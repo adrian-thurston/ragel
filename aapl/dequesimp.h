@@ -23,7 +23,7 @@
 #define _AAPL_DEQUESIMP_H
 
 #include <string.h>
-#include <malloc.h>
+#include <stdlib.h>
 #include "dlist.h"
 
 /* Get the common deque code. */
