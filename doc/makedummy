@@ -15,7 +15,6 @@ echo > dummy/table.h
 echo > dummy/stdlib.h
 echo > dummy/string.h
 echo > dummy/dlistmel.h
-echo > dummy/malloc.h
 echo > dummy/bstset.h
 echo > dummy/bstmap.h
 echo > dummy/avltree.h
