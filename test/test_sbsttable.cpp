@@ -1,0 +1,206 @@
+/*
+ *  Copyright 2001 Adrian Thurston <adriant@ragel.ca>
+ */
+
+/*  This file is part of Aapl.
+ *
+ *  Aapl is free software; you can redistribute it and/or modify it under the
+ *  terms of the GNU Lesser General Public License as published by the Free
+ *  Software Foundation; either version 2.1 of the License, or (at your option)
+ *  any later version.
+ *
+ *  Aapl is distributed in the hope that it will be useful, but WITHOUT ANY
+ *  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ *  FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
+ *  more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with Aapl; if not, write to the Free Software Foundation, Inc., 59
+ *  Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ */
+
+#include <iostream>
+#include <stdio.h>
+
+#include "sbsttable.h"
+#include "sbstmap.h"
+#include "sbstset.h"
+
+using namespace std;
+
+struct MyElement  : public CmpOrd<int>
+{
+	MyElement() {}
+	MyElement(int key) : key(key) { }
+	const int &getKey() const { return key; }
+	int key;
+};
+
+template class SBstTable<MyElement, int>;
+
+void testBstTable1()
+{
+	SBstMap<int, int, CmpOrd<int> > table;
+
+	table.insert(1, 3);
+	table.insert(3, 1);
+	table.insert(5, 0);
+	table.insert(7, 1);
+	table.insert(4, 8);
+	table.insert(2, 0);
+	table.insert(6, 1);
+
+	table.remove(2);
+	table.remove(3);
+	table.remove(6);
+	table.remove(4);
+	table.remove(5);
+	table.remove(7);
+
+	SBstMapEl<int, int> *tab = table.data;
+	int len = table.length();
+	for (int i = 0; i < len; i++, tab++)
+		printf("(%i) maps to %i\n", tab->key, tab->value);
+}
+
+struct CompoundKey
+{
+	int Key1;
+	int Key2;
+};
+
+struct CompoundKeyCompare
+{
+	inline static int compare(const CompoundKey &key1, const CompoundKey &key2)
+	{
+		if ( key1.Key1 < key2.Key1 )
+			return -1;
+		else if ( key1.Key1 > key2.Key1 )
+			return 1;
+		else
+		{
+			if ( key1.Key2 < key2.Key2 )
+				return -1;
+			else if ( key1.Key2 > key2.Key2 )
+				return 1;
+			else
+				return 0;
+		}
+	}
+};
+
+void testBstTable2()
+{
+	SBstMap<CompoundKey, int, CompoundKeyCompare > table;
+
+	CompoundKey k;
+
+	k.Key1 = 1; k.Key2 = 2;
+	table.insert(k, 10);
+
+	k.Key1 = 1; k.Key2 = 3;
+	table.insert(k, 10);
+
+	k.Key1 = 2; k.Key2 = 2;
+	table.insert(k, 10);
+
+	k.Key1 = 0; k.Key2 = 2;
+	table.insert(k, 10);
+
+	k.Key1 = 2; k.Key2 = -10;
+	table.insert(k, 10);
+
+	SBstMapEl<CompoundKey, int> *tab = table.data;
+	int len = table.length();
+	for (int i = 0; i < len; i++, tab++)
+		printf("(%i, %i) maps to %i\n", tab->key.Key1, tab->key.Key2, tab->value);
+}
+
+struct KeyStruct
+{
+	/* Constructors. */
+	KeyStruct() : key(0) { }
+	KeyStruct(int i) : key(i)
+		{ cout << "KeyStruct(" << key << ")" << endl; }
+	KeyStruct(const KeyStruct &o) : key(o.key)
+		{ cout << "KeyStruct(KeyStruct &)" << endl; }
+
+	/* Destructors. */
+	~KeyStruct() { cout << "~KeyStruct = {" << key << "}" << endl; }
+
+	int key;
+};
+
+struct KeyStructCompare
+{
+	static inline int compare(const KeyStruct &k1, const KeyStruct &k2)
+		{ return CmpOrd<int>::compare(k1.key, k2.key); }
+};
+
+int testBstTable3()
+{
+	SBstMap<KeyStruct, int, KeyStructCompare > tbl;
+
+	cout << "ins res = " << tbl.insert(KeyStruct(0), 1) << endl;
+	cout << "ins res = " << tbl.insert(KeyStruct(1), 1) << endl;
+	return 0;
+}
+
+int testBstTable4()
+{
+	SBstMap<int, int, CmpOrd<int> > tbl;
+
+	tbl.insertMulti(1, 1);
+	tbl.insertMulti(4, 1);
+	tbl.insertMulti(2, 1);
+	tbl.insertMulti(1, 1);
+	tbl.insertMulti(1, 1);
+	tbl.insertMulti(1, 3);
+	tbl.insertMulti(3, 1);
+	tbl.insertMulti(1, 0);
+	tbl.insertMulti(7, 1);
+	tbl.insertMulti(4, 8);
+	tbl.insertMulti(1, 0);
+	tbl.insertMulti(6, 1);
+
+	SBstMapEl<int, int> *low, *high;
+
+	tbl.findMulti( 1, low, high );
+	cout << high - low + 1 << endl;
+
+	cout << tbl.removeMulti( 1 ) << endl;
+	cout << tbl.findMulti( 1, low, high ) << endl;
+	return 0;
+}
+
+int testBstTable5()
+{
+	cout << "TEST 5" << endl;
+
+	SBstTable<MyElement, int> table1, table2;
+	table1.insert( 1 );
+	table1.insert( 2 );
+	table1.insert( 3 );
+	table1.insertMulti( 2 );
+
+	table2.insert( 3 );
+	table2.insert( table1 );
+
+	for ( int i = 0; i < table2.length(); i++ )
+		cout << table2.data[i].key << endl;
+
+	table2.insertMulti( table1 );
+	for ( int i = 0; i < table2.length(); i++ )
+		cout << table2.data[i].key << endl;
+	return 0;
+}
+
+int main()
+{
+	testBstTable1();
+	testBstTable2();
+	testBstTable3();
+	testBstTable4();
+	testBstTable5();
+	return 0;
+}
