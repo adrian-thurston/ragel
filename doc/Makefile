@@ -28,7 +28,6 @@ PREFIX = ../../aapl
 all: Doxyfile 
 	rm -Rf html
 	mkdir html
-	cp essemage.png html/
 	./makelinks
 	./makedummy
 	doxygen Doxyfile
