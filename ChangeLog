@@ -1,3 +1,8 @@
+For Next Release
+================
+ -Moved from ints to longs for most integer values to get 64 bit values on 64
+  bit machines.
+
 Aapl 2.10 -- Feb 5, 2004
 ========================
  -Fixes for two-stage lookup. Compiles with gcc-3.4
