@@ -1,7 +1,10 @@
 For Next Release
 ================
  -Moved from ints to longs for most integer values to get 64 bit numbers on 64
-  bit machines. Fixes alignment problems.
+  bit machines. Fixes alignment problems on 64 bit machines.
+ -Added AvliBasic, the linked version of the basic tree where the entire
+  element is the key.
+ -Documentation updates were made.
 
 Aapl 2.10 -- Feb 5, 2004
 ========================
