@@ -1,5 +1,5 @@
 /*
- *  Copyright 2002, 2003 Adrian Thurston <adriant@ragel.ca>
+ *  Copyright 2002, 2003 Adrian Thurston <thurston@cs.queensu.ca>
  */
 
 /*  This file is part of Aapl.
