@@ -1,0 +1,15 @@
+                               TODO
+                               ====
+
+-Docs for all code with Doxygen (ooh baby, gotta love that doxygen).
+-Finish Editor Buffer
+-More Iterators
+-More Lowercasing the interface.
+-Singly linked list.
+-Xor list
+-The union of two sets can be done in O(N) time, instead of O(N*log(N)); Perhaps
+ decide which is cheaper on the fly and then do that.
+-String class based on VectSimp<char> (why, for the fun of it).
+-Ref-counted implicity shared versions of all classes.
+-Copy-on-write automatically shared versions of all classes.
+-Generic automatic pointers that can be used to make automatic pointers for any class.

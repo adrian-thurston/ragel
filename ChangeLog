@@ -1,0 +1,500 @@
+Aapl 2.10 -- Feb 5, 2004
+========================
+ -Fixes for two-stage lookup. Compiles with gcc-3.4
+  Details at http://gcc.gnu.org/onlinedocs/gcc/Name-lookup.html#Name%20lookup
+ -Fixed wrong Vector::Iter::pos() routines.
+ -FsmGraph code removed from aapl, as an increasing amount of diverse
+  specialization is required in applications. No longer feels like a general
+  purpose template.
+
+Aapl 2.9 -- Dec 8, 2003
+=======================
+ -Rewrote Deque to look and behave more like the rest of Aapl. Split it into
+  Deque and DequeSimp. Deque supports complex classes with constructors and
+  destructors. DequeSimp is for simple classes that can be coppied with
+  memcpy.  Wrote stress tests for both.
+ -SVector::makeRawSpaceFor fixed to detach from the vector when the current
+  storage is shared. This affected SBstTable::insert() routines and caused
+  them to modify shared data, instead of behaving like copy on write as they
+  should.
+ -Tiny templates renamed to be consistent with the non-tiny templates. The
+  tiny versions now only have a T prepended to the name, the second character
+  is no longer lowercased. This changes Tavl* to TAvl*, TdList* to TDList* and
+  TsVect* to TSVect*.
+ -Removed AvlPmap, AvlPset, AvliPmap, and AvliPset. Rationale is that these
+  are too application specific. They require a pointer as the key (not
+  anything that dereferences the pointer) and so do not generalize very well.
+  Due to their lack of generality, they belong in application code.  They
+  allowed a savings in code size when many instantiations were necessary,
+  however, the savings was only slightly better than TAvlTree.
+ -Test programs split into stress tests and non stress tests. All stress tests
+  run indefinitely as long as they don't encounter an error condition, in
+  which case they terminate by an assertion failure. They can be given a time
+  limit to run for by specifying the number of seconds on the command line.
+ -FsmGraph given repetition operators for repeating a machine n times.
+ -Concatenation operator accepts an optional list of states to draw the epsilon
+  transition instead of the from graph's final state set.
+ -Useless shared table header template parameter removed.
+  
+Aapl 2.8.2 -- Aug 18, 2003
+==========================
+ -AvlSet::Iter and DListVal::Iter data access operators (*, ->) now return the
+  node in the tree, rather than value. This is to make all iterator behaviour
+  consistent: return the element.  This also allows for O(1) statements like
+  tree.detach( iter );
+ -DList and DListMel and Avl trees that are not sets or maps no longer do a
+  deep copy in the copy constructor and assignement operator. This is to stay
+  consistent with the fact that these lists and trees are not responsible for
+  managing the memory of the elements they contain.
+ -Table compare split into static and non-static versions. Default is the
+  static version, which compiles out the 'this' pointer. If an item compare
+  requires access to class data, the CmpTableNs can be used.
+ -The user's Fsm class is now required as a template parameter to FsmTrans,
+  FsmState and FsmGraph.
+ -All callbacks moved into FsmGraph class to allow the access of user data in
+  FsmGraph.
+ -Added callbacks for state creation and destruction to FsmGraph.
+ -EpsilonOp now takes a list of fsms to draw ops to. Allows the merging in of
+  several machines using only a single invocation of the NFA to DFA algorithm.
+ -FsmKeyOps is now expected to be a base class of the derived fsm class (ie a
+  sibling of FsmGraph).
+ -In transition lists are encapsulated in a class with an iterator.
+ -Unused leavingFsm parameter to starOp and concatOp removed.
+ -Fixed documentation building warnings.
+ -Documented iterator classes.
+
+Aapl 2.8.1 -- Jun 11, 2003
+==========================
+ -All iterator endpoint test functions have been renamed.
+        Iter::more()    -> Iter::lte()
+        Iter::done()    -> Iter::end()
+        Iter::revMore() -> Iter::gtb()
+        Iter::revDone() -> Iter::beg()
+  The rationale is that it is not obvious that more() and done() are direction
+  specific. It is more clear that lte() (less than end) needs to be changed to
+  gtb() (greater than beginning) when reversing the direction of a traversal.
+ -All avl tree element classes have been renamed to make element names
+  consistent.
+        AvlNode      -> AvlTreeEl
+        AvliNode     -> AvliTreeEl
+        AvlMapNode   -> AvlMapEl
+        AvliMapNode  -> AvliMapEl
+        AvlSetNode   -> AvlSetEl
+        AvliSetNode  -> AvliSetEl
+        TavlNode     -> TavlTreeEl
+        TavliNode    -> TavliTreeEl
+        TavlMapNode  -> TavlMapEl
+        TavliMapNode -> TavliMapEl
+        TavlSetNode  -> TavlSetEl
+        TavliSetNode -> TavliSetEl
+        AvlPmapNode  -> AvlPmapEl
+        AvliPmapNode -> AvliPmapEl
+        AvlPsetNode  -> AvlPsetEl
+        AvliPsetNode -> AvliPsetEl
+        FsmSDNode    -> StateDictEl
+        AvlTree::nodeCount  -> AvlTree::treeSize
+ -All binary search table and avl tree classes now inherit from the compare
+  class. This allows the compare function to be non-static and for it make use
+  of state that is common to the data structure.
+ -BstTable(int allocLen) no longer uses Vector::setAsNew and therefore Element
+  does not require Element() constructor.
+
+Aapl 2.8.0 -- Jan 5, 2003
+=========================
+ -Switched to the LGPL.
+ -Added get() to String class. Returns the data ptr.
+ -Added operator<<(ostream &, String&). Previously relied on the implicit
+  cast to char* which did not work all the time.
+ -Iterators renamed and rewritten. The new style for checking if the iterator
+  is done is to call more() or done() if moving forwards and revMore() or
+  revDone() if moving backwards. Iterators now have first() and last() calls
+  for checking if the iterator is on the first and last element. The next()
+  and prev() calls now return the next and previous. THEY NO LONGER MOVE THE
+  ITERATOR FORWARD OR BACKWARDS. Increment() and decrement() are now available
+  for moving the iterator.
+ -Various fixes for the intel C++ compiler.
+ -Shared vector table header renamed from TabHead to STabHead.
+ -Started Tiny DList, Tiny VectSimp, Tiny SVectSimp, and Tiny AvlTree. These
+  classes reduce final executable size by reusing core code across
+  instantiations with different types. They can be used identically to the
+  non-tiny counterpart if only iterators are used for accesing the structure.
+  The catch is that the underlying data structures have generic pointers that
+  are not directly usable without casting.
+
+Aapl 2.7.0 -- Dec 20, 2002
+==========================
+ -DoubleList::length -> DoubleList::listLen and added length() function. This
+  is to keep consistent with vectors and strings.
+ -Sorting routines now inherit from the compare class and use a non-static
+  compare routine. This lets the compare have state. This will likely be
+  extended to all structures that use a compare class.
+ -Constructor added to string that does sprintf style formatting.
+ -Routines added to string for setting from a char*, len pair.
+ -Table class (used by vector) member length changed to tabLen and the
+  the length() const routine added. This makes SVector a more easy substitute
+  for Vector. Previously the length member was an int in Vector and a function
+  call in SVector. Now it is a function in both.
+ -String::str -> String::data and String::getLen() -> String::length() to make
+  access of string data consistent with access of table data.
+ -Binary search tweaked to use a shift in place of a divide.
+ -FsmGraph code from rlfsm moved back into Aapl and Reglang FSM terminated.
+  Now that the graph code has been separted from the priority and action code,
+  the base template is leaner and more generalized. It now fits well in Aapl
+  as a generic programming construct. Also, rlfsm was not enjoying much
+  exposure and no sense in letting the fsmgraph code fight for itself. The
+  relevant fsmgraph changes since the split at 2.5.0 follow:
+ -Support of arbitrary key types for graph completed.
+ -Dramatic performance improvements in basic fsm operations. Kleen star,
+  union, and concatenation do not require a walk of all states and can go very
+  fast when there is no overlap between the machines.
+ -Fsm Range transitions implemented. Can now efficiently specify machines that
+  span very large ranges.
+ -More efficient partition based fsm minimization implemented. Algorithm is
+  similar to Hopcroft's minimization algorithm.
+ -Fsm Graph split into base code that implements FSM operations, NFA-DFA
+  conversion and minimization and a superclass that implements priority and
+  action setting. Allows the base code to be easily reused for other
+  applications that require different state and transition properties. The
+  superclass is left as user code in Ragel and is not included in Aapl.
+ -Can now have various classes of named entry points in an fsm graph for
+  maintaining entry other than the start state. This is useful for making
+  actions that jump into or call various named locations in the machine.
+ -Various bugs in fsm graph code fixed.
+
+Aapl 2.6.0 -- Nov 4, 2002
+=========================
+ -Added AvlPmap, AvlPset, AvliPmap and AvliPset classes. These are
+  instantiations of AvlMap and AvlSet with void* types and a small inline
+  wrapper interface for doing type conversions. If many different maps are
+  used for storing integers or pointers then these classes can cut down on
+  code bloat.
+ -Added AvlTree::remove, which will detach and delete elements from the tree.
+ -Removed set, unSet and isSet from AvlTree. These functions are redundant and
+  clutter the interface.
+  insert/remove/find functionality just for convenience. Prefer to remove them
+  than to clutter the interface with inconsistently named functions.
+ -Fixed the return type of BstTable::removeMulti. It should be an int (not
+  bool) because it returns the number of items removed.
+ -Added SVector and SVectSimp: implicitly shared copy-on-write vectors.
+ -Added ResizeCtLin: Identical to ResizeLin, except the step is specified at
+  compile time using a template argument.
+ -Removed deepCopy from the classes that by default behave as a deep copy.
+  Found the duplicate function to make it confusing as to how the structure's
+  operator= behaves.
+ -File rename of shrstr to astring, to make it easier to find.
+ -BsTable renamed to BstTable to stay consistenty named with the other Bst
+  classes. Also renamed the file from bstable.h to bsttable.h for consistency.
+ -Compare class routines are now Compare::compare (used to be
+  Compare::Compare). This is to keep with the lowercase function name
+  convention.
+ -Added the insertion of whole elements to BsTable and BstMap (already exists
+  for BstMap).
+ -Added the insertion of entire other tables to BsTable, BstMap and BstSet.
+ -The getKey function for binary search table must now be const as well as the
+  existing requirement of returning a const object. This was needed for the
+  insertion of whole elements so the requirement was made for all
+  insert/remove/find routines in order to stay consistent.
+ -Removed set, unSet and isSet from BstSet. These functions duplicated the
+  insert/remove/find functionality just for convenience. Prefer to remove them
+  than to clutter the interface with inconsistently named functions.
+
+Aapl 2.5.4 -- Sept 20, 2002
+===========================
+ -All of Aapl is now in the Aapl:: namespace, which is disabled by default. It
+  can be turned on by defining #define AAPL_NAMESPACE.
+ -Mergesort uses only memcpy to move data around, instead of the inconsistent
+  use of the = operator. Classes that are sorted have no way of knowing that
+  they are being moved around in mem.
+ -Implemented QuickSort, BubbleSort and Insertion Sort.
+ -QuickSort uses InsertSort when the array being sorted is small.
+ -MergeSort uses BubbleSort when the array be sorted is small.
+ -Implemented an implicitly shared string class.
+
+Aapl 2.5.3 -- Aug 17, 2002
+==========================
+ -Much work done on the user documentation.
+ -AvlMap and AvlSet destructors now delete all elements. The idea is that
+  these classes manage memory on behalf of the user, so cleanup. Also, a deep
+  copy will cause the existing contents to be deleted. The remaining avl trees
+  do not assume ownership of element and thus do not delete anything.
+
+Aapl 2.5.2 -- Aug 14, 2002
+==========================
+ -Bug fixed in Vector::replace. When overwriting data without overwriting up
+  to the end of the vector or extending it, the vector would shrink in size.
+  This is because the tableLength was getting set to the end of the overwrite
+  region in every case.
+ -Bug fixed in empty and abandon of Avli* trees. They now clear the list head
+  and tail pointers.
+ -shallowCopy, deepCopy and the = operator were added to double list, vector,
+  and avl tree. The = operator implements the deep copy functionality.
+ -The Vector class was heavily rewritten. The purpose of the rewrite is to
+  have a vector that does not require the class that it contains to have a
+  default constructor. In many cases adding a default constructor violates the
+  design of a class. A class should not be required to have a default
+  constructor just because it is going into a vector. To have this feature,
+  the new vector differs from the old vector in a few ways. If the vector is
+  instructed to add elements off the end of the vector then undefined
+  behaviour results. The new vector will not implictly create new items.
+  Also, new items cannot be added to the list by giving a null data pointer.
+  Instead insertNew, appendNew, etc. can be used.
+ -DListVal destructor now deletes all elements. The reasoning is that DListVal
+  manages elements and so it should clean up after itself.
+ -remove routines added to double list classes. They are the same as detach
+  except they also delete elements.
+ -Default down resize of ResizeRunTime fixed: now is Exponential as is the up
+  resizing.
+
+Aapl 2.5.1 -- Aug 9, 2002
+=========================
+ -Class and function descriptions from doc/*.txt moved to source code in
+  doxygen format.
+ -Iterators slimmed down in anticipation of the more coplicated iterator for
+  avltree. Iterators now provide basic moving forward and backward and looking
+  at current value. Looking ahead and moving ahead by more than one space is no
+  longer supported.
+ -Assignment operator of all iterators now return a reference to this.
+ -Implemented iterator for avl tree (non Avli* trees). The iterator can be
+  started on either end and can move forwards or backwards. Does not support
+  trees larger than 32 element in height (should be sufficient).
+
+Aapl 2.5.0 -- Jun 22, 2002
+==========================
+ -Doxygen docs started.
+ -ExpnResize -> ResizeExpn, ConstResize -> ResizeConst, LinResize -> ResizeLin
+  Name changes that will keep a lexographically sorted list of classes in good
+  order.
+ -StrCmp -> CmpStr, OrdCmp -> CmpOrd, TableCmp -> CmpTable for same reason as
+  above.
+ -BstTable fixed so that Resize class is passed to underlying vector.
+ -Pdp Endianness support removed as it is untested. Don't have a pdp endian
+  machine on which to test.
+ -cc file extension changed to cpp for better portability.
+
+ ******** Aapl split out into three libs: Aapl, Autil, Reglang FSM ***********
+
+  Aapl is: A generic programming template library. Aapl is an alternative to
+  the STL. It currently contains Linked List, Avl Tree, Vector, Binary Search
+  Table, Double Ended Queue, Merge Sort.
+
+  Autil is: A library of simple utility classes that are easy to come by.
+  Autil contains paramater parser, byte ordering facilities, character
+  classes.
+
+  Reglang FSM is: A template library of algorithms and data structures for
+  compiling state machines from regular languages.
+
+Aapl 2.4.1 -- May 4, 2002
+=========================
+ -Fixed automatic dependencies, were not working correctly.
+ -C++ standards compliant I/O and namespaces.
+
+Aapl 2.4.0 -- May 3, 2002
+=========================
+ -Vector now uses malloc, realloc and free so the performance gain of
+  of using realloc over new, memcpy, delete in resizing can be realized.
+ -Buffer Renamed to VectSimp. The name buffer is way overused and brings
+  preconceptions with it. VectSimp now has the same functionality as vector.
+  It is a 'flavour' of vector. The main difference is that is does not use
+  copy constructors/destructors. It uses memcpy to put data in and as a result
+  can go much faster.  The idea is that it is used on 'simple data'.
+ -The type of resizing that vector uses is no longer controlled by including
+  different files and using different names (ie, VectorC no longer exists).
+  The old style (last seen in v1.1.2) of using a template parameter has been
+  resurrected. It was previously removed because it caused very long symbol
+  names. That problem has been fixed by making the class that goes into that
+  template parameter not a template. It is a normal class and as such will
+  cause symbol names to increase a constant amount. The old way was the class
+  was a template taking type T so that essentially doubled the length of the
+  symbol.  The purpose of this change is to eliminate the many files required
+  to have all the different resizing types. Any class that inherits from
+  vector needs to have many flavours in order to support the different
+  resizing types and that gets ugly. Providing resizing options to the bstable
+  classes would require 30 files.
+ -Default step for linear resizing is changed from 10 to 256.
+ -FsmGraph structure supports Default transitions. Default transitions can be
+  used in place of newing up a transition for every char in the alphabet in
+  order to get the 'dot' and 'dot star' fsms. It is incredibly more efficient
+  and will make large integer alphabets feasible.
+ -The conversion from FsmGraph to FsmMachine is now moved into a class called 
+  FsmBuild.
+ -FsmMachine no longer stores transition indicies as a linear chunk. Now
+  stores key, index pairs. This will facilitate using FsmMachine with very
+  large alphabets because large index tables will not be allocated.  when there
+  is great variation in transition keys.
+ -FsmMachine stores only offsets, no pointers.
+ -Aapl assert is removed in favour of using system assert. Can't see a reason
+  to duplicate system include.
+ -Lowercased the interface to BsTable.
+ -Makefiles use automatic dependencies.
+ -AvlTree interface was lowercased/consolodated.
+ -Large switches at the top of *common.h files were removed. The defines were
+  put into the files that include the common files.
+ -BsTable interface was lowercased/consolodated.
+ -BstSet replaces VectSet.
+ -Configure script allows you to specify what objects to build using the
+  --enable-src option
+ -AvlTree verification is moved out of the main tree and into the test cases.
+
+Aapl 2.3.1 -- March 25, 2002
+============================
+ -Fixed errors in the event loop with respect to unregistering.
+ -Added Signal handling to event loop.
+ -Breaking out of event loop is now much cleaner. 
+ -Added CONTENTS file.
+ -Removed trivial class File. I think most would rather code this kind
+  of stuff on their own, or use a more featureful library.
+ -Removed Data base class. Again, kind of trivial. Better left to the user.
+ -DList::detach{Front,End} -> DList::detach{First,Last}. This change was
+  made in order to be more consistent with the iterator convention of
+  using first, last, sfirst, slast.
+ -Wrote documentation for double list.
+
+Aapl 2.3.0 -- March 19, 2002
+============================
+ IMPORTANT: This release marks the beginning of a major change in the
+ naming conventions. Previously, naming conventions had function names
+ starting with an upper case. The member functions will slowly be changed
+ to start with a lower case. Some functions names will also be changed
+ to follow the conventions in doc/conventions.txt. Vector and DList have
+ already been changed.
+
+ These changes are being made to make aapl more compatible with existing
+ template libraries and to provide a more consistent interface across
+ the classes.
+
+ -Vector and double list get iterators.
+ -Fixed buffer. Restructuring vector broke it.
+ -Lower cased names in vector.
+ -Lower cased names in doublelist.
+ -Vector::Overwrite -> Vector::replace
+ -Vector::Delete -> Vector::remove
+ -DList::AddEnd -> DoubleList::append()
+ -DList::AddFront -> DoubleList::prepend()
+ -DList::DeleteElements -> DoubleList::empty()
+ -DList::EmptyList -> DoubleList::abandon()
+ -Added DListVal, which is the 'by-value-type' double list that does
+  not require a DListEl class to be defined.
+ -Began conventions doc.
+ -Rewrote the connection/selector code. It is now simpler and more generic.
+  Docs on the way. The code is now in event.{h,cc}.  The select loop can
+  reliably translate asyncronous signals into events in the event loop.
+  However, code is not yet set up for processing the signal events.  The event
+  loop handles signals using sigsetjmp/siglongjmp and avoides the classic unix
+  select loop race condition with respect to signals.
+
+Aapl 2.2.0 -- Feb 25, 2002
+==========================
+ -Added AvlSet. AvlSet is like AvlMap except you give only a key. It also has
+  the set interface: Set, UnSet and IsSet that return boolean values and don't
+  really care to speak about element in a tree.
+ -Added walkable versions of avl tree. There is a walkable version of all
+  existing trees. They are AvliTree, AvliMel, AvliMelKey, AvliMap, and AvliSet.
+  Implemented by having the element inherit from DListEl and the tree inherit
+  from DList. All operations on the tree remain O(log(N)). Maintaining the list
+  pointers adds a constant amount of work.  Adds 8 bytes to each element (for a
+  total of 24) and 12 bytes to the tree (for a total of 20).
+ -Added a few more sections to docs for AvlTree
+
+Aapl 2.1.0 -- Feb 22, 2002
+==========================
+ IMPORTANT: VectorC(int) no longer has the same meaning. Previously it set
+ allocation length with no size. Now it sets size with no allocation so
+ it is effectively useless as the table cannot grow it's allocation. It
+ will assert fail. Use VectorC(int, int) instead. See Vector docs.
+
+ -Further split Vector into all possible types of upresizing and down
+  resizing. Existing Vectors remain unchanged except for constructor of
+  VectorC. It is now possible to have a vector that up resizes linear and
+  down exponential or up exponential and no down (constant), etc. Also
+  added VectorR, which allows for runtime setting of how to resize.
+ -Implemented a step for the linear vector. Now the following is true:
+  If the sequence of size requests is linear, the number of resizes is
+  also linear.
+ -Wrote docs for Vector.
+
+Aapl 2.0.0 -- Feb 17, 2002
+==========================
+ IMPORTANT: The 2.x.x version of Aapl is not backwards compatible with
+ 1.x.x version. Code that compiles against 1.x.x may not compile against
+ 2.x.x. The changes mostly amount to two things:
+
+ 1) Making data and function class member naming convetions consistent. All
+ variables start with a lower case whereas functions, classes, constants
+ and type names all start with an upper case.
+
+ 2) Shortening the symbols in resulting object code. Aapl classes achieved
+ great versatility by providing many tempate parameters mostly with
+ default values. Now this versatility is achieved by splitting the class
+ up into many different classes, each with thier own 'flavour' of the data
+ structure. This split is accomplished using preprocessor defines so there
+ is no code duplication. Classes now have shorter names and only required
+ template paramaters. This dramatically cuts down on long symbols and
+ eliminates compiler warnings on platforms that restrict symbol lengths.
+
+ -Made all data member names consistent with general coding style: constant
+  identifiers start with upper case, variables (members too) start with lower.
+ -Split up DoubleList into DList and DListMel. Goal is shorter
+  symbol names by making two specialzed classes instead of one general class.
+ -Split up AvlTree into 4 classes. Same goal as split of DoubleList.
+  AvlTree now supports having multiple keys in the same object as well as
+  multiple tree pointers. This means a single object can be in different
+  trees that each use different keys.
+ -General rearranging of code in fsmgraph and changing templates to result
+  in shorter symbols. Try to keep symbol lengths < 255.
+ -Split up Vector into 3 classes, one for each table type.
+ -Split up VectorSet into 3 classes, one for each table type. Also renamed
+  it to VectSet for conciseness.
+ -Split up Binary Search table into 6 classes, one for each table type times
+  regular bst table and bstmap. The bstmap has the template semantics of
+  the old bstable. BsTable lets you give the whole object you want to put in
+  the table in the same manner as vector and avltree.
+ -Both AvlTree and BsTable use GetKey() functions in the element/element types.
+  Previously they required that the key member be named 'key.' It can now
+  be named anything, and it must be returned by GetKey.
+ -Added copy constructor for AvlTree.
+ -Added Avl test progs for the various flavours.
+ -Started some real docs. Currently only AvlTree is documented.
+
+Aapl 1.2.2 -- Feb 2, 2002
+=========================
+ -Started ChangeLog file.
+ -Parser Gen is now gone from aapl. It is not generic reusable code. It now
+  lives in Keller which will be released soon.
+
+Aapl 1.2.1 -- Jan 29, 2002
+==========================
+ -Can choose between assertions that dump details of the assertion
+  failure to the screen then segfault or just segfault using a define.
+ -Bugfix in avltree insertion. Only showed up when re-using avl element.
+  The insert routine was not nulling out appropriate pointers when adding
+  a leaf element. Worked correctly when always newing up element (how avl tree
+  is mostly used) as nulling out pointers is done by the element constructor.
+ -File Buffer size up to 1K. Was at 10 bytes for debugging/testing purposes.
+ -Transition count variables gone from fsm graph. Computing this is silly as
+  the vectors that implement the out transitions 
+ -Transition priorities routines in FSM Graph no longer operate as a 'delta'
+  but instead as absolute.
+ -Function keys are no long a duple, instead just one integer. Using two
+  integers is overkill and not likely to be used. To acieve the same effect as
+  a duple, break the bits of the single integer into multiple fields.
+ -Allow the shifting of the priorities of start transitions to above some
+  value. Useful before staring machines so that out transitions of a final
+  state run before the transitions of the start state when going from a final
+  state back into the machine.
+ -Allow the clearing of transition functions.
+ -Cleaned up FsmAttachStates: no longer reusing transitions when replacing,
+  old trans are deleted and a new one is made. This eliminates the need for
+  the ResetTransition routine.
+ -When building machines, use max int and min int as the defaults for highIndex
+  and lowIndex.
+ -When building machines, transition 0 is always the error transition,
+  no longer insert it into the transition list on demand.
+ -When building machines, compute the global high and low index. Used by ragel.
+ -Out priorities have a concept of being set vs not being set.
+ -Concatenation and Star can now behave as if they do not cause leaving the fsm.
+  Allows the user to turn off picking up of out transitions and out priorities.
+
+Aapl 1.2 -- Aug 28, 2001
+========================
+ -Initial release.

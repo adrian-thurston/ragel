@@ -1,0 +1,25 @@
+#!/bin/sh -e
+#
+
+# Make sure dummy dir is there.
+[ -d dummy ] || mkdir dummy
+
+# Write dummy include files.
+echo > dummy/new
+echo > dummy/dlist.h
+echo > dummy/compare.h
+echo > dummy/assert.h
+echo > dummy/vector.h
+echo > dummy/svector.h
+echo > dummy/table.h
+echo > dummy/stdlib.h
+echo > dummy/string.h
+echo > dummy/dlistmel.h
+echo > dummy/malloc.h
+echo > dummy/bstset.h
+echo > dummy/bstmap.h
+echo > dummy/avltree.h
+echo > dummy/mergesort.h
+echo > dummy/stdarg.h
+echo > dummy/stdio.h
+echo > dummy/iostream

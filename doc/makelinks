@@ -1,0 +1,61 @@
+#!/bin/sh -e
+#
+
+# The location of aapl files.
+PREFIX=../../aapl
+
+# Vector
+ln -fs $PREFIX/vectcommon.h vector/vectcommon.h
+ln -fs $PREFIX/vector.h vector/vector.h
+ln -fs $PREFIX/vectsimp.h vector/vectsimp.h
+ln -fs $PREFIX/svectcommon.h vector/svectcommon.h
+ln -fs $PREFIX/svector.h vector/svector.h
+ln -fs $PREFIX/svectsimp.h vector/svectsimp.h
+
+# AvlTree
+ln -fs $PREFIX/avlcommon.h avltree/avlcommon.h
+ln -fs $PREFIX/avltree.h avltree/avltree.h
+ln -fs $PREFIX/avlmel.h avltree/avlmel.h
+ln -fs $PREFIX/avlmelkey.h avltree/avlmelkey.h
+ln -fs $PREFIX/avlmap.h avltree/avlmap.h
+ln -fs $PREFIX/avlset.h avltree/avlset.h
+ln -fs $PREFIX/avlitree.h avltree/avlitree.h
+ln -fs $PREFIX/avlimel.h avltree/avlimel.h
+ln -fs $PREFIX/avlimelkey.h avltree/avlimelkey.h
+ln -fs $PREFIX/avlimap.h avltree/avlimap.h
+ln -fs $PREFIX/avliset.h avltree/avliset.h
+
+# Double List
+ln -fs $PREFIX/dlcommon.h dlist/dlcommon.h
+ln -fs $PREFIX/dlist.h dlist/dlist.h
+ln -fs $PREFIX/dlistmel.h dlist/dlistmel.h
+ln -fs $PREFIX/dlistval.h dlist/dlistval.h
+
+# Binary Search Table
+ln -fs $PREFIX/bstcommon.h bsttable/bstcommon.h
+ln -fs $PREFIX/bsttable.h bsttable/bsttable.h
+ln -fs $PREFIX/bstmap.h bsttable/bstmap.h
+ln -fs $PREFIX/bstset.h bsttable/bstset.h
+ln -fs $PREFIX/sbsttable.h bsttable/sbsttable.h
+ln -fs $PREFIX/sbstmap.h bsttable/sbstmap.h
+ln -fs $PREFIX/sbstset.h bsttable/sbstset.h
+
+# Deque
+test -d deque || mkdir deque
+ln -fs $PREFIX/deque.h deque/deque.h
+ln -fs $PREFIX/dequesimp.h deque/dequesimp.h
+ln -fs $PREFIX/dequecommon.h deque/dequecommon.h
+
+# Sorting
+ln -fs $PREFIX/bubblesort.h sort/bubblesort.h
+ln -fs $PREFIX/mergesort.h sort/mergesort.h
+ln -fs $PREFIX/insertsort.h sort/insertsort.h
+ln -fs $PREFIX/quicksort.h sort/quicksort.h
+
+# String
+test -d string || mkdir string
+ln -fs $PREFIX/astring.h string/astring.h
+
+# Compare
+test -d compare || mkdir compare
+ln -fs $PREFIX/compare.h compare/compare.h
