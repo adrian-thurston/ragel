@@ -89,7 +89,7 @@ void printStats( VectSimp<TheData> &v1 )
 
 	memset( buf, '\b', strlen(buf) );
 	cout << buf;
-	sprintf( tmpBuf, "%i\t%i\t", curRound, v1.length() );
+	sprintf( tmpBuf, "%i\t%li\t", curRound, v1.length() );
 	expandTab( buf, tmpBuf );
 	cout << buf;
 	cout.flush();

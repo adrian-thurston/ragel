@@ -85,7 +85,7 @@ void printStats( int treeSize, AvlSetEl<int> *root )
 	if ( curRound % STATS_PERIOD == 0 ) {
 		memset( buf, '\b', strlen(buf) );
 		cout << buf;
-		sprintf( tmpBuf, "%i\t%i\t%s\t%s\t%i\t%i\t%i\t", curRound, increment,
+		sprintf( tmpBuf, "%i\t%i\t%s\t%s\t%i\t%i\t%li\t", curRound, increment,
 				action&0x1 ? "yes" : "no", action&0x2 ? "yes" : "no", 
 				curIndex, treeSize, root ? root->height : 0 );
 		expandTab( buf, tmpBuf );
