@@ -79,7 +79,7 @@ void writeStats( int treeSize, TreeEl *root )
 		cout << buf;
 
 		/* Write the new stats line. */
-		sprintf( tmpBuf, "%i\t%i\t%s\t%s\t%i\t%i\t%i\t", curRound, increment,
+		sprintf( tmpBuf, "%i\t%i\t%s\t%s\t%i\t%i\t%li\t", curRound, increment,
 				action&0x1 ? "yes" : "no", action&0x2 ? "yes" : "no", 
 				curIndex, treeSize, root ? root->height : 0 );
 		expandTab( buf, tmpBuf );

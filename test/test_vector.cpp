@@ -112,7 +112,7 @@ void testVector1()
 				break;
 
 			case 'w':
-				printf("L: %i  AL: %i\n", v.tabLen, v.allocLen);
+				printf("L: %li  AL: %li\n", v.tabLen, v.allocLen);
 				fwrite(v.data, 1, v.tabLen, stdout);
 				fputc('\n', stdout);
 				break;

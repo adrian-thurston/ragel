@@ -113,7 +113,7 @@ void PrintStats( int treeSize, TreeEl *root )
 	if ( curRound % STATS_PERIOD == 0 ) {
 		memset( buf1, '\b', OUTBUFSIZE );
 		fwrite( buf1, 1, OUTBUFSIZE, stdout );
-		sprintf(buf1, "%i\t%i\t%s\t%s\t%i\t%i\t%i\t", curRound, increment,
+		sprintf(buf1, "%i\t%i\t%s\t%s\t%i\t%i\t%li\t", curRound, increment,
 				action&0x1 ? "yes" : "no", action&0x2 ? "yes" : "no", 
 				curIndex, treeSize, root ? root->height : 0 );
 		ExpandTab(buf1, buf2);

@@ -122,7 +122,7 @@ void testVector1()
 				}
 				else {
 					STabHead *head = ((STabHead*)v.data) - 1;
-					printf("L: %i  AL: %i\n", head->tabLen, head->allocLen);
+					printf("L: %li  AL: %li\n", head->tabLen, head->allocLen);
 					fwrite(v.data, 1, head->tabLen, stdout);
 					fputc('\n', stdout);
 				}
@@ -288,7 +288,7 @@ void testOperators1()
 	v.append( 10 );
 	v.append( 11 );
 
-	printf("%i\n", v.size());
+	printf("%li\n", v.size());
 	printf("%i\n", v[0]);
 	printf("%i\n", v[1]);
 
@@ -381,7 +381,7 @@ void printStats( Vector<TheData> &v1 )
 
 	memset( buf1, '\b', OUTBUFSIZE );
 	fwrite( buf1, 1, OUTBUFSIZE, stdout );
-	sprintf( buf1, "%i\t%i\t", curRound, v1.length() );
+	sprintf( buf1, "%i\t%li\t", curRound, v1.length() );
 	expandTab( buf2, buf1 );
 	fputs( buf2, stdout );
 	fflush( stdout);
