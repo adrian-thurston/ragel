@@ -26,7 +26,7 @@
 #include "dlistmel.h"
 
 /**
- * \addtogroup avltree
+ * \addtogroup avlitree
  * @{
  */
 
@@ -34,20 +34,18 @@
  * \class AvliTree
  * \brief Linked AVL tree.
  *
- * AvliTree is the standard by-structure AVL tree. A element class and a key type
- * must be given. Elements can be inserted by specifying a key only or by
- * explicitly creating the element and then inserting it. The element type must have
- * the appropriate AVL element pointers. This can be achieved by inheriting from
- * the AvlTreeEl class.
+ * AvliTree is the standard linked by-structure AVL tree. An element and a key
+ * type must be given. Elements can be inserted by specifying a key only or by
+ * explicitly allocating the element and then inserting it. The element type
+ * must have the appropriate AVL element pointers. This can be achieved by
+ * inheriting from the AvlTreeEl class.
  *
- * AvliTree implicitly connects element with linked list pointers, allowing the
- * element to be walked in order using next and previous pointers.
+ * AvliTree implicitly connects elements with linked list pointers, allowing
+ * the tree to be walked in order using next and previous pointers.
  *
- * AvliTree does not explicitly manage memory for element. Elements inserted into
- * the tree can be allocated by the user or can be allocated by the tree. In
- * any case, the tree does not assume ownership of the element. The destructor
- * will not delete element. A deep copy will cause existing elements to be
- * abandoned.
+ * Since it is possible to insert statically allocated elements, AvliTree does
+ * not assume ownership of elements in the tree. Items must be explicitly
+ * de-allocated.
  *
  * \include ex_avlitree.cpp
  */

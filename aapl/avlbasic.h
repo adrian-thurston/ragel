@@ -31,6 +31,7 @@
 
 /**
  * \class AvlBasic
+ * \brief AVL Tree that whos key is the element.
  */
 
 /*@}*/

@@ -26,7 +26,7 @@
 #include "dlist.h"
 
 /**
- * \addtogroup avltree 
+ * \addtogroup avlitree 
  * @{
  */
 

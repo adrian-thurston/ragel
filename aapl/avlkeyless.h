@@ -31,7 +31,7 @@
 
 /**
  * \class AvlKeyless
- * \brief Basic AVL tree that has no functions operating on a key.
+ * \brief AVL tree that has no insert/find/remove functions that take a key.
  */
 
 /*@}*/

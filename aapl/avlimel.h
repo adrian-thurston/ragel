@@ -26,7 +26,7 @@
 #include "dlistmel.h"
 
 /**
- * \addtogroup avltree 
+ * \addtogroup avlitree 
  * @{
  */
 
@@ -34,21 +34,19 @@
  * \class AvliMel
  * \brief Linked AVL tree for element appearing in multiple trees.
  *
- * AvliMel allows for a element to simultaneously be an element in multiple trees
- * without the two trees interferring with one another. This is achieved by
- * multiple inheritence. The element must use the same key for each tree. The
- * AvliMel class requires that you specify to it how to resolve the ambiguities
- * between the multiple AvlTreeEl classes that the element will inherit from. This
- * is done with the BaseEl parameter.
+ * AvliMel allows for a element to simultaneously be in multiple trees without
+ * the trees interferring with each another. This is achieved by multiple
+ * inheritence. The element must use the same key for each tree. The AvliMel
+ * class requires that you specify how to resolve the ambiguities between the
+ * multiple AvlTreeEl classes that the element will inherit from. This is done
+ * with the BaseEl parameter.
  *
- * AvliMel implicitly connects element with linked list pointers, allowing the
- * element to be walked in order using next and previous pointers.
+ * AvliMel implicitly connects elements with linked list pointers, allowing
+ * the element to be walked in order using next and previous pointers.
  *
- * AvliMel does not explicitly manage memory for element. Elements inserted into
- * the tree are typically allocated by the user. Since element can have static
- * allocation, the tree does not assume ownership of the element. The destructor
- * will not delete element. A deep copy will cause existing elements to be
- * abandoned.
+ * Since AvilMel may contain statically allocated elements or elements in more
+ * than one tree it does not assume ownership of elements in the tree. Items
+ * must be explicitly de-allocated.
  *
  * \include ex_avlimel.cpp
  */

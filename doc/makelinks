@@ -19,11 +19,18 @@ ln -fs $PREFIX/avlmel.h avltree/avlmel.h
 ln -fs $PREFIX/avlmelkey.h avltree/avlmelkey.h
 ln -fs $PREFIX/avlmap.h avltree/avlmap.h
 ln -fs $PREFIX/avlset.h avltree/avlset.h
-ln -fs $PREFIX/avlitree.h avltree/avlitree.h
-ln -fs $PREFIX/avlimel.h avltree/avlimel.h
-ln -fs $PREFIX/avlimelkey.h avltree/avlimelkey.h
-ln -fs $PREFIX/avlimap.h avltree/avlimap.h
-ln -fs $PREFIX/avliset.h avltree/avliset.h
+ln -fs $PREFIX/avlbasic.h avltree/avlbasic.h
+ln -fs $PREFIX/avlkeyless.h avltree/avlkeyless.h
+
+# AvliTree
+ln -fs $PREFIX/avlcommon.h avlitree/avlcommon.h
+ln -fs $PREFIX/avlitree.h avlitree/avlitree.h
+ln -fs $PREFIX/avlimel.h avlitree/avlimel.h
+ln -fs $PREFIX/avlimelkey.h avlitree/avlimelkey.h
+ln -fs $PREFIX/avlimap.h avlitree/avlimap.h
+ln -fs $PREFIX/avliset.h avlitree/avliset.h
+ln -fs $PREFIX/avlibasic.h avlitree/avlibasic.h
+ln -fs $PREFIX/avlikeyless.h avlitree/avlikeyless.h
 
 # Double List
 ln -fs $PREFIX/dlcommon.h dlist/dlcommon.h

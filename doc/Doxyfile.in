@@ -364,6 +364,7 @@ WARN_LOGFILE           =
 INPUT = \
 	dlist/dlistall.h \
 	avltree/avlall.h \
+	avlitree/avliall.h \
 	vector/vectall.h \
 	../aapl/table.h \
 	../aapl/resize.h \
