@@ -34,14 +34,11 @@
  * \brief Basic AVL tree.
  *
  * AvlTree is the standard by-structure AVL tree. An element and a key type
- * must be given. Elements can be inserted by specifying a key only or by
- * explicitly allocating the element and then inserting it. The element type
- * must have the appropriate AVL element pointers. This can be achieved by
- * inheriting from the AvlTreeEl class.
+ * must be given. The element type must have the appropriate AVL element
+ * pointers. This can be achieved by inheriting from the AvlTreeEl class.
  *
- * Since it is possible to insert statically allocated elements, AvlTree does
- * not assume ownership of elements in the tree. Items must be explicitly
- * de-allocated.
+ * AvlTree does not assume ownership of elements in the tree. Items must be
+ * explicitly de-allocated.
  *
  * \include ex_avltree.cpp
  */

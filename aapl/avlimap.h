@@ -39,9 +39,6 @@
  * Key type, a Value type and a compare class be given. Items can be inserted 
  * with just a key or with a key and value pair.
  *
- * AvliMap implicitly connects element with linked list pointers, allowing the
- * element to be walked in order using next and previous pointers.
- *
  * AvliMap assumes all elements in the tree are allocated on the heap and are
  * to be managed by the tree. This means that the class destructor will
  * delete the contents of the tree. A deep copy will cause existing elements

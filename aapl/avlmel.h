@@ -40,9 +40,8 @@
  * between the multiple AvlTreeEl classes that the element will inherit from.
  * This is done with the BaseEl parameter.
  *
- * Since AvlMel may contain statically allocated elements or elements in more
- * than one tree it does not assume ownership of elements in the tree. Items
- * must be explicitly de-allocated.
+ * AvlMel does not assume ownership of elements in the tree. Items must be
+ * explicitly de-allocated.
  *
  * \include ex_avlmel.cpp
  */

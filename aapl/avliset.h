@@ -38,9 +38,6 @@
  * that a Key type and a class containing a static Compare routine for Key
  * be given. Items are inserted with just a key value.
  *
- * AvliSet implicitly connects element with linked list pointers, allowing the
- * element to be walked in order using next and previous pointers.
- *
  * AvliSet assumes all elements in the tree are allocated on the heap and are
  * to be managed by the tree. This means that the class destructor will
  * delete the contents of the tree. A deep copy will cause existing elements

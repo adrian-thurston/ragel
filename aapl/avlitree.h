@@ -35,17 +35,11 @@
  * \brief Linked AVL tree.
  *
  * AvliTree is the standard linked by-structure AVL tree. An element and a key
- * type must be given. Elements can be inserted by specifying a key only or by
- * explicitly allocating the element and then inserting it. The element type
- * must have the appropriate AVL element pointers. This can be achieved by
- * inheriting from the AvlTreeEl class.
+ * type must be given. The element type must have appropriate AVL element
+ * pointers. This can be achieved by inheriting from the AvlTreeEl class.
  *
- * AvliTree implicitly connects elements with linked list pointers, allowing
- * the tree to be walked in order using next and previous pointers.
- *
- * Since it is possible to insert statically allocated elements, AvliTree does
- * not assume ownership of elements in the tree. Items must be explicitly
- * de-allocated.
+ * AvliTree does not assume ownership of elements in the tree. Items must be
+ * explicitly de-allocated.
  *
  * \include ex_avlitree.cpp
  */

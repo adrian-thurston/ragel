@@ -41,12 +41,8 @@
  * multiple AvlTreeEl classes that the element will inherit from. This is done
  * with the BaseEl parameter.
  *
- * AvliMel implicitly connects elements with linked list pointers, allowing
- * the element to be walked in order using next and previous pointers.
- *
- * Since AvilMel may contain statically allocated elements or elements in more
- * than one tree it does not assume ownership of elements in the tree. Items
- * must be explicitly de-allocated.
+ * AvilMel does not assume ownership of elements in the tree. Items must be
+ * explicitly de-allocated.
  *
  * \include ex_avlimel.cpp
  */

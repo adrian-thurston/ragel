@@ -39,14 +39,8 @@
  * given to AvliMelKey template in the same was the location of the AvlTreeEl is
  * given.
  *
- * AvliMelKey implicitly connects element with linked list pointers, allowing the
- * element to be walked in order using next and previous pointers.
- *
- * AvliMelKey does not explicitly manage memory for element. Elements inserted into
- * the tree are typically allocated by the user. Since element can have static
- * allocation, the tree does not assume ownership of the element. The destructor
- * will not delete element. A deep copy will cause existing elements to be
- * abandoned.
+ * AvliMelKey does not assume ownership of elements in the tree. Items must be
+ * explicitly de-allocated.
  *
  * \include ex_avlimelkey.cpp
  */

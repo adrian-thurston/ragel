@@ -42,9 +42,8 @@
  * DListEl class or by simply adding next and previous pointers directly into
  * the list element class.
  *
- * DList does not in any way manage memory for elements. The programmer must
- * allocate the elements added to the list. The destructor will not delete
- * elements. A deep copy will cause existing elements to be abandoned.
+ * DList does not assume ownership of elements in the tree. Items must be
+ * explicitly de-allocated.
  *
  * \include ex_dlist.cpp
  */

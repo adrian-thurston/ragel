@@ -42,6 +42,9 @@
  * base class name. This name is given to DListMel so it can use the correct
  * next and previous pointers in its list operations.
  *
+ * DListMel does not assume ownership of elements in the tree. Items must be
+ * explicitly de-allocated.
+ *
  * \include ex_dlistmel.cpp
  */
 

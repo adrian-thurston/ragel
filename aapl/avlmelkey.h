@@ -38,11 +38,8 @@
  * given to AvlMelKey template in the same was the location of the AvlTreeEl is
  * given.
  *
- * AvlMelKey does not explicitly manage memory for element. Elements inserted into
- * the tree are typically allocated by the user. Since element can have static
- * allocation, the tree does not assume ownership of the element. The destructor
- * will not delete element. A deep copy will cause existing elements to be
- * abandoned.
+ * AvlMelKey does not assume ownership of elements in the tree. Items must be
+ * explicitly de-allocated.
  *
  * \include ex_avlmelkey.cpp
  */
