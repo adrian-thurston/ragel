@@ -102,7 +102,7 @@ template <class Key, class Value> struct TAvliMapEl : public TAvliTreeEl
 	TAvliMapEl(const Key &key, const Value &value) 
 		: key(key), value(value) { }
 
-	const Key &getKey() { return key; }
+	const Key &getKey() const { return key; }
 
 	/** \brief The key. */
 	Key key;
@@ -125,7 +125,7 @@ template <class Key, class Value> struct TAvlMapEl : public TAvlTreeEl
 	TAvlMapEl(const Key &key, const Value &value) 
 		: key(key), value(value) { }
 
-	const Key &getKey() { return key; }
+	const Key &getKey() const { return key; }
 
 	/** \brief The key. */
 	Key key;
@@ -147,7 +147,7 @@ template <class Key> struct TAvliSetEl : public TAvliTreeEl
 {
 	TAvliSetEl(const Key &key) : key(key) { }
 
-	const Key &getKey() { return key; }
+	const Key &getKey() const { return key; }
 
 	/** \brief The key. */
 	Key key;
@@ -164,7 +164,7 @@ template <class Key> struct TAvlSetEl : public TAvlTreeEl
 {
 	TAvlSetEl(const Key &key) : key(key) { }
 
-	const Key &getKey() { return key; }
+	const Key &getKey() const { return key; }
 
 	/** \brief The key. */
 	Key key;

@@ -108,7 +108,7 @@ template <class Key, class Value> struct AvliMapEl :
 	AvliMapEl(const Key &key, const Value &value) 
 		: key(key), value(value) { }
 
-	const Key &getKey() { return key; }
+	const Key &getKey() const { return key; }
 
 	/** \brief The key. */
 	Key key;
@@ -131,7 +131,7 @@ template <class Key, class Value> struct AvlMapEl :
 	AvlMapEl(const Key &key, const Value &value) 
 		: key(key), value(value) { }
 
-	const Key &getKey() { return key; }
+	const Key &getKey() const { return key; }
 
 	/** \brief The key. */
 	Key key;
@@ -154,7 +154,7 @@ template <class Key> struct AvliSetEl :
 {
 	AvliSetEl(const Key &key) : key(key) { }
 
-	const Key &getKey() { return key; }
+	const Key &getKey() const { return key; }
 
 	/** \brief The key. */
 	Key key;
@@ -170,7 +170,7 @@ template <class Key> struct AvlSetEl :
 {
 	AvlSetEl(const Key &key) : key(key) { }
 
-	const Key &getKey() { return key; }
+	const Key &getKey() const { return key; }
 
 	/** \brief The key. */
 	Key key;
