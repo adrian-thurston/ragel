@@ -196,7 +196,10 @@ public:
 	struct IterNext { IterNext( const Iter &i ) : i(i) { } const Iter &i; };
 	struct IterPrev { IterPrev( const Iter &i ) : i(i) { } const Iter &i; };
 
-	/** \brief Vector Iterator. */
+	/** 
+	 * \brief Vector Iterator.
+	 * \ingroup iterators
+	 */
 	struct Iter
 	{
 		/* Construct, assign. */

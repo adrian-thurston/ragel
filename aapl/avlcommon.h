@@ -317,21 +317,24 @@ public:
 	/** The number of element in the tree. */
 	long treeSize;
 
-	/* Convenience. */
+	/** \brief Return the number of elements in the tree. */
 	long length() const         { return treeSize; }
+
+	/** \brief Return the number of elements in the tree. */
 	long size() const           { return treeSize; }
 
-	/* Forward this so a ref can be used. */
-	struct Iter;
-
 	/* Various classes for setting the iterator */
+	struct Iter;
 	struct IterFirst { IterFirst( const AvlTree &t ) : t(t) { } const AvlTree &t; };
 	struct IterLast { IterLast( const AvlTree &t ) : t(t) { } const AvlTree &t; };
 	struct IterNext { IterNext( const Iter &i ) : i(i) { } const Iter &i; };
 	struct IterPrev { IterPrev( const Iter &i ) : i(i) { } const Iter &i; };
 
 #ifdef WALKABLE
-	/** \brief Avl Tree Iterator. */
+	/** 
+	 * \brief Avl Tree Iterator. 
+	 * \ingroup iterators
+	 */
 	struct Iter
 	{
 		/* Default construct. */
@@ -414,7 +417,10 @@ public:
 
 #else
 
-	/** \brief Avl Tree Iterator. */
+	/**
+	 * \brief Avl Tree Iterator.
+	 * \ingroup avltree
+	 */
 	struct Iter
 	{
 		/* Default construct. */

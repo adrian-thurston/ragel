@@ -34,6 +34,9 @@
  * \class AvliKeyless
  * \brief Linked AVL tree that has no insert/find/remove functions that take a
  * key.
+ *
+ * AvlKeyless is an implementation of the AVL tree rebalancing functionality
+ * only. It provides the common code for the tiny AVL tree implementations.
  */
 
 /*@}*/

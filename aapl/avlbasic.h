@@ -31,7 +31,10 @@
 
 /**
  * \class AvlBasic
- * \brief AVL Tree in which the key is the element.
+ * \brief AVL Tree in which the entire element structure is the key.
+ *
+ * AvlBasic does not assume ownership of elements in the tree. Items must be
+ * explicitly de-allocated.
  */
 
 /*@}*/

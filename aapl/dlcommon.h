@@ -316,11 +316,7 @@ public:
 	void empty();
 	void abandon();
 
-	/**
-	 * \brief Return the length.
-	 *
-	 * \returns The number of elements in the list. 
-	 */
+	/** \brief The number of elements in the list. */
 	long length() const { return listLen; }
 
 	/** \brief Head and tail of the linked list. */
@@ -343,6 +339,7 @@ public:
 
 	/**
 	 * \brief Double List Iterator. 
+	 * \ingroup iterators
 	 */
 	struct Iter
 	{

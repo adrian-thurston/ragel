@@ -101,7 +101,7 @@ public:
 	struct IterNext { IterNext( const Iter &i ) : i(i) { } const Iter &i; };
 	struct IterPrev { IterPrev( const Iter &i ) : i(i) { } const Iter &i; };
 
-	/* Vector Iterator. */
+	/* Deque Iterator. */
 	struct Iter
 	{
 		/* Construct, assign. */

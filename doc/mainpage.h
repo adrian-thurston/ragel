@@ -36,3 +36,8 @@
  * </ul>
  */
 
+/** 
+ * \defgroup iterators Iterators
+ * \brief Iterators for walking Aapl data structures.
+ */
+

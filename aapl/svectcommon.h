@@ -194,16 +194,17 @@ public:
 	T &operator[](int i) const { return BaseTable::data[i]; }
 	long size() const           { return BaseTable::length(); }
 
-	/* Forward this so a ref can be used. */
-	struct Iter;
-
 	/* Various classes for setting the iterator */
+	struct Iter;
 	struct IterFirst { IterFirst( const SVector &v ) : v(v) { } const SVector &v; };
 	struct IterLast { IterLast( const SVector &v ) : v(v) { } const SVector &v; };
 	struct IterNext { IterNext( const Iter &i ) : i(i) { } const Iter &i; };
 	struct IterPrev { IterPrev( const Iter &i ) : i(i) { } const Iter &i; };
 
-	/** \brief Shared Vector Iterator. */
+	/** 
+	 * \brief Shared Vector Iterator. 
+	 * \ingroup iterators
+	 */
 	struct Iter
 	{
 		/* Construct, assign. */
