@@ -369,7 +369,6 @@ INPUT = \
 	../aapl/table.h \
 	../aapl/resize.h \
 	bsttable/bstall.h \
-	deque/dequeall.h \
 	sort/sortall.h \
 	compare/compare.h \
 	string/astring.h \

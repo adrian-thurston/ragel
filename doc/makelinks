@@ -47,12 +47,6 @@ ln -fs $PREFIX/sbsttable.h bsttable/sbsttable.h
 ln -fs $PREFIX/sbstmap.h bsttable/sbstmap.h
 ln -fs $PREFIX/sbstset.h bsttable/sbstset.h
 
-# Deque
-test -d deque || mkdir deque
-ln -fs $PREFIX/deque.h deque/deque.h
-ln -fs $PREFIX/dequesimp.h deque/dequesimp.h
-ln -fs $PREFIX/dequecommon.h deque/dequecommon.h
-
 # Sorting
 ln -fs $PREFIX/bubblesort.h sort/bubblesort.h
 ln -fs $PREFIX/mergesort.h sort/mergesort.h

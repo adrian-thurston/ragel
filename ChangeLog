@@ -1,3 +1,8 @@
+For Next Release
+================
+ -Removed Deque structure. Never used, incomplete and poorly tested. Often,
+  the same tasks can be achieved with a small amount of coding.
+
 Aapl 2.11 - May 30, 2004
 ========================
  -Moved from ints to longs for most integer values to get 64 bit numbers on 64
