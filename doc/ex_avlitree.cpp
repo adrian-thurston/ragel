@@ -1,3 +1,6 @@
+#include "avlitree.h"
+#include <iostream>
+
 struct CustomEl :
 		public AvliTreeEl<CustomEl>,
 		public CmpOrd<int>
@@ -22,6 +25,9 @@ int main()
 
 	/* Here we make the element ourselves. */
 	tree.insert( new CustomEl( 2, "CustomEl") );
+
+	for ( CustomEl *el = tree.head; el != 0; el = el->next )
+		std::cout << el->key << std::endl;
 
 	tree.empty();
 	return 0;

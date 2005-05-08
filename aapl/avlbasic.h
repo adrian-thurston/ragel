@@ -33,6 +33,11 @@
  * \class AvlBasic
  * \brief AVL Tree in which the entire element structure is the key.
  *
+ * AvlBasic is an AVL tree that does not distinguish between the element that
+ * it contains and the key. The entire element structure is the key that is
+ * used to compare the relative ordering of elements. This is similar to the
+ * BstSet structure.
+ *
  * AvlBasic does not assume ownership of elements in the tree. Items must be
  * explicitly de-allocated.
  */

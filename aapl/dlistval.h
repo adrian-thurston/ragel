@@ -31,17 +31,20 @@
  * \class DListVal
  * \brief By-value doubly linked list.
  *
- * This class is a by-value list that does not require a list element type to
- * be declared. When adding list items, the user can supply the data type and
- * the list will implicitly new up a list element. This behaviour is intended
- * to be similar to a standard list template implementation.
+ * This class is a doubly linked list that does not require a list element
+ * type to be declared. The user instead gives a type that is to be stored in
+ * the list element. When inserting a new data item, the value is copied into
+ * a newly allocated element. This list is inteded to behave and be utilized
+ * like the list template found in the STL.
  *
- * DListVal is different from the other lists in that it assumes all elements
- * in the list are allocated on the heap and are to be managed by the list.
- * This means that the class destructor will delete the contents of the list.
- * If the list is ever copied in from another list, the existing contents are
- * deleted first. The other lists will never delete contents to allow for
- * statically allocated elements.
+ * DListVal is different from the other lists in that it allocates elements
+ * itself. The raw element insert interface is still exposed for convenience,
+ * however, the list assumes all elements in the list are allocated on the
+ * heap and are to be managed by the list. The destructor WILL delete the
+ * contents of the list. If the list is ever copied in from another list, the
+ * existing contents are deleted first. This is in contrast to DList and
+ * DListMel, which will never delete their contents to allow for statically
+ * allocated elements.
  *
  * \include ex_dlistval.cpp
  */

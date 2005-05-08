@@ -19,7 +19,6 @@
 #   Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 
-
 # Get the version info.
 include ../version.mk
 
@@ -31,6 +30,9 @@ all: Doxyfile
 	./makelinks
 	./makedummy
 	doxygen Doxyfile
+
+%: %.cpp
+	g++ -I../aapl -o $@ $<
 
 Doxyfile: Doxyfile.in ../version.mk
 	sed 's/@VERSION@/$(VERSION)/' Doxyfile.in > Doxyfile

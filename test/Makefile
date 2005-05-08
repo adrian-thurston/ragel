@@ -40,7 +40,7 @@ TEST = \
 	test_sbstset.cpp test_tdlist.cpp test_tdlistmel.cpp \
 	test_tdlistval.cpp test_tdlistall.cpp test_tvectsimp.cpp \
 	test_tsvectsimp.cpp test_avlkeyless.cpp test_avlikeyless.cpp \
-	test_tavltree.cpp
+	test_tavltree.cpp test_compare.cpp
 
 
 #*************************************

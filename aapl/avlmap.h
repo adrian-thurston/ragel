@@ -33,16 +33,16 @@
  * \class AvlMap
  * \brief Key and value oriented AVL tree. 
  *
- * AvlMap stores key and value pairs in element managed by the tree. It is
- * intendend to be similar to standard map templates. AvlMap requires that a
- * Key type, a Value type, and a class containing a static compare routine for
- * Key be given. Items can be inserted with just a key or with a key and value
- * pair.
+ * AvlMap stores key and value pairs in elements that managed by the tree. It
+ * is intendend to be similar to map template found in the STL. AvlMap
+ * requires that a Key type, a Value type, and a class containing a compare()
+ * routine for Key be given. Items can be inserted with just a key or with a
+ * key and value pair.
  *
  * AvlMap assumes all elements in the tree are allocated on the heap and are
- * to be managed by the tree. This means that the class destructor will
- * delete the contents of the tree. A deep copy will cause existing elements
- * to be deleted first.
+ * to be managed by the tree. This means that the class destructor will delete
+ * the contents of the tree. A deep copy will cause existing elements to be
+ * deleted first.
  *
  * \include ex_avlmap.cpp
  */

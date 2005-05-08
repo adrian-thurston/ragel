@@ -4,7 +4,7 @@ struct CustomEl :
 		public AvlTreeEl<CustomEl>,
 		public CmpOrd<int>
 {
-	/* Needed for the insert(const &Key key) routine. */
+	/* Needed only for the insert(const &Key key) routine. */
 	CustomEl(int key) : key(key), data(0) { }
 
 	/* For our purposes. */

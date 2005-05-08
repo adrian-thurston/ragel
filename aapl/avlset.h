@@ -33,14 +33,14 @@
  * \class AvlSet
  * \brief Key-only oriented tree.
  *
- * AvlSet stores only keys in element managed by the tree. AvlSet requires
- * that a Key type and a class containing a static Compare routine for Key
- * be given. Items are inserted with just a key value.
+ * AvlSet stores only keys in elements that are managed by the tree. AvlSet
+ * requires that a Key type and a class containing a compare() routine
+ * for Key be given. Items are inserted with just a key value.
  *
  * AvlSet assumes all elements in the tree are allocated on the heap and are
- * to be managed by the tree. This means that the class destructor will
- * delete the contents of the tree. A deep copy will cause existing elements
- * to be deleted first.
+ * to be managed by the tree. This means that the class destructor will delete
+ * the contents of the tree. A deep copy will cause existing elements to be
+ * deleted first.
  *
  * \include ex_avlset.cpp
  */

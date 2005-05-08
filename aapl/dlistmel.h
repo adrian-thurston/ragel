@@ -38,12 +38,17 @@
  * with one another.
  *
  * For each list that an element class is to appear in, the element must have
- * next and previous pointers that can be unambiguously refered to with some
- * base class name. This name is given to DListMel so it can use the correct
- * next and previous pointers in its list operations.
+ * unique next and previous pointers that can be unambiguously refered to with
+ * some base class name. This name is given to DListMel as a template argument
+ * so it can use the correct next and previous pointers in its list
+ * operations.
  *
- * DListMel does not assume ownership of elements in the tree. Items must be
- * explicitly de-allocated.
+ * DListMel does not assume ownership of elements in the list. If the elements
+ * are known to reside on the heap and are not contained in any other list or
+ * data structure, the provided empty() routine can be used to delete all
+ * elements, however the destructor will not call this routine, it will simply
+ * abandon all the elements. It is up to the programmer to explicitly
+ * de-allocate items when it is safe to do so.
  *
  * \include ex_dlistmel.cpp
  */

@@ -419,7 +419,7 @@ public:
 
 	/**
 	 * \brief Avl Tree Iterator.
-	 * \ingroup avltree
+	 * \ingroup iterators
 	 */
 	struct Iter
 	{

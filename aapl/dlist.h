@@ -42,8 +42,11 @@
  * DListEl class or by simply adding next and previous pointers directly into
  * the list element class.
  *
- * DList does not assume ownership of elements in the tree. Items must be
- * explicitly de-allocated.
+ * DList does not assume ownership of elements in the list. If the elements
+ * are known to reside on the heap, the provided empty() routine can be used to
+ * delete all elements, however the destructor will not call this routine, it
+ * will simply abandon all the elements. It is up to the programmer to
+ * explicitly de-allocate items when necessary.
  *
  * \include ex_dlist.cpp
  */

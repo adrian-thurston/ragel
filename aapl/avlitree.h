@@ -34,12 +34,21 @@
  * \class AvliTree
  * \brief Linked AVL tree.
  *
- * AvliTree is the standard linked by-structure AVL tree. An element and a key
- * type must be given. The element type must have appropriate AVL element
- * pointers. This can be achieved by inheriting from the AvlTreeEl class.
+ * AvliTree is the standard linked by-structure AVL tree. To use this
+ * structure the user must define an element type and give it the necessary
+ * properties. At the very least it must have a getKey() function that will be
+ * used to compare the relative ordering of elements and tree management data
+ * necessary for the AVL algorithm. An element type can acquire the management
+ * data by inheriting the AvliTreeEl class.
  *
- * AvliTree does not assume ownership of elements in the tree. Items must be
- * explicitly de-allocated.
+ * AvliTree does not presume to manage the allocation of elements in the tree.
+ * The destructor will not delete the items in the tree, instead the elements
+ * must be explicitly de-allocated by the user if necessary and when it is
+ * safe to do so. The empty() routine will traverse the tree and delete all
+ * items. 
+ *
+ * Since the tree does not manage the elements, it can contain elements that
+ * are allocated statically or that are part of another data structure.
  *
  * \include ex_avlitree.cpp
  */

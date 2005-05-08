@@ -34,14 +34,19 @@
  * \brief AVL tree for elements appearing in multiple trees.
  *
  * AvlMel allows for an element to simultaneously be in multiple trees without
- * the trees interferring with one another. This is achieved by multiple
- * inheritence. The element must use the same key for each tree. The AvlMel
- * class requires that you specify to it how to resolve the ambiguities
- * between the multiple AvlTreeEl classes that the element will inherit from.
- * This is done with the BaseEl parameter.
+ * the trees interferring with one another. For each tree that the element is
+ * to appear in, there must be a distinct set of AVL Tree management data that
+ * can be unambiguously referenced with some base class name. This name
+ * is passed to the tree as a template parameter and is used in the tree
+ * algorithms.
  *
- * AvlMel does not assume ownership of elements in the tree. Items must be
- * explicitly de-allocated.
+ * The element must use the same key type and value in each tree that it
+ * appears in. If distinct keys are required, the AvlMelKey structure is
+ * available.
+ *
+ * AvlMel does not assume ownership of elements in the tree. The destructor
+ * will not delete the elements. If the user wishes to explicitly deallocate
+ * all the items in the tree the empty() routine is available. 
  *
  * \include ex_avlmel.cpp
  */

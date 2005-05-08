@@ -36,7 +36,9 @@ struct CustomEl :
 
 int main()
 {
-    /* Specify to AvlMelKey which base element and base key to use. */
+	/* Specify to AvlMelKey which base element and base key to use. In this
+	 * example, both the key and the AVL tree data are in the CustomElBase
+	 * classes. */
     AvlMelKey< CustomEl, int, CustomElBase1, CustomElBase1 > avltree1;
     AvlMelKey< CustomEl, char*, CustomElBase2, CustomElBase2, CmpStr > avltree2;
 

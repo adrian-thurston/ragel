@@ -34,13 +34,17 @@
  * \class AvliMelKey
  * \brief Linked AVL tree for element appearing in multiple trees with different keys.
  *
- * AvliMelKey is the same as AvlMel with the added feature of being able to use
- * different keys for different trees. The location of the getKey routine is
- * given to AvliMelKey template in the same was the location of the AvlTreeEl is
- * given.
+ * AvliMelKey is similar to AvliMel, except that an additional template
+ * parameter, BaseKey, is provided for resolving ambiguous references to
+ * getKey(). This means that if an element is stored in multiple trees, each
+ * tree can use a different key for ordering the elements in it. Using
+ * AvliMelKey an array of data structures can be indexed with an O(log(n))
+ * search on two or more of the values contained within it and without
+ * allocating any additional data.
  *
- * AvliMelKey does not assume ownership of elements in the tree. Items must be
- * explicitly de-allocated.
+ * AvliMelKey does not assume ownership of elements in the tree. The destructor
+ * will not delete the elements. If the user wishes to explicitly deallocate
+ * all the items in the tree the empty() routine is available. 
  *
  * \include ex_avlimelkey.cpp
  */

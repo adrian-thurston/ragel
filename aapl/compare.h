@@ -35,19 +35,24 @@ namespace Aapl {
  *
  * Compare classes are used by data structures that need to know the relative
  * ordering of elemets. To become a compare class, a class must imlement a
- * static routine Compare() that behaves just like strcmp. In some cases the
- * compare class is passed to the data structure. Such is the case with
- * BstMap. In other cases the comapre class is expected to be the structure
- * that is being contained. AvlTree expects the element to implement the compare
- * routine.
+ * routine long compare(const T &key1, const T &key2) that behaves just like
+ * strcmp. 
+ *
+ * Compare classes are passed to the template data structure as a template
+ * parameter and are inherited. In most cases the compare routine will base
+ * the key comparision only on the two keys and the compare routine can
+ * therefore be static. Though sometimes it is useful to include data in the
+ * compare class and use this data in the comparison. For example the compare
+ * class may contain a pointer to some other data structure to which the
+ * comparison is delegated.
  *
  * @{
  */
 
 /**
- * \brief Compare two c-style strings
+ * \brief Compare two null terminated character sequences.
  *
- * Wrapper for strcmp.
+ * This comparision class is a wrapper for strcmp.
  */
 struct CmpStr
 {
@@ -59,10 +64,10 @@ struct CmpStr
 };
 
 /**
- * \brief Compare a an ordinal type that implements '<' and '>' operators.
+ * \brief Compare a type for which < and > are implemented.
  *
  * CmpOrd is suitable for simple types such as integers and pointers that by
- * default have the less than and greater than operators defined.
+ * default have the less-than and greater-than operators defined.
  */
 template <class T> struct CmpOrd
 {
@@ -85,11 +90,13 @@ template <class T> struct CmpOrd
 /**
  * \brief Compare two tables of type T
  *
- * CmpTable is useful for keying a data structure on a vector or binary search
- * table. T is the type of the table that the compare is for. CmpTable
- * requires that a compare class for T be given.
+ * Table comparison is useful for keying a data structure on a vector or
+ * binary search table. T is the type of the table that the compare is for.
+ * CompareT is the comparison structure used to compare the individual values
+ * in the table.
  */
-template < class T, class CompareT = CmpOrd<T> > struct CmpTable
+template < class T, class CompareT = CmpOrd<T> > struct CmpTable 
+		: public CompareT
 {
 	/**
 	 * \brief Compare two tables storing type T.
@@ -119,18 +126,22 @@ template < class T, class CompareT = CmpOrd<T> > struct CmpTable
 /**
  * \brief Compare two tables of type T -- non-static version.
  *
- * CmpTable is useful for keying a data structure on a vector or binary search
- * table. T is the type of the table that the compare is for. CmpTable
- * requires that a compare class for T be given.
+ * CmpTableNs is identical to CmpTable, however the compare routine is
+ * non-static.  If the CompareT class contains a non-static compare, then this
+ * version must be used.
+ *
+ * Table comparison useful for keying a data structure on a vector or binary
+ * search table. T is the type of the table that the compare is for. CompareT
+ * is the comparison structure used to compare the individual values in the
+ * table.
  */
-template < class T, class CompareT = CmpOrd<T> > struct CmpTableNs
+template < class T, class CompareT = CmpOrd<T> > struct CmpTableNs 
+		: public CompareT
 {
 	/**
 	 * \brief Compare two tables storing type T.
-	 *
-	 * Non-static for CompareT classes that have non-static compare routine.
 	 */
-	inline long compare(const Table<T> &t1, const Table<T> &t2) const
+	inline long compare(const Table<T> &t1, const Table<T> &t2)
 	{
 		if ( t1.tabLen < t2.tabLen )
 			return -1;
@@ -155,11 +166,15 @@ template < class T, class CompareT = CmpOrd<T> > struct CmpTableNs
 /**
  * \brief Compare two implicitly shared tables of type T
  *
- * CmpTable is useful for keying a data structure on a vector or binary search
- * table. T is the type of the table that the compare is for. CmpTable
- * requires that a compare class for T be given.
+ * This table comparison is for data structures based on implicitly
+ * shared tables.
+ *
+ * Table comparison is useful for keying a data structure on a vector or
+ * binary search table. T is the type of the table that the compare is for.
+ * CompareT is the comparison structure used to compare the individual values
+ * in the table.
  */
-template < class T, class CompareT = CmpOrd<T> > struct CmpSTable
+template < class T, class CompareT = CmpOrd<T> > struct CmpSTable : public CompareT
 {
 	/**
 	 * \brief Compare two tables storing type T.
@@ -193,18 +208,21 @@ template < class T, class CompareT = CmpOrd<T> > struct CmpSTable
  * \brief Compare two implicitly shared tables of type T -- non-static
  * version.
  *
- * CmpTable is useful for keying a data structure on a vector or binary search
- * table. T is the type of the table that the compare is for. CmpTable
- * requires that a compare class for T be given.
+ * This is a non-static table comparison is for data structures based on
+ * implicitly shared tables.
+ *
+ * Table comparison is useful for keying a data structure on a vector or
+ * binary search table. T is the type of the table that the compare is for.
+ * CompareT is the comparison structure used to compare the individual values
+ * in the table.
  */
-template < class T, class CompareT = CmpOrd<T> > struct CmpSTableNs
+template < class T, class CompareT = CmpOrd<T> > struct CmpSTableNs 
+		: public CompareT
 {
 	/**
 	 * \brief Compare two tables storing type T.
-	 *
-	 * Non-static for CompareT classes that have non-static compare routine.
 	 */
-	inline long compare(const STable<T> &t1, const STable<T> &t2) const
+	inline long compare(const STable<T> &t1, const STable<T> &t2)
 	{
 		long t1Length = t1.length();
 		long t2Length = t2.length();
