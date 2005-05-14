@@ -31,9 +31,9 @@
  * \class BstSet
  * \brief Binary search table for types that are the key.
  *
- * BstSet is suitable for simple types that comprise the entire key. The
- * compare routine is not implemented in the key type. It is intended for
- * simple types such as integers and pointers.
+ * BstSet is suitable for types that comprise the entire key. Rather than look
+ * into the element to retrieve the key, the element is the key. A class that
+ * contains a comparison routine for the key must be given.
  */
 
 /*@}*/

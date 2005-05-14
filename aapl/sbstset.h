@@ -32,9 +32,10 @@
  * \brief Copy-on-write binary search table for types that are the key.
  *
  * This is a set style binary search table that employs the copy-on-write
- * mechanism for storing table data. BstSet is suitable for simple types that
- * comprise the entire key. The compare routine is not implemented in the key
- * type. It is intended for simple types such as integers and pointers.
+ * mechanism for storing table data. BstSet is suitable for types that
+ * comprise the entire key. Rather than look into the element to retrieve the
+ * key, the element is the key.  A class that contains a comparison routine
+ * for the key must be given.
  */
 
 /*@}*/

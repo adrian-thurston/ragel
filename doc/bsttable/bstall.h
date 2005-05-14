@@ -9,7 +9,7 @@
  * Binary Search %Table is instantiated by supplying an element or key and
  * value types which are stored directly in the underlying vector. This is
  * opposed to requiring that the element inherit from a base element as is the
- * case with AvlTree. A Compare routine that can compare the key type must be
+ * case with AvlTree. A Compare class that can compare the key type must be
  * supplied.
  *
  * Being table based means that it is simple to get an ordered walk of the

@@ -61,9 +61,9 @@ template <class Key, class Value> struct SBstMapEl
  * \brief Copy-on-write binary search table for key and value pairs.
  *
  * This is a map style binary search table that employs the copy-on-write
- * mechanism for table data. BstMap stores each element as a key and value
- * pair. The key and value can be any type. A compare class for the key must
- * be supplied.
+ * mechanism for table data. BstMap stores key and value pairs in each
+ * element. The key and value can be any type. A compare class for the key
+ * must be supplied.
  */
 
 /*@}*/

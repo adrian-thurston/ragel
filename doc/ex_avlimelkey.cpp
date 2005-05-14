@@ -1,3 +1,5 @@
+#include "avlimelkey.h"
+
 /* Forward the element struct so we can pass it to AvliTreeEl. */
 struct CustomEl;
 

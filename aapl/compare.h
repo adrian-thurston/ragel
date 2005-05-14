@@ -91,7 +91,7 @@ template <class T> struct CmpOrd
  * \brief Compare two tables of type T
  *
  * Table comparison is useful for keying a data structure on a vector or
- * binary search table. T is the type of the table that the compare is for.
+ * binary search table. T is the element type stored in the table.
  * CompareT is the comparison structure used to compare the individual values
  * in the table.
  */
@@ -128,10 +128,11 @@ template < class T, class CompareT = CmpOrd<T> > struct CmpTable
  *
  * CmpTableNs is identical to CmpTable, however the compare routine is
  * non-static.  If the CompareT class contains a non-static compare, then this
- * version must be used.
+ * version must be used because a static member cannot invoke a non-static
+ * member.
  *
- * Table comparison useful for keying a data structure on a vector or binary
- * search table. T is the type of the table that the compare is for. CompareT
+ * Table comparison is useful for keying a data structure on a vector or binary
+ * search table. T is the element type stored in the table. CompareT
  * is the comparison structure used to compare the individual values in the
  * table.
  */
@@ -170,7 +171,7 @@ template < class T, class CompareT = CmpOrd<T> > struct CmpTableNs
  * shared tables.
  *
  * Table comparison is useful for keying a data structure on a vector or
- * binary search table. T is the type of the table that the compare is for.
+ * binary search table. T is the element type stored in the table.
  * CompareT is the comparison structure used to compare the individual values
  * in the table.
  */
@@ -208,11 +209,13 @@ template < class T, class CompareT = CmpOrd<T> > struct CmpSTable : public Compa
  * \brief Compare two implicitly shared tables of type T -- non-static
  * version.
  *
- * This is a non-static table comparison is for data structures based on
- * implicitly shared tables.
+ * This is a non-static table comparison for data structures based on
+ * implicitly shared tables. If the CompareT class contains a non-static
+ * compare, then this version must be used because a static member cannot
+ * invoke a non-static member.
  *
  * Table comparison is useful for keying a data structure on a vector or
- * binary search table. T is the type of the table that the compare is for.
+ * binary search table. T is the element type stored in the table.
  * CompareT is the comparison structure used to compare the individual values
  * in the table.
  */

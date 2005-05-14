@@ -1,3 +1,5 @@
+#include "avlimap.h"
+
 int main()
 {
 	AvliMap< char *, int, CmpStr > avlmap;

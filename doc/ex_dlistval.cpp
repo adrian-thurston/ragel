@@ -1,3 +1,5 @@
+#include "dlistval.h"
+
 int main()
 {
     DListVal<int> list;

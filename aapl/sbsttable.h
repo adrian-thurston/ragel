@@ -34,10 +34,11 @@
  * \class SBstTable
  * \brief Copy-on-write binary search table for structures that contain a key.
  *
- * This is the basic binary search table that employs the copy-on-write
- * mecanism.  It can be used to contain a structure that has a key and some
- * data. The key should be a member of the element class accessible with
- * getKey(). The compare routine should also be a member of the element class.
+ * This is a basic binary search table that employs a copy-on-write data
+ * storage mechanism. It can be used to contain a structure that has a key and
+ * possibly some data. The key should be a member of the element class and
+ * accessible with getKey(). A class containing the compare routine must be
+ * supplied.
  */
 
 /*@}*/

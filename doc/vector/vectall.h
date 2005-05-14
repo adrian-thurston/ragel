@@ -8,7 +8,7 @@
  * reallocation policies available. It is also possible to use a custom
  * reallocation scheme.
  *
- * VectSimp has the same interface as Vector and provides a significant
+ * VectSimp has the same interface as Vector and provides a 
  * performance improvement for types that do not have constructors or
  * destructors. VectSimp uses memcpy for copying data as opposed to invoking
  * copy constructors.

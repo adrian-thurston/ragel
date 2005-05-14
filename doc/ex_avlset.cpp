@@ -1,3 +1,5 @@
+#include "avlset.h"
+
 int main()
 {
     AvlSet< int, CmpOrd<int> > avlset;

@@ -60,8 +60,8 @@ template <class Key, class Value> struct BstMapEl
  * \class BstMap
  * \brief Binary search table for key and value pairs.
  *
- * BstMap stores each element as a key and value pair. The key and value can
- * be any type. A compare class for the key must be supplied.
+ * BstMap stores key and value pairs in each element. The key and value can be
+ * any type. A compare class for the key must be supplied.
  */
 
 /*@}*/
