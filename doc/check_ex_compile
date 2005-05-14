@@ -1,0 +1,7 @@
+#!/bin/bash
+#
+
+for fn in ex_*.cpp; do
+	( set -x; g++ -Wall -I../aapl -o tmp.out $fn; )
+done
+rm tmp.out
