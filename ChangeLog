@@ -1,11 +1,17 @@
 For Next Release
 ================
+ -Documentation updates to trees, lists, compare classes, binary search tables
+  and various other places.
+ -Added iterator documentation and example.
+ -Added proper includes for all examples, which now all compile.
+ -Table comparisons now properly inherit the CompareT class, enabling table
+  comparisons to call non-static element compare classes.
  -Removed the Deque structure. This structure was never used, incomplete and
-  poorly tested. In most problems for which it was a candidate (large
+  poorly tested. In most problems for which it is a candidate (large
   collections of objects in sequential ordering that are not required to be in
-  contiguous memory), a simple replacement was be implemented with a small
-  amount of code. Rather than be allowed to go unused and unmaintained, it is
-  removed.
+  contiguous memory), a simple replacement can easily be implemented with a
+  small amount of code. Rather than be allowed to go unused and unmaintained,
+  it is removed.
  -In the AvlTreeEl structures for Maps and Sets, getKey can be const.
  -Removed the non-standard malloc include.
 
