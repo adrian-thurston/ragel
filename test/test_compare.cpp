@@ -51,6 +51,6 @@ struct CmpItem
 int main()
 {
 	Vector<Item> v;
-	BstSet< Vector<Item>, CmpTableNsc<Item, CmpItem> > bst;
+	BstSet< Vector<Item>, CmpTableNs<Item, CmpItem> > bst;
 	bst.insert(Vector<Item>());
 }
