@@ -1,3 +1,12 @@
+For Next Release
+================
+ -Added vinsert and vremove routines for accessing the insert and remove of
+  the underlying vector of binary search tables. Previously, these were
+  accessed by prefixing the insert call with the vector base class name,
+  however this method is somewhat inconvenient, because it either requires all
+  the template arguments to be given or an additional typedef to be made.
+  Prefixing the call with the letter v is simpler.
+
 Aapl 2.12 - May 15, 2005
 ========================
  -Documentation updates to trees, lists, compare classes, binary search tables

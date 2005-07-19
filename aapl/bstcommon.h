@@ -69,6 +69,123 @@ public:
 	bool remove(Element *item);
 	long removeMulti(const Key &key);
 	long removeMulti(Element *lower, Element *upper);
+
+	/* The following provide access to the underlying insert and remove
+	 * functions that my be hidden by the BST insert and remove. The insertDup
+	 * and insertNew functions will never be hidden. They are provided for
+	 * consistency. The difference between the non-shared and the shared
+	 * tables is the documentation reference to the invoked function. */	
+
+#if !defined( SHARED_BST )
+	/*@{*/
+
+	/** \brief Call the insert of the underlying vector. 
+	 *
+	 * Provides to access to the vector insert, which may become hidden. Care
+	 * should be taken to ensure that after the insert the ordering of
+	 * elements is preserved. 
+	 * Invokes Vector::insert( long pos, const T &val ).
+	 */
+	void vinsert(long pos, const T &val)
+		{ Vector< Element, Resize >::insert( pos, &val, 1 ); }
+
+	/** \brief Call the insert of the underlying vector.
+	 *
+	 * Provides to access to the vector insert, which may become hidden. Care
+	 * should be taken to ensure that after the insert the ordering of
+	 * elements is preserved. 
+	 * Invokes Vector::insert( long pos, const T *val, long len ).
+	 */
+	void vinsert(long pos, const T *val, long len)
+		{ Vector< Element, Resize >::insert( pos, val, len ); }
+
+	/** \brief Call the insert of the underlying vector.
+	 *
+	 * Provides to access to the vector insert, which may become hidden. Care
+	 * should be taken to ensure that after the insert the ordering of
+	 * elements is preserved. 
+	 * Invokes Vector::insert( long pos, const Vector &v ).
+	 */
+	void vinsert(long pos, const Vector &v)
+		{ Vector< Element, Resize >::insert( pos, v.data, v.tabLen ); }
+
+	/*@}*/
+
+	/*@{*/
+
+	/** \brief Call the remove of the underlying vector. 
+	 *
+	 * 	Provides access to the vector remove, which may become hidden.
+	 * 	Invokes Vector::remove( long pos ).
+	 */
+	void vremove(long pos)
+		{ Vector< Element, Resize >::remove( pos, 1 ); }
+
+	/** \brief Call the remove of the underlying vector. 
+	 *
+	 * Proves access to the vector remove, which may become hidden.
+	 * Invokes Vector::remove( long pos, long len ). 
+	 */
+	void vremove(long pos, long len)
+		{ Vector< Element, Resize >::remove( pos, len ); }
+
+	/*@}*/
+#else /* SHARED_BST */
+	/*@{*/
+
+	/** \brief Call the insert of the underlying vector. 
+	 *
+	 * Provides to access to the vector insert, which may become hidden. Care
+	 * should be taken to ensure that after the insert the ordering of
+	 * elements is preserved. 
+	 * Invokes SVector::insert( long pos, const T &val ).
+	 */
+	void vinsert(long pos, const T &val)
+		{ Vector< Element, Resize >::insert( pos, &val, 1 ); }
+
+	/** \brief Call the insert of the underlying vector.
+	 *
+	 * Provides to access to the vector insert, which may become hidden. Care
+	 * should be taken to ensure that after the insert the ordering of
+	 * elements is preserved. 
+	 * Invokes SVector::insert( long pos, const T *val, long len ).
+	 */
+	void vinsert(long pos, const T *val, long len)
+		{ Vector< Element, Resize >::insert( pos, val, len ); }
+
+	/** \brief Call the insert of the underlying vector.
+	 *
+	 * Provides to access to the vector insert, which may become hidden. Care
+	 * should be taken to ensure that after the insert the ordering of
+	 * elements is preserved. 
+	 * Invokes SVector::insert( long pos, const SVector &v ).
+	 */
+	void vinsert(long pos, const Vector &v)
+		{ Vector< Element, Resize >::insert( pos, v.data, v.tabLen ); }
+
+	/*@}*/
+
+	/*@{*/
+
+	/** \brief Call the remove of the underlying vector. 
+	 *
+	 * 	Provides access to the vector remove, which may become hidden.
+	 * 	Invokes SVector::remove( long pos ).
+	 */
+	void vremove(long pos)
+		{ Vector< Element, Resize >::remove( pos, 1 ); }
+
+	/** \brief Call the remove of the underlying vector. 
+	 *
+	 * Proves access to the vector remove, which may become hidden.
+	 * Invokes SVector::remove( long pos, long len ). 
+	 */
+	void vremove(long pos, long len)
+		{ Vector< Element, Resize >::remove( pos, len ); }
+
+	/*@}*/
+
+#endif /* SHARED_BST */
 };
 
 
