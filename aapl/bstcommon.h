@@ -86,7 +86,7 @@ public:
 	 * elements is preserved. 
 	 * Invokes Vector::insert( long pos, const T &val ).
 	 */
-	void vinsert(long pos, const T &val)
+	void vinsert(long pos, const Element &val)
 		{ Vector< Element, Resize >::insert( pos, &val, 1 ); }
 
 	/** \brief Call the insert of the underlying vector.
@@ -96,7 +96,7 @@ public:
 	 * elements is preserved. 
 	 * Invokes Vector::insert( long pos, const T *val, long len ).
 	 */
-	void vinsert(long pos, const T *val, long len)
+	void vinsert(long pos, const Element *val, long len)
 		{ Vector< Element, Resize >::insert( pos, val, len ); }
 
 	/** \brief Call the insert of the underlying vector.
@@ -106,7 +106,7 @@ public:
 	 * elements is preserved. 
 	 * Invokes Vector::insert( long pos, const Vector &v ).
 	 */
-	void vinsert(long pos, const Vector &v)
+	void vinsert(long pos, const BstTable &v)
 		{ Vector< Element, Resize >::insert( pos, v.data, v.tabLen ); }
 
 	/*@}*/
@@ -140,7 +140,7 @@ public:
 	 * elements is preserved. 
 	 * Invokes SVector::insert( long pos, const T &val ).
 	 */
-	void vinsert(long pos, const T &val)
+	void vinsert(long pos, const Element &val)
 		{ Vector< Element, Resize >::insert( pos, &val, 1 ); }
 
 	/** \brief Call the insert of the underlying vector.
@@ -150,7 +150,7 @@ public:
 	 * elements is preserved. 
 	 * Invokes SVector::insert( long pos, const T *val, long len ).
 	 */
-	void vinsert(long pos, const T *val, long len)
+	void vinsert(long pos, const Element *val, long len)
 		{ Vector< Element, Resize >::insert( pos, val, len ); }
 
 	/** \brief Call the insert of the underlying vector.
@@ -160,8 +160,8 @@ public:
 	 * elements is preserved. 
 	 * Invokes SVector::insert( long pos, const SVector &v ).
 	 */
-	void vinsert(long pos, const Vector &v)
-		{ Vector< Element, Resize >::insert( pos, v.data, v.tabLen ); }
+	void vinsert(long pos, const BstTable &v)
+		{ Vector< Element, Resize >::insert( pos, v.data, v.length() ); }
 
 	/*@}*/
 
