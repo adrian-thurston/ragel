@@ -1,0 +1,5 @@
+Add multi-insert to avl tree.
+
+The should do away with the allocLen constructors in the vector-based data
+structures.  Instead the constructors should be reserved for constructing with
+an initial bit of data, as in SomeSet( item );
