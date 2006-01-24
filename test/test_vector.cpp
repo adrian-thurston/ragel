@@ -157,7 +157,8 @@ struct theData
 void testDelete()
 {
 	/* Initialization. */
-	Vector< theData, ResizeLin > v1(10);
+	Vector< theData, ResizeLin > v1;
+	v1.setAsNew(10);
 	assert_reset( defaultCount == 10 );
 
 	/* Delete some. */
@@ -179,7 +180,8 @@ void testInsert()
 	assert_reset( defaultCount == 10 );
 	
 	/* Initialization. */
-	Vector< theData, ResizeLin > v1(6);
+	Vector< theData, ResizeLin > v1;
+	v1.setAsNew(6);
 	assert_reset( defaultCount == 6 );
 
 	/* Copy Constructor. */
@@ -210,7 +212,8 @@ void testSetAs()
 	assert_reset( defaultCount == 10 );
 	
 	/* Initialization. */
-	Vector< theData, ResizeLin > v1(6);
+	Vector< theData, ResizeLin > v1;
+	v1.setAsNew(6);
 	assert_reset( defaultCount == 6 );
 
 	v1.setAs( sampleData, 10 );
@@ -225,7 +228,8 @@ void testReplace()
 	assert_reset( defaultCount == 10 );
 	
 	/* Initialization. */
-	Vector< theData, ResizeLin > v1(4);
+	Vector< theData, ResizeLin > v1;
+	v1.setAsNew(4);
 	assert_reset( defaultCount == 4 );
 
 	/* Copy Constructor. */
@@ -288,7 +292,8 @@ void testOperators1()
 
 void testOperators2()
 {
-	Vector< Vector<int> > vvi(1);
+	Vector< Vector<int> > vvi;
+	vvi.setAsNew(1);
 	Vector< Vector<int> >::Iter it;
 	for ( it = vvi; it.lte(); it++ )
 		cout << it->size() << endl;

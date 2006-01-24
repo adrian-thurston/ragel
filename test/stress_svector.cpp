@@ -88,7 +88,7 @@ template class SVector<NoisyData>;
 int testShared()
 {
 	cout << sizeof(SVector<NoisyData>) << endl;
-	SVector<NoisyData> v1(2);
+	SVector<NoisyData> v1;
 	SVector<NoisyData> v2;
 	SVector<NoisyData> v3;
 
