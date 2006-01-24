@@ -1,5 +1,18 @@
 For Next Release
 ================
+ -The vector and binary search table constructors that set an initial amount
+  of allocation have been removed. They have been replaced with constructors
+  that insert initial values, which is a more common task and is a more
+  intuitive use for contructors.
+ -Removed the String class. Better to use the stl string class. Aapl::String
+  does not provide any real advantage over it. Aapl::String has not been
+  heavily tested and does not have very much functionality.
+ -Removed the "tiny" versions of templates. These templates had functionality
+  reduced in the interest of reducing compiled binary size. These templates
+  did not find any real world use, nor were they heavily tested.
+ -Removed the "simple" versions of vectors. These should be implemented as
+  template specializations, not new classes. May be brought back as such in
+  the future.
  -Added vinsert and vremove routines for accessing the insert and remove of
   the underlying vector of binary search tables. Previously, these were
   accessed by prefixing the insert call with the vector base class name,
