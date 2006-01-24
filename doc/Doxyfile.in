@@ -459,7 +459,6 @@ INPUT                  = dlist/dlistall.h \
                          bsttable/bstall.h \
                          sort/sortall.h \
                          compare/compare.h \
-                         string/astring.h \
                          mainpage.h
 
 # If the value of the INPUT tag contains directories, you can use the 

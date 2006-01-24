@@ -7,10 +7,8 @@ PREFIX=../../aapl
 # Vector
 ln -fs $PREFIX/vectcommon.h vector/vectcommon.h
 ln -fs $PREFIX/vector.h vector/vector.h
-ln -fs $PREFIX/vectsimp.h vector/vectsimp.h
 ln -fs $PREFIX/svectcommon.h vector/svectcommon.h
 ln -fs $PREFIX/svector.h vector/svector.h
-ln -fs $PREFIX/svectsimp.h vector/svectsimp.h
 
 # AvlTree
 ln -fs $PREFIX/avlcommon.h avltree/avlcommon.h
@@ -52,10 +50,6 @@ ln -fs $PREFIX/bubblesort.h sort/bubblesort.h
 ln -fs $PREFIX/mergesort.h sort/mergesort.h
 ln -fs $PREFIX/insertsort.h sort/insertsort.h
 ln -fs $PREFIX/quicksort.h sort/quicksort.h
-
-# String
-test -d string || mkdir string
-ln -fs $PREFIX/astring.h string/astring.h
 
 # Compare
 test -d compare || mkdir compare

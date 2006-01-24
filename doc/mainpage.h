@@ -4,8 +4,8 @@
  * \section Introduction
  *
  * Aapl is a C++ template library for generic programming. It contains
- * implementations of %AVL Tree, Linked List, %Vector, Binary Search %Table,
- * %String and %Sort.
+ * implementations of %AVL Tree, Linked List, %Vector, Binary Search %Table
+ * and %Sort.
  *
  * Aapl supports different generic programming paradigms by providing
  * variations of standard data structures. For example, a by-value linked list

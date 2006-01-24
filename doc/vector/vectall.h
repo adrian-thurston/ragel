@@ -26,6 +26,4 @@
  */
 
 #include "vector.h"
-#include "vectsimp.h"
 #include "svector.h"
-#include "svectsimp.h"

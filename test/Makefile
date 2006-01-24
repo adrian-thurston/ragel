@@ -27,20 +27,16 @@ STRESS = \
 	stress_avlmelkey.cpp stress_avlitree.cpp stress_avlmap.cpp \
 	stress_avlset.cpp stress_avlimel.cpp stress_avlimelkey.cpp \
 	stress_avlimap.cpp stress_avliset.cpp stress_svector.cpp \
-	stress_svectsimp.cpp stress_allsort.cpp stress_stblsort.cpp
+	stress_allsort.cpp stress_stblsort.cpp
 
 TEST = \
 	test_vector.cpp test_bsttable.cpp test_bstmap.cpp \
 	test_bstset.cpp test_doublelist.cpp test_dlistval.cpp \
-	test_mergesort.cpp \
-	test_allavl.cpp test_vectsimp.cpp test_avliter.cpp \
+	test_mergesort.cpp test_allavl.cpp test_avliter.cpp \
 	test_quicksort.cpp test_insertsort.cpp test_bubblesort.cpp \
-	test_allsort.cpp test_string.cpp test_svector.cpp \
-	test_svectsimp.cpp test_sbsttable.cpp test_sbstmap.cpp \
-	test_sbstset.cpp test_tdlist.cpp test_tdlistmel.cpp \
-	test_tdlistval.cpp test_tdlistall.cpp test_tvectsimp.cpp \
-	test_tsvectsimp.cpp test_avlkeyless.cpp test_avlikeyless.cpp \
-	test_tavltree.cpp test_compare.cpp
+	test_allsort.cpp test_svector.cpp test_sbsttable.cpp \
+	test_sbstmap.cpp test_sbstset.cpp test_avlkeyless.cpp \
+	test_avlikeyless.cpp test_compare.cpp
 
 
 #*************************************
