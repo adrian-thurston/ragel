@@ -42,6 +42,19 @@ public:
 	 */
 	BstTable() { }
 
+	BstTable(const Key &key) 
+		{ insert(key); }
+
+#if defined( BSTMAP )
+	BstTable(const Key &key, const Value &val) 
+		{ insert(key, val); }
+#endif
+
+#if ! defined( BSTSET )
+	BstTable(const Element &el) 
+		{ insert(el); }
+#endif
+
 	//BstTable(long allocLen);
 
 	Element *insert(const Key &key, Element **lastFound = 0);

@@ -22,11 +22,20 @@
 #include <iostream>
 #include <stdio.h>
 
+using std::cout;
+using std::endl;
+
 #include "bstmap.h"
 
-template class BstMap< char *, int, CmpStr >;
+typedef BstMap< char *, int, CmpStr > Map;
 
 int main()
 {
+	Map m1( "hi there", 1 );
+	Map m2( "friend" );
+
+	cout << m1.data[0].key << endl;
+	cout << m2.data[0].key << endl;
+
 	return 0;
 }

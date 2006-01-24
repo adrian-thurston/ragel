@@ -84,6 +84,9 @@ public:
 	 */
 	SVector() { }
 
+	SVector(const T &val)             { setAs(&val, 1); }
+	SVector(const T *val, long len)   { setAs(val, len); }
+
 	/**
 	 * \brief Create a vector with a specified number of initial elements.
 	 *
