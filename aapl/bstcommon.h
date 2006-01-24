@@ -42,7 +42,7 @@ public:
 	 */
 	BstTable() { }
 
-	BstTable(long allocLen);
+	//BstTable(long allocLen);
 
 	Element *insert(const Key &key, Element **lastFound = 0);
 	Element *insertMulti(const Key &key);
@@ -189,6 +189,7 @@ public:
 };
 
 
+#if 0
 #if defined( SHARED_BST )
 /**
  * \brief Construct a binary search table with an initial amount of
@@ -235,6 +236,7 @@ template <BST_TEMPL_DEF> BstTable<BST_TEMPL_USE>::
 	}
 }
 
+#endif
 #endif
 
 /**

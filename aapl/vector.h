@@ -91,7 +91,7 @@ public:
 	 * scheme as it starts with no space allocated and is unable to grow. It will
 	 * assertion fail with a non-zero size value.
 	 */
-	Vector( long size ) { setAsNew( size ); }
+	//Vector( long size ) { setAsNew( size ); }
 
 	/**
 	 * \brief Create a vector with a specified number of initial elements and
@@ -103,7 +103,7 @@ public:
 	 * resizer is used, the step defaults to 256 units of T. For a runtime vector
 	 * both up and down allocation schemes default to Exponential.
 	 */
-	Vector( long size, long allocLen );
+	//Vector( long size, long allocLen );
 
 	/* Deep copy. */
 	Vector( const Vector &v );
@@ -481,6 +481,7 @@ protected:
 	void downResize(long len);
 };
 
+#if 0
 /* Create a vector with an intial number of elements and size. */
 template<class T, class Resize> Vector<T, Resize>::
 		Vector( long size, long allocLen )
@@ -497,6 +498,7 @@ template<class T, class Resize> Vector<T, Resize>::
 	 * allocated that is ok. Table will be grown to right size. */
 	setAsNew( size );
 }
+#endif
 
 /* Init a vector iterator with just a vector. */
 template <class T, class Resize> Vector<T, Resize>::Iter::Iter( const Vector &v ) 

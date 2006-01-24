@@ -173,7 +173,8 @@ bool operator==(const TheData &td1, const TheData &td2)
 void testDelete()
 {
 	/* Initialization. */
-	SVector< TheData, ResizeLin > v1(10);
+	SVector< TheData, ResizeLin > v1;
+	v1.setAsNew(10);
 	assert_reset( defaultCount == 10 );
 
 	/* Delete some. */
@@ -195,7 +196,8 @@ void testInsert()
 	assert_reset( defaultCount == 10 );
 	
 	/* Initialization. */
-	SVector< TheData, ResizeLin > v1(6);
+	SVector< TheData, ResizeLin > v1;
+	v1.setAsNew(6);
 	assert_reset( defaultCount == 6 );
 
 	/* Copy Constructor. */
@@ -226,7 +228,8 @@ void testSetAs()
 	assert_reset( defaultCount == 10 );
 	
 	/* Initialization. */
-	SVector< TheData, ResizeLin > v1(6);
+	SVector< TheData, ResizeLin > v1;
+	v1.setAsNew(6);
 	assert_reset( defaultCount == 6 );
 
 	v1.setAs( sampleData, 10 );
@@ -241,7 +244,8 @@ void testReplace()
 	assert_reset( defaultCount == 10 );
 	
 	/* Initialization. */
-	SVector< TheData, ResizeLin > v1(4);
+	SVector< TheData, ResizeLin > v1;
+	v1.setAsNew(4);
 	assert_reset( defaultCount == 4 );
 
 	/* Copy Constructor. */
@@ -303,7 +307,8 @@ void testOperators1()
 
 void testOperators2()
 {
-	SVector< SVector<int> > vvi(1);
+	SVector< SVector<int> > vvi;
+	vvi.setAsNew(1);
 	SVector< SVector<int> >::Iter it;
 	for ( it = vvi; it.lte(); it++ )
 		cout << it->size() << endl;
@@ -337,7 +342,8 @@ template class SVector<NoisyData>;
 int testShared()
 {
 	cout << sizeof(SVector<NoisyData>) << endl;
-	SVector<NoisyData> v1(2);
+	SVector<NoisyData> v1;
+	v1.setAsNew(2);
 	SVector<NoisyData> v2;
 	SVector<NoisyData> v3;
 

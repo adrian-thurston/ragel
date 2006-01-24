@@ -84,8 +84,6 @@ public:
 	 */
 	SVector() { }
 
-
-
 	/**
 	 * \brief Create a vector with a specified number of initial elements.
 	 *
@@ -100,7 +98,7 @@ public:
 	 * assertion fail with a non-zero size value.
 	 *
 	 */
-	SVector( long size ) { setAsNew( size ); }
+	//SVector( long size ) { setAsNew( size ); }
 
 	/**
 	 * \brief Create a vector with a specified number of initial elements and
@@ -112,7 +110,7 @@ public:
 	 * resizer is used, the step defaults to 256 units of T. For a runtime vector
 	 * both up and down allocation schemes default to Exponential.
 	 */
-	SVector( long size, long allocLen );
+	//SVector( long size, long allocLen );
 
 	/* Shallow copy. */
 	SVector( const SVector &v );
@@ -504,7 +502,7 @@ protected:
 	void downResizeDup(long len);
 };
 
-
+#if 0
 /* Create a vector with an intial number of elements and size. */
 template <class T, class Resize> SVector<T, Resize>::
 		SVector( long size, long allocLen )
@@ -528,6 +526,7 @@ template <class T, class Resize> SVector<T, Resize>::
 	 * allocated that is ok. Table will be grown to the right size. */
 	setAsNew( size );
 }
+#endif
 
 /**
  * \brief Perform a shallow copy of the vector.
@@ -548,6 +547,7 @@ template <class T, class Resize> SVector<T, Resize>::
 	}
 }
 
+#if 0
 /**
  * \brief Perform a shallow copy of the vector from only the header.
  *
@@ -564,6 +564,7 @@ template <class T, class Resize> SVector<T, Resize>::
 		BaseTable::data = (T*) (head + 1);
 	}
 }
+#endif
 
 
 /**
