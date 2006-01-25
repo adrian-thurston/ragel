@@ -42,20 +42,34 @@ public:
 	 */
 	BstTable() { }
 
+	/**
+	 * \brief Construct with initial value.
+	 *
+	 * Constructs a binary search table with an initial item. Uses the default
+	 * constructor for initializing Value.
+	 */
 	BstTable(const Key &key) 
 		{ insert(key); }
 
 #if defined( BSTMAP )
+	/**
+	 * \brief Construct with initial value.
+	 *
+	 * Constructs a binary search table with an initial key/value pair.
+	 */
 	BstTable(const Key &key, const Value &val) 
 		{ insert(key, val); }
 #endif
 
 #if ! defined( BSTSET )
+	/**
+	 * \brief Construct with initial value.
+	 *
+	 * Constructs a binary search table with an initial Element.
+	 */
 	BstTable(const Element &el) 
 		{ insert(el); }
 #endif
-
-	//BstTable(long allocLen);
 
 	Element *insert(const Key &key, Element **lastFound = 0);
 	Element *insertMulti(const Key &key);

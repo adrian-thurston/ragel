@@ -29,13 +29,31 @@ using std::endl;
 
 typedef BstMap< char *, int, CmpStr > Map;
 
-int main()
+void testBstMap1()
 {
+	cout << "TEST 1" << endl;
 	Map m1( "hi there", 1 );
 	Map m2( "friend" );
 
 	cout << m1.data[0].key << endl;
 	cout << m2.data[0].key << endl;
+}
 
+void testBstMap2()
+{
+	cout << "TEST 2" << endl;
+	BstMap<char *, int, CmpStr> table1( "hi" );
+	cout << table1[0].key << endl;
+
+	BstMap<char *, int, CmpStr> table2( "there", 1  );
+	cout << table2[0].key << endl;
+	cout << table2[0].value << endl;
+}
+
+
+int main()
+{
+	testBstMap1();
+	testBstMap2();
 	return 0;
 }

@@ -195,6 +195,13 @@ int testBstTable5()
 	return 0;
 }
 
+void testBstTable6()
+{
+	cout << "TEST 6" << endl;
+	BstTable<MyElement, int> table1( MyElement(1) );
+	cout << table1[0].key << endl;
+}
+
 int main()
 {
 	testBstTable1();
@@ -202,5 +209,6 @@ int main()
 	testBstTable3();
 	testBstTable4();
 	testBstTable5();
+	testBstTable6();
 	return 0;
 }

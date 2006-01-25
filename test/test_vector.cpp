@@ -444,6 +444,18 @@ void testIterator()
 		cout << *it3 << endl;
 }
 
+void testConstructor()
+{
+	reset();
+	theData someData;
+	Vector<theData> v1( someData );
+	v1.append( theData() );
+	Vector<theData> v2( v1.data, v1.length() );
+
+	cout << "testConstructor" << endl;
+	assert( destructorCount == 1 && defaultCount == 2 && copyCount == 4 );
+}
+
 int main()
 {
 	testReplace();
@@ -456,5 +468,6 @@ int main()
 	testCopying();
 	testBounds();
 	testIterator();
+	testConstructor();
 	return 0;
 }

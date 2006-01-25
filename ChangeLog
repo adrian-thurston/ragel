@@ -5,8 +5,8 @@ For Next Release
   that insert initial values, which is a more common task and is a more
   intuitive use for contructors.
  -Removed the String class. Better to use the stl string class. Aapl::String
-  does not provide any real advantage over it. Aapl::String has not been
-  heavily tested and does not have very much functionality.
+  does not provide any real advantage over the STL version. Aapl::String has
+  not been heavily tested and does not have very much functionality.
  -Removed the "tiny" versions of templates. These templates had functionality
   reduced in the interest of reducing compiled binary size. These templates
   did not find any real world use, nor were they heavily tested.

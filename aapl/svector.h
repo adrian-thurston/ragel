@@ -84,36 +84,21 @@ public:
 	 */
 	SVector() { }
 
+	/**
+	 * \brief Create a vector that contains an initial element.
+	 *
+	 * The vector becomes one element in length. The element's copy
+	 * constructor is used to place the value in the vector.
+	 */
 	SVector(const T &val)             { setAs(&val, 1); }
+
+	/**
+	 * \brief Create a vector that contains an array of elements.
+	 *
+	 * The vector becomes len elements in length.  Copy constructors are used
+	 * to place the new elements in the vector. 
+	 */
 	SVector(const T *val, long len)   { setAs(val, len); }
-
-	/**
-	 * \brief Create a vector with a specified number of initial elements.
-	 *
-	 * Default constructors are used to create the new elements. The initial space
-	 * allocation is zero and it is grown according to the up allocation scheme
-	 * used.  If a linear resizer is used, the step defaults to 256 units of T.
-	 * For a runtime vector both up and down allocation schemes default to
-	 * Exponential.
-	 * 
-	 * This constructor is not of any use to a vector with a constant up resizing
-	 * scheme as it starts with no space allocated and is unable to grow. It will
-	 * assertion fail with a non-zero size value.
-	 *
-	 */
-	//SVector( long size ) { setAsNew( size ); }
-
-	/**
-	 * \brief Create a vector with a specified number of initial elements and
-	 * allocation.
-	 *
-	 * Default constructors are used to create the new elements. If the size is
-	 * greater than allocLen, then the space will be grown according to the
-	 * allocation scheme. Both size and allocLen are in units of T. If a linear
-	 * resizer is used, the step defaults to 256 units of T. For a runtime vector
-	 * both up and down allocation schemes default to Exponential.
-	 */
-	//SVector( long size, long allocLen );
 
 	/* Shallow copy. */
 	SVector( const SVector &v );
