@@ -48,12 +48,13 @@ CXX		= g++
 # Make targets from sources. 
 STRESS_TARGS = $(STRESS:%.cpp=%.tst)
 TEST_TARGS = $(TEST:%.cpp=%.tst)
+TARGS = $(STRESS_TARGS) $(TEST_TARGS)
 DEPS = $(STRESS:%.cpp=.deps/%.d) $(TEST:%.cpp=.deps/%.d) .deps/util.d
 
 # Rules.
 main: $(STRESS_TARGS) $(TEST_TARGS)
 
-%.tst: %.cpp util.o
+$(TARGS): %.tst: %.cpp util.o
 	@test -d .deps || mkdir .deps
 	@$(CXX) -M $(CFLAGS) $< \
 		| sed 's/^\([a-zA-Z0-9_-]*\)\.o:/\1.tst:/;' > .deps/$*.d

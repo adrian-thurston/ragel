@@ -519,6 +519,17 @@ void testIterator()
 		cout << *it3 << endl;
 }
 
+void testConstructor()
+{
+	reset();
+	SVector<TheData> v1( TheData(1) );
+	v1.append( TheData() );
+	SVector<TheData> v2( v1.data, v1.length() );
+
+	cout << "testConstructor" << endl;
+	assert( destructorCount == 2 && defaultCount == 1 && nonDefCount == 1 && copyCount == 4 );
+}
+
 int main()
 {
 	testReplace();
@@ -531,5 +542,6 @@ int main()
 	testCopying();
 	testShared();
 	testIterator();
+	testConstructor();
 	return 0;
 }
