@@ -1,3 +1,9 @@
+For Next Release
+================
+ -Added transfer to the double list. This function should supersede the use of
+  shallowCopy + abandon. In the by-value list the destination list if emptied
+  first.
+
 Aapl 2.13 - Jan 25, 2006
 ========================
  -The vector and binary search table constructors that set an initial amount

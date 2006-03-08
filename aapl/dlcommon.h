@@ -138,6 +138,15 @@ public:
 	 * \returns A reference to this.
 	 */
 	DList &operator=(const DList &other);
+
+	/**
+	 * \brief Transfer the contents of another list into this list.
+	 *
+	 * The elements of the other list moved in by reference. The other list
+	 * will be empty afterwards.  If this list contains any elements before
+	 * the copy, then they are deleted. 
+	 */
+	void transfer(DList &other);
 #else
 	/** 
 	 * \brief Perform a shallow copy of the list. 
@@ -160,6 +169,15 @@ public:
 	 * \returns A reference to this.
 	 */
 	DList &operator=(const DList &other);
+
+	/**
+	 * \brief Transfer the contents of another list into this list.
+	 *
+	 * The elements of the other list moved in by reference. The other list
+	 * will be empty afterwards.  If this list contains any elements before
+	 * the copy, then they are abandoned. 
+	 */
+	void transfer(DList &other);
 #endif
 
 	/**
@@ -442,8 +460,8 @@ template <DLMEL_TEMPDEF> DList<DLMEL_TEMPUSE>::
 template <DLMEL_TEMPDEF> DList<DLMEL_TEMPUSE> &DList<DLMEL_TEMPUSE>::
 		operator=(const DList &other)
 {
-	/* Loose the old list. The value list assumes items were allocated on the
-	 * heap by ourselves. It assumes ownership. */
+	/* Free the old list. The value list assumes items were allocated on the
+	 * heap by itself. */
 	empty();
 
 	Element *el = other.head;
@@ -452,6 +470,20 @@ template <DLMEL_TEMPDEF> DList<DLMEL_TEMPUSE> &DList<DLMEL_TEMPUSE>::
 		el = el->BASE_EL(next);
 	}
 	return *this;
+}
+
+template <DLMEL_TEMPDEF> void DList<DLMEL_TEMPUSE>::
+		transfer(DList &other)
+{
+	/* Free the old list. The value list assumes items were allocated on the
+	 * heap by itself. */
+	empty();
+
+	head = other.head;
+	tail = other.tail;
+	listLen = other.listLen;
+
+	other.abandon();
 }
 
 #else 
@@ -475,6 +507,17 @@ template <DLMEL_TEMPDEF> DList<DLMEL_TEMPUSE> &DList<DLMEL_TEMPUSE>::
 	listLen = other.listLen;
 	return *this;
 }
+
+template <DLMEL_TEMPDEF> void DList<DLMEL_TEMPUSE>::
+		transfer(DList &other)
+{
+	head = other.head;
+	tail = other.tail;
+	listLen = other.listLen;
+
+	other.abandon();
+}
+
 #endif
 
 /* Explicit shallow copy. */
