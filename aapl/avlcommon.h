@@ -199,7 +199,6 @@ public:
 	AvlTree() : root(0), head(0), tail(0), treeSize(0) { }
 #endif
 
-#if defined( AVLTREE_MAP ) || defined( AVLTREE_SET )
 	/** 
 	 * \brief Perform a deep copy of the tree. 
 	 *
@@ -208,6 +207,7 @@ public:
 	 */
 	AvlTree(const AvlTree &other);
 
+#if defined( AVLTREE_MAP ) || defined( AVLTREE_SET )
 	/**
 	 * \brief Clear the contents of the tree.
 	 *
@@ -227,18 +227,12 @@ public:
 	AvlTree &operator=( const AvlTree &tree );
 
 	/**
-	 * \brief Perform a shallow copy of the tree.
+	 * \brief Transfer the elements of another tree into this.
 	 *
-	 * Performs a shallow copy of another avl tree into this avl tree. If this
-	 * tree is non-empty then its contents are abandoned (not freed).
+	 * First deletes all elements in this tree.
 	 */
-	void shallowCopy( const AvlTree &tree );
+	void transfer( AvlTree &tree );
 #else
-	/** 
-	 * \brief Perform a shallow copy of the tree. 
-	 */
-	AvlTree(const AvlTree &other);
-
 	/**
 	 * \brief Abandon all elements in the tree. 
 	 *
@@ -247,23 +241,22 @@ public:
 	~AvlTree() {}
 
 	/**
-	 * \brief Perform a shallow copy of the tree.
+	 * \brief Perform a deep copy of the tree.
 	 *
-	 * Performs a shallow copy of another avl tree into this avl tree. If this
-	 * tree is non-empty then its contents are abandoned (not freed).
+	 * Each element is duplicated for the new tree. Copy constructors are used
+	 * to create the new element. If this tree contains items, they are
+	 * abandoned.
 	 *
 	 * \returns A reference to this.
 	 */
 	AvlTree &operator=( const AvlTree &tree );
 
-	/** 
-	 * \brief Perform a deep copy of the tree. 
+	/**
+	 * \brief Transfer the elements of another tree into this.
 	 *
-	 * Each element is duplicated for the new tree. Copy constructors are used
-	 * to create the new element. If this tree contains items, they are first
-	 * deleted.
+	 * All elements in this tree are abandoned first.
 	 */
-	void deepCopy( const AvlTree &tree );
+	void transfer( AvlTree &tree );
 #endif
 
 #ifndef AVL_KEYLESS
@@ -548,9 +541,6 @@ protected:
 	void attachRebal( Element *element, Element *parentEl, Element *lastLess );
 };
 
-
-#if defined( AVLTREE_MAP ) || defined( AVLTREE_SET )
-
 /* Copy constructor. New up each item. */
 template <AVLMEL_TEMPDEF> AvlTree<AVLMEL_TEMPUSE>::
 		AvlTree(const AvlTree<AVLMEL_TEMPUSE> &other)
@@ -572,6 +562,8 @@ template <AVLMEL_TEMPDEF> AvlTree<AVLMEL_TEMPUSE>::
 	if ( other.root != 0 )
 		root = copyBranch( other.root );
 }
+
+#if defined( AVLTREE_MAP ) || defined( AVLTREE_SET )
 
 /* Assignment does deep copy. */
 template <AVLMEL_TEMPDEF> AvlTree<AVLMEL_TEMPUSE> &AvlTree<AVLMEL_TEMPUSE>::
@@ -596,64 +588,31 @@ template <AVLMEL_TEMPDEF> AvlTree<AVLMEL_TEMPUSE> &AvlTree<AVLMEL_TEMPUSE>::
 	return *this;
 }
 
-/* Shallow copy, all existing items abandoned. */
 template <AVLMEL_TEMPDEF> void AvlTree<AVLMEL_TEMPUSE>::
-		shallowCopy(const AvlTree<AVLMEL_TEMPUSE> &other)
-{
-	treeSize = other.treeSize;
-	root = other.root;
-
-#ifdef WALKABLE
-	BASELIST::shallowCopy( other );
-#else
-	head = other.head;
-	tail = other.tail;
-#endif
-}
-
-#else /* ! AVLTREE_MAP && ! AVLTREE_SET */
-
-/* Copy constructor. Does a shallow copy. */
-template <AVLMEL_TEMPDEF> AvlTree<AVLMEL_TEMPUSE>::
-		AvlTree(const AvlTree<AVLMEL_TEMPUSE> &other)
-#ifdef WALKABLE
-:
-	/* Shallow copy in the list. */
-	BASELIST( other )
-#endif
-{
-	treeSize = other.treeSize;
-	root = other.root;
-
-#ifndef WALKABLE
-	head = other.head;
-	tail = other.tail;
-#endif
-}
-
-/* Shallow copy the other tree in. */
-template <AVLMEL_TEMPDEF> AvlTree<AVLMEL_TEMPUSE> &AvlTree<AVLMEL_TEMPUSE>::
-	operator=( const AvlTree &other )
-{
-	treeSize = other.treeSize;
-	root = other.root;
-
-#ifdef WALKABLE
-	BASELIST::shallowCopy( other );
-#else
-	head = other.head;
-	tail = other.tail;
-#endif
-	return *this;
-}
-
-/* Deep copy another tree in. Deletes existing elements. */
-template <AVLMEL_TEMPDEF> void AvlTree<AVLMEL_TEMPUSE>::
-		deepCopy(const AvlTree<AVLMEL_TEMPUSE> &other)
+		transfer(AvlTree<AVLMEL_TEMPUSE> &other)
 {
 	/* Clear the tree first. */
 	empty();
 
+	treeSize = other.treeSize;
+	root = other.root;
+
+#ifdef WALKABLE
+	BASELIST::shallowCopy( other );
+#else
+	head = other.head;
+	tail = other.tail;
+#endif
+
+	other.abandon();
+}
+
+#else /* ! AVLTREE_MAP && ! AVLTREE_SET */
+
+/* Assignment does deep copy. This version does not clear the tree first. */
+template <AVLMEL_TEMPDEF> AvlTree<AVLMEL_TEMPUSE> &AvlTree<AVLMEL_TEMPUSE>::
+	operator=( const AvlTree &other )
+{
 	/* Reset the list pointers, the tree copy will fill in the list for us. */
 #ifdef WALKABLE
 	BASELIST::abandon();
@@ -667,6 +626,23 @@ template <AVLMEL_TEMPDEF> void AvlTree<AVLMEL_TEMPUSE>::
 	root = other.root;
 	if ( other.root != 0 )
 		root = copyBranch( other.root );
+	return *this;
+}
+
+template <AVLMEL_TEMPDEF> void AvlTree<AVLMEL_TEMPUSE>::
+		transfer(AvlTree<AVLMEL_TEMPUSE> &other)
+{
+	treeSize = other.treeSize;
+	root = other.root;
+
+#ifdef WALKABLE
+	BASELIST::shallowCopy( other );
+#else
+	head = other.head;
+	tail = other.tail;
+#endif
+
+	other.abandon();
 }
 
 #endif

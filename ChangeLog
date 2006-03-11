@@ -1,9 +1,18 @@
 For Next Release
 ================
- -Added transfer to the double list. This function should supersede the use of
-  shallowCopy + abandon. In the by-value list the destination list if emptied
-  first.
-
+ -Added a transfer function to the double list. This function should supersede
+  the use of shallowCopy + abandon. In the by-value list the destination list
+  is emptied first.
+ -Added a transfer function to the Avl tree.
+ -All double lists and Avl trees now implement deep copies in the
+  operator=(...) functions and copy constructors. Previously only the by-value
+  versions of these structures would do deep copies.
+ -Removed the deep and shallow copy functions from the double lists and Avl
+  trees. These structures should now be consistent accross all variants except
+  for the fact that the by-value versions delete elements in destructors and
+  when overwriting and the others simply abandon their elements (which may not
+  be allocated on the stack).
+ 
 Aapl 2.13 - Jan 25, 2006
 ========================
  -The vector and binary search table constructors that set an initial amount

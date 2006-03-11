@@ -112,7 +112,6 @@ public:
 	/** \brief Initialize an empty list. */
 	DList() : head(0), tail(0), listLen(0) {}
 
-#ifdef DOUBLELIST_VALUE
 	/** 
 	 * \brief Perform a deep copy of the list.
 	 * 
@@ -121,6 +120,7 @@ public:
 	 */
 	DList(const DList &other);
 
+#ifdef DOUBLELIST_VALUE
 	/**
 	 * \brief Clear the double list contents.
 	 *
@@ -142,17 +142,12 @@ public:
 	/**
 	 * \brief Transfer the contents of another list into this list.
 	 *
-	 * The elements of the other list moved in by reference. The other list
-	 * will be empty afterwards.  If this list contains any elements before
-	 * the copy, then they are deleted. 
+	 * The elements of the other list moved in. The other list will be empty
+	 * afterwards.  If this list contains any elements before the copy, then
+	 * they are deleted. 
 	 */
 	void transfer(DList &other);
 #else
-	/** 
-	 * \brief Perform a shallow copy of the list. 
-	 */
-	DList(const DList &other);
-
 	/**
 	 * \brief Abandon all elements in the list. 
 	 *
@@ -161,10 +156,11 @@ public:
 	~DList() {}
 
 	/**
-	 * \brief Perform a shallow copy of the list.
+	 * \brief Perform a deep copy of the list.
 	 *
-	 * Performs a shallow copy of another list into this list. If this list is
-	 * non-empty then its contents are abandoned (not freed).
+	 * The elements of the other list are duplicated and put into this list.
+	 * Each list item is created using the copy constructor. If this list
+	 * contains any elements before the copy, they are abandoned.
 	 *
 	 * \returns A reference to this.
 	 */
@@ -173,33 +169,12 @@ public:
 	/**
 	 * \brief Transfer the contents of another list into this list.
 	 *
-	 * The elements of the other list moved in by reference. The other list
-	 * will be empty afterwards.  If this list contains any elements before
-	 * the copy, then they are abandoned. 
+	 * The elements of the other list moved in. The other list will be empty
+	 * afterwards.  If this list contains any elements before the copy, they
+	 * are abandoned. 
 	 */
 	void transfer(DList &other);
 #endif
-
-	/**
-	 * \brief Shallow copy another list into this list.
-	 *
-	 * The elements of the other list are copied in by reference. The two
-	 * lists will share the same list elements. If this list contains any
-	 * elements before the copy, then they are abandoned. If either of the
-	 * lists are modified after a shallow copy, the other list may become
-	 * corrupted.
-	 */
-	void shallowCopy(const DList &other);
-
-
-	/** 
-	 * \brief Perform a deep copy of the list. 
-	 *
-	 * Each element is duplicated for the new list. Copy constructors are used
-	 * to create the new elements. If this list contains items, they are first
-	 * deleted.
-	 */
-	void deepCopy(const DList &other);
 
 
 #ifdef DOUBLELIST_VALUE
@@ -442,8 +417,6 @@ public:
 	IterLast last()    { return IterLast(*this); }
 };
 
-#ifdef DOUBLELIST_VALUE
-
 /* Copy constructor, does a deep copy of other. */
 template <DLMEL_TEMPDEF> DList<DLMEL_TEMPUSE>::
 		DList(const DList<DLMEL_TEMPUSE> &other) :
@@ -455,6 +428,8 @@ template <DLMEL_TEMPDEF> DList<DLMEL_TEMPUSE>::
 		el = el->BASE_EL(next);
 	}
 }
+
+#ifdef DOUBLELIST_VALUE
 
 /* Assignement operator does deep copy. */
 template <DLMEL_TEMPDEF> DList<DLMEL_TEMPUSE> &DList<DLMEL_TEMPUSE>::
@@ -488,23 +463,15 @@ template <DLMEL_TEMPDEF> void DList<DLMEL_TEMPUSE>::
 
 #else 
 
-/* Copy constructor, does a shallow copy. */
-template <DLMEL_TEMPDEF> DList<DLMEL_TEMPUSE>::
-		DList(const DList<DLMEL_TEMPUSE> &other)
-:
-	head(other.head), 
-	tail(other.tail), 
-	listLen(other.listLen)
-{
-}
-
-/* Assignment does a shallow copy. */
+/* Assignement operator does deep copy. */
 template <DLMEL_TEMPDEF> DList<DLMEL_TEMPUSE> &DList<DLMEL_TEMPUSE>::
 		operator=(const DList &other)
 {
-	head = other.head;
-	tail = other.tail;
-	listLen = other.listLen;
+	Element *el = other.head;
+	while( el != 0 ) {
+		append( new Element(*el) );
+		el = el->BASE_EL(next);
+	}
 	return *this;
 }
 
@@ -519,31 +486,6 @@ template <DLMEL_TEMPDEF> void DList<DLMEL_TEMPUSE>::
 }
 
 #endif
-
-/* Explicit shallow copy. */
-template <DLMEL_TEMPDEF> void DList<DLMEL_TEMPUSE>::
-		shallowCopy(const DList &other)
-{
-	head = other.head;
-	tail = other.tail;
-	listLen = other.listLen;
-}
-
-/* Deep copy another list in. Empties the current list. */
-template <DLMEL_TEMPDEF> void DList<DLMEL_TEMPUSE>::
-		deepCopy(const DList &other)
-{
-	/* Loose the old list. The value list assumes items were allocated on the
-	 * heap by ourselves. It assumes ownership. */
-	empty();
-
-	Element *el = other.head;
-	while( el != 0 ) {
-		append( new Element(*el) );
-		el = el->BASE_EL(next);
-	}
-}
-
 
 #ifdef DOUBLELIST_VALUE
 
