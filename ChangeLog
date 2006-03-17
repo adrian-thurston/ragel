@@ -1,5 +1,5 @@
-For Next Release
-================
+Aapl 2.14 - March 17, 2006
+==========================
  -Added a transfer function to the double list. This function should supersede
   the use of shallowCopy + abandon. In the by-value list the destination list
   is emptied first.
