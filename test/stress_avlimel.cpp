@@ -189,10 +189,8 @@ int main( int argc, char **argv )
 
 		/* Test the copy constructor? */
 		if ( curRound % COPY_PERIOD == 0 ) {
-			AvliMelVer< TreeEl, int, BaseEl1 > copy1;
-			AvliMelVer< TreeEl, int, BaseEl2 > copy2;
-			copy1.deepCopy( tree1 );
-			copy2.deepCopy( tree2 );
+			AvliMelVer< TreeEl, int, BaseEl1 > copy1( tree1 );
+			AvliMelVer< TreeEl, int, BaseEl2 > copy2( tree2 );
 			copy1.verifyIntegrity();
 			copy2.verifyIntegrity();
 			copy1.empty();

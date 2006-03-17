@@ -219,10 +219,8 @@ int main( int argc, char **argv )
 
 		/* Test the deep copy? */
 		if ( curRound % COPY_PERIOD == 0 ) {
-			AvliMelKeyVer< TreeEl, int, BaseEl1, BaseEl1 > copy1;
-			AvliMelKeyVer< TreeEl, int, BaseEl2, BaseEl2, CmpStr > copy2;
-			copy1.deepCopy( tree1 );
-			copy2.deepCopy( tree2 );
+			AvliMelKeyVer< TreeEl, int, BaseEl1, BaseEl1 > copy1( tree1 );
+			AvliMelKeyVer< TreeEl, int, BaseEl2, BaseEl2, CmpStr > copy2( tree2 );
 			copy1.verifyIntegrity();
 			copy2.verifyIntegrity();
 			copy1.empty();
