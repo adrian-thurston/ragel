@@ -173,8 +173,7 @@ int main( int argc, char **argv )
 
 		/* Test the deep copy? */
 		if ( curRound % COPY_PERIOD == 0 ) {
-			AvliTreeVer< TreeEl, int > copy;
-			copy.deepCopy( tree );
+			AvliTreeVer< TreeEl, int > copy( tree );
 			copy.verifyIntegrity();
 			copy.empty();
 		}
