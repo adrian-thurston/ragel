@@ -1,0 +1,361 @@
+
+                      RELEASE NOTES Ragel 4.X
+
+
+To-State and From-State Action Embedding Operators Added (4.2)
+==============================================================
+
+Added operators for embedding actions into all transitions into a state and all
+transitions out of a state. These embeddings stay with the state, and are
+irrespective of what the current transitions are and any future transitions
+that may be added into or out of the state.
+
+In the following example act is executed on the transitions for 't' and 'y'.
+Even though it is only embedded in the context of the first alternative. This
+is because after matching 'hi ', the machine has not yet distinguished beween
+the two threads. The machine is simultaneously in the state expecting 'there'
+and the state expecting 'you'.
+
+    action act {}
+    main := 
+        'hi ' %*act 'there' |
+        'hi you';
+
+The to-state action embedding operators embed into transitions that go into:
+>~    the start state
+$~    all states
+%~    final states
+<~    states that are not the start
+@~    states that are not final
+<@~   states that are not the start AND not final
+
+The from-state action embedding operators embed into transitions that leave:
+>*    the start state
+$*    all states
+%*    final states
+<*    states that are not the start
+@*    states that are not final
+<@*   states that are not the start AND not final
+
+Changed Operators for Embedding Context/Actions Into States (4.2)
+=================================================================
+
+The operators used to embed context and actions into states have been modified.
+The purpose of the modification is to make it easier to distribute actions to
+take among the states in a chain of concatenations such that each state has
+only a single action embedded. An example follows below.
+
+Now Gone:
+
+1. The use of >@ for selecting the states to modfiy (as in >@/ to embed eof
+   actions, etc) has been removed. This prefix meant start state OR not start AND
+   not final.
+
+2. The use of @% for selecting states to modify (as in @%/ to embed eof
+   actions, etc) has been removed. This prefix previously meant not start AND not
+   final OR final.
+
+Now Added:
+
+1. The prefix < which means not start.
+2. The prefix @ which means not final.
+3. The prefix <@ which means not start & not final" 
+
+The new matrix of operators used to embed into states is:
+
+>:  $:  %:  <:  @:  <@:   - context
+>~  $~  %~  <~  @~  <@~   - to state action
+>*  $*  %*  <*  @*  <@*   - from state action
+>/  $/  %/  </  @/  <@/   - eof action
+>!  $!  %!  <!  @!  <@!   - error action
+>^  $^  %^  <^  @^  <@^   - local error action
+
+|   |   |   |   |   |
+|   |   |   |   |   *- not start & not final
+|   |   |   |   |
+|   |   |   |   *- not final
+|   |   |   |
+|   |   |   *- not start
+|   |   |
+|   |   *- final
+|   |
+|   *- all states
+|
+*- start state
+
+This example shows one way to use the new operators to cover all the states
+with a single action. The embedding of eof2 covers all the states in m2.  The
+embeddings of eof1 and eof3 avoid the boundaries that m1 and m3 both share with
+m2.
+
+    action eof1 {}
+    action eof2 {}
+    action eof3 {}
+    m1 = 'm1';
+    m2 = ' '+;
+    m3 = 'm3';
+
+    main := m1 @/eof1 . m2 $/eof2 . m3 </eof3;
+
+Verbose Action, Priority and Context Embedding Added (4.2)
+==========================================================
+
+As an alternative to the symbol-based action, priority and context embedding
+operators, a more verbose form of embedding has been added. The general form of
+the verbose embedding is:
+
+        machine <- location [modifier] embedding_type value
+
+For embeddings into transitions, the possible locations are:
+    enter           -- entering transitions
+    all             -- all transitions
+    finish          -- transitions into a final state
+    leave           -- pending transitions out of the final states
+
+For embeddings into states, the possible locations are:
+    start           -- the start state
+    all             -- all states
+    final           -- final states
+    !start          -- all states except the start
+    !final          -- states that are not final
+    !start !final   -- states that are not the start and not final
+
+The embedding types are:
+    exec            -- an action into transitions
+    pri             -- a priority into transitions
+    ctx             -- a named context into a state
+    into            -- an action into all transitions into a state
+    from            -- an action into all transitions out of a state
+    err             -- an error action into a state
+    lerr            -- a local error action into a state
+
+The possible modfiers:
+    on name         -- specify a name for priority and local error embedding
+
+Character-Level Negation '^' Added (4.1)
+========================================
+
+A character-level negation operator ^ was added. This operator has the same
+precedence level as !. It is used to match single characters that are not
+matched by the machine it operates on. The expression ^m is equivalent to
+(any-(m)). This machine makes sense only when applied to machines that match
+single characters. Since subtraction is essentially a set difference, any
+strings matched by m that are not of length 1 will be ignored by the
+subtraction and have no effect.
+
+Discontinued Plus Sign To Specifify Positive Literal Numbers (4.1)
+==================================================================
+
+The use of + to specify a literal number as positive has been removed. This
+notation is redundant because all literals are positive by default. It was
+unlikely to be used but was provided for consistency. This notation caused an
+ambiguity with the '+' repetition operator. Due to this ambibuity, and the fact
+that it is unlikely to be used and is completely unnecessary when it is, it has
+been removed. This simplifies the design. It elimnates possible confusion and
+removes the need to explain why the ambiguity exists and how it is resolved.
+
+As a consequence of the removal, any expression (m +1) or (m+1) will now be
+parsed as (m+ . 1) rather then (m . +1). This is because previously the scanner
+handled positive literals and therefore they got precedence over the repetition
+operator. 
+
+Precedence of Subtraction Operator vs Negative Literals Changed (4.1)
+=====================================================================
+
+Previously, the scanner located negative numbers and therefore gave a higher
+priority to the use of - to specify a negative literal number. This has
+changed, precedence is now given to the subtraction operator.
+
+This change is for two reasons: A) The subtraction operator is far more common
+than negative literal numbers. I have quite often been fooled by writing
+(any-0) and having it parsed as ( any . -0 ) rather than ( any - 0 ) as I
+wanted.  B) In the definition of concatentation I want to maintain that
+concatenation is used only when there are no other binary operators separating
+two machines.  In the case of (any-0) there is an operator separating the
+machines and parsing this as the concatenation of (any . -0) violates this
+rule.
+
+Duplicate Actions are Removed From Action Lists (4.1)
+=====================================================
+
+With previous versions of Ragel, effort was often expended towards ensuring
+identical machines were not uniononed together, causing duplicate actions to
+appear in the same action list (transition or eof perhaps). Often this required
+factoring out a machine or specializing a machine's purpose. For example,
+consider the following machine:
+
+  word = [a-z]+ >s $a %l;
+  main :=
+      ( word ' '  word ) |
+      ( word '\t' word );
+
+This machine needed to be rewritten as the following to avoid duplicate
+actions. This is essentially a refactoring of the machine.
+
+  main := word ( ' ' | '\t' ) word;
+
+An alternative was to specialize the machines:
+
+  word1 = [a-z]+ >s $a %l;
+  word2 = [a-z]+;
+  main :=
+      ( word1 ' '  word1 ) |
+      ( word2 '\t' word1 );
+
+Since duplicating an action on a transition is never (in my experience) desired
+and must be manually avoided, sometimes to the point of obscuring the machine
+specification, it is now done automatically by Ragel. This change should have
+no effect on existing code that is properly written and will allow the
+programmer more freedom when writing new code.
+
+New Frontend (4.0)
+==================
+
+The syntax for embedding Ragel statements into the host language has changed.
+The primary motivation is a better interaction with Objective-C. Under the
+previous scheme Ragel generated the opening and closing of the structure and
+the interface. The user could inject user defined declarations into the struct
+using the struct {}; statement, however there was no way to inject interface
+declarations. Under this scheme it was also awkward to give the machine a base
+class. Rather then add another statement similar to struct for including
+declarations in the interface we take the reverse approach, the user now writes
+the struct and interface and Ragel statements are injected as needed.
+
+Machine specifications now begin with %% and are followed with an optional name
+and either a single ragel statement or a sequence of statements enclosed in {}.
+If a machine specification does not have a name then Ragel tries to find a name
+for it by first checking if the specification is inside a struct or class or
+interface.  If it is not then it uses the name of the previous machine
+specification. If still no name is found then an error is raised.
+
+Since the user now specifies the fsm struct directly and since the current
+state and stack variables are now of type integer in all code styles, it is
+more appropriate for the user to manage the declarations of these variables.
+Ragel no longer generates the current state and the stack data variables.  This
+also gives the user more freedom in deciding how the stack is to be allocated,
+and also permits it to be grown as necessary, rather than allowing only a fixed
+stack size.
+
+FSM specifications now persist in memory, so the second time a specification of
+any particular name is seen the statements will be added to the previous
+specification. Due to this it is no longer necessary to give the element or
+alphabet type in the header portion and in the code portion. In addition there
+is now an include statement that allows the inclusion of the header portion of
+a machine it it resides in a different file, as well as allowing the inclusion
+of a machine spec of a different name from the any file at all.
+
+Ragel is still able to generate the machine's function declarations. This may
+not be required for C code, however this will be necessary for C++ and
+Objective-C code. This is now accomplished with the interface statement.
+
+Ragel now has different criteria for deciding what to generate. If the spec
+contains the interface statement then the machine's interface is generated. If
+the spec contains the definition of a main machine, then the code is generated.
+It is now possible to put common machine definitions into a separate library
+file and to include them in other machine specifications.
+
+To port Ragel 3.x programs to 4.x, the FSM's structure must be explicitly coded
+in the host language and it must include the declaration of current state. This
+should be called 'curs' and be of type int. If the machine uses the fcall
+and fret directives, the structure must also include the stack variables. The
+stack should be named 'stack' and be of type int*. The stack top should be
+named 'top' and be of type int. 
+
+In Objective-C, the both the interface and implementation directives must also
+be explicitly coded by the user. Examples can be found in the section "New
+Interface Examples".
+
+Action and Priority Embedding Operators (4.0)
+=============================================
+
+In the interest of simplifying the language, operators now embed strictly
+either on characters or on EOF, but never both. Operators should be doing one
+well-defined thing, rather than have multiple effects. This also enables the
+detection of FSM commands that do not make sense in EOF actions.
+
+This change is summarized by:
+ -'%' operator embeds only into leaving characters.
+ -All global and local error operators only embed on error character
+  transitions, their action will not be triggerend on EOF in non-final states.
+ -Addition of EOF action embedding operators for all classes of states to make
+  up for functionality removed from other operators. These are >/ $/ @/ %/.
+ -Start transition operator '>' does not imply leaving transtions when start
+  state is final.
+
+This change results in a simpler and more direct relationship between the
+operators and the physical state machine entities they operate on. It removes
+the special cases within the operators that require you to stop and think as
+you program in Ragel.
+
+Previously, the pending out transition operator % simultaneously served two
+purposes. First, to embed actions to that are to get transfered to transitions
+made going out of the machine. These transitions are created by the
+concatentation and kleene star operators. Second, to specify actions that get
+executed on EOF should the final state in the machine to which the operator is
+applied remain final.
+
+To convert Ragel 3.x programs: Any place where there is an embedding of an
+action into pending out transitions using the % operator and the final states
+remain final in the end result machine, add an embedding of the same action
+using the EOF operator %/action.
+
+Also note that when generating dot file output of a specific component of a
+machine that has leaving transitions embedded in the final states, these
+transitions will no longer show up since leaving transtion operator no longer
+causes actions to be moved into the the EOF event when the state they are
+embeeded into becomes a final state of the final machine.
+
+Const Element Type (4.0)
+========================
+
+If the element type has not been defined, the previous behaviour was to default
+to the alphabet type. The element type however is usually not specified as
+const and in most cases the data pointer in the machine's execute function
+should be a const pointer. Therefore ragel now makes the element type default
+to a constant version of the alphabet type. This can always be changed by using
+the element statment. For example 'element char;' will result in a non-const
+data pointer.
+
+New Interface Examples (4.0)
+============================
+
+---------- C ----------
+
+struct fsm
+{
+    int curs;
+};
+
+%% fsm 
+{
+    main := 'hello world';
+}
+
+--------- C++ ---------
+
+struct fsm
+{
+    int curs;
+    %% interface;
+};
+
+%% main := 'hello world';
+
+----- Objective-C -----
+
+@interface Clang : Object
+{
+@public
+     int curs;
+};
+
+%% interface;
+
+@end
+
+@implementation Clang
+
+%% main := 'hello world';
+
+@end
+

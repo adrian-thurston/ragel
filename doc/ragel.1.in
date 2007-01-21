@@ -1,0 +1,561 @@
+.\"
+.\"   Copyright 2001-2005 Adrian Thurston <thurston@cs.queensu.ca>
+.\"
+
+.\"   This file is part of Ragel.
+.\"
+.\"   Ragel is free software; you can redistribute it and/or modify
+.\"   it under the terms of the GNU General Public License as published by
+.\"   the Free Software Foundation; either version 2 of the License, or
+.\"   (at your option) any later version.
+.\"
+.\"   Ragel is distributed in the hope that it will be useful,
+.\"   but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\"   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\"   GNU General Public License for more details.
+.\"
+.\"   You should have received a copy of the GNU General Public License
+.\"   along with Ragel; if not, write to the Free Software
+.\"   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+
+.\"   Process this file with
+.\"   groff -man -Tascii ragel.1
+.\"
+.TH RAGEL 1 "@PUBDATE@" "Ragel @VERSION@" "Ragel State Machine Compiler"
+.SH NAME
+ragel \- compile regular languages into executable state machines 
+.SH SYNOPSIS
+.B ragel 
+.RI [ options ]
+.I file
+.SH DESCRIPTION
+.B Note:
+this is the frontend component of Ragel, which generates an intermediate
+file format that must be processed by rlcodegen(1).
+
+Ragel compiles finite state machines from regular languages into executable
+code.  Ragel can generate C, C++, Objective-C, D, or Java code. Ragel state
+machines can not only recognize byte
+sequences as regular expression machines do, but can also execute code at
+arbitrary points in the recognition of a regular language.  User code is
+embedded using inline operators that do not disrupt the regular language
+syntax.
+
+The core language consists of standard regular expression operators, such as
+union, concatenation and kleene star, accompanied by action embedding
+operators. Ragel also provides operators that let you control any
+non-determinism that you create, construct scanners using the longest match
+paradigm, and build state machines using the statechart model. It is also
+possible to influence the execution of a state machine from inside an embedded
+action by jumping or calling to other parts of the machine and reprocessing
+input.
+
+Ragel provides a very flexibile interface to the host language that attempts to
+place minimal restrictions on how the generated code is used and integrated
+into the application. The generated code has no dependencies.
+
+.SH OPTIONS
+.TP
+.BR \-h ", " \-H ", " \-? ", " \-\-help
+Display help and exit.
+.TP
+.B \-o " file"
+Write output to file. If -o is not given, a default file name is chosen by
+replacing the suffix of the input. For source files ending in .rh the suffix .h
+is used. For all other source files a suffix based on the output language
+is used (.c, .cpp, .m, .dot)
+.TP
+.B \-n
+Do not perform state minimization.
+.TP
+.B \-m
+Perform minimization once, at the end of the state machine compilation. 
+.TP
+.B \-l
+Minimize after nearly every operation. Lists of like operations such as unions
+are minimized once at the end. This is the default minimization option.
+.TP
+.B \-e
+Minimize after every operation.
+.TP
+.B \-S <spec>
+FSM specification to output for -V
+.TP
+.B \-M <machine>
+Machine definition/instantiation to output for -V
+.TP
+.B \-C
+The host language is C, C++, Obj-C or Obj-C++. This is the default host language option.
+.TP
+.B \-D
+The host language is D.
+.TP
+.B \-J
+The host language is Java.
+.SH RAGEL INPUT
+NOTE: This is a very brief description of Ragel input. Ragel is described in
+more detail in the user guide available from the homepage (see below).
+
+Ragel normally passes input files straight to the output. When it sees an FSM
+specification that contains machine instantiations it stops to generate the
+state machine. If there are write statements (such as "write exec") then ragel emits the
+corresponding code. There can be any number of FSM specifications in an input
+file. A multi-line FSM specification starts with '%%{' and ends with '}%%'. A
+single line FSM specification starts with %% and ends at the first newline.
+.SH FSM STATEMENTS
+.TP
+.I Machine Name:
+Set the the name of the machine. If given, it must be the first statement.
+.TP
+.I Alphabet Type:
+Set the data type of the alphabet.
+.TP
+.I GetKey:
+Specify how to retrieve the alphabet character from the element type.
+.TP
+.I Include:
+Include a machine of same name as the current or of a different name in either
+the current file or some other file.
+.TP
+.I Action Definition:
+Define an action that can be invoked by the FSM.
+.TP
+.I Fsm Definition, Instantiation and Longest Match Instantiation:
+Used to build FSMs. Syntax description in next few sections.
+.TP
+.I Access:
+Specify how to access the persistent state machine variables.
+.TP
+.I Write:
+Write some component of the machine.
+.SH BASIC MACHINES
+The basic machines are the base operands of the regular language expressions.
+.TP
+.I 'hello'
+Concat literal. Produces a concatenation of the characters in the string.
+Supports escape sequences with '\\'.  The result will have a start state and a
+transition to a new state for each character in the string. The last state in
+the sequence will be made final. To make the string case-insensitive, append
+an 'i' to the string, as in 'cmd'i\fR.
+.TP
+.I \(dqhello\(dq
+Identical to single quote version.
+.TP
+.I [hello]
+Or literal. Produces a union of characters.  Supports character ranges 
+with '\-', negating the sense of the union with an initial '^' and escape
+sequences with '\\'. The result will have two states with a transition between
+them for each character or range. 
+.LP
+NOTE: '', "", and [] produce null FSMs. Null machines have one state that is
+both a start state and a final state and match the zero length string. A null machine
+may be created with the null builtin machine.
+.TP
+.I integer
+Makes a two state machine with one transition on the given integer number.
+.TP
+.I hex
+Makes a two state machine with one transition on the given hexidecimal number.
+.TP
+.I "/simple_regex/"
+A simple regular expression. Supports the notation '.', '*' and '[]', character
+ranges with '\-', negating the sense of an OR expression with and initial '^'
+and escape sequences with '\\'. Also supports one trailing flag: i. Use it to
+produce a case-insensitive regular expression, as in /GET/i.
+.TP
+.I lit .. lit
+Specifies a range. The allowable upper and lower bounds are concat literals of
+length one and number machines. 
+For example, 0x10..0x20,  0..63, and 'a'..'z' are valid ranges.
+.TP 
+.I "variable_name"
+References the machine definition assigned to the variable name given.
+.TP
+.I "builtin_machine"
+There are several builtin machines available. They are all two state machines
+for the purpose of matching common classes of characters. They are:
+.RS
+.TP
+.B any
+Any character in the alphabet.
+.TP
+.B ascii
+Ascii characters 0..127.
+.TP
+.B extend
+Ascii extended characters. This is the range -128..127 for signed alphabets
+and the range 0..255 for unsigned alphabets.
+.TP
+.B alpha
+Alphabetic characters /[A-Za-z]/.
+.TP
+.B digit
+Digits /[0-9]/.
+.TP
+.B alnum
+Alpha numerics /[0-9A-Za-z]/.
+.TP
+.B lower
+Lowercase characters /[a-z]/.
+.TP
+.B upper
+Uppercase characters /[A-Z]/.
+.TP
+.B xdigit
+Hexidecimal digits /[0-9A-Fa-f]/.
+.TP
+.B cntrl
+Control characters 0..31.
+.TP
+.B graph
+Graphical characters /[!-~]/.
+.TP
+.B print
+Printable characters /[ -~]/.
+.TP
+.B punct
+Punctuation. Graphical characters that are not alpha-numerics
+/[!-/:-@\\[-`{-~]/. 
+.TP
+.B space
+Whitespace /[\\t\\v\\f\\n\\r ]/.
+.TP
+.B null
+Zero length string. Equivalent to '', "" and [].
+.TP
+.B empty
+Empty set. Matches nothing.
+.RE
+.SH BRIEF OPERATOR REFERENCE
+Operators are grouped by precedence, group 1 being the lowest and group 6 the
+highest.
+.LP
+.B GROUP 1:
+.TP
+.I expr , expr
+Join machines together without drawing any transitions, setting up a start
+state or any final states. Start state must be explicitly specified with the
+"start" label. Final states may be specified with the an epsilon transitions to
+the implicitly created "final" state.
+.LP
+.B GROUP 2:
+.TP
+.I expr | expr
+Produces a machine that matches any string in machine one or machine two.
+.TP
+.I expr & expr
+Produces a machine that matches any string that is in both machine one and
+machine two.
+.TP
+.I expr - expr
+Produces a machine that matches string that is in machine one but not in
+machine two.
+.LP
+.B GROUP 3:
+.TP
+.I expr . expr
+Produces a machine that matches all the strings in machine one followed
+by all the strings in machine two.
+.LP
+NOTE: Concatenation is the default operator. Two machines next to each other
+with no operator between them results in the concatenation operation.
+.LP
+.B GROUP 4:
+.TP
+.I label: expr
+Attaches a label to an expression. Labels can be used by epsilon transitions
+and fgoto and fcall statements in actions. Also note that the referencing of a
+machine definition causes the implicit creation of label by the same name.
+.LP
+.B GROUP 5:
+.TP
+.I expr -> label
+Draws an epsilon transition to the state defined by label. Label must
+be a name in the current scope. Epsilon transitions are resolved when
+comma operators are evaluated and at the root of the expression tree of
+machine assignment/instantiation.
+.LP
+.B GROUP 6: Actions
+.LP
+An action may be a name predefined with an action statement or may
+be specified directly with '{' and '}' in the expression.
+.TP
+.I expr > action
+Embeds action into starting transitions.
+.TP
+.I expr @ action
+Embeds action into transitions that go into a final state.
+.TP
+.I expr $ action
+Embeds action into all transitions. Does not include pending out transitions.
+.TP
+.I expr % action
+Embeds action into pending out transitions from final states.
+.LP
+.B GROUP 6: EOF Actions
+.LP
+When a machine's finish routine is called the current state's EOF actions are
+executed. 
+.TP
+.I expr >/ action
+Embed an EOF action into the start state.
+.TP
+.I expr </ action
+Embed an EOF action into all states except the start state.
+.TP
+.I expr $/ action
+Embed an EOF action into all states.
+.TP
+.I expr %/ action
+Embed an EOF action into final states.
+.TP
+.I expr @/ action
+Embed an EOF action into all states that are not final.
+.TP
+.I expr <>/ action
+Embed an EOF action into all states that are not the start
+state and that are not final (middle states).
+.LP
+.B GROUP 6: Global Error Actions
+.LP
+Global error actions are stored in states until the final state machine has
+been fully constructed. They are then transferred to error transitions, giving
+the effect of a default action.
+.TP
+.I expr >! action
+Embed a global error action into the start state.
+.TP
+.I expr <! action
+Embed a global error action into all states except the start state.
+.TP
+.I expr $! action
+Embed a global error action into all states.
+.TP
+.I expr %! action
+Embed a global error action into the final states.
+.TP
+.I expr @! action
+Embed a global error action into all states which are not final.
+.TP
+.I expr <>! action
+Embed a global error action into all states which are not the start state and
+are not final (middle states).
+.LP
+.B GROUP 6: Local Error Actions 
+.LP
+Local error actions are stored in states until the named machine is fully
+constructed. They are then transferred to error transitions, giving the effect
+of a default action for a section of the total machine. Note that the name may
+be omitted, in which case the action will be transferred to error actions upon
+construction of the current machine.
+.TP
+.I expr >^ action
+Embed a local error action into the start state.
+.TP
+.I expr <^ action
+Embed a local error action into all states except the start state.
+.TP
+.I expr $^ action
+Embed a local error action into all states.
+.TP
+.I expr %^ action
+Embed a local error action into the final states.
+.TP
+.I expr @^ action
+Embed a local error action into all states which are not final.
+.TP
+.I expr <>^ action
+Embed a local error action into all states which are not the start state and
+are not final (middle states).
+.LP
+.B GROUP 6: To-State Actions
+.LP
+To state actions are stored in states and executed any time the machine moves
+into a state. This includes regular transitions, and transfers of control such
+as fgoto. Note that setting the current state from outside the machine (for
+example during initialization) does not count as a transition into a state.
+.TP
+.I expr >~ action
+Embed a to-state action action into the start state.
+.TP
+.I expr <~ action
+Embed a to-state action into all states except the start state.
+.TP
+.I expr $~ action
+Embed a to-state action into all states.
+.TP
+.I expr %~ action
+Embed a to-state action into the final states.
+.TP
+.I expr @~ action
+Embed a to-state action into all states which are not final.
+.TP
+.I expr <>~ action
+Embed a to-state action into all states which are not the start state and
+are not final (middle states).
+.LP
+.B GROUP 6: From-State Actions
+.LP
+From state actions are executed whenever a state takes a transition on a character.
+This includes the error transition and a transition to self.
+.TP
+.I expr >* action
+Embed a from-state action into the start state.
+.TP
+.I expr <* action
+Embed a from-state action into every state except the start state.
+.TP
+.I expr $* action
+Embed a from-state action into all states.
+.TP
+.I expr %* action
+Embed a from-state action into the final states.
+.TP
+.I expr @* action
+Embed a from-state action into all states which are not final.
+.TP
+.I expr <>* action
+Embed a from-state action into all states which are not the start state and
+are not final (middle states).
+.LP
+.B GROUP 6: Priority Assignment
+.LP
+Priorities are assigned to names within transitions. Only priorities on the
+same name are allowed to interact. In the first form of priorities the name
+defaults to the name of the machine definition the priority is assigned in.
+Transitions do not have default priorities.
+.TP
+.I expr > int
+Assigns the priority int in all transitions entering into the machine.
+.TP
+.I expr @ int
+Assigns the priority int in all transitions that go into a final state.
+.TP
+.I expr $ int
+Assigns the priority int in all existing transitions.
+.TP
+.I expr % int
+Assigns the priority int in all pending out transitions.
+.LP
+A second form of priority assignment allows the programmer to specify the name
+to which the priority is assigned, allowing interactions to cross machine
+definition boundaries.
+.TP
+.I expr > (name,int)
+Assigns the priority int to name in all transitions entering into the machine.
+.TP
+.I expr @ (name, int)
+Assigns the priority int to name in all transitions that go into a final state.
+.TP
+.I expr $ (name, int)
+Assigns the priority int to name in all existing transitions.
+.TP
+.I expr % (name, int)
+Assigns the priority int to name in all pending out transitions.
+.LP
+.B GROUP 7:
+.TP
+.I expr *
+Produces the kleene star of a machine. Matches zero or more repetitions of the
+machine.
+.TP
+.I expr **
+Longest Matching Kleene Star. This version of kleene star puts a higher
+priority on staying in the machine over wrapping around and starting over. This
+operator is equivalent to ( ( expr ) $0 %1 )*.
+.TP
+.I expr ?
+Produces a machine that accepts the machine given or the null string. This operator
+is equivalent to  ( expr | '' ).
+.TP
+.I expr +
+Produces the machine concatenated with the kleen star of itself. Matches one or
+more repetitions of the machine.  This operator is equivalent to ( expr . expr* ).
+.TP
+.I expr {n}
+Produces a machine that matches exactly n repetitions of expr.
+.TP
+.I expr {,n}
+Produces a machine that matches anywhere from zero to n repetitions of expr.
+.TP
+.I expr {n,}
+Produces a machine that matches n or more repetitions of expr.
+.TP
+.I expr {n,m}
+Produces a machine that matches n to m repetitions of expr.
+.LP
+.B GROUP 8:
+.TP
+.I ! expr
+Produces a machine that matches any string not matched by the given machine.
+This operator is equivalent to ( *extend - expr ).
+.LP
+.B GROUP 9:
+.TP
+.I ( expr )
+Forces precedence on operators.
+.SH VALUES AVAILABLE IN CODE BLOCKS
+.TP
+.I fc
+The current character. Equivalent to *p.
+.TP
+.I fpc
+A pointer to the current character. Equivalent to p.
+.TP
+.I fcurs
+An integer value representing the current state.
+.TP
+.I ftargs
+An integer value representing the target state.
+.TP
+.I fentry(<label>)
+An integer value representing the entry point <label>.
+.SH STATEMENTS AVAILABLE IN CODE BLOCKS
+.TP
+.I fhold;
+Do not advance over the current character. Equivalent to --p;.
+.TP
+.I fexec <expr>;
+Sets the current character to something else. Equivalent to p = (<expr>)-1;
+.TP
+.I fgoto <label>;
+Jump to the machine defined by <label>. 
+.TP
+.I fgoto *<expr>;
+Jump to the entry point given by <expr>. The expression must
+evaluate to an integer value representing a state.
+.TP
+.I fnext <label>;
+Set the next state to be the entry point defined by <label>.  The fnext
+statement does not immediately jump to the specified state. Any action code
+following the statement is executed.
+.TP
+.I fnext *<expr>;
+Set the next state to be the entry point given by <expr>. The expression must
+evaluate to an integer value representing a state.
+.TP
+.I fcall <label>;
+Call the machine defined by <label>. The next fret will jump to the
+target of the transition on which the action is invoked.
+.TP
+.I fcall *<expr>;
+Call the entry point given by <expr>. The next fret will jump to the target of
+the transition on which the action is invoked.
+.TP
+.I fret;
+Return to the target state of the transition on which the last fcall was made.
+.TP
+.I fbreak;
+Save the current state and immediately break out of the machine.
+.SH BUGS
+Ragel is still under development and has not yet matured. There are probably
+many bugs.
+.SH CREDITS
+Ragel was written by Adrian Thurston <thurston@cs.queensu.ca>.  Objective-C
+output contributed by Eric Ocean. D output contributed by Alan West. 
+.SH "SEE ALSO"
+.BR rlcodegen (1),
+.BR re2c (1),
+.BR flex (1)
+
+Homepage: http://www.cs.queensu.ca/home/thurston/ragel/

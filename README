@@ -1,0 +1,54 @@
+
+                     Ragel State Machine Compiler -- README
+                     ======================================
+
+1. Build Requirements
+---------------------
+
+ * GNU Make
+ * g++
+
+If you would like to modify Ragel and need to build Ragel's scanners and
+parsers from the specifications then set BUILD_PARSERS=true in the configure
+script and then run it. To build the parsers you will need the following
+programs:
+
+ * flex 
+ * bison (recent version and not bison++, see below)
+ * gperf
+
+To build the user guide the following extra programs are needed:
+
+ * fig2dev
+ * pdflatex
+
+
+2. Compilation
+--------------
+
+To configure type './configure'. The makefiles honour the --prefix option to
+specify where the program is to be installed to.
+
+To build the ragel program type 'make'.
+
+To build all the documentation cd to 'doc' and type 'make'. If you don't have
+all of the programs to build the user guide and just want the man page use
+'make ragel.1 rlcodegen.1'.
+
+
+3. Installing
+-------------
+
+The command 'make install' will build the programs and install them to $PREFIX/bin/.
+A 'make install' in the doc directory will make and install all the
+documentation.  The man pages install to $PREFIX/man/man1/ and the user guide
+and ChangeLog install to $PREFIX/share/doc/ragel/. To install just the man page
+use 'make man-install'.
+
+
+4. Why Ragel cannot be built with Bison++
+-----------------------------------------
+Ragel is written in C++ using a C-style parser. Bison++ sees that we are using
+C++ and generates classes, which breaks the build. As of last investigation,
+this can't be stopped.  Bison++ is therefore only compatible with Bison if you
+are implementing a C-style parser in C.

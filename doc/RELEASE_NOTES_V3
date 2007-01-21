@@ -1,0 +1,8 @@
+                 Porting Ragel Version 2 Programs to Version 3
+                 =============================================
+
+1. Replace all instances of *p in action code with the keyword fc.
+
+2. Replace all instances of : used to set actions or priorities with @.
+
+3. Wrap named priorities in parentheses so they are of the form @(name,1).

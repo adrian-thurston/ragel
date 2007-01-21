@@ -1,0 +1,122 @@
+/*
+ *  Copyright 2006 Adrian Thurston <thurston@cs.queensu.ca>
+ */
+
+/*  This file is part of Ragel.
+ *
+ *  Ragel is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ * 
+ *  Ragel is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with Ragel; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+ */
+
+#ifndef RLPARSE_H
+#define RLPARSE_H
+
+#include <iostream>
+#include "avltree.h"
+#include "parsedata.h"
+
+extern char *lelNames[];
+
+struct LangEl;
+
+struct Parser
+{
+	%%{
+	parser Parser;
+
+	# These must be declared first and in this order. Ragel currently cannot
+	# import kelbt keywords for use in machines, so in the scanner
+	# rely on knowing the values that kelbt will assign to these.
+	token KW_Machine, KW_Include, KW_Write, TK_Word, TK_Literal;
+
+	token TK_Number, TK_Inline, TK_Reference, TK_ColonEquals, TK_EndSection;
+
+	# General tokens.
+	token TK_UInt, TK_Hex, TK_Word, TK_Literal, TK_BaseClause,
+		TK_DotDot, TK_ColonGt, TK_ColonGtGt, TK_LtColon, TK_Arrow,
+		TK_DoubleArrow, TK_StarStar, TK_ColonEquals, TK_NameSep, TK_BarStar,
+		TK_DashDash;
+
+	# Conditions.
+	token TK_StartCond, TK_AllCond, TK_LeavingCond;
+
+	token TK_Middle;
+
+	# Global error actions.
+	token TK_StartGblError, TK_AllGblError, TK_FinalGblError,
+		TK_NotFinalGblError, TK_NotStartGblError, TK_MiddleGblError;
+
+	# Local error actions.
+	token TK_StartLocalError, TK_AllLocalError, TK_FinalLocalError,
+		TK_NotFinalLocalError, TK_NotStartLocalError, TK_MiddleLocalError;
+
+	# EOF Action embedding.
+	token TK_StartEOF, TK_AllEOF, TK_FinalEOF, TK_NotFinalEOF, TK_NotStartEOF,
+		TK_MiddleEOF;
+
+	# To State Actions.
+	token TK_StartToState, TK_AllToState, TK_FinalToState, TK_NotFinalToState,
+		TK_NotStartToState, TK_MiddleToState;
+
+	# In State Actions.
+	token TK_StartFromState, TK_AllFromState, TK_FinalFromState,
+		TK_NotFinalFromState, TK_NotStartFromState, TK_MiddleFromState;
+
+	# Regular expression tokens. */
+	token RE_Slash, RE_SqOpen, RE_SqOpenNeg, RE_SqClose, RE_Dot, RE_Star,
+		RE_Dash, RE_Char;
+
+	# Tokens specific to inline code.
+	token IL_WhiteSpace, IL_Comment, IL_Literal, IL_Symbol;
+
+	# Keywords.
+	token KW_Action, KW_AlphType, KW_Range, KW_GetKey, KW_Include, KW_Write,
+		KW_Machine, KW_When, KW_Eof, KW_Err, KW_Lerr, KW_To, KW_From;
+
+	# Specials in code blocks.
+	token KW_Break, KW_Exec, KW_Hold, KW_PChar, KW_Char, KW_Goto, KW_Call,
+		KW_Ret, KW_CurState, KW_TargState, KW_Entry, KW_Next, KW_Exec,
+		KW_Variable, KW_Access;
+
+	# Special token for terminating semi-terminated code blocks. Needed because
+	# semi is sent as a token in the code block rather than as a generic
+	# symbol.
+	token TK_Semi;
+
+	interface;
+	}%%
+
+	Parser( char *fileName, char *sectionName, InputLoc &sectionLoc )
+		: sectionName(sectionName)
+	{
+		pd = new ParseData( fileName, sectionName, sectionLoc );
+	}
+
+	int token( InputLoc &loc, int tokId, char *tokstart, int toklen );
+	void tryMachineDef( InputLoc &loc, char *name, 
+		JoinOrLm *joinOrLm, bool isInstance );
+
+	/* Report an error encountered by the parser. */
+	ostream &parser_error( int tokId, Token &token );
+
+	ParseData *pd;
+
+	/* The name of the root section, this does not change during an include. */
+	char *sectionName;
+
+	NameRef nameRef;
+	NameRefList nameRefList;
+};
+
+#endif

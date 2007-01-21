@@ -1,0 +1,71 @@
+#
+#   Copyright 2001-2006 Adrian Thurston <thurston@cs.queensu.ca>
+#
+
+#   This file is part of Ragel.
+#
+#   Ragel is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   Ragel is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with Ragel; if not, write to the Free Software
+#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+
+INCS = -Iaapl
+DEFS =
+
+CFLAGS = -g -Wall
+LDFLAGS =
+
+SUBDIRS = codegen test examples doc
+
+CC_SRCS = \
+	rlparse.cpp rlscan.cpp main.cpp parsetree.cpp \
+	parsedata.cpp fsmstate.cpp fsmbase.cpp fsmattach.cpp \
+	fsmmin.cpp fsmgraph.cpp fsmap.cpp xmlcodegen.cpp
+
+GEN_SRC = version.h
+
+LIBS = @LIBS@
+PREFIX = @prefix@
+
+#*************************************
+
+include ../version.mk
+
+# Programs
+CXX = @CXX@
+
+# What kind of header does bison put out?
+BISON_HEAD_SUFFIX = @BISON_HEAD_SUFFIX@
+
+# Get objects and dependencies from sources.
+RAGEL_OBJS = $(RAGEL_CC_SRCS:%.cpp=%.o)
+RLCG_OBJS = $(RLCG_CC_SRCS:%.cpp=%.o)
+DEPS = $(RAGEL_CC_SRCS:%.cpp=.%.d) $(RLCG_CC_SRCS:%.cpp=.%.d)
+
+# Rules.
+all: $(GEN_SRC)
+
+version.h: ../version.mk
+	echo '#define VERSION "$(VERSION)"' > version.h
+	echo '#define PUBDATE "$(PUBDATE)"' >> version.h
+
+%.o: %.cpp
+	@$(CXX) -M $(DEFS) $(INCS) $< > .$*.d
+	$(CXX) -c $(CFLAGS) $(DEFS) $(INCS) -o $@ $<
+
+distclean: clean
+	rm -f Makefile config.h
+
+clean:
+	rm -f tags .*.d *.o version.h
+
+-include $(DEPS)

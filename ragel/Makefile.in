@@ -1,0 +1,85 @@
+#
+#   Copyright 2001-2006 Adrian Thurston <thurston@cs.queensu.ca>
+#
+
+#   This file is part of Ragel.
+#
+#   Ragel is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   Ragel is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with Ragel; if not, write to the Free Software
+#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+
+INCS += -I../common -I../aapl
+DEFS +=
+
+CFLAGS += -g -Wall
+LDFLAGS +=
+
+CC_SRCS = \
+	main.cpp parsetree.cpp parsedata.cpp fsmstate.cpp fsmbase.cpp \
+	fsmattach.cpp fsmmin.cpp fsmgraph.cpp fsmap.cpp xmlcodegen.cpp \
+	rlscan.cpp rlparse.cpp
+
+GEN_SRC = rlscan.cpp rlparse.h rlparse.cpp
+
+LIBS += @LIBS@
+PREFIX = @prefix@
+
+BUILD_PARSERS = @BUILD_PARSERS@
+
+#*************************************
+
+# Programs
+CXX = @CXX@
+
+# Get objects and dependencies from sources.
+OBJS = $(CC_SRCS:%.cpp=%.o)
+DEPS = $(CC_SRCS:%.cpp=.%.d)
+
+# Rules.
+all: ragel
+
+ragel: $(GEN_SRC) $(OBJS)
+	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
+
+ifeq ($(BUILD_PARSERS),true)
+
+rlparse.h: rlparse.kh
+	kelbt -o $@ $<
+
+rlparse.cpp: rlparse.kl rlparse.kh
+	kelbt -o $@ $<
+
+rlscan.cpp: rlscan.rl
+	ragel $< | rlcodegen -G2 -o $@
+
+endif
+
+%.o: %.cpp
+	@$(CXX) -M $(DEFS) $(INCS) $< > .$*.d
+	$(CXX) -c $(CFLAGS) $(DEFS) $(INCS) -o $@ $<
+
+distclean: clean
+	rm -f Makefile 
+
+ifeq ($(BUILD_PARSERS),true)
+EXTRA_CLEAN = $(GEN_SRC)
+endif
+
+clean:
+	rm -f tags .*.d *.o ragel $(EXTRA_CLEAN)
+
+install: all
+	install -d $(PREFIX)/bin
+	install -s ragel $(PREFIX)/bin/ragel
+
+-include $(DEPS)

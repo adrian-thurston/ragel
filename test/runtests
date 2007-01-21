@@ -1,0 +1,251 @@
+#!/bin/bash
+
+#
+#   Copyright 2006 Adrian Thurston <thurston@cs.queensu.ca>
+#
+
+#   This file is part of Ragel.
+#
+#   Ragel is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   Ragel is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with Ragel; if not, write to the Free Software
+#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+
+while getopts "gcnmleT:F:G:P:CDJ" opt; do
+	case $opt in
+		T|F|G|P) 
+			genflags="$genflags -$opt$OPTARG"
+			options="$options -$opt$OPTARG"
+			;;
+		n|m|l|e) 
+			minflags="$minflags -$opt"
+			options="$options -$opt"
+			;;
+		c) 
+			compile_only="true"
+			options="$options -$opt"
+			;;
+		g) 
+			allow_generated="true"
+			;;
+		C|D|J) 
+			langflags="$langflags -$opt"
+			;;
+	esac
+done
+
+[ -z "$minflags" ] && minflags="-n -m -l -e"
+[ -z "$genflags" ] && genflags="-T0 -T1 -F0 -F1 -G0 -G1 -G2"
+[ -z "$langflags" ] && langflags="-C -D -J"
+
+shift $((OPTIND - 1));
+
+[ -z "$*" ] && set -- *.rl
+
+# find the config file
+config=../common/config.h
+ragel=../ragel/ragel
+rlcodegen=../rlcodegen/rlcodegen
+if ! [ -d ../common ]; then 
+	config=../$config
+	ragel=../$ragel
+	rlcodegen=../$rlcodegen
+fi
+
+cxx_compiler=`sed '/^#define CXX/s/#define CXX *//p;d' $config`
+c_compiler=`sed '/^#define CC/s/#define CC *//p;d' $config`
+objc_compiler=`sed '/^#define GOBJC/s/#define GOBJC *//p;d' $config`
+d_compiler=`sed '/^#define GDC/s/#define GDC *//p;d' $config`
+java_compiler=`sed '/#define JAVAC/s/#define JAVAC *//p;d' $config`
+txl_engine=`sed '/^#define TXL/s/#define TXL *//p;d' $config`
+
+function test_error
+{
+	exit 1;
+}
+
+for test_case; do
+	root=${test_case%.rl};
+
+	if ! [ -f "$test_case" ]; then
+		echo "runtests: not a file: $test_case"; >&2
+		exit 1;
+	fi
+
+	# Check if we should ignore the test case
+	ignore=`sed '/@IGNORE:/s/^.*: *//p;d' $test_case`
+    if [ "$ignore" = yes ]; then
+        continue;
+    fi
+
+	# If the generated flag is given make sure that the test case is generated.
+	is_generated=`sed '/@GENERATED:/s/^.*: *//p;d' $test_case`
+	if [ "$is_generated" = yes ] && [ "$allow_generated" != true ]; then
+		continue;
+	fi
+
+	expected_out=$root.exp;
+	sed '1,/_____OUTPUT_____/d;$d' $test_case > $expected_out
+
+	lang=`sed '/@LANG:/s/^.*: *//p;d' $test_case`
+	if [ -z "$lang" ]; then
+		echo "$test_case: language unset"; >&2
+		exit 1;
+	fi
+
+	case $lang in
+		c++)
+			code_suffix=cpp;
+			compiler=$cxx_compiler;
+			lang_opt=-C;
+			cflags="-pedantic -ansi -Wall -O3"
+		;;
+		d)
+			code_suffix=d;
+			compiler=$d_compiler;
+			lang_opt=-D;
+			cflags="-Wall -O3"
+		;;
+		c)
+			code_suffix=c;
+			compiler=$c_compiler;
+			lang_opt=-C;
+			cflags="-pedantic -ansi -Wall -O3"
+		;;
+		obj-c)
+			code_suffix=m;
+			compiler=$objc_compiler
+			lang_opt=-C;
+			cflags="-Wall -O3 -fno-strict-aliasing -lobjc"
+		;;
+		java)
+			code_suffix=java;
+			compiler=$java_compiler
+			lang_opt=-J;
+			cflags=""
+		;;
+		indep)
+			# If we have no compiler for the source program then skip it.
+			[ -z "$txl_engine" ] && continue
+			for lang in c d java; do
+				case $lang in 
+					c) lf="-C";;
+					d) lf="-D";;
+					java) lf="-J";;
+				esac
+
+				echo "$langflags" | grep -e $lf >/dev/null || continue
+
+				targ=${root}_$lang.rl
+				echo "./langtrans_$lang.sh $test_case > $targ"
+				if ! ./langtrans_$lang.sh $test_case > $targ; then
+					test_error
+				fi
+				echo "./runtests -g $options $targ"
+				if !  ./runtests -g $options $targ; then
+					test_error
+				fi
+			done
+			continue;
+		;;
+		*)
+			echo "$test_case: unknown language type $lang" >&2
+			exit 1;
+		;;
+	esac
+
+	# Make sure that we are interested in the host language.
+	echo "$langflags" | grep -e $lang_opt >/dev/null || continue
+
+	code_src=$root.$code_suffix;
+	binary=$root.bin;
+	output=$root.out;
+
+	# If we have no compiler for the source program then skip it.
+	[ -z "$compiler" ] && continue
+
+	additional_cflags=`sed '/@CFLAGS:/s/^.*: *//p;d' $test_case`
+	[ -n "$additional_cflags" ] && cflags="$cflags $additional_cflags"
+
+	allow_minflags=`sed '/@ALLOW_MINFLAGS:/s/^.*: *//p;d' $test_case`
+	[ -z "$allow_minflags" ] && allow_minflags="-n -m -l -e"
+
+	allow_genflags=`sed '/@ALLOW_GENFLAGS:/s/^.*: *//p;d' $test_case`
+	[ -z "$allow_genflags" ] && allow_genflags="-T0 -T1 -F0 -F1 -G0 -G1 -G2"
+
+	for min_opt in $minflags; do
+		for gen_opt in $genflags; do
+			echo "$allow_minflags" | grep -e $min_opt >/dev/null || continue
+
+			grep_gen_opt=${gen_opt}
+			split_iters=${gen_opt#-P}
+			if test $split_iters != $gen_opt; then
+				grep_gen_opt="-P";
+			fi
+			echo "$allow_genflags" | grep -e $grep_gen_opt >/dev/null || continue
+
+			echo "$ragel $min_opt $lang_opt $test_case | $rlcodegen  $gen_opt -o $code_src"
+			if ! $ragel $min_opt $lang_opt $test_case | $rlcodegen $gen_opt -o $code_src; then
+				test_error;
+			fi
+
+			split_objs=""
+			if test $split_iters != $gen_opt; then
+				n=0;
+				while test $n -lt $split_iters; do
+					part_root=${root}_`awk 'BEGIN {
+						width = 0;
+						high = '$split_iters' - 1;
+						while ( high > 0 ) {
+							width = width + 1;
+							high = int(high / 10);
+						}
+						suffFormat = "%" width "." width "d\n";
+						printf( suffFormat, '$n' );
+						exit 0;
+					}'`
+					part_src=${part_root}.c
+					part_bin=${part_root}.o
+					echo "$compiler -c $cflags -o $part_bin $part_src"
+					if ! $compiler -c $cflags -o $part_bin $part_src; then
+						test_error;
+					fi
+					split_objs="$split_objs $part_bin"
+					n=$((n+1))
+				done
+			fi
+
+			out_args=""
+			[ $lang != java ] && out_args="-o ${binary}";
+
+			echo "$compiler ${cflags} ${out_args} ${code_src}"
+			if ! $compiler ${cflags} ${out_args} ${code_src}; then
+				test_error;
+			fi
+
+			if [ "$compile_only" != "true" ]; then
+				echo -n "running $root ... ";
+				
+				exec_cmd=./$binary
+				[ $lang = java ] && exec_cmd="java $root"
+					
+				$exec_cmd 2>&1 > $output;
+				if diff $expected_out $output > /dev/null; then
+					echo "passed";
+				else
+					echo "FAILED";
+					test_error;
+				fi;
+			fi
+		done
+	done
+done

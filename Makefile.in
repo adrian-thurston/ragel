@@ -1,0 +1,56 @@
+#
+#   Copyright 2001-2006 Adrian Thurston <thurston@cs.queensu.ca>
+#
+
+#   This file is part of Ragel.
+#
+#   Ragel is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   Ragel is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with Ragel; if not, write to the Free Software
+#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+
+SUBDIRS = common ragel rlcodegen test examples doc
+
+#*************************************
+
+# Programs
+CXX = @CXX@
+
+# Get the version info.
+include version.mk
+
+# Rules.
+all: 
+	@cd common && $(MAKE) && cd ../ragel && $(MAKE) && cd ../rlcodegen && $(MAKE)
+
+new-version:
+	sed 's/^\(Version:[[:space:]]*\)[0-9.]*$$/\1$(VERSION)/' ragel.spec > spec-new
+	cat spec-new > ragel.spec && rm spec-new
+
+distclean: distclean-rec distclean-local
+
+distclean-rec:
+	for dir in $(SUBDIRS); do cd $$dir; $(MAKE) distclean; cd ..; done
+
+distclean-local: clean-local
+	rm -f Makefile config.cache config.status config.log
+
+clean: clean-rec clean-local
+
+clean-rec:
+	for dir in $(SUBDIRS); do cd $$dir; $(MAKE) clean; cd ..; done
+
+clean-local:
+	rm -f tags
+
+install:
+	@cd ragel && $(MAKE) install && cd ../rlcodegen && $(MAKE) install

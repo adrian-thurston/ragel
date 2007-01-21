@@ -1,0 +1,875 @@
+/*
+ *  Copyright 2001-2007 Adrian Thurston <thurston@cs.queensu.ca>
+ */
+
+/*  This file is part of Ragel.
+ *
+ *  Ragel is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ * 
+ *  Ragel is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with Ragel; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+ */
+
+#include "xmlparse.h"
+#include "rlcodegen.h"
+#include "common.h"
+#include "gendata.h"
+#include <iostream>
+
+using std::cout;
+using std::ostream;
+using std::istream;
+using std::cerr;
+using std::endl;
+
+Key readKey( char *td, char **end );
+long readOffsetPtr( char *td, char **end );
+unsigned long readLength( char *td );
+
+%%{
+
+parser Parser;
+
+include "xmlparse.kh";
+
+start: tag_ragel;
+start:
+	final {
+		/* If we get no input the assumption is that the frontend died and
+		 * emitted an error. */ 
+		gblErrorCount += 1;
+	};
+
+tag_ragel: tag_ragel_head host_or_def_list '/' TAG_ragel;
+
+tag_ragel_head: TAG_ragel
+	final {
+		Attribute *fileNameAttr = $1->tag->findAttr( "filename" );
+		if ( fileNameAttr == 0 ) {
+			xml_error($1->loc) << "tag <ragel> requires a filename attribute" << endl;
+			exit(1);
+		}
+		else
+			sourceFileName = fileNameAttr->value;
+
+		Attribute *langAttr = $1->tag->findAttr( "lang" );
+		if ( langAttr == 0 )
+			xml_error($1->loc) << "tag <ragel> requires a lang attribute" << endl;
+		else {
+			if ( strcmp( langAttr->value, "C" ) == 0 ) {
+				hostLangType = CCode;
+				hostLang = &hostLangC;
+			}
+			else if ( strcmp( langAttr->value, "D" ) == 0 ) {
+				hostLangType = DCode;
+				hostLang = &hostLangD;
+			}
+			else if ( strcmp( langAttr->value, "Java" ) == 0 ) {
+				hostLangType = JavaCode;
+				hostLang = &hostLangJava;
+			}
+		}
+
+		/* Eventually more types will be supported. */
+		if ( hostLangType == JavaCode && codeStyle != GenTables ) {
+			error() << "java: only the table code style -T0 is "
+						"currently supported" << endl;
+		}
+
+		openOutput( sourceFileName );
+	};
+
+host_or_def_list: host_or_def_list host_or_def;
+host_or_def_list: ;
+
+host_or_def: host;
+host_or_def: ragel_def;
+
+host: 
+	TAG_host '/' TAG_host
+	final {
+		Attribute *lineAttr = $1->tag->findAttr( "line" );
+		if ( lineAttr == 0 )
+			xml_error($1->loc) << "tag <host> requires a line attribute" << endl;
+		else {
+			int line = atoi( lineAttr->value );
+			if ( outputFormat == OutCode )
+				lineDirective( *outStream, sourceFileName, line );
+		}
+
+		if ( outputFormat == OutCode )
+			*outStream << $3->tag->content;
+	};
+
+ragel_def: 
+	tag_ragel_def_head ragel_def_item_list '/' TAG_ragel_def
+	final {
+		if ( gblErrorCount == 0 )
+			cgd->generate();
+	};
+
+tag_ragel_def_head: TAG_ragel_def 
+	final {
+		bool wantComplete = outputFormat != OutGraphvizDot;
+
+		char *fsmName = 0;
+		Attribute *nameAttr = $1->tag->findAttr( "name" );
+		if ( nameAttr != 0 ) {
+			fsmName = nameAttr->value;
+
+			CodeGenMapEl *mapEl = codeGenMap.find( fsmName );
+			if ( mapEl != 0 )
+				cgd = mapEl->value;
+			else {
+				cgd = new CodeGenData( sourceFileName, fsmName, wantComplete );
+				codeGenMap.insert( fsmName, cgd );
+			}
+		}
+		else {
+			cgd = new CodeGenData( sourceFileName, fsmName, wantComplete );
+		}
+
+		cgd->writeOps = 0;
+		cgd->writeData = false;
+		cgd->writeInit = false;
+		cgd->writeExec = false;
+		cgd->writeEOF = false;
+		::keyOps = &cgd->thisKeyOps;
+	};
+
+ragel_def_item_list: ragel_def_item_list ragel_def_item;
+ragel_def_item_list: ;
+
+ragel_def_item: tag_alph_type;
+ragel_def_item: tag_getkey_expr;
+ragel_def_item: tag_access_expr;
+ragel_def_item: tag_curstate_expr;
+ragel_def_item: tag_machine;
+ragel_def_item: tag_write;
+
+tag_alph_type: TAG_alphtype '/' TAG_alphtype
+	final {
+		if ( ! cgd->setAlphType( $3->tag->content ) )
+			xml_error($1->loc) << "tag <alphtype> specifies unknown alphabet type" << endl;
+	};
+
+tag_getkey_expr: TAG_getkey inline_list '/' TAG_getkey
+	final {
+		cgd->getKeyExpr = $2->inlineList;
+	};
+
+tag_access_expr: TAG_access inline_list '/' TAG_access
+	final {
+		cgd->accessExpr = $2->inlineList;
+	};
+
+tag_curstate_expr: TAG_curstate inline_list '/' TAG_curstate
+	final {
+		cgd->curStateExpr = $2->inlineList;
+	};
+
+tag_write: TAG_write write_option_list '/' TAG_write
+	final {
+		Attribute *what = $1->tag->findAttr( "what" );
+		if ( what == 0 ) {
+			xml_error($1->loc) << "tag <write> requires a what attribute" << endl;
+		}
+		else {
+			if ( strcmp( what->value, "data" ) == 0 )
+				cgd->writeData = true;
+			else if ( strcmp( what->value, "init" ) == 0 )
+				cgd->writeInit = true;
+			else if ( strcmp( what->value, "exec" ) == 0 )
+				cgd->writeExec = true;
+			else if ( strcmp( what->value, "eof" ) == 0 )
+				cgd->writeEOF = true;
+		}
+	};
+
+write_option_list: write_option_list tag_option;
+write_option_list: ;
+
+tag_option: TAG_option '/' TAG_option
+	final {
+		char *content = $3->tag->content;
+		if ( strcmp( content, "noend" ) == 0 )
+			cgd->writeOps |= WO_NOEND;
+	 	else if ( strcmp( content, "noerror" ) == 0 )
+			cgd->writeOps |= WO_NOERROR;
+		else if ( strcmp( content, "noprefix" ) == 0 )
+			cgd->writeOps |= WO_NOPREFIX;
+		else if ( strcmp( content, "nofinal" ) == 0 )
+			cgd->writeOps |= WO_NOFF;
+		else {
+			warning() << "unrecognized write option" << endl;
+		}
+	};
+
+tag_machine: tag_machine_head machine_item_list '/' TAG_machine
+	final {
+		cgd->finishMachine();
+	};
+
+tag_machine_head: TAG_machine
+	final {
+		cgd->createMachine();
+	};
+
+machine_item_list: machine_item_list machine_item;
+machine_item_list: ;
+
+machine_item: tag_start_state;
+machine_item: tag_entry_points;
+machine_item: tag_state_list;
+machine_item: tag_action_list;
+machine_item: tag_action_table_list;
+machine_item: tag_cond_space_list;
+
+#
+# States.
+#
+
+tag_start_state: TAG_start_state '/' TAG_start_state
+	final {
+		unsigned long startState = strtoul( $3->tag->content, 0, 10 );
+		cgd->setStartState( startState );
+	};
+
+tag_entry_points: TAG_entry_points entry_point_list '/' TAG_entry_points
+	final {
+		Attribute *errorAttr = $1->tag->findAttr( "error" );
+		if ( errorAttr != 0 )
+			cgd->setForcedErrorState();
+	};
+
+entry_point_list: entry_point_list tag_entry;
+entry_point_list: ;
+
+tag_entry: TAG_entry '/' TAG_entry
+	final {
+		Attribute *nameAttr = $1->tag->findAttr( "name" );
+		if ( nameAttr == 0 ) {
+			xml_error($1->loc) << "tag <entry_points>::<entry> "
+					"requires a name attribute" << endl;
+		}
+		else {
+			char *data = $3->tag->content;
+			unsigned long entry = strtoul( data, &data, 10 );
+			cgd->addEntryPoint( nameAttr->value, entry );
+		}
+	};
+
+tag_state_list: tag_state_list_head state_list '/' TAG_state_list;
+
+tag_state_list_head: TAG_state_list
+	final {
+		Attribute *lengthAttr = $1->tag->findAttr( "length" );
+		if ( lengthAttr == 0 )
+			xml_error($1->loc) << "tag <state_list> requires a length attribute" << endl;
+	 	else {
+			unsigned long length = strtoul( lengthAttr->value, 0, 10 );
+			cgd->initStateList( length );
+			curState = 0;
+		}
+	};
+
+state_list: state_list tag_state;
+state_list: ;
+
+tag_state: TAG_state state_item_list '/' TAG_state
+	final {
+		Attribute *lengthAttr = $1->tag->findAttr( "final" );
+		if ( lengthAttr != 0 )
+			cgd->setFinal( curState );
+		curState += 1;
+	};
+
+state_item_list: state_item_list state_item;
+state_item_list: ;
+
+state_item: tag_state_actions;
+state_item: tag_state_cond_list;
+state_item: tag_trans_list;
+
+tag_state_actions: TAG_state_actions '/' TAG_state_actions
+	final {
+		char *ad = $3->tag->content;
+
+		long toStateAction = readOffsetPtr( ad, &ad );
+		long fromStateAction = readOffsetPtr( ad, &ad );
+		long eofAction = readOffsetPtr( ad, &ad );
+
+		cgd->setStateActions( curState, toStateAction,
+				fromStateAction, eofAction );
+	};
+
+tag_state_cond_list: tag_state_cond_list_head state_cond_list '/' TAG_cond_list;
+
+tag_state_cond_list_head: TAG_cond_list
+	final {
+		Attribute *lengthAttr = $1->tag->findAttr( "length" );
+		if ( lengthAttr == 0 )
+			xml_error($1->loc) << "tag <cond_list> requires a length attribute" << endl;
+	 	else {
+			ulong length = readLength( lengthAttr->value );
+			cgd->initStateCondList( curState, length );
+			curStateCond = 0;
+		}
+	};
+
+state_cond_list: state_cond_list state_cond;
+state_cond_list: ;
+
+state_cond: TAG_c '/' TAG_c
+	final {
+		char *td = $3->tag->content;
+		Key lowKey = readKey( td, &td );
+		Key highKey = readKey( td, &td );
+		long condId = readOffsetPtr( td, &td );
+		cgd->addStateCond( curState, lowKey, highKey, condId );
+	};
+
+tag_trans_list: tag_trans_list_head trans_list '/' TAG_trans_list
+	final {
+		cgd->finishTransList( curState );
+	};
+
+tag_trans_list_head: TAG_trans_list
+	final {
+		Attribute *lengthAttr = $1->tag->findAttr( "length" );
+		if ( lengthAttr == 0 )
+			xml_error($1->loc) << "tag <trans_list> requires a length attribute" << endl;
+	 	else {
+			unsigned long length = strtoul( lengthAttr->value, 0, 10 );
+			cgd->initTransList( curState, length );
+			curTrans = 0;
+		}
+	};
+
+trans_list: trans_list tag_trans;
+trans_list: ;
+
+tag_trans: TAG_t '/' TAG_t
+	final {
+		char *td = $3->tag->content;
+		Key lowKey = readKey( td, &td );
+		Key highKey = readKey( td, &td );
+		long targ = readOffsetPtr( td, &td );
+		long action = readOffsetPtr( td, &td );
+
+		cgd->newTrans( curState, curTrans++, lowKey, highKey, targ, action );
+	};
+
+#
+# Action Lists.
+#
+
+tag_action_list: tag_action_list_head action_list '/' TAG_action_list;
+
+tag_action_list_head: TAG_action_list
+	final {
+		Attribute *lengthAttr = $1->tag->findAttr( "length" );
+		if ( lengthAttr == 0 )
+			xml_error($1->loc) << "tag <action_list> requires a length attribute" << endl;
+	 	else {
+			unsigned long length = strtoul( lengthAttr->value, 0, 10 );
+			cgd->initActionList( length );
+			curAction = 0;
+		}
+	};
+
+action_list: action_list tag_action;
+action_list: ;
+
+#
+# Actions.
+#
+
+tag_action: TAG_action inline_list '/' TAG_action
+	final {
+		Attribute *lineAttr = $1->tag->findAttr( "line" );
+		Attribute *colAttr = $1->tag->findAttr( "col" );
+		Attribute *nameAttr = $1->tag->findAttr( "name" );
+		if ( lineAttr == 0 || colAttr == 0)
+			xml_error($1->loc) << "tag <action> requires a line and col attributes" << endl;
+	 	else {
+			unsigned long line = strtoul( lineAttr->value, 0, 10 );
+			unsigned long col = strtoul( colAttr->value, 0, 10 );
+
+			char *name = 0;
+			if ( nameAttr != 0 )
+				name = nameAttr->value;
+
+			cgd->newAction( curAction++, name, line, col, $2->inlineList );
+		}
+	};
+
+nonterm inline_list
+{
+	InlineList *inlineList;
+};
+
+
+inline_list: inline_list inline_item
+	final {
+		/* Append the item to the list, return the list. */
+		$1->inlineList->append( $2->inlineItem );
+		$$->inlineList = $1->inlineList;
+	};
+
+inline_list: 
+	final {
+		/* Start with empty list. */
+		$$->inlineList = new InlineList;
+	};
+
+nonterm inline_item_type
+{
+	InlineItem *inlineItem;
+};
+
+nonterm inline_item uses inline_item_type;
+
+inline_item: tag_text final { $$->inlineItem = $1->inlineItem; };
+inline_item: tag_goto final { $$->inlineItem = $1->inlineItem; };
+inline_item: tag_call final { $$->inlineItem = $1->inlineItem; };
+inline_item: tag_next final { $$->inlineItem = $1->inlineItem; };
+inline_item: tag_goto_expr final { $$->inlineItem = $1->inlineItem; };
+inline_item: tag_call_expr final { $$->inlineItem = $1->inlineItem; };
+inline_item: tag_next_expr final { $$->inlineItem = $1->inlineItem; };
+inline_item: tag_ret final { $$->inlineItem = $1->inlineItem; };
+inline_item: tag_break final { $$->inlineItem = $1->inlineItem; };
+inline_item: tag_pchar final { $$->inlineItem = $1->inlineItem; };
+inline_item: tag_char final { $$->inlineItem = $1->inlineItem; };
+inline_item: tag_hold final { $$->inlineItem = $1->inlineItem; };
+inline_item: tag_exec final { $$->inlineItem = $1->inlineItem; };
+inline_item: tag_holdte final { $$->inlineItem = $1->inlineItem; };
+inline_item: tag_execte final { $$->inlineItem = $1->inlineItem; };
+inline_item: tag_curs final { $$->inlineItem = $1->inlineItem; };
+inline_item: tag_targs final { $$->inlineItem = $1->inlineItem; };
+inline_item: tag_il_entry final { $$->inlineItem = $1->inlineItem; };
+inline_item: tag_init_tokstart final { $$->inlineItem = $1->inlineItem; };
+inline_item: tag_init_act final { $$->inlineItem = $1->inlineItem; };
+inline_item: tag_get_tokend final { $$->inlineItem = $1->inlineItem; };
+inline_item: tag_set_tokstart final { $$->inlineItem = $1->inlineItem; };
+inline_item: tag_set_tokend final { $$->inlineItem = $1->inlineItem; };
+inline_item: tag_set_act final { $$->inlineItem = $1->inlineItem; };
+inline_item: tag_sub_action final { $$->inlineItem = $1->inlineItem; };
+inline_item: tag_lm_switch final { $$->inlineItem = $1->inlineItem; };
+
+nonterm tag_text uses inline_item_type;
+nonterm tag_goto uses inline_item_type;
+nonterm tag_call uses inline_item_type;
+nonterm tag_next uses inline_item_type;
+nonterm tag_goto_expr uses inline_item_type;
+nonterm tag_call_expr uses inline_item_type;
+nonterm tag_next_expr uses inline_item_type;
+nonterm tag_ret uses inline_item_type;
+nonterm tag_break uses inline_item_type;
+nonterm tag_pchar uses inline_item_type;
+nonterm tag_char uses inline_item_type;
+nonterm tag_hold uses inline_item_type;
+nonterm tag_exec uses inline_item_type;
+nonterm tag_holdte uses inline_item_type;
+nonterm tag_execte uses inline_item_type;
+nonterm tag_curs uses inline_item_type;
+nonterm tag_targs uses inline_item_type;
+nonterm tag_il_entry uses inline_item_type;
+nonterm tag_init_tokstart uses inline_item_type;
+nonterm tag_init_act uses inline_item_type;
+nonterm tag_get_tokend uses inline_item_type;
+nonterm tag_set_tokstart uses inline_item_type;
+nonterm tag_set_tokend uses inline_item_type;
+nonterm tag_set_act uses inline_item_type;
+nonterm tag_sub_action uses inline_item_type;
+nonterm tag_lm_switch uses inline_item_type;
+
+tag_text: TAG_text '/' TAG_text
+	final {
+		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::Text );
+		$$->inlineItem->data = $3->tag->content;
+	};
+
+tag_goto: TAG_goto '/' TAG_goto
+	final {
+		int targ = strtol( $3->tag->content, 0, 10 );
+		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::Goto );
+		$$->inlineItem->targId = targ;
+	};
+
+tag_call: TAG_call '/' TAG_call
+	final {
+		int targ = strtol( $3->tag->content, 0, 10 );
+		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::Call );
+		$$->inlineItem->targId = targ;
+	};
+
+tag_next: TAG_next '/' TAG_next
+	final {
+		int targ = strtol( $3->tag->content, 0, 10 );
+		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::Next );
+		$$->inlineItem->targId = targ;
+	};
+
+tag_goto_expr: TAG_goto_expr inline_list '/' TAG_goto_expr
+	final {
+		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::GotoExpr );
+		$$->inlineItem->children = $2->inlineList;
+	};
+
+tag_call_expr: TAG_call_expr inline_list '/' TAG_call_expr
+	final {
+		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::CallExpr );
+		$$->inlineItem->children = $2->inlineList;
+	};
+
+tag_next_expr: TAG_next_expr inline_list '/' TAG_next_expr
+	final {
+		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::NextExpr );
+		$$->inlineItem->children = $2->inlineList;
+	};
+
+tag_ret: TAG_ret '/' TAG_ret
+	final {
+		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::Ret );
+	};
+
+tag_break: TAG_break '/' TAG_break
+	final {
+		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::Break );
+	};
+
+tag_pchar: TAG_pchar '/' TAG_pchar
+	final {
+		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::PChar );
+	};
+
+tag_char: TAG_char '/' TAG_char
+	final {
+		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::Char );
+	};
+
+tag_hold: TAG_hold '/' TAG_hold
+	final {
+		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::Hold );
+	};
+
+tag_exec: TAG_exec inline_list '/' TAG_exec
+	final {
+		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::Exec );
+		$$->inlineItem->children = $2->inlineList;
+	};
+
+tag_holdte: TAG_holdte '/' TAG_holdte
+	final {
+		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::HoldTE );
+	};
+
+tag_execte: TAG_execte inline_list '/' TAG_execte
+	final {
+		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::ExecTE );
+		$$->inlineItem->children = $2->inlineList;
+	};
+
+tag_curs: TAG_curs '/' TAG_curs
+	final {
+		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::Curs );
+	};
+
+tag_targs: TAG_targs '/' TAG_targs
+	final {
+		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::Targs );
+	};
+
+tag_il_entry: TAG_entry '/' TAG_entry
+	final {
+		int targ = strtol( $3->tag->content, 0, 10 );
+		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::Entry );
+		$$->inlineItem->targId = targ;
+	};
+
+tag_init_tokstart: TAG_init_tokstart '/' TAG_init_tokstart
+	final {
+		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::LmInitTokStart );
+	};
+
+tag_init_act: TAG_init_act '/' TAG_init_act
+	final {
+		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::LmInitAct );
+	};
+
+tag_get_tokend: TAG_get_tokend '/' TAG_get_tokend
+	final {
+		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::LmGetTokEnd );
+	};
+
+tag_set_tokstart: TAG_set_tokstart '/' TAG_set_tokstart
+	final {
+		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::LmSetTokStart );
+		cgd->hasLongestMatch = true;
+	};
+
+tag_set_tokend: TAG_set_tokend '/' TAG_set_tokend
+	final {
+		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::LmSetTokEnd );
+		$$->inlineItem->offset = strtol( $3->tag->content, 0, 10 );
+	};
+
+tag_set_act: TAG_set_act '/' TAG_set_act
+	final {
+		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::LmSetActId );
+		$$->inlineItem->lmId = strtol( $3->tag->content, 0, 10 );
+	};
+
+tag_sub_action: TAG_sub_action inline_list '/' TAG_sub_action
+	final {
+		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::SubAction );
+		$$->inlineItem->children = $2->inlineList;
+	};
+
+# Action switches.
+tag_lm_switch: TAG_lm_switch lm_action_list '/' TAG_lm_switch
+	final {
+		bool handlesError = false;
+		Attribute *handlesErrorAttr = $1->tag->findAttr( "handles_error" );
+		if ( handlesErrorAttr != 0 )
+			handlesError = true;
+
+		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::LmSwitch );
+		$$->inlineItem->children = $2->inlineList;
+		$$->inlineItem->handlesError = handlesError;
+	};
+
+nonterm lm_action_list
+{
+	InlineList *inlineList;
+};
+
+lm_action_list: lm_action_list tag_inline_action
+	final {
+		$$->inlineList = $1->inlineList;
+		$$->inlineList->append( $2->inlineItem );
+	};
+lm_action_list:
+	final {
+		$$->inlineList = new InlineList;
+	};
+
+nonterm tag_inline_action uses inline_item_type;
+
+tag_inline_action: TAG_sub_action inline_list '/' TAG_sub_action
+	final {
+		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::SubAction );
+		$$->inlineItem->children = $2->inlineList;
+
+		Attribute *idAttr = $1->tag->findAttr( "id" );
+		if ( idAttr != 0 ) {
+			unsigned long id = strtoul( idAttr->value, 0, 10 );
+			$$->inlineItem->lmId = id;
+		}
+	};
+
+#
+# Lists of Actions.
+#
+
+tag_action_table_list: 
+	tag_action_table_list_head action_table_list '/' TAG_action_table_list;
+
+tag_action_table_list_head: TAG_action_table_list
+	final {
+		Attribute *lengthAttr = $1->tag->findAttr( "length" );
+		if ( lengthAttr == 0 ) {
+			xml_error($1->loc) << "tag <action_table_list> requires "
+					"a length attribute" << endl;
+		}
+	 	else {
+			unsigned long length = strtoul( lengthAttr->value, 0, 10 );
+			cgd->initActionTableList( length );
+			curActionTable = 0;
+		}
+	};
+
+action_table_list: action_table_list tag_action_table;
+action_table_list: ;
+
+tag_action_table: TAG_action_table '/' TAG_action_table
+	final {
+		/* Find the length of the action table. */
+		Attribute *lengthAttr = $1->tag->findAttr( "length" );
+		if ( lengthAttr == 0 )
+			xml_error($1->loc) << "tag <at> requires a length attribute" << endl;
+	 	else {
+			unsigned long length = strtoul( lengthAttr->value, 0, 10 );
+
+			/* Collect the action table. */
+			RedAction *redAct = cgd->allActionTables + curActionTable;
+			redAct->actListId = curActionTable;
+			redAct->key.setAsNew( length );
+			char *ptr = $3->tag->content;
+			int pos = 0;
+			while ( *ptr != 0 ) {
+				unsigned long actionId = strtoul( ptr, &ptr, 10 );
+				redAct->key[pos].key = 0;
+				redAct->key[pos].value = cgd->allActions+actionId;
+				pos += 1;
+			}
+
+			/* Insert into the action table map. */
+			cgd->redFsm->actionMap.insert( redAct );
+		}
+
+		curActionTable += 1;
+	};
+
+#
+# Conditions.
+#
+
+tag_cond_space_list: tag_cond_space_list_head cond_space_list '/' TAG_cond_space_list;
+
+tag_cond_space_list_head: TAG_cond_space_list
+	final {
+		Attribute *lengthAttr = $1->tag->findAttr( "length" );
+		if ( lengthAttr == 0 ) {
+			xml_error($1->loc) << "tag <cond_space_list> "
+					"requires a length attribute" << endl;
+		}
+	 	else {
+			ulong length = readLength( lengthAttr->value );
+			cgd->initCondSpaceList( length );
+			curCondSpace = 0;
+		}
+	};
+
+cond_space_list: cond_space_list tag_cond_space;
+cond_space_list: tag_cond_space;
+
+tag_cond_space: TAG_cond_space '/' TAG_cond_space
+	final {
+		Attribute *lengthAttr = $1->tag->findAttr( "length" );
+		Attribute *idAttr = $1->tag->findAttr( "id" );
+		if ( lengthAttr == 0 )
+			xml_error($1->loc) << "tag <cond_space> requires a length attribute" << endl;
+	 	else {
+			if ( lengthAttr == 0 )
+				xml_error($1->loc) << "tag <cond_space> requires an id attribute" << endl;
+		 	else {
+				unsigned long condSpaceId = strtoul( idAttr->value, 0, 10 );
+				ulong length = readLength( lengthAttr->value );
+
+				char *td = $3->tag->content;
+				Key baseKey = readKey( td, &td );
+
+				cgd->newCondSpace( curCondSpace, condSpaceId, baseKey );
+				for ( ulong a = 0; a < length; a++ ) {
+					long actionOffset = readOffsetPtr( td, &td );
+					cgd->condSpaceItem( curCondSpace, actionOffset );
+				}
+				curCondSpace += 1;
+			}
+		}
+	};
+
+}%%
+
+unsigned long readLength( char *td )
+{
+	return strtoul( td, 0, 10 );
+}
+
+Key readKey( char *td, char **end )
+{
+	if ( keyOps->isSigned )
+		return Key( strtol( td, end, 10 ) );
+	else
+		return Key( strtoul( td, end, 10 ) );
+}
+
+long readOffsetPtr( char *td, char **end )
+{
+	while ( *td == ' ' || *td == '\t' )
+		td++;
+
+	if ( *td == 'x' ) {
+		if ( end != 0 )
+			*end = td + 1;
+		return -1;
+	}
+
+	return strtol( td, end, 10 );
+}
+
+ostream &Parser::error()
+{
+	gblErrorCount += 1;
+	cerr << PROGNAME ": ";
+	return cerr;
+}
+
+ostream &Parser::error( const InputLoc &loc )
+{
+	gblErrorCount += 1;
+	assert( fileName != 0 );
+	cerr << fileName << ":" << loc.line << ":" << loc.col << ": ";
+	return cerr;
+}
+
+ostream &Parser::parser_error( int tokId, Token &token )
+{
+	gblErrorCount += 1;
+	assert( fileName != 0 );
+	cerr << fileName << ":" << token.loc.line << ":" << token.loc.col;
+	if ( token.tag != 0 ) {
+		if ( token.tag->tagId == 0 )
+			cerr << ": at unknown tag";
+		else
+			cerr << ": at tag <" << token.tag->tagId->name << ">";
+	}
+	cerr << ": ";
+	
+	return cerr;
+}
+
+int Parser::token( int tokenId, Token &tok )
+{
+	int res = parseLangEl( tokenId, tok );
+	if ( res < 0 ) {
+		parser_error( tokenId, tok ) << "parse error" << endl;
+		exit(1);
+	}
+	return res;
+}
+
+int Parser::token( int tokenId )
+{
+	Token tok;
+	tok.tag = 0;
+	return token( tokenId, tok );
+}
+
+int Parser::token( XMLTag *tag, int col, int line )
+{
+	Token tok;
+	tok.loc.col = col;
+	tok.loc.line = line;
+	tok.tag = tag;
+	
+	if ( tag->type == XMLTag::Close ) {
+		int res = token( '/', tok );
+		if ( res < 0 )
+			return res;
+	}
+
+	tok.tag = tag;
+	return token( tag->tagId != 0 ? tag->tagId->id : TAG_unknown, tok );
+}

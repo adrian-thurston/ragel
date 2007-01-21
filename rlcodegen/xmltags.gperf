@@ -1,0 +1,81 @@
+/*
+ *  Copyright 2005 Adrian Thurston <thurston@cs.queensu.ca>
+ */
+
+/*  This file is part of Ragel.
+ *
+ *  Ragel is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ * 
+ *  Ragel is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with Ragel; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+ */
+
+
+%{
+#include <string.h>
+#include "xmlparse.h"
+%}
+%compare-strncmp
+struct XMLTagHashPair;
+%%
+ragel, TAG_ragel
+ragel_def, TAG_ragel_def
+host, TAG_host
+state_list, TAG_state_list
+state, TAG_state
+trans_list, TAG_trans_list
+t, TAG_t
+machine, TAG_machine
+start_state, TAG_start_state
+action_list, TAG_action_list
+action, TAG_action
+action_table_list, TAG_action_table_list
+action_table, TAG_action_table
+alphtype, TAG_alphtype
+getkey, TAG_getkey
+state_actions, TAG_state_actions
+entry_points, TAG_entry_points
+text, TAG_text
+goto, TAG_goto
+call, TAG_call
+next, TAG_next
+goto_expr, TAG_goto_expr
+call_expr, TAG_call_expr
+next_expr, TAG_next_expr
+ret, TAG_ret
+pchar, TAG_pchar
+char, TAG_char
+hold, TAG_hold
+exec, TAG_exec
+holdte, TAG_holdte
+execte, TAG_execte
+curs, TAG_curs
+targs, TAG_targs
+entry, TAG_entry
+data, TAG_data
+lm_switch, TAG_lm_switch
+sub_action, TAG_sub_action
+init_act, TAG_init_act
+set_act, TAG_set_act
+get_tokend, TAG_get_tokend
+set_tokend, TAG_set_tokend
+init_tokstart, TAG_init_tokstart
+set_tokstart, TAG_set_tokstart
+write, TAG_write
+curstate, TAG_curstate
+access, TAG_access
+break, TAG_break
+option, TAG_option
+cond_space_list, TAG_cond_space_list
+cond_space, TAG_cond_space
+cond_list, TAG_cond_list
+c, TAG_c

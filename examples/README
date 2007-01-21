@@ -1,0 +1,40 @@
+
+                    Ragel State Machine Compiler -- Examples
+                    ========================================
+
+atoi        -- Converts a string to an integer.
+
+awkemu      -- Perfoms the basic parsing that the awk program perfoms on input.
+               The awk equivalent to awkemu is in awkemu/awkequiv.awk
+
+clang       -- A scanner for a simple C like language. It breaks input up into
+               words, numbers, strings and symbols and strips out whitespace
+               and comments. It is a suitable template for writing a parser
+               that finds a sequence of tokens.
+
+concurrent  -- Demonstrates the ability of ragel to produce parsers that
+               perform independent tasks concurrently.
+
+cppscan     -- A C++ scanner that uses the longest match scanning method. This
+               example differs from other examples of scanning. Each run of the
+               state machine matches one token. This method results in a
+               smaller state machine since the final kleene star is omitted and
+               therefore every state does not need to get all the transitions
+               of the start state.
+
+format      -- Partial printf implementation.
+
+gotocallret -- Demonstrate the use of fgoto, fcall and fret.
+
+mailbox     -- Parses unix mailbox files. It breaks files into messages, and
+               messages into headers and body. It demonstrates Ragel's ability
+               to make parsers for structured file formats.
+
+params      -- Parses command line arguements.
+
+rlscan      -- Lexes Ragel input files.
+
+statechart  -- Demonstrate the use of labels, the epsilon operator, and the
+               join operator for creating machines using the named state and
+               transition list paradigm.  This implementes the same machine as
+               the atoi example.

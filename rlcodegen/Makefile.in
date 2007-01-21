@@ -1,0 +1,93 @@
+#
+#   Copyright 2001-2006 Adrian Thurston <thurston@cs.queensu.ca>
+#
+
+#   This file is part of Ragel.
+#
+#   Ragel is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   Ragel is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with Ragel; if not, write to the Free Software
+#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+
+INCS += -I../common -I../aapl
+DEFS +=
+
+CFLAGS += -g -Wall
+LDFLAGS +=
+
+CC_SRCS = \
+	gendata.cpp xmltags.cpp xmlscan.cpp xmlparse.cpp \
+	main.cpp redfsm.cpp gvdotgen.cpp fsmcodegen.cpp \
+	tabcodegen.cpp ftabcodegen.cpp flatcodegen.cpp \
+	fflatcodegen.cpp gotocodegen.cpp fgotocodegen.cpp \
+	ipgotocodegen.cpp splitcodegen.cpp javacodegen.cpp
+
+GEN_SRC = xmltags.cpp xmlscan.cpp xmlparse.cpp xmlparse.h
+
+LIBS += @LIBS@
+PREFIX += @prefix@
+
+BUILD_PARSERS = @BUILD_PARSERS@
+
+#*************************************
+
+# Programs
+CXX = @CXX@
+
+# Get objects and dependencies from sources.
+OBJS = $(CC_SRCS:%.cpp=%.o)
+DEPS = $(CC_SRCS:%.cpp=.%.d)
+
+# Get the version info.
+include ../version.mk
+
+# Rules.
+all: rlcodegen
+
+rlcodegen: $(GEN_SRC) $(OBJS)
+	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
+
+ifeq ($(BUILD_PARSERS),true)
+
+xmlparse.h: xmlparse.kh
+	kelbt -o $@ $<
+
+xmlparse.cpp: xmlparse.kl xmlparse.kh
+	kelbt -o $@ $<
+
+xmlscan.cpp: xmlscan.rl
+	ragel xmlscan.rl | rlcodegen -G2 -o xmlscan.cpp
+
+xmltags.cpp: xmltags.gperf
+	gperf -L C++ -t $< > $@
+
+endif
+
+%.o: %.cpp
+	@$(CXX) -M $(DEFS) $(INCS) $< > .$*.d
+	$(CXX) -c $(CFLAGS) $(DEFS) $(INCS) -o $@ $<
+
+distclean: clean
+	rm -f Makefile
+
+ifeq ($(BUILD_PARSERS),true)
+EXTRA_CLEAN = $(GEN_SRC)
+endif
+
+clean:
+	rm -f tags .*.d *.o rlcodegen $(EXTRA_CLEAN)
+
+install: all
+	install -d $(PREFIX)/bin
+	install -s rlcodegen $(PREFIX)/bin/rlcodegen
+
+-include $(DEPS)

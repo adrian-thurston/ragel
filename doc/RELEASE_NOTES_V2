@@ -1,0 +1,86 @@
+                     Porting Ragel Programs to Version 2
+                     ===================================
+
+
+1. Move all ?, +, and * operators to the right hand side of the operand.
+
+    float = *digit ?('.' +digit);
+
+    float = digit* ('.' digit+)?;
+
+2. Change all assignments to main from a definition using the = operator to an
+instantiation using the := operator.
+
+    main = 'hello';
+
+    main := 'hello';
+
+3. Remove $0 %! operations for clearing priorities.
+
+4. Anywhere implicit default priorities of zero are used to interact with
+explicitly set non-zero transitions, set the priorities to zero explicitly.
+
+    main := any* 'FIN' :1;
+
+    main := ( any $0 )* 'FIN' :1;
+
+5. If priorities need to interact across different machines, use a common name.
+Note that priority names default to the name of the machine they are assigned
+to.
+
+    wild = any*;
+    main := wild 'FIN' :1;
+
+    wild = ( any $0 )*;
+    main := wild 'FIN' :wild,1;
+
+6. If using clear keyword or operators modified with ^, duplicate the operand
+machines and rewrite them such that the cleared actions and suppressed out
+transitions and out priorities are removed.
+
+7. Change func keyword to action.
+
+8. Escape any - symbols and initial ^ symbol in or literals ([] outside of
+regular expressions).
+
+    main := [^#$-+*];
+
+    main := [\^#$\-+*];
+
+9. In C output, lowercase init, execute and finish routines and put an
+underscore in between the fsm name and the function name. Also qualify
+references to the fsm structure with the struct keyword.
+
+    fsm f;
+    fsmInit( &f );
+    fsmExecute( &f, buf, len );
+    fsmFinish( &f );
+
+    struct fsm f;
+    fsm_init( &f );
+    fsm_execute( &f, buf, len );
+    fsm_finish( &f );
+
+10. In C++ output, lowercase the init, execute and finish routines. Also make
+sure that the init routine is explicitly called.
+
+    fsm f;
+    f.Init();
+    f.Execute( buf, len );
+    f.Finish();
+
+    fsm f;
+    f.init();
+    f.execute( buf, len );
+    f.finish();
+
+11. Remove calls to the accept routine, instead examine the return value of the
+finish routine. If the machine does not accept then finish returns -1 or 0, if
+the machine accepts then finish returns 1.
+
+    f.finish();
+    if ( f.accept() )
+        cout << "ACCEPT" << endl;
+
+    if ( f.finish() > 0 )
+        cout << "ACCEPT" << endl;

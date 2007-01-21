@@ -1,0 +1,48 @@
+fbreak should advance the current char. Depreciate fbreak and add
+    fctl_break;
+    fctl_return <expr>;
+    fctl_goto <label>;
+
+It should be possible to import/export definitions.
+
+If a scanner can be optimized into a pure state machine, maybe permit it to be
+referenced as a machine definition. Alternately: inline scanners with an
+explicit exit pattern.
+
+The split codegen needs a profiler connected to a graph partitioning algorithm.
+
+Die a graceful death when rlcodegen -F receives large alphabets.
+
+It's not currently possible to have more than one machine in a single function
+because of label conflicts. Labels should have a unique prefix.
+
+Emit a warning when a subtraction has no effect.
+
+Emit a warning when unnamed priorities are used in longest match machines.
+These priorities may unexpectedly interact across longest-match items. Changing
+the language such that unwated interaction cannot happen would require naming
+longest-match items.
+
+Testing facilities: Quick easy way to query which strings are accepted.
+Enumerate all accepted strings. From Nicholas Maxwell Lester.
+
+Add more examples, add more tests and write more documentation.
+
+A debugger would be nice. Ragel could emit a special debug version that
+prompted for debug commands that allowed the user to step through the machine
+and get details about where they are in their RL.
+
+Frontend should allow the redefinition of fsm section delimiters.
+
+Do more to obscure ragel's private variables. Just a leading underscore is not
+enough. Maybe something more like __ri__.
+
+Some talk about capturing data:
+
+Separate tokstart/tokend from the backtracking.  One var for preservation,
+called preserve.  Write delcarations;  produces the necessary variables used by
+ragel.  Move pattern start pattern end concepts into the general?  The
+variables which may need to influence the preserve is dependent on the state.
+States have a concept of which variables are in use.  Can be used for length
+restrictions.  If there is an exit pattern, it is the explicit way out,
+otherwise the start state and all final states are a way out.

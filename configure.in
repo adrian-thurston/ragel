@@ -1,0 +1,118 @@
+dnl 
+dnl   Copyright 2001-2006 Adrian Thurston <thurston@cs.queensu.ca>
+dnl
+
+dnl   This file is part of Ragel.
+dnl  
+dnl   Ragel is free software; you can redistribute it and/or modify
+dnl   it under the terms of the GNU General Public License as published by
+dnl   the Free Software Foundation; either version 2 of the License, or
+dnl   (at your option) any later version.
+dnl   
+dnl   Ragel is distributed in the hope that it will be useful,
+dnl   but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+dnl   GNU General Public License for more details.
+dnl   
+dnl   You should have received a copy of the GNU General Public License
+dnl   along with Ragel; if not, write to the Free Software
+dnl   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+  
+AC_INIT(ragel/main.cpp)
+AC_CONFIG_HEADER(common/config.h)
+
+dnl Set true if build system should generate parsers from flex, bison, and
+dnl gperf sources. Set false if generated files are included and not to be
+dnl built (production).
+AC_SUBST(BUILD_PARSERS,true)
+
+dnl Checks for programs.
+AC_PROG_CC
+AC_DEFINE_UNQUOTED(CC,$CC)
+
+dnl Checks for programs.
+AC_PROG_CXX
+AC_DEFINE_UNQUOTED(CXX,$CXX)
+
+dnl Set test on c++ compiler.
+AC_LANG_CPLUSPLUS
+
+dnl Check for definition of MAKE.
+AC_PROG_MAKE_SET
+
+if test $BUILD_PARSERS = true; then
+
+dnl Check for flex
+AC_CHECK_PROG(FLEX, flex, flex)
+if test -z "$FLEX"; then
+	echo
+	echo "error: flex is required to compile ragel"
+	echo
+	exit 1
+fi
+
+dnl Check for gperf
+AC_CHECK_PROG(GPERF, gperf, gperf)
+if test -z "$GPERF"; then
+	echo
+	echo "error: gperf is required to compile ragel"
+	echo
+	exit 1
+fi
+
+dnl Check for bison
+AC_CHECK_PROG(BISON, bison, bison)
+if test -z "$BISON"; then
+	echo
+	echo "error: bison is required to compile ragel"
+	echo
+	exit 1
+fi
+
+dnl Sorry, Ragel will not compile with bison++.
+if "$BISON" --version | grep 'bison++'; then
+	echo
+	echo "error: sorry, ragel cannot be compiled with bison++"
+	echo
+	exit 1
+fi
+
+fi # BUILD_PARSERS
+
+dnl Check for the D compiler
+AC_CHECK_PROG(GDC, gdc, gdc)
+if test -n "$GDC"; then
+	AC_DEFINE_UNQUOTED(GDC,$GDC)
+fi
+
+dnl Check for the Objective-C compiler
+AC_MSG_CHECKING([for the Objective-C compiler])
+cat > conftest.m <<EOF
+int main() { return 0; }
+EOF
+GOBJC=""
+if gcc -x objective-c conftest.m -o conftest.bin 2>/dev/null; then
+	GOBJC="gcc -x objective-c"
+	AC_MSG_RESULT([yes])
+	AC_DEFINE_UNQUOTED(GOBJC,$GOBJC)
+else
+	AC_MSG_RESULT([no])
+fi
+AC_SUBST(GOBJC)
+
+dnl Check for the Java compiler.
+AC_CHECK_PROG(JAVAC, javac, javac)
+if test -n "$JAVAC"; then
+	AC_DEFINE_UNQUOTED(JAVAC,$JAVAC)
+fi
+
+dnl Check for TXL.
+AC_CHECK_PROG(TXL, txl, txl)
+if test -n "$TXL"; then
+	AC_DEFINE_UNQUOTED(TXL,$TXL)
+fi
+
+dnl write output files
+AC_OUTPUT(Makefile common/Makefile ragel/Makefile rlcodegen/Makefile doc/Makefile test/Makefile)
+
+echo "configuration of ragel complete"

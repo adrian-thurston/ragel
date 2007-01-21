@@ -1,0 +1,119 @@
+/*
+ *  Copyright 2001-2007 Adrian Thurston <thurston@cs.queensu.ca>
+ */
+
+/*  This file is part of Ragel.
+ *
+ *  Ragel is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ * 
+ *  Ragel is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with Ragel; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+ */
+#ifndef _XMLPARSE_H
+#define _XMLPARSE_H
+
+#include "vector.h"
+#include "rlcodegen.h"
+#include "gendata.h"
+#include <iostream>
+
+using std::ostream;
+
+struct XMLTagHashPair
+{
+    char *name;
+    int id;
+};
+
+struct Token
+{
+	XMLTag *tag;
+	InputLoc loc;
+};
+
+struct InlineItem;
+struct InlineList;
+
+struct LmSwitchVect;
+struct LmSwitchAction;
+
+//#include "xmlpdefs.h"
+
+/* These come from the scanner and point back into the parser. We will borrow
+ * them for error reporting. */
+//extern YYSTYPE *yylval;
+//extern YYLTYPE *yylloc;
+
+//int yylex( YYSTYPE *, YYLTYPE *);
+void scannerInit();
+
+extern char *lelNames[];
+
+struct LangEl;
+
+struct Parser
+{
+	%%{
+		parser Parser;
+
+		token TAG_unknown, TAG_ragel, TAG_ragel_def, TAG_host, TAG_state_list,
+			TAG_state, TAG_trans_list, TAG_t, TAG_machine, TAG_start_state,
+			TAG_action_list, TAG_action_table_list, TAG_action,
+			TAG_action_table, TAG_alphtype, TAG_element, TAG_getkey,
+			TAG_state_actions, TAG_entry_points, TAG_sub_action,
+			TAG_cond_space_list, TAG_cond_space, TAG_cond_list, TAG_c;
+
+		# Inline block tokens.
+		token TAG_text, TAG_goto, TAG_call, TAG_next, TAG_goto_expr,
+			TAG_call_expr, TAG_next_expr, TAG_ret, TAG_pchar, TAG_char,
+			TAG_hold, TAG_exec, TAG_holdte, TAG_execte, TAG_curs, TAG_targs,
+			TAG_entry, TAG_data, TAG_lm_switch, TAG_init_act, TAG_set_act,
+			TAG_set_tokend, TAG_get_tokend, TAG_init_tokstart,
+			TAG_set_tokstart, TAG_write, TAG_curstate, TAG_access, TAG_break,
+			TAG_option;
+
+		interface;
+	}%%
+
+	Parser( char *fileName )
+		: fileName(fileName), sourceFileName(0)
+	{
+		//pd = new ParseData( fileName, sectionName, sectionLoc );
+	}
+
+	int token( int id );
+	int token( int tokenId, Token &token );
+	int token( XMLTag *tag, int col, int line );
+
+	/* Report an error encountered by the parser. */
+	ostream &error();
+	ostream &error( const InputLoc &loc );
+	ostream &parser_error( int tokId, Token &token );
+
+	/* The name of the root section, this does not change during an include. */
+	char *fileName;
+
+	/* Collected during parsing. */
+	char *sourceFileName;
+	char *attrKey;
+	char *attrValue;
+	int curAction;
+	int curActionTable;
+	int curTrans;
+	int curState;
+	int curCondSpace;
+	int curStateCond;
+
+	CodeGenMap codeGenMap;
+};
+
+#endif /* _XMLPARSE_H */

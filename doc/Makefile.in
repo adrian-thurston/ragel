@@ -1,0 +1,73 @@
+#
+#   Copyright 2001-2006 Adrian Thurston <thurston@cs.queensu.ca>
+#
+
+#   This file is part of Ragel.
+#
+#   Ragel is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   Ragel is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with Ragel; if not, write to the Free Software
+#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+
+INPUT = version.tex ragel-guide.tex
+
+# Pick up all the figures in the current dir.
+FIGURES = $(wildcard *.fig)
+PDFFIGS = $(FIGURES:%.fig=%.pdf)
+
+# Get the version info.
+include ../version.mk
+
+# Install prefix.
+PREFIX = @prefix@
+
+# Rules.
+all: ragel-guide.pdf ragel.1 rlcodegen.1
+
+ragel-guide.pdf: $(PDFFIGS) $(INPUT)
+
+%.pdf: %.fig
+	fig2dev -L pdf $< $@
+
+%.pdf: %.tex
+	pdflatex -interaction=nonstopmode $< >/dev/null
+	pdflatex -interaction=nonstopmode $< >/dev/null
+	pdflatex -interaction=nonstopmode $< >/dev/null
+
+version.tex: ../version.mk
+	echo '\def\version{$(VERSION)}' > version.tex
+	echo '\def\pubdate{$(PUBDATE)}' >> version.tex
+
+ragel.1: ragel.1.in ../version.mk
+	cat ragel.1.in | sed 's/@PUBDATE@/$(PUBDATE)/' \
+		| sed 's/@VERSION@/$(VERSION)/' > ragel.1
+
+rlcodegen.1: rlcodegen.1.in ../version.mk
+	cat rlcodegen.1.in | sed 's/@PUBDATE@/$(PUBDATE)/' \
+		| sed 's/@VERSION@/$(VERSION)/' > rlcodegen.1
+
+clean:
+	rm -f ragel.1 rlcodegen.1 \
+		*.bak *.aux *.dvi *.log *.toc *.pdf
+
+distclean: clean
+	rm -f Makefile
+	
+install: all
+	install -d $(PREFIX)/man/man1
+	install -m 644 ragel.1 $(PREFIX)/man/man1/ragel.1
+	install -m 644 rlcodegen.1 $(PREFIX)/man/man1/rlcodegen.1
+	install -d $(PREFIX)/share/doc/ragel
+	install -m 644 ragel-guide.pdf $(PREFIX)/share/doc/ragel/ragel-guide.pdf
+	gzip -c ../ChangeLog > ChangeLog.gz
+	install -m 644 ChangeLog.gz $(PREFIX)/share/doc/ragel/ChangeLog.gz
+	rm ChangeLog.gz
