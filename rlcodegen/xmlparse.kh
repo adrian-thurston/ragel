@@ -46,16 +46,6 @@ struct InlineList;
 struct LmSwitchVect;
 struct LmSwitchAction;
 
-//#include "xmlpdefs.h"
-
-/* These come from the scanner and point back into the parser. We will borrow
- * them for error reporting. */
-//extern YYSTYPE *yylval;
-//extern YYLTYPE *yylloc;
-
-//int yylex( YYSTYPE *, YYLTYPE *);
-void scannerInit();
-
 extern char *lelNames[];
 
 struct LangEl;
@@ -85,16 +75,14 @@ struct Parser
 	}%%
 
 	Parser( char *fileName )
-		: fileName(fileName), sourceFileName(0)
-	{
-		//pd = new ParseData( fileName, sectionName, sectionLoc );
-	}
+		: fileName(fileName), sourceFileName(0) { }
 
-	int token( int id );
 	int token( int tokenId, Token &token );
+	int token( int tokenId, int col, int line );
 	int token( XMLTag *tag, int col, int line );
 
 	/* Report an error encountered by the parser. */
+	ostream &warning( const InputLoc &loc );
 	ostream &error();
 	ostream &error( const InputLoc &loc );
 	ostream &parser_error( int tokId, Token &token );

@@ -140,23 +140,8 @@ struct XMLTag
 	AttrList *attrList;
 };
 
-
 std::ostream &error();
-//std::ostream &error( const YYLTYPE &loc ); 
-std::ostream &error( const InputLoc &loc ); 
-std::ostream &error( int first_line, int first_column );
-std::ostream &warning( ); 
-std::ostream &warning( const InputLoc &loc ); 
-std::ostream &warning( int first_line, int first_column );
-std::ostream &xml_error( const InputLoc &loc );
-//std::ostream &xml_error( const YYLTYPE &loc ); 
-
-
-
 void openOutput( char *inputFile );
 char *fileNameFromStem( char *stemFile, char *suffix );
-
-/* Size of the include stack. */
-#define INCLUDE_STACK_SIZE 32
 
 #endif /* _RLCODEGEN_H */

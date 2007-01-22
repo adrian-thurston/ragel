@@ -57,10 +57,7 @@ char *outputFileName = 0;
 /* Graphviz dot file generation. */
 bool graphvizDone = false;
 
-char *gblFileName = "<unknown>";
-
 int numSplitPartitions = 0;
-
 bool printPrintables = false;
 
 /* Print a summary of the options. */
@@ -150,67 +147,10 @@ char *fileNameFromStem( char *stemFile, char *suffix )
 /* Total error count. */
 int gblErrorCount = 0;
 
-/* Print the opening to a program error, then return the error stream. */
 ostream &error()
 {
 	gblErrorCount += 1;
 	cerr << PROGNAME ": ";
-	return cerr;
-}
-
-/* Print the opening to an error in the input, then return the error ostream. */
-//ostream &error( const YYLTYPE &loc )
-//{
-//	gblErrorCount += 1;
-//	cerr << gblFileName << ":" << loc.first_line << ":" << loc.first_column << ": ";
-//	return cerr;
-//}
-
-/* Print the opening to an error in the input, then return the error ostream. */
-//ostream &error( const InputLoc &loc )
-//{
-//	gblErrorCount += 1;
-//	cerr << gblFileName << ":" << loc.line << ":" << loc.col << ": ";
-//	return cerr;
-//}
-
-ostream &error( int first_line, int first_column )
-{
-	gblErrorCount += 1;
-	cerr << gblFileName << ":" << ":" << first_line << ":" << first_column << ": ";
-	return cerr;
-}
-
-ostream &warning( )
-{
-	cerr << gblFileName << ":" << ": warning: ";
-	return cerr;
-}
-
-ostream &warning( const InputLoc &loc )
-{
-	cerr << gblFileName << loc.line << ":" << loc.col << ": warning: ";
-	return cerr;
-}
-
-std::ostream &warning( int first_line, int first_column )
-{
-	cerr << gblFileName << ":" << first_line << ":" << 
-			first_column << ": warning: ";
-	return cerr;
-}
-
-//ostream &xml_error( const YYLTYPE &loc )
-//{
-//	gblErrorCount += 1;
-//	cerr << "<xml-input>:" << loc.first_line << ":" << loc.first_column << ": ";
-//	return cerr;
-//}
-
-ostream &xml_error( const InputLoc &loc )
-{
-	gblErrorCount += 1;
-	cerr << "<xml-input>:" << loc.line << ":" << loc.col << ": ";
 	return cerr;
 }
 

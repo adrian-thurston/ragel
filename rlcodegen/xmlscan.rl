@@ -27,6 +27,7 @@
 
 using std::istream;
 using std::cout;
+using std::cerr;
 using std::endl;
 
 #define BUFSIZE 4096
@@ -47,7 +48,8 @@ public:
 
 struct Scanner
 {
-	Scanner( istream &input ) : 
+	Scanner( char *fileName, istream &input ) : 
+		fileName(fileName),
 		input(input), 
 		curline(1), 
 		curcol(1),
@@ -64,7 +66,9 @@ struct Scanner
 	
 	int scan();
 	void adjustAttrPointers( int distance );
+	std::ostream &error();
 
+	char *fileName;
 	istream &input;
 
 	/* Scanner State. */
@@ -89,9 +93,10 @@ struct Scanner
 
 #define TK_NO_TOKEN (-1)
 #define TK_ERR 1
-#define TK_EOF 2
-#define TK_OpenTag 3
-#define TK_CloseTag 4
+#define TK_SPACE 2
+#define TK_EOF 3
+#define TK_OpenTag 4
+#define TK_CloseTag 5
 
 #define ret_tok( _tok ) token = (_tok); data = tokstart
 
@@ -102,6 +107,76 @@ void Scanner::adjustAttrPointers( int distance )
 		attr->value -= distance;
 	}
 }
+
+/* There is no claim that this is a proper XML parser, but it is good
+ * enough for our purposes. */
+%%{
+	machine Scanner;
+
+	action colup { curcol++; }
+	action start_tok { token_col = curcol; token_line = curline; }
+	NL = '\n' @{ curcol = 0; curline++; };
+
+	WS = [\r\t ] | NL;
+	id = [_a-zA-Z][_a-zA-Z0-9]*;
+	literal = '"' ( [^"] | NL )* '"';
+
+	# Attribute identifiers.
+	action start_attr_id { attr_id_start = p; }
+	action leave_attr_id { attr_id_len = p - attr_id_start; }
+
+	attr_id = id >start_attr_id %leave_attr_id;
+
+	# Attribute values
+	action start_attr_value { attr_value_start = p; }
+	action leave_attr_value
+	{
+		attr_value_len = p - attr_value_start;
+
+		AttrMarker newAttr;
+		newAttr.id = attr_id_start;
+		newAttr.idLen = attr_id_len;
+		newAttr.value = attr_value_start;
+		newAttr.valueLen = attr_value_len;
+		attrMkList.append( newAttr );
+	}
+
+	attr_value = literal >start_attr_value %leave_attr_value;
+
+	# Attribute list. 
+	attribute = attr_id WS* '=' WS* attr_value WS*;
+
+	# Tag identifiers.
+	action tag_id_start { tag_id_start = p; }
+	action leave_tag_id { tag_id_len = p - tag_id_start; }
+
+	tag_id = id >tag_id_start %leave_tag_id;
+
+	main := |*
+		# Tags
+		( '<' WS* tag_id ( WS+ attribute* )? '>' ) >start_tok $colup 
+			=> { ret_tok( TK_OpenTag ); fbreak; };
+
+		( '<' WS* '/' WS* tag_id WS* '>' ) >start_tok $colup 
+			=> { ret_tok( TK_CloseTag ); fbreak; };
+
+		# Data in between tags.
+		( [^<&\0] | NL ) $colup 
+			=> { buffer.append( *p ); };
+
+		# Specials.
+		"&amp;" $colup
+			=> { buffer.append( '&' ); };
+		"&lt;" $colup
+			=> { buffer.append( '<' ); };
+		"&gt;" $colup
+			=> { buffer.append( '>' ); };
+		
+		# EOF
+		0 >start_tok => { ret_tok( TK_EOF ); fbreak; };
+
+	*|;
+}%%
 
 int Scanner::scan( )
 {
@@ -141,8 +216,7 @@ int Scanner::scan( )
 
 			if ( space == 0 ) {
 				/* We filled up the buffer trying to scan a token. */
-				//printf("scanner: out of buffer space, you have a really long tag\n");
-				return TK_ERR;
+				return TK_SPACE;
 			}
 
 			if ( done ) {
@@ -162,77 +236,7 @@ int Scanner::scan( )
 			pe = p + readlen;
 		}
 
-		/* There is no claim that this is a proper XML parser, but it is good
-		 * enough for our purposes. */
-		%%{
-			machine Scanner;
-
-			action colup { curcol++; }
-			action start_tok { token_col = curcol; token_line = curline; }
-			NL = '\n' @{ curcol = 0; curline++; };
-
-			WS = [\r\t ] | NL;
-			id = [_a-zA-Z][_a-zA-Z0-9]*;
-			literal = '"' ( [^"] | NL )* '"';
-
-			# Attribute identifiers.
-			action start_attr_id { attr_id_start = p; }
-			action leave_attr_id { attr_id_len = p - attr_id_start; }
-
-			attr_id = id >start_attr_id %leave_attr_id;
-
-			# Attribute values
-			action start_attr_value { attr_value_start = p; }
-			action leave_attr_value
-			{
-				attr_value_len = p - attr_value_start;
-
-				AttrMarker newAttr;
-				newAttr.id = attr_id_start;
-				newAttr.idLen = attr_id_len;
-				newAttr.value = attr_value_start;
-				newAttr.valueLen = attr_value_len;
-				attrMkList.append( newAttr );
-			}
-
-			attr_value = literal >start_attr_value %leave_attr_value;
-
-			# Attribute list. 
-			attribute = attr_id WS* '=' WS* attr_value WS*;
-
-			# Tag identifiers.
-			action tag_id_start { tag_id_start = p; }
-			action leave_tag_id { tag_id_len = p - tag_id_start; }
-
-			tag_id = id >tag_id_start %leave_tag_id;
-
-			main := |*
-				# Tags
-				( '<' WS* tag_id ( WS+ attribute* )? '>' ) >start_tok $colup 
-					=> { ret_tok( TK_OpenTag ); fbreak; };
-
-				( '<' WS* '/' WS* tag_id WS* '>' ) >start_tok $colup 
-					=> { ret_tok( TK_CloseTag ); fbreak; };
-
-				# Data in between tags.
-				( [^<&\0] | NL ) $colup 
-					=> { buffer.append( *p ); };
-
-				# Specials.
-				"&amp;" $colup
-					=> { buffer.append( '&' ); };
-				"&lt;" $colup
-					=> { buffer.append( '<' ); };
-				"&gt;" $colup
-					=> { buffer.append( '>' ); };
-				
-				# EOF
-				0 >start_tok => { ret_tok( TK_EOF ); fbreak; };
-
-			*|;
-
-			write exec;
-		}%%
+		%% write exec;
 
 		if ( cs == Scanner_error )
 			return TK_ERR;
@@ -249,7 +253,7 @@ int Scanner::scan( )
 
 int xml_parse( istream &input, char *fileName )
 {
-	Scanner scanner( input );
+	Scanner scanner( fileName, input );
 	Parser parser( fileName );
 
 	parser.init();
@@ -257,12 +261,15 @@ int xml_parse( istream &input, char *fileName )
 	while ( 1 ) {
 		int token = scanner.scan();
 		if ( token == TK_EOF ) {
-			//cout << "parser_driver: EOF" << endl;
-			parser.token( _eof );
+			parser.token( _eof, scanner.token_col, scanner.token_line );
 			break;
 		}
 		else if ( token == TK_ERR ) {
-			//cout << "parser_driver: ERR" << endl;
+			scanner.error() << "scanner error" << endl;
+			break;
+		}
+		else if ( token == TK_SPACE ) {
+			scanner.error() << "scanner is out of buffer space" << endl;
 			break;
 		}
 		else {
@@ -330,4 +337,10 @@ int xml_parse( istream &input, char *fileName )
 	}
 
 	return 0;
+}
+
+std::ostream &Scanner::error()
+{
+	cerr << fileName << ":" << curline << ":" << curcol << ": ";
+	return cerr;
 }
