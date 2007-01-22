@@ -644,7 +644,10 @@ void Scanner::endSection( )
 		};
 		'action' => { token( KW_Action ); };
 		'alphtype' => { token( KW_AlphType ); };
-		'range' => { token( KW_Range ); };
+
+		# FIXME: Enable this post 5.17.
+		# 'range' => { token( KW_Range ); };
+
 		'getkey' => { 
 			token( KW_GetKey );
 			inlineBlockType = SemiTerminated;
