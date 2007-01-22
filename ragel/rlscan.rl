@@ -88,7 +88,7 @@ struct Scanner
 
 	void init();
 	void token( int type, char *start, char *end );
-	void token( int type, char *string );
+	void token( int type, char c );
 	void token( int type );
 	void updateCol();
 	void startSection();
@@ -183,9 +183,9 @@ void Scanner::updateCol()
 	lastnl = 0;
 }
 
-void Scanner::token( int type, char *string )
+void Scanner::token( int type, char c )
 {
-	token( type, string, string + strlen(string) );
+	token( type, &c, &c + 1 );
 }
 
 void Scanner::token( int type )
@@ -341,11 +341,14 @@ void Scanner::token( int type )
 		if ( active && parserExists() ) {
 			InputLoc loc;
 
-			//cerr << "scanner:" << line << ":" << column << 
-			//		": sending token to the parser " << lelNames[*p];
-			//if ( tokdata != 0 )
-			//	cerr << " " << tokdata;
-			//cerr << endl;
+			#if 0
+			cerr << "scanner:" << line << ":" << column << 
+					": sending token to the parser " << lelNames[*p];
+			cerr << " " << toklen;
+			if ( tokdata != 0 )
+				cerr << " " << tokdata;
+			cerr << endl;
+			#endif
 
 			loc.fileName = fileName;
 			loc.line = line;
@@ -571,20 +574,24 @@ void Scanner::endSection( )
 			}
 		};
 
+		EOF => {
+			error() << "unterminated code block" << endl;
+		};
+
 		# Send every other character as a symbol.
 		any => { token( IL_Symbol, tokstart, tokend ); };
 	*|;
 
 	or_literal := |*
 		# Escape sequences in OR expressions.
-		'\\0' => { token( RE_Char, "\0" ); };
-		'\\a' => { token( RE_Char, "\a" ); };
-		'\\b' => { token( RE_Char, "\b" ); };
-		'\\t' => { token( RE_Char, "\t" ); };
-		'\\n' => { token( RE_Char, "\n" ); };
-		'\\v' => { token( RE_Char, "\v" ); };
-		'\\f' => { token( RE_Char, "\f" ); };
-		'\\r' => { token( RE_Char, "\r" ); };
+		'\\0' => { token( RE_Char, '\0' ); };
+		'\\a' => { token( RE_Char, '\a' ); };
+		'\\b' => { token( RE_Char, '\b' ); };
+		'\\t' => { token( RE_Char, '\t' ); };
+		'\\n' => { token( RE_Char, '\n' ); };
+		'\\v' => { token( RE_Char, '\v' ); };
+		'\\f' => { token( RE_Char, '\f' ); };
+		'\\r' => { token( RE_Char, '\r' ); };
 		'\\\n' => { updateCol(); };
 		'\\' any => { token( RE_Char, tokstart+1, tokend ); };
 
@@ -594,20 +601,25 @@ void Scanner::endSection( )
 		# Terminate an OR expression.
 		']'	=> { token( RE_SqClose ); fret; };
 
+		EOF => {
+			error() << "unterminated OR literal" << endl;
+		};
+
 		# Characters in an OR expression.
 		[^\]] => { token( RE_Char, tokstart, tokend ); };
+
 	*|;
 
 	re_literal := |*
 		# Escape sequences in regular expressions.
-		'\\0' => { token( RE_Char, "\0" ); };
-		'\\a' => { token( RE_Char, "\a" ); };
-		'\\b' => { token( RE_Char, "\b" ); };
-		'\\t' => { token( RE_Char, "\t" ); };
-		'\\n' => { token( RE_Char, "\n" ); };
-		'\\v' => { token( RE_Char, "\v" ); };
-		'\\f' => { token( RE_Char, "\f" ); };
-		'\\r' => { token( RE_Char, "\r" ); };
+		'\\0' => { token( RE_Char, '\0' ); };
+		'\\a' => { token( RE_Char, '\a' ); };
+		'\\b' => { token( RE_Char, '\b' ); };
+		'\\t' => { token( RE_Char, '\t' ); };
+		'\\n' => { token( RE_Char, '\n' ); };
+		'\\v' => { token( RE_Char, '\v' ); };
+		'\\f' => { token( RE_Char, '\f' ); };
+		'\\r' => { token( RE_Char, '\r' ); };
 		'\\\n' => { updateCol(); };
 		'\\' any => { token( RE_Char, tokstart+1, tokend ); };
 
@@ -624,6 +636,10 @@ void Scanner::endSection( )
 		'[' => { token( RE_SqOpen ); fcall or_literal; };
 		'[^' => { token( RE_SqOpenNeg ); fcall or_literal; };
 
+		EOF => {
+			error() << "unterminated regular expression" << endl;
+		};
+
 		# Characters in an OR expression.
 		[^\/] => { token( RE_Char, tokstart, tokend ); };
 	*|;
@@ -632,6 +648,10 @@ void Scanner::endSection( )
 		ident => { token( TK_Word, tokstart, tokend ); } ;
 		[ \t\n]+ => { updateCol(); };
 		';' => { token( ';' ); fgoto parser_def; };
+
+		EOF => {
+			error() << "unterminated write statement" << endl;
+		};
 	*|;
 
 	# Parser definitions. 
@@ -782,6 +802,10 @@ void Scanner::endSection( )
 			fgoto inline_code;
 		};
 
+		EOF => {
+			error() << "unterminated ragel section" << endl;
+		};
+
 		any => { token( *tokstart ); } ;
 	*|;
 
@@ -906,5 +930,9 @@ void scan( char *fileName, istream &input )
 	Scanner scanner( fileName, input, 0, 0, 0 );
 	scanner.init();
 	scanner.do_scan();
-}
 
+	InputLoc eofLoc;
+	eofLoc.fileName = fileName;
+	eofLoc.col = 1;
+	eofLoc.line = scanner.line;
+}

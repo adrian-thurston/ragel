@@ -35,7 +35,10 @@ parser Parser;
 
 include "rlparse.kh";
 
-start: statement_list;
+start: section_list;
+
+section_list: section_list statement_list TK_EndSection;
+section_list: ;
 
 statement_list: statement_list statement;
 statement_list: ;
@@ -48,9 +51,6 @@ statement: range_spec commit;
 statement: getkey_spec commit;
 statement: access_spec commit;
 statement: variable_spec commit;
-
-# We use end section tokens to draw firm boundaries between sections.
-statement: TK_EndSection;
 
 assignment:
 	machine_name '=' join ';' final {
@@ -1374,7 +1374,7 @@ ostream &Parser::parser_error( int tokId, Token &token )
 {
 	gblErrorCount += 1;
 
-	cerr << token.loc.fileName << ":" << token.loc.line << ": ";
+	cerr << token.loc.fileName << ":" << token.loc.line << ":" << token.loc.col << ": ";
 	cerr << "at token ";
 	if ( tokId < 128 )
 		cerr << "\"" << lelNames[tokId] << "\"";

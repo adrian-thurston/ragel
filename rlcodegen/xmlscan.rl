@@ -260,7 +260,11 @@ int xml_parse( istream &input, char *fileName )
 
 	while ( 1 ) {
 		int token = scanner.scan();
-		if ( token == TK_EOF ) {
+		if ( token == TK_NO_TOKEN ) {
+			cerr << PROGNAME << ": interal error: scanner returned NO_TOKEN" << endl;
+			exit(1);
+		}
+		else if ( token == TK_EOF ) {
 			parser.token( _eof, scanner.token_col, scanner.token_line );
 			break;
 		}
@@ -322,14 +326,14 @@ int xml_parse( istream &input, char *fileName )
 			}
 
 			#if 0
-			cout << "parser_driver: " << (tag->type == XMLTag::Open ? "open" : "close") <<
-					": " << tag->tagId->name << endl;
+			cerr << "parser_driver: " << (tag->type == XMLTag::Open ? "open" : "close") <<
+					": " << (tag->tagId != 0 ? tag->tagId->name : "<unknown>") << endl;
 			if ( tag->attrList != 0 ) {
 				for ( AttrList::Iter attr = *tag->attrList; attr.lte(); attr++ )
-					cout << "    " << attr->id << ": " << attr->value << endl;
+					cerr << "    " << attr->id << ": " << attr->value << endl;
 			}
 			if ( tag->content != 0 )
-				cout << "    content: " << tag->content << endl;
+				cerr << "    content: " << tag->content << endl;
 			#endif
 
 			parser.token( tag, scanner.token_col, scanner.token_line );
