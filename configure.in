@@ -21,8 +21,8 @@ dnl   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 AC_INIT(ragel/main.cpp)
 AC_CONFIG_HEADER(common/config.h)
 
-dnl Set true if build system should generate parsers from flex, bison, and
-dnl gperf sources. Set false if generated files are included and not to be
+dnl Set to true if build system should generate parsers from ragel, kelbt, and
+dnl gperf sources. Set to false if generated files are included and not to be
 dnl built (production).
 AC_SUBST(BUILD_PARSERS,true)
 
@@ -42,11 +42,11 @@ AC_PROG_MAKE_SET
 
 if test $BUILD_PARSERS = true; then
 
-dnl Check for flex
-AC_CHECK_PROG(FLEX, flex, flex)
-if test -z "$FLEX"; then
+dnl Check for Ragel
+AC_CHECK_PROG(RAGEL, ragel, ragel)
+if test -z "$RAGEL"; then
 	echo
-	echo "error: flex is required to compile ragel"
+	echo "error: ragel is required to build the parsers"
 	echo
 	exit 1
 fi
@@ -55,24 +55,16 @@ dnl Check for gperf
 AC_CHECK_PROG(GPERF, gperf, gperf)
 if test -z "$GPERF"; then
 	echo
-	echo "error: gperf is required to compile ragel"
+	echo "error: gperf is required to build the parsers"
 	echo
 	exit 1
 fi
 
-dnl Check for bison
-AC_CHECK_PROG(BISON, bison, bison)
-if test -z "$BISON"; then
+dnl Check for Kelbt
+AC_CHECK_PROG(KELBT, kelbt, kelbt)
+if test -z "$KELBT"; then
 	echo
-	echo "error: bison is required to compile ragel"
-	echo
-	exit 1
-fi
-
-dnl Sorry, Ragel will not compile with bison++.
-if "$BISON" --version | grep 'bison++'; then
-	echo
-	echo "error: sorry, ragel cannot be compiled with bison++"
+	echo "error: kelbt is required to build the parsers"
 	echo
 	exit 1
 fi

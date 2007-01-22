@@ -18,38 +18,11 @@
 #   along with Ragel; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
 
-INCS = -Iaapl
-DEFS =
-
-CFLAGS = -g -Wall
-LDFLAGS =
-
-SUBDIRS = codegen test examples doc
-
-CC_SRCS = \
-	rlparse.cpp rlscan.cpp main.cpp parsetree.cpp \
-	parsedata.cpp fsmstate.cpp fsmbase.cpp fsmattach.cpp \
-	fsmmin.cpp fsmgraph.cpp fsmap.cpp xmlcodegen.cpp
-
 GEN_SRC = version.h
-
-LIBS = @LIBS@
-PREFIX = @prefix@
 
 #*************************************
 
 include ../version.mk
-
-# Programs
-CXX = @CXX@
-
-# What kind of header does bison put out?
-BISON_HEAD_SUFFIX = @BISON_HEAD_SUFFIX@
-
-# Get objects and dependencies from sources.
-RAGEL_OBJS = $(RAGEL_CC_SRCS:%.cpp=%.o)
-RLCG_OBJS = $(RLCG_CC_SRCS:%.cpp=%.o)
-DEPS = $(RAGEL_CC_SRCS:%.cpp=.%.d) $(RLCG_CC_SRCS:%.cpp=.%.d)
 
 # Rules.
 all: $(GEN_SRC)
@@ -58,14 +31,8 @@ version.h: ../version.mk
 	echo '#define VERSION "$(VERSION)"' > version.h
 	echo '#define PUBDATE "$(PUBDATE)"' >> version.h
 
-%.o: %.cpp
-	@$(CXX) -M $(DEFS) $(INCS) $< > .$*.d
-	$(CXX) -c $(CFLAGS) $(DEFS) $(INCS) -o $@ $<
-
 distclean: clean
 	rm -f Makefile config.h
 
 clean:
-	rm -f tags .*.d *.o version.h
-
--include $(DEPS)
+	rm -f tags version.h

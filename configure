@@ -272,7 +272,7 @@ PACKAGE_STRING=
 PACKAGE_BUGREPORT=
 
 ac_unique_file="ragel/main.cpp"
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS BUILD_PARSERS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CXX CXXFLAGS ac_ct_CXX SET_MAKE FLEX GPERF BISON GDC GOBJC JAVAC TXL LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS BUILD_PARSERS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CXX CXXFLAGS ac_ct_CXX SET_MAKE RAGEL GPERF KELBT GDC GOBJC JAVAC TXL LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -2582,15 +2582,15 @@ fi
 
 if test $BUILD_PARSERS = true; then
 
-# Extract the first word of "flex", so it can be a program name with args.
-set dummy flex; ac_word=$2
+# Extract the first word of "ragel", so it can be a program name with args.
+set dummy ragel; ac_word=$2
 echo "$as_me:$LINENO: checking for $ac_word" >&5
 echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
-if test "${ac_cv_prog_FLEX+set}" = set; then
+if test "${ac_cv_prog_RAGEL+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
-  if test -n "$FLEX"; then
-  ac_cv_prog_FLEX="$FLEX" # Let the user override the test.
+  if test -n "$RAGEL"; then
+  ac_cv_prog_RAGEL="$RAGEL" # Let the user override the test.
 else
 as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
 for as_dir in $PATH
@@ -2599,7 +2599,7 @@ do
   test -z "$as_dir" && as_dir=.
   for ac_exec_ext in '' $ac_executable_extensions; do
   if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_FLEX="flex"
+    ac_cv_prog_RAGEL="ragel"
     echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
     break 2
   fi
@@ -2608,18 +2608,18 @@ done
 
 fi
 fi
-FLEX=$ac_cv_prog_FLEX
-if test -n "$FLEX"; then
-  echo "$as_me:$LINENO: result: $FLEX" >&5
-echo "${ECHO_T}$FLEX" >&6
+RAGEL=$ac_cv_prog_RAGEL
+if test -n "$RAGEL"; then
+  echo "$as_me:$LINENO: result: $RAGEL" >&5
+echo "${ECHO_T}$RAGEL" >&6
 else
   echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
 fi
 
-if test -z "$FLEX"; then
+if test -z "$RAGEL"; then
 	echo
-	echo "error: flex is required to compile ragel"
+	echo "error: ragel is required to build the parsers"
 	echo
 	exit 1
 fi
@@ -2661,20 +2661,20 @@ fi
 
 if test -z "$GPERF"; then
 	echo
-	echo "error: gperf is required to compile ragel"
+	echo "error: gperf is required to build the parsers"
 	echo
 	exit 1
 fi
 
-# Extract the first word of "bison", so it can be a program name with args.
-set dummy bison; ac_word=$2
+# Extract the first word of "kelbt", so it can be a program name with args.
+set dummy kelbt; ac_word=$2
 echo "$as_me:$LINENO: checking for $ac_word" >&5
 echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
-if test "${ac_cv_prog_BISON+set}" = set; then
+if test "${ac_cv_prog_KELBT+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
-  if test -n "$BISON"; then
-  ac_cv_prog_BISON="$BISON" # Let the user override the test.
+  if test -n "$KELBT"; then
+  ac_cv_prog_KELBT="$KELBT" # Let the user override the test.
 else
 as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
 for as_dir in $PATH
@@ -2683,7 +2683,7 @@ do
   test -z "$as_dir" && as_dir=.
   for ac_exec_ext in '' $ac_executable_extensions; do
   if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_BISON="bison"
+    ac_cv_prog_KELBT="kelbt"
     echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
     break 2
   fi
@@ -2692,25 +2692,18 @@ done
 
 fi
 fi
-BISON=$ac_cv_prog_BISON
-if test -n "$BISON"; then
-  echo "$as_me:$LINENO: result: $BISON" >&5
-echo "${ECHO_T}$BISON" >&6
+KELBT=$ac_cv_prog_KELBT
+if test -n "$KELBT"; then
+  echo "$as_me:$LINENO: result: $KELBT" >&5
+echo "${ECHO_T}$KELBT" >&6
 else
   echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
 fi
 
-if test -z "$BISON"; then
+if test -z "$KELBT"; then
 	echo
-	echo "error: bison is required to compile ragel"
-	echo
-	exit 1
-fi
-
-if "$BISON" --version | grep 'bison++'; then
-	echo
-	echo "error: sorry, ragel cannot be compiled with bison++"
+	echo "error: kelbt is required to build the parsers"
 	echo
 	exit 1
 fi
@@ -3491,9 +3484,9 @@ s,@CXX@,$CXX,;t t
 s,@CXXFLAGS@,$CXXFLAGS,;t t
 s,@ac_ct_CXX@,$ac_ct_CXX,;t t
 s,@SET_MAKE@,$SET_MAKE,;t t
-s,@FLEX@,$FLEX,;t t
+s,@RAGEL@,$RAGEL,;t t
 s,@GPERF@,$GPERF,;t t
-s,@BISON@,$BISON,;t t
+s,@KELBT@,$KELBT,;t t
 s,@GDC@,$GDC,;t t
 s,@GOBJC@,$GOBJC,;t t
 s,@JAVAC@,$JAVAC,;t t
