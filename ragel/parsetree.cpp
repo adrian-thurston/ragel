@@ -1922,6 +1922,7 @@ FsmAp *RegExpr::walk( ParseData *pd, RegExpr *rootRegex )
 			break;
 		}
 		case Empty: {
+			/* FIXME: Return something here. */
 			rtnVal = 0;
 			break;
 		}

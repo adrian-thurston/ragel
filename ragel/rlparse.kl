@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006 Adrian Thurston <thurston@cs.queensu.ca>
+ *  Copyright 2001-2007 Adrian Thurston <thurston@cs.queensu.ca>
  */
 
 /*  This file is part of Ragel.
@@ -82,8 +82,6 @@ nonterm machine_name uses token_type;
 
 machine_name: 
 	TK_Word final {
-		//cerr << "parser: machine name" << endl;
-
 		/* Make/get the priority key. The name may have already been referenced
 		 * and therefore exist. */
 		PriorDictEl *priorDictEl;
@@ -282,6 +280,8 @@ expression:
 		$$->expression = new Expression( $1->expression, 
 				$3->term, Expression::IntersectType );
 	};
+# This priority specification overrides the innermost parsing strategy which
+# results ordered choice interpretation of the grammar.
 expression: 
 	expression pri(1) '-' term final {
 		$$->expression = new Expression( $1->expression, 
@@ -304,7 +304,6 @@ nonterm term
 
 term:
 	term factor_with_label final {
-		/* FIXME: Need to reject this if of the form (term . -num). */
 		$$->term = new Term( $1->term, $2->factorWithAug );
 	};
 term:

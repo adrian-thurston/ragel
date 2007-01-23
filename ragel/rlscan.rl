@@ -216,17 +216,12 @@ void Scanner::token( int type )
 	{
 		/* Assign a name to the machine. */
 		char *machine = word;
-		//cerr << "scanner: machine statement: " << machine << endl;
 
 		if ( inclSectionTarg == 0 ) {
 			active = true;
 
 			ParserDictEl *pdEl = parserDict.find( machine );
-			if ( pdEl != 0 ) {
-				//cerr << "scanner: using existing parser" << endl;
-			}
-			else {
-				//cerr << "scanner: creating a new parser" << endl;
+			if ( pdEl == 0 ) {
 				pdEl = new ParserDictEl( machine );
 				pdEl->value = new Parser( fileName, machine, sectionLoc );
 				pdEl->value->init();
@@ -236,12 +231,12 @@ void Scanner::token( int type )
 			parser = pdEl->value;
 		}
 		else if ( strcmp( inclSectionTarg, machine ) == 0 ) {
-			//cerr << "scanner: found include target" << endl;
+			/* found include target */
 			active = true;
 			parser = inclToParser;
 		}
 		else {
-			//cerr << "scanner: ignoring section" << endl;
+			/* ignoring section */
 			active = false;
 			parser = 0;
 		}
@@ -265,9 +260,6 @@ void Scanner::token( int type )
 				inclFileName = prepareFileName( lit, lit_len );
 			else
 				inclFileName = fileName;
-
-			/* Open the file and process it. */
-			//cerr << "scanner: include: " << inclSectionName << " " << inclFileName << endl;
 
 			/* Check for a recursive include structure. Add the current file/section
 			 * name then check if what we are including is already in the stack. */
@@ -867,7 +859,6 @@ void Scanner::do_scan()
 			/* We filled up the buffer trying to scan a token. Grow it. */
 			bufsize = bufsize * 2;
 			char *newbuf = new char[bufsize];
-			//cerr << "FULL BUFFER, NEW SIZE: " << bufsize << endl;
 
 			/* Recompute p and space. */
 			p = newbuf + have;
@@ -898,8 +889,9 @@ void Scanner::do_scan()
 
 		/* Check if we failed. */
 		if ( cs == rlscan_error ) {
-			/* Machine failed before finding a token. */
-			//cerr << "PARSE ERROR" << endl;
+			/* Machine failed before finding a token. I'm not yet sure if this
+			 * is reachable. */
+			error() << "scanner error" << endl;
 			exit(1);
 		}
 
