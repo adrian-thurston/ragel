@@ -636,6 +636,7 @@ void Scanner::endSection( )
 		[^\/] => { token( RE_Char, tokstart, tokend ); };
 	*|;
 
+	# We need a separate token space here to avoid the ragel keywords.
 	write_statement := |*
 		ident => { token( TK_Word, tokstart, tokend ); } ;
 		[ \t\n]+ => { updateCol(); };
