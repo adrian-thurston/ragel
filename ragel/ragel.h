@@ -60,11 +60,17 @@ extern bool printStatistics;
 extern int gblErrorCount;
 extern char machineMain[];
 
+/* Location in an input file. */
+struct InputLoc
+{
+	char *fileName;
+	int line;
+	int col;
+};
+
 /* Error reporting. */
-struct InputLoc;
 std::ostream &error();
 std::ostream &error( const InputLoc &loc ); 
-std::ostream &warning( ); 
 std::ostream &warning( const InputLoc &loc ); 
 
 void scan( char *fileName, std::istream &input );

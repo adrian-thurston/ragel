@@ -93,36 +93,23 @@ void version()
 			"Copyright (c) 2001-2006 by Adrian Thurston" << endl;
 }
 
-/* Global parse data pointer. */
-//extern InputData *id;
-
 /* Total error count. */
 int gblErrorCount = 0;
 
 /* Print the opening to a program error, then return the error stream. */
 ostream &error()
 {
-	/* Keep the error count. */
-//	if ( id != 0 && id->pd != 0 )
-//		id->pd->errorCount += 1;
 	gblErrorCount += 1;
-	
 	cerr << PROGNAME ": ";
 	return cerr;
 }
 
-/* Print the opening to a warning, then return the error ostream. */
-ostream &warning( )
-{
-//	cerr << id->fileName << ": warning: ";
-	return cerr;
-}
 
 /* Print the opening to a warning in the input, then return the error ostream. */
 ostream &warning( const InputLoc &loc )
 {
-//	cerr << id->fileName << ":" << loc.line << ":" << 
-//			loc.col << ": warning: ";
+	cerr << loc.fileName << ":" << loc.line << ":" << 
+			loc.col << ": warning: ";
 	return cerr;
 }
 

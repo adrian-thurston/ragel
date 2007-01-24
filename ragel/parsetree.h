@@ -22,6 +22,7 @@
 #ifndef _PARSETREE_H
 #define _PARSETREE_H
 
+#include "ragel.h"
 #include "avlmap.h"
 #include "bstmap.h"
 #include "vector.h"
@@ -50,13 +51,6 @@ enum BuiltinMachine
 	BT_Empty
 };
 
-/* Location in an input file. */
-struct InputLoc
-{
-	char *fileName;
-	int line;
-	int col;
-};
 
 struct ParseData;
 
