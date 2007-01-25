@@ -26,7 +26,7 @@
 #include "avltree.h"
 #include "parsedata.h"
 
-extern char *lelNames[];
+extern char *Parser_lelNames[];
 
 struct LangEl;
 
@@ -93,9 +93,12 @@ struct Parser
 	# semi is sent as a token in the code block rather than as a generic
 	# symbol.
 	token TK_Semi;
-
-	interface;
 	}%%
+
+	%%{ write instance_data; }%%
+
+	void init();
+	int parseLangEl( int type, const Token *token );
 
 	Parser( char *fileName, char *sectionName, InputLoc &sectionLoc )
 		: sectionName(sectionName)
@@ -118,5 +121,7 @@ struct Parser
 	NameRef nameRef;
 	NameRefList nameRefList;
 };
+
+%%{ write token_defs; }%%
 
 #endif

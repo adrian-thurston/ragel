@@ -70,9 +70,12 @@ struct Parser
 			TAG_set_tokend, TAG_get_tokend, TAG_init_tokstart,
 			TAG_set_tokstart, TAG_write, TAG_curstate, TAG_access, TAG_break,
 			TAG_option;
-
-		interface;
 	}%%
+
+	%%{ write instance_data; }%%
+
+	void init();
+	int parseLangEl( int type, const Token *token );
 
 	Parser( char *fileName )
 		: fileName(fileName), sourceFileName(0) { }
@@ -103,5 +106,7 @@ struct Parser
 
 	CodeGenMap codeGenMap;
 };
+
+%%{ write token_defs; }%%
 
 #endif /* _XMLPARSE_H */

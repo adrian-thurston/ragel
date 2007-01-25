@@ -1342,6 +1342,23 @@ state_ref_names:
 
 }%%
 
+%%{
+	write types;
+	write data;
+}%%
+
+
+void Parser::init()
+{
+	%%{ write init; }%%
+}
+
+int Parser::parseLangEl( int type, const Token *token )
+{
+	%%{ write exec; }%%
+	return errCount == 0 ? 0 : -1;
+}
+
 void Parser::tryMachineDef( InputLoc &loc, char *name, 
 		JoinOrLm *joinOrLm, bool isInstance )
 {
@@ -1377,9 +1394,9 @@ ostream &Parser::parser_error( int tokId, Token &token )
 	cerr << token.loc.fileName << ":" << token.loc.line << ":" << token.loc.col << ": ";
 	cerr << "at token ";
 	if ( tokId < 128 )
-		cerr << "\"" << lelNames[tokId] << "\"";
+		cerr << "\"" << Parser_lelNames[tokId] << "\"";
 	else 
-		cerr << lelNames[tokId];
+		cerr << Parser_lelNames[tokId];
 	if ( token.data != 0 )
 		cerr << " with data \"" << token.data << "\"";
 	cerr << ": ";
@@ -1393,7 +1410,7 @@ int Parser::token( InputLoc &loc, int tokId, char *tokstart, int toklen )
 	token.data = tokstart;
 	token.length = toklen;
 	token.loc = loc;
-	int res = parseLangEl( tokId, token );
+	int res = parseLangEl( tokId, &token );
 	if ( res < 0 ) {
 		parser_error(tokId, token) << "parse error" << endl;
 		exit(1);

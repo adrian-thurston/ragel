@@ -782,6 +782,23 @@ tag_cond_space: TAG_cond_space '/' TAG_cond_space
 
 }%%
 
+%%{
+	write types;
+	write data;
+}%%
+
+void Parser::init()
+{
+	%%{ write init; }%%
+}
+
+int Parser::parseLangEl( int type, const Token *token )
+{
+	%%{ write exec; }%%
+	return errCount == 0 ? 0 : -1;
+}
+
+
 unsigned long readLength( char *td )
 {
 	return strtoul( td, 0, 10 );
@@ -848,7 +865,7 @@ ostream &Parser::parser_error( int tokId, Token &token )
 
 int Parser::token( int tokenId, Token &tok )
 {
-	int res = parseLangEl( tokenId, tok );
+	int res = parseLangEl( tokenId, &tok );
 	if ( res < 0 ) {
 		parser_error( tokenId, tok ) << "parse error" << endl;
 		exit(1);
