@@ -132,9 +132,11 @@ syntax keyword rlWriteOptions noerror nofinal noprefix noend contained
 "
 " Sync at the start of machine specs.
 "
-syntax sync match ragelSyncPat grouphere NONE "%%{&"
-syntax sync match ragelSyncPat grouphere NONE "%%[^{]&"
-syntax sync match ragelSyncPat grouphere NONE "}%%"
+" Match The ragel delimiters only if there quotes no ahead on the same line.
+" On the open marker, use & to consume the leader.
+syntax sync match ragelSyncPat grouphere NONE "^[^\'\"%]*%%{&^[^\'\"%]*"
+syntax sync match ragelSyncPat grouphere NONE "^[^\'\"%]*%%[^{]&^[^\'\"%]*"
+syntax sync match ragelSyncPat grouphere NONE "^[^\'\"]*}%%"
 
 "
 " Specifying Groups
