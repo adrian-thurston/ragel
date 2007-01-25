@@ -95,7 +95,7 @@ struct Parser
 	token TK_Semi;
 	}%%
 
-	%%{ write instance_data; }%%
+	%% write instance_data;
 
 	void init();
 	int parseLangEl( int type, const Token *token );
@@ -122,6 +122,6 @@ struct Parser
 	NameRefList nameRefList;
 };
 
-%%{ write token_defs; }%%
+%% write token_defs;
 
 #endif

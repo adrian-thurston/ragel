@@ -766,9 +766,6 @@ void Scanner::endSection( )
 		"|*" => { token( TK_BarStar ); };
 
 		'}%%' => { 
-			/* In order to generate anything we must be in the top level file
-			 * and the current spec must be active and there must not have been
-			 * any parse errors. */
 			updateCol();
 			endSection();
 			fgoto main;
@@ -780,9 +777,6 @@ void Scanner::endSection( )
 		NL => {
 			updateCol();
 			if ( singleLineSpec ) {
-				/* In order to generate anything we must be in the top level file
-				 * and the current spec must be active and there must not have been
-				 * any parse errors. */
 				endSection();
 				fgoto main;
 			}

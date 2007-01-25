@@ -789,12 +789,12 @@ tag_cond_space: TAG_cond_space '/' TAG_cond_space
 
 void Parser::init()
 {
-	%%{ write init; }%%
+	%% write init;
 }
 
 int Parser::parseLangEl( int type, const Token *token )
 {
-	%%{ write exec; }%%
+	%% write exec;
 	return errCount == 0 ? 0 : -1;
 }
 

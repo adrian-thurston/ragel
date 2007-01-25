@@ -72,7 +72,7 @@ struct Parser
 			TAG_option;
 	}%%
 
-	%%{ write instance_data; }%%
+	%% write instance_data;
 
 	void init();
 	int parseLangEl( int type, const Token *token );
@@ -107,6 +107,6 @@ struct Parser
 	CodeGenMap codeGenMap;
 };
 
-%%{ write token_defs; }%%
+%% write token_defs;
 
 #endif /* _XMLPARSE_H */
