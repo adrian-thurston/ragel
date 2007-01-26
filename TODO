@@ -1,3 +1,7 @@
+Might be a good idea to add in some protection against using up all of a
+system's memory. This protection could then be removed by people when someone
+is sure they want to use a lot of memory.
+
 fbreak should advance the current char. Depreciate fbreak and add
     fctl_break;
     fctl_return <expr>;
