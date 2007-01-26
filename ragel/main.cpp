@@ -46,11 +46,6 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-/* Io globals. */
-istream *inStream = 0;
-ostream *outStream = 0;
-char *outputFileName = 0;
-
 /* Controls minimization. */
 MinimizeLevel minimizeLevel = MinimizePartition2;
 MinimizeOpt minimizeOpt = MinimizeMostOps;
@@ -96,6 +91,15 @@ void version()
 /* Total error count. */
 int gblErrorCount = 0;
 
+/* Print the opening to a warning in the input, then return the error ostream. */
+ostream &warning( const InputLoc &loc )
+{
+	assert( loc.fileName != 0 );
+	cerr << loc.fileName << ":" << loc.line << ":" << 
+			loc.col << ": warning: ";
+	return cerr;
+}
+
 /* Print the opening to a program error, then return the error stream. */
 ostream &error()
 {
@@ -104,12 +108,11 @@ ostream &error()
 	return cerr;
 }
 
-
-/* Print the opening to a warning in the input, then return the error ostream. */
-ostream &warning( const InputLoc &loc )
+ostream &error( const InputLoc &loc )
 {
-	cerr << loc.fileName << ":" << loc.line << ":" << 
-			loc.col << ": warning: ";
+	gblErrorCount += 1;
+	assert( loc.fileName != 0 );
+	cerr << loc.fileName << ":" << loc.line << ": ";
 	return cerr;
 }
 
@@ -128,6 +131,7 @@ int main(int argc, char **argv)
 {
 	ParamCheck pc("o:nmleabjkS:M:CDJvHh?-:s", argc, argv);
 	char *inputFileName = 0;
+	char *outputFileName = 0;
 
 	while ( pc.check() ) {
 		switch ( pc.state ) {
@@ -266,6 +270,7 @@ int main(int argc, char **argv)
 	}
 
 	/* Open the input file for reading. */
+	istream *inStream;
 	if ( inputFileName != 0 ) {
 		/* Open the input file for reading. */
 		ifstream *inFile = new ifstream( inputFileName );
@@ -284,12 +289,11 @@ int main(int argc, char **argv)
 		exit(1);
 
 	std::ostringstream outputBuffer;
-	outStream = &outputBuffer;
 
 	if ( machineSpec == 0 && machineName == 0 )
-		*outStream << "<host line=\"1\" col=\"1\">";
+		outputBuffer << "<host line=\"1\" col=\"1\">";
 
-	scan( inputFileName, *inStream );
+	scan( inputFileName, *inStream, outputBuffer );
 
 	/* Finished, final check for errors.. */
 	if ( gblErrorCount > 0 )
@@ -303,7 +307,7 @@ int main(int argc, char **argv)
 		return 1;
 
 	if ( machineSpec == 0 && machineName == 0 )
-		*outStream << "</host>\n";
+		outputBuffer << "</host>\n";
 
 	checkMachines();
 

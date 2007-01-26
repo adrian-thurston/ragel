@@ -1347,7 +1347,6 @@ state_ref_names:
 	write data;
 }%%
 
-
 void Parser::init()
 {
 	%% write init;
@@ -1379,16 +1378,9 @@ void Parser::tryMachineDef( InputLoc &loc, char *name,
 	}
 }
 
-ostream &error( const InputLoc &loc )
+ostream &Parser::parse_error( int tokId, Token &token )
 {
-	gblErrorCount += 1;
-	assert( loc.fileName != 0 );
-	cerr << loc.fileName << ":" << loc.line << ": ";
-	return cerr;
-}
-
-ostream &Parser::parser_error( int tokId, Token &token )
-{
+	/* Maintain the error count. */
 	gblErrorCount += 1;
 
 	cerr << token.loc.fileName << ":" << token.loc.line << ":" << token.loc.col << ": ";
@@ -1412,7 +1404,7 @@ int Parser::token( InputLoc &loc, int tokId, char *tokstart, int toklen )
 	token.loc = loc;
 	int res = parseLangEl( tokId, &token );
 	if ( res < 0 ) {
-		parser_error(tokId, token) << "parse error" << endl;
+		parse_error(tokId, token) << "parse error" << endl;
 		exit(1);
 	}
 	return res;

@@ -49,7 +49,6 @@ struct IncludeStackItem
 };
 
 typedef Vector<IncludeStackItem> IncludeStack;
-IncludeStack includeStack;
 
 enum InlineBlockType
 {
@@ -59,22 +58,21 @@ enum InlineBlockType
 
 struct Scanner
 {
-	Scanner( char *fileName, istream &input,
+	Scanner( char *fileName, istream &input, ostream &output,
 			Parser *inclToParser, char *inclSectionTarg,
-			int include_depth )
+			int includeDepth )
 	: 
-		fileName(fileName), input(input), 
+		fileName(fileName), input(input), output(output),
 		inclToParser(inclToParser),
 		inclSectionTarg(inclSectionTarg),
-		include_depth(include_depth),
+		includeDepth(includeDepth),
 		line(1), column(1), lastnl(0), 
 		parser(0), active(false), 
 		parserExistsError(false), ragelDefOpen(false),
 		whitespaceOn(true)
 		{}
 
-	bool recursiveInclude( IncludeStack &includeStack, 
-			char *inclFileName, char *inclSectionName );
+	bool recursiveInclude( char *inclFileName, char *inclSectionName );
 
 	char *prepareFileName( char *fileName, int len )
 	{
@@ -96,13 +94,14 @@ struct Scanner
 	void openRagelDef();
 	void do_scan();
 	bool parserExists();
-	ostream &error();
+	ostream &scan_error();
 
 	char *fileName;
 	istream &input;
+	ostream &output;
 	Parser *inclToParser;
 	char *inclSectionTarg;
-	int include_depth;
+	int includeDepth;
 
 	int cs;
 	int line;
@@ -117,6 +116,7 @@ struct Scanner
 	 * allowing for unnamed sections. */
 	Parser *parser;
 	bool active;
+	IncludeStack includeStack;
 
 	/* This is set if ragel has already emitted an error stating that
 	 * no section name has been seen and thus no parser exists. */
@@ -145,23 +145,21 @@ bool Scanner::parserExists()
 		return true;
 
 	if ( ! parserExistsError ) {
-		error() << "include: there is no previous specification name" << endl;
+		scan_error() << "include: there is no previous specification name" << endl;
 		parserExistsError = true;
 	}
 	return false;
 }
 
-ostream &Scanner::error()
+ostream &Scanner::scan_error()
 {
 	/* Maintain the error count. */
 	gblErrorCount += 1;
-
 	cerr << fileName << ":" << line << ":" << column << ": ";
 	return cerr;
 }
 
-bool Scanner::recursiveInclude( IncludeStack &includeStack, 
-			char *inclFileName, char *inclSectionName )
+bool Scanner::recursiveInclude( char *inclFileName, char *inclSectionName )
 {
 	for ( IncludeStack::Iter si = includeStack; si.lte(); si++ ) {
 		if ( strcmp( si->fileName, inclFileName ) == 0 &&
@@ -208,9 +206,9 @@ void Scanner::token( int type )
 	action store_word { word = tokdata; word_len = toklen; }
 	action store_lit { lit = tokdata; lit_len = toklen; }
 
-	action mach_err { error() << "bad machine statement" << endl; }
-	action incl_err { error() << "bad include statement" << endl; }
-	action write_err { error() << "bad write statement" << endl; }
+	action mach_err { scan_error() << "bad machine statement" << endl; }
+	action incl_err { scan_error() << "bad include statement" << endl; }
+	action write_err { scan_error() << "bad write statement" << endl; }
 
 	action handle_machine
 	{
@@ -265,18 +263,18 @@ void Scanner::token( int type )
 			 * name then check if what we are including is already in the stack. */
 			includeStack.append( IncludeStackItem( fileName, parser->sectionName ) );
 
-			if ( recursiveInclude( includeStack, inclFileName, inclSectionName ) )
-				error() << "include: this is a recursive include operation" << endl;
+			if ( recursiveInclude( inclFileName, inclSectionName ) )
+				scan_error() << "include: this is a recursive include operation" << endl;
 			else {
 				/* Open the input file for reading. */
 				ifstream *inFile = new ifstream( inclFileName );
 				if ( ! inFile->is_open() ) {
-					error() << "include: could not open " << 
+					scan_error() << "include: could not open " << 
 							inclFileName << " for reading" << endl;
 				}
 
-				Scanner scanner( inclFileName, *inFile, parser,
-						inclSectionName, include_depth+1 );
+				Scanner scanner( inclFileName, *inFile, output, parser,
+						inclSectionName, includeDepth+1 );
 				scanner.init();
 				scanner.do_scan( );
 				delete inFile;
@@ -305,21 +303,21 @@ void Scanner::token( int type )
 					strcmp( tokdata, "exec" ) != 0 &&
 					strcmp( tokdata, "eof" ) != 0 )
 			{
-				error() << "unknown write command" << endl;
+				scan_error() << "unknown write command" << endl;
 			}
-			*outStream << "  <write what=\"" << tokdata << "\">";
+			output << "  <write what=\"" << tokdata << "\">";
 		}
 	}
 
 	action write_option
 	{
 		if ( active )
-			*outStream << "<option>" << tokdata << "</option>";
+			output << "<option>" << tokdata << "</option>";
 	}
 	action write_close
 	{
 		if ( active )
-			*outStream << "</write>\n";
+			output << "</write>\n";
 	}
 
 	write_stmt =
@@ -387,9 +385,9 @@ void Scanner::startSection( )
 {
 	parserExistsError = false;
 
-	if ( include_depth == 0 ) {
+	if ( includeDepth == 0 ) {
 		if ( machineSpec == 0 && machineName == 0 )
-			*outStream << "</host>\n";
+			output << "</host>\n";
 		ragelDefOpen = false;
 	}
 
@@ -402,7 +400,7 @@ void Scanner::openRagelDef()
 {
 	if ( ! ragelDefOpen ) {
 		ragelDefOpen = true;
-		*outStream << "<ragel_def name=\"" << parser->sectionName << "\">\n";
+		output << "<ragel_def name=\"" << parser->sectionName << "\">\n";
 	}
 }
 
@@ -424,16 +422,16 @@ void Scanner::endSection( )
 		parser->token( loc, TK_EndSection, 0, 0 );
 	}
 
-	if ( include_depth == 0 ) {
+	if ( includeDepth == 0 ) {
 		if ( ragelDefOpen ) {
-			*outStream << "</ragel_def>\n";
+			output << "</ragel_def>\n";
 			ragelDefOpen = false;
 		}
 
 		if ( machineSpec == 0 && machineName == 0 ) {
 			/* The end section may include a newline on the end, so
 			 * we use the last line, which will count the newline. */
-			*outStream << "<host line=\"" << line << "\">";
+			output << "<host line=\"" << line << "\">";
 		}
 	}
 }
@@ -567,7 +565,7 @@ void Scanner::endSection( )
 		};
 
 		EOF => {
-			error() << "unterminated code block" << endl;
+			scan_error() << "unterminated code block" << endl;
 		};
 
 		# Send every other character as a symbol.
@@ -594,7 +592,7 @@ void Scanner::endSection( )
 		']'	=> { token( RE_SqClose ); fret; };
 
 		EOF => {
-			error() << "unterminated OR literal" << endl;
+			scan_error() << "unterminated OR literal" << endl;
 		};
 
 		# Characters in an OR expression.
@@ -629,7 +627,7 @@ void Scanner::endSection( )
 		'[^' => { token( RE_SqOpenNeg ); fcall or_literal; };
 
 		EOF => {
-			error() << "unterminated regular expression" << endl;
+			scan_error() << "unterminated regular expression" << endl;
 		};
 
 		# Characters in an OR expression.
@@ -643,7 +641,7 @@ void Scanner::endSection( )
 		';' => { token( ';' ); fgoto parser_def; };
 
 		EOF => {
-			error() << "unterminated write statement" << endl;
+			scan_error() << "unterminated write statement" << endl;
 		};
 	*|;
 
@@ -790,7 +788,7 @@ void Scanner::endSection( )
 		};
 
 		EOF => {
-			error() << "unterminated ragel section" << endl;
+			scan_error() << "unterminated ragel section" << endl;
 		};
 
 		any => { token( *tokstart ); } ;
@@ -801,8 +799,8 @@ void Scanner::endSection( )
 
 		/* If no errors and we are at the bottom of the include stack (the
 		 * source file listed on the command line) then write out the data. */
-		if ( include_depth == 0 && machineSpec == 0 && machineName == 0 )
-			xmlEscapeHost( *outStream, tokstart, tokend-tokstart );
+		if ( includeDepth == 0 && machineSpec == 0 && machineName == 0 )
+			xmlEscapeHost( output, tokstart, tokend-tokstart );
 	}
 
 	# Outside code scanner. These tokens get passed through.
@@ -886,7 +884,7 @@ void Scanner::do_scan()
 		if ( cs == rlscan_error ) {
 			/* Machine failed before finding a token. I'm not yet sure if this
 			 * is reachable. */
-			error() << "scanner error" << endl;
+			scan_error() << "scanner error" << endl;
 			exit(1);
 		}
 
@@ -912,9 +910,9 @@ void Scanner::do_scan()
 	delete[] buf;
 }
 
-void scan( char *fileName, istream &input )
+void scan( char *fileName, istream &input, ostream &output )
 {
-	Scanner scanner( fileName, input, 0, 0, 0 );
+	Scanner scanner( fileName, input, output, 0, 0, 0 );
 	scanner.init();
 	scanner.do_scan();
 

@@ -26,13 +26,9 @@
 #include "avltree.h"
 #include "parsedata.h"
 
-extern char *Parser_lelNames[];
-
-struct LangEl;
-
 struct Parser
 {
-	%%{
+%%{
 	parser Parser;
 
 	# These must be declared first and in this order. Ragel currently cannot
@@ -93,7 +89,7 @@ struct Parser
 	# semi is sent as a token in the code block rather than as a generic
 	# symbol.
 	token TK_Semi;
-	}%%
+}%%
 
 	%% write instance_data;
 
@@ -111,7 +107,7 @@ struct Parser
 		JoinOrLm *joinOrLm, bool isInstance );
 
 	/* Report an error encountered by the parser. */
-	ostream &parser_error( int tokId, Token &token );
+	ostream &parse_error( int tokId, Token &token );
 
 	ParseData *pd;
 

@@ -45,12 +45,6 @@ enum MinimizeOpt {
 	MinimizeEveryOp
 };
 
-
-/* IO filenames and stream. */
-extern char *outputFileName;
-extern std::istream *inStream;
-extern std::ostream *outStream;
-
 /* Options. */
 extern MinimizeLevel minimizeLevel;
 extern MinimizeOpt minimizeOpt;
@@ -73,7 +67,7 @@ std::ostream &error();
 std::ostream &error( const InputLoc &loc ); 
 std::ostream &warning( const InputLoc &loc ); 
 
-void scan( char *fileName, std::istream &input );
+void scan( char *fileName, std::istream &input, std::ostream &output );
 void terminateAllParsers( );
 void checkMachines( );
 void writeMachines( std::ostream &out, std::string hostData, char *inputFileName );
