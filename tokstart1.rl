@@ -72,7 +72,7 @@ struct Scanner
 		digit+ exponent float_suffix? ) $~ to_act $* from_act;
 	
 	# Integer decimal. Leading part buffered by float.
-	( ( '0' | [1-9] [0-9]* ) [ulUL]{0,3} ) $~ to_act $* from_act
+	( ( '0' | [1-9] [0-9]* ) [ulUL]{0,3} ) $~ to_act $* from_act;
 
 	# Integer octal. Leading part buffered by float.
 	( '0' [0-9]+ [ulUL]{0,2} ) $~ to_act $* from_act;
