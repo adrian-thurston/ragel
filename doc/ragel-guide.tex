@@ -113,27 +113,28 @@ License along with Ragel; if not, write to the Free Software Foundation, Inc.,
 
 Regular expressions are used heavily in practice for the purpose of specifying
 parsers. However, they are normally used as black boxes linked together with
-program logic. User actions are associated with entire expressions and matched
-text is extracted from input.  With these facilities it is not possible to
-specify an entire parser with a single regular expression because practical
-parsing tasks invariably involve the execution of arbitrary user code
-throughout the course of parsing.  
+program logic.  User actions are executed in between invocations of the regular
+expression engine. Adding actions before a pattern terminates requires patterns
+to be broken and pasted back together with program logic. The more user actions
+are needed, the less the advantages of regular expressions are seen. 
 
-Ragel is a software development tool which allows the user to embed actions into
-regular expressions without disrupting the regular expression syntax.
-Consequently, one can specify an entire parser using a single regular
-experssion.  The single-expression model affords concise
-and elegant descriptions of languages and the generation of very simple,
-fast and robust code.  Ragel compiles finite state machines from a high level
-regular language notation to executable C, C++, Objective-C or D. 
+Ragel is a software development tool which allows user actions to be 
+embedded into the transitions of a regular expression's corresponding state
+machine, eliminating the need to switch from the regular expression engine and
+user code execution environment and back again. As a result, expressions can be
+maximally continuous.  One is free to specify an entire parser using a single
+regular experssion.  The single-expression model affords concise and elegant
+descriptions of languages and the generation of very simple, fast and robust
+code.  Ragel compiles finite state machines from a high level regular language
+notation to executable C, C++, Objective-C or D. 
 
 In addition to building state machines from regular expressions, Ragel allows
 the programmer to directly specify state machines with state charts. These two
-notations may also be freely combined. There are facilities for controlling
-nondeterminism in the resulting machines and building scanners using the
-longest-match paradigm.  Ragel can produce code that runs as fast as manually
-constructed machines.  Ragel can handle integer-sized alphabets and can compile
-very large state machines.
+notations may be freely combined. There are also facilities for controlling
+nondeterminism in the resulting machines and building scanners using patterns
+that themselves have embedded actions. Ragel can produce code that runs
+nearly as fast as manually constructed machines.  Ragel can handle
+integer-sized alphabets and can compile very large state machines.
 
 \section{Motivation}
 
@@ -143,43 +144,41 @@ to generate useful and efficient parsers for programming languages from a
 formal grammar. It is also quite common for programmers to avoid such tools
 when making parsers for simple computer languages, such as file formats and
 communication protocols.  Such languages often meet the criteria for the
-regular languages.  Tools for processing the context-free languages are simply
-too heavyweight for the purpose of parsing regular languages because the extra
+regular languages.  Tools for processing the context-free languages are viewed
+as too heavyweight for the purpose of parsing regular languages because the extra
 run-time effort required for supporting the recursive nature of context-free
 languages is wasted.
 
-Regular expressions are more appropriate than context-free grammars for a large
-number of parsing probelems. Parsers based on them have many advantages over
-hand written parsers. Regular expression syntax is convenient,
-concise and easy to maintain. Existing
-parsing tools based on regular expressions, such as Lex, Re2C, Sed, Awk and
-Perl, are normally split into two levels: a regular expression matching engine
-and some kind of program logic for linking patterns together and executing user
-code.  
+When we turn to the regular expression-based parsing tools, such as Lex, Re2C,
+and scripting languages such as Sed, Awk and Perl we find that they are split
+into two levels: a regular expression matching engine and some kind of program
+logic for linking patterns together.  For example, a Lex program is composed of
+sets of regular expressions. The implied program logic repeatedly attempts to
+match a pattern in the current set, then executes the associated user code. It requires the
+user to consider a language as a sequence of independent tokens.  Scripting
+languages and regular expression libraries allow one to link patterns together
+using arbitrary program code.  This is very flexible and powerful, however we
+can be more concise and clear if we avoid gluing together regular expressions
+with if statements and while loops.
 
-As an example, Lex requires the user to consider a language as a sequence
-of independent patterns.
-Unfortunately, there are many computer languages that are considered regular,
-which do not fit this model. This model also places restrictions on when action
-code may be executed. Since action code can only be associated with complete
-patterns, if action code must be executed before an entire pattern is matched
-then the pattern must be broken into smaller units.  Instead of being forced to
-disrupt the regular expression syntax, it is desirable to retain a single
-expression and embed code for performing actions directly into the transitions
-which move over the characters.  After all we know the transitions are there. 
+This model of execution, where the runtime alternates between regular
+expression matching and user code exectution places severe restrictions on when
+action code may be executed. Since action code can only be associated with
+complete patterns, any action code which must be executed before an entire
+pattern is matched requires that the pattern be broken into smaller units.
+Instead of being forced to disrupt the regular expression syntax and write
+smaller expressions, it is desirable to retain a single expression and embed
+code for performing actions directly into the transitions which move over the
+characters. After all, capable programmers are astutely aware of the machinery
+underlying their programs, so why not provide them with access to that
+machinery? To achieve this we require an action execution model for associating
+code with the sub-expressions of a regular expression in a way that does not
+disrupt its syntax.
 
-Perl allows one to link patterns together using arbitrary program code.  This
-is very flexible and powerful, however we can be more concise, clear and robust
-if we avoid gluing together regular expressions with if statements and while
-loops, and instead only compose parsers with regular expression operators.  To
-achieve this we require an action execution model for associating code with the
-sub-expressions of a regular expression in a way that does not disrupt its
-syntax.
-
-The primary goal of Ragel is therefore to provide developers with an ability to embed
-actions into the transitions and states of a regular expression in support the
+The primary goal of Ragel is to provide developers with an ability to embed
+actions into the transitions and states of a regular expression in support of the
 definition of entire parsers or large sections of parsers using a single
-regular expression that is compiled to a simple state machine.  From the
+regular expression that is compiled to a finite state machine.  From the
 regular expression we gain a clear and concise statement of our language. From
 the state machine we obtain a very fast and robust executable that lends itself
 to many kinds of analysis and visualization.
@@ -210,25 +209,25 @@ of Computation'' textbooks. They date back to the 1950s and are widely studied.
 They are based on set operations and permit one to think of languages as a set
 of strings. They are Union, Intersection, Subtraction, Concatenation and Kleene
 Star. Put together, these operators make up what most people know as regular
-expressions. Ragel also provides a longest-match construction for easily
-building scanners and provides operators for explicitly constructing machines
-using a state chart method. In the state chart method one joins machines
+expressions. Ragel also provides a scanner construction construction operator 
+and provides operators for explicitly constructing machines
+using a state chart method. In the state chart method, one joins machines
 together without any implied transitions and then explicitly specifies where
 epsilon transitions should be drawn.
 
 The state machine manipulation operators are specific to Ragel. They allow the
-programmer to access the states and transitions of regular languages. There are
-two uses of the manipulation operators. The first and primary use is to embed
-code into transitions and states, allowing the programmer to specify the
-actions of the state machine.
+programmer to access the states and transitions of regular language's
+corresponding machine. There are two uses of the manipulation operators. The
+first and primary use is to embed code into transitions and states, allowing
+the programmer to specify the actions of the state machine.
 
-Following a number of action embeddings, a single transition can have a number
-of actions embedded in it. When making a nondeterministic specification into a
-DFA using machines that have embedded actions, new transitions are often made
-that have the combined actions of several source transitions. Ragel ensures
-that multiple actions associated with a single transition are ordered
-consistently with respect to the order of reference and the natural ordering
-implied by the construction operators.
+Ragel attempts to make the action embedding facility as intuitive as possible.
+To do that, a number issues need to be addresses.  For example, when making a
+nondeterministic specification into a DFA using machines that have embedded
+actions, new transitions are often made that have the combined actions of
+several source transitions. Ragel ensures that multiple actions associated with
+a single transition are ordered consistently with respect to the order of
+reference and the natural ordering implied by the construction operators.
 
 The second use of the manipulation operators is to assign priorities in
 transitions. Priorities provide a convenient way of controlling any
@@ -243,24 +242,24 @@ target states. Priorities are often required for segmenting machines. The most
 common uses of priorities have been encoded into a set of simple operators
 which should be used instead of priority embeddings whenever possible.
 
-There are four operators for embedding actions and priorities into the
-transitions of a state machine, these correspond to the different
-classes of transitions in a machine. It is possible to embed into start
-transitions, finishing transitions, all transitions or pending out
+For the purposes of embedding, Ragel divides transitions and states into
+different classes. There are four operators for embedding actions and
+priorities into the transitions of a state machine. It is possible to embed
+into start transitions, finishing transitions, all transitions and pending out
 transitions.  The embedding of pending out transitions is a special case.
-These transition embeddings gets stored in the final states of a machine.  They
+These transition embeddings get stored in the final states of a machine.  They
 are transferred to any transitions that may be made going out of the machine by
 a concatenation or kleene star operator.
 
 There are several more operators for embedding actions into states. Like the
 transition embeddings, there are various different classes of states that the
 embedding operators access. For example, one can access start states, final
-states or all states, among others. Unlike the transition
-embeddings, there
-are several different types of state action embeddings. These are executed at various
-different times during the processing of input. It is possible to embed
-actions which are exectued on all transitions into a state, all transitions out of a state,
-transitions taken on the error event or on the EOF event.
+states or all states, among others. Unlike the transition embeddings, there are
+several different types of state action embeddings. These are executed at
+various different times during the processing of input. It is possible to embed
+actions which are exectued on all transitions which enter into a state, all
+transitions out of a state, transitions taken on the error event, or
+transitions taken on the EOF event.
 
 Within actions, it is possible to influence the behaviour of the state machine.
 The user can write action code that jumps or calls to another portion of the
@@ -272,25 +271,30 @@ returning to the state on the top of the stack when the corresponding closing
 bracket character is seen. More complicated context-free languages such as
 expressions in C, are out of the scope of Ragel. 
 
-Ragel provides a longest-match construction operator which eases the task of
-building scanners. This construction behaves much like the primary processing
-model of Lex. The generated code, which relies on user-defined variables for
+Ragel also provides a scanner construction operator which can be used to build scanners
+much the same way that Lex is used. The Ragel generated code, which relies on
+user-defined variables for
 backtracking, repeatedly tries to match patterns to the input, favouring longer
 patterns over shorter ones and patterns that appear ahead of others when the
 lengths of the possible matches are identical. When a pattern is matched the
-associated action is executed. Longest-match machines take Ragel out of the
-domain of pure state machines and require the user to maintain the backtracking
-related variables.  However, longest-match machines integrate well with regular
-state machine instantiations. They can be called to or jumped to only when
-needed, or they can be called out of or jumped out of when a simpler, pure
-state machine model is needed.
+associated action is executed. 
+
+The key distinguishing feature between scanners in Ragel and scanners in Lex is
+that Ragel patterns may be arbitrary Ragel expressions and can therefore
+contain embedded code. With a Ragel-based scanner the user need not wait until
+the end of a pattern before user code can be executed.
+
+Scanners do take Ragel out of the domain of pure state machines and require the
+user to maintain the backtracking related variables.  However, scanners
+integrate well with regular state machine instantiations. They can be called to
+or jumped to only when needed, or they can be called out of or jumped out of
+when a simpler, pure state machine model is appropriate.
 
 Two types of output code style are available. Ragel can produce a table-driven
-machine or a directly executable machine. The directly executable machine is much
-faster than the table-driven. On the other hand, the table-driven machine is
-more compact and less demanding on the host language compiler. It is better
-suited to compiling large state machines and in the future will be used for
-coverage statistics gathering and debugging.
+machine or a directly executable machine. The directly executable machine is
+much faster than the table-driven. On the other hand, the table-driven machine
+is more compact and less demanding on the host language compiler. It is better
+suited to compiling large state machines.
 
 \section{Related Work}
 
@@ -322,8 +326,8 @@ help, but employing a heavyweight processing loop that imposes a stream
 example of this kind of scenario is the conversion of floating point numbers
 contained in a string to their corresponding numerical values.
 
-Another drawback is that 
-Lex patterns are black boxes. It is not possbile to execute a user action while
+Another drawback is the very issue that Ragel attempts to solve.
+It is not possbile to execute a user action while
 matching a character contained inside a pattern. For example, if scanning a
 programming language and string literals can contain newlines which must be
 counted, a Lex user must break up a string literal pattern so as to associate
@@ -382,7 +386,7 @@ How ragel is different from Lex.
 \end{comment}
 
 The Re2C program defines an input processing model similar to that of Lex.
-Unlike Lex, Re2C focuses on making generated state machines run very fast and
+Re2C focuses on making generated state machines run very fast and
 integrate easily into any program, free of dependencies.  Re2C generates
 directly executable code and is able to claim that generated parsers run nearly
 as fast as their hand-coded equivalents.  This is very important for user
@@ -407,16 +411,22 @@ They are instead interpreted and involve backtracking. This is shown by the
 following Perl program. When it is fed the input \verb|abcd| the interpretor
 attempts to match the first alternative, printing \verb|a1 b1|.  When this
 possibility fails it backtracks and tries the second possibility, printing
-\verb|a2 b2|, at which point it succeeds. A similar parser expressed in Ragel
-will attempt both of the alternatives concurrently, printing 
-\verb|a1 a2 b1 b2|.
+\verb|a2 b2|, at which point it succeeds.
 
-\verbspace
+\begin{inline_code}
 \begin{verbatim}
 print "YES\n" if ( <STDIN> =~
         /( a (?{ print "a1 "; }) b (?{ print "b1 "; }) cX ) |
          ( a (?{ print "a2 "; }) b (?{ print "b2 "; }) cd )/x )
 \end{verbatim}
+\end{inline_code}
+\verbspace
+
+In Ragel there is no regular expression interpretor. Aside from the scanner
+operator, all Ragel expressions are made into deterministic machines and the
+run time simply moves from state to state as it consumes input. An equivalent
+parser expressed in Ragel would attempt both of the alternatives concurrently,
+printing \verb|a1 a2 b1 b2|.
 
 \section{Development Status}
 
