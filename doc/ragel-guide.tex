@@ -653,13 +653,13 @@ there will be 6 states chained together with the characters in the string. See
 Section \ref{lexing} for information on valid escape sequences. 
 
 % GENERATE: bmconcat
+% OPT: -p
 % %%{
 % machine bmconcat;
 \begin{comment}
 \begin{verbatim}
 main := 'hello';
 \end{verbatim}
-\end{inline_code}
 \end{comment}
 % }%%
 % END GENERATE
@@ -684,13 +684,13 @@ See Section \ref{lexing} for information on valid escape sequences
 in or expressions.
 
 % GENERATE: bmor
+% OPT: -p
 % %%{
 % machine bmor;
 \begin{comment}
 \begin{verbatim}
 main := [hello];
 \end{verbatim}
-\end{inline_code}
 \end{comment}
 % }%%
 % END GENERATE
@@ -704,13 +704,13 @@ that matches the zero length string. Zero length machines have one state that is
 a start state and a final state.
 
 % GENERATE: bmnull
+% OPT: -p
 % %%{
 % machine bmnull;
 \begin{comment}
 \begin{verbatim}
 main := '';
 \end{verbatim}
-\end{inline_code}
 \end{comment}
 % }%%
 % END GENERATE
@@ -720,7 +720,7 @@ main := '';
 \end{center}
 
 % FIXME: More on the range of values here.
-\item \verb|42| -- Simple Machine. Produces a two state machine with one
+\item \verb|42| -- Numerical Literal. Produces a two state machine with one
 transition on the given number. The number may be in decimal or hexadecimal
 format and should be in the range allowed by the alphabet type. The minimum and
 maximum values permitted are defined by the host machine that Ragel is compiled
@@ -734,7 +734,6 @@ be in the range \verb|-32768| to \verb|32767|.
 \begin{verbatim}
 main := 42;
 \end{verbatim}
-\end{inline_code}
 \end{comment}
 % }%%
 % END GENERATE
@@ -762,19 +761,44 @@ results can always be achieved using the more general machine construction
 operators listed in Section \ref{machconst}. The following diagram shows the
 result of compiling \verb|/ab*[c-z].*[123]/|.
 
+% GENERATE: bmregex
+% OPT: -p
+% %%{
+% machine bmregex;
+\begin{comment}
+\begin{verbatim}
+main := /ab*[c-z].*[123]/;
+\end{verbatim}
+\end{comment}
+% }%%
+% END GENERATE
+
 \begin{center}
-\includegraphics{bmregex}
+\includegraphics[scale=0.45]{bmregex}
 \end{center}
 
-\item \verb|lit .. lit| -- Range. Produces a machine that matches any
+\item \verb|'a' .. 'z'| -- Range. Produces a machine that matches any
 characters in the specified range.  Allowable upper and lower bounds of the
-range are concatenation literals of length one and number literals.  For
+range are concatenation literals of length one and numerical literals.  For
 example, \verb|0x10..0x20|, \verb|0..63|, and \verb|'a'..'z'| are valid ranges.
 The bounds should be in the range allowed by the alphabet type.
 
+% GENERATE: bmrange
+% OPT: -p
+% %%{
+% machine bmrange;
+\begin{comment}
+\begin{verbatim}
+main := 'a' .. 'z';
+\end{verbatim}
+\end{comment}
+% }%%
+% END GENERATE
+
 \begin{center}
-\includegraphics{bmrange}
+\includegraphics[scale=0.45]{bmrange}
 \end{center}
+
 
 \item \verb|variable_name| -- Lookup the machine definition assigned to the
 variable name given and use an instance of it. See Section \ref{definition} for
@@ -933,16 +957,22 @@ shown below.
 The following example demonstrates the union of three machines representing
 common tokens.
 
-\verbspace
+% GENERATE: exor
+% OPT: -p
+% %%{
+% machine exor;
+\begin{inline_code}
 \begin{verbatim}
 # Hex digits, decimal digits, or identifiers
 main := '0x' xdigit+ | digit+ | alpha alnum*;
 \end{verbatim}
-\verbspace
+\end{inline_code}
+% }%%
+% END GENERATE
 
 \graphspace
 \begin{center}
-\includegraphics{exor}
+\includegraphics[scale=0.45]{exor}
 \end{center}
 
 \subsection{Intersection}
@@ -960,7 +990,11 @@ if there are any such paths in either of the expressions they will be removed
 by the intersection operator.  Intersection can be used to require that two
 independent patterns be simultaneously satisfied as in the following example.
 
-\verbspace
+% GENERATE: exinter
+% OPT: -p
+% %%{
+% machine exinter;
+\begin{inline_code}
 \begin{verbatim}
 # Match lines four characters wide that contain 
 # words separated by whitespace.
@@ -968,11 +1002,13 @@ main :=
     /[^\n][^\n][^\n][^\n]\n/* &
     (/[a-z][a-z]*/ | [ \n])**;
 \end{verbatim}
-\verbspace
+\end{inline_code}
+% }%%
+% END GENERATE
 
 \graphspace
 \begin{center}
-\includegraphics{exinter}
+\includegraphics[scale=0.45]{exinter}
 \end{center}
 
 \subsection{Difference}
@@ -990,17 +1026,26 @@ that does not lead to a final state.  The following example demonstrates the
 use of subtraction to exclude specific cases from a set.
 
 \verbspace
+
+% GENERATE: exsubtr
+% OPT: -p
+% %%{
+% machine exsubtr;
+\begin{inline_code}
 \begin{verbatim}
 # Subtract keywords from identifiers.
 main := /[a-z][a-z]*/ - ( 'for' | 'int' );
 \end{verbatim}
-\verbspace
+\end{inline_code}
+% }%%
+% END GENERATE
 
 \graphspace
 \begin{center}
-\includegraphics{exsubtr}
+\includegraphics[scale=0.45]{exsubtr}
 \end{center}
 \graphspace
+
 
 \subsection{Strong Difference}
 \label{strong_difference}
@@ -1013,15 +1058,22 @@ machine which does not have any string of the second machine as a substring. In
 the following example, strong subtraction is used to excluded \verb|CRLF| from
 a sequence.
 
-\verbspace
+% GENERATE: exstrongsubtr
+% OPT: -p
+% %%{
+% machine exstrongsubtr;
+\begin{inline_code}
 \begin{verbatim}
 crlf = '\r\n';
 main := [a-z]+ ':' ( any* -- crlf ) crlf;
 \end{verbatim}
-\verbspace
+\end{inline_code}
+% }%%
+% END GENERATE
 
+\graphspace
 \begin{center}
-\includegraphics{exstrongsubtr}
+\includegraphics[scale=0.45]{exstrongsubtr}
 \end{center}
 \graphspace
 
@@ -1067,15 +1119,22 @@ In the following example, the first machine is always active due to the
 nondeterministic nature of concatenation. This particular nondeterminism is intended
 however because we wish to permit EOF strings before the end of the input.
 
-\verbspace
+% GENERATE: exconcat
+% OPT: -p
+% %%{
+% machine exconcat;
+\begin{inline_code}
 \begin{verbatim}
 # Require an eof marker on the last line.
 main := /[^\n]*\n/* . 'EOF\n';
 \end{verbatim}
-\verbspace
+\end{inline_code}
+% }%%
+% END GENERATE
 
+\graphspace
 \begin{center}
-\includegraphics{exconcat}
+\includegraphics[scale=0.45]{exconcat}
 \end{center}
 \graphspace
 
@@ -1132,16 +1191,24 @@ expression. Though it would not cause a problem in this case, unnecessary
 nondeterminism in the kleene star operator often causes undesired results for
 new Ragel users and must be guarded against.
 
-\verbspace
+% GENERATE: exstar
+% OPT: -p
+% %%{
+% machine exstar;
+\begin{inline_code}
 \begin{verbatim}
 # Match any number of lines with only lowercase letters.
 main := /[a-z]*\n/*;
 \end{verbatim}
-\verbspace
+\end{inline_code}
+% }%%
+% END GENERATE
 
+\graphspace
 \begin{center}
-\includegraphics{exstar}
+\includegraphics[scale=0.45]{exstar}
 \end{center}
+\graphspace
 
 \subsection{One Or More Repetition}
 
@@ -1153,16 +1220,24 @@ itself. The result will match one or more repetitions of the machine. The plus
 operator is equivalent to \verb|(expr . expr*)|.  The plus operator makes
 repetitions that cannot be zero length.
 
-\verbspace
+% GENERATE: explus
+% OPT: -p
+% %%{
+% machine explus;
+\begin{inline_code}
 \begin{verbatim}
 # Match alpha-numeric words.
 main := alnum+;
 \end{verbatim}
-\verbspace
+\end{inline_code}
+% }%%
+% END GENERATE
 
+\graphspace
 \begin{center}
-\includegraphics{explus}
+\includegraphics[scale=0.45]{explus}
 \end{center}
+\graphspace
 
 \subsection{Optional}
 
@@ -1174,16 +1249,25 @@ given or the zero length string. The optional operator is equivalent to
 \verb/(expr | '' )/. In the following example the optional operator is used to
 extend a token.
 
-\verbspace
+% GENERATE: exoption
+% OPT: -p
+% %%{
+% machine exoption;
+\begin{inline_code}
 \begin{verbatim}
 # Match integers or floats.
 main := digit+ ('.' digit+)?;
 \end{verbatim}
-\verbspace
+\end{inline_code}
+% }%%
+% END GENERATE
 
+\graphspace
 \begin{center}
-\includegraphics{exoption}
+\includegraphics[scale=0.45]{exoption}
 \end{center}
+\graphspace
+
 
 \subsection{Repetition}
 
@@ -1205,16 +1289,25 @@ main := digit+ ('.' digit+)?;
 Negation produces a machine that matches any string not matched by the given
 machine. Negation is equivalent to \verb|(any* - expr)|.
 
-\verbspace
+% GENERATE: exnegate
+% OPT: -p
+% %%{
+% machine exnegate;
+\begin{inline_code}
 \begin{verbatim}
 # Accept anything but a string beginning with a digit.
 main := ! ( digit any* );
 \end{verbatim}
-\verbspace
+\end{inline_code}
+% }%%
+% END GENERATE
 
+\graphspace
 \begin{center}
-\includegraphics{exnegate}
+\includegraphics[scale=0.45]{exnegate}
 \end{center}
+\graphspace
+
 
 \subsection{Character-Level Negation}
 
@@ -1701,14 +1794,26 @@ following example, the action is executed on the first transition of the
 machine. If the repetition machine is bypassed the action is not executed.
 
 \verbspace
+
+% GENERATE: exstact
+% OPT: -p
+% %%{
+% machine exstact;
+\begin{inline_code}
 \begin{verbatim}
 # Execute A at the beginning of a string of alpha.
+action A {}
 main := ( lower* >A ) . ' ';
 \end{verbatim}
+\end{inline_code}
+% }%%
+% END GENERATE
 
+\graphspace
 \begin{center}
-\includegraphics{exstact}
+\includegraphics[scale=0.45]{exstact}
 \end{center}
+\graphspace
 
 \subsection{Finishing Action}
 
@@ -1721,16 +1826,26 @@ the action is executed. Further input may move the machine out of the accepting
 state, but keep it in the machine. As in the following example, the
 into-final-state operator is most often used when no lookahead is necessary.
 
-\verbspace
+% GENERATE: exdoneact
+% OPT: -p
+% %%{
+% machine exdoneact;
+% action A {}
+\begin{inline_code}
 \begin{verbatim}
 # Execute A when the trailing space is seen.
 main := ( lower* ' ' ) @A;
 \end{verbatim}
-\verbspace
+\end{inline_code}
+% }%%
+% END GENERATE
 
+\graphspace
 \begin{center}
-\includegraphics{exdoneact}
+\includegraphics[scale=0.45]{exdoneact}
 \end{center}
+\graphspace
+
 
 \subsection{All Transition Action}
 
@@ -1741,16 +1856,26 @@ The all transition operator embeds an action into all transitions of a machine.
 The action is executed whenever a transition of the machine is taken. In the
 following example, A is executed on every character matched.
 
-\verbspace
+% GENERATE: exallact
+% OPT: -p
+% %%{
+% machine exallact;
+% action A {}
+\begin{inline_code}
 \begin{verbatim}
 # Execute A on any characters of machine one or two.
 main := ( 'm1' | 'm2' ) $A;
 \end{verbatim}
-\verbspace
+\end{inline_code}
+% }%%
+% END GENERATE
 
+\graphspace
 \begin{center}
-\includegraphics{exallact}
+\includegraphics[scale=0.45]{exallact}
 \end{center}
+\graphspace
+
 
 \subsection{Pending Out Actions}
 \label{out-actions}
@@ -1767,35 +1892,54 @@ termination of a sequence, without being concerned about what particular
 character terminates the sequence.  In the following example, A is executed
 when leaving the alpha machine by the newline character.
 
-\verbspace
+% GENERATE: exoutact1
+% OPT: -p
+% %%{
+% machine exoutact1;
+% action A {}
+\begin{inline_code}
 \begin{verbatim}
 # Match a word followed by an newline. Execute A when 
 # finishing the word.
 main := ( lower+ %A ) . '\n';
 \end{verbatim}
-\verbspace
+\end{inline_code}
+% }%%
+% END GENERATE
 
+\graphspace
 \begin{center}
-\includegraphics{exfinact}
+\includegraphics[scale=0.45]{exoutact1}
 \end{center}
 \graphspace
-
 
 In the following example, the \verb|term_word| action could be used to register
 the appearance of a word and to clear the buffer that the \verb|lower| action used
 to store the text of it.
 
-\verbspace
+% GENERATE: exoutact2
+% OPT: -p
+% %%{
+% machine exoutact2;
+% action lower {}
+% action space {}
+% action term_word {}
+% action newline {}
+\begin{inline_code}
 \begin{verbatim}
 word = ( [a-z] @lower )+ %term_word;
 main := word ( ' ' @space word )* '\n' @newline;
 \end{verbatim}
-\verbspace
+\end{inline_code}
+% }%%
+% END GENERATE
 
-% FIXME: add
-%\begin{center}
-%\includegraphics[scale=0.4]{outact.ps}
-%\end{center}
+\graphspace
+\begin{center}
+\includegraphics[scale=0.45]{exoutact2}
+\end{center}
+\graphspace
+
 
 In this final example of the action embedding operators, A is executed upon
 entering the alpha machine, B is executed on all transitions of the alpha
@@ -1803,17 +1947,30 @@ machine, C is executed when the alpha machine accepts by moving into the
 newline machine and N is executed when the newline machine moves into a final
 state.  
 
-\verbspace
+% GENERATE: exaction
+% OPT: -p
+% %%{
+% machine exaction;
+% action A {}
+% action B {}
+% action C {}
+% action N {}
+\begin{inline_code}
 \begin{verbatim}
 # Execute A on starting the alpha machine, B on every transition 
 # moving through it and C upon finishing. Execute N on the newline.
 main := ( lower* >A $B %C ) . '\n' @N;
 \end{verbatim}
-\verbspace
+\end{inline_code}
+% }%%
+% END GENERATE
 
+\graphspace
 \begin{center}
-\includegraphics{exaction}
+\includegraphics[scale=0.45]{exaction}
 \end{center}
+\graphspace
+
 
 \section{State Action Embedding Operators}
 
@@ -2275,8 +2432,8 @@ advantageous from a language design point of view because it greatly simplifies
 the design.  
 
 \begin{comment}
+% FIXME: Add
 Example from 2 page poster paper.
-% GENERATE: lmkleene
 % %%{
 % machine lmkleene;
 % action id {}
@@ -2293,10 +2450,9 @@ main := ( lower+ ':' ' '* <: (
 % }%%
 % END GENERATE
 
-% FIXME: Add
-%\begin{center}
-%\includegraphics[scale=0.4]{lmkleene.ps}
-%\end{center}
+\begin{center}
+\includegraphics[scale=0.4]{lmkleene}
+\end{center}
 \end{comment}
 
 \subsection{Entry-Guarded Contatenation}
@@ -2315,17 +2471,23 @@ pursued concurrently. In the following example, entry-guarded concatenation is
 used to move out of a machine that matches everything at the first sign of an
 end-of-input marker.
 
-\verbspace
+% GENERATE: exstpri
+% OPT: -p
+% %%{
+% machine exstpri;
+\begin{comment}
 \begin{verbatim}
 # Leave the catch-all machine on the first character of FIN.
 main := any* :> 'FIN';
 \end{verbatim}
-\verbspace
+\end{comment}
+% }%%
+% END GENERATE
 
 \begin{center}
-\includegraphics{exstpri}
+\includegraphics[scale=0.45]{exstpri}
 \end{center}
-\graphspace
+
 
 Entry-guarded concatenation is equivalent to the following:
 
@@ -2348,17 +2510,22 @@ machine only when the second accepts. In the following example, finish-guarded
 concatenation causes the move out of the machine that matches everything to be
 delayed until the full end-of-input marker has been matched.
 
-\verbspace
+% GENERATE: exdonepri
+% OPT: -p
+% %%{
+% machine exdonepri;
+\begin{comment}
 \begin{verbatim}
 # Leave the catch-all machine on the last character of FIN.
 main := any* :>> 'FIN';
 \end{verbatim}
-\verbspace
+\end{comment}
+% }%%
+% END GENERATE
 
 \begin{center}
-\includegraphics{exdonepri}
+\includegraphics[scale=0.45]{exdonepri}
 \end{center}
-\graphspace
 
 Finish-guarded concatenation is equivalent to the following:
 
@@ -2405,6 +2572,14 @@ longest-match kleene star to an alternation of token patterns, as in the
 following.
 
 \verbspace
+
+% GENERATE: exfinpri
+% OPT: -p
+% %%{
+% machine exfinpri;
+% action A {}
+% action B {}
+\begin{comment}
 \begin{verbatim}
 # Repeat tokens, but make sure to get the longest match.
 main := (
@@ -2413,13 +2588,13 @@ main := (
     ' '
 )**;
 \end{verbatim}
-
-\verbspace
+\end{comment}
+% }%%
+% END GENERATE
 
 \begin{center}
-\includegraphics{exfinpri}
+\includegraphics[scale=0.45]{exfinpri}
 \end{center}
-\graphspace
 
 If a regular kleene star were used the machine above would not be able to
 distinguish between extending a word and beginning a new one.  This operator is
