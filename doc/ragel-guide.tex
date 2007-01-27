@@ -20,7 +20,7 @@
 
 \documentclass[letterpaper,12pt,oneside]{book}
 \usepackage{pslatex}
-\usepackage{graphics}
+\usepackage{graphicx}
 \usepackage{comment}
 \usepackage{multicol}
 \usepackage[medium]{titlesec}
@@ -47,6 +47,8 @@
 \setcounter{totalnumber}{50}
 \setcounter{topnumber}{50}
 \setcounter{bottomnumber}{50}
+
+\newenvironment{inline_code}{\def\baselinestretch{1}\vspace{12pt}\small}{}
 
 \begin{document}
 
@@ -650,8 +652,20 @@ the sequence of characters in the quoted string. If there are 5 characters
 there will be 6 states chained together with the characters in the string. See
 Section \ref{lexing} for information on valid escape sequences. 
 
-\begin{center} 
-\includegraphics{bmconcat}
+% GENERATE: bmconcat
+% %%{
+% machine bmconcat;
+\begin{comment}
+\begin{verbatim}
+main := 'hello';
+\end{verbatim}
+\end{inline_code}
+\end{comment}
+% }%%
+% END GENERATE
+
+\begin{center}
+\includegraphics[scale=0.45]{bmconcat}
 \end{center}
 
 It is possible
@@ -669,27 +683,64 @@ using an initial \verb|^| character as in standard regular expressions.
 See Section \ref{lexing} for information on valid escape sequences
 in or expressions.
 
+% GENERATE: bmor
+% %%{
+% machine bmor;
+\begin{comment}
+\begin{verbatim}
+main := [hello];
+\end{verbatim}
+\end{inline_code}
+\end{comment}
+% }%%
+% END GENERATE
+
 \begin{center}
-\includegraphics{bmor}
+\includegraphics[scale=0.45]{bmor}
 \end{center}
 
 \item \verb|''|, \verb|""|, and \verb|[]| -- Zero Length Machine.  Produces a machine
 that matches the zero length string. Zero length machines have one state that is both
 a start state and a final state.
 
+% GENERATE: bmnull
+% %%{
+% machine bmnull;
+\begin{comment}
+\begin{verbatim}
+main := '';
+\end{verbatim}
+\end{inline_code}
+\end{comment}
+% }%%
+% END GENERATE
+
 \begin{center}
-\includegraphics{bmnull}
+\includegraphics[scale=0.45]{bmnull}
 \end{center}
 
-\item \verb|number| -- Simple Machine. Produces a two state machine with one
+% FIXME: More on the range of values here.
+\item \verb|42| -- Simple Machine. Produces a two state machine with one
 transition on the given number. The number may be in decimal or hexadecimal
 format and should be in the range allowed by the alphabet type. The minimum and
 maximum values permitted are defined by the host machine that Ragel is compiled
 on. For example, numbers in a \verb|short| alphabet on an i386 machine should
 be in the range \verb|-32768| to \verb|32767|.
 
+% GENERATE: bmnum
+% %%{
+% machine bmnum;
+\begin{comment}
+\begin{verbatim}
+main := 42;
+\end{verbatim}
+\end{inline_code}
+\end{comment}
+% }%%
+% END GENERATE
+
 \begin{center}
-\includegraphics{bmnum}
+\includegraphics[scale=0.45]{bmnum}
 \end{center}
 
 \item \verb|/simple_regex/| -- Regular Expression. Regular expressions are
