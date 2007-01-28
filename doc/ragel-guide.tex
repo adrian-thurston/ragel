@@ -2540,9 +2540,11 @@ to which the priority is assigned.
 
 \section{Guarded Operators that Encapsulate Priorities}
 
-Priorities can be very confusing for the user. They force the user to imagine
-the transitions inside machines and work out the precise effects of regular
-expression operations. When we consider that this problem is worsened by the
+Priorities embeddings are a very expressive mechanism. At the same time they
+can be very confusing for the user. They force the user to imagine
+the transitions inside two interacting expressions and work out the precise
+effects of the operations between them. When we consider
+that this problem is worsened by the
 potential for side effects caused by unintended priority name collisions, we
 see that exposing the user to priorities is rather undesirable.
 
@@ -2552,29 +2554,44 @@ into a small set of operators and fully hide them from the user. This is
 advantageous from a language design point of view because it greatly simplifies
 the design.  
 
-\begin{comment}
-% FIXME: Add
-Example from 2 page poster paper.
-% %%{
-% machine lmkleene;
-% action id {}
-% action number {}
-% action ws {}
-% action mark {}
-\begin{verbatim}
-main := ( lower+ ':' ' '* <: (
-    ( lower ( lower | digit )* ) >mark %id | 
-    digit+ >mark %number | 
-    ' '+ >mark %ws
-)** '\n' )*;
-\end{verbatim}
-% }%%
-% END GENERATE
+Going back to the C comment example, we can now properly specify
+it using a guarded concatenation operator which we call {\em finish-guarded
+concatenation}. From the user's point of view, this operator terminates the
+first machine when the second machine moves into a final state.  It chooses a
+unique name and uses it to embed a low priority into all
+transitions of the first machine. A higher priority is then embedded into the
+transitions of the second machine which enter into a final state. The following
+example yields a machine identical to the example in Section \ref{priorities}
 
-\begin{center}
-\includegraphics[scale=0.4]{lmkleene}
-\end{center}
-\end{comment}
+\begin{inline_code}
+\begin{verbatim}
+comment = '/*' ( any @comm )* :>> '*/';
+\end{verbatim}
+\end{inline_code}
+
+Another guarded operator is {\em left-guarded concatenation}, given by the
+\verb|<:| compound symbol. This operator places a higher priority on all
+transitions of the first machine. This is useful if one must forcibly separate
+two lists that contain common elements. For example, one may need to tokenize a
+stream, but first consume leading whitespace.
+
+Ragel also includes a {\em longest-match kleene star} operator, given by the
+\verb|**| compound symbol. This 
+guarded operator embeds a high
+priority into all transitions of the machine. 
+A lower priority is then embedded into pending out transitions
+(in a manner similar to pending out action embeddings, described in Section
+\ref{out-actions}).  When the kleene star operator makes the epsilon transitions from
+the final states into the start state, the lower priority will be transferred
+to the epsilon transitions. In cases where following an epsilon transition
+out of a final state conflicts with an existing transition out of a final
+state, the epsilon transition will be dropped.
+
+Other guarded operators are conceivable, such as guards on union that cause one
+alternative to take precedence over another. These may be implemented when it
+is clear they constitute a frequently used operation.
+In the next section we discuss the explicit specification of state machines
+using state charts.
 
 \subsection{Entry-Guarded Contatenation}
 
@@ -2592,21 +2609,21 @@ pursued concurrently. In the following example, entry-guarded concatenation is
 used to move out of a machine that matches everything at the first sign of an
 end-of-input marker.
 
-% GENERATE: exstpri
+% GENERATE: entryguard
 % OPT: -p
 % %%{
-% machine exstpri;
-\begin{comment}
+% machine entryguard;
+\begin{inline_code}
 \begin{verbatim}
 # Leave the catch-all machine on the first character of FIN.
 main := any* :> 'FIN';
 \end{verbatim}
-\end{comment}
+\end{inline_code}
 % }%%
 % END GENERATE
 
 \begin{center}
-\includegraphics[scale=0.45]{exstpri}
+\includegraphics[scale=0.45]{entryguard}
 \end{center}
 
 
@@ -2631,21 +2648,21 @@ machine only when the second accepts. In the following example, finish-guarded
 concatenation causes the move out of the machine that matches everything to be
 delayed until the full end-of-input marker has been matched.
 
-% GENERATE: exdonepri
+% GENERATE: finguard
 % OPT: -p
 % %%{
-% machine exdonepri;
-\begin{comment}
+% machine finguard;
+\begin{inline_code}
 \begin{verbatim}
 # Leave the catch-all machine on the last character of FIN.
 main := any* :>> 'FIN';
 \end{verbatim}
-\end{comment}
+\end{inline_code}
 % }%%
 % END GENERATE
 
 \begin{center}
-\includegraphics[scale=0.45]{exdonepri}
+\includegraphics[scale=0.45]{finguard}
 \end{center}
 
 Finish-guarded concatenation is equivalent to the following:
@@ -2666,11 +2683,25 @@ sequence with another sequence composed of some of the same characters. For
 example, one can consume leading whitespace before tokenizing a sequence of
 whitespace-separated words as in:
 
-\verbspace
+% GENERATE: leftguard
+% OPT: -p
+% %%{
+% machine leftguard;
+% action alpha {}
+% action ws {}
+% action start {}
+% action fin {}
+\begin{inline_code}
 \begin{verbatim}
-( ' '* <: ( ' '+ | [a-z]+ )** )
+main := ( ' '* >start %fin ) <: ( ' ' $ws | [a-z] $alpha )*;
 \end{verbatim}
-\verbspace
+\end{inline_code}
+% }%%
+% END GENERATE
+
+\begin{center}
+\includegraphics[scale=0.45]{leftguard}
+\end{center}
 
 Left-guarded concatenation is equivalent to the following:
 
@@ -2694,13 +2725,13 @@ following.
 
 \verbspace
 
-% GENERATE: exfinpri
+% GENERATE: lmkleene
 % OPT: -p
 % %%{
 % machine exfinpri;
 % action A {}
 % action B {}
-\begin{comment}
+\begin{inline_code}
 \begin{verbatim}
 # Repeat tokens, but make sure to get the longest match.
 main := (
@@ -2709,12 +2740,12 @@ main := (
     ' '
 )**;
 \end{verbatim}
-\end{comment}
+\end{inline_code}
 % }%%
 % END GENERATE
 
 \begin{center}
-\includegraphics[scale=0.45]{exfinpri}
+\includegraphics[scale=0.45]{lmkleene}
 \end{center}
 
 If a regular kleene star were used the machine above would not be able to
@@ -2735,9 +2766,10 @@ the same character, the differing priorities causes the transition which
 stays in the machine to take precedence.  The transition that wraps around is
 dropped.
 
-Note that this operator does not build a scanner in the traditional sense because
-there is never any backtracking. To build a scanner in the traditional sense
-use the Longest-Match machine construction described Section \ref{generating-scanners}.
+Note that this operator does not build a scanner in the traditional sense
+because there is never any backtracking. To build a scanner in the traditional
+sense use the Longest-Match machine construction described Section
+\ref{generating-scanners}.
 
 \chapter{Interface to Host Program}
 
