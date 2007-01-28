@@ -38,9 +38,6 @@ ragel-guide.pdf: $(PDFFIGS) $(INPUT)
 %.pdf: %.fig
 	fig2dev -L pdf $< $@
 
-figs: 
-	./genfigs.sh
-
 %.pdf: %.tex
 	pdflatex -interaction=nonstopmode $< >/dev/null
 	pdflatex -interaction=nonstopmode $< >/dev/null

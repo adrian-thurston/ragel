@@ -1,5 +1,5 @@
 %
-%   Copyright 2001-2006 Adrian Thurston <thurston@cs.queensu.ca>
+%   Copyright 2001-2007 Adrian Thurston <thurston@cs.queensu.ca>
 %
 
 %   This file is part of Ragel.
@@ -17,6 +17,8 @@
 %   You should have received a copy of the GNU General Public License
 %   along with Ragel; if not, write to the Free Software
 %   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+
+% TODO: Need a section on the different strategies for handline recursion.
 
 \documentclass[letterpaper,11pt,oneside]{book}
 \usepackage{graphicx}
@@ -1064,7 +1066,9 @@ main := /[a-z][a-z]*/ - ( 'for' | 'int' );
 Strong difference produces a machine that matches any string of the first
 machine which does not have any string of the second machine as a substring. In
 the following example, strong subtraction is used to excluded \verb|CRLF| from
-a sequence.
+a sequence. In the corresponding visualization, the label \verb|DEF| is short
+for default. The default transition is taken if no other transition can be
+taken.
 
 % GENERATE: exstrongsubtr
 % OPT: -p
@@ -1769,6 +1773,24 @@ $n$ is the number of states.
 
 \chapter{User Actions}
 
+Ragel permits the user to embed actions into the transitions of a regular
+expression's corresponding state machine. These actions are executed when the
+generated code moves over a transition.  Like the regular expression operators,
+the action embedding operators are fully compositional. They take a state
+machine and an action as input, embed the action, and yield a new state machine
+which can be used in the construction of other machines. Due to the
+compositional nature of embeddings, the user has complete freedom in the
+placement of actions.
+
+A machine's transitions are categorized into four classes, The action embedding
+operators access the transitions defined by these classes.  The {\em entering
+transition} operator \verb|>| isolates the start state, then embeds an action
+into all transitions leaving it. The {\em finishing transition} operator
+\verb|@| embeds an action into all transitions going into a final state.  The
+{\em all transition} operator \verb|$| embeds an action into all transitions of
+an expression. The {\em pending out transition} operator \verb|%| provides
+access to yet-unmade leaving transitions. 
+
 \section{Embedding Actions}
 
 \begin{verbatim}
@@ -2281,8 +2303,8 @@ commands should therefore be used with caution.
 
 Along with the flexibility of arbitrary action embeddings comes a need to
 control nondeterminism in regular expressions. If a regular expression is
-ambiguous, then sup-components of a parser other than the intended parts may be
-active at any given time. This means that actions which are irrelevant to the
+ambiguous, then sup-components of a parser other than the intended parts may become
+active. This means that actions which are irrelevant to the
 current subset of the parser may be executed, causing problems for the
 programmer.
 
@@ -2291,12 +2313,9 @@ recognition tasks will usually function as intended regardless of the presence
 of ambiguities. It is quite common for users of scripting languages to write
 regular expressions that are heavily ambiguous and it generally does not
 matter. As long as one of the potential matches is recognized, there can be any
-number of other matches present.
-
-In some systems, matched text is attributed to a portion of a regular
-expression. Armed with the knowledge that the regular expression engine always
-pursues the longest match or the shortest match, the user is able to compose
-their patterns accordingly.
+number of other matches present.  In some parsing systems the run-time engine
+can employ a strategy for resolving ambiguities, for example always pursuing
+the longest possible match and discarding others.
 
 In Ragel, there is no regular expression run-time engine, just a simple state
 machine execution model. When we begin to embed actions and face the
@@ -2304,67 +2323,161 @@ possibility of spurious action execution, it becomes clear that controlling
 nondeterminism at the machine construction level is very important. Consider
 the following example.
 
-\verbspace
+% GENERATE: lines1
+% OPT: -p
+% %%{
+% machine lines1;
+% action first {}
+% action tail {}
+% word = [a-z]+;
+\begin{inline_code}
 \begin{verbatim}
-lines = ( word ( space word )* '\n' )*;
+ws = [\n\t ];
+line = word $first ( ws word $tail )* '\n';
+lines = line*;
 \end{verbatim}
-\verbspace
+\end{inline_code}
+% main := lines;
+% }%%
+% END GENERATE
 
-Since the \verb|space| built-in expression includes the newline character, we will
-not leave the line expression when a newline character is seen. We will
+\begin{center}
+\includegraphics[scale=0.45]{lines1}
+\end{center}
+
+Since the \verb|ws| expression includes the newline character, we will
+not finish the \verb|line| expression when a newline character is seen. We will
 simultaneously pursue the possibility of matching further words on the same
-line and the possibility of matching a second line. The solution here is easy:
-simply exclude the newline character from the \verb|space| expression. Solving
-this kind of problem is straightforward because the string that terminates the
-sequence is a single character long. When it is multiple characters long we
-have a more difficult problem, as shown by the following example.
+line and the possibility of matching a second line. Evidence of this fact is 
+in the state tables. On several transitions both the \verb|first| and
+\verb|tail| actions are executed.  The solution here is simple: exclude
+the newline character from the \verb|ws| expression. 
 
-\verbspace
+% GENERATE: lines2
+% OPT: -p
+% %%{
+% machine lines2;
+% action first {}
+% action tail {}
+% word = [a-z]+;
+\begin{inline_code}
 \begin{verbatim}
-comment = '/*' any* '*/';
+ws = [\t ];
+line = word $first ( ws word $tail )* '\n';
+lines = line*;
 \end{verbatim}
-\verbspace
+\end{inline_code}
+% main := lines;
+% }%%
+% END GENERATE
+
+\begin{center}
+\includegraphics[scale=0.45]{lines2}
+\end{center}
+
+Solving this kind of problem is straightforward when the ambiguity is created
+by strings which are a single character long.  When the ambiguity is created by
+strings which are multiple characters long we have a more difficult problem.
+The following example is an incorrect attempt at a regular expression for C
+language comments. 
+
+% GENERATE: comments1
+% OPT: -p
+% %%{
+% machine comments1;
+% action comm {}
+\begin{inline_code}
+\begin{verbatim}
+comment = '/*' ( any @comm )* '*/';
+main := comment ' ';
+\end{verbatim}
+\end{inline_code}
+% }%%
+% END GENERATE
+
+\begin{center}
+\includegraphics[scale=0.45]{comments1}
+\end{center}
 
 Using standard concatenation, we will never leave the \verb|any*| expression.
 We will forever entertain the possibility that a \verb|'*/'| string that we see
 is contained in a longer comment and that, simultaneously, the comment has
-ended. One way to approach the problem is to exclude the terminating string
+ended.  The concatenation of the \verb|comment| machine with \verb|SP| is done
+to show this. When we match space, we are also still matching the comment body.
+
+One way to approach the problem is to exclude the terminating string
 from the \verb|any*| expression using set difference. We must be careful to
 exclude not just the terminating string, but any string that contains it as a
 substring. A verbose, but proper specification of a C comment parser is given
-by the following regular expression. Note that this operation is the basis of the
-strong subtraction operator.
+by the following regular expression. 
 
-\verbspace
+% GENERATE: comments2
+% OPT: -p
+% %%{
+% machine comments2;
+% action comm {}
+\begin{inline_code}
 \begin{verbatim}
-comment = '/*' ( any* - ( any* '*/' any* ) ) '*/';
+comment = '/*' ( ( any @comm )* - ( any* '*/' any* ) ) '*/';
 \end{verbatim}
-\verbspace
+\end{inline_code}
+% main := comment;
+% }%%
+% END GENERATE
 
+\begin{center}
+\includegraphics[scale=0.45]{comments2}
+\end{center}
+
+
+We have phrased the problem of controlling non-determinism in terms of
+excluding strings common to two expressions which interact when combined.
 We can also phrase the problem in terms of the transitions of the state
 machines that implement these expressions. During the concatenation of
 \verb|any*| and \verb|'*/'| we will be making transitions that are composed of
-both the loop of the first expression and the characters of the second.
+both the loop of the first expression and the final character of the second.
 At this time we want the transition on the \verb|'/'| character to take precedence
 over and disallow the transition that originated in the \verb|any*| loop.
 
-In another scenario, we wish to implement a lightweight tokenizer that we can
+In another parsing problem, we wish to implement a lightweight tokenizer that we can
 utilize in the composition of a larger machine. For example, some HTTP headers
-have a token stream as a sub-language.
+have a token stream as a sub-language. The following example is an attempt
+at a regular expression-based tokenizer that does not function correctly due to
+unintended nondeterminism.
 
-\verbspace
+% GENERATE: smallscanner
+% OPT: -p
+% %%{
+% machine smallscanner;
+% action start_str {}
+% action on_char {}
+% action finish_str {}
+\begin{inline_code}
 \begin{verbatim}
-header_contents = ( lower+ | digit+ | ' ' )*;
+header_contents = ( 
+    lower+ >start_str $on_char %finish_str | 
+    ' '
+)*;
 \end{verbatim}
-\verbspace
+\end{inline_code}
+% main := header_contents;
+% }%%
+% END GENERATE
+
+\begin{center}
+\includegraphics[scale=0.45]{smallscanner}
+\end{center}
 
 In this case, the problem with using a standard kleene star operation is that
-there is an ambiguity between extending a token and wrapping around the
-machine to begin a new token. Using the standard operator, we get
-an undesirable nondeterministic behaviour. What is required is for the
+there is an ambiguity between extending a token and wrapping around the machine
+to begin a new token. Using the standard operator, we get an undesirable
+nondeterministic behaviour. Evidence of this can be seen on the transition out
+of state one to itself.  The transition extends the string, and simultaneously,
+finishes the string only to immediately begin a new one.  What is required is
+for the
 transitions that represent an extension of a token to take precedence over the
-transitions that represent the beginning of a new token. For this problem,
-there is no simple solution that uses standard regular expressions.
+transitions that represent the beginning of a new token. For this problem
+there is no simple solution that uses standard regular expression operators.
 
 \section{Priorities}
 

@@ -3,13 +3,7 @@
 
 input=ragel-guide.tex
 
-if [ $# = 0 ]; then
-	figs=`awk '/^% GENERATE: *[a-z0-9A-Z_\.\-]+ *$/ {print $3;}' $input`
-else
-	figs="$@"
-fi
-
-for fig in $figs; do
+for fig; do
 	if awk -f extract.awk -vexname=$fig $input > /dev/null; then
 		echo generating ${fig}.fig
 		opt=`awk -f extract.awk -vexname=$fig $input | 
