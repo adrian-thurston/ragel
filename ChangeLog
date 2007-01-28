@@ -1,8 +1,16 @@
-For Next Release
-================
+Ragel 5.17 - Jan 28, 2007
+=========================
+ -The scanners and parsers in both the frontend and backend programs were
+  completely rewritten using Ragel and Kelbt.
  -The '%when condition' syntax was functioning like '$when condition'. This
   was fixed.
-
+ -In the Vim syntax file fixes to the matching of embedding operators were
+  made. Also, improvements to the sync patterns were made.
+ -Added pullscan.rl to the examples directory. It is an example of doing
+  pull-based scanning. Also, xmlscan.rl in rlcodegen is a pull scanner.
+ -The introduction chapter of the manual was improved. The manually drawn
+  figures for the examples were replaced with graphviz drawn figures.
+ 
 Ragel 5.16 - Nov 20, 2006
 =========================
  -Bug fix: the fhold and fexec directives did not function correctly in

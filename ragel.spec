@@ -1,16 +1,16 @@
 Summary:      Ragel State Machine Compiler
 Name:         ragel
-Version:      5.16
+Version:      5.17
 Release:      1
 
-URL:          http://www.cs.queensu.ca/home/thurston/ragel/
+URL:          http://www.cs.queensu.ca/~thurston/ragel/
 Vendor:       Adrian Thurston
 Packager:     Adrian Thurston
 Distribution: Any
 Group:        Development/Other
 License:      GPL
 
-Source0:      http://www.cs.queensu.ca/home/thurston/ragel/%{name}-%{version}.tar.gz
+Source0:      http://www.cs.queensu.ca/~thurston/ragel/%{name}-%{version}.tar.gz
 
 Prefix:       /usr
 BuildRoot:    %_tmppath/%name-%version-root
