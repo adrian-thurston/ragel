@@ -568,20 +568,6 @@ set of states.  At a very minimum the \verb|main| machine must be instantiated.
 Other machines may be instantiated and control passed to them by use of
 \verb|fcall|, \verb|fgoto| or \verb|fnext| statements.
 
-\begin{comment}
-\subsection{Write Statement}
-
-\begin{verbatim}
-write <component> [options];
-\end{verbatim}
-\verbspace
-
-The write statement is used to generate parts of the machine. There are four
-components that can be generated: the state machine's static data, the
-initialization code, the execution code and the EOF action execution code.  The
-write statement is described in detail in Section \ref{write-statement}.
-\end{comment}
-
 \section{Lexical Analysis of an FSM Specification}
 \label{lexing}
 
@@ -1330,431 +1316,6 @@ Character-level negation produces a machine that matches any single character
 not matched by the given machine. Character-Level Negation is equivalent to
 \verb|(any - expr)|.
 
-\section{State Charts}
-
-It is not uncommon for programmers to implement
-parsers as manually-coded state machines, either using a switch statement or a
-state map compiler which takes a list of states, transitions and actions, and
-generates code. 
-
-This method can be a very effective programming technique for producing robust
-code. The key disadvantage becomes clear when one attempts to comprehend such a
-parser. Machines coded in this way usually require many lines, causing logic to
-be spread out over large distances in the source file. Remembering the function
-of a large number of states can be difficult and organizing the parser in a
-sensible way requires discipline because branches and repetition present many
-file layout options.  This kind of programming takes a specification with
-inherent structure such as looping, alternation and concatenation and expresses
-it in a flat form. 
-
-If we could take an isolated component of a manually programmed state chart,
-that is, a subset of states that has only one entry point, and implement it
-using regular language operators then we could eliminate all the explicit
-naming of the states contained in it. By eliminating explicitly named states
-and replacing them with higher-level specifications we simplify a parser
-specification.
-
-For example, sometimes chains of states are needed, with only a small number of
-possible characters appearing along the chain. These can easily be replaced
-with a concatenation of characters. Sometimes a group of common states
-implement a loop back to another single portion of the machine. Rather than
-manually duplicate all the transitions that loop back, we may be able to
-express the loop using a kleene star operator.
-
-Ragel allows one to take this state map simplification approach. We can build
-state machines using a state map model and implement portions of the state map
-using regular languages. In place of any transition in the state machine,
-entire sub-state machines can be given. These can encapsulate functionality
-defined elsewhere. An important aspect of the Ragel approach is that when we
-wrap up a collection of states using a regular expression we do not loose
-access to the states and transitions. We can still execute code on the
-transitions that we have encapsulated.
-
-\subsection{Join}
-
-\verb|expr , expr , ...|
-\verbspace
-
-Join a list of machines together without
-drawing any transitions, without setting up a start state, and without
-designating any final states. Transitions between the machines may be specified
-using labels and epsilon transitions. The start state must be explicity
-specified with the ``start'' label. Final states may be specified with the an
-epsilon transition to the implicitly created ``final'' state. The join
-operation allows one to build machines using a state chart model.
-
-\subsection{Label}
-
-\verb|label: expr| 
-\verbspace
-
-Attaches a label to an expression. Labels can be
-used as the target of epsilon transitions and explicit control transfer
-statements such \verb|fgoto| and \verb|fnext| in action
-code.
-
-\subsection{Epsilon}
-
-\verb|expr -> label| 
-\verbspace
-
-Draws an epsilon transition to the state defined
-by \verb|label|.  Epsilon transitions are made deterministic when join
-operators are evaluated. Epsilon transitions that are not in a join operation
-are made deterministic when the machine definition that contains the epsilon is
-complete. See Section \ref{labels} for information on referencing labels.
-
-
-\section{Scanners}
-\label{generating-scanners}
-
-The longest-match operator can be used to construct scanners.  The generated
-machine repeatedly attempts to match one of the given patterns, first favouring
-longer pattern matches over shorter ones. If there is a choice between equal
-length matches, the match of the pattern which appears first is chosen.
-
-\verbspace
-\begin{verbatim}
-<machine_name> := |* 
-        pattern1 => action1;
-        pattern2 => action2;
-        ...
-    *|;
-\end{verbatim}
-\verbspace
-
-The longest-match construction operator is not a pure state machine operator.
-It relies on the \verb|tokstart|, \verb|tokend| and \verb|act| variables to be
-present so that it can backtrack and make pointers to the matched text
-available to the user. If input is processed using multiple calls to the
-execute code then the user must ensure that when a token is only partially
-matched that the prefix is preserved on the subsequent invocation of the
-execute code.
-
-The \verb|tokstart| variable must be defined as a pointer to the input data.
-It is used for recording where the current token match begins. This variable
-may be used in action code for retrieving the text of the current match.  Ragel
-ensures that in between tokens and outside of the longest-match machines that
-this pointer is set to null. In between calls to the execute code the user must
-check if \verb|tokstart| is set and if so, ensure that the data it points to is
-preserved ahead of the next buffer block. This is described in more detail
-below.
-
-The \verb|tokend| variable must also be defined as a pointer to the input data.
-It is used for recording where a match ends and where scanning of the next
-token should begin. This can also be used in action code for retrieving the
-text of the current match.
-
-The \verb|act| variable must be defined as an integer type. It is used for
-recording the identity of the last pattern matched when the scanner must go
-past a matched pattern in an attempt to make a longer match. If the longer
-match fails it may need to consult the act variable. In some cases use of the act
-variable can be avoided because the value of the current state is enough
-information to determine which token to accept, however in other cases this is
-not enough and so the \verb|act| variable is used. 
-
-When the longest-match operator is in use, the user's driver code must take on
-some buffer management functions. The following algorithm gives an overview of
-the steps that should be taken to properly use the longest-match operator.
-
-\begin{itemize}
-\setlength{\parskip}{0pt}
-\item Read a block of input data.
-\item Run the execute code.
-\item If \verb|tokstart| is set, the execute code will expect the incomplete
-token to be preserved ahead of the buffer on the next invocation of the execute
-code.  
-\begin{itemize}
-\item Shift the data beginning at \verb|tokstart| and ending at \verb|pe| to the
-beginning of the input buffer.
-\item Reset \verb|tokstart| to the beginning of the buffer. 
-\item Shift \verb|tokend| by the distance from the old value of \verb|tokstart|
-to the new value. The \verb|tokend| variable may or may not be valid.  There is
-no way to know if it holds a meaningful value because it is not kept at null
-when it is not in use. It can be shifted regardless.
-\end{itemize}
-\item Read another block of data into the buffer, immediately following any
-preserved data.
-\item Run the scanner on the new data.
-\end{itemize}
-
-Figure \ref{preserve_example} shows the required handling of an input stream in
-which a token is broken by the input block boundaries. After processing up to
-and including the ``t'' of ``characters'', the prefix of the string token must be
-retained and processing should resume at the ``e'' on the next iteration of
-the execute code.
-
-If one uses a large input buffer for collecting input then the number of times
-the shifting must be done will be small. Furthermore, if one takes care not to
-define tokens that are allowed to be very long and instead processes these
-items using pure state machines or sub-scanners, then only a small amount of
-data will ever need to be shifted.
-
-\begin{figure}
-\begin{verbatim}
-      a)           A stream "of characters" to be scanned.
-                   |        |          |
-                   p        tokstart   pe
-
-      b)           "of characters" to be scanned.
-                   |          |        |
-                   tokstart   p        pe
-\end{verbatim}
-\caption{Following an invocation of the execute code there may be a partially
-matched token (a). The data of the partially matched token 
-must be preserved ahead of the new data on the next invocation (b).}
-\label{preserve_example}
-\end{figure}
-
-Since scanners attempt to make the longest possible match of input, in some
-cases they are not able to identify a token upon parsing its final character,
-they must wait for a lookahead character. For example if trying to match words,
-the token match must be triggered on following whitespace in case more
-characters of the word have yet to come. The user must therefore arrange for an
-EOF character to be sent to the scanner to flush out any token that has not yet
-been matched.  The user can exclude a single character from the entire scanner
-and use this character as the EOF character, possibly specifying an EOF action.
-For most scanners, zero is a suitable choice for the EOF character. 
-
-Alternatively, if whitespace is not significant and ignored by the scanner, the
-final real token can be flushed out by simply sending an additional whitespace
-character on the end of the stream. If the real stream ends with whitespace
-then it will simply be extended and ignored. If it does not, then the last real token is
-guaranteed to be flushed and the dummy EOF whitespace ignored.
-An example scanner processing loop is given in Figure \ref{scanner-loop}.
-
-\begin{figure}
-\small
-\begin{verbatim}
-    int have = 0;
-    bool done = false;
-    while ( !done ) {
-        /* How much space is in the buffer? */
-        int space = BUFSIZE - have;
-        if ( space == 0 ) {
-            /* Buffer is full. */
-            cerr << "TOKEN TOO BIG" << endl;
-            exit(1);
-        }
-
-        /* Read in a block after any data we already have. */
-        char *p = inbuf + have;
-        cin.read( p, space );
-        int len = cin.gcount();
-
-        /* If no data was read, send the EOF character.
-        if ( len == 0 ) {
-            p[0] = 0, len++;
-            done = true;
-        }
-
-        char *pe = p + len;
-        %% write exec;
-
-        if ( cs == RagelScan_error ) {
-            /* Machine failed before finding a token. */
-            cerr << "PARSE ERROR" << endl;
-            exit(1);
-        }
-
-        if ( tokstart == 0 )
-            have = 0;
-        else {
-            /* There is a prefix to preserve, shift it over. */
-            have = pe - tokstart;
-            memmove( inbuf, tokstart, have );
-            tokend = inbuf + (tokend-tokstart);
-            tokstart = inbuf;
-        }
-    }
-\end{verbatim}
-\caption{A processing loop for a scanner.}
-\label{scanner-loop}
-\end{figure}
-
-
-\section{Write Statement}
-\label{write-statement}
-
-\begin{verbatim}
-write <component> [options];
-\end{verbatim}
-\verbspace
-
-
-The write statement is used to generate parts of the machine. 
-There are four
-components that can be generated by a write statement. These components are the
-state machine's data, initialization code, execution code and EOF action
-execution code. A write statement may appear before a machine is fully defined.
-This allows one to write out the data first then later define the machine where
-it is used. An example of this is show in Figure \ref{fbreak-example}.
-
-\subsection{Write Data}
-\begin{verbatim}
-write data [options];
-\end{verbatim}
-\verbspace
-
-The write data statement causes Ragel to emit the constant static data needed
-by the machine. In table-driven output styles (see Section \ref{genout}) this
-is a collection of arrays that represent the states and transitions of the
-machine.  In goto-driven machines much less data is emitted. At the very
-minimum a start state \verb|name_start| is generated.  All variables written
-out in machine data have both the \verb|static| and \verb|const| properties and
-are prefixed with the name of the machine and an
-underscore. The data can be placed inside a class, inside a function, or it can
-be defined as global data.
-
-Two variables are written that may be used to test the state of the machine
-after a buffer block has been processed. The \verb|name_error| variable gives
-the id of the state that the machine moves into when it cannot find a valid
-transition to take. The machine immediately breaks out of the processing loop when
-it finds itself in the error state. The error variable can be compared to the
-current state to determine if the machine has failed to parse the input. If the
-machine is complete, that is from every state there is a transition to a proper
-state on every possible character of the alphabet, then no error state is required
-and this variable will be set to -1.
-
-The \verb|name_first_final| variable stores the id of the first final state. All of the
-machine's states are sorted by their final state status before having their ids
-assigned. Checking if the machine has accepted its input can then be done by
-checking if the current state is greater-than or equal to the first final
-state.
-
-Data generation has several options:
-
-\begin{itemize}
-\item \verb|noerror| - Do not generate the integer variable that gives the
-id of the error state.
-\item \verb|nofinal| - Do not generate the integer variable that gives the
-id of the first final state.
-\item \verb|noprefix| - Do not prefix the variable names with the name of the
-machine.
-\end{itemize}
-
-\subsection{Write Init}
-\begin{verbatim}
-write init;
-\end{verbatim}
-\verbspace
-
-The write init statement causes Ragel to emit initialization code. This should
-be executed once before the machine is started. At a very minimum this sets the
-current state to the start state. If other variables are needed by the
-generated code, such as call
-stack variables or longest-match management variables, they are also
-initialized here.
-
-\subsection{Write Exec}
-\begin{verbatim}
-write exec [options];
-\end{verbatim}
-\verbspace
-
-The write exec statement causes Ragel to emit the state machine's execution code.
-Ragel expects several variables to be available to this code. At a very minimum, the
-generated code needs access to the current character position \verb|p|, the ending
-position \verb|pe| and the current state \verb|cs|, though \verb|pe|
-can be excluded by specifying the \verb|noend| write option.
-The \verb|p| variable is the cursor that the execute code will
-used to traverse the input. The \verb|pe| variable should be set up to point to one
-position past the last valid character in the buffer.
-
-Other variables are needed when certain features are used. For example using
-the \verb|fcall| or \verb|fret| statements requires \verb|stack| and
-\verb|top| variables to be defined. If a longest-match construction is used,
-variables for managing backtracking are required.
-
-The write exec statement has one option. The \verb|noend| option tells Ragel
-to generate code that ignores the end position \verb|pe|. In this
-case the user must explicitly break out of the processing loop using
-\verb|fbreak|, otherwise the machine will continue to process characters until
-it moves into the error state. This option is useful if one wishes to process a
-null terminated string. Rather than traverse the string to discover then length
-before processing the input, the user can break out when the null character is
-seen.  The example in Figure \ref{fbreak-example} shows the use of the
-\verb|noend| write option and the \verb|fbreak| statement for processing a string.
-
-\begin{figure}
-\small
-\begin{verbatim}
-#include <stdio.h>
-%% machine foo;
-int main( int argc, char **argv )
-{
-    %% write data noerror nofinal;
-    int cs, res = 0;
-    if ( argc > 1 ) {
-        char *p = argv[1];
-        %%{ 
-            main := 
-                [a-z]+ 
-                0 @{ res = 1; fbreak; };
-            write init;
-            write exec noend;
-        }%%
-    }
-    printf("execute = %i\n", res );
-    return 0;
-}
-\end{verbatim}
-\caption{Use of {\tt noend} write option and the {\tt fbreak} statement for
-processing a string.}
-\label{fbreak-example}
-\end{figure}
-
-
-\subsection{Write EOF Actions}
-\begin{verbatim}
-write eof;
-\end{verbatim}
-\verbspace
-
-The write EOF statement causes Ragel to emit code that executes EOF actions.
-This write statement is only relevant if EOF actions have been embedded,
-otherwise it does not generate anything. The EOF action code requires access to
-the current state.
-
-\section{Referencing Names}
-\label{labels}
-
-This section describes how to reference names in epsilon transitions and
-action-based control-flow statements such as \verb|fgoto|. There is a hierarchy
-of names implied in a Ragel specification.  At the top level are the machine
-instantiations. Beneath the instantiations are labels and references to machine
-definitions. Beneath those are more labels and references to definitions, and
-so on.
-
-Any name reference may contain multiple components separated with the \verb|::|
-compound symbol.  The search for the first component of a name reference is
-rooted at the join expression that the epsilon transition or action embedding
-is contained in. If the name reference is not not contained in a join,
-the search is rooted at the machine definition that that the epsilon transition or
-action embedding is contained in. Each component after the first is searched
-for beginning at the location in the name tree that the previous reference
-component refers to.
-
-In the case of action-based references, if the action is embedded more than
-once, the local search is performed for each embedding and the result is the
-union of all the searches. If no result is found for action-based references then
-the search is repeated at the root of the name tree.  Any action-based name
-search may be forced into a strictly global search by prefixing the name
-reference with \verb|::|.
-
-The final component of the name reference must resolve to a unique entry point.
-If a name is unique in the entire name tree it can be referenced as is. If it
-is not unique it can be specified by qualifying it with names above it in the
-name tree. However, it can always be renamed.
-
-% FIXME: Should fit this in somewhere.
-% Some kinds of name references are illegal. Cannot call into longest-match
-% machine, can only call its start state. Cannot make a call to anywhere from
-% any part of a longest-match machine except a rule's action. This would result
-% in an eventual return to some point inside a longest-match other than the
-% start state. This is banned for the same reason a call into the LM machine is
-% banned.
-
 \section{State Machine Minimization}
 
 State machine minimization is the process of finding the minimal equivalent FSM accepting
@@ -1770,6 +1331,19 @@ memory, whereas Ragel supports arbitrary integer alphabets that cannot be
 listed in memory. Though exact analysis is very difficult, Ragel minimization
 runs close to $O(n \times log(n))$ and requires $O(n)$ temporary storage where
 $n$ is the number of states.
+
+\section{Visualization}
+
+Ragel is able to emit compiled state machines in Graphviz's Dot file format.
+Graphviz support allows users to perform
+incremental visualization of their parsers. User actions are displayed on
+transition labels of the graph. If the final graph is too large to be
+meaningful, or even drawn, the user is able to inspect portions of the parser
+by naming particular regular expression definitions with the \verb|-S| and
+\verb|-M| options to the \verb|ragel| program. Use of Graphviz greatly
+improves the Ragel programming experience. It allows users to learn Ragel by
+experimentation and also to track down bugs caused by unintended
+nondeterminism.
 
 \chapter{User Actions}
 
@@ -2818,6 +2392,149 @@ This is useful if a machine is to be encapsulated inside a
 structure in C code. The access statement can be used to give the name of
 a pointer to the structure.
 
+\section{Write Statement}
+\label{write-statement}
+
+\begin{verbatim}
+write <component> [options];
+\end{verbatim}
+\verbspace
+
+
+The write statement is used to generate parts of the machine. 
+There are four
+components that can be generated by a write statement. These components are the
+state machine's data, initialization code, execution code and EOF action
+execution code. A write statement may appear before a machine is fully defined.
+This allows one to write out the data first then later define the machine where
+it is used. An example of this is show in Figure \ref{fbreak-example}.
+
+\subsection{Write Data}
+\begin{verbatim}
+write data [options];
+\end{verbatim}
+\verbspace
+
+The write data statement causes Ragel to emit the constant static data needed
+by the machine. In table-driven output styles (see Section \ref{genout}) this
+is a collection of arrays that represent the states and transitions of the
+machine.  In goto-driven machines much less data is emitted. At the very
+minimum a start state \verb|name_start| is generated.  All variables written
+out in machine data have both the \verb|static| and \verb|const| properties and
+are prefixed with the name of the machine and an
+underscore. The data can be placed inside a class, inside a function, or it can
+be defined as global data.
+
+Two variables are written that may be used to test the state of the machine
+after a buffer block has been processed. The \verb|name_error| variable gives
+the id of the state that the machine moves into when it cannot find a valid
+transition to take. The machine immediately breaks out of the processing loop when
+it finds itself in the error state. The error variable can be compared to the
+current state to determine if the machine has failed to parse the input. If the
+machine is complete, that is from every state there is a transition to a proper
+state on every possible character of the alphabet, then no error state is required
+and this variable will be set to -1.
+
+The \verb|name_first_final| variable stores the id of the first final state. All of the
+machine's states are sorted by their final state status before having their ids
+assigned. Checking if the machine has accepted its input can then be done by
+checking if the current state is greater-than or equal to the first final
+state.
+
+Data generation has several options:
+
+\begin{itemize}
+\item \verb|noerror| - Do not generate the integer variable that gives the
+id of the error state.
+\item \verb|nofinal| - Do not generate the integer variable that gives the
+id of the first final state.
+\item \verb|noprefix| - Do not prefix the variable names with the name of the
+machine.
+\end{itemize}
+
+\subsection{Write Init}
+\begin{verbatim}
+write init;
+\end{verbatim}
+\verbspace
+
+The write init statement causes Ragel to emit initialization code. This should
+be executed once before the machine is started. At a very minimum this sets the
+current state to the start state. If other variables are needed by the
+generated code, such as call
+stack variables or longest-match management variables, they are also
+initialized here.
+
+\subsection{Write Exec}
+\begin{verbatim}
+write exec [options];
+\end{verbatim}
+\verbspace
+
+The write exec statement causes Ragel to emit the state machine's execution code.
+Ragel expects several variables to be available to this code. At a very minimum, the
+generated code needs access to the current character position \verb|p|, the ending
+position \verb|pe| and the current state \verb|cs|, though \verb|pe|
+can be excluded by specifying the \verb|noend| write option.
+The \verb|p| variable is the cursor that the execute code will
+used to traverse the input. The \verb|pe| variable should be set up to point to one
+position past the last valid character in the buffer.
+
+Other variables are needed when certain features are used. For example using
+the \verb|fcall| or \verb|fret| statements requires \verb|stack| and
+\verb|top| variables to be defined. If a longest-match construction is used,
+variables for managing backtracking are required.
+
+The write exec statement has one option. The \verb|noend| option tells Ragel
+to generate code that ignores the end position \verb|pe|. In this
+case the user must explicitly break out of the processing loop using
+\verb|fbreak|, otherwise the machine will continue to process characters until
+it moves into the error state. This option is useful if one wishes to process a
+null terminated string. Rather than traverse the string to discover then length
+before processing the input, the user can break out when the null character is
+seen.  The example in Figure \ref{fbreak-example} shows the use of the
+\verb|noend| write option and the \verb|fbreak| statement for processing a string.
+
+\begin{figure}
+\small
+\begin{verbatim}
+#include <stdio.h>
+%% machine foo;
+int main( int argc, char **argv )
+{
+    %% write data noerror nofinal;
+    int cs, res = 0;
+    if ( argc > 1 ) {
+        char *p = argv[1];
+        %%{ 
+            main := 
+                [a-z]+ 
+                0 @{ res = 1; fbreak; };
+            write init;
+            write exec noend;
+        }%%
+    }
+    printf("execute = %i\n", res );
+    return 0;
+}
+\end{verbatim}
+\caption{Use of {\tt noend} write option and the {\tt fbreak} statement for
+processing a string.}
+\label{fbreak-example}
+\end{figure}
+
+
+\subsection{Write EOF Actions}
+\begin{verbatim}
+write eof;
+\end{verbatim}
+\verbspace
+
+The write EOF statement causes Ragel to emit code that executes EOF actions.
+This write statement is only relevant if EOF actions have been embedded,
+otherwise it does not generate anything. The EOF action code requires access to
+the current state.
+
 \section{Maintaining Pointers to Input Data}
 
 In the creation of any parser it is not uncommon to require the collection of
@@ -2829,7 +2546,7 @@ uses of Ragel where the input data arrives in blocks, such as over a socket or
 from a file. The program will error if a pointer is set in one buffer block but
 must be used while parsing a following buffer block.
 
-The longest-match constructions exhibit this problem, requiring the maintenance
+The scanner constructions exhibit this problem, requiring the maintenance
 code described in Section \ref{generating-scanners}. If a longest-match
 construction has been used somewhere in the machine then it is possible to
 take advantage of the required prefix maintenance code in the driver program to
@@ -2916,6 +2633,30 @@ generate code.
 \section{Choosing a Generated Code Style}
 \label{genout}
 
+The Ragel code generator is very flexible. Following the lead of Re2C, the
+generated code has no dependencies and can be inserted in any function, perhaps
+inside a loop if so desired.  The user is responsible for declaring and
+initializing a number of required variables, including the current state and
+the pointer to the input stream. The user may break out of the processing loop
+and return to it at any time.
+
+Ragel is able to generate very fast-running code that implements state machines
+as directly executable code. Since very large files strain the host language
+compiler, table-based code generation is also supported. In the future we hope
+to provide a partitioned, directly executable format which is able to reduce the
+burden on the host compiler by splitting large machines across multiple functions.
+
+Ragel can be used to parse input in one block, or it can be used to parse input
+in a sequence of blocks as it arrives from a file or socket.  Parsing the
+input in a sequence of blocks brings with it a few responsibilities. If the parser
+utilizes a scanner, care must be taken to not break the input stream anywhere
+but token boundaries.  If pointers to the input stream are taken during parsing,
+care must be taken to not use a pointer which has been invalidated by movement
+to a subsequent block.  
+If the current input data pointer is moved backwards it must not be moved
+past the beginning of the current block.
+Strategies for handling these scenarios are given in Ragel's manual.
+
 There are three styles of code output to choose from. Code style affects the
 size and speed of the compiled binary. Changing code style does not require any
 change to the Ragel program. There are two table-driven formats and a goto
@@ -2991,17 +2732,656 @@ preferred output format.
 \end{tabular}
 \end{center}
 
-\section{Graphviz}
+\chapter{Beyond the Basic Model}
 
-Ragel is able to emit compiled state machines in Graphviz's Dot file format.
-Graphviz support allows users to perform
-incremental visualization of their parsers. User actions are displayed on
-transition labels of the graph. If the final graph is too large to be
-meaningful, or even drawn, the user is able to inspect portions of the parser
-by naming particular regular expression definitions with the \verb|-S| and
-\verb|-M| options to the \verb|ragel| program. Use of Graphviz greatly
-improves the Ragel programming experience. It allows users to learn Ragel by
-experimentation and also to track down bugs caused by unintended
-nondeterminism.
+\section{Parser Modularization}
+
+It is possible to use Ragel's machine construction and action embedding
+operators to specify an entire parser using a single regular expression. An
+example is given in Section \ref{examples}. In many cases this is the desired
+way to specify a parser in Ragel. However, in some scenarios, the language to
+parse may be so large that it is difficult to think about it as a single
+regular expression. It may shift between distinct parsing strategies,
+in which case modularization into several coherent blocks of the language may
+be appropriate.
+
+It may also be the case that patterns which compile to a large number of states
+must be used in a number of different contexts and referencing them in each
+context results in a very large state machine. In this case, an ability to reuse
+parsers would reduce code size.
+
+To address this, distinct regular expressions may be instantiated and linked
+together by means of a jumping and calling mechanism. This mechanism is
+analogous to the jumping to and calling of processor instructions. A jump
+command, given in action code, causes control to be immediately passed to
+another portion of the machine by way of setting the current state variable. A
+call command causes the target state of the current transition to be pushed to
+a state stack before control is transferred.  Later on, the original location
+may be returned to with a return statement. In the following example, distinct
+state machines are used to handle the parsing of two types of headers.
+
+% GENERATE: call
+% %%{
+% 	machine call;
+\begin{inline_code}
+\begin{verbatim}
+action return { fret; }
+action call_date { fcall date; }
+action call_name { fcall name; }
+
+# A parser for date strings.
+date := [0-9][0-9] '/' 
+        [0-9][0-9] '/' 
+        [0-9][0-9][0-9][0-9] '\n' @return;
+
+# A parser for name strings.
+name := ( [a-zA-Z]+ | ' ' )** '\n' @return;
+
+# The main parser.
+headers = 
+    ( 'from' | 'to' ) ':' @call_name | 
+    ( 'departed' | 'arrived' ) ':' @call_date;
+
+main := headers*;
+\end{verbatim}
+\end{inline_code}
+% }%%
+% %% write data;
+% void f()
+% {
+% 	%% write init;
+% 	%% write exec;
+% }
+% END GENERATE
+
+Calling and jumping should be used carefully as they are operations which take
+one out of the domain
+of regular languages. A machine that contains a call or jump statement in one
+of its actions should be used as an argument to a machine construction operator
+only with considerable care. Since DFA transitions may actually
+represent several NFA transitions, a call or jump embedded in one machine can
+inadvertently terminate another machine that it shares prefixes with. Despite
+this danger, theses statements have proven useful for tying together
+sub-parsers of a language into a parser for the full language, especially for
+the purpose of modularization and reducing the number of states when the
+machine contains frequently recurring patterns.
+\section{Referencing Names}
+\label{labels}
+
+This section describes how to reference names in epsilon transitions and
+action-based control-flow statements such as \verb|fgoto|. There is a hierarchy
+of names implied in a Ragel specification.  At the top level are the machine
+instantiations. Beneath the instantiations are labels and references to machine
+definitions. Beneath those are more labels and references to definitions, and
+so on.
+
+Any name reference may contain multiple components separated with the \verb|::|
+compound symbol.  The search for the first component of a name reference is
+rooted at the join expression that the epsilon transition or action embedding
+is contained in. If the name reference is not not contained in a join,
+the search is rooted at the machine definition that that the epsilon transition or
+action embedding is contained in. Each component after the first is searched
+for beginning at the location in the name tree that the previous reference
+component refers to.
+
+In the case of action-based references, if the action is embedded more than
+once, the local search is performed for each embedding and the result is the
+union of all the searches. If no result is found for action-based references then
+the search is repeated at the root of the name tree.  Any action-based name
+search may be forced into a strictly global search by prefixing the name
+reference with \verb|::|.
+
+The final component of the name reference must resolve to a unique entry point.
+If a name is unique in the entire name tree it can be referenced as is. If it
+is not unique it can be specified by qualifying it with names above it in the
+name tree. However, it can always be renamed.
+
+% FIXME: Should fit this in somewhere.
+% Some kinds of name references are illegal. Cannot call into longest-match
+% machine, can only call its start state. Cannot make a call to anywhere from
+% any part of a longest-match machine except a rule's action. This would result
+% in an eventual return to some point inside a longest-match other than the
+% start state. This is banned for the same reason a call into the LM machine is
+% banned.
+
+
+
+\section{Scanners}
+
+Though the overall language may be represented by regular expressions, it may
+be the case that a language
+contains sub-regions where the input is best represented as a sequence
+of tokens. To support the scanning of sub-regions of a language, Ragel allows
+the definition of longest-match machines, also known as scanners. The generated
+code will repeatedly attempt to match patterns from a list, favouring longer
+patterns over shorter patterns.  In the case of equal length matches, the
+generated code will favour patterns that appear ahead of others. When a scanner
+makes a match it executes the user code associated with the match, consumes the
+input then resumes scanning.
+
+On the surface, Ragel scanners are similar to those defined by Lex. Though
+there is a key distinguishing feature: patterns may be arbitrary Ragel
+expressions and can therefore contain embedded code. With a Ragel-based scanner
+the user need not wait until the end of a pattern before user code can be
+executed.
+
+The longest-match construction is not a pure state machine construction. It
+relies on several variables which enable it to backtrack and make pointers to the
+matched input text available to the user. 
+For this reason scanners must be immediately instantiated. They cannot be defined inline or
+referenced by another expression. Scanners must be jumped to or called.
+
+% GENERATE: scanner
+% %%{
+%	machine scanner;
+%	word = 'foo';
+%	head_name = 'bar';
+\begin{inline_code}
+\begin{verbatim}
+header := |*
+    word;
+    ' ';
+    '\n' => { fret; };
+*|;
+
+main := ( head_name ':' @{ fcall header; } )*;
+\end{verbatim}
+\end{inline_code}
+% }%%
+% %% write data;
+% void f()
+% {
+% 	%% write init;
+% 	%% write exec;
+% }
+% END GENERATE
+
+The scanner construction has a purpose similar to the longest-match kleene star
+operator \verb|**| when used in conjunction with the union operator. The key
+difference is that a scanner is able to backtrack to match a previously
+matched shorter string when the pursuit of a longer string fails.
+
+The longest-match operator can be used to construct scanners.  The generated
+machine repeatedly attempts to match one of the given patterns, first favouring
+longer pattern matches over shorter ones. If there is a choice between equal
+length matches, the match of the pattern which appears first is chosen.
+
+\verbspace
+\begin{verbatim}
+<machine_name> := |* 
+        pattern1 => action1;
+        pattern2 => action2;
+        ...
+    *|;
+\end{verbatim}
+\verbspace
+
+The longest-match construction operator is not a pure state machine operator.
+It relies on the \verb|tokstart|, \verb|tokend| and \verb|act| variables to be
+present so that it can backtrack and make pointers to the matched text
+available to the user. If input is processed using multiple calls to the
+execute code then the user must ensure that when a token is only partially
+matched that the prefix is preserved on the subsequent invocation of the
+execute code.
+
+The \verb|tokstart| variable must be defined as a pointer to the input data.
+It is used for recording where the current token match begins. This variable
+may be used in action code for retrieving the text of the current match.  Ragel
+ensures that in between tokens and outside of the longest-match machines that
+this pointer is set to null. In between calls to the execute code the user must
+check if \verb|tokstart| is set and if so, ensure that the data it points to is
+preserved ahead of the next buffer block. This is described in more detail
+below.
+
+The \verb|tokend| variable must also be defined as a pointer to the input data.
+It is used for recording where a match ends and where scanning of the next
+token should begin. This can also be used in action code for retrieving the
+text of the current match.
+
+The \verb|act| variable must be defined as an integer type. It is used for
+recording the identity of the last pattern matched when the scanner must go
+past a matched pattern in an attempt to make a longer match. If the longer
+match fails it may need to consult the act variable. In some cases use of the act
+variable can be avoided because the value of the current state is enough
+information to determine which token to accept, however in other cases this is
+not enough and so the \verb|act| variable is used. 
+
+When the longest-match operator is in use, the user's driver code must take on
+some buffer management functions. The following algorithm gives an overview of
+the steps that should be taken to properly use the longest-match operator.
+
+\begin{itemize}
+\setlength{\parskip}{0pt}
+\item Read a block of input data.
+\item Run the execute code.
+\item If \verb|tokstart| is set, the execute code will expect the incomplete
+token to be preserved ahead of the buffer on the next invocation of the execute
+code.  
+\begin{itemize}
+\item Shift the data beginning at \verb|tokstart| and ending at \verb|pe| to the
+beginning of the input buffer.
+\item Reset \verb|tokstart| to the beginning of the buffer. 
+\item Shift \verb|tokend| by the distance from the old value of \verb|tokstart|
+to the new value. The \verb|tokend| variable may or may not be valid.  There is
+no way to know if it holds a meaningful value because it is not kept at null
+when it is not in use. It can be shifted regardless.
+\end{itemize}
+\item Read another block of data into the buffer, immediately following any
+preserved data.
+\item Run the scanner on the new data.
+\end{itemize}
+
+Figure \ref{preserve_example} shows the required handling of an input stream in
+which a token is broken by the input block boundaries. After processing up to
+and including the ``t'' of ``characters'', the prefix of the string token must be
+retained and processing should resume at the ``e'' on the next iteration of
+the execute code.
+
+If one uses a large input buffer for collecting input then the number of times
+the shifting must be done will be small. Furthermore, if one takes care not to
+define tokens that are allowed to be very long and instead processes these
+items using pure state machines or sub-scanners, then only a small amount of
+data will ever need to be shifted.
+
+\begin{figure}
+\begin{verbatim}
+      a)           A stream "of characters" to be scanned.
+                   |        |          |
+                   p        tokstart   pe
+
+      b)           "of characters" to be scanned.
+                   |          |        |
+                   tokstart   p        pe
+\end{verbatim}
+\caption{Following an invocation of the execute code there may be a partially
+matched token (a). The data of the partially matched token 
+must be preserved ahead of the new data on the next invocation (b).}
+\label{preserve_example}
+\end{figure}
+
+Since scanners attempt to make the longest possible match of input, in some
+cases they are not able to identify a token upon parsing its final character,
+they must wait for a lookahead character. For example if trying to match words,
+the token match must be triggered on following whitespace in case more
+characters of the word have yet to come. The user must therefore arrange for an
+EOF character to be sent to the scanner to flush out any token that has not yet
+been matched.  The user can exclude a single character from the entire scanner
+and use this character as the EOF character, possibly specifying an EOF action.
+For most scanners, zero is a suitable choice for the EOF character. 
+
+Alternatively, if whitespace is not significant and ignored by the scanner, the
+final real token can be flushed out by simply sending an additional whitespace
+character on the end of the stream. If the real stream ends with whitespace
+then it will simply be extended and ignored. If it does not, then the last real token is
+guaranteed to be flushed and the dummy EOF whitespace ignored.
+An example scanner processing loop is given in Figure \ref{scanner-loop}.
+
+\begin{figure}
+\small
+\begin{verbatim}
+    int have = 0;
+    bool done = false;
+    while ( !done ) {
+        /* How much space is in the buffer? */
+        int space = BUFSIZE - have;
+        if ( space == 0 ) {
+            /* Buffer is full. */
+            cerr << "TOKEN TOO BIG" << endl;
+            exit(1);
+        }
+
+        /* Read in a block after any data we already have. */
+        char *p = inbuf + have;
+        cin.read( p, space );
+        int len = cin.gcount();
+
+        /* If no data was read, send the EOF character.
+        if ( len == 0 ) {
+            p[0] = 0, len++;
+            done = true;
+        }
+
+        char *pe = p + len;
+        %% write exec;
+
+        if ( cs == RagelScan_error ) {
+            /* Machine failed before finding a token. */
+            cerr << "PARSE ERROR" << endl;
+            exit(1);
+        }
+
+        if ( tokstart == 0 )
+            have = 0;
+        else {
+            /* There is a prefix to preserve, shift it over. */
+            have = pe - tokstart;
+            memmove( inbuf, tokstart, have );
+            tokend = inbuf + (tokend-tokstart);
+            tokstart = inbuf;
+        }
+    }
+\end{verbatim}
+\caption{A processing loop for a scanner.}
+\label{scanner-loop}
+\end{figure}
+
+\section{State Charts}
+
+In addition to supporting the construction of state machines using regular
+languages, Ragel also provides a way to manually specify state machines using
+state charts.  The comma operator wombines machines together without any
+implied transitions. The user can then manually link machines by specifying
+epsilon transitions with the \verb|->| operator.  Epsilon transitions are drawn
+between the final states of a machine and entry points defined by labels.  This
+makes it possible to build machines using the explicit state-chart method while
+making minimal changes to the Ragel language. 
+
+An interesting feature of Ragel's state chart construction method is that it
+can be mixed freely with regular expression constructions. A state chart may be
+referenced from within a regular expression, or a regular expression may be
+used in the definition of a state chart transition.
+
+\subsection{Join}
+
+\verb|expr , expr , ...|
+\verbspace
+
+Join a list of machines together without
+drawing any transitions, without setting up a start state, and without
+designating any final states. Transitions between the machines may be specified
+using labels and epsilon transitions. The start state must be explicity
+specified with the ``start'' label. Final states may be specified with the an
+epsilon transition to the implicitly created ``final'' state. The join
+operation allows one to build machines using a state chart model.
+
+\subsection{Label}
+
+\verb|label: expr| 
+\verbspace
+
+Attaches a label to an expression. Labels can be
+used as the target of epsilon transitions and explicit control transfer
+statements such \verb|fgoto| and \verb|fnext| in action
+code.
+
+\subsection{Epsilon}
+
+\verb|expr -> label| 
+\verbspace
+
+Draws an epsilon transition to the state defined
+by \verb|label|.  Epsilon transitions are made deterministic when join
+operators are evaluated. Epsilon transitions that are not in a join operation
+are made deterministic when the machine definition that contains the epsilon is
+complete. See Section \ref{labels} for information on referencing labels.
+
+\subsection{Simplifying State Charts}
+
+There are two benefits to providing state charts in Ragel. The first is that it
+allows us to take a state chart with a full listing of states and transitions
+and simplifly it in selective places using regular expressions.
+
+The state chart method of specifying parsers is a very common.  It is an
+effective programming technique for producing robust code. The key disadvantage
+becomes clear when one attempts to comprehend a large parser specified in this
+way.  These programs usually require many lines, causing logic to be spread out
+over large distances in the source file. Remembering the function of a large
+number of states can be difficult and organizing the parser in a sensible way
+requires discipline because branches and repetition present many file layout
+options.  This kind of programming takes a specification with inherent
+structure such as looping, alternation and concatenation and expresses it in a
+flat form. 
+
+If we could take an isolated component of a manually programmed state chart,
+that is, a subset of states that has only one entry point, and implement it
+using regular language operators then we could eliminate all the explicit
+naming of the states contained in it. By eliminating explicitly named states
+and replacing them with higher-level specifications we simplify a state machine
+specification.
+
+For example, sometimes chains of states are needed, with only a small number of
+possible characters appearing along the chain. These can easily be replaced
+with a concatenation of characters. Sometimes a group of common states
+implement a loop back to another single portion of the machine. Rather than
+manually duplicate all the transitions that loop back, we may be able to
+express the loop using a kleene star operator.
+
+Ragel allows one to take this state map simplification approach. We can build
+state machines using a state map model and implement portions of the state map
+using regular languages. In place of any transition in the state machine,
+entire sub-state machines can be given. These can encapsulate functionality
+defined elsewhere. An important aspect of the Ragel approach is that when we
+wrap up a collection of states using a regular expression we do not loose
+access to the states and transitions. We can still execute code on the
+transitions that we have encapsulated.
+
+\subsection{Down One Level of Abstraction}
+\label{down}
+
+The second benefit of incorporating state charts into Ragel is that it permits
+us to bypass the regular language abstraction if we need to. Ragel's action
+embedding operators are sometimes insufficient for expressing certain parsing
+tasks.  In the same way that is useful for C language programmers to drop down
+to assembly language programming using embedded assembler, it is sometimes
+useful for the Ragel programmer to drop down to programming with state charts.
+
+In the following example, we wish to buffer the characters of an XML CDATA
+sequence. The sequence is terminated by the string \verb|]]>|. The challenge
+in our application is that we do not wish the terminating characters to be
+buffered. An expression of the form \verb|any* @buffer :>> ']]>'| will not work
+because the buffer will alway contain the characters \verb|]]| on the end.
+Instead, what we need is to delay the buffering of \hspace{0.25mm} \verb|]|
+characters until a time when we
+abandon the terminating sequence and go back into the main loop. There is no
+easy way to express this using Ragel's regular expression and action embedding
+operators, and so an ability to drop down to the state chart method is useful.
+
+% GENERATE: dropdown
+% OPT: -p
+% %%{
+% machine dropdown;
+\begin{inline_code}
+\begin{verbatim}
+action bchar { buff( fpc ); }    # Buffer the current character.
+action bbrack1 { buff( "]" ); }
+action bbrack2 { buff( "]]" ); }
+
+CDATA_body =
+start: (
+     ']' -> one |
+     (any-']') @bchar ->start
+),
+one: (
+     ']' -> two |
+     [^\]] @bbrack1 @bchar ->start
+),
+two: (
+     '>' -> final |
+     ']' @bbrack1 -> two |
+     [^>\]] @bbrack2 @bchar ->start
+);
+\end{verbatim}
+\end{inline_code}
+% main := CDATA_body;
+% }%%
+% END GENERATE
+
+\begin{center}
+\includegraphics[scale=0.45]{dropdown}
+\end{center}
+
+
+\section{Semantic Conditions}
+\label{semantic}
+
+Many communication protocols contain variable-length fields, where the length
+of the field is given ahead of the field as a value. This
+problem cannot be expressed using regular languages because of its
+context-dependent nature. The prevalence of variable-length fields in
+communication protocols motivated us to introduce semantic conditions into
+the Ragel language.
+
+A semantic condition is a block of user code which is executed immediately
+before a transition is taken. If the code returns a value of true, the
+transition may be taken.  We can now embed code which extracts the length of a
+field, then proceed to match $n$ data values.
+
+% GENERATE: conds1
+% OPT: -p
+% %%{
+% machine conds1;
+% number = digit+;
+\begin{inline_code}
+\begin{verbatim}
+action rec_num { i = 0; n = getnumber(); }
+action test_len { i++ < n }
+data_fields = (
+    'd' 
+    [0-9]+ %rec_num 
+    ':'
+    ( [a-z] when test_len )*
+)**;
+\end{verbatim}
+\end{inline_code}
+% main := data_fields;
+% }%%
+% END GENERATE
+
+\begin{center}
+\includegraphics[scale=0.45]{conds1}
+\end{center}
+
+The Ragel implementation of semantic conditions does not force us to give up the
+compositional property of Ragel definitions. For example, a machine which tests
+the length of a field using conditions can be unioned with another machine
+which accepts some of the same strings, without the two machines interfering with
+another. The user need not be concerned about whether or not the result of the
+semantic condition will affect the matching of the second machine.
+
+To see this, first consider that when a user associates a condition with an
+existing transition, the transition's label is translated from the base character
+to its corresponding value in the space which represents ``condition $c$ true''. Should
+the determinization process combine a state that has a conditional transition
+with another state has a transition on the same input character but
+without a condition, then the condition-less transition first has its label
+translated into two values, one to its corresponding value in the space which
+represents ``condition $c$ true'' and another to its corresponding value in the
+space which represents ``condition $c$ false''. It
+is then safe to combine the two transitions. This is shown in the following
+example.  Two intersecting patterns are unioned, one with a condition and one
+without. The condition embedded in the first pattern does not affect the second
+pattern.
+
+\newpage
+
+% GENERATE: conds2
+% OPT: -p
+% %%{
+% machine conds2;
+% number = digit+;
+\begin{inline_code}
+\begin{verbatim}
+action test_len { i++ < n }
+action one { /* accept pattern one */ }
+action two { /* accept pattern two */ }
+patterns = 
+    ( [a-z] when test_len )+ %one |
+    [a-z][a-z0-9]* %two;
+main := patterns '\n';
+\end{verbatim}
+\end{inline_code}
+% }%%
+% END GENERATE
+
+\begin{center}
+\includegraphics[scale=0.45]{conds2}
+\end{center}
+
+There are many more potential uses for semantic conditions. The user is free to
+use arbitrary code and may therefore perform actions such as looking up names
+in dictionaries, validating input using external parsing mechanisms or
+performing checks on the semantic structure of input seen so far. In the
+next section we describe how Ragel accommodates several common parser
+engineering problems.
+
+\section{Implementing Lookahead}
+
+There are a few strategies for implementing lookahead in Ragel programs.
+Pending out actions, which were described in Section \ref{out-actions}, can be
+used as a form of lookahead.  Ragel also provides the \verb|fhold| directive
+which can be used in actions to prevent the machine from advancing over the
+current character. It is also possible to manually adjust the current
+character position by shifting it backwards. 
+
+\section{Handling Errors}
+
+In many applications it is useful to be able to react to parsing errors.  The
+user may wish to print an error message which depends on the context.  It
+may also be desirable to consume input in an attempt to return the input stream
+to some known state and resume parsing.
+
+To support error handling and recovery, Ragel provides error action embedding
+operators. Error actions are embedded into an expression's states. When the
+final machine has been constructed and it is being made complete, error actions
+are transfered from their place of embedding within a state to the transitions
+which go to the error
+state.  When the machine fails and is about to move into the error state, the
+current state's error actions get executed.
+
+Error actions can be used to simply report errors, or by jumping to a machine
+instantiation which consumes input, can attempt to recover from errors.  Like
+the action embedding operators, there are several classes of states which
+error action embedding operators can access. For example, the \verb|@err|
+operator embeds an error action into non-final states. The \verb|$err| operator
+embeds an error action into all states. Other operators access the start state,
+final states, and states which are neither the start state nor are final. The
+design of the state selections was driven by a need to cover the states of an
+expression with a single error action.
+
+The following example uses error actions to report an error and jump to a
+machine which consumes the remainder of the line when parsing fails. After
+consuming the line, the error recovery machine returns to the main loop.
+
+% GENERATE: erract
+% %%{
+% 	machine erract;
+%	ws = ' ';
+%	address = 'foo@bar.com';
+%	date = 'Monday May 12';
+\begin{inline_code}
+\begin{verbatim}
+action cmd_err { 
+    printf( "command error\n" ); 
+    fhold; fgoto line;
+}
+action from_err { 
+    printf( "from error\n" ); 
+    fhold; fgoto line; 
+}
+action to_err { 
+    printf( "to error\n" ); 
+    fhold; fgoto line;
+}
+
+line := [^\n]* '\n' @{ fgoto main; };
+
+main := (
+    (
+        'from' @err cmd_err 
+            ( ws+ address ws+ date '\n' ) $err from_err |
+        'to' @err cmd_err 
+            ( ws+ address '\n' ) $err to_err
+    ) 
+)*;
+\end{verbatim}
+\end{inline_code}
+% }%%
+% %% write data;
+% void f()
+% {
+% 	%% write init;
+% 	%% write exec;
+% }
+% END GENERATE
 
 \end{document}
