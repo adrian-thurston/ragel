@@ -2,6 +2,9 @@
                      Ragel State Machine Compiler -- CREDITS
                      =======================================
 
+These are some of the people who deserve credit. Many apolgies to those who
+have been missed. 
+
 * Written by Adrian Thurston <thurston@cs.queensu.ca>.
 
 * Objective-C output contributed by Eric Ocean.
@@ -13,7 +16,7 @@
 * Java code generation contributions, bug reports, fixes, test cases
   and suggestions from Colin Fleming
 
-* Useful discussion and bug from Carlos Antunes.
+* Useful discussions and bug reports due to Carlos Antunes.
 
 * Feedback, Packaging, and Fixes provided by:
 
