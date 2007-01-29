@@ -2845,66 +2845,15 @@ name tree. However, it can always be renamed.
 % banned.
 
 
-
 \section{Scanners}
 
-Though the overall language may be represented by regular expressions, it may
-be the case that a language
-contains sub-regions where the input is best represented as a sequence
-of tokens. To support the scanning of sub-regions of a language, Ragel allows
-the definition of longest-match machines, also known as scanners. The generated
-code will repeatedly attempt to match patterns from a list, favouring longer
-patterns over shorter patterns.  In the case of equal length matches, the
-generated code will favour patterns that appear ahead of others. When a scanner
-makes a match it executes the user code associated with the match, consumes the
-input then resumes scanning.
-
-On the surface, Ragel scanners are similar to those defined by Lex. Though
-there is a key distinguishing feature: patterns may be arbitrary Ragel
-expressions and can therefore contain embedded code. With a Ragel-based scanner
-the user need not wait until the end of a pattern before user code can be
-executed.
-
-The longest-match construction is not a pure state machine construction. It
-relies on several variables which enable it to backtrack and make pointers to the
-matched input text available to the user. 
-For this reason scanners must be immediately instantiated. They cannot be defined inline or
-referenced by another expression. Scanners must be jumped to or called.
-
-% GENERATE: scanner
-% %%{
-%	machine scanner;
-%	word = 'foo';
-%	head_name = 'bar';
-\begin{inline_code}
-\begin{verbatim}
-header := |*
-    word;
-    ' ';
-    '\n' => { fret; };
-*|;
-
-main := ( head_name ':' @{ fcall header; } )*;
-\end{verbatim}
-\end{inline_code}
-% }%%
-% %% write data;
-% void f()
-% {
-% 	%% write init;
-% 	%% write exec;
-% }
-% END GENERATE
-
-The scanner construction has a purpose similar to the longest-match kleene star
-operator \verb|**| when used in conjunction with the union operator. The key
-difference is that a scanner is able to backtrack to match a previously
-matched shorter string when the pursuit of a longer string fails.
-
-The longest-match operator can be used to construct scanners.  The generated
-machine repeatedly attempts to match one of the given patterns, first favouring
-longer pattern matches over shorter ones. If there is a choice between equal
-length matches, the match of the pattern which appears first is chosen.
+Scanners are very much intertwinded with regular-languages and their
+corresponding processors. For this reason Ragel supports the definition of
+Scanners.  The generated code will repeatedly attempt to match patterns from a
+list, favouring longer patterns over shorter patterns.  In the case of
+equal-length matches, the generated code will favour patterns that appear ahead
+of others. When a scanner makes a match it executes the user code associated
+with the match, consumes the input then resumes scanning.
 
 \verbspace
 \begin{verbatim}
@@ -2916,13 +2865,48 @@ length matches, the match of the pattern which appears first is chosen.
 \end{verbatim}
 \verbspace
 
-The longest-match construction operator is not a pure state machine operator.
-It relies on the \verb|tokstart|, \verb|tokend| and \verb|act| variables to be
-present so that it can backtrack and make pointers to the matched text
-available to the user. If input is processed using multiple calls to the
-execute code then the user must ensure that when a token is only partially
-matched that the prefix is preserved on the subsequent invocation of the
-execute code.
+On the surface, Ragel scanners are similar to those defined by Lex. Though
+there is a key distinguishing feature: patterns may be arbitrary Ragel
+expressions and can therefore contain embedded code. With a Ragel-based scanner
+the user need not wait until the end of a pattern before user code can be
+executed.
+
+Scanners can be used to processes sub-languages, as well as for tokenizing
+programming languages. In the following example a scanner is used to tokenize
+the contents of header field.
+
+\begin{inline_code}
+\begin{verbatim}
+word = [a-z]+;
+head_name = 'Header';
+
+header := |*
+    word;
+    ' ';
+    '\n' => { fret; };
+*|;
+
+main := ( head_name ':' @{ fcall header; } )*;
+\end{verbatim}
+\end{inline_code}
+\verbspace
+
+The scanner construction has a purpose similar to the longest-match kleene star
+operator \verb|**|. The key
+difference is that a scanner is able to backtrack to match a previously matched
+shorter string when the pursuit of a longer string fails.  For this reason the
+scanner construction operator is not a pure state machine construction
+operator. It relies on several variables which enable it to backtrack and make
+pointers to the matched input text available to the user.  For this reason
+scanners must be immediately instantiated. They cannot be defined inline or
+referenced by another expression. Scanners must be jumped to or called.
+
+Scanners rely on the \verb|tokstart|, \verb|tokend| and \verb|act|
+variables to be present so that it can backtrack and make pointers to the
+matched text available to the user. If input is processed using multiple calls
+to the execute code then the user must ensure that when a token is only
+partially matched that the prefix is preserved on the subsequent invocation of
+the execute code.
 
 The \verb|tokstart| variable must be defined as a pointer to the input data.
 It is used for recording where the current token match begins. This variable
@@ -3068,7 +3052,7 @@ An example scanner processing loop is given in Figure \ref{scanner-loop}.
 \section{State Charts}
 
 In addition to supporting the construction of state machines using regular
-languages, Ragel also provides a way to manually specify state machines using
+languages, Ragel provides a way to manually specify state machines using
 state charts.  The comma operator wombines machines together without any
 implied transitions. The user can then manually link machines by specifying
 epsilon transitions with the \verb|->| operator.  Epsilon transitions are drawn
@@ -3155,7 +3139,7 @@ wrap up a collection of states using a regular expression we do not loose
 access to the states and transitions. We can still execute code on the
 transitions that we have encapsulated.
 
-\subsection{Down One Level of Abstraction}
+\subsection{Dropping Down One Level of Abstraction}
 \label{down}
 
 The second benefit of incorporating state charts into Ragel is that it permits
@@ -3271,8 +3255,6 @@ is then safe to combine the two transitions. This is shown in the following
 example.  Two intersecting patterns are unioned, one with a condition and one
 without. The condition embedded in the first pattern does not affect the second
 pattern.
-
-\newpage
 
 % GENERATE: conds2
 % OPT: -p
