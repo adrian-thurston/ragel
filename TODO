@@ -1,3 +1,6 @@
+An option to turn off the removal of duplicate actions might be useful for
+analyzing unintentional nondeterminism.
+
 To avoid confusion, there should be a correspondence between state numbers in
 the generated code, graphviz and the XML.
 
