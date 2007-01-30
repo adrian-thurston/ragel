@@ -1,6 +1,6 @@
 /*
  *  Copyright 2001-2006 Adrian Thurston <thurston@cs.queensu.ca>
- *            2004 Eric Ocean <eric.ocean@ampede.com>
+ *            2004 Erich Ocean <eric.ocean@ampede.com>
  *            2005 Alan West <alan@alanz.com>
  */
 

@@ -560,7 +560,7 @@ Ragel 3.7 - Oct 31, 2004
  -Changed examples/cppscan to use fexec and thereby go much faster.
  -Implemented flex and re2c versions of examples/cppscan. Ragel version
   goes faster than flex version but not as fast as re2c version.
- -Merged in Objective-C patch from Eric Ocean.
+ -Merged in Objective-C patch from Erich Ocean.
  -Turned off syncing with stdio in C++ tests to make them go faster.
  -Renamed C++ code generaion classes with the Cpp Prefix instead of CC to make
   them easier to read.

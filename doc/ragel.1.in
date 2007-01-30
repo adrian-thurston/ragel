@@ -552,7 +552,7 @@ Ragel is still under development and has not yet matured. There are probably
 many bugs.
 .SH CREDITS
 Ragel was written by Adrian Thurston <thurston@cs.queensu.ca>.  Objective-C
-output contributed by Eric Ocean. D output contributed by Alan West. 
+output contributed by Erich Ocean. D output contributed by Alan West. 
 .SH "SEE ALSO"
 .BR rlcodegen (1),
 .BR re2c (1),
