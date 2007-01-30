@@ -211,10 +211,10 @@ std::ostream &SplitCodeGen::PARTITION( int partition )
 
 	out << "	" << ALPH_TYPE() << " *p = *_pp, *pe = *_ppe;\n";
 
-	if ( anyRegCurStateRef() )
+	if ( redFsm->anyRegCurStateRef() )
 		out << "	int _ps = 0;\n";
 
-	if ( anyConditions() )
+	if ( redFsm->anyConditions() )
 		out << "	" << WIDE_ALPH_TYPE() << " _widec;\n";
 
 	if ( useAgainLabel() ) {
@@ -483,7 +483,7 @@ void SplitCodeGen::setLabelsNeeded()
 		for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ )
 			trans->labelNeeded = false;
 
-		if ( redFsm->errState != 0 && anyLmSwitchError() )
+		if ( redFsm->errState != 0 && redFsm->anyLmSwitchError() )
 			redFsm->errState->labelNeeded = true;
 
 		/* Walk all transitions and set only those that have targs. */

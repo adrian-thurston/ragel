@@ -166,22 +166,6 @@ protected:
 
 	unsigned int arrayTypeSize( unsigned long maxVal );
 
-	bool anyActions();
-	bool anyToStateActions()        { return bAnyToStateActions; }
-	bool anyFromStateActions()      { return bAnyFromStateActions; }
-	bool anyRegActions()            { return bAnyRegActions; }
-	bool anyEofActions()            { return bAnyEofActions; }
-	bool anyActionGotos()           { return bAnyActionGotos; }
-	bool anyActionCalls()           { return bAnyActionCalls; }
-	bool anyActionRets()            { return bAnyActionRets; }
-	bool anyRegActionRets()         { return bAnyRegActionRets; }
-	bool anyRegActionByValControl() { return bAnyRegActionByValControl; }
-	bool anyRegNextStmt()           { return bAnyRegNextStmt; }
-	bool anyRegCurStateRef()        { return bAnyRegCurStateRef; }
-	bool anyRegBreak()              { return bAnyRegBreak; }
-	bool anyLmSwitchError()         { return bAnyLmSwitchError; }
-	bool anyConditions()            { return bAnyConditions; }
-
 	/* Set up labelNeeded flag for each state. Differs for each goto style so
 	 * is virtual. */
 	virtual void setLabelsNeeded() {}
@@ -198,40 +182,6 @@ protected:
 
 protected:
 	ostream &out;
-
-	bool bAnyToStateActions;
-	bool bAnyFromStateActions;
-	bool bAnyRegActions;
-	bool bAnyEofActions;
-	bool bAnyActionGotos;
-	bool bAnyActionCalls;
-	bool bAnyActionRets;
-	bool bAnyRegActionRets;
-	bool bAnyRegActionByValControl;
-	bool bAnyRegNextStmt;
-	bool bAnyRegCurStateRef;
-	bool bAnyRegBreak;
-	bool bAnyLmSwitchError;
-	bool bAnyConditions;
-
-	int maxState;
-	int maxSingleLen;
-	int maxRangeLen;
-	int maxKeyOffset;
-	int maxIndexOffset;
-	int maxIndex;
-	int maxActListId;
-	int maxActionLoc;
-	int maxActArrItem;
-	unsigned long long maxSpan;
-	unsigned long long maxCondSpan;
-	int maxFlatIndexOffset;
-	Key maxKey;
-	int maxCondOffset;
-	int maxCondLen;
-	int maxCondSpaceId;
-	int maxCondIndexOffset;
-	int maxCond;
 
 	bool useIndicies;
 };

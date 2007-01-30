@@ -174,17 +174,19 @@ void JavaTabCodeGen::writeOutExec()
 		"	{\n"
 		"	int _klen";
 
-	if ( anyRegCurStateRef() )
+	if ( redFsm->anyRegCurStateRef() )
 		out << ", _ps";
 
 	out << 
 		";\n"
 		"	int _trans;\n";
 
-	if ( anyConditions() )
+	if ( redFsm->anyConditions() )
 		out << "	int _widec;\n";
 
-	if ( anyToStateActions() || anyRegActions() || anyFromStateActions() ) {
+	if ( redFsm->anyToStateActions() || redFsm->anyRegActions() || 
+			redFsm->anyFromStateActions() )
+	{
 		out << 
 			"	int _acts;\n"
 			"	int _nacts;\n";
@@ -207,7 +209,7 @@ void JavaTabCodeGen::writeOutExec()
 			"		break _resume;\n";
 	}
 
-	if ( anyFromStateActions() ) {
+	if ( redFsm->anyFromStateActions() ) {
 		out <<
 			"	_acts = " << FSA() << "[" << CS() << "]" << ";\n"
 			"	_nacts = " << CAST("int") << " " << A() << "[_acts++];\n"
@@ -220,12 +222,12 @@ void JavaTabCodeGen::writeOutExec()
 			"\n";
 	}
 
-	if ( anyConditions() )
+	if ( redFsm->anyConditions() )
 		COND_TRANSLATE();
 
 	LOCATE_TRANS();
 
-	if ( anyRegCurStateRef() )
+	if ( redFsm->anyRegCurStateRef() )
 		out << "	_ps = " << CS() << ";\n";
 
 	if ( useIndicies )
@@ -235,7 +237,7 @@ void JavaTabCodeGen::writeOutExec()
 		"	" << CS() << " = " << TT() << "[_trans];\n"
 		"\n";
 
-	if ( anyRegActions() ) {
+	if ( redFsm->anyRegActions() ) {
 		out <<
 			"	if ( " << TA() << "[_trans] == 0 )\n"
 			"		break _again;\n"
@@ -255,7 +257,7 @@ void JavaTabCodeGen::writeOutExec()
 	/* Again loop, functions as again label. */
 	out << "	} while (false);\n";
 
-	if ( anyToStateActions() ) {
+	if ( redFsm->anyToStateActions() ) {
 		out <<
 			"	_acts = " << TSA() << "[" << CS() << "]" << ";\n"
 			"	_nacts = " << CAST("int") << " " << A() << "[_acts++];\n"
@@ -291,7 +293,7 @@ void JavaTabCodeGen::writeOutExec()
 
 void JavaTabCodeGen::writeOutEOF()
 {
-	if ( anyEofActions() ) {
+	if ( redFsm->anyEofActions() ) {
 		out <<
 			"	int _acts = " << EA() << "[" << CS() << "]" << ";\n"
 			"	int _nacts = " << CAST("int") << " " << A() << "[_acts++];\n"

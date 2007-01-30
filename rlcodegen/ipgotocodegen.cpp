@@ -27,6 +27,13 @@
 #include "gendata.h"
 #include "bstmap.h"
 
+bool IpGotoCodeGen::useAgainLabel()
+{
+	return redFsm->anyRegActionRets() || 
+			redFsm->anyRegActionByValControl() || 
+			redFsm->anyRegNextStmt();
+}
+
 void IpGotoCodeGen::GOTO( ostream &ret, int gotoDest, bool inFinish )
 {
 	ret << "{" << CTRL_FLOW() << "goto st" << gotoDest << ";}";
@@ -286,7 +293,7 @@ void IpGotoCodeGen::setLabelsNeeded()
 		for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ )
 			st->labelNeeded = false;
 
-		if ( redFsm->errState != 0 && anyLmSwitchError() )
+		if ( redFsm->errState != 0 && redFsm->anyLmSwitchError() )
 			redFsm->errState->labelNeeded = true;
 
 		/* Walk all transitions and set only those that have targs. */
@@ -350,10 +357,10 @@ void IpGotoCodeGen::writeOutExec()
 
 	out << "	{\n";
 
-	if ( anyRegCurStateRef() )
+	if ( redFsm->anyRegCurStateRef() )
 		out << "	int _ps = 0;\n";
 
-	if ( anyConditions() )
+	if ( redFsm->anyConditions() )
 		out << "	" << WIDE_ALPH_TYPE() << " _widec;\n";
 
 	if ( cgd->hasEnd ) {
@@ -405,7 +412,7 @@ void IpGotoCodeGen::writeOutExec()
 
 void IpGotoCodeGen::writeOutEOF()
 {
-	if ( anyEofActions() ) {
+	if ( redFsm->anyEofActions() ) {
 		out <<
 			"	{\n"
 			"	switch ( " << CS() << " ) {\n";

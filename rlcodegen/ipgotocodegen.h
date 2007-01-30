@@ -59,8 +59,7 @@ public:
 	virtual void writeOutExec();
 
 protected:
-	bool useAgainLabel()
-		{ return anyRegActionRets() || anyRegActionByValControl() || anyRegNextStmt(); }
+	bool useAgainLabel();
 
 	/* Called from GotoCodeGen::STATE_GOTOS just before writing the gotos for
 	 * each state. */

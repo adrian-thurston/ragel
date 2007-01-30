@@ -54,28 +54,8 @@ FsmCodeGen::FsmCodeGen( ostream &out )
 :
 	cgd(0), 
 	redFsm(0), 
-	out(out),
-	bAnyToStateActions(false),
-	bAnyFromStateActions(false),
-	bAnyRegActions(false),
-	bAnyEofActions(false),
-	bAnyActionGotos(false),
-	bAnyActionCalls(false),
-	bAnyActionRets(false),
-	bAnyRegActionRets(false),
-	bAnyRegActionByValControl(false),
-	bAnyRegNextStmt(false),
-	bAnyRegCurStateRef(false),
-	bAnyRegBreak(false),
-	bAnyLmSwitchError(false),
-	bAnyConditions(false)
+	out(out)
 {
-}
-
-/* Does the machine have any actions. */
-bool FsmCodeGen::anyActions()
-{
-	return redFsm->actionMap.length() > 0;
 }
 
 unsigned int FsmCodeGen::arrayTypeSize( unsigned long maxVal )
@@ -168,7 +148,7 @@ string FsmCodeGen::ACCESS()
 
 string FsmCodeGen::GET_WIDE_KEY()
 {
-	if ( anyConditions() ) 
+	if ( redFsm->anyConditions() ) 
 		return "_widec";
 	else
 		return GET_KEY();
@@ -466,7 +446,7 @@ void FsmCodeGen::writeOutInit()
 	out << "\t" << CS() << " = " << START() << ";\n";
 	
 	/* If there are any calls, then the stack top needs initialization. */
-	if ( anyActionCalls() || anyActionRets() )
+	if ( redFsm->anyActionCalls() || redFsm->anyActionRets() )
 		out << "\t" << TOP() << " = 0;\n";
 
 	if ( cgd->hasLongestMatch ) {
@@ -500,10 +480,10 @@ string FsmCodeGen::ALPH_TYPE()
 string FsmCodeGen::WIDE_ALPH_TYPE()
 {
 	string ret;
-	if ( maxKey <= keyOps->maxKey )
+	if ( redFsm->maxKey <= keyOps->maxKey )
 		ret = ALPH_TYPE();
 	else {
-		long long maxKeyVal = maxKey.getLongLong();
+		long long maxKeyVal = redFsm->maxKey.getLongLong();
 		HostType *wideType = keyOps->typeSubsumes( keyOps->isSigned, maxKeyVal );
 		assert( wideType != 0 );
 

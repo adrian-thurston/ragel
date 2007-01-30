@@ -411,6 +411,57 @@ struct RedFsmAp
 	int numFinStates;
 	int nParts;
 
+	bool bAnyToStateActions;
+	bool bAnyFromStateActions;
+	bool bAnyRegActions;
+	bool bAnyEofActions;
+	bool bAnyActionGotos;
+	bool bAnyActionCalls;
+	bool bAnyActionRets;
+	bool bAnyRegActionRets;
+	bool bAnyRegActionByValControl;
+	bool bAnyRegNextStmt;
+	bool bAnyRegCurStateRef;
+	bool bAnyRegBreak;
+	bool bAnyLmSwitchError;
+	bool bAnyConditions;
+
+	int maxState;
+	int maxSingleLen;
+	int maxRangeLen;
+	int maxKeyOffset;
+	int maxIndexOffset;
+	int maxIndex;
+	int maxActListId;
+	int maxActionLoc;
+	int maxActArrItem;
+	unsigned long long maxSpan;
+	unsigned long long maxCondSpan;
+	int maxFlatIndexOffset;
+	Key maxKey;
+	int maxCondOffset;
+	int maxCondLen;
+	int maxCondSpaceId;
+	int maxCondIndexOffset;
+	int maxCond;
+
+	bool anyActions();
+	bool anyToStateActions()        { return bAnyToStateActions; }
+	bool anyFromStateActions()      { return bAnyFromStateActions; }
+	bool anyRegActions()            { return bAnyRegActions; }
+	bool anyEofActions()            { return bAnyEofActions; }
+	bool anyActionGotos()           { return bAnyActionGotos; }
+	bool anyActionCalls()           { return bAnyActionCalls; }
+	bool anyActionRets()            { return bAnyActionRets; }
+	bool anyRegActionRets()         { return bAnyRegActionRets; }
+	bool anyRegActionByValControl() { return bAnyRegActionByValControl; }
+	bool anyRegNextStmt()           { return bAnyRegNextStmt; }
+	bool anyRegCurStateRef()        { return bAnyRegCurStateRef; }
+	bool anyRegBreak()              { return bAnyRegBreak; }
+	bool anyLmSwitchError()         { return bAnyLmSwitchError; }
+	bool anyConditions()            { return bAnyConditions; }
+
+
 	/* Is is it possible to extend a range by bumping ranges that span only
 	 * one character to the singles array. */
 	bool canExtend( const RedTransList &list, int pos );

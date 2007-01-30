@@ -458,36 +458,36 @@ void CodeGenData::analyzeAction( Action *act, InlineList *inlineList )
 		/* Only consider actions that are referenced. */
 		if ( act->numRefs() > 0 ) {
 			if ( item->type == InlineItem::Goto || item->type == InlineItem::GotoExpr )
-				codeGen->bAnyActionGotos = true;
+				redFsm->bAnyActionGotos = true;
 			else if ( item->type == InlineItem::Call || item->type == InlineItem::CallExpr )
-				codeGen->bAnyActionCalls = true;
+				redFsm->bAnyActionCalls = true;
 			else if ( item->type == InlineItem::Ret )
-				codeGen->bAnyActionRets = true;
+				redFsm->bAnyActionRets = true;
 		}
 
 		/* Check for various things in regular actions. */
 		if ( act->numTransRefs > 0 || act->numToStateRefs > 0 || act->numFromStateRefs > 0 ) {
 			/* Any returns in regular actions? */
 			if ( item->type == InlineItem::Ret )
-				codeGen->bAnyRegActionRets = true;
+				redFsm->bAnyRegActionRets = true;
 
 			/* Any next statements in the regular actions? */
 			if ( item->type == InlineItem::Next || item->type == InlineItem::NextExpr )
-				codeGen->bAnyRegNextStmt = true;
+				redFsm->bAnyRegNextStmt = true;
 
 			/* Any by value control in regular actions? */
 			if ( item->type == InlineItem::CallExpr || item->type == InlineItem::GotoExpr )
-				codeGen->bAnyRegActionByValControl = true;
+				redFsm->bAnyRegActionByValControl = true;
 
 			/* Any references to the current state in regular actions? */
 			if ( item->type == InlineItem::Curs )
-				codeGen->bAnyRegCurStateRef = true;
+				redFsm->bAnyRegCurStateRef = true;
 
 			if ( item->type == InlineItem::Break )
-				codeGen->bAnyRegBreak = true;
+				redFsm->bAnyRegBreak = true;
 
 			if ( item->type == InlineItem::LmSwitch && item->handlesError )
-				codeGen->bAnyLmSwitchError = true;
+				redFsm->bAnyLmSwitchError = true;
 		}
 
 		if ( item->children != 0 )
@@ -527,97 +527,97 @@ void CodeGenData::assignActionIds()
 
 void CodeGenData::setValueLimits()
 {
-	codeGen->maxSingleLen = 0;
-	codeGen->maxRangeLen = 0;
-	codeGen->maxKeyOffset = 0;
-	codeGen->maxIndexOffset = 0;
-	codeGen->maxActListId = 0;
-	codeGen->maxActionLoc = 0;
-	codeGen->maxActArrItem = 0;
-	codeGen->maxSpan = 0;
-	codeGen->maxCondSpan = 0;
-	codeGen->maxFlatIndexOffset = 0;
-	codeGen->maxCondOffset = 0;
-	codeGen->maxCondLen = 0;
-	codeGen->maxCondSpaceId = 0;
-	codeGen->maxCondIndexOffset = 0;
+	redFsm->maxSingleLen = 0;
+	redFsm->maxRangeLen = 0;
+	redFsm->maxKeyOffset = 0;
+	redFsm->maxIndexOffset = 0;
+	redFsm->maxActListId = 0;
+	redFsm->maxActionLoc = 0;
+	redFsm->maxActArrItem = 0;
+	redFsm->maxSpan = 0;
+	redFsm->maxCondSpan = 0;
+	redFsm->maxFlatIndexOffset = 0;
+	redFsm->maxCondOffset = 0;
+	redFsm->maxCondLen = 0;
+	redFsm->maxCondSpaceId = 0;
+	redFsm->maxCondIndexOffset = 0;
 
 	/* In both of these cases the 0 index is reserved for no value, so the max
 	 * is one more than it would be if they started at 0. */
-	codeGen->maxIndex = redFsm->transSet.length();
-	codeGen->maxCond = cgd->condSpaceList.length(); 
+	redFsm->maxIndex = redFsm->transSet.length();
+	redFsm->maxCond = cgd->condSpaceList.length(); 
 
 	/* The nextStateId - 1 is the last state id assigned. */
-	codeGen->maxState = redFsm->nextStateId - 1;
+	redFsm->maxState = redFsm->nextStateId - 1;
 
 	for ( CondSpaceList::Iter csi = cgd->condSpaceList; csi.lte(); csi++ ) {
-		if ( csi->condSpaceId > codeGen->maxCondSpaceId )
-			codeGen->maxCondSpaceId = csi->condSpaceId;
+		if ( csi->condSpaceId > redFsm->maxCondSpaceId )
+			redFsm->maxCondSpaceId = csi->condSpaceId;
 	}
 
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Maximum cond length. */
-		if ( st->stateCondList.length() > codeGen->maxCondLen )
-			codeGen->maxCondLen = st->stateCondList.length();
+		if ( st->stateCondList.length() > redFsm->maxCondLen )
+			redFsm->maxCondLen = st->stateCondList.length();
 
 		/* Maximum single length. */
-		if ( st->outSingle.length() > codeGen->maxSingleLen )
-			codeGen->maxSingleLen = st->outSingle.length();
+		if ( st->outSingle.length() > redFsm->maxSingleLen )
+			redFsm->maxSingleLen = st->outSingle.length();
 
 		/* Maximum range length. */
-		if ( st->outRange.length() > codeGen->maxRangeLen )
-			codeGen->maxRangeLen = st->outRange.length();
+		if ( st->outRange.length() > redFsm->maxRangeLen )
+			redFsm->maxRangeLen = st->outRange.length();
 
 		/* The key offset index offset for the state after last is not used, skip it.. */
 		if ( ! st.last() ) {
-			codeGen->maxCondOffset += st->stateCondList.length();
-			codeGen->maxKeyOffset += st->outSingle.length() + st->outRange.length()*2;
-			codeGen->maxIndexOffset += st->outSingle.length() + st->outRange.length() + 1;
+			redFsm->maxCondOffset += st->stateCondList.length();
+			redFsm->maxKeyOffset += st->outSingle.length() + st->outRange.length()*2;
+			redFsm->maxIndexOffset += st->outSingle.length() + st->outRange.length() + 1;
 		}
 
 		/* Max cond span. */
 		if ( st->condList != 0 ) {
 			unsigned long long span = keyOps->span( st->condLowKey, st->condHighKey );
-			if ( span > codeGen->maxCondSpan )
-				codeGen->maxCondSpan = span;
+			if ( span > redFsm->maxCondSpan )
+				redFsm->maxCondSpan = span;
 		}
 
 		/* Max key span. */
 		if ( st->transList != 0 ) {
 			unsigned long long span = keyOps->span( st->lowKey, st->highKey );
-			if ( span > codeGen->maxSpan )
-				codeGen->maxSpan = span;
+			if ( span > redFsm->maxSpan )
+				redFsm->maxSpan = span;
 		}
 
 		/* Max cond index offset. */
 		if ( ! st.last() ) {
 			if ( st->condList != 0 )
-				codeGen->maxCondIndexOffset += keyOps->span( st->condLowKey, st->condHighKey );
+				redFsm->maxCondIndexOffset += keyOps->span( st->condLowKey, st->condHighKey );
 		}
 
 		/* Max flat index offset. */
 		if ( ! st.last() ) {
 			if ( st->transList != 0 )
-				codeGen->maxFlatIndexOffset += keyOps->span( st->lowKey, st->highKey );
-			codeGen->maxFlatIndexOffset += 1;
+				redFsm->maxFlatIndexOffset += keyOps->span( st->lowKey, st->highKey );
+			redFsm->maxFlatIndexOffset += 1;
 		}
 	}
 
 	for ( ActionTableMap::Iter at = redFsm->actionMap; at.lte(); at++ ) {
 		/* Maximum id of action lists. */
-		if ( at->actListId+1 > codeGen->maxActListId )
-			codeGen->maxActListId = at->actListId+1;
+		if ( at->actListId+1 > redFsm->maxActListId )
+			redFsm->maxActListId = at->actListId+1;
 
 		/* Maximum location of items in action array. */
-		if ( at->location+1 > codeGen->maxActionLoc )
-			codeGen->maxActionLoc = at->location+1;
+		if ( at->location+1 > redFsm->maxActionLoc )
+			redFsm->maxActionLoc = at->location+1;
 
 		/* Maximum values going into the action array. */
-		if ( at->key.length() > codeGen->maxActArrItem )
-			codeGen->maxActArrItem = at->key.length();
+		if ( at->key.length() > redFsm->maxActArrItem )
+			redFsm->maxActArrItem = at->key.length();
 		for ( ActionTable::Iter item = at->key; item.lte(); item++ ) {
-			if ( item->value->actionId > codeGen->maxActArrItem )
-				codeGen->maxActArrItem = item->value->actionId;
+			if ( item->value->actionId > redFsm->maxActArrItem )
+				redFsm->maxActArrItem = item->value->actionId;
 		}
 	}
 }
@@ -634,13 +634,13 @@ void CodeGenData::analyzeMachine()
 	for ( ActionList::Iter act = cgd->actionList; act.lte(); act++ ) {
 		/* Record the occurrence of various kinds of actions. */
 		if ( act->numToStateRefs > 0 )
-			codeGen->bAnyToStateActions = true;
+			redFsm->bAnyToStateActions = true;
 		if ( act->numFromStateRefs > 0 )
-			codeGen->bAnyFromStateActions = true;
+			redFsm->bAnyFromStateActions = true;
 		if ( act->numEofRefs > 0 )
-			codeGen->bAnyEofActions = true;
+			redFsm->bAnyEofActions = true;
 		if ( act->numTransRefs > 0 )
-			codeGen->bAnyRegActions = true;
+			redFsm->bAnyRegActions = true;
 
 		/* Recurse through the action's parse tree looking for various things. */
 		analyzeAction( act, act->inlineList );
@@ -673,7 +673,7 @@ void CodeGenData::analyzeMachine()
 			st->bAnyRegCurStateRef = true;
 		
 		if ( st->stateCondList.length() > 0 )
-			codeGen->bAnyConditions = true;
+			redFsm->bAnyConditions = true;
 	}
 
 	/* Assign ids to actions that are referenced. */
@@ -753,7 +753,7 @@ void CodeGenData::prepareMachine()
 	 * other things. We will use these in reporting the usage
 	 * of fsm directives in action code. */
 	analyzeMachine();
-	codeGen->maxKey = maxKey;
+	redFsm->maxKey = maxKey;
 }
 
 void CodeGenData::generateGraphviz()

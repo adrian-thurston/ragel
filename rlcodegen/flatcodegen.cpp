@@ -490,30 +490,30 @@ void FlatCodeGen::writeOutData()
 {
 	/* If there are any transtion functions then output the array. If there
 	 * are none, don't bother emitting an empty array that won't be used. */
-	if ( anyActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(maxActArrItem), A() );
+	if ( redFsm->anyActions() ) {
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActArrItem), A() );
 		ACTIONS_ARRAY();
 		CLOSE_ARRAY() <<
 		"\n";
 	}
 
-	if ( anyConditions() ) {
+	if ( redFsm->anyConditions() ) {
 		OPEN_ARRAY( WIDE_ALPH_TYPE(), CK() );
 		COND_KEYS();
 		CLOSE_ARRAY() <<
 		"\n";
 
-		OPEN_ARRAY( ARRAY_TYPE(maxCondSpan), CSP() );
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxCondSpan), CSP() );
 		COND_KEY_SPANS();
 		CLOSE_ARRAY() <<
 		"\n";
 
-		OPEN_ARRAY( ARRAY_TYPE(maxCond), C() );
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxCond), C() );
 		CONDS();
 		CLOSE_ARRAY() <<
 		"\n";
 
-		OPEN_ARRAY( ARRAY_TYPE(maxCondIndexOffset), CO() );
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxCondIndexOffset), CO() );
 		COND_INDEX_OFFSET();
 		CLOSE_ARRAY() <<
 		"\n";
@@ -524,49 +524,49 @@ void FlatCodeGen::writeOutData()
 	CLOSE_ARRAY() <<
 	"\n";
 
-	OPEN_ARRAY( ARRAY_TYPE(maxSpan), SP() );
+	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxSpan), SP() );
 	KEY_SPANS();
 	CLOSE_ARRAY() <<
 	"\n";
 
-	OPEN_ARRAY( ARRAY_TYPE(maxFlatIndexOffset), IO() );
+	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxFlatIndexOffset), IO() );
 	FLAT_INDEX_OFFSET();
 	CLOSE_ARRAY() <<
 	"\n";
 
-	OPEN_ARRAY( ARRAY_TYPE(maxIndex), I() );
+	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxIndex), I() );
 	INDICIES();
 	CLOSE_ARRAY() <<
 	"\n";
 
-	OPEN_ARRAY( ARRAY_TYPE(maxState), TT() );
+	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TT() );
 	TRANS_TARGS();
 	CLOSE_ARRAY() <<
 	"\n";
 
-	if ( anyActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(maxActionLoc), TA() );
+	if ( redFsm->anyActions() ) {
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), TA() );
 		TRANS_ACTIONS();
 		CLOSE_ARRAY() <<
 		"\n";
 	}
 
-	if ( anyToStateActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(maxActionLoc), TSA() );
+	if ( redFsm->anyToStateActions() ) {
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), TSA() );
 		TO_STATE_ACTIONS();
 		CLOSE_ARRAY() <<
 		"\n";
 	}
 
-	if ( anyFromStateActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(maxActionLoc), FSA() );
+	if ( redFsm->anyFromStateActions() ) {
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), FSA() );
 		FROM_STATE_ACTIONS();
 		CLOSE_ARRAY() <<
 		"\n";
 	}
 
-	if ( anyEofActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(maxActionLoc), EA() );
+	if ( redFsm->anyEofActions() ) {
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), EA() );
 		EOF_ACTIONS();
 		CLOSE_ARRAY() <<
 		"\n";
@@ -638,30 +638,32 @@ void FlatCodeGen::writeOutExec()
 		"	{\n"
 		"	int _slen";
 
-	if ( anyRegCurStateRef() )
+	if ( redFsm->anyRegCurStateRef() )
 		out << ", _ps";
 
 	out << 
 		";\n"
 		"	int _trans";
 
-	if ( anyConditions() )
+	if ( redFsm->anyConditions() )
 		out << ", _cond";
 	out << ";\n";
 
-	if ( anyToStateActions() || anyRegActions() || anyFromStateActions() ) {
+	if ( redFsm->anyToStateActions() || 
+			redFsm->anyRegActions() || redFsm->anyFromStateActions() )
+	{
 		out << 
-			"	" << PTR_CONST() << ARRAY_TYPE(maxActArrItem) << POINTER() << "_acts;\n"
+			"	" << PTR_CONST() << ARRAY_TYPE(redFsm->maxActArrItem) << POINTER() << "_acts;\n"
 			"	" << UINT() << " _nacts;\n"; 
 	}
 
 	out <<
 		"	" << PTR_CONST() << WIDE_ALPH_TYPE() << POINTER() << "_keys;\n"
-		"	" << PTR_CONST() << ARRAY_TYPE(maxIndex) << POINTER() << "_inds;\n";
+		"	" << PTR_CONST() << ARRAY_TYPE(redFsm->maxIndex) << POINTER() << "_inds;\n";
 
-	if ( anyConditions() ) {
+	if ( redFsm->anyConditions() ) {
 		out << 
-			"	" << PTR_CONST() << ARRAY_TYPE(maxCond) << POINTER() << "_conds;\n"
+			"	" << PTR_CONST() << ARRAY_TYPE(redFsm->maxCond) << POINTER() << "_conds;\n"
 			"	" << WIDE_ALPH_TYPE() << " _widec;\n";
 	}
 
@@ -683,7 +685,7 @@ void FlatCodeGen::writeOutExec()
 			"		goto _out;\n";
 	}
 
-	if ( anyFromStateActions() ) {
+	if ( redFsm->anyFromStateActions() ) {
 		out <<
 			"	_acts = " << ARR_OFF( A(), FSA() + "[" + CS() + "]" ) << ";\n"
 			"	_nacts = " << CAST(UINT()) << " *_acts++;\n"
@@ -696,19 +698,19 @@ void FlatCodeGen::writeOutExec()
 			"\n";
 	}
 
-	if ( anyConditions() )
+	if ( redFsm->anyConditions() )
 		COND_TRANSLATE();
 
 	LOCATE_TRANS();
 
-	if ( anyRegCurStateRef() )
+	if ( redFsm->anyRegCurStateRef() )
 		out << "	_ps = " << CS() << ";\n";
 
 	out <<
 		"	" << CS() << " = " << TT() << "[_trans];\n"
 		"\n";
 
-	if ( anyRegActions() ) {
+	if ( redFsm->anyRegActions() ) {
 		out <<
 			"	if ( " << TA() << "[_trans] == 0 )\n"
 			"		goto _again;\n"
@@ -724,10 +726,11 @@ void FlatCodeGen::writeOutExec()
 			"\n";
 	}
 
-	if ( anyRegActions() || anyActionGotos() || anyActionCalls() || anyActionRets() )
+	if ( redFsm->anyRegActions() || redFsm->anyActionGotos() || 
+			redFsm->anyActionCalls() || redFsm->anyActionRets() )
 		out << "_again:\n";
 
-	if ( anyToStateActions() ) {
+	if ( redFsm->anyToStateActions() ) {
 		out <<
 			"	_acts = " << ARR_OFF( A(),  TSA() + "[" + CS() + "]" ) << ";\n"
 			"	_nacts = " << CAST(UINT()) << " *_acts++;\n"
@@ -759,10 +762,10 @@ void FlatCodeGen::writeOutExec()
 
 void FlatCodeGen::writeOutEOF()
 {
-	if ( anyEofActions() ) {
+	if ( redFsm->anyEofActions() ) {
 		out << 
 			"	{\n"
-			"	" << PTR_CONST() << ARRAY_TYPE(maxActArrItem) << POINTER() << "_acts = " << 
+			"	" << PTR_CONST() << ARRAY_TYPE(redFsm->maxActArrItem) << POINTER() << "_acts = " << 
 					ARR_OFF( A(), EA() + "[" + CS() + "]" ) << ";\n"
 			"	" << UINT() << " _nacts = " << CAST(UINT()) << " *_acts++;\n"
 			"	while ( _nacts-- > 0 ) {\n"

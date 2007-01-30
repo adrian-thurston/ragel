@@ -48,8 +48,28 @@ RedFsmAp::RedFsmAp()
 	errState(0),
 	errTrans(0),
 	firstFinState(0),
-	numFinStates(0)
+	numFinStates(0),
+	bAnyToStateActions(false),
+	bAnyFromStateActions(false),
+	bAnyRegActions(false),
+	bAnyEofActions(false),
+	bAnyActionGotos(false),
+	bAnyActionCalls(false),
+	bAnyActionRets(false),
+	bAnyRegActionRets(false),
+	bAnyRegActionByValControl(false),
+	bAnyRegNextStmt(false),
+	bAnyRegCurStateRef(false),
+	bAnyRegBreak(false),
+	bAnyLmSwitchError(false),
+	bAnyConditions(false)
 {
+}
+
+/* Does the machine have any actions. */
+bool RedFsmAp::anyActions()
+{
+	return actionMap.length() > 0;
 }
 
 void RedFsmAp::depthFirstOrdering( RedStateAp *state )

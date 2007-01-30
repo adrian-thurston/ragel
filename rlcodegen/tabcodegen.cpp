@@ -35,19 +35,19 @@ void TabCodeGen::calcIndexSize()
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		int totalIndex = st->outSingle.length() + st->outRange.length() + 
 				(st->defTrans == 0 ? 0 : 1);
-		sizeWithInds += arrayTypeSize(maxIndex) * totalIndex;
+		sizeWithInds += arrayTypeSize(redFsm->maxIndex) * totalIndex;
 	}
-	sizeWithInds += arrayTypeSize(maxState) * redFsm->transSet.length();
-	if ( anyActions() )
-		sizeWithInds += arrayTypeSize(maxActionLoc) * redFsm->transSet.length();
+	sizeWithInds += arrayTypeSize(redFsm->maxState) * redFsm->transSet.length();
+	if ( redFsm->anyActions() )
+		sizeWithInds += arrayTypeSize(redFsm->maxActionLoc) * redFsm->transSet.length();
 
 	/* Calculate the cost of not using indicies. */
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		int totalIndex = st->outSingle.length() + st->outRange.length() + 
 				(st->defTrans == 0 ? 0 : 1);
-		sizeWithoutInds += arrayTypeSize(maxState) * totalIndex;
-		if ( anyActions() )
-			sizeWithoutInds += arrayTypeSize(maxActionLoc) * totalIndex;
+		sizeWithoutInds += arrayTypeSize(redFsm->maxState) * totalIndex;
+		if ( redFsm->anyActions() )
+			sizeWithoutInds += arrayTypeSize(redFsm->maxActionLoc) * totalIndex;
 	}
 
 	/* If using indicies reduces the size, use them. */
@@ -678,20 +678,20 @@ void TabCodeGen::writeOutData()
 {
 	/* If there are any transtion functions then output the array. If there
 	 * are none, don't bother emitting an empty array that won't be used. */
-	if ( anyActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(maxActArrItem), A() );
+	if ( redFsm->anyActions() ) {
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActArrItem), A() );
 		ACTIONS_ARRAY();
 		CLOSE_ARRAY() <<
 		"\n";
 	}
 
-	if ( anyConditions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(maxCondOffset), CO() );
+	if ( redFsm->anyConditions() ) {
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxCondOffset), CO() );
 		COND_OFFSETS();
 		CLOSE_ARRAY() <<
 		"\n";
 
-		OPEN_ARRAY( ARRAY_TYPE(maxCondLen), CL() );
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxCondLen), CL() );
 		COND_LENS();
 		CLOSE_ARRAY() <<
 		"\n";
@@ -701,13 +701,13 @@ void TabCodeGen::writeOutData()
 		CLOSE_ARRAY() <<
 		"\n";
 
-		OPEN_ARRAY( ARRAY_TYPE(maxCondSpaceId), C() );
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxCondSpaceId), C() );
 		COND_SPACES();
 		CLOSE_ARRAY() <<
 		"\n";
 	}
 
-	OPEN_ARRAY( ARRAY_TYPE(maxKeyOffset), KO() );
+	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxKeyOffset), KO() );
 	KEY_OFFSETS();
 	CLOSE_ARRAY() <<
 	"\n";
@@ -717,69 +717,69 @@ void TabCodeGen::writeOutData()
 	CLOSE_ARRAY() <<
 	"\n";
 
-	OPEN_ARRAY( ARRAY_TYPE(maxSingleLen), SL() );
+	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxSingleLen), SL() );
 	SINGLE_LENS();
 	CLOSE_ARRAY() <<
 	"\n";
 
-	OPEN_ARRAY( ARRAY_TYPE(maxRangeLen), RL() );
+	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxRangeLen), RL() );
 	RANGE_LENS();
 	CLOSE_ARRAY() <<
 	"\n";
 
-	OPEN_ARRAY( ARRAY_TYPE(maxIndexOffset), IO() );
+	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxIndexOffset), IO() );
 	INDEX_OFFSETS();
 	CLOSE_ARRAY() <<
 	"\n";
 
 	if ( useIndicies ) {
-		OPEN_ARRAY( ARRAY_TYPE(maxIndex), I() );
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxIndex), I() );
 		INDICIES();
 		CLOSE_ARRAY() <<
 		"\n";
 
-		OPEN_ARRAY( ARRAY_TYPE(maxState), TT() );
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TT() );
 		TRANS_TARGS_WI();
 		CLOSE_ARRAY() <<
 		"\n";
 
-		if ( anyActions() ) {
-			OPEN_ARRAY( ARRAY_TYPE(maxActionLoc), TA() );
+		if ( redFsm->anyActions() ) {
+			OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), TA() );
 			TRANS_ACTIONS_WI();
 			CLOSE_ARRAY() <<
 			"\n";
 		}
 	}
 	else {
-		OPEN_ARRAY( ARRAY_TYPE(maxState), TT() );
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TT() );
 		TRANS_TARGS();
 		CLOSE_ARRAY() <<
 		"\n";
 
-		if ( anyActions() ) {
-			OPEN_ARRAY( ARRAY_TYPE(maxActionLoc), TA() );
+		if ( redFsm->anyActions() ) {
+			OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), TA() );
 			TRANS_ACTIONS();
 			CLOSE_ARRAY() <<
 			"\n";
 		}
 	}
 
-	if ( anyToStateActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(maxActionLoc), TSA() );
+	if ( redFsm->anyToStateActions() ) {
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), TSA() );
 		TO_STATE_ACTIONS();
 		CLOSE_ARRAY() <<
 		"\n";
 	}
 
-	if ( anyFromStateActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(maxActionLoc), FSA() );
+	if ( redFsm->anyFromStateActions() ) {
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), FSA() );
 		FROM_STATE_ACTIONS();
 		CLOSE_ARRAY() <<
 		"\n";
 	}
 
-	if ( anyEofActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(maxActionLoc), EA() );
+	if ( redFsm->anyEofActions() ) {
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), EA() );
 		EOF_ACTIONS();
 		CLOSE_ARRAY() <<
 		"\n";
@@ -860,19 +860,21 @@ void TabCodeGen::writeOutExec()
 		"	{\n"
 		"	int _klen";
 
-	if ( anyRegCurStateRef() )
+	if ( redFsm->anyRegCurStateRef() )
 		out << ", _ps";
 
 	out << 
 		";\n"
 		"	" << UINT() << " _trans;\n";
 
-	if ( anyConditions() )
+	if ( redFsm->anyConditions() )
 		out << "	" << WIDE_ALPH_TYPE() << " _widec;\n";
 
-	if ( anyToStateActions() || anyRegActions() || anyFromStateActions() ) {
+	if ( redFsm->anyToStateActions() || redFsm->anyRegActions() 
+			|| redFsm->anyFromStateActions() )
+	{
 		out << 
-			"	" << PTR_CONST() << ARRAY_TYPE(maxActArrItem) << POINTER() << "_acts;\n"
+			"	" << PTR_CONST() << ARRAY_TYPE(redFsm->maxActArrItem) << POINTER() << "_acts;\n"
 			"	" << UINT() << " _nacts;\n";
 	}
 
@@ -896,7 +898,7 @@ void TabCodeGen::writeOutExec()
 			"		goto _out;\n";
 	}
 
-	if ( anyFromStateActions() ) {
+	if ( redFsm->anyFromStateActions() ) {
 		out <<
 			"	_acts = " << ARR_OFF( A(),  FSA() + "[" + CS() + "]" ) << ";\n"
 			"	_nacts = " << CAST(UINT()) << " *_acts++;\n"
@@ -909,14 +911,14 @@ void TabCodeGen::writeOutExec()
 			"\n";
 	}
 
-	if ( anyConditions() )
+	if ( redFsm->anyConditions() )
 		COND_TRANSLATE();
 
 	LOCATE_TRANS();
 
 	out << "_match:\n";
 
-	if ( anyRegCurStateRef() )
+	if ( redFsm->anyRegCurStateRef() )
 		out << "	_ps = " << CS() << ";\n";
 
 	if ( useIndicies )
@@ -926,7 +928,7 @@ void TabCodeGen::writeOutExec()
 		"	" << CS() << " = " << TT() << "[_trans];\n"
 		"\n";
 
-	if ( anyRegActions() ) {
+	if ( redFsm->anyRegActions() ) {
 		out <<
 			"	if ( " << TA() << "[_trans] == 0 )\n"
 			"		goto _again;\n"
@@ -942,10 +944,11 @@ void TabCodeGen::writeOutExec()
 			"\n";
 	}
 
-	if ( anyRegActions() || anyActionGotos() || anyActionCalls() || anyActionRets() )
+	if ( redFsm->anyRegActions() || redFsm->anyActionGotos() || 
+			redFsm->anyActionCalls() || redFsm->anyActionRets() )
 		out << "_again:\n";
 
-	if ( anyToStateActions() ) {
+	if ( redFsm->anyToStateActions() ) {
 		out <<
 			"	_acts = " << ARR_OFF( A(), TSA() + "[" + CS() + "]" ) << ";\n"
 			"	_nacts = " << CAST(UINT()) << " *_acts++;\n"
@@ -978,10 +981,10 @@ void TabCodeGen::writeOutExec()
 
 void TabCodeGen::writeOutEOF()
 {
-	if ( anyEofActions() ) {
+	if ( redFsm->anyEofActions() ) {
 		out << 
 			"	{\n"
-			"	" << PTR_CONST() << ARRAY_TYPE(maxActArrItem) << POINTER() << "_acts = " << 
+			"	" << PTR_CONST() << ARRAY_TYPE(redFsm->maxActArrItem) << POINTER() << "_acts = " << 
 					ARR_OFF( A(), EA() + "[" + CS() + "]" ) << ";\n"
 			"	" << UINT() << " _nacts = " << CAST(UINT()) << " *_acts++;\n"
 			"	while ( _nacts-- > 0 ) {\n"

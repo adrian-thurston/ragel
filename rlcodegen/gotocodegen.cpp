@@ -619,29 +619,29 @@ void GotoCodeGen::writeOutData()
 			"\n";
 	}
 
-	if ( anyActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(maxActArrItem), A() );
+	if ( redFsm->anyActions() ) {
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActArrItem), A() );
 		ACTIONS_ARRAY();
 		CLOSE_ARRAY() <<
 		"\n";
 	}
 
-	if ( anyToStateActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(maxActionLoc), TSA() );
+	if ( redFsm->anyToStateActions() ) {
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), TSA() );
 		TO_STATE_ACTIONS();
 		CLOSE_ARRAY() <<
 		"\n";
 	}
 
-	if ( anyFromStateActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(maxActionLoc), FSA() );
+	if ( redFsm->anyFromStateActions() ) {
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), FSA() );
 		FROM_STATE_ACTIONS();
 		CLOSE_ARRAY() <<
 		"\n";
 	}
 
-	if ( anyEofActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(maxActionLoc), EA() );
+	if ( redFsm->anyEofActions() ) {
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), EA() );
 		EOF_ACTIONS();
 		CLOSE_ARRAY() <<
 		"\n";
@@ -654,16 +654,18 @@ void GotoCodeGen::writeOutExec()
 
 	out << "	{\n";
 
-	if ( anyRegCurStateRef() )
+	if ( redFsm->anyRegCurStateRef() )
 		out << "	int _ps = 0;\n";
 
-	if ( anyToStateActions() || anyRegActions() || anyFromStateActions() ) {
+	if ( redFsm->anyToStateActions() || redFsm->anyRegActions() 
+			|| redFsm->anyFromStateActions() )
+	{
 		out << 
-			"	" << PTR_CONST() << ARRAY_TYPE(maxActArrItem) << POINTER() << "_acts;\n"
+			"	" << PTR_CONST() << ARRAY_TYPE(redFsm->maxActArrItem) << POINTER() << "_acts;\n"
 			"	" << UINT() << " _nacts;\n";
 	}
 
-	if ( anyConditions() )
+	if ( redFsm->anyConditions() )
 		out << "	" << WIDE_ALPH_TYPE() << " _widec;\n";
 
 	out << "\n";
@@ -677,7 +679,7 @@ void GotoCodeGen::writeOutExec()
 
 	out << "_resume:\n";
 
-	if ( anyFromStateActions() ) {
+	if ( redFsm->anyFromStateActions() ) {
 		out <<
 			"	_acts = " << ARR_OFF( A(), FSA() + "[" + CS() + "]" ) << ";\n"
 			"	_nacts = " << CAST(UINT()) << " *_acts++;\n"
@@ -699,12 +701,12 @@ void GotoCodeGen::writeOutExec()
 		TRANSITIONS() <<
 		"\n";
 
-	if ( anyRegActions() )
+	if ( redFsm->anyRegActions() )
 		EXEC_FUNCS() << "\n";
 
 	out << "_again:\n";
 
-	if ( anyToStateActions() ) {
+	if ( redFsm->anyToStateActions() ) {
 		out <<
 			"	_acts = " << ARR_OFF( A(), TSA() + "[" + CS() + "]" ) << ";\n"
 			"	_nacts = " << CAST(UINT()) << " *_acts++;\n"
@@ -736,10 +738,10 @@ void GotoCodeGen::writeOutExec()
 
 void GotoCodeGen::writeOutEOF()
 {
-	if ( anyEofActions() ) {
+	if ( redFsm->anyEofActions() ) {
 		out << 
 			"	{\n"
-			"	" << PTR_CONST() << ARRAY_TYPE(maxActArrItem) << POINTER() << "_acts = " << 
+			"	" << PTR_CONST() << ARRAY_TYPE(redFsm->maxActArrItem) << POINTER() << "_acts = " << 
 					ARR_OFF( A(), EA() + "[" + CS() + "]" ) << ";\n"
 			"	" << UINT() << " _nacts = " << CAST(UINT()) << " *_acts++;\n"
 			"	while ( _nacts-- > 0 ) {\n"

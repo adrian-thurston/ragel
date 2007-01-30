@@ -168,22 +168,22 @@ void FGotoCodeGen::writeOutData()
 			"\n";
 	}
 
-	if ( anyToStateActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(maxActionLoc), TSA() );
+	if ( redFsm->anyToStateActions() ) {
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), TSA() );
 		TO_STATE_ACTIONS();
 		CLOSE_ARRAY() <<
 		"\n";
 	}
 
-	if ( anyFromStateActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(maxActionLoc), FSA() );
+	if ( redFsm->anyFromStateActions() ) {
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), FSA() );
 		FROM_STATE_ACTIONS();
 		CLOSE_ARRAY() <<
 		"\n";
 	}
 
-	if ( anyEofActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(maxActionLoc), EA() );
+	if ( redFsm->anyEofActions() ) {
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), EA() );
 		EOF_ACTIONS();
 		CLOSE_ARRAY() <<
 		"\n";
@@ -196,10 +196,10 @@ void FGotoCodeGen::writeOutExec()
 
 	out << "	{\n";
 
-	if ( anyRegCurStateRef() )
+	if ( redFsm->anyRegCurStateRef() )
 		out << "	int _ps = 0;\n";
 
-	if ( anyConditions() )
+	if ( redFsm->anyConditions() )
 		out << "	" << WIDE_ALPH_TYPE() << " _widec;\n";
 
 	if ( cgd->hasEnd ) {
@@ -211,7 +211,7 @@ void FGotoCodeGen::writeOutExec()
 
 	out << "_resume:\n";
 
-	if ( anyFromStateActions() ) {
+	if ( redFsm->anyFromStateActions() ) {
 		out <<
 			"	switch ( " << FSA() << "[" << CS() << "] ) {\n";
 			FROM_STATE_ACTION_SWITCH();
@@ -229,12 +229,12 @@ void FGotoCodeGen::writeOutExec()
 		TRANSITIONS() << 
 		"\n";
 
-	if ( anyRegActions() )
+	if ( redFsm->anyRegActions() )
 		EXEC_ACTIONS() << "\n";
 
 	out << "_again:\n";
 
-	if ( anyToStateActions() ) {
+	if ( redFsm->anyToStateActions() ) {
 		out <<
 			"	switch ( " << TSA() << "[" << CS() << "] ) {\n";
 			TO_STATE_ACTION_SWITCH();
@@ -263,7 +263,7 @@ void FGotoCodeGen::writeOutExec()
 
 void FGotoCodeGen::writeOutEOF()
 {
-	if ( anyEofActions() ) {
+	if ( redFsm->anyEofActions() ) {
 		out <<
 			"	{\n"
 			"	switch ( " << EA() << "[" << CS() << "] ) {\n";
