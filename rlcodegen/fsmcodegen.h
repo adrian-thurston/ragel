@@ -174,16 +174,17 @@ protected:
 	virtual void calcIndexSize() {}
 
 	/* Are there any regular transition functions, any out transition functions. */
-	CodeGenData *cgd;
 	RedFsmAp *redFsm;
 
 	bool outLabelUsed;
 	bool againLabelUsed;
 
-protected:
 	ostream &out;
 
 	bool useIndicies;
+
+public:
+	CodeGenData *cgd;
 };
 
 class CCodeGen : virtual public FsmCodeGen

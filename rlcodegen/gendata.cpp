@@ -23,15 +23,6 @@
 
 /* Code Generators. */
 #include "gvdotgen.h"
-#include "tabcodegen.h"
-#include "ftabcodegen.h"
-#include "flatcodegen.h"
-#include "fflatcodegen.h"
-#include "gotocodegen.h"
-#include "fgotocodegen.h"
-#include "ipgotocodegen.h"
-#include "splitcodegen.h"
-#include "javacodegen.h"
 
 #include <iostream>
 
@@ -284,83 +275,6 @@ void CodeGenData::addStateCond( int snum, Key lowKey, Key highKey, long condNum 
 	curState->stateCondList.append( stateCond );
 }
 
-
-/* Generate the codegen depending on the command line options given. */
-void CodeGenData::makeCodeGen()
-{
-	switch ( hostLangType ) {
-	case CCode:
-		switch ( codeStyle ) {
-		case GenTables:
-			codeGen = new CTabCodeGen(out);
-			break;
-		case GenFTables:
-			codeGen = new CFTabCodeGen(out);
-			break;
-		case GenFlat:
-			codeGen = new CFlatCodeGen(out);
-			break;
-		case GenFFlat:
-			codeGen = new CFFlatCodeGen(out);
-			break;
-		case GenGoto:
-			codeGen = new CGotoCodeGen(out);
-			break;
-		case GenFGoto:
-			codeGen = new CFGotoCodeGen(out);
-			break;
-		case GenIpGoto:
-			codeGen = new CIpGotoCodeGen(out);
-			break;
-		case GenSplit:
-			codeGen = new CSplitCodeGen(out);
-			break;
-		}
-		break;
-
-	case DCode:
-		switch ( codeStyle ) {
-		case GenTables:
-			codeGen = new DTabCodeGen(out);
-			break;
-		case GenFTables:
-			codeGen = new DFTabCodeGen(out);
-			break;
-		case GenFlat:
-			codeGen = new DFlatCodeGen(out);
-			break;
-		case GenFFlat:
-			codeGen = new DFFlatCodeGen(out);
-			break;
-		case GenGoto:
-			codeGen = new DGotoCodeGen(out);
-			break;
-		case GenFGoto:
-			codeGen = new DFGotoCodeGen(out);
-			break;
-		case GenIpGoto:
-			codeGen = new DIpGotoCodeGen(out);
-			break;
-		case GenSplit:
-			codeGen = new DSplitCodeGen(out);
-			break;
-		}
-		break;
-
-	case JavaCode:
-		switch ( codeStyle ) {
-		case GenTables:
-			codeGen = new JavaTabCodeGen(out);
-			break;
-		default:
-			assert(false);
-			break;
-		}
-		break;
-	}
-
-	codeGen->cgd = this;
-}
 
 CondSpace *CodeGenData::findCondSpace( Key lowKey, Key highKey )
 {
@@ -681,9 +595,6 @@ void CodeGenData::analyzeMachine()
 
 	/* Set the maximums of various values used for deciding types. */
 	setValueLimits();
-
-	/* Determine if we should use indicies. */
-	codeGen->calcIndexSize();
 }
 
 /* Generate the code for an fsm. Assumes parseData is set up properly. Called
@@ -696,7 +607,7 @@ void CodeGenData::prepareMachine()
 	
 	/* Do this before distributing transitions out to singles and defaults
 	 * makes life easier. */
-	Key maxKey = findMaxKey();
+	redFsm->maxKey = findMaxKey();
 
 	redFsm->assignActionLocs();
 
@@ -744,16 +655,18 @@ void CodeGenData::prepareMachine()
 	if ( codeStyle == GenIpGoto || codeStyle == GenSplit )
 		redFsm->setInTrans();
 
-	/* Make a code generator that will output the header/code. */
-	if ( codeGen == 0 )
-		makeCodeGen();
-	codeGen->redFsm = redFsm;
-
 	/* Anlayze Machine will find the final action reference counts, among
 	 * other things. We will use these in reporting the usage
 	 * of fsm directives in action code. */
 	analyzeMachine();
-	redFsm->maxKey = maxKey;
+
+	/* Make a code generator that will output the header/code. */
+	if ( codeGen == 0 )
+		codeGen = makeCodeGen( this );
+	codeGen->redFsm = redFsm;
+
+	/* Determine if we should use indicies. */
+	codeGen->calcIndexSize();
 }
 
 void CodeGenData::generateGraphviz()

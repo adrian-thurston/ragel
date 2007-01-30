@@ -29,6 +29,16 @@
 #include <string>
 #include <assert.h>
 
+#include "tabcodegen.h"
+#include "ftabcodegen.h"
+#include "flatcodegen.h"
+#include "fflatcodegen.h"
+#include "gotocodegen.h"
+#include "fgotocodegen.h"
+#include "ipgotocodegen.h"
+#include "splitcodegen.h"
+#include "javacodegen.h"
+
 using std::ostream;
 using std::ostringstream;
 using std::string;
@@ -49,12 +59,93 @@ bool onlyWhitespace( char *str )
 	return true;
 }
 
+/* Generate the codegen depending on the command line options given. */
+FsmCodeGen *makeCodeGen( CodeGenData *cgd )
+{
+	FsmCodeGen *codeGen = 0;
+	switch ( hostLangType ) {
+	case CCode:
+		switch ( codeStyle ) {
+		case GenTables:
+			codeGen = new CTabCodeGen(cgd->out);
+			break;
+		case GenFTables:
+			codeGen = new CFTabCodeGen(cgd->out);
+			break;
+		case GenFlat:
+			codeGen = new CFlatCodeGen(cgd->out);
+			break;
+		case GenFFlat:
+			codeGen = new CFFlatCodeGen(cgd->out);
+			break;
+		case GenGoto:
+			codeGen = new CGotoCodeGen(cgd->out);
+			break;
+		case GenFGoto:
+			codeGen = new CFGotoCodeGen(cgd->out);
+			break;
+		case GenIpGoto:
+			codeGen = new CIpGotoCodeGen(cgd->out);
+			break;
+		case GenSplit:
+			codeGen = new CSplitCodeGen(cgd->out);
+			break;
+		}
+		break;
+
+	case DCode:
+		switch ( codeStyle ) {
+		case GenTables:
+			codeGen = new DTabCodeGen(cgd->out);
+			break;
+		case GenFTables:
+			codeGen = new DFTabCodeGen(cgd->out);
+			break;
+		case GenFlat:
+			codeGen = new DFlatCodeGen(cgd->out);
+			break;
+		case GenFFlat:
+			codeGen = new DFFlatCodeGen(cgd->out);
+			break;
+		case GenGoto:
+			codeGen = new DGotoCodeGen(cgd->out);
+			break;
+		case GenFGoto:
+			codeGen = new DFGotoCodeGen(cgd->out);
+			break;
+		case GenIpGoto:
+			codeGen = new DIpGotoCodeGen(cgd->out);
+			break;
+		case GenSplit:
+			codeGen = new DSplitCodeGen(cgd->out);
+			break;
+		}
+		break;
+
+	case JavaCode:
+		switch ( codeStyle ) {
+		case GenTables:
+			codeGen = new JavaTabCodeGen(cgd->out);
+			break;
+		default:
+			assert(false);
+			break;
+		}
+		break;
+	}
+
+	codeGen->cgd = cgd;
+
+	return codeGen;
+}
+
+
 /* Init code gen with in parameters. */
 FsmCodeGen::FsmCodeGen( ostream &out )
 :
-	cgd(0), 
 	redFsm(0), 
-	out(out)
+	out(out),
+	cgd(0)
 {
 }
 

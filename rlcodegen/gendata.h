@@ -142,7 +142,6 @@ struct CodeGenData
 
 	bool setAlphType( char *data );
 
-	void makeCodeGen();
 	void generateGraphviz();
 	void resolveTargetStates( InlineList *inlineList );
 	Key findMaxKey();
@@ -166,5 +165,7 @@ extern CodeGenData *cgd;
 
 void lineDirective( ostream &out, char *fileName, int line );
 void genLineDirective( ostream &out );
+
+FsmCodeGen *makeCodeGen( CodeGenData *cgd );
 
 #endif /* _GENDATA_H */
