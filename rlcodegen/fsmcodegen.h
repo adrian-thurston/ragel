@@ -68,10 +68,6 @@ public:
 	virtual void writeOutExec() = 0;
 	virtual void writeOutEOF() = 0;
 	
-	/* Gather various info on the machine. */
-	void analyzeAction( Action *act, InlineList *inlineList );
-	void analyzeActionList( RedAction *redAct, InlineList *inlineList );
-	void analyzeMachine();
 
 protected:
 	friend struct CodeGenData;
@@ -193,7 +189,6 @@ protected:
 	/* Determine if we should use indicies. */
 	virtual void calcIndexSize() {}
 
-	void findFinalActionRefs();
 	void assignActionIds();
 	void setValueLimits();
 

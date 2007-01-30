@@ -402,6 +402,181 @@ Key CodeGenData::findMaxKey()
 	return maxKey;
 }
 
+void CodeGenData::findFinalActionRefs()
+{
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		/* Rerence count out of single transitions. */
+		for ( RedTransList::Iter rtel = st->outSingle; rtel.lte(); rtel++ ) {
+			if ( rtel->value->action != 0 ) {
+				rtel->value->action->numTransRefs += 1;
+				for ( ActionTable::Iter item = rtel->value->action->key; item.lte(); item++ )
+					item->value->numTransRefs += 1;
+			}
+		}
+
+		/* Reference count out of range transitions. */
+		for ( RedTransList::Iter rtel = st->outRange; rtel.lte(); rtel++ ) {
+			if ( rtel->value->action != 0 ) {
+				rtel->value->action->numTransRefs += 1;
+				for ( ActionTable::Iter item = rtel->value->action->key; item.lte(); item++ )
+					item->value->numTransRefs += 1;
+			}
+		}
+
+		/* Reference count default transition. */
+		if ( st->defTrans != 0 && st->defTrans->action != 0 ) {
+			st->defTrans->action->numTransRefs += 1;
+			for ( ActionTable::Iter item = st->defTrans->action->key; item.lte(); item++ )
+				item->value->numTransRefs += 1;
+		}
+
+		/* Reference count to state actions. */
+		if ( st->toStateAction != 0 ) {
+			st->toStateAction->numToStateRefs += 1;
+			for ( ActionTable::Iter item = st->toStateAction->key; item.lte(); item++ )
+				item->value->numToStateRefs += 1;
+		}
+
+		/* Reference count from state actions. */
+		if ( st->fromStateAction != 0 ) {
+			st->fromStateAction->numFromStateRefs += 1;
+			for ( ActionTable::Iter item = st->fromStateAction->key; item.lte(); item++ )
+				item->value->numFromStateRefs += 1;
+		}
+
+		/* Reference count EOF actions. */
+		if ( st->eofAction != 0 ) {
+			st->eofAction->numEofRefs += 1;
+			for ( ActionTable::Iter item = st->eofAction->key; item.lte(); item++ )
+				item->value->numEofRefs += 1;
+		}
+	}
+}
+
+void CodeGenData::analyzeAction( Action *act, InlineList *inlineList )
+{
+	for ( InlineList::Iter item = *inlineList; item.lte(); item++ ) {
+		/* Only consider actions that are referenced. */
+		if ( act->numRefs() > 0 ) {
+			if ( item->type == InlineItem::Goto || item->type == InlineItem::GotoExpr )
+				codeGen->bAnyActionGotos = true;
+			else if ( item->type == InlineItem::Call || item->type == InlineItem::CallExpr )
+				codeGen->bAnyActionCalls = true;
+			else if ( item->type == InlineItem::Ret )
+				codeGen->bAnyActionRets = true;
+		}
+
+		/* Check for various things in regular actions. */
+		if ( act->numTransRefs > 0 || act->numToStateRefs > 0 || act->numFromStateRefs > 0 ) {
+			/* Any returns in regular actions? */
+			if ( item->type == InlineItem::Ret )
+				codeGen->bAnyRegActionRets = true;
+
+			/* Any next statements in the regular actions? */
+			if ( item->type == InlineItem::Next || item->type == InlineItem::NextExpr )
+				codeGen->bAnyRegNextStmt = true;
+
+			/* Any by value control in regular actions? */
+			if ( item->type == InlineItem::CallExpr || item->type == InlineItem::GotoExpr )
+				codeGen->bAnyRegActionByValControl = true;
+
+			/* Any references to the current state in regular actions? */
+			if ( item->type == InlineItem::Curs )
+				codeGen->bAnyRegCurStateRef = true;
+
+			if ( item->type == InlineItem::Break )
+				codeGen->bAnyRegBreak = true;
+
+			if ( item->type == InlineItem::LmSwitch && item->handlesError )
+				codeGen->bAnyLmSwitchError = true;
+		}
+
+		if ( item->children != 0 )
+			analyzeAction( act, item->children );
+	}
+}
+
+void CodeGenData::analyzeActionList( RedAction *redAct, InlineList *inlineList )
+{
+	for ( InlineList::Iter item = *inlineList; item.lte(); item++ ) {
+		/* Any next statements in the action table? */
+		if ( item->type == InlineItem::Next || item->type == InlineItem::NextExpr )
+			redAct->bAnyNextStmt = true;
+
+		/* Any references to the current state. */
+		if ( item->type == InlineItem::Curs )
+			redAct->bAnyCurStateRef = true;
+
+		if ( item->type == InlineItem::Break )
+			redAct->bAnyBreakStmt = true;
+
+		if ( item->children != 0 )
+			analyzeActionList( redAct, item->children );
+	}
+}
+
+/* Gather various info on the machine. */
+void CodeGenData::analyzeMachine()
+{
+	/* Find the true count of action references.  */
+	findFinalActionRefs();
+
+	/* Check if there are any calls in action code. */
+	for ( ActionList::Iter act = cgd->actionList; act.lte(); act++ ) {
+		/* Record the occurrence of various kinds of actions. */
+		if ( act->numToStateRefs > 0 )
+			codeGen->bAnyToStateActions = true;
+		if ( act->numFromStateRefs > 0 )
+			codeGen->bAnyFromStateActions = true;
+		if ( act->numEofRefs > 0 )
+			codeGen->bAnyEofActions = true;
+		if ( act->numTransRefs > 0 )
+			codeGen->bAnyRegActions = true;
+
+		/* Recurse through the action's parse tree looking for various things. */
+		analyzeAction( act, act->inlineList );
+	}
+
+	/* Analyze reduced action lists. */
+	for ( ActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
+		for ( ActionTable::Iter act = redAct->key; act.lte(); act++ )
+			analyzeActionList( redAct, act->value->inlineList );
+	}
+
+	/* Find states that have transitions with actions that have next
+	 * statements. */
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		/* Check any actions out of outSinge. */
+		for ( RedTransList::Iter rtel = st->outSingle; rtel.lte(); rtel++ ) {
+			if ( rtel->value->action != 0 && rtel->value->action->anyCurStateRef() )
+				st->bAnyRegCurStateRef = true;
+		}
+
+		/* Check any actions out of outRange. */
+		for ( RedTransList::Iter rtel = st->outRange; rtel.lte(); rtel++ ) {
+			if ( rtel->value->action != 0 && rtel->value->action->anyCurStateRef() )
+				st->bAnyRegCurStateRef = true;
+		}
+
+		/* Check any action out of default. */
+		if ( st->defTrans != 0 && st->defTrans->action != 0 && 
+				st->defTrans->action->anyCurStateRef() )
+			st->bAnyRegCurStateRef = true;
+		
+		if ( st->stateCondList.length() > 0 )
+			codeGen->bAnyConditions = true;
+	}
+
+	/* Assign ids to actions that are referenced. */
+	codeGen->assignActionIds();
+
+	/* Set the maximums of various values used for deciding types. */
+	codeGen->setValueLimits();
+
+	/* Determine if we should use indicies. */
+	codeGen->calcIndexSize();
+}
+
 /* Generate the code for an fsm. Assumes parseData is set up properly. Called
  * by parser code. */
 void CodeGenData::prepareMachine()
@@ -468,7 +643,7 @@ void CodeGenData::prepareMachine()
 	/* Anlayze Machine will find the final action reference counts, among
 	 * other things. We will use these in reporting the usage
 	 * of fsm directives in action code. */
-	codeGen->analyzeMachine();
+	analyzeMachine();
 	codeGen->maxKey = maxKey;
 }
 

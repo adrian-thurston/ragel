@@ -149,6 +149,12 @@ struct CodeGenData
 
 	void generate();
 	void generateCode();
+
+	/* Gather various info on the machine. */
+	void analyzeActionList( RedAction *redAct, InlineList *inlineList );
+	void analyzeAction( Action *act, InlineList *inlineList );
+	void findFinalActionRefs();
+	void analyzeMachine();
 	void prepareMachine();
 	bool hasBeenPrepared;
 };
