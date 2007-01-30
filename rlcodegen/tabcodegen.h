@@ -39,6 +39,7 @@ struct RedStateAp;
 class TabCodeGen : virtual public FsmCodeGen
 {
 public:
+	TabCodeGen( ostream &out ) : FsmCodeGen(out) {}
 	virtual ~TabCodeGen() { }
 	virtual void writeOutData();
 	virtual void writeOutExec();
@@ -96,6 +97,8 @@ protected:
 struct CTabCodeGen
 	: public TabCodeGen, public CCodeGen
 {
+	CTabCodeGen( ostream &out ) : 
+		FsmCodeGen(out), TabCodeGen(out), CCodeGen(out) {}
 };
 
 /*
@@ -104,6 +107,8 @@ struct CTabCodeGen
 struct DTabCodeGen
 	: public TabCodeGen, public DCodeGen
 {
+	DTabCodeGen( ostream &out ) : 
+		FsmCodeGen(out), TabCodeGen(out), DCodeGen(out) {}
 };
 
 

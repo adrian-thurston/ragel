@@ -56,11 +56,12 @@ enum CodeStyleEnum
 class output_filter : public std::filebuf
 {
 public:
-	output_filter() : line(1) { }
+	output_filter( char *fileName ) : fileName(fileName), line(1) { }
 
 	virtual int sync();
 	virtual std::streamsize xsputn(const char* s, std::streamsize n);
 
+	char *fileName;
 	int line;
 };
 	
@@ -68,14 +69,11 @@ extern OutputFormat outputFormat;
 extern CodeStyleEnum codeStyle;
 
 /* IO filenames and stream. */
-extern char *outputFileName;
-extern std::ostream *outStream;
-extern output_filter *outFilter;
-
 extern bool printPrintables;
 extern bool graphvizDone;
 
-int xml_parse( std::istream &input, char *fileName );
+int xml_parse( std::istream &input, char *fileName, 
+		bool outputActive, bool wantComplete );
 
 extern int gblErrorCount;
 extern char machineMain[];
@@ -141,7 +139,7 @@ struct XMLTag
 };
 
 std::ostream &error();
-void openOutput( char *inputFile );
+std::ostream *openOutput( char *inputFile );
 char *fileNameFromStem( char *stemFile, char *suffix );
 
 #endif /* _RLCODEGEN_H */

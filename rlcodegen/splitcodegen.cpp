@@ -345,9 +345,9 @@ std::ostream &SplitCodeGen::ALL_PARTITIONS()
 		char *include = fileNameFromStem( cgd->fileName, ".h" );
 
 		/* Create the filter on the output and open it. */
-		output_filter *partFilter = new output_filter;
+		output_filter *partFilter = new output_filter( fn );
 		partFilter->open( fn, ios::out|ios::trunc );
-		if ( !outFilter->is_open() ) {
+		if ( !partFilter->is_open() ) {
 			error() << "error opening " << fn << " for writing" << endl;
 			exit(1);
 		}

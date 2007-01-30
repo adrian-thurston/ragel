@@ -292,28 +292,28 @@ void CodeGenData::makeCodeGen()
 	case CCode:
 		switch ( codeStyle ) {
 		case GenTables:
-			codeGen = new CTabCodeGen;
+			codeGen = new CTabCodeGen(out);
 			break;
 		case GenFTables:
-			codeGen = new CFTabCodeGen;
+			codeGen = new CFTabCodeGen(out);
 			break;
 		case GenFlat:
-			codeGen = new CFlatCodeGen;
+			codeGen = new CFlatCodeGen(out);
 			break;
 		case GenFFlat:
-			codeGen = new CFFlatCodeGen;
+			codeGen = new CFFlatCodeGen(out);
 			break;
 		case GenGoto:
-			codeGen = new CGotoCodeGen;
+			codeGen = new CGotoCodeGen(out);
 			break;
 		case GenFGoto:
-			codeGen = new CFGotoCodeGen;
+			codeGen = new CFGotoCodeGen(out);
 			break;
 		case GenIpGoto:
-			codeGen = new CIpGotoCodeGen;
+			codeGen = new CIpGotoCodeGen(out);
 			break;
 		case GenSplit:
-			codeGen = new CSplitCodeGen;
+			codeGen = new CSplitCodeGen(out);
 			break;
 		}
 		break;
@@ -321,28 +321,28 @@ void CodeGenData::makeCodeGen()
 	case DCode:
 		switch ( codeStyle ) {
 		case GenTables:
-			codeGen = new DTabCodeGen;
+			codeGen = new DTabCodeGen(out);
 			break;
 		case GenFTables:
-			codeGen = new DFTabCodeGen;
+			codeGen = new DFTabCodeGen(out);
 			break;
 		case GenFlat:
-			codeGen = new DFlatCodeGen;
+			codeGen = new DFlatCodeGen(out);
 			break;
 		case GenFFlat:
-			codeGen = new DFFlatCodeGen;
+			codeGen = new DFFlatCodeGen(out);
 			break;
 		case GenGoto:
-			codeGen = new DGotoCodeGen;
+			codeGen = new DGotoCodeGen(out);
 			break;
 		case GenFGoto:
-			codeGen = new DFGotoCodeGen;
+			codeGen = new DFGotoCodeGen(out);
 			break;
 		case GenIpGoto:
-			codeGen = new DIpGotoCodeGen;
+			codeGen = new DIpGotoCodeGen(out);
 			break;
 		case GenSplit:
-			codeGen = new DSplitCodeGen;
+			codeGen = new DSplitCodeGen(out);
 			break;
 		}
 		break;
@@ -350,7 +350,7 @@ void CodeGenData::makeCodeGen()
 	case JavaCode:
 		switch ( codeStyle ) {
 		case GenTables:
-			codeGen = new JavaTabCodeGen;
+			codeGen = new JavaTabCodeGen(out);
 			break;
 		default:
 			assert(false);
@@ -482,7 +482,7 @@ void CodeGenData::generateGraphviz()
 	redFsm->chooseDefaultSpan();
 
 	/* Make the generator. */
-	GraphvizDotGen dotGen( fsmName, this, redFsm, *outStream );
+	GraphvizDotGen dotGen( fsmName, this, redFsm, out );
 
 	/* Write out with it. */
 	dotGen.writeDotFile();
@@ -506,8 +506,8 @@ void CodeGenData::generateCode()
 		prepareMachine();
 
 		/* Force a newline. */
-		*outStream << "\n";
-		genLineDirective( *outStream );
+		out << "\n";
+		genLineDirective( out );
 	}
 	
 
@@ -559,5 +559,8 @@ void lineDirective( ostream &out, char *fileName, int line )
 
 void genLineDirective( ostream &out )
 {
-	lineDirective( out, outputFileName, outFilter->line + 1 );
+	assert( outputFormat == OutCode );
+	std::streambuf *sbuf = out.rdbuf();
+	output_filter *filter = static_cast<output_filter*>(sbuf);
+	lineDirective( out, filter->fileName, filter->line + 1 );
 }

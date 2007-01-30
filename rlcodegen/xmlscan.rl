@@ -250,11 +250,11 @@ int Scanner::scan( )
 	}
 }
 
-
-int xml_parse( istream &input, char *fileName )
+int xml_parse( std::istream &input, char *fileName, 
+		bool outputActive, bool wantComplete )
 {
 	Scanner scanner( fileName, input );
-	Parser parser( fileName );
+	Parser parser( fileName, outputActive, wantComplete );
 
 	parser.init();
 

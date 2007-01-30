@@ -30,6 +30,9 @@
 struct JavaTabCodeGen
 	: public TabCodeGen, public JavaCodeGen
 {
+	JavaTabCodeGen( ostream &out ) : 
+		FsmCodeGen(out), TabCodeGen(out), JavaCodeGen(out) {}
+
 	void BREAK( ostream &ret, int targState );
 	void GOTO( ostream &ret, int gotoDest, bool inFinish );
 	void GOTO_EXPR( ostream &ret, InlineItem *ilItem, bool inFinish );

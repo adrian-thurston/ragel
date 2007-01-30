@@ -77,8 +77,9 @@ struct Parser
 	void init();
 	int parseLangEl( int type, const Token *token );
 
-	Parser( char *fileName )
-		: fileName(fileName), sourceFileName(0) { }
+	Parser( char *fileName, bool outputActive, bool wantComplete ) : 
+		fileName(fileName), sourceFileName(0), outStream(0),
+		outputActive(outputActive), wantComplete(wantComplete) { }
 
 	int token( int tokenId, Token &token );
 	int token( int tokenId, int col, int line );
@@ -92,9 +93,12 @@ struct Parser
 
 	/* The name of the root section, this does not change during an include. */
 	char *fileName;
+	char *sourceFileName;
+	ostream *outStream;
+	bool outputActive;
+	bool wantComplete;
 
 	/* Collected during parsing. */
-	char *sourceFileName;
 	char *attrKey;
 	char *attrValue;
 	int curAction;

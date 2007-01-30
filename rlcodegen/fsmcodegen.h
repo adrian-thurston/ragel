@@ -60,7 +60,7 @@ inline string itoa( int i )
 class FsmCodeGen
 {
 public:
-	FsmCodeGen();
+	FsmCodeGen( ostream &out );
 	virtual ~FsmCodeGen() {}
 
 	virtual void writeOutData() = 0;
@@ -248,6 +248,8 @@ protected:
 class CCodeGen : virtual public FsmCodeGen
 {
 public:
+	CCodeGen( ostream &out ) : FsmCodeGen(out) {}
+
 	virtual string NULL_ITEM();
 	virtual string POINTER();
 	virtual ostream &SWITCH_DEFAULT();
@@ -264,6 +266,8 @@ public:
 class DCodeGen : virtual public FsmCodeGen
 {
 public:
+	DCodeGen( ostream &out ) : FsmCodeGen(out) {}
+
 	virtual string NULL_ITEM();
 	virtual string POINTER();
 	virtual ostream &SWITCH_DEFAULT();
@@ -280,6 +284,8 @@ public:
 class JavaCodeGen : virtual public FsmCodeGen
 {
 public:
+	JavaCodeGen( ostream &out ) : FsmCodeGen(out) {}
+
 	virtual string NULL_ITEM();
 	virtual string POINTER();
 	virtual ostream &SWITCH_DEFAULT();

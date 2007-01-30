@@ -37,6 +37,8 @@ struct CodeGenData;
 class FTabCodeGen : public TabCodeGen
 {
 protected:
+	FTabCodeGen( ostream &out ) : FsmCodeGen(out), TabCodeGen(out) {}
+
 	std::ostream &TO_STATE_ACTION_SWITCH();
 	std::ostream &FROM_STATE_ACTION_SWITCH();
 	std::ostream &EOF_ACTION_SWITCH();
@@ -59,6 +61,8 @@ protected:
 struct CFTabCodeGen
 	: public FTabCodeGen, public CCodeGen
 {
+	CFTabCodeGen( ostream &out ) : 
+		FsmCodeGen(out), FTabCodeGen(out), CCodeGen(out) {}
 };
 
 /*
@@ -67,6 +71,8 @@ struct CFTabCodeGen
 struct DFTabCodeGen
 	: public FTabCodeGen, public DCodeGen
 {
+	DFTabCodeGen( ostream &out ) : 
+		FsmCodeGen(out), FTabCodeGen(out), DCodeGen(out) {}
 };
 
 #endif /* _FTABCODEGEN_H */

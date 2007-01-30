@@ -183,7 +183,7 @@ void escapeLineDirectivePath( std::ostream &out, char *path )
 
 /* Invoked by the parser, after the source file 
  * name is taken from XML file. */
-void openOutput( char *inputFile )
+ostream *openOutput( char *inputFile )
 {
 	/* If the output format is code and no output file name is given, then
 	 * make a default. */
@@ -210,7 +210,7 @@ void openOutput( char *inputFile )
 
 	if ( outputFileName != 0 ) {
 		/* Create the filter on the output and open it. */
-		outFilter = new output_filter;
+		outFilter = new output_filter( outputFileName );
 		outFilter->open( outputFileName, ios::out|ios::trunc );
 		if ( !outFilter->is_open() ) {
 			error() << "error opening " << outputFileName << " for writing" << endl;
@@ -224,6 +224,7 @@ void openOutput( char *inputFile )
 		/* Writing out ot std out. */
 		outStream = &cout;
 	}
+	return outStream;
 }
 
 /* Main, process args and call yyparse to start scanning input. */
@@ -360,8 +361,11 @@ int main(int argc, char **argv)
 	if ( gblErrorCount > 0 )
 		exit(1);
 
+	bool wantComplete = outputFormat != OutGraphvizDot;
+	bool outputActive = outputFormat == OutCode;
+
 	/* Parse the input! */
-	xml_parse( *inStream, xmlInputFileName );
+	xml_parse( *inStream, xmlInputFileName, outputActive, wantComplete );
 
 	/* If writing to a file, delete the ostream, causing it to flush.
 	 * Standard out is flushed automatically. */

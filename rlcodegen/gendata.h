@@ -42,10 +42,11 @@ typedef AvlMapEl<char *, CodeGenData*> CodeGenMapEl;
 
 struct CodeGenData
 {
-	CodeGenData( char *fileName, char *fsmName, bool wantComplete )
+	CodeGenData( char *fileName, char *fsmName, ostream &out, bool wantComplete )
 	:
 		fileName(fileName),
 		fsmName(fsmName), 
+		out(out),
 		redFsm(0), 
 		allActions(0),
 		allActionTables(0),
@@ -78,6 +79,7 @@ struct CodeGenData
 
 	char *fileName;
 	char *fsmName;
+	ostream &out;
 	RedFsmAp *redFsm;
 	Action *allActions;
 	RedAction *allActionTables;

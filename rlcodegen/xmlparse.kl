@@ -85,7 +85,7 @@ tag_ragel_head: TAG_ragel
 						"currently supported" << endl;
 		}
 
-		openOutput( sourceFileName );
+		outStream = openOutput( sourceFileName );
 	};
 
 host_or_def_list: host_or_def_list host_or_def;
@@ -102,11 +102,11 @@ host:
 			error($1->loc) << "tag <host> requires a line attribute" << endl;
 		else {
 			int line = atoi( lineAttr->value );
-			if ( outputFormat == OutCode )
+			if ( outputActive )
 				lineDirective( *outStream, sourceFileName, line );
 		}
 
-		if ( outputFormat == OutCode )
+		if ( outputActive )
 			*outStream << $3->tag->content;
 	};
 
@@ -119,8 +119,6 @@ ragel_def:
 
 tag_ragel_def_head: TAG_ragel_def 
 	final {
-		bool wantComplete = outputFormat != OutGraphvizDot;
-
 		char *fsmName = 0;
 		Attribute *nameAttr = $1->tag->findAttr( "name" );
 		if ( nameAttr != 0 ) {
@@ -130,12 +128,12 @@ tag_ragel_def_head: TAG_ragel_def
 			if ( mapEl != 0 )
 				cgd = mapEl->value;
 			else {
-				cgd = new CodeGenData( sourceFileName, fsmName, wantComplete );
+				cgd = new CodeGenData( sourceFileName, fsmName, *outStream, wantComplete );
 				codeGenMap.insert( fsmName, cgd );
 			}
 		}
 		else {
-			cgd = new CodeGenData( sourceFileName, fsmName, wantComplete );
+			cgd = new CodeGenData( sourceFileName, fsmName, *outStream, wantComplete );
 		}
 
 		cgd->writeOps = 0;

@@ -27,6 +27,8 @@
 class SplitCodeGen : public IpGotoCodeGen
 {
 public:
+	SplitCodeGen( ostream &out ) : FsmCodeGen(out), IpGotoCodeGen(out) {}
+
 	bool ptOutLabelUsed;
 
 	std::ostream &PART_MAP();
@@ -51,14 +53,18 @@ public:
 struct CSplitCodeGen
 	: public SplitCodeGen, public CCodeGen
 {
+	CSplitCodeGen( ostream &out ) : 
+		FsmCodeGen(out), SplitCodeGen(out), CCodeGen(out) {}
 };
 
 /*
  * class DIpGotoCodeGen
  */
 struct DSplitCodeGen
-	: public IpGotoCodeGen, public DCodeGen
+	: public SplitCodeGen, public DCodeGen
 {
+	DSplitCodeGen( ostream &out ) : 
+		FsmCodeGen(out), SplitCodeGen(out), DCodeGen(out) {}
 };
 
 

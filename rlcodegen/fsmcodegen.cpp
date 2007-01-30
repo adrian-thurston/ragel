@@ -50,12 +50,12 @@ bool onlyWhitespace( char *str )
 }
 
 /* Init code gen with in parameters. */
-FsmCodeGen::FsmCodeGen( )
+FsmCodeGen::FsmCodeGen( ostream &out )
 :
 	fsmName(0), 
 	cgd(0), 
 	redFsm(0), 
-	out(*outStream),
+	out(out),
 	bAnyToStateActions(false),
 	bAnyFromStateActions(false),
 	bAnyRegActions(false),

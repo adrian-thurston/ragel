@@ -40,6 +40,7 @@ struct StateCond;
 class GotoCodeGen : virtual public FsmCodeGen
 {
 public:
+	GotoCodeGen( ostream &out ) : FsmCodeGen(out) {}
 	std::ostream &TO_STATE_ACTION_SWITCH();
 	std::ostream &FROM_STATE_ACTION_SWITCH();
 	std::ostream &EOF_ACTION_SWITCH();
@@ -92,6 +93,8 @@ public:
 struct CGotoCodeGen
 	: public GotoCodeGen, public CCodeGen
 {
+	CGotoCodeGen( ostream &out ) : 
+		FsmCodeGen(out), GotoCodeGen(out), CCodeGen(out) {}
 };
 
 /*
@@ -100,6 +103,8 @@ struct CGotoCodeGen
 struct DGotoCodeGen
 	: public GotoCodeGen, public DCodeGen
 {
+	DGotoCodeGen( ostream &out ) : 
+		FsmCodeGen(out), GotoCodeGen(out), DCodeGen(out) {}
 };
 
 

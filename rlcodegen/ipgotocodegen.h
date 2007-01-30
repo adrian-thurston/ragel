@@ -36,6 +36,8 @@ struct CodeGenData;
 class IpGotoCodeGen : public GotoCodeGen
 {
 public:
+	IpGotoCodeGen( ostream &out ) : FsmCodeGen(out), GotoCodeGen(out) {}
+
 	std::ostream &EXIT_STATES();
 	std::ostream &TRANS_GOTO( RedTransAp *trans, int level );
 	std::ostream &FINISH_CASES();
@@ -78,6 +80,8 @@ protected:
 struct CIpGotoCodeGen
 	: public IpGotoCodeGen, public CCodeGen
 {
+	CIpGotoCodeGen( ostream &out ) : 
+		FsmCodeGen(out), IpGotoCodeGen(out), CCodeGen(out) {}
 };
 
 /*
@@ -86,6 +90,8 @@ struct CIpGotoCodeGen
 struct DIpGotoCodeGen
 	: public IpGotoCodeGen, public DCodeGen
 {
+	DIpGotoCodeGen( ostream &out ) : 
+		FsmCodeGen(out), IpGotoCodeGen(out), DCodeGen(out) {}
 };
 
 
