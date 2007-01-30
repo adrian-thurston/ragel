@@ -45,22 +45,8 @@ using std::string;
 using std::cerr;
 using std::endl;
 
-
-/* Determine if a string is only whitespace. Code blocks that are only
- * whitespace need not be output. */
-bool onlyWhitespace( char *str )
-{
-	while ( *str != 0 ) {
-		if ( *str != ' ' && *str != '\t' && *str != '\n' &&
-				*str != '\v' && *str != '\f' && *str != '\r' )
-			return false;
-		str += 1;
-	}
-	return true;
-}
-
 /* Generate the codegen depending on the command line options given. */
-FsmCodeGen *makeCodeGen( CodeGenData *cgd )
+FsmCodeGen *makeCodeGen( CodeGenData *cgd, RedFsmAp *redFsm )
 {
 	FsmCodeGen *codeGen = 0;
 	switch ( hostLangType ) {
@@ -134,7 +120,11 @@ FsmCodeGen *makeCodeGen( CodeGenData *cgd )
 		break;
 	}
 
+	codeGen->redFsm = redFsm;
 	codeGen->cgd = cgd;
+
+	/* Determine if we should use indicies. */
+	codeGen->calcIndexSize();
 
 	return codeGen;
 }
@@ -143,9 +133,9 @@ FsmCodeGen *makeCodeGen( CodeGenData *cgd )
 /* Init code gen with in parameters. */
 FsmCodeGen::FsmCodeGen( ostream &out )
 :
-	redFsm(0), 
 	out(out),
-	cgd(0)
+	cgd(0),
+	redFsm(0)
 {
 }
 

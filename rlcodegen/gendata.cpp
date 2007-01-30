@@ -29,7 +29,6 @@
 using std::cerr;
 using std::endl;
 
-CodeGenData *cgd = 0;
 
 void CodeGenData::createMachine()
 {
@@ -432,7 +431,7 @@ void CodeGenData::analyzeActionList( RedAction *redAct, InlineList *inlineList )
 void CodeGenData::assignActionIds()
 {
 	int nextActionId = 0;
-	for ( ActionList::Iter act = cgd->actionList; act.lte(); act++ ) {
+	for ( ActionList::Iter act = actionList; act.lte(); act++ ) {
 		/* Only ever interested in referenced actions. */
 		if ( act->numRefs() > 0 )
 			act->actionId = nextActionId++;
@@ -459,12 +458,12 @@ void CodeGenData::setValueLimits()
 	/* In both of these cases the 0 index is reserved for no value, so the max
 	 * is one more than it would be if they started at 0. */
 	redFsm->maxIndex = redFsm->transSet.length();
-	redFsm->maxCond = cgd->condSpaceList.length(); 
+	redFsm->maxCond = condSpaceList.length(); 
 
 	/* The nextStateId - 1 is the last state id assigned. */
 	redFsm->maxState = redFsm->nextStateId - 1;
 
-	for ( CondSpaceList::Iter csi = cgd->condSpaceList; csi.lte(); csi++ ) {
+	for ( CondSpaceList::Iter csi = condSpaceList; csi.lte(); csi++ ) {
 		if ( csi->condSpaceId > redFsm->maxCondSpaceId )
 			redFsm->maxCondSpaceId = csi->condSpaceId;
 	}
@@ -545,7 +544,7 @@ void CodeGenData::analyzeMachine()
 	findFinalActionRefs();
 
 	/* Check if there are any calls in action code. */
-	for ( ActionList::Iter act = cgd->actionList; act.lte(); act++ ) {
+	for ( ActionList::Iter act = actionList; act.lte(); act++ ) {
 		/* Record the occurrence of various kinds of actions. */
 		if ( act->numToStateRefs > 0 )
 			redFsm->bAnyToStateActions = true;
@@ -661,12 +660,7 @@ void CodeGenData::prepareMachine()
 	analyzeMachine();
 
 	/* Make a code generator that will output the header/code. */
-	if ( codeGen == 0 )
-		codeGen = makeCodeGen( this );
-	codeGen->redFsm = redFsm;
-
-	/* Determine if we should use indicies. */
-	codeGen->calcIndexSize();
+	codeGen = makeCodeGen( this, redFsm );
 }
 
 void CodeGenData::generateGraphviz()

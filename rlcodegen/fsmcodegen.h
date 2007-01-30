@@ -170,12 +170,6 @@ protected:
 	 * is virtual. */
 	virtual void setLabelsNeeded() {}
 
-	/* Determine if we should use indicies. */
-	virtual void calcIndexSize() {}
-
-	/* Are there any regular transition functions, any out transition functions. */
-	RedFsmAp *redFsm;
-
 	bool outLabelUsed;
 	bool againLabelUsed;
 
@@ -184,7 +178,11 @@ protected:
 	bool useIndicies;
 
 public:
+	/* Determine if we should use indicies. */
+	virtual void calcIndexSize() {}
+
 	CodeGenData *cgd;
+	RedFsmAp *redFsm;
 };
 
 class CCodeGen : virtual public FsmCodeGen

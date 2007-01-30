@@ -48,10 +48,10 @@ protected:
 	virtual std::ostream &FROM_STATE_ACTION( RedStateAp *state );
 	virtual std::ostream &EOF_ACTION( RedStateAp *state );
 	virtual std::ostream &TRANS_ACTION( RedTransAp *trans );
-	virtual void calcIndexSize();
 	virtual void writeOutData();
 	virtual void writeOutEOF();
 	virtual void writeOutExec();
+	virtual void calcIndexSize();
 };
 
 

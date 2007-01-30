@@ -161,11 +161,9 @@ struct CodeGenData
 	bool hasBeenPrepared;
 };
 
-extern CodeGenData *cgd;
-
 void lineDirective( ostream &out, char *fileName, int line );
 void genLineDirective( ostream &out );
 
-FsmCodeGen *makeCodeGen( CodeGenData *cgd );
+FsmCodeGen *makeCodeGen( CodeGenData *cgd, RedFsmAp *redFsm );
 
 #endif /* _GENDATA_H */

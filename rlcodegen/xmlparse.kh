@@ -79,7 +79,8 @@ struct Parser
 
 	Parser( char *fileName, bool outputActive, bool wantComplete ) : 
 		fileName(fileName), sourceFileName(0), outStream(0),
-		outputActive(outputActive), wantComplete(wantComplete) { }
+		outputActive(outputActive), wantComplete(wantComplete),
+		cgd(0) { }
 
 	int token( int tokenId, Token &token );
 	int token( int tokenId, int col, int line );
@@ -108,6 +109,7 @@ struct Parser
 	int curCondSpace;
 	int curStateCond;
 
+	CodeGenData *cgd;
 	CodeGenMap codeGenMap;
 };
 
