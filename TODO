@@ -1,3 +1,5 @@
+The fixed size stack is a problem for manual recursion of unlimited depth.
+
 An option to turn off the removal of duplicate actions might be useful for
 analyzing unintentional nondeterminism.
 
