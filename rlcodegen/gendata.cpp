@@ -359,7 +359,6 @@ void CodeGenData::makeCodeGen()
 		break;
 	}
 
-	codeGen->fsmName = fsmName;
 	codeGen->cgd = this;
 }
 
@@ -515,6 +514,116 @@ void CodeGenData::analyzeActionList( RedAction *redAct, InlineList *inlineList )
 	}
 }
 
+/* Assign ids to referenced actions. */
+void CodeGenData::assignActionIds()
+{
+	int nextActionId = 0;
+	for ( ActionList::Iter act = cgd->actionList; act.lte(); act++ ) {
+		/* Only ever interested in referenced actions. */
+		if ( act->numRefs() > 0 )
+			act->actionId = nextActionId++;
+	}
+}
+
+void CodeGenData::setValueLimits()
+{
+	codeGen->maxSingleLen = 0;
+	codeGen->maxRangeLen = 0;
+	codeGen->maxKeyOffset = 0;
+	codeGen->maxIndexOffset = 0;
+	codeGen->maxActListId = 0;
+	codeGen->maxActionLoc = 0;
+	codeGen->maxActArrItem = 0;
+	codeGen->maxSpan = 0;
+	codeGen->maxCondSpan = 0;
+	codeGen->maxFlatIndexOffset = 0;
+	codeGen->maxCondOffset = 0;
+	codeGen->maxCondLen = 0;
+	codeGen->maxCondSpaceId = 0;
+	codeGen->maxCondIndexOffset = 0;
+
+	/* In both of these cases the 0 index is reserved for no value, so the max
+	 * is one more than it would be if they started at 0. */
+	codeGen->maxIndex = redFsm->transSet.length();
+	codeGen->maxCond = cgd->condSpaceList.length(); 
+
+	/* The nextStateId - 1 is the last state id assigned. */
+	codeGen->maxState = redFsm->nextStateId - 1;
+
+	for ( CondSpaceList::Iter csi = cgd->condSpaceList; csi.lte(); csi++ ) {
+		if ( csi->condSpaceId > codeGen->maxCondSpaceId )
+			codeGen->maxCondSpaceId = csi->condSpaceId;
+	}
+
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		/* Maximum cond length. */
+		if ( st->stateCondList.length() > codeGen->maxCondLen )
+			codeGen->maxCondLen = st->stateCondList.length();
+
+		/* Maximum single length. */
+		if ( st->outSingle.length() > codeGen->maxSingleLen )
+			codeGen->maxSingleLen = st->outSingle.length();
+
+		/* Maximum range length. */
+		if ( st->outRange.length() > codeGen->maxRangeLen )
+			codeGen->maxRangeLen = st->outRange.length();
+
+		/* The key offset index offset for the state after last is not used, skip it.. */
+		if ( ! st.last() ) {
+			codeGen->maxCondOffset += st->stateCondList.length();
+			codeGen->maxKeyOffset += st->outSingle.length() + st->outRange.length()*2;
+			codeGen->maxIndexOffset += st->outSingle.length() + st->outRange.length() + 1;
+		}
+
+		/* Max cond span. */
+		if ( st->condList != 0 ) {
+			unsigned long long span = keyOps->span( st->condLowKey, st->condHighKey );
+			if ( span > codeGen->maxCondSpan )
+				codeGen->maxCondSpan = span;
+		}
+
+		/* Max key span. */
+		if ( st->transList != 0 ) {
+			unsigned long long span = keyOps->span( st->lowKey, st->highKey );
+			if ( span > codeGen->maxSpan )
+				codeGen->maxSpan = span;
+		}
+
+		/* Max cond index offset. */
+		if ( ! st.last() ) {
+			if ( st->condList != 0 )
+				codeGen->maxCondIndexOffset += keyOps->span( st->condLowKey, st->condHighKey );
+		}
+
+		/* Max flat index offset. */
+		if ( ! st.last() ) {
+			if ( st->transList != 0 )
+				codeGen->maxFlatIndexOffset += keyOps->span( st->lowKey, st->highKey );
+			codeGen->maxFlatIndexOffset += 1;
+		}
+	}
+
+	for ( ActionTableMap::Iter at = redFsm->actionMap; at.lte(); at++ ) {
+		/* Maximum id of action lists. */
+		if ( at->actListId+1 > codeGen->maxActListId )
+			codeGen->maxActListId = at->actListId+1;
+
+		/* Maximum location of items in action array. */
+		if ( at->location+1 > codeGen->maxActionLoc )
+			codeGen->maxActionLoc = at->location+1;
+
+		/* Maximum values going into the action array. */
+		if ( at->key.length() > codeGen->maxActArrItem )
+			codeGen->maxActArrItem = at->key.length();
+		for ( ActionTable::Iter item = at->key; item.lte(); item++ ) {
+			if ( item->value->actionId > codeGen->maxActArrItem )
+				codeGen->maxActArrItem = item->value->actionId;
+		}
+	}
+}
+
+
+
 /* Gather various info on the machine. */
 void CodeGenData::analyzeMachine()
 {
@@ -568,10 +677,10 @@ void CodeGenData::analyzeMachine()
 	}
 
 	/* Assign ids to actions that are referenced. */
-	codeGen->assignActionIds();
+	assignActionIds();
 
 	/* Set the maximums of various values used for deciding types. */
-	codeGen->setValueLimits();
+	setValueLimits();
 
 	/* Determine if we should use indicies. */
 	codeGen->calcIndexSize();

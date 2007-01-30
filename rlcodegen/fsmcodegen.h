@@ -189,11 +189,7 @@ protected:
 	/* Determine if we should use indicies. */
 	virtual void calcIndexSize() {}
 
-	void assignActionIds();
-	void setValueLimits();
-
 	/* Are there any regular transition functions, any out transition functions. */
-	char *fsmName;
 	CodeGenData *cgd;
 	RedFsmAp *redFsm;
 

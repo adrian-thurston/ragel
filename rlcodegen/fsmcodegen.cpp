@@ -52,7 +52,6 @@ bool onlyWhitespace( char *str )
 /* Init code gen with in parameters. */
 FsmCodeGen::FsmCodeGen( ostream &out )
 :
-	fsmName(0), 
 	cgd(0), 
 	redFsm(0), 
 	out(out),
@@ -78,115 +77,6 @@ bool FsmCodeGen::anyActions()
 {
 	return redFsm->actionMap.length() > 0;
 }
-
-/* Assign ids to referenced actions. */
-void FsmCodeGen::assignActionIds()
-{
-	int nextActionId = 0;
-	for ( ActionList::Iter act = cgd->actionList; act.lte(); act++ ) {
-		/* Only ever interested in referenced actions. */
-		if ( act->numRefs() > 0 )
-			act->actionId = nextActionId++;
-	}
-}
-
-void FsmCodeGen::setValueLimits()
-{
-	maxSingleLen = 0;
-	maxRangeLen = 0;
-	maxKeyOffset = 0;
-	maxIndexOffset = 0;
-	maxActListId = 0;
-	maxActionLoc = 0;
-	maxActArrItem = 0;
-	maxSpan = 0;
-	maxCondSpan = 0;
-	maxFlatIndexOffset = 0;
-	maxCondOffset = 0;
-	maxCondLen = 0;
-	maxCondSpaceId = 0;
-	maxCondIndexOffset = 0;
-
-	/* In both of these cases the 0 index is reserved for no value, so the max
-	 * is one more than it would be if they started at 0. */
-	maxIndex = redFsm->transSet.length();
-	maxCond = cgd->condSpaceList.length(); 
-
-	/* The nextStateId - 1 is the last state id assigned. */
-	maxState = redFsm->nextStateId - 1;
-
-	for ( CondSpaceList::Iter csi = cgd->condSpaceList; csi.lte(); csi++ ) {
-		if ( csi->condSpaceId > maxCondSpaceId )
-			maxCondSpaceId = csi->condSpaceId;
-	}
-
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		/* Maximum cond length. */
-		if ( st->stateCondList.length() > maxCondLen )
-			maxCondLen = st->stateCondList.length();
-
-		/* Maximum single length. */
-		if ( st->outSingle.length() > maxSingleLen )
-			maxSingleLen = st->outSingle.length();
-
-		/* Maximum range length. */
-		if ( st->outRange.length() > maxRangeLen )
-			maxRangeLen = st->outRange.length();
-
-		/* The key offset index offset for the state after last is not used, skip it.. */
-		if ( ! st.last() ) {
-			maxCondOffset += st->stateCondList.length();
-			maxKeyOffset += st->outSingle.length() + st->outRange.length()*2;
-			maxIndexOffset += st->outSingle.length() + st->outRange.length() + 1;
-		}
-
-		/* Max cond span. */
-		if ( st->condList != 0 ) {
-			unsigned long long span = keyOps->span( st->condLowKey, st->condHighKey );
-			if ( span > maxCondSpan )
-				maxCondSpan = span;
-		}
-
-		/* Max key span. */
-		if ( st->transList != 0 ) {
-			unsigned long long span = keyOps->span( st->lowKey, st->highKey );
-			if ( span > maxSpan )
-				maxSpan = span;
-		}
-
-		/* Max cond index offset. */
-		if ( ! st.last() ) {
-			if ( st->condList != 0 )
-				maxCondIndexOffset += keyOps->span( st->condLowKey, st->condHighKey );
-		}
-
-		/* Max flat index offset. */
-		if ( ! st.last() ) {
-			if ( st->transList != 0 )
-				maxFlatIndexOffset += keyOps->span( st->lowKey, st->highKey );
-			maxFlatIndexOffset += 1;
-		}
-	}
-
-	for ( ActionTableMap::Iter at = redFsm->actionMap; at.lte(); at++ ) {
-		/* Maximum id of action lists. */
-		if ( at->actListId+1 > maxActListId )
-			maxActListId = at->actListId+1;
-
-		/* Maximum location of items in action array. */
-		if ( at->location+1 > maxActionLoc )
-			maxActionLoc = at->location+1;
-
-		/* Maximum values going into the action array. */
-		if ( at->key.length() > maxActArrItem )
-			maxActArrItem = at->key.length();
-		for ( ActionTable::Iter item = at->key; item.lte(); item++ ) {
-			if ( item->value->actionId > maxActArrItem )
-				maxActArrItem = item->value->actionId;
-		}
-	}
-}
-
 
 unsigned int FsmCodeGen::arrayTypeSize( unsigned long maxVal )
 {
@@ -214,7 +104,7 @@ string FsmCodeGen::ARRAY_TYPE( unsigned long maxVal )
 /* Write out the fsm name. */
 string FsmCodeGen::FSM_NAME()
 {
-	return fsmName;
+	return cgd->fsmName;
 }
 
 /* Emit the offset of the start state as a decimal integer. */

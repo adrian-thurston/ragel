@@ -155,6 +155,9 @@ struct CodeGenData
 	void analyzeAction( Action *act, InlineList *inlineList );
 	void findFinalActionRefs();
 	void analyzeMachine();
+
+	void setValueLimits();
+	void assignActionIds();
 	void prepareMachine();
 	bool hasBeenPrepared;
 };
