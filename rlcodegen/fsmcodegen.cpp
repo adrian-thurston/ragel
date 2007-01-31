@@ -46,7 +46,7 @@ using std::cerr;
 using std::endl;
 
 /* Generate the codegen depending on the command line options given. */
-FsmCodeGen *makeCodeGen( CodeGenData *cgd, RedFsmAp *redFsm )
+FsmCodeGen *makeCodeGen( CodeGenData *cgd )
 {
 	FsmCodeGen *codeGen = 0;
 	switch ( hostLangType ) {
@@ -119,12 +119,6 @@ FsmCodeGen *makeCodeGen( CodeGenData *cgd, RedFsmAp *redFsm )
 		}
 		break;
 	}
-
-	codeGen->redFsm = redFsm;
-	codeGen->cgd = cgd;
-
-	/* Determine if we should use indicies. */
-	codeGen->calcIndexSize();
 
 	return codeGen;
 }

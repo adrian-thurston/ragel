@@ -20,14 +20,45 @@
  */
 
 #include "gendata.h"
-
-/* Code Generators. */
 #include "gvdotgen.h"
-
 #include <iostream>
 
 using std::cerr;
 using std::endl;
+
+CodeGenData::CodeGenData( char *fileName, char *fsmName, ostream &out, bool wantComplete )
+:
+	fileName(fileName),
+	fsmName(fsmName), 
+	out(out),
+	redFsm(0), 
+	allActions(0),
+	allActionTables(0),
+	allConditions(0),
+	allCondSpaces(0),
+	allStates(0),
+	nameIndex(0),
+	startState(0),
+	getKeyExpr(0),
+	accessExpr(0),
+	curStateExpr(0),
+	codeGen(0),
+	wantComplete(wantComplete),
+	writeOps(0),
+	writeData(false),
+	writeInit(false),
+	writeExec(false),
+	writeEOF(false),
+	hasLongestMatch(false),
+	hasEnd(true),
+	dataPrefix(true),
+	writeFirstFinal(true),
+	writeErr(true),
+	hasBeenPrepared(false)
+{
+	/* Make a code generator that will output the header/code. */
+	codeGen = makeCodeGen( this );
+}
 
 
 void CodeGenData::createMachine()
@@ -659,8 +690,11 @@ void CodeGenData::prepareMachine()
 	 * of fsm directives in action code. */
 	analyzeMachine();
 
-	/* Make a code generator that will output the header/code. */
-	codeGen = makeCodeGen( this, redFsm );
+	codeGen->redFsm = redFsm;
+	codeGen->cgd = this;
+
+	/* Determine if we should use indicies. */
+	codeGen->calcIndexSize();
 }
 
 void CodeGenData::generateGraphviz()

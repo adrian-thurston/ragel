@@ -42,36 +42,7 @@ typedef AvlMapEl<char *, CodeGenData*> CodeGenMapEl;
 
 struct CodeGenData
 {
-	CodeGenData( char *fileName, char *fsmName, ostream &out, bool wantComplete )
-	:
-		fileName(fileName),
-		fsmName(fsmName), 
-		out(out),
-		redFsm(0), 
-		allActions(0),
-		allActionTables(0),
-		allConditions(0),
-		allCondSpaces(0),
-		allStates(0),
-		nameIndex(0),
-		startState(0),
-		getKeyExpr(0),
-		accessExpr(0),
-		curStateExpr(0),
-		codeGen(0),
-		wantComplete(wantComplete),
-		writeOps(0),
-		writeData(false),
-		writeInit(false),
-		writeExec(false),
-		writeEOF(false),
-		hasLongestMatch(false),
-		hasEnd(true),
-		dataPrefix(true),
-		writeFirstFinal(true),
-		writeErr(true),
-		hasBeenPrepared(false)
-	{ }
+	CodeGenData( char *fileName, char *fsmName, ostream &out, bool wantComplete );
 
 	/* 
 	 * Collecting the machine.
@@ -164,6 +135,6 @@ struct CodeGenData
 void lineDirective( ostream &out, char *fileName, int line );
 void genLineDirective( ostream &out );
 
-FsmCodeGen *makeCodeGen( CodeGenData *cgd, RedFsmAp *redFsm );
+FsmCodeGen *makeCodeGen( CodeGenData *cgd );
 
 #endif /* _GENDATA_H */
