@@ -86,7 +86,7 @@ void JavaTabCodeGen::COND_TRANSLATE()
 							" + ((_mid - _keys)>>1)] ) {\n"
 		;
 
-	for ( CondSpaceList::Iter csi = cgd->condSpaceList; csi.lte(); csi++ ) {
+	for ( CondSpaceList::Iter csi = condSpaceList; csi.lte(); csi++ ) {
 		CondSpace *condSpace = csi;
 		out << "	case " << condSpace->condSpaceId << ": {\n";
 		out << TABS(2) << "_widec = " << KEY(condSpace->baseKey) << 
@@ -196,7 +196,7 @@ void JavaTabCodeGen::writeOutExec()
 		"	int _keys;\n"
 		"\n";
 
-	if ( cgd->hasEnd )
+	if ( hasEnd )
 		out << "	if ( " << P() << " != " << PE() << " ) {\n";
 
 	out << "	_resume: while ( true ) {\n";
@@ -270,7 +270,7 @@ void JavaTabCodeGen::writeOutExec()
 			"\n";
 	}
 
-	if ( cgd->hasEnd ) {
+	if ( hasEnd ) {
 		out << 
 			"	if ( ++" << P() << " == " << PE() << " )\n"
 			"		break _resume;\n";
@@ -284,7 +284,7 @@ void JavaTabCodeGen::writeOutExec()
 	out << "	}\n";
 
 	/* The if guarding on empty string. */
-	if ( cgd->hasEnd )
+	if ( hasEnd )
 		out << "	}\n";
 
 	/* The execute block. */

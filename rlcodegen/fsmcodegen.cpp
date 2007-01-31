@@ -119,24 +119,19 @@ CodeGenData *makeCodeGen( char *fileName, char *fsmName, ostream &out, bool want
 		break;
 	}
 
-	CodeGenData *cgd = codeGen;
+	codeGen->fileName = fileName;
+	codeGen->fsmName = fsmName;
+	codeGen->wantComplete = wantComplete;
+	codeGen->codeGen = codeGen;
 
-	cgd->fileName = fileName;
-	cgd->fsmName = fsmName;
-	cgd->wantComplete = wantComplete;
-	cgd->codeGen = codeGen;
-
-	return cgd;
+	return codeGen;
 }
 
 
 /* Init code gen with in parameters. */
 FsmCodeGen::FsmCodeGen( ostream &out )
 :
-	CodeGenData(out),
-	out(out),
-	cgd(0),
-	redFsm(0)
+	CodeGenData(out)
 {
 }
 
@@ -166,7 +161,7 @@ string FsmCodeGen::ARRAY_TYPE( unsigned long maxVal )
 /* Write out the fsm name. */
 string FsmCodeGen::FSM_NAME()
 {
-	return cgd->fsmName;
+	return fsmName;
 }
 
 /* Emit the offset of the start state as a decimal integer. */
@@ -207,10 +202,10 @@ std::ostream &FsmCodeGen::ACTIONS_ARRAY()
 string FsmCodeGen::CS()
 {
 	ostringstream ret;
-	if ( cgd->curStateExpr != 0 ) { 
+	if ( curStateExpr != 0 ) { 
 		/* Emit the user supplied method of retrieving the key. */
 		ret << "(";
-		INLINE_LIST( ret, cgd->curStateExpr, 0, false );
+		INLINE_LIST( ret, curStateExpr, 0, false );
 		ret << ")";
 	}
 	else {
@@ -223,8 +218,8 @@ string FsmCodeGen::CS()
 string FsmCodeGen::ACCESS()
 {
 	ostringstream ret;
-	if ( cgd->accessExpr != 0 )
-		INLINE_LIST( ret, cgd->accessExpr, 0, false );
+	if ( accessExpr != 0 )
+		INLINE_LIST( ret, accessExpr, 0, false );
 	return ret.str();
 }
 
@@ -247,10 +242,10 @@ string FsmCodeGen::GET_WIDE_KEY( RedStateAp *state )
 string FsmCodeGen::GET_KEY()
 {
 	ostringstream ret;
-	if ( cgd->getKeyExpr != 0 ) { 
+	if ( getKeyExpr != 0 ) { 
 		/* Emit the user supplied method of retrieving the key. */
 		ret << "(";
-		INLINE_LIST( ret, cgd->getKeyExpr, 0, false );
+		INLINE_LIST( ret, getKeyExpr, 0, false );
 		ret << ")";
 	}
 	else {
@@ -487,7 +482,7 @@ string FsmCodeGen::LDIR_PATH( char *path )
 void FsmCodeGen::ACTION( ostream &ret, Action *action, int targState, bool inFinish )
 {
 	/* Write the preprocessor line info for going into the source file. */
-	lineDirective( ret, cgd->fileName, action->loc.line );
+	lineDirective( ret, fileName, action->loc.line );
 
 	/* Write the block and close it off. */
 	ret << "\t{";
@@ -498,7 +493,7 @@ void FsmCodeGen::ACTION( ostream &ret, Action *action, int targState, bool inFin
 void FsmCodeGen::CONDITION( ostream &ret, Action *condition )
 {
 	ret << "\n";
-	lineDirective( ret, cgd->fileName, condition->loc.line );
+	lineDirective( ret, fileName, condition->loc.line );
 	INLINE_LIST( ret, condition->inlineList, 0, false );
 }
 
@@ -531,7 +526,7 @@ void FsmCodeGen::writeOutInit()
 	if ( redFsm->anyActionCalls() || redFsm->anyActionRets() )
 		out << "\t" << TOP() << " = 0;\n";
 
-	if ( cgd->hasLongestMatch ) {
+	if ( hasLongestMatch ) {
 		out << 
 			"	" << TOKSTART() << " = " << NULL_ITEM() << ";\n"
 			"	" << TOKEND() << " = " << NULL_ITEM() << ";\n"
@@ -542,7 +537,7 @@ void FsmCodeGen::writeOutInit()
 
 string FsmCodeGen::DATA_PREFIX()
 {
-	if ( cgd->dataPrefix )
+	if ( dataPrefix )
 		return FSM_NAME() + "_";
 	return "";
 }
@@ -770,10 +765,10 @@ std::ostream &JavaCodeGen::SWITCH_DEFAULT()
 string JavaCodeGen::GET_KEY()
 {
 	ostringstream ret;
-	if ( cgd->getKeyExpr != 0 ) { 
+	if ( getKeyExpr != 0 ) { 
 		/* Emit the user supplied method of retrieving the key. */
 		ret << "(";
-		INLINE_LIST( ret, cgd->getKeyExpr, 0, false );
+		INLINE_LIST( ret, getKeyExpr, 0, false );
 		ret << ")";
 	}
 	else {

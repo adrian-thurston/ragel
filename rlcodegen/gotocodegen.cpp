@@ -37,7 +37,7 @@ std::ostream &GotoCodeGen::TRANS_GOTO( RedTransAp *trans, int level )
 std::ostream &GotoCodeGen::TO_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
-	for ( ActionList::Iter act = cgd->actionList; act.lte(); act++ ) {
+	for ( ActionList::Iter act = actionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numToStateRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
@@ -54,7 +54,7 @@ std::ostream &GotoCodeGen::TO_STATE_ACTION_SWITCH()
 std::ostream &GotoCodeGen::FROM_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
-	for ( ActionList::Iter act = cgd->actionList; act.lte(); act++ ) {
+	for ( ActionList::Iter act = actionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numFromStateRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
@@ -71,7 +71,7 @@ std::ostream &GotoCodeGen::FROM_STATE_ACTION_SWITCH()
 std::ostream &GotoCodeGen::EOF_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
-	for ( ActionList::Iter act = cgd->actionList; act.lte(); act++ ) {
+	for ( ActionList::Iter act = actionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numEofRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
@@ -88,7 +88,7 @@ std::ostream &GotoCodeGen::EOF_ACTION_SWITCH()
 std::ostream &GotoCodeGen::ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
-	for ( ActionList::Iter act = cgd->actionList; act.lte(); act++ ) {
+	for ( ActionList::Iter act = actionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numTransRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
@@ -607,13 +607,13 @@ void GotoCodeGen::writeOutData()
 		"static const int " << START() << " = " << START_STATE_ID() << ";\n"
 		"\n";
 
-	if ( cgd->writeFirstFinal ) {
+	if ( writeFirstFinal ) {
 		out <<
 			"static const int " << FIRST_FINAL() << " = " << FIRST_FINAL_STATE() << ";\n"
 			"\n";
 	}
 
-	if ( cgd->writeErr ) {
+	if ( writeErr ) {
 		out <<
 			"static const int " << ERROR() << " = " << ERROR_STATE() << ";\n"
 			"\n";
@@ -670,7 +670,7 @@ void GotoCodeGen::writeOutExec()
 
 	out << "\n";
 
-	if ( cgd->hasEnd ) {
+	if ( hasEnd ) {
 		outLabelUsed = true;
 		out << 
 			"	if ( " << P() << " == " << PE() << " )\n"
@@ -719,7 +719,7 @@ void GotoCodeGen::writeOutExec()
 			"\n";
 	}
 
-	if ( cgd->hasEnd ) {
+	if ( hasEnd ) {
 		out << 
 			"	if ( ++" << P() << " != " << PE() << " )\n"
 			"		goto _resume;\n";

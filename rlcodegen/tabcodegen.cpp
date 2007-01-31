@@ -95,7 +95,7 @@ std::ostream &TabCodeGen::TRANS_ACTION( RedTransAp *trans )
 std::ostream &TabCodeGen::TO_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
-	for ( ActionList::Iter act = cgd->actionList; act.lte(); act++ ) {
+	for ( ActionList::Iter act = actionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numToStateRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
@@ -112,7 +112,7 @@ std::ostream &TabCodeGen::TO_STATE_ACTION_SWITCH()
 std::ostream &TabCodeGen::FROM_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
-	for ( ActionList::Iter act = cgd->actionList; act.lte(); act++ ) {
+	for ( ActionList::Iter act = actionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numFromStateRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
@@ -129,7 +129,7 @@ std::ostream &TabCodeGen::FROM_STATE_ACTION_SWITCH()
 std::ostream &TabCodeGen::EOF_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
-	for ( ActionList::Iter act = cgd->actionList; act.lte(); act++ ) {
+	for ( ActionList::Iter act = actionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numEofRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
@@ -147,7 +147,7 @@ std::ostream &TabCodeGen::EOF_ACTION_SWITCH()
 std::ostream &TabCodeGen::ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
-	for ( ActionList::Iter act = cgd->actionList; act.lte(); act++ ) {
+	for ( ActionList::Iter act = actionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numTransRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
@@ -788,12 +788,12 @@ void TabCodeGen::writeOutData()
 	STATIC_VAR( "int", START() ) << " = " << START_STATE_ID() << ";\n"
 	"\n";
 
-	if ( cgd->writeFirstFinal ) {
+	if ( writeFirstFinal ) {
 		STATIC_VAR( "int" , FIRST_FINAL() ) << " = " << FIRST_FINAL_STATE() << ";\n"
 		"\n";
 	}
 
-	if ( cgd->writeErr ) {
+	if ( writeErr ) {
 		STATIC_VAR( "int", ERROR() ) << " = " << ERROR_STATE() << ";\n"
 		"\n";
 	}
@@ -822,7 +822,7 @@ void TabCodeGen::COND_TRANSLATE()
 		"				switch ( " << C() << "[" << CO() << "[" << CS() << "]"
 							" + ((_mid - _keys)>>1)] ) {\n";
 
-	for ( CondSpaceList::Iter csi = cgd->condSpaceList; csi.lte(); csi++ ) {
+	for ( CondSpaceList::Iter csi = condSpaceList; csi.lte(); csi++ ) {
 		CondSpace *condSpace = csi;
 		out << "	case " << condSpace->condSpaceId << ": {\n";
 		out << TABS(2) << "_widec = " << CAST(WIDE_ALPH_TYPE()) << "(" <<
@@ -882,7 +882,7 @@ void TabCodeGen::writeOutExec()
 		"	" << PTR_CONST() << WIDE_ALPH_TYPE() << POINTER() << "_keys;\n"
 		"\n";
 
-	if ( cgd->hasEnd ) {
+	if ( hasEnd ) {
 		outLabelUsed = true;
 		out << 
 			"	if ( " << P() << " == " << PE() << " )\n"
@@ -961,7 +961,7 @@ void TabCodeGen::writeOutExec()
 			"\n";
 	}
 
-	if ( cgd->hasEnd ) {
+	if ( hasEnd ) {
 		out << 
 			"	if ( ++" << P() << " != " << PE() << " )\n"
 			"		goto _resume;\n";

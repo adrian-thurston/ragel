@@ -174,16 +174,11 @@ protected:
 	bool outLabelUsed;
 	bool againLabelUsed;
 
-	ostream &out;
-
 	bool useIndicies;
 
 public:
 	/* Determine if we should use indicies. */
 	virtual void calcIndexSize() {}
-
-	CodeGenData *cgd;
-	RedFsmAp *redFsm;
 };
 
 class CCodeGen : virtual public FsmCodeGen

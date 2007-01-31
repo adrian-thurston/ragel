@@ -146,7 +146,7 @@ void IpGotoCodeGen::GOTO_HEADER( RedStateAp *state )
 
 	/* Advance and test buffer pos. */
 	if ( state->labelNeeded ) {
-		if ( cgd->hasEnd ) {
+		if ( hasEnd ) {
 			out <<
 				"	if ( ++" << P() << " == " << PE() << " )\n"
 				"		goto _out" << state->id << ";\n";
@@ -315,7 +315,7 @@ void IpGotoCodeGen::setLabelsNeeded()
 		}
 	}
 
-	if ( cgd->hasEnd ) {
+	if ( hasEnd ) {
 		for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ )
 			st->outNeeded = st->labelNeeded;
 	}
@@ -338,13 +338,13 @@ void IpGotoCodeGen::writeOutData()
 		"static const int " << START() << " = " << START_STATE_ID() << ";\n"
 		"\n";
 
-	if ( cgd->writeFirstFinal ) {
+	if ( writeFirstFinal ) {
 		out <<
 			"static const int " << FIRST_FINAL() << " = " << FIRST_FINAL_STATE() << ";\n"
 			"\n";
 	}
 
-	if ( cgd->writeErr ) {
+	if ( writeErr ) {
 		out <<
 			"static const int " << ERROR() << " = " << ERROR_STATE() << ";\n"
 			"\n";
@@ -363,7 +363,7 @@ void IpGotoCodeGen::writeOutExec()
 	if ( redFsm->anyConditions() )
 		out << "	" << WIDE_ALPH_TYPE() << " _widec;\n";
 
-	if ( cgd->hasEnd ) {
+	if ( hasEnd ) {
 		outLabelUsed = true;
 		out << 
 			"	if ( " << P() << " == " << PE() << " )\n"
@@ -381,7 +381,7 @@ void IpGotoCodeGen::writeOutExec()
 			"	}\n"
 			"\n";
 
-		if ( cgd->hasEnd ) {
+		if ( hasEnd ) {
 			outLabelUsed = true;
 			out << 
 				"	if ( ++" << P() << " == " << PE() << " )\n"

@@ -688,9 +688,6 @@ void CodeGenData::prepareMachine()
 	 * of fsm directives in action code. */
 	analyzeMachine();
 
-	codeGen->redFsm = redFsm;
-	codeGen->cgd = this;
-
 	/* Determine if we should use indicies. */
 	codeGen->calcIndexSize();
 }

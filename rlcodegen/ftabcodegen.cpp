@@ -284,13 +284,13 @@ void FTabCodeGen::writeOutData()
 		"static const int " << START() << " = " << START_STATE_ID() << ";\n"
 		"\n";
 
-	if ( cgd->writeFirstFinal ) {
+	if ( writeFirstFinal ) {
 		out <<
 			"static const int " << FIRST_FINAL() << " = " << FIRST_FINAL_STATE() << ";\n"
 			"\n";
 	}
 
-	if ( cgd->writeErr ) {
+	if ( writeErr ) {
 		out <<
 			"static const int " << ERROR() << " = " << ERROR_STATE() << ";\n"
 			"\n";
@@ -318,7 +318,7 @@ void FTabCodeGen::writeOutExec()
 
 	out << "\n";
 
-	if ( cgd->hasEnd ) {
+	if ( hasEnd ) {
 		outLabelUsed = true;
 		out <<
 			"	if ( " << P() << " == " << PE() << " )\n"
@@ -385,7 +385,7 @@ void FTabCodeGen::writeOutExec()
 			"\n";
 	}
 
-	if ( cgd->hasEnd ) {
+	if ( hasEnd ) {
 		out << 
 			"	if ( ++" << P() << " != " << PE() << " )\n"
 			"		goto _resume;\n";

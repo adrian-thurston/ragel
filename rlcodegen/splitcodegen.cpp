@@ -74,7 +74,7 @@ void SplitCodeGen::GOTO_HEADER( RedStateAp *state, bool stateInPartition )
 
 	/* Advance and test buffer pos. */
 	if ( state->labelNeeded ) {
-		if ( cgd->hasEnd ) {
+		if ( hasEnd ) {
 			out <<
 				"	if ( ++" << P() << " == " << PE() << " )\n"
 				"		goto _out" << state->id << ";\n";
@@ -229,7 +229,7 @@ std::ostream &SplitCodeGen::PARTITION( int partition )
 			"\n";
 
 
-		if ( cgd->hasEnd ) {
+		if ( hasEnd ) {
 			outLabelUsed = true;
 			out << 
 				"	if ( ++" << P() << " == " << PE() << " )\n"
@@ -301,13 +301,13 @@ void SplitCodeGen::writeOutData()
 		"static const int " << START() << " = " << START_STATE_ID() << ";\n"
 		"\n";
 
-	if ( cgd->writeFirstFinal ) {
+	if ( writeFirstFinal ) {
 		out <<
 			"static const int " << FIRST_FINAL() << " = " << FIRST_FINAL_STATE() << ";\n"
 			"\n";
 	}
 
-	if ( cgd->writeErr ) {
+	if ( writeErr ) {
 		out <<
 			"static const int " << ERROR() << " = " << ERROR_STATE() << ";\n"
 			"\n";
@@ -341,8 +341,8 @@ std::ostream &SplitCodeGen::ALL_PARTITIONS()
 	for ( int p = 0; p < redFsm->nParts; p++ ) {
 		char suffix[10];
 		sprintf( suffix, suffFormat, p );
-		char *fn = fileNameFromStem( cgd->fileName, suffix );
-		char *include = fileNameFromStem( cgd->fileName, ".h" );
+		char *fn = fileNameFromStem( fileName, suffix );
+		char *include = fileNameFromStem( fileName, ".h" );
 
 		/* Create the filter on the output and open it. */
 		output_filter *partFilter = new output_filter( fn );
@@ -377,7 +377,7 @@ void SplitCodeGen::writeOutExec()
 		"	{\n"
 		"	int _stat = 0;\n";
 
-	if ( cgd->hasEnd ) {
+	if ( hasEnd ) {
 		out <<
 			"	if ( " << P() << " == " << PE() << " )\n"
 			"		goto _out;\n";
@@ -389,7 +389,7 @@ void SplitCodeGen::writeOutExec()
 	 * partition-switch exit from the last partition. */
 	out << "_reenter:\n";
 
-	if ( cgd->hasEnd ) {
+	if ( hasEnd ) {
 		out <<
 			"	if ( ++" << P() << " == " << PE() << " )\n"
 			"		goto _out;\n";
@@ -414,7 +414,7 @@ void SplitCodeGen::writeOutExec()
 		"	if ( _stat )\n"
 		"		goto _reenter;\n";
 	
-	if ( cgd->hasEnd )
+	if ( hasEnd )
 		out << "	_out: {}\n";
 
 	out <<
@@ -499,7 +499,7 @@ void SplitCodeGen::setLabelsNeeded()
 		}
 	}
 
-	if ( cgd->hasEnd ) {
+	if ( hasEnd ) {
 		for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ )
 			st->outNeeded = st->labelNeeded;
 	}
