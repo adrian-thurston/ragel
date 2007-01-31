@@ -128,12 +128,12 @@ tag_ragel_def_head: TAG_ragel_def
 			if ( mapEl != 0 )
 				cgd = mapEl->value;
 			else {
-				cgd = new CodeGenData( sourceFileName, fsmName, *outStream, wantComplete );
+				cgd = makeCodeGen( sourceFileName, fsmName, *outStream, wantComplete );
 				codeGenMap.insert( fsmName, cgd );
 			}
 		}
 		else {
-			cgd = new CodeGenData( sourceFileName, fsmName, *outStream, wantComplete );
+			cgd = makeCodeGen( sourceFileName, fsmName, *outStream, wantComplete );
 		}
 
 		cgd->writeOps = 0;

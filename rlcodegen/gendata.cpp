@@ -21,15 +21,16 @@
 
 #include "gendata.h"
 #include "gvdotgen.h"
+#include "fsmcodegen.h"
 #include <iostream>
 
 using std::cerr;
 using std::endl;
 
-CodeGenData::CodeGenData( char *fileName, char *fsmName, ostream &out, bool wantComplete )
+CodeGenData::CodeGenData( ostream &out )
 :
-	fileName(fileName),
-	fsmName(fsmName), 
+	fileName(0),
+	fsmName(0), 
 	out(out),
 	redFsm(0), 
 	allActions(0),
@@ -43,7 +44,7 @@ CodeGenData::CodeGenData( char *fileName, char *fsmName, ostream &out, bool want
 	accessExpr(0),
 	curStateExpr(0),
 	codeGen(0),
-	wantComplete(wantComplete),
+	wantComplete(0),
 	writeOps(0),
 	writeData(false),
 	writeInit(false),
@@ -55,10 +56,7 @@ CodeGenData::CodeGenData( char *fileName, char *fsmName, ostream &out, bool want
 	writeFirstFinal(true),
 	writeErr(true),
 	hasBeenPrepared(false)
-{
-	/* Make a code generator that will output the header/code. */
-	codeGen = makeCodeGen( this );
-}
+{}
 
 
 void CodeGenData::createMachine()

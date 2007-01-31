@@ -28,6 +28,7 @@
 #include <string>
 #include <stdio.h>
 #include "common.h"
+#include "gendata.h"
 
 using std::string;
 using std::ostream;
@@ -57,7 +58,7 @@ inline string itoa( int i )
 /*
  * class FsmCodeGen
  */
-class FsmCodeGen
+class FsmCodeGen : public CodeGenData
 {
 public:
 	FsmCodeGen( ostream &out );

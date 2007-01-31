@@ -24,13 +24,17 @@
 
 #include <iostream>
 #include "redfsm.h"
-#include "fsmcodegen.h"
 #include "common.h"
+
+using std::ostream;
 
 struct NameInst;
 typedef DList<Action> ActionList;
 
 typedef unsigned long ulong;
+
+struct FsmCodeGen;
+struct CodeGenData;
 
 typedef AvlMap<char *, CodeGenData*, CmpStr> CodeGenMap;
 typedef AvlMapEl<char *, CodeGenData*> CodeGenMapEl;
@@ -42,7 +46,7 @@ typedef AvlMapEl<char *, CodeGenData*> CodeGenMapEl;
 
 struct CodeGenData
 {
-	CodeGenData( char *fileName, char *fsmName, ostream &out, bool wantComplete );
+	CodeGenData( ostream &out );
 
 	/* 
 	 * Collecting the machine.
@@ -135,6 +139,6 @@ struct CodeGenData
 void lineDirective( ostream &out, char *fileName, int line );
 void genLineDirective( ostream &out );
 
-FsmCodeGen *makeCodeGen( CodeGenData *cgd );
+CodeGenData *makeCodeGen( char *fileName, char *fsmName, ostream &out, bool wantComplete );
 
 #endif /* _GENDATA_H */

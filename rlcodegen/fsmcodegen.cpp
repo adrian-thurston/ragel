@@ -45,36 +45,35 @@ using std::string;
 using std::cerr;
 using std::endl;
 
-/* Generate the codegen depending on the command line options given. */
-FsmCodeGen *makeCodeGen( CodeGenData *cgd )
+CodeGenData *makeCodeGen( char *fileName, char *fsmName, ostream &out, bool wantComplete )
 {
 	FsmCodeGen *codeGen = 0;
 	switch ( hostLangType ) {
 	case CCode:
 		switch ( codeStyle ) {
 		case GenTables:
-			codeGen = new CTabCodeGen(cgd->out);
+			codeGen = new CTabCodeGen(out);
 			break;
 		case GenFTables:
-			codeGen = new CFTabCodeGen(cgd->out);
+			codeGen = new CFTabCodeGen(out);
 			break;
 		case GenFlat:
-			codeGen = new CFlatCodeGen(cgd->out);
+			codeGen = new CFlatCodeGen(out);
 			break;
 		case GenFFlat:
-			codeGen = new CFFlatCodeGen(cgd->out);
+			codeGen = new CFFlatCodeGen(out);
 			break;
 		case GenGoto:
-			codeGen = new CGotoCodeGen(cgd->out);
+			codeGen = new CGotoCodeGen(out);
 			break;
 		case GenFGoto:
-			codeGen = new CFGotoCodeGen(cgd->out);
+			codeGen = new CFGotoCodeGen(out);
 			break;
 		case GenIpGoto:
-			codeGen = new CIpGotoCodeGen(cgd->out);
+			codeGen = new CIpGotoCodeGen(out);
 			break;
 		case GenSplit:
-			codeGen = new CSplitCodeGen(cgd->out);
+			codeGen = new CSplitCodeGen(out);
 			break;
 		}
 		break;
@@ -82,28 +81,28 @@ FsmCodeGen *makeCodeGen( CodeGenData *cgd )
 	case DCode:
 		switch ( codeStyle ) {
 		case GenTables:
-			codeGen = new DTabCodeGen(cgd->out);
+			codeGen = new DTabCodeGen(out);
 			break;
 		case GenFTables:
-			codeGen = new DFTabCodeGen(cgd->out);
+			codeGen = new DFTabCodeGen(out);
 			break;
 		case GenFlat:
-			codeGen = new DFlatCodeGen(cgd->out);
+			codeGen = new DFlatCodeGen(out);
 			break;
 		case GenFFlat:
-			codeGen = new DFFlatCodeGen(cgd->out);
+			codeGen = new DFFlatCodeGen(out);
 			break;
 		case GenGoto:
-			codeGen = new DGotoCodeGen(cgd->out);
+			codeGen = new DGotoCodeGen(out);
 			break;
 		case GenFGoto:
-			codeGen = new DFGotoCodeGen(cgd->out);
+			codeGen = new DFGotoCodeGen(out);
 			break;
 		case GenIpGoto:
-			codeGen = new DIpGotoCodeGen(cgd->out);
+			codeGen = new DIpGotoCodeGen(out);
 			break;
 		case GenSplit:
-			codeGen = new DSplitCodeGen(cgd->out);
+			codeGen = new DSplitCodeGen(out);
 			break;
 		}
 		break;
@@ -111,7 +110,7 @@ FsmCodeGen *makeCodeGen( CodeGenData *cgd )
 	case JavaCode:
 		switch ( codeStyle ) {
 		case GenTables:
-			codeGen = new JavaTabCodeGen(cgd->out);
+			codeGen = new JavaTabCodeGen(out);
 			break;
 		default:
 			assert(false);
@@ -120,13 +119,21 @@ FsmCodeGen *makeCodeGen( CodeGenData *cgd )
 		break;
 	}
 
-	return codeGen;
+	CodeGenData *cgd = codeGen;
+
+	cgd->fileName = fileName;
+	cgd->fsmName = fsmName;
+	cgd->wantComplete = wantComplete;
+	cgd->codeGen = codeGen;
+
+	return cgd;
 }
 
 
 /* Init code gen with in parameters. */
 FsmCodeGen::FsmCodeGen( ostream &out )
 :
+	CodeGenData(out),
 	out(out),
 	cgd(0),
 	redFsm(0)
