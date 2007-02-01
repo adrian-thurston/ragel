@@ -177,6 +177,12 @@ protected:
 	bool useIndicies;
 
 public:
+	void generateGraphviz();
+	void prepareMachine();
+	void generateCode();
+
+	virtual void generate();
+
 	/* Determine if we should use indicies. */
 	virtual void calcIndexSize() {}
 };

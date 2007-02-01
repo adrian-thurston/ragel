@@ -47,6 +47,7 @@ typedef AvlMapEl<char *, CodeGenData*> CodeGenMapEl;
 struct CodeGenData
 {
 	CodeGenData( ostream &out );
+	virtual ~CodeGenData() {}
 
 	/* 
 	 * Collecting the machine.
@@ -117,12 +118,8 @@ struct CodeGenData
 
 	bool setAlphType( char *data );
 
-	void generateGraphviz();
 	void resolveTargetStates( InlineList *inlineList );
 	Key findMaxKey();
-
-	void generate();
-	void generateCode();
 
 	/* Gather various info on the machine. */
 	void analyzeActionList( RedAction *redAct, InlineList *inlineList );
@@ -134,6 +131,9 @@ struct CodeGenData
 	void assignActionIds();
 	void prepareMachine();
 	bool hasBeenPrepared;
+
+	/* The interface to the code generator. */
+	virtual void generate() {}
 };
 
 void lineDirective( ostream &out, char *fileName, int line );
