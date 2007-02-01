@@ -177,11 +177,10 @@ protected:
 	bool useIndicies;
 
 public:
-	void generateGraphviz();
 	void prepareMachine();
-	void generateCode();
 
-	virtual void generate();
+	virtual void finishRagelDef();
+	void writeStatement( char *what, int nopts, char **options );
 
 	/* Determine if we should use indicies. */
 	virtual void calcIndexSize() {}

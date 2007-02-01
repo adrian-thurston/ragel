@@ -302,8 +302,11 @@ void Scanner::token( int type )
 			{
 				scan_error() << "unknown write command" << endl;
 			}
-			output << "<write def_name=\"" << parser->sectionName << 
-					"\" what=\"" << tokdata << "\">";
+
+			if ( machineSpec == 0 && machineName == 0 ) {
+				output << "<write def_name=\"" << parser->sectionName << 
+						"\" what=\"" << tokdata << "\">";
+			}
 		}
 	}
 
@@ -314,7 +317,7 @@ void Scanner::token( int type )
 	}
 	action write_close
 	{
-		if ( active )
+		if ( active && machineSpec == 0 && machineName == 0 )
 			output << "</write>\n";
 	}
 

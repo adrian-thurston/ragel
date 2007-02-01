@@ -113,7 +113,11 @@ tag_host:
 			*outStream << $3->tag->content;
 	};
 
-ragel_def: tag_ragel_def_head ragel_def_item_list '/' TAG_ragel_def;
+ragel_def: 
+	tag_ragel_def_head ragel_def_item_list '/' TAG_ragel_def
+	final {
+		cgd->finishRagelDef();
+	};
 
 tag_ragel_def_head: TAG_ragel_def 
 	final {
@@ -174,17 +178,9 @@ tag_write: tag_write_head write_option_list '/' TAG_write
 			error($1->loc) << "tag <write> requires a what attribute" << endl;
 		}
 		else {
-			if ( strcmp( what->value, "data" ) == 0 )
-				cgd->writeData = true;
-			else if ( strcmp( what->value, "init" ) == 0 )
-				cgd->writeInit = true;
-			else if ( strcmp( what->value, "exec" ) == 0 )
-				cgd->writeExec = true;
-			else if ( strcmp( what->value, "eof" ) == 0 )
-				cgd->writeEOF = true;
-
-			if ( gblErrorCount == 0 )
-				cgd->generate();
+			writeOptions.append(0);
+			cgd->writeStatement( what->value, writeOptions.length()-1, writeOptions.data );
+			writeOptions.empty();
 		}
 	};
 
@@ -206,10 +202,6 @@ tag_write_head: TAG_write
 			cgd = mapEl->value;
 		}
 
-		cgd->writeData = false;
-		cgd->writeInit = false;
-		cgd->writeExec = false;
-		cgd->writeEOF = false;
 		::keyOps = &cgd->thisKeyOps;
 
 		$$->tag = $1->tag;
@@ -220,25 +212,19 @@ tag_write_head: TAG_write
 write_option_list: write_option_list tag_option;
 write_option_list: ;
 
+nonterm tag_option
+{
+	char *option;
+};
+
 tag_option: TAG_option '/' TAG_option
 	final {
-		char *content = $3->tag->content;
-		if ( strcmp( content, "noend" ) == 0 )
-			cgd->writeOps |= WO_NOEND;
-	 	else if ( strcmp( content, "noerror" ) == 0 )
-			cgd->writeOps |= WO_NOERROR;
-		else if ( strcmp( content, "noprefix" ) == 0 )
-			cgd->writeOps |= WO_NOPREFIX;
-		else if ( strcmp( content, "nofinal" ) == 0 )
-			cgd->writeOps |= WO_NOFF;
-		else {
-			warning($1->loc) << "unrecognized write option" << endl;
-		}
+		writeOptions.append( $3->tag->content );
 	};
 
 tag_machine: tag_machine_head machine_item_list '/' TAG_machine
 	final {
-		cgd->finishMachine();
+		cgd->closeMachine();
 	};
 
 tag_machine_head: TAG_machine

@@ -43,13 +43,7 @@ CodeGenData::CodeGenData( ostream &out )
 	getKeyExpr(0),
 	accessExpr(0),
 	curStateExpr(0),
-	codeGen(0),
 	wantComplete(0),
-	writeOps(0),
-	writeData(false),
-	writeInit(false),
-	writeExec(false),
-	writeEOF(false),
 	hasLongestMatch(false),
 	hasEnd(true),
 	dataPrefix(true),
@@ -227,8 +221,7 @@ void CodeGenData::resolveTargetStates( InlineList *inlineList )
 	}
 }
 
-
-void CodeGenData::finishMachine()
+void CodeGenData::closeMachine()
 {
 	if ( redFsm->forcedErrorState )
 		redFsm->getErrorState();
@@ -245,11 +238,9 @@ void CodeGenData::finishMachine()
 	 * state a default transition. All machines break out of the processing
 	 * loop when in the error state. */
 
-	if ( codeStyle == GenGoto || codeStyle == GenFGoto || codeStyle == GenIpGoto ) {
-		for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-			for ( StateCondList::Iter sci = st->stateCondList; sci.lte(); sci++ )
-				st->stateCondVect.append( sci );
-		}
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		for ( StateCondList::Iter sci = st->stateCondList; sci.lte(); sci++ )
+			st->stateCondVect.append( sci );
 	}
 }
 

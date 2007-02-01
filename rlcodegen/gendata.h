@@ -39,11 +39,6 @@ struct CodeGenData;
 typedef AvlMap<char *, CodeGenData*, CmpStr> CodeGenMap;
 typedef AvlMapEl<char *, CodeGenData*> CodeGenMapEl;
 
-#define WO_NOEND    0x01
-#define WO_NOERROR  0x02
-#define WO_NOPREFIX 0x04
-#define WO_NOFF     0x08
-
 struct CodeGenData
 {
 	CodeGenData( ostream &out );
@@ -70,14 +65,8 @@ struct CodeGenData
 	InlineList *getKeyExpr;
 	InlineList *accessExpr;
 	InlineList *curStateExpr;
-	FsmCodeGen *codeGen;
 	KeyOps thisKeyOps;
 	bool wantComplete;
-	int writeOps;
-	bool writeData;
-	bool writeInit;
-	bool writeExec;
-	bool writeEOF;
 	EntryIdVect entryPointIds;
 	EntryNameVect entryPointNames;
 	bool hasLongestMatch;
@@ -102,9 +91,9 @@ struct CodeGenData
 	void finishTransList( int snum );
 	void setStateActions( int snum, long toStateAction, 
 			long fromStateAction, long eofAction );
-	void finishMachine();
 	void setForcedErrorState()
 		{ redFsm->forcedErrorState = true; }
+
 	
 	void initCondSpaceList( ulong length );
 	void condSpaceItem( int cnum, long condActionId );
@@ -127,13 +116,15 @@ struct CodeGenData
 	void findFinalActionRefs();
 	void analyzeMachine();
 
+	void closeMachine();
 	void setValueLimits();
 	void assignActionIds();
 	void prepareMachine();
 	bool hasBeenPrepared;
 
 	/* The interface to the code generator. */
-	virtual void generate() {}
+	virtual void finishRagelDef() {}
+	virtual void writeStatement( char *what, int nopts, char **options ) {}
 };
 
 void lineDirective( ostream &out, char *fileName, int line );

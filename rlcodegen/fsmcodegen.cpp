@@ -123,7 +123,6 @@ CodeGenData *makeCodeGen( char *fileName, char *fsmName, ostream &out, bool want
 	codeGen->fileName = fileName;
 	codeGen->fsmName = fsmName;
 	codeGen->wantComplete = wantComplete;
-	codeGen->codeGen = codeGen;
 
 	return codeGen;
 }
@@ -848,76 +847,72 @@ void FsmCodeGen::prepareMachine()
 	analyzeMachine();
 
 	/* Determine if we should use indicies. */
-	codeGen->calcIndexSize();
+	calcIndexSize();
 }
 
-void FsmCodeGen::generateGraphviz()
+void FsmCodeGen::finishRagelDef()
 {
-	/* Do ordering and choose state ids. */
-	redFsm->depthFirstOrdering();
-	redFsm->sequentialStateIds();
-
-	/* For dot file generation we want to pick default transitions. */
-	redFsm->chooseDefaultSpan();
-
-	/* Make the generator. */
-	GraphvizDotGen dotGen( fsmName, this, redFsm, out );
-
-	/* Write out with it. */
-	dotGen.writeDotFile();
-}
-
-void FsmCodeGen::generateCode()
-{
-	if ( writeOps & WO_NOEND )
-		hasEnd = false;
-
-	if ( writeOps & WO_NOERROR )
-		writeErr = false;
-
-	if ( writeOps & WO_NOPREFIX )
-		dataPrefix = false;
-	
-	if ( writeOps & WO_NOFF )
-		writeFirstFinal = false;
-
-	if ( writeData || writeInit || writeExec || writeEOF ) {
+	if ( outputFormat == OutCode ) {
 		prepareMachine();
+	}
+	else if ( outputFormat == OutGraphvizDot && !graphvizDone ) {
+		graphvizDone = true;
 
+		/* Do ordering and choose state ids. */
+		redFsm->depthFirstOrdering();
+		redFsm->sequentialStateIds();
+
+		/* For dot file generation we want to pick default transitions. */
+		redFsm->chooseDefaultSpan();
+
+		/* Make the generator. */
+		GraphvizDotGen dotGen( fsmName, this, redFsm, out );
+
+		/* Write out with it. */
+		dotGen.writeDotFile();
+	}
+}
+
+void FsmCodeGen::writeStatement( char *what, int nopts, char **options )
+{
+	/* Read the options. FIXME: These should be parsed according to each
+	 * particualr function below. */
+	for ( int i = 0; i < nopts; i++ ) {
+		if ( strcmp( options[i], "noend" ) == 0 )
+			hasEnd = false;
+	 	else if ( strcmp( options[i], "noerror" ) == 0 )
+			writeErr = false;
+		else if ( strcmp( options[i], "noprefix" ) == 0 )
+			dataPrefix = false;
+		else if ( strcmp( options[i], "nofinal" ) == 0 )
+			writeFirstFinal = false;
+		else {
+			//warning($1->loc) << "unrecognized write option" << endl;
+		}
+	}
+
+	if ( outputFormat == OutCode ) {
 		/* Force a newline. */
 		out << "\n";
 		genLineDirective( out );
-	}
-	
 
-	if ( writeExec ) {
-		/* Must set labels immediately before writing because we may depend
-		 * on the noend write option. */
-		codeGen->setLabelsNeeded();
-	}
-
-	if ( writeData )
-		codeGen->writeOutData();
-	
-	if ( writeInit )
-		codeGen->writeOutInit();
-
-	if ( writeExec )
-		codeGen->writeOutExec();
-
-	if ( writeEOF )
-		codeGen->writeOutEOF();
-}
-
-void FsmCodeGen::generate()
-{
-	if ( redFsm != 0 ) {
-		if ( outputFormat == OutCode )
-			generateCode();
-		else if ( outputFormat == OutGraphvizDot && !graphvizDone ) {
-			graphvizDone = true;
-			generateGraphviz();
+		if ( strcmp( what, "data" ) == 0 ) {
+			writeOutData();
+		}
+		else if ( strcmp( what, "init" ) == 0 ) {
+			writeOutInit();
+		}
+		else if ( strcmp( what, "exec" ) == 0 ) {
+			/* Must set labels immediately before writing because we may depend
+			 * on the noend write option. */
+			setLabelsNeeded();
+			writeOutExec();
+		}
+		else if ( strcmp( what, "eof" ) == 0 ) {
+			writeOutEOF();
+		}
+		else {
+			/* EMIT An error here. */
 		}
 	}
 }
-
