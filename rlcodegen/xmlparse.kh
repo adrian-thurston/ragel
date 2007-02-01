@@ -69,7 +69,7 @@ struct Parser
 			TAG_entry, TAG_data, TAG_lm_switch, TAG_init_act, TAG_set_act,
 			TAG_set_tokend, TAG_get_tokend, TAG_init_tokstart,
 			TAG_set_tokstart, TAG_write, TAG_curstate, TAG_access, TAG_break,
-			TAG_option;
+			TAG_arg;
 	}%%
 
 	%% write instance_data;

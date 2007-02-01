@@ -29,7 +29,7 @@ using std::endl;
 
 CodeGenData::CodeGenData( ostream &out )
 :
-	fileName(0),
+	sourceFileName(0),
 	fsmName(0), 
 	out(out),
 	redFsm(0), 
@@ -615,6 +615,21 @@ void CodeGenData::analyzeMachine()
 	/* Set the maximums of various values used for deciding types. */
 	setValueLimits();
 }
+
+ostream &CodeGenData::source_warning( const InputLoc &loc )
+{
+	cerr << sourceFileName << ":" << loc.line << ":" << loc.col << ": warning: ";
+	return cerr;
+}
+
+ostream &CodeGenData::source_error( const InputLoc &loc )
+{
+	gblErrorCount += 1;
+	assert( sourceFileName != 0 );
+	cerr << sourceFileName << ":" << loc.line << ":" << loc.col << ": ";
+	return cerr;
+}
+
 
 
 void lineDirective( ostream &out, char *fileName, int line )

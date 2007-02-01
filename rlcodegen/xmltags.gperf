@@ -74,7 +74,7 @@ write, TAG_write
 curstate, TAG_curstate
 access, TAG_access
 break, TAG_break
-option, TAG_option
+arg, TAG_arg
 cond_space_list, TAG_cond_space_list
 cond_space, TAG_cond_space
 cond_list, TAG_cond_list

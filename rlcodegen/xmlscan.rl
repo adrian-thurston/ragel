@@ -308,7 +308,7 @@ int xml_parse( std::istream &input, char *fileName,
 				/* Get content for closing tags. */
 				if ( token == TK_CloseTag ) {
 					switch ( tagId->id ) {
-					case TAG_host: case TAG_option:
+					case TAG_host: case TAG_arg:
 					case TAG_t: case TAG_alphtype:
 					case TAG_text: case TAG_goto:
 					case TAG_call: case TAG_next:

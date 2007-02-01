@@ -180,7 +180,7 @@ public:
 	void prepareMachine();
 
 	virtual void finishRagelDef();
-	void writeStatement( char *what, int nopts, char **options );
+	virtual void writeStatement( InputLoc &loc, int nargs, char **args );
 
 	/* Determine if we should use indicies. */
 	virtual void calcIndexSize() {}

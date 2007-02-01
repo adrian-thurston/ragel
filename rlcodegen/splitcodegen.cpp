@@ -341,8 +341,8 @@ std::ostream &SplitCodeGen::ALL_PARTITIONS()
 	for ( int p = 0; p < redFsm->nParts; p++ ) {
 		char suffix[10];
 		sprintf( suffix, suffFormat, p );
-		char *fn = fileNameFromStem( fileName, suffix );
-		char *include = fileNameFromStem( fileName, ".h" );
+		char *fn = fileNameFromStem( sourceFileName, suffix );
+		char *include = fileNameFromStem( sourceFileName, ".h" );
 
 		/* Create the filter on the output and open it. */
 		output_filter *partFilter = new output_filter( fn );

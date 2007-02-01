@@ -73,8 +73,4 @@ void checkMachines( );
 void writeMachines( std::ostream &out, std::string hostData, char *inputFileName );
 void xmlEscapeHost( std::ostream &out, char *data, int len );
 
-
-/* Size of the include stack. */
-#define INCLUDE_STACK_SIZE 32
-
 #endif /* _RAGEL_H */

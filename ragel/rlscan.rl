@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006 Adrian Thurston <thurston@cs.queensu.ca>
+ *  Copyright 2006-2007 Adrian Thurston <thurston@cs.queensu.ca>
  */
 
 /*  This file is part of Ragel.
@@ -294,27 +294,21 @@ void Scanner::token( int type )
 
 	action write_command
 	{
-		if ( active ) {
-			if ( strcmp( tokdata, "data" ) != 0 &&
-					strcmp( tokdata, "init" ) != 0 &&
-					strcmp( tokdata, "exec" ) != 0 &&
-					strcmp( tokdata, "eof" ) != 0 )
-			{
-				scan_error() << "unknown write command" << endl;
-			}
-
-			if ( machineSpec == 0 && machineName == 0 ) {
-				output << "<write def_name=\"" << parser->sectionName << 
-						"\" what=\"" << tokdata << "\">";
-			}
+		if ( active && machineSpec == 0 && machineName == 0 ) {
+			output << "<write"
+					" def_name=\"" << parser->sectionName << "\""
+					" line=\"" << line << "\""
+					" col=\"" << column << "\""
+					">";
 		}
 	}
 
-	action write_option
+	action write_arg
 	{
-		if ( active )
-			output << "<option>" << tokdata << "</option>";
+		if ( active && machineSpec == 0 && machineName == 0 )
+			output << "<arg>" << tokdata << "</arg>";
 	}
+
 	action write_close
 	{
 		if ( active && machineSpec == 0 && machineName == 0 )
@@ -322,8 +316,8 @@ void Scanner::token( int type )
 	}
 
 	write_stmt =
-		( KW_Write TK_Word @write_command 
-			( TK_Word @write_option )* ';' @write_close )
+		( KW_Write @write_command 
+		( TK_Word @write_arg )+ ';' @write_close )
 		<>err write_err <>eof write_err;
 
 	action handle_token

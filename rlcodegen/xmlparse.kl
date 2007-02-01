@@ -135,7 +135,8 @@ tag_ragel_def_head: TAG_ragel_def
 			}
 		}
 		else {
-			cgd = makeCodeGen( sourceFileName, fsmName, *outStream, wantComplete );
+			cgd = makeCodeGen( sourceFileName, fsmName, 
+					*outStream, wantComplete );
 		}
 
 		::keyOps = &cgd->thisKeyOps;
@@ -173,51 +174,53 @@ tag_curstate_expr: TAG_curstate inline_list '/' TAG_curstate
 
 tag_write: tag_write_head write_option_list '/' TAG_write
 	final {
-		Attribute *what = $1->tag->findAttr( "what" );
-		if ( what == 0 ) {
-			error($1->loc) << "tag <write> requires a what attribute" << endl;
-		}
-		else {
-			writeOptions.append(0);
-			cgd->writeStatement( what->value, writeOptions.length()-1, writeOptions.data );
-			writeOptions.empty();
-		}
+		writeOptions.append(0);
+		cgd->writeStatement( $1->loc, writeOptions.length()-1, writeOptions.data );
+		writeOptions.empty();
 	};
 
 nonterm tag_write_head
 {
-	XMLTag *tag;
 	InputLoc loc;
 };
 
 tag_write_head: TAG_write
 	final {
 		Attribute *nameAttr = $1->tag->findAttr( "def_name" );
-		if ( nameAttr == 0 ) {
+		Attribute *lineAttr = $1->tag->findAttr( "line" );
+		Attribute *colAttr = $1->tag->findAttr( "col" );
+
+		if ( nameAttr == 0 )
 			error($1->loc) << "tag <write> requires a def_name attribute" << endl;
-		}
-		else {
+		if ( lineAttr == 0 )
+			error($1->loc) << "tag <write> requires a line attribute" << endl;
+		if ( colAttr == 0 )
+			error($1->loc) << "tag <write> requires a col attribute" << endl;
+
+		if ( nameAttr != 0 && lineAttr != 0 && colAttr != 0 ) {
 			CodeGenMapEl *mapEl = codeGenMap.find( nameAttr->value );
-			assert( mapEl != 0 );
-			cgd = mapEl->value;
+			if ( mapEl == 0 )
+				error($1->loc) << "internal error: cannot find codeGen" << endl;
+			else {
+				cgd = mapEl->value;
+				::keyOps = &cgd->thisKeyOps;
+			}
+
+			$$->loc.line = atoi(lineAttr->value);
+			$$->loc.col = atoi(colAttr->value);
 		}
-
-		::keyOps = &cgd->thisKeyOps;
-
-		$$->tag = $1->tag;
-		$$->loc = $1->loc;
 	};
 
 
-write_option_list: write_option_list tag_option;
+write_option_list: write_option_list tag_arg;
 write_option_list: ;
 
-nonterm tag_option
+nonterm tag_arg
 {
 	char *option;
 };
 
-tag_option: TAG_option '/' TAG_option
+tag_arg: TAG_arg '/' TAG_arg
 	final {
 		writeOptions.append( $3->tag->content );
 	};

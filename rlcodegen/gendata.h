@@ -48,7 +48,7 @@ struct CodeGenData
 	 * Collecting the machine.
 	 */
 
-	char *fileName;
+	char *sourceFileName;
 	char *fsmName;
 	ostream &out;
 	RedFsmAp *redFsm;
@@ -122,14 +122,18 @@ struct CodeGenData
 	void prepareMachine();
 	bool hasBeenPrepared;
 
+	ostream &source_warning(const InputLoc &loc);
+	ostream &source_error(const InputLoc &loc);
+
 	/* The interface to the code generator. */
 	virtual void finishRagelDef() {}
-	virtual void writeStatement( char *what, int nopts, char **options ) {}
+	virtual void writeStatement( InputLoc &loc, int nargs, char **args ) {}
 };
 
 void lineDirective( ostream &out, char *fileName, int line );
 void genLineDirective( ostream &out );
 
-CodeGenData *makeCodeGen( char *fileName, char *fsmName, ostream &out, bool wantComplete );
+CodeGenData *makeCodeGen( char *sourceFileName, 
+		char *fsmName, ostream &out, bool wantComplete );
 
 #endif /* _GENDATA_H */

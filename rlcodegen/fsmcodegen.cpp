@@ -46,7 +46,8 @@ using std::string;
 using std::cerr;
 using std::endl;
 
-CodeGenData *makeCodeGen( char *fileName, char *fsmName, ostream &out, bool wantComplete )
+CodeGenData *makeCodeGen( char *sourceFileName, char *fsmName, 
+		ostream &out, bool wantComplete )
 {
 	FsmCodeGen *codeGen = 0;
 	switch ( hostLangType ) {
@@ -120,7 +121,7 @@ CodeGenData *makeCodeGen( char *fileName, char *fsmName, ostream &out, bool want
 		break;
 	}
 
-	codeGen->fileName = fileName;
+	codeGen->sourceFileName = sourceFileName;
 	codeGen->fsmName = fsmName;
 	codeGen->wantComplete = wantComplete;
 
@@ -482,7 +483,7 @@ string FsmCodeGen::LDIR_PATH( char *path )
 void FsmCodeGen::ACTION( ostream &ret, Action *action, int targState, bool inFinish )
 {
 	/* Write the preprocessor line info for going into the source file. */
-	lineDirective( ret, fileName, action->loc.line );
+	lineDirective( ret, sourceFileName, action->loc.line );
 
 	/* Write the block and close it off. */
 	ret << "\t{";
@@ -493,7 +494,7 @@ void FsmCodeGen::ACTION( ostream &ret, Action *action, int targState, bool inFin
 void FsmCodeGen::CONDITION( ostream &ret, Action *condition )
 {
 	ret << "\n";
-	lineDirective( ret, fileName, condition->loc.line );
+	lineDirective( ret, sourceFileName, condition->loc.line );
 	INLINE_LIST( ret, condition->inlineList, 0, false );
 }
 
@@ -873,42 +874,55 @@ void FsmCodeGen::finishRagelDef()
 	}
 }
 
-void FsmCodeGen::writeStatement( char *what, int nopts, char **options )
+void FsmCodeGen::writeStatement( InputLoc &loc, int nargs, char **args )
 {
-	/* Read the options. FIXME: These should be parsed according to each
-	 * particualr function below. */
-	for ( int i = 0; i < nopts; i++ ) {
-		if ( strcmp( options[i], "noend" ) == 0 )
-			hasEnd = false;
-	 	else if ( strcmp( options[i], "noerror" ) == 0 )
-			writeErr = false;
-		else if ( strcmp( options[i], "noprefix" ) == 0 )
-			dataPrefix = false;
-		else if ( strcmp( options[i], "nofinal" ) == 0 )
-			writeFirstFinal = false;
-		else {
-			//warning($1->loc) << "unrecognized write option" << endl;
-		}
-	}
-
 	if ( outputFormat == OutCode ) {
 		/* Force a newline. */
 		out << "\n";
 		genLineDirective( out );
 
-		if ( strcmp( what, "data" ) == 0 ) {
+		if ( strcmp( args[0], "data" ) == 0 ) {
+			for ( int i = 1; i < nargs; i++ ) {
+				if ( strcmp( args[i], "noerror" ) == 0 )
+					writeErr = false;
+				else if ( strcmp( args[i], "noprefix" ) == 0 )
+					dataPrefix = false;
+				else if ( strcmp( args[i], "nofinal" ) == 0 )
+					writeFirstFinal = false;
+				else {
+					source_warning(loc) << "unrecognized write option \"" << 
+							args[i] << "\"" << endl;
+				}
+			}
 			writeOutData();
 		}
-		else if ( strcmp( what, "init" ) == 0 ) {
+		else if ( strcmp( args[0], "init" ) == 0 ) {
+			for ( int i = 1; i < nargs; i++ ) {
+				source_warning(loc) << "unrecognized write option \"" << 
+						args[i] << "\"" << endl;
+			}
 			writeOutInit();
 		}
-		else if ( strcmp( what, "exec" ) == 0 ) {
+		else if ( strcmp( args[0], "exec" ) == 0 ) {
+			for ( int i = 1; i < nargs; i++ ) {
+				if ( strcmp( args[i], "noend" ) == 0 )
+					hasEnd = false;
+				else {
+					source_warning(loc) << "unrecognized write option \"" << 
+							args[i] << "\"" << endl;
+				}
+			}
+
 			/* Must set labels immediately before writing because we may depend
 			 * on the noend write option. */
 			setLabelsNeeded();
 			writeOutExec();
 		}
-		else if ( strcmp( what, "eof" ) == 0 ) {
+		else if ( strcmp( args[0], "eof" ) == 0 ) {
+			for ( int i = 1; i < nargs; i++ ) {
+				source_warning(loc) << "unrecognized write option \"" << 
+						args[i] << "\"" << endl;
+			}
 			writeOutEOF();
 		}
 		else {
