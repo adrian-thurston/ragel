@@ -49,7 +49,7 @@ start:
 		gblErrorCount += 1;
 	};
 
-tag_ragel: tag_ragel_head host_or_def_list '/' TAG_ragel;
+tag_ragel: tag_ragel_head ragel_def_list host_or_write_list '/' TAG_ragel;
 
 tag_ragel_head: TAG_ragel
 	final {
@@ -88,13 +88,16 @@ tag_ragel_head: TAG_ragel
 		outStream = openOutput( sourceFileName );
 	};
 
-host_or_def_list: host_or_def_list host_or_def;
-host_or_def_list: ;
+ragel_def_list: ragel_def_list ragel_def;
+ragel_def_list: ;
 
-host_or_def: host;
-host_or_def: ragel_def;
+host_or_write_list: host_or_write_list host_or_write;
+host_or_write_list: ;
 
-host: 
+host_or_write: tag_host;
+host_or_write: tag_write;
+
+tag_host: 
 	TAG_host '/' TAG_host
 	final {
 		Attribute *lineAttr = $1->tag->findAttr( "line" );
@@ -110,12 +113,7 @@ host:
 			*outStream << $3->tag->content;
 	};
 
-ragel_def: 
-	tag_ragel_def_head ragel_def_item_list '/' TAG_ragel_def
-	final {
-		if ( gblErrorCount == 0 )
-			cgd->generate();
-	};
+ragel_def: tag_ragel_def_head ragel_def_item_list '/' TAG_ragel_def;
 
 tag_ragel_def_head: TAG_ragel_def 
 	final {
@@ -136,11 +134,6 @@ tag_ragel_def_head: TAG_ragel_def
 			cgd = makeCodeGen( sourceFileName, fsmName, *outStream, wantComplete );
 		}
 
-		cgd->writeOps = 0;
-		cgd->writeData = false;
-		cgd->writeInit = false;
-		cgd->writeExec = false;
-		cgd->writeEOF = false;
 		::keyOps = &cgd->thisKeyOps;
 	};
 
@@ -152,7 +145,6 @@ ragel_def_item: tag_getkey_expr;
 ragel_def_item: tag_access_expr;
 ragel_def_item: tag_curstate_expr;
 ragel_def_item: tag_machine;
-ragel_def_item: tag_write;
 
 tag_alph_type: TAG_alphtype '/' TAG_alphtype
 	final {
@@ -175,7 +167,7 @@ tag_curstate_expr: TAG_curstate inline_list '/' TAG_curstate
 		cgd->curStateExpr = $2->inlineList;
 	};
 
-tag_write: TAG_write write_option_list '/' TAG_write
+tag_write: tag_write_head write_option_list '/' TAG_write
 	final {
 		Attribute *what = $1->tag->findAttr( "what" );
 		if ( what == 0 ) {
@@ -190,8 +182,40 @@ tag_write: TAG_write write_option_list '/' TAG_write
 				cgd->writeExec = true;
 			else if ( strcmp( what->value, "eof" ) == 0 )
 				cgd->writeEOF = true;
+
+			if ( gblErrorCount == 0 )
+				cgd->generate();
 		}
 	};
+
+nonterm tag_write_head
+{
+	XMLTag *tag;
+	InputLoc loc;
+};
+
+tag_write_head: TAG_write
+	final {
+		Attribute *nameAttr = $1->tag->findAttr( "def_name" );
+		if ( nameAttr == 0 ) {
+			error($1->loc) << "tag <write> requires a def_name attribute" << endl;
+		}
+		else {
+			CodeGenMapEl *mapEl = codeGenMap.find( nameAttr->value );
+			assert( mapEl != 0 );
+			cgd = mapEl->value;
+		}
+
+		cgd->writeData = false;
+		cgd->writeInit = false;
+		cgd->writeExec = false;
+		cgd->writeEOF = false;
+		::keyOps = &cgd->thisKeyOps;
+
+		$$->tag = $1->tag;
+		$$->loc = $1->loc;
+	};
+
 
 write_option_list: write_option_list tag_option;
 write_option_list: ;

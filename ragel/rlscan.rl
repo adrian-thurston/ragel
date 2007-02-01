@@ -68,7 +68,7 @@ struct Scanner
 		includeDepth(includeDepth),
 		line(1), column(1), lastnl(0), 
 		parser(0), active(false), 
-		parserExistsError(false), ragelDefOpen(false),
+		parserExistsError(false),
 		whitespaceOn(true)
 		{}
 
@@ -91,7 +91,6 @@ struct Scanner
 	void updateCol();
 	void startSection();
 	void endSection();
-	void openRagelDef();
 	void do_scan();
 	bool parserExists();
 	ostream &scan_error();
@@ -121,7 +120,6 @@ struct Scanner
 	/* This is set if ragel has already emitted an error stating that
 	 * no section name has been seen and thus no parser exists. */
 	bool parserExistsError;
-	bool ragelDefOpen;
 
 	/* This is for inline code. By default it is on. It goes off for
 	 * statements and values in inline blocks which are parsed. */
@@ -297,7 +295,6 @@ void Scanner::token( int type )
 	action write_command
 	{
 		if ( active ) {
-			openRagelDef();
 			if ( strcmp( tokdata, "data" ) != 0 &&
 					strcmp( tokdata, "init" ) != 0 &&
 					strcmp( tokdata, "exec" ) != 0 &&
@@ -305,7 +302,8 @@ void Scanner::token( int type )
 			{
 				scan_error() << "unknown write command" << endl;
 			}
-			output << "  <write what=\"" << tokdata << "\">";
+			output << "<write def_name=\"" << parser->sectionName << 
+					"\" what=\"" << tokdata << "\">";
 		}
 	}
 
@@ -388,20 +386,11 @@ void Scanner::startSection( )
 	if ( includeDepth == 0 ) {
 		if ( machineSpec == 0 && machineName == 0 )
 			output << "</host>\n";
-		ragelDefOpen = false;
 	}
 
 	sectionLoc.fileName = fileName;
 	sectionLoc.line = line;
 	sectionLoc.col = 0;
-}
-
-void Scanner::openRagelDef()
-{
-	if ( ! ragelDefOpen ) {
-		ragelDefOpen = true;
-		output << "<ragel_def name=\"" << parser->sectionName << "\">\n";
-	}
 }
 
 void Scanner::endSection( )
@@ -423,11 +412,6 @@ void Scanner::endSection( )
 	}
 
 	if ( includeDepth == 0 ) {
-		if ( ragelDefOpen ) {
-			output << "</ragel_def>\n";
-			ragelDefOpen = false;
-		}
-
 		if ( machineSpec == 0 && machineName == 0 ) {
 			/* The end section may include a newline on the end, so
 			 * we use the last line, which will count the newline. */
