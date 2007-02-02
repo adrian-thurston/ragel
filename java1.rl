@@ -7,6 +7,7 @@ class java1
 {
 	%%{
 		machine java1;
+		alphtype byte;
 
 		one := 'one\n';
 		two := 'two\n';

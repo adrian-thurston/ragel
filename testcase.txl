@@ -17,6 +17,7 @@ keys
 	'int 'bool 'true 'false 'char 'ptr
 	'if 'else 'printi 'prints 
 	'fc 'fpc 'fbreak 'fgoto 'fcall 'fret 'fhold 'fexec
+	'machine 'alphtype 'action
 end keys
 
 define lang_indep
@@ -38,6 +39,7 @@ end define
 
 define statement
 		[machine_stmt]
+	|	[alphtype_stmt]
 	|	[action_stmt]
 	|	[cond_action_stmt]
 	|	[machine_def]
@@ -46,6 +48,10 @@ end define
 
 define machine_stmt
 		'machine [id] '; [NL]
+end define
+
+define alphtype_stmt
+		'alphtype [repeat id] '; [NL]
 end define
 
 define action_stmt

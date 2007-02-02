@@ -1,6 +1,9 @@
 /*
  * @LANG: java
  * @ALLOW_GENFLAGS: -T0
+ *
+ * Need unpacking of integer types for this to work.
+ * @IGNORE: yes
  */
 
 class java2
