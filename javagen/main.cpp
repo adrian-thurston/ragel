@@ -67,7 +67,7 @@ bool printPrintables = false;
 void usage()
 {
 	cout <<
-"usage: rlcodegen [options] file\n"
+"usage: rlcodegen-java [options] file\n"
 "general:\n"
 "   -h, -H, -?, --help    Print this usage and exit\n"
 "   -v, --version         Print version information and exit\n"
@@ -264,8 +264,6 @@ CodeGenData *makeCodeGen( char *sourceFileName, char *fsmName,
 
 	return codeGen;
 }
-
-
 
 /* Main, process args and call yyparse to start scanning input. */
 int main(int argc, char **argv)

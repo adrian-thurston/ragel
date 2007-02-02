@@ -42,7 +42,6 @@ public:
 	TabCodeGen( ostream &out ) : FsmCodeGen(out) {}
 	virtual ~TabCodeGen() { }
 	virtual void writeOutData();
-	virtual void writeOutExec();
 
 protected:
 	std::ostream &TO_STATE_ACTION_SWITCH();
@@ -67,48 +66,17 @@ protected:
 	std::ostream &TRANS_ACTIONS();
 	std::ostream &TRANS_TARGS_WI();
 	std::ostream &TRANS_ACTIONS_WI();
-	void LOCATE_TRANS();
 
-	void COND_TRANSLATE();
-
-	void GOTO( ostream &ret, int gotoDest, bool inFinish );
-	void CALL( ostream &ret, int callDest, int targState, bool inFinish );
 	void NEXT( ostream &ret, int nextDest, bool inFinish );
-	void GOTO_EXPR( ostream &ret, InlineItem *ilItem, bool inFinish );
 	void NEXT_EXPR( ostream &ret, InlineItem *ilItem, bool inFinish );
-	void CALL_EXPR( ostream &ret, InlineItem *ilItem, int targState, bool inFinish );
 	void CURS( ostream &ret, bool inFinish );
 	void TARGS( ostream &ret, bool inFinish, int targState );
-	void RET( ostream &ret, bool inFinish );
-	void BREAK( ostream &ret, int targState );
 
 	virtual int TO_STATE_ACTION( RedStateAp *state );
 	virtual int FROM_STATE_ACTION( RedStateAp *state );
 	virtual int EOF_ACTION( RedStateAp *state );
 	virtual int TRANS_ACTION( RedTransAp *trans );
 	virtual void calcIndexSize();
-	virtual void writeOutEOF();
-};
-
-
-/*
- * CTabCodeGen
- */
-struct CTabCodeGen
-	: public TabCodeGen, public CCodeGen
-{
-	CTabCodeGen( ostream &out ) : 
-		FsmCodeGen(out), TabCodeGen(out), CCodeGen(out) {}
-};
-
-/*
- * DTabCodeGen
- */
-struct DTabCodeGen
-	: public TabCodeGen, public DCodeGen
-{
-	DTabCodeGen( ostream &out ) : 
-		FsmCodeGen(out), TabCodeGen(out), DCodeGen(out) {}
 };
 
 

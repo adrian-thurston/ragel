@@ -192,48 +192,6 @@ public:
 	virtual void calcIndexSize() {}
 };
 
-class CCodeGen : virtual public FsmCodeGen
-{
-public:
-	CCodeGen( ostream &out ) : FsmCodeGen(out) {}
-
-	virtual string NULL_ITEM();
-	virtual string POINTER();
-	virtual ostream &SWITCH_DEFAULT();
-	virtual ostream &OPEN_ARRAY( string type, string name );
-	virtual ostream &START_ARRAY_LINE();
-	virtual ostream &ARRAY_ITEM( int item, int count, bool last );
-	virtual ostream &END_ARRAY_LINE();
-	virtual ostream &CLOSE_ARRAY();
-	virtual ostream &STATIC_VAR( string type, string name );
-	virtual string ARR_OFF( string ptr, string offset );
-	virtual string CAST( string type );
-	virtual string UINT();
-	virtual string PTR_CONST();
-	virtual string CTRL_FLOW();
-};
-
-class DCodeGen : virtual public FsmCodeGen
-{
-public:
-	DCodeGen( ostream &out ) : FsmCodeGen(out) {}
-
-	virtual string NULL_ITEM();
-	virtual string POINTER();
-	virtual ostream &SWITCH_DEFAULT();
-	virtual ostream &OPEN_ARRAY( string type, string name );
-	virtual ostream &CLOSE_ARRAY();
-	virtual ostream &START_ARRAY_LINE();
-	virtual ostream &ARRAY_ITEM( int item, int count, bool last );
-	virtual ostream &END_ARRAY_LINE();
-	virtual ostream &STATIC_VAR( string type, string name );
-	virtual string ARR_OFF( string ptr, string offset );
-	virtual string CAST( string type );
-	virtual string UINT();
-	virtual string PTR_CONST();
-	virtual string CTRL_FLOW();
-};
-
 class JavaCodeGen : virtual public FsmCodeGen
 {
 private:
