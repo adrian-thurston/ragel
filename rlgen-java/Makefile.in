@@ -24,9 +24,9 @@ DEFS +=
 CFLAGS += -g -Wall
 LDFLAGS +=
 
-CC_SRCS = main.cpp fsmcodegen.cpp tabcodegen.cpp javacodegen.cpp
+CC_SRCS = main.cpp javacodegen.cpp
 
-REDFSM = ../redfsm/redfsm.a
+LIBS = ../common/common.a ../redfsm/redfsm.a
 
 LIBS += @LIBS@
 PREFIX += @prefix@
@@ -46,8 +46,8 @@ include ../version.mk
 # Rules.
 all: rlgen-java
 
-rlgen-java: $(REDFSM) $(OBJS)
-	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(REDFSM) $(LIBS)
+rlgen-java: $(LIBS) $(OBJS)
+	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
 
 %.o: %.cpp
 	@$(CXX) -M $(DEFS) $(INCS) $< > .$*.d

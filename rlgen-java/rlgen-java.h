@@ -1,5 +1,5 @@
 /*
- *  Copyright 2001-2006 Adrian Thurston <thurston@cs.queensu.ca>
+ *  Copyright 2001-2007 Adrian Thurston <thurston@cs.queensu.ca>
  */
 
 /*  This file is part of Ragel.
@@ -19,8 +19,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _RLCODEGEN_H
-#define _RLCODEGEN_H
+#ifndef _RLGEN_JAVA_H
+#define _RLGEN_JAVA_H
 
 #include <stdio.h>
 #include <iostream>
@@ -80,4 +80,4 @@ extern int numSplitPartitions;
 std::ostream &error();
 char *fileNameFromStem( char *stemFile, char *suffix );
 
-#endif /* _RLCODEGEN_H */
+#endif /* _RLGEN_JAVA_H */

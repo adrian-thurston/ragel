@@ -26,17 +26,13 @@
 #include <fstream>
 #include <unistd.h>
 
-#include "javagen.h"
+#include "rlgen-java.h"
 #include "xmlparse.h"
 #include "pcheck.h"
 #include "vector.h"
 #include "version.h"
-
-/* Code generators. */
-#include "javacodegen.h"
-
 #include "common.h"
-#include "common.cpp"
+#include "javacodegen.h"
 
 using std::istream;
 using std::ifstream;

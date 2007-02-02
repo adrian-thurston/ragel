@@ -71,8 +71,6 @@ public:
 	
 
 protected:
-	friend struct CodeGenData;
-
 	string FSM_NAME();
 	string START_STATE_ID();
 	ostream &ACTIONS_ARRAY();
