@@ -62,7 +62,7 @@ distclean: clean
 	rm -f Makefile
 
 clean:
-	rm -f tags .*.d *.o rlcodegen $(EXTRA_CLEAN)
+	rm -f tags .*.d *.o rlcodegen-java
 
 install: all
 	install -d $(PREFIX)/bin
