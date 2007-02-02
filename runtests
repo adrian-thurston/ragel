@@ -125,7 +125,7 @@ for test_case; do
 			cflags="-Wall -O3 -fno-strict-aliasing -lobjc"
 		;;
 		java)
-			codegen=../javagen/rlcodegen-java;
+			codegen=../rlgen-java/rlgen-java;
 			code_suffix=java;
 			compiler=$java_compiler
 			lang_opt=-J;
