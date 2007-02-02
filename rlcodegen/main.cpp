@@ -44,6 +44,8 @@
 #include "splitcodegen.h"
 #include "javacodegen.h"
 
+#include "gvdotgen.h"
+
 #include "common.h"
 #include "common.cpp"
 
@@ -265,76 +267,81 @@ ostream *openOutput( char *inputFile, char *language )
 CodeGenData *makeCodeGen( char *sourceFileName, char *fsmName, 
 		ostream &out, bool wantComplete )
 {
-	FsmCodeGen *codeGen = 0;
-	switch ( hostLangType ) {
-	case CCode:
-		switch ( codeStyle ) {
-		case GenTables:
-			codeGen = new CTabCodeGen(out);
+	CodeGenData *codeGen = 0;
+	if ( outputFormat == OutGraphvizDot ) {
+		codeGen = new GraphvizDotGen(out);
+	}
+	else {
+		switch ( hostLangType ) {
+		case CCode:
+			switch ( codeStyle ) {
+			case GenTables:
+				codeGen = new CTabCodeGen(out);
+				break;
+			case GenFTables:
+				codeGen = new CFTabCodeGen(out);
+				break;
+			case GenFlat:
+				codeGen = new CFlatCodeGen(out);
+				break;
+			case GenFFlat:
+				codeGen = new CFFlatCodeGen(out);
+				break;
+			case GenGoto:
+				codeGen = new CGotoCodeGen(out);
+				break;
+			case GenFGoto:
+				codeGen = new CFGotoCodeGen(out);
+				break;
+			case GenIpGoto:
+				codeGen = new CIpGotoCodeGen(out);
+				break;
+			case GenSplit:
+				codeGen = new CSplitCodeGen(out);
+				break;
+			}
 			break;
-		case GenFTables:
-			codeGen = new CFTabCodeGen(out);
-			break;
-		case GenFlat:
-			codeGen = new CFlatCodeGen(out);
-			break;
-		case GenFFlat:
-			codeGen = new CFFlatCodeGen(out);
-			break;
-		case GenGoto:
-			codeGen = new CGotoCodeGen(out);
-			break;
-		case GenFGoto:
-			codeGen = new CFGotoCodeGen(out);
-			break;
-		case GenIpGoto:
-			codeGen = new CIpGotoCodeGen(out);
-			break;
-		case GenSplit:
-			codeGen = new CSplitCodeGen(out);
-			break;
-		}
-		break;
 
-	case DCode:
-		switch ( codeStyle ) {
-		case GenTables:
-			codeGen = new DTabCodeGen(out);
+		case DCode:
+			switch ( codeStyle ) {
+			case GenTables:
+				codeGen = new DTabCodeGen(out);
+				break;
+			case GenFTables:
+				codeGen = new DFTabCodeGen(out);
+				break;
+			case GenFlat:
+				codeGen = new DFlatCodeGen(out);
+				break;
+			case GenFFlat:
+				codeGen = new DFFlatCodeGen(out);
+				break;
+			case GenGoto:
+				codeGen = new DGotoCodeGen(out);
+				break;
+			case GenFGoto:
+				codeGen = new DFGotoCodeGen(out);
+				break;
+			case GenIpGoto:
+				codeGen = new DIpGotoCodeGen(out);
+				break;
+			case GenSplit:
+				codeGen = new DSplitCodeGen(out);
+				break;
+			}
 			break;
-		case GenFTables:
-			codeGen = new DFTabCodeGen(out);
-			break;
-		case GenFlat:
-			codeGen = new DFlatCodeGen(out);
-			break;
-		case GenFFlat:
-			codeGen = new DFFlatCodeGen(out);
-			break;
-		case GenGoto:
-			codeGen = new DGotoCodeGen(out);
-			break;
-		case GenFGoto:
-			codeGen = new DFGotoCodeGen(out);
-			break;
-		case GenIpGoto:
-			codeGen = new DIpGotoCodeGen(out);
-			break;
-		case GenSplit:
-			codeGen = new DSplitCodeGen(out);
-			break;
-		}
-		break;
 
-	case JavaCode:
-		switch ( codeStyle ) {
-		case GenTables:
-			codeGen = new JavaTabCodeGen(out);
-			break;
-		default:
-			assert(false);
+		case JavaCode:
+			switch ( codeStyle ) {
+			case GenTables:
+				codeGen = new JavaTabCodeGen(out);
+				break;
+			default:
+				assert(false);
+				break;
+			}
 			break;
 		}
-		break;
 	}
 
 	codeGen->sourceFileName = sourceFileName;

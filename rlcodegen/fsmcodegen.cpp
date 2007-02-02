@@ -762,25 +762,8 @@ void FsmCodeGen::prepareMachine()
 
 void FsmCodeGen::finishRagelDef()
 {
-	if ( outputFormat == OutCode ) {
-		prepareMachine();
-	}
-	else if ( outputFormat == OutGraphvizDot && !graphvizDone ) {
-		graphvizDone = true;
-
-		/* Do ordering and choose state ids. */
-		redFsm->depthFirstOrdering();
-		redFsm->sequentialStateIds();
-
-		/* For dot file generation we want to pick default transitions. */
-		redFsm->chooseDefaultSpan();
-
-		/* Make the generator. */
-		GraphvizDotGen dotGen( fsmName, this, redFsm, out );
-
-		/* Write out with it. */
-		dotGen.writeDotFile();
-	}
+	assert( outputFormat == OutCode );
+	prepareMachine();
 }
 
 void FsmCodeGen::writeStatement( InputLoc &loc, int nargs, char **args )

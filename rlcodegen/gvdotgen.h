@@ -1,5 +1,5 @@
 /*
- *  Copyright 2001-2006 Adrian Thurston <thurston@cs.queensu.ca>
+ *  Copyright 2001-2007 Adrian Thurston <thurston@cs.queensu.ca>
  */
 
 /*  This file is part of Ragel.
@@ -23,20 +23,18 @@
 #define _GVDOTGEN_H
 
 #include <iostream>
-#include "redfsm.h"
+#include "gendata.h"
 
-/* Forwards. */
-struct CodeGenData;
-
-class GraphvizDotGen
+class GraphvizDotGen : public CodeGenData
 {
 public:
-	GraphvizDotGen( char *fsmName, CodeGenData *cgd, 
-			RedFsmAp *redFsm, std::ostream &out );
+	GraphvizDotGen( ostream &out ) : CodeGenData(out) { }
 
 	/* Print an fsm to out stream. */
 	void writeTransList( RedStateAp *state );
 	void writeDotFile( );
+
+	virtual void finishRagelDef();
 
 private:
 	/* Writing labels and actions. */
@@ -44,11 +42,6 @@ private:
 	std::ostream &TRANS_ACTION( RedStateAp *fromState, RedTransAp *trans );
 	std::ostream &ACTION( RedAction *action );
 	std::ostream &KEY( Key key );
-
-	char *fsmName;
-	CodeGenData *cgd;
-	RedFsmAp *redFsm;
-	std::ostream &out;
 };
 
 

@@ -1,5 +1,5 @@
 /*
- *  Copyright 2001-2006 Adrian Thurston <thurston@cs.queensu.ca>
+ *  Copyright 2001-2007 Adrian Thurston <thurston@cs.queensu.ca>
  */
 
 /*  This file is part of Ragel.
@@ -23,19 +23,8 @@
 #include "rlcodegen.h"
 #include "gvdotgen.h"
 #include "gendata.h"
-#include "redfsm.h"
 
 using namespace std;
-
-GraphvizDotGen::GraphvizDotGen( char *fsmName, CodeGenData *cgd, 
-		RedFsmAp *redFsm, ostream &out )
-:
-	fsmName(fsmName),
-	cgd(cgd),
-	redFsm(redFsm),
-	out(out)
-{
-}
 
 std::ostream &GraphvizDotGen::KEY( Key key )
 {
@@ -109,7 +98,7 @@ std::ostream &GraphvizDotGen::ACTION( RedAction *action )
 std::ostream &GraphvizDotGen::ONCHAR( Key lowKey, Key highKey )
 {
 	if ( lowKey > keyOps->maxKey ) {
-		CondSpace *condSpace = cgd->findCondSpace( lowKey, highKey );
+		CondSpace *condSpace = findCondSpace( lowKey, highKey );
 		Key values = ( lowKey - condSpace->baseKey ) / keyOps->alphSize();
 
 		lowKey = keyOps->minKey + 
@@ -209,8 +198,8 @@ void GraphvizDotGen::writeDotFile( )
 	out << "	ENTRY;\n";
 
 	/* Psuedo states for entry points in the entry map. */
-	for ( EntryIdVect::Iter en = cgd->entryPointIds; en.lte(); en++ ) {
-		RedStateAp *state = cgd->allStates + *en;
+	for ( EntryIdVect::Iter en = entryPointIds; en.lte(); en++ ) {
+		RedStateAp *state = allStates + *en;
 		out << "	en_" << state->id << ";\n";
 	}
 
@@ -261,9 +250,9 @@ void GraphvizDotGen::writeDotFile( )
 	out << "\" ];\n";
 
 	/* Transitions into the entry points. */
-	for ( EntryIdVect::Iter en = cgd->entryPointIds; en.lte(); en++ ) {
-		RedStateAp *state = cgd->allStates + *en;
-		char *name = cgd->entryPointNames[en.pos()];
+	for ( EntryIdVect::Iter en = entryPointIds; en.lte(); en++ ) {
+		RedStateAp *state = allStates + *en;
+		char *name = entryPointNames[en.pos()];
 		out << "	en_" << state->id << " -> " << state->id <<
 				" [ label = \"" << name << "\" ];\n";
 	}
@@ -279,4 +268,22 @@ void GraphvizDotGen::writeDotFile( )
 
 	out <<
 		"}\n";
+}
+
+void GraphvizDotGen::finishRagelDef()
+{
+	assert( outputFormat == OutGraphvizDot );
+	if ( !graphvizDone ) {
+		graphvizDone = true;
+
+		/* Do ordering and choose state ids. */
+		redFsm->depthFirstOrdering();
+		redFsm->sequentialStateIds();
+
+		/* For dot file generation we want to pick default transitions. */
+		redFsm->chooseDefaultSpan();
+
+		/* Write out with it. */
+		writeDotFile();
+	}
 }
