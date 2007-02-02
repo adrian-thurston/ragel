@@ -29,13 +29,14 @@
 #include "avltree.h"
 #include "vector.h"
 
-
 using std::ifstream;
 using std::istream;
 using std::ostream;
 using std::cout;
 using std::cerr;
 using std::endl;
+
+extern char *Parser_lelNames[];
 
 /* This is used for tracking the current stack of include file/machine pairs. It is
  * is used to detect and recursive include structure. */
@@ -328,7 +329,7 @@ void Scanner::token( int type )
 
 			#if 0
 			cerr << "scanner:" << line << ":" << column << 
-					": sending token to the parser " << lelNames[*p];
+					": sending token to the parser " << Parser_lelNames[*p];
 			cerr << " " << toklen;
 			if ( tokdata != 0 )
 				cerr << " " << tokdata;
@@ -750,7 +751,7 @@ void Scanner::endSection( )
 			fgoto main;
 		};
 
-		[ \t]+ => { updateCol(); };
+		[ \t\r]+ => { updateCol(); };
 
 		# If we are in a single line machine then newline may end the spec.
 		NL => {
