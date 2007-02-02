@@ -26,7 +26,7 @@
 #include <fstream>
 #include <unistd.h>
 
-#include "rlcodegen.h"
+#include "common.h"
 #include "rlcodegen.h"
 #include "xmlparse.h"
 #include "pcheck.h"
@@ -45,8 +45,6 @@
 
 #include "gvdotgen.h"
 
-#include "common.h"
-#include "common.cpp"
 
 using std::istream;
 using std::ifstream;

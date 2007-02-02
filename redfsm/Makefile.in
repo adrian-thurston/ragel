@@ -78,4 +78,7 @@ endif
 clean:
 	rm -f tags .*.d *.o rlcodegen $(EXTRA_CLEAN)
 
+install:
+	@true
+
 -include $(DEPS)

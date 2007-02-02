@@ -31,9 +31,8 @@ CC_SRCS = main.cpp gvdotgen.cpp fsmcodegen.cpp \
 
 GEN_SRC = xmltags.cpp xmlscan.cpp xmlparse.cpp xmlparse.h
 
-REDFSM = ../redfsm/redfsm.a
+LIBS = ../common/common.a ../redfsm/redfsm.a
 
-LIBS += @LIBS@
 PREFIX += @prefix@
 
 #*************************************
@@ -49,15 +48,10 @@ DEPS = $(CC_SRCS:%.cpp=.%.d)
 include ../version.mk
 
 # Rules.
-all: redfsm rlcodegen
+all: rlcodegen
 
-rlcodegen: $(REDFSM) $(OBJS)
-	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(REDFSM) $(LIBS)
-
-.PHONY: redfsm
-
-redfsm:
-	@cd ../redfsm && $(MAKE) 
+rlcodegen: $(LIBS) $(OBJS)
+	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
 
 %.o: %.cpp
 	@$(CXX) -M $(DEFS) $(INCS) $< > .$*.d

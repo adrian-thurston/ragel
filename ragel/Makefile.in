@@ -1,5 +1,5 @@
 #
-#   Copyright 2001-2006 Adrian Thurston <thurston@cs.queensu.ca>
+#   Copyright 2001-2007 Adrian Thurston <thurston@cs.queensu.ca>
 #
 
 #   This file is part of Ragel.
@@ -31,12 +31,13 @@ CC_SRCS = \
 
 GEN_SRC = rlscan.cpp rlparse.h rlparse.cpp
 
-LIBS += @LIBS@
+LIBS = ../common/common.a
+
+#*************************************
+
 PREFIX = @prefix@
 
 BUILD_PARSERS = @BUILD_PARSERS@
-
-#*************************************
 
 # Programs
 CXX = @CXX@
@@ -48,7 +49,7 @@ DEPS = $(CC_SRCS:%.cpp=.%.d)
 # Rules.
 all: ragel
 
-ragel: $(GEN_SRC) $(OBJS)
+ragel: $(GEN_SRC) $(OBJS) $(LIBS)
 	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
 
 ifeq ($(BUILD_PARSERS),true)

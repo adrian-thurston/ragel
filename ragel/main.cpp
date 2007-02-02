@@ -34,8 +34,7 @@
 #include "pcheck.h"
 #include "vector.h"
 #include "version.h"
-
-#include "common.cpp"
+#include "common.h"
 
 using std::istream;
 using std::ostream;

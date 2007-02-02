@@ -18,21 +18,50 @@
 #   along with Ragel; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
 
+INCS += 
+DEFS +=
+
+CFLAGS += -g -Wall
+LDFLAGS +=
+
+CC_SRCS = common.cpp
+
 GEN_SRC = version.h
 
 #*************************************
 
+# Programs
+CXX = @CXX@
+
+# Get objects and dependencies from sources.
+OBJS = $(CC_SRCS:%.cpp=%.o)
+DEPS = $(CC_SRCS:%.cpp=.%.d)
+
+# Get the version info.
 include ../version.mk
 
-# Rules.
-all: $(GEN_SRC)
+# rules
+
+all: common.a
+
+common.a: $(GEN_SRC) $(OBJS)
+	ar -cr $@ $(OBJS) 
 
 version.h: ../version.mk
 	echo '#define VERSION "$(VERSION)"' > version.h
 	echo '#define PUBDATE "$(PUBDATE)"' >> version.h
 
+%.o: %.cpp
+	@$(CXX) -M $(DEFS) $(INCS) $< > .$*.d
+	$(CXX) -c $(CFLAGS) $(DEFS) $(INCS) -o $@ $<
+
 distclean: clean
 	rm -f Makefile config.h
 
 clean:
-	rm -f tags version.h
+	rm -f tags version.h .*.d *.o common.a
+
+install:
+	@true
+
+-include $(DEPS)

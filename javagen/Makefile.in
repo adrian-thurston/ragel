@@ -44,15 +44,10 @@ DEPS = $(CC_SRCS:%.cpp=.%.d)
 include ../version.mk
 
 # Rules.
-all: redfsm rlcodegen-java
+all: rlcodegen-java
 
 rlcodegen-java: $(REDFSM) $(OBJS)
 	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(REDFSM) $(LIBS)
-
-.PHONY: redfsm
-
-redfsm:
-	@cd ../redfsm && $(MAKE) 
 
 %.o: %.cpp
 	@$(CXX) -M $(DEFS) $(INCS) $< > .$*.d

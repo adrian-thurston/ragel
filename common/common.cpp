@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006 Adrian Thurston <thurston@cs.queensu.ca>
+ *  Copyright 2006-2007 Adrian Thurston <thurston@cs.queensu.ca>
  */
 
 /*  This file is part of Ragel.
@@ -19,6 +19,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
+#include "pcheck.h"
 #include "common.h"
 
 HostType hostTypesC[] =
