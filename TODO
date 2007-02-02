@@ -1,3 +1,13 @@
+An expression of the form:
+    expr1 <: expr2 . expr3
+Is parsed as:
+    ( expr1 <: expr2 ) . expr3
+If expr2 contains the empty string then it's possible for the machine to escape
+to expr3. This can be confusing. Perhaps <: should behave like
+    expr1 <: ( expr2 . expr3 )
+By using the implementation:
+    expr1 $1 %0 . expr2 . expr3
+
 The |> guarded operator and the <| guarded operator need to be added.
 
 The fixed size stack is a problem for manual recursion of unlimited depth.
