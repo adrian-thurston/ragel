@@ -18,23 +18,17 @@
 #   along with Ragel; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
 
-INCS += -I../common -I../redfsm -I../aapl
+INCS += -I../common -I../aapl
 DEFS +=
 
 CFLAGS += -g -Wall
 LDFLAGS +=
 
-CC_SRCS = main.cpp gvdotgen.cpp fsmcodegen.cpp \
-	tabcodegen.cpp ftabcodegen.cpp flatcodegen.cpp \
-	fflatcodegen.cpp gotocodegen.cpp fgotocodegen.cpp \
-	ipgotocodegen.cpp splitcodegen.cpp javacodegen.cpp
+CC_SRCS = redfsm.cpp gendata.cpp xmltags.cpp xmlscan.cpp xmlparse.cpp
 
 GEN_SRC = xmltags.cpp xmlscan.cpp xmlparse.cpp xmlparse.h
 
-REDFSM = ../redfsm/redfsm.a
-
-LIBS += @LIBS@
-PREFIX += @prefix@
+BUILD_PARSERS = @BUILD_PARSERS@
 
 #*************************************
 
@@ -49,15 +43,26 @@ DEPS = $(CC_SRCS:%.cpp=.%.d)
 include ../version.mk
 
 # Rules.
-all: redfsm rlcodegen
+all: redfsm.a
 
-rlcodegen: $(REDFSM) $(OBJS)
-	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(REDFSM) $(LIBS)
+redfsm.a: $(GEN_SRC) $(OBJS)
+	ar -cr $@ $(OBJS) 
 
-.PHONY: redfsm
+ifeq ($(BUILD_PARSERS),true)
 
-redfsm:
-	@cd ../redfsm && $(MAKE) 
+xmlparse.h: xmlparse.kh
+	kelbt -o $@ $<
+
+xmlparse.cpp: xmlparse.kl xmlparse.kh
+	kelbt -o $@ $<
+
+xmlscan.cpp: xmlscan.rl
+	ragel xmlscan.rl | rlcodegen -G2 -o xmlscan.cpp
+
+xmltags.cpp: xmltags.gperf
+	gperf -L C++ -t $< > $@
+
+endif
 
 %.o: %.cpp
 	@$(CXX) -M $(DEFS) $(INCS) $< > .$*.d
@@ -66,11 +71,11 @@ redfsm:
 distclean: clean
 	rm -f Makefile
 
+ifeq ($(BUILD_PARSERS),true)
+EXTRA_CLEAN = $(GEN_SRC)
+endif
+
 clean:
 	rm -f tags .*.d *.o rlcodegen $(EXTRA_CLEAN)
-
-install: all
-	install -d $(PREFIX)/bin
-	install -s rlcodegen $(PREFIX)/bin/rlcodegen
 
 -include $(DEPS)

@@ -105,6 +105,6 @@ if test -n "$TXL"; then
 fi
 
 dnl write output files
-AC_OUTPUT(Makefile common/Makefile ragel/Makefile rlcodegen/Makefile doc/Makefile test/Makefile)
+AC_OUTPUT(Makefile common/Makefile ragel/Makefile redfsm/Makefile rlcodegen/Makefile doc/Makefile test/Makefile)
 
 echo "configuration of ragel complete"
