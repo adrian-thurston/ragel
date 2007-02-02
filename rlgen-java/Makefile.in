@@ -44,9 +44,9 @@ DEPS = $(CC_SRCS:%.cpp=.%.d)
 include ../version.mk
 
 # Rules.
-all: rlcodegen-java
+all: rlgen-java
 
-rlcodegen-java: $(REDFSM) $(OBJS)
+rlgen-java: $(REDFSM) $(OBJS)
 	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(REDFSM) $(LIBS)
 
 %.o: %.cpp
@@ -57,10 +57,10 @@ distclean: clean
 	rm -f Makefile
 
 clean:
-	rm -f tags .*.d *.o rlcodegen-java
+	rm -f tags .*.d *.o rlgen-java
 
 install: all
 	install -d $(PREFIX)/bin
-	install -s rlcodegen-java $(PREFIX)/bin/rlcodegen-java
+	install -s rlgen-java $(PREFIX)/bin/rlgen-java
 
 -include $(DEPS)
