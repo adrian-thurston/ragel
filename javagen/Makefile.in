@@ -1,0 +1,71 @@
+#
+#   Copyright 2001-2006 Adrian Thurston <thurston@cs.queensu.ca>
+#
+
+#   This file is part of Ragel.
+#
+#   Ragel is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   Ragel is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with Ragel; if not, write to the Free Software
+#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+
+INCS += -I../common -I../redfsm -I../aapl
+DEFS +=
+
+CFLAGS += -g -Wall
+LDFLAGS +=
+
+CC_SRCS = main.cpp fsmcodegen.cpp tabcodegen.cpp javacodegen.cpp
+
+REDFSM = ../redfsm/redfsm.a
+
+LIBS += @LIBS@
+PREFIX += @prefix@
+
+#*************************************
+
+# Programs
+CXX = @CXX@
+
+# Get objects and dependencies from sources.
+OBJS = $(CC_SRCS:%.cpp=%.o)
+DEPS = $(CC_SRCS:%.cpp=.%.d)
+
+# Get the version info.
+include ../version.mk
+
+# Rules.
+all: redfsm rlcodegen-java
+
+rlcodegen-java: $(REDFSM) $(OBJS)
+	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(REDFSM) $(LIBS)
+
+.PHONY: redfsm
+
+redfsm:
+	@cd ../redfsm && $(MAKE) 
+
+%.o: %.cpp
+	@$(CXX) -M $(DEFS) $(INCS) $< > .$*.d
+	$(CXX) -c $(CFLAGS) $(DEFS) $(INCS) -o $@ $<
+
+distclean: clean
+	rm -f Makefile
+
+clean:
+	rm -f tags .*.d *.o rlcodegen $(EXTRA_CLEAN)
+
+install: all
+	install -d $(PREFIX)/bin
+	install -s rlcodegen-java $(PREFIX)/bin/rlcodegen-java
+
+-include $(DEPS)

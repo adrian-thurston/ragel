@@ -2856,7 +2856,7 @@ _ACEOF
 
 fi
 
-                                                                      ac_config_files="$ac_config_files Makefile common/Makefile ragel/Makefile redfsm/Makefile rlcodegen/Makefile doc/Makefile test/Makefile"
+                                                                                ac_config_files="$ac_config_files Makefile common/Makefile ragel/Makefile redfsm/Makefile rlcodegen/Makefile javagen/Makefile doc/Makefile test/Makefile"
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure
@@ -3386,6 +3386,7 @@ do
   "ragel/Makefile" ) CONFIG_FILES="$CONFIG_FILES ragel/Makefile" ;;
   "redfsm/Makefile" ) CONFIG_FILES="$CONFIG_FILES redfsm/Makefile" ;;
   "rlcodegen/Makefile" ) CONFIG_FILES="$CONFIG_FILES rlcodegen/Makefile" ;;
+  "javagen/Makefile" ) CONFIG_FILES="$CONFIG_FILES javagen/Makefile" ;;
   "doc/Makefile" ) CONFIG_FILES="$CONFIG_FILES doc/Makefile" ;;
   "test/Makefile" ) CONFIG_FILES="$CONFIG_FILES test/Makefile" ;;
   "common/config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS common/config.h" ;;

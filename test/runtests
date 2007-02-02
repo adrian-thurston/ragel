@@ -51,15 +51,8 @@ shift $((OPTIND - 1));
 
 [ -z "$*" ] && set -- *.rl
 
-# find the config file
 config=../common/config.h
 ragel=../ragel/ragel
-rlcodegen=../rlcodegen/rlcodegen
-if ! [ -d ../common ]; then 
-	config=../$config
-	ragel=../$ragel
-	rlcodegen=../$rlcodegen
-fi
 
 cxx_compiler=`sed '/^#define CXX/s/#define CXX *//p;d' $config`
 c_compiler=`sed '/^#define CC/s/#define CC *//p;d' $config`
@@ -104,30 +97,35 @@ for test_case; do
 
 	case $lang in
 		c++)
+			codegen=../rlcodegen/rlcodegen;
 			code_suffix=cpp;
 			compiler=$cxx_compiler;
 			lang_opt=-C;
 			cflags="-pedantic -ansi -Wall -O3"
 		;;
 		d)
+			codegen=../rlcodegen/rlcodegen;
 			code_suffix=d;
 			compiler=$d_compiler;
 			lang_opt=-D;
 			cflags="-Wall -O3"
 		;;
 		c)
+			codegen=../rlcodegen/rlcodegen;
 			code_suffix=c;
 			compiler=$c_compiler;
 			lang_opt=-C;
 			cflags="-pedantic -ansi -Wall -O3"
 		;;
 		obj-c)
+			codegen=../rlcodegen/rlcodegen;
 			code_suffix=m;
 			compiler=$objc_compiler
 			lang_opt=-C;
 			cflags="-Wall -O3 -fno-strict-aliasing -lobjc"
 		;;
 		java)
+			codegen=../javagen/rlcodegen-java;
 			code_suffix=java;
 			compiler=$java_compiler
 			lang_opt=-J;
@@ -193,8 +191,8 @@ for test_case; do
 			fi
 			echo "$allow_genflags" | grep -e $grep_gen_opt >/dev/null || continue
 
-			echo "$ragel $min_opt $lang_opt $test_case | $rlcodegen  $gen_opt -o $code_src"
-			if ! $ragel $min_opt $lang_opt $test_case | $rlcodegen $gen_opt -o $code_src; then
+			echo "$ragel $min_opt $lang_opt $test_case | $codegen  $gen_opt -o $code_src"
+			if ! $ragel $min_opt $lang_opt $test_case | $codegen $gen_opt -o $code_src; then
 				test_error;
 			fi
 
