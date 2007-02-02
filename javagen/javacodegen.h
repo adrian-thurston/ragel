@@ -44,6 +44,7 @@ struct JavaTabCodeGen
 	void LOCATE_TRANS();
 	virtual void writeOutExec();
 	virtual void writeOutEOF();
+	virtual void writeOutData();
 };
 
 

@@ -28,7 +28,7 @@
 #include <sstream>
 #include <string>
 #include <assert.h>
-
+#include <iomanip>
 
 using std::ostream;
 using std::ostringstream;
@@ -84,26 +84,18 @@ string FsmCodeGen::START_STATE_ID()
 /* Write out the array of actions. */
 std::ostream &FsmCodeGen::ACTIONS_ARRAY()
 {
-	out << "\t0, ";
-	int totalActions = 1;
+	START_ARRAY_LINE();
+	int totalActions = 0;
+	ARRAY_ITEM( 0, ++totalActions, false );
 	for ( ActionTableMap::Iter act = redFsm->actionMap; act.lte(); act++ ) {
 		/* Write out the length, which will never be the last character. */
-		out << act->key.length() << ", ";
-		/* Put in a line break every 8 */
-		if ( totalActions++ % 8 == 7 )
-			out << "\n\t";
+		ARRAY_ITEM( act->key.length(), ++totalActions, false );
 
 		for ( ActionTable::Iter item = act->key; item.lte(); item++ ) {
-			out << item->value->actionId;
-			if ( ! (act.last() && item.last()) )
-				out << ", ";
-
-			/* Put in a line break every 8 */
-			if ( totalActions++ % 8 == 7 )
-				out << "\n\t";
+			ARRAY_ITEM( item->value->actionId, ++totalActions, (act.last() && item.last()) );
 		}
 	}
-	out << "\n";
+	END_ARRAY_LINE();
 	return out;
 }
 
@@ -174,16 +166,9 @@ string FsmCodeGen::TABS( int level )
 	return result;
 }
 
-/* Write out a key from the fsm code gen. Depends on wether or not the key is
- * signed. */
-string FsmCodeGen::KEY( Key key )
+int FsmCodeGen::KEY( Key key )
 {
-	ostringstream ret;
-	if ( keyOps->isSigned || !hostLang->explicitUnsigned )
-		ret << key.getVal();
-	else
-		ret << (unsigned long) key.getVal() << 'u';
-	return ret.str();
+	return key.getVal();
 }
 
 void FsmCodeGen::EXEC( ostream &ret, InlineItem *item, int targState, int inFinish )
@@ -498,6 +483,33 @@ std::ostream &CCodeGen::OPEN_ARRAY( string type, string name )
 	return out;
 }
 
+std::ostream &CCodeGen::START_ARRAY_LINE()
+{
+	out << "\t";
+	return out;
+}
+
+std::ostream &CCodeGen::ARRAY_ITEM( int item, int count, bool last )
+{
+	out << item;
+	if ( !last )
+	{
+		out << ", ";
+		if ( count % IALL == 0 )
+		{
+			END_ARRAY_LINE();
+			START_ARRAY_LINE();
+		}
+	}
+	return out;
+}
+
+std::ostream &CCodeGen::END_ARRAY_LINE()
+{
+	out << "\n";
+	return out;
+}
+
 std::ostream &CCodeGen::CLOSE_ARRAY()
 {
 	return out << "};\n";
@@ -570,6 +582,33 @@ std::ostream &DCodeGen::OPEN_ARRAY( string type, string name )
 	return out;
 }
 
+std::ostream &DCodeGen::START_ARRAY_LINE()
+{
+	out << "\t";
+	return out;
+}
+
+std::ostream &DCodeGen::ARRAY_ITEM( int item, int count, bool last )
+{
+	out << item;
+	if ( !last )
+	{
+		out << ", ";
+		if ( count % IALL == 0 )
+		{
+			END_ARRAY_LINE();
+			START_ARRAY_LINE();
+		}
+	}
+	return out;
+}
+
+std::ostream &DCodeGen::END_ARRAY_LINE()
+{
+	out << "\n";
+	return out;
+}
+
 std::ostream &DCodeGen::CLOSE_ARRAY()
 {
 	return out << "];\n";
@@ -621,13 +660,58 @@ string JavaCodeGen::PTR_CONST()
 
 std::ostream &JavaCodeGen::OPEN_ARRAY( string type, string name )
 {
-	out << "static final " << type << "[] " << name << " = {\n";
+	array_type = type;
+	array_name = name;
+	out << "private static final String packed" << name << " = \n";
+	return out;
+}
+
+std::ostream &JavaCodeGen::START_ARRAY_LINE()
+{
+	out << "\t\"";
+	return out;
+}
+
+std::ostream &JavaCodeGen::ARRAY_ITEM( int item, int count, bool last )
+{
+	// 0 codes in 2 bytes in the Java class file and is common,
+	// so we increment all values by one when packing
+	item++;
+
+	std::ios_base::fmtflags originalFlags=out.flags();
+	if ( item < 0x80 )
+	{
+		out << std::oct << "\\" << item;
+	}
+	else
+	{
+		out << std::hex << "\\u" << std::setfill('0') << std::setw(4) << item;
+	}
+	out.flags(originalFlags);
+	
+	if ( !last )
+	{
+		if ( count % IALL == 0 )
+		{
+			END_ARRAY_LINE();
+			START_ARRAY_LINE();
+		}
+	}
+	return out;
+}
+
+std::ostream &JavaCodeGen::END_ARRAY_LINE()
+{
+	out << "\" +\n";
 	return out;
 }
 
 std::ostream &JavaCodeGen::CLOSE_ARRAY()
 {
-	return out << "};\n";
+	out << "\t\"\";\n";
+	out << "static final " << array_type << "[] " << array_name 
+		<< " = unpack_" << array_type << "(packed" << array_name << ");\n";
+	return out;
 }
 
 std::ostream &JavaCodeGen::STATIC_VAR( string type, string name )

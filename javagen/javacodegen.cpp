@@ -168,6 +168,37 @@ void JavaTabCodeGen::LOCATE_TRANS()
 		"\n";
 }
 
+void JavaTabCodeGen::writeOutData()
+{
+	TabCodeGen::writeOutData();
+	
+	out <<
+		"	private static byte[] unpack_byte(String packed)\n"
+		"	{\n"
+		"		byte[] ret = new byte[packed.length()];\n"
+		"		for (int i = 0; i < packed.length(); i++)\n"
+		"		{\n"
+		"			int value = packed.charAt(i);\n"
+		"			value--;\n"
+		"			ret[i] = (byte) value;\n"
+		"		}\n"
+		"		return ret;\n"
+		"	}\n"
+		"	private static short[] unpack_short(String packed)\n"
+		"	{\n"
+		"		short[] ret = new short[packed.length()];\n"
+		"		for (int i = 0; i < packed.length(); i++)\n"
+		"		{\n"
+		"			int value = packed.charAt(i);\n"
+		"			value--;\n"
+		"			ret[i] = (short) value;\n"
+		"		}\n"
+		"		return ret;\n"
+		"	}\n";
+
+	
+}
+
 void JavaTabCodeGen::writeOutExec()
 {
 	out <<

@@ -54,42 +54,38 @@ void TabCodeGen::calcIndexSize()
 	useIndicies = sizeWithInds < sizeWithoutInds;
 }
 
-std::ostream &TabCodeGen::TO_STATE_ACTION( RedStateAp *state )
+int TabCodeGen::TO_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->toStateAction != 0 )
 		act = state->toStateAction->location+1;
-	out << act;
-	return out;
+	return act;
 }
 
-std::ostream &TabCodeGen::FROM_STATE_ACTION( RedStateAp *state )
+int TabCodeGen::FROM_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->fromStateAction != 0 )
 		act = state->fromStateAction->location+1;
-	out << act;
-	return out;
+	return act;
 }
 
-std::ostream &TabCodeGen::EOF_ACTION( RedStateAp *state )
+int TabCodeGen::EOF_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->eofAction != 0 )
 		act = state->eofAction->location+1;
-	out << act;
-	return out;
+	return act;
 }
 
 
-std::ostream &TabCodeGen::TRANS_ACTION( RedTransAp *trans )
+int TabCodeGen::TRANS_ACTION( RedTransAp *trans )
 {
 	/* If there are actions, emit them. Otherwise emit zero. */
 	int act = 0;
 	if ( trans->action != 0 )
 		act = trans->action->location+1;
-	out << act;
-	return out;
+	return act;
 }
 
 std::ostream &TabCodeGen::TO_STATE_ACTION_SWITCH()
@@ -163,313 +159,247 @@ std::ostream &TabCodeGen::ACTION_SWITCH()
 
 std::ostream &TabCodeGen::COND_OFFSETS()
 {
-	out << "\t";
+	START_ARRAY_LINE();
 	int totalStateNum = 0, curKeyOffset = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write the key offset. */
-		out << curKeyOffset;
-		if ( !st.last() ) {
-			out << ", ";
-			if ( ++totalStateNum % IALL == 0 )
-				out << "\n\t";
-		}
+		ARRAY_ITEM( curKeyOffset, ++totalStateNum, st.last() );
 
 		/* Move the key offset ahead. */
 		curKeyOffset += st->stateCondList.length();
 	}
-	out << "\n";
+	END_ARRAY_LINE();
 	return out;
 }
 
 std::ostream &TabCodeGen::KEY_OFFSETS()
 {
-	out << "\t";
+	START_ARRAY_LINE();
 	int totalStateNum = 0, curKeyOffset = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write the key offset. */
-		out << curKeyOffset;
-		if ( !st.last() ) {
-			out << ", ";
-			if ( ++totalStateNum % IALL == 0 )
-				out << "\n\t";
-		}
+		ARRAY_ITEM( curKeyOffset, ++totalStateNum, st.last() );
 
 		/* Move the key offset ahead. */
 		curKeyOffset += st->outSingle.length() + st->outRange.length()*2;
 	}
-	out << "\n";
+	END_ARRAY_LINE();
 	return out;
 }
 
 
 std::ostream &TabCodeGen::INDEX_OFFSETS()
 {
-	out << "\t";
+	START_ARRAY_LINE();
 	int totalStateNum = 0, curIndOffset = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write the index offset. */
-		out << curIndOffset;
-		if ( !st.last() ) {
-			out << ", ";
-			if ( ++totalStateNum % IALL == 0 )
-				out << "\n\t";
-		}
+		ARRAY_ITEM( curIndOffset, ++totalStateNum, st.last() );
 
 		/* Move the index offset ahead. */
 		curIndOffset += st->outSingle.length() + st->outRange.length();
 		if ( st->defTrans != 0 )
 			curIndOffset += 1;
 	}
-	out << "\n";
+	END_ARRAY_LINE();
 	return out;
 }
 
 std::ostream &TabCodeGen::COND_LENS()
 {
-	out << "\t";
+	START_ARRAY_LINE();
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write singles length. */
-		out << st->stateCondList.length();
-		if ( !st.last() ) {
-			out << ", ";
-			if ( ++totalStateNum % IALL == 0 )
-				out << "\n\t";
-		}
+		ARRAY_ITEM( st->stateCondList.length(), ++totalStateNum, st.last() );
 	}
-	out << "\n";
+	END_ARRAY_LINE();
 	return out;
 }
 
 
 std::ostream &TabCodeGen::SINGLE_LENS()
 {
-	out << "\t";
+	START_ARRAY_LINE();
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write singles length. */
-		out << st->outSingle.length();
-		if ( !st.last() ) {
-			out << ", ";
-			if ( ++totalStateNum % IALL == 0 )
-				out << "\n\t";
-		}
+		ARRAY_ITEM( st->outSingle.length(), ++totalStateNum, st.last() );
 	}
-	out << "\n";
+	END_ARRAY_LINE();
 	return out;
 }
 
 std::ostream &TabCodeGen::RANGE_LENS()
 {
-	out << "\t";
+	START_ARRAY_LINE();
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Emit length of range index. */
-		out << st->outRange.length();
-		if ( !st.last() ) {
-			out << ", ";
-			if ( ++totalStateNum % IALL == 0 )
-				out << "\n\t";
-		}
+		ARRAY_ITEM( st->outRange.length(), ++totalStateNum, st.last() );
 	}
-	out << "\n";
+	END_ARRAY_LINE();
 	return out;
 }
 
 std::ostream &TabCodeGen::TO_STATE_ACTIONS()
 {
-	out << "\t";
+	START_ARRAY_LINE();
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write any eof action. */
-		TO_STATE_ACTION(st);
-		if ( !st.last() ) {
-			out << ", ";
-			if ( ++totalStateNum % IALL == 0 )
-				out << "\n\t";
-		}
+		ARRAY_ITEM( TO_STATE_ACTION(st), ++totalStateNum, st.last() );
 	}
-	out << "\n";
+	END_ARRAY_LINE();
 	return out;
 }
 
 std::ostream &TabCodeGen::FROM_STATE_ACTIONS()
 {
-	out << "\t";
+	START_ARRAY_LINE();
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write any eof action. */
-		FROM_STATE_ACTION(st);
-		if ( !st.last() ) {
-			out << ", ";
-			if ( ++totalStateNum % IALL == 0 )
-				out << "\n\t";
-		}
+		ARRAY_ITEM( FROM_STATE_ACTION(st), ++totalStateNum, st.last() );
 	}
-	out << "\n";
+	END_ARRAY_LINE();
 	return out;
 }
 
 std::ostream &TabCodeGen::EOF_ACTIONS()
 {
-	out << "\t";
+	START_ARRAY_LINE();
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write any eof action. */
-		EOF_ACTION(st);
-		if ( !st.last() ) {
-			out << ", ";
-			if ( ++totalStateNum % IALL == 0 )
-				out << "\n\t";
-		}
+		ARRAY_ITEM( EOF_ACTION(st), ++totalStateNum, st.last() );
 	}
-	out << "\n";
+	END_ARRAY_LINE();
 	return out;
 }
 
 std::ostream &TabCodeGen::COND_KEYS()
 {
-	out << '\t';
+	START_ARRAY_LINE();
 	int totalTrans = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Loop the state's transitions. */
 		for ( StateCondList::Iter sc = st->stateCondList; sc.lte(); sc++ ) {
 			/* Lower key. */
-			out << KEY( sc->lowKey ) << ", ";
-			if ( ++totalTrans % IALL == 0 )
-				out << "\n\t";
-
-			/* Upper key. */
-			out << KEY( sc->highKey ) << ", ";
-			if ( ++totalTrans % IALL == 0 )
-				out << "\n\t";
+			ARRAY_ITEM( KEY( sc->lowKey ), ++totalTrans, false );
+			ARRAY_ITEM( KEY( sc->highKey ), ++totalTrans, false );
 		}
 	}
 
 	/* Output one last number so we don't have to figure out when the last
 	 * entry is and avoid writing a comma. */
-	out << 0 << "\n";
+	ARRAY_ITEM( 0, ++totalTrans, true );
+	END_ARRAY_LINE();
 	return out;
 }
 
 std::ostream &TabCodeGen::COND_SPACES()
 {
-	out << '\t';
+	START_ARRAY_LINE();
 	int totalTrans = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Loop the state's transitions. */
 		for ( StateCondList::Iter sc = st->stateCondList; sc.lte(); sc++ ) {
 			/* Cond Space id. */
-			out << sc->condSpace->condSpaceId << ", ";
-			if ( ++totalTrans % IALL == 0 )
-				out << "\n\t";
+			ARRAY_ITEM( KEY( sc->condSpace->condSpaceId ), ++totalTrans, false );
 		}
 	}
 
 	/* Output one last number so we don't have to figure out when the last
 	 * entry is and avoid writing a comma. */
-	out << 0 << "\n";
+	ARRAY_ITEM( 0, ++totalTrans, true );
+	END_ARRAY_LINE();
 	return out;
 }
 
 std::ostream &TabCodeGen::KEYS()
 {
-	out << '\t';
+	START_ARRAY_LINE();
 	int totalTrans = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Loop the singles. */
 		for ( RedTransList::Iter stel = st->outSingle; stel.lte(); stel++ ) {
-			out << KEY( stel->lowKey ) << ", ";
-			if ( ++totalTrans % IALL == 0 )
-				out << "\n\t";
+			ARRAY_ITEM( KEY( stel->lowKey ), ++totalTrans, false );
 		}
 
 		/* Loop the state's transitions. */
 		for ( RedTransList::Iter rtel = st->outRange; rtel.lte(); rtel++ ) {
 			/* Lower key. */
-			out << KEY( rtel->lowKey ) << ", ";
-			if ( ++totalTrans % IALL == 0 )
-				out << "\n\t";
+			ARRAY_ITEM( KEY( rtel->lowKey ), ++totalTrans, false );
 
 			/* Upper key. */
-			out << KEY( rtel->highKey ) << ", ";
-			if ( ++totalTrans % IALL == 0 )
-				out << "\n\t";
+			ARRAY_ITEM( KEY( rtel->highKey ), ++totalTrans, false );
 		}
 	}
 
 	/* Output one last number so we don't have to figure out when the last
 	 * entry is and avoid writing a comma. */
-	out << 0 << "\n";
+	ARRAY_ITEM( 0, ++totalTrans, true );
+	END_ARRAY_LINE();
 	return out;
 }
 
 std::ostream &TabCodeGen::INDICIES()
 {
 	int totalTrans = 0;
-	out << '\t';
+	START_ARRAY_LINE();
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Walk the singles. */
 		for ( RedTransList::Iter stel = st->outSingle; stel.lte(); stel++ ) {
-			out << stel->value->id << ", ";
-			if ( ++totalTrans % IALL == 0 )
-				out << "\n\t";
+			ARRAY_ITEM( KEY( stel->value->id ), ++totalTrans, false );
 		}
 
 		/* Walk the ranges. */
 		for ( RedTransList::Iter rtel = st->outRange; rtel.lte(); rtel++ ) {
-			out << rtel->value->id << ", ";
-			if ( ++totalTrans % IALL == 0 )
-				out << "\n\t";
+			ARRAY_ITEM( KEY( rtel->value->id ), ++totalTrans, false );
 		}
 
 		/* The state's default index goes next. */
 		if ( st->defTrans != 0 ) {
-			out << st->defTrans->id << ", ";
-			if ( ++totalTrans % IALL == 0 )
-				out << "\n\t";
+			ARRAY_ITEM( KEY( st->defTrans->id ), ++totalTrans, false );
 		}
 	}
 
 	/* Output one last number so we don't have to figure out when the last
 	 * entry is and avoid writing a comma. */
-	out << 0 << "\n";
+	ARRAY_ITEM( 0, ++totalTrans, true );
+	END_ARRAY_LINE();
 	return out;
 }
 
 std::ostream &TabCodeGen::TRANS_TARGS()
 {
 	int totalTrans = 0;
-	out << '\t';
+	START_ARRAY_LINE();
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Walk the singles. */
 		for ( RedTransList::Iter stel = st->outSingle; stel.lte(); stel++ ) {
 			RedTransAp *trans = stel->value;
-			out << trans->targ->id << ", ";
-			if ( ++totalTrans % IALL == 0 )
-				out << "\n\t";
+			ARRAY_ITEM( KEY( trans->targ->id ), ++totalTrans, false );
 		}
 
 		/* Walk the ranges. */
 		for ( RedTransList::Iter rtel = st->outRange; rtel.lte(); rtel++ ) {
 			RedTransAp *trans = rtel->value;
-			out << trans->targ->id << ", ";
-			if ( ++totalTrans % IALL == 0 )
-				out << "\n\t";
+			ARRAY_ITEM( KEY( trans->targ->id ), ++totalTrans, false );
 		}
 
 		/* The state's default target state. */
 		if ( st->defTrans != 0 ) {
 			RedTransAp *trans = st->defTrans;
-			out << trans->targ->id << ", ";
-			if ( ++totalTrans % IALL == 0 )
-				out << "\n\t";
+			ARRAY_ITEM( KEY( trans->targ->id ), ++totalTrans, false );
 		}
 	}
 
 	/* Output one last number so we don't have to figure out when the last
 	 * entry is and avoid writing a comma. */
-	out << 0 << "\n";
+	ARRAY_ITEM( 0, ++totalTrans, true );
+	END_ARRAY_LINE();
 	return out;
 }
 
@@ -477,36 +407,31 @@ std::ostream &TabCodeGen::TRANS_TARGS()
 std::ostream &TabCodeGen::TRANS_ACTIONS()
 {
 	int totalTrans = 0;
-	out << '\t';
+	START_ARRAY_LINE();
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Walk the singles. */
 		for ( RedTransList::Iter stel = st->outSingle; stel.lte(); stel++ ) {
 			RedTransAp *trans = stel->value;
-			TRANS_ACTION( trans ) << ", ";
-			if ( ++totalTrans % IALL == 0 )
-				out << "\n\t";
+			ARRAY_ITEM( TRANS_ACTION( trans ), ++totalTrans, false );
 		}
 
 		/* Walk the ranges. */
 		for ( RedTransList::Iter rtel = st->outRange; rtel.lte(); rtel++ ) {
 			RedTransAp *trans = rtel->value;
-			TRANS_ACTION( trans ) << ", ";
-			if ( ++totalTrans % IALL == 0 )
-				out << "\n\t";
+			ARRAY_ITEM( TRANS_ACTION( trans ), ++totalTrans, false );
 		}
 
 		/* The state's default index goes next. */
 		if ( st->defTrans != 0 ) {
 			RedTransAp *trans = st->defTrans;
-			TRANS_ACTION( trans ) << ", ";
-			if ( ++totalTrans % IALL == 0 )
-				out << "\n\t";
+			ARRAY_ITEM( TRANS_ACTION( trans ), ++totalTrans, false );
 		}
 	}
 
 	/* Output one last number so we don't have to figure out when the last
 	 * entry is and avoid writing a comma. */
-	out << 0 << "\n";
+	ARRAY_ITEM( 0, ++totalTrans, true );
+	END_ARRAY_LINE();
 	return out;
 }
 
@@ -518,19 +443,14 @@ std::ostream &TabCodeGen::TRANS_TARGS_WI()
 		transPtrs[trans->id] = trans;
 
 	/* Keep a count of the num of items in the array written. */
-	out << '\t';
+	START_ARRAY_LINE();
 	int totalStates = 0;
 	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
 		/* Write out the target state. */
 		RedTransAp *trans = transPtrs[t];
-		out << trans->targ->id;
-		if ( t < redFsm->transSet.length()-1 ) {
-			out << ", ";
-			if ( ++totalStates % IALL == 0 )
-				out << "\n\t";
-		}
+		ARRAY_ITEM( trans->targ->id, ++totalStates, ( t >= redFsm->transSet.length()-1 ) );
 	}
-	out << "\n";
+	END_ARRAY_LINE();
 	delete[] transPtrs;
 	return out;
 }
@@ -544,19 +464,14 @@ std::ostream &TabCodeGen::TRANS_ACTIONS_WI()
 		transPtrs[trans->id] = trans;
 
 	/* Keep a count of the num of items in the array written. */
-	out << '\t';
+	START_ARRAY_LINE();
 	int totalAct = 0;
 	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
 		/* Write the function for the transition. */
 		RedTransAp *trans = transPtrs[t];
-		TRANS_ACTION( trans );
-		if ( t < redFsm->transSet.length()-1 ) {
-			out << ", ";
-			if ( ++totalAct % IALL == 0 )
-				out << "\n\t";
-		}
+		ARRAY_ITEM( TRANS_ACTION( trans ), ++totalAct, ( t >= redFsm->transSet.length()-1 ) );
 	}
-	out << "\n";
+	END_ARRAY_LINE();
 	delete[] transPtrs;
 	return out;
 }

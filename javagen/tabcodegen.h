@@ -82,10 +82,10 @@ protected:
 	void RET( ostream &ret, bool inFinish );
 	void BREAK( ostream &ret, int targState );
 
-	virtual std::ostream &TO_STATE_ACTION( RedStateAp *state );
-	virtual std::ostream &FROM_STATE_ACTION( RedStateAp *state );
-	virtual std::ostream &EOF_ACTION( RedStateAp *state );
-	virtual std::ostream &TRANS_ACTION( RedTransAp *trans );
+	virtual int TO_STATE_ACTION( RedStateAp *state );
+	virtual int FROM_STATE_ACTION( RedStateAp *state );
+	virtual int EOF_ACTION( RedStateAp *state );
+	virtual int TRANS_ACTION( RedTransAp *trans );
 	virtual void calcIndexSize();
 	virtual void writeOutEOF();
 };

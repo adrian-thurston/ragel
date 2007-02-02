@@ -79,7 +79,7 @@ protected:
 	string GET_WIDE_KEY();
 	string GET_WIDE_KEY( RedStateAp *state );
 	string TABS( int level );
-	string KEY( Key key );
+	int KEY( Key key );
 	string LDIR_PATH( char *path );
 	void ACTION( ostream &ret, Action *action, int targState, bool inFinish );
 	void CONDITION( ostream &ret, Action *condition );
@@ -160,6 +160,9 @@ protected:
 
 	virtual string PTR_CONST() = 0;
 	virtual ostream &OPEN_ARRAY( string type, string name ) = 0;
+	virtual ostream &START_ARRAY_LINE() = 0;
+	virtual ostream &ARRAY_ITEM( int item, int count, bool last ) = 0;
+	virtual ostream &END_ARRAY_LINE() = 0;
 	virtual ostream &CLOSE_ARRAY() = 0;
 	virtual ostream &STATIC_VAR( string type, string name ) = 0;
 
@@ -198,6 +201,9 @@ public:
 	virtual string POINTER();
 	virtual ostream &SWITCH_DEFAULT();
 	virtual ostream &OPEN_ARRAY( string type, string name );
+	virtual ostream &START_ARRAY_LINE();
+	virtual ostream &ARRAY_ITEM( int item, int count, bool last );
+	virtual ostream &END_ARRAY_LINE();
 	virtual ostream &CLOSE_ARRAY();
 	virtual ostream &STATIC_VAR( string type, string name );
 	virtual string ARR_OFF( string ptr, string offset );
@@ -217,6 +223,9 @@ public:
 	virtual ostream &SWITCH_DEFAULT();
 	virtual ostream &OPEN_ARRAY( string type, string name );
 	virtual ostream &CLOSE_ARRAY();
+	virtual ostream &START_ARRAY_LINE();
+	virtual ostream &ARRAY_ITEM( int item, int count, bool last );
+	virtual ostream &END_ARRAY_LINE();
 	virtual ostream &STATIC_VAR( string type, string name );
 	virtual string ARR_OFF( string ptr, string offset );
 	virtual string CAST( string type );
@@ -227,6 +236,10 @@ public:
 
 class JavaCodeGen : virtual public FsmCodeGen
 {
+private:
+	string array_type;
+	string array_name;
+
 public:
 	JavaCodeGen( ostream &out ) : FsmCodeGen(out) {}
 
@@ -234,6 +247,9 @@ public:
 	virtual string POINTER();
 	virtual ostream &SWITCH_DEFAULT();
 	virtual ostream &OPEN_ARRAY( string type, string name );
+	virtual ostream &START_ARRAY_LINE();
+	virtual ostream &ARRAY_ITEM( int item, int count, bool last );
+	virtual ostream &END_ARRAY_LINE();
 	virtual ostream &CLOSE_ARRAY();
 	virtual ostream &STATIC_VAR( string type, string name );
 	virtual string ARR_OFF( string ptr, string offset );
