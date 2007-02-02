@@ -30,7 +30,8 @@ include version.mk
 
 # Rules.
 all: 
-	@cd common && $(MAKE) && cd ../ragel && $(MAKE) && cd ../rlcodegen && $(MAKE)
+	@cd common && $(MAKE) && cd ../ragel && $(MAKE) && \
+		cd ../rlcodegen && $(MAKE) && cd ../javagen && $(MAKE)
 
 new-version:
 	sed 's/^\(Version:[[:space:]]*\)[0-9.]*$$/\1$(VERSION)/' ragel.spec > spec-new

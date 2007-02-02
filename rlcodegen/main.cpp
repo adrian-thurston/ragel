@@ -42,7 +42,6 @@
 #include "fgotocodegen.h"
 #include "ipgotocodegen.h"
 #include "splitcodegen.h"
-#include "javacodegen.h"
 
 #include "gvdotgen.h"
 
@@ -210,15 +209,9 @@ ostream *openOutput( char *inputFile, char *language )
 		hostLangType = DCode;
 		hostLang = &hostLangD;
 	}
-	else if ( strcmp( language, "Java" ) == 0 ) {
-		hostLangType = JavaCode;
-		hostLang = &hostLangJava;
-	}
-
-	/* Eventually more types will be supported. */
-	if ( hostLangType == JavaCode && codeStyle != GenTables ) {
-		error() << "java: only the table code style -T0 is "
-					"currently supported" << endl;
+	else {
+		error() << PROGNAME " generates code for C and D only, you "
+			"need a diferent code generator for " << language << endl;
 	}
 
 	/* If the output format is code and no output file name is given, then
@@ -232,7 +225,7 @@ ostream *openOutput( char *inputFile, char *language )
 			switch ( hostLangType ) {
 				case CCode: defExtension = ".c"; break;
 				case DCode: defExtension = ".d"; break;
-				case JavaCode: defExtension = ".java"; break;
+				default: break;
 			}
 			outputFileName = fileNameFromStem( inputFile, defExtension );
 		}
@@ -331,16 +324,7 @@ CodeGenData *makeCodeGen( char *sourceFileName, char *fsmName,
 			}
 			break;
 
-		case JavaCode:
-			switch ( codeStyle ) {
-			case GenTables:
-				codeGen = new JavaTabCodeGen(out);
-				break;
-			default:
-				assert(false);
-				break;
-			}
-			break;
+		default: break;
 		}
 	}
 

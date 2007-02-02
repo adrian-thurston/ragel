@@ -27,7 +27,7 @@ LDFLAGS +=
 CC_SRCS = main.cpp gvdotgen.cpp fsmcodegen.cpp \
 	tabcodegen.cpp ftabcodegen.cpp flatcodegen.cpp \
 	fflatcodegen.cpp gotocodegen.cpp fgotocodegen.cpp \
-	ipgotocodegen.cpp splitcodegen.cpp javacodegen.cpp
+	ipgotocodegen.cpp splitcodegen.cpp 
 
 GEN_SRC = xmltags.cpp xmlscan.cpp xmlparse.cpp xmlparse.h
 
