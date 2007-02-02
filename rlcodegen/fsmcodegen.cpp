@@ -30,103 +30,12 @@
 #include <string>
 #include <assert.h>
 
-#include "tabcodegen.h"
-#include "ftabcodegen.h"
-#include "flatcodegen.h"
-#include "fflatcodegen.h"
-#include "gotocodegen.h"
-#include "fgotocodegen.h"
-#include "ipgotocodegen.h"
-#include "splitcodegen.h"
-#include "javacodegen.h"
 
 using std::ostream;
 using std::ostringstream;
 using std::string;
 using std::cerr;
 using std::endl;
-
-CodeGenData *makeCodeGen( char *sourceFileName, char *fsmName, 
-		ostream &out, bool wantComplete )
-{
-	FsmCodeGen *codeGen = 0;
-	switch ( hostLangType ) {
-	case CCode:
-		switch ( codeStyle ) {
-		case GenTables:
-			codeGen = new CTabCodeGen(out);
-			break;
-		case GenFTables:
-			codeGen = new CFTabCodeGen(out);
-			break;
-		case GenFlat:
-			codeGen = new CFlatCodeGen(out);
-			break;
-		case GenFFlat:
-			codeGen = new CFFlatCodeGen(out);
-			break;
-		case GenGoto:
-			codeGen = new CGotoCodeGen(out);
-			break;
-		case GenFGoto:
-			codeGen = new CFGotoCodeGen(out);
-			break;
-		case GenIpGoto:
-			codeGen = new CIpGotoCodeGen(out);
-			break;
-		case GenSplit:
-			codeGen = new CSplitCodeGen(out);
-			break;
-		}
-		break;
-
-	case DCode:
-		switch ( codeStyle ) {
-		case GenTables:
-			codeGen = new DTabCodeGen(out);
-			break;
-		case GenFTables:
-			codeGen = new DFTabCodeGen(out);
-			break;
-		case GenFlat:
-			codeGen = new DFlatCodeGen(out);
-			break;
-		case GenFFlat:
-			codeGen = new DFFlatCodeGen(out);
-			break;
-		case GenGoto:
-			codeGen = new DGotoCodeGen(out);
-			break;
-		case GenFGoto:
-			codeGen = new DFGotoCodeGen(out);
-			break;
-		case GenIpGoto:
-			codeGen = new DIpGotoCodeGen(out);
-			break;
-		case GenSplit:
-			codeGen = new DSplitCodeGen(out);
-			break;
-		}
-		break;
-
-	case JavaCode:
-		switch ( codeStyle ) {
-		case GenTables:
-			codeGen = new JavaTabCodeGen(out);
-			break;
-		default:
-			assert(false);
-			break;
-		}
-		break;
-	}
-
-	codeGen->sourceFileName = sourceFileName;
-	codeGen->fsmName = fsmName;
-	codeGen->wantComplete = wantComplete;
-
-	return codeGen;
-}
 
 
 /* Init code gen with in parameters. */
@@ -930,3 +839,26 @@ void FsmCodeGen::writeStatement( InputLoc &loc, int nargs, char **args )
 		}
 	}
 }
+
+ostream &FsmCodeGen::source_warning( const InputLoc &loc )
+{
+	cerr << sourceFileName << ":" << loc.line << ":" << loc.col << ": warning: ";
+	return cerr;
+}
+
+ostream &FsmCodeGen::source_error( const InputLoc &loc )
+{
+	gblErrorCount += 1;
+	assert( sourceFileName != 0 );
+	cerr << sourceFileName << ":" << loc.line << ":" << loc.col << ": ";
+	return cerr;
+}
+
+void genLineDirective( ostream &out )
+{
+	assert( outputFormat == OutCode );
+	std::streambuf *sbuf = out.rdbuf();
+	output_filter *filter = static_cast<output_filter*>(sbuf);
+	lineDirective( out, filter->fileName, filter->line + 1 );
+}
+

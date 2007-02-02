@@ -20,7 +20,6 @@
  */
 
 #include "xmlparse.h"
-#include "rlcodegen.h"
 #include "common.h"
 #include "gendata.h"
 #include <iostream>
@@ -46,7 +45,7 @@ start:
 	final {
 		/* If we get no input the assumption is that the frontend died and
 		 * emitted an error. */ 
-		gblErrorCount += 1;
+		errCount += 1;
 	};
 
 tag_ragel: tag_ragel_head ragel_def_list host_or_write_list '/' TAG_ragel;
@@ -58,34 +57,16 @@ tag_ragel_head: TAG_ragel
 			error($1->loc) << "tag <ragel> requires a filename attribute" << endl;
 			exit(1);
 		}
-		else
+		else {
 			sourceFileName = fileNameAttr->value;
 
-		Attribute *langAttr = $1->tag->findAttr( "lang" );
-		if ( langAttr == 0 )
-			error($1->loc) << "tag <ragel> requires a lang attribute" << endl;
-		else {
-			if ( strcmp( langAttr->value, "C" ) == 0 ) {
-				hostLangType = CCode;
-				hostLang = &hostLangC;
-			}
-			else if ( strcmp( langAttr->value, "D" ) == 0 ) {
-				hostLangType = DCode;
-				hostLang = &hostLangD;
-			}
-			else if ( strcmp( langAttr->value, "Java" ) == 0 ) {
-				hostLangType = JavaCode;
-				hostLang = &hostLangJava;
+			Attribute *langAttr = $1->tag->findAttr( "lang" );
+			if ( langAttr == 0 )
+				error($1->loc) << "tag <ragel> requires a lang attribute" << endl;
+			else {
+				outStream = openOutput( sourceFileName, langAttr->value );
 			}
 		}
-
-		/* Eventually more types will be supported. */
-		if ( hostLangType == JavaCode && codeStyle != GenTables ) {
-			error() << "java: only the table code style -T0 is "
-						"currently supported" << endl;
-		}
-
-		outStream = openOutput( sourceFileName );
 	};
 
 ragel_def_list: ragel_def_list ragel_def;
@@ -843,24 +824,18 @@ ostream &Parser::warning( const InputLoc &loc )
 	return cerr;
 }
 
-ostream &Parser::error()
-{
-	gblErrorCount += 1;
-	cerr << PROGNAME ": ";
-	return cerr;
-}
-
 ostream &Parser::error( const InputLoc &loc )
 {
-	gblErrorCount += 1;
+	errCount += 1;
 	assert( fileName != 0 );
 	cerr << fileName << ":" << loc.line << ":" << loc.col << ": ";
 	return cerr;
 }
 
+
 ostream &Parser::parser_error( int tokId, Token &token )
 {
-	gblErrorCount += 1;
+	errCount += 1;
 	assert( fileName != 0 );
 	cerr << fileName << ":" << token.loc.line << ":" << token.loc.col;
 	if ( token.tag != 0 ) {

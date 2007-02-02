@@ -20,8 +20,6 @@
  */
 
 #include "gendata.h"
-#include "gvdotgen.h"
-#include "fsmcodegen.h"
 #include <iostream>
 
 using std::cerr;
@@ -616,20 +614,6 @@ void CodeGenData::analyzeMachine()
 	setValueLimits();
 }
 
-ostream &CodeGenData::source_warning( const InputLoc &loc )
-{
-	cerr << sourceFileName << ":" << loc.line << ":" << loc.col << ": warning: ";
-	return cerr;
-}
-
-ostream &CodeGenData::source_error( const InputLoc &loc )
-{
-	gblErrorCount += 1;
-	assert( sourceFileName != 0 );
-	cerr << sourceFileName << ":" << loc.line << ":" << loc.col << ": ";
-	return cerr;
-}
-
 
 
 void lineDirective( ostream &out, char *fileName, int line )
@@ -647,10 +631,3 @@ void lineDirective( ostream &out, char *fileName, int line )
 	}
 }
 
-void genLineDirective( ostream &out )
-{
-	assert( outputFormat == OutCode );
-	std::streambuf *sbuf = out.rdbuf();
-	output_filter *filter = static_cast<output_filter*>(sbuf);
-	lineDirective( out, filter->fileName, filter->line + 1 );
-}

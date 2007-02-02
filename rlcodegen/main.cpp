@@ -33,6 +33,18 @@
 #include "vector.h"
 #include "version.h"
 
+/* Code generators. */
+#include "tabcodegen.h"
+#include "ftabcodegen.h"
+#include "flatcodegen.h"
+#include "fflatcodegen.h"
+#include "gotocodegen.h"
+#include "fgotocodegen.h"
+#include "ipgotocodegen.h"
+#include "splitcodegen.h"
+#include "javacodegen.h"
+
+#include "common.h"
 #include "common.cpp"
 
 using std::istream;
@@ -181,10 +193,32 @@ void escapeLineDirectivePath( std::ostream &out, char *path )
 	}
 }
 
-/* Invoked by the parser, after the source file 
- * name is taken from XML file. */
-ostream *openOutput( char *inputFile )
+/*
+ * Callbacks invoked by the XML data parser.
+ */
+
+/* Invoked by the parser when the root element is opened. */
+ostream *openOutput( char *inputFile, char *language )
 {
+	if ( strcmp( language, "C" ) == 0 ) {
+		hostLangType = CCode;
+		hostLang = &hostLangC;
+	}
+	else if ( strcmp( language, "D" ) == 0 ) {
+		hostLangType = DCode;
+		hostLang = &hostLangD;
+	}
+	else if ( strcmp( language, "Java" ) == 0 ) {
+		hostLangType = JavaCode;
+		hostLang = &hostLangJava;
+	}
+
+	/* Eventually more types will be supported. */
+	if ( hostLangType == JavaCode && codeStyle != GenTables ) {
+		error() << "java: only the table code style -T0 is "
+					"currently supported" << endl;
+	}
+
 	/* If the output format is code and no output file name is given, then
 	 * make a default. */
 	if ( outputFormat == OutCode && outputFileName == 0 ) {
@@ -226,6 +260,91 @@ ostream *openOutput( char *inputFile )
 	}
 	return outStream;
 }
+
+/* Invoked by the parser when a ragel definition is opened. */
+CodeGenData *makeCodeGen( char *sourceFileName, char *fsmName, 
+		ostream &out, bool wantComplete )
+{
+	FsmCodeGen *codeGen = 0;
+	switch ( hostLangType ) {
+	case CCode:
+		switch ( codeStyle ) {
+		case GenTables:
+			codeGen = new CTabCodeGen(out);
+			break;
+		case GenFTables:
+			codeGen = new CFTabCodeGen(out);
+			break;
+		case GenFlat:
+			codeGen = new CFlatCodeGen(out);
+			break;
+		case GenFFlat:
+			codeGen = new CFFlatCodeGen(out);
+			break;
+		case GenGoto:
+			codeGen = new CGotoCodeGen(out);
+			break;
+		case GenFGoto:
+			codeGen = new CFGotoCodeGen(out);
+			break;
+		case GenIpGoto:
+			codeGen = new CIpGotoCodeGen(out);
+			break;
+		case GenSplit:
+			codeGen = new CSplitCodeGen(out);
+			break;
+		}
+		break;
+
+	case DCode:
+		switch ( codeStyle ) {
+		case GenTables:
+			codeGen = new DTabCodeGen(out);
+			break;
+		case GenFTables:
+			codeGen = new DFTabCodeGen(out);
+			break;
+		case GenFlat:
+			codeGen = new DFlatCodeGen(out);
+			break;
+		case GenFFlat:
+			codeGen = new DFFlatCodeGen(out);
+			break;
+		case GenGoto:
+			codeGen = new DGotoCodeGen(out);
+			break;
+		case GenFGoto:
+			codeGen = new DFGotoCodeGen(out);
+			break;
+		case GenIpGoto:
+			codeGen = new DIpGotoCodeGen(out);
+			break;
+		case GenSplit:
+			codeGen = new DSplitCodeGen(out);
+			break;
+		}
+		break;
+
+	case JavaCode:
+		switch ( codeStyle ) {
+		case GenTables:
+			codeGen = new JavaTabCodeGen(out);
+			break;
+		default:
+			assert(false);
+			break;
+		}
+		break;
+	}
+
+	codeGen->sourceFileName = sourceFileName;
+	codeGen->fsmName = fsmName;
+	codeGen->wantComplete = wantComplete;
+
+	return codeGen;
+}
+
+
 
 /* Main, process args and call yyparse to start scanning input. */
 int main(int argc, char **argv)

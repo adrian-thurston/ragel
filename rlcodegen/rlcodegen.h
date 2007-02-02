@@ -72,74 +72,12 @@ extern CodeStyleEnum codeStyle;
 extern bool printPrintables;
 extern bool graphvizDone;
 
-int xml_parse( std::istream &input, char *fileName, 
-		bool outputActive, bool wantComplete );
-
 extern int gblErrorCount;
 extern char machineMain[];
 
 extern int numSplitPartitions;
 
-/* 
- * Error reporting. 
- */
-
-/* Location in an input file. */
-struct InputLoc
-{
-	int line;
-	int col;
-};
-
-struct AttrMarker
-{
-	char *id;
-	int idLen;
-	char *value;
-	int valueLen;
-};
-
-struct Attribute
-{
-	char *id;
-	char *value;
-};
-
-typedef Vector<AttrMarker> AttrMkList;
-typedef Vector<Attribute> AttrList;
-struct XMLTagHashPair;
-
-struct XMLTag
-{
-	enum TagType { Open, Close };
-
-	XMLTag( XMLTagHashPair *tagId, TagType type ) : 
-		tagId(tagId), type(type), 
-		content(0), attrList(0) {}
-	
-	Attribute *findAttr( char *id )
-	{
-		if ( attrList != 0 ) {
-			for ( AttrList::Iter attr = *attrList; attr.lte(); attr++ ) {
-				if ( strcmp( id, attr->id ) == 0 )
-					return attr;
-			}
-		}
-		return 0;
-	}
-
-	XMLTagHashPair *tagId;
-	TagType type;
-
-	/* Content is associtated with closing tags. */
-	char *content;
-
-	/* Attribute lists are associated with opening tags. */
-	AttrList *attrList;
-};
-
 std::ostream &error();
-std::ostream *openOutput( char *inputFile );
 char *fileNameFromStem( char *stemFile, char *suffix );
 
 #endif /* _RLCODEGEN_H */

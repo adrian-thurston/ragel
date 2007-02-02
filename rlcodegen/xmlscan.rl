@@ -22,7 +22,6 @@
 #include <string.h>
 #include "vector.h"
 #include "xmlparse.h"
-#include "rlcodegen.h"
 #include "buffer.h"
 
 using std::istream;
@@ -261,7 +260,7 @@ int xml_parse( std::istream &input, char *fileName,
 	while ( 1 ) {
 		int token = scanner.scan();
 		if ( token == TK_NO_TOKEN ) {
-			cerr << PROGNAME << ": interal error: scanner returned NO_TOKEN" << endl;
+			cerr << "xmlscan: interal error: scanner returned NO_TOKEN" << endl;
 			exit(1);
 		}
 		else if ( token == TK_EOF ) {

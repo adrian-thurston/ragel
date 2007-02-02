@@ -122,9 +122,6 @@ struct CodeGenData
 	void prepareMachine();
 	bool hasBeenPrepared;
 
-	ostream &source_warning(const InputLoc &loc);
-	ostream &source_error(const InputLoc &loc);
-
 	/* The interface to the code generator. */
 	virtual void finishRagelDef() {}
 	virtual void writeStatement( InputLoc &loc, int nargs, char **args ) {}
@@ -133,6 +130,10 @@ struct CodeGenData
 void lineDirective( ostream &out, char *fileName, int line );
 void genLineDirective( ostream &out );
 
+/* These two functions must be implemented by the code generation executable.
+ * The openOutput function is invoked when the root element is opened.  The
+ * makeCodeGen function is invoked when a ragel_def element is opened. */
+std::ostream *openOutput( char *inputFile, char *language );
 CodeGenData *makeCodeGen( char *sourceFileName, 
 		char *fsmName, ostream &out, bool wantComplete );
 

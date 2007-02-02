@@ -35,7 +35,6 @@
 #include "avltree.h"
 #include "avlbasic.h"
 #include "mergesort.h"
-#include "rlcodegen.h"
 #include "sbstmap.h"
 #include "sbstset.h"
 #include "sbsttable.h"
@@ -49,6 +48,13 @@ using std::string;
 struct RedStateAp;
 struct InlineList;
 struct Action;
+
+/* Location in an input file. */
+struct InputLoc
+{
+	int line;
+	int col;
+};
 
 /*
  * Inline code tree
