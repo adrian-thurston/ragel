@@ -84,6 +84,7 @@ struct CodeGenData
 	void initStateList( unsigned long length );
 	void setStartState( unsigned long startState );
 	void addEntryPoint( char *name, unsigned long entryState );
+	void setId( int snum, int id );
 	void setFinal( int snum );
 	void initTransList( int snum, unsigned long length );
 	void newTrans( int snum, int tnum, Key lowKey, Key highKey, 

@@ -1318,7 +1318,7 @@ void ParseData::prepareMachineGen( GraphDictEl *graphDictEl )
 
 	sectionGraph->depthFirstOrdering();
 	sectionGraph->sortStatesByFinal();
-	sectionGraph->setStateNumbers( 1 );
+	sectionGraph->setStateNumbers( 0 );
 }
 
 void ParseData::generateXML( ostream &out )

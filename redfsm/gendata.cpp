@@ -183,6 +183,12 @@ void CodeGenData::finishTransList( int snum )
 	}
 }
 
+void CodeGenData::setId( int snum, int id )
+{
+	RedStateAp *curState = allStates + snum;
+	curState->id = id;
+}
+
 void CodeGenData::setFinal( int snum )
 {
 	RedStateAp *curState = allStates + snum;
