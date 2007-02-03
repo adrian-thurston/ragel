@@ -75,7 +75,7 @@ bool printPrintables = false;
 void usage()
 {
 	cout <<
-"usage: rlcodegen [options] file\n"
+"usage: " PROGNAME " [options] file\n"
 "general:\n"
 "   -h, -H, -?, --help    Print this usage and exit\n"
 "   -v, --version         Print version information and exit\n"
@@ -98,8 +98,9 @@ void usage()
 /* Print version information. */
 void version()
 {
-	cout << "Ragel Code Generator version " VERSION << " " PUBDATE << endl <<
-			"Copyright (c) 2001-2006 by Adrian Thurston" << endl;
+	cout << "Ragel Code Generator for C, C++, Objective-C, D and Graphviz" << endl <<
+			"Version " VERSION << ", " PUBDATE << endl <<
+			"Copyright (c) 2001-2007 by Adrian Thurston" << endl;
 }
 
 /* Scans a string looking for the file extension. If there is a file

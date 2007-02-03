@@ -38,7 +38,6 @@ using std::endl;
 
 void genLineDirective( ostream &out )
 {
-	assert( outputFormat == OutCode );
 	std::streambuf *sbuf = out.rdbuf();
 	output_filter *filter = static_cast<output_filter*>(sbuf);
 	lineDirective( out, filter->fileName, filter->line + 1 );
@@ -1478,23 +1477,13 @@ void JavaTabCodeGen::prepareMachine()
 	/* Order the states. */
 	redFsm->depthFirstOrdering();
 
-	if ( codeStyle == GenGoto || codeStyle == GenFGoto || 
-			codeStyle == GenIpGoto || codeStyle == GenSplit )
-	{
-		/* For goto driven machines we can keep the original depth
-		 * first ordering because it's ok if the state ids are not
-		 * sequential. Split the the ids by final state status. */
-		redFsm->sortStateIdsByFinal();
-	}
-	else {
-		/* For table driven machines the location of the state is used to
-		 * identify it so the states must be sorted by their final ids.
-		 * Though having a deterministic ordering is important,
-		 * specifically preserving the depth first ordering is not because
-		 * states are stored in tables. */
-		redFsm->sortStatesByFinal();
-		redFsm->sequentialStateIds();
-	}
+	/* For table driven machines the location of the state is used to
+	 * identify it so the states must be sorted by their final ids.
+	 * Though having a deterministic ordering is important,
+	 * specifically preserving the depth first ordering is not because
+	 * states are stored in tables. */
+	redFsm->sortStatesByFinal();
+	redFsm->sequentialStateIds();
 
 	/* Find the first final state. This is the final state with the lowest
 	 * id.  */
@@ -1504,21 +1493,12 @@ void JavaTabCodeGen::prepareMachine()
 	redFsm->chooseDefaultSpan();
 		
 	/* Maybe do flat expand, otherwise choose single. */
-	if ( codeStyle == GenFlat || codeStyle == GenFFlat )
-		redFsm->makeFlat();
-	else
-		redFsm->chooseSingle();
+	redFsm->chooseSingle();
 
 	/* If any errors have occured in the input file then don't write anything. */
 	if ( gblErrorCount > 0 )
 		return;
 	
-	if ( codeStyle == GenSplit )
-		redFsm->partitionFsm( numSplitPartitions );
-
-	if ( codeStyle == GenIpGoto || codeStyle == GenSplit )
-		redFsm->setInTrans();
-
 	/* Anlayze Machine will find the final action reference counts, among
 	 * other things. We will use these in reporting the usage
 	 * of fsm directives in action code. */
@@ -1530,64 +1510,61 @@ void JavaTabCodeGen::prepareMachine()
 
 void JavaTabCodeGen::finishRagelDef()
 {
-	assert( outputFormat == OutCode );
 	prepareMachine();
 }
 
 void JavaTabCodeGen::writeStatement( InputLoc &loc, int nargs, char **args )
 {
-	if ( outputFormat == OutCode ) {
-		/* Force a newline. */
-		out << "\n";
-		genLineDirective( out );
+	/* Force a newline. */
+	out << "\n";
+	genLineDirective( out );
 
-		if ( strcmp( args[0], "data" ) == 0 ) {
-			for ( int i = 1; i < nargs; i++ ) {
-				if ( strcmp( args[i], "noerror" ) == 0 )
-					writeErr = false;
-				else if ( strcmp( args[i], "noprefix" ) == 0 )
-					dataPrefix = false;
-				else if ( strcmp( args[i], "nofinal" ) == 0 )
-					writeFirstFinal = false;
-				else {
-					source_warning(loc) << "unrecognized write option \"" << 
-							args[i] << "\"" << endl;
-				}
-			}
-			writeOutData();
-		}
-		else if ( strcmp( args[0], "init" ) == 0 ) {
-			for ( int i = 1; i < nargs; i++ ) {
+	if ( strcmp( args[0], "data" ) == 0 ) {
+		for ( int i = 1; i < nargs; i++ ) {
+			if ( strcmp( args[i], "noerror" ) == 0 )
+				writeErr = false;
+			else if ( strcmp( args[i], "noprefix" ) == 0 )
+				dataPrefix = false;
+			else if ( strcmp( args[i], "nofinal" ) == 0 )
+				writeFirstFinal = false;
+			else {
 				source_warning(loc) << "unrecognized write option \"" << 
 						args[i] << "\"" << endl;
 			}
-			writeOutInit();
 		}
-		else if ( strcmp( args[0], "exec" ) == 0 ) {
-			for ( int i = 1; i < nargs; i++ ) {
-				if ( strcmp( args[i], "noend" ) == 0 )
-					hasEnd = false;
-				else {
-					source_warning(loc) << "unrecognized write option \"" << 
-							args[i] << "\"" << endl;
-				}
-			}
-
-			/* Must set labels immediately before writing because we may depend
-			 * on the noend write option. */
-			setLabelsNeeded();
-			writeOutExec();
+		writeOutData();
+	}
+	else if ( strcmp( args[0], "init" ) == 0 ) {
+		for ( int i = 1; i < nargs; i++ ) {
+			source_warning(loc) << "unrecognized write option \"" << 
+					args[i] << "\"" << endl;
 		}
-		else if ( strcmp( args[0], "eof" ) == 0 ) {
-			for ( int i = 1; i < nargs; i++ ) {
+		writeOutInit();
+	}
+	else if ( strcmp( args[0], "exec" ) == 0 ) {
+		for ( int i = 1; i < nargs; i++ ) {
+			if ( strcmp( args[i], "noend" ) == 0 )
+				hasEnd = false;
+			else {
 				source_warning(loc) << "unrecognized write option \"" << 
 						args[i] << "\"" << endl;
 			}
-			writeOutEOF();
 		}
-		else {
-			/* EMIT An error here. */
+
+		/* Must set labels immediately before writing because we may depend
+		 * on the noend write option. */
+		setLabelsNeeded();
+		writeOutExec();
+	}
+	else if ( strcmp( args[0], "eof" ) == 0 ) {
+		for ( int i = 1; i < nargs; i++ ) {
+			source_warning(loc) << "unrecognized write option \"" << 
+					args[i] << "\"" << endl;
 		}
+		writeOutEOF();
+	}
+	else {
+		/* EMIT An error here. */
 	}
 }
 

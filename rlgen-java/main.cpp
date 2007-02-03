@@ -43,10 +43,6 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-/* Target language and output style. */
-OutputFormat outputFormat = OutCode;
-CodeStyleEnum codeStyle = GenTables;
-
 /* Io globals. */
 istream *inStream = 0;
 ostream *outStream = 0;
@@ -63,31 +59,20 @@ bool printPrintables = false;
 void usage()
 {
 	cout <<
-"usage: rlcodegen-java [options] file\n"
+"usage: " PROGNAME " [options] file\n"
 "general:\n"
 "   -h, -H, -?, --help    Print this usage and exit\n"
 "   -v, --version         Print version information and exit\n"
 "   -o <file>             Write output to <file>\n"
-"output:\n"
-"   -V                    Generate a Graphviz dotfile instead of code\n"
-"   -p                    Print printable characters in Graphviz output\n"
-"generated code style:\n"
-"   -T0                   Table driven FSM (default)\n"
-"   -T1                   Faster table driven FSM\n"
-"   -F0                   Flat table driven FSM\n"
-"   -F1                   Faster flat table-driven FSM\n"
-"   -G0                   Goto-driven FSM\n"
-"   -G1                   Faster goto-driven FSM\n"
-"   -G2                   Really fast goto-driven FSM\n"
-"   -P<N>                 N-Way Split really fast goto-driven FSM\n"
 	;	
 }
 
 /* Print version information. */
 void version()
 {
-	cout << "Ragel Code Generator version " VERSION << " " PUBDATE << endl <<
-			"Copyright (c) 2001-2006 by Adrian Thurston" << endl;
+	cout << "Ragel Code Generator for Java" << endl <<
+			"Version " VERSION << ", " PUBDATE << endl <<
+			"Copyright (c) 2001-2007 by Adrian Thurston" << endl;
 }
 
 /* Scans a string looking for the file extension. If there is a file
@@ -187,28 +172,17 @@ void escapeLineDirectivePath( std::ostream &out, char *path )
 /* Invoked by the parser when the root element is opened. */
 ostream *openOutput( char *inputFile, char *language )
 {
-	if ( strcmp( language, "C" ) == 0 ) {
-		hostLangType = CCode;
-		hostLang = &hostLangC;
-	}
-	else if ( strcmp( language, "D" ) == 0 ) {
-		hostLangType = DCode;
-		hostLang = &hostLangD;
-	}
-	else if ( strcmp( language, "Java" ) == 0 ) {
+	if ( strcmp( language, "Java" ) == 0 ) {
 		hostLangType = JavaCode;
 		hostLang = &hostLangJava;
 	}
-
-	/* Eventually more types will be supported. */
-	if ( hostLangType == JavaCode && codeStyle != GenTables ) {
-		error() << "java: only the table code style -T0 is "
-					"currently supported" << endl;
+	else {
+		error() << "this code genreator is for Java only" << endl;
 	}
 
 	/* If the output format is code and no output file name is given, then
 	 * make a default. */
-	if ( outputFormat == OutCode && outputFileName == 0 ) {
+	if ( outputFileName == 0 ) {
 		char *ext = findFileExtension( inputFile );
 		if ( ext != 0 && strcmp( ext, ".rh" ) == 0 )
 			outputFileName = fileNameFromStem( inputFile, ".h" );
@@ -283,56 +257,6 @@ int main(int argc, char **argv)
 				}
 				break;
 
-			/* Output formats. */
-			case 'V':
-				outputFormat = OutGraphvizDot;
-				break;
-
-			case 'p':
-				printPrintables = true;
-				break;
-
-			/* Code style. */
-			case 'T':
-				if ( pc.parameterArg[0] == '0' )
-					codeStyle = GenTables;
-				else if ( pc.parameterArg[0] == '1' )
-					codeStyle = GenFTables;
-				else {
-					error() << "-T" << pc.parameterArg[0] << 
-							" is an invalid argument" << endl;
-					exit(1);
-				}
-				break;
-			case 'F':
-				if ( pc.parameterArg[0] == '0' )
-					codeStyle = GenFlat;
-				else if ( pc.parameterArg[0] == '1' )
-					codeStyle = GenFFlat;
-				else {
-					error() << "-F" << pc.parameterArg[0] << 
-							" is an invalid argument" << endl;
-					exit(1);
-				}
-				break;
-			case 'G':
-				if ( pc.parameterArg[0] == '0' )
-					codeStyle = GenGoto;
-				else if ( pc.parameterArg[0] == '1' )
-					codeStyle = GenFGoto;
-				else if ( pc.parameterArg[0] == '2' )
-					codeStyle = GenIpGoto;
-				else {
-					error() << "-G" << pc.parameterArg[0] << 
-							" is an invalid argument" << endl;
-					exit(1);
-				}
-				break;
-			case 'P':
-				codeStyle = GenSplit;
-				numSplitPartitions = atoi( pc.parameterArg );
-				break;
-
 			/* Version and help. */
 			case 'v':
 				version();
@@ -395,8 +319,8 @@ int main(int argc, char **argv)
 	if ( gblErrorCount > 0 )
 		exit(1);
 
-	bool wantComplete = outputFormat != OutGraphvizDot;
-	bool outputActive = outputFormat == OutCode;
+	bool wantComplete = true;
+	bool outputActive = true;
 
 	/* Parse the input! */
 	xml_parse( *inStream, xmlInputFileName, outputActive, wantComplete );

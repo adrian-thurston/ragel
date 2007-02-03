@@ -29,27 +29,7 @@
 #include "vector.h"
 #include "config.h"
 
-#define PROGNAME "rlcodegen"
-
-/* Target language. */
-enum OutputFormat
-{
-	OutCode,
-	OutGraphvizDot
-};
-
-/* Target output style. */
-enum CodeStyleEnum
-{
-	GenTables,
-	GenFTables,
-	GenFlat,
-	GenFFlat,
-	GenGoto,
-	GenFGoto,
-	GenIpGoto,
-	GenSplit
-};
+#define PROGNAME "rlgen-java"
 
 /* Filter on the output stream that keeps track of the number of lines
  * output. */
@@ -64,18 +44,9 @@ public:
 	char *fileName;
 	int line;
 };
-	
-extern OutputFormat outputFormat;
-extern CodeStyleEnum codeStyle;
-
-/* IO filenames and stream. */
-extern bool printPrintables;
-extern bool graphvizDone;
 
 extern int gblErrorCount;
 extern char machineMain[];
-
-extern int numSplitPartitions;
 
 std::ostream &error();
 char *fileNameFromStem( char *stemFile, char *suffix );
