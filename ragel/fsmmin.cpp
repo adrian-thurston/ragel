@@ -407,7 +407,7 @@ bool FsmAp::markRound( MarkIndex &markIndex )
 void FsmAp::minimizeStable()
 {
 	/* Set the state numbers. */
-	setStateNumbers();
+	setStateNumbers( 0 );
 
 	/* This keeps track of which pairs have been marked. */
 	MarkIndex markIndex( stateList.length() );

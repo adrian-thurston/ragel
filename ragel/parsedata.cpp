@@ -1308,6 +1308,17 @@ void ParseData::prepareMachineGen( GraphDictEl *graphDictEl )
 
 	/* Depends on the graph analysis. */
 	setLongestMatchData( sectionGraph );
+
+	/* State numbers need to be assigned such that all final states have a
+	 * larger state id number than all non-final states. This enables the
+	 * first_final mechanism to function correctly. We also want states to be
+	 * ordered in a predictable fashion. So we first apply a depth-first
+	 * search, then do a stable sort by final state status, then assign
+	 * numbers. */
+
+	sectionGraph->depthFirstOrdering();
+	sectionGraph->sortStatesByFinal();
+	sectionGraph->setStateNumbers( 1 );
 }
 
 void ParseData::generateXML( ostream &out )

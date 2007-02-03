@@ -1,5 +1,5 @@
 /*
- *  Copyright 2001 Adrian Thurston <thurston@cs.queensu.ca>
+ *  Copyright 2001-2007 Adrian Thurston <thurston@cs.queensu.ca>
  */
 
 /*  This file is part of Ragel.
@@ -414,14 +414,6 @@ void FsmAp::copyInEntryPoints( FsmAp *other )
 		entryPoints.insertMulti( en->key, en->value );
 }
 
-void FsmAp::setStateNumbers()
-{
-	int curNum = 0;
-	StateList::Iter state = stateList;
-	for ( ; state.lte(); state++ )
-		state->alg.stateNum = curNum++;
-}
-
 
 void FsmAp::unsetAllFinStates()
 {
@@ -483,3 +475,68 @@ void FsmAp::verifyNoDeadEndStates()
 		st->stateBits &= ~ SB_ISMARKED;
 	}
 }
+
+void FsmAp::depthFirstOrdering( StateAp *state )
+{
+	/* Nothing to do if the state is already on the list. */
+	if ( state->stateBits & SB_ONLIST )
+		return;
+
+	/* Doing depth first, put state on the list. */
+	state->stateBits |= SB_ONLIST;
+	stateList.append( state );
+	
+	/* Recurse on everything ranges. */
+	for ( TransList::Iter tel = state->outList; tel.lte(); tel++ ) {
+		if ( tel->toState != 0 )
+			depthFirstOrdering( tel->toState );
+	}
+}
+
+/* Ordering states by transition connections. */
+void FsmAp::depthFirstOrdering()
+{
+	/* Init on state list flags. */
+	for ( StateList::Iter st = stateList; st.lte(); st++ )
+		st->stateBits &= ~SB_ONLIST;
+	
+	/* Clear out the state list, we will rebuild it. */
+	int stateListLen = stateList.length();
+	stateList.abandon();
+
+	/* Add back to the state list from the start state and all other entry
+	 * points. */
+	depthFirstOrdering( startState );
+	for ( EntryMap::Iter en = entryPoints; en.lte(); en++ )
+		depthFirstOrdering( en->value );
+	
+	/* Make sure we put everything back on. */
+	assert( stateListLen == stateList.length() );
+}
+
+/* Stable sort the states by final state status. */
+void FsmAp::sortStatesByFinal()
+{
+	/* Move forward through the list and throw final states onto the end. */
+	StateAp *state = 0;
+	StateAp *next = stateList.head;
+	StateAp *last = stateList.tail;
+	while ( state != last ) {
+		/* Move forward and load up the next. */
+		state = next;
+		next = state->next;
+
+		/* Throw to the end? */
+		if ( state->isFinState() ) {
+			stateList.detach( state );
+			stateList.append( state );
+		}
+	}
+}
+
+void FsmAp::setStateNumbers( int base )
+{
+	for ( StateList::Iter state = stateList; state.lte(); state++ )
+		state->alg.stateNum = base++;
+}
+

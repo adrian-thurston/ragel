@@ -583,8 +583,6 @@ void XMLCodeGen::writeEntryPoints()
 
 void XMLCodeGen::writeMachine()
 {
-	fsm->setStateNumbers();
-
 	/* Open the machine. */
 	out << "  <machine>\n"; 
 	

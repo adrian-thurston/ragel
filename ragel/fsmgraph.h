@@ -1,5 +1,5 @@
 /*
- *  Copyright 2001-2004 Adrian Thurston <thurston@cs.queensu.ca>
+ *  Copyright 2001-2007 Adrian Thurston <thurston@cs.queensu.ca>
  */
 
 /*  This file is part of Ragel.
@@ -44,6 +44,7 @@
 #define SB_BOTH       0x03
 #define SB_ISFINAL    0x04
 #define SB_ISMARKED   0x08
+#define SB_ONLIST     0x10
 
 struct TransAp;
 struct StateAp;
@@ -1261,8 +1262,13 @@ struct FsmAp
 	 * copied into this machine. */
 	void copyInEntryPoints( FsmAp *other );
 
-	/* Set State numbers starting at 0. */
-	void setStateNumbers();
+	/* Ordering states. */
+	void depthFirstOrdering( StateAp *state );
+	void depthFirstOrdering();
+	void sortStatesByFinal();
+
+	/* Set sqequential state numbers starting at 0. */
+	void setStateNumbers( int base );
 
 	/* Unset all final states. */
 	void unsetAllFinStates();
