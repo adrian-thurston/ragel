@@ -1363,6 +1363,7 @@ void writeLanguage( std::ostream &out )
 		case CCode:    out << "C"; break;
 		case DCode:    out << "D"; break;
 		case JavaCode: out << "Java"; break;
+		case RubyCode: out << "Ruby"; break;
 	}
 	out << "\"";
 	

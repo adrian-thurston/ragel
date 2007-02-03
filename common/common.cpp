@@ -55,9 +55,18 @@ HostType hostTypesJava[] =
 	{ "int",      0,  true,   INT_MIN,   INT_MAX,     4 },
 };
 
+HostType hostTypesRuby[] = 
+{
+	{ "byte",     0,  true,   CHAR_MIN,  CHAR_MAX,    1 },
+	{ "short",    0,  true,   SHRT_MIN,  SHRT_MAX,    2 },
+	{ "char",     0,  false,  0,         USHRT_MAX,   2 },
+	{ "int",      0,  true,   INT_MIN,   INT_MAX,     4 },
+};
+
 HostLang hostLangC =    { hostTypesC,    8, hostTypesC+0,    true };
 HostLang hostLangD =    { hostTypesD,    9, hostTypesD+2,    true };
 HostLang hostLangJava = { hostTypesJava, 4, hostTypesJava+2, false };
+HostLang hostLangRuby = { hostTypesRuby, 4, hostTypesRuby+2, false };
 
 HostLang *hostLang = &hostLangC;
 HostLangType hostLangType = CCode;

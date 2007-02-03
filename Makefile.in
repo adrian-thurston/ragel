@@ -19,7 +19,7 @@
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
 
 
-BUILD_SUBDIRS = common ragel redfsm rlcodegen rlgen-java
+BUILD_SUBDIRS = common ragel redfsm rlcodegen rlgen-java rlgen-ruby
 ALL_SUBDIRS = $(BUILD_SUBDIRS) test examples doc
 
 #*************************************

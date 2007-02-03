@@ -77,6 +77,7 @@ void usage()
 "   -C                   The host language is C, C++, Obj-C or Obj-C++ (default)\n"
 "   -D                   The host language is D\n"
 "   -J                   The host language is Java\n"
+"   -R                   The host language is Ruby\n"
 	;	
 }
 
@@ -210,6 +211,10 @@ int main(int argc, char **argv)
 			case 'J':
 				hostLangType = JavaCode;
 				hostLang = &hostLangJava;
+				break;
+			case 'R':
+				hostLangType = RubyCode;
+				hostLang = &hostLangRuby;
 				break;
 
 			/* Version and help. */
