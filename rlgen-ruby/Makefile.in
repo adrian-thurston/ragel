@@ -24,7 +24,7 @@ DEFS +=
 CFLAGS += -g -Wall
 LDFLAGS +=
 
-CC_SRCS = main.cpp javacodegen.cpp
+CC_SRCS = main.cpp rubycodegen.cpp
 
 LIBS = ../common/common.a ../redfsm/redfsm.a
 
@@ -44,9 +44,9 @@ DEPS = $(CC_SRCS:%.cpp=.%.d)
 include ../version.mk
 
 # Rules.
-all: rlgen-java
+all: rlgen-ruby
 
-rlgen-java: $(LIBS) $(OBJS)
+rlgen-ruby: $(LIBS) $(OBJS)
 	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
 
 %.o: %.cpp
@@ -57,10 +57,10 @@ distclean: clean
 	rm -f Makefile
 
 clean:
-	rm -f tags .*.d *.o rlgen-java
+	rm -f tags .*.d *.o rlgen-ruby
 
 install: all
 	install -d $(PREFIX)/bin
-	install -s rlgen-java $(PREFIX)/bin/rlgen-java
+	install -s rlgen-ruby $(PREFIX)/bin/rlgen-ruby
 
 -include $(DEPS)
