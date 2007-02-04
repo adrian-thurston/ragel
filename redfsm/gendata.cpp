@@ -123,6 +123,9 @@ void CodeGenData::newTrans( int snum, int tnum, Key lowKey,
 	RedStateAp *curState = allStates + snum;
 	RedTransList &destRange = curState->outRange;
 
+	if ( curState == redFsm->errState )
+		return;
+
 	/* Make the new transitions. */
 	RedStateAp *targState = targ >= 0 ? (allStates + targ) : 
 			wantComplete ? redFsm->getErrorState() : 0;
@@ -171,6 +174,9 @@ void CodeGenData::finishTransList( int snum )
 	/* Get the current state and range. */
 	RedStateAp *curState = allStates + snum;
 	RedTransList &destRange = curState->outRange;
+
+	if ( curState == redFsm->errState )
+		return;
 
 	/* If building a complete machine we may need filler on the end. */
 	if ( wantComplete ) {
