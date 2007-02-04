@@ -22,33 +22,12 @@
 #ifndef _RLGEN_JAVA_H
 #define _RLGEN_JAVA_H
 
-#include <stdio.h>
 #include <iostream>
-#include <fstream>
-#include "avltree.h"
-#include "vector.h"
 #include "config.h"
 
 #define PROGNAME "rlgen-java"
 
-/* Filter on the output stream that keeps track of the number of lines
- * output. */
-class output_filter : public std::filebuf
-{
-public:
-	output_filter( char *fileName ) : fileName(fileName), line(1) { }
-
-	virtual int sync();
-	virtual std::streamsize xsputn(const char* s, std::streamsize n);
-
-	char *fileName;
-	int line;
-};
-
 extern int gblErrorCount;
-extern char machineMain[];
-
 std::ostream &error();
-char *fileNameFromStem( char *stemFile, char *suffix );
 
 #endif /* _RLGEN_JAVA_H */

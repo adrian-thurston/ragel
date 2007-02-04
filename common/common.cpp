@@ -21,6 +21,7 @@
 
 #include "pcheck.h"
 #include "common.h"
+#include <assert.h>
 
 HostType hostTypesC[] =
 {
@@ -198,6 +199,76 @@ bool ParamCheck::check()
 	argOffset += 1;
 	state = invalid;
 	return true;
+}
+
+/* Counts newlines before sending sync. */
+int output_filter::sync( )
+{
+	line += 1;
+	return std::filebuf::sync();
+}
+
+/* Counts newlines before sending data out to file. */
+std::streamsize output_filter::xsputn( const char *s, std::streamsize n )
+{
+	for ( int i = 0; i < n; i++ ) {
+		if ( s[i] == '\n' )
+			line += 1;
+	}
+	return std::filebuf::xsputn( s, n );
+}
+
+/* Scans a string looking for the file extension. If there is a file
+ * extension then pointer returned points to inside the string
+ * passed in. Otherwise returns null. */
+char *findFileExtension( char *stemFile )
+{
+	char *ppos = stemFile + strlen(stemFile) - 1;
+
+	/* Scan backwards from the end looking for the first dot.
+	 * If we encounter a '/' before the first dot, then stop the scan. */
+	while ( 1 ) {
+		/* If we found a dot or got to the beginning of the string then
+		 * we are done. */
+		if ( ppos == stemFile || *ppos == '.' )
+			break;
+
+		/* If we hit a / then there is no extension. Done. */
+		if ( *ppos == '/' ) {
+			ppos = stemFile;
+			break;
+		}
+		ppos--;
+	} 
+
+	/* If we got to the front of the string then bail we 
+	 * did not find an extension  */
+	if ( ppos == stemFile )
+		ppos = 0;
+
+	return ppos;
+}
+
+/* Make a file name from a stem. Removes the old filename suffix and
+ * replaces it with a new one. Returns a newed up string. */
+char *fileNameFromStem( char *stemFile, char *suffix )
+{
+	int len = strlen( stemFile );
+	assert( len > 0 );
+
+	/* Get the extension. */
+	char *ppos = findFileExtension( stemFile );
+
+	/* If an extension was found, then shorten what we think the len is. */
+	if ( ppos != 0 )
+		len = ppos - stemFile;
+
+	/* Make the return string from the stem and the suffix. */
+	char *retVal = new char[ len + strlen( suffix ) + 1 ];
+	strncpy( retVal, stemFile, len );
+	strcpy( retVal + len, suffix );
+
+	return retVal;
 }
 
 

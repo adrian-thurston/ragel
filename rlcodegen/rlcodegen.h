@@ -24,7 +24,6 @@
 
 #include <stdio.h>
 #include <iostream>
-#include <fstream>
 #include "avltree.h"
 #include "vector.h"
 #include "config.h"
@@ -51,20 +50,6 @@ enum CodeStyleEnum
 	GenSplit
 };
 
-/* Filter on the output stream that keeps track of the number of lines
- * output. */
-class output_filter : public std::filebuf
-{
-public:
-	output_filter( char *fileName ) : fileName(fileName), line(1) { }
-
-	virtual int sync();
-	virtual std::streamsize xsputn(const char* s, std::streamsize n);
-
-	char *fileName;
-	int line;
-};
-	
 extern OutputFormat outputFormat;
 extern CodeStyleEnum codeStyle;
 
@@ -73,11 +58,8 @@ extern bool printPrintables;
 extern bool graphvizDone;
 
 extern int gblErrorCount;
-extern char machineMain[];
-
 extern int numSplitPartitions;
 
 std::ostream &error();
-char *fileNameFromStem( char *stemFile, char *suffix );
 
 #endif /* _RLCODEGEN_H */
