@@ -186,15 +186,8 @@ ostream *openOutput( char *inputFile, char *language )
 		char *ext = findFileExtension( inputFile );
 		if ( ext != 0 && strcmp( ext, ".rh" ) == 0 )
 			outputFileName = fileNameFromStem( inputFile, ".h" );
-		else {
-			char *defExtension = 0;
-			switch ( hostLangType ) {
-				case CCode: defExtension = ".c"; break;
-				case DCode: defExtension = ".d"; break;
-				case JavaCode: defExtension = ".java"; break;
-			}
-			outputFileName = fileNameFromStem( inputFile, defExtension );
-		}
+		else
+			outputFileName = fileNameFromStem( inputFile, ".rb" );
 	}
 
 	/* Make sure we are not writing to the same file as the input file. */
