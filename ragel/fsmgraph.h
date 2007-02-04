@@ -971,6 +971,11 @@ struct FsmAp
 	/* The start state. */
 	StateAp *startState;
 
+	/* Error state, possibly created only when the final machine has been
+	 * created and the XML machine is about to be written. No transitions
+	 * point to this state. */
+	StateAp *errState;
+
 	/* The set of final states. */
 	StateSet finStateSet;
 
@@ -1369,6 +1374,12 @@ struct FsmAp
 	/* Merge neighboring transitions go to the same state and have the same
 	 * transitions data. */
 	void compressTransitions();
+
+	/* Returns true if there is a transtion (either explicit or by a gap) to
+	 * the error state. */
+	bool checkErrTrans( StateAp *state, TransAp *trans );
+	bool checkErrTransFinish( StateAp *state );
+	bool hasErrorTrans();
 };
 
 

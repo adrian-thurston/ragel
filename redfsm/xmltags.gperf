@@ -36,6 +36,7 @@ trans_list, TAG_trans_list
 t, TAG_t
 machine, TAG_machine
 start_state, TAG_start_state
+error_state, TAG_error_state
 action_list, TAG_action_list
 action, TAG_action
 action_table_list, TAG_action_table_list

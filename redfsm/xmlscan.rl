@@ -313,8 +313,9 @@ int xml_parse( std::istream &input, char *fileName,
 					case TAG_call: case TAG_next:
 					case TAG_entry: case TAG_set_tokend:
 					case TAG_set_act: case TAG_start_state:
-					case TAG_state_actions: case TAG_action_table:
-					case TAG_cond_space: case TAG_c:
+					case TAG_error_state: case TAG_state_actions: 
+					case TAG_action_table: case TAG_cond_space: 
+					case TAG_c:
 						tag->content = new char[scanner.buffer.length+1];
 						memcpy( tag->content, scanner.buffer.data,
 								scanner.buffer.length );

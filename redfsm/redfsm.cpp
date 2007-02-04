@@ -491,11 +491,9 @@ RedTransAp *RedFsmAp::getErrorTrans( )
 
 RedStateAp *RedFsmAp::getErrorState()
 {
-	/* Check if we need to init the error trans. */
-	if ( errState == 0 ) {
-		errState = new RedStateAp();
-		stateList.append( errState );
-	}
+	/* Something went wrong. An error state is needed but one was not supplied
+	 * by the frontend. */
+	assert( errState != 0 );
 	return errState;
 }
 

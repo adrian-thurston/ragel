@@ -59,6 +59,7 @@ struct CodeGenData
 	RedStateAp *allStates;
 	NameInst **nameIndex;
 	int startState;
+	int errState;
 	ActionList actionList;
 	ConditionList conditionList;
 	CondSpaceList condSpaceList;
@@ -83,6 +84,7 @@ struct CodeGenData
 	void initActionTableList( unsigned long length );
 	void initStateList( unsigned long length );
 	void setStartState( unsigned long startState );
+	void setErrorState( unsigned long errState );
 	void addEntryPoint( char *name, unsigned long entryState );
 	void setId( int snum, int id );
 	void setFinal( int snum );

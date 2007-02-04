@@ -220,6 +220,7 @@ machine_item_list: machine_item_list machine_item;
 machine_item_list: ;
 
 machine_item: tag_start_state;
+machine_item: tag_error_state;
 machine_item: tag_entry_points;
 machine_item: tag_state_list;
 machine_item: tag_action_list;
@@ -234,6 +235,12 @@ tag_start_state: TAG_start_state '/' TAG_start_state
 	final {
 		unsigned long startState = strtoul( $3->tag->content, 0, 10 );
 		cgd->setStartState( startState );
+	};
+
+tag_error_state: TAG_error_state '/' TAG_error_state
+	final {
+		unsigned long errorState = strtoul( $3->tag->content, 0, 10 );
+		cgd->setErrorState( errorState );
 	};
 
 tag_entry_points: TAG_entry_points entry_point_list '/' TAG_entry_points

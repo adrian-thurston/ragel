@@ -46,6 +46,7 @@ FsmAp::FsmAp()
 :
 	/* No start state. */
 	startState(0),
+	errState(0),
 
 	/* Misfit accounting is a switch, turned on only at specific times. It
 	 * controls what happens when states have no way in from the outside
@@ -65,6 +66,7 @@ FsmAp::FsmAp( const FsmAp &graph )
 	 * pointers will be resolved later. */
 	entryPoints(graph.entryPoints),
 	startState(graph.startState),
+	errState(0),
 
 	/* Will be filled by copy. */
 	finStateSet(),
@@ -509,6 +511,8 @@ void FsmAp::depthFirstOrdering()
 	depthFirstOrdering( startState );
 	for ( EntryMap::Iter en = entryPoints; en.lte(); en++ )
 		depthFirstOrdering( en->value );
+	if ( errState != 0 )
+		depthFirstOrdering( errState );
 	
 	/* Make sure we put everything back on. */
 	assert( stateListLen == stateList.length() );
@@ -540,3 +544,55 @@ void FsmAp::setStateNumbers( int base )
 		state->alg.stateNum = base++;
 }
 
+
+bool FsmAp::checkErrTrans( StateAp *state, TransAp *trans )
+{
+	/* Might go directly to error state. */
+	if ( trans->toState == 0 )
+		return true;
+
+	if ( trans->prev == 0 ) {
+		/* If this is the first transition. */
+		if ( keyOps->minKey < trans->lowKey )
+			return true;
+	}
+	else {
+		/* Not the first transition. Compare against the prev. */
+		TransAp *prev = trans->prev;
+		Key nextKey = prev->highKey;
+		nextKey.increment();
+		if ( nextKey < trans->lowKey )
+			return true; 
+	}
+	return false;
+}
+
+bool FsmAp::checkErrTransFinish( StateAp *state )
+{
+	/* Check if there are any ranges already. */
+	if ( state->outList.length() == 0 )
+		return true;
+	else {
+		/* Get the last and check for a gap on the end. */
+		TransAp *last = state->outList.tail;
+		if ( last->highKey < keyOps->maxKey )
+			return true;
+	}
+	return 0;
+}
+
+bool FsmAp::hasErrorTrans()
+{
+	bool result;
+	for ( StateList::Iter st = stateList; st.lte(); st++ ) {
+		for ( TransList::Iter tr = st->outList; tr.lte(); tr++ ) {
+			result = checkErrTrans( st, tr );
+			if ( result )
+				return true;
+		}
+		result = checkErrTransFinish( st );
+		if ( result )
+			return true;
+	}
+	return false;
+}

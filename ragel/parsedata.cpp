@@ -1309,6 +1309,13 @@ void ParseData::prepareMachineGen( GraphDictEl *graphDictEl )
 	/* Depends on the graph analysis. */
 	setLongestMatchData( sectionGraph );
 
+	/* Decide if an error state is necessary.
+	 *  1. There is an error transition
+	 *  2. There is a gap in the transitions
+	 *  3. The longest match operator requires it. */
+	if ( lmRequiresErrorState || sectionGraph->hasErrorTrans() )
+		sectionGraph->errState = sectionGraph->addState();
+
 	/* State numbers need to be assigned such that all final states have a
 	 * larger state id number than all non-final states. This enables the
 	 * first_final mechanism to function correctly. We also want states to be
@@ -1319,6 +1326,7 @@ void ParseData::prepareMachineGen( GraphDictEl *graphDictEl )
 	sectionGraph->depthFirstOrdering();
 	sectionGraph->sortStatesByFinal();
 	sectionGraph->setStateNumbers( 0 );
+
 }
 
 void ParseData::generateXML( ostream &out )

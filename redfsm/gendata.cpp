@@ -37,7 +37,8 @@ CodeGenData::CodeGenData( ostream &out )
 	allCondSpaces(0),
 	allStates(0),
 	nameIndex(0),
-	startState(0),
+	startState(-1),
+	errState(-1),
 	getKeyExpr(0),
 	accessExpr(0),
 	curStateExpr(0),
@@ -83,11 +84,24 @@ void CodeGenData::initStateList( unsigned long length )
 	allStates = new RedStateAp[length];
 	for ( unsigned long s = 0; s < length; s++ )
 		redFsm->stateList.append( allStates+s );
+
+	/* We get the start state as an offset, set the pointer now. */
+	assert( startState >= 0 );
+	redFsm->startState = allStates + startState;
+	if ( errState >= 0 )
+		redFsm->errState = allStates + errState;
+	for ( EntryIdVect::Iter en = entryPointIds; en.lte(); en++ )
+		redFsm->entryPoints.insert( allStates + *en );
 }
 
 void CodeGenData::setStartState( unsigned long startState )
 {
 	this->startState = startState;
+}
+
+void CodeGenData::setErrorState( unsigned long errState )
+{
+	this->errState = errState;
 }
 
 void CodeGenData::addEntryPoint( char *name, unsigned long entryState )
@@ -227,14 +241,6 @@ void CodeGenData::resolveTargetStates( InlineList *inlineList )
 
 void CodeGenData::closeMachine()
 {
-	if ( redFsm->forcedErrorState )
-		redFsm->getErrorState();
-
-	/* We get the start state as an offset, set the pointer now. */
-	redFsm->startState = allStates + startState;
-	for ( EntryIdVect::Iter en = entryPointIds; en.lte(); en++ )
-		redFsm->entryPoints.insert( allStates + *en );
-
 	for ( ActionList::Iter a = actionList; a.lte(); a++ )
 		resolveTargetStates( a->inlineList );
 

@@ -595,7 +595,13 @@ void XMLCodeGen::writeMachine()
 
 	/* Start state. */
 	out << "    <start_state>" << fsm->startState->alg.stateNum << 
-			"</start_state>\n";
+		"</start_state>\n";
+	
+	/* Error state. */
+	if ( fsm->errState != 0 ) {
+		out << "    <error_state>" << fsm->errState->alg.stateNum << 
+			"</error_state>\n";
+	}
 
 	writeEntryPoints();
 	writeStateList();
