@@ -998,8 +998,7 @@ void JavaTabCodeGen::writeOutExec()
 			"	_nacts = " << CAST("int") << " " << A() << "[_acts++];\n"
 			"	while ( _nacts-- > 0 ) {\n"
 			"		switch ( " << A() << "[_acts++] ) {\n";
-			FROM_STATE_ACTION_SWITCH();
-			SWITCH_DEFAULT() <<
+			FROM_STATE_ACTION_SWITCH() <<
 			"		}\n"
 			"	}\n"
 			"\n";
@@ -1030,8 +1029,7 @@ void JavaTabCodeGen::writeOutExec()
 			"	while ( _nacts-- > 0 )\n	{\n"
 			"		switch ( " << A() << "[_acts++] )\n"
 			"		{\n";
-			ACTION_SWITCH();
-			SWITCH_DEFAULT() <<
+			ACTION_SWITCH() <<
 			"		}\n"
 			"	}\n"
 			"\n";
@@ -1046,8 +1044,7 @@ void JavaTabCodeGen::writeOutExec()
 			"	_nacts = " << CAST("int") << " " << A() << "[_acts++];\n"
 			"	while ( _nacts-- > 0 ) {\n"
 			"		switch ( " << A() << "[_acts++] ) {\n";
-			TO_STATE_ACTION_SWITCH();
-			SWITCH_DEFAULT() <<
+			TO_STATE_ACTION_SWITCH() <<
 			"		}\n"
 			"	}\n"
 			"\n";
@@ -1082,19 +1079,11 @@ void JavaTabCodeGen::writeOutEOF()
 			"	int _nacts = " << CAST("int") << " " << A() << "[_acts++];\n"
 			"	while ( _nacts-- > 0 ) {\n"
 			"		switch ( " << A() << "[_acts++] ) {\n";
-			EOF_ACTION_SWITCH();
-			SWITCH_DEFAULT() <<
+			EOF_ACTION_SWITCH() <<
 			"		}\n"
 			"	}\n"
 			"\n";
 	}
-}
-
-string JavaTabCodeGen::PTR_CONST()
-{
-	/* Not used in Java code. */
-	assert( false );
-	return "final";
 }
 
 std::ostream &JavaTabCodeGen::OPEN_ARRAY( string type, string name )
@@ -1159,13 +1148,6 @@ std::ostream &JavaTabCodeGen::STATIC_VAR( string type, string name )
 	return out;
 }
 
-string JavaTabCodeGen::UINT( )
-{
-	/* Not used. */
-	assert( false );
-	return "long";
-}
-
 string JavaTabCodeGen::ARR_OFF( string ptr, string offset )
 {
 	return ptr + " + " + offset;
@@ -1180,18 +1162,6 @@ string JavaTabCodeGen::NULL_ITEM()
 {
 	/* In java we use integers instead of pointers. */
 	return "-1";
-}
-
-string JavaTabCodeGen::POINTER()
-{
-	/* Not used. */
-	assert( false );
-	return " *";
-}
-
-std::ostream &JavaTabCodeGen::SWITCH_DEFAULT()
-{
-	return out;
 }
 
 string JavaTabCodeGen::GET_KEY()

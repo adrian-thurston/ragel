@@ -186,15 +186,10 @@ public:
 	virtual void writeStatement( InputLoc &loc, int nargs, char **args );
 
 	virtual string NULL_ITEM();
-	virtual string POINTER();
-	virtual ostream &SWITCH_DEFAULT();
 	virtual ostream &OPEN_ARRAY( string type, string name );
 	virtual ostream &CLOSE_ARRAY();
 	virtual ostream &STATIC_VAR( string type, string name );
 	virtual string ARR_OFF( string ptr, string offset );
-	virtual string CAST( string type );
-	virtual string UINT();
-	virtual string PTR_CONST();
 	virtual string GET_KEY();
 	virtual string CTRL_FLOW();
 	virtual void ACTION( ostream &ret, Action *action, int targState, bool inFinish );

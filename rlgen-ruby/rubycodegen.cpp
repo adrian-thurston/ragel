@@ -223,8 +223,7 @@ void RubyCodeGen::writeOutExec()
 			<< INDENT_S() <<   "_nacts -= 1" 
 			<< INDENT_S() <<   " _acts += 1" 
 			<< INDENT_U() <<   "case " << A() << "[_acts - 1]" ;
-		FROM_STATE_ACTION_SWITCH();
-		SWITCH_DEFAULT()
+		FROM_STATE_ACTION_SWITCH()
 			<< INDENT_D() <<   "end # from state action switch" 
 			<< INDENT_D() << "end" 
 			<< INDENT_S();
@@ -253,8 +252,7 @@ void RubyCodeGen::writeOutExec()
 			<< INDENT_S() <<   "_nacts -= 1" 
 			<< INDENT_S() <<   "_acts += 1" 
 			<< INDENT_U() <<   "case " << A() << "[_acts - 1]" ;
-		ACTION_SWITCH();
-		SWITCH_DEFAULT() 
+		ACTION_SWITCH()
 			<< INDENT_D() << "end # action switch"
 			<< INDENT_D() << "end"
 			<< INDENT_S();
@@ -272,8 +270,7 @@ void RubyCodeGen::writeOutExec()
 			<< INDENT_S() <<   "_nacts -= 1" 
 			<< INDENT_S() <<   "_acts += 1" 
 			<< INDENT_U() <<   "case " << A() << "[acts - 1]" ;
-		TO_STATE_ACTION_SWITCH();
-		SWITCH_DEFAULT()
+		TO_STATE_ACTION_SWITCH()
 			<< INDENT_D() <<     "end # to state action switch"
 			<< INDENT_D() << "end" 
 			<< INDENT_S();
@@ -297,8 +294,7 @@ void RubyCodeGen::writeOutEOF()
 			<< INDENT_S() <<    "_nacts -= 1" 
 			<< INDENT_S() <<    "_acts += 1" 
 			<< INDENT_S() <<    "case " << A() << "[_acts - 1]" ;
-		EOF_ACTION_SWITCH();
-		SWITCH_DEFAULT()
+		EOF_ACTION_SWITCH()
 			<< INDENT_D() << "end # eof action switch" 
 			<< INDENT_D() << "end" 
 			<< INDENT_S();
@@ -389,13 +385,6 @@ void RubyCodeGen::writeOutInit()
 	out << INDENT_D() << "end";
 }
 
-string RubyCodeGen::PTR_CONST()
-{
-	/* Not used in Ruby code. */
-	assert( false );
-	return "final";
-}
-
 std::ostream &RubyCodeGen::OPEN_ARRAY( string type, string name )
 {
 	out << "class << self" << endl
@@ -420,40 +409,14 @@ std::ostream &RubyCodeGen::STATIC_VAR( string type, string name )
 	return out;
 }
 
-string RubyCodeGen::UINT( )
-{
-	/* Not used. */
-	assert( false );
-	return "long";
-}
-
 string RubyCodeGen::ARR_OFF( string ptr, string offset )
 {
 	return ptr + " + " + offset;
 }
 
-string RubyCodeGen::CAST( string type )
-{
-	/* No casts on ruby */
-	assert( false );
-	return "";
-}
-
 string RubyCodeGen::NULL_ITEM()
 {
 	return "nil";
-}
-
-string RubyCodeGen::POINTER()
-{
-	/* Not used. */
-	assert( false );
-	return " *";
-}
-
-std::ostream &RubyCodeGen::SWITCH_DEFAULT()
-{
-	return out;
 }
 
 string RubyCodeGen::GET_KEY()
