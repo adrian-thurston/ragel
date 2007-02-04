@@ -1474,16 +1474,9 @@ void JavaTabCodeGen::prepareMachine()
 
 	redFsm->assignActionLocs();
 
-	/* Order the states. */
-	redFsm->depthFirstOrdering();
-
-	/* For table driven machines the location of the state is used to
-	 * identify it so the states must be sorted by their final ids.
-	 * Though having a deterministic ordering is important,
-	 * specifically preserving the depth first ordering is not because
-	 * states are stored in tables. */
-	redFsm->sortStatesByFinal();
-	redFsm->sequentialStateIds();
+	/* The frontend will do this for us, but it may be a good idea to force it
+	 * if the intermediate file is edited. */
+	redFsm->sortByStateId();
 
 	/* Find the first final state. This is the final state with the lowest
 	 * id.  */

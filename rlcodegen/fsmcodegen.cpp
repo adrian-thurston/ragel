@@ -622,25 +622,18 @@ void FsmCodeGen::prepareMachine()
 
 	redFsm->assignActionLocs();
 
-	/* Order the states. */
-	redFsm->depthFirstOrdering();
-
 	if ( codeStyle == GenGoto || codeStyle == GenFGoto || 
 			codeStyle == GenIpGoto || codeStyle == GenSplit )
 	{
-		/* For goto driven machines we can keep the original depth
-		 * first ordering because it's ok if the state ids are not
-		 * sequential. Split the the ids by final state status. */
-		redFsm->sortStateIdsByFinal();
+		/* For directly executable machines there is no required state
+		 * ordering. Choose a depth-first ordering to increase the
+		 * potential for fall-throughs. */
+		redFsm->depthFirstOrdering();
 	}
 	else {
-		/* For table driven machines the location of the state is used to
-		 * identify it so the states must be sorted by their final ids.
-		 * Though having a deterministic ordering is important,
-		 * specifically preserving the depth first ordering is not because
-		 * states are stored in tables. */
-		redFsm->sortStatesByFinal();
-		redFsm->sequentialStateIds();
+		/* The frontend will do this for us, but it may be a good idea to
+		 * force it if the intermediate file is edited. */
+		redFsm->sortByStateId();
 	}
 
 	/* Find the first final state. This is the final state with the lowest

@@ -508,6 +508,9 @@ struct RedFsmAp
 	/* Arrange states in by final id. This is a stable sort. */
 	void sortStatesByFinal();
 
+	/* Sorting states by id. */
+	void sortByStateId();
+
 	/* Locating the first final state. This is the final state with the lowest
 	 * id. */
 	void findFirstFinState();

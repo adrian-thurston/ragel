@@ -92,6 +92,11 @@ void CodeGenData::initStateList( unsigned long length )
 		redFsm->errState = allStates + errState;
 	for ( EntryIdVect::Iter en = entryPointIds; en.lte(); en++ )
 		redFsm->entryPoints.insert( allStates + *en );
+
+	/* The nextStateId is no longer used to assign state ids (they come in set
+	 * from the frontend now), however generation code still depends on it.
+	 * Should eventually remove this variable. */
+	redFsm->nextStateId = redFsm->stateList.length();
 }
 
 void CodeGenData::setStartState( unsigned long startState )

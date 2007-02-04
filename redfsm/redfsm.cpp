@@ -164,6 +164,11 @@ void RedFsmAp::sortStateIdsByFinal()
 	}
 }
 
+void RedFsmAp::sortByStateId()
+{
+	/* FIXME: Implement. */
+}
+
 /* Find the final state with the lowest id. */
 void RedFsmAp::findFirstFinState()
 {
