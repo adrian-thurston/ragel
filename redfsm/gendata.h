@@ -1,5 +1,5 @@
 /*
- *  Copyright 2005-2006 Adrian Thurston <thurston@cs.queensu.ca>
+ *  Copyright 2005-2007 Adrian Thurston <thurston@cs.queensu.ca>
  */
 
 /*  This file is part of Ragel.
@@ -39,8 +39,27 @@ struct CodeGenData;
 typedef AvlMap<char *, CodeGenData*, CmpStr> CodeGenMap;
 typedef AvlMapEl<char *, CodeGenData*> CodeGenMapEl;
 
+/*
+ * The interface to the parser
+ */
+
+/* These two functions must be implemented by the code generation executable.
+ * The openOutput function is invoked when the root element is opened.  The
+ * makeCodeGen function is invoked when a ragel_def element is opened. */
+std::ostream *openOutput( char *inputFile );
+CodeGenData *makeCodeGen( char *sourceFileName, 
+		char *fsmName, ostream &out, bool wantComplete );
+
 struct CodeGenData
 {
+	/*
+	 * The interface to the code generator.
+	 */
+	virtual void finishRagelDef() {}
+	virtual void writeStatement( InputLoc &loc, int nargs, char **args ) {}
+
+	/********************/
+
 	CodeGenData( ostream &out );
 	virtual ~CodeGenData() {}
 
@@ -125,19 +144,9 @@ struct CodeGenData
 	void prepareMachine();
 	bool hasBeenPrepared;
 
-	/* The interface to the code generator. */
-	virtual void finishRagelDef() {}
-	virtual void writeStatement( InputLoc &loc, int nargs, char **args ) {}
 };
 
 void lineDirective( ostream &out, char *fileName, int line );
 void genLineDirective( ostream &out );
-
-/* These two functions must be implemented by the code generation executable.
- * The openOutput function is invoked when the root element is opened.  The
- * makeCodeGen function is invoked when a ragel_def element is opened. */
-std::ostream *openOutput( char *inputFile, char *language );
-CodeGenData *makeCodeGen( char *sourceFileName, 
-		char *fsmName, ostream &out, bool wantComplete );
 
 #endif /* _GENDATA_H */

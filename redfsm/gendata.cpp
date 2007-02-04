@@ -1,5 +1,5 @@
 /*
- *  Copyright 2005-2006 Adrian Thurston <thurston@cs.queensu.ca>
+ *  Copyright 2005-2007 Adrian Thurston <thurston@cs.queensu.ca>
  */
 
 /*  This file is part of Ragel.
@@ -636,21 +636,3 @@ void CodeGenData::analyzeMachine()
 	/* Set the maximums of various values used for deciding types. */
 	setValueLimits();
 }
-
-
-
-void lineDirective( ostream &out, char *fileName, int line )
-{
-	if ( hostLangType != JavaCode ) {
-		/* Write the preprocessor line info for to the input file. */
-		out << "#line " << line  << " \"";
-		for ( char *pc = fileName; *pc != 0; pc++ ) {
-			if ( *pc == '\\' )
-				out << "\\\\";
-			else
-				out << *pc;
-		}
-		out << "\"\n";
-	}
-}
-

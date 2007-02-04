@@ -118,20 +118,10 @@ ostream &error()
  */
 
 /* Invoked by the parser when the root element is opened. */
-ostream *openOutput( char *inputFile, char *language )
+ostream *openOutput( char *inputFile )
 {
-	if ( strcmp( language, "C" ) == 0 ) {
-		hostLangType = CCode;
-		hostLang = &hostLangC;
-	}
-	else if ( strcmp( language, "D" ) == 0 ) {
-		hostLangType = DCode;
-		hostLang = &hostLangD;
-	}
-	else {
-		error() << PROGNAME " generates code for C and D only, you "
-			"need a diferent code generator for " << language << endl;
-	}
+	if ( hostLangType != CCode && hostLangType != DCode )
+		error() << PROGNAME " generates code for C and D only" << endl;
 
 	/* If the output format is code and no output file name is given, then
 	 * make a default. */

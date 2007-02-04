@@ -36,13 +36,25 @@ using std::string;
 using std::cerr;
 using std::endl;
 
+void lineDirective( ostream &out, char *fileName, int line )
+{
+	/* Write the preprocessor line info for to the input file. */
+	out << "// line " << line  << " \"";
+	for ( char *pc = fileName; *pc != 0; pc++ ) {
+		if ( *pc == '\\' )
+			out << "\\\\";
+		else
+			out << *pc;
+	}
+	out << "\"\n";
+}
+
 void genLineDirective( ostream &out )
 {
 	std::streambuf *sbuf = out.rdbuf();
 	output_filter *filter = static_cast<output_filter*>(sbuf);
 	lineDirective( out, filter->fileName, filter->line + 1 );
 }
-
 
 void JavaTabCodeGen::GOTO( ostream &ret, int gotoDest, bool inFinish )
 {

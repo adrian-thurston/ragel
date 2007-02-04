@@ -64,7 +64,28 @@ tag_ragel_head: TAG_ragel
 			if ( langAttr == 0 )
 				error($1->loc) << "tag <ragel> requires a lang attribute" << endl;
 			else {
-				outStream = openOutput( sourceFileName, langAttr->value );
+				if ( strcmp( langAttr->value, "C" ) == 0 ) {
+					hostLangType = CCode;
+					hostLang = &hostLangC;
+				}
+				else if ( strcmp( langAttr->value, "D" ) == 0 ) {
+					hostLangType = DCode;
+					hostLang = &hostLangD;
+				}
+				else if ( strcmp( langAttr->value, "Java" ) == 0 ) {
+					hostLangType = JavaCode;
+					hostLang = &hostLangJava;
+				}
+				else if ( strcmp( langAttr->value, "Ruby" ) == 0 ) {
+					hostLangType = RubyCode;
+					hostLang = &hostLangRuby;
+				}
+				else {
+					error($1->loc) << "expecting lang attribute to be "
+							"one of C, D, Java or Ruby" << endl;
+				}
+
+				outStream = openOutput( sourceFileName );
 			}
 		}
 	};
