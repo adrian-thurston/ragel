@@ -1,3 +1,17 @@
+Ragel 5.18 - Feb 5, 2007
+========================
+ -Backened class structure reorganized to make it easier to add new code
+  generators without having to also modify the existing code generators.
+ -The java code generation was then split out into it's own exectuable to
+  allow it to freely diverge from the C/D-based code generation.
+ -The "large machines in Java" patch from Colin Fleming was comitted. This
+  encodes data arrays as strings and decodes them at runtime to get around
+  limits on the size of static data. Currently only byte and short alphabet
+  types are supported. Since the default alphabet type for Java is "char," it
+  is now necessary to add "alphtype byte;" to Java programs.
+ -The Ruby code generation patch from Victor Hugo Borja was added. This is
+  highly experimental code.
+
 Ragel 5.17 - Jan 28, 2007
 =========================
  -The scanners and parsers in both the frontend and backend programs were
@@ -8,8 +22,8 @@ Ragel 5.17 - Jan 28, 2007
   made. Also, improvements to the sync patterns were made.
  -Added pullscan.rl to the examples directory. It is an example of doing
   pull-based scanning. Also, xmlscan.rl in rlcodegen is a pull scanner.
- -The introduction chapter of the manual was improved. The manually drawn
-  figures for the examples were replaced with graphviz drawn figures.
+ -The introduction chapter of the manual was improved. The manually-drawn
+  figures for the examples were replaced with graphviz-drawn figures.
  
 Ragel 5.16 - Nov 20, 2006
 =========================

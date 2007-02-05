@@ -1,12 +1,13 @@
-An expression of the form:
-    expr1 <: expr2 . expr3
-Is parsed as:
-    ( expr1 <: expr2 ) . expr3
-If expr2 contains the empty string then it's possible for the machine to escape
-to expr3. This can be confusing. Perhaps <: should behave like
-    expr1 <: ( expr2 . expr3 )
-By using the implementation:
-    expr1 $1 %0 . expr2 . expr3
+Expressions of the form: expr1 <: expr2 . expr3
+sometimes don't behave as expected. If expr2 contains the empty string then
+it's possible for the machine to escape to expr3. This is somewhat unexpected.
+The empty string does count as moving through the right machine so there should
+not be an exception for this case.
+Using the stronger implementation: ( expr1 $1 %0 . expr2 ) will solve the problem.
+
+Also, there is potential for nondeterminism to persist via the empty string
+with the :> and :>> operators. Should also guard against this using leaving
+priorities.
 
 The |> guarded operator and the <| guarded operator need to be added.
 
@@ -55,6 +56,10 @@ Add more examples, add more tests and write more documentation.
 A debugger would be nice. Ragel could emit a special debug version that
 prompted for debug commands that allowed the user to step through the machine
 and get details about where they are in their RL.
+
+A quick and easy alternative would be a trace code generation option. This
+would open a trace file and list all the active machines at each step of the
+input.
 
 Frontend should allow the redefinition of fsm section delimiters.
 

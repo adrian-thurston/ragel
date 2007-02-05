@@ -1,6 +1,6 @@
 Summary:      Ragel State Machine Compiler
 Name:         ragel
-Version:      5.17
+Version:      5.18
 Release:      1
 
 URL:          http://www.cs.queensu.ca/~thurston/ragel/
