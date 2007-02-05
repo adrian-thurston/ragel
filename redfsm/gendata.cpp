@@ -44,11 +44,11 @@ CodeGenData::CodeGenData( ostream &out )
 	curStateExpr(0),
 	wantComplete(0),
 	hasLongestMatch(false),
+	codeGenErrCount(0),
 	hasEnd(true),
 	dataPrefix(true),
 	writeFirstFinal(true),
-	writeErr(true),
-	hasBeenPrepared(false)
+	writeErr(true)
 {}
 
 
@@ -636,3 +636,72 @@ void CodeGenData::analyzeMachine()
 	/* Set the maximums of various values used for deciding types. */
 	setValueLimits();
 }
+
+void CodeGenData::writeStatement( InputLoc &loc, int nargs, char **args )
+{
+	/* Force a newline. */
+	out << "\n";
+	genLineDirective( out );
+
+	if ( strcmp( args[0], "data" ) == 0 ) {
+		for ( int i = 1; i < nargs; i++ ) {
+			if ( strcmp( args[i], "noerror" ) == 0 )
+				writeErr = false;
+			else if ( strcmp( args[i], "noprefix" ) == 0 )
+				dataPrefix = false;
+			else if ( strcmp( args[i], "nofinal" ) == 0 )
+				writeFirstFinal = false;
+			else {
+				source_warning(loc) << "unrecognized write option \"" << 
+						args[i] << "\"" << endl;
+			}
+		}
+		writeOutData();
+	}
+	else if ( strcmp( args[0], "init" ) == 0 ) {
+		for ( int i = 1; i < nargs; i++ ) {
+			source_warning(loc) << "unrecognized write option \"" << 
+					args[i] << "\"" << endl;
+		}
+		writeOutInit();
+	}
+	else if ( strcmp( args[0], "exec" ) == 0 ) {
+		for ( int i = 1; i < nargs; i++ ) {
+			if ( strcmp( args[i], "noend" ) == 0 )
+				hasEnd = false;
+			else {
+				source_warning(loc) << "unrecognized write option \"" << 
+						args[i] << "\"" << endl;
+			}
+		}
+		writeOutExec();
+	}
+	else if ( strcmp( args[0], "eof" ) == 0 ) {
+		for ( int i = 1; i < nargs; i++ ) {
+			source_warning(loc) << "unrecognized write option \"" << 
+					args[i] << "\"" << endl;
+		}
+		writeOutEOF();
+	}
+	else {
+		/* EMIT An error here. */
+		source_error(loc) << "unrecognized write command \"" << 
+				args[0] << "\"" << endl;
+	}
+}
+
+ostream &CodeGenData::source_warning( const InputLoc &loc )
+{
+	cerr << sourceFileName << ":" << loc.line << ":" << loc.col << ": warning: ";
+	return cerr;
+}
+
+ostream &CodeGenData::source_error( const InputLoc &loc )
+{
+	codeGenErrCount += 1;
+	assert( sourceFileName != 0 );
+	cerr << sourceFileName << ":" << loc.line << ":" << loc.col << ": ";
+	return cerr;
+}
+
+

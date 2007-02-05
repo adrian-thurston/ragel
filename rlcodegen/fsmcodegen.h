@@ -64,11 +64,8 @@ public:
 	FsmCodeGen( ostream &out );
 	virtual ~FsmCodeGen() {}
 
-	virtual void writeOutData() = 0;
+	virtual void finishRagelDef();
 	virtual void writeOutInit();
-	virtual void writeOutExec() = 0;
-	virtual void writeOutEOF() = 0;
-	
 
 protected:
 	string FSM_NAME();
@@ -168,21 +165,11 @@ protected:
 
 	unsigned int arrayTypeSize( unsigned long maxVal );
 
-	/* Set up labelNeeded flag for each state. Differs for each goto style so
-	 * is virtual. */
-	virtual void setLabelsNeeded() {}
-
 	bool outLabelUsed;
 	bool againLabelUsed;
-
 	bool useIndicies;
 
 public:
-	void prepareMachine();
-
-	virtual void finishRagelDef();
-	virtual void writeStatement( InputLoc &loc, int nargs, char **args );
-
 	/* Determine if we should use indicies. */
 	virtual void calcIndexSize() {}
 };

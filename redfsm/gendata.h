@@ -43,12 +43,17 @@ typedef AvlMapEl<char *, CodeGenData*> CodeGenMapEl;
  * The interface to the parser
  */
 
-/* These two functions must be implemented by the code generation executable.
+/* These functions must be implemented by the code generation executable.
  * The openOutput function is invoked when the root element is opened.  The
  * makeCodeGen function is invoked when a ragel_def element is opened. */
 std::ostream *openOutput( char *inputFile );
 CodeGenData *makeCodeGen( char *sourceFileName, 
 		char *fsmName, ostream &out, bool wantComplete );
+
+void lineDirective( ostream &out, char *fileName, int line );
+void genLineDirective( ostream &out );
+
+/*********************************/
 
 struct CodeGenData
 {
@@ -56,7 +61,16 @@ struct CodeGenData
 	 * The interface to the code generator.
 	 */
 	virtual void finishRagelDef() {}
-	virtual void writeStatement( InputLoc &loc, int nargs, char **args ) {}
+
+	/* These are invoked by the corresponding write statements. */
+	virtual void writeOutData() {};
+	virtual void writeOutInit() {};
+	virtual void writeOutExec() {};
+	virtual void writeOutEOF() {};
+
+	/* This can also be overwridden to modify the processing of write
+	 * statements. */
+	virtual void writeStatement( InputLoc &loc, int nargs, char **args );
 
 	/********************/
 
@@ -90,6 +104,7 @@ struct CodeGenData
 	EntryIdVect entryPointIds;
 	EntryNameVect entryPointNames;
 	bool hasLongestMatch;
+	int codeGenErrCount;
 
 	/* Write options. */
 	bool hasEnd;
@@ -141,12 +156,10 @@ struct CodeGenData
 	void closeMachine();
 	void setValueLimits();
 	void assignActionIds();
-	void prepareMachine();
-	bool hasBeenPrepared;
 
+	ostream &source_warning( const InputLoc &loc );
+	ostream &source_error( const InputLoc &loc );
 };
 
-void lineDirective( ostream &out, char *fileName, int line );
-void genLineDirective( ostream &out );
 
 #endif /* _GENDATA_H */

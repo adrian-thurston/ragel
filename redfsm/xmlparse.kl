@@ -118,6 +118,16 @@ tag_host:
 ragel_def: 
 	tag_ragel_def_head ragel_def_item_list '/' TAG_ragel_def
 	final {
+		/* Do this before distributing transitions out to singles and defaults
+		 * makes life easier. */
+		cgd->redFsm->maxKey = cgd->findMaxKey();
+
+		cgd->redFsm->assignActionLocs();
+
+		/* Find the first final state (The final state with the lowest id). */
+		cgd->redFsm->findFirstFinState();
+
+		/* Call the user's callback. */
 		cgd->finishRagelDef();
 	};
 
@@ -176,8 +186,14 @@ tag_curstate_expr: TAG_curstate inline_list '/' TAG_curstate
 
 tag_write: tag_write_head write_option_list '/' TAG_write
 	final {
+		/* Terminate the options list and call the write statement handler. */
 		writeOptions.append(0);
 		cgd->writeStatement( $1->loc, writeOptions.length()-1, writeOptions.data );
+
+		/* CodeGenData may have issued an error. */
+		errCount += cgd->codeGenErrCount;
+
+		/* Clear the options in prep for the next write statement. */
 		writeOptions.empty();
 	};
 

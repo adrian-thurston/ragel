@@ -77,6 +77,7 @@ struct JavaTabCodeGen : public CodeGenData
 	virtual void writeOutEOF();
 	virtual void writeOutData();
 	virtual void writeOutInit();
+	virtual void finishRagelDef();
 
 	void NEXT( ostream &ret, int nextDest, bool inFinish );
 	void NEXT_EXPR( ostream &ret, InlineItem *ilItem, bool inFinish );
@@ -177,21 +178,9 @@ public:
 
 	unsigned int arrayTypeSize( unsigned long maxVal );
 
-	/* Set up labelNeeded flag for each state. Differs for each goto style so
-	 * is virtual. */
-	virtual void setLabelsNeeded() {}
-
 	bool outLabelUsed;
 	bool againLabelUsed;
-
 	bool useIndicies;
-
-public:
-	void prepareMachine();
-
-	virtual void finishRagelDef();
-	virtual void writeStatement( InputLoc &loc, int nargs, char **args );
-
 };
 
 

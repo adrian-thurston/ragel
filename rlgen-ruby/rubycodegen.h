@@ -51,8 +51,12 @@ public:
 
 	void COND_TRANSLATE();
 	void LOCATE_TRANS();
+
 	virtual void writeOutExec();
 	virtual void writeOutEOF();
+	virtual void writeOutInit();
+	virtual void writeOutData();
+	virtual void finishRagelDef();
 
  protected:
 	std::ostream &TO_STATE_ACTION_SWITCH();
@@ -78,7 +82,6 @@ public:
 	std::ostream &TRANS_TARGS_WI();
 	std::ostream &TRANS_ACTIONS_WI();
 
-	virtual void writeOutData();
 
 	void NEXT( ostream &ret, int nextDest, bool inFinish );
 	void NEXT_EXPR( ostream &ret, InlineItem *ilItem, bool inFinish );
@@ -170,21 +173,12 @@ public:
 
 	unsigned int arrayTypeSize( unsigned long maxVal );
 
-	/* Set up labelNeeded flag for each state. Differs for each goto style so
-	 * is virtual. */
-	virtual void setLabelsNeeded() {}
-
 	bool outLabelUsed;
 	bool againLabelUsed;
 
 	bool useIndicies;
 
 public:
-	void prepareMachine();
-
-	virtual void finishRagelDef();
-	virtual void writeStatement( InputLoc &loc, int nargs, char **args );
-
 	virtual string NULL_ITEM();
 	virtual ostream &OPEN_ARRAY( string type, string name );
 	virtual ostream &CLOSE_ARRAY();
@@ -193,7 +187,6 @@ public:
 	virtual string GET_KEY();
 	virtual string CTRL_FLOW();
 	virtual void ACTION( ostream &ret, Action *action, int targState, bool inFinish );
-	virtual void writeOutInit();
 
 protected:
 	virtual string INDENT_S();

@@ -373,6 +373,9 @@ std::ostream &SplitCodeGen::ALL_PARTITIONS()
 
 void SplitCodeGen::writeOutExec()
 {
+	/* Must set labels immediately before writing because we may depend on the
+	 * noend write option. */
+	setLabelsNeeded();
 	out << 
 		"	{\n"
 		"	int _stat = 0;\n";

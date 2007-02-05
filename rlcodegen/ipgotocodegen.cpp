@@ -353,6 +353,9 @@ void IpGotoCodeGen::writeOutData()
 
 void IpGotoCodeGen::writeOutExec()
 {
+	/* Must set labels immediately before writing because we may depend on the
+	 * noend write option. */
+	setLabelsNeeded();
 	outLabelUsed = false;
 
 	out << "	{\n";

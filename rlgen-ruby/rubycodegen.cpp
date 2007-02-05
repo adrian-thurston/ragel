@@ -1431,27 +1431,11 @@ string RubyCodeGen::FIRST_FINAL_STATE()
 	return ret.str();
 }
 
-/* Generate the code for an fsm. Assumes parseData is set up properly. Called
- * by parser code. */
-void RubyCodeGen::prepareMachine()
+void RubyCodeGen::finishRagelDef()
 {
-	if ( hasBeenPrepared )
-		return;
-	hasBeenPrepared = true;
-	
-	/* Do this before distributing transitions out to singles and defaults
-	 * makes life easier. */
-	redFsm->maxKey = findMaxKey();
-
-	redFsm->assignActionLocs();
-
 	/* The frontend will do this for us, but it may be a good idea to force it
 	 * if the intermediate file is edited. */
 	redFsm->sortByStateId();
-
-	/* Find the first final state. This is the final state with the lowest
-	 * id.  */
-	redFsm->findFirstFinState();
 
 	/* Choose default transitions and the single transition. */
 	redFsm->chooseDefaultSpan();
@@ -1470,66 +1454,6 @@ void RubyCodeGen::prepareMachine()
 
 	/* Determine if we should use indicies. */
 	calcIndexSize();
-}
-
-void RubyCodeGen::finishRagelDef()
-{
-	prepareMachine();
-}
-
-void RubyCodeGen::writeStatement( InputLoc &loc, int nargs, char **args )
-{
-	/* Force a newline. */
-	out << "\n";
-	genLineDirective( out );
-
-	if ( strcmp( args[0], "data" ) == 0 ) {
-		for ( int i = 1; i < nargs; i++ ) {
-			if ( strcmp( args[i], "noerror" ) == 0 )
-				writeErr = false;
-			else if ( strcmp( args[i], "noprefix" ) == 0 )
-				dataPrefix = false;
-			else if ( strcmp( args[i], "nofinal" ) == 0 )
-				writeFirstFinal = false;
-			else {
-				source_warning(loc) << "unrecognized write option \"" << 
-						args[i] << "\"" << endl;
-			}
-		}
-		writeOutData();
-	}
-	else if ( strcmp( args[0], "init" ) == 0 ) {
-		for ( int i = 1; i < nargs; i++ ) {
-			source_warning(loc) << "unrecognized write option \"" << 
-					args[i] << "\"" << endl;
-		}
-		writeOutInit();
-	}
-	else if ( strcmp( args[0], "exec" ) == 0 ) {
-		for ( int i = 1; i < nargs; i++ ) {
-			if ( strcmp( args[i], "noend" ) == 0 )
-				hasEnd = false;
-			else {
-				source_warning(loc) << "unrecognized write option \"" << 
-						args[i] << "\"" << endl;
-			}
-		}
-
-		/* Must set labels immediately before writing because we may depend
-		 * on the noend write option. */
-		setLabelsNeeded();
-		writeOutExec();
-	}
-	else if ( strcmp( args[0], "eof" ) == 0 ) {
-		for ( int i = 1; i < nargs; i++ ) {
-			source_warning(loc) << "unrecognized write option \"" << 
-					args[i] << "\"" << endl;
-		}
-		writeOutEOF();
-	}
-	else {
-		/* EMIT An error here. */
-	}
 }
 
 ostream &RubyCodeGen::source_warning( const InputLoc &loc )
