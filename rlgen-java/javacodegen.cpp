@@ -1313,7 +1313,7 @@ void JavaTabCodeGen::LM_SWITCH( ostream &ret, InlineItem *item,
 		int targState, int inFinish )
 {
 	ret << 
-		"	switch( act ) {\n";
+		"	switch( " << ACT() << " ) {\n";
 
 	/* If the switch handles error then we also forced the error state. It
 	 * will exist. */
