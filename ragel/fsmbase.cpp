@@ -508,11 +508,11 @@ void FsmAp::depthFirstOrdering()
 
 	/* Add back to the state list from the start state and all other entry
 	 * points. */
+	if ( errState != 0 )
+		depthFirstOrdering( errState );
 	depthFirstOrdering( startState );
 	for ( EntryMap::Iter en = entryPoints; en.lte(); en++ )
 		depthFirstOrdering( en->value );
-	if ( errState != 0 )
-		depthFirstOrdering( errState );
 	
 	/* Make sure we put everything back on. */
 	assert( stateListLen == stateList.length() );

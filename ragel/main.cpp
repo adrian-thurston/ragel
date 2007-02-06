@@ -1,5 +1,5 @@
 /*
- *  Copyright 2001-2005 Adrian Thurston <thurston@cs.queensu.ca>
+ *  Copyright 2001-2007 Adrian Thurston <thurston@cs.queensu.ca>
  */
 
 /*  This file is part of Ragel.
@@ -129,7 +129,7 @@ void escapeLineDirectivePath( std::ostream &out, char *path )
 /* Main, process args and call yyparse to start scanning input. */
 int main(int argc, char **argv)
 {
-	ParamCheck pc("o:nmleabjkS:M:CDJvHh?-:s", argc, argv);
+	ParamCheck pc("o:nmleabjkS:M:CDJRvHh?-:s", argc, argv);
 	char *inputFileName = 0;
 	char *outputFileName = 0;
 

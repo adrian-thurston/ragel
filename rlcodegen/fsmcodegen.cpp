@@ -52,10 +52,11 @@ void lineDirective( ostream &out, char *fileName, int line )
 
 void genLineDirective( ostream &out )
 {
-	assert( outputFormat == OutCode );
-	std::streambuf *sbuf = out.rdbuf();
-	output_filter *filter = static_cast<output_filter*>(sbuf);
-	lineDirective( out, filter->fileName, filter->line + 1 );
+	if ( outputFormat == OutCode ) {
+		std::streambuf *sbuf = out.rdbuf();
+		output_filter *filter = static_cast<output_filter*>(sbuf);
+		lineDirective( out, filter->fileName, filter->line + 1 );
+	}
 }
 
 

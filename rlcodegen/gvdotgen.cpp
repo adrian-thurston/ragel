@@ -276,10 +276,6 @@ void GraphvizDotGen::finishRagelDef()
 	if ( !graphvizDone ) {
 		graphvizDone = true;
 
-		/* Do ordering and choose state ids. */
-		redFsm->depthFirstOrdering();
-		redFsm->sequentialStateIds();
-
 		/* For dot file generation we want to pick default transitions. */
 		redFsm->chooseDefaultSpan();
 
