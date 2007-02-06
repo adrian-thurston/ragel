@@ -190,7 +190,7 @@ void RubyCodeGen::LOCATE_TRANS()
 		<< INDENT_S() <<          "_mid = _lower + (((_upper-_lower) >> 1) & ~1)" 
 		<< INDENT_U() <<          "if " << GET_WIDE_KEY() << " < " << K() << "[_mid]" 
 		<< INDENT_O() <<            "_upper = _mid - 2" 
-		<< INDENT_U() <<          "elsif " << GET_WIDE_KEY() << " > " << K() << "[_mid]" 
+		<< INDENT_U() <<          "elsif " << GET_WIDE_KEY() << " > " << K() << "[_mid+1]" 
 		<< INDENT_O() <<            "_lower = _mid + 2" 
 		<< INDENT_U() <<          "else" 
 		<< INDENT_S() <<            "_trans += ((_mid - _keys) >> 1)" 
@@ -1026,30 +1026,6 @@ std::ostream &RubyCodeGen::TRANS_ACTIONS_WI()
 
 void RubyCodeGen::writeOutData()
 {
-	out <<
-		"	private static byte[] unpack_byte(String packed)\n"
-		"	{\n"
-		"		byte[] ret = new byte[packed.length()];\n"
-		"		for (int i = 0; i < packed.length(); i++)\n"
-		"		{\n"
-		"			int value = packed.charAt(i);\n"
-		"			value--;\n"
-		"			ret[i] = (byte) value;\n"
-		"		}\n"
-		"		return ret;\n"
-		"	}\n"
-		"	private static short[] unpack_short(String packed)\n"
-		"	{\n"
-		"		short[] ret = new short[packed.length()];\n"
-		"		for (int i = 0; i < packed.length(); i++)\n"
-		"		{\n"
-		"			int value = packed.charAt(i);\n"
-		"			value--;\n"
-		"			ret[i] = (short) value;\n"
-		"		}\n"
-		"		return ret;\n"
-		"	}\n";
-	
 	/* If there are any transtion functions then output the array. If there
 	 * are none, don't bother emitting an empty array that won't be used. */
 	if ( redFsm->anyActions() ) {
@@ -1176,29 +1152,16 @@ void RubyCodeGen::writeOutData()
 
 std::ostream &RubyCodeGen::START_ARRAY_LINE()
 {
-	out << "\t\"";
+	out << "\t";
 	return out;
 }
 
 std::ostream &RubyCodeGen::ARRAY_ITEM( int item, int count, bool last )
 {
-	// 0 codes in 2 bytes in the Java class file and is common,
-	// so we increment all values by one when packing
-	item++;
-
-	std::ios_base::fmtflags originalFlags=out.flags();
-	if ( item < 0x80 )
-	{
-		out << std::oct << "\\" << item;
-	}
-	else
-	{
-		out << std::hex << "\\u" << std::setfill('0') << std::setw(4) << item;
-	}
-	out.flags(originalFlags);
-	
+	out << item;
 	if ( !last )
 	{
+		out << ", ";
 		if ( count % IALL == 0 )
 		{
 			END_ARRAY_LINE();
@@ -1210,7 +1173,7 @@ std::ostream &RubyCodeGen::ARRAY_ITEM( int item, int count, bool last )
 
 std::ostream &RubyCodeGen::END_ARRAY_LINE()
 {
-	out << "\" +\n";
+	out << "\n";
 	return out;
 }
 
