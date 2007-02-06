@@ -31,6 +31,8 @@ fbreak should advance the current char. Depreciate fbreak and add
     fctl_return <expr>;
     fctl_goto <label>;
 
+Should the fbreak functions execute the to-state actions of the target state?
+
 It should be possible to import/export definitions.
 
 If a scanner can be optimized into a pure state machine, maybe permit it to be
