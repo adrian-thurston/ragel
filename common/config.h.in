@@ -22,12 +22,13 @@
 #ifndef _CONFIG_H
 #define _CONFIG_H
 
-/* Compilers. */
+/* Programs. */
 #undef GDC
 #undef GOBJC
 #undef CXX
 #undef CC
 #undef JAVAC
 #undef TXL
+#undef RUBY
 
 #endif /* _CONFIG_H */

@@ -37,7 +37,7 @@ while getopts "gcnmleT:F:G:P:CDJ" opt; do
 		g) 
 			allow_generated="true"
 			;;
-		C|D|J) 
+		C|D|J|R) 
 			langflags="$langflags -$opt"
 			;;
 	esac
@@ -45,7 +45,7 @@ done
 
 [ -z "$minflags" ] && minflags="-n -m -l -e"
 [ -z "$genflags" ] && genflags="-T0 -T1 -F0 -F1 -G0 -G1 -G2"
-[ -z "$langflags" ] && langflags="-C -D -J"
+[ -z "$langflags" ] && langflags="-C -D -J -R"
 
 shift $((OPTIND - 1));
 
@@ -60,6 +60,7 @@ objc_compiler=`sed '/^#define GOBJC/s/#define GOBJC *//p;d' $config`
 d_compiler=`sed '/^#define GDC/s/#define GDC *//p;d' $config`
 java_compiler=`sed '/#define JAVAC/s/#define JAVAC *//p;d' $config`
 txl_engine=`sed '/^#define TXL/s/#define TXL *//p;d' $config`
+ruby_engine=`sed '/^#define RUBY/s/#define RUBY *//p;d' $config`
 
 function test_error
 {
@@ -131,6 +132,13 @@ for test_case; do
 			lang_opt=-J;
 			cflags=""
 		;;
+		ruby)
+			codegen=../rlgen-ruby/rlgen-ruby;
+			code_suffix=rb;
+			compiler=$ruby_engine
+			lang_opt=-R;
+			cflags=""
+		;;
 		indep)
 			# If we have no compiler for the source program then skip it.
 			[ -z "$txl_engine" ] && continue
@@ -180,6 +188,7 @@ for test_case; do
 	allow_genflags=`sed '/@ALLOW_GENFLAGS:/s/^.*: *//p;d' $test_case`
 	[ -z "$allow_genflags" ] && allow_genflags="-T0 -T1 -F0 -F1 -G0 -G1 -G2"
 
+
 	for min_opt in $minflags; do
 		for gen_opt in $genflags; do
 			echo "$allow_minflags" | grep -e $min_opt >/dev/null || continue
@@ -225,9 +234,12 @@ for test_case; do
 			out_args=""
 			[ $lang != java ] && out_args="-o ${binary}";
 
-			echo "$compiler ${cflags} ${out_args} ${code_src}"
-			if ! $compiler ${cflags} ${out_args} ${code_src}; then
-				test_error;
+			# Ruby doesn't need to be compiled.
+			if [ $lang != ruby ]; then
+				echo "$compiler ${cflags} ${out_args} ${code_src}"
+				if ! $compiler ${cflags} ${out_args} ${code_src}; then
+					test_error;
+				fi
 			fi
 
 			if [ "$compile_only" != "true" ]; then
@@ -235,7 +247,8 @@ for test_case; do
 				
 				exec_cmd=./$binary
 				[ $lang = java ] && exec_cmd="java $root"
-					
+				[ $lang = ruby ] && exec_cmd="ruby ${code_src}"
+
 				$exec_cmd 2>&1 > $output;
 				if diff $expected_out $output > /dev/null; then
 					echo "passed";

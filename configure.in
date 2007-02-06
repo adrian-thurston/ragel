@@ -104,6 +104,12 @@ if test -n "$TXL"; then
 	AC_DEFINE_UNQUOTED(TXL,$TXL)
 fi
 
+dnl Check for Ruby.
+AC_CHECK_PROG(RUBY, ruby, ruby)
+if test -n "$RUBY"; then
+	AC_DEFINE_UNQUOTED(RUBY,$RUBY)
+fi
+
 dnl write output files
 AC_OUTPUT(Makefile common/Makefile ragel/Makefile redfsm/Makefile rlcodegen/Makefile rlgen-java/Makefile rlgen-ruby/Makefile doc/Makefile test/Makefile)
 
