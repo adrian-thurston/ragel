@@ -26,11 +26,17 @@ typedef struct _Scanner {
 } Scanner;
 
 
+%%{
+	machine Scanner;
+	write data;
+}%%
+
 void scan_init( Scanner *s, FILE *file )
 {
 	memset (s, '\0', sizeof(Scanner));
 	s->curline = 1;
 	s->file = file;
+	%% write init;
 }
 
 #define TK_NO_TOKEN (-1)
@@ -38,12 +44,6 @@ void scan_init( Scanner *s, FILE *file )
 #define TK_EOF 129
 #define TK_Identifier 130
 #define TK_Number 131
-
-
-%%{
-	machine Scanner;
-	write data;
-}%%
 
 #define ret_tok( _tok ) token = _tok; s->data = s->tokstart
 
@@ -104,6 +104,8 @@ int scan( Scanner *s )
 
 			# Whitespace
 			[ \t\n];
+
+			'"' ( [^\\"] | '\\' any ) * '"';
 
 			# Number
 			digit+ => 
