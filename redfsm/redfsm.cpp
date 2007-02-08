@@ -325,8 +325,7 @@ void RedFsmAp::moveToDefault( RedTransAp *defTrans, RedStateAp *state )
 	}
 
 	/* Save off the range we just created into the state's range. */
-	state->outRange.shallowCopy( outRange );
-	outRange.abandon();
+	state->outRange.transfer( outRange );
 
 	/* Store the default. */
 	state->defTrans = defTrans;

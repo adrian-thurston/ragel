@@ -103,9 +103,6 @@ public:
 	/* Shallow copy. */
 	SVector( const SVector &v );
 
-	/* Shallow copy. */
-	SVector(STabHead *head);
-
 	/**
 	 * \brief Free all memory used by the vector. 
 	 *
@@ -127,9 +124,6 @@ public:
 
 	/* Perform a shallow copy of another vector. */
 	SVector &operator=( const SVector &v );
-
-	/* Perform a shallow copy of another vector by the header. */
-	SVector &operator=( STabHead *head );
 
 
 	/*@{*/
@@ -490,32 +484,6 @@ protected:
 	void downResizeDup(long len);
 };
 
-#if 0
-/* Create a vector with an intial number of elements and size. */
-template <class T, class Resize> SVector<T, Resize>::
-		SVector( long size, long allocLen )
-{
-	/* Allocate the space if we are given a positive allocLen. */
-	if ( allocLen > 0 ) {
-		/* Allocate the data needed. */
-		STabHead *head = (STabHead*) malloc( sizeof(STabHead) + 
-				sizeof(T) * allocLen );
-		if ( head == 0 )
-			throw std::bad_alloc();
-
-		/* Set up the header and save the data pointer. */
-		head->refCount = 1;
-		head->allocLen = allocLen;
-		head->tabLen = 0;
-		BaseTable::data = (T*) (head + 1);
-	}
-
-	/* Grow to the size specified. If we did not have enough space
-	 * allocated that is ok. Table will be grown to the right size. */
-	setAsNew( size );
-}
-#endif
-
 /**
  * \brief Perform a shallow copy of the vector.
  *
@@ -534,26 +502,6 @@ template <class T, class Resize> SVector<T, Resize>::
 		BaseTable::data = (T*) (srcHead + 1);
 	}
 }
-
-#if 0
-/**
- * \brief Perform a shallow copy of the vector from only the header.
- *
- * Takes a reference to the contents specified by the header.
- */
-template <class T, class Resize> SVector<T, Resize>::
-		SVector(STabHead *head)
-{
-	/* Take a reference to other, if the header is no-null. */
-	if ( head == 0 )
-		BaseTable::data = 0;
-	else {
-		head->refCount += 1;
-		BaseTable::data = (T*) (head + 1);
-	}
-}
-#endif
-
 
 /**
  * \brief Shallow copy another vector into this vector.
@@ -577,30 +525,6 @@ template <class T, class Resize> SVector<T, Resize> &
 		STabHead *srcHead = ((STabHead*) v.data) - 1;
 		srcHead->refCount += 1;
 		BaseTable::data = (T*) (srcHead + 1);
-	}
-	return *this;
-}
-
-/**
- * \brief Shallow copy another vector into this vector from only the header.
- *
- * Takes a reference to the other header vector. The contents of this vector
- * are first emptied. 
- *
- * \returns A reference to this.
- */
-template <class T, class Resize> SVector<T, Resize> &
-		SVector<T, Resize>::operator=( STabHead *head )
-{
-	/* First clean out the current contents. */
-	empty();
-
-	/* Take a reference to other, if the header is no-null. */
-	if ( head == 0 )
-		BaseTable::data = 0;
-	else {
-		head->refCount += 1;
-		BaseTable::data = (T*) (head + 1);
 	}
 	return *this;
 }

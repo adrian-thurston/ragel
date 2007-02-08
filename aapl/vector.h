@@ -106,9 +106,9 @@ public:
 	/* Abandon the contents of the vector without deleteing. */
 	void abandon();
 
-	/* Performs a shallow copy of another vector into this vector. If this
-	 * vector is non-empty then its contents are lost (not freed). */
-	void shallowCopy( const Vector &v );
+	/* Transfers the elements of another vector into this vector. First emptys
+	 * the current vector. */
+	void transfer( Vector &v );
 
 	/* Perform a deep copy of another vector into this vector. */
 	Vector &operator=( const Vector &v );
@@ -470,25 +470,6 @@ protected:
 	void downResize(long len);
 };
 
-#if 0
-/* Create a vector with an intial number of elements and size. */
-template<class T, class Resize> Vector<T, Resize>::
-		Vector( long size, long allocLen )
-{
-	/* Allocate the space if we are given a positive allocLen. */
-	BaseTable::allocLen = allocLen;
-	if ( allocLen > 0 ) {
-		BaseTable::data = (T*) malloc(sizeof(T) * BaseTable::allocLen);
-		if ( BaseTable::data == 0 )
-			throw std::bad_alloc();
-	}
-
-	/* Grow to the size specified. If we did not have enough space
-	 * allocated that is ok. Table will be grown to right size. */
-	setAsNew( size );
-}
-#endif
-
 /* Init a vector iterator with just a vector. */
 template <class T, class Resize> Vector<T, Resize>::Iter::Iter( const Vector &v ) 
 {
@@ -624,20 +605,22 @@ template<class T, class Resize> void Vector<T, Resize>::
 }
 
 /**
- * \brief Shallow copy another vector into this vector. 
+ * \brief Transfer the contents of another vector into this vector.
  *
- * The dynamic array of the other vector is copied into this vector by
- * reference. If this vector is non-empty then its contents are lost. This
- * routine must be used with care. After a shallow copy one vector should
- * abandon its contents to prevent both destructors from attempting to free
- * the common array.
+ * The dynamic array of the other vector is moved into this vector by
+ * reference. If this vector is non-empty then its contents are first deleted.
+ * Afterward the other vector will be empty.
  */
 template<class T, class Resize> void Vector<T, Resize>::
-		shallowCopy( const Vector &v )
+		transfer( Vector &v )
 {
+	empty();
+
 	BaseTable::data = v.data;
 	BaseTable::tabLen = v.tabLen;
 	BaseTable::allocLen = v.allocLen;
+
+	v.abandon();
 }
 
 /**
