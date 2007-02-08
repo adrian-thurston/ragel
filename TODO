@@ -1,5 +1,5 @@
-Should be possible to turn off line numbers for debugging purposes (from a
-user).
+Add an option (probably -L) for turning off line numbers for debugging the
+generated state machine.
 
 Expressions of the form: expr1 <: expr2 . expr3
 sometimes don't behave as expected. If expr2 contains the empty string then
