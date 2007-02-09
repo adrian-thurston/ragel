@@ -36,6 +36,27 @@ std::ostream &GraphvizDotGen::KEY( Key key )
 			case '"': case '\\':
 				out << "\\" << cVal;
 				break;
+			case '\a':
+				out << "\\\\a";
+				break;
+			case '\b':
+				out << "\\\\b";
+				break;
+			case '\t':
+				out << "\\\\t";
+				break;
+			case '\n':
+				out << "\\\\n";
+				break;
+			case '\v':
+				out << "\\\\v";
+				break;
+			case '\f':
+				out << "\\\\f";
+				break;
+			case '\r':
+				out << "\\\\r";
+				break;
 			default:	
 				out << cVal;
 				break;

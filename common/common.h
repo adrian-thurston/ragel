@@ -61,7 +61,10 @@ public:
 
 	bool isUpper() const { return ( 'A' <= key && key <= 'Z' ); }
 	bool isLower() const { return ( 'a' <= key && key <= 'z' ); }
-	bool isPrintable() const { return ( 32 <= key && key < 127 ); }
+	bool isPrintable() const
+	{
+	    return ( 7 <= key && key <= 13 ) || ( 32 <= key && key < 127 );
+	}
 
 	Key toUpper() const
 		{ return Key( 'A' + ( key - 'a' ) ); }
