@@ -19,9 +19,6 @@ The fixed size stack is a problem for manual recursion of unlimited depth.
 An option to turn off the removal of duplicate actions might be useful for
 analyzing unintentional nondeterminism.
 
-To avoid confusion, there should be a correspondence between state numbers in
-the generated code, graphviz and the XML.
-
 Might be a good idea to add in some protection against using up all of a
 system's memory. This protection could then be removed by people when someone
 is sure they want to use a lot of memory.
