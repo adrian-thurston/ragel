@@ -1,3 +1,11 @@
+Verbose embeddings %eof a  to   $eof(a).
+User defined embeddings <-name(a1,a2,...).
+User defined operators expr1 <name> expr2.
+
+Doesn't make make sense for [] to be the lambda (zero-length) machine. This
+should be the empty set (the empty machine). But then would it be invalid in a
+regular expression?
+
 Add an option (probably -L) for turning off line numbers for debugging the
 generated state machine.
 
