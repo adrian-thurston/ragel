@@ -557,8 +557,8 @@ struct Factor
 		reItem(reItem), type(OrExprType) { }
 
 	/* Construct with a regular expression. */
-	Factor( RegExpr *regExp ) :
-		regExp(regExp), type(RegExprType) { }
+	Factor( RegExpr *regExpr ) :
+		regExpr(regExpr), type(RegExprType) { }
 
 	/* Construct with a reference to a var def. */
 	Factor( const InputLoc &loc, VarDef *varDef ) :
@@ -584,7 +584,7 @@ struct Factor
 	Literal *literal;
 	Range *range;
 	ReItem *reItem;
-	RegExpr *regExp;
+	RegExpr *regExpr;
 	VarDef *varDef;
 	Join *join;
 	LongestMatch *longestMatch;
@@ -628,14 +628,14 @@ struct RegExpr
 	/* Constructors. */
 	RegExpr() : 
 		type(Empty), caseInsensitive(false) { }
-	RegExpr(RegExpr *regExp, ReItem *item) : 
-		regExp(regExp), item(item), 
+	RegExpr(RegExpr *regExpr, ReItem *item) : 
+		regExpr(regExpr), item(item), 
 		type(RecurseItem), caseInsensitive(false) { }
 
 	~RegExpr();
 	FsmAp *walk( ParseData *pd, RegExpr *rootRegex );
 
-	RegExpr *regExp;
+	RegExpr *regExpr;
 	ReItem *item;
 	RegExpType type;
 	bool caseInsensitive;

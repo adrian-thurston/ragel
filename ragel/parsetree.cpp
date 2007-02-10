@@ -1700,7 +1700,7 @@ Factor::~Factor()
 			delete reItem;
 			break;
 		case RegExprType:
-			delete regExp;
+			delete regExpr;
 			break;
 		case ReferenceType:
 			break;
@@ -1728,7 +1728,7 @@ FsmAp *Factor::walk( ParseData *pd )
 		rtnVal = reItem->walk( pd, 0 );
 		break;
 	case RegExprType:
-		rtnVal = regExp->walk( pd, 0 );
+		rtnVal = regExpr->walk( pd, 0 );
 		break;
 	case ReferenceType:
 		rtnVal = varDef->walk( pd );
@@ -1892,7 +1892,7 @@ RegExpr::~RegExpr()
 {
 	switch ( type ) {
 		case RecurseItem:
-			delete regExp;
+			delete regExpr;
 			delete item;
 			break;
 		case Empty:
@@ -1911,19 +1911,14 @@ FsmAp *RegExpr::walk( ParseData *pd, RegExpr *rootRegex )
 	switch ( type ) {
 		case RecurseItem: {
 			/* Walk both items. */
-			FsmAp *fsm1 = regExp->walk( pd, rootRegex );
+			rtnVal = regExpr->walk( pd, rootRegex );
 			FsmAp *fsm2 = item->walk( pd, rootRegex );
-			if ( fsm1 == 0 )
-				rtnVal = fsm2;
-			else {
-				fsm1->concatOp( fsm2 );
-				rtnVal = fsm1;
-			}
+			rtnVal->concatOp( fsm2 );
 			break;
 		}
 		case Empty: {
-			/* FIXME: Return something here. */
-			rtnVal = 0;
+			rtnVal = new FsmAp();
+			rtnVal->lambdaFsm();
 			break;
 		}
 	}
@@ -1973,6 +1968,10 @@ FsmAp *ReItem::walk( ParseData *pd, RegExpr *rootRegex )
 		case OrBlock: {
 			/* Get the or block and minmize it. */
 			rtnVal = orBlock->walk( pd, rootRegex );
+			if ( rtnVal == 0 ) {
+				rtnVal = new FsmAp();
+				rtnVal->lambdaFsm();
+			}
 			rtnVal->minimizePartition2();
 			break;
 		}
