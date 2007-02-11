@@ -826,8 +826,7 @@ factor_with_rep:
 	};
 factor_with_rep:
 	factor_with_neg final {
-		$$->factorWithRep = new FactorWithRep( 
-				$1->factorWithNeg->loc, $1->factorWithNeg );
+		$$->factorWithRep = new FactorWithRep( $1->factorWithNeg );
 	};
 
 nonterm factor_rep_num
@@ -873,7 +872,7 @@ factor_with_neg:
 	};
 factor_with_neg:
 	factor final {
-		$$->factorWithNeg = new FactorWithNeg( $1->factor->loc, $1->factor );
+		$$->factorWithNeg = new FactorWithNeg( $1->factor );
 	};
 
 nonterm factor

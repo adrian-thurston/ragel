@@ -480,8 +480,8 @@ struct FactorWithRep
 		factorWithNeg(0), lowerRep(lowerRep), 
 		upperRep(upperRep), type(type) { }
 	
-	FactorWithRep( const InputLoc &loc, FactorWithNeg *factorWithNeg )
-		: loc(loc), factorWithNeg(factorWithNeg), type(FactorWithNegType) { }
+	FactorWithRep( FactorWithNeg *factorWithNeg )
+		: factorWithNeg(factorWithNeg), type(FactorWithNegType) { }
 
 	~FactorWithRep();
 
@@ -512,8 +512,8 @@ struct FactorWithNeg
 	FactorWithNeg( const InputLoc &loc, FactorWithNeg *factorWithNeg, Type type) :
 		loc(loc), factorWithNeg(factorWithNeg), factor(0), type(type) { }
 
-	FactorWithNeg( const InputLoc &loc, Factor *factor ) :
-		loc(loc), factorWithNeg(0), factor(factor), type(FactorType) { }
+	FactorWithNeg( Factor *factor ) :
+		factorWithNeg(0), factor(factor), type(FactorType) { }
 
 	~FactorWithNeg();
 
