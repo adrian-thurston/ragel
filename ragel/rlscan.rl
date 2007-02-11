@@ -68,7 +68,7 @@ struct Scanner
 		inclSectionTarg(inclSectionTarg),
 		includeDepth(includeDepth),
 		line(1), column(1), lastnl(0), 
-		parser(0), active(false), 
+		parser(0), ignoreSection(false), 
 		parserExistsError(false),
 		whitespaceOn(true)
 		{}
@@ -93,7 +93,7 @@ struct Scanner
 	void startSection();
 	void endSection();
 	void do_scan();
-	bool parserExists();
+	bool active();
 	ostream &scan_error();
 
 	char *fileName;
@@ -115,7 +115,7 @@ struct Scanner
 	/* Set by machine statements, these persist from section to section
 	 * allowing for unnamed sections. */
 	Parser *parser;
-	bool active;
+	bool ignoreSection;
 	IncludeStack includeStack;
 
 	/* This is set if ragel has already emitted an error stating that
@@ -138,16 +138,20 @@ void Scanner::init( )
 	%% write init;
 }
 
-bool Scanner::parserExists()
+bool Scanner::active()
 {
-	if ( parser != 0 )
-		return true;
+	if ( ignoreSection )
+		return false;
 
-	if ( ! parserExistsError ) {
+	if ( parser == 0 && ! parserExistsError ) {
 		scan_error() << "there is no previous specification name" << endl;
 		parserExistsError = true;
 	}
-	return false;
+
+	if ( parser == 0 )
+		return false;
+
+	return true;
 }
 
 ostream &Scanner::scan_error()
@@ -215,7 +219,7 @@ void Scanner::token( int type )
 		char *machine = word;
 
 		if ( inclSectionTarg == 0 ) {
-			active = true;
+			ignoreSection = false;
 
 			ParserDictEl *pdEl = parserDict.find( machine );
 			if ( pdEl == 0 ) {
@@ -229,12 +233,12 @@ void Scanner::token( int type )
 		}
 		else if ( strcmp( inclSectionTarg, machine ) == 0 ) {
 			/* found include target */
-			active = true;
+			ignoreSection = false;
 			parser = inclToParser;
 		}
 		else {
 			/* ignoring section */
-			active = false;
+			ignoreSection = true;
 			parser = 0;
 		}
 	}
@@ -245,7 +249,7 @@ void Scanner::token( int type )
 
 	action handle_include
 	{
-		if ( parserExists() && active ) {
+		if ( active() ) {
 			char *inclSectionName = word;
 			char *inclFileName = 0;
 
@@ -295,8 +299,7 @@ void Scanner::token( int type )
 
 	action write_command
 	{
-		parserExists();
-		if ( active && machineSpec == 0 && machineName == 0 ) {
+		if ( active() && machineSpec == 0 && machineName == 0 ) {
 			output << "<write"
 					" def_name=\"" << parser->sectionName << "\""
 					" line=\"" << line << "\""
@@ -307,13 +310,13 @@ void Scanner::token( int type )
 
 	action write_arg
 	{
-		if ( active && machineSpec == 0 && machineName == 0 )
+		if ( active() && machineSpec == 0 && machineName == 0 )
 			output << "<arg>" << tokdata << "</arg>";
 	}
 
 	action write_close
 	{
-		if ( active && machineSpec == 0 && machineName == 0 )
+		if ( active() && machineSpec == 0 && machineName == 0 )
 			output << "</write>\n";
 	}
 
@@ -325,7 +328,7 @@ void Scanner::token( int type )
 	action handle_token
 	{
 		/* Send the token off to the parser. */
-		if ( parserExists() && active ) {
+		if ( active() ) {
 			InputLoc loc;
 
 			#if 0
@@ -401,7 +404,7 @@ void Scanner::endSection( )
 	}%%
 
 	/* Close off the section with the parser. */
-	if ( parserExists() && active ) {
+	if ( active() ) {
 		InputLoc loc;
 		loc.fileName = fileName;
 		loc.line = line;
