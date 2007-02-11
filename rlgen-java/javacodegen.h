@@ -100,7 +100,7 @@ public:
 
 	virtual string NULL_ITEM();
 	virtual ostream &OPEN_ARRAY( string type, string name );
-	virtual ostream &ARRAY_ITEM( int item, bool last );
+	virtual ostream &ARRAY_ITEM( string item, bool last );
 	virtual ostream &CLOSE_ARRAY();
 	virtual ostream &STATIC_VAR( string type, string name );
 	virtual string ARR_OFF( string ptr, string offset );
@@ -114,7 +114,8 @@ public:
 	string GET_WIDE_KEY();
 	string GET_WIDE_KEY( RedStateAp *state );
 	string TABS( int level );
-	int KEY( Key key );
+	string KEY( Key key );
+	string INT( int i );
 	void ACTION( ostream &ret, Action *action, int targState, bool inFinish );
 	void CONDITION( ostream &ret, Action *condition );
 	string ALPH_TYPE();

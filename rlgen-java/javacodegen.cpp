@@ -502,7 +502,7 @@ std::ostream &JavaTabCodeGen::COND_OFFSETS()
 	int curKeyOffset = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write the key offset. */
-		ARRAY_ITEM( curKeyOffset, st.last() );
+		ARRAY_ITEM( INT(curKeyOffset), st.last() );
 
 		/* Move the key offset ahead. */
 		curKeyOffset += st->stateCondList.length();
@@ -515,7 +515,7 @@ std::ostream &JavaTabCodeGen::KEY_OFFSETS()
 	int curKeyOffset = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write the key offset. */
-		ARRAY_ITEM( curKeyOffset, st.last() );
+		ARRAY_ITEM( INT(curKeyOffset), st.last() );
 
 		/* Move the key offset ahead. */
 		curKeyOffset += st->outSingle.length() + st->outRange.length()*2;
@@ -529,7 +529,7 @@ std::ostream &JavaTabCodeGen::INDEX_OFFSETS()
 	int curIndOffset = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write the index offset. */
-		ARRAY_ITEM( curIndOffset, st.last() );
+		ARRAY_ITEM( INT(curIndOffset), st.last() );
 
 		/* Move the index offset ahead. */
 		curIndOffset += st->outSingle.length() + st->outRange.length();
@@ -543,7 +543,7 @@ std::ostream &JavaTabCodeGen::COND_LENS()
 {
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write singles length. */
-		ARRAY_ITEM( st->stateCondList.length(), st.last() );
+		ARRAY_ITEM( INT(st->stateCondList.length()), st.last() );
 	}
 	return out;
 }
@@ -553,7 +553,7 @@ std::ostream &JavaTabCodeGen::SINGLE_LENS()
 {
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write singles length. */
-		ARRAY_ITEM( st->outSingle.length(), st.last() );
+		ARRAY_ITEM( INT(st->outSingle.length()), st.last() );
 	}
 	return out;
 }
@@ -562,7 +562,7 @@ std::ostream &JavaTabCodeGen::RANGE_LENS()
 {
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Emit length of range index. */
-		ARRAY_ITEM( st->outRange.length(), st.last() );
+		ARRAY_ITEM( INT(st->outRange.length()), st.last() );
 	}
 	return out;
 }
@@ -571,7 +571,7 @@ std::ostream &JavaTabCodeGen::TO_STATE_ACTIONS()
 {
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write any eof action. */
-		ARRAY_ITEM( TO_STATE_ACTION(st), st.last() );
+		ARRAY_ITEM( INT(TO_STATE_ACTION(st)), st.last() );
 	}
 	return out;
 }
@@ -580,7 +580,7 @@ std::ostream &JavaTabCodeGen::FROM_STATE_ACTIONS()
 {
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write any eof action. */
-		ARRAY_ITEM( FROM_STATE_ACTION(st), st.last() );
+		ARRAY_ITEM( INT(FROM_STATE_ACTION(st)), st.last() );
 	}
 	return out;
 }
@@ -589,7 +589,7 @@ std::ostream &JavaTabCodeGen::EOF_ACTIONS()
 {
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write any eof action. */
-		ARRAY_ITEM( EOF_ACTION(st), st.last() );
+		ARRAY_ITEM( INT(EOF_ACTION(st)), st.last() );
 	}
 	return out;
 }
@@ -607,7 +607,7 @@ std::ostream &JavaTabCodeGen::COND_KEYS()
 
 	/* Output one last number so we don't have to figure out when the last
 	 * entry is and avoid writing a comma. */
-	ARRAY_ITEM( 0, true );
+	ARRAY_ITEM( INT(0), true );
 	return out;
 }
 
@@ -623,7 +623,7 @@ std::ostream &JavaTabCodeGen::COND_SPACES()
 
 	/* Output one last number so we don't have to figure out when the last
 	 * entry is and avoid writing a comma. */
-	ARRAY_ITEM( 0, true );
+	ARRAY_ITEM( INT(0), true );
 	return out;
 }
 
@@ -647,7 +647,7 @@ std::ostream &JavaTabCodeGen::KEYS()
 
 	/* Output one last number so we don't have to figure out when the last
 	 * entry is and avoid writing a comma. */
-	ARRAY_ITEM( 0, true );
+	ARRAY_ITEM( INT(0), true );
 	return out;
 }
 
@@ -672,7 +672,7 @@ std::ostream &JavaTabCodeGen::INDICIES()
 
 	/* Output one last number so we don't have to figure out when the last
 	 * entry is and avoid writing a comma. */
-	ARRAY_ITEM( 0, true );
+	ARRAY_ITEM( INT(0), true );
 	return out;
 }
 
@@ -700,7 +700,7 @@ std::ostream &JavaTabCodeGen::TRANS_TARGS()
 
 	/* Output one last number so we don't have to figure out when the last
 	 * entry is and avoid writing a comma. */
-	ARRAY_ITEM( 0, true );
+	ARRAY_ITEM( INT(0), true );
 	return out;
 }
 
@@ -711,25 +711,25 @@ std::ostream &JavaTabCodeGen::TRANS_ACTIONS()
 		/* Walk the singles. */
 		for ( RedTransList::Iter stel = st->outSingle; stel.lte(); stel++ ) {
 			RedTransAp *trans = stel->value;
-			ARRAY_ITEM( TRANS_ACTION( trans ), false );
+			ARRAY_ITEM( INT(TRANS_ACTION( trans )), false );
 		}
 
 		/* Walk the ranges. */
 		for ( RedTransList::Iter rtel = st->outRange; rtel.lte(); rtel++ ) {
 			RedTransAp *trans = rtel->value;
-			ARRAY_ITEM( TRANS_ACTION( trans ), false );
+			ARRAY_ITEM( INT(TRANS_ACTION( trans )), false );
 		}
 
 		/* The state's default index goes next. */
 		if ( st->defTrans != 0 ) {
 			RedTransAp *trans = st->defTrans;
-			ARRAY_ITEM( TRANS_ACTION( trans ), false );
+			ARRAY_ITEM( INT(TRANS_ACTION( trans )), false );
 		}
 	}
 
 	/* Output one last number so we don't have to figure out when the last
 	 * entry is and avoid writing a comma. */
-	ARRAY_ITEM( 0, true );
+	ARRAY_ITEM( INT(0), true );
 	return out;
 }
 
@@ -744,7 +744,7 @@ std::ostream &JavaTabCodeGen::TRANS_TARGS_WI()
 	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
 		/* Write out the target state. */
 		RedTransAp *trans = transPtrs[t];
-		ARRAY_ITEM( trans->targ->id, ( t >= redFsm->transSet.length()-1 ) );
+		ARRAY_ITEM( INT(trans->targ->id), ( t >= redFsm->transSet.length()-1 ) );
 	}
 	delete[] transPtrs;
 	return out;
@@ -762,7 +762,7 @@ std::ostream &JavaTabCodeGen::TRANS_ACTIONS_WI()
 	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
 		/* Write the function for the transition. */
 		RedTransAp *trans = transPtrs[t];
-		ARRAY_ITEM( TRANS_ACTION( trans ), ( t >= redFsm->transSet.length()-1 ) );
+		ARRAY_ITEM( INT(TRANS_ACTION( trans )), ( t >= redFsm->transSet.length()-1 ) );
 	}
 	delete[] transPtrs;
 	return out;
@@ -1044,7 +1044,7 @@ std::ostream &JavaTabCodeGen::OPEN_ARRAY( string type, string name )
 	return out;
 }
 
-std::ostream &JavaTabCodeGen::ARRAY_ITEM( int item, bool last )
+std::ostream &JavaTabCodeGen::ARRAY_ITEM( string item, bool last )
 {
 	out << "r[" << item_count << "]=" << item << "; ";
 
@@ -1172,13 +1172,13 @@ string JavaTabCodeGen::START_STATE_ID()
 /* Write out the array of actions. */
 std::ostream &JavaTabCodeGen::ACTIONS_ARRAY()
 {
-	ARRAY_ITEM( 0, false );
+	ARRAY_ITEM( INT(0), false );
 	for ( ActionTableMap::Iter act = redFsm->actionMap; act.lte(); act++ ) {
 		/* Write out the length, which will never be the last character. */
-		ARRAY_ITEM( act->key.length(), false );
+		ARRAY_ITEM( INT(act->key.length()), false );
 
 		for ( ActionTable::Iter item = act->key; item.lte(); item++ )
-			ARRAY_ITEM( item->value->actionId, (act.last() && item.last()) );
+			ARRAY_ITEM( INT(item->value->actionId), (act.last() && item.last()) );
 	}
 	return out;
 }
@@ -1234,11 +1234,22 @@ string JavaTabCodeGen::TABS( int level )
 	return result;
 }
 
-int JavaTabCodeGen::KEY( Key key )
+string JavaTabCodeGen::KEY( Key key )
 {
-	return key.getVal();
+	ostringstream ret;
+	if ( keyOps->isSigned || !hostLang->explicitUnsigned )
+		ret << key.getVal();
+	else
+		ret << (unsigned long) key.getVal();
+	return ret.str();
 }
 
+string JavaTabCodeGen::INT( int i )
+{
+	ostringstream ret;
+	ret << i;
+	return ret.str();
+}
 
 void JavaTabCodeGen::LM_SWITCH( ostream &ret, InlineItem *item, 
 		int targState, int inFinish )
