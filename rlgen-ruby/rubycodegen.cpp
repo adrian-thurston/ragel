@@ -710,7 +710,7 @@ std::ostream &RubyCodeGen::COND_OFFSETS()
 	int totalStateNum = 0, curKeyOffset = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write the key offset. */
-		ARRAY_ITEM( curKeyOffset, ++totalStateNum, st.last() );
+		ARRAY_ITEM( INT(curKeyOffset), ++totalStateNum, st.last() );
 
 		/* Move the key offset ahead. */
 		curKeyOffset += st->stateCondList.length();
@@ -725,7 +725,7 @@ std::ostream &RubyCodeGen::KEY_OFFSETS()
 	int totalStateNum = 0, curKeyOffset = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write the key offset. */
-		ARRAY_ITEM( curKeyOffset, ++totalStateNum, st.last() );
+		ARRAY_ITEM( INT(curKeyOffset), ++totalStateNum, st.last() );
 
 		/* Move the key offset ahead. */
 		curKeyOffset += st->outSingle.length() + st->outRange.length()*2;
@@ -741,7 +741,7 @@ std::ostream &RubyCodeGen::INDEX_OFFSETS()
 	int totalStateNum = 0, curIndOffset = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write the index offset. */
-		ARRAY_ITEM( curIndOffset, ++totalStateNum, st.last() );
+		ARRAY_ITEM( INT(curIndOffset), ++totalStateNum, st.last() );
 
 		/* Move the index offset ahead. */
 		curIndOffset += st->outSingle.length() + st->outRange.length();
@@ -758,7 +758,7 @@ std::ostream &RubyCodeGen::COND_LENS()
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write singles length. */
-		ARRAY_ITEM( st->stateCondList.length(), ++totalStateNum, st.last() );
+		ARRAY_ITEM( INT(st->stateCondList.length()), ++totalStateNum, st.last() );
 	}
 	END_ARRAY_LINE();
 	return out;
@@ -771,7 +771,7 @@ std::ostream &RubyCodeGen::SINGLE_LENS()
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write singles length. */
-		ARRAY_ITEM( st->outSingle.length(), ++totalStateNum, st.last() );
+		ARRAY_ITEM( INT(st->outSingle.length()), ++totalStateNum, st.last() );
 	}
 	END_ARRAY_LINE();
 	return out;
@@ -783,7 +783,7 @@ std::ostream &RubyCodeGen::RANGE_LENS()
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Emit length of range index. */
-		ARRAY_ITEM( st->outRange.length(), ++totalStateNum, st.last() );
+		ARRAY_ITEM( INT(st->outRange.length()), ++totalStateNum, st.last() );
 	}
 	END_ARRAY_LINE();
 	return out;
@@ -795,7 +795,7 @@ std::ostream &RubyCodeGen::TO_STATE_ACTIONS()
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write any eof action. */
-		ARRAY_ITEM( TO_STATE_ACTION(st), ++totalStateNum, st.last() );
+		ARRAY_ITEM( INT(TO_STATE_ACTION(st)), ++totalStateNum, st.last() );
 	}
 	END_ARRAY_LINE();
 	return out;
@@ -807,7 +807,7 @@ std::ostream &RubyCodeGen::FROM_STATE_ACTIONS()
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write any eof action. */
-		ARRAY_ITEM( FROM_STATE_ACTION(st), ++totalStateNum, st.last() );
+		ARRAY_ITEM( INT(FROM_STATE_ACTION(st)), ++totalStateNum, st.last() );
 	}
 	END_ARRAY_LINE();
 	return out;
@@ -819,7 +819,7 @@ std::ostream &RubyCodeGen::EOF_ACTIONS()
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write any eof action. */
-		ARRAY_ITEM( EOF_ACTION(st), ++totalStateNum, st.last() );
+		ARRAY_ITEM( INT(EOF_ACTION(st)), ++totalStateNum, st.last() );
 	}
 	END_ARRAY_LINE();
 	return out;
@@ -840,7 +840,7 @@ std::ostream &RubyCodeGen::COND_KEYS()
 
 	/* Output one last number so we don't have to figure out when the last
 	 * entry is and avoid writing a comma. */
-	ARRAY_ITEM( 0, ++totalTrans, true );
+	ARRAY_ITEM( INT(0), ++totalTrans, true );
 	END_ARRAY_LINE();
 	return out;
 }
@@ -859,7 +859,7 @@ std::ostream &RubyCodeGen::COND_SPACES()
 
 	/* Output one last number so we don't have to figure out when the last
 	 * entry is and avoid writing a comma. */
-	ARRAY_ITEM( 0, ++totalTrans, true );
+	ARRAY_ITEM( INT(0), ++totalTrans, true );
 	END_ARRAY_LINE();
 	return out;
 }
@@ -886,7 +886,7 @@ std::ostream &RubyCodeGen::KEYS()
 
 	/* Output one last number so we don't have to figure out when the last
 	 * entry is and avoid writing a comma. */
-	ARRAY_ITEM( 0, ++totalTrans, true );
+	ARRAY_ITEM( INT(0), ++totalTrans, true );
 	END_ARRAY_LINE();
 	return out;
 }
@@ -914,7 +914,7 @@ std::ostream &RubyCodeGen::INDICIES()
 
 	/* Output one last number so we don't have to figure out when the last
 	 * entry is and avoid writing a comma. */
-	ARRAY_ITEM( 0, ++totalTrans, true );
+	ARRAY_ITEM( INT(0), ++totalTrans, true );
 	END_ARRAY_LINE();
 	return out;
 }
@@ -945,7 +945,7 @@ std::ostream &RubyCodeGen::TRANS_TARGS()
 
 	/* Output one last number so we don't have to figure out when the last
 	 * entry is and avoid writing a comma. */
-	ARRAY_ITEM( 0, ++totalTrans, true );
+	ARRAY_ITEM( INT(0), ++totalTrans, true );
 	END_ARRAY_LINE();
 	return out;
 }
@@ -959,25 +959,25 @@ std::ostream &RubyCodeGen::TRANS_ACTIONS()
 		/* Walk the singles. */
 		for ( RedTransList::Iter stel = st->outSingle; stel.lte(); stel++ ) {
 			RedTransAp *trans = stel->value;
-			ARRAY_ITEM( TRANS_ACTION( trans ), ++totalTrans, false );
+			ARRAY_ITEM( INT(TRANS_ACTION( trans )), ++totalTrans, false );
 		}
 
 		/* Walk the ranges. */
 		for ( RedTransList::Iter rtel = st->outRange; rtel.lte(); rtel++ ) {
 			RedTransAp *trans = rtel->value;
-			ARRAY_ITEM( TRANS_ACTION( trans ), ++totalTrans, false );
+			ARRAY_ITEM( INT(TRANS_ACTION( trans )), ++totalTrans, false );
 		}
 
 		/* The state's default index goes next. */
 		if ( st->defTrans != 0 ) {
 			RedTransAp *trans = st->defTrans;
-			ARRAY_ITEM( TRANS_ACTION( trans ), ++totalTrans, false );
+			ARRAY_ITEM( INT(TRANS_ACTION( trans )), ++totalTrans, false );
 		}
 	}
 
 	/* Output one last number so we don't have to figure out when the last
 	 * entry is and avoid writing a comma. */
-	ARRAY_ITEM( 0, ++totalTrans, true );
+	ARRAY_ITEM( INT(0), ++totalTrans, true );
 	END_ARRAY_LINE();
 	return out;
 }
@@ -995,7 +995,7 @@ std::ostream &RubyCodeGen::TRANS_TARGS_WI()
 	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
 		/* Write out the target state. */
 		RedTransAp *trans = transPtrs[t];
-		ARRAY_ITEM( trans->targ->id, ++totalStates, ( t >= redFsm->transSet.length()-1 ) );
+		ARRAY_ITEM( INT(trans->targ->id), ++totalStates, ( t >= redFsm->transSet.length()-1 ) );
 	}
 	END_ARRAY_LINE();
 	delete[] transPtrs;
@@ -1016,7 +1016,7 @@ std::ostream &RubyCodeGen::TRANS_ACTIONS_WI()
 	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
 		/* Write the function for the transition. */
 		RedTransAp *trans = transPtrs[t];
-		ARRAY_ITEM( TRANS_ACTION( trans ), ++totalAct, ( t >= redFsm->transSet.length()-1 ) );
+		ARRAY_ITEM( INT(TRANS_ACTION( trans )), ++totalAct, ( t >= redFsm->transSet.length()-1 ) );
 	}
 	END_ARRAY_LINE();
 	delete[] transPtrs;
@@ -1156,7 +1156,7 @@ std::ostream &RubyCodeGen::START_ARRAY_LINE()
 	return out;
 }
 
-std::ostream &RubyCodeGen::ARRAY_ITEM( int item, int count, bool last )
+std::ostream &RubyCodeGen::ARRAY_ITEM( string item, int count, bool last )
 {
 	out << item;
 	if ( !last )
@@ -1223,10 +1223,10 @@ std::ostream &RubyCodeGen::ACTIONS_ARRAY()
 	ARRAY_ITEM( 0, ++totalActions, false );
 	for ( ActionTableMap::Iter act = redFsm->actionMap; act.lte(); act++ ) {
 		/* Write out the length, which will never be the last character. */
-		ARRAY_ITEM( act->key.length(), ++totalActions, false );
+		ARRAY_ITEM( INT(act->key.length()), ++totalActions, false );
 
 		for ( ActionTable::Iter item = act->key; item.lte(); item++ ) {
-			ARRAY_ITEM( item->value->actionId, ++totalActions, (act.last() && item.last()) );
+			ARRAY_ITEM( INT(item->value->actionId), ++totalActions, (act.last() && item.last()) );
 		}
 	}
 	END_ARRAY_LINE();
@@ -1284,11 +1284,22 @@ string RubyCodeGen::TABS( int level )
 	return result;
 }
 
-int RubyCodeGen::KEY( Key key )
+string RubyCodeGen::KEY( Key key )
 {
-	return key.getVal();
+	ostringstream ret;
+	if ( keyOps->isSigned || !hostLang->explicitUnsigned )
+		ret << key.getVal();
+	else
+		ret << (unsigned long) key.getVal();
+	return ret.str();
 }
 
+string RubyCodeGen::INT( int i )
+{
+	ostringstream ret;
+	ret << i;
+	return ret.str();
+}
 
 void RubyCodeGen::LM_SWITCH( ostream &ret, InlineItem *item, 
 		int targState, int inFinish )

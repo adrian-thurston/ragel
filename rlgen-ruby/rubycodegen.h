@@ -101,7 +101,7 @@ private:
 public:
 
 	virtual ostream &START_ARRAY_LINE();
-	virtual ostream &ARRAY_ITEM( int item, int count, bool last );
+	virtual ostream &ARRAY_ITEM( string item, int count, bool last );
 	virtual ostream &END_ARRAY_LINE();
 
 	string FSM_NAME();
@@ -110,7 +110,8 @@ public:
 	string GET_WIDE_KEY();
 	string GET_WIDE_KEY( RedStateAp *state );
 	string TABS( int level );
-	int KEY( Key key );
+	string KEY( Key key );
+	string INT( int i );
 	void CONDITION( ostream &ret, Action *condition );
 	string ALPH_TYPE();
 	string WIDE_ALPH_TYPE();
