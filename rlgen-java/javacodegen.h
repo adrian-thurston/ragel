@@ -93,14 +93,14 @@ struct JavaTabCodeGen : public CodeGenData
 private:
 	string array_type;
 	string array_name;
+	int item_count;
+	int div_count;
 
 public:
 
 	virtual string NULL_ITEM();
 	virtual ostream &OPEN_ARRAY( string type, string name );
-	virtual ostream &START_ARRAY_LINE();
-	virtual ostream &ARRAY_ITEM( int item, int count, bool last );
-	virtual ostream &END_ARRAY_LINE();
+	virtual ostream &ARRAY_ITEM( int item, bool last );
 	virtual ostream &CLOSE_ARRAY();
 	virtual ostream &STATIC_VAR( string type, string name );
 	virtual string ARR_OFF( string ptr, string offset );
