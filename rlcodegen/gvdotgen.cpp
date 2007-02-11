@@ -31,37 +31,38 @@ std::ostream &GraphvizDotGen::KEY( Key key )
 	if ( printPrintables && key.isPrintable() ) {
 		// Output values as characters, ensuring we escape the quote (") character
 		char cVal = (char) key.getVal();
-		out << "'";
 		switch ( cVal ) {
 			case '"': case '\\':
-				out << "\\" << cVal;
+				out << "'\\" << cVal << "'";
 				break;
 			case '\a':
-				out << "\\\\a";
+				out << "'\\\\a'";
 				break;
 			case '\b':
-				out << "\\\\b";
+				out << "'\\\\b'";
 				break;
 			case '\t':
-				out << "\\\\t";
+				out << "'\\\\t'";
 				break;
 			case '\n':
-				out << "\\\\n";
+				out << "'\\\\n'";
 				break;
 			case '\v':
-				out << "\\\\v";
+				out << "'\\\\v'";
 				break;
 			case '\f':
-				out << "\\\\f";
+				out << "'\\\\f'";
 				break;
 			case '\r':
-				out << "\\\\r";
+				out << "'\\\\r'";
+				break;
+			case ' ':
+				out << "SP";
 				break;
 			default:	
-				out << cVal;
+				out << "'" << cVal << "'";
 				break;
 		}
-		out << "'";
 	}
 	else {
 		if ( keyOps->isSigned )
