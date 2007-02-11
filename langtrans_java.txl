@@ -272,16 +272,6 @@ rule machineName
 		'machine ClassName ';
 end rule
 
-function byteAlphtype
-	replace * [repeat statement]
-		MS [machine_stmt]
-		Rest [repeat statement]
-	by
-		MS
-		'alphtype 'byte ';
-		Rest
-end function
-
 function langTransJava
 	replace [program]
 		Definitions [repeat action_lang_stmt]
@@ -293,7 +283,7 @@ function langTransJava
 	construct JavaInitializations [repeat java_lang_stmt]
 		_ [alToJava Initializations]
 	construct NewRagelDef [ragel_def]
-		RagelDef [actionTransJava] [machineName] [byteAlphtype]
+		RagelDef [actionTransJava] [machineName]
 	import ArrayInits [java_statements]
 		ArrayInitStmts [repeat java_lang_stmt]
 	by
