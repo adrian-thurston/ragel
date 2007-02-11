@@ -144,7 +144,7 @@ bool Scanner::parserExists()
 		return true;
 
 	if ( ! parserExistsError ) {
-		scan_error() << "include: there is no previous specification name" << endl;
+		scan_error() << "there is no previous specification name" << endl;
 		parserExistsError = true;
 	}
 	return false;
@@ -245,7 +245,7 @@ void Scanner::token( int type )
 
 	action handle_include
 	{
-		if ( active && parserExists() ) {
+		if ( parserExists() && active ) {
 			char *inclSectionName = word;
 			char *inclFileName = 0;
 
@@ -295,6 +295,7 @@ void Scanner::token( int type )
 
 	action write_command
 	{
+		parserExists();
 		if ( active && machineSpec == 0 && machineName == 0 ) {
 			output << "<write"
 					" def_name=\"" << parser->sectionName << "\""
@@ -324,7 +325,7 @@ void Scanner::token( int type )
 	action handle_token
 	{
 		/* Send the token off to the parser. */
-		if ( active && parserExists() ) {
+		if ( parserExists() && active ) {
 			InputLoc loc;
 
 			#if 0
@@ -400,7 +401,7 @@ void Scanner::endSection( )
 	}%%
 
 	/* Close off the section with the parser. */
-	if ( active && parserExists() ) {
+	if ( parserExists() && active ) {
 		InputLoc loc;
 		loc.fileName = fileName;
 		loc.line = line;
