@@ -98,28 +98,28 @@ for test_case; do
 
 	case $lang in
 		c++)
-			codegen=../rlcodegen/rlcodegen;
+			codegen=../rlgen-cd/rlgen-cd;
 			code_suffix=cpp;
 			compiler=$cxx_compiler;
 			lang_opt=-C;
 			cflags="-pedantic -ansi -Wall -O3"
 		;;
 		d)
-			codegen=../rlcodegen/rlcodegen;
+			codegen=../rlgen-cd/rlgen-cd;
 			code_suffix=d;
 			compiler=$d_compiler;
 			lang_opt=-D;
 			cflags="-Wall -O3"
 		;;
 		c)
-			codegen=../rlcodegen/rlcodegen;
+			codegen=../rlgen-cd/rlgen-cd;
 			code_suffix=c;
 			compiler=$c_compiler;
 			lang_opt=-C;
 			cflags="-pedantic -ansi -Wall -O3"
 		;;
 		obj-c)
-			codegen=../rlcodegen/rlcodegen;
+			codegen=../rlgen-cd/rlgen-cd;
 			code_suffix=m;
 			compiler=$objc_compiler
 			lang_opt=-C;
