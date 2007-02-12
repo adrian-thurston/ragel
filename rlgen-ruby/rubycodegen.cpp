@@ -1220,7 +1220,7 @@ std::ostream &RubyCodeGen::ACTIONS_ARRAY()
 {
 	START_ARRAY_LINE();
 	int totalActions = 0;
-	ARRAY_ITEM( 0, ++totalActions, false );
+	ARRAY_ITEM( INT(0), ++totalActions, false );
 	for ( ActionTableMap::Iter act = redFsm->actionMap; act.lte(); act++ ) {
 		/* Write out the length, which will never be the last character. */
 		ARRAY_ITEM( INT(act->key.length()), ++totalActions, false );
