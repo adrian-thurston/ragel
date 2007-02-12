@@ -7,8 +7,7 @@ neg = false
 val = 0
 
 %%{
-    machine atoi1_java;
-    alphtype byte;
+    machine atoi3;
     action begin {
         neg = false;
         val = 0;
@@ -42,7 +41,7 @@ def run_machine( data )
 	%% write init;
 	%% write exec;
 	%% write eof;
-	if  cs >= atoi1_java_first_final
+	if  cs >= atoi3_first_final
 		puts "ACCEPT"
 	else
 		puts "FAIL"
