@@ -28,7 +28,7 @@
 #include "vector.h"
 #include "config.h"
 
-#define PROGNAME "rlcodegen"
+#define PROGNAME "rlgen-cd"
 
 /* Target output style. */
 enum CodeStyleEnum

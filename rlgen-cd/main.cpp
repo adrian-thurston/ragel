@@ -27,7 +27,7 @@
 #include <unistd.h>
 
 #include "common.h"
-#include "rlcodegen.h"
+#include "rlgen-cd.h"
 #include "xmlparse.h"
 #include "pcheck.h"
 #include "vector.h"
@@ -114,7 +114,7 @@ ostream &error()
 ostream *openOutput( char *inputFile )
 {
 	if ( hostLangType != CCode && hostLangType != DCode )
-		error() << PROGNAME " generates code for C and D only" << endl;
+		error() << "this code generator is for C and D only" << endl;
 
 	/* If the output format is code and no output file name is given, then
 	 * make a default. */

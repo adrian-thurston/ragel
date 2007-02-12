@@ -48,9 +48,9 @@ DEPS = $(CC_SRCS:%.cpp=.%.d)
 include ../version.mk
 
 # Rules.
-all: rlcodegen
+all: rlgen-cd
 
-rlcodegen: $(LIBS) $(OBJS)
+rlgen-cd: $(LIBS) $(OBJS)
 	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
 
 %.o: %.cpp
@@ -61,10 +61,10 @@ distclean: clean
 	rm -f Makefile
 
 clean:
-	rm -f tags .*.d *.o rlcodegen $(EXTRA_CLEAN)
+	rm -f tags .*.d *.o rlgen-cd $(EXTRA_CLEAN)
 
 install: all
 	install -d $(PREFIX)/bin
-	install -s rlcodegen $(PREFIX)/bin/rlcodegen
+	install -s rlgen-cd $(PREFIX)/bin/rlgen-cd
 
 -include $(DEPS)
