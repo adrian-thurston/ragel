@@ -27,21 +27,12 @@
 #include <unistd.h>
 
 #include "common.h"
-#include "rlcodegen.h"
+#include "rlgen-dot.h"
 #include "xmlparse.h"
 #include "pcheck.h"
 #include "vector.h"
 #include "version.h"
-
-/* Code generators. */
-#include "tabcodegen.h"
-#include "ftabcodegen.h"
-#include "flatcodegen.h"
-#include "fflatcodegen.h"
-#include "gotocodegen.h"
-#include "fgotocodegen.h"
-#include "ipgotocodegen.h"
-#include "splitcodegen.h"
+#include "gvdotgen.h"
 
 using std::istream;
 using std::ifstream;
@@ -51,9 +42,6 @@ using std::cin;
 using std::cout;
 using std::cerr;
 using std::endl;
-
-/* Target language and output style. */
-CodeStyleEnum codeStyle = GenTables;
 
 /* Io globals. */
 istream *inStream = 0;
@@ -65,7 +53,7 @@ char *outputFileName = 0;
 bool graphvizDone = false;
 
 int numSplitPartitions = 0;
-bool printPrintables = false;
+bool displayPrintables = false;
 
 /* Print a summary of the options. */
 void usage()
@@ -76,22 +64,15 @@ void usage()
 "   -h, -H, -?, --help    Print this usage and exit\n"
 "   -v, --version         Print version information and exit\n"
 "   -o <file>             Write output to <file>\n"
-"generated code style:\n"
-"   -T0                   Table driven FSM (default)\n"
-"   -T1                   Faster table driven FSM\n"
-"   -F0                   Flat table driven FSM\n"
-"   -F1                   Faster flat table-driven FSM\n"
-"   -G0                   Goto-driven FSM\n"
-"   -G1                   Faster goto-driven FSM\n"
-"   -G2                   Really fast goto-driven FSM\n"
-"   -P<N>                 N-Way Split really fast goto-driven FSM\n"
+"output:\n"
+"   -p                    Display printable characters on labels\n"
 	;	
 }
 
 /* Print version information. */
 void version()
 {
-	cout << "Ragel Code Generator for C, C++, Objective-C, D" << endl <<
+	cout << "Ragel interface to Graphviz Dotfiles" << endl <<
 			"Version " VERSION << ", " PUBDATE << endl <<
 			"Copyright (c) 2001-2007 by Adrian Thurston" << endl;
 }
@@ -113,26 +94,6 @@ ostream &error()
 /* Invoked by the parser when the root element is opened. */
 ostream *openOutput( char *inputFile )
 {
-	if ( hostLangType != CCode && hostLangType != DCode )
-		error() << PROGNAME " generates code for C and D only" << endl;
-
-	/* If the output format is code and no output file name is given, then
-	 * make a default. */
-	if ( outputFileName == 0 ) {
-		char *ext = findFileExtension( inputFile );
-		if ( ext != 0 && strcmp( ext, ".rh" ) == 0 )
-			outputFileName = fileNameFromStem( inputFile, ".h" );
-		else {
-			char *defExtension = 0;
-			switch ( hostLangType ) {
-				case CCode: defExtension = ".c"; break;
-				case DCode: defExtension = ".d"; break;
-				default: break;
-			}
-			outputFileName = fileNameFromStem( inputFile, defExtension );
-		}
-	}
-
 	/* Make sure we are not writing to the same file as the input file. */
 	if ( outputFileName != 0 && strcmp( inputFile, outputFileName  ) == 0 ) {
 		error() << "output file \"" << outputFileName  << 
@@ -162,68 +123,7 @@ ostream *openOutput( char *inputFile )
 CodeGenData *makeCodeGen( char *sourceFileName, char *fsmName, 
 		ostream &out, bool wantComplete )
 {
-	CodeGenData *codeGen = 0;
-	switch ( hostLangType ) {
-	case CCode:
-		switch ( codeStyle ) {
-		case GenTables:
-			codeGen = new CTabCodeGen(out);
-			break;
-		case GenFTables:
-			codeGen = new CFTabCodeGen(out);
-			break;
-		case GenFlat:
-			codeGen = new CFlatCodeGen(out);
-			break;
-		case GenFFlat:
-			codeGen = new CFFlatCodeGen(out);
-			break;
-		case GenGoto:
-			codeGen = new CGotoCodeGen(out);
-			break;
-		case GenFGoto:
-			codeGen = new CFGotoCodeGen(out);
-			break;
-		case GenIpGoto:
-			codeGen = new CIpGotoCodeGen(out);
-			break;
-		case GenSplit:
-			codeGen = new CSplitCodeGen(out);
-			break;
-		}
-		break;
-
-	case DCode:
-		switch ( codeStyle ) {
-		case GenTables:
-			codeGen = new DTabCodeGen(out);
-			break;
-		case GenFTables:
-			codeGen = new DFTabCodeGen(out);
-			break;
-		case GenFlat:
-			codeGen = new DFlatCodeGen(out);
-			break;
-		case GenFFlat:
-			codeGen = new DFFlatCodeGen(out);
-			break;
-		case GenGoto:
-			codeGen = new DGotoCodeGen(out);
-			break;
-		case GenFGoto:
-			codeGen = new DFGotoCodeGen(out);
-			break;
-		case GenIpGoto:
-			codeGen = new DIpGotoCodeGen(out);
-			break;
-		case GenSplit:
-			codeGen = new DSplitCodeGen(out);
-			break;
-		}
-		break;
-
-	default: break;
-	}
+	CodeGenData *codeGen = new GraphvizDotGen(out);
 
 	codeGen->sourceFileName = sourceFileName;
 	codeGen->fsmName = fsmName;
@@ -233,11 +133,10 @@ CodeGenData *makeCodeGen( char *sourceFileName, char *fsmName,
 }
 
 
-
 /* Main, process args and call yyparse to start scanning input. */
 int main(int argc, char **argv)
 {
-	ParamCheck pc("o:VpT:F:G:vHh?-:P:", argc, argv);
+	ParamCheck pc("o:pvHh?-:", argc, argv);
 	char *xmlInputFileName = 0;
 
 	while ( pc.check() ) {
@@ -256,45 +155,8 @@ int main(int argc, char **argv)
 				}
 				break;
 
-			/* Code style. */
-			case 'T':
-				if ( pc.parameterArg[0] == '0' )
-					codeStyle = GenTables;
-				else if ( pc.parameterArg[0] == '1' )
-					codeStyle = GenFTables;
-				else {
-					error() << "-T" << pc.parameterArg[0] << 
-							" is an invalid argument" << endl;
-					exit(1);
-				}
-				break;
-			case 'F':
-				if ( pc.parameterArg[0] == '0' )
-					codeStyle = GenFlat;
-				else if ( pc.parameterArg[0] == '1' )
-					codeStyle = GenFFlat;
-				else {
-					error() << "-F" << pc.parameterArg[0] << 
-							" is an invalid argument" << endl;
-					exit(1);
-				}
-				break;
-			case 'G':
-				if ( pc.parameterArg[0] == '0' )
-					codeStyle = GenGoto;
-				else if ( pc.parameterArg[0] == '1' )
-					codeStyle = GenFGoto;
-				else if ( pc.parameterArg[0] == '2' )
-					codeStyle = GenIpGoto;
-				else {
-					error() << "-G" << pc.parameterArg[0] << 
-							" is an invalid argument" << endl;
-					exit(1);
-				}
-				break;
-			case 'P':
-				codeStyle = GenSplit;
-				numSplitPartitions = atoi( pc.parameterArg );
+			case 'p':
+				displayPrintables = true;
 				break;
 
 			/* Version and help. */
@@ -359,8 +221,8 @@ int main(int argc, char **argv)
 	if ( gblErrorCount > 0 )
 		exit(1);
 
-	bool wantComplete = true;
-	bool outputActive = true;
+	bool wantComplete = false;
+	bool outputActive = false;
 
 	/* Parse the input! */
 	xml_parse( *inStream, xmlInputFileName, outputActive, wantComplete );

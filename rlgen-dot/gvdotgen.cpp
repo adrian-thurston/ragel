@@ -19,16 +19,23 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-
-#include "rlcodegen.h"
+#include "rlgen-dot.h"
 #include "gvdotgen.h"
 #include "gendata.h"
 
 using namespace std;
 
+void lineDirective( ostream &out, char *fileName, int line )
+{
+}
+
+void genLineDirective( ostream &out )
+{
+}
+
 std::ostream &GraphvizDotGen::KEY( Key key )
 {
-	if ( printPrintables && key.isPrintable() ) {
+	if ( displayPrintables && key.isPrintable() ) {
 		// Output values as characters, ensuring we escape the quote (") character
 		char cVal = (char) key.getVal();
 		switch ( cVal ) {
@@ -294,7 +301,6 @@ void GraphvizDotGen::writeDotFile( )
 
 void GraphvizDotGen::finishRagelDef()
 {
-	assert( outputFormat == OutGraphvizDot );
 	if ( !graphvizDone ) {
 		graphvizDone = true;
 

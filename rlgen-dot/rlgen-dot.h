@@ -19,8 +19,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _RLCODEGEN_H
-#define _RLCODEGEN_H
+#ifndef _RLGENDOT
+#define _RLGENDOT
 
 #include <stdio.h>
 #include <iostream>
@@ -28,30 +28,13 @@
 #include "vector.h"
 #include "config.h"
 
-#define PROGNAME "rlcodegen"
-
-/* Target output style. */
-enum CodeStyleEnum
-{
-	GenTables,
-	GenFTables,
-	GenFlat,
-	GenFFlat,
-	GenGoto,
-	GenFGoto,
-	GenIpGoto,
-	GenSplit
-};
-
-extern CodeStyleEnum codeStyle;
+#define PROGNAME "rlgen-dot"
 
 /* IO filenames and stream. */
-extern bool printPrintables;
+extern bool displayPrintables;
 extern bool graphvizDone;
-
 extern int gblErrorCount;
-extern int numSplitPartitions;
 
 std::ostream &error();
 
-#endif /* _RLCODEGEN_H */
+#endif /* _RLGENDOT */

@@ -25,7 +25,6 @@
 #include "fsmcodegen.h"
 #include "redfsm.h"
 #include "gendata.h"
-#include "gvdotgen.h"
 #include <sstream>
 #include <string>
 #include <assert.h>
@@ -52,11 +51,9 @@ void lineDirective( ostream &out, char *fileName, int line )
 
 void genLineDirective( ostream &out )
 {
-	if ( outputFormat == OutCode ) {
-		std::streambuf *sbuf = out.rdbuf();
-		output_filter *filter = static_cast<output_filter*>(sbuf);
-		lineDirective( out, filter->fileName, filter->line + 1 );
-	}
+	std::streambuf *sbuf = out.rdbuf();
+	output_filter *filter = static_cast<output_filter*>(sbuf);
+	lineDirective( out, filter->fileName, filter->line + 1 );
 }
 
 

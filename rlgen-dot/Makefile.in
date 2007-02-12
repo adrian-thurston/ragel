@@ -1,5 +1,5 @@
 #
-#   Copyright 2001-2006 Adrian Thurston <thurston@cs.queensu.ca>
+#   Copyright 2001-2007 Adrian Thurston <thurston@cs.queensu.ca>
 #
 
 #   This file is part of Ragel.
@@ -24,12 +24,7 @@ DEFS +=
 CFLAGS += -g -Wall
 LDFLAGS +=
 
-CC_SRCS = main.cpp fsmcodegen.cpp \
-	tabcodegen.cpp ftabcodegen.cpp flatcodegen.cpp \
-	fflatcodegen.cpp gotocodegen.cpp fgotocodegen.cpp \
-	ipgotocodegen.cpp splitcodegen.cpp 
-
-GEN_SRC = xmltags.cpp xmlscan.cpp xmlparse.cpp xmlparse.h
+CC_SRCS = main.cpp gvdotgen.cpp 
 
 LIBS = ../common/common.a ../redfsm/redfsm.a
 
@@ -48,9 +43,9 @@ DEPS = $(CC_SRCS:%.cpp=.%.d)
 include ../version.mk
 
 # Rules.
-all: rlcodegen
+all: rlgen-dot
 
-rlcodegen: $(LIBS) $(OBJS)
+rlgen-dot: $(LIBS) $(OBJS)
 	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
 
 %.o: %.cpp
@@ -61,10 +56,10 @@ distclean: clean
 	rm -f Makefile
 
 clean:
-	rm -f tags .*.d *.o rlcodegen $(EXTRA_CLEAN)
+	rm -f tags .*.d *.o rlgen-dot $(EXTRA_CLEAN)
 
 install: all
 	install -d $(PREFIX)/bin
-	install -s rlcodegen $(PREFIX)/bin/rlcodegen
+	install -s rlgen-dot $(PREFIX)/bin/rlgen-dot
 
 -include $(DEPS)
