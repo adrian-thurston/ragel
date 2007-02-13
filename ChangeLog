@@ -1,16 +1,37 @@
 Ragel 5.18 - TBD 
 ================
- -Backened class structure reorganized to make it easier to add new code
+ -There is now a 100% correspondence between state id numbers in the
+  intermediate XML file, Graphviz dot files and generated code. This was
+  achieved by moving code which determines if the error state is necessary
+  into the frontend, and then assigning state numbers before writing out the
+  intermediate file.
+ -Backened class structure was reorganized to make it easier to add new code
   generators without having to also modify the existing code generators.
- -The java code generation was then split out into it's own exectuable to
-  allow it to freely diverge from the C/D-based code generation.
- -The "large machines in Java" patch from Colin Fleming was comitted. This
-  encodes data arrays as strings and decodes them at runtime to get around
-  limits on the size of static data. Currently only byte and short alphabet
-  types are supported. Since the default alphabet type for Java is "char," it
-  is now necessary to add "alphtype byte;" to Java programs.
+ -The C and D code generation executable was changed to rlgen-cd.
+ -The Java code generation was split out into it's own exectuable (rlgen-java)
+  to allow it to freely diverge from the C/D-based code generation.
+ -The graphviz dot file generation was also split out to it's own executable
+  (rlgen-dot).
  -The Ruby code generation patch from Victor Hugo Borja was added. This is
-  highly experimental code.
+  highly experimental code and is not yet completely functional. It is in the
+  executable rlgen-ruby.
+ -The problem with large state machine machines in Java was fixed. This
+  problem was discovered by Colin Fleming, who also contributed a patch.
+  Rather than specify arrays as comma-separated lists of literals, array
+  initialization is now done in a static function. This is the approach used
+  by the Java compiler. Unlike the compiler Ragel is careful split large
+  initilization functions.
+ -The manual was expanded and reorganized somewhat.
+ -Eliminated per-example directories in examples/.
+ -Made some fixes to the pullscan.rl example.
+ -In the frontend CR characters are now treated as whitespace.
+ -Updated to the latest aapl. This completely eliminates the shallowCopy
+  function. With that, a definitive memory leak is fixed.
+ -Control codes with escape sequences are now printable characters (-p
+  option). Also, the space character is now printed as SP.
+ -Fixed the null dereference and consequential segfault which occurred when
+  trying to create empty machines with [] and // and /a[]b/. 
+ -Fixed the segfault which occured when a machine reference failed.
 
 Ragel 5.17 - Jan 28, 2007
 =========================

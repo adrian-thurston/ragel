@@ -93,10 +93,6 @@ struct InlineList;
 struct LmSwitchVect;
 struct LmSwitchAction;
 
-extern char *lelNames[];
-
-struct LangEl;
-
 struct Parser
 {
 	%%{
