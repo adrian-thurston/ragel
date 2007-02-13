@@ -72,7 +72,7 @@ void usage()
 /* Print version information. */
 void version()
 {
-	cout << "Ragel interface to Graphviz Dotfiles" << endl <<
+	cout << "Ragel Code Generator for Graphviz" << endl <<
 			"Version " VERSION << ", " PUBDATE << endl <<
 			"Copyright (c) 2001-2007 by Adrian Thurston" << endl;
 }

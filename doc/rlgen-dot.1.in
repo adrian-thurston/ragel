@@ -1,0 +1,62 @@
+.\"
+.\"   Copyright 2001-2007 Adrian Thurston <thurston@cs.queensu.ca>
+.\"
+
+.\"   This file is part of Ragel.
+.\"
+.\"   Ragel is free software; you can redistribute it and/or modify
+.\"   it under the terms of the GNU General Public License as published by
+.\"   the Free Software Foundation; either version 2 of the License, or
+.\"   (at your option) any later version.
+.\"
+.\"   Ragel is distributed in the hope that it will be useful,
+.\"   but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\"   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\"   GNU General Public License for more details.
+.\"
+.\"   You should have received a copy of the GNU General Public License
+.\"   along with Ragel; if not, write to the Free Software
+.\"   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+
+.\"   Process this file with
+.\"   groff -man -Tascii rlgen-dot.1
+.\"
+.TH RLGEN-DOT 1 "@PUBDATE@" "Ragel @VERSION@" "Ragel State Machine Compiler"
+.SH NAME
+rlgen-dot \- Dotfile generator for Ragel State Machine Compiler
+.SH SYNOPSIS
+.B rlgen-dot 
+.RI [ options ]
+.I file
+.SH DESCRIPTION
+This is a backend component of Ragel. This program accepts a machine
+compiled by the frontend program ragel(1) and generates a Graphviz dot file.
+
+.SH OPTIONS
+.TP
+.BR \-h ", " \-H ", " \-? ", " \-\-help
+Display help and exit.
+.TP
+.BR \-v 
+Display version information and exit.
+.TP
+.B \-o " file"
+Write output to file. If -o is not given, the output is written to the standard out.
+.TP
+.B \-p
+Display printable characters in transition labels.
+.SH BUGS
+Ragel is still under development and has not yet matured. There are probably
+many bugs.
+.SH CREDITS
+Ragel was written by Adrian Thurston <thurston@cs.queensu.ca>.  Objective-C
+output contributed by Erich Ocean. D output contributed by Alan West. 
+.SH "SEE ALSO"
+.BR ragel (1),
+.BR rlgen-cd (1),
+.BR rlgen-java (1),
+.BR rlgen-ruby (1),
+.BR re2c (1),
+.BR flex (1)
+
+Homepage: http://www.cs.queensu.ca/~thurston/ragel/

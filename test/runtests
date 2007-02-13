@@ -200,13 +200,19 @@ for test_case; do
 			fi
 			echo "$allow_genflags" | grep -e $grep_gen_opt >/dev/null || continue
 
-			echo "$ragel $min_opt $lang_opt $test_case | $codegen  $gen_opt -o $code_src"
-			if ! $ragel $min_opt $lang_opt $test_case | $codegen $gen_opt -o $code_src; then
+			if [ $lang == "java" ] || [ $lang == "ruby" ]; then
+				be_gen_opt=""
+			else
+				be_gen_opt=$gen_opt
+			fi
+
+			echo "$ragel $min_opt $lang_opt $test_case | $codegen $be_gen_opt -o $code_src"
+			if ! $ragel $min_opt $lang_opt $test_case | $codegen $be_gen_opt -o $code_src; then
 				test_error;
 			fi
 
 			split_objs=""
-			if test $split_iters != $gen_opt; then
+			if test $split_iters != "$gen_opt"; then
 				n=0;
 				while test $n -lt $split_iters; do
 					part_root=${root}_`awk 'BEGIN {

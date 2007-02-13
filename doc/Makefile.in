@@ -31,7 +31,7 @@ include ../version.mk
 PREFIX = @prefix@
 
 # Rules.
-all: ragel-guide.pdf ragel.1 rlcodegen.1
+all: ragel-guide.pdf ragel.1 rlgen-cd.1 rlgen-java.1 rlgen-ruby.1 rlgen-dot.1
 
 ragel-guide.pdf: $(PDFFIGS) $(INPUT)
 
@@ -47,13 +47,13 @@ version.tex: ../version.mk
 	echo '\def\version{$(VERSION)}' > version.tex
 	echo '\def\pubdate{$(PUBDATE)}' >> version.tex
 
-ragel.1: ragel.1.in ../version.mk
-	cat ragel.1.in | sed 's/@PUBDATE@/$(PUBDATE)/' \
-		| sed 's/@VERSION@/$(VERSION)/' > ragel.1
+%.1: %.1.in ../version.mk
+	cat $< | sed 's/@PUBDATE@/$(PUBDATE)/' \
+		| sed 's/@VERSION@/$(VERSION)/' > $@
 
-rlcodegen.1: rlcodegen.1.in ../version.mk
-	cat rlcodegen.1.in | sed 's/@PUBDATE@/$(PUBDATE)/' \
-		| sed 's/@VERSION@/$(VERSION)/' > rlcodegen.1
+#rlcodegen.1: rlcodegen.1.in ../version.mk
+#	cat rlcodegen.1.in | sed 's/@PUBDATE@/$(PUBDATE)/' \
+#		| sed 's/@VERSION@/$(VERSION)/' > rlcodegen.1
 
 clean:
 	rm -f ragel.1 rlcodegen.1 \

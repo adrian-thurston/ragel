@@ -1,5 +1,5 @@
 .\"
-.\"   Copyright 2001 Adrian Thurston <thurston@cs.queensu.ca>
+.\"   Copyright 2001-2007 Adrian Thurston <thurston@cs.queensu.ca>
 .\"
 
 .\"   This file is part of Ragel.
@@ -19,39 +19,33 @@
 .\"   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
 
 .\"   Process this file with
-.\"   groff -man -Tascii rlcodegen.1
+.\"   groff -man -Tascii rlgen-ruby.1
 .\"
-.TH RAGEL 1 "@PUBDATE@" "Ragel @VERSION@" "Ragel State Machine Compiler"
+.TH RLGEN-RUBY 1 "@PUBDATE@" "Ragel @VERSION@" "Ragel State Machine Compiler"
 .SH NAME
-rlcodegen \- code generator for Ragel State Machine Compiler
+rlgen-ruby \- code generator for Ragel State Machine Compiler
 .SH SYNOPSIS
-.B rlcodegen 
+.B rlgen-ruby 
 .RI [ options ]
 .I file
 .SH DESCRIPTION
-.B Note:
-this is the backend component of Ragel. This program accepts a machine
-compiled by the frontend program ragel(1) and generates either code or a
-graphviz dot file.
+This is a backend component of Ragel. This program accepts a machine
+compiled by the frontend program ragel(1) and generates Ruby code.
 
+Use it with the frontend option -R.
 .SH OPTIONS
 .TP
 .BR \-h ", " \-H ", " \-? ", " \-\-help
 Display help and exit.
+.TP
+.BR \-v 
+Display version information and exit.
 .TP
 .B \-o " file"
 Write output to file. If -o is not given, a default file name is chosen by
 replacing the suffix of the input. For source files ending in .rh the suffix .h
 is used. For all other source files a suffix based on the output language
 is used (.c, .cpp, .m, .dot)
-.TP
-.B \-V
-Generate a Graphviz dotfile instead of code. By default this option writes the
-dotfile to standard output. The frontend options -M and -S can be used
-to specify a subset of the grammar to write.
-.TP
-.B \-p
-Print printable characters in Graphviz output.
 .TP
 .B \-T0
 Generate a table driven FSM. This is the default code style.  The table driven
@@ -63,36 +57,6 @@ executes any actions and moves to the target state. In general, the table
 driven FSM produces a smaller binary and requires a less expensive host language
 compile but results in slower running code. The table driven FSM is suitable
 for any FSM.
-.TP
-.B \-T1
-Generate a faster table driven FSM by expanding action lists in the action
-execute code.
-.TP
-.B \-F0
-Generate a flat table driven FSM. Transitions are represented as an array
-indexed by the current alphabet character. This eliminates the need for a
-binary search to locate transitions and produces faster code, however it is
-only suitable for small alphabets.
-.TP
-.B \-F1
-Generate a faster flat table driven FSM by expanding action lists in the action
-execute code.
-.TP
-.B \-G0
-Generate a goto driven FSM. The goto driven FSM represents the state machine
-as a series of goto statements. While in the machine, the current state is
-stored by the processor's instruction pointer. The execution is a flat function
-where control is passed from state to state using gotos. In general, the goto
-FSM produces faster code but results in a larger binary and a more expensive
-host language compile.
-.TP
-.B \-G1
-Generate a faster goto driven FSM by expanding action lists in the action
-execute code.
-.TP
-.B \-G2
-Generate a really fast goto driven FSM by embedding action lists in the state
-machine control code.
 .SH BUGS
 Ragel is still under development and has not yet matured. There are probably
 many bugs.
@@ -101,6 +65,9 @@ Ragel was written by Adrian Thurston <thurston@cs.queensu.ca>.  Objective-C
 output contributed by Erich Ocean. D output contributed by Alan West. 
 .SH "SEE ALSO"
 .BR ragel (1),
+.BR rlgen-cd (1),
+.BR rlgen-java (1),
+.BR rlgen-dot (1),
 .BR re2c (1),
 .BR flex (1)
 

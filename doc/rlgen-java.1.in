@@ -1,0 +1,71 @@
+.\"
+.\"   Copyright 2001-2007 Adrian Thurston <thurston@cs.queensu.ca>
+.\"
+
+.\"   This file is part of Ragel.
+.\"
+.\"   Ragel is free software; you can redistribute it and/or modify
+.\"   it under the terms of the GNU General Public License as published by
+.\"   the Free Software Foundation; either version 2 of the License, or
+.\"   (at your option) any later version.
+.\"
+.\"   Ragel is distributed in the hope that it will be useful,
+.\"   but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\"   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\"   GNU General Public License for more details.
+.\"
+.\"   You should have received a copy of the GNU General Public License
+.\"   along with Ragel; if not, write to the Free Software
+.\"   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+
+.\"   Process this file with
+.\"   groff -man -Tascii rlgen-java.1
+.\"
+.TH RLGEN-JAVA 1 "@PUBDATE@" "Ragel @VERSION@" "Ragel State Machine Compiler"
+.SH NAME
+rlgen-java \- code generator for Ragel State Machine Compiler
+.SH SYNOPSIS
+.B rlgen-java 
+.RI [ options ]
+.I file
+.SH DESCRIPTION
+This is a backend component of Ragel. This program accepts a machine
+compiled by the frontend program ragel(1) and generates Java code.
+
+Use it with the frontend option -J.
+.SH OPTIONS
+.TP
+.BR \-h ", " \-H ", " \-? ", " \-\-help
+Display help and exit.
+.TP
+.BR \-v 
+Display version information and exit.
+.TP
+.B \-o " file"
+Write output to file. If -o is not given, a default file name is chosen by
+replacing the suffix of the input. For source files ending in .rh the suffix .h
+is used. For all other source files a suffix based on the output language
+is used (.c, .cpp, .m, .dot)
+.TP
+.B \-T0
+Generate a table driven FSM. This is the default code style.  The table driven
+FSM represents the state machine as static data. There are tables of states,
+transitions, indicies and actions. The current state is stored in a variable.
+The execution is a loop that looks that given the current state and current
+character to process looks up the transition to take using a binary search,
+executes any actions and moves to the target state. In general, the table
+driven FSM produces a smaller binary and requires a less expensive host language
+compile but results in slower running code. The table driven FSM is suitable
+for any FSM.
+.SH CREDITS
+Ragel was written by Adrian Thurston <thurston@cs.queensu.ca>.  Contributions
+to Java code generation by Colin Fleming.
+.SH "SEE ALSO"
+.BR ragel (1),
+.BR rlgen-cd (1),
+.BR rlgen-ruby (1),
+.BR rlgen-dot (1),
+.BR re2c (1),
+.BR flex (1)
+
+Homepage: http://www.cs.queensu.ca/~thurston/ragel/

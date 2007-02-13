@@ -146,7 +146,7 @@ CodeGenData *makeCodeGen( char *sourceFileName, char *fsmName,
 /* Main, process args and call yyparse to start scanning input. */
 int main(int argc, char **argv)
 {
-	ParamCheck pc("o:VpT:F:G:vHh?-:P:", argc, argv);
+	ParamCheck pc("o:vHh?-:", argc, argv);
 	char *xmlInputFileName = 0;
 
 	while ( pc.check() ) {
