@@ -33,6 +33,11 @@ void genLineDirective( ostream &out )
 {
 }
 
+/* Override this so that write statement processing is ignored */
+void GraphvizDotGen::writeStatement( InputLoc &, int, char ** )
+{
+}
+
 std::ostream &GraphvizDotGen::KEY( Key key )
 {
 	if ( displayPrintables && key.isPrintable() ) {

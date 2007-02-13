@@ -92,8 +92,10 @@ ostream &error()
 /* Invoked by the parser when the root element is opened. */
 ostream *openOutput( char *inputFile )
 {
-	if ( hostLangType != RubyCode ) 
+	if ( hostLangType != RubyCode ) {
 		error() << "this code generator is for Ruby only" << endl;
+		exit(1);
+	}
 
 	/* If the output format is code and no output file name is given, then
 	 * make a default. */

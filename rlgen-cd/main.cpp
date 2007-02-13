@@ -113,8 +113,10 @@ ostream &error()
 /* Invoked by the parser when the root element is opened. */
 ostream *openOutput( char *inputFile )
 {
-	if ( hostLangType != CCode && hostLangType != DCode )
+	if ( hostLangType != CCode && hostLangType != DCode ) {
 		error() << "this code generator is for C and D only" << endl;
+		exit(1);
+	}
 
 	/* If the output format is code and no output file name is given, then
 	 * make a default. */

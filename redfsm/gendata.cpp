@@ -639,7 +639,10 @@ void CodeGenData::analyzeMachine()
 
 void CodeGenData::writeStatement( InputLoc &loc, int nargs, char **args )
 {
-	/* Force a newline. */
+	/* FIXME: This should be moved to the virtual functions in the code
+	 * generators.
+	 *
+	 * Force a newline. */
 	out << "\n";
 	genLineDirective( out );
 
