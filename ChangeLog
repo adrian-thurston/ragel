@@ -32,6 +32,8 @@ Ragel 5.18 - TBD
  -Fixed the null dereference and consequential segfault which occurred when
   trying to create empty machines with [] and // and /a[]b/. 
  -Fixed the segfault which occured when a machine reference failed.
+ -Discontinuing ragel.spec. It is more appropriate for this to be written by
+  package maintenance developers.
 
 Ragel 5.17 - Jan 28, 2007
 =========================

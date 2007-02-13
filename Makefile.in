@@ -38,12 +38,6 @@ all: $(BUILD_SUBDIRS)
 $(BUILD_SUBDIRS):
 	@cd $@ && $(MAKE)
 
-# new version
-
-new-version:
-	sed 's/^\(Version:[[:space:]]*\)[0-9.]*$$/\1$(VERSION)/' ragel.spec > spec-new
-	cat spec-new > ragel.spec && rm spec-new
-
 # clean targets.
 
 CLEAN_SUBDIRS = $(ALL_SUBDIRS:%=%-clean)
