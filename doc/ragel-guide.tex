@@ -568,7 +568,7 @@ set of states.  At a very minimum the \verb|main| machine must be instantiated.
 Other machines may be instantiated and control passed to them by use of
 \verb|fcall|, \verb|fgoto| or \verb|fnext| statements.
 
-\section{Lexical Analysis of an FSM Specification}
+\section{Lexical Analysis of a Ragel Block}
 \label{lexing}
 
 Within a machine specification the following lexical rules apply to the parse
@@ -661,7 +661,7 @@ main := 'hello';
 % END GENERATE
 
 \begin{center}
-\includegraphics[scale=0.45]{bmconcat}
+\includegraphics[scale=0.55]{bmconcat}
 \end{center}
 
 It is possible
@@ -692,7 +692,7 @@ main := [hello];
 % END GENERATE
 
 \begin{center}
-\includegraphics[scale=0.45]{bmor}
+\includegraphics[scale=0.55]{bmor}
 \end{center}
 
 \item \verb|''|, \verb|""|, and \verb|[]| -- Zero Length Machine.  Produces a machine
@@ -712,7 +712,7 @@ main := '';
 % END GENERATE
 
 \begin{center}
-\includegraphics[scale=0.45]{bmnull}
+\includegraphics[scale=0.55]{bmnull}
 \end{center}
 
 % FIXME: More on the range of values here.
@@ -735,7 +735,7 @@ main := 42;
 % END GENERATE
 
 \begin{center}
-\includegraphics[scale=0.45]{bmnum}
+\includegraphics[scale=0.55]{bmnum}
 \end{center}
 
 \item \verb|/simple_regex/| -- Regular Expression. Regular expressions are
@@ -770,7 +770,7 @@ main := /ab*[c-z].*[123]/;
 % END GENERATE
 
 \begin{center}
-\includegraphics[scale=0.45]{bmregex}
+\includegraphics[scale=0.55]{bmregex}
 \end{center}
 
 \item \verb|'a' .. 'z'| -- Range. Produces a machine that matches any
@@ -792,7 +792,7 @@ main := 'a' .. 'z';
 % END GENERATE
 
 \begin{center}
-\includegraphics[scale=0.45]{bmrange}
+\includegraphics[scale=0.55]{bmrange}
 \end{center}
 
 
@@ -968,7 +968,7 @@ main := '0x' xdigit+ | digit+ | alpha alnum*;
 
 \graphspace
 \begin{center}
-\includegraphics[scale=0.45]{exor}
+\includegraphics[scale=0.55]{exor}
 \end{center}
 
 \subsection{Intersection}
@@ -1004,7 +1004,7 @@ main :=
 
 \graphspace
 \begin{center}
-\includegraphics[scale=0.45]{exinter}
+\includegraphics[scale=0.55]{exinter}
 \end{center}
 
 \subsection{Difference}
@@ -1038,7 +1038,7 @@ main := /[a-z][a-z]*/ - ( 'for' | 'int' );
 
 \graphspace
 \begin{center}
-\includegraphics[scale=0.45]{exsubtr}
+\includegraphics[scale=0.55]{exsubtr}
 \end{center}
 \graphspace
 
@@ -1071,7 +1071,7 @@ main := [a-z]+ ':' ( any* -- crlf ) crlf;
 
 \graphspace
 \begin{center}
-\includegraphics[scale=0.45]{exstrongsubtr}
+\includegraphics[scale=0.55]{exstrongsubtr}
 \end{center}
 \graphspace
 
@@ -1132,7 +1132,7 @@ main := /[^\n]*\n/* . 'EOF\n';
 
 \graphspace
 \begin{center}
-\includegraphics[scale=0.45]{exconcat}
+\includegraphics[scale=0.55]{exconcat}
 \end{center}
 \graphspace
 
@@ -1204,7 +1204,7 @@ main := /[a-z]*\n/*;
 
 \graphspace
 \begin{center}
-\includegraphics[scale=0.45]{exstar}
+\includegraphics[scale=0.55]{exstar}
 \end{center}
 \graphspace
 
@@ -1233,7 +1233,7 @@ main := alnum+;
 
 \graphspace
 \begin{center}
-\includegraphics[scale=0.45]{explus}
+\includegraphics[scale=0.55]{explus}
 \end{center}
 \graphspace
 
@@ -1262,7 +1262,7 @@ main := digit+ ('.' digit+)?;
 
 \graphspace
 \begin{center}
-\includegraphics[scale=0.45]{exoption}
+\includegraphics[scale=0.55]{exoption}
 \end{center}
 \graphspace
 
@@ -1302,7 +1302,7 @@ main := ! ( digit any* );
 
 \graphspace
 \begin{center}
-\includegraphics[scale=0.45]{exnegate}
+\includegraphics[scale=0.55]{exnegate}
 \end{center}
 \graphspace
 
@@ -1415,7 +1415,7 @@ main := ( lower* >A ) . ' ';
 
 \graphspace
 \begin{center}
-\includegraphics[scale=0.45]{exstact}
+\includegraphics[scale=0.55]{exstact}
 \end{center}
 \graphspace
 
@@ -1446,7 +1446,7 @@ main := ( lower* ' ' ) @A;
 
 \graphspace
 \begin{center}
-\includegraphics[scale=0.45]{exdoneact}
+\includegraphics[scale=0.55]{exdoneact}
 \end{center}
 \graphspace
 
@@ -1476,7 +1476,7 @@ main := ( 'm1' | 'm2' ) $A;
 
 \graphspace
 \begin{center}
-\includegraphics[scale=0.45]{exallact}
+\includegraphics[scale=0.55]{exallact}
 \end{center}
 \graphspace
 
@@ -1513,7 +1513,7 @@ main := ( lower+ %A ) . '\n';
 
 \graphspace
 \begin{center}
-\includegraphics[scale=0.45]{exoutact1}
+\includegraphics[scale=0.55]{exoutact1}
 \end{center}
 \graphspace
 
@@ -1540,14 +1540,14 @@ main := word ( ' ' @space word )* '\n' @newline;
 
 \graphspace
 \begin{center}
-\includegraphics[scale=0.45]{exoutact2}
+\includegraphics[scale=0.55]{exoutact2}
 \end{center}
 \graphspace
 
 
-In this final example of the action embedding operators, A is executed upon
-entering the alpha machine, B is executed on all transitions of the alpha
-machine, C is executed when the alpha machine accepts by moving into the
+In this final example of the action embedding operators, A is executed upon the
+first character of the alpha machine, B is executed on all transitions of the
+alpha machine, C is executed when the alpha machine is exited by moving into the
 newline machine and N is executed when the newline machine moves into a final
 state.  
 
@@ -1571,7 +1571,7 @@ main := ( lower* >A $B %C ) . '\n' @N;
 
 \graphspace
 \begin{center}
-\includegraphics[scale=0.45]{exaction}
+\includegraphics[scale=0.55]{exaction}
 \end{center}
 \graphspace
 
@@ -1916,8 +1916,9 @@ lines = line*;
 % END GENERATE
 
 \begin{center}
-\includegraphics[scale=0.45]{lines1}
+\includegraphics[scale=0.53]{lines1}
 \end{center}
+\graphspace
 
 Since the \verb|ws| expression includes the newline character, we will
 not finish the \verb|line| expression when a newline character is seen. We will
@@ -1946,8 +1947,9 @@ lines = line*;
 % END GENERATE
 
 \begin{center}
-\includegraphics[scale=0.45]{lines2}
+\includegraphics[scale=0.55]{lines2}
 \end{center}
+\graphspace
 
 Solving this kind of problem is straightforward when the ambiguity is created
 by strings which are a single character long.  When the ambiguity is created by
@@ -1970,8 +1972,9 @@ main := comment ' ';
 % END GENERATE
 
 \begin{center}
-\includegraphics[scale=0.45]{comments1}
+\includegraphics[scale=0.55]{comments1}
 \end{center}
+\graphspace
 
 Using standard concatenation, we will never leave the \verb|any*| expression.
 We will forever entertain the possibility that a \verb|'*/'| string that we see
@@ -1999,9 +2002,11 @@ comment = '/*' ( ( any @comm )* - ( any* '*/' any* ) ) '*/';
 % }%%
 % END GENERATE
 
+\graphspace
 \begin{center}
-\includegraphics[scale=0.45]{comments2}
+\includegraphics[scale=0.55]{comments2}
 \end{center}
+\graphspace
 
 
 We have phrased the problem of controlling non-determinism in terms of
@@ -2018,6 +2023,8 @@ utilize in the composition of a larger machine. For example, some HTTP headers
 have a token stream as a sub-language. The following example is an attempt
 at a regular expression-based tokenizer that does not function correctly due to
 unintended nondeterminism.
+
+\newpage
 
 % GENERATE: smallscanner
 % OPT: -p
@@ -2039,8 +2046,9 @@ header_contents = (
 % END GENERATE
 
 \begin{center}
-\includegraphics[scale=0.45]{smallscanner}
+\includegraphics[scale=0.55]{smallscanner}
 \end{center}
+\graphspace
 
 In this case, the problem with using a standard kleene star operation is that
 there is an ambiguity between extending a token and wrapping around the machine
@@ -2073,14 +2081,6 @@ the purpose of controlling various different regular expression operations and
 eliminates the need to ever delete them. Such a scheme allows the user to
 choose a unique name, embed two different priority values using that name
 and be confident that the priority embedding will be free of any side effects.
-
-\section{Priority Assignment}
-
-Priorities are integer values assigned to names within transitions.
-Only priorities with the same name are allowed to interact. When the machine
-construction process is combining transitions that have different priorities
-assiged to the same name, the transition with the higher priority is preserved
-and the lower priority is dropped.
 
 In the first form of priority embedding the name defaults to the name of the machine
 definition that the priority is assigned in. In this sense priorities are by
@@ -2135,13 +2135,20 @@ first machine when the second machine moves into a final state.  It chooses a
 unique name and uses it to embed a low priority into all
 transitions of the first machine. A higher priority is then embedded into the
 transitions of the second machine which enter into a final state. The following
-example yields a machine identical to the example in Section \ref{priorities}
+example yields a machine identical to the example in Section 
+\ref{controlling-nondeterminism}.
 
 \begin{inline_code}
 \begin{verbatim}
 comment = '/*' ( any @comm )* :>> '*/';
 \end{verbatim}
 \end{inline_code}
+
+\graphspace
+\begin{center}
+\includegraphics[scale=0.55]{comments2}
+\end{center}
+\graphspace
 
 Another guarded operator is {\em left-guarded concatenation}, given by the
 \verb|<:| compound symbol. This operator places a higher priority on all
@@ -2197,9 +2204,9 @@ main := any* :> 'FIN';
 % END GENERATE
 
 \begin{center}
-\includegraphics[scale=0.45]{entryguard}
+\includegraphics[scale=0.55]{entryguard}
 \end{center}
-
+\graphspace
 
 Entry-guarded concatenation is equivalent to the following:
 
@@ -2236,8 +2243,9 @@ main := any* :>> 'FIN';
 % END GENERATE
 
 \begin{center}
-\includegraphics[scale=0.45]{finguard}
+\includegraphics[scale=0.55]{finguard}
 \end{center}
+\graphspace
 
 Finish-guarded concatenation is equivalent to the following:
 
@@ -2273,9 +2281,11 @@ main := ( ' '* >start %fin ) <: ( ' ' $ws | [a-z] $alpha )*;
 % }%%
 % END GENERATE
 
+\graphspace
 \begin{center}
-\includegraphics[scale=0.45]{leftguard}
+\includegraphics[scale=0.55]{leftguard}
 \end{center}
+\graphspace
 
 Left-guarded concatenation is equivalent to the following:
 
@@ -2319,8 +2329,9 @@ main := (
 % END GENERATE
 
 \begin{center}
-\includegraphics[scale=0.45]{lmkleene}
+\includegraphics[scale=0.55]{lmkleene}
 \end{center}
+\graphspace
 
 If a regular kleene star were used the machine above would not be able to
 distinguish between extending a word and beginning a new one.  This operator is
@@ -2540,11 +2551,12 @@ the current state.
 In the creation of any parser it is not uncommon to require the collection of
 the data being parsed.  It is always possible to collect data into a growable
 buffer as the machine moves over it, however the copying of data is a somewhat
-wasteful use of processor cycles. The most efficient way to collect data
-from the parser is to set pointers into the input. This poses a problem for
-uses of Ragel where the input data arrives in blocks, such as over a socket or
-from a file. The program will error if a pointer is set in one buffer block but
-must be used while parsing a following buffer block.
+wasteful use of processor cycles. The most efficient way to collect data from
+the parser is to set pointers into the input then later reference them.  This
+poses a problem for uses of Ragel where the input data arrives in blocks, such
+as over a socket or from a file. If a pointer is set in one buffer block but
+must be used while parsing a following buffer block, some extrac consideration
+to correctness must be made.
 
 The scanner constructions exhibit this problem, requiring the maintenance
 code described in Section \ref{generating-scanners}. If a longest-match
@@ -2627,7 +2639,7 @@ generate code.
 
 \verbspace
 \begin{verbatim}
-[user@host] myproj: ragel file.rl | rlcodegen -G2 -o file.c
+[user@host] myproj: ragel file.rl | rlgen-cd -G2 -o file.c
 \end{verbatim}
 
 \section{Choosing a Generated Code Style}
@@ -2846,6 +2858,7 @@ name tree. However, it can always be renamed.
 
 
 \section{Scanners}
+\label{generating-scanners}
 
 Scanners are very much intertwinded with regular-languages and their
 corresponding processors. For this reason Ragel supports the definition of
@@ -3019,7 +3032,7 @@ An example scanner processing loop is given in Figure \ref{scanner-loop}.
         cin.read( p, space );
         int len = cin.gcount();
 
-        /* If no data was read, send the EOF character.
+        /* If no data was read, send the EOF character. */
         if ( len == 0 ) {
             p[0] = 0, len++;
             done = true;
@@ -3190,8 +3203,9 @@ two: (
 % }%%
 % END GENERATE
 
+\graphspace
 \begin{center}
-\includegraphics[scale=0.45]{dropdown}
+\includegraphics[scale=0.55]{dropdown}
 \end{center}
 
 
@@ -3232,8 +3246,9 @@ data_fields = (
 % END GENERATE
 
 \begin{center}
-\includegraphics[scale=0.45]{conds1}
+\includegraphics[scale=0.55]{conds1}
 \end{center}
+\graphspace
 
 The Ragel implementation of semantic conditions does not force us to give up the
 compositional property of Ragel definitions. For example, a machine which tests
@@ -3276,8 +3291,9 @@ main := patterns '\n';
 % END GENERATE
 
 \begin{center}
-\includegraphics[scale=0.45]{conds2}
+\includegraphics[scale=0.55]{conds2}
 \end{center}
+\graphspace
 
 There are many more potential uses for semantic conditions. The user is free to
 use arbitrary code and may therefore perform actions such as looking up names
@@ -3289,11 +3305,16 @@ engineering problems.
 \section{Implementing Lookahead}
 
 There are a few strategies for implementing lookahead in Ragel programs.
-Pending out actions, which were described in Section \ref{out-actions}, can be
+Pending out actions, which are described in Section \ref{out-actions}, can be
 used as a form of lookahead.  Ragel also provides the \verb|fhold| directive
 which can be used in actions to prevent the machine from advancing over the
-current character. It is also possible to manually adjust the current
-character position by shifting it backwards. 
+current character. It is also possible to manually adjust the current character
+position by shifting it backwards using \verb|fexec|, however when this is
+done, care must be taken not to overstep the beginning of the current buffer
+block. In the both the use of \verb|fhold| and \verb|fexec| the user must be
+cautious of combining the resulting machine with another in such a way that the
+transition on which the current position is adjusted is not combined with a
+transition from the other machine.
 
 \section{Handling Errors}
 
