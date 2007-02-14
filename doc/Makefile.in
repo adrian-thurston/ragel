@@ -65,7 +65,10 @@ distclean: clean
 install: all
 	install -d $(PREFIX)/man/man1
 	install -m 644 ragel.1 $(PREFIX)/man/man1/ragel.1
-	install -m 644 rlcodegen.1 $(PREFIX)/man/man1/rlcodegen.1
+	install -m 644 rlgen-dot.1 $(PREFIX)/man/man1/rlgen-dot.1
+	install -m 644 rlgen-cd.1 $(PREFIX)/man/man1/rlgen-cd.1
+	install -m 644 rlgen-java.1 $(PREFIX)/man/man1/rlgen-java.1
+	install -m 644 rlgen-ruby.1 $(PREFIX)/man/man1/rlgen-ruby.1
 	install -d $(PREFIX)/share/doc/ragel
 	install -m 644 ragel-guide.pdf $(PREFIX)/share/doc/ragel/ragel-guide.pdf
 	gzip -c ../ChangeLog > ChangeLog.gz

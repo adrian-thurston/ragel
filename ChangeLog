@@ -1,5 +1,5 @@
-Ragel 5.18 - TBD 
-================
+Ragel 5.18 - February 13, 2007
+==============================
  -There is now a 100% correspondence between state id numbers in the
   intermediate XML file, Graphviz dot files and generated code. This was
   achieved by moving code which determines if the error state is necessary
