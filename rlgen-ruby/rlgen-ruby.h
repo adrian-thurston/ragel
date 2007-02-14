@@ -25,11 +25,11 @@
 #include <iostream>
 #include "config.h"
 
-#define PROGNAME "rlgen-java"
+#define PROGNAME "rlgen-ruby"
 
 extern int gblErrorCount;
 extern char machineMain[];
 
 std::ostream &error();
 
-#endif /* _RLGEN_JAVA_H */
+#endif /* _RLGEN_RUBY_H */

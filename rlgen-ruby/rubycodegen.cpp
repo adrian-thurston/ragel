@@ -38,17 +38,15 @@ using std::endl;
 
 void lineDirective( ostream &out, char *fileName, int line )
 {
-	if ( hostLangType != JavaCode ) {
-		/* Write a comment containing line info. */
-		out << "# line " << line  << " \"";
-		for ( char *pc = fileName; *pc != 0; pc++ ) {
-			if ( *pc == '\\' )
-				out << "\\\\";
-			else
-				out << *pc;
-		}
-		out << "\"\n";
+	/* Write a comment containing line info. */
+	out << "# line " << line  << " \"";
+	for ( char *pc = fileName; *pc != 0; pc++ ) {
+		if ( *pc == '\\' )
+			out << "\\\\";
+		else
+			out << *pc;
 	}
+	out << "\"\n";
 }
 
 void genLineDirective( ostream &out )
