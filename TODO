@@ -1,3 +1,6 @@
+Possibly bring back the old semantics of > in a new operator, or allow it to be
+defined somehow.
+
 When priorities are embedded without a name, the name of the current machine is
 used. Perhaps a unique name for each instance of the current machine should be
 used instead. This idea could work well if applied to user-defined embeddings. 
