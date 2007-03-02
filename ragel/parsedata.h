@@ -85,7 +85,7 @@ public:
 	ActionRefs actionRefs;
 
 	/* Number of references in the final machine. */
-	bool numRefs() 
+	int numRefs() 
 		{ return numTransRefs + numToStateRefs + numFromStateRefs + numEofRefs; }
 	int numTransRefs;
 	int numToStateRefs;
