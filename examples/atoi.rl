@@ -17,7 +17,7 @@ int atoi( char *str )
 {
 	char *p = str;
 	int cs, val = 0;
-	bool neg = false;;
+	bool neg = false;
 
 	%%{
 		action see_neg {
@@ -32,7 +32,7 @@ int atoi( char *str )
 			( '-'@see_neg | '+' )? ( digit @add_digit )+ 
 			'\n' @{ fbreak; };
 
-		# Inintialize and execute.
+		# Initialize and execute.
 		write init;
 		write exec noend;
 	}%%
