@@ -33,7 +33,7 @@ GEN_SRC = xmltags.cpp xmlscan.cpp xmlparse.cpp xmlparse.h
 
 LIBS = ../common/common.a ../redfsm/redfsm.a
 
-PREFIX += @prefix@
+prefix = @prefix@
 
 #*************************************
 
@@ -64,7 +64,7 @@ clean:
 	rm -f tags .*.d *.o rlgen-cd $(EXTRA_CLEAN)
 
 install: all
-	install -d $(PREFIX)/bin
-	install -s rlgen-cd $(PREFIX)/bin/rlgen-cd
+	install -d $(prefix)/bin
+	install -s rlgen-cd $(prefix)/bin/rlgen-cd
 
 -include $(DEPS)

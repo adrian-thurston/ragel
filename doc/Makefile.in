@@ -27,8 +27,10 @@ PDFFIGS = $(FIGURES:%.fig=%.pdf)
 # Get the version info.
 include ../version.mk
 
-# Install prefix.
-PREFIX = @prefix@
+# Installation locations.
+prefix = @prefix@
+docdir = @datadir@/doc/ragel
+mandir = @mandir@
 
 # Rules.
 all: ragel-guide.pdf ragel.1 rlgen-cd.1 rlgen-java.1 rlgen-ruby.1 rlgen-dot.1
@@ -63,14 +65,14 @@ distclean: clean
 	rm -f Makefile
 	
 install: all
-	install -d $(PREFIX)/man/man1
-	install -m 644 ragel.1 $(PREFIX)/man/man1/ragel.1
-	install -m 644 rlgen-dot.1 $(PREFIX)/man/man1/rlgen-dot.1
-	install -m 644 rlgen-cd.1 $(PREFIX)/man/man1/rlgen-cd.1
-	install -m 644 rlgen-java.1 $(PREFIX)/man/man1/rlgen-java.1
-	install -m 644 rlgen-ruby.1 $(PREFIX)/man/man1/rlgen-ruby.1
-	install -d $(PREFIX)/share/doc/ragel
-	install -m 644 ragel-guide.pdf $(PREFIX)/share/doc/ragel/ragel-guide.pdf
+	install -d $(mandir)/man1
+	install -m 644 ragel.1      $(mandir)/man1/ragel.1
+	install -m 644 rlgen-dot.1  $(mandir)/man1/rlgen-dot.1
+	install -m 644 rlgen-cd.1   $(mandir)/man1/rlgen-cd.1
+	install -m 644 rlgen-java.1 $(mandir)/man1/rlgen-java.1
+	install -m 644 rlgen-ruby.1 $(mandir)/man1/rlgen-ruby.1
+	install -d $(docdir)
+	install -m 644 ragel-guide.pdf $(docdir)/ragel-guide.pdf
 	gzip -c ../ChangeLog > ChangeLog.gz
-	install -m 644 ChangeLog.gz $(PREFIX)/share/doc/ragel/ChangeLog.gz
+	install -m 644 ChangeLog.gz $(docdir)/ChangeLog.gz
 	rm ChangeLog.gz

@@ -28,7 +28,7 @@ CC_SRCS = main.cpp gvdotgen.cpp
 
 LIBS = ../common/common.a ../redfsm/redfsm.a
 
-PREFIX += @prefix@
+prefix = @prefix@
 
 #*************************************
 
@@ -59,7 +59,7 @@ clean:
 	rm -f tags .*.d *.o rlgen-dot $(EXTRA_CLEAN)
 
 install: all
-	install -d $(PREFIX)/bin
-	install -s rlgen-dot $(PREFIX)/bin/rlgen-dot
+	install -d $(prefix)/bin
+	install -s rlgen-dot $(prefix)/bin/rlgen-dot
 
 -include $(DEPS)

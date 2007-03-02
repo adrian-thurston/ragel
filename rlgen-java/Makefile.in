@@ -29,7 +29,7 @@ CC_SRCS = main.cpp javacodegen.cpp
 LIBS = ../common/common.a ../redfsm/redfsm.a
 
 LIBS += @LIBS@
-PREFIX += @prefix@
+prefix = @prefix@
 
 #*************************************
 
@@ -60,7 +60,7 @@ clean:
 	rm -f tags .*.d *.o rlgen-java
 
 install: all
-	install -d $(PREFIX)/bin
-	install -s rlgen-java $(PREFIX)/bin/rlgen-java
+	install -d $(prefix)/bin
+	install -s rlgen-java $(prefix)/bin/rlgen-java
 
 -include $(DEPS)

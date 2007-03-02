@@ -35,7 +35,7 @@ LIBS = ../common/common.a
 
 #*************************************
 
-PREFIX = @prefix@
+prefix = @prefix@
 
 BUILD_PARSERS = @BUILD_PARSERS@
 
@@ -80,7 +80,7 @@ clean:
 	rm -f tags .*.d *.o ragel $(EXTRA_CLEAN)
 
 install: all
-	install -d $(PREFIX)/bin
-	install -s ragel $(PREFIX)/bin/ragel
+	install -d $(prefix)/bin
+	install -s ragel $(prefix)/bin/ragel
 
 -include $(DEPS)
