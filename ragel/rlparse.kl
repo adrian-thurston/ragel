@@ -23,6 +23,7 @@
 #include "ragel.h"
 #include <iostream>
 #include <errno.h>
+#include <malloc.h>
 
 using std::cout;
 using std::cerr;
