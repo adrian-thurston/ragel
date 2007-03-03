@@ -31,4 +31,8 @@
 #undef TXL
 #undef RUBY
 
+#ifdef WIN32
+#define strcasecmp _stricmp
+#endif
+
 #endif /* _CONFIG_H */
