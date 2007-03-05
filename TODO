@@ -1,3 +1,8 @@
+Need a "write entry name;" feature.
+
+Conditional action blocks need to be explicitly ordered in the same way that
+actions are ordered.
+
 Possibly bring back the old semantics of > in a new operator, or allow it to be
 defined somehow.
 
