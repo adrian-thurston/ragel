@@ -17,9 +17,6 @@ Doesn't make make sense for [] to be the lambda (zero-length) machine. This
 should be the empty set (the empty machine). But then would it be invalid in a
 regular expression?
 
-Add an option (probably -L) for turning off line numbers for debugging the
-generated state machine.
-
 Expressions of the form: expr1 <: expr2 . expr3
 sometimes don't behave as expected. If expr2 contains the empty string then
 it's possible for the machine to escape to expr3. This is somewhat unexpected.
