@@ -663,6 +663,7 @@ type action_ref
 nonterm action_embed uses action_ref;
 
 action_embed: action_embed_word final { $$->action = $1->action; };
+action_embed: '(' action_embed_word ')' final { $$->action = $2->action; };
 action_embed: action_embed_block final { $$->action = $1->action; };
 
 nonterm action_embed_word uses action_ref;
