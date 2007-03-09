@@ -39,8 +39,11 @@ Use it with the frontend options -C or -D.
 .BR \-h ", " \-H ", " \-? ", " \-\-help
 Display help and exit.
 .TP
-.BR \-v 
+.BR \-v
 Display version information and exit.
+.TP
+.BR \-l
+Inhibit the writing of #line directives in generated code.
 .TP
 .B \-o " file"
 Write output to file. If -o is not given, a default file name is chosen by

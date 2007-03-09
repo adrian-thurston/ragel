@@ -38,6 +38,9 @@ using std::endl;
 
 void lineDirective( ostream &out, char *fileName, int line )
 {
+	if ( noLineDirectives )
+		out << "/* ";
+
 	/* Write the preprocessor line info for to the input file. */
 	out << "#line " << line  << " \"";
 	for ( char *pc = fileName; *pc != 0; pc++ ) {
@@ -46,7 +49,12 @@ void lineDirective( ostream &out, char *fileName, int line )
 		else
 			out << *pc;
 	}
-	out << "\"\n";
+	out << '"';
+
+	if ( noLineDirectives )
+		out << " */";
+
+	out << '\n';
 }
 
 void genLineDirective( ostream &out )

@@ -1,5 +1,7 @@
 For Next Release
 ================
+ -Added an option -l to rlgen-cd which inhibits the writing of #line
+  directives.
  -Added a new syntax for verbose embeddings. This adds parentheses: 
       $from(action_name);
   Verbose embeddings without parentheses can make code difficult to read

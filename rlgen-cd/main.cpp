@@ -65,6 +65,7 @@ char *outputFileName = 0;
 bool graphvizDone = false;
 
 int numSplitPartitions = 0;
+bool noLineDirectives = false;
 bool printPrintables = false;
 
 /* Print a summary of the options. */
@@ -76,6 +77,8 @@ void usage()
 "   -h, -H, -?, --help    Print this usage and exit\n"
 "   -v, --version         Print version information and exit\n"
 "   -o <file>             Write output to <file>\n"
+"code generation options:\n"
+"   -l                    Inhibit writing of #line directives\n"
 "generated code style:\n"
 "   -T0                   Table driven FSM (default)\n"
 "   -T1                   Faster table driven FSM\n"
@@ -239,7 +242,7 @@ CodeGenData *makeCodeGen( char *sourceFileName, char *fsmName,
 /* Main, process args and call yyparse to start scanning input. */
 int main(int argc, char **argv)
 {
-	ParamCheck pc("o:T:F:G:P:vHh?-:", argc, argv);
+	ParamCheck pc("-:Hh?vlo:T:F:G:P:", argc, argv);
 	char *xmlInputFileName = 0;
 
 	while ( pc.check() ) {
@@ -256,6 +259,10 @@ int main(int argc, char **argv)
 					/* Ok, remember the output file name. */
 					outputFileName = pc.parameterArg;
 				}
+				break;
+
+			case 'l':
+				noLineDirectives = true;
 				break;
 
 			/* Code style. */

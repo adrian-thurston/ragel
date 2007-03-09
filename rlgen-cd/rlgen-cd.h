@@ -45,12 +45,15 @@ enum CodeStyleEnum
 
 extern CodeStyleEnum codeStyle;
 
+
 /* IO filenames and stream. */
-extern bool printPrintables;
 extern bool graphvizDone;
 
 extern int gblErrorCount;
+
+/* Options. */
 extern int numSplitPartitions;
+extern bool noLineDirectives;
 
 std::ostream &error();
 
