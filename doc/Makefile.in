@@ -32,8 +32,11 @@ prefix = @prefix@
 docdir = @datadir@/doc/ragel
 mandir = @mandir@
 
+
+MANPAGES = ragel.1 rlgen-cd.1 rlgen-java.1 rlgen-ruby.1 rlgen-dot.1
+
 # Rules.
-all: ragel-guide.pdf ragel.1 rlgen-cd.1 rlgen-java.1 rlgen-ruby.1 rlgen-dot.1
+all: ragel-guide.pdf $(MANPAGES)
 
 ragel-guide.pdf: $(PDFFIGS) $(INPUT)
 
@@ -53,13 +56,8 @@ version.tex: ../version.mk
 	cat $< | sed 's/@PUBDATE@/$(PUBDATE)/' \
 		| sed 's/@VERSION@/$(VERSION)/' > $@
 
-#rlcodegen.1: rlcodegen.1.in ../version.mk
-#	cat rlcodegen.1.in | sed 's/@PUBDATE@/$(PUBDATE)/' \
-#		| sed 's/@VERSION@/$(VERSION)/' > rlcodegen.1
-
 clean:
-	rm -f ragel.1 rlcodegen.1 \
-		*.bak *.aux *.dvi *.log *.toc *.pdf
+	rm -f $(MANPAGES) *.bak *.aux *.dvi *.log *.toc *.pdf
 
 distclean: clean
 	rm -f Makefile
