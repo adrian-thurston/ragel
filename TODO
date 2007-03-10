@@ -1,7 +1,6 @@
 Need a "write entry name;" feature.
 
-Conditional action blocks need to be explicitly ordered in the same way that
-actions are ordered.
+Should be possible to embed the negative sense of a condition.
 
 Possibly bring back the old semantics of > in a new operator, or allow it to be
 defined somehow.
