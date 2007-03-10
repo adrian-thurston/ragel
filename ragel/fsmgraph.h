@@ -23,6 +23,7 @@
 #define _FSMGRAPH_H
 
 #include <assert.h>
+#include <iostream>
 #include "common.h"
 #include "vector.h"
 #include "bstset.h"
@@ -35,6 +36,7 @@
 #include "sbsttable.h"
 #include "avlset.h"
 #include "avlmap.h"
+#include "ragel.h"
 
 //#define LOG_CONDS
 
@@ -45,6 +47,8 @@
 #define SB_ISFINAL    0x04
 #define SB_ISMARKED   0x08
 #define SB_ONLIST     0x10
+
+using std::ostream;
 
 struct TransAp;
 struct StateAp;
@@ -77,6 +81,94 @@ extern KeyOps *keyOps;
 
 /* Transistion Action Element. */
 typedef SBstMapEl< int, Action* > ActionTableEl;
+
+/* Nodes in the tree that use this action. */
+struct NameInst;
+struct InlineList;
+typedef Vector<NameInst*> ActionRefs;
+
+/* Element in list of actions. Contains the string for the code to exectute. */
+struct Action 
+:
+	public DListEl<Action>,
+	public AvlTreeEl<Action>
+{
+public:
+
+	Action( const InputLoc &loc, char *name, InlineList *inlineList, int condId )
+	:
+		loc(loc),
+		name(name),
+		inlineList(inlineList), 
+		actionId(-1),
+		numTransRefs(0),
+		numToStateRefs(0),
+		numFromStateRefs(0),
+		numEofRefs(0),
+		numCondRefs(0),
+		anyCall(false),
+		isLmAction(false),
+		condId(condId)
+	{
+	}
+
+	/* Key for action dictionary. */
+	char *getKey() const { return name; }
+
+	/* Data collected during parse. */
+	InputLoc loc;
+	char *name;
+	InlineList *inlineList;
+	int actionId;
+
+	void actionName( ostream &out )
+	{
+		if ( name != 0 )
+			out << name;
+		else
+			out << loc.line << ":" << loc.col;
+	}
+
+	/* Places in the input text that reference the action. */
+	ActionRefs actionRefs;
+
+	/* Number of references in the final machine. */
+	int numRefs() 
+		{ return numTransRefs + numToStateRefs + numFromStateRefs + numEofRefs; }
+	int numTransRefs;
+	int numToStateRefs;
+	int numFromStateRefs;
+	int numEofRefs;
+	int numCondRefs;
+	bool anyCall;
+
+	bool isLmAction;
+	int condId;
+};
+
+struct CmpCondId
+{
+	static inline int compare( const Action *cond1, const Action *cond2 )
+	{
+		if ( cond1->condId < cond2->condId )
+			return -1;
+		else if ( cond1->condId > cond2->condId )
+			return 1;
+		return 0;
+	}
+};
+
+/* A list of actions. */
+typedef DList<Action> ActionList;
+typedef AvlTree<Action, char *, CmpStr> ActionDict;
+
+/* Structure for reverse action mapping. */
+struct RevActionMapEl
+{
+	char *name;
+	InputLoc location;
+};
+
 
 /* Transition Action Table.  */
 struct ActionTable 
@@ -444,8 +536,8 @@ typedef BstSet<int> EntryIdSet;
 typedef BstSet<LongestMatchPart*> LmItemSet;
 
 /* Conditions. */
-typedef BstSet< Action*, CmpOrd<Action*> > CondSet;
-typedef CmpTable< Action*, CmpOrd<Action*> > CmpCondSet;
+typedef BstSet< Action*, CmpCondId > CondSet;
+typedef CmpTable< Action*, CmpCondId > CmpCondSet;
 
 struct CondSpace
 	: public AvlTreeEl<CondSpace>

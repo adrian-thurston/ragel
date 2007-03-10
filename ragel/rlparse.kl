@@ -109,7 +109,8 @@ action_spec:
 		else {
 			//cerr << "NEW ACTION " << $2->data << " " << $4->inlineList << endl;
 			/* Add the action to the list of actions. */
-			Action *newAction = new Action( $3->loc, $2->data, $4->inlineList );
+			Action *newAction = new Action( $3->loc, $2->data, 
+					$4->inlineList, pd->nextCondId++ );
 
 			/* Insert to list and dict. */
 			pd->actionList.append( newAction );
@@ -688,7 +689,7 @@ nonterm action_embed_block uses action_ref;
 action_embed_block:
 	'{' inline_block '}' final {
 		/* Create the action, add it to the list and pass up. */
-		Action *newAction = new Action( $1->loc, 0, $2->inlineList );
+		Action *newAction = new Action( $1->loc, 0, $2->inlineList, pd->nextCondId++ );
 		pd->actionList.append( newAction );
 		$$->action = newAction;
 	};

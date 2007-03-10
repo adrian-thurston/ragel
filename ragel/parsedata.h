@@ -37,77 +37,6 @@
 /* Forwards. */
 using std::ostream;
 
-/* Nodes in the tree that use this action. */
-typedef Vector<NameInst*> ActionRefs;
-
-/* Element in list of actions. Contains the string for the code to exectute. */
-struct Action 
-:
-	public DListEl<Action>,
-	public AvlTreeEl<Action>
-{
-public:
-
-	Action( const InputLoc &loc, char *name, InlineList *inlineList )
-	:
-		loc(loc),
-		name(name),
-		inlineList(inlineList), 
-		actionId(-1),
-		numTransRefs(0),
-		numToStateRefs(0),
-		numFromStateRefs(0),
-		numEofRefs(0),
-		numCondRefs(0),
-		anyCall(false),
-		isLmAction(false)
-	{
-	}
-
-	/* Key for action dictionary. */
-	char *getKey() const { return name; }
-
-	/* Data collected during parse. */
-	InputLoc loc;
-	char *name;
-	InlineList *inlineList;
-	int actionId;
-
-	void actionName( ostream &out )
-	{
-		if ( name != 0 )
-			out << name;
-		else
-			out << loc.line << ":" << loc.col;
-	}
-
-	/* Places in the input text that reference the action. */
-	ActionRefs actionRefs;
-
-	/* Number of references in the final machine. */
-	int numRefs() 
-		{ return numTransRefs + numToStateRefs + numFromStateRefs + numEofRefs; }
-	int numTransRefs;
-	int numToStateRefs;
-	int numFromStateRefs;
-	int numEofRefs;
-	int numCondRefs;
-	bool anyCall;
-
-	bool isLmAction;
-};
-
-/* A list of actions. */
-typedef DList<Action> ActionList;
-typedef AvlTree<Action, char *, CmpStr> ActionDict;
-
-/* Structure for reverse action mapping. */
-struct RevActionMapEl
-{
-	char *name;
-	InputLoc location;
-};
-
 struct VarDef;
 struct Join;
 struct Expression;
@@ -308,7 +237,7 @@ struct ParseData
 	ActionList actionList;
 
 	/* The id of the next priority name and label. */
-	int nextPriorKey, nextLocalErrKey, nextNameId;
+	int nextPriorKey, nextLocalErrKey, nextNameId, nextCondId;
 	
 	/* The default priority number key for a machine. This is active during
 	 * the parse of the rhs of a machine assignment. */

@@ -9,10 +9,13 @@ For Next Release
   tendency to associtate spaces with concatenation. Without syntax
   highlighting to make it clear that the embedding type is a keyword, the
   problem is especially bad. The danger is that a verbose embedding could be
-  read as an embedding of the embedding type:
-      main := 'foo' $from some_action '\n';
-  With parentheses this statment reads much more clearly.
-      main := 'foo' $from(some_action) '\n';
+  read as an embedding of the embedding type. With parentheses verbose
+  embeddings read much more clearly.
+ -Conditions now have a forced order when more than one is executed on a
+  single character. Previously, ordering relied on pointers, which caused
+  results to vary by compiler. Ordering is now done using conditon action
+  declaration order. This fixes the failure of cond4.rl which occured with
+  g++ 4.1 and other compiler versions.
 
 Ragel 5.18 - February 13, 2007
 ==============================

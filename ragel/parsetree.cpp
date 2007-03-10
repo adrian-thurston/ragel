@@ -164,7 +164,7 @@ InputLoc LongestMatchPart::getLoc()
 Action *LongestMatch::newAction( ParseData *pd, const InputLoc &loc, 
 		char *name, InlineList *inlineList )
 {
-	Action *action = new Action( loc, name, inlineList );
+	Action *action = new Action( loc, name, inlineList, pd->nextCondId++ );
 	action->actionRefs.append( pd->curNameInst );
 	pd->actionList.append( action );
 	action->isLmAction = true;
@@ -1172,8 +1172,10 @@ FsmAp *FactorWithAug::walk( ParseData *pd )
 			actionOrd[i] = pd->curActionOrd++;
 	}
 
+	/* Embed conditions. */
 	assignConditions( rtnVal );
 
+	/* Embed actions. */
 	assignActions( pd, rtnVal , actionOrd );
 
 	/* Make the array of priority orderings. Orderings are local to this walk

@@ -424,6 +424,7 @@ ParseData::ParseData( char *fileName, char *sectionName,
 	/* 0 is reserved for global error actions. */
 	nextLocalErrKey(1),
 	nextNameId(0),
+	nextCondId(0),
 	alphTypeSet(false),
 	getKeyExpr(0),
 	accessExpr(0),
@@ -933,7 +934,7 @@ Action *ParseData::newAction( char *name, InlineList *inlineList )
 	loc.line = 1;
 	loc.col = 1;
 
-	Action *action = new Action( loc, name, inlineList );
+	Action *action = new Action( loc, name, inlineList, nextCondId++ );
 	action->actionRefs.append( rootName );
 	actionList.append( action );
 	return action;
@@ -1326,7 +1327,6 @@ void ParseData::prepareMachineGen( GraphDictEl *graphDictEl )
 	sectionGraph->depthFirstOrdering();
 	sectionGraph->sortStatesByFinal();
 	sectionGraph->setStateNumbers( 0 );
-
 }
 
 void ParseData::generateXML( ostream &out )
