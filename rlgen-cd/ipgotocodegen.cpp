@@ -332,7 +332,7 @@ void IpGotoCodeGen::setLabelsNeeded()
 	}
 }
 
-void IpGotoCodeGen::writeOutData()
+void IpGotoCodeGen::writeData()
 {
 	out <<
 		"static const int " << START() << " = " << START_STATE_ID() << ";\n"
@@ -351,7 +351,7 @@ void IpGotoCodeGen::writeOutData()
 	}
 }
 
-void IpGotoCodeGen::writeOutExec()
+void IpGotoCodeGen::writeExec()
 {
 	/* Must set labels immediately before writing because we may depend on the
 	 * noend write option. */
@@ -413,7 +413,7 @@ void IpGotoCodeGen::writeOutExec()
 		"	}\n";
 }
 
-void IpGotoCodeGen::writeOutEOF()
+void IpGotoCodeGen::writeEOF()
 {
 	if ( redFsm->anyEofActions() ) {
 		out <<

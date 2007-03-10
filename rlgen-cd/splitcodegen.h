@@ -39,9 +39,9 @@ public:
 	std::ostream &STATE_GOTOS( int partition );
 	std::ostream &PARTITION( int partition );
 	std::ostream &ALL_PARTITIONS();
-	void writeOutData();
-	void writeOutExec();
-	void writeOutParts();
+	void writeData();
+	void writeExec();
+	void writeParts();
 
 	void setLabelsNeeded( RedStateAp *fromState, InlineList *inlineList );
 	void setLabelsNeeded( RedStateAp *fromState, RedTransAp *trans );

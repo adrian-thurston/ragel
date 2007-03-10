@@ -150,7 +150,7 @@ unsigned int FGotoCodeGen::EOF_ACTION( RedStateAp *state )
 	return act;
 }
 
-void FGotoCodeGen::writeOutData()
+void FGotoCodeGen::writeData()
 {
 	out <<
 		"static const int " << START() << " = " << START_STATE_ID() << ";\n"
@@ -190,7 +190,7 @@ void FGotoCodeGen::writeOutData()
 	}
 }
 
-void FGotoCodeGen::writeOutExec()
+void FGotoCodeGen::writeExec()
 {
 	outLabelUsed = false;
 
@@ -261,7 +261,7 @@ void FGotoCodeGen::writeOutExec()
 	out << "	}\n";
 }
 
-void FGotoCodeGen::writeOutEOF()
+void FGotoCodeGen::writeEOF()
 {
 	if ( redFsm->anyEofActions() ) {
 		out <<

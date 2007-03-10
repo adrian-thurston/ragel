@@ -1397,3 +1397,30 @@ void FsmAp::embedCondition( MergeData &md, StateAp *state, Action *condAction )
 	doRemove( md, state, expList );
 	expList.empty();
 }
+
+/* Check if a machine defines a single character. This is useful in validating
+ * ranges and machines to export. */
+bool FsmAp::checkSingleCharMachine()
+{
+	/* Must have two states. */
+	if ( stateList.length() != 2 )
+		return false;
+	/* The start state cannot be final. */
+	if ( startState->isFinState() )
+		return false;
+	/* There should be only one final state. */
+	if ( finStateSet.length() != 1 )
+		return false;
+	/* The final state cannot have any transitions out. */
+	if ( finStateSet[0]->outList.length() != 0 )
+		return false;
+	/* The start state should have only one transition out. */
+	if ( startState->outList.length() != 1 )
+		return false;
+	/* The singe transition out of the start state should not be a range. */
+	TransAp *startTrans = startState->outList.head;
+	if ( startTrans->lowKey != startTrans->highKey )
+		return false;
+	return true;
+}
+

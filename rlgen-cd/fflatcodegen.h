@@ -48,9 +48,9 @@ protected:
 	virtual std::ostream &EOF_ACTION( RedStateAp *state );
 	virtual std::ostream &TRANS_ACTION( RedTransAp *trans );
 
-	virtual void writeOutData();
-	virtual void writeOutEOF();
-	virtual void writeOutExec();
+	virtual void writeData();
+	virtual void writeEOF();
+	virtual void writeExec();
 };
 
 /*

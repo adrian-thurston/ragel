@@ -70,7 +70,8 @@ struct Scanner
 		line(1), column(1), lastnl(0), 
 		parser(0), ignoreSection(false), 
 		parserExistsError(false),
-		whitespaceOn(true)
+		whitespaceOn(true),
+		lastToken(0)
 		{}
 
 	bool recursiveInclude( char *inclFileName, char *inclSectionName );
@@ -125,6 +126,9 @@ struct Scanner
 	/* This is for inline code. By default it is on. It goes off for
 	 * statements and values in inline blocks which are parsed. */
 	bool whitespaceOn;
+
+	/* Keeps a record of the previous token sent to the section parser. */
+	int lastToken;
 };
 
 %%{
@@ -379,6 +383,10 @@ void Scanner::token( int type, char *start, char *end )
 	}%%
 
 	updateCol();
+
+	/* Record the last token for use in controlling the scan of subsequent
+	 * tokens. */
+	lastToken = type;
 }
 
 void Scanner::startSection( )
@@ -666,6 +674,8 @@ void Scanner::endSection( )
 		'lerr' => { token( KW_Lerr ); };
 		'to' => { token( KW_To ); };
 		'from' => { token( KW_From ); };
+		'export' => { token( KW_Export ); };
+		'entry' => { token( KW_Entry ); };
 
 		# Identifiers.
 		ident => { token( TK_Word, tokstart, tokend ); } ;
@@ -767,10 +777,14 @@ void Scanner::endSection( )
 		};
 
 		'{' => { 
-			token( '{' );
-			curly_count = 1; 
-			inlineBlockType = CurlyDelimited;
-			fgoto inline_code;
+			if ( lastToken == KW_Export || lastToken == KW_Entry )
+				token( '{' );
+			else {
+				token( '{' );
+				curly_count = 1; 
+				inlineBlockType = CurlyDelimited;
+				fgoto inline_code;
+			}
 		};
 
 		EOF => {

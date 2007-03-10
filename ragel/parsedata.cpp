@@ -438,6 +438,7 @@ ParseData::ParseData( char *fileName, char *sectionName,
 	curActionOrd(0),
 	curPriorOrd(0),
 	rootName(0),
+	exportsRootName(0),
 	nextEpsilonResolvedLink(0),
 	nextLongestMatchId(1),
 	lmRequiresErrorState(false)
@@ -472,6 +473,12 @@ NameInst *ParseData::addNameInst( const InputLoc &loc, char *data, bool isLabel 
 void ParseData::initNameWalk()
 {
 	curNameInst = rootName;
+	curNameChild = 0;
+}
+
+void ParseData::initExportsNameWalk()
+{
+	curNameInst = exportsRootName;
 	curNameChild = 0;
 }
 
@@ -767,18 +774,18 @@ void ParseData::fillNameIndex( NameInst *from )
 		fillNameIndex( *name );
 }
 
-void ParseData::makeRootName()
+void ParseData::makeRootNames()
 {
 	/* Create the root name. */
 	rootName = new NameInst( InputLoc(), 0, 0, nextNameId++, false );
+	exportsRootName = new NameInst( InputLoc(), 0, 0, nextNameId++, false );
 }
 
 /* Build the name tree and supporting data structures. */
 void ParseData::makeNameTree( GraphDictEl *dictEl )
 {
 	/* Set up curNameInst for the walk. */
-	curNameInst = rootName;
-	curNameChild = 0;
+	initNameWalk();
 
 	if ( dictEl != 0 ) {
 		/* A start location has been specified. */
@@ -797,6 +804,7 @@ void ParseData::makeNameTree( GraphDictEl *dictEl )
 	memset( nameIndex, 0, sizeof(NameInst*)*nextNameId );
 	fillNameIndex( rootName );
 }
+
 
 void ParseData::createBuiltin( char *name, BuiltinMachine builtin )
 {
@@ -1288,11 +1296,59 @@ void ParseData::analyzeGraph( FsmAp *graph )
 		checkAction( act );
 }
 
+void ParseData::makeExportsNameTree()
+{
+	/* Make a name tree for the exports. */
+	initExportsNameWalk();
+
+	/* First make the name tree. */
+	for ( GraphDict::Iter gdel = graphDict; gdel.lte(); gdel++ ) {
+		if ( gdel->value->isExport ) {
+			/* Recurse on the instance. */
+			gdel->value->makeNameTree( gdel->loc, this );
+		}
+	}
+}
+
+void ParseData::makeExports()
+{
+	makeExportsNameTree();
+
+	/* Resove name references in the tree. */
+	initExportsNameWalk();
+	for ( GraphDict::Iter gdel = graphDict; gdel.lte(); gdel++ ) {
+		if ( gdel->value->isExport )
+			gdel->value->resolveNameRefs( this );
+	}
+
+	/* Make all the instantiations, we know that main exists in this list. */
+	initExportsNameWalk();
+	for ( GraphDict::Iter gdel = graphDict; gdel.lte();  gdel++ ) {
+		/* Check if this var def is an export. */
+		if ( gdel->value->isExport ) {
+			/* Build the graph from a walk of the parse tree. */
+			FsmAp *graph = gdel->value->walk( this );
+
+			/* Build the graph from a walk of the parse tree. */
+			if ( !graph->checkSingleCharMachine() ) {
+				error(gdel->loc) << "bad export machine, must define "
+						"a single character" << endl;
+			}
+			else {
+				/* Safe to extract the key and declare the export. */
+				Key exportKey = graph->startState->outList.head->lowKey;
+				exportList.append( new Export( gdel->value->name, exportKey ) );
+			}
+		}
+	}
+
+}
+
 void ParseData::prepareMachineGen( GraphDictEl *graphDictEl )
 {
 	beginProcessing();
 	initKeyOps();
-	makeRootName();
+	makeRootNames();
 	initLongestMatchData();
 
 	/* Make the graph, do minimization. */
@@ -1300,6 +1356,9 @@ void ParseData::prepareMachineGen( GraphDictEl *graphDictEl )
 		sectionGraph = makeAll();
 	else
 		sectionGraph = makeSpecific( graphDictEl );
+	
+	/* Compute exports from the export definitions. */
+	makeExports();
 
 	/* If any errors have occured in the input file then don't write anything. */
 	if ( gblErrorCount > 0 )

@@ -82,9 +82,9 @@ public:
 	virtual void GOTO_HEADER( RedStateAp *state );
 	virtual void STATE_GOTO_ERROR();
 
-	virtual void writeOutData();
-	virtual void writeOutEOF();
-	virtual void writeOutExec();
+	virtual void writeData();
+	virtual void writeEOF();
+	virtual void writeExec();
 };
 
 /*

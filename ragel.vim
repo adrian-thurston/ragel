@@ -98,7 +98,7 @@ syntax match rlOtherOps "<:" contained
 " Keywords
 " FIXME: Enable the range keyword post 5.17.
 " syntax keyword rlKeywords machine action context include range contained
-syntax keyword rlKeywords machine action context include contained
+syntax keyword rlKeywords machine action context include export entry contained
 syntax keyword rlExprKeywords when err lerr eof from to contained
 
 " Case Labels
@@ -126,7 +126,7 @@ syntax region rlCodeSemi matchgroup=Type start="\<alphtype\>" start="\<getkey\>"
 
 syntax region rlWrite matchgroup=Type start="\<write\>" matchgroup=NONE end=";" contained contains=rlWriteKeywords,rlWriteOptions
 
-syntax keyword rlWriteKeywords init data exec eof contained
+syntax keyword rlWriteKeywords init data exec eof exports contained
 syntax keyword rlWriteOptions noerror nofinal noprefix noend contained
 
 "

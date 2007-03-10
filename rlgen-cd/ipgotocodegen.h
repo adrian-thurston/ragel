@@ -54,9 +54,9 @@ public:
 	void TARGS( ostream &ret, bool inFinish, int targState );
 	void BREAK( ostream &ret, int targState );
 
-	virtual void writeOutData();
-	virtual void writeOutEOF();
-	virtual void writeOutExec();
+	virtual void writeData();
+	virtual void writeEOF();
+	virtual void writeExec();
 
 protected:
 	bool useAgainLabel();

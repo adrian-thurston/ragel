@@ -53,26 +53,74 @@ statement: range_spec commit;
 statement: getkey_spec commit;
 statement: access_spec commit;
 statement: variable_spec commit;
+statement: export_block commit;
+statement: entry_block commit;
+
+export_open: KW_Export 
+	final {
+		exportContext.append( true );
+	};
+
+nonterm opt_export
+{
+	bool isSet;
+};
+
+opt_export: export_open final { $$->isSet = true; };
+opt_export: final { $$->isSet = false; };
+
+export_block: export_open '{' statement_list '}' 
+	final {
+		exportContext.remove( exportContext.length()-1 );
+	};
+
+nonterm opt_entry
+{
+	bool isSet;
+};
+
+entry_open: KW_Entry
+	final {
+		entryContext.append( true );
+	};
+
+opt_entry: entry_open final { $$->isSet = true; };
+opt_entry: final { $$->isSet = false; };
+
+entry_block: entry_open '{' statement_list '}'
+	final {
+		entryContext.remove( entryContext.length()-1 );
+	};
 
 assignment:
-	machine_name '=' join ';' final {
+	opt_export opt_entry machine_name '=' join ';' final {
 		/* Main machine must be an instance. */
 		bool isInstance = false;
-		if ( strcmp($1->token.data, machineMain) == 0 ) {
-			warning($1->token.loc) << 
+		if ( strcmp($3->token.data, machineMain) == 0 ) {
+			warning($3->token.loc) << 
 					"main machine will be implicitly instantiated" << endl;
 			isInstance = true;
 		}
 
 		/* Generic creation of machine for instantiation and assignment. */
-		JoinOrLm *joinOrLm = new JoinOrLm( $3->join );
-		tryMachineDef( $1->token.loc, $1->token.data, joinOrLm, isInstance );
+		JoinOrLm *joinOrLm = new JoinOrLm( $5->join );
+		tryMachineDef( $3->token.loc, $3->token.data, joinOrLm, isInstance );
+
+		if ( $1->isSet )
+			exportContext.remove( exportContext.length()-1 );
+		if ( $2->isSet )
+			entryContext.remove( entryContext.length()-1 );
 	};
 
 instantiation: 
-	machine_name TK_ColonEquals join_or_lm ';' final {
+	opt_export opt_entry machine_name TK_ColonEquals join_or_lm ';' final {
 		/* Generic creation of machine for instantiation and assignment. */
-		tryMachineDef( $1->token.loc, $1->token.data, $3->joinOrLm, true );
+		tryMachineDef( $3->token.loc, $3->token.data, $5->joinOrLm, true );
+
+		if ( $1->isSet )
+			exportContext.remove( exportContext.length()-1 );
+		if ( $2->isSet )
+			entryContext.remove( entryContext.length()-1 );
 	};
 
 type token_type
@@ -1369,6 +1417,8 @@ void Parser::tryMachineDef( InputLoc &loc, char *name,
 		newEl->value = new VarDef( name, joinOrLm );
 		newEl->isInstance = isInstance;
 		newEl->loc = loc;
+		newEl->value->isExport = exportContext[exportContext.length()-1];
+		newEl->value->isEntry = entryContext[entryContext.length()-1];
 
 		/* It it is an instance, put on the instance list. */
 		if ( isInstance )

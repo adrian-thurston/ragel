@@ -57,7 +57,7 @@ xmlparse.cpp: xmlparse.kl xmlparse.kh
 	kelbt -o $@ $<
 
 xmlscan.cpp: xmlscan.rl
-	ragel xmlscan.rl | rlcodegen -G2 -o xmlscan.cpp
+	ragel xmlscan.rl | rlgen-cd -G2 -o xmlscan.cpp
 
 xmltags.cpp: xmltags.gperf
 	gperf -L C++ -t $< > $@
@@ -76,7 +76,7 @@ EXTRA_CLEAN = $(GEN_SRC)
 endif
 
 clean:
-	rm -f tags .*.d *.o rlcodegen $(EXTRA_CLEAN)
+	rm -f tags .*.d *.o rlgen-cd $(EXTRA_CLEAN)
 
 install:
 	@true

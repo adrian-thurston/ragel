@@ -162,7 +162,25 @@ ragel_def_item: tag_alph_type;
 ragel_def_item: tag_getkey_expr;
 ragel_def_item: tag_access_expr;
 ragel_def_item: tag_curstate_expr;
+ragel_def_item: tag_export_list;
 ragel_def_item: tag_machine;
+
+tag_export_list: TAG_exports export_list '/' TAG_exports;
+
+export_list: export_list tag_export;
+export_list: ;
+
+tag_export: TAG_ex '/' TAG_ex
+	final {
+		Attribute *nameAttr = $1->tag->findAttr( "name" );
+		if ( nameAttr == 0 )
+			error($1->loc) << "tag <ex> requires a name attribute" << endl;
+		else {
+			char *td = $3->tag->content;
+			Key exportKey = readKey( td, &td );
+			cgd->exportList.append( new Export( nameAttr->value, exportKey ) );
+		}
+	};
 
 tag_alph_type: TAG_alphtype '/' TAG_alphtype
 	final {

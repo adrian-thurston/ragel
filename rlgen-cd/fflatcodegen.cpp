@@ -149,7 +149,7 @@ std::ostream &FFlatCodeGen::ACTION_SWITCH()
 	return out;
 }
 
-void FFlatCodeGen::writeOutData()
+void FFlatCodeGen::writeData()
 {
 	if ( redFsm->anyConditions() ) {
 		OPEN_ARRAY( WIDE_ALPH_TYPE(), CK() );
@@ -243,7 +243,7 @@ void FFlatCodeGen::writeOutData()
 	}
 }
 
-void FFlatCodeGen::writeOutExec()
+void FFlatCodeGen::writeExec()
 {
 	outLabelUsed = false;
 
@@ -350,7 +350,7 @@ void FFlatCodeGen::writeOutExec()
 	out << "	}\n";
 }
 
-void FFlatCodeGen::writeOutEOF()
+void FFlatCodeGen::writeEOF()
 {
 	if ( redFsm->anyEofActions() ) {
 		out <<

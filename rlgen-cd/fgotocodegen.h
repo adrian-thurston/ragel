@@ -48,9 +48,9 @@ public:
 	unsigned int FROM_STATE_ACTION( RedStateAp *state );
 	unsigned int EOF_ACTION( RedStateAp *state );
 
-	virtual void writeOutData();
-	virtual void writeOutEOF();
-	virtual void writeOutExec();
+	virtual void writeData();
+	virtual void writeEOF();
+	virtual void writeExec();
 };
 
 /*

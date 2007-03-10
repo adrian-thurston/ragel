@@ -65,7 +65,8 @@ public:
 	virtual ~FsmCodeGen() {}
 
 	virtual void finishRagelDef();
-	virtual void writeOutInit();
+	virtual void writeInit();
+	virtual void writeExports();
 
 protected:
 	string FSM_NAME();

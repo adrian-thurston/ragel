@@ -167,8 +167,9 @@ struct ParseData
 	/* Make a name id in the current name instantiation scope if it is not
 	 * already there. */
 	NameInst *addNameInst( const InputLoc &loc, char *data, bool isLabel );
-	void makeRootName();
+	void makeRootNames();
 	void makeNameTree( GraphDictEl *gdNode );
+	void makeExportsNameTree();
 	void fillNameIndex( NameInst *from );
 	void printNameTree();
 
@@ -206,6 +207,7 @@ struct ParseData
 
 	void analyzeAction( Action *action, InlineList *inlineList );
 	void analyzeGraph( FsmAp *graph );
+	void makeExports();
 
 	void prepareMachineGen( GraphDictEl *graphDictEl );
 	void generateXML( ostream &out );
@@ -271,8 +273,12 @@ struct ParseData
 	int curActionOrd;
 	int curPriorOrd;
 
-	/* Root of the name tree. */
+	/* Root of the name tree. One root is for the instantiated machines. The
+	 * other root is for exported definitions. */
 	NameInst *rootName;
+	NameInst *exportsRootName;
+	
+	/* Name tree walking. */
 	NameInst *curNameInst;
 	int curNameChild;
 
@@ -289,6 +295,7 @@ struct ParseData
 	void initLongestMatchData();
 	void setLongestMatchData( FsmAp *graph );
 	void initNameWalk();
+	void initExportsNameWalk();
 	NameInst *nextNameScope() { return curNameInst->childVect[curNameChild]; }
 	NameFrame enterNameScope( bool isLocal, int numScopes );
 	void popNameScope( const NameFrame &frame );
@@ -326,6 +333,8 @@ struct ParseData
 
 	CondData thisCondData;
 	KeyOps thisKeyOps;
+
+	ExportList exportList;
 };
 
 void afterOpMinimize( FsmAp *fsm, bool lastInSeq = true );

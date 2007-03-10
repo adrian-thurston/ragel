@@ -41,8 +41,8 @@ class TabCodeGen : virtual public FsmCodeGen
 public:
 	TabCodeGen( ostream &out ) : FsmCodeGen(out) {}
 	virtual ~TabCodeGen() { }
-	virtual void writeOutData();
-	virtual void writeOutExec();
+	virtual void writeData();
+	virtual void writeExec();
 
 protected:
 	std::ostream &TO_STATE_ACTION_SWITCH();
@@ -87,7 +87,7 @@ protected:
 	virtual std::ostream &EOF_ACTION( RedStateAp *state );
 	virtual std::ostream &TRANS_ACTION( RedTransAp *trans );
 	virtual void calcIndexSize();
-	virtual void writeOutEOF();
+	virtual void writeEOF();
 };
 
 

@@ -295,7 +295,7 @@ std::ostream &SplitCodeGen::PART_MAP()
 	return out;
 }
 
-void SplitCodeGen::writeOutData()
+void SplitCodeGen::writeData()
 {
 	out <<
 		"static const int " << START() << " = " << START_STATE_ID() << ";\n"
@@ -371,7 +371,7 @@ std::ostream &SplitCodeGen::ALL_PARTITIONS()
 }
 
 
-void SplitCodeGen::writeOutExec()
+void SplitCodeGen::writeExec()
 {
 	/* Must set labels immediately before writing because we may depend on the
 	 * noend write option. */

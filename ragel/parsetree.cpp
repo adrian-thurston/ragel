@@ -112,7 +112,7 @@ FsmAp *VarDef::walk( ParseData *pd )
 	 * the graph. */
 	if ( pd->curNameInst->numRefs > 0 )
 		rtnVal->setEntry( pd->curNameInst->id, rtnVal->startState );
-	
+
 	/* Pop the name scope. */
 	pd->popNameScope( nameFrame );
 	return rtnVal;
@@ -1793,43 +1793,19 @@ Range::~Range()
 	delete upperLit;
 }
 
-bool Range::verifyRangeFsm( FsmAp *rangeEnd )
-{
-	/* Must have two states. */
-	if ( rangeEnd->stateList.length() != 2 )
-		return false;
-	/* The start state cannot be final. */
-	if ( rangeEnd->startState->isFinState() )
-		return false;
-	/* There should be only one final state. */
-	if ( rangeEnd->finStateSet.length() != 1 )
-		return false;
-	/* The final state cannot have any transitions out. */
-	if ( rangeEnd->finStateSet[0]->outList.length() != 0 )
-		return false;
-	/* The start state should have only one transition out. */
-	if ( rangeEnd->startState->outList.length() != 1 )
-		return false;
-	/* The singe transition out of the start state should not be a range. */
-	TransAp *startTrans = rangeEnd->startState->outList.head;
-	if ( startTrans->lowKey != startTrans->highKey )
-		return false;
-	return true;
-}
-
 /* Evaluate a range. Gets the lower an upper key and makes an fsm range. */
 FsmAp *Range::walk( ParseData *pd )
 {
 	/* Construct and verify the suitability of the lower end of the range. */
 	FsmAp *lowerFsm = lowerLit->walk( pd );
-	if ( !verifyRangeFsm( lowerFsm ) ) {
+	if ( !lowerFsm->checkSingleCharMachine() ) {
 		error(lowerLit->token.loc) << 
 			"bad range lower end, must be a single character" << endl;
 	}
 
 	/* Construct and verify the upper end. */
 	FsmAp *upperFsm = upperLit->walk( pd );
-	if ( !verifyRangeFsm( upperFsm ) ) {
+	if ( !upperFsm->checkSingleCharMachine() ) {
 		error(upperLit->token.loc) << 
 			"bad range upper end, must be a single character" << endl;
 	}

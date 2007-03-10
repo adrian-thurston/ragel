@@ -104,6 +104,7 @@ private:
 	void writeLmOnNext( InlineItem *item );
 	void writeLmOnLagBehind( InlineItem *item );
 
+	void writeExports();
 	void writeEntryPoints();
 	void writeGetKeyExpr();
 	void writeAccessExpr();

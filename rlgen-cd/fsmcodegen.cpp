@@ -454,7 +454,7 @@ string FsmCodeGen::FIRST_FINAL_STATE()
 	return ret.str();
 }
 
-void FsmCodeGen::writeOutInit()
+void FsmCodeGen::writeInit()
 {
 	out << "	{\n";
 	out << "\t" << CS() << " = " << START() << ";\n";
@@ -508,6 +508,17 @@ string FsmCodeGen::WIDE_ALPH_TYPE()
 		}
 	}
 	return ret;
+}
+
+void FsmCodeGen::writeExports()
+{
+	if ( exportList.length() > 0 ) {
+		for ( ExportList::Iter ex = exportList; ex.lte(); ex++ ) {
+			out << "#define " << DATA_PREFIX() << ex->name << " " << 
+					KEY(ex->key) << "\n";
+		}
+		out << "\n";
+	}
 }
 
 

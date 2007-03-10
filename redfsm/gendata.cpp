@@ -659,14 +659,14 @@ void CodeGenData::writeStatement( InputLoc &loc, int nargs, char **args )
 						args[i] << "\"" << endl;
 			}
 		}
-		writeOutData();
+		writeData();
 	}
 	else if ( strcmp( args[0], "init" ) == 0 ) {
 		for ( int i = 1; i < nargs; i++ ) {
 			source_warning(loc) << "unrecognized write option \"" << 
 					args[i] << "\"" << endl;
 		}
-		writeOutInit();
+		writeInit();
 	}
 	else if ( strcmp( args[0], "exec" ) == 0 ) {
 		for ( int i = 1; i < nargs; i++ ) {
@@ -677,14 +677,21 @@ void CodeGenData::writeStatement( InputLoc &loc, int nargs, char **args )
 						args[i] << "\"" << endl;
 			}
 		}
-		writeOutExec();
+		writeExec();
 	}
 	else if ( strcmp( args[0], "eof" ) == 0 ) {
 		for ( int i = 1; i < nargs; i++ ) {
 			source_warning(loc) << "unrecognized write option \"" << 
 					args[i] << "\"" << endl;
 		}
-		writeOutEOF();
+		writeEOF();
+	}
+	else if ( strcmp( args[0], "exports" ) == 0 ) {
+		for ( int i = 1; i < nargs; i++ ) {
+			source_warning(loc) << "unrecognized write option \"" << 
+					args[i] << "\"" << endl;
+		}
+		writeExports();
 	}
 	else {
 		/* EMIT An error here. */

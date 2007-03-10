@@ -218,6 +218,9 @@ struct VarDef
 
 	char *name;
 	JoinOrLm *joinOrLm;
+
+	bool isExport;
+	bool isEntry;
 };
 
 
@@ -600,7 +603,6 @@ struct Range
 
 	~Range();
 	FsmAp *walk( ParseData *pd );
-	bool verifyRangeFsm( FsmAp *rangeEnd );
 
 	Literal *lowerLit;
 	Literal *upperLit;

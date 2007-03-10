@@ -656,6 +656,19 @@ void XMLCodeGen::writeConditions()
 	}
 }
 
+void XMLCodeGen::writeExports()
+{
+	if ( pd->exportList.length() > 0 ) {
+		out << "  <exports>\n";
+		for ( ExportList::Iter exp = pd->exportList; exp.lte(); exp++ ) {
+			out << "    <ex name=\"" << exp->name << "\">";
+			writeKey( exp->key );
+			out << "</ex>\n";
+		}
+		out << "  </exports>\n";
+	}
+}
+
 void XMLCodeGen::writeXML()
 {
 	/* Open the definition. */
@@ -670,6 +683,8 @@ void XMLCodeGen::writeXML()
 
 	if ( pd->curStateExpr != 0 )
 		writeCurStateExpr();
+	
+	writeExports();
 	
 	writeMachine();
 

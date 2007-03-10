@@ -178,7 +178,7 @@ std::ostream &FTabCodeGen::ACTION_SWITCH()
 	return out;
 }
 
-void FTabCodeGen::writeOutData()
+void FTabCodeGen::writeData()
 {
 	if ( redFsm->anyConditions() ) {
 		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxCondOffset), CO() );
@@ -297,7 +297,7 @@ void FTabCodeGen::writeOutData()
 	}
 }
 
-void FTabCodeGen::writeOutExec()
+void FTabCodeGen::writeExec()
 {
 	outLabelUsed = false;
 
@@ -404,7 +404,7 @@ void FTabCodeGen::writeOutExec()
 }
 
 
-void FTabCodeGen::writeOutEOF()
+void FTabCodeGen::writeEOF()
 {
 	if ( redFsm->anyEofActions() ) {
 		out <<

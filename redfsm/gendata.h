@@ -63,10 +63,11 @@ struct CodeGenData
 	virtual void finishRagelDef() {}
 
 	/* These are invoked by the corresponding write statements. */
-	virtual void writeOutData() {};
-	virtual void writeOutInit() {};
-	virtual void writeOutExec() {};
-	virtual void writeOutEOF() {};
+	virtual void writeData() {};
+	virtual void writeInit() {};
+	virtual void writeExec() {};
+	virtual void writeEOF() {};
+	virtual void writeExports() {};
 
 	/* This can also be overwridden to modify the processing of write
 	 * statements. */
@@ -105,6 +106,7 @@ struct CodeGenData
 	EntryNameVect entryPointNames;
 	bool hasLongestMatch;
 	int codeGenErrCount;
+	ExportList exportList;
 
 	/* Write options. */
 	bool hasEnd;

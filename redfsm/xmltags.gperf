@@ -80,3 +80,5 @@ cond_space_list, TAG_cond_space_list
 cond_space, TAG_cond_space
 cond_list, TAG_cond_list
 c, TAG_c
+exports, TAG_exports
+ex, TAG_ex

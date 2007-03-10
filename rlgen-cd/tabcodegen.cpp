@@ -674,7 +674,7 @@ void TabCodeGen::BREAK( ostream &ret, int targState )
 	ret << CTRL_FLOW() << "goto _out;";
 }
 
-void TabCodeGen::writeOutData()
+void TabCodeGen::writeData()
 {
 	/* If there are any transtion functions then output the array. If there
 	 * are none, don't bother emitting an empty array that won't be used. */
@@ -852,7 +852,7 @@ void TabCodeGen::COND_TRANSLATE()
 		"\n";
 }
 
-void TabCodeGen::writeOutExec()
+void TabCodeGen::writeExec()
 {
 	outLabelUsed = false;
 
@@ -979,7 +979,7 @@ void TabCodeGen::writeOutExec()
 }
 
 
-void TabCodeGen::writeOutEOF()
+void TabCodeGen::writeEOF()
 {
 	if ( redFsm->anyEofActions() ) {
 		out << 

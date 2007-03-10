@@ -61,7 +61,7 @@ rlparse.cpp: rlparse.kl rlparse.kh
 	kelbt -o $@ $<
 
 rlscan.cpp: rlscan.rl
-	ragel $< | rlcodegen -G2 -o $@
+	ragel $< | rlgen-cd -G2 -o $@
 
 endif
 

@@ -24,6 +24,7 @@
 
 #include <fstream>
 #include <climits>
+#include "dlist.h"
 
 typedef unsigned long long Size;
 
@@ -290,5 +291,18 @@ public:
 
 char *findFileExtension( char *stemFile );
 char *fileNameFromStem( char *stemFile, char *suffix );
+
+struct Export
+{
+	Export( char *name, Key key )
+		: name(name), key(key) {}
+
+	char *name;
+	Key key;
+
+	Export *prev, *next;
+};
+
+typedef DList<Export> ExportList;
 
 #endif /* _COMMON_H */

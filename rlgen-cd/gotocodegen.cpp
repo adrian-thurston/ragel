@@ -601,7 +601,7 @@ void GotoCodeGen::BREAK( ostream &ret, int targState )
 	ret << CTRL_FLOW() << "goto _out;";
 }
 
-void GotoCodeGen::writeOutData()
+void GotoCodeGen::writeData()
 {
 	out <<
 		"static const int " << START() << " = " << START_STATE_ID() << ";\n"
@@ -648,7 +648,7 @@ void GotoCodeGen::writeOutData()
 	}
 }
 
-void GotoCodeGen::writeOutExec()
+void GotoCodeGen::writeExec()
 {
 	outLabelUsed = false;
 
@@ -736,7 +736,7 @@ void GotoCodeGen::writeOutExec()
 	out << "	}\n";
 }
 
-void GotoCodeGen::writeOutEOF()
+void GotoCodeGen::writeEOF()
 {
 	if ( redFsm->anyEofActions() ) {
 		out << 

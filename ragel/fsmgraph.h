@@ -1472,6 +1472,10 @@ struct FsmAp
 	bool checkErrTrans( StateAp *state, TransAp *trans );
 	bool checkErrTransFinish( StateAp *state );
 	bool hasErrorTrans();
+
+	/* Check if a machine defines a single character. This is useful in
+	 * validating ranges and machines to export. */
+	bool checkSingleCharMachine( );
 };
 
 

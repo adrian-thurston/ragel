@@ -486,7 +486,7 @@ void FlatCodeGen::BREAK( ostream &ret, int targState )
 	ret << CTRL_FLOW() << "goto _out;";
 }
 
-void FlatCodeGen::writeOutData()
+void FlatCodeGen::writeData()
 {
 	/* If there are any transtion functions then output the array. If there
 	 * are none, don't bother emitting an empty array that won't be used. */
@@ -630,7 +630,7 @@ void FlatCodeGen::COND_TRANSLATE()
 		"	}\n";
 }
 
-void FlatCodeGen::writeOutExec()
+void FlatCodeGen::writeExec()
 {
 	outLabelUsed = false;
 
@@ -760,7 +760,7 @@ void FlatCodeGen::writeOutExec()
 	out << "	}\n";
 }
 
-void FlatCodeGen::writeOutEOF()
+void FlatCodeGen::writeEOF()
 {
 	if ( redFsm->anyEofActions() ) {
 		out << 

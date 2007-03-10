@@ -103,7 +103,8 @@ struct Parser
 			TAG_error_state, TAG_action_list, TAG_action_table_list,
 			TAG_action, TAG_action_table, TAG_alphtype, TAG_element,
 			TAG_getkey, TAG_state_actions, TAG_entry_points, TAG_sub_action,
-			TAG_cond_space_list, TAG_cond_space, TAG_cond_list, TAG_c;
+			TAG_cond_space_list, TAG_cond_space, TAG_cond_list, TAG_c,
+			TAG_exports, TAG_ex;
 
 		# Inline block tokens.
 		token TAG_text, TAG_goto, TAG_call, TAG_next, TAG_goto_expr,
