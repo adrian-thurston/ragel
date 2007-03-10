@@ -19,7 +19,7 @@
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
 
 RAGEL = ../ragel/ragel
-RLCODEGEN = ../rlcodegen/rlcodegen
+RLCODEGEN = ../rlgen-cd/rlgen-cd
 FLEX = flex
 RE2C = re2c
 CFLAGS = -Wall -g -O3

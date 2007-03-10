@@ -68,6 +68,8 @@ struct StateChart
 
 int StateChart::init( )
 {
+	neg = false;
+	val = false;
 	%% write init;
 	return 1;
 }
