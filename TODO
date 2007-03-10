@@ -3,3 +3,5 @@ Add multi-insert to avl tree.
 All classes should have the transfer function.
 
 It should be easier to get the end of an array.
+
+Add push and pop functions to vectors.
