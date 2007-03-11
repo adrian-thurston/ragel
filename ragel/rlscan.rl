@@ -759,6 +759,9 @@ void Scanner::endSection( )
 		# Opening of longest match.
 		"|*" => { token( TK_BarStar ); };
 
+		# Separater for name references.
+		"::" => { token( TK_NameSep, tokstart, tokend ); };
+
 		'}%%' => { 
 			updateCol();
 			endSection();
