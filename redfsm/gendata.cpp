@@ -86,8 +86,8 @@ void CodeGenData::initStateList( unsigned long length )
 		redFsm->stateList.append( allStates+s );
 
 	/* We get the start state as an offset, set the pointer now. */
-	assert( startState >= 0 );
-	redFsm->startState = allStates + startState;
+	if ( startState >= 0 )
+		redFsm->startState = allStates + startState;
 	if ( errState >= 0 )
 		redFsm->errState = allStates + errState;
 	for ( EntryIdVect::Iter en = entryPointIds; en.lte(); en++ )

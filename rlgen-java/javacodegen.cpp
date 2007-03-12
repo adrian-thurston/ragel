@@ -890,7 +890,8 @@ void JavaTabCodeGen::writeData()
 		"\n";
 	}
 
-	STATIC_VAR( "int", START() ) << " = " << START_STATE_ID() << ";\n";
+	if ( redFsm->startState != 0 )
+		STATIC_VAR( "int", START() ) << " = " << START_STATE_ID() << ";\n";
 
 	if ( writeFirstFinal )
 		STATIC_VAR( "int" , FIRST_FINAL() ) << " = " << FIRST_FINAL_STATE() << ";\n";
@@ -1383,7 +1384,9 @@ string JavaTabCodeGen::FIRST_FINAL_STATE()
 void JavaTabCodeGen::writeInit()
 {
 	out << "	{\n";
-	out << "\t" << CS() << " = " << START() << ";\n";
+
+	if ( redFsm->startState != 0 )
+		out << "\t" << CS() << " = " << START() << ";\n";
 	
 	/* If there are any calls, then the stack top needs initialization. */
 	if ( redFsm->anyActionCalls() || redFsm->anyActionRets() )

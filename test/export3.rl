@@ -16,7 +16,7 @@
 		c3 . '.'* '\n' @{ puts "c3"; }
 	)*;
 			
-	main := any*;
+	other := any*;
 }%%
 
 %% write exports;
@@ -25,12 +25,10 @@
 def run_machine( data )
 	p = 0;
 	pe = data.length
-	cs = 0
-	cs = 0
+	cs = test_en_commands
 	val = 0;
 	neg = false;
 
-	cs = test_en_commands;
 	%% write exec;
 	%% write eof;
 	if  cs >= test_first_final

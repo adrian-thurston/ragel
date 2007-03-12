@@ -77,7 +77,7 @@ assignment:
 	opt_export machine_name '=' join ';' final {
 		/* Main machine must be an instance. */
 		bool isInstance = false;
-		if ( strcmp($2->token.data, machineMain) == 0 ) {
+		if ( strcmp($2->token.data, mainMachine) == 0 ) {
 			warning($2->token.loc) << 
 					"main machine will be implicitly instantiated" << endl;
 			isInstance = true;

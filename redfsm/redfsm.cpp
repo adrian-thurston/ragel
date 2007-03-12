@@ -45,6 +45,7 @@ RedFsmAp::RedFsmAp()
 	forcedErrorState(false),
 	nextActionId(0),
 	nextTransId(0),
+	startState(0),
 	errState(0),
 	errTrans(0),
 	firstFinState(0),
@@ -106,7 +107,8 @@ void RedFsmAp::depthFirstOrdering()
 
 	/* Add back to the state list from the start state and all other entry
 	 * points. */
-	depthFirstOrdering( startState );
+	if ( startState != 0 )
+		depthFirstOrdering( startState );
 	for ( RedStateSet::Iter en = entryPoints; en.lte(); en++ )
 		depthFirstOrdering( *en );
 	if ( forcedErrorState )

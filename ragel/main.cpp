@@ -313,8 +313,6 @@ int main(int argc, char **argv)
 	if ( machineSpec == 0 && machineName == 0 )
 		outputBuffer << "</host>\n";
 
-	checkMachines();
-
 	if ( gblErrorCount > 0 )
 		return 1;
 	

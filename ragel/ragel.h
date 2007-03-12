@@ -52,7 +52,7 @@ extern char *machineSpec, *machineName;
 extern bool printStatistics;
 
 extern int gblErrorCount;
-extern char machineMain[];
+extern char mainMachine[];
 
 /* Location in an input file. */
 struct InputLoc
@@ -69,7 +69,6 @@ std::ostream &warning( const InputLoc &loc );
 
 void scan( char *fileName, std::istream &input, std::ostream &output );
 void terminateAllParsers( );
-void checkMachines( );
 void writeMachines( std::ostream &out, std::string hostData, char *inputFileName );
 void xmlEscapeHost( std::ostream &out, char *data, int len );
 

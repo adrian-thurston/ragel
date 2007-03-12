@@ -34,7 +34,7 @@
 
 using namespace std;
 
-char machineMain[] = "main";
+char mainMachine[] = "main";
 
 void Token::set( char *str, int len )
 {
@@ -1151,7 +1151,7 @@ FsmAp *ParseData::makeAll()
 	/* Make all the instantiations, we know that main exists in this list. */
 	initNameWalk();
 	for ( GraphList::Iter glel = instanceList; glel.lte();  glel++ ) {
-		if ( strcmp( glel->key, machineMain ) == 0 ) {
+		if ( strcmp( glel->key, mainMachine ) == 0 ) {
 			/* Main graph is always instantiated. */
 			mainGraph = makeInstance( glel );
 		}
@@ -1160,6 +1160,9 @@ FsmAp *ParseData::makeAll()
 			graphs[numOthers++] = makeInstance( glel );
 		}
 	}
+
+	if ( mainGraph == 0 )
+		mainGraph = graphs[--numOthers];
 
 	if ( numOthers > 0 ) {
 		/* Add all the other graphs into main. */
@@ -1418,22 +1421,6 @@ void terminateAllParsers( )
 	loc.col = 0;
 	for ( ParserDict::Iter pdel = parserDict; pdel.lte(); pdel++ )
 		pdel->value->token( loc, _eof, 0, 0 );
-}
-
-void checkMachines( )
-{
-	for ( ParserDict::Iter parser = parserDict; parser.lte(); parser++ ) {
-		ParseData *pd = parser->value->pd;
-		if ( pd->instanceList.length() > 0 ) {
-			/* There must be a main graph defined. */
-			/* No machine name. Need to have a main. Make sure it was given. */
-			GraphDictEl *mainEl = pd->graphDict.find( machineMain );
-			if ( mainEl == 0 ) {
-				error(pd->sectionLoc) << "main graph not defined in \"" << 
-						pd->sectionName << "\"" << endl;
-			}
-		}
-	}
 }
 
 void writeLanguage( std::ostream &out )

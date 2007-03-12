@@ -382,8 +382,10 @@ std::ostream &RubyCodeGen::ACTION_SWITCH()
 
 void RubyCodeGen::writeInit()
 {
-	out << INDENT_U() << "begin"
-		<< INDENT_S() <<   CS() << " = " << START();
+	out << INDENT_U() << "begin";
+
+	if ( redFsm->startState != 0 )
+		out << INDENT_S() <<   CS() << " = " << START();
 
 	/* If there are any calls, then the stack top needs initialization. */
 	if ( redFsm->anyActionCalls() || redFsm->anyActionRets() )
@@ -1144,7 +1146,8 @@ void RubyCodeGen::writeData()
 		"\n";
 	}
 
-	STATIC_VAR( "int", START() ) << " = " << START_STATE_ID() << ";\n";
+	if ( redFsm->startState != 0 )
+		STATIC_VAR( "int", START() ) << " = " << START_STATE_ID() << ";\n";
 
 	if ( writeFirstFinal )
 		STATIC_VAR( "int" , FIRST_FINAL() ) << " = " << FIRST_FINAL_STATE() << ";\n";
