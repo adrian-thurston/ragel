@@ -535,7 +535,7 @@ void FsmCodeGen::writeExports()
 {
 	if ( exportList.length() > 0 ) {
 		for ( ExportList::Iter ex = exportList; ex.lte(); ex++ ) {
-			out << "#define " << DATA_PREFIX() << ex->name << " " << 
+			out << "#define " << DATA_PREFIX() << "ex_" << ex->name << " " << 
 					KEY(ex->key) << "\n";
 		}
 		out << "\n";

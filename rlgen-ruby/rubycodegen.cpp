@@ -1025,7 +1025,7 @@ void RubyCodeGen::writeExports()
 {
 	if ( exportList.length() > 0 ) {
 		for ( ExportList::Iter ex = exportList; ex.lte(); ex++ ) {
-			STATIC_VAR( ALPH_TYPE(), DATA_PREFIX() + ex->name ) 
+			STATIC_VAR( ALPH_TYPE(), DATA_PREFIX() + "ex_" + ex->name ) 
 					<< " = " << KEY(ex->key) << "\n";
 		}
 		out << "\n";
