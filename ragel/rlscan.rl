@@ -842,7 +842,7 @@ void Scanner::do_scan()
 	int curly_count = 0;
 	bool execute = true;
 	bool singleLineSpec = false;
-	InlineBlockType inlineBlockType;
+	InlineBlockType inlineBlockType = CurlyDelimited;
 
 	%% write init;
 

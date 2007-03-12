@@ -180,11 +180,11 @@ void Scanner::adjustAttrPointers( int distance )
 int Scanner::scan( )
 {
 	int token = TK_NO_TOKEN;
-	int space, readlen;
-	char *attr_id_start;
-	char *attr_value_start;
-	int attr_id_len;
-	int attr_value_len;
+	int space = 0, readlen = 0;
+	char *attr_id_start = 0;
+	char *attr_value_start = 0;
+	int attr_id_len = 0;
+	int attr_value_len = 0;
 
 	attrMkList.empty();
 	buffer.clear();

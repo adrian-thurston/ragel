@@ -748,7 +748,7 @@ priority_aug:
 		// Convert the priority number to a long. Check for overflow.
 		errno = 0;
 		//cerr << "PRIOR AUG: " << $1->token.data << endl;
-		int aug = strtol( $1->token.data, 0, 10 );
+		long aug = strtol( $1->token.data, 0, 10 );
 		if ( errno == ERANGE && aug == LONG_MAX ) {
 			/* Priority number too large. Recover by setting the priority to 0. */
 			error($1->token.loc) << "priority number " << $1->token.data << 
@@ -866,7 +866,7 @@ factor_rep_num:
 	TK_UInt final {
 		// Convert the priority number to a long. Check for overflow.
 		errno = 0;
-		int rep = strtol( $1->data, 0, 10 );
+		long rep = strtol( $1->data, 0, 10 );
 		if ( errno == ERANGE && rep == LONG_MAX ) {
 			// Repetition too large. Recover by returing repetition 1. */
 			error($1->loc) << "repetition number " << $1->data << " overflows" << endl;

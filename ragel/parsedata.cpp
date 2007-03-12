@@ -944,6 +944,7 @@ Action *ParseData::newAction( char *name, InlineList *inlineList )
 	InputLoc loc;
 	loc.line = 1;
 	loc.col = 1;
+	loc.fileName = "<NONE>";
 
 	Action *action = new Action( loc, name, inlineList, nextCondId++ );
 	action->actionRefs.append( rootName );
