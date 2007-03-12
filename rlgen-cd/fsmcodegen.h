@@ -150,7 +150,7 @@ protected:
 	void GET_TOKEND( ostream &ret, InlineItem *item );
 	void SUB_ACTION( ostream &ret, InlineItem *item, 
 			int targState, bool inFinish );
-	void ENTRY_POINTS();
+	void STATE_IDS();
 
 	string ERROR_STATE();
 	string FIRST_FINAL_STATE();

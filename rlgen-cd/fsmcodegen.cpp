@@ -510,13 +510,25 @@ string FsmCodeGen::WIDE_ALPH_TYPE()
 	return ret;
 }
 
-void FsmCodeGen::ENTRY_POINTS()
+void FsmCodeGen::STATE_IDS()
 {
-	for ( EntryNameVect::Iter en = entryPointNames; en.lte(); en++ ) {
-		STATIC_VAR( "int", DATA_PREFIX() + "en_" + *en ) << 
-				" = " << entryPointIds[en.pos()] << ";\n";
-	}
+	STATIC_VAR( "int", START() ) << " = " << START_STATE_ID() << ";\n";
+
+	if ( writeFirstFinal )
+		STATIC_VAR( "int" , FIRST_FINAL() ) << " = " << FIRST_FINAL_STATE() << ";\n";
+
+	if ( writeErr )
+		STATIC_VAR( "int", ERROR() ) << " = " << ERROR_STATE() << ";\n";
+
 	out << "\n";
+
+	if ( entryPointNames.length() > 0 ) {
+		for ( EntryNameVect::Iter en = entryPointNames; en.lte(); en++ ) {
+			STATIC_VAR( "int", DATA_PREFIX() + "en_" + *en ) << 
+					" = " << entryPointIds[en.pos()] << ";\n";
+		}
+		out << "\n";
+	}
 }
 
 void FsmCodeGen::writeExports()

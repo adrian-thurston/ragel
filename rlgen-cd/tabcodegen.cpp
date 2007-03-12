@@ -785,20 +785,7 @@ void TabCodeGen::writeData()
 		"\n";
 	}
 
-	STATIC_VAR( "int", START() ) << " = " << START_STATE_ID() << ";\n"
-	"\n";
-
-	if ( writeFirstFinal ) {
-		STATIC_VAR( "int" , FIRST_FINAL() ) << " = " << FIRST_FINAL_STATE() << ";\n"
-		"\n";
-	}
-
-	if ( writeErr ) {
-		STATIC_VAR( "int", ERROR() ) << " = " << ERROR_STATE() << ";\n"
-		"\n";
-	}
-
-	ENTRY_POINTS();
+	STATE_IDS();
 }
 
 void TabCodeGen::COND_TRANSLATE()

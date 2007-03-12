@@ -152,22 +152,6 @@ unsigned int FGotoCodeGen::EOF_ACTION( RedStateAp *state )
 
 void FGotoCodeGen::writeData()
 {
-	out <<
-		"static const int " << START() << " = " << START_STATE_ID() << ";\n"
-		"\n";
-
-	if ( writeFirstFinal ) {
-		out <<
-			"static const int " << FIRST_FINAL() << " = " << FIRST_FINAL_STATE() << ";\n"
-			"\n";
-	}
-
-	if ( writeErr ) {
-		out <<
-			"static const int " << ERROR() << " = " << ERROR_STATE() << ";\n"
-			"\n";
-	}
-
 	if ( redFsm->anyToStateActions() ) {
 		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), TSA() );
 		TO_STATE_ACTIONS();
@@ -188,6 +172,8 @@ void FGotoCodeGen::writeData()
 		CLOSE_ARRAY() <<
 		"\n";
 	}
+
+	STATE_IDS();
 }
 
 void FGotoCodeGen::writeExec()

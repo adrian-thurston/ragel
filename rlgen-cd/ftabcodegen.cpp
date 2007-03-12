@@ -280,21 +280,7 @@ void FTabCodeGen::writeData()
 		"\n";
 	}
 
-	out <<
-		"static const int " << START() << " = " << START_STATE_ID() << ";\n"
-		"\n";
-
-	if ( writeFirstFinal ) {
-		out <<
-			"static const int " << FIRST_FINAL() << " = " << FIRST_FINAL_STATE() << ";\n"
-			"\n";
-	}
-
-	if ( writeErr ) {
-		out <<
-			"static const int " << ERROR() << " = " << ERROR_STATE() << ";\n"
-			"\n";
-	}
+	STATE_IDS();
 }
 
 void FTabCodeGen::writeExec()
