@@ -768,6 +768,16 @@ std::ostream &JavaTabCodeGen::TRANS_ACTIONS_WI()
 	return out;
 }
 
+void JavaTabCodeGen::writeExports()
+{
+	if ( exportList.length() > 0 ) {
+		for ( ExportList::Iter ex = exportList; ex.lte(); ex++ ) {
+			STATIC_VAR( ALPH_TYPE(), DATA_PREFIX() + ex->name ) 
+					<< " = " << KEY(ex->key) << "\n";
+		}
+		out << "\n";
+	}
+}
 
 void JavaTabCodeGen::writeData()
 {
@@ -880,19 +890,23 @@ void JavaTabCodeGen::writeData()
 		"\n";
 	}
 
-	STATIC_VAR( "int", START() ) << " = " << START_STATE_ID() << ";\n"
-	"\n";
+	STATIC_VAR( "int", START() ) << " = " << START_STATE_ID() << ";\n";
 
-	if ( writeFirstFinal ) {
-		STATIC_VAR( "int" , FIRST_FINAL() ) << " = " << FIRST_FINAL_STATE() << ";\n"
-		"\n";
-	}
+	if ( writeFirstFinal )
+		STATIC_VAR( "int" , FIRST_FINAL() ) << " = " << FIRST_FINAL_STATE() << ";\n";
 
-	if ( writeErr ) {
-		STATIC_VAR( "int", ERROR() ) << " = " << ERROR_STATE() << ";\n"
-		"\n";
-	}
+	if ( writeErr )
+		STATIC_VAR( "int", ERROR() ) << " = " << ERROR_STATE() << ";\n";
 	
+	out << "\n";
+
+	if ( entryPointNames.length() > 0 ) {
+		for ( EntryNameVect::Iter en = entryPointNames; en.lte(); en++ ) {
+			STATIC_VAR( "int", DATA_PREFIX() + "en_" + *en ) << 
+					" = " << entryPointIds[en.pos()] << ";\n";
+		}
+		out << "\n";
+	}
 }
 
 void JavaTabCodeGen::writeExec()

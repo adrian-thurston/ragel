@@ -56,6 +56,7 @@ public:
 	virtual void writeEOF();
 	virtual void writeInit();
 	virtual void writeData();
+	virtual void writeExports();
 	virtual void finishRagelDef();
 
  protected:

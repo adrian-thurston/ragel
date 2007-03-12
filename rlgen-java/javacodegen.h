@@ -77,6 +77,7 @@ struct JavaTabCodeGen : public CodeGenData
 	virtual void writeEOF();
 	virtual void writeData();
 	virtual void writeInit();
+	virtual void writeExports();
 	virtual void finishRagelDef();
 
 	void NEXT( ostream &ret, int nextDest, bool inFinish );
