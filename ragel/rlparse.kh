@@ -79,7 +79,7 @@ struct Parser
 	# Keywords.
 	token KW_Action, KW_AlphType, KW_Range, KW_GetKey, KW_Include, KW_Write,
 		KW_Machine, KW_When, KW_Eof, KW_Err, KW_Lerr, KW_To, KW_From,
-		KW_Export, KW_Entry;
+		KW_Export;
 
 	# Specials in code blocks.
 	token KW_Break, KW_Exec, KW_Hold, KW_PChar, KW_Char, KW_Goto, KW_Call,
@@ -102,7 +102,6 @@ struct Parser
 	{
 		pd = new ParseData( fileName, sectionName, sectionLoc );
 		exportContext.append( false );
-		entryContext.append( false );
 	}
 
 	int token( InputLoc &loc, int tokId, char *tokstart, int toklen );
@@ -121,7 +120,6 @@ struct Parser
 	NameRefList nameRefList;
 
 	Vector<bool> exportContext;
-	Vector<bool> entryContext;
 };
 
 %% write token_defs;

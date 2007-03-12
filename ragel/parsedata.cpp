@@ -540,6 +540,7 @@ void ParseData::unsetObsoleteEntries( FsmAp *graph )
 		if ( name->numUses == name->numRefs ) {
 			assert( graph->entryPoints.find( name->id ) != 0 );
 			graph->unsetEntry( name->id );
+			assert( graph->entryPoints.find( name->id ) == 0 );
 		}
 	}
 }
@@ -803,6 +804,7 @@ void ParseData::makeNameTree( GraphDictEl *dictEl )
 	nameIndex = new NameInst*[nextNameId];
 	memset( nameIndex, 0, sizeof(NameInst*)*nextNameId );
 	fillNameIndex( rootName );
+	fillNameIndex( exportsRootName );
 }
 
 
@@ -899,7 +901,8 @@ void ParseData::printNameInst( NameInst *nameInst, int level )
 		cerr << "  ";
 	cerr << (nameInst->name != 0 ? nameInst->name : "<ANON>") << 
 			"  id: " << nameInst->id << 
-			"  refs: " << nameInst->numRefs << endl;
+			"  refs: " << nameInst->numRefs <<
+			"  uses: " << nameInst->numUses << endl;
 	for ( NameVect::Iter name = nameInst->childVect; name.lte(); name++ )
 		printNameInst( *name, level+1 );
 }
@@ -1111,6 +1114,8 @@ FsmAp *ParseData::makeSpecific( GraphDictEl *gdNode )
 	 * is okay since generating part of the graph is usually only done when
 	 * inspecting the compiled machine. */
 
+	/* Same story for extern entry point references. */
+
 	/* Flag this case so that the XML code generator is aware that we haven't
 	 * looked up name references in actions. It can then avoid segfaulting. */
 	generatingSectionSubset = true;
@@ -1135,6 +1140,10 @@ FsmAp *ParseData::makeAll()
 	/* Resolve action code name references. */
 	resolveActionNameRefs();
 
+	/* Force name references to the top level instantiations. */
+	for ( NameVect::Iter inst = rootName->childVect; inst.lte(); inst++ )
+		(*inst)->numRefs += 1;
+
 	FsmAp *mainGraph = 0;
 	FsmAp **graphs = new FsmAp*[instanceList.length()];
 	int numOthers = 0;
@@ -1147,15 +1156,8 @@ FsmAp *ParseData::makeAll()
 			mainGraph = makeInstance( glel );
 		}
 		else {
-			/* Check to see if the instance is ever referenced. */
-			NameInst *nameInst = nextNameScope();
-			if ( nameInst->anyRefsRec() )
-				graphs[numOthers++] = makeInstance( glel );
-			else {
-				/* Need to walk over the name tree item. */
-				NameFrame nameFrame = enterNameScope( true, 1 );
-				popNameScope( nameFrame );
-			}
+			/* Instantiate and store in others array. */
+			graphs[numOthers++] = makeInstance( glel );
 		}
 	}
 

@@ -557,9 +557,24 @@ void XMLCodeGen::writeStateList()
 
 		if ( !st.last() )
 			out << "\n";
-
 	}
 	out << "    </state_list>\n";
+}
+
+bool XMLCodeGen::writeNameInst( NameInst *nameInst )
+{
+	bool written = false;
+	if ( nameInst->parent != 0 )
+		written = writeNameInst( nameInst->parent );
+	
+	if ( nameInst->name != 0 ) {
+		if ( written )
+			out << '_';
+		out << nameInst->name;
+		written = true;
+	}
+
+	return written;
 }
 
 void XMLCodeGen::writeEntryPoints()
@@ -574,8 +589,9 @@ void XMLCodeGen::writeEntryPoints()
 			/* Get the name instantiation from nameIndex. */
 			NameInst *nameInst = pd->nameIndex[en->key];
 			StateAp *state = en->value;
-			out << "      <entry name=\"" << nameInst->name << "\">" << 
-					state->alg.stateNum << "</entry>\n";
+			out << "      <entry name=\"";
+			writeNameInst( nameInst );
+			out << "\">" << state->alg.stateNum << "</entry>\n";
 		}
 		out << "    </entry_points>\n";
 	}

@@ -200,7 +200,7 @@ void RubyCodeGen::LOCATE_TRANS()
 		<< INDENT_D() << "end # cc _match" ;
 }
 
-void RubyCodeGen::writeOutExec()
+void RubyCodeGen::writeExec()
 {
 	out << INDENT_U() << "callcc do |_out|" 
 		<< INDENT_S() <<    "_klen, _trans, _keys";
@@ -297,7 +297,7 @@ void RubyCodeGen::writeOutExec()
 	out << INDENT_D() << "end # cc _out" ;          
 }
 
-void RubyCodeGen::writeOutEOF()
+void RubyCodeGen::writeEOF()
 {
 	if ( redFsm->anyEofActions() ) {
 		out << INDENT_S() << "_acts = " << EA() << "[" << CS() << "]" 
@@ -380,7 +380,7 @@ std::ostream &RubyCodeGen::ACTION_SWITCH()
 }
 
 
-void RubyCodeGen::writeOutInit()
+void RubyCodeGen::writeInit()
 {
 	out << INDENT_U() << "begin"
 		<< INDENT_S() <<   CS() << " = " << START();
@@ -1022,7 +1022,7 @@ std::ostream &RubyCodeGen::TRANS_ACTIONS_WI()
 }
 
 
-void RubyCodeGen::writeOutData()
+void RubyCodeGen::writeData()
 {
 	/* If there are any transtion functions then output the array. If there
 	 * are none, don't bother emitting an empty array that won't be used. */

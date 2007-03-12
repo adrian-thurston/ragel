@@ -209,7 +209,7 @@ struct PriorityAug
 struct VarDef
 {
 	VarDef( char *name, JoinOrLm *joinOrLm )
-		: name(name), joinOrLm(joinOrLm) { }
+		: name(name), joinOrLm(joinOrLm), isExport(false) { }
 	
 	/* Parse tree traversal. */
 	FsmAp *walk( ParseData *pd );
@@ -218,9 +218,7 @@ struct VarDef
 
 	char *name;
 	JoinOrLm *joinOrLm;
-
 	bool isExport;
-	bool isEntry;
 };
 
 

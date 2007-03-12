@@ -73,10 +73,10 @@ struct JavaTabCodeGen : public CodeGenData
 	void COND_TRANSLATE();
 	void LOCATE_TRANS();
 
-	virtual void writeOutExec();
-	virtual void writeOutEOF();
-	virtual void writeOutData();
-	virtual void writeOutInit();
+	virtual void writeExec();
+	virtual void writeEOF();
+	virtual void writeData();
+	virtual void writeInit();
 	virtual void finishRagelDef();
 
 	void NEXT( ostream &ret, int nextDest, bool inFinish );

@@ -52,10 +52,10 @@ public:
 	void COND_TRANSLATE();
 	void LOCATE_TRANS();
 
-	virtual void writeOutExec();
-	virtual void writeOutEOF();
-	virtual void writeOutInit();
-	virtual void writeOutData();
+	virtual void writeExec();
+	virtual void writeEOF();
+	virtual void writeInit();
+	virtual void writeData();
 	virtual void finishRagelDef();
 
  protected:

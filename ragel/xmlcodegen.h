@@ -105,6 +105,7 @@ private:
 	void writeLmOnLagBehind( InlineItem *item );
 
 	void writeExports();
+	bool writeNameInst( NameInst *nameInst );
 	void writeEntryPoints();
 	void writeGetKeyExpr();
 	void writeAccessExpr();

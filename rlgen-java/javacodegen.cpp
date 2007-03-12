@@ -769,7 +769,7 @@ std::ostream &JavaTabCodeGen::TRANS_ACTIONS_WI()
 }
 
 
-void JavaTabCodeGen::writeOutData()
+void JavaTabCodeGen::writeData()
 {
 	/* If there are any transtion functions then output the array. If there
 	 * are none, don't bother emitting an empty array that won't be used. */
@@ -895,7 +895,7 @@ void JavaTabCodeGen::writeOutData()
 	
 }
 
-void JavaTabCodeGen::writeOutExec()
+void JavaTabCodeGen::writeExec()
 {
 	out <<
 		"	{\n"
@@ -1015,7 +1015,7 @@ void JavaTabCodeGen::writeOutExec()
 	out << "	}\n";
 }
 
-void JavaTabCodeGen::writeOutEOF()
+void JavaTabCodeGen::writeEOF()
 {
 	if ( redFsm->anyEofActions() ) {
 		out <<
@@ -1366,7 +1366,7 @@ string JavaTabCodeGen::FIRST_FINAL_STATE()
 	return ret.str();
 }
 
-void JavaTabCodeGen::writeOutInit()
+void JavaTabCodeGen::writeInit()
 {
 	out << "	{\n";
 	out << "\t" << CS() << " = " << START() << ";\n";

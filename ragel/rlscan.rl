@@ -675,7 +675,6 @@ void Scanner::endSection( )
 		'to' => { token( KW_To ); };
 		'from' => { token( KW_From ); };
 		'export' => { token( KW_Export ); };
-		'entry' => { token( KW_Entry ); };
 
 		# Identifiers.
 		ident => { token( TK_Word, tokstart, tokend ); } ;

@@ -510,6 +510,15 @@ string FsmCodeGen::WIDE_ALPH_TYPE()
 	return ret;
 }
 
+void FsmCodeGen::ENTRY_POINTS()
+{
+	for ( EntryNameVect::Iter en = entryPointNames; en.lte(); en++ ) {
+		STATIC_VAR( "int", DATA_PREFIX() + "en_" + *en ) << 
+				" = " << entryPointIds[en.pos()] << ";\n";
+	}
+	out << "\n";
+}
+
 void FsmCodeGen::writeExports()
 {
 	if ( exportList.length() > 0 ) {

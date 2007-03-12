@@ -797,6 +797,8 @@ void TabCodeGen::writeData()
 		STATIC_VAR( "int", ERROR() ) << " = " << ERROR_STATE() << ";\n"
 		"\n";
 	}
+
+	ENTRY_POINTS();
 }
 
 void TabCodeGen::COND_TRANSLATE()
