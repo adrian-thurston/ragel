@@ -18,7 +18,7 @@ class export2
 			c3 . '.'* '\n' @{ System.out.println( "c3" );}
 		)*;
 			
-		main := any*;
+		other := any*;
 	}%%
 
 	%% write exports;
@@ -26,10 +26,10 @@ class export2
 
 	static void test( char data[] )
 	{
-		int cs, p = 0, pe = data.length;
+		int cs = test_en_commands, p = 0, pe = data.length;
 		int top;
 
-		cs = test_en_commands;
+		%% write init;
 		%% write exec;
 
 		if ( cs >= test_first_final )

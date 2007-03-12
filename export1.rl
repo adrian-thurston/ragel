@@ -18,7 +18,7 @@
 		c3 . '.'* '\n' @{ printf( "c3\n" );}
 	)*;
 		
-	main := any*;
+	some_other := any*;
 }%%
 
 %% write exports;
@@ -26,10 +26,10 @@
 
 int test( const char *data, int len )
 {
-	int cs;
+	int cs = test_en_commands;
 	const char *p = data, *pe = data + len;
 
-	cs = test_en_commands;
+	%% write init;
 	%% write exec;
 
 	if ( cs >= test_first_final )
