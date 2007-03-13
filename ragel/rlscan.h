@@ -33,6 +33,42 @@
 using std::istream;
 using std::ostream;
 
+struct ImportScanner
+{
+	ImportScanner( char *fileName, istream &input, ostream &output, Parser *parser )
+	: 
+		fileName(fileName), input(input), output(output), 
+		parser(parser), 
+		cur_token(0),
+		line(1), column(1)
+	{}
+
+	void token( int type, char *start, char *end );
+	void updateCol();
+	void startSection();
+	void endSection();
+	void do_scan();
+	ostream &scan_error();
+
+	char *fileName;
+	istream &input;
+	ostream &output;
+	Parser *parser;
+
+	/* For scanning the tokens. */
+	int tok_cs, tok_act;
+	int *tok_tokstart, *tok_tokend;
+	int cur_token;
+	static const int max_tokens = 8;
+	int token_data[max_tokens];
+
+	/* For scanning the characters. */
+	int line;
+	char *chr_tokstart, *chr_tokend;
+	int column;
+};
+
+
 extern char *Parser_lelNames[];
 
 /* This is used for tracking the current stack of include file/machine pairs. It is
@@ -95,10 +131,13 @@ struct Scanner
 	char *inclSectionTarg;
 	int includeDepth;
 
+	/* For section processing. */
 	int cs;
-	int line;
 	char *word, *lit;
 	int word_len, lit_len;
+
+	/* For character scanning. */
+	int line;
 	InputLoc sectionLoc;
 	char *tokstart, *tokend;
 	int column;

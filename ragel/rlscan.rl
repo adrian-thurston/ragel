@@ -33,6 +33,189 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
+/*
+ * The Scanner for Importing
+ */
+
+#define IMP_Word 128
+#define IMP_Literal 129
+#define IMP_Number 130
+#define IMP_Define 131
+
+%%{
+	machine inline_token_scan;
+	alphtype int;
+	access tok_;
+
+	IMP_Word = 128;
+	IMP_Literal = 129;
+	IMP_Number = 130;
+	IMP_Define = 131;
+
+	main := |*
+		IMP_Define IMP_Word IMP_Number => { cerr << ( "define" ) << endl; };
+		IMP_Word '=' IMP_Number => { cerr << ( "const1" ) << endl; };
+		IMP_Word '=' IMP_Literal => { cerr << ( "const2" ) << endl; };
+		any;
+	*|;
+}%%
+
+%% write data;
+
+void ImportScanner::token( int token, char *start, char *end )
+{
+	if ( cur_token == max_tokens ) {
+		int *p = token_data;
+		int *pe = token_data + cur_token;
+
+		%% write init;
+		%% write exec;
+
+		if ( tok_tokstart == 0 )
+			cur_token = 0;
+		else {
+			cerr << "BLOCK BREAK" << endl;
+			cur_token = pe - tok_tokstart;
+			memmove( token_data, tok_tokstart, cur_token*sizeof(int) );
+		}
+	}
+
+	token_data[cur_token++] = token;
+}
+
+%%{
+	machine inline_scan;
+	access chr_;
+
+	# This is sent by the driver code.
+	EOF = 0;
+	NL = '\n';
+
+	# Identifiers, numbers, commetns, and other common things.
+	ident = ( alpha | '_' ) ( alpha |digit |'_' )*;
+	number = digit+;
+	hex_number = '0x' [0-9a-fA-F]+;
+
+	c_comment = 
+		'/*' ( any | NL )* :>> '*/';
+
+	cpp_comment =
+		'//' [^\n]* NL;
+
+	c_cpp_comment = c_comment | cpp_comment;
+
+	# These literal forms are common to C-like host code and ragel.
+	s_literal = "'" ([^'\\] | NL | '\\' (any | NL))* "'";
+	d_literal = '"' ([^"\\] | NL | '\\' (any | NL))* '"';
+
+	whitespace = [ \t] | NL;
+
+
+	# Outside code scanner. These tokens get passed through.
+	main := |*
+		'define' => { token( IMP_Define, 0, 0 ); };
+		ident => { token( IMP_Word, chr_tokstart, chr_tokend ); };
+		number => { token( IMP_Number, chr_tokstart, chr_tokend ); };
+		c_cpp_comment;
+		s_literal | d_literal => { token( IMP_Literal, chr_tokstart, chr_tokend ); };
+		whitespace+;
+		EOF;
+		any => { token( *chr_tokstart, 0, 0 ); };
+	*|;
+}%%
+
+%% write data;
+
+void ImportScanner::do_scan()
+{
+	int bufsize = 8;
+	char *buf = new char[bufsize];
+	const char last_char = 0;
+	int chr_cs, chr_act, have = 0;
+	bool execute = true;
+
+	/* Init the section parser and the character scanner. */
+	%% write init;
+
+	while ( execute ) {
+		char *p = buf + have;
+		int space = bufsize - have;
+
+		if ( space == 0 ) {
+			/* We filled up the buffer trying to scan a token. Grow it. */
+			bufsize = bufsize * 2;
+			char *newbuf = new char[bufsize];
+
+			/* Recompute p and space. */
+			p = newbuf + have;
+			space = bufsize - have;
+
+			/* Patch up pointers possibly in use. */
+			if ( chr_tokstart != 0 )
+				chr_tokstart = newbuf + ( chr_tokstart - buf );
+			chr_tokend = newbuf + ( chr_tokend - buf );
+
+			/* Copy the new buffer in. */
+			memcpy( newbuf, buf, have );
+			delete[] buf;
+			buf = newbuf;
+		}
+
+		input.read( p, space );
+		int len = input.gcount();
+
+		/* If we see eof then append the EOF char. */
+	 	if ( len == 0 ) {
+			p[0] = last_char, len = 1;
+			execute = false;
+		}
+
+		char *pe = p + len;
+		%% write exec;
+
+		/* Check if we failed. */
+		if ( chr_cs == inline_scan_error ) {
+			/* Machine failed before finding a token. I'm not yet sure if this
+			 * is reachable. */
+			scan_error() << "scanner error" << endl;
+			exit(1);
+		}
+
+		/* Decide if we need to preserve anything. */
+		char *preserve = chr_tokstart;
+
+		/* Now set up the prefix. */
+		if ( preserve == 0 )
+			have = 0;
+		else {
+			/* There is data that needs to be shifted over. */
+			have = pe - preserve;
+			memmove( buf, preserve, have );
+			unsigned int shiftback = preserve - buf;
+			if ( chr_tokstart != 0 )
+				chr_tokstart -= shiftback;
+			chr_tokend -= shiftback;
+
+			preserve = buf;
+		}
+	}
+
+	delete[] buf;
+}
+
+ostream &ImportScanner::scan_error()
+{
+	/* Maintain the error count. */
+	gblErrorCount += 1;
+	cerr << fileName << ":" << line << ":" << column << ": ";
+	return cerr;
+}
+
+
+/* 
+ * The Ragel Scanner
+ */
+
 enum InlineBlockType
 {
 	CurlyDelimited,
@@ -44,6 +227,7 @@ enum InlineBlockType
 	alphtype int;
 	write data;
 }%%
+
 
 void Scanner::init( )
 {
