@@ -24,10 +24,7 @@
 #include <string.h>
 
 #include "ragel.h"
-#include "rlparse.h"
-#include "parsedata.h"
-#include "avltree.h"
-#include "vector.h"
+#include "rlscan.h"
 
 using std::ifstream;
 using std::istream;
@@ -36,99 +33,10 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-extern char *Parser_lelNames[];
-
-/* This is used for tracking the current stack of include file/machine pairs. It is
- * is used to detect and recursive include structure. */
-struct IncludeStackItem
-{
-	IncludeStackItem( char *fileName, char *sectionName )
-		: fileName(fileName), sectionName(sectionName) {}
-
-	char *fileName;
-	char *sectionName;
-};
-
-typedef Vector<IncludeStackItem> IncludeStack;
-
 enum InlineBlockType
 {
 	CurlyDelimited,
 	SemiTerminated
-};
-
-struct Scanner
-{
-	Scanner( char *fileName, istream &input, ostream &output,
-			Parser *inclToParser, char *inclSectionTarg,
-			int includeDepth )
-	: 
-		fileName(fileName), input(input), output(output),
-		inclToParser(inclToParser),
-		inclSectionTarg(inclSectionTarg),
-		includeDepth(includeDepth),
-		line(1), column(1), lastnl(0), 
-		parser(0), ignoreSection(false), 
-		parserExistsError(false),
-		whitespaceOn(true),
-		lastToken(0)
-		{}
-
-	bool recursiveInclude( char *inclFileName, char *inclSectionName );
-
-	char *prepareFileName( char *fileName, int len )
-	{
-		bool caseInsensitive;
-		Token tokenFnStr, tokenRes;
-		tokenFnStr.data = fileName;
-		tokenFnStr.length = len;
-		tokenFnStr.prepareLitString( tokenRes, caseInsensitive );
-		return tokenRes.data;
-	}
-
-	void init();
-	void token( int type, char *start, char *end );
-	void token( int type, char c );
-	void token( int type );
-	void updateCol();
-	void startSection();
-	void endSection();
-	void do_scan();
-	bool active();
-	ostream &scan_error();
-
-	char *fileName;
-	istream &input;
-	ostream &output;
-	Parser *inclToParser;
-	char *inclSectionTarg;
-	int includeDepth;
-
-	int cs;
-	int line;
-	char *word, *lit;
-	int word_len, lit_len;
-	InputLoc sectionLoc;
-	char *tokstart, *tokend;
-	int column;
-	char *lastnl;
-
-	/* Set by machine statements, these persist from section to section
-	 * allowing for unnamed sections. */
-	Parser *parser;
-	bool ignoreSection;
-	IncludeStack includeStack;
-
-	/* This is set if ragel has already emitted an error stating that
-	 * no section name has been seen and thus no parser exists. */
-	bool parserExistsError;
-
-	/* This is for inline code. By default it is on. It goes off for
-	 * statements and values in inline blocks which are parsed. */
-	bool whitespaceOn;
-
-	/* Keeps a record of the previous token sent to the section parser. */
-	int lastToken;
 };
 
 %%{
@@ -282,7 +190,6 @@ void Scanner::token( int type )
 
 				Scanner scanner( inclFileName, *inFile, output, parser,
 						inclSectionName, includeDepth+1 );
-				scanner.init();
 				scanner.do_scan( );
 				delete inFile;
 			}
@@ -844,6 +751,8 @@ void Scanner::do_scan()
 	bool singleLineSpec = false;
 	InlineBlockType inlineBlockType = CurlyDelimited;
 
+	/* Init the section parser and the character scanner. */
+	init();
 	%% write init;
 
 	while ( execute ) {
@@ -914,12 +823,4 @@ void Scanner::do_scan()
 
 void scan( char *fileName, istream &input, ostream &output )
 {
-	Scanner scanner( fileName, input, output, 0, 0, 0 );
-	scanner.init();
-	scanner.do_scan();
-
-	InputLoc eofLoc;
-	eofLoc.fileName = fileName;
-	eofLoc.col = 1;
-	eofLoc.line = scanner.line;
 }

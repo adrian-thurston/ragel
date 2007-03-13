@@ -29,6 +29,7 @@
 
 /* Parsing. */
 #include "ragel.h"
+#include "rlscan.h"
 
 /* Parameters and output. */
 #include "pcheck.h"
@@ -297,7 +298,8 @@ int main(int argc, char **argv)
 	if ( machineSpec == 0 && machineName == 0 )
 		outputBuffer << "<host line=\"1\" col=\"1\">";
 
-	scan( inputFileName, *inStream, outputBuffer );
+	Scanner scanner( inputFileName, *inStream, outputBuffer, 0, 0, 0 );
+	scanner.do_scan();
 
 	/* Finished, final check for errors.. */
 	if ( gblErrorCount > 0 )

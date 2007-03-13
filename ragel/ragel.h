@@ -67,7 +67,6 @@ std::ostream &error();
 std::ostream &error( const InputLoc &loc ); 
 std::ostream &warning( const InputLoc &loc ); 
 
-void scan( char *fileName, std::istream &input, std::ostream &output );
 void terminateAllParsers( );
 void writeMachines( std::ostream &out, std::string hostData, char *inputFileName );
 void xmlEscapeHost( std::ostream &out, char *data, int len );
