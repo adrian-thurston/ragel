@@ -560,11 +560,15 @@ expression.
 \end{verbatim}
 \verbspace
 
-The machine instantiation statement generates a set of states representing an expression and
-associates a name with the entry point. Each instantiation generates a distinct
-set of states.  At a very minimum the \verb|main| machine must be instantiated.
-Other machines may be instantiated and control passed to them by use of
-\verb|fcall|, \verb|fgoto| or \verb|fnext| statements.
+The machine instantiation statement generates a set of states representing an
+expression. Each instantiation generates a distinct set of states.  The entry
+point is written in the generated code using the instantiation name.  If the
+\verb|main| machine is instantiated, then a start state is also generated and
+assigned to the \verb|cs| variable by the \verb|write init| command.  From
+outside the execution loop, control may be passed to any machine by assigning
+the entry point to the \verb|cs| variable.  From inside the execution loop,
+control may be passed to any machine instantiation using \verb|fcall|,
+\verb|fgoto| or \verb|fnext| statements.
 
 \section{Lexical Analysis of a Ragel Block}
 \label{lexing}

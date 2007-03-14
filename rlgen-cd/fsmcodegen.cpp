@@ -534,17 +534,6 @@ void FsmCodeGen::STATE_IDS()
 	}
 }
 
-void FsmCodeGen::writeExports()
-{
-	if ( exportList.length() > 0 ) {
-		for ( ExportList::Iter ex = exportList; ex.lte(); ex++ ) {
-			out << "#define " << DATA_PREFIX() << "ex_" << ex->name << " " << 
-					KEY(ex->key) << "\n";
-		}
-		out << "\n";
-	}
-}
-
 
 /*
  * Language specific, but style independent code generators functions.
@@ -605,6 +594,17 @@ std::ostream &CCodeGen::SWITCH_DEFAULT()
 string CCodeGen::CTRL_FLOW()
 {
 	return "";
+}
+
+void CCodeGen::writeExports()
+{
+	if ( exportList.length() > 0 ) {
+		for ( ExportList::Iter ex = exportList; ex.lte(); ex++ ) {
+			out << "#define " << DATA_PREFIX() << "ex_" << ex->name << " " << 
+					KEY(ex->key) << "\n";
+		}
+		out << "\n";
+	}
 }
 
 /*
@@ -669,6 +669,21 @@ string DCodeGen::CTRL_FLOW()
 {
 	return "if (true) ";
 }
+
+void DCodeGen::writeExports()
+{
+	if ( exportList.length() > 0 ) {
+		for ( ExportList::Iter ex = exportList; ex.lte(); ex++ ) {
+			out << "static const " << ALPH_TYPE() << " " << DATA_PREFIX() << 
+					"ex_" << ex->name << " = " << KEY(ex->key) << ";\n";
+		}
+		out << "\n";
+	}
+}
+
+/*
+ * End D-specific code.
+ */
 
 void FsmCodeGen::finishRagelDef()
 {

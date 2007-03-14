@@ -136,7 +136,6 @@ void Scanner::flushImport()
 	if ( tok_tokstart == 0 )
 		cur_token = 0;
 	else {
-		cerr << "BLOCK BREAK" << endl;
 		cur_token = pe - tok_tokstart;
 		int ts_offset = tok_tokstart - token_data;
 		memmove( token_data, token_data+ts_offset, cur_token*sizeof(token_data[0]) );

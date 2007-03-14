@@ -66,7 +66,6 @@ public:
 
 	virtual void finishRagelDef();
 	virtual void writeInit();
-	virtual void writeExports();
 
 protected:
 	string FSM_NAME();
@@ -192,6 +191,8 @@ public:
 	virtual string UINT();
 	virtual string PTR_CONST();
 	virtual string CTRL_FLOW();
+
+	virtual void writeExports();
 };
 
 class DCodeGen : virtual public FsmCodeGen
@@ -210,6 +211,8 @@ public:
 	virtual string UINT();
 	virtual string PTR_CONST();
 	virtual string CTRL_FLOW();
+
+	virtual void writeExports();
 };
 
 #endif /* _FSMCODEGEN_H */
