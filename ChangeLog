@@ -1,5 +1,23 @@
-For Next Release
-================
+Ragel 5.19 - Mar 14, 2007
+=========================
+ -Added an import statement to ragel. This statement takes a literal string as
+  an argument, interprets it as a file name, then scrapes the file for
+  sequences of tokens that match the following forms. Tokens inside ragel
+  sections are ignored. An example is in test/import1.rl
+    name = number
+    name = lit_string
+    "define" name number
+    "define" name lit_string
+ -Added an export mechanism which writes defines for single character machines
+  that have been tagged with the export keyword in their definition. Defines
+  are used for C, ints for D, Java and Ruby. Examples of the export feature
+  are in test/export*.rl.
+ -All machine instantiations are now always generated, even if they are not
+  referenced. In the backend, entry points for all instantiations are written
+  out alongside start, error and first final states.
+ -If the main machine is not present then do not emit an error. Generate the
+  machine without a start state and do not initialize cs in the write init
+  code.
  -Added an option -l to rlgen-cd which inhibits the writing of #line
   directives.
  -Added a new syntax for verbose embeddings. This adds parentheses: 
@@ -9,16 +27,27 @@ For Next Release
   tendency to associtate spaces with concatenation. Without syntax
   highlighting to make it clear that the embedding type is a keyword, the
   problem is especially bad. The danger is that a verbose embedding could be
-  read as an embedding of the embedding type. With parentheses verbose
-  embeddings read much more clearly.
+  read as an embedding of the keyword representing the empbedding type. With
+  parentheses, verbose embeddings read much more clearly.
  -Conditions now have a forced order when more than one is executed on a
-  single character. Previously, ordering relied on pointers, which caused
+  single character. Previously ordering relied on pointers, which caused
   results to vary by compiler. Ordering is now done using conditon action
   declaration order. This fixes the failure of cond4.rl which occured with
   g++ 4.1 and other compiler versions.
+ -In the port from flex to ragel, the name separator :: in Ragel code was
+  lost. Added it back.
+ -In the examples directory switched from rlcodegen to rlgen-cd. Silenced a
+  warning in statechart.rl.
+ -In the root makefile the distclean target was fixed. It was calling clean in
+  the subdirs. In docs, the clean target was not deleting the new manpages for
+  the rlgen-* programs. Fixed.
+ -Portability and other fixes from Josef Goettgens were applied.
+ -The @datadir@ and @mandir@ variables are made use of in doc/Makefile.in for
+  specifying where documentation should be installed. Patch from Marcus
+  Rueckert. 
 
-Ragel 5.18 - February 13, 2007
-==============================
+Ragel 5.18 - Feb 13, 2007
+=========================
  -There is now a 100% correspondence between state id numbers in the
   intermediate XML file, Graphviz dot files and generated code. This was
   achieved by moving code which determines if the error state is necessary
@@ -772,7 +801,7 @@ Ragel 3.4 - May 8, 2004
   running of tests.
 
 Ragel 3.3 - Mar 7, 2004
-=========================
+=======================
  -Portability bug fixes were made. Minimum and maximum integer values are
   now taken from the system. An alignment problem on 64bit systems
   was fixed.
@@ -1120,8 +1149,8 @@ Ragel 1.3.1 - Oct 2, 2002
  -A proper user guide was started. Chapter 1: Specifying Ragel Programs
   was written. It even has some diagrams :)
 
-Ragel 1.3.0 - Sept 4, 2002
-==========================
+Ragel 1.3.0 - Sep 4, 2002
+=========================
  -NULL keyword no longer used in table output.
  -Though not yet in use, underlying graph structure changed to support range
   transitions. As a result, most of the code that walks transition lists is now
@@ -1181,8 +1210,8 @@ Ragel 1.2.0 - May 3, 2002
  -If -e is given, but minimization is not turned on, print a warning.
  -Makefiles use automatic dependencies.
 
-Ragel 1.1.0 - April 15, 2002
-============================
+Ragel 1.1.0 - Apr 15, 2002
+==========================
  -Added goto fsm: much faster than any other fsm style.
  -Default operator (if two machines are side by side with no operator
   between them) is concatenation. First showed up in 1.0.4.
@@ -1211,8 +1240,8 @@ Ragel 1.1.0 - April 15, 2002
  -Code generation section in docs.
  -Uses the latests aapl.
 
-Ragel 1.0.5 - March 3, 2002
-===========================
+Ragel 1.0.5 - Mar 3, 2002
+=========================
  -Bugfix in SetErrorState that caused an assertion failure when compiling
   simple machines that did not have full transition tables (and thus did
   not show up on any example machines). Assertion failure did not occur
@@ -1228,8 +1257,8 @@ Ragel 1.0.5 - March 3, 2002
  -Started a README with compilation notes. Started an AUTHORS file.
  -Started the user documentation. Describes basic machines and operators.
 
-Ragel 1.0.4 - March 1, 2002
-===========================
+Ragel 1.0.4 - Mar 1, 2002
+=========================
  -Ported to the version of Aapl just after 2.2.0 release. See 
   http://www.ragel.ca/aapl/ for details on aapl.
  -Fixed a bug in the clang example: the newline machine was not stared.
