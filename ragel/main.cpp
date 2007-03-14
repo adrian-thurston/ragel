@@ -298,7 +298,7 @@ int main(int argc, char **argv)
 	if ( machineSpec == 0 && machineName == 0 )
 		outputBuffer << "<host line=\"1\" col=\"1\">";
 
-	Scanner scanner( inputFileName, *inStream, outputBuffer, 0, 0, 0 );
+	Scanner scanner( inputFileName, *inStream, outputBuffer, 0, 0, 0, false );
 	scanner.do_scan();
 
 	/* Finished, final check for errors.. */

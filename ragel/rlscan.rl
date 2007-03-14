@@ -26,6 +26,8 @@
 #include "ragel.h"
 #include "rlscan.h"
 
+//#define LOG_TOKENS
+
 using std::ifstream;
 using std::istream;
 using std::ostream;
@@ -33,13 +35,20 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
+enum InlineBlockType
+{
+	CurlyDelimited,
+	SemiTerminated
+};
+
+
 /*
  * The Scanner for Importing
  */
 
 #define IMP_Word 128
 #define IMP_Literal 129
-#define IMP_Number 130
+#define IMP_UInt 130
 #define IMP_Define 131
 
 %%{
@@ -49,178 +58,154 @@ using std::endl;
 
 	IMP_Word = 128;
 	IMP_Literal = 129;
-	IMP_Number = 130;
+	IMP_UInt = 130;
 	IMP_Define = 131;
 
 	main := |*
-		IMP_Define IMP_Word IMP_Number => { cerr << ( "define" ) << endl; };
-		IMP_Word '=' IMP_Number => { cerr << ( "const1" ) << endl; };
-		IMP_Word '=' IMP_Literal => { cerr << ( "const2" ) << endl; };
+		# Define of number.
+		IMP_Define IMP_Word IMP_UInt => { 
+			int base = tok_tokstart - token_data;
+			int nameOff = 1;
+			int numOff = 2;
+
+			directToParser( inclToParser, fileName, line, column, TK_Word, 
+					token_strings[base+nameOff], token_lens[base+nameOff] );
+			directToParser( inclToParser, fileName, line, column, '=', 0, 0 );
+			directToParser( inclToParser, fileName, line, column, TK_UInt,
+					token_strings[base+numOff], token_lens[base+numOff] );
+			directToParser( inclToParser, fileName, line, column, ';', 0, 0 );
+		};
+
+		# Assignment of number.
+		IMP_Word '=' IMP_UInt => { 
+			int base = tok_tokstart - token_data;
+			int nameOff = 0;
+			int numOff = 2;
+
+			directToParser( inclToParser, fileName, line, column, TK_Word, 
+					token_strings[base+nameOff], token_lens[base+nameOff] );
+			directToParser( inclToParser, fileName, line, column, '=', 0, 0 );
+			directToParser( inclToParser, fileName, line, column, TK_UInt,
+					token_strings[base+numOff], token_lens[base+numOff] );
+			directToParser( inclToParser, fileName, line, column, ';', 0, 0 );
+		};
+
+		# Define of literal.
+		IMP_Define IMP_Word IMP_Literal => { 
+			int base = tok_tokstart - token_data;
+			int nameOff = 1;
+			int litOff = 2;
+
+			directToParser( inclToParser, fileName, line, column, TK_Word, 
+					token_strings[base+nameOff], token_lens[base+nameOff] );
+			directToParser( inclToParser, fileName, line, column, '=', 0, 0 );
+			directToParser( inclToParser, fileName, line, column, TK_Literal,
+					token_strings[base+litOff], token_lens[base+litOff] );
+			directToParser( inclToParser, fileName, line, column, ';', 0, 0 );
+		};
+
+		# Assignment of literal.
+		IMP_Word '=' IMP_Literal => { 
+			int base = tok_tokstart - token_data;
+			int nameOff = 0;
+			int litOff = 2;
+
+			directToParser( inclToParser, fileName, line, column, TK_Word, 
+					token_strings[base+nameOff], token_lens[base+nameOff] );
+			directToParser( inclToParser, fileName, line, column, '=', 0, 0 );
+			directToParser( inclToParser, fileName, line, column, TK_Literal,
+					token_strings[base+litOff], token_lens[base+litOff] );
+			directToParser( inclToParser, fileName, line, column, ';', 0, 0 );
+		};
+
+		# Catch everything else.
 		any;
 	*|;
 }%%
 
 %% write data;
 
-void ImportScanner::token( int token, char *start, char *end )
+void Scanner::flushImport()
 {
-	if ( cur_token == max_tokens ) {
-		int *p = token_data;
-		int *pe = token_data + cur_token;
+	int *p = token_data;
+	int *pe = token_data + cur_token;
 
-		%% write init;
-		%% write exec;
-
-		if ( tok_tokstart == 0 )
-			cur_token = 0;
-		else {
-			cerr << "BLOCK BREAK" << endl;
-			cur_token = pe - tok_tokstart;
-			memmove( token_data, tok_tokstart, cur_token*sizeof(int) );
-		}
-	}
-
-	token_data[cur_token++] = token;
-}
-
-%%{
-	machine inline_scan;
-	access chr_;
-
-	# This is sent by the driver code.
-	EOF = 0;
-	NL = '\n';
-
-	# Identifiers, numbers, commetns, and other common things.
-	ident = ( alpha | '_' ) ( alpha |digit |'_' )*;
-	number = digit+;
-	hex_number = '0x' [0-9a-fA-F]+;
-
-	c_comment = 
-		'/*' ( any | NL )* :>> '*/';
-
-	cpp_comment =
-		'//' [^\n]* NL;
-
-	c_cpp_comment = c_comment | cpp_comment;
-
-	# These literal forms are common to C-like host code and ragel.
-	s_literal = "'" ([^'\\] | NL | '\\' (any | NL))* "'";
-	d_literal = '"' ([^"\\] | NL | '\\' (any | NL))* '"';
-
-	whitespace = [ \t] | NL;
-
-
-	# Outside code scanner. These tokens get passed through.
-	main := |*
-		'define' => { token( IMP_Define, 0, 0 ); };
-		ident => { token( IMP_Word, chr_tokstart, chr_tokend ); };
-		number => { token( IMP_Number, chr_tokstart, chr_tokend ); };
-		c_cpp_comment;
-		s_literal | d_literal => { token( IMP_Literal, chr_tokstart, chr_tokend ); };
-		whitespace+;
-		EOF;
-		any => { token( *chr_tokstart, 0, 0 ); };
-	*|;
-}%%
-
-%% write data;
-
-void ImportScanner::do_scan()
-{
-	int bufsize = 8;
-	char *buf = new char[bufsize];
-	const char last_char = 0;
-	int chr_cs, chr_act, have = 0;
-	bool execute = true;
-
-	/* Init the section parser and the character scanner. */
 	%% write init;
+	%% write exec;
 
-	while ( execute ) {
-		char *p = buf + have;
-		int space = bufsize - have;
-
-		if ( space == 0 ) {
-			/* We filled up the buffer trying to scan a token. Grow it. */
-			bufsize = bufsize * 2;
-			char *newbuf = new char[bufsize];
-
-			/* Recompute p and space. */
-			p = newbuf + have;
-			space = bufsize - have;
-
-			/* Patch up pointers possibly in use. */
-			if ( chr_tokstart != 0 )
-				chr_tokstart = newbuf + ( chr_tokstart - buf );
-			chr_tokend = newbuf + ( chr_tokend - buf );
-
-			/* Copy the new buffer in. */
-			memcpy( newbuf, buf, have );
-			delete[] buf;
-			buf = newbuf;
-		}
-
-		input.read( p, space );
-		int len = input.gcount();
-
-		/* If we see eof then append the EOF char. */
-	 	if ( len == 0 ) {
-			p[0] = last_char, len = 1;
-			execute = false;
-		}
-
-		char *pe = p + len;
-		%% write exec;
-
-		/* Check if we failed. */
-		if ( chr_cs == inline_scan_error ) {
-			/* Machine failed before finding a token. I'm not yet sure if this
-			 * is reachable. */
-			scan_error() << "scanner error" << endl;
-			exit(1);
-		}
-
-		/* Decide if we need to preserve anything. */
-		char *preserve = chr_tokstart;
-
-		/* Now set up the prefix. */
-		if ( preserve == 0 )
-			have = 0;
-		else {
-			/* There is data that needs to be shifted over. */
-			have = pe - preserve;
-			memmove( buf, preserve, have );
-			unsigned int shiftback = preserve - buf;
-			if ( chr_tokstart != 0 )
-				chr_tokstart -= shiftback;
-			chr_tokend -= shiftback;
-
-			preserve = buf;
-		}
+	if ( tok_tokstart == 0 )
+		cur_token = 0;
+	else {
+		cerr << "BLOCK BREAK" << endl;
+		cur_token = pe - tok_tokstart;
+		int ts_offset = tok_tokstart - token_data;
+		memmove( token_data, token_data+ts_offset, cur_token*sizeof(token_data[0]) );
+		memmove( token_strings, token_strings+ts_offset, cur_token*sizeof(token_strings[0]) );
+		memmove( token_lens, token_lens+ts_offset, cur_token*sizeof(token_lens[0]) );
 	}
-
-	delete[] buf;
 }
 
-ostream &ImportScanner::scan_error()
+void Scanner::directToParser( Parser *toParser, char *tokFileName, int tokLine, 
+		int tokColumn, int type, char *tokdata, int toklen )
 {
-	/* Maintain the error count. */
-	gblErrorCount += 1;
-	cerr << fileName << ":" << line << ":" << column << ": ";
-	return cerr;
+	InputLoc loc;
+
+	#ifdef LOG_TOKENS
+	cerr << "scanner:" << tokLine << ":" << tokColumn << 
+			": sending token to the parser " << Parser_lelNames[type];
+	cerr << " " << toklen;
+	if ( tokdata != 0 )
+		cerr << " " << tokdata;
+	cerr << endl;
+	#endif
+
+	loc.fileName = tokFileName;
+	loc.line = tokLine;
+	loc.col = tokColumn;
+
+	toParser->token( loc, type, tokdata, toklen );
 }
 
+void Scanner::importToken( int token, char *start, char *end )
+{
+	if ( cur_token == max_tokens )
+		flushImport();
 
-/* 
- * The Ragel Scanner
+	token_data[cur_token] = token;
+	if ( start == 0 ) {
+		token_strings[cur_token] = 0;
+		token_lens[cur_token] = 0;
+	}
+	else {
+		int toklen = end-start;
+		token_lens[cur_token] = toklen;
+		token_strings[cur_token] = new char[toklen+1];
+		memcpy( token_strings[cur_token], start, toklen );
+		token_strings[cur_token][toklen] = 0;
+	}
+	cur_token++;
+}
+
+void Scanner::pass( int token, char *start, char *end )
+{
+	if ( importMachines )
+		importToken( token, start, end );
+	pass();
+}
+
+void Scanner::pass()
+{
+	updateCol();
+
+	/* If no errors and we are at the bottom of the include stack (the
+	 * source file listed on the command line) then write out the data. */
+	if ( includeDepth == 0 && machineSpec == 0 && machineName == 0 )
+		xmlEscapeHost( output, tokstart, tokend-tokstart );
+}
+
+/*
+ * The scanner for processing sections, includes, imports, etc.
  */
-
-enum InlineBlockType
-{
-	CurlyDelimited,
-	SemiTerminated
-};
 
 %%{
 	machine section_parse;
@@ -280,16 +265,6 @@ void Scanner::updateCol()
 	lastnl = 0;
 }
 
-void Scanner::token( int type, char c )
-{
-	token( type, &c, &c + 1 );
-}
-
-void Scanner::token( int type )
-{
-	token( type, 0, 0 );
-}
-
 %%{
 	machine section_parse;
 
@@ -297,9 +272,10 @@ void Scanner::token( int type )
 	# that tokens are declared.
 	KW_Machine = 128;
 	KW_Include = 129;
-	KW_Write = 130;
-	TK_Word = 131;
-	TK_Literal = 132;
+	KW_Import = 130;
+	KW_Write = 131;
+	TK_Word = 132;
+	TK_Literal = 133;
 
 	action clear_words { word = lit = 0; word_len = lit_len = 0; }
 	action store_word { word = tokdata; word_len = toklen; }
@@ -307,6 +283,7 @@ void Scanner::token( int type )
 
 	action mach_err { scan_error() << "bad machine statement" << endl; }
 	action incl_err { scan_error() << "bad include statement" << endl; }
+	action import_err { scan_error() << "bad import statement" << endl; }
 	action write_err { scan_error() << "bad write statement" << endl; }
 
 	action handle_machine
@@ -314,7 +291,7 @@ void Scanner::token( int type )
 		/* Assign a name to the machine. */
 		char *machine = word;
 
-		if ( inclSectionTarg == 0 ) {
+		if ( !importMachines && inclSectionTarg == 0 ) {
 			ignoreSection = false;
 
 			ParserDictEl *pdEl = parserDict.find( machine );
@@ -327,7 +304,7 @@ void Scanner::token( int type )
 
 			parser = pdEl->value;
 		}
-		else if ( strcmp( inclSectionTarg, machine ) == 0 ) {
+		else if ( !importMachines && strcmp( inclSectionTarg, machine ) == 0 ) {
 			/* found include target */
 			ignoreSection = false;
 			parser = inclToParser;
@@ -373,7 +350,7 @@ void Scanner::token( int type )
 				}
 
 				Scanner scanner( inclFileName, *inFile, output, parser,
-						inclSectionName, includeDepth+1 );
+						inclSectionName, includeDepth+1, false );
 				scanner.do_scan( );
 				delete inFile;
 			}
@@ -391,6 +368,31 @@ void Scanner::token( int type )
 	include_stmt =
 		( KW_Include include_names ';' ) @handle_include
 		<>err incl_err <>eof incl_err;
+
+	action handle_import
+	{
+		if ( active() ) {
+			char *importFileName = prepareFileName( lit, lit_len );
+
+			/* Open the input file for reading. */
+			ifstream *inFile = new ifstream( importFileName );
+			if ( ! inFile->is_open() ) {
+				scan_error() << "import: could not open " << 
+						importFileName << " for reading" << endl;
+			}
+
+			Scanner scanner( importFileName, *inFile, output, parser,
+					0, includeDepth+1, true );
+			scanner.do_scan( );
+			scanner.importToken( 0, 0, 0 );
+			scanner.flushImport();
+			delete inFile;
+		}
+	}
+
+	import_stmt =
+		( KW_Import TK_Literal @store_lit ';' ) @handle_import
+		<>err import_err <>eof import_err;
 
 	action write_command
 	{
@@ -423,50 +425,51 @@ void Scanner::token( int type )
 	action handle_token
 	{
 		/* Send the token off to the parser. */
-		if ( active() ) {
-			InputLoc loc;
-
-			#if 0
-			cerr << "scanner:" << line << ":" << column << 
-					": sending token to the parser " << Parser_lelNames[*p];
-			cerr << " " << toklen;
-			if ( tokdata != 0 )
-				cerr << " " << tokdata;
-			cerr << endl;
-			#endif
-
-			loc.fileName = fileName;
-			loc.line = line;
-			loc.col = column;
-
-			parser->token( loc, type, tokdata, toklen );
-		}
+		if ( active() )
+			directToParser( parser, fileName, line, column, type, tokdata, toklen );
 	}
 
 	# Catch everything else.
-	everything_else = ^( KW_Machine | KW_Include | KW_Write ) @handle_token;
+	everything_else = 
+		^( KW_Machine | KW_Include | KW_Import | KW_Write ) @handle_token;
 
 	main := ( 
 		machine_stmt |
 		include_stmt |
+		import_stmt |
 		write_stmt |
 		everything_else
 	)*;
 }%%
 
+void Scanner::token( int type, char c )
+{
+	token( type, &c, &c + 1 );
+}
+
+void Scanner::token( int type )
+{
+	token( type, 0, 0 );
+}
+
 void Scanner::token( int type, char *start, char *end )
 {
 	char *tokdata = 0;
 	int toklen = 0;
-	int *p = &type;
-	int *pe = &type + 1;
-
 	if ( start != 0 ) {
 		toklen = end-start;
 		tokdata = new char[toklen+1];
 		memcpy( tokdata, start, toklen );
 		tokdata[toklen] = 0;
 	}
+
+	processToken( type, tokdata, toklen );
+}
+
+void Scanner::processToken( int type, char *tokdata, int toklen )
+{
+	int *p = &type;
+	int *pe = &type + 1;
 
 	%%{
 		machine section_parse;
@@ -734,6 +737,7 @@ void Scanner::endSection( )
 	parser_def := |*
 		'machine' => { token( KW_Machine ); };
 		'include' => { token( KW_Include ); };
+		'import' => { token( KW_Import ); };
 		'write' => { 
 			token( KW_Write );
 			fgoto write_statement;
@@ -887,21 +891,14 @@ void Scanner::endSection( )
 		any => { token( *tokstart ); } ;
 	*|;
 
-	action pass {
-		updateCol();
-
-		/* If no errors and we are at the bottom of the include stack (the
-		 * source file listed on the command line) then write out the data. */
-		if ( includeDepth == 0 && machineSpec == 0 && machineName == 0 )
-			xmlEscapeHost( output, tokstart, tokend-tokstart );
-	}
-
 	# Outside code scanner. These tokens get passed through.
 	main := |*
-		ident => pass;
-		number => pass;
-		c_cpp_comment => pass;
-		s_literal | d_literal => pass;
+		'define' => { pass( IMP_Define, 0, 0 ); };
+		ident => { pass( IMP_Word, tokstart, tokend ); };
+		number => { pass( IMP_UInt, tokstart, tokend ); };
+		c_cpp_comment => { pass(); };
+		( s_literal | d_literal ) => { pass( IMP_Literal, tokstart, tokend ); };
+
 		'%%{' => { 
 			updateCol();
 			singleLineSpec = false;
@@ -914,11 +911,10 @@ void Scanner::endSection( )
 			startSection();
 			fgoto parser_def;
 		};
-		whitespace+ => pass;
+		whitespace+ => { pass(); };
 		EOF;
-		any => pass;
+		any => { pass( *tokstart, 0, 0 ); };
 	*|;
-
 }%%
 
 %% write data;

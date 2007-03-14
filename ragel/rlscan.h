@@ -33,42 +33,6 @@
 using std::istream;
 using std::ostream;
 
-struct ImportScanner
-{
-	ImportScanner( char *fileName, istream &input, ostream &output, Parser *parser )
-	: 
-		fileName(fileName), input(input), output(output), 
-		parser(parser), 
-		cur_token(0),
-		line(1), column(1)
-	{}
-
-	void token( int type, char *start, char *end );
-	void updateCol();
-	void startSection();
-	void endSection();
-	void do_scan();
-	ostream &scan_error();
-
-	char *fileName;
-	istream &input;
-	ostream &output;
-	Parser *parser;
-
-	/* For scanning the tokens. */
-	int tok_cs, tok_act;
-	int *tok_tokstart, *tok_tokend;
-	int cur_token;
-	static const int max_tokens = 8;
-	int token_data[max_tokens];
-
-	/* For scanning the characters. */
-	int line;
-	char *chr_tokstart, *chr_tokend;
-	int column;
-};
-
-
 extern char *Parser_lelNames[];
 
 /* This is used for tracking the current stack of include file/machine pairs. It is
@@ -88,12 +52,14 @@ struct Scanner
 {
 	Scanner( char *fileName, istream &input, ostream &output,
 			Parser *inclToParser, char *inclSectionTarg,
-			int includeDepth )
+			int includeDepth, bool importMachines )
 	: 
 		fileName(fileName), input(input), output(output),
 		inclToParser(inclToParser),
 		inclSectionTarg(inclSectionTarg),
 		includeDepth(includeDepth),
+		importMachines(importMachines),
+		cur_token(0),
 		line(1), column(1), lastnl(0), 
 		parser(0), ignoreSection(false), 
 		parserExistsError(false),
@@ -117,6 +83,13 @@ struct Scanner
 	void token( int type, char *start, char *end );
 	void token( int type, char c );
 	void token( int type );
+	void processToken( int type, char *tokdata, int toklen );
+	void directToParser( Parser *toParser, char *tokFileName, int tokLine, 
+		int tokColumn, int type, char *tokdata, int toklen );
+	void flushImport( );
+	void importToken( int type, char *start, char *end );
+	void pass( int token, char *start, char *end );
+	void pass();
 	void updateCol();
 	void startSection();
 	void endSection();
@@ -130,6 +103,16 @@ struct Scanner
 	Parser *inclToParser;
 	char *inclSectionTarg;
 	int includeDepth;
+	bool importMachines;
+
+	/* For import parsing. */
+	int tok_cs, tok_act;
+	int *tok_tokstart, *tok_tokend;
+	int cur_token;
+	static const int max_tokens = 32;
+	int token_data[max_tokens];
+	char *token_strings[max_tokens];
+	int token_lens[max_tokens];
 
 	/* For section processing. */
 	int cs;

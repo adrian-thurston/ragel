@@ -34,7 +34,7 @@ struct Parser
 	# These must be declared first and in this order. Ragel currently cannot
 	# import kelbt keywords for use in machines, so in the scanner
 	# rely on knowing the values that kelbt will assign to these.
-	token KW_Machine, KW_Include, KW_Write, TK_Word, TK_Literal;
+	token KW_Machine, KW_Include, KW_Import, KW_Write, TK_Word, TK_Literal;
 
 	token TK_Number, TK_Inline, TK_Reference, TK_ColonEquals, TK_EndSection;
 
