@@ -229,7 +229,9 @@ void GraphvizDotGen::writeDotFile( )
 	/* Define the psuedo states. Transitions will be done after the states
 	 * have been defined as either final or not final. */
 	out << "	node [ shape = point ];\n";
-	out << "	ENTRY;\n";
+
+	if ( redFsm->startState != 0 )
+		out << "	ENTRY;\n";
 
 	/* Psuedo states for entry points in the entry map. */
 	for ( EntryIdVect::Iter en = entryPointIds; en.lte(); en++ ) {
@@ -280,8 +282,8 @@ void GraphvizDotGen::writeDotFile( )
 		writeTransList( st );
 
 	/* Transitions into the start state. */
-	out << "	ENTRY -> " << redFsm->startState->id << " [ label = \"IN";
-	out << "\" ];\n";
+	if ( redFsm->startState != 0 ) 
+		out << "	ENTRY -> " << redFsm->startState->id << " [ label = \"IN\" ];\n";
 
 	/* Transitions into the entry points. */
 	for ( EntryIdVect::Iter en = entryPointIds; en.lte(); en++ ) {
