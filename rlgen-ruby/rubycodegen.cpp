@@ -475,10 +475,6 @@ string RubyCodeGen::INDENT(int level)
 		result += "  "; /* The convention in ruby is 2 spaces per level */
 	return result;
 }
-inline string RubyCodeGen::INDENT_S() { return INDENT(indent_level); }
-inline string RubyCodeGen::INDENT_U() { return INDENT(++indent_level); }
-inline string RubyCodeGen::INDENT_D() { return INDENT(--indent_level); }
-inline string RubyCodeGen::INDENT_O() { return INDENT(indent_level--); }
 
 
 void RubyCodeGen::NEXT( ostream &ret, int nextDest, bool inFinish )

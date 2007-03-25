@@ -191,10 +191,10 @@ public:
 	virtual void ACTION( ostream &ret, Action *action, int targState, bool inFinish );
 
 protected:
-	virtual string INDENT_S();
-	virtual string INDENT_U();
-	virtual string INDENT_D();
-	virtual string INDENT_O();
+	string INDENT_S() { return INDENT(indent_level); }
+	string INDENT_U() { return INDENT(++indent_level); }
+	string INDENT_D() { return INDENT(--indent_level); }
+	string INDENT_O() { return INDENT(indent_level--); }
 
 private:
 	virtual string INDENT(int level);
