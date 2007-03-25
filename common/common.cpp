@@ -253,7 +253,7 @@ char *findFileExtension( char *stemFile )
  * replaces it with a new one. Returns a newed up string. */
 char *fileNameFromStem( char *stemFile, char *suffix )
 {
-	int len = strlen( stemFile );
+	long len = strlen( stemFile );
 	assert( len > 0 );
 
 	/* Get the extension. */

@@ -22,6 +22,7 @@
 #ifndef _FSMGRAPH_H
 #define _FSMGRAPH_H
 
+#include "config.h"
 #include <assert.h>
 #include <iostream>
 #include "common.h"

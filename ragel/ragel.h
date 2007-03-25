@@ -69,6 +69,6 @@ std::ostream &warning( const InputLoc &loc );
 
 void terminateAllParsers( );
 void writeMachines( std::ostream &out, std::string hostData, char *inputFileName );
-void xmlEscapeHost( std::ostream &out, char *data, int len );
+void xmlEscapeHost( std::ostream &out, char *data, long len );
 
 #endif /* _RAGEL_H */

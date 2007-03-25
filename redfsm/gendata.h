@@ -23,6 +23,7 @@
 #define _GENDATA_H
 
 #include <iostream>
+#include "config.h"
 #include "redfsm.h"
 #include "common.h"
 
@@ -33,7 +34,6 @@ typedef DList<Action> ActionList;
 
 typedef unsigned long ulong;
 
-struct FsmCodeGen;
 struct CodeGenData;
 
 typedef AvlMap<char *, CodeGenData*, CmpStr> CodeGenMap;

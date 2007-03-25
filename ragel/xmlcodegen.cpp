@@ -475,7 +475,7 @@ void XMLCodeGen::writeAction( Action *action )
 	out << "</action>\n";
 }
 
-void xmlEscapeHost( std::ostream &out, char *data, int len )
+void xmlEscapeHost( std::ostream &out, char *data, long len )
 {
 	char *end = data + len;
 	while ( data != end ) {

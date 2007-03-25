@@ -31,8 +31,10 @@
 #undef TXL
 #undef RUBY
 
-#ifdef WIN32
+#ifdef _MSC_VER
 #define strcasecmp _stricmp
+#define strtoll _strtoi64
+#pragma warning( disable: 4244 4250 4355 4800 )
 #endif
 
 #endif /* _CONFIG_H */

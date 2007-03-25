@@ -24,6 +24,7 @@
 
 #include <stdio.h>
 #include <iostream>
+#include "config.h"
 #include "avltree.h"
 #include "vector.h"
 #include "config.h"
