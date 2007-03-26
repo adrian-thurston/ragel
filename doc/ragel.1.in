@@ -554,7 +554,9 @@ many bugs.
 Ragel was written by Adrian Thurston <thurston@cs.queensu.ca>.  Objective-C
 output contributed by Erich Ocean. D output contributed by Alan West. 
 .SH "SEE ALSO"
-.BR rlcodegen (1),
+.BR rlgen-cd (1),
+.BR rlgen-dot (1),
+.BR rlgen-java (1),
 .BR re2c (1),
 .BR flex (1)
 
