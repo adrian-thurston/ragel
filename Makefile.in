@@ -18,9 +18,9 @@
 #   along with Ragel; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
 
-
-BUILD_SUBDIRS = common ragel redfsm rlgen-cd rlgen-java rlgen-ruby rlgen-dot
-ALL_SUBDIRS = $(BUILD_SUBDIRS) test examples doc
+BUILD_COMMON = common redfsm
+BUILD_SUBDIRS = ragel rlgen-cd rlgen-java rlgen-ruby rlgen-dot
+ALL_SUBDIRS = $(BUILD_COMMON) $(BUILD_SUBDIRS) test examples doc
 
 #*************************************
 
@@ -33,9 +33,12 @@ include version.mk
 # build targets
 all: $(BUILD_SUBDIRS)
 
-.PHONY: $(BUILD_SUBDIRS)
+.PHONY: $(ALL_SUBDIRS)
 
-$(BUILD_SUBDIRS):
+$(BUILD_COMMON):
+	@cd $@ && $(MAKE)
+
+$(BUILD_SUBDIRS): $(BUILD_COMMON)
 	@cd $@ && $(MAKE)
 
 # clean targets.
