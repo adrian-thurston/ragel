@@ -458,7 +458,7 @@ void FsmCodeGen::writeInit()
 {
 	out << "	{\n";
 
-	if ( redFsm->startState != 0 )
+	if ( writeCS )
 		out << "\t" << CS() << " = " << START() << ";\n";
 	
 	/* If there are any calls, then the stack top needs initialization. */

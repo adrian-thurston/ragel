@@ -610,11 +610,8 @@ void XMLCodeGen::writeMachine()
 	writeConditions();
 
 	/* Start state. */
-	GraphDictEl *mainEl = pd->graphDict.find( mainMachine );
-	if ( mainEl != 0 ) {
-		out << "    <start_state>" << fsm->startState->alg.stateNum << 
+	out << "    <start_state>" << fsm->startState->alg.stateNum << 
 			"</start_state>\n";
-	}
 	
 	/* Error state. */
 	if ( fsm->errState != 0 ) {

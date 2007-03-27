@@ -29,7 +29,7 @@ int test( char data[] )
 	int cs = test_en_commands;
 	char *p = data.ptr, pe = data.ptr + data.length;
 
-	%% write init;
+	%% write init nocs;
 	%% write exec;
 
 	if ( cs >= test_first_final )

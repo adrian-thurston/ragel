@@ -113,6 +113,7 @@ struct CodeGenData
 	bool dataPrefix;
 	bool writeFirstFinal;
 	bool writeErr;
+	bool writeCS;
 
 	void createMachine();
 	void initActionList( unsigned long length );

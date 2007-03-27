@@ -384,7 +384,7 @@ void RubyCodeGen::writeInit()
 {
 	out << INDENT_U() << "begin";
 
-	if ( redFsm->startState != 0 )
+	if ( writeCS )
 		out << INDENT_S() <<   CS() << " = " << START();
 
 	/* If there are any calls, then the stack top needs initialization. */

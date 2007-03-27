@@ -29,7 +29,7 @@ class export2
 		int cs = test_en_commands, p = 0, pe = data.length;
 		int top;
 
-		%% write init;
+		%% write init nocs;
 		%% write exec;
 
 		if ( cs >= test_first_final )

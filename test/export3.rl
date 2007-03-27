@@ -29,6 +29,7 @@ def run_machine( data )
 	val = 0;
 	neg = false;
 
+	%% write init nocs;
 	%% write exec;
 	%% write eof;
 	if  cs >= test_first_final

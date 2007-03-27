@@ -48,7 +48,8 @@ CodeGenData::CodeGenData( ostream &out )
 	hasEnd(true),
 	dataPrefix(true),
 	writeFirstFinal(true),
-	writeErr(true)
+	writeErr(true),
+	writeCS(true)
 {}
 
 
@@ -663,8 +664,12 @@ void CodeGenData::writeStatement( InputLoc &loc, int nargs, char **args )
 	}
 	else if ( strcmp( args[0], "init" ) == 0 ) {
 		for ( int i = 1; i < nargs; i++ ) {
-			source_warning(loc) << "unrecognized write option \"" << 
-					args[i] << "\"" << endl;
+			if ( strcmp( args[i], "nocs" ) == 0 )
+				writeCS = false;
+			else {
+				source_warning(loc) << "unrecognized write option \"" << 
+						args[i] << "\"" << endl;
+			}
 		}
 		writeInit();
 	}
