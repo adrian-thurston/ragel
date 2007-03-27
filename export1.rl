@@ -29,7 +29,7 @@ int test( const char *data, int len )
 	int cs = test_en_commands;
 	const char *p = data, *pe = data + len;
 
-	%% write init;
+	%% write init nocs;
 	%% write exec;
 
 	if ( cs >= test_first_final )
