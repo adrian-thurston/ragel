@@ -23,7 +23,7 @@
 #include "common.h"
 #include "gendata.h"
 #include <iostream>
-#include <malloc.h>
+#include <stdlib.h>
 
 using std::cout;
 using std::ostream;
