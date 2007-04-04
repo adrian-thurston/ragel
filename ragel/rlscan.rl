@@ -46,20 +46,13 @@ enum InlineBlockType
  * The Scanner for Importing
  */
 
-#define IMP_Word 128
-#define IMP_Literal 129
-#define IMP_UInt 130
-#define IMP_Define 131
-
 %%{
 	machine inline_token_scan;
 	alphtype int;
 	access tok_;
 
-	IMP_Word = 128;
-	IMP_Literal = 129;
-	IMP_UInt = 130;
-	IMP_Define = 131;
+	# Import scanner tokens.
+	import "rlparse.h"; 
 
 	main := |*
 		# Define of number.
@@ -267,14 +260,8 @@ void Scanner::updateCol()
 %%{
 	machine section_parse;
 
-	# This relies on the the kelbt implementation and the order
-	# that tokens are declared.
-	KW_Machine = 128;
-	KW_Include = 129;
-	KW_Import = 130;
-	KW_Write = 131;
-	TK_Word = 132;
-	TK_Literal = 133;
+	# Need the defines representing tokens.
+	import "rlparse.h"; 
 
 	action clear_words { word = lit = 0; word_len = lit_len = 0; }
 	action store_word { word = tokdata; word_len = toklen; }

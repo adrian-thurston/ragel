@@ -26,23 +26,24 @@
 #include "avltree.h"
 #include "parsedata.h"
 
+
+/* Import scanner tokens. */
+#define IMP_Word 128
+#define IMP_Literal 129
+#define IMP_UInt 130
+#define IMP_Define 131
+
+
 struct Parser
 {
 %%{
 	parser Parser;
 
-	# These must be declared first and in this order. Ragel currently cannot
-	# import kelbt keywords for use in machines, so in the scanner
-	# rely on knowing the values that kelbt will assign to these.
-	token KW_Machine, KW_Include, KW_Import, KW_Write, TK_Word, TK_Literal;
-
-	token TK_Number, TK_Inline, TK_Reference, TK_ColonEquals, TK_EndSection;
-
 	# General tokens.
-	token TK_UInt, TK_Hex, TK_Word, TK_Literal, TK_BaseClause,
-		TK_DotDot, TK_ColonGt, TK_ColonGtGt, TK_LtColon, TK_Arrow,
-		TK_DoubleArrow, TK_StarStar, TK_ColonEquals, TK_NameSep, TK_BarStar,
-		TK_DashDash;
+	token TK_Word, TK_Literal, TK_Number, TK_Reference, TK_ColonEquals,
+		TK_EndSection, TK_UInt, TK_Hex, TK_Word, TK_Literal, TK_DotDot,
+		TK_ColonGt, TK_ColonGtGt, TK_LtColon, TK_Arrow, TK_DoubleArrow,
+		TK_StarStar, TK_ColonEquals, TK_NameSep, TK_BarStar, TK_DashDash;
 
 	# Conditions.
 	token TK_StartCond, TK_AllCond, TK_LeavingCond;
@@ -77,9 +78,9 @@ struct Parser
 	token IL_WhiteSpace, IL_Comment, IL_Literal, IL_Symbol;
 
 	# Keywords.
-	token KW_Action, KW_AlphType, KW_Range, KW_GetKey, KW_Include, KW_Write,
-		KW_Machine, KW_When, KW_Eof, KW_Err, KW_Lerr, KW_To, KW_From,
-		KW_Export;
+	token KW_Machine, KW_Include, KW_Import, KW_Write, KW_Action, KW_AlphType,
+		KW_Range, KW_GetKey, KW_Include, KW_Write, KW_Machine, KW_When, KW_Eof,
+		KW_Err, KW_Lerr, KW_To, KW_From, KW_Export;
 
 	# Specials in code blocks.
 	token KW_Break, KW_Exec, KW_Hold, KW_PChar, KW_Char, KW_Goto, KW_Call,

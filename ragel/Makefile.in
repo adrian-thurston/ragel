@@ -60,6 +60,10 @@ rlparse.h: rlparse.kh
 rlparse.cpp: rlparse.kl rlparse.kh
 	kelbt -o $@ $<
 
+# This dependency comes from the import of the parser defines
+# into the scanner.
+rlscan.cpp: rlparse.h
+
 rlscan.cpp: rlscan.rl
 	ragel $< | rlgen-cd -G2 -o $@
 
