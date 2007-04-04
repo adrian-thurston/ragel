@@ -49,8 +49,8 @@ ragel-guide.pdf: $(PDFFIGS) $(INPUT)
 	pdflatex -interaction=nonstopmode $< >/dev/null
 
 version.tex: ../version.mk
-	echo '\def\version{$(VERSION)}' > version.tex
-	echo '\def\pubdate{$(PUBDATE)}' >> version.tex
+	echo '|def|version{$(VERSION)}' | tr '|' '\\' > version.tex
+	echo '|def|pubdate{$(PUBDATE)}' | tr '|' '\\' >> version.tex
 
 %.1: %.1.in ../version.mk
 	cat $< | sed 's/@PUBDATE@/$(PUBDATE)/' \
