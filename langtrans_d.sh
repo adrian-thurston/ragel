@@ -38,7 +38,7 @@ cat << EOF
 	{
 EOF
 
-sed -n '1,/^%%$/d; /^%%{$/q; {s/^/\t\t/;p}' $file.pr
+sed -n '0,/^%%$/d; /^%%{$/q; {s/^/\t\t/;p}' $file.pr
 
 cat << EOF
 		%% write init;
@@ -63,7 +63,7 @@ cat << EOF
 EOF
 
 # Write out the test data.
-sed -n '1,/\/\* _____INPUT_____/d; /_____INPUT_____ \*\//q; p;' $file | awk '
+sed -n '0,/\/\* _____INPUT_____/d; /_____INPUT_____ \*\//q; p;' $file | awk '
 BEGIN {
 	print "	char[][] inp = ["
 }
@@ -95,7 +95,7 @@ int main( )
 EOF
 
 # Write out the expected output.
-sed -n '1,/\/\* _____OUTPUT_____/d; /_____OUTPUT_____ \*\//q; p;' $file
+sed -n '0,/\/\* _____OUTPUT_____/d; /_____OUTPUT_____ \*\//q; p;' $file
 echo "*/"
 
 # Don't need this language-specific file anymore.
