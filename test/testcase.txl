@@ -114,8 +114,8 @@ end define
 define al_term
 		[id]
 	|	[opt al_sign] [number]
-	|	[stringlit]
-	|	[charlit]
+	|	[stringlit] [opt union]
+	|	[charlit] 
 	|	'fc
 	|	'true
 	|	'false

@@ -7,7 +7,7 @@ file=$1
 root=${file%.rl}
 class=${root}_java
 
-# Make a temporary version of the test case the Java language translations.
+# Make a temporary version of the test case using the Java language translations.
 sed -n '/\/\*/,/\*\//d;p' $file | txl -q stdin langtrans_java.txl - $class > $file.pr
 
 # Begin writing out the test case.
@@ -38,7 +38,7 @@ cat << EOF
 	{
 EOF
 
-sed -n '1,/^%%$/d; /^%%{$/q; {s/^/\t\t/;p}' $file.pr
+sed -n '0,/^%%$/d; /^%%{$/q; {s/^/\t\t/;p}' $file.pr
 
 cat << EOF
 		%% write init;
@@ -63,7 +63,7 @@ cat << EOF
 EOF
 
 # Write out the test data.
-sed -n '1,/\/\* _____INPUT_____/d; /_____INPUT_____ \*\//q; p;' $file | awk '
+sed -n '0,/\/\* _____INPUT_____/d; /_____INPUT_____ \*\//q; p;' $file | awk '
 BEGIN {
 	print "	static final String inp[] = {"
 }
