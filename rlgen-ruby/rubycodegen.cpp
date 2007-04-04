@@ -107,7 +107,7 @@ void RubyCodeGen::RET( ostream &out, bool inFinish )
 
 void RubyCodeGen::BREAK( ostream &out, int targState )
 {
-	out << "_resume.call " << CTRL_FLOW();
+	out << "_out.call " << CTRL_FLOW();
 }
 
 void RubyCodeGen::COND_TRANSLATE()
@@ -540,13 +540,13 @@ void RubyCodeGen::INLINE_LIST( ostream &ret, InlineList *inlineList,
 			ret << GET_KEY();
 			break;
 		case InlineItem::Hold:
-			ret << P() << "--;";
+			ret << P() << " = " << P() << " - 1;";
 			break;
 		case InlineItem::Exec:
 			EXEC( ret, item, targState, inFinish );
 			break;
 		case InlineItem::HoldTE:
-			ret << TOKEND() << "--;";
+			ret << TOKEND() << " = " << TOKEND() << " - 1;";
 			break;
 		case InlineItem::ExecTE:
 			EXECTE( ret, item, targState, inFinish );
