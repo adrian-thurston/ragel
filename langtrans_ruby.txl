@@ -38,7 +38,7 @@ define ruby_term
 	|	[stringlit] [union]
 	|	[id] [repeat ruby_dot_id]
 	|	[SPOFF] [id] [repeat ruby_dot_id] '( [SPON] [ruby_args] ')
-	|	'new [ruby_type_decl] [union]
+	|	[union]
 end define
 
 define ruby_dot_id
@@ -82,60 +82,57 @@ redefine al_host_block
 	|	'{ [NL] [IN] [ruby_statements] [EX] '} [NL]
 end define
 
-function clearUnion Type [ruby_type_decl] Id [id] 
-	replace [opt union]
-		Union [union]
-	import ArrayInits [ruby_statements]
-		Stmts [repeat ruby_lang_stmt]
-	export ArrayInits 
-		Id '= 'new Type Union '; Stmts
-	by
-		'[]
-end function
-
-function initDecl1 Id [id] DeclType [al_type_decl]
-	deconstruct DeclType
-		'bool
+function initDecl1 VarDecl [al_variable_decl]
+	deconstruct VarDecl
+		'bool Id [id] ';
 	replace [repeat ruby_lang_stmt]
 	by
 		Id '= 'false ';
 end function
 
-function initDecl2 Id [id] DeclType [al_type_decl]
-	deconstruct DeclType
-		'char
+function initDecl2 VarDecl [al_variable_decl]
+	deconstruct VarDecl
+		'char Id [id] ';
 	replace [repeat ruby_lang_stmt]
 	by
 		Id '= ''c' ';
 end function
 
-function initDecl3 Id [id] DeclType [al_type_decl]
-	deconstruct DeclType
-		'int
+function initDecl3 VarDecl [al_variable_decl]
+	deconstruct VarDecl
+		'int Id [id] ';
 	replace [repeat ruby_lang_stmt]
 	by
 		Id '= '0 ';
 end function
 
-function initDecl4 Id [id] DeclType [al_type_decl]
-	deconstruct DeclType
-		'ptr
+function initDecl4 VarDecl [al_variable_decl]
+	deconstruct VarDecl
+		'ptr Id [id] ';
 	replace [repeat ruby_lang_stmt]
 	by
 		Id '= '-1 ';
 end function
+
+function initDecl5 VarDecl [al_variable_decl]
+	deconstruct VarDecl
+		'int Id [id] Union [union] ';
+	replace [repeat ruby_lang_stmt]
+	by
+		Id '= '[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] ';
+end function
+
 
 function alStmtToRuby1 AlStmt [action_lang_stmt]
 	deconstruct AlStmt
 		VarDecl [al_variable_decl]
 	deconstruct VarDecl
 		Type [al_type_decl] Id [id] OptUnion [opt union] ';
-	construct RubyType [ruby_type_decl]
-		Type
 	replace [repeat ruby_lang_stmt]
 	by
-		_ [initDecl1 Id Type] [initDecl2 Id Type] 
-			[initDecl3 Id Type] [initDecl4 Id Type] 
+		_ [initDecl1 VarDecl] [initDecl2 VarDecl] 
+			[initDecl3 VarDecl] [initDecl4 VarDecl]
+			[initDecl5 VarDecl]
 end function
 
 function alExprExtendToRuby AlExprExtend [repeat al_expr_extend]
