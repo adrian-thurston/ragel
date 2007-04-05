@@ -77,8 +77,8 @@ void RubyCodeGen::GOTO_EXPR( ostream &out, InlineItem *ilItem, bool inFinish )
 void RubyCodeGen::CALL( ostream &out, int callDest, int targState, bool inFinish )
 {
 	out << INDENT_U() << "begin" 
+		<< INDENT_S() <<   STACK() << "[" << TOP() << "] = " << CS() 
 		<< INDENT_S() <<   TOP() << "+= 1" 
-		<< INDENT_S() <<   STACK() << "[" << TOP() << "-1] = " << CS() 
 		<< INDENT_S() <<   CS() << " = " << callDest 
 		<< INDENT_S() <<   "_again.call " << CTRL_FLOW() 
 		<< INDENT_D() << "end";
@@ -87,8 +87,8 @@ void RubyCodeGen::CALL( ostream &out, int callDest, int targState, bool inFinish
 void RubyCodeGen::CALL_EXPR(ostream &out, InlineItem *ilItem, int targState, bool inFinish )
 {
 	out << INDENT_U() << "begin" 
+		<< INDENT_S() <<   STACK() << "[" << TOP() << "] = " << CS() 
 		<< INDENT_S() <<   TOP() << " += 1" 
-		<< INDENT_S() <<   STACK() << "[" << TOP() << "-1] = " << CS() 
 		<< INDENT_S() <<   CS() << " = (";
 	INLINE_LIST( out, ilItem->children, targState, inFinish );
 	out << ")" 
@@ -100,7 +100,7 @@ void RubyCodeGen::RET( ostream &out, bool inFinish )
 {
 	out << INDENT_U() << "begin" 
 		<< INDENT_S() <<   TOP() << " -= 1" 
-		<< INDENT_S() <<   CS() << " = " << STACK() << "[" << TOP() << "+1]" 
+		<< INDENT_S() <<   CS() << " = " << STACK() << "[" << TOP() << "]" 
 		<< INDENT_S() <<   "_again.call " << CTRL_FLOW() 
 		<< INDENT_D() << "end";
 }
@@ -230,7 +230,7 @@ void RubyCodeGen::writeExec()
 
 	if ( redFsm->anyFromStateActions() ) {
 		out << INDENT_S() << "_acts = " << FSA() << "[" << CS() << "]" 
-			<< INDENT_S() << "_nacts = " << A() << "[acts]" 
+			<< INDENT_S() << "_nacts = " << A() << "[_acts]" 
 			<< INDENT_S() << "_acts += 1" 
 			<< INDENT_U() << "while _nacts > 0" 
 			<< INDENT_S() <<   "_nacts -= 1" 
@@ -282,7 +282,7 @@ void RubyCodeGen::writeExec()
 			<< INDENT_U() << "while _nacts > 0" 
 			<< INDENT_S() <<   "_nacts -= 1" 
 			<< INDENT_S() <<   "_acts += 1" 
-			<< INDENT_U() <<   "case " << A() << "[acts - 1]" ;
+			<< INDENT_U() <<   "case " << A() << "[_acts - 1]" ;
 		TO_STATE_ACTION_SWITCH()
 			<< INDENT_D() <<     "end # to state action switch"
 			<< INDENT_D() << "end" 
@@ -461,9 +461,9 @@ void RubyCodeGen::ACTION( ostream &ret, Action *action, int targState, bool inFi
 	lineDirective( ret, sourceFileName, action->loc.line );
 
 	/* Write the block and close it off. */
-	ret << "begin" << endl << INDENT(1);
+	ret << " begin " << endl << INDENT(1);
 	INLINE_LIST( ret, action->inlineList, targState, inFinish );
-	ret << "end ";
+	ret << " end\n";
 	lineDirective( ret, sourceFileName, action->loc.line );
 	ret << endl;
 }
@@ -494,9 +494,9 @@ void RubyCodeGen::EXEC( ostream &ret, InlineItem *item, int targState, int inFin
 	/* The parser gives fexec two children. The double brackets are for D
 	 * code. If the inline list is a single word it will get interpreted as a
 	 * C-style cast by the D compiler. */
-	ret << "{" << P() << " = ((";
+	ret << " begin " << P() << " = ((";
 	INLINE_LIST( ret, item->children, targState, inFinish );
-	ret << "))-1;}";
+	ret << "))-1; end\n";
 }
 
 void RubyCodeGen::EXECTE( ostream &ret, InlineItem *item, int targState, int inFinish )
@@ -506,9 +506,9 @@ void RubyCodeGen::EXECTE( ostream &ret, InlineItem *item, int targState, int inF
 	/* The parser gives fexec two children. The double brackets are for D
 	 * code. If the inline list is a single word it will get interpreted as a
 	 * C-style cast by the D compiler. */
-	ret << "{" << TOKEND() << " = ((";
+	ret << " begin " << TOKEND() << " = ((";
 	INLINE_LIST( ret, item->children, targState, inFinish );
-	ret << "));}";
+	ret << ")); end\n";
 }
 
 /* Write out an inline tree structure. Walks the list and possibly calls out
@@ -1317,32 +1317,27 @@ void RubyCodeGen::LM_SWITCH( ostream &ret, InlineItem *item,
 		int targState, int inFinish )
 {
 	ret << 
-		"	switch( " << ACT() << " ) {\n";
+		"	case " << ACT() << "\n";
 
 	/* If the switch handles error then we also forced the error state. It
 	 * will exist. */
 	if ( item->handlesError ) {
-		ret << "	case 0: " << TOKEND() << " = " << TOKSTART() << "; ";
+		ret << "	when 0: " << TOKEND() << " = " << TOKSTART() << "; ";
 		GOTO( ret, redFsm->errState->id, inFinish );
 		ret << "\n";
 	}
 
 	for ( InlineList::Iter lma = *item->children; lma.lte(); lma++ ) {
 		/* Write the case label, the action and the case break. */
-		ret << "	case " << lma->lmId << ":\n";
+		ret << "	when " << lma->lmId << ":\n";
 
 		/* Write the block and close it off. */
-		ret << "	{";
+		ret << "	begin";
 		INLINE_LIST( ret, lma->children, targState, inFinish );
-		ret << "}\n";
-
-		ret << "	break;\n";
+		ret << "end\n";
 	}
-	/* Default required for D code. */
-	ret << 
-		"	default: break;\n"
-		"	}\n"
-		"\t";
+
+	ret << "end \n\t";
 }
 
 void RubyCodeGen::SET_ACT( ostream &ret, InlineItem *item )
@@ -1384,9 +1379,9 @@ void RubyCodeGen::SUB_ACTION( ostream &ret, InlineItem *item,
 {
 	if ( item->children->length() > 0 ) {
 		/* Write the block and close it off. */
-		ret << "{";
+		ret << " begin ";
 		INLINE_LIST( ret, item->children, targState, inFinish );
-		ret << "}";
+		ret << " end\n";
 	}
 }
 
