@@ -16,7 +16,6 @@ sed -n '/\/\*/,/\*\//d;p' $file | txl -q stdin langtrans_ruby.txl > $file.pr
 cat << EOF
 #
 # @LANG: ruby
-# @ALLOW_GENFLAGS: -T0
 # @GENERATED: yes
 #
 

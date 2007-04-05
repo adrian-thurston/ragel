@@ -14,7 +14,6 @@ sed -n '/\/\*/,/\*\//d;p' $file | txl -q stdin langtrans_java.txl - $class > $fi
 cat << EOF
 /*
  * @LANG: java
- * @ALLOW_GENFLAGS: -T0
  * @GENERATED: yes
  */
 

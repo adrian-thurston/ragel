@@ -1,6 +1,5 @@
 #
 # @LANG: ruby
-# @ALLOW_GENFLAGS: -T0
 #
 
 neg = false
