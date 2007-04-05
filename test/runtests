@@ -20,7 +20,7 @@
 #   along with Ragel; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
 
-while getopts "gcnmleT:F:G:P:CDJ" opt; do
+while getopts "gcnmleT:F:G:P:CDJR" opt; do
 	case $opt in
 		T|F|G|P) 
 			genflags="$genflags -$opt$OPTARG"
@@ -98,55 +98,58 @@ for test_case; do
 
 	case $lang in
 		c++)
+			lang_opt=-C;
 			codegen=../rlgen-cd/rlgen-cd;
 			code_suffix=cpp;
 			compiler=$cxx_compiler;
-			lang_opt=-C;
 			cflags="-pedantic -ansi -Wall -O3"
 		;;
 		d)
+			lang_opt=-D;
 			codegen=../rlgen-cd/rlgen-cd;
 			code_suffix=d;
 			compiler=$d_compiler;
-			lang_opt=-D;
 			cflags="-Wall -O3"
 		;;
 		c)
+			lang_opt=-C;
 			codegen=../rlgen-cd/rlgen-cd;
 			code_suffix=c;
 			compiler=$c_compiler;
-			lang_opt=-C;
 			cflags="-pedantic -ansi -Wall -O3"
 		;;
 		obj-c)
+			lang_opt=-C;
 			codegen=../rlgen-cd/rlgen-cd;
 			code_suffix=m;
 			compiler=$objc_compiler
-			lang_opt=-C;
 			cflags="-Wall -O3 -fno-strict-aliasing -lobjc"
 		;;
 		java)
+			lang_opt=-J;
 			codegen=../rlgen-java/rlgen-java;
 			code_suffix=java;
 			compiler=$java_compiler
-			lang_opt=-J;
 			cflags=""
 		;;
 		ruby)
+			lang_opt=-R;
 			codegen=../rlgen-ruby/rlgen-ruby;
 			code_suffix=rb;
 			compiler=$ruby_engine
-			lang_opt=-R;
 			cflags=""
 		;;
 		indep)
-			# If we have no compiler for the source program then skip it.
+			lang_opt="";
+
+			# If we have no txl engine then skip this test.
 			[ -z "$txl_engine" ] && continue
-			for lang in c d java; do
+			for lang in c d java ruby; do
 				case $lang in 
 					c) lf="-C";;
 					d) lf="-D";;
 					java) lf="-J";;
+					ruby) lf="-R";;
 				esac
 
 				echo "$langflags" | grep -e $lf >/dev/null || continue
@@ -185,9 +188,21 @@ for test_case; do
 	allow_minflags=`sed '/@ALLOW_MINFLAGS:/s/^.*: *//p;d' $test_case`
 	[ -z "$allow_minflags" ] && allow_minflags="-n -m -l -e"
 
-	allow_genflags=`sed '/@ALLOW_GENFLAGS:/s/^.*: *//p;d' $test_case`
-	[ -z "$allow_genflags" ] && allow_genflags="-T0 -T1 -F0 -F1 -G0 -G1 -G2"
 
+	# If we are in java or ruby then we are not interested in genflags
+	case $lang in
+	c|c++|objc|d)
+		# Using genflags, get the allowed gen flags from the test case. If the
+		# test case doesn't specify assume that all gen flags are allowed.
+		allow_genflags=`sed '/@ALLOW_GENFLAGS:/s/^.*: *//p;d' $test_case`
+		[ -z "$allow_genflags" ] && allow_genflags="-T0 -T1 -F0 -F1 -G0 -G1 -G2"
+	;;
+	*)
+		# Not interested in gen flags.
+		allow_genflags=noflags
+		genflags=noflags
+	;;
+	esac
 
 	for min_opt in $minflags; do
 		for gen_opt in $genflags; do
@@ -200,7 +215,7 @@ for test_case; do
 			fi
 			echo "$allow_genflags" | grep -e $grep_gen_opt >/dev/null || continue
 
-			if [ $lang == "java" ] || [ $lang == "ruby" ]; then
+			if [ $genflags == noflags ]; then
 				be_gen_opt=""
 			else
 				be_gen_opt=$gen_opt
