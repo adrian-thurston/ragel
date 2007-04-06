@@ -1,3 +1,37 @@
+Ragel 6.0 Features
+==================
+
+Expressions of the form: ( expr1 <: expr2 . expr3 ) sometimes don't behave as
+expected. If expr2 contains the empty string then it's possible for the machine
+to escape to expr3. This is somewhat unexpected.  The empty string does count
+as moving through the right machine so there should not be an exception for
+this case. Using the stronger implementation: ( expr1 $1 %0 . expr2 ) will
+solve the problem.
+
+Also, there is potential for nondeterminism to persist via the empty string
+with the :> and :>> operators. Should also guard against this using leaving
+priorities.
+
+fbreak should advance the current char. Depreciate fbreak and add
+    fctl_break;
+    fctl_return <expr>;
+    fctl_goto <label>;
+
+fbreak should execute the to-state actions of the target state. The semantics
+of fbreak should be identical to reaching the end of a buffer block.
+
+Introduce a new variable "eof" which is a pointer like pe. It gets set to pe
+when the input has ended. This would enable eof actions to go into the main
+loop, granting them the ability to manipulate p and cs. This would free us from
+requiring some eof character to be sent to scanners to 'flush out' the last
+token.  Instead an eof action can now execute scanner pattern actions and
+backtrack if necessary.
+
+The tokstart/tokend variable should be shortened to ts/te.
+
+================
+END 6.0 Features
+
 Should be possible to include scanner definitions in another scanner.
 
 Need a "write entry name;" feature.
@@ -18,17 +52,6 @@ Doesn't make make sense for [] to be the lambda (zero-length) machine. This
 should be the empty set (the empty machine). But then would it be invalid in a
 regular expression?
 
-Expressions of the form: expr1 <: expr2 . expr3
-sometimes don't behave as expected. If expr2 contains the empty string then
-it's possible for the machine to escape to expr3. This is somewhat unexpected.
-The empty string does count as moving through the right machine so there should
-not be an exception for this case.
-Using the stronger implementation: ( expr1 $1 %0 . expr2 ) will solve the problem.
-
-Also, there is potential for nondeterminism to persist via the empty string
-with the :> and :>> operators. Should also guard against this using leaving
-priorities.
-
 The |> guarded operator and the <| guarded operator need to be added.
 
 The fixed size stack is a problem for manual recursion of unlimited depth.
@@ -40,14 +63,6 @@ Might be a good idea to add in some protection against using up all of a
 system's memory. This protection could then be removed by people when someone
 is sure they want to use a lot of memory.
 
-fbreak should advance the current char. Depreciate fbreak and add
-    fctl_break;
-    fctl_return <expr>;
-    fctl_goto <label>;
-
-Should the fbreak functions execute the to-state actions of the target state?
-
-It should be possible to import/export definitions.
 
 If a scanner can be optimized into a pure state machine, maybe permit it to be
 referenced as a machine definition. Alternately: inline scanners with an
