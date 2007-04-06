@@ -87,4 +87,4 @@ sed -n '/\/\* _____OUTPUT_____/,/_____OUTPUT_____ \*\//{/_____OUTPUT_____/d;p;};
 echo "=end _____OUTPUT_____"
 
 # Don't need this language-specific file anymore.
-#rm $file.pr
+rm $file.pr
