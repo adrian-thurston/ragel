@@ -13,8 +13,8 @@ parsers from the specifications then set BUILD_PARSERS=true in the configure
 script and then run it. To build the parsers you will need the following
 programs:
 
- * ragel (recent version)
- * kelbt (recent version)
+ * ragel (the most recent version)
+ * kelbt (the most recent version)
  * gperf
 
 To build the user guide the following extra programs are needed:
