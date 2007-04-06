@@ -536,16 +536,120 @@ void Scanner::endSection( )
 
 	c_cpp_comment = c_comment | cpp_comment;
 
-	# These literal forms are common to C-like host code and ragel.
+	ruby_comment = '#' [^\n]* NL;
+
+	# These literal forms are common to host code and ragel.
 	s_literal = "'" ([^'\\] | NL | '\\' (any | NL))* "'";
 	d_literal = '"' ([^"\\] | NL | '\\' (any | NL))* '"';
+	host_re_literal = '/' ([^/\\] | NL | '\\' (any | NL))* '/';
 
 	whitespace = [ \t] | NL;
 	pound_comment = '#' [^\n]* NL;
 
-	# An inline block of code. This is specified as a scanned, but is sent to
-	# the parser as one long block. The inline_block pointer is used to handle
-	# the preservation of the data.
+	# An inline block of code for Ruby.
+	inline_code_ruby := |*
+		# Inline expression keywords.
+		"fpc" => { token( KW_PChar ); };
+		"fc" => { token( KW_Char ); };
+		"fcurs" => { token( KW_CurState ); };
+		"ftargs" => { token( KW_TargState ); };
+		"fentry" => { 
+			whitespaceOn = false; 
+			token( KW_Entry );
+		};
+
+		# Inline statement keywords.
+		"fhold" => { 
+			whitespaceOn = false; 
+			token( KW_Hold );
+		};
+		"fexec" => { token( KW_Exec, 0, 0 ); };
+		"fgoto" => { 
+			whitespaceOn = false; 
+			token( KW_Goto );
+		};
+		"fnext" => { 
+			whitespaceOn = false; 
+			token( KW_Next );
+		};
+		"fcall" => { 
+			whitespaceOn = false; 
+			token( KW_Call );
+		};
+		"fret" => { 
+			whitespaceOn = false; 
+			token( KW_Ret );
+		};
+		"fbreak" => { 
+			whitespaceOn = false; 
+			token( KW_Break );
+		};
+
+		ident => { token( TK_Word, tokstart, tokend ); };
+
+		number => { token( TK_UInt, tokstart, tokend ); };
+		hex_number => { token( TK_Hex, tokstart, tokend ); };
+
+		( s_literal | d_literal | host_re_literal ) 
+			=> { token( IL_Literal, tokstart, tokend ); };
+
+		whitespace+ => { 
+			if ( whitespaceOn ) 
+				token( IL_WhiteSpace, tokstart, tokend );
+		};
+
+		ruby_comment => { token( IL_Comment, tokstart, tokend ); };
+
+		"::" => { token( TK_NameSep, tokstart, tokend ); };
+
+		# Some symbols need to go to the parser as with their cardinal value as
+		# the token type (as opposed to being sent as anonymous symbols)
+		# because they are part of the sequences which we interpret. The * ) ;
+		# symbols cause whitespace parsing to come back on. This gets turned
+		# off by some keywords.
+
+		";" => {
+			whitespaceOn = true;
+			token( *tokstart, tokstart, tokend );
+			if ( inlineBlockType == SemiTerminated )
+				fret;
+		};
+
+		[*)] => { 
+			whitespaceOn = true;
+			token( *tokstart, tokstart, tokend );
+		};
+
+		[,(] => { token( *tokstart, tokstart, tokend ); };
+
+		'{' => { 
+			token( IL_Symbol, tokstart, tokend );
+			curly_count += 1; 
+		};
+
+		'}' => { 
+			if ( --curly_count == 0 && inlineBlockType == CurlyDelimited ) {
+				/* Inline code block ends. */
+				token( '}' );
+				fret;
+			}
+			else {
+				/* Either a semi terminated inline block or only the closing
+				 * brace of some inner scope, not the block's closing brace. */
+				token( IL_Symbol, tokstart, tokend );
+			}
+		};
+
+		EOF => {
+			scan_error() << "unterminated code block" << endl;
+		};
+
+		# Send every other character as a symbol.
+		any => { token( IL_Symbol, tokstart, tokend ); };
+	*|;
+
+
+	# An inline block of code for languages other than Ruby.
 	inline_code := |*
 		# Inline expression keywords.
 		"fpc" => { token( KW_PChar ); };
@@ -596,6 +700,7 @@ void Scanner::endSection( )
 			if ( whitespaceOn ) 
 				token( IL_WhiteSpace, tokstart, tokend );
 		};
+
 		c_cpp_comment => { token( IL_Comment, tokstart, tokend ); };
 
 		"::" => { token( TK_NameSep, tokstart, tokend ); };
@@ -610,7 +715,7 @@ void Scanner::endSection( )
 			whitespaceOn = true;
 			token( *tokstart, tokstart, tokend );
 			if ( inlineBlockType == SemiTerminated )
-				fgoto parser_def;
+				fret;
 		};
 
 		[*)] => { 
@@ -629,7 +734,7 @@ void Scanner::endSection( )
 			if ( --curly_count == 0 && inlineBlockType == CurlyDelimited ) {
 				/* Inline code block ends. */
 				token( '}' );
-				fgoto parser_def;
+				fret;
 			}
 			else {
 				/* Either a semi terminated inline block or only the closing
@@ -674,7 +779,7 @@ void Scanner::endSection( )
 
 	*|;
 
-	re_literal := |*
+	ragel_re_literal := |*
 		# Escape sequences in regular expressions.
 		'\\0' => { token( RE_Char, '\0' ); };
 		'\\a' => { token( RE_Char, '\a' ); };
@@ -737,17 +842,26 @@ void Scanner::endSection( )
 		'getkey' => { 
 			token( KW_GetKey );
 			inlineBlockType = SemiTerminated;
-			fgoto inline_code;
+			if ( hostLangType == RubyCode )
+				fcall inline_code_ruby;
+			else
+				fcall inline_code;
 		};
 		'access' => { 
 			token( KW_Access );
 			inlineBlockType = SemiTerminated;
-			fgoto inline_code;
+			if ( hostLangType == RubyCode )
+				fcall inline_code_ruby;
+			else
+				fcall inline_code;
 		};
 		'variable' => { 
 			token( KW_Variable );
 			inlineBlockType = SemiTerminated;
-			fgoto inline_code;
+			if ( hostLangType == RubyCode )
+				fcall inline_code_ruby;
+			else
+				fcall inline_code;
 		};
 		'when' => { token( KW_When ); };
 		'eof' => { token( KW_Eof ); };
@@ -771,7 +885,7 @@ void Scanner::endSection( )
 		'[' => { token( RE_SqOpen ); fcall or_literal; };
 		'[^' => { token( RE_SqOpenNeg ); fcall or_literal; };
 
-		'/' => { token( RE_Slash ); fgoto re_literal; };
+		'/' => { token( RE_Slash ); fgoto ragel_re_literal; };
 
 		# Ignore.
 		pound_comment => { updateCol(); };
@@ -845,7 +959,7 @@ void Scanner::endSection( )
 		'}%%' => { 
 			updateCol();
 			endSection();
-			fgoto main;
+			fret;
 		};
 
 		[ \t\r]+ => { updateCol(); };
@@ -855,7 +969,7 @@ void Scanner::endSection( )
 			updateCol();
 			if ( singleLineSpec ) {
 				endSection();
-				fgoto main;
+				fret;
 			}
 		};
 
@@ -866,7 +980,10 @@ void Scanner::endSection( )
 				token( '{' );
 				curly_count = 1; 
 				inlineBlockType = CurlyDelimited;
-				fgoto inline_code;
+				if ( hostLangType == RubyCode )
+					fcall inline_code_ruby;
+				else
+					fcall inline_code;
 			}
 		};
 
@@ -875,6 +992,31 @@ void Scanner::endSection( )
 		};
 
 		any => { token( *tokstart ); } ;
+	*|;
+
+	# Outside code scanner. These tokens get passed through.
+	main_ruby := |*
+		ident => { pass( IMP_Word, tokstart, tokend ); };
+		number => { pass( IMP_UInt, tokstart, tokend ); };
+		ruby_comment => { pass(); };
+		( s_literal | d_literal | host_re_literal ) 
+			=> { pass( IMP_Literal, tokstart, tokend ); };
+
+		'%%{' => { 
+			updateCol();
+			singleLineSpec = false;
+			startSection();
+			fcall parser_def;
+		};
+		'%%' => { 
+			updateCol();
+			singleLineSpec = true;
+			startSection();
+			fcall parser_def;
+		};
+		whitespace+ => { pass(); };
+		EOF;
+		any => { pass( *tokstart, 0, 0 ); };
 	*|;
 
 	# Outside code scanner. These tokens get passed through.
@@ -889,13 +1031,13 @@ void Scanner::endSection( )
 			updateCol();
 			singleLineSpec = false;
 			startSection();
-			fgoto parser_def;
+			fcall parser_def;
 		};
 		'%%' => { 
 			updateCol();
 			singleLineSpec = true;
 			startSection();
-			fgoto parser_def;
+			fcall parser_def;
 		};
 		whitespace+ => { pass(); };
 		EOF;
@@ -911,7 +1053,12 @@ void Scanner::do_scan()
 	char *buf = new char[bufsize];
 	const char last_char = 0;
 	int cs, act, have = 0;
-	int top, stack[1];
+	int top;
+
+	/* The stack is two deep, one level for going into ragel defs from the main
+	 * machines which process outside code, and another for going into or literals
+	 * from either a ragel spec, or a regular expression. */
+	int stack[2];
 	int curly_count = 0;
 	bool execute = true;
 	bool singleLineSpec = false;
@@ -921,6 +1068,14 @@ void Scanner::do_scan()
 	init();
 	%% write init;
 
+	/* Set up the start state. FIXME: After 5.20 is released the nocs write
+	 * init option should be used, the main machine eliminated and this statement moved
+	 * above the write init. */
+	if ( hostLangType == RubyCode )
+		cs = rlscan_en_main_ruby;
+	else
+		cs = rlscan_en_main;
+	
 	while ( execute ) {
 		char *p = buf + have;
 		int space = bufsize - have;
@@ -985,8 +1140,4 @@ void Scanner::do_scan()
 	}
 
 	delete[] buf;
-}
-
-void scan( char *fileName, istream &input, ostream &output )
-{
 }
