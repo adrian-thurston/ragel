@@ -2,9 +2,6 @@
 # @LANG: ruby
 #
 
-neg = false
-val = 0
-
 %%{
     machine atoi3;
     action begin {
@@ -32,7 +29,6 @@ val = 0
 def run_machine( data )
 	p = 0;
 	pe = data.length
-	cs = 0
 	cs = 0
 	val = 0;
 	neg = false;
