@@ -32,6 +32,13 @@ The tokstart/tokend variable should be shortened to ts/te.
 ================
 END 6.0 Features
 
+Minimization should remove a condition when the character allows both
+the positive and negative sense of the condition. This happens in:
+test_every_10_chars = ( ( c when test_len ) c{0,9} )**;
+In this example there is non-determinsm that is killed by the priorities, but
+since conditions are expanded before priorities are tested, many transitions
+end up with test_len || !test_len.
+
 Should be possible to include scanner definitions in another scanner.
 
 Need a "write entry name;" feature.
