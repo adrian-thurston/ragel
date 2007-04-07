@@ -111,7 +111,7 @@ line = 1;
 	# priority bump on tne terminator of the comments brings us
 	# out of the extend* which matches everything.
 	ccComment = '//' . extend* $0 . '\n' @1;
-	cComment = '/\*' . extend* $0 . '\*/' @1;
+	cComment = '/!' . extend* $0 . '!/' @1;
 
 	# Match an integer. We don't bother clearing the buf or filling it.
 	# The float machine overlaps with int and it will do it.
@@ -153,17 +153,18 @@ line = 1;
 	main := clang_main & newline;
 }%%
 /* _____INPUT_____
-"999 0xaAFF99 99.99 *\n 'lksdj' //\n\"\n\nliteral\n\n\"\n0x00aba foobardd.ddsf 0x0.9\n"
+"999 0xaAFF99 99.99 /!\n!/ 'lksdj' //\n\"\n\nliteral\n\n\n\"0x00aba foobardd.ddsf 0x0.9\n"
+"wordwithnum00asdf\n000wordfollowsnum,makes new symbol\n\nfinishing early /! unfinished ...\n"
 _____INPUT_____ */
 /* _____OUTPUT_____
 int(1,3): 999
 hex(1,6): aAFF99
 float(1,5): 99.99
-symbol(1,1): *
 literal(2,5): lksdj
-literal(7,11): 
+literal(8,12): 
 
 literal
+
 
 
 hex(8,5): 00aba
@@ -174,5 +175,15 @@ hex(8,1): 0
 symbol(8,1): .
 int(8,1): 9
 ACCEPT
+ident(1,17): wordwithnum00asdf
+int(2,3): 000
+ident(2,14): wordfollowsnum
+symbol(2,1): ,
+ident(2,5): makes
+ident(2,3): new
+ident(2,6): symbol
+ident(4,9): finishing
+ident(4,5): early
+FAIL
 _____OUTPUT_____ */
 

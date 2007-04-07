@@ -126,6 +126,13 @@ function alStmtToJava1 AlStmt [action_lang_stmt]
 		Result
 end function
 
+function alTermToJava
+	replace [al_term]
+		'first_token_char
+	by
+		'data '[tokstart]
+end function
+
 function alExprExtendToJava AlExprExtend [repeat al_expr_extend]
 	deconstruct AlExprExtend
 		Op [al_expr_op] Term [al_term] Rest [repeat al_expr_extend]
@@ -133,7 +140,7 @@ function alExprExtendToJava AlExprExtend [repeat al_expr_extend]
 		_ [alExprExtendToJava Rest]
 	replace [repeat java_expr_extend]
 	by
-		Op Term JavaRest
+		Op Term [alTermToJava] JavaRest
 end function
 
 function alExprToJava AlExpr [al_expr]
@@ -142,7 +149,7 @@ function alExprToJava AlExpr [al_expr]
 	construct JavaExprExtend [repeat java_expr_extend]
 		_ [alExprExtendToJava AlExprExtend]
 	construct Result [opt java_expr]
-		ALTerm JavaExprExtend
+		ALTerm [alTermToJava] JavaExprExtend
 	replace [opt java_expr]
 	by
 		Result 
@@ -225,6 +232,15 @@ function alStmtToJava4c AlStmt [action_lang_stmt]
 		'System '. 'out '. 'print '( '_s ');
 end function
 
+function alStmtToJava4d AlStmt [action_lang_stmt]
+	deconstruct AlStmt
+		'print_token ';
+	replace [repeat java_lang_stmt]
+	by
+		'_s '= 'new 'String '( 'data ', 'tokstart ', 'tokend '- 'tokstart ') ';
+		'System '. 'out '. 'print '( '_s ');
+end function
+
 function alStmtToJava5 AlStmt [action_lang_stmt]
 	deconstruct AlStmt
 		'{ AlSubStmts [repeat action_lang_stmt] '}
@@ -255,6 +271,7 @@ function alToJava AlStmts [repeat action_lang_stmt]
 			[alStmtToJava4a FirstStmt]
 			[alStmtToJava4b FirstStmt]
 			[alStmtToJava4c FirstStmt]
+			[alStmtToJava4d FirstStmt]
 			[alStmtToJava5 FirstStmt]
 			[alStmtToJava6 FirstStmt]
 	construct JavaRest [repeat java_lang_stmt]

@@ -135,6 +135,13 @@ function alStmtToRuby1 AlStmt [action_lang_stmt]
 			[initDecl5 VarDecl]
 end function
 
+function alTermToRuby
+	replace [al_term]
+		'first_token_char
+	by
+		'data '[tokstart]
+end function
+
 function alExprExtendToRuby AlExprExtend [repeat al_expr_extend]
 	deconstruct AlExprExtend
 		Op [al_expr_op] Term [al_term] Rest [repeat al_expr_extend]
@@ -142,7 +149,7 @@ function alExprExtendToRuby AlExprExtend [repeat al_expr_extend]
 		_ [alExprExtendToRuby Rest]
 	replace [repeat ruby_expr_extend]
 	by
-		Op Term RubyRest
+		Op Term [alTermToRuby] RubyRest
 end function
 
 % Note: this doesn't go into the ( al_expr ) form of al_term.
@@ -152,7 +159,7 @@ function alExprToRuby AlExpr [al_expr]
 	construct RubyExprExtend [repeat ruby_expr_extend]
 		_ [alExprExtendToRuby AlExprExtend]
 	construct Result [opt ruby_expr]
-		ALTerm RubyExprExtend
+		ALTerm [alTermToRuby] RubyExprExtend
 	replace [opt ruby_expr]
 	by
 		Result 
@@ -241,6 +248,14 @@ function alStmtToRuby4c AlStmt [action_lang_stmt]
 		'print '( '_a '. 'pack '( '"c*" ')  ') ';
 end function
 
+function alStmtToRuby4d AlStmt [action_lang_stmt]
+	deconstruct AlStmt
+		'print_token ';
+	replace [repeat ruby_lang_stmt]
+	by
+		'print '( 'data '[tokstart..tokend-1] ') ';
+end function
+
 function alStmtToRuby5 AlStmt [action_lang_stmt]
 	deconstruct AlStmt
 		'{ AlSubStmts [repeat action_lang_stmt] '}
@@ -286,6 +301,7 @@ function alToRuby AlStmts [repeat action_lang_stmt]
 			[alStmtToRuby4a FirstStmt]
 			[alStmtToRuby4b FirstStmt]
 			[alStmtToRuby4c FirstStmt]
+			[alStmtToRuby4d FirstStmt]
 			[alStmtToRuby5 FirstStmt]
 			[alStmtToRuby6 FirstStmt]
 			[fixCharLit]

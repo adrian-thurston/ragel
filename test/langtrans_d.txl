@@ -95,6 +95,13 @@ function alStmtToD1 AlStmt [action_lang_stmt]
 		Result
 end function
 
+function alTermToD
+	replace [al_term]
+		'first_token_char
+	by
+		'tokstart '[0]
+end function
+
 function alExprExtendToD AlExprExtend [repeat al_expr_extend]
 	deconstruct AlExprExtend
 		Op [al_expr_op] Term [al_term] Rest [repeat al_expr_extend]
@@ -102,7 +109,7 @@ function alExprExtendToD AlExprExtend [repeat al_expr_extend]
 		_ [alExprExtendToD Rest]
 	replace [repeat d_expr_extend]
 	by
-		Op Term DRest
+		Op Term [alTermToD] DRest
 end function
 
 function alExprToD AlExpr [al_expr]
@@ -111,7 +118,7 @@ function alExprToD AlExpr [al_expr]
 	construct DExprExtend [repeat d_expr_extend]
 		_ [alExprExtendToD AlExprExtend]
 	construct Result [opt d_expr]
-		ALTerm DExprExtend
+		ALTerm [alTermToD] DExprExtend
 	replace [opt d_expr]
 	by
 		Result
@@ -194,6 +201,15 @@ function alStmtToD4c AlStmt [action_lang_stmt]
 		'writef '( '"%s" ', '_s ') ';
 end function
 
+function alStmtToD4d AlStmt [action_lang_stmt]
+	deconstruct AlStmt
+		'print_token ';
+	replace [repeat d_lang_stmt]
+	by
+		'_s '= tokstart '[0..(tokend-tokstart)] ';
+		'writef '( '"%s" ', '_s ') ';
+end function
+
 function alStmtToD5 AlStmt [action_lang_stmt]
 	deconstruct AlStmt
 		'{ AlSubStmts [repeat action_lang_stmt] '}
@@ -223,6 +239,7 @@ function alToD AlStmts [repeat action_lang_stmt]
 			[alStmtToD4a FirstStmt]
 			[alStmtToD4b FirstStmt]
 			[alStmtToD4c FirstStmt]
+			[alStmtToD4d FirstStmt]
 			[alStmtToD5 FirstStmt]
 			[alStmtToD6 FirstStmt]
 	construct DRest [repeat d_lang_stmt]
