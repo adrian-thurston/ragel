@@ -1,7 +1,9 @@
 /*
  * @LANG: c
- * @ALLOW_GENFLAGS: -T0 -T1 -F0 -F1 -P
+ * @ALLOW_GENFLAGS: -T0 -T1 -F0 -F1
  * @ALLOW_MINFLAGS: -n -m -l
+ *
+ * Test works with split code gen.
  */
 
 #include <string.h>

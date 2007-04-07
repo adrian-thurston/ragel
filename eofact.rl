@@ -1,6 +1,7 @@
 /*
  * @LANG: indep
- * @ALLOW_GENFLAGS: -T0 -T1 -F0 -F1 -G0 -G1 -G2 -P
+ *
+ * Test works with split code gen.
  */
 %%
 %%{
