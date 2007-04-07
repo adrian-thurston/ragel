@@ -15,9 +15,10 @@ end compounds
 
 keys
 	'int 'bool 'true 'false 'char 'ptr
-	'if 'else 'printi 'prints 
+	'if 'else 'printi 'prints 'printb 'print_token
 	'fc 'fpc 'fbreak 'fgoto 'fcall 'fret 'fhold 'fexec
 	'machine 'alphtype 'action
+	'first_token_char
 end keys
 
 define lang_indep
@@ -77,6 +78,7 @@ end define
 
 define al_print_stmt
 		[print_cmd] [al_expr] '; [NL]
+	|	'print_token '; [NL]
 end define
 
 define print_cmd
@@ -124,6 +126,7 @@ define al_term_base
 	|	'true
 	|	'false
 	|	'( [al_expr] ')
+	|	'first_token_char
 end define
 
 define al_sign

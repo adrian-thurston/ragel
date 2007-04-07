@@ -116,6 +116,13 @@ function alStmtToC1 AlStmt [action_lang_stmt]
 		Result
 end function
 
+function alTermToC
+	replace [al_term]
+		'first_token_char
+	by
+		'tokstart '[0]
+end function
+
 function alExprExtendToC AlExprExtend [repeat al_expr_extend]
 	deconstruct AlExprExtend
 		Op [al_expr_op] Term [al_term] Rest [repeat al_expr_extend]
@@ -123,7 +130,7 @@ function alExprExtendToC AlExprExtend [repeat al_expr_extend]
 		_ [alExprExtendToC Rest]
 	replace [repeat c_expr_extend]
 	by
-		Op Term RestC
+		Op Term [alTermToC] RestC
 end function
 
 function alExprToC AlExpr [al_expr]
@@ -132,7 +139,7 @@ function alExprToC AlExpr [al_expr]
 	construct CExprExtend [repeat c_expr_extend]
 		_ [alExprExtendToC AlExprExtend]
 	construct Result [opt c_expr]
-		ALTerm CExprExtend
+		ALTerm [alTermToC] CExprExtend
 	replace [opt c_expr]
 	by
 		Result [boolVals1] [boolVals2]
@@ -214,6 +221,14 @@ function alStmtToC4c AlStmt [action_lang_stmt]
 		'fwrite '( Id ', '1 ', 'pos ', 'stdout ');
 end function
 
+function alStmtToC4d AlStmt [action_lang_stmt]
+	deconstruct AlStmt
+		'print_token ';
+	replace [repeat c_lang_stmt]
+	by
+		'fwrite '( 'tokstart ', '1 ', 'tokend '- 'tokstart ', 'stdout ');
+end function
+
 function alStmtToC5 AlStmt [action_lang_stmt]
 	deconstruct AlStmt
 		'{ AlSubStmts [repeat action_lang_stmt] '}
@@ -243,6 +258,7 @@ function alToC AlStmts [repeat action_lang_stmt]
 			[alStmtToC4a FirstStmt]
 			[alStmtToC4b FirstStmt]
 			[alStmtToC4c FirstStmt]
+			[alStmtToC4d FirstStmt]
 			[alStmtToC5 FirstStmt]
 			[alStmtToC6 FirstStmt]
 	construct RestC [repeat c_lang_stmt]
