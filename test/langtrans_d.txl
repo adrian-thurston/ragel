@@ -174,7 +174,7 @@ function alStmtToD4a AlStmt [action_lang_stmt]
 		'printi Id [id] ';
 	replace [repeat d_lang_stmt]
 	by
-		'writef '( '"%d" ', Id ');
+		'writef '( '"%d" ', Id ') ';
 end function
 
 function alStmtToD4b AlStmt [action_lang_stmt]
@@ -182,7 +182,16 @@ function alStmtToD4b AlStmt [action_lang_stmt]
 		'prints String [stringlit] ';
 	replace [repeat d_lang_stmt]
 	by
-		'writef '( '"%s" ', String ');
+		'writef '( '"%s" ', String ') ';
+end function
+
+function alStmtToD4c AlStmt [action_lang_stmt]
+	deconstruct AlStmt
+		'printb Id [id] ';
+	replace [repeat d_lang_stmt]
+	by
+		'_s '= Id '[0..pos] ';
+		'writef '( '"%s" ', '_s ') ';
 end function
 
 function alStmtToD5 AlStmt [action_lang_stmt]
@@ -213,6 +222,7 @@ function alToD AlStmts [repeat action_lang_stmt]
 			[alStmtToD3 FirstStmt]
 			[alStmtToD4a FirstStmt]
 			[alStmtToD4b FirstStmt]
+			[alStmtToD4c FirstStmt]
 			[alStmtToD5 FirstStmt]
 			[alStmtToD6 FirstStmt]
 	construct DRest [repeat d_lang_stmt]

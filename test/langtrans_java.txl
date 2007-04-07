@@ -24,6 +24,7 @@ end define
 define java_type_decl
 		[al_type_decl]
 	|	'boolean
+	|	'String
 end define
 
 define java_expr_stmt
@@ -43,6 +44,7 @@ define java_term
 	|	[id] [repeat java_dot_id]
 	|	[id] [repeat java_dot_id] '( [java_args] ')
 	|	'new [java_type_decl] [union]
+	|	'new [java_type_decl] '( [java_args] ') 
 end define
 
 define java_dot_id
@@ -214,6 +216,15 @@ function alStmtToJava4b AlStmt [action_lang_stmt]
 		'System '. 'out '. 'print '( String ');
 end function
 
+function alStmtToJava4c AlStmt [action_lang_stmt]
+	deconstruct AlStmt
+		'printb Id [id] ';
+	replace [repeat java_lang_stmt]
+	by
+		'_s '= 'new 'String '( Id ', '0 ', 'pos ') ';
+		'System '. 'out '. 'print '( '_s ');
+end function
+
 function alStmtToJava5 AlStmt [action_lang_stmt]
 	deconstruct AlStmt
 		'{ AlSubStmts [repeat action_lang_stmt] '}
@@ -243,6 +254,7 @@ function alToJava AlStmts [repeat action_lang_stmt]
 			[alStmtToJava3 FirstStmt]
 			[alStmtToJava4a FirstStmt]
 			[alStmtToJava4b FirstStmt]
+			[alStmtToJava4c FirstStmt]
 			[alStmtToJava5 FirstStmt]
 			[alStmtToJava6 FirstStmt]
 	construct JavaRest [repeat java_lang_stmt]

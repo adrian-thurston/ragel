@@ -48,6 +48,8 @@ cat << EOF
 	{
 		char *p = data;
 		char *pe = data + len;
+		char _s[];
+
 		%% write exec;
 	}
 

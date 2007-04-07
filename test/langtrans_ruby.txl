@@ -116,10 +116,10 @@ end function
 
 function initDecl5 VarDecl [al_variable_decl]
 	deconstruct VarDecl
-		'int Id [id] Union [union] ';
+		Type [al_type_decl] Id [id] Union [union] ';
 	replace [repeat ruby_lang_stmt]
 	by
-		Id '= '[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] ';
+		Id '= '[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] ';
 end function
 
 
@@ -232,6 +232,15 @@ function alStmtToRuby4b AlStmt [action_lang_stmt]
 		'print '( String ') ';
 end function
 
+function alStmtToRuby4c AlStmt [action_lang_stmt]
+	deconstruct AlStmt
+		'printb Id [id] ';
+	replace [repeat ruby_lang_stmt]
+	by
+		'_a = Id '[0..pos-1] ';
+		'print '( '_a '. 'pack '( '"c*" ')  ') ';
+end function
+
 function alStmtToRuby5 AlStmt [action_lang_stmt]
 	deconstruct AlStmt
 		'{ AlSubStmts [repeat action_lang_stmt] '}
@@ -276,6 +285,7 @@ function alToRuby AlStmts [repeat action_lang_stmt]
 			[alStmtToRuby3 FirstStmt]
 			[alStmtToRuby4a FirstStmt]
 			[alStmtToRuby4b FirstStmt]
+			[alStmtToRuby4c FirstStmt]
 			[alStmtToRuby5 FirstStmt]
 			[alStmtToRuby6 FirstStmt]
 			[fixCharLit]
