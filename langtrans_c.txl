@@ -206,6 +206,14 @@ function alStmtToC4b AlStmt [action_lang_stmt]
 		'fputs '( String , 'stdout ');
 end function
 
+function alStmtToC4c AlStmt [action_lang_stmt]
+	deconstruct AlStmt
+		'printb Id [id] ';
+	replace [repeat c_lang_stmt]
+	by
+		'fwrite '( Id ', '1 ', 'pos ', 'stdout ');
+end function
+
 function alStmtToC5 AlStmt [action_lang_stmt]
 	deconstruct AlStmt
 		'{ AlSubStmts [repeat action_lang_stmt] '}
@@ -234,6 +242,7 @@ function alToC AlStmts [repeat action_lang_stmt]
 			[alStmtToC3 FirstStmt]
 			[alStmtToC4a FirstStmt]
 			[alStmtToC4b FirstStmt]
+			[alStmtToC4c FirstStmt]
 			[alStmtToC5 FirstStmt]
 			[alStmtToC6 FirstStmt]
 	construct RestC [repeat c_lang_stmt]

@@ -47,6 +47,7 @@ cat << EOF
 	{
 		int p = 0;
 		int pe = len;
+		String _s;
 		%% write exec;
 	}
 

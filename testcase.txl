@@ -80,7 +80,7 @@ define al_print_stmt
 end define
 
 define print_cmd
-		'printi | 'prints
+		'printi | 'prints | 'printb
 end define
 
 define al_variable_decl
@@ -112,9 +112,13 @@ define al_expr_op
 end define
 
 define al_term
+		[al_term_base] [opt union]
+end define
+
+define al_term_base
 		[id]
 	|	[opt al_sign] [number]
-	|	[stringlit] [opt union]
+	|	[stringlit] 
 	|	[charlit] 
 	|	'fc
 	|	'true

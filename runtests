@@ -215,7 +215,7 @@ for test_case; do
 			fi
 			echo "$allow_genflags" | grep -e $grep_gen_opt >/dev/null || continue
 
-			if [ $genflags == noflags ]; then
+			if [ "$genflags" == noflags ]; then
 				be_gen_opt=""
 			else
 				be_gen_opt=$gen_opt
