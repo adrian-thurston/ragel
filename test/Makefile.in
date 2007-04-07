@@ -24,7 +24,7 @@ test:
 
 clean:
 	rm -f *.c *.cpp *.m *.d *.java *.bin *.class *.exp \
-		*.out *_c.rl *_d.rl *_java.rl
+		*.out *_c.rl *_d.rl *_java.rl *_ruby.rl
 
 distclean: clean
 	rm -f Makefile
