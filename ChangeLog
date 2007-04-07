@@ -1,13 +1,13 @@
 Ragel 5.20 - Apr 7, 2007
 ========================
+ -The cs variable is now always initialized, unless the "nocs" option is given
+  to the write init command. If there is no main machine, cs is initialized to
+  the entry point defined by the last machine instantiation.
  -A number of fixes were made to the Ruby code generator.
  -The frontend now scans ruby comments and regular expressions.
  -A transformation for Ruby was added to the language-independent test suite.
   The Ruby code generator passes on all the language-independent tests.
  -A new Ruby test and two language-independent tests were added.
- -The cs variable is now always initialized, unless the "nocs" option is given
-  to the write init command. If there is no main machine, cs is initialized to
-  the entry point defined by the last machine instantiation.
  -Some portability fixes were made (Patches from Josef Goettgens and Aaron
   Campbell).
  -Fixed a make dependency bug which caused a problem for parallel building
