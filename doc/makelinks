@@ -53,7 +53,7 @@ ln -fs $PREFIX/quicksort.h sort/quicksort.h
 
 # String
 test -d string || mkdir string
-ln -fs $PREFIX/shrstr.h string/shrstr.h
+ln -fs $PREFIX/astring.h string/astring.h
 
 # Compare
 test -d compare || mkdir compare

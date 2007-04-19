@@ -1,5 +1,5 @@
 #include <iostream>
-#include "shrstr.h"
+#include "astring.h"
 
 using namespace std;
 
