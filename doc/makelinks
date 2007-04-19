@@ -51,6 +51,10 @@ ln -fs $PREFIX/mergesort.h sort/mergesort.h
 ln -fs $PREFIX/insertsort.h sort/insertsort.h
 ln -fs $PREFIX/quicksort.h sort/quicksort.h
 
+# String
+test -d string || mkdir string
+ln -fs $PREFIX/shrstr.h string/shrstr.h
+
 # Compare
 test -d compare || mkdir compare
 ln -fs $PREFIX/compare.h compare/compare.h
