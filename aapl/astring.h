@@ -19,8 +19,8 @@
  *  Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef _AAPL_SHRSTR_H
-#define _AAPL_SHRSTR_H
+#ifndef _AAPL_ASTRING_H
+#define _AAPL_ASTRING_H
 
 #include <new>
 #include <stdlib.h>
@@ -748,4 +748,4 @@ typedef StrTmpl<char> String;
 }
 #endif
 
-#endif /* _AAPL_SHRSTR_H */
+#endif /* _AAPL_ASTRING_H */
