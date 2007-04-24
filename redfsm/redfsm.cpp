@@ -21,6 +21,7 @@
 
 #include "redfsm.h"
 #include "avlmap.h"
+#include "mergesort.h"
 #include <iostream>
 #include <sstream>
 
@@ -166,9 +167,35 @@ void RedFsmAp::sortStateIdsByFinal()
 	}
 }
 
+struct CmpStateById
+{
+	static int compare( RedStateAp *st1, RedStateAp *st2 )
+	{
+		if ( st1->id < st2->id )
+			return -1;
+		else if ( st1->id > st2->id )
+			return 1;
+		else
+			return 0;
+	}
+};
+
 void RedFsmAp::sortByStateId()
 {
-	/* FIXME: Implement. */
+	/* Make the array. */
+	int pos = 0;
+	RedStateAp **ptrList = new RedStateAp*[stateList.length()];
+	for ( RedStateList::Iter st = stateList; st.lte(); st++, pos++ )
+		ptrList[pos] = st;
+	
+	MergeSort<RedStateAp*, CmpStateById> mergeSort;
+	mergeSort.sort( ptrList, stateList.length() );
+
+	stateList.abandon();
+	for ( int st = 0; st < pos; st++ )
+		stateList.append( ptrList[st] );
+
+	delete[] ptrList;
 }
 
 /* Find the final state with the lowest id. */
