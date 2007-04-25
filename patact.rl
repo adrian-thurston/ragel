@@ -29,6 +29,10 @@ int val;
 		'!';# => { prints "immdiate\n"; fgoto exec_test; };
 	*|;
 
+	semi := |* 
+		';' => { prints "in semi\n"; fgoto main; };
+	*|;
+
 	main := |* 
 		[a-z]+ => { prints "word (w/lbh)\n"; fhold; fgoto other; };
 		[a-z]+ ' foil' => { prints "word (c/lbh)\n"; };
@@ -36,6 +40,7 @@ int val;
 		'22' => { prints "num (w/switch)\n"; };
 		[0-9]+ => { prints "num (w/switch)\n"; fhold; fgoto other;};
 		[0-9]+ ' foil' => {prints "num (c/switch)\n"; };
+		';' => { prints "going to semi\n"; fhold; fgoto semi;};
 		'!' => { prints "immdiate\n"; fgoto exec_test; };
 	*|;
 }%%
@@ -46,6 +51,7 @@ int val;
 "!abcd foix\n"
 "!abcd\nanother\n"
 "!123 foix\n"
+";"
 _____INPUT_____ */
 /* _____OUTPUT_____
 word (w/lbh)
@@ -86,6 +92,9 @@ num
 space
 word
 space
+ACCEPT
+going to semi
+in semi
 ACCEPT
 _____OUTPUT_____ */
 
