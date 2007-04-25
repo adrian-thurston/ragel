@@ -113,10 +113,12 @@ Ragel 5.17 - Jan 28, 2007
  
 Ragel 5.16 - Nov 20, 2006
 =========================
- -Bug fix: the fhold and fexec directives did not function correctly in
+ -Policy change: the fhold and fexec directives did not function correctly in
   scanner pattern actions. In this context manipulations of p may be lost or
-  made invalid. To fix this, fexec and fhold now manipulate tokend, which is
-  now always used to update p when the action terminates.
+  made invalid. In the previous version of Ragel they were banned because of
+  this. Instead of banning these directives they have been fixed. The fexec
+  and fhold directives now manipulate tokend, which is now always used to
+  update p when the action terminates.
 
 Ragel 5.15 - Oct 31, 2006
 =========================
