@@ -397,7 +397,6 @@ struct RedFsmAp
 {
 	RedFsmAp();
 
-	bool wantComplete;
 	bool forcedErrorState;
 
 	int nextActionId;

@@ -42,7 +42,6 @@ string Action::nameOrLoc()
 
 RedFsmAp::RedFsmAp()
 :
-	wantComplete(false),
 	forcedErrorState(false),
 	nextActionId(0),
 	nextTransId(0),
