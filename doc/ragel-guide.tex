@@ -125,7 +125,7 @@ embedded into the transitions of a regular expression's corresponding state
 machine, eliminating the need to switch from the regular expression engine and
 user code execution environment and back again. As a result, expressions can be
 maximally continuous.  One is free to specify an entire parser using a single
-regular experssion.  The single-expression model affords concise and elegant
+regular expression.  The single-expression model affords concise and elegant
 descriptions of languages and the generation of very simple, fast and robust
 code.  Ragel compiles finite state machines from a high level regular language
 notation to executable C, C++, Objective-C or D. 
@@ -203,16 +203,16 @@ this way, a Ragel machine can be used to simply recognize a regular language
 like a regular expression library. By embedding code into the regular language,
 a Ragel machine can also be used to parse input.
 
-The Ragel input language has many operators for constructing and manipulating
+The Ragel language has many operators for constructing and manipulating
 machines. Machines are built up from smaller machines, to bigger ones, to the
 final machine representing the language that needs to be recognized or parsed.
 
-The core state machine construction operators are those found in most ``Theory
-of Computation'' textbooks. They date back to the 1950s and are widely studied.
+The core state machine construction operators are those found in most theory
+of computation textbooks. They date back to the 1950s and are widely studied.
 They are based on set operations and permit one to think of languages as a set
-of strings. They are Union, Intersection, Subtraction, Concatenation and Kleene
+of strings. They are Union, Intersection, Difference, Concatenation and Kleene
 Star. Put together, these operators make up what most people know as regular
-expressions. Ragel also provides a scanner construction construction operator 
+expressions. Ragel also provides a scanner construction operator 
 and provides operators for explicitly constructing machines
 using a state chart method. In the state chart method, one joins machines
 together without any implied transitions and then explicitly specifies where
@@ -225,7 +225,7 @@ first and primary use is to embed code into transitions and states, allowing
 the programmer to specify the actions of the state machine.
 
 Ragel attempts to make the action embedding facility as intuitive as possible.
-To do that, a number issues need to be addresses.  For example, when making a
+To do so, a number issues need to be addressed.  For example, when making a
 nondeterministic specification into a DFA using machines that have embedded
 actions, new transitions are often made that have the combined actions of
 several source transitions. Ragel ensures that multiple actions associated with
@@ -887,15 +887,18 @@ in the same precedence group are evaluated from left to right.
 \label{machconst}
 
 When using Ragel it is helpful to have a sense of how it constructs machines.
-Sometimes this the determinization process can cause results that appear unusual to someone
-unfamiliar with it. Ragel does not make use of any nondeterministic
-intermediate state machines. All operators accept and return deterministic
-machines. However, to ease the discussion, the operations are defined in terms
-epsilon transitions.
+The determinization process can produce results which seem unusual to someone
+not familiar with the NFA to DFA conversion algorithm. In this section we
+describe Ragel's state machine operators. Though the operators are defined
+using epsilon transitions, it should be noted that this is for discussion only.
+The epsilon transitions described in this section do not persist, but are
+immediately removed by the determinization process which is executed in every
+operation. Ragel does not make use of any nondeterministic intermediate state
+machines. 
 
-To draw an epsilon transition between two states \verb|x| and \verb|y|, is to
+To create an epsilon transition between two states \verb|x| and \verb|y| is to
 copy all of the properties of \verb|y| into \verb|x|. This involves drawing in
-all of \verb|y|'s to-state actions, EOF actions, etc., as well as its
+all of \verb|y|'s to-state actions, EOF actions, etc., in addition to its
 transitions. If \verb|x| and \verb|y| both have a transition out on the same
 character, then the transitions must be combined.  During transition
 combination a new transition is made which goes to a new state that is the
@@ -1111,7 +1114,7 @@ concatenation of a machine that repeats some pattern with a machine that gives
 a termination string, but the repetition machine does not exclude the
 termination string. The example in Section \ref{strong_difference}
 guards against this. Another example is the expression \verb|("'" any* "'")|.
-When exectued the thread of control will
+When executed the thread of control will
 never leave the \verb|any*| machine.  This is a problem especially if actions
 are embedded to processes the characters of the \verb|any*| component.
 
@@ -1151,7 +1154,7 @@ concatenation operator takes effect only when there are no other operators betwe
 two machines. Beware of writing machines such as \verb|(any -1)| when what is
 desired is a concatenation of \verb|any| and -1. Instead write 
 \verb|(any .  -1)| or \verb|(any (-1))|. If in doubt of the meaning of your program do not
-rely on the default concatenation operator, always use the \verb|.| symbol.
+rely on the default concatenation operator; always use the \verb|.| symbol.
 
 
 \subsection{Kleene Star}
@@ -1879,7 +1882,7 @@ commands should therefore be used with caution.
 
 Along with the flexibility of arbitrary action embeddings comes a need to
 control nondeterminism in regular expressions. If a regular expression is
-ambiguous, then sup-components of a parser other than the intended parts may become
+ambiguous, then sub-components of a parser other than the intended parts may become
 active. This means that actions which are irrelevant to the
 current subset of the parser may be executed, causing problems for the
 programmer.
@@ -2010,9 +2013,10 @@ comment = '/*' ( ( any @comm )* - ( any* '*/' any* ) ) '*/';
 \end{center}
 \graphspace
 
-
-We have phrased the problem of controlling non-determinism in terms of
-excluding strings common to two expressions which interact when combined.
+Note that Ragel's strong subtraction operator \verb|--| can also be used here.
+In doing this subtraction we have phrased the problem of controlling non-determinism in
+terms of excluding strings common to two expressions which interact when
+combined.
 We can also phrase the problem in terms of the transitions of the state
 machines that implement these expressions. During the concatenation of
 \verb|any*| and \verb|'*/'| we will be making transitions that are composed of
@@ -2557,7 +2561,7 @@ wasteful use of processor cycles. The most efficient way to collect data from
 the parser is to set pointers into the input then later reference them.  This
 poses a problem for uses of Ragel where the input data arrives in blocks, such
 as over a socket or from a file. If a pointer is set in one buffer block but
-must be used while parsing a following buffer block, some extrac consideration
+must be used while parsing a following buffer block, some extra consideration
 to correctness must be made.
 
 The scanner constructions exhibit this problem, requiring the maintenance
@@ -2751,13 +2755,12 @@ preferred output format.
 \section{Parser Modularization}
 
 It is possible to use Ragel's machine construction and action embedding
-operators to specify an entire parser using a single regular expression. An
-example is given in Section \ref{examples}. In many cases this is the desired
-way to specify a parser in Ragel. However, in some scenarios, the language to
-parse may be so large that it is difficult to think about it as a single
-regular expression. It may shift between distinct parsing strategies,
-in which case modularization into several coherent blocks of the language may
-be appropriate.
+operators to specify an entire parser using a single regular expression. In
+many cases this is the desired way to specify a parser in Ragel. However, in
+some scenarios, the language to parse may be so large that it is difficult to
+think about it as a single regular expression. It may shift between distinct
+parsing strategies, in which case modularization into several coherent blocks
+of the language may be appropriate.
 
 It may also be the case that patterns which compile to a large number of states
 must be used in a number of different contexts and referencing them in each
@@ -3068,7 +3071,7 @@ An example scanner processing loop is given in Figure \ref{scanner-loop}.
 
 In addition to supporting the construction of state machines using regular
 languages, Ragel provides a way to manually specify state machines using
-state charts.  The comma operator wombines machines together without any
+state charts.  The comma operator combines machines together without any
 implied transitions. The user can then manually link machines by specifying
 epsilon transitions with the \verb|->| operator.  Epsilon transitions are drawn
 between the final states of a machine and entry points defined by labels.  This
