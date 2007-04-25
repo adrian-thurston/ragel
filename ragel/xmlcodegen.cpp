@@ -1,5 +1,5 @@
 /*
- *  Copyright 2005, 2006 Adrian Thurston <thurston@cs.queensu.ca>
+ *  Copyright 2005-2007 Adrian Thurston <thurston@cs.queensu.ca>
  */
 
 /*  This file is part of Ragel.
@@ -206,26 +206,20 @@ void XMLCodeGen::writeText( InlineItem *item )
 		out << "</text>";
 }
 
+bool isLmItem( InlineItem *context )
+{
+	return context != 0 && (
+		context->type == InlineItem::LmOnLast ||
+		context->type == InlineItem::LmOnNext ||
+		context->type == InlineItem::LmOnLagBehind ||
+		context->type == InlineItem::LmSwitch );
+}
+
 void XMLCodeGen::writeCtrlFlow( InlineItem *item, InlineItem *context )
 {
-	if ( context != 0 ) {
+	if ( isLmItem( context ) ) {
 		out << "<sub_action>";
-
-		switch ( context->type ) {
-		case InlineItem::LmOnLast:
-			out << "<exec><get_tokend></get_tokend></exec>";
-			break;
-		case InlineItem::LmOnNext:
-			out << "<exec><get_tokend></get_tokend></exec>";
-			break;
-		case InlineItem::LmOnLagBehind:
-			out << "<exec><get_tokend></get_tokend></exec>";
-			break;
-		case InlineItem::LmSwitch:
-			out << "<exec><get_tokend></get_tokend></exec>";
-			break;
-		default: break;
-		}
+		out << "<exec><get_tokend></get_tokend></exec>";
 	}
 
 	switch ( item->type ) {
@@ -256,16 +250,13 @@ void XMLCodeGen::writeCtrlFlow( InlineItem *item, InlineItem *context )
 	default: break;
 	}
 
-	if ( context != 0 )
+	if ( isLmItem( context ) )
 		out << "</sub_action>";
 }
 
 void XMLCodeGen::writePtrMod( InlineItem *item, InlineItem *context )
 {
-	if ( context != 0 && ( context->type == InlineItem::LmOnNext ||
-			context->type == InlineItem::LmOnLagBehind ||
-			context->type == InlineItem::LmSwitch ) )
-	{
+	if ( isLmItem( context ) ) {
 		switch ( item->type ) {
 		case InlineItem::Hold:
 			out << "<holdte></holdte>";
