@@ -299,30 +299,49 @@ nonterm expression
 };
 
 expression: 
-	expression '|' term final {
+	expression '|' term_short final {
 		$$->expression = new Expression( $1->expression, 
 				$3->term, Expression::OrType );
 	};
 expression: 
-	expression '&' term final {
+	expression '&' term_short final {
 		$$->expression = new Expression( $1->expression, 
 				$3->term, Expression::IntersectType );
 	};
-# This priority specification overrides the innermost parsing strategy which
-# results ordered choice interpretation of the grammar.
 expression: 
-	expression pri(1) '-' term final {
+	expression '-' term_short final {
 		$$->expression = new Expression( $1->expression, 
 				$3->term, Expression::SubtractType );
 	};
 expression: 
-	expression TK_DashDash term final {
+	expression TK_DashDash term_short final {
 		$$->expression = new Expression( $1->expression, 
 				$3->term, Expression::StrongSubtractType );
 	};
 expression: 
-	term final {
+	term_short final {
 		$$->expression = new Expression( $1->term );
+	};
+
+# This is where we resolve the ambiguity involving -. By default ragel tries to
+# do a longest match, which gives precedence to a concatenation because it is
+# innermost. What we need is to force term into a shortest match so that when -
+# is seen it doesn't try to extend term with a concatenation, but ends term and
+# goes for a subtraction.
+#
+# The shortest tag overrides the default longest match action ordering strategy
+# and instead forces a shortest match stragegy. The wrap the term production in
+# a new nonterminal 'term_short' to guarantee the shortest match behaviour.
+
+shortest term_short;
+nonterm term_short
+{
+	Term *term;
+};
+
+term_short:
+	term final {
+		$$->term = $1->term;
 	};
 
 nonterm term
