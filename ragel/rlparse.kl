@@ -436,8 +436,14 @@ factor_with_aug:
 	};
 factor_with_aug:
 	factor_with_aug aug_type_cond action_embed final {
-		$1->factorWithAug->conditions.append( ParserAction( $2->loc, 
-				$2->augType, 0, $3->action ) );
+		$1->factorWithAug->conditions.append( ConditionTest( $2->loc, 
+				$2->augType, $3->action, true ) );
+		$$->factorWithAug = $1->factorWithAug;
+	};
+factor_with_aug:
+	factor_with_aug aug_type_cond '!' action_embed final {
+		$1->factorWithAug->conditions.append( ConditionTest( $2->loc, 
+				$2->augType, $4->action, false ) );
 		$$->factorWithAug = $1->factorWithAug;
 	};
 factor_with_aug:
@@ -514,6 +520,8 @@ aug_type_cond: '$' KW_When final { $$->loc = $1->loc; $$->augType = at_all; };
 aug_type_cond: TK_LeavingCond final { $$->loc = $1->loc; $$->augType = at_leave; };
 aug_type_cond: '%' KW_When final { $$->loc = $1->loc; $$->augType = at_leave; };
 aug_type_cond: KW_When final { $$->loc = $1->loc; $$->augType = at_all; };
+aug_type_cond: KW_InWhen final { $$->loc = $1->loc; $$->augType = at_start; };
+aug_type_cond: KW_OutWhen final { $$->loc = $1->loc; $$->augType = at_leave; };
 
 #
 # To state actions.

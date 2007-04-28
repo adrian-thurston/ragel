@@ -756,7 +756,7 @@ int FsmAp::compareStateData( const StateAp *state1, const StateAp *state2 )
 		return cmpRes;
 
 	/* Test out condition sets. */
-	cmpRes = CmpActionSet::compare( state1->outCondSet, 
+	cmpRes = CmpOutCondSet::compare( state1->outCondSet, 
 			state2->outCondSet );
 	if ( cmpRes != 0 )
 		return cmpRes;
@@ -820,21 +820,21 @@ CondSpace *FsmAp::addCondSpace( const CondSet &condSet )
 	return condSpace;
 }
 
-void FsmAp::startFsmCondition( Action *condAction )
+void FsmAp::startFsmCondition( Action *condAction, bool sense )
 {
 	/* Make sure the start state has no other entry points. */
 	isolateStartState();
-	embedCondition( startState, condAction );
+	embedCondition( startState, condAction, sense );
 }
 
-void FsmAp::allTransCondition( Action *condAction )
+void FsmAp::allTransCondition( Action *condAction, bool sense )
 {
 	for ( StateList::Iter state = stateList; state.lte(); state++ )
-		embedCondition( state, condAction );
+		embedCondition( state, condAction, sense );
 }
 
-void FsmAp::leaveFsmCondition( Action *condAction )
+void FsmAp::leaveFsmCondition( Action *condAction, bool sense )
 {
 	for ( StateSet::Iter state = finStateSet; state.lte(); state++ )
-		(*state)->outCondSet.insert( condAction );
+		(*state)->outCondSet.insert( OutCond( condAction, sense ) );
 }

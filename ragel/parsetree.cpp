@@ -1119,14 +1119,14 @@ void FactorWithAug::assignConditions( FsmAp *graph )
 		switch ( conditions[i].type ) {
 		/* Transition actions. */
 		case at_start:
-			graph->startFsmCondition( conditions[i].action );
+			graph->startFsmCondition( conditions[i].action, conditions[i].sense );
 			afterOpMinimize( graph );
 			break;
 		case at_all:
-			graph->allTransCondition( conditions[i].action );
+			graph->allTransCondition( conditions[i].action, conditions[i].sense );
 			break;
 		case at_leave:
-			graph->leaveFsmCondition( conditions[i].action );
+			graph->leaveFsmCondition( conditions[i].action, conditions[i].sense );
 			break;
 		default:
 			break;

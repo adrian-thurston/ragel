@@ -1182,8 +1182,8 @@ void FsmAp::mergeStatesLeaving( MergeData &md, StateAp *destState, StateAp *srcS
 		mergeStates( md, ssMutable, srcState );
 		transferOutData( ssMutable, destState );
 
-		for ( ActionSet::Iter cond = destState->outCondSet; cond.lte(); cond++ )
-			embedCondition( md, ssMutable, *cond );
+		for ( OutCondSet::Iter cond = destState->outCondSet; cond.lte(); cond++ )
+			embedCondition( md, ssMutable, cond->action, cond->sense );
 
 		mergeStates( md, destState, ssMutable );
 	}
@@ -1237,7 +1237,7 @@ void FsmAp::mergeStates( MergeData &md, StateAp *destState, StateAp *srcState )
 		destState->fromStateActionTable.setActions( 
 				ActionTable( srcState->fromStateActionTable ) );
 		destState->outActionTable.setActions( ActionTable( srcState->outActionTable ) );
-		destState->outCondSet.insert( ActionSet( srcState->outCondSet ) );
+		destState->outCondSet.insert( OutCondSet( srcState->outCondSet ) );
 		destState->errActionTable.setActions( ErrActionTable( srcState->errActionTable ) );
 		destState->eofActionTable.setActions( ActionTable( srcState->eofActionTable ) );
 	}
@@ -1283,7 +1283,7 @@ void FsmAp::fillInStates( MergeData &md )
 }
 
 void FsmAp::findEmbedExpansions( ExpansionList &expansionList, 
-		StateAp *destState, Action *condAction )
+		StateAp *destState, Action *condAction, bool sense )
 {
 	StateCondList destList;
 	PairIter<TransAp, StateCond> transCond( destState->outList.head,
@@ -1309,7 +1309,7 @@ void FsmAp::findEmbedExpansions( ExpansionList &expansionList,
 					expansion->fromCondSpace = 0;
 					expansion->fromVals = 0;
 					expansion->toCondSpace = newStateCond->condSpace;
-					expansion->toValsList.append( 1 );
+					expansion->toValsList.append( sense?1:0 );
 					#ifdef LOG_CONDS
 					logNewExpansion( expansion );
 					#endif
@@ -1347,7 +1347,7 @@ void FsmAp::findEmbedExpansions( ExpansionList &expansionList,
 					long targVals = basicVals;
 					Action **cim = mergedCS.find( condAction );
 					long bitPos = (cim - mergedCS.data);
-					targVals |= 1 << bitPos;
+					targVals |= (sense?1:0) << bitPos;
 					
 					LongVect expandToVals( targVals );
 					findCondExpInTrans( expansionList, destState, 
@@ -1369,7 +1369,7 @@ void FsmAp::findEmbedExpansions( ExpansionList &expansionList,
 	destState->stateCondList.transfer( destList );
 }
 
-void FsmAp::embedCondition( StateAp *state, Action *condAction )
+void FsmAp::embedCondition( StateAp *state, Action *condAction, bool sense )
 {
 	MergeData md;
 	ExpansionList expList;
@@ -1378,7 +1378,7 @@ void FsmAp::embedCondition( StateAp *state, Action *condAction )
 	setMisfitAccounting( true );
 
 	/* Worker. */
-	embedCondition( md, state, condAction );
+	embedCondition( md, state, condAction, sense );
 
 	/* Fill in any states that were newed up as combinations of others. */
 	fillInStates( md );
@@ -1388,11 +1388,11 @@ void FsmAp::embedCondition( StateAp *state, Action *condAction )
 	setMisfitAccounting( false );
 }
 
-void FsmAp::embedCondition( MergeData &md, StateAp *state, Action *condAction )
+void FsmAp::embedCondition( MergeData &md, StateAp *state, Action *condAction, bool sense )
 {
 	ExpansionList expList;
 
-	findEmbedExpansions( expList, state, condAction );
+	findEmbedExpansions( expList, state, condAction, sense );
 	doExpand( md, state, expList );
 	doRemove( md, state, expList );
 	expList.empty();

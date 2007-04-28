@@ -536,6 +536,37 @@ typedef BstSet<int> EntryIdSet;
 /* Set of longest match items that may be active in a given state. */
 typedef BstSet<LongestMatchPart*> LmItemSet;
 
+/* A Conditions which is to be 
+ * transfered on pending out transitions. */
+struct OutCond
+{
+	OutCond( Action *action, bool sense )
+		: action(action), sense(sense) {}
+
+	Action *action;
+	bool sense;
+};
+
+struct CmpOutCond
+{
+	static int compare( const OutCond &outCond1, const OutCond &outCond2 )
+	{
+		if ( outCond1.action < outCond2.action )
+			return -1;
+		else if ( outCond1.action > outCond2.action )
+			return 1;
+		else if ( outCond1.sense < outCond2.sense )
+			return -1;
+		else if ( outCond1.sense > outCond2.sense )
+			return 1;
+		return 0;
+	}
+};
+
+/* Set of conditions to be transfered to on pending out transitions. */
+typedef SBstSet< OutCond, CmpOutCond > OutCondSet;
+typedef CmpSTable< OutCond, CmpOutCond > CmpOutCondSet;
+
 /* Conditions. */
 typedef BstSet< Action*, CmpCondId > CondSet;
 typedef CmpTable< Action*, CmpCondId > CmpCondSet;
@@ -710,7 +741,7 @@ struct StateAp
 	ActionTable outActionTable;
 
 	/* Conditions to add to any future transiions that leave via this sttate. */
-	ActionSet outCondSet;
+	OutCondSet outCondSet;
 
 	/* Error action tables. */
 	ErrActionTable errActionTable;
@@ -1107,13 +1138,13 @@ struct FsmAp
 	CondSpace *addCondSpace( const CondSet &condSet );
 
 	void findEmbedExpansions( ExpansionList &expansionList, 
-		StateAp *destState, Action *condAction );
-	void embedCondition( MergeData &md, StateAp *state, Action *condAction );
-	void embedCondition( StateAp *state, Action *condAction );
+		StateAp *destState, Action *condAction, bool sense );
+	void embedCondition( MergeData &md, StateAp *state, Action *condAction, bool sense );
+	void embedCondition( StateAp *state, Action *condAction, bool sense );
 
-	void startFsmCondition( Action *condAction );
-	void allTransCondition( Action *condAction );
-	void leaveFsmCondition( Action *condAction );
+	void startFsmCondition( Action *condAction, bool sense );
+	void allTransCondition( Action *condAction, bool sense );
+	void leaveFsmCondition( Action *condAction, bool sense );
 
 	/* Set error actions to execute. */
 	void startErrorAction( int ordering, Action *action, int transferPoint );

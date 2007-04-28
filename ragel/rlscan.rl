@@ -864,6 +864,8 @@ void Scanner::endSection( )
 				fcall inline_code;
 		};
 		'when' => { token( KW_When ); };
+		'inwhen' => { token( KW_InWhen ); };
+		'outwhen' => { token( KW_OutWhen ); };
 		'eof' => { token( KW_Eof ); };
 		'err' => { token( KW_Err ); };
 		'lerr' => { token( KW_Lerr ); };

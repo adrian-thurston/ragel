@@ -181,6 +181,17 @@ struct ParserAction
 	Action *action;
 };
 
+struct ConditionTest
+{
+	ConditionTest( const InputLoc &loc, AugType type, Action *action, bool sense ) : 
+		loc(loc), type(type), action(action), sense(sense) { }
+
+	InputLoc loc;
+	AugType type;
+	Action *action;
+	bool sense;
+};
+
 struct Token
 {
 	char *data;
@@ -454,7 +465,7 @@ struct FactorWithAug
 	PriorDesc *priorDescs;
 	Vector<Label> labels;
 	Vector<EpsilonLink> epsilonLinks;
-	Vector<ParserAction> conditions;
+	Vector<ConditionTest> conditions;
 
 	FactorWithRep *factorWithRep;
 };

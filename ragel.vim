@@ -99,7 +99,7 @@ syntax match rlOtherOps "<:" contained
 " FIXME: Enable the range keyword post 5.17.
 " syntax keyword rlKeywords machine action context include range contained
 syntax keyword rlKeywords machine action context include import export contained
-syntax keyword rlExprKeywords when err lerr eof from to contained
+syntax keyword rlExprKeywords when inwhen outwhen err lerr eof from to contained
 
 " Case Labels
 syntax keyword caseLabelKeyword case contained
