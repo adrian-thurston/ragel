@@ -1585,16 +1585,18 @@ main := ( lower* >A $B %C ) . '\n' @N;
 
 The state embedding operators allow one to embed actions into states. Like the
 transition embedding operators, there are several different classes of states
-that the operators access. The meanings of the symbols are partially related to
-the meanings of the symbols used by the transition embedding operators. 
+that the operators access. The meanings of the symbols are similar to the
+meanings of the symbols used by the transition embedding operators. The design
+of the state selections was driven by a need to cover the states of an
+expression with a single error action.
 
-The state embedding operators are different from the transition embedding
-operators in that there are various kinds of events that embedded actions can
-be associated with, requiring them to be distinguished by these different types
-of events. The state embedding operators have two components.  The first, which
-is the first one or two characters, specifies the class of states that the
-action will be embedded into. The second component specifies the type of event
-the action will be executed on. 
+Unlike the transition embedding operators, the state embedding operators are
+also distinguished by the different kinds of events that embedded actions can
+be associated with. Therefore the state embedding operators have two
+components.  The first, which is the first one or two characters, specifies the
+class of states that the action will be embedded into. The second component
+specifies the type of event the action will be executed on. The symbols of the
+second component also have equivalent kewords. 
 
 \def\fakeitem{\hspace*{12pt}$\bullet$\hspace*{10pt}}
 
@@ -1612,11 +1614,11 @@ the action will be executed on.
 \columnbreak
 
 \noindent The different kinds of embeddings are:\\
-\fakeitem \verb|~| -- to-state actions\\
-\fakeitem \verb|*| -- from-state actions\\
-\fakeitem \verb|/| -- EOF actions\\
-\fakeitem \verb|!| -- error actions\\
-\fakeitem \verb|^| -- local error actions\\
+\fakeitem \verb|~| -- to-state actions (\verb|to|)\\
+\fakeitem \verb|*| -- from-state actions (\verb|from|)\\
+\fakeitem \verb|/| -- EOF actions (\verb|eof|)\\
+\fakeitem \verb|!| -- error actions (\verb|err|)\\
+\fakeitem \verb|^| -- local error actions (\verb|lerr|)\\
 \end{multicols}
 \end{minipage}
 %\label{state-act-embed}
@@ -1638,8 +1640,13 @@ the action will be executed on.
 
 \subsubsection{To-State Actions}
 
-\verb| >~  $~  %~  <~  @~  <>~ |
-\verbspace
+\noindent\verb|>~action     <~action     $~action    %~action      @~action      <>~action|\\
+\\
+\noindent Verbose forms:\\
+\noindent\verb|>to(act)     <to(act)     $to(na)     %to(name)     @to(name)     <>to(name)|\\
+\noindent\verb|>to{...}     <to{...}     $to{...}    %to{...}      @to{...}      <>to{...}|
+\\
+
 
 To-state actions are executed whenever the state machine moves into the
 specified state, either by a natural movement over a transition or by an
@@ -1658,8 +1665,12 @@ of to-state actions.
 
 \subsubsection{From-State Actions}
 
-\verb| >*  $*  %*  <*  @*  <>* |
-\verbspace
+\noindent\verb|>*action     <*action     $*action    %*action      @*action      <>*action|\\
+\\
+\noindent Verbose forms:\\
+\noindent\verb|>from(act)   <from(act)   $from(na)   %from(name)   @from(name)   <>from(name)|\\
+\noindent\verb|>from{...}   <from{...}   $from{...}  %from{...}    @from{...}    <>from{...}|
+\\
 
 From-state actions are executed whenever the state machine takes a transition from a
 state, either to itself or to some other state. These actions are executed
@@ -1671,8 +1682,13 @@ embeddings, from-state embeddings stay with the state.
 
 \subsection{EOF Actions}
 
-\verb| >/  $/  %/  </  @/  <>/ | 
-\verbspace
+\noindent\verb|>/action     </action     $/action    %/action      @/action      <>/action|\\
+\\
+\noindent Verbose forms:\\
+\noindent\verb|>eof(act)    <eof(act)    $eof(na)    %eof(name)    @eof(name)    <>eof(name)|\\
+\noindent\verb|>eof{...}    <eof{...}    $eof{...}   %eof{...}     @eof{...}     <>eof{...}|
+\\
+
 
 The EOF action embedding operators enable the user to embed EOF actions into
 different classes of
@@ -1682,10 +1698,23 @@ actions associated with it.
 
 \subsection{Handling Errors}
 
+In many applications it is useful to be able to react to parsing errors.  The
+user may wish to print an error message which depends on the context.  It
+may also be desirable to consume input in an attempt to return the input stream
+to some known state and resume parsing. To support error handling and recovery,
+Ragel provides error action embedding operators. There are two kinds of error
+actions, regular (global) error actions and local error actions.
+Error actions can be used to simply report errors, or by jumping to a machine
+instantiation which consumes input, can attempt to recover from errors.  
+
 \subsubsection{Global Error Actions}
 
-\verb| >!  $!  %!  <!  @!  <>! | 
-\verbspace
+\noindent\verb|>!action     <!action     $!action    %!action      @!action      <>!action|\\
+\\
+\noindent Verbose forms:\\
+\noindent\verb|>err(act)    <err(act)    $err(na)    %err(name)    @err(name)    <>err(name)|\\
+\noindent\verb|>err{...}    <err{...}    $err{...}   %err{...}     @err{...}     <>err{...}|
+\\
 
 Error actions are stored in states until the final state machine has been fully
 constructed. They are then transferred to the transitions that move into the
@@ -1697,8 +1726,12 @@ into the machine with \verb|fgoto|.
 
 \subsubsection{Local Error Actions}
 
-\verb| >^  $^  %^  <^  @^  <>^ | 
-\verbspace
+\noindent\verb|>^action     <^action     $^action    %^action      @^action      <>^action|\\
+\\
+\noindent Verbose forms:\\
+\noindent\verb|>lerr(act)   <lerr(act)   $lerr(na)   %lerr(name)   @lerr(name)   <>lerr(name)|\\
+\noindent\verb|>lerr{...}   <lerr{...}   $lerr{...}  %lerr{...}    @lerr{...}    <>lerr{...}|
+\\
 
 Like global error actions, local error actions are also stored in states until
 a transfer point. The transfer point is different however. Each local error action
@@ -1728,6 +1761,56 @@ action.
 \item \verb|expr <>^ (name, action)| -- Not start and not final states.
 \end{itemize}
 \end{comment}
+
+\subsubsection{Example}
+
+The following example uses error actions to report an error and jump to a
+machine which consumes the remainder of the line when parsing fails. After
+consuming the line, the error recovery machine returns to the main loop.
+
+% GENERATE: erract
+% %%{
+% 	machine erract;
+%	ws = ' ';
+%	address = 'foo@bar.com';
+%	date = 'Monday May 12';
+\begin{inline_code}
+\begin{verbatim}
+action cmd_err { 
+    printf( "command error\n" ); 
+    fhold; fgoto line;
+}
+action from_err { 
+    printf( "from error\n" ); 
+    fhold; fgoto line; 
+}
+action to_err { 
+    printf( "to error\n" ); 
+    fhold; fgoto line;
+}
+
+line := [^\n]* '\n' @{ fgoto main; };
+
+main := (
+    (
+        'from' @err(cmd_err) 
+            ( ws+ address ws+ date '\n' ) $err(from_err) |
+        'to' @err(cmd_err)
+            ( ws+ address '\n' ) $err(to_err)
+    ) 
+)*;
+\end{verbatim}
+\end{inline_code}
+% }%%
+% %% write data;
+% void f()
+% {
+% 	%% write init;
+% 	%% write exec;
+% }
+% END GENERATE
+
+
 
 \section{Action Ordering and Duplicates}
 
@@ -3320,76 +3403,5 @@ block. In the both the use of \verb|fhold| and \verb|fexec| the user must be
 cautious of combining the resulting machine with another in such a way that the
 transition on which the current position is adjusted is not combined with a
 transition from the other machine.
-
-\section{Handling Errors}
-
-In many applications it is useful to be able to react to parsing errors.  The
-user may wish to print an error message which depends on the context.  It
-may also be desirable to consume input in an attempt to return the input stream
-to some known state and resume parsing.
-
-To support error handling and recovery, Ragel provides error action embedding
-operators. Error actions are embedded into an expression's states. When the
-final machine has been constructed and it is being made complete, error actions
-are transfered from their place of embedding within a state to the transitions
-which go to the error
-state.  When the machine fails and is about to move into the error state, the
-current state's error actions get executed.
-
-Error actions can be used to simply report errors, or by jumping to a machine
-instantiation which consumes input, can attempt to recover from errors.  Like
-the action embedding operators, there are several classes of states which
-error action embedding operators can access. For example, the \verb|@err|
-operator embeds an error action into non-final states. The \verb|$err| operator
-embeds an error action into all states. Other operators access the start state,
-final states, and states which are neither the start state nor are final. The
-design of the state selections was driven by a need to cover the states of an
-expression with a single error action.
-
-The following example uses error actions to report an error and jump to a
-machine which consumes the remainder of the line when parsing fails. After
-consuming the line, the error recovery machine returns to the main loop.
-
-% GENERATE: erract
-% %%{
-% 	machine erract;
-%	ws = ' ';
-%	address = 'foo@bar.com';
-%	date = 'Monday May 12';
-\begin{inline_code}
-\begin{verbatim}
-action cmd_err { 
-    printf( "command error\n" ); 
-    fhold; fgoto line;
-}
-action from_err { 
-    printf( "from error\n" ); 
-    fhold; fgoto line; 
-}
-action to_err { 
-    printf( "to error\n" ); 
-    fhold; fgoto line;
-}
-
-line := [^\n]* '\n' @{ fgoto main; };
-
-main := (
-    (
-        'from' @err cmd_err 
-            ( ws+ address ws+ date '\n' ) $err from_err |
-        'to' @err cmd_err 
-            ( ws+ address '\n' ) $err to_err
-    ) 
-)*;
-\end{verbatim}
-\end{inline_code}
-% }%%
-% %% write data;
-% void f()
-% {
-% 	%% write init;
-% 	%% write exec;
-% }
-% END GENERATE
 
 \end{document}
