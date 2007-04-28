@@ -123,7 +123,7 @@ void RubyCodeGen::COND_TRANSLATE()
 		<< INDENT_S() <<      "_mid = _lower + (((_upper-_lower) >> 1) & ~1)" 
 		<< INDENT_U() <<      "if " << GET_WIDE_KEY() << " < " << CK() << "[_mid]" 
 		<< INDENT_O() <<         "_upper = _mid - 2" 
-		<< INDENT_U() <<      "elsif " << GET_WIDE_KEY() << " > " << CK() << "[_mid]" 
+		<< INDENT_U() <<      "elsif " << GET_WIDE_KEY() << " > " << CK() << "[_mid+1]" 
 		<< INDENT_O() <<         "_lower = _mid + 2" 
 		<< INDENT_U() <<      "else" 
 		<< INDENT_U() <<         "case " << C() << "[" << CO() << "[" << CS() << "]" 

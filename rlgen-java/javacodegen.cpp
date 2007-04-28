@@ -277,7 +277,7 @@ void JavaTabCodeGen::COND_TRANSLATE()
 		"			_mid = _lower + (((_upper-_lower) >> 1) & ~1);\n"
 		"			if ( " << GET_WIDE_KEY() << " < " << CK() << "[_mid] )\n"
 		"				_upper = _mid - 2;\n"
-		"			else if ( " << GET_WIDE_KEY() << " > " << CK() << "[_mid] )\n"
+		"			else if ( " << GET_WIDE_KEY() << " > " << CK() << "[_mid+1] )\n"
 		"				_lower = _mid + 2;\n"
 		"			else {\n"
 		"				switch ( " << C() << "[" << CO() << "[" << CS() << "]"
