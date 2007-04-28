@@ -110,7 +110,7 @@ define al_expr_extend
 end define
 
 define al_expr_op
-		'= | '+ | '- | '* | '/ | '== | '<= | '>=
+		'= | '+ | '- | '* | '/ | '== | '<= | '>= | '< | '>
 end define
 
 define al_term

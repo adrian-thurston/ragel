@@ -87,6 +87,12 @@ redefine al_host_block
 	|	'{ [NL] [IN] [java_statements] [EX] '} [NL]
 end define
 
+redefine cond_action_stmt
+		'action [id] '{ [al_expr] '} [NL]
+	|	'action [id] '{ [java_expr] '} [NL]
+end redefine
+
+
 function clearUnion Type [java_type_decl] Id [id] 
 	replace [opt union]
 		Union [union]
@@ -290,6 +296,17 @@ rule actionTransJava
 		'{ JavaStmts '}
 end rule
 
+rule condTransJava
+	replace [cond_action_stmt]
+		'action Id [id] '{ AlExpr [al_expr] '}
+	construct OptJavaExpr [opt java_expr]
+		_ [alExprToJava AlExpr]
+	deconstruct OptJavaExpr
+		JavaExpr [java_expr]
+	by
+		'action Id '{ JavaExpr '}
+end rule
+
 rule machineName
 	replace $ [machine_stmt]
 		'machine _ [id] ';
@@ -312,7 +329,7 @@ function langTransJava
 	construct JavaInitializations [repeat java_lang_stmt]
 		_ [alToJava Initializations]
 	construct NewRagelDef [ragel_def]
-		RagelDef [actionTransJava] [machineName]
+		RagelDef [actionTransJava] [condTransJava] [machineName]
 	import ArrayInits [java_statements]
 		ArrayInitStmts [repeat java_lang_stmt]
 	by

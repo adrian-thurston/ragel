@@ -82,6 +82,11 @@ redefine al_host_block
 	|	'{ [NL] [IN] [ruby_statements] [EX] '} [NL]
 end define
 
+redefine cond_action_stmt
+		'action [id] '{ [al_expr] '} [NL]
+	|	'action [id] '{ [ruby_expr] '} [NL]
+end redefine
+
 function initDecl1 VarDecl [al_variable_decl]
 	deconstruct VarDecl
 		'bool Id [id] ';
@@ -321,6 +326,17 @@ rule actionTransRuby
 		'{ RubyStmts '}
 end rule
 
+rule condTransRuby
+	replace [cond_action_stmt]
+		'action Id [id] '{ AlExpr [al_expr] '}
+	construct OptRubyExpr [opt ruby_expr]
+		_ [alExprToRuby AlExpr]
+	deconstruct OptRubyExpr
+		RubyExpr [ruby_expr]
+	by
+		'action Id '{ RubyExpr '}
+end rule
+
 rule lowercaseMachine
 	replace $ [machine_stmt]
 		'machine Id [id] ';
@@ -339,7 +355,7 @@ function langTransRuby
 	construct RubyInitializations [repeat ruby_lang_stmt]
 		_ [alToRuby Initializations]
 	construct NewRagelDef [ragel_def]
-		RagelDef [actionTransRuby] [lowercaseMachine]
+		RagelDef [actionTransRuby] [condTransRuby] [lowercaseMachine]
 	import ArrayInits [ruby_statements]
 		ArrayInitStmts [repeat ruby_lang_stmt]
 	by
