@@ -74,6 +74,12 @@ redefine al_host_block
 	|	'{ [NL] [IN] [c_statements] [EX] '} [NL]
 end define
 
+redefine cond_action_stmt
+		'action [id] '{ [al_expr] '} [NL]
+	|	'action [id] '{ [c_expr] '} [NL]
+end redefine
+
+
 rule boolTypes
 	replace [al_type_decl]
 		'bool
@@ -277,6 +283,17 @@ rule actionTransC
 		'{ CStmts '}
 end rule
 
+rule condTransC
+	replace [cond_action_stmt]
+		'action Id [id] '{ AlExpr [al_expr] '}
+	construct OptCExpr [opt c_expr]
+		_ [alExprToC AlExpr]
+	deconstruct OptCExpr
+		CExpr [c_expr]
+	by
+		'action Id '{ CExpr '}
+end rule
+
 function langTransC
 	replace [program]
 		Definitions [repeat action_lang_stmt]
@@ -291,7 +308,7 @@ function langTransC
 		CDefinitions
 		'%%
 		CInitializations
-		RagelDef [actionTransC]
+		RagelDef [actionTransC] [condTransC]
 end function
 
 function main
