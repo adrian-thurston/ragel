@@ -12,7 +12,7 @@ struct erract
 
 %%{
 	machine erract;
-	variable curstate fsm->cs;
+	variable cs fsm->cs;
 
 	# The data that is to go into the fsm structure.
 	action hello_fails { printf("hello fails\n");}

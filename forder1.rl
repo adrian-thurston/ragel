@@ -12,7 +12,7 @@ struct forder
 
 %%{
 	machine forder;
-	variable curstate fsm->cs;
+	variable cs fsm->cs;
 
 	second = 'b'
 		>{printf("enter b1\n");}

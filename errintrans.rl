@@ -16,7 +16,7 @@ struct errintrans
 
 %%{
 	machine errintrans;
-	variable curstate fsm->cs;
+	variable cs fsm->cs;
 
 	char = any - (digit | '\n');
 	line = char* "\n";

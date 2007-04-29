@@ -12,7 +12,7 @@ struct range
 
 %%{
 	machine range;
-	variable curstate fsm->cs;
+	variable cs fsm->cs;
 
 	main := ( 'a' .. 'c' | 'c' .. 'e' | 'm' .. 'n' | 'a' .. 'z' ) '\n';
 }%%

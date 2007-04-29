@@ -17,7 +17,7 @@ struct forder
 
 %%{
 	machine forder;
-	variable curstate fsm->cs;
+	variable cs fsm->cs;
 
 	inner = 'inner'
 		>{printf("enter inner\n");}

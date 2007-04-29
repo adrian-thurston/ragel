@@ -19,7 +19,7 @@ struct high
 
 %%{
 	machine high;
-	variable curstate fsm->cs;
+	variable cs fsm->cs;
 
 	# We Want the header portion.
 	alphtype unsigned int;
@@ -74,7 +74,7 @@ struct tokenizer
 
 %%{
 	machine tokenizer;
-	variable curstate fsm->cs;
+	variable cs fsm->cs;
 
 	action bufdigit {
 		if ( numlen < 8 )

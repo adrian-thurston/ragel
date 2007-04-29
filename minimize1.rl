@@ -12,7 +12,7 @@ struct min
 
 %%{
 	machine min;
-	variable curstate fsm->cs;
+	variable cs fsm->cs;
 
 	action a_or_b { printf("a or b\n"); }
 

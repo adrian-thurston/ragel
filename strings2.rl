@@ -13,7 +13,7 @@
 
 %%{
 	machine strs;
-	variable curstate fsm->cs;
+	variable cs fsm->cs;
 
 	main := 
 		"/lib/ld-linux.so.2\n" |
