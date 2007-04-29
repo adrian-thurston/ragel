@@ -2,10 +2,11 @@
                      Ragel State Machine Compiler -- CREDITS
                      =======================================
 
-These are some of the people who deserve credit. Many apolgies to those who
-have been missed. 
 
-* Written by Adrian Thurston <thurston@cs.queensu.ca>.
+* Ragel is designed, written and maintained by Adrian Thurston <thurston@cs.queensu.ca>.
+
+Many others have helped out along the way. My apolgies to anyone who has been
+missed.
 
 * Objective-C output contributed by Erich Ocean.
 
@@ -17,6 +18,8 @@ have been missed.
   and suggestions from Colin Fleming
 
 * Useful discussions and bug reports due to Carlos Antunes.
+
+* Ruby code generation contributed by Victor Hugo Borja
 
 * Feedback, Packaging, and Fixes provided by:
 
