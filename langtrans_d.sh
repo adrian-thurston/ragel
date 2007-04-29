@@ -44,10 +44,10 @@ cat << EOF
 		%% write init;
 	}
 
-	void exec( char *data, int len )
+	void exec( char data[] )
 	{
-		char *p = data;
-		char *pe = data + len;
+		char *p = data.ptr;
+		char *pe = data.ptr + data.length;
 		char _s[];
 
 		%% write exec;
@@ -88,7 +88,7 @@ int main( )
 	int i;
 	for ( i = 0; i < m.inplen; i++ ) {
 		m.init();
-		m.exec( m.inp[i], m.inp[i].length );
+		m.exec( m.inp[i] );
 		m.finish();
 	}
 	return 0;
