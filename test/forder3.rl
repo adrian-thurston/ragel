@@ -12,7 +12,7 @@ struct forder
 
 %%{
 	machine forder;
-	variable curstate fsm->cs;
+	variable cs fsm->cs;
 
 	m1 = ( "" %{printf("enter m1 aa\n");} |
 			'aa'* >{printf("enter m1 aa\n");} %{printf("leave m1 aa\n");} )

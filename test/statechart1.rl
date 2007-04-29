@@ -16,7 +16,7 @@ struct state_chart
 
 %%{
 	machine state_chart;
-	variable curstate fsm->cs;
+	variable cs fsm->cs;
 
 	action a { printf("a"); }
 	action b { printf("b"); }

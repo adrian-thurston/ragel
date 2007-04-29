@@ -27,7 +27,7 @@ struct awkemu
 %%{
 	machine awkemu;
 
-	variable curstate fsm->cs;
+	variable cs fsm->cs;
 
 	# Starts a line. Will initialize all the data necessary for capturing the line.
 	action startline {

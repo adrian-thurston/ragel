@@ -12,7 +12,7 @@ struct strs
 
 %%{
 	machine strs;
-	variable curstate fsm->cs;
+	variable cs fsm->cs;
 
 	main := 
 		"__gmon_start__\n" |

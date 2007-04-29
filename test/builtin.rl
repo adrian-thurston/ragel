@@ -17,7 +17,7 @@ struct builtin
 %%{
 	machine builtin;
 	alphtype unsigned int;
-	variable curstate fsm->cs;
+	variable cs fsm->cs;
 
 	main := (
 		any    @{alph("any");} |

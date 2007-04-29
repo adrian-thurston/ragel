@@ -19,7 +19,7 @@ struct fsm
 	machine fsm;
 	alphtype int;
 	getkey fpc->key;
-	variable curstate fsm->cs;
+	variable cs fsm->cs;
 
 	action a1 {}
 	action a2 {}
