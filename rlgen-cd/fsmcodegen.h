@@ -90,16 +90,16 @@ protected:
 	virtual string GET_KEY();
 	virtual ostream &SWITCH_DEFAULT() = 0;
 
-	string P() { return "p"; }
-	string PE() { return "pe"; }
+	string P();
+	string PE();
 
 	string ACCESS();
 	string CS();
-	string STACK() { return ACCESS() + "stack"; }
-	string TOP() { return ACCESS() + "top"; }
-	string TOKSTART() { return ACCESS() + "tokstart"; }
-	string TOKEND() { return ACCESS() + "tokend"; }
-	string ACT() { return ACCESS() + "act"; }
+	string STACK();
+	string TOP();
+	string TOKSTART();
+	string TOKEND();
+	string ACT();
 
 	string DATA_PREFIX();
 	string PM() { return "_" + DATA_PREFIX() + "partition_map"; }

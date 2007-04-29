@@ -136,27 +136,117 @@ std::ostream &FsmCodeGen::ACTIONS_ARRAY()
 }
 
 
-string FsmCodeGen::CS()
-{
-	ostringstream ret;
-	if ( curStateExpr != 0 ) { 
-		/* Emit the user supplied method of retrieving the key. */
-		ret << "(";
-		INLINE_LIST( ret, curStateExpr, 0, false );
-		ret << ")";
-	}
-	else {
-		/* Expression for retrieving the key, use simple dereference. */
-		ret << ACCESS() << "cs";
-	}
-	return ret.str();
-}
-
 string FsmCodeGen::ACCESS()
 {
 	ostringstream ret;
 	if ( accessExpr != 0 )
 		INLINE_LIST( ret, accessExpr, 0, false );
+	return ret.str();
+}
+
+
+string FsmCodeGen::P()
+{ 
+	ostringstream ret;
+	if ( pExpr == 0 )
+		ret << "p";
+	else {
+		ret << "(";
+		INLINE_LIST( ret, pExpr, 0, false );
+		ret << ")";
+	}
+	return ret.str();
+}
+
+string FsmCodeGen::PE()
+{
+	ostringstream ret;
+	if ( peExpr == 0 )
+		ret << "pe";
+	else {
+		ret << "(";
+		INLINE_LIST( ret, peExpr, 0, false );
+		ret << ")";
+	}
+	return ret.str();
+}
+
+string FsmCodeGen::CS()
+{
+	ostringstream ret;
+	if ( csExpr == 0 )
+		ret << ACCESS() << "cs";
+	else {
+		/* Emit the user supplied method of retrieving the key. */
+		ret << "(";
+		INLINE_LIST( ret, csExpr, 0, false );
+		ret << ")";
+	}
+	return ret.str();
+}
+
+string FsmCodeGen::TOP()
+{
+	ostringstream ret;
+	if ( topExpr == 0 )
+		ret << ACCESS() + "top";
+	else {
+		ret << "(";
+		INLINE_LIST( ret, topExpr, 0, false );
+		ret << ")";
+	}
+	return ret.str();
+}
+
+string FsmCodeGen::STACK()
+{
+	ostringstream ret;
+	if ( stackExpr == 0 )
+		ret << ACCESS() + "stack";
+	else {
+		ret << "(";
+		INLINE_LIST( ret, stackExpr, 0, false );
+		ret << ")";
+	}
+	return ret.str();
+}
+
+string FsmCodeGen::ACT()
+{
+	ostringstream ret;
+	if ( actExpr == 0 )
+		ret << ACCESS() + "act";
+	else {
+		ret << "(";
+		INLINE_LIST( ret, actExpr, 0, false );
+		ret << ")";
+	}
+	return ret.str();
+}
+
+string FsmCodeGen::TOKSTART()
+{
+	ostringstream ret;
+	if ( tokstartExpr == 0 )
+		ret << ACCESS() + "tokstart";
+	else {
+		ret << "(";
+		INLINE_LIST( ret, tokstartExpr, 0, false );
+		ret << ")";
+	}
+	return ret.str();
+}
+
+string FsmCodeGen::TOKEND()
+{
+	ostringstream ret;
+	if ( tokendExpr == 0 )
+		ret << ACCESS() + "tokend";
+	else {
+		ret << "(";
+		INLINE_LIST( ret, tokendExpr, 0, false );
+		ret << ")";
+	}
 	return ret.str();
 }
 

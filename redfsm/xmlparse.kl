@@ -161,9 +161,16 @@ ragel_def_item_list: ;
 ragel_def_item: tag_alph_type;
 ragel_def_item: tag_getkey_expr;
 ragel_def_item: tag_access_expr;
-ragel_def_item: tag_curstate_expr;
 ragel_def_item: tag_export_list;
 ragel_def_item: tag_machine;
+ragel_def_item: tag_p_expr;
+ragel_def_item: tag_pe_expr;
+ragel_def_item: tag_cs_expr;
+ragel_def_item: tag_top_expr;
+ragel_def_item: tag_stack_expr;
+ragel_def_item: tag_act_expr;
+ragel_def_item: tag_tokstart_expr;
+ragel_def_item: tag_tokend_expr;
 
 tag_export_list: TAG_exports export_list '/' TAG_exports;
 
@@ -198,10 +205,23 @@ tag_access_expr: TAG_access inline_list '/' TAG_access
 		cgd->accessExpr = $2->inlineList;
 	};
 
-tag_curstate_expr: TAG_curstate inline_list '/' TAG_curstate
-	final {
-		cgd->curStateExpr = $2->inlineList;
-	};
+tag_p_expr: TAG_p_expr inline_list '/' TAG_p_expr
+	final { cgd->pExpr = $2->inlineList; };
+tag_pe_expr: TAG_pe_expr inline_list '/' TAG_pe_expr
+	final { cgd->peExpr = $2->inlineList; };
+tag_cs_expr: TAG_cs_expr inline_list '/' TAG_cs_expr
+	final { cgd->csExpr = $2->inlineList; };
+tag_top_expr: TAG_top_expr inline_list '/' TAG_top_expr
+	final { cgd->topExpr = $2->inlineList; };
+tag_stack_expr: TAG_stack_expr inline_list '/' TAG_stack_expr
+	final { cgd->stackExpr = $2->inlineList; };
+tag_act_expr: TAG_act_expr inline_list '/' TAG_act_expr
+	final { cgd->actExpr = $2->inlineList; };
+tag_tokstart_expr: TAG_tokstart_expr inline_list '/' TAG_tokstart_expr
+	final { cgd->tokstartExpr = $2->inlineList; };
+tag_tokend_expr: TAG_tokend_expr inline_list '/' TAG_tokend_expr
+	final { cgd->tokendExpr = $2->inlineList; };
+
 
 tag_write: tag_write_head write_option_list '/' TAG_write
 	final {

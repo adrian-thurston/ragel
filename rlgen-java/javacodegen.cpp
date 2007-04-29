@@ -1199,22 +1199,6 @@ std::ostream &JavaTabCodeGen::ACTIONS_ARRAY()
 }
 
 
-string JavaTabCodeGen::CS()
-{
-	ostringstream ret;
-	if ( curStateExpr != 0 ) { 
-		/* Emit the user supplied method of retrieving the key. */
-		ret << "(";
-		INLINE_LIST( ret, curStateExpr, 0, false );
-		ret << ")";
-	}
-	else {
-		/* Expression for retrieving the key, use simple dereference. */
-		ret << ACCESS() << "cs";
-	}
-	return ret.str();
-}
-
 string JavaTabCodeGen::ACCESS()
 {
 	ostringstream ret;
@@ -1222,6 +1206,112 @@ string JavaTabCodeGen::ACCESS()
 		INLINE_LIST( ret, accessExpr, 0, false );
 	return ret.str();
 }
+
+string JavaTabCodeGen::P()
+{ 
+	ostringstream ret;
+	if ( pExpr == 0 )
+		ret << "p";
+	else {
+		ret << "(";
+		INLINE_LIST( ret, pExpr, 0, false );
+		ret << ")";
+	}
+	return ret.str();
+}
+
+string JavaTabCodeGen::PE()
+{
+	ostringstream ret;
+	if ( peExpr == 0 )
+		ret << "pe";
+	else {
+		ret << "(";
+		INLINE_LIST( ret, peExpr, 0, false );
+		ret << ")";
+	}
+	return ret.str();
+}
+
+string JavaTabCodeGen::CS()
+{
+	ostringstream ret;
+	if ( csExpr == 0 )
+		ret << ACCESS() << "cs";
+	else {
+		/* Emit the user supplied method of retrieving the key. */
+		ret << "(";
+		INLINE_LIST( ret, csExpr, 0, false );
+		ret << ")";
+	}
+	return ret.str();
+}
+
+string JavaTabCodeGen::TOP()
+{
+	ostringstream ret;
+	if ( topExpr == 0 )
+		ret << ACCESS() + "top";
+	else {
+		ret << "(";
+		INLINE_LIST( ret, topExpr, 0, false );
+		ret << ")";
+	}
+	return ret.str();
+}
+
+string JavaTabCodeGen::STACK()
+{
+	ostringstream ret;
+	if ( stackExpr == 0 )
+		ret << ACCESS() + "stack";
+	else {
+		ret << "(";
+		INLINE_LIST( ret, stackExpr, 0, false );
+		ret << ")";
+	}
+	return ret.str();
+}
+
+string JavaTabCodeGen::ACT()
+{
+	ostringstream ret;
+	if ( actExpr == 0 )
+		ret << ACCESS() + "act";
+	else {
+		ret << "(";
+		INLINE_LIST( ret, actExpr, 0, false );
+		ret << ")";
+	}
+	return ret.str();
+}
+
+string JavaTabCodeGen::TOKSTART()
+{
+	ostringstream ret;
+	if ( tokstartExpr == 0 )
+		ret << ACCESS() + "tokstart";
+	else {
+		ret << "(";
+		INLINE_LIST( ret, tokstartExpr, 0, false );
+		ret << ")";
+	}
+	return ret.str();
+}
+
+string JavaTabCodeGen::TOKEND()
+{
+	ostringstream ret;
+	if ( tokendExpr == 0 )
+		ret << ACCESS() + "tokend";
+	else {
+		ret << "(";
+		INLINE_LIST( ret, tokendExpr, 0, false );
+		ret << ")";
+	}
+	return ret.str();
+}
+
 
 string JavaTabCodeGen::GET_WIDE_KEY()
 {

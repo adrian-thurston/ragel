@@ -123,16 +123,16 @@ public:
 	string WIDE_ALPH_TYPE();
 	string ARRAY_TYPE( unsigned long maxVal );
 
-	string P() { return "p"; }
-	string PE() { return "pe"; }
-
 	string ACCESS();
+
+	string P();
+	string PE();
 	string CS();
-	string STACK() { return ACCESS() + "stack"; }
-	string TOP() { return ACCESS() + "top"; }
-	string TOKSTART() { return ACCESS() + "tokstart"; }
-	string TOKEND() { return ACCESS() + "tokend"; }
-	string ACT() { return ACCESS() + "act"; }
+	string STACK();
+	string TOP();
+	string TOKSTART();
+	string TOKEND();
+	string ACT();
 
 	string DATA_PREFIX();
 	string PM() { return "_" + DATA_PREFIX() + "partition_map"; }

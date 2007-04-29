@@ -186,11 +186,9 @@ access_spec:
 variable_spec:
 	KW_Variable opt_whitespace TK_Word inline_expr ';' final {
 		/* FIXME: Need to implement the rest of this. */
-		if ( strcmp( $3->data, "curstate" ) == 0 )
-			pd->curStateExpr = $4->inlineList;
-		else {
-			error($3->loc) << "sorry, unimplementd" << endl;
-		}
+		bool wasSet = pd->setVariable( $3->data, $4->inlineList );
+		if ( !wasSet )
+			error($3->loc) << "bad variable name" << endl;
 	};
 
 opt_whitespace: opt_whitespace IL_WhiteSpace;

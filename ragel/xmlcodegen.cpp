@@ -616,32 +616,6 @@ void XMLCodeGen::writeMachine()
 	out << "  </machine>\n";
 }
 
-void XMLCodeGen::writeAlphType()
-{
-	out << "  <alphtype>" << 
-		(keyOps->alphType - hostLang->hostTypes) << "</alphtype>\n";
-}
-
-void XMLCodeGen::writeGetKeyExpr()
-{
-	out << "  <getkey>";
-	writeInlineList( pd->getKeyExpr, 0 );
-	out << "</getkey>\n";
-}
-
-void XMLCodeGen::writeAccessExpr()
-{
-	out << "  <access>";
-	writeInlineList( pd->accessExpr, 0 );
-	out << "</access>\n";
-}
-
-void XMLCodeGen::writeCurStateExpr()
-{
-	out << "  <curstate>";
-	writeInlineList( pd->curStateExpr, 0 );
-	out << "</curstate>\n";
-}
 
 void XMLCodeGen::writeConditions()
 {
@@ -680,16 +654,76 @@ void XMLCodeGen::writeXML()
 {
 	/* Open the definition. */
 	out << "<ragel_def name=\"" << fsmName << "\">\n";
-	writeAlphType();
+
+	/* Alphabet type. */
+	out << "  <alphtype>" << 
+		(keyOps->alphType - hostLang->hostTypes) << "</alphtype>\n";
 	
-	if ( pd->getKeyExpr != 0 )
-		writeGetKeyExpr();
+	/* Getkey expression. */
+	if ( pd->getKeyExpr != 0 ) {
+		out << "  <getkey>";
+		writeInlineList( pd->getKeyExpr, 0 );
+		out << "</getkey>\n";
+	}
 
-	if ( pd->accessExpr != 0 )
-		writeAccessExpr();
+	/* Access expression. */
+	if ( pd->accessExpr != 0 ) {
+		out << "  <access>";
+		writeInlineList( pd->accessExpr, 0 );
+		out << "</access>\n";
+	}
 
-	if ( pd->curStateExpr != 0 )
-		writeCurStateExpr();
+	/*
+	 * Variable expressions.
+	 */
+
+	if ( pd->pExpr != 0 ) {
+		out << "  <p_expr>";
+		writeInlineList( pd->pExpr, 0 );
+		out << "</p_expr>\n";
+	}
+	
+	if ( pd->peExpr != 0 ) {
+		out << "  <pe_expr>";
+		writeInlineList( pd->peExpr, 0 );
+		out << "</pe_expr>\n";
+	}
+	
+	if ( pd->csExpr != 0 ) {
+		out << "  <cs_expr>";
+		writeInlineList( pd->csExpr, 0 );
+		out << "</cs_expr>\n";
+	}
+	
+	if ( pd->topExpr != 0 ) {
+		out << "  <top_expr>";
+		writeInlineList( pd->topExpr, 0 );
+		out << "</top_expr>\n";
+	}
+	
+	if ( pd->stackExpr != 0 ) {
+		out << "  <stack_expr>";
+		writeInlineList( pd->stackExpr, 0 );
+		out << "</stack_expr>\n";
+	}
+	
+	if ( pd->actExpr != 0 ) {
+		out << "  <act_expr>";
+		writeInlineList( pd->actExpr, 0 );
+		out << "</act_expr>\n";
+	}
+	
+	if ( pd->tokstartExpr != 0 ) {
+		out << "  <tokstart_expr>";
+		writeInlineList( pd->tokstartExpr, 0 );
+		out << "</tokstart_expr>\n";
+	}
+	
+	if ( pd->tokendExpr != 0 ) {
+		out << "  <tokend_expr>";
+		writeInlineList( pd->tokendExpr, 0 );
+		out << "</tokend_expr>\n";
+	}
 	
 	writeExports();
 	

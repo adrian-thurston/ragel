@@ -107,12 +107,8 @@ private:
 	void writeExports();
 	bool writeNameInst( NameInst *nameInst );
 	void writeEntryPoints();
-	void writeGetKeyExpr();
-	void writeAccessExpr();
-	void writeCurStateExpr();
 	void writeConditions();
 	void writeInlineList( InlineList *inlineList, InlineItem *context );
-	void writeAlphType();
 	void writeActionList();
 	void writeActionTableList();
 	void reduceTrans( TransAp *trans );

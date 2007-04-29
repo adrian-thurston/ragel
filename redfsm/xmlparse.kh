@@ -112,8 +112,12 @@ struct Parser
 			TAG_hold, TAG_exec, TAG_holdte, TAG_execte, TAG_curs, TAG_targs,
 			TAG_entry, TAG_data, TAG_lm_switch, TAG_init_act, TAG_set_act,
 			TAG_set_tokend, TAG_get_tokend, TAG_init_tokstart,
-			TAG_set_tokstart, TAG_write, TAG_curstate, TAG_access, TAG_break,
-			TAG_arg;
+			TAG_set_tokstart;
+
+		token TAG_write, TAG_access, TAG_break, TAG_arg, TAG_cs_expr;
+
+		token TAG_p_expr, TAG_pe_expr, TAG_cs_expr, TAG_top_expr,
+			TAG_stack_expr, TAG_act_expr, TAG_tokstart_expr, TAG_tokend_expr;
 	}%%
 
 	%% write instance_data;

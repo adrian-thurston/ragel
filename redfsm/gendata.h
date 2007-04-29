@@ -99,7 +99,17 @@ struct CodeGenData
 	CondSpaceList condSpaceList;
 	InlineList *getKeyExpr;
 	InlineList *accessExpr;
-	InlineList *curStateExpr;
+
+	/* Overriding variables. */
+	InlineList *pExpr;
+	InlineList *peExpr;
+	InlineList *csExpr;
+	InlineList *topExpr;
+	InlineList *stackExpr;
+	InlineList *actExpr;
+	InlineList *tokstartExpr;
+	InlineList *tokendExpr;
+
 	KeyOps thisKeyOps;
 	bool wantComplete;
 	EntryIdVect entryPointIds;

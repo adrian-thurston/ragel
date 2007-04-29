@@ -55,6 +55,7 @@ struct ReOrItem;
 struct LongestMatch;
 typedef DList<LongestMatch> LmList;
 
+
 /* Graph dictionary. */
 struct GraphDictEl 
 :
@@ -189,6 +190,9 @@ struct ParseData
 	bool setAlphType( char *s1, char *s2 );
 	bool setAlphType( char *s1 );
 
+	/* Override one of the variables ragel uses. */
+	bool setVariable( char *var, InlineList *inlineList );
+
 	/* Unique actions. */
 	void removeDups( ActionTable &actionTable );
 	void removeActionDups( FsmAp *graph );
@@ -254,7 +258,16 @@ struct ParseData
 	/* Element type and get key expression. */
 	InlineList *getKeyExpr;
 	InlineList *accessExpr;
-	InlineList *curStateExpr;
+
+	/* Overriding variables. */
+	InlineList *pExpr;
+	InlineList *peExpr;
+	InlineList *csExpr;
+	InlineList *topExpr;
+	InlineList *stackExpr;
+	InlineList *actExpr;
+	InlineList *tokstartExpr;
+	InlineList *tokendExpr;
 
 	/* The alphabet range. */
 	char *lowerNum, *upperNum;

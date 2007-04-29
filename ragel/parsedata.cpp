@@ -428,7 +428,14 @@ ParseData::ParseData( char *fileName, char *sectionName,
 	alphTypeSet(false),
 	getKeyExpr(0),
 	accessExpr(0),
-	curStateExpr(0),
+	pExpr(0),
+	peExpr(0),
+	csExpr(0),
+	topExpr(0),
+	stackExpr(0),
+	actExpr(0),
+	tokstartExpr(0),
+	tokendExpr(0),
 	lowerNum(0),
 	upperNum(0),
 	fileName(fileName),
@@ -875,6 +882,32 @@ bool ParseData::setAlphType( char *s1 )
 
 	alphTypeSet = true;
 	return valid;
+}
+
+bool ParseData::setVariable( char *var, InlineList *inlineList )
+{
+	bool set = true;
+
+	if ( strcmp( var, "p" ) == 0 )
+		pExpr = inlineList;
+	else if ( strcmp( var, "pe" ) == 0 )
+		peExpr = inlineList;
+	else if ( strcmp( var, "cs" ) == 0 )
+		csExpr = inlineList;
+	else if ( strcmp( var, "top" ) == 0 )
+		topExpr = inlineList;
+	else if ( strcmp( var, "stack" ) == 0 )
+		stackExpr = inlineList;
+	else if ( strcmp( var, "act" ) == 0 )
+		actExpr = inlineList;
+	else if ( strcmp( var, "tokstart" ) == 0 )
+		tokstartExpr = inlineList;
+	else if ( strcmp( var, "tokend" ) == 0 )
+		tokendExpr = inlineList;
+	else
+		set = false;
+
+	return set;
 }
 
 /* Initialize the key operators object that will be referenced by all fsms

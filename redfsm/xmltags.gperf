@@ -72,7 +72,6 @@ set_tokend, TAG_set_tokend
 init_tokstart, TAG_init_tokstart
 set_tokstart, TAG_set_tokstart
 write, TAG_write
-curstate, TAG_curstate
 access, TAG_access
 break, TAG_break
 arg, TAG_arg
@@ -82,3 +81,11 @@ cond_list, TAG_cond_list
 c, TAG_c
 exports, TAG_exports
 ex, TAG_ex
+p_expr, TAG_p_expr
+pe_expr, TAG_pe_expr
+cs_expr, TAG_cs_expr
+top_expr, TAG_top_expr
+stack_expr, TAG_stack_expr
+act_expr, TAG_act_expr
+tokstart_expr, TAG_tokstart_expr
+tokend_expr, TAG_tokend_expr
