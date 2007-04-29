@@ -31,6 +31,7 @@
 #include "parsetree.h"
 #include "mergesort.h"
 #include "xmlcodegen.h"
+#include "version.h"
 
 using namespace std;
 
@@ -1480,7 +1481,7 @@ void writeMachines( std::ostream &out, std::string hostData, char *inputFileName
 		}
 
 		if ( gblErrorCount == 0 ) {
-			out << "<ragel filename=\"" << inputFileName << "\"";
+			out << "<ragel version=\"" VERSION "\" filename=\"" << inputFileName << "\"";
 			writeLanguage( out );
 			out << ">\n";
 			for ( ParserDict::Iter parser = parserDict; parser.lte(); parser++ ) {

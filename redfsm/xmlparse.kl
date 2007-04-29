@@ -22,6 +22,7 @@
 #include "xmlparse.h"
 #include "common.h"
 #include "gendata.h"
+#include "version.h"
 #include <iostream>
 #include <stdlib.h>
 
@@ -54,40 +55,46 @@ tag_ragel: tag_ragel_head ragel_def_list host_or_write_list '/' TAG_ragel;
 
 tag_ragel_head: TAG_ragel
 	final {
+		/* Check version used to generated the intermediate file. */
+		Attribute *versionAttr = $1->tag->findAttr( "version" );
+		if ( versionAttr == 0 )
+			error($1->loc) << "tag <ragel> requires a version attribute" << endp;
+		if ( strcmp( versionAttr->value, VERSION ) != 0 )
+			error($1->loc) << "version mismatch between frontend and backend" << endp;
+
+		/* Check for file name attribute. */
 		Attribute *fileNameAttr = $1->tag->findAttr( "filename" );
 		if ( fileNameAttr == 0 )
 			error($1->loc) << "tag <ragel> requires a filename attribute" << endp;
-		else {
-			sourceFileName = fileNameAttr->value;
+		sourceFileName = fileNameAttr->value;
 
-			Attribute *langAttr = $1->tag->findAttr( "lang" );
-			if ( langAttr == 0 )
-				error($1->loc) << "tag <ragel> requires a lang attribute" << endp;
-			else {
-				if ( strcmp( langAttr->value, "C" ) == 0 ) {
-					hostLangType = CCode;
-					hostLang = &hostLangC;
-				}
-				else if ( strcmp( langAttr->value, "D" ) == 0 ) {
-					hostLangType = DCode;
-					hostLang = &hostLangD;
-				}
-				else if ( strcmp( langAttr->value, "Java" ) == 0 ) {
-					hostLangType = JavaCode;
-					hostLang = &hostLangJava;
-				}
-				else if ( strcmp( langAttr->value, "Ruby" ) == 0 ) {
-					hostLangType = RubyCode;
-					hostLang = &hostLangRuby;
-				}
-				else {
-					error($1->loc) << "expecting lang attribute to be "
-							"one of C, D, Java or Ruby" << endp;
-				}
+		/* Check for language attribute. */
+		Attribute *langAttr = $1->tag->findAttr( "lang" );
+		if ( langAttr == 0 )
+			error($1->loc) << "tag <ragel> requires a lang attribute" << endp;
 
-				outStream = openOutput( sourceFileName );
-			}
+		if ( strcmp( langAttr->value, "C" ) == 0 ) {
+			hostLangType = CCode;
+			hostLang = &hostLangC;
 		}
+		else if ( strcmp( langAttr->value, "D" ) == 0 ) {
+			hostLangType = DCode;
+			hostLang = &hostLangD;
+		}
+		else if ( strcmp( langAttr->value, "Java" ) == 0 ) {
+			hostLangType = JavaCode;
+			hostLang = &hostLangJava;
+		}
+		else if ( strcmp( langAttr->value, "Ruby" ) == 0 ) {
+			hostLangType = RubyCode;
+			hostLang = &hostLangRuby;
+		}
+		else {
+			error($1->loc) << "expecting lang attribute to be "
+					"one of C, D, Java or Ruby" << endp;
+		}
+
+		outStream = openOutput( sourceFileName );
 	};
 
 ragel_def_list: ragel_def_list ragel_def;

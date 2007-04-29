@@ -1,5 +1,7 @@
-Ragel 6.0 Features
-==================
+Ragel 6.0 Changes
+=================
+
+Remove old action embedding and condition setting syntax.
 
 Expressions of the form: ( expr1 <: expr2 . expr3 ) sometimes don't behave as
 expected. If expr2 contains the empty string then it's possible for the machine
@@ -42,8 +44,6 @@ end up with test_len || !test_len.
 Should be possible to include scanner definitions in another scanner.
 
 Need a "write entry name;" feature.
-
-Should be possible to embed the negative sense of a condition.
 
 Possibly bring back the old semantics of > in a new operator, or allow it to be
 defined somehow.
