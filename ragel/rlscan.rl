@@ -842,7 +842,7 @@ void Scanner::endSection( )
 		'getkey' => { 
 			token( KW_GetKey );
 			inlineBlockType = SemiTerminated;
-			if ( hostLangType == RubyCode )
+			if ( hostLang->lang == HostLang::Ruby )
 				fcall inline_code_ruby;
 			else
 				fcall inline_code;
@@ -850,7 +850,7 @@ void Scanner::endSection( )
 		'access' => { 
 			token( KW_Access );
 			inlineBlockType = SemiTerminated;
-			if ( hostLangType == RubyCode )
+			if ( hostLang->lang == HostLang::Ruby )
 				fcall inline_code_ruby;
 			else
 				fcall inline_code;
@@ -858,7 +858,7 @@ void Scanner::endSection( )
 		'variable' => { 
 			token( KW_Variable );
 			inlineBlockType = SemiTerminated;
-			if ( hostLangType == RubyCode )
+			if ( hostLang->lang == HostLang::Ruby )
 				fcall inline_code_ruby;
 			else
 				fcall inline_code;
@@ -982,7 +982,7 @@ void Scanner::endSection( )
 				token( '{' );
 				curly_count = 1; 
 				inlineBlockType = CurlyDelimited;
-				if ( hostLangType == RubyCode )
+				if ( hostLang->lang == HostLang::Ruby )
 					fcall inline_code_ruby;
 				else
 					fcall inline_code;
@@ -1073,7 +1073,7 @@ void Scanner::do_scan()
 	/* Set up the start state. FIXME: After 5.20 is released the nocs write
 	 * init option should be used, the main machine eliminated and this statement moved
 	 * above the write init. */
-	if ( hostLangType == RubyCode )
+	if ( hostLang->lang == HostLang::Ruby )
 		cs = rlscan_en_main_ruby;
 	else
 		cs = rlscan_en_main;

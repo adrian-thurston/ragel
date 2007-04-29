@@ -278,8 +278,10 @@ void CodeGenData::closeMachine()
 
 bool CodeGenData::setAlphType( char *data )
 {
-	/* FIXME: This should validate the alphabet type selection. */
-	HostType *alphType = hostLang->hostTypes + atoi(data);
+	HostType *alphType = findAlphTypeInternal( data );
+	if ( alphType == 0 )
+		return false;
+
 	thisKeyOps.setAlphType( alphType );
 	return true;
 }

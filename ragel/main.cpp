@@ -202,19 +202,15 @@ int main(int argc, char **argv)
 
 			/* Host language types. */
 			case 'C':
-				hostLangType = CCode;
 				hostLang = &hostLangC;
 				break;
 			case 'D':
-				hostLangType = DCode;
 				hostLang = &hostLangD;
 				break;
 			case 'J':
-				hostLangType = JavaCode;
 				hostLang = &hostLangJava;
 				break;
 			case 'R':
-				hostLangType = RubyCode;
 				hostLang = &hostLangRuby;
 				break;
 

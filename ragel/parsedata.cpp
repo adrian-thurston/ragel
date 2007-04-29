@@ -850,38 +850,17 @@ void ParseData::initGraphDict( )
 /* Set the alphabet type. If the types are not valid returns false. */
 bool ParseData::setAlphType( char *s1, char *s2 )
 {
-	bool valid = false;
-	for ( int i = 0; i < hostLang->numHostTypes; i++ ) {
-		if ( strcmp( s1, hostLang->hostTypes[i].data1 ) == 0 && 
-				hostLang->hostTypes[i].data2 != 0 && 
-				strcmp( s2, hostLang->hostTypes[i].data2 ) == 0 )
-		{
-			valid = true;
-			userAlphType = hostLang->hostTypes + i;
-			break;
-		}
-	}
-
+	userAlphType = findAlphType( s1, s2 );
 	alphTypeSet = true;
-	return valid;
+	return userAlphType != 0;
 }
 
 /* Set the alphabet type. If the types are not valid returns false. */
 bool ParseData::setAlphType( char *s1 )
 {
-	bool valid = false;
-	for ( int i = 0; i < hostLang->numHostTypes; i++ ) {
-		if ( strcmp( s1, hostLang->hostTypes[i].data1 ) == 0 && 
-				hostLang->hostTypes[i].data2 == 0 )
-		{
-			valid = true;
-			userAlphType = hostLang->hostTypes + i;
-			break;
-		}
-	}
-
+	userAlphType = findAlphType( s1 );
 	alphTypeSet = true;
-	return valid;
+	return userAlphType != 0;
 }
 
 bool ParseData::setVariable( char *var, InlineList *inlineList )
@@ -1460,11 +1439,11 @@ void terminateAllParsers( )
 void writeLanguage( std::ostream &out )
 {
 	out << " lang=\"";
-	switch ( hostLangType ) {
-		case CCode:    out << "C"; break;
-		case DCode:    out << "D"; break;
-		case JavaCode: out << "Java"; break;
-		case RubyCode: out << "Ruby"; break;
+	switch ( hostLang->lang ) {
+		case HostLang::C:    out << "C"; break;
+		case HostLang::D:    out << "D"; break;
+		case HostLang::Java: out << "Java"; break;
+		case HostLang::Ruby: out << "Ruby"; break;
 	}
 	out << "\"";
 	

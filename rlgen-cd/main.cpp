@@ -113,7 +113,7 @@ ostream &error()
 /* Invoked by the parser when the root element is opened. */
 ostream *openOutput( char *inputFile )
 {
-	if ( hostLangType != CCode && hostLangType != DCode ) {
+	if ( hostLang->lang != HostLang::C && hostLang->lang != HostLang::D ) {
 		error() << "this code generator is for C and D only" << endl;
 		exit(1);
 	}
@@ -126,9 +126,9 @@ ostream *openOutput( char *inputFile )
 			outputFileName = fileNameFromStem( inputFile, ".h" );
 		else {
 			char *defExtension = 0;
-			switch ( hostLangType ) {
-				case CCode: defExtension = ".c"; break;
-				case DCode: defExtension = ".d"; break;
+			switch ( hostLang->lang ) {
+				case HostLang::C: defExtension = ".c"; break;
+				case HostLang::D: defExtension = ".d"; break;
 				default: break;
 			}
 			outputFileName = fileNameFromStem( inputFile, defExtension );
@@ -165,8 +165,8 @@ CodeGenData *makeCodeGen( char *sourceFileName, char *fsmName,
 		ostream &out, bool wantComplete )
 {
 	CodeGenData *codeGen = 0;
-	switch ( hostLangType ) {
-	case CCode:
+	switch ( hostLang->lang ) {
+	case HostLang::C:
 		switch ( codeStyle ) {
 		case GenTables:
 			codeGen = new CTabCodeGen(out);
@@ -195,7 +195,7 @@ CodeGenData *makeCodeGen( char *sourceFileName, char *fsmName,
 		}
 		break;
 
-	case DCode:
+	case HostLang::D:
 		switch ( codeStyle ) {
 		case GenTables:
 			codeGen = new DTabCodeGen(out);

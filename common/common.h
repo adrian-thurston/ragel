@@ -99,6 +99,7 @@ struct HostType
 {
 	char *data1;
 	char *data2;
+	char *internalName;
 	bool isSigned;
 	long long minVal;
 	long long maxVal;
@@ -107,29 +108,29 @@ struct HostType
 
 struct HostLang
 {
+	/* Target language. */
+	enum Lang
+	{
+		C, D, Java, Ruby
+	};
+
+	Lang lang;
 	HostType *hostTypes;
 	int numHostTypes;
 	HostType *defaultAlphType;
 	bool explicitUnsigned;
 };
 
-
-/* Target language. */
-enum HostLangType
-{
-	CCode,
-	DCode,
-	JavaCode,
-	RubyCode
-};
-
 extern HostLang *hostLang;
-extern HostLangType hostLangType;
 
 extern HostLang hostLangC;
 extern HostLang hostLangD;
 extern HostLang hostLangJava;
 extern HostLang hostLangRuby;
+
+HostType *findAlphType( char *s1 );
+HostType *findAlphType( char *s1, char *s2 );
+HostType *findAlphTypeInternal( char *s1 );
 
 /* An abstraction of the key operators that manages key operations such as
  * comparison and increment according the signedness of the key. */

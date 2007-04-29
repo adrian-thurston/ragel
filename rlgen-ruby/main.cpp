@@ -1,5 +1,5 @@
 /*
- *  Copyright 2001-2005 Adrian Thurston <thurston@cs.queensu.ca>
+ *  Copyright 2001-2007 Adrian Thurston <thurston@cs.queensu.ca>
  */
 
 /*  This file is part of Ragel.
@@ -89,7 +89,7 @@ ostream &error()
 /* Invoked by the parser when the root element is opened. */
 ostream *openOutput( char *inputFile )
 {
-	if ( hostLangType != RubyCode ) {
+	if ( hostLang->lang != HostLang::Ruby ) {
 		error() << "this code generator is for Ruby only" << endl;
 		exit(1);
 	}

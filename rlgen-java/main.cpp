@@ -89,7 +89,7 @@ ostream &error()
 /* Invoked by the parser when the root element is opened. */
 ostream *openOutput( char *inputFile )
 {
-	if ( hostLangType != JavaCode ) {
+	if ( hostLang->lang != HostLang::Java ) {
 		error() << "this code generator is for Java only" << endl;
 		exit(1);
 	}

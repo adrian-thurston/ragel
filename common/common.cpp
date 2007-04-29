@@ -26,52 +26,87 @@
 
 HostType hostTypesC[] =
 {
-	{ "char",     0,       true,   CHAR_MIN,  CHAR_MAX,   sizeof(char) },
-	{ "unsigned", "char",  false,  0,         UCHAR_MAX,  sizeof(unsigned char) },
-	{ "short",    0,       true,   SHRT_MIN,  SHRT_MAX,   sizeof(short) },
-	{ "unsigned", "short", false,  0,         USHRT_MAX,  sizeof(unsigned short) },
-	{ "int",      0,       true,   INT_MIN,   INT_MAX,    sizeof(int) },
-	{ "unsigned", "int",   false,  0,         UINT_MAX,   sizeof(unsigned int) },
-	{ "long",     0,       true,   LONG_MIN,  LONG_MAX,   sizeof(long) },
-	{ "unsigned", "long",  false,  0,         ULONG_MAX,  sizeof(unsigned long) }
+	{ "char",     0,       "char",    true,   CHAR_MIN,  CHAR_MAX,   sizeof(char) },
+	{ "unsigned", "char",  "uchar",   false,  0,         UCHAR_MAX,  sizeof(unsigned char) },
+	{ "short",    0,       "short",   true,   SHRT_MIN,  SHRT_MAX,   sizeof(short) },
+	{ "unsigned", "short", "ushort",  false,  0,         USHRT_MAX,  sizeof(unsigned short) },
+	{ "int",      0,       "int",     true,   INT_MIN,   INT_MAX,    sizeof(int) },
+	{ "unsigned", "int",   "uint",    false,  0,         UINT_MAX,   sizeof(unsigned int) },
+	{ "long",     0,       "long",    true,   LONG_MIN,  LONG_MAX,   sizeof(long) },
+	{ "unsigned", "long",  "ulong",   false,  0,         ULONG_MAX,  sizeof(unsigned long) }
 };
 
 HostType hostTypesD[] =
 {
-	{ "byte",     0,  true,   CHAR_MIN,  CHAR_MAX,    1 },
-	{ "ubyte",    0,  false,  0,         UCHAR_MAX,   1 },
-	{ "char",     0,  false,  0,         UCHAR_MAX,   1 },
-	{ "short",    0,  true,   SHRT_MIN,  SHRT_MAX,    2 },
-	{ "ushort",   0,  false,  0,         USHRT_MAX,   2 },
-	{ "wchar",    0,  false,  0,         USHRT_MAX,   2 },
-	{ "int",      0,  true,   INT_MIN,   INT_MAX,     4 },
-	{ "uint",     0,  false,  0,         UINT_MAX,    4 },
-	{ "dchar",    0,  false,  0,         UINT_MAX,    4 }
+	{ "byte",    0,  "byte",    true,   CHAR_MIN,  CHAR_MAX,    1 },
+	{ "ubyte",   0,  "ubyte",   false,  0,         UCHAR_MAX,   1 },
+	{ "char",    0,  "char",    false,  0,         UCHAR_MAX,   1 },
+	{ "short",   0,  "short",   true,   SHRT_MIN,  SHRT_MAX,    2 },
+	{ "ushort",  0,  "ushort",  false,  0,         USHRT_MAX,   2 },
+	{ "wchar",   0,  "wchar",   false,  0,         USHRT_MAX,   2 },
+	{ "int",     0,  "int",     true,   INT_MIN,   INT_MAX,     4 },
+	{ "uint",    0,  "uint",    false,  0,         UINT_MAX,    4 },
+	{ "dchar",   0,  "dchar",   false,  0,         UINT_MAX,    4 }
 };
 
 HostType hostTypesJava[] = 
 {
-	{ "byte",     0,  true,   CHAR_MIN,  CHAR_MAX,    1 },
-	{ "short",    0,  true,   SHRT_MIN,  SHRT_MAX,    2 },
-	{ "char",     0,  false,  0,         USHRT_MAX,   2 },
-	{ "int",      0,  true,   INT_MIN,   INT_MAX,     4 },
+	{ "byte",    0,  "byte",   true,   CHAR_MIN,  CHAR_MAX,    1 },
+	{ "short",   0,  "short",  true,   SHRT_MIN,  SHRT_MAX,    2 },
+	{ "char",    0,  "char",   false,  0,         USHRT_MAX,   2 },
+	{ "int",     0,  "int",    true,   INT_MIN,   INT_MAX,     4 },
 };
 
+/* What are the appropriate types for ruby? */
 HostType hostTypesRuby[] = 
 {
-	{ "byte",     0,  true,   CHAR_MIN,  CHAR_MAX,    1 },
-	{ "short",    0,  true,   SHRT_MIN,  SHRT_MAX,    2 },
-	{ "char",     0,  false,  0,         USHRT_MAX,   2 },
-	{ "int",      0,  true,   INT_MIN,   INT_MAX,     4 },
+	{ "char",    0,  "char",   true,   CHAR_MIN,  CHAR_MAX,    1 },
+	{ "int",     0,  "int",    true,   INT_MIN,   INT_MAX,     4 },
 };
 
-HostLang hostLangC =    { hostTypesC,    8, hostTypesC+0,    true };
-HostLang hostLangD =    { hostTypesD,    9, hostTypesD+2,    true };
-HostLang hostLangJava = { hostTypesJava, 4, hostTypesJava+2, false };
-HostLang hostLangRuby = { hostTypesRuby, 4, hostTypesRuby+2, false };
+HostLang hostLangC =    { HostLang::C,    hostTypesC,    8, hostTypesC+0,    true };
+HostLang hostLangD =    { HostLang::D,    hostTypesD,    9, hostTypesD+2,    true };
+HostLang hostLangJava = { HostLang::Java, hostTypesJava, 4, hostTypesJava+2, false };
+HostLang hostLangRuby = { HostLang::Ruby, hostTypesRuby, 2, hostTypesRuby+0, false };
 
 HostLang *hostLang = &hostLangC;
-HostLangType hostLangType = CCode;
+
+HostType *findAlphType( char *s1 )
+{
+	for ( int i = 0; i < hostLang->numHostTypes; i++ ) {
+		if ( strcmp( s1, hostLang->hostTypes[i].data1 ) == 0 && 
+				hostLang->hostTypes[i].data2 == 0 )
+		{
+			return hostLang->hostTypes + i;
+		}
+	}
+
+	return 0;
+}
+
+HostType *findAlphType( char *s1, char *s2 )
+{
+	for ( int i = 0; i < hostLang->numHostTypes; i++ ) {
+		if ( strcmp( s1, hostLang->hostTypes[i].data1 ) == 0 && 
+				hostLang->hostTypes[i].data2 != 0 && 
+				strcmp( s2, hostLang->hostTypes[i].data2 ) == 0 )
+		{
+			return hostLang->hostTypes + i;
+		}
+	}
+
+	return 0;
+}
+
+HostType *findAlphTypeInternal( char *s1 )
+{
+	for ( int i = 0; i < hostLang->numHostTypes; i++ ) {
+		if ( strcmp( s1, hostLang->hostTypes[i].internalName ) == 0 )
+			return hostLang->hostTypes + i;
+	}
+
+	return 0;
+}
 
 /* Construct a new parameter checker with for paramSpec. */
 ParamCheck::ParamCheck(char *paramSpec, int argc, char **argv)

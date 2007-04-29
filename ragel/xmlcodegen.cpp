@@ -656,8 +656,7 @@ void XMLCodeGen::writeXML()
 	out << "<ragel_def name=\"" << fsmName << "\">\n";
 
 	/* Alphabet type. */
-	out << "  <alphtype>" << 
-		(keyOps->alphType - hostLang->hostTypes) << "</alphtype>\n";
+	out << "  <alphtype>" << keyOps->alphType->internalName << "</alphtype>\n";
 	
 	/* Getkey expression. */
 	if ( pd->getKeyExpr != 0 ) {
