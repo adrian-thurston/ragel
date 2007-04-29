@@ -345,6 +345,7 @@ int xml_parse( std::istream &input, char *fileName,
 
 std::ostream &Scanner::error()
 {
+	gblErrorCount += 1;
 	cerr << fileName << ":" << curline << ":" << curcol << ": ";
 	return cerr;
 }

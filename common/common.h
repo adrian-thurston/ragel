@@ -305,4 +305,8 @@ struct Export
 
 typedef DList<Export> ExportList;
 
+struct exit_object { };
+extern exit_object endp;
+void operator<<( std::ostream &out, exit_object & );
+
 #endif /* _COMMON_H */

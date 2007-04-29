@@ -25,6 +25,9 @@
 using std::cerr;
 using std::endl;
 
+/* Total error count. */
+int gblErrorCount = 0;
+
 CodeGenData::CodeGenData( ostream &out )
 :
 	sourceFileName(0),
@@ -51,7 +54,6 @@ CodeGenData::CodeGenData( ostream &out )
 	tokendExpr(0),
 	wantComplete(0),
 	hasLongestMatch(false),
-	codeGenErrCount(0),
 	hasEnd(true),
 	dataPrefix(true),
 	writeFirstFinal(true),
@@ -720,7 +722,7 @@ ostream &CodeGenData::source_warning( const InputLoc &loc )
 
 ostream &CodeGenData::source_error( const InputLoc &loc )
 {
-	codeGenErrCount += 1;
+	gblErrorCount += 1;
 	assert( sourceFileName != 0 );
 	cerr << sourceFileName << ":" << loc.line << ":" << loc.col << ": ";
 	return cerr;

@@ -75,9 +75,6 @@ void version()
 			"Copyright (c) 2001-2007 by Adrian Thurston" << endl;
 }
 
-/* Total error count. */
-int gblErrorCount = 0;
-
 ostream &error()
 {
 	gblErrorCount += 1;

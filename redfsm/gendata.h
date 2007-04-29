@@ -34,6 +34,8 @@ typedef DList<Action> ActionList;
 
 typedef unsigned long ulong;
 
+extern int gblErrorCount;
+
 struct CodeGenData;
 
 typedef AvlMap<char *, CodeGenData*, CmpStr> CodeGenMap;
@@ -115,7 +117,6 @@ struct CodeGenData
 	EntryIdVect entryPointIds;
 	EntryNameVect entryPointNames;
 	bool hasLongestMatch;
-	int codeGenErrCount;
 	ExportList exportList;
 
 	/* Write options. */

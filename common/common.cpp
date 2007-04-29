@@ -21,6 +21,7 @@
 
 #include "pcheck.h"
 #include "common.h"
+#include "stdlib.h"
 #include <assert.h>
 
 HostType hostTypesC[] =
@@ -271,4 +272,10 @@ char *fileNameFromStem( char *stemFile, char *suffix )
 	return retVal;
 }
 
+exit_object endp;
 
+void operator<<( std::ostream &out, exit_object & )
+{
+    out << std::endl;
+    exit(1);
+}

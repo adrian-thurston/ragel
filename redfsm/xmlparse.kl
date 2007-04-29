@@ -45,8 +45,9 @@ start: tag_ragel;
 start:
 	final {
 		/* If we get no input the assumption is that the frontend died and
-		 * emitted an error. */ 
-		errCount += 1;
+		 * emitted an error. This forces the backend to return a non-zero
+		 * exit status, but does not print an error. */
+		gblErrorCount += 1;
 	};
 
 tag_ragel: tag_ragel_head ragel_def_list host_or_write_list '/' TAG_ragel;
@@ -54,16 +55,14 @@ tag_ragel: tag_ragel_head ragel_def_list host_or_write_list '/' TAG_ragel;
 tag_ragel_head: TAG_ragel
 	final {
 		Attribute *fileNameAttr = $1->tag->findAttr( "filename" );
-		if ( fileNameAttr == 0 ) {
-			error($1->loc) << "tag <ragel> requires a filename attribute" << endl;
-			exit(1);
-		}
+		if ( fileNameAttr == 0 )
+			error($1->loc) << "tag <ragel> requires a filename attribute" << endp;
 		else {
 			sourceFileName = fileNameAttr->value;
 
 			Attribute *langAttr = $1->tag->findAttr( "lang" );
 			if ( langAttr == 0 )
-				error($1->loc) << "tag <ragel> requires a lang attribute" << endl;
+				error($1->loc) << "tag <ragel> requires a lang attribute" << endp;
 			else {
 				if ( strcmp( langAttr->value, "C" ) == 0 ) {
 					hostLangType = CCode;
@@ -83,7 +82,7 @@ tag_ragel_head: TAG_ragel
 				}
 				else {
 					error($1->loc) << "expecting lang attribute to be "
-							"one of C, D, Java or Ruby" << endl;
+							"one of C, D, Java or Ruby" << endp;
 				}
 
 				outStream = openOutput( sourceFileName );
@@ -105,7 +104,7 @@ tag_host:
 	final {
 		Attribute *lineAttr = $1->tag->findAttr( "line" );
 		if ( lineAttr == 0 )
-			error($1->loc) << "tag <host> requires a line attribute" << endl;
+			error($1->loc) << "tag <host> requires a line attribute" << endp;
 		else {
 			int line = atoi( lineAttr->value );
 			if ( outputActive )
@@ -181,7 +180,7 @@ tag_export: TAG_ex '/' TAG_ex
 	final {
 		Attribute *nameAttr = $1->tag->findAttr( "name" );
 		if ( nameAttr == 0 )
-			error($1->loc) << "tag <ex> requires a name attribute" << endl;
+			error($1->loc) << "tag <ex> requires a name attribute" << endp;
 		else {
 			char *td = $3->tag->content;
 			Key exportKey = readKey( td, &td );
@@ -192,7 +191,7 @@ tag_export: TAG_ex '/' TAG_ex
 tag_alph_type: TAG_alphtype '/' TAG_alphtype
 	final {
 		if ( ! cgd->setAlphType( $3->tag->content ) )
-			error($1->loc) << "tag <alphtype> specifies unknown alphabet type" << endl;
+			error($1->loc) << "tag <alphtype> specifies unknown alphabet type" << endp;
 	};
 
 tag_getkey_expr: TAG_getkey inline_list '/' TAG_getkey
@@ -229,9 +228,6 @@ tag_write: tag_write_head write_option_list '/' TAG_write
 		writeOptions.append(0);
 		cgd->writeStatement( $1->loc, writeOptions.length()-1, writeOptions.data );
 
-		/* CodeGenData may have issued an error. */
-		errCount += cgd->codeGenErrCount;
-
 		/* Clear the options in prep for the next write statement. */
 		writeOptions.empty();
 	};
@@ -248,16 +244,16 @@ tag_write_head: TAG_write
 		Attribute *colAttr = $1->tag->findAttr( "col" );
 
 		if ( nameAttr == 0 )
-			error($1->loc) << "tag <write> requires a def_name attribute" << endl;
+			error($1->loc) << "tag <write> requires a def_name attribute" << endp;
 		if ( lineAttr == 0 )
-			error($1->loc) << "tag <write> requires a line attribute" << endl;
+			error($1->loc) << "tag <write> requires a line attribute" << endp;
 		if ( colAttr == 0 )
-			error($1->loc) << "tag <write> requires a col attribute" << endl;
+			error($1->loc) << "tag <write> requires a col attribute" << endp;
 
 		if ( nameAttr != 0 && lineAttr != 0 && colAttr != 0 ) {
 			CodeGenMapEl *mapEl = codeGenMap.find( nameAttr->value );
 			if ( mapEl == 0 )
-				error($1->loc) << "internal error: cannot find codeGen" << endl;
+				error($1->loc) << "internal error: cannot find codeGen" << endp;
 			else {
 				cgd = mapEl->value;
 				::keyOps = &cgd->thisKeyOps;
@@ -334,7 +330,7 @@ tag_entry: TAG_entry '/' TAG_entry
 		Attribute *nameAttr = $1->tag->findAttr( "name" );
 		if ( nameAttr == 0 ) {
 			error($1->loc) << "tag <entry_points>::<entry> "
-					"requires a name attribute" << endl;
+					"requires a name attribute" << endp;
 		}
 		else {
 			char *data = $3->tag->content;
@@ -349,7 +345,7 @@ tag_state_list_head: TAG_state_list
 	final {
 		Attribute *lengthAttr = $1->tag->findAttr( "length" );
 		if ( lengthAttr == 0 )
-			error($1->loc) << "tag <state_list> requires a length attribute" << endl;
+			error($1->loc) << "tag <state_list> requires a length attribute" << endp;
 	 	else {
 			unsigned long length = strtoul( lengthAttr->value, 0, 10 );
 			cgd->initStateList( length );
@@ -364,7 +360,7 @@ tag_state: TAG_state state_item_list '/' TAG_state
 	final {
 		Attribute *idAttr = $1->tag->findAttr( "id" );
 		if ( idAttr == 0 )
-			error($1->loc) << "tag <state> requires an id attribute" << endl;
+			error($1->loc) << "tag <state> requires an id attribute" << endp;
 		else {
 			int id = atoi( idAttr->value );
 			cgd->setId( curState, id );
@@ -401,7 +397,7 @@ tag_state_cond_list_head: TAG_cond_list
 	final {
 		Attribute *lengthAttr = $1->tag->findAttr( "length" );
 		if ( lengthAttr == 0 )
-			error($1->loc) << "tag <cond_list> requires a length attribute" << endl;
+			error($1->loc) << "tag <cond_list> requires a length attribute" << endp;
 	 	else {
 			ulong length = readLength( lengthAttr->value );
 			cgd->initStateCondList( curState, length );
@@ -430,7 +426,7 @@ tag_trans_list_head: TAG_trans_list
 	final {
 		Attribute *lengthAttr = $1->tag->findAttr( "length" );
 		if ( lengthAttr == 0 )
-			error($1->loc) << "tag <trans_list> requires a length attribute" << endl;
+			error($1->loc) << "tag <trans_list> requires a length attribute" << endp;
 	 	else {
 			unsigned long length = strtoul( lengthAttr->value, 0, 10 );
 			cgd->initTransList( curState, length );
@@ -462,7 +458,7 @@ tag_action_list_head: TAG_action_list
 	final {
 		Attribute *lengthAttr = $1->tag->findAttr( "length" );
 		if ( lengthAttr == 0 )
-			error($1->loc) << "tag <action_list> requires a length attribute" << endl;
+			error($1->loc) << "tag <action_list> requires a length attribute" << endp;
 	 	else {
 			unsigned long length = strtoul( lengthAttr->value, 0, 10 );
 			cgd->initActionList( length );
@@ -483,7 +479,7 @@ tag_action: TAG_action inline_list '/' TAG_action
 		Attribute *colAttr = $1->tag->findAttr( "col" );
 		Attribute *nameAttr = $1->tag->findAttr( "name" );
 		if ( lineAttr == 0 || colAttr == 0)
-			error($1->loc) << "tag <action> requires a line and col attributes" << endl;
+			error($1->loc) << "tag <action> requires a line and col attributes" << endp;
 	 	else {
 			unsigned long line = strtoul( lineAttr->value, 0, 10 );
 			unsigned long col = strtoul( colAttr->value, 0, 10 );
@@ -773,7 +769,7 @@ tag_action_table_list_head: TAG_action_table_list
 		Attribute *lengthAttr = $1->tag->findAttr( "length" );
 		if ( lengthAttr == 0 ) {
 			error($1->loc) << "tag <action_table_list> requires "
-					"a length attribute" << endl;
+					"a length attribute" << endp;
 		}
 	 	else {
 			unsigned long length = strtoul( lengthAttr->value, 0, 10 );
@@ -790,7 +786,7 @@ tag_action_table: TAG_action_table '/' TAG_action_table
 		/* Find the length of the action table. */
 		Attribute *lengthAttr = $1->tag->findAttr( "length" );
 		if ( lengthAttr == 0 )
-			error($1->loc) << "tag <at> requires a length attribute" << endl;
+			error($1->loc) << "tag <at> requires a length attribute" << endp;
 	 	else {
 			unsigned long length = strtoul( lengthAttr->value, 0, 10 );
 
@@ -825,7 +821,7 @@ tag_cond_space_list_head: TAG_cond_space_list
 		Attribute *lengthAttr = $1->tag->findAttr( "length" );
 		if ( lengthAttr == 0 ) {
 			error($1->loc) << "tag <cond_space_list> "
-					"requires a length attribute" << endl;
+					"requires a length attribute" << endp;
 		}
 	 	else {
 			ulong length = readLength( lengthAttr->value );
@@ -842,10 +838,10 @@ tag_cond_space: TAG_cond_space '/' TAG_cond_space
 		Attribute *lengthAttr = $1->tag->findAttr( "length" );
 		Attribute *idAttr = $1->tag->findAttr( "id" );
 		if ( lengthAttr == 0 )
-			error($1->loc) << "tag <cond_space> requires a length attribute" << endl;
+			error($1->loc) << "tag <cond_space> requires a length attribute" << endp;
 	 	else {
 			if ( lengthAttr == 0 )
-				error($1->loc) << "tag <cond_space> requires an id attribute" << endl;
+				error($1->loc) << "tag <cond_space> requires an id attribute" << endp;
 		 	else {
 				unsigned long condSpaceId = strtoul( idAttr->value, 0, 10 );
 				ulong length = readLength( lengthAttr->value );
@@ -917,7 +913,7 @@ ostream &Parser::warning( const InputLoc &loc )
 
 ostream &Parser::error( const InputLoc &loc )
 {
-	errCount += 1;
+	gblErrorCount += 1;
 	assert( fileName != 0 );
 	cerr << fileName << ":" << loc.line << ":" << loc.col << ": ";
 	return cerr;
@@ -926,7 +922,7 @@ ostream &Parser::error( const InputLoc &loc )
 
 ostream &Parser::parser_error( int tokId, Token &token )
 {
-	errCount += 1;
+	gblErrorCount += 1;
 	assert( fileName != 0 );
 	cerr << fileName << ":" << token.loc.line << ":" << token.loc.col;
 	if ( token.tag != 0 ) {
@@ -943,10 +939,8 @@ ostream &Parser::parser_error( int tokId, Token &token )
 int Parser::token( int tokenId, Token &tok )
 {
 	int res = parseLangEl( tokenId, &tok );
-	if ( res < 0 ) {
-		parser_error( tokenId, tok ) << "parse error" << endl;
-		exit(1);
-	}
+	if ( res < 0 )
+		parser_error( tokenId, tok ) << "parse error" << endp;
 	return res;
 }
 

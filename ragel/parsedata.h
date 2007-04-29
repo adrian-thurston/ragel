@@ -279,9 +279,6 @@ struct ParseData
 	char *sectionName;
 	InputLoc sectionLoc;
 
-	/* Number of errors encountered parsing the fsm spec. */
-	int errorCount;
-
 	/* Counting the action and priority ordering. */
 	int curActionOrd;
 	int curPriorOrd;
