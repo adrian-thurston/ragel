@@ -275,6 +275,8 @@ struct StringHead
 template<class T> class StrTmpl
 {
 public:
+	class Fresh {};
+
 	/**
 	 * \brief Create a null string.
 	 */
@@ -289,6 +291,9 @@ public:
 	/* Construct a string from a c-style string of specific len. */
 	StrTmpl( const char *s, long len );
 
+	/* Allocate len spaces. */
+	StrTmpl( const Fresh &, long len );
+
 	/* Construct a string from another StrTmpl.  */
 	StrTmpl( const StrTmpl &s );
 
@@ -300,6 +305,11 @@ public:
 
 	/* Set the string from a c-style string of specific len. */
 	void setAs( const char *s, long len );
+
+	/* Allocate len spaces. */
+	void setAs( const Fresh &, long len );
+
+	void chop( long len );
 
 	/* Set the string from a single char. */
 	StrTmpl &operator=( const char c );
@@ -349,9 +359,23 @@ protected:
 private:
 	/* A dummy struct solely to make a constructor that will never be
 	 * ambiguous with the public constructors. */
-	struct DisAmbig { long dummy; };
+	struct DisAmbig { };
 	StrTmpl( char *data, const DisAmbig & ) : data(data) { }
 };
+
+template<class T> struct CmpStrTmpl
+{
+	static int compare( const StrTmpl<T> &s1, const StrTmpl<T> &s2 )
+	{
+		if ( s1.length() < s2.length() )
+			return -1;
+		else if ( s1.length() > s2.length() )
+			return 1;
+		else
+			return memcmp( s1.data, s2.data, s1.length() );
+	}
+};
+
 
 /* Free all mem used by the string. */
 template<class T> StrTmpl<T>::~StrTmpl()
@@ -395,6 +419,14 @@ template<class T> StrTmpl<T>::StrTmpl( const char *s, long length )
 		memcpy( data, s, length );
 		data[length] = 0;
 	}
+}
+
+/* Create from a c-style string. */
+template<class T> StrTmpl<T>::StrTmpl( const Fresh &, long length )
+{
+	/* Init space for the data. */
+	initSpace( length );
+	data[length] = 0;
 }
 
 /* Create from another string class. */
@@ -500,6 +532,24 @@ template<class T> void StrTmpl<T>::setAs( const char *s, long length )
 		memcpy( data, s, length );
 		data[length] = 0;
 	}
+}
+
+template<class T> void StrTmpl<T>::chop( long length )
+{
+	/* Detach from the existing string. */
+	StringHead *head = ((StringHead*)data) - 1;
+	assert( head->refCount == 1 );
+	assert( length <= head->length );
+	head->length = length;
+	data[length] = 0;
+}
+
+/* Set this string to be the c string exactly. The old string is discarded.
+ * Returns a reference to this. */
+template<class T> void StrTmpl<T>::setAs( const Fresh &, long length )
+{
+	setSpace( length );
+	data[length] = 0;
 }
 
 /* Set this string to be the single char exactly. The old string is discarded.
@@ -738,10 +788,11 @@ template<class T> StrTmpl<T> operator+( const StrTmpl<T> &s1, const StrTmpl<T> &
 /* Operator used in case the compiler does not support the conversion. */
 template <class T> inline std::ostream &operator<<( std::ostream &o, const StrTmpl<T> &s )
 {
-	return o << s.data;
+	return o.write( s.data, s.length() );
 }
 
 typedef StrTmpl<char> String;
+typedef CmpStrTmpl<char> CmpString;
 
 
 #ifdef AAPL_NAMESPACE
