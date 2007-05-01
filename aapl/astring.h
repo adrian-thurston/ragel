@@ -27,6 +27,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <iostream>
+#include <assert.h>
 
 #ifdef AAPL_NAMESPACE
 namespace Aapl {
@@ -298,7 +299,7 @@ public:
 	StrTmpl( const StrTmpl &s );
 
 	/* Construct a string from with, sprintf. */
-	StrTmpl( long maxLen, const char *format, ... );
+	StrTmpl( long lenGuess, const char *format, ... );
 
 	/* Set the string from a c-style string. */
 	StrTmpl &operator=( const char *s );
@@ -310,6 +311,9 @@ public:
 	void setAs( const Fresh &, long len );
 
 	void chop( long len );
+
+	/* Construct a string from with, sprintf. */
+	void setAs( long lenGuess, const char *format, ... );
 
 	/* Set the string from a single char. */
 	StrTmpl &operator=( const char c );
@@ -362,20 +366,6 @@ private:
 	struct DisAmbig { };
 	StrTmpl( char *data, const DisAmbig & ) : data(data) { }
 };
-
-template<class T> struct CmpStrTmpl
-{
-	static int compare( const StrTmpl<T> &s1, const StrTmpl<T> &s2 )
-	{
-		if ( s1.length() < s2.length() )
-			return -1;
-		else if ( s1.length() > s2.length() )
-			return 1;
-		else
-			return memcmp( s1.data, s2.data, s1.length() );
-	}
-};
-
 
 /* Free all mem used by the string. */
 template<class T> StrTmpl<T>::~StrTmpl()
@@ -443,28 +433,45 @@ template<class T> StrTmpl<T>::StrTmpl( const StrTmpl &s )
 }
 
 /* Construct a string from with, sprintf. */
-template<class T> StrTmpl<T>::StrTmpl( long maxLen, const char *format, ... )
+template<class T> StrTmpl<T>::StrTmpl( long lenGuess, const char *format, ... )
 {
+	/* Set the string for len. */
+	initSpace( lenGuess );
+
 	va_list args;
-	char buf[maxLen+1];
 
 	/* Write to the temporary buffer. */
 	va_start( args, format );
-	long written = vsnprintf( buf, maxLen+1, format, args );
+
+	long written = vsnprintf( data, lenGuess+1, format, args );
+	if ( written > lenGuess ) {
+		setSpace( written );
+		written = vsnprintf( data, written+1, format, args );
+	}
+	chop( written );
+
 	va_end( args );
+}
 
-	/* If the output was truncated, then add a terminating null.  Before the
-	 * C99 standard vsnprintf would return -1 if the buffer were not big
-	 * enoug. */
-	if ( written < 0 || written > maxLen )
-		buf[maxLen] = 0;
+/* Construct a string from with, sprintf. */
+template<class T> void StrTmpl<T>::setAs( long lenGuess, const char *format, ... )
+{
+	/* Set the string for len. */
+	setSpace( lenGuess );
 
-	/* Init the string with enough space for the contents of the temp buffer. */
-	long length = strlen( buf );
-	initSpace( length );
+	va_list args;
 
-	/* Copy the buffer in. */
-	memcpy( data, buf, length+1 );
+	/* Write to the temporary buffer. */
+	va_start( args, format );
+
+	long written = vsnprintf( data, lenGuess+1, format, args );
+	if ( written > lenGuess ) {
+		setSpace( written );
+		written = vsnprintf( data, written+1, format, args );
+	}
+	chop( written );
+
+	va_end( args );
 }
 
 template<class T> void StrTmpl<T>::initSpace( long length )
@@ -792,7 +799,6 @@ template <class T> inline std::ostream &operator<<( std::ostream &o, const StrTm
 }
 
 typedef StrTmpl<char> String;
-typedef CmpStrTmpl<char> CmpString;
 
 
 #ifdef AAPL_NAMESPACE
