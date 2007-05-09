@@ -537,6 +537,27 @@ of the same name as the current specification. Without an input file the
 current file is searched for a machine of the given name. If both are present,
 the given input file is searched for a machine of the given name.
 
+\subsection{Importing Definitions}
+
+\begin{verbatim}
+import "inputfile.h";
+\end{verbatim}
+\verbspace
+
+The \verb|import| statement takes a literal string as an argument, interprets
+it as a file name, then scrapes the file for sequences of tokens that match the
+following forms. If the input file is a Ragel program then tokens inside the
+Ragel sections are ignored. See Section \ref{export} for a description of
+exporting machine definitions.
+
+\begin{itemize}
+	\setlength{\itemsep}{-2mm}
+    \item \verb|name = number|
+    \item \verb|name = lit_string|
+    \item \verb|"define" name number|
+    \item \verb|"define" name lit_string|
+\end{itemize}
+
 \subsection{Machine Definition}
 \label{definition}
 
@@ -2447,6 +2468,34 @@ sense use the Longest-Match machine construction described Section
 
 \chapter{Interface to Host Program}
 
+The Ragel code generator is very flexible. The generated code has no
+dependencies and can be inserted in any function, perhaps inside a loop if so
+desired.  The user is responsible for declaring and initializing a number of
+required variables, including the current state and the pointer to the input
+stream. These can live in any scope. Control of the input processing loop is
+also possible: the user may break out of the processing loop and return to it
+at any time.
+
+In the case of C and D host languages, Ragel is able to generate very
+fast-running code that implements state machines as directly executable code.
+Since very large files strain the host language compiler, table-based code
+generation is also supported. In the future we hope to provide a partitioned,
+directly executable format which is able to reduce the burden on the host
+compiler by splitting large machines across multiple functions.
+
+In the case of Java and Ruby, table-based code generation is the only code
+style supported. In the future this may be expanded to include other code
+styles.
+
+Ragel can be used to parse input in one block, or it can be used to parse input
+in a sequence of blocks as it arrives from a file or socket.  Parsing the input
+in a sequence of blocks brings with it a few responsibilities. If the parser
+utilizes a scanner, care must be taken to not break the input stream anywhere
+but token boundaries.  If pointers to the input stream are taken during
+parsing, care must be taken to not use a pointer which has been invalidated by
+movement to a subsequent block.  If the current input data pointer is moved
+backwards it must not be moved past the beginning of the current block.
+
 \section{Alphtype Statement}
 
 \begin{verbatim}
@@ -2491,6 +2540,18 @@ This includes all variables except \verb|p| and \verb|pe|. This includes
 This is useful if a machine is to be encapsulated inside a
 structure in C code. The access statement can be used to give the name of
 a pointer to the structure.
+
+\section{Variable Statement}
+
+\begin{verbatim}
+variable p fsm->p;
+\end{verbatim}
+\verbspace
+
+The variable statement allows one to tell ragel how to access a specific
+variable. All of the variables which are declared by the user and
+used by Ragel can be changed. This includes \verb|p|, \verb|pe|, \verb|cs|,
+\verb|top|, \verb|stack|, \verb|tokstart|, \verb|tokend| and \verb|act|.
 
 \section{Write Statement}
 \label{write-statement}
@@ -2544,11 +2605,12 @@ state.
 Data generation has several options:
 
 \begin{itemize}
-\item \verb|noerror| - Do not generate the integer variable that gives the
+\setlength{\itemsep}{-2mm}
+\item \verb|noerror  | - Do not generate the integer variable that gives the
 id of the error state.
-\item \verb|nofinal| - Do not generate the integer variable that gives the
+\item \verb|nofinal  | - Do not generate the integer variable that gives the
 id of the first final state.
-\item \verb|noprefix| - Do not prefix the variable names with the name of the
+\item \verb|noprefix | - Do not prefix the variable names with the name of the
 machine.
 \end{itemize}
 
@@ -2635,6 +2697,27 @@ This write statement is only relevant if EOF actions have been embedded,
 otherwise it does not generate anything. The EOF action code requires access to
 the current state.
 
+\subsection{Write Exports}
+\label{export}
+
+\begin{verbatim}
+write exports;
+\end{verbatim}
+\verbspace
+
+The export feature can be used to export simple machine definitions. Machine definitions
+are marked for export using the \verb|export| keyword.
+
+\verbspace
+\begin{verbatim}
+export machine_to_export = 0x44;
+\end{verbatim}
+\verbspace
+
+When the write exports statement is used these machines are 
+written out in the generated code. Defines are used for C and constant integers
+are used for D, Java and Ruby. 
+  
 \section{Maintaining Pointers to Input Data}
 
 In the creation of any parser it is not uncommon to require the collection of
@@ -2715,48 +2798,38 @@ An example of line-oriented processing is given in Figure \ref{line-oriented}.
 
 \section{Running the Executables}
 
-Ragel is broken down into two executables: a frontend which compiles machines
+Ragel is broken down into two parts: a frontend which compiles machines
 and emits them in an XML format, and a backend which generates code or a
 Graphviz Dot file from the XML data. The purpose of the XML-based intermediate
 format is to allow users to inspect their compiled state machines and to
 interface Ragel to other tools such as custom visualizers, code generators or
-analysis tools. The intermediate format will provide a better platform for
-extending Ragel to support new host languages. The split also serves to reduce
-complexity of the Ragel program by strictly separating the data structures and
-algorithms that are used to compile machines from those that are used to
-generate code. 
+analysis tools. The split also serves to reduce the complexity of the Ragel
+program by strictly separating the data structures and algorithms that are used
+to compile machines from those that are used to generate code. 
 
-\verbspace
-\begin{verbatim}
-[user@host] myproj: ragel file.rl | rlgen-cd -G2 -o file.c
-\end{verbatim}
+\vspace{10pt}
 
-\section{Choosing a Generated Code Style}
+\noindent The frontend program is called \verb|ragel|. It takes as an argument the host
+language. This can be:
+
+\begin{itemize}
+\item \verb|-C  | for C/C++/Objective-C code (default)
+\item \verb|-D  | for D code.
+\item \verb|-J  | for Java code.
+\item \verb|-R  | for Ruby code.
+\end{itemize}
+
+\noindent There are four code backend programs. These are:
+
+\begin{itemize}
+\item \verb|rlgen-cd    | generate code for the C-based and D languages.
+\item \verb|rlgen-java  | generate code for the Java language.
+\item \verb|rlgen-ruby  | generate code for the Ruby language.
+\item \verb|rlgen-dot   | generate a Graphviz Dot file.
+\end{itemize}
+
+\section{Choosing a Generated Code Style (C/D only)}
 \label{genout}
-
-The Ragel code generator is very flexible. Following the lead of Re2C, the
-generated code has no dependencies and can be inserted in any function, perhaps
-inside a loop if so desired.  The user is responsible for declaring and
-initializing a number of required variables, including the current state and
-the pointer to the input stream. The user may break out of the processing loop
-and return to it at any time.
-
-Ragel is able to generate very fast-running code that implements state machines
-as directly executable code. Since very large files strain the host language
-compiler, table-based code generation is also supported. In the future we hope
-to provide a partitioned, directly executable format which is able to reduce the
-burden on the host compiler by splitting large machines across multiple functions.
-
-Ragel can be used to parse input in one block, or it can be used to parse input
-in a sequence of blocks as it arrives from a file or socket.  Parsing the
-input in a sequence of blocks brings with it a few responsibilities. If the parser
-utilizes a scanner, care must be taken to not break the input stream anywhere
-but token boundaries.  If pointers to the input stream are taken during parsing,
-care must be taken to not use a pointer which has been invalidated by movement
-to a subsequent block.  
-If the current input data pointer is moved backwards it must not be moved
-past the beginning of the current block.
-Strategies for handling these scenarios are given in Ragel's manual.
 
 There are three styles of code output to choose from. Code style affects the
 size and speed of the compiled binary. Changing code style does not require any
