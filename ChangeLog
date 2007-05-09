@@ -1,3 +1,39 @@
+Ragel 5.21 - May 9, 2007
+========================
+ -Bug fix: when fhold was used in scanner pattern actions which get executed
+  on the last character of the pattern (pattern matches which do not require
+  any lookahead), fhold was modifying p instead of tokend. This was fixed and
+  the patact.rl test was modified to cover the case.
+ -Fixed typos in the guide, improved the state action embedding operator
+  section.
+ -Implemented a better solution than the pri hack for resolving the '-'
+  ambiguity: force a shortest match of term.
+ -Fixed bugs in the binary searching for condition keys in both the Ruby and
+  Java code generation. 
+ -Can now embed the negative sense of a condition. Added a language-
+  independent test case for this feature and the necessary transformation
+  support.
+ -Added new condition embedding syntax:
+    expr inwhen cond   - The transitions into the machine (starting transitions).
+    expr outwhen cond  - The pending transitions out of the machine.
+ -The argument to the variable statement which affects the name of the current
+  state variable was changed from "curstate" to "cs" (the default name used
+  for the current state)
+ -Implemented the other variables names in the variable statement. Now all
+  variables (p, pe, cs, top, stack, act, tokstart, tokend) can be renamed.
+ -Parse errors in the intermediate XML file now cause the backend to exit
+  immediately rather then forge on. The recovery infrastructure isn't there
+  and segfaults are likely.
+ -When no input is given to the backend program, it should not print an error
+  message, it should just return a non-zero exit status. The assumption is
+  that the frontend printed an error.
+ -The version number is now included in the intermediate file. An error is
+  emitted if there is a mismatch.
+ -The alphabet type is now communicated from the frontend to the backend using
+  a one-word internal name instead of an array offset.
+ -The Ruby host language types had been just copied from Java. Reduced them to
+  two basic types: char and int, both signed with the usual C sizes.
+
 Ragel 5.20 - Apr 7, 2007
 ========================
  -The cs variable is now always initialized, unless the "nocs" option is given
