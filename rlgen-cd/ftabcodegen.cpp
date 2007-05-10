@@ -311,14 +311,14 @@ void FTabCodeGen::writeExec()
 			"		goto _out;\n";
 	}
 
-	out << "_resume:\n";
-
 	if ( redFsm->errState != 0 ) {
 		outLabelUsed = true;
 		out << 
 			"	if ( " << CS() << " == " << redFsm->errState->id << " )\n"
 			"		goto _out;\n";
 	}
+
+	out << "_resume:\n";
 
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
@@ -369,6 +369,13 @@ void FTabCodeGen::writeExec()
 			SWITCH_DEFAULT() <<
 			"	}\n"
 			"\n";
+	}
+
+	if ( redFsm->errState != 0 ) {
+		outLabelUsed = true;
+		out << 
+			"	if ( " << CS() << " == " << redFsm->errState->id << " )\n"
+			"		goto _out;\n";
 	}
 
 	if ( hasEnd ) {

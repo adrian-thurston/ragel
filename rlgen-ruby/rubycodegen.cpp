@@ -218,11 +218,11 @@ void RubyCodeGen::writeExec()
 	if ( hasEnd ) 
 		out << INDENT_S() << "_out.call if " << P() << " == " << PE() ;
 
+	if ( redFsm->errState != 0 ) 
+		out << INDENT_S() << "_out.call if " << CS() << " == " << redFsm->errState->id ;
+
 	out << INDENT_S() << "_resume = nil" 
 		<< INDENT_S() << "callcc { |_cc| _resume = _cc }" ;
-
-	if ( redFsm->errState != 0) 
-		out << INDENT_S() << "_out.call if " << CS() << " == " << redFsm->errState->id ;
 
 	if ( redFsm->anyRegActions() || redFsm->anyActionGotos() || 
 			redFsm->anyActionCalls() || redFsm->anyActionRets() )
@@ -288,6 +288,9 @@ void RubyCodeGen::writeExec()
 			<< INDENT_D() << "end" 
 			<< INDENT_S();
 	}
+
+	if ( redFsm->errState != 0 ) 
+		out << INDENT_S() << "_out.call if " << CS() << " == " << redFsm->errState->id ;
 
 	out << INDENT_S() << P() << " += 1" ;
 

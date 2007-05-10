@@ -941,15 +941,12 @@ void JavaTabCodeGen::writeExec()
 	if ( hasEnd )
 		out << "	if ( " << P() << " != " << PE() << " ) {\n";
 
+	if ( redFsm->errState != 0 )
+		out << "	if ( " << CS() << " != " << redFsm->errState->id << " ) {\n";
+
 	out << "	_resume: while ( true ) {\n";
 
 	out << "	_again: do {\n";
-
-	if ( redFsm->errState != 0 ) {
-		out << 
-			"	if ( " << CS() << " == " << redFsm->errState->id << " )\n"
-			"		break _resume;\n";
-	}
 
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
@@ -1009,6 +1006,12 @@ void JavaTabCodeGen::writeExec()
 			"\n";
 	}
 
+	if ( redFsm->errState != 0 ) {
+		out << 
+			"	if ( " << CS() << " == " << redFsm->errState->id << " )\n"
+			"		break _resume;\n";
+	}
+
 	if ( hasEnd ) {
 		out << 
 			"	if ( ++" << P() << " == " << PE() << " )\n"
@@ -1021,6 +1024,10 @@ void JavaTabCodeGen::writeExec()
 
 	/* Close the resume loop. */
 	out << "	}\n";
+
+	/* The if guarding on the error state. */
+	if ( redFsm->errState != 0 )
+		out << "	}";
 
 	/* The if guarding on empty string. */
 	if ( hasEnd )

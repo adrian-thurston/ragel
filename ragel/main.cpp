@@ -86,7 +86,7 @@ void usage()
 void version()
 {
 	cout << "Ragel State Machine Compiler version " VERSION << " " PUBDATE << endl <<
-			"Copyright (c) 2001-2006 by Adrian Thurston" << endl;
+			"Copyright (c) 2001-2007 by Adrian Thurston" << endl;
 }
 
 /* Total error count. */

@@ -1,11 +1,17 @@
 Ragel 5.21 - May 9, 2007
 ========================
+ -Fixed an inconsistency in the value of p following an error. In the C
+  directly executable code (rlgen-cd -G2) p is left at the character where
+  the error occurred, which is correct. In all other code generators it was
+  left at the following character. This was fixed. Now in all code generators
+  p is left at the character where the error occurred.
  -Bug fix: when fhold was used in scanner pattern actions which get executed
   on the last character of the pattern (pattern matches which do not require
   any lookahead), fhold was modifying p instead of tokend. This was fixed and
   the patact.rl test was modified to cover the case.
  -Fixed typos in the guide, improved the state action embedding operator
-  section.
+  section and added subsections on the variable, import, and export
+  statements.
  -Implemented a better solution than the pri hack for resolving the '-'
   ambiguity: force a shortest match of term.
  -Fixed bugs in the binary searching for condition keys in both the Ruby and
