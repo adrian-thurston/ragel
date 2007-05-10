@@ -225,7 +225,7 @@ first and primary use is to embed code into transitions and states, allowing
 the programmer to specify the actions of the state machine.
 
 Ragel attempts to make the action embedding facility as intuitive as possible.
-To do so, a number issues need to be addressed.  For example, when making a
+To do so, a number of issues need to be addressed.  For example, when making a
 nondeterministic specification into a DFA using machines that have embedded
 actions, new transitions are often made that have the combined actions of
 several source transitions. Ragel ensures that multiple actions associated with
@@ -521,7 +521,7 @@ previous specification name exists then this is an error. Because FSM
 specifications persist in memory, a machine's statements can be spread across
 multiple machine specifications.  This allows one to break up a machine across
 several files or draw in statements that are common to multiple machines using
-the include statement.
+the \verb|include| statement.
 
 \subsection{Including Ragel Code}
 
@@ -624,7 +624,7 @@ identical reproduction in the output code.
 Integers used for specifying machines may be negative only if the alphabet type
 is signed. Integers used for specifying priorities may be positive or negative.
 
-\item The pattern \verb|0x[0-9a-fA-f]+| denotes an integer in hexadecimal
+\item The pattern \verb|0x[0-9A-Fa-f]+| denotes an integer in hexadecimal
 format.
 
 \item The keywords are \verb|access|, \verb|action|, \verb|alphtype|,
@@ -696,11 +696,11 @@ the string, for example \verb|'cmd'i|.
 \item \verb|[hello]| -- Or Expression. Produces a union of characters.  There
 will be two states with a transition for each unique character between the two states.
 The \verb|[]| delimiters behave like the quotes of a literal string. For example, 
-\verb|[ \t]| means tab or space. The or expression supports character ranges
+\verb|[ \t]| means tab or space. The \verb|or| expression supports character ranges
 with the \verb|-| symbol as a separator. The meaning of the union can be negated
 using an initial \verb|^| character as in standard regular expressions. 
 See Section \ref{lexing} for information on valid escape sequences
-in or expressions.
+in \verb|or| expressions.
 
 % GENERATE: bmor
 % OPT: -p
@@ -1116,7 +1116,7 @@ expr - ( any* expr any* )
 Concatenation produces a machine that matches all the strings in machine one followed by all
 the strings in machine two.  Concatenation draws epsilon transitions from the
 final states of the first machine to the start state of the second machine. The
-final states of the first machine loose their final state status, unless the
+final states of the first machine lose their final state status, unless the
 start state of the second machine is final as well. 
 Concatenation is the default operator. Two machines next to each other with no
 operator between them results in the machines being concatenated together.  
@@ -1137,7 +1137,7 @@ termination string. The example in Section \ref{strong_difference}
 guards against this. Another example is the expression \verb|("'" any* "'")|.
 When executed the thread of control will
 never leave the \verb|any*| machine.  This is a problem especially if actions
-are embedded to processes the characters of the \verb|any*| component.
+are embedded to process the characters of the \verb|any*| component.
 
 In the following example, the first machine is always active due to the
 nondeterministic nature of concatenation. This particular nondeterminism is intended
@@ -1207,7 +1207,7 @@ by using the longest-match construction discussed in Section
 \ref{generating-scanners} on scanners.
 
 In this simple
-example, there is no nondeterminism introduced by the exterior kleene star due
+example, there is no nondeterminism introduced by the exterior kleene star due to
 the newline at the end of the regular expression. Without the newline the
 exterior kleene star would be redundant and there would be ambiguity between
 repeating the inner range of the regular expression and the entire regular
@@ -1529,7 +1529,7 @@ when leaving the alpha machine by the newline character.
 % action A {}
 \begin{inline_code}
 \begin{verbatim}
-# Match a word followed by an newline. Execute A when 
+# Match a word followed by a newline. Execute A when 
 # finishing the word.
 main := ( lower+ %A ) . '\n';
 \end{verbatim}
@@ -1757,7 +1757,7 @@ into the machine with \verb|fgoto|.
 Like global error actions, local error actions are also stored in states until
 a transfer point. The transfer point is different however. Each local error action
 embedding is associated with a name. When a machine definition has been fully
-constructed, all local error actions embeddings associated the same name as the
+constructed, all local error action embeddings associated the same name as the
 machine are transferred to error transitions. Local error actions can be used
 to specify an action to take when a particular section of a larger state
 machine fails to make a match. A particular machine definition's ``thread'' may
@@ -1857,7 +1857,7 @@ finishing}, and {\em leaving} embeddings in the order in which they appear.
 
 Ragel does not permit actions (defined or unnamed) to appear multiple times in
 an action list.  When the final machine has been created, actions which appear
-more than once in single transition or EOF action list have their duplicates
+more than once in a single transition or EOF action list have their duplicates
 removed. The first appearance of the action is preserved. This is useful in a
 number of scenarios.  First, it allows us to union machines with common
 prefixes without worrying about the action embeddings in the prefix being
@@ -1918,7 +1918,7 @@ used to backtrack to previous input or advance ahead.
 Unlike \verb|fhold|, which can be used
 anywhere, \verb|fexec| requires the user to ensure that the target of the
 backtrack is in the current buffer block or is known to be somewhere ahead of
-it. The machine will continue iterating forward until \verb|pe| is arrived,
+it. The machine will continue iterating forward until \verb|pe| is arrived at,
 \verb|fbreak| is called or the machine moves into the error state. In actions
 embedded into transitions, the \verb|fexec| statement is equivalent to setting
 \verb|p| to one position ahead of the next character to process.  If the user
@@ -2224,7 +2224,7 @@ to which the priority is assigned.
 
 \section{Guarded Operators that Encapsulate Priorities}
 
-Priorities embeddings are a very expressive mechanism. At the same time they
+Priority embeddings are a very expressive mechanism. At the same time they
 can be very confusing for the user. They force the user to imagine
 the transitions inside two interacting expressions and work out the precise
 effects of the operations between them. When we consider
@@ -2284,7 +2284,7 @@ is clear they constitute a frequently used operation.
 In the next section we discuss the explicit specification of state machines
 using state charts.
 
-\subsection{Entry-Guarded Contatenation}
+\subsection{Entry-Guarded Concatenation}
 
 \verb|expr :> expr| 
 \verbspace
@@ -2325,7 +2325,7 @@ Entry-guarded concatenation is equivalent to the following:
 expr $(unique_name,0) . expr >(unique_name,1)
 \end{verbatim}
 
-\subsection{Finish-Guarded Contatenation}
+\subsection{Finish-Guarded Concatenation}
 
 \verb|expr :>> expr|
 \verbspace
@@ -2463,7 +2463,7 @@ dropped.
 
 Note that this operator does not build a scanner in the traditional sense
 because there is never any backtracking. To build a scanner in the traditional
-sense use the Longest-Match machine construction described Section
+sense use the Longest-Match machine construction described in Section
 \ref{generating-scanners}.
 
 \chapter{Interface to Host Program}
@@ -2568,7 +2568,7 @@ components that can be generated by a write statement. These components are the
 state machine's data, initialization code, execution code and EOF action
 execution code. A write statement may appear before a machine is fully defined.
 This allows one to write out the data first then later define the machine where
-it is used. An example of this is show in Figure \ref{fbreak-example}.
+it is used. An example of this is shown in Figure \ref{fbreak-example}.
 
 \subsection{Write Data}
 \begin{verbatim}
@@ -2991,8 +2991,8 @@ so on.
 Any name reference may contain multiple components separated with the \verb|::|
 compound symbol.  The search for the first component of a name reference is
 rooted at the join expression that the epsilon transition or action embedding
-is contained in. If the name reference is not not contained in a join,
-the search is rooted at the machine definition that that the epsilon transition or
+is contained in. If the name reference is not contained in a join,
+the search is rooted at the machine definition that the epsilon transition or
 action embedding is contained in. Each component after the first is searched
 for beginning at the location in the name tree that the previous reference
 component refers to.
@@ -3021,7 +3021,7 @@ name tree. However, it can always be renamed.
 \section{Scanners}
 \label{generating-scanners}
 
-Scanners are very much intertwinded with regular-languages and their
+Scanners are very much intertwined with regular-languages and their
 corresponding processors. For this reason Ragel supports the definition of
 Scanners.  The generated code will repeatedly attempt to match patterns from a
 list, favouring longer patterns over shorter patterns.  In the case of
@@ -3045,9 +3045,9 @@ expressions and can therefore contain embedded code. With a Ragel-based scanner
 the user need not wait until the end of a pattern before user code can be
 executed.
 
-Scanners can be used to processes sub-languages, as well as for tokenizing
+Scanners can be used to process sub-languages, as well as for tokenizing
 programming languages. In the following example a scanner is used to tokenize
-the contents of header field.
+the contents of a header field.
 
 \begin{inline_code}
 \begin{verbatim}
@@ -3248,7 +3248,7 @@ Join a list of machines together without
 drawing any transitions, without setting up a start state, and without
 designating any final states. Transitions between the machines may be specified
 using labels and epsilon transitions. The start state must be explicity
-specified with the ``start'' label. Final states may be specified with the an
+specified with the ``start'' label. Final states may be specified with an
 epsilon transition to the implicitly created ``final'' state. The join
 operation allows one to build machines using a state chart model.
 
@@ -3259,7 +3259,7 @@ operation allows one to build machines using a state chart model.
 
 Attaches a label to an expression. Labels can be
 used as the target of epsilon transitions and explicit control transfer
-statements such \verb|fgoto| and \verb|fnext| in action
+statements such as \verb|fgoto| and \verb|fnext| in action
 code.
 
 \subsection{Epsilon}
@@ -3279,7 +3279,7 @@ There are two benefits to providing state charts in Ragel. The first is that it
 allows us to take a state chart with a full listing of states and transitions
 and simplifly it in selective places using regular expressions.
 
-The state chart method of specifying parsers is a very common.  It is an
+The state chart method of specifying parsers is very common.  It is an
 effective programming technique for producing robust code. The key disadvantage
 becomes clear when one attempts to comprehend a large parser specified in this
 way.  These programs usually require many lines, causing logic to be spread out
@@ -3309,7 +3309,7 @@ state machines using a state map model and implement portions of the state map
 using regular languages. In place of any transition in the state machine,
 entire sub-state machines can be given. These can encapsulate functionality
 defined elsewhere. An important aspect of the Ragel approach is that when we
-wrap up a collection of states using a regular expression we do not loose
+wrap up a collection of states using a regular expression we do not lose
 access to the states and transitions. We can still execute code on the
 transitions that we have encapsulated.
 
@@ -3327,7 +3327,7 @@ In the following example, we wish to buffer the characters of an XML CDATA
 sequence. The sequence is terminated by the string \verb|]]>|. The challenge
 in our application is that we do not wish the terminating characters to be
 buffered. An expression of the form \verb|any* @buffer :>> ']]>'| will not work
-because the buffer will alway contain the characters \verb|]]| on the end.
+because the buffer will always contain the characters \verb|]]| on the end.
 Instead, what we need is to delay the buffering of \hspace{0.25mm} \verb|]|
 characters until a time when we
 abandon the terminating sequence and go back into the main loop. There is no
@@ -3415,14 +3415,14 @@ The Ragel implementation of semantic conditions does not force us to give up the
 compositional property of Ragel definitions. For example, a machine which tests
 the length of a field using conditions can be unioned with another machine
 which accepts some of the same strings, without the two machines interfering with
-another. The user need not be concerned about whether or not the result of the
+one another. The user need not be concerned about whether or not the result of the
 semantic condition will affect the matching of the second machine.
 
 To see this, first consider that when a user associates a condition with an
 existing transition, the transition's label is translated from the base character
 to its corresponding value in the space which represents ``condition $c$ true''. Should
 the determinization process combine a state that has a conditional transition
-with another state has a transition on the same input character but
+with another state that has a transition on the same input character but
 without a condition, then the condition-less transition first has its label
 translated into two values, one to its corresponding value in the space which
 represents ``condition $c$ true'' and another to its corresponding value in the
@@ -3472,7 +3472,7 @@ which can be used in actions to prevent the machine from advancing over the
 current character. It is also possible to manually adjust the current character
 position by shifting it backwards using \verb|fexec|, however when this is
 done, care must be taken not to overstep the beginning of the current buffer
-block. In the both the use of \verb|fhold| and \verb|fexec| the user must be
+block. In both the use of \verb|fhold| and \verb|fexec| the user must be
 cautious of combining the resulting machine with another in such a way that the
 transition on which the current position is adjusted is not combined with a
 transition from the other machine.
