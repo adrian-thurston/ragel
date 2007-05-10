@@ -75,7 +75,7 @@ by\\
 %
 \chapter*{License}
 Ragel version \version, \pubdate\\
-Copyright \copyright\ 2003, 2004, 2005, 2006 Adrian Thurston
+Copyright \copyright\ 2003-2007 Adrian Thurston
 \vspace{6mm}
 
 {\bf\it\noindent This document is part of Ragel, and as such, this document is
@@ -128,7 +128,7 @@ maximally continuous.  One is free to specify an entire parser using a single
 regular expression.  The single-expression model affords concise and elegant
 descriptions of languages and the generation of very simple, fast and robust
 code.  Ragel compiles finite state machines from a high level regular language
-notation to executable C, C++, Objective-C or D. 
+notation to executable C, C++, Objective-C, D, Java or Ruby.
 
 In addition to building state machines from regular expressions, Ragel allows
 the programmer to directly specify state machines with state charts. These two
@@ -195,7 +195,7 @@ deterministic finite state automaton. Since every regular language has a state
 machine representation and vice versa, the terms regular language and state
 machine (or just machine) will be used interchangeably in this document.
 
-Ragel outputs machines to C, C++, Objective-C, or D code. The output is
+Ragel outputs machines to C, C++, Objective-C, D, Java or Ruby code. The output is
 designed to be generic and is not bound to any particular input or processing
 method. A Ragel machine expects to have data passed to it in buffer blocks.
 When there is no more input, the machine can be queried for acceptance.  In
