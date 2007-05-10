@@ -31,6 +31,11 @@ backtrack if necessary.
 
 The tokstart/tokend variable should be shortened to ts/te.
 
+Adjust p before executing token actions, eliminating the transfer from tokend
+to p following an action. Loose the ability to determine where in the input
+stream a scanner action is executed. Gain consistency, simplicity. Eliminate
+tokend, replace it with the marker variable and add ftokend/ftoklen.
+
 ================
 END 6.0 Features
 
