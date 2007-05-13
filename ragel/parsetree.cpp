@@ -346,6 +346,7 @@ void LongestMatch::runLonestMatch( ParseData *pd, FsmAp *graph )
 	}
 
 	/* The actions executed on starting to match a token. */
+	graph->isolateStartState();
 	graph->startState->toStateActionTable.setAction( pd->initTokStartOrd, pd->initTokStart );
 	graph->startState->fromStateActionTable.setAction( pd->setTokStartOrd, pd->setTokStart );
 	if ( maxItemSetLength > 1 ) {
