@@ -175,28 +175,6 @@ void XMLCodeGen::writeTransList( StateAp *state )
 	out << "      </trans_list>\n";
 }
 
-void XMLCodeGen::writeLmSwitch( InlineItem *item )
-{
-	LongestMatch *longestMatch = item->longestMatch;
-
-	out << "<lm_switch";
-	if ( longestMatch->lmSwitchHandlesError )
-		out << " handles_error=\"t\"";
-	out << ">\n";
-	
-	for ( LmPartList::Iter lmi = *longestMatch->longestMatchList; lmi.lte(); lmi++ ) {
-		if ( lmi->inLmSelect && lmi->action != 0 ) {
-			/* Open the action. Write it with the context that sets up _p 
-			 * when doing control flow changes from inside the machine. */
-			out << "      <sub_action id=\"" << lmi->longestMatchId << "\">";
-			writeInlineList( lmi->action->inlineList, item );
-			out << "</sub_action>\n";
-		}
-	}
-
-	out << "    </lm_switch><exec><get_tokend></get_tokend></exec>";
-}
-
 void XMLCodeGen::writeText( InlineItem *item )
 {
 	if ( item->prev == 0 || item->prev->type != InlineItem::Text )
@@ -388,6 +366,27 @@ void XMLCodeGen::writeLmOnLagBehind( InlineItem *item )
 	out << "<exec><get_tokend></get_tokend></exec>";
 }
 
+void XMLCodeGen::writeLmSwitch( InlineItem *item )
+{
+	LongestMatch *longestMatch = item->longestMatch;
+
+	out << "<lm_switch";
+	if ( longestMatch->lmSwitchHandlesError )
+		out << " handles_error=\"t\"";
+	out << ">\n";
+	
+	for ( LmPartList::Iter lmi = *longestMatch->longestMatchList; lmi.lte(); lmi++ ) {
+		if ( lmi->inLmSelect && lmi->action != 0 ) {
+			/* Open the action. Write it with the context that sets up _p 
+			 * when doing control flow changes from inside the machine. */
+			out << "      <sub_action id=\"" << lmi->longestMatchId << "\">";
+			writeInlineList( lmi->action->inlineList, item );
+			out << "</sub_action>\n";
+		}
+	}
+
+	out << "    </lm_switch><exec><get_tokend></get_tokend></exec>";
+}
 
 void XMLCodeGen::writeInlineList( InlineList *inlineList, InlineItem *context )
 {
@@ -423,9 +422,6 @@ void XMLCodeGen::writeInlineList( InlineList *inlineList, InlineItem *context )
 			writePtrMod( item, context );
 			break;
 
-		case InlineItem::LmSwitch: 
-			writeLmSwitch( item );
-			break;
 		case InlineItem::LmSetActId:
 			out << "<set_act>" << 
 					item->longestMatchPart->longestMatchId << 
@@ -434,6 +430,7 @@ void XMLCodeGen::writeInlineList( InlineList *inlineList, InlineItem *context )
 		case InlineItem::LmSetTokEnd:
 			out << "<set_tokend>1</set_tokend>";
 			break;
+
 		case InlineItem::LmOnLast:
 			writeLmOnLast( item );
 			break;
@@ -443,6 +440,10 @@ void XMLCodeGen::writeInlineList( InlineList *inlineList, InlineItem *context )
 		case InlineItem::LmOnLagBehind:
 			writeLmOnLagBehind( item );
 			break;
+		case InlineItem::LmSwitch: 
+			writeLmSwitch( item );
+			break;
+
 		case InlineItem::LmInitAct:
 			out << "<init_act></init_act>";
 			break;
