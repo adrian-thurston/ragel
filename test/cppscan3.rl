@@ -143,6 +143,8 @@ void Scanner::execute( char *data, int len )
 	char *pe = data + len;
 
 	%% write exec;
+
+	cout << "P: " << (p - data) << endl;
 }
 
 int Scanner::finish( )
@@ -245,6 +247,7 @@ int main()
 <241> 
 
 <195> _hithere22
+P: 53
 <193> '\''
 <192> "\n\d'\""
 <241> 
@@ -277,5 +280,7 @@ int main()
 <242> //
 
 <242> /* * */
+P: 56
+P: 1
 PARSE ERROR
 #endif
