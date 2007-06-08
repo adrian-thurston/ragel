@@ -1501,7 +1501,7 @@ void writeMachines( std::ostream &out, std::string hostData, char *inputFileName
 			/* Section/Machine to emit was found. Prepare and emit it. */
 			parseData->prepareMachineGen( graphDictEl );
 			if ( gblErrorCount == 0 ) {
-				out << "<ragel filename=\"" << inputFileName << "\"";
+				out << "<ragel version=\"" VERSION "\" filename=\"" << inputFileName << "\"";
 				writeLanguage( out );
 				out << ">\n";
 				parseData->generateXML( out );
