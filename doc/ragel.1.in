@@ -79,10 +79,10 @@ are minimized once at the end. This is the default minimization option.
 Minimize after every operation.
 .TP
 .B \-S <spec>
-FSM specification to output for -V
+FSM specification to output (for rlgen-dot)
 .TP
 .B \-M <machine>
-Machine definition/instantiation to output for -V
+Machine definition/instantiation to output (for rlgen-dot)
 .TP
 .B \-C
 The host language is C, C++, Obj-C or Obj-C++. This is the default host language option.
