@@ -717,14 +717,8 @@ tag_sub_action: TAG_sub_action inline_list '/' TAG_sub_action
 # Action switches.
 tag_lm_switch: TAG_lm_switch lm_action_list '/' TAG_lm_switch
 	final {
-		bool handlesError = false;
-		Attribute *handlesErrorAttr = $1->tag->findAttr( "handles_error" );
-		if ( handlesErrorAttr != 0 )
-			handlesError = true;
-
 		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::LmSwitch );
 		$$->inlineItem->children = $2->inlineList;
-		$$->inlineItem->handlesError = handlesError;
 	};
 
 nonterm lm_action_list

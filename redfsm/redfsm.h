@@ -73,7 +73,7 @@ struct InlineItem
 	InlineItem( const InputLoc &loc, Type type ) : 
 		loc(loc), data(0), targId(0), targState(0), 
 		lmId(0), children(0), offset(0),
-		handlesError(false), type(type) { }
+		type(type) { }
 	
 	InputLoc loc;
 	char *data;
@@ -82,7 +82,6 @@ struct InlineItem
 	int lmId;
 	InlineList *children;
 	int offset;
-	bool handlesError;
 	Type type;
 
 	InlineItem *prev, *next;
@@ -429,7 +428,6 @@ struct RedFsmAp
 	bool bAnyRegNextStmt;
 	bool bAnyRegCurStateRef;
 	bool bAnyRegBreak;
-	bool bAnyLmSwitchError;
 	bool bAnyConditions;
 
 	int maxState;
@@ -464,7 +462,6 @@ struct RedFsmAp
 	bool anyRegNextStmt()           { return bAnyRegNextStmt; }
 	bool anyRegCurStateRef()        { return bAnyRegCurStateRef; }
 	bool anyRegBreak()              { return bAnyRegBreak; }
-	bool anyLmSwitchError()         { return bAnyLmSwitchError; }
 	bool anyConditions()            { return bAnyConditions; }
 
 

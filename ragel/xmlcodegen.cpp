@@ -195,11 +195,6 @@ bool isLmItem( InlineItem *context )
 
 void XMLCodeGen::writeCtrlFlow( InlineItem *item, InlineItem *context )
 {
-	if ( isLmItem( context ) ) {
-		out << "<sub_action>";
-		out << "<exec><get_tokend></get_tokend></exec>";
-	}
-
 	switch ( item->type ) {
 	case InlineItem::Goto:
 		writeGoto( item, context );
@@ -227,34 +222,18 @@ void XMLCodeGen::writeCtrlFlow( InlineItem *item, InlineItem *context )
 		break;
 	default: break;
 	}
-
-	if ( isLmItem( context ) )
-		out << "</sub_action>";
 }
 
-void XMLCodeGen::writePtrMod( InlineItem *item, InlineItem *context )
+void XMLCodeGen::writePtrMod( InlineItem *item, InlineItem * )
 {
-	if ( isLmItem( context ) ) {
-		switch ( item->type ) {
-		case InlineItem::Hold:
-			out << "<holdte></holdte>";
-			break;
-		case InlineItem::Exec:
-			writeActionExecTE( item );
-			break;
-		default: break;
-		}
-	}
-	else {
-		switch ( item->type ) {
-		case InlineItem::Hold:
-			out << "<hold></hold>";
-			break;
-		case InlineItem::Exec:
-			writeActionExec( item );
-			break;
-		default: break;
-		}
+	switch ( item->type ) {
+	case InlineItem::Hold:
+		out << "<hold></hold>";
+		break;
+	case InlineItem::Exec:
+		writeActionExec( item );
+		break;
+	default: break;
 	}
 }
 
@@ -337,55 +316,65 @@ void XMLCodeGen::writeActionExecTE( InlineItem *item )
 void XMLCodeGen::writeLmOnLast( InlineItem *item )
 {
 	out << "<set_tokend>1</set_tokend>";
+
 	if ( item->longestMatchPart->action != 0 ) {
 		out << "<sub_action>";
 		writeInlineList( item->longestMatchPart->action->inlineList, item );
 		out << "</sub_action>";
 	}
-	out << "<exec><get_tokend></get_tokend></exec>";
 }
 
 void XMLCodeGen::writeLmOnNext( InlineItem *item )
 {
 	out << "<set_tokend>0</set_tokend>";
+	out << "<hold></hold>";
+
 	if ( item->longestMatchPart->action != 0 ) {
 		out << "<sub_action>";
 		writeInlineList( item->longestMatchPart->action->inlineList, item );
 		out << "</sub_action>";
 	}
-	out << "<exec><get_tokend></get_tokend></exec>";
 }
 
 void XMLCodeGen::writeLmOnLagBehind( InlineItem *item )
 {
+	out << "<exec><get_tokend></get_tokend></exec>";
+
 	if ( item->longestMatchPart->action != 0 ) {
 		out << "<sub_action>";
 		writeInlineList( item->longestMatchPart->action->inlineList, item );
 		out << "</sub_action>";
 	}
-	out << "<exec><get_tokend></get_tokend></exec>";
 }
 
 void XMLCodeGen::writeLmSwitch( InlineItem *item )
 {
-	LongestMatch *longestMatch = item->longestMatch;
 
-	out << "<lm_switch";
-	if ( longestMatch->lmSwitchHandlesError )
-		out << " handles_error=\"t\"";
-	out << ">\n";
+	LongestMatch *longestMatch = item->longestMatch;
+	out << "<lm_switch>\n";
+
+	if ( longestMatch->lmSwitchHandlesError ) {
+		/* If the switch handles error then we should have also forced the
+		 * error state. */
+		assert( fsm->errState != 0 );
+
+		out << "      <sub_action id=\"0\">";
+		out << "<goto>" << fsm->errState->alg.stateNum << "</goto>";
+		out << "</sub_action>\n";
+	}
 	
 	for ( LmPartList::Iter lmi = *longestMatch->longestMatchList; lmi.lte(); lmi++ ) {
 		if ( lmi->inLmSelect && lmi->action != 0 ) {
 			/* Open the action. Write it with the context that sets up _p 
 			 * when doing control flow changes from inside the machine. */
 			out << "      <sub_action id=\"" << lmi->longestMatchId << "\">";
+			out << "<exec><get_tokend></get_tokend></exec>";
 			writeInlineList( lmi->action->inlineList, item );
 			out << "</sub_action>\n";
 		}
 	}
 
-	out << "    </lm_switch><exec><get_tokend></get_tokend></exec>";
+	out << "    </lm_switch>";
 }
 
 void XMLCodeGen::writeInlineList( InlineList *inlineList, InlineItem *context )

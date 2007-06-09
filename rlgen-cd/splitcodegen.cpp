@@ -486,9 +486,6 @@ void SplitCodeGen::setLabelsNeeded()
 		for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ )
 			trans->labelNeeded = false;
 
-		if ( redFsm->errState != 0 && redFsm->anyLmSwitchError() )
-			redFsm->errState->labelNeeded = true;
-
 		/* Walk all transitions and set only those that have targs. */
 		for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 			for ( RedTransList::Iter tel = st->outRange; tel.lte(); tel++ )

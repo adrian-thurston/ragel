@@ -61,7 +61,7 @@ void RubyCodeGen::GOTO( ostream &out, int gotoDest, bool inFinish )
 	out << INDENT_U() << "begin"
 		<< INDENT_S() <<     CS() << " = " << gotoDest
 		<< INDENT_S() <<     "_again.call " << CTRL_FLOW()
-		<< INDENT_D() << "end";
+		<< INDENT_D() << "end ";
 }
 
 void RubyCodeGen::GOTO_EXPR( ostream &out, InlineItem *ilItem, bool inFinish )
@@ -71,7 +71,7 @@ void RubyCodeGen::GOTO_EXPR( ostream &out, InlineItem *ilItem, bool inFinish )
 	INLINE_LIST( out, ilItem->children, 0, inFinish );
 	out << ")"
 		<< INDENT_S() <<    "_again.call " << CTRL_FLOW()
-		<< INDENT_D() << "end";
+		<< INDENT_D() << "end ";
 }
 
 void RubyCodeGen::CALL( ostream &out, int callDest, int targState, bool inFinish )
@@ -81,7 +81,7 @@ void RubyCodeGen::CALL( ostream &out, int callDest, int targState, bool inFinish
 		<< INDENT_S() <<   TOP() << "+= 1" 
 		<< INDENT_S() <<   CS() << " = " << callDest 
 		<< INDENT_S() <<   "_again.call " << CTRL_FLOW() 
-		<< INDENT_D() << "end";
+		<< INDENT_D() << "end ";
 }
 
 void RubyCodeGen::CALL_EXPR(ostream &out, InlineItem *ilItem, int targState, bool inFinish )
@@ -93,7 +93,7 @@ void RubyCodeGen::CALL_EXPR(ostream &out, InlineItem *ilItem, int targState, boo
 	INLINE_LIST( out, ilItem->children, targState, inFinish );
 	out << ")" 
 		<< INDENT_S() <<   "_again.call " << CTRL_FLOW() 
-		<< INDENT_D() << "end";
+		<< INDENT_D() << "end ";
 }
 
 void RubyCodeGen::RET( ostream &out, bool inFinish )
@@ -102,7 +102,7 @@ void RubyCodeGen::RET( ostream &out, bool inFinish )
 		<< INDENT_S() <<   TOP() << " -= 1" 
 		<< INDENT_S() <<   CS() << " = " << STACK() << "[" << TOP() << "]" 
 		<< INDENT_S() <<   "_again.call " << CTRL_FLOW() 
-		<< INDENT_D() << "end";
+		<< INDENT_D() << "end ";
 }
 
 void RubyCodeGen::BREAK( ostream &out, int targState )
@@ -1410,14 +1410,6 @@ void RubyCodeGen::LM_SWITCH( ostream &ret, InlineItem *item,
 {
 	ret << 
 		"	case " << ACT() << "\n";
-
-	/* If the switch handles error then we also forced the error state. It
-	 * will exist. */
-	if ( item->handlesError ) {
-		ret << "	when 0: " << TOKEND() << " = " << TOKSTART() << "; ";
-		GOTO( ret, redFsm->errState->id, inFinish );
-		ret << "\n";
-	}
 
 	for ( InlineList::Iter lma = *item->children; lma.lte(); lma++ ) {
 		/* Write the case label, the action and the case break. */

@@ -451,9 +451,6 @@ void CodeGenData::analyzeAction( Action *act, InlineList *inlineList )
 
 			if ( item->type == InlineItem::Break )
 				redFsm->bAnyRegBreak = true;
-
-			if ( item->type == InlineItem::LmSwitch && item->handlesError )
-				redFsm->bAnyLmSwitchError = true;
 		}
 
 		if ( item->children != 0 )

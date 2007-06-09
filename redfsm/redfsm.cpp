@@ -62,7 +62,6 @@ RedFsmAp::RedFsmAp()
 	bAnyRegNextStmt(false),
 	bAnyRegCurStateRef(false),
 	bAnyRegBreak(false),
-	bAnyLmSwitchError(false),
 	bAnyConditions(false)
 {
 }

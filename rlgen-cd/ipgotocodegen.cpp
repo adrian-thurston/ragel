@@ -293,9 +293,6 @@ void IpGotoCodeGen::setLabelsNeeded()
 		for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ )
 			st->labelNeeded = false;
 
-		if ( redFsm->errState != 0 && redFsm->anyLmSwitchError() )
-			redFsm->errState->labelNeeded = true;
-
 		/* Walk all transitions and set only those that have targs. */
 		for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ ) {
 			/* If there is no action with a next statement, then the label will be

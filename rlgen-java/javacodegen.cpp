@@ -1369,14 +1369,6 @@ void JavaTabCodeGen::LM_SWITCH( ostream &ret, InlineItem *item,
 	ret << 
 		"	switch( " << ACT() << " ) {\n";
 
-	/* If the switch handles error then we also forced the error state. It
-	 * will exist. */
-	if ( item->handlesError ) {
-		ret << "	case 0: " << TOKEND() << " = " << TOKSTART() << "; ";
-		GOTO( ret, redFsm->errState->id, inFinish );
-		ret << "\n";
-	}
-
 	for ( InlineList::Iter lma = *item->children; lma.lte(); lma++ ) {
 		/* Write the case label, the action and the case break. */
 		ret << "	case " << lma->lmId << ":\n";
