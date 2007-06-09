@@ -192,7 +192,7 @@ void LongestMatch::makeActions( ParseData *pd )
 		inlineList->append( new InlineItem( lmi->getLoc(), this, lmi, 
 				InlineItem::LmOnLast ) );
 		char *actName = new char[50];
-		sprintf( actName, "imm%i", lmi->longestMatchId );
+		sprintf( actName, "last%i", lmi->longestMatchId );
 		lmi->actOnLast = newAction( pd, lmi->getLoc(), actName, inlineList );
 	}
 
@@ -206,7 +206,7 @@ void LongestMatch::makeActions( ParseData *pd )
 		inlineList->append( new InlineItem( lmi->getLoc(), this, lmi, 
 				InlineItem::LmOnNext ) );
 		char *actName = new char[50];
-		sprintf( actName, "lagh%i", lmi->longestMatchId );
+		sprintf( actName, "next%i", lmi->longestMatchId );
 		lmi->actOnNext = newAction( pd, lmi->getLoc(), actName, inlineList );
 	}
 
@@ -230,7 +230,7 @@ void LongestMatch::makeActions( ParseData *pd )
 	/* Create the error action. */
 	InlineList *il6 = new InlineList;
 	il6->append( new InlineItem( loc, this, 0, InlineItem::LmSwitch ) );
-	lmActSelect = newAction( pd, loc, "lagsel", il6 );
+	lmActSelect = newAction( pd, loc, "switch", il6 );
 }
 
 void LongestMatch::findName( ParseData *pd )
