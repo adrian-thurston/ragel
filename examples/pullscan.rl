@@ -44,18 +44,17 @@ void scan_init( Scanner *s, FILE *file )
 #define TK_EOF 129
 #define TK_Identifier 130
 #define TK_Number 131
+#define TK_String 132
 
 #define ret_tok( _tok ) token = _tok; s->data = s->tokstart
 
 int scan( Scanner *s )
 {
-	char *p = s->p;
-	char *pe = s->pe;
 	int token = TK_NO_TOKEN;
 	int space, readlen;
 
 	while ( 1 ) {
-		if ( p == pe ) {
+		if ( s->p == s->pe ) {
 			printf("scanner: need more data\n");
 
 			if ( s->tokstart == 0 )
@@ -63,13 +62,13 @@ int scan( Scanner *s )
 			else {
 				/* There is data that needs to be shifted over. */
 				printf("scanner: buffer broken mid token\n");
-				s->have = pe - s->tokstart;
+				s->have = s->pe - s->tokstart;
 				memmove( s->buf, s->tokstart, s->have );
 				s->tokend -= (s->tokstart-s->buf);
 				s->tokstart = s->buf;
 			}
 
-			p = s->buf + s->have;
+			s->p = s->buf + s->have;
 			space = BUFSIZE - s->have;
 
 			if ( space == 0 ) {
@@ -80,21 +79,23 @@ int scan( Scanner *s )
 
 			if ( s->done ) {
 				printf("scanner: end of file\n");
-				p[0] = 0;
+				s->p[0] = 0;
 				readlen = 1;
 			}
 			else {
-				readlen = fread( p, 1, space, s->file );
+				readlen = fread( s->p, 1, space, s->file );
 				if ( readlen < space )
 					s->done = 1;
 			}
 
-			pe = p + readlen;
+			s->pe = s->p + readlen;
 		}
 
 		%%{
 			machine Scanner;
 			access s->;
+			variable p s->p;
+			variable pe s->pe;
 
 			main := |*
 
@@ -105,7 +106,8 @@ int scan( Scanner *s )
 			# Whitespace
 			[ \t\n];
 
-			'"' ( [^\\"] | '\\' any ) * '"';
+			'"' ( [^\\"] | '\\' any ) * '"' =>
+				{ ret_tok( TK_String ); fbreak; };
 
 			# Number
 			digit+ => 
@@ -117,7 +119,7 @@ int scan( Scanner *s )
 
 			# Anything else
 			any => 
-				{ ret_tok( *p ); fbreak; };
+				{ ret_tok( *s->p ); fbreak; };
 
 			*|;
 
@@ -129,8 +131,7 @@ int scan( Scanner *s )
 
 		if ( token != TK_NO_TOKEN ) {
 			/* Save p and pe. fbreak does not advance p. */
-			s->p = p + 1;
-			s->pe = pe;
+			s->p += 1;
 			s->len = s->p - s->data;
 			return token;
 		}
