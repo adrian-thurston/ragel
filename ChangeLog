@@ -1,3 +1,15 @@
+For Next Release
+================
+ -The p varialbe is now set up at the beginning of a scanner action, rather
+  than at the end. This leaves scanner actions free to manipulate p and
+  removes the need for the special holdTE and execTE (TE for tokend) versions
+  of hold and exec. It also removes the need to set p = tokend-1 immediately
+  before any control flow. We loose the ability to determine where in the
+  input stream a scanner action is executed, however this information is of
+  little use because it is primarily an artifact of the scanner implementation
+  (sometimes the last char, other times later on). The gains of of this change
+  are consistency and simplicity.
+
 Ragel 5.21 - May 9, 2007
 ========================
  -Fixed an inconsistency in the value of p following an error. In the C

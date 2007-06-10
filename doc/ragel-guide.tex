@@ -1908,10 +1908,8 @@ label represents.
 data in multiple buffer blocks, the \verb|fhold| statement should only be used
 once in the set of actions executed on a character.  Multiple calls may result
 in backing up over the beginning of the buffer block. The \verb|fhold|
-statement does not imply any transfer of control. In actions embedded into
-transitions, it is equivalent to the \verb|p--;| statement. In scanner pattern
-actions any changes made to \verb|p| are lost. In this context, \verb|fhold| is
-equivalent to \verb|tokend--;|.
+statement does not imply any transfer of control. It is equivalent to the
+\verb|p--;| statement. 
 
 \item \verb|fexec <expr>;| -- Set the next character to process. This can be
 used to backtrack to previous input or advance ahead.
@@ -1923,9 +1921,6 @@ it. The machine will continue iterating forward until \verb|pe| is arrived at,
 embedded into transitions, the \verb|fexec| statement is equivalent to setting
 \verb|p| to one position ahead of the next character to process.  If the user
 also modifies \verb|pe|, it is possible to change the buffer block entirely.
-In scanner pattern actions any changes made to \verb|p| are lost. In this
-context, \verb|fexec| is equivalent to setting \verb|tokend| to the next
-character to process.
 
 \item \verb|fgoto <label>;| -- Jump to an entry point defined by
 \verb|<label>|.  The \verb|fgoto| statement immediately transfers control to
