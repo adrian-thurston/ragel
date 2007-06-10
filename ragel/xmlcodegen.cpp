@@ -184,61 +184,7 @@ void XMLCodeGen::writeText( InlineItem *item )
 		out << "</text>";
 }
 
-bool isLmItem( InlineItem *context )
-{
-	return context != 0 && (
-		context->type == InlineItem::LmOnLast ||
-		context->type == InlineItem::LmOnNext ||
-		context->type == InlineItem::LmOnLagBehind ||
-		context->type == InlineItem::LmSwitch );
-}
-
-void XMLCodeGen::writeCtrlFlow( InlineItem *item, InlineItem *context )
-{
-	switch ( item->type ) {
-	case InlineItem::Goto:
-		writeGoto( item, context );
-		break;
-	case InlineItem::GotoExpr:
-		writeGotoExpr( item, context );
-		break;
-	case InlineItem::Call:
-		writeCall( item, context );
-		break;
-	case InlineItem::CallExpr:
-		writeCallExpr( item, context );
-		break;
-	case InlineItem::Next:
-		writeNext( item, context );
-		break;
-	case InlineItem::NextExpr:
-		writeNextExpr( item, context );
-		break;
-	case InlineItem::Break:
-		out << "<break></break>";
-		break;
-	case InlineItem::Ret: 
-		out << "<ret></ret>";
-		break;
-	default: break;
-	}
-}
-
-void XMLCodeGen::writePtrMod( InlineItem *item, InlineItem * )
-{
-	switch ( item->type ) {
-	case InlineItem::Hold:
-		out << "<hold></hold>";
-		break;
-	case InlineItem::Exec:
-		writeActionExec( item );
-		break;
-	default: break;
-	}
-}
-
-
-void XMLCodeGen::writeGoto( InlineItem *item, InlineItem *context )
+void XMLCodeGen::writeGoto( InlineItem *item )
 {
 	if ( pd->generatingSectionSubset )
 		out << "<goto>-1</goto>";
@@ -248,7 +194,7 @@ void XMLCodeGen::writeGoto( InlineItem *item, InlineItem *context )
 	}
 }
 
-void XMLCodeGen::writeCall( InlineItem *item, InlineItem *context )
+void XMLCodeGen::writeCall( InlineItem *item )
 {
 	if ( pd->generatingSectionSubset )
 		out << "<call>-1</call>";
@@ -258,7 +204,7 @@ void XMLCodeGen::writeCall( InlineItem *item, InlineItem *context )
 	}
 }
 
-void XMLCodeGen::writeNext( InlineItem *item, InlineItem *context )
+void XMLCodeGen::writeNext( InlineItem *item )
 {
 	if ( pd->generatingSectionSubset )
 		out << "<next>-1</next>";
@@ -268,28 +214,28 @@ void XMLCodeGen::writeNext( InlineItem *item, InlineItem *context )
 	}
 }
 
-void XMLCodeGen::writeGotoExpr( InlineItem *item, InlineItem *context )
+void XMLCodeGen::writeGotoExpr( InlineItem *item )
 {
 	out << "<goto_expr>";
-	writeInlineList( item->children, 0 );
+	writeInlineList( item->children );
 	out << "</goto_expr>";
 }
 
-void XMLCodeGen::writeCallExpr( InlineItem *item, InlineItem *context )
+void XMLCodeGen::writeCallExpr( InlineItem *item )
 {
 	out << "<call_expr>";
-	writeInlineList( item->children, 0 );
+	writeInlineList( item->children );
 	out << "</call_expr>";
 }
 
-void XMLCodeGen::writeNextExpr( InlineItem *item, InlineItem *context )
+void XMLCodeGen::writeNextExpr( InlineItem *item )
 {
 	out << "<next_expr>";
-	writeInlineList( item->children, 0 );
+	writeInlineList( item->children );
 	out << "</next_expr>";
 }
 
-void XMLCodeGen::writeEntry( InlineItem * item )
+void XMLCodeGen::writeEntry( InlineItem *item )
 {
 	if ( pd->generatingSectionSubset )
 		out << "<entry>-1</entry>";
@@ -302,15 +248,8 @@ void XMLCodeGen::writeEntry( InlineItem * item )
 void XMLCodeGen::writeActionExec( InlineItem *item )
 {
 	out << "<exec>";
-	writeInlineList( item->children, 0 );
+	writeInlineList( item->children );
 	out << "</exec>";
-}
-
-void XMLCodeGen::writeActionExecTE( InlineItem *item )
-{
-	out << "<execte>";
-	writeInlineList( item->children, 0 );
-	out << "</execte>";
 }
 
 void XMLCodeGen::writeLmOnLast( InlineItem *item )
@@ -319,7 +258,7 @@ void XMLCodeGen::writeLmOnLast( InlineItem *item )
 
 	if ( item->longestMatchPart->action != 0 ) {
 		out << "<sub_action>";
-		writeInlineList( item->longestMatchPart->action->inlineList, item );
+		writeInlineList( item->longestMatchPart->action->inlineList );
 		out << "</sub_action>";
 	}
 }
@@ -331,7 +270,7 @@ void XMLCodeGen::writeLmOnNext( InlineItem *item )
 
 	if ( item->longestMatchPart->action != 0 ) {
 		out << "<sub_action>";
-		writeInlineList( item->longestMatchPart->action->inlineList, item );
+		writeInlineList( item->longestMatchPart->action->inlineList );
 		out << "</sub_action>";
 	}
 }
@@ -342,7 +281,7 @@ void XMLCodeGen::writeLmOnLagBehind( InlineItem *item )
 
 	if ( item->longestMatchPart->action != 0 ) {
 		out << "<sub_action>";
-		writeInlineList( item->longestMatchPart->action->inlineList, item );
+		writeInlineList( item->longestMatchPart->action->inlineList );
 		out << "</sub_action>";
 	}
 }
@@ -369,7 +308,7 @@ void XMLCodeGen::writeLmSwitch( InlineItem *item )
 			 * when doing control flow changes from inside the machine. */
 			out << "      <sub_action id=\"" << lmi->longestMatchId << "\">";
 			out << "<exec><get_tokend></get_tokend></exec>";
-			writeInlineList( lmi->action->inlineList, item );
+			writeInlineList( lmi->action->inlineList );
 			out << "</sub_action>\n";
 		}
 	}
@@ -377,18 +316,36 @@ void XMLCodeGen::writeLmSwitch( InlineItem *item )
 	out << "    </lm_switch>";
 }
 
-void XMLCodeGen::writeInlineList( InlineList *inlineList, InlineItem *context )
+void XMLCodeGen::writeInlineList( InlineList *inlineList )
 {
 	for ( InlineList::Iter item = *inlineList; item.lte(); item++ ) {
 		switch ( item->type ) {
 		case InlineItem::Text:
 			writeText( item );
 			break;
-		case InlineItem::Goto: case InlineItem::GotoExpr:
-		case InlineItem::Call: case InlineItem::CallExpr:
-		case InlineItem::Next: case InlineItem::NextExpr:
-		case InlineItem::Break: case InlineItem::Ret: 
-			writeCtrlFlow( item, context );
+		case InlineItem::Goto:
+			writeGoto( item );
+			break;
+		case InlineItem::GotoExpr:
+			writeGotoExpr( item );
+			break;
+		case InlineItem::Call:
+			writeCall( item );
+			break;
+		case InlineItem::CallExpr:
+			writeCallExpr( item );
+			break;
+		case InlineItem::Next:
+			writeNext( item );
+			break;
+		case InlineItem::NextExpr:
+			writeNextExpr( item );
+			break;
+		case InlineItem::Break:
+			out << "<break></break>";
+			break;
+		case InlineItem::Ret: 
+			out << "<ret></ret>";
 			break;
 		case InlineItem::PChar:
 			out << "<pchar></pchar>";
@@ -407,8 +364,10 @@ void XMLCodeGen::writeInlineList( InlineList *inlineList, InlineItem *context )
 			break;
 
 		case InlineItem::Hold:
+			out << "<hold></hold>";
+			break;
 		case InlineItem::Exec:
-			writePtrMod( item, context );
+			writeActionExec( item );
 			break;
 
 		case InlineItem::LmSetActId:
@@ -452,7 +411,7 @@ void XMLCodeGen::writeAction( Action *action )
 	if ( action->name != 0 ) 
 		out << " name=\"" << action->name << "\"";
 	out << " line=\"" << action->loc.line << "\" col=\"" << action->loc.col << "\">";
-	writeInlineList( action->inlineList, 0 );
+	writeInlineList( action->inlineList );
 	out << "</action>\n";
 }
 
@@ -651,14 +610,14 @@ void XMLCodeGen::writeXML()
 	/* Getkey expression. */
 	if ( pd->getKeyExpr != 0 ) {
 		out << "  <getkey>";
-		writeInlineList( pd->getKeyExpr, 0 );
+		writeInlineList( pd->getKeyExpr );
 		out << "</getkey>\n";
 	}
 
 	/* Access expression. */
 	if ( pd->accessExpr != 0 ) {
 		out << "  <access>";
-		writeInlineList( pd->accessExpr, 0 );
+		writeInlineList( pd->accessExpr );
 		out << "</access>\n";
 	}
 
@@ -668,49 +627,49 @@ void XMLCodeGen::writeXML()
 
 	if ( pd->pExpr != 0 ) {
 		out << "  <p_expr>";
-		writeInlineList( pd->pExpr, 0 );
+		writeInlineList( pd->pExpr );
 		out << "</p_expr>\n";
 	}
 	
 	if ( pd->peExpr != 0 ) {
 		out << "  <pe_expr>";
-		writeInlineList( pd->peExpr, 0 );
+		writeInlineList( pd->peExpr );
 		out << "</pe_expr>\n";
 	}
 	
 	if ( pd->csExpr != 0 ) {
 		out << "  <cs_expr>";
-		writeInlineList( pd->csExpr, 0 );
+		writeInlineList( pd->csExpr );
 		out << "</cs_expr>\n";
 	}
 	
 	if ( pd->topExpr != 0 ) {
 		out << "  <top_expr>";
-		writeInlineList( pd->topExpr, 0 );
+		writeInlineList( pd->topExpr );
 		out << "</top_expr>\n";
 	}
 	
 	if ( pd->stackExpr != 0 ) {
 		out << "  <stack_expr>";
-		writeInlineList( pd->stackExpr, 0 );
+		writeInlineList( pd->stackExpr );
 		out << "</stack_expr>\n";
 	}
 	
 	if ( pd->actExpr != 0 ) {
 		out << "  <act_expr>";
-		writeInlineList( pd->actExpr, 0 );
+		writeInlineList( pd->actExpr );
 		out << "</act_expr>\n";
 	}
 	
 	if ( pd->tokstartExpr != 0 ) {
 		out << "  <tokstart_expr>";
-		writeInlineList( pd->tokstartExpr, 0 );
+		writeInlineList( pd->tokstartExpr );
 		out << "</tokstart_expr>\n";
 	}
 	
 	if ( pd->tokendExpr != 0 ) {
 		out << "  <tokend_expr>";
-		writeInlineList( pd->tokendExpr, 0 );
+		writeInlineList( pd->tokendExpr );
 		out << "</tokend_expr>\n";
 	}
 	

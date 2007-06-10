@@ -139,7 +139,6 @@ protected:
 	virtual void CURS( ostream &ret, bool inFinish ) = 0;
 	virtual void TARGS( ostream &ret, bool inFinish, int targState ) = 0;
 	void EXEC( ostream &ret, InlineItem *item, int targState, int inFinish );
-	void EXECTE( ostream &ret, InlineItem *item, int targState, int inFinish );
 	void LM_SWITCH( ostream &ret, InlineItem *item, int targState, int inFinish );
 	void SET_ACT( ostream &ret, InlineItem *item );
 	void INIT_TOKSTART( ostream &ret, InlineItem *item );

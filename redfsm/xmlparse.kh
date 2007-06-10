@@ -109,10 +109,9 @@ struct Parser
 		# Inline block tokens.
 		token TAG_text, TAG_goto, TAG_call, TAG_next, TAG_goto_expr,
 			TAG_call_expr, TAG_next_expr, TAG_ret, TAG_pchar, TAG_char,
-			TAG_hold, TAG_exec, TAG_holdte, TAG_execte, TAG_curs, TAG_targs,
-			TAG_entry, TAG_data, TAG_lm_switch, TAG_init_act, TAG_set_act,
-			TAG_set_tokend, TAG_get_tokend, TAG_init_tokstart,
-			TAG_set_tokstart;
+			TAG_hold, TAG_exec, TAG_curs, TAG_targs, TAG_entry, TAG_data, 
+			TAG_lm_switch, TAG_init_act, TAG_set_act, TAG_set_tokend, 
+			TAG_get_tokend, TAG_init_tokstart, TAG_set_tokstart;
 
 		token TAG_write, TAG_access, TAG_break, TAG_arg, TAG_cs_expr;
 

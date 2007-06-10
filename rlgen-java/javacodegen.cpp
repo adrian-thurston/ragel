@@ -119,18 +119,6 @@ void JavaTabCodeGen::EXEC( ostream &ret, InlineItem *item, int targState, int in
 	ret << "))-1;}";
 }
 
-void JavaTabCodeGen::EXECTE( ostream &ret, InlineItem *item, int targState, int inFinish )
-{
-	/* Tokend version of exec. */
-
-	/* The parser gives fexec two children. The double brackets are for D
-	 * code. If the inline list is a single word it will get interpreted as a
-	 * C-style cast by the D compiler. */
-	ret << "{" << TOKEND() << " = ((";
-	INLINE_LIST( ret, item->children, targState, inFinish );
-	ret << "));}";
-}
-
 /* Write out an inline tree structure. Walks the list and possibly calls out
  * to virtual functions than handle language specific items in the tree. */
 void JavaTabCodeGen::INLINE_LIST( ostream &ret, InlineList *inlineList, 
@@ -164,12 +152,6 @@ void JavaTabCodeGen::INLINE_LIST( ostream &ret, InlineList *inlineList,
 			break;
 		case InlineItem::Exec:
 			EXEC( ret, item, targState, inFinish );
-			break;
-		case InlineItem::HoldTE:
-			ret << TOKEND() << "--;";
-			break;
-		case InlineItem::ExecTE:
-			EXECTE( ret, item, targState, inFinish );
 			break;
 		case InlineItem::Curs:
 			ret << "(_ps)";

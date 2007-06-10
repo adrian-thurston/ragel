@@ -530,8 +530,6 @@ inline_item: tag_pchar final { $$->inlineItem = $1->inlineItem; };
 inline_item: tag_char final { $$->inlineItem = $1->inlineItem; };
 inline_item: tag_hold final { $$->inlineItem = $1->inlineItem; };
 inline_item: tag_exec final { $$->inlineItem = $1->inlineItem; };
-inline_item: tag_holdte final { $$->inlineItem = $1->inlineItem; };
-inline_item: tag_execte final { $$->inlineItem = $1->inlineItem; };
 inline_item: tag_curs final { $$->inlineItem = $1->inlineItem; };
 inline_item: tag_targs final { $$->inlineItem = $1->inlineItem; };
 inline_item: tag_il_entry final { $$->inlineItem = $1->inlineItem; };
@@ -557,8 +555,6 @@ nonterm tag_pchar uses inline_item_type;
 nonterm tag_char uses inline_item_type;
 nonterm tag_hold uses inline_item_type;
 nonterm tag_exec uses inline_item_type;
-nonterm tag_holdte uses inline_item_type;
-nonterm tag_execte uses inline_item_type;
 nonterm tag_curs uses inline_item_type;
 nonterm tag_targs uses inline_item_type;
 nonterm tag_il_entry uses inline_item_type;
@@ -644,17 +640,6 @@ tag_hold: TAG_hold '/' TAG_hold
 tag_exec: TAG_exec inline_list '/' TAG_exec
 	final {
 		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::Exec );
-		$$->inlineItem->children = $2->inlineList;
-	};
-
-tag_holdte: TAG_holdte '/' TAG_holdte
-	final {
-		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::HoldTE );
-	};
-
-tag_execte: TAG_execte inline_list '/' TAG_execte
-	final {
-		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::ExecTE );
 		$$->inlineItem->children = $2->inlineList;
 	};
 

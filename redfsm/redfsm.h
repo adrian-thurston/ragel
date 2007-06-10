@@ -65,7 +65,7 @@ struct InlineItem
 	enum Type 
 	{
 		Text, Goto, Call, Next, GotoExpr, CallExpr, NextExpr, Ret, 
-		PChar, Char, Hold, Exec, HoldTE, ExecTE, Curs, Targs, Entry,
+		PChar, Char, Hold, Exec, Curs, Targs, Entry,
 		LmSwitch, LmSetActId, LmSetTokEnd, LmGetTokEnd, LmInitTokStart,
 		LmInitAct, LmSetTokStart, SubAction, Break
 	};

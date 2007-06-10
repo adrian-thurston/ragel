@@ -314,19 +314,6 @@ void FsmCodeGen::EXEC( ostream &ret, InlineItem *item, int targState, int inFini
 	ret << "))-1;}";
 }
 
-void FsmCodeGen::EXECTE( ostream &ret, InlineItem *item, int targState, int inFinish )
-{
-	/* Tokend version of exec. */
-
-	/* The parser gives fexec two children. The double brackets are for D
-	 * code. If the inline list is a single word it will get interpreted as a
-	 * C-style cast by the D compiler. */
-	ret << "{" << TOKEND() << " = ((";
-	INLINE_LIST( ret, item->children, targState, inFinish );
-	ret << "));}";
-}
-
-
 void FsmCodeGen::LM_SWITCH( ostream &ret, InlineItem *item, 
 		int targState, int inFinish )
 {
@@ -430,12 +417,6 @@ void FsmCodeGen::INLINE_LIST( ostream &ret, InlineList *inlineList,
 			break;
 		case InlineItem::Exec:
 			EXEC( ret, item, targState, inFinish );
-			break;
-		case InlineItem::HoldTE:
-			ret << TOKEND() << "--;";
-			break;
-		case InlineItem::ExecTE:
-			EXECTE( ret, item, targState, inFinish );
 			break;
 		case InlineItem::Curs:
 			CURS( ret, inFinish );

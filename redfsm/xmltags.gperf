@@ -57,8 +57,6 @@ pchar, TAG_pchar
 char, TAG_char
 hold, TAG_hold
 exec, TAG_exec
-holdte, TAG_holdte
-execte, TAG_execte
 curs, TAG_curs
 targs, TAG_targs
 entry, TAG_entry

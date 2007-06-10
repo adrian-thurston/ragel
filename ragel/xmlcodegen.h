@@ -90,14 +90,12 @@ private:
 
 	void writeKey( Key key );
 	void writeText( InlineItem *item );
-	void writeCtrlFlow( InlineItem *item, InlineItem *context );
-	void writePtrMod( InlineItem *item, InlineItem *context );
-	void writeGoto( InlineItem *item, InlineItem *context );
-	void writeGotoExpr( InlineItem *item, InlineItem *context );
-	void writeCall( InlineItem *item, InlineItem *context );
-	void writeCallExpr( InlineItem *item, InlineItem *context );
-	void writeNext( InlineItem *item, InlineItem *context );
-	void writeNextExpr( InlineItem *item, InlineItem *context );
+	void writeGoto( InlineItem *item );
+	void writeGotoExpr( InlineItem *item );
+	void writeCall( InlineItem *item );
+	void writeCallExpr( InlineItem *item );
+	void writeNext( InlineItem *item );
+	void writeNextExpr( InlineItem *item );
 	void writeEntry( InlineItem *item );
 	void writeLmSetActId( InlineItem *item );
 	void writeLmOnLast( InlineItem *item );
@@ -108,7 +106,7 @@ private:
 	bool writeNameInst( NameInst *nameInst );
 	void writeEntryPoints();
 	void writeConditions();
-	void writeInlineList( InlineList *inlineList, InlineItem *context );
+	void writeInlineList( InlineList *inlineList );
 	void writeActionList();
 	void writeActionTableList();
 	void reduceTrans( TransAp *trans );
@@ -119,7 +117,6 @@ private:
 	void writeLmSwitch( InlineItem *item );
 	void writeMachine();
 	void writeActionExec( InlineItem *item );
-	void writeActionExecTE( InlineItem *item );
 
 	char *fsmName;
 	ParseData *pd;
