@@ -288,7 +288,6 @@ void XMLCodeGen::writeLmOnLagBehind( InlineItem *item )
 
 void XMLCodeGen::writeLmSwitch( InlineItem *item )
 {
-
 	LongestMatch *longestMatch = item->longestMatch;
 	out << "<lm_switch>\n";
 
@@ -297,7 +296,7 @@ void XMLCodeGen::writeLmSwitch( InlineItem *item )
 		 * error state. */
 		assert( fsm->errState != 0 );
 
-		out << "      <sub_action id=\"0\">";
+		out << "        <sub_action id=\"0\">";
 		out << "<goto>" << fsm->errState->alg.stateNum << "</goto>";
 		out << "</sub_action>\n";
 	}
@@ -306,7 +305,7 @@ void XMLCodeGen::writeLmSwitch( InlineItem *item )
 		if ( lmi->inLmSelect && lmi->action != 0 ) {
 			/* Open the action. Write it with the context that sets up _p 
 			 * when doing control flow changes from inside the machine. */
-			out << "      <sub_action id=\"" << lmi->longestMatchId << "\">";
+			out << "        <sub_action id=\"" << lmi->longestMatchId << "\">";
 			out << "<exec><get_tokend></get_tokend></exec>";
 			writeInlineList( lmi->action->inlineList );
 			out << "</sub_action>\n";
