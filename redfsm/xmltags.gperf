@@ -87,3 +87,4 @@ stack_expr, TAG_stack_expr
 act_expr, TAG_act_expr
 tokstart_expr, TAG_tokstart_expr
 tokend_expr, TAG_tokend_expr
+data_expr, TAG_data_expr

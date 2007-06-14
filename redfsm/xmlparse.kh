@@ -116,7 +116,8 @@ struct Parser
 		token TAG_write, TAG_access, TAG_break, TAG_arg, TAG_cs_expr;
 
 		token TAG_p_expr, TAG_pe_expr, TAG_cs_expr, TAG_top_expr,
-			TAG_stack_expr, TAG_act_expr, TAG_tokstart_expr, TAG_tokend_expr;
+			TAG_stack_expr, TAG_act_expr, TAG_tokstart_expr, TAG_tokend_expr,
+			TAG_data_expr;
 	}%%
 
 	%% write instance_data;

@@ -169,6 +169,7 @@ ragel_def_item: tag_stack_expr;
 ragel_def_item: tag_act_expr;
 ragel_def_item: tag_tokstart_expr;
 ragel_def_item: tag_tokend_expr;
+ragel_def_item: tag_data_expr;
 
 tag_export_list: TAG_exports export_list '/' TAG_exports;
 
@@ -219,6 +220,8 @@ tag_tokstart_expr: TAG_tokstart_expr inline_list '/' TAG_tokstart_expr
 	final { cgd->tokstartExpr = $2->inlineList; };
 tag_tokend_expr: TAG_tokend_expr inline_list '/' TAG_tokend_expr
 	final { cgd->tokendExpr = $2->inlineList; };
+tag_data_expr: TAG_data_expr inline_list '/' TAG_data_expr
+	final { cgd->dataExpr = $2->inlineList; };
 
 
 tag_write: tag_write_head write_option_list '/' TAG_write

@@ -111,6 +111,7 @@ struct CodeGenData
 	InlineList *actExpr;
 	InlineList *tokstartExpr;
 	InlineList *tokendExpr;
+	InlineList *dataExpr;
 
 	KeyOps thisKeyOps;
 	bool wantComplete;

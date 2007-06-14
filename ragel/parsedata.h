@@ -268,6 +268,7 @@ struct ParseData
 	InlineList *actExpr;
 	InlineList *tokstartExpr;
 	InlineList *tokendExpr;
+	InlineList *dataExpr;
 
 	/* The alphabet range. */
 	char *lowerNum, *upperNum;

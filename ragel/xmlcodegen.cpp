@@ -672,6 +672,12 @@ void XMLCodeGen::writeXML()
 		out << "</tokend_expr>\n";
 	}
 	
+	if ( pd->dataExpr != 0 ) {
+		out << "  <data_expr>";
+		writeInlineList( pd->dataExpr );
+		out << "</data_expr>\n";
+	}
+	
 	writeExports();
 	
 	writeMachine();

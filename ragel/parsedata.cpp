@@ -437,6 +437,7 @@ ParseData::ParseData( char *fileName, char *sectionName,
 	actExpr(0),
 	tokstartExpr(0),
 	tokendExpr(0),
+	dataExpr(0),
 	lowerNum(0),
 	upperNum(0),
 	fileName(fileName),
@@ -883,6 +884,8 @@ bool ParseData::setVariable( char *var, InlineList *inlineList )
 		tokstartExpr = inlineList;
 	else if ( strcmp( var, "tokend" ) == 0 )
 		tokendExpr = inlineList;
+	else if ( strcmp( var, "data" ) == 0 )
+		dataExpr = inlineList;
 	else
 		set = false;
 

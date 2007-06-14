@@ -127,6 +127,7 @@ public:
 	string ACT();
 	string TOKSTART();
 	string TOKEND();
+	string DATA();
 
 	string DATA_PREFIX();
 	string PM() { return "_" + DATA_PREFIX() + "partition_map"; }

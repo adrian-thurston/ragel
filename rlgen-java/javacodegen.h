@@ -133,6 +133,7 @@ public:
 	string TOKSTART();
 	string TOKEND();
 	string ACT();
+	string DATA();
 
 	string DATA_PREFIX();
 	string PM() { return "_" + DATA_PREFIX() + "partition_map"; }

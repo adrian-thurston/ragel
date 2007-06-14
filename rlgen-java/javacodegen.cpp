@@ -1126,7 +1126,7 @@ string JavaTabCodeGen::GET_KEY()
 	}
 	else {
 		/* Expression for retrieving the key, use simple dereference. */
-		ret << "data[" << P() << "]";
+		ret << DATA() << "[" << P() << "]";
 	}
 	return ret.str();
 }
@@ -1296,6 +1296,19 @@ string JavaTabCodeGen::TOKEND()
 	else {
 		ret << "(";
 		INLINE_LIST( ret, tokendExpr, 0, false );
+		ret << ")";
+	}
+	return ret.str();
+}
+
+string JavaTabCodeGen::DATA()
+{
+	ostringstream ret;
+	if ( dataExpr == 0 )
+		ret << ACCESS() + "data";
+	else {
+		ret << "(";
+		INLINE_LIST( ret, dataExpr, 0, false );
 		ret << ")";
 	}
 	return ret.str();
