@@ -128,6 +128,9 @@ Specify how to access the persistent state machine variables.
 .TP
 .I Write:
 Write some component of the machine.
+.TP
+.I Variable:
+Override the default variable names (p, pe, cs, act, etc).
 .SH BASIC MACHINES
 The basic machines are the base operands of the regular language expressions.
 .TP
