@@ -1,5 +1,11 @@
-For Next Release
-================
+Ragel 5.22 - May 10, 2007
+=========================
+ -Bug fix: need to isolate the start state of a scanner before setting the
+  to-state and from-state actions which clear and set tokstart. This affected
+  very simple scanners only. Most scanners have an isolated start state due to
+  the pattern structure.
+ -Bug fix: when -S or -M was given the ragel version number was not emitted,
+  causing the backend to reject the intermediate format. From Tim Potter.
  -The p varialbe is now set up at the beginning of a scanner action, rather
   than at the end. This leaves scanner actions free to manipulate p and
   removes the need for the special holdTE and execTE (TE for tokend) versions
@@ -7,8 +13,10 @@ For Next Release
   before any control flow. We loose the ability to determine where in the
   input stream a scanner action is executed, however this information is of
   little use because it is primarily an artifact of the scanner implementation
-  (sometimes the last char, other times later on). The gains of of this change
+  (sometimes the last char, other times later on). The gains of this change
   are consistency and simplicity.
+ -The "data" variable (used in Java and Ruby code generation only) can now be
+  overridden using the variable statement.
 
 Ragel 5.21 - May 9, 2007
 ========================
