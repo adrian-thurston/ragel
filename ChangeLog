@@ -1,5 +1,5 @@
-Ragel 5.22 - May 10, 2007
-=========================
+Ragel 5.22 - June 14, 2007
+==========================
  -Bug fix: need to isolate the start state of a scanner before setting the
   to-state and from-state actions which clear and set tokstart. This affected
   very simple scanners only. Most scanners have an isolated start state due to
