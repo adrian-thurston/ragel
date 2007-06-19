@@ -60,7 +60,7 @@ void RubyCodeGen::GOTO( ostream &out, int gotoDest, bool inFinish )
 {
 	out << INDENT_U() << "begin"
 		<< INDENT_S() <<     CS() << " = " << gotoDest
-		<< INDENT_S() <<     "_again.call " << CTRL_FLOW()
+		<< INDENT_S() <<     "_break_again = true; break " // break _again
 		<< INDENT_D() << "end ";
 }
 
@@ -70,7 +70,7 @@ void RubyCodeGen::GOTO_EXPR( ostream &out, InlineItem *ilItem, bool inFinish )
 		<< INDENT_S() <<    CS() << " = (";
 	INLINE_LIST( out, ilItem->children, 0, inFinish );
 	out << ")"
-		<< INDENT_S() <<    "_again.call " << CTRL_FLOW()
+		<< INDENT_S() <<    "_break_again = true; break " // break _again
 		<< INDENT_D() << "end ";
 }
 
@@ -80,7 +80,7 @@ void RubyCodeGen::CALL( ostream &out, int callDest, int targState, bool inFinish
 		<< INDENT_S() <<   STACK() << "[" << TOP() << "] = " << CS() 
 		<< INDENT_S() <<   TOP() << "+= 1" 
 		<< INDENT_S() <<   CS() << " = " << callDest 
-		<< INDENT_S() <<   "_again.call " << CTRL_FLOW() 
+		<< INDENT_S() <<   "_break_again = true; break " // break _again
 		<< INDENT_D() << "end ";
 }
 
@@ -92,7 +92,7 @@ void RubyCodeGen::CALL_EXPR(ostream &out, InlineItem *ilItem, int targState, boo
 		<< INDENT_S() <<   CS() << " = (";
 	INLINE_LIST( out, ilItem->children, targState, inFinish );
 	out << ")" 
-		<< INDENT_S() <<   "_again.call " << CTRL_FLOW() 
+		<< INDENT_S() <<   "_break_again = true; break " // break _again
 		<< INDENT_D() << "end ";
 }
 
@@ -101,13 +101,13 @@ void RubyCodeGen::RET( ostream &out, bool inFinish )
 	out << INDENT_U() << "begin" 
 		<< INDENT_S() <<   TOP() << " -= 1" 
 		<< INDENT_S() <<   CS() << " = " << STACK() << "[" << TOP() << "]" 
-		<< INDENT_S() <<   "_again.call " << CTRL_FLOW() 
+		<< INDENT_S() <<   "_break_again = true; break " // break _again
 		<< INDENT_D() << "end ";
 }
 
 void RubyCodeGen::BREAK( ostream &out, int targState )
 {
-	out << "_out.call " << CTRL_FLOW();
+	out << "_break_resume = true; break\n";
 }
 
 void RubyCodeGen::COND_TRANSLATE()
@@ -156,8 +156,9 @@ void RubyCodeGen::LOCATE_TRANS()
 	out << INDENT_S() << "_keys = " << KO() << "[" << CS() << "]" 
 		<< INDENT_S() << "_trans = " << IO() << "[" << CS() << "]" 
 		<< INDENT_S() << "_klen = " << SL() << "[" << CS() << "]" 
+		<< INDENT_S() << "_break_match = false"
 		<< INDENT_S()
-		<< INDENT_U() << "callcc do |_match|" 
+		<< INDENT_U() << "begin" 
 		<< INDENT_U() <<    "if _klen > 0" 
 		<< INDENT_S() <<       "_lower = _keys" 
 		<< INDENT_S() <<       "_upper = _keys + _klen - 1" 
@@ -172,9 +173,11 @@ void RubyCodeGen::LOCATE_TRANS()
 		<< INDENT_O() <<             "_lower = _mid + 1" 
 		<< INDENT_U() <<          "else" 
 		<< INDENT_S() <<             "_trans += (_mid - _keys)" 
-		<< INDENT_S() <<             "_match.call" 
+		<< INDENT_S() <<             "_break_match = true"
+		<< INDENT_S() <<             "break"
 		<< INDENT_D() <<          "end" 
 		<< INDENT_D() <<       "end # loop" 
+		<< INDENT_S() <<       "break if _break_match"
 		<< INDENT_S() <<       "_keys += _klen" 
 		<< INDENT_S() <<       "_trans += _klen" 
 		<< INDENT_D() <<    "end" 
@@ -192,17 +195,19 @@ void RubyCodeGen::LOCATE_TRANS()
 		<< INDENT_O() <<            "_lower = _mid + 2" 
 		<< INDENT_U() <<          "else" 
 		<< INDENT_S() <<            "_trans += ((_mid - _keys) >> 1)" 
-		<< INDENT_S() <<            "_match.call" 
+		<< INDENT_S() <<            "_break_match = true"
+		<< INDENT_S() <<            "break"
 		<< INDENT_D() <<          "end" 
 		<< INDENT_D() <<       "end # loop" 
+		<< INDENT_S() <<       "break if _break_match"
 		<< INDENT_S() <<       "_trans += _klen" 
 		<< INDENT_D() <<    "end" 
-		<< INDENT_D() << "end # cc _match" ;
+		<< INDENT_D() << "end while false";
 }
 
 void RubyCodeGen::writeExec()
 {
-	out << INDENT_U() << "callcc do |_out|" 
+	out << INDENT_U() << "begin" 
 		<< INDENT_S() <<    "_klen, _trans, _keys";
 
 	if ( redFsm->anyRegCurStateRef() )
@@ -216,17 +221,18 @@ void RubyCodeGen::writeExec()
 	out << " = nil" ;
 
 	if ( hasEnd ) 
-		out << INDENT_S() << "_out.call if " << P() << " == " << PE() ;
+		out << INDENT_S() << "if " << P() << " != " << PE() ;
 
 	if ( redFsm->errState != 0 ) 
-		out << INDENT_S() << "_out.call if " << CS() << " == " << redFsm->errState->id ;
+		out << INDENT_S() << "if " << CS() << " != " << redFsm->errState->id;
 
-	out << INDENT_S() << "_resume = nil" 
-		<< INDENT_S() << "callcc { |_cc| _resume = _cc }" ;
+	/* Open the _resume loop. */
+	out << INDENT_S() << "while true"
+		<< INDENT_S() <<    "_break_resume = false";
 
-	if ( redFsm->anyRegActions() || redFsm->anyActionGotos() || 
-			redFsm->anyActionCalls() || redFsm->anyActionRets() )
-		out << INDENT_U() << "callcc do |_again|" ;
+	/* Open the _again loop. */
+	out << INDENT_S() << "begin"
+		<< INDENT_S() <<    "_break_again = false";
 
 	if ( redFsm->anyFromStateActions() ) {
 		out << INDENT_S() << "_acts = " << FSA() << "[" << CS() << "]" 
@@ -239,6 +245,7 @@ void RubyCodeGen::writeExec()
 		FROM_STATE_ACTION_SWITCH()
 			<< INDENT_D() <<   "end # from state action switch" 
 			<< INDENT_D() << "end" 
+			<< INDENT_D() << "break if _break_again"
 			<< INDENT_S();
 	}
 
@@ -256,7 +263,8 @@ void RubyCodeGen::writeExec()
 	out << INDENT_S() << CS() << " = " << TT() << "[_trans]" ;
 
 	if ( redFsm->anyRegActions() ) {
-		out << INDENT_S() << "_again.call if " << TA() << "[_trans] == 0" 
+		/* break _again */
+		out << INDENT_S() << "break if " << TA() << "[_trans] == 0"
 			<< INDENT_S()
 			<< INDENT_S() << "_acts = " << TA() << "[_trans]" 
 			<< INDENT_S() << "_nacts = " << A() << "[_acts]" 
@@ -266,14 +274,17 @@ void RubyCodeGen::writeExec()
 			<< INDENT_S() <<   "_acts += 1" 
 			<< INDENT_U() <<   "case " << A() << "[_acts - 1]" ;
 		ACTION_SWITCH()
-			<< INDENT_D() << "end # action switch"
+			<< INDENT_D() <<   "end # action switch"
 			<< INDENT_D() << "end"
+			/* Not necessary as long as there is no code between here and the
+			 * end while false. */
+			<< INDENT_D() << "break if _break_again"
 			<< INDENT_S();
 	}
 
-	if ( redFsm->anyRegActions() || redFsm->anyActionGotos() || 
-			redFsm->anyActionCalls() || redFsm->anyActionRets() )
-		out << INDENT_D() << "end # cc _again";
+	/* Close the again loop. */
+	out << INDENT_S() << "end while false";
+	out << INDENT_S() << "break if _break_resume";
 
 	if ( redFsm->anyToStateActions() ) {
 		out << INDENT_S() << "_acts = " << TSA() << "["  << CS() << "]"  
@@ -290,14 +301,26 @@ void RubyCodeGen::writeExec()
 	}
 
 	if ( redFsm->errState != 0 ) 
-		out << INDENT_S() << "_out.call if " << CS() << " == " << redFsm->errState->id ;
+		out << INDENT_S() << "break if " << CS() << " == " << redFsm->errState->id ;
 
 	out << INDENT_S() << P() << " += 1" ;
 
 	if ( hasEnd )
-		out << INDENT_S() << "_resume.call if " << P() << " != " << PE();
+		out << INDENT_S() << "break if " << P() << " == " << PE();
 
-	out << INDENT_D() << "end # cc _out" ;          
+	/* Close the resume loop. */
+	out << INDENT_S() << "end";
+
+	/* The if guarding on the error state. */
+	if ( redFsm->errState != 0 ) 
+		out << INDENT_S() << "end";
+
+	/* The if guarding on empty string. */
+	if ( hasEnd ) 
+		out << INDENT_S() << "end";
+
+	/* Wrapping the execute block. */
+	out << INDENT_D() << "end" ;          
 }
 
 void RubyCodeGen::writeEOF()
@@ -451,11 +474,6 @@ string RubyCodeGen::GET_KEY()
 		ret << DATA() << "[" << P() << "]";
 	}
 	return ret.str();
-}
-
-string RubyCodeGen::CTRL_FLOW()
-{
-	return "if (true)";
 }
 
 void RubyCodeGen::ACTION( ostream &ret, Action *action, int targState, bool inFinish )

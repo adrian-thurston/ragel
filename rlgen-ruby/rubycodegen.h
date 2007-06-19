@@ -101,9 +101,9 @@ private:
 
 public:
 
-	virtual ostream &START_ARRAY_LINE();
-	virtual ostream &ARRAY_ITEM( string item, int count, bool last );
-	virtual ostream &END_ARRAY_LINE();
+	ostream &START_ARRAY_LINE();
+	ostream &ARRAY_ITEM( string item, int count, bool last );
+	ostream &END_ARRAY_LINE();
 
 	string FSM_NAME();
 	string START_STATE_ID();
@@ -181,14 +181,13 @@ public:
 	bool useIndicies;
 
 public:
-	virtual string NULL_ITEM();
-	virtual ostream &OPEN_ARRAY( string type, string name );
-	virtual ostream &CLOSE_ARRAY();
-	virtual ostream &STATIC_VAR( string type, string name );
-	virtual string ARR_OFF( string ptr, string offset );
-	virtual string GET_KEY();
-	virtual string CTRL_FLOW();
-	virtual void ACTION( ostream &ret, Action *action, int targState, bool inFinish );
+	string NULL_ITEM();
+	ostream &OPEN_ARRAY( string type, string name );
+	ostream &CLOSE_ARRAY();
+	ostream &STATIC_VAR( string type, string name );
+	string ARR_OFF( string ptr, string offset );
+	string GET_KEY();
+	void ACTION( ostream &ret, Action *action, int targState, bool inFinish );
 
 protected:
 	string INDENT_S() { return INDENT(indent_level); }
@@ -197,7 +196,7 @@ protected:
 	string INDENT_O() { return INDENT(indent_level--); }
 
 private:
-	virtual string INDENT(int level);
+	string INDENT(int level);
 	int indent_level;
 };
 
