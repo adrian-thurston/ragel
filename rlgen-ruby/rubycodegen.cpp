@@ -112,97 +112,98 @@ void RubyCodeGen::BREAK( ostream &out, int targState )
 
 void RubyCodeGen::COND_TRANSLATE()
 {
-	out << INDENT_S() << "_widec = " << GET_KEY() 
-		<< INDENT_S() << "_keys = " << CO() << "[" << CS() << "]*2" 
-		<< INDENT_S() << "_klen = " << CL() << "[" << CS() << "]" 
-		<< INDENT_U() << "if _klen > 0" 
-		<< INDENT_S() <<   "_lower = _keys" 
-		<< INDENT_S() <<   "_upper = _keys + (_klen<<1) - 2" 
-		<< INDENT_U() <<   "loop do" 
-		<< INDENT_S() <<      "break if _upper < _lower"  
-		<< INDENT_S() <<      "_mid = _lower + (((_upper-_lower) >> 1) & ~1)" 
-		<< INDENT_U() <<      "if " << GET_WIDE_KEY() << " < " << CK() << "[_mid]" 
-		<< INDENT_O() <<         "_upper = _mid - 2" 
-		<< INDENT_U() <<      "elsif " << GET_WIDE_KEY() << " > " << CK() << "[_mid+1]" 
-		<< INDENT_O() <<         "_lower = _mid + 2" 
-		<< INDENT_U() <<      "else" 
-		<< INDENT_U() <<         "case " << C() << "[" << CO() << "[" << CS() << "]" 
-		<<                      " + ((_mid - _keys)>>1)]" 
-	;
+	out <<
+		"	_widec = " << GET_KEY() << "\n"
+		"	_keys = " << CO() << "[" << CS() << "]*2\n"
+		"	_klen = " << CL() << "[" << CS() << "]\n"
+		"	if _klen > 0\n"
+		"		_lower = _keys\n"
+		"		_upper = _keys + (_klen<<1) - 2\n"
+		"		loop do\n"
+		"			break if _upper < _lower\n"
+		"			_mid = _lower + (((_upper-_lower) >> 1) & ~1)\n"
+		"			if " << GET_WIDE_KEY() << " < " << CK() << "[_mid]\n"
+		"				_upper = _mid - 2\n"
+		"			elsif " << GET_WIDE_KEY() << " > " << CK() << "[_mid+1]\n"
+		"				_lower = _mid + 2\n"
+		"			else\n"
+		"				case " << C() << "[" << CO() << "[" << CS() << "]\n"
+		"					+ ((_mid - _keys)>>1)]\n";
 
 	for ( CondSpaceList::Iter csi = condSpaceList; csi.lte(); csi++ ) {
 		CondSpace *condSpace = csi;
-		out << INDENT_U() << "when " << condSpace->condSpaceId << ":" ;
-		out << INDENT_S() <<    "_widec = " << KEY(condSpace->baseKey)
-			<< "+ (" << GET_KEY() << " - " << KEY(keyOps->minKey) << ")" ;
+		out << "	when " << condSpace->condSpaceId << ":" ;
+		out << "	_widec = " << KEY(condSpace->baseKey) << 
+				"+ (" << GET_KEY() << " - " << KEY(keyOps->minKey) << ")" ;
 
 		for ( CondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
 			Size condValOffset = ((1 << csi.pos()) * keyOps->alphSize());
-			out << INDENT_S() << "_widec += " << condValOffset << " if ( ";
+			out << "	_widec += " << condValOffset << " if ( ";
 			CONDITION( out, *csi );
 			out << " )";
 		}
 	}
 
-	out << INDENT_D() << "end # case" 
-		<< INDENT_D() << "end" 
-		<< INDENT_D() << "end # loop" 
-		<< INDENT_D() << "end" 
-	;
+	out <<
+		"				end # case\n"
+		"			end\n"
+		"		end # loop\n"
+		"	end\n";
 }
 
 void RubyCodeGen::LOCATE_TRANS()
 {
-	out << INDENT_S() << "_keys = " << KO() << "[" << CS() << "]" 
-		<< INDENT_S() << "_trans = " << IO() << "[" << CS() << "]" 
-		<< INDENT_S() << "_klen = " << SL() << "[" << CS() << "]" 
-		<< INDENT_S() << "_break_match = false"
-		<< INDENT_S()
-		<< INDENT_U() << "begin" 
-		<< INDENT_U() <<    "if _klen > 0" 
-		<< INDENT_S() <<       "_lower = _keys" 
-		<< INDENT_S() <<       "_upper = _keys + _klen - 1" 
-		<< INDENT_S()
-		<< INDENT_U() <<       "loop do" 
-		<< INDENT_S() <<          "break if _upper < _lower" 
-		<< INDENT_S() <<          "_mid = _lower + ( (_upper - _lower) >> 1 )" 
-		<< INDENT_S()
-		<< INDENT_U() <<          "if " << GET_WIDE_KEY() << " < " << K() << "[_mid]" 
-		<< INDENT_O() <<             "_upper = _mid - 1" 
-		<< INDENT_U() <<          "elsif " << GET_WIDE_KEY() << " > " << K() << "[_mid]" 
-		<< INDENT_O() <<             "_lower = _mid + 1" 
-		<< INDENT_U() <<          "else" 
-		<< INDENT_S() <<             "_trans += (_mid - _keys)" 
-		<< INDENT_S() <<             "_break_match = true"
-		<< INDENT_S() <<             "break"
-		<< INDENT_D() <<          "end" 
-		<< INDENT_D() <<       "end # loop" 
-		<< INDENT_S() <<       "break if _break_match"
-		<< INDENT_S() <<       "_keys += _klen" 
-		<< INDENT_S() <<       "_trans += _klen" 
-		<< INDENT_D() <<    "end" 
-		<< INDENT_S()
-		<< INDENT_S() <<    "_klen = " << RL() << "[" << CS() << "]" 
-		<< INDENT_U() <<    "if _klen > 0" 
-		<< INDENT_S() <<       "_lower = _keys" 
-		<< INDENT_S() <<       "_upper = _keys + (_klen << 1) - 2" 
-		<< INDENT_U() <<       "loop do" 
-		<< INDENT_S() <<          "break if _upper < _lower"
-		<< INDENT_S() <<          "_mid = _lower + (((_upper-_lower) >> 1) & ~1)" 
-		<< INDENT_U() <<          "if " << GET_WIDE_KEY() << " < " << K() << "[_mid]" 
-		<< INDENT_O() <<            "_upper = _mid - 2" 
-		<< INDENT_U() <<          "elsif " << GET_WIDE_KEY() << " > " << K() << "[_mid+1]" 
-		<< INDENT_O() <<            "_lower = _mid + 2" 
-		<< INDENT_U() <<          "else" 
-		<< INDENT_S() <<            "_trans += ((_mid - _keys) >> 1)" 
-		<< INDENT_S() <<            "_break_match = true"
-		<< INDENT_S() <<            "break"
-		<< INDENT_D() <<          "end" 
-		<< INDENT_D() <<       "end # loop" 
-		<< INDENT_S() <<       "break if _break_match"
-		<< INDENT_S() <<       "_trans += _klen" 
-		<< INDENT_D() <<    "end" 
-		<< INDENT_D() << "end while false";
+	out <<
+		"	_keys = " << KO() << "[" << CS() << "]\n"
+		"	_trans = " << IO() << "[" << CS() << "]\n"
+		"	_klen = " << SL() << "[" << CS() << "]\n"
+		"	_break_match = false\n"
+		"	\n"
+		"	begin\n"
+		"	  if _klen > 0\n"
+		"	     _lower = _keys\n"
+		"	     _upper = _keys + _klen - 1\n"
+		"\n"
+		"	     loop do\n"
+		"	        break if _upper < _lower\n"
+		"	        _mid = _lower + ( (_upper - _lower) >> 1 )\n"
+		"\n"
+		"	        if " << GET_WIDE_KEY() << " < " << K() << "[_mid]\n"
+		"	           _upper = _mid - 1\n"
+		"	        elsif " << GET_WIDE_KEY() << " > " << K() << "[_mid]\n"
+		"	           _lower = _mid + 1\n"
+		"	        else\n"
+		"	           _trans += (_mid - _keys)\n"
+		"	           _break_match = true\n"
+		"	           break\n"
+		"	        end\n"
+		"	     end # loop\n"
+		"	     break if _break_match\n"
+		"	     _keys += _klen\n"
+		"	     _trans += _klen\n"
+		"	  end"
+		"\n"
+		"	  _klen = " << RL() << "[" << CS() << "]\n"
+		"	  if _klen > 0\n"
+		"	     _lower = _keys\n"
+		"	     _upper = _keys + (_klen << 1) - 2\n"
+		"	     loop do\n"
+		"	        break if _upper < _lower\n"
+		"	        _mid = _lower + (((_upper-_lower) >> 1) & ~1)\n"
+		"	        if " << GET_WIDE_KEY() << " < " << K() << "[_mid]\n"
+		"	          _upper = _mid - 2\n"
+		"	        elsif " << GET_WIDE_KEY() << " > " << K() << "[_mid+1]\n"
+		"	          _lower = _mid + 2\n"
+		"	        else\n"
+		"	          _trans += ((_mid - _keys) >> 1)\n"
+		"	          _break_match = true\n"
+		"	          break\n"
+		"	        end\n"
+		"	     end # loop\n"
+		"	     break if _break_match\n"
+		"	     _trans += _klen\n"
+		"	  end\n"
+		"	end while false\n";
 }
 
 void RubyCodeGen::writeExec()
