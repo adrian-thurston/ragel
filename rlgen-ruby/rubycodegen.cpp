@@ -207,8 +207,8 @@ void RubyCodeGen::LOCATE_TRANS()
 
 void RubyCodeGen::writeExec()
 {
-	out << INDENT_U() << "begin" 
-		<< INDENT_S() <<    "_klen, _trans, _keys";
+	out << "begin\n" 
+		<< "	_klen, _trans, _keys";
 
 	if ( redFsm->anyRegCurStateRef() )
 		out << ", _ps";
@@ -218,35 +218,36 @@ void RubyCodeGen::writeExec()
 			|| redFsm->anyFromStateActions() )
 		out << ", _acts, _nacts";
 
-	out << " = nil" ;
+	out << " = nil\n";
 
 	if ( hasEnd ) 
-		out << INDENT_S() << "if " << P() << " != " << PE() ;
+		out << "	if " << P() << " != " << PE() << "\n";
 
 	if ( redFsm->errState != 0 ) 
-		out << INDENT_S() << "if " << CS() << " != " << redFsm->errState->id;
+		out << "	if " << CS() << " != " << redFsm->errState->id << "\n";
 
 	/* Open the _resume loop. */
-	out << INDENT_S() << "while true"
-		<< INDENT_S() <<    "_break_resume = false";
+	out << "	while true\n"
+		<< "	_break_resume = false\n";
 
 	/* Open the _again loop. */
-	out << INDENT_S() << "begin"
-		<< INDENT_S() <<    "_break_again = false";
+	out << "	begin\n"
+		<< "	_break_again = false\n";
 
 	if ( redFsm->anyFromStateActions() ) {
-		out << INDENT_S() << "_acts = " << FSA() << "[" << CS() << "]" 
-			<< INDENT_S() << "_nacts = " << A() << "[_acts]" 
-			<< INDENT_S() << "_acts += 1" 
-			<< INDENT_U() << "while _nacts > 0" 
-			<< INDENT_S() <<   "_nacts -= 1" 
-			<< INDENT_S() <<   " _acts += 1" 
-			<< INDENT_U() <<   "case " << A() << "[_acts - 1]" ;
-		FROM_STATE_ACTION_SWITCH()
-			<< INDENT_D() <<   "end # from state action switch" 
-			<< INDENT_D() << "end" 
-			<< INDENT_D() << "break if _break_again"
-			<< INDENT_S();
+		out << 
+			"	_acts = " << FSA() << "[" << CS() << "]\n"
+			"	_nacts = " << A() << "[_acts]\n"
+			"	_acts += 1\n"
+			"	while _nacts > 0\n"
+			"		_nacts -= 1\n"
+			"		_acts += 1\n"
+			"		case " << A() << "[_acts - 1]\n";
+
+		FROM_STATE_ACTION_SWITCH() << 
+			"		end # from state action switch\n"
+			"	end\n"
+			"	break if _break_again\n";
 	}
 
 	if ( redFsm->anyConditions() )
@@ -347,7 +348,7 @@ std::ostream &RubyCodeGen::FROM_STATE_ACTION_SWITCH()
 		/* Write out referenced actions. */
 		if ( act->numFromStateRefs > 0 ) {
 			/* Write the case label, the action */
-			out << INDENT_S() << "when " << act->actionId << ":" ;
+			out << "			when " << act->actionId << ":\n";
 			ACTION( out, act, 0, false );
 		}
 	}
@@ -482,11 +483,10 @@ void RubyCodeGen::ACTION( ostream &ret, Action *action, int targState, bool inFi
 	lineDirective( ret, sourceFileName, action->loc.line );
 
 	/* Write the block and close it off. */
-	ret << " begin " << endl << INDENT(1);
+	ret << "		begin\n";
 	INLINE_LIST( ret, action->inlineList, targState, inFinish );
-	ret << " end\n";
+	ret << "		end\n";
 	lineDirective( ret, sourceFileName, action->loc.line );
-	ret << endl;
 }
 
 string RubyCodeGen::INDENT(int level)
