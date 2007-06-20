@@ -523,41 +523,6 @@ multiple machine specifications.  This allows one to break up a machine across
 several files or draw in statements that are common to multiple machines using
 the \verb|include| statement.
 
-\subsection{Including Ragel Code}
-
-\begin{verbatim}
-include FsmName "inputfile.rl";
-\end{verbatim}
-\verbspace
-
-The \verb|include| statement can be used to draw in the statements of another FSM
-specification. Both the name and input file are optional, however at least one
-must be given. Without an FSM name, the given input file is searched for an FSM
-of the same name as the current specification. Without an input file the
-current file is searched for a machine of the given name. If both are present,
-the given input file is searched for a machine of the given name.
-
-\subsection{Importing Definitions}
-
-\begin{verbatim}
-import "inputfile.h";
-\end{verbatim}
-\verbspace
-
-The \verb|import| statement takes a literal string as an argument, interprets
-it as a file name, then scrapes the file for sequences of tokens that match the
-following forms. If the input file is a Ragel program then tokens inside the
-Ragel sections are ignored. See Section \ref{export} for a description of
-exporting machine definitions.
-
-\begin{itemize}
-	\setlength{\itemsep}{-2mm}
-    \item \verb|name = number|
-    \item \verb|name = lit_string|
-    \item \verb|"define" name number|
-    \item \verb|"define" name lit_string|
-\end{itemize}
-
 \subsection{Machine Definition}
 \label{definition}
 
@@ -584,12 +549,52 @@ expression.
 The machine instantiation statement generates a set of states representing an
 expression. Each instantiation generates a distinct set of states.  The entry
 point is written in the generated code using the instantiation name.  If the
-\verb|main| machine is instantiated, then a start state is also generated and
-assigned to the \verb|cs| variable by the \verb|write init| command.  From
-outside the execution loop, control may be passed to any machine by assigning
-the entry point to the \verb|cs| variable.  From inside the execution loop,
-control may be passed to any machine instantiation using \verb|fcall|,
+\verb|main| machine is instantiated, its start state is used as the
+specification's start state and is assigned to the \verb|cs| variable by the
+\verb|write init| command. If no \verb|main| machine is given, the start state
+of the last machine instantiation is used as the specification's start state.
+
+From outside the execution loop, control may be passed to any machine by
+assigning the entry point to the \verb|cs| variable.  From inside the execution
+loop, control may be passed to any machine instantiation using \verb|fcall|,
 \verb|fgoto| or \verb|fnext| statements.
+
+\subsection{Including Ragel Code}
+
+\begin{verbatim}
+include FsmName "inputfile.rl";
+\end{verbatim}
+\verbspace
+
+The \verb|include| statement can be used to draw in the statements of another FSM
+specification. Both the name and input file are optional, however at least one
+must be given. Without an FSM name, the given input file is searched for an FSM
+of the same name as the current specification. Without an input file the
+current file is searched for a machine of the given name. If both are present,
+the given input file is searched for a machine of the given name.
+
+\subsection{Importing Definitions}
+\label{import}
+
+\begin{verbatim}
+import "inputfile.h";
+\end{verbatim}
+\verbspace
+
+The \verb|import| statement takes a literal string as an argument, interprets
+it as a file name, then scrapes the file for sequences of tokens that match the
+following forms. If the input file is a Ragel program then tokens inside the
+Ragel sections are ignored. See Section \ref{export} for a description of
+exporting machine definitions.
+
+\begin{itemize}
+	\setlength{\itemsep}{-2mm}
+    \item \verb|name = number|
+    \item \verb|name = lit_string|
+    \item \verb|"define" name number|
+    \item \verb|"define" name lit_string|
+\end{itemize}
+
 
 \section{Lexical Analysis of a Ragel Block}
 \label{lexing}
@@ -2491,6 +2496,52 @@ parsing, care must be taken to not use a pointer which has been invalidated by
 movement to a subsequent block.  If the current input data pointer is moved
 backwards it must not be moved past the beginning of the current block.
 
+\section{Variables Used by Ragel}
+
+There are a number of variables which Ragel expects the user to declare. At a
+very minimum the \verb|cs|, \verb|p| and \verb|pe| variables must be declared.
+In Java and Ruby code the \verb|data| variable must also be declared. If
+stack-based state machine control flow statements are used then the
+\verb|stack| and \verb|top| variables are required. If a scanner is declared
+then the \verb|act|, \verb|tokstart| and \verb|tokend| variables must be
+declared.
+
+\begin{itemize}
+
+\item \verb|cs| - Current state. This must be an integer and it should persist
+across invocations of the machine when the data is broken into blocks that are
+processed independently.
+
+\item \verb|p| - Data pointer. In C/D code this variable is expected to be a
+pointer to the character data to process. It should be initialized to the
+beginning of the data block on every run of the machine. In Java and Ruby it is
+used as an offset to \verb|data| and must be an integer. In this case it should
+be initialized to zero on every run of the machine.
+
+\item \verb|pe| - Data end pointer. This should be initialized to \verb|p| plus
+the data length on every run of the machine. In Java and Ruby code this should
+be initialized to the data length.
+
+\item \verb|data| - This variable is only required in Java and Ruby code. It
+must be an array containting the data to process.
+
+\item \verb|stack| - This must be an array of integers. It is used to store
+integer values representing states.
+
+\item \verb|top| - This must be an integer value and will be used as an offset
+to \verb|stack|, giving the next available spot on the top of the stack.
+
+\item \verb|act| - This must be an integer value. It is a variable sometimes
+used by scanner code to keep track of the most recent successful pattern match.
+
+\item \verb|tokstart| - This must be a pointer to character data. In Java and
+Ruby code this must be an integer. See Section \ref{generating-scanners} for
+more information.
+
+\item \verb|tokend| - Also a pointer to character data.
+
+\end{itemize}
+
 \section{Alphtype Statement}
 
 \begin{verbatim}
@@ -2619,9 +2670,12 @@ write init;
 The write init statement causes Ragel to emit initialization code. This should
 be executed once before the machine is started. At a very minimum this sets the
 current state to the start state. If other variables are needed by the
-generated code, such as call
-stack variables or longest-match management variables, they are also
-initialized here.
+generated code, such as call stack variables or scanner management
+variables, they are also initialized here.
+
+The \verb|nocs| option to the write init statement will cause ragel to skip
+intialization of the cs variable. This is useful if the user wishes to use
+custom logic to decide which state the specification should start in.
 
 \subsection{Write Exec}
 \begin{verbatim}
@@ -2712,7 +2766,8 @@ export machine_to_export = 0x44;
 
 When the write exports statement is used these machines are 
 written out in the generated code. Defines are used for C and constant integers
-are used for D, Java and Ruby. 
+are used for D, Java and Ruby. See Section \ref{import} for a description of the
+import statement.
   
 \section{Maintaining Pointers to Input Data}
 
