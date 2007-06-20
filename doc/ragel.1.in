@@ -31,7 +31,8 @@ ragel \- compile regular languages into executable state machines
 .SH DESCRIPTION
 .B Note:
 this is the frontend component of Ragel, which generates an intermediate
-file format that must be processed by rlcodegen(1).
+file format that must be processed by one of rlgen-cd(1), rlgen-java(1), 
+rlgen-ruby(1) or rlgen-dot(1).
 
 Ragel compiles finite state machines from regular languages into executable
 code.  Ragel can generate C, C++, Objective-C, D, or Java code. Ragel state
