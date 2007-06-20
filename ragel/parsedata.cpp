@@ -874,6 +874,8 @@ bool ParseData::setVariable( char *var, InlineList *inlineList )
 		peExpr = inlineList;
 	else if ( strcmp( var, "cs" ) == 0 )
 		csExpr = inlineList;
+	else if ( strcmp( var, "data" ) == 0 )
+		dataExpr = inlineList;
 	else if ( strcmp( var, "top" ) == 0 )
 		topExpr = inlineList;
 	else if ( strcmp( var, "stack" ) == 0 )
@@ -884,8 +886,6 @@ bool ParseData::setVariable( char *var, InlineList *inlineList )
 		tokstartExpr = inlineList;
 	else if ( strcmp( var, "tokend" ) == 0 )
 		tokendExpr = inlineList;
-	else if ( strcmp( var, "data" ) == 0 )
-		dataExpr = inlineList;
 	else
 		set = false;
 
