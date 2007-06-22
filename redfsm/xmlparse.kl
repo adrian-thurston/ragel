@@ -253,16 +253,18 @@ tag_write_head: TAG_write
 			error($1->loc) << "tag <write> requires a col attribute" << endp;
 
 		if ( nameAttr != 0 && lineAttr != 0 && colAttr != 0 ) {
+			$$->loc.line = atoi(lineAttr->value);
+			$$->loc.col = atoi(colAttr->value);
+
 			CodeGenMapEl *mapEl = codeGenMap.find( nameAttr->value );
-			if ( mapEl == 0 )
-				error($1->loc) << "internal error: cannot find codeGen" << endp;
+			if ( mapEl == 0 ) {
+				source_error($$->loc) << "write statement given "
+						"but there are no machine instantiations" << endp;
+			}
 			else {
 				cgd = mapEl->value;
 				::keyOps = &cgd->thisKeyOps;
 			}
-
-			$$->loc.line = atoi(lineAttr->value);
-			$$->loc.col = atoi(colAttr->value);
 		}
 	};
 
@@ -916,6 +918,15 @@ ostream &Parser::parser_error( int tokId, Token &token )
 	
 	return cerr;
 }
+
+ostream &Parser::source_error( const InputLoc &loc )
+{
+	gblErrorCount += 1;
+	assert( sourceFileName != 0 );
+	cerr << sourceFileName << ":" << loc.line << ":" << loc.col << ": ";
+	return cerr;
+}
+
 
 int Parser::token( int tokenId, Token &tok )
 {
