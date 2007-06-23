@@ -58,56 +58,73 @@ void genLineDirective( ostream &out )
 
 void RubyCodeGen::GOTO( ostream &out, int gotoDest, bool inFinish )
 {
-	out << INDENT_U() << "begin"
-		<< INDENT_S() <<     CS() << " = " << gotoDest
-		<< INDENT_S() <<     "_break_again = true; break " // break _again
-		<< INDENT_D() << "end ";
+	out << 
+		"	begin\n"
+		"		" << CS() << " = " << gotoDest << "\n"
+		"		_break_again = true\n"
+		"		break\n" // break _again
+		"	end\n";
 }
 
 void RubyCodeGen::GOTO_EXPR( ostream &out, InlineItem *ilItem, bool inFinish )
 {
-	out << INDENT_U() << "begin"
-		<< INDENT_S() <<    CS() << " = (";
+	out << 
+		"	begin\n"
+		"		" << CS() << " = (";
 	INLINE_LIST( out, ilItem->children, 0, inFinish );
-	out << ")"
-		<< INDENT_S() <<    "_break_again = true; break " // break _again
-		<< INDENT_D() << "end ";
+	out << ")\n";
+	out <<
+		"		_break_again = true\n"
+		"		break\n" // break _again
+		"	end\n";
 }
 
 void RubyCodeGen::CALL( ostream &out, int callDest, int targState, bool inFinish )
 {
-	out << INDENT_U() << "begin" 
-		<< INDENT_S() <<   STACK() << "[" << TOP() << "] = " << CS() 
-		<< INDENT_S() <<   TOP() << "+= 1" 
-		<< INDENT_S() <<   CS() << " = " << callDest 
-		<< INDENT_S() <<   "_break_again = true; break " // break _again
-		<< INDENT_D() << "end ";
+	out <<
+		"	begin\n" 
+		"		" << STACK() << "[" << TOP() << "] = " << CS() << "\n"
+		"		" << TOP() << "+= 1\n" 
+		"		" << CS() << " = " << callDest << "\n"
+		"		_break_again = true\n"
+		"		break\n" // break _again
+		"	end\n";
 }
 
 void RubyCodeGen::CALL_EXPR(ostream &out, InlineItem *ilItem, int targState, bool inFinish )
 {
-	out << INDENT_U() << "begin" 
-		<< INDENT_S() <<   STACK() << "[" << TOP() << "] = " << CS() 
-		<< INDENT_S() <<   TOP() << " += 1" 
-		<< INDENT_S() <<   CS() << " = (";
+	out <<
+		"	begin\n" 
+		"		" << STACK() << "[" << TOP() << "] = " << CS() << "\n"
+		"		" << TOP() << " += 1\n"
+		"		" << CS() << " = (";
 	INLINE_LIST( out, ilItem->children, targState, inFinish );
-	out << ")" 
-		<< INDENT_S() <<   "_break_again = true; break " // break _again
-		<< INDENT_D() << "end ";
+	out << ")\n";
+
+	out << 
+		"		_break_again = true\n"
+		"		break\n" // break _again
+		"	end\n";
 }
 
 void RubyCodeGen::RET( ostream &out, bool inFinish )
 {
-	out << INDENT_U() << "begin" 
-		<< INDENT_S() <<   TOP() << " -= 1" 
-		<< INDENT_S() <<   CS() << " = " << STACK() << "[" << TOP() << "]" 
-		<< INDENT_S() <<   "_break_again = true; break " // break _again
-		<< INDENT_D() << "end ";
+	out <<
+		"	begin\n" 
+		"		" << TOP() << " -= 1\n"
+		"		" << CS() << " = " << STACK() << "[" << TOP() << "]\n"
+		"		_break_again = true\n"
+		"		break\n" // break _again
+		"	end\n";
 }
 
 void RubyCodeGen::BREAK( ostream &out, int targState )
 {
-	out << "_break_resume = true; break\n";
+	out << 
+		"	begin\n"
+		"		_break_resume = true\n"
+		"		break\n"
+		"	end\n";
 }
 
 void RubyCodeGen::COND_TRANSLATE()
@@ -127,20 +144,20 @@ void RubyCodeGen::COND_TRANSLATE()
 		"			elsif " << GET_WIDE_KEY() << " > " << CK() << "[_mid+1]\n"
 		"				_lower = _mid + 2\n"
 		"			else\n"
-		"				case " << C() << "[" << CO() << "[" << CS() << "]\n"
-		"					+ ((_mid - _keys)>>1)]\n";
+		"				case " << C() << "[" << CO() << "[" << CS() << "]"
+							" + ((_mid - _keys)>>1)]\n";
 
 	for ( CondSpaceList::Iter csi = condSpaceList; csi.lte(); csi++ ) {
 		CondSpace *condSpace = csi;
 		out << "	when " << condSpace->condSpaceId << ":" ;
 		out << "	_widec = " << KEY(condSpace->baseKey) << 
-				"+ (" << GET_KEY() << " - " << KEY(keyOps->minKey) << ")" ;
+				"+ (" << GET_KEY() << " - " << KEY(keyOps->minKey) << ")\n";
 
 		for ( CondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
 			Size condValOffset = ((1 << csi.pos()) * keyOps->alphSize());
 			out << "	_widec += " << condValOffset << " if ( ";
 			CONDITION( out, *csi );
-			out << " )";
+			out << " )\n";
 		}
 	}
 
@@ -410,45 +427,49 @@ std::ostream &RubyCodeGen::ACTION_SWITCH()
 
 void RubyCodeGen::writeInit()
 {
-	out << INDENT_U() << "begin";
+	out << "begin\n";
 
 	if ( writeCS )
-		out << INDENT_S() <<   CS() << " = " << START();
+		out << "	" << CS() << " = " << START() << "\n";
 
 	/* If there are any calls, then the stack top needs initialization. */
 	if ( redFsm->anyActionCalls() || redFsm->anyActionRets() )
-		out << INDENT_S() << TOP() << " = 0";
+		out << "	" << TOP() << " = 0\n";
 
 	if ( hasLongestMatch ) {
-		out << INDENT_S() << TOKSTART() << " = " << NULL_ITEM() 
-			<< INDENT_S() << TOKEND() << " = " << NULL_ITEM()
-			<< INDENT_S() << ACT() << " = 0"
-			<< INDENT_S();
+		out <<
+			"	" << TOKSTART() << " = " << NULL_ITEM() << "\n"
+			"	" << TOKEND() << " = " << NULL_ITEM() << "\n"
+			"	" << ACT() << " = 0\n";
 	}
-	out << INDENT_D() << "end";
+
+	out << "end\n";
 }
 
 std::ostream &RubyCodeGen::OPEN_ARRAY( string type, string name )
 {
-	out << "class << self" << endl
-		<< INDENT(1) << "attr_accessor :" << name << endl
-		<< INDENT(1) << "private :" << name << ", :" << name << "=" << endl
-		<< "end" << endl
-		<< "self." << name << " = [" << endl;
+	out << 
+		"class << self\n"
+		"	attr_accessor :" << name << "\n"
+		"	private :" << name << ", :" << name << "=\n"
+		"end\n"
+		"self." << name << " = [\n";
 	return out;
 }
 
 std::ostream &RubyCodeGen::CLOSE_ARRAY()
 {
-	return out << "]" << endl;
+	out << "]\n";
+	return out;
 }
 
 std::ostream &RubyCodeGen::STATIC_VAR( string type, string name )
 {
-	out << "class << self" << endl
-		<< INDENT(1) << "attr_accessor :" << name << endl
-		<< "end" << endl
-		<< "self." << name;
+	out << 
+		"class << self\n"
+		"	attr_accessor :" << name << "\n"
+		"end\n"
+		"self." << name;
 	return out;
 }
 
@@ -1449,7 +1470,7 @@ void RubyCodeGen::SET_TOKEND( ostream &ret, InlineItem *item )
 	ret << TOKEND() << " = " << P();
 	if ( item->offset != 0 ) 
 		out << "+" << item->offset;
-	out << ";";
+	out << "\n";
 }
 
 void RubyCodeGen::GET_TOKEND( ostream &ret, InlineItem *item )
@@ -1464,12 +1485,12 @@ void RubyCodeGen::INIT_TOKSTART( ostream &ret, InlineItem *item )
 
 void RubyCodeGen::INIT_ACT( ostream &ret, InlineItem *item )
 {
-	ret << ACT() << " = 0;";
+	ret << ACT() << " = 0\n";
 }
 
 void RubyCodeGen::SET_TOKSTART( ostream &ret, InlineItem *item )
 {
-	ret << TOKSTART() << " = " << P() << ";";
+	ret << TOKSTART() << " = " << P() << "\n";
 }
 
 void RubyCodeGen::SUB_ACTION( ostream &ret, InlineItem *item, 
