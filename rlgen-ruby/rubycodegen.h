@@ -189,12 +189,6 @@ public:
 	string GET_KEY();
 	void ACTION( ostream &ret, Action *action, int targState, bool inFinish );
 
-protected:
-	string INDENT_S() { return INDENT(indent_level); }
-	string INDENT_U() { return INDENT(++indent_level); }
-	string INDENT_D() { return INDENT(--indent_level); }
-	string INDENT_O() { return INDENT(indent_level--); }
-
 private:
 	string INDENT(int level);
 	int indent_level;
