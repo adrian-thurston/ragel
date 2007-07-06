@@ -40,6 +40,9 @@ eof action execution is moved into the main loop.
 ================
 END 6.0 Features
 
+Check initts on calls to scanners, may be necessary to stuff the initts into
+the call.
+
 Minimization should remove a condition when the character allows both
 the positive and negative sense of the condition. This happens in:
 test_every_10_chars = ( ( c when test_len ) c{0,9} )**;
