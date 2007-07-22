@@ -1388,7 +1388,7 @@ compositional nature of embeddings, the user has complete freedom in the
 placement of actions.
 
 A machine's transitions are categorized into four classes, The action embedding
-operators access the transitions defined by these classes.  The {\em entering
+operators access the transitions defined by these classes.  The {\em starting
 transition} operator \verb|>| isolates the start state, then embeds an action
 into all transitions leaving it. The {\em finishing transition} operator
 \verb|@| embeds an action into all transitions going into a final state.  The
@@ -1416,17 +1416,21 @@ and statements are parsed and translated. These allow the user to interact with 
 from action code. See Section \ref{vals} for a complete list of statements and
 values available in code blocks. 
 
-\subsection{Entering Action}
+\subsection{Starting Action}
 
 \verb|expr > action| 
 \verbspace
 
-The entering operator embeds an action into the starting transitions. The
-action is executed on all transitions that enter into the machine from the
-start state.  If the start state is a final state then it is possible for the
-machine to never be entered and the starting transitions bypassed.  In the
-following example, the action is executed on the first transition of the
-machine. If the repetition machine is bypassed the action is not executed.
+The starting transition operator embeds an action into all transitions that
+leave the start state. In some machines the start state has in transtions from
+within the machine and the start state is effectively reused. In these cases
+the start state is first isolated from the rest of the machine and the starting
+actions do not get re-executed.
+
+If the start state is a final state then it is possible for the machine to
+never be started and the starting transitions by-passed.  In the following
+example, the action is executed on the first transition of the machine. If the
+repetition machine is bypassed the action is not executed.
 
 \verbspace
 
@@ -2216,8 +2220,8 @@ to which the priority is assigned.
 
 \begin{itemize}
 \setlength{\parskip}{0in}
-\item \verb|expr > (name, int)| -- Entering transitions.
-\item \verb|expr @ (name, int)| -- Transitions into final state.
+\item \verb|expr > (name, int)| -- Starting transitions.
+\item \verb|expr @ (name, int)| -- Finishing transitions (into a final state).
 \item \verb|expr $ (name, int)| -- All transitions.
 \item \verb|expr % (name, int)| -- Pending out transitions.
 \end{itemize}
@@ -2291,11 +2295,11 @@ using state charts.
 
 This operator concatenates two machines, but first assigns a low
 priority to all transitions
-of the first machine and a high priority to the entering transitions of the
+of the first machine and a high priority to the starting transitions of the
 second machine. This operator is useful if from the final states of the first
 machine, it is possible to accept the characters in the start transitions of
 the second machine. This operator effectively terminates the first machine
-immediately upon entering the second machine, where otherwise they would be
+immediately upon starting the second machine, where otherwise they would be
 pursued concurrently. In the following example, entry-guarded concatenation is
 used to move out of a machine that matches everything at the first sign of an
 end-of-input marker.

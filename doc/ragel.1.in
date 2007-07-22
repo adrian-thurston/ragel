@@ -430,7 +430,7 @@ defaults to the name of the machine definition the priority is assigned in.
 Transitions do not have default priorities.
 .TP
 .I expr > int
-Assigns the priority int in all transitions entering into the machine.
+Assigns the priority int in all transitions leaving the start state.
 .TP
 .I expr @ int
 Assigns the priority int in all transitions that go into a final state.
@@ -446,7 +446,7 @@ to which the priority is assigned, allowing interactions to cross machine
 definition boundaries.
 .TP
 .I expr > (name,int)
-Assigns the priority int to name in all transitions entering into the machine.
+Assigns the priority int to name in all transitions leaving the start state.
 .TP
 .I expr @ (name, int)
 Assigns the priority int to name in all transitions that go into a final state.
