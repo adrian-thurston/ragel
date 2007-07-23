@@ -120,7 +120,7 @@ expression engine. Adding actions before a pattern terminates requires patterns
 to be broken and pasted back together with program logic. The more user actions
 are needed, the less the advantages of regular expressions are seen. 
 
-Ragel is a software development tool which allows user actions to be 
+Ragel is a software development tool that allows user actions to be 
 embedded into the transitions of a regular expression's corresponding state
 machine, eliminating the need to switch from the regular expression engine and
 user code execution environment and back again. As a result, expressions can be
@@ -166,11 +166,11 @@ with if statements and while loops.
 This model of execution, where the runtime alternates between regular
 expression matching and user code exectution places severe restrictions on when
 action code may be executed. Since action code can only be associated with
-complete patterns, any action code which must be executed before an entire
+complete patterns, any action code that must be executed before an entire
 pattern is matched requires that the pattern be broken into smaller units.
 Instead of being forced to disrupt the regular expression syntax and write
 smaller expressions, it is desirable to retain a single expression and embed
-code for performing actions directly into the transitions which move over the
+code for performing actions directly into the transitions that move over the
 characters. After all, capable programmers are astutely aware of the machinery
 underlying their programs, so why not provide them with access to that
 machinery? To achieve this we require an action execution model for associating
@@ -239,11 +239,11 @@ transitions leave from the same state and go to distinct target states on the
 same character. If these transitions are assigned conflicting priorities, then
 during the determinization process the transition with the higher priority will
 take precedence over the transition with the lower priority. The lower priority
-transition gets abandoned. The transitions would otherwise be combined to a new
-transition that goes to a new state which is a combination of the original
+transition gets abandoned. The transitions would otherwise be combined into a new
+transition that goes to a new state that is a combination of the original
 target states. Priorities are often required for segmenting machines. The most
 common uses of priorities have been encoded into a set of simple operators
-which should be used instead of priority embeddings whenever possible.
+that should be used instead of priority embeddings whenever possible.
 
 For the purposes of embedding, Ragel divides transitions and states into
 different classes. There are four operators for embedding actions and
@@ -260,7 +260,7 @@ embedding operators access. For example, one can access start states, final
 states or all states, among others. Unlike the transition embeddings, there are
 several different types of state action embeddings. These are executed at
 various different times during the processing of input. It is possible to embed
-actions which are exectued on all transitions which enter into a state, all
+actions which are exectued on all transitions that enter into a state, all
 transitions out of a state, transitions taken on the error event, or
 transitions taken on the EOF event.
 
@@ -268,7 +268,7 @@ Within actions, it is possible to influence the behaviour of the state machine.
 The user can write action code that jumps or calls to another portion of the
 machine, changes the current character being processed, or breaks out of the
 processing loop. With the state machine calling feature Ragel can be used to
-parse languages which are not regular. For example, one can parse balanced
+parse languages that are not regular. For example, one can parse balanced
 parentheses by calling into a parser when an open bracket character is seen and
 returning to the state on the top of the stack when the corresponding closing
 bracket character is seen. More complicated context-free languages such as
@@ -913,7 +913,7 @@ in the same precedence group are evaluated from left to right.
 \label{machconst}
 
 When using Ragel it is helpful to have a sense of how it constructs machines.
-The determinization process can produce results which seem unusual to someone
+The determinization process can produce results that seem unusual to someone
 not familiar with the NFA to DFA conversion algorithm. In this section we
 describe Ragel's state machine operators. Though the operators are defined
 using epsilon transitions, it should be noted that this is for discussion only.
@@ -927,7 +927,7 @@ copy all of the properties of \verb|y| into \verb|x|. This involves drawing in
 all of \verb|y|'s to-state actions, EOF actions, etc., in addition to its
 transitions. If \verb|x| and \verb|y| both have a transition out on the same
 character, then the transitions must be combined.  During transition
-combination a new transition is made which goes to a new state that is the
+combination a new transition is made that goes to a new state that is the
 combination of both target states. The new combination state is created using
 the same epsilon transition method.  The new state has an epsilon transition
 drawn to all the states that compose it. Since every time an epsilon transition
@@ -1008,7 +1008,7 @@ main := '0x' xdigit+ | digit+ | alpha alnum*;
 \verbspace
 
 Intersection produces a machine that matches any
-string which is in both machine one and machine two. To achieve intersection, a
+string that is in both machine one and machine two. To achieve intersection, a
 union is performed on the two machines. After the result has been made
 deterministic, any final state that is not a combination of final states from
 both machines has its final state status revoked. To complete the operation,
@@ -1044,7 +1044,7 @@ main :=
 \verbspace
 
 The difference operation produces a machine that matches
-strings which are in machine one but which are not in machine two. To achieve subtraction,
+strings that are in machine one but are not in machine two. To achieve subtraction,
 a union is performed on the two machines. After the result has been made
 deterministic, any final state that came from machine two or is a combination
 of states involving a final state from machine two has its final state status
@@ -1081,7 +1081,7 @@ main := /[a-z][a-z]*/ - ( 'for' | 'int' );
 \verbspace
 
 Strong difference produces a machine that matches any string of the first
-machine which does not have any string of the second machine as a substring. In
+machine that does not have any string of the second machine as a substring. In
 the following example, strong subtraction is used to excluded \verb|CRLF| from
 a sequence. In the corresponding visualization, the label \verb|DEF| is short
 for default. The default transition is taken if no other transition can be
@@ -1133,7 +1133,7 @@ operator between them results in the machines being concatenated together.
 \graphspace
 
 The opportunity for nondeterministic behaviour results from the possibility of
-the final states of the first machine accepting a string which is also accepted
+the final states of the first machine accepting a string that is also accepted
 by the start state of the second machine.
 The most common scenario that this happens in is the
 concatenation of a machine that repeats some pattern with a machine that gives
@@ -1383,7 +1383,7 @@ expression's corresponding state machine. These actions are executed when the
 generated code moves over a transition.  Like the regular expression operators,
 the action embedding operators are fully compositional. They take a state
 machine and an action as input, embed the action, and yield a new state machine
-which can be used in the construction of other machines. Due to the
+that can be used in the construction of other machines. Due to the
 compositional nature of embeddings, the user has complete freedom in the
 placement of actions.
 
@@ -1729,13 +1729,13 @@ actions associated with it.
 \subsection{Handling Errors}
 
 In many applications it is useful to be able to react to parsing errors.  The
-user may wish to print an error message which depends on the context.  It
+user may wish to print an error message that depends on the context.  It
 may also be desirable to consume input in an attempt to return the input stream
 to some known state and resume parsing. To support error handling and recovery,
 Ragel provides error action embedding operators. There are two kinds of error
 actions, regular (global) error actions and local error actions.
 Error actions can be used to simply report errors, or by jumping to a machine
-instantiation which consumes input, can attempt to recover from errors.  
+instantiation that consumes input, can attempt to recover from errors.  
 
 \subsubsection{Global Error Actions}
 
@@ -1749,7 +1749,7 @@ instantiation which consumes input, can attempt to recover from errors.
 Error actions are stored in states until the final state machine has been fully
 constructed. They are then transferred to the transitions that move into the
 error state. This transfer entails the creation of a transition from the state
-to the error state that is taken on all input characters which are not already
+to the error state that is taken on all input characters that are not already
 covered by the state's transitions. In other words it provides a default
 action. Error actions can induce a recovery by altering \verb|p| and then jumping back
 into the machine with \verb|fgoto|.
@@ -1795,7 +1795,7 @@ action.
 \subsubsection{Example}
 
 The following example uses error actions to report an error and jump to a
-machine which consumes the remainder of the line when parsing fails. After
+machine that consumes the remainder of the line when parsing fails. After
 consuming the line, the error recovery machine returns to the main loop.
 
 % GENERATE: erract
@@ -1844,9 +1844,9 @@ main := (
 
 \section{Action Ordering and Duplicates}
 
-When building a parser by combining smaller expressions which themselves have
-embedded actions, it is often the case that transitions are made which need to
-execute a number of actions on one input character. For example when we leave
+When building a parser by combining smaller expressions that themselves have
+embedded actions, it is often the case that transitions that need to
+execute a number of actions on one input character are made. For example when we leave
 an expression, we may execute the expression's pending out action and the
 subsequent expression's starting action on the same input character.  We must
 therefore devise a method for ordering actions that is both intuitive and
@@ -1855,7 +1855,7 @@ determinization processes cannot simply order actions by the time at which they
 are introduced into a transition -- otherwise the programmer will be at the
 mercy of luck.
 
-We associate with the embedding of each action a distinct timestamp which is
+We associate with the embedding of each action a distinct timestamp that is
 used to order actions that appear together on a single transition in the final
 compiled state machine. To accomplish this we traverse the parse tree of
 regular expressions and assign timestamps to action embeddings. This algorithm
@@ -1865,7 +1865,7 @@ parse tree, then assigns timestamps to the remaining {\em all}, {\em
 finishing}, and {\em leaving} embeddings in the order in which they appear.
 
 Ragel does not permit actions (defined or unnamed) to appear multiple times in
-an action list.  When the final machine has been created, actions which appear
+an action list.  When the final machine has been created, actions that appear
 more than once in a single transition or EOF action list have their duplicates
 removed. The first appearance of the action is preserved. This is useful in a
 number of scenarios.  First, it allows us to union machines with common
@@ -1991,11 +1991,11 @@ commands should therefore be used with caution.
 Along with the flexibility of arbitrary action embeddings comes a need to
 control nondeterminism in regular expressions. If a regular expression is
 ambiguous, then sub-components of a parser other than the intended parts may become
-active. This means that actions which are irrelevant to the
+active. This means that actions that are irrelevant to the
 current subset of the parser may be executed, causing problems for the
 programmer.
 
-Tools which are based on regular expression engines and which are used for
+Tools that are based on regular expression engines and used for
 recognition tasks will usually function as intended regardless of the presence
 of ambiguities. It is quite common for users of scripting languages to write
 regular expressions that are heavily ambiguous and it generally does not
@@ -2065,8 +2065,8 @@ lines = line*;
 \graphspace
 
 Solving this kind of problem is straightforward when the ambiguity is created
-by strings which are a single character long.  When the ambiguity is created by
-strings which are multiple characters long we have a more difficult problem.
+by strings that are a single character long.  When the ambiguity is created by
+strings that are multiple characters long we have a more difficult problem.
 The following example is an incorrect attempt at a regular expression for C
 language comments. 
 
@@ -2123,7 +2123,7 @@ comment = '/*' ( ( any @comm )* - ( any* '*/' any* ) ) '*/';
 
 Note that Ragel's strong subtraction operator \verb|--| can also be used here.
 In doing this subtraction we have phrased the problem of controlling non-determinism in
-terms of excluding strings common to two expressions which interact when
+terms of excluding strings common to two expressions that interact when
 combined.
 We can also phrase the problem in terms of the transitions of the state
 machines that implement these expressions. During the concatenation of
@@ -2248,7 +2248,7 @@ concatenation}. From the user's point of view, this operator terminates the
 first machine when the second machine moves into a final state.  It chooses a
 unique name and uses it to embed a low priority into all
 transitions of the first machine. A higher priority is then embedded into the
-transitions of the second machine which enter into a final state. The following
+transitions of the second machine that enter into a final state. The following
 example yields a machine identical to the example in Section 
 \ref{controlling-nondeterminism}.
 
@@ -2457,13 +2457,13 @@ equivalent to:
 \end{verbatim}
 \verbspace
 
-When the kleene star is applied, transitions are made out of the machine which
-go back into it. These are assigned a priority of zero by the pending out
-transition mechanism. This is less than the priority of the transitions out of
-the final states that do not leave the machine. When two transitions clash on
-the same character, the differing priorities causes the transition which
-stays in the machine to take precedence.  The transition that wraps around is
-dropped.
+When the kleene star is applied, transitions that go out of the machine and
+back into it are made. These are assigned a priority of zero by the pending out
+transition mechanism. This is less than the priority of one assigned to the
+transitions leaving the final states but not leaving the machine. When two of
+these transitions clash on the same character, the differing priorities cause
+the transition that stays in the machine to take precedence.  The transition
+that wraps around is dropped.
 
 Note that this operator does not build a scanner in the traditional sense
 because there is never any backtracking. To build a scanner in the traditional
@@ -2484,7 +2484,7 @@ In the case of C and D host languages, Ragel is able to generate very
 fast-running code that implements state machines as directly executable code.
 Since very large files strain the host language compiler, table-based code
 generation is also supported. In the future we hope to provide a partitioned,
-directly executable format which is able to reduce the burden on the host
+directly executable format that is able to reduce the burden on the host
 compiler by splitting large machines across multiple functions.
 
 In the case of Java and Ruby, table-based code generation is the only code
@@ -2496,7 +2496,7 @@ in a sequence of blocks as it arrives from a file or socket.  Parsing the input
 in a sequence of blocks brings with it a few responsibilities. If the parser
 utilizes a scanner, care must be taken to not break the input stream anywhere
 but token boundaries.  If pointers to the input stream are taken during
-parsing, care must be taken to not use a pointer which has been invalidated by
+parsing, care must be taken to not use a pointer that has been invalidated by
 movement to a subsequent block.  If the current input data pointer is moved
 backwards it must not be moved past the beginning of the current block.
 
@@ -2599,7 +2599,7 @@ variable p fsm->p;
 \verbspace
 
 The variable statement allows one to tell ragel how to access a specific
-variable. All of the variables which are declared by the user and
+variable. All of the variables that are declared by the user and
 used by Ragel can be changed. This includes \verb|p|, \verb|pe|, \verb|cs|,
 \verb|top|, \verb|stack|, \verb|tokstart|, \verb|tokend| and \verb|act|.
 In Ruby and Java code generation the \verb|data| variable can also be changed.
@@ -2853,8 +2853,8 @@ An example of line-oriented processing is given in Figure \ref{line-oriented}.
 
 \section{Running the Executables}
 
-Ragel is broken down into two parts: a frontend which compiles machines
-and emits them in an XML format, and a backend which generates code or a
+Ragel is broken down into two parts: a frontend that compiles machines
+and emits them in an XML format, and a backend that generates code or a
 Graphviz Dot file from the XML data. The purpose of the XML-based intermediate
 format is to allow users to inspect their compiled state machines and to
 interface Ragel to other tools such as custom visualizers, code generators or
@@ -2973,7 +2973,7 @@ think about it as a single regular expression. It may shift between distinct
 parsing strategies, in which case modularization into several coherent blocks
 of the language may be appropriate.
 
-It may also be the case that patterns which compile to a large number of states
+It may also be the case that patterns that compile to a large number of states
 must be used in a number of different contexts and referencing them in each
 context results in a very large state machine. In this case, an ability to reuse
 parsers would reduce code size.
@@ -3022,7 +3022,7 @@ main := headers*;
 % }
 % END GENERATE
 
-Calling and jumping should be used carefully as they are operations which take
+Calling and jumping should be used carefully as they are operations that take
 one out of the domain
 of regular languages. A machine that contains a call or jump statement in one
 of its actions should be used as an argument to a machine construction operator
@@ -3154,7 +3154,8 @@ text of the current match.
 The \verb|act| variable must be defined as an integer type. It is used for
 recording the identity of the last pattern matched when the scanner must go
 past a matched pattern in an attempt to make a longer match. If the longer
-match fails it may need to consult the act variable. In some cases use of the act
+match fails it may need to consult the \verb|act| variable. In some cases, use 
+of the \verb|act|
 variable can be avoided because the value of the current state is enough
 information to determine which token to accept, however in other cases this is
 not enough and so the \verb|act| variable is used. 
@@ -3435,9 +3436,9 @@ context-dependent nature. The prevalence of variable-length fields in
 communication protocols motivated us to introduce semantic conditions into
 the Ragel language.
 
-A semantic condition is a block of user code which is executed immediately
+A semantic condition is a block of user code that is executed immediately
 before a transition is taken. If the code returns a value of true, the
-transition may be taken.  We can now embed code which extracts the length of a
+transition may be taken.  We can now embed code that extracts the length of a
 field, then proceed to match $n$ data values.
 
 % GENERATE: conds1
@@ -3467,21 +3468,21 @@ data_fields = (
 \graphspace
 
 The Ragel implementation of semantic conditions does not force us to give up the
-compositional property of Ragel definitions. For example, a machine which tests
+compositional property of Ragel definitions. For example, a machine that tests
 the length of a field using conditions can be unioned with another machine
-which accepts some of the same strings, without the two machines interfering with
+that accepts some of the same strings, without the two machines interfering with
 one another. The user need not be concerned about whether or not the result of the
 semantic condition will affect the matching of the second machine.
 
 To see this, first consider that when a user associates a condition with an
 existing transition, the transition's label is translated from the base character
-to its corresponding value in the space which represents ``condition $c$ true''. Should
+to its corresponding value in the space that represents ``condition $c$ true''. Should
 the determinization process combine a state that has a conditional transition
 with another state that has a transition on the same input character but
 without a condition, then the condition-less transition first has its label
-translated into two values, one to its corresponding value in the space which
+translated into two values, one to its corresponding value in the space that
 represents ``condition $c$ true'' and another to its corresponding value in the
-space which represents ``condition $c$ false''. It
+space that represents ``condition $c$ false''. It
 is then safe to combine the two transitions. This is shown in the following
 example.  Two intersecting patterns are unioned, one with a condition and one
 without. The condition embedded in the first pattern does not affect the second
@@ -3540,7 +3541,7 @@ parsed it is sometimes practical to implement the recursive parts using manual
 coding techniques. This often works in cases where the recursive structures are
 simple and easy to recognize, such as in the balancing of parentheses
 
-One approach to parsing recursive structures is to use actions which increment
+One approach to parsing recursive structures is to use actions that increment
 and decrement counters or otherwise recognise the entry to and exit from
 recursive structures and then jump to the appropriate machine defnition using
 \verb|fcall| and \verb|fret|. Alternatively, semantic conditions can be used to
