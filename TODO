@@ -40,8 +40,6 @@ eof action execution is moved into the main loop.
 ================
 END 6.0 Features
 
-"Entering" action should be renamed to "starting" action.
-
 Check initts on calls to scanners, may be necessary to stuff the initts into
 the call.
 
