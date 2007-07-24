@@ -1,3 +1,15 @@
+Ragel 5.23 - Jul 24, 2007
+=========================
+ -Eliminated the use of callcc as an alternative to goto. Instead, the named
+  breaks implementation used in the Java code generator is imitated using
+  control flow variables.
+ -Improved the error message given when there is a write statement but no
+  machine instantiations and hence no state machine.
+ -Documentation improvements: updates to "Machine Instantiation", "Write Init"
+  and "Write Exports" sectons. Added the "Variables Used by Ragel" section.
+ -Renamed "Entering Actions" to "Starting Actions."
+ -Other documentation updats.
+
 Ragel 5.22 - June 14, 2007
 ==========================
  -Bug fix: need to isolate the start state of a scanner before setting the
