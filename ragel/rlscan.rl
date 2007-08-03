@@ -217,7 +217,8 @@ bool Scanner::active()
 		return false;
 
 	if ( parser == 0 && ! parserExistsError ) {
-		scan_error() << "there is no previous specification name" << endl;
+		scan_error() << "this specification has no name, nor does any previous"
+			" specification" << endl;
 		parserExistsError = true;
 	}
 

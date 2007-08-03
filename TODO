@@ -54,7 +54,8 @@ end up with test_len || !test_len.
 
 Should be possible to include scanner definitions in another scanner.
 
-Need a "write entry name;" feature.
+Need an "entry name;" feature, causing name to get written out with the other
+entry points in the data.
 
 Possibly bring back the old semantics of > in a new operator, or allow it to be
 defined somehow.
