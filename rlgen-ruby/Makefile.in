@@ -24,7 +24,8 @@ DEFS +=
 CFLAGS += -g -Wall
 LDFLAGS +=
 
-CC_SRCS = main.cpp rubycodegen.cpp
+CC_SRCS = main.cpp ruby-codegen.cpp ruby-tabcodegen.cpp ruby-ftabcodegen.cpp \
+	ruby-flatcodegen.cpp ruby-fflatcodegen.cpp rbx-gotocodegen.cpp
 
 LIBS = ../common/common.a ../redfsm/redfsm.a
 

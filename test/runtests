@@ -258,6 +258,30 @@ for test_case; do
 
 		for min_opt in $minflags; do
 			echo "$allow_minflags" | grep -e $min_opt >/dev/null || continue
+			for gen_opt in $genflags; do
+				echo "$allow_genflags" | grep -e $gen_opt >/dev/null || continue
+				run_test
+			done
+		done
+	;;
+
+	java) 
+		# Not interested in gen opt.
+		gen_opt=""
+		for min_opt in $minflags; do
+			echo "$allow_minflags" | grep -e $min_opt >/dev/null || continue
+			run_test
+		done
+	;;
+
+	ruby) 
+		# Using genflags, get the allowed gen flags from the test case. If the
+		# test case doesn't specify assume that all gen flags are allowed.
+		allow_genflags=`sed '/@ALLOW_GENFLAGS:/s/^.*: *//p;d' $test_case`
+		[ -z "$allow_genflags" ] && allow_genflags="-T0 -T1 -F0 -F1"
+
+		for min_opt in $minflags; do
+			echo "$allow_minflags" | grep -e $min_opt >/dev/null || continue
 
 			for gen_opt in $genflags; do
 				echo "$allow_genflags" | grep -e $gen_opt >/dev/null || continue
@@ -266,14 +290,6 @@ for test_case; do
 		done
 	;;
 
-	java|ruby) 
-		# Not interested in gen opt.
-		gen_opt=""
-		for min_opt in $minflags; do
-			echo "$allow_minflags" | grep -e $min_opt >/dev/null || continue
-			run_test
-		done
-	;;
 	esac
 
 done

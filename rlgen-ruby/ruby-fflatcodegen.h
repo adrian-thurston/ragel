@@ -20,47 +20,36 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _RLGEN_RUBY_H
-#define _RLGEN_RUBY_H
+#ifndef _RUBY_FFLATCODEGEN_H
+#define _RUBY_FFLATCODEGEN_H
 
 #include <iostream>
-#include "config.h"
+#include "ruby-flatcodegen.h"
 
-#define PROGNAME "rlgen-ruby"
-
-/* Target implementation */
-enum RubyImplEnum
+class RubyFFlatCodeGen : public RubyFlatCodeGen 
 {
-  MRI,
-  Rubinius
+public:
+	RubyFFlatCodeGen( ostream &out ) : 
+		RubyFlatCodeGen(out) {}
+protected:
+	
+	std::ostream &TO_STATE_ACTION_SWITCH();
+	std::ostream &FROM_STATE_ACTION_SWITCH();
+	std::ostream &EOF_ACTION_SWITCH();
+	std::ostream &ACTION_SWITCH();
+
+	virtual int TO_STATE_ACTION( RedStateAp *state );
+	virtual int FROM_STATE_ACTION( RedStateAp *state );
+	virtual int EOF_ACTION( RedStateAp *state );
+	virtual int TRANS_ACTION( RedTransAp *trans );
+
+	virtual void writeData();
+	virtual void writeEOF();
+	virtual void writeExec();
 };
 
-extern RubyImplEnum rubyImpl;
+#endif /* _RUBY_FFLATCODEGEN_H */
 
-/* Target output style. */
-enum CodeStyleEnum
-{
-	GenTables,
-	GenFTables,
-	GenFlat,
-	GenFFlat,
-	GenGoto,
-	GenFGoto,
-	GenIpGoto,
-	GenSplit
-
-};
-
-extern CodeStyleEnum codeStyle;
-
-extern int gblErrorCount;
-extern char machineMain[];
-
-/* Options. */
-extern int numSplitPartitions;
-extern bool noLineDirectives;
-
-std::ostream &error();
 
 /*
  * Local Variables:
@@ -70,4 +59,3 @@ std::ostream &error();
  * End:
  */
 
-#endif /* _RLGEN_RUBY_H */

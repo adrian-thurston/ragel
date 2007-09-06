@@ -1,4 +1,5 @@
 /*
+ *  Copyright 2007 Victor Hugo Borja <vic@rubyforge.org>
  *  Copyright 2001-2007 Adrian Thurston <thurston@cs.queensu.ca>
  */
 
@@ -26,13 +27,17 @@
 #include <fstream>
 #include <unistd.h>
 
-#include "rlgen-ruby.h"
 #include "xmlparse.h"
 #include "pcheck.h"
 #include "vector.h"
 #include "version.h"
 #include "common.h"
-#include "rubycodegen.h"
+#include "rlgen-ruby.h"
+#include "ruby-tabcodegen.h"
+#include "ruby-ftabcodegen.h"
+#include "ruby-flatcodegen.h"
+#include "ruby-fflatcodegen.h"
+#include "rbx-gotocodegen.h"
 
 using std::istream;
 using std::ifstream;
@@ -42,6 +47,12 @@ using std::cin;
 using std::cout;
 using std::cerr;
 using std::endl;
+
+/* Target ruby impl */
+RubyImplEnum rubyImpl = MRI;
+
+/* Target language and output style. */
+CodeStyleEnum codeStyle = GenTables;
 
 /* Io globals. */
 istream *inStream = 0;
@@ -53,6 +64,7 @@ char *outputFileName = 0;
 bool graphvizDone = false;
 
 int numSplitPartitions = 0;
+bool noLineDirectives = false;
 bool printPrintables = false;
 
 /* Print a summary of the options. */
@@ -64,6 +76,15 @@ void usage()
 "   -h, -H, -?, --help    Print this usage and exit\n"
 "   -v, --version         Print version information and exit\n"
 "   -o <file>             Write output to <file>\n"
+"   -x, --rbx             Allow to use Rubinius asm features\n"
+"code generation options:\n"
+"   -l                    Inhibit writing of #line directives\n"
+"generated code style:\n"
+"   -T0                   Table driven FSM (default)\n"
+"   -T1                   Faster table driven FSM\n"
+"   -F0                   Flat table driven FSM\n"
+"   -F1                   Faster flat table-driven FSM\n"
+"   -G0                   Goto-driven FSM\n"
 	;	
 }
 
@@ -72,7 +93,8 @@ void version()
 {
 	cout << "Ragel Code Generator for Ruby" << endl <<
 			"Version " VERSION << ", " PUBDATE << endl <<
-			"Copyright (c) 2001-2007 by Adrian Thurston" << endl;
+                        "Copyright (c) 2001-2007 by Adrian Thurston" << endl <<
+			"Copyright (c) 2007 by Victor Hugo Borja" << endl;
 }
 
 ostream &error()
@@ -133,8 +155,36 @@ ostream *openOutput( char *inputFile )
 CodeGenData *makeCodeGen( char *sourceFileName, char *fsmName, 
 		ostream &out, bool wantComplete )
 {
-	CodeGenData *codeGen = new RubyCodeGen(out);
-
+	CodeGenData *codeGen = 0;
+	switch ( codeStyle ) {
+		case GenTables: 
+			codeGen = new RubyTabCodeGen(out);
+			break;
+		case GenFTables:
+			codeGen = new RubyFTabCodeGen(out);
+			break;
+		case GenFlat:
+			codeGen = new RubyFlatCodeGen(out);
+			break;
+		case GenFFlat:
+			codeGen = new RubyFFlatCodeGen(out);
+			break;
+		case GenGoto:
+			if ( rubyImpl == Rubinius ) {
+				codeGen = new RbxGotoCodeGen(out);
+			} else {
+				cout << "Goto style is still _very_ experimental " 
+					"and only supported using Rubinius.\n"
+					"You may want to enable the --rbx flag "
+					" to give it a try.\n";
+				exit(1);
+			}
+			break;
+		default:
+			cout << "Invalid code style\n";
+			exit(1);
+			break;
+	}
 	codeGen->sourceFileName = sourceFileName;
 	codeGen->fsmName = fsmName;
 	codeGen->wantComplete = wantComplete;
@@ -145,7 +195,7 @@ CodeGenData *makeCodeGen( char *sourceFileName, char *fsmName,
 /* Main, process args and call yyparse to start scanning input. */
 int main(int argc, char **argv)
 {
-	ParamCheck pc("o:vHh?-:", argc, argv);
+	ParamCheck pc("-:xHlh?vo:T:F:G:P:", argc, argv);
 	char *xmlInputFileName = 0;
 
 	while ( pc.check() ) {
@@ -164,6 +214,55 @@ int main(int argc, char **argv)
 				}
 				break;
 
+			case 'l':
+				noLineDirectives = true;
+				break;
+
+			/* Code style. */
+			case 'T':
+				if ( pc.parameterArg[0] == '0' )
+					codeStyle = GenTables;
+				else if ( pc.parameterArg[0] == '1' )
+					codeStyle = GenFTables;
+				else {
+					error() << "-T" << pc.parameterArg[0] << 
+							" is an invalid argument" << endl;
+					exit(1);
+				}
+				break;
+			case 'F':
+				if ( pc.parameterArg[0] == '0' )
+					codeStyle = GenFlat;
+				else if ( pc.parameterArg[0] == '1' )
+					codeStyle = GenFFlat;
+				else {
+					error() << "-F" << pc.parameterArg[0] << 
+							" is an invalid argument" << endl;
+					exit(1);
+				}
+				break;
+			case 'G':
+				if ( pc.parameterArg[0] == '0' )
+					codeStyle = GenGoto;
+				else if ( pc.parameterArg[0] == '1' )
+					codeStyle = GenFGoto;
+				else if ( pc.parameterArg[0] == '2' )
+					codeStyle = GenIpGoto;
+				else {
+					error() << "-G" << pc.parameterArg[0] << 
+							" is an invalid argument" << endl;
+					exit(1);
+				}
+				break;
+			case 'P':
+				codeStyle = GenSplit;
+				numSplitPartitions = atoi( pc.parameterArg );
+				break;
+
+                        case 'x':
+                                rubyImpl = Rubinius;
+                                break;
+
 			/* Version and help. */
 			case 'v':
 				version();
@@ -171,6 +270,7 @@ int main(int argc, char **argv)
 			case 'H': case 'h': case '?':
 				usage();
 				exit(0);
+
 			case '-':
 				if ( strcasecmp(pc.parameterArg, "help") == 0 ) {
 					usage();
@@ -180,6 +280,9 @@ int main(int argc, char **argv)
 					version();
 					exit(0);
 				}
+                                else if ( strcasecmp(pc.parameterArg, "rbx") == 0 ) {
+                                        rubyImpl = Rubinius;
+                                }
 				else {
 					error() << "--" << pc.parameterArg << 
 							" is an invalid argument" << endl;
@@ -248,3 +351,11 @@ int main(int argc, char **argv)
 	}
 	return 0;
 }
+
+/*
+ * Local Variables:
+ * mode: c++
+ * indent-tabs-mode: 1
+ * c-file-style: "bsd"
+ * End:
+ */
