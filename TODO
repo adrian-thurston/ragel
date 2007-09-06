@@ -76,6 +76,8 @@ regular expression?
 The |> guarded operator and the <| guarded operator need to be added.
 
 The fixed size stack is a problem for manual recursion of unlimited depth.
+    stack[top++] = ftargs; fgoto call_arg
+    fgoto* stack[--top];
 
 An option to turn off the removal of duplicate actions might be useful for
 analyzing unintentional nondeterminism.
