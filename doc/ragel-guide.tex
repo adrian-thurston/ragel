@@ -506,7 +506,6 @@ int main( int argc, char **argv )
 \label{cmd-line-parsing}
 \end{figure}
 
-
 \subsection{Naming Ragel Blocks}
 
 \begin{verbatim}
@@ -2500,6 +2499,41 @@ parsing, care must be taken to not use a pointer that has been invalidated by
 movement to a subsequent block.  If the current input data pointer is moved
 backwards it must not be moved past the beginning of the current block.
 
+Figure \ref{basic-example} shows a simple Ragel program that does not have any
+actions. The example tests the first argument of the program against a number
+pattern and then prints the machine's acceptance status.
+
+\begin{figure}
+\small
+\begin{verbatim}
+#include <stdio.h>
+#include <string.h>
+%%{
+    machine foo;
+    write data;
+}%%
+int main( int argc, char **argv )
+{
+    int cs;
+    if ( argc > 1 ) {
+        char *p = argv[1];
+        char *pe = p + strlen( p );
+        %%{ 
+            main := [0-9]+ ( '.' [0-9]+ )?;
+
+            write init;
+            write exec;
+            write eof;
+        }%%
+    }
+    printf("result = %i\n", cs >= foo_first_final );
+    return 0;
+}
+\end{verbatim}
+\caption{A basic Ragel example without any actions.}
+\label{basic-example}
+\end{figure}
+
 \section{Variables Used by Ragel}
 
 There are a number of variables which Ragel expects the user to declare. At a
@@ -2574,7 +2608,7 @@ may be used. The getkey statement may be used for looking into element
 structures or for translating the character to process. The getkey expression
 defaults to \verb|(*p)|. In goto-driven machines the getkey expression may be
 evaluated more than once per element processed, therefore it should not incur a
-large cost and preclude optimization.
+large cost nor preclude optimization.
 
 \section{Access Statement}
 

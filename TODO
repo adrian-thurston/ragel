@@ -40,8 +40,6 @@ eof action execution is moved into the main loop.
 ================
 END 6.0 Features
 
-Early example in docs should not use the noend option.
-
 Check initts on calls to scanners, may be necessary to stuff the initts into
 the call.
 
