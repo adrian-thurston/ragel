@@ -25,6 +25,7 @@
 #include "config.h"
 #include <assert.h>
 #include <iostream>
+#include <string>
 #include "common.h"
 #include "vector.h"
 #include "bstset.h"
@@ -641,15 +642,27 @@ struct Removal
 
 struct CondData
 {
-	CondData() : nextCondKey(0) {}
+	CondData() : lastCondKey(0) {}
 
 	/* Condition info. */
-	Key nextCondKey;
+	Key lastCondKey;
 
 	CondSpaceMap condSpaceMap;
 };
 
 extern CondData *condData;
+
+struct FsmConstructFail
+{
+	enum Reason
+	{
+		CondNoKeySpace
+	};
+
+	FsmConstructFail( Reason reason ) 
+		: reason(reason) {}
+	Reason reason;
+};
 
 /* State class that implements actions and priorities. */
 struct StateAp 

@@ -3553,6 +3553,16 @@ performing checks on the semantic structure of input seen so far. In the
 next section we describe how Ragel accommodates several common parser
 engineering problems.
 
+\vspace{10pt}
+
+\noindent {\large\bf Note:} The semantic condition feature works only with
+alphabet types that are smaller in width than the \verb|long| type. To
+implement semantic conditions Ragel needs to be able to allocate characters
+from the alphabet space. Ragel uses these allocated characters to express
+"character C with condition P true" or "C with P false." Since internally Ragel
+uses longs to store characters there is no room left in the alphabet space
+unless an alphabet type smaller than long is used.
+
 \section{Implementing Lookahead}
 
 There are a few strategies for implementing lookahead in Ragel programs.

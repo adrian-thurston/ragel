@@ -187,8 +187,8 @@ struct ParseData
 	void resolveActionNameRefs();
 
 	/* Set the alphabet type. If type types are not valid returns false. */
-	bool setAlphType( char *s1, char *s2 );
-	bool setAlphType( char *s1 );
+	bool setAlphType( const InputLoc &loc, char *s1, char *s2 );
+	bool setAlphType( const InputLoc &loc, char *s1 );
 
 	/* Override one of the variables ragel uses. */
 	bool setVariable( char *var, InlineList *inlineList );
@@ -214,6 +214,7 @@ struct ParseData
 	void makeExports();
 
 	void prepareMachineGen( GraphDictEl *graphDictEl );
+	void prepareMachineGenTBWrapped( GraphDictEl *graphDictEl );
 	void generateXML( ostream &out );
 	FsmAp *sectionGraph;
 	bool generatingSectionSubset;
@@ -254,6 +255,7 @@ struct ParseData
 	/* Alphabet type. */
 	HostType *userAlphType;
 	bool alphTypeSet;
+	InputLoc alphTypeLoc;
 
 	/* Element type and get key expression. */
 	InlineList *getKeyExpr;

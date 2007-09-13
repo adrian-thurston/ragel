@@ -802,8 +802,15 @@ CondSpace *FsmAp::addCondSpace( const CondSet &condSet )
 {
 	CondSpace *condSpace = condData->condSpaceMap.find( condSet );
 	if ( condSpace == 0 ) {
-		Key baseKey = condData->nextCondKey;
-		condData->nextCondKey += (1 << condSet.length() ) * keyOps->alphSize();
+		/* Do we have enough keyspace left? */
+		Size availableSpace = condData->lastCondKey.availableSpace();
+		Size neededSpace = (1 << condSet.length() ) * keyOps->alphSize();
+		if ( neededSpace > availableSpace )
+			throw FsmConstructFail( FsmConstructFail::CondNoKeySpace );
+
+		Key baseKey = condData->lastCondKey;
+		baseKey.increment();
+		condData->lastCondKey += (1 << condSet.length() ) * keyOps->alphSize();
 
 		condSpace = new CondSpace( condSet );
 		condSpace->baseKey = baseKey;

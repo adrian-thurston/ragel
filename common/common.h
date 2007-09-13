@@ -57,8 +57,12 @@ public:
 	long getVal() const { return key; };
 
 	/* Returns the key casted to a long long. This form of the key does not
-	 * require and signedness interpretation. */
+	 * require any signedness interpretation. */
 	long long getLongLong() const;
+
+	/* Returns the distance from the key value to the maximum value that the
+	 * key implementation can hold. */
+	Size availableSpace() const;
 
 	bool isUpper() const { return ( 'A' <= key && key <= 'Z' ); }
 	bool isLower() const { return ( 'a' <= key && key <= 'z' ); }
@@ -252,6 +256,14 @@ inline long long Key::getLongLong() const
 	return keyOps->isSigned ? (long long)key : (long long)(unsigned long)key;
 }
 
+inline Size Key::availableSpace() const
+{
+	if ( keyOps->isSigned ) 
+		return (long long)LONG_MAX - (long long)key;
+	else
+		return (unsigned long long)ULONG_MAX - (unsigned long long)(unsigned long)key;
+}
+	
 inline Key operator+(const Key key1, const Key key2)
 {
 	/* FIXME: must be made aware of isSigned. */
