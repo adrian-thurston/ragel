@@ -40,9 +40,6 @@ eof action execution is moved into the main loop.
 ================
 END 6.0 Features
 
-Check initts on calls to scanners, may be necessary to stuff the initts into
-the call.
-
 Add a prefix operator which sets every state final.
 
 Minimization should remove a condition when the character allows both
