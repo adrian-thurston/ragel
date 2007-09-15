@@ -261,6 +261,10 @@ struct ParseData
 	InlineList *getKeyExpr;
 	InlineList *accessExpr;
 
+	/* Stack management */
+	InlineList *prePushExpr;
+	InlineList *postPopExpr;
+
 	/* Overriding variables. */
 	InlineList *pExpr;
 	InlineList *peExpr;

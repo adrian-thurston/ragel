@@ -159,6 +159,8 @@ ragel_def_item_list: ;
 ragel_def_item: tag_alph_type;
 ragel_def_item: tag_getkey_expr;
 ragel_def_item: tag_access_expr;
+ragel_def_item: tag_prepush_expr;
+ragel_def_item: tag_postpop_expr;
 ragel_def_item: tag_export_list;
 ragel_def_item: tag_machine;
 ragel_def_item: tag_p_expr;
@@ -202,6 +204,16 @@ tag_getkey_expr: TAG_getkey inline_list '/' TAG_getkey
 tag_access_expr: TAG_access inline_list '/' TAG_access
 	final {
 		cgd->accessExpr = $2->inlineList;
+	};
+
+tag_prepush_expr: TAG_prepush inline_list '/' TAG_prepush
+	final {
+		cgd->prePushExpr = $2->inlineList;
+	};
+
+tag_postpop_expr: TAG_postpop inline_list '/' TAG_postpop
+	final {
+		cgd->postPopExpr = $2->inlineList;
 	};
 
 tag_p_expr: TAG_p_expr inline_list '/' TAG_p_expr

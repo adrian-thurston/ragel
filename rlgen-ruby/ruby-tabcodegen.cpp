@@ -60,6 +60,11 @@ void RubyTabCodeGen::GOTO_EXPR( ostream &out, InlineItem *ilItem, bool inFinish 
 
 void RubyTabCodeGen::CALL( ostream &out, int callDest, int targState, bool inFinish )
 {
+	if ( prePushExpr != 0 ) {
+		out << "begin\n";
+		INLINE_LIST( out, prePushExpr, 0, false );
+	}
+
 	out <<
 		"	begin\n"
 		"		" << STACK() << "[" << TOP() << "] = " << CS() << "\n"
@@ -68,10 +73,18 @@ void RubyTabCodeGen::CALL( ostream &out, int callDest, int targState, bool inFin
 		"		_break_again = true\n"
 		"		break\n" // break _again
 		"	end\n";
+
+	if ( prePushExpr != 0 )
+		out << "end\n";
 }
 
 void RubyTabCodeGen::CALL_EXPR(ostream &out, InlineItem *ilItem, int targState, bool inFinish )
 {
+	if ( prePushExpr != 0 ) {
+		out << "begin\n";
+		INLINE_LIST( out, prePushExpr, 0, false );
+	}
+
 	out <<
 		"	begin\n"
 		"		" << STACK() << "[" << TOP() << "] = " << CS() << "\n"
@@ -84,6 +97,9 @@ void RubyTabCodeGen::CALL_EXPR(ostream &out, InlineItem *ilItem, int targState, 
 		"		_break_again = true\n"
 		"		break\n" // break _again
 		"	end\n";
+
+	if ( prePushExpr != 0 )
+		out << "end\n";
 }
 
 void RubyTabCodeGen::RET( ostream &out, bool inFinish )
@@ -91,7 +107,15 @@ void RubyTabCodeGen::RET( ostream &out, bool inFinish )
 	out <<
 		"	begin\n"
 		"		" << TOP() << " -= 1\n"
-		"		" << CS() << " = " << STACK() << "[" << TOP() << "]\n"
+		"		" << CS() << " = " << STACK() << "[" << TOP() << "]\n";
+
+	if ( postPopExpr != 0 ) {
+		out << "begin\n";
+		INLINE_LIST( out, postPopExpr, 0, false );
+		out << "end\n";
+	}
+
+	out <<
 		"		_break_again = true\n"
 		"		break\n" // break _again
 		"	end\n";

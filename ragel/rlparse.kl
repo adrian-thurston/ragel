@@ -54,6 +54,32 @@ statement: getkey_spec commit;
 statement: access_spec commit;
 statement: variable_spec commit;
 statement: export_block commit;
+statement: pre_push_spec commit;
+statement: post_pop_spec commit;
+
+pre_push_spec:
+	KW_PrePush '{' inline_block '}' 
+	final {
+		if ( pd->prePushExpr != 0 ) {
+			/* Recover by just ignoring the duplicate. */
+			error($2->loc) << "pre_push code already defined" << endl;
+		}
+
+		pd->prePushExpr = $3->inlineList;
+	};
+
+
+post_pop_spec:
+	KW_PostPop '{' inline_block '}' 
+	final {
+		if ( pd->postPopExpr != 0 ) {
+			/* Recover by just ignoring the duplicate. */
+			error($2->loc) << "post_pop code already defined" << endl;
+		}
+
+		pd->postPopExpr = $3->inlineList;
+	};
+
 
 export_open: KW_Export 
 	final {

@@ -82,7 +82,7 @@ struct Parser
 	token KW_Machine, KW_Include, KW_Import, KW_Write, KW_Action, KW_AlphType,
 		KW_Range, KW_GetKey, KW_Include, KW_Write, KW_Machine, KW_InWhen,
 		KW_When, KW_OutWhen, KW_Eof, KW_Err, KW_Lerr, KW_To, KW_From,
-		KW_Export;
+		KW_Export, KW_PrePush, KW_PostPop;
 
 	# Specials in code blocks.
 	token KW_Break, KW_Exec, KW_Hold, KW_PChar, KW_Char, KW_Goto, KW_Call,

@@ -41,26 +41,49 @@ void IpGotoCodeGen::GOTO( ostream &ret, int gotoDest, bool inFinish )
 
 void IpGotoCodeGen::CALL( ostream &ret, int callDest, int targState, bool inFinish )
 {
+	if ( prePushExpr != 0 ) {
+		ret << "{";
+		INLINE_LIST( ret, prePushExpr, 0, false );
+	}
+
 	ret << "{" << STACK() << "[" << TOP() << "++] = " << targState << 
 			"; " << CTRL_FLOW() << "goto st" << callDest << ";}";
+
+	if ( prePushExpr != 0 )
+		ret << "}";
+}
+
+void IpGotoCodeGen::CALL_EXPR( ostream &ret, InlineItem *ilItem, int targState, bool inFinish )
+{
+	if ( prePushExpr != 0 ) {
+		ret << "{";
+		INLINE_LIST( ret, prePushExpr, 0, false );
+	}
+
+	ret << "{" << STACK() << "[" << TOP() << "++] = " << targState << "; " << CS() << " = (";
+	INLINE_LIST( ret, ilItem->children, 0, inFinish );
+	ret << "); " << CTRL_FLOW() << "goto _again;}";
+
+	if ( prePushExpr != 0 )
+		ret << "}";
 }
 
 void IpGotoCodeGen::RET( ostream &ret, bool inFinish )
 {
-	ret << "{" << CS() << " = " << STACK() << "[--" << TOP() << "]; " << 
-			CTRL_FLOW() << "goto _again;}";
+	ret << "{" << CS() << " = " << STACK() << "[--" << TOP() << "];";
+
+	if ( postPopExpr != 0 ) {
+		ret << "{";
+		INLINE_LIST( ret, postPopExpr, 0, false );
+		ret << "}";
+	}
+
+	ret << CTRL_FLOW() << "goto _again;}";
 }
 
 void IpGotoCodeGen::GOTO_EXPR( ostream &ret, InlineItem *ilItem, bool inFinish )
 {
 	ret << "{" << CS() << " = (";
-	INLINE_LIST( ret, ilItem->children, 0, inFinish );
-	ret << "); " << CTRL_FLOW() << "goto _again;}";
-}
-
-void IpGotoCodeGen::CALL_EXPR( ostream &ret, InlineItem *ilItem, int targState, bool inFinish )
-{
-	ret << "{" << STACK() << "[" << TOP() << "++] = " << targState << "; " << CS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish );
 	ret << "); " << CTRL_FLOW() << "goto _again;}";
 }

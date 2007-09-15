@@ -75,21 +75,44 @@ void JavaTabCodeGen::GOTO_EXPR( ostream &ret, InlineItem *ilItem, bool inFinish 
 
 void JavaTabCodeGen::CALL( ostream &ret, int callDest, int targState, bool inFinish )
 {
+	if ( prePushExpr != 0 ) {
+		ret << "{";
+		INLINE_LIST( ret, prePushExpr, 0, false );
+	}
+
 	ret << "{" << STACK() << "[" << TOP() << "++] = " << CS() << "; " << CS() << " = " << 
 			callDest << "; " << CTRL_FLOW() << "break _again;}";
+
+	if ( prePushExpr != 0 )
+		ret << "}";
 }
 
 void JavaTabCodeGen::CALL_EXPR( ostream &ret, InlineItem *ilItem, int targState, bool inFinish )
 {
+	if ( prePushExpr != 0 ) {
+		ret << "{";
+		INLINE_LIST( ret, prePushExpr, 0, false );
+	}
+
 	ret << "{" << STACK() << "[" << TOP() << "++] = " << CS() << "; " << CS() << " = (";
 	INLINE_LIST( ret, ilItem->children, targState, inFinish );
 	ret << "); " << CTRL_FLOW() << "break _again;}";
+
+	if ( prePushExpr != 0 )
+		ret << "}";
 }
 
 void JavaTabCodeGen::RET( ostream &ret, bool inFinish )
 {
-	ret << "{" << CS() << " = " << STACK() << "[--" << TOP() 
-			<< "]; " << CTRL_FLOW() << "break _again;}";
+	ret << "{" << CS() << " = " << STACK() << "[--" << TOP() << "];";
+
+	if ( postPopExpr != 0 ) {
+		ret << "{";
+		INLINE_LIST( ret, postPopExpr, 0, false );
+		ret << "}";
+	}
+
+	ret << CTRL_FLOW() << "break _again;}";
 }
 
 void JavaTabCodeGen::BREAK( ostream &ret, int targState )

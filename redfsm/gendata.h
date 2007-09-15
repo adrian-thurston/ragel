@@ -101,6 +101,8 @@ struct CodeGenData
 	CondSpaceList condSpaceList;
 	InlineList *getKeyExpr;
 	InlineList *accessExpr;
+	InlineList *prePushExpr;
+	InlineList *postPopExpr;
 
 	/* Overriding variables. */
 	InlineList *pExpr;

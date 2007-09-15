@@ -620,6 +620,20 @@ void XMLCodeGen::writeXML()
 		out << "</access>\n";
 	}
 
+	/* PrePush expression. */
+	if ( pd->prePushExpr != 0 ) {
+		out << "  <prepush>";
+		writeInlineList( pd->prePushExpr );
+		out << "</prepush>\n";
+	}
+
+	/* PostPop expression. */
+	if ( pd->postPopExpr != 0 ) {
+		out << "  <postpop>";
+		writeInlineList( pd->postPopExpr );
+		out << "</postpop>\n";
+	}
+
 	/*
 	 * Variable expressions.
 	 */

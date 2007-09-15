@@ -578,21 +578,44 @@ void GotoCodeGen::NEXT_EXPR( ostream &ret, InlineItem *ilItem, bool inFinish )
 
 void GotoCodeGen::CALL( ostream &ret, int callDest, int targState, bool inFinish )
 {
+	if ( prePushExpr != 0 ) {
+		ret << "{";
+		INLINE_LIST( ret, prePushExpr, 0, false );
+	}
+
 	ret << "{" << STACK() << "[" << TOP() << "++] = " << CS() << "; " << CS() << " = " << 
 			callDest << "; " << CTRL_FLOW() << "goto _again;}";
+
+	if ( prePushExpr != 0 )
+		ret << "}";
 }
 
 void GotoCodeGen::CALL_EXPR( ostream &ret, InlineItem *ilItem, int targState, bool inFinish )
 {
+	if ( prePushExpr != 0 ) {
+		ret << "{";
+		INLINE_LIST( ret, prePushExpr, 0, false );
+	}
+
 	ret << "{" << STACK() << "[" << TOP() << "++] = " << CS() << "; " << CS() << " = (";
 	INLINE_LIST( ret, ilItem->children, targState, inFinish );
 	ret << "); " << CTRL_FLOW() << "goto _again;}";
+
+	if ( prePushExpr != 0 )
+		ret << "}";
 }
 
 void GotoCodeGen::RET( ostream &ret, bool inFinish )
 {
-	ret << "{" << CS() << " = " << STACK() << "[--" << TOP() << "]; " << 
-			CTRL_FLOW() << "goto _again;}";
+	ret << "{" << CS() << " = " << STACK() << "[--" << TOP() << "];";
+
+	if ( postPopExpr != 0 ) {
+		ret << "{";
+		INLINE_LIST( ret, postPopExpr, 0, false );
+		ret << "}";
+	}
+
+	ret << CTRL_FLOW() << "goto _again;}";
 }
 
 void GotoCodeGen::BREAK( ostream &ret, int targState )

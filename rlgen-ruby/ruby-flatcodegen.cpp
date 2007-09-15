@@ -392,11 +392,62 @@ void RubyFlatCodeGen::GOTO( ostream &out, int gotoDest, bool inFinish )
 
 void RubyFlatCodeGen::CALL( ostream &out, int callDest, int targState, bool inFinish )
 {
+	if ( prePushExpr != 0 ) {
+		out << "begin\n";
+		INLINE_LIST( out, prePushExpr, 0, false );
+	}
+
 	out <<
 		"	begin\n"
 		"		" << STACK() << "[" << TOP() << "] = " << CS() << "\n"
 		"		" << TOP() << "+= 1\n"
 		"		" << CS() << " = " << callDest << "\n"
+		"		_break_again = true\n"
+		"		break\n" // break _again
+		"	end\n";
+
+	if ( prePushExpr != 0 )
+		out << "end\n";
+}
+
+void RubyFlatCodeGen::CALL_EXPR(ostream &out, InlineItem *ilItem, int targState, bool inFinish )
+{
+	if ( prePushExpr != 0 ) {
+		out << "begin\n";
+		INLINE_LIST( out, prePushExpr, 0, false );
+	}
+
+	out <<
+		"	begin\n"
+		"		" << STACK() << "[" << TOP() << "] = " << CS() << "\n"
+		"		" << TOP() << " += 1\n"
+		"		" << CS() << " = (";
+	INLINE_LIST( out, ilItem->children, targState, inFinish );
+	out << ")\n";
+
+	out << 
+		"		_break_again = true\n"
+		"		break\n" // break _again
+		"	end\n";
+
+	if ( prePushExpr != 0 )
+		out << "end\n";
+}
+
+void RubyFlatCodeGen::RET( ostream &out, bool inFinish )
+{
+	out <<
+		"	begin\n"
+		"		" << TOP() << " -= 1\n"
+		"		" << CS() << " = " << STACK() << "[" << TOP() << "]\n";
+
+	if ( postPopExpr != 0 ) {
+		out << "begin\n";
+		INLINE_LIST( out, postPopExpr, 0, false );
+		out << "end\n";
+	}
+
+	out <<
 		"		_break_again = true\n"
 		"		break\n" // break _again
 		"	end\n";
@@ -428,22 +479,6 @@ void RubyFlatCodeGen::NEXT_EXPR( ostream &ret, InlineItem *ilItem, bool inFinish
 }
 
 
-void RubyFlatCodeGen::CALL_EXPR(ostream &out, InlineItem *ilItem, int targState, bool inFinish )
-{
-	out <<
-		"	begin\n"
-		"		" << STACK() << "[" << TOP() << "] = " << CS() << "\n"
-		"		" << TOP() << " += 1\n"
-		"		" << CS() << " = (";
-	INLINE_LIST( out, ilItem->children, targState, inFinish );
-	out << ")\n";
-
-	out << 
-		"		_break_again = true\n"
-		"		break\n" // break _again
-		"	end\n";
-}
-
 void RubyFlatCodeGen::CURS( ostream &ret, bool inFinish )
 {
 	ret << "(_ps)";
@@ -452,17 +487,6 @@ void RubyFlatCodeGen::CURS( ostream &ret, bool inFinish )
 void RubyFlatCodeGen::TARGS( ostream &ret, bool inFinish, int targState )
 {
 	ret << "(" << CS() << ")";
-}
-
-void RubyFlatCodeGen::RET( ostream &out, bool inFinish )
-{
-	out <<
-		"	begin\n"
-		"		" << TOP() << " -= 1\n"
-		"		" << CS() << " = " << STACK() << "[" << TOP() << "]\n"
-		"		_break_again = true\n"
-		"		break\n" // break _again
-		"	end\n";
 }
 
 void RubyFlatCodeGen::BREAK( ostream &out, int targState )

@@ -117,7 +117,7 @@ struct Parser
 
 		token TAG_p_expr, TAG_pe_expr, TAG_cs_expr, TAG_top_expr,
 			TAG_stack_expr, TAG_act_expr, TAG_tokstart_expr, TAG_tokend_expr,
-			TAG_data_expr;
+			TAG_data_expr, TAG_prepush, TAG_postpop;
 	}%%
 
 	%% write instance_data;

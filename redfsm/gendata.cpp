@@ -44,6 +44,8 @@ CodeGenData::CodeGenData( ostream &out )
 	errState(-1),
 	getKeyExpr(0),
 	accessExpr(0),
+	prePushExpr(0),
+	postPopExpr(0),
 	pExpr(0),
 	peExpr(0),
 	csExpr(0),
