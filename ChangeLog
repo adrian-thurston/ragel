@@ -1,3 +1,21 @@
+Ragel 5.24 - Sep 16, 2007
+=========================
+ -Applied patch from Victor Hugo Borja <vic@rubyforge.org>. This patch
+  implements -T1 -F0 -F1 and -G0 in the ruby code generator. Goto-driven code
+  generation is experimental and requires rubinius asm directives (specify
+  with --rbx option). These code generators pass all the ruby tests.
+ -If the condition embedding code runs out of available characters in the
+  keyspace an error message is emitted.
+ -The first example that appeared in the manual used the special-purpose
+  'noend' write option. This caused confusion. Now a basic example appears
+  first.
+ -Added two new statements: prepush and postpop. These are code blocks that
+  are written out during call and return statements. The prepush code is
+  written immediately before pushing the current state to the state stack
+  during a call. The postpop code is written immediately after popping the
+  current state during return. These can be used to implement a dynamically
+  resizable stack. 
+
 Ragel 5.23 - Jul 24, 2007
 =========================
  -Eliminated the use of callcc as an alternative to goto. Instead, the named
@@ -8,7 +26,7 @@ Ragel 5.23 - Jul 24, 2007
  -Documentation improvements: updates to "Machine Instantiation", "Write Init"
   and "Write Exports" sectons. Added the "Variables Used by Ragel" section.
  -Renamed "Entering Actions" to "Starting Actions."
- -Other documentation updats.
+ -Other documentation updates.
 
 Ragel 5.22 - June 14, 2007
 ==========================
