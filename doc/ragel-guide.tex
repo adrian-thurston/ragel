@@ -330,7 +330,7 @@ example of this kind of scenario is the conversion of floating point numbers
 contained in a string to their corresponding numerical values.
 
 Another drawback is the very issue that Ragel attempts to solve.
-It is not possbile to execute a user action while
+It is not possible to execute a user action while
 matching a character contained inside a pattern. For example, if scanning a
 programming language and string literals can contain newlines which must be
 counted, a Lex user must break up a string literal pattern so as to associate
@@ -2564,7 +2564,9 @@ be initialized to the data length.
 must be an array containting the data to process.
 
 \item \verb|stack| - This must be an array of integers. It is used to store
-integer values representing states.
+integer values representing states. If the stack must resize dynamically the
+Pre-push and Post-Pop statements can be used to do this (Sections
+\ref{prepush} and \ref{postpop}).
 
 \item \verb|top| - This must be an integer value and will be used as an offset
 to \verb|stack|, giving the next available spot on the top of the stack.
@@ -2637,6 +2639,36 @@ variable. All of the variables that are declared by the user and
 used by Ragel can be changed. This includes \verb|p|, \verb|pe|, \verb|cs|,
 \verb|top|, \verb|stack|, \verb|tokstart|, \verb|tokend| and \verb|act|.
 In Ruby and Java code generation the \verb|data| variable can also be changed.
+
+\section{Pre-Push Statement}
+\label{prepush}
+
+\begin{verbatim}
+prepush { 
+	/* stack growing code */
+}
+\end{verbatim}
+\verbspace
+
+The prepush statement allows the user to supply stack management code that is
+written out during the generation of fcall, immediately before the current
+state is pushed to the stack. This statement can be used to test the number of
+available spaces and dynamically grow the stack if necessary.
+
+\section{Post-Pop Statement}
+\label{postpop}
+
+\begin{verbatim}
+postpop { 
+	/* stack shrinking code */
+}
+\end{verbatim}
+\verbspace
+
+The postpop statement allows the user to supply stack management code that is
+written out during the generation of fret, immediately after the next state is
+popped from the stack. This statement can be used to dynamically shrink the
+stack.
 
 \section{Write Statement}
 \label{write-statement}
@@ -3057,16 +3089,24 @@ main := headers*;
 % END GENERATE
 
 Calling and jumping should be used carefully as they are operations that take
-one out of the domain
-of regular languages. A machine that contains a call or jump statement in one
-of its actions should be used as an argument to a machine construction operator
-only with considerable care. Since DFA transitions may actually
-represent several NFA transitions, a call or jump embedded in one machine can
-inadvertently terminate another machine that it shares prefixes with. Despite
-this danger, theses statements have proven useful for tying together
-sub-parsers of a language into a parser for the full language, especially for
-the purpose of modularization and reducing the number of states when the
-machine contains frequently recurring patterns.
+one out of the domain of regular languages. A machine that contains a call or
+jump statement in one of its actions should be used as an argument to a machine
+construction operator only with considerable care. Since DFA transitions may
+actually represent several NFA transitions, a call or jump embedded in one
+machine can inadvertently terminate another machine that it shares prefixes
+with. Despite this danger, theses statements have proven useful for tying
+together sub-parsers of a language into a parser for the full language,
+especially for the purpose of modularizing code and reducing the number of
+states when the machine contains frequently recurring patterns.
+
+Section \ref{vals} describes the jump and call statements that are used to
+transfer control. These statements make use of two variables that must be
+declared by the user, \verb|stack| and \verb|top|. The \verb|stack| variable
+must be an array of integers and \verb|top| must be a single integer, which
+will point to the next available space in \verb|stack|. Sections \ref{prepush}
+and \ref{postpop} describe the Pre-Push and Post-Pop statements which can be
+used to implement a dynamically resizable array.
+
 \section{Referencing Names}
 \label{labels}
 
@@ -3367,7 +3407,7 @@ complete. See Section \ref{labels} for information on referencing labels.
 
 There are two benefits to providing state charts in Ragel. The first is that it
 allows us to take a state chart with a full listing of states and transitions
-and simplifly it in selective places using regular expressions.
+and simplify it in selective places using regular expressions.
 
 The state chart method of specifying parsers is very common.  It is an
 effective programming technique for producing robust code. The key disadvantage
@@ -3586,7 +3626,7 @@ coding techniques. This often works in cases where the recursive structures are
 simple and easy to recognize, such as in the balancing of parentheses
 
 One approach to parsing recursive structures is to use actions that increment
-and decrement counters or otherwise recognise the entry to and exit from
+and decrement counters or otherwise recognize the entry to and exit from
 recursive structures and then jump to the appropriate machine defnition using
 \verb|fcall| and \verb|fret|. Alternatively, semantic conditions can be used to
 test counter variables.
