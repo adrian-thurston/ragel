@@ -2,21 +2,20 @@
  * Convert a string to an integer.
  */
 
-#include <iostream>
 #include <stdlib.h>
+#include <string.h>
 #include <stdio.h>
-
-using namespace std;
 
 %%{
 	machine atoi;
-	write data noerror;
+	write data;
 }%%
 
-int atoi( char *str )
+long long atoi( char *str )
 {
-	char *p = str;
-	int cs, val = 0;
+	char *p = str, *pe = str + strlen( str );
+	int cs;
+	long long val = 0;
 	bool neg = false;
 
 	%%{
@@ -30,18 +29,18 @@ int atoi( char *str )
 
 		main := 
 			( '-'@see_neg | '+' )? ( digit @add_digit )+ 
-			'\n' @{ fbreak; };
+			'\n';
 
 		# Initialize and execute.
 		write init;
-		write exec noend;
+		write exec;
 	}%%
 
 	if ( neg )
 		val = -1 * val;
 
 	if ( cs < atoi_first_final )
-		cerr << "atoi: there was an error" << endl;
+		fprintf( stderr, "atoi: there was an error\n" );
 
 	return val;
 };
@@ -53,8 +52,8 @@ int main()
 {
 	char buf[BUFSIZE];
 	while ( fgets( buf, sizeof(buf), stdin ) != 0 ) {
-		int value = atoi( buf );
-		cout << value << endl;
+		long long value = atoi( buf );
+		printf( "%lld\n", value );
 	}
 	return 0;
 }
