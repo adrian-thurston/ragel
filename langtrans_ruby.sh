@@ -32,6 +32,7 @@ cat << EOF
 	def run_machine( data )
 		p = 0
 		pe = data.length
+		eof = data.length
 		cs = 0;
 EOF
 
@@ -45,7 +46,6 @@ cat << EOF
 
 		%% write init;
 		%% write exec;
-		%% write eof;
 		if cs >= ${machine}_first_final
 			puts "ACCEPT"
 		else

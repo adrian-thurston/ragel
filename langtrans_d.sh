@@ -48,6 +48,7 @@ cat << EOF
 	{
 		char *p = data.ptr;
 		char *pe = data.ptr + data.length;
+		char *eof = pe;
 		char _s[];
 
 		%% write exec;
@@ -55,7 +56,6 @@ cat << EOF
 
 	void finish( )
 	{
-		%% write eof;
 		if ( cs >= ${machine}_first_final )
 			writefln( "ACCEPT" );
 		else

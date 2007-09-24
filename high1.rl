@@ -119,14 +119,13 @@ void tokenizer_execute( struct tokenizer *fsm, const char *_data, int _len )
 {
 	const char *p = _data;
 	const char *pe = _data+_len;
+	const char *eof = pe;
 
 	%% write exec;
 }
 
 int tokenizer_finish( struct tokenizer *fsm )
 {
-	%% write eof;
-
 	if ( fsm->cs == tokenizer_error )
 		return -1;
 	if ( fsm->cs >= tokenizer_first_final )

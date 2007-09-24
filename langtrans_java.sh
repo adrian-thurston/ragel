@@ -47,13 +47,13 @@ cat << EOF
 	{
 		int p = 0;
 		int pe = len;
+		int eof = len;
 		String _s;
 		%% write exec;
 	}
 
 	void finish( )
 	{
-		%% write eof;
 		if ( cs >= ${class}_first_final )
 			System.out.println( "ACCEPT" );
 		else
