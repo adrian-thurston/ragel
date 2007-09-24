@@ -649,6 +649,12 @@ void XMLCodeGen::writeXML()
 		writeInlineList( pd->peExpr );
 		out << "</pe_expr>\n";
 	}
+
+	if ( pd->eofExpr != 0 ) {
+		out << "  <eof_expr>";
+		writeInlineList( pd->eofExpr );
+		out << "</eof_expr>\n";
+	}
 	
 	if ( pd->csExpr != 0 ) {
 		out << "  <cs_expr>";

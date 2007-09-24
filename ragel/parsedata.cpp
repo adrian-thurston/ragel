@@ -433,6 +433,7 @@ ParseData::ParseData( char *fileName, char *sectionName,
 	postPopExpr(0),
 	pExpr(0),
 	peExpr(0),
+	eofExpr(0),
 	csExpr(0),
 	topExpr(0),
 	stackExpr(0),
@@ -876,6 +877,8 @@ bool ParseData::setVariable( char *var, InlineList *inlineList )
 		pExpr = inlineList;
 	else if ( strcmp( var, "pe" ) == 0 )
 		peExpr = inlineList;
+	else if ( strcmp( var, "eof" ) == 0 )
+		eofExpr = inlineList;
 	else if ( strcmp( var, "cs" ) == 0 )
 		csExpr = inlineList;
 	else if ( strcmp( var, "data" ) == 0 )

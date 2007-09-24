@@ -48,6 +48,7 @@ CodeGenData::CodeGenData( ostream &out )
 	postPopExpr(0),
 	pExpr(0),
 	peExpr(0),
+	eofExpr(0),
 	csExpr(0),
 	topExpr(0),
 	stackExpr(0),

@@ -268,6 +268,7 @@ struct ParseData
 	/* Overriding variables. */
 	InlineList *pExpr;
 	InlineList *peExpr;
+	InlineList *eofExpr;
 	InlineList *csExpr;
 	InlineList *topExpr;
 	InlineList *stackExpr;

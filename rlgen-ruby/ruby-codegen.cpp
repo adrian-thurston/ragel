@@ -130,13 +130,13 @@ string RubyCodeGen::PE()
 string RubyCodeGen::EOFV()
 {
 	ostringstream ret;
-//	if ( peExpr == 0 )
+	if ( eofExpr == 0 )
 		ret << "eof";
-//	else {
-//		//ret << "(";
-//		INLINE_LIST( ret, peExpr, 0, false );
-//		//ret << ")";
-//	}
+	else {
+		//ret << "(";
+		INLINE_LIST( ret, eofExpr, 0, false );
+		//ret << ")";
+	}
 	return ret.str();
 }
 

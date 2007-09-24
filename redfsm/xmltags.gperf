@@ -81,6 +81,7 @@ exports, TAG_exports
 ex, TAG_ex
 p_expr, TAG_p_expr
 pe_expr, TAG_pe_expr
+eof_expr, TAG_eof_expr
 cs_expr, TAG_cs_expr
 top_expr, TAG_top_expr
 stack_expr, TAG_stack_expr

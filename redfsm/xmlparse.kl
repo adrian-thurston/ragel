@@ -165,6 +165,7 @@ ragel_def_item: tag_export_list;
 ragel_def_item: tag_machine;
 ragel_def_item: tag_p_expr;
 ragel_def_item: tag_pe_expr;
+ragel_def_item: tag_eof_expr;
 ragel_def_item: tag_cs_expr;
 ragel_def_item: tag_top_expr;
 ragel_def_item: tag_stack_expr;
@@ -220,6 +221,8 @@ tag_p_expr: TAG_p_expr inline_list '/' TAG_p_expr
 	final { cgd->pExpr = $2->inlineList; };
 tag_pe_expr: TAG_pe_expr inline_list '/' TAG_pe_expr
 	final { cgd->peExpr = $2->inlineList; };
+tag_eof_expr: TAG_eof_expr inline_list '/' TAG_eof_expr
+	final { cgd->eofExpr = $2->inlineList; };
 tag_cs_expr: TAG_cs_expr inline_list '/' TAG_cs_expr
 	final { cgd->csExpr = $2->inlineList; };
 tag_top_expr: TAG_top_expr inline_list '/' TAG_top_expr
