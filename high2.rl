@@ -67,7 +67,6 @@ int Fsm::execute( const unsigned char *_data, int _len )
 
 int Fsm::finish()
 {
-	%% write eof;
 	if ( cs == Fsm_error )
 		return -1;
 	if ( cs >= Fsm_first_final )

@@ -51,8 +51,6 @@ void forder_execute( struct forder *fsm, const char *_data, int _len )
 
 int forder_finish( struct forder *fsm )
 {
-	%% write eof;
-
 	if ( fsm->cs == forder_error )
 		return -1;
 	if ( fsm->cs >= forder_first_final )

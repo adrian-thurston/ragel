@@ -76,7 +76,6 @@ int ErrAct::execute( const char *_data, int _len )
 
 int ErrAct::finish( )
 {
-	%% write eof;
 	if ( cs == ErrAct_error )
 		return -1;
 	if ( cs >= ErrAct_first_final )

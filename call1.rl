@@ -56,8 +56,6 @@ void test_execute( struct test *fsm, const char *data, int len )
 
 int test_finish( struct test *fsm )
 {
-	%% write eof;
-
 	if ( fsm->cs == test_error )
 		return -1;
 	if ( fsm->cs >= test_first_final )

@@ -150,8 +150,6 @@ void strs_execute( struct strs *fsm, const char *_data, int _len )
 
 int strs_finish( struct strs *fsm )
 {
-	%% write eof;
-
 	if ( fsm->cs == strs_error )
 		return -1;
 	if ( fsm->cs >= strs_first_final )

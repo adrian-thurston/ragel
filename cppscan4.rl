@@ -208,8 +208,6 @@ class Scanner
 	// accepting state.
 	int finish( )
 	{
-		%% write eof;
-
 		if ( cs == error )
 			return -1;
 		if ( cs >= first_final )

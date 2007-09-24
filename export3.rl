@@ -30,7 +30,6 @@ def run_machine( data )
 
 	%% write init nocs;
 	%% write exec;
-	%% write eof;
 	if  cs >= test_first_final
 		puts "ACCEPT"
 	else

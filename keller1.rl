@@ -777,7 +777,6 @@ int Parser::execute( LangEl *_data, int _len )
 
 int Parser::finish( )
 {
-	%% write eof;
 	if ( cs == Parser_error )
 		return -1;
 	if ( cs >= Parser_first_final )

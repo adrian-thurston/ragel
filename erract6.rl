@@ -40,8 +40,6 @@ void errintrans_execute( struct errintrans *fsm, const char *_data, int _len )
 
 int errintrans_finish( struct errintrans *fsm )
 {
-	%% write eof;
-
 	if ( fsm->cs == errintrans_error )
 		return -1;
 	if ( fsm->cs >= errintrans_first_final )

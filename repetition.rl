@@ -62,7 +62,6 @@ int Rep::execute( const char *_data, int _len )
 
 int Rep::finish( )
 {
-	%% write eof;
 	if ( cs == Rep_error )
 		return -1;
 	if ( cs >= Rep_first_final )

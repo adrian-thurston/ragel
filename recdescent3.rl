@@ -77,7 +77,6 @@ def run_machine( data )
 
 	%% write init;
 	%% write exec;
-	%% write eof;
 
 	if cs == recdescent3_error
 		puts "SCANNER_ERROR"

@@ -92,7 +92,6 @@ struct XML
 
 	int XML::finish( )
 	{
-		%% write eof;
 		if ( cs == XML_error )
 			return -1;
 		if ( cs >= XML_first_final )

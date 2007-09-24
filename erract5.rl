@@ -74,7 +74,6 @@
 
 - (int) finish;
 {
-	%% write eof;
 	if ( cs == ErrAct_error )
 		return -1;
 	else if ( cs >= ErrAct_first_final )

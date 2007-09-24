@@ -34,8 +34,6 @@ void range_execute( struct range *fsm, const char *_data, int _len )
 
 int range_finish( struct range *fsm )
 {
-	%% write eof;
-
 	if ( fsm->cs == range_error )
 		return -1;
 	if ( fsm->cs >= range_first_final )

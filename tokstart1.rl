@@ -119,7 +119,6 @@ int Scanner::execute( char *data, int len )
 
 int Scanner::finish( )
 {
-	%% write eof;
 	if ( cs == Scanner_error )
 		return -1;
 	if ( cs >= Scanner_first_final )

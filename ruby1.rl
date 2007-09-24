@@ -37,7 +37,6 @@ def run_machine( data )
 
 	%% write init;
 	%% write exec;
-	%% write eof;
 	if  cs >= ruby1_first_final
 		puts "ACCEPT"
 	else

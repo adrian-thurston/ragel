@@ -78,7 +78,6 @@ class recdescent2
 
 		%% write init;
 		%% write exec;
-		%% write eof;
 
 		if ( cs == recdescent_error )
 			System.out.println( "SCANNER ERROR" );
