@@ -919,6 +919,7 @@ void JavaTabCodeGen::writeExec()
 {
 	out <<
 		"	{\n"
+		"	boolean testEof = false;\n"
 		"	int _klen";
 
 	if ( redFsm->anyRegCurStateRef() )
@@ -1019,8 +1020,10 @@ void JavaTabCodeGen::writeExec()
 
 	if ( hasEnd ) {
 		out << 
-			"	if ( ++" << P() << " == " << PE() << " )\n"
-			"		break _resume;\n";
+			"	if ( ++" << P() << " == " << PE() << " ) {\n"
+			"		testEof = true;\n"
+			"		break _resume;\n"
+			"	}\n";
 	}
 	else {
 		out << 
@@ -1035,8 +1038,27 @@ void JavaTabCodeGen::writeExec()
 		out << "	}";
 
 	/* The if guarding on empty string. */
-	if ( hasEnd )
-		out << "	}\n";
+	if ( hasEnd ) {
+		out << 
+			"	}\n"
+			"	else"
+			"		testEof = true;\n";
+	}
+
+	if ( redFsm->anyEofActions() ) {
+		out <<
+			"	if ( testEof && " << P() << " == " << EOFV() << " )\n"
+			"	{\n"
+			"	int __acts = " << EA() << "[" << CS() << "]" << ";\n"
+			"	int __nacts = " << CAST("int") << " " << A() << "[__acts++];\n"
+			"	while ( __nacts-- > 0 ) {\n"
+			"		switch ( " << A() << "[__acts++] ) {\n";
+			EOF_ACTION_SWITCH() <<
+			"		}\n"
+			"	}\n"
+			"	}\n"
+			"\n";
+	}
 
 	/* The execute block. */
 	out << "	}\n";
@@ -1044,17 +1066,6 @@ void JavaTabCodeGen::writeExec()
 
 void JavaTabCodeGen::writeEOF()
 {
-	if ( redFsm->anyEofActions() ) {
-		out <<
-			"	int _acts = " << EA() << "[" << CS() << "]" << ";\n"
-			"	int _nacts = " << CAST("int") << " " << A() << "[_acts++];\n"
-			"	while ( _nacts-- > 0 ) {\n"
-			"		switch ( " << A() << "[_acts++] ) {\n";
-			EOF_ACTION_SWITCH() <<
-			"		}\n"
-			"	}\n"
-			"\n";
-	}
 }
 
 std::ostream &JavaTabCodeGen::OPEN_ARRAY( string type, string name )
@@ -1242,6 +1253,19 @@ string JavaTabCodeGen::PE()
 		INLINE_LIST( ret, peExpr, 0, false );
 		ret << ")";
 	}
+	return ret.str();
+}
+
+string JavaTabCodeGen::EOFV()
+{
+	ostringstream ret;
+//	if ( peExpr == 0 )
+		ret << "eof";
+//	else {
+//		ret << "(";
+//		INLINE_LIST( ret, peExpr, 0, false );
+//		ret << ")";
+//	}
 	return ret.str();
 }
 

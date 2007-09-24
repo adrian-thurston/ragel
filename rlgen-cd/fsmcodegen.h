@@ -92,6 +92,7 @@ protected:
 
 	string P();
 	string PE();
+	string EOFV();
 
 	string ACCESS();
 	string CS();
@@ -166,6 +167,7 @@ protected:
 	unsigned int arrayTypeSize( unsigned long maxVal );
 
 	bool outLabelUsed;
+	bool testEofUsed;
 	bool againLabelUsed;
 	bool useIndicies;
 

@@ -127,6 +127,8 @@ public:
 
 	string P();
 	string PE();
+	string EOFV();
+
 	string CS();
 	string STACK();
 	string TOP();

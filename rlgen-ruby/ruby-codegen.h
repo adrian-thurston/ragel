@@ -105,6 +105,8 @@ public:
 
 	string P();
 	string PE();
+	string EOFV();
+
 	string CS();
 	string TOP();
 	string STACK();

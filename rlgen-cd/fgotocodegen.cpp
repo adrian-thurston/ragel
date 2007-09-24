@@ -178,6 +178,7 @@ void FGotoCodeGen::writeData()
 
 void FGotoCodeGen::writeExec()
 {
+	testEofUsed = false;
 	outLabelUsed = false;
 
 	out << "	{\n";
@@ -189,10 +190,10 @@ void FGotoCodeGen::writeExec()
 		out << "	" << WIDE_ALPH_TYPE() << " _widec;\n";
 
 	if ( hasEnd ) {
-		outLabelUsed = true;
+		testEofUsed = true;
 		out << 
 			"	if ( " << P() << " == " << PE() << " )\n"
-			"		goto _out;\n";
+			"		goto _test_eof;\n";
 	}
 
 	if ( redFsm->errState != 0 ) {
@@ -254,6 +255,20 @@ void FGotoCodeGen::writeExec()
 			"	goto _resume;\n";
 	}
 
+	if ( testEofUsed )
+		out << "	_test_eof: {}\n";
+
+	if ( redFsm->anyEofActions() ) {
+		out <<
+			"	if ( " << P() << " == " << EOFV() << " )\n"
+			"	{\n"
+			"	switch ( " << EA() << "[" << CS() << "] ) {\n";
+			EOF_ACTION_SWITCH();
+			SWITCH_DEFAULT() <<
+			"	}\n"
+			"	}\n"
+			"\n";
+	}
 
 	if ( outLabelUsed )
 		out << "	_out: {}\n";
@@ -263,14 +278,4 @@ void FGotoCodeGen::writeExec()
 
 void FGotoCodeGen::writeEOF()
 {
-	if ( redFsm->anyEofActions() ) {
-		out <<
-			"	{\n"
-			"	switch ( " << EA() << "[" << CS() << "] ) {\n";
-			EOF_ACTION_SWITCH();
-			SWITCH_DEFAULT() <<
-			"	}\n"
-			"	}\n"
-			"\n";
-	}
 }

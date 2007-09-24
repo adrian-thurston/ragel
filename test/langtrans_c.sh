@@ -11,6 +11,8 @@ machine=`sed -n 's/^[\t ]*machine[\t ]*\([a-zA-Z_0-9]*\)[\t ]*;[\t ]*$/\1/p' $fi
 # Make a temporary version of the test case using the C language translations.
 sed -n '/\/\*/,/\*\//d;p' $file | txl -q stdin langtrans_c.txl > $file.pr
 
+has_eof_act=`sed -n '/\/\*/,/\*\//d;p' $file | txl -q stdin checkeofact.txl`
+
 # Begin writing out the test case.
 cat << EOF
 /*
@@ -45,12 +47,16 @@ void exec( char *data, int len )
 {
 	char *p = data;
 	char *pe = data + len;
+EOF
+
+[ "$has_eof_act" = "yes" ] && echo "char *eof = pe;"
+
+cat << EOF
 	%% write exec;
 }
 
 void finish( )
 {
-	%% write eof;
 	if ( cs >= ${machine}_first_final )
 		printf( "ACCEPT\\n" );
 	else

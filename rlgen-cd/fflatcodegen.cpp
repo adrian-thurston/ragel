@@ -231,6 +231,7 @@ void FFlatCodeGen::writeData()
 
 void FFlatCodeGen::writeExec()
 {
+	testEofUsed = false;
 	outLabelUsed = false;
 
 	out << 
@@ -259,10 +260,10 @@ void FFlatCodeGen::writeExec()
 	}
 
 	if ( hasEnd ) {
-		outLabelUsed = true;
+		testEofUsed = true;
 		out << 
 			"	if ( " << P() << " == " << PE() << " )\n"
-			"		goto _out;\n";
+			"		goto _test_eof;\n";
 	}
 
 	if ( redFsm->errState != 0 ) {
@@ -337,16 +338,12 @@ void FFlatCodeGen::writeExec()
 			"	goto _resume;\n";
 	}
 
-	if ( outLabelUsed )
-		out << "	_out: {}\n";
+	if ( testEofUsed )
+		out << "	_test_eof: {}\n";
 
-	out << "	}\n";
-}
-
-void FFlatCodeGen::writeEOF()
-{
 	if ( redFsm->anyEofActions() ) {
 		out <<
+			"	if ( " << P() << " == " << EOFV() << " )\n"
 			"	{\n"
 			"	switch ( " << EA() << "[" << CS() << "] ) {\n";
 			EOF_ACTION_SWITCH();
@@ -355,4 +352,13 @@ void FFlatCodeGen::writeEOF()
 			"	}\n"
 			"\n";
 	}
+
+	if ( outLabelUsed )
+		out << "	_out: {}\n";
+
+	out << "	}\n";
+}
+
+void FFlatCodeGen::writeEOF()
+{
 }

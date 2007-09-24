@@ -659,6 +659,7 @@ void GotoCodeGen::writeData()
 
 void GotoCodeGen::writeExec()
 {
+	testEofUsed = false;
 	outLabelUsed = false;
 
 	out << "	{\n";
@@ -680,10 +681,10 @@ void GotoCodeGen::writeExec()
 	out << "\n";
 
 	if ( hasEnd ) {
-		outLabelUsed = true;
+		testEofUsed = true;
 		out << 
 			"	if ( " << P() << " == " << PE() << " )\n"
-			"		goto _out;\n";
+			"		goto _test_eof;\n";
 	}
 
 	if ( redFsm->errState != 0 ) {
@@ -753,6 +754,26 @@ void GotoCodeGen::writeExec()
 			"	goto _resume;\n";
 	}
 
+	if ( testEofUsed )
+		out << "	_test_eof: {}\n";
+
+	if ( redFsm->anyEofActions() ) {
+		out << 
+			"	if ( " << P() << " == " << EOFV() << " )\n"
+			"	{\n"
+			"	" << PTR_CONST() << ARRAY_TYPE(redFsm->maxActArrItem) << POINTER() << "__acts = " << 
+					ARR_OFF( A(), EA() + "[" + CS() + "]" ) << ";\n"
+			"	" << UINT() << " __nacts = " << CAST(UINT()) << " *__acts++;\n"
+			"	while ( __nacts-- > 0 ) {\n"
+			"		switch ( *__acts++ ) {\n";
+			EOF_ACTION_SWITCH();
+			SWITCH_DEFAULT() <<
+			"		}\n"
+			"	}\n"
+			"	}\n"
+			"\n";
+	}
+
 	if ( outLabelUsed )
 		out << "	_out: {}\n";
 
@@ -761,19 +782,4 @@ void GotoCodeGen::writeExec()
 
 void GotoCodeGen::writeEOF()
 {
-	if ( redFsm->anyEofActions() ) {
-		out << 
-			"	{\n"
-			"	" << PTR_CONST() << ARRAY_TYPE(redFsm->maxActArrItem) << POINTER() << "_acts = " << 
-					ARR_OFF( A(), EA() + "[" + CS() + "]" ) << ";\n"
-			"	" << UINT() << " _nacts = " << CAST(UINT()) << " *_acts++;\n"
-			"	while ( _nacts-- > 0 ) {\n"
-			"		switch ( *_acts++ ) {\n";
-			EOF_ACTION_SWITCH();
-			SWITCH_DEFAULT() <<
-			"		}\n"
-			"	}\n"
-			"	}\n"
-			"\n";
-	}
 }

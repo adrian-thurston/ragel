@@ -285,6 +285,7 @@ void FTabCodeGen::writeData()
 
 void FTabCodeGen::writeExec()
 {
+	testEofUsed = false;
 	outLabelUsed = false;
 
 	out << 
@@ -305,10 +306,10 @@ void FTabCodeGen::writeExec()
 	out << "\n";
 
 	if ( hasEnd ) {
-		outLabelUsed = true;
+		testEofUsed = true;
 		out <<
 			"	if ( " << P() << " == " << PE() << " )\n"
-			"		goto _out;\n";
+			"		goto _test_eof;\n";
 	}
 
 	if ( redFsm->errState != 0 ) {
@@ -389,6 +390,20 @@ void FTabCodeGen::writeExec()
 			"	goto _resume;\n";
 	}
 
+	if ( testEofUsed )
+		out << "	_test_eof: {}\n";
+
+	if ( redFsm->anyEofActions() ) {
+		out <<
+			"	if ( " << P() << " == " << EOFV() << " )\n"
+			"	{\n"
+			"	switch ( " << EA() << "[" << CS() << "] ) {\n";
+			EOF_ACTION_SWITCH();
+			SWITCH_DEFAULT() <<
+			"	}\n"
+			"	}\n"
+			"\n";
+	}
 
 	if ( outLabelUsed )
 		out << "	_out: {}\n";
@@ -399,14 +414,4 @@ void FTabCodeGen::writeExec()
 
 void FTabCodeGen::writeEOF()
 {
-	if ( redFsm->anyEofActions() ) {
-		out <<
-			"	{\n"
-			"	switch ( " << EA() << "[" << CS() << "] ) {\n";
-			EOF_ACTION_SWITCH();
-			SWITCH_DEFAULT() <<
-			"	}\n"
-			"	}\n"
-			"\n";
-	}
 }

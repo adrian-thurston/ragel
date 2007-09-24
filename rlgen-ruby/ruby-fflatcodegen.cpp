@@ -218,6 +218,7 @@ void RubyFFlatCodeGen::writeExec()
 {
 	out << 
 		"begin # ragel fflat\n"
+		"	testEof = false\n"
 		"	_slen, _trans, _keys, _inds";
 	if ( redFsm->anyRegCurStateRef() )
 		out << ", _ps";
@@ -294,9 +295,13 @@ void RubyFFlatCodeGen::writeExec()
 
 	out << "	" << P() << " += 1\n";
 
-	if ( hasEnd )
-		out << "	break if " << P() << " == " << PE() << "\n";
-
+	if ( hasEnd ) {
+		out << 
+			"	if " << P() << " == " << PE() << "\n"
+			"		testEof = true\n"
+			"		break\n"
+			"	end\n";
+	}
 	
 	out << /* Close the _resume loop. */
 		"	end # _resume loop\n";
@@ -305,26 +310,32 @@ void RubyFFlatCodeGen::writeExec()
 		out << "	end # errstate guard\n";
 
 	
-	if ( hasEnd )
-		out << "	end # pe guard\n";
+	if ( hasEnd ) {
+		out << 
+			"	# close if guarding empty string \n"
+			"	else\n"
+			"		testEof = true\n"
+			"	end\n";
+	}
+
+	if ( redFsm->anyEofActions() ) {
+		out <<
+			"	if testEof && " << P() << " == " << EOFV() << "\n"
+			"	  case " << EA() << "[" << CS() << "]\n";
+		EOF_ACTION_SWITCH();
+		out <<
+			"	  end # eof action switch \n"
+			"	end\n"
+			"\n";
+	}
 
 	out << "end # ragel fflat";
-
 }
 
 
 void RubyFFlatCodeGen::writeEOF()
 {
-	if ( redFsm->anyEofActions() ) {
-		out <<
-			"	  case " << EA() << "[" << CS() << "]\n";
-		EOF_ACTION_SWITCH();
-		out <<
-			"	  end # eof action switch \n"
-			"\n";
-	}
 }
-
 
 /*
  * Local Variables:

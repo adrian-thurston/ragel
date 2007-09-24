@@ -256,23 +256,14 @@ void RubyFTabCodeGen::writeData()
 
 void RubyFTabCodeGen::writeEOF()
 {
-	if ( redFsm->anyEofActions() ) {
-		out <<
-			"	begin\n"
-			"		case ( " << EA() << "[" << CS() << "] )\n";
-			EOF_ACTION_SWITCH();
-		out <<
-			"		end\n"
-			"	end\n"
-			"\n";
-	}
 }
 
 void RubyFTabCodeGen::writeExec()
 {
 	out << 
-                "	begin # ragel ftab \n"
-		"	  _klen, _trans, _keys";
+		"begin # ragel ftab\n"
+		"	testEof = false\n"
+		"	_klen, _trans, _keys";
 
 	if ( redFsm->anyRegCurStateRef() )
 		out << ", _ps";
@@ -362,7 +353,10 @@ void RubyFTabCodeGen::writeExec()
 
 	if ( hasEnd ) {
 		out << 
-			"	break if "<< P() << " == " << PE() << " \n";
+			"	if " << P() << " == " << PE() << "\n"
+			"		testEof = true\n"
+			"		break\n"
+			"	end\n";
 	}
 
 	/* Close the resume loop. */
@@ -374,8 +368,26 @@ void RubyFTabCodeGen::writeExec()
 		out << "	end # close if guarding error state \n";
 
 	/* The if guarding on empty string. */
-	if ( hasEnd ) 
-		out << "	end # close if guarding empty string \n";
+	if ( hasEnd ) {
+		out << 
+			"	# close if guarding empty string \n"
+			"	else\n"
+			"		testEof = true\n"
+			"	end\n";
+	}
+
+	if ( redFsm->anyEofActions() ) {
+		out <<
+			"	if testEof && " << P() << " == " << EOFV() << "\n"
+			"	begin\n"
+			"		case ( " << EA() << "[" << CS() << "] )\n";
+			EOF_ACTION_SWITCH();
+		out <<
+			"		end\n"
+			"	end\n"
+			"	end\n"
+			"\n";
+	}
 
 	/* Wrapping the execute block. */
 	out << "	end # close execution block \n";

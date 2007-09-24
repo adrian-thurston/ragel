@@ -119,6 +119,7 @@ end define
 
 define al_term_base
 		[id]
+	|	[SPOFF] [id] '( [SPON] [al_expr] ')
 	|	[opt al_sign] [number]
 	|	[stringlit] 
 	|	[charlit] 

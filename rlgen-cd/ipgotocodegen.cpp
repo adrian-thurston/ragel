@@ -112,7 +112,7 @@ void IpGotoCodeGen::TARGS( ostream &ret, bool inFinish, int targState )
 
 void IpGotoCodeGen::BREAK( ostream &ret, int targState )
 {
-	ret << CTRL_FLOW() << "goto _out" << targState << ";";
+	ret << "{" << CS() << " = " << targState << "; " << CTRL_FLOW() << "goto _out;}";
 }
 
 bool IpGotoCodeGen::IN_TRANS_ACTIONS( RedStateAp *state )
@@ -172,7 +172,7 @@ void IpGotoCodeGen::GOTO_HEADER( RedStateAp *state )
 		if ( hasEnd ) {
 			out <<
 				"	if ( ++" << P() << " == " << PE() << " )\n"
-				"		goto _out" << state->id << ";\n";
+				"		goto _test_eof" << state->id << ";\n";
 		}
 		else {
 			out << 
@@ -213,7 +213,9 @@ void IpGotoCodeGen::STATE_GOTO_ERROR()
 		out << "st" << state->id << ":\n";
 
 	/* Break out here. */
-	out << "	goto _out" << state->id << ";\n";
+	outLabelUsed = true;
+	out << CS() << " = " << state->id << ";\n";
+	out << "	goto _out;\n";
 }
 
 
@@ -235,9 +237,9 @@ std::ostream &IpGotoCodeGen::EXIT_STATES()
 {
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->outNeeded ) {
-			outLabelUsed = true;
-			out << "	_out" << st->id << ": " << CS() << " = " << 
-					st->id << "; goto _out; \n";
+			testEofUsed = true;
+			out << "	_test_eof" << st->id << ": " << CS() << " = " << 
+					st->id << "; goto _test_eof; \n";
 		}
 	}
 	return out;
@@ -336,18 +338,9 @@ void IpGotoCodeGen::setLabelsNeeded()
 	}
 
 	if ( hasEnd ) {
-		for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ )
-			st->outNeeded = st->labelNeeded;
-	}
-	else {
-		if ( redFsm->errState != 0 )
-			redFsm->errState->outNeeded = true;
-
-		for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ ) {
-			/* Any state with a transition in that has a break will need an
-			 * out label. */
-			if ( trans->action != 0 && trans->action->anyBreakStmt() )
-				trans->targ->outNeeded = true;
+		for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+			if ( st != redFsm->errState )
+				st->outNeeded = st->labelNeeded;
 		}
 	}
 }
@@ -362,6 +355,7 @@ void IpGotoCodeGen::writeExec()
 	/* Must set labels immediately before writing because we may depend on the
 	 * noend write option. */
 	setLabelsNeeded();
+	testEofUsed = false;
 	outLabelUsed = false;
 
 	out << "	{\n";
@@ -373,10 +367,10 @@ void IpGotoCodeGen::writeExec()
 		out << "	" << WIDE_ALPH_TYPE() << " _widec;\n";
 
 	if ( hasEnd ) {
-		outLabelUsed = true;
+		testEofUsed = true;
 		out << 
 			"	if ( " << P() << " == " << PE() << " )\n"
-			"		goto _out;\n";
+			"		goto _test_eof;\n";
 	}
 
 	if ( useAgainLabel() ) {
@@ -391,10 +385,10 @@ void IpGotoCodeGen::writeExec()
 			"\n";
 
 		if ( hasEnd ) {
-			outLabelUsed = true;
+			testEofUsed = true;
 			out << 
 				"	if ( ++" << P() << " == " << PE() << " )\n"
-				"		goto _out;\n";
+				"		goto _test_eof;\n";
 		}
 		else {
 			out << 
@@ -412,6 +406,21 @@ void IpGotoCodeGen::writeExec()
 		EXIT_STATES() << 
 		"\n";
 
+	if ( testEofUsed ) 
+		out << "	_test_eof: {}\n";
+
+	if ( redFsm->anyEofActions() ) {
+		out <<
+			"	if ( " << P() << " == " << EOFV() << " )\n"
+			"	{\n"
+			"	switch ( " << CS() << " ) {\n";
+			FINISH_CASES();
+			SWITCH_DEFAULT() <<
+			"	}\n"
+			"	}\n"
+			"\n";
+	}
+
 	if ( outLabelUsed ) 
 		out << "	_out: {}\n";
 
@@ -421,14 +430,4 @@ void IpGotoCodeGen::writeExec()
 
 void IpGotoCodeGen::writeEOF()
 {
-	if ( redFsm->anyEofActions() ) {
-		out <<
-			"	{\n"
-			"	switch ( " << CS() << " ) {\n";
-			FINISH_CASES();
-			SWITCH_DEFAULT() <<
-			"	}\n"
-			"	}\n"
-			"\n";
-	}
 }

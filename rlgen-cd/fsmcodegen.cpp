@@ -171,6 +171,19 @@ string FsmCodeGen::PE()
 	return ret.str();
 }
 
+string FsmCodeGen::EOFV()
+{
+	ostringstream ret;
+//	if ( peExpr == 0 )
+		ret << "eof";
+//	else {
+//		ret << "(";
+//		INLINE_LIST( ret, peExpr, 0, false );
+//		ret << ")";
+//	}
+	return ret.str();
+}
+
 string FsmCodeGen::CS()
 {
 	ostringstream ret;

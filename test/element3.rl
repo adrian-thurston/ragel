@@ -66,6 +66,7 @@ struct LangEl
 {
 	struct LangEl *p = _data;
 	struct LangEl *pe = _data + _len;
+	struct LangEl *eof = pe;
 	%% write exec;
 
 	if ( self->cs == Fsm_error ) 
@@ -75,7 +76,6 @@ struct LangEl
 
 - (int) finish;
 {
-	%% write eof;
 	if ( self->cs == Fsm_error ) 
 		return -1;
 	return ( self->cs >= Fsm_first_final ) ? 1 : 0;

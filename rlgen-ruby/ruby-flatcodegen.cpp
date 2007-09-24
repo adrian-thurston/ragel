@@ -622,29 +622,13 @@ void RubyFlatCodeGen::writeData()
 
 void RubyFlatCodeGen::writeEOF()
 {
-	if ( redFsm->anyEofActions() ) {
-		out << 
-			"	begin\n"
-			"	" << "_acts = " << EA() << "[" << CS() << "]\n"
-			"	_nacts = " << A() << "[_acts]\n" << 
-			"	_acts += 1\n"
-			"	while ( _nacts > 0 ) \n"
-			"		_nacts -= 1\n"
-			"		_acts += 1\n"
-			"		case ( "<< A() << "[_acts-1] ) \n";
-		EOF_ACTION_SWITCH();
-		out <<
-			"		end # eof action switch \n"
-			"	end\n"
-			"	end\n"
-			"\n";
-	}
 }
 
 void RubyFlatCodeGen::writeExec()
 {
 	out << 
 		"begin # ragel flat\n"
+		"	testEof = false\n"
 		"	_slen, _trans, _keys, _inds";
 	if ( redFsm->anyRegCurStateRef() )
 		out << ", _ps";
@@ -743,9 +727,13 @@ void RubyFlatCodeGen::writeExec()
 
 	out << "	" << P() << " += 1\n";
 
-	if ( hasEnd )
-		out << "	break if " << P() << " == " << PE() << "\n";
-
+	if ( hasEnd ) {
+		out << 
+			"	if " << P() << " == " << PE() << "\n"
+			"		testEof = true\n"
+			"		break\n"
+			"	end\n";
+	}
 	
 	out << /* Close the _resume loop. */
 		"	end # _resume loop\n";
@@ -754,8 +742,33 @@ void RubyFlatCodeGen::writeExec()
 		out << "	end # errstate guard\n";
 
 	
-	if ( hasEnd )
-		out << "	end # pe guard\n";
+	if ( hasEnd ) {
+		out << 
+			"	# close if guarding empty string \n"
+			"	else\n"
+			"		testEof = true\n"
+			"	end\n";
+	}
+
+	if ( redFsm->anyEofActions() ) {
+		out << 
+			"	if testEof && " << P() << " == " << EOFV() << "\n"
+			"	begin\n"
+			"	__acts = " << EA() << "[" << CS() << "]\n"
+			"	__nacts = " << A() << "[__acts]\n" << 
+			"	__acts += 1\n"
+			"	while ( __nacts > 0 ) \n"
+			"		__nacts -= 1\n"
+			"		__acts += 1\n"
+			"		case ( "<< A() << "[__acts-1] ) \n";
+		EOF_ACTION_SWITCH();
+		out <<
+			"		end # eof action switch \n"
+			"	end\n"
+			"	end\n"
+			"	end\n"
+			"\n";
+	}
 
 	out << "end # ragel flat";
 }

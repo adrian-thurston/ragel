@@ -229,8 +229,10 @@ void RubyTabCodeGen::LOCATE_TRANS()
 
 void RubyTabCodeGen::writeExec()
 {
-	out << "begin\n"
-		<< "	_klen, _trans, _keys";
+	out << 
+		"begin\n"
+		"	testEof = false\n"
+		"	_klen, _trans, _keys";
 
 	if ( redFsm->anyRegCurStateRef() )
 		out << ", _ps";
@@ -330,8 +332,13 @@ void RubyTabCodeGen::writeExec()
 
 	out << "	" << P() << " += 1\n";
 
-	if ( hasEnd )
-		out << "	break if " << P() << " == " << PE() << "\n";
+	if ( hasEnd ) {
+		out << 
+			"	if " << P() << " == " << PE() << "\n"
+			"		testEof = true\n"
+			"		break\n"
+			"	end\n";
+	}
 
 	/* Close the resume loop. */
 	out << "	end\n";
@@ -341,8 +348,28 @@ void RubyTabCodeGen::writeExec()
 		out << "	end\n";
 
 	/* The if guarding on empty string. */
-	if ( hasEnd ) 
-		out << "	end\n";
+	if ( hasEnd ) {
+		out << 
+			"	else\n"
+			"		testEof = true\n"
+			"	end\n";
+	}
+
+	if ( redFsm->anyEofActions() ) {
+		out << 
+			"	if testEof && " << P() << " == " << EOFV() << "\n"
+			"	__acts = " << EA() << "[" << CS() << "]\n"
+			"	__nacts = " << " " << A() << "[__acts]\n"
+			"	__acts += 1\n"
+			"	while __nacts > 0\n"
+			"		__nacts -= 1\n"
+			"		__acts += 1\n"
+			"		case " << A() << "[__acts - 1]\n";
+		EOF_ACTION_SWITCH() <<
+			"		end # eof action switch\n"
+			"	end\n"
+			"	end\n";
+	}
 
 	/* Wrapping the execute block. */
 	out << "	end\n";
@@ -350,19 +377,6 @@ void RubyTabCodeGen::writeExec()
 
 void RubyTabCodeGen::writeEOF()
 {
-	if ( redFsm->anyEofActions() ) {
-		out << 
-			"	_acts = " << EA() << "[" << CS() << "]\n"
-			"	_nacts = " << " " << A() << "[_acts]\n"
-			"	_acts += 1\n"
-			"	while _nacts > 0\n"
-			"		_nacts -= 1\n"
-			"		_acts += 1\n"
-			"		case " << A() << "[_acts - 1]\n";
-		EOF_ACTION_SWITCH() <<
-			"		end # eof action switch\n"
-			"	end\n";
-	}
 }
 
 
