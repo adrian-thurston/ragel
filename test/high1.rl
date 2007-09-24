@@ -49,8 +49,6 @@ void high_execute( struct high *fsm, const unsigned int *_data, int _len )
 
 int high_finish( struct high *fsm )
 {
-	%% write eof;
-
 	if ( fsm->cs == high_error )
 		return -1;
 	if ( fsm->cs >= high_first_final )

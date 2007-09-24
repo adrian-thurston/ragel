@@ -1018,8 +1018,3 @@ void TabCodeGen::writeExec()
 
 	out << "	}\n";
 }
-
-
-void TabCodeGen::writeEOF()
-{
-}

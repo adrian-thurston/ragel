@@ -168,7 +168,6 @@
 
 - (int) finish;
 {
-	%% write eof;
 	if ( cs == Clang_error ) 
 		return -1;
 	if ( cs >= Clang_first_final ) 

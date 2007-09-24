@@ -87,7 +87,6 @@ protected:
 	virtual std::ostream &EOF_ACTION( RedStateAp *state );
 	virtual std::ostream &TRANS_ACTION( RedTransAp *trans );
 	virtual void calcIndexSize();
-	virtual void writeEOF();
 };
 
 

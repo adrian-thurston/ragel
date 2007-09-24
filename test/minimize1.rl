@@ -39,8 +39,6 @@ void min_execute( struct min *fsm, const char *_data, int _len )
 
 int min_finish( struct min *fsm )
 {
-	%% write eof;
-
 	if ( fsm->cs == min_error )
 		return -1;
 	if ( fsm->cs >= min_first_final )

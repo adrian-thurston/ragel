@@ -79,7 +79,6 @@ int num = 0;
 
 - (int) finish;
 {
-	%% write eof;
 	if ( cs == CallTest_error ) 
 		return -1;
 	return ( cs >= CallTest_first_final ) ? 1 : 0;

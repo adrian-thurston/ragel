@@ -49,7 +49,6 @@ public:
 	unsigned int EOF_ACTION( RedStateAp *state );
 
 	virtual void writeData();
-	virtual void writeEOF();
 	virtual void writeExec();
 };
 

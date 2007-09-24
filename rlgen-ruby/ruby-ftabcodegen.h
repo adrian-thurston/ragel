@@ -41,7 +41,6 @@ protected:
 	virtual int TRANS_ACTION( RedTransAp *trans );
 
   	void writeData();
-	void writeEOF();
 	void writeExec();
 	void calcIndexSize();
 };

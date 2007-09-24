@@ -83,7 +83,6 @@ public:
 	virtual void STATE_GOTO_ERROR();
 
 	virtual void writeData();
-	virtual void writeEOF();
 	virtual void writeExec();
 };
 

@@ -375,12 +375,6 @@ void RubyTabCodeGen::writeExec()
 	out << "	end\n";
 }
 
-void RubyTabCodeGen::writeEOF()
-{
-}
-
-
-
 std::ostream &RubyTabCodeGen::FROM_STATE_ACTION_SWITCH() 
 {
 	/* Walk the list of functions, printing the cases. */

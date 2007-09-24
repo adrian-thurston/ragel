@@ -56,7 +56,6 @@ public:
 	void LOCATE_TRANS();
 
 	virtual void writeExec();
-	virtual void writeEOF();
 	virtual void writeData();
 
  protected:

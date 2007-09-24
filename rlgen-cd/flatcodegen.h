@@ -81,7 +81,6 @@ protected:
 	virtual std::ostream &TRANS_ACTION( RedTransAp *trans );
 
 	virtual void writeData();
-	virtual void writeEOF();
 	virtual void writeExec();
 };
 

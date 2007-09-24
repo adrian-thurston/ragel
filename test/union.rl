@@ -106,7 +106,6 @@ void Concurrent::execute( const char *data, int len )
 
 int Concurrent::finish( )
 {
-	%% write eof;
 	if ( cs == Concurrent_error )
 		return -1;
 	if ( cs >= Concurrent_first_final )

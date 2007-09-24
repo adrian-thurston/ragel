@@ -74,7 +74,6 @@ struct JavaTabCodeGen : public CodeGenData
 	void LOCATE_TRANS();
 
 	virtual void writeExec();
-	virtual void writeEOF();
 	virtual void writeData();
 	virtual void writeInit();
 	virtual void writeExports();

@@ -68,7 +68,6 @@ struct CodeGenData
 	virtual void writeData() {};
 	virtual void writeInit() {};
 	virtual void writeExec() {};
-	virtual void writeEOF() {};
 	virtual void writeExports() {};
 
 	/* This can also be overwridden to modify the processing of write

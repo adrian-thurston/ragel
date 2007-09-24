@@ -67,7 +67,6 @@
 
 - (int) finish;
 {
-	%% write eof;
 	if ( cs == Fsm_error )
 		return -1;
 	else if ( cs >= Fsm_first_final )

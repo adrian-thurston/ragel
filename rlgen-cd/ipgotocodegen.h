@@ -55,7 +55,6 @@ public:
 	void BREAK( ostream &ret, int targState );
 
 	virtual void writeData();
-	virtual void writeEOF();
 	virtual void writeExec();
 
 protected:

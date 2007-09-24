@@ -620,10 +620,6 @@ void RubyFlatCodeGen::writeData()
 	STATE_IDS();
 }
 
-void RubyFlatCodeGen::writeEOF()
-{
-}
-
 void RubyFlatCodeGen::writeExec()
 {
 	out << 

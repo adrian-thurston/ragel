@@ -44,7 +44,6 @@ protected:
 	virtual int TRANS_ACTION( RedTransAp *trans );
 
 	virtual void writeData();
-	virtual void writeEOF();
 	virtual void writeExec();
 };
 

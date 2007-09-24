@@ -87,7 +87,6 @@ void test( char *buf )
 	pe = buf + len;
 
 	%% write exec;
-	%% write eof;
 
 	if ( cs == recdescent_error ) {
 		/* Machine failed before finding a token. */

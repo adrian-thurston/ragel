@@ -427,7 +427,3 @@ void IpGotoCodeGen::writeExec()
 	out <<
 		"	}\n";
 }
-
-void IpGotoCodeGen::writeEOF()
-{
-}

@@ -410,8 +410,3 @@ void FTabCodeGen::writeExec()
 
 	out << "	}\n";
 }
-
-
-void FTabCodeGen::writeEOF()
-{
-}

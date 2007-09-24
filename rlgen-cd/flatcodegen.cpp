@@ -797,7 +797,3 @@ void FlatCodeGen::writeExec()
 
 	out << "	}\n";
 }
-
-void FlatCodeGen::writeEOF()
-{
-}

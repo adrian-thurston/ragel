@@ -171,7 +171,6 @@ void test( char *buf )
 
 	%% write init;
 	%% write exec;
-	%% write eof;
 
 	if ( cs >= clang_first_final )
 		printf("ACCEPT\n");

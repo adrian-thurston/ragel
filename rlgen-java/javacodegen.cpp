@@ -1064,10 +1064,6 @@ void JavaTabCodeGen::writeExec()
 	out << "	}\n";
 }
 
-void JavaTabCodeGen::writeEOF()
-{
-}
-
 std::ostream &JavaTabCodeGen::OPEN_ARRAY( string type, string name )
 {
 	array_type = type;

@@ -358,7 +358,3 @@ void FFlatCodeGen::writeExec()
 
 	out << "	}\n";
 }
-
-void FFlatCodeGen::writeEOF()
-{
-}

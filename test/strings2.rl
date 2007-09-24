@@ -1319,8 +1319,6 @@ void test( char *buf )
 	%% write init;
 	%% write exec;
 
-	%% write eof;
-
 	if ( fsm->cs >= strs_first_final )
 		printf("ACCEPT\n");
 	else

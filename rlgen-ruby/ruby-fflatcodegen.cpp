@@ -332,11 +332,6 @@ void RubyFFlatCodeGen::writeExec()
 	out << "end # ragel fflat";
 }
 
-
-void RubyFFlatCodeGen::writeEOF()
-{
-}
-
 /*
  * Local Variables:
  * mode: c++

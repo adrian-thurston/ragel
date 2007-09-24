@@ -72,8 +72,6 @@ void CallTest::execute( const char *data, int len )
 
 int CallTest::finish( )
 {
-	%% write eof;
-
 	if ( this->cs == CallTest_error )
 		return -1;
 	if ( this->cs >= CallTest_first_final )

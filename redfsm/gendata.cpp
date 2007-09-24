@@ -695,13 +695,6 @@ void CodeGenData::writeStatement( InputLoc &loc, int nargs, char **args )
 		}
 		writeExec();
 	}
-	else if ( strcmp( args[0], "eof" ) == 0 ) {
-		for ( int i = 1; i < nargs; i++ ) {
-			source_warning(loc) << "unrecognized write option \"" << 
-					args[i] << "\"" << endl;
-		}
-		writeEOF();
-	}
 	else if ( strcmp( args[0], "exports" ) == 0 ) {
 		for ( int i = 1; i < nargs; i++ ) {
 			source_warning(loc) << "unrecognized write option \"" << 

@@ -162,7 +162,6 @@ void Scanner::run( char *buf )
 		/* Machine failed before finding a token. */
 		cout << "PARSE ERROR" << endl;
 	}
-	%% write eof;
 }
 
 int main()

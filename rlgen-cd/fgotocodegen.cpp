@@ -275,7 +275,3 @@ void FGotoCodeGen::writeExec()
 
 	out << "	}\n";
 }
-
-void FGotoCodeGen::writeEOF()
-{
-}

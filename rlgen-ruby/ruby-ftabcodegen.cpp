@@ -254,10 +254,6 @@ void RubyFTabCodeGen::writeData()
 	STATE_IDS();
 }
 
-void RubyFTabCodeGen::writeEOF()
-{
-}
-
 void RubyFTabCodeGen::writeExec()
 {
 	out << 

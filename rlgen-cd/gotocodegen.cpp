@@ -779,7 +779,3 @@ void GotoCodeGen::writeExec()
 
 	out << "	}\n";
 }
-
-void GotoCodeGen::writeEOF()
-{
-}
