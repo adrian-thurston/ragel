@@ -39,6 +39,7 @@ struct Fsm
 
 	alphtype int;
 	getkey fpc->key;
+	variable eof eof_marker;
 
 	action a1 {}
 	action a2 {}
@@ -61,7 +62,7 @@ int Fsm::execute( LangEl *data, int len )
 {
 	LangEl *p = data;
 	LangEl *pe = data + len;
-	LangEl *eof = pe;
+	LangEl *eof_marker = pe;
 	%% write exec;
 
 	if ( cs == Fsm_error )
