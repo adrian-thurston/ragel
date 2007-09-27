@@ -76,6 +76,9 @@ StateAp::StateAp()
 	outList(),
 	inList(),
 
+	/* No EOF target. */
+	eofTarget(0),
+
 	/* No entry points, or epsilon trans. */
 	entryIds(),
 	epsilonTrans(),
@@ -114,6 +117,10 @@ StateAp::StateAp(const StateAp &other)
 	 * individual transitions are duplicated and attached. */
 	outList(),
 	inList(),
+
+	/* Set this using the original state's eofTarget. It will get mapped back
+	 * to the new machine in the Fsm copy constructor. */
+	eofTarget(other.eofTarget),
 
 	/* Duplicate the entry id set and epsilon transitions. These
 	 * are sets of integers and as such need no fixing. */

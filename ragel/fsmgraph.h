@@ -680,6 +680,10 @@ struct StateAp
 	/* In transition Lists. */
 	TransInList inList;
 
+	/* Set only during scanner construction when actions are added. NFA to DFA
+	 * code can ignore this. */
+	StateAp *eofTarget;
+
 	/* Entry points into the state. */
 	EntryIdSet entryIds;
 

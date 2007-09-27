@@ -98,6 +98,10 @@ FsmAp::FsmAp( const FsmAp &graph )
 			trans->toState = 0;
 			attachTrans( state, toState, trans );
 		}
+
+		/* Fix the eofTarg, if set. */
+		if ( state->eofTarget != 0 )
+			state->eofTarget = state->eofTarget->alg.stateMap;
 	}
 
 	/* Fix the state pointers in the entry points array. */
