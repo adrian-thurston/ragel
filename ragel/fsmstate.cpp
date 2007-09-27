@@ -172,7 +172,7 @@ StateAp::~StateAp()
 /* Compare two states using pointers to the states. With the approximate
  * compare the idea is that if the compare finds them the same, they can
  * immediately be merged. */
-int ApproxCompare::compare( const StateAp *state1 , const StateAp *state2 )
+int ApproxCompare::compare( const StateAp *state1, const StateAp *state2 )
 {
 	int compareRes;
 
@@ -222,6 +222,9 @@ int ApproxCompare::compare( const StateAp *state1 , const StateAp *state2 )
 			break;
 		}
 	}
+
+	/* Not yet supporting minimization of states with EOF targets. */
+	assert( state1->eofTarget == 0 && state2->eofTarget == 0 );
 
 	/* Got through the entire state comparison, deem them equal. */
 	return 0;
@@ -303,6 +306,9 @@ int InitPartitionCompare::compare( const StateAp *state1 , const StateAp *state2
 		}
 	}
 
+	/* Not yet supporting minimization of states with EOF targets. */
+	assert( state1->eofTarget == 0 && state2->eofTarget == 0 );
+
 	return 0;
 }
 
@@ -340,6 +346,9 @@ int PartitionCompare::compare( const StateAp *state1, const StateAp *state2 )
 			break;
 		}
 	}
+
+	/* Not yet supporting minimization of states with EOF targets. */
+	assert( state1->eofTarget == 0 && state2->eofTarget == 0 );
 
 	return 0;
 }
