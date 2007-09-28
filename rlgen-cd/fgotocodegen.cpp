@@ -258,14 +258,33 @@ void FGotoCodeGen::writeExec()
 	if ( testEofUsed )
 		out << "	_test_eof: {}\n";
 
-	if ( redFsm->anyEofActions() ) {
+	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
 		out <<
 			"	if ( " << P() << " == " << EOFV() << " )\n"
-			"	{\n"
-			"	switch ( " << EA() << "[" << CS() << "] ) {\n";
-			EOF_ACTION_SWITCH();
+			"	{\n";
+
+		if ( redFsm->anyEofTrans() ) {
+			out <<
+				"	switch ( " << CS() << " ) {\n";
+
+			for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+				if ( st->eofTrans != 0 )
+					out << "	case " << st->id << ": goto tr" << st->eofTrans->id << ";\n";
+			}
+
 			SWITCH_DEFAULT() <<
-			"	}\n"
+				"	}\n";
+		}
+
+		if ( redFsm->anyEofActions() ) {
+			out <<
+				"	switch ( " << EA() << "[" << CS() << "] ) {\n";
+				EOF_ACTION_SWITCH();
+				SWITCH_DEFAULT() <<
+				"	}\n";
+		}
+
+		out <<
 			"	}\n"
 			"\n";
 	}

@@ -655,6 +655,9 @@ void CodeGenData::analyzeMachine()
 		
 		if ( st->stateCondList.length() > 0 )
 			redFsm->bAnyConditions = true;
+
+		if ( st->eofTrans != 0 )
+			redFsm->bAnyEofTrans = true;
 	}
 
 	/* Assign ids to actions that are referenced. */

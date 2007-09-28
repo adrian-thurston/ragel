@@ -757,19 +757,39 @@ void GotoCodeGen::writeExec()
 	if ( testEofUsed )
 		out << "	_test_eof: {}\n";
 
-	if ( redFsm->anyEofActions() ) {
+	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
 		out << 
 			"	if ( " << P() << " == " << EOFV() << " )\n"
-			"	{\n"
-			"	" << PTR_CONST() << ARRAY_TYPE(redFsm->maxActArrItem) << POINTER() << "__acts = " << 
-					ARR_OFF( A(), EA() + "[" + CS() + "]" ) << ";\n"
-			"	" << UINT() << " __nacts = " << CAST(UINT()) << " *__acts++;\n"
-			"	while ( __nacts-- > 0 ) {\n"
-			"		switch ( *__acts++ ) {\n";
-			EOF_ACTION_SWITCH();
+			"	{\n";
+
+		if ( redFsm->anyEofTrans() ) {
+			out <<
+				"	switch ( " << CS() << " ) {\n";
+
+			for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+				if ( st->eofTrans != 0 )
+					out << "	case " << st->id << ": goto tr" << st->eofTrans->id << ";\n";
+			}
+
 			SWITCH_DEFAULT() <<
-			"		}\n"
-			"	}\n"
+				"	}\n";
+		}
+
+		if ( redFsm->anyEofActions() ) {
+			out <<
+				"	" << PTR_CONST() << ARRAY_TYPE(redFsm->maxActArrItem) << 
+						POINTER() << "__acts = " << 
+						ARR_OFF( A(), EA() + "[" + CS() + "]" ) << ";\n"
+				"	" << UINT() << " __nacts = " << CAST(UINT()) << " *__acts++;\n"
+				"	while ( __nacts-- > 0 ) {\n"
+				"		switch ( *__acts++ ) {\n";
+				EOF_ACTION_SWITCH();
+				SWITCH_DEFAULT() <<
+				"		}\n"
+				"	}\n";
+		}
+
+		out <<
 			"	}\n"
 			"\n";
 	}

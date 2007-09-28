@@ -54,6 +54,7 @@ RedFsmAp::RedFsmAp()
 	bAnyFromStateActions(false),
 	bAnyRegActions(false),
 	bAnyEofActions(false),
+	bAnyEofTrans(false),
 	bAnyActionGotos(false),
 	bAnyActionCalls(false),
 	bAnyActionRets(false),

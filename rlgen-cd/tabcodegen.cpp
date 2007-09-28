@@ -327,6 +327,29 @@ std::ostream &TabCodeGen::EOF_ACTIONS()
 	return out;
 }
 
+std::ostream &TabCodeGen::EOF_TRANS()
+{
+	out << "\t";
+	int totalStateNum = 0;
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		/* Write any eof action. */
+
+		long trans = 0;
+		if ( st->eofTrans != 0 )
+			trans = st->eofTrans->id+1;
+		out << trans;
+
+		if ( !st.last() ) {
+			out << ", ";
+			if ( ++totalStateNum % IALL == 0 )
+				out << "\n\t";
+		}
+	}
+	out << "\n";
+	return out;
+}
+
+
 std::ostream &TabCodeGen::COND_KEYS()
 {
 	out << '\t';
@@ -809,6 +832,13 @@ void TabCodeGen::writeData()
 		"\n";
 	}
 
+	if ( redFsm->anyEofTrans() ) {
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxIndex+1), ET() );
+		EOF_TRANS();
+		CLOSE_ARRAY() <<
+		"\n";
+	}
+
 	STATE_IDS();
 }
 
@@ -932,11 +962,14 @@ void TabCodeGen::writeExec()
 
 	out << "_match:\n";
 
-	if ( redFsm->anyRegCurStateRef() )
-		out << "	_ps = " << CS() << ";\n";
-
 	if ( useIndicies )
 		out << "	_trans = " << I() << "[_trans];\n";
+	
+	if ( redFsm->anyEofTrans() )
+		out << "_eof_trans:\n";
+
+	if ( redFsm->anyRegCurStateRef() )
+		out << "	_ps = " << CS() << ";\n";
 
 	out <<
 		"	" << CS() << " = " << TT() << "[_trans];\n"
@@ -996,19 +1029,34 @@ void TabCodeGen::writeExec()
 	if ( testEofUsed )
 		out << "	_test_eof: {}\n";
 	
-	if ( redFsm->anyEofActions() ) {
+	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
 		out << 
 			"	if ( " << P() << " == " << EOFV() << " )\n"
-			"	{\n"
-			"	" << PTR_CONST() << ARRAY_TYPE(redFsm->maxActArrItem) << 
-					POINTER() << "__acts = " << ARR_OFF( A(), EA() + "[" + CS() + "]" ) << ";\n"
-			"	" << UINT() << " __nacts = " << CAST(UINT()) << " *__acts++;\n"
-			"	while ( __nacts-- > 0 ) {\n"
-			"		switch ( *__acts++ ) {\n";
-			EOF_ACTION_SWITCH();
-			SWITCH_DEFAULT() <<
-			"		}\n"
-			"	}\n"
+			"	{\n";
+
+		if ( redFsm->anyEofTrans() ) {
+			out <<
+				"	if ( " << ET() << "[" << CS() << "] > 0 ) {\n"
+				"		_trans = " << ET() << "[" << CS() << "] - 1;\n"
+				"		goto _eof_trans;\n"
+				"	}\n";
+		}
+
+		if ( redFsm->anyEofActions() ) {
+			out <<
+				"	" << PTR_CONST() << ARRAY_TYPE(redFsm->maxActArrItem) << 
+						POINTER() << "__acts = " << 
+						ARR_OFF( A(), EA() + "[" + CS() + "]" ) << ";\n"
+				"	" << UINT() << " __nacts = " << CAST(UINT()) << " *__acts++;\n"
+				"	while ( __nacts-- > 0 ) {\n"
+				"		switch ( *__acts++ ) {\n";
+				EOF_ACTION_SWITCH();
+				SWITCH_DEFAULT() <<
+				"		}\n"
+				"	}\n";
+		}
+		
+		out << 
 			"	}\n"
 			"\n";
 	}

@@ -66,6 +66,11 @@ rule findEof12
 		'<> 'eof _ [repeat machine_expr_item]
 end rule
 
+rule findScanner
+	match [machine_expr_item]
+		'|* _ [repeat scanner_item] '*|
+end rule
+
 function findEof P [program]
 	replace [program]
 		_ [program]
@@ -75,6 +80,7 @@ function findEof P [program]
 			[findEof4] [findEof5] [findEof6]
 			[findEof7] [findEof8] [findEof9]
 			[findEof10] [findEof11] [findEof12]
+			[findScanner]
 	by
 		'yes
 end function

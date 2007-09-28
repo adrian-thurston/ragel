@@ -266,6 +266,11 @@ std::ostream &IpGotoCodeGen::FINISH_CASES()
 		}
 	}
 
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		if ( st->eofTrans != 0 )
+			out << "	case " << st->id << ": goto tr" << st->eofTrans->id << ";\n";
+	}
+
 	for ( ActionTableMap::Iter act = redFsm->actionMap; act.lte(); act++ ) {
 		if ( act->eofRefs != 0 ) {
 			for ( IntSet::Iter pst = *act->eofRefs; pst.lte(); pst++ )
@@ -409,7 +414,7 @@ void IpGotoCodeGen::writeExec()
 	if ( testEofUsed ) 
 		out << "	_test_eof: {}\n";
 
-	if ( redFsm->anyEofActions() ) {
+	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
 		out <<
 			"	if ( " << P() << " == " << EOFV() << " )\n"
 			"	{\n"

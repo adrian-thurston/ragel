@@ -142,6 +142,7 @@ class Scanner
 	{
 		char *p = data;
 		char *pe = data + len;
+		char *eof = pe;
 
 		%% write exec;
 	}
@@ -185,8 +186,7 @@ int main()
 		"44. 44\n"
 		"44 . 44\n"
 		"44.44\n"
-		"_hithere22\n"
-		"\n"
+		"_hithere22"
 	);
 
 	test(
@@ -200,7 +200,7 @@ int main()
 		"0x98\n"
 		"0x\n"
 		"//\n"
-		"/* * */\n"
+		"/* * */"
 	);
 
 	test(

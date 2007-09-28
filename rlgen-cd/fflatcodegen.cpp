@@ -226,6 +226,13 @@ void FFlatCodeGen::writeData()
 		"\n";
 	}
 
+	if ( redFsm->anyEofTrans() ) {
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxIndex+1), ET() );
+		EOF_TRANS();
+		CLOSE_ARRAY() <<
+		"\n";
+	}
+
 	STATE_IDS();
 }
 
@@ -288,6 +295,9 @@ void FFlatCodeGen::writeExec()
 		COND_TRANSLATE();
 
 	LOCATE_TRANS();
+
+	if ( redFsm->anyEofTrans() )
+		out << "_eof_trans:\n";
 	
 	if ( redFsm->anyRegCurStateRef() )
 		out << "	_ps = " << CS() << ";\n";
@@ -341,14 +351,28 @@ void FFlatCodeGen::writeExec()
 	if ( testEofUsed )
 		out << "	_test_eof: {}\n";
 
-	if ( redFsm->anyEofActions() ) {
+	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
 		out <<
 			"	if ( " << P() << " == " << EOFV() << " )\n"
-			"	{\n"
-			"	switch ( " << EA() << "[" << CS() << "] ) {\n";
-			EOF_ACTION_SWITCH();
-			SWITCH_DEFAULT() <<
-			"	}\n"
+			"	{\n";
+
+		if ( redFsm->anyEofTrans() ) {
+			out <<
+				"	if ( " << ET() << "[" << CS() << "] > 0 ) {\n"
+				"		_trans = " << ET() << "[" << CS() << "] - 1;\n"
+				"		goto _eof_trans;\n"
+				"	}\n";
+		}
+
+		if ( redFsm->anyEofActions() ) {
+			out <<
+				"	switch ( " << EA() << "[" << CS() << "] ) {\n";
+				EOF_ACTION_SWITCH();
+				SWITCH_DEFAULT() <<
+				"	}\n";
+		}
+
+		out <<
 			"	}\n"
 			"\n";
 	}

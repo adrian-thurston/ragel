@@ -156,6 +156,7 @@ void Scanner::run( char *buf )
 	%% write init;
 	char *p = buf;
 	char *pe = buf + len;
+	char *eof = pe;
 	%% write exec;
 
 	if ( cs == Scanner_error ) {
@@ -169,7 +170,7 @@ int main()
 	Scanner scanner;
 	scanner.run(
 		"//hello*/\n"
-		"/*hi there*/ hello 0x88\n"
+		"/*hi there*/ hello 0x88"
 	);
 	return 0;
 }
