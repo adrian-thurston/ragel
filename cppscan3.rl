@@ -141,6 +141,7 @@ void Scanner::execute( char *data, int len )
 {
 	char *p = data;
 	char *pe = data + len;
+	char *eof = pe;
 
 	%% write exec;
 
@@ -193,8 +194,7 @@ int main()
 		"44. 44\n"
 		"44 . 44\n"
 		"44.44\n"
-		"_hithere22\n"
-		"\n"
+		"_hithere22"
 	);
 
 	test(
@@ -208,7 +208,7 @@ int main()
 		"0x98\n"
 		"0x\n"
 		"//\n"
-		"/* * */\n"
+		"/* * */"
 	);
 
 	test(
@@ -246,7 +246,7 @@ int main()
 <241> 
 
 <195> _hithere22
-P: 53
+P: 51
 <193> '\''
 <192> "\n\d'\""
 <241> 
@@ -279,7 +279,7 @@ P: 53
 <242> //
 
 <242> /* * */
-P: 56
+P: 55
 P: 1
 PARSE ERROR
 #endif

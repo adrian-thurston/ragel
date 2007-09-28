@@ -106,15 +106,11 @@ int Scanner::execute( char *data, int len )
 {
 	char *p = data;
 	char *pe = data + len;
+	char *eof = pe;
 
 	%% write exec;
 
-	int have = 0;
-	if ( tokstart != 0 ) {
-		have = pe - tokstart;
-		memmove( data, tokstart, have );
-	}
-	return have;
+	return 0;
 }
 
 int Scanner::finish( )
@@ -237,4 +233,6 @@ from: fc =
  tokstart = 30
 to:   fc = 
  tokstart = 30
+to:   fc = 
+ tokstart = -1
 #endif

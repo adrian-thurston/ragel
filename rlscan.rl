@@ -258,6 +258,7 @@ void test( char *data )
 	/* Read in a block. */
 	char *p = data;
 	char *pe = data + strlen( data );
+	char *eof = pe;
 	%% write exec;
 
 	if ( cs == RagelScan_error ) {
