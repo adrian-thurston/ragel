@@ -145,6 +145,7 @@ struct CodeGenData
 	void finishTransList( int snum );
 	void setStateActions( int snum, long toStateAction, 
 			long fromStateAction, long eofAction );
+	void setEofTrans( int snum, long targ, long eofAction );
 	void setForcedErrorState()
 		{ redFsm->forcedErrorState = true; }
 

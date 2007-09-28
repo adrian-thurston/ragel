@@ -438,10 +438,16 @@ void LongestMatch::runLonestMatch( ParseData *pd, FsmAp *graph )
 				 * the last character of the token was one back and restart. */
 				graph->setErrorTarget( st, graph->startState, &lmErrActionOrd, 
 						&st->lmItemSet[0]->actOnNext, 1 );
+				st->eofActionTable.setAction( lmErrActionOrd, 
+						st->lmItemSet[0]->actOnNext );
+				st->eofTarget = graph->startState;
 			}
 			else {
 				graph->setErrorTarget( st, graph->startState, &lmErrActionOrd, 
 						&st->lmItemSet[0]->actLagBehind, 1 );
+				st->eofActionTable.setAction( lmErrActionOrd, 
+						st->lmItemSet[0]->actLagBehind );
+				st->eofTarget = graph->startState;
 			}
 		}
 		else if ( st->lmItemSet.length() > 1 ) {
@@ -454,6 +460,8 @@ void LongestMatch::runLonestMatch( ParseData *pd, FsmAp *graph )
 			/* On error, execute the action select and go to the start state. */
 			graph->setErrorTarget( st, graph->startState, &lmErrActionOrd, 
 					&lmActSelect, 1 );
+			st->eofActionTable.setAction( lmErrActionOrd, lmActSelect );
+			st->eofTarget = graph->startState;
 		}
 	}
 	

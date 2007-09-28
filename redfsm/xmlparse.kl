@@ -395,6 +395,7 @@ state_item_list: state_item_list state_item;
 state_item_list: ;
 
 state_item: tag_state_actions;
+state_item: tag_eof_t;
 state_item: tag_state_cond_list;
 state_item: tag_trans_list;
 
@@ -408,6 +409,15 @@ tag_state_actions: TAG_state_actions '/' TAG_state_actions
 
 		cgd->setStateActions( curState, toStateAction,
 				fromStateAction, eofAction );
+	};
+
+tag_eof_t: TAG_eof_t '/' TAG_eof_t
+	final {
+		char *et = $3->tag->content;
+		long targ = readOffsetPtr( et, &et );
+		long eofAction = readOffsetPtr( et, &et );
+
+		cgd->setEofTrans( curState, targ, eofAction );
 	};
 
 tag_state_cond_list: tag_state_cond_list_head state_cond_list '/' TAG_cond_list;

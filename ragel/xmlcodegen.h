@@ -112,6 +112,7 @@ private:
 	void reduceTrans( TransAp *trans );
 	void reduceActionTables();
 	void writeTransList( StateAp *state );
+	void writeEofTrans( StateAp *state );
 	void writeTrans( Key lowKey, Key highKey, TransAp *defTrans );
 	void writeAction( Action *action );
 	void writeLmSwitch( InlineItem *item );

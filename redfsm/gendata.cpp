@@ -235,7 +235,7 @@ void CodeGenData::setFinal( int snum )
 
 
 void CodeGenData::setStateActions( int snum, long toStateAction, 
-			long fromStateAction, long eofAction )
+		long fromStateAction, long eofAction )
 {
 	RedStateAp *curState = allStates + snum;
 	if ( toStateAction >= 0 )
@@ -244,6 +244,14 @@ void CodeGenData::setStateActions( int snum, long toStateAction,
 		curState->fromStateAction = allActionTables + fromStateAction;
 	if ( eofAction >= 0 )
 		curState->eofAction = allActionTables + eofAction;
+}
+
+void CodeGenData::setEofTrans( int snum, long eofTarget, long actId )
+{
+	RedStateAp *curState = allStates + snum;
+	RedStateAp *targState = allStates + eofTarget;
+	RedAction *eofAct = allActionTables + actId;
+	curState->eofTrans = redFsm->allocateTrans( targState, eofAct );
 }
 
 void CodeGenData::resolveTargetStates( InlineList *inlineList )
@@ -395,6 +403,13 @@ void CodeGenData::findFinalActionRefs()
 		if ( st->defTrans != 0 && st->defTrans->action != 0 ) {
 			st->defTrans->action->numTransRefs += 1;
 			for ( ActionTable::Iter item = st->defTrans->action->key; item.lte(); item++ )
+				item->value->numTransRefs += 1;
+		}
+
+		/* Reference count eof transitions. */
+		if ( st->eofTrans != 0 && st->eofTrans->action != 0 ) {
+			st->eofTrans->action->numTransRefs += 1;
+			for ( ActionTable::Iter item = st->eofTrans->action->key; item.lte(); item++ )
 				item->value->numTransRefs += 1;
 		}
 

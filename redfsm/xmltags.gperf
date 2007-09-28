@@ -91,3 +91,4 @@ tokend_expr, TAG_tokend_expr
 data_expr, TAG_data_expr
 prepush, TAG_prepush
 postpop, TAG_postpop
+eof_t, TAG_eof_t

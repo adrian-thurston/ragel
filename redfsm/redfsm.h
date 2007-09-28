@@ -338,6 +338,7 @@ struct RedStateAp
 		toStateAction(0), 
 		fromStateAction(0), 
 		eofAction(0), 
+		eofTrans(0), 
 		id(0), 
 		bAnyRegCurStateRef(false),
 		partitionBoundary(false),
@@ -368,6 +369,7 @@ struct RedStateAp
 	RedAction *toStateAction;
 	RedAction *fromStateAction;
 	RedAction *eofAction;
+	RedTransAp *eofTrans;
 	int id;
 	StateCondList stateCondList;
 	StateCondVect stateCondVect;

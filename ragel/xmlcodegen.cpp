@@ -175,6 +175,26 @@ void XMLCodeGen::writeTransList( StateAp *state )
 	out << "      </trans_list>\n";
 }
 
+void XMLCodeGen::writeEofTrans( StateAp *state )
+{
+	RedActionTable *eofActions = 0;
+	if ( state->eofActionTable.length() > 0 )
+		eofActions = actionTableMap.find( state->eofActionTable );
+	
+	/* The <eof_t> is used when there is an eof target, otherwise the eof
+	 * action goes into state actions. */
+	if ( state->eofTarget != 0 ) {
+		out << "      <eof_t>" << state->eofTarget->alg.stateNum;
+
+		if ( eofActions != 0 )
+			out << " " << eofActions->id;
+		else
+			out << " x"; 
+
+		out << "</eof_t>" << endl;
+	}
+}
+
 void XMLCodeGen::writeText( InlineItem *item )
 {
 	if ( item->prev == 0 || item->prev->type != InlineItem::Text )
@@ -438,8 +458,10 @@ void XMLCodeGen::writeStateActions( StateAp *state )
 	if ( state->fromStateActionTable.length() > 0 )
 		fromStateActions = actionTableMap.find( state->fromStateActionTable );
 
+	/* EOF actions go out here only if the state has no eof target. If it has
+	 * an eof target then an eof transition will be used instead. */
 	RedActionTable *eofActions = 0;
-	if ( state->eofActionTable.length() > 0 )
+	if ( state->eofTarget == 0 && state->eofActionTable.length() > 0 )
 		eofActions = actionTableMap.find( state->eofActionTable );
 	
 	if ( toStateActions != 0 || fromStateActions != 0 || eofActions != 0 ) {
@@ -457,7 +479,9 @@ void XMLCodeGen::writeStateActions( StateAp *state )
 		if ( eofActions != 0 )
 			out << " " << eofActions->id;
 		else
-			out << " x"; out << "</state_actions>\n";
+			out << " x";
+
+		out << "</state_actions>\n";
 	}
 }
 
@@ -489,6 +513,7 @@ void XMLCodeGen::writeStateList()
 		out << ">\n";
 
 		writeStateActions( st );
+		writeEofTrans( st );
 		writeStateConditions( st );
 		writeTransList( st );
 
