@@ -34,6 +34,12 @@
  * (should be multiple of IALL). */
 #define SAIIC 8192
 
+#define _resume    1
+#define _again     2
+#define _eof_trans 3
+#define _test_eof  4
+#define _out       5
+
 using std::ostream;
 using std::ostringstream;
 using std::string;
@@ -62,15 +68,15 @@ void genLineDirective( ostream &out )
 
 void JavaTabCodeGen::GOTO( ostream &ret, int gotoDest, bool inFinish )
 {
-	ret << "{" << CS() << " = " << gotoDest << "; " << 
-			CTRL_FLOW() << "break _again;}";
+	ret << "{" << CS() << " = " << gotoDest << "; _goto_targ = " << _again << "; " << 
+			CTRL_FLOW() << "continue _goto;}";
 }
 
 void JavaTabCodeGen::GOTO_EXPR( ostream &ret, InlineItem *ilItem, bool inFinish )
 {
 	ret << "{" << CS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish );
-	ret << "); " << CTRL_FLOW() << "break _again;}";
+	ret << "); _goto_targ = " << _again << "; " << CTRL_FLOW() << "continue _goto;}";
 }
 
 void JavaTabCodeGen::CALL( ostream &ret, int callDest, int targState, bool inFinish )
@@ -81,7 +87,7 @@ void JavaTabCodeGen::CALL( ostream &ret, int callDest, int targState, bool inFin
 	}
 
 	ret << "{" << STACK() << "[" << TOP() << "++] = " << CS() << "; " << CS() << " = " << 
-			callDest << "; " << CTRL_FLOW() << "break _again;}";
+			callDest << "; _goto_targ = " << _again << "; " << CTRL_FLOW() << "continue _goto;}";
 
 	if ( prePushExpr != 0 )
 		ret << "}";
@@ -96,7 +102,7 @@ void JavaTabCodeGen::CALL_EXPR( ostream &ret, InlineItem *ilItem, int targState,
 
 	ret << "{" << STACK() << "[" << TOP() << "++] = " << CS() << "; " << CS() << " = (";
 	INLINE_LIST( ret, ilItem->children, targState, inFinish );
-	ret << "); " << CTRL_FLOW() << "break _again;}";
+	ret << "); _goto_targ = " << _again << "; " << CTRL_FLOW() << "continue _goto;}";
 
 	if ( prePushExpr != 0 )
 		ret << "}";
@@ -112,12 +118,12 @@ void JavaTabCodeGen::RET( ostream &ret, bool inFinish )
 		ret << "}";
 	}
 
-	ret << CTRL_FLOW() << "break _again;}";
+	ret << "_goto_targ = " << _again << "; " << CTRL_FLOW() << "continue _goto;}";
 }
 
 void JavaTabCodeGen::BREAK( ostream &ret, int targState )
 {
-	ret << CTRL_FLOW() << "break _resume;";
+	ret << "{ _goto_targ = " << _out << "; " << CTRL_FLOW() << " continue _goto;}";
 }
 
 void JavaTabCodeGen::NEXT( ostream &ret, int nextDest, bool inFinish )
@@ -599,6 +605,21 @@ std::ostream &JavaTabCodeGen::EOF_ACTIONS()
 	return out;
 }
 
+std::ostream &JavaTabCodeGen::EOF_TRANS()
+{
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		/* Write any eof action. */
+		long trans = 0;
+		if ( st->eofTrans != 0 )
+			trans = st->eofTrans->id+1;
+
+		/* Write any eof action. */
+		ARRAY_ITEM( INT(trans), st.last() );
+	}
+	return out;
+}
+
+
 std::ostream &JavaTabCodeGen::COND_KEYS()
 {
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
@@ -895,6 +916,13 @@ void JavaTabCodeGen::writeData()
 		"\n";
 	}
 
+	if ( redFsm->anyEofTrans() ) {
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxIndex+1), ET() );
+		EOF_TRANS();
+		CLOSE_ARRAY() <<
+		"\n";
+	}
+
 	if ( redFsm->startState != 0 )
 		STATIC_VAR( "int", START() ) << " = " << START_STATE_ID() << ";\n";
 
@@ -919,7 +947,6 @@ void JavaTabCodeGen::writeExec()
 {
 	out <<
 		"	{\n"
-		"	boolean testEof = false;\n"
 		"	int _klen";
 
 	if ( redFsm->anyRegCurStateRef() )
@@ -927,7 +954,7 @@ void JavaTabCodeGen::writeExec()
 
 	out << 
 		";\n"
-		"	int _trans;\n";
+		"	int _trans = 0;\n";
 
 	if ( redFsm->anyConditions() )
 		out << "	int _widec;\n";
@@ -942,17 +969,31 @@ void JavaTabCodeGen::writeExec()
 
 	out <<
 		"	int _keys;\n"
+		"	int _goto_targ = 0;\n"
 		"\n";
+	
+	out <<
+		"	_goto: while (true) {\n"
+		"	switch ( _goto_targ ) {\n"
+		"	case 0:\n";
 
-	if ( hasEnd )
-		out << "	if ( " << P() << " != " << PE() << " ) {\n";
+	if ( hasEnd ) {
+		out << 
+			"	if ( " << P() << " == " << PE() << " ) {\n"
+			"		_goto_targ = " << _test_eof << ";\n"
+			"		continue _goto;\n"
+			"	}\n";
+	}
 
-	if ( redFsm->errState != 0 )
-		out << "	if ( " << CS() << " != " << redFsm->errState->id << " ) {\n";
+	if ( redFsm->errState != 0 ) {
+		out << 
+			"	if ( " << CS() << " == " << redFsm->errState->id << " ) {\n"
+			"		_goto_targ = " << _out << ";\n"
+			"		continue _goto;\n"
+			"	}\n";
+	}
 
-	out << "	_resume: while ( true ) {\n";
-
-	out << "	_again: do {\n";
+	out << "case " << _resume << ":\n"; 
 
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
@@ -971,11 +1012,14 @@ void JavaTabCodeGen::writeExec()
 
 	LOCATE_TRANS();
 
-	if ( redFsm->anyRegCurStateRef() )
-		out << "	_ps = " << CS() << ";\n";
-
 	if ( useIndicies )
 		out << "	_trans = " << I() << "[_trans];\n";
+	
+	if ( redFsm->anyEofTrans() )
+		out << "case " << _eof_trans << ":\n";
+
+	if ( redFsm->anyRegCurStateRef() )
+		out << "	_ps = " << CS() << ";\n";
 
 	out <<
 		"	" << CS() << " = " << TT() << "[_trans];\n"
@@ -983,22 +1027,20 @@ void JavaTabCodeGen::writeExec()
 
 	if ( redFsm->anyRegActions() ) {
 		out <<
-			"	if ( " << TA() << "[_trans] == 0 )\n"
-			"		break _again;\n"
-			"\n"
-			"	_acts = " <<  TA() << "[_trans]" << ";\n"
-			"	_nacts = " << CAST("int") << " " <<  A() << "[_acts++];\n"
-			"	while ( _nacts-- > 0 )\n	{\n"
-			"		switch ( " << A() << "[_acts++] )\n"
-			"		{\n";
+			"	if ( " << TA() << "[_trans] != 0 ) {\n"
+			"		_acts = " <<  TA() << "[_trans]" << ";\n"
+			"		_nacts = " << CAST("int") << " " <<  A() << "[_acts++];\n"
+			"		while ( _nacts-- > 0 )\n	{\n"
+			"			switch ( " << A() << "[_acts++] )\n"
+			"			{\n";
 			ACTION_SWITCH() <<
+			"			}\n"
 			"		}\n"
 			"	}\n"
 			"\n";
 	}
 
-	/* Again loop, functions as again label. */
-	out << "	} while (false);\n";
+	out << "case " << _again << ":\n";
 
 	if ( redFsm->anyToStateActions() ) {
 		out <<
@@ -1014,51 +1056,63 @@ void JavaTabCodeGen::writeExec()
 
 	if ( redFsm->errState != 0 ) {
 		out << 
-			"	if ( " << CS() << " == " << redFsm->errState->id << " )\n"
-			"		break _resume;\n";
+			"	if ( " << CS() << " == " << redFsm->errState->id << " ) {\n"
+			"		_goto_targ = " << _out << ";\n"
+			"		continue _goto;\n"
+			"	}\n";
 	}
 
 	if ( hasEnd ) {
 		out << 
-			"	if ( ++" << P() << " == " << PE() << " ) {\n"
-			"		testEof = true;\n"
-			"		break _resume;\n"
+			"	if ( ++" << P() << " != " << PE() << " ) {\n"
+			"		_goto_targ = " << _resume << ";\n"
+			"		continue _goto;\n"
 			"	}\n";
 	}
 	else {
 		out << 
-			"	" << P() << " += 1;\n";
+			"	" << P() << " += 1;\n"
+			"	_goto_targ = " << _resume << ";\n"
+			"	continue _goto;\n";
 	}
 
-	/* Close the resume loop. */
-	out << "	}\n";
+	out << "case " << _test_eof << ":\n"; 
 
-	/* The if guarding on the error state. */
-	if ( redFsm->errState != 0 )
-		out << "	}";
-
-	/* The if guarding on empty string. */
-	if ( hasEnd ) {
-		out << 
-			"	}\n"
-			"	else"
-			"		testEof = true;\n";
-	}
-
-	if ( redFsm->anyEofActions() ) {
+	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
 		out <<
-			"	if ( testEof && " << P() << " == " << EOFV() << " )\n"
-			"	{\n"
-			"	int __acts = " << EA() << "[" << CS() << "]" << ";\n"
-			"	int __nacts = " << CAST("int") << " " << A() << "[__acts++];\n"
-			"	while ( __nacts-- > 0 ) {\n"
-			"		switch ( " << A() << "[__acts++] ) {\n";
-			EOF_ACTION_SWITCH() <<
-			"		}\n"
-			"	}\n"
+			"	if ( " << P() << " == " << EOFV() << " )\n"
+			"	{\n";
+
+		if ( redFsm->anyEofTrans() ) {
+			out <<
+				"	if ( " << ET() << "[" << CS() << "] > 0 ) {\n"
+				"		_trans = " << ET() << "[" << CS() << "] - 1;\n"
+				"		_goto_targ = " << _eof_trans << ";\n"
+				"		continue _goto;\n"
+				"	}\n";
+		}
+
+		if ( redFsm->anyEofActions() ) {
+			out <<
+				"	int __acts = " << EA() << "[" << CS() << "]" << ";\n"
+				"	int __nacts = " << CAST("int") << " " << A() << "[__acts++];\n"
+				"	while ( __nacts-- > 0 ) {\n"
+				"		switch ( " << A() << "[__acts++] ) {\n";
+				EOF_ACTION_SWITCH() <<
+				"		}\n"
+				"	}\n";
+		}
+
+		out <<
 			"	}\n"
 			"\n";
 	}
+
+	out << "case " << _out << ":\n"; 
+
+	/* The switch and goto loop. */
+	out << "	}\n";
+	out << "	break; }\n";
 
 	/* The execute block. */
 	out << "	}\n";

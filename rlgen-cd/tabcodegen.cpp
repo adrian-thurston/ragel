@@ -918,7 +918,8 @@ void TabCodeGen::writeExec()
 			|| redFsm->anyFromStateActions() )
 	{
 		out << 
-			"	" << PTR_CONST() << ARRAY_TYPE(redFsm->maxActArrItem) << POINTER() << "_acts;\n"
+			"	" << PTR_CONST() << ARRAY_TYPE(redFsm->maxActArrItem) << 
+					POINTER() << "_acts;\n"
 			"	" << UINT() << " _nacts;\n";
 	}
 
