@@ -78,8 +78,6 @@ void params_execute( struct params *fsm, const char *data, int len )
 
 int params_finish( struct params *fsm )
 {
-	%% write eof;
-
 	if ( fsm->cs == params_error )
 		return -1;
 	if ( fsm->cs >= params_first_final )

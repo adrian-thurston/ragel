@@ -90,7 +90,6 @@ int StateChart::execute( const char *data, int len )
 
 int StateChart::finish( )
 {
-	%% write eof;
 	if ( cs == StateChart_error )
 		return -1;
 	if ( cs >= StateChart_first_final )

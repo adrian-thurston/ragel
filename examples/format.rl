@@ -144,18 +144,17 @@ void format_init( struct format *fsm )
 	%% write init;
 }
 
-void format_execute( struct format *fsm, const char *data, int len )
+void format_execute( struct format *fsm, const char *data, int len, int isEof )
 {
 	const char *p = data;
 	const char *pe = data + len;
+	const char *eof = isEof ? pe : 0;
 
 	%% write exec;
 }
 
 int format_finish( struct format *fsm )
 {
-	%% write eof;
-
 	if ( fsm->cs == format_error )
 		return -1;
 	if ( fsm->cs >= format_first_final )
@@ -180,8 +179,9 @@ int main()
 	format_init( &fsm );
 	while ( 1 ) {
 		int len = fread( buf, 1, INPUT_BUFSIZE, stdin );
-		format_execute( &fsm, buf, len );
-		if ( len != INPUT_BUFSIZE )
+		int eof = len != INPUT_BUFSIZE;
+		format_execute( &fsm, buf, len, eof );
+		if ( eof )
 			break;
 	}
 	if ( format_finish( &fsm ) <= 0 )

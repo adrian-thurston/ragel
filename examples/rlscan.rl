@@ -268,14 +268,15 @@ int main()
 		char *p = inbuf + have;
 		cin.read( p, space );
 		int len = cin.gcount();
+		char *pe = p + len;
+		char *eof = 0;
 
 		/* Check for EOF. */
 		if ( len == 0 ) {
-			p[0] = 0, len++;
+			eof = pe;
 			done = true;
 		}
 
-		char *pe = p + len;
 		%% write exec;
 
 		if ( cs == RagelScan_error ) {

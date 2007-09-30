@@ -174,14 +174,15 @@ int main()
 
 		cin.read( p, space );
 		int len = cin.gcount();
+		char *pe = p + len;
+		char *eof = 0;
 
 		/* If we see eof then append the EOF char. */
-	 	if ( len == 0 ) {
-			p[0] = LAST_CHAR, len++;
+	 	if ( cin.eof() ) {
+			eof = pe;
 			done = true;
 		}
 
-		char *pe = p + len;
 		%% write exec;
 
 		/* Check if we failed. */

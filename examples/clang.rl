@@ -104,7 +104,7 @@ void scanner()
 	%% write init;
 
 	while ( !done ) {
-		char *p = buf + have, *pe;
+		char *p = buf + have, *pe, *eof = 0;
 		int len, space = BUFSIZE - have;
 		
 		if ( space == 0 ) {
@@ -115,14 +115,14 @@ void scanner()
 		}
 
 		len = fread( p, 1, space, stdin );
+		pe = p + len;
 
-		/* If this is the last buffer, tack on an EOF. */
+		/* Check if this is the end of file. */
 		if ( len < space ) {
-			p[len++] = 0;
+			eof = pe;
 			done = 1;
 		}
 			
-		pe = p + len;
 		%% write exec;
 
 		if ( cs == clang_error ) {

@@ -76,16 +76,6 @@ int GotoCallRet::execute( const char *data, int len )
 	return 0;
 }
 
-int GotoCallRet::finish( )
-{
-	%% write eof;
-	if ( cs == GotoCallRet_error )
-		return -1;
-	if ( cs >= GotoCallRet_first_final )
-		return 1;
-	return 0;
-}
-
 #define BUFSIZE 1024
 
 int main()
@@ -97,7 +87,7 @@ int main()
 	while ( fgets( buf, sizeof(buf), stdin ) != 0 ) {
 		gcr.execute( buf, strlen(buf) );
 	}
-	if ( gcr.finish() <= 0 )
+	if ( gcr.cs < GotoCallRet_first_final )
 		cerr << "gotocallret: error: parsing input" << endl;
 	return 0;
 }

@@ -14,6 +14,7 @@ typedef struct _Scanner {
     char *tokend;
     char *p;
     char *pe;
+    char *eof;
 	FILE *file;
 	int done;
 
@@ -36,6 +37,7 @@ void scan_init( Scanner *s, FILE *file )
 	memset (s, '\0', sizeof(Scanner));
 	s->curline = 1;
 	s->file = file;
+	s->eof = 0;
 	%% write init;
 }
 
@@ -96,6 +98,7 @@ int scan( Scanner *s )
 			access s->;
 			variable p s->p;
 			variable pe s->pe;
+			variable eof s->eof;
 
 			main := |*
 

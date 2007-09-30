@@ -159,7 +159,6 @@ int MailboxScanner::execute( const char *data, int len )
 
 int MailboxScanner::finish( )
 {
-	%% write eof;
 	if ( cs == MailboxScanner_error )
 		return -1;
 	if ( cs >= MailboxScanner_first_final )
