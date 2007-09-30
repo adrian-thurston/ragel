@@ -112,6 +112,7 @@ void IpGotoCodeGen::TARGS( ostream &ret, bool inFinish, int targState )
 
 void IpGotoCodeGen::BREAK( ostream &ret, int targState )
 {
+	outLabelUsed = true;
 	ret << "{" << CS() << " = " << targState << "; " << CTRL_FLOW() << "goto _out;}";
 }
 
