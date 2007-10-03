@@ -333,7 +333,6 @@ std::ostream &TabCodeGen::EOF_TRANS()
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write any eof action. */
-
 		long trans = 0;
 		if ( st->eofTrans != 0 )
 			trans = st->eofTrans->id+1;
