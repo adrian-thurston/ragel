@@ -259,9 +259,8 @@ void RubyTabCodeGen::writeExec()
 
 	out << 
 		"	while true\n"
-		"	_trigger_goto = false\n";
-
-	out << "	if _goto_level <= 0\n";
+		"	_trigger_goto = false\n"
+		"	if _goto_level <= 0\n";
 
 	if ( hasEnd ) {
 		out << 
@@ -358,6 +357,9 @@ void RubyTabCodeGen::writeExec()
 		TO_STATE_ACTION_SWITCH();
 		out <<
 			"		end # to state action switch\n"
+			"	end\n"
+			"	if _trigger_goto\n"
+			"		next\n"
 			"	end\n";
 	}
 
@@ -384,6 +386,7 @@ void RubyTabCodeGen::writeExec()
 			"	next\n";
 	}
 
+	/* The test_eof label. */
 	out <<
 		"	end\n"
 		"	if _goto_level <= _test_eof\n";
@@ -426,11 +429,15 @@ void RubyTabCodeGen::writeExec()
 		"	end\n"
 		"	if _goto_level <= _out\n"
 		"		break\n"
-		"	end\n"
-		"end\n";
+		"	end\n";
+
+	/* The loop for next. */
+	out << 
+		"	end\n";
 
 	/* Wrapping the execute block. */
-	out << "	end\n";
+	out << 
+		"	end\n";
 }
 
 std::ostream &RubyTabCodeGen::FROM_STATE_ACTION_SWITCH() 
@@ -866,7 +873,8 @@ std::ostream &RubyTabCodeGen::TRANS_ACTIONS_WI()
 	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
 		/* Write the function for the transition. */
 		RedTransAp *trans = transPtrs[t];
-		ARRAY_ITEM( INT(TRANS_ACTION( trans )), ++totalAct, ( t >= redFsm->transSet.length()-1 ) );
+		ARRAY_ITEM( INT(TRANS_ACTION( trans )), ++totalAct, 
+				( t >= redFsm->transSet.length()-1 ) );
 	}
 	END_ARRAY_LINE();
 	delete[] transPtrs;

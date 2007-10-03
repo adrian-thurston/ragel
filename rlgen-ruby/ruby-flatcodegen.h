@@ -53,6 +53,7 @@ protected:
 	std::ostream &TO_STATE_ACTIONS();
 	std::ostream &FROM_STATE_ACTIONS();
 	std::ostream &EOF_ACTIONS();
+	std::ostream &EOF_TRANS();
 	std::ostream &TRANS_TARGS();
 	std::ostream &TRANS_ACTIONS();
 	void LOCATE_TRANS();

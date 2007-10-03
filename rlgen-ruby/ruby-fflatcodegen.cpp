@@ -22,6 +22,103 @@
 
 #include "ruby-fflatcodegen.h"
 
+void RubyFFlatCodeGen::GOTO( ostream &out, int gotoDest, bool inFinish )
+{
+	out << 
+		"	begin\n"
+		"		" << CS() << " = " << gotoDest << "\n"
+		"		_goto_level = _again\n"
+		"		next\n"
+		"	end\n";
+}
+
+void RubyFFlatCodeGen::GOTO_EXPR( ostream &out, InlineItem *ilItem, bool inFinish )
+{
+	out << 
+		"	begin\n"
+		"		" << CS() << " = (";
+	INLINE_LIST( out, ilItem->children, 0, inFinish );
+	out << ")\n";
+	out <<
+		"		_goto_level = _again\n"
+		"		next\n"
+		"	end\n";
+}
+
+void RubyFFlatCodeGen::CALL( ostream &out, int callDest, int targState, bool inFinish )
+{
+	if ( prePushExpr != 0 ) {
+		out << "begin\n";
+		INLINE_LIST( out, prePushExpr, 0, false );
+	}
+
+	out <<
+		"	begin\n"
+		"		" << STACK() << "[" << TOP() << "] = " << CS() << "\n"
+		"		" << TOP() << "+= 1\n"
+		"		" << CS() << " = " << callDest << "\n"
+		"		_goto_level = _again\n"
+		"		next\n"
+		"	end\n";
+
+	if ( prePushExpr != 0 )
+		out << "end\n";
+}
+
+void RubyFFlatCodeGen::CALL_EXPR(ostream &out, InlineItem *ilItem, 
+		int targState, bool inFinish )
+{
+	if ( prePushExpr != 0 ) {
+		out << "begin\n";
+		INLINE_LIST( out, prePushExpr, 0, false );
+	}
+
+	out <<
+		"	begin\n"
+		"		" << STACK() << "[" << TOP() << "] = " << CS() << "\n"
+		"		" << TOP() << " += 1\n"
+		"		" << CS() << " = (";
+	INLINE_LIST( out, ilItem->children, targState, inFinish );
+	out << ")\n";
+
+	out << 
+		"		_goto_level = _again\n"
+		"		next\n"
+		"	end\n";
+
+	if ( prePushExpr != 0 )
+		out << "end\n";
+}
+
+void RubyFFlatCodeGen::RET( ostream &out, bool inFinish )
+{
+	out <<
+		"	begin\n"
+		"		" << TOP() << " -= 1\n"
+		"		" << CS() << " = " << STACK() << "[" << TOP() << "]\n";
+
+	if ( postPopExpr != 0 ) {
+		out << "begin\n";
+		INLINE_LIST( out, postPopExpr, 0, false );
+		out << "end\n";
+	}
+
+	out <<
+		"		_goto_level = _again\n"
+		"		next\n"
+		"	end\n";
+}
+
+void RubyFFlatCodeGen::BREAK( ostream &out, int targState )
+{
+	out << 
+		"	begin\n"
+		"		_goto_level = _out\n"
+		"		next\n"
+		"	end\n";
+}
+
+
 int RubyFFlatCodeGen::TO_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
@@ -211,13 +308,20 @@ void RubyFFlatCodeGen::writeData()
 		"\n";
 	}
 
+	if ( redFsm->anyEofTrans() ) {
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxIndex+1), ET() );
+		EOF_TRANS();
+		CLOSE_ARRAY() <<
+		"\n";
+	}
+
 	STATE_IDS();
 }
 
 void RubyFFlatCodeGen::writeExec()
 {
 	out << 
-		"begin # ragel fflat\n"
+		"begin\n"
 		"	testEof = false\n"
 		"	_slen, _trans, _keys, _inds";
 	if ( redFsm->anyRegCurStateRef() )
@@ -229,35 +333,57 @@ void RubyFFlatCodeGen::writeExec()
 		out << ", _acts, _nacts";
 	
 	out << " = nil\n";
+
+	out << 
+		"	_goto_level = 0\n"
+		"	_resume = 10\n"
+		"	_eof_trans = 15\n"
+		"	_again = 20\n"
+		"	_test_eof = 30\n"
+		"	_out = 40\n";
+
+	out << 
+		"	while true\n"
+		"	if _goto_level <= 0\n";
 	
-	if ( hasEnd ) 
-		out << "	if " << P() << " != " << PE() << " # pe guard\n";
+	if ( hasEnd ) {
+		out << 
+			"	if " << P() << " == " << PE() << "\n"
+			"		_goto_level = _test_eof\n"
+			"		next\n"
+			"	end\n";
+	}
 
-	if ( redFsm->errState != 0 ) 
-		out << "	if " << CS() << " != " << redFsm->errState->id << " # errstate guard\n";
+	if ( redFsm->errState != 0 ) {
+		out << 
+			"	if " << CS() << " == " << redFsm->errState->id << "\n"
+			"		_goto_level = _out\n"
+			"		next\n"
+			"	end\n";
+	}
 
-
+	/* The resume label. */
+	out << 
+		"	end\n"
+		"	if _goto_level <= _resume\n";
 	
-	out << /* Open the _resume loop. */
-		"	while true # _resume loop \n"
-		"		_break_resume = false\n";	
-	out << /* Open the _again loop. */
-		"	begin\n"
-		"		_break_again = false\n";
-
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
 			"	case " << FSA() << "[" << CS() << "] \n";
-		FROM_STATE_ACTION_SWITCH();
-		out << 
-			"	end # from state action switch \n"
-			"	break if _break_again\n";
+			FROM_STATE_ACTION_SWITCH() <<
+			"	end\n";
 	}
 
 	if ( redFsm->anyConditions() )
 		COND_TRANSLATE();
 	
 	LOCATE_TRANS();
+
+	if ( redFsm->anyEofTrans() ) {
+		out << 
+			"	end\n"
+			"	if _goto_level <= _eof_trans\n";
+	}
 
 	if ( redFsm->anyRegCurStateRef() )
 		out << "	_ps = " << CS() << "\n";
@@ -267,69 +393,88 @@ void RubyFFlatCodeGen::writeExec()
 	if ( redFsm->anyRegActions() ) {
 		/* break _again */
 		out << 
-			"	break if " << TA() << "[_trans] == 0\n"
+			"	if " << TA() << "[_trans] != 0\n"
 			"	case " << TA() << "[_trans]" << "\n";
-		ACTION_SWITCH();
-		out << 
-			"	end # action switch\n";
-		/* Not necessary as long as there is no code between here and the
-		 * end while false. */
-		// "break if _break_again\n";
+			ACTION_SWITCH() <<
+			"	end\n"
+			"	end\n";
 	}
-	
-	out << /* Close the _again loop. */
-		"	end while false # _again loop\n"
-		"	break if _break_resume\n";
-	
+
+	/* The again label. */
+	out <<
+		"	end\n"
+		"	if _goto_level <= _again\n";
+
 	if ( redFsm->anyToStateActions() ) {
 		out <<
 			"	case " << TSA() << "[" << CS() << "] \n";
-		TO_STATE_ACTION_SWITCH();
-		out <<
-			"	end # to state action switch \n"
+			TO_STATE_ACTION_SWITCH() <<
+			"	end\n"
 			"\n";
 	}
 
-	if ( redFsm->errState != 0 ) 
-		out << "	break if " << CS() << " == " << redFsm->errState->id << "\n";
+	if ( redFsm->errState != 0 ) {
+		out << 
+			"	if " << CS() << " == " << redFsm->errState->id << "\n"
+			"		_goto_level = _out\n"
+			"		next\n"
+			"	end\n";
+	}
 
 	out << "	" << P() << " += 1\n";
 
 	if ( hasEnd ) {
 		out << 
-			"	if " << P() << " == " << PE() << "\n"
-			"		testEof = true\n"
-			"		break\n"
+			"	if " << P() << " != " << PE() << "\n"
+			"		_goto_level = _resume\n"
+			"		next\n"
 			"	end\n";
 	}
-	
-	out << /* Close the _resume loop. */
-		"	end # _resume loop\n";
-
-	if ( redFsm->errState != 0 ) 
-		out << "	end # errstate guard\n";
-
-	
-	if ( hasEnd ) {
-		out << 
-			"	# close if guarding empty string \n"
-			"	else\n"
-			"		testEof = true\n"
-			"	end\n";
+	else {
+		out <<
+			"	_goto_level = _resume\n"
+			"	next\n";
 	}
+	
+	/* The test eof label. */
+	out <<
+		"	end\n"
+		"	if _goto_level <= _test_eof\n";
 
-	if ( redFsm->anyEofActions() ) {
+	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
 		out <<
-			"	if testEof && " << P() << " == " << EOFV() << "\n"
-			"	  case " << EA() << "[" << CS() << "]\n";
-		EOF_ACTION_SWITCH();
+			"	if " << P() << " == " << EOFV() << "\n";
+	
+		if ( redFsm->anyEofTrans() ) {
+			out <<
+				"	if " << ET() << "[" << CS() << "] > 0\n"
+				"		_trans = " << ET() << "[" << CS() << "] - 1;\n"
+				"		_goto_level = _eof_trans\n"
+				"		next;\n"
+				"	end\n";
+		}
+
+		if ( redFsm->anyEofActions() ) {
+			out <<
+				"	  case " << EA() << "[" << CS() << "]\n";
+				EOF_ACTION_SWITCH() <<
+				"	  end\n";
+		}
+
 		out <<
-			"	  end # eof action switch \n"
 			"	end\n"
 			"\n";
 	}
 
-	out << "end # ragel fflat";
+	out << 
+		"	end\n"
+		"	if _goto_level <= _out\n"
+		"		break\n"
+		"	end\n"
+		"end\n";
+
+	/* Wrapping the execute block. */
+	out << "	end\n";
 }
 
 /*

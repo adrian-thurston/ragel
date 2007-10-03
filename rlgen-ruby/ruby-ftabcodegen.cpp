@@ -361,7 +361,7 @@ void RubyFTabCodeGen::writeData()
 void RubyFTabCodeGen::writeExec()
 {
 	out << 
-		"begin # ragel ftab\n"
+		"begin\n"
 		"	testEof = false\n"
 		"	_klen, _trans, _keys";
 
@@ -455,7 +455,7 @@ void RubyFTabCodeGen::writeExec()
 		out <<
 			"	case " << TSA() << "[" << CS() << "] \n";
 			TO_STATE_ACTION_SWITCH() <<
-			"	end # to state action switch \n"
+			"	end\n"
 			"\n";
 	}
 
@@ -482,6 +482,7 @@ void RubyFTabCodeGen::writeExec()
 			"	next\n";
 	}
 
+	/* The test eof label. */
 	out <<
 		"	end\n"
 		"	if _goto_level <= _test_eof\n";
