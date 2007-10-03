@@ -271,7 +271,6 @@ void RubyTabCodeGen::writeExec()
 			"	end\n";
 	}
 
-
 	if ( redFsm->errState != 0 ) {
 		out << 
 			"	if " << CS() << " == " << redFsm->errState->id << "\n"
@@ -280,7 +279,7 @@ void RubyTabCodeGen::writeExec()
 			"	end\n";
 	}
 
-	/* Open the resume loop. */
+	/* The resume label. */
 	out << 
 		"	end\n"
 		"	if _goto_level <= _resume\n";
@@ -342,8 +341,7 @@ void RubyTabCodeGen::writeExec()
 			"	end\n";
 	}
 
-
-	/* Open the _again loop. */
+	/* The again label. */
 	out <<
 		"	end\n"
 		"	if _goto_level <= _again\n";
@@ -402,7 +400,6 @@ void RubyTabCodeGen::writeExec()
 				"		next;\n"
 				"	end\n";
 		}
-
 
 		if ( redFsm->anyEofActions() ) {
 			out << 
