@@ -40,8 +40,9 @@ void RubyTabCodeGen::GOTO( ostream &out, int gotoDest, bool inFinish )
 	out << 
 		"	begin\n"
 		"		" << CS() << " = " << gotoDest << "\n"
-		"		_break_again = true\n"
-		"		break\n" // break _again
+		"		_trigger_goto = true\n"
+		"		_goto_level = _again\n"
+		"		break\n"
 		"	end\n";
 }
 
@@ -53,8 +54,9 @@ void RubyTabCodeGen::GOTO_EXPR( ostream &out, InlineItem *ilItem, bool inFinish 
 	INLINE_LIST( out, ilItem->children, 0, inFinish );
 	out << ")\n";
 	out <<
-		"		_break_again = true\n"
-		"		break\n" // break _again
+		"		_trigger_goto = true\n"
+		"		_goto_level = _again\n"
+		"		break\n"
 		"	end\n";
 }
 
@@ -70,8 +72,9 @@ void RubyTabCodeGen::CALL( ostream &out, int callDest, int targState, bool inFin
 		"		" << STACK() << "[" << TOP() << "] = " << CS() << "\n"
 		"		" << TOP() << "+= 1\n"
 		"		" << CS() << " = " << callDest << "\n"
-		"		_break_again = true\n"
-		"		break\n" // break _again
+		"		_trigger_goto = true\n"
+		"		_goto_level = _again\n"
+		"		break\n"
 		"	end\n";
 
 	if ( prePushExpr != 0 )
@@ -94,8 +97,9 @@ void RubyTabCodeGen::CALL_EXPR(ostream &out, InlineItem *ilItem, int targState, 
 	out << ")\n";
 
 	out << 
-		"		_break_again = true\n"
-		"		break\n" // break _again
+		"		_trigger_goto = true\n"
+		"		_goto_level = _again\n"
+		"		break\n"
 		"	end\n";
 
 	if ( prePushExpr != 0 )
@@ -116,8 +120,9 @@ void RubyTabCodeGen::RET( ostream &out, bool inFinish )
 	}
 
 	out <<
-		"		_break_again = true\n"
-		"		break\n" // break _again
+		"		_trigger_goto = true\n"
+		"		_goto_level = _again\n"
+		"		break\n"
 		"	end\n";
 }
 
@@ -125,7 +130,8 @@ void RubyTabCodeGen::BREAK( ostream &out, int targState )
 {
 	out << 
 		"	begin\n"
-		"		_break_resume = true\n"
+		"		_trigger_goto = true\n"
+		"		_goto_level = _out\n"
 		"		break\n"
 		"	end\n";
 }
@@ -231,7 +237,6 @@ void RubyTabCodeGen::writeExec()
 {
 	out << 
 		"begin\n"
-		"	testEof = false\n"
 		"	_klen, _trans, _keys";
 
 	if ( redFsm->anyRegCurStateRef() )
@@ -244,20 +249,42 @@ void RubyTabCodeGen::writeExec()
 
 	out << " = nil\n";
 
-	if ( hasEnd ) 
-		out << "	if " << P() << " != " << PE() << "\n";
+	out << 
+		"	_goto_level = 0\n"
+		"	_resume = 10\n"
+		"	_eof_trans = 15\n"
+		"	_again = 20\n"
+		"	_test_eof = 30\n"
+		"	_out = 40\n";
 
-	if ( redFsm->errState != 0 ) 
-		out << "	if " << CS() << " != " << redFsm->errState->id << "\n";
+	out << 
+		"	while true\n"
+		"	_trigger_goto = false\n";
 
-	/* Open the _resume loop. */
-	out << "	while true\n"
-		<< "	_break_resume = false\n";
+	out << "	if _goto_level <= 0\n";
 
-	/* Open the _again loop. */
-	out << "	begin\n"
-		<< "	_break_again = false\n";
+	if ( hasEnd ) {
+		out << 
+			"	if " << P() << " == " << PE() << "\n"
+			"		_goto_level = _test_eof\n"
+			"		next\n"
+			"	end\n";
+	}
 
+
+	if ( redFsm->errState != 0 ) {
+		out << 
+			"	if " << CS() << " == " << redFsm->errState->id << "\n"
+			"		_goto_level = _out\n"
+			"		next\n"
+			"	end\n";
+	}
+
+	/* Open the resume loop. */
+	out << 
+		"	end\n"
+		"	if _goto_level <= _resume\n";
+	
 	if ( redFsm->anyFromStateActions() ) {
 		out << 
 			"	_acts = " << FSA() << "[" << CS() << "]\n"
@@ -271,7 +298,9 @@ void RubyTabCodeGen::writeExec()
 		out <<
 			"		end # from state action switch\n"
 			"	end\n"
-			"	break if _break_again\n";
+			"	if _trigger_goto\n"
+			"		next\n"
+			"	end\n";
 	}
 
 	if ( redFsm->anyConditions() )
@@ -279,38 +308,45 @@ void RubyTabCodeGen::writeExec()
 
 	LOCATE_TRANS();
 
-	if ( redFsm->anyRegCurStateRef() )
-		out << "	_ps = " << CS() << "\n";
-
 	if ( useIndicies )
 		out << "	_trans = " << I() << "[_trans]\n";
+
+	if ( redFsm->anyEofTrans() ) {
+		out << 
+			"	end\n"
+			"	if _goto_level <= _eof_trans\n";
+	}
+
+	if ( redFsm->anyRegCurStateRef() )
+		out << "	_ps = " << CS() << "\n";
 
 	out << "	" << CS() << " = " << TT() << "[_trans]\n";
 
 	if ( redFsm->anyRegActions() ) {
-		/* break _again */
 		out << 
-			"	break if " << TA() << "[_trans] == 0\n"
-			"	_acts = " << TA() << "[_trans]\n"
-			"	_nacts = " << A() << "[_acts]\n"
-			"	_acts += 1\n"
-			"	while _nacts > 0\n"
-			"		_nacts -= 1\n"
+			"	if " << TA() << "[_trans] != 0\n"
+			"		_acts = " << TA() << "[_trans]\n"
+			"		_nacts = " << A() << "[_acts]\n"
 			"		_acts += 1\n"
-			"		case " << A() << "[_acts - 1]\n";
+			"		while _nacts > 0\n"
+			"			_nacts -= 1\n"
+			"			_acts += 1\n"
+			"			case " << A() << "[_acts - 1]\n";
 		ACTION_SWITCH();
 		out <<
-			"		end # action switch\n"
+			"			end # action switch\n"
+			"		end\n"
+			"	end\n"
+			"	if _trigger_goto\n"
+			"		next\n"
 			"	end\n";
-
-			/* Not necessary as long as there is no code between here and the
-			 * end while false. */
-			// "break if _break_again\n";
 	}
 
-	/* Close the again loop. */
-	out << "	end while false\n";
-	out << "	break if _break_resume\n";
+
+	/* Open the _again loop. */
+	out <<
+		"	end\n"
+		"	if _goto_level <= _again\n";
 
 	if ( redFsm->anyToStateActions() ) {
 		out <<
@@ -327,49 +363,74 @@ void RubyTabCodeGen::writeExec()
 			"	end\n";
 	}
 
-	if ( redFsm->errState != 0 ) 
-		out << "	break if " << CS() << " == " << redFsm->errState->id << "\n";
+	if ( redFsm->errState != 0 ) {
+		out << 
+			"	if " << CS() << " == " << redFsm->errState->id << "\n"
+			"		_goto_level = _out\n"
+			"		next\n"
+			"	end\n";
+	}
 
 	out << "	" << P() << " += 1\n";
 
 	if ( hasEnd ) {
 		out << 
-			"	if " << P() << " == " << PE() << "\n"
-			"		testEof = true\n"
-			"		break\n"
+			"	if " << P() << " != " << PE() << "\n"
+			"		_goto_level = _resume\n"
+			"		next\n"
 			"	end\n";
 	}
+	else {
+		out <<
+			"	_goto_level = _resume\n"
+			"	next\n";
+	}
 
-	/* Close the resume loop. */
-	out << "	end\n";
+	out <<
+		"	end\n"
+		"	if _goto_level <= _test_eof\n";
 
-	/* The if guarding on the error state. */
-	if ( redFsm->errState != 0 ) 
-		out << "	end\n";
-
-	/* The if guarding on empty string. */
-	if ( hasEnd ) {
+	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
 		out << 
-			"	else\n"
-			"		testEof = true\n"
-			"	end\n";
+			"	if " << P() << " == " << EOFV() << "\n";
+
+		if ( redFsm->anyEofTrans() ) {
+			out <<
+				"	if " << ET() << "[" << CS() << "] > 0\n"
+				"		_trans = " << ET() << "[" << CS() << "] - 1;\n"
+				"		_goto_level = _eof_trans\n"
+				"		next;\n"
+				"	end\n";
+		}
+
+
+		if ( redFsm->anyEofActions() ) {
+			out << 
+				"	__acts = " << EA() << "[" << CS() << "]\n"
+				"	__nacts = " << " " << A() << "[__acts]\n"
+				"	__acts += 1\n"
+				"	while __nacts > 0\n"
+				"		__nacts -= 1\n"
+				"		__acts += 1\n"
+				"		case " << A() << "[__acts - 1]\n";
+			EOF_ACTION_SWITCH() <<
+				"		end # eof action switch\n"
+				"	end\n"
+				"	if _trigger_goto\n"
+				"		next\n"
+				"	end\n";
+		}
+
+		out << 
+			"end\n";
 	}
 
-	if ( redFsm->anyEofActions() ) {
-		out << 
-			"	if testEof && " << P() << " == " << EOFV() << "\n"
-			"	__acts = " << EA() << "[" << CS() << "]\n"
-			"	__nacts = " << " " << A() << "[__acts]\n"
-			"	__acts += 1\n"
-			"	while __nacts > 0\n"
-			"		__nacts -= 1\n"
-			"		__acts += 1\n"
-			"		case " << A() << "[__acts - 1]\n";
-		EOF_ACTION_SWITCH() <<
-			"		end # eof action switch\n"
-			"	end\n"
-			"	end\n";
-	}
+	out << 
+		"	end\n"
+		"	if _goto_level <= _out\n"
+		"		break\n"
+		"	end\n"
+		"end\n";
 
 	/* Wrapping the execute block. */
 	out << "	end\n";
@@ -595,6 +656,23 @@ std::ostream &RubyTabCodeGen::EOF_ACTIONS()
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write any eof action. */
 		ARRAY_ITEM( INT(EOF_ACTION(st)), ++totalStateNum, st.last() );
+	}
+	END_ARRAY_LINE();
+	return out;
+}
+
+std::ostream &RubyTabCodeGen::EOF_TRANS()
+{
+	START_ARRAY_LINE();
+	int totalStateNum = 0;
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		/* Write any eof action. */
+		long trans = 0;
+		if ( st->eofTrans != 0 )
+			trans = st->eofTrans->id+1;
+
+		/* Write any eof action. */
+		ARRAY_ITEM( INT(trans), ++totalStateNum, st.last() );
 	}
 	END_ARRAY_LINE();
 	return out;
@@ -906,6 +984,13 @@ void RubyTabCodeGen::writeData()
 	if ( redFsm->anyEofActions() ) {
 		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), EA() );
 		EOF_ACTIONS();
+		CLOSE_ARRAY() <<
+		"\n";
+	}
+
+	if ( redFsm->anyEofTrans() ) {
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxIndex+1), ET() );
+		EOF_TRANS();
 		CLOSE_ARRAY() <<
 		"\n";
 	}

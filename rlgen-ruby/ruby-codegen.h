@@ -89,6 +89,7 @@ protected:
 	string TSA() { return "_" + DATA_PREFIX() + "to_state_actions"; }
 	string FSA() { return "_" + DATA_PREFIX() + "from_state_actions"; }
 	string EA() { return "_" + DATA_PREFIX() + "eof_actions"; }
+	string ET() { return "_" + DATA_PREFIX() + "eof_trans"; }
 	string SP() { return "_" + DATA_PREFIX() + "key_spans"; }
 	string CSP() { return "_" + DATA_PREFIX() + "cond_key_spans"; }
 	string START() { return DATA_PREFIX() + "start"; }
