@@ -544,10 +544,14 @@ protected:
 /* Copy constructor. New up each item. */
 template <AVLMEL_TEMPDEF> AvlTree<AVLMEL_TEMPUSE>::
 		AvlTree(const AvlTree<AVLMEL_TEMPUSE> &other)
-#ifdef WALKABLE
-:
-	/* Make an empty list, copyBranch will fill in the details for us. */
-	BASELIST()
+#if !defined( AVL_KEYLESS ) && defined ( WALKABLE )
+	/* BASELIST should be made empty. The copyBranch function 
+	 * will fill in the details for us. */
+	: Compare(other), BASELIST()
+#elif !defined( AVL_KEYLESS )
+	: Compare(other)
+#elif defined( WALKABLE )
+	: BASELIST()
 #endif
 {
 	treeSize = other.treeSize;
