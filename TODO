@@ -37,6 +37,9 @@ Add the accept action embedding operator: like eof but only for states that end
 up final. Add the combined pending/accept action. This becomes a good idea when
 eof action execution is moved into the main loop.
 
+Include file searching should be relative to the source file. Should add a -I
+option.
+
 ================
 END 6.0 Features
 
