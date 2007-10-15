@@ -19,6 +19,7 @@ class erract8
 	static void test( char data[] )
 	{
 		int cs, p = 0, pe = data.length;
+		int eof = pe;
 		int top;
 
 		%% write init;

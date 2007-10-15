@@ -74,7 +74,7 @@ void test( char *buf )
 	int cs;
 	int *stack;
 	int top, stack_size;
-	char *p, *pe, *item = 0;
+	char *p, *pe, *eof, *item = 0;
 
 	int len = strlen( buf );
 
@@ -85,6 +85,7 @@ void test( char *buf )
 
 	p = buf;
 	pe = buf + len;
+	eof = pe;
 
 	%% write exec;
 

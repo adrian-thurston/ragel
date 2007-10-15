@@ -40,33 +40,45 @@
 _____INPUT_____ */
 
 /* _____OUTPUT_____
+err_start
 eof_start
+err_all
 eof_all
 FAIL
+err_all
+err_middle
 eof_all
 eof_middle
 FAIL
 err_start
 err_all
 FAIL
+err_all
+err_middle
 eof_all
 eof_middle
 FAIL
 err_all
 err_middle
 FAIL
+err_all
+err_middle
 eof_all
 eof_middle
 FAIL
 err_all
 err_middle
 FAIL
+err_all
+err_middle
 eof_all
 eof_middle
 FAIL
 err_all
 err_middle
 FAIL
+err_all
+err_out
 eof_all
 eof_out
 FAIL

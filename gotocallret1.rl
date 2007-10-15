@@ -106,6 +106,7 @@ correct command
 ACCEPT
 correct command
 ACCEPT
+error: failed to recover
 FAIL
 error: garbling line
 error: failed to recover

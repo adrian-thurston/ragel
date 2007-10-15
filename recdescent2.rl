@@ -71,7 +71,7 @@ class recdescent2
 
 	static void test( char data[] )
 	{
-		int cs, p = 0, pe = data.length, item = 0;
+		int cs, p = 0, pe = data.length, eof = data.length, item = 0;
 		int stack[] = new int[1024];
 		int stack_size = 1;
 		int top;

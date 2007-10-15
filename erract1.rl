@@ -65,6 +65,7 @@ int ErrAct::execute( const char *_data, int _len )
 {
 	const char *p = _data;
 	const char *pe = _data+_len;
+	const char *eof = pe;
 	%% write exec;
 
 	if ( cs == ErrAct_error )
