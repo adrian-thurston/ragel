@@ -21,6 +21,7 @@ int main()
 {
 	int cs;
 	char *p = "hello", *pe = p + strlen(p);
+	char *eof = pe;
 	%%{
 		write init;
 		write exec;

@@ -192,6 +192,7 @@ class Scanner
 	{
 		char *p = _data;
 		char *pe = _data + _len;
+		char *eof = null;
 
 		%% write exec;
 

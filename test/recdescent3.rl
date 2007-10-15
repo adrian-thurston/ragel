@@ -70,6 +70,7 @@ def run_machine( data )
 	item = 0;
 	p = 0;
 	pe = data.length;
+	eof = pe;
 	cs = 0;
 	stack = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ];
 	stack_size = 1;

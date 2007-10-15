@@ -1064,6 +1064,10 @@ FsmAp *ParseData::makeInstance( GraphDictEl *gdNode )
 	 * All state construction is now complete.
 	 */
 
+	/* Transfer actions from the out action tables to eof action tables. */
+	for ( StateSet::Iter state = graph->finStateSet; state.lte(); state++ )
+		graph->transferOutActions( *state );
+
 	/* Transfer global error actions. */
 	for ( StateList::Iter state = graph->stateList; state.lte(); state++ )
 		graph->transferErrorActions( state, 0 );
@@ -1235,31 +1239,9 @@ void ParseData::checkInlineList( Action *act, InlineList *inlineList )
 		/* EOF checks. */
 		if ( act->numEofRefs > 0 ) {
 			switch ( item->type ) {
-			case InlineItem::PChar: 
-				error(item->loc) << "pointer to current element does not exist in "
-						"EOF action code" << endl;
-				break;
-			case InlineItem::Char: 
-				error(item->loc) << "current element does not exist in "
-						"EOF action code" << endl;
-				break;
-			case InlineItem::Hold:
-				error(item->loc) << "changing the current element not possible in "
-						"EOF action code" << endl;
-				break;
-			case InlineItem::Exec:
-				error(item->loc) << "changing the current element not possible in "
-						"EOF action code" << endl;
-				break;
-			case InlineItem::Goto: case InlineItem::Call: 
-			case InlineItem::Next: case InlineItem::GotoExpr: 
-			case InlineItem::CallExpr: case InlineItem::NextExpr:
-			case InlineItem::Ret:
-				error(item->loc) << "changing the current state not possible in "
-						"EOF action code" << endl;
-				break;
-			default:
-				break;
+				/* Currently no checks. */
+				default:
+					break;
 			}
 		}
 

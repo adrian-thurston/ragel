@@ -1,5 +1,6 @@
 /*
  * @LANG: indep
+ * @NEEDS_EOF: yes
  */
 
 ptr tokstart;

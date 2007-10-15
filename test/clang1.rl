@@ -161,6 +161,7 @@ void test( char *buf )
 {
 	int len = strlen( buf );
 	char *p = buf, *pe = buf + len;
+	char *eof = pe;
 	char identBuf[IDENT_BUFLEN+1];
 	int identLen;
 	int curLine;

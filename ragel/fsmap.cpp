@@ -122,6 +122,12 @@ void FsmAp::startFsmPrior( int ordering, PriorDesc *prior )
 		if ( trans->toState != 0 )
 			trans->priorTable.setPrior( ordering, prior );
 	}
+
+	/* If the new start state is final then set the out priority. This follows
+	 * the same convention as setting start action in the out action table of
+	 * a final start state. */
+	if ( startState->stateBits & SB_ISFINAL )
+		startState->outPriorTable.setPrior( ordering, prior );
 }
 
 /* Set the priority of all transitions in a graph. Walks all transition lists
@@ -180,6 +186,12 @@ void FsmAp::startFsmAction( int ordering, Action *action )
 		if ( trans->toState != 0 )
 			trans->actionTable.setAction( ordering, action );
 	}
+
+	/* If start state is final then add the action to the out action table.
+	 * This means that when the null string is accepted the start action will
+	 * not be bypassed. */
+	if ( startState->stateBits & SB_ISFINAL )
+		startState->outActionTable.setAction( ordering, action );
 }
 
 /* Set functions to execute on all transitions. Walks the out lists of all
@@ -320,6 +332,13 @@ void FsmAp::setErrorTarget( StateAp *state, StateAp *target, int *orderings,
 	}
 }
 
+void FsmAp::transferOutActions( StateAp *state )
+{
+	for ( ActionTable::Iter act = state->outActionTable; act.lte(); act++ )
+		state->eofActionTable.setAction( act->key, act->value ); 
+	state->outActionTable.empty();
+}
+
 void FsmAp::transferErrorActions( StateAp *state, int transferPoint )
 {
 	for ( int i = 0; i < state->errActionTable.length(); ) {
@@ -327,6 +346,8 @@ void FsmAp::transferErrorActions( StateAp *state, int transferPoint )
 		if ( act->transferPoint == transferPoint ) {
 			/* Transfer the error action and remove it. */
 			setErrorAction( state, act->ordering, act->action );
+			if ( ! state->isFinState() )
+				state->eofActionTable.setAction( act->ordering, act->action );
 			state->errActionTable.vremove( i );
 		}
 		else {

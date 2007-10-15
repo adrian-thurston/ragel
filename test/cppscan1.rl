@@ -136,6 +136,7 @@ int Scanner::execute( char *data, int len )
 	Scanner *fsm = this;
 	char *p = data;
 	char *pe = data + len;
+	char *eof = pe;
 
 	%% write exec;
 	if ( cs == Scanner_error )

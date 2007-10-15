@@ -1134,6 +1134,7 @@ struct FsmAp
 	void leaveFsmPrior( int ordering, PriorDesc *prior );
 
 	/* Action setting support. */
+	void transferOutActions( StateAp *state );
 	void transferErrorActions( StateAp *state, int transferPoint );
 	void setErrorAction( StateAp *state, int ordering, Action *action );
 

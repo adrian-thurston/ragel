@@ -159,6 +159,7 @@ class CLang
 	{
 		char *p = _data;
 		char *pe = _data + _len;
+		char *eof = pe;
 		%% write exec;
 	}
 

@@ -100,6 +100,7 @@ void Concurrent::execute( const char *data, int len )
 {
 	const char *p = data;
 	const char *pe = data + len;
+	const char *eof = pe;
 
 	%% write exec;
 }

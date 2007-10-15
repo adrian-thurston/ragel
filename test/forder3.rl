@@ -83,14 +83,17 @@ through m1 b
 accept m1
 ACCEPT
 enter m2
+enter m2
 accpet m2
 ACCEPT
+enter m1 aa
 enter m1 aa
 leave m1 aa
 through m1 b
 enter m2
 accept m1
 ACCEPT
+enter m1 aa
 enter m1 aa
 leave m1 aa
 through m1 b

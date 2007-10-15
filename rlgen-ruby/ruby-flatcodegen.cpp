@@ -515,7 +515,8 @@ void RubyFlatCodeGen::BREAK( ostream &out, int targState )
 {
 	out << 
 		"	begin\n"
-		"		_break_resume = true\n"
+		"		_trigger_goto = true\n"
+		"		_goto_level = _out\n"
 		"		break\n"
 		"	end\n";
 }
@@ -828,6 +829,9 @@ void RubyFlatCodeGen::writeExec()
 				"		case ( "<< A() << "[__acts-1] ) \n";
 				EOF_ACTION_SWITCH() <<
 				"		end\n"
+				"	end\n"
+				"	if _trigger_goto\n"
+				"		next\n"
 				"	end\n"
 				"	end\n";
 		}
