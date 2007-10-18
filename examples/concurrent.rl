@@ -20,7 +20,7 @@ struct Concurrent
 	int cs;
 
 	int init( );
-	int execute( const char *data, int len );
+	int execute( const char *data, int len, bool isEof );
 	int finish( );
 };
 
@@ -83,10 +83,11 @@ int Concurrent::init( )
 	return 1;
 }
 
-int Concurrent::execute( const char *data, int len )
+int Concurrent::execute( const char *data, int len, bool isEof )
 {
 	const char *p = data;
 	const char *pe = data + len;
+	const char *eof = isEof ? pe : 0;
 
 	%% write exec;
 
@@ -114,7 +115,7 @@ int main()
 	concurrent.init();
 	while ( 1 ) {
 		int len = fread( buf, 1, BUFSIZE, stdin );
-		concurrent.execute( buf, len );
+		concurrent.execute( buf, len, len != BUFSIZE );
 		if ( len != BUFSIZE )
 			break;
 	}

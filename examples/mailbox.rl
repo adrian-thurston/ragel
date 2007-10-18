@@ -40,7 +40,7 @@ struct MailboxScanner
 	int cs, top, stack[1];
 
 	int init( );
-	int execute( const char *data, int len );
+	int execute( const char *data, int len, bool isEof );
 	int finish( );
 };
 
@@ -143,10 +143,11 @@ int MailboxScanner::init( )
 	return 1;
 }
 
-int MailboxScanner::execute( const char *data, int len )
+int MailboxScanner::execute( const char *data, int len, bool isEof )
 {
 	const char *p = data;
 	const char *pe = data + len;
+	const char *eof = isEof ? pe : 0;
 
 	%% write exec;
 
@@ -195,7 +196,7 @@ int main()
 	mailbox.init();
 	while ( 1 ) {
 		int len = fread( buf, 1, BUFSIZE, stdin );
-		mailbox.execute( buf, len );
+		mailbox.execute( buf, len, len != BUFSIZE );
 		if ( len != BUFSIZE )
 			break;
 	}

@@ -19,7 +19,7 @@ struct GotoCallRet
 	int cs, top, stack[32];
 
 	int init( );
-	int execute( const char *data, int len );
+	int execute( const char *data, int len, bool isEof );
 	int finish( );
 };
 
@@ -63,10 +63,11 @@ int GotoCallRet::init( )
 	return 1;
 }
 
-int GotoCallRet::execute( const char *data, int len )
+int GotoCallRet::execute( const char *data, int len, bool isEof )
 {
 	const char *p = data;
 	const char *pe = data + len;
+	const char *eof = isEof ? pe : 0;
 
 	%% write exec;
 	if ( cs == GotoCallRet_error )
@@ -84,9 +85,10 @@ int main()
 
 	GotoCallRet gcr;
 	gcr.init();
-	while ( fgets( buf, sizeof(buf), stdin ) != 0 ) {
-		gcr.execute( buf, strlen(buf) );
-	}
+	while ( fgets( buf, sizeof(buf), stdin ) != 0 )
+		gcr.execute( buf, strlen(buf), false );
+
+	gcr.execute( 0, 0, true );
 	if ( gcr.cs < GotoCallRet_first_final )
 		cerr << "gotocallret: error: parsing input" << endl;
 	return 0;
