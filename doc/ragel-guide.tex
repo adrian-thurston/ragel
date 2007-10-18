@@ -127,8 +127,8 @@ user code execution environment and back again. As a result, expressions can be
 maximally continuous.  One is free to specify an entire parser using a single
 regular expression.  The single-expression model affords concise and elegant
 descriptions of languages and the generation of very simple, fast and robust
-code.  Ragel compiles finite state machines from a high level regular language
-notation to executable C, C++, Objective-C, D, Java or Ruby.
+code.  Ragel compiles executable finite state machines from a high level regular language
+notation. Ragel targets C, C++, Objective-C, D, Java and Ruby.
 
 In addition to building state machines from regular expressions, Ragel allows
 the programmer to directly specify state machines with state charts. These two
@@ -1627,16 +1627,18 @@ class of states that the action will be embedded into. The second component
 specifies the type of event the action will be executed on. The symbols of the
 second component also have equivalent kewords. 
 
+\vspace{10pt}
+
 \def\fakeitem{\hspace*{12pt}$\bullet$\hspace*{10pt}}
 
 \begin{minipage}{\textwidth}
 \begin{multicols}{2}
 \raggedcolumns
 \noindent The different classes of states are:\\
-\fakeitem \verb|> | -- the start state \\
+\fakeitem \verb|> | -- the start state\\
+\fakeitem \verb|< | -- any state except the start state\\
 \fakeitem \verb|$ | -- all states\\
 \fakeitem \verb|% | -- final states\\
-\fakeitem \verb|< | -- any state except the start state\\
 \fakeitem \verb|@ | -- any state except final states\\
 \fakeitem \verb|<>| -- any except start and final (middle)
 
@@ -1650,31 +1652,20 @@ second component also have equivalent kewords.
 \fakeitem \verb|^| -- local error actions (\verb|lerr|)\\
 \end{multicols}
 \end{minipage}
-%\label{state-act-embed}
-%\caption{The two components of state embedding operators. The class of states
-%to select comes first, followed by the type of embedding.}
-%
-%\begin{figure}[t]
-%\centering
-%\includegraphics{stembed}
-%\caption{Summary of state manipulation operators}
-%\label{state-act-embed-chart}
-%\end{figure}
-
-%\noindent Putting these two components together we get a matrix of state
-%embedding operators. The entire set is given in Figure \ref{state-act-embed-chart}.
-
 
 \subsection{To-State and From-State Actions}
 
 \subsubsection{To-State Actions}
 
-\noindent\verb|>~action     <~action     $~action    %~action      @~action      <>~action|\\
-\\
-\noindent Verbose forms:\\
-\noindent\verb|>to(act)     <to(act)     $to(na)     %to(name)     @to(name)     <>to(name)|\\
-\noindent\verb|>to{...}     <to{...}     $to{...}    %to{...}      @to{...}      <>to{...}|
-\\
+\def\sasp{\hspace*{40pt}}
+
+\sasp\verb|>~action      >to(name)      >to{...} | -- the start state\\
+\sasp\verb|<~action      <to(name)      <to{...} | -- any state except the start state\\
+\sasp\verb|$~action      $to(name)      $to{...} | -- all states\\
+\sasp\verb|%~action      %to(name)      %to{...} | -- final states\\
+\sasp\verb|@~action      @to(name)      @to{...} | -- any state except final states\\
+\sasp\verb|<>~action     <>to(name)     <>to{...}| -- any except start and final (middle)
+\vspace{12pt}
 
 
 To-state actions are executed whenever the state machine moves into the
@@ -1694,12 +1685,13 @@ of to-state actions.
 
 \subsubsection{From-State Actions}
 
-\noindent\verb|>*action     <*action     $*action    %*action      @*action      <>*action|\\
-\\
-\noindent Verbose forms:\\
-\noindent\verb|>from(act)   <from(act)   $from(na)   %from(name)   @from(name)   <>from(name)|\\
-\noindent\verb|>from{...}   <from{...}   $from{...}  %from{...}    @from{...}    <>from{...}|
-\\
+\sasp\verb|>*action     >from(name)     >from{...} | -- the start state\\
+\sasp\verb|<*action     <from(name)     <from{...} | -- any state except the start state\\
+\sasp\verb|$*action     $from(name)     $from{...} | -- all states\\
+\sasp\verb|%*action     %from(name)     %from{...} | -- final states\\
+\sasp\verb|@*action     @from(name)     @from{...} | -- any state except final states\\
+\sasp\verb|<>*action    <>from(name)    <>from{...}| -- any except start and final (middle)
+\vspace{12pt}
 
 From-state actions are executed whenever the state machine takes a transition from a
 state, either to itself or to some other state. These actions are executed
@@ -1711,13 +1703,13 @@ embeddings, from-state embeddings stay with the state.
 
 \subsection{EOF Actions}
 
-\noindent\verb|>/action     </action     $/action    %/action      @/action      <>/action|\\
-\\
-\noindent Verbose forms:\\
-\noindent\verb|>eof(act)    <eof(act)    $eof(na)    %eof(name)    @eof(name)    <>eof(name)|\\
-\noindent\verb|>eof{...}    <eof{...}    $eof{...}   %eof{...}     @eof{...}     <>eof{...}|
-\\
-
+\sasp\verb|>/action     >eof(name)     >eof{...} | -- the start state\\
+\sasp\verb|</action     <eof(name)     <eof{...} | -- any state except the start state\\
+\sasp\verb|$/action     $eof(name)     $eof{...} | -- all states\\
+\sasp\verb|%/action     %eof(name)     %eof{...} | -- final states\\
+\sasp\verb|@/action     @eof(name)     @eof{...} | -- any state except final states\\
+\sasp\verb|<>/action    <>eof(name)    <>eof{...}| -- any except start and final (middle)
+\vspace{12pt}
 
 The EOF action embedding operators enable the user to embed EOF actions into
 different classes of
@@ -1738,12 +1730,13 @@ instantiation that consumes input, can attempt to recover from errors.
 
 \subsubsection{Global Error Actions}
 
-\noindent\verb|>!action     <!action     $!action    %!action      @!action      <>!action|\\
-\\
-\noindent Verbose forms:\\
-\noindent\verb|>err(act)    <err(act)    $err(na)    %err(name)    @err(name)    <>err(name)|\\
-\noindent\verb|>err{...}    <err{...}    $err{...}   %err{...}     @err{...}     <>err{...}|
-\\
+\sasp\verb|>!action     >err(name)     >err{...} | -- the start state\\
+\sasp\verb|<!action     <err(name)     <err{...} | -- any state except the start state\\
+\sasp\verb|$!action     $eof(name)     $err{...} | -- all states\\
+\sasp\verb|%!action     %err(name)     %err{...} | -- final states\\
+\sasp\verb|@!action     @err(name)     @err{...} | -- any state except final states\\
+\sasp\verb|<>!action    <>err(name)    <>err{...}| -- any except start and final (middle)
+\vspace{12pt}
 
 Error actions are stored in states until the final state machine has been fully
 constructed. They are then transferred to the transitions that move into the
@@ -1755,12 +1748,13 @@ into the machine with \verb|fgoto|.
 
 \subsubsection{Local Error Actions}
 
-\noindent\verb|>^action     <^action     $^action    %^action      @^action      <>^action|\\
-\\
-\noindent Verbose forms:\\
-\noindent\verb|>lerr(act)   <lerr(act)   $lerr(na)   %lerr(name)   @lerr(name)   <>lerr(name)|\\
-\noindent\verb|>lerr{...}   <lerr{...}   $lerr{...}  %lerr{...}    @lerr{...}    <>lerr{...}|
-\\
+\sasp\verb|>^action     >lerr(name)     >lerr{...} | -- the start state\\
+\sasp\verb|<^action     <lerr(name)     <lerr{...} | -- any state except the start state\\
+\sasp\verb|$^action     $lerr(name)     $lerr{...} | -- all states\\
+\sasp\verb|%^action     %lerr(name)     %lerr{...} | -- final states\\
+\sasp\verb|@^action     @lerr(name)     @lerr{...} | -- any state except final states\\
+\sasp\verb|<>^action    <>lerr(name)    <>lerr{...}| -- any except start and final (middle)
+\vspace{12pt}
 
 Like global error actions, local error actions are also stored in states until
 a transfer point. The transfer point is different however. Each local error action
@@ -1779,17 +1773,6 @@ sub-definition that is used to construct the machine definition where the
 transfer should happen. To embed local error actions and explicitly state the
 machine on which the transfer is to happen use \verb|(name, action)| as the
 action.
-
-\begin{comment}
-\begin{itemize}
-\setlength{\parskip}{0in}
-\item \verb|expr >^ (name, action) | -- Start state.
-\item \verb|expr $^ (name, action) | -- All states.
-\item \verb|expr %^ (name, action) | -- Final states.
-\item \verb|expr <^ (name, action) | -- Not start state.
-\item \verb|expr <>^ (name, action)| -- Not start and not final states.
-\end{itemize}
-\end{comment}
 
 \subsubsection{Example}
 

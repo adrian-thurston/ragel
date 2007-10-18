@@ -34,8 +34,8 @@ this is the frontend component of Ragel, which generates an intermediate
 file format that must be processed by one of rlgen-cd(1), rlgen-java(1), 
 rlgen-ruby(1) or rlgen-dot(1).
 
-Ragel compiles finite state machines from regular languages into executable
-code.  Ragel can generate C, C++, Objective-C, D, or Java code. Ragel state
+Ragel compiles executable finite state machines from regular languages.  
+Ragel can generate C, C++, Objective-C, D, or Java code. Ragel state
 machines can not only recognize byte
 sequences as regular expression machines do, but can also execute code at
 arbitrary points in the recognition of a regular language.  User code is
