@@ -1415,21 +1415,21 @@ and statements are parsed and translated. These allow the user to interact with 
 from action code. See Section \ref{vals} for a complete list of statements and
 values available in code blocks. 
 
-\subsection{Starting Action}
+\subsection{Entering Action}
 
 \verb|expr > action| 
 \verbspace
 
-The starting transition operator embeds an action into all transitions that
-leave the start state. In some machines the start state has in transtions from
-within the machine and the start state is effectively reused. In these cases
-the start state is first isolated from the rest of the machine and the starting
-actions do not get re-executed.
+The entering action operator embeds an action into all transitions
+that enter into the machine from the start state. If the start state is final,
+then the action is also embedded into the start state as a leaving action. This
+means that if a machine accepts the zero-length string and control passes
+through it then the entering action is still executed. Note
+that this can happen on both a following character and on the EOF event.
 
-If the start state is a final state then it is possible for the machine to
-never be started and the starting transitions by-passed.  In the following
-example, the action is executed on the first transition of the machine. If the
-repetition machine is bypassed the action is not executed.
+In some machines the start state has transtions coming in from within the
+machine. In these cases the start state is first isolated from the rest of the
+machine ensuring that the entering actions are not re-executed.
 
 \verbspace
 

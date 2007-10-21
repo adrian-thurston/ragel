@@ -9,8 +9,8 @@ for fig; do
 		opt=`awk -f extract.awk -vexname=$fig $input | 
 				sed '/^ *OPT:/s/^.*: *//p;d'`
 		awk -f extract.awk -vexname=$fig $input | \
-			ragel | rlcodegen -V $opt | \
-			dot -Tfig | awk -f fixbackbox.awk > ${fig}.fig;
+			../ragel/ragel | ../rlgen-dot/rlgen-dot $opt | \
+			dot -Tfig > ${fig}.fig;
 	else
 		echo "$0: internal error: figure $fig not found in $input" >&2
 		exit 1
