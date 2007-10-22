@@ -1742,13 +1742,14 @@ instantiation that consumes input, can attempt to recover from errors.
 \sasp\verb|<>!action    <>err(name)    <>err{...}| -- any except start and final (middle)
 \vspace{12pt}
 
-Error actions are stored in states until the final state machine has been fully
-constructed. They are then transferred to the transitions that move into the
-error state. This transfer entails the creation of a transition from the state
-to the error state that is taken on all input characters that are not already
-covered by the state's transitions. In other words it provides a default
-action. Error actions can induce a recovery by altering \verb|p| and then jumping back
-into the machine with \verb|fgoto|.
+Global error actions are stored in states until compilation is complete. They
+are then transferred to transitions that move into the error state. These
+transitions are taken on all input characters that are not already covered by
+the state's transitions. If a state with an error action is not final when
+compilation is complete, then the action is also embedded as an EOF action.
+
+Error actions can be used to recover from errors by jumping back into the
+machine with \verb|fgoto| and optionally altering \verb|p|.
 
 \subsubsection{Local Error Actions}
 
@@ -1763,8 +1764,8 @@ into the machine with \verb|fgoto|.
 Like global error actions, local error actions are also stored in states until
 a transfer point. The transfer point is different however. Each local error action
 embedding is associated with a name. When a machine definition has been fully
-constructed, all local error action embeddings associated the same name as the
-machine are transferred to error transitions. Local error actions can be used
+constructed, all local error action embeddings associated with the same name as the
+machine definition are transferred to the error transitions. Local error actions can be used
 to specify an action to take when a particular section of a larger state
 machine fails to make a match. A particular machine definition's ``thread'' may
 die and the local error actions executed, however the machine as a whole may
