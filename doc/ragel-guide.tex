@@ -1521,14 +1521,19 @@ main := ( 'm1' | 'm2' ) $A;
 \verb|expr % action|
 \verbspace
 
-The pending out action operator embeds an action into the pending out
-transitions of a machine. The action is first embedded into the final states of
-the machine and later transferred to any transitions made going out of the
-machine. The transfer can be caused either by a concatenation or kleene star
-operation.  This mechanism allows one to associate an action with the
-termination of a sequence, without being concerned about what particular
-character terminates the sequence.  In the following example, A is executed
-when leaving the alpha machine by the newline character.
+The pending out action operator queues an action for embedding into the
+transitions that leave a machine. The action is first stored in the final
+states of the machine and is later transferred to any transitions that are made
+going out of the machine. The transfer can be caused either by a concatenation
+or kleene star operation. If a final state is still final when compilation is
+complete then the pending out action is also embedded as an EOF action into the
+final state. Therefore, leaving the machine is defined as either leaving on a
+character or as state machine acceptance.
+
+This operator allows one to associate an action with the termination of a
+sequence, without being concerned about what particular character terminates
+the sequence. In the following example, A is executed when leaving the alpha
+machine on the newline character.
 
 % GENERATE: exoutact1
 % OPT: -p
@@ -1578,9 +1583,8 @@ main := word ( ' ' @space word )* '\n' @newline;
 \end{center}
 \graphspace
 
-
-In this final example of the action embedding operators, A is executed upon the
-first character of the alpha machine, B is executed on all transitions of the
+In this final example of the action embedding operators, A is executed upon entering
+the alpha machine, B is executed on all transitions of the
 alpha machine, C is executed when the alpha machine is exited by moving into the
 newline machine and N is executed when the newline machine moves into a final
 state.  
