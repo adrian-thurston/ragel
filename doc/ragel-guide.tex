@@ -1715,11 +1715,11 @@ embeddings, from-state embeddings stay with the state.
 \sasp\verb|<>/action    <>eof(name)    <>eof{...}| -- any except start and final (middle)
 \vspace{12pt}
 
-The EOF action embedding operators enable the user to embed EOF actions into
-different classes of
-states.  EOF actions are stored in states and generated with the \verb|write eof|
-statement. The generated EOF code switches on the current state and executes the EOF
-actions associated with it.
+The EOF action embedding operators enable the user to embed actions that are
+executed at the end of the input stream. EOF actions are stored in states and
+generated in the \verb|write exec| block. They are run when \verb|p == pe == eof|
+as the execute block is finishing. EOF actions are free to adjust \verb|p| and
+jump to another part of the machine to restart execution.
 
 \subsection{Handling Errors}
 
@@ -2515,7 +2515,6 @@ int main( int argc, char **argv )
 
             write init;
             write exec;
-            write eof;
         }%%
     }
     printf("result = %i\n", cs >= foo_first_final );
@@ -2802,18 +2801,6 @@ int main( int argc, char **argv )
 processing a string.}
 \label{fbreak-example}
 \end{figure}
-
-
-\subsection{Write EOF Actions}
-\begin{verbatim}
-write eof;
-\end{verbatim}
-\verbspace
-
-The write EOF statement causes Ragel to emit code that executes EOF actions.
-This write statement is only relevant if EOF actions have been embedded,
-otherwise it does not generate anything. The EOF action code requires access to
-the current state.
 
 \subsection{Write Exports}
 \label{export}
