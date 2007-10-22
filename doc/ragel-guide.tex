@@ -1742,11 +1742,12 @@ instantiation that consumes input, can attempt to recover from errors.
 \sasp\verb|<>!action    <>err(name)    <>err{...}| -- any except start and final (middle)
 \vspace{12pt}
 
-Global error actions are stored in states until compilation is complete. They
-are then transferred to transitions that move into the error state. These
-transitions are taken on all input characters that are not already covered by
-the state's transitions. If a state with an error action is not final when
-compilation is complete, then the action is also embedded as an EOF action.
+Global error actions are stored in the states they are embedded into until
+compilation is complete. They are then transferred to the transitions that move
+into the error state. These transitions are taken on all input characters that
+are not already covered by the state's transitions. If a state with an error
+action is not final when compilation is complete, then the action is also
+embedded as an EOF action.
 
 Error actions can be used to recover from errors by jumping back into the
 machine with \verb|fgoto| and optionally altering \verb|p|.
@@ -1761,23 +1762,26 @@ machine with \verb|fgoto| and optionally altering \verb|p|.
 \sasp\verb|<>^action    <>lerr(name)    <>lerr{...}| -- any except start and final (middle)
 \vspace{12pt}
 
-Like global error actions, local error actions are also stored in states until
-a transfer point. The transfer point is different however. Each local error action
-embedding is associated with a name. When a machine definition has been fully
-constructed, all local error action embeddings associated with the same name as the
-machine definition are transferred to the error transitions. Local error actions can be used
-to specify an action to take when a particular section of a larger state
-machine fails to make a match. A particular machine definition's ``thread'' may
-die and the local error actions executed, however the machine as a whole may
-continue to match input.
+Like global error actions, local error actions are also stored in the states
+they are embedded into until a transfer point. The transfer point is different
+however. Each local error action embedding is associated with a name. When a
+machine definition has been fully constructed, all local error action
+embeddings associated with the same name as the machine definition are
+transferred to the error transitions. At this time they are also embedded as
+EOF actions in the case of non-final states.
 
-There are two forms of local error action embeddings. In the first form the name defaults
-to the current machine. In the second form the machine name can be specified.  This
-is useful when it is more convenient to specify the local error action in a
-sub-definition that is used to construct the machine definition where the
-transfer should happen. To embed local error actions and explicitly state the
-machine on which the transfer is to happen use \verb|(name, action)| as the
-action.
+Local error actions can be used to specify an action to take when a particular
+section of a larger state machine fails to match. A particular machine
+definition's ``thread'' may die and the local error actions executed, however
+the machine as a whole may continue to match input.
+
+There are two forms of local error action embeddings. In the first form the
+name defaults to the current machine. In the second form the machine name can
+be specified.  This is useful when it is more convenient to specify the local
+error action in a sub-definition that is used to construct the machine
+definition where the transfer should happen. To embed local error actions and
+explicitly state the machine on which the transfer is to happen use
+\verb|(name, action)| as the action.
 
 \subsubsection{Example}
 
@@ -2547,6 +2551,12 @@ be initialized to zero on every run of the machine.
 \item \verb|pe| - Data end pointer. This should be initialized to \verb|p| plus
 the data length on every run of the machine. In Java and Ruby code this should
 be initialized to the data length.
+
+\item \verb|eof| - End of file pointer. This should be set to \verb|pe| when
+the buffer block being processed is the last one, otherwise it should be set to
+null. In Java and Ruby code \verb|-1| must be used instead of null. If the EOF
+event can be known only after the final buffer block has been processed, then
+it is possible to set \verb|p = pe = eof| and run the execute block.
 
 \item \verb|data| - This variable is only required in Java and Ruby code. It
 must be an array containting the data to process.
