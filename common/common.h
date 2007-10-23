@@ -302,6 +302,49 @@ public:
 	int line;
 };
 
+class cfilebuf : public std::streambuf
+{
+public:
+	cfilebuf( char *fileName, FILE* file ) : fileName(fileName), file(file) { }
+	char *fileName;
+	FILE *file;
+
+	int sync()
+	{
+		fflush( file );
+		return 0;
+	}
+
+	int overflow( int c )
+	{
+		if ( c != EOF )
+			fputc( c, file );
+		return 0;
+	}
+
+	std::streamsize xsputn( const char* s, std::streamsize n )
+	{
+		std::streamsize written = fwrite( s, 1, n, file );
+		return written;
+	}
+};
+
+class costream : public std::ostream
+{
+public:
+	costream( cfilebuf *b ) : 
+		std::ostream(b), b(b) {}
+	
+	~costream()
+		{ delete b; }
+
+	void fclose()
+		{ ::fclose( b->file ); }
+
+	cfilebuf *b;
+};
+
+
 char *findFileExtension( char *stemFile );
 char *fileNameFromStem( char *stemFile, char *suffix );
 
