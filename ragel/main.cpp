@@ -127,6 +127,71 @@ void escapeLineDirectivePath( std::ostream &out, char *path )
 	}
 }
 
+/* If any forward slash is found in argv0 then it is assumed that the path is
+ * explicit and the path to the backend executable should be derived from
+ * that. If no forward slash is found it is assumed the file is being run from
+ * the installed location. The PREFIX supplied during configuration is used.
+ * */
+char **makePathChecks( const char *argv0, const char *progName )
+{
+	char **result = new char*[3];
+	const char *lastSlash = strrchr( argv0, '/' );
+	int numChecks = 0;
+
+	if ( lastSlash != 0 ) {
+		char *path = strdup( argv0 );
+		int givenPathLen = (lastSlash - argv0) + 1;
+		path[givenPathLen] = 0;
+
+		int progNameLen = strlen(progName);
+		int length = givenPathLen + progNameLen + 1;
+		char *check = new char[length];
+		sprintf( check, "%s%s", path, progName );
+		result[numChecks++] = check;
+
+		length = givenPathLen + 3 + progNameLen + 1 + progNameLen + 1;
+		check = new char[length];
+		sprintf( check, "%s../%s/%s", path, progName, progName );
+		result[numChecks++] = check;
+	}
+	else {
+		int prefixLen = strlen(PREFIX);
+		int progNameLen = strlen(progName);
+		int length = prefixLen + 5 + progNameLen + 1;
+		char *check = new char[length];
+
+		sprintf( check, PREFIX "/bin/%s", progName );
+		result[numChecks++] = check;
+	}
+
+	result[numChecks] = 0;
+	return result;
+}
+
+
+void execBackend( const char *argv0 )
+{
+	/* Locate the backend program */
+	const char *progName = 0;
+	switch ( hostLang->lang ) {
+		case HostLang::C:
+		case HostLang::D:
+			progName = "rlgen-cd";
+			break;
+		case HostLang::Java:
+			progName = "rlgen-java";
+			break;
+		case HostLang::Ruby:
+			progName = "rlgen-ruby";
+			break;
+	}
+
+	char **pathChecks = makePathChecks( argv0, progName );
+	while ( *pathChecks != 0 ) {
+		pathChecks += 1;
+	}
+}
+
 /* Main, process args and call yyparse to start scanning input. */
 int main(int argc, char **argv)
 {
@@ -325,6 +390,8 @@ int main(int argc, char **argv)
 
 	if ( outputFileName != 0 )
 		delete outputFile;
+
+	execBackend( argv[0] );
 
 	return 0;
 }

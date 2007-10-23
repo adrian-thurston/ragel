@@ -29,6 +29,7 @@ CC_SRCS = common.cpp
 GEN_SRC = version.h
 
 #*************************************
+prefix = @prefix@
 
 # Programs
 CXX = @CXX@
@@ -50,6 +51,7 @@ common.a: $(GEN_SRC) $(OBJS)
 version.h: ../version.mk
 	echo '#define VERSION "$(VERSION)"' > version.h
 	echo '#define PUBDATE "$(PUBDATE)"' >> version.h
+	echo '#define PREFIX "$(prefix)"' >> version.h
 
 %.o: %.cpp
 	@$(CXX) -M $(DEFS) $(INCS) $< > .$*.d
