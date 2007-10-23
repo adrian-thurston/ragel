@@ -64,7 +64,6 @@ char *outputFileName = 0;
 bool graphvizDone = false;
 
 int numSplitPartitions = 0;
-bool noLineDirectives = false;
 bool printPrintables = false;
 
 /* Print a summary of the options. */
@@ -77,8 +76,6 @@ void usage()
 "   -v, --version         Print version information and exit\n"
 "   -o <file>             Write output to <file>\n"
 "   -x, --rbx             Allow to use Rubinius asm features\n"
-"code generation options:\n"
-"   -l                    Inhibit writing of #line directives\n"
 "generated code style:\n"
 "   -T0                   Table driven FSM (default)\n"
 "   -T1                   Faster table driven FSM\n"
@@ -212,10 +209,6 @@ int main(int argc, char **argv)
 					/* Ok, remember the output file name. */
 					outputFileName = pc.parameterArg;
 				}
-				break;
-
-			case 'l':
-				noLineDirectives = true;
 				break;
 
 			/* Code style. */

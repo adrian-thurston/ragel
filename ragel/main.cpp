@@ -290,7 +290,7 @@ costream *openIntermed( char *inputFileName, char *outputFileName )
 /* Main, process args and call yyparse to start scanning input. */
 int main(int argc, char **argv)
 {
-	ParamCheck pc("o:nmleabjkS:M:CDJRvHh?-:s", argc, argv);
+	ParamCheck pc("o:nmleabjkS:M:CDJRvHh?-:sT:F:G:P:Lp", argc, argv);
 	char *inputFileName = 0;
 	char *outputFileName = 0;
 
@@ -399,6 +399,30 @@ int main(int argc, char **argv)
 					error() << "--" << pc.parameterArg << 
 							" is an invalid argument" << endl;
 				}
+
+			/* Passthrough args. */
+			case 'T': 
+				backendArgs.append( "-T" );
+				backendArgs.append( pc.parameterArg );
+				break;
+			case 'F': 
+				backendArgs.append( "-F" );
+				backendArgs.append( pc.parameterArg );
+				break;
+			case 'G': 
+				backendArgs.append( "-G" );
+				backendArgs.append( pc.parameterArg );
+				break;
+			case 'P':
+				backendArgs.append( "-P" );
+				backendArgs.append( pc.parameterArg );
+				break;
+			case 'p':
+				backendArgs.append( "-p" );
+				break;
+			case 'L':
+				backendArgs.append( "-L" );
+				break;
 			}
 			break;
 

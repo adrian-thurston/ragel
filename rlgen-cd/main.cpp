@@ -78,7 +78,7 @@ void usage()
 "   -v, --version         Print version information and exit\n"
 "   -o <file>             Write output to <file>\n"
 "code generation options:\n"
-"   -l                    Inhibit writing of #line directives\n"
+"   -L                    Inhibit writing of #line directives\n"
 "generated code style:\n"
 "   -T0                   Table driven FSM (default)\n"
 "   -T1                   Faster table driven FSM\n"
@@ -239,7 +239,7 @@ CodeGenData *makeCodeGen( char *sourceFileName, char *fsmName,
 /* Main, process args and call yyparse to start scanning input. */
 int main(int argc, char **argv)
 {
-	ParamCheck pc("-:Hh?vlo:T:F:G:P:", argc, argv);
+	ParamCheck pc("-:Hh?vLo:T:F:G:P:", argc, argv);
 	char *xmlInputFileName = 0;
 
 	while ( pc.check() ) {
@@ -258,7 +258,7 @@ int main(int argc, char **argv)
 				}
 				break;
 
-			case 'l':
+			case 'L':
 				noLineDirectives = true;
 				break;
 
