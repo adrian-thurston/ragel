@@ -95,8 +95,8 @@ function test_error
 
 function run_test()
 {
-	echo "$ragel $min_opt $lang_opt $test_case | $codegen $gen_opt -o $code_src"
-	if ! $ragel $min_opt $lang_opt $test_case | $codegen $gen_opt -o $code_src; then
+	echo "$ragel $lang_opt $min_opt $gen_opt -o $code_src $test_case"
+	if ! $ragel $lang_opt $min_opt $gen_opt -o $code_src $test_case; then
 		test_error;
 	fi
 
