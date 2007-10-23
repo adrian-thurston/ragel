@@ -180,7 +180,7 @@ char **makePathChecks( const char *argv0, const char *progName )
 }
 
 
-void execBackend( const char *argv0, costream *intermed )
+int execBackend( const char *argv0, costream *intermed )
 {
 	/* Locate the backend program */
 	const char *progName = 0;
@@ -216,12 +216,22 @@ void execBackend( const char *argv0, costream *intermed )
 		}
 		error() << "failed to exec backend" << endp;
 	}
-	else {
-		/* parent. */
-		wait( 0 );
-	}
 
+	/* Parent process, wait for the child. */
+	int status;
+	wait( &status );
+
+	/* Clean up the intermediate. */
 	unlink( intermed->b->fileName );
+
+	/* What happened with the child. */
+	if ( ! WIFEXITED( status ) )
+		error() << "backend did not exit normally" << endp;
+	
+	if ( WEXITSTATUS(status) != 0 )
+		exit( WEXITSTATUS(status) );
+
+	return status;
 }
 
 char *makeIntermedTemplate( char *baseFileName )
