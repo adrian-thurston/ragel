@@ -26,6 +26,12 @@
 #include <fstream>
 #include <unistd.h>
 #include <sstream>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <errno.h>
 
 /* Parsing. */
 #include "ragel.h"
@@ -45,6 +51,8 @@ using std::cin;
 using std::cout;
 using std::cerr;
 using std::endl;
+using std::ios;
+using std::streamsize;
 
 /* Controls minimization. */
 MinimizeLevel minimizeLevel = MinimizePartition2;
@@ -55,6 +63,9 @@ char *machineSpec = 0, *machineName = 0;
 bool machineSpecFound = false;
 
 bool printStatistics = false;
+
+typedef Vector<char*> ArgsVector;
+ArgsVector backendArgs;
 
 /* Print a summary of the options. */
 void usage()
@@ -169,7 +180,7 @@ char **makePathChecks( const char *argv0, const char *progName )
 }
 
 
-void execBackend( const char *argv0 )
+void execBackend( const char *argv0, costream *intermed )
 {
 	/* Locate the backend program */
 	const char *progName = 0;
@@ -187,9 +198,93 @@ void execBackend( const char *argv0 )
 	}
 
 	char **pathChecks = makePathChecks( argv0, progName );
-	while ( *pathChecks != 0 ) {
-		pathChecks += 1;
+
+	backendArgs.insert( 0, "rlgen-ruby" );
+	backendArgs.append( intermed->b->fileName );
+	backendArgs.append( 0 );
+
+	pid_t pid = fork();
+	if ( pid < 0 ) {
+		/* Error, no child created. */
+		error() << "failed to fork backend" << endp;
 	}
+	else if ( pid == 0 ) {
+		/* child */
+		while ( *pathChecks != 0 ) {
+			execv( *pathChecks, backendArgs.data );
+			pathChecks += 1;
+		}
+		error() << "failed to exec backend" << endp;
+	}
+	else {
+		/* parent. */
+		wait( 0 );
+	}
+
+	unlink( intermed->b->fileName );
+}
+
+char *makeIntermedTemplate( char *baseFileName )
+{
+	char *result;
+	char *lastSlash = strrchr( baseFileName, '/' );
+	if ( lastSlash == 0 ) {
+		result = new char[13];
+		strcpy( result, "ragel-XXXXXX.xml" );
+	}
+	else {
+		int baseLen = lastSlash - baseFileName + 1;
+		result = new char[baseLen + 13];
+		memcpy( result, baseFileName, baseLen );
+		strcpy( result+baseLen, "ragel-XXXXXX.xml" );
+	}
+	return result;
+};
+
+char fnChars[] = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+costream *openIntermed( char *inputFileName, char *outputFileName )
+{
+	srandom(time(0));
+	costream *result = 0;
+
+	/* Which filename do we use as the base? */
+	char *baseFileName = outputFileName != 0 ? outputFileName : inputFileName;
+
+	/* The template for the intermediate file name. */
+	char *intermedFileName = makeIntermedTemplate( baseFileName );
+
+	/* Randomize the name and try to open. */
+	char *firstX = strrchr( intermedFileName, 'X' ) - 5;
+	for ( int tries = 0; tries < 20; tries++ ) {
+		/* Choose a random name. */
+		for ( int x = 0; x < 6; x++ )
+			firstX[x] = fnChars[random() % 52];
+
+		/* Try to open the file. */
+		int fd = ::open( intermedFileName, O_WRONLY|O_EXCL|O_CREAT, S_IRUSR|S_IWUSR );
+
+		if ( fd > 0 ) {
+			/* Success. */
+			FILE *file = fdopen( fd, "wt" );
+			if ( file == 0 )
+				error() << "fdopen(...) on intermediate file failed" << endp;
+
+			cfilebuf *b = new cfilebuf( intermedFileName, file );
+			result = new costream( b );
+			break;
+		}
+
+		if ( errno == EACCES ) {
+			error() << "failed to open temp file " << intermedFileName << 
+					", access denied" << endp;
+		}
+	}
+
+	if ( result == 0 )
+		error() << "abnormal error: cannot find unique name for temp file" << endp;
+
+	return result;
 }
 
 /* Main, process args and call yyparse to start scanning input. */
@@ -212,6 +307,8 @@ int main(int argc, char **argv)
 				else {
 					/* Ok, remember the output file name. */
 					outputFileName = pc.parameterArg;
+					backendArgs.append( "-o" );
+					backendArgs.append( pc.parameterArg );
 				}
 				break;
 
@@ -332,7 +429,7 @@ int main(int argc, char **argv)
 			strcmp( inputFileName, outputFileName  ) == 0 )
 	{
 		error() << "output file \"" << outputFileName  << 
-				"\" is the same as the input file" << endl;
+				"\" is the same as the input file" << endp;
 	}
 
 	/* Open the input file for reading. */
@@ -342,24 +439,20 @@ int main(int argc, char **argv)
 		ifstream *inFile = new ifstream( inputFileName );
 		inStream = inFile;
 		if ( ! inFile->is_open() )
-			error() << "could not open " << inputFileName << " for reading" << endl;
+			error() << "could not open " << inputFileName << " for reading" << endp;
 	}
 	else {
 		inputFileName = "<stdin>";
 		inStream = &cin;
 	}
 
-
-	/* Bail on above errors. */
-	if ( gblErrorCount > 0 )
-		exit(1);
-
-	std::ostringstream outputBuffer;
+	/* Used for just a few things. */
+	std::ostringstream hostData;
 
 	if ( machineSpec == 0 && machineName == 0 )
-		outputBuffer << "<host line=\"1\" col=\"1\">";
+		hostData << "<host line=\"1\" col=\"1\">";
 
-	Scanner scanner( inputFileName, *inStream, outputBuffer, 0, 0, 0, false );
+	Scanner scanner( inputFileName, *inStream, hostData, 0, 0, 0, false );
 	scanner.do_scan();
 
 	/* Finished, final check for errors.. */
@@ -374,24 +467,21 @@ int main(int argc, char **argv)
 		return 1;
 
 	if ( machineSpec == 0 && machineName == 0 )
-		outputBuffer << "</host>\n";
+		hostData << "</host>\n";
 
 	if ( gblErrorCount > 0 )
 		return 1;
 	
-	ostream *outputFile = 0;
-	if ( outputFileName != 0 )
-		outputFile = new ofstream( outputFileName );
-	else
-		outputFile = &cout;
+	costream *intermed = openIntermed( inputFileName, outputFileName );
 
 	/* Write the machines, then the surrounding code. */
-	writeMachines( *outputFile, outputBuffer.str(), inputFileName );
+	writeMachines( *intermed, hostData.str(), inputFileName );
 
-	if ( outputFileName != 0 )
-		delete outputFile;
+	/* Close the intermediate file. */
+	intermed->fclose();
 
-	execBackend( argv[0] );
+	/* Run the backend process. */
+	execBackend( argv[0], intermed );
 
 	return 0;
 }
