@@ -70,6 +70,7 @@ bool machineSpecFound = false;
 
 bool printStatistics = false;
 bool frontendOnly = false;
+bool generateDot = false;
 
 typedef Vector<char*> ArgsVector;
 ArgsVector frontendArgs;
@@ -90,7 +91,9 @@ void usage()
 "   -m                   Minimize at the end of the compilation\n"
 "   -l                   Minimize after most operations (default)\n"
 "   -e                   Minimize after every operation\n"
-"machine selection:\n"
+"visualization:\n"
+"   -V                   Generate a dot file for Graphviz\n"
+"   -p                   Display printable characters on labels\n"
 "   -S <spec>            FSM specification to output (for rlgen-dot)\n"
 "   -M <machine>         Machine definition/instantiation to output (for rlgen-dot)\n"
 "host language:\n"
@@ -98,6 +101,18 @@ void usage()
 "   -D                   The host language is D\n"
 "   -J                   The host language is Java\n"
 "   -R                   The host language is Ruby\n"
+"line direcives: (C/D only)\n"
+"   -L                   Inhibit writing of #line directives\n"
+"code style: (C/Ruby only)\n"
+"   -T0                  Table driven FSM (default)\n"
+"   -T1                  Faster table driven FSM\n"
+"   -F0                  Flat table driven FSM\n"
+"   -F1                  Faster flat table-driven FSM\n"
+"code style: (C only)\n"
+"   -G0                  Goto-driven FSM\n"
+"   -G1                  Faster goto-driven FSM\n"
+"   -G2                  Really fast goto-driven FSM\n"
+"   -P<N>                N-Way Split really fast goto-driven FSM\n"
 	;	
 }
 
@@ -148,12 +163,16 @@ void escapeLineDirectivePath( std::ostream &out, char *path )
 
 void processArgs( int argc, char **argv, char *&inputFileName, char *&outputFileName )
 {
-	ParamCheck pc("fo:nmleabjkS:M:CDJRvHh?-:sT:F:G:P:Lp", argc, argv);
+	ParamCheck pc("fo:nmleabjkS:M:CDJRvHh?-:sT:F:G:P:LpV", argc, argv);
 
 	while ( pc.check() ) {
 		switch ( pc.state ) {
 		case ParamCheck::match:
 			switch ( pc.parameter ) {
+			case 'V':
+				generateDot = true;
+				break;
+
 			case 'f':
 				frontendOnly = true;
 				break;
@@ -323,18 +342,11 @@ void processArgs( int argc, char **argv, char *&inputFileName, char *&outputFile
 int frontend( char *inputFileName, char *outputFileName )
 {
 	/* Open the input file for reading. */
-	istream *inStream;
-	if ( inputFileName != 0 ) {
-		/* Open the input file for reading. */
-		ifstream *inFile = new ifstream( inputFileName );
-		inStream = inFile;
-		if ( ! inFile->is_open() )
-			error() << "could not open " << inputFileName << " for reading" << endp;
-	}
-	else {
-		inputFileName = "<stdin>";
-		inStream = &cin;
-	}
+	assert( inputFileName != 0 );
+	ifstream *inFile = new ifstream( inputFileName );
+	istream *inStream = inFile;
+	if ( ! inFile->is_open() )
+		error() << "could not open " << inputFileName << " for reading" << endp;
 
 	/* Used for just a few things. */
 	std::ostringstream hostData;
@@ -608,17 +620,21 @@ void execBackend( const char *argv0, char *intermed, char *outputFileName )
 {
 	/* Locate the backend program */
 	char *progName = 0;
-	switch ( hostLang->lang ) {
-		case HostLang::C:
-		case HostLang::D:
-			progName = "rlgen-cd";
-			break;
-		case HostLang::Java:
-			progName = "rlgen-java";
-			break;
-		case HostLang::Ruby:
-			progName = "rlgen-ruby";
-			break;
+	if ( generateDot )
+		progName = "rlgen-dot";
+	else {
+		switch ( hostLang->lang ) {
+			case HostLang::C:
+			case HostLang::D:
+				progName = "rlgen-cd";
+				break;
+			case HostLang::Java:
+				progName = "rlgen-java";
+				break;
+			case HostLang::Ruby:
+				progName = "rlgen-ruby";
+				break;
+		}
 	}
 
 	backendArgs.insert( 0, progName );
@@ -646,7 +662,12 @@ int main(int argc, char **argv)
 
 	processArgs( argc, argv, inputFileName, outputFileName );
 
-	/* Bail on above errors. */
+	/* Require an input file. If we use standard in then we won't have a file
+	 * name on which to base the output. */
+	if ( inputFileName == 0 )
+		error() << "no input file given" << endl;
+
+	/* Bail on argument processing errors. */
 	if ( gblErrorCount > 0 )
 		exit(1);
 
