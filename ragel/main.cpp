@@ -63,8 +63,10 @@ char *machineSpec = 0, *machineName = 0;
 bool machineSpecFound = false;
 
 bool printStatistics = false;
+bool frontendOnly = false;
 
 typedef Vector<char*> ArgsVector;
+ArgsVector frontendArgs;
 ArgsVector backendArgs;
 
 /* Print a summary of the options. */
@@ -138,176 +140,18 @@ void escapeLineDirectivePath( std::ostream &out, char *path )
 	}
 }
 
-/* If any forward slash is found in argv0 then it is assumed that the path is
- * explicit and the path to the backend executable should be derived from
- * that. If no forward slash is found it is assumed the file is being run from
- * the installed location. The PREFIX supplied during configuration is used.
- * */
-char **makePathChecks( const char *argv0, const char *progName )
+void processArgs( int argc, char **argv, char *&inputFileName, char *&outputFileName )
 {
-	char **result = new char*[3];
-	const char *lastSlash = strrchr( argv0, '/' );
-	int numChecks = 0;
-
-	if ( lastSlash != 0 ) {
-		char *path = strdup( argv0 );
-		int givenPathLen = (lastSlash - argv0) + 1;
-		path[givenPathLen] = 0;
-
-		int progNameLen = strlen(progName);
-		int length = givenPathLen + progNameLen + 1;
-		char *check = new char[length];
-		sprintf( check, "%s%s", path, progName );
-		result[numChecks++] = check;
-
-		length = givenPathLen + 3 + progNameLen + 1 + progNameLen + 1;
-		check = new char[length];
-		sprintf( check, "%s../%s/%s", path, progName, progName );
-		result[numChecks++] = check;
-	}
-	else {
-		int prefixLen = strlen(PREFIX);
-		int progNameLen = strlen(progName);
-		int length = prefixLen + 5 + progNameLen + 1;
-		char *check = new char[length];
-
-		sprintf( check, PREFIX "/bin/%s", progName );
-		result[numChecks++] = check;
-	}
-
-	result[numChecks] = 0;
-	return result;
-}
-
-
-int execBackend( const char *argv0, costream *intermed )
-{
-	/* Locate the backend program */
-	const char *progName = 0;
-	switch ( hostLang->lang ) {
-		case HostLang::C:
-		case HostLang::D:
-			progName = "rlgen-cd";
-			break;
-		case HostLang::Java:
-			progName = "rlgen-java";
-			break;
-		case HostLang::Ruby:
-			progName = "rlgen-ruby";
-			break;
-	}
-
-	char **pathChecks = makePathChecks( argv0, progName );
-
-	backendArgs.insert( 0, "rlgen-ruby" );
-	backendArgs.append( intermed->b->fileName );
-	backendArgs.append( 0 );
-
-	pid_t pid = fork();
-	if ( pid < 0 ) {
-		/* Error, no child created. */
-		error() << "failed to fork backend" << endp;
-	}
-	else if ( pid == 0 ) {
-		/* child */
-		while ( *pathChecks != 0 ) {
-			execv( *pathChecks, backendArgs.data );
-			pathChecks += 1;
-		}
-		error() << "failed to exec backend" << endp;
-	}
-
-	/* Parent process, wait for the child. */
-	int status;
-	wait( &status );
-
-	/* Clean up the intermediate. */
-	unlink( intermed->b->fileName );
-
-	/* What happened with the child. */
-	if ( ! WIFEXITED( status ) )
-		error() << "backend did not exit normally" << endp;
-	
-	if ( WEXITSTATUS(status) != 0 )
-		exit( WEXITSTATUS(status) );
-
-	return status;
-}
-
-char *makeIntermedTemplate( char *baseFileName )
-{
-	char *result;
-	char *lastSlash = strrchr( baseFileName, '/' );
-	if ( lastSlash == 0 ) {
-		result = new char[13];
-		strcpy( result, "ragel-XXXXXX.xml" );
-	}
-	else {
-		int baseLen = lastSlash - baseFileName + 1;
-		result = new char[baseLen + 13];
-		memcpy( result, baseFileName, baseLen );
-		strcpy( result+baseLen, "ragel-XXXXXX.xml" );
-	}
-	return result;
-};
-
-char fnChars[] = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
-costream *openIntermed( char *inputFileName, char *outputFileName )
-{
-	srandom(time(0));
-	costream *result = 0;
-
-	/* Which filename do we use as the base? */
-	char *baseFileName = outputFileName != 0 ? outputFileName : inputFileName;
-
-	/* The template for the intermediate file name. */
-	char *intermedFileName = makeIntermedTemplate( baseFileName );
-
-	/* Randomize the name and try to open. */
-	char *firstX = strrchr( intermedFileName, 'X' ) - 5;
-	for ( int tries = 0; tries < 20; tries++ ) {
-		/* Choose a random name. */
-		for ( int x = 0; x < 6; x++ )
-			firstX[x] = fnChars[random() % 52];
-
-		/* Try to open the file. */
-		int fd = ::open( intermedFileName, O_WRONLY|O_EXCL|O_CREAT, S_IRUSR|S_IWUSR );
-
-		if ( fd > 0 ) {
-			/* Success. */
-			FILE *file = fdopen( fd, "wt" );
-			if ( file == 0 )
-				error() << "fdopen(...) on intermediate file failed" << endp;
-
-			cfilebuf *b = new cfilebuf( intermedFileName, file );
-			result = new costream( b );
-			break;
-		}
-
-		if ( errno == EACCES ) {
-			error() << "failed to open temp file " << intermedFileName << 
-					", access denied" << endp;
-		}
-	}
-
-	if ( result == 0 )
-		error() << "abnormal error: cannot find unique name for temp file" << endp;
-
-	return result;
-}
-
-/* Main, process args and call yyparse to start scanning input. */
-int main(int argc, char **argv)
-{
-	ParamCheck pc("o:nmleabjkS:M:CDJRvHh?-:sT:F:G:P:Lp", argc, argv);
-	char *inputFileName = 0;
-	char *outputFileName = 0;
+	ParamCheck pc("fo:nmleabjkS:M:CDJRvHh?-:sT:F:G:P:Lp", argc, argv);
 
 	while ( pc.check() ) {
 		switch ( pc.state ) {
 		case ParamCheck::match:
 			switch ( pc.parameter ) {
+			case 'f':
+				frontendOnly = true;
+				break;
+
 			/* Output. */
 			case 'o':
 				if ( *pc.parameterArg == 0 )
@@ -317,35 +161,41 @@ int main(int argc, char **argv)
 				else {
 					/* Ok, remember the output file name. */
 					outputFileName = pc.parameterArg;
-					backendArgs.append( "-o" );
-					backendArgs.append( pc.parameterArg );
 				}
 				break;
 
 			/* Minimization, mostly hidden options. */
 			case 'n':
 				minimizeOpt = MinimizeNone;
+				frontendArgs.append( "-n" );
 				break;
 			case 'm':
 				minimizeOpt = MinimizeEnd;
+				frontendArgs.append( "-m" );
 				break;
 			case 'l':
 				minimizeOpt = MinimizeMostOps;
+				frontendArgs.append( "-l" );
 				break;
 			case 'e':
 				minimizeOpt = MinimizeEveryOp;
+				frontendArgs.append( "-e" );
 				break;
 			case 'a':
 				minimizeLevel = MinimizeApprox;
+				frontendArgs.append( "-a" );
 				break;
 			case 'b':
 				minimizeLevel = MinimizeStable;
+				frontendArgs.append( "-b" );
 				break;
 			case 'j':
 				minimizeLevel = MinimizePartition1;
+				frontendArgs.append( "-j" );
 				break;
 			case 'k':
 				minimizeLevel = MinimizePartition2;
+				frontendArgs.append( "-k" );
 				break;
 
 			/* Machine spec. */
@@ -357,6 +207,8 @@ int main(int argc, char **argv)
 				else {
 					/* Ok, remember the path to the machine to generate. */
 					machineSpec = pc.parameterArg;
+					frontendArgs.append( "-S" );
+					frontendArgs.append( pc.parameterArg );
 				}
 				break;
 
@@ -369,21 +221,27 @@ int main(int argc, char **argv)
 				else {
 					/* Ok, remember the machine name to generate. */
 					machineName = pc.parameterArg;
+					frontendArgs.append( "-M" );
+					frontendArgs.append( pc.parameterArg );
 				}
 				break;
 
 			/* Host language types. */
 			case 'C':
 				hostLang = &hostLangC;
+				frontendArgs.append( "-C" );
 				break;
 			case 'D':
 				hostLang = &hostLangD;
+				frontendArgs.append( "-D" );
 				break;
 			case 'J':
 				hostLang = &hostLangJava;
+				frontendArgs.append( "-J" );
 				break;
 			case 'R':
 				hostLang = &hostLangRuby;
+				frontendArgs.append( "-R" );
 				break;
 
 			/* Version and help. */
@@ -395,6 +253,7 @@ int main(int argc, char **argv)
 				exit(0);
 			case 's':
 				printStatistics = true;
+				frontendArgs.append( "-s" );
 				break;
 			case '-':
 				if ( strcasecmp(pc.parameterArg, "help") == 0 ) {
@@ -453,19 +312,10 @@ int main(int argc, char **argv)
 			break;
 		}
 	}
+}
 
-	/* Bail on above errors. */
-	if ( gblErrorCount > 0 )
-		exit(1);
-
-	/* Make sure we are not writing to the same file as the input file. */
-	if ( inputFileName != 0 && outputFileName != 0 && 
-			strcmp( inputFileName, outputFileName  ) == 0 )
-	{
-		error() << "output file \"" << outputFileName  << 
-				"\" is the same as the input file" << endp;
-	}
-
+int frontend( char *inputFileName, char *outputFileName )
+{
 	/* Open the input file for reading. */
 	istream *inStream;
 	if ( inputFileName != 0 ) {
@@ -506,16 +356,264 @@ int main(int argc, char **argv)
 	if ( gblErrorCount > 0 )
 		return 1;
 	
-	costream *intermed = openIntermed( inputFileName, outputFileName );
+	ostream *outputFile = 0;
+	if ( outputFileName != 0 )
+		outputFile = new ofstream( outputFileName );
+	else
+		outputFile = &cout;
 
 	/* Write the machines, then the surrounding code. */
-	writeMachines( *intermed, hostData.str(), inputFileName );
+	writeMachines( *outputFile, hostData.str(), inputFileName );
 
 	/* Close the intermediate file. */
-	intermed->fclose();
+	if ( outputFileName != 0 )
+		delete outputFile;
 
-	/* Run the backend process. */
-	execBackend( argv[0], intermed );
+	return gblErrorCount > 0;
+}
+
+char *makeIntermedTemplate( char *baseFileName )
+{
+	char *result = 0, *templ = "ragel-XXXXXX.xml";
+	char *lastSlash = strrchr( baseFileName, '/' );
+	if ( lastSlash == 0 ) {
+		result = new char[strlen(templ)+1];
+		strcpy( result, templ );
+	}
+	else {
+		int baseLen = lastSlash - baseFileName + 1;
+		result = new char[baseLen + strlen(templ) + 1];
+		memcpy( result, baseFileName, baseLen );
+		strcpy( result+baseLen, templ );
+	}
+	return result;
+};
+
+char *openIntermed( char *inputFileName, char *outputFileName )
+{
+	srandom(time(0));
+	char *result = 0;
+
+	/* Which filename do we use as the base? */
+	char *baseFileName = outputFileName != 0 ? outputFileName : inputFileName;
+
+	/* The template for the intermediate file name. */
+	char *intermedFileName = makeIntermedTemplate( baseFileName );
+
+	/* Randomize the name and try to open. */
+	char fnChars[] = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	char *firstX = strrchr( intermedFileName, 'X' ) - 5;
+	for ( int tries = 0; tries < 20; tries++ ) {
+		/* Choose a random name. */
+		for ( int x = 0; x < 6; x++ )
+			firstX[x] = fnChars[random() % 52];
+
+		/* Try to open the file. */
+		int fd = ::open( intermedFileName, O_WRONLY|O_EXCL|O_CREAT, S_IRUSR|S_IWUSR );
+
+		if ( fd > 0 ) {
+			/* Success. Close the file immediately and return the name for use
+			 * by the child processes. */
+			::close( fd );
+			result = intermedFileName;
+			break;
+		}
+
+		if ( errno == EACCES ) {
+			error() << "failed to open temp file " << intermedFileName << 
+					", access denied" << endp;
+		}
+	}
+
+	if ( result == 0 )
+		error() << "abnormal error: cannot find unique name for temp file" << endp;
+
+	return result;
+}
+
+/* If any forward slash is found in argv0 then it is assumed that the path is
+ * explicit and the path to the backend executable should be derived from
+ * that. If no forward slash is found it is assumed the file is being run from
+ * the installed location. The PREFIX supplied during configuration is used.
+ * */
+char **makePathChecks( const char *argv0, const char *progName )
+{
+	char **result = new char*[3];
+	const char *lastSlash = strrchr( argv0, '/' );
+	int numChecks = 0;
+
+	if ( lastSlash != 0 ) {
+		char *path = strdup( argv0 );
+		int givenPathLen = (lastSlash - argv0) + 1;
+		path[givenPathLen] = 0;
+
+		int progNameLen = strlen(progName);
+		int length = givenPathLen + progNameLen + 1;
+		char *check = new char[length];
+		sprintf( check, "%s%s", path, progName );
+		result[numChecks++] = check;
+
+		length = givenPathLen + 3 + progNameLen + 1 + progNameLen + 1;
+		check = new char[length];
+		sprintf( check, "%s../%s/%s", path, progName, progName );
+		result[numChecks++] = check;
+	}
+	else {
+		int prefixLen = strlen(PREFIX);
+		int progNameLen = strlen(progName);
+		int length = prefixLen + 5 + progNameLen + 1;
+		char *check = new char[length];
+
+		sprintf( check, PREFIX "/bin/%s", progName );
+		result[numChecks++] = check;
+	}
+
+	result[numChecks] = 0;
+	return result;
+}
+
+void cleanExit( char *intermed, int status )
+{
+	unlink( intermed );
+	exit( status );
+}
+
+int execFrontend( const char *argv0, char *inputFileName, char *intermed )
+{
+	/* The frontend program name. */
+	char *progName = "ragel";
+
+	char **pathChecks = makePathChecks( argv0, progName );
+
+	frontendArgs.insert( 0, progName );
+	frontendArgs.insert( 1, "-f" );
+	frontendArgs.append( "-o" );
+	frontendArgs.append( intermed );
+	frontendArgs.append( inputFileName );
+	frontendArgs.append( 0 );
+
+	pid_t pid = fork();
+	if ( pid < 0 ) {
+		/* Error, no child created. */
+		error() << "failed to fork frontend" << endl;
+		cleanExit( intermed, 1 );
+	}
+	else if ( pid == 0 ) {
+		/* child */
+		while ( *pathChecks != 0 ) {
+			execv( *pathChecks, frontendArgs.data );
+			pathChecks += 1;
+		}
+		error() << "failed to exec frontend" << endl;
+		cleanExit( intermed, 1 );
+	}
+
+	/* Parent process, wait for the child. */
+	int status;
+	wait( &status );
+
+	/* What happened with the child. */
+	if ( ! WIFEXITED( status ) ) {
+		error() << "frontend did not exit normally" << endp;
+		cleanExit( intermed, 1 );
+	}
+	
+	if ( WEXITSTATUS(status) != 0 )
+		cleanExit( intermed, WEXITSTATUS(status) );
+
+	return status;
+}
+
+int execBackend( const char *argv0, char *intermed, char *outputFileName )
+{
+	/* Locate the backend program */
+	char *progName = 0;
+	switch ( hostLang->lang ) {
+		case HostLang::C:
+		case HostLang::D:
+			progName = "rlgen-cd";
+			break;
+		case HostLang::Java:
+			progName = "rlgen-java";
+			break;
+		case HostLang::Ruby:
+			progName = "rlgen-ruby";
+			break;
+	}
+
+	char **pathChecks = makePathChecks( argv0, progName );
+
+	backendArgs.insert( 0, progName );
+	if ( outputFileName != 0 ) {
+		backendArgs.append( "-o" );
+		backendArgs.append( outputFileName );
+	}
+	backendArgs.append( intermed );
+	backendArgs.append( 0 );
+
+	pid_t pid = fork();
+	if ( pid < 0 ) {
+		/* Error, no child created. */
+		error() << "failed to fork backend" << endl;
+		cleanExit( intermed, 1 );
+	}
+	else if ( pid == 0 ) {
+		/* child */
+		while ( *pathChecks != 0 ) {
+			execv( *pathChecks, backendArgs.data );
+			pathChecks += 1;
+		}
+		error() << "failed to exec backend" << endl;
+		cleanExit( intermed, 1 );
+	}
+
+	/* Parent process, wait for the child. */
+	int status;
+	wait( &status );
+
+	/* What happened with the child. */
+	if ( ! WIFEXITED( status ) ) {
+		error() << "backend did not exit normally" << endl;
+		cleanExit( intermed, 1 );
+	}
+	
+	if ( WEXITSTATUS(status) != 0 )
+		cleanExit( intermed, WEXITSTATUS(status) );
+
+	return status;
+}
+
+/* Main, process args and call yyparse to start scanning input. */
+int main(int argc, char **argv)
+{
+	char *inputFileName = 0;
+	char *outputFileName = 0;
+
+	processArgs( argc, argv, inputFileName, outputFileName );
+
+	/* Bail on above errors. */
+	if ( gblErrorCount > 0 )
+		exit(1);
+
+	/* Make sure we are not writing to the same file as the input file. */
+	if ( inputFileName != 0 && outputFileName != 0 && 
+			strcmp( inputFileName, outputFileName  ) == 0 )
+	{
+		error() << "output file \"" << outputFileName  << 
+				"\" is the same as the input file" << endp;
+	}
+
+	if ( frontendOnly )
+		return frontend( inputFileName, outputFileName );
+
+	char *intermed = openIntermed( inputFileName, outputFileName );
+
+	/* Run the frontend, then the backend processes. */
+	execFrontend( argv[0], inputFileName, intermed );
+	execBackend( argv[0], intermed, outputFileName );
+
+	/* Clean up the intermediate. */
+	cleanExit( intermed, 0 );
 
 	return 0;
 }
