@@ -488,7 +488,7 @@ char **makePathChecksUnix( const char *argv0, const char *progName )
 }
 
 
-int forkAndExec( char *progName, char **pathChecks, 
+void forkAndExec( char *progName, char **pathChecks, 
 		ArgsVector &args, char *intermed )
 {
 	pid_t pid = fork();
@@ -519,8 +519,6 @@ int forkAndExec( char *progName, char **pathChecks,
 	
 	if ( WEXITSTATUS(status) != 0 )
 		cleanExit( intermed, WEXITSTATUS(status) );
-
-	return status;
 }
 
 #else
@@ -562,6 +560,27 @@ char **makePathChecksWin( const char *progName )
 	return result;
 }
 
+void spawn( char *progName, char **pathChecks, 
+		ArgsVector &args, char *intermed )
+{
+	int result = 0;
+	while ( *pathChecks != 0 ) {
+		cerr << "trying to execute " << *pathChecks << endl;
+		result = _spawnv( _P_WAIT, *pathChecks, args.data );
+		if ( result >= 0 || errno != ENOENT )
+			break;
+		pathChecks += 1;
+	}
+
+	if ( result < 0 ) {
+		error() << "failed to spawn " << progName << endl;
+		cleanExit( intermed, 1 );
+	}
+
+	if ( result > 0 )
+		cleanExit( intermed, 1 );
+}
+
 #endif
 
 void execFrontend( const char *argv0, char *inputFileName, char *intermed )
@@ -581,8 +600,7 @@ void execFrontend( const char *argv0, char *inputFileName, char *intermed )
 	forkAndExec( progName, pathChecks, frontendArgs, intermed );
 #else
 	char **pathChecks = makePathChecksWin( progName );
-	while ( *pathChecks != 0 )
-		cerr << *pathChecks++ << endl;
+	spawn( progName, pathChecks, frontendArgs, intermed );
 #endif
 }
 
@@ -616,8 +634,7 @@ void execBackend( const char *argv0, char *intermed, char *outputFileName )
 	forkAndExec( progName, pathChecks, backendArgs, intermed );
 #else
 	char **pathChecks = makePathChecksWin( progName );
-	while ( *pathChecks != 0 )
-		cerr << *pathChecks++ << endl;
+	spawn( progName, pathChecks, backendArgs, intermed );
 #endif
 }
 
