@@ -484,7 +484,46 @@ void cleanExit( char *intermed, int status )
 	exit( status );
 }
 
-int execFrontend( const char *argv0, char *inputFileName, char *intermed )
+#ifndef WIN32
+
+int forkAndExec( char *progName, char **pathChecks, 
+		ArgsVector &args, char *intermed )
+{
+	pid_t pid = fork();
+	if ( pid < 0 ) {
+		/* Error, no child created. */
+		error() << "failed to fork for " << progName << endl;
+		cleanExit( intermed, 1 );
+	}
+	else if ( pid == 0 ) {
+		/* child */
+		while ( *pathChecks != 0 ) {
+			execv( *pathChecks, args.data );
+			pathChecks += 1;
+		}
+		error() << "failed to exec " << progName << endl;
+		cleanExit( intermed, 1 );
+	}
+
+	/* Parent process, wait for the child. */
+	int status;
+	wait( &status );
+
+	/* What happened with the child. */
+	if ( ! WIFEXITED( status ) ) {
+		error() << progName << " did not exit normally" << endl;
+		cleanExit( intermed, 1 );
+	}
+	
+	if ( WEXITSTATUS(status) != 0 )
+		cleanExit( intermed, WEXITSTATUS(status) );
+
+	return status;
+}
+
+#endif
+
+void execFrontend( const char *argv0, char *inputFileName, char *intermed )
 {
 	/* The frontend program name. */
 	char *progName = "ragel";
@@ -496,46 +535,14 @@ int execFrontend( const char *argv0, char *inputFileName, char *intermed )
 	frontendArgs.append( inputFileName );
 	frontendArgs.append( 0 );
 
-	
 	char **pathChecks = makePathChecks( argv0, progName );
 
 #ifndef WIN32
-	pid_t pid = fork();
-	if ( pid < 0 ) {
-		/* Error, no child created. */
-		error() << "failed to fork frontend" << endl;
-		cleanExit( intermed, 1 );
-	}
-	else if ( pid == 0 ) {
-		/* child */
-		while ( *pathChecks != 0 ) {
-			execv( *pathChecks, frontendArgs.data );
-			pathChecks += 1;
-		}
-		error() << "failed to exec frontend" << endl;
-		cleanExit( intermed, 1 );
-	}
-
-	/* Parent process, wait for the child. */
-	int status;
-	wait( &status );
-
-	/* What happened with the child. */
-	if ( ! WIFEXITED( status ) ) {
-		error() << "frontend did not exit normally" << endp;
-		cleanExit( intermed, 1 );
-	}
-	
-	if ( WEXITSTATUS(status) != 0 )
-		cleanExit( intermed, WEXITSTATUS(status) );
-
-	return status;
-#else
-	return 0;
+	forkAndExec( progName, pathChecks, frontendArgs, intermed );
 #endif
 }
 
-int execBackend( const char *argv0, char *intermed, char *outputFileName )
+void execBackend( const char *argv0, char *intermed, char *outputFileName )
 {
 	/* Locate the backend program */
 	char *progName = 0;
@@ -552,8 +559,6 @@ int execBackend( const char *argv0, char *intermed, char *outputFileName )
 			break;
 	}
 
-	char **pathChecks = makePathChecks( argv0, progName );
-
 	backendArgs.insert( 0, progName );
 	if ( outputFileName != 0 ) {
 		backendArgs.append( "-o" );
@@ -562,39 +567,10 @@ int execBackend( const char *argv0, char *intermed, char *outputFileName )
 	backendArgs.append( intermed );
 	backendArgs.append( 0 );
 
+	char **pathChecks = makePathChecks( argv0, progName );
+
 #ifndef WIN32
-	pid_t pid = fork();
-	if ( pid < 0 ) {
-		/* Error, no child created. */
-		error() << "failed to fork backend" << endl;
-		cleanExit( intermed, 1 );
-	}
-	else if ( pid == 0 ) {
-		/* child */
-		while ( *pathChecks != 0 ) {
-			execv( *pathChecks, backendArgs.data );
-			pathChecks += 1;
-		}
-		error() << "failed to exec backend" << endl;
-		cleanExit( intermed, 1 );
-	}
-
-	/* Parent process, wait for the child. */
-	int status;
-	wait( &status );
-
-	/* What happened with the child. */
-	if ( ! WIFEXITED( status ) ) {
-		error() << "backend did not exit normally" << endl;
-		cleanExit( intermed, 1 );
-	}
-	
-	if ( WEXITSTATUS(status) != 0 )
-		cleanExit( intermed, WEXITSTATUS(status) );
-
-	return status;
-#else
-	return 0;
+	forkAndExec( progName, pathChecks, backendArgs, intermed );
 #endif
 }
 
