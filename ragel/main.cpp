@@ -663,6 +663,8 @@ int main(int argc, char **argv)
 
 	char *intermed = openIntermed( inputFileName, outputFileName );
 
+	/* From here on in the cleanExit function should be used to exit. */
+
 	/* Run the frontend, then the backend processes. */
 	execFrontend( argv[0], inputFileName, intermed );
 	execBackend( argv[0], intermed, outputFileName );
