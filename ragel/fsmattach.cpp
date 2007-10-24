@@ -183,7 +183,7 @@ void FsmAp::detachState( StateAp *state )
 	state->outList.abandon();
 
 	/* Unset final stateness before detaching from graph. */
-	if ( state->stateBits & SB_ISFINAL )
+	if ( state->stateBits & STB_ISFINAL )
 		finStateSet.remove( state );
 }
 

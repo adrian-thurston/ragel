@@ -43,12 +43,12 @@
 //#define LOG_CONDS
 
 /* Flags that control merging. */
-#define SB_GRAPH1     0x01
-#define SB_GRAPH2     0x02
-#define SB_BOTH       0x03
-#define SB_ISFINAL    0x04
-#define SB_ISMARKED   0x08
-#define SB_ONLIST     0x10
+#define STB_GRAPH1     0x01
+#define STB_GRAPH2     0x02
+#define STB_BOTH       0x03
+#define STB_ISFINAL    0x04
+#define STB_ISMARKED   0x08
+#define STB_ONLIST     0x10
 
 using std::ostream;
 
@@ -672,7 +672,7 @@ struct StateAp
 	~StateAp();
 
 	/* Is the state final? */
-	bool isFinState() { return stateBits & SB_ISFINAL; }
+	bool isFinState() { return stateBits & STB_ISFINAL; }
 
 	/* Out transition list and the pointer for the default out trans. */
 	TransList outList;

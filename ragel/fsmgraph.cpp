@@ -293,7 +293,7 @@ void FsmAp::optionalRepeatOp( int times )
 		/* Make a duplicate for concating and set the fin bits to graph 2 so we
 		 * can pick out it's final states after the optional style concat. */
 		FsmAp *dup = new FsmAp( *copyFrom );
-		dup->setFinBits( SB_GRAPH2 );
+		dup->setFinBits( STB_GRAPH2 );
 		doConcat( dup, &lastFinSet, true );
 
 		/* Clear the last final state set and make the new one by taking only
@@ -303,9 +303,9 @@ void FsmAp::optionalRepeatOp( int times )
 			/* If the state came from graph 2, add it to the last set and clear
 			 * the bits. */
 			StateAp *fs = finStateSet[i];
-			if ( fs->stateBits & SB_GRAPH2 ) {
+			if ( fs->stateBits & STB_GRAPH2 ) {
 				lastFinSet.insert( fs );
-				fs->stateBits &= ~SB_GRAPH2;
+				fs->stateBits &= ~STB_GRAPH2;
 			}
 		}
 	}
@@ -455,8 +455,8 @@ void FsmAp::intersectOp( FsmAp *other )
 	other->setMisfitAccounting( true );
 
 	/* Set the fin bits on this and other to want each other. */
-	setFinBits( SB_GRAPH1 );
-	other->setFinBits( SB_GRAPH2 );
+	setFinBits( STB_GRAPH1 );
+	other->setFinBits( STB_GRAPH2 );
 
 	/* Call worker Or routine. */
 	doOr( other );
@@ -481,7 +481,7 @@ void FsmAp::subtractOp( FsmAp *other )
 	other->setMisfitAccounting( true );
 
 	/* Set the fin bits of other to be killers. */
-	other->setFinBits( SB_GRAPH1 );
+	other->setFinBits( STB_GRAPH1 );
 
 	/* Call worker Or routine. */
 	doOr( other );
@@ -725,7 +725,7 @@ void FsmAp::joinOp( int startId, int finalId, FsmAp **others, int numOthers )
 	/* Invoke the relinquish final callback on any states that did not get
 	 * final state status back. */
 	for ( StateSet::Iter st = finStateSetCopy; st.lte(); st++ ) {
-		if ( !((*st)->stateBits & SB_ISFINAL) )
+		if ( !((*st)->stateBits & STB_ISFINAL) )
 			clearOutData( *st );
 	}
 
@@ -818,14 +818,14 @@ void FsmAp::unsetKilledFinals()
 	for ( int s = 0; s < fin.length(); s++ ) {
 		/* Check for killing bit. */
 		StateAp *state = fin.data[s];
-		if ( state->stateBits & SB_GRAPH1 ) {
+		if ( state->stateBits & STB_GRAPH1 ) {
 			/* One final state is a killer, set to non-final. */
 			unsetFinState( state );
 		}
 
 		/* Clear all killing bits. Non final states should never have had those
 		 * state bits set in the first place. */
-		state->stateBits &= ~SB_GRAPH1;
+		state->stateBits &= ~STB_GRAPH1;
 	}
 }
 
@@ -838,8 +838,8 @@ void FsmAp::unsetIncompleteFinals()
 	for ( int s = 0; s < fin.length(); s++ ) {
 		/* Check for one set but not the other. */
 		StateAp *state = fin.data[s];
-		if ( state->stateBits & SB_BOTH && 
-				(state->stateBits & SB_BOTH) != SB_BOTH )
+		if ( state->stateBits & STB_BOTH && 
+				(state->stateBits & STB_BOTH) != STB_BOTH )
 		{
 			/* One state wants the other but it is not there. */
 			unsetFinState( state );
@@ -847,7 +847,7 @@ void FsmAp::unsetIncompleteFinals()
 
 		/* Clear wanting bits. Non final states should never have had those
 		 * state bits set in the first place. */
-		state->stateBits &= ~SB_BOTH;
+		state->stateBits &= ~STB_BOTH;
 	}
 }
 
@@ -1220,7 +1220,7 @@ void FsmAp::mergeStates( MergeData &md, StateAp *destState, StateAp *srcState )
 	expList2.empty();
 
 	/* Get its bits and final state status. */
-	destState->stateBits |= ( srcState->stateBits & ~SB_ISFINAL );
+	destState->stateBits |= ( srcState->stateBits & ~STB_ISFINAL );
 	if ( srcState->isFinState() )
 		setFinState( destState );
 

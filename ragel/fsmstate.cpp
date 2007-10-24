@@ -177,9 +177,9 @@ int ApproxCompare::compare( const StateAp *state1, const StateAp *state2 )
 	int compareRes;
 
 	/* Test final state status. */
-	if ( (state1->stateBits & SB_ISFINAL) && !(state2->stateBits & SB_ISFINAL) )
+	if ( (state1->stateBits & STB_ISFINAL) && !(state2->stateBits & STB_ISFINAL) )
 		return -1;
-	else if ( !(state1->stateBits & SB_ISFINAL) && (state2->stateBits & SB_ISFINAL) )
+	else if ( !(state1->stateBits & STB_ISFINAL) && (state2->stateBits & STB_ISFINAL) )
 		return 1;
 	
 	/* Test epsilon transition sets. */
@@ -239,9 +239,9 @@ int InitPartitionCompare::compare( const StateAp *state1 , const StateAp *state2
 	int compareRes;
 
 	/* Test final state status. */
-	if ( (state1->stateBits & SB_ISFINAL) && !(state2->stateBits & SB_ISFINAL) )
+	if ( (state1->stateBits & STB_ISFINAL) && !(state2->stateBits & STB_ISFINAL) )
 		return -1;
-	else if ( !(state1->stateBits & SB_ISFINAL) && (state2->stateBits & SB_ISFINAL) )
+	else if ( !(state1->stateBits & STB_ISFINAL) && (state2->stateBits & STB_ISFINAL) )
 		return 1;
 
 	/* Test epsilon transition sets. */

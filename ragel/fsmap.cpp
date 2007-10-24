@@ -126,7 +126,7 @@ void FsmAp::startFsmPrior( int ordering, PriorDesc *prior )
 	/* If the new start state is final then set the out priority. This follows
 	 * the same convention as setting start action in the out action table of
 	 * a final start state. */
-	if ( startState->stateBits & SB_ISFINAL )
+	if ( startState->stateBits & STB_ISFINAL )
 		startState->outPriorTable.setPrior( ordering, prior );
 }
 
@@ -190,7 +190,7 @@ void FsmAp::startFsmAction( int ordering, Action *action )
 	/* If start state is final then add the action to the out action table.
 	 * This means that when the null string is accepted the start action will
 	 * not be bypassed. */
-	if ( startState->stateBits & SB_ISFINAL )
+	if ( startState->stateBits & STB_ISFINAL )
 		startState->outActionTable.setAction( ordering, action );
 }
 
@@ -658,14 +658,14 @@ void FsmAp::verifyStates()
 {
 	for ( StateList::Iter state = stateList; state.lte(); state++ ) {
 		/* Non final states should not have leaving data. */
-		if ( ! (state->stateBits & SB_ISFINAL) ) {
+		if ( ! (state->stateBits & STB_ISFINAL) ) {
 			assert( state->outActionTable.length() == 0 );
 			assert( state->outCondSet.length() == 0 );
 			assert( state->outPriorTable.length() == 0 );
 		}
 
 		/* Data used in algorithms should be cleared. */
-		assert( (state->stateBits & SB_BOTH) == 0 );
+		assert( (state->stateBits & STB_BOTH) == 0 );
 		assert( state->foreignInTrans > 0 );
 	}
 }

@@ -144,10 +144,10 @@ FsmAp::~FsmAp()
 void FsmAp::setFinState( StateAp *state )
 {
 	/* Is it already a fin state. */
-	if ( state->stateBits & SB_ISFINAL )
+	if ( state->stateBits & STB_ISFINAL )
 		return;
 	
-	state->stateBits |= SB_ISFINAL;
+	state->stateBits |= STB_ISFINAL;
 	finStateSet.insert( state );
 }
 
@@ -156,14 +156,14 @@ void FsmAp::setFinState( StateAp *state )
 void FsmAp::unsetFinState( StateAp *state )
 {
 	/* Is it already a non-final state? */
-	if ( ! (state->stateBits & SB_ISFINAL) )
+	if ( ! (state->stateBits & STB_ISFINAL) )
 		return;
 
 	/* When a state looses its final state status it must relinquish all the
 	 * properties that are allowed only for final states. */
 	clearOutData( state );
 
-	state->stateBits &= ~ SB_ISFINAL;
+	state->stateBits &= ~ STB_ISFINAL;
 	finStateSet.remove( state );
 }
 
@@ -346,12 +346,12 @@ void FsmAp::epsilonTrans( int id )
 void FsmAp::markReachableFromHere( StateAp *state )
 {
 	/* Base case: return; */
-	if ( state->stateBits & SB_ISMARKED )
+	if ( state->stateBits & STB_ISMARKED )
 		return;
 	
 	/* Set this state as processed. We are going to visit all states that this
 	 * state has a transition to. */
-	state->stateBits |= SB_ISMARKED;
+	state->stateBits |= STB_ISMARKED;
 
 	/* Recurse on all out transitions. */
 	for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
@@ -363,12 +363,12 @@ void FsmAp::markReachableFromHere( StateAp *state )
 void FsmAp::markReachableFromHereStopFinal( StateAp *state )
 {
 	/* Base case: return; */
-	if ( state->stateBits & SB_ISMARKED )
+	if ( state->stateBits & STB_ISMARKED )
 		return;
 	
 	/* Set this state as processed. We are going to visit all states that this
 	 * state has a transition to. */
-	state->stateBits |= SB_ISMARKED;
+	state->stateBits |= STB_ISMARKED;
 
 	/* Recurse on all out transitions. */
 	for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
@@ -383,12 +383,12 @@ void FsmAp::markReachableFromHereStopFinal( StateAp *state )
 void FsmAp::markReachableFromHereReverse( StateAp *state )
 {
 	/* Base case: return; */
-	if ( state->stateBits & SB_ISMARKED )
+	if ( state->stateBits & STB_ISMARKED )
 		return;
 	
 	/* Set this state as processed. We are going to visit all states with
 	 * transitions into this state. */
-	state->stateBits |= SB_ISMARKED;
+	state->stateBits |= STB_ISMARKED;
 
 	/* Recurse on all items in transitions. */
 	for ( TransInList::Iter trans = state->inList; trans.lte(); trans++ ) 
@@ -424,7 +424,7 @@ void FsmAp::copyInEntryPoints( FsmAp *other )
 void FsmAp::unsetAllFinStates()
 {
 	for ( StateSet::Iter st = finStateSet; st.lte(); st++ )
-		(*st)->stateBits &= ~ SB_ISFINAL;
+		(*st)->stateBits &= ~ STB_ISFINAL;
 	finStateSet.empty();
 }
 
@@ -460,8 +460,8 @@ void FsmAp::verifyReachability()
 	/* Check that everything got marked. */
 	for ( StateList::Iter st = stateList; st.lte(); st++ ) {
 		/* Assert it got marked and then clear the mark. */
-		assert( st->stateBits & SB_ISMARKED );
-		st->stateBits &= ~ SB_ISMARKED;
+		assert( st->stateBits & STB_ISMARKED );
+		st->stateBits &= ~ STB_ISMARKED;
 	}
 }
 
@@ -472,24 +472,24 @@ void FsmAp::verifyNoDeadEndStates()
 		markReachableFromHereReverse( *pst );
 
 	/* Start state gets honorary marking. Must be done AFTER recursive call. */
-	startState->stateBits |= SB_ISMARKED;
+	startState->stateBits |= STB_ISMARKED;
 
 	/* Make sure everything got marked. */
 	for ( StateList::Iter st = stateList; st.lte(); st++ ) {
 		/* Assert the state got marked and unmark it. */
-		assert( st->stateBits & SB_ISMARKED );
-		st->stateBits &= ~ SB_ISMARKED;
+		assert( st->stateBits & STB_ISMARKED );
+		st->stateBits &= ~ STB_ISMARKED;
 	}
 }
 
 void FsmAp::depthFirstOrdering( StateAp *state )
 {
 	/* Nothing to do if the state is already on the list. */
-	if ( state->stateBits & SB_ONLIST )
+	if ( state->stateBits & STB_ONLIST )
 		return;
 
 	/* Doing depth first, put state on the list. */
-	state->stateBits |= SB_ONLIST;
+	state->stateBits |= STB_ONLIST;
 	stateList.append( state );
 	
 	/* Recurse on everything ranges. */
@@ -504,7 +504,7 @@ void FsmAp::depthFirstOrdering()
 {
 	/* Init on state list flags. */
 	for ( StateList::Iter st = stateList; st.lte(); st++ )
-		st->stateBits &= ~SB_ONLIST;
+		st->stateBits &= ~STB_ONLIST;
 	
 	/* Clear out the state list, we will rebuild it. */
 	int stateListLen = stateList.length();

@@ -296,9 +296,9 @@ void LongestMatch::runLonestMatch( ParseData *pd, FsmAp *graph )
 {
 	graph->markReachableFromHereStopFinal( graph->startState );
 	for ( StateList::Iter ms = graph->stateList; ms.lte(); ms++ ) {
-		if ( ms->stateBits & SB_ISMARKED ) {
+		if ( ms->stateBits & STB_ISMARKED ) {
 			ms->lmItemSet.insert( 0 );
-			ms->stateBits &= ~ SB_ISMARKED;
+			ms->stateBits &= ~ STB_ISMARKED;
 		}
 	}
 
@@ -320,9 +320,9 @@ void LongestMatch::runLonestMatch( ParseData *pd, FsmAp *graph )
 					/* Fill the item sets. */
 					graph->markReachableFromHereStopFinal( toState );
 					for ( StateList::Iter ms = graph->stateList; ms.lte(); ms++ ) {
-						if ( ms->stateBits & SB_ISMARKED ) {
+						if ( ms->stateBits & STB_ISMARKED ) {
 							ms->lmItemSet.insert( lmAct->value );
-							ms->stateBits &= ~ SB_ISMARKED;
+							ms->stateBits &= ~ STB_ISMARKED;
 						}
 					}
 				}
@@ -338,10 +338,10 @@ void LongestMatch::runLonestMatch( ParseData *pd, FsmAp *graph )
 	int maxItemSetLength = 0;
 	graph->markReachableFromHereStopFinal( graph->startState );
 	for ( StateList::Iter ms = graph->stateList; ms.lte(); ms++ ) {
-		if ( ms->stateBits & SB_ISMARKED ) {
+		if ( ms->stateBits & STB_ISMARKED ) {
 			if ( ms->lmItemSet.length() > maxItemSetLength )
 				maxItemSetLength = ms->lmItemSet.length();
-			ms->stateBits &= ~ SB_ISMARKED;
+			ms->stateBits &= ~ STB_ISMARKED;
 		}
 	}
 
@@ -394,12 +394,12 @@ void LongestMatch::runLonestMatch( ParseData *pd, FsmAp *graph )
 					maxItemSetLength = 0;
 					graph->markReachableFromHereStopFinal( toState );
 					for ( StateList::Iter ms = graph->stateList; ms.lte(); ms++ ) {
-						if ( ms->stateBits & SB_ISMARKED ) {
+						if ( ms->stateBits & STB_ISMARKED ) {
 							if ( ms->lmItemSet.length() > 0 && !ms->isFinState() )
 								nonFinalNonEmptyItemSet = true;
 							if ( ms->lmItemSet.length() > maxItemSetLength )
 								maxItemSetLength = ms->lmItemSet.length();
-							ms->stateBits &= ~ SB_ISMARKED;
+							ms->stateBits &= ~ STB_ISMARKED;
 						}
 					}
 

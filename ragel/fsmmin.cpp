@@ -509,8 +509,8 @@ void FsmAp::removeUnreachableStates()
 	while ( state ) {
 		StateAp *next = state->next;
 
-		if ( state->stateBits & SB_ISMARKED )
-			state->stateBits &= ~ SB_ISMARKED;
+		if ( state->stateBits & STB_ISMARKED )
+			state->stateBits &= ~ STB_ISMARKED;
 		else {
 			detachState( state );
 			stateList.detach( state );
@@ -573,7 +573,7 @@ void FsmAp::removeDeadEndStates()
 	 * recursive call on all the final states so that it does not cause the
 	 * start state in transitions to be skipped when the start state is
 	 * visited by the traversal. */
-	startState->stateBits |= SB_ISMARKED;
+	startState->stateBits |= STB_ISMARKED;
 
 	/* Delete all states that are not marked
 	 * and unmark the ones that are marked. */
@@ -581,8 +581,8 @@ void FsmAp::removeDeadEndStates()
 	while ( state != 0 ) {
 		StateAp *next = state->next;
 
-		if ( state->stateBits & SB_ISMARKED  )
-			state->stateBits &= ~ SB_ISMARKED;
+		if ( state->stateBits & STB_ISMARKED  )
+			state->stateBits &= ~ STB_ISMARKED;
 		else {
 			detachState( state );
 			stateList.detach( state );
