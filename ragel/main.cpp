@@ -28,10 +28,16 @@
 #include <sstream>
 #include <unistd.h>
 #include <sys/types.h>
-#include <sys/wait.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <errno.h>
+
+#ifndef WIN32
+#include <sys/wait.h>
+#else
+#include <windows.h>
+#include <psapi.h>
+#endif
 
 /* Parsing. */
 #include "ragel.h"
@@ -391,7 +397,7 @@ char *makeIntermedTemplate( char *baseFileName )
 
 char *openIntermed( char *inputFileName, char *outputFileName )
 {
-	srandom(time(0));
+	srand(time(0));
 	char *result = 0;
 
 	/* Which filename do we use as the base? */
@@ -406,7 +412,7 @@ char *openIntermed( char *inputFileName, char *outputFileName )
 	for ( int tries = 0; tries < 20; tries++ ) {
 		/* Choose a random name. */
 		for ( int x = 0; x < 6; x++ )
-			firstX[x] = fnChars[random() % 52];
+			firstX[x] = fnChars[rand() % 52];
 
 		/* Try to open the file. */
 		int fd = ::open( intermedFileName, O_WRONLY|O_EXCL|O_CREAT, S_IRUSR|S_IWUSR );
@@ -483,8 +489,6 @@ int execFrontend( const char *argv0, char *inputFileName, char *intermed )
 	/* The frontend program name. */
 	char *progName = "ragel";
 
-	char **pathChecks = makePathChecks( argv0, progName );
-
 	frontendArgs.insert( 0, progName );
 	frontendArgs.insert( 1, "-f" );
 	frontendArgs.append( "-o" );
@@ -492,6 +496,10 @@ int execFrontend( const char *argv0, char *inputFileName, char *intermed )
 	frontendArgs.append( inputFileName );
 	frontendArgs.append( 0 );
 
+	
+	char **pathChecks = makePathChecks( argv0, progName );
+
+#ifndef WIN32
 	pid_t pid = fork();
 	if ( pid < 0 ) {
 		/* Error, no child created. */
@@ -522,6 +530,9 @@ int execFrontend( const char *argv0, char *inputFileName, char *intermed )
 		cleanExit( intermed, WEXITSTATUS(status) );
 
 	return status;
+#else
+	return 0;
+#endif
 }
 
 int execBackend( const char *argv0, char *intermed, char *outputFileName )
@@ -551,6 +562,7 @@ int execBackend( const char *argv0, char *intermed, char *outputFileName )
 	backendArgs.append( intermed );
 	backendArgs.append( 0 );
 
+#ifndef WIN32
 	pid_t pid = fork();
 	if ( pid < 0 ) {
 		/* Error, no child created. */
@@ -581,6 +593,9 @@ int execBackend( const char *argv0, char *intermed, char *outputFileName )
 		cleanExit( intermed, WEXITSTATUS(status) );
 
 	return status;
+#else
+	return 0;
+#endif
 }
 
 /* Main, process args and call yyparse to start scanning input. */

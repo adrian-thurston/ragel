@@ -36,10 +36,8 @@ LIBS = ../common/common.a
 #*************************************
 
 prefix = @prefix@
-
 BUILD_PARSERS = @BUILD_PARSERS@
-
-# Programs
+EXEEXT = @EXEEXT@
 CXX = @CXX@
 
 # Get objects and dependencies from sources.
@@ -47,9 +45,9 @@ OBJS = $(CC_SRCS:%.cpp=%.o)
 DEPS = $(CC_SRCS:%.cpp=.%.d)
 
 # Rules.
-all: ragel
+all: ragel$(EXEEXT)
 
-ragel: $(GEN_SRC) $(OBJS) $(LIBS)
+ragel$(EXEEXT): $(GEN_SRC) $(OBJS) $(LIBS)
 	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
 
 ifeq ($(BUILD_PARSERS),true)

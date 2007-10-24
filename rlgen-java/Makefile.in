@@ -29,12 +29,12 @@ CC_SRCS = main.cpp javacodegen.cpp
 LIBS = ../common/common.a ../redfsm/redfsm.a
 
 LIBS += @LIBS@
-prefix = @prefix@
 
 #*************************************
 
-# Programs
+prefix = @prefix@
 CXX = @CXX@
+EXEEXT = @EXEEXT@
 
 # Get objects and dependencies from sources.
 OBJS = $(CC_SRCS:%.cpp=%.o)
@@ -44,9 +44,9 @@ DEPS = $(CC_SRCS:%.cpp=.%.d)
 include ../version.mk
 
 # Rules.
-all: rlgen-java
+all: rlgen-java$(EXEEXT)
 
-rlgen-java: $(LIBS) $(OBJS)
+rlgen-java$(EXEEXT): $(LIBS) $(OBJS)
 	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
 
 %.o: %.cpp

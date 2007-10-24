@@ -33,11 +33,10 @@ GEN_SRC = xmltags.cpp xmlscan.cpp xmlparse.cpp xmlparse.h
 
 LIBS = ../common/common.a ../redfsm/redfsm.a
 
-prefix = @prefix@
-
 #*************************************
 
-# Programs
+prefix = @prefix@
+EXEEXT = @EXEEXT@
 CXX = @CXX@
 
 # Get objects and dependencies from sources.
@@ -48,9 +47,9 @@ DEPS = $(CC_SRCS:%.cpp=.%.d)
 include ../version.mk
 
 # Rules.
-all: rlgen-cd
+all: rlgen-cd$(EXEEXT)
 
-rlgen-cd: $(LIBS) $(OBJS)
+rlgen-cd$(EXEEXT): $(LIBS) $(OBJS)
 	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
 
 %.o: %.cpp
