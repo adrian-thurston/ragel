@@ -437,12 +437,21 @@ char *openIntermed( char *inputFileName, char *outputFileName )
 	return result;
 }
 
+
+void cleanExit( char *intermed, int status )
+{
+	unlink( intermed );
+	exit( status );
+}
+
+#ifndef WIN32
+
 /* If any forward slash is found in argv0 then it is assumed that the path is
  * explicit and the path to the backend executable should be derived from
  * that. If no forward slash is found it is assumed the file is being run from
  * the installed location. The PREFIX supplied during configuration is used.
  * */
-char **makePathChecks( const char *argv0, const char *progName )
+char **makePathChecksUnix( const char *argv0, const char *progName )
 {
 	char **result = new char*[3];
 	const char *lastSlash = strrchr( argv0, '/' );
@@ -478,13 +487,6 @@ char **makePathChecks( const char *argv0, const char *progName )
 	return result;
 }
 
-void cleanExit( char *intermed, int status )
-{
-	unlink( intermed );
-	exit( status );
-}
-
-#ifndef WIN32
 
 int forkAndExec( char *progName, char **pathChecks, 
 		ArgsVector &args, char *intermed )
@@ -521,6 +523,45 @@ int forkAndExec( char *progName, char **pathChecks,
 	return status;
 }
 
+#else
+
+/* If any forward slash is found in argv0 then it is assumed that the path is
+ * explicit and the path to the backend executable should be derived from
+ * that. If no forward slash is found it is assumed the file is being run from
+ * the installed location. The PREFIX supplied during configuration is used.
+ * */
+char **makePathChecksWin( const char *progName )
+{
+	int len = 1024;
+	char *imageFileName = new char[len];
+	HANDLE h = GetCurrentProcess();
+	len = GetModuleFileNameEx( h, NULL, imageFileName, len );
+	imageFileName[len] = 0;
+
+	char **result = new char*[3];
+	const char *lastSlash = strrchr( imageFileName, '\\' );
+	int numChecks = 0;
+
+	assert( lastSlash != 0 );
+	char *path = strdup( imageFileName );
+	int givenPathLen = (lastSlash - imageFileName) + 1;
+	path[givenPathLen] = 0;
+
+	int progNameLen = strlen(progName);
+	int length = givenPathLen + progNameLen + 1;
+	char *check = new char[length];
+	sprintf( check, "%s%s", path, progName );
+	result[numChecks++] = check;
+
+	length = givenPathLen + 3 + progNameLen + 1 + progNameLen + 1;
+	check = new char[length];
+	sprintf( check, "%s..\\%s\\%s", path, progName, progName );
+	result[numChecks++] = check;
+
+	result[numChecks] = 0;
+	return result;
+}
+
 #endif
 
 void execFrontend( const char *argv0, char *inputFileName, char *intermed )
@@ -535,10 +576,13 @@ void execFrontend( const char *argv0, char *inputFileName, char *intermed )
 	frontendArgs.append( inputFileName );
 	frontendArgs.append( 0 );
 
-	char **pathChecks = makePathChecks( argv0, progName );
-
 #ifndef WIN32
+	char **pathChecks = makePathChecksUnix( argv0, progName );
 	forkAndExec( progName, pathChecks, frontendArgs, intermed );
+#else
+	char **pathChecks = makePathChecksWin( progName );
+	while ( *pathChecks != 0 )
+		cerr << *pathChecks++ << endl;
 #endif
 }
 
@@ -567,10 +611,13 @@ void execBackend( const char *argv0, char *intermed, char *outputFileName )
 	backendArgs.append( intermed );
 	backendArgs.append( 0 );
 
-	char **pathChecks = makePathChecks( argv0, progName );
-
 #ifndef WIN32
+	char **pathChecks = makePathChecksUnix( argv0, progName );
 	forkAndExec( progName, pathChecks, backendArgs, intermed );
+#else
+	char **pathChecks = makePathChecksWin( progName );
+	while ( *pathChecks != 0 )
+		cerr << *pathChecks++ << endl;
 #endif
 }
 

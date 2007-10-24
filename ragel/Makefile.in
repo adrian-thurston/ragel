@@ -31,7 +31,9 @@ CC_SRCS = \
 
 GEN_SRC = rlscan.cpp rlparse.h rlparse.cpp
 
-LIBS = ../common/common.a
+RAGEL_LIBS = ../common/common.a
+LIBS = $(RAGEL_LIBS)
+MINGW_LIBS = -lpsapi
 
 #*************************************
 
@@ -40,6 +42,10 @@ BUILD_PARSERS = @BUILD_PARSERS@
 EXEEXT = @EXEEXT@
 CXX = @CXX@
 
+ifeq ($(EXEEXT), .exe)
+LIBS += $(MINGW_LIBS)
+endif
+
 # Get objects and dependencies from sources.
 OBJS = $(CC_SRCS:%.cpp=%.o)
 DEPS = $(CC_SRCS:%.cpp=.%.d)
@@ -47,7 +53,7 @@ DEPS = $(CC_SRCS:%.cpp=.%.d)
 # Rules.
 all: ragel$(EXEEXT)
 
-ragel$(EXEEXT): $(GEN_SRC) $(OBJS) $(LIBS)
+ragel$(EXEEXT): $(GEN_SRC) $(OBJS) $(RAGEL_LIBS)
 	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
 
 ifeq ($(BUILD_PARSERS),true)
