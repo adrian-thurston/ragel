@@ -250,7 +250,7 @@ for test_case; do
 	[ -z "$allow_minflags" ] && allow_minflags="-n -m -l -e"
 
 	case $lang in
-	c|c++|objc|d)
+	c|obj-c|c++|d)
 		# Using genflags, get the allowed gen flags from the test case. If the
 		# test case doesn't specify assume that all gen flags are allowed.
 		allow_genflags=`sed '/@ALLOW_GENFLAGS:/s/^.*: *//p;d' $test_case`
