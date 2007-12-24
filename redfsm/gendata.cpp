@@ -54,6 +54,7 @@ CodeGenData::CodeGenData( ostream &out )
 	actExpr(0),
 	tokstartExpr(0),
 	tokendExpr(0),
+	dataExpr(0),
 	wantComplete(0),
 	hasLongestMatch(false),
 	hasEnd(true),
