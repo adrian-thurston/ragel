@@ -28,11 +28,11 @@
 #include <sstream>
 
 /* Integer array line length. */
-#define IALL 8
+#define IALL 12
 
 /* Static array initialization item count 
  * (should be multiple of IALL). */
-#define SAIIC 8192
+#define SAIIC 8184
 
 #define _resume    1
 #define _again     2
@@ -40,11 +40,11 @@
 #define _test_eof  4
 #define _out       5
 
-using std::ostream;
+using std::setw;
+using std::ios;
 using std::ostringstream;
 using std::string;
 using std::cerr;
-using std::endl;
 
 void lineDirective( ostream &out, char *fileName, int line )
 {
@@ -1125,54 +1125,62 @@ std::ostream &JavaTabCodeGen::OPEN_ARRAY( string type, string name )
 	item_count = 0;
 	div_count = 1;
 
-	out << 
-		"private static void init_" << name << "_0( " << type << "[] r )\n"
-		"{\n\t";
-
+	out <<  "private static " << type << "[] init_" << name << "_0()\n"
+		"{\n\t"
+		"return new " << type << " [] {\n\t";
 	return out;
 }
 
 std::ostream &JavaTabCodeGen::ARRAY_ITEM( string item, bool last )
 {
-	out << "r[" << item_count << "]=" << item << "; ";
+	item_count++;
 
-	item_count += 1;
+	out << setw(5) << setiosflags(ios::right) << item;
 	
 	if ( !last ) {
 		if ( item_count % SAIIC == 0 ) {
-			out << "\n}\n\n";
-			out << "private static void init_" << array_name << "_" << div_count << 
-					"( " << array_type << "[] r )\n{\n\t";
-			div_count += 1;
+			out << "\n\t};\n};\n"
+				"private static "<< array_type << "[] init_" << 
+				array_name << "_" << div_count << "()\n"
+				"{\n\t"
+				"return new " << array_type << " [] {\n\t";
+			div_count++;
+		} else if (item_count % IALL == 0) { 
+			out << ",\n\t";
+		} else {
+			out << ",";
 		}
-		else if ( item_count % IALL == 0 )
-			out << "\n\t";
 	}
-
 	return out;
 }
 
 std::ostream &JavaTabCodeGen::CLOSE_ARRAY()
 {
-	out << "\n}\n\n";
+	out << "\n\t};\n}\n\n";
 
-	out << 
-		"private static " << array_type << "[] create_" << array_name << "( )\n"
-		"{\n"
-		"	" << array_type << "[] r = new " << array_type << "[" << item_count << "];\n";
-
-	for ( int i = 0; i < div_count; i++ )
-		out << "	init_" << array_name << "_" << i << "( r );\n";
-
-	out <<
-		"	return r;\n"
-		"}\n"
-		"\n";
-
-	out << 
-		"private static final " << array_type << " " << array_name << 
-				"[] = create_" << array_name << "();\n\n";
-
+	if (item_count < SAIIC) {
+		out << "private static final " << array_type << " " << array_name << 
+			"[] = init_" << array_name << "_0();\n\n";
+	} else {
+		out << "private static final " << array_type << " [] combine_" << array_name
+			<< "() {\n\t"
+			<< array_type << " [] combined = new " << array_type << 
+			" [ " << item_count << " ];\n\t";
+		int block = 0;
+		int full_blocks = item_count / SAIIC;
+		for (;block < full_blocks; ++block) {
+			out << "System.arraycopy ( init_" << array_name << "_" << block << 
+				"(), 0, combined, " << SAIIC * block << ", " << SAIIC << " );\n\t";
+		}
+		if ( (item_count % SAIIC) > 0 ) {
+			out << "System.arraycopy ( init_" << array_name << "_" << block << 
+				"(), 0, combined, " << SAIIC * block << ", " << 
+				(item_count % SAIIC) << " );\n\t";
+		}
+		out << "return combined;\n}\n";
+		out << "private static final " << array_type << " [] " << array_name << 
+			" = combine_" << array_name << "();";
+	}
 	return out;
 }
 
