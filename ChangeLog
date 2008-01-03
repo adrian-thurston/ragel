@@ -1,3 +1,54 @@
+Ragel 6.0 - TBR
+===============
+ -Remove the 'noend' write option from examples/atoi.rl. This example is
+  referenced a lot as a first example and as such it shouldn't contain a
+  special purpose write option like 'noend'.
+ -Introcuded the "eof" variable for indicating the end of file. The p variable
+  is checked against eof when the processing loop reaches the end of a block.
+  If p == eof at this time then the EOF actions are executed. The variable is
+  required only when EOF actions have been emebedded.
+ -The "write eof" command is no longer needed and was removed.
+ -Scanners now use EOF actions to generate tokens. This eliminates the need to
+  flush the last token.
+ -Restructured the Java driver; a switch statement with fallthrough cases are
+  now used to emulate gotos.
+ -Ruby code generation was also restructured. Gotos are elmulated using a
+  series of if tests. 
+ -Gone back to 3.X semantics for >, % and error actions. The > operator also
+  embeds a leaving action/priority into the start state if it is final. If EOF
+  happens in a state with a leaving operator then leaving action it is
+  executed. If EOF happens in a non-final state that has an error action, the
+  error action is executed.
+ -The Ragel program now executes frontend and backend processes separately,
+  connecting them with a temporary file in the current directory. Without the
+  -f option the "ragel" program marshals arguments and calls the frontend and
+  backend. With the -f option the "ragel" program acts as the frontend only.
+ -Added name finding for executables. If any forward slash is found in argv0
+  then it is assumed that the path is explicit and the path to the backend
+  executable should be derived from that. Whe check that location and also go
+  up one then inside a directory of the same name in case we are executing
+  from the source tree. If no forward slash is found it is assumed the file is
+  being run from the installed location. The PREFIX supplied during
+  configuration is used.
+ -On windows GetModuleFileNameEx is used to find out where the the current
+  process's binary is. That location is searched first. If that fails then we
+  go up one directory and look for the executable inside a directory of the
+  same name in case we are executing from the source tree.
+ -Changed the -l option in rlgen-cd to -L because it is covered in the
+  frontend. Added a passthrough in the frontend for the backend options.
+ -Dot file generation can now be invoked using the -V option to the parent. We
+  now require an input file. If standard in is used then we don't have a file
+  name on which to base the output.
+ -Rather than have the frontend process call the backend, the ragel program
+  now calls the frontend (itself with the -f option) and the backend.
+ -Able to build native windows executables using Cygwin+MinGW. 
+ -Patch from David Waite: Large arrays are now created by copying in the data
+  from smaller arrays using System.arraycopy(). This eliminates the debug data
+  associated with explicit initialization statements. It is also much easier
+  on the java compiler which can run out of memory compiling very large
+  machines. The downside is that it takes slightly longer to initialize static
+  data.
+
 Ragel 5.25 - Dec 24, 2007
 =========================
  -Fixed segfault reported by Ryan Phelps. Affected Java and Ruby code

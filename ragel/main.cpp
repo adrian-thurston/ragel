@@ -460,9 +460,10 @@ void cleanExit( char *intermed, int status )
 
 /* If any forward slash is found in argv0 then it is assumed that the path is
  * explicit and the path to the backend executable should be derived from
- * that. If no forward slash is found it is assumed the file is being run from
- * the installed location. The PREFIX supplied during configuration is used.
- * */
+ * that. Whe check that location and also go up one then inside a directory of
+ * the same name in case we are executing from the source tree. If no forward
+ * slash is found it is assumed the file is being run from the installed
+ * location. The PREFIX supplied during configuration is used. */
 char **makePathChecksUnix( const char *argv0, const char *progName )
 {
 	char **result = new char*[3];
@@ -535,10 +536,10 @@ void forkAndExec( char *progName, char **pathChecks,
 
 #else
 
-/* If any forward slash is found in argv0 then it is assumed that the path is
- * explicit and the path to the backend executable should be derived from
- * that. If no forward slash is found it is assumed the file is being run from
- * the installed location. The PREFIX supplied during configuration is used.
+/* GetModuleFileNameEx is used to find out where the the current process's
+ * binary is. That location is searched first. If that fails then we go up one
+ * directory and look for the executable inside a directory of the same name
+ * in case we are executing from the source tree.
  * */
 char **makePathChecksWin( const char *progName )
 {
