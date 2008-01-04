@@ -101,9 +101,9 @@ public:
 
 struct HostType
 {
-	char *data1;
-	char *data2;
-	char *internalName;
+	const char *data1;
+	const char *data2;
+	const char *internalName;
 	bool isSigned;
 	long long minVal;
 	long long maxVal;
@@ -195,7 +195,7 @@ struct KeyOps
 	HostType *typeSubsumes( bool isSigned, long long maxVal )
 	{
 		for ( int i = 0; i < hostLang->numHostTypes; i++ ) {
-			if ( ( isSigned && hostLang->hostTypes[i].isSigned || !isSigned ) &&
+			if ( ( ( isSigned && hostLang->hostTypes[i].isSigned ) || !isSigned ) &&
 					maxVal <= hostLang->hostTypes[i].maxVal )
 				return hostLang->hostTypes + i;
 		}

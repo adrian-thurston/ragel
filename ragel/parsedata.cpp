@@ -61,7 +61,7 @@ void Token::append( const Token &other )
 void afterOpMinimize( FsmAp *fsm, bool lastInSeq )
 {
 	/* Switch on the prefered minimization algorithm. */
-	if ( minimizeOpt == MinimizeEveryOp || minimizeOpt == MinimizeMostOps && lastInSeq ) {
+	if ( minimizeOpt == MinimizeEveryOp || ( minimizeOpt == MinimizeMostOps && lastInSeq ) ) {
 		/* First clean up the graph. FsmAp operations may leave these
 		 * lying around. There should be no dead end states. The subtract
 		 * intersection operators are the only places where they may be
@@ -108,7 +108,7 @@ Key makeFsmKeyHex( char *str, const InputLoc &loc, ParseData *pd )
 
 	unsigned long ul = strtoul( str, 0, 16 );
 
-	if ( errno == ERANGE || unusedBits && ul >> (size * 8) ) {
+	if ( errno == ERANGE || ( unusedBits && ul >> (size * 8) ) ) {
 		error(loc) << "literal " << str << " overflows the alphabet type" << endl;
 		ul = 1 << (size * 8);
 	}
@@ -130,12 +130,12 @@ Key makeFsmKeyDec( char *str, const InputLoc &loc, ParseData *pd )
 	long long ll = strtoll( str, 0, 10 );
 
 	/* Check for underflow. */
-	if ( errno == ERANGE && ll < 0 || ll < minVal) {
+	if ( ( errno == ERANGE && ll < 0 ) || ll < minVal) {
 		error(loc) << "literal " << str << " underflows the alphabet type" << endl;
 		ll = minVal;
 	}
 	/* Check for overflow. */
-	else if ( errno == ERANGE && ll > 0 || ll > maxVal ) {
+	else if ( ( errno == ERANGE && ll > 0 ) || ll > maxVal ) {
 		error(loc) << "literal " << str << " overflows the alphabet type" << endl;
 		ll = maxVal;
 	}

@@ -77,7 +77,7 @@ struct XMLTag
 
 struct XMLTagHashPair
 {
-    char *name;
+    const char *name;
     int id;
 };
 
