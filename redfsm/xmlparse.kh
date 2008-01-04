@@ -53,7 +53,7 @@ struct XMLTag
 		tagId(tagId), type(type), 
 		content(0), attrList(0) {}
 	
-	Attribute *findAttr( char *id )
+	Attribute *findAttr( const char *id )
 	{
 		if ( attrList != 0 ) {
 			for ( AttrList::Iter attr = *attrList; attr.lte(); attr++ ) {

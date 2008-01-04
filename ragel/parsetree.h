@@ -200,7 +200,7 @@ struct Token
 
 	void prepareLitString( Token &result, bool &caseInsensitive );
 	void append( const Token &other );
-	void set( char *str, int len );
+	void set( const char *str, int len );
 };
 
 /* Store the value and type of a priority augmentation. */

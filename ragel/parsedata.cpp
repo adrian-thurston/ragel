@@ -37,7 +37,7 @@ using namespace std;
 
 char mainMachine[] = "main";
 
-void Token::set( char *str, int len )
+void Token::set( const char *str, int len )
 {
 	length = len;
 	data = new char[len+1];
