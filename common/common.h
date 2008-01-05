@@ -346,7 +346,7 @@ public:
 
 
 char *findFileExtension( char *stemFile );
-char *fileNameFromStem( char *stemFile, char *suffix );
+char *fileNameFromStem( char *stemFile, const char *suffix );
 
 struct Export
 {

@@ -210,7 +210,7 @@ int main(int argc, char **argv)
 			error() << "could not open " << xmlInputFileName << " for reading" << endl;
 	}
 	else {
-		xmlInputFileName = "<stdin>";
+		xmlInputFileName = strdup("<stdin>");
 		inStream = &cin;
 	}
 

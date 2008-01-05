@@ -125,7 +125,7 @@ ostream *openOutput( char *inputFile )
 		if ( ext != 0 && strcmp( ext, ".rh" ) == 0 )
 			outputFileName = fileNameFromStem( inputFile, ".h" );
 		else {
-			char *defExtension = 0;
+			const char *defExtension = 0;
 			switch ( hostLang->lang ) {
 				case HostLang::C: defExtension = ".c"; break;
 				case HostLang::D: defExtension = ".d"; break;
@@ -357,7 +357,7 @@ int main(int argc, char **argv)
 			error() << "could not open " << xmlInputFileName << " for reading" << endl;
 	}
 	else {
-		xmlInputFileName = "<stdin>";
+		xmlInputFileName = strdup("<stdin>");
 		inStream = &cin;
 	}
 

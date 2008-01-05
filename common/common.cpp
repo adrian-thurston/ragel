@@ -288,7 +288,7 @@ char *findFileExtension( char *stemFile )
 
 /* Make a file name from a stem. Removes the old filename suffix and
  * replaces it with a new one. Returns a newed up string. */
-char *fileNameFromStem( char *stemFile, char *suffix )
+char *fileNameFromStem( char *stemFile, const char *suffix )
 {
 	long len = strlen( stemFile );
 	assert( len > 0 );
