@@ -74,7 +74,7 @@ END {
 cat << EOF
 
 	inp.each { |str| 
-		run_machine(str)
+		run_machine(str.unpack("c*"))
 	}
 
 EOF
