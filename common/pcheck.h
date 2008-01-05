@@ -25,7 +25,7 @@
 class ParamCheck
 {
 public:
-	ParamCheck(char *paramSpec, int argc, char **argv);
+	ParamCheck( const char *paramSpec, int argc, char **argv);
 
 	bool check();
 
@@ -40,7 +40,7 @@ public:
 	int iCurArg;        /* Index to the current arg. */
 
 private:
-	char *paramSpec;    /* Parameter spec supplied by the coder. */
+	const char *paramSpec;    /* Parameter spec supplied by the coder. */
 	int argc;           /* Arguement data from the command line. */
 	char **argv;
 

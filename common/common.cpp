@@ -110,7 +110,7 @@ HostType *findAlphTypeInternal( char *s1 )
 }
 
 /* Construct a new parameter checker with for paramSpec. */
-ParamCheck::ParamCheck(char *paramSpec, int argc, char **argv)
+ParamCheck::ParamCheck( const char *paramSpec, int argc, char **argv )
 :
 	state(noparam),
 	argOffset(0),
@@ -166,7 +166,7 @@ bool ParamCheck::check()
 	char argChar = *argOffset;
 	
 	/* Loop over all the parms and look for a match. */
-	char *pSpec = paramSpec;
+	const char *pSpec = paramSpec;
 	while ( *pSpec != 0 ) {
 		char pSpecChar = *pSpec;
 
