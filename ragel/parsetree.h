@@ -219,7 +219,7 @@ struct PriorityAug
  */
 struct VarDef
 {
-	VarDef( char *name, JoinOrLm *joinOrLm )
+	VarDef( const char *name, JoinOrLm *joinOrLm )
 		: name(name), joinOrLm(joinOrLm), isExport(false) { }
 	
 	/* Parse tree traversal. */
@@ -227,7 +227,7 @@ struct VarDef
 	void makeNameTree( const InputLoc &loc, ParseData *pd );
 	void resolveNameRefs( ParseData *pd );
 
-	char *name;
+	const char *name;
 	JoinOrLm *joinOrLm;
 	bool isExport;
 };
@@ -299,7 +299,7 @@ struct LongestMatch
 	void makeNameTree( ParseData *pd );
 	void resolveNameRefs( ParseData *pd );
 	void runLonestMatch( ParseData *pd, FsmAp *graph );
-	Action *newAction( ParseData *pd, const InputLoc &loc, char *name, 
+	Action *newAction( ParseData *pd, const InputLoc &loc, const char *name, 
 			InlineList *inlineList );
 	void makeActions( ParseData *pd );
 	void findName( ParseData *pd );
@@ -307,7 +307,7 @@ struct LongestMatch
 
 	InputLoc loc;
 	LmPartList *longestMatchList;
-	char *name;
+	const char *name;
 
 	Action *lmActSelect;
 	bool lmSwitchHandlesError;

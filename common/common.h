@@ -350,10 +350,10 @@ char *fileNameFromStem( char *stemFile, const char *suffix );
 
 struct Export
 {
-	Export( char *name, Key key )
+	Export( const char *name, Key key )
 		: name(name), key(key) {}
 
-	char *name;
+	const char *name;
 	Key key;
 
 	Export *prev, *next;

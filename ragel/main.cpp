@@ -72,7 +72,7 @@ bool printStatistics = false;
 bool frontendOnly = false;
 bool generateDot = false;
 
-typedef Vector<char*> ArgsVector;
+typedef Vector<const char *> ArgsVector;
 ArgsVector frontendArgs;
 ArgsVector backendArgs;
 
@@ -392,7 +392,8 @@ int frontend( char *inputFileName, char *outputFileName )
 
 char *makeIntermedTemplate( char *baseFileName )
 {
-	char *result = 0, *templ = "ragel-XXXXXX.xml";
+	char *result = 0;
+	const char *templ = "ragel-XXXXXX.xml";
 	char *lastSlash = strrchr( baseFileName, '/' );
 	if ( lastSlash == 0 ) {
 		result = new char[strlen(templ)+1];
@@ -501,7 +502,7 @@ char **makePathChecksUnix( const char *argv0, const char *progName )
 }
 
 
-void forkAndExec( char *progName, char **pathChecks, 
+void forkAndExec( const char *progName, char **pathChecks, 
 		ArgsVector &args, char *intermed )
 {
 	pid_t pid = fork();
@@ -513,7 +514,9 @@ void forkAndExec( char *progName, char **pathChecks,
 	else if ( pid == 0 ) {
 		/* child */
 		while ( *pathChecks != 0 ) {
-			execv( *pathChecks, args.data );
+			/* Execv does not modify argv, it just uses the const form that is
+			 * compatible with the most code. Ours not included. */
+			execv( *pathChecks, (char *const*) args.data );
 			pathChecks += 1;
 		}
 		error() << "failed to exec " << progName << endl;
@@ -599,7 +602,7 @@ void spawn( char *progName, char **pathChecks,
 void execFrontend( const char *argv0, char *inputFileName, char *intermed )
 {
 	/* The frontend program name. */
-	char *progName = "ragel";
+	const char *progName = "ragel";
 
 	frontendArgs.insert( 0, progName );
 	frontendArgs.insert( 1, "-f" );
@@ -620,7 +623,7 @@ void execFrontend( const char *argv0, char *inputFileName, char *intermed )
 void execBackend( const char *argv0, char *intermed, char *outputFileName )
 {
 	/* Locate the backend program */
-	char *progName = 0;
+	const char *progName = 0;
 	if ( generateDot )
 		progName = "rlgen-dot";
 	else {

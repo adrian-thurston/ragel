@@ -471,7 +471,7 @@ ParseData::~ParseData()
 
 /* Make a name id in the current name instantiation scope if it is not
  * already there. */
-NameInst *ParseData::addNameInst( const InputLoc &loc, char *data, bool isLabel )
+NameInst *ParseData::addNameInst( const InputLoc &loc, const char *data, bool isLabel )
 {
 	/* Create the name instantitaion object and insert it. */
 	NameInst *newNameInst = new NameInst( loc, curNameInst, data, nextNameId++, isLabel );
@@ -556,7 +556,7 @@ void ParseData::unsetObsoleteEntries( FsmAp *graph )
 	}
 }
 
-NameSet ParseData::resolvePart( NameInst *refFrom, char *data, bool recLabelsOnly )
+NameSet ParseData::resolvePart( NameInst *refFrom, const char *data, bool recLabelsOnly )
 {
 	/* Queue needed for breadth-first search, load it with the start node. */
 	NameInstList nameQueue;
@@ -819,7 +819,7 @@ void ParseData::makeNameTree( GraphDictEl *dictEl )
 }
 
 
-void ParseData::createBuiltin( char *name, BuiltinMachine builtin )
+void ParseData::createBuiltin( const char *name, BuiltinMachine builtin )
 {
 	Expression *expression = new Expression( builtin );
 	Join *join = new Join( expression );
@@ -960,7 +960,7 @@ void ParseData::removeActionDups( FsmAp *graph )
 	}
 }
 
-Action *ParseData::newAction( char *name, InlineList *inlineList )
+Action *ParseData::newAction( const char *name, InlineList *inlineList )
 {
 	InputLoc loc;
 	loc.line = 1;
@@ -1121,7 +1121,7 @@ void ParseData::printNameTree()
 	/* Show that the name index is correct. */
 	for ( int ni = 0; ni < nextNameId; ni++ ) {
 		cerr << ni << ": ";
-		char *name = nameIndex[ni]->name;
+		const char *name = nameIndex[ni]->name;
 		cerr << ( name != 0 ? name : "<ANON>" ) << endl;
 	}
 }

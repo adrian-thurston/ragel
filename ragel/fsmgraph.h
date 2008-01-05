@@ -97,7 +97,7 @@ struct Action
 {
 public:
 
-	Action( const InputLoc &loc, char *name, InlineList *inlineList, int condId )
+	Action( const InputLoc &loc, const char *name, InlineList *inlineList, int condId )
 	:
 		loc(loc),
 		name(name),
@@ -115,11 +115,11 @@ public:
 	}
 
 	/* Key for action dictionary. */
-	char *getKey() const { return name; }
+	const char *getKey() const { return name; }
 
 	/* Data collected during parse. */
 	InputLoc loc;
-	char *name;
+	const char *name;
 	InlineList *inlineList;
 	int actionId;
 

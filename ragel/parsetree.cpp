@@ -162,7 +162,7 @@ InputLoc LongestMatchPart::getLoc()
  */
 
 Action *LongestMatch::newAction( ParseData *pd, const InputLoc &loc, 
-		char *name, InlineList *inlineList )
+		const char *name, InlineList *inlineList )
 {
 	Action *action = new Action( loc, name, inlineList, pd->nextCondId++ );
 	action->actionRefs.append( pd->curNameInst );

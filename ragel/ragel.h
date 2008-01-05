@@ -57,7 +57,7 @@ extern char mainMachine[];
 /* Location in an input file. */
 struct InputLoc
 {
-	char *fileName;
+	const char *fileName;
 	int line;
 	int col;
 };

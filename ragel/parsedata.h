@@ -62,14 +62,14 @@ struct GraphDictEl
 	public AvlTreeEl<GraphDictEl>,
 	public DListEl<GraphDictEl>
 {
-	GraphDictEl( char *k ) 
+	GraphDictEl( const char *k ) 
 		: key(k), value(0), isInstance(false) { }
-	GraphDictEl( char *k, VarDef *value ) 
+	GraphDictEl( const char *k, VarDef *value ) 
 		: key(k), value(value), isInstance(false) { }
 
 	const char *getKey() { return key; }
 
-	char *key;
+	const char *key;
 	VarDef *value;
 	bool isInstance;
 
@@ -77,7 +77,7 @@ struct GraphDictEl
 	InputLoc loc;
 };
 
-typedef AvlTree<GraphDictEl, char*, CmpStr> GraphDict;
+typedef AvlTree<GraphDictEl, const char*, CmpStr> GraphDict;
 typedef DList<GraphDictEl> GraphList;
 
 /* Priority name dictionary. */
@@ -85,19 +85,19 @@ typedef AvlMapEl<char*, int> PriorDictEl;
 typedef AvlMap<char*, int, CmpStr> PriorDict;
 
 /* Local error name dictionary. */
-typedef AvlMapEl<char*, int> LocalErrDictEl;
-typedef AvlMap<char*, int, CmpStr> LocalErrDict;
+typedef AvlMapEl<const char*, int> LocalErrDictEl;
+typedef AvlMap<const char*, int, CmpStr> LocalErrDict;
 
 /* Tree of instantiated names. */
-typedef BstMapEl<char*, NameInst*> NameMapEl;
-typedef BstMap<char*, NameInst*, CmpStr> NameMap;
+typedef BstMapEl<const char*, NameInst*> NameMapEl;
+typedef BstMap<const char*, NameInst*, CmpStr> NameMap;
 typedef Vector<NameInst*> NameVect;
 typedef BstSet<NameInst*> NameSet;
 
 /* Node in the tree of instantiated names. */
 struct NameInst
 {
-	NameInst( const InputLoc &loc, NameInst *parent, char *name, int id, bool isLabel ) : 
+	NameInst( const InputLoc &loc, NameInst *parent, const char *name, int id, bool isLabel ) : 
 		loc(loc), parent(parent), name(name), id(id), isLabel(isLabel),
 		isLongestMatch(false), numRefs(0), numUses(0), start(0), final(0) {}
 
@@ -107,7 +107,7 @@ struct NameInst
 	 * fully qulified names. */
 	NameInst *parent;
 
-	char *name;
+	const char *name;
 	int id;
 	bool isLabel;
 	bool isLongestMatch;
@@ -163,11 +163,11 @@ struct ParseData
 
 	/* Initialize a graph dict with the basic fsms. */
 	void initGraphDict();
-	void createBuiltin( char *name, BuiltinMachine builtin );
+	void createBuiltin( const char *name, BuiltinMachine builtin );
 
 	/* Make a name id in the current name instantiation scope if it is not
 	 * already there. */
-	NameInst *addNameInst( const InputLoc &loc, char *data, bool isLabel );
+	NameInst *addNameInst( const InputLoc &loc, const char *data, bool isLabel );
 	void makeRootNames();
 	void makeNameTree( GraphDictEl *gdNode );
 	void makeExportsNameTree();
@@ -179,7 +179,7 @@ struct ParseData
 	void unsetObsoleteEntries( FsmAp *graph );
 
 	/* Resove name references in action code and epsilon transitions. */
-	NameSet resolvePart( NameInst *refFrom, char *data, bool recLabelsOnly );
+	NameSet resolvePart( NameInst *refFrom, const char *data, bool recLabelsOnly );
 	void resolveFrom( NameSet &result, NameInst *refFrom, 
 			const NameRef &nameRef, int namePos );
 	NameInst *resolveStateRef( const NameRef &nameRef, InputLoc &loc, Action *action );
@@ -329,7 +329,7 @@ struct ParseData
 	/* List of all longest match parse tree items. */
 	LmList lmList;
 
-	Action *newAction( char *name, InlineList *inlineList );
+	Action *newAction( const char *name, InlineList *inlineList );
 
 	Action *initTokStart;
 	int initTokStartOrd;
