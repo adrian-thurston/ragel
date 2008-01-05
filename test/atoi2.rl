@@ -20,7 +20,7 @@ neg = false;
 	}
 
 	action add_digit { 
-		val = val * 10 + (fc - '0');
+		val = val * 10 + (fc - 48);
 	}
 
 	action finish {

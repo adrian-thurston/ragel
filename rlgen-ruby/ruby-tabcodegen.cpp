@@ -158,7 +158,7 @@ void RubyTabCodeGen::COND_TRANSLATE()
 
 	for ( CondSpaceList::Iter csi = condSpaceList; csi.lte(); csi++ ) {
 		CondSpace *condSpace = csi;
-		out << "	when " << condSpace->condSpaceId << ":" ;
+		out << "	when " << condSpace->condSpaceId << " then" ;
 		out << "	_widec = " << KEY(condSpace->baseKey) << 
 				"+ (" << GET_KEY() << " - " << KEY(keyOps->minKey) << ")\n";
 
@@ -447,7 +447,7 @@ std::ostream &RubyTabCodeGen::FROM_STATE_ACTION_SWITCH()
 		/* Write out referenced actions. */
 		if ( act->numFromStateRefs > 0 ) {
 			/* Write the case label, the action */
-			out << "			when " << act->actionId << ":\n";
+			out << "			when " << act->actionId << " then\n";
 			ACTION( out, act, 0, false );
 		}
 	}
@@ -464,7 +464,7 @@ std::ostream &RubyTabCodeGen::TO_STATE_ACTION_SWITCH()
 		/* Write out referenced actions. */
 		if ( act->numToStateRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
-			out << "when " << act->actionId << "\n";
+			out << "when " << act->actionId << " then\n";
 			ACTION( out, act, 0, false );
 		}
 	}
@@ -480,7 +480,7 @@ std::ostream &RubyTabCodeGen::EOF_ACTION_SWITCH()
 		/* Write out referenced actions. */
 		if ( act->numEofRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
-			out << "when " << act->actionId << ":\n";
+			out << "when " << act->actionId << " then\n";
 			ACTION( out, act, 0, true );
 		}
 	}
@@ -496,7 +496,7 @@ std::ostream &RubyTabCodeGen::ACTION_SWITCH()
 		/* Write out referenced actions. */
 		if ( act->numTransRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
-			out << "when " << act->actionId << ":\n";
+			out << "when " << act->actionId << " then\n";
 			ACTION( out, act, 0, false );
 		}
 	}

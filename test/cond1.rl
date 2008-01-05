@@ -16,9 +16,9 @@ bool k;
 	action two { prints "  two\n";}
 	action three { prints "  three\n";}
 
-	action seti { if ( fc == '0' ) i = false; else i = true; }
-	action setj { if ( fc == '0' ) j = false; else j = true; }
-	action setk { if ( fc == '0' ) k = false; else k = true; }
+	action seti { if ( fc == 48 ) i = false; else i = true; }
+	action setj { if ( fc == 48 ) j = false; else j = true; }
+	action setk { if ( fc == 48 ) k = false; else k = true; }
 
 	action break {fbreak;}
 

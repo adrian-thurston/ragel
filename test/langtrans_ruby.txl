@@ -258,7 +258,8 @@ function alStmtToRuby4d AlStmt [action_lang_stmt]
 		'print_token ';
 	replace [repeat ruby_lang_stmt]
 	by
-		'print '( 'data '[tokstart..tokend-1] ') ';
+		'_m = 'data '[tokstart..tokend-1] ';
+		'print '( '_m '. 'pack '( '"c*" ') ') ';
 end function
 
 function alStmtToRuby5 AlStmt [action_lang_stmt]
