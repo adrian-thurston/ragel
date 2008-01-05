@@ -86,7 +86,7 @@ int ErrAct::finish( )
 
 #define BUFSIZE 1024
 
-void test( char *buf )
+void test( const char *buf )
 {
 	ErrAct errAct;
 	errAct.init();

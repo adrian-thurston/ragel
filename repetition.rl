@@ -7,6 +7,7 @@
 #include <iostream>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 using namespace std;
 
@@ -69,7 +70,7 @@ int Rep::finish( )
 	return 0;
 }
 
-void test( char *buf )
+void test( const char *buf )
 {
 	Rep rep;
 	int len = strlen( buf );

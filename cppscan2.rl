@@ -3,6 +3,7 @@
  */
 
 #include <iostream>
+#include <string.h>
 using namespace std;
 
 #define TK_Dlit 192
@@ -39,8 +40,9 @@ using namespace std;
 #define BUFSIZE 4096
 
 int tok;
-char buf[BUFSIZE], *tokstart, *tokend;
-void token( char *data, int len );
+char buf[BUFSIZE];
+const char *tokstart, *tokend;
+void token( const char *data, int len );
 bool discard = false;
 
 struct Scanner
@@ -56,7 +58,7 @@ struct Scanner
 	// the data, the machine is in the error state and can never accept, 0 if
 	// the machine is in a non-accepting state and 1 if the machine is in an
 	// accepting state.
-	int execute( char *data, int len );
+	int execute( const char *data, int len );
 
 	// Indicate that there is no more data. Returns -1 if the machine finishes
 	// in the error state and does not accept, 0 if the machine finishes
@@ -141,7 +143,7 @@ struct Scanner
 
 	action onError {
 		if ( tok != 0 ) {
-			char *rst_data;
+			const char *rst_data;
 
 			if ( tok == TK_Comment || tok == TK_Whitespace ) {
 				/* Reset comment status, don't send. */
@@ -180,11 +182,11 @@ int Scanner::init( )
 	return 1;
 }
 
-int Scanner::execute( char *data, int len )
+int Scanner::execute( const char *data, int len )
 {
-	char *p = data;
-	char *pe = data + len;
-	char *eof = pe;
+	const char *p = data;
+	const char *pe = data + len;
+	const char *eof = pe;
 
 	%% write exec;
 
@@ -205,7 +207,7 @@ int Scanner::finish( )
 }
 
 
-void token( char *data, int len )
+void token( const char *data, int len )
 {
 	cout << "<" << tok << "> ";
 	for ( int i = 0; i < len; i++ )
@@ -213,7 +215,7 @@ void token( char *data, int len )
 	cout << '\n';
 }
 
-void test( char * data )
+void test( const char * data )
 {
 	Scanner scanner;
 	scanner.init();

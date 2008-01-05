@@ -21,7 +21,7 @@ struct MBox
 	// the data, the machine is in the error state and can never accept, 0 if
 	// the machine is in a non-accepting state and 1 if the machine is in an
 	// accepting state.
-	void execute( char *data, int len );
+	void execute( const char *data, int len );
 
 	// Indicate that there is no more data. Returns -1 if the machine finishes
 	// in the error state and does not accept, 0 if the machine finishes

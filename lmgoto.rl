@@ -40,11 +40,11 @@ using namespace std;
 struct Scanner
 {
 	int cs, act;
-	char *tokstart, *tokend;
+	const char *tokstart, *tokend;
 	bool isCxx;
 
 	void token( int tok );
-	void run( char *buf );
+	void run( const char *buf );
 };
 
 
@@ -150,13 +150,13 @@ void Scanner::token( int tok )
 	cout << '\n';
 }
 
-void Scanner::run( char *buf )
+void Scanner::run( const char *buf )
 {
 	int len = strlen( buf );
 	%% write init;
-	char *p = buf;
-	char *pe = buf + len;
-	char *eof = pe;
+	const char *p = buf;
+	const char *pe = buf + len;
+	const char *eof = pe;
 	%% write exec;
 
 	if ( cs == Scanner_error ) {

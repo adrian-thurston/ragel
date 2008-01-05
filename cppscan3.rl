@@ -44,13 +44,13 @@ char buf[BUFSIZE];
 struct Scanner
 {
 	int cs, act;
-	char *tokstart, *tokend;
+	const char *tokstart, *tokend;
 
 	void token( int tok );
 	void run();
 
 	void init( );
-	void execute( char *data, int len );
+	void execute( const char *data, int len );
 	int finish( );
 };
 
@@ -137,11 +137,11 @@ void Scanner::init( )
 
 /* Returns the count of bytes still in the buffer 
  * (shifted to the biginning) */
-void Scanner::execute( char *data, int len )
+void Scanner::execute( const char *data, int len )
 {
-	char *p = data;
-	char *pe = data + len;
-	char *eof = pe;
+	const char *p = data;
+	const char *pe = data + len;
+	const char *eof = pe;
 
 	%% write exec;
 
@@ -168,7 +168,7 @@ void Scanner::token( int tok )
 	cout << '\n';
 }
 
-void test( char *buf )
+void test( const char *buf )
 {
 	int len = strlen( buf );
 	std::ios::sync_with_stdio(false);

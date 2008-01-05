@@ -131,12 +131,12 @@ void Scanner::init( )
 	%% write init;
 }
 
-int Scanner::execute( char *data, int len )
+int Scanner::execute( const char *data, int len )
 {
 	Scanner *fsm = this;
-	char *p = data;
-	char *pe = data + len;
-	char *eof = pe;
+	const char *p = data;
+	const char *pe = data + len;
+	const char *eof = pe;
 
 	%% write exec;
 	if ( cs == Scanner_error )
@@ -190,7 +190,7 @@ void Buffer::upAllocate( int len )
 	allocated = len;
 }
 
-void test( char *buf )
+void test( const char *buf )
 {
 	Scanner scanner(cout);
 	scanner.init();

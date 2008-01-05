@@ -12,12 +12,12 @@ using std::endl;
 	write data noerror;
 }%%
 
-void test( char *str )
+void test( const char *str )
 {
 	int cs = foo_start;
 	int c = 0;
-	char *p = str;
-	char *pe = str + strlen( str );
+	const char *p = str;
+	const char *pe = str + strlen( str );
 	char last = '0';
 
 	cout << "run:";
