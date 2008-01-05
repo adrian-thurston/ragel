@@ -8,7 +8,7 @@ using namespace std;
 struct LangEl
 {
 	int key;
-	char *name;
+	const char *name;
 };
 
 struct Fsm

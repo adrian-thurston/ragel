@@ -14,11 +14,11 @@ using std::endl;
 	write data noerror;
 }%%
 
-void test( char *str )
+void test( const char *str )
 {
 	int cs = cond_start, n = 0;
-	char *p = str;
-	char *pe = str + strlen( str );
+	const char *p = str;
+	const char *pe = str + strlen( str );
 
 	%%{
 		comment = '(' @{n=0;} 

@@ -2,6 +2,8 @@
 #define _CPPSCAN1_H
 
 #include <iostream>
+#include <malloc.h>
+#include <string.h>
 
 using namespace std;
 
@@ -98,7 +100,7 @@ struct Scanner
 	// the data, the machine is in the error state and can never accept, 0 if
 	// the machine is in a non-accepting state and 1 if the machine is in an
 	// accepting state.
-	int execute( char *data, int len );
+	int execute( const char *data, int len );
 
 	// Indicate that there is no more data. Returns -1 if the machine finishes
 	// in the error state and does not accept, 0 if the machine finishes

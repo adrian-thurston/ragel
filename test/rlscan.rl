@@ -13,7 +13,7 @@
 
 using namespace std;
 
-void escapeXML( char *data )
+void escapeXML( const char *data )
 {
 	while ( *data != 0 ) {
 		switch ( *data ) {
@@ -36,9 +36,9 @@ void escapeXML( char c )
 	}
 }
 
-void escapeXML( char *data, int len )
+void escapeXML( const char *data, int len )
 {
-	for ( char *end = data + len; data != end; data++  ) {
+	for ( const char *end = data + len; data != end; data++  ) {
 		switch ( *data ) {
 			case '<': cout << "&lt;"; break;
 			case '>': cout << "&gt;"; break;
@@ -48,7 +48,7 @@ void escapeXML( char *data, int len )
 	}
 }
 
-inline void write( char *data )
+inline void write( const char *data )
 {
 	cout << data;
 }
@@ -58,7 +58,7 @@ inline void write( char c )
 	cout << c;
 }
 
-inline void write( char *data, int len )
+inline void write( const char *data, int len )
 {
 	cout.write( data, len );
 }
@@ -242,12 +242,12 @@ inline void write( char *data, int len )
 
 %% write data nofinal;
 
-void test( char *data )
+void test( const char *data )
 {
 	std::ios::sync_with_stdio(false);
 
 	int cs, act;
-	char *tokstart, *tokend;
+	const char *tokstart, *tokend;
 	int stack[1], top;
 
 	bool single_line = false;
@@ -256,9 +256,9 @@ void test( char *data )
 	%% write init;
 
 	/* Read in a block. */
-	char *p = data;
-	char *pe = data + strlen( data );
-	char *eof = pe;
+	const char *p = data;
+	const char *pe = data + strlen( data );
+	const char *eof = pe;
 	%% write exec;
 
 	if ( cs == RagelScan_error ) {

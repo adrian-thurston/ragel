@@ -129,15 +129,15 @@ using std::endl;
 
 #define BUFSIZE 8192
 
-void test( char *buf )
+void test( const char *buf )
 {
 	int cs, len = strlen( buf );
-	char *preserve = 0, *ws = 0;
+	const char *preserve = 0, *ws = 0;
 	int hlen = 0;
 
 	%% write init;
-	char *p = buf;
-	char *pe = p + len;
+	const char *p = buf;
+	const char *pe = p + len;
 	%% write exec;
 
 	if ( cs < mailbox_first_final ) {

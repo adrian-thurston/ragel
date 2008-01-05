@@ -25,11 +25,11 @@ using std::endl;
 
 %% write data noerror;
 
-void test( int i, int j, char *str )
+void test( int i, int j, const char *str )
 {
 	int cs = foo_start;
-	char *p = str;
-	char *pe = str + strlen( str );
+	const char *p = str;
+	const char *pe = str + strlen( str );
 
 	cout << "run:" << endl;
 	%% write exec;
