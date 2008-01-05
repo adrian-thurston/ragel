@@ -5,6 +5,7 @@
 #include <iostream>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 using namespace std;
 
@@ -43,7 +44,7 @@ void escapeXML( char *data, int len )
 	}
 }
 
-inline void write( char *data )
+inline void write( const char *data )
 {
 	cout << data;
 }
