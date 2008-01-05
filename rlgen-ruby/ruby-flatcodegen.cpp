@@ -35,7 +35,7 @@ std::ostream &RubyFlatCodeGen::TO_STATE_ACTION_SWITCH()
 		/* Write out referenced actions. */
 		if ( act->numToStateRefs > 0 ) {
 			/* Write the case label, the action and the case break */
-			out << "\twhen " << act->actionId << "\n";
+			out << "\twhen " << act->actionId << " then\n";
 			ACTION( out, act, 0, false );
 		}
 	}
@@ -51,7 +51,7 @@ std::ostream &RubyFlatCodeGen::FROM_STATE_ACTION_SWITCH()
 		/* Write out referenced actions. */
 		if ( act->numFromStateRefs > 0 ) {
 			/* Write the case label, the action and the case break */
-			out << "\twhen " << act->actionId << "\n";
+			out << "\twhen " << act->actionId << " then\n";
 			ACTION( out, act, 0, false );
 		}
 	}
@@ -67,7 +67,7 @@ std::ostream &RubyFlatCodeGen::EOF_ACTION_SWITCH()
 		/* Write out referenced actions. */
 		if ( act->numEofRefs > 0 ) {
 			/* Write the case label, the action and the case break */
-			out << "\twhen " << act->actionId << "\n";
+			out << "\twhen " << act->actionId << " then\n";
 			ACTION( out, act, 0, true );
 		}
 	}
@@ -83,7 +83,7 @@ std::ostream &RubyFlatCodeGen::ACTION_SWITCH()
 		/* Write out referenced actions. */
 		if ( act->numTransRefs > 0 ) {
 			/* Write the case label, the action and the case break */
-			out << "\twhen " << act->actionId << "\n";
+			out << "\twhen " << act->actionId << " then\n";
 			ACTION( out, act, 0, false );
 		}
 	}
@@ -320,7 +320,7 @@ void RubyFlatCodeGen::COND_TRANSLATE()
 		"	case _cond \n";
 	for ( CondSpaceList::Iter csi = condSpaceList; csi.lte(); csi++ ) {
 		CondSpace *condSpace = csi;
-		out << "	when " << condSpace->condSpaceId + 1 << "\n";
+		out << "	when " << condSpace->condSpaceId + 1 << " then\n";
 		out << TABS(2) << "_widec = " << "(" <<
 				KEY(condSpace->baseKey) << " + (" << GET_KEY() << 
 				" - " << KEY(keyOps->minKey) << "))\n";

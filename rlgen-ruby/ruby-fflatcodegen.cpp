@@ -160,7 +160,7 @@ std::ostream &RubyFFlatCodeGen::TO_STATE_ACTION_SWITCH()
 	for ( ActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
 		if ( redAct->numToStateRefs > 0 ) {
 			/* Write the entry label. */
-			out << "\twhen " << redAct->actListId+1 << "\n";
+			out << "\twhen " << redAct->actListId+1 << " then\n";
 
 			/* Write each action in the list of action items. */
 			for ( ActionTable::Iter item = redAct->key; item.lte(); item++ )
@@ -180,7 +180,7 @@ std::ostream &RubyFFlatCodeGen::FROM_STATE_ACTION_SWITCH()
 	for ( ActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
 		if ( redAct->numFromStateRefs > 0 ) {
 			/* Write the entry label. */
-			out << "\twhen " << redAct->actListId+1 << "\n";
+			out << "\twhen " << redAct->actListId+1 << " then\n";
 
 			/* Write each action in the list of action items. */
 			for ( ActionTable::Iter item = redAct->key; item.lte(); item++ )
@@ -198,7 +198,7 @@ std::ostream &RubyFFlatCodeGen::EOF_ACTION_SWITCH()
 	for ( ActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
 		if ( redAct->numEofRefs > 0 ) {
 			/* Write the entry label. */
-			out << "\twhen " << redAct->actListId+1 << "\n";
+			out << "\twhen " << redAct->actListId+1 << " then\n";
 
 			/* Write each action in the list of action items. */
 			for ( ActionTable::Iter item = redAct->key; item.lte(); item++ )
@@ -218,7 +218,7 @@ std::ostream &RubyFFlatCodeGen::ACTION_SWITCH()
 	for ( ActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
 		if ( redAct->numTransRefs > 0 ) {
 			/* Write the entry label. */
-			out << "\twhen " << redAct->actListId+1 << "\n";
+			out << "\twhen " << redAct->actListId+1 << " then\n";
 
 			/* Write each action in the list of action items. */
 			for ( ActionTable::Iter item = redAct->key; item.lte(); item++ )

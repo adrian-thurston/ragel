@@ -58,7 +58,7 @@ std::ostream &RbxGotoCodeGen::TO_STATE_ACTION_SWITCH()
 		/* Write out referenced actions. */
 		if ( act->numToStateRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
-			out << "\twhen " << act->actionId << "\n";
+			out << "\twhen " << act->actionId << " then\n";
 			ACTION( out, act, 0, false );
 		}
 	}
@@ -74,7 +74,7 @@ std::ostream &RbxGotoCodeGen::FROM_STATE_ACTION_SWITCH()
 		/* Write out referenced actions. */
 		if ( act->numFromStateRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
-			out << "\twhen " << act->actionId << "\n";
+			out << "\twhen " << act->actionId << " then\n";
 			ACTION( out, act, 0, false );
 		}
 	}
@@ -90,7 +90,7 @@ std::ostream &RbxGotoCodeGen::EOF_ACTION_SWITCH()
 		/* Write out referenced actions. */
 		if ( act->numEofRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
-			out << "\twhen " << act->actionId << "\n";
+			out << "\twhen " << act->actionId << " then\n";
 			ACTION( out, act, 0, true );
 		}
 	}
@@ -106,7 +106,7 @@ std::ostream &RbxGotoCodeGen::ACTION_SWITCH()
 		/* Write out referenced actions. */
 		if ( act->numTransRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
-			out << "\twhen " << act->actionId << "\n";
+			out << "\twhen " << act->actionId << " then\n";
 			ACTION( out, act, 0, false );
 		}
 	}
@@ -118,7 +118,7 @@ std::ostream &RbxGotoCodeGen::ACTION_SWITCH()
 void RbxGotoCodeGen::GOTO_HEADER( RedStateAp *state )
 {
 	/* Label the state. */
-	out << "when " << state->id << "\n";
+	out << "when " << state->id << " then\n";
 }
 
 
@@ -144,7 +144,7 @@ void RbxGotoCodeGen::emitSingleSwitch( RedStateAp *state )
 
 		/* Write out the single indicies. */
 		for ( int j = 0; j < numSingles; j++ ) {
-			out << "\t\twhen " << KEY(data[j].lowKey) << "\n";
+			out << "\t\twhen " << KEY(data[j].lowKey) << " then\n";
 			TRANS_GOTO(data[j].value, 0) << "\n";
 		}
 		
@@ -251,7 +251,7 @@ void RbxGotoCodeGen::STATE_GOTO_ERROR()
 	/* Label the state and bail immediately. */
 	outLabelUsed = true;
 	RedStateAp *state = redFsm->errState;
-	out << "when " << state->id << "\n";
+	out << "when " << state->id << " then\n";
 	rbxGoto(out << "	", "_out") << "\n";
 }
 
@@ -550,7 +550,7 @@ std::ostream &RbxGotoCodeGen::FINISH_CASES()
 		/* States that are final and have an out action need a case. */
 		if ( st->eofAction != 0 ) {
 			/* Write the case label. */
-			out << "\t\twhen " << st->id << "\n";
+			out << "\t\twhen " << st->id << " then\n";
 
 			/* Write the goto func. */
 			rbxGoto(out, label("f", st->eofAction->actListId)) << "\n";
