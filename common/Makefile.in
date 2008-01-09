@@ -47,6 +47,7 @@ all: common.a
 
 common.a: $(GEN_SRC) $(OBJS)
 	ar -cr $@ $(OBJS) 
+	ranlib $@
 
 version.h: ../version.mk
 	echo '#define VERSION "$(VERSION)"' > version.h
