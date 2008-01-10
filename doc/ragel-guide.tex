@@ -1377,13 +1377,13 @@ Ragel permits the user to embed actions into the transitions of a regular
 expression's corresponding state machine. These actions are executed when the
 generated code moves over a transition.  Like the regular expression operators,
 the action embedding operators are fully compositional. They take a state
-machine and an action as input, embed the action, and yield a new state machine
+machine and an action as input, embed the action and yield a new state machine
 that can be used in the construction of other machines. Due to the
 compositional nature of embeddings, the user has complete freedom in the
 placement of actions.
 
-A machine's transitions are categorized into four classes, The action embedding
-operators access the transitions defined by these classes.  The {\em starting
+A machine's transitions are categorized into four classes. The action embedding
+operators access the transitions defined by these classes.  The {\em entering
 transition} operator \verb|>| isolates the start state, then embeds an action
 into all transitions leaving it. The {\em finishing transition} operator
 \verb|@| embeds an action into all transitions going into a final state.  The
@@ -1406,10 +1406,12 @@ Action names can be referenced by the action embedding operators in
 expressions. Though actions need not be named in this way (literal blocks
 of code can be embedded directly when building machines), defining reusable
 blocks of code whenever possible is good practice because it potentially increases the
-degree to which the machine can be minimized. Within an action some Ragel expressions
-and statements are parsed and translated. These allow the user to interact with the machine
-from action code. See Section \ref{vals} for a complete list of statements and
-values available in code blocks. 
+degree to which the machine can be minimized. 
+
+Within an action some Ragel expressions and statements are parsed and
+translated. These allow the user to interact with the machine from action code.
+See Section \ref{vals} for a complete list of statements and values available
+in code blocks. 
 
 \subsection{Entering Action}
 
@@ -1420,12 +1422,12 @@ The entering action operator embeds an action into all transitions
 that enter into the machine from the start state. If the start state is final,
 then the action is also embedded into the start state as a leaving action. This
 means that if a machine accepts the zero-length string and control passes
-through it then the entering action is still executed. Note
+through the start state then the entering action is executed. Note
 that this can happen on both a following character and on the EOF event.
 
 In some machines the start state has transtions coming in from within the
 machine. In these cases the start state is first isolated from the rest of the
-machine ensuring that the entering actions are not re-executed.
+machine ensuring that the entering actions are exected once only.
 
 \verbspace
 
@@ -1454,11 +1456,12 @@ main := ( lower* >A ) . ' ';
 \verb|expr @ action|
 \verbspace
 
-The finishing action operator embeds an action into any transitions that go into a
-final state. Whether or not the machine accepts is not determined at the point
-the action is executed. Further input may move the machine out of the accepting
-state, but keep it in the machine. As in the following example, the
-into-final-state operator is most often used when no lookahead is necessary.
+The finishing action operator embeds an action into any transitions that move
+the machine into a final state. Further input may move the machine out of the
+final state, but keep it in the machine. Therefore finishing actions may be
+executed more than once if a machine has any internal transitions out of a
+final state. In the following example the final state has no transitions out
+and the finishing action is executed only once.
 
 % GENERATE: exdoneact
 % OPT: -p
@@ -1497,7 +1500,7 @@ following example, A is executed on every character matched.
 % action A {}
 \begin{inline_code}
 \begin{verbatim}
-# Execute A on any characters of machine one or two.
+# Execute A on any characters of the machine.
 main := ( 'm1' | 'm2' ) $A;
 \end{verbatim}
 \end{inline_code}
@@ -1511,20 +1514,21 @@ main := ( 'm1' | 'm2' ) $A;
 \graphspace
 
 
-\subsection{Pending Out (Leaving) Actions}
+\subsection{Leaving Actions}
 \label{out-actions}
 
 \verb|expr % action|
 \verbspace
 
-The pending out action operator queues an action for embedding into the
-transitions that leave a machine. The action is first stored in the final
-states of the machine and is later transferred to any transitions that are made
-going out of the machine. The transfer can be caused either by a concatenation
-or kleene star operation. If a final state is still final when compilation is
-complete then the pending out action is also embedded as an EOF action into the
-final state. Therefore, leaving the machine is defined as either leaving on a
-character or as state machine acceptance.
+The leaving action operator queues an action for embedding into the transitions
+that go out of a machine via a final state. The action is first stored in
+the machine's final states and is later transferred to any transitions that are
+made going out of the machine by a kleene star or concatenation operation.
+
+If a final state of the machine is still final when compilation is complete
+then the leaving action is also embedded as an EOF action. Therefore, leaving
+the machine is defined as either leaving on a character or as state machine
+acceptance.
 
 This operator allows one to associate an action with the termination of a
 sequence, without being concerned about what particular character terminates
@@ -1615,9 +1619,9 @@ main := ( lower* >A $B %C ) . '\n' @N;
 The state embedding operators allow one to embed actions into states. Like the
 transition embedding operators, there are several different classes of states
 that the operators access. The meanings of the symbols are similar to the
-meanings of the symbols used by the transition embedding operators. The design
+meanings of the symbols used for the transition embedding operators. The design
 of the state selections was driven by a need to cover the states of an
-expression with a single error action.
+expression with exactly one error action.
 
 Unlike the transition embedding operators, the state embedding operators are
 also distinguished by the different kinds of events that embedded actions can
@@ -1724,7 +1728,7 @@ user may wish to print an error message that depends on the context.  It
 may also be desirable to consume input in an attempt to return the input stream
 to some known state and resume parsing. To support error handling and recovery,
 Ragel provides error action embedding operators. There are two kinds of error
-actions, regular (global) error actions and local error actions.
+actions: global error actions and local error actions.
 Error actions can be used to simply report errors, or by jumping to a machine
 instantiation that consumes input, can attempt to recover from errors.  
 
@@ -1775,8 +1779,9 @@ There are two forms of local error action embeddings. In the first form the
 name defaults to the current machine. In the second form the machine name can
 be specified.  This is useful when it is more convenient to specify the local
 error action in a sub-definition that is used to construct the machine
-definition where the transfer should happen. To embed local error actions and
-explicitly state the machine on which the transfer is to happen use
+definition that the local error action is associated with. To embed local 
+error actions and
+explicitly state the machine definition on which the transfer is to happen use
 \verb|(name, action)| as the action.
 
 \subsubsection{Example}
@@ -1833,7 +1838,7 @@ main := (
 
 When combining expressions that have embedded actions it is often the case that
 a number of actions must be executed on a single input character. For example,
-following a concatenation the pending out action of the left expression and the
+following a concatenation the leaving action of the left expression and the
 entering action of the right expression will be embedded into one transition.
 This requires a method of ordering actions that is intuitive and
 predictable for the user, and repeatable for the compiler. 
@@ -1850,7 +1855,8 @@ appear.
 
 Ragel does not permit a single action to appear multiple times in an action
 list. When the final machine has been created, actions that appear more than
-once in a single transition or EOF action list have their duplicates removed.
+once in a single transition, to-state, from-state or EOF action list have their
+duplicates removed.
 The first appearance of the action is preserved. This is useful in a number of
 scenarios. First, it allows us to union machines with common prefixes without
 worrying about the action embeddings in the prefix being duplicated. Second, it
@@ -1863,6 +1869,7 @@ begins with a common character. For example:
 word = [a-z]+ %act;
 main := word ( '\n' word )* '\n\n';
 \end{verbatim}
+\verbspace
 
 Note that Ragel does not compare action bodies to determine if they have
 identical program text. It simply checks for duplicates using each action
@@ -1893,8 +1900,8 @@ entry point \verb|label|. The integer value returned will be a compile time
 constant. This number is suitable for later use in control flow transfer
 statements that take an expression. This value should not be compared against
 the current state because any given label can have multiple states representing
-it. The value returned by \verb|fentry| will be one of the possibly multiple states the
-label represents.
+it. The value returned by \verb|fentry| can be any one of the multiple states that
+it represents.
 \end{itemize}
 
 \noindent The following statements are available in code blocks:
@@ -1947,8 +1954,7 @@ representing a state.
 
 \item \verb|fret;| -- Return to the target state of the transition on which the
 last \verb|fcall| was made.  Use of \verb|fret| requires the declaration of a
-call stack with \verb|fstack| in the struct block.  Control is immediately
-transferred to the destination state.
+call stack. Control is immediately transferred to the destination state.
 
 \item \verb|fbreak;| -- Save the current state and immediately break out of the
 execute loop. This statement is useful in conjunction with the \verb|noend|
@@ -1968,7 +1974,7 @@ to other machine construction operators. If an action jumps to another state
 then unioning any transition that executes that action with another transition
 that follows some other path will cause that other path to be lost. Using
 commands that manually jump around a machine takes us out of the domain of
-regular languages because transitions that may be conditional and that the
+regular languages because transitions that the
 machine construction operators are not aware of are introduced.  These
 commands should therefore be used with caution.
 
