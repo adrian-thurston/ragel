@@ -246,11 +246,11 @@ that should be used instead of priority embeddings whenever possible.
 For the purposes of embedding, Ragel divides transitions and states into
 different classes. There are four operators for embedding actions and
 priorities into the transitions of a state machine. It is possible to embed
-into entering transitions, finishing transitions, all transitions and pending out
-transitions.  The embedding of pending out transitions is a special case.
+into entering transitions, finishing transitions, all transitions and leaving
+transitions. The embedding into leaving transitions is a special case.
 These transition embeddings get stored in the final states of a machine.  They
 are transferred to any transitions that are made going out of the machine by
-a concatenation or kleene star operation.
+future concatenation or kleene star operations.
 
 There are several more operators for embedding actions into states. Like the
 transition embeddings, there are various different classes of states that the
@@ -1388,8 +1388,8 @@ transition} operator \verb|>| isolates the start state, then embeds an action
 into all transitions leaving it. The {\em finishing transition} operator
 \verb|@| embeds an action into all transitions going into a final state.  The
 {\em all transition} operator \verb|$| embeds an action into all transitions of
-an expression. The {\em pending out transition} operator \verb|%| provides
-access to yet-unmade leaving transitions. 
+an expression. The {\em leaving transition} operator \verb|%| provides access
+to the yet-unmade transitions moving out of the machine via the final states. 
 
 \section{Embedding Actions}
 
@@ -1860,7 +1860,7 @@ duplicates removed.
 The first appearance of the action is preserved. This is useful in a number of
 scenarios. First, it allows us to union machines with common prefixes without
 worrying about the action embeddings in the prefix being duplicated. Second, it
-prevents pending out actions from being transferred multiple times. This can
+prevents leaving actions from being transferred multiple times. This can
 happen when a machine is repeated, then followed with another machine that
 begins with a common character. For example:
 
@@ -2203,10 +2203,10 @@ boundaries.
 \item \verb|expr > int| -- Sets starting transitions to have priority int.
 \item \verb|expr @ int| -- Sets transitions that go into a final state to have priority int. 
 \item \verb|expr $ int| -- Sets all transitions to have priority int.
-\item \verb|expr % int| -- Sets pending out transitions from final states to
+\item \verb|expr % int| -- Sets leaving transitions to
 have priority int.\\ When a transition is made going out of the machine (either
-by concatenation or kleene star) its priority is immediately set to the pending
-out priority.  
+by concatenation or kleene star) its priority is immediately set to the 
+leaving priority.  
 \end{itemize}
 
 The second form of priority assignment allows the programmer to specify the name
@@ -2217,7 +2217,7 @@ to which the priority is assigned.
 \item \verb|expr > (name, int)| -- Starting transitions.
 \item \verb|expr @ (name, int)| -- Finishing transitions (into a final state).
 \item \verb|expr $ (name, int)| -- All transitions.
-\item \verb|expr % (name, int)| -- Pending out transitions.
+\item \verb|expr % (name, int)| -- Leaving transitions.
 \end{itemize}
 
 \section{Guarded Operators that Encapsulate Priorities}
@@ -2268,10 +2268,9 @@ Ragel also includes a {\em longest-match kleene star} operator, given by the
 \verb|**| compound symbol. This 
 guarded operator embeds a high
 priority into all transitions of the machine. 
-A lower priority is then embedded into pending out transitions
-(in a manner similar to pending out action embeddings, described in Section
-\ref{out-actions}).  When the kleene star operator makes the epsilon transitions from
-the final states into the start state, the lower priority will be transferred
+A lower priority is then embedded into the leaving transitions.  When the
+kleene star operator makes the epsilon transitions from
+the final states into the new start state, the lower priority will be transferred
 to the epsilon transitions. In cases where following an epsilon transition
 out of a final state conflicts with an existing transition out of a final
 state, the epsilon transition will be dropped.
@@ -2452,7 +2451,7 @@ equivalent to:
 \verbspace
 
 When the kleene star is applied, transitions that go out of the machine and
-back into it are made. These are assigned a priority of zero by the pending out
+back into it are made. These are assigned a priority of zero by the leaving 
 transition mechanism. This is less than the priority of one assigned to the
 transitions leaving the final states but not leaving the machine. When two of
 these transitions clash on the same character, the differing priorities cause
@@ -3594,7 +3593,7 @@ unless an alphabet type smaller than long is used.
 \section{Implementing Lookahead}
 
 There are a few strategies for implementing lookahead in Ragel programs.
-Pending out actions, which are described in Section \ref{out-actions}, can be
+Leaving actions, which are described in Section \ref{out-actions}, can be
 used as a form of lookahead.  Ragel also provides the \verb|fhold| directive
 which can be used in actions to prevent the machine from advancing over the
 current character. It is also possible to manually adjust the current character
