@@ -2467,7 +2467,7 @@ use the Longest-Match machine construction described in Section
 \chapter{Interface to Host Program}
 
 The Ragel code generator is very flexible. The generated code has no
-dependencies and can be inserted in any function, perhaps inside a loop if so
+dependencies and can be inserted in any function, perhaps inside a loop if
 desired.  The user is responsible for declaring and initializing a number of
 required variables, including the current state and the pointer to the input
 stream. These can live in any scope. Control of the input processing loop is
@@ -2530,9 +2530,10 @@ int main( int argc, char **argv )
 
 \section{Variables Used by Ragel}
 
-There are a number of variables which Ragel expects the user to declare. At a
+There are a number of variables that Ragel expects the user to declare. At a
 very minimum the \verb|cs|, \verb|p| and \verb|pe| variables must be declared.
 In Java and Ruby code the \verb|data| variable must also be declared. If
+EOF actions are used then the \verb|eof| variable is required. If
 stack-based state machine control flow statements are used then the
 \verb|stack| and \verb|top| variables are required. If a scanner is declared
 then the \verb|act|, \verb|tokstart| and \verb|tokend| variables must be
@@ -2542,7 +2543,8 @@ declared.
 
 \item \verb|cs| - Current state. This must be an integer and it should persist
 across invocations of the machine when the data is broken into blocks that are
-processed independently.
+processed independently. This variable may be modified from outside the
+execution loop, but not from within.
 
 \item \verb|p| - Data pointer. In C/D code this variable is expected to be a
 pointer to the character data to process. It should be initialized to the
@@ -2590,11 +2592,47 @@ alphtype unsigned int;
 \verbspace
 
 The alphtype statement specifies the alphabet data type that the machine
-operates on. During the compilation of the machine, integer literals are expected to
-be in the range of possible values of the alphtype.  Supported alphabet types
-are \verb|char|, \verb|unsigned char|, \verb|short|, \verb|unsigned short|,
-\verb|int|, \verb|unsigned int|, \verb|long|, and \verb|unsigned long|. 
-The default is \verb|char|.
+operates on. During the compilation of the machine, integer literals are
+expected to be in the range of possible values of the alphtype. The default
+is always \verb|char|.
+
+\begin{multicols}{2}
+\setlength{\columnseprule}{1pt} 
+C/C++/Objective-C:
+\begin{verbatim}
+          char      unsigned char      
+          short     unsigned short
+          int       unsigned int
+          long      unsigned long
+\end{verbatim}
+
+Java:
+\begin{verbatim}
+          char 
+          byte 
+          short 
+          int
+\end{verbatim}
+
+
+\columnbreak
+
+D:
+\begin{verbatim}
+          char 
+          byte      ubyte   
+          short     ushort 
+          wchar 
+          int       uint 
+          dchar
+\end{verbatim}
+
+Ruby: 
+\begin{verbatim}
+          char 
+          int
+\end{verbatim}
+\end{multicols}
 
 \section{Getkey Statement}
 
@@ -2603,7 +2641,7 @@ getkey fpc->id;
 \end{verbatim}
 \verbspace
 
-Specify to Ragel how to retrieve the character that the machine operates on
+This statement specifies to Ragel how to retrieve the current character from 
 from the pointer to the current element (\verb|p|). Any expression that returns
 a value of the alphabet type
 may be used. The getkey statement may be used for looking into element
@@ -2619,12 +2657,12 @@ access fsm->;
 \end{verbatim}
 \verbspace
 
-The access statement allows one to tell Ragel how the generated code should
+The access statement specifies how the generated code should
 access the machine data that is persistent across processing buffer blocks.
-This includes all variables except \verb|p| and \verb|pe|. This includes
+This applies to all variables except \verb|p|, \verb|pe| and \verb|eof|. This includes
 \verb|cs|, \verb|top|, \verb|stack|, \verb|tokstart|, \verb|tokend| and \verb|act|.
-This is useful if a machine is to be encapsulated inside a
-structure in C code. The access statement can be used to give the name of
+The access statement is useful if a machine is to be encapsulated inside a
+structure in C code. It can be used to give the name of
 a pointer to the structure.
 
 \section{Variable Statement}
@@ -2634,9 +2672,9 @@ variable p fsm->p;
 \end{verbatim}
 \verbspace
 
-The variable statement allows one to tell ragel how to access a specific
+The variable statement specifies how to access a specific
 variable. All of the variables that are declared by the user and
-used by Ragel can be changed. This includes \verb|p|, \verb|pe|, \verb|cs|,
+used by Ragel can be changed. This includes \verb|p|, \verb|pe|, \verb|eof|, \verb|cs|,
 \verb|top|, \verb|stack|, \verb|tokstart|, \verb|tokend| and \verb|act|.
 In Ruby and Java code generation the \verb|data| variable can also be changed.
 
@@ -2645,7 +2683,7 @@ In Ruby and Java code generation the \verb|data| variable can also be changed.
 
 \begin{verbatim}
 prepush { 
-	/* stack growing code */
+    /* stack growing code */
 }
 \end{verbatim}
 \verbspace
@@ -2660,7 +2698,7 @@ available spaces and dynamically grow the stack if necessary.
 
 \begin{verbatim}
 postpop { 
-	/* stack shrinking code */
+    /* stack shrinking code */
 }
 \end{verbatim}
 \verbspace
