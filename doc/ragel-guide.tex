@@ -1947,6 +1947,7 @@ of the transition on which the call was made. Use of \verb|fcall| requires
 the declaration of a call stack. An array of integers named \verb|stack| and a
 single integer named \verb|top| must be declared. With the \verb|fcall|
 construct, control is immediately transferred to the destination state.
+See section \ref{modularization} for more information.
 
 \item \verb|fcall *<expr>;| -- Push the current state and jump to the entry
 point given by \verb|<expr>|. The expression must evaluate to an integer value
@@ -1989,7 +1990,7 @@ active. This means that actions that are irrelevant to the
 current subset of the parser may be executed, causing problems for the
 programmer.
 
-Tools that are based on regular expression engines and used for
+Tools that are based on regular expression engines and that are used for
 recognition tasks will usually function as intended regardless of the presence
 of ambiguities. It is quite common for users of scripting languages to write
 regular expressions that are heavily ambiguous and it generally does not
@@ -2204,7 +2205,7 @@ boundaries.
 \item \verb|expr @ int| -- Sets transitions that go into a final state to have priority int. 
 \item \verb|expr $ int| -- Sets all transitions to have priority int.
 \item \verb|expr % int| -- Sets leaving transitions to
-have priority int.\\ When a transition is made going out of the machine (either
+have priority int. When a transition is made going out of the machine (either
 by concatenation or kleene star) its priority is immediately set to the 
 leaving priority.  
 \end{itemize}
@@ -2228,7 +2229,7 @@ the transitions inside two interacting expressions and work out the precise
 effects of the operations between them. When we consider
 that this problem is worsened by the
 potential for side effects caused by unintended priority name collisions, we
-see that exposing the user to priorities is rather undesirable.
+see that exposing the user to priorities is undesirable.
 
 Fortunately, in practice the use of priorities has been necessary only in a
 small number of scenarios.  This allows us to encapsulate their functionality
@@ -2290,7 +2291,7 @@ This operator concatenates two machines, but first assigns a low
 priority to all transitions
 of the first machine and a high priority to the starting transitions of the
 second machine. This operator is useful if from the final states of the first
-machine, it is possible to accept the characters in the start transitions of
+machine it is possible to accept the characters in the entering transitions of
 the second machine. This operator effectively terminates the first machine
 immediately upon starting the second machine, where otherwise they would be
 pursued concurrently. In the following example, entry-guarded concatenation is
@@ -2453,14 +2454,14 @@ equivalent to:
 When the kleene star is applied, transitions that go out of the machine and
 back into it are made. These are assigned a priority of zero by the leaving 
 transition mechanism. This is less than the priority of one assigned to the
-transitions leaving the final states but not leaving the machine. When two of
-these transitions clash on the same character, the differing priorities cause
-the transition that stays in the machine to take precedence.  The transition
+transitions leaving the final states but not leaving the machine. When 
+these transitions clash on the same character, the 
+transition that stays in the machine takes precedence.  The transition
 that wraps around is dropped.
 
 Note that this operator does not build a scanner in the traditional sense
-because there is never any backtracking. To build a scanner in the traditional
-sense use the Longest-Match machine construction described in Section
+because there is never any backtracking. To build a scanner with backtracking
+use the Longest-Match machine construction described in Section
 \ref{generating-scanners}.
 
 \chapter{Interface to Host Program}
@@ -3017,6 +3018,7 @@ preferred output format.
 \chapter{Beyond the Basic Model}
 
 \section{Parser Modularization}
+\label{modularization}
 
 It is possible to use Ragel's machine construction and action embedding
 operators to specify an entire parser using a single regular expression. In
