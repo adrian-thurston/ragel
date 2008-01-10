@@ -3068,8 +3068,8 @@ preferred output format.
 It is possible to use Ragel's machine construction and action embedding
 operators to specify an entire parser using a single regular expression. In
 many cases this is the desired way to specify a parser in Ragel. However, in
-some scenarios, the language to parse may be so large that it is difficult to
-think about it as a single regular expression. It may shift between distinct
+some scenarios the language to parse may be so large that it is difficult to
+think about it as a single regular expression. It may also shift between distinct
 parsing strategies, in which case modularization into several coherent blocks
 of the language may be appropriate.
 
@@ -3144,7 +3144,8 @@ used to implement a dynamically resizable array.
 \section{Referencing Names}
 \label{labels}
 
-This section describes how to reference names in epsilon transitions and
+This section describes how to reference names in epsilon transitions (Section
+\ref{state-charts}) and
 action-based control-flow statements such as \verb|fgoto|. There is a hierarchy
 of names implied in a Ragel specification.  At the top level are the machine
 instantiations. Beneath the instantiations are labels and references to machine
@@ -3186,7 +3187,7 @@ name tree. However, it can always be renamed.
 
 Scanners are very much intertwined with regular-languages and their
 corresponding processors. For this reason Ragel supports the definition of
-Scanners.  The generated code will repeatedly attempt to match patterns from a
+scanners.  The generated code will repeatedly attempt to match patterns from a
 list, favouring longer patterns over shorter patterns.  In the case of
 equal-length matches, the generated code will favour patterns that appear ahead
 of others. When a scanner makes a match it executes the user code associated
@@ -3233,13 +3234,13 @@ operator \verb|**|. The key
 difference is that a scanner is able to backtrack to match a previously matched
 shorter string when the pursuit of a longer string fails.  For this reason the
 scanner construction operator is not a pure state machine construction
-operator. It relies on several variables which enable it to backtrack and make
+operator. It relies on several variables that enable it to backtrack and make
 pointers to the matched input text available to the user.  For this reason
 scanners must be immediately instantiated. They cannot be defined inline or
 referenced by another expression. Scanners must be jumped to or called.
 
 Scanners rely on the \verb|tokstart|, \verb|tokend| and \verb|act|
-variables to be present so that it can backtrack and make pointers to the
+variables to be present so that they can backtrack and make pointers to the
 matched text available to the user. If input is processed using multiple calls
 to the execute code then the user must ensure that when a token is only
 partially matched that the prefix is preserved on the subsequent invocation of
@@ -3321,21 +3322,11 @@ must be preserved ahead of the new data on the next invocation (b).}
 \label{preserve_example}
 \end{figure}
 
-Since scanners attempt to make the longest possible match of input, in some
-cases they are not able to identify a token upon parsing its final character,
-they must wait for a lookahead character. For example if trying to match words,
-the token match must be triggered on following whitespace in case more
-characters of the word have yet to come. The user must therefore arrange for an
-EOF character to be sent to the scanner to flush out any token that has not yet
-been matched.  The user can exclude a single character from the entire scanner
-and use this character as the EOF character, possibly specifying an EOF action.
-For most scanners, zero is a suitable choice for the EOF character. 
+Since scanners attempt to make the longest possible match of input, patterns
+such as identifiers require one character of lookahead in order to trigger a
+match. In the case of the last token in the input stream the user must ensure
+that the \verb|eof| variable is set so that the final token is flushed out.
 
-Alternatively, if whitespace is not significant and ignored by the scanner, the
-final real token can be flushed out by simply sending an additional whitespace
-character on the end of the stream. If the real stream ends with whitespace
-then it will simply be extended and ignored. If it does not, then the last real token is
-guaranteed to be flushed and the dummy EOF whitespace ignored.
 An example scanner processing loop is given in Figure \ref{scanner-loop}.
 
 \begin{figure}
@@ -3357,16 +3348,18 @@ An example scanner processing loop is given in Figure \ref{scanner-loop}.
         cin.read( p, space );
         int len = cin.gcount();
 
-        /* If no data was read, send the EOF character. */
+        char *pe = p + len;
+        char *eof = 0;
+
+        /* If no data was read indicate EOF. */
         if ( len == 0 ) {
-            p[0] = 0, len++;
+            eof = pe;
             done = true;
         }
 
-        char *pe = p + len;
         %% write exec;
 
-        if ( cs == RagelScan_error ) {
+        if ( cs == Scanner_error ) {
             /* Machine failed before finding a token. */
             cerr << "PARSE ERROR" << endl;
             exit(1);
@@ -3388,6 +3381,7 @@ An example scanner processing loop is given in Figure \ref{scanner-loop}.
 \end{figure}
 
 \section{State Charts}
+\label{state-charts}
 
 In addition to supporting the construction of state machines using regular
 languages, Ragel provides a way to manually specify state machines using
@@ -3471,7 +3465,7 @@ express the loop using a kleene star operator.
 Ragel allows one to take this state map simplification approach. We can build
 state machines using a state map model and implement portions of the state map
 using regular languages. In place of any transition in the state machine,
-entire sub-state machines can be given. These can encapsulate functionality
+entire sub-machines can be given. These can encapsulate functionality
 defined elsewhere. An important aspect of the Ragel approach is that when we
 wrap up a collection of states using a regular expression we do not lose
 access to the states and transitions. We can still execute code on the
