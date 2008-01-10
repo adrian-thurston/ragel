@@ -583,7 +583,7 @@ The \verb|import| statement scrapes a file for sequences of tokens that match
 the following forms. Ragel treats these forms as state machine definitions.
 
 \begin{itemize}
-	\setlength{\itemsep}{-2mm}
+    \setlength{\itemsep}{-2mm}
     \item \verb|name '=' number|
     \item \verb|name '=' lit_string|
     \item \verb|'define' name number|
@@ -1792,10 +1792,10 @@ consuming the line, the error recovery machine returns to the main loop.
 
 % GENERATE: erract
 % %%{
-% 	machine erract;
-%	ws = ' ';
-%	address = 'foo@bar.com';
-%	date = 'Monday May 12';
+%   machine erract;
+%   ws = ' ';
+%   address = 'foo@bar.com';
+%   date = 'Monday May 12';
 \begin{inline_code}
 \begin{verbatim}
 action cmd_err { 
@@ -1827,8 +1827,8 @@ main := (
 % %% write data;
 % void f()
 % {
-% 	%% write init;
-% 	%% write exec;
+%   %% write init;
+%   %% write exec;
 % }
 % END GENERATE
 
@@ -3090,7 +3090,7 @@ state machines are used to handle the parsing of two types of headers.
 
 % GENERATE: call
 % %%{
-% 	machine call;
+%   machine call;
 \begin{inline_code}
 \begin{verbatim}
 action return { fret; }
@@ -3117,8 +3117,8 @@ main := headers*;
 % %% write data;
 % void f()
 % {
-% 	%% write init;
-% 	%% write exec;
+%   %% write init;
+%   %% write exec;
 % }
 % END GENERATE
 
