@@ -444,7 +444,7 @@ file.
 
 \section{Ragel State Machine Specifications}
 
-A Ragel input file consists of a host language code file with embedded machine
+A Ragel input file consists of a program in the host language that contains embedded machine
 specifications.  Ragel normally passes input straight to output.  When it sees
 a machine specification it stops to read the Ragel statements and possibly generate
 code in place of the specification.
@@ -461,10 +461,10 @@ interpret preprocessor directives itself so includes, defines and ifdef logic
 cannot be used to alter the parse of a Ragel input file. It is therefore not
 possible to use an \verb|#if 0| directive to comment out a machine as is
 commonly done in C code. As an alternative, a machine can be prevented from
-causing any generated output by commenting out the write statements.
+causing any generated output by commenting out write statements.
 
-In Figure \ref{cmd-line-parsing}, a multi-line machine is used to define the
-machine and single line machines are used to trigger the writing of the machine
+In Figure \ref{cmd-line-parsing}, a multi-line specification is used to define the
+machine and single line specifications are used to trigger the writing of the machine
 data and execution code.
 
 \begin{figure}
@@ -527,8 +527,8 @@ the \verb|include| statement.
 \end{verbatim}
 \verbspace
 
-The machine definition statement associates an FSM expression with a name.  Machine
-expressions assigned to names can later be referenced by other expressions.  A
+The machine definition statement associates an FSM expression with a name. Machine
+expressions assigned to names can later be referenced in other expressions. A
 definition statement on its own does not cause any states to be generated. It is simply a
 description of a machine to be used later. States are generated only when a definition is
 instantiated, which happens when a definition is referenced in an instantiated
@@ -543,12 +543,14 @@ expression.
 \verbspace
 
 The machine instantiation statement generates a set of states representing an
-expression. Each instantiation generates a distinct set of states.  The entry
-point is written in the generated code using the instantiation name.  If the
-\verb|main| machine is instantiated, its start state is used as the
+expression. Each instantiation generates a distinct set of states.  The starting
+state of the instantiation is written in the data section of the generated code
+using the instantiation name.  If a machine named
+\verb|main| is instantiated, its start state is used as the
 specification's start state and is assigned to the \verb|cs| variable by the
 \verb|write init| command. If no \verb|main| machine is given, the start state
-of the last machine instantiation is used as the specification's start state.
+of the last machine instantiation to appear is used as the specification's
+start state.
 
 From outside the execution loop, control may be passed to any machine by
 assigning the entry point to the \verb|cs| variable.  From inside the execution
@@ -577,33 +579,34 @@ import "inputfile.h";
 \end{verbatim}
 \verbspace
 
-The \verb|import| statement takes a literal string as an argument, interprets
-it as a file name, then scrapes the file for sequences of tokens that match the
-following forms. If the input file is a Ragel program then tokens inside the
-Ragel sections are ignored. See Section \ref{export} for a description of
-exporting machine definitions.
+The \verb|import| statement scrapes a file for sequences of tokens that match
+the following forms. Ragel treats these forms as state machine definitions.
 
 \begin{itemize}
 	\setlength{\itemsep}{-2mm}
-    \item \verb|name = number|
-    \item \verb|name = lit_string|
-    \item \verb|"define" name number|
-    \item \verb|"define" name lit_string|
+    \item \verb|name '=' number|
+    \item \verb|name '=' lit_string|
+    \item \verb|'define' name number|
+    \item \verb|'define' name lit_string|
 \end{itemize}
+
+If the input file is a Ragel program then tokens inside any Ragel
+specifications are ignored. See Section \ref{export} for a description of
+exporting machine definitions.
 
 
 \section{Lexical Analysis of a Ragel Block}
 \label{lexing}
 
-Within a machine specification the following lexical rules apply to the parse
-of the input.
+Within a machine specification the following lexical rules apply to the input.
 
 \begin{itemize}
 
 \item The \verb|#| symbol begins a comment that terminates at the next newline.
 
 \item The symbols \verb|""|, \verb|''|, \verb|//|, \verb|[]| behave as the
-delimiters of literal strings. With them, the following escape sequences are interpreted: 
+delimiters of literal strings. Within them, the following escape sequences 
+are interpreted: 
 
 \verb|    \0 \a \b \t \n \v \f \r|
 
@@ -616,7 +619,7 @@ expressions in Section \ref{basic}.
 
 \item The symbols \verb|{}| delimit a block of host language code that will be
 embedded into the machine as an action.  Within the block of host language
-code, basic lexical analysis of C/C++ comments and strings is done in order to
+code, basic lexical analysis of comments and strings is done in order to
 correctly find the closing brace of the block. With the exception of FSM
 commands embedded in code blocks, the entire block is preserved as is for
 identical reproduction in the output code.
@@ -763,9 +766,9 @@ main := 42;
 \end{center}
 
 \item \verb|/simple_regex/| -- Regular Expression. Regular expressions are
-parsed as a series of expressions that will be concatenated together. Each
+parsed as a series of expressions that are concatenated together. Each
 concatenated expression
-may be a literal character, the any character specified by the \verb|.|
+may be a literal character, the ``any'' character specified by the \verb|.|
 symbol, or a union of characters specified by the \verb|[]| delimiters. If the
 first character of a union is \verb|^| then it matches any character not in the
 list. Within a union, a range of characters can be given by separating the first
@@ -914,7 +917,7 @@ not familiar with the NFA to DFA conversion algorithm. In this section we
 describe Ragel's state machine operators. Though the operators are defined
 using epsilon transitions, it should be noted that this is for discussion only.
 The epsilon transitions described in this section do not persist, but are
-immediately removed by the determinization process which is executed in every
+immediately removed by the determinization process which is executed at every
 operation. Ragel does not make use of any nondeterministic intermediate state
 machines. 
 
@@ -926,14 +929,14 @@ character, then the transitions must be combined.  During transition
 combination a new transition is made that goes to a new state that is the
 combination of both target states. The new combination state is created using
 the same epsilon transition method.  The new state has an epsilon transition
-drawn to all the states that compose it. Since every time an epsilon transition
-is drawn the creation of new epsilon transitions may be triggered, the process
-of drawing epsilon transitions is repeated until there are no more epsilon
-transitions to be made.
+drawn to all the states that compose it. Since the creation of new epsilon
+transitions may be triggered every time an epsilon transition is drawn, the
+process of drawing epsilon transitions is repeated until there are no more
+epsilon transitions to be made.
 
 A very common error that is made when using Ragel is to make machines that do
-too much at once. That is, to create machines that have unintentional
-nondeterminism. This usually results from being unaware of the common strings
+too much. That is, to create machines that have unintentional
+nondetermistic properties. This usually results from being unaware of the common strings
 between machines that are combined together using the regular language
 operators. This can involve never leaving a machine, causing its actions to be
 propagated through all the following states. Or it can involve an alternation
@@ -951,7 +954,7 @@ parsing programs will be too large to completely visualize with Graphviz.  The
 proper approach is to reduce the language to the smallest subset possible that
 still exhibits the characteristics that one wishes to learn about or to fix.
 This can be done without modifying the source code using the \verb|-M| and
-\verb|-S| options at the frontend. If a machine cannot be easily reduced,
+\verb|-S| options. If a machine cannot be easily reduced,
 embeddings of unique actions can be very useful for tracing a
 particular component of a larger machine specification, since action names are
 written out on transition labels.
