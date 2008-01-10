@@ -663,11 +663,6 @@ The basic machines are the base operands of regular language expressions. They
 are the smallest unit to which machine construction and manipulation operators
 can be applied.
 
-In the diagrams that follow the symbol \verb|df| represents
-the default transition, which is taken if no other transition can be taken. The
-symbol \verb|cr| represents the carriage return character, \verb|nl| represents the newline character (aka line feed) and the symbol
-\verb|sp| represents the space character.
-
 \begin{itemize}
 
 \item \verb|'hello'| -- Concatenation Literal. Produces a machine that matches
@@ -782,7 +777,9 @@ trailing option. Use it to produce case-insensitive machines, as in \verb|/GET/i
 Ragel does not support very complex regular expressions because the desired
 results can always be achieved using the more general machine construction
 operators listed in Section \ref{machconst}. The following diagram shows the
-result of compiling \verb|/ab*[c-z].*[123]/|.
+result of compiling \verb|/ab*[c-z].*[123]/|. \verb|DEF| represents the default
+transition, which is taken if no other transition can be taken. 
+
 
 % GENERATE: bmregex
 % OPT: -p
@@ -1123,7 +1120,7 @@ final states of the first machine to the start state of the second machine. The
 final states of the first machine lose their final state status, unless the
 start state of the second machine is final as well. 
 Concatenation is the default operator. Two machines next to each other with no
-operator between them results in the machines being concatenated together.  
+operator between them results in concatenation.
 
 \graphspace
 \begin{center}
@@ -1134,10 +1131,10 @@ operator between them results in the machines being concatenated together.
 The opportunity for nondeterministic behaviour results from the possibility of
 the final states of the first machine accepting a string that is also accepted
 by the start state of the second machine.
-The most common scenario that this happens in is the
+The most common scenario in which this happens is the
 concatenation of a machine that repeats some pattern with a machine that gives
-a termination string, but the repetition machine does not exclude the
-termination string. The example in Section \ref{strong_difference}
+a terminating string, but the repetition machine does not exclude the
+terminating string. The example in Section \ref{strong_difference}
 guards against this. Another example is the expression \verb|("'" any* "'")|.
 When executed the thread of control will
 never leave the \verb|any*| machine.  This is a problem especially if actions
@@ -1173,12 +1170,11 @@ adjacent machines there is an ambiguity between subtraction of
 a positive numerical literal and concatenation of a negative numerical literal.
 For example, \verb|(x-7)| could be interpreted as \verb|(x . -7)| or 
 \verb|(x - 7)|. In the Ragel language, the subtraction operator always takes precedence
-over concatenation of a negative literal. Precedence was given to the
-subtraction-based interpretation so as to adhere to the rule that the default
+over concatenation of a negative literal. We adhere to the rule that the default
 concatenation operator takes effect only when there are no other operators between
 two machines. Beware of writing machines such as \verb|(any -1)| when what is
-desired is a concatenation of \verb|any| and -1. Instead write 
-\verb|(any .  -1)| or \verb|(any (-1))|. If in doubt of the meaning of your program do not
+desired is a concatenation of \verb|any| and \verb|-1|. Instead write 
+\verb|(any . -1)| or \verb|(any (-1))|. If in doubt of the meaning of your program do not
 rely on the default concatenation operator; always use the \verb|.| symbol.
 
 
@@ -1210,7 +1206,7 @@ arising from nondeterministic behavior, this is discussed in more detail in Chap
 by using the longest-match construction discussed in Section 
 \ref{generating-scanners} on scanners.
 
-In this simple
+In this 
 example, there is no nondeterminism introduced by the exterior kleene star due to
 the newline at the end of the regular expression. Without the newline the
 exterior kleene star would be redundant and there would be ambiguity between
@@ -1245,8 +1241,7 @@ main := /[a-z]*\n/*;
 
 This operator produces the concatenation of the machine with the kleene star of
 itself. The result will match one or more repetitions of the machine. The plus
-operator is equivalent to \verb|(expr . expr*)|.  The plus operator makes
-repetitions that cannot be zero length.
+operator is equivalent to \verb|(expr . expr*)|.  
 
 % GENERATE: explus
 % OPT: -p
@@ -1275,7 +1270,7 @@ main := alnum+;
 The {\em optional} operator produces a machine that accepts the machine
 given or the zero length string. The optional operator is equivalent to
 \verb/(expr | '' )/. In the following example the optional operator is used to
-extend a token.
+possibly extend a token.
 
 % GENERATE: exoption
 % OPT: -p
@@ -1344,7 +1339,8 @@ main := ! ( digit any* );
 
 Character-level negation produces a machine that matches any single character
 not matched by the given machine. Character-Level Negation is equivalent to
-\verb|(any - expr)|.
+\verb|(any - expr)|. It must be applied only to machines that match strings of
+length one.
 
 \section{State Machine Minimization}
 
