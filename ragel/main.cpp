@@ -92,6 +92,7 @@ void usage()
 "   -l                   Minimize after most operations (default)\n"
 "   -e                   Minimize after every operation\n"
 "visualization:\n"
+"   -x                   Run the frontend only: emit XML intermediate format\n"
 "   -V                   Generate a dot file for Graphviz\n"
 "   -p                   Display printable characters on labels\n"
 "   -S <spec>            FSM specification to output (for rlgen-dot)\n"
@@ -163,7 +164,7 @@ void escapeLineDirectivePath( std::ostream &out, char *path )
 
 void processArgs( int argc, char **argv, char *&inputFileName, char *&outputFileName )
 {
-	ParamCheck pc("fo:nmleabjkS:M:CDJRvHh?-:sT:F:G:P:LpV", argc, argv);
+	ParamCheck pc("xo:nmleabjkS:M:CDJRvHh?-:sT:F:G:P:LpV", argc, argv);
 
 	while ( pc.check() ) {
 		switch ( pc.state ) {
@@ -173,7 +174,7 @@ void processArgs( int argc, char **argv, char *&inputFileName, char *&outputFile
 				generateDot = true;
 				break;
 
-			case 'f':
+			case 'x':
 				frontendOnly = true;
 				break;
 
@@ -605,7 +606,7 @@ void execFrontend( const char *argv0, char *inputFileName, char *intermed )
 	const char *progName = "ragel";
 
 	frontendArgs.insert( 0, progName );
-	frontendArgs.insert( 1, "-f" );
+	frontendArgs.insert( 1, "-x" );
 	frontendArgs.append( "-o" );
 	frontendArgs.append( intermed );
 	frontendArgs.append( inputFileName );
