@@ -26,14 +26,14 @@
 	# Symbols. Upon entering clear the buffer. On all transitions
 	# buffer a character. Upon leaving dump the symbol.
 	( punct - [_'"] ) {
-		printf( "symbol(%i): %c\n", curline, tokstart[0] );
+		printf( "symbol(%i): %c\n", curline, ts[0] );
 	};
 
 	# Identifier. Upon entering clear the buffer. On all transitions
 	# buffer a character. Upon leaving, dump the identifier.
 	alpha_u alnum_u* {
 		printf( "ident(%i): ", curline );
-		fwrite( tokstart, 1, tokend-tokstart, stdout );
+		fwrite( ts, 1, te-ts, stdout );
 		printf("\n");
 	};
 
@@ -41,7 +41,7 @@
 	sliteralChar = [^'\\] | newline | ( '\\' . any_count_line );
 	'\'' . sliteralChar* . '\'' {
 		printf( "single_lit(%i): ", curline );
-		fwrite( tokstart, 1, tokend-tokstart, stdout );
+		fwrite( ts, 1, te-ts, stdout );
 		printf("\n");
 	};
 
@@ -49,7 +49,7 @@
 	dliteralChar = [^"\\] | newline | ( '\\' any_count_line );
 	'"' . dliteralChar* . '"' {
 		printf( "double_lit(%i): ", curline );
-		fwrite( tokstart, 1, tokend-tokstart, stdout );
+		fwrite( ts, 1, te-ts, stdout );
 		printf("\n");
 	};
 
@@ -67,7 +67,7 @@
 	# The float machine overlaps with int and it will do it.
 	digit+ {
 		printf( "int(%i): ", curline );
-		fwrite( tokstart, 1, tokend-tokstart, stdout );
+		fwrite( ts, 1, te-ts, stdout );
 		printf("\n");
 	};
 
@@ -75,7 +75,7 @@
 	# characters on every trans and dump the float upon leaving.
 	digit+ '.' digit+ {
 		printf( "float(%i): ", curline );
-		fwrite( tokstart, 1, tokend-tokstart, stdout );
+		fwrite( ts, 1, te-ts, stdout );
 		printf("\n");
 	};
 
@@ -83,7 +83,7 @@
 	# on every trans and dump the hex on leaving transitions.
 	'0x' xdigit+ {
 		printf( "hex(%i): ", curline );
-		fwrite( tokstart, 1, tokend-tokstart, stdout );
+		fwrite( ts, 1, te-ts, stdout );
 		printf("\n");
 	};
 
@@ -98,7 +98,7 @@ void scanner()
 {
 	static char buf[BUFSIZE];
 	int cs, act, have = 0, curline = 1;
-	char *tokstart, *tokend = 0;
+	char *ts, *te = 0;
 	int done = 0;
 
 	%% write init;
@@ -130,14 +130,14 @@ void scanner()
 			break;
 		}
 
-		if ( tokstart == 0 )
+		if ( ts == 0 )
 			have = 0;
 		else {
 			/* There is a prefix to preserve, shift it over. */
-			have = pe - tokstart;
-			memmove( buf, tokstart, have );
-			tokend = buf + (tokend-tokstart);
-			tokstart = buf;
+			have = pe - ts;
+			memmove( buf, ts, have );
+			te = buf + (te-ts);
+			ts = buf;
 		}
 	}
 }

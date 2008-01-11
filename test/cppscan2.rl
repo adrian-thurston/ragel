@@ -41,7 +41,7 @@ using namespace std;
 
 int tok;
 char buf[BUFSIZE];
-const char *tokstart, *tokend;
+const char *ts, *te;
 void token( const char *data, int len );
 bool discard = false;
 
@@ -155,19 +155,19 @@ struct Scanner
 			}
 			else {
 				/* Send the token. */
-				token( tokstart, tokend - tokstart + 1 );
+				token( ts, te - ts + 1 );
 
 				/* Restart right after the token. */
-				rst_data = tokend+1;
+				rst_data = te+1;
 			}
 
-			tokstart = 0;
+			ts = 0;
 			fexec rst_data;
 			fgoto main;
 		}
 	}
 
-	main := tokens >{tokstart=fpc;} @{tokend=fpc;} $!onError;
+	main := tokens >{ts=fpc;} @{te=fpc;} $!onError;
 }%%
 
 %% write data;
@@ -175,8 +175,8 @@ struct Scanner
 int Scanner::init( )
 {
 	tok = 0;
-	tokstart = 0;
-	tokend = 0;
+	ts = 0;
+	te = 0;
 
 	%% write init;
 	return 1;
@@ -222,7 +222,7 @@ void test( const char * data )
 	scanner.execute( data, strlen(data) );
 	scanner.finish();
 	if ( tok != 0 && tok != TK_Comment && tok != TK_Whitespace )
-		token( tokstart, tokend - tokstart + 1 );
+		token( ts, te - ts + 1 );
 }
 
 int main()

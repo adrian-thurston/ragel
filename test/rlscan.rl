@@ -81,7 +81,7 @@ inline void write( const char *data, int len )
 		@{ fret; };
 
 	action emit {
-		escapeXML( tokstart, tokend-tokstart );
+		escapeXML( ts, te-ts );
 	}
 
 	#
@@ -113,7 +113,7 @@ inline void write( const char *data, int len )
 			}
 		};
 
-		default => { escapeXML( *tokstart ); };
+		default => { escapeXML( *ts ); };
 	*|;
 
 	#
@@ -138,21 +138,21 @@ inline void write( const char *data, int len )
 		# Word
 		word {
 			write( "<word>" );
-			write( tokstart, tokend-tokstart );
+			write( ts, te-ts );
 			write( "</word>\n" );
 		};
 
 		# Decimal integer.
 		integer {
 			write( "<int>" );
-			write( tokstart, tokend-tokstart );
+			write( ts, te-ts );
 			write( "</int>\n" );
 		};
 
 		# Hexidecimal integer.
 		hex {
 			write( "<hex>" );
-			write( tokstart, tokend-tokstart );
+			write( ts, te-ts );
 			write( "</hex>\n" );
 		};
 
@@ -162,28 +162,28 @@ inline void write( const char *data, int len )
 		# Single literal string.
 		"'" ( [^'\\] | /\\./ )* "'" {
 			write( "<single_lit>" );
-			escapeXML( tokstart, tokend-tokstart );
+			escapeXML( ts, te-ts );
 			write( "</single_lit>\n" );
 		};
 
 		# Double literal string.
 		'"' ( [^"\\] | /\\./ )* '"' {
 			write( "<double_lit>" );
-			escapeXML( tokstart, tokend-tokstart );
+			escapeXML( ts, te-ts );
 			write( "</double_lit>\n" );
 		};
 
 		# Or literal.
 		'[' ( [^\]\\] | /\\./ )* ']' {
 			write( "<or_lit>" );
-			escapeXML( tokstart, tokend-tokstart );
+			escapeXML( ts, te-ts );
 			write( "</or_lit>\n" );
 		};
 
 		# Regex Literal.
 		'/' ( [^/\\] | /\\./ ) * '/' {
 			write( "<re_lit>" );
-			escapeXML( tokstart, tokend-tokstart );
+			escapeXML( ts, te-ts );
 			write( "</re_lit>\n" );
 		};
 
@@ -213,7 +213,7 @@ inline void write( const char *data, int len )
 		'"' ( [^"\\] | /\\./ )* '"' => emit;
 
 		'/*' {
-			escapeXML( tokstart, tokend-tokstart );
+			escapeXML( ts, te-ts );
 			fcall c_comment;
 		};
 
@@ -232,7 +232,7 @@ inline void write( const char *data, int len )
 		};
 
 		default { 
-			escapeXML( *tokstart );
+			escapeXML( *ts );
 		};
 
 		# EOF.
@@ -247,7 +247,7 @@ void test( const char *data )
 	std::ios::sync_with_stdio(false);
 
 	int cs, act;
-	const char *tokstart, *tokend;
+	const char *ts, *te;
 	int stack[1], top;
 
 	bool single_line = false;

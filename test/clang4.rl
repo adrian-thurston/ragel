@@ -3,8 +3,6 @@
  * @NEEDS_EOF: yes
  */
 
-ptr tokstart;
-ptr tokend;
 char array[32];
 int pos;
 int line;

@@ -126,7 +126,7 @@ function alTermToC
 	replace [al_term]
 		'first_token_char
 	by
-		'tokstart '[0]
+		'ts '[0]
 end function
 
 function alExprExtendToC AlExprExtend [repeat al_expr_extend]
@@ -232,7 +232,7 @@ function alStmtToC4d AlStmt [action_lang_stmt]
 		'print_token ';
 	replace [repeat c_lang_stmt]
 	by
-		'fwrite '( 'tokstart ', '1 ', 'tokend '- 'tokstart ', 'stdout ');
+		'fwrite '( 'ts ', '1 ', 'te '- 'ts ', 'stdout ');
 end function
 
 function alStmtToC5 AlStmt [action_lang_stmt]

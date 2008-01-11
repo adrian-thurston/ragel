@@ -11,7 +11,7 @@ extern char buf[];
 struct Scanner
 {
 	int cs, act;
-	char *tokstart, *tokend;
+	char *ts, *te;
 
 	// Initialize the machine. Invokes any init statement blocks. Returns 0
 	// if the machine begins in a non-accepting state and 1 if the machine
@@ -40,7 +40,7 @@ struct Scanner
 			cout << (int)fc;
 		else
 			cout << fc;
-		cout << " tokstart = " << ( tokstart == 0 ? -1 : tokstart-buf ) << endl;
+		cout << " ts = " << ( ts == 0 ? -1 : ts-buf ) << endl;
 	} 
 	action from_act {
 		cout << "from: fc = ";
@@ -48,7 +48,7 @@ struct Scanner
 			cout << (int)fc;
 		else
 			cout << fc;
-		cout << " tokstart = " << ( tokstart == 0 ? -1 : tokstart-buf ) << endl;
+		cout << " ts = " << ( ts == 0 ? -1 : ts-buf ) << endl;
 	}
 
 	c_comm := ( any* $0 '*/' @1 @{ fgoto main; } ) $~to_act $*from_act;
@@ -150,89 +150,89 @@ int main()
 }
 
 #ifdef _____OUTPUT_____
-from: fc = a tokstart = 0
-to:   fc = a tokstart = 0
-from: fc =   tokstart = 0
-to:   fc = a tokstart = -1
-from: fc =   tokstart = 1
-to:   fc =   tokstart = 1
-from: fc = b tokstart = 1
-to:   fc =   tokstart = -1
-from: fc = b tokstart = 2
-to:   fc = b tokstart = 2
-from: fc =   tokstart = 2
-to:   fc = b tokstart = -1
-from: fc =   tokstart = 3
-to:   fc =   tokstart = 3
-from: fc = 0 tokstart = 3
-to:   fc =   tokstart = -1
-from: fc = 0 tokstart = 4
-to:   fc = 0 tokstart = 4
-from: fc = . tokstart = 4
-to:   fc = . tokstart = 4
-from: fc = 9 tokstart = 4
-to:   fc = 9 tokstart = 4
-from: fc = 8 tokstart = 4
-to:   fc = 8 tokstart = 4
-from: fc =   tokstart = 4
-to:   fc = 8 tokstart = -1
-from: fc =   tokstart = 8
-to:   fc =   tokstart = 8
-from: fc = / tokstart = 8
-to:   fc =   tokstart = -1
-from: fc = / tokstart = 9
-to:   fc = / tokstart = 9
-from: fc = * tokstart = 9
-to:   fc = * tokstart = -1
+from: fc = a ts = 0
+to:   fc = a ts = 0
+from: fc =   ts = 0
+to:   fc = a ts = -1
+from: fc =   ts = 1
+to:   fc =   ts = 1
+from: fc = b ts = 1
+to:   fc =   ts = -1
+from: fc = b ts = 2
+to:   fc = b ts = 2
+from: fc =   ts = 2
+to:   fc = b ts = -1
+from: fc =   ts = 3
+to:   fc =   ts = 3
+from: fc = 0 ts = 3
+to:   fc =   ts = -1
+from: fc = 0 ts = 4
+to:   fc = 0 ts = 4
+from: fc = . ts = 4
+to:   fc = . ts = 4
+from: fc = 9 ts = 4
+to:   fc = 9 ts = 4
+from: fc = 8 ts = 4
+to:   fc = 8 ts = 4
+from: fc =   ts = 4
+to:   fc = 8 ts = -1
+from: fc =   ts = 8
+to:   fc =   ts = 8
+from: fc = / ts = 8
+to:   fc =   ts = -1
+from: fc = / ts = 9
+to:   fc = / ts = 9
+from: fc = * ts = 9
+to:   fc = * ts = -1
 from: fc = 
- tokstart = -1
+ ts = -1
 to:   fc = 
- tokstart = -1
-from: fc = 9 tokstart = -1
-to:   fc = 9 tokstart = -1
-from: fc =   tokstart = -1
-to:   fc =   tokstart = -1
-from: fc = * tokstart = -1
-to:   fc = * tokstart = -1
-from: fc = / tokstart = -1
-to:   fc = / tokstart = -1
-from: fc = 39 tokstart = 16
-to:   fc = 39 tokstart = 16
-from: fc = \ tokstart = 16
-to:   fc = \ tokstart = 16
-from: fc = 39 tokstart = 16
-to:   fc = 39 tokstart = 16
-from: fc = 39 tokstart = 16
-to:   fc = 39 tokstart = -1
-from: fc = / tokstart = 20
-to:   fc = / tokstart = 20
-from: fc = / tokstart = 20
-to:   fc = / tokstart = -1
-from: fc = h tokstart = -1
-to:   fc = h tokstart = -1
-from: fc = i tokstart = -1
-to:   fc = i tokstart = -1
+ ts = -1
+from: fc = 9 ts = -1
+to:   fc = 9 ts = -1
+from: fc =   ts = -1
+to:   fc =   ts = -1
+from: fc = * ts = -1
+to:   fc = * ts = -1
+from: fc = / ts = -1
+to:   fc = / ts = -1
+from: fc = 39 ts = 16
+to:   fc = 39 ts = 16
+from: fc = \ ts = 16
+to:   fc = \ ts = 16
+from: fc = 39 ts = 16
+to:   fc = 39 ts = 16
+from: fc = 39 ts = 16
+to:   fc = 39 ts = -1
+from: fc = / ts = 20
+to:   fc = / ts = 20
+from: fc = / ts = 20
+to:   fc = / ts = -1
+from: fc = h ts = -1
+to:   fc = h ts = -1
+from: fc = i ts = -1
+to:   fc = i ts = -1
 from: fc = 
- tokstart = -1
+ ts = -1
 to:   fc = 
- tokstart = -1
-from: fc = t tokstart = 25
-to:   fc = t tokstart = 25
-from: fc = h tokstart = 25
-to:   fc = h tokstart = 25
-from: fc = e tokstart = 25
-to:   fc = e tokstart = 25
-from: fc = r tokstart = 25
-to:   fc = r tokstart = 25
-from: fc = e tokstart = 25
-to:   fc = e tokstart = 25
+ ts = -1
+from: fc = t ts = 25
+to:   fc = t ts = 25
+from: fc = h ts = 25
+to:   fc = h ts = 25
+from: fc = e ts = 25
+to:   fc = e ts = 25
+from: fc = r ts = 25
+to:   fc = r ts = 25
+from: fc = e ts = 25
+to:   fc = e ts = 25
 from: fc = 
- tokstart = 25
-to:   fc = e tokstart = -1
+ ts = 25
+to:   fc = e ts = -1
 from: fc = 
- tokstart = 30
+ ts = 30
 to:   fc = 
- tokstart = 30
+ ts = 30
 to:   fc = 
- tokstart = -1
+ ts = -1
 #endif

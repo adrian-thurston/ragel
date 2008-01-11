@@ -10,8 +10,8 @@ typedef struct _Scanner {
     int act;
     int have;
     int curline;
-    char *tokstart;
-    char *tokend;
+    char *ts;
+    char *te;
     char *p;
     char *pe;
     char *eof;
@@ -48,7 +48,7 @@ void scan_init( Scanner *s, FILE *file )
 #define TK_Number 131
 #define TK_String 132
 
-#define ret_tok( _tok ) token = _tok; s->data = s->tokstart
+#define ret_tok( _tok ) token = _tok; s->data = s->ts
 
 int scan( Scanner *s )
 {
@@ -59,15 +59,15 @@ int scan( Scanner *s )
 		if ( s->p == s->pe ) {
 			printf("scanner: need more data\n");
 
-			if ( s->tokstart == 0 )
+			if ( s->ts == 0 )
 				s->have = 0;
 			else {
 				/* There is data that needs to be shifted over. */
 				printf("scanner: buffer broken mid token\n");
-				s->have = s->pe - s->tokstart;
-				memmove( s->buf, s->tokstart, s->have );
-				s->tokend -= (s->tokstart-s->buf);
-				s->tokstart = s->buf;
+				s->have = s->pe - s->ts;
+				memmove( s->buf, s->ts, s->have );
+				s->te -= (s->ts-s->buf);
+				s->ts = s->buf;
 			}
 
 			s->p = s->buf + s->have;

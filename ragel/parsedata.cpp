@@ -889,9 +889,9 @@ bool ParseData::setVariable( char *var, InlineList *inlineList )
 		stackExpr = inlineList;
 	else if ( strcmp( var, "act" ) == 0 )
 		actExpr = inlineList;
-	else if ( strcmp( var, "tokstart" ) == 0 )
+	else if ( strcmp( var, "ts" ) == 0 )
 		tokstartExpr = inlineList;
-	else if ( strcmp( var, "tokend" ) == 0 )
+	else if ( strcmp( var, "te" ) == 0 )
 		tokendExpr = inlineList;
 	else
 		set = false;
@@ -991,13 +991,13 @@ void ParseData::initLongestMatchData()
 		/* The setTokStart action sets tokstart. */
 		InlineList *il5 = new InlineList;
 		il5->append( new InlineItem( InputLoc(), InlineItem::LmSetTokStart ) );
-		setTokStart = newAction( "tokstart", il5 );
+		setTokStart = newAction( "ts", il5 );
 		setTokStart->isLmAction = true;
 
 		/* The setTokEnd action sets tokend. */
 		InlineList *il3 = new InlineList;
 		il3->append( new InlineItem( InputLoc(), InlineItem::LmSetTokEnd ) );
-		setTokEnd = newAction( "tokend", il3 );
+		setTokEnd = newAction( "te", il3 );
 		setTokEnd->isLmAction = true;
 
 		/* The action will also need an ordering: ahead of all user action

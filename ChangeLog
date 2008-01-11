@@ -64,6 +64,7 @@ Ragel 6.0 - TBR
  -Made a number of fixes that eliminate warnings in GCC 4.3. Mostly concern
   the now depreciate automatic conversion of string contsants to "char*" type.
   Other fixes include adding parenthesis around && within ||.
+ -The "tokstart" and "tokend" variables were changed to "ts" and "te".
 
 Ragel 5.25 - Dec 24, 2007
 =========================

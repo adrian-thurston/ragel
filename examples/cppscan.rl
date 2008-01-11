@@ -52,7 +52,7 @@ using std::endl;
 
 static char buf[BUFSIZE];
 static int line = 1, col = 1;
-static char *tokstart, *tokend;
+static char *ts, *te;
 static int act, have = 0;
 static int cs;
 
@@ -121,7 +121,7 @@ static int cs;
 	'...' {token( TK_DotDotDot );};
 
 	# Single char symbols.
-	( punct - [_"'] ) {token( tokstart[0] );};
+	( punct - [_"'] ) {token( ts[0] );};
 
 	# Comments and whitespace.
 	'/*' { fgoto c_comment; };
@@ -133,8 +133,8 @@ static int cs;
 
 void token( int tok )
 {
-	char *data = tokstart;
-	int len = tokend - tokstart;
+	char *data = ts;
+	int len = te - ts;
 
 	cout << '<' << tok << "> ";
 	cout.write( data, len );
@@ -193,14 +193,14 @@ int main()
 		}
 
 		/* Now set up the prefix. */
-		if ( tokstart == 0 )
+		if ( ts == 0 )
 			have = 0;
 		else {
 			/* There is data that needs to be shifted over. */
-			have = pe - tokstart;
-			memmove( buf, tokstart, have );
-			tokend -= (tokstart-buf);
-			tokstart = buf;
+			have = pe - ts;
+			memmove( buf, ts, have );
+			te -= (ts-buf);
+			ts = buf;
 		}
 	}
 

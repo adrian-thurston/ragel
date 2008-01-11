@@ -1385,7 +1385,7 @@ string JavaTabCodeGen::TOKSTART()
 {
 	ostringstream ret;
 	if ( tokstartExpr == 0 )
-		ret << ACCESS() + "tokstart";
+		ret << ACCESS() + "ts";
 	else {
 		ret << "(";
 		INLINE_LIST( ret, tokstartExpr, 0, false );
@@ -1398,7 +1398,7 @@ string JavaTabCodeGen::TOKEND()
 {
 	ostringstream ret;
 	if ( tokendExpr == 0 )
-		ret << ACCESS() + "tokend";
+		ret << ACCESS() + "te";
 	else {
 		ret << "(";
 		INLINE_LIST( ret, tokendExpr, 0, false );
