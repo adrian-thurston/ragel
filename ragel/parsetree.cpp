@@ -889,14 +889,14 @@ FsmAp *Term::walk( ParseData *pd, bool lastInSeq )
 			priorDescs[0].priority = 1;
 			rtnVal->allTransPrior( pd->curPriorOrd++, &priorDescs[0] );
 
-			/* The right machine gets the lower priority.  Since
-			 * startTransPrior might unnecessarily increase the number of
-			 * states during the state machine construction process (due to
-			 * isolation), we use allTransPrior instead, which has the same
-			 * effect. */
+			/* The right machine gets the lower priority. We cannot use
+			 * allTransPrior here in case the start state of the right machine
+			 * is final. It would allow the right machine thread to run along
+			 * with the left if just passing through the start state. Using
+			 * startFsmPrior prevents this. */
 			priorDescs[1].key = priorDescs[0].key;
 			priorDescs[1].priority = 0;
-			rhs->allTransPrior( pd->curPriorOrd++, &priorDescs[1] );
+			rhs->startFsmPrior( pd->curPriorOrd++, &priorDescs[1] );
 
 			/* Perform concatenation. */
 			rtnVal->concatOp( rhs );
