@@ -2355,7 +2355,10 @@ main := any* :>> 'FIN';
 \end{center}
 \graphspace
 
-Finish-guarded concatenation is equivalent to the following:
+Finish-guarded concatenation is equivalent to the following, with one
+exception. If the right machine's start state is final, the higher priority is
+also embedded into it as a leaving priority. This prevents the left machine
+from persisting via the zero-length string.
 
 \verbspace
 \begin{verbatim}

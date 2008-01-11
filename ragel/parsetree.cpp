@@ -840,8 +840,8 @@ FsmAp *Term::walk( ParseData *pd, bool lastInSeq )
 			priorDescs[0].priority = 0;
 			rtnVal->allTransPrior( pd->curPriorOrd++, &priorDescs[0] );
 
-			/* The start transitions right machine get the higher priority.
-			 * Use the same unique key. */
+			/* The start transitions of the right machine gets the higher
+			 * priority. Use the same unique key. */
 			priorDescs[1].key = priorDescs[0].key;
 			priorDescs[1].priority = 1;
 			rhs->startFsmPrior( pd->curPriorOrd++, &priorDescs[1] );
@@ -870,6 +870,14 @@ FsmAp *Term::walk( ParseData *pd, bool lastInSeq )
 			priorDescs[1].key = priorDescs[0].key;
 			priorDescs[1].priority = 1;
 			rhs->finishFsmPrior( pd->curPriorOrd++, &priorDescs[1] );
+
+			/* If the right machine's start state is final we need to guard
+			 * against the left machine persisting by moving through the empty
+			 * string. */
+			if ( rhs->startState->isFinState() ) {
+				rhs->startState->outPriorTable.setPrior( 
+						pd->curPriorOrd++, &priorDescs[1] );
+			}
 
 			/* Perform concatenation. */
 			rtnVal->concatOp( rhs );
