@@ -667,6 +667,13 @@ int main(int argc, char **argv)
 
 	processArgs( argc, argv, inputFileName, outputFileName );
 
+	/* If -M or -S are given and we're not generating a dot file then invoke
+	 * the frontend. These options are not useful with code generators. */
+	if ( machineName != 0 || machineSpec != 0 ) {
+		if ( !generateDot )
+			frontendOnly = true;
+	}
+
 	/* Require an input file. If we use standard in then we won't have a file
 	 * name on which to base the output. */
 	if ( inputFileName == 0 )
