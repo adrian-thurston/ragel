@@ -21,8 +21,8 @@ Ragel 6.0 - TBR
   error action is executed.
  -The Ragel program now executes frontend and backend processes separately,
   connecting them with a temporary file in the current directory. Without the
-  -f option the "ragel" program marshals arguments and calls the frontend and
-  backend. With the -f option the "ragel" program acts as the frontend only.
+  -x option the "ragel" program marshals arguments and calls the frontend and
+  backend. With the -x option the "ragel" program acts as the frontend only.
  -Added name finding for executables. If any forward slash is found in argv0
   then it is assumed that the path is explicit and the path to the backend
   executable should be derived from that. Whe check that location and also go
@@ -39,8 +39,6 @@ Ragel 6.0 - TBR
  -Dot file generation can now be invoked using the -V option to the parent. We
   now require an input file. If standard in is used then we don't have a file
   name on which to base the output.
- -Rather than have the frontend process call the backend, the ragel program
-  now calls the frontend (itself with the -f option) and the backend.
  -Able to build native windows executables using Cygwin+MinGW. 
  -Patch from David Waite: Large arrays are now created by copying in the data
   from smaller arrays using System.arraycopy(). This eliminates the debug data

@@ -1,0 +1,69 @@
+                      RELEASE NOTES Ragel 6.X
+
+This file describes the changes in Ragel version 5.X that are not backwards
+compatible. For a list of all the changes see the ChangeLog file.
+
+The EOF Event
+=============
+
+The "write eof" command is no longer needed and was removed.
+
+Introcuded the "eof" variable for indicating the end of file. The p variable is
+checked against eof when the processing loop reaches the end of a block. If p
+== eof at this time then the EOF actions are executed. The variable is required
+only when EOF actions have been emebedded.
+
+Scanners now use EOF actions to generate tokens. This eliminates the need to
+flush the last token.
+
+Remove the "write eof" directive.
+
+If the machine has EOF actions then the "eof" variable must be declared and set
+to pe on the last buffer block.
+
+Semantics of > % and Error Actions
+==================================
+
+Gone back to 3.X semantics for >, % and error actions. The > operator also
+embeds a leaving action/priority into the start state if it is final. If EOF
+happens in a state with a leaving operator then leaving action it is executed.
+If EOF happens in a non-final state that has an error action, the error action
+is executed.
+
+Backend Automatically Executed
+==============================
+
+The Ragel program now executes frontend and backend processes separately,
+connecting them with a temporary file in the current directory. Without the -f
+option the "ragel" program marshals arguments and calls the frontend and
+backend. With the -f option the "ragel" program acts as the frontend only.
+
+Makefiles don't need to execute the backend.
+
+The fbreak Statement
+====================
+
+The fbreak statement now advances p.
+
+After an fbreak you do not need to advance p.
+
+Guarded Concatenation Operators are Stronger
+============================================
+
+In the :> :>> and <: operators it was possible for the priority assignment to
+be bypassed via the zero length string. In :> this was fixed automatically with
+the semantics change to the entering priority operator. If the start state is
+final it now embeds a leaving action into it, preventing persistance through
+the zero length string. In :>> and <: this was fixed explicitly. With <: the
+entering priority operator was used and with :> a sepecial exception was added.
+Since it uses the finishing transition operator it also adds a leaving priority
+to the start state if it is final.
+
+The tokstart and tokend Variables Renamed
+=========================================
+
+The "tokstart" and "tokend" variables were changed to "ts" and "te".
+
+Search and replace:
+    tokstart => ts
+    tokend => te
