@@ -293,14 +293,27 @@ Produces a machine that matches any string that is in both machine one and
 machine two.
 .TP
 .I expr - expr
-Produces a machine that matches string that is in machine one but not in
+Produces a machine that matches any string that is in machine one but not in
 machine two.
+.TP
+.I expr -- expr
+Strong Subtraction. Matches any string in machine one that does not have any string
+in machine two as a substring.
 .LP
 .B GROUP 3:
 .TP
 .I expr . expr
 Produces a machine that matches all the strings in machine one followed
 by all the strings in machine two.
+.TP
+.I expr :> expr
+Entry-Guarded Concatenation: terminates machine one upon entry to machine two.
+.TP
+.I expr :>> expr
+Finish-Guarded Concatenation: terminates machine one when machine two finishes.
+.TP
+.I expr <: expr
+Left-Guarded Concatenation: gives a higher priority to machine one.
 .LP
 NOTE: Concatenation is the default operator. Two machines next to each other
 with no operator between them results in the concatenation operation.
@@ -505,7 +518,7 @@ Produces the kleene star of a machine. Matches zero or more repetitions of the
 machine.
 .TP
 .I expr **
-Longest Matching Kleene Star. This version of kleene star puts a higher
+Longest-Match Kleene Star. This version of kleene star puts a higher
 priority on staying in the machine over wrapping around and starting over. This
 operator is equivalent to ( ( expr ) $0 %1 )*.
 .TP
@@ -534,6 +547,10 @@ Produces a machine that matches n to m repetitions of expr.
 .I ! expr
 Produces a machine that matches any string not matched by the given machine.
 This operator is equivalent to ( *extend - expr ).
+.TP
+.I ^ expr
+Character-Level Negation. Matches any single character not matched by the
+single character machine expr.
 .LP
 .B GROUP 9:
 .TP
