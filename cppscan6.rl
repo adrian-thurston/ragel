@@ -1,15 +1,15 @@
 /*
  * @LANG: indep
  *
- * const char *data = tokstart;
- * int len = tokend - tokstart;
+ * const char *data = ts;
+ * int len = te - ts;
  * cout << "<" << tok << "> ";
  * for ( int i = 0; i < len; i++ )
  *     cout << data[i];
  * cout << '\n';
  */
-ptr tokstart;
-ptr tokend;
+ptr ts;
+ptr te;
 int act;
 int token;
 %%

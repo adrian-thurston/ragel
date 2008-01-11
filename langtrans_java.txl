@@ -136,7 +136,7 @@ function alTermToJava
 	replace [al_term]
 		'first_token_char
 	by
-		'data '[tokstart]
+		'data '[ts]
 end function
 
 function alExprExtendToJava AlExprExtend [repeat al_expr_extend]
@@ -243,7 +243,7 @@ function alStmtToJava4d AlStmt [action_lang_stmt]
 		'print_token ';
 	replace [repeat java_lang_stmt]
 	by
-		'_s '= 'new 'String '( 'data ', 'tokstart ', 'tokend '- 'tokstart ') ';
+		'_s '= 'new 'String '( 'data ', 'ts ', 'te '- 'ts ') ';
 		'System '. 'out '. 'print '( '_s ');
 end function
 

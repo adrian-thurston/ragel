@@ -5,8 +5,8 @@
 char comm;
 int top;
 int stack[32];
-ptr tokstart;
-ptr tokend;
+ptr ts;
+ptr te;
 int act;
 int val;
 %%

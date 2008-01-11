@@ -43,12 +43,12 @@ static const int TK_Comment = 242;
 class Scanner 
 {
 	int cs, act;
-	char *tokstart, tokend;
+	char *ts, te;
 
 	void token( int tok )
 	{
-		char *data = tokstart;
-		int len = tokend - tokstart;
+		char *data = ts;
+		int len = te - ts;
 		printf( "<%i> ", tok );
 		for ( int i = 0; i < len; i++ )
 			printf( "%c", data[i] );
@@ -116,7 +116,7 @@ class Scanner
 	'...' => { token( TK_DotDotDot );};
 
 	# Single char symbols.
-	( punct - [_"'] ) => { token( tokstart[0] );};
+	( punct - [_"'] ) => { token( ts[0] );};
 
 	action comment {
 		token( TK_Comment );

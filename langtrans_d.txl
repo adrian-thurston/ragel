@@ -99,7 +99,7 @@ function alTermToD
 	replace [al_term]
 		'first_token_char
 	by
-		'tokstart '[0]
+		'ts '[0]
 end function
 
 function alExprExtendToD AlExprExtend [repeat al_expr_extend]
@@ -206,7 +206,7 @@ function alStmtToD4d AlStmt [action_lang_stmt]
 		'print_token ';
 	replace [repeat d_lang_stmt]
 	by
-		'_s '= tokstart '[0..(tokend-tokstart)] ';
+		'_s '= ts '[0..(te-ts)] ';
 		'writef '( '"%s" ', '_s ') ';
 end function
 

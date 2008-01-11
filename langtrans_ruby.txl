@@ -144,7 +144,7 @@ function alTermToRuby
 	replace [al_term]
 		'first_token_char
 	by
-		'data '[tokstart]
+		'data '[ts]
 end function
 
 function alExprExtendToRuby AlExprExtend [repeat al_expr_extend]
@@ -258,7 +258,7 @@ function alStmtToRuby4d AlStmt [action_lang_stmt]
 		'print_token ';
 	replace [repeat ruby_lang_stmt]
 	by
-		'_m = 'data '[tokstart..tokend-1] ';
+		'_m = 'data '[ts..te-1] ';
 		'print '( '_m '. 'pack '( '"c*" ') ') ';
 end function
 

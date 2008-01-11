@@ -40,7 +40,7 @@ using namespace std;
 struct Scanner
 {
 	int cs, act;
-	const char *tokstart, *tokend;
+	const char *ts, *te;
 	bool isCxx;
 
 	void token( int tok );
@@ -57,8 +57,8 @@ struct Scanner
 			if ( ! isCxx )
 				fgoto main;
 			else {
-				cout << "comm char: " << tokstart[0] << endl;
-				cout << "comm char: " << tokstart[1] << endl;
+				cout << "comm char: " << ts[0] << endl;
+				cout << "comm char: " << ts[1] << endl;
 			}
 		};
 
@@ -66,11 +66,11 @@ struct Scanner
 			if ( isCxx )
 				fgoto main;
 			else
-				cout << "comm char: " << tokstart[0] << endl;
+				cout << "comm char: " << ts[0] << endl;
 		};
 		
 		any {
-			cout << "comm char: " << tokstart[0] << endl;
+			cout << "comm char: " << ts[0] << endl;
 		};
 	*|;
 	
@@ -124,7 +124,7 @@ struct Scanner
 	'...' { token( TK_DotDotDot );};
 
 	# Single char symbols.
-	( punct - [_"'] ) { token( tokstart[0] );};
+	( punct - [_"'] ) { token( ts[0] );};
 
 	# Comments and whitespace. Handle these outside of the machine so that se
 	# don't end up buffering the comments.
@@ -140,8 +140,8 @@ struct Scanner
 
 void Scanner::token( int tok )
 {
-	const char *data = tokstart;
-	int len = tokend - tokstart;
+	const char *data = ts;
+	int len = te - ts;
 	cout << "<" << tok << "> ";
 	if ( data != 0 ) {
 		for ( int i = 0; i < len; i++ )

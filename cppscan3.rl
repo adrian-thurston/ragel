@@ -44,7 +44,7 @@ char buf[BUFSIZE];
 struct Scanner
 {
 	int cs, act;
-	const char *tokstart, *tokend;
+	const char *ts, *te;
 
 	void token( int tok );
 	void run();
@@ -114,7 +114,7 @@ struct Scanner
 	'...' => { token( TK_DotDotDot );};
 
 	# Single char symbols.
-	( punct - [_"'] ) => { token( tokstart[0] );};
+	( punct - [_"'] ) => { token( ts[0] );};
 
 	action comment {
 		token( TK_Comment );
@@ -160,8 +160,8 @@ int Scanner::finish( )
 
 void Scanner::token( int tok )
 {
-	const char *data = tokstart;
-	int len = tokend - tokstart;
+	const char *data = ts;
+	int len = te - ts;
 	cout << "<" << tok << "> ";
 	for ( int i = 0; i < len; i++ )
 		cout << data[i];
