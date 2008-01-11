@@ -2538,7 +2538,7 @@ In Java and Ruby code the \verb|data| variable must also be declared. If
 EOF actions are used then the \verb|eof| variable is required. If
 stack-based state machine control flow statements are used then the
 \verb|stack| and \verb|top| variables are required. If a scanner is declared
-then the \verb|act|, \verb|tokstart| and \verb|tokend| variables must be
+then the \verb|act|, \verb|ts| and \verb|te| variables must be
 declared.
 
 \begin{itemize}
@@ -2578,11 +2578,11 @@ to \verb|stack|, giving the next available spot on the top of the stack.
 \item \verb|act| - This must be an integer value. It is a variable sometimes
 used by scanner code to keep track of the most recent successful pattern match.
 
-\item \verb|tokstart| - This must be a pointer to character data. In Java and
+\item \verb|ts| - This must be a pointer to character data. In Java and
 Ruby code this must be an integer. See Section \ref{generating-scanners} for
 more information.
 
-\item \verb|tokend| - Also a pointer to character data.
+\item \verb|te| - Also a pointer to character data.
 
 \end{itemize}
 
@@ -2662,7 +2662,7 @@ access fsm->;
 The access statement specifies how the generated code should
 access the machine data that is persistent across processing buffer blocks.
 This applies to all variables except \verb|p|, \verb|pe| and \verb|eof|. This includes
-\verb|cs|, \verb|top|, \verb|stack|, \verb|tokstart|, \verb|tokend| and \verb|act|.
+\verb|cs|, \verb|top|, \verb|stack|, \verb|ts|, \verb|te| and \verb|act|.
 The access statement is useful if a machine is to be encapsulated inside a
 structure in C code. It can be used to give the name of
 a pointer to the structure.
@@ -2677,7 +2677,7 @@ variable p fsm->p;
 The variable statement specifies how to access a specific
 variable. All of the variables that are declared by the user and
 used by Ragel can be changed. This includes \verb|p|, \verb|pe|, \verb|eof|, \verb|cs|,
-\verb|top|, \verb|stack|, \verb|tokstart|, \verb|tokend| and \verb|act|.
+\verb|top|, \verb|stack|, \verb|ts|, \verb|te| and \verb|act|.
 In Ruby and Java code generation the \verb|data| variable can also be changed.
 
 \section{Pre-Push Statement}
@@ -2885,7 +2885,7 @@ code described in Section \ref{generating-scanners}. If a longest-match
 construction has been used somewhere in the machine then it is possible to
 take advantage of the required prefix maintenance code in the driver program to
 ensure pointers to the input are always valid. If laying down a pointer one can
-set \verb|tokstart| at the same spot or ahead of it. When data is shifted in
+set \verb|ts| at the same spot or ahead of it. When data is shifted in
 between loops the user must also shift the pointer.  In this way it is possible
 to maintain pointers to the input that will always be consistent.
 
@@ -3241,23 +3241,23 @@ pointers to the matched input text available to the user.  For this reason
 scanners must be immediately instantiated. They cannot be defined inline or
 referenced by another expression. Scanners must be jumped to or called.
 
-Scanners rely on the \verb|tokstart|, \verb|tokend| and \verb|act|
+Scanners rely on the \verb|ts|, \verb|te| and \verb|act|
 variables to be present so that they can backtrack and make pointers to the
 matched text available to the user. If input is processed using multiple calls
 to the execute code then the user must ensure that when a token is only
 partially matched that the prefix is preserved on the subsequent invocation of
 the execute code.
 
-The \verb|tokstart| variable must be defined as a pointer to the input data.
+The \verb|ts| variable must be defined as a pointer to the input data.
 It is used for recording where the current token match begins. This variable
 may be used in action code for retrieving the text of the current match.  Ragel
 ensures that in between tokens and outside of the longest-match machines that
 this pointer is set to null. In between calls to the execute code the user must
-check if \verb|tokstart| is set and if so, ensure that the data it points to is
+check if \verb|ts| is set and if so, ensure that the data it points to is
 preserved ahead of the next buffer block. This is described in more detail
 below.
 
-The \verb|tokend| variable must also be defined as a pointer to the input data.
+The \verb|te| variable must also be defined as a pointer to the input data.
 It is used for recording where a match ends and where scanning of the next
 token should begin. This can also be used in action code for retrieving the
 text of the current match.
@@ -3279,15 +3279,15 @@ the steps that should be taken to properly use the longest-match operator.
 \setlength{\parskip}{0pt}
 \item Read a block of input data.
 \item Run the execute code.
-\item If \verb|tokstart| is set, the execute code will expect the incomplete
+\item If \verb|ts| is set, the execute code will expect the incomplete
 token to be preserved ahead of the buffer on the next invocation of the execute
 code.  
 \begin{itemize}
-\item Shift the data beginning at \verb|tokstart| and ending at \verb|pe| to the
+\item Shift the data beginning at \verb|ts| and ending at \verb|pe| to the
 beginning of the input buffer.
-\item Reset \verb|tokstart| to the beginning of the buffer. 
-\item Shift \verb|tokend| by the distance from the old value of \verb|tokstart|
-to the new value. The \verb|tokend| variable may or may not be valid.  There is
+\item Reset \verb|ts| to the beginning of the buffer. 
+\item Shift \verb|te| by the distance from the old value of \verb|ts|
+to the new value. The \verb|te| variable may or may not be valid.  There is
 no way to know if it holds a meaningful value because it is not kept at null
 when it is not in use. It can be shifted regardless.
 \end{itemize}
@@ -3312,11 +3312,11 @@ data will ever need to be shifted.
 \begin{verbatim}
       a)           A stream "of characters" to be scanned.
                    |        |          |
-                   p        tokstart   pe
+                   p        ts         pe
 
       b)           "of characters" to be scanned.
                    |          |        |
-                   tokstart   p        pe
+                   ts         p        pe
 \end{verbatim}
 \caption{Following an invocation of the execute code there may be a partially
 matched token (a). The data of the partially matched token 
@@ -3367,14 +3367,14 @@ An example scanner processing loop is given in Figure \ref{scanner-loop}.
             exit(1);
         }
 
-        if ( tokstart == 0 )
+        if ( ts == 0 )
             have = 0;
         else {
             /* There is a prefix to preserve, shift it over. */
-            have = pe - tokstart;
-            memmove( inbuf, tokstart, have );
-            tokend = inbuf + (tokend-tokstart);
-            tokstart = inbuf;
+            have = pe - ts;
+            memmove( inbuf, ts, have );
+            te = inbuf + (te-ts);
+            ts = inbuf;
         }
     }
 \end{verbatim}
