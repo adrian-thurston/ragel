@@ -29,11 +29,6 @@ ragel \- compile regular languages into executable state machines
 .RI [ options ]
 .I file
 .SH DESCRIPTION
-.B Note:
-this is the frontend component of Ragel, which generates an intermediate
-file format that must be processed by one of rlgen-cd(1), rlgen-java(1), 
-rlgen-ruby(1) or rlgen-dot(1).
-
 Ragel compiles executable finite state machines from regular languages.  
 Ragel can generate C, C++, Objective-C, D, or Java code. Ragel state
 machines can not only recognize byte
@@ -60,11 +55,17 @@ into the application. The generated code has no dependencies.
 .BR \-h ", " \-H ", " \-? ", " \-\-help
 Display help and exit.
 .TP
+.B \-v
+Print version information and exit.
+.TP
 .B \-o " file"
 Write output to file. If -o is not given, a default file name is chosen by
 replacing the suffix of the input. For source files ending in .rh the suffix .h
 is used. For all other source files a suffix based on the output language
 is used (.c, .cpp, .m, .dot)
+.TP
+.B \-s
+Print some statistics on standard error.
 .TP
 .B \-n
 Do not perform state minimization.
@@ -79,11 +80,20 @@ are minimized once at the end. This is the default minimization option.
 .B \-e
 Minimize after every operation.
 .TP
+.B \-x
+Run the frontend only: emit XML intermediate format.
+.TP
+.B \-V
+Generate a dot file for Graphviz.
+.TP
+.B \-p
+Display printable characters on labels.
+.TP
 .B \-S <spec>
-FSM specification to output (for rlgen-dot)
+FSM specification to output
 .TP
 .B \-M <machine>
-Machine definition/instantiation to output (for rlgen-dot)
+Machine definition/instantiation to output 
 .TP
 .B \-C
 The host language is C, C++, Obj-C or Obj-C++. This is the default host language option.
@@ -93,6 +103,37 @@ The host language is D.
 .TP
 .B \-J
 The host language is Java.
+.TP
+.B \-R
+The host language is Ruby.
+.TP
+.B \-L
+Inhibit writing of #line directives.
+.TP
+.B \-T0
+Table driven FSM (default).
+.TP
+.B \-T1
+Faster table driven FSM.
+.TP
+.B \-F0
+Flat table driven FSM.
+.TP
+.B \-F1
+Faster flat table-driven FSM.
+.TP
+.B \-G0
+Goto-driven FSM.
+.TP
+.B \-G1
+Faster goto-driven FSM.
+.TP
+.B \-G2
+Really fast goto-driven FSM.
+.TP
+.B \-P<N>
+N-Way Split really fast goto-driven FSM.
+
 .SH RAGEL INPUT
 NOTE: This is a very brief description of Ragel input. Ragel is described in
 more detail in the user guide available from the homepage (see below).
