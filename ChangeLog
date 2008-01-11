@@ -48,6 +48,22 @@ Ragel 6.0 - TBR
   on the java compiler which can run out of memory compiling very large
   machines. The downside is that it takes slightly longer to initialize static
   data.
+ -The fbreak statement now advances p.
+ -In the :> :>> and <: operators it was possible for the priority assignment
+  to be bypassed via the zero length string. In :> this was fixed
+  automatically with the semantics change to the entering priority operator.
+  If the start state is final it now embeds a leaving action into it,
+  preventing persistance through the zero length string. In :>> and <: this
+  was fixed explicitly. With <: the entering priority operator was used and
+  with :> a sepecial exception was added. Since it uses the finishing
+  transition operator it also adds a leaving priority to the start state if it
+  is final.
+ -Ranlib is now run on the archives. Patch from Kenny MacDermid.
+ -The case statement syntax in ruby code generation used a form depreciated in
+  Ruby 1.9. Updated it.
+ -Made a number of fixes that eliminate warnings in GCC 4.3. Mostly concern
+  the now depreciate automatic conversion of string contsants to "char*" type.
+  Other fixes include adding parenthesis around && within ||.
 
 Ragel 5.25 - Dec 24, 2007
 =========================
