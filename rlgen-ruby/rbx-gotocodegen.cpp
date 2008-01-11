@@ -649,7 +649,12 @@ void RbxGotoCodeGen::RET( ostream &ret, bool inFinish )
 void RbxGotoCodeGen::BREAK( ostream &ret, int targState )
 {
 	outLabelUsed = true;
-	rbxGoto(ret, "_out") << "\n";
+
+	out <<
+		"	begin\n"
+		"		" << P() << " += 1\n"
+		"		" << rbxGoto(ret, "_out") << "\n" 
+		"	end\n";
 }
 
 void RbxGotoCodeGen::writeData()

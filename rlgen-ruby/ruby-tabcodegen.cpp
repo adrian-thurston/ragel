@@ -130,6 +130,7 @@ void RubyTabCodeGen::BREAK( ostream &out, int targState )
 {
 	out << 
 		"	begin\n"
+		"		" << P() << " += 1\n"
 		"		_trigger_goto = true\n"
 		"		_goto_level = _out\n"
 		"		break\n"

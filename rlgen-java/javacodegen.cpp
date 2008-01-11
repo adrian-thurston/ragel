@@ -123,7 +123,8 @@ void JavaTabCodeGen::RET( ostream &ret, bool inFinish )
 
 void JavaTabCodeGen::BREAK( ostream &ret, int targState )
 {
-	ret << "{ _goto_targ = " << _out << "; " << CTRL_FLOW() << " continue _goto;}";
+	ret << "{ " << P() << " += 1; _goto_targ = " << _out << "; " << 
+			CTRL_FLOW() << " continue _goto;}";
 }
 
 void JavaTabCodeGen::NEXT( ostream &ret, int nextDest, bool inFinish )

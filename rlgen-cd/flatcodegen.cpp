@@ -529,7 +529,7 @@ void FlatCodeGen::RET( ostream &ret, bool inFinish )
 void FlatCodeGen::BREAK( ostream &ret, int targState )
 {
 	outLabelUsed = true;
-	ret << CTRL_FLOW() << "goto _out;";
+	ret << "{" << P() << "++; " << CTRL_FLOW() << "goto _out; }";
 }
 
 void FlatCodeGen::writeData()

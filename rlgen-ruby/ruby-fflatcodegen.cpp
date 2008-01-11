@@ -113,6 +113,7 @@ void RubyFFlatCodeGen::BREAK( ostream &out, int targState )
 {
 	out << 
 		"	begin\n"
+		"		" << P() << " += 1\n"
 		"		_goto_level = _out\n"
 		"		next\n"
 		"	end\n";

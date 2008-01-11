@@ -1957,15 +1957,14 @@ representing a state.
 last \verb|fcall| was made.  Use of \verb|fret| requires the declaration of a
 call stack. Control is immediately transferred to the destination state.
 
-\item \verb|fbreak;| -- Save the current state and immediately break out of the
-execute loop. This statement is useful in conjunction with the \verb|noend|
-write option. Rather than process input until the end marker of the input
-buffer is arrived at, the fbreak statement can be used to stop processing input
-upon seeing some end-of-string marker.  It can also be used for handling
-exceptional circumstances.  The fbreak statement does not change the pointer to
-the current character. After an \verb|fbreak| call the \verb|p| variable will point to
-the character that was being traversed over when the action was
-executed. The current state will be the target of the current transition.
+\item \verb|fbreak;| -- Advance \verb|p|, save the target state to \verb|cs|
+and immediately break out of the execute loop. This statement is useful
+in conjunction with the \verb|noend| write option. Rather than process input
+until \verb|pe| is arrived at, the fbreak statement
+can be used to stop processing from an action.  After an \verb|fbreak|
+statement the \verb|p| variable will point to the next character in the input. The
+current state will be the target of the current transition. Note that \verb|fbreak|
+causes the target state's to-state actions to be skipped.
 
 \end{itemize}
 

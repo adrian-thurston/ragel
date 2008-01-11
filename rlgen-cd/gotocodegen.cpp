@@ -621,7 +621,7 @@ void GotoCodeGen::RET( ostream &ret, bool inFinish )
 void GotoCodeGen::BREAK( ostream &ret, int targState )
 {
 	outLabelUsed = true;
-	ret << CTRL_FLOW() << "goto _out;";
+	ret << "{" << P() << "++; " << CTRL_FLOW() << "goto _out; }";
 }
 
 void GotoCodeGen::writeData()
