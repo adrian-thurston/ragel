@@ -107,7 +107,7 @@ struct Scanner
 
 	/* For import parsing. */
 	int tok_cs, tok_act;
-	int *tok_tokstart, *tok_tokend;
+	int *tok_ts, *tok_te;
 	int cur_token;
 	static const int max_tokens = 32;
 	int token_data[max_tokens];
@@ -122,7 +122,7 @@ struct Scanner
 	/* For character scanning. */
 	int line;
 	InputLoc sectionLoc;
-	char *tokstart, *tokend;
+	char *ts, *te;
 	int column;
 	char *lastnl;
 

@@ -58,7 +58,7 @@ xmlparse.cpp: xmlparse.kl xmlparse.kh
 	kelbt -o $@ $<
 
 xmlscan.cpp: xmlscan.rl
-	ragel xmlscan.rl | rlgen-cd -G2 -o xmlscan.cpp
+	ragel -G2 -o xmlscan.cpp xmlscan.rl
 
 xmltags.cpp: xmltags.gperf
 	gperf -L C++ -t $< > $@

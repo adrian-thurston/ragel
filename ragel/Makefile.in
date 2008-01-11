@@ -69,7 +69,7 @@ rlparse.cpp: rlparse.kl rlparse.kh
 rlscan.cpp: rlparse.h
 
 rlscan.cpp: rlscan.rl
-	ragel $< | rlgen-cd -G2 -o $@
+	ragel -G2 -o $@ $<
 
 endif
 

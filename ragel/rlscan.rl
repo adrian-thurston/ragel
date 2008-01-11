@@ -57,7 +57,7 @@ enum InlineBlockType
 	main := |*
 		# Define of number.
 		IMP_Define IMP_Word IMP_UInt => { 
-			int base = tok_tokstart - token_data;
+			int base = tok_ts - token_data;
 			int nameOff = 1;
 			int numOff = 2;
 
@@ -71,7 +71,7 @@ enum InlineBlockType
 
 		# Assignment of number.
 		IMP_Word '=' IMP_UInt => { 
-			int base = tok_tokstart - token_data;
+			int base = tok_ts - token_data;
 			int nameOff = 0;
 			int numOff = 2;
 
@@ -85,7 +85,7 @@ enum InlineBlockType
 
 		# Define of literal.
 		IMP_Define IMP_Word IMP_Literal => { 
-			int base = tok_tokstart - token_data;
+			int base = tok_ts - token_data;
 			int nameOff = 1;
 			int litOff = 2;
 
@@ -99,7 +99,7 @@ enum InlineBlockType
 
 		# Assignment of literal.
 		IMP_Word '=' IMP_Literal => { 
-			int base = tok_tokstart - token_data;
+			int base = tok_ts - token_data;
 			int nameOff = 0;
 			int litOff = 2;
 
@@ -122,15 +122,19 @@ void Scanner::flushImport()
 {
 	int *p = token_data;
 	int *pe = token_data + cur_token;
+	int *eof = 0;
 
-	%% write init;
-	%% write exec;
+	%%{
+		machine inline_token_scan;
+		write init;
+		write exec;
+	}%%
 
-	if ( tok_tokstart == 0 )
+	if ( tok_ts == 0 )
 		cur_token = 0;
 	else {
-		cur_token = pe - tok_tokstart;
-		int ts_offset = tok_tokstart - token_data;
+		cur_token = pe - tok_ts;
+		int ts_offset = tok_ts - token_data;
 		memmove( token_data, token_data+ts_offset, cur_token*sizeof(token_data[0]) );
 		memmove( token_strings, token_strings+ts_offset, cur_token*sizeof(token_strings[0]) );
 		memmove( token_lens, token_lens+ts_offset, cur_token*sizeof(token_lens[0]) );
@@ -192,7 +196,7 @@ void Scanner::pass()
 	/* If no errors and we are at the bottom of the include stack (the
 	 * source file listed on the command line) then write out the data. */
 	if ( includeDepth == 0 && machineSpec == 0 && machineName == 0 )
-		xmlEscapeHost( output, tokstart, tokend-tokstart );
+		xmlEscapeHost( output, ts, te-ts );
 }
 
 /*
@@ -252,9 +256,9 @@ void Scanner::updateCol()
 {
 	char *from = lastnl;
 	if ( from == 0 )
-		from = tokstart;
-	//cerr << "adding " << tokend - from << " to column" << endl;
-	column += tokend - from;
+		from = ts;
+	//cerr << "adding " << te - from << " to column" << endl;
+	column += te - from;
 	lastnl = 0;
 }
 
@@ -455,8 +459,16 @@ void Scanner::token( int type, char *start, char *end )
 
 void Scanner::processToken( int type, char *tokdata, int toklen )
 {
-	int *p = &type;
-	int *pe = &type + 1;
+	int *p, *pe, *eof;
+	
+
+	if ( type < 0 )
+		p = pe = eof = 0;
+	else {
+		p = &type;
+		pe = &type + 1;
+		eof = 0;
+	}
 
 	%%{
 		machine section_parse;
@@ -487,10 +499,7 @@ void Scanner::startSection( )
 void Scanner::endSection( )
 {
 	/* Execute the eof actions for the section parser. */
-	%%{
-		machine section_parse;
-		write eof;
-	}%%
+	processToken( -1, 0, 0 );
 
 	/* Close off the section with the parser. */
 	if ( active() ) {
@@ -586,22 +595,22 @@ void Scanner::endSection( )
 			token( KW_Break );
 		};
 
-		ident => { token( TK_Word, tokstart, tokend ); };
+		ident => { token( TK_Word, ts, te ); };
 
-		number => { token( TK_UInt, tokstart, tokend ); };
-		hex_number => { token( TK_Hex, tokstart, tokend ); };
+		number => { token( TK_UInt, ts, te ); };
+		hex_number => { token( TK_Hex, ts, te ); };
 
 		( s_literal | d_literal | host_re_literal ) 
-			=> { token( IL_Literal, tokstart, tokend ); };
+			=> { token( IL_Literal, ts, te ); };
 
 		whitespace+ => { 
 			if ( whitespaceOn ) 
-				token( IL_WhiteSpace, tokstart, tokend );
+				token( IL_WhiteSpace, ts, te );
 		};
 
-		ruby_comment => { token( IL_Comment, tokstart, tokend ); };
+		ruby_comment => { token( IL_Comment, ts, te ); };
 
-		"::" => { token( TK_NameSep, tokstart, tokend ); };
+		"::" => { token( TK_NameSep, ts, te ); };
 
 		# Some symbols need to go to the parser as with their cardinal value as
 		# the token type (as opposed to being sent as anonymous symbols)
@@ -611,20 +620,20 @@ void Scanner::endSection( )
 
 		";" => {
 			whitespaceOn = true;
-			token( *tokstart, tokstart, tokend );
+			token( *ts, ts, te );
 			if ( inlineBlockType == SemiTerminated )
 				fret;
 		};
 
 		[*)] => { 
 			whitespaceOn = true;
-			token( *tokstart, tokstart, tokend );
+			token( *ts, ts, te );
 		};
 
-		[,(] => { token( *tokstart, tokstart, tokend ); };
+		[,(] => { token( *ts, ts, te ); };
 
 		'{' => { 
-			token( IL_Symbol, tokstart, tokend );
+			token( IL_Symbol, ts, te );
 			curly_count += 1; 
 		};
 
@@ -637,7 +646,7 @@ void Scanner::endSection( )
 			else {
 				/* Either a semi terminated inline block or only the closing
 				 * brace of some inner scope, not the block's closing brace. */
-				token( IL_Symbol, tokstart, tokend );
+				token( IL_Symbol, ts, te );
 			}
 		};
 
@@ -646,7 +655,7 @@ void Scanner::endSection( )
 		};
 
 		# Send every other character as a symbol.
-		any => { token( IL_Symbol, tokstart, tokend ); };
+		any => { token( IL_Symbol, ts, te ); };
 	*|;
 
 
@@ -689,22 +698,22 @@ void Scanner::endSection( )
 			token( KW_Break );
 		};
 
-		ident => { token( TK_Word, tokstart, tokend ); };
+		ident => { token( TK_Word, ts, te ); };
 
-		number => { token( TK_UInt, tokstart, tokend ); };
-		hex_number => { token( TK_Hex, tokstart, tokend ); };
+		number => { token( TK_UInt, ts, te ); };
+		hex_number => { token( TK_Hex, ts, te ); };
 
 		( s_literal | d_literal ) 
-			=> { token( IL_Literal, tokstart, tokend ); };
+			=> { token( IL_Literal, ts, te ); };
 
 		whitespace+ => { 
 			if ( whitespaceOn ) 
-				token( IL_WhiteSpace, tokstart, tokend );
+				token( IL_WhiteSpace, ts, te );
 		};
 
-		c_cpp_comment => { token( IL_Comment, tokstart, tokend ); };
+		c_cpp_comment => { token( IL_Comment, ts, te ); };
 
-		"::" => { token( TK_NameSep, tokstart, tokend ); };
+		"::" => { token( TK_NameSep, ts, te ); };
 
 		# Some symbols need to go to the parser as with their cardinal value as
 		# the token type (as opposed to being sent as anonymous symbols)
@@ -714,20 +723,20 @@ void Scanner::endSection( )
 
 		";" => {
 			whitespaceOn = true;
-			token( *tokstart, tokstart, tokend );
+			token( *ts, ts, te );
 			if ( inlineBlockType == SemiTerminated )
 				fret;
 		};
 
 		[*)] => { 
 			whitespaceOn = true;
-			token( *tokstart, tokstart, tokend );
+			token( *ts, ts, te );
 		};
 
-		[,(] => { token( *tokstart, tokstart, tokend ); };
+		[,(] => { token( *ts, ts, te ); };
 
 		'{' => { 
-			token( IL_Symbol, tokstart, tokend );
+			token( IL_Symbol, ts, te );
 			curly_count += 1; 
 		};
 
@@ -740,7 +749,7 @@ void Scanner::endSection( )
 			else {
 				/* Either a semi terminated inline block or only the closing
 				 * brace of some inner scope, not the block's closing brace. */
-				token( IL_Symbol, tokstart, tokend );
+				token( IL_Symbol, ts, te );
 			}
 		};
 
@@ -749,7 +758,7 @@ void Scanner::endSection( )
 		};
 
 		# Send every other character as a symbol.
-		any => { token( IL_Symbol, tokstart, tokend ); };
+		any => { token( IL_Symbol, ts, te ); };
 	*|;
 
 	or_literal := |*
@@ -763,7 +772,7 @@ void Scanner::endSection( )
 		'\\f' => { token( RE_Char, '\f' ); };
 		'\\r' => { token( RE_Char, '\r' ); };
 		'\\\n' => { updateCol(); };
-		'\\' any => { token( RE_Char, tokstart+1, tokend ); };
+		'\\' any => { token( RE_Char, ts+1, te ); };
 
 		# Range dash in an OR expression.
 		'-' => { token( RE_Dash, 0, 0 ); };
@@ -776,7 +785,7 @@ void Scanner::endSection( )
 		};
 
 		# Characters in an OR expression.
-		[^\]] => { token( RE_Char, tokstart, tokend ); };
+		[^\]] => { token( RE_Char, ts, te ); };
 
 	*|;
 
@@ -791,11 +800,11 @@ void Scanner::endSection( )
 		'\\f' => { token( RE_Char, '\f' ); };
 		'\\r' => { token( RE_Char, '\r' ); };
 		'\\\n' => { updateCol(); };
-		'\\' any => { token( RE_Char, tokstart+1, tokend ); };
+		'\\' any => { token( RE_Char, ts+1, te ); };
 
 		# Terminate an OR expression.
 		'/' [i]? => { 
-			token( RE_Slash, tokstart, tokend ); 
+			token( RE_Slash, ts, te ); 
 			fgoto parser_def;
 		};
 
@@ -811,12 +820,12 @@ void Scanner::endSection( )
 		};
 
 		# Characters in an OR expression.
-		[^\/] => { token( RE_Char, tokstart, tokend ); };
+		[^\/] => { token( RE_Char, ts, te ); };
 	*|;
 
 	# We need a separate token space here to avoid the ragel keywords.
 	write_statement := |*
-		ident => { token( TK_Word, tokstart, tokend ); } ;
+		ident => { token( TK_Word, ts, te ); } ;
 		[ \t\n]+ => { updateCol(); };
 		';' => { token( ';' ); fgoto parser_def; };
 
@@ -877,15 +886,15 @@ void Scanner::endSection( )
 		'export' => { token( KW_Export ); };
 
 		# Identifiers.
-		ident => { token( TK_Word, tokstart, tokend ); } ;
+		ident => { token( TK_Word, ts, te ); } ;
 
 		# Numbers
-		number => { token( TK_UInt, tokstart, tokend ); };
-		hex_number => { token( TK_Hex, tokstart, tokend ); };
+		number => { token( TK_UInt, ts, te ); };
+		hex_number => { token( TK_Hex, ts, te ); };
 
 		# Literals, with optionals.
 		( s_literal | d_literal ) [i]? 
-			=> { token( TK_Literal, tokstart, tokend ); };
+			=> { token( TK_Literal, ts, te ); };
 
 		'[' => { token( RE_SqOpen ); fcall or_literal; };
 		'[^' => { token( RE_SqOpenNeg ); fcall or_literal; };
@@ -959,7 +968,7 @@ void Scanner::endSection( )
 		"|*" => { token( TK_BarStar ); };
 
 		# Separater for name references.
-		"::" => { token( TK_NameSep, tokstart, tokend ); };
+		"::" => { token( TK_NameSep, ts, te ); };
 
 		'}%%' => { 
 			updateCol();
@@ -996,16 +1005,16 @@ void Scanner::endSection( )
 			scan_error() << "unterminated ragel section" << endl;
 		};
 
-		any => { token( *tokstart ); } ;
+		any => { token( *ts ); } ;
 	*|;
 
 	# Outside code scanner. These tokens get passed through.
 	main_ruby := |*
-		ident => { pass( IMP_Word, tokstart, tokend ); };
-		number => { pass( IMP_UInt, tokstart, tokend ); };
+		ident => { pass( IMP_Word, ts, te ); };
+		number => { pass( IMP_UInt, ts, te ); };
 		ruby_comment => { pass(); };
 		( s_literal | d_literal | host_re_literal ) 
-			=> { pass( IMP_Literal, tokstart, tokend ); };
+			=> { pass( IMP_Literal, ts, te ); };
 
 		'%%{' => { 
 			updateCol();
@@ -1021,16 +1030,16 @@ void Scanner::endSection( )
 		};
 		whitespace+ => { pass(); };
 		EOF;
-		any => { pass( *tokstart, 0, 0 ); };
+		any => { pass( *ts, 0, 0 ); };
 	*|;
 
 	# Outside code scanner. These tokens get passed through.
 	main := |*
 		'define' => { pass( IMP_Define, 0, 0 ); };
-		ident => { pass( IMP_Word, tokstart, tokend ); };
-		number => { pass( IMP_UInt, tokstart, tokend ); };
+		ident => { pass( IMP_Word, ts, te ); };
+		number => { pass( IMP_UInt, ts, te ); };
 		c_cpp_comment => { pass(); };
-		( s_literal | d_literal ) => { pass( IMP_Literal, tokstart, tokend ); };
+		( s_literal | d_literal ) => { pass( IMP_Literal, ts, te ); };
 
 		'%%{' => { 
 			updateCol();
@@ -1046,7 +1055,7 @@ void Scanner::endSection( )
 		};
 		whitespace+ => { pass(); };
 		EOF;
-		any => { pass( *tokstart, 0, 0 ); };
+		any => { pass( *ts, 0, 0 ); };
 	*|;
 }%%
 
@@ -1056,7 +1065,6 @@ void Scanner::do_scan()
 {
 	int bufsize = 8;
 	char *buf = new char[bufsize];
-	const char last_char = 0;
 	int cs, act, have = 0;
 	int top;
 
@@ -1095,9 +1103,9 @@ void Scanner::do_scan()
 			space = bufsize - have;
 
 			/* Patch up pointers possibly in use. */
-			if ( tokstart != 0 )
-				tokstart = newbuf + ( tokstart - buf );
-			tokend = newbuf + ( tokend - buf );
+			if ( ts != 0 )
+				ts = newbuf + ( ts - buf );
+			te = newbuf + ( te - buf );
 
 			/* Copy the new buffer in. */
 			memcpy( newbuf, buf, have );
@@ -1107,14 +1115,15 @@ void Scanner::do_scan()
 
 		input.read( p, space );
 		int len = input.gcount();
+		char *pe = p + len;
 
-		/* If we see eof then append the EOF char. */
+		/* If we see eof then append the eof var. */
+		char *eof = 0;
 	 	if ( len == 0 ) {
-			p[0] = last_char, len = 1;
+			eof = pe;
 			execute = false;
 		}
 
-		char *pe = p + len;
 		%% write exec;
 
 		/* Check if we failed. */
@@ -1126,7 +1135,7 @@ void Scanner::do_scan()
 		}
 
 		/* Decide if we need to preserve anything. */
-		char *preserve = tokstart;
+		char *preserve = ts;
 
 		/* Now set up the prefix. */
 		if ( preserve == 0 )
@@ -1136,9 +1145,9 @@ void Scanner::do_scan()
 			have = pe - preserve;
 			memmove( buf, preserve, have );
 			unsigned int shiftback = preserve - buf;
-			if ( tokstart != 0 )
-				tokstart -= shiftback;
-			tokend -= shiftback;
+			if ( ts != 0 )
+				ts -= shiftback;
+			te -= shiftback;
 
 			preserve = buf;
 		}

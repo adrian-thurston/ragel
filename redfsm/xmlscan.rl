@@ -72,7 +72,7 @@ struct Scanner
 
 	/* Scanner State. */
 	int cs, act, have, curline, curcol;
-	char *tokstart, *tokend;
+	char *ts, *te;
 	char *p, *pe;
 	int done;
 
@@ -97,7 +97,7 @@ struct Scanner
 #define TK_OpenTag 4
 #define TK_CloseTag 5
 
-#define ret_tok( _tok ) token = (_tok); data = tokstart
+#define ret_tok( _tok ) token = (_tok); data = ts
 
 void Scanner::adjustAttrPointers( int distance )
 {
@@ -193,21 +193,21 @@ int Scanner::scan( )
 		if ( p == pe ) {
 			//printf("scanner: need more data\n");
 
-			if ( tokstart == 0 )
+			if ( ts == 0 )
 				have = 0;
 			else {
 				/* There is data that needs to be shifted over. */
 				//printf("scanner: buffer broken mid token\n");
-				have = pe - tokstart;
-				memmove( buf, tokstart, have );
+				have = pe - ts;
+				memmove( buf, ts, have );
 
-				int distance = tokstart - buf;
-				tokend -= distance;
+				int distance = ts - buf;
+				te -= distance;
 				tag_id_start -= distance;
 				attr_id_start -= distance;
 				attr_value_start -= distance;
 				adjustAttrPointers( distance );
-				tokstart = buf;
+				ts = buf;
 			}
 
 			p = buf + have;
@@ -241,8 +241,6 @@ int Scanner::scan( )
 			return TK_ERR;
 
 		if ( token != TK_NO_TOKEN ) {
-			/* fbreak does not advance p, so we do it manually. */
-			p = p + 1;
 			data_len = p - data;
 			return token;
 		}
