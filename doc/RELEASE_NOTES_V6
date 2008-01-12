@@ -1,69 +1,82 @@
                       RELEASE NOTES Ragel 6.X
 
-This file describes the changes in Ragel version 5.X that are not backwards
+This file describes the changes in Ragel version 6.X that are not backwards
 compatible. For a list of all the changes see the ChangeLog file.
 
 The EOF Event
 =============
 
-The "write eof" command is no longer needed and was removed.
+There is a new execution variable called "eof". This should be set to pe on the
+execution of the last buffer block. When p == eof the state machine's EOF
+actions are executed. The variable is required only when EOF actions have been
+embedded.
 
-Introcuded the "eof" variable for indicating the end of file. The p variable is
-checked against eof when the processing loop reaches the end of a block. If p
-== eof at this time then the EOF actions are executed. The variable is required
-only when EOF actions have been emebedded.
+The advantage of this over "write eof" is that EOF actions are now executed in
+the same context as regular actions. They are free to manipulate p, and jump to
+a new portion of the machine to reprocess input. This was not possible with
+"write eof".
 
-Scanners now use EOF actions to generate tokens. This eliminates the need to
-flush the last token.
+The "write eof" directive was consequently removed.
 
-Remove the "write eof" directive.
-
-If the machine has EOF actions then the "eof" variable must be declared and set
-to pe on the last buffer block.
+Scanners now use EOF actions to to flush out the last token, if needed. This
+eliminates the need to manually flush the last token.
 
 Semantics of > % and Error Actions
 ==================================
 
-Gone back to 3.X semantics for >, % and error actions. The > operator also
-embeds a leaving action/priority into the start state if it is final. If EOF
-happens in a state with a leaving operator then leaving action it is executed.
-If EOF happens in a non-final state that has an error action, the error action
-is executed.
+Now that EOF actions are executed in the same context as regular actions we are
+free to go back to the 3.X semantics for >, % and error actions. 
+
+Those that have been using Ragel since the 3.X days will remember that the >
+operator also embedded a leaving action/priority into the start state when it
+was final. The leaving operator would embed EOF actions when the final states
+stayed final all the way to the end of compilation. Also error actions would
+embed EOF actions when at the end of compilation the error states were not
+final.
+
+These characteristics were removed because EOF actions were not executed in the
+same context as regular actions and easily resulted in compile errors. Now that
+all actions are executed in the same context this is no longer a problem and
+the orignal Ragel semantics is restored.
 
 Backend Automatically Executed
 ==============================
 
-The Ragel program now executes frontend and backend processes separately,
-connecting them with a temporary file in the current directory. Without the -f
-option the "ragel" program marshals arguments and calls the frontend and
-backend. With the -f option the "ragel" program acts as the frontend only.
-
-Makefiles don't need to execute the backend.
+The "ragel" program now automatically executes the appropriate backend. If you
+need the intermediate XML format you can use the -x option. Your makefiles will
+need to be updated.
 
 The fbreak Statement
 ====================
 
-The fbreak statement now advances p.
-
-After an fbreak you do not need to advance p.
+The fbreak statement now advances p. It is now possible to break out of the
+machine and restart it without having to fixing p first. Originally fbreak did
+not advance p because it was intended to be used stop processing and advancing
+p was more work than necessary in that case. But it turns out to be also useful
+for stopping to return a token. In this case the failure to advance p is a
+major inconvenience.
 
 Guarded Concatenation Operators are Stronger
 ============================================
 
-In the :> :>> and <: operators it was possible for the priority assignment to
-be bypassed via the zero length string. In :> this was fixed automatically with
-the semantics change to the entering priority operator. If the start state is
-final it now embeds a leaving action into it, preventing persistance through
-the zero length string. In :>> and <: this was fixed explicitly. With <: the
-entering priority operator was used and with :> a sepecial exception was added.
-Since it uses the finishing transition operator it also adds a leaving priority
-to the start state if it is final.
+The :> :>> and <: guarded concatenation operators have been strengthend. In the
+previous version of Ragel is was possible for the priority assignments to be
+bypassed via the the zero length string. Running these examples through 5.25
+you will see that the a and b actions are executed on the same character,
+showing the guard fails. This happens because the the operators did not
+consider that the middle machine might have a start state that is final. In 6.0
+these cases have been fixed.
 
+    (' '@a)* <: 'x'* . ' '@b;
+    (' '@a)* :> 'x'? . ' '@b;
+    (' '@a)* :>> 'xyz'? . ' '@b;
+	
 The tokstart and tokend Variables Renamed
 =========================================
 
-The "tokstart" and "tokend" variables were changed to "ts" and "te".
+The "tokstart" and "tokend" variables were changed to "ts" and "te". These
+variables can be referenced a lot in scanner actions. They should be shorter.
 
-Search and replace:
+To update your code simply search and replace:
     tokstart => ts
     tokend => te
