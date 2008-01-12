@@ -1,6 +1,6 @@
-Ragel 6.0 - TBR
-===============
- -Remove the 'noend' write option from examples/atoi.rl. This example is
+Ragel 6.0 - Jan 12, 2008
+========================
+ -Removed the 'noend' write option from examples/atoi.rl. This example is
   referenced a lot as a first example and as such it shouldn't contain a
   special purpose write option like 'noend'.
  -Introcuded the "eof" variable for indicating the end of file. The p variable
@@ -14,12 +14,12 @@ Ragel 6.0 - TBR
   now used to emulate gotos.
  -Ruby code generation was also restructured. Gotos are elmulated using a
   series of if tests. 
- -Gone back to 3.X semantics for >, % and error actions. The > operator also
+ -Went back to 3.X semantics for >, % and error actions. The > operator also
   embeds a leaving action/priority into the start state if it is final. If EOF
-  happens in a state with a leaving operator then leaving action it is
+  happens in a state with a leaving operator then the leaving action is
   executed. If EOF happens in a non-final state that has an error action, the
   error action is executed.
- -The Ragel program now executes frontend and backend processes separately,
+ -The "ragel" program now executes frontend and backend processes separately,
   connecting them with a temporary file in the current directory. Without the
   -x option the "ragel" program marshals arguments and calls the frontend and
   backend. With the -x option the "ragel" program acts as the frontend only.
@@ -36,7 +36,7 @@ Ragel 6.0 - TBR
   same name in case we are executing from the source tree.
  -Changed the -l option in rlgen-cd to -L because it is covered in the
   frontend. Added a passthrough in the frontend for the backend options.
- -Dot file generation can now be invoked using the -V option to the parent. We
+ -Dot file generation can now be invoked using the -V option to ragel. We
   now require an input file. If standard in is used then we don't have a file
   name on which to base the output.
  -Able to build native windows executables using Cygwin+MinGW. 
@@ -45,7 +45,7 @@ Ragel 6.0 - TBR
   associated with explicit initialization statements. It is also much easier
   on the java compiler which can run out of memory compiling very large
   machines. The downside is that it takes slightly longer to initialize static
-  data.
+  data at run time.
  -The fbreak statement now advances p.
  -In the :> :>> and <: operators it was possible for the priority assignment
   to be bypassed via the zero length string. In :> this was fixed
@@ -53,7 +53,7 @@ Ragel 6.0 - TBR
   If the start state is final it now embeds a leaving action into it,
   preventing persistance through the zero length string. In :>> and <: this
   was fixed explicitly. With <: the entering priority operator was used and
-  with :> a sepecial exception was added. Since it uses the finishing
+  with :> a special exception was added. Since it uses the finishing
   transition operator it also adds a leaving priority to the start state if it
   is final.
  -Ranlib is now run on the archives. Patch from Kenny MacDermid.

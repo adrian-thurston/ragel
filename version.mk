@@ -1,2 +1,2 @@
-VERSION = 5.25
-PUBDATE = December 2007
+VERSION = 6.0
+PUBDATE = January 2008

@@ -25,27 +25,27 @@ eliminates the need to manually flush the last token.
 Semantics of > % and Error Actions
 ==================================
 
-Now that EOF actions are executed in the same context as regular actions we are
-free to go back to the 3.X semantics for >, % and error actions. 
+Ragel has gone back to the 3.X semantics for >, % and error actions. 
 
 Those that have been using Ragel since the 3.X days will remember that the
 entering operator > embedded a leaving action/priority into the start state
 when it was final. The leaving operator % would embed EOF actions when the
 final states stayed final all the way to the end of compilation. Also, error
-actions would embed EOF actions when at the end of compilation the states they
-were embedded into were not final.
+actions would embed EOF actions when at the end of compilation the states the
+error actions were embedded into were not final.
 
-These characteristics were removed because EOF actions were not executed in the
-same context as regular actions and easily resulted in compile errors. Now that
-all actions are executed in the same context this is no longer a problem and
-the original Ragel semantics is restored.
+The problem before was that EOF actions and regular actions were executed in
+different contexts ("write exec" and "write eof"), and a single action block
+could easily end up in two different functions. This could lead to compile
+errors and other subtle errors. Now that all actions are executed in the same
+context ("write exec") these problems go away. The original semantics has been
+restored.
 
 Backend Automatically Executed
 ==============================
 
 The "ragel" program now automatically executes the appropriate backend. If you
-need the intermediate XML format you can use the -x option. Your makefiles will
-need to be updated.
+need the intermediate XML format you can use the -x option. 
 
 The fbreak Statement
 ====================
@@ -64,9 +64,9 @@ The :> :>> and <: guarded concatenation operators have been strengthened. In
 the previous version of Ragel is was possible for the priority assignments to
 be bypassed via the the zero length string. Running the following examples
 through 5.25 you will see that the a and b actions are executed on a single
-transition, showing the guard fails. This happens because the the operators did
-not consider that the middle machine might have a start state that is final. In
-6.0 these cases have been fixed.
+transition, showing the guard fails. This happens because the operators did not
+consider that the middle machine might have a start state that is final. In 6.0
+these cases have been fixed.
 
     (' '@a)* <: 'x'* . ' '@b;
     (' '@a)* :> 'x'? . ' '@b;
@@ -81,3 +81,9 @@ variables get referenced a lot in scanner actions. They should be shorter.
 To update your code simply search and replace:
     tokstart => ts
     tokend => te
+
+Options
+=======
+
+The -l option in rlgen-cd was changed to -L because -l is used in the frontend,
+which now must pass options through.
