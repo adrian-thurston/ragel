@@ -577,12 +577,12 @@ char **makePathChecksWin( const char *progName )
 	return result;
 }
 
-void spawn( char *progName, char **pathChecks, 
+void spawn( const char *progName, char **pathChecks, 
 		ArgsVector &args, char *intermed )
 {
 	int result = 0;
 	while ( *pathChecks != 0 ) {
-		cerr << "trying to execute " << *pathChecks << endl;
+		//cerr << "trying to execute " << *pathChecks << endl;
 		result = _spawnv( _P_WAIT, *pathChecks, args.data );
 		if ( result >= 0 || errno != ENOENT )
 			break;
