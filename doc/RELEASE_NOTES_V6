@@ -1,3 +1,4 @@
+
                       RELEASE NOTES Ragel 6.X
 
 This file describes the changes in Ragel version 6.X that are not backwards
@@ -27,17 +28,17 @@ Semantics of > % and Error Actions
 Now that EOF actions are executed in the same context as regular actions we are
 free to go back to the 3.X semantics for >, % and error actions. 
 
-Those that have been using Ragel since the 3.X days will remember that the >
-operator also embedded a leaving action/priority into the start state when it
-was final. The leaving operator would embed EOF actions when the final states
-stayed final all the way to the end of compilation. Also error actions would
-embed EOF actions when at the end of compilation the error states were not
-final.
+Those that have been using Ragel since the 3.X days will remember that the
+entering operator > embedded a leaving action/priority into the start state
+when it was final. The leaving operator % would embed EOF actions when the
+final states stayed final all the way to the end of compilation. Also, error
+actions would embed EOF actions when at the end of compilation the states they
+were embedded into were not final.
 
 These characteristics were removed because EOF actions were not executed in the
 same context as regular actions and easily resulted in compile errors. Now that
 all actions are executed in the same context this is no longer a problem and
-the orignal Ragel semantics is restored.
+the original Ragel semantics is restored.
 
 Backend Automatically Executed
 ==============================
@@ -50,22 +51,22 @@ The fbreak Statement
 ====================
 
 The fbreak statement now advances p. It is now possible to break out of the
-machine and restart it without having to fixing p first. Originally fbreak did
-not advance p because it was intended to be used stop processing and advancing
-p was more work than necessary in that case. But it turns out to be also useful
-for stopping to return a token. In this case the failure to advance p is a
-major inconvenience.
+machine and restart it without having to fix p first. Originally, fbreak did
+not advance p because it was intended to be used to terminate processing.
+Advancing p was more work than necessary in that case. But fbreak turns out to
+be useful for stopping to return a token as well. In this case the failure to
+advance p is an inconvenience.
 
 Guarded Concatenation Operators are Stronger
 ============================================
 
-The :> :>> and <: guarded concatenation operators have been strengthend. In the
-previous version of Ragel is was possible for the priority assignments to be
-bypassed via the the zero length string. Running these examples through 5.25
-you will see that the a and b actions are executed on the same character,
-showing the guard fails. This happens because the the operators did not
-consider that the middle machine might have a start state that is final. In 6.0
-these cases have been fixed.
+The :> :>> and <: guarded concatenation operators have been strengthened. In
+the previous version of Ragel is was possible for the priority assignments to
+be bypassed via the the zero length string. Running the following examples
+through 5.25 you will see that the a and b actions are executed on a single
+transition, showing the guard fails. This happens because the the operators did
+not consider that the middle machine might have a start state that is final. In
+6.0 these cases have been fixed.
 
     (' '@a)* <: 'x'* . ' '@b;
     (' '@a)* :> 'x'? . ' '@b;
@@ -75,7 +76,7 @@ The tokstart and tokend Variables Renamed
 =========================================
 
 The "tokstart" and "tokend" variables were changed to "ts" and "te". These
-variables can be referenced a lot in scanner actions. They should be shorter.
+variables get referenced a lot in scanner actions. They should be shorter.
 
 To update your code simply search and replace:
     tokstart => ts
