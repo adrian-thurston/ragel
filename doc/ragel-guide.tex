@@ -946,15 +946,10 @@ one portion of the machine to the next. See Chapter
 \ref{controlling-nondeterminism} for more on this problem and how to solve it.
 
 The Graphviz tool is an immense help when debugging improperly compiled
-machines or otherwise learning how to use Ragel. In many cases, practical
-parsing programs will be too large to completely visualize with Graphviz.  The
-proper approach is to reduce the language to the smallest subset possible that
-still exhibits the characteristics that one wishes to learn about or to fix.
-This can be done without modifying the source code using the \verb|-M| and
-\verb|-S| options. If a machine cannot be easily reduced,
-embeddings of unique actions can be very useful for tracing a
-particular component of a larger machine specification, since action names are
-written out on transition labels.
+machines or otherwise learning how to use Ragel. Graphviz Dot files can be
+generated from Ragel programs using the \verb|-V| option. See Section
+\ref{visualization} for more information.
+
 
 \subsection{Union}
 
@@ -1359,11 +1354,25 @@ runs close to $O(n \times log(n))$ and requires $O(n)$ temporary storage where
 $n$ is the number of states.
 
 \section{Visualization}
+\label{visualization}
+
+%In many cases, practical
+%parsing programs will be too large to completely visualize with Graphviz.  The
+%proper approach is to reduce the language to the smallest subset possible that
+%still exhibits the characteristics that one wishes to learn about or to fix.
+%This can be done without modifying the source code using the \verb|-M| and
+%\verb|-S| options. If a machine cannot be easily reduced,
+%embeddings of unique actions can be very useful for tracing a
+%particular component of a larger machine specification, since action names are
+%written out on transition labels.
 
 Ragel is able to emit compiled state machines in Graphviz's Dot file format.
+This is done using the \verb|-V| option.
 Graphviz support allows users to perform
 incremental visualization of their parsers. User actions are displayed on
-transition labels of the graph. If the final graph is too large to be
+transition labels of the graph. 
+
+If the final graph is too large to be
 meaningful, or even drawn, the user is able to inspect portions of the parser
 by naming particular regular expression definitions with the \verb|-S| and
 \verb|-M| options to the \verb|ragel| program. Use of Graphviz greatly
@@ -2975,7 +2984,7 @@ for code generation. The host language options are:
 \item \verb|-R  | for Ruby code.
 \end{itemize}
 
-\noindent There are four code backend programs. These are:
+\noindent There are four backend code generation programs. These are:
 
 \begin{itemize}
 \item \verb|rlgen-cd    | generate code for the C-based and D languages.
@@ -2983,6 +2992,8 @@ for code generation. The host language options are:
 \item \verb|rlgen-ruby  | generate code for the Ruby language.
 \item \verb|rlgen-dot   | generate a Graphviz Dot file.
 \end{itemize}
+
+\noindent The rlgen-dot program is invoked using the \verb|-V| option.
 
 \section{Choosing a Generated Code Style (C/D/Java only)}
 \label{genout}
