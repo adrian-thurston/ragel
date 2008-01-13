@@ -133,7 +133,6 @@ int scan( Scanner *s )
 			return TK_ERR;
 
 		if ( token != TK_NO_TOKEN ) {
-			/* Save p and pe. fbreak does not advance p. */
 			s->len = s->p - s->data;
 			return token;
 		}
