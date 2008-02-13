@@ -34,6 +34,8 @@ BUILD_PARSERS = @BUILD_PARSERS@
 
 # Programs
 CXX = @CXX@
+AR = @AR@
+RANLIB = @RANLIB@
 
 # Get objects and dependencies from sources.
 OBJS = $(CC_SRCS:%.cpp=%.o)
@@ -46,8 +48,8 @@ include ../version.mk
 all: redfsm.a
 
 redfsm.a: $(GEN_SRC) $(OBJS)
-	ar -cr $@ $(OBJS) 
-	ranlib $@
+	$(AR) -cr $@ $(OBJS) 
+	$(RANLIB) $@
 
 ifeq ($(BUILD_PARSERS),true)
 

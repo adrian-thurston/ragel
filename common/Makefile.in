@@ -33,6 +33,8 @@ prefix = @prefix@
 
 # Programs
 CXX = @CXX@
+AR = @AR@
+RANLIB = @RANLIB@
 
 # Get objects and dependencies from sources.
 OBJS = $(CC_SRCS:%.cpp=%.o)
@@ -46,8 +48,8 @@ include ../version.mk
 all: common.a
 
 common.a: $(GEN_SRC) $(OBJS)
-	ar -cr $@ $(OBJS) 
-	ranlib $@
+	$(AR) -cr $@ $(OBJS) 
+	$(RANLIB) $@
 
 version.h: ../version.mk
 	echo '#define VERSION "$(VERSION)"' > version.h
