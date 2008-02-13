@@ -28,10 +28,11 @@ PDFFIGS = $(FIGURES:%.fig=%.pdf)
 include ../version.mk
 
 # Installation locations.
-prefix = @prefix@
-docdir = @datadir@/doc/ragel
-mandir = @mandir@
-
+PACKAGE     = ragel
+prefix      = @prefix@
+datarootdir = @datarootdir@
+docdir      = @docdir@
+mandir      = @mandir@
 
 MANPAGES = ragel.1 rlgen-cd.1 rlgen-java.1 rlgen-ruby.1 rlgen-dot.1
 
