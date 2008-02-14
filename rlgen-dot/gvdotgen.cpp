@@ -241,6 +241,8 @@ void GraphvizDotGen::writeDotFile( )
 
 	/* Psuedo states for final states with eof actions. */
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		if ( st->eofTrans != 0 && st->eofTrans->action != 0 )
+			out << "	eof_" << st->id << ";\n";
 		if ( st->eofAction != 0 )
 			out << "	eof_" << st->id << ";\n";
 	}
@@ -295,6 +297,11 @@ void GraphvizDotGen::writeDotFile( )
 
 	/* Out action transitions. */
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		if ( st->eofTrans != 0 && st->eofTrans->action != 0 ) {
+			out << "	" << st->id << " -> eof_" << 
+					st->id << " [ label = \"EOF"; 
+			ACTION( st->eofTrans->action ) << "\" ];\n";
+		}
 		if ( st->eofAction != 0 ) {
 			out << "	" << st->id << " -> eof_" << 
 					st->id << " [ label = \"EOF"; 
