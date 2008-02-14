@@ -302,6 +302,18 @@ void FsmAp::fillGaps( StateAp *state )
 	}
 }
 
+void FsmAp::setErrorActions( StateAp *state, const ActionTable &other )
+{
+	/* Fill any gaps in the out list with an error transition. */
+	fillGaps( state );
+
+	/* Set error transitions in the transitions that go to error. */
+	for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
+		if ( trans->toState == 0 )
+			trans->actionTable.setActions( other );
+	}
+}
+
 void FsmAp::setErrorAction( StateAp *state, int ordering, Action *action )
 {
 	/* Fill any gaps in the out list with an error transition. */

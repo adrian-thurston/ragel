@@ -178,13 +178,15 @@ void LongestMatch::makeActions( ParseData *pd )
 		/* For each part create actions for setting the match type.  We need
 		 * to do this so that the actions will go into the actionIndex. */
 		InlineList *inlineList = new InlineList;
-		inlineList->append( new InlineItem( lmi->getLoc(), this, lmi, InlineItem::LmSetActId ) );
+		inlineList->append( new InlineItem( lmi->getLoc(), this, lmi, 
+				InlineItem::LmSetActId ) );
 		char *actName = new char[50];
 		sprintf( actName, "store%i", lmi->longestMatchId );
 		lmi->setActId = newAction( pd, lmi->getLoc(), actName, inlineList );
 	}
 
-	/* Make actions that execute the user action and restart on the last character. */
+	/* Make actions that execute the user action and restart on the last
+	 * character. */
 	for ( LmPartList::Iter lmi = *longestMatchList; lmi.lte(); lmi++ ) {
 		/* For each part create actions for setting the match type.  We need
 		 * to do this so that the actions will go into the actionIndex. */
@@ -292,7 +294,7 @@ void LongestMatch::restart( FsmAp *graph, TransAp *trans )
 	graph->attachTrans( fromState, graph->startState, trans );
 }
 
-void LongestMatch::runLonestMatch( ParseData *pd, FsmAp *graph )
+void LongestMatch::runLongestMatch( ParseData *pd, FsmAp *graph )
 {
 	graph->markReachableFromHereStopFinal( graph->startState );
 	for ( StateList::Iter ms = graph->stateList; ms.lte(); ms++ ) {
@@ -313,9 +315,9 @@ void LongestMatch::runLonestMatch( ParseData *pd, FsmAp *graph )
 				StateAp *toState = trans->toState;
 				assert( toState );
 
-				/* Check if there are transitions out, this may be a very
-				 * close approximation? Out transitions going nowhere?
-				 * FIXME: Check. */
+				/* Can only optimize this if there are no transitions out.
+				 * Note there can be out transitions going nowhere with
+				 * actions and they too must inhibit this optimization. */
 				if ( toState->outList.length() > 0 ) {
 					/* Fill the item sets. */
 					graph->markReachableFromHereStopFinal( toState );
@@ -374,12 +376,18 @@ void LongestMatch::runLonestMatch( ParseData *pd, FsmAp *graph )
 				StateAp *toState = trans->toState;
 				assert( toState );
 
-				/* Check if there are transitions out, this may be a very
-				 * close approximation? Out transitions going nowhere?
-				 * FIXME: Check. */
+				/* Can only optimize this if there are no transitions out.
+				 * Note there can be out transitions going nowhere with
+				 * actions and they too must inhibit this optimization. */
 				if ( toState->outList.length() == 0 ) {
 					/* Can execute the immediate action for the longest match
-					 * part. Redirect the action to the start state. */
+					 * part. Redirect the action to the start state.
+					 *
+					 * NOTE: When we need to inhibit on_last due to leaving
+					 * actions the above test suffices. If the state has out
+					 * actions then it will fail because the out action will
+					 * have been transferred to an error transition, which
+					 * makes the outlist non-empty. */
 					trans->actionTable.setAction( lmAct->key, 
 							lmAct->value->actOnLast );
 					restartTrans.append( trans );
@@ -451,7 +459,7 @@ void LongestMatch::runLonestMatch( ParseData *pd, FsmAp *graph )
 			}
 		}
 		else if ( st->lmItemSet.length() > 1 ) {
-			/* Need to use the select. Take note of the which items the select
+			/* Need to use the select. Take note of which items the select
 			 * is needed for so only the necessary actions are included. */
 			for ( LmItemSet::Iter plmi = st->lmItemSet; plmi.lte(); plmi++ ) {
 				if ( *plmi != 0 )
@@ -469,6 +477,14 @@ void LongestMatch::runLonestMatch( ParseData *pd, FsmAp *graph )
 	graph->setFinState( graph->startState );
 }
 
+void LongestMatch::transferScannerLeavingActions( FsmAp *graph )
+{
+	for ( StateList::Iter st = graph->stateList; st.lte(); st++ ) {
+		if ( st->outActionTable.length() > 0 )
+			graph->setErrorActions( st, st->outActionTable );
+	}
+}
+
 FsmAp *LongestMatch::walk( ParseData *pd )
 {
 	/* The longest match has it's own name scope. */
@@ -483,6 +499,13 @@ FsmAp *LongestMatch::walk( ParseData *pd )
 		parts[i]->longMatchAction( pd->curActionOrd++, lmi );
 	}
 
+	/* Before we union the patterns we need to deal with leaving actions. They
+	 * are transfered to error transitions out of the final states (like local
+	 * error actions) and to eof actions. In the scanner we need to forbid
+	 * on_last for any final state that has an leaving action. */
+	for ( int i = 0; i < longestMatchList->length(); i++ )
+		transferScannerLeavingActions( parts[i] );
+
 	/* Union machines one and up with machine zero. The grammar dictates that
 	 * there will always be at least one part. */
 	FsmAp *rtnVal = parts[0];
@@ -491,7 +514,7 @@ FsmAp *LongestMatch::walk( ParseData *pd )
 		afterOpMinimize( rtnVal );
 	}
 
-	runLonestMatch( pd, rtnVal );
+	runLongestMatch( pd, rtnVal );
 
 	/* Pop the name scope. */
 	pd->popNameScope( nameFrame );

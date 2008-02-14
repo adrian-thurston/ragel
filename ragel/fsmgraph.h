@@ -1136,6 +1136,7 @@ struct FsmAp
 	/* Action setting support. */
 	void transferOutActions( StateAp *state );
 	void transferErrorActions( StateAp *state, int transferPoint );
+	void setErrorActions( StateAp *state, const ActionTable &other );
 	void setErrorAction( StateAp *state, int ordering, Action *action );
 
 	/* Fill all spaces in a transition list with an error transition. */

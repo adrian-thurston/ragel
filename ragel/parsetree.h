@@ -298,7 +298,8 @@ struct LongestMatch
 	FsmAp *walk( ParseData *pd );
 	void makeNameTree( ParseData *pd );
 	void resolveNameRefs( ParseData *pd );
-	void runLonestMatch( ParseData *pd, FsmAp *graph );
+	void transferScannerLeavingActions( FsmAp *graph );
+	void runLongestMatch( ParseData *pd, FsmAp *graph );
 	Action *newAction( ParseData *pd, const InputLoc &loc, const char *name, 
 			InlineList *inlineList );
 	void makeActions( ParseData *pd );
