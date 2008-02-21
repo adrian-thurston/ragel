@@ -265,18 +265,18 @@ String operator+( const String &s1, const String &s2 );
 
 #endif 
 
-/* Header located just before string data. Keeps the length and a refcount on
- * the data. */
-struct StringHead
-{
-	long refCount;
-	long length;
-};
-
 template<class T> class StrTmpl
 {
 public:
 	class Fresh {};
+
+	/* Header located just before string data. Keeps the length and a refcount on
+	 * the data. */
+	struct Head
+	{
+		long refCount;
+		long length;
+	};
 
 	/**
 	 * \brief Create a null string.
@@ -340,7 +340,7 @@ public:
 	char *get() const { return data; }
 
 	/* Return the length of the string. Must check for null data pointer. */
-	long length() const { return data ? (((StringHead*)data)-1)->length : 0; }
+	long length() const { return data ? (((Head*)data)-1)->length : 0; }
 
 	/**
 	 * \brief Pointer to the data.
@@ -372,7 +372,7 @@ template<class T> StrTmpl<T>::~StrTmpl()
 {
 	if ( data != 0 ) {
 		/* If we are the only ones referencing the string, then delete it. */
-		StringHead *head = ((StringHead*) data) - 1;
+		Head *head = ((Head*) data) - 1;
 		head->refCount -= 1;
 		if ( head->refCount == 0 )
 			free( head );
@@ -426,7 +426,7 @@ template<class T> StrTmpl<T>::StrTmpl( const StrTmpl &s )
 		data = 0;
 	else {
 		/* Take a reference to the string. */
-		StringHead *strHead = ((StringHead*)s.data) - 1;
+		Head *strHead = ((Head*)s.data) - 1;
 		strHead->refCount += 1;
 		data = (char*) (strHead+1);
 	}
@@ -477,7 +477,7 @@ template<class T> void StrTmpl<T>::setAs( long lenGuess, const char *format, ...
 template<class T> void StrTmpl<T>::initSpace( long length )
 {
 	/* Find the length and allocate the space for the shared string. */
-	StringHead *head = (StringHead*) malloc( sizeof(StringHead) + length+1 );
+	Head *head = (Head*) malloc( sizeof(Head) + length+1 );
 	if ( head == 0 )
 		throw std::bad_alloc();
 
@@ -497,7 +497,7 @@ template<class T> StrTmpl<T> &StrTmpl<T>::operator=( const char *s )
 	if ( s == 0 ) {
 		/* Just free the data, we are being set to null. */
 		if ( data != 0 ) {
-			StringHead *head = ((StringHead*)data) - 1;
+			Head *head = ((Head*)data) - 1;
 			head->refCount -= 1;
 			if ( head->refCount == 0 )
 				free(head);
@@ -524,7 +524,7 @@ template<class T> void StrTmpl<T>::setAs( const char *s, long length )
 	if ( s == 0 ) {
 		/* Just free the data, we are being set to null. */
 		if ( data != 0 ) {
-			StringHead *head = ((StringHead*)data) - 1;
+			Head *head = ((Head*)data) - 1;
 			head->refCount -= 1;
 			if ( head->refCount == 0 )
 				free(head);
@@ -544,7 +544,7 @@ template<class T> void StrTmpl<T>::setAs( const char *s, long length )
 template<class T> void StrTmpl<T>::chop( long length )
 {
 	/* Detach from the existing string. */
-	StringHead *head = ((StringHead*)data) - 1;
+	Head *head = ((Head*)data) - 1;
 	assert( head->refCount == 1 );
 	assert( length <= head->length );
 	head->length = length;
@@ -580,7 +580,7 @@ template<class T> StrTmpl<T> &StrTmpl<T>::operator=( const StrTmpl &s )
 {
 	/* Detach from the existing string. */
 	if ( data != 0 ) {
-		StringHead *head = ((StringHead*)data) - 1;
+		Head *head = ((Head*)data) - 1;
 		head->refCount -= 1;
 		if ( head->refCount == 0 )
 			free( head );
@@ -588,7 +588,7 @@ template<class T> StrTmpl<T> &StrTmpl<T>::operator=( const StrTmpl &s )
 
 	if ( s.data != 0 ) {
 		/* Take a reference to the string. */
-		StringHead *strHead = ((StringHead*)s.data) - 1;
+		Head *strHead = ((Head*)s.data) - 1;
 		strHead->refCount += 1;
 		data = (char*)(strHead+1);
 	}
@@ -603,14 +603,14 @@ template<class T> StrTmpl<T> &StrTmpl<T>::operator=( const StrTmpl &s )
 template<class T> void StrTmpl<T>::setSpace( long length )
 {
 	/* Detach from the existing string. */
-	StringHead *head = ((StringHead*)data) - 1;
+	Head *head = ((Head*)data) - 1;
 	if ( data != 0 && --head->refCount == 0 ) {
 		/* Resuse the space. */
-		head = (StringHead*) realloc( head, sizeof(StringHead) + length+1 );
+		head = (Head*) realloc( head, sizeof(Head) + length+1 );
 	}
 	else {
 		/* Need to make new space, there is no usable old space. */
-		head = (StringHead*) malloc( sizeof(StringHead) + length+1 );
+		head = (Head*) malloc( sizeof(Head) + length+1 );
 	}
 	if ( head == 0 )
 		throw std::bad_alloc();
@@ -676,7 +676,7 @@ template<class T> StrTmpl<T> &StrTmpl<T>::operator+=( const StrTmpl &s )
 	/* Find the length of the string appended. */
 	if ( s.data != 0 ) {
 		/* Find the length to append. */
-		long addedLen = (((StringHead*)s.data) - 1)->length;
+		long addedLen = (((Head*)s.data) - 1)->length;
 
 		/* Make space on the end to put the string. */
 		char *dest = appendSpace( addedLen );
@@ -691,13 +691,13 @@ template<class T> StrTmpl<T> &StrTmpl<T>::operator+=( const StrTmpl &s )
 template<class T> char *StrTmpl<T>::appendSpace( long len )
 {
 	/* Find the length of this and the string appended. */
-	StringHead *head = (((StringHead*)data) - 1);
+	Head *head = (((Head*)data) - 1);
 	long thisLen = head->length;
 
 	if ( head->refCount == 1 ) {
 		/* No other string is using the space, grow this space. */
-		head = (StringHead*) realloc( head, 
-				sizeof(StringHead) + thisLen + len + 1 );
+		head = (Head*) realloc( head, 
+				sizeof(Head) + thisLen + len + 1 );
 		if ( head == 0 )
 			throw std::bad_alloc();
 		data = (char*) (head+1);
@@ -708,8 +708,8 @@ template<class T> char *StrTmpl<T>::appendSpace( long len )
 	else {
 		/* Another string is using this space, make new space. */
 		head->refCount -= 1;
-		StringHead *newHead = (StringHead*) malloc(
-				sizeof(StringHead) + thisLen + len + 1 );
+		Head *newHead = (Head*) malloc(
+				sizeof(Head) + thisLen + len + 1 );
 		if ( newHead == 0 )
 			throw std::bad_alloc();
 		data = (char*) (newHead+1);
@@ -728,11 +728,11 @@ template<class T> char *StrTmpl<T>::appendSpace( long len )
 template<class T> StrTmpl<T> operator+( const StrTmpl<T> &s1, const char *s2 )
 {
 	/* Find s2 length and alloc the space for the result. */
-	long str1Len = (((StringHead*)(s1.data)) - 1)->length;
+	long str1Len = (((typename StrTmpl<T>::Head*)(s1.data)) - 1)->length;
 	long str2Len = strlen( s2 );
 
-	StringHead *head = (StringHead*) malloc( sizeof(StringHead) + 
-			str1Len + str2Len + 1 );
+	typename StrTmpl<T>::Head *head = (typename StrTmpl<T>::Head*) 
+			malloc( sizeof(typename StrTmpl<T>::Head) + str1Len + str2Len + 1 );
 	if ( head == 0 )
 		throw std::bad_alloc();
 
@@ -752,10 +752,10 @@ template<class T> StrTmpl<T> operator+( const char *s1, const StrTmpl<T> &s2 )
 {
 	/* Find s2 length and alloc the space for the result. */
 	long str1Len = strlen( s1 );
-	long str2Len = (((StringHead*)(s2.data)) - 1)->length;
+	long str2Len = (((typename StrTmpl<T>::Head*)(s2.data)) - 1)->length;
 
-	StringHead *head = (StringHead*) malloc( sizeof(StringHead) + 
-			str1Len + str2Len + 1 );
+	typename StrTmpl<T>::Head *head = (typename StrTmpl<T>::Head*) 
+			malloc( sizeof(typename StrTmpl<T>::Head) + str1Len + str2Len + 1 );
 	if ( head == 0 )
 		throw std::bad_alloc();
 
@@ -774,10 +774,10 @@ template<class T> StrTmpl<T> operator+( const char *s1, const StrTmpl<T> &s2 )
 template<class T> StrTmpl<T> operator+( const StrTmpl<T> &s1, const StrTmpl<T> &s2 )
 {
 	/* Find s2 length and alloc the space for the result. */
-	long str1Len = (((StringHead*)(s1.data)) - 1)->length;
-	long str2Len = (((StringHead*)(s2.data)) - 1)->length;
-	StringHead *head = (StringHead*) malloc( sizeof(StringHead) + 
-			str1Len + str2Len + 1 );
+	long str1Len = (((typename StrTmpl<T>::Head*)(s1.data)) - 1)->length;
+	long str2Len = (((typename StrTmpl<T>::Head*)(s2.data)) - 1)->length;
+	typename StrTmpl<T>::Head *head = (typename StrTmpl<T>::Head*) 
+			malloc( sizeof(typename StrTmpl<T>::Head) + str1Len + str2Len + 1 );
 	if ( head == 0 )
 		throw std::bad_alloc();
 
