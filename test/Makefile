@@ -36,7 +36,7 @@ TEST = \
 	test_quicksort.cpp test_insertsort.cpp test_bubblesort.cpp \
 	test_allsort.cpp test_svector.cpp test_sbsttable.cpp \
 	test_sbstmap.cpp test_sbstset.cpp test_avlkeyless.cpp \
-	test_avlikeyless.cpp test_compare.cpp
+	test_avlikeyless.cpp test_compare.cpp test_string.cpp
 
 
 #*************************************
