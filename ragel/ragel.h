@@ -50,6 +50,7 @@ extern MinimizeLevel minimizeLevel;
 extern MinimizeOpt minimizeOpt;
 extern char *machineSpec, *machineName;
 extern bool printStatistics;
+extern bool wantDupsRemoved;
 
 extern int gblErrorCount;
 extern char mainMachine[];

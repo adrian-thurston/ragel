@@ -1072,7 +1072,8 @@ FsmAp *ParseData::makeInstance( GraphDictEl *gdNode )
 	for ( StateList::Iter state = graph->stateList; state.lte(); state++ )
 		graph->transferErrorActions( state, 0 );
 	
-	removeActionDups( graph );
+	if ( ::wantDupsRemoved )
+		removeActionDups( graph );
 
 	/* Remove unreachable states. There should be no dead end states. The
 	 * subtract and intersection operators are the only places where they may

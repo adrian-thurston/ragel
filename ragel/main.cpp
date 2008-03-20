@@ -67,6 +67,7 @@ MinimizeOpt minimizeOpt = MinimizeMostOps;
 /* Graphviz dot file generation. */
 char *machineSpec = 0, *machineName = 0;
 bool machineSpecFound = false;
+bool wantDupsRemoved = true;
 
 bool printStatistics = false;
 bool frontendOnly = false;
@@ -164,7 +165,7 @@ void escapeLineDirectivePath( std::ostream &out, char *path )
 
 void processArgs( int argc, char **argv, char *&inputFileName, char *&outputFileName )
 {
-	ParamCheck pc("xo:nmleabjkS:M:CDJRvHh?-:sT:F:G:P:LpV", argc, argv);
+	ParamCheck pc("xo:dnmleabjkS:M:CDJRvHh?-:sT:F:G:P:LpV", argc, argv);
 
 	while ( pc.check() ) {
 		switch ( pc.state ) {
@@ -188,6 +189,12 @@ void processArgs( int argc, char **argv, char *&inputFileName, char *&outputFile
 					/* Ok, remember the output file name. */
 					outputFileName = pc.parameterArg;
 				}
+				break;
+
+			/* Minimization, mostly hidden options. */
+			case 'd':
+				wantDupsRemoved = false;
+				frontendArgs.append( "-d" );
 				break;
 
 			/* Minimization, mostly hidden options. */
