@@ -1170,7 +1170,7 @@ void FsmAp::mergeStateConds( StateAp *destState, StateAp *srcState )
 }
 
 /* A state merge which represents the drawing in of leaving transitions.  If
- * there is any out data then we duplicate the souce state, transfer the out
+ * there is any out data then we duplicate the source state, transfer the out
  * data, then merge in the state. The new state will be reaped because it will
  * not be given any in transitions. */
 void FsmAp::mergeStatesLeaving( MergeData &md, StateAp *destState, StateAp *srcState )

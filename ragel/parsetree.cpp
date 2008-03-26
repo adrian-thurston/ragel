@@ -1386,6 +1386,7 @@ FsmAp *FactorWithRep::walk( ParseData *pd )
 		if ( retFsm->startState->isFinState() ) {
 			warning(loc) << "applying kleene star to a machine that "
 					"accepts zero length word" << endl;
+			retFsm->unsetFinState( retFsm->startState );
 		}
 
 		/* Shift over the start action orders then do the kleene star. */
