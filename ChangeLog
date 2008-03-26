@@ -1,3 +1,16 @@
+Ragel 6.1 - Mar 26, 2008
+========================
+ -Scanners now ensure that any leaving actions at the end of a pattern are
+  executed. They are always executed before the pattern action.
+ -Added an option -d for turning off the removal of duplicate actions from
+  actions lists.
+ -Need to unset the final state status of the start state in kleene star if it
+  is set. It is possible to crash ragel when the warning is ignored.
+ -In the dot file generation we need to print any actions that are in
+  State::eofTrans. These come from scanners only.
+ -Use @docdir@ for the docdir Makefile variable.
+ -Check for ar and ranlib in the configure script.
+
 Ragel 6.0 - Jan 12, 2008
 ========================
  -Removed the 'noend' write option from examples/atoi.rl. This example is

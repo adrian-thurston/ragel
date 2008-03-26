@@ -67,6 +67,9 @@ is used (.c, .cpp, .m, .dot)
 .B \-s
 Print some statistics on standard error.
 .TP
+.B \-d
+Do not remove duplicate actions from action lists.
+.TP
 .B \-n
 Do not perform state minimization.
 .TP

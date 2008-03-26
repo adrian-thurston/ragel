@@ -4,6 +4,12 @@
 This file describes the changes in Ragel version 6.X that are not backwards
 compatible. For a list of all the changes see the ChangeLog file.
 
+Leaving Actions in Scanners (new in 6.1)
+========================================
+
+Scanners now ensure that any leaving actions at the end of a pattern are
+executed. They are always executed before the pattern action.
+
 The EOF Event
 =============
 

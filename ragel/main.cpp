@@ -87,6 +87,7 @@ void usage()
 "   -v, --version        Print version information and exit\n"
 "   -o <file>            Write output to <file>\n"
 "   -s                   Print some statistics on stderr\n"
+"   -d                   Do not remove duplicates from action lists\n"
 "fsm minimization:\n"
 "   -n                   Do not perform minimization\n"
 "   -m                   Minimize at the end of the compilation\n"

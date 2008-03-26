@@ -1862,7 +1862,7 @@ recurse on the parse tree, then assign timestamps to the remaining {\em all},
 {\em finishing}, and {\em leaving} embeddings in the order in which they
 appear.
 
-Ragel does not permit a single action to appear multiple times in an action
+By default Ragel does not permit a single action to appear multiple times in an action
 list. When the final machine has been created, actions that appear more than
 once in a single transition, to-state, from-state or EOF action list have their
 duplicates removed.
@@ -1883,6 +1883,8 @@ main := word ( '\n' word )* '\n\n';
 Note that Ragel does not compare action bodies to determine if they have
 identical program text. It simply checks for duplicates using each action
 block's unique location in the program.
+
+The removal of duplicates can be turned off using the \verb|-d| option.
 
 \section{Values and Statements Available in Code Blocks}
 \label{vals}
