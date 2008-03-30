@@ -81,9 +81,11 @@ tag_ragel_head: TAG_ragel
 			hostLang = &hostLangJava;
 		else if ( strcmp( langAttr->value, "Ruby" ) == 0 )
 			hostLang = &hostLangRuby;
+		else if ( strcmp( langAttr->value, "C#" ) == 0 )
+			hostLang = &hostLangCSharp;
 		else {
 			error($1->loc) << "expecting lang attribute to be "
-					"one of C, D, Java or Ruby" << endp;
+					"one of C, D, Java, Ruby or C#" << endp;
 		}
 
 		outStream = openOutput( sourceFileName );

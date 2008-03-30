@@ -65,10 +65,24 @@ HostType hostTypesRuby[] =
 	{ "int",     0,  "int",    true,   INT_MIN,   INT_MAX,     4 },
 };
 
+HostType hostTypesCSharp[] =
+{
+	{ "sbyte",    0, "sbyte",   true,   CHAR_MIN,  CHAR_MAX,    1 },
+	{ "byte",   0,   "byte",    false,  0,         UCHAR_MAX,   1 },
+	{ "short",   0,  "short",   true,   SHRT_MIN,  SHRT_MAX,    2 },
+	{ "ushort",  0,  "ushort",  false,  0,         USHRT_MAX,   2 },
+	{ "char",    0,  "char",    false,  0,         USHRT_MAX,   2 },
+	{ "int",     0,  "int",     true,   INT_MIN,   INT_MAX,     4 },
+	{ "uint",    0,  "uint",    false,  0,         UINT_MAX,    4 },
+	{ "long",    0,  "long",    true,   LONG_MIN,  LONG_MAX,    8 },
+	{ "ulong",   0,  "ulong",   false,  0,         ULONG_MAX,   8 }
+};
+
 HostLang hostLangC =    { HostLang::C,    hostTypesC,    8, hostTypesC+0,    true };
 HostLang hostLangD =    { HostLang::D,    hostTypesD,    9, hostTypesD+2,    true };
 HostLang hostLangJava = { HostLang::Java, hostTypesJava, 4, hostTypesJava+2, false };
 HostLang hostLangRuby = { HostLang::Ruby, hostTypesRuby, 2, hostTypesRuby+0, false };
+HostLang hostLangCSharp = { HostLang::CSharp, hostTypesCSharp, 9, hostTypesCSharp+4, true };
 
 HostLang *hostLang = &hostLangC;
 

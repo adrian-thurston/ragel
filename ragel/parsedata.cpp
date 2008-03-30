@@ -1460,6 +1460,7 @@ void writeLanguage( std::ostream &out )
 		case HostLang::D:    out << "D"; break;
 		case HostLang::Java: out << "Java"; break;
 		case HostLang::Ruby: out << "Ruby"; break;
+		case HostLang::CSharp: out << "C#"; break;
 	}
 	out << "\"";
 	

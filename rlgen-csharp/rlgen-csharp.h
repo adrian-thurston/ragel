@@ -1,5 +1,5 @@
 /*
- *  Copyright 2001 Adrian Thurston <thurston@cs.queensu.ca>
+ *  Copyright 2001-2006 Adrian Thurston <thurston@cs.queensu.ca>
  */
 
 /*  This file is part of Ragel.
@@ -19,23 +19,43 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _CONFIG_H
-#define _CONFIG_H
+#ifndef _RLCODEGEN_H
+#define _RLCODEGEN_H
 
-/* Programs. */
-#undef GDC
-#undef GOBJC
-#undef CXX
-#undef CC
-#undef JAVAC
-#undef TXL
-#undef RUBY
-#undef GMCS
+#include <stdio.h>
+#include <iostream>
+#include "config.h"
+#include "avltree.h"
+#include "vector.h"
+#include "config.h"
 
-#ifdef _MSC_VER
-#define strcasecmp _stricmp
-#define strtoll _strtoi64
-#pragma warning( disable: 4244 4250 4355 4800 )
-#endif
+#define PROGNAME "rlgen-csharp"
 
-#endif /* _CONFIG_H */
+/* Target output style. */
+enum CodeStyleEnum
+{
+	GenTables,
+	GenFTables,
+	GenFlat,
+	GenFFlat,
+	GenGoto,
+	GenFGoto,
+	GenIpGoto,
+	GenSplit
+};
+
+extern CodeStyleEnum codeStyle;
+
+
+/* IO filenames and stream. */
+extern bool graphvizDone;
+
+extern int gblErrorCount;
+
+/* Options. */
+extern int numSplitPartitions;
+extern bool noLineDirectives;
+
+std::ostream &error();
+
+#endif /* _RLCODEGEN_H */

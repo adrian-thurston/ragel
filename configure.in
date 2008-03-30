@@ -112,7 +112,13 @@ if test -n "$RUBY"; then
 	AC_DEFINE_UNQUOTED(RUBY,$RUBY)
 fi
 
+dnl Check for the C# compiler.
+AC_CHECK_PROG(GMCS, gmcs, gmcs)
+if test -n "$GMCS"; then
+	AC_DEFINE_UNQUOTED(GMCS,$GMCS)
+fi
+
 dnl write output files
-AC_OUTPUT(Makefile common/Makefile ragel/Makefile redfsm/Makefile rlgen-cd/Makefile rlgen-java/Makefile rlgen-ruby/Makefile rlgen-dot/Makefile doc/Makefile test/Makefile)
+AC_OUTPUT(Makefile common/Makefile ragel/Makefile redfsm/Makefile rlgen-cd/Makefile rlgen-java/Makefile rlgen-ruby/Makefile rlgen-dot/Makefile rlgen-csharp/Makefile doc/Makefile test/Makefile)
 
 echo "configuration of ragel complete"

@@ -636,6 +636,7 @@ GOBJC
 JAVAC
 TXL
 RUBY
+GMCS
 LIBOBJS
 LTLIBOBJS'
 ac_subst_files=''
@@ -3516,7 +3517,51 @@ _ACEOF
 
 fi
 
-ac_config_files="$ac_config_files Makefile common/Makefile ragel/Makefile redfsm/Makefile rlgen-cd/Makefile rlgen-java/Makefile rlgen-ruby/Makefile rlgen-dot/Makefile doc/Makefile test/Makefile"
+# Extract the first word of "gmcs", so it can be a program name with args.
+set dummy gmcs; ac_word=$2
+{ echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6; }
+if test "${ac_cv_prog_GMCS+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  if test -n "$GMCS"; then
+  ac_cv_prog_GMCS="$GMCS" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_prog_GMCS="gmcs"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+IFS=$as_save_IFS
+
+fi
+fi
+GMCS=$ac_cv_prog_GMCS
+if test -n "$GMCS"; then
+  { echo "$as_me:$LINENO: result: $GMCS" >&5
+echo "${ECHO_T}$GMCS" >&6; }
+else
+  { echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6; }
+fi
+
+
+if test -n "$GMCS"; then
+	cat >>confdefs.h <<_ACEOF
+#define GMCS $GMCS
+_ACEOF
+
+fi
+
+ac_config_files="$ac_config_files Makefile common/Makefile ragel/Makefile redfsm/Makefile rlgen-cd/Makefile rlgen-java/Makefile rlgen-ruby/Makefile rlgen-dot/Makefile rlgen-csharp/Makefile doc/Makefile test/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -4079,6 +4124,7 @@ do
     "rlgen-java/Makefile") CONFIG_FILES="$CONFIG_FILES rlgen-java/Makefile" ;;
     "rlgen-ruby/Makefile") CONFIG_FILES="$CONFIG_FILES rlgen-ruby/Makefile" ;;
     "rlgen-dot/Makefile") CONFIG_FILES="$CONFIG_FILES rlgen-dot/Makefile" ;;
+    "rlgen-csharp/Makefile") CONFIG_FILES="$CONFIG_FILES rlgen-csharp/Makefile" ;;
     "doc/Makefile") CONFIG_FILES="$CONFIG_FILES doc/Makefile" ;;
     "test/Makefile") CONFIG_FILES="$CONFIG_FILES test/Makefile" ;;
 
@@ -4201,11 +4247,12 @@ GOBJC!$GOBJC$ac_delim
 JAVAC!$JAVAC$ac_delim
 TXL!$TXL$ac_delim
 RUBY!$RUBY$ac_delim
+GMCS!$GMCS$ac_delim
 LIBOBJS!$LIBOBJS$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 61; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 62; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5

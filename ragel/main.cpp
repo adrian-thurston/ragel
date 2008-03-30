@@ -104,16 +104,18 @@ void usage()
 "   -D                   The host language is D\n"
 "   -J                   The host language is Java\n"
 "   -R                   The host language is Ruby\n"
-"line direcives: (C/D only)\n"
+"   -A                   The host language is C#\n"
+"line direcives: (C/D/C# only)\n"
 "   -L                   Inhibit writing of #line directives\n"
-"code style: (C/Ruby only)\n"
+"code style: (C/Ruby/C# only)\n"
 "   -T0                  Table driven FSM (default)\n"
 "   -T1                  Faster table driven FSM\n"
 "   -F0                  Flat table driven FSM\n"
 "   -F1                  Faster flat table-driven FSM\n"
-"code style: (C only)\n"
+"code style: (C/C# only)\n"
 "   -G0                  Goto-driven FSM\n"
 "   -G1                  Faster goto-driven FSM\n"
+"code style: (C only)\n"
 "   -G2                  Really fast goto-driven FSM\n"
 "   -P<N>                N-Way Split really fast goto-driven FSM\n"
 	;	
@@ -166,7 +168,7 @@ void escapeLineDirectivePath( std::ostream &out, char *path )
 
 void processArgs( int argc, char **argv, char *&inputFileName, char *&outputFileName )
 {
-	ParamCheck pc("xo:dnmleabjkS:M:CDJRvHh?-:sT:F:G:P:LpV", argc, argv);
+	ParamCheck pc("xo:dnmleabjkS:M:CDJRAvHh?-:sT:F:G:P:LpV", argc, argv);
 
 	while ( pc.check() ) {
 		switch ( pc.state ) {
@@ -276,6 +278,10 @@ void processArgs( int argc, char **argv, char *&inputFileName, char *&outputFile
 			case 'R':
 				hostLang = &hostLangRuby;
 				frontendArgs.append( "-R" );
+				break;
+			case 'A':
+				hostLang = &hostLangCSharp;
+				frontendArgs.append( "-A" );
 				break;
 
 			/* Version and help. */
@@ -647,6 +653,8 @@ void execBackend( const char *argv0, char *intermed, char *outputFileName )
 			case HostLang::Ruby:
 				progName = "rlgen-ruby";
 				break;
+			case HostLang::CSharp:
+				progName = "rlgen-csharp";
 		}
 	}
 
