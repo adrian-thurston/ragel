@@ -37,6 +37,30 @@ HostType hostTypesC[] =
 	{ "unsigned", "long",  "ulong",   false,  0,         ULONG_MAX,  sizeof(unsigned long) }
 };
 
+#define S8BIT_MIN  -128
+#define S8BIT_MAX  127
+
+#define U8BIT_MIN  0
+#define U8BIT_MAX  255
+
+#define S16BIT_MIN -32768
+#define S16BIT_MAX 32767
+
+#define U16BIT_MIN 0
+#define U16BIT_MAX 65535
+
+#define S32BIT_MIN –2147483648l
+#define S32BIT_MAX 2147483647l
+
+#define U32BIT_MIN 0
+#define U32BIT_MAX 4294967295l
+
+#define S64BIT_MIN –9223372036854775808ll
+#define S64BIT_MAX 9223372036854775807ll
+
+#define U64BIT_MIN 0
+#define U64BIT_MAX 18446744073709551615ll
+
 HostType hostTypesD[] =
 {
 	{ "byte",    0,  "byte",    true,   CHAR_MIN,  CHAR_MAX,    1 },
