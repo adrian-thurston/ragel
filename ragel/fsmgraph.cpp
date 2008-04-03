@@ -959,6 +959,7 @@ void FsmAp::findCondExpInTrans( ExpansionList &expansionList, StateAp *state,
 		Key lowKey, Key highKey, CondSpace *fromCondSpace, CondSpace *toCondSpace,
 		long fromVals, LongVect &toValsList )
 {
+	/* Make condition-space low and high keys for searching. */
 	TransAp searchTrans;
 	searchTrans.lowKey = fromCondSpace->baseKey + fromVals * keyOps->alphSize() + 
 			(lowKey - keyOps->minKey);
@@ -969,7 +970,14 @@ void FsmAp::findCondExpInTrans( ExpansionList &expansionList, StateAp *state,
 	PairIter<TransAp> pairIter( state->outList.head, &searchTrans );
 	for ( ; !pairIter.end(); pairIter++ ) {
 		if ( pairIter.userState == RangeOverlap ) {
-			Expansion *expansion = new Expansion( lowKey, highKey );
+			/* Need to make character-space low and high keys from the range
+			 * overlap for the expansion object. */
+			Key expLowKey = pairIter.s1Tel.lowKey - fromCondSpace->baseKey - fromVals *
+					keyOps->alphSize() + keyOps->minKey;
+			Key expHighKey = pairIter.s1Tel.highKey - fromCondSpace->baseKey - fromVals *
+					keyOps->alphSize() + keyOps->minKey;
+
+			Expansion *expansion = new Expansion( expLowKey, expHighKey );
 			expansion->fromTrans = new TransAp(*pairIter.s1Tel.trans);
 			expansion->fromTrans->fromState = 0;
 			expansion->fromTrans->toState = pairIter.s1Tel.trans->toState;
