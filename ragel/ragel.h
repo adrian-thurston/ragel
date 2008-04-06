@@ -26,6 +26,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include "vector.h"
 #include "config.h"
 
 #define PROGNAME "ragel"
@@ -71,5 +72,8 @@ std::ostream &warning( const InputLoc &loc );
 void terminateAllParsers( );
 void writeMachines( std::ostream &out, std::string hostData, char *inputFileName );
 void xmlEscapeHost( std::ostream &out, char *data, long len );
+
+typedef Vector<const char *> ArgsVector;
+extern ArgsVector includePaths;
 
 #endif /* _RAGEL_H */

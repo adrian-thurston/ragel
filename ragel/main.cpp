@@ -73,9 +73,9 @@ bool printStatistics = false;
 bool frontendOnly = false;
 bool generateDot = false;
 
-typedef Vector<const char *> ArgsVector;
 ArgsVector frontendArgs;
 ArgsVector backendArgs;
+ArgsVector includePaths;
 
 /* Print a summary of the options. */
 void usage()
@@ -168,7 +168,7 @@ void escapeLineDirectivePath( std::ostream &out, char *path )
 
 void processArgs( int argc, char **argv, char *&inputFileName, char *&outputFileName )
 {
-	ParamCheck pc("xo:dnmleabjkS:M:CDJRAvHh?-:sT:F:G:P:LpV", argc, argv);
+	ParamCheck pc("xo:dnmleabjkS:M:I:CDJRAvHh?-:sT:F:G:P:LpV", argc, argv);
 
 	while ( pc.check() ) {
 		switch ( pc.state ) {
@@ -258,6 +258,16 @@ void processArgs( int argc, char **argv, char *&inputFileName, char *&outputFile
 					/* Ok, remember the machine name to generate. */
 					machineName = pc.parameterArg;
 					frontendArgs.append( "-M" );
+					frontendArgs.append( pc.parameterArg );
+				}
+				break;
+
+			case 'I':
+				if ( *pc.parameterArg == 0 )
+					error() << "please specify an argument to -I" << endl;
+				else {
+					includePaths.append( pc.parameterArg );
+					frontendArgs.append( "-I" );
 					frontendArgs.append( pc.parameterArg );
 				}
 				break;

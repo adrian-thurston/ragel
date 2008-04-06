@@ -198,10 +198,12 @@ struct Token
 	int length;
 	InputLoc loc;
 
-	void prepareLitString( Token &result, bool &caseInsensitive );
 	void append( const Token &other );
 	void set( const char *str, int len );
 };
+
+char *prepareLitString( const InputLoc &loc, char *src, long length, 
+			long &resLen, bool &caseInsensitive );
 
 /* Store the value and type of a priority augmentation. */
 struct PriorityAug

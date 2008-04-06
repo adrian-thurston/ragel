@@ -37,28 +37,28 @@ ostream &operator<<( ostream &out, const NameInst &nameInst );
 /* Convert the literal string which comes in from the scanner into an array of
  * characters with escapes and options interpreted. Also null terminates the
  * string. Though this null termination should not be relied on for
- * interpreting literals in the parser because the string may contain a
- * literal string with \0 */
-void Token::prepareLitString( Token &result, bool &caseInsensitive )
+ * interpreting literals in the parser because the string may contain \0 */
+char *prepareLitString( const InputLoc &loc, char *data, long length, 
+		long &resLen, bool &caseInsensitive )
 {
-	result.data = new char[this->length+1];
+	char *resData = new char[length+1];
 	caseInsensitive = false;
 
-	char *src = this->data + 1;
-	char *end = this->data + this->length - 1;
+	char *src = data + 1;
+	char *end = data + length - 1;
 
 	while ( *end != '\'' && *end != '\"' ) {
 		if ( *end == 'i' )
 			caseInsensitive = true;
 		else {
-			error( this->loc ) << "literal string '" << *end << 
+			error( loc ) << "literal string '" << *end << 
 					"' option not supported" << endl;
 		}
 		end -= 1;
 	}
 
-	char *dest = result.data;
-	int len = 0;
+	char *dest = resData;
+	long len = 0;
 	while ( src != end ) {
 		if ( *src == '\\' ) {
 			switch ( src[1] ) {
@@ -79,10 +79,11 @@ void Token::prepareLitString( Token &result, bool &caseInsensitive )
 			dest[len++] = *src++;
 		}
 	}
-	result.length = len;
-	result.data[result.length] = 0;
-}
 
+	resLen = len;
+	resData[resLen] = 0;
+	return resData;
+}
 
 FsmAp *VarDef::walk( ParseData *pd )
 {
@@ -1887,19 +1888,20 @@ FsmAp *Literal::walk( ParseData *pd )
 	}
 	case LitString: {
 		/* Make the array of keys in int format. */
-		Token interp;
+		long length;
 		bool caseInsensitive;
-		token.prepareLitString( interp, caseInsensitive );
-		Key *arr = new Key[interp.length];
-		makeFsmKeyArray( arr, interp.data, interp.length, pd );
+		char *data = prepareLitString( token.loc, token.data, token.length, 
+				length, caseInsensitive );
+		Key *arr = new Key[length];
+		makeFsmKeyArray( arr, data, length, pd );
 
 		/* Make the new machine. */
 		rtnVal = new FsmAp();
 		if ( caseInsensitive )
-			rtnVal->concatFsmCI( arr, interp.length );
+			rtnVal->concatFsmCI( arr, length );
 		else
-			rtnVal->concatFsm( arr, interp.length );
-		delete[] interp.data;
+			rtnVal->concatFsm( arr, length );
+		delete[] data;
 		delete[] arr;
 		break;
 	}}

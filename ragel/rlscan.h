@@ -69,15 +69,13 @@ struct Scanner
 
 	bool recursiveInclude( char *inclFileName, char *inclSectionName );
 
-	char *prepareFileName( char *fileName, int len )
-	{
-		bool caseInsensitive;
-		Token tokenFnStr, tokenRes;
-		tokenFnStr.data = fileName;
-		tokenFnStr.length = len;
-		tokenFnStr.prepareLitString( tokenRes, caseInsensitive );
-		return tokenRes.data;
-	}
+	/* Make a list of places to look for an included file. */
+	char **makeIncludePathChecks( char *curFileName, char *fileName, int len );
+	std::ifstream *tryOpenInclude( char **pathChecks, long &found );
+
+	void handleMachine();
+	void handleInclude();
+	void handleImport();
 
 	void init();
 	void token( int type, char *start, char *end );

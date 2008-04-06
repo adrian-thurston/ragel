@@ -41,6 +41,12 @@ enum InlineBlockType
 	SemiTerminated
 };
 
+#ifdef WIN32
+#define PATH_SEP '\\'
+#else
+#define PATH_SEP '/'
+#endif
+
 
 /*
  * The Scanner for Importing
@@ -262,6 +268,104 @@ void Scanner::updateCol()
 	lastnl = 0;
 }
 
+void Scanner::handleMachine()
+{
+	/* Assign a name to the machine. */
+	char *machine = word;
+
+	if ( !importMachines && inclSectionTarg == 0 ) {
+		ignoreSection = false;
+
+		ParserDictEl *pdEl = parserDict.find( machine );
+		if ( pdEl == 0 ) {
+			pdEl = new ParserDictEl( machine );
+			pdEl->value = new Parser( fileName, machine, sectionLoc );
+			pdEl->value->init();
+			parserDict.insert( pdEl );
+		}
+
+		parser = pdEl->value;
+	}
+	else if ( !importMachines && strcmp( inclSectionTarg, machine ) == 0 ) {
+		/* found include target */
+		ignoreSection = false;
+		parser = inclToParser;
+	}
+	else {
+		/* ignoring section */
+		ignoreSection = true;
+		parser = 0;
+	}
+}
+
+void Scanner::handleInclude()
+{
+	if ( active() ) {
+		char *inclSectionName = word;
+		char **inclFileName = 0;
+
+		/* Implement defaults for the input file and section name. */
+		if ( inclSectionName == 0 )
+			inclSectionName = parser->sectionName;
+
+		if ( lit != 0 )
+			inclFileName = makeIncludePathChecks( fileName, lit, lit_len );
+		else {
+			char *test = new char[strlen(fileName)+1];
+			strcpy( test, fileName );
+
+			inclFileName = new char*[2];
+
+			inclFileName[0] = test;
+			inclFileName[1] = 0;
+		}
+
+		long found = 0;
+		ifstream *inFile = tryOpenInclude( inclFileName, found );
+		if ( inFile == 0 )
+			scan_error() << "include: failed to locate file" << endl;
+		else {
+			/* Check for a recursive include structure. Add the current file/section
+			 * name then check if what we are including is already in the stack. */
+			includeStack.append( IncludeStackItem( fileName, parser->sectionName ) );
+
+			if ( recursiveInclude( inclFileName[found], inclSectionName ) )
+				scan_error() << "include: this is a recursive include operation" << endl;
+			else {
+				Scanner scanner( inclFileName[found], *inFile, output, parser,
+						inclSectionName, includeDepth+1, false );
+				scanner.do_scan( );
+				delete inFile;
+			}
+
+			/* Remove the last element (len-1) */
+			includeStack.remove( -1 );
+		}
+	}
+}
+
+void Scanner::handleImport()
+{
+	if ( active() ) {
+		char **importFileName = makeIncludePathChecks( fileName, lit, lit_len );
+
+		/* Open the input file for reading. */
+		long found = 0;
+		ifstream *inFile = tryOpenInclude( importFileName, found );
+		if ( inFile == 0 ) {
+			scan_error() << "import: could not open import file " <<
+					"for reading" << endl;
+		}
+
+		Scanner scanner( importFileName[found], *inFile, output, parser,
+				0, includeDepth+1, true );
+		scanner.do_scan( );
+		scanner.importToken( 0, 0, 0 );
+		scanner.flushImport();
+		delete inFile;
+	}
+}
+
 %%{
 	machine section_parse;
 
@@ -277,79 +381,13 @@ void Scanner::updateCol()
 	action import_err { scan_error() << "bad import statement" << endl; }
 	action write_err { scan_error() << "bad write statement" << endl; }
 
-	action handle_machine
-	{
-		/* Assign a name to the machine. */
-		char *machine = word;
-
-		if ( !importMachines && inclSectionTarg == 0 ) {
-			ignoreSection = false;
-
-			ParserDictEl *pdEl = parserDict.find( machine );
-			if ( pdEl == 0 ) {
-				pdEl = new ParserDictEl( machine );
-				pdEl->value = new Parser( fileName, machine, sectionLoc );
-				pdEl->value->init();
-				parserDict.insert( pdEl );
-			}
-
-			parser = pdEl->value;
-		}
-		else if ( !importMachines && strcmp( inclSectionTarg, machine ) == 0 ) {
-			/* found include target */
-			ignoreSection = false;
-			parser = inclToParser;
-		}
-		else {
-			/* ignoring section */
-			ignoreSection = true;
-			parser = 0;
-		}
-	}
+	action handle_machine { handleMachine(); }
+	action handle_include { handleInclude(); }
+	action handle_import { handleImport(); }
 
 	machine_stmt =
 		( KW_Machine TK_Word @store_word ';' ) @handle_machine
 		<>err mach_err <>eof mach_err;
-
-	action handle_include
-	{
-		if ( active() ) {
-			char *inclSectionName = word;
-			char *inclFileName = 0;
-
-			/* Implement defaults for the input file and section name. */
-			if ( inclSectionName == 0 )
-				inclSectionName = parser->sectionName;
-
-			if ( lit != 0 ) 
-				inclFileName = prepareFileName( lit, lit_len );
-			else
-				inclFileName = fileName;
-
-			/* Check for a recursive include structure. Add the current file/section
-			 * name then check if what we are including is already in the stack. */
-			includeStack.append( IncludeStackItem( fileName, parser->sectionName ) );
-
-			if ( recursiveInclude( inclFileName, inclSectionName ) )
-				scan_error() << "include: this is a recursive include operation" << endl;
-			else {
-				/* Open the input file for reading. */
-				ifstream *inFile = new ifstream( inclFileName );
-				if ( ! inFile->is_open() ) {
-					scan_error() << "include: could not open " << 
-							inclFileName << " for reading" << endl;
-				}
-
-				Scanner scanner( inclFileName, *inFile, output, parser,
-						inclSectionName, includeDepth+1, false );
-				scanner.do_scan( );
-				delete inFile;
-			}
-
-			/* Remove the last element (len-1) */
-			includeStack.remove( -1 );
-		}
-	}
 
 	include_names = (
 		TK_Word @store_word ( TK_Literal @store_lit )? |
@@ -359,27 +397,6 @@ void Scanner::updateCol()
 	include_stmt =
 		( KW_Include include_names ';' ) @handle_include
 		<>err incl_err <>eof incl_err;
-
-	action handle_import
-	{
-		if ( active() ) {
-			char *importFileName = prepareFileName( lit, lit_len );
-
-			/* Open the input file for reading. */
-			ifstream *inFile = new ifstream( importFileName );
-			if ( ! inFile->is_open() ) {
-				scan_error() << "import: could not open " << 
-						importFileName << " for reading" << endl;
-			}
-
-			Scanner scanner( importFileName, *inFile, output, parser,
-					0, includeDepth+1, true );
-			scanner.do_scan( );
-			scanner.importToken( 0, 0, 0 );
-			scanner.flushImport();
-			delete inFile;
-		}
-	}
 
 	import_stmt =
 		( KW_Import TK_Literal @store_lit ';' ) @handle_import
@@ -518,6 +535,79 @@ void Scanner::endSection( )
 			output << "<host line=\"" << line << "\">";
 		}
 	}
+}
+
+bool isAbsolutePath( const char *path )
+{
+#ifdef WIN32
+	return isalpha( path[0] ) && path[1] == ':' && path[2] == '\\';
+#else
+	return path[0] == '/';
+#endif
+}
+
+char **Scanner::makeIncludePathChecks( char *thisFileName, char *fileName, int fnlen )
+{
+	char **checks = new char*[2];
+	long nextCheck = 0;
+
+	bool caseInsensitive = false;
+	long length = 0;
+	char *data = prepareLitString( InputLoc(), fileName, fnlen, 
+			length, caseInsensitive );
+
+	/* Absolute path? */
+	if ( isAbsolutePath( data ) )
+		checks[nextCheck++] = data;
+	else {
+		/* Search from the the location of the current file. */
+		const char *lastSlash = strrchr( thisFileName, PATH_SEP );
+		if ( lastSlash == 0 )
+			checks[nextCheck++] = data;
+		else {
+			long givenPathLen = (lastSlash - thisFileName) + 1;
+			long checklen = givenPathLen + length;
+			char *check = new char[checklen+1];
+			memcpy( check, thisFileName, givenPathLen );
+			memcpy( check+givenPathLen, data, length );
+			check[checklen] = 0;
+			checks[nextCheck++] = check;
+		}
+
+		/* Search from the include paths given on the command line. */
+		for ( ArgsVector::Iter incp = includePaths; incp.lte(); incp++ ) {
+			long pathLen = strlen( *incp );
+			long checkLen = pathLen + 1 + length;
+			char *check = new char[checkLen+1];
+			memcpy( check, *incp, pathLen );
+			check[pathLen] = PATH_SEP;
+			memcpy( check+pathLen+1, data, length );
+			check[checkLen] = 0;
+			checks[nextCheck++] = check;
+		}
+	}
+
+	checks[nextCheck] = 0;
+	return checks;
+}
+
+ifstream *Scanner::tryOpenInclude( char **pathChecks, long &found )
+{
+	char **check = pathChecks;
+	ifstream *inFile = new ifstream;
+	
+	while ( *check != 0 ) {
+		inFile->open( *check );
+		if ( inFile->is_open() ) {
+			found = check - pathChecks;
+			return inFile;
+		}
+		check += 1;
+	}
+
+	found = -1;
+	delete inFile;
+	return 0;
 }
 
 %%{
