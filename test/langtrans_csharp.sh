@@ -15,6 +15,12 @@ cat << EOF
 /*
  * @LANG: csharp
  * @GENERATED: yes
+EOF
+
+grep '@ALLOW_GENFLAGS:' $file | sed 's/-G2//g'
+grep '@ALLOW_MINFLAGS:' $file
+
+cat << EOF
  */
 using System;
 // Disables lots of warnings that appear in the test suite
