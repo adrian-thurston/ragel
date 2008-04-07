@@ -21,6 +21,12 @@ cat << EOF
 /*
  * @LANG: c
  * @GENERATED: yes
+EOF
+
+grep '@ALLOW_GENFLAGS:' $file
+grep '@ALLOW_MINFLAGS:' $file
+
+cat << EOF
  */
 #include <string.h>
 #include <stdio.h>

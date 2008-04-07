@@ -15,6 +15,12 @@ cat << EOF
 /*
  * @LANG: java
  * @GENERATED: yes
+EOF
+
+grep '@ALLOW_GENFLAGS:' $file
+grep '@ALLOW_MINFLAGS:' $file
+
+cat << EOF
  */
 
 class $class

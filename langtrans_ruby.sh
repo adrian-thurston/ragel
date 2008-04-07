@@ -17,6 +17,12 @@ cat << EOF
 #
 # @LANG: ruby
 # @GENERATED: yes
+EOF
+
+grep '@ALLOW_GENFLAGS:' $file | sed 's/^ *\*/#/' | sed 's/-G.//g'
+grep '@ALLOW_MINFLAGS:' $file | sed 's/^ *\*/#/'
+
+cat << EOF
 #
 
 EOF

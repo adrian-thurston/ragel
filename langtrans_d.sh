@@ -16,6 +16,12 @@ cat << EOF
 /*
  * @LANG: d
  * @GENERATED: yes
+EOF
+
+grep '@ALLOW_GENFLAGS:' $file
+grep '@ALLOW_MINFLAGS:' $file
+
+cat << EOF
  */
 import std.stdio;
 import std.string;
