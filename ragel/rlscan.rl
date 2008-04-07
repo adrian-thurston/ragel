@@ -302,37 +302,41 @@ void Scanner::handleInclude()
 {
 	if ( active() ) {
 		char *inclSectionName = word;
-		char **inclFileName = 0;
+		char **includeChecks = 0;
 
 		/* Implement defaults for the input file and section name. */
 		if ( inclSectionName == 0 )
 			inclSectionName = parser->sectionName;
 
 		if ( lit != 0 )
-			inclFileName = makeIncludePathChecks( fileName, lit, lit_len );
+			includeChecks = makeIncludePathChecks( fileName, lit, lit_len );
 		else {
 			char *test = new char[strlen(fileName)+1];
 			strcpy( test, fileName );
 
-			inclFileName = new char*[2];
+			includeChecks = new char*[2];
 
-			inclFileName[0] = test;
-			inclFileName[1] = 0;
+			includeChecks[0] = test;
+			includeChecks[1] = 0;
 		}
 
 		long found = 0;
-		ifstream *inFile = tryOpenInclude( inclFileName, found );
-		if ( inFile == 0 )
+		ifstream *inFile = tryOpenInclude( includeChecks, found );
+		if ( inFile == 0 ) {
 			scan_error() << "include: failed to locate file" << endl;
+			char **tried = includeChecks;
+			while ( *tried != 0 )
+				scan_error() << "include: attempted: \"" << *tried++ << '\"' << endl;
+		}
 		else {
 			/* Check for a recursive include structure. Add the current file/section
 			 * name then check if what we are including is already in the stack. */
 			includeStack.append( IncludeStackItem( fileName, parser->sectionName ) );
 
-			if ( recursiveInclude( inclFileName[found], inclSectionName ) )
+			if ( recursiveInclude( includeChecks[found], inclSectionName ) )
 				scan_error() << "include: this is a recursive include operation" << endl;
 			else {
-				Scanner scanner( inclFileName[found], *inFile, output, parser,
+				Scanner scanner( includeChecks[found], *inFile, output, parser,
 						inclSectionName, includeDepth+1, false );
 				scanner.do_scan( );
 				delete inFile;
@@ -347,17 +351,20 @@ void Scanner::handleInclude()
 void Scanner::handleImport()
 {
 	if ( active() ) {
-		char **importFileName = makeIncludePathChecks( fileName, lit, lit_len );
+		char **importChecks = makeIncludePathChecks( fileName, lit, lit_len );
 
 		/* Open the input file for reading. */
 		long found = 0;
-		ifstream *inFile = tryOpenInclude( importFileName, found );
+		ifstream *inFile = tryOpenInclude( importChecks, found );
 		if ( inFile == 0 ) {
 			scan_error() << "import: could not open import file " <<
 					"for reading" << endl;
+			char **tried = importChecks;
+			while ( *tried != 0 )
+				scan_error() << "import: attempted: \"" << *tried++ << '\"' << endl;
 		}
 
-		Scanner scanner( importFileName[found], *inFile, output, parser,
+		Scanner scanner( importChecks[found], *inFile, output, parser,
 				0, includeDepth+1, true );
 		scanner.do_scan( );
 		scanner.importToken( 0, 0, 0 );

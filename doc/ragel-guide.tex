@@ -571,6 +571,10 @@ of the same name as the current specification. Without an input file the
 current file is searched for a machine of the given name. If both are present,
 the given input file is searched for a machine of the given name.
 
+Ragel searches for included files from the location of the current file.
+Additional directories can be added to the search path using the \verb|-I|
+option.
+
 \subsection{Importing Definitions}
 \label{import}
 
@@ -594,6 +598,9 @@ If the input file is a Ragel program then tokens inside any Ragel
 specifications are ignored. See Section \ref{export} for a description of
 exporting machine definitions.
 
+Ragel searches for imported files from the location of the current file.
+Additional directories can be added to the search path using the \verb|-I|
+option.
 
 \section{Lexical Analysis of a Ragel Block}
 \label{lexing}

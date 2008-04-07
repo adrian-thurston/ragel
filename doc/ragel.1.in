@@ -70,6 +70,9 @@ Print some statistics on standard error.
 .B \-d
 Do not remove duplicate actions from action lists.
 .TP
+.B \-I " dir"
+Add dir to the list of directories to search for included and imported files
+.TP
 .B \-n
 Do not perform state minimization.
 .TP
