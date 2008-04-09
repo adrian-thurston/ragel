@@ -671,7 +671,7 @@ void Join::resolveNameRefs( ParseData *pd )
 			pd->curNameInst->start = resolved[0];
 			if ( resolved.length() > 1 ) {
 				/* Complain about the multiple references. */
-				error(loc) << "multiple start labels" << endl;
+				error(loc) << "join operation has multiple start labels" << endl;
 				errorStateLabels( resolved );
 			}
 		}
@@ -682,9 +682,8 @@ void Join::resolveNameRefs( ParseData *pd )
 			pd->curNameInst->start->numRefs += 1;
 		}
 		else {
-			/* No start label. Complain and recover by adding a label to the
-			 * adding one. Recover ignoring the problem. */
-			error(loc) << "no start label" << endl;
+			/* No start label. */
+			error(loc) << "join operation has no start label" << endl;
 		}
 
 		/* Recurse into all expressions in the list. */

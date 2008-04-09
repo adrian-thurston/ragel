@@ -115,6 +115,8 @@ assignment:
 
 		if ( $1->isSet )
 			exportContext.remove( exportContext.length()-1 );
+
+		$4->join->loc = $3->loc;
 	};
 
 instantiation: 
@@ -124,6 +126,10 @@ instantiation:
 
 		if ( $1->isSet )
 			exportContext.remove( exportContext.length()-1 );
+
+		/* Pass a location to join_or_lm */
+		if ( $4->joinOrLm->join != 0 )
+			$4->joinOrLm->join->loc = $3->loc;
 	};
 
 type token_type
@@ -250,13 +256,15 @@ nonterm lm_part_list
 };
 
 lm_part_list:
-	lm_part_list longest_match_part final {
+	lm_part_list longest_match_part
+	final {
 		if ( $2->lmPart != 0 ) 
 			$1->lmPartList->append( $2->lmPart );
 		$$->lmPartList = $1->lmPartList;
 	};
 lm_part_list:
-	longest_match_part final {
+	longest_match_part
+	final {
 		/* Create a new list with the part. */
 		$$->lmPartList = new LmPartList;
 		if ( $1->lmPart != 0 )
@@ -280,6 +288,10 @@ longest_match_part:
 			action->isLmAction = true;
 		$$->lmPart = new LongestMatchPart( $1->join, action, 
 				$3->loc, pd->nextLongestMatchId++ );
+
+		/* Provide a location to join. Unfortunately We don't
+		 * have the start of the join as in other occurances. Use the end. */
+		$1->join->loc = $3->loc;
 	};
 
 nonterm opt_lm_part_action
@@ -1020,6 +1032,7 @@ factor:
 	'(' join ')' final {
 		/* Create a new factor going to a parenthesized join. */
 		$$->factor = new Factor( $2->join );
+		$2->join->loc = $1->loc;
 	};
 
 nonterm range_lit

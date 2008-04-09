@@ -330,9 +330,9 @@ struct JoinOrLm
 	};
 
 	JoinOrLm( Join *join ) : 
-		join(join), type(JoinType) {}
+		join(join), longestMatch(0), type(JoinType) {}
 	JoinOrLm( LongestMatch *longestMatch ) :
-		longestMatch(longestMatch), type(LongestMatchType) {}
+		join(0), longestMatch(longestMatch), type(LongestMatchType) {}
 
 	FsmAp *walk( ParseData *pd );
 	void makeNameTree( ParseData *pd );
