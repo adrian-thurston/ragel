@@ -44,6 +44,8 @@ option.
 ================
 END 6.0 Features
 
+Add an option for outputting ragel include dependencies.
+
 Add a prefix operator which sets every state final.
 
 Minimization should remove a condition when the character allows both
