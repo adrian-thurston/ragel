@@ -59,7 +59,7 @@ public:
 	void CURS( ostream &ret, bool inFinish );
 	void TARGS( ostream &ret, bool inFinish, int targState );
 	void RET( ostream &ret, bool inFinish );
-	void BREAK( ostream &ret, int targState );
+	void BREAK( ostream &ret, int targState, bool csForced );
 
 	virtual unsigned int TO_STATE_ACTION( RedStateAp *state );
 	virtual unsigned int FROM_STATE_ACTION( RedStateAp *state );

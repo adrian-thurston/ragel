@@ -140,7 +140,7 @@ string FsmCodeGen::ACCESS()
 {
 	ostringstream ret;
 	if ( accessExpr != 0 )
-		INLINE_LIST( ret, accessExpr, 0, false );
+		INLINE_LIST( ret, accessExpr, 0, false, false );
 	return ret.str();
 }
 
@@ -152,7 +152,7 @@ string FsmCodeGen::P()
 		ret << "p";
 	else {
 		ret << "(";
-		INLINE_LIST( ret, pExpr, 0, false );
+		INLINE_LIST( ret, pExpr, 0, false, false );
 		ret << ")";
 	}
 	return ret.str();
@@ -165,7 +165,7 @@ string FsmCodeGen::PE()
 		ret << "pe";
 	else {
 		ret << "(";
-		INLINE_LIST( ret, peExpr, 0, false );
+		INLINE_LIST( ret, peExpr, 0, false, false );
 		ret << ")";
 	}
 	return ret.str();
@@ -178,7 +178,7 @@ string FsmCodeGen::EOFV()
 		ret << "eof";
 	else {
 		ret << "(";
-		INLINE_LIST( ret, eofExpr, 0, false );
+		INLINE_LIST( ret, eofExpr, 0, false, false );
 		ret << ")";
 	}
 	return ret.str();
@@ -192,7 +192,7 @@ string FsmCodeGen::CS()
 	else {
 		/* Emit the user supplied method of retrieving the key. */
 		ret << "(";
-		INLINE_LIST( ret, csExpr, 0, false );
+		INLINE_LIST( ret, csExpr, 0, false, false );
 		ret << ")";
 	}
 	return ret.str();
@@ -205,7 +205,7 @@ string FsmCodeGen::TOP()
 		ret << ACCESS() + "top";
 	else {
 		ret << "(";
-		INLINE_LIST( ret, topExpr, 0, false );
+		INLINE_LIST( ret, topExpr, 0, false, false );
 		ret << ")";
 	}
 	return ret.str();
@@ -218,7 +218,7 @@ string FsmCodeGen::STACK()
 		ret << ACCESS() + "stack";
 	else {
 		ret << "(";
-		INLINE_LIST( ret, stackExpr, 0, false );
+		INLINE_LIST( ret, stackExpr, 0, false, false );
 		ret << ")";
 	}
 	return ret.str();
@@ -231,7 +231,7 @@ string FsmCodeGen::ACT()
 		ret << ACCESS() + "act";
 	else {
 		ret << "(";
-		INLINE_LIST( ret, actExpr, 0, false );
+		INLINE_LIST( ret, actExpr, 0, false, false );
 		ret << ")";
 	}
 	return ret.str();
@@ -244,7 +244,7 @@ string FsmCodeGen::TOKSTART()
 		ret << ACCESS() + "ts";
 	else {
 		ret << "(";
-		INLINE_LIST( ret, tokstartExpr, 0, false );
+		INLINE_LIST( ret, tokstartExpr, 0, false, false );
 		ret << ")";
 	}
 	return ret.str();
@@ -257,7 +257,7 @@ string FsmCodeGen::TOKEND()
 		ret << ACCESS() + "te";
 	else {
 		ret << "(";
-		INLINE_LIST( ret, tokendExpr, 0, false );
+		INLINE_LIST( ret, tokendExpr, 0, false, false );
 		ret << ")";
 	}
 	return ret.str();
@@ -285,7 +285,7 @@ string FsmCodeGen::GET_KEY()
 	if ( getKeyExpr != 0 ) { 
 		/* Emit the user supplied method of retrieving the key. */
 		ret << "(";
-		INLINE_LIST( ret, getKeyExpr, 0, false );
+		INLINE_LIST( ret, getKeyExpr, 0, false, false );
 		ret << ")";
 	}
 	else {
@@ -323,7 +323,7 @@ void FsmCodeGen::EXEC( ostream &ret, InlineItem *item, int targState, int inFini
 	 * code. If the inline list is a single word it will get interpreted as a
 	 * C-style cast by the D compiler. */
 	ret << "{" << P() << " = ((";
-	INLINE_LIST( ret, item->children, targState, inFinish );
+	INLINE_LIST( ret, item->children, targState, inFinish, false );
 	ret << "))-1;}";
 }
 
@@ -339,7 +339,7 @@ void FsmCodeGen::LM_SWITCH( ostream &ret, InlineItem *item,
 
 		/* Write the block and close it off. */
 		ret << "	{";
-		INLINE_LIST( ret, lma->children, targState, inFinish );
+		INLINE_LIST( ret, lma->children, targState, inFinish, false );
 		ret << "}\n";
 
 		ret << "	break;\n";
@@ -391,7 +391,7 @@ void FsmCodeGen::SUB_ACTION( ostream &ret, InlineItem *item,
 	if ( item->children->length() > 0 ) {
 		/* Write the block and close it off. */
 		ret << "{";
-		INLINE_LIST( ret, item->children, targState, inFinish );
+		INLINE_LIST( ret, item->children, targState, inFinish, false );
 		ret << "}";
 	}
 }
@@ -400,7 +400,7 @@ void FsmCodeGen::SUB_ACTION( ostream &ret, InlineItem *item,
 /* Write out an inline tree structure. Walks the list and possibly calls out
  * to virtual functions than handle language specific items in the tree. */
 void FsmCodeGen::INLINE_LIST( ostream &ret, InlineList *inlineList, 
-		int targState, bool inFinish )
+		int targState, bool inFinish, bool csForced )
 {
 	for ( InlineList::Iter item = *inlineList; item.lte(); item++ ) {
 		switch ( item->type ) {
@@ -474,7 +474,7 @@ void FsmCodeGen::INLINE_LIST( ostream &ret, InlineList *inlineList,
 			SUB_ACTION( ret, item, targState, inFinish );
 			break;
 		case InlineItem::Break:
-			BREAK( ret, targState );
+			BREAK( ret, targState, csForced );
 			break;
 		}
 	}
@@ -492,14 +492,15 @@ string FsmCodeGen::LDIR_PATH( char *path )
 	return ret.str();
 }
 
-void FsmCodeGen::ACTION( ostream &ret, Action *action, int targState, bool inFinish )
+void FsmCodeGen::ACTION( ostream &ret, Action *action, int targState, 
+		bool inFinish, bool csForced )
 {
 	/* Write the preprocessor line info for going into the source file. */
 	lineDirective( ret, sourceFileName, action->loc.line );
 
 	/* Write the block and close it off. */
 	ret << "\t{";
-	INLINE_LIST( ret, action->inlineList, targState, inFinish );
+	INLINE_LIST( ret, action->inlineList, targState, inFinish, csForced );
 	ret << "}\n";
 }
 
@@ -507,7 +508,7 @@ void FsmCodeGen::CONDITION( ostream &ret, Action *condition )
 {
 	ret << "\n";
 	lineDirective( ret, sourceFileName, condition->loc.line );
-	INLINE_LIST( ret, condition->inlineList, 0, false );
+	INLINE_LIST( ret, condition->inlineList, 0, false, false );
 }
 
 string FsmCodeGen::ERROR_STATE()

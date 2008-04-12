@@ -81,7 +81,7 @@ protected:
 	void CURS( ostream &ret, bool inFinish );
 	void TARGS( ostream &ret, bool inFinish, int targState );
 	void RET( ostream &ret, bool inFinish );
-	void BREAK( ostream &ret, int targState );
+	void BREAK( ostream &ret, int targState, bool csForced );
 
 	virtual std::ostream &TO_STATE_ACTION( RedStateAp *state );
 	virtual std::ostream &FROM_STATE_ACTION( RedStateAp *state );

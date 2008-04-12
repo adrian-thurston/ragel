@@ -68,8 +68,10 @@ void SplitCodeGen::GOTO_HEADER( RedStateAp *state, bool stateInPartition )
 	if ( state->toStateAction != 0 ) {
 		/* Remember that we wrote an action. Write every action in the list. */
 		anyWritten = true;
-		for ( ActionTable::Iter item = state->toStateAction->key; item.lte(); item++ )
-			ACTION( out, item->value, state->id, false );
+		for ( ActionTable::Iter item = state->toStateAction->key; item.lte(); item++ ) {
+			ACTION( out, item->value, state->id, false,
+					state->toStateAction->anyNextStmt() );
+		}
 	}
 
 	/* Advance and test buffer pos. */
@@ -91,8 +93,10 @@ void SplitCodeGen::GOTO_HEADER( RedStateAp *state, bool stateInPartition )
 	if ( state->fromStateAction != 0 ) {
 		/* Remember that we wrote an action. Write every action in the list. */
 		anyWritten = true;
-		for ( ActionTable::Iter item = state->fromStateAction->key; item.lte(); item++ )
-			ACTION( out, item->value, state->id, false );
+		for ( ActionTable::Iter item = state->fromStateAction->key; item.lte(); item++ ) {
+			ACTION( out, item->value, state->id, false,
+					state->fromStateAction->anyNextStmt() );
+		}
 	}
 
 	if ( anyWritten )
@@ -154,8 +158,10 @@ std::ostream &SplitCodeGen::PART_TRANS( int partition )
 					out << "	" << CS() << " = " << trans->targ->id << ";\n";
 
 				/* Write each action in the list. */
-				for ( ActionTable::Iter item = trans->action->key; item.lte(); item++ )
-					ACTION( out, item->value, trans->targ->id, false );
+				for ( ActionTable::Iter item = trans->action->key; item.lte(); item++ ) {
+					ACTION( out, item->value, trans->targ->id, false,
+							trans->action->anyNextStmt() );
+				}
 			}
 
 			out <<
@@ -172,8 +178,10 @@ std::ostream &SplitCodeGen::PART_TRANS( int partition )
 
 			if ( st->toStateAction != 0 ) {
 				/* Remember that we wrote an action. Write every action in the list. */
-				for ( ActionTable::Iter item = st->toStateAction->key; item.lte(); item++ )
-					ACTION( out, item->value, st->id, false );
+				for ( ActionTable::Iter item = st->toStateAction->key; item.lte(); item++ ) {
+					ACTION( out, item->value, st->id, false,
+							st->toStateAction->anyNextStmt() );
+				}
 				genLineDirective( out );
 			}
 

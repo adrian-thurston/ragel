@@ -112,6 +112,8 @@ void CSharpIpGotoCodeGen::TARGS( ostream &ret, bool inFinish, int targState )
 
 void CSharpIpGotoCodeGen::BREAK( ostream &ret, int targState )
 {
+	/* FIXME: If this code generator is made active then BREAK generation
+	 * needs to check csForced. */
 	outLabelUsed = true;
 	ret << "{" << P() << "++; " << CS() << " = " << targState << 
 			"; " << CTRL_FLOW() << "goto _out;}";

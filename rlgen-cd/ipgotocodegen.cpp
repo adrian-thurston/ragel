@@ -43,7 +43,7 @@ void IpGotoCodeGen::CALL( ostream &ret, int callDest, int targState, bool inFini
 {
 	if ( prePushExpr != 0 ) {
 		ret << "{";
-		INLINE_LIST( ret, prePushExpr, 0, false );
+		INLINE_LIST( ret, prePushExpr, 0, false, false );
 	}
 
 	ret << "{" << STACK() << "[" << TOP() << "++] = " << targState << 
@@ -57,11 +57,11 @@ void IpGotoCodeGen::CALL_EXPR( ostream &ret, InlineItem *ilItem, int targState, 
 {
 	if ( prePushExpr != 0 ) {
 		ret << "{";
-		INLINE_LIST( ret, prePushExpr, 0, false );
+		INLINE_LIST( ret, prePushExpr, 0, false, false );
 	}
 
 	ret << "{" << STACK() << "[" << TOP() << "++] = " << targState << "; " << CS() << " = (";
-	INLINE_LIST( ret, ilItem->children, 0, inFinish );
+	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
 	ret << "); " << CTRL_FLOW() << "goto _again;}";
 
 	if ( prePushExpr != 0 )
@@ -74,7 +74,7 @@ void IpGotoCodeGen::RET( ostream &ret, bool inFinish )
 
 	if ( postPopExpr != 0 ) {
 		ret << "{";
-		INLINE_LIST( ret, postPopExpr, 0, false );
+		INLINE_LIST( ret, postPopExpr, 0, false, false );
 		ret << "}";
 	}
 
@@ -84,7 +84,7 @@ void IpGotoCodeGen::RET( ostream &ret, bool inFinish )
 void IpGotoCodeGen::GOTO_EXPR( ostream &ret, InlineItem *ilItem, bool inFinish )
 {
 	ret << "{" << CS() << " = (";
-	INLINE_LIST( ret, ilItem->children, 0, inFinish );
+	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
 	ret << "); " << CTRL_FLOW() << "goto _again;}";
 }
 
@@ -96,7 +96,7 @@ void IpGotoCodeGen::NEXT( ostream &ret, int nextDest, bool inFinish )
 void IpGotoCodeGen::NEXT_EXPR( ostream &ret, InlineItem *ilItem, bool inFinish )
 {
 	ret << CS() << " = (";
-	INLINE_LIST( ret, ilItem->children, 0, inFinish );
+	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
 	ret << ");";
 }
 
@@ -110,11 +110,13 @@ void IpGotoCodeGen::TARGS( ostream &ret, bool inFinish, int targState )
 	ret << targState;
 }
 
-void IpGotoCodeGen::BREAK( ostream &ret, int targState )
+void IpGotoCodeGen::BREAK( ostream &ret, int targState, bool csForced )
 {
 	outLabelUsed = true;
-	ret << "{" << P() << "++; " << CS() << " = " << targState << 
-			"; " << CTRL_FLOW() << "goto _out;}";
+	ret << "{" << P() << "++; ";
+	if ( !csForced ) 
+		ret << CS() << " = " << targState << "; ";
+	ret << CTRL_FLOW() << "goto _out;}";
 }
 
 bool IpGotoCodeGen::IN_TRANS_ACTIONS( RedStateAp *state )
@@ -138,8 +140,10 @@ bool IpGotoCodeGen::IN_TRANS_ACTIONS( RedStateAp *state )
 				out << "	" << CS() << " = " << trans->targ->id << ";\n";
 
 			/* Write each action in the list. */
-			for ( ActionTable::Iter item = trans->action->key; item.lte(); item++ )
-				ACTION( out, item->value, trans->targ->id, false );
+			for ( ActionTable::Iter item = trans->action->key; item.lte(); item++ ) {
+				ACTION( out, item->value, trans->targ->id, false, 
+						trans->action->anyNextStmt() );
+			}
 
 			/* If the action contains a next then we need to reload, otherwise
 			 * jump directly to the target state. */
@@ -165,8 +169,10 @@ void IpGotoCodeGen::GOTO_HEADER( RedStateAp *state )
 	if ( state->toStateAction != 0 ) {
 		/* Remember that we wrote an action. Write every action in the list. */
 		anyWritten = true;
-		for ( ActionTable::Iter item = state->toStateAction->key; item.lte(); item++ )
-			ACTION( out, item->value, state->id, false );
+		for ( ActionTable::Iter item = state->toStateAction->key; item.lte(); item++ ) {
+			ACTION( out, item->value, state->id, false, 
+					state->toStateAction->anyNextStmt() );
+		}
 	}
 
 	/* Advance and test buffer pos. */
@@ -188,8 +194,10 @@ void IpGotoCodeGen::GOTO_HEADER( RedStateAp *state )
 	if ( state->fromStateAction != 0 ) {
 		/* Remember that we wrote an action. Write every action in the list. */
 		anyWritten = true;
-		for ( ActionTable::Iter item = state->fromStateAction->key; item.lte(); item++ )
-			ACTION( out, item->value, state->id, false );
+		for ( ActionTable::Iter item = state->fromStateAction->key; item.lte(); item++ ) {
+			ACTION( out, item->value, state->id, false,
+					state->fromStateAction->anyNextStmt() );
+		}
 	}
 
 	if ( anyWritten )
@@ -284,7 +292,7 @@ std::ostream &IpGotoCodeGen::FINISH_CASES()
 
 			/* Write each action in the eof action list. */
 			for ( ActionTable::Iter item = act->key; item.lte(); item++ )
-				ACTION( out, item->value, STATE_ERR_STATE, true );
+				ACTION( out, item->value, STATE_ERR_STATE, true, false );
 			out << "\tbreak;\n";
 		}
 	}

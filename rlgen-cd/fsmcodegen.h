@@ -76,7 +76,8 @@ protected:
 	string TABS( int level );
 	string KEY( Key key );
 	string LDIR_PATH( char *path );
-	void ACTION( ostream &ret, Action *action, int targState, bool inFinish );
+	void ACTION( ostream &ret, Action *action, int targState, 
+			bool inFinish, bool csForced );
 	void CONDITION( ostream &ret, Action *condition );
 	string ALPH_TYPE();
 	string WIDE_ALPH_TYPE();
@@ -128,7 +129,8 @@ protected:
 	string FIRST_FINAL() { return DATA_PREFIX() + "first_final"; }
 	string CTXDATA() { return DATA_PREFIX() + "ctxdata"; }
 
-	void INLINE_LIST( ostream &ret, InlineList *inlineList, int targState, bool inFinish );
+	void INLINE_LIST( ostream &ret, InlineList *inlineList, 
+			int targState, bool inFinish, bool csForced );
 	virtual void GOTO( ostream &ret, int gotoDest, bool inFinish ) = 0;
 	virtual void CALL( ostream &ret, int callDest, int targState, bool inFinish ) = 0;
 	virtual void NEXT( ostream &ret, int nextDest, bool inFinish ) = 0;
@@ -137,7 +139,7 @@ protected:
 	virtual void CALL_EXPR( ostream &ret, InlineItem *ilItem, 
 			int targState, bool inFinish ) = 0;
 	virtual void RET( ostream &ret, bool inFinish ) = 0;
-	virtual void BREAK( ostream &ret, int targState ) = 0;
+	virtual void BREAK( ostream &ret, int targState, bool csForced ) = 0;
 	virtual void CURS( ostream &ret, bool inFinish ) = 0;
 	virtual void TARGS( ostream &ret, bool inFinish, int targState ) = 0;
 	void EXEC( ostream &ret, InlineItem *item, int targState, int inFinish );

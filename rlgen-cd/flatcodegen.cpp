@@ -71,7 +71,7 @@ std::ostream &FlatCodeGen::TO_STATE_ACTION_SWITCH()
 		if ( act->numToStateRefs > 0 ) {
 			/* Write the case label, the action and the case break */
 			out << "\tcase " << act->actionId << ":\n";
-			ACTION( out, act, 0, false );
+			ACTION( out, act, 0, false, false );
 			out << "\tbreak;\n";
 		}
 	}
@@ -88,7 +88,7 @@ std::ostream &FlatCodeGen::FROM_STATE_ACTION_SWITCH()
 		if ( act->numFromStateRefs > 0 ) {
 			/* Write the case label, the action and the case break */
 			out << "\tcase " << act->actionId << ":\n";
-			ACTION( out, act, 0, false );
+			ACTION( out, act, 0, false, false );
 			out << "\tbreak;\n";
 		}
 	}
@@ -105,7 +105,7 @@ std::ostream &FlatCodeGen::EOF_ACTION_SWITCH()
 		if ( act->numEofRefs > 0 ) {
 			/* Write the case label, the action and the case break */
 			out << "\tcase " << act->actionId << ":\n";
-			ACTION( out, act, 0, true );
+			ACTION( out, act, 0, true, false );
 			out << "\tbreak;\n";
 		}
 	}
@@ -123,7 +123,7 @@ std::ostream &FlatCodeGen::ACTION_SWITCH()
 		if ( act->numTransRefs > 0 ) {
 			/* Write the case label, the action and the case break */
 			out << "\tcase " << act->actionId << ":\n";
-			ACTION( out, act, 0, false );
+			ACTION( out, act, 0, false, false );
 			out << "\tbreak;\n";
 		}
 	}
@@ -456,7 +456,7 @@ void FlatCodeGen::GOTO( ostream &ret, int gotoDest, bool inFinish )
 void FlatCodeGen::GOTO_EXPR( ostream &ret, InlineItem *ilItem, bool inFinish )
 {
 	ret << "{" << CS() << " = (";
-	INLINE_LIST( ret, ilItem->children, 0, inFinish );
+	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
 	ret << "); " << CTRL_FLOW() << "goto _again;}";
 }
 
@@ -478,7 +478,7 @@ void FlatCodeGen::NEXT( ostream &ret, int nextDest, bool inFinish )
 void FlatCodeGen::NEXT_EXPR( ostream &ret, InlineItem *ilItem, bool inFinish )
 {
 	ret << CS() << " = (";
-	INLINE_LIST( ret, ilItem->children, 0, inFinish );
+	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
 	ret << ");";
 }
 
@@ -486,7 +486,7 @@ void FlatCodeGen::CALL( ostream &ret, int callDest, int targState, bool inFinish
 {
 	if ( prePushExpr != 0 ) {
 		ret << "{";
-		INLINE_LIST( ret, prePushExpr, 0, false );
+		INLINE_LIST( ret, prePushExpr, 0, false, false );
 	}
 
 	ret << "{" << STACK() << "[" << TOP() << "++] = " << CS() << "; " << CS() << " = " << 
@@ -501,11 +501,11 @@ void FlatCodeGen::CALL_EXPR( ostream &ret, InlineItem *ilItem, int targState, bo
 {
 	if ( prePushExpr != 0 ) {
 		ret << "{";
-		INLINE_LIST( ret, prePushExpr, 0, false );
+		INLINE_LIST( ret, prePushExpr, 0, false, false );
 	}
 
 	ret << "{" << STACK() << "[" << TOP() << "++] = " << CS() << "; " << CS() << " = (";
-	INLINE_LIST( ret, ilItem->children, targState, inFinish );
+	INLINE_LIST( ret, ilItem->children, targState, inFinish, false );
 	ret << "); " << CTRL_FLOW() << "goto _again;}";
 
 	if ( prePushExpr != 0 )
@@ -519,14 +519,14 @@ void FlatCodeGen::RET( ostream &ret, bool inFinish )
 
 	if ( postPopExpr != 0 ) {
 		ret << "{";
-		INLINE_LIST( ret, postPopExpr, 0, false );
+		INLINE_LIST( ret, postPopExpr, 0, false, false );
 		ret << "}";
 	}
 
 	ret << CTRL_FLOW() << "goto _again;}";
 }
 
-void FlatCodeGen::BREAK( ostream &ret, int targState )
+void FlatCodeGen::BREAK( ostream &ret, int targState, bool csForced )
 {
 	outLabelUsed = true;
 	ret << "{" << P() << "++; " << CTRL_FLOW() << "goto _out; }";
