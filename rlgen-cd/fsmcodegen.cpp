@@ -328,7 +328,7 @@ void FsmCodeGen::EXEC( ostream &ret, InlineItem *item, int targState, int inFini
 }
 
 void FsmCodeGen::LM_SWITCH( ostream &ret, InlineItem *item, 
-		int targState, int inFinish )
+		int targState, int inFinish, bool csForced )
 {
 	ret << 
 		"	switch( " << ACT() << " ) {\n";
@@ -339,7 +339,7 @@ void FsmCodeGen::LM_SWITCH( ostream &ret, InlineItem *item,
 
 		/* Write the block and close it off. */
 		ret << "	{";
-		INLINE_LIST( ret, lma->children, targState, inFinish, false );
+		INLINE_LIST( ret, lma->children, targState, inFinish, csForced );
 		ret << "}\n";
 
 		ret << "	break;\n";
@@ -386,12 +386,12 @@ void FsmCodeGen::SET_TOKSTART( ostream &ret, InlineItem *item )
 }
 
 void FsmCodeGen::SUB_ACTION( ostream &ret, InlineItem *item, 
-		int targState, bool inFinish )
+		int targState, bool inFinish, bool csForced )
 {
 	if ( item->children->length() > 0 ) {
 		/* Write the block and close it off. */
 		ret << "{";
-		INLINE_LIST( ret, item->children, targState, inFinish, false );
+		INLINE_LIST( ret, item->children, targState, inFinish, csForced );
 		ret << "}";
 	}
 }
@@ -450,7 +450,7 @@ void FsmCodeGen::INLINE_LIST( ostream &ret, InlineList *inlineList,
 			NEXT_EXPR( ret, item, inFinish );
 			break;
 		case InlineItem::LmSwitch:
-			LM_SWITCH( ret, item, targState, inFinish );
+			LM_SWITCH( ret, item, targState, inFinish, csForced );
 			break;
 		case InlineItem::LmSetActId:
 			SET_ACT( ret, item );
@@ -471,7 +471,7 @@ void FsmCodeGen::INLINE_LIST( ostream &ret, InlineList *inlineList,
 			SET_TOKSTART( ret, item );
 			break;
 		case InlineItem::SubAction:
-			SUB_ACTION( ret, item, targState, inFinish );
+			SUB_ACTION( ret, item, targState, inFinish, csForced );
 			break;
 		case InlineItem::Break:
 			BREAK( ret, targState, csForced );
