@@ -23,7 +23,7 @@ struct forder
 	main := ( 
 			m1 %{printf("accept m1\n");} |
 			"" %{printf("enter m2\n");} |
-			m2 >{printf("enter m2\n");} %{printf("accpet m2\n");}
+			m2 >{printf("enter m2\n");} %{printf("accept m2\n");}
 		) . '\n';
 }%%
 
@@ -84,7 +84,7 @@ accept m1
 ACCEPT
 enter m2
 enter m2
-accpet m2
+accept m2
 ACCEPT
 enter m1 aa
 enter m1 aa
@@ -99,7 +99,7 @@ leave m1 aa
 through m1 b
 enter m2
 accept m1
-accpet m2
+accept m2
 ACCEPT
 enter m1 aa
 enter m2
