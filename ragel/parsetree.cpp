@@ -1439,7 +1439,7 @@ FsmAp *FactorWithRep::walk( ParseData *pd )
 		retFsm = factorWithRep->walk( pd );
 		if ( retFsm->startState->isFinState() ) {
 			warning(loc) << "applying plus operator to a machine that "
-					"accpets zero length word" << endl;
+					"accepts zero length word" << endl;
 		}
 
 		/* Need a duplicated for the star end. */
@@ -2012,7 +2012,7 @@ FsmAp *ReItem::walk( ParseData *pd, RegExpr *rootRegex )
 	if ( star ) {
 		if ( rtnVal->startState->isFinState() ) {
 			warning(loc) << "applying kleene star to a machine that "
-					"accpets zero length word" << endl;
+					"accepts zero length word" << endl;
 		}
 
 		rtnVal->starOp();
