@@ -29,7 +29,7 @@ public:
 
 	bool check();
 
-	char *parameterArg; /* The argument to the parameter. */
+	char *paramArg;     /* The argument to the parameter. */
 	char parameter;     /* The parameter matched. */
 	enum { match, invalid, noparam } state;
 

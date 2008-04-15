@@ -242,7 +242,7 @@ ostream &Scanner::scan_error()
 {
 	/* Maintain the error count. */
 	gblErrorCount += 1;
-	cerr << fileName << ":" << line << ":" << column << ": ";
+	cerr << makeInputLoc( fileName, line, column ) << ": ";
 	return cerr;
 }
 

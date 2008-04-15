@@ -201,55 +201,55 @@ int main(int argc, char **argv)
 			switch ( pc.parameter ) {
 			/* Output. */
 			case 'o':
-				if ( *pc.parameterArg == 0 )
+				if ( *pc.paramArg == 0 )
 					error() << "a zero length output file name was given" << endl;
 				else if ( outputFileName != 0 )
 					error() << "more than one output file name was given" << endl;
 				else {
 					/* Ok, remember the output file name. */
-					outputFileName = pc.parameterArg;
+					outputFileName = pc.paramArg;
 				}
 				break;
 
 			/* Code style. */
 			case 'T':
-				if ( pc.parameterArg[0] == '0' )
+				if ( pc.paramArg[0] == '0' )
 					codeStyle = GenTables;
-				else if ( pc.parameterArg[0] == '1' )
+				else if ( pc.paramArg[0] == '1' )
 					codeStyle = GenFTables;
 				else {
-					error() << "-T" << pc.parameterArg[0] << 
+					error() << "-T" << pc.paramArg[0] << 
 							" is an invalid argument" << endl;
 					exit(1);
 				}
 				break;
 			case 'F':
-				if ( pc.parameterArg[0] == '0' )
+				if ( pc.paramArg[0] == '0' )
 					codeStyle = GenFlat;
-				else if ( pc.parameterArg[0] == '1' )
+				else if ( pc.paramArg[0] == '1' )
 					codeStyle = GenFFlat;
 				else {
-					error() << "-F" << pc.parameterArg[0] << 
+					error() << "-F" << pc.paramArg[0] << 
 							" is an invalid argument" << endl;
 					exit(1);
 				}
 				break;
 			case 'G':
-				if ( pc.parameterArg[0] == '0' )
+				if ( pc.paramArg[0] == '0' )
 					codeStyle = GenGoto;
-				else if ( pc.parameterArg[0] == '1' )
+				else if ( pc.paramArg[0] == '1' )
 					codeStyle = GenFGoto;
-				else if ( pc.parameterArg[0] == '2' )
+				else if ( pc.paramArg[0] == '2' )
 					codeStyle = GenIpGoto;
 				else {
-					error() << "-G" << pc.parameterArg[0] << 
+					error() << "-G" << pc.paramArg[0] << 
 							" is an invalid argument" << endl;
 					exit(1);
 				}
 				break;
 			case 'P':
 				codeStyle = GenSplit;
-				numSplitPartitions = atoi( pc.parameterArg );
+				numSplitPartitions = atoi( pc.paramArg );
 				break;
 
                         case 'x':
@@ -265,19 +265,19 @@ int main(int argc, char **argv)
 				exit(0);
 
 			case '-':
-				if ( strcasecmp(pc.parameterArg, "help") == 0 ) {
+				if ( strcmp(pc.paramArg, "help") == 0 ) {
 					usage();
 					exit(0);
 				}
-				else if ( strcasecmp(pc.parameterArg, "version") == 0 ) {
+				else if ( strcmp(pc.paramArg, "version") == 0 ) {
 					version();
 					exit(0);
 				}
-                                else if ( strcasecmp(pc.parameterArg, "rbx") == 0 ) {
-                                        rubyImpl = Rubinius;
-                                }
+				else if ( strcmp(pc.paramArg, "rbx") == 0 ) {
+					rubyImpl = Rubinius;
+				}
 				else {
-					error() << "--" << pc.parameterArg << 
+					error() << "--" << pc.paramArg << 
 							" is an invalid argument" << endl;
 					break;
 				}

@@ -1475,7 +1475,7 @@ ostream &Parser::parse_error( int tokId, Token &token )
 	/* Maintain the error count. */
 	gblErrorCount += 1;
 
-	cerr << token.loc.fileName << ":" << token.loc.line << ":" << token.loc.col << ": ";
+	cerr << token.loc << ": ";
 	cerr << "at token ";
 	if ( tokId < 128 )
 		cerr << "\"" << Parser_lelNames[tokId] << "\"";

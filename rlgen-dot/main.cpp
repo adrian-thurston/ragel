@@ -142,13 +142,13 @@ int main(int argc, char **argv)
 			switch ( pc.parameter ) {
 			/* Output. */
 			case 'o':
-				if ( *pc.parameterArg == 0 )
+				if ( *pc.paramArg == 0 )
 					error() << "a zero length output file name was given" << endl;
 				else if ( outputFileName != 0 )
 					error() << "more than one output file name was given" << endl;
 				else {
 					/* Ok, remember the output file name. */
-					outputFileName = pc.parameterArg;
+					outputFileName = pc.paramArg;
 				}
 				break;
 
@@ -164,16 +164,16 @@ int main(int argc, char **argv)
 				usage();
 				exit(0);
 			case '-':
-				if ( strcasecmp(pc.parameterArg, "help") == 0 ) {
+				if ( strcmp(pc.paramArg, "help") == 0 ) {
 					usage();
 					exit(0);
 				}
-				else if ( strcasecmp(pc.parameterArg, "version") == 0 ) {
+				else if ( strcmp(pc.paramArg, "version") == 0 ) {
 					version();
 					exit(0);
 				}
 				else {
-					error() << "--" << pc.parameterArg << 
+					error() << "--" << pc.paramArg << 
 							" is an invalid argument" << endl;
 					break;
 				}

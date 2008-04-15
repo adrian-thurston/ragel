@@ -53,6 +53,13 @@ extern char *machineSpec, *machineName;
 extern bool printStatistics;
 extern bool wantDupsRemoved;
 
+/* Error reporting format. */
+enum ErrorFormat {
+	ErrorFormatGNU,
+	ErrorFormatMSVC,
+};
+
+extern ErrorFormat errorFormat;
 extern int gblErrorCount;
 extern char mainMachine[];
 
@@ -63,6 +70,9 @@ struct InputLoc
 	int line;
 	int col;
 };
+
+InputLoc makeInputLoc( const char *fileName, int line = 0, int col = 0 );
+std::ostream &operator<<( std::ostream &out, const InputLoc &loc );
 
 /* Error reporting. */
 std::ostream &error();

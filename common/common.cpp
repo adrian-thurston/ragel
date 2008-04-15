@@ -191,7 +191,7 @@ bool ParamCheck::check()
 			 argv[iCurArg][0] != '-' ||   /* Not a param. */
 			 argv[iCurArg][1] == 0 ) {    /* Only a dash. */
 			parameter = 0;
-			parameterArg = 0;
+			paramArg = 0;
 
 			iCurArg += 1;
 			state = noparam;
@@ -230,7 +230,7 @@ bool ParamCheck::check()
 						/* We are the last arg so there
 						 * cannot be a parameter to it. */
 						parameter = argChar;
-						parameterArg = 0;
+						paramArg = 0;
 						iCurArg += 1;
 						argOffset = 0;
 						state = invalid;
@@ -239,7 +239,7 @@ bool ParamCheck::check()
 					else {
 						/* the parameter to the arg is the next arg. */
 						parameter = pSpecChar;
-						parameterArg = argv[iCurArg + 1];
+						paramArg = argv[iCurArg + 1];
 						iCurArg += 2;
 						argOffset = 0;
 						state = match;
@@ -249,7 +249,7 @@ bool ParamCheck::check()
 				else {
 					/* The param for the arg is built in. */
 					parameter = pSpecChar;
-					parameterArg = argOffset + 1;
+					paramArg = argOffset + 1;
 					iCurArg += 1;
 					argOffset = 0;
 					state = match;
@@ -260,7 +260,7 @@ bool ParamCheck::check()
 				/* Good, we matched the parm and no
 				 * arg is required. */
 				parameter = pSpecChar;
-				parameterArg = 0;
+				paramArg = 0;
 				argOffset += 1;
 				state = match;
 				return true;
@@ -270,7 +270,7 @@ bool ParamCheck::check()
 
 	/* We did not find a match. Bad Argument. */
 	parameter = argChar;
-	parameterArg = 0;
+	paramArg = 0;
 	argOffset += 1;
 	state = invalid;
 	return true;

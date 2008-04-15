@@ -90,6 +90,9 @@ void usage()
 "   -d                   Do not remove duplicates from action lists\n"
 "   -I <dir>             Add <dir> to the list of directories to search\n"
 "                        for included an imported files\n"
+"error reporting format:\n"
+"   --error-format=gnu   file:line:column: message (default)\n"
+"   --error-format=msvc  file(line,column): message\n"
 "fsm minimization:\n"
 "   -n                   Do not perform minimization\n"
 "   -m                   Minimize at the end of the compilation\n"
@@ -121,13 +124,45 @@ void usage()
 "   -G2                  Really fast goto-driven FSM\n"
 "   -P<N>                N-Way Split really fast goto-driven FSM\n"
 	;	
+
+	exit(0);
 }
 
-/* Print version information. */
+/* Print version information and exit. */
 void version()
 {
 	cout << "Ragel State Machine Compiler version " VERSION << " " PUBDATE << endl <<
 			"Copyright (c) 2001-2007 by Adrian Thurston" << endl;
+	exit(0);
+}
+
+/* Error reporting format. */
+ErrorFormat errorFormat = ErrorFormatGNU;
+
+InputLoc makeInputLoc( const char *fileName, int line, int col)
+{
+	InputLoc loc = { fileName, line, col };
+	return loc;
+}
+
+ostream &operator<<( ostream &out, const InputLoc &loc )
+{
+	assert( loc.fileName != 0 );
+	switch ( errorFormat ) {
+	case ErrorFormatMSVC:
+		out << loc.fileName << "(" << loc.line;
+		if ( loc.col )
+			out << "," << loc.col;
+		out << ")";
+		break;
+
+	default:
+		out << loc.fileName << ":" << loc.line;
+		if ( loc.col )
+			out << ":" << loc.col;
+		break;
+	}
+	return out;
 }
 
 /* Total error count. */
@@ -136,9 +171,7 @@ int gblErrorCount = 0;
 /* Print the opening to a warning in the input, then return the error ostream. */
 ostream &warning( const InputLoc &loc )
 {
-	assert( loc.fileName != 0 );
-	cerr << loc.fileName << ":" << loc.line << ":" << 
-			loc.col << ": warning: ";
+	cerr << loc << ": warning: ";
 	return cerr;
 }
 
@@ -153,8 +186,7 @@ ostream &error()
 ostream &error( const InputLoc &loc )
 {
 	gblErrorCount += 1;
-	assert( loc.fileName != 0 );
-	cerr << loc.fileName << ":" << loc.line << ": ";
+	cerr << loc << ": ";
 	return cerr;
 }
 
@@ -186,13 +218,13 @@ void processArgs( int argc, char **argv, char *&inputFileName, char *&outputFile
 
 			/* Output. */
 			case 'o':
-				if ( *pc.parameterArg == 0 )
+				if ( *pc.paramArg == 0 )
 					error() << "a zero length output file name was given" << endl;
 				else if ( outputFileName != 0 )
 					error() << "more than one output file name was given" << endl;
 				else {
 					/* Ok, remember the output file name. */
-					outputFileName = pc.parameterArg;
+					outputFileName = pc.paramArg;
 				}
 				break;
 
@@ -238,40 +270,54 @@ void processArgs( int argc, char **argv, char *&inputFileName, char *&outputFile
 
 			/* Machine spec. */
 			case 'S':
-				if ( *pc.parameterArg == 0 )
+				if ( *pc.paramArg == 0 )
 					error() << "please specify an argument to -S" << endl;
 				else if ( machineSpec != 0 )
 					error() << "more than one -S argument was given" << endl;
 				else {
 					/* Ok, remember the path to the machine to generate. */
-					machineSpec = pc.parameterArg;
+					machineSpec = pc.paramArg;
 					frontendArgs.append( "-S" );
-					frontendArgs.append( pc.parameterArg );
+					frontendArgs.append( pc.paramArg );
 				}
 				break;
 
 			/* Machine path. */
 			case 'M':
-				if ( *pc.parameterArg == 0 )
+				if ( *pc.paramArg == 0 )
 					error() << "please specify an argument to -M" << endl;
 				else if ( machineName != 0 )
 					error() << "more than one -M argument was given" << endl;
 				else {
 					/* Ok, remember the machine name to generate. */
-					machineName = pc.parameterArg;
+					machineName = pc.paramArg;
 					frontendArgs.append( "-M" );
-					frontendArgs.append( pc.parameterArg );
+					frontendArgs.append( pc.paramArg );
 				}
 				break;
 
 			case 'I':
-				if ( *pc.parameterArg == 0 )
+				if ( *pc.paramArg == 0 )
 					error() << "please specify an argument to -I" << endl;
 				else {
-					includePaths.append( pc.parameterArg );
+					includePaths.append( pc.paramArg );
 					frontendArgs.append( "-I" );
-					frontendArgs.append( pc.parameterArg );
+					frontendArgs.append( pc.paramArg );
 				}
+				break;
+
+			/* Error reporting format. */
+			case 'E':
+				if ( pc.paramArg[0] == '0' )
+					errorFormat = ErrorFormatGNU;
+				else if ( pc.paramArg[0] == '1' )
+					errorFormat = ErrorFormatMSVC;
+				else {
+					error() << "-E" << pc.paramArg[0] << 
+							" is an invalid argument" << endl;
+				}
+				frontendArgs.append( "-E" );
+				frontendArgs.append( pc.paramArg );
 				break;
 
 			/* Host language types. */
@@ -299,44 +345,61 @@ void processArgs( int argc, char **argv, char *&inputFileName, char *&outputFile
 			/* Version and help. */
 			case 'v':
 				version();
-				exit(0);
+				break;
 			case 'H': case 'h': case '?':
 				usage();
-				exit(0);
+				break;
 			case 's':
 				printStatistics = true;
 				frontendArgs.append( "-s" );
 				break;
-			case '-':
-				if ( strcasecmp(pc.parameterArg, "help") == 0 ) {
+			case '-': {
+				char *eq = strchr( pc.paramArg, '=' );
+
+				if ( eq != 0 )
+					*eq++ = 0;
+
+				if ( strcmp( pc.paramArg, "help" ) == 0 )
 					usage();
-					exit(0);
-				}
-				else if ( strcasecmp(pc.parameterArg, "version") == 0 ) {
+				else if ( strcmp( pc.paramArg, "version" ) == 0 )
 					version();
-					exit(0);
+				else if ( strcmp( pc.paramArg, "error-format" ) == 0 ) {
+					if ( eq == 0 )
+						error() << "expecting '=value' for error-format" << endl;
+					else if ( strcmp( eq, "gnu" ) == 0 ) {
+						errorFormat = ErrorFormatGNU;
+						frontendArgs.append( "--error-format=gnu" );
+					}
+					else if ( strcmp( eq, "msvc" ) == 0 ) {
+						errorFormat = ErrorFormatMSVC;
+						frontendArgs.append( "--error-format=msvc" );
+					}
+					else {
+						error() << "invalid value for error-format" << endl;
+					}
 				}
 				else {
-					error() << "--" << pc.parameterArg << 
+					error() << "--" << pc.paramArg << 
 							" is an invalid argument" << endl;
 				}
+			}
 
 			/* Passthrough args. */
 			case 'T': 
 				backendArgs.append( "-T" );
-				backendArgs.append( pc.parameterArg );
+				backendArgs.append( pc.paramArg );
 				break;
 			case 'F': 
 				backendArgs.append( "-F" );
-				backendArgs.append( pc.parameterArg );
+				backendArgs.append( pc.paramArg );
 				break;
 			case 'G': 
 				backendArgs.append( "-G" );
-				backendArgs.append( pc.parameterArg );
+				backendArgs.append( pc.paramArg );
 				break;
 			case 'P':
 				backendArgs.append( "-P" );
-				backendArgs.append( pc.parameterArg );
+				backendArgs.append( pc.paramArg );
 				break;
 			case 'p':
 				backendArgs.append( "-p" );

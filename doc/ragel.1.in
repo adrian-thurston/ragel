@@ -67,6 +67,12 @@ is used (.c, .cpp, .m, .dot)
 .B \-s
 Print some statistics on standard error.
 .TP
+.B \--error-format=gnu
+Print error messages using the format "file:line:column:" (default)
+.TP
+.B \--error-format=msvc
+Print error messages using the format "file(line,column):"
+.TP
 .B \-d
 Do not remove duplicate actions from action lists.
 .TP
