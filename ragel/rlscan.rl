@@ -41,7 +41,7 @@ enum InlineBlockType
 	SemiTerminated
 };
 
-#ifdef WIN32
+#ifdef _WIN32
 #define PATH_SEP '\\'
 #else
 #define PATH_SEP '/'
@@ -546,7 +546,7 @@ void Scanner::endSection( )
 
 bool isAbsolutePath( const char *path )
 {
-#ifdef WIN32
+#ifdef _WIN32
 	return isalpha( path[0] ) && path[1] == ':' && path[2] == '\\';
 #else
 	return path[0] == '/';

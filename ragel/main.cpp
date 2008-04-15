@@ -32,11 +32,19 @@
 #include <fcntl.h>
 #include <errno.h>
 
-#ifndef WIN32
+#ifndef _WIN32
 #include <sys/wait.h>
 #else
 #include <windows.h>
 #include <psapi.h>
+#include <time.h>
+#include <io.h>
+#include <process.h>
+
+#if _MSC_VER
+#define S_IRUSR _S_IREAD
+#define S_IWUSR _S_IWRITE
+#endif
 #endif
 
 /* Parsing. */
@@ -547,7 +555,7 @@ void cleanExit( char *intermed, int status )
 	exit( status );
 }
 
-#ifndef WIN32
+#ifndef _WIN32
 
 /* If any forward slash is found in argv0 then it is assumed that the path is
  * explicit and the path to the backend executable should be derived from
@@ -701,7 +709,7 @@ void execFrontend( const char *argv0, char *inputFileName, char *intermed )
 	frontendArgs.append( inputFileName );
 	frontendArgs.append( 0 );
 
-#ifndef WIN32
+#ifndef _WIN32
 	char **pathChecks = makePathChecksUnix( argv0, progName );
 	forkAndExec( progName, pathChecks, frontendArgs, intermed );
 #else
@@ -741,7 +749,7 @@ void execBackend( const char *argv0, char *intermed, char *outputFileName )
 	backendArgs.append( intermed );
 	backendArgs.append( 0 );
 
-#ifndef WIN32
+#ifndef _WIN32
 	char **pathChecks = makePathChecksUnix( argv0, progName );
 	forkAndExec( progName, pathChecks, backendArgs, intermed );
 #else
