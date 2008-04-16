@@ -390,6 +390,7 @@ void processArgs( int argc, char **argv, char *&inputFileName, char *&outputFile
 					error() << "--" << pc.paramArg << 
 							" is an invalid argument" << endl;
 				}
+				break;
 			}
 
 			/* Passthrough args. */
