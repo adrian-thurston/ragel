@@ -611,8 +611,10 @@ std::ostream &JavaTabCodeGen::EOF_TRANS()
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write any eof action. */
 		long trans = 0;
-		if ( st->eofTrans != 0 )
-			trans = st->eofTrans->id+1;
+		if ( st->eofTrans != 0 ) {
+			assert( st->eofTrans->pos >= 0 );
+			trans = st->eofTrans->pos+1;
+		}
 
 		/* Write any eof action. */
 		ARRAY_ITEM( INT(trans), st.last() );
@@ -705,22 +707,34 @@ std::ostream &JavaTabCodeGen::INDICIES()
 
 std::ostream &JavaTabCodeGen::TRANS_TARGS()
 {
+	int totalTrans = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Walk the singles. */
 		for ( RedTransList::Iter stel = st->outSingle; stel.lte(); stel++ ) {
 			RedTransAp *trans = stel->value;
 			ARRAY_ITEM( KEY( trans->targ->id ), false );
+			totalTrans++;
 		}
 
 		/* Walk the ranges. */
 		for ( RedTransList::Iter rtel = st->outRange; rtel.lte(); rtel++ ) {
 			RedTransAp *trans = rtel->value;
 			ARRAY_ITEM( KEY( trans->targ->id ), false );
+			totalTrans++;
 		}
 
 		/* The state's default target state. */
 		if ( st->defTrans != 0 ) {
 			RedTransAp *trans = st->defTrans;
+			ARRAY_ITEM( KEY( trans->targ->id ), false );
+			totalTrans++;
+		}
+	}
+
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		if ( st->eofTrans != 0 ) {
+			RedTransAp *trans = st->eofTrans;
+			trans->pos = totalTrans++;
 			ARRAY_ITEM( KEY( trans->targ->id ), false );
 		}
 	}
@@ -754,6 +768,13 @@ std::ostream &JavaTabCodeGen::TRANS_ACTIONS()
 		}
 	}
 
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		if ( st->eofTrans != 0 ) {
+			RedTransAp *trans = st->eofTrans;
+			ARRAY_ITEM( INT(TRANS_ACTION( trans )), false );
+		}
+	}
+
 	/* Output one last number so we don't have to figure out when the last
 	 * entry is and avoid writing a comma. */
 	ARRAY_ITEM( INT(0), true );
@@ -769,8 +790,11 @@ std::ostream &JavaTabCodeGen::TRANS_TARGS_WI()
 
 	/* Keep a count of the num of items in the array written. */
 	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
-		/* Write out the target state. */
+		/* Save the position. Needed for eofTargs. */
 		RedTransAp *trans = transPtrs[t];
+		trans->pos = t;
+
+		/* Write out the target state. */
 		ARRAY_ITEM( INT(trans->targ->id), ( t >= redFsm->transSet.length()-1 ) );
 	}
 	delete[] transPtrs;

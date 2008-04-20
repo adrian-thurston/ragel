@@ -217,11 +217,12 @@ struct RedTransAp
 	public AvlTreeEl<RedTransAp>
 {
 	RedTransAp( RedStateAp *targ, RedAction *action, int id )
-		: targ(targ), action(action), id(id), labelNeeded(true) { }
+		: targ(targ), action(action), id(id), pos(-1), labelNeeded(true) { }
 
 	RedStateAp *targ;
 	RedAction *action;
 	int id;
+	int pos;
 	bool partitionBoundary;
 	bool labelNeeded;
 };

@@ -236,8 +236,10 @@ std::ostream &CSharpFlatCodeGen::EOF_TRANS()
 		/* Write any eof action. */
 
 		long trans = 0;
-		if ( st->eofTrans != 0 )
-			trans = st->eofTrans->id+1;
+		if ( st->eofTrans != 0 ) {
+			assert( st->eofTrans->pos >= 0 );
+			trans = st->eofTrans->pos+1;
+		}
 		out << trans;
 
 		if ( !st.last() ) {
@@ -394,8 +396,11 @@ std::ostream &CSharpFlatCodeGen::TRANS_TARGS()
 	out << '\t';
 	int totalStates = 0;
 	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
-		/* Write out the target state. */
+		/* Record the position, need this for eofTrans. */
 		RedTransAp *trans = transPtrs[t];
+		trans->pos = t;
+
+		/* Write out the target state. */
 		out << trans->targ->id;
 		if ( t < redFsm->transSet.length()-1 ) {
 			out << ", ";

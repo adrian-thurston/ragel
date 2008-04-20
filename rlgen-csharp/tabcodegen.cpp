@@ -334,8 +334,10 @@ std::ostream &CSharpTabCodeGen::EOF_TRANS()
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write any eof action. */
 		long trans = 0;
-		if ( st->eofTrans != 0 )
-			trans = st->eofTrans->id+1;
+		if ( st->eofTrans != 0 ) {
+			assert( st->eofTrans->pos >= 0 );
+			trans = st->eofTrans->pos+1;
+		}
 		out << trans;
 
 		if ( !st.last() ) {
@@ -489,6 +491,17 @@ std::ostream &CSharpTabCodeGen::TRANS_TARGS()
 		}
 	}
 
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		if ( st->eofTrans != 0 ) {
+			RedTransAp *trans = st->eofTrans;
+			trans->pos = totalTrans;
+			out << trans->targ->id << ", ";
+			if ( ++totalTrans % IALL == 0 )
+				out << "\n\t";
+		}
+	}
+
+
 	/* Output one last number so we don't have to figure out when the last
 	 * entry is and avoid writing a comma. */
 	out << 0 << "\n";
@@ -526,6 +539,15 @@ std::ostream &CSharpTabCodeGen::TRANS_ACTIONS()
 		}
 	}
 
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		if ( st->eofTrans != 0 ) {
+			RedTransAp *trans = st->eofTrans;
+			TRANS_ACTION( trans ) << ", ";
+			if ( ++totalTrans % IALL == 0 )
+				out << "\n\t";
+		}
+	}
+
 	/* Output one last number so we don't have to figure out when the last
 	 * entry is and avoid writing a comma. */
 	out << 0 << "\n";
@@ -543,8 +565,11 @@ std::ostream &CSharpTabCodeGen::TRANS_TARGS_WI()
 	out << '\t';
 	int totalStates = 0;
 	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
-		/* Write out the target state. */
+		/* Record the position, need this for eofTrans. */
 		RedTransAp *trans = transPtrs[t];
+		trans->pos = t;
+
+		/* Write out the target state. */
 		out << trans->targ->id;
 		if ( t < redFsm->transSet.length()-1 ) {
 			out << ", ";

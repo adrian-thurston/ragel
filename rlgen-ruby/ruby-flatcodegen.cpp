@@ -215,8 +215,10 @@ std::ostream &RubyFlatCodeGen::EOF_TRANS()
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write any eof action. */
 		long trans = 0;
-		if ( st->eofTrans != 0 )
-			trans = st->eofTrans->id+1;
+		if ( st->eofTrans != 0 ) {
+			assert( st->eofTrans->pos >= 0 );
+			trans = st->eofTrans->pos+1;
+		}
 
 		/* Write any eof action. */
 		ARRAY_ITEM( INT(trans), ++totalStateNum, st.last() );
@@ -237,8 +239,11 @@ std::ostream &RubyFlatCodeGen::TRANS_TARGS()
 
 	int totalStates = 0;
 	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
-		/* Write out the target state. */
+		/* Save the position. Needed for eofTargs. */
 		RedTransAp *trans = transPtrs[t];
+		trans->pos = t;
+
+		/* Write out the target state. */
 		ARRAY_ITEM( INT( trans->targ->id ), ++totalStates, t >= redFsm->transSet.length()-1  );
 	}
 	END_ARRAY_LINE();

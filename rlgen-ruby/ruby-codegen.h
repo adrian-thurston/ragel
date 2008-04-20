@@ -84,8 +84,8 @@ protected:
 	string SL() { return "_" + DATA_PREFIX() + "single_lengths"; }
 	string RL() { return "_" + DATA_PREFIX() + "range_lengths"; }
 	string A() { return "_" + DATA_PREFIX() + "actions"; }
-	string TA() { return "_" + DATA_PREFIX() + "trans_actions_wi"; }
-	string TT() { return "_" + DATA_PREFIX() + "trans_targs_wi"; }
+	string TA() { return "_" + DATA_PREFIX() + "trans_actions"; }
+	string TT() { return "_" + DATA_PREFIX() + "trans_targs"; }
 	string TSA() { return "_" + DATA_PREFIX() + "to_state_actions"; }
 	string FSA() { return "_" + DATA_PREFIX() + "from_state_actions"; }
 	string EA() { return "_" + DATA_PREFIX() + "eof_actions"; }
