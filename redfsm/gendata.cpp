@@ -554,7 +554,7 @@ void CodeGenData::setValueLimits()
 		if ( ! st.last() ) {
 			redFsm->maxCondOffset += st->stateCondList.length();
 			redFsm->maxKeyOffset += st->outSingle.length() + st->outRange.length()*2;
-			redFsm->maxIndexOffset += st->outSingle.length() + st->outRange.length() + 1;
+			redFsm->maxIndexOffset += st->outSingle.length() + st->outRange.length() + 2;
 		}
 
 		/* Max cond span. */

@@ -350,7 +350,7 @@ void RubyFTabCodeGen::writeData()
 	}
 
 	if ( redFsm->anyEofTrans() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxIndex+1), ET() );
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxIndexOffset+1), ET() );
 		EOF_TRANS();
 		CLOSE_ARRAY() <<
 		"\n";
