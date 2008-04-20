@@ -314,20 +314,6 @@ void processArgs( int argc, char **argv, char *&inputFileName, char *&outputFile
 				}
 				break;
 
-			/* Error reporting format. */
-			case 'E':
-				if ( pc.paramArg[0] == '0' )
-					errorFormat = ErrorFormatGNU;
-				else if ( pc.paramArg[0] == '1' )
-					errorFormat = ErrorFormatMSVC;
-				else {
-					error() << "-E" << pc.paramArg[0] << 
-							" is an invalid argument" << endl;
-				}
-				frontendArgs.append( "-E" );
-				frontendArgs.append( pc.paramArg );
-				break;
-
 			/* Host language types. */
 			case 'C':
 				hostLang = &hostLangC;
