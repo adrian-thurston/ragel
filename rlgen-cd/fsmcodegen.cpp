@@ -333,9 +333,15 @@ void FsmCodeGen::LM_SWITCH( ostream &ret, InlineItem *item,
 	ret << 
 		"	switch( " << ACT() << " ) {\n";
 
+	bool haveDefault = false;
 	for ( InlineList::Iter lma = *item->children; lma.lte(); lma++ ) {
 		/* Write the case label, the action and the case break. */
-		ret << "	case " << lma->lmId << ":\n";
+		if ( lma->lmId < 0 ) {
+			ret << "	default:\n";
+			haveDefault = true;
+		}
+		else
+			ret << "	case " << lma->lmId << ":\n";
 
 		/* Write the block and close it off. */
 		ret << "	{";
@@ -344,9 +350,11 @@ void FsmCodeGen::LM_SWITCH( ostream &ret, InlineItem *item,
 
 		ret << "	break;\n";
 	}
-	/* Default required for D code. */
+
+	if ( hostLang->lang == HostLang::D && !haveDefault )
+		ret << "	default: break;";
+
 	ret << 
-		"	default: break;\n"
 		"	}\n"
 		"\t";
 }

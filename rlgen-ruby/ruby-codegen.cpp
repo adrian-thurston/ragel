@@ -570,7 +570,11 @@ void RubyCodeGen::LM_SWITCH( ostream &ret, InlineItem *item,
 
 	for ( InlineList::Iter lma = *item->children; lma.lte(); lma++ ) {
 		/* Write the case label, the action and the case break. */
-		ret << "	when " << lma->lmId << " then\n";
+		if ( lma->lmId < 0 )
+			ret << "	else\n";
+		else
+			ret << "	when " << lma->lmId << " then\n";
+
 
 		/* Write the block and close it off. */
 		ret << "	begin";

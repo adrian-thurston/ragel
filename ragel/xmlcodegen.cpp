@@ -311,6 +311,11 @@ void XMLCodeGen::writeLmSwitch( InlineItem *item )
 	LongestMatch *longestMatch = item->longestMatch;
 	out << "<lm_switch>\n";
 
+	/* We can't put the <exec> here because we may need to handle the error
+	 * case and in that case p should not be changed. Instead use a default
+	 * label in the switch to adjust p when user actions are not set. An id of
+	 * -1 indicates the default. */
+
 	if ( longestMatch->lmSwitchHandlesError ) {
 		/* If the switch handles error then we should have also forced the
 		 * error state. */
@@ -321,15 +326,25 @@ void XMLCodeGen::writeLmSwitch( InlineItem *item )
 		out << "</sub_action>\n";
 	}
 	
+	bool needDefault = false;
 	for ( LmPartList::Iter lmi = *longestMatch->longestMatchList; lmi.lte(); lmi++ ) {
-		if ( lmi->inLmSelect && lmi->action != 0 ) {
-			/* Open the action. Write it with the context that sets up _p 
-			 * when doing control flow changes from inside the machine. */
-			out << "        <sub_action id=\"" << lmi->longestMatchId << "\">";
-			out << "<exec><get_tokend></get_tokend></exec>";
-			writeInlineList( lmi->action->inlineList );
-			out << "</sub_action>\n";
+		if ( lmi->inLmSelect ) {
+			if ( lmi->action == 0 )
+				needDefault = true;
+			else {
+				/* Open the action. Write it with the context that sets up _p 
+				 * when doing control flow changes from inside the machine. */
+				out << "        <sub_action id=\"" << lmi->longestMatchId << "\">";
+				out << "<exec><get_tokend></get_tokend></exec>";
+				writeInlineList( lmi->action->inlineList );
+				out << "</sub_action>\n";
+			}
 		}
+	}
+
+	if ( needDefault ) {
+		out << "        <sub_action id=\"-1\"><exec><get_tokend>"
+				"</get_tokend></exec></sub_action>\n";
 	}
 
 	out << "    </lm_switch>";

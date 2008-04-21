@@ -357,7 +357,10 @@ void FsmCodeGen::LM_SWITCH( ostream &ret, InlineItem *item,
 
 	for ( InlineList::Iter lma = *item->children; lma.lte(); lma++ ) {
 		/* Write the case label, the action and the case break. */
-		ret << "	case " << lma->lmId << ":\n";
+		if ( lma->lmId < 0 )
+			ret << "	default:\n";
+		else
+			ret << "	case " << lma->lmId << ":\n";
 
 		/* Write the block and close it off. */
 		ret << "	{";
@@ -366,9 +369,8 @@ void FsmCodeGen::LM_SWITCH( ostream &ret, InlineItem *item,
 
 		ret << "	break;\n";
 	}
-	/* Default required for D code. */
+
 	ret << 
-		"	default: break;\n"
 		"	}\n"
 		"\t";
 }
