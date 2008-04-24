@@ -1,5 +1,5 @@
-Ragel 6.0 Changes
-=================
+Line numbers in included files refer to the master file. This needs to be
+fixed -- from Manoj.
 
 Remove old action embedding and condition setting syntax.
 
