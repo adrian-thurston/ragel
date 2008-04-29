@@ -372,6 +372,8 @@ void processArgs( int argc, char **argv, char *&inputFileName, char *&outputFile
 						error() << "invalid value for error-format" << endl;
 					}
 				}
+				else if ( strcmp( pc.paramArg, "rbx" ) == 0 )
+					backendArgs.append( "--rbx" );
 				else {
 					error() << "--" << pc.paramArg << 
 							" is an invalid argument" << endl;

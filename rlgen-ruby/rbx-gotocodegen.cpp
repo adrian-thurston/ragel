@@ -36,12 +36,28 @@ inline string label(string a, int i)
 	return a + itoa(i);
 }
 
-ostream &RbxGotoCodeGen::rbxLabel(ostream &out, string label) {
-	return out << "Ruby.asm \"_" << FSM_NAME() << "_" << label << ":\"";
+ostream &RbxGotoCodeGen::rbxLabel(ostream &out, string label)
+{
+	out << "Rubinius.asm { \n";
+	out << " @labels = Hash.new if @labels.nil?; tbl = @labels;\n";
+	out << " unless lbl = tbl[:_" << FSM_NAME() << "_" << label << "]\n";
+	out << "   lbl = tbl[:_" << FSM_NAME() << "_" << label << "] = new_label\n";
+	out << " end\n";
+	out << " lbl.set!\n";
+	out << "}";
+	return out;
 }
 
-ostream &RbxGotoCodeGen::rbxGoto(ostream &out, string label) {
-	return out << "Ruby.asm \"goto _" << FSM_NAME() << "_" << label << "\"";
+ostream &RbxGotoCodeGen::rbxGoto(ostream &out, string label)
+{
+	out << "Rubinius.asm { \n";
+	out << " @labels = Hash.new if @labels.nil?; tbl = @labels;\n";
+	out << " unless lbl = tbl[:_" << FSM_NAME() << "_" << label << "]\n";
+	out << "   lbl = tbl[:_" << FSM_NAME() << "_" << label << "] = new_label\n";
+	out << " end\n";
+	out << " goto lbl\n";
+	out << "}";
+	return out;
 }
 
 /* Emit the goto to take for a given transition. */

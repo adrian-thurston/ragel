@@ -75,7 +75,7 @@ void usage()
 "   -h, -H, -?, --help    Print this usage and exit\n"
 "   -v, --version         Print version information and exit\n"
 "   -o <file>             Write output to <file>\n"
-"   -x, --rbx             Allow to use Rubinius asm features\n"
+"   --rbx                 Allow to use Rubinius asm features\n"
 "generated code style:\n"
 "   -T0                   Table driven FSM (default)\n"
 "   -T1                   Faster table driven FSM\n"
@@ -192,7 +192,7 @@ CodeGenData *makeCodeGen( char *sourceFileName, char *fsmName,
 /* Main, process args and call yyparse to start scanning input. */
 int main(int argc, char **argv)
 {
-	ParamCheck pc("-:xHlh?vo:T:F:G:P:", argc, argv);
+	ParamCheck pc("-:Hlh?vo:T:F:G:P:", argc, argv);
 	char *xmlInputFileName = 0;
 
 	while ( pc.check() ) {
@@ -252,10 +252,6 @@ int main(int argc, char **argv)
 				numSplitPartitions = atoi( pc.paramArg );
 				break;
 
-                        case 'x':
-                                rubyImpl = Rubinius;
-                                break;
-
 			/* Version and help. */
 			case 'v':
 				version();
@@ -279,7 +275,6 @@ int main(int argc, char **argv)
 				else {
 					error() << "--" << pc.paramArg << 
 							" is an invalid argument" << endl;
-					break;
 				}
 			}
 			break;
