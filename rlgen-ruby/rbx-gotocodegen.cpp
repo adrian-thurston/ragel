@@ -38,25 +38,13 @@ inline string label(string a, int i)
 
 ostream &RbxGotoCodeGen::rbxLabel(ostream &out, string label)
 {
-	out << "Rubinius.asm { \n";
-	out << " @labels = Hash.new if @labels.nil?; tbl = @labels;\n";
-	out << " unless lbl = tbl[:_" << FSM_NAME() << "_" << label << "]\n";
-	out << "   lbl = tbl[:_" << FSM_NAME() << "_" << label << "] = new_label\n";
-	out << " end\n";
-	out << " lbl.set!\n";
-	out << "}";
+	out << "Rubinius.asm { @labels[:_" << FSM_NAME() << "_" << label << "].set! }\n";
 	return out;
 }
 
 ostream &RbxGotoCodeGen::rbxGoto(ostream &out, string label)
 {
-	out << "Rubinius.asm { \n";
-	out << " @labels = Hash.new if @labels.nil?; tbl = @labels;\n";
-	out << " unless lbl = tbl[:_" << FSM_NAME() << "_" << label << "]\n";
-	out << "   lbl = tbl[:_" << FSM_NAME() << "_" << label << "] = new_label\n";
-	out << " end\n";
-	out << " goto lbl\n";
-	out << "}";
+	out << "Rubinius.asm { goto @labels[:_" << FSM_NAME() << "_" << label << "] }\n";
 	return out;
 }
 
@@ -711,6 +699,8 @@ void RbxGotoCodeGen::writeExec()
 	outLabelUsed = false;
 
 	out << "	begin\n";
+
+	out << "	Rubinius.asm { @labels = Hash.new { |h,k| h[k] = new_label } }\n";
 
 	if ( redFsm->anyRegCurStateRef() )
 		out << "	_ps = 0;\n";
