@@ -6,9 +6,9 @@ Ragel 6.2 - May 9, 2008
   the eof transition to take. Instead add the transition to the end of the
   transition list and store its position in a new var called pos. The pos var
   is then used as the index.
- -Bug fix: an fnext followed by an fbreak in -G2 did not work. The fbreak was
-  not aware that the fnext causes the cs variable to be forced active. In this
-  case fbreak does not need to save cs because it is already current.
+ -Bug fix: an fnext followed by an fbreak in -G2 was not working. The fbreak
+  was not aware that the fnext causes the cs variable to be forced active. In
+  this case fbreak does not need to save cs because it is already current.
  -Bug fix: need to compute the low and high character-space keys from the
   condition-trans overlap when computing an expansion. Can't use the range
   supplied from the condition overlap since they may not match. An incorrect
@@ -22,7 +22,7 @@ Ragel 6.2 - May 9, 2008
   causing assertion failures because location info was not set. Fixed by
   adding locations.
  -Include and import file searching now searches for the file name given based
-  on the location of the current file, not the program's current path.
+  on the location of the current file, not the ragel's current path.
   Additional search locations can be given using the -I option.
  -Rubinius code generation was updated to the latest Rubinius. Patch from Evan
   Phoenix.
