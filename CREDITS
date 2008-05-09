@@ -23,6 +23,8 @@ missed.
 
 * Ruby code generation contributed by Victor Hugo Borja
 
+* C# code generation contributed by Daniel Tang.
+
 * Feedback, Packaging, and Fixes provided by:
 
     Bob Tennent, Robert Lemmen, Tobias Jahn, Cris Bailiff, Buddy Betts,
@@ -34,4 +36,4 @@ missed.
     Marcus Rueckert, Jeremy Hinegardner, Aaron Campbell, Josh Purinton,
     Judson Lester, Barry Arthur, Tim Potter, Ryan Phelps, David Waite,
     Kenny MacDermid, MenTaLguY, Manoj Rajagopalan, Tim Chklovski,
-    Mikkel Fahnøe Jørgensen, Andrei Polushin
+    Mikkel Fahnøe Jørgensen, Andrei Polushin, Evan Phoenix, David Balmain

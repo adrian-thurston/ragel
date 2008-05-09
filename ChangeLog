@@ -1,3 +1,39 @@
+Ragel 6.2 - May 9, 2008
+=======================
+ -Bug fix: The lm_switch actions needs to set p from tokend when there is no
+  user action.
+ -Bug fix: when not using indicies we can't use a transitions's id to identify
+  the eof transition to take. Instead add the transition to the end of the
+  transition list and store its position in a new var called pos. The pos var
+  is then used as the index.
+ -Bug fix: an fnext followed by an fbreak in -G2 did not work. The fbreak was
+  not aware that the fnext causes the cs variable to be forced active. In this
+  case fbreak does not need to save cs because it is already current.
+ -Bug fix: need to compute the low and high character-space keys from the
+  condition-trans overlap when computing an expansion. Can't use the range
+  supplied from the condition overlap since they may not match. An incorrect
+  machine that accepted 1(!cond1, !cond2) was generated for the following
+  grammar. This bug was reported by Tim Chklovski.
+      c = 2 @matched_c;
+      sc1 = 1..2 when cond1;
+      sc2 = 1..2 when cond2;
+      main := sc1 | c | sc2;
+ -Bug fix: error messages in start label analysis of join operations were
+  causing assertion failures because location info was not set. Fixed by
+  adding locations.
+ -Include and import file searching now searches for the file name given based
+  on the location of the current file, not the program's current path.
+  Additional search locations can be given using the -I option.
+ -Rubinius code generation was updated to the latest Rubinius. Patch from Evan
+  Phoenix.
+ -Switched from strcasecmp to strcmp for testing long arguments.
+ -Applied a patch from Andrei Polushin for setting the error message format.
+     --error-format=gnu (default)
+     --error-fromat=msvc
+ -Now using the _WIN32 define instead of _WIN32. Other MSVC compilation
+  improvments from Andrei Polushin.
+ -Added the hyperref package to the manual. 
+
 Ragel 6.1 - Mar 26, 2008
 ========================
  -Scanners now ensure that any leaving actions at the end of a pattern are
