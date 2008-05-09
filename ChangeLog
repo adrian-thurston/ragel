@@ -22,7 +22,7 @@ Ragel 6.2 - May 9, 2008
   causing assertion failures because location info was not set. Fixed by
   adding locations.
  -Include and import file searching now searches for the file name given based
-  on the location of the current file, not the ragel's current path.
+  on the location of the current file, not ragel's current path.
   Additional search locations can be given using the -I option.
  -Rubinius code generation was updated to the latest Rubinius. Patch from Evan
   Phoenix.
