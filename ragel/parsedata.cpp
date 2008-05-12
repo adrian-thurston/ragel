@@ -735,21 +735,25 @@ void ParseData::resolveNameRefs( InlineList *inlineList, Action *action )
 				/* Resolve, pass action for local search. */
 				NameInst *target = resolveStateRef( *item->nameRef, item->loc, action );
 
-				/* Check if the target goes into a longest match. */
-				NameInst *search = target->parent;
-				while ( search != 0 ) {
-					if ( search->isLongestMatch ) {
-						error(item->loc) << "cannot enter inside a longest "
-								"match construction as an entry point" << endl;
-						break;
+				/* Name lookup error reporting is handled by resolveStateRef. */
+				if ( target != 0 ) {
+					/* Check if the target goes into a longest match. */
+					NameInst *search = target->parent;
+					while ( search != 0 ) {
+						if ( search->isLongestMatch ) {
+							error(item->loc) << "cannot enter inside a longest "
+									"match construction as an entry point" << endl;
+							break;
+						}
+						search = search->parent;
 					}
-					search = search->parent;
+
+					/* Record the reference in the name. This will cause the
+					 * entry point to survive to the end of the graph
+					 * generating walk. */
+					target->numRefs += 1;
 				}
 
-				/* Note the reference in the name. This will cause the entry
-				 * point to survive to the end of the graph generating walk. */
-				if ( target != 0 )
-					target->numRefs += 1;
 				item->nameTarg = target;
 				break;
 			}
