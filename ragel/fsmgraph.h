@@ -380,10 +380,8 @@ struct TransAp
 		highKey(other.highKey),
 		fromState(0), toState(0),
 		actionTable(other.actionTable),
-		priorTable(other.priorTable)
-	{
-		assert( lmActionTable.length() == 0 && other.lmActionTable.length() == 0 );
-	}
+		priorTable(other.priorTable),
+		lmActionTable(other.lmActionTable) {}
 
 	Key lowKey, highKey;
 	StateAp *fromState;

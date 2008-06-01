@@ -156,6 +156,7 @@ StateAp::StateAp(const StateAp &other)
 		/* Dupicate and store the orginal target in the transition. This will
 		 * be corrected once all the states have been created. */
 		TransAp *newTrans = new TransAp(*trans);
+		assert( trans->lmActionTable.length() == 0 );
 		newTrans->toState = trans->toState;
 		outList.append( newTrans );
 	}
