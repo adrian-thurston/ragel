@@ -246,6 +246,8 @@ ostream &Scanner::scan_error()
 	return cerr;
 }
 
+/* An approximate check for duplicate includes. Due to aliasing of files it's
+ * possible for duplicates to creep in. */
 bool Scanner::duplicateInclude( char *inclFileName, char *inclSectionName )
 {
 	for ( IncludeHistory::Iter hi = parser->includeHistory; hi.lte(); hi++ ) {
