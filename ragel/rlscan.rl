@@ -246,11 +246,11 @@ ostream &Scanner::scan_error()
 	return cerr;
 }
 
-bool Scanner::recursiveInclude( char *inclFileName, char *inclSectionName )
+bool Scanner::duplicateInclude( char *inclFileName, char *inclSectionName )
 {
-	for ( IncludeStack::Iter si = includeStack; si.lte(); si++ ) {
-		if ( strcmp( si->fileName, inclFileName ) == 0 &&
-				strcmp( si->sectionName, inclSectionName ) == 0 )
+	for ( IncludeHistory::Iter hi = parser->includeHistory; hi.lte(); hi++ ) {
+		if ( strcmp( hi->fileName, inclFileName ) == 0 &&
+				strcmp( hi->sectionName, inclSectionName ) == 0 )
 		{
 			return true;
 		}
@@ -329,21 +329,16 @@ void Scanner::handleInclude()
 				scan_error() << "include: attempted: \"" << *tried++ << '\"' << endl;
 		}
 		else {
-			/* Check for a recursive include structure. Add the current file/section
-			 * name then check if what we are including is already in the stack. */
-			includeStack.append( IncludeStackItem( fileName, parser->sectionName ) );
+			/* Don't include anything that's already been included. */
+			if ( !duplicateInclude( includeChecks[found], inclSectionName ) ) {
+				parser->includeHistory.append( IncludeHistoryItem( 
+						includeChecks[found], inclSectionName ) );
 
-			if ( recursiveInclude( includeChecks[found], inclSectionName ) )
-				scan_error() << "include: this is a recursive include operation" << endl;
-			else {
 				Scanner scanner( includeChecks[found], *inFile, output, parser,
 						inclSectionName, includeDepth+1, false );
 				scanner.do_scan( );
 				delete inFile;
 			}
-
-			/* Remove the last element (len-1) */
-			includeStack.remove( -1 );
 		}
 	}
 }

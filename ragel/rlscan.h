@@ -35,19 +35,6 @@ using std::ostream;
 
 extern char *Parser_lelNames[];
 
-/* This is used for tracking the current stack of include file/machine pairs. It is
- * is used to detect and recursive include structure. */
-struct IncludeStackItem
-{
-	IncludeStackItem( char *fileName, char *sectionName )
-		: fileName(fileName), sectionName(sectionName) {}
-
-	char *fileName;
-	char *sectionName;
-};
-
-typedef Vector<IncludeStackItem> IncludeStack;
-
 struct Scanner
 {
 	Scanner( char *fileName, istream &input, ostream &output,
@@ -67,7 +54,7 @@ struct Scanner
 		lastToken(0)
 		{}
 
-	bool recursiveInclude( char *inclFileName, char *inclSectionName );
+	bool duplicateInclude( char *inclFileName, char *inclSectionName );
 
 	/* Make a list of places to look for an included file. */
 	char **makeIncludePathChecks( char *curFileName, char *fileName, int len );
@@ -128,7 +115,6 @@ struct Scanner
 	 * allowing for unnamed sections. */
 	Parser *parser;
 	bool ignoreSection;
-	IncludeStack includeStack;
 
 	/* This is set if ragel has already emitted an error stating that
 	 * no section name has been seen and thus no parser exists. */
