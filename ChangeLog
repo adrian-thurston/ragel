@@ -1,3 +1,13 @@
+Ragel 6.3 - Aug 29, 2008
+========================
+ -Fixed an assertion that is too strong. In the condition code we need to copy
+  transitions that have non-empty lmActionTable arrays so we don't assert
+  emptiness in the constructor. Lift out the assertion and copy the array in
+  the constructor.
+ -Fixed and improved multiple include prevention. We now track the entire
+  include history of a parser state to prevent duplicates.
+ -Fixed crash on failed lookup of goto/call/etc target.
+
 Ragel 6.2 - May 9, 2008
 =======================
  -Bug fix: The lm_switch actions needs to set p from tokend when there is no
