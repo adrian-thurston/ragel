@@ -32,8 +32,10 @@ LIBS = ../common/common.a ../redfsm/redfsm.a
 #*************************************
 
 prefix = @prefix@
-CXX = @CXX@
 EXEEXT = @EXEEXT@
+CXX = @CXX@
+AR = @AR@
+RANLIB = @RANLIB@
 
 # Get objects and dependencies from sources.
 OBJS = $(CC_SRCS:%.cpp=%.o)
@@ -43,10 +45,11 @@ DEPS = $(CC_SRCS:%.cpp=.%.d)
 include ../version.mk
 
 # Rules.
-all: rlgen-dot$(EXEEXT)
+all: rlgen-dot.a
 
-rlgen-dot$(EXEEXT): $(LIBS) $(OBJS)
-	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
+rlgen-dot.a: $(LIBS) $(OBJS)
+	$(AR) -cr $@ $(OBJS) 
+	$(RANLIB) $@
 
 %.o: %.cpp
 	@$(CXX) -M $(DEFS) $(INCS) $< > .$*.d

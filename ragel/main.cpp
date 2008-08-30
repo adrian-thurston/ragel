@@ -594,6 +594,7 @@ int cd_main(int argc, const char **argv);
 int java_main(int argc, const char **argv);
 int ruby_main(int argc, const char **argv);
 int csharp_main(int argc, const char **argv);
+int dot_main(int argc, const char **argv);
 
 
 void forkAndExec( const char *progName, char **pathChecks, 
@@ -629,6 +630,8 @@ void forkAndExec( const char *progName, char **pathChecks,
 		ruby_main( args.length()-1, args.data );
 	else if ( strcmp( progName, "rlgen-csharp" ) == 0 )
 		csharp_main( args.length()-1, args.data );
+	else if ( strcmp( progName, "rlgen-dot" ) == 0 )
+		dot_main( args.length()-1, args.data );
 
 #if 0
 	/* Parent process, wait for the child. */

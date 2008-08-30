@@ -40,7 +40,9 @@ CodeGenData *makeCodeGen( char *sourceFileName, char *fsmName,
 		ostream &out, bool wantComplete )
 {
 	CodeGenData *cgd = 0;
-	if ( hostLang == &hostLangC )
+	if ( generateDot )
+		cgd = dotMakeCodeGen( sourceFileName, fsmName, out, wantComplete );
+	else if ( hostLang == &hostLangC )
 		cgd = cdMakeCodeGen( sourceFileName, fsmName, out, wantComplete );
 	else if ( hostLang == &hostLangD )
 		cgd = cdMakeCodeGen( sourceFileName, fsmName, out, wantComplete );
@@ -56,16 +58,18 @@ CodeGenData *makeCodeGen( char *sourceFileName, char *fsmName,
 void lineDirective( ostream &out, const char *fileName, int line )
 {
 	CodeGenData *cgd = 0;
-	if ( hostLang == &hostLangC )
-		cdLineDirective( out, fileName, line );
-	else if ( hostLang == &hostLangD )
-		cdLineDirective( out, fileName, line );
-	else if ( hostLang == &hostLangJava )
-		javaLineDirective( out, fileName, line );
-	else if ( hostLang == &hostLangRuby )
-		rubyLineDirective( out, fileName, line );
-	else if ( hostLang == &hostLangCSharp )
-		csharpLineDirective( out, fileName, line );
+	if ( !generateDot ) {
+		if ( hostLang == &hostLangC )
+			cdLineDirective( out, fileName, line );
+		else if ( hostLang == &hostLangD )
+			cdLineDirective( out, fileName, line );
+		else if ( hostLang == &hostLangJava )
+			javaLineDirective( out, fileName, line );
+		else if ( hostLang == &hostLangRuby )
+			rubyLineDirective( out, fileName, line );
+		else if ( hostLang == &hostLangCSharp )
+			csharpLineDirective( out, fileName, line );
+	}
 }
 
 void genLineDirective( ostream &out )
@@ -112,7 +116,9 @@ tag_ragel_head: TAG_ragel
 		if ( langAttr == 0 )
 			error($1->loc) << "tag <ragel> requires a lang attribute" << endp;
 
-		if ( strcmp( langAttr->value, "C" ) == 0 ) {
+		if ( generateDot )
+			outStream = dotOpenOutput( sourceFileName );
+		else if ( strcmp( langAttr->value, "C" ) == 0 ) {
 			hostLang = &hostLangC;
 			outStream = cdOpenOutput( sourceFileName );
 		}

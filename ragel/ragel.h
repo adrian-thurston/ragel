@@ -52,6 +52,7 @@ extern MinimizeOpt minimizeOpt;
 extern const char *machineSpec, *machineName;
 extern bool printStatistics;
 extern bool wantDupsRemoved;
+extern bool generateDot;
 
 /* Error reporting format. */
 enum ErrorFormat {

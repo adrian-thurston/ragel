@@ -25,16 +25,8 @@
 
 using namespace std;
 
-void lineDirective( ostream &out, char *fileName, int line )
-{
-}
-
-void genLineDirective( ostream &out )
-{
-}
-
 /* Override this so that write statement processing is ignored */
-void GraphvizDotGen::writeStatement( InputLoc &, int, char ** )
+void GraphvizDotGen::writeStatement( GenInputLoc &, int, char ** )
 {
 }
 

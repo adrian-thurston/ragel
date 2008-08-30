@@ -29,6 +29,8 @@
 
 using std::ostream;
 
+extern bool generateDot;
+
 struct NameInst;
 typedef DList<Action> ActionList;
 
@@ -52,6 +54,7 @@ std::ostream *cdOpenOutput( char *inputFile );
 std::ostream *javaOpenOutput( char *inputFile );
 std::ostream *rubyOpenOutput( char *inputFile );
 std::ostream *csharpOpenOutput( char *inputFile );
+std::ostream *dotOpenOutput( char *inputFile );
 
 CodeGenData *cdMakeCodeGen( char *sourceFileName, 
 		char *fsmName, ostream &out, bool wantComplete );
@@ -60,6 +63,8 @@ CodeGenData *javaMakeCodeGen( char *sourceFileName,
 CodeGenData *rubyMakeCodeGen( char *sourceFileName, 
 		char *fsmName, ostream &out, bool wantComplete );
 CodeGenData *csharpMakeCodeGen( char *sourceFileName, 
+		char *fsmName, ostream &out, bool wantComplete );
+CodeGenData *dotMakeCodeGen( char *sourceFileName, 
 		char *fsmName, ostream &out, bool wantComplete );
 
 void cdLineDirective( ostream &out, const char *fileName, int line );

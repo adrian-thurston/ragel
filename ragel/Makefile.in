@@ -36,6 +36,7 @@ RAGEL_LIBS = ../common/common.a \
 	../rlgen-java/rlgen-java.a \
 	../rlgen-ruby/rlgen-ruby.a \
 	../rlgen-csharp/rlgen-csharp.a \
+	../rlgen-dot/rlgen-dot.a \
 	../redfsm/redfsm.a 
 
 LIBS = $(RAGEL_LIBS)
