@@ -37,7 +37,7 @@ struct CodeGenData;
 class CSharpFGotoCodeGen : public CSharpGotoCodeGen
 {
 public:
-	CSharpFGotoCodeGen( ostream &out ) : FsmCodeGen(out), CSharpGotoCodeGen(out) {}
+	CSharpFGotoCodeGen( ostream &out ) : CSharpFsmCodeGen(out), CSharpGotoCodeGen(out) {}
 
 	std::ostream &EXEC_ACTIONS();
 	std::ostream &TO_STATE_ACTION_SWITCH();

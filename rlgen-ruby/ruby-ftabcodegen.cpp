@@ -43,7 +43,7 @@ void RubyFTabCodeGen::GOTO( ostream &out, int gotoDest, bool inFinish )
 		"	end\n";
 }
 
-void RubyFTabCodeGen::GOTO_EXPR( ostream &out, InlineItem *ilItem, bool inFinish )
+void RubyFTabCodeGen::GOTO_EXPR( ostream &out, GenInlineItem *ilItem, bool inFinish )
 {
 	out << 
 		"	begin\n"
@@ -76,7 +76,7 @@ void RubyFTabCodeGen::CALL( ostream &out, int callDest, int targState, bool inFi
 		out << "end\n";
 }
 
-void RubyFTabCodeGen::CALL_EXPR(ostream &out, InlineItem *ilItem, 
+void RubyFTabCodeGen::CALL_EXPR(ostream &out, GenInlineItem *ilItem, 
 		int targState, bool inFinish )
 {
 	if ( prePushExpr != 0 ) {

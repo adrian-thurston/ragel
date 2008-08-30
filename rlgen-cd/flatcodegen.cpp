@@ -458,7 +458,7 @@ void FlatCodeGen::GOTO( ostream &ret, int gotoDest, bool inFinish )
 			CTRL_FLOW() << "goto _again;}";
 }
 
-void FlatCodeGen::GOTO_EXPR( ostream &ret, InlineItem *ilItem, bool inFinish )
+void FlatCodeGen::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
 	ret << "{" << CS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
@@ -480,7 +480,7 @@ void FlatCodeGen::NEXT( ostream &ret, int nextDest, bool inFinish )
 	ret << CS() << " = " << nextDest << ";";
 }
 
-void FlatCodeGen::NEXT_EXPR( ostream &ret, InlineItem *ilItem, bool inFinish )
+void FlatCodeGen::NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
 	ret << CS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
@@ -502,7 +502,7 @@ void FlatCodeGen::CALL( ostream &ret, int callDest, int targState, bool inFinish
 }
 
 
-void FlatCodeGen::CALL_EXPR( ostream &ret, InlineItem *ilItem, int targState, bool inFinish )
+void FlatCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
 {
 	if ( prePushExpr != 0 ) {
 		ret << "{";

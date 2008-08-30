@@ -31,7 +31,13 @@ CC_SRCS = \
 
 GEN_SRC = rlscan.cpp rlparse.h rlparse.cpp
 
-RAGEL_LIBS = ../common/common.a
+RAGEL_LIBS = ../common/common.a \
+	../rlgen-cd/rlgen-cd.a \
+	../rlgen-java/rlgen-java.a \
+	../rlgen-ruby/rlgen-ruby.a \
+	../rlgen-csharp/rlgen-csharp.a \
+	../redfsm/redfsm.a 
+
 LIBS = $(RAGEL_LIBS)
 MINGW_LIBS = -lpsapi
 

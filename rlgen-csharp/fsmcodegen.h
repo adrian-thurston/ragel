@@ -42,8 +42,8 @@ struct RedStateAp;
 struct CodeGenData;
 struct Action;
 struct NameInst;
-struct InlineItem;
-struct InlineList;
+struct GenInlineItem;
+struct GenInlineList;
 struct RedAction;
 struct LongestMatch;
 struct LongestMatchPart;
@@ -56,13 +56,13 @@ inline string itoa( int i )
 }
 
 /*
- * class FsmCodeGen
+ * class CSharpFsmCodeGen
  */
-class FsmCodeGen : public CodeGenData
+class CSharpFsmCodeGen : public CodeGenData
 {
 public:
-	FsmCodeGen( ostream &out );
-	virtual ~FsmCodeGen() {}
+	CSharpFsmCodeGen( ostream &out );
+	virtual ~CSharpFsmCodeGen() {}
 
 	virtual void finishRagelDef();
 	virtual void writeInit();
@@ -130,27 +130,27 @@ protected:
 	string FIRST_FINAL() { return DATA_PREFIX() + "first_final"; }
 	string CTXDATA() { return DATA_PREFIX() + "ctxdata"; }
 
-	void INLINE_LIST( ostream &ret, InlineList *inlineList, int targState, bool inFinish );
+	void INLINE_LIST( ostream &ret, GenInlineList *inlineList, int targState, bool inFinish );
 	virtual void GOTO( ostream &ret, int gotoDest, bool inFinish ) = 0;
 	virtual void CALL( ostream &ret, int callDest, int targState, bool inFinish ) = 0;
 	virtual void NEXT( ostream &ret, int nextDest, bool inFinish ) = 0;
-	virtual void GOTO_EXPR( ostream &ret, InlineItem *ilItem, bool inFinish ) = 0;
-	virtual void NEXT_EXPR( ostream &ret, InlineItem *ilItem, bool inFinish ) = 0;
-	virtual void CALL_EXPR( ostream &ret, InlineItem *ilItem, 
+	virtual void GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish ) = 0;
+	virtual void NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish ) = 0;
+	virtual void CALL_EXPR( ostream &ret, GenInlineItem *ilItem, 
 			int targState, bool inFinish ) = 0;
 	virtual void RET( ostream &ret, bool inFinish ) = 0;
 	virtual void BREAK( ostream &ret, int targState ) = 0;
 	virtual void CURS( ostream &ret, bool inFinish ) = 0;
 	virtual void TARGS( ostream &ret, bool inFinish, int targState ) = 0;
-	void EXEC( ostream &ret, InlineItem *item, int targState, int inFinish );
-	void LM_SWITCH( ostream &ret, InlineItem *item, int targState, int inFinish );
-	void SET_ACT( ostream &ret, InlineItem *item );
-	void INIT_TOKSTART( ostream &ret, InlineItem *item );
-	void INIT_ACT( ostream &ret, InlineItem *item );
-	void SET_TOKSTART( ostream &ret, InlineItem *item );
-	void SET_TOKEND( ostream &ret, InlineItem *item );
-	void GET_TOKEND( ostream &ret, InlineItem *item );
-	void SUB_ACTION( ostream &ret, InlineItem *item, 
+	void EXEC( ostream &ret, GenInlineItem *item, int targState, int inFinish );
+	void LM_SWITCH( ostream &ret, GenInlineItem *item, int targState, int inFinish );
+	void SET_ACT( ostream &ret, GenInlineItem *item );
+	void INIT_TOKSTART( ostream &ret, GenInlineItem *item );
+	void INIT_ACT( ostream &ret, GenInlineItem *item );
+	void SET_TOKSTART( ostream &ret, GenInlineItem *item );
+	void SET_TOKEND( ostream &ret, GenInlineItem *item );
+	void GET_TOKEND( ostream &ret, GenInlineItem *item );
+	void SUB_ACTION( ostream &ret, GenInlineItem *item, 
 			int targState, bool inFinish );
 	void STATE_IDS();
 
@@ -164,8 +164,8 @@ protected:
 
 	virtual string CTRL_FLOW() = 0;
 
-	ostream &source_warning(const InputLoc &loc);
-	ostream &source_error(const InputLoc &loc);
+	ostream &source_warning(const GenInputLoc &loc);
+	ostream &source_error(const GenInputLoc &loc);
 
 	unsigned int arrayTypeSize( unsigned long maxVal );
 
@@ -177,12 +177,14 @@ protected:
 public:
 	/* Determine if we should use indicies. */
 	virtual void calcIndexSize() {}
+
+	void genLineDirective( ostream &out );
 };
 
-class CSharpCodeGen : virtual public FsmCodeGen
+class CSharpCodeGen : virtual public CSharpFsmCodeGen
 {
 public:
-	CSharpCodeGen( ostream &out ) : FsmCodeGen(out) {}
+	CSharpCodeGen( ostream &out ) : CSharpFsmCodeGen(out) {}
 
 	virtual string GET_KEY();
 	virtual string NULL_ITEM();

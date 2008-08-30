@@ -38,14 +38,14 @@ ostream &operator<<( ostream &out, const NameInst &nameInst );
  * characters with escapes and options interpreted. Also null terminates the
  * string. Though this null termination should not be relied on for
  * interpreting literals in the parser because the string may contain \0 */
-char *prepareLitString( const InputLoc &loc, char *data, long length, 
+char *prepareLitString( const InputLoc &loc, const char *data, long length, 
 		long &resLen, bool &caseInsensitive )
 {
 	char *resData = new char[length+1];
 	caseInsensitive = false;
 
-	char *src = data + 1;
-	char *end = data + length - 1;
+	const char *src = data + 1;
+	const char *end = data + length - 1;
 
 	while ( *end != '\'' && *end != '\"' ) {
 		if ( *end == 'i' )

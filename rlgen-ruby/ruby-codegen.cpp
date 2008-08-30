@@ -34,11 +34,11 @@ using std::cerr;
 using std::endl;
 
 
-void lineDirective( ostream &out, char *fileName, int line )
+void rubyLineDirective( ostream &out, const char *fileName, int line )
 {
 	/* Write a comment containing line info. */
 	out << "# line " << line  << " \"";
-	for ( char *pc = fileName; *pc != 0; pc++ ) {
+	for ( const char *pc = fileName; *pc != 0; pc++ ) {
 		if ( *pc == '\\' )
 			out << "\\\\";
 		else
@@ -47,11 +47,11 @@ void lineDirective( ostream &out, char *fileName, int line )
 	out << "\"\n";
 }
 
-void genLineDirective( ostream &out )
+void RubyCodeGen::genLineDirective( ostream &out )
 {
 	std::streambuf *sbuf = out.rdbuf();
 	output_filter *filter = static_cast<output_filter*>(sbuf);
-	lineDirective( out, filter->fileName, filter->line + 1 );
+	rubyLineDirective( out, filter->fileName, filter->line + 1 );
 }
 
 string RubyCodeGen::DATA_PREFIX()
@@ -241,13 +241,13 @@ string RubyCodeGen::FSM_NAME()
 void RubyCodeGen::ACTION( ostream &ret, Action *action, int targState, bool inFinish )
 {
 	/* Write the preprocessor line info for going into the source file. */
-	lineDirective( ret, sourceFileName, action->loc.line );
+	rubyLineDirective( ret, sourceFileName, action->loc.line );
 
 	/* Write the block and close it off. */
 	ret << "		begin\n";
 	INLINE_LIST( ret, action->inlineList, targState, inFinish );
 	ret << "		end\n";
-	lineDirective( ret, sourceFileName, action->loc.line );
+	rubyLineDirective( ret, sourceFileName, action->loc.line );
 }
 
 
@@ -315,7 +315,7 @@ string RubyCodeGen::INT( int i )
 void RubyCodeGen::CONDITION( ostream &ret, Action *condition )
 {
 	ret << "\n";
-	lineDirective( ret, sourceFileName, condition->loc.line );
+	rubyLineDirective( ret, sourceFileName, condition->loc.line );
 	INLINE_LIST( ret, condition->inlineList, 0, false );
 }
 
@@ -470,81 +470,81 @@ string RubyCodeGen::ACCESS()
 
 /* Write out an inline tree structure. Walks the list and possibly calls out
  * to virtual functions than handle language specific items in the tree. */
-void RubyCodeGen::INLINE_LIST( ostream &ret, InlineList *inlineList, 
+void RubyCodeGen::INLINE_LIST( ostream &ret, GenInlineList *inlineList, 
 		int targState, bool inFinish )
 {
-	for ( InlineList::Iter item = *inlineList; item.lte(); item++ ) {
+	for ( GenInlineList::Iter item = *inlineList; item.lte(); item++ ) {
 		switch ( item->type ) {
-		case InlineItem::Text:
+		case GenInlineItem::Text:
 			ret << item->data;
 			break;
-		case InlineItem::Goto:
+		case GenInlineItem::Goto:
 			GOTO( ret, item->targState->id, inFinish );
 			break;
-		case InlineItem::Call:
+		case GenInlineItem::Call:
 			CALL( ret, item->targState->id, targState, inFinish );
 			break;
-		case InlineItem::Next:
+		case GenInlineItem::Next:
 			NEXT( ret, item->targState->id, inFinish );
 			break;
-		case InlineItem::Ret:
+		case GenInlineItem::Ret:
 			RET( ret, inFinish );
 			break;
-		case InlineItem::PChar:
+		case GenInlineItem::PChar:
 			ret << P();
 			break;
-		case InlineItem::Char:
+		case GenInlineItem::Char:
 			ret << GET_KEY();
 			break;
-		case InlineItem::Hold:
+		case GenInlineItem::Hold:
 			ret << P() << " = " << P() << " - 1;";
 			break;
-		case InlineItem::Exec:
+		case GenInlineItem::Exec:
 			EXEC( ret, item, targState, inFinish );
 			break;
-		case InlineItem::Curs:
+		case GenInlineItem::Curs:
 			ret << "(_ps)";
 			break;
-		case InlineItem::Targs:
+		case GenInlineItem::Targs:
 			ret << "(" << CS() << ")";
 			break;
-		case InlineItem::Entry:
+		case GenInlineItem::Entry:
 			ret << item->targState->id;
 			break;
-		case InlineItem::GotoExpr:
+		case GenInlineItem::GotoExpr:
 			GOTO_EXPR( ret, item, inFinish );
 			break;
-		case InlineItem::CallExpr:
+		case GenInlineItem::CallExpr:
 			CALL_EXPR( ret, item, targState, inFinish );
 			break;
-		case InlineItem::NextExpr:
+		case GenInlineItem::NextExpr:
 			NEXT_EXPR( ret, item, inFinish );
 			break;
-		case InlineItem::LmSwitch:
+		case GenInlineItem::LmSwitch:
 			LM_SWITCH( ret, item, targState, inFinish );
 			break;
-		case InlineItem::LmSetActId:
+		case GenInlineItem::LmSetActId:
 			SET_ACT( ret, item );
 			break;
-		case InlineItem::LmSetTokEnd:
+		case GenInlineItem::LmSetTokEnd:
 			SET_TOKEND( ret, item );
 			break;
-		case InlineItem::LmGetTokEnd:
+		case GenInlineItem::LmGetTokEnd:
 			GET_TOKEND( ret, item );
 			break;
-		case InlineItem::LmInitTokStart:
+		case GenInlineItem::LmInitTokStart:
 			INIT_TOKSTART( ret, item );
 			break;
-		case InlineItem::LmInitAct:
+		case GenInlineItem::LmInitAct:
 			INIT_ACT( ret, item );
 			break;
-		case InlineItem::LmSetTokStart:
+		case GenInlineItem::LmSetTokStart:
 			SET_TOKSTART( ret, item );
 			break;
-		case InlineItem::SubAction:
+		case GenInlineItem::SubAction:
 			SUB_ACTION( ret, item, targState, inFinish );
 			break;
-		case InlineItem::Break:
+		case GenInlineItem::Break:
 			BREAK( ret, targState );
 			break;
 		}
@@ -552,7 +552,7 @@ void RubyCodeGen::INLINE_LIST( ostream &ret, InlineList *inlineList,
 }
 
 
-void RubyCodeGen::EXEC( ostream &ret, InlineItem *item, int targState, int inFinish )
+void RubyCodeGen::EXEC( ostream &ret, GenInlineItem *item, int targState, int inFinish )
 {
 	/* The parser gives fexec two children. The double brackets are for D
 	 * code. If the inline list is a single word it will get interpreted as a
@@ -562,13 +562,13 @@ void RubyCodeGen::EXEC( ostream &ret, InlineItem *item, int targState, int inFin
 	ret << "))-1; end\n";
 }
 
-void RubyCodeGen::LM_SWITCH( ostream &ret, InlineItem *item, 
+void RubyCodeGen::LM_SWITCH( ostream &ret, GenInlineItem *item, 
 		int targState, int inFinish )
 {
 	ret << 
 		"	case " << ACT() << "\n";
 
-	for ( InlineList::Iter lma = *item->children; lma.lte(); lma++ ) {
+	for ( GenInlineList::Iter lma = *item->children; lma.lte(); lma++ ) {
 		/* Write the case label, the action and the case break. */
 		if ( lma->lmId < 0 )
 			ret << "	else\n";
@@ -585,27 +585,27 @@ void RubyCodeGen::LM_SWITCH( ostream &ret, InlineItem *item,
 	ret << "end \n\t";
 }
 
-void RubyCodeGen::SET_ACT( ostream &ret, InlineItem *item )
+void RubyCodeGen::SET_ACT( ostream &ret, GenInlineItem *item )
 {
 	ret << ACT() << " = " << item->lmId << ";";
 }
 
-void RubyCodeGen::INIT_TOKSTART( ostream &ret, InlineItem *item )
+void RubyCodeGen::INIT_TOKSTART( ostream &ret, GenInlineItem *item )
 {
 	ret << TOKSTART() << " = " << NULL_ITEM() << ";";
 }
 
-void RubyCodeGen::INIT_ACT( ostream &ret, InlineItem *item )
+void RubyCodeGen::INIT_ACT( ostream &ret, GenInlineItem *item )
 {
 	ret << ACT() << " = 0\n";
 }
 
-void RubyCodeGen::SET_TOKSTART( ostream &ret, InlineItem *item )
+void RubyCodeGen::SET_TOKSTART( ostream &ret, GenInlineItem *item )
 {
 	ret << TOKSTART() << " = " << P() << "\n";
 }
 
-void RubyCodeGen::SET_TOKEND( ostream &ret, InlineItem *item )
+void RubyCodeGen::SET_TOKEND( ostream &ret, GenInlineItem *item )
 {
 	/* The tokend action sets tokend. */
 	ret << TOKEND() << " = " << P();
@@ -614,12 +614,12 @@ void RubyCodeGen::SET_TOKEND( ostream &ret, InlineItem *item )
 	out << "\n";
 }
 
-void RubyCodeGen::GET_TOKEND( ostream &ret, InlineItem *item )
+void RubyCodeGen::GET_TOKEND( ostream &ret, GenInlineItem *item )
 {
 	ret << TOKEND();
 }
 
-void RubyCodeGen::SUB_ACTION( ostream &ret, InlineItem *item, 
+void RubyCodeGen::SUB_ACTION( ostream &ret, GenInlineItem *item, 
 		int targState, bool inFinish )
 {
 	if ( item->children->length() > 0 ) {
@@ -639,13 +639,13 @@ int RubyCodeGen::TRANS_ACTION( RedTransAp *trans )
 	return act;
 }
 
-ostream &RubyCodeGen::source_warning( const InputLoc &loc )
+ostream &RubyCodeGen::source_warning( const GenInputLoc &loc )
 {
 	cerr << sourceFileName << ":" << loc.line << ":" << loc.col << ": warning: ";
 	return cerr;
 }
 
-ostream &RubyCodeGen::source_error( const InputLoc &loc )
+ostream &RubyCodeGen::source_error( const GenInputLoc &loc )
 {
 	gblErrorCount += 1;
 	assert( sourceFileName != 0 );

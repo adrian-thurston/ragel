@@ -36,9 +36,9 @@ protected:
 	std::ostream &ACTION_SWITCH();
 
 	void GOTO( ostream &out, int gotoDest, bool inFinish );
-	void GOTO_EXPR( ostream &out, InlineItem *ilItem, bool inFinish );
+	void GOTO_EXPR( ostream &out, GenInlineItem *ilItem, bool inFinish );
 	void CALL( ostream &out, int callDest, int targState, bool inFinish );
-	void CALL_EXPR(ostream &out, InlineItem *ilItem, int targState, bool inFinish );
+	void CALL_EXPR(ostream &out, GenInlineItem *ilItem, int targState, bool inFinish );
 	void RET( ostream &out, bool inFinish );
 	void BREAK( ostream &out, int targState );
 

@@ -154,7 +154,7 @@ struct ParseData
 {
 	/* Create a new parse data object. This is done at the beginning of every
 	 * fsm specification. */
-	ParseData( char *fileName, char *sectionName, const InputLoc &sectionLoc );
+	ParseData( const char *fileName, char *sectionName, const InputLoc &sectionLoc );
 	~ParseData();
 
 	/*
@@ -283,7 +283,7 @@ struct ParseData
 	InputLoc rangeLowLoc, rangeHighLoc;
 
 	/* The name of the file the fsm is from, and the spec name. */
-	char *fileName;
+	const char *fileName;
 	char *sectionName;
 	InputLoc sectionLoc;
 

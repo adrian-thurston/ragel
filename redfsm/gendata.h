@@ -48,11 +48,24 @@ typedef AvlMapEl<char *, CodeGenData*> CodeGenMapEl;
 /* These functions must be implemented by the code generation executable.
  * The openOutput function is invoked when the root element is opened.  The
  * makeCodeGen function is invoked when a ragel_def element is opened. */
-std::ostream *openOutput( char *inputFile );
-CodeGenData *makeCodeGen( char *sourceFileName, 
+std::ostream *cdOpenOutput( char *inputFile );
+std::ostream *javaOpenOutput( char *inputFile );
+std::ostream *rubyOpenOutput( char *inputFile );
+std::ostream *csharpOpenOutput( char *inputFile );
+
+CodeGenData *cdMakeCodeGen( char *sourceFileName, 
+		char *fsmName, ostream &out, bool wantComplete );
+CodeGenData *javaMakeCodeGen( char *sourceFileName, 
+		char *fsmName, ostream &out, bool wantComplete );
+CodeGenData *rubyMakeCodeGen( char *sourceFileName, 
+		char *fsmName, ostream &out, bool wantComplete );
+CodeGenData *csharpMakeCodeGen( char *sourceFileName, 
 		char *fsmName, ostream &out, bool wantComplete );
 
-void lineDirective( ostream &out, char *fileName, int line );
+void cdLineDirective( ostream &out, const char *fileName, int line );
+void javaLineDirective( ostream &out, const char *fileName, int line );
+void rubyLineDirective( ostream &out, const char *fileName, int line );
+void csharpLineDirective( ostream &out, const char *fileName, int line );
 void genLineDirective( ostream &out );
 
 /*********************************/
@@ -72,7 +85,7 @@ struct CodeGenData
 
 	/* This can also be overwridden to modify the processing of write
 	 * statements. */
-	virtual void writeStatement( InputLoc &loc, int nargs, char **args );
+	virtual void writeStatement( GenInputLoc &loc, int nargs, char **args );
 
 	/********************/
 
@@ -98,22 +111,22 @@ struct CodeGenData
 	ActionList actionList;
 	ConditionList conditionList;
 	CondSpaceList condSpaceList;
-	InlineList *getKeyExpr;
-	InlineList *accessExpr;
-	InlineList *prePushExpr;
-	InlineList *postPopExpr;
+	GenInlineList *getKeyExpr;
+	GenInlineList *accessExpr;
+	GenInlineList *prePushExpr;
+	GenInlineList *postPopExpr;
 
 	/* Overriding variables. */
-	InlineList *pExpr;
-	InlineList *peExpr;
-	InlineList *eofExpr;
-	InlineList *csExpr;
-	InlineList *topExpr;
-	InlineList *stackExpr;
-	InlineList *actExpr;
-	InlineList *tokstartExpr;
-	InlineList *tokendExpr;
-	InlineList *dataExpr;
+	GenInlineList *pExpr;
+	GenInlineList *peExpr;
+	GenInlineList *eofExpr;
+	GenInlineList *csExpr;
+	GenInlineList *topExpr;
+	GenInlineList *stackExpr;
+	GenInlineList *actExpr;
+	GenInlineList *tokstartExpr;
+	GenInlineList *tokendExpr;
+	GenInlineList *dataExpr;
 
 	KeyOps thisKeyOps;
 	bool wantComplete;
@@ -131,7 +144,7 @@ struct CodeGenData
 
 	void createMachine();
 	void initActionList( unsigned long length );
-	void newAction( int anum, char *name, int line, int col, InlineList *inlineList );
+	void newAction( int anum, char *name, int line, int col, GenInlineList *inlineList );
 	void initActionTableList( unsigned long length );
 	void initStateList( unsigned long length );
 	void setStartState( unsigned long startState );
@@ -162,12 +175,12 @@ struct CodeGenData
 
 	bool setAlphType( char *data );
 
-	void resolveTargetStates( InlineList *inlineList );
+	void resolveTargetStates( GenInlineList *inlineList );
 	Key findMaxKey();
 
 	/* Gather various info on the machine. */
-	void analyzeActionList( RedAction *redAct, InlineList *inlineList );
-	void analyzeAction( Action *act, InlineList *inlineList );
+	void analyzeActionList( RedAction *redAct, GenInlineList *inlineList );
+	void analyzeAction( Action *act, GenInlineList *inlineList );
 	void findFinalActionRefs();
 	void analyzeMachine();
 
@@ -175,8 +188,8 @@ struct CodeGenData
 	void setValueLimits();
 	void assignActionIds();
 
-	ostream &source_warning( const InputLoc &loc );
-	ostream &source_error( const InputLoc &loc );
+	ostream &source_warning( const GenInputLoc &loc );
+	ostream &source_error( const GenInputLoc &loc );
 };
 
 

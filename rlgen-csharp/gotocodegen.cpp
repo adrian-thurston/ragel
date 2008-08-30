@@ -547,7 +547,7 @@ void CSharpGotoCodeGen::GOTO( ostream &ret, int gotoDest, bool inFinish )
 			CTRL_FLOW() << "goto _again;}";
 }
 
-void CSharpGotoCodeGen::GOTO_EXPR( ostream &ret, InlineItem *ilItem, bool inFinish )
+void CSharpGotoCodeGen::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
 	ret << "{" << CS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish );
@@ -569,7 +569,7 @@ void CSharpGotoCodeGen::NEXT( ostream &ret, int nextDest, bool inFinish )
 	ret << CS() << " = " << nextDest << ";";
 }
 
-void CSharpGotoCodeGen::NEXT_EXPR( ostream &ret, InlineItem *ilItem, bool inFinish )
+void CSharpGotoCodeGen::NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
 	ret << CS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish );
@@ -590,7 +590,7 @@ void CSharpGotoCodeGen::CALL( ostream &ret, int callDest, int targState, bool in
 		ret << "}";
 }
 
-void CSharpGotoCodeGen::CALL_EXPR( ostream &ret, InlineItem *ilItem, int targState, bool inFinish )
+void CSharpGotoCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
 {
 	if ( prePushExpr != 0 ) {
 		ret << "{";

@@ -33,8 +33,10 @@ LIBS += @LIBS@
 #*************************************
 
 prefix = @prefix@
-CXX = @CXX@
 EXEEXT = @EXEEXT@
+CXX = @CXX@
+AR = @AR@
+RANLIB = @RANLIB@
 
 # Get objects and dependencies from sources.
 OBJS = $(CC_SRCS:%.cpp=%.o)
@@ -44,10 +46,11 @@ DEPS = $(CC_SRCS:%.cpp=.%.d)
 include ../version.mk
 
 # Rules.
-all: rlgen-java$(EXEEXT)
+all: rlgen-java.a
 
-rlgen-java$(EXEEXT): $(LIBS) $(OBJS)
-	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
+rlgen-java.a: $(LIBS) $(OBJS)
+	$(AR) -cr $@ $(OBJS) 
+	$(RANLIB) $@
 
 %.o: %.cpp
 	@$(CXX) -M $(DEFS) $(INCS) $< > .$*.d
@@ -57,10 +60,9 @@ distclean: clean
 	rm -f Makefile
 
 clean:
-	rm -f tags .*.d *.o rlgen-java
+	rm -f tags .*.d *.o rlgen-java.a
 
 install: all
-	install -d $(prefix)/bin
-	install -s rlgen-java $(prefix)/bin/rlgen-java
+	@true
 
 -include $(DEPS)

@@ -66,9 +66,9 @@ struct JavaTabCodeGen : public CodeGenData
 
 	void BREAK( ostream &ret, int targState );
 	void GOTO( ostream &ret, int gotoDest, bool inFinish );
-	void GOTO_EXPR( ostream &ret, InlineItem *ilItem, bool inFinish );
+	void GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish );
 	void CALL( ostream &ret, int callDest, int targState, bool inFinish );
-	void CALL_EXPR( ostream &ret, InlineItem *ilItem, int targState, bool inFinish );
+	void CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish );
 	void RET( ostream &ret, bool inFinish );
 
 	void COND_TRANSLATE();
@@ -81,7 +81,7 @@ struct JavaTabCodeGen : public CodeGenData
 	virtual void finishRagelDef();
 
 	void NEXT( ostream &ret, int nextDest, bool inFinish );
-	void NEXT_EXPR( ostream &ret, InlineItem *ilItem, bool inFinish );
+	void NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish );
 
 	int TO_STATE_ACTION( RedStateAp *state );
 	int FROM_STATE_ACTION( RedStateAp *state );
@@ -163,30 +163,32 @@ public:
 	string FIRST_FINAL() { return DATA_PREFIX() + "first_final"; }
 	string CTXDATA() { return DATA_PREFIX() + "ctxdata"; }
 
-	void INLINE_LIST( ostream &ret, InlineList *inlineList, int targState, bool inFinish );
-	void EXEC( ostream &ret, InlineItem *item, int targState, int inFinish );
-	void EXECTE( ostream &ret, InlineItem *item, int targState, int inFinish );
-	void LM_SWITCH( ostream &ret, InlineItem *item, int targState, int inFinish );
-	void SET_ACT( ostream &ret, InlineItem *item );
-	void INIT_TOKSTART( ostream &ret, InlineItem *item );
-	void INIT_ACT( ostream &ret, InlineItem *item );
-	void SET_TOKSTART( ostream &ret, InlineItem *item );
-	void SET_TOKEND( ostream &ret, InlineItem *item );
-	void GET_TOKEND( ostream &ret, InlineItem *item );
-	void SUB_ACTION( ostream &ret, InlineItem *item, 
+	void INLINE_LIST( ostream &ret, GenInlineList *inlineList, int targState, bool inFinish );
+	void EXEC( ostream &ret, GenInlineItem *item, int targState, int inFinish );
+	void EXECTE( ostream &ret, GenInlineItem *item, int targState, int inFinish );
+	void LM_SWITCH( ostream &ret, GenInlineItem *item, int targState, int inFinish );
+	void SET_ACT( ostream &ret, GenInlineItem *item );
+	void INIT_TOKSTART( ostream &ret, GenInlineItem *item );
+	void INIT_ACT( ostream &ret, GenInlineItem *item );
+	void SET_TOKSTART( ostream &ret, GenInlineItem *item );
+	void SET_TOKEND( ostream &ret, GenInlineItem *item );
+	void GET_TOKEND( ostream &ret, GenInlineItem *item );
+	void SUB_ACTION( ostream &ret, GenInlineItem *item, 
 			int targState, bool inFinish );
 
 	string ERROR_STATE();
 	string FIRST_FINAL_STATE();
 
-	ostream &source_warning(const InputLoc &loc);
-	ostream &source_error(const InputLoc &loc);
+	ostream &source_warning(const GenInputLoc &loc);
+	ostream &source_error(const GenInputLoc &loc);
 
 	unsigned int arrayTypeSize( unsigned long maxVal );
 
 	bool outLabelUsed;
 	bool againLabelUsed;
 	bool useIndicies;
+
+	void genLineDirective( ostream &out );
 };
 
 

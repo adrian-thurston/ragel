@@ -27,7 +27,7 @@
 
 using std::ostringstream;
 
-KeyOps *keyOps = 0;
+/* KeyOps *keyOps = 0; */
 
 string Action::nameOrLoc()
 {

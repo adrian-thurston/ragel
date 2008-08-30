@@ -426,11 +426,11 @@ void CSharpSplitCodeGen::writeExec()
 	ALL_PARTITIONS();
 }
 
-void CSharpSplitCodeGen::setLabelsNeeded( RedStateAp *fromState, InlineList *inlineList )
+void CSharpSplitCodeGen::setLabelsNeeded( RedStateAp *fromState, GenInlineList *inlineList )
 {
-	for ( InlineList::Iter item = *inlineList; item.lte(); item++ ) {
+	for ( GenInlineList::Iter item = *inlineList; item.lte(); item++ ) {
 		switch ( item->type ) {
-		case InlineItem::Goto: case InlineItem::Call: {
+		case GenInlineItem::Goto: case GenInlineItem::Call: {
 			/* In split code gen we only need labels for transitions across
 			 * partitions. */
 			if ( fromState->partition == item->targState->partition ){

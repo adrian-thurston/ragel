@@ -52,22 +52,22 @@ using std::endl;
 RubyImplEnum rubyImpl = MRI;
 
 /* Target language and output style. */
-CodeStyleEnum codeStyle = GenTables;
+extern CodeStyleEnum codeStyle;
 
 /* Io globals. */
-istream *inStream = 0;
-ostream *outStream = 0;
-output_filter *outFilter = 0;
-char *outputFileName = 0;
+extern istream *inStream;
+extern ostream *outStream;
+extern output_filter *outFilter;
+extern const char *outputFileName;
 
 /* Graphviz dot file generation. */
-bool graphvizDone = false;
+extern bool graphvizDone;
 
-int numSplitPartitions = 0;
-bool printPrintables = false;
+extern int numSplitPartitions;
+extern bool printPrintables;
 
 /* Print a summary of the options. */
-void usage()
+void ruby_usage()
 {
 	cout <<
 "usage: " PROGNAME " [options] file\n"
@@ -86,7 +86,7 @@ void usage()
 }
 
 /* Print version information. */
-void version()
+void ruby_version()
 {
 	cout << "Ragel Code Generator for Ruby" << endl <<
 			"Version " VERSION << ", " PUBDATE << endl <<
@@ -94,7 +94,7 @@ void version()
 			"Copyright (c) 2007 by Victor Hugo Borja" << endl;
 }
 
-ostream &error()
+ostream &ruby_error()
 {
 	gblErrorCount += 1;
 	cerr << PROGNAME ": ";
@@ -106,10 +106,10 @@ ostream &error()
  */
 
 /* Invoked by the parser when the root element is opened. */
-ostream *openOutput( char *inputFile )
+ostream *rubyOpenOutput( char *inputFile )
 {
 	if ( hostLang->lang != HostLang::Ruby ) {
-		error() << "this code generator is for Ruby only" << endl;
+		ruby_error() << "this code generator is for Ruby only" << endl;
 		exit(1);
 	}
 
@@ -125,7 +125,7 @@ ostream *openOutput( char *inputFile )
 
 	/* Make sure we are not writing to the same file as the input file. */
 	if ( outputFileName != 0 && strcmp( inputFile, outputFileName  ) == 0 ) {
-		error() << "output file \"" << outputFileName  << 
+		ruby_error() << "output file \"" << outputFileName  << 
 				"\" is the same as the input file" << endl;
 	}
 
@@ -134,7 +134,7 @@ ostream *openOutput( char *inputFile )
 		outFilter = new output_filter( outputFileName );
 		outFilter->open( outputFileName, ios::out|ios::trunc );
 		if ( !outFilter->is_open() ) {
-			error() << "error opening " << outputFileName << " for writing" << endl;
+			ruby_error() << "error opening " << outputFileName << " for writing" << endl;
 			exit(1);
 		}
 
@@ -149,7 +149,7 @@ ostream *openOutput( char *inputFile )
 }
 
 /* Invoked by the parser when a ragel definition is opened. */
-CodeGenData *makeCodeGen( char *sourceFileName, char *fsmName, 
+CodeGenData *rubyMakeCodeGen( char *sourceFileName, char *fsmName, 
 		ostream &out, bool wantComplete )
 {
 	CodeGenData *codeGen = 0;
@@ -190,10 +190,10 @@ CodeGenData *makeCodeGen( char *sourceFileName, char *fsmName,
 }
 
 /* Main, process args and call yyparse to start scanning input. */
-int main(int argc, char **argv)
+int ruby_main(int argc, const char **argv)
 {
 	ParamCheck pc("-:Hlh?vo:T:F:G:P:", argc, argv);
-	char *xmlInputFileName = 0;
+	const char *xmlInputFileName = 0;
 
 	while ( pc.check() ) {
 		switch ( pc.state ) {
@@ -202,9 +202,9 @@ int main(int argc, char **argv)
 			/* Output. */
 			case 'o':
 				if ( *pc.paramArg == 0 )
-					error() << "a zero length output file name was given" << endl;
+					ruby_error() << "a zero length output file name was given" << endl;
 				else if ( outputFileName != 0 )
-					error() << "more than one output file name was given" << endl;
+					ruby_error() << "more than one output file name was given" << endl;
 				else {
 					/* Ok, remember the output file name. */
 					outputFileName = pc.paramArg;
@@ -218,7 +218,7 @@ int main(int argc, char **argv)
 				else if ( pc.paramArg[0] == '1' )
 					codeStyle = GenFTables;
 				else {
-					error() << "-T" << pc.paramArg[0] << 
+					ruby_error() << "-T" << pc.paramArg[0] << 
 							" is an invalid argument" << endl;
 					exit(1);
 				}
@@ -229,7 +229,7 @@ int main(int argc, char **argv)
 				else if ( pc.paramArg[0] == '1' )
 					codeStyle = GenFFlat;
 				else {
-					error() << "-F" << pc.paramArg[0] << 
+					ruby_error() << "-F" << pc.paramArg[0] << 
 							" is an invalid argument" << endl;
 					exit(1);
 				}
@@ -242,7 +242,7 @@ int main(int argc, char **argv)
 				else if ( pc.paramArg[0] == '2' )
 					codeStyle = GenIpGoto;
 				else {
-					error() << "-G" << pc.paramArg[0] << 
+					ruby_error() << "-G" << pc.paramArg[0] << 
 							" is an invalid argument" << endl;
 					exit(1);
 				}
@@ -254,40 +254,40 @@ int main(int argc, char **argv)
 
 			/* Version and help. */
 			case 'v':
-				version();
+				ruby_version();
 				exit(0);
 			case 'H': case 'h': case '?':
-				usage();
+				ruby_usage();
 				exit(0);
 
 			case '-':
 				if ( strcmp(pc.paramArg, "help") == 0 ) {
-					usage();
+					ruby_usage();
 					exit(0);
 				}
 				else if ( strcmp(pc.paramArg, "version") == 0 ) {
-					version();
+					ruby_version();
 					exit(0);
 				}
 				else if ( strcmp(pc.paramArg, "rbx") == 0 ) {
 					rubyImpl = Rubinius;
 				}
 				else {
-					error() << "--" << pc.paramArg << 
+					ruby_error() << "--" << pc.paramArg << 
 							" is an invalid argument" << endl;
 				}
 			}
 			break;
 
 		case ParamCheck::invalid:
-			error() << "-" << pc.parameter << " is an invalid argument" << endl;
+			ruby_error() << "-" << pc.parameter << " is an invalid argument" << endl;
 			break;
 
 		case ParamCheck::noparam:
 			if ( *pc.curArg == 0 )
-				error() << "a zero length input file name was given" << endl;
+				ruby_error() << "a zero length input file name was given" << endl;
 			else if ( xmlInputFileName != 0 )
-				error() << "more than one input file name was given" << endl;
+				ruby_error() << "more than one input file name was given" << endl;
 			else {
 				/* OK, Remember the filename. */
 				xmlInputFileName = pc.curArg;
@@ -306,7 +306,7 @@ int main(int argc, char **argv)
 		ifstream *inFile = new ifstream( xmlInputFileName );
 		inStream = inFile;
 		if ( ! inFile->is_open() )
-			error() << "could not open " << xmlInputFileName << " for reading" << endl;
+			ruby_error() << "could not open " << xmlInputFileName << " for reading" << endl;
 	}
 	else {
 		xmlInputFileName = strdup("<stdin>");

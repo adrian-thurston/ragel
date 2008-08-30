@@ -416,7 +416,7 @@ bool NameInst::anyRefsRec()
 
 /* Initialize the structure that will collect info during the parse of a
  * machine. */
-ParseData::ParseData( char *fileName, char *sectionName, 
+ParseData::ParseData( const char *fileName, char *sectionName, 
 		const InputLoc &sectionLoc )
 :	
 	sectionGraph(0),
@@ -1470,7 +1470,7 @@ void writeLanguage( std::ostream &out )
 	
 }
 
-void writeMachines( std::ostream &out, std::string hostData, char *inputFileName )
+void writeMachines( std::ostream &out, std::string hostData, const char *inputFileName )
 {
 	if ( machineSpec == 0 && machineName == 0 ) {
 		/* No machine spec or machine name given. Generate everything. */

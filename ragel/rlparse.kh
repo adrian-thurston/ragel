@@ -36,11 +36,11 @@
 /* This is used for tracking the include files/machine pairs. */
 struct IncludeHistoryItem
 {
-	IncludeHistoryItem( char *fileName, char *sectionName )
+	IncludeHistoryItem( const char *fileName, const char *sectionName )
 		: fileName(fileName), sectionName(sectionName) {}
 
-	char *fileName;
-	char *sectionName;
+	const char *fileName;
+	const char *sectionName;
 };
 
 typedef Vector<IncludeHistoryItem> IncludeHistory;
@@ -106,7 +106,7 @@ struct Parser
 	void init();
 	int parseLangEl( int type, const Token *token );
 
-	Parser( char *fileName, char *sectionName, InputLoc &sectionLoc )
+	Parser( const char *fileName, char *sectionName, InputLoc &sectionLoc )
 		: sectionName(sectionName)
 	{
 		pd = new ParseData( fileName, sectionName, sectionLoc );

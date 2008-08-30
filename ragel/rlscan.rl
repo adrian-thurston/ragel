@@ -147,7 +147,7 @@ void Scanner::flushImport()
 	}
 }
 
-void Scanner::directToParser( Parser *toParser, char *tokFileName, int tokLine, 
+void Scanner::directToParser( Parser *toParser, const char *tokFileName, int tokLine, 
 		int tokColumn, int type, char *tokdata, int toklen )
 {
 	InputLoc loc;
@@ -550,7 +550,8 @@ bool isAbsolutePath( const char *path )
 #endif
 }
 
-char **Scanner::makeIncludePathChecks( char *thisFileName, char *fileName, int fnlen )
+char **Scanner::makeIncludePathChecks( const char *thisFileName, 
+		const char *fileName, int fnlen )
 {
 	char **checks = new char*[2];
 	long nextCheck = 0;

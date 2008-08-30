@@ -84,19 +84,19 @@ struct XMLTagHashPair
 struct Token
 {
 	XMLTag *tag;
-	InputLoc loc;
+	GenInputLoc loc;
 };
 
-struct InlineItem;
-struct InlineList;
+struct GenInlineItem;
+struct GenInlineList;
 
 struct LmSwitchVect;
 struct LmSwitchAction;
 
-struct Parser
+struct XmlParser
 {
 	%%{
-		parser Parser;
+		parser XmlParser;
 
 		token TAG_unknown, TAG_ragel, TAG_ragel_def, TAG_host, TAG_state_list,
 			TAG_state, TAG_trans_list, TAG_t, TAG_machine, TAG_start_state,
@@ -125,7 +125,7 @@ struct Parser
 	void init();
 	int parseLangEl( int type, const Token *token );
 
-	Parser( char *fileName, bool outputActive, bool wantComplete ) : 
+	XmlParser( const char *fileName, bool outputActive, bool wantComplete ) : 
 		fileName(fileName), sourceFileName(0), outStream(0),
 		outputActive(outputActive), wantComplete(wantComplete),
 		cgd(0) { }
@@ -135,14 +135,14 @@ struct Parser
 	int token( XMLTag *tag, int col, int line );
 
 	/* Report an error encountered by the parser. */
-	ostream &warning( const InputLoc &loc );
+	ostream &warning( const GenInputLoc &loc );
 	ostream &error();
-	ostream &error( const InputLoc &loc );
+	ostream &error( const GenInputLoc &loc );
 	ostream &parser_error( int tokId, Token &token );
-	ostream &source_error( const InputLoc &loc );
+	ostream &source_error( const GenInputLoc &loc );
 
 	/* The name of the root section, this does not change during an include. */
-	char *fileName;
+	const char *fileName;
 	char *sourceFileName;
 	ostream *outStream;
 	bool outputActive;
@@ -166,7 +166,7 @@ struct Parser
 
 %% write token_defs;
 
-int xml_parse( std::istream &input, char *fileName, 
+int xml_parse( std::istream &input, const char *fileName, 
 		bool outputActive, bool wantComplete );
 
 #endif /* _XMLPARSE_H */

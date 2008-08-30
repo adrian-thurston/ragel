@@ -571,7 +571,7 @@ void RbxGotoCodeGen::GOTO( ostream &ret, int gotoDest, bool inFinish )
 		"\nend\n";
 }
 
-void RbxGotoCodeGen::GOTO_EXPR( ostream &ret, InlineItem *ilItem, bool inFinish )
+void RbxGotoCodeGen::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
 	ret << "begin\n" << CS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish );
@@ -595,7 +595,7 @@ void RbxGotoCodeGen::NEXT( ostream &ret, int nextDest, bool inFinish )
 	ret << CS() << " = " << nextDest << ";";
 }
 
-void RbxGotoCodeGen::NEXT_EXPR( ostream &ret, InlineItem *ilItem, bool inFinish )
+void RbxGotoCodeGen::NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
 	ret << CS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish );
@@ -619,7 +619,7 @@ void RbxGotoCodeGen::CALL( ostream &ret, int callDest, int targState, bool inFin
 		ret << "}";
 }
 
-void RbxGotoCodeGen::CALL_EXPR( ostream &ret, InlineItem *ilItem, int targState, bool inFinish )
+void RbxGotoCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
 {
 	if ( prePushExpr != 0 ) {
 		ret << "{";

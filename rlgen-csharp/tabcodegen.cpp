@@ -614,7 +614,7 @@ void CSharpTabCodeGen::GOTO( ostream &ret, int gotoDest, bool inFinish )
 			CTRL_FLOW() << "goto _again;}";
 }
 
-void CSharpTabCodeGen::GOTO_EXPR( ostream &ret, InlineItem *ilItem, bool inFinish )
+void CSharpTabCodeGen::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
 	ret << "{" << CS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish );
@@ -636,7 +636,7 @@ void CSharpTabCodeGen::NEXT( ostream &ret, int nextDest, bool inFinish )
 	ret << CS() << " = " << nextDest << ";";
 }
 
-void CSharpTabCodeGen::NEXT_EXPR( ostream &ret, InlineItem *ilItem, bool inFinish )
+void CSharpTabCodeGen::NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
 	ret << CS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish );
@@ -657,7 +657,7 @@ void CSharpTabCodeGen::CALL( ostream &ret, int callDest, int targState, bool inF
 		ret << "}";
 }
 
-void CSharpTabCodeGen::CALL_EXPR( ostream &ret, InlineItem *ilItem, int targState, bool inFinish )
+void CSharpTabCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
 {
 	if ( prePushExpr != 0 ) {
 		ret << "{";

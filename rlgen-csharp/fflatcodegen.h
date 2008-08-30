@@ -36,7 +36,7 @@ struct CodeGenData;
 class CSharpFFlatCodeGen : public CSharpFlatCodeGen
 {
 public:
-	CSharpFFlatCodeGen( ostream &out ) : FsmCodeGen(out), CSharpFlatCodeGen(out) {}
+	CSharpFFlatCodeGen( ostream &out ) : CSharpFsmCodeGen(out), CSharpFlatCodeGen(out) {}
 private:
 	std::ostream &TO_STATE_ACTION_SWITCH();
 	std::ostream &FROM_STATE_ACTION_SWITCH();

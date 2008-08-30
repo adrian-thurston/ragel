@@ -53,7 +53,7 @@ void CSharpIpGotoCodeGen::CALL( ostream &ret, int callDest, int targState, bool 
 		ret << "}";
 }
 
-void CSharpIpGotoCodeGen::CALL_EXPR( ostream &ret, InlineItem *ilItem, int targState, bool inFinish )
+void CSharpIpGotoCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
 {
 	if ( prePushExpr != 0 ) {
 		ret << "{";
@@ -81,7 +81,7 @@ void CSharpIpGotoCodeGen::RET( ostream &ret, bool inFinish )
 	ret << CTRL_FLOW() << "goto _again;}";
 }
 
-void CSharpIpGotoCodeGen::GOTO_EXPR( ostream &ret, InlineItem *ilItem, bool inFinish )
+void CSharpIpGotoCodeGen::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
 	ret << "{" << CS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish );
@@ -93,7 +93,7 @@ void CSharpIpGotoCodeGen::NEXT( ostream &ret, int nextDest, bool inFinish )
 	ret << CS() << " = " << nextDest << ";";
 }
 
-void CSharpIpGotoCodeGen::NEXT_EXPR( ostream &ret, InlineItem *ilItem, bool inFinish )
+void CSharpIpGotoCodeGen::NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
 	ret << CS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish );
@@ -296,11 +296,11 @@ std::ostream &CSharpIpGotoCodeGen::FINISH_CASES()
 	return out;
 }
 
-void CSharpIpGotoCodeGen::setLabelsNeeded( InlineList *inlineList )
+void CSharpIpGotoCodeGen::setLabelsNeeded( GenInlineList *inlineList )
 {
-	for ( InlineList::Iter item = *inlineList; item.lte(); item++ ) {
+	for ( GenInlineList::Iter item = *inlineList; item.lte(); item++ ) {
 		switch ( item->type ) {
-		case InlineItem::Goto: case InlineItem::Call: {
+		case GenInlineItem::Goto: case GenInlineItem::Call: {
 			/* Mark the target as needing a label. */
 			item->targState->labelNeeded = true;
 			break;

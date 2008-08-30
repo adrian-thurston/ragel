@@ -47,11 +47,11 @@
 using std::string;
 
 struct RedStateAp;
-struct InlineList;
+struct GenInlineList;
 struct Action;
 
 /* Location in an input file. */
-struct InputLoc
+struct GenInputLoc
 {
 	int line;
 	int col;
@@ -60,7 +60,7 @@ struct InputLoc
 /*
  * Inline code tree
  */
-struct InlineItem
+struct GenInlineItem
 {
 	enum Type 
 	{
@@ -70,26 +70,26 @@ struct InlineItem
 		LmInitAct, LmSetTokStart, SubAction, Break
 	};
 
-	InlineItem( const InputLoc &loc, Type type ) : 
+	GenInlineItem( const GenInputLoc &loc, Type type ) : 
 		loc(loc), data(0), targId(0), targState(0), 
 		lmId(0), children(0), offset(0),
 		type(type) { }
 	
-	InputLoc loc;
+	GenInputLoc loc;
 	char *data;
 	int targId;
 	RedStateAp *targState;
 	int lmId;
-	InlineList *children;
+	GenInlineList *children;
 	int offset;
 	Type type;
 
-	InlineItem *prev, *next;
+	GenInlineItem *prev, *next;
 };
 
 /* Normally this would be atypedef, but that would entail including DList from
  * ptreetypes, which should be just typedef forwards. */
-struct InlineList : public DList<InlineItem> { };
+struct GenInlineList : public DList<GenInlineItem> { };
 
 /* Element in list of actions. Contains the string for the code to exectute. */
 struct Action 
@@ -109,9 +109,9 @@ struct Action
 	}
 
 	/* Data collected during parse. */
-	InputLoc loc;
+	GenInputLoc loc;
 	char *name;
-	InlineList *inlineList;
+	GenInlineList *inlineList;
 	int actionId;
 
 	string nameOrLoc();

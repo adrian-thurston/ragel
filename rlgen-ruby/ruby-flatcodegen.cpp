@@ -434,7 +434,7 @@ void RubyFlatCodeGen::CALL( ostream &out, int callDest, int targState, bool inFi
 		out << "end\n";
 }
 
-void RubyFlatCodeGen::CALL_EXPR(ostream &out, InlineItem *ilItem, int targState, bool inFinish )
+void RubyFlatCodeGen::CALL_EXPR(ostream &out, GenInlineItem *ilItem, int targState, bool inFinish )
 {
 	if ( prePushExpr != 0 ) {
 		out << "begin\n";
@@ -484,7 +484,7 @@ void RubyFlatCodeGen::NEXT( ostream &ret, int nextDest, bool inFinish )
 	ret << CS() << " = " << nextDest << ";";
 }
 
-void RubyFlatCodeGen::GOTO_EXPR( ostream &out, InlineItem *ilItem, bool inFinish )
+void RubyFlatCodeGen::GOTO_EXPR( ostream &out, GenInlineItem *ilItem, bool inFinish )
 {
 	out << 
 		"	begin\n"
@@ -498,7 +498,7 @@ void RubyFlatCodeGen::GOTO_EXPR( ostream &out, InlineItem *ilItem, bool inFinish
 		"	end\n";
 }
 
-void RubyFlatCodeGen::NEXT_EXPR( ostream &ret, InlineItem *ilItem, bool inFinish )
+void RubyFlatCodeGen::NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
 	ret << CS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish );

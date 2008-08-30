@@ -37,14 +37,14 @@ using std::string;
 using std::cerr;
 using std::endl;
 
-void lineDirective( ostream &out, char *fileName, int line )
+void csharpLineDirective( ostream &out, const char *fileName, int line )
 {
 	if ( noLineDirectives )
 		out << "/* ";
 
 	/* Write the preprocessor line info for to the input file. */
 	out << "#line " << line  << " \"";
-	for ( char *pc = fileName; *pc != 0; pc++ ) {
+	for ( const char *pc = fileName; *pc != 0; pc++ ) {
 		if ( *pc == '\\' )
 			out << "\\\\";
 		else
@@ -58,22 +58,22 @@ void lineDirective( ostream &out, char *fileName, int line )
 	out << '\n';
 }
 
-void genLineDirective( ostream &out )
+void CSharpFsmCodeGen::genLineDirective( ostream &out )
 {
 	std::streambuf *sbuf = out.rdbuf();
 	output_filter *filter = static_cast<output_filter*>(sbuf);
-	lineDirective( out, filter->fileName, filter->line + 1 );
+	csharpLineDirective( out, filter->fileName, filter->line + 1 );
 }
 
 
 /* Init code gen with in parameters. */
-FsmCodeGen::FsmCodeGen( ostream &out )
+CSharpFsmCodeGen::CSharpFsmCodeGen( ostream &out )
 :
 	CodeGenData(out)
 {
 }
 
-unsigned int FsmCodeGen::arrayTypeSize( unsigned long maxVal )
+unsigned int CSharpFsmCodeGen::arrayTypeSize( unsigned long maxVal )
 {
 	long long maxValLL = (long long) maxVal;
 	HostType *arrayType = keyOps->typeSubsumes( maxValLL );
@@ -81,12 +81,12 @@ unsigned int FsmCodeGen::arrayTypeSize( unsigned long maxVal )
 	return arrayType->size;
 }
 
-string FsmCodeGen::ARRAY_TYPE( unsigned long maxVal )
+string CSharpFsmCodeGen::ARRAY_TYPE( unsigned long maxVal )
 {
 	return ARRAY_TYPE( maxVal, false );
 }
 
-string FsmCodeGen::ARRAY_TYPE( unsigned long maxVal, bool forceSigned )
+string CSharpFsmCodeGen::ARRAY_TYPE( unsigned long maxVal, bool forceSigned )
 {
 	long long maxValLL = (long long) maxVal;
 	HostType *arrayType;
@@ -105,13 +105,13 @@ string FsmCodeGen::ARRAY_TYPE( unsigned long maxVal, bool forceSigned )
 }
 
 /* Write out the fsm name. */
-string FsmCodeGen::FSM_NAME()
+string CSharpFsmCodeGen::FSM_NAME()
 {
 	return fsmName;
 }
 
 /* Emit the offset of the start state as a decimal integer. */
-string FsmCodeGen::START_STATE_ID()
+string CSharpFsmCodeGen::START_STATE_ID()
 {
 	ostringstream ret;
 	ret << redFsm->startState->id;
@@ -119,7 +119,7 @@ string FsmCodeGen::START_STATE_ID()
 };
 
 /* Write out the array of actions. */
-std::ostream &FsmCodeGen::ACTIONS_ARRAY()
+std::ostream &CSharpFsmCodeGen::ACTIONS_ARRAY()
 {
 	out << "\t0, ";
 	int totalActions = 1;
@@ -145,7 +145,7 @@ std::ostream &FsmCodeGen::ACTIONS_ARRAY()
 }
 
 
-string FsmCodeGen::ACCESS()
+string CSharpFsmCodeGen::ACCESS()
 {
 	ostringstream ret;
 	if ( accessExpr != 0 )
@@ -154,7 +154,7 @@ string FsmCodeGen::ACCESS()
 }
 
 
-string FsmCodeGen::P()
+string CSharpFsmCodeGen::P()
 { 
 	ostringstream ret;
 	if ( pExpr == 0 )
@@ -167,7 +167,7 @@ string FsmCodeGen::P()
 	return ret.str();
 }
 
-string FsmCodeGen::PE()
+string CSharpFsmCodeGen::PE()
 {
 	ostringstream ret;
 	if ( peExpr == 0 )
@@ -180,7 +180,7 @@ string FsmCodeGen::PE()
 	return ret.str();
 }
 
-string FsmCodeGen::EOFV()
+string CSharpFsmCodeGen::EOFV()
 {
 	ostringstream ret;
 	if ( eofExpr == 0 )
@@ -193,7 +193,7 @@ string FsmCodeGen::EOFV()
 	return ret.str();
 }
 
-string FsmCodeGen::CS()
+string CSharpFsmCodeGen::CS()
 {
 	ostringstream ret;
 	if ( csExpr == 0 )
@@ -207,7 +207,7 @@ string FsmCodeGen::CS()
 	return ret.str();
 }
 
-string FsmCodeGen::TOP()
+string CSharpFsmCodeGen::TOP()
 {
 	ostringstream ret;
 	if ( topExpr == 0 )
@@ -220,7 +220,7 @@ string FsmCodeGen::TOP()
 	return ret.str();
 }
 
-string FsmCodeGen::STACK()
+string CSharpFsmCodeGen::STACK()
 {
 	ostringstream ret;
 	if ( stackExpr == 0 )
@@ -233,7 +233,7 @@ string FsmCodeGen::STACK()
 	return ret.str();
 }
 
-string FsmCodeGen::ACT()
+string CSharpFsmCodeGen::ACT()
 {
 	ostringstream ret;
 	if ( actExpr == 0 )
@@ -246,7 +246,7 @@ string FsmCodeGen::ACT()
 	return ret.str();
 }
 
-string FsmCodeGen::TOKSTART()
+string CSharpFsmCodeGen::TOKSTART()
 {
 	ostringstream ret;
 	if ( tokstartExpr == 0 )
@@ -259,7 +259,7 @@ string FsmCodeGen::TOKSTART()
 	return ret.str();
 }
 
-string FsmCodeGen::TOKEND()
+string CSharpFsmCodeGen::TOKEND()
 {
 	ostringstream ret;
 	if ( tokendExpr == 0 )
@@ -272,7 +272,7 @@ string FsmCodeGen::TOKEND()
 	return ret.str();
 }
 
-string FsmCodeGen::GET_WIDE_KEY()
+string CSharpFsmCodeGen::GET_WIDE_KEY()
 {
 	if ( redFsm->anyConditions() ) 
 		return "_widec";
@@ -280,7 +280,7 @@ string FsmCodeGen::GET_WIDE_KEY()
 		return GET_KEY();
 }
 
-string FsmCodeGen::GET_WIDE_KEY( RedStateAp *state )
+string CSharpFsmCodeGen::GET_WIDE_KEY( RedStateAp *state )
 {
 	if ( state->stateCondList.length() > 0 )
 		return "_widec";
@@ -288,7 +288,7 @@ string FsmCodeGen::GET_WIDE_KEY( RedStateAp *state )
 		return GET_KEY();
 }
 
-string FsmCodeGen::GET_KEY()
+string CSharpFsmCodeGen::GET_KEY()
 {
 	ostringstream ret;
 	if ( getKeyExpr != 0 ) { 
@@ -306,7 +306,7 @@ string FsmCodeGen::GET_KEY()
 
 /* Write out level number of tabs. Makes the nested binary search nice
  * looking. */
-string FsmCodeGen::TABS( int level )
+string CSharpFsmCodeGen::TABS( int level )
 {
 	string result;
 	while ( level-- > 0 )
@@ -316,7 +316,7 @@ string FsmCodeGen::TABS( int level )
 
 /* Write out a key from the fsm code gen. Depends on wether or not the key is
  * signed. */
-string FsmCodeGen::KEY( Key key )
+string CSharpFsmCodeGen::KEY( Key key )
 {
 	ostringstream ret;
 	if ( keyOps->isSigned || !hostLang->explicitUnsigned )
@@ -326,7 +326,7 @@ string FsmCodeGen::KEY( Key key )
 	return ret.str();
 }
 
-string FsmCodeGen::ALPHA_KEY( Key key )
+string CSharpFsmCodeGen::ALPHA_KEY( Key key )
 {
 	ostringstream ret;
 	if (key.getVal() > 0xFFFF) {
@@ -339,7 +339,7 @@ string FsmCodeGen::ALPHA_KEY( Key key )
 	return ret.str();
 }
 
-void FsmCodeGen::EXEC( ostream &ret, InlineItem *item, int targState, int inFinish )
+void CSharpFsmCodeGen::EXEC( ostream &ret, GenInlineItem *item, int targState, int inFinish )
 {
 	/* The parser gives fexec two children. The double brackets are for D
 	 * code. If the inline list is a single word it will get interpreted as a
@@ -349,13 +349,13 @@ void FsmCodeGen::EXEC( ostream &ret, InlineItem *item, int targState, int inFini
 	ret << "))-1;}";
 }
 
-void FsmCodeGen::LM_SWITCH( ostream &ret, InlineItem *item, 
+void CSharpFsmCodeGen::LM_SWITCH( ostream &ret, GenInlineItem *item, 
 		int targState, int inFinish )
 {
 	ret << 
 		"	switch( " << ACT() << " ) {\n";
 
-	for ( InlineList::Iter lma = *item->children; lma.lte(); lma++ ) {
+	for ( GenInlineList::Iter lma = *item->children; lma.lte(); lma++ ) {
 		/* Write the case label, the action and the case break. */
 		if ( lma->lmId < 0 )
 			ret << "	default:\n";
@@ -375,12 +375,12 @@ void FsmCodeGen::LM_SWITCH( ostream &ret, InlineItem *item,
 		"\t";
 }
 
-void FsmCodeGen::SET_ACT( ostream &ret, InlineItem *item )
+void CSharpFsmCodeGen::SET_ACT( ostream &ret, GenInlineItem *item )
 {
 	ret << ACT() << " = " << item->lmId << ";";
 }
 
-void FsmCodeGen::SET_TOKEND( ostream &ret, InlineItem *item )
+void CSharpFsmCodeGen::SET_TOKEND( ostream &ret, GenInlineItem *item )
 {
 	/* The tokend action sets tokend. */
 	ret << TOKEND() << " = " << P();
@@ -389,27 +389,27 @@ void FsmCodeGen::SET_TOKEND( ostream &ret, InlineItem *item )
 	out << ";";
 }
 
-void FsmCodeGen::GET_TOKEND( ostream &ret, InlineItem *item )
+void CSharpFsmCodeGen::GET_TOKEND( ostream &ret, GenInlineItem *item )
 {
 	ret << TOKEND();
 }
 
-void FsmCodeGen::INIT_TOKSTART( ostream &ret, InlineItem *item )
+void CSharpFsmCodeGen::INIT_TOKSTART( ostream &ret, GenInlineItem *item )
 {
 	ret << TOKSTART() << " = " << NULL_ITEM() << ";";
 }
 
-void FsmCodeGen::INIT_ACT( ostream &ret, InlineItem *item )
+void CSharpFsmCodeGen::INIT_ACT( ostream &ret, GenInlineItem *item )
 {
 	ret << ACT() << " = 0;";
 }
 
-void FsmCodeGen::SET_TOKSTART( ostream &ret, InlineItem *item )
+void CSharpFsmCodeGen::SET_TOKSTART( ostream &ret, GenInlineItem *item )
 {
 	ret << TOKSTART() << " = " << P() << ";";
 }
 
-void FsmCodeGen::SUB_ACTION( ostream &ret, InlineItem *item, 
+void CSharpFsmCodeGen::SUB_ACTION( ostream &ret, GenInlineItem *item, 
 		int targState, bool inFinish )
 {
 	if ( item->children->length() > 0 ) {
@@ -423,88 +423,88 @@ void FsmCodeGen::SUB_ACTION( ostream &ret, InlineItem *item,
 
 /* Write out an inline tree structure. Walks the list and possibly calls out
  * to virtual functions than handle language specific items in the tree. */
-void FsmCodeGen::INLINE_LIST( ostream &ret, InlineList *inlineList, 
+void CSharpFsmCodeGen::INLINE_LIST( ostream &ret, GenInlineList *inlineList, 
 		int targState, bool inFinish )
 {
-	for ( InlineList::Iter item = *inlineList; item.lte(); item++ ) {
+	for ( GenInlineList::Iter item = *inlineList; item.lte(); item++ ) {
 		switch ( item->type ) {
-		case InlineItem::Text:
+		case GenInlineItem::Text:
 			ret << item->data;
 			break;
-		case InlineItem::Goto:
+		case GenInlineItem::Goto:
 			GOTO( ret, item->targState->id, inFinish );
 			break;
-		case InlineItem::Call:
+		case GenInlineItem::Call:
 			CALL( ret, item->targState->id, targState, inFinish );
 			break;
-		case InlineItem::Next:
+		case GenInlineItem::Next:
 			NEXT( ret, item->targState->id, inFinish );
 			break;
-		case InlineItem::Ret:
+		case GenInlineItem::Ret:
 			RET( ret, inFinish );
 			break;
-		case InlineItem::PChar:
+		case GenInlineItem::PChar:
 			ret << P();
 			break;
-		case InlineItem::Char:
+		case GenInlineItem::Char:
 			ret << GET_KEY();
 			break;
-		case InlineItem::Hold:
+		case GenInlineItem::Hold:
 			ret << P() << "--;";
 			break;
-		case InlineItem::Exec:
+		case GenInlineItem::Exec:
 			EXEC( ret, item, targState, inFinish );
 			break;
-		case InlineItem::Curs:
+		case GenInlineItem::Curs:
 			CURS( ret, inFinish );
 			break;
-		case InlineItem::Targs:
+		case GenInlineItem::Targs:
 			TARGS( ret, inFinish, targState );
 			break;
-		case InlineItem::Entry:
+		case GenInlineItem::Entry:
 			ret << item->targState->id;
 			break;
-		case InlineItem::GotoExpr:
+		case GenInlineItem::GotoExpr:
 			GOTO_EXPR( ret, item, inFinish );
 			break;
-		case InlineItem::CallExpr:
+		case GenInlineItem::CallExpr:
 			CALL_EXPR( ret, item, targState, inFinish );
 			break;
-		case InlineItem::NextExpr:
+		case GenInlineItem::NextExpr:
 			NEXT_EXPR( ret, item, inFinish );
 			break;
-		case InlineItem::LmSwitch:
+		case GenInlineItem::LmSwitch:
 			LM_SWITCH( ret, item, targState, inFinish );
 			break;
-		case InlineItem::LmSetActId:
+		case GenInlineItem::LmSetActId:
 			SET_ACT( ret, item );
 			break;
-		case InlineItem::LmSetTokEnd:
+		case GenInlineItem::LmSetTokEnd:
 			SET_TOKEND( ret, item );
 			break;
-		case InlineItem::LmGetTokEnd:
+		case GenInlineItem::LmGetTokEnd:
 			GET_TOKEND( ret, item );
 			break;
-		case InlineItem::LmInitTokStart:
+		case GenInlineItem::LmInitTokStart:
 			INIT_TOKSTART( ret, item );
 			break;
-		case InlineItem::LmInitAct:
+		case GenInlineItem::LmInitAct:
 			INIT_ACT( ret, item );
 			break;
-		case InlineItem::LmSetTokStart:
+		case GenInlineItem::LmSetTokStart:
 			SET_TOKSTART( ret, item );
 			break;
-		case InlineItem::SubAction:
+		case GenInlineItem::SubAction:
 			SUB_ACTION( ret, item, targState, inFinish );
 			break;
-		case InlineItem::Break:
+		case GenInlineItem::Break:
 			BREAK( ret, targState );
 			break;
 		}
 	}
 }
 /* Write out paths in line directives. Escapes any special characters. */
-string FsmCodeGen::LDIR_PATH( char *path )
+string CSharpFsmCodeGen::LDIR_PATH( char *path )
 {
 	ostringstream ret;
 	for ( char *pc = path; *pc != 0; pc++ ) {
@@ -516,10 +516,10 @@ string FsmCodeGen::LDIR_PATH( char *path )
 	return ret.str();
 }
 
-void FsmCodeGen::ACTION( ostream &ret, Action *action, int targState, bool inFinish )
+void CSharpFsmCodeGen::ACTION( ostream &ret, Action *action, int targState, bool inFinish )
 {
 	/* Write the preprocessor line info for going into the source file. */
-	lineDirective( ret, sourceFileName, action->loc.line );
+	csharpLineDirective( ret, sourceFileName, action->loc.line );
 
 	/* Write the block and close it off. */
 	ret << "\t{";
@@ -527,14 +527,14 @@ void FsmCodeGen::ACTION( ostream &ret, Action *action, int targState, bool inFin
 	ret << "}\n";
 }
 
-void FsmCodeGen::CONDITION( ostream &ret, Action *condition )
+void CSharpFsmCodeGen::CONDITION( ostream &ret, Action *condition )
 {
 	ret << "\n";
-	lineDirective( ret, sourceFileName, condition->loc.line );
+	csharpLineDirective( ret, sourceFileName, condition->loc.line );
 	INLINE_LIST( ret, condition->inlineList, 0, false );
 }
 
-string FsmCodeGen::ERROR_STATE()
+string CSharpFsmCodeGen::ERROR_STATE()
 {
 	ostringstream ret;
 	if ( redFsm->errState != 0 )
@@ -544,7 +544,7 @@ string FsmCodeGen::ERROR_STATE()
 	return ret.str();
 }
 
-string FsmCodeGen::FIRST_FINAL_STATE()
+string CSharpFsmCodeGen::FIRST_FINAL_STATE()
 {
 	ostringstream ret;
 	if ( redFsm->firstFinState != 0 )
@@ -554,7 +554,7 @@ string FsmCodeGen::FIRST_FINAL_STATE()
 	return ret.str();
 }
 
-void FsmCodeGen::writeInit()
+void CSharpFsmCodeGen::writeInit()
 {
 	out << "	{\n";
 
@@ -574,7 +574,7 @@ void FsmCodeGen::writeInit()
 	out << "	}\n";
 }
 
-string FsmCodeGen::DATA_PREFIX()
+string CSharpFsmCodeGen::DATA_PREFIX()
 {
 	if ( dataPrefix )
 		return FSM_NAME() + "_";
@@ -582,7 +582,7 @@ string FsmCodeGen::DATA_PREFIX()
 }
 
 /* Emit the alphabet data type. */
-string FsmCodeGen::ALPH_TYPE()
+string CSharpFsmCodeGen::ALPH_TYPE()
 {
 	string ret = keyOps->alphType->data1;
 	if ( keyOps->alphType->data2 != 0 ) {
@@ -593,7 +593,7 @@ string FsmCodeGen::ALPH_TYPE()
 }
 
 /* Emit the alphabet data type. */
-string FsmCodeGen::WIDE_ALPH_TYPE()
+string CSharpFsmCodeGen::WIDE_ALPH_TYPE()
 {
 	string ret;
 	if ( redFsm->maxKey <= keyOps->maxKey )
@@ -612,7 +612,7 @@ string FsmCodeGen::WIDE_ALPH_TYPE()
 	return ret;
 }
 
-void FsmCodeGen::STATE_IDS()
+void CSharpFsmCodeGen::STATE_IDS()
 {
 	if ( redFsm->startState != 0 )
 		STATIC_VAR( "int", START() ) << " = " << START_STATE_ID() << ";\n";
@@ -733,7 +733,7 @@ void CSharpCodeGen::writeExports()
  * End C#-specific code.
  */
 
-void FsmCodeGen::finishRagelDef()
+void CSharpFsmCodeGen::finishRagelDef()
 {
 	if ( codeStyle == GenGoto || codeStyle == GenFGoto || 
 			codeStyle == GenIpGoto || codeStyle == GenSplit )
@@ -777,13 +777,13 @@ void FsmCodeGen::finishRagelDef()
 	calcIndexSize();
 }
 
-ostream &FsmCodeGen::source_warning( const InputLoc &loc )
+ostream &CSharpFsmCodeGen::source_warning( const GenInputLoc &loc )
 {
 	cerr << sourceFileName << ":" << loc.line << ":" << loc.col << ": warning: ";
 	return cerr;
 }
 
-ostream &FsmCodeGen::source_error( const InputLoc &loc )
+ostream &CSharpFsmCodeGen::source_error( const GenInputLoc &loc )
 {
 	gblErrorCount += 1;
 	assert( sourceFileName != 0 );

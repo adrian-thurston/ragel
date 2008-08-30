@@ -34,8 +34,10 @@ LIBS += @LIBS@
 #*************************************
 
 prefix = @prefix@
-CXX = @CXX@
 EXEEXT = @EXEEXT@
+CXX = @CXX@
+AR = @AR@
+RANLIB = @RANLIB@
 
 # Get objects and dependencies from sources.
 OBJS = $(CC_SRCS:%.cpp=%.o)
@@ -45,10 +47,11 @@ DEPS = $(CC_SRCS:%.cpp=.%.d)
 include ../version.mk
 
 # Rules.
-all: rlgen-ruby$(EXEEXT)
+all: rlgen-ruby.a
 
-rlgen-ruby$(EXEEXT): $(LIBS) $(OBJS)
-	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
+rlgen-ruby.a: $(LIBS) $(OBJS)
+	$(AR) -cr $@ $(OBJS) 
+	$(RANLIB) $@
 
 %.o: %.cpp
 	@$(CXX) -M $(DEFS) $(INCS) $< > .$*.d
@@ -58,10 +61,9 @@ distclean: clean
 	rm -f Makefile
 
 clean:
-	rm -f tags .*.d *.o rlgen-ruby
+	rm -f tags .*.d *.o rlgen-ruby.a
 
-install: all
-	install -d $(prefix)/bin
-	install -s rlgen-ruby $(prefix)/bin/rlgen-ruby
+install:
+	@true
 
 -include $(DEPS)

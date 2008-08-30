@@ -43,7 +43,7 @@ public:
 	void writeExec();
 	void writeParts();
 
-	void setLabelsNeeded( RedStateAp *fromState, InlineList *inlineList );
+	void setLabelsNeeded( RedStateAp *fromState, GenInlineList *inlineList );
 	void setLabelsNeeded( RedStateAp *fromState, RedTransAp *trans );
 	void setLabelsNeeded();
 

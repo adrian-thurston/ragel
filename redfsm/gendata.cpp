@@ -26,7 +26,7 @@ using std::cerr;
 using std::endl;
 
 /* Total error count. */
-int gblErrorCount = 0;
+/* int gblErrorCount = 0; */
 
 CodeGenData::CodeGenData( ostream &out )
 :
@@ -79,7 +79,7 @@ void CodeGenData::initActionList( unsigned long length )
 }
 
 void CodeGenData::newAction( int anum, char *name, int line, 
-		int col, InlineList *inlineList )
+		int col, GenInlineList *inlineList )
 {
 	allActions[anum].actionId = anum;
 	allActions[anum].name = name;
@@ -255,12 +255,12 @@ void CodeGenData::setEofTrans( int snum, long eofTarget, long actId )
 	curState->eofTrans = redFsm->allocateTrans( targState, eofAct );
 }
 
-void CodeGenData::resolveTargetStates( InlineList *inlineList )
+void CodeGenData::resolveTargetStates( GenInlineList *inlineList )
 {
-	for ( InlineList::Iter item = *inlineList; item.lte(); item++ ) {
+	for ( GenInlineList::Iter item = *inlineList; item.lte(); item++ ) {
 		switch ( item->type ) {
-		case InlineItem::Goto: case InlineItem::Call:
-		case InlineItem::Next: case InlineItem::Entry:
+		case GenInlineItem::Goto: case GenInlineItem::Call:
+		case GenInlineItem::Next: case GenInlineItem::Entry:
 			item->targState = allStates + item->targId;
 			break;
 		default:
@@ -437,38 +437,38 @@ void CodeGenData::findFinalActionRefs()
 	}
 }
 
-void CodeGenData::analyzeAction( Action *act, InlineList *inlineList )
+void CodeGenData::analyzeAction( Action *act, GenInlineList *inlineList )
 {
-	for ( InlineList::Iter item = *inlineList; item.lte(); item++ ) {
+	for ( GenInlineList::Iter item = *inlineList; item.lte(); item++ ) {
 		/* Only consider actions that are referenced. */
 		if ( act->numRefs() > 0 ) {
-			if ( item->type == InlineItem::Goto || item->type == InlineItem::GotoExpr )
+			if ( item->type == GenInlineItem::Goto || item->type == GenInlineItem::GotoExpr )
 				redFsm->bAnyActionGotos = true;
-			else if ( item->type == InlineItem::Call || item->type == InlineItem::CallExpr )
+			else if ( item->type == GenInlineItem::Call || item->type == GenInlineItem::CallExpr )
 				redFsm->bAnyActionCalls = true;
-			else if ( item->type == InlineItem::Ret )
+			else if ( item->type == GenInlineItem::Ret )
 				redFsm->bAnyActionRets = true;
 		}
 
 		/* Check for various things in regular actions. */
 		if ( act->numTransRefs > 0 || act->numToStateRefs > 0 || act->numFromStateRefs > 0 ) {
 			/* Any returns in regular actions? */
-			if ( item->type == InlineItem::Ret )
+			if ( item->type == GenInlineItem::Ret )
 				redFsm->bAnyRegActionRets = true;
 
 			/* Any next statements in the regular actions? */
-			if ( item->type == InlineItem::Next || item->type == InlineItem::NextExpr )
+			if ( item->type == GenInlineItem::Next || item->type == GenInlineItem::NextExpr )
 				redFsm->bAnyRegNextStmt = true;
 
 			/* Any by value control in regular actions? */
-			if ( item->type == InlineItem::CallExpr || item->type == InlineItem::GotoExpr )
+			if ( item->type == GenInlineItem::CallExpr || item->type == GenInlineItem::GotoExpr )
 				redFsm->bAnyRegActionByValControl = true;
 
 			/* Any references to the current state in regular actions? */
-			if ( item->type == InlineItem::Curs )
+			if ( item->type == GenInlineItem::Curs )
 				redFsm->bAnyRegCurStateRef = true;
 
-			if ( item->type == InlineItem::Break )
+			if ( item->type == GenInlineItem::Break )
 				redFsm->bAnyRegBreak = true;
 		}
 
@@ -477,18 +477,18 @@ void CodeGenData::analyzeAction( Action *act, InlineList *inlineList )
 	}
 }
 
-void CodeGenData::analyzeActionList( RedAction *redAct, InlineList *inlineList )
+void CodeGenData::analyzeActionList( RedAction *redAct, GenInlineList *inlineList )
 {
-	for ( InlineList::Iter item = *inlineList; item.lte(); item++ ) {
+	for ( GenInlineList::Iter item = *inlineList; item.lte(); item++ ) {
 		/* Any next statements in the action table? */
-		if ( item->type == InlineItem::Next || item->type == InlineItem::NextExpr )
+		if ( item->type == GenInlineItem::Next || item->type == GenInlineItem::NextExpr )
 			redAct->bAnyNextStmt = true;
 
 		/* Any references to the current state. */
-		if ( item->type == InlineItem::Curs )
+		if ( item->type == GenInlineItem::Curs )
 			redAct->bAnyCurStateRef = true;
 
-		if ( item->type == InlineItem::Break )
+		if ( item->type == GenInlineItem::Break )
 			redAct->bAnyBreakStmt = true;
 
 		if ( item->children != 0 )
@@ -668,7 +668,7 @@ void CodeGenData::analyzeMachine()
 	setValueLimits();
 }
 
-void CodeGenData::writeStatement( InputLoc &loc, int nargs, char **args )
+void CodeGenData::writeStatement( GenInputLoc &loc, int nargs, char **args )
 {
 	/* FIXME: This should be moved to the virtual functions in the code
 	 * generators.
@@ -728,13 +728,13 @@ void CodeGenData::writeStatement( InputLoc &loc, int nargs, char **args )
 	}
 }
 
-ostream &CodeGenData::source_warning( const InputLoc &loc )
+ostream &CodeGenData::source_warning( const GenInputLoc &loc )
 {
 	cerr << sourceFileName << ":" << loc.line << ":" << loc.col << ": warning: ";
 	return cerr;
 }
 
-ostream &CodeGenData::source_error( const InputLoc &loc )
+ostream &CodeGenData::source_error( const GenInputLoc &loc )
 {
 	gblErrorCount += 1;
 	assert( sourceFileName != 0 );

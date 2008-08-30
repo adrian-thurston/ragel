@@ -670,7 +670,7 @@ void TabCodeGen::GOTO( ostream &ret, int gotoDest, bool inFinish )
 			CTRL_FLOW() << "goto _again;}";
 }
 
-void TabCodeGen::GOTO_EXPR( ostream &ret, InlineItem *ilItem, bool inFinish )
+void TabCodeGen::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
 	ret << "{" << CS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
@@ -692,7 +692,7 @@ void TabCodeGen::NEXT( ostream &ret, int nextDest, bool inFinish )
 	ret << CS() << " = " << nextDest << ";";
 }
 
-void TabCodeGen::NEXT_EXPR( ostream &ret, InlineItem *ilItem, bool inFinish )
+void TabCodeGen::NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
 	ret << CS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
@@ -713,7 +713,7 @@ void TabCodeGen::CALL( ostream &ret, int callDest, int targState, bool inFinish 
 		ret << "}";
 }
 
-void TabCodeGen::CALL_EXPR( ostream &ret, InlineItem *ilItem, int targState, bool inFinish )
+void TabCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
 {
 	if ( prePushExpr != 0 ) {
 		ret << "{";

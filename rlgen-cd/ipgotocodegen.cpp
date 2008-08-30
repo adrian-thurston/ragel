@@ -53,7 +53,7 @@ void IpGotoCodeGen::CALL( ostream &ret, int callDest, int targState, bool inFini
 		ret << "}";
 }
 
-void IpGotoCodeGen::CALL_EXPR( ostream &ret, InlineItem *ilItem, int targState, bool inFinish )
+void IpGotoCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
 {
 	if ( prePushExpr != 0 ) {
 		ret << "{";
@@ -81,7 +81,7 @@ void IpGotoCodeGen::RET( ostream &ret, bool inFinish )
 	ret << CTRL_FLOW() << "goto _again;}";
 }
 
-void IpGotoCodeGen::GOTO_EXPR( ostream &ret, InlineItem *ilItem, bool inFinish )
+void IpGotoCodeGen::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
 	ret << "{" << CS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
@@ -93,7 +93,7 @@ void IpGotoCodeGen::NEXT( ostream &ret, int nextDest, bool inFinish )
 	ret << CS() << " = " << nextDest << ";";
 }
 
-void IpGotoCodeGen::NEXT_EXPR( ostream &ret, InlineItem *ilItem, bool inFinish )
+void IpGotoCodeGen::NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
 	ret << CS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
@@ -302,11 +302,11 @@ std::ostream &IpGotoCodeGen::FINISH_CASES()
 	return out;
 }
 
-void IpGotoCodeGen::setLabelsNeeded( InlineList *inlineList )
+void IpGotoCodeGen::setLabelsNeeded( GenInlineList *inlineList )
 {
-	for ( InlineList::Iter item = *inlineList; item.lte(); item++ ) {
+	for ( GenInlineList::Iter item = *inlineList; item.lte(); item++ ) {
 		switch ( item->type ) {
-		case InlineItem::Goto: case InlineItem::Call: {
+		case GenInlineItem::Goto: case GenInlineItem::Call: {
 			/* Mark the target as needing a label. */
 			item->targState->labelNeeded = true;
 			break;

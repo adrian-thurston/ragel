@@ -32,7 +32,7 @@ using std::endl;
 #define BUFSIZE 4096
 
 %%{
-	machine Scanner;
+	machine XmlScanner;
 	write data;
 }%%
 
@@ -45,9 +45,9 @@ public:
 	static struct XMLTagHashPair *in_word_set (const char *str, unsigned int len);
 };
 
-struct Scanner
+struct XmlScanner
 {
-	Scanner( char *fileName, istream &input ) : 
+	XmlScanner( const char *fileName, istream &input ) : 
 		fileName(fileName),
 		input(input), 
 		curline(1), 
@@ -58,7 +58,7 @@ struct Scanner
 		value(0)
 	{
 		%%{
-			machine Scanner;
+			machine XmlScanner;
 			write init;
 		}%%
 	}
@@ -67,7 +67,7 @@ struct Scanner
 	void adjustAttrPointers( int distance );
 	std::ostream &error();
 
-	char *fileName;
+	const char *fileName;
 	istream &input;
 
 	/* Scanner State. */
@@ -99,7 +99,7 @@ struct Scanner
 
 #define ret_tok( _tok ) token = (_tok); data = ts
 
-void Scanner::adjustAttrPointers( int distance )
+void XmlScanner::adjustAttrPointers( int distance )
 {
 	for ( AttrMkList::Iter attr = attrMkList; attr.lte(); attr++ ) {
 		attr->id -= distance;
@@ -110,7 +110,7 @@ void Scanner::adjustAttrPointers( int distance )
 /* There is no claim that this is a proper XML parser, but it is good
  * enough for our purposes. */
 %%{
-	machine Scanner;
+	machine XmlScanner;
 
 	action colup { curcol++; }
 	action start_tok { token_col = curcol; token_line = curline; }
@@ -177,7 +177,7 @@ void Scanner::adjustAttrPointers( int distance )
 	*|;
 }%%
 
-int Scanner::scan( )
+int XmlScanner::scan( )
 {
 	int token = TK_NO_TOKEN;
 	int space = 0, readlen = 0;
@@ -237,7 +237,7 @@ int Scanner::scan( )
 
 		%% write exec;
 
-		if ( cs == Scanner_error )
+		if ( cs == XmlScanner_error )
 			return TK_ERR;
 
 		if ( token != TK_NO_TOKEN ) {
@@ -247,11 +247,11 @@ int Scanner::scan( )
 	}
 }
 
-int xml_parse( std::istream &input, char *fileName, 
+int xml_parse( std::istream &input, const char *fileName, 
 		bool outputActive, bool wantComplete )
 {
-	Scanner scanner( fileName, input );
-	Parser parser( fileName, outputActive, wantComplete );
+	XmlScanner scanner( fileName, input );
+	XmlParser parser( fileName, outputActive, wantComplete );
 
 	parser.init();
 
@@ -341,7 +341,7 @@ int xml_parse( std::istream &input, char *fileName,
 	return 0;
 }
 
-std::ostream &Scanner::error()
+std::ostream &XmlScanner::error()
 {
 	gblErrorCount += 1;
 	cerr << fileName << ":" << curline << ":" << curcol << ": ";

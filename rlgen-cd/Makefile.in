@@ -38,6 +38,8 @@ LIBS = ../common/common.a ../redfsm/redfsm.a
 prefix = @prefix@
 EXEEXT = @EXEEXT@
 CXX = @CXX@
+AR = @AR@
+RANLIB = @RANLIB@
 
 # Get objects and dependencies from sources.
 OBJS = $(CC_SRCS:%.cpp=%.o)
@@ -47,10 +49,11 @@ DEPS = $(CC_SRCS:%.cpp=.%.d)
 include ../version.mk
 
 # Rules.
-all: rlgen-cd$(EXEEXT)
+all: rlgen-cd.a
 
-rlgen-cd$(EXEEXT): $(LIBS) $(OBJS)
-	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
+rlgen-cd.a: $(LIBS) $(OBJS)
+	$(AR) -cr $@ $(OBJS) 
+	$(RANLIB) $@
 
 %.o: %.cpp
 	@$(CXX) -M $(DEFS) $(INCS) $< > .$*.d
@@ -60,10 +63,9 @@ distclean: clean
 	rm -f Makefile
 
 clean:
-	rm -f tags .*.d *.o rlgen-cd $(EXTRA_CLEAN)
+	rm -f tags .*.d *.o rlgen-cd.a $(EXTRA_CLEAN)
 
-install: all
-	install -d $(prefix)/bin
-	install -s rlgen-cd $(prefix)/bin/rlgen-cd
+install:
+	@true
 
 -include $(DEPS)

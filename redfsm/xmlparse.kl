@@ -36,9 +36,48 @@ Key readKey( char *td, char **end );
 long readOffsetPtr( char *td, char **end );
 unsigned long readLength( char *td );
 
+CodeGenData *makeCodeGen( char *sourceFileName, char *fsmName, 
+		ostream &out, bool wantComplete )
+{
+	CodeGenData *cgd = 0;
+	if ( hostLang == &hostLangC )
+		cgd = cdMakeCodeGen( sourceFileName, fsmName, out, wantComplete );
+	else if ( hostLang == &hostLangD )
+		cgd = cdMakeCodeGen( sourceFileName, fsmName, out, wantComplete );
+	else if ( hostLang == &hostLangJava )
+		cgd = javaMakeCodeGen( sourceFileName, fsmName, out, wantComplete );
+	else if ( hostLang == &hostLangRuby )
+		cgd = rubyMakeCodeGen( sourceFileName, fsmName, out, wantComplete );
+	else if ( hostLang == &hostLangCSharp )
+		cgd = csharpMakeCodeGen( sourceFileName, fsmName, out, wantComplete );
+	return cgd;
+}
+
+void lineDirective( ostream &out, const char *fileName, int line )
+{
+	CodeGenData *cgd = 0;
+	if ( hostLang == &hostLangC )
+		cdLineDirective( out, fileName, line );
+	else if ( hostLang == &hostLangD )
+		cdLineDirective( out, fileName, line );
+	else if ( hostLang == &hostLangJava )
+		javaLineDirective( out, fileName, line );
+	else if ( hostLang == &hostLangRuby )
+		rubyLineDirective( out, fileName, line );
+	else if ( hostLang == &hostLangCSharp )
+		csharpLineDirective( out, fileName, line );
+}
+
+void genLineDirective( ostream &out )
+{
+	std::streambuf *sbuf = out.rdbuf();
+	output_filter *filter = static_cast<output_filter*>(sbuf);
+	lineDirective( out, filter->fileName, filter->line + 1 );
+}
+
 %%{
 
-parser Parser;
+parser XmlParser;
 
 include "xmlparse.kh";
 
@@ -73,22 +112,30 @@ tag_ragel_head: TAG_ragel
 		if ( langAttr == 0 )
 			error($1->loc) << "tag <ragel> requires a lang attribute" << endp;
 
-		if ( strcmp( langAttr->value, "C" ) == 0 )
+		if ( strcmp( langAttr->value, "C" ) == 0 ) {
 			hostLang = &hostLangC;
-		else if ( strcmp( langAttr->value, "D" ) == 0 )
+			outStream = cdOpenOutput( sourceFileName );
+		}
+		else if ( strcmp( langAttr->value, "D" ) == 0 ) {
 			hostLang = &hostLangD;
-		else if ( strcmp( langAttr->value, "Java" ) == 0 )
+			outStream = cdOpenOutput( sourceFileName );
+		}
+		else if ( strcmp( langAttr->value, "Java" ) == 0 ) {
 			hostLang = &hostLangJava;
-		else if ( strcmp( langAttr->value, "Ruby" ) == 0 )
+			outStream = javaOpenOutput( sourceFileName );
+		}
+		else if ( strcmp( langAttr->value, "Ruby" ) == 0 ) {
 			hostLang = &hostLangRuby;
-		else if ( strcmp( langAttr->value, "C#" ) == 0 )
+			outStream = rubyOpenOutput( sourceFileName );
+		}
+		else if ( strcmp( langAttr->value, "C#" ) == 0 ) {
 			hostLang = &hostLangCSharp;
+			outStream = csharpOpenOutput( sourceFileName );
+		}
 		else {
 			error($1->loc) << "expecting lang attribute to be "
 					"one of C, D, Java, Ruby or C#" << endp;
 		}
-
-		outStream = openOutput( sourceFileName );
 	};
 
 ragel_def_list: ragel_def_list ragel_def;
@@ -253,7 +300,7 @@ tag_write: tag_write_head write_option_list '/' TAG_write
 
 nonterm tag_write_head
 {
-	InputLoc loc;
+	GenInputLoc loc;
 };
 
 tag_write_head: TAG_write
@@ -525,7 +572,7 @@ tag_action: TAG_action inline_list '/' TAG_action
 
 nonterm inline_list
 {
-	InlineList *inlineList;
+	GenInlineList *inlineList;
 };
 
 
@@ -539,12 +586,12 @@ inline_list: inline_list inline_item
 inline_list: 
 	final {
 		/* Start with empty list. */
-		$$->inlineList = new InlineList;
+		$$->inlineList = new GenInlineList;
 	};
 
 nonterm inline_item_type
 {
-	InlineItem *inlineItem;
+	GenInlineItem *inlineItem;
 };
 
 nonterm inline_item uses inline_item_type;
@@ -601,146 +648,146 @@ nonterm tag_lm_switch uses inline_item_type;
 
 tag_text: TAG_text '/' TAG_text
 	final {
-		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::Text );
+		$$->inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::Text );
 		$$->inlineItem->data = $3->tag->content;
 	};
 
 tag_goto: TAG_goto '/' TAG_goto
 	final {
 		int targ = strtol( $3->tag->content, 0, 10 );
-		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::Goto );
+		$$->inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::Goto );
 		$$->inlineItem->targId = targ;
 	};
 
 tag_call: TAG_call '/' TAG_call
 	final {
 		int targ = strtol( $3->tag->content, 0, 10 );
-		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::Call );
+		$$->inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::Call );
 		$$->inlineItem->targId = targ;
 	};
 
 tag_next: TAG_next '/' TAG_next
 	final {
 		int targ = strtol( $3->tag->content, 0, 10 );
-		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::Next );
+		$$->inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::Next );
 		$$->inlineItem->targId = targ;
 	};
 
 tag_goto_expr: TAG_goto_expr inline_list '/' TAG_goto_expr
 	final {
-		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::GotoExpr );
+		$$->inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::GotoExpr );
 		$$->inlineItem->children = $2->inlineList;
 	};
 
 tag_call_expr: TAG_call_expr inline_list '/' TAG_call_expr
 	final {
-		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::CallExpr );
+		$$->inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::CallExpr );
 		$$->inlineItem->children = $2->inlineList;
 	};
 
 tag_next_expr: TAG_next_expr inline_list '/' TAG_next_expr
 	final {
-		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::NextExpr );
+		$$->inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::NextExpr );
 		$$->inlineItem->children = $2->inlineList;
 	};
 
 tag_ret: TAG_ret '/' TAG_ret
 	final {
-		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::Ret );
+		$$->inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::Ret );
 	};
 
 tag_break: TAG_break '/' TAG_break
 	final {
-		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::Break );
+		$$->inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::Break );
 	};
 
 tag_pchar: TAG_pchar '/' TAG_pchar
 	final {
-		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::PChar );
+		$$->inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::PChar );
 	};
 
 tag_char: TAG_char '/' TAG_char
 	final {
-		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::Char );
+		$$->inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::Char );
 	};
 
 tag_hold: TAG_hold '/' TAG_hold
 	final {
-		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::Hold );
+		$$->inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::Hold );
 	};
 
 tag_exec: TAG_exec inline_list '/' TAG_exec
 	final {
-		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::Exec );
+		$$->inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::Exec );
 		$$->inlineItem->children = $2->inlineList;
 	};
 
 tag_curs: TAG_curs '/' TAG_curs
 	final {
-		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::Curs );
+		$$->inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::Curs );
 	};
 
 tag_targs: TAG_targs '/' TAG_targs
 	final {
-		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::Targs );
+		$$->inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::Targs );
 	};
 
 tag_il_entry: TAG_entry '/' TAG_entry
 	final {
 		int targ = strtol( $3->tag->content, 0, 10 );
-		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::Entry );
+		$$->inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::Entry );
 		$$->inlineItem->targId = targ;
 	};
 
 tag_init_tokstart: TAG_init_tokstart '/' TAG_init_tokstart
 	final {
-		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::LmInitTokStart );
+		$$->inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::LmInitTokStart );
 	};
 
 tag_init_act: TAG_init_act '/' TAG_init_act
 	final {
-		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::LmInitAct );
+		$$->inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::LmInitAct );
 	};
 
 tag_get_tokend: TAG_get_tokend '/' TAG_get_tokend
 	final {
-		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::LmGetTokEnd );
+		$$->inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::LmGetTokEnd );
 	};
 
 tag_set_tokstart: TAG_set_tokstart '/' TAG_set_tokstart
 	final {
-		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::LmSetTokStart );
+		$$->inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::LmSetTokStart );
 		cgd->hasLongestMatch = true;
 	};
 
 tag_set_tokend: TAG_set_tokend '/' TAG_set_tokend
 	final {
-		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::LmSetTokEnd );
+		$$->inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::LmSetTokEnd );
 		$$->inlineItem->offset = strtol( $3->tag->content, 0, 10 );
 	};
 
 tag_set_act: TAG_set_act '/' TAG_set_act
 	final {
-		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::LmSetActId );
+		$$->inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::LmSetActId );
 		$$->inlineItem->lmId = strtol( $3->tag->content, 0, 10 );
 	};
 
 tag_sub_action: TAG_sub_action inline_list '/' TAG_sub_action
 	final {
-		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::SubAction );
+		$$->inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::SubAction );
 		$$->inlineItem->children = $2->inlineList;
 	};
 
 # Action switches.
 tag_lm_switch: TAG_lm_switch lm_action_list '/' TAG_lm_switch
 	final {
-		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::LmSwitch );
+		$$->inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::LmSwitch );
 		$$->inlineItem->children = $2->inlineList;
 	};
 
 nonterm lm_action_list
 {
-	InlineList *inlineList;
+	GenInlineList *inlineList;
 };
 
 lm_action_list: lm_action_list tag_inline_action
@@ -750,14 +797,14 @@ lm_action_list: lm_action_list tag_inline_action
 	};
 lm_action_list:
 	final {
-		$$->inlineList = new InlineList;
+		$$->inlineList = new GenInlineList;
 	};
 
 nonterm tag_inline_action uses inline_item_type;
 
 tag_inline_action: TAG_sub_action inline_list '/' TAG_sub_action
 	final {
-		$$->inlineItem = new InlineItem( InputLoc(), InlineItem::SubAction );
+		$$->inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::SubAction );
 		$$->inlineItem->children = $2->inlineList;
 
 		Attribute *idAttr = $1->tag->findAttr( "id" );
@@ -876,12 +923,12 @@ tag_cond_space: TAG_cond_space '/' TAG_cond_space
 	write data;
 }%%
 
-void Parser::init()
+void XmlParser::init()
 {
 	%% write init;
 }
 
-int Parser::parseLangEl( int type, const Token *token )
+int XmlParser::parseLangEl( int type, const Token *token )
 {
 	%% write exec;
 	return errCount == 0 ? 0 : -1;
@@ -915,13 +962,13 @@ long readOffsetPtr( char *td, char **end )
 	return strtol( td, end, 10 );
 }
 
-ostream &Parser::warning( const InputLoc &loc )
+ostream &XmlParser::warning( const GenInputLoc &loc )
 {
 	cerr << fileName << ":" << loc.line << ":" << loc.col << ": warning: ";
 	return cerr;
 }
 
-ostream &Parser::error( const InputLoc &loc )
+ostream &XmlParser::error( const GenInputLoc &loc )
 {
 	gblErrorCount += 1;
 	assert( fileName != 0 );
@@ -930,7 +977,7 @@ ostream &Parser::error( const InputLoc &loc )
 }
 
 
-ostream &Parser::parser_error( int tokId, Token &token )
+ostream &XmlParser::parser_error( int tokId, Token &token )
 {
 	gblErrorCount += 1;
 	assert( fileName != 0 );
@@ -946,7 +993,7 @@ ostream &Parser::parser_error( int tokId, Token &token )
 	return cerr;
 }
 
-ostream &Parser::source_error( const InputLoc &loc )
+ostream &XmlParser::source_error( const GenInputLoc &loc )
 {
 	gblErrorCount += 1;
 	assert( sourceFileName != 0 );
@@ -955,7 +1002,7 @@ ostream &Parser::source_error( const InputLoc &loc )
 }
 
 
-int Parser::token( int tokenId, Token &tok )
+int XmlParser::token( int tokenId, Token &tok )
 {
 	int res = parseLangEl( tokenId, &tok );
 	if ( res < 0 )
@@ -963,7 +1010,7 @@ int Parser::token( int tokenId, Token &tok )
 	return res;
 }
 
-int Parser::token( int tokenId, int col, int line )
+int XmlParser::token( int tokenId, int col, int line )
 {
 	Token tok;
 	tok.loc.col = col;
@@ -972,7 +1019,7 @@ int Parser::token( int tokenId, int col, int line )
 	return token( tokenId, tok );
 }
 
-int Parser::token( XMLTag *tag, int col, int line )
+int XmlParser::token( XMLTag *tag, int col, int line )
 {
 	Token tok;
 	tok.loc.col = col;

@@ -27,7 +27,7 @@
 class CSharpSplitCodeGen : public CSharpIpGotoCodeGen
 {
 public:
-	CSharpSplitCodeGen( ostream &out ) : FsmCodeGen(out), CSharpIpGotoCodeGen(out) {}
+	CSharpSplitCodeGen( ostream &out ) : CSharpFsmCodeGen(out), CSharpIpGotoCodeGen(out) {}
 
 	bool ptOutLabelUsed;
 
@@ -43,7 +43,7 @@ public:
 	void writeExec();
 	void writeParts();
 
-	void setLabelsNeeded( RedStateAp *fromState, InlineList *inlineList );
+	void setLabelsNeeded( RedStateAp *fromState, GenInlineList *inlineList );
 	void setLabelsNeeded( RedStateAp *fromState, RedTransAp *trans );
 	void setLabelsNeeded();
 

@@ -547,7 +547,7 @@ void GotoCodeGen::GOTO( ostream &ret, int gotoDest, bool inFinish )
 			CTRL_FLOW() << "goto _again;}";
 }
 
-void GotoCodeGen::GOTO_EXPR( ostream &ret, InlineItem *ilItem, bool inFinish )
+void GotoCodeGen::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
 	ret << "{" << CS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
@@ -569,7 +569,7 @@ void GotoCodeGen::NEXT( ostream &ret, int nextDest, bool inFinish )
 	ret << CS() << " = " << nextDest << ";";
 }
 
-void GotoCodeGen::NEXT_EXPR( ostream &ret, InlineItem *ilItem, bool inFinish )
+void GotoCodeGen::NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
 	ret << CS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
@@ -590,7 +590,7 @@ void GotoCodeGen::CALL( ostream &ret, int callDest, int targState, bool inFinish
 		ret << "}";
 }
 
-void GotoCodeGen::CALL_EXPR( ostream &ret, InlineItem *ilItem, int targState, bool inFinish )
+void GotoCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
 {
 	if ( prePushExpr != 0 ) {
 		ret << "{";

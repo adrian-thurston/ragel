@@ -37,10 +37,10 @@ struct StateCond;
 /*
  * Goto driven fsm.
  */
-class CSharpGotoCodeGen : virtual public FsmCodeGen, public CSharpCodeGen
+class CSharpGotoCodeGen : virtual public CSharpFsmCodeGen, public CSharpCodeGen
 {
 public:
-	CSharpGotoCodeGen( ostream &out ) : FsmCodeGen(out), CSharpCodeGen(out) {}
+	CSharpGotoCodeGen( ostream &out ) : CSharpFsmCodeGen(out), CSharpCodeGen(out) {}
 	std::ostream &TO_STATE_ACTION_SWITCH();
 	std::ostream &FROM_STATE_ACTION_SWITCH();
 	std::ostream &EOF_ACTION_SWITCH();
@@ -53,9 +53,9 @@ public:
 	void GOTO( ostream &ret, int gotoDest, bool inFinish );
 	void CALL( ostream &ret, int callDest, int targState, bool inFinish );
 	void NEXT( ostream &ret, int nextDest, bool inFinish );
-	void GOTO_EXPR( ostream &ret, InlineItem *ilItem, bool inFinish );
-	void NEXT_EXPR( ostream &ret, InlineItem *ilItem, bool inFinish );
-	void CALL_EXPR( ostream &ret, InlineItem *ilItem, int targState, bool inFinish );
+	void GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish );
+	void NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish );
+	void CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish );
 	void CURS( ostream &ret, bool inFinish );
 	void TARGS( ostream &ret, bool inFinish, int targState );
 	void RET( ostream &ret, bool inFinish );

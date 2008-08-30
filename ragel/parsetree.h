@@ -202,7 +202,7 @@ struct Token
 	void set( const char *str, int len );
 };
 
-char *prepareLitString( const InputLoc &loc, char *src, long length, 
+char *prepareLitString( const InputLoc &loc, const char *src, long length, 
 			long &resLen, bool &caseInsensitive );
 
 /* Store the value and type of a priority augmentation. */

@@ -49,7 +49,7 @@ enum MinimizeOpt {
 /* Options. */
 extern MinimizeLevel minimizeLevel;
 extern MinimizeOpt minimizeOpt;
-extern char *machineSpec, *machineName;
+extern const char *machineSpec, *machineName;
 extern bool printStatistics;
 extern bool wantDupsRemoved;
 
@@ -80,7 +80,7 @@ std::ostream &error( const InputLoc &loc );
 std::ostream &warning( const InputLoc &loc ); 
 
 void terminateAllParsers( );
-void writeMachines( std::ostream &out, std::string hostData, char *inputFileName );
+void writeMachines( std::ostream &out, std::string hostData, const char *inputFileName );
 void xmlEscapeHost( std::ostream &out, char *data, long len );
 
 typedef Vector<const char *> ArgsVector;

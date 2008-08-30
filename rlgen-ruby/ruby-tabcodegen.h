@@ -47,9 +47,9 @@ public:
 public:
 	void BREAK( ostream &ret, int targState );
 	void GOTO( ostream &ret, int gotoDest, bool inFinish );
-	void GOTO_EXPR( ostream &ret, InlineItem *ilItem, bool inFinish );
+	void GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish );
 	void CALL( ostream &ret, int callDest, int targState, bool inFinish );
-	void CALL_EXPR( ostream &ret, InlineItem *ilItem, int targState, bool inFinish );
+	void CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish );
 	void RET( ostream &ret, bool inFinish );
 
 	void COND_TRANSLATE();
@@ -85,7 +85,7 @@ public:
 
 
 	void NEXT( ostream &ret, int nextDest, bool inFinish );
-	void NEXT_EXPR( ostream &ret, InlineItem *ilItem, bool inFinish );
+	void NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish );
 
 	virtual int TO_STATE_ACTION( RedStateAp *state );
 	virtual int FROM_STATE_ACTION( RedStateAp *state );
@@ -97,16 +97,16 @@ private:
 
 public:
 
-	void EXEC( ostream &ret, InlineItem *item, int targState, int inFinish );
-	void EXECTE( ostream &ret, InlineItem *item, int targState, int inFinish );
-	void LM_SWITCH( ostream &ret, InlineItem *item, int targState, int inFinish );
-	void SET_ACT( ostream &ret, InlineItem *item );
-	void INIT_TOKSTART( ostream &ret, InlineItem *item );
-	void INIT_ACT( ostream &ret, InlineItem *item );
-	void SET_TOKSTART( ostream &ret, InlineItem *item );
-	void SET_TOKEND( ostream &ret, InlineItem *item );
-	void GET_TOKEND( ostream &ret, InlineItem *item );
-	void SUB_ACTION( ostream &ret, InlineItem *item, 
+	void EXEC( ostream &ret, GenInlineItem *item, int targState, int inFinish );
+	void EXECTE( ostream &ret, GenInlineItem *item, int targState, int inFinish );
+	void LM_SWITCH( ostream &ret, GenInlineItem *item, int targState, int inFinish );
+	void SET_ACT( ostream &ret, GenInlineItem *item );
+	void INIT_TOKSTART( ostream &ret, GenInlineItem *item );
+	void INIT_ACT( ostream &ret, GenInlineItem *item );
+	void SET_TOKSTART( ostream &ret, GenInlineItem *item );
+	void SET_TOKEND( ostream &ret, GenInlineItem *item );
+	void GET_TOKEND( ostream &ret, GenInlineItem *item );
+	void SUB_ACTION( ostream &ret, GenInlineItem *item, 
 			int targState, bool inFinish );
 
 

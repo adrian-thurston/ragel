@@ -32,7 +32,7 @@ void RubyFFlatCodeGen::GOTO( ostream &out, int gotoDest, bool inFinish )
 		"	end\n";
 }
 
-void RubyFFlatCodeGen::GOTO_EXPR( ostream &out, InlineItem *ilItem, bool inFinish )
+void RubyFFlatCodeGen::GOTO_EXPR( ostream &out, GenInlineItem *ilItem, bool inFinish )
 {
 	out << 
 		"	begin\n"
@@ -65,7 +65,7 @@ void RubyFFlatCodeGen::CALL( ostream &out, int callDest, int targState, bool inF
 		out << "end\n";
 }
 
-void RubyFFlatCodeGen::CALL_EXPR(ostream &out, InlineItem *ilItem, 
+void RubyFFlatCodeGen::CALL_EXPR(ostream &out, GenInlineItem *ilItem, 
 		int targState, bool inFinish )
 {
 	if ( prePushExpr != 0 ) {

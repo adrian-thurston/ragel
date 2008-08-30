@@ -46,11 +46,11 @@ using std::ostringstream;
 using std::string;
 using std::cerr;
 
-void lineDirective( ostream &out, char *fileName, int line )
+void javaLineDirective( ostream &out, const char *fileName, int line )
 {
 	/* Write the preprocessor line info for to the input file. */
 	out << "// line " << line  << " \"";
-	for ( char *pc = fileName; *pc != 0; pc++ ) {
+	for ( const char *pc = fileName; *pc != 0; pc++ ) {
 		if ( *pc == '\\' )
 			out << "\\\\";
 		else
@@ -59,11 +59,11 @@ void lineDirective( ostream &out, char *fileName, int line )
 	out << "\"\n";
 }
 
-void genLineDirective( ostream &out )
+void JavaTabCodeGen::genLineDirective( ostream &out )
 {
 	std::streambuf *sbuf = out.rdbuf();
 	output_filter *filter = static_cast<output_filter*>(sbuf);
-	lineDirective( out, filter->fileName, filter->line + 1 );
+	javaLineDirective( out, filter->fileName, filter->line + 1 );
 }
 
 void JavaTabCodeGen::GOTO( ostream &ret, int gotoDest, bool inFinish )
@@ -72,7 +72,7 @@ void JavaTabCodeGen::GOTO( ostream &ret, int gotoDest, bool inFinish )
 			CTRL_FLOW() << "continue _goto;}";
 }
 
-void JavaTabCodeGen::GOTO_EXPR( ostream &ret, InlineItem *ilItem, bool inFinish )
+void JavaTabCodeGen::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
 	ret << "{" << CS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish );
@@ -93,7 +93,7 @@ void JavaTabCodeGen::CALL( ostream &ret, int callDest, int targState, bool inFin
 		ret << "}";
 }
 
-void JavaTabCodeGen::CALL_EXPR( ostream &ret, InlineItem *ilItem, int targState, bool inFinish )
+void JavaTabCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
 {
 	if ( prePushExpr != 0 ) {
 		ret << "{";
@@ -132,14 +132,14 @@ void JavaTabCodeGen::NEXT( ostream &ret, int nextDest, bool inFinish )
 	ret << CS() << " = " << nextDest << ";";
 }
 
-void JavaTabCodeGen::NEXT_EXPR( ostream &ret, InlineItem *ilItem, bool inFinish )
+void JavaTabCodeGen::NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
 	ret << CS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish );
 	ret << ");";
 }
 
-void JavaTabCodeGen::EXEC( ostream &ret, InlineItem *item, int targState, int inFinish )
+void JavaTabCodeGen::EXEC( ostream &ret, GenInlineItem *item, int targState, int inFinish )
 {
 	/* The parser gives fexec two children. The double brackets are for D
 	 * code. If the inline list is a single word it will get interpreted as a
@@ -151,81 +151,81 @@ void JavaTabCodeGen::EXEC( ostream &ret, InlineItem *item, int targState, int in
 
 /* Write out an inline tree structure. Walks the list and possibly calls out
  * to virtual functions than handle language specific items in the tree. */
-void JavaTabCodeGen::INLINE_LIST( ostream &ret, InlineList *inlineList, 
+void JavaTabCodeGen::INLINE_LIST( ostream &ret, GenInlineList *inlineList, 
 		int targState, bool inFinish )
 {
-	for ( InlineList::Iter item = *inlineList; item.lte(); item++ ) {
+	for ( GenInlineList::Iter item = *inlineList; item.lte(); item++ ) {
 		switch ( item->type ) {
-		case InlineItem::Text:
+		case GenInlineItem::Text:
 			ret << item->data;
 			break;
-		case InlineItem::Goto:
+		case GenInlineItem::Goto:
 			GOTO( ret, item->targState->id, inFinish );
 			break;
-		case InlineItem::Call:
+		case GenInlineItem::Call:
 			CALL( ret, item->targState->id, targState, inFinish );
 			break;
-		case InlineItem::Next:
+		case GenInlineItem::Next:
 			NEXT( ret, item->targState->id, inFinish );
 			break;
-		case InlineItem::Ret:
+		case GenInlineItem::Ret:
 			RET( ret, inFinish );
 			break;
-		case InlineItem::PChar:
+		case GenInlineItem::PChar:
 			ret << P();
 			break;
-		case InlineItem::Char:
+		case GenInlineItem::Char:
 			ret << GET_KEY();
 			break;
-		case InlineItem::Hold:
+		case GenInlineItem::Hold:
 			ret << P() << "--;";
 			break;
-		case InlineItem::Exec:
+		case GenInlineItem::Exec:
 			EXEC( ret, item, targState, inFinish );
 			break;
-		case InlineItem::Curs:
+		case GenInlineItem::Curs:
 			ret << "(_ps)";
 			break;
-		case InlineItem::Targs:
+		case GenInlineItem::Targs:
 			ret << "(" << CS() << ")";
 			break;
-		case InlineItem::Entry:
+		case GenInlineItem::Entry:
 			ret << item->targState->id;
 			break;
-		case InlineItem::GotoExpr:
+		case GenInlineItem::GotoExpr:
 			GOTO_EXPR( ret, item, inFinish );
 			break;
-		case InlineItem::CallExpr:
+		case GenInlineItem::CallExpr:
 			CALL_EXPR( ret, item, targState, inFinish );
 			break;
-		case InlineItem::NextExpr:
+		case GenInlineItem::NextExpr:
 			NEXT_EXPR( ret, item, inFinish );
 			break;
-		case InlineItem::LmSwitch:
+		case GenInlineItem::LmSwitch:
 			LM_SWITCH( ret, item, targState, inFinish );
 			break;
-		case InlineItem::LmSetActId:
+		case GenInlineItem::LmSetActId:
 			SET_ACT( ret, item );
 			break;
-		case InlineItem::LmSetTokEnd:
+		case GenInlineItem::LmSetTokEnd:
 			SET_TOKEND( ret, item );
 			break;
-		case InlineItem::LmGetTokEnd:
+		case GenInlineItem::LmGetTokEnd:
 			GET_TOKEND( ret, item );
 			break;
-		case InlineItem::LmInitTokStart:
+		case GenInlineItem::LmInitTokStart:
 			INIT_TOKSTART( ret, item );
 			break;
-		case InlineItem::LmInitAct:
+		case GenInlineItem::LmInitAct:
 			INIT_ACT( ret, item );
 			break;
-		case InlineItem::LmSetTokStart:
+		case GenInlineItem::LmSetTokStart:
 			SET_TOKSTART( ret, item );
 			break;
-		case InlineItem::SubAction:
+		case GenInlineItem::SubAction:
 			SUB_ACTION( ret, item, targState, inFinish );
 			break;
-		case InlineItem::Break:
+		case GenInlineItem::Break:
 			BREAK( ret, targState );
 			break;
 		}
@@ -1488,13 +1488,13 @@ string JavaTabCodeGen::INT( int i )
 	return ret.str();
 }
 
-void JavaTabCodeGen::LM_SWITCH( ostream &ret, InlineItem *item, 
+void JavaTabCodeGen::LM_SWITCH( ostream &ret, GenInlineItem *item, 
 		int targState, int inFinish )
 {
 	ret << 
 		"	switch( " << ACT() << " ) {\n";
 
-	for ( InlineList::Iter lma = *item->children; lma.lte(); lma++ ) {
+	for ( GenInlineList::Iter lma = *item->children; lma.lte(); lma++ ) {
 		/* Write the case label, the action and the case break. */
 		if ( lma->lmId < 0 )
 			ret << "	default:\n";
@@ -1514,12 +1514,12 @@ void JavaTabCodeGen::LM_SWITCH( ostream &ret, InlineItem *item,
 		"\t";
 }
 
-void JavaTabCodeGen::SET_ACT( ostream &ret, InlineItem *item )
+void JavaTabCodeGen::SET_ACT( ostream &ret, GenInlineItem *item )
 {
 	ret << ACT() << " = " << item->lmId << ";";
 }
 
-void JavaTabCodeGen::SET_TOKEND( ostream &ret, InlineItem *item )
+void JavaTabCodeGen::SET_TOKEND( ostream &ret, GenInlineItem *item )
 {
 	/* The tokend action sets tokend. */
 	ret << TOKEND() << " = " << P();
@@ -1528,27 +1528,27 @@ void JavaTabCodeGen::SET_TOKEND( ostream &ret, InlineItem *item )
 	out << ";";
 }
 
-void JavaTabCodeGen::GET_TOKEND( ostream &ret, InlineItem *item )
+void JavaTabCodeGen::GET_TOKEND( ostream &ret, GenInlineItem *item )
 {
 	ret << TOKEND();
 }
 
-void JavaTabCodeGen::INIT_TOKSTART( ostream &ret, InlineItem *item )
+void JavaTabCodeGen::INIT_TOKSTART( ostream &ret, GenInlineItem *item )
 {
 	ret << TOKSTART() << " = " << NULL_ITEM() << ";";
 }
 
-void JavaTabCodeGen::INIT_ACT( ostream &ret, InlineItem *item )
+void JavaTabCodeGen::INIT_ACT( ostream &ret, GenInlineItem *item )
 {
 	ret << ACT() << " = 0;";
 }
 
-void JavaTabCodeGen::SET_TOKSTART( ostream &ret, InlineItem *item )
+void JavaTabCodeGen::SET_TOKSTART( ostream &ret, GenInlineItem *item )
 {
 	ret << TOKSTART() << " = " << P() << ";";
 }
 
-void JavaTabCodeGen::SUB_ACTION( ostream &ret, InlineItem *item, 
+void JavaTabCodeGen::SUB_ACTION( ostream &ret, GenInlineItem *item, 
 		int targState, bool inFinish )
 {
 	if ( item->children->length() > 0 ) {
@@ -1562,7 +1562,7 @@ void JavaTabCodeGen::SUB_ACTION( ostream &ret, InlineItem *item,
 void JavaTabCodeGen::ACTION( ostream &ret, Action *action, int targState, bool inFinish )
 {
 	/* Write the preprocessor line info for going into the source file. */
-	lineDirective( ret, sourceFileName, action->loc.line );
+	javaLineDirective( ret, sourceFileName, action->loc.line );
 
 	/* Write the block and close it off. */
 	ret << "\t{";
@@ -1573,7 +1573,7 @@ void JavaTabCodeGen::ACTION( ostream &ret, Action *action, int targState, bool i
 void JavaTabCodeGen::CONDITION( ostream &ret, Action *condition )
 {
 	ret << "\n";
-	lineDirective( ret, sourceFileName, condition->loc.line );
+	javaLineDirective( ret, sourceFileName, condition->loc.line );
 	INLINE_LIST( ret, condition->inlineList, 0, false );
 }
 
@@ -1642,13 +1642,13 @@ void JavaTabCodeGen::finishRagelDef()
 	calcIndexSize();
 }
 
-ostream &JavaTabCodeGen::source_warning( const InputLoc &loc )
+ostream &JavaTabCodeGen::source_warning( const GenInputLoc &loc )
 {
 	cerr << sourceFileName << ":" << loc.line << ":" << loc.col << ": warning: ";
 	return cerr;
 }
 
-ostream &JavaTabCodeGen::source_error( const InputLoc &loc )
+ostream &JavaTabCodeGen::source_error( const GenInputLoc &loc )
 {
 	gblErrorCount += 1;
 	assert( sourceFileName != 0 );

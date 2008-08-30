@@ -294,12 +294,12 @@ inline Key operator/(const Key key1, const Key key2)
 class output_filter : public std::filebuf
 {
 public:
-	output_filter( char *fileName ) : fileName(fileName), line(1) { }
+	output_filter( const char *fileName ) : fileName(fileName), line(1) { }
 
 	virtual int sync();
 	virtual std::streamsize xsputn(const char* s, std::streamsize n);
 
-	char *fileName;
+	const char *fileName;
 	int line;
 };
 

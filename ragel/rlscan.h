@@ -37,7 +37,7 @@ extern char *Parser_lelNames[];
 
 struct Scanner
 {
-	Scanner( char *fileName, istream &input, ostream &output,
+	Scanner( const char *fileName, istream &input, ostream &output,
 			Parser *inclToParser, char *inclSectionTarg,
 			int includeDepth, bool importMachines )
 	: 
@@ -57,7 +57,7 @@ struct Scanner
 	bool duplicateInclude( char *inclFileName, char *inclSectionName );
 
 	/* Make a list of places to look for an included file. */
-	char **makeIncludePathChecks( char *curFileName, char *fileName, int len );
+	char **makeIncludePathChecks( const char *curFileName, const char *fileName, int len );
 	std::ifstream *tryOpenInclude( char **pathChecks, long &found );
 
 	void handleMachine();
@@ -69,7 +69,7 @@ struct Scanner
 	void token( int type, char c );
 	void token( int type );
 	void processToken( int type, char *tokdata, int toklen );
-	void directToParser( Parser *toParser, char *tokFileName, int tokLine, 
+	void directToParser( Parser *toParser, const char *tokFileName, int tokLine, 
 		int tokColumn, int type, char *tokdata, int toklen );
 	void flushImport( );
 	void importToken( int type, char *start, char *end );
@@ -82,7 +82,7 @@ struct Scanner
 	bool active();
 	ostream &scan_error();
 
-	char *fileName;
+	const char *fileName;
 	istream &input;
 	ostream &output;
 	Parser *inclToParser;

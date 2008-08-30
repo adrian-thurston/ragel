@@ -459,7 +459,7 @@ void CSharpFlatCodeGen::GOTO( ostream &ret, int gotoDest, bool inFinish )
 			CTRL_FLOW() << "goto _again;}";
 }
 
-void CSharpFlatCodeGen::GOTO_EXPR( ostream &ret, InlineItem *ilItem, bool inFinish )
+void CSharpFlatCodeGen::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
 	ret << "{" << CS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish );
@@ -481,7 +481,7 @@ void CSharpFlatCodeGen::NEXT( ostream &ret, int nextDest, bool inFinish )
 	ret << CS() << " = " << nextDest << ";";
 }
 
-void CSharpFlatCodeGen::NEXT_EXPR( ostream &ret, InlineItem *ilItem, bool inFinish )
+void CSharpFlatCodeGen::NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
 	ret << CS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish );
@@ -503,7 +503,7 @@ void CSharpFlatCodeGen::CALL( ostream &ret, int callDest, int targState, bool in
 }
 
 
-void CSharpFlatCodeGen::CALL_EXPR( ostream &ret, InlineItem *ilItem, int targState, bool inFinish )
+void CSharpFlatCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
 {
 	if ( prePushExpr != 0 ) {
 		ret << "{";

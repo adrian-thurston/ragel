@@ -73,7 +73,7 @@ MinimizeLevel minimizeLevel = MinimizePartition2;
 MinimizeOpt minimizeOpt = MinimizeMostOps;
 
 /* Graphviz dot file generation. */
-char *machineSpec = 0, *machineName = 0;
+const char *machineSpec = 0, *machineName = 0;
 bool machineSpecFound = false;
 bool wantDupsRemoved = true;
 
@@ -208,7 +208,8 @@ void escapeLineDirectivePath( std::ostream &out, char *path )
 	}
 }
 
-void processArgs( int argc, char **argv, char *&inputFileName, char *&outputFileName )
+void processArgs( int argc, const char **argv, 
+		const char *&inputFileName, const char *&outputFileName )
 {
 	ParamCheck pc("xo:dnmleabjkS:M:I:CDJRAvHh?-:sT:F:G:P:LpV", argc, argv);
 
@@ -426,7 +427,7 @@ void processArgs( int argc, char **argv, char *&inputFileName, char *&outputFile
 	}
 }
 
-int frontend( char *inputFileName, char *outputFileName )
+int frontend( const char *inputFileName, const char *outputFileName )
 {
 	/* Open the input file for reading. */
 	assert( inputFileName != 0 );
@@ -477,7 +478,7 @@ int frontend( char *inputFileName, char *outputFileName )
 	return gblErrorCount > 0;
 }
 
-char *makeIntermedTemplate( char *baseFileName )
+char *makeIntermedTemplate( const char *baseFileName )
 {
 	char *result = 0;
 	const char *templ = "ragel-XXXXXX.xml";
@@ -495,16 +496,16 @@ char *makeIntermedTemplate( char *baseFileName )
 	return result;
 };
 
-char *openIntermed( char *inputFileName, char *outputFileName )
+const char *openIntermed( const char *inputFileName, const char *outputFileName )
 {
 	srand(time(0));
-	char *result = 0;
+	const char *result = 0;
 
 	/* Which filename do we use as the base? */
-	char *baseFileName = outputFileName != 0 ? outputFileName : inputFileName;
+	const char *baseFileName = outputFileName != 0 ? outputFileName : inputFileName;
 
 	/* The template for the intermediate file name. */
-	char *intermedFileName = makeIntermedTemplate( baseFileName );
+	const char *intermedFileName = makeIntermedTemplate( baseFileName );
 
 	/* Randomize the name and try to open. */
 	char fnChars[] = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -538,7 +539,7 @@ char *openIntermed( char *inputFileName, char *outputFileName )
 }
 
 
-void cleanExit( char *intermed, int status )
+void cleanExit( const char *intermed, int status )
 {
 	unlink( intermed );
 	exit( status );
@@ -588,10 +589,17 @@ char **makePathChecksUnix( const char *argv0, const char *progName )
 	return result;
 }
 
+int main(int argc, const char **argv);
+int cd_main(int argc, const char **argv);
+int java_main(int argc, const char **argv);
+int ruby_main(int argc, const char **argv);
+int csharp_main(int argc, const char **argv);
+
 
 void forkAndExec( const char *progName, char **pathChecks, 
-		ArgsVector &args, char *intermed )
+		ArgsVector &args, const char *intermed )
 {
+#if 0
 	pid_t pid = fork();
 	if ( pid < 0 ) {
 		/* Error, no child created. */
@@ -609,7 +617,20 @@ void forkAndExec( const char *progName, char **pathChecks,
 		error() << "failed to exec " << progName << endl;
 		cleanExit( intermed, 1 );
 	}
+#endif
 
+	if ( strcmp( progName, "ragel" ) == 0 )
+		main( args.length()-1, args.data );
+	else if ( strcmp( progName, "rlgen-cd" ) == 0 )
+		cd_main( args.length()-1, args.data );
+	else if ( strcmp( progName, "rlgen-java" ) == 0 )
+		java_main( args.length()-1, args.data );
+	else if ( strcmp( progName, "rlgen-ruby" ) == 0 )
+		ruby_main( args.length()-1, args.data );
+	else if ( strcmp( progName, "rlgen-csharp" ) == 0 )
+		csharp_main( args.length()-1, args.data );
+
+#if 0
 	/* Parent process, wait for the child. */
 	int status;
 	wait( &status );
@@ -622,6 +643,7 @@ void forkAndExec( const char *progName, char **pathChecks,
 	
 	if ( WEXITSTATUS(status) != 0 )
 		cleanExit( intermed, WEXITSTATUS(status) );
+#endif
 }
 
 #else
@@ -686,7 +708,7 @@ void spawn( const char *progName, char **pathChecks,
 
 #endif
 
-void execFrontend( const char *argv0, char *inputFileName, char *intermed )
+void execFrontend( const char *argv0, const char *inputFileName, const char *intermed )
 {
 	/* The frontend program name. */
 	const char *progName = "ragel";
@@ -707,7 +729,7 @@ void execFrontend( const char *argv0, char *inputFileName, char *intermed )
 #endif
 }
 
-void execBackend( const char *argv0, char *intermed, char *outputFileName )
+void execBackend( const char *argv0, const char *intermed, const char *outputFileName )
 {
 	/* Locate the backend program */
 	const char *progName = 0;
@@ -748,10 +770,10 @@ void execBackend( const char *argv0, char *intermed, char *outputFileName )
 }
 
 /* Main, process args and call yyparse to start scanning input. */
-int main(int argc, char **argv)
+int main(int argc, const char **argv)
 {
-	char *inputFileName = 0;
-	char *outputFileName = 0;
+	const char *inputFileName = 0;
+	const char *outputFileName = 0;
 
 	processArgs( argc, argv, inputFileName, outputFileName );
 
@@ -779,15 +801,8 @@ int main(int argc, char **argv)
 				"\" is the same as the input file" << endp;
 	}
 
-	if ( frontendOnly )
-		return frontend( inputFileName, outputFileName );
-
-	char *intermed = openIntermed( inputFileName, outputFileName );
-
-	/* From here on in the cleanExit function should be used to exit. */
-
-	/* Run the frontend, then the backend processes. */
-	execFrontend( argv[0], inputFileName, intermed );
+	const char *intermed = openIntermed( inputFileName, outputFileName );
+	frontend( inputFileName, intermed );
 	execBackend( argv[0], intermed, outputFileName );
 
 	/* Clean up the intermediate. */

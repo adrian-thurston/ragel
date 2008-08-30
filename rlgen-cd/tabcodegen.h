@@ -75,9 +75,9 @@ protected:
 	void GOTO( ostream &ret, int gotoDest, bool inFinish );
 	void CALL( ostream &ret, int callDest, int targState, bool inFinish );
 	void NEXT( ostream &ret, int nextDest, bool inFinish );
-	void GOTO_EXPR( ostream &ret, InlineItem *ilItem, bool inFinish );
-	void NEXT_EXPR( ostream &ret, InlineItem *ilItem, bool inFinish );
-	void CALL_EXPR( ostream &ret, InlineItem *ilItem, int targState, bool inFinish );
+	void GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish );
+	void NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish );
+	void CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish );
 	void CURS( ostream &ret, bool inFinish );
 	void TARGS( ostream &ret, bool inFinish, int targState );
 	void RET( ostream &ret, bool inFinish );
