@@ -56,33 +56,6 @@ extern bool displayPrintables;
 extern int numSplitPartitions;
 
 /* Print a summary of the options. */
-void dot_usage()
-{
-	cout <<
-"usage: " PROGNAME " [options] file\n"
-"general:\n"
-"   -h, -H, -?, --help    Print this usage and exit\n"
-"   -v, --version         Print version information and exit\n"
-"   -o <file>             Write output to <file>\n"
-"output:\n"
-"   -p                    Display printable characters on labels\n"
-	;	
-}
-
-/* Print version information. */
-void dot_version()
-{
-	cout << "Ragel Code Generator for Graphviz" << endl <<
-			"Version " VERSION << ", " PUBDATE << endl <<
-			"Copyright (c) 2001-2007 by Adrian Thurston" << endl;
-}
-
-ostream &dot_error()
-{
-	gblErrorCount += 1;
-	cerr << PROGNAME ": ";
-	return cerr;
-}
 
 /*
  * Callbacks invoked by the XML data parser.
@@ -93,7 +66,7 @@ ostream *dotOpenOutput( char *inputFile )
 {
 	/* Make sure we are not writing to the same file as the input file. */
 	if ( outputFileName != 0 && strcmp( inputFile, outputFileName  ) == 0 ) {
-		dot_error() << "output file \"" << outputFileName  << 
+		error() << "output file \"" << outputFileName  << 
 				"\" is the same as the input file" << endl;
 	}
 
@@ -102,7 +75,7 @@ ostream *dotOpenOutput( char *inputFile )
 		outFilter = new output_filter( outputFileName );
 		outFilter->open( outputFileName, ios::out|ios::trunc );
 		if ( !outFilter->is_open() ) {
-			dot_error() << "error opening " << outputFileName << " for writing" << endl;
+			error() << "error opening " << outputFileName << " for writing" << endl;
 			exit(1);
 		}
 
@@ -127,41 +100,4 @@ CodeGenData *dotMakeCodeGen( char *sourceFileName, char *fsmName,
 	codeGen->wantComplete = wantComplete;
 
 	return codeGen;
-}
-
-
-/* Main, process args and call yyparse to start scanning input. */
-int dot_main( const char *xmlInputFileName )
-{
-	/* Open the input file for reading. */
-	ifstream *inFile = new ifstream( xmlInputFileName );
-	inStream = inFile;
-	if ( ! inFile->is_open() )
-		dot_error() << "could not open " << xmlInputFileName << " for reading" << endl;
-
-	/* Bail on above errors. */
-	if ( gblErrorCount > 0 )
-		exit(1);
-
-	bool wantComplete = false;
-	bool outputActive = false;
-
-	/* Parse the input! */
-	xml_parse( *inStream, xmlInputFileName, outputActive, wantComplete );
-
-	/* If writing to a file, delete the ostream, causing it to flush.
-	 * Standard out is flushed automatically. */
-	if ( outputFileName != 0 ) {
-		delete outStream;
-		delete outFilter;
-	}
-
-	/* Finished, final check for errors.. */
-	if ( gblErrorCount > 0 ) {
-		/* If we opened an output file, remove it. */
-		if ( outputFileName != 0 )
-			unlink( outputFileName );
-		exit(1);
-	}
-	return 0;
 }

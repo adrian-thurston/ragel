@@ -84,13 +84,18 @@ CodeStyleEnum codeStyle = GenTables;
 
 int numSplitPartitions = 0;
 bool noLineDirectives = false;
+
 bool displayPrintables = false;
+bool graphvizDone = false;
 
 /* Target ruby impl */
 RubyImplEnum rubyImpl = MRI;
 
 ArgsVector includePaths;
 
+istream *inStream = 0;
+ostream *outStream = 0;
+output_filter *outFilter = 0;
 const char *outputFileName = 0;
 
 /* Print a summary of the options. */
@@ -548,33 +553,44 @@ void cleanExit( const char *intermed, int status )
 	exit( status );
 }
 
-int cd_main( const char *xmlInputFileName );
-int java_main( const char *xmlInputFileName );
-int ruby_main( const char *xmlInputFileName );
-int csharp_main( const char *xmlInputFileName );
-int dot_main( const char *xmlInputFileName );
-
 void backend( const char *intermed )
 {
+	const char *xmlInputFileName = intermed;
+
+	bool wantComplete = true;
+	bool outputActive = true;
+
+	/* Open the input file for reading. */
+	ifstream *inFile = new ifstream( xmlInputFileName );
+	inStream = inFile;
+	if ( ! inFile->is_open() )
+		error() << "could not open " << xmlInputFileName << " for reading" << endl;
+
+	/* Bail on above error. */
+	if ( gblErrorCount > 0 )
+		exit(1);
+
 	/* Locate the backend program */
-	if ( generateDot )
-		dot_main( intermed );
-	else {
-		switch ( hostLang->lang ) {
-			case HostLang::C:
-			case HostLang::D:
-				cd_main( intermed );
-				break;
-			case HostLang::Java:
-				java_main( intermed );
-				break;
-			case HostLang::Ruby:
-				ruby_main( intermed );
-				break;
-			case HostLang::CSharp:
-				csharp_main( intermed );
-				break;
-		}
+	if ( generateDot ) {
+		wantComplete = false;
+		outputActive = false;
+	}
+
+	xml_parse( *inStream, xmlInputFileName, outputActive, wantComplete );
+
+	/* If writing to a file, delete the ostream, causing it to flush.
+	 * Standard out is flushed automatically. */
+	if ( outputFileName != 0 ) {
+		delete outStream;
+		delete outFilter;
+	}
+
+	/* Finished, final check for errors.. */
+	if ( gblErrorCount > 0 ) {
+		/* If we opened an output file, remove it. */
+		if ( outputFileName != 0 )
+			unlink( outputFileName );
+		exit(1);
 	}
 }
 

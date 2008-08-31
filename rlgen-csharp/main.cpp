@@ -189,39 +189,3 @@ CodeGenData *csharpMakeCodeGen( char *sourceFileName, char *fsmName,
 
 	return codeGen;
 }
-
-/* Main, process args and call yyparse to start scanning input. */
-int csharp_main( const char *xmlInputFileName )
-{
-	/* Open the input file for reading. */
-	ifstream *inFile = new ifstream( xmlInputFileName );
-	inStream = inFile;
-	if ( ! inFile->is_open() )
-		csharp_error() << "could not open " << xmlInputFileName << " for reading" << endl;
-
-	/* Bail on above errors. */
-	if ( gblErrorCount > 0 )
-		exit(1);
-
-	bool wantComplete = true;
-	bool outputActive = true;
-
-	/* Parse the input! */
-	xml_parse( *inStream, xmlInputFileName, outputActive, wantComplete );
-
-	/* If writing to a file, delete the ostream, causing it to flush.
-	 * Standard out is flushed automatically. */
-	if ( outputFileName != 0 ) {
-		delete outStream;
-		delete outFilter;
-	}
-
-	/* Finished, final check for errors.. */
-	if ( gblErrorCount > 0 ) {
-		/* If we opened an output file, remove it. */
-		if ( outputFileName != 0 )
-			unlink( outputFileName );
-		exit(1);
-	}
-	return 0;
-}

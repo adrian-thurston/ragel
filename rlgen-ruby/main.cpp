@@ -65,41 +65,6 @@ extern bool graphvizDone;
 
 extern int numSplitPartitions;
 
-/* Print a summary of the options. */
-void ruby_usage()
-{
-	cout <<
-"usage: " PROGNAME " [options] file\n"
-"general:\n"
-"   -h, -H, -?, --help    Print this usage and exit\n"
-"   -v, --version         Print version information and exit\n"
-"   -o <file>             Write output to <file>\n"
-"   --rbx                 Allow to use Rubinius asm features\n"
-"generated code style:\n"
-"   -T0                   Table driven FSM (default)\n"
-"   -T1                   Faster table driven FSM\n"
-"   -F0                   Flat table driven FSM\n"
-"   -F1                   Faster flat table-driven FSM\n"
-"   -G0                   Goto-driven FSM\n"
-	;	
-}
-
-/* Print version information. */
-void ruby_version()
-{
-	cout << "Ragel Code Generator for Ruby" << endl <<
-			"Version " VERSION << ", " PUBDATE << endl <<
-                        "Copyright (c) 2001-2007 by Adrian Thurston" << endl <<
-			"Copyright (c) 2007 by Victor Hugo Borja" << endl;
-}
-
-ostream &ruby_error()
-{
-	gblErrorCount += 1;
-	cerr << PROGNAME ": ";
-	return cerr;
-}
-
 /*
  * Callbacks invoked by the XML data parser.
  */
@@ -108,7 +73,7 @@ ostream &ruby_error()
 ostream *rubyOpenOutput( char *inputFile )
 {
 	if ( hostLang->lang != HostLang::Ruby ) {
-		ruby_error() << "this code generator is for Ruby only" << endl;
+		error() << "this code generator is for Ruby only" << endl;
 		exit(1);
 	}
 
@@ -124,7 +89,7 @@ ostream *rubyOpenOutput( char *inputFile )
 
 	/* Make sure we are not writing to the same file as the input file. */
 	if ( outputFileName != 0 && strcmp( inputFile, outputFileName  ) == 0 ) {
-		ruby_error() << "output file \"" << outputFileName  << 
+		error() << "output file \"" << outputFileName  << 
 				"\" is the same as the input file" << endl;
 	}
 
@@ -133,7 +98,7 @@ ostream *rubyOpenOutput( char *inputFile )
 		outFilter = new output_filter( outputFileName );
 		outFilter->open( outputFileName, ios::out|ios::trunc );
 		if ( !outFilter->is_open() ) {
-			ruby_error() << "error opening " << outputFileName << " for writing" << endl;
+			error() << "error opening " << outputFileName << " for writing" << endl;
 			exit(1);
 		}
 
@@ -186,42 +151,6 @@ CodeGenData *rubyMakeCodeGen( char *sourceFileName, char *fsmName,
 	codeGen->wantComplete = wantComplete;
 
 	return codeGen;
-}
-
-/* Main, process args and call yyparse to start scanning input. */
-int ruby_main( const char *xmlInputFileName )
-{
-	/* Open the input file for reading. */
-	ifstream *inFile = new ifstream( xmlInputFileName );
-	inStream = inFile;
-	if ( ! inFile->is_open() )
-		ruby_error() << "could not open " << xmlInputFileName << " for reading" << endl;
-
-	/* Bail on above errors. */
-	if ( gblErrorCount > 0 )
-		exit(1);
-
-	bool wantComplete = true;
-	bool outputActive = true;
-
-	/* Parse the input! */
-	xml_parse( *inStream, xmlInputFileName, outputActive, wantComplete );
-
-	/* If writing to a file, delete the ostream, causing it to flush.
-	 * Standard out is flushed automatically. */
-	if ( outputFileName != 0 ) {
-		delete outStream;
-		delete outFilter;
-	}
-
-	/* Finished, final check for errors.. */
-	if ( gblErrorCount > 0 ) {
-		/* If we opened an output file, remove it. */
-		if ( outputFileName != 0 )
-			unlink( outputFileName );
-		exit(1);
-	}
-	return 0;
 }
 
 /*
