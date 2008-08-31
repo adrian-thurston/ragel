@@ -49,7 +49,7 @@ using std::cerr;
 using std::endl;
 
 /* Target ruby impl */
-RubyImplEnum rubyImpl = MRI;
+extern RubyImplEnum rubyImpl;
 
 /* Target language and output style. */
 extern CodeStyleEnum codeStyle;
@@ -64,7 +64,6 @@ extern const char *outputFileName;
 extern bool graphvizDone;
 
 extern int numSplitPartitions;
-extern bool printPrintables;
 
 /* Print a summary of the options. */
 void ruby_usage()
@@ -190,128 +189,13 @@ CodeGenData *rubyMakeCodeGen( char *sourceFileName, char *fsmName,
 }
 
 /* Main, process args and call yyparse to start scanning input. */
-int ruby_main(int argc, const char **argv)
+int ruby_main( const char *xmlInputFileName )
 {
-	ParamCheck pc("-:Hlh?vo:T:F:G:P:", argc, argv);
-	const char *xmlInputFileName = 0;
-
-	while ( pc.check() ) {
-		switch ( pc.state ) {
-		case ParamCheck::match:
-			switch ( pc.parameter ) {
-			/* Output. */
-			case 'o':
-				if ( *pc.paramArg == 0 )
-					ruby_error() << "a zero length output file name was given" << endl;
-				else if ( outputFileName != 0 )
-					ruby_error() << "more than one output file name was given" << endl;
-				else {
-					/* Ok, remember the output file name. */
-					outputFileName = pc.paramArg;
-				}
-				break;
-
-			/* Code style. */
-			case 'T':
-				if ( pc.paramArg[0] == '0' )
-					codeStyle = GenTables;
-				else if ( pc.paramArg[0] == '1' )
-					codeStyle = GenFTables;
-				else {
-					ruby_error() << "-T" << pc.paramArg[0] << 
-							" is an invalid argument" << endl;
-					exit(1);
-				}
-				break;
-			case 'F':
-				if ( pc.paramArg[0] == '0' )
-					codeStyle = GenFlat;
-				else if ( pc.paramArg[0] == '1' )
-					codeStyle = GenFFlat;
-				else {
-					ruby_error() << "-F" << pc.paramArg[0] << 
-							" is an invalid argument" << endl;
-					exit(1);
-				}
-				break;
-			case 'G':
-				if ( pc.paramArg[0] == '0' )
-					codeStyle = GenGoto;
-				else if ( pc.paramArg[0] == '1' )
-					codeStyle = GenFGoto;
-				else if ( pc.paramArg[0] == '2' )
-					codeStyle = GenIpGoto;
-				else {
-					ruby_error() << "-G" << pc.paramArg[0] << 
-							" is an invalid argument" << endl;
-					exit(1);
-				}
-				break;
-			case 'P':
-				codeStyle = GenSplit;
-				numSplitPartitions = atoi( pc.paramArg );
-				break;
-
-			/* Version and help. */
-			case 'v':
-				ruby_version();
-				exit(0);
-			case 'H': case 'h': case '?':
-				ruby_usage();
-				exit(0);
-
-			case '-':
-				if ( strcmp(pc.paramArg, "help") == 0 ) {
-					ruby_usage();
-					exit(0);
-				}
-				else if ( strcmp(pc.paramArg, "version") == 0 ) {
-					ruby_version();
-					exit(0);
-				}
-				else if ( strcmp(pc.paramArg, "rbx") == 0 ) {
-					rubyImpl = Rubinius;
-				}
-				else {
-					ruby_error() << "--" << pc.paramArg << 
-							" is an invalid argument" << endl;
-				}
-			}
-			break;
-
-		case ParamCheck::invalid:
-			ruby_error() << "-" << pc.parameter << " is an invalid argument" << endl;
-			break;
-
-		case ParamCheck::noparam:
-			if ( *pc.curArg == 0 )
-				ruby_error() << "a zero length input file name was given" << endl;
-			else if ( xmlInputFileName != 0 )
-				ruby_error() << "more than one input file name was given" << endl;
-			else {
-				/* OK, Remember the filename. */
-				xmlInputFileName = pc.curArg;
-			}
-			break;
-		}
-	}
-
-	/* Bail on above errors. */
-	if ( gblErrorCount > 0 )
-		exit(1);
-
 	/* Open the input file for reading. */
-	if ( xmlInputFileName != 0 ) {
-		/* Open the input file for reading. */
-		ifstream *inFile = new ifstream( xmlInputFileName );
-		inStream = inFile;
-		if ( ! inFile->is_open() )
-			ruby_error() << "could not open " << xmlInputFileName << " for reading" << endl;
-	}
-	else {
-		xmlInputFileName = strdup("<stdin>");
-		inStream = &cin;
-	}
+	ifstream *inFile = new ifstream( xmlInputFileName );
+	inStream = inFile;
+	if ( ! inFile->is_open() )
+		ruby_error() << "could not open " << xmlInputFileName << " for reading" << endl;
 
 	/* Bail on above errors. */
 	if ( gblErrorCount > 0 )

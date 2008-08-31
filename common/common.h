@@ -366,4 +366,24 @@ struct exit_object { };
 extern exit_object endp;
 void operator<<( std::ostream &out, exit_object & );
 
+/* Target output style. */
+enum CodeStyleEnum
+{
+	GenTables,
+	GenFTables,
+	GenFlat,
+	GenFFlat,
+	GenGoto,
+	GenFGoto,
+	GenIpGoto,
+	GenSplit
+};
+
+/* Target implementation */
+enum RubyImplEnum
+{
+	MRI,
+	Rubinius
+};
+
 #endif /* _COMMON_H */

@@ -25,32 +25,11 @@
 
 #include <iostream>
 #include "config.h"
+#include "common.h"
 
 #define PROGNAME "rlgen-ruby"
 
-/* Target implementation */
-enum RubyImplEnum
-{
-  MRI,
-  Rubinius
-};
-
 extern RubyImplEnum rubyImpl;
-
-/* Target output style. */
-enum CodeStyleEnum
-{
-	GenTables,
-	GenFTables,
-	GenFlat,
-	GenFFlat,
-	GenGoto,
-	GenFGoto,
-	GenIpGoto,
-	GenSplit
-
-};
-
 extern CodeStyleEnum codeStyle;
 
 extern int gblErrorCount;

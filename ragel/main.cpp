@@ -32,9 +32,7 @@
 #include <fcntl.h>
 #include <errno.h>
 
-#ifndef _WIN32
-#include <sys/wait.h>
-#else
+#ifdef _WIN32
 #include <windows.h>
 #include <psapi.h>
 #include <time.h>
@@ -81,9 +79,19 @@ bool printStatistics = false;
 bool frontendOnly = false;
 bool generateDot = false;
 
-ArgsVector frontendArgs;
-ArgsVector backendArgs;
+/* Target language and output style. */
+CodeStyleEnum codeStyle = GenTables;
+
+int numSplitPartitions = 0;
+bool noLineDirectives = false;
+bool displayPrintables = false;
+
+/* Target ruby impl */
+RubyImplEnum rubyImpl = MRI;
+
 ArgsVector includePaths;
+
+const char *outputFileName = 0;
 
 /* Print a summary of the options. */
 void usage()
@@ -208,10 +216,11 @@ void escapeLineDirectivePath( std::ostream &out, char *path )
 	}
 }
 
-void processArgs( int argc, const char **argv, 
-		const char *&inputFileName, const char *&outputFileName )
+void processArgs( int argc, const char **argv, const char *&inputFileName )
 {
 	ParamCheck pc("xo:dnmleabjkS:M:I:CDJRAvHh?-:sT:F:G:P:LpV", argc, argv);
+
+	/* FIXME: Need to check code styles VS langauge. */
 
 	while ( pc.check() ) {
 		switch ( pc.state ) {
@@ -237,44 +246,35 @@ void processArgs( int argc, const char **argv,
 				}
 				break;
 
-			/* Minimization, mostly hidden options. */
+			/* Flag for turning off duplicate action removal. */
 			case 'd':
 				wantDupsRemoved = false;
-				frontendArgs.append( "-d" );
 				break;
 
 			/* Minimization, mostly hidden options. */
 			case 'n':
 				minimizeOpt = MinimizeNone;
-				frontendArgs.append( "-n" );
 				break;
 			case 'm':
 				minimizeOpt = MinimizeEnd;
-				frontendArgs.append( "-m" );
 				break;
 			case 'l':
 				minimizeOpt = MinimizeMostOps;
-				frontendArgs.append( "-l" );
 				break;
 			case 'e':
 				minimizeOpt = MinimizeEveryOp;
-				frontendArgs.append( "-e" );
 				break;
 			case 'a':
 				minimizeLevel = MinimizeApprox;
-				frontendArgs.append( "-a" );
 				break;
 			case 'b':
 				minimizeLevel = MinimizeStable;
-				frontendArgs.append( "-b" );
 				break;
 			case 'j':
 				minimizeLevel = MinimizePartition1;
-				frontendArgs.append( "-j" );
 				break;
 			case 'k':
 				minimizeLevel = MinimizePartition2;
-				frontendArgs.append( "-k" );
 				break;
 
 			/* Machine spec. */
@@ -286,8 +286,6 @@ void processArgs( int argc, const char **argv,
 				else {
 					/* Ok, remember the path to the machine to generate. */
 					machineSpec = pc.paramArg;
-					frontendArgs.append( "-S" );
-					frontendArgs.append( pc.paramArg );
 				}
 				break;
 
@@ -300,8 +298,6 @@ void processArgs( int argc, const char **argv,
 				else {
 					/* Ok, remember the machine name to generate. */
 					machineName = pc.paramArg;
-					frontendArgs.append( "-M" );
-					frontendArgs.append( pc.paramArg );
 				}
 				break;
 
@@ -310,31 +306,24 @@ void processArgs( int argc, const char **argv,
 					error() << "please specify an argument to -I" << endl;
 				else {
 					includePaths.append( pc.paramArg );
-					frontendArgs.append( "-I" );
-					frontendArgs.append( pc.paramArg );
 				}
 				break;
 
 			/* Host language types. */
 			case 'C':
 				hostLang = &hostLangC;
-				frontendArgs.append( "-C" );
 				break;
 			case 'D':
 				hostLang = &hostLangD;
-				frontendArgs.append( "-D" );
 				break;
 			case 'J':
 				hostLang = &hostLangJava;
-				frontendArgs.append( "-J" );
 				break;
 			case 'R':
 				hostLang = &hostLangRuby;
-				frontendArgs.append( "-R" );
 				break;
 			case 'A':
 				hostLang = &hostLangCSharp;
-				frontendArgs.append( "-A" );
 				break;
 
 			/* Version and help. */
@@ -346,7 +335,6 @@ void processArgs( int argc, const char **argv,
 				break;
 			case 's':
 				printStatistics = true;
-				frontendArgs.append( "-s" );
 				break;
 			case '-': {
 				char *eq = strchr( pc.paramArg, '=' );
@@ -361,20 +349,15 @@ void processArgs( int argc, const char **argv,
 				else if ( strcmp( pc.paramArg, "error-format" ) == 0 ) {
 					if ( eq == 0 )
 						error() << "expecting '=value' for error-format" << endl;
-					else if ( strcmp( eq, "gnu" ) == 0 ) {
+					else if ( strcmp( eq, "gnu" ) == 0 )
 						errorFormat = ErrorFormatGNU;
-						frontendArgs.append( "--error-format=gnu" );
-					}
-					else if ( strcmp( eq, "msvc" ) == 0 ) {
+					else if ( strcmp( eq, "msvc" ) == 0 )
 						errorFormat = ErrorFormatMSVC;
-						frontendArgs.append( "--error-format=msvc" );
-					}
-					else {
+					else
 						error() << "invalid value for error-format" << endl;
-					}
 				}
 				else if ( strcmp( pc.paramArg, "rbx" ) == 0 )
-					backendArgs.append( "--rbx" );
+					rubyImpl = Rubinius;
 				else {
 					error() << "--" << pc.paramArg << 
 							" is an invalid argument" << endl;
@@ -384,26 +367,51 @@ void processArgs( int argc, const char **argv,
 
 			/* Passthrough args. */
 			case 'T': 
-				backendArgs.append( "-T" );
-				backendArgs.append( pc.paramArg );
+				if ( pc.paramArg[0] == '0' )
+					codeStyle = GenTables;
+				else if ( pc.paramArg[0] == '1' )
+					codeStyle = GenFTables;
+				else {
+					error() << "-T" << pc.paramArg[0] << 
+							" is an invalid argument" << endl;
+					exit(1);
+				}
 				break;
 			case 'F': 
-				backendArgs.append( "-F" );
-				backendArgs.append( pc.paramArg );
+				if ( pc.paramArg[0] == '0' )
+					codeStyle = GenFlat;
+				else if ( pc.paramArg[0] == '1' )
+					codeStyle = GenFFlat;
+				else {
+					error() << "-F" << pc.paramArg[0] << 
+							" is an invalid argument" << endl;
+					exit(1);
+				}
 				break;
 			case 'G': 
-				backendArgs.append( "-G" );
-				backendArgs.append( pc.paramArg );
+				if ( pc.paramArg[0] == '0' )
+					codeStyle = GenGoto;
+				else if ( pc.paramArg[0] == '1' )
+					codeStyle = GenFGoto;
+				else if ( pc.paramArg[0] == '2' )
+					codeStyle = GenIpGoto;
+				else {
+					error() << "-G" << pc.paramArg[0] << 
+							" is an invalid argument" << endl;
+					exit(1);
+				}
 				break;
 			case 'P':
-				backendArgs.append( "-P" );
-				backendArgs.append( pc.paramArg );
+				codeStyle = GenSplit;
+				numSplitPartitions = atoi( pc.paramArg );
 				break;
+
 			case 'p':
-				backendArgs.append( "-p" );
+				displayPrintables = true;
 				break;
+
 			case 'L':
-				backendArgs.append( "-L" );
+				noLineDirectives = true;
 				break;
 			}
 			break;
@@ -427,7 +435,7 @@ void processArgs( int argc, const char **argv,
 	}
 }
 
-int frontend( const char *inputFileName, const char *outputFileName )
+int frontend( const char *inputFileName, const char *intermed )
 {
 	/* Open the input file for reading. */
 	assert( inputFileName != 0 );
@@ -462,18 +470,13 @@ int frontend( const char *inputFileName, const char *outputFileName )
 	if ( gblErrorCount > 0 )
 		return 1;
 	
-	ostream *outputFile = 0;
-	if ( outputFileName != 0 )
-		outputFile = new ofstream( outputFileName );
-	else
-		outputFile = &cout;
+	ostream *outputFile = new ofstream( intermed );
 
 	/* Write the machines, then the surrounding code. */
 	writeMachines( *outputFile, hostData.str(), inputFileName );
 
 	/* Close the intermediate file. */
-	if ( outputFileName != 0 )
-		delete outputFile;
+	delete outputFile;
 
 	return gblErrorCount > 0;
 }
@@ -545,240 +548,41 @@ void cleanExit( const char *intermed, int status )
 	exit( status );
 }
 
-#ifndef _WIN32
+int cd_main( const char *xmlInputFileName );
+int java_main( const char *xmlInputFileName );
+int ruby_main( const char *xmlInputFileName );
+int csharp_main( const char *xmlInputFileName );
+int dot_main( const char *xmlInputFileName );
 
-/* If any forward slash is found in argv0 then it is assumed that the path is
- * explicit and the path to the backend executable should be derived from
- * that. Whe check that location and also go up one then inside a directory of
- * the same name in case we are executing from the source tree. If no forward
- * slash is found it is assumed the file is being run from the installed
- * location. The PREFIX supplied during configuration is used. */
-char **makePathChecksUnix( const char *argv0, const char *progName )
-{
-	char **result = new char*[3];
-	const char *lastSlash = strrchr( argv0, '/' );
-	int numChecks = 0;
-
-	if ( lastSlash != 0 ) {
-		char *path = strdup( argv0 );
-		int givenPathLen = (lastSlash - argv0) + 1;
-		path[givenPathLen] = 0;
-
-		int progNameLen = strlen(progName);
-		int length = givenPathLen + progNameLen + 1;
-		char *check = new char[length];
-		sprintf( check, "%s%s", path, progName );
-		result[numChecks++] = check;
-
-		length = givenPathLen + 3 + progNameLen + 1 + progNameLen + 1;
-		check = new char[length];
-		sprintf( check, "%s../%s/%s", path, progName, progName );
-		result[numChecks++] = check;
-	}
-	else {
-		int prefixLen = strlen(PREFIX);
-		int progNameLen = strlen(progName);
-		int length = prefixLen + 5 + progNameLen + 1;
-		char *check = new char[length];
-
-		sprintf( check, PREFIX "/bin/%s", progName );
-		result[numChecks++] = check;
-	}
-
-	result[numChecks] = 0;
-	return result;
-}
-
-int main(int argc, const char **argv);
-int cd_main(int argc, const char **argv);
-int java_main(int argc, const char **argv);
-int ruby_main(int argc, const char **argv);
-int csharp_main(int argc, const char **argv);
-int dot_main(int argc, const char **argv);
-
-
-void forkAndExec( const char *progName, char **pathChecks, 
-		ArgsVector &args, const char *intermed )
-{
-#if 0
-	pid_t pid = fork();
-	if ( pid < 0 ) {
-		/* Error, no child created. */
-		error() << "failed to fork for " << progName << endl;
-		cleanExit( intermed, 1 );
-	}
-	else if ( pid == 0 ) {
-		/* child */
-		while ( *pathChecks != 0 ) {
-			/* Execv does not modify argv, it just uses the const form that is
-			 * compatible with the most code. Ours not included. */
-			execv( *pathChecks, (char *const*) args.data );
-			pathChecks += 1;
-		}
-		error() << "failed to exec " << progName << endl;
-		cleanExit( intermed, 1 );
-	}
-#endif
-
-	if ( strcmp( progName, "ragel" ) == 0 )
-		main( args.length()-1, args.data );
-	else if ( strcmp( progName, "rlgen-cd" ) == 0 )
-		cd_main( args.length()-1, args.data );
-	else if ( strcmp( progName, "rlgen-java" ) == 0 )
-		java_main( args.length()-1, args.data );
-	else if ( strcmp( progName, "rlgen-ruby" ) == 0 )
-		ruby_main( args.length()-1, args.data );
-	else if ( strcmp( progName, "rlgen-csharp" ) == 0 )
-		csharp_main( args.length()-1, args.data );
-	else if ( strcmp( progName, "rlgen-dot" ) == 0 )
-		dot_main( args.length()-1, args.data );
-
-#if 0
-	/* Parent process, wait for the child. */
-	int status;
-	wait( &status );
-
-	/* What happened with the child. */
-	if ( ! WIFEXITED( status ) ) {
-		error() << progName << " did not exit normally" << endl;
-		cleanExit( intermed, 1 );
-	}
-	
-	if ( WEXITSTATUS(status) != 0 )
-		cleanExit( intermed, WEXITSTATUS(status) );
-#endif
-}
-
-#else
-
-/* GetModuleFileNameEx is used to find out where the the current process's
- * binary is. That location is searched first. If that fails then we go up one
- * directory and look for the executable inside a directory of the same name
- * in case we are executing from the source tree.
- * */
-char **makePathChecksWin( const char *progName )
-{
-	int len = 1024;
-	char *imageFileName = new char[len];
-	HANDLE h = GetCurrentProcess();
-	len = GetModuleFileNameEx( h, NULL, imageFileName, len );
-	imageFileName[len] = 0;
-
-	char **result = new char*[3];
-	const char *lastSlash = strrchr( imageFileName, '\\' );
-	int numChecks = 0;
-
-	assert( lastSlash != 0 );
-	char *path = strdup( imageFileName );
-	int givenPathLen = (lastSlash - imageFileName) + 1;
-	path[givenPathLen] = 0;
-
-	int progNameLen = strlen(progName);
-	int length = givenPathLen + progNameLen + 1;
-	char *check = new char[length];
-	sprintf( check, "%s%s", path, progName );
-	result[numChecks++] = check;
-
-	length = givenPathLen + 3 + progNameLen + 1 + progNameLen + 1;
-	check = new char[length];
-	sprintf( check, "%s..\\%s\\%s", path, progName, progName );
-	result[numChecks++] = check;
-
-	result[numChecks] = 0;
-	return result;
-}
-
-void spawn( const char *progName, char **pathChecks, 
-		ArgsVector &args, char *intermed )
-{
-	int result = 0;
-	while ( *pathChecks != 0 ) {
-		//cerr << "trying to execute " << *pathChecks << endl;
-		result = _spawnv( _P_WAIT, *pathChecks, args.data );
-		if ( result >= 0 || errno != ENOENT )
-			break;
-		pathChecks += 1;
-	}
-
-	if ( result < 0 ) {
-		error() << "failed to spawn " << progName << endl;
-		cleanExit( intermed, 1 );
-	}
-
-	if ( result > 0 )
-		cleanExit( intermed, 1 );
-}
-
-#endif
-
-void execFrontend( const char *argv0, const char *inputFileName, const char *intermed )
-{
-	/* The frontend program name. */
-	const char *progName = "ragel";
-
-	frontendArgs.insert( 0, progName );
-	frontendArgs.insert( 1, "-x" );
-	frontendArgs.append( "-o" );
-	frontendArgs.append( intermed );
-	frontendArgs.append( inputFileName );
-	frontendArgs.append( 0 );
-
-#ifndef _WIN32
-	char **pathChecks = makePathChecksUnix( argv0, progName );
-	forkAndExec( progName, pathChecks, frontendArgs, intermed );
-#else
-	char **pathChecks = makePathChecksWin( progName );
-	spawn( progName, pathChecks, frontendArgs, intermed );
-#endif
-}
-
-void execBackend( const char *argv0, const char *intermed, const char *outputFileName )
+void backend( const char *intermed )
 {
 	/* Locate the backend program */
-	const char *progName = 0;
 	if ( generateDot )
-		progName = "rlgen-dot";
+		dot_main( intermed );
 	else {
 		switch ( hostLang->lang ) {
 			case HostLang::C:
 			case HostLang::D:
-				progName = "rlgen-cd";
+				cd_main( intermed );
 				break;
 			case HostLang::Java:
-				progName = "rlgen-java";
+				java_main( intermed );
 				break;
 			case HostLang::Ruby:
-				progName = "rlgen-ruby";
+				ruby_main( intermed );
 				break;
 			case HostLang::CSharp:
-				progName = "rlgen-csharp";
+				csharp_main( intermed );
+				break;
 		}
 	}
-
-	backendArgs.insert( 0, progName );
-	if ( outputFileName != 0 ) {
-		backendArgs.append( "-o" );
-		backendArgs.append( outputFileName );
-	}
-	backendArgs.append( intermed );
-	backendArgs.append( 0 );
-
-#ifndef _WIN32
-	char **pathChecks = makePathChecksUnix( argv0, progName );
-	forkAndExec( progName, pathChecks, backendArgs, intermed );
-#else
-	char **pathChecks = makePathChecksWin( progName );
-	spawn( progName, pathChecks, backendArgs, intermed );
-#endif
 }
 
 /* Main, process args and call yyparse to start scanning input. */
-int main(int argc, const char **argv)
+int main( int argc, const char **argv )
 {
 	const char *inputFileName = 0;
-	const char *outputFileName = 0;
-
-	processArgs( argc, argv, inputFileName, outputFileName );
+	processArgs( argc, argv, inputFileName );
 
 	/* If -M or -S are given and we're not generating a dot file then invoke
 	 * the frontend. These options are not useful with code generators. */
@@ -806,7 +610,7 @@ int main(int argc, const char **argv)
 
 	const char *intermed = openIntermed( inputFileName, outputFileName );
 	frontend( inputFileName, intermed );
-	execBackend( argv[0], intermed, outputFileName );
+	backend( intermed );
 
 	/* Clean up the intermediate. */
 	cleanExit( intermed, 0 );

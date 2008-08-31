@@ -50,7 +50,6 @@ extern output_filter *outFilter;
 extern const char *outputFileName;
 
 extern int numSplitPartitions;
-extern bool printPrintables;
 
 /* Print a summary of the options. */
 void java_usage()
@@ -140,84 +139,13 @@ CodeGenData *javaMakeCodeGen( char *sourceFileName, char *fsmName,
 }
 
 /* Main, process args and call yyparse to start scanning input. */
-int java_main(int argc, const char **argv)
+int java_main( const char *xmlInputFileName )
 {
-	ParamCheck pc("o:vHh?-:", argc, argv);
-	const char *xmlInputFileName = 0;
-
-	while ( pc.check() ) {
-		switch ( pc.state ) {
-		case ParamCheck::match:
-			switch ( pc.parameter ) {
-			/* Output. */
-			case 'o':
-				if ( *pc.paramArg == 0 )
-					java_error() << "a zero length output file name was given" << endl;
-				else if ( outputFileName != 0 )
-					java_error() << "more than one output file name was given" << endl;
-				else {
-					/* Ok, remember the output file name. */
-					outputFileName = pc.paramArg;
-				}
-				break;
-
-			/* Version and help. */
-			case 'v':
-				java_version();
-				exit(0);
-			case 'H': case 'h': case '?':
-				java_usage();
-				exit(0);
-			case '-':
-				if ( strcmp(pc.paramArg, "help") == 0 ) {
-					java_usage();
-					exit(0);
-				}
-				else if ( strcmp(pc.paramArg, "version") == 0 ) {
-					java_version();
-					exit(0);
-				}
-				else {
-					java_error() << "--" << pc.paramArg << 
-							" is an invalid argument" << endl;
-					break;
-				}
-			}
-			break;
-
-		case ParamCheck::invalid:
-			java_error() << "-" << pc.parameter << " is an invalid argument" << endl;
-			break;
-
-		case ParamCheck::noparam:
-			if ( *pc.curArg == 0 )
-				java_error() << "a zero length input file name was given" << endl;
-			else if ( xmlInputFileName != 0 )
-				java_error() << "more than one input file name was given" << endl;
-			else {
-				/* OK, Remember the filename. */
-				xmlInputFileName = pc.curArg;
-			}
-			break;
-		}
-	}
-
-	/* Bail on above errors. */
-	if ( gblErrorCount > 0 )
-		exit(1);
-
 	/* Open the input file for reading. */
-	if ( xmlInputFileName != 0 ) {
-		/* Open the input file for reading. */
-		ifstream *inFile = new ifstream( xmlInputFileName );
-		inStream = inFile;
-		if ( ! inFile->is_open() )
-			java_error() << "could not open " << xmlInputFileName << " for reading" << endl;
-	}
-	else {
-		xmlInputFileName = strdup("<stdin>");
-		inStream = &cin;
-	}
+	ifstream *inFile = new ifstream( xmlInputFileName );
+	inStream = inFile;
+	if ( ! inFile->is_open() )
+		java_error() << "could not open " << xmlInputFileName << " for reading" << endl;
 
 	/* Bail on above errors. */
 	if ( gblErrorCount > 0 )
