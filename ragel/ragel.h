@@ -87,7 +87,4 @@ void xmlEscapeHost( std::ostream &out, char *data, long len );
 typedef Vector<const char *> ArgsVector;
 extern ArgsVector includePaths;
 
-int xml_parse( std::istream &input, const char *fileName, 
-		bool outputActive, bool wantComplete );
-
 #endif /* _RAGEL_H */

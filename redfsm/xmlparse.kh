@@ -198,6 +198,7 @@ struct XmlParser
 %% write token_defs;
 
 int xml_parse( std::istream &input, const char *fileName, 
-		bool outputActive, bool wantComplete );
+		bool outputActive, bool wantComplete, 
+		XmlScanner &scanner, XmlParser &parser );
 
 #endif /* _XMLPARSE_H */

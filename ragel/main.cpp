@@ -441,7 +441,7 @@ void processArgs( int argc, const char **argv, const char *&inputFileName )
 	}
 }
 
-int frontend( const char *inputFileName, const char *intermed )
+void process( const char *inputFileName, const char *intermed )
 {
 	/* Open the input file for reading. */
 	assert( inputFileName != 0 );
@@ -461,30 +461,77 @@ int frontend( const char *inputFileName, const char *intermed )
 
 	/* Finished, final check for errors.. */
 	if ( gblErrorCount > 0 )
-		return 1;
+		exit(1);
 	
 	/* Now send EOF to all parsers. */
 	terminateAllParsers();
 
 	/* Finished, final check for errors.. */
 	if ( gblErrorCount > 0 )
-		return 1;
+		exit(1);
 
 	if ( machineSpec == 0 && machineName == 0 )
 		hostData << "</host>\n";
 
 	if ( gblErrorCount > 0 )
-		return 1;
+		exit(1);
 	
 	ostream *outputFile = new ofstream( intermed );
 
 	/* Write the machines, then the surrounding code. */
 	writeMachines( *outputFile, hostData.str(), inputFileName );
 
-	/* Close the intermediate file. */
+	/* Close the input and the intermediate file. */
 	delete outputFile;
+	delete inFile;
 
-	return gblErrorCount > 0;
+	/* Bail on above error. */
+	if ( gblErrorCount > 0 )
+		exit(1);
+
+	const char *xmlInputFileName = intermed;
+
+	bool wantComplete = true;
+	bool outputActive = true;
+
+	/* Open the input file for reading. */
+	inFile = new ifstream( xmlInputFileName );
+	inStream = inFile;
+	if ( ! inFile->is_open() )
+		error() << "could not open " << xmlInputFileName << " for reading" << endl;
+
+	/* Bail on above error. */
+	if ( gblErrorCount > 0 )
+		exit(1);
+
+	/* Locate the backend program */
+	if ( generateDot ) {
+		wantComplete = false;
+		outputActive = false;
+	}
+
+	XmlScanner xmlScanner( xmlInputFileName, *inStream );
+	XmlParser xmlParser( xmlInputFileName, outputActive, wantComplete );
+	xmlParser.init();
+
+	xml_parse( *inStream, xmlInputFileName, 
+		outputActive, wantComplete,
+		xmlScanner, xmlParser );
+
+	/* If writing to a file, delete the ostream, causing it to flush.
+	 * Standard out is flushed automatically. */
+	if ( outputFileName != 0 ) {
+		delete outStream;
+		delete outFilter;
+	}
+
+	/* Finished, final check for errors.. */
+	if ( gblErrorCount > 0 ) {
+		/* If we opened an output file, remove it. */
+		if ( outputFileName != 0 )
+			unlink( outputFileName );
+		exit(1);
+	}
 }
 
 char *makeIntermedTemplate( const char *baseFileName )
@@ -554,47 +601,6 @@ void cleanExit( const char *intermed, int status )
 	exit( status );
 }
 
-void backend( const char *intermed )
-{
-	const char *xmlInputFileName = intermed;
-
-	bool wantComplete = true;
-	bool outputActive = true;
-
-	/* Open the input file for reading. */
-	ifstream *inFile = new ifstream( xmlInputFileName );
-	inStream = inFile;
-	if ( ! inFile->is_open() )
-		error() << "could not open " << xmlInputFileName << " for reading" << endl;
-
-	/* Bail on above error. */
-	if ( gblErrorCount > 0 )
-		exit(1);
-
-	/* Locate the backend program */
-	if ( generateDot ) {
-		wantComplete = false;
-		outputActive = false;
-	}
-
-	xml_parse( *inStream, xmlInputFileName, outputActive, wantComplete );
-
-	/* If writing to a file, delete the ostream, causing it to flush.
-	 * Standard out is flushed automatically. */
-	if ( outputFileName != 0 ) {
-		delete outStream;
-		delete outFilter;
-	}
-
-	/* Finished, final check for errors.. */
-	if ( gblErrorCount > 0 ) {
-		/* If we opened an output file, remove it. */
-		if ( outputFileName != 0 )
-			unlink( outputFileName );
-		exit(1);
-	}
-}
-
 /* Main, process args and call yyparse to start scanning input. */
 int main( int argc, const char **argv )
 {
@@ -626,8 +632,7 @@ int main( int argc, const char **argv )
 	}
 
 	const char *intermed = openIntermed( inputFileName, outputFileName );
-	frontend( inputFileName, intermed );
-	backend( intermed );
+	process( inputFileName, intermed );
 
 	/* Clean up the intermediate. */
 	cleanExit( intermed, 0 );

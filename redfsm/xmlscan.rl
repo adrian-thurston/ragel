@@ -216,13 +216,9 @@ int XmlScanner::scan( )
 }
 
 int xml_parse( std::istream &input, const char *fileName, 
-		bool outputActive, bool wantComplete )
+		bool outputActive, bool wantComplete, 
+		XmlScanner &scanner, XmlParser &parser )
 {
-	XmlScanner scanner( fileName, input );
-	XmlParser parser( fileName, outputActive, wantComplete );
-
-	parser.init();
-
 	while ( 1 ) {
 		int token = scanner.scan();
 		if ( token == TK_NO_TOKEN ) {
