@@ -1470,7 +1470,8 @@ void writeLanguage( std::ostream &out )
 	
 }
 
-void writeMachines( std::ostream &out, std::string hostData, const char *inputFileName )
+void writeMachines( std::ostream &out, std::string hostData, 
+		const char *inputFileName, XmlParser &xmlParser )
 {
 	if ( machineSpec == 0 && machineName == 0 ) {
 		/* No machine spec or machine name given. Generate everything. */

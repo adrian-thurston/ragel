@@ -443,10 +443,13 @@ void processArgs( int argc, const char **argv, const char *&inputFileName )
 
 void process( const char *inputFileName, const char *intermed )
 {
+	const char *xmlFileName = intermed;
+	bool wantComplete = true;
+	bool outputActive = true;
+
 	/* Open the input file for reading. */
 	assert( inputFileName != 0 );
 	ifstream *inFile = new ifstream( inputFileName );
-	istream *inStream = inFile;
 	if ( ! inFile->is_open() )
 		error() << "could not open " << inputFileName << " for reading" << endp;
 
@@ -456,7 +459,7 @@ void process( const char *inputFileName, const char *intermed )
 	if ( machineSpec == 0 && machineName == 0 )
 		hostData << "<host line=\"1\" col=\"1\">";
 
-	Scanner scanner( inputFileName, *inStream, hostData, 0, 0, 0, false );
+	Scanner scanner( inputFileName, *inFile, hostData, 0, 0, 0, false );
 	scanner.do_scan();
 
 	/* Finished, final check for errors.. */
@@ -476,29 +479,13 @@ void process( const char *inputFileName, const char *intermed )
 	if ( gblErrorCount > 0 )
 		exit(1);
 	
-	ostream *outputFile = new ofstream( intermed );
+	/* Open the XML file for writing. */
+	ostream *xmlOutFile = new ofstream( xmlFileName );
 
-	/* Write the machines, then the surrounding code. */
-	writeMachines( *outputFile, hostData.str(), inputFileName );
-
-	/* Close the input and the intermediate file. */
-	delete outputFile;
-	delete inFile;
-
-	/* Bail on above error. */
-	if ( gblErrorCount > 0 )
-		exit(1);
-
-	const char *xmlInputFileName = intermed;
-
-	bool wantComplete = true;
-	bool outputActive = true;
-
-	/* Open the input file for reading. */
-	inFile = new ifstream( xmlInputFileName );
-	inStream = inFile;
-	if ( ! inFile->is_open() )
-		error() << "could not open " << xmlInputFileName << " for reading" << endl;
+	/* Open the XML file for reading. */
+	ifstream *xmlInFile = new ifstream( xmlFileName );
+	if ( ! xmlInFile->is_open() )
+		error() << "could not open " << xmlFileName << " for reading" << endl;
 
 	/* Bail on above error. */
 	if ( gblErrorCount > 0 )
@@ -510,11 +497,22 @@ void process( const char *inputFileName, const char *intermed )
 		outputActive = false;
 	}
 
-	XmlScanner xmlScanner( xmlInputFileName, *inStream );
-	XmlParser xmlParser( xmlInputFileName, outputActive, wantComplete );
+	XmlScanner xmlScanner( xmlFileName, *xmlInFile );
+	XmlParser xmlParser( xmlFileName, outputActive, wantComplete );
 	xmlParser.init();
 
-	xml_parse( *inStream, xmlInputFileName, 
+	/* Write the machines, then the surrounding code. */
+	writeMachines( *xmlOutFile, hostData.str(), inputFileName, xmlParser );
+
+	/* Close the input and the intermediate file. */
+	delete xmlOutFile;
+	delete inFile;
+
+	/* Bail on above error. */
+	if ( gblErrorCount > 0 )
+		exit(1);
+
+	xml_parse( *xmlInFile, xmlFileName, 
 		outputActive, wantComplete,
 		xmlScanner, xmlParser );
 

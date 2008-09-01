@@ -80,8 +80,11 @@ std::ostream &error();
 std::ostream &error( const InputLoc &loc ); 
 std::ostream &warning( const InputLoc &loc ); 
 
+struct XmlParser;
+
 void terminateAllParsers( );
-void writeMachines( std::ostream &out, std::string hostData, const char *inputFileName );
+void writeMachines( std::ostream &out, std::string hostData, 
+	const char *inputFileName, XmlParser &xmlParser );
 void xmlEscapeHost( std::ostream &out, char *data, long len );
 
 typedef Vector<const char *> ArgsVector;
