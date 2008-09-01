@@ -140,7 +140,7 @@ std::ostream &RubyFTabCodeGen::TO_STATE_ACTION_SWITCH()
 			out << "\twhen " << redAct->actListId+1 << " then\n";
 
 			/* Write each action in the list of action items. */
-			for ( ActionTable::Iter item = redAct->key; item.lte(); item++ )
+			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
 				ACTION( out, item->value, 0, false );
 
 		}
@@ -161,7 +161,7 @@ std::ostream &RubyFTabCodeGen::FROM_STATE_ACTION_SWITCH()
 			out << "\twhen " << redAct->actListId+1 << " then\n";
 
 			/* Write each action in the list of action items. */
-			for ( ActionTable::Iter item = redAct->key; item.lte(); item++ )
+			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
 				ACTION( out, item->value, 0, false );
 
 		}
@@ -180,7 +180,7 @@ std::ostream &RubyFTabCodeGen::EOF_ACTION_SWITCH()
 			out << "\twhen " << redAct->actListId+1 << " then\n";
 
 			/* Write each action in the list of action items. */
-			for ( ActionTable::Iter item = redAct->key; item.lte(); item++ )
+			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
 				ACTION( out, item->value, 0, true );
 
 		}
@@ -201,7 +201,7 @@ std::ostream &RubyFTabCodeGen::ACTION_SWITCH()
 			out << "\twhen " << redAct->actListId+1 << " then\n";
 
 			/* Write each action in the list of action items. */
-			for ( ActionTable::Iter item = redAct->key; item.lte(); item++ )
+			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
 				ACTION( out, item->value, 0, false );
 
 		}

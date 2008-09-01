@@ -36,7 +36,7 @@ std::ostream &FGotoCodeGen::EXEC_ACTIONS()
 			out << "f" << redAct->actListId << ":\n";
 
 			/* Write each action in the list of action items. */
-			for ( ActionTable::Iter item = redAct->key; item.lte(); item++ )
+			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
 				ACTION( out, item->value, 0, false, false );
 
 			out << "\tgoto _again;\n";
@@ -56,7 +56,7 @@ std::ostream &FGotoCodeGen::TO_STATE_ACTION_SWITCH()
 			out << "\tcase " << redAct->actListId+1 << ":\n";
 
 			/* Write each action in the list of action items. */
-			for ( ActionTable::Iter item = redAct->key; item.lte(); item++ )
+			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
 				ACTION( out, item->value, 0, false, false );
 
 			out << "\tbreak;\n";
@@ -78,7 +78,7 @@ std::ostream &FGotoCodeGen::FROM_STATE_ACTION_SWITCH()
 			out << "\tcase " << redAct->actListId+1 << ":\n";
 
 			/* Write each action in the list of action items. */
-			for ( ActionTable::Iter item = redAct->key; item.lte(); item++ )
+			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
 				ACTION( out, item->value, 0, false, false );
 
 			out << "\tbreak;\n";
@@ -98,7 +98,7 @@ std::ostream &FGotoCodeGen::EOF_ACTION_SWITCH()
 			out << "\tcase " << redAct->actListId+1 << ":\n";
 
 			/* Write each action in the list of action items. */
-			for ( ActionTable::Iter item = redAct->key; item.lte(); item++ )
+			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
 				ACTION( out, item->value, 0, true, false );
 
 			out << "\tbreak;\n";

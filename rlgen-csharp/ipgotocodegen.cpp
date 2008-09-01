@@ -140,7 +140,7 @@ bool CSharpIpGotoCodeGen::IN_TRANS_ACTIONS( RedStateAp *state )
 				out << "	" << CS() << " = " << trans->targ->id << ";\n";
 
 			/* Write each action in the list. */
-			for ( ActionTable::Iter item = trans->action->key; item.lte(); item++ )
+			for ( GenActionTable::Iter item = trans->action->key; item.lte(); item++ )
 				ACTION( out, item->value, trans->targ->id, false );
 
 			/* If the action contains a next then we need to reload, otherwise
@@ -167,7 +167,7 @@ void CSharpIpGotoCodeGen::GOTO_HEADER( RedStateAp *state )
 	if ( state->toStateAction != 0 ) {
 		/* Remember that we wrote an action. Write every action in the list. */
 		anyWritten = true;
-		for ( ActionTable::Iter item = state->toStateAction->key; item.lte(); item++ )
+		for ( GenActionTable::Iter item = state->toStateAction->key; item.lte(); item++ )
 			ACTION( out, item->value, state->id, false );
 	}
 
@@ -190,7 +190,7 @@ void CSharpIpGotoCodeGen::GOTO_HEADER( RedStateAp *state )
 	if ( state->fromStateAction != 0 ) {
 		/* Remember that we wrote an action. Write every action in the list. */
 		anyWritten = true;
-		for ( ActionTable::Iter item = state->fromStateAction->key; item.lte(); item++ )
+		for ( GenActionTable::Iter item = state->fromStateAction->key; item.lte(); item++ )
 			ACTION( out, item->value, state->id, false );
 	}
 
@@ -285,7 +285,7 @@ std::ostream &CSharpIpGotoCodeGen::FINISH_CASES()
 			anyWritten = true;
 
 			/* Write each action in the eof action list. */
-			for ( ActionTable::Iter item = act->key; item.lte(); item++ )
+			for ( GenActionTable::Iter item = act->key; item.lte(); item++ )
 				ACTION( out, item->value, STATE_ERR_STATE, true );
 			out << "\tbreak;\n";
 		}
@@ -338,7 +338,7 @@ void CSharpIpGotoCodeGen::setLabelsNeeded()
 			 * invoked on characters (ie, not from out action code). */
 			if ( trans->action != 0 ) {
 				/* Loop the actions. */
-				for ( ActionTable::Iter act = trans->action->key; act.lte(); act++ ) {
+				for ( GenActionTable::Iter act = trans->action->key; act.lte(); act++ ) {
 					/* Get the action and walk it's tree. */
 					setLabelsNeeded( act->value->inlineList );
 				}

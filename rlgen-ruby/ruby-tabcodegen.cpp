@@ -158,12 +158,12 @@ void RubyTabCodeGen::COND_TRANSLATE()
 							" + ((_mid - _keys)>>1)]\n";
 
 	for ( CondSpaceList::Iter csi = condSpaceList; csi.lte(); csi++ ) {
-		CondSpace *condSpace = csi;
+		GenCondSpace *condSpace = csi;
 		out << "	when " << condSpace->condSpaceId << " then" ;
 		out << "	_widec = " << KEY(condSpace->baseKey) << 
 				"+ (" << GET_KEY() << " - " << KEY(keyOps->minKey) << ")\n";
 
-		for ( CondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
+		for ( GenCondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
 			Size condValOffset = ((1 << csi.pos()) * keyOps->alphSize());
 			out << "	_widec += " << condValOffset << " if ( ";
 			CONDITION( out, *csi );
@@ -444,7 +444,7 @@ void RubyTabCodeGen::writeExec()
 std::ostream &RubyTabCodeGen::FROM_STATE_ACTION_SWITCH() 
 {
 	/* Walk the list of functions, printing the cases. */
-	for ( ActionList::Iter act = actionList; act.lte(); act++ ) {
+	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numFromStateRefs > 0 ) {
 			/* Write the case label, the action */
@@ -461,7 +461,7 @@ std::ostream &RubyTabCodeGen::FROM_STATE_ACTION_SWITCH()
 std::ostream &RubyTabCodeGen::TO_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
-	for ( ActionList::Iter act = actionList; act.lte(); act++ ) {
+	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numToStateRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
@@ -477,7 +477,7 @@ std::ostream &RubyTabCodeGen::TO_STATE_ACTION_SWITCH()
 std::ostream &RubyTabCodeGen::EOF_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
-	for ( ActionList::Iter act = actionList; act.lte(); act++ ) {
+	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numEofRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
@@ -493,7 +493,7 @@ std::ostream &RubyTabCodeGen::EOF_ACTION_SWITCH()
 std::ostream &RubyTabCodeGen::ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
-	for ( ActionList::Iter act = actionList; act.lte(); act++ ) {
+	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numTransRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
@@ -691,7 +691,7 @@ std::ostream &RubyTabCodeGen::COND_KEYS()
 	int totalTrans = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Loop the state's transitions. */
-		for ( StateCondList::Iter sc = st->stateCondList; sc.lte(); sc++ ) {
+		for ( GenStateCondList::Iter sc = st->stateCondList; sc.lte(); sc++ ) {
 			/* Lower key. */
 			ARRAY_ITEM( KEY( sc->lowKey ), ++totalTrans, false );
 			ARRAY_ITEM( KEY( sc->highKey ), ++totalTrans, false );
@@ -711,7 +711,7 @@ std::ostream &RubyTabCodeGen::COND_SPACES()
 	int totalTrans = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Loop the state's transitions. */
-		for ( StateCondList::Iter sc = st->stateCondList; sc.lte(); sc++ ) {
+		for ( GenStateCondList::Iter sc = st->stateCondList; sc.lte(); sc++ ) {
 			/* Cond Space id. */
 			ARRAY_ITEM( KEY( sc->condSpace->condSpaceId ), ++totalTrans, false );
 		}

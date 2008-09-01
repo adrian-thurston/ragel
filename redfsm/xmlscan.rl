@@ -22,14 +22,11 @@
 #include <string.h>
 #include "vector.h"
 #include "xmlparse.h"
-#include "buffer.h"
 
 using std::istream;
 using std::cout;
 using std::cerr;
 using std::endl;
-
-#define BUFSIZE 4096
 
 %%{
 	machine XmlScanner;
@@ -45,50 +42,21 @@ public:
 	static struct XMLTagHashPair *in_word_set (const char *str, unsigned int len);
 };
 
-struct XmlScanner
+XmlScanner::XmlScanner( const char *fileName, istream &input ) : 
+	fileName(fileName),
+	input(input), 
+	curline(1), 
+	curcol(1),
+	p(0), pe(0), 
+	done(false),
+	data(0), data_len(0),
+	value(0)
 {
-	XmlScanner( const char *fileName, istream &input ) : 
-		fileName(fileName),
-		input(input), 
-		curline(1), 
-		curcol(1),
-		p(0), pe(0), 
-		done(false),
-		data(0), data_len(0),
-		value(0)
-	{
-		%%{
-			machine XmlScanner;
-			write init;
-		}%%
-	}
-	
-	int scan();
-	void adjustAttrPointers( int distance );
-	std::ostream &error();
-
-	const char *fileName;
-	istream &input;
-
-	/* Scanner State. */
-	int cs, act, have, curline, curcol;
-	char *ts, *te;
-	char *p, *pe;
-	int done;
-
-	/* Token data */
-	char *data;
-	int data_len;
-	int value;
-	AttrMkList attrMkList;
-	Buffer buffer;
-	char *tag_id_start;
-	int tag_id_len;
-	int token_col, token_line;
-
-	char buf[BUFSIZE];
-};
-
+	%%{
+		machine XmlScanner;
+		write init;
+	}%%
+}
 
 #define TK_NO_TOKEN (-1)
 #define TK_ERR 1
@@ -211,7 +179,7 @@ int XmlScanner::scan( )
 			}
 
 			p = buf + have;
-			space = BUFSIZE - have;
+			space = XML_BUFSIZE - have;
 
 			if ( space == 0 ) {
 				/* We filled up the buffer trying to scan a token. */

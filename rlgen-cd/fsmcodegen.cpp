@@ -121,7 +121,7 @@ std::ostream &FsmCodeGen::ACTIONS_ARRAY()
 		if ( totalActions++ % 8 == 7 )
 			out << "\n\t";
 
-		for ( ActionTable::Iter item = act->key; item.lte(); item++ ) {
+		for ( GenActionTable::Iter item = act->key; item.lte(); item++ ) {
 			out << item->value->actionId;
 			if ( ! (act.last() && item.last()) )
 				out << ", ";
@@ -500,7 +500,7 @@ string FsmCodeGen::LDIR_PATH( char *path )
 	return ret.str();
 }
 
-void FsmCodeGen::ACTION( ostream &ret, Action *action, int targState, 
+void FsmCodeGen::ACTION( ostream &ret, GenAction *action, int targState, 
 		bool inFinish, bool csForced )
 {
 	/* Write the preprocessor line info for going into the source file. */
@@ -512,7 +512,7 @@ void FsmCodeGen::ACTION( ostream &ret, Action *action, int targState,
 	ret << "}\n";
 }
 
-void FsmCodeGen::CONDITION( ostream &ret, Action *condition )
+void FsmCodeGen::CONDITION( ostream &ret, GenAction *condition )
 {
 	ret << "\n";
 	cdLineDirective( ret, sourceFileName, condition->loc.line );

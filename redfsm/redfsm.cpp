@@ -29,7 +29,7 @@ using std::ostringstream;
 
 /* KeyOps *keyOps = 0; */
 
-string Action::nameOrLoc()
+string GenAction::nameOrLoc()
 {
 	if ( name != 0 )
 		return string(name);
@@ -298,10 +298,10 @@ void RedFsmAp::makeFlat()
 			st->condHighKey = st->stateCondList.tail->highKey;
 
 			unsigned long long span = keyOps->span( st->condLowKey, st->condHighKey );
-			st->condList = new CondSpace*[ span ];
-			memset( st->condList, 0, sizeof(CondSpace*)*span );
+			st->condList = new GenCondSpace*[ span ];
+			memset( st->condList, 0, sizeof(GenCondSpace*)*span );
 
-			for ( StateCondList::Iter sci = st->stateCondList; sci.lte(); sci++ ) {
+			for ( GenStateCondList::Iter sci = st->stateCondList; sci.lte(); sci++ ) {
 				unsigned long long base, trSpan;
 				base = keyOps->span( st->condLowKey, sci->lowKey )-1;
 				trSpan = keyOps->span( sci->lowKey, sci->highKey );

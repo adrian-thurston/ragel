@@ -48,7 +48,7 @@ using std::string;
 
 struct RedStateAp;
 struct GenInlineList;
-struct Action;
+struct GenAction;
 
 /* Location in an input file. */
 struct GenInputLoc
@@ -92,11 +92,11 @@ struct GenInlineItem
 struct GenInlineList : public DList<GenInlineItem> { };
 
 /* Element in list of actions. Contains the string for the code to exectute. */
-struct Action 
+struct GenAction 
 :
-	public DListEl<Action>
+	public DListEl<GenAction>
 {
-	Action( )
+	GenAction( )
 	:
 		name(0),
 		inlineList(0), 
@@ -130,23 +130,23 @@ struct Action
 struct RedStateAp;
 struct StateAp;
 
-/* Transistion Action Element. */
-typedef SBstMapEl< int, Action* > ActionTableEl;
+/* Transistion GenAction Element. */
+typedef SBstMapEl< int, GenAction* > GenActionTableEl;
 
-/* Transition Action Table.  */
-struct ActionTable 
-	: public SBstMap< int, Action*, CmpOrd<int> >
+/* Transition GenAction Table.  */
+struct GenActionTable 
+	: public SBstMap< int, GenAction*, CmpOrd<int> >
 {
-	void setAction( int ordering, Action *action );
-	void setActions( int *orderings, Action **actions, int nActs );
-	void setActions( const ActionTable &other );
+	void setAction( int ordering, GenAction *action );
+	void setActions( int *orderings, GenAction **actions, int nActs );
+	void setActions( const GenActionTable &other );
 };
 
 /* Compare of a whole action table element (key & value). */
-struct CmpActionTableEl
+struct CmpGenActionTableEl
 {
-	static int compare( const ActionTableEl &action1, 
-			const ActionTableEl &action2 )
+	static int compare( const GenActionTableEl &action1, 
+			const GenActionTableEl &action2 )
 	{
 		if ( action1.key < action2.key )
 			return -1;
@@ -160,8 +160,8 @@ struct CmpActionTableEl
 	}
 };
 
-/* Compare for ActionTable. */
-typedef CmpSTable< ActionTableEl, CmpActionTableEl > CmpActionTable;
+/* Compare for GenActionTable. */
+typedef CmpSTable< GenActionTableEl, CmpGenActionTableEl > CmpGenActionTable;
 
 /* Set of states. */
 typedef BstSet<RedStateAp*> RedStateSet;
@@ -185,10 +185,10 @@ struct RedAction
 		bAnyBreakStmt(false)
 	{ }
 	
-	const ActionTable &getKey() 
+	const GenActionTable &getKey() 
 		{ return key; }
 
-	ActionTable key;
+	GenActionTable key;
 	int actListId;
 	int location;
 	IntSet *eofRefs;
@@ -209,7 +209,7 @@ struct RedAction
 	bool bAnyCurStateRef;
 	bool bAnyBreakStmt;
 };
-typedef AvlTree<RedAction, ActionTable, CmpActionTable> ActionTableMap;
+typedef AvlTree<RedAction, GenActionTable, CmpGenActionTable> ActionTableMap;
 
 /* Reduced transition. */
 struct RedTransAp
@@ -287,7 +287,7 @@ typedef MergeSort<RedSpanMapEl, CmpRedSpanMapEl> RedSpanMapSort;
 typedef Vector<int> EntryIdVect;
 typedef Vector<char*> EntryNameVect;
 
-typedef Vector< Action* > CondSet;
+typedef Vector< GenAction* > GenCondSet;
 
 struct Condition
 {
@@ -296,33 +296,33 @@ struct Condition
 
 	Key key;
 	Key baseKey;
-	CondSet condSet;
+	GenCondSet condSet;
 
 	Condition *next, *prev;
 };
 typedef DList<Condition> ConditionList;
 
-struct CondSpace
+struct GenCondSpace
 {
 	Key baseKey;
-	CondSet condSet;
+	GenCondSet condSet;
 	int condSpaceId;
 
-	CondSpace *next, *prev;
+	GenCondSpace *next, *prev;
 };
-typedef DList<CondSpace> CondSpaceList;
+typedef DList<GenCondSpace> CondSpaceList;
 
-struct StateCond
+struct GenStateCond
 {
 	Key lowKey;
 	Key highKey;
 
-	CondSpace *condSpace;
+	GenCondSpace *condSpace;
 
-	StateCond *prev, *next;
+	GenStateCond *prev, *next;
 };
-typedef DList<StateCond> StateCondList;
-typedef Vector<StateCond*> StateCondVect;
+typedef DList<GenStateCond> GenStateCondList;
+typedef Vector<GenStateCond*> StateCondVect;
 
 /* Reduced state. */
 struct RedStateAp
@@ -354,7 +354,7 @@ struct RedStateAp
 
 	/* For flat conditions. */
 	Key condLowKey, condHighKey;
-	CondSpace **condList;
+	GenCondSpace **condList;
 
 	/* For flat keys. */
 	Key lowKey, highKey;
@@ -372,7 +372,7 @@ struct RedStateAp
 	RedAction *eofAction;
 	RedTransAp *eofTrans;
 	int id;
-	StateCondList stateCondList;
+	GenStateCondList stateCondList;
 	StateCondVect stateCondVect;
 
 	/* Pointers for the list of states. */

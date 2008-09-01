@@ -95,8 +95,8 @@ std::ostream &GraphvizDotGen::TRANS_ACTION( RedStateAp *fromState, RedTransAp *t
 	
 	/* Loop the existing actions and write out what's there. */
 	for ( int a = 0; a < n; a++ ) {
-		for ( ActionTable::Iter actIt = actions[a]->key.first(); actIt.lte(); actIt++ ) {
-			Action *action = actIt->value;
+		for ( GenActionTable::Iter actIt = actions[a]->key.first(); actIt.lte(); actIt++ ) {
+			GenAction *action = actIt->value;
 			out << action->nameOrLoc();
 			if ( a < n-1 || !actIt.last() )
 				out << ", ";
@@ -109,8 +109,8 @@ std::ostream &GraphvizDotGen::ACTION( RedAction *action )
 {
 	/* The action. */
 	out << " / ";
-	for ( ActionTable::Iter actIt = action->key.first(); actIt.lte(); actIt++ ) {
-		Action *action = actIt->value;
+	for ( GenActionTable::Iter actIt = action->key.first(); actIt.lte(); actIt++ ) {
+		GenAction *action = actIt->value;
 		if ( action->name != 0 )
 			out << action->name;
 		else
@@ -124,7 +124,7 @@ std::ostream &GraphvizDotGen::ACTION( RedAction *action )
 std::ostream &GraphvizDotGen::ONCHAR( Key lowKey, Key highKey )
 {
 	if ( lowKey > keyOps->maxKey ) {
-		CondSpace *condSpace = findCondSpace( lowKey, highKey );
+		GenCondSpace *condSpace = findCondSpace( lowKey, highKey );
 		Key values = ( lowKey - condSpace->baseKey ) / keyOps->alphSize();
 
 		lowKey = keyOps->minKey + 
@@ -138,7 +138,7 @@ std::ostream &GraphvizDotGen::ONCHAR( Key lowKey, Key highKey )
 		}
 		out << "(";
 
-		for ( CondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
+		for ( GenCondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
 			bool set = values & (1 << csi.pos());
 			if ( !set )
 				out << "!";

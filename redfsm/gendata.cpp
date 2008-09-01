@@ -73,7 +73,7 @@ void CodeGenData::createMachine()
 
 void CodeGenData::initActionList( unsigned long length )
 { 
-	allActions = new Action[length];
+	allActions = new GenAction[length];
 	for ( unsigned long a = 0; a < length; a++ )
 		actionList.append( allActions+a );
 }
@@ -274,7 +274,7 @@ void CodeGenData::resolveTargetStates( GenInlineList *inlineList )
 
 void CodeGenData::closeMachine()
 {
-	for ( ActionList::Iter a = actionList; a.lte(); a++ )
+	for ( GenActionList::Iter a = actionList; a.lte(); a++ )
 		resolveTargetStates( a->inlineList );
 
 	/* Note that even if we want a complete graph we do not give the error
@@ -282,7 +282,7 @@ void CodeGenData::closeMachine()
 	 * loop when in the error state. */
 
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		for ( StateCondList::Iter sci = st->stateCondList; sci.lte(); sci++ )
+		for ( GenStateCondList::Iter sci = st->stateCondList; sci.lte(); sci++ )
 			st->stateCondVect.append( sci );
 	}
 }
@@ -300,21 +300,21 @@ bool CodeGenData::setAlphType( char *data )
 
 void CodeGenData::initCondSpaceList( ulong length )
 {
-	allCondSpaces = new CondSpace[length];
+	allCondSpaces = new GenCondSpace[length];
 	for ( ulong c = 0; c < length; c++ )
 		condSpaceList.append( allCondSpaces + c );
 }
 
 void CodeGenData::newCondSpace( int cnum, int condSpaceId, Key baseKey )
 {
-	CondSpace *cond = allCondSpaces + cnum;
+	GenCondSpace *cond = allCondSpaces + cnum;
 	cond->condSpaceId = condSpaceId;
 	cond->baseKey = baseKey;
 }
 
 void CodeGenData::condSpaceItem( int cnum, long condActionId )
 {
-	CondSpace *cond = allCondSpaces + cnum;
+	GenCondSpace *cond = allCondSpaces + cnum;
 	cond->condSet.append( allActions + condActionId );
 }
 
@@ -328,19 +328,19 @@ void CodeGenData::addStateCond( int snum, Key lowKey, Key highKey, long condNum 
 	RedStateAp *curState = allStates + snum;
 
 	/* Create the new state condition. */
-	StateCond *stateCond = new StateCond;
+	GenStateCond *stateCond = new GenStateCond;
 	stateCond->lowKey = lowKey;
 	stateCond->highKey = highKey;
 
 	/* Assign it a cond space. */
-	CondSpace *condSpace = allCondSpaces + condNum;
+	GenCondSpace *condSpace = allCondSpaces + condNum;
 	stateCond->condSpace = condSpace;
 
 	curState->stateCondList.append( stateCond );
 }
 
 
-CondSpace *CodeGenData::findCondSpace( Key lowKey, Key highKey )
+GenCondSpace *CodeGenData::findCondSpace( Key lowKey, Key highKey )
 {
 	for ( CondSpaceList::Iter cs = condSpaceList; cs.lte(); cs++ ) {
 		Key csHighKey = cs->baseKey;
@@ -386,7 +386,7 @@ void CodeGenData::findFinalActionRefs()
 		for ( RedTransList::Iter rtel = st->outSingle; rtel.lte(); rtel++ ) {
 			if ( rtel->value->action != 0 ) {
 				rtel->value->action->numTransRefs += 1;
-				for ( ActionTable::Iter item = rtel->value->action->key; item.lte(); item++ )
+				for ( GenActionTable::Iter item = rtel->value->action->key; item.lte(); item++ )
 					item->value->numTransRefs += 1;
 			}
 		}
@@ -395,7 +395,7 @@ void CodeGenData::findFinalActionRefs()
 		for ( RedTransList::Iter rtel = st->outRange; rtel.lte(); rtel++ ) {
 			if ( rtel->value->action != 0 ) {
 				rtel->value->action->numTransRefs += 1;
-				for ( ActionTable::Iter item = rtel->value->action->key; item.lte(); item++ )
+				for ( GenActionTable::Iter item = rtel->value->action->key; item.lte(); item++ )
 					item->value->numTransRefs += 1;
 			}
 		}
@@ -403,41 +403,41 @@ void CodeGenData::findFinalActionRefs()
 		/* Reference count default transition. */
 		if ( st->defTrans != 0 && st->defTrans->action != 0 ) {
 			st->defTrans->action->numTransRefs += 1;
-			for ( ActionTable::Iter item = st->defTrans->action->key; item.lte(); item++ )
+			for ( GenActionTable::Iter item = st->defTrans->action->key; item.lte(); item++ )
 				item->value->numTransRefs += 1;
 		}
 
 		/* Reference count eof transitions. */
 		if ( st->eofTrans != 0 && st->eofTrans->action != 0 ) {
 			st->eofTrans->action->numTransRefs += 1;
-			for ( ActionTable::Iter item = st->eofTrans->action->key; item.lte(); item++ )
+			for ( GenActionTable::Iter item = st->eofTrans->action->key; item.lte(); item++ )
 				item->value->numTransRefs += 1;
 		}
 
 		/* Reference count to state actions. */
 		if ( st->toStateAction != 0 ) {
 			st->toStateAction->numToStateRefs += 1;
-			for ( ActionTable::Iter item = st->toStateAction->key; item.lte(); item++ )
+			for ( GenActionTable::Iter item = st->toStateAction->key; item.lte(); item++ )
 				item->value->numToStateRefs += 1;
 		}
 
 		/* Reference count from state actions. */
 		if ( st->fromStateAction != 0 ) {
 			st->fromStateAction->numFromStateRefs += 1;
-			for ( ActionTable::Iter item = st->fromStateAction->key; item.lte(); item++ )
+			for ( GenActionTable::Iter item = st->fromStateAction->key; item.lte(); item++ )
 				item->value->numFromStateRefs += 1;
 		}
 
 		/* Reference count EOF actions. */
 		if ( st->eofAction != 0 ) {
 			st->eofAction->numEofRefs += 1;
-			for ( ActionTable::Iter item = st->eofAction->key; item.lte(); item++ )
+			for ( GenActionTable::Iter item = st->eofAction->key; item.lte(); item++ )
 				item->value->numEofRefs += 1;
 		}
 	}
 }
 
-void CodeGenData::analyzeAction( Action *act, GenInlineList *inlineList )
+void CodeGenData::analyzeAction( GenAction *act, GenInlineList *inlineList )
 {
 	for ( GenInlineList::Iter item = *inlineList; item.lte(); item++ ) {
 		/* Only consider actions that are referenced. */
@@ -500,7 +500,7 @@ void CodeGenData::analyzeActionList( RedAction *redAct, GenInlineList *inlineLis
 void CodeGenData::assignActionIds()
 {
 	int nextActionId = 0;
-	for ( ActionList::Iter act = actionList; act.lte(); act++ ) {
+	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
 		/* Only ever interested in referenced actions. */
 		if ( act->numRefs() > 0 )
 			act->actionId = nextActionId++;
@@ -597,7 +597,7 @@ void CodeGenData::setValueLimits()
 		/* Maximum values going into the action array. */
 		if ( at->key.length() > redFsm->maxActArrItem )
 			redFsm->maxActArrItem = at->key.length();
-		for ( ActionTable::Iter item = at->key; item.lte(); item++ ) {
+		for ( GenActionTable::Iter item = at->key; item.lte(); item++ ) {
 			if ( item->value->actionId > redFsm->maxActArrItem )
 				redFsm->maxActArrItem = item->value->actionId;
 		}
@@ -613,7 +613,7 @@ void CodeGenData::analyzeMachine()
 	findFinalActionRefs();
 
 	/* Check if there are any calls in action code. */
-	for ( ActionList::Iter act = actionList; act.lte(); act++ ) {
+	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
 		/* Record the occurrence of various kinds of actions. */
 		if ( act->numToStateRefs > 0 )
 			redFsm->bAnyToStateActions = true;
@@ -630,7 +630,7 @@ void CodeGenData::analyzeMachine()
 
 	/* Analyze reduced action lists. */
 	for ( ActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
-		for ( ActionTable::Iter act = redAct->key; act.lte(); act++ )
+		for ( GenActionTable::Iter act = redAct->key; act.lte(); act++ )
 			analyzeActionList( redAct, act->value->inlineList );
 	}
 

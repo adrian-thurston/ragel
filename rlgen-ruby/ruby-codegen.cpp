@@ -238,7 +238,7 @@ string RubyCodeGen::FSM_NAME()
 }
 
 
-void RubyCodeGen::ACTION( ostream &ret, Action *action, int targState, bool inFinish )
+void RubyCodeGen::ACTION( ostream &ret, GenAction *action, int targState, bool inFinish )
 {
 	/* Write the preprocessor line info for going into the source file. */
 	rubyLineDirective( ret, sourceFileName, action->loc.line );
@@ -312,7 +312,7 @@ string RubyCodeGen::INT( int i )
 	return ret.str();
 }
 
-void RubyCodeGen::CONDITION( ostream &ret, Action *condition )
+void RubyCodeGen::CONDITION( ostream &ret, GenAction *condition )
 {
 	ret << "\n";
 	rubyLineDirective( ret, sourceFileName, condition->loc.line );
@@ -375,7 +375,7 @@ std::ostream &RubyCodeGen::ACTIONS_ARRAY()
 		/* Write out the length, which will never be the last character. */
 		ARRAY_ITEM( INT(act->key.length()), ++totalActions, false );
 
-		for ( ActionTable::Iter item = act->key; item.lte(); item++ ) {
+		for ( GenActionTable::Iter item = act->key; item.lte(); item++ ) {
 			ARRAY_ITEM( INT(item->value->actionId), ++totalActions, (act.last() && item.last()) );
 		}
 	}

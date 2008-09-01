@@ -68,7 +68,7 @@ void CSharpSplitCodeGen::GOTO_HEADER( RedStateAp *state, bool stateInPartition )
 	if ( state->toStateAction != 0 ) {
 		/* Remember that we wrote an action. Write every action in the list. */
 		anyWritten = true;
-		for ( ActionTable::Iter item = state->toStateAction->key; item.lte(); item++ )
+		for ( GenActionTable::Iter item = state->toStateAction->key; item.lte(); item++ )
 			ACTION( out, item->value, state->id, false );
 	}
 
@@ -91,7 +91,7 @@ void CSharpSplitCodeGen::GOTO_HEADER( RedStateAp *state, bool stateInPartition )
 	if ( state->fromStateAction != 0 ) {
 		/* Remember that we wrote an action. Write every action in the list. */
 		anyWritten = true;
-		for ( ActionTable::Iter item = state->fromStateAction->key; item.lte(); item++ )
+		for ( GenActionTable::Iter item = state->fromStateAction->key; item.lte(); item++ )
 			ACTION( out, item->value, state->id, false );
 	}
 
@@ -154,7 +154,7 @@ std::ostream &CSharpSplitCodeGen::PART_TRANS( int partition )
 					out << "	" << CS() << " = " << trans->targ->id << ";\n";
 
 				/* Write each action in the list. */
-				for ( ActionTable::Iter item = trans->action->key; item.lte(); item++ )
+				for ( GenActionTable::Iter item = trans->action->key; item.lte(); item++ )
 					ACTION( out, item->value, trans->targ->id, false );
 			}
 
@@ -172,7 +172,7 @@ std::ostream &CSharpSplitCodeGen::PART_TRANS( int partition )
 
 			if ( st->toStateAction != 0 ) {
 				/* Remember that we wrote an action. Write every action in the list. */
-				for ( ActionTable::Iter item = st->toStateAction->key; item.lte(); item++ )
+				for ( GenActionTable::Iter item = st->toStateAction->key; item.lte(); item++ )
 					ACTION( out, item->value, st->id, false );
 				genLineDirective( out );
 			}
@@ -463,7 +463,7 @@ void CSharpSplitCodeGen::setLabelsNeeded( RedStateAp *fromState, RedTransAp *tra
 	 * invoked on characters (ie, not from out action code). */
 	if ( trans->action != 0 ) {
 		/* Loop the actions. */
-		for ( ActionTable::Iter act = trans->action->key; act.lte(); act++ ) {
+		for ( GenActionTable::Iter act = trans->action->key; act.lte(); act++ ) {
 			/* Get the action and walk it's tree. */
 			setLabelsNeeded( fromState, act->value->inlineList );
 		}

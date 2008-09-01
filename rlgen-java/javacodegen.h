@@ -117,8 +117,8 @@ public:
 	string TABS( int level );
 	string KEY( Key key );
 	string INT( int i );
-	void ACTION( ostream &ret, Action *action, int targState, bool inFinish );
-	void CONDITION( ostream &ret, Action *condition );
+	void ACTION( ostream &ret, GenAction *action, int targState, bool inFinish );
+	void CONDITION( ostream &ret, GenAction *condition );
 	string ALPH_TYPE();
 	string WIDE_ALPH_TYPE();
 	string ARRAY_TYPE( unsigned long maxVal );

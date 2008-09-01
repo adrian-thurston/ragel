@@ -32,7 +32,7 @@ using std::ostream;
 extern bool generateDot;
 
 struct NameInst;
-typedef DList<Action> ActionList;
+typedef DList<GenAction> GenActionList;
 
 typedef unsigned long ulong;
 
@@ -105,15 +105,15 @@ struct CodeGenData
 	char *fsmName;
 	ostream &out;
 	RedFsmAp *redFsm;
-	Action *allActions;
+	GenAction *allActions;
 	RedAction *allActionTables;
 	Condition *allConditions;
-	CondSpace *allCondSpaces;
+	GenCondSpace *allCondSpaces;
 	RedStateAp *allStates;
 	NameInst **nameIndex;
 	int startState;
 	int errState;
-	ActionList actionList;
+	GenActionList actionList;
 	ConditionList conditionList;
 	CondSpaceList condSpaceList;
 	GenInlineList *getKeyExpr;
@@ -175,7 +175,7 @@ struct CodeGenData
 	void initStateCondList( int snum, ulong length );
 	void addStateCond( int snum, Key lowKey, Key highKey, long condNum );
 
-	CondSpace *findCondSpace( Key lowKey, Key highKey );
+	GenCondSpace *findCondSpace( Key lowKey, Key highKey );
 	Condition *findCondition( Key key );
 
 	bool setAlphType( char *data );
@@ -185,7 +185,7 @@ struct CodeGenData
 
 	/* Gather various info on the machine. */
 	void analyzeActionList( RedAction *redAct, GenInlineList *inlineList );
-	void analyzeAction( Action *act, GenInlineList *inlineList );
+	void analyzeAction( GenAction *act, GenInlineList *inlineList );
 	void findFinalActionRefs();
 	void analyzeMachine();
 

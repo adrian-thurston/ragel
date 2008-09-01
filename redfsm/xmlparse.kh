@@ -23,9 +23,13 @@
 
 #include "vector.h"
 #include "gendata.h"
+#include "buffer.h"
 #include <iostream>
 
+using std::istream;
 using std::ostream;
+
+#define XML_BUFSIZE 4096
 
 struct AttrMarker
 {
@@ -81,17 +85,44 @@ struct XMLTagHashPair
     int id;
 };
 
-struct Token
-{
-	XMLTag *tag;
-	GenInputLoc loc;
-};
+struct Token;
 
 struct GenInlineItem;
 struct GenInlineList;
 
 struct LmSwitchVect;
 struct LmSwitchAction;
+
+struct XmlScanner
+{
+	XmlScanner( const char *fileName, istream &input );
+
+	int scan();
+	void adjustAttrPointers( int distance );
+	std::ostream &error();
+
+	const char *fileName;
+	istream &input;
+
+	/* Scanner State. */
+	int cs, act, have, curline, curcol;
+	char *ts, *te;
+	char *p, *pe;
+	int done;
+
+	/* Token data */
+	char *data;
+	int data_len;
+	int value;
+	AttrMkList attrMkList;
+	Buffer buffer;
+	char *tag_id_start;
+	int tag_id_len;
+	int token_col, token_line;
+
+	char buf[XML_BUFSIZE];
+};
+
 
 struct XmlParser
 {

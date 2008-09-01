@@ -54,6 +54,7 @@
 #include "vector.h"
 #include "version.h"
 #include "common.h"
+#include "xmlparse.h"
 
 using std::istream;
 using std::ostream;

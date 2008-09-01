@@ -55,8 +55,6 @@ extern bool displayPrintables;
 
 extern int numSplitPartitions;
 
-/* Print a summary of the options. */
-
 /*
  * Callbacks invoked by the XML data parser.
  */

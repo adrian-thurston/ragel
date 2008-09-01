@@ -32,7 +32,7 @@ struct CodeGenData;
 struct NameInst;
 struct RedTransAp;
 struct RedStateAp;
-struct StateCond;
+struct GenStateCond;
 
 /*
  * Goto driven fsm.
@@ -69,7 +69,7 @@ public:
 	std::ostream &FROM_STATE_ACTIONS();
 	std::ostream &EOF_ACTIONS();
 
-	void COND_TRANSLATE( StateCond *stateCond, int level );
+	void COND_TRANSLATE( GenStateCond *stateCond, int level );
 	void emitCondBSearch( RedStateAp *state, int level, int low, int high );
 	void STATE_CONDS( RedStateAp *state, bool genDefault ); 
 

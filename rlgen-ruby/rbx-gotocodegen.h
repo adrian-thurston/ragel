@@ -59,7 +59,7 @@ public:
         int FROM_STATE_ACTION( RedStateAp *state );
         int EOF_ACTION( RedStateAp *state );
 
-	void COND_TRANSLATE( StateCond *stateCond, int level );
+	void COND_TRANSLATE( GenStateCond *stateCond, int level );
 	void emitCondBSearch( RedStateAp *state, int level, int low, int high );
 	void STATE_CONDS( RedStateAp *state, bool genDefault ); 
 

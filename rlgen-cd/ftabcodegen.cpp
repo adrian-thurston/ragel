@@ -103,7 +103,7 @@ std::ostream &FTabCodeGen::TO_STATE_ACTION_SWITCH()
 			out << "\tcase " << redAct->actListId+1 << ":\n";
 
 			/* Write each action in the list of action items. */
-			for ( ActionTable::Iter item = redAct->key; item.lte(); item++ )
+			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
 				ACTION( out, item->value, 0, false, false );
 
 			out << "\tbreak;\n";
@@ -125,7 +125,7 @@ std::ostream &FTabCodeGen::FROM_STATE_ACTION_SWITCH()
 			out << "\tcase " << redAct->actListId+1 << ":\n";
 
 			/* Write each action in the list of action items. */
-			for ( ActionTable::Iter item = redAct->key; item.lte(); item++ )
+			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
 				ACTION( out, item->value, 0, false, false );
 
 			out << "\tbreak;\n";
@@ -145,7 +145,7 @@ std::ostream &FTabCodeGen::EOF_ACTION_SWITCH()
 			out << "\tcase " << redAct->actListId+1 << ":\n";
 
 			/* Write each action in the list of action items. */
-			for ( ActionTable::Iter item = redAct->key; item.lte(); item++ )
+			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
 				ACTION( out, item->value, 0, true, false );
 
 			out << "\tbreak;\n";
@@ -167,7 +167,7 @@ std::ostream &FTabCodeGen::ACTION_SWITCH()
 			out << "\tcase " << redAct->actListId+1 << ":\n";
 
 			/* Write each action in the list of action items. */
-			for ( ActionTable::Iter item = redAct->key; item.lte(); item++ )
+			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
 				ACTION( out, item->value, 0, false, false );
 
 			out << "\tbreak;\n";

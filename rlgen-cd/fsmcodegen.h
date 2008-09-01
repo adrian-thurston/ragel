@@ -40,7 +40,7 @@ using std::ostream;
 struct RedFsmAp;
 struct RedStateAp;
 struct CodeGenData;
-struct Action;
+struct GenAction;
 struct NameInst;
 struct GenInlineItem;
 struct GenInlineList;
@@ -76,9 +76,9 @@ protected:
 	string TABS( int level );
 	string KEY( Key key );
 	string LDIR_PATH( char *path );
-	void ACTION( ostream &ret, Action *action, int targState, 
+	void ACTION( ostream &ret, GenAction *action, int targState, 
 			bool inFinish, bool csForced );
-	void CONDITION( ostream &ret, Action *condition );
+	void CONDITION( ostream &ret, GenAction *condition );
 	string ALPH_TYPE();
 	string WIDE_ALPH_TYPE();
 	string ARRAY_TYPE( unsigned long maxVal );

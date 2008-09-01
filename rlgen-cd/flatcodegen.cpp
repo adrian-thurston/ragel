@@ -66,7 +66,7 @@ std::ostream &FlatCodeGen::TRANS_ACTION( RedTransAp *trans )
 std::ostream &FlatCodeGen::TO_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
-	for ( ActionList::Iter act = actionList; act.lte(); act++ ) {
+	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numToStateRefs > 0 ) {
 			/* Write the case label, the action and the case break */
@@ -83,7 +83,7 @@ std::ostream &FlatCodeGen::TO_STATE_ACTION_SWITCH()
 std::ostream &FlatCodeGen::FROM_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
-	for ( ActionList::Iter act = actionList; act.lte(); act++ ) {
+	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numFromStateRefs > 0 ) {
 			/* Write the case label, the action and the case break */
@@ -100,7 +100,7 @@ std::ostream &FlatCodeGen::FROM_STATE_ACTION_SWITCH()
 std::ostream &FlatCodeGen::EOF_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
-	for ( ActionList::Iter act = actionList; act.lte(); act++ ) {
+	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numEofRefs > 0 ) {
 			/* Write the case label, the action and the case break */
@@ -118,7 +118,7 @@ std::ostream &FlatCodeGen::EOF_ACTION_SWITCH()
 std::ostream &FlatCodeGen::ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
-	for ( ActionList::Iter act = actionList; act.lte(); act++ ) {
+	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numTransRefs > 0 ) {
 			/* Write the case label, the action and the case break */
@@ -651,13 +651,13 @@ void FlatCodeGen::COND_TRANSLATE()
 	out <<
 		"	switch ( _cond ) {\n";
 	for ( CondSpaceList::Iter csi = condSpaceList; csi.lte(); csi++ ) {
-		CondSpace *condSpace = csi;
+		GenCondSpace *condSpace = csi;
 		out << "	case " << condSpace->condSpaceId + 1 << ": {\n";
 		out << TABS(2) << "_widec = " << CAST(WIDE_ALPH_TYPE()) << "(" <<
 				KEY(condSpace->baseKey) << " + (" << GET_KEY() << 
 				" - " << KEY(keyOps->minKey) << "));\n";
 
-		for ( CondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
+		for ( GenCondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
 			out << TABS(2) << "if ( ";
 			CONDITION( out, *csi );
 			Size condValOffset = ((1 << csi.pos()) * keyOps->alphSize());

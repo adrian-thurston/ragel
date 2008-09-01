@@ -95,7 +95,7 @@ std::ostream &TabCodeGen::TRANS_ACTION( RedTransAp *trans )
 std::ostream &TabCodeGen::TO_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
-	for ( ActionList::Iter act = actionList; act.lte(); act++ ) {
+	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numToStateRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
@@ -112,7 +112,7 @@ std::ostream &TabCodeGen::TO_STATE_ACTION_SWITCH()
 std::ostream &TabCodeGen::FROM_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
-	for ( ActionList::Iter act = actionList; act.lte(); act++ ) {
+	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numFromStateRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
@@ -129,7 +129,7 @@ std::ostream &TabCodeGen::FROM_STATE_ACTION_SWITCH()
 std::ostream &TabCodeGen::EOF_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
-	for ( ActionList::Iter act = actionList; act.lte(); act++ ) {
+	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numEofRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
@@ -147,7 +147,7 @@ std::ostream &TabCodeGen::EOF_ACTION_SWITCH()
 std::ostream &TabCodeGen::ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
-	for ( ActionList::Iter act = actionList; act.lte(); act++ ) {
+	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numTransRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
@@ -357,7 +357,7 @@ std::ostream &TabCodeGen::COND_KEYS()
 	int totalTrans = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Loop the state's transitions. */
-		for ( StateCondList::Iter sc = st->stateCondList; sc.lte(); sc++ ) {
+		for ( GenStateCondList::Iter sc = st->stateCondList; sc.lte(); sc++ ) {
 			/* Lower key. */
 			out << KEY( sc->lowKey ) << ", ";
 			if ( ++totalTrans % IALL == 0 )
@@ -382,7 +382,7 @@ std::ostream &TabCodeGen::COND_SPACES()
 	int totalTrans = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Loop the state's transitions. */
-		for ( StateCondList::Iter sc = st->stateCondList; sc.lte(); sc++ ) {
+		for ( GenStateCondList::Iter sc = st->stateCondList; sc.lte(); sc++ ) {
 			/* Cond Space id. */
 			out << sc->condSpace->condSpaceId << ", ";
 			if ( ++totalTrans % IALL == 0 )
@@ -893,13 +893,13 @@ void TabCodeGen::COND_TRANSLATE()
 							" + ((_mid - _keys)>>1)] ) {\n";
 
 	for ( CondSpaceList::Iter csi = condSpaceList; csi.lte(); csi++ ) {
-		CondSpace *condSpace = csi;
+		GenCondSpace *condSpace = csi;
 		out << "	case " << condSpace->condSpaceId << ": {\n";
 		out << TABS(2) << "_widec = " << CAST(WIDE_ALPH_TYPE()) << "(" <<
 				KEY(condSpace->baseKey) << " + (" << GET_KEY() << 
 				" - " << KEY(keyOps->minKey) << "));\n";
 
-		for ( CondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
+		for ( GenCondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
 			out << TABS(2) << "if ( ";
 			CONDITION( out, *csi );
 			Size condValOffset = ((1 << csi.pos()) * keyOps->alphSize());

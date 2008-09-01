@@ -58,7 +58,7 @@ std::ostream &RbxGotoCodeGen::TRANS_GOTO( RedTransAp *trans, int level )
 std::ostream &RbxGotoCodeGen::TO_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
-	for ( ActionList::Iter act = actionList; act.lte(); act++ ) {
+	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numToStateRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
@@ -74,7 +74,7 @@ std::ostream &RbxGotoCodeGen::TO_STATE_ACTION_SWITCH()
 std::ostream &RbxGotoCodeGen::FROM_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
-	for ( ActionList::Iter act = actionList; act.lte(); act++ ) {
+	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numFromStateRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
@@ -90,7 +90,7 @@ std::ostream &RbxGotoCodeGen::FROM_STATE_ACTION_SWITCH()
 std::ostream &RbxGotoCodeGen::EOF_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
-	for ( ActionList::Iter act = actionList; act.lte(); act++ ) {
+	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numEofRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
@@ -106,7 +106,7 @@ std::ostream &RbxGotoCodeGen::EOF_ACTION_SWITCH()
 std::ostream &RbxGotoCodeGen::ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
-	for ( ActionList::Iter act = actionList; act.lte(); act++ ) {
+	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numTransRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
@@ -259,14 +259,14 @@ void RbxGotoCodeGen::STATE_GOTO_ERROR()
 	rbxGoto(out << "	", "_out") << "\n";
 }
 
-void RbxGotoCodeGen::COND_TRANSLATE( StateCond *stateCond, int level )
+void RbxGotoCodeGen::COND_TRANSLATE( GenStateCond *stateCond, int level )
 {
-	CondSpace *condSpace = stateCond->condSpace;
+	GenCondSpace *condSpace = stateCond->condSpace;
 	out << TABS(level) << "_widec = " <<
 		KEY(condSpace->baseKey) << " + (" << GET_KEY() << 
 		" - " << KEY(keyOps->minKey) << ");\n";
 
-	for ( CondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
+	for ( GenCondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
 		out << TABS(level) << "if ";
 		CONDITION( out, *csi );
 		Size condValOffset = ((1 << csi.pos()) * keyOps->alphSize());
@@ -278,7 +278,7 @@ void RbxGotoCodeGen::emitCondBSearch( RedStateAp *state, int level, int low, int
 {
 	/* Get the mid position, staying on the lower end of the range. */
 	int mid = (low + high) >> 1;
-	StateCond **data = state->stateCondVect.data;
+	GenStateCond **data = state->stateCondVect.data;
 
 	/* Determine if we need to look higher or lower. */
 	bool anyLower = mid > low;

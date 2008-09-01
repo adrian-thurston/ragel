@@ -37,7 +37,7 @@ std::ostream &GotoCodeGen::TRANS_GOTO( RedTransAp *trans, int level )
 std::ostream &GotoCodeGen::TO_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
-	for ( ActionList::Iter act = actionList; act.lte(); act++ ) {
+	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numToStateRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
@@ -54,7 +54,7 @@ std::ostream &GotoCodeGen::TO_STATE_ACTION_SWITCH()
 std::ostream &GotoCodeGen::FROM_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
-	for ( ActionList::Iter act = actionList; act.lte(); act++ ) {
+	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numFromStateRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
@@ -71,7 +71,7 @@ std::ostream &GotoCodeGen::FROM_STATE_ACTION_SWITCH()
 std::ostream &GotoCodeGen::EOF_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
-	for ( ActionList::Iter act = actionList; act.lte(); act++ ) {
+	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numEofRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
@@ -88,7 +88,7 @@ std::ostream &GotoCodeGen::EOF_ACTION_SWITCH()
 std::ostream &GotoCodeGen::ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
-	for ( ActionList::Iter act = actionList; act.lte(); act++ ) {
+	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numTransRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
@@ -237,14 +237,14 @@ void GotoCodeGen::STATE_GOTO_ERROR()
 	out << "	goto _out;\n";
 }
 
-void GotoCodeGen::COND_TRANSLATE( StateCond *stateCond, int level )
+void GotoCodeGen::COND_TRANSLATE( GenStateCond *stateCond, int level )
 {
-	CondSpace *condSpace = stateCond->condSpace;
+	GenCondSpace *condSpace = stateCond->condSpace;
 	out << TABS(level) << "_widec = " << CAST(WIDE_ALPH_TYPE()) << "(" <<
 			KEY(condSpace->baseKey) << " + (" << GET_KEY() << 
 			" - " << KEY(keyOps->minKey) << "));\n";
 
-	for ( CondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
+	for ( GenCondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
 		out << TABS(level) << "if ( ";
 		CONDITION( out, *csi );
 		Size condValOffset = ((1 << csi.pos()) * keyOps->alphSize());
@@ -256,7 +256,7 @@ void GotoCodeGen::emitCondBSearch( RedStateAp *state, int level, int low, int hi
 {
 	/* Get the mid position, staying on the lower end of the range. */
 	int mid = (low + high) >> 1;
-	StateCond **data = state->stateCondVect.data;
+	GenStateCond **data = state->stateCondVect.data;
 
 	/* Determine if we need to look higher or lower. */
 	bool anyLower = mid > low;

@@ -297,12 +297,12 @@ void JavaTabCodeGen::COND_TRANSLATE()
 		;
 
 	for ( CondSpaceList::Iter csi = condSpaceList; csi.lte(); csi++ ) {
-		CondSpace *condSpace = csi;
+		GenCondSpace *condSpace = csi;
 		out << "	case " << condSpace->condSpaceId << ": {\n";
 		out << TABS(2) << "_widec = " << KEY(condSpace->baseKey) << 
 				" + (" << GET_KEY() << " - " << KEY(keyOps->minKey) << ");\n";
 
-		for ( CondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
+		for ( GenCondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
 			out << TABS(2) << "if ( ";
 			CONDITION( out, *csi );
 			Size condValOffset = ((1 << csi.pos()) * keyOps->alphSize());
@@ -443,7 +443,7 @@ int JavaTabCodeGen::TRANS_ACTION( RedTransAp *trans )
 std::ostream &JavaTabCodeGen::TO_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
-	for ( ActionList::Iter act = actionList; act.lte(); act++ ) {
+	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numToStateRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
@@ -460,7 +460,7 @@ std::ostream &JavaTabCodeGen::TO_STATE_ACTION_SWITCH()
 std::ostream &JavaTabCodeGen::FROM_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
-	for ( ActionList::Iter act = actionList; act.lte(); act++ ) {
+	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numFromStateRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
@@ -477,7 +477,7 @@ std::ostream &JavaTabCodeGen::FROM_STATE_ACTION_SWITCH()
 std::ostream &JavaTabCodeGen::EOF_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
-	for ( ActionList::Iter act = actionList; act.lte(); act++ ) {
+	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numEofRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
@@ -495,7 +495,7 @@ std::ostream &JavaTabCodeGen::EOF_ACTION_SWITCH()
 std::ostream &JavaTabCodeGen::ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
-	for ( ActionList::Iter act = actionList; act.lte(); act++ ) {
+	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numTransRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
@@ -627,7 +627,7 @@ std::ostream &JavaTabCodeGen::COND_KEYS()
 {
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Loop the state's transitions. */
-		for ( StateCondList::Iter sc = st->stateCondList; sc.lte(); sc++ ) {
+		for ( GenStateCondList::Iter sc = st->stateCondList; sc.lte(); sc++ ) {
 			/* Lower key. */
 			ARRAY_ITEM( KEY( sc->lowKey ), false );
 			ARRAY_ITEM( KEY( sc->highKey ), false );
@@ -644,7 +644,7 @@ std::ostream &JavaTabCodeGen::COND_SPACES()
 {
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Loop the state's transitions. */
-		for ( StateCondList::Iter sc = st->stateCondList; sc.lte(); sc++ ) {
+		for ( GenStateCondList::Iter sc = st->stateCondList; sc.lte(); sc++ ) {
 			/* Cond Space id. */
 			ARRAY_ITEM( KEY( sc->condSpace->condSpaceId ), false );
 		}
@@ -1298,7 +1298,7 @@ std::ostream &JavaTabCodeGen::ACTIONS_ARRAY()
 		/* Write out the length, which will never be the last character. */
 		ARRAY_ITEM( INT(act->key.length()), false );
 
-		for ( ActionTable::Iter item = act->key; item.lte(); item++ )
+		for ( GenActionTable::Iter item = act->key; item.lte(); item++ )
 			ARRAY_ITEM( INT(item->value->actionId), (act.last() && item.last()) );
 	}
 	return out;
@@ -1559,7 +1559,7 @@ void JavaTabCodeGen::SUB_ACTION( ostream &ret, GenInlineItem *item,
 	}
 }
 
-void JavaTabCodeGen::ACTION( ostream &ret, Action *action, int targState, bool inFinish )
+void JavaTabCodeGen::ACTION( ostream &ret, GenAction *action, int targState, bool inFinish )
 {
 	/* Write the preprocessor line info for going into the source file. */
 	javaLineDirective( ret, sourceFileName, action->loc.line );
@@ -1570,7 +1570,7 @@ void JavaTabCodeGen::ACTION( ostream &ret, Action *action, int targState, bool i
 	ret << "}\n";
 }
 
-void JavaTabCodeGen::CONDITION( ostream &ret, Action *condition )
+void JavaTabCodeGen::CONDITION( ostream &ret, GenAction *condition )
 {
 	ret << "\n";
 	javaLineDirective( ret, sourceFileName, condition->loc.line );

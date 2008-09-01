@@ -36,6 +36,12 @@ Key readKey( char *td, char **end );
 long readOffsetPtr( char *td, char **end );
 unsigned long readLength( char *td );
 
+struct Token
+{
+	XMLTag *tag;
+	GenInputLoc loc;
+};
+
 CodeGenData *makeCodeGen( char *sourceFileName, char *fsmName, 
 		ostream &out, bool wantComplete )
 {

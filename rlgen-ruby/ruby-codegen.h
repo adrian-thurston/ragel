@@ -56,14 +56,14 @@ protected:
         void INLINE_LIST(ostream &ret, GenInlineList *inlineList, int targState, bool inFinish);
         string ACCESS();
 
-        void ACTION( ostream &ret, Action *action, int targState, bool inFinish );
+        void ACTION( ostream &ret, GenAction *action, int targState, bool inFinish );
 	string GET_KEY();
         string GET_WIDE_KEY();
 	string GET_WIDE_KEY( RedStateAp *state );
 	string KEY( Key key );
 	string TABS( int level );
 	string INT( int i );
-	void CONDITION( ostream &ret, Action *condition );
+	void CONDITION( ostream &ret, GenAction *condition );
 	string ALPH_TYPE();
 	string WIDE_ALPH_TYPE();
   	string ARRAY_TYPE( unsigned long maxVal );

@@ -130,7 +130,7 @@ std::ostream &CSharpFsmCodeGen::ACTIONS_ARRAY()
 		if ( totalActions++ % 8 == 7 )
 			out << "\n\t";
 
-		for ( ActionTable::Iter item = act->key; item.lte(); item++ ) {
+		for ( GenActionTable::Iter item = act->key; item.lte(); item++ ) {
 			out << item->value->actionId;
 			if ( ! (act.last() && item.last()) )
 				out << ", ";
@@ -516,7 +516,7 @@ string CSharpFsmCodeGen::LDIR_PATH( char *path )
 	return ret.str();
 }
 
-void CSharpFsmCodeGen::ACTION( ostream &ret, Action *action, int targState, bool inFinish )
+void CSharpFsmCodeGen::ACTION( ostream &ret, GenAction *action, int targState, bool inFinish )
 {
 	/* Write the preprocessor line info for going into the source file. */
 	csharpLineDirective( ret, sourceFileName, action->loc.line );
@@ -527,7 +527,7 @@ void CSharpFsmCodeGen::ACTION( ostream &ret, Action *action, int targState, bool
 	ret << "}\n";
 }
 
-void CSharpFsmCodeGen::CONDITION( ostream &ret, Action *condition )
+void CSharpFsmCodeGen::CONDITION( ostream &ret, GenAction *condition )
 {
 	ret << "\n";
 	csharpLineDirective( ret, sourceFileName, condition->loc.line );
