@@ -33,7 +33,7 @@ To build the ragel program type 'make'.
 
 To build all the documentation cd to 'doc' and type 'make'. If you don't have
 all of the programs to build the user guide and just want the man page use
-'make ragel.1 rlgen-cd.1 rlgen-java.1 rlgen-ruby.1 rlgen-dot.1'
+'make man'.
 
 
 3. Installing
