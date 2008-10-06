@@ -66,16 +66,16 @@ distclean: clean
 man: $(MANPAGES)
 
 man-install: man
-	install -d $(mandir)/man1
-	install -m 644 ragel.1      $(mandir)/man1/ragel.1
-	install -m 644 rlgen-dot.1  $(mandir)/man1/rlgen-dot.1
-	install -m 644 rlgen-cd.1   $(mandir)/man1/rlgen-cd.1
-	install -m 644 rlgen-java.1 $(mandir)/man1/rlgen-java.1
-	install -m 644 rlgen-ruby.1 $(mandir)/man1/rlgen-ruby.1
+	install -d $(DESTDIR)$(mandir)/man1
+	install -m 644 ragel.1      $(DESTDIR)$(mandir)/man1/ragel.1
+	install -m 644 rlgen-dot.1  $(DESTDIR)$(mandir)/man1/rlgen-dot.1
+	install -m 644 rlgen-cd.1   $(DESTDIR)$(mandir)/man1/rlgen-cd.1
+	install -m 644 rlgen-java.1 $(DESTDIR)$(mandir)/man1/rlgen-java.1
+	install -m 644 rlgen-ruby.1 $(DESTDIR)$(mandir)/man1/rlgen-ruby.1
 
 install: all man-install
-	install -d $(docdir)
-	install -m 644 ragel-guide.pdf $(docdir)/ragel-guide.pdf
+	install -d $(DESTDIR)$(docdir)
+	install -m 644 ragel-guide.pdf $(DESTDIR)$(docdir)/ragel-guide.pdf
 	gzip -c ../ChangeLog > ChangeLog.gz
-	install -m 644 ChangeLog.gz $(docdir)/ChangeLog.gz
+	install -m 644 ChangeLog.gz $(DESTDIR)$(docdir)/ChangeLog.gz
 	rm ChangeLog.gz

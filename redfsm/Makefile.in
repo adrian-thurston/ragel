@@ -81,7 +81,7 @@ endif
 clean:
 	rm -f tags .*.d *.o rlgen-cd $(EXTRA_CLEAN)
 
-install:
+install: all
 	@true
 
 -include $(DEPS)

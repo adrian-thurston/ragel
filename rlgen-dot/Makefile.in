@@ -62,7 +62,6 @@ clean:
 	rm -f tags .*.d *.o rlgen-dot $(EXTRA_CLEAN)
 
 install: all
-	install -d $(prefix)/bin
-	install -s rlgen-dot $(prefix)/bin/rlgen-dot
+	@true
 
 -include $(DEPS)

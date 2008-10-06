@@ -65,7 +65,7 @@ distclean: clean
 clean:
 	rm -f tags .*.d *.o rlgen-cd.a $(EXTRA_CLEAN)
 
-install:
+install: all
 	@true
 
 -include $(DEPS)

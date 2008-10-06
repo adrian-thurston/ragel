@@ -95,7 +95,7 @@ clean:
 	rm -f tags .*.d *.o ragel $(EXTRA_CLEAN)
 
 install: all
-	install -d $(prefix)/bin
-	install -s ragel $(prefix)/bin/ragel
+	install -d $(DESTDIR)$(prefix)/bin
+	install -s ragel $(DESTDIR)$(prefix)/bin/ragel
 
 -include $(DEPS)

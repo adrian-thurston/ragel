@@ -63,7 +63,7 @@ distclean: clean
 clean:
 	rm -f tags .*.d *.o rlgen-ruby.a
 
-install:
+install: all
 	@true
 
 -include $(DEPS)
