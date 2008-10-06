@@ -476,9 +476,6 @@ void process( const char *inputFileName, const char *intermed )
 	if ( machineSpec == 0 && machineName == 0 )
 		hostData << "</host>\n";
 
-	if ( gblErrorCount > 0 )
-		exit(1);
-	
 	/* Open the XML file for writing. */
 	ostream *xmlOutFile = new ofstream( xmlFileName );
 
