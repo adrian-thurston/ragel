@@ -21,7 +21,7 @@
 INCS += -I../common -I../aapl
 DEFS +=
 
-CFLAGS += -g -Wall
+CXXFLAGS += -g -Wall
 LDFLAGS +=
 
 CC_SRCS = redfsm.cpp gendata.cpp xmltags.cpp xmlscan.cpp xmlparse.cpp
@@ -69,7 +69,7 @@ endif
 
 %.o: %.cpp
 	@$(CXX) -M $(DEFS) $(INCS) $< > .$*.d
-	$(CXX) -c $(CFLAGS) $(DEFS) $(INCS) -o $@ $<
+	$(CXX) -c $(CXXFLAGS) $(DEFS) $(INCS) -o $@ $<
 
 distclean: clean
 	rm -f Makefile

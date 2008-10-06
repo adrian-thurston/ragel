@@ -21,7 +21,7 @@
 INCS += -I../common -I../redfsm -I../aapl
 DEFS +=
 
-CFLAGS += -g -Wall
+CXXFLAGS += -g -Wall
 LDFLAGS +=
 
 CC_SRCS = main.cpp ruby-codegen.cpp ruby-tabcodegen.cpp ruby-ftabcodegen.cpp \
@@ -55,7 +55,7 @@ rlgen-ruby.a: $(LIBS) $(OBJS)
 
 %.o: %.cpp
 	@$(CXX) -M $(DEFS) $(INCS) $< > .$*.d
-	$(CXX) -c $(CFLAGS) $(DEFS) $(INCS) -o $@ $<
+	$(CXX) -c $(CXXFLAGS) $(DEFS) $(INCS) -o $@ $<
 
 distclean: clean
 	rm -f Makefile

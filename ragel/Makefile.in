@@ -21,7 +21,7 @@
 INCS += -I../common -I../aapl -I../redfsm
 DEFS +=
 
-CFLAGS += -g -Wall
+CXXFLAGS += -g -Wall
 LDFLAGS +=
 
 CC_SRCS = \
@@ -82,7 +82,7 @@ endif
 
 %.o: %.cpp
 	@$(CXX) -M $(DEFS) $(INCS) $< > .$*.d
-	$(CXX) -c $(CFLAGS) $(DEFS) $(INCS) -o $@ $<
+	$(CXX) -c $(CXXFLAGS) $(DEFS) $(INCS) -o $@ $<
 
 distclean: clean
 	rm -f Makefile 

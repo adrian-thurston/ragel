@@ -21,7 +21,7 @@
 INCS += -I../aapl
 DEFS +=
 
-CFLAGS += -g -Wall
+CXXFLAGS += -g -Wall
 LDFLAGS +=
 
 CC_SRCS = common.cpp
@@ -58,7 +58,7 @@ version.h: ../version.mk
 
 %.o: %.cpp
 	@$(CXX) -M $(DEFS) $(INCS) $< > .$*.d
-	$(CXX) -c $(CFLAGS) $(DEFS) $(INCS) -o $@ $<
+	$(CXX) -c $(CXXFLAGS) $(DEFS) $(INCS) -o $@ $<
 
 distclean: clean
 	rm -f Makefile config.h

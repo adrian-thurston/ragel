@@ -21,7 +21,6 @@
 RAGEL = ../ragel/ragel
 FLEX = flex
 RE2C = re2c
-CFLAGS = -Wall -g -O3
 
 TARGS = \
 	atoi awkemu clang concurrent cppscan format gotocallret mailbox params \
@@ -38,7 +37,7 @@ distclean clean:
 	gcc $(CFLAGS) -Wall -g -c -O3 -o $@ $<
 
 %.o: %.cpp
-	g++ $(CFLAGS) -Wall -g -c -O3 -o $@ $<
+	g++ $(CXXFLAGS) -Wall -g -c -O3 -o $@ $<
 
 #########################################
 
