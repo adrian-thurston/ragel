@@ -126,7 +126,7 @@ syntax region rlCodeSemi matchgroup=Type start="\<alphtype\>" start="\<getkey\>"
 
 syntax region rlWrite matchgroup=Type start="\<write\>" matchgroup=NONE end=";" contained contains=rlWriteKeywords,rlWriteOptions
 
-syntax keyword rlWriteKeywords init data exec eof exports contained
+syntax keyword rlWriteKeywords init data exec exports contained
 syntax keyword rlWriteOptions noerror nofinal noprefix noend nocs contained
 
 "
