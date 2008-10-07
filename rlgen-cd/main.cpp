@@ -73,7 +73,7 @@ extern bool noLineDirectives;
  */
 
 /* Invoked by the parser when the root element is opened. */
-ostream *cdOpenOutput( char *inputFile )
+ostream *cdOpenOutput( const char *inputFile )
 {
 	if ( hostLang->lang != HostLang::C && hostLang->lang != HostLang::D ) {
 		error() << "this code generator is for C and D only" << endl;
@@ -83,7 +83,7 @@ ostream *cdOpenOutput( char *inputFile )
 	/* If the output format is code and no output file name is given, then
 	 * make a default. */
 	if ( outputFileName == 0 ) {
-		char *ext = findFileExtension( inputFile );
+		const char *ext = findFileExtension( inputFile );
 		if ( ext != 0 && strcmp( ext, ".rh" ) == 0 )
 			outputFileName = fileNameFromStem( inputFile, ".h" );
 		else {
@@ -123,7 +123,7 @@ ostream *cdOpenOutput( char *inputFile )
 }
 
 /* Invoked by the parser when a ragel definition is opened. */
-CodeGenData *cdMakeCodeGen( char *sourceFileName, char *fsmName, 
+CodeGenData *cdMakeCodeGen( const char *sourceFileName, const char *fsmName, 
 		ostream &out, bool wantComplete )
 {
 	CodeGenData *codeGen = 0;

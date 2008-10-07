@@ -68,7 +68,7 @@ std::ostream &FFlatCodeGen::TRANS_ACTION( RedTransAp *trans )
 std::ostream &FFlatCodeGen::TO_STATE_ACTION_SWITCH()
 {
 	/* Loop the actions. */
-	for ( ActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
+	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
 		if ( redAct->numToStateRefs > 0 ) {
 			/* Write the entry label. */
 			out << "\tcase " << redAct->actListId+1 << ":\n";
@@ -90,7 +90,7 @@ std::ostream &FFlatCodeGen::TO_STATE_ACTION_SWITCH()
 std::ostream &FFlatCodeGen::FROM_STATE_ACTION_SWITCH()
 {
 	/* Loop the actions. */
-	for ( ActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
+	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
 		if ( redAct->numFromStateRefs > 0 ) {
 			/* Write the entry label. */
 			out << "\tcase " << redAct->actListId+1 << ":\n";
@@ -110,7 +110,7 @@ std::ostream &FFlatCodeGen::FROM_STATE_ACTION_SWITCH()
 std::ostream &FFlatCodeGen::EOF_ACTION_SWITCH()
 {
 	/* Loop the actions. */
-	for ( ActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
+	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
 		if ( redAct->numEofRefs > 0 ) {
 			/* Write the entry label. */
 			out << "\tcase " << redAct->actListId+1 << ":\n";
@@ -132,7 +132,7 @@ std::ostream &FFlatCodeGen::EOF_ACTION_SWITCH()
 std::ostream &FFlatCodeGen::ACTION_SWITCH()
 {
 	/* Loop the actions. */
-	for ( ActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
+	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
 		if ( redAct->numTransRefs > 0 ) {
 			/* Write the entry label. */
 			out << "\tcase " << redAct->actListId+1 << ":\n";

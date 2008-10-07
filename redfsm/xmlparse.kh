@@ -165,6 +165,8 @@ struct XmlParser
 	int token( int tokenId, int col, int line );
 	int token( XMLTag *tag, int col, int line );
 
+	void ragel( const char *version, const char *fileName, const char *lang );
+
 	/* Report an error encountered by the parser. */
 	ostream &warning( const GenInputLoc &loc );
 	ostream &error();
@@ -174,7 +176,7 @@ struct XmlParser
 
 	/* The name of the root section, this does not change during an include. */
 	const char *fileName;
-	char *sourceFileName;
+	const char *sourceFileName;
 	ostream *outStream;
 	bool outputActive;
 	bool wantComplete;

@@ -123,7 +123,7 @@ std::ostream &CSharpFsmCodeGen::ACTIONS_ARRAY()
 {
 	out << "\t0, ";
 	int totalActions = 1;
-	for ( ActionTableMap::Iter act = redFsm->actionMap; act.lte(); act++ ) {
+	for ( GenActionTableMap::Iter act = redFsm->actionMap; act.lte(); act++ ) {
 		/* Write out the length, which will never be the last character. */
 		out << act->key.length() << ", ";
 		/* Put in a line break every 8 */

@@ -209,7 +209,7 @@ void RedFsmAp::findFirstFinState()
 void RedFsmAp::assignActionLocs()
 {
 	int nextLocation = 0;
-	for ( ActionTableMap::Iter act = actionMap; act.lte(); act++ ) {
+	for ( GenActionTableMap::Iter act = actionMap; act.lte(); act++ ) {
 		/* Store the loc, skip over the array and a null terminator. */
 		act->location = nextLocation;
 		nextLocation += act->key.length() + 1;		

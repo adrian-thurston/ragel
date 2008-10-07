@@ -30,7 +30,7 @@
 std::ostream &FGotoCodeGen::EXEC_ACTIONS()
 {
 	/* Loop the actions. */
-	for ( ActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
+	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
 		if ( redAct->numTransRefs > 0 ) {
 			/* 	We are at the start of a glob, write the case. */
 			out << "f" << redAct->actListId << ":\n";
@@ -50,7 +50,7 @@ std::ostream &FGotoCodeGen::EXEC_ACTIONS()
 std::ostream &FGotoCodeGen::TO_STATE_ACTION_SWITCH()
 {
 	/* Loop the actions. */
-	for ( ActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
+	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
 		if ( redAct->numToStateRefs > 0 ) {
 			/* Write the entry label. */
 			out << "\tcase " << redAct->actListId+1 << ":\n";
@@ -72,7 +72,7 @@ std::ostream &FGotoCodeGen::TO_STATE_ACTION_SWITCH()
 std::ostream &FGotoCodeGen::FROM_STATE_ACTION_SWITCH()
 {
 	/* Loop the actions. */
-	for ( ActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
+	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
 		if ( redAct->numFromStateRefs > 0 ) {
 			/* Write the entry label. */
 			out << "\tcase " << redAct->actListId+1 << ":\n";
@@ -92,7 +92,7 @@ std::ostream &FGotoCodeGen::FROM_STATE_ACTION_SWITCH()
 std::ostream &FGotoCodeGen::EOF_ACTION_SWITCH()
 {
 	/* Loop the actions. */
-	for ( ActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
+	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
 		if ( redAct->numEofRefs > 0 ) {
 			/* Write the entry label. */
 			out << "\tcase " << redAct->actListId+1 << ":\n";

@@ -585,7 +585,7 @@ void CodeGenData::setValueLimits()
 		}
 	}
 
-	for ( ActionTableMap::Iter at = redFsm->actionMap; at.lte(); at++ ) {
+	for ( GenActionTableMap::Iter at = redFsm->actionMap; at.lte(); at++ ) {
 		/* Maximum id of action lists. */
 		if ( at->actListId+1 > redFsm->maxActListId )
 			redFsm->maxActListId = at->actListId+1;
@@ -629,7 +629,7 @@ void CodeGenData::analyzeMachine()
 	}
 
 	/* Analyze reduced action lists. */
-	for ( ActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
+	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
 		for ( GenActionTable::Iter act = redAct->key; act.lte(); act++ )
 			analyzeActionList( redAct, act->value->inlineList );
 	}

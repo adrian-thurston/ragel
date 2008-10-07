@@ -42,7 +42,7 @@ struct Token
 	GenInputLoc loc;
 };
 
-CodeGenData *makeCodeGen( char *sourceFileName, char *fsmName, 
+CodeGenData *makeCodeGen( const char *sourceFileName, const char *fsmName, 
 		ostream &out, bool wantComplete )
 {
 	CodeGenData *cgd = 0;
@@ -63,7 +63,6 @@ CodeGenData *makeCodeGen( char *sourceFileName, char *fsmName,
 
 void lineDirective( ostream &out, const char *fileName, int line )
 {
-	CodeGenData *cgd = 0;
 	if ( !generateDot ) {
 		if ( hostLang == &hostLangC )
 			cdLineDirective( out, fileName, line );
@@ -85,70 +84,44 @@ void genLineDirective( ostream &out )
 	lineDirective( out, filter->fileName, filter->line + 1 );
 }
 
+void XmlParser::ragel( const char *version, const char *fileName, const char *lang )
+{
+	/* Check for file name attribute. */
+	sourceFileName = fileName;
+
+	if ( generateDot )
+		outStream = dotOpenOutput( sourceFileName );
+	else if ( strcmp( lang, "C" ) == 0 ) {
+		hostLang = &hostLangC;
+		outStream = cdOpenOutput( sourceFileName );
+	}
+	else if ( strcmp( lang, "D" ) == 0 ) {
+		hostLang = &hostLangD;
+		outStream = cdOpenOutput( sourceFileName );
+	}
+	else if ( strcmp( lang, "Java" ) == 0 ) {
+		hostLang = &hostLangJava;
+		outStream = javaOpenOutput( sourceFileName );
+	}
+	else if ( strcmp( lang, "Ruby" ) == 0 ) {
+		hostLang = &hostLangRuby;
+		outStream = rubyOpenOutput( sourceFileName );
+	}
+	else if ( strcmp( lang, "C#" ) == 0 ) {
+		hostLang = &hostLangCSharp;
+		outStream = csharpOpenOutput( sourceFileName );
+	}
+	else {
+		assert( false );
+	}
+}
 %%{
 
 parser XmlParser;
 
 include "xmlparse.kh";
 
-start: tag_ragel;
-start:
-	final {
-		/* If we get no input the assumption is that the frontend died and
-		 * emitted an error. This forces the backend to return a non-zero
-		 * exit status, but does not print an error. */
-		gblErrorCount += 1;
-	};
-
-tag_ragel: tag_ragel_head ragel_def_list host_or_write_list '/' TAG_ragel;
-
-tag_ragel_head: TAG_ragel
-	final {
-		/* Check version used to generated the intermediate file. */
-		Attribute *versionAttr = $1->tag->findAttr( "version" );
-		if ( versionAttr == 0 )
-			error($1->loc) << "tag <ragel> requires a version attribute" << endp;
-		if ( strcmp( versionAttr->value, VERSION ) != 0 )
-			error($1->loc) << "version mismatch between frontend and backend" << endp;
-
-		/* Check for file name attribute. */
-		Attribute *fileNameAttr = $1->tag->findAttr( "filename" );
-		if ( fileNameAttr == 0 )
-			error($1->loc) << "tag <ragel> requires a filename attribute" << endp;
-		sourceFileName = fileNameAttr->value;
-
-		/* Check for language attribute. */
-		Attribute *langAttr = $1->tag->findAttr( "lang" );
-		if ( langAttr == 0 )
-			error($1->loc) << "tag <ragel> requires a lang attribute" << endp;
-
-		if ( generateDot )
-			outStream = dotOpenOutput( sourceFileName );
-		else if ( strcmp( langAttr->value, "C" ) == 0 ) {
-			hostLang = &hostLangC;
-			outStream = cdOpenOutput( sourceFileName );
-		}
-		else if ( strcmp( langAttr->value, "D" ) == 0 ) {
-			hostLang = &hostLangD;
-			outStream = cdOpenOutput( sourceFileName );
-		}
-		else if ( strcmp( langAttr->value, "Java" ) == 0 ) {
-			hostLang = &hostLangJava;
-			outStream = javaOpenOutput( sourceFileName );
-		}
-		else if ( strcmp( langAttr->value, "Ruby" ) == 0 ) {
-			hostLang = &hostLangRuby;
-			outStream = rubyOpenOutput( sourceFileName );
-		}
-		else if ( strcmp( langAttr->value, "C#" ) == 0 ) {
-			hostLang = &hostLangCSharp;
-			outStream = csharpOpenOutput( sourceFileName );
-		}
-		else {
-			error($1->loc) << "expecting lang attribute to be "
-					"one of C, D, Java, Ruby or C#" << endp;
-		}
-	};
+start: ragel_def_list host_or_write_list;
 
 ragel_def_list: ragel_def_list ragel_def;
 ragel_def_list: ;

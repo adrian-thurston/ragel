@@ -32,6 +32,7 @@
 #include "mergesort.h"
 #include "xmlcodegen.h"
 #include "version.h"
+#include "xmlparse.h"
 
 using namespace std;
 
@@ -1456,18 +1457,17 @@ void terminateAllParsers( )
 		pdel->value->token( loc, Parser_tk_eof, 0, 0 );
 }
 
-void writeLanguage( std::ostream &out )
+const char *getLang()
 {
-	out << " lang=\"";
+	const char *lang = 0;
 	switch ( hostLang->lang ) {
-		case HostLang::C:    out << "C"; break;
-		case HostLang::D:    out << "D"; break;
-		case HostLang::Java: out << "Java"; break;
-		case HostLang::Ruby: out << "Ruby"; break;
-		case HostLang::CSharp: out << "C#"; break;
+		case HostLang::C:      lang = "C"; break;
+		case HostLang::D:      lang = "D"; break;
+		case HostLang::Java:   lang = "Java"; break;
+		case HostLang::Ruby:   lang = "Ruby"; break;
+		case HostLang::CSharp: lang = "C#"; break;
 	}
-	out << "\"";
-	
+	return lang;
 }
 
 void writeMachines( std::ostream &out, std::string hostData, 
@@ -1482,16 +1482,13 @@ void writeMachines( std::ostream &out, std::string hostData,
 		}
 
 		if ( gblErrorCount == 0 ) {
-			out << "<ragel version=\"" VERSION "\" filename=\"" << inputFileName << "\"";
-			writeLanguage( out );
-			out << ">\n";
+			xmlParser.ragel( VERSION, inputFileName, getLang() );
 			for ( ParserDict::Iter parser = parserDict; parser.lte(); parser++ ) {
 				ParseData *pd = parser->value->pd;
 				if ( pd->instanceList.length() > 0 )
 					pd->generateXML( out );
 			}
 			out << hostData;
-			out << "</ragel>\n";
 		}
 	}
 	else if ( parserDict.length() > 0 ) {
@@ -1523,12 +1520,9 @@ void writeMachines( std::ostream &out, std::string hostData,
 			/* Section/Machine to emit was found. Prepare and emit it. */
 			parseData->prepareMachineGen( graphDictEl );
 			if ( gblErrorCount == 0 ) {
-				out << "<ragel version=\"" VERSION "\" filename=\"" << inputFileName << "\"";
-				writeLanguage( out );
-				out << ">\n";
+				xmlParser.ragel( VERSION, inputFileName, getLang() );
 				parseData->generateXML( out );
 				out << hostData;
-				out << "</ragel>\n";
 			}
 		}
 	}

@@ -209,7 +209,7 @@ struct RedAction
 	bool bAnyCurStateRef;
 	bool bAnyBreakStmt;
 };
-typedef AvlTree<RedAction, GenActionTable, CmpGenActionTable> ActionTableMap;
+typedef AvlTree<RedAction, GenActionTable, CmpGenActionTable> GenActionTableMap;
 
 /* Reduced transition. */
 struct RedTransAp
@@ -408,7 +408,7 @@ struct RedFsmAp
 	int nextStateId;
 
 	TransApSet transSet;
-	ActionTableMap actionMap;
+	GenActionTableMap actionMap;
 	RedStateList stateList;
 	RedStateSet entryPoints;
 	RedStateAp *startState;

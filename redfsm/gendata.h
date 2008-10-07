@@ -50,22 +50,22 @@ typedef AvlMapEl<char *, CodeGenData*> CodeGenMapEl;
 /* These functions must be implemented by the code generation executable.
  * The openOutput function is invoked when the root element is opened.  The
  * makeCodeGen function is invoked when a ragel_def element is opened. */
-std::ostream *cdOpenOutput( char *inputFile );
-std::ostream *javaOpenOutput( char *inputFile );
-std::ostream *rubyOpenOutput( char *inputFile );
-std::ostream *csharpOpenOutput( char *inputFile );
-std::ostream *dotOpenOutput( char *inputFile );
+std::ostream *cdOpenOutput( const char *inputFile );
+std::ostream *javaOpenOutput( const char *inputFile );
+std::ostream *rubyOpenOutput( const char *inputFile );
+std::ostream *csharpOpenOutput( const char *inputFile );
+std::ostream *dotOpenOutput( const char *inputFile );
 
-CodeGenData *cdMakeCodeGen( char *sourceFileName, 
-		char *fsmName, ostream &out, bool wantComplete );
-CodeGenData *javaMakeCodeGen( char *sourceFileName, 
-		char *fsmName, ostream &out, bool wantComplete );
-CodeGenData *rubyMakeCodeGen( char *sourceFileName, 
-		char *fsmName, ostream &out, bool wantComplete );
-CodeGenData *csharpMakeCodeGen( char *sourceFileName, 
-		char *fsmName, ostream &out, bool wantComplete );
-CodeGenData *dotMakeCodeGen( char *sourceFileName, 
-		char *fsmName, ostream &out, bool wantComplete );
+CodeGenData *cdMakeCodeGen( const char *sourceFileName, 
+		const char *fsmName, ostream &out, bool wantComplete );
+CodeGenData *javaMakeCodeGen( const char *sourceFileName, 
+		const char *fsmName, ostream &out, bool wantComplete );
+CodeGenData *rubyMakeCodeGen( const char *sourceFileName, 
+		const char *fsmName, ostream &out, bool wantComplete );
+CodeGenData *csharpMakeCodeGen( const char *sourceFileName, 
+		const char *fsmName, ostream &out, bool wantComplete );
+CodeGenData *dotMakeCodeGen( const char *sourceFileName, 
+		const char *fsmName, ostream &out, bool wantComplete );
 
 void cdLineDirective( ostream &out, const char *fileName, int line );
 void javaLineDirective( ostream &out, const char *fileName, int line );
@@ -101,8 +101,8 @@ struct CodeGenData
 	 * Collecting the machine.
 	 */
 
-	char *sourceFileName;
-	char *fsmName;
+	const char *sourceFileName;
+	const char *fsmName;
 	ostream &out;
 	RedFsmAp *redFsm;
 	GenAction *allActions;

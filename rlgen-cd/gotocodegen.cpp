@@ -404,7 +404,7 @@ std::ostream &GotoCodeGen::TRANSITIONS()
 std::ostream &GotoCodeGen::EXEC_FUNCS()
 {
 	/* Make labels that set acts and jump to execFuncs. Loop func indicies. */
-	for ( ActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
+	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
 		if ( redAct->numTransRefs > 0 ) {
 			out << "	f" << redAct->actListId << ": " <<
 				"_acts = " << ARR_OFF(A(), itoa( redAct->location+1 ) ) << ";"

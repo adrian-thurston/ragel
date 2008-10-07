@@ -1294,7 +1294,7 @@ string JavaTabCodeGen::START_STATE_ID()
 std::ostream &JavaTabCodeGen::ACTIONS_ARRAY()
 {
 	ARRAY_ITEM( INT(0), false );
-	for ( ActionTableMap::Iter act = redFsm->actionMap; act.lte(); act++ ) {
+	for ( GenActionTableMap::Iter act = redFsm->actionMap; act.lte(); act++ ) {
 		/* Write out the length, which will never be the last character. */
 		ARRAY_ITEM( INT(act->key.length()), false );
 

@@ -60,7 +60,7 @@ extern int numSplitPartitions;
  */
 
 /* Invoked by the parser when the root element is opened. */
-ostream *dotOpenOutput( char *inputFile )
+ostream *dotOpenOutput( const char *inputFile )
 {
 	/* Make sure we are not writing to the same file as the input file. */
 	if ( outputFileName != 0 && strcmp( inputFile, outputFileName  ) == 0 ) {
@@ -88,7 +88,7 @@ ostream *dotOpenOutput( char *inputFile )
 }
 
 /* Invoked by the parser when a ragel definition is opened. */
-CodeGenData *dotMakeCodeGen( char *sourceFileName, char *fsmName, 
+CodeGenData *dotMakeCodeGen( const char *sourceFileName, const char *fsmName, 
 		ostream &out, bool wantComplete )
 {
 	CodeGenData *codeGen = new GraphvizDotGen(out);

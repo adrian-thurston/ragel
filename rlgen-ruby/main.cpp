@@ -70,7 +70,7 @@ extern int numSplitPartitions;
  */
 
 /* Invoked by the parser when the root element is opened. */
-ostream *rubyOpenOutput( char *inputFile )
+ostream *rubyOpenOutput( const char *inputFile )
 {
 	if ( hostLang->lang != HostLang::Ruby ) {
 		error() << "this code generator is for Ruby only" << endl;
@@ -80,7 +80,7 @@ ostream *rubyOpenOutput( char *inputFile )
 	/* If the output format is code and no output file name is given, then
 	 * make a default. */
 	if ( outputFileName == 0 ) {
-		char *ext = findFileExtension( inputFile );
+		const char *ext = findFileExtension( inputFile );
 		if ( ext != 0 && strcmp( ext, ".rh" ) == 0 )
 			outputFileName = fileNameFromStem( inputFile, ".h" );
 		else
@@ -113,7 +113,7 @@ ostream *rubyOpenOutput( char *inputFile )
 }
 
 /* Invoked by the parser when a ragel definition is opened. */
-CodeGenData *rubyMakeCodeGen( char *sourceFileName, char *fsmName, 
+CodeGenData *rubyMakeCodeGen( const char *sourceFileName, const char *fsmName, 
 		ostream &out, bool wantComplete )
 {
 	CodeGenData *codeGen = 0;

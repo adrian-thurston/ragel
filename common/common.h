@@ -346,8 +346,8 @@ public:
 };
 
 
-char *findFileExtension( char *stemFile );
-char *fileNameFromStem( char *stemFile, const char *suffix );
+const char *findFileExtension( const char *stemFile );
+const char *fileNameFromStem( const char *stemFile, const char *suffix );
 
 struct Export
 {

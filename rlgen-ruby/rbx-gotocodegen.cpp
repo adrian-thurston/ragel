@@ -425,7 +425,7 @@ std::ostream &RbxGotoCodeGen::TRANSITIONS()
 std::ostream &RbxGotoCodeGen::EXEC_FUNCS()
 {
 	/* Make labels that set acts and jump to execFuncs. Loop func indicies. */
-	for ( ActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
+	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
 		if ( redAct->numTransRefs > 0 ) {
 			rbxLabel(out, label("f", redAct->actListId)) << "\n" <<
 				"_acts = " << itoa( redAct->location+1 ) << "\n";

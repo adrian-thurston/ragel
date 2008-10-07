@@ -296,9 +296,9 @@ std::streamsize output_filter::xsputn( const char *s, std::streamsize n )
 /* Scans a string looking for the file extension. If there is a file
  * extension then pointer returned points to inside the string
  * passed in. Otherwise returns null. */
-char *findFileExtension( char *stemFile )
+const char *findFileExtension( const char *stemFile )
 {
-	char *ppos = stemFile + strlen(stemFile) - 1;
+	const char *ppos = stemFile + strlen(stemFile) - 1;
 
 	/* Scan backwards from the end looking for the first dot.
 	 * If we encounter a '/' before the first dot, then stop the scan. */
@@ -326,13 +326,13 @@ char *findFileExtension( char *stemFile )
 
 /* Make a file name from a stem. Removes the old filename suffix and
  * replaces it with a new one. Returns a newed up string. */
-char *fileNameFromStem( char *stemFile, const char *suffix )
+const char *fileNameFromStem( const char *stemFile, const char *suffix )
 {
 	long len = strlen( stemFile );
 	assert( len > 0 );
 
 	/* Get the extension. */
-	char *ppos = findFileExtension( stemFile );
+	const char *ppos = findFileExtension( stemFile );
 
 	/* If an extension was found, then shorten what we think the len is. */
 	if ( ppos != 0 )

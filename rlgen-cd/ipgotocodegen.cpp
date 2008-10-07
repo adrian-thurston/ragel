@@ -281,7 +281,7 @@ std::ostream &IpGotoCodeGen::FINISH_CASES()
 			out << "	case " << st->id << ": goto tr" << st->eofTrans->id << ";\n";
 	}
 
-	for ( ActionTableMap::Iter act = redFsm->actionMap; act.lte(); act++ ) {
+	for ( GenActionTableMap::Iter act = redFsm->actionMap; act.lte(); act++ ) {
 		if ( act->eofRefs != 0 ) {
 			for ( IntSet::Iter pst = *act->eofRefs; pst.lte(); pst++ )
 				out << "	case " << *pst << ": \n";
