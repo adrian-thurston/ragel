@@ -1453,7 +1453,7 @@ void terminateAllParsers( )
 	loc.line = 0;
 	loc.col = 0;
 	for ( ParserDict::Iter pdel = parserDict; pdel.lte(); pdel++ )
-		pdel->value->token( loc, _eof, 0, 0 );
+		pdel->value->token( loc, Parser_tk_eof, 0, 0 );
 }
 
 void writeLanguage( std::ostream &out )

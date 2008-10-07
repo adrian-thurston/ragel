@@ -226,7 +226,7 @@ int xml_parse( std::istream &input, const char *fileName,
 			exit(1);
 		}
 		else if ( token == TK_EOF ) {
-			parser.token( _eof, scanner.token_col, scanner.token_line );
+			parser.token( XmlParser_tk_eof, scanner.token_col, scanner.token_line );
 			break;
 		}
 		else if ( token == TK_ERR ) {
