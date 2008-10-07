@@ -22,6 +22,7 @@
 
 #include "ragel.h"
 #include "xmlcodegen.h"
+#include "xmlparse.h"
 #include "parsedata.h"
 #include "fsmgraph.h"
 #include <string.h>
@@ -29,12 +30,13 @@
 using namespace std;
 
 XMLCodeGen::XMLCodeGen( char *fsmName, ParseData *pd, FsmAp *fsm, 
-		std::ostream &out )
+		std::ostream &out, XmlParser &xmlParser )
 :
 	fsmName(fsmName),
 	pd(pd),
 	fsm(fsm),
 	out(out),
+	xmlParser(xmlParser),
 	nextActionTableId(0)
 {
 }
@@ -641,7 +643,8 @@ void XMLCodeGen::writeExports()
 void XMLCodeGen::writeXML()
 {
 	/* Open the definition. */
-	out << "<ragel_def name=\"" << fsmName << "\">\n";
+	xmlParser.open_ragel_def( fsmName );
+	out << "<ragel_def>\n";
 
 	/* Alphabet type. */
 	out << "  <alphtype>" << keyOps->alphType->internalName << "</alphtype>\n";

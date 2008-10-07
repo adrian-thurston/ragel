@@ -27,8 +27,6 @@
 
 using std::ostringstream;
 
-/* KeyOps *keyOps = 0; */
-
 string GenAction::nameOrLoc()
 {
 	if ( name != 0 )

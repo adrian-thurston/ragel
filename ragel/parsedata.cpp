@@ -1427,12 +1427,12 @@ void ParseData::prepareMachineGenTBWrapped( GraphDictEl *graphDictEl )
 	sectionGraph->setStateNumbers( 0 );
 }
 
-void ParseData::generateXML( ostream &out )
+void ParseData::generateXML( ostream &out, XmlParser &xmlParser )
 {
 	beginProcessing();
 
 	/* Make the generator. */
-	XMLCodeGen codeGen( sectionName, this, sectionGraph, out );
+	XMLCodeGen codeGen( sectionName, this, sectionGraph, out, xmlParser );
 
 	/* Write out with it. */
 	codeGen.writeXML();
@@ -1469,11 +1469,11 @@ void writeMachines( std::ostream &out, std::string hostData,
 		}
 
 		if ( gblErrorCount == 0 ) {
-			xmlParser.ragel( inputFileName );
+			xmlParser.open_ragel( inputFileName );
 			for ( ParserDict::Iter parser = parserDict; parser.lte(); parser++ ) {
 				ParseData *pd = parser->value->pd;
 				if ( pd->instanceList.length() > 0 )
-					pd->generateXML( out );
+					pd->generateXML( out, xmlParser );
 			}
 			out << hostData;
 		}
@@ -1507,8 +1507,8 @@ void writeMachines( std::ostream &out, std::string hostData,
 			/* Section/Machine to emit was found. Prepare and emit it. */
 			parseData->prepareMachineGen( graphDictEl );
 			if ( gblErrorCount == 0 ) {
-				xmlParser.ragel( inputFileName );
-				parseData->generateXML( out );
+				xmlParser.open_ragel( inputFileName );
+				parseData->generateXML( out, xmlParser );
 				out << hostData;
 			}
 		}

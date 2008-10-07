@@ -79,7 +79,8 @@ struct NextRedTrans
 class XMLCodeGen
 {
 public:
-	XMLCodeGen( char *fsmName, ParseData *pd, FsmAp *fsm, std::ostream &out );
+	XMLCodeGen( char *fsmName, ParseData *pd, FsmAp *fsm, 
+			std::ostream &out, XmlParser &xmlParser );
 	void writeXML( );
 
 private:
@@ -123,6 +124,8 @@ private:
 	ParseData *pd;
 	FsmAp *fsm;
 	std::ostream &out;
+	XmlParser &xmlParser;
+
 	ActionTableMap actionTableMap;
 	int nextActionTableId;
 };

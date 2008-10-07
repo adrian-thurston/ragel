@@ -84,7 +84,7 @@ void genLineDirective( ostream &out )
 	lineDirective( out, filter->fileName, filter->line + 1 );
 }
 
-void XmlParser::ragel( const char *fileName )
+void XmlParser::open_ragel( const char *fileName )
 {
 	/* Check for file name attribute. */
 	sourceFileName = fileName;
@@ -115,6 +115,18 @@ void XmlParser::ragel( const char *fileName )
 		assert( false );
 	}
 }
+
+void XmlParser::open_ragel_def( char *fsmName )
+{
+	CodeGenMapEl *mapEl = codeGenMap.find( fsmName );
+	if ( mapEl != 0 )
+		cgd = mapEl->value;
+	else {
+		cgd = makeCodeGen( sourceFileName, fsmName, *outStream, wantComplete );
+		codeGenMap.insert( fsmName, cgd );
+	}
+}
+
 %%{
 
 parser XmlParser;
@@ -149,7 +161,7 @@ tag_host:
 	};
 
 ragel_def: 
-	tag_ragel_def_head ragel_def_item_list '/' TAG_ragel_def
+	TAG_ragel_def ragel_def_item_list '/' TAG_ragel_def
 	final {
 		/* Do this before distributing transitions out to singles and defaults
 		 * makes life easier. */
@@ -162,29 +174,6 @@ ragel_def:
 
 		/* Call the user's callback. */
 		cgd->finishRagelDef();
-	};
-
-tag_ragel_def_head: TAG_ragel_def 
-	final {
-		char *fsmName = 0;
-		Attribute *nameAttr = $1->tag->findAttr( "name" );
-		if ( nameAttr != 0 ) {
-			fsmName = nameAttr->value;
-
-			CodeGenMapEl *mapEl = codeGenMap.find( fsmName );
-			if ( mapEl != 0 )
-				cgd = mapEl->value;
-			else {
-				cgd = makeCodeGen( sourceFileName, fsmName, *outStream, wantComplete );
-				codeGenMap.insert( fsmName, cgd );
-			}
-		}
-		else {
-			cgd = makeCodeGen( sourceFileName, fsmName, 
-					*outStream, wantComplete );
-		}
-
-		::keyOps = &cgd->thisKeyOps;
 	};
 
 ragel_def_item_list: ragel_def_item_list ragel_def_item;
