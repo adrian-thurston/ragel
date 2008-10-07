@@ -1457,19 +1457,6 @@ void terminateAllParsers( )
 		pdel->value->token( loc, Parser_tk_eof, 0, 0 );
 }
 
-const char *getLang()
-{
-	const char *lang = 0;
-	switch ( hostLang->lang ) {
-		case HostLang::C:      lang = "C"; break;
-		case HostLang::D:      lang = "D"; break;
-		case HostLang::Java:   lang = "Java"; break;
-		case HostLang::Ruby:   lang = "Ruby"; break;
-		case HostLang::CSharp: lang = "C#"; break;
-	}
-	return lang;
-}
-
 void writeMachines( std::ostream &out, std::string hostData, 
 		const char *inputFileName, XmlParser &xmlParser )
 {
@@ -1482,7 +1469,7 @@ void writeMachines( std::ostream &out, std::string hostData,
 		}
 
 		if ( gblErrorCount == 0 ) {
-			xmlParser.ragel( VERSION, inputFileName, getLang() );
+			xmlParser.ragel( inputFileName );
 			for ( ParserDict::Iter parser = parserDict; parser.lte(); parser++ ) {
 				ParseData *pd = parser->value->pd;
 				if ( pd->instanceList.length() > 0 )
@@ -1520,7 +1507,7 @@ void writeMachines( std::ostream &out, std::string hostData,
 			/* Section/Machine to emit was found. Prepare and emit it. */
 			parseData->prepareMachineGen( graphDictEl );
 			if ( gblErrorCount == 0 ) {
-				xmlParser.ragel( VERSION, inputFileName, getLang() );
+				xmlParser.ragel( inputFileName );
 				parseData->generateXML( out );
 				out << hostData;
 			}

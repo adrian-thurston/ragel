@@ -84,30 +84,30 @@ void genLineDirective( ostream &out )
 	lineDirective( out, filter->fileName, filter->line + 1 );
 }
 
-void XmlParser::ragel( const char *version, const char *fileName, const char *lang )
+void XmlParser::ragel( const char *fileName )
 {
 	/* Check for file name attribute. */
 	sourceFileName = fileName;
 
 	if ( generateDot )
 		outStream = dotOpenOutput( sourceFileName );
-	else if ( strcmp( lang, "C" ) == 0 ) {
+	else if ( hostLang->lang == HostLang::C ) {
 		hostLang = &hostLangC;
 		outStream = cdOpenOutput( sourceFileName );
 	}
-	else if ( strcmp( lang, "D" ) == 0 ) {
+	else if ( hostLang->lang == HostLang::D ) {
 		hostLang = &hostLangD;
 		outStream = cdOpenOutput( sourceFileName );
 	}
-	else if ( strcmp( lang, "Java" ) == 0 ) {
+	else if ( hostLang->lang == HostLang::Java ) {
 		hostLang = &hostLangJava;
 		outStream = javaOpenOutput( sourceFileName );
 	}
-	else if ( strcmp( lang, "Ruby" ) == 0 ) {
+	else if ( hostLang->lang == HostLang::Ruby ) {
 		hostLang = &hostLangRuby;
 		outStream = rubyOpenOutput( sourceFileName );
 	}
-	else if ( strcmp( lang, "C#" ) == 0 ) {
+	else if ( hostLang->lang == HostLang::CSharp ) {
 		hostLang = &hostLangCSharp;
 		outStream = csharpOpenOutput( sourceFileName );
 	}
