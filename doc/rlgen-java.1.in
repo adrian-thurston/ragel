@@ -1,5 +1,5 @@
 .\"
-.\"   Copyright 2001-2007 Adrian Thurston <thurston@cs.queensu.ca>
+.\"   Copyright 2001-2007 Adrian Thurston <thurston@complang.org>
 .\"
 
 .\"   This file is part of Ragel.
@@ -58,7 +58,7 @@ driven FSM produces a smaller binary and requires a less expensive host language
 compile but results in slower running code. The table driven FSM is suitable
 for any FSM.
 .SH CREDITS
-Ragel was written by Adrian Thurston <thurston@cs.queensu.ca>.  Contributions
+Ragel was written by Adrian Thurston <thurston@complang.org>.  Contributions
 to Java code generation by Colin Fleming.
 .SH "SEE ALSO"
 .BR ragel (1),

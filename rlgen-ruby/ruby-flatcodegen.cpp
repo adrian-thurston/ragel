@@ -1,5 +1,5 @@
 /*
- *  Copyright 2001-2007 Adrian Thurston <thurston@cs.queensu.ca>
+ *  Copyright 2001-2007 Adrian Thurston <thurston@complang.org>
  *  Copyright 2007 Victor Hugo Borja <vic@rubyforge.org>
  */
 

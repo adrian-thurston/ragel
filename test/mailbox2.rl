@@ -142,7 +142,7 @@ int main()
 {
 	test(
 		"From user@host.com Wed Nov 28 13:30:05 2001\n"
-		"From: \"Adrian D. Thurston\" <thurston@cs.queensu.ca>\n"
+		"From: \"Adrian D. Thurston\" <thurston@complang.org>\n"
 		"Subject:   the squirrel has landed\n"
 		"\n"
 		"Message goes here. \n"
@@ -162,7 +162,7 @@ int main()
 #ifdef _____OUTPUT_____
 ------
 FROM
-	"Adrian D. Thurston" | thurston@cs.queensu.ca
+	"Adrian D. Thurston" | thurston@complang.org
 SUBJECT
 	the squirrel has landed
 ------

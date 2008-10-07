@@ -1,5 +1,5 @@
 .\"
-.\"   Copyright 2001-2007 Adrian Thurston <thurston@cs.queensu.ca>
+.\"   Copyright 2001-2007 Adrian Thurston <thurston@complang.org>
 .\"
 
 .\"   This file is part of Ragel.
@@ -625,7 +625,7 @@ Save the current state and immediately break out of the machine.
 Ragel is still under development and has not yet matured. There are probably
 many bugs.
 .SH CREDITS
-Ragel was written by Adrian Thurston <thurston@cs.queensu.ca>.  Objective-C
+Ragel was written by Adrian Thurston <thurston@complang.org>.  Objective-C
 output contributed by Erich Ocean. D output contributed by Alan West. 
 .SH "SEE ALSO"
 .BR rlgen-cd (1),

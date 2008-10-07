@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006-2007 Adrian Thurston <thurston@cs.queensu.ca>
+ *  Copyright 2006-2007 Adrian Thurston <thurston@complang.org>
  *            2007 Colin Fleming <colin.fleming@caverock.com>
  */
 

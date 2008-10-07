@@ -1,6 +1,6 @@
 /*
  *  Copyright 2007 Victor Hugo Borja <vic@rubyforge.org>
- *            2006-2007 Adrian Thurston <thurston@cs.queensu.ca>
+ *            2006-2007 Adrian Thurston <thurston@complang.org>
  */
 
 /*  This file is part of Ragel.
