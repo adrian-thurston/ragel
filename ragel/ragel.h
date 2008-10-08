@@ -85,6 +85,8 @@ struct XmlParser;
 void terminateAllParsers( );
 void writeMachines( std::ostream &out, std::string hostData, 
 	const char *inputFileName, XmlParser &xmlParser );
+void generate( std::ostream &out, std::string hostData, 
+	const char *inputFileName, XmlParser &xmlParser );
 void xmlEscapeHost( std::ostream &out, char *data, long len );
 
 typedef Vector<const char *> ArgsVector;

@@ -1427,7 +1427,7 @@ void ParseData::prepareMachineGenTBWrapped( GraphDictEl *graphDictEl )
 	sectionGraph->setStateNumbers( 0 );
 }
 
-void ParseData::generateXML( ostream &out, XmlParser &xmlParser )
+void ParseData::generate( ostream &out, XmlParser &xmlParser )
 {
 	beginProcessing();
 
@@ -1457,7 +1457,101 @@ void terminateAllParsers( )
 		pdel->value->token( loc, Parser_tk_eof, 0, 0 );
 }
 
+void writeLanguage( std::ostream &out )
+{
+	out << " lang=\"";
+	switch ( hostLang->lang ) {
+		case HostLang::C:    out << "C"; break;
+		case HostLang::D:    out << "D"; break;
+		case HostLang::Java: out << "Java"; break;
+		case HostLang::Ruby: out << "Ruby"; break;
+		case HostLang::CSharp: out << "C#"; break;
+	}
+	out << "\"";
+}
+
+void ParseData::generateXML( ostream &out, XmlParser &xmlParser )
+{
+	beginProcessing();
+
+	/* Make the generator. */
+	XMLCodeGen codeGen( sectionName, this, sectionGraph, out, xmlParser );
+
+	/* Write out with it. */
+	codeGen.writeXML();
+
+	if ( printStatistics ) {
+		cerr << "fsm name  : " << sectionName << endl;
+		cerr << "num states: " << sectionGraph->stateList.length() << endl;
+		cerr << endl;
+	}
+}
+
 void writeMachines( std::ostream &out, std::string hostData, 
+		const char *inputFileName, XmlParser &xmlParser )
+{
+	if ( machineSpec == 0 && machineName == 0 ) {
+		/* No machine spec or machine name given. Generate everything. */
+		for ( ParserDict::Iter parser = parserDict; parser.lte(); parser++ ) {
+			ParseData *pd = parser->value->pd;
+			if ( pd->instanceList.length() > 0 )
+				pd->prepareMachineGen( 0 );
+		}
+
+		if ( gblErrorCount == 0 ) {
+			out << "<ragel version=\"" VERSION "\" filename=\"" << inputFileName << "\"";
+			writeLanguage( out );
+			out << ">\n";
+			for ( ParserDict::Iter parser = parserDict; parser.lte(); parser++ ) {
+				ParseData *pd = parser->value->pd;
+				if ( pd->instanceList.length() > 0 )
+					pd->generateXML( out, xmlParser );
+			}
+			out << hostData;
+			out << "</ragel>\n";
+		}
+	}
+	else if ( parserDict.length() > 0 ) {
+		/* There is either a machine spec or machine name given. */
+		ParseData *parseData = 0;
+		GraphDictEl *graphDictEl = 0;
+
+		/* Traverse the sections, break out when we find a section/machine
+		 * that matches the one specified. */
+		for ( ParserDict::Iter parser = parserDict; parser.lte(); parser++ ) {
+			ParseData *checkPd = parser->value->pd;
+			if ( machineSpec == 0 || strcmp( checkPd->sectionName, machineSpec ) == 0 ) {
+				GraphDictEl *checkGdEl = 0;
+				if ( machineName == 0 || (checkGdEl = 
+						checkPd->graphDict.find( machineName )) != 0 )
+				{
+					/* Have a machine spec and/or machine name that matches
+					 * the -M/-S options. */
+					parseData = checkPd;
+					graphDictEl = checkGdEl;
+					break;
+				}
+			}
+		}
+
+		if ( parseData == 0 )
+			error() << "could not locate machine specified with -S and/or -M" << endl;
+		else {
+			/* Section/Machine to emit was found. Prepare and emit it. */
+			parseData->prepareMachineGen( graphDictEl );
+			if ( gblErrorCount == 0 ) {
+				out << "<ragel version=\"" VERSION "\" filename=\"" << inputFileName << "\"";
+				writeLanguage( out );
+				out << ">\n";
+				parseData->generateXML( out, xmlParser );
+				out << hostData;
+				out << "</ragel>\n";
+			}
+		}
+	}
+}
+
+void generate( std::ostream &out, std::string hostData, 
 		const char *inputFileName, XmlParser &xmlParser )
 {
 	if ( machineSpec == 0 && machineName == 0 ) {
@@ -1473,7 +1567,7 @@ void writeMachines( std::ostream &out, std::string hostData,
 			for ( ParserDict::Iter parser = parserDict; parser.lte(); parser++ ) {
 				ParseData *pd = parser->value->pd;
 				if ( pd->instanceList.length() > 0 )
-					pd->generateXML( out, xmlParser );
+					pd->generate( out, xmlParser );
 			}
 			out << hostData;
 		}
@@ -1508,7 +1602,7 @@ void writeMachines( std::ostream &out, std::string hostData,
 			parseData->prepareMachineGen( graphDictEl );
 			if ( gblErrorCount == 0 ) {
 				xmlParser.open_ragel( inputFileName );
-				parseData->generateXML( out, xmlParser );
+				parseData->generate( out, xmlParser );
 				out << hostData;
 			}
 		}

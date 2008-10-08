@@ -216,6 +216,7 @@ struct ParseData
 	void prepareMachineGen( GraphDictEl *graphDictEl );
 	void prepareMachineGenTBWrapped( GraphDictEl *graphDictEl );
 	void generateXML( ostream &out, XmlParser &xmlParser );
+	void generate( ostream &out, XmlParser &xmlParser );
 	FsmAp *sectionGraph;
 	bool generatingSectionSubset;
 
