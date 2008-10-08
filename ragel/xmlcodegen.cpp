@@ -484,22 +484,69 @@ void XMLCodeGen::makeGotoExpr( GenInlineList *outList, InlineItem *item )
 
 void XMLCodeGen::makeCall( GenInlineList *outList, InlineItem *item )
 {
+	long targetState;
+	if ( pd->generatingSectionSubset )
+		targetState = -1;
+	else {
+		EntryMapEl *targ = fsm->entryPoints.find( item->nameTarg->id );
+		targetState = targ->value->alg.stateNum;
+	}
+
+	GenInlineItem *inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::Call );
+	inlineItem->targId = targetState;
+	outList->append( inlineItem );
 }
 
 void XMLCodeGen::makeCallExpr( GenInlineList *outList, InlineItem *item )
 {
+	/* Fill the sub list. */
+	GenInlineList *subList = new GenInlineList;
+	makeGenInlineList( subList, item->children );
+
+	/* Make the item. */
+	GenInlineItem *inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::CallExpr );
+	inlineItem->children = subList;
+	outList->append( inlineItem );
 }
 
 void XMLCodeGen::makeNext( GenInlineList *outList, InlineItem *item )
 {
+	long targetState;
+	if ( pd->generatingSectionSubset )
+		targetState = -1;
+	else {
+		EntryMapEl *targ = fsm->entryPoints.find( item->nameTarg->id );
+		targetState = targ->value->alg.stateNum;
+	}
+
+	GenInlineItem *inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::Next );
+	inlineItem->targId = targetState;
 }
 
 void XMLCodeGen::makeNextExpr( GenInlineList *outList, InlineItem *item )
 {
+	/* Fill the sub list. */
+	GenInlineList *subList = new GenInlineList;
+	makeGenInlineList( subList, item->children );
+
+	/* Make the item. */
+	GenInlineItem *inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::NextExpr );
+	inlineItem->children = subList;
+	outList->append( inlineItem );
 }
 
 void XMLCodeGen::makeEntry( GenInlineList *outList, InlineItem *item )
 {
+	long entryState;
+	if ( pd->generatingSectionSubset )
+		entryState = -1;
+	else {
+		EntryMapEl *targ = fsm->entryPoints.find( item->nameTarg->id );
+		entryState = targ->value->alg.stateNum;
+	}
+
+	GenInlineItem *inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::Entry );
+	inlineItem->targId = entryState;
 }
 
 void XMLCodeGen::makeLmSetActId( GenInlineList *outList, InlineItem *item )
