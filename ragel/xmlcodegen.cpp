@@ -549,10 +549,6 @@ void XMLCodeGen::makeEntry( GenInlineList *outList, InlineItem *item )
 	inlineItem->targId = entryState;
 }
 
-void XMLCodeGen::makeLmSetActId( GenInlineList *outList, InlineItem *item )
-{
-}
-
 void XMLCodeGen::makeLmOnLast( GenInlineList *outList, InlineItem *item )
 {
 }

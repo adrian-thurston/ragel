@@ -100,7 +100,6 @@ private:
 	void writeNext( InlineItem *item );
 	void writeNextExpr( InlineItem *item );
 	void writeEntry( InlineItem *item );
-	void writeLmSetActId( InlineItem *item );
 	void writeLmOnLast( InlineItem *item );
 	void writeLmOnNext( InlineItem *item );
 	void writeLmOnLagBehind( InlineItem *item );
@@ -132,7 +131,6 @@ private:
 	void makeNext( GenInlineList *outList, InlineItem *item );
 	void makeNextExpr( GenInlineList *outList, InlineItem *item );
 	void makeEntry( GenInlineList *outList, InlineItem *item );
-	void makeLmSetActId( GenInlineList *outList, InlineItem *item );
 	void makeLmOnLast( GenInlineList *outList, InlineItem *item );
 	void makeLmOnNext( GenInlineList *outList, InlineItem *item );
 	void makeLmOnLagBehind( GenInlineList *outList, InlineItem *item );
