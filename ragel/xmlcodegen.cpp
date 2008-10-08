@@ -448,14 +448,38 @@ void XMLCodeGen::makeKey( GenInlineList *outList, Key key )
 
 void XMLCodeGen::makeText( GenInlineList *outList, InlineItem *item )
 {
+	GenInlineItem *inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::Text );
+	inlineItem->data = item->data;
+
+	outList->append( inlineItem );
 }
 
 void XMLCodeGen::makeGoto( GenInlineList *outList, InlineItem *item )
 {
+	long targetState;
+	if ( pd->generatingSectionSubset )
+		targetState = -1;
+	else {
+		EntryMapEl *targ = fsm->entryPoints.find( item->nameTarg->id );
+		targetState = targ->value->alg.stateNum;
+	}
+
+	/* Make the item. */
+	GenInlineItem *inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::Goto );
+	inlineItem->targId = targetState;
+	outList->append( inlineItem );
 }
 
 void XMLCodeGen::makeGotoExpr( GenInlineList *outList, InlineItem *item )
 {
+	/* Fill the sub list. */
+	GenInlineList *subList = new GenInlineList;
+	makeGenInlineList( subList, item->children );
+
+	/* Make the item. */
+	GenInlineItem *inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::GotoExpr );
+	inlineItem->children = subList;
+	outList->append( inlineItem );
 }
 
 void XMLCodeGen::makeCall( GenInlineList *outList, InlineItem *item )
