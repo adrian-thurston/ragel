@@ -25,6 +25,7 @@
 #include "xmlparse.h"
 #include "parsedata.h"
 #include "fsmgraph.h"
+#include "gendata.h"
 #include <string.h>
 
 using namespace std;
@@ -441,6 +442,156 @@ void XMLCodeGen::writeInlineList( InlineList *inlineList )
 	}
 }
 
+void XMLCodeGen::makeKey( GenInlineList *outList, Key key )
+{
+}
+
+void XMLCodeGen::makeText( GenInlineList *outList, InlineItem *item )
+{
+}
+
+void XMLCodeGen::makeGoto( GenInlineList *outList, InlineItem *item )
+{
+}
+
+void XMLCodeGen::makeGotoExpr( GenInlineList *outList, InlineItem *item )
+{
+}
+
+void XMLCodeGen::makeCall( GenInlineList *outList, InlineItem *item )
+{
+}
+
+void XMLCodeGen::makeCallExpr( GenInlineList *outList, InlineItem *item )
+{
+}
+
+void XMLCodeGen::makeNext( GenInlineList *outList, InlineItem *item )
+{
+}
+
+void XMLCodeGen::makeNextExpr( GenInlineList *outList, InlineItem *item )
+{
+}
+
+void XMLCodeGen::makeEntry( GenInlineList *outList, InlineItem *item )
+{
+}
+
+void XMLCodeGen::makeLmSetActId( GenInlineList *outList, InlineItem *item )
+{
+}
+
+void XMLCodeGen::makeLmOnLast( GenInlineList *outList, InlineItem *item )
+{
+}
+
+void XMLCodeGen::makeLmOnNext( GenInlineList *outList, InlineItem *item )
+{
+}
+
+void XMLCodeGen::makeLmOnLagBehind( GenInlineList *outList, InlineItem *item )
+{
+}
+
+void XMLCodeGen::makeActionExec( GenInlineList *outList, InlineItem *item )
+{
+}
+
+void XMLCodeGen::makeLmSwitch( GenInlineList *outList, InlineItem *item )
+{
+}
+
+void XMLCodeGen::makeGenInlineList( GenInlineList *outList, InlineList *inList )
+{
+	for ( InlineList::Iter item = *inList; item.lte(); item++ ) {
+		switch ( item->type ) {
+		case InlineItem::Text:
+			makeText( outList, item );
+			break;
+		case InlineItem::Goto:
+			makeGoto( outList, item );
+			break;
+		case InlineItem::GotoExpr:
+			makeGotoExpr( outList, item );
+			break;
+		case InlineItem::Call:
+			makeCall( outList, item );
+			break;
+		case InlineItem::CallExpr:
+			makeCallExpr( outList, item );
+			break;
+		case InlineItem::Next:
+			makeNext( outList, item );
+			break;
+		case InlineItem::NextExpr:
+			makeNextExpr( outList, item );
+			break;
+		case InlineItem::Break:
+			out << "<break></break>";
+			break;
+		case InlineItem::Ret: 
+			out << "<ret></ret>";
+			break;
+		case InlineItem::PChar:
+			out << "<pchar></pchar>";
+			break;
+		case InlineItem::Char: 
+			out << "<char></char>";
+			break;
+		case InlineItem::Curs: 
+			out << "<curs></curs>";
+			break;
+		case InlineItem::Targs: 
+			out << "<targs></targs>";
+			break;
+		case InlineItem::Entry:
+			makeEntry( outList, item );
+			break;
+
+		case InlineItem::Hold:
+			out << "<hold></hold>";
+			break;
+		case InlineItem::Exec:
+			makeActionExec( outList, item );
+			break;
+
+		case InlineItem::LmSetActId:
+			out << "<set_act>" << 
+					item->longestMatchPart->longestMatchId << 
+					"</set_act>";
+			break;
+		case InlineItem::LmSetTokEnd:
+			out << "<set_tokend>1</set_tokend>";
+			break;
+
+		case InlineItem::LmOnLast:
+			makeLmOnLast( outList, item );
+			break;
+		case InlineItem::LmOnNext:
+			makeLmOnNext( outList, item );
+			break;
+		case InlineItem::LmOnLagBehind:
+			makeLmOnLagBehind( outList, item );
+			break;
+		case InlineItem::LmSwitch: 
+			makeLmSwitch( outList, item );
+			break;
+
+		case InlineItem::LmInitAct:
+			out << "<init_act></init_act>";
+			break;
+		case InlineItem::LmInitTokStart:
+			out << "<init_tokstart></init_tokstart>";
+			break;
+		case InlineItem::LmSetTokStart:
+			out << "<set_tokstart></set_tokstart>";
+			break;
+		}
+	}
+}
+
+
 void XMLCodeGen::writeAction( Action *action )
 {
 	out << "      <action id=\"" << action->actionId << "\"";
@@ -644,10 +795,9 @@ void XMLCodeGen::writeXML()
 {
 	/* Open the definition. */
 	xmlParser.open_ragel_def( fsmName );
-	out << "<ragel_def>\n";
 
 	/* Alphabet type. */
-	out << "  <alphtype>" << keyOps->alphType->internalName << "</alphtype>\n";
+	xmlParser.cgd->setAlphType( keyOps->alphType->internalName );
 	
 	/* Getkey expression. */
 	if ( pd->getKeyExpr != 0 ) {
@@ -748,4 +898,113 @@ void XMLCodeGen::writeXML()
 	out <<
 		"</ragel_def>\n";
 }
+
+void XMLCodeGen::makeBackend()
+{
+	/* Open the definition. */
+	xmlParser.open_ragel_def( fsmName );
+
+	/* Alphabet type. */
+	xmlParser.cgd->setAlphType( keyOps->alphType->internalName );
+	
+	/* Getkey expression. */
+	if ( pd->getKeyExpr != 0 ) {
+		out << "  <getkey>";
+		writeInlineList( pd->getKeyExpr );
+		out << "</getkey>\n";
+	}
+
+	/* Access expression. */
+	if ( pd->accessExpr != 0 ) {
+		out << "  <access>";
+		writeInlineList( pd->accessExpr );
+		out << "</access>\n";
+	}
+
+	/* PrePush expression. */
+	if ( pd->prePushExpr != 0 ) {
+		out << "  <prepush>";
+		writeInlineList( pd->prePushExpr );
+		out << "</prepush>\n";
+	}
+
+	/* PostPop expression. */
+	if ( pd->postPopExpr != 0 ) {
+		out << "  <postpop>";
+		writeInlineList( pd->postPopExpr );
+		out << "</postpop>\n";
+	}
+
+	/*
+	 * Variable expressions.
+	 */
+
+	if ( pd->pExpr != 0 ) {
+		out << "  <p_expr>";
+		writeInlineList( pd->pExpr );
+		out << "</p_expr>\n";
+	}
+	
+	if ( pd->peExpr != 0 ) {
+		out << "  <pe_expr>";
+		writeInlineList( pd->peExpr );
+		out << "</pe_expr>\n";
+	}
+
+	if ( pd->eofExpr != 0 ) {
+		out << "  <eof_expr>";
+		writeInlineList( pd->eofExpr );
+		out << "</eof_expr>\n";
+	}
+	
+	if ( pd->csExpr != 0 ) {
+		out << "  <cs_expr>";
+		writeInlineList( pd->csExpr );
+		out << "</cs_expr>\n";
+	}
+	
+	if ( pd->topExpr != 0 ) {
+		out << "  <top_expr>";
+		writeInlineList( pd->topExpr );
+		out << "</top_expr>\n";
+	}
+	
+	if ( pd->stackExpr != 0 ) {
+		out << "  <stack_expr>";
+		writeInlineList( pd->stackExpr );
+		out << "</stack_expr>\n";
+	}
+	
+	if ( pd->actExpr != 0 ) {
+		out << "  <act_expr>";
+		writeInlineList( pd->actExpr );
+		out << "</act_expr>\n";
+	}
+	
+	if ( pd->tokstartExpr != 0 ) {
+		out << "  <tokstart_expr>";
+		writeInlineList( pd->tokstartExpr );
+		out << "</tokstart_expr>\n";
+	}
+	
+	if ( pd->tokendExpr != 0 ) {
+		out << "  <tokend_expr>";
+		writeInlineList( pd->tokendExpr );
+		out << "</tokend_expr>\n";
+	}
+	
+	if ( pd->dataExpr != 0 ) {
+		out << "  <data_expr>";
+		writeInlineList( pd->dataExpr );
+		out << "</data_expr>\n";
+	}
+	
+	writeExports();
+	
+	writeMachine();
+
+	out <<
+		"</ragel_def>\n";
+}
+
 

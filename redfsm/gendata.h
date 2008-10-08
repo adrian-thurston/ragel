@@ -178,7 +178,7 @@ struct CodeGenData
 	GenCondSpace *findCondSpace( Key lowKey, Key highKey );
 	Condition *findCondition( Key key );
 
-	bool setAlphType( char *data );
+	bool setAlphType( const char *data );
 
 	void resolveTargetStates( GenInlineList *inlineList );
 	Key findMaxKey();

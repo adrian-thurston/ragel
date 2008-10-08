@@ -288,7 +288,7 @@ void CodeGenData::closeMachine()
 }
 
 
-bool CodeGenData::setAlphType( char *data )
+bool CodeGenData::setAlphType( const char *data )
 {
 	HostType *alphType = findAlphTypeInternal( data );
 	if ( alphType == 0 )

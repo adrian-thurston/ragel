@@ -110,7 +110,7 @@ HostLang hostLangCSharp = { HostLang::CSharp, hostTypesCSharp, 9, hostTypesCShar
 
 HostLang *hostLang = &hostLangC;
 
-HostType *findAlphType( char *s1 )
+HostType *findAlphType( const char *s1 )
 {
 	for ( int i = 0; i < hostLang->numHostTypes; i++ ) {
 		if ( strcmp( s1, hostLang->hostTypes[i].data1 ) == 0 && 
@@ -123,7 +123,7 @@ HostType *findAlphType( char *s1 )
 	return 0;
 }
 
-HostType *findAlphType( char *s1, char *s2 )
+HostType *findAlphType( const char *s1, const char *s2 )
 {
 	for ( int i = 0; i < hostLang->numHostTypes; i++ ) {
 		if ( strcmp( s1, hostLang->hostTypes[i].data1 ) == 0 && 
@@ -137,7 +137,7 @@ HostType *findAlphType( char *s1, char *s2 )
 	return 0;
 }
 
-HostType *findAlphTypeInternal( char *s1 )
+HostType *findAlphTypeInternal( const char *s1 )
 {
 	for ( int i = 0; i < hostLang->numHostTypes; i++ ) {
 		if ( strcmp( s1, hostLang->hostTypes[i].internalName ) == 0 )

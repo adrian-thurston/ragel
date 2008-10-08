@@ -216,8 +216,6 @@ tag_export: TAG_ex '/' TAG_ex
 
 tag_alph_type: TAG_alphtype '/' TAG_alphtype
 	final {
-		if ( ! cgd->setAlphType( $3->tag->content ) )
-			error($1->loc) << "tag <alphtype> specifies unknown alphabet type" << endp;
 	};
 
 tag_getkey_expr: TAG_getkey inline_list '/' TAG_getkey

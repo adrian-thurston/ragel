@@ -133,9 +133,9 @@ extern HostLang hostLangJava;
 extern HostLang hostLangRuby;
 extern HostLang hostLangCSharp;
 
-HostType *findAlphType( char *s1 );
-HostType *findAlphType( char *s1, char *s2 );
-HostType *findAlphTypeInternal( char *s1 );
+HostType *findAlphType( const char *s1 );
+HostType *findAlphType( const char *s1, const char *s2 );
+HostType *findAlphTypeInternal( const char *s1 );
 
 /* An abstraction of the key operators that manages key operations such as
  * comparison and increment according the signedness of the key. */

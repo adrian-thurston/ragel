@@ -31,6 +31,7 @@
 struct TransAp;
 struct FsmAp;
 struct ParseData;
+struct GenInlineList;
 
 struct RedActionTable
 :
@@ -82,6 +83,7 @@ public:
 	XMLCodeGen( char *fsmName, ParseData *pd, FsmAp *fsm, 
 			std::ostream &out, XmlParser &xmlParser );
 	void writeXML( );
+	void makeBackend( );
 
 private:
 	void appendTrans( TransListVect &outList, Key lowKey, Key highKey, TransAp *trans );
@@ -119,6 +121,23 @@ private:
 	void writeLmSwitch( InlineItem *item );
 	void writeMachine();
 	void writeActionExec( InlineItem *item );
+
+	void makeGenInlineList( GenInlineList *outList, InlineList *inList );
+	void makeKey( GenInlineList *outList, Key key );
+	void makeText( GenInlineList *outList, InlineItem *item );
+	void makeGoto( GenInlineList *outList, InlineItem *item );
+	void makeGotoExpr( GenInlineList *outList, InlineItem *item );
+	void makeCall( GenInlineList *outList, InlineItem *item );
+	void makeCallExpr( GenInlineList *outList, InlineItem *item );
+	void makeNext( GenInlineList *outList, InlineItem *item );
+	void makeNextExpr( GenInlineList *outList, InlineItem *item );
+	void makeEntry( GenInlineList *outList, InlineItem *item );
+	void makeLmSetActId( GenInlineList *outList, InlineItem *item );
+	void makeLmOnLast( GenInlineList *outList, InlineItem *item );
+	void makeLmOnNext( GenInlineList *outList, InlineItem *item );
+	void makeLmOnLagBehind( GenInlineList *outList, InlineItem *item );
+	void makeActionExec( GenInlineList *outList, InlineItem *item );
+	void makeLmSwitch( GenInlineList *outList, InlineItem *item );
 
 	char *fsmName;
 	ParseData *pd;
