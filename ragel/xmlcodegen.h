@@ -26,6 +26,7 @@
 #include "avltree.h"
 #include "fsmgraph.h"
 #include "parsedata.h"
+#include "redfsm.h"
 
 /* Forwards. */
 struct TransAp;
@@ -124,18 +125,15 @@ private:
 	void makeGenInlineList( GenInlineList *outList, InlineList *inList );
 	void makeKey( GenInlineList *outList, Key key );
 	void makeText( GenInlineList *outList, InlineItem *item );
-	void makeGoto( GenInlineList *outList, InlineItem *item );
-	void makeGotoExpr( GenInlineList *outList, InlineItem *item );
-	void makeCall( GenInlineList *outList, InlineItem *item );
-	void makeCallExpr( GenInlineList *outList, InlineItem *item );
-	void makeNext( GenInlineList *outList, InlineItem *item );
-	void makeNextExpr( GenInlineList *outList, InlineItem *item );
-	void makeEntry( GenInlineList *outList, InlineItem *item );
 	void makeLmOnLast( GenInlineList *outList, InlineItem *item );
 	void makeLmOnNext( GenInlineList *outList, InlineItem *item );
 	void makeLmOnLagBehind( GenInlineList *outList, InlineItem *item );
 	void makeActionExec( GenInlineList *outList, InlineItem *item );
 	void makeLmSwitch( GenInlineList *outList, InlineItem *item );
+	void makeSetTokend( GenInlineList *outList, long offset );
+	void makeSetAct( GenInlineList *outList, long lmId );
+	void makeSubList( GenInlineList *outList, InlineList *inlineList, GenInlineItem::Type type );
+	void makeTargetItem( GenInlineList *outList, InlineItem *item, GenInlineItem::Type type );
 
 	char *fsmName;
 	ParseData *pd;

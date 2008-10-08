@@ -454,7 +454,7 @@ void XMLCodeGen::makeText( GenInlineList *outList, InlineItem *item )
 	outList->append( inlineItem );
 }
 
-void XMLCodeGen::makeGoto( GenInlineList *outList, InlineItem *item )
+void XMLCodeGen::makeTargetItem( GenInlineList *outList, InlineItem *item, GenInlineItem::Type type )
 {
 	long targetState;
 	if ( pd->generatingSectionSubset )
@@ -465,108 +465,84 @@ void XMLCodeGen::makeGoto( GenInlineList *outList, InlineItem *item )
 	}
 
 	/* Make the item. */
-	GenInlineItem *inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::Goto );
+	GenInlineItem *inlineItem = new GenInlineItem( GenInputLoc(), type );
 	inlineItem->targId = targetState;
 	outList->append( inlineItem );
 }
 
-void XMLCodeGen::makeGotoExpr( GenInlineList *outList, InlineItem *item )
+/* Make a sublist item with a given type. */
+void XMLCodeGen::makeSubList( GenInlineList *outList, 
+		InlineList *inlineList, GenInlineItem::Type type )
 {
 	/* Fill the sub list. */
 	GenInlineList *subList = new GenInlineList;
-	makeGenInlineList( subList, item->children );
+	makeGenInlineList( subList, inlineList );
 
 	/* Make the item. */
-	GenInlineItem *inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::GotoExpr );
+	GenInlineItem *inlineItem = new GenInlineItem( GenInputLoc(), type );
 	inlineItem->children = subList;
 	outList->append( inlineItem );
-}
-
-void XMLCodeGen::makeCall( GenInlineList *outList, InlineItem *item )
-{
-	long targetState;
-	if ( pd->generatingSectionSubset )
-		targetState = -1;
-	else {
-		EntryMapEl *targ = fsm->entryPoints.find( item->nameTarg->id );
-		targetState = targ->value->alg.stateNum;
-	}
-
-	GenInlineItem *inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::Call );
-	inlineItem->targId = targetState;
-	outList->append( inlineItem );
-}
-
-void XMLCodeGen::makeCallExpr( GenInlineList *outList, InlineItem *item )
-{
-	/* Fill the sub list. */
-	GenInlineList *subList = new GenInlineList;
-	makeGenInlineList( subList, item->children );
-
-	/* Make the item. */
-	GenInlineItem *inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::CallExpr );
-	inlineItem->children = subList;
-	outList->append( inlineItem );
-}
-
-void XMLCodeGen::makeNext( GenInlineList *outList, InlineItem *item )
-{
-	long targetState;
-	if ( pd->generatingSectionSubset )
-		targetState = -1;
-	else {
-		EntryMapEl *targ = fsm->entryPoints.find( item->nameTarg->id );
-		targetState = targ->value->alg.stateNum;
-	}
-
-	GenInlineItem *inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::Next );
-	inlineItem->targId = targetState;
-}
-
-void XMLCodeGen::makeNextExpr( GenInlineList *outList, InlineItem *item )
-{
-	/* Fill the sub list. */
-	GenInlineList *subList = new GenInlineList;
-	makeGenInlineList( subList, item->children );
-
-	/* Make the item. */
-	GenInlineItem *inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::NextExpr );
-	inlineItem->children = subList;
-	outList->append( inlineItem );
-}
-
-void XMLCodeGen::makeEntry( GenInlineList *outList, InlineItem *item )
-{
-	long entryState;
-	if ( pd->generatingSectionSubset )
-		entryState = -1;
-	else {
-		EntryMapEl *targ = fsm->entryPoints.find( item->nameTarg->id );
-		entryState = targ->value->alg.stateNum;
-	}
-
-	GenInlineItem *inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::Entry );
-	inlineItem->targId = entryState;
 }
 
 void XMLCodeGen::makeLmOnLast( GenInlineList *outList, InlineItem *item )
 {
+	makeSetTokend( outList, 1 );
+
+	if ( item->longestMatchPart->action != 0 ) {
+		makeSubList( outList, 
+				item->longestMatchPart->action->inlineList, 
+				GenInlineItem::SubAction );
+	}
 }
 
 void XMLCodeGen::makeLmOnNext( GenInlineList *outList, InlineItem *item )
 {
+	makeSetTokend( outList, 0 );
+	outList->append( new GenInlineItem( GenInputLoc(), GenInlineItem::Hold ) );
+
+	if ( item->longestMatchPart->action != 0 ) {
+		makeSubList( outList, 
+			item->longestMatchPart->action->inlineList,
+			GenInlineItem::SubAction );
+	}
 }
 
 void XMLCodeGen::makeLmOnLagBehind( GenInlineList *outList, InlineItem *item )
 {
+	/* Make the sublist containing a just get_tokend. */
+	GenInlineItem *getTokend = new GenInlineItem( GenInputLoc(), GenInlineItem::LmGetTokEnd );
+	GenInlineList *subList = new GenInlineList;
+	subList->append( getTokend );
+
+	/* Make the Exec item. */
+	GenInlineItem *inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::Exec );
+	inlineItem->children = subList;
+	outList->append( inlineItem );
+
+	if ( item->longestMatchPart->action != 0 ) {
+		makeSubList( outList,
+			item->longestMatchPart->action->inlineList,
+			GenInlineItem::SubAction );
+	}
 }
 
-void XMLCodeGen::makeActionExec( GenInlineList *outList, InlineItem *item )
-{
-}
 
 void XMLCodeGen::makeLmSwitch( GenInlineList *outList, InlineItem *item )
 {
+}
+
+void XMLCodeGen::makeSetTokend( GenInlineList *outList, long offset )
+{
+	GenInlineItem *inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::LmSetTokEnd );
+	inlineItem->offset = offset;
+	outList->append( inlineItem );
+}
+
+void XMLCodeGen::makeSetAct( GenInlineList *outList, long lmId )
+{
+	GenInlineItem *inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::LmSetActId );
+	inlineItem->lmId = lmId;
+	outList->append( inlineItem );
 }
 
 void XMLCodeGen::makeGenInlineList( GenInlineList *outList, InlineList *inList )
@@ -577,59 +553,57 @@ void XMLCodeGen::makeGenInlineList( GenInlineList *outList, InlineList *inList )
 			makeText( outList, item );
 			break;
 		case InlineItem::Goto:
-			makeGoto( outList, item );
+			makeTargetItem( outList, item, GenInlineItem::Goto );
 			break;
 		case InlineItem::GotoExpr:
-			makeGotoExpr( outList, item );
+			makeSubList( outList, item->children, GenInlineItem::GotoExpr );
 			break;
 		case InlineItem::Call:
-			makeCall( outList, item );
+			makeTargetItem( outList, item, GenInlineItem::Call );
 			break;
 		case InlineItem::CallExpr:
-			makeCallExpr( outList, item );
+			makeSubList( outList, item->children, GenInlineItem::CallExpr );
 			break;
 		case InlineItem::Next:
-			makeNext( outList, item );
+			makeTargetItem( outList, item, GenInlineItem::Next );
 			break;
 		case InlineItem::NextExpr:
-			makeNextExpr( outList, item );
+			makeSubList( outList, item->children, GenInlineItem::NextExpr );
 			break;
 		case InlineItem::Break:
-			out << "<break></break>";
+			outList->append( new GenInlineItem( GenInputLoc(), GenInlineItem::Break ) );
 			break;
 		case InlineItem::Ret: 
-			out << "<ret></ret>";
+			outList->append( new GenInlineItem( GenInputLoc(), GenInlineItem::Ret ) );
 			break;
 		case InlineItem::PChar:
-			out << "<pchar></pchar>";
+			outList->append( new GenInlineItem( GenInputLoc(), GenInlineItem::PChar ) );
 			break;
 		case InlineItem::Char: 
-			out << "<char></char>";
+			outList->append( new GenInlineItem( GenInputLoc(), GenInlineItem::Char ) );
 			break;
 		case InlineItem::Curs: 
-			out << "<curs></curs>";
+			outList->append( new GenInlineItem( GenInputLoc(), GenInlineItem::Curs ) );
 			break;
 		case InlineItem::Targs: 
-			out << "<targs></targs>";
+			outList->append( new GenInlineItem( GenInputLoc(), GenInlineItem::Targs ) );
 			break;
 		case InlineItem::Entry:
-			makeEntry( outList, item );
+			makeTargetItem( outList, item, GenInlineItem::Entry );
 			break;
 
 		case InlineItem::Hold:
-			out << "<hold></hold>";
+			outList->append( new GenInlineItem( GenInputLoc(), GenInlineItem::Hold ) );
 			break;
 		case InlineItem::Exec:
-			makeActionExec( outList, item );
+			makeSubList( outList, item->children, GenInlineItem::Exec );
 			break;
 
 		case InlineItem::LmSetActId:
-			out << "<set_act>" << 
-					item->longestMatchPart->longestMatchId << 
-					"</set_act>";
+			makeSetAct( outList, item->longestMatchPart->longestMatchId );
 			break;
 		case InlineItem::LmSetTokEnd:
-			out << "<set_tokend>1</set_tokend>";
+			makeSetTokend( outList, 1 );
 			break;
 
 		case InlineItem::LmOnLast:
@@ -646,13 +620,14 @@ void XMLCodeGen::makeGenInlineList( GenInlineList *outList, InlineList *inList )
 			break;
 
 		case InlineItem::LmInitAct:
-			out << "<init_act></init_act>";
+			outList->append( new GenInlineItem( GenInputLoc(), GenInlineItem::LmInitAct ) );
 			break;
 		case InlineItem::LmInitTokStart:
-			out << "<init_tokstart></init_tokstart>";
+			outList->append( new GenInlineItem( GenInputLoc(), GenInlineItem::LmInitTokStart ) );
 			break;
 		case InlineItem::LmSetTokStart:
-			out << "<set_tokstart></set_tokstart>";
+			outList->append( new GenInlineItem( GenInputLoc(), GenInlineItem::LmSetTokStart ) );
+			xmlParser.cgd->hasLongestMatch = true;
 			break;
 		}
 	}
