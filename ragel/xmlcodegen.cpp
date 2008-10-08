@@ -861,10 +861,10 @@ void XMLCodeGen::writeExports()
 void XMLCodeGen::writeXML()
 {
 	/* Open the definition. */
-	xmlParser.open_ragel_def( fsmName );
+	out << "<ragel_def name=\"" << fsmName << "\">\n";
 
 	/* Alphabet type. */
-	xmlParser.cgd->setAlphType( keyOps->alphType->internalName );
+	out << "  <alphtype>" << keyOps->alphType->internalName << "</alphtype>\n";
 	
 	/* Getkey expression. */
 	if ( pd->getKeyExpr != 0 ) {

@@ -133,7 +133,64 @@ parser XmlParser;
 
 include "xmlparse.kh";
 
-start: ragel_def_list host_or_write_list;
+start: tag_ragel;
+start:
+	final {
+		/* If we get no input the assumption is that the frontend died and
+		 * emitted an error. This forces the backend to return a non-zero
+		 * exit status, but does not print an error. */
+		gblErrorCount += 1;
+	};
+
+tag_ragel: tag_ragel_head ragel_def_list host_or_write_list '/' TAG_ragel;
+
+tag_ragel_head: TAG_ragel
+	final {
+		/* Check version used to generated the intermediate file. */
+		Attribute *versionAttr = $1->tag->findAttr( "version" );
+		if ( versionAttr == 0 )
+			error($1->loc) << "tag <ragel> requires a version attribute" << endp;
+		if ( strcmp( versionAttr->value, VERSION ) != 0 )
+			error($1->loc) << "version mismatch between frontend and backend" << endp;
+
+		/* Check for file name attribute. */
+		Attribute *fileNameAttr = $1->tag->findAttr( "filename" );
+		if ( fileNameAttr == 0 )
+			error($1->loc) << "tag <ragel> requires a filename attribute" << endp;
+		sourceFileName = fileNameAttr->value;
+
+		/* Check for language attribute. */
+		Attribute *langAttr = $1->tag->findAttr( "lang" );
+		if ( langAttr == 0 )
+			error($1->loc) << "tag <ragel> requires a lang attribute" << endp;
+
+		if ( generateDot )
+			outStream = dotOpenOutput( sourceFileName );
+		else if ( strcmp( langAttr->value, "C" ) == 0 ) {
+			hostLang = &hostLangC;
+			outStream = cdOpenOutput( sourceFileName );
+		}
+		else if ( strcmp( langAttr->value, "D" ) == 0 ) {
+			hostLang = &hostLangD;
+			outStream = cdOpenOutput( sourceFileName );
+		}
+		else if ( strcmp( langAttr->value, "Java" ) == 0 ) {
+			hostLang = &hostLangJava;
+			outStream = javaOpenOutput( sourceFileName );
+		}
+		else if ( strcmp( langAttr->value, "Ruby" ) == 0 ) {
+			hostLang = &hostLangRuby;
+			outStream = rubyOpenOutput( sourceFileName );
+		}
+		else if ( strcmp( langAttr->value, "C#" ) == 0 ) {
+			hostLang = &hostLangCSharp;
+			outStream = csharpOpenOutput( sourceFileName );
+		}
+		else {
+			error($1->loc) << "expecting lang attribute to be "
+					"one of C, D, Java, Ruby or C#" << endp;
+		}
+	};
 
 ragel_def_list: ragel_def_list ragel_def;
 ragel_def_list: ;
@@ -161,7 +218,7 @@ tag_host:
 	};
 
 ragel_def: 
-	TAG_ragel_def ragel_def_item_list '/' TAG_ragel_def
+	tag_ragel_def_head ragel_def_item_list '/' TAG_ragel_def
 	final {
 		/* Do this before distributing transitions out to singles and defaults
 		 * makes life easier. */
@@ -174,6 +231,29 @@ ragel_def:
 
 		/* Call the user's callback. */
 		cgd->finishRagelDef();
+	};
+
+tag_ragel_def_head: TAG_ragel_def 
+	final {
+		char *fsmName = 0;
+		Attribute *nameAttr = $1->tag->findAttr( "name" );
+		if ( nameAttr != 0 ) {
+			fsmName = nameAttr->value;
+
+			CodeGenMapEl *mapEl = codeGenMap.find( fsmName );
+			if ( mapEl != 0 )
+				cgd = mapEl->value;
+			else {
+				cgd = makeCodeGen( sourceFileName, fsmName, *outStream, wantComplete );
+				codeGenMap.insert( fsmName, cgd );
+			}
+		}
+		else {
+			cgd = makeCodeGen( sourceFileName, fsmName, 
+					*outStream, wantComplete );
+		}
+
+		::keyOps = &cgd->thisKeyOps;
 	};
 
 ragel_def_item_list: ragel_def_item_list ragel_def_item;
@@ -216,6 +296,8 @@ tag_export: TAG_ex '/' TAG_ex
 
 tag_alph_type: TAG_alphtype '/' TAG_alphtype
 	final {
+		if ( ! cgd->setAlphType( $3->tag->content ) )
+			error($1->loc) << "tag <alphtype> specifies unknown alphabet type" << endp;
 	};
 
 tag_getkey_expr: TAG_getkey inline_list '/' TAG_getkey

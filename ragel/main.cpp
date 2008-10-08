@@ -499,8 +499,8 @@ void process( const char *inputFileName, const char *intermed )
 	xmlParser.init();
 
 	/* Write the machines, then the surrounding code. */
-	//writeMachines( *xmlOutFile, hostData.str(), inputFileName, xmlParser );
-	generate( *xmlOutFile, hostData.str(), inputFileName, xmlParser );
+	writeMachines( *xmlOutFile, hostData.str(), inputFileName, xmlParser );
+	//generate( *xmlOutFile, hostData.str(), inputFileName, xmlParser );
 
 	/* Close the input and the intermediate file. */
 	delete xmlOutFile;

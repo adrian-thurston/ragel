@@ -1435,7 +1435,7 @@ void ParseData::generate( ostream &out, XmlParser &xmlParser )
 	XMLCodeGen codeGen( sectionName, this, sectionGraph, out, xmlParser );
 
 	/* Write out with it. */
-	codeGen.writeXML();
+	codeGen.makeBackend();
 
 	if ( printStatistics ) {
 		cerr << "fsm name  : " << sectionName << endl;
