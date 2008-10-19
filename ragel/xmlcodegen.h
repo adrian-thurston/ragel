@@ -133,7 +133,8 @@ private:
 	void makeSetTokend( GenInlineList *outList, long offset );
 	void makeSetAct( GenInlineList *outList, long lmId );
 	void makeSubList( GenInlineList *outList, InlineList *inlineList, GenInlineItem::Type type );
-	void makeTargetItem( GenInlineList *outList, InlineItem *item, GenInlineItem::Type type );
+	void makeTargetItem( GenInlineList *outList, long targetId, GenInlineItem::Type type );
+	void makeExecGetTokend( GenInlineList *outList );
 
 	char *fsmName;
 	ParseData *pd;

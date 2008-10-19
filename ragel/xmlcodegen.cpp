@@ -454,13 +454,13 @@ void XMLCodeGen::makeText( GenInlineList *outList, InlineItem *item )
 	outList->append( inlineItem );
 }
 
-void XMLCodeGen::makeTargetItem( GenInlineList *outList, InlineItem *item, GenInlineItem::Type type )
+void XMLCodeGen::makeTargetItem( GenInlineList *outList, long targetId, GenInlineItem::Type type )
 {
 	long targetState;
 	if ( pd->generatingSectionSubset )
 		targetState = -1;
 	else {
-		EntryMapEl *targ = fsm->entryPoints.find( item->nameTarg->id );
+		EntryMapEl *targ = fsm->entryPoints.find( targetId );
 		targetState = targ->value->alg.stateNum;
 	}
 
@@ -507,17 +507,23 @@ void XMLCodeGen::makeLmOnNext( GenInlineList *outList, InlineItem *item )
 	}
 }
 
+void XMLCodeGen::makeExecGetTokend( GenInlineList *outList )
+{
+	/* Make the Exec item. */
+	GenInlineItem *execItem = new GenInlineItem( GenInputLoc(), GenInlineItem::Exec );
+	execItem->children = new GenInlineList;
+
+	/* Make the GetTokEnd */
+	GenInlineItem *getTokend = new GenInlineItem( GenInputLoc(), GenInlineItem::LmGetTokEnd );
+	execItem->children->append( getTokend );
+
+	outList->append( execItem );
+}
+
 void XMLCodeGen::makeLmOnLagBehind( GenInlineList *outList, InlineItem *item )
 {
-	/* Make the sublist containing a just get_tokend. */
-	GenInlineItem *getTokend = new GenInlineItem( GenInputLoc(), GenInlineItem::LmGetTokEnd );
-	GenInlineList *subList = new GenInlineList;
-	subList->append( getTokend );
-
-	/* Make the Exec item. */
-	GenInlineItem *inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::Exec );
-	inlineItem->children = subList;
-	outList->append( inlineItem );
+	/* Jump to the tokend. */
+	makeExecGetTokend( outList );
 
 	if ( item->longestMatchPart->action != 0 ) {
 		makeSubList( outList,
@@ -526,9 +532,65 @@ void XMLCodeGen::makeLmOnLagBehind( GenInlineList *outList, InlineItem *item )
 	}
 }
 
-
 void XMLCodeGen::makeLmSwitch( GenInlineList *outList, InlineItem *item )
 {
+	GenInlineItem *lmSwitch = new GenInlineItem( GenInputLoc(), GenInlineItem::LmSwitch );
+	GenInlineList *lmList = lmSwitch->children = new GenInlineList;
+	LongestMatch *longestMatch = item->longestMatch;
+
+	/* We can't put the <exec> here because we may need to handle the error
+	 * case and in that case p should not be changed. Instead use a default
+	 * label in the switch to adjust p when user actions are not set. An id of
+	 * -1 indicates the default. */
+
+	if ( longestMatch->lmSwitchHandlesError ) {
+		/* If the switch handles error then we should have also forced the
+		 * error state. */
+		assert( fsm->errState != 0 );
+
+		GenInlineItem *errCase = new GenInlineItem( GenInputLoc(), GenInlineItem::SubAction );
+		errCase->lmId = 0;
+		errCase->children = new GenInlineList;
+
+		makeTargetItem( errCase->children, 
+				fsm->errState->alg.stateNum, GenInlineItem::Goto );
+
+		lmList->append( errCase );
+	}
+	
+	bool needDefault = false;
+	for ( LmPartList::Iter lmi = *longestMatch->longestMatchList; lmi.lte(); lmi++ ) {
+		if ( lmi->inLmSelect ) {
+			if ( lmi->action == 0 )
+				needDefault = true;
+			else {
+				/* Open the action. Write it with the context that sets up _p 
+				 * when doing control flow changes from inside the machine. */
+				GenInlineItem *lmCase = new GenInlineItem( GenInputLoc(), 
+						GenInlineItem::SubAction );
+				lmCase->lmId = lmi->longestMatchId;
+				lmCase->children = new GenInlineList;
+
+				makeExecGetTokend( lmCase->children );
+				makeGenInlineList( lmCase->children, lmi->action->inlineList );
+
+				lmList->append( lmCase );
+			}
+		}
+	}
+
+	if ( needDefault ) {
+		GenInlineItem *defCase = new GenInlineItem( GenInputLoc(), 
+				GenInlineItem::SubAction );
+		defCase->lmId = -1;
+		defCase->children = new GenInlineList;
+
+		makeExecGetTokend( defCase->children );
+
+		lmList->append( defCase );
+	}
+
+	outList->append( lmSwitch );
 }
 
 void XMLCodeGen::makeSetTokend( GenInlineList *outList, long offset )
@@ -553,19 +615,19 @@ void XMLCodeGen::makeGenInlineList( GenInlineList *outList, InlineList *inList )
 			makeText( outList, item );
 			break;
 		case InlineItem::Goto:
-			makeTargetItem( outList, item, GenInlineItem::Goto );
+			makeTargetItem( outList, item->nameTarg->id, GenInlineItem::Goto );
 			break;
 		case InlineItem::GotoExpr:
 			makeSubList( outList, item->children, GenInlineItem::GotoExpr );
 			break;
 		case InlineItem::Call:
-			makeTargetItem( outList, item, GenInlineItem::Call );
+			makeTargetItem( outList, item->nameTarg->id, GenInlineItem::Call );
 			break;
 		case InlineItem::CallExpr:
 			makeSubList( outList, item->children, GenInlineItem::CallExpr );
 			break;
 		case InlineItem::Next:
-			makeTargetItem( outList, item, GenInlineItem::Next );
+			makeTargetItem( outList, item->nameTarg->id, GenInlineItem::Next );
 			break;
 		case InlineItem::NextExpr:
 			makeSubList( outList, item->children, GenInlineItem::NextExpr );
@@ -589,7 +651,7 @@ void XMLCodeGen::makeGenInlineList( GenInlineList *outList, InlineList *inList )
 			outList->append( new GenInlineItem( GenInputLoc(), GenInlineItem::Targs ) );
 			break;
 		case InlineItem::Entry:
-			makeTargetItem( outList, item, GenInlineItem::Entry );
+			makeTargetItem( outList, item->nameTarg->id, GenInlineItem::Entry );
 			break;
 
 		case InlineItem::Hold:
@@ -951,30 +1013,26 @@ void XMLCodeGen::makeBackend()
 	
 	/* Getkey expression. */
 	if ( pd->getKeyExpr != 0 ) {
-		out << "  <getkey>";
-		writeInlineList( pd->getKeyExpr );
-		out << "</getkey>\n";
+		xmlParser.cgd->getKeyExpr = new GenInlineList;
+		makeGenInlineList( xmlParser.cgd->getKeyExpr, pd->getKeyExpr );
 	}
 
 	/* Access expression. */
 	if ( pd->accessExpr != 0 ) {
-		out << "  <access>";
-		writeInlineList( pd->accessExpr );
-		out << "</access>\n";
+		xmlParser.cgd->accessExpr = new GenInlineList;
+		makeGenInlineList( xmlParser.cgd->accessExpr, pd->accessExpr );
 	}
 
 	/* PrePush expression. */
 	if ( pd->prePushExpr != 0 ) {
-		out << "  <prepush>";
-		writeInlineList( pd->prePushExpr );
-		out << "</prepush>\n";
+		xmlParser.cgd->prePushExpr = new GenInlineList;
+		makeGenInlineList( xmlParser.cgd->prePushExpr, pd->prePushExpr );
 	}
 
 	/* PostPop expression. */
 	if ( pd->postPopExpr != 0 ) {
-		out << "  <postpop>";
-		writeInlineList( pd->postPopExpr );
-		out << "</postpop>\n";
+		xmlParser.cgd->postPopExpr = new GenInlineList;
+		makeGenInlineList( xmlParser.cgd->postPopExpr, pd->postPopExpr );
 	}
 
 	/*
@@ -982,71 +1040,63 @@ void XMLCodeGen::makeBackend()
 	 */
 
 	if ( pd->pExpr != 0 ) {
-		out << "  <p_expr>";
-		writeInlineList( pd->pExpr );
-		out << "</p_expr>\n";
+		xmlParser.cgd->pExpr = new GenInlineList;
+		makeGenInlineList( xmlParser.cgd->pExpr, pd->pExpr );
 	}
 	
 	if ( pd->peExpr != 0 ) {
-		out << "  <pe_expr>";
-		writeInlineList( pd->peExpr );
-		out << "</pe_expr>\n";
+		xmlParser.cgd->peExpr = new GenInlineList;
+		makeGenInlineList( xmlParser.cgd->peExpr, pd->peExpr );
 	}
 
 	if ( pd->eofExpr != 0 ) {
-		out << "  <eof_expr>";
-		writeInlineList( pd->eofExpr );
-		out << "</eof_expr>\n";
+		xmlParser.cgd->eofExpr = new GenInlineList;
+		makeGenInlineList( xmlParser.cgd->eofExpr, pd->eofExpr );
 	}
 	
 	if ( pd->csExpr != 0 ) {
-		out << "  <cs_expr>";
-		writeInlineList( pd->csExpr );
-		out << "</cs_expr>\n";
+		xmlParser.cgd->csExpr = new GenInlineList;
+		makeGenInlineList( xmlParser.cgd->csExpr, pd->csExpr );
 	}
 	
 	if ( pd->topExpr != 0 ) {
-		out << "  <top_expr>";
-		writeInlineList( pd->topExpr );
-		out << "</top_expr>\n";
+		xmlParser.cgd->topExpr = new GenInlineList;
+		makeGenInlineList( xmlParser.cgd->topExpr, pd->topExpr );
 	}
 	
 	if ( pd->stackExpr != 0 ) {
-		out << "  <stack_expr>";
-		writeInlineList( pd->stackExpr );
-		out << "</stack_expr>\n";
+		xmlParser.cgd->stackExpr = new GenInlineList;
+		makeGenInlineList( xmlParser.cgd->stackExpr, pd->stackExpr );
 	}
 	
 	if ( pd->actExpr != 0 ) {
-		out << "  <act_expr>";
-		writeInlineList( pd->actExpr );
-		out << "</act_expr>\n";
+		xmlParser.cgd->actExpr = new GenInlineList;
+		makeGenInlineList( xmlParser.cgd->actExpr, pd->actExpr );
 	}
 	
 	if ( pd->tokstartExpr != 0 ) {
-		out << "  <tokstart_expr>";
-		writeInlineList( pd->tokstartExpr );
-		out << "</tokstart_expr>\n";
+		xmlParser.cgd->tokstartExpr = new GenInlineList;
+		makeGenInlineList( xmlParser.cgd->tokstartExpr, pd->tokstartExpr );
 	}
 	
 	if ( pd->tokendExpr != 0 ) {
-		out << "  <tokend_expr>";
-		writeInlineList( pd->tokendExpr );
-		out << "</tokend_expr>\n";
+		xmlParser.cgd->tokendExpr = new GenInlineList;
+		makeGenInlineList( xmlParser.cgd->tokendExpr, pd->tokendExpr );
 	}
 	
 	if ( pd->dataExpr != 0 ) {
-		out << "  <data_expr>";
-		writeInlineList( pd->dataExpr );
-		out << "</data_expr>\n";
+		xmlParser.cgd->dataExpr = new GenInlineList;
+		makeGenInlineList( xmlParser.cgd->dataExpr, pd->dataExpr );
 	}
 	
+#if 0
 	writeExports();
 	
 	writeMachine();
 
 	out <<
 		"</ragel_def>\n";
+#endif
 }
 
 
