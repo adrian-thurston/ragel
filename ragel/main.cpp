@@ -499,8 +499,8 @@ void process( const char *inputFileName, const char *intermed )
 	xmlParser.init();
 
 	/* Write the machines, then the surrounding code. */
-	writeMachines( *xmlOutFile, hostData.str(), inputFileName, xmlParser );
-	//generate( *xmlOutFile, hostData.str(), inputFileName, xmlParser );
+	//writeMachines( *xmlOutFile, hostData.str(), inputFileName, xmlParser );
+	generate( *xmlOutFile, hostData.str(), inputFileName, xmlParser );
 
 	/* Close the input and the intermediate file. */
 	delete xmlOutFile;
@@ -510,9 +510,9 @@ void process( const char *inputFileName, const char *intermed )
 	if ( gblErrorCount > 0 )
 		exit(1);
 
-	xml_parse( *xmlInFile, xmlFileName, 
-		outputActive, wantComplete,
-		xmlScanner, xmlParser );
+//	xml_parse( *xmlInFile, xmlFileName, 
+//		outputActive, wantComplete,
+//		xmlScanner, xmlParser );
 
 	/* If writing to a file, delete the ostream, causing it to flush.
 	 * Standard out is flushed automatically. */

@@ -1003,6 +1003,279 @@ void XMLCodeGen::writeXML()
 		"</ragel_def>\n";
 }
 
+void XMLCodeGen::makeExports()
+{
+	for ( ExportList::Iter exp = pd->exportList; exp.lte(); exp++ )
+		xmlParser.cgd->exportList.append( new Export( exp->name, exp->key ) );
+}
+
+void XMLCodeGen::makeAction( Action *action )
+{
+	GenInlineList *genList = new GenInlineList;
+	makeGenInlineList( genList, action->inlineList );
+
+	xmlParser.cgd->newAction( xmlParser.curAction++, action->name, 
+			action->loc.line, action->loc.col, genList );
+}
+
+
+void XMLCodeGen::makeActionList()
+{
+	/* Determine which actions to write. */
+	int nextActionId = 0;
+	for ( ActionList::Iter act = pd->actionList; act.lte(); act++ ) {
+		if ( act->numRefs() > 0 || act->numCondRefs > 0 )
+			act->actionId = nextActionId++;
+	}
+
+	/* Write the list. */
+	xmlParser.cgd->initActionList( nextActionId );
+	xmlParser.curAction = 0;
+
+	for ( ActionList::Iter act = pd->actionList; act.lte(); act++ ) {
+		if ( act->actionId >= 0 )
+			makeAction( act );
+	}
+}
+
+void XMLCodeGen::makeActionTableList()
+{
+	/* Must first order the action tables based on their id. */
+	int numTables = nextActionTableId;
+	RedActionTable **tables = new RedActionTable*[numTables];
+	for ( ActionTableMap::Iter at = actionTableMap; at.lte(); at++ )
+		tables[at->id] = at;
+
+	xmlParser.cgd->initActionTableList( numTables );
+	xmlParser.curActionTable = 0;
+
+	for ( int t = 0; t < numTables; t++ ) {
+		long length = tables[t]->key.length();
+
+		/* Collect the action table. */
+		RedAction *redAct = xmlParser.cgd->allActionTables + xmlParser.curActionTable;
+		redAct->actListId = xmlParser.curActionTable;
+		redAct->key.setAsNew( length );
+
+		for ( ActionTable::Iter atel = tables[t]->key; atel.lte(); atel++ ) {
+			redAct->key[atel.pos()].key = 0;
+			redAct->key[atel.pos()].value = xmlParser.cgd->allActions + 
+					atel->value->actionId;
+		}
+
+		xmlParser.curActionTable += 1;
+	}
+
+	delete[] tables;
+}
+
+void XMLCodeGen::makeConditions()
+{
+	if ( condData->condSpaceMap.length() > 0 ) {
+		long nextCondSpaceId = 0;
+		for ( CondSpaceMap::Iter cs = condData->condSpaceMap; cs.lte(); cs++ )
+			cs->condSpaceId = nextCondSpaceId++;
+
+		long listLength = condData->condSpaceMap.length();
+		xmlParser.cgd->initCondSpaceList( listLength );
+		xmlParser.curCondSpace = 0;
+
+		for ( CondSpaceMap::Iter cs = condData->condSpaceMap; cs.lte(); cs++ ) {
+			long id = cs->condSpaceId;
+			xmlParser.cgd->newCondSpace( xmlParser.curCondSpace, id, cs->baseKey );
+			for ( CondSet::Iter csi = cs->condSet; csi.lte(); csi++ )
+				xmlParser.cgd->condSpaceItem( xmlParser.curCondSpace, (*csi)->actionId );
+			xmlParser.curCondSpace += 1;
+		}
+	}
+}
+
+bool XMLCodeGen::makeNameInst( std::string &res, NameInst *nameInst )
+{
+	bool written = false;
+	if ( nameInst->parent != 0 )
+		written = makeNameInst( res, nameInst->parent );
+	
+	if ( nameInst->name != 0 ) {
+		if ( written )
+			res += '_';
+		res += nameInst->name;
+		written = true;
+	}
+
+	return written;
+}
+
+void XMLCodeGen::makeEntryPoints()
+{
+	/* List of entry points other than start state. */
+	if ( fsm->entryPoints.length() > 0 || pd->lmRequiresErrorState ) {
+		if ( pd->lmRequiresErrorState )
+			xmlParser.cgd->setForcedErrorState();
+
+		for ( EntryMap::Iter en = fsm->entryPoints; en.lte(); en++ ) {
+			/* Get the name instantiation from nameIndex. */
+			NameInst *nameInst = pd->nameIndex[en->key];
+			std::string name;
+			makeNameInst( name, nameInst );
+			StateAp *state = en->value;
+			xmlParser.cgd->addEntryPoint( strdup(name.c_str()), state->alg.stateNum );
+		}
+	}
+}
+
+void XMLCodeGen::makeStateActions( StateAp *state )
+{
+	RedActionTable *toStateActions = 0;
+	if ( state->toStateActionTable.length() > 0 )
+		toStateActions = actionTableMap.find( state->toStateActionTable );
+
+	RedActionTable *fromStateActions = 0;
+	if ( state->fromStateActionTable.length() > 0 )
+		fromStateActions = actionTableMap.find( state->fromStateActionTable );
+
+	/* EOF actions go out here only if the state has no eof target. If it has
+	 * an eof target then an eof transition will be used instead. */
+	RedActionTable *eofActions = 0;
+	if ( state->eofTarget == 0 && state->eofActionTable.length() > 0 )
+		eofActions = actionTableMap.find( state->eofActionTable );
+	
+	if ( toStateActions != 0 || fromStateActions != 0 || eofActions != 0 ) {
+		long to = -1;
+		if ( toStateActions != 0 )
+			to = toStateActions->id;
+
+		long from = -1;
+		if ( fromStateActions != 0 )
+			from = fromStateActions->id;
+
+		long eof = -1;
+		if ( eofActions != 0 )
+			eof = eofActions->id;
+
+		xmlParser.cgd->setStateActions( xmlParser.curState, to, from, eof );
+	}
+}
+
+void XMLCodeGen::makeEofTrans( StateAp *state )
+{
+	RedActionTable *eofActions = 0;
+	if ( state->eofActionTable.length() > 0 )
+		eofActions = actionTableMap.find( state->eofActionTable );
+	
+	/* The EOF trans is used when there is an eof target, otherwise the eof
+	 * action goes into state actions. */
+	if ( state->eofTarget != 0 ) {
+		long targ = state->eofTarget->alg.stateNum;
+		long action = -1;
+		if ( eofActions != 0 )
+			action = eofActions->id;
+
+		xmlParser.cgd->setEofTrans( xmlParser.curState, targ, action );
+	}
+}
+
+void XMLCodeGen::makeStateConditions( StateAp *state )
+{
+	if ( state->stateCondList.length() > 0 ) {
+		long length = state->stateCondList.length();
+		xmlParser.cgd->initStateCondList( xmlParser.curState, length );
+		xmlParser.curStateCond = 0;
+
+		for ( StateCondList::Iter scdi = state->stateCondList; scdi.lte(); scdi++ ) {
+			xmlParser.cgd->addStateCond( xmlParser.curState, scdi->lowKey, scdi->highKey, 
+					scdi->condSpace->condSpaceId );
+		}
+	}
+}
+
+void XMLCodeGen::makeTrans( Key lowKey, Key highKey, TransAp *trans )
+{
+	/* First reduce the action. */
+	RedActionTable *actionTable = 0;
+	if ( trans->actionTable.length() > 0 )
+		actionTable = actionTableMap.find( trans->actionTable );
+
+	long targ = -1;
+	if ( trans->toState != 0 )
+		targ = trans->toState->alg.stateNum;
+
+	long action = -1;
+	if ( actionTable != 0 )
+		action = actionTable->id;
+
+	xmlParser.cgd->newTrans( xmlParser.curState, xmlParser.curTrans++, lowKey, highKey, targ, action );
+}
+
+
+void XMLCodeGen::makeTransList( StateAp *state )
+{
+	TransListVect outList;
+
+	/* If there is only are no ranges the task is simple. */
+	if ( state->outList.length() > 0 ) {
+		/* Loop each source range. */
+		for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
+			/* Reduce the transition. If it reduced to anything then add it. */
+			appendTrans( outList, trans->lowKey, trans->highKey, trans );
+		}
+	}
+
+	xmlParser.cgd->initTransList( xmlParser.curState, outList.length() );
+	xmlParser.curTrans = 0;
+
+	for ( TransListVect::Iter tvi = outList; tvi.lte(); tvi++ )
+		makeTrans( tvi->lowKey, tvi->highKey, tvi->value );
+
+	xmlParser.cgd->finishTransList( xmlParser.curState );
+}
+
+
+void XMLCodeGen::makeStateList()
+{
+	/* Write the list of states. */
+	long length = fsm->stateList.length();
+	xmlParser.cgd->initStateList( length );
+	xmlParser.curState = 0;
+	for ( StateList::Iter st = fsm->stateList; st.lte(); st++ ) {
+		makeStateActions( st );
+		makeEofTrans( st );
+		makeStateConditions( st );
+		makeTransList( st );
+
+		long id = st->alg.stateNum;
+		xmlParser.cgd->setId( xmlParser.curState, id );
+
+		if ( st->isFinState() )
+			xmlParser.cgd->setFinal( xmlParser.curState );
+
+		xmlParser.curState += 1;
+	}
+}
+
+
+void XMLCodeGen::makeMachine()
+{
+	xmlParser.cgd->createMachine();
+
+	/* Action tables. */
+	reduceActionTables();
+
+	makeActionList();
+	makeActionTableList();
+	makeConditions();
+
+	/* Start State. */
+	xmlParser.cgd->setStartState( fsm->startState->alg.stateNum );
+
+	/* Error state. */
+	if ( fsm->errState != 0 )
+		xmlParser.cgd->setErrorState( fsm->errState->alg.stateNum );
+
+	makeEntryPoints();
+	makeStateList();
+}
+
 void XMLCodeGen::makeBackend()
 {
 	/* Open the definition. */
@@ -1089,14 +1362,8 @@ void XMLCodeGen::makeBackend()
 		makeGenInlineList( xmlParser.cgd->dataExpr, pd->dataExpr );
 	}
 	
-#if 0
-	writeExports();
-	
-	writeMachine();
-
-	out <<
-		"</ragel_def>\n";
-#endif
+	makeExports();
+	makeMachine();
 }
 
 

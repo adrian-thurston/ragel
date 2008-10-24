@@ -110,7 +110,7 @@ struct GenAction
 
 	/* Data collected during parse. */
 	GenInputLoc loc;
-	char *name;
+	const char *name;
 	GenInlineList *inlineList;
 	int actionId;
 

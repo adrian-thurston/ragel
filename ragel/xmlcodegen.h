@@ -132,9 +132,25 @@ private:
 	void makeLmSwitch( GenInlineList *outList, InlineItem *item );
 	void makeSetTokend( GenInlineList *outList, long offset );
 	void makeSetAct( GenInlineList *outList, long lmId );
-	void makeSubList( GenInlineList *outList, InlineList *inlineList, GenInlineItem::Type type );
+	void makeSubList( GenInlineList *outList, InlineList *inlineList, 
+			GenInlineItem::Type type );
 	void makeTargetItem( GenInlineList *outList, long targetId, GenInlineItem::Type type );
 	void makeExecGetTokend( GenInlineList *outList );
+	void makeExports();
+	void makeMachine();
+	void makeActionList();
+	void makeAction( Action *action );
+	void makeActionTableList();
+	void makeConditions();
+	void makeEntryPoints();
+	bool makeNameInst( std::string &out, NameInst *nameInst );
+	void makeStateList();
+
+	void makeStateActions( StateAp *state );
+	void makeEofTrans( StateAp *state );
+	void makeStateConditions( StateAp *state );
+	void makeTransList( StateAp *state );
+	void makeTrans( Key lowKey, Key highKey, TransAp *trans );
 
 	char *fsmName;
 	ParseData *pd;

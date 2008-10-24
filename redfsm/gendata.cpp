@@ -78,7 +78,7 @@ void CodeGenData::initActionList( unsigned long length )
 		actionList.append( allActions+a );
 }
 
-void CodeGenData::newAction( int anum, char *name, int line, 
+void CodeGenData::newAction( int anum, const char *name, int line, 
 		int col, GenInlineList *inlineList )
 {
 	allActions[anum].actionId = anum;

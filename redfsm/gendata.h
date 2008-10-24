@@ -149,7 +149,7 @@ struct CodeGenData
 
 	void createMachine();
 	void initActionList( unsigned long length );
-	void newAction( int anum, char *name, int line, int col, GenInlineList *inlineList );
+	void newAction( int anum, const char *name, int line, int col, GenInlineList *inlineList );
 	void initActionTableList( unsigned long length );
 	void initStateList( unsigned long length );
 	void setStartState( unsigned long startState );
