@@ -1427,7 +1427,7 @@ void ParseData::prepareMachineGenTBWrapped( GraphDictEl *graphDictEl )
 	sectionGraph->setStateNumbers( 0 );
 }
 
-void ParseData::genBackend( XmlParser &xmlParser )
+void ParseData::generateReduced( XmlParser &xmlParser )
 {
 	beginProcessing();
 
@@ -1551,25 +1551,9 @@ void writeMachines( std::ostream &out, std::string hostData,
 	}
 }
 
-void generate( XmlParser &xmlParser )
+void generateSpecificReduced( XmlParser &xmlParser )
 {
-	if ( machineSpec == 0 && machineName == 0 ) {
-		/* No machine spec or machine name given. Generate everything. */
-		for ( ParserDict::Iter parser = parserDict; parser.lte(); parser++ ) {
-			ParseData *pd = parser->value->pd;
-			if ( pd->instanceList.length() > 0 )
-				pd->prepareMachineGen( 0 );
-		}
-
-		if ( gblErrorCount == 0 ) {
-			for ( ParserDict::Iter parser = parserDict; parser.lte(); parser++ ) {
-				ParseData *pd = parser->value->pd;
-				if ( pd->instanceList.length() > 0 )
-					pd->genBackend( xmlParser );
-			}
-		}
-	}
-	else if ( parserDict.length() > 0 ) {
+	if ( parserDict.length() > 0 ) {
 		/* There is either a machine spec or machine name given. */
 		ParseData *parseData = 0;
 		GraphDictEl *graphDictEl = 0;
@@ -1598,10 +1582,46 @@ void generate( XmlParser &xmlParser )
 			/* Section/Machine to emit was found. Prepare and emit it. */
 			parseData->prepareMachineGen( graphDictEl );
 			if ( gblErrorCount == 0 )
-				parseData->genBackend( xmlParser );
+				parseData->generateReduced( xmlParser );
 		}
 	}
 
+
+	for ( InputItemList::Iter ii = inputItems; ii.lte(); ii++ ) {
+		if ( ii->type == InputItem::Write ) {
+			CodeGenMapEl *mapEl = xmlParser.codeGenMap.find( (char*)ii->name.c_str() );
+			xmlParser.cgd = mapEl->value;
+			::keyOps = &xmlParser.cgd->thisKeyOps;
+
+			xmlParser.cgd->writeStatement( ii->loc, ii->writeArgs.length()-1, ii->writeArgs.data );
+		}
+		else 
+			xmlParser.cgd->out << ii->data.str();
+	}
+}
+
+void generateReduced( const char *sourceFileName, const char *xmlFileName, 
+		bool outputActive, bool wantComplete )
+{
+	/* No machine spec or machine name given. Generate everything. */
+	for ( ParserDict::Iter parser = parserDict; parser.lte(); parser++ ) {
+		ParseData *pd = parser->value->pd;
+		if ( pd->instanceList.length() > 0 )
+			pd->prepareMachineGen( 0 );
+	}
+
+	XmlParser xmlParser( sourceFileName, xmlFileName, outputActive, wantComplete );
+	xmlParser.init();
+	xmlParser.openOutput();
+
+	if ( gblErrorCount > 0 )
+		return;
+
+	for ( ParserDict::Iter parser = parserDict; parser.lte(); parser++ ) {
+		ParseData *pd = parser->value->pd;
+		if ( pd->instanceList.length() > 0 )
+			pd->generateReduced( xmlParser );
+	}
 
 	for ( InputItemList::Iter ii = inputItems; ii.lte(); ii++ ) {
 		if ( ii->type == InputItem::Write ) {

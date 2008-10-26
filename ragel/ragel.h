@@ -78,8 +78,10 @@ struct XmlParser;
 void terminateAllParsers( );
 void writeMachines( std::ostream &out, std::string hostData, 
 	const char *inputFileName, XmlParser &xmlParser );
-void generate( XmlParser &xmlParser );
 void xmlEscapeHost( std::ostream &out, char *data, long len );
+
+void generateReduced( const char *sourceFileName, const char *xmlFileName, 
+		bool outputActive, bool wantComplete );
 
 typedef Vector<const char *> ArgsVector;
 extern ArgsVector includePaths;

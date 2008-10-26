@@ -175,6 +175,9 @@ private:
 	void makeStateConditions( StateAp *state );
 	void makeTransList( StateAp *state );
 	void makeTrans( Key lowKey, Key highKey, TransAp *trans );
+
+	void open_ragel_def( char *fsmName );
+	void close_ragel_def();
 };
 
 

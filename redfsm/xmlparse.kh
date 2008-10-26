@@ -168,9 +168,6 @@ struct XmlParser
 	int token( int tokenId, int col, int line );
 	int token( XMLTag *tag, int col, int line );
 
-	void open_ragel_def( char *fsmName );
-	void close_ragel_def();
-
 	void openOutput();
 
 	/* Report an error encountered by the parser. */
@@ -208,5 +205,8 @@ struct XmlParser
 int xml_parse( std::istream &input, const char *fileName, 
 		bool outputActive, bool wantComplete, 
 		XmlScanner &scanner, XmlParser &parser );
+
+CodeGenData *makeCodeGen( const char *sourceFileName, 
+		const char *fsmName, ostream &out, bool wantComplete );
 
 #endif /* _XMLPARSE_H */

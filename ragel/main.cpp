@@ -487,14 +487,8 @@ void process( const char *inputFileName, const char *intermed )
 		outputActive = false;
 	}
 
-	XmlScanner xmlScanner( xmlFileName, cin );
-	XmlParser xmlParser( inputFileName, xmlFileName, outputActive, wantComplete );
-	xmlParser.init();
-
-	xmlParser.openOutput();
-
 	/* Write the machines, then the surrounding code. */
-	generate( xmlParser );
+	generateReduced( inputFileName, xmlFileName, outputActive, wantComplete );
 
 	/* Close the input and the intermediate file. */
 	delete inFile;
@@ -502,10 +496,6 @@ void process( const char *inputFileName, const char *intermed )
 	/* Bail on above error. */
 	if ( gblErrorCount > 0 )
 		exit(1);
-
-//	xml_parse( *xmlInFile, xmlFileName, 
-//		outputActive, wantComplete,
-//		xmlScanner, xmlParser );
 
 	/* If writing to a file, delete the ostream, causing it to flush.
 	 * Standard out is flushed automatically. */

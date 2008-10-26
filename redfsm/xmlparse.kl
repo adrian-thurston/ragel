@@ -103,32 +103,6 @@ void XmlParser::openOutput()
 	}
 }
 
-void XmlParser::open_ragel_def( char *fsmName )
-{
-	CodeGenMapEl *mapEl = codeGenMap.find( fsmName );
-	if ( mapEl != 0 )
-		cgd = mapEl->value;
-	else {
-		cgd = makeCodeGen( sourceFileName, fsmName, *outStream, wantComplete );
-		codeGenMap.insert( fsmName, cgd );
-	}
-}
-
-void XmlParser::close_ragel_def()
-{
-	/* Do this before distributing transitions out to singles and defaults
-	 * makes life easier. */
-	cgd->redFsm->maxKey = cgd->findMaxKey();
-
-	cgd->redFsm->assignActionLocs();
-
-	/* Find the first final state (The final state with the lowest id). */
-	cgd->redFsm->findFirstFinState();
-
-	/* Call the user's callback. */
-	cgd->finishRagelDef();
-}
-
 %%{
 
 parser XmlParser;

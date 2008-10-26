@@ -1291,10 +1291,38 @@ void BackendGen::makeMachine()
 	xmlParser.cgd->closeMachine();
 }
 
+void BackendGen::open_ragel_def( char *fsmName )
+{
+	CodeGenMapEl *mapEl = xmlParser.codeGenMap.find( fsmName );
+	if ( mapEl != 0 )
+		xmlParser.cgd = mapEl->value;
+	else {
+		xmlParser.cgd = makeCodeGen( xmlParser.sourceFileName, fsmName, 
+				*xmlParser.outStream, xmlParser.wantComplete );
+		xmlParser.codeGenMap.insert( fsmName, xmlParser.cgd );
+	}
+}
+
+void BackendGen::close_ragel_def()
+{
+	/* Do this before distributing transitions out to singles and defaults
+	 * makes life easier. */
+	xmlParser.cgd->redFsm->maxKey = xmlParser.cgd->findMaxKey();
+
+	xmlParser.cgd->redFsm->assignActionLocs();
+
+	/* Find the first final state (The final state with the lowest id). */
+	xmlParser.cgd->redFsm->findFirstFinState();
+
+	/* Call the user's callback. */
+	xmlParser.cgd->finishRagelDef();
+}
+
+
 void BackendGen::makeBackend()
 {
 	/* Open the definition. */
-	xmlParser.open_ragel_def( fsmName );
+	open_ragel_def( fsmName );
 
 	/* Alphabet type. */
 	xmlParser.cgd->setAlphType( keyOps->alphType->internalName );
@@ -1380,7 +1408,7 @@ void BackendGen::makeBackend()
 	makeExports();
 	makeMachine();
 
-	xmlParser.close_ragel_def();
+	close_ragel_def();
 }
 
 
