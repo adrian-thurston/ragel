@@ -80,7 +80,7 @@ struct NextRedTrans
 
 struct GenBase
 {
-	GenBase( char *fsmName, ParseData *pd, FsmAp *fsm, InputData &inputData );
+	GenBase( char *fsmName, ParseData *pd, FsmAp *fsm );
 
 	void appendTrans( TransListVect &outList, Key lowKey, Key highKey, TransAp *trans );
 	void reduceActionTables();
@@ -88,7 +88,6 @@ struct GenBase
 	char *fsmName;
 	ParseData *pd;
 	FsmAp *fsm;
-	InputData &inputData;
 
 	ActionTableMap actionTableMap;
 	int nextActionTableId;
@@ -97,8 +96,7 @@ struct GenBase
 class XMLCodeGen : protected GenBase
 {
 public:
-	XMLCodeGen( char *fsmName, ParseData *pd, FsmAp *fsm, 
-			std::ostream &out, InputData &inputData );
+	XMLCodeGen( char *fsmName, ParseData *pd, FsmAp *fsm, std::ostream &out );
 
 	void writeXML( );
 
@@ -178,6 +176,17 @@ private:
 
 	void open_ragel_def( char *fsmName );
 	void close_ragel_def();
+
+	InputData &inputData;
+
+	/* Collected during parsing. */
+	int curAction;
+	int curActionTable;
+	int curTrans;
+	int curState;
+	int curCondSpace;
+	int curStateCond;
+
 };
 
 

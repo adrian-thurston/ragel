@@ -1471,12 +1471,12 @@ void writeLanguage( std::ostream &out )
 	out << "\"";
 }
 
-void ParseData::generateXML( ostream &out, InputData &inputData )
+void ParseData::generateXML( ostream &out )
 {
 	beginProcessing();
 
 	/* Make the generator. */
-	XMLCodeGen codeGen( sectionName, this, sectionGraph, out, inputData );
+	XMLCodeGen codeGen( sectionName, this, sectionGraph, out );
 
 	/* Write out with it. */
 	codeGen.writeXML();
@@ -1488,8 +1488,7 @@ void ParseData::generateXML( ostream &out, InputData &inputData )
 	}
 }
 
-void writeMachines( std::ostream &out, std::string hostData, 
-		const char *inputFileName, InputData &inputData )
+void writeMachines( std::ostream &out, std::string hostData, const char *inputFileName )
 {
 	if ( machineSpec == 0 && machineName == 0 ) {
 		/* No machine spec or machine name given. Generate everything. */
@@ -1506,7 +1505,7 @@ void writeMachines( std::ostream &out, std::string hostData,
 			for ( ParserDict::Iter parser = parserDict; parser.lte(); parser++ ) {
 				ParseData *pd = parser->value->pd;
 				if ( pd->instanceList.length() > 0 )
-					pd->generateXML( out, inputData );
+					pd->generateXML( out );
 			}
 			out << hostData;
 			out << "</ragel>\n";
@@ -1544,7 +1543,7 @@ void writeMachines( std::ostream &out, std::string hostData,
 				out << "<ragel version=\"" VERSION "\" filename=\"" << inputFileName << "\"";
 				writeLanguage( out );
 				out << ">\n";
-				parseData->generateXML( out, inputData );
+				parseData->generateXML( out );
 				out << hostData;
 				out << "</ragel>\n";
 			}
@@ -1620,8 +1619,7 @@ void InputData::openOutput()
 	}
 }
 
-void generateReduced( const char *sourceFileName, const char *xmlFileName, 
-		bool outputActive, bool wantComplete )
+void generateReduced( const char *sourceFileName, bool outputActive, bool wantComplete )
 {
 	/* No machine spec or machine name given. Generate everything. */
 	for ( ParserDict::Iter parser = parserDict; parser.lte(); parser++ ) {
@@ -1630,7 +1628,7 @@ void generateReduced( const char *sourceFileName, const char *xmlFileName,
 			pd->prepareMachineGen( 0 );
 	}
 
-	InputData inputData( sourceFileName, xmlFileName, outputActive, wantComplete );
+	InputData inputData( sourceFileName, outputActive, wantComplete );
 	inputData.openOutput();
 
 	if ( gblErrorCount > 0 )

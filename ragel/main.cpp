@@ -442,9 +442,8 @@ void processArgs( int argc, const char **argv, const char *&inputFileName )
 	}
 }
 
-void process( const char *inputFileName, const char *intermed )
+void process( const char *inputFileName )
 {
-	const char *xmlFileName = intermed;
 	bool wantComplete = true;
 	bool outputActive = true;
 
@@ -489,7 +488,7 @@ void process( const char *inputFileName, const char *intermed )
 	}
 
 	/* Write the machines, then the surrounding code. */
-	generateReduced( inputFileName, xmlFileName, outputActive, wantComplete );
+	generateReduced( inputFileName, outputActive, wantComplete );
 
 	/* Close the input and the intermediate file. */
 	delete inFile;
@@ -575,11 +574,6 @@ const char *openIntermed( const char *inputFileName, const char *outputFileName 
 }
 
 
-void cleanExit( const char *intermed, int status )
-{
-	//unlink( intermed );
-	exit( status );
-}
 
 /* Main, process args and call yyparse to start scanning input. */
 int main( int argc, const char **argv )
@@ -612,11 +606,10 @@ int main( int argc, const char **argv )
 				"\" is the same as the input file" << endp;
 	}
 
-	const char *intermed = 0; //openIntermed( inputFileName, outputFileName );
-	process( inputFileName, intermed );
+	process( inputFileName );
 
 	/* Clean up the intermediate. */
-	cleanExit( intermed, 0 );
+	exit( 0 );
 
 	return 0;
 }

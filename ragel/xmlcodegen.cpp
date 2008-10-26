@@ -31,12 +31,11 @@
 
 using namespace std;
 
-GenBase::GenBase( char *fsmName, ParseData *pd, FsmAp *fsm, InputData &inputData )
+GenBase::GenBase( char *fsmName, ParseData *pd, FsmAp *fsm )
 :
 	fsmName(fsmName),
 	pd(pd),
 	fsm(fsm),
-	inputData(inputData),
 	nextActionTableId(0)
 {
 }
@@ -82,10 +81,9 @@ void GenBase::reduceActionTables()
 	}
 }
 
-XMLCodeGen::XMLCodeGen( char *fsmName, ParseData *pd, FsmAp *fsm, 
-		std::ostream &out, InputData &inputData )
+XMLCodeGen::XMLCodeGen( char *fsmName, ParseData *pd, FsmAp *fsm, std::ostream &out )
 :
-	GenBase(fsmName, pd, fsm, inputData),
+	GenBase(fsmName, pd, fsm),
 	out(out)
 {
 }
@@ -451,7 +449,8 @@ void XMLCodeGen::writeInlineList( InlineList *inlineList )
 
 BackendGen::BackendGen( char *fsmName, ParseData *pd, FsmAp *fsm, InputData &inputData )
 :
-	GenBase(fsmName, pd, fsm, inputData)
+	GenBase(fsmName, pd, fsm),
+	inputData(inputData)
 {
 }
 
@@ -1026,7 +1025,7 @@ void BackendGen::makeAction( Action *action )
 	GenInlineList *genList = new GenInlineList;
 	makeGenInlineList( genList, action->inlineList );
 
-	inputData.cgd->newAction( inputData.curAction++, action->name, 
+	inputData.cgd->newAction( curAction++, action->name, 
 			action->loc.line, action->loc.col, genList );
 }
 
@@ -1042,7 +1041,7 @@ void BackendGen::makeActionList()
 
 	/* Write the list. */
 	inputData.cgd->initActionList( nextActionId );
-	inputData.curAction = 0;
+	curAction = 0;
 
 	for ( ActionList::Iter act = pd->actionList; act.lte(); act++ ) {
 		if ( act->actionId >= 0 )
@@ -1059,14 +1058,14 @@ void BackendGen::makeActionTableList()
 		tables[at->id] = at;
 
 	inputData.cgd->initActionTableList( numTables );
-	inputData.curActionTable = 0;
+	curActionTable = 0;
 
 	for ( int t = 0; t < numTables; t++ ) {
 		long length = tables[t]->key.length();
 
 		/* Collect the action table. */
-		RedAction *redAct = inputData.cgd->allActionTables + inputData.curActionTable;
-		redAct->actListId = inputData.curActionTable;
+		RedAction *redAct = inputData.cgd->allActionTables + curActionTable;
+		redAct->actListId = curActionTable;
 		redAct->key.setAsNew( length );
 
 		for ( ActionTable::Iter atel = tables[t]->key; atel.lte(); atel++ ) {
@@ -1078,7 +1077,7 @@ void BackendGen::makeActionTableList()
 		/* Insert into the action table map. */
 		inputData.cgd->redFsm->actionMap.insert( redAct );
 
-		inputData.curActionTable += 1;
+		curActionTable += 1;
 	}
 
 	delete[] tables;
@@ -1093,14 +1092,14 @@ void BackendGen::makeConditions()
 
 		long listLength = condData->condSpaceMap.length();
 		inputData.cgd->initCondSpaceList( listLength );
-		inputData.curCondSpace = 0;
+		curCondSpace = 0;
 
 		for ( CondSpaceMap::Iter cs = condData->condSpaceMap; cs.lte(); cs++ ) {
 			long id = cs->condSpaceId;
-			inputData.cgd->newCondSpace( inputData.curCondSpace, id, cs->baseKey );
+			inputData.cgd->newCondSpace( curCondSpace, id, cs->baseKey );
 			for ( CondSet::Iter csi = cs->condSet; csi.lte(); csi++ )
-				inputData.cgd->condSpaceItem( inputData.curCondSpace, (*csi)->actionId );
-			inputData.curCondSpace += 1;
+				inputData.cgd->condSpaceItem( curCondSpace, (*csi)->actionId );
+			curCondSpace += 1;
 		}
 	}
 }
@@ -1168,7 +1167,7 @@ void BackendGen::makeStateActions( StateAp *state )
 		if ( eofActions != 0 )
 			eof = eofActions->id;
 
-		inputData.cgd->setStateActions( inputData.curState, to, from, eof );
+		inputData.cgd->setStateActions( curState, to, from, eof );
 	}
 }
 
@@ -1186,7 +1185,7 @@ void BackendGen::makeEofTrans( StateAp *state )
 		if ( eofActions != 0 )
 			action = eofActions->id;
 
-		inputData.cgd->setEofTrans( inputData.curState, targ, action );
+		inputData.cgd->setEofTrans( curState, targ, action );
 	}
 }
 
@@ -1194,11 +1193,11 @@ void BackendGen::makeStateConditions( StateAp *state )
 {
 	if ( state->stateCondList.length() > 0 ) {
 		long length = state->stateCondList.length();
-		inputData.cgd->initStateCondList( inputData.curState, length );
-		inputData.curStateCond = 0;
+		inputData.cgd->initStateCondList( curState, length );
+		curStateCond = 0;
 
 		for ( StateCondList::Iter scdi = state->stateCondList; scdi.lte(); scdi++ ) {
-			inputData.cgd->addStateCond( inputData.curState, scdi->lowKey, scdi->highKey, 
+			inputData.cgd->addStateCond( curState, scdi->lowKey, scdi->highKey, 
 					scdi->condSpace->condSpaceId );
 		}
 	}
@@ -1219,7 +1218,7 @@ void BackendGen::makeTrans( Key lowKey, Key highKey, TransAp *trans )
 	if ( actionTable != 0 )
 		action = actionTable->id;
 
-	inputData.cgd->newTrans( inputData.curState, inputData.curTrans++, lowKey, highKey, targ, action );
+	inputData.cgd->newTrans( curState, curTrans++, lowKey, highKey, targ, action );
 }
 
 void BackendGen::makeTransList( StateAp *state )
@@ -1235,13 +1234,13 @@ void BackendGen::makeTransList( StateAp *state )
 		}
 	}
 
-	inputData.cgd->initTransList( inputData.curState, outList.length() );
-	inputData.curTrans = 0;
+	inputData.cgd->initTransList( curState, outList.length() );
+	curTrans = 0;
 
 	for ( TransListVect::Iter tvi = outList; tvi.lte(); tvi++ )
 		makeTrans( tvi->lowKey, tvi->highKey, tvi->value );
 
-	inputData.cgd->finishTransList( inputData.curState );
+	inputData.cgd->finishTransList( curState );
 }
 
 
@@ -1250,7 +1249,7 @@ void BackendGen::makeStateList()
 	/* Write the list of states. */
 	long length = fsm->stateList.length();
 	inputData.cgd->initStateList( length );
-	inputData.curState = 0;
+	curState = 0;
 	for ( StateList::Iter st = fsm->stateList; st.lte(); st++ ) {
 		makeStateActions( st );
 		makeEofTrans( st );
@@ -1258,12 +1257,12 @@ void BackendGen::makeStateList()
 		makeTransList( st );
 
 		long id = st->alg.stateNum;
-		inputData.cgd->setId( inputData.curState, id );
+		inputData.cgd->setId( curState, id );
 
 		if ( st->isFinState() )
-			inputData.cgd->setFinal( inputData.curState );
+			inputData.cgd->setFinal( curState );
 
-		inputData.curState += 1;
+		curState += 1;
 	}
 }
 
