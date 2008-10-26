@@ -84,25 +84,6 @@ void genLineDirective( ostream &out )
 	lineDirective( out, filter->fileName, filter->line + 1 );
 }
 
-void XmlParser::openOutput()
-{
-	if ( generateDot )
-		outStream = dotOpenOutput( sourceFileName );
-	else if ( hostLang->lang == HostLang::C )
-		outStream = cdOpenOutput( sourceFileName );
-	else if ( hostLang->lang == HostLang::D )
-		outStream = cdOpenOutput( sourceFileName );
-	else if ( hostLang->lang == HostLang::Java )
-		outStream = javaOpenOutput( sourceFileName );
-	else if ( hostLang->lang == HostLang::Ruby )
-		outStream = rubyOpenOutput( sourceFileName );
-	else if ( hostLang->lang == HostLang::CSharp )
-		outStream = csharpOpenOutput( sourceFileName );
-	else {
-		assert( false );
-	}
-}
-
 %%{
 
 parser XmlParser;

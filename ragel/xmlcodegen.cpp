@@ -26,16 +26,17 @@
 #include "parsedata.h"
 #include "fsmgraph.h"
 #include "gendata.h"
+#include "inputdata.h"
 #include <string.h>
 
 using namespace std;
 
-GenBase::GenBase( char *fsmName, ParseData *pd, FsmAp *fsm, XmlParser &xmlParser )
+GenBase::GenBase( char *fsmName, ParseData *pd, FsmAp *fsm, InputData &inputData )
 :
 	fsmName(fsmName),
 	pd(pd),
 	fsm(fsm),
-	xmlParser(xmlParser),
+	inputData(inputData),
 	nextActionTableId(0)
 {
 }
@@ -82,9 +83,9 @@ void GenBase::reduceActionTables()
 }
 
 XMLCodeGen::XMLCodeGen( char *fsmName, ParseData *pd, FsmAp *fsm, 
-		std::ostream &out, XmlParser &xmlParser )
+		std::ostream &out, InputData &inputData )
 :
-	GenBase(fsmName, pd, fsm, xmlParser),
+	GenBase(fsmName, pd, fsm, inputData),
 	out(out)
 {
 }
@@ -448,9 +449,9 @@ void XMLCodeGen::writeInlineList( InlineList *inlineList )
 	}
 }
 
-BackendGen::BackendGen( char *fsmName, ParseData *pd, FsmAp *fsm, XmlParser &xmlParser )
+BackendGen::BackendGen( char *fsmName, ParseData *pd, FsmAp *fsm, InputData &inputData )
 :
-	GenBase(fsmName, pd, fsm, xmlParser)
+	GenBase(fsmName, pd, fsm, inputData)
 {
 }
 
@@ -700,7 +701,7 @@ void BackendGen::makeGenInlineList( GenInlineList *outList, InlineList *inList )
 			break;
 		case InlineItem::LmSetTokStart:
 			outList->append( new GenInlineItem( InputLoc(), GenInlineItem::LmSetTokStart ) );
-			xmlParser.cgd->hasLongestMatch = true;
+			inputData.cgd->hasLongestMatch = true;
 			break;
 		}
 	}
@@ -1017,7 +1018,7 @@ void XMLCodeGen::writeXML()
 void BackendGen::makeExports()
 {
 	for ( ExportList::Iter exp = pd->exportList; exp.lte(); exp++ )
-		xmlParser.cgd->exportList.append( new Export( exp->name, exp->key ) );
+		inputData.cgd->exportList.append( new Export( exp->name, exp->key ) );
 }
 
 void BackendGen::makeAction( Action *action )
@@ -1025,7 +1026,7 @@ void BackendGen::makeAction( Action *action )
 	GenInlineList *genList = new GenInlineList;
 	makeGenInlineList( genList, action->inlineList );
 
-	xmlParser.cgd->newAction( xmlParser.curAction++, action->name, 
+	inputData.cgd->newAction( inputData.curAction++, action->name, 
 			action->loc.line, action->loc.col, genList );
 }
 
@@ -1040,8 +1041,8 @@ void BackendGen::makeActionList()
 	}
 
 	/* Write the list. */
-	xmlParser.cgd->initActionList( nextActionId );
-	xmlParser.curAction = 0;
+	inputData.cgd->initActionList( nextActionId );
+	inputData.curAction = 0;
 
 	for ( ActionList::Iter act = pd->actionList; act.lte(); act++ ) {
 		if ( act->actionId >= 0 )
@@ -1057,27 +1058,27 @@ void BackendGen::makeActionTableList()
 	for ( ActionTableMap::Iter at = actionTableMap; at.lte(); at++ )
 		tables[at->id] = at;
 
-	xmlParser.cgd->initActionTableList( numTables );
-	xmlParser.curActionTable = 0;
+	inputData.cgd->initActionTableList( numTables );
+	inputData.curActionTable = 0;
 
 	for ( int t = 0; t < numTables; t++ ) {
 		long length = tables[t]->key.length();
 
 		/* Collect the action table. */
-		RedAction *redAct = xmlParser.cgd->allActionTables + xmlParser.curActionTable;
-		redAct->actListId = xmlParser.curActionTable;
+		RedAction *redAct = inputData.cgd->allActionTables + inputData.curActionTable;
+		redAct->actListId = inputData.curActionTable;
 		redAct->key.setAsNew( length );
 
 		for ( ActionTable::Iter atel = tables[t]->key; atel.lte(); atel++ ) {
 			redAct->key[atel.pos()].key = 0;
-			redAct->key[atel.pos()].value = xmlParser.cgd->allActions + 
+			redAct->key[atel.pos()].value = inputData.cgd->allActions + 
 					atel->value->actionId;
 		}
 
 		/* Insert into the action table map. */
-		xmlParser.cgd->redFsm->actionMap.insert( redAct );
+		inputData.cgd->redFsm->actionMap.insert( redAct );
 
-		xmlParser.curActionTable += 1;
+		inputData.curActionTable += 1;
 	}
 
 	delete[] tables;
@@ -1091,15 +1092,15 @@ void BackendGen::makeConditions()
 			cs->condSpaceId = nextCondSpaceId++;
 
 		long listLength = condData->condSpaceMap.length();
-		xmlParser.cgd->initCondSpaceList( listLength );
-		xmlParser.curCondSpace = 0;
+		inputData.cgd->initCondSpaceList( listLength );
+		inputData.curCondSpace = 0;
 
 		for ( CondSpaceMap::Iter cs = condData->condSpaceMap; cs.lte(); cs++ ) {
 			long id = cs->condSpaceId;
-			xmlParser.cgd->newCondSpace( xmlParser.curCondSpace, id, cs->baseKey );
+			inputData.cgd->newCondSpace( inputData.curCondSpace, id, cs->baseKey );
 			for ( CondSet::Iter csi = cs->condSet; csi.lte(); csi++ )
-				xmlParser.cgd->condSpaceItem( xmlParser.curCondSpace, (*csi)->actionId );
-			xmlParser.curCondSpace += 1;
+				inputData.cgd->condSpaceItem( inputData.curCondSpace, (*csi)->actionId );
+			inputData.curCondSpace += 1;
 		}
 	}
 }
@@ -1125,7 +1126,7 @@ void BackendGen::makeEntryPoints()
 	/* List of entry points other than start state. */
 	if ( fsm->entryPoints.length() > 0 || pd->lmRequiresErrorState ) {
 		if ( pd->lmRequiresErrorState )
-			xmlParser.cgd->setForcedErrorState();
+			inputData.cgd->setForcedErrorState();
 
 		for ( EntryMap::Iter en = fsm->entryPoints; en.lte(); en++ ) {
 			/* Get the name instantiation from nameIndex. */
@@ -1133,7 +1134,7 @@ void BackendGen::makeEntryPoints()
 			std::string name;
 			makeNameInst( name, nameInst );
 			StateAp *state = en->value;
-			xmlParser.cgd->addEntryPoint( strdup(name.c_str()), state->alg.stateNum );
+			inputData.cgd->addEntryPoint( strdup(name.c_str()), state->alg.stateNum );
 		}
 	}
 }
@@ -1167,7 +1168,7 @@ void BackendGen::makeStateActions( StateAp *state )
 		if ( eofActions != 0 )
 			eof = eofActions->id;
 
-		xmlParser.cgd->setStateActions( xmlParser.curState, to, from, eof );
+		inputData.cgd->setStateActions( inputData.curState, to, from, eof );
 	}
 }
 
@@ -1185,7 +1186,7 @@ void BackendGen::makeEofTrans( StateAp *state )
 		if ( eofActions != 0 )
 			action = eofActions->id;
 
-		xmlParser.cgd->setEofTrans( xmlParser.curState, targ, action );
+		inputData.cgd->setEofTrans( inputData.curState, targ, action );
 	}
 }
 
@@ -1193,11 +1194,11 @@ void BackendGen::makeStateConditions( StateAp *state )
 {
 	if ( state->stateCondList.length() > 0 ) {
 		long length = state->stateCondList.length();
-		xmlParser.cgd->initStateCondList( xmlParser.curState, length );
-		xmlParser.curStateCond = 0;
+		inputData.cgd->initStateCondList( inputData.curState, length );
+		inputData.curStateCond = 0;
 
 		for ( StateCondList::Iter scdi = state->stateCondList; scdi.lte(); scdi++ ) {
-			xmlParser.cgd->addStateCond( xmlParser.curState, scdi->lowKey, scdi->highKey, 
+			inputData.cgd->addStateCond( inputData.curState, scdi->lowKey, scdi->highKey, 
 					scdi->condSpace->condSpaceId );
 		}
 	}
@@ -1218,7 +1219,7 @@ void BackendGen::makeTrans( Key lowKey, Key highKey, TransAp *trans )
 	if ( actionTable != 0 )
 		action = actionTable->id;
 
-	xmlParser.cgd->newTrans( xmlParser.curState, xmlParser.curTrans++, lowKey, highKey, targ, action );
+	inputData.cgd->newTrans( inputData.curState, inputData.curTrans++, lowKey, highKey, targ, action );
 }
 
 void BackendGen::makeTransList( StateAp *state )
@@ -1234,13 +1235,13 @@ void BackendGen::makeTransList( StateAp *state )
 		}
 	}
 
-	xmlParser.cgd->initTransList( xmlParser.curState, outList.length() );
-	xmlParser.curTrans = 0;
+	inputData.cgd->initTransList( inputData.curState, outList.length() );
+	inputData.curTrans = 0;
 
 	for ( TransListVect::Iter tvi = outList; tvi.lte(); tvi++ )
 		makeTrans( tvi->lowKey, tvi->highKey, tvi->value );
 
-	xmlParser.cgd->finishTransList( xmlParser.curState );
+	inputData.cgd->finishTransList( inputData.curState );
 }
 
 
@@ -1248,8 +1249,8 @@ void BackendGen::makeStateList()
 {
 	/* Write the list of states. */
 	long length = fsm->stateList.length();
-	xmlParser.cgd->initStateList( length );
-	xmlParser.curState = 0;
+	inputData.cgd->initStateList( length );
+	inputData.curState = 0;
 	for ( StateList::Iter st = fsm->stateList; st.lte(); st++ ) {
 		makeStateActions( st );
 		makeEofTrans( st );
@@ -1257,19 +1258,19 @@ void BackendGen::makeStateList()
 		makeTransList( st );
 
 		long id = st->alg.stateNum;
-		xmlParser.cgd->setId( xmlParser.curState, id );
+		inputData.cgd->setId( inputData.curState, id );
 
 		if ( st->isFinState() )
-			xmlParser.cgd->setFinal( xmlParser.curState );
+			inputData.cgd->setFinal( inputData.curState );
 
-		xmlParser.curState += 1;
+		inputData.curState += 1;
 	}
 }
 
 
 void BackendGen::makeMachine()
 {
-	xmlParser.cgd->createMachine();
+	inputData.cgd->createMachine();
 
 	/* Action tables. */
 	reduceActionTables();
@@ -1279,27 +1280,27 @@ void BackendGen::makeMachine()
 	makeConditions();
 
 	/* Start State. */
-	xmlParser.cgd->setStartState( fsm->startState->alg.stateNum );
+	inputData.cgd->setStartState( fsm->startState->alg.stateNum );
 
 	/* Error state. */
 	if ( fsm->errState != 0 )
-		xmlParser.cgd->setErrorState( fsm->errState->alg.stateNum );
+		inputData.cgd->setErrorState( fsm->errState->alg.stateNum );
 
 	makeEntryPoints();
 	makeStateList();
 
-	xmlParser.cgd->closeMachine();
+	inputData.cgd->closeMachine();
 }
 
 void BackendGen::open_ragel_def( char *fsmName )
 {
-	CodeGenMapEl *mapEl = xmlParser.codeGenMap.find( fsmName );
+	CodeGenMapEl *mapEl = inputData.codeGenMap.find( fsmName );
 	if ( mapEl != 0 )
-		xmlParser.cgd = mapEl->value;
+		inputData.cgd = mapEl->value;
 	else {
-		xmlParser.cgd = makeCodeGen( xmlParser.sourceFileName, fsmName, 
-				*xmlParser.outStream, xmlParser.wantComplete );
-		xmlParser.codeGenMap.insert( fsmName, xmlParser.cgd );
+		inputData.cgd = makeCodeGen( inputData.sourceFileName, fsmName, 
+				*inputData.outStream, inputData.wantComplete );
+		inputData.codeGenMap.insert( fsmName, inputData.cgd );
 	}
 }
 
@@ -1307,15 +1308,15 @@ void BackendGen::close_ragel_def()
 {
 	/* Do this before distributing transitions out to singles and defaults
 	 * makes life easier. */
-	xmlParser.cgd->redFsm->maxKey = xmlParser.cgd->findMaxKey();
+	inputData.cgd->redFsm->maxKey = inputData.cgd->findMaxKey();
 
-	xmlParser.cgd->redFsm->assignActionLocs();
+	inputData.cgd->redFsm->assignActionLocs();
 
 	/* Find the first final state (The final state with the lowest id). */
-	xmlParser.cgd->redFsm->findFirstFinState();
+	inputData.cgd->redFsm->findFirstFinState();
 
 	/* Call the user's callback. */
-	xmlParser.cgd->finishRagelDef();
+	inputData.cgd->finishRagelDef();
 }
 
 
@@ -1325,30 +1326,30 @@ void BackendGen::makeBackend()
 	open_ragel_def( fsmName );
 
 	/* Alphabet type. */
-	xmlParser.cgd->setAlphType( keyOps->alphType->internalName );
+	inputData.cgd->setAlphType( keyOps->alphType->internalName );
 	
 	/* Getkey expression. */
 	if ( pd->getKeyExpr != 0 ) {
-		xmlParser.cgd->getKeyExpr = new GenInlineList;
-		makeGenInlineList( xmlParser.cgd->getKeyExpr, pd->getKeyExpr );
+		inputData.cgd->getKeyExpr = new GenInlineList;
+		makeGenInlineList( inputData.cgd->getKeyExpr, pd->getKeyExpr );
 	}
 
 	/* Access expression. */
 	if ( pd->accessExpr != 0 ) {
-		xmlParser.cgd->accessExpr = new GenInlineList;
-		makeGenInlineList( xmlParser.cgd->accessExpr, pd->accessExpr );
+		inputData.cgd->accessExpr = new GenInlineList;
+		makeGenInlineList( inputData.cgd->accessExpr, pd->accessExpr );
 	}
 
 	/* PrePush expression. */
 	if ( pd->prePushExpr != 0 ) {
-		xmlParser.cgd->prePushExpr = new GenInlineList;
-		makeGenInlineList( xmlParser.cgd->prePushExpr, pd->prePushExpr );
+		inputData.cgd->prePushExpr = new GenInlineList;
+		makeGenInlineList( inputData.cgd->prePushExpr, pd->prePushExpr );
 	}
 
 	/* PostPop expression. */
 	if ( pd->postPopExpr != 0 ) {
-		xmlParser.cgd->postPopExpr = new GenInlineList;
-		makeGenInlineList( xmlParser.cgd->postPopExpr, pd->postPopExpr );
+		inputData.cgd->postPopExpr = new GenInlineList;
+		makeGenInlineList( inputData.cgd->postPopExpr, pd->postPopExpr );
 	}
 
 	/*
@@ -1356,53 +1357,53 @@ void BackendGen::makeBackend()
 	 */
 
 	if ( pd->pExpr != 0 ) {
-		xmlParser.cgd->pExpr = new GenInlineList;
-		makeGenInlineList( xmlParser.cgd->pExpr, pd->pExpr );
+		inputData.cgd->pExpr = new GenInlineList;
+		makeGenInlineList( inputData.cgd->pExpr, pd->pExpr );
 	}
 	
 	if ( pd->peExpr != 0 ) {
-		xmlParser.cgd->peExpr = new GenInlineList;
-		makeGenInlineList( xmlParser.cgd->peExpr, pd->peExpr );
+		inputData.cgd->peExpr = new GenInlineList;
+		makeGenInlineList( inputData.cgd->peExpr, pd->peExpr );
 	}
 
 	if ( pd->eofExpr != 0 ) {
-		xmlParser.cgd->eofExpr = new GenInlineList;
-		makeGenInlineList( xmlParser.cgd->eofExpr, pd->eofExpr );
+		inputData.cgd->eofExpr = new GenInlineList;
+		makeGenInlineList( inputData.cgd->eofExpr, pd->eofExpr );
 	}
 	
 	if ( pd->csExpr != 0 ) {
-		xmlParser.cgd->csExpr = new GenInlineList;
-		makeGenInlineList( xmlParser.cgd->csExpr, pd->csExpr );
+		inputData.cgd->csExpr = new GenInlineList;
+		makeGenInlineList( inputData.cgd->csExpr, pd->csExpr );
 	}
 	
 	if ( pd->topExpr != 0 ) {
-		xmlParser.cgd->topExpr = new GenInlineList;
-		makeGenInlineList( xmlParser.cgd->topExpr, pd->topExpr );
+		inputData.cgd->topExpr = new GenInlineList;
+		makeGenInlineList( inputData.cgd->topExpr, pd->topExpr );
 	}
 	
 	if ( pd->stackExpr != 0 ) {
-		xmlParser.cgd->stackExpr = new GenInlineList;
-		makeGenInlineList( xmlParser.cgd->stackExpr, pd->stackExpr );
+		inputData.cgd->stackExpr = new GenInlineList;
+		makeGenInlineList( inputData.cgd->stackExpr, pd->stackExpr );
 	}
 	
 	if ( pd->actExpr != 0 ) {
-		xmlParser.cgd->actExpr = new GenInlineList;
-		makeGenInlineList( xmlParser.cgd->actExpr, pd->actExpr );
+		inputData.cgd->actExpr = new GenInlineList;
+		makeGenInlineList( inputData.cgd->actExpr, pd->actExpr );
 	}
 	
 	if ( pd->tokstartExpr != 0 ) {
-		xmlParser.cgd->tokstartExpr = new GenInlineList;
-		makeGenInlineList( xmlParser.cgd->tokstartExpr, pd->tokstartExpr );
+		inputData.cgd->tokstartExpr = new GenInlineList;
+		makeGenInlineList( inputData.cgd->tokstartExpr, pd->tokstartExpr );
 	}
 	
 	if ( pd->tokendExpr != 0 ) {
-		xmlParser.cgd->tokendExpr = new GenInlineList;
-		makeGenInlineList( xmlParser.cgd->tokendExpr, pd->tokendExpr );
+		inputData.cgd->tokendExpr = new GenInlineList;
+		makeGenInlineList( inputData.cgd->tokendExpr, pd->tokendExpr );
 	}
 	
 	if ( pd->dataExpr != 0 ) {
-		xmlParser.cgd->dataExpr = new GenInlineList;
-		makeGenInlineList( xmlParser.cgd->dataExpr, pd->dataExpr );
+		inputData.cgd->dataExpr = new GenInlineList;
+		makeGenInlineList( inputData.cgd->dataExpr, pd->dataExpr );
 	}
 	
 	makeExports();

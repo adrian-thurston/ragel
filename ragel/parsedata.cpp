@@ -33,6 +33,7 @@
 #include "xmlcodegen.h"
 #include "version.h"
 #include "xmlparse.h"
+#include "inputdata.h"
 
 using namespace std;
 
@@ -1427,12 +1428,12 @@ void ParseData::prepareMachineGenTBWrapped( GraphDictEl *graphDictEl )
 	sectionGraph->setStateNumbers( 0 );
 }
 
-void ParseData::generateReduced( XmlParser &xmlParser )
+void ParseData::generateReduced( InputData &inputData )
 {
 	beginProcessing();
 
 	/* Make the generator. */
-	BackendGen backendGen( sectionName, this, sectionGraph, xmlParser );
+	BackendGen backendGen( sectionName, this, sectionGraph, inputData );
 
 	/* Write out with it. */
 	backendGen.makeBackend();
@@ -1470,12 +1471,12 @@ void writeLanguage( std::ostream &out )
 	out << "\"";
 }
 
-void ParseData::generateXML( ostream &out, XmlParser &xmlParser )
+void ParseData::generateXML( ostream &out, InputData &inputData )
 {
 	beginProcessing();
 
 	/* Make the generator. */
-	XMLCodeGen codeGen( sectionName, this, sectionGraph, out, xmlParser );
+	XMLCodeGen codeGen( sectionName, this, sectionGraph, out, inputData );
 
 	/* Write out with it. */
 	codeGen.writeXML();
@@ -1488,7 +1489,7 @@ void ParseData::generateXML( ostream &out, XmlParser &xmlParser )
 }
 
 void writeMachines( std::ostream &out, std::string hostData, 
-		const char *inputFileName, XmlParser &xmlParser )
+		const char *inputFileName, InputData &inputData )
 {
 	if ( machineSpec == 0 && machineName == 0 ) {
 		/* No machine spec or machine name given. Generate everything. */
@@ -1505,7 +1506,7 @@ void writeMachines( std::ostream &out, std::string hostData,
 			for ( ParserDict::Iter parser = parserDict; parser.lte(); parser++ ) {
 				ParseData *pd = parser->value->pd;
 				if ( pd->instanceList.length() > 0 )
-					pd->generateXML( out, xmlParser );
+					pd->generateXML( out, inputData );
 			}
 			out << hostData;
 			out << "</ragel>\n";
@@ -1543,7 +1544,7 @@ void writeMachines( std::ostream &out, std::string hostData,
 				out << "<ragel version=\"" VERSION "\" filename=\"" << inputFileName << "\"";
 				writeLanguage( out );
 				out << ">\n";
-				parseData->generateXML( out, xmlParser );
+				parseData->generateXML( out, inputData );
 				out << hostData;
 				out << "</ragel>\n";
 			}
@@ -1551,7 +1552,7 @@ void writeMachines( std::ostream &out, std::string hostData,
 	}
 }
 
-void generateSpecificReduced( XmlParser &xmlParser )
+void generateSpecificReduced( InputData &inputData )
 {
 	if ( parserDict.length() > 0 ) {
 		/* There is either a machine spec or machine name given. */
@@ -1582,21 +1583,40 @@ void generateSpecificReduced( XmlParser &xmlParser )
 			/* Section/Machine to emit was found. Prepare and emit it. */
 			parseData->prepareMachineGen( graphDictEl );
 			if ( gblErrorCount == 0 )
-				parseData->generateReduced( xmlParser );
+				parseData->generateReduced( inputData );
 		}
 	}
 
 
 	for ( InputItemList::Iter ii = inputItems; ii.lte(); ii++ ) {
 		if ( ii->type == InputItem::Write ) {
-			CodeGenMapEl *mapEl = xmlParser.codeGenMap.find( (char*)ii->name.c_str() );
-			xmlParser.cgd = mapEl->value;
-			::keyOps = &xmlParser.cgd->thisKeyOps;
+			CodeGenMapEl *mapEl = inputData.codeGenMap.find( (char*)ii->name.c_str() );
+			inputData.cgd = mapEl->value;
+			::keyOps = &inputData.cgd->thisKeyOps;
 
-			xmlParser.cgd->writeStatement( ii->loc, ii->writeArgs.length()-1, ii->writeArgs.data );
+			inputData.cgd->writeStatement( ii->loc, ii->writeArgs.length()-1, ii->writeArgs.data );
 		}
 		else 
-			xmlParser.cgd->out << ii->data.str();
+			inputData.cgd->out << ii->data.str();
+	}
+}
+
+void InputData::openOutput()
+{
+	if ( generateDot )
+		outStream = dotOpenOutput( sourceFileName );
+	else if ( hostLang->lang == HostLang::C )
+		outStream = cdOpenOutput( sourceFileName );
+	else if ( hostLang->lang == HostLang::D )
+		outStream = cdOpenOutput( sourceFileName );
+	else if ( hostLang->lang == HostLang::Java )
+		outStream = javaOpenOutput( sourceFileName );
+	else if ( hostLang->lang == HostLang::Ruby )
+		outStream = rubyOpenOutput( sourceFileName );
+	else if ( hostLang->lang == HostLang::CSharp )
+		outStream = csharpOpenOutput( sourceFileName );
+	else {
+		assert( false );
 	}
 }
 
@@ -1610,9 +1630,8 @@ void generateReduced( const char *sourceFileName, const char *xmlFileName,
 			pd->prepareMachineGen( 0 );
 	}
 
-	XmlParser xmlParser( sourceFileName, xmlFileName, outputActive, wantComplete );
-	xmlParser.init();
-	xmlParser.openOutput();
+	InputData inputData( sourceFileName, xmlFileName, outputActive, wantComplete );
+	inputData.openOutput();
 
 	if ( gblErrorCount > 0 )
 		return;
@@ -1620,18 +1639,18 @@ void generateReduced( const char *sourceFileName, const char *xmlFileName,
 	for ( ParserDict::Iter parser = parserDict; parser.lte(); parser++ ) {
 		ParseData *pd = parser->value->pd;
 		if ( pd->instanceList.length() > 0 )
-			pd->generateReduced( xmlParser );
+			pd->generateReduced( inputData );
 	}
 
 	for ( InputItemList::Iter ii = inputItems; ii.lte(); ii++ ) {
 		if ( ii->type == InputItem::Write ) {
-			CodeGenMapEl *mapEl = xmlParser.codeGenMap.find( (char*)ii->name.c_str() );
-			xmlParser.cgd = mapEl->value;
-			::keyOps = &xmlParser.cgd->thisKeyOps;
+			CodeGenMapEl *mapEl = inputData.codeGenMap.find( (char*)ii->name.c_str() );
+			inputData.cgd = mapEl->value;
+			::keyOps = &inputData.cgd->thisKeyOps;
 
-			xmlParser.cgd->writeStatement( ii->loc, ii->writeArgs.length()-1, ii->writeArgs.data );
+			inputData.cgd->writeStatement( ii->loc, ii->writeArgs.length()-1, ii->writeArgs.data );
 		}
 		else 
-			xmlParser.cgd->out << ii->data.str();
+			inputData.cgd->out << ii->data.str();
 	}
 }

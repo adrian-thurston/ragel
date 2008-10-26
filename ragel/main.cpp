@@ -55,6 +55,7 @@
 #include "version.h"
 #include "common.h"
 #include "xmlparse.h"
+#include "inputdata.h"
 
 using std::istream;
 using std::ostream;
@@ -585,6 +586,7 @@ int main( int argc, const char **argv )
 {
 	const char *inputFileName = 0;
 	processArgs( argc, argv, inputFileName );
+	
 
 	/* If -M or -S are given and we're not generating a dot file then invoke
 	 * the frontend. These options are not useful with code generators. */
