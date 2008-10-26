@@ -155,8 +155,8 @@ protected:
 	void SUB_ACTION( ostream &ret, GenInlineItem *item, int targState, bool inFinish );
 
 protected:
-	ostream &source_warning(const GenInputLoc &loc);
-	ostream &source_error(const GenInputLoc &loc);
+	ostream &source_warning(const InputLoc &loc);
+	ostream &source_error(const InputLoc &loc);
 
 
         /* fields */

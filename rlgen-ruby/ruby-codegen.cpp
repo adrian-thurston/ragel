@@ -639,13 +639,13 @@ int RubyCodeGen::TRANS_ACTION( RedTransAp *trans )
 	return act;
 }
 
-ostream &RubyCodeGen::source_warning( const GenInputLoc &loc )
+ostream &RubyCodeGen::source_warning( const InputLoc &loc )
 {
 	cerr << sourceFileName << ":" << loc.line << ":" << loc.col << ": warning: ";
 	return cerr;
 }
 
-ostream &RubyCodeGen::source_error( const GenInputLoc &loc )
+ostream &RubyCodeGen::source_error( const InputLoc &loc )
 {
 	gblErrorCount += 1;
 	assert( sourceFileName != 0 );

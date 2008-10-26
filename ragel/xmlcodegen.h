@@ -78,16 +78,31 @@ struct NextRedTrans
 	}
 };
 
-class XMLCodeGen
+struct GenBase
+{
+	GenBase( char *fsmName, ParseData *pd, FsmAp *fsm, XmlParser &xmlParser );
+
+	void appendTrans( TransListVect &outList, Key lowKey, Key highKey, TransAp *trans );
+	void reduceActionTables();
+
+	char *fsmName;
+	ParseData *pd;
+	FsmAp *fsm;
+	XmlParser &xmlParser;
+
+	ActionTableMap actionTableMap;
+	int nextActionTableId;
+};
+
+class XMLCodeGen : protected GenBase
 {
 public:
 	XMLCodeGen( char *fsmName, ParseData *pd, FsmAp *fsm, 
 			std::ostream &out, XmlParser &xmlParser );
+
 	void writeXML( );
-	void makeBackend( );
 
 private:
-	void appendTrans( TransListVect &outList, Key lowKey, Key highKey, TransAp *trans );
 	void writeStateActions( StateAp *state );
 	void writeStateList();
 	void writeStateConditions( StateAp *state );
@@ -113,7 +128,6 @@ private:
 	void writeActionList();
 	void writeActionTableList();
 	void reduceTrans( TransAp *trans );
-	void reduceActionTables();
 	void writeTransList( StateAp *state );
 	void writeEofTrans( StateAp *state );
 	void writeTrans( Key lowKey, Key highKey, TransAp *defTrans );
@@ -122,6 +136,16 @@ private:
 	void writeMachine();
 	void writeActionExec( InlineItem *item );
 
+	std::ostream &out;
+};
+
+class BackendGen : protected GenBase
+{
+public:
+	BackendGen( char *fsmName, ParseData *pd, FsmAp *fsm, XmlParser &xmlParser );
+	void makeBackend( );
+
+private:
 	void makeGenInlineList( GenInlineList *outList, InlineList *inList );
 	void makeKey( GenInlineList *outList, Key key );
 	void makeText( GenInlineList *outList, InlineItem *item );
@@ -151,15 +175,6 @@ private:
 	void makeStateConditions( StateAp *state );
 	void makeTransList( StateAp *state );
 	void makeTrans( Key lowKey, Key highKey, TransAp *trans );
-
-	char *fsmName;
-	ParseData *pd;
-	FsmAp *fsm;
-	std::ostream &out;
-	XmlParser &xmlParser;
-
-	ActionTableMap actionTableMap;
-	int nextActionTableId;
 };
 
 

@@ -39,7 +39,7 @@ unsigned long readLength( char *td );
 struct Token
 {
 	XMLTag *tag;
-	GenInputLoc loc;
+	InputLoc loc;
 };
 
 CodeGenData *makeCodeGen( const char *sourceFileName, const char *fsmName, 
@@ -84,33 +84,20 @@ void genLineDirective( ostream &out )
 	lineDirective( out, filter->fileName, filter->line + 1 );
 }
 
-void XmlParser::open_ragel( const char *fileName )
+void XmlParser::openOutput()
 {
-	/* Check for file name attribute. */
-	sourceFileName = fileName;
-
 	if ( generateDot )
 		outStream = dotOpenOutput( sourceFileName );
-	else if ( hostLang->lang == HostLang::C ) {
-		hostLang = &hostLangC;
+	else if ( hostLang->lang == HostLang::C )
 		outStream = cdOpenOutput( sourceFileName );
-	}
-	else if ( hostLang->lang == HostLang::D ) {
-		hostLang = &hostLangD;
+	else if ( hostLang->lang == HostLang::D )
 		outStream = cdOpenOutput( sourceFileName );
-	}
-	else if ( hostLang->lang == HostLang::Java ) {
-		hostLang = &hostLangJava;
+	else if ( hostLang->lang == HostLang::Java )
 		outStream = javaOpenOutput( sourceFileName );
-	}
-	else if ( hostLang->lang == HostLang::Ruby ) {
-		hostLang = &hostLangRuby;
+	else if ( hostLang->lang == HostLang::Ruby )
 		outStream = rubyOpenOutput( sourceFileName );
-	}
-	else if ( hostLang->lang == HostLang::CSharp ) {
-		hostLang = &hostLangCSharp;
+	else if ( hostLang->lang == HostLang::CSharp )
 		outStream = csharpOpenOutput( sourceFileName );
-	}
 	else {
 		assert( false );
 	}
@@ -125,6 +112,21 @@ void XmlParser::open_ragel_def( char *fsmName )
 		cgd = makeCodeGen( sourceFileName, fsmName, *outStream, wantComplete );
 		codeGenMap.insert( fsmName, cgd );
 	}
+}
+
+void XmlParser::close_ragel_def()
+{
+	/* Do this before distributing transitions out to singles and defaults
+	 * makes life easier. */
+	cgd->redFsm->maxKey = cgd->findMaxKey();
+
+	cgd->redFsm->assignActionLocs();
+
+	/* Find the first final state (The final state with the lowest id). */
+	cgd->redFsm->findFirstFinState();
+
+	/* Call the user's callback. */
+	cgd->finishRagelDef();
 }
 
 %%{
@@ -354,7 +356,7 @@ tag_write: tag_write_head write_option_list '/' TAG_write
 
 nonterm tag_write_head
 {
-	GenInputLoc loc;
+	InputLoc loc;
 };
 
 tag_write_head: TAG_write
@@ -702,140 +704,140 @@ nonterm tag_lm_switch uses inline_item_type;
 
 tag_text: TAG_text '/' TAG_text
 	final {
-		$$->inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::Text );
+		$$->inlineItem = new GenInlineItem( InputLoc(), GenInlineItem::Text );
 		$$->inlineItem->data = $3->tag->content;
 	};
 
 tag_goto: TAG_goto '/' TAG_goto
 	final {
 		int targ = strtol( $3->tag->content, 0, 10 );
-		$$->inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::Goto );
+		$$->inlineItem = new GenInlineItem( InputLoc(), GenInlineItem::Goto );
 		$$->inlineItem->targId = targ;
 	};
 
 tag_call: TAG_call '/' TAG_call
 	final {
 		int targ = strtol( $3->tag->content, 0, 10 );
-		$$->inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::Call );
+		$$->inlineItem = new GenInlineItem( InputLoc(), GenInlineItem::Call );
 		$$->inlineItem->targId = targ;
 	};
 
 tag_next: TAG_next '/' TAG_next
 	final {
 		int targ = strtol( $3->tag->content, 0, 10 );
-		$$->inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::Next );
+		$$->inlineItem = new GenInlineItem( InputLoc(), GenInlineItem::Next );
 		$$->inlineItem->targId = targ;
 	};
 
 tag_goto_expr: TAG_goto_expr inline_list '/' TAG_goto_expr
 	final {
-		$$->inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::GotoExpr );
+		$$->inlineItem = new GenInlineItem( InputLoc(), GenInlineItem::GotoExpr );
 		$$->inlineItem->children = $2->inlineList;
 	};
 
 tag_call_expr: TAG_call_expr inline_list '/' TAG_call_expr
 	final {
-		$$->inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::CallExpr );
+		$$->inlineItem = new GenInlineItem( InputLoc(), GenInlineItem::CallExpr );
 		$$->inlineItem->children = $2->inlineList;
 	};
 
 tag_next_expr: TAG_next_expr inline_list '/' TAG_next_expr
 	final {
-		$$->inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::NextExpr );
+		$$->inlineItem = new GenInlineItem( InputLoc(), GenInlineItem::NextExpr );
 		$$->inlineItem->children = $2->inlineList;
 	};
 
 tag_ret: TAG_ret '/' TAG_ret
 	final {
-		$$->inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::Ret );
+		$$->inlineItem = new GenInlineItem( InputLoc(), GenInlineItem::Ret );
 	};
 
 tag_break: TAG_break '/' TAG_break
 	final {
-		$$->inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::Break );
+		$$->inlineItem = new GenInlineItem( InputLoc(), GenInlineItem::Break );
 	};
 
 tag_pchar: TAG_pchar '/' TAG_pchar
 	final {
-		$$->inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::PChar );
+		$$->inlineItem = new GenInlineItem( InputLoc(), GenInlineItem::PChar );
 	};
 
 tag_char: TAG_char '/' TAG_char
 	final {
-		$$->inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::Char );
+		$$->inlineItem = new GenInlineItem( InputLoc(), GenInlineItem::Char );
 	};
 
 tag_hold: TAG_hold '/' TAG_hold
 	final {
-		$$->inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::Hold );
+		$$->inlineItem = new GenInlineItem( InputLoc(), GenInlineItem::Hold );
 	};
 
 tag_exec: TAG_exec inline_list '/' TAG_exec
 	final {
-		$$->inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::Exec );
+		$$->inlineItem = new GenInlineItem( InputLoc(), GenInlineItem::Exec );
 		$$->inlineItem->children = $2->inlineList;
 	};
 
 tag_curs: TAG_curs '/' TAG_curs
 	final {
-		$$->inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::Curs );
+		$$->inlineItem = new GenInlineItem( InputLoc(), GenInlineItem::Curs );
 	};
 
 tag_targs: TAG_targs '/' TAG_targs
 	final {
-		$$->inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::Targs );
+		$$->inlineItem = new GenInlineItem( InputLoc(), GenInlineItem::Targs );
 	};
 
 tag_il_entry: TAG_entry '/' TAG_entry
 	final {
 		int targ = strtol( $3->tag->content, 0, 10 );
-		$$->inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::Entry );
+		$$->inlineItem = new GenInlineItem( InputLoc(), GenInlineItem::Entry );
 		$$->inlineItem->targId = targ;
 	};
 
 tag_init_tokstart: TAG_init_tokstart '/' TAG_init_tokstart
 	final {
-		$$->inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::LmInitTokStart );
+		$$->inlineItem = new GenInlineItem( InputLoc(), GenInlineItem::LmInitTokStart );
 	};
 
 tag_init_act: TAG_init_act '/' TAG_init_act
 	final {
-		$$->inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::LmInitAct );
+		$$->inlineItem = new GenInlineItem( InputLoc(), GenInlineItem::LmInitAct );
 	};
 
 tag_get_tokend: TAG_get_tokend '/' TAG_get_tokend
 	final {
-		$$->inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::LmGetTokEnd );
+		$$->inlineItem = new GenInlineItem( InputLoc(), GenInlineItem::LmGetTokEnd );
 	};
 
 tag_set_tokstart: TAG_set_tokstart '/' TAG_set_tokstart
 	final {
-		$$->inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::LmSetTokStart );
+		$$->inlineItem = new GenInlineItem( InputLoc(), GenInlineItem::LmSetTokStart );
 		cgd->hasLongestMatch = true;
 	};
 
 tag_set_tokend: TAG_set_tokend '/' TAG_set_tokend
 	final {
-		$$->inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::LmSetTokEnd );
+		$$->inlineItem = new GenInlineItem( InputLoc(), GenInlineItem::LmSetTokEnd );
 		$$->inlineItem->offset = strtol( $3->tag->content, 0, 10 );
 	};
 
 tag_set_act: TAG_set_act '/' TAG_set_act
 	final {
-		$$->inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::LmSetActId );
+		$$->inlineItem = new GenInlineItem( InputLoc(), GenInlineItem::LmSetActId );
 		$$->inlineItem->lmId = strtol( $3->tag->content, 0, 10 );
 	};
 
 tag_sub_action: TAG_sub_action inline_list '/' TAG_sub_action
 	final {
-		$$->inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::SubAction );
+		$$->inlineItem = new GenInlineItem( InputLoc(), GenInlineItem::SubAction );
 		$$->inlineItem->children = $2->inlineList;
 	};
 
 # Action switches.
 tag_lm_switch: TAG_lm_switch lm_action_list '/' TAG_lm_switch
 	final {
-		$$->inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::LmSwitch );
+		$$->inlineItem = new GenInlineItem( InputLoc(), GenInlineItem::LmSwitch );
 		$$->inlineItem->children = $2->inlineList;
 	};
 
@@ -858,7 +860,7 @@ nonterm tag_inline_action uses inline_item_type;
 
 tag_inline_action: TAG_sub_action inline_list '/' TAG_sub_action
 	final {
-		$$->inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::SubAction );
+		$$->inlineItem = new GenInlineItem( InputLoc(), GenInlineItem::SubAction );
 		$$->inlineItem->children = $2->inlineList;
 
 		Attribute *idAttr = $1->tag->findAttr( "id" );
@@ -1016,13 +1018,13 @@ long readOffsetPtr( char *td, char **end )
 	return strtol( td, end, 10 );
 }
 
-ostream &XmlParser::warning( const GenInputLoc &loc )
+ostream &XmlParser::warning( const InputLoc &loc )
 {
 	cerr << fileName << ":" << loc.line << ":" << loc.col << ": warning: ";
 	return cerr;
 }
 
-ostream &XmlParser::error( const GenInputLoc &loc )
+ostream &XmlParser::error( const InputLoc &loc )
 {
 	gblErrorCount += 1;
 	assert( fileName != 0 );
@@ -1047,7 +1049,7 @@ ostream &XmlParser::parser_error( int tokId, Token &token )
 	return cerr;
 }
 
-ostream &XmlParser::source_error( const GenInputLoc &loc )
+ostream &XmlParser::source_error( const InputLoc &loc )
 {
 	gblErrorCount += 1;
 	assert( sourceFileName != 0 );

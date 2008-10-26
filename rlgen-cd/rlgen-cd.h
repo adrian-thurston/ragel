@@ -30,8 +30,6 @@
 #include "config.h"
 #include "common.h"
 
-#define PROGNAME "rlgen-cd"
-
 extern CodeStyleEnum codeStyle;
 
 /* IO filenames and stream. */

@@ -30,15 +30,62 @@
 
 using namespace std;
 
-XMLCodeGen::XMLCodeGen( char *fsmName, ParseData *pd, FsmAp *fsm, 
-		std::ostream &out, XmlParser &xmlParser )
+GenBase::GenBase( char *fsmName, ParseData *pd, FsmAp *fsm, XmlParser &xmlParser )
 :
 	fsmName(fsmName),
 	pd(pd),
 	fsm(fsm),
-	out(out),
 	xmlParser(xmlParser),
 	nextActionTableId(0)
+{
+}
+
+void GenBase::appendTrans( TransListVect &outList, Key lowKey, 
+		Key highKey, TransAp *trans )
+{
+	if ( trans->toState != 0 || trans->actionTable.length() > 0 )
+		outList.append( TransEl( lowKey, highKey, trans ) );
+}
+
+void GenBase::reduceActionTables()
+{
+	/* Reduce the actions tables to a set. */
+	for ( StateList::Iter st = fsm->stateList; st.lte(); st++ ) {
+		RedActionTable *actionTable = 0;
+
+		/* Reduce To State Actions. */
+		if ( st->toStateActionTable.length() > 0 ) {
+			if ( actionTableMap.insert( st->toStateActionTable, &actionTable ) )
+				actionTable->id = nextActionTableId++;
+		}
+
+		/* Reduce From State Actions. */
+		if ( st->fromStateActionTable.length() > 0 ) {
+			if ( actionTableMap.insert( st->fromStateActionTable, &actionTable ) )
+				actionTable->id = nextActionTableId++;
+		}
+
+		/* Reduce EOF actions. */
+		if ( st->eofActionTable.length() > 0 ) {
+			if ( actionTableMap.insert( st->eofActionTable, &actionTable ) )
+				actionTable->id = nextActionTableId++;
+		}
+
+		/* Loop the transitions and reduce their actions. */
+		for ( TransList::Iter trans = st->outList; trans.lte(); trans++ ) {
+			if ( trans->actionTable.length() > 0 ) {
+				if ( actionTableMap.insert( trans->actionTable, &actionTable ) )
+					actionTable->id = nextActionTableId++;
+			}
+		}
+	}
+}
+
+XMLCodeGen::XMLCodeGen( char *fsmName, ParseData *pd, FsmAp *fsm, 
+		std::ostream &out, XmlParser &xmlParser )
+:
+	GenBase(fsmName, pd, fsm, xmlParser),
+	out(out)
 {
 }
 
@@ -83,47 +130,6 @@ void XMLCodeGen::writeActionTableList()
 	out << "    </action_table_list>\n";
 
 	delete[] tables;
-}
-
-void XMLCodeGen::reduceActionTables()
-{
-	/* Reduce the actions tables to a set. */
-	for ( StateList::Iter st = fsm->stateList; st.lte(); st++ ) {
-		RedActionTable *actionTable = 0;
-
-		/* Reduce To State Actions. */
-		if ( st->toStateActionTable.length() > 0 ) {
-			if ( actionTableMap.insert( st->toStateActionTable, &actionTable ) )
-				actionTable->id = nextActionTableId++;
-		}
-
-		/* Reduce From State Actions. */
-		if ( st->fromStateActionTable.length() > 0 ) {
-			if ( actionTableMap.insert( st->fromStateActionTable, &actionTable ) )
-				actionTable->id = nextActionTableId++;
-		}
-
-		/* Reduce EOF actions. */
-		if ( st->eofActionTable.length() > 0 ) {
-			if ( actionTableMap.insert( st->eofActionTable, &actionTable ) )
-				actionTable->id = nextActionTableId++;
-		}
-
-		/* Loop the transitions and reduce their actions. */
-		for ( TransList::Iter trans = st->outList; trans.lte(); trans++ ) {
-			if ( trans->actionTable.length() > 0 ) {
-				if ( actionTableMap.insert( trans->actionTable, &actionTable ) )
-					actionTable->id = nextActionTableId++;
-			}
-		}
-	}
-}
-
-void XMLCodeGen::appendTrans( TransListVect &outList, Key lowKey, 
-		Key highKey, TransAp *trans )
-{
-	if ( trans->toState != 0 || trans->actionTable.length() > 0 )
-		outList.append( TransEl( lowKey, highKey, trans ) );
 }
 
 void XMLCodeGen::writeKey( Key key )
@@ -442,36 +448,39 @@ void XMLCodeGen::writeInlineList( InlineList *inlineList )
 	}
 }
 
-void XMLCodeGen::makeKey( GenInlineList *outList, Key key )
+BackendGen::BackendGen( char *fsmName, ParseData *pd, FsmAp *fsm, XmlParser &xmlParser )
+:
+	GenBase(fsmName, pd, fsm, xmlParser)
 {
 }
 
-void XMLCodeGen::makeText( GenInlineList *outList, InlineItem *item )
+
+void BackendGen::makeText( GenInlineList *outList, InlineItem *item )
 {
-	GenInlineItem *inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::Text );
+	GenInlineItem *inlineItem = new GenInlineItem( InputLoc(), GenInlineItem::Text );
 	inlineItem->data = item->data;
 
 	outList->append( inlineItem );
 }
 
-void XMLCodeGen::makeTargetItem( GenInlineList *outList, long targetId, GenInlineItem::Type type )
+void BackendGen::makeTargetItem( GenInlineList *outList, long entryId, GenInlineItem::Type type )
 {
 	long targetState;
 	if ( pd->generatingSectionSubset )
 		targetState = -1;
 	else {
-		EntryMapEl *targ = fsm->entryPoints.find( targetId );
+		EntryMapEl *targ = fsm->entryPoints.find( entryId );
 		targetState = targ->value->alg.stateNum;
 	}
 
 	/* Make the item. */
-	GenInlineItem *inlineItem = new GenInlineItem( GenInputLoc(), type );
+	GenInlineItem *inlineItem = new GenInlineItem( InputLoc(), type );
 	inlineItem->targId = targetState;
 	outList->append( inlineItem );
 }
 
 /* Make a sublist item with a given type. */
-void XMLCodeGen::makeSubList( GenInlineList *outList, 
+void BackendGen::makeSubList( GenInlineList *outList, 
 		InlineList *inlineList, GenInlineItem::Type type )
 {
 	/* Fill the sub list. */
@@ -479,12 +488,12 @@ void XMLCodeGen::makeSubList( GenInlineList *outList,
 	makeGenInlineList( subList, inlineList );
 
 	/* Make the item. */
-	GenInlineItem *inlineItem = new GenInlineItem( GenInputLoc(), type );
+	GenInlineItem *inlineItem = new GenInlineItem( InputLoc(), type );
 	inlineItem->children = subList;
 	outList->append( inlineItem );
 }
 
-void XMLCodeGen::makeLmOnLast( GenInlineList *outList, InlineItem *item )
+void BackendGen::makeLmOnLast( GenInlineList *outList, InlineItem *item )
 {
 	makeSetTokend( outList, 1 );
 
@@ -495,10 +504,10 @@ void XMLCodeGen::makeLmOnLast( GenInlineList *outList, InlineItem *item )
 	}
 }
 
-void XMLCodeGen::makeLmOnNext( GenInlineList *outList, InlineItem *item )
+void BackendGen::makeLmOnNext( GenInlineList *outList, InlineItem *item )
 {
 	makeSetTokend( outList, 0 );
-	outList->append( new GenInlineItem( GenInputLoc(), GenInlineItem::Hold ) );
+	outList->append( new GenInlineItem( InputLoc(), GenInlineItem::Hold ) );
 
 	if ( item->longestMatchPart->action != 0 ) {
 		makeSubList( outList, 
@@ -507,20 +516,20 @@ void XMLCodeGen::makeLmOnNext( GenInlineList *outList, InlineItem *item )
 	}
 }
 
-void XMLCodeGen::makeExecGetTokend( GenInlineList *outList )
+void BackendGen::makeExecGetTokend( GenInlineList *outList )
 {
 	/* Make the Exec item. */
-	GenInlineItem *execItem = new GenInlineItem( GenInputLoc(), GenInlineItem::Exec );
+	GenInlineItem *execItem = new GenInlineItem( InputLoc(), GenInlineItem::Exec );
 	execItem->children = new GenInlineList;
 
 	/* Make the GetTokEnd */
-	GenInlineItem *getTokend = new GenInlineItem( GenInputLoc(), GenInlineItem::LmGetTokEnd );
+	GenInlineItem *getTokend = new GenInlineItem( InputLoc(), GenInlineItem::LmGetTokEnd );
 	execItem->children->append( getTokend );
 
 	outList->append( execItem );
 }
 
-void XMLCodeGen::makeLmOnLagBehind( GenInlineList *outList, InlineItem *item )
+void BackendGen::makeLmOnLagBehind( GenInlineList *outList, InlineItem *item )
 {
 	/* Jump to the tokend. */
 	makeExecGetTokend( outList );
@@ -532,9 +541,9 @@ void XMLCodeGen::makeLmOnLagBehind( GenInlineList *outList, InlineItem *item )
 	}
 }
 
-void XMLCodeGen::makeLmSwitch( GenInlineList *outList, InlineItem *item )
+void BackendGen::makeLmSwitch( GenInlineList *outList, InlineItem *item )
 {
-	GenInlineItem *lmSwitch = new GenInlineItem( GenInputLoc(), GenInlineItem::LmSwitch );
+	GenInlineItem *lmSwitch = new GenInlineItem( InputLoc(), GenInlineItem::LmSwitch );
 	GenInlineList *lmList = lmSwitch->children = new GenInlineList;
 	LongestMatch *longestMatch = item->longestMatch;
 
@@ -548,12 +557,14 @@ void XMLCodeGen::makeLmSwitch( GenInlineList *outList, InlineItem *item )
 		 * error state. */
 		assert( fsm->errState != 0 );
 
-		GenInlineItem *errCase = new GenInlineItem( GenInputLoc(), GenInlineItem::SubAction );
+		GenInlineItem *errCase = new GenInlineItem( InputLoc(), GenInlineItem::SubAction );
 		errCase->lmId = 0;
 		errCase->children = new GenInlineList;
 
-		makeTargetItem( errCase->children, 
-				fsm->errState->alg.stateNum, GenInlineItem::Goto );
+		/* Make the item. */
+		GenInlineItem *gotoItem = new GenInlineItem( InputLoc(), GenInlineItem::Goto );
+		gotoItem->targId = fsm->errState->alg.stateNum;
+		errCase->children->append( gotoItem );
 
 		lmList->append( errCase );
 	}
@@ -566,7 +577,7 @@ void XMLCodeGen::makeLmSwitch( GenInlineList *outList, InlineItem *item )
 			else {
 				/* Open the action. Write it with the context that sets up _p 
 				 * when doing control flow changes from inside the machine. */
-				GenInlineItem *lmCase = new GenInlineItem( GenInputLoc(), 
+				GenInlineItem *lmCase = new GenInlineItem( InputLoc(), 
 						GenInlineItem::SubAction );
 				lmCase->lmId = lmi->longestMatchId;
 				lmCase->children = new GenInlineList;
@@ -580,7 +591,7 @@ void XMLCodeGen::makeLmSwitch( GenInlineList *outList, InlineItem *item )
 	}
 
 	if ( needDefault ) {
-		GenInlineItem *defCase = new GenInlineItem( GenInputLoc(), 
+		GenInlineItem *defCase = new GenInlineItem( InputLoc(), 
 				GenInlineItem::SubAction );
 		defCase->lmId = -1;
 		defCase->children = new GenInlineList;
@@ -593,21 +604,21 @@ void XMLCodeGen::makeLmSwitch( GenInlineList *outList, InlineItem *item )
 	outList->append( lmSwitch );
 }
 
-void XMLCodeGen::makeSetTokend( GenInlineList *outList, long offset )
+void BackendGen::makeSetTokend( GenInlineList *outList, long offset )
 {
-	GenInlineItem *inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::LmSetTokEnd );
+	GenInlineItem *inlineItem = new GenInlineItem( InputLoc(), GenInlineItem::LmSetTokEnd );
 	inlineItem->offset = offset;
 	outList->append( inlineItem );
 }
 
-void XMLCodeGen::makeSetAct( GenInlineList *outList, long lmId )
+void BackendGen::makeSetAct( GenInlineList *outList, long lmId )
 {
-	GenInlineItem *inlineItem = new GenInlineItem( GenInputLoc(), GenInlineItem::LmSetActId );
+	GenInlineItem *inlineItem = new GenInlineItem( InputLoc(), GenInlineItem::LmSetActId );
 	inlineItem->lmId = lmId;
 	outList->append( inlineItem );
 }
 
-void XMLCodeGen::makeGenInlineList( GenInlineList *outList, InlineList *inList )
+void BackendGen::makeGenInlineList( GenInlineList *outList, InlineList *inList )
 {
 	for ( InlineList::Iter item = *inList; item.lte(); item++ ) {
 		switch ( item->type ) {
@@ -633,29 +644,29 @@ void XMLCodeGen::makeGenInlineList( GenInlineList *outList, InlineList *inList )
 			makeSubList( outList, item->children, GenInlineItem::NextExpr );
 			break;
 		case InlineItem::Break:
-			outList->append( new GenInlineItem( GenInputLoc(), GenInlineItem::Break ) );
+			outList->append( new GenInlineItem( InputLoc(), GenInlineItem::Break ) );
 			break;
 		case InlineItem::Ret: 
-			outList->append( new GenInlineItem( GenInputLoc(), GenInlineItem::Ret ) );
+			outList->append( new GenInlineItem( InputLoc(), GenInlineItem::Ret ) );
 			break;
 		case InlineItem::PChar:
-			outList->append( new GenInlineItem( GenInputLoc(), GenInlineItem::PChar ) );
+			outList->append( new GenInlineItem( InputLoc(), GenInlineItem::PChar ) );
 			break;
 		case InlineItem::Char: 
-			outList->append( new GenInlineItem( GenInputLoc(), GenInlineItem::Char ) );
+			outList->append( new GenInlineItem( InputLoc(), GenInlineItem::Char ) );
 			break;
 		case InlineItem::Curs: 
-			outList->append( new GenInlineItem( GenInputLoc(), GenInlineItem::Curs ) );
+			outList->append( new GenInlineItem( InputLoc(), GenInlineItem::Curs ) );
 			break;
 		case InlineItem::Targs: 
-			outList->append( new GenInlineItem( GenInputLoc(), GenInlineItem::Targs ) );
+			outList->append( new GenInlineItem( InputLoc(), GenInlineItem::Targs ) );
 			break;
 		case InlineItem::Entry:
 			makeTargetItem( outList, item->nameTarg->id, GenInlineItem::Entry );
 			break;
 
 		case InlineItem::Hold:
-			outList->append( new GenInlineItem( GenInputLoc(), GenInlineItem::Hold ) );
+			outList->append( new GenInlineItem( InputLoc(), GenInlineItem::Hold ) );
 			break;
 		case InlineItem::Exec:
 			makeSubList( outList, item->children, GenInlineItem::Exec );
@@ -682,13 +693,13 @@ void XMLCodeGen::makeGenInlineList( GenInlineList *outList, InlineList *inList )
 			break;
 
 		case InlineItem::LmInitAct:
-			outList->append( new GenInlineItem( GenInputLoc(), GenInlineItem::LmInitAct ) );
+			outList->append( new GenInlineItem( InputLoc(), GenInlineItem::LmInitAct ) );
 			break;
 		case InlineItem::LmInitTokStart:
-			outList->append( new GenInlineItem( GenInputLoc(), GenInlineItem::LmInitTokStart ) );
+			outList->append( new GenInlineItem( InputLoc(), GenInlineItem::LmInitTokStart ) );
 			break;
 		case InlineItem::LmSetTokStart:
-			outList->append( new GenInlineItem( GenInputLoc(), GenInlineItem::LmSetTokStart ) );
+			outList->append( new GenInlineItem( InputLoc(), GenInlineItem::LmSetTokStart ) );
 			xmlParser.cgd->hasLongestMatch = true;
 			break;
 		}
@@ -1003,13 +1014,13 @@ void XMLCodeGen::writeXML()
 		"</ragel_def>\n";
 }
 
-void XMLCodeGen::makeExports()
+void BackendGen::makeExports()
 {
 	for ( ExportList::Iter exp = pd->exportList; exp.lte(); exp++ )
 		xmlParser.cgd->exportList.append( new Export( exp->name, exp->key ) );
 }
 
-void XMLCodeGen::makeAction( Action *action )
+void BackendGen::makeAction( Action *action )
 {
 	GenInlineList *genList = new GenInlineList;
 	makeGenInlineList( genList, action->inlineList );
@@ -1019,7 +1030,7 @@ void XMLCodeGen::makeAction( Action *action )
 }
 
 
-void XMLCodeGen::makeActionList()
+void BackendGen::makeActionList()
 {
 	/* Determine which actions to write. */
 	int nextActionId = 0;
@@ -1038,7 +1049,7 @@ void XMLCodeGen::makeActionList()
 	}
 }
 
-void XMLCodeGen::makeActionTableList()
+void BackendGen::makeActionTableList()
 {
 	/* Must first order the action tables based on their id. */
 	int numTables = nextActionTableId;
@@ -1063,13 +1074,16 @@ void XMLCodeGen::makeActionTableList()
 					atel->value->actionId;
 		}
 
+		/* Insert into the action table map. */
+		xmlParser.cgd->redFsm->actionMap.insert( redAct );
+
 		xmlParser.curActionTable += 1;
 	}
 
 	delete[] tables;
 }
 
-void XMLCodeGen::makeConditions()
+void BackendGen::makeConditions()
 {
 	if ( condData->condSpaceMap.length() > 0 ) {
 		long nextCondSpaceId = 0;
@@ -1090,7 +1104,7 @@ void XMLCodeGen::makeConditions()
 	}
 }
 
-bool XMLCodeGen::makeNameInst( std::string &res, NameInst *nameInst )
+bool BackendGen::makeNameInst( std::string &res, NameInst *nameInst )
 {
 	bool written = false;
 	if ( nameInst->parent != 0 )
@@ -1106,7 +1120,7 @@ bool XMLCodeGen::makeNameInst( std::string &res, NameInst *nameInst )
 	return written;
 }
 
-void XMLCodeGen::makeEntryPoints()
+void BackendGen::makeEntryPoints()
 {
 	/* List of entry points other than start state. */
 	if ( fsm->entryPoints.length() > 0 || pd->lmRequiresErrorState ) {
@@ -1124,7 +1138,7 @@ void XMLCodeGen::makeEntryPoints()
 	}
 }
 
-void XMLCodeGen::makeStateActions( StateAp *state )
+void BackendGen::makeStateActions( StateAp *state )
 {
 	RedActionTable *toStateActions = 0;
 	if ( state->toStateActionTable.length() > 0 )
@@ -1157,7 +1171,7 @@ void XMLCodeGen::makeStateActions( StateAp *state )
 	}
 }
 
-void XMLCodeGen::makeEofTrans( StateAp *state )
+void BackendGen::makeEofTrans( StateAp *state )
 {
 	RedActionTable *eofActions = 0;
 	if ( state->eofActionTable.length() > 0 )
@@ -1175,7 +1189,7 @@ void XMLCodeGen::makeEofTrans( StateAp *state )
 	}
 }
 
-void XMLCodeGen::makeStateConditions( StateAp *state )
+void BackendGen::makeStateConditions( StateAp *state )
 {
 	if ( state->stateCondList.length() > 0 ) {
 		long length = state->stateCondList.length();
@@ -1189,7 +1203,7 @@ void XMLCodeGen::makeStateConditions( StateAp *state )
 	}
 }
 
-void XMLCodeGen::makeTrans( Key lowKey, Key highKey, TransAp *trans )
+void BackendGen::makeTrans( Key lowKey, Key highKey, TransAp *trans )
 {
 	/* First reduce the action. */
 	RedActionTable *actionTable = 0;
@@ -1207,8 +1221,7 @@ void XMLCodeGen::makeTrans( Key lowKey, Key highKey, TransAp *trans )
 	xmlParser.cgd->newTrans( xmlParser.curState, xmlParser.curTrans++, lowKey, highKey, targ, action );
 }
 
-
-void XMLCodeGen::makeTransList( StateAp *state )
+void BackendGen::makeTransList( StateAp *state )
 {
 	TransListVect outList;
 
@@ -1231,7 +1244,7 @@ void XMLCodeGen::makeTransList( StateAp *state )
 }
 
 
-void XMLCodeGen::makeStateList()
+void BackendGen::makeStateList()
 {
 	/* Write the list of states. */
 	long length = fsm->stateList.length();
@@ -1254,7 +1267,7 @@ void XMLCodeGen::makeStateList()
 }
 
 
-void XMLCodeGen::makeMachine()
+void BackendGen::makeMachine()
 {
 	xmlParser.cgd->createMachine();
 
@@ -1274,9 +1287,11 @@ void XMLCodeGen::makeMachine()
 
 	makeEntryPoints();
 	makeStateList();
+
+	xmlParser.cgd->closeMachine();
 }
 
-void XMLCodeGen::makeBackend()
+void BackendGen::makeBackend()
 {
 	/* Open the definition. */
 	xmlParser.open_ragel_def( fsmName );
@@ -1364,6 +1379,8 @@ void XMLCodeGen::makeBackend()
 	
 	makeExports();
 	makeMachine();
+
+	xmlParser.close_ragel_def();
 }
 
 

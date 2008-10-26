@@ -28,6 +28,7 @@
 #include <string>
 #include "vector.h"
 #include "config.h"
+#include "common.h"
 
 #define PROGNAME "ragel"
 
@@ -64,14 +65,6 @@ extern ErrorFormat errorFormat;
 extern int gblErrorCount;
 extern char mainMachine[];
 
-/* Location in an input file. */
-struct InputLoc
-{
-	const char *fileName;
-	int line;
-	int col;
-};
-
 InputLoc makeInputLoc( const char *fileName, int line = 0, int col = 0 );
 std::ostream &operator<<( std::ostream &out, const InputLoc &loc );
 
@@ -85,8 +78,7 @@ struct XmlParser;
 void terminateAllParsers( );
 void writeMachines( std::ostream &out, std::string hostData, 
 	const char *inputFileName, XmlParser &xmlParser );
-void generate( std::ostream &out, std::string hostData, 
-	const char *inputFileName, XmlParser &xmlParser );
+void generate( XmlParser &xmlParser );
 void xmlEscapeHost( std::ostream &out, char *data, long len );
 
 typedef Vector<const char *> ArgsVector;

@@ -27,8 +27,6 @@
 #include "config.h"
 #include "common.h"
 
-#define PROGNAME "rlgen-ruby"
-
 extern RubyImplEnum rubyImpl;
 extern CodeStyleEnum codeStyle;
 

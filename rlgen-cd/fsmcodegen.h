@@ -165,8 +165,8 @@ protected:
 
 	virtual string CTRL_FLOW() = 0;
 
-	ostream &source_warning(const GenInputLoc &loc);
-	ostream &source_error(const GenInputLoc &loc);
+	ostream &source_warning(const InputLoc &loc);
+	ostream &source_error(const InputLoc &loc);
 
 	unsigned int arrayTypeSize( unsigned long maxVal );
 

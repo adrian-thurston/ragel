@@ -1642,13 +1642,13 @@ void JavaTabCodeGen::finishRagelDef()
 	calcIndexSize();
 }
 
-ostream &JavaTabCodeGen::source_warning( const GenInputLoc &loc )
+ostream &JavaTabCodeGen::source_warning( const InputLoc &loc )
 {
 	cerr << sourceFileName << ":" << loc.line << ":" << loc.col << ": warning: ";
 	return cerr;
 }
 
-ostream &JavaTabCodeGen::source_error( const GenInputLoc &loc )
+ostream &JavaTabCodeGen::source_error( const InputLoc &loc )
 {
 	gblErrorCount += 1;
 	assert( sourceFileName != 0 );

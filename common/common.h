@@ -26,6 +26,15 @@
 #include <climits>
 #include "dlist.h"
 
+/* Location in an input file. */
+struct InputLoc
+{
+	const char *fileName;
+	long line;
+	long col;
+};
+
+
 typedef unsigned long long Size;
 
 struct Key

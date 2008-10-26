@@ -35,7 +35,7 @@ public:
 	void writeDotFile( );
 
 	virtual void finishRagelDef();
-	virtual void writeStatement( GenInputLoc &, int, char ** );
+	virtual void writeStatement( InputLoc &, int, char ** );
 
 private:
 	/* Writing labels and actions. */

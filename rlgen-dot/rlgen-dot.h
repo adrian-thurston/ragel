@@ -29,8 +29,6 @@
 #include "vector.h"
 #include "config.h"
 
-#define PROGNAME "rlgen-dot"
-
 /* IO filenames and stream. */
 extern bool displayPrintables;
 extern bool graphvizDone;

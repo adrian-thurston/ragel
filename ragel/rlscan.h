@@ -37,11 +37,11 @@ extern char *Parser_lelNames[];
 
 struct Scanner
 {
-	Scanner( const char *fileName, istream &input, ostream &output,
+	Scanner( const char *fileName, istream &input,
 			Parser *inclToParser, char *inclSectionTarg,
 			int includeDepth, bool importMachines )
 	: 
-		fileName(fileName), input(input), output(output),
+		fileName(fileName), input(input),
 		inclToParser(inclToParser),
 		inclSectionTarg(inclSectionTarg),
 		includeDepth(includeDepth),
@@ -84,7 +84,6 @@ struct Scanner
 
 	const char *fileName;
 	istream &input;
-	ostream &output;
 	Parser *inclToParser;
 	char *inclSectionTarg;
 	int includeDepth;

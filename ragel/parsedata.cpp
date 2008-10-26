@@ -1427,15 +1427,15 @@ void ParseData::prepareMachineGenTBWrapped( GraphDictEl *graphDictEl )
 	sectionGraph->setStateNumbers( 0 );
 }
 
-void ParseData::generate( ostream &out, XmlParser &xmlParser )
+void ParseData::genBackend( XmlParser &xmlParser )
 {
 	beginProcessing();
 
 	/* Make the generator. */
-	XMLCodeGen codeGen( sectionName, this, sectionGraph, out, xmlParser );
+	BackendGen backendGen( sectionName, this, sectionGraph, xmlParser );
 
 	/* Write out with it. */
-	codeGen.makeBackend();
+	backendGen.makeBackend();
 
 	if ( printStatistics ) {
 		cerr << "fsm name  : " << sectionName << endl;
@@ -1551,8 +1551,7 @@ void writeMachines( std::ostream &out, std::string hostData,
 	}
 }
 
-void generate( std::ostream &out, std::string hostData, 
-		const char *inputFileName, XmlParser &xmlParser )
+void generate( XmlParser &xmlParser )
 {
 	if ( machineSpec == 0 && machineName == 0 ) {
 		/* No machine spec or machine name given. Generate everything. */
@@ -1563,13 +1562,11 @@ void generate( std::ostream &out, std::string hostData,
 		}
 
 		if ( gblErrorCount == 0 ) {
-			xmlParser.open_ragel( inputFileName );
 			for ( ParserDict::Iter parser = parserDict; parser.lte(); parser++ ) {
 				ParseData *pd = parser->value->pd;
 				if ( pd->instanceList.length() > 0 )
-					pd->generate( out, xmlParser );
+					pd->genBackend( xmlParser );
 			}
-			out << hostData;
 		}
 	}
 	else if ( parserDict.length() > 0 ) {
@@ -1600,11 +1597,21 @@ void generate( std::ostream &out, std::string hostData,
 		else {
 			/* Section/Machine to emit was found. Prepare and emit it. */
 			parseData->prepareMachineGen( graphDictEl );
-			if ( gblErrorCount == 0 ) {
-				xmlParser.open_ragel( inputFileName );
-				parseData->generate( out, xmlParser );
-				out << hostData;
-			}
+			if ( gblErrorCount == 0 )
+				parseData->genBackend( xmlParser );
 		}
+	}
+
+
+	for ( InputItemList::Iter ii = inputItems; ii.lte(); ii++ ) {
+		if ( ii->type == InputItem::Write ) {
+			CodeGenMapEl *mapEl = xmlParser.codeGenMap.find( (char*)ii->name.c_str() );
+			xmlParser.cgd = mapEl->value;
+			::keyOps = &xmlParser.cgd->thisKeyOps;
+
+			xmlParser.cgd->writeStatement( ii->loc, ii->writeArgs.length()-1, ii->writeArgs.data );
+		}
+		else 
+			xmlParser.cgd->out << ii->data.str();
 	}
 }

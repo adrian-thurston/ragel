@@ -202,7 +202,7 @@ void Scanner::pass()
 	/* If no errors and we are at the bottom of the include stack (the
 	 * source file listed on the command line) then write out the data. */
 	if ( includeDepth == 0 && machineSpec == 0 && machineName == 0 )
-		xmlEscapeHost( output, ts, te-ts );
+		inputItems.tail->data.write( ts, te-ts );
 }
 
 /*
@@ -336,7 +336,7 @@ void Scanner::handleInclude()
 				parser->includeHistory.append( IncludeHistoryItem( 
 						includeChecks[found], inclSectionName ) );
 
-				Scanner scanner( includeChecks[found], *inFile, output, parser,
+				Scanner scanner( includeChecks[found], *inFile, parser,
 						inclSectionName, includeDepth+1, false );
 				scanner.do_scan( );
 				delete inFile;
@@ -361,7 +361,7 @@ void Scanner::handleImport()
 				scan_error() << "import: attempted: \"" << *tried++ << '\"' << endl;
 		}
 
-		Scanner scanner( importChecks[found], *inFile, output, parser,
+		Scanner scanner( importChecks[found], *inFile, parser,
 				0, includeDepth+1, true );
 		scanner.do_scan( );
 		scanner.importToken( 0, 0, 0 );
@@ -409,24 +409,25 @@ void Scanner::handleImport()
 	action write_command
 	{
 		if ( active() && machineSpec == 0 && machineName == 0 ) {
-			output << "<write"
-					" def_name=\"" << parser->sectionName << "\""
-					" line=\"" << line << "\""
-					" col=\"" << column << "\""
-					">";
+			InputItem *inputItem = new InputItem;
+			inputItem->type = InputItem::Write;
+			inputItem->loc.line = line;
+			inputItem->loc.col = column;
+			inputItem->name = parser->sectionName;
+			inputItems.append( inputItem );
 		}
 	}
 
 	action write_arg
 	{
 		if ( active() && machineSpec == 0 && machineName == 0 )
-			output << "<arg>" << tokdata << "</arg>";
+			inputItems.tail->writeArgs.append( strdup(tokdata) );
 	}
 
 	action write_close
 	{
 		if ( active() && machineSpec == 0 && machineName == 0 )
-			output << "</write>\n";
+			inputItems.tail->writeArgs.append( 0 );
 	}
 
 	write_stmt =
@@ -507,14 +508,9 @@ void Scanner::startSection( )
 {
 	parserExistsError = false;
 
-	if ( includeDepth == 0 ) {
-		if ( machineSpec == 0 && machineName == 0 )
-			output << "</host>\n";
-	}
-
 	sectionLoc.fileName = fileName;
 	sectionLoc.line = line;
-	sectionLoc.col = 0;
+	sectionLoc.col = column;
 }
 
 void Scanner::endSection( )
@@ -527,7 +523,7 @@ void Scanner::endSection( )
 		InputLoc loc;
 		loc.fileName = fileName;
 		loc.line = line;
-		loc.col = 0;
+		loc.col = column;
 
 		parser->token( loc, TK_EndSection, 0, 0 );
 	}
@@ -536,7 +532,11 @@ void Scanner::endSection( )
 		if ( machineSpec == 0 && machineName == 0 ) {
 			/* The end section may include a newline on the end, so
 			 * we use the last line, which will count the newline. */
-			output << "<host line=\"" << line << "\">";
+			InputItem *inputItem = new InputItem;
+			inputItem->type = InputItem::HostData;
+			inputItem->loc.line = line;
+			inputItem->loc.col = column;
+			inputItems.append( inputItem );
 		}
 	}
 }

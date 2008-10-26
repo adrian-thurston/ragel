@@ -777,13 +777,13 @@ void CSharpFsmCodeGen::finishRagelDef()
 	calcIndexSize();
 }
 
-ostream &CSharpFsmCodeGen::source_warning( const GenInputLoc &loc )
+ostream &CSharpFsmCodeGen::source_warning( const InputLoc &loc )
 {
 	cerr << sourceFileName << ":" << loc.line << ":" << loc.col << ": warning: ";
 	return cerr;
 }
 
-ostream &CSharpFsmCodeGen::source_error( const GenInputLoc &loc )
+ostream &CSharpFsmCodeGen::source_error( const InputLoc &loc )
 {
 	gblErrorCount += 1;
 	assert( sourceFileName != 0 );

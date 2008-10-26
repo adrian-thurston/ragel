@@ -156,28 +156,33 @@ struct XmlParser
 	void init();
 	int parseLangEl( int type, const Token *token );
 
-	XmlParser( const char *fileName, bool outputActive, bool wantComplete ) : 
-		fileName(fileName), sourceFileName(0), outStream(0),
-		outputActive(outputActive), wantComplete(wantComplete),
+	XmlParser( const char *sourceFileName, const char *xmlFileName, bool outputActive, bool wantComplete ) : 
+		sourceFileName(sourceFileName),
+		fileName(xmlFileName),
+		outStream(0),
+		outputActive(outputActive),
+		wantComplete(wantComplete),
 		cgd(0) { }
 
 	int token( int tokenId, Token &token );
 	int token( int tokenId, int col, int line );
 	int token( XMLTag *tag, int col, int line );
 
-	void open_ragel( const char *fileName );
 	void open_ragel_def( char *fsmName );
+	void close_ragel_def();
+
+	void openOutput();
 
 	/* Report an error encountered by the parser. */
-	ostream &warning( const GenInputLoc &loc );
+	ostream &warning( const InputLoc &loc );
 	ostream &error();
-	ostream &error( const GenInputLoc &loc );
+	ostream &error( const InputLoc &loc );
 	ostream &parser_error( int tokId, Token &token );
-	ostream &source_error( const GenInputLoc &loc );
+	ostream &source_error( const InputLoc &loc );
 
 	/* The name of the root section, this does not change during an include. */
-	const char *fileName;
 	const char *sourceFileName;
+	const char *fileName;
 	ostream *outStream;
 	bool outputActive;
 	bool wantComplete;

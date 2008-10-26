@@ -24,6 +24,7 @@
 
 #include <iostream>
 #include <limits.h>
+#include <sstream>
 #include "avlmap.h"
 #include "bstmap.h"
 #include "vector.h"
@@ -216,7 +217,7 @@ struct ParseData
 	void prepareMachineGen( GraphDictEl *graphDictEl );
 	void prepareMachineGenTBWrapped( GraphDictEl *graphDictEl );
 	void generateXML( ostream &out, XmlParser &xmlParser );
-	void generate( ostream &out, XmlParser &xmlParser );
+	void genBackend( XmlParser &xmlParser );
 	FsmAp *sectionGraph;
 	bool generatingSectionSubset;
 
@@ -370,51 +371,35 @@ FsmAp *dotStarFsm( ParseData *pd );
 
 void errorStateLabels( const NameSet &locations );
 
-/* Data used by the parser specific to the current file. Supports the include
- * system, since a new parser is executed for each included file. */
-struct InputData
+struct InputItem
 {
-	InputData( char *fileName, char *includeSpec, char *includeTo ) :
-		pd(0), sectionName(0), defaultParseData(0), 
-		first_line(1), first_column(1), 
-		last_line(1), last_column(0), 
-		fileName(fileName), includeSpec(includeSpec), 
-		includeTo(includeTo), active(true)
-		{}
+	enum Type {
+		HostData,
+		Write,
+	};
 
-	/* For collecting a name references. */
-	NameRef nameRef;
-	NameRefList nameRefList;
+	Type type;
+	std::ostringstream data;
+	std::string name;
+	Vector<char *> writeArgs;
 
-	/* The parse data. For each fsm spec, the parser collects things that it parses
-	 * in data structures in here. */
-	ParseData *pd;
+	InputLoc loc;
 
-	char *sectionName;
-	ParseData *defaultParseData;
-
-	int first_line;
-	int first_column;
-	int last_line;
-	int last_column;
-
-	char *fileName;
-
-	/* If this is an included file, this contains the specification to search
-	 * for. IncludeTo will contain the spec name that does the includng. */
-	char *includeSpec;
-	char *includeTo;
-
-	bool active;
-	InputLoc sectionLoc;
+	InputItem *prev, *next;
 };
+
+/*
+ * Global data.
+ */
 
 struct Parser;
 
 typedef AvlMap<char*, Parser *, CmpStr> ParserDict;
 typedef AvlMapEl<char*, Parser *> ParserDictEl;
 
-extern ParserDict parserDict;
+typedef DList<InputItem> InputItemList;
 
+extern ParserDict parserDict;
+extern InputItemList inputItems;
 
 #endif /* _PARSEDATA_H */

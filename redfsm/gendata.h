@@ -90,7 +90,7 @@ struct CodeGenData
 
 	/* This can also be overwridden to modify the processing of write
 	 * statements. */
-	virtual void writeStatement( GenInputLoc &loc, int nargs, char **args );
+	virtual void writeStatement( InputLoc &loc, int nargs, char **args );
 
 	/********************/
 
@@ -193,8 +193,8 @@ struct CodeGenData
 	void setValueLimits();
 	void assignActionIds();
 
-	ostream &source_warning( const GenInputLoc &loc );
-	ostream &source_error( const GenInputLoc &loc );
+	ostream &source_warning( const InputLoc &loc );
+	ostream &source_error( const InputLoc &loc );
 };
 
 

@@ -26,7 +26,7 @@
 using namespace std;
 
 /* Override this so that write statement processing is ignored */
-void GraphvizDotGen::writeStatement( GenInputLoc &, int, char ** )
+void GraphvizDotGen::writeStatement( InputLoc &, int, char ** )
 {
 }
 

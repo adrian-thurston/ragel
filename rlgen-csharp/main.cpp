@@ -67,42 +67,6 @@ extern bool graphvizDone;
 extern int numSplitPartitions;
 extern bool noLineDirectives;
 
-/* Print a summary of the options. */
-void csharp_usage()
-{
-	cout <<
-"usage: " PROGNAME " [options] file\n"
-"general:\n"
-"   -h, -H, -?, --help    Print this usage and exit\n"
-"   -v, --version         Print version information and exit\n"
-"   -o <file>             Write output to <file>\n"
-"code generation options:\n"
-"   -L                    Inhibit writing of #line directives\n"
-"generated code style:\n"
-"   -T0                   Table driven FSM (default)\n"
-"   -T1                   Faster table driven FSM\n"
-"   -F0                   Flat table driven FSM\n"
-"   -F1                   Faster flat table-driven FSM\n"
-"   -G0                   Goto-driven FSM\n"
-"   -G1                   Faster goto-driven FSM\n"
-	;	
-}
-
-/* Print version information. */
-void csharp_version()
-{
-	cout << "Ragel Code Generator for C#" << endl <<
-			"Version " VERSION << ", " PUBDATE << endl <<
-			"Copyright (c) 2001-2007 by Adrian Thurston" << endl;
-}
-
-ostream &csharp_error()
-{
-	gblErrorCount += 1;
-	cerr << PROGNAME ": ";
-	return cerr;
-}
-
 /*
  * Callbacks invoked by the XML data parser.
  */
@@ -111,7 +75,7 @@ ostream &csharp_error()
 ostream *csharpOpenOutput( const char *inputFile )
 {
 	if ( hostLang->lang != HostLang::CSharp ) {
-		csharp_error() << "this code generator is for C# only" << endl;
+		error() << "this code generator is for C# only" << endl;
 		exit(1);
 	}
 
@@ -127,7 +91,7 @@ ostream *csharpOpenOutput( const char *inputFile )
 
 	/* Make sure we are not writing to the same file as the input file. */
 	if ( outputFileName != 0 && strcmp( inputFile, outputFileName  ) == 0 ) {
-		csharp_error() << "output file \"" << outputFileName  << 
+		error() << "output file \"" << outputFileName  << 
 				"\" is the same as the input file" << endl;
 	}
 
@@ -136,7 +100,7 @@ ostream *csharpOpenOutput( const char *inputFile )
 		outFilter = new output_filter( outputFileName );
 		outFilter->open( outputFileName, ios::out|ios::trunc );
 		if ( !outFilter->is_open() ) {
-			csharp_error() << "error opening " << outputFileName << " for writing" << endl;
+			error() << "error opening " << outputFileName << " for writing" << endl;
 			exit(1);
 		}
 

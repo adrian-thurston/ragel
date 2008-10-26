@@ -25,8 +25,6 @@
 #include <iostream>
 #include "config.h"
 
-#define PROGNAME "rlgen-java"
-
 extern int gblErrorCount;
 std::ostream &error();
 

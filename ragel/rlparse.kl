@@ -30,6 +30,7 @@ using std::cerr;
 using std::endl;
 
 ParserDict parserDict;
+InputItemList inputItems;
 
 %%{
 

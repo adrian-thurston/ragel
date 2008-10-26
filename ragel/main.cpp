@@ -456,10 +456,14 @@ void process( const char *inputFileName, const char *intermed )
 	/* Used for just a few things. */
 	std::ostringstream hostData;
 
-	if ( machineSpec == 0 && machineName == 0 )
-		hostData << "<host line=\"1\" col=\"1\">";
+	/* Make the first input item. */
+	InputItem *firstInputItem = new InputItem;
+	firstInputItem->type = InputItem::HostData;
+	firstInputItem->loc.line = 1;
+	firstInputItem->loc.col = 1;
+	inputItems.append( firstInputItem );
 
-	Scanner scanner( inputFileName, *inFile, hostData, 0, 0, 0, false );
+	Scanner scanner( inputFileName, *inFile, 0, 0, 0, false );
 	scanner.do_scan();
 
 	/* Finished, final check for errors.. */
@@ -473,17 +477,6 @@ void process( const char *inputFileName, const char *intermed )
 	if ( gblErrorCount > 0 )
 		exit(1);
 
-	if ( machineSpec == 0 && machineName == 0 )
-		hostData << "</host>\n";
-
-	/* Open the XML file for writing. */
-	ostream *xmlOutFile = new ofstream( xmlFileName );
-
-	/* Open the XML file for reading. */
-	ifstream *xmlInFile = new ifstream( xmlFileName );
-	if ( ! xmlInFile->is_open() )
-		error() << "could not open " << xmlFileName << " for reading" << endl;
-
 	/* Bail on above error. */
 	if ( gblErrorCount > 0 )
 		exit(1);
@@ -494,16 +487,16 @@ void process( const char *inputFileName, const char *intermed )
 		outputActive = false;
 	}
 
-	XmlScanner xmlScanner( xmlFileName, *xmlInFile );
-	XmlParser xmlParser( xmlFileName, outputActive, wantComplete );
+	XmlScanner xmlScanner( xmlFileName, cin );
+	XmlParser xmlParser( inputFileName, xmlFileName, outputActive, wantComplete );
 	xmlParser.init();
 
+	xmlParser.openOutput();
+
 	/* Write the machines, then the surrounding code. */
-	//writeMachines( *xmlOutFile, hostData.str(), inputFileName, xmlParser );
-	generate( *xmlOutFile, hostData.str(), inputFileName, xmlParser );
+	generate( xmlParser );
 
 	/* Close the input and the intermediate file. */
-	delete xmlOutFile;
 	delete inFile;
 
 	/* Bail on above error. */
@@ -593,7 +586,7 @@ const char *openIntermed( const char *inputFileName, const char *outputFileName 
 
 void cleanExit( const char *intermed, int status )
 {
-	unlink( intermed );
+	//unlink( intermed );
 	exit( status );
 }
 
@@ -627,7 +620,7 @@ int main( int argc, const char **argv )
 				"\" is the same as the input file" << endp;
 	}
 
-	const char *intermed = openIntermed( inputFileName, outputFileName );
+	const char *intermed = 0; //openIntermed( inputFileName, outputFileName );
 	process( inputFileName, intermed );
 
 	/* Clean up the intermediate. */

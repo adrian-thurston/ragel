@@ -40,6 +40,7 @@
 #include "sbstset.h"
 #include "sbsttable.h"
 
+
 #define TRANS_ERR_TRANS   0
 #define STATE_ERR_STATE   0
 #define FUNC_NO_FUNC      0
@@ -49,13 +50,6 @@ using std::string;
 struct RedStateAp;
 struct GenInlineList;
 struct GenAction;
-
-/* Location in an input file. */
-struct GenInputLoc
-{
-	int line;
-	int col;
-};
 
 /*
  * Inline code tree
@@ -70,12 +64,12 @@ struct GenInlineItem
 		LmInitAct, LmSetTokStart, SubAction, Break
 	};
 
-	GenInlineItem( const GenInputLoc &loc, Type type ) : 
+	GenInlineItem( const InputLoc &loc, Type type ) : 
 		loc(loc), data(0), targId(0), targState(0), 
 		lmId(0), children(0), offset(0),
 		type(type) { }
 	
-	GenInputLoc loc;
+	InputLoc loc;
 	char *data;
 	int targId;
 	RedStateAp *targState;
@@ -109,7 +103,7 @@ struct GenAction
 	}
 
 	/* Data collected during parse. */
-	GenInputLoc loc;
+	InputLoc loc;
 	const char *name;
 	GenInlineList *inlineList;
 	int actionId;

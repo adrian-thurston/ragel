@@ -668,7 +668,7 @@ void CodeGenData::analyzeMachine()
 	setValueLimits();
 }
 
-void CodeGenData::writeStatement( GenInputLoc &loc, int nargs, char **args )
+void CodeGenData::writeStatement( InputLoc &loc, int nargs, char **args )
 {
 	/* FIXME: This should be moved to the virtual functions in the code
 	 * generators.
@@ -728,13 +728,13 @@ void CodeGenData::writeStatement( GenInputLoc &loc, int nargs, char **args )
 	}
 }
 
-ostream &CodeGenData::source_warning( const GenInputLoc &loc )
+ostream &CodeGenData::source_warning( const InputLoc &loc )
 {
 	cerr << sourceFileName << ":" << loc.line << ":" << loc.col << ": warning: ";
 	return cerr;
 }
 
-ostream &CodeGenData::source_error( const GenInputLoc &loc )
+ostream &CodeGenData::source_error( const InputLoc &loc )
 {
 	gblErrorCount += 1;
 	assert( sourceFileName != 0 );
