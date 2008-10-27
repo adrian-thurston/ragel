@@ -26,27 +26,25 @@
 
 struct InputData
 {
-	InputData( const char *sourceFileName, bool outputActive, bool wantComplete ) : 
-		sourceFileName(sourceFileName),
+	InputData( const char *inputFileName, bool outputActive, bool wantComplete ) : 
+		inputFileName(inputFileName),
 		outStream(0),
 		outputActive(outputActive),
-		wantComplete(wantComplete),
-		cgd(0) { }
-
-	void openOutput();
+		wantComplete(wantComplete)
+	{}
 
 	/* The name of the root section, this does not change during an include. */
-	const char *sourceFileName;
+	const char *inputFileName;
 	ostream *outStream;
 	bool outputActive;
 	bool wantComplete;
 
-	CodeGenData *cgd;
 	CodeGenMap codeGenMap;
 
-	Vector <char*> writeOptions;
+	void writeOutput();
+	void generateSpecificReduced();
+	void openOutput();
+	void generateReduced();
 };
-
-void generateReduced( const char *sourceFileName, bool outputActive, bool wantComplete );
 
 #endif

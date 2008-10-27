@@ -487,8 +487,10 @@ void process( const char *inputFileName )
 		outputActive = false;
 	}
 
+	InputData inputData( inputFileName, outputActive, wantComplete );
+
 	/* Write the machines, then the surrounding code. */
-	generateReduced( inputFileName, outputActive, wantComplete );
+	inputData.generateReduced();
 
 	/* Close the input and the intermediate file. */
 	delete inFile;

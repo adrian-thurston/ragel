@@ -33,6 +33,7 @@ struct TransAp;
 struct FsmAp;
 struct ParseData;
 struct GenInlineList;
+struct CodeGenData;
 
 struct RedActionTable
 :
@@ -140,9 +141,8 @@ private:
 class BackendGen : protected GenBase
 {
 public:
-	BackendGen( char *fsmName, ParseData *pd, FsmAp *fsm, InputData &inputData );
+	BackendGen( char *fsmName, ParseData *pd, FsmAp *fsm, CodeGenData *cgd );
 	void makeBackend( );
-	void open_ragel_def( char *fsmName );
 
 private:
 	void makeGenInlineList( GenInlineList *outList, InlineList *inList );
@@ -177,7 +177,7 @@ private:
 
 	void close_ragel_def();
 
-	InputData &inputData;
+	CodeGenData *cgd;
 
 	/* Collected during parsing. */
 	int curAction;

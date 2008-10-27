@@ -1,5 +1,5 @@
 /*
- *  Copyright 2001-2006 Adrian Thurston <thurston@complang.org>
+ *  Copyright 2001-2008 Adrian Thurston <thurston@complang.org>
  */
 
 /*  This file is part of Ragel.
@@ -1432,11 +1432,19 @@ void ParseData::generateReduced( InputData &inputData )
 {
 	beginProcessing();
 
-	/* Make the generator. */
-	BackendGen backendGen( sectionName, this, sectionGraph, inputData );
-
 	/* Open the definition. */
-	backendGen.open_ragel_def( sectionName );
+	CodeGenMapEl *mapEl = inputData.codeGenMap.find( sectionName );
+	CodeGenData *cgd = 0;
+	if ( mapEl != 0 )
+		cgd = mapEl->value;
+	else {
+		cgd = makeCodeGen( inputData.inputFileName, sectionName, 
+				*inputData.outStream, inputData.wantComplete );
+		inputData.codeGenMap.insert( sectionName, cgd );
+	}
+
+	/* Make the generator. */
+	BackendGen backendGen( sectionName, this, sectionGraph, cgd );
 
 	/* Write out with it. */
 	backendGen.makeBackend();
@@ -1554,104 +1562,3 @@ void writeMachines( std::ostream &out, std::string hostData, const char *inputFi
 	}
 }
 
-void generateSpecificReduced( InputData &inputData )
-{
-	if ( parserDict.length() > 0 ) {
-		/* There is either a machine spec or machine name given. */
-		ParseData *parseData = 0;
-		GraphDictEl *graphDictEl = 0;
-
-		/* Traverse the sections, break out when we find a section/machine
-		 * that matches the one specified. */
-		for ( ParserDict::Iter parser = parserDict; parser.lte(); parser++ ) {
-			ParseData *checkPd = parser->value->pd;
-			if ( machineSpec == 0 || strcmp( checkPd->sectionName, machineSpec ) == 0 ) {
-				GraphDictEl *checkGdEl = 0;
-				if ( machineName == 0 || (checkGdEl = 
-						checkPd->graphDict.find( machineName )) != 0 )
-				{
-					/* Have a machine spec and/or machine name that matches
-					 * the -M/-S options. */
-					parseData = checkPd;
-					graphDictEl = checkGdEl;
-					break;
-				}
-			}
-		}
-
-		if ( parseData == 0 )
-			error() << "could not locate machine specified with -S and/or -M" << endl;
-		else {
-			/* Section/Machine to emit was found. Prepare and emit it. */
-			parseData->prepareMachineGen( graphDictEl );
-			if ( gblErrorCount == 0 )
-				parseData->generateReduced( inputData );
-		}
-	}
-
-
-	for ( InputItemList::Iter ii = inputItems; ii.lte(); ii++ ) {
-		if ( ii->type == InputItem::Write ) {
-			CodeGenMapEl *mapEl = inputData.codeGenMap.find( (char*)ii->name.c_str() );
-			inputData.cgd = mapEl->value;
-			::keyOps = &inputData.cgd->thisKeyOps;
-
-			inputData.cgd->writeStatement( ii->loc, ii->writeArgs.length()-1, ii->writeArgs.data );
-		}
-		else 
-			inputData.cgd->out << ii->data.str();
-	}
-}
-
-void InputData::openOutput()
-{
-	if ( generateDot )
-		outStream = dotOpenOutput( sourceFileName );
-	else if ( hostLang->lang == HostLang::C )
-		outStream = cdOpenOutput( sourceFileName );
-	else if ( hostLang->lang == HostLang::D )
-		outStream = cdOpenOutput( sourceFileName );
-	else if ( hostLang->lang == HostLang::Java )
-		outStream = javaOpenOutput( sourceFileName );
-	else if ( hostLang->lang == HostLang::Ruby )
-		outStream = rubyOpenOutput( sourceFileName );
-	else if ( hostLang->lang == HostLang::CSharp )
-		outStream = csharpOpenOutput( sourceFileName );
-	else {
-		assert( false );
-	}
-}
-
-void generateReduced( const char *sourceFileName, bool outputActive, bool wantComplete )
-{
-	/* No machine spec or machine name given. Generate everything. */
-	for ( ParserDict::Iter parser = parserDict; parser.lte(); parser++ ) {
-		ParseData *pd = parser->value->pd;
-		if ( pd->instanceList.length() > 0 )
-			pd->prepareMachineGen( 0 );
-	}
-
-	InputData inputData( sourceFileName, outputActive, wantComplete );
-	inputData.openOutput();
-
-	if ( gblErrorCount > 0 )
-		return;
-
-	for ( ParserDict::Iter parser = parserDict; parser.lte(); parser++ ) {
-		ParseData *pd = parser->value->pd;
-		if ( pd->instanceList.length() > 0 )
-			pd->generateReduced( inputData );
-	}
-
-	for ( InputItemList::Iter ii = inputItems; ii.lte(); ii++ ) {
-		if ( ii->type == InputItem::Write ) {
-			CodeGenMapEl *mapEl = inputData.codeGenMap.find( (char*)ii->name.c_str() );
-			inputData.cgd = mapEl->value;
-			::keyOps = &inputData.cgd->thisKeyOps;
-
-			inputData.cgd->writeStatement( ii->loc, ii->writeArgs.length()-1, ii->writeArgs.data );
-		}
-		else 
-			inputData.cgd->out << ii->data.str();
-	}
-}
