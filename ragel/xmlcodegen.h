@@ -142,6 +142,7 @@ class BackendGen : protected GenBase
 public:
 	BackendGen( char *fsmName, ParseData *pd, FsmAp *fsm, InputData &inputData );
 	void makeBackend( );
+	void open_ragel_def( char *fsmName );
 
 private:
 	void makeGenInlineList( GenInlineList *outList, InlineList *inList );
@@ -174,7 +175,6 @@ private:
 	void makeTransList( StateAp *state );
 	void makeTrans( Key lowKey, Key highKey, TransAp *trans );
 
-	void open_ragel_def( char *fsmName );
 	void close_ragel_def();
 
 	InputData &inputData;

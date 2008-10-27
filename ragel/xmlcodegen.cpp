@@ -1321,9 +1321,6 @@ void BackendGen::close_ragel_def()
 
 void BackendGen::makeBackend()
 {
-	/* Open the definition. */
-	open_ragel_def( fsmName );
-
 	/* Alphabet type. */
 	inputData.cgd->setAlphType( keyOps->alphType->internalName );
 	

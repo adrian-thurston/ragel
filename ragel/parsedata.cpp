@@ -1435,6 +1435,9 @@ void ParseData::generateReduced( InputData &inputData )
 	/* Make the generator. */
 	BackendGen backendGen( sectionName, this, sectionGraph, inputData );
 
+	/* Open the definition. */
+	backendGen.open_ragel_def( sectionName );
+
 	/* Write out with it. */
 	backendGen.makeBackend();
 
