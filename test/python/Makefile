@@ -1,5 +1,5 @@
 #
-#   Copyright 2007 Adrian Thurston <thurston@cs.queensu.ca>
+#   Copyright 2007 Adrian Thurston <thurston@complang.org>
 #
 
 

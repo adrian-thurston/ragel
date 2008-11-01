@@ -1,5 +1,5 @@
 #
-#   Copyright 2001-2007 Adrian Thurston <thurston@cs.queensu.ca>
+#   Copyright 2001-2007 Adrian Thurston <thurston@complang.org>
 #
 
 #   This file is part of Colm.
@@ -115,7 +115,7 @@ endif
 	$(CXX) -c $(CFLAGS) $(DEFS) $(INCS) -o $@ $<
 
 distclean: clean
-	rm -f Makefile 
+	rm -f Makefile config.h
 
 ifeq ($(BUILD_PARSERS),true)
 EXTRA_CLEAN = $(GEN_SRC)
