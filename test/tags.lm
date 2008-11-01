@@ -1,0 +1,82 @@
+# Open and close tags by rewriting to generic close tags. Won't work if
+# interested in unclosed tags because a token can start as not close_id, but
+# then become a close id during the course of parsing.
+
+#
+# Regular Definitions
+#
+rl rl_ws /[ \t\n\r\v]+/
+rl rl_id /[a-zA-Z_][a-zA-Z0-9_]*/
+
+#
+# Tokens
+#
+
+# Any single character can be a literal
+lex start
+{
+	literal '!\n', ';\n'
+
+	# Ignore whitespace.
+	ignore /rl_ws/
+
+	# Open and close id
+	token id /rl_id/
+}
+
+#
+# Global Data
+#
+
+def tag_stack 
+	[id tag_stack]
+|	[]
+
+global tag_stack TS = construct tag_stack ["sentinal"]
+
+#
+# Productions
+#
+
+def open_tag 
+	[id]
+	{
+		match lhs [Id:id]
+		match TS [Top:id Rest:tag_stack]
+		if Id.data == Top.data {
+			reject
+		} else {
+			TS = construct tag_stack [Id TS]
+		}
+	}
+
+def close_tag 
+	[id]
+	{
+		match lhs [Id:id]
+		match TS [Top:id Rest:tag_stack]
+
+		if Id.data == Top.data {
+			TS = construct tag_stack [Rest]
+		} else {
+			reject
+		}
+	}
+
+def tag 
+	[open_tag tag* close_tag]
+
+def start
+	[tag* ';\n']
+	{
+		print_xml( TS )
+		print_xml( lhs )
+		print( 'got structure\n' )
+	}
+
+|	[id* ';\n']
+	{
+		print_xml( TS )
+		print_xml( lhs )
+		print( 'failed\n' )
+	}

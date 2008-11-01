@@ -1,0 +1,2 @@
+VERSION = 0.1.0
+PUBDATE = June 2008

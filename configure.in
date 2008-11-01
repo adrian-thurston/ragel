@@ -1,0 +1,79 @@
+dnl 
+dnl   Copyright 2001-2008 Adrian Thurston <thurston@cs.queensu.ca>
+dnl
+
+dnl   This file is part of Colm.
+dnl  
+dnl   Colm is free software; you can redistribute it and/or modify
+dnl   it under the terms of the GNU General Public License as published by
+dnl   the Free Software Foundation; either version 2 of the License, or
+dnl   (at your option) any later version.
+dnl   
+dnl   Colm is distributed in the hope that it will be useful,
+dnl   but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+dnl   GNU General Public License for more details.
+dnl   
+dnl   You should have received a copy of the GNU General Public License
+dnl   along with Colm; if not, write to the Free Software
+dnl   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+  
+AC_INIT(colm/main.cpp)
+AC_CONFIG_HEADER(common/config.h)
+
+dnl Set to true if build system should generate parsers from ragel, kelbt, and
+dnl gperf sources. Set to false if generated files are included and not to be
+dnl built (production).
+AC_SUBST(BUILD_PARSERS,true)
+
+dnl Checks for programs.
+AC_PROG_CC
+AC_DEFINE_UNQUOTED(CC,$CC)
+
+dnl Checks for programs.
+AC_PROG_CXX
+AC_DEFINE_UNQUOTED(CXX,$CXX)
+
+dnl Set test on c++ compiler.
+AC_LANG_CPLUSPLUS
+
+dnl Check for definition of MAKE.
+AC_PROG_MAKE_SET
+
+# Logging features
+AC_ARG_ENABLE(log, "turn on logging", AC_DEFINE(COLM_LOG))
+AC_ARG_ENABLE(log-bytecode, "turns on bytecode logging", 
+		AC_DEFINE(COLM_LOG_BYTECODE))
+AC_ARG_ENABLE(log-parse, "turns on parse logging", 
+		AC_DEFINE(COLM_LOG_PARSE))
+AC_ARG_ENABLE(log-match, "turns on match logging", 
+		AC_DEFINE(COLM_LOG_MATCH))
+AC_ARG_ENABLE(log-compile, "turns on compile logging", 
+		AC_DEFINE(COLM_LOG_COMPILE))
+
+if test $BUILD_PARSERS = true; then
+
+dnl Check for Ragel
+AC_CHECK_PROG(RAGEL, ragel, ragel)
+if test -z "$RAGEL"; then
+	echo
+	echo "error: ragel is required to build the parsers"
+	echo
+	exit 1
+fi
+
+dnl Check for Kelbt
+AC_CHECK_PROG(KELBT, kelbt, kelbt)
+if test -z "$KELBT"; then
+	echo
+	echo "error: kelbt is required to build the parsers"
+	echo
+	exit 1
+fi
+
+fi # BUILD_PARSERS
+
+dnl write output files
+AC_OUTPUT(Makefile common/Makefile colm/Makefile)
+
+echo "configuration of colm complete"

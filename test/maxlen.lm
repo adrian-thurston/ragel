@@ -1,0 +1,44 @@
+
+#
+# Regular Definitions
+#
+rl rl_ws /[ \t\n\r\v]+/
+rl rl_id /[a-zA-Z_][a-zA-Z0-9_]*/
+
+#
+# Tokens
+#
+
+lex start
+{
+	ignore /rl_ws/
+	token id /rl_id/
+}
+
+global int num
+global int allow = 3
+
+def item 
+	[id]
+	{
+		num = num + 1
+		int toomuch = allow+1
+		if num == toomuch {
+			reject
+		}
+	}
+
+def open
+	[]
+	{
+		num = 0
+	}
+
+def close []
+
+def restricted_list 
+	[open item*]
+
+def start 
+	[restricted_list id*]
+

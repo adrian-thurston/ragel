@@ -1,0 +1,59 @@
+
+lex start
+{
+	literal '!', 'a', ';\n'
+
+	token id /'a'|'b'/
+	{
+		#tok.id = trans_id_to
+	}
+	
+	token super_id //
+	token foo //
+
+	ignore ws / [ \n\t]+ /
+}
+
+global int trans_id_to
+
+def e1 
+	[]
+	{
+		print( 'old_id = ', trans_id_to, '\n' )
+		#trans_id_to = type_id foo
+		print( 'new_id = ', trans_id_to, '\n' )
+	}
+
+def item1 
+	str msg
+
+	[ e1 '!' 'a' super_id super_id 'a']
+	{
+		lhs.msg = 'this is item1\n'
+	}
+
+def e2 
+	[]
+	{
+		print( 'old_id = ', trans_id_to, '\n' )
+		#trans_id_to = type_id super_id
+		print( 'new_id = ', trans_id_to, '\n' )
+	}
+
+def item2 
+	str msg
+
+	[ e2 '!' 'a' super_id super_id 'a']
+	{
+		lhs.msg = 'this is item2\n'
+	}
+
+
+def start 
+	[item1 ';\n']
+|	[item2 ';\n']
+	{
+		match lhs [Item2:item2 ';\n']
+		print( Item2.msg )
+	}
+

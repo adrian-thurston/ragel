@@ -1,0 +1,106 @@
+/*
+ *  Copyright 2001-2007 Adrian Thurston <thurston@cs.queensu.ca>
+ */
+
+/*  This file is part of Colm.
+ *
+ *  Colm is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ * 
+ *  Colm is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with Colm; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+ */
+
+#ifndef RLPARSE_H
+#define RLPARSE_H
+
+#include <iostream>
+#include "avltree.h"
+#include "parsedata.h"
+
+struct Parser
+{
+	%%{
+	parser Parser;
+
+	# Use a class for tokens.
+	token uses class Token;
+
+	# Atoms.
+	token TK_Word, TK_Literal, TK_SingleLit, TK_DoubleLit, TK_Number, TK_UInt,
+		TK_Hex, KW_Nil, KW_True, KW_False;
+
+	# General tokens.
+	token TK_DotDot, TK_ColonGt, TK_ColonGtGt, TK_LtColon,
+		TK_DoubleArrow, TK_StarStar, TK_NameSep, TK_DashDash, TK_DoubleEql,
+		TK_NotEql, TK_DoubleColon, TK_LessEql, TK_GrtrEql, TK_RightArrow,
+		TK_LitPat, TK_AmpAmp, TK_BarBar, TK_SqOpen, TK_SqOpenNeg, TK_SqClose,
+		TK_Dash, TK_ReChar;
+
+	# Defining things.
+	token KW_Rl, KW_Def, KW_Lex, KW_Ignore, KW_Token, KW_Commit, KW_Namespace,
+		KW_Literal, KW_ReduceFirst, KW_Map, KW_List, KW_Vector, KW_Global,
+		KW_Iter, KW_Reject, KW_Ptr, KW_Ref, KW_Deref;
+
+	# Language.
+	token KW_If, KW_While, KW_Else, KW_Elsif, KW_For, KW_Return, KW_Yield, KW_In,
+		KW_Break, KW_PrintXML, KW_Print, KW_Require;
+
+	# Patterns.
+	token KW_Match, KW_Construct, KW_Parse, KW_ParseStop, KW_New, KW_MakeToken,
+		KW_MakeTree, KW_TypeId;
+
+	token KW_Include, KW_Preeof;
+
+	}%%
+
+	%% write instance_data;
+
+	void init();
+	int parseLangEl( int type, const Token *token );
+
+	Parser( const char *fileName, const char *sectionName, const InputLoc &sectionLoc )
+		: sectionName(sectionName)
+	{
+		pd = new ParseData( fileName, sectionName, sectionLoc, std::cout );
+	}
+
+	int token( InputLoc &loc, int tokId, char *tokstart, int toklen );
+	void addRegularDef( const InputLoc &loc, Namespace *nspace, 
+		const String &name, JoinOrLm *joinOrLm, bool isInstance );
+	void addProduction( InputLoc &loc, const String &name, 
+		ProdElList *prodElList, bool commit, CodeBlock *redBlock );
+
+	/* Report an error encountered by the parser. */
+	ostream &parse_error( int tokId, Token &token );
+
+	ParseData *pd;
+
+	/* The name of the root section, this does not change during an include. */
+	const char *sectionName;
+
+	NameRef nameRef;
+	NameRefList nameRefList;
+
+	KlangElVect langElVect;
+
+	PatternItemList *patternItemList;
+	ReplItemList *replItemList;
+	RegionVect regionStack;
+	NamespaceVect namespaceStack;
+
+	String curDefineId;
+	ProdElList *curProdElList;
+};
+
+%% write token_defs;
+
+#endif

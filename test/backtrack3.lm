@@ -1,0 +1,27 @@
+
+# Token names.
+lex start
+{
+	token number /[0-9]+/
+	token id /[a-z]+/
+	token string /'"' [^"]* '"'/
+	ignore ws / [ \t\n]+ /
+}
+
+def prefix [id]
+
+def choice1
+	[number number]
+|	[number]
+
+def choice2 
+	[string id]
+|	[number number]
+|	[id number]
+|	[number]
+
+def start 
+	[prefix choice1 choice2 string id id]
+	{
+		match lhs "id 77 88 \"hello\" dude dude"
+	}

@@ -1,0 +1,123 @@
+#
+#   Copyright 2001-2007 Adrian Thurston <thurston@cs.queensu.ca>
+#
+
+#   This file is part of Colm.
+#
+#   Colm is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   Colm is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with Colm; if not, write to the Free Software
+#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+
+INCS += -I../common -I../aapl
+DEFS +=
+
+CFLAGS += -g -Wall -Wwrite-strings
+LDFLAGS +=
+
+# Frequently changed ones first.
+CC_SRCS = \
+	compile.cpp \
+	bytecode.cpp \
+	fsmrun.cpp \
+	pdarun.cpp \
+	input.cpp \
+	lmparse.cpp \
+	lmscan.cpp \
+	parsetree.cpp \
+	parsedata.cpp \
+	fsmstate.cpp \
+	fsmbase.cpp \
+	fsmattach.cpp \
+	fsmmin.cpp \
+	fsmgraph.cpp \
+	pdagraph.cpp \
+	pdabuild.cpp \
+	pdacodegen.cpp \
+	fsmcodegen.cpp \
+	redfsm.cpp \
+	fsmexec.cpp \
+	main.cpp \
+	list.cpp \
+	map.cpp \
+	string.cpp \
+	redbuild.cpp \
+	closure.cpp \
+	fsmap.cpp \
+	dotgen.cpp \
+	tree.cpp
+
+RUNTIME_SRC = fsmrun.cpp pdarun.cpp bytecode.cpp list.cpp \
+	map.cpp string.cpp input.cpp tree.cpp
+GEN_SRC = lmscan.cpp lmparse.h lmparse.cpp 
+
+RUNTIME = runtime.a
+
+LIBS = ../common/common.a
+
+#*************************************
+
+PREFIX = @prefix@
+
+BUILD_PARSERS = @BUILD_PARSERS@
+
+# Programs
+CXX = @CXX@
+
+# Get objects and dependencies from sources.
+OBJS = $(CC_SRCS:%.cpp=%.o)
+DEPS = $(CC_SRCS:%.cpp=.%.d)
+RUNTIME_OBJS = $(RUNTIME_SRC:%.cpp=%.o)
+
+# Rules.
+all: colm $(RUNTIME)
+
+colm: $(GEN_SRC) $(OBJS) $(LIBS)
+	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
+
+$(RUNTIME): $(RUNTIME_OBJS)
+	ar -cr $@ $(RUNTIME_OBJS)
+
+ifeq ($(BUILD_PARSERS),true)
+
+lmparse.h: lmparse.kh
+	kelbt -o $@ $<
+
+lmparse.cpp: lmparse.kl lmparse.kh
+	kelbt -o $@ $<
+
+lmscan.cpp: lmparse.h
+
+lmscan.cpp: lmscan.rl
+	ragel -G2 -o $@ $<
+
+endif
+
+%.o: %.cpp
+	@$(CXX) -M $(DEFS) $(INCS) $< > .$*.d
+	$(CXX) -c $(CFLAGS) $(DEFS) $(INCS) -o $@ $<
+
+distclean: clean
+	rm -f Makefile 
+
+ifeq ($(BUILD_PARSERS),true)
+EXTRA_CLEAN = $(GEN_SRC)
+endif
+
+clean:
+	rm -f tags .*.d *.o colm $(EXTRA_CLEAN) $(RUNTIME)
+
+install: all
+	install -d $(PREFIX)/bin
+	install -s colm $(PREFIX)/bin/colm
+
+-include $(DEPS)

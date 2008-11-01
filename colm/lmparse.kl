@@ -1,0 +1,2013 @@
+/*
+ *  Copyright 2001-2007 Adrian Thurston <thurston@cs.queensu.ca>
+ */
+
+/*  This file is part of Colm.
+ *
+ *  Colm is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ * 
+ *  Colm is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with Colm; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+ */
+
+#include <iostream>
+#include <errno.h>
+
+#include "config.h"
+#include "lmparse.h"
+#include "colm.h"
+
+using std::cout;
+using std::cerr;
+using std::endl;
+
+ParserDict parserDict;
+
+%%{
+
+parser Parser;
+
+include "lmparse.kh";
+
+start: root_item_list
+	final {
+		#ifdef COLM_LOG_COMPILE
+		cerr << "parsing complete" << endl;
+		#endif
+
+		pd->rootCodeBlock = new CodeBlock( $1->stmtList );
+	};
+
+nonterm root_item_list uses lang_stmt_list;
+
+root_item_list: root_item_list root_item
+	final {
+		$$->stmtList = $1->stmtList;
+
+		/* Maybe a statement. */
+		if ( $2->stmt != 0 )
+			$$->stmtList->append( $2->stmt );
+	};
+
+root_item_list: 
+	final {
+		$$->stmtList = new StmtList;
+	};
+
+nonterm root_item uses statement;
+
+root_item: literal_def commit final { $$->stmt = 0; };
+root_item: rl_def commit final { $$->stmt = 0; };
+root_item: token_def commit final { $$->stmt = 0; };
+root_item: cfl_def commit final { $$->stmt = 0; };
+root_item: region_def commit final { $$->stmt = 0; };
+root_item: namespace_def commit final { $$->stmt = 0; };
+root_item: function_def commit final { $$->stmt = 0; };
+root_item: generic_def commit final { $$->stmt = 0; };
+root_item: iter_def commit final { $$->stmt = 0; };
+root_item: global_def commit final { $$->stmt = $1->stmt; };
+root_item: statement commit final { $$->stmt = $1->stmt; };
+root_item: pre_eof commit final { $$->stmt = 0; };
+
+nonterm block_open
+{
+	ObjectDef *localFrame;
+};
+
+block_open: '{' 
+	final {
+		/* Init the object representing the local frame. */
+		$$->localFrame = new ObjectDef( ObjectDef::FrameType, 
+				"local", new ObjFieldMap(), new ObjMethodMap(), pd->nextObjectId++ );
+		pd->curLocalFrame = $$->localFrame;
+	};
+
+block_close: '}' 
+	final {
+		/* Pop the cur local frame, back to the root. */
+		pd->curLocalFrame = pd->rootLocalFrame;
+	};
+
+
+iter_def: 
+	KW_Iter TK_Word '(' opt_param_list ')' block_open lang_stmt_list block_close
+	final {
+		CodeBlock *codeBlock = new CodeBlock( $7->stmtList );
+		codeBlock->localFrame = $6->localFrame;
+		Function *newFunction = new Function( 0, $2->data, 
+				$4->paramList, codeBlock, pd->nextFuncId++, true );
+		pd->functionList.append( newFunction );
+	};
+
+function_def: 
+	type_ref TK_Word '(' opt_param_list ')' block_open lang_stmt_list block_close
+	final {
+		CodeBlock *codeBlock = new CodeBlock( $7->stmtList );
+		codeBlock->localFrame = $6->localFrame;
+		Function *newFunction = new Function( $1->typeRef, $2->data, 
+				$4->paramList, codeBlock, pd->nextFuncId++, false );
+		pd->functionList.append( newFunction );
+	};
+
+nonterm opt_param_list uses param_list;
+
+opt_param_list: param_list
+	final {
+		$$->paramList = $1->paramList;
+	};
+		
+opt_param_list: 
+	final {
+		$$->paramList = new ParameterList;
+	};
+
+nonterm param_list
+{
+	ParameterList *paramList;
+};
+
+param_list: param_list ',' param_var_def
+	final {
+		$$->paramList = $1->paramList;
+		$$->paramList->append( $3->objField );
+	};
+
+param_list: param_var_def
+	final {
+		/* Create the map and insert the first item. */
+		$$->paramList = new ParameterList;
+		$$->paramList->append( $1->objField );
+	};
+
+nonterm param_var_def uses var_def;
+
+param_var_def: var_def
+	final {
+		$$->objField = $1->objField;
+	};
+param_var_def: reference_type_ref TK_Word
+	final {
+		/* Return an object field object. The user of this nonterminal must
+		 * load it into the approrpriate map and do error checking. */
+		$$->objField = new ObjField( $2->loc, $1->typeRef, $2->data );
+	};
+
+nonterm reference_type_ref uses type_ref;
+
+reference_type_ref: KW_Ref region_qual TK_Word
+	final {
+		$$->typeRef = new TypeRef( $1->loc, $2->nspaceQual, $3->data );
+		$$->typeRef->isRef = true;
+	};
+
+generic_def: KW_Map TK_Word '[' type_ref type_ref ']'
+	final {
+		Namespace *nspace = namespaceStack.top();
+
+		KlangEl *langEl = getKlangEl( pd, nspace, $2->data, KlangEl::NonTerm );
+
+		/* Check that the element wasn't previously defined as something else. */
+		if ( langEl->type != KlangEl::Unknown && langEl->type != KlangEl::NonTerm ) {
+			error($1->loc) << "'" << curDefineId << 
+				"' already defined as something else" << endp;
+		}
+
+		GenericType *generic = new GenericType( $2->data, GEN_MAP,
+				pd->nextGenericId++, langEl, $5->typeRef );
+		generic->keyTypeArg = $4->typeRef;
+
+		/* Add one empty production. */
+		ProdElList *emptyList = new ProdElList;
+		addProduction( $1->loc, $2->data, emptyList, false, 0 );
+
+		nspace->genericList.append( generic );
+		langEl->generic = generic;
+	};
+
+generic_def: KW_List TK_Word '[' type_ref ']'
+	final {
+		/* Get the language element. */
+		Namespace *nspace = namespaceStack.top();
+		KlangEl *langEl = getKlangEl( pd, nspace, $2->data, KlangEl::NonTerm );
+
+		/* Check that the element wasn't previously defined as something else. */
+		if ( langEl->type != KlangEl::Unknown && langEl->type != KlangEl::NonTerm ) {
+			error($1->loc) << "'" << curDefineId << 
+				"' already defined as something else" << endp;
+		}
+
+		GenericType *generic = new GenericType( $2->data, GEN_LIST, 
+				pd->nextGenericId++, langEl, $4->typeRef );
+
+		/* Add one empty production. */
+		ProdElList *emptyList = new ProdElList;
+		addProduction( $1->loc, $2->data, emptyList, false, 0 );
+
+		nspace->genericList.append( generic );
+		langEl->generic = generic;
+	};
+
+generic_def: KW_Vector TK_Word '[' type_ref ']'
+	final {
+		GenericType *generic = new GenericType( $2->data, GEN_VECTOR,
+				pd->nextGenericId++, 0, $4->typeRef );
+
+		Namespace *nspace = namespaceStack.top();
+		nspace->genericList.append( generic );
+	};
+
+nonterm global_def uses statement;
+
+global_def: KW_Global var_def opt_def_init
+	final {
+		$$->stmt = 0;
+		ObjectDef *globalObj = pd->globalObjectDef;
+
+		if ( globalObj->objFieldMap->find( $2->objField->name ) != 0 )
+			error($2->objField->loc) << "object field renamed" << endp;
+
+		globalObj->objFieldMap->insert( $2->objField->name, $2->objField );
+
+		if ( $3->expr != 0 ) {
+			LangVarRef *varRef = new LangVarRef( $2->objField->loc, 
+					new QualItemVect, $2->objField->name );
+
+			$$->stmt = new LangStmt( $2->objField->loc, 
+					$3->assignType, varRef, $3->expr );
+		}
+	};
+
+cfl_def: KW_Def cfl_id obj_var_list properties_list cfl_prod_list
+	final {
+		/* Get the language element. */
+		KlangEl *langEl = getKlangEl( pd, namespaceStack.top(), 
+				curDefineId, KlangEl::NonTerm );
+
+		/* Check that the element wasn't previously defined as something else. */
+		if ( langEl->type != KlangEl::Unknown && langEl->type != KlangEl::NonTerm ) {
+			error($1->loc) << "'" << curDefineId << 
+				"' already defined as something else" << endp;
+		}
+
+		/* Make a new object definition. */
+		ObjectDef *objectDef = new ObjectDef( ObjectDef::UserType, curDefineId, 
+				pd->objFieldMap, new ObjMethodMap(), pd->nextObjectId++ ); 
+
+		langEl->objectDef = objectDef;
+	};
+
+cfl_id: TK_Word
+	final {
+		curDefineId = $1->data;
+	};
+
+cfl_prod_list: cfl_prod_list '|' define_prod;
+cfl_prod_list: define_prod;
+
+properties_list: properties_list property;
+properties_list: ;
+
+property: 
+	KW_ReduceFirst
+	final {
+		/* Get the language element. */
+		KlangEl *prodName = getKlangEl( pd, namespaceStack.top(), 
+				curDefineId, KlangEl::NonTerm );
+		prodName->reduceFirst = true;
+	};
+
+define_prod: '[' prod_el_list ']' opt_commit opt_reduce_code
+	final {
+		addProduction( $1->loc, curDefineId, curProdElList, $4->commit, $5->codeBlock ); 
+	};
+
+obj_var_list: obj_var_list var_def
+	final {
+		if ( pd->objFieldMap->find( $2->objField->name ) != 0 )
+			error() << "object field renamed" << endp;
+
+		pd->objFieldMap->insert( $2->objField->name, $2->objField );
+	};
+
+obj_var_list:
+	final {
+		pd->objFieldMap = new ObjFieldMap;
+	};
+
+
+nonterm type_ref
+{
+	TypeRef *typeRef;
+};
+
+type_ref: basic_type_ref
+	final {
+		$$->typeRef = $1->typeRef;
+	};
+
+nonterm basic_type_ref uses type_ref;
+
+basic_type_ref: region_qual TK_Word opt_repeat
+	final {
+		$$->typeRef = new TypeRef( $2->loc, $1->nspaceQual, $2->data );
+		$$->typeRef->isRepeat = $3->repeat;
+		$$->typeRef->isOpt = $3->opt;
+	};
+
+basic_type_ref: KW_Ptr region_qual TK_Word opt_repeat
+	final {
+		$$->typeRef = new TypeRef( $1->loc, $2->nspaceQual, $3->data );
+		$$->typeRef->isRepeat = $4->repeat;
+		$$->typeRef->isOpt = $4->opt;
+		$$->typeRef->isPtr = true;
+	};
+
+nonterm var_def
+{
+	InputLoc loc;
+	ObjField *objField;
+};
+
+var_def: type_ref TK_Word
+	final {
+		/* Return an object field object. The user of this nonterminal must
+		 * load it into the approrpriate map and do error checking. */
+		$$->objField = new ObjField( $2->loc, $1->typeRef, $2->data );
+	};
+
+region_def: 
+	region_head '{' root_item_list '}'
+	final {
+		/* Pop the top of the stack. */
+		regionStack.pop();
+	};
+
+region_head: 
+	KW_Lex TK_Word 
+	final {
+		/* Make the new token region. */
+		TokenRegion *tokenRegion = new TokenRegion( InputLoc(), $2->data,
+				pd->regionList.length(), regionStack.top() );
+		regionStack.top()->childRegions.append( tokenRegion );
+		pd->regionList.append( tokenRegion );
+		JoinOrLm *joinOrLm = new JoinOrLm( tokenRegion );
+		String scannerName( $2->data.length() + 2, "<%s>", $2->data.data );
+		addRegularDef( InputLoc(), namespaceStack.top(), scannerName, joinOrLm, true );
+		regionStack.push( tokenRegion );
+	};
+
+namespace_def: 
+	namespace_head '{' root_item_list '}'
+	final{
+		/* Pop the top of the stack. */
+		namespaceStack.pop();
+	};
+
+namespace_head: 
+	KW_Namespace TK_Word 
+	final {
+		/* Make the new namespace. */
+		Namespace *nspace = new Namespace( InputLoc(), $2->data,
+				pd->namespaceList.length(), namespaceStack.top() );
+		namespaceStack.top()->childNamespaces.append( nspace );
+		pd->namespaceList.append( nspace );
+		namespaceStack.push( nspace );
+	};
+
+pattern_list: pattern_list pattern;
+pattern_list: init_pattern_list pattern;
+
+init_pattern_list:
+	final {
+		patternItemList = new PatternItemList;
+	};
+
+pattern: '"' litpat_el_list '"';
+pattern: '[' pattern_el_list ']';
+
+litpat_el_list: litpat_el_list litpat_el;
+litpat_el_list: ;
+
+litpat_el: TK_LitPat
+	final {
+		PatternItem *patternItem = new PatternItem( $1->data,
+			PatternItem::InputText );
+		patternItemList->append( patternItem );
+	};
+
+litpat_el: '[' pattern_el_list ']';
+
+pattern_el_list: pattern_el_list pattern_el;
+pattern_el_list: ;
+
+pattern_el: opt_label pattern_el_type_or_lit
+	final {
+		/* Store the variable reference in the pattern itemm. */
+		$2->patternItem->varRef = $1->varRef;
+
+		if ( $1->varRef != 0 ) {
+			if ( pd->curLocalFrame->objFieldMap->find( $1->varRef->name ) != 0 ) {
+				error( $1->varRef->loc ) << "variable " << $1->varRef->name << 
+						" redeclared" << endp;
+			}
+
+			TypeRef *typeRef = new TypeRef( InputLoc(), $2->patternItem->factor );
+			ObjField *objField = new ObjField( InputLoc(), typeRef, $1->varRef->name );
+
+			/* Insert it into the field map. */
+			pd->curLocalFrame->objFieldMap->insert( $1->varRef->name, objField );
+		}
+	};
+
+pattern_el: '"' litpat_el_list '"';
+pattern_el: '?' TK_Word
+	final {
+		/* FIXME: Implement */
+		assert(false);
+	};
+
+nonterm pattern_el_type_or_lit
+{
+	PatternItem *patternItem;
+};
+
+pattern_el_type_or_lit: region_qual TK_Word opt_repeat
+	final {
+		PdaFactor *factor = new PdaFactor( $2->loc, false, $1->nspaceQual, 
+				$2->data, 0, $3->opt, $3->repeat );
+		$$->patternItem = new PatternItem( factor, PatternItem::FactorType );
+		patternItemList->append( $$->patternItem );
+	};
+
+pattern_el_type_or_lit: region_qual TK_Literal opt_repeat
+	final {
+		PdaLiteral *literal = new PdaLiteral( $2->loc, *$2 );
+		PdaFactor *factor = new PdaFactor( $2->loc, false, $1->nspaceQual, 
+				literal, 0, $3->opt, $3->repeat );
+		$$->patternItem = new PatternItem( factor, PatternItem::FactorType );
+		patternItemList->append( $$->patternItem );
+	};
+
+nonterm opt_label
+{
+	/* Variable reference. */
+	LangVarRef *varRef;
+};
+
+opt_label: TK_Word ':'
+	final {
+		$$->varRef = new LangVarRef( $1->loc, new QualItemVect, $1->data );
+	};
+opt_label: 
+	final {
+		$$->varRef = 0;
+	};
+
+repl_list: repl_list replacement;
+repl_list: init_repl_list replacement;
+
+init_repl_list: 
+	final {
+		replItemList = new ReplItemList;
+	};
+
+replacement: '"' litrepl_el_list '"';
+replacement: '[' repl_el_list ']';
+
+litrepl_el_list: litrepl_el_list litrepl_el;
+litrepl_el_list: ;
+
+litrepl_el: TK_LitPat
+	final {
+		ReplItem *replItem = new ReplItem( ReplItem::InputText, $1->data );
+		replItemList->append( replItem );
+	};
+
+litrepl_el: '[' repl_el_list ']';
+
+repl_el_list: repl_el_list repl_el;
+repl_el_list: ;
+
+repl_el: var_ref
+	final {
+		ReplItem *replItem = new ReplItem( ReplItem::VarRefType, $1->varRef );
+		replItemList->append( replItem );
+	};
+
+repl_el: region_qual TK_Literal
+	final {
+		PdaLiteral *literal = new PdaLiteral( $2->loc, *$2 );
+		PdaFactor *factor = new PdaFactor( $2->loc, false, $1->nspaceQual, 
+				literal, 0, false, false );
+		ReplItem *replItem = new ReplItem( ReplItem::FactorType, factor );
+		replItemList->append( replItem );
+	};
+
+repl_el: '"' litrepl_el_list '"';
+
+prod_el_list: 
+	prod_el_list prod_el 
+	final {
+		curProdElList->append( $2->factor );
+	};
+
+prod_el_list: 
+	final { curProdElList = new ProdElList; };
+
+nonterm prod_el
+{
+	PdaFactor *factor;
+};
+
+prod_el: 
+	opt_commit region_qual TK_Word opt_repeat
+	final {
+		$$->factor = new PdaFactor( $3->loc, $1->commit, 
+				$2->nspaceQual, $3->data, 0, $4->opt, $4->repeat );
+	};
+
+prod_el: 
+	opt_commit region_qual TK_Literal opt_repeat
+	final {
+		/* Create a new factor node going to a concat literal. */
+		PdaLiteral *literal = new PdaLiteral( $3->loc, *$3 );
+		$$->factor = new PdaFactor( $3->loc, $1->commit, $2->nspaceQual, 
+				literal, 0, $4->opt, $4->repeat );
+	};
+
+nonterm opt_repeat
+{
+	bool opt;
+	bool repeat;
+};
+
+opt_repeat: '?' final { $$->opt = true; $$->repeat = false; };
+opt_repeat: '*' final { $$->opt = false; $$->repeat = true; };
+opt_repeat:     final { $$->opt = false; $$->repeat = false; };
+
+nonterm region_qual
+{
+	NamespaceQual *nspaceQual;
+};
+
+region_qual: region_qual TK_Word TK_DoubleColon
+	final {
+		$$->nspaceQual = $1->nspaceQual;
+		$$->nspaceQual->qualNames.append( $2->data );
+	};
+
+region_qual: 
+	final {
+		$$->nspaceQual = new NamespaceQual( namespaceStack.top(), regionStack.top() );
+	};
+
+literal_def: KW_Literal literal_list;
+
+literal_list: literal_list ',' literal_item;
+literal_list: literal_item;
+
+literal_item: TK_Literal
+	final {
+		/* Create a name for the literal. */
+		String name( 32, "_literal_%.4x", pd->nextTokenId );
+
+		bool insideRegion = regionStack.top() != pd->rootRegion;
+		if ( !insideRegion ) {
+			/* Make a new token region just for the token. */
+			TokenRegion *tokenRegion = new TokenRegion( InputLoc(), $1->data,
+					pd->regionList.length(), regionStack.top() );
+			regionStack.top()->childRegions.append( tokenRegion );
+			pd->regionList.append( tokenRegion );
+			JoinOrLm *joinOrLm = new JoinOrLm( tokenRegion );
+			String scannerName( name.length() + 2, "<%s>", name.data );
+			addRegularDef( InputLoc(), namespaceStack.top(), scannerName, joinOrLm, true );
+			regionStack.push( tokenRegion );
+		}
+
+		bool unusedCI;
+		String interp;
+		prepareLitString( interp, unusedCI, $1->data, $1->loc );
+
+		/* Look for the production's associated region. */
+		Namespace *nspace = namespaceStack.top();
+		TokenRegion *region = regionStack.top();
+
+		LiteralDictEl *ldel = nspace->literalDict.find( interp );
+		if ( ldel != 0 )
+			error( $1->loc ) << "literal already defined in this namespace" << endp;
+		else {
+			/* Create a token for the literal. */
+			KlangEl *newLangEl = getKlangEl( pd, nspace, name, KlangEl::Term );
+			assert( newLangEl != 0 );
+			assert( newLangEl->type == KlangEl::Term );
+			newLangEl->lit = $1->data;
+			newLangEl->isLiteral = true;
+
+			Join *join = new Join( new Expression( new Term( new FactorWithAug(
+				new FactorWithRep( $1->loc, new FactorWithNeg( $1->loc, new Factor(
+				new Literal( $1->loc, $1->data, 
+					Literal::LitString ) ) ) ) ) ) ) );
+			
+			TokenDef *tokenDef = new TokenDef( join, newLangEl, $1->loc, 
+					pd->nextTokenId, nspace, region );
+			newLangEl->tokenDef = tokenDef;
+
+			region->tokenDefList.append( tokenDef );
+			ldel = nspace->literalDict.insert( interp, newLangEl );
+			pd->nextTokenId += 1;
+		}
+
+		if ( !insideRegion ) {
+			/* Leave the region just for this token. */
+			regionStack.pop();
+		}
+	};
+
+token_def: 
+	token_or_ignore token_def_name obj_var_list
+	'/' opt_rl_join '/' opt_translate
+	final {
+		bool ignore = $1->ignore;
+		String name = $2->name;
+		Join *join = $5->join;
+		CodeBlock *transBlock = $7->transBlock;
+
+		/* Check the region if this is for an ignore. */
+		if ( ignore && !pd->insideRegion )
+			error($1->loc) << "ignore tokens can only appear inside scanners" << endp;
+
+		/* Check the name if this is a token. */
+		if ( !ignore && name == 0 )
+			error($1->loc) << "tokens must have a name" << endp;
+
+		/* Give a default name to ignores. */ 
+		if ( name == 0 )
+			name.setAs( 32, "_ignore_%.4x", pd->nextTokenId );
+
+		/* Create the token. */
+		KlangEl *tokEl = getKlangEl( pd, namespaceStack.top(), name, KlangEl::Term );
+		if ( tokEl->type != KlangEl::Unknown && tokEl->type != KlangEl::Term )
+			error($1->loc) << "'" << name << "' already defined as something else" << endp;
+
+		tokEl->type = KlangEl::Term;
+		tokEl->ignore = ignore;
+		tokEl->transBlock = transBlock;
+
+		Namespace *nspace = namespaceStack.top();
+		TokenRegion *region = regionStack.top();
+
+		TokenDef *tokenDef = new TokenDef( join, tokEl, $1->loc, 
+				pd->nextTokenId++, nspace, region );
+		region->tokenDefList.append( tokenDef );
+		tokEl->tokenDef = tokenDef;
+
+		/* Create the object def for the token. */
+		ObjectDef *objectDef = new ObjectDef( ObjectDef::UserType, name, 
+				pd->objFieldMap, new ObjMethodMap(), pd->nextObjectId++ ); 
+
+		tokEl->objectDef = objectDef;
+
+		/* This is created and pushed in the name. */
+		if ( !pd->insideRegion ) {
+			/* Leave the region that we made just for this token. */
+			regionStack.pop();
+		}
+
+		if ( join != 0 ) {
+			/* Create a regular language definition so the token can be used to
+			 * make other tokens */
+			JoinOrLm *joinOrLm = new JoinOrLm( join );
+			addRegularDef( $1->loc, namespaceStack.top(), name, joinOrLm, false );
+		}
+	};
+
+nonterm token_or_ignore
+{
+	InputLoc loc;
+	bool ignore;
+};
+
+token_or_ignore: KW_Token
+	final { $$->loc = $1->loc; $$->ignore = false; };
+	
+token_or_ignore: KW_Ignore
+	final { $$->loc = $1->loc; $$->ignore = true; };
+
+nonterm class token_def_name
+{
+	String name;
+};
+
+token_def_name:
+	opt_name
+	final {
+		String name = $1->name;
+
+		$$->name = name;
+		pd->insideRegion = regionStack.top() != pd->rootRegion;
+		pd->tokenDefName = name;
+
+		if ( !pd->insideRegion ) {
+			/* If not inside a region, make one for the token. */
+			TokenRegion *tokenRegion = new TokenRegion( InputLoc(), name,
+					pd->regionList.length(), regionStack.top() );
+			regionStack.top()->childRegions.append( tokenRegion );
+			pd->regionList.append( tokenRegion );
+			JoinOrLm *joinOrLm = new JoinOrLm( tokenRegion );
+			String scannerName( name.length() + 2, "<%s>", name.data );
+			addRegularDef( InputLoc(), namespaceStack.top(), scannerName, joinOrLm, true );
+			regionStack.push( tokenRegion );
+		}
+
+		/* Reset the lable id counter. */
+		pd->nextLabelId = 0;
+	};
+
+nonterm class opt_name
+{
+	String name;
+};
+
+opt_name: TK_Word final { $$->name = $1->data; };
+opt_name: ;
+
+nonterm opt_translate
+{
+	CodeBlock *transBlock;
+};
+
+opt_translate: 
+	block_open lang_stmt_list block_close
+	final { 
+		$$->transBlock = new CodeBlock( $2->stmtList );
+		$$->transBlock->localFrame = $1->localFrame;
+	};
+
+opt_translate: 
+	final {
+		$$->transBlock = 0;
+	};
+
+pre_eof: 
+	KW_Preeof block_open lang_stmt_list block_close
+	final {
+		bool insideRegion = regionStack.top() != pd->rootRegion;
+		if ( !insideRegion )
+			error($1->loc) << "preeof must be used inside an existing region" << endl;
+
+		CodeBlock *codeBlock = new CodeBlock( $3->stmtList );
+		codeBlock->localFrame = $2->localFrame;
+
+		TokenRegion *region = regionStack.top();
+		region->preEofBlock = codeBlock;
+	};
+
+rl_def:
+	KW_Rl machine_name '/' rl_join '/'
+	final {
+		/* Generic creation of machine for instantiation and assignment. */
+		JoinOrLm *joinOrLm = new JoinOrLm( $4->join );
+		addRegularDef( $2->loc, namespaceStack.top(), $2->data, joinOrLm, false );
+	};
+
+type class token_data
+{
+	InputLoc loc;
+	String data;
+};
+
+nonterm machine_name uses token_data;
+
+machine_name: 
+	TK_Word
+	final {
+		/* Make/get the priority key. The name may have already been referenced
+		 * and therefore exist. */
+		PriorDictEl *priorDictEl;
+		if ( pd->priorDict.insert( $1->data, pd->nextPriorKey, &priorDictEl ) )
+			pd->nextPriorKey += 1;
+		pd->curDefPriorKey = priorDictEl->value;
+
+		/* Make/get the local error key. */
+		LocalErrDictEl *localErrDictEl;
+		if ( pd->localErrDict.insert( $1->data, pd->nextLocalErrKey, &localErrDictEl ) )
+			pd->nextLocalErrKey += 1;
+		pd->curDefLocalErrKey = localErrDictEl->value;
+
+		$$->loc = $1->loc;
+		$$->data = $1->data;
+	};
+
+#
+# Reduce statements
+#
+
+nonterm opt_reduce_code
+{
+	CodeBlock *codeBlock;
+};
+
+opt_reduce_code: 
+	final { $$->codeBlock = 0; };
+
+opt_reduce_code: 
+	start_reduce lang_stmt_list block_close
+	final { 
+		$$->codeBlock = new CodeBlock( $2->stmtList );
+		$$->codeBlock->localFrame = $1->localFrame;
+	};
+
+nonterm start_reduce uses block_open;
+
+start_reduce: 
+	block_open
+	final {
+		$$->localFrame = $1->localFrame;
+
+		/* Get the language element. */
+		KlangEl *prodName = getKlangEl( pd, namespaceStack.top(), 
+			curDefineId, KlangEl::NonTerm );
+
+		/* References to the reduce item. */
+		pd->addProdRedObjectVar( pd->curLocalFrame, prodName );
+		pd->addProdRHSVars( pd->curLocalFrame, curProdElList );
+	};
+
+nonterm lang_stmt_list
+{
+	StmtList *stmtList;
+};
+
+lang_stmt_list: rec_stmt_list opt_require_stmt
+	final {
+		$$->stmtList = $1->stmtList;
+		if ( $2->stmt != 0 )
+			$$->stmtList->append( $2->stmt );
+	};
+
+nonterm rec_stmt_list uses lang_stmt_list;
+
+rec_stmt_list: rec_stmt_list statement
+	final {
+		$$->stmtList = $1->stmtList;
+
+		/* Maybe a statement was generated. */
+		if ( $2->stmt != 0 )
+			$$->stmtList->append( $2->stmt );
+	};
+
+rec_stmt_list:
+	final {
+		$$->stmtList = new StmtList;
+	};
+
+nonterm opt_def_init
+{
+	LangExpr *expr;
+	LangStmt::Type assignType;
+};
+
+opt_def_init: '=' code_expr
+	final {
+		$$->expr = $2->expr;
+		$$->assignType = LangStmt::AssignType;
+	};
+opt_def_init: 
+	final {
+		$$->expr = 0;
+	};
+
+nonterm statement
+{
+	LangStmt *stmt;
+};
+
+statement: var_def opt_def_init 
+	final {
+		/* By default no statement here. Maybe will add an initialization. */
+		$$->stmt = 0;
+
+		/* Check for redeclaration. */
+		if ( pd->curLocalFrame->objFieldMap->find( $1->objField->name ) != 0 ) {
+			error( $1->objField->loc ) << "variable " << $1->objField->name <<
+					" redeclared" << endp;
+		}
+
+		/* Insert it into the field map. */
+		pd->curLocalFrame->objFieldMap->insert( $1->objField->name, $1->objField );
+
+		if ( $2->expr != 0 ) {
+			LangVarRef *varRef = new LangVarRef( $1->objField->loc, 
+					new QualItemVect, $1->objField->name );
+
+			$$->stmt = new LangStmt( $1->objField->loc, 
+					$2->assignType, varRef, $2->expr );
+		}
+	};
+statement: var_ref '=' code_expr
+	final {
+		$$->stmt = new LangStmt( $2->loc, LangStmt::AssignType, $1->varRef, $3->expr );
+	};
+statement: KW_Print '(' code_expr_list ')'
+	final {
+		$$->stmt = new LangStmt( $1->loc, LangStmt::PrintType, $3->exprVect );
+	};
+statement: KW_PrintXML '(' code_expr_list ')'
+	final {
+		$$->stmt = new LangStmt( $1->loc, LangStmt::PrintXMLType, $3->exprVect );
+	};
+statement: code_expr
+	final {
+		$$->stmt = new LangStmt( InputLoc(), LangStmt::ExprType, $1->expr );
+	};
+statement: KW_If code_expr block_or_single elsif_list
+	final {
+		$$->stmt = new LangStmt( LangStmt::IfType, $2->expr, $3->stmtList, $4->stmtList );
+	};
+statement: KW_Reject
+	final {
+		$$->stmt = new LangStmt( $1->loc, LangStmt::RejectType );
+	};
+statement: KW_While code_expr block_or_single
+	final {
+		$$->stmt = new LangStmt( LangStmt::WhileType, $2->expr, $3->stmtList );
+	};
+statement: KW_For TK_Word ':' type_ref KW_In iter_call block_or_single
+	final {
+		$$->stmt = new LangStmt( $1->loc, LangStmt::ForIterType, 
+			$2->data, $4->typeRef, $6->langTerm, $7->stmtList );
+	};
+statement: KW_Return code_expr
+	final {
+		$$->stmt = new LangStmt( $1->loc, LangStmt::ReturnType, $2->expr );
+	};
+statement: KW_Break
+	final {
+		$$->stmt = new LangStmt( LangStmt::BreakType );
+	};
+statement: KW_Yield var_ref
+	final {
+		$$->stmt = new LangStmt( LangStmt::YieldType, $2->varRef );
+	};
+
+nonterm opt_require_stmt uses statement;
+
+opt_require_stmt: 
+	require_pattern lang_stmt_list
+	final {
+		$$->stmt = new LangStmt( LangStmt::IfType, $1->expr, $2->stmtList, 0 );
+	};
+opt_require_stmt:
+	final {
+		$$->stmt = 0;
+	};
+
+nonterm require_pattern uses code_expr;
+
+require_pattern: 
+	KW_Require var_ref pattern_list 
+	final {
+		Namespace *nspace = namespaceStack.top();
+		TokenRegion *region = regionStack.top();
+		Pattern *pattern = new Pattern( $1->loc, nspace, region, 
+				patternItemList, pd->nextPatReplId++ );
+		pd->patternList.append( pattern );
+
+		$$->expr = new LangExpr(
+				new LangTerm( LangTerm::MatchType, $2->varRef, pattern ) );
+	};
+
+nonterm block_or_single uses lang_stmt_list;
+
+block_or_single: '{' lang_stmt_list '}'
+	final {
+		$$->stmtList = $2->stmtList;
+	};
+block_or_single: statement
+	final {
+		$$->stmtList = new StmtList;
+		$$->stmtList->append( $1->stmt );
+	};
+
+nonterm iter_call
+{
+	LangTerm *langTerm;
+};
+
+iter_call: var_ref '(' opt_code_expr_list ')'
+	final {
+		$$->langTerm = new LangTerm( $1->varRef, $3->exprVect );
+	};
+iter_call: TK_Word
+	final {
+		$$->langTerm = new LangTerm( LangTerm::VarRefType,
+			new LangVarRef( $1->loc, new QualItemVect, $1->data ) );
+	};
+
+nonterm elsif_list
+{
+	StmtList *stmtList;
+};
+
+elsif_list: 
+	elsif_clause elsif_list
+	final {
+		/* Put any of the followng elseif part, an else, or null into the elsePart. */
+		$1->stmt->elsePart = $2->stmtList;
+
+		/* Make a statement list with jsut the elseif clause in it. It will go into
+		 * some else part. */
+		$$->stmtList = new StmtList;
+		$$->stmtList->append( $1->stmt );
+	};
+elsif_list:
+	optional_else
+	final {
+		$$->stmtList = $1->stmtList;
+	};
+
+nonterm elsif_clause
+{
+	LangStmt *stmt;
+};
+
+elsif_clause: 
+	KW_Elsif code_expr block_or_single
+	final {
+		$$->stmt = new LangStmt( LangStmt::IfType, $2->expr, $3->stmtList, 0 );
+	};
+
+nonterm optional_else
+{
+	StmtList *stmtList;
+};
+
+optional_else: 
+	KW_Else block_or_single
+	final {
+		$$->stmtList = $2->stmtList;
+	};
+
+optional_else: 
+	final {
+		$$->stmtList = 0;
+	};
+
+nonterm code_expr_list
+{
+	ExprVect *exprVect;
+};
+
+code_expr_list: code_expr_list ',' code_expr
+	final {
+		$$->exprVect = $1->exprVect;
+		$$->exprVect->append( $3->expr );
+	};
+code_expr_list: code_expr
+	final {
+		$$->exprVect = new ExprVect;
+		$$->exprVect->append( $1->expr );
+	};
+
+nonterm opt_code_expr_list uses code_expr_list;
+
+opt_code_expr_list: code_expr_list
+	final {
+		$$->exprVect = $1->exprVect;
+	};
+
+opt_code_expr_list: 
+	final {
+		$$->exprVect = 0;
+	};
+
+#
+# Type list
+#
+
+nonterm type_list
+{
+	TypeRefVect *typeRefVect;
+};
+
+type_list: type_list ',' type_ref
+	final {
+		$$->typeRefVect = $1->typeRefVect;
+		$$->typeRefVect->append( $3->typeRef );
+	};
+type_list: type_ref
+	final {
+		$$->typeRefVect = new TypeRefVect;
+		$$->typeRefVect->append( $1->typeRef );
+	};
+
+nonterm opt_type_list uses type_list;
+
+opt_type_list: type_list
+	final {
+		$$->typeRefVect = $1->typeRefVect;
+	};
+
+opt_type_list: 
+	final {
+		$$->typeRefVect = 0;
+	};
+
+
+#
+# Variable reference
+#
+
+nonterm var_ref
+{
+	LangVarRef *varRef;
+};
+
+var_ref: qual TK_Word
+	final {
+		$$->varRef = new LangVarRef( $2->loc, $1->qual, $2->data );
+	};
+
+nonterm qual
+{
+	QualItemVect *qual;
+};
+
+qual: qual TK_Word '.'
+	final {
+		$$->qual = $1->qual;
+		$$->qual->append( QualItem( $2->loc, $2->data, QualItem::Dot ) );
+	};
+qual: qual TK_Word TK_RightArrow
+	final {
+		$$->qual = $1->qual;
+		$$->qual->append( QualItem( $2->loc, $2->data, QualItem::Arrow ) );
+	};
+qual: 
+	final {
+		$$->qual = new QualItemVect;
+	};
+
+#
+# Code expression
+#
+
+nonterm code_expr
+{
+	LangExpr *expr;
+};
+
+code_expr: code_expr TK_AmpAmp code_relational
+	final {
+		$$->expr = new LangExpr( $2->loc, $1->expr, OP_LogicalAnd, $3->expr );
+	};
+
+code_expr: code_expr TK_BarBar code_relational
+	final {
+		$$->expr = new LangExpr( $2->loc, $1->expr, OP_LogicalOr, $3->expr );
+	};
+
+code_expr: code_relational
+	final {
+		$$->expr = $1->expr;
+	};
+
+nonterm code_relational uses code_expr;
+
+code_relational: code_relational TK_DoubleEql code_additive
+	final {
+		$$->expr = new LangExpr( $2->loc, $1->expr, OP_DoubleEql, $3->expr );
+	};
+
+code_relational: code_relational TK_NotEql code_additive
+	final {
+		$$->expr = new LangExpr( $2->loc, $1->expr, OP_NotEql, $3->expr );
+	};
+
+code_relational: code_relational '<' code_additive
+	final {
+		$$->expr = new LangExpr( $2->loc, $1->expr, '<', $3->expr );
+	};
+
+code_relational: code_relational '>' code_additive
+	final {
+		$$->expr = new LangExpr( $2->loc, $1->expr, '>', $3->expr );
+	};
+
+code_relational: code_relational TK_LessEql code_additive
+	final {
+		$$->expr = new LangExpr( $2->loc, $1->expr, OP_LessEql, $3->expr );
+	};
+
+code_relational: code_relational TK_GrtrEql code_additive
+	final {
+		$$->expr = new LangExpr( $2->loc, $1->expr, OP_GrtrEql, $3->expr );
+	};
+
+
+code_relational: code_additive
+	final {
+		$$->expr = $1->expr;
+	};
+
+nonterm code_additive uses code_expr;
+
+code_additive: code_additive '+' code_multiplicitive
+	final {
+		$$->expr = new LangExpr( $2->loc, $1->expr, '+', $3->expr );
+	};
+
+code_additive: code_additive '-' code_multiplicitive
+	final {
+		$$->expr = new LangExpr( $2->loc, $1->expr, '-', $3->expr );
+	};
+
+code_additive: code_multiplicitive
+	final {
+		$$->expr = $1->expr;
+	};
+
+nonterm code_multiplicitive uses code_expr;
+
+code_multiplicitive: code_multiplicitive '*' code_unary
+	final {
+		$$->expr = new LangExpr( $2->loc, $1->expr, '*', $3->expr );
+	};
+
+code_multiplicitive: code_unary
+	final {
+		$$->expr = $1->expr;
+	};
+
+nonterm code_unary uses code_expr;
+code_unary: '!' code_factor
+	final {
+		$$->expr = new LangExpr( $1->loc, '!', $2->expr );
+	};
+code_unary: code_factor
+	final {
+		$$->expr = $1->expr;
+	};
+
+
+
+nonterm code_factor uses code_expr;
+
+code_factor: TK_Number
+	final {
+		$$->expr = new LangExpr( new LangTerm( LangTerm::NumberType, $1->data ) );
+	};
+code_factor: TK_Literal
+	final {
+		$$->expr = new LangExpr( new LangTerm( LangTerm::StringType, $1->data ) );
+	};
+code_factor: var_ref '(' opt_code_expr_list ')'
+	final {
+		$$->expr = new LangExpr( new LangTerm( $1->varRef, $3->exprVect ) );
+	};
+code_factor: var_ref
+	final {
+		$$->expr = new LangExpr( new LangTerm( LangTerm::VarRefType, $1->varRef ) );
+	};
+code_factor: KW_Match var_ref pattern_list
+	final {
+		Namespace *nspace = namespaceStack.top();
+		TokenRegion *region = regionStack.top();
+		Pattern *pattern = new Pattern( $1->loc, nspace, region, 
+				patternItemList, pd->nextPatReplId++ );
+		pd->patternList.append( pattern );
+
+		$$->expr = new LangExpr( new LangTerm( LangTerm::MatchType, $2->varRef, pattern ) );
+	};
+code_factor: KW_New code_factor
+	final {
+		$$->expr = new LangExpr( new LangTerm( LangTerm::NewType, $2->expr ) );
+	};
+code_factor: 
+	KW_Construct type_ref opt_field_init repl_list
+	final {
+		Namespace *nspace = namespaceStack.top();
+		TokenRegion *region = regionStack.top();
+		Replacement *replacement = new Replacement( nspace, region, replItemList, 
+				pd->nextPatReplId++ );
+		pd->replList.append( replacement );
+		$$->expr = new LangExpr( new LangTerm( $1->loc, LangTerm::ConstructType,
+				$2->typeRef, $3->fieldInitVect, replacement ) );
+	};
+code_factor: KW_Parse type_ref '(' opt_code_expr_list ')'
+	final {
+		$$->expr = new LangExpr( new LangTerm( $1->loc, 
+				LangTerm::ParseType, $2->typeRef ) );
+		$$->expr->term->args = $4->exprVect;
+	};
+code_factor: KW_ParseStop type_ref '(' opt_code_expr_list ')'
+	final {
+		$$->expr = new LangExpr( new LangTerm( $1->loc, 
+				LangTerm::ParseStopType, $2->typeRef ) );
+		$$->expr->term->args = $4->exprVect;
+	};
+code_factor: KW_TypeId type_ref
+	final {
+		$$->expr = new LangExpr( new LangTerm( $1->loc,
+				LangTerm::TypeIdType, $2->typeRef ) );
+	};
+code_factor: type_ref KW_In var_ref
+	final {
+		$$->expr = new LangExpr( new LangTerm( $2->loc,
+				LangTerm::SearchType, $1->typeRef, $3->varRef ) );
+	};
+code_factor: KW_Nil
+	final {
+		$$->expr = new LangExpr( new LangTerm( $1->loc, 
+				LangTerm::NilType ) );
+	};
+code_factor: KW_True
+	final {
+		$$->expr = new LangExpr( new LangTerm( $1->loc, 
+				LangTerm::TrueType ) );
+	};
+code_factor: KW_False
+	final {
+		$$->expr = new LangExpr( new LangTerm( $1->loc, 
+				LangTerm::FalseType ) );
+	};
+code_factor: '(' code_expr ')'
+	final {
+		$$->expr = $2->expr;
+	};
+code_factor: KW_MakeTree '(' opt_code_expr_list ')'
+	final {
+		$$->expr = new LangExpr( new LangTerm( $1->loc, 
+				LangTerm::MakeTreeType, $3->exprVect ) );
+	};
+code_factor: KW_MakeToken '(' opt_code_expr_list ')'
+	final {
+		$$->expr = new LangExpr( new LangTerm( $1->loc, 
+				LangTerm::MakeTokenType, $3->exprVect ) );
+	};
+code_factor: KW_Deref code_expr
+	final {
+		$$->expr = new LangExpr( $1->loc, OP_Deref, $2->expr );
+	};
+
+nonterm opt_field_init uses field_init_list;
+
+opt_field_init: '(' opt_field_init_list ')'
+	final {
+		$$->fieldInitVect = $2->fieldInitVect;
+	};
+opt_field_init: 
+	final {
+		$$->fieldInitVect = 0;
+	};
+
+nonterm opt_field_init_list uses field_init_list;
+
+opt_field_init_list: field_init_list 
+	final {
+		$$->fieldInitVect = $1->fieldInitVect;
+	};
+opt_field_init_list: 
+	final { 
+		$$->fieldInitVect = 0;
+	};
+
+nonterm field_init_list
+{
+	FieldInitVect *fieldInitVect;
+};
+
+field_init_list: field_init_list ',' field_init
+	final {
+		$$->fieldInitVect = $1->fieldInitVect;
+		$$->fieldInitVect->append( $3->fieldInit );
+	};
+field_init_list: field_init
+	final {
+		$$->fieldInitVect = new FieldInitVect;
+		$$->fieldInitVect->append( $1->fieldInit );
+	};
+
+nonterm field_init
+{
+	FieldInit *fieldInit;
+};
+
+field_init: TK_Word ':' code_expr
+	final {
+		$$->fieldInit = new FieldInit( $1->loc, $1->data, $3->expr );
+	};
+
+#
+# Regular Expressions
+#
+
+nonterm opt_rl_join uses rl_join;
+
+opt_rl_join: rl_join
+	final {
+		$$->join = $1->join;
+	};
+
+opt_rl_join:
+	final {
+		$$->join = 0;
+	};
+
+nonterm rl_join
+{
+	Join *join;
+};
+
+rl_join: 
+	rl_join ',' rl_expr
+	final {
+		/* Append the expression to the list and return it. */
+		$1->join->exprList.append( $3->expression );
+		$$->join = $1->join;
+	};
+rl_join: 
+	rl_expr 
+	final {
+		$$->join = new Join( $1->expression );
+	};
+
+nonterm rl_expr
+{
+	Expression *expression;
+};
+
+rl_expr: 
+	rl_expr '|' rl_term_short final {
+		$$->expression = new Expression( $1->expression, 
+				$3->term, Expression::OrType );
+	};
+rl_expr: 
+	rl_expr '&' rl_term_short final {
+		$$->expression = new Expression( $1->expression, 
+				$3->term, Expression::IntersectType );
+	};
+# This priority specification overrides the innermost parsing strategy which
+# results ordered choice interpretation of the grammar.
+rl_expr: 
+	rl_expr '-' rl_term_short final {
+		$$->expression = new Expression( $1->expression, 
+				$3->term, Expression::SubtractType );
+	};
+rl_expr: 
+	rl_expr TK_DashDash rl_term_short final {
+		$$->expression = new Expression( $1->expression, 
+				$3->term, Expression::StrongSubtractType );
+	};
+rl_expr: 
+	rl_term_short final {
+		$$->expression = new Expression( $1->term );
+	};
+
+nonterm rl_term_short
+{
+	Term *term;
+};
+
+shortest rl_term_short;
+
+rl_term_short: rl_term 
+	final { $$->term = $1->term; };
+
+nonterm rl_term
+{
+	Term *term;
+};
+
+rl_term:
+	rl_term factor_with_label final {
+		$$->term = new Term( $1->term, $2->factorWithAug );
+	};
+rl_term:
+	rl_term '.' factor_with_label final {
+		$$->term = new Term( $1->term, $3->factorWithAug );
+	};
+rl_term:
+	rl_term TK_ColonGt factor_with_label final {
+		$$->term = new Term( $1->term, $3->factorWithAug, Term::RightStartType );
+	};
+rl_term:
+	rl_term TK_ColonGtGt factor_with_label final {
+		$$->term = new Term( $1->term, $3->factorWithAug, Term::RightFinishType );
+	};
+rl_term:
+	rl_term TK_LtColon factor_with_label final {
+		$$->term = new Term( $1->term, 
+				$3->factorWithAug, Term::LeftType );
+	};
+rl_term:
+	factor_with_label final {
+		$$->term = new Term( $1->factorWithAug );
+	};
+
+nonterm factor_with_label
+{
+	FactorWithAug *factorWithAug;
+};
+
+factor_with_label: 
+	factor_with_ep final {
+		$$->factorWithAug = $1->factorWithAug;
+	};
+
+factor_with_label: 
+	TK_Word ':' factor_with_label final {
+		$$->factorWithAug = $3->factorWithAug;
+
+		if ( pd->objFieldMap->find( $1->data ) != 0 )
+			error($1->loc) << "label name \"" << $1->data << "\" already in use" << endp;
+
+		/* Create the object field. */
+		NamespaceQual *qual = new NamespaceQual( namespaceStack.top(), regionStack.top() );
+		TypeRef *typeRef = new TypeRef( $1->loc, qual, "str" );
+		ObjField *objField = new ObjField( $1->loc, typeRef, $1->data );
+
+		/* Insert it into the map. */
+		pd->objFieldMap->insert( $1->data, objField );
+
+		/* Create the enter and leaving actions that will mark the substring. */
+		Action *enter = new Action( MarkEnter, objField );
+		Action *leave = new Action( MarkLeave, objField );
+		pd->actionList.append( enter );
+		pd->actionList.append( leave );
+		
+		/* Add entering and leaving actions. */
+		$$->factorWithAug->actions.append( ParserAction( $1->loc, at_start, 0, enter ) );
+		$$->factorWithAug->actions.append( ParserAction( $1->loc, at_leave, 0, leave ) );
+	};
+
+nonterm factor_with_ep
+{
+	FactorWithAug *factorWithAug;
+};
+
+factor_with_ep: 
+	factor_with_aug final {
+		$$->factorWithAug = $1->factorWithAug;
+	};
+
+nonterm factor_with_aug
+{
+	FactorWithAug *factorWithAug;
+};
+
+factor_with_aug:
+	factor_with_rep final {
+		$$->factorWithAug = new FactorWithAug( $1->factorWithRep );
+	};
+
+
+# The fourth level of precedence. These are the trailing unary operators that
+# allow for repetition.
+
+nonterm factor_with_rep
+{
+	FactorWithRep *factorWithRep;
+};
+
+factor_with_rep:
+	factor_with_rep '*' final {
+		$$->factorWithRep = new FactorWithRep( $2->loc, $1->factorWithRep, 
+				0, 0, FactorWithRep::StarType );
+	};
+factor_with_rep:
+	factor_with_rep TK_StarStar final {
+		$$->factorWithRep = new FactorWithRep( $2->loc, $1->factorWithRep, 
+				0, 0, FactorWithRep::StarStarType );
+	};
+factor_with_rep:
+	factor_with_rep '?' final {
+		$$->factorWithRep = new FactorWithRep( $2->loc, $1->factorWithRep, 
+				0, 0, FactorWithRep::OptionalType );
+	};
+factor_with_rep:
+	factor_with_rep '+' final {
+		$$->factorWithRep = new FactorWithRep( $2->loc, $1->factorWithRep, 
+				0, 0, FactorWithRep::PlusType );
+	};
+factor_with_rep:
+	factor_with_rep '{' factor_rep_num '}' final {
+		$$->factorWithRep = new FactorWithRep( $2->loc, $1->factorWithRep, 
+				$3->rep, 0, FactorWithRep::ExactType );
+	};
+factor_with_rep:
+	factor_with_rep '{' ',' factor_rep_num '}' final {
+		$$->factorWithRep = new FactorWithRep( $2->loc, $1->factorWithRep, 
+				0, $4->rep, FactorWithRep::MaxType );
+	};
+factor_with_rep:
+	factor_with_rep '{' factor_rep_num ',' '}' final {
+		$$->factorWithRep = new FactorWithRep( $2->loc, $1->factorWithRep,
+				$3->rep, 0, FactorWithRep::MinType );
+	};
+factor_with_rep:
+	factor_with_rep '{' factor_rep_num ',' factor_rep_num '}' final {
+		$$->factorWithRep = new FactorWithRep( $2->loc, $1->factorWithRep, 
+				$3->rep, $5->rep, FactorWithRep::RangeType );
+	};
+factor_with_rep:
+	factor_with_neg final {
+		$$->factorWithRep = new FactorWithRep( 
+				$1->factorWithNeg->loc, $1->factorWithNeg );
+	};
+
+nonterm factor_rep_num
+{
+	int rep;
+};
+
+factor_rep_num:
+	TK_UInt final {
+		// Convert the priority number to a long. Check for overflow.
+		errno = 0;
+		int rep = strtol( $1->data, 0, 10 );
+		if ( errno == ERANGE && rep == LONG_MAX ) {
+			// Repetition too large. Recover by returing repetition 1. */
+			error($1->loc) << "repetition number " << $1->data << " overflows" << endl;
+			$$->rep = 1;
+		}
+		else {
+			// Cannot be negative, so no overflow.
+			$$->rep = rep;
+ 		}
+	};
+
+
+#
+# The fifth level up in precedence. Negation.
+#
+
+nonterm factor_with_neg
+{
+	FactorWithNeg *factorWithNeg;
+};
+
+factor_with_neg:
+	'!' factor_with_neg final {
+		$$->factorWithNeg = new FactorWithNeg( $1->loc,
+				$2->factorWithNeg, FactorWithNeg::NegateType );
+	};
+factor_with_neg:
+	'^' factor_with_neg final {
+		$$->factorWithNeg = new FactorWithNeg( $1->loc,
+				$2->factorWithNeg, FactorWithNeg::CharNegateType );
+	};
+factor_with_neg:
+	rl_factor final {
+		$$->factorWithNeg = new FactorWithNeg( $1->factor->loc, $1->factor );
+	};
+
+nonterm rl_factor
+{
+	Factor *factor;
+};
+
+rl_factor: 
+	TK_Literal final {
+		/* Create a new factor node going to a concat literal. */
+		$$->factor = new Factor( new Literal( $1->loc, $1->data, Literal::LitString ) );
+	};
+rl_factor: 
+	alphabet_num final {
+		/* Create a new factor node going to a literal number. */
+		$$->factor = new Factor( new Literal( $1->loc, 
+				$1->data, Literal::Number ) );
+	};
+rl_factor:
+	TK_Word final {
+		/* Find the named graph. */
+		Namespace *nspace = namespaceStack.top();
+		GraphDictEl *gdNode = nspace->graphDict.find( $1->data );
+		if ( gdNode == 0 ) {
+			/* Recover by returning null as the factor node. */
+			error($1->loc) << "graph lookup of \"" << $1->data << "\" failed" << endl;
+			$$->factor = 0;
+		}
+		else if ( gdNode->isInstance ) {
+			/* Recover by retuning null as the factor node. */
+			error($1->loc) << "references to graph instantiations not allowed "
+					"in expressions" << endl;
+			$$->factor = 0;
+		}
+		else {
+			/* Create a factor node that is a lookup of an expression. */
+			$$->factor = new Factor( $1->loc, gdNode->value );
+		}
+	};
+rl_factor:
+	TK_SqOpen regular_expr_or_data TK_SqClose final {
+		/* Create a new factor node going to an OR expression. */
+		$$->factor = new Factor( new ReItem( $1->loc, $2->reOrBlock, ReItem::OrBlock ) );
+	};
+rl_factor:
+	TK_SqOpenNeg regular_expr_or_data TK_SqClose final {
+		/* Create a new factor node going to a negated OR expression. */
+		$$->factor = new Factor( new ReItem( $1->loc, $2->reOrBlock, ReItem::NegOrBlock ) );
+	};
+rl_factor:
+	range_lit TK_DotDot range_lit final {
+		/* Create a new factor node going to a range. */
+		$$->factor = new Factor( new Range( $1->literal, $3->literal ) );
+	};
+rl_factor:
+	'(' rl_join ')' final {
+		/* Create a new factor going to a parenthesized join. */
+		$$->factor = new Factor( $2->join );
+	};
+
+nonterm range_lit
+{
+	Literal *literal;
+};
+
+# Literals which can be the end points of ranges.
+range_lit:
+	TK_Literal final {
+		/* Range literas must have only one char. We restrict this in the parse tree. */
+		$$->literal = new Literal( $1->loc, $1->data, Literal::LitString );
+	};
+range_lit:
+	alphabet_num final {
+		/* Create a new literal number. */
+		$$->literal = new Literal( $1->loc, $1->data, Literal::Number );
+	};
+
+nonterm alphabet_num uses token_data;
+
+# Any form of a number that can be used as a basic machine. */
+alphabet_num:
+	TK_UInt final { 
+		$$->loc = $1->loc;
+		$$->data = $1->data;
+	};
+alphabet_num: 
+	'-' TK_UInt final { 
+		$$->loc = $1->loc;
+		$$->data = '+';
+		$$->data += $2->data;
+	};
+alphabet_num: 
+	TK_Hex final { 
+		$$->loc = $1->loc;
+		$$->data = $1->data;
+	};
+
+#
+# Regular Expressions.
+#
+
+
+# The data inside of a [] expression in a regular expression. Accepts any
+# number of characters or ranges. */
+nonterm regular_expr_or_data
+{
+	ReOrBlock *reOrBlock;
+};
+
+regular_expr_or_data:
+	regular_expr_or_data regular_expr_or_char final {
+		/* An optimization to lessen the tree size. If an or char is directly
+		 * under the left side on the right and the right side is another or
+		 * char then paste them together and return the left side. Otherwise
+		 * just put the two under a new or data node. */
+		if ( $2->reOrItem->type == ReOrItem::Data &&
+				$1->reOrBlock->type == ReOrBlock::RecurseItem &&
+				$1->reOrBlock->item->type == ReOrItem::Data )
+		{
+			/* Append the right side to right side of the left and toss the
+			 * right side. */
+			$1->reOrBlock->item->data += $2->reOrItem->data;
+			delete $2->reOrItem;
+			$$->reOrBlock = $1->reOrBlock;
+		}
+		else {
+			/* Can't optimize, put the left and right under a new node. */
+			$$->reOrBlock = new ReOrBlock( $1->reOrBlock, $2->reOrItem );
+		}
+	};
+regular_expr_or_data:
+	final {
+		$$->reOrBlock = new ReOrBlock();
+	};
+
+# A single character inside of an or expression. Can either be a character or a
+# set of characters.
+nonterm regular_expr_or_char
+{
+	ReOrItem *reOrItem;
+};
+
+regular_expr_or_char:
+	TK_ReChar final {
+		$$->reOrItem = new ReOrItem( $1->loc, $1->data );
+	};
+regular_expr_or_char:
+	TK_ReChar TK_Dash TK_ReChar final {
+		$$->reOrItem = new ReOrItem( $2->loc, $1->data[0], $3->data[0] );
+	};
+
+#  A local state reference. Cannot have :: prefix.
+local_state_ref:
+	no_name_sep state_ref_names;
+
+# Clear the name ref structure.
+no_name_sep:
+	final {
+		nameRef.empty();
+	};
+
+# A qualified state reference.
+state_ref: opt_name_sep state_ref_names;
+
+# Optional leading name separator.
+opt_name_sep:
+	TK_NameSep 
+	final {
+		/* Insert an initial null pointer val to indicate the existence of the
+		 * initial name seperator. */
+		nameRef.setAs( 0 );
+	};
+opt_name_sep:
+	final {
+		nameRef.empty();
+	};
+
+# List of names separated by ::
+state_ref_names:
+	state_ref_names TK_NameSep TK_Word
+	final {
+		nameRef.append( $3->data );
+	};
+state_ref_names:
+	TK_Word 
+	final {
+		nameRef.append( $1->data );
+	};
+
+nonterm opt_commit
+{
+	bool commit;
+};
+
+opt_commit: final { $$->commit = false; };
+opt_commit: KW_Commit final { $$->commit = true; };
+
+#
+# Grammar Finished
+#
+
+	write types;
+	write data;
+}%%
+
+void Parser::init()
+{
+
+	/* Set up the root namespace. */
+	const char *rootNamespaceName = "___ROOT_NAMESPACE";
+	Namespace *rootNamespace = new Namespace( InputLoc(), 
+			rootNamespaceName, pd->namespaceList.length(), 0 );
+	pd->namespaceList.append( rootNamespace );
+	namespaceStack.push( rootNamespace );
+	pd->rootNamespace = rootNamespace;
+
+	/* Set up the root token region. */
+	const char *rootRegionName = "___ROOT_REGION";
+	TokenRegion *rootRegion = new TokenRegion( InputLoc(), rootRegionName, 
+			pd->regionList.length(), 0 );
+	pd->regionList.append( rootRegion );
+	JoinOrLm *joinOrLm = new JoinOrLm( rootRegion );
+	addRegularDef( InputLoc(), namespaceStack.top(), rootRegionName, joinOrLm, true );
+	regionStack.push( rootRegion );
+	pd->rootRegion = rootRegion;
+
+	/* Set up the global object. */
+	String global = "global";
+	ObjFieldMap *objFieldMap = new ObjFieldMap;
+	pd->globalObjectDef = new ObjectDef( ObjectDef::UserType, global, 
+			objFieldMap, new ObjMethodMap(), pd->nextObjectId++ ); 
+	
+	/* The eofTokenRegion defaults to the root region. */
+	pd->eofTokenRegion = rootRegion;
+
+	/* Initialize the dictionary of graphs. This is our symbol table. The
+	 * initialization needs to be done on construction which happens at the
+	 * beginning of a machine spec so any assignment operators can reference
+	 * the builtins. */
+	pd->initGraphDict();
+
+	pd->rootLocalFrame = new ObjectDef( ObjectDef::FrameType, 
+				"local", new ObjFieldMap(), new ObjMethodMap(), 
+				pd->nextObjectId++ );
+	pd->curLocalFrame = pd->rootLocalFrame;
+
+	%% write init;
+}
+
+int Parser::parseLangEl( int type, const Token *token )
+{
+	%% write exec;
+	return errCount == 0 ? 0 : -1;
+}
+
+void Parser::addRegularDef( const InputLoc &loc, Namespace *nspace,
+		const String &name, JoinOrLm *joinOrLm, bool isInstance )
+{
+	GraphDictEl *newEl = nspace->graphDict.insert( name );
+	if ( newEl != 0 ) {
+		/* New element in the dict, all good. */
+		newEl->value = new VarDef( name, joinOrLm );
+		newEl->isInstance = isInstance;
+		newEl->loc = loc;
+
+		/* It it is an instance, put on the instance list. */
+		if ( isInstance )
+			pd->instanceList.append( newEl );
+	}
+	else {
+		// Recover by ignoring the duplicate.
+		error(loc) << "fsm \"" << name << "\" previously defined" << endl;
+	}
+}
+
+void Parser::addProduction( InputLoc &loc, const String &name, 
+		ProdElList *prodElList, bool commit, CodeBlock *redBlock )
+{
+	/* Get the language element. */
+	KlangEl *prodName = getKlangEl( pd, namespaceStack.top(), 
+			name, KlangEl::NonTerm );
+
+	/* Check that the element wasn't previously defined as something else. */
+	if ( prodName->type != KlangEl::Unknown 
+			&& prodName->type != KlangEl::NonTerm )
+	{
+		error(loc) << "'" << name << "' already defined as something else" << endp;
+	}
+	else {
+		Namespace *nspace = namespaceStack.top();
+
+		prodName->type = KlangEl::NonTerm;
+		Definition *newDef = new Definition( loc, prodName, 
+				prodElList, commit, redBlock,
+				pd->prodList.length(), Definition::Production );
+
+		prodName->defList.append( newDef );
+		pd->prodList.append( newDef );
+
+		/* If the token has the same name as the region it is in, then also
+		 * insert it into the symbol map for the parent region. */
+		if ( strcmp( name, nspace->name ) == 0 ) {
+			/* Insert the name into the top of the region stack after popping the
+			 * region just created. We need it in the parent. */
+			nspace->parentNamespace->symbolMap.insert( name, prodName );
+		}
+	}
+}
+
+ostream &Parser::parse_error( int tokId, Token &token )
+{
+	/* Maintain the error count. */
+	gblErrorCount += 1;
+
+	cerr << token.loc.fileName << ":" << token.loc.line << ":" << token.loc.col << ": ";
+	cerr << "at token ";
+	if ( tokId < 128 )
+		cerr << "\"" << Parser_lelNames[tokId] << "\"";
+	else 
+		cerr << Parser_lelNames[tokId];
+	if ( token.data != 0 )
+		cerr << " with data \"" << token.data << "\"";
+	cerr << ": ";
+	
+	return cerr;
+}
+
+int Parser::token( InputLoc &loc, int tokId, char *tokstart, int toklen )
+{
+	Token token;
+
+	if ( toklen > 0 )
+		token.data.setAs( tokstart, toklen );
+
+	token.loc = loc;
+	int res = parseLangEl( tokId, &token );
+	if ( res < 0 ) {
+		parse_error(tokId, token) << "parse error" << endl;
+		exit(1);
+	}
+	return res;
+}

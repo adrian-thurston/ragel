@@ -1,0 +1,89 @@
+rl ident_pattern /[a-zA-Z_][a-zA-Z_0-9]*/
+rl number_pattern /[0-9]+/
+
+lex start
+{
+	ignore /[ \t\n]+/
+	token id /ident_pattern/
+	token number /number_pattern/
+	literal '<<', '*', ',', '(', ')'
+}
+
+global str HereId
+
+token rest_of_line /[^\n]*'\n'/
+
+lex here_start
+{
+	ignore /[ \t\n]+/
+	token here_id
+		here_data HereData
+		/ident_pattern/
+		{
+			# Take the text of the here_id from the input stream.
+			HereId = pull( stdin, match_length )
+
+			# Get the data up to the rest of the line.
+			rest_of_line ROL = parse_stop rest_of_line( stdin )
+
+			# Parse the heredoc data.
+			here_data HereData = parse_stop here_data( stdin )
+
+			# Push the rest-of-line data back to the input stream.
+			push( stdin, ROL )
+
+			# Send the here_id token. Attach the heredoc data as an attribute.
+			send( make_token( typeid here_id, HereId, HereData ) )
+		}
+}
+
+lex here_data
+{
+	token here_close_id 
+		/ ident_pattern '\n' /
+		{
+			if match_text == HereId + '\n' {
+				send( make_token( 
+					typeid here_close_id,
+					pull(stdin, match_length) ) )
+			}
+			else 
+				send( make_token( typeid here_line, pull(stdin, match_length) ) )
+		}
+
+	token here_line
+		/ [^\n]* '\n' /
+}
+
+def here_data
+	[here_line* here_close_id]
+
+def heredoc
+	['<<' here_id]
+
+def primary
+	[id]
+|	[number]
+|	[heredoc]
+
+def arglist
+	[primary arglist_more*]
+
+def arglist_more
+	[',' primary]
+
+def call
+	[id '(' arglist? ')']
+
+def statement
+	[primary]
+|	[call]
+
+token foobar /any*/
+
+def start 
+	[statement*]
+|	[foobar]
+
+start S = parse start( stdin )
+print_xml(S)

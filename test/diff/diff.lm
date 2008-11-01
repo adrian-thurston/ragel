@@ -1,0 +1,84 @@
+
+
+token newline / '\n' /
+token index / 'Index:' [ \t]* /
+token consume_line / [^\n]* /
+
+
+def index_stmt [index consume_line newline]
+
+token separator_line / '='+ '\n' /
+
+# Whitespace separated word list
+lex word_list
+{
+	token word /[^\t \n]+/
+	ignore /[\t ]+/
+
+	def word_list 
+		[word word_list]
+	|	[]
+}
+
+token old_file_start / '---' [\t ]+ /
+token new_file_start / '+++' [\t ]+ /
+
+def old_file 
+	[old_file_start word_list newline]
+
+def new_file 
+	[new_file_start word_list newline]
+
+def file_header 
+	[index_stmt separator_line old_file new_file]
+
+token hunk_header / '@@' any* :>> '@@' '\n' /
+token hunk_line / ( ' ' | '-' | '+' ) [^\n]* '\n' /
+
+def hunk_body 
+	[hunk_line*]
+
+def hunk 
+	[hunk_header hunk_body]
+
+# diff of a single file: header followed by a hunk list.
+def file_diff 
+	[file_header hunk*]
+
+def start 
+	[file_diff*]
+
+
+start S = parse start( stdin )
+
+for OF:old_file in S {
+	print( 'old file: ', OF )
+	# Get the first word and check if it is 
+	# the file we are interested in.
+	if match OF [
+			"--- fsmrun.cpp" 
+				Rest: word_list 
+			"\n"
+		]
+	{
+		OF = construct old_file
+			["--- newfilename.cpp" Rest "\n"]
+		print_xml( OF )
+	}
+}
+
+print( S )
+
+#		for Header: file_header in lhs {
+#			old_file OF = old_file in Header
+#			if match OF 
+#				[old_file_start "lmparse.kl" word_list newline]
+#			{
+#				Header = construct file_header
+#					~Index: rewritten
+#					~===================================================================
+#					~--- this is the file (asldkfj)
+#					~+++ this is the file (ewir)
+#			}
+#		}
+

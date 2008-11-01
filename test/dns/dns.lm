@@ -1,0 +1,488 @@
+
+# Used for most of the grammar.
+token octet /any/
+
+# Filled in during the parsing of resource records. Determine what RR_UNKNOWN
+# translates to.
+global int rr_type_value
+global int rr_class_value
+
+# Tokens generated from RR_UNKNOWN. Used to pick the kind 
+# of resource record to attempt to parse.
+token RR_A //        # 1 a host address
+token RR_NS //       # 2 an authoritative name server
+token RR_MD //       # 3 a mail destination (Obsolete - use MX)
+token RR_MF //       # 4 a mail forwarder (Obsolete - use MX)
+token RR_CNAME //    # 5 the canonical name for an alias
+token RR_SOA //      # 6 marks the start of a zone of authority
+token RR_MB //       # 7 a mailbox domain name (EXPERIMENTAL)
+token RR_MG //       # 8 a mail group member (EXPERIMENTAL)
+token RR_MR //       # 9 a mail rename domain name (EXPERIMENTAL)
+token RR_NULL //     # 10 a null RR (EXPERIMENTAL)
+token RR_WKS //      # 11 a well known service description
+token RR_PTR //      # 12 a domain name pointer
+token RR_HINFO //    # 13 host information
+token RR_MINFO //    # 14 mailbox or mail list information
+token RR_MX //       # 15 mail exchange
+token RR_TXT //       # 16 text strings
+
+token RR_UNKNOWN 
+	/''/
+	{
+		int id = typeid RR_UNKNOWN
+		if rr_type_value == 1
+			id = typeid RR_A
+		elsif rr_type_value == 2
+			id = typeid RR_NS
+		elsif rr_type_value == 5
+			id = typeid RR_CNAME
+		elsif rr_type_value == 12
+			id = typeid RR_PTR
+		elsif rr_type_value == 15
+			id = typeid RR_MX
+		elsif rr_type_value == 16
+			id = typeid RR_TXT
+
+		send( make_token( id, '' ) )
+	}
+
+# Convert two octets in network order into an unsigned 16 bit value.
+int network_uord16( octet o1, octet o2 )
+{
+	return o1.data.uord8() * 256 + o2.data.uord8()
+}
+
+
+def message
+	[header questions answers authorities additionals]
+
+global int question_count
+global int answer_count
+global int authority_count
+global int additional_count
+
+#    Message Header
+#
+#                                    1  1  1  1  1  1
+#      0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5
+#    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+#    |                      ID                       |
+#    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+#    |QR|   Opcode  |AA|TC|RD|RA|   Z    |   RCODE   |
+#    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+#    |                    QDCOUNT                    |
+#    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+#    |                    ANCOUNT                    |
+#    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+#    |                    NSCOUNT                    |
+#    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+#    |                    ARCOUNT                    |
+#    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+def header
+	[header_id header_fields count count count count]
+	{
+		question_count = r3.count
+		answer_count = r4.count
+		authority_count = r5.count
+		additional_count = r6.count
+	}
+
+def header_id
+	[octet octet]
+
+def header_fields
+	[octet octet]
+
+def count
+	int count
+
+	[octet octet]
+	{
+		lhs.count = network_uord16( r1, r2 )
+	}
+
+#
+# Counting Primitives
+#
+# Uses a global stack of lengths. Using a stack allows for counted lists to be
+# nested. As the list is consumed it brings the count down to zero. To use it,
+# push a new count value to the list and include it in a right-recursive list
+# like so:
+#
+# def LIST
+#     [count_inc ITEM LIST]
+#     [count_end]
+# end
+#
+
+list count_stack [int]
+global count_stack CL = construct count_stack []
+
+int start_list( int count )
+{
+	CL.push( count )
+}
+
+def count_inc
+	[]
+	{
+		if CL.top == 0 {
+			reject
+		} else {
+			CL.top = CL.top - 1
+		}
+	}
+
+def count_end
+	[]
+	{
+		if CL.top != 0 {
+			reject
+		} else {
+			CL.pop()
+		}
+	}
+
+#
+# Octet List
+#
+
+# General octet list. Length must be set to use this.
+def octet_list
+	[count_inc octet octet_list]
+|	[count_end]
+
+
+#
+# Names
+#
+
+def name
+	[name_part* name_end]
+
+# Name part lists are terminated by a zero length or a pointer.
+def name_end
+	# Zero length ending
+	[octet]
+	{
+		int val = r1.data.uord8()
+		if val != 0 {
+			reject
+		}
+	}
+
+	# Pointer ending
+	#   +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+	#   | 1  1|                OFFSET                   |
+	#   +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+|	[octet octet]
+	{
+		int val = r1.data.uord8()
+		if val < 64 {
+			reject
+		}
+	}
+
+#
+# Get some number of bytes.
+#
+
+# How many to get
+global int nbytes
+
+# We use this token to eliminate the lookahead that would be needed to cause a
+# reduce of part_len. This forces whatever comes before nbytes to be reduced before 
+# nbytes_data token is fetched from the scanner. We need this because nbytes_data
+# depends on the nbytes global and we need to ensure that it is set.
+token nb_empty /''/
+
+# Fetch nbytes bytes.
+token nbytes_data
+	/''/
+	{
+		send( make_token( typeid nbytes_data, pull(stdin, nbytes) ) )
+	}
+
+def nbytes
+	[nb_empty nbytes_data]
+
+def name_part
+	[part_len nbytes]
+
+
+def part_len
+	[octet]
+	{
+		# A name part list is terminated either by a zero length or a pointer,
+		# which must have the two high bits set.
+		int count = r1.data.uord8()
+		if count == 0 || count >= 64 {
+			reject
+		} else {
+			# Set the number of bytes to get for the name part.
+			nbytes = count
+		}
+	}
+
+#
+#   Resource Records
+#
+
+#                                   1  1  1  1  1  1
+#     0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5
+#   +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+#   |                                               |
+#   /                                               /
+#   /                      NAME                     /
+#   |                                               |
+#   +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+#   |                      TYPE                     |
+#   +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+#   |                     CLASS                     |
+#   +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+#   |                      TTL                      |
+#   |                                               |
+#   +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+#   |                   RDLENGTH                    |
+#   +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--|
+#   /                     RDATA                     /
+#   /                                               /
+#   +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+
+def resource_record
+	[name rr_type rr_class ttl rdlength rdata]
+
+def rr_type 
+	[octet octet]
+	{
+		rr_type_value = network_uord16( r1, r2 )
+	}
+
+def rr_class 
+	int value
+	[octet octet]
+	{
+		rr_class_value = network_uord16( r1, r2 )
+	}
+
+def ttl 
+	[octet octet octet octet]
+
+token rdata_bytes
+	/''/
+	{
+		send( make_token( typeid rdata_bytes, pull(stdin, rdata_length) ) )
+	}
+
+def rdlength 
+	[octet octet]
+	{
+		rdata_length = network_uord16( r1, r2 )
+	}
+
+global int rdata_length
+	
+def rdata
+	[RR_UNKNOWN rdata_bytes]
+|	[RR_A address]
+|	[RR_NS name]
+|	[RR_CNAME name]
+|	[RR_PTR name]
+|	[RR_MX octet octet name]
+|	[RR_TXT rdata_bytes]
+
+
+#
+# Address
+#
+def address [octet octet octet octet]
+
+#
+# List of Questions
+#
+
+def questions
+	[load_question_count question_list]
+
+def load_question_count
+	[]
+	{
+		start_list( question_count )
+	}
+
+def question_list
+	[count_inc question question_list]
+|	[count_end]
+
+#
+#   Question
+#
+
+#                                   1  1  1  1  1  1
+#     0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5
+#   +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+#   |                                               |
+#   /                     QNAME                     /
+#   /                                               /
+#   +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+#   |                     QTYPE                     |
+#   +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+#   |                     QCLASS                    |
+#   +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+
+def question
+	[name qtype qclass]
+
+def qtype
+	[octet octet]
+
+def qclass
+	[octet octet]
+
+#
+# List of Answers
+#
+
+def answers
+	[load_answer_count answer_list]
+
+def load_answer_count
+	[]
+	{
+		start_list( answer_count )
+	}
+
+def answer_list
+	[count_inc answer answer_list]
+|	[count_end]
+
+#
+# Answer
+#
+
+def answer
+	[resource_record]
+
+#
+# List of Authorities
+#
+
+def authorities
+	[load_authority_count authority_list]
+
+def load_authority_count
+	[]
+	{
+		start_list( authority_count )
+	}
+
+def authority_list
+	[count_inc authority authority_list]
+|	[count_end]
+
+#
+# Authority
+#
+
+def authority
+	[resource_record]
+
+#
+# List of Additionals
+#
+
+def additionals
+	[load_additional_count additional_list]
+
+def load_additional_count
+	[]
+	{
+		start_list( additional_count )
+	}
+
+def additional_list
+	[count_inc additional additional_list]
+|	[count_end]
+
+#
+# Additional
+#
+
+def additional
+	[resource_record]
+
+
+def start
+	[message*]
+
+#
+# Grammar End.
+#
+
+int print_RR_UNKNOWN( start s )
+{
+	for I:rdata in s {
+		if match I [u:RR_UNKNOWN rdata_bytes] {
+			print( 'UNKNOWN TYPE\n' )
+		}
+	}
+}
+
+int print_RR_A( start s )
+{
+	for I:rdata in s {
+		if match I [RR_A o1:octet o2:octet o3:octet o4:octet] {
+			print( 'RR_A: ', o1.data.uord8(), '.', o2.data.uord8(), '.', 
+					o3.data.uord8(), '.', o4.data.uord8(), '\n' )
+		}
+	}
+}
+
+map name_map [int name]
+
+int print_name( name n, name_map m )
+{
+	for P: name_part in n {
+		match P [part_len D:nbytes]
+		print( D, '.' )
+	}
+
+	for E:name_end in n {
+		if match E [o1:octet o2:octet] {
+			int val = (o1.data.uord8() - 192) * 256 + o2.data.uord8()
+			print( '[', val, ']' )
+			name nameInMap = m.find( val )
+			print_name( nameInMap, m )
+		}
+	}
+}
+
+int print_all_names( start s )
+{
+	for M:message in s {
+		name_map m = construct name_map []
+
+		octet O = octet in M
+
+		for N:name in M {
+			match N [name_part* E:name_end]
+
+			for NP: name_part* in N {
+				if match NP [L:octet nbytes name_part*] {
+					int messageOffset = L.pos - O.pos
+					name n = construct name [NP E]
+					m.insert( messageOffset, n )
+				}
+			}
+		}
+
+		for I:name in M {
+			print_name( I, m )
+			print( '\n' )
+		}
+	}
+}
+
+start S = parse start( stdin )
+print_all_names( S )
+print( '*** SUCCESS ***\n' )
