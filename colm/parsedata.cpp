@@ -707,43 +707,6 @@ void ParseData::initGraphDict( )
 	createBuiltin( "empty", BT_Empty );
 }
 
-/* Set the alphabet type. If the types are not valid returns false. */
-bool ParseData::setAlphType( char *s1, char *s2 )
-{
-	bool valid = false;
-	for ( int i = 0; i < hostLang->numHostTypes; i++ ) {
-		if ( strcmp( s1, hostLang->hostTypes[i].data1 ) == 0 && 
-				hostLang->hostTypes[i].data2 != 0 && 
-				strcmp( s2, hostLang->hostTypes[i].data2 ) == 0 )
-		{
-			valid = true;
-			userAlphType = hostLang->hostTypes + i;
-			break;
-		}
-	}
-
-	alphTypeSet = true;
-	return valid;
-}
-
-/* Set the alphabet type. If the types are not valid returns false. */
-bool ParseData::setAlphType( char *s1 )
-{
-	bool valid = false;
-	for ( int i = 0; i < hostLang->numHostTypes; i++ ) {
-		if ( strcmp( s1, hostLang->hostTypes[i].data1 ) == 0 && 
-				hostLang->hostTypes[i].data2 == 0 )
-		{
-			valid = true;
-			userAlphType = hostLang->hostTypes + i;
-			break;
-		}
-	}
-
-	alphTypeSet = true;
-	return valid;
-}
-
 /* Initialize the key operators object that will be referenced by all fsms
  * created. */
 void ParseData::initKeyOps( )

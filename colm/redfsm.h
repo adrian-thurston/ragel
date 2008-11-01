@@ -25,7 +25,7 @@
 #include <assert.h>
 #include <string.h>
 #include <string>
-#include "common.h"
+#include "keyops.h"
 #include "vector.h"
 #include "dlist.h"
 #include "compare.h"

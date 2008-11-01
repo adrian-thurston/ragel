@@ -30,7 +30,7 @@
 
 #include "config.h"
 #include "avltree.h"
-#include "common.h"
+#include "keyops.h"
 
 #define PROGNAME "colm"
 

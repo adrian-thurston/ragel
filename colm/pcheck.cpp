@@ -20,57 +20,7 @@
  */
 
 #include "pcheck.h"
-#include "common.h"
 #include <assert.h>
-
-HostType hostTypesC[] =
-{
-	{ "char",     0,       true,   CHAR_MIN,  CHAR_MAX,   sizeof(char) },
-	{ "unsigned", "char",  false,  0,         UCHAR_MAX,  sizeof(unsigned char) },
-	{ "short",    0,       true,   SHRT_MIN,  SHRT_MAX,   sizeof(short) },
-	{ "unsigned", "short", false,  0,         USHRT_MAX,  sizeof(unsigned short) },
-	{ "int",      0,       true,   INT_MIN,   INT_MAX,    sizeof(int) },
-	{ "unsigned", "int",   false,  0,         UINT_MAX,   sizeof(unsigned int) },
-	{ "long",     0,       true,   LONG_MIN,  LONG_MAX,   sizeof(long) },
-	{ "unsigned", "long",  false,  0,         ULONG_MAX,  sizeof(unsigned long) }
-};
-
-HostType hostTypesD[] =
-{
-	{ "byte",     0,  true,   CHAR_MIN,  CHAR_MAX,    1 },
-	{ "ubyte",    0,  false,  0,         UCHAR_MAX,   1 },
-	{ "char",     0,  false,  0,         UCHAR_MAX,   1 },
-	{ "short",    0,  true,   SHRT_MIN,  SHRT_MAX,    2 },
-	{ "ushort",   0,  false,  0,         USHRT_MAX,   2 },
-	{ "wchar",    0,  false,  0,         USHRT_MAX,   2 },
-	{ "int",      0,  true,   INT_MIN,   INT_MAX,     4 },
-	{ "uint",     0,  false,  0,         UINT_MAX,    4 },
-	{ "dchar",    0,  false,  0,         UINT_MAX,    4 }
-};
-
-HostType hostTypesJava[] = 
-{
-	{ "byte",     0,  true,   CHAR_MIN,  CHAR_MAX,    1 },
-	{ "short",    0,  true,   SHRT_MIN,  SHRT_MAX,    2 },
-	{ "char",     0,  false,  0,         USHRT_MAX,   2 },
-	{ "int",      0,  true,   INT_MIN,   INT_MAX,     4 },
-};
-
-HostType hostTypesRuby[] = 
-{
-	{ "byte",     0,  true,   CHAR_MIN,  CHAR_MAX,    1 },
-	{ "short",    0,  true,   SHRT_MIN,  SHRT_MAX,    2 },
-	{ "char",     0,  false,  0,         USHRT_MAX,   2 },
-	{ "int",      0,  true,   INT_MIN,   INT_MAX,     4 },
-};
-
-HostLang hostLangC =    { hostTypesC,    8, hostTypesC+0,    true };
-HostLang hostLangD =    { hostTypesD,    9, hostTypesD+2,    true };
-HostLang hostLangJava = { hostTypesJava, 4, hostTypesJava+2, false };
-HostLang hostLangRuby = { hostTypesRuby, 4, hostTypesRuby+2, false };
-
-HostLang *hostLang = &hostLangC;
-HostLangType hostLangType = CCode;
 
 /* Construct a new parameter checker with for paramSpec. */
 ParamCheck::ParamCheck( const char *paramSpec, int argc,  const char **argv )
@@ -199,59 +149,6 @@ bool ParamCheck::check()
 	argOffset += 1;
 	state = invalid;
 	return true;
-}
-
-/* Scans a string looking for the file extension. If there is a file
- * extension then pointer returned points to inside the string
- * passed in. Otherwise returns null. */
-const char *findFileExtension( const char *stemFile )
-{
-	const char *ppos = stemFile + strlen(stemFile) - 1;
-
-	/* Scan backwards from the end looking for the first dot.
-	 * If we encounter a '/' before the first dot, then stop the scan. */
-	while ( 1 ) {
-		/* If we found a dot or got to the beginning of the string then
-		 * we are done. */
-		if ( ppos == stemFile || *ppos == '.' )
-			break;
-
-		/* If we hit a / then there is no extension. Done. */
-		if ( *ppos == '/' ) {
-			ppos = stemFile;
-			break;
-		}
-		ppos--;
-	} 
-
-	/* If we got to the front of the string then bail we 
-	 * did not find an extension  */
-	if ( ppos == stemFile )
-		ppos = 0;
-
-	return ppos;
-}
-
-/* Make a file name from a stem. Removes the old filename suffix and
- * replaces it with a new one. Returns a newed up string. */
-char *fileNameFromStem( const char *stemFile, const char *suffix )
-{
-	int len = strlen( stemFile );
-	assert( len > 0 );
-
-	/* Get the extension. */
-	const char *ppos = findFileExtension( stemFile );
-
-	/* If an extension was found, then shorten what we think the len is. */
-	if ( ppos != 0 )
-		len = ppos - stemFile;
-
-	/* Make the return string from the stem and the suffix. */
-	char *retVal = new char[ len + strlen( suffix ) + 1 ];
-	strncpy( retVal, stemFile, len );
-	strcpy( retVal + len, suffix );
-
-	return retVal;
 }
 
 

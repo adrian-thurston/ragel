@@ -35,7 +35,7 @@
 #include "fsmgraph.h"
 #include "compare.h"
 #include "vector.h"
-#include "common.h"
+#include "keyops.h"
 #include "parsetree.h"
 #include "astring.h"
 #include "pdagraph.h"

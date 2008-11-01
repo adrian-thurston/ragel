@@ -55,7 +55,7 @@ CC_SRCS = \
 	closure.cpp \
 	fsmap.cpp \
 	dotgen.cpp \
-	common.cpp
+	pcheck.cpp
 
 RUNTIME_SRC = fsmrun.cpp pdarun.cpp bytecode.cpp list.cpp \
 	map.cpp string.cpp input.cpp tree.cpp

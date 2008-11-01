@@ -25,7 +25,7 @@
 #include <iostream>
 #include <string>
 #include <stdio.h>
-#include "common.h"
+#include "keyops.h"
 #include "parsedata.h"
 #include "redfsm.h"
 

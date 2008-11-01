@@ -23,7 +23,7 @@
 #define _FSMGRAPH_H
 
 #include <assert.h>
-#include "common.h"
+#include "keyops.h"
 #include "vector.h"
 #include "bstset.h"
 #include "compare.h"
