@@ -99,8 +99,8 @@ public:
 
 struct HostType
 {
-	char *data1;
-	char *data2;
+	const char *data1;
+	const char *data2;
 	bool isSigned;
 	long long minVal;
 	long long maxVal;
