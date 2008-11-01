@@ -3741,7 +3741,7 @@
   </machine>
 </ragel_def>
 <host line="1" col="1">/*
- *  Copyright 2006-2007 Adrian Thurston &lt;thurston@cs.queensu.ca&gt;
+ *  Copyright 2006-2007 Adrian Thurston &lt;thurston@complang.org&gt;
  */
 
 /*  This file is part of Ragel.
