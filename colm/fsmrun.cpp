@@ -42,8 +42,9 @@ void operator<<( ostream &out, exit_object & )
 	exit(1);
 }
 
-FsmRun::FsmRun( FsmTables *tables ) :
-	tables(tables),
+FsmRun::FsmRun( Program *prg ) :
+	prg(prg),
+	tables(prg->rtd->fsmTables),
 	parser(0),
 	position(0)
 {
@@ -213,7 +214,7 @@ void FsmRun::queueBack( Kid *input )
 void FsmRun::sendBackIgnore( Kid *ignore )
 {
 	/* Ignore tokens are queued in reverse order. */
-	while ( tree_is_ignore( parser->prg, ignore ) ) {
+	while ( tree_is_ignore( prg, ignore ) ) {
 		#ifdef COLM_LOG_PARSE
 		LangElInfo *lelInfo = parser->tables->gbl->lelInfo;
 		cerr << "sending back: " << lelInfo[ignore->tree->id].name;
@@ -232,7 +233,7 @@ void FsmRun::sendBackIgnore( Kid *ignore )
 		/* Check for reverse code. */
 		Alg *alg = ignore->tree->alg;
 		if ( alg != 0 && alg->flags & AF_HAS_RCODE ) {
-			Execution execution( parser->prg, parser->reverseCode, 
+			Execution execution( prg, parser->reverseCode, 
 					parser, 0, 0, 0 );
 
 			/* Do the reverse exeuction. */
@@ -273,7 +274,7 @@ void FsmRun::sendBack( Kid *input )
 
 	/* Check for reverse code. */
 	if ( alg->flags & AF_HAS_RCODE ) {
-		Execution execution( parser->prg, parser->reverseCode, 
+		Execution execution( prg, parser->reverseCode, 
 				parser, 0, 0, 0 );
 
 		/* Do the reverse exeuction. */
@@ -282,7 +283,7 @@ void FsmRun::sendBack( Kid *input )
 	}
 
 	/* Always push back the ignore text. */
-	sendBackIgnore( tree_ignore( parser->prg, input->tree ) );
+	sendBackIgnore( tree_ignore( prg, input->tree ) );
 
 	/* If eof was just sent back remember that it needs to be sent again. */
 	if ( input->tree->id == parser->tables->gbl->eofId )
@@ -292,12 +293,12 @@ void FsmRun::sendBack( Kid *input )
 	Tree *lastBound = parser->bindings.top();
 	if ( lastBound == input->tree ) {
 		parser->bindings.pop();
-		tree_downref( parser->prg, input->tree );
+		tree_downref( prg, input->tree );
 	}
 
 	/* Downref the tree that was sent back and free the kid. */
-	tree_downref( parser->prg, input->tree );
-	parser->prg->kidPool.free( input );
+	tree_downref( prg, input->tree );
+	prg->kidPool.free( input );
 }
 
 void FsmRun::sendEOF( )
@@ -306,14 +307,14 @@ void FsmRun::sendEOF( )
 	cerr << "token: _EOF" << endl;
 	#endif
 
-	Kid *input = parser->prg->kidPool.allocate();
-	input->tree = parser->prg->treePool.allocate();
-	input->tree->alg = parser->prg->algPool.allocate();
+	Kid *input = prg->kidPool.allocate();
+	input->tree = prg->treePool.allocate();
+	input->tree->alg = prg->algPool.allocate();
 
 	input->tree->refs = 1;
 	input->tree->id = parser->tables->gbl->eofId;
 
-	bool ctxDepParsing = parser->prg->ctxDepParsing;
+	bool ctxDepParsing = prg->ctxDepParsing;
 	long frameId = parser->tables->gbl->regionInfo[region].eofFrameId;
 	if ( ctxDepParsing && frameId >= 0 ) {
 		#ifdef COLM_LOG_PARSE
@@ -323,7 +324,7 @@ void FsmRun::sendEOF( )
 		Code *code = parser->tables->gbl->frameInfo[frameId].code;
 	
 		/* Execute the translation. */
-		Execution execution( parser->prg, parser->reverseCode, 
+		Execution execution( prg, parser->reverseCode, 
 				parser, code, 0, 0 );
 		execution.execute( parser->root );
 
@@ -360,7 +361,7 @@ void FsmRun::sendQueuedTokens()
 			#endif
 			
 			parser->ignore( send->tree );
-			parser->prg->kidPool.free( send );
+			prg->kidPool.free( send );
 		}
 		else {
 			#ifdef COLM_LOG_PARSE
@@ -378,12 +379,12 @@ void FsmRun::sendToken( long id )
 	cerr << "token: " << parser->tables->gbl->lelInfo[id].name << endl;
 	#endif
 
-	bool ctxDepParsing = parser->prg->ctxDepParsing;
+	bool ctxDepParsing = prg->ctxDepParsing;
 	LangElInfo *lelInfo = parser->tables->gbl->lelInfo;
 
 	/* Copy the token data. */
 	long length = p-tokstart;
-	Head *tokdata = string_alloc_const( parser->prg, tokstart, length );
+	Head *tokdata = string_alloc_const( prg, tokstart, length );
 
 	if ( ctxDepParsing && lelInfo[id].frameId >= 0 ) {
 		translateLangEl( id, tokdata, false, 0 );
@@ -415,7 +416,7 @@ void FsmRun::sendNamedLangEl()
 	/* Copy the token data. */
 	Head *tokdata = 0;
 	if ( data != 0 )
-		tokdata = string_alloc_new( parser->prg, data, length );
+		tokdata = string_alloc_new( prg, data, length );
 
 	makeToken( klangEl->id, tokdata, true, bindId );
 }
@@ -458,11 +459,11 @@ void FsmRun::translateLangEl( int id, Head *tokdata, bool namedLangEl, int bindI
 	p = tokstart;
 
 	/* Execute the translation. */
-	Execution execution( parser->prg, parser->reverseCode, 
+	Execution execution( prg, parser->reverseCode, 
 			parser, code, 0, tokdata );
 	execution.execute( parser->root );
 
-	string_free( parser->prg, tokdata );
+	string_free( prg, tokdata );
 
 	set_AF_GROUP_MEM();
 }
@@ -471,12 +472,12 @@ void FsmRun::makeToken( int id, Head *tokdata, bool namedLangEl, int bindId )
 {
 	/* Make the token object. */
 	long objectLength = parser->tables->gbl->lelInfo[id].objectLength;
-	Kid *attrs = alloc_attrs( parser->prg, objectLength );
+	Kid *attrs = alloc_attrs( prg, objectLength );
 
 	Kid *input = 0;
-	input = parser->prg->kidPool.allocate();
-	input->tree = parser->prg->treePool.allocate();
-	input->tree->alg = parser->prg->algPool.allocate();
+	input = prg->kidPool.allocate();
+	input->tree = prg->treePool.allocate();
+	input->tree->alg = prg->algPool.allocate();
 
 	if ( namedLangEl )
 		input->tree->alg->flags |= AF_NAMED;
@@ -491,9 +492,9 @@ void FsmRun::makeToken( int id, Head *tokdata, bool namedLangEl, int bindId )
 	/* Set attributes for the labelled components. */
 	for ( int i = 0; i < 32; i++ ) {
 		if ( mark_leave[i] != 0 ) {
-			Head *data = string_alloc_new( parser->prg, 
+			Head *data = string_alloc_new( prg, 
 					mark_enter[i], mark_leave[i] - mark_enter[i] );
-			set_attr( input->tree, i, construct_string( parser->prg, data ) );
+			set_attr( input->tree, i, construct_string( prg, data ) );
 			tree_upref( get_attr( input->tree, i ) );
 		}
 	}
@@ -614,9 +615,9 @@ void FsmRun::sendIgnore( long id )
 	#endif
 
 	/* Make the ignore string. */
-	Head *ignoreStr = string_alloc_const( parser->prg, tokstart, length );
+	Head *ignoreStr = string_alloc_const( prg, tokstart, length );
 	
-	Tree *tree = parser->prg->treePool.allocate();
+	Tree *tree = prg->treePool.allocate();
 	tree->refs = 1;
 	tree->id = id;
 	tree->tokdata = ignoreStr;
@@ -677,7 +678,7 @@ Head *FsmRun::extractToken( long length )
 	if ( tokstart + length > pe )
 		cerr << "NOT ENOUGH DATA TO FETCH TOKEN" << endp;
 
-	Head *tokdata = string_alloc_const( parser->prg, tokstart, length );
+	Head *tokdata = string_alloc_const( prg, tokstart, length );
 	p = tokstart + length;
 	tokstart = 0;
 

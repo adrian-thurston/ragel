@@ -1627,8 +1627,8 @@ void ParseData::makePatternParsers()
 
 void ParseData::parsePatterns()
 {
-	FsmRun fsmRun( runtimeData->fsmTables );
 	Program program( false, runtimeData );
+	FsmRun fsmRun( &program );
 
 	for ( ReplList::Iter repl = replList; repl.lte(); repl++ ) {
 		//cerr << "parsing replacement: " << repl->data << endl;

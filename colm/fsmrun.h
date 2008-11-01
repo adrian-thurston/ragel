@@ -83,7 +83,7 @@ struct RunBuf
 
 struct FsmRun
 {
-	FsmRun( FsmTables *tables );
+	FsmRun( Program *prg );
 	~FsmRun();
 
 	void set_AF_GROUP_MEM();
@@ -113,6 +113,7 @@ struct FsmRun
 
 	void execute();
 
+	Program *prg;
 	FsmTables *tables;
 	PdaRun *parser;
 	InputStream *inputStream;
