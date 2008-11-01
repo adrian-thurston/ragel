@@ -1,0 +1,144 @@
+lex start
+{
+	ignore /[\t\n ]+/
+	literal '^', '|', '-', ',', ':', '!', '?', '.'
+	literal '(', ')', '{', '}', '*', '&', '+'
+
+	literal '--', ':>', ':>>', '<:', '->', '**'
+
+	token word /[a-zA-Z_][a-zA-Z0-9_]*/
+	token uint /[0-9]+/
+}
+
+
+def start [expression]
+
+def expression [term expression_op*]
+
+def expression_op
+	['|' term]
+|	['&' term]
+|	['-' term]
+|	['--' term]
+
+def term [factor_rep term_rest]
+
+# This list is done manually to get shortest match.
+def term_rest
+	[]
+|	[term_op term_rest]
+
+def term_op
+	[factor_rep]
+|	['.' factor_rep]
+|	[':>' factor_rep]
+|	[':>>' factor_rep]
+|	['<:' factor_rep]
+
+def factor_rep 
+	[factor_neg factor_rep_op*]
+
+def factor_rep_op
+	['*']
+|	['**']
+|	['?']
+|	['+']
+|	['{' factor_rep_num '}']
+|	['{' ',' factor_rep_num '}']
+|	['{' factor_rep_num ',' '}']
+|	['{' factor_rep_num ',' factor_rep_num '}']
+
+def factor_rep_num [uint]
+
+def factor_neg 
+	['!' factor_neg]
+|	['^' factor_neg]
+|	[factor]
+
+def factor 
+	[alphabet_num]
+|	[word]
+|	['(' expression ')']
+
+def alphabet_num 
+	[uint]
+
+start S = parse start(stdin)
+
+#
+# Top-Down, Left-Right
+#
+
+int do_topdown_leftright( ref any T )
+{
+	for C:any in child(T) {
+		yield C
+		do_topdown_leftright( C )
+	}
+}
+
+iter topdown_leftright( ref any T )
+{
+	do_topdown_leftright( T )
+}
+
+#
+# Bottom-Up, Left-Right
+#
+
+int do_bottomup_leftright( ref any T )
+{
+	for C:any in child(T) {
+		do_bottomup_leftright( C )
+		yield C
+	}
+}
+
+iter bottomup_leftright( ref any T )
+{
+	do_bottomup_leftright( T )
+}
+
+
+#
+# Top-Down, Right-Left
+#
+
+int do_topdown_rightleft( ref any T )
+{
+	for C:any in rev_child(T) {
+		yield C
+		do_topdown_rightleft( C )
+	}
+}
+
+iter topdown_rightleft( ref any T )
+{
+	do_topdown_rightleft( T )
+}
+
+#
+# Bottom-Up, Right-Left
+#
+
+int do_bottomup_rightleft( ref any T )
+{
+	for C:any in rev_child(T) {
+		do_bottomup_rightleft( C )
+		yield C
+	}
+}
+
+iter bottomup_rightleft( ref any T )
+{
+	do_bottomup_rightleft( T )
+}
+
+#
+# Testing
+#
+
+for C: expression in bottomup_leftright( S ) 
+{
+	print_xml( C )
+}

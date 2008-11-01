@@ -1,0 +1,307 @@
+#
+# Regular Definitions
+#
+rl def_name_char /[\-A-Za-z0-9._:?]/
+rl def_name /[A-Za-z_:] def_name_char*/
+rl def_system_literal /'"' [^"]* '"' | "'" [^']* "'"/
+
+#
+# Scanner for tag names.
+#
+lex TAG_NAME
+{
+	ignore /space+/
+	token tag_id /def_name/
+}
+
+#
+# Scanner for attributes names
+#
+lex ATTR_NAME
+{
+	ignore  /space+/
+	token attr_name /def_name_char+/
+	literal '='
+}
+
+# Scanner for attribute values.
+lex ATTR_VAL
+{
+	ignore  /space+/
+	literal '>', '/>'
+	token dquote_val /'"' ([^"] | '\\' any)* '"'/
+	token squote_val /"'" ([^'] | '\\' any)* "'"/
+	token unq_val /[^ \t\r\n<>"'] [^ \t\r\n<>]*/
+}
+
+#
+# Tokens
+#
+
+lex START
+{
+	ignore /space+/
+	literal '<', '</', '<!DOCTYPE'
+	token doc_data /[^<]+/
+  	token comment /"<!--" any* :>> "-->"/
+}
+
+#
+# Tags
+#
+
+# This scanner is just for the id in close tags. The id needs to be looked up
+# in the tag stack so we can determine if it is a stray. 
+lex close_id
+{
+	# Ignore whitespace.
+	ignore /space+/
+
+	token stray_close_id //
+	token close_id /def_name/
+	{
+		# If it is in the tag stack then it is a close_id. If not then it's a
+		# stray_close_id.
+		int send_id = typeid stray_close_id
+
+		tag_stack LocalTagStack = TagStack
+		for Tag:tag_id in LocalTagStack {
+			tag_id T = Tag
+			if match_text == T.data {
+				send_id = typeid close_id
+				break
+			}
+		}
+
+		send( make_token( send_id, pull(stdin, match_length) ) )
+	}
+}
+
+#
+# Tag Stack
+#
+
+def tag_stack 
+	[tag_id tag_stack]
+|	[]
+
+global tag_stack TagStack = construct tag_stack []
+
+#
+# Document Type
+#
+# This scanner handles inside DOCTYPE tags (except keywords).
+lex DOCTYPE
+{
+	ignore /space+/
+	token dt_name /def_name/
+	token dt_literal /def_system_literal/
+	token dt_bl /"[" [^\]]* "]"/
+	token dt_close /'>'/
+}
+
+# Using a separate scanner for the keywords in DOCTYPE prevents them from
+# covering dt_name
+lex DOCTYPE_KW
+{
+	ignore /space+/
+	literal 'SYSTEM', 'PUBLIC'
+}
+
+def DOCTYPE ['<!DOCTYPE' dt_name external_id dt_bl? dt_close]
+
+def external_id
+	['SYSTEM' dt_literal?]
+|	['PUBLIC' dt_literal dt_literal?]
+
+#
+# Tags, with optionanal close.
+#
+
+def tag 
+	[open_tag item* opt_close_tag]
+
+def open_tag 
+	['<' tag_id attr* '>']
+	{
+		TagStack = construct tag_stack 
+			[r2 TagStack]
+	}
+
+def opt_close_tag
+	['</' close_id '>']
+	{
+		match TagStack [Top:tag_id Rest:tag_stack] 
+		if r2.data == Top.data
+			TagStack = Rest
+		else
+			reject
+	}
+
+|	[]
+	{
+		match TagStack [Top:tag_id Rest:tag_stack] 
+		TagStack = Rest
+	}
+
+#
+# Empty tags
+#
+def empty_tag 
+	['<' tag_id attr* '/>']
+
+#
+# Stray close tags
+#
+def stray_close 
+	['</' stray_close_id '>']
+
+
+#
+# Attributes
+#
+
+def attr
+	[attr_name eql_attr_val?]
+
+def eql_attr_val ['=' attr_val]
+
+def attr_val
+	[squote_val]
+|	[dquote_val]
+|	[unq_val]
+|	[]
+
+#
+# Items
+#
+
+def item 
+	[DOCTYPE]
+|	[tag]
+|	[empty_tag]
+|	[stray_close]
+|	[doc_data]
+|	[comment]
+
+
+token trailing /any*/
+
+def start 
+	[item* trailing]
+
+#
+# END GRAMMAR
+#
+
+int addDefaultAltTags( ref start Start )
+{
+	for T: open_tag in Start {
+		require T 
+			["<img" AttrList: attr* '>']
+		
+		bool haveAlt = false
+		for A: attr in T {
+			if match A ["alt=" attr_val]
+				haveAlt = true
+		}
+
+		if !haveAlt {
+			for AL: attr* in T {
+				if match AL [] {
+					AL = construct attr* 
+						[" alt=\"default alt\""]
+					break
+				}
+			}
+		}
+	}
+}
+
+int printLinks( start Start )
+{
+	for A:tag in Start {
+		require A
+			["<a" AttrList: attr* ">" I: item* "</a>"]
+
+		for Attr: attr in AttrList {
+			if match Attr ["href = " AttrVal: attr_val]
+				print( 'link: ', I, '\ntarget: ', AttrVal, '\n\n' )
+		}
+	}
+}
+
+
+bool should_close( tag_id TI )
+{
+	return true
+}
+
+bool should_flatten( tag_id TI )
+{
+	return true
+}
+
+# Finds unclosed tags and puts the content after the tag. Afterwards
+# all unclosed tags will be empty 'inside'.
+int flatten( ref start Start )
+{
+    for TL: item* in Start {
+        require TL
+            [OT: open_tag Inside: item* Trailing: item*]
+
+		match OT 
+			['<' TagId: tag_id attr* '>']
+
+		if should_flatten( TagId )
+		{
+			require Inside
+				[item item*]
+			
+			# Put Trailing at the end of inside.
+			for END: item* in Inside {
+				if match END [] {
+					END = Trailing
+					break
+				}
+			}
+
+			opt_close_tag EmptyCloseTag = 
+				construct opt_close_tag []
+
+			# Close the tag and put inside after it.
+			TL = construct item*
+				[OT EmptyCloseTag Inside]
+		}
+    }
+}
+
+int close( ref start Start )
+{
+    for TL: item in Start {
+        require TL
+            [OpenTag: open_tag Inside: item*]
+
+        match OpenTag 
+            ['<' TagId: tag_id attr* '>']
+
+        if should_close( TagId )
+        {
+			close_id CloseId = construct close_id 
+				[TagId.data]
+
+            opt_close_tag CloseTag = 
+                construct opt_close_tag ['</' CloseId '>']
+
+            # Close the tag and put inside after it.
+            TL = construct item
+                [OpenTag Inside CloseTag]
+        }
+    }
+}
+
+start HTML = parse start( stdin )
+flatten( HTML )
+#print_xml( HTML )
+printLinks( HTML )
+

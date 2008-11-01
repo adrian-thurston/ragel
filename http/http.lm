@@ -1,0 +1,68 @@
+#
+# Character classes
+#
+rl CTL /0..31 | 127/
+rl CR /13/
+rl LF /10/
+rl SP /32/
+rl HT /9/
+rl CHAR /0..127/
+
+rl separators / '(' | ')' | '<' | '>' 
+		| '@' | ',' | ';' | ':' | '\\' 
+		| '"' | '/' | '[' | ']' | '?' 
+		| '=' | '{' | '}' | SP | HT /
+
+rl token_char /CHAR - CTL - separators/
+
+#
+# Literal tokens
+#
+
+literal 'HTTP/', ' ', ':'
+token CRLF /CR LF/
+
+#
+# Request Line
+#
+
+token method /token_char+/
+
+token request_uri /(^SP)+/
+
+token http_number /digit+ '.' digit+/
+
+def http_version 
+	[ 'HTTP/' http_number ]
+
+def request_line 
+	[method ' ' request_uri 
+	 ' ' http_version CRLF]
+
+#
+# Header
+#
+
+token field_name /token_char+/
+
+token field_value 
+	/(^(CR|LF) | CR LF (SP|HT))* CR LF/
+
+def header 
+	[field_name ':' field_value]
+
+#
+# Request
+#
+
+def request
+	[request_line header* CRLF]
+
+request R = parse_stop request( stdin )
+
+print( 'HTTP/1.0 200 OK\r\n' )
+print( 'Date: Fri, 31 Dec 1999 23:59:59 GMT\r\n' )
+print( 'Content-Type: text/plain\r\n' )
+print( '\r\n' )
+print_xml( R )
+

@@ -1,0 +1,726 @@
+# Regular definitions
+rl ident_char /[a-zA-Z_]/
+
+# List used as a stack of indentations.
+list indent_stack [int]
+global indent_stack IndentStack = construct indent_stack []
+IndentStack.push( 0 )
+
+# Has a newline been sent for this '\n' .. whitespace match. 
+global int newline_sent = 0
+
+# Tokens. 
+lex start
+{
+	# Python keywords.
+	literal 'and', 'del', 'from', 'not', 'while', 'as', 'elif', 'global', 'or',
+		'with', 'assert', 'else', 'if', 'pass', 'yield', 'break', 'except',
+		'import', 'print', 'class', 'exec', 'in', 'raise', 'continue',
+		'finally', 'is', 'return', 'def', 'for', 'lambda', 'try'
+
+	# Identifiers
+	rl lowercase /'a'..'z'/
+	rl uppercase /'A'..'Z'/
+	rl letter /lowercase | uppercase/
+	token identifier /(letter|'_') (letter | digit | '_')*/
+
+	# Literals
+	rl escapeseq /'\\' any /
+	rl longstringchar /[^\\]/
+	rl shortstringchar_s /[^\\\n']/
+	rl shortstringchar_d /[^\\\n"]/
+	rl longstringitem /longstringchar | escapeseq/
+	rl shortstringitem_s /shortstringchar_s | escapeseq/
+	rl shortstringitem_d /shortstringchar_d | escapeseq/
+	rl longstring /"'''" longstringitem* :>> "'''" | '"""' longstringitem* :>> '"""'/
+	rl shortstring /"'" shortstringitem_s* "'" | '"' shortstringitem_d* '"'/
+	rl stringprefix /"r" | "u" | "ur" | "R" | "U" | "UR" | "Ur" | "uR"/
+	token stringliteral /stringprefix? (shortstring | longstring)/
+
+	# Integers
+	rl hexdigit /digit | 'a'..'f' | 'A'..'F'/
+	rl octdigit /'0'..'7'/
+	rl nonzerodigit /'1'..'9'/
+	rl hexinteger /'0' ('x' | 'X') hexdigit+/
+	rl octinteger /'0' octdigit+/
+	rl decimalinteger /nonzerodigit digit* | '0'/
+	token integer /decimalinteger | octinteger | hexinteger/
+	token longinteger /integer ('l' | 'L')/
+
+	# Floats.
+	rl exponent /('e' | 'E') ('+' | '-')? digit+/
+	rl fraction /'.' digit+/
+	rl intpart /digit+/
+	rl pointfloat /intpart? fraction | intpart '.'/
+	rl exponentfloat /(intpart | pointfloat) exponent/
+	token floatnumber /pointfloat | exponentfloat/
+
+	# Imaginaries.
+	token imagnumber /(floatnumber | intpart) ("j" | "J")/
+
+	# Operators.
+	literal '+', '-', '*', '**', '/', '//', '%', '<<', '>>', '&', '|', '^',
+		'~', '<', '>', '<=', '>=', '==', '!=', '<>'
+	
+	# Delimiters
+	literal '(', ')', '[', ']', '{', '}', '@', ',', ':', '.', '`', '=', ';',
+		'+=', '-=', '*=', '/=', '//=', '%=', '&=', '|=', '^=', '>>=', '<<=',
+		'**='
+	
+	literal '...'
+
+	# In general whitespace is ignored.
+	ignore WS /' '+/
+
+	# Find and ignore entire blank lines.
+	token BLANK_LINE 
+		/ '\n' [ \t]* ('#' [^\n]*)? '\n' /
+		{
+			# Need to shorten to take off the newline.
+			# Turn it into ignore.
+			send_ignore( make_token( typeid WS, pull(stdin, match_length - 1) ) )
+		}
+
+	# Find and ignore comments.
+	token COMMENT 
+		/ '#' [^\n]* '\n' /
+		{
+			# Need to shorten to take off the newline. Turn it into ignore.
+			send_ignore( make_token( typeid WS, pull(stdin, match_length - 1) ) )
+		}
+
+	# These tokens are generated
+	token INDENT //
+	token DEDENT //
+	token NEWLINE //
+	ignore IND_WS //
+
+	token INDENTATION 
+		/'\n' [ \t]*/
+		{
+			# First the newline.
+			send( make_token( typeid NEWLINE, '' ) )
+
+			# We have already sent the newline, compute the indentation level.
+			int data_length = match_length - 1
+
+			if data_length > IndentStack.top {
+				# The indentation level is more than the level on the top
+				# of the stack. This is an indent event. Send as an INDENT.
+				send( make_token( typeid INDENT, '' ) )
+
+				# Push to the stack as per python manual.
+				IndentStack.push( data_length )
+			} else {
+				while data_length < IndentStack.top {
+					# The indentation level is less than the level on the top of
+					# the stack. Pop the level and send one dedent. This flow of
+					# control will execute until we find the right indentation level
+					# to match up with.
+					IndentStack.pop()
+
+					# Send as a DEDENT
+					send( make_token( typeid DEDENT, '' ) )
+				}
+			}
+
+			# FIXME: if data.length is now > top of stack then error. This
+			# means the outdent does not match anything.
+
+			# We have squared up INDENTs and DEDENTs. Ignore the entire match.
+			send_ignore( make_token( typeid WS, pull(stdin, match_length) ) )
+		}
+}
+
+# Blank lines or comment lines at the beginning of the file.
+token LEADER / ( [ \t]* ('#' [^\n]*)? '\n' )* /
+
+int print_target_subscriptions_and_slicings( start Start )
+{
+	for TI: target_ext in Start {
+		if match TI [subscription] {
+			print( 'TARGET SUBSCRIPTION: ', TI, '\n' )
+		}
+
+		if match TI [simple_slicing] {
+			print( 'TARGET SIMPLE SLICING: ', TI, '\n' )
+		}
+
+		if match TI [extended_slicing] {
+			print( 'TARGET EXTENDED SLICING: ', TI, '\n' )
+		}
+	}
+	
+}
+
+int print_primary_subscriptions_and_slicings( start Start )
+{
+	for PI:primary_ext in Start {
+		if match PI [subscription] {
+			print( 'PRIMARY SUBSCRIPTION: ', PI, '\n' )
+		}
+
+		if match PI [simple_slicing] {
+			print( 'PRIMARY SIMPLE SLICING: ', PI, '\n' )
+		}
+
+		if match PI [extended_slicing] {
+			print( 'PRIMARY EXTENDED SLICING: ', PI, '\n' )
+		}
+	}
+}
+
+def start 
+	[file_input]
+
+def file_input 
+	[file_input_forms*]
+
+def file_input_forms 
+	[statement]
+|	[NEWLINE]
+
+def statement 
+	[stmt_list NEWLINE]
+|	[compound_stmt]
+
+def stmt_list 
+	[simple_stmt another_stmt* opt_semi]
+
+def another_stmt 
+	[';' simple_stmt]
+
+def opt_semi 
+	[';']
+|	[]
+
+def suite 
+	[stmt_list NEWLINE]
+|	[NEWLINE INDENT statement_seq DEDENT]
+
+def statement_seq 
+	[statement_seq statement]
+|	[statement]
+
+def compound_stmt 
+	[if_stmt]
+|	[while_stmt]
+|	[for_stmt]
+|	[try_stmt]
+|	[with_stmt]
+|	[funcdef]
+|	[classdef]
+
+def if_stmt 
+	['if' expression ':' suite elif_part* opt_else_part]
+
+def elif_part 
+	['elif' expression ':' suite]
+
+def opt_else_part 
+	['else' ':' suite]
+|	[]
+
+def while_stmt 
+	['while' expression ':' suite opt_else_part]
+
+def for_stmt 
+	['for' target_list 'in' expression_list ':' suite opt_else_part]
+
+def try_stmt 
+	['try' ':' suite except_list opt_else_part opt_finally_part]
+|	['try' ':' suite 'finally' ':' suite]
+
+def except_list 
+	[except_list except_part]
+|	[except_part]
+
+def except_part 
+	['except' ':' suite]
+|	['except' expression ':' suite]
+|	['except' expression ',' target ':' suite]
+
+def opt_finally_part 
+	['finally' ':' suite]
+|	[]
+  
+def with_stmt 
+	['with' expression ':' suite]
+|	['with' expression 'as' target ':' suite]
+
+def funcdef 
+	[decorators 'def' funcname '(' opt_parameter_list ')' ':' suite]
+
+def funcname 
+	[identifier]
+
+def decorators 
+	[decorators decorator]
+|	[]
+  
+def decorator 
+	['@' dotted_name opt_decorator_pal NEWLINE]
+
+def opt_decorator_pal 
+	[]
+|	['(' ')'] 
+|	['(' argument_list ')'] 
+|	['(' argument_list ',' ')'] 
+  
+def dotted_name 
+	[dotted_name '.' identifier]
+|	[identifier]
+
+def opt_parameter_list 
+	[parameter_list]
+|	[]
+
+def parameter_list 
+	[defparameter_list defparameter opt_comma]
+|	[defparameter_list '*' identifier]
+|	[defparameter_list '*' identifier '**' identifier]
+|	[defparameter_list '**' identifier]
+
+def defparameter_list 
+	[defparameter_list defparameter ',']
+|	[]
+  
+def defparameter 
+	[parameter]
+|	[parameter '=' expression]
+  
+def sublist 
+	[parameter_list opt_comma]
+
+def parameter_list 
+	[parameter_list ',' parameter]
+|	[parameter]
+  
+def parameter 
+	[identifier]
+|	['(' sublist ')']
+  
+def classdef 
+	['class' classname opt_inheritance ':' suite]
+
+def classname 
+	[identifier]
+
+def opt_inheritance 
+	['(' ')']
+|	['(' expression_list ')']
+|	[]
+
+def simple_stmt 
+	[expression_stmt]
+|	[assert_stmt]
+|	[assignment_stmt]
+|	[augmented_assignment_stmt]
+|	[pass_stmt]
+|	[del_stmt]
+|	[print_stmt]
+|	[return_stmt]
+|	[yield_stmt]
+|	[raise_stmt]
+|	[break_stmt]
+|	[continue_stmt]
+|	[import_stmt]
+|	[global_stmt]
+|	[exec_stmt]
+
+def expression_stmt 
+	[expression_list]
+
+def assert_stmt 
+	['assert' expression_list_core]
+
+def assignment_stmt 
+	[target_equals_list expression_list]
+
+def target_equals_list 
+	[target_equals_list target_equals]
+|	[target_equals]
+
+def target_equals 
+	[target_list '=']
+
+def target_list 
+	[target_list_core opt_comma]
+
+def target_list_core 
+	[target_list_core ',' target]
+|	[target]
+
+def target 
+	[target_atom target_ext_rep]
+
+def target_atom
+	[identifier]
+|	['(' target_list ')']
+|	['[' target_list ']']
+
+def target_ext_rep [target_ext target_ext_rep]
+def target_ext_rep []
+
+def target_ext
+	[attributeref]
+|	[subscription]
+|	[slicing]
+
+def augmented_assignment_stmt 
+	[target augop expression_list]
+  
+def augop 
+	['+='] | ['-='] | ['*='] | ['/=']
+|	['\%='] | ['**='] | ['>>='] | ['<<='] | ['\&=']
+|	['^'] | ['|=']
+
+def pass_stmt 
+	['pass']
+
+def del_stmt 
+	['del' target_list]
+
+def print_stmt 
+	['print' opt_expression_list]
+|	['print' '>>' expression_list]
+
+def return_stmt 
+	['return' opt_expression_list] 
+
+def yield_stmt 
+	['yield' expression_list]
+
+def raise_stmt 
+	['raise']
+|	['raise' expression]
+|	['raise' expression ',' expression]
+|	['raise' expression ',' expression ',' expression]
+
+def break_stmt 
+	['break']
+
+def continue_stmt 
+	['continue']
+
+def import_stmt 
+	['import' module opt_as_name more_imports]
+|	['from' module 'import' identifier opt_as_name more_imports]
+|	['from' module 'import' '(' identifier opt_as_name more_imports opt_comma ')']
+|	['from' module 'import' '*']
+
+def more_imports 
+	[more_imports ',' identifier opt_as_name]
+|	[]
+
+def module 
+	[module '.' identifier]
+|	[identifier]
+
+def opt_as_name 
+	['as' identifier]
+|	[]
+
+def global_stmt 
+	['global' identifer_list]
+
+def identifer_list 
+	[identifer_list ',' identifier]
+|	[identifier]
+
+def exec_stmt 
+	['exec' expression]
+|	['exec' expression 'in' expression]
+|	['exec' expression 'in' expression ',' expression]
+
+def opt_expression_list 
+	[expression_list]
+|	[]
+
+def expression_list 
+	[expression_list_core opt_comma]
+
+def expression_list_core 
+	[expression_list_core ',' expression]
+|	[expression]
+
+def opt_comma 
+	[',']
+|	[]
+
+def expression 
+	[or_test 'if' or_test 'else' test]
+|	[or_test]
+|	[lambda_form]
+
+def or_test 
+	[or_test 'or' and_test]
+|	[and_test]
+  
+def and_test 
+	[and_test 'and' not_test]
+|	[not_test]
+  
+def not_test 
+	[comparison]
+|	['not' not_test]
+
+def lambda_form 
+	['lambda' opt_parameter_list ':' expression]
+
+def test 
+	[or_test]
+|	[lambda_form]
+
+def comparison 
+	[or_expr comparison_part*]
+
+def comparison_part 
+	[comp_operator or_expr]
+
+def comp_operator 
+	['<'] | ['>'] | ['=='] | ['>='] | ['<='] | ['<>'] | ['!='] | ['is'] |
+	['is' 'not'] | ['in'] | ['not' 'in']
+
+def or_expr 
+	[or_expr '|' xor_expr]
+|	[xor_expr]
+
+def xor_expr 
+	[xor_expr '^' and_expr]
+|	[and_expr]
+
+def and_expr 
+	[and_expr '&' shift_expr]
+|	[shift_expr]
+
+def shift_expr 
+	[shift_expr '<<' a_expr]
+|	[shift_expr '>>' a_expr]
+|	[a_expr]
+
+def a_expr 
+	[a_expr '+' m_expr]
+|	[a_expr '-' m_expr]
+|	[m_expr]
+
+def m_expr 
+	[m_expr '*' u_expr]
+|	[m_expr '//' u_expr]
+|	[m_expr '/' u_expr]
+|	[m_expr '\%' u_expr]
+|	[u_expr]
+
+def u_expr 
+	[power]
+|	['-' u_expr]
+|	['+' u_expr]
+|	['\~' u_expr]
+
+def power 
+	[primary '**' u_expr]
+|	[primary] 
+
+def primary 
+	[atom primary_ext_rep]
+
+def atom 
+	[identifier]
+|	[pyliteral]
+|	[enclosure]
+
+def primary_ext_rep
+	[primary_ext primary_ext_rep]
+|	[]
+
+def primary_ext
+	[attributeref]
+|	[subscription]
+|	[slicing]
+|	[call]
+
+def pyliteral 
+	[stringliteral]
+|	[integer]
+|	[longinteger]
+|	[floatnumber]
+|	[imagnumber]
+
+def enclosure 
+	[parenth_form]
+|	[list_display]
+|	[generator_expression]
+|	[dict_display]
+|	[string_conversion]
+
+def parenth_form 
+	['(' opt_expression_list ')']
+
+def list_display 
+	['[' opt_listmaker ']']
+
+def opt_listmaker 
+	[listmaker]
+|	[]
+
+def listmaker 
+	[expression list_for]
+|	[expression listmaker_ext* opt_comma]
+
+def listmaker_ext
+	[',' expression]
+
+def opt_list_iter 
+	[list_iter]
+|	[]
+
+def list_iter 
+	[list_for] 
+|	[list_if]
+
+def list_if 
+	['if' test opt_list_iter]
+
+def list_for 
+	['for' expression_list 'in' testlist opt_list_iter]
+
+def testlist 
+	[test testlist_ext* opt_comma]
+
+def testlist_ext 
+	[',' test ]
+
+def generator_expression 
+	['(' test genexpr_for ')']
+
+def genexpr_for 
+	['for' expression_list 'in' test opt_genexpr_iter]
+
+def opt_genexpr_iter 
+	[genexpr_iter] 
+|	[] 
+
+def genexpr_iter 
+	[genexpr_for] 
+|	[genexpr_if]
+  
+def genexpr_if 
+	['if' test opt_genexpr_iter]
+
+def dict_display 
+	['\{' opt_key_datum_list '\}']
+
+def opt_key_datum_list 
+	[key_datum_list]
+|	[]
+
+def key_datum_list 
+	[key_datum key_datum_list_ext* opt_comma]
+
+def key_datum_list_ext 
+	[',' key_datum]
+
+def key_datum 
+	[expression ':' expression]
+
+def string_conversion 
+	['`' expression_list '`']
+
+def attributeref 
+	['.' identifier]
+
+def subscription 
+	['[' expression_list ']']
+
+# The natural ordered choice does not suffice here. Must force it.
+
+def slicing 
+	[simple_slicing]
+|	[extended_slicing]
+
+def simple_slicing 
+	['[' short_slice ']']
+
+def extended_slicing 
+	['[' slice_list ']']
+
+def slice_list 
+	[slice_item slice_list_ext* opt_comma]
+
+def slice_list_ext 
+	[',' slice_item]
+  
+def slice_item 
+	[expression]
+|	[proper_slice]
+|	[ellipsis]
+  
+def proper_slice 
+	[short_slice]
+|	[long_slice]
+  
+def short_slice 
+	[':']
+|	[':' upper_bound]
+|	[lower_bound ':']
+|	[lower_bound ':' upper_bound]
+  
+def long_slice 
+	[short_slice ':' stride]
+|	[short_slice ':']
+  
+def lower_bound 
+	[expression]
+  
+def upper_bound 
+	[expression]
+  
+def stride 
+	[expression]
+
+def ellipsis 
+	['...']
+
+def call 
+	['(' opt_argument_list ')']
+
+def opt_argument_list 
+	[argument_list opt_comma]
+|	[]
+  
+def argument_list 
+	[positional_arguments opt_comma_keyword_arguments
+		opt_comma_star_expr opt_comma_dstar_expr]
+|	[keyword_arguments opt_comma_star_expr opt_comma_dstar_expr]
+|	['*' expression opt_comma_dstar_expr]
+|	['**' expression]
+
+def opt_comma_star_expr 
+	[',' '*' expression] 
+|	[] 
+
+def opt_comma_dstar_expr 
+	[',' '**' expression] 
+|	[] 
+  
+def positional_arguments 
+	[positional_arguments ',' expression]
+|	[expression]
+  
+def opt_comma_keyword_arguments 
+	[',' keyword_arguments]
+|	[]
+
+def keyword_arguments 
+	[keyword_arguments ',' keyword_item]
+|	[keyword_item]
+
+def keyword_item 
+	[identifier '=' expression]
+
+
+start S = parse start( stdin )
+#print_xml( S )
+print_target_subscriptions_and_slicings( S )
+print_primary_subscriptions_and_slicings( S )
+print( '*** SUCCESS ***\n' )

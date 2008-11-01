@@ -1,0 +1,8 @@
+print( <<DATA1, more, <<DATA2, 99 )
+"&^#(@ almost
+!arbitrary text!
+DATA1
+hello
+world
+DATA2
+. error here

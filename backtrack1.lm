@@ -1,0 +1,24 @@
+# Token names.
+
+lex start
+{
+	literal '+', '*'
+	token number /[0-9]+/
+	ignore ws / [ \t\n]+ /
+}
+
+def F
+	[number '+']
+|	[number]
+|	[F '*' number]
+
+def E
+	[E '+' F]
+|	[F]
+
+def start 
+	[E]
+
+start S = parse start( stdin )
+start R = match S ~ 9 + 9
+print_xml( R )

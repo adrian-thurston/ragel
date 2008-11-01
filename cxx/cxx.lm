@@ -1,0 +1,2163 @@
+#
+# Data types for global data.
+#
+
+# Map definition
+map object_map [str object_list]
+
+# Language objects. 
+def lang_object
+	int typeId
+	str name
+
+	# If the object is a typedef, this points to the real object.
+	ptr lang_object typedefOf
+
+	object_map objectMap
+	object_list inherited
+	ptr lang_object lookupParent
+	ptr lang_object specializationOf
+	[]
+
+# This structure is used to keep track of information necessary to make a
+# declaration. While parsing a declaration it records the declaration's
+# attributes.
+def declaration_data
+	int isTypedef
+	int isFriend
+	int isTemplate
+
+	ptr lang_object typeObj
+	[]
+
+def declarator_data
+	ptr lang_object qualObj
+	ptr lang_object pdcScope
+	ptr lang_object lookupObj
+	[]
+
+list declaration_data_list [declaration_data]
+list declarator_data_list [declarator_data]
+
+# Constants for language object types.
+global int NamespaceType = typeid namespace_id
+global int ClassType = typeid class_id
+global int TemplateClassType = typeid templ_class_id
+global int EnumType = typeid enum_id
+global int IdType = typeid identifier
+global int TypedefType = typeid typedef_id
+global int TemplateIdType = typeid template_id
+
+# Object stack definition. Uses references to objects.
+list object_list [ptr lang_object]
+
+# Stack of integers.
+list int_stack [int]
+
+#
+# Global data declarations
+#
+
+# Object stacks.
+global object_list curNamespace = construct object_list []
+global object_list declNs = construct object_list []
+global object_list lookupNs = construct object_list []
+global object_list qualNs = construct object_list []
+global object_list templateParamNs = construct object_list []
+
+# Declaration, declarator data.
+global declaration_data_list declarationData = construct declaration_data_list []
+global declarator_data_list declaratorData = construct declarator_data_list []
+
+# Template declarations
+global int_stack templDecl = construct int_stack []
+
+# Root namespace object
+global ptr lang_object rootNamespace = createLangObject( NamespaceType, 
+		'<root_namespace>', nil )
+
+# Initialize the namespace and declaration stacks with the root namespace
+curNamespace.push( rootNamespace )
+declNs.push( rootNamespace )
+lookupNs.push( rootNamespace )
+
+# Start with no qualification (note variables are initialized to zero)
+qualNs.push( nil )
+
+templDecl.push( 0 )
+declarationData.push( construct declaration_data( 
+		isTypedef: 0, isFriend: 0, isTemplate: 0 ) [] )
+
+#
+# Identifier lookup.
+#
+
+# Lookup the token in the members of an object.
+ptr lang_object lookupInObject( ptr lang_object obj, str name )
+{
+	# LOG print( '  looking in ', obj->name, '\n' )
+
+	object_list ol = obj->objectMap.find( name )
+	if ol {
+		# LOG print( '  * found an object: ', ol.head, '\n' )
+		return ol.head
+	}
+
+	return nil
+}
+
+# Lookup in an object and all the objects beneath it in the inheritance
+# tree.
+ptr lang_object lookupWithInheritance( ptr lang_object obj, str name )
+{
+	ptr lang_object found = lookupInObject( obj, name )
+	if found
+		return found
+
+	object_list localObjInherited = obj->inherited
+	for II: ptr lang_object in localObjInherited {
+		ptr lang_object inh = II
+
+		# First check if the inherited object is the one we are after.
+		if inh->name == name && inh->typeId == ClassType {
+			# LOG print( '  * found a class name\n' )
+			return inh
+		}
+
+		# Otherwise look inside the inherited object.
+		found = lookupWithInheritance( inh, name )
+		if found
+			return found
+	}
+
+	return nil
+}
+
+ptr lang_object unqualifiedLookup( str name )
+{
+	ptr lang_object found
+
+	# Start with the objects in the templateParamNs.
+	object_list localTemplateParamNs = templateParamNs
+	for TemplParaObjIter: ptr lang_object in rev_child(localTemplateParamNs) {
+		found = lookupWithInheritance( TemplParaObjIter, name )
+		if found
+			break
+	}
+
+	if !found {
+		# Iterator over the objects starting at the head of the lookup stack
+		# and going up through the lookup parents.
+		ptr lang_object lookupIn = lookupNs.top
+		while lookupIn {
+			found = lookupWithInheritance( lookupIn, name )
+			if found
+				break
+			lookupIn = lookupIn->lookupParent
+		}
+	}
+
+	return found
+}
+
+# The C++ scanner.
+lex start
+{
+	rl fract_const / digit* '.' digit+ | digit+ '.' /
+	rl exponent / [eE] [+\-]? digit+ /
+	rl float_suffix / [flFL] /
+
+	# Single and double literals.
+	token TK_SingleLit /( 'L'? "'" ( [^'\\\n] | '\\' any )* "'" )/
+	token TK_DoubleLit /( 'L'? '"' ( [^"\\\n] | '\\' any )* '"' )/
+
+	literal 'extern', 'namespace', 'friend', 'typedef', 'auto', 'register',
+			'static', 'mutable', 'inline', 'virtual', 'explicit', 'const',
+			'volatile', 'restrict', 'class', 'struct', 'union', 'template',
+			'private', 'protected', 'public', 'using', 'void', 'char',
+			'wchar_t', 'bool', 'int', 'float', 'double', 'short', 'long',
+			'signed', 'unsigned', 'enum', 'new', 'delete', 'operator',
+			'typename', 'export', 'throw', 'try', 'catch', 'sizeof',
+			'dynamic_cast', 'static_cast', 'reinterpret_cast', 'const_cast',
+			'typeid', 'this', 'true', 'false', 'switch', 'case', 'default',
+			'if', 'else', 'while', 'do', 'for', 'break', 'continue',
+			'return', 'goto'
+
+	literal '__typeof'
+
+	literal '{', '}', ';', ',', '=', '(', ')', ':', '&', '*', '[', ']', '~', '+', '-',
+		'/', '<', '>', '|', '^', '%', '!', '?', '.'
+
+	literal '::', '==', '!=', '&&', '||', '*=', '/=', '%=', '+=', '-=', '&=',
+		'^=', '|=', '++', '--', '->', '->*', '.*', '...', '<<=', '>>='
+
+	# Token translation targets.
+	def unknown_id [lookup_id]
+	def class_id [lookup_id]
+	def namespace_id [lookup_id]
+	def templ_class_id [lookup_id]
+	def enum_id [lookup_id]
+	def typedef_id [lookup_id]
+	def identifier [lookup_id]
+	def template_id [lookup_id]
+
+	# Identifiers
+	token lookup_id 
+		ptr lang_object obj
+		ptr lang_object qualObj
+
+		/( [a-zA-Z_] [a-zA-Z0-9_]* )/
+		{
+			str name = match_text
+			ptr lang_object found = nil
+			ptr lang_object qualObj = nil
+			if qualNs.top {
+				# LOG print( 'qualified lookup of ', name, '\n' )
+
+				# Transfer the qualification to the token and reset it.
+				qualObj = qualNs.top
+				qualNs.top = nil
+
+				# Lookup using the qualification. 
+				found = lookupWithInheritance( qualObj, name )
+			}
+			else {
+				# No qualification, full search.
+				# LOG print( 'unqualified lookup of ', name, '\n' )
+				found = unqualifiedLookup( name )
+			}
+
+			# If no match, return an Unknown ID
+			int id = typeid unknown_id
+			if found
+				id = found->typeId
+
+			any LookupId = make_token( typeid lookup_id, 
+					pull(stdin, match_length), found, qualObj )
+			send( make_tree( id, LookupId ) )
+
+		}
+
+	# Floats.
+	token TK_Float /( fract_const exponent? float_suffix? |
+		digit+ exponent float_suffix? )/
+
+	# Integer decimal. Leading part buffered by float.
+	token TK_IntegerDecimal /( ( '0' | [1-9] [0-9]* ) [ulUL]{0,3} )/
+
+	# Integer octal. Leading part buffered by float.
+	token TK_IntegerOctal /( '0' [0-9]+ [ulUL]{0,2} )/
+
+	# Integer hex. Leading 0 buffered by float.
+	token TK_IntegerHex /( '0x' [0-9a-fA-F]+ [ulUL]{0,2} )/
+
+	# Preprocessor line.
+	ignore /'#' [^\n]* '\n'/
+
+	# Comments and whitespace.
+	ignore /( '/*' (any | '\n')* :>> '*/' )/
+	ignore /( '//' any* :> '\n' )/
+	ignore /( any - 33..126 )+/
+}
+
+#
+# Support functions
+#
+
+ptr lang_object createLangObject( int typeId, str name, ptr lang_object lookupParent )
+{
+	ptr lang_object obj = new construct lang_object(
+			typeId: typeId, 
+			name: name,
+			objectMap: construct object_map [],
+			inherited: construct object_list [],
+			lookupParent: lookupParent ) []
+	return obj
+}
+
+# Building the language object tree.
+int insertObject( ptr lang_object definedIn, str name, ptr lang_object obj )
+{
+	object_list ol = definedIn->objectMap.find( name )
+	if !ol {
+		# Element not in the map already
+		ol = construct object_list []
+	}
+	ol.append( obj )
+	definedIn->objectMap.store( name, ol )
+}
+
+ptr lang_object findClass( ptr lang_object inObj, str name )
+{
+	object_list ol = inObj->objectMap.find( name )
+	if ol { 
+		for ObjIter: ptr lang_object in ol {
+			ptr lang_object obj = ObjIter
+			if obj->typeId == ClassType {
+				return obj
+			}
+		}
+	}
+	return nil
+}
+
+ptr lang_object findTemplateClass( ptr lang_object inObj, str name )
+{
+	object_list ol = inObj->objectMap.find( name )
+	if ol { 
+		for ObjIter: ptr lang_object in ol {
+			ptr lang_object obj = ObjIter
+			if obj->typeId == TemplateClassType
+				return obj
+		}
+	}
+	return nil
+}
+
+def root_qual_opt 
+	[]
+|	['::']
+
+def nested_name_specifier_opt 
+	[nested_name_specifier_opt qualifying_name '::' designated_qualifying_name '::']
+|	[nested_name_specifier_opt qualifying_name '::']
+|	[]
+
+def nested_name_specifier 
+	[nested_name_specifier designated_qualifying_name '::']
+|	[nested_name_specifier qualifying_name '::']
+|	[qualifying_name '::']
+
+def qualifying_name 
+	[class_name]
+	{
+		qualNs.top = r1.lookupId.obj
+	}
+
+|	[namespace_id]
+	{
+		match r1 [Id: lookup_id]
+		qualNs.top = Id.obj
+	}
+
+|	[typedef_id]
+	{
+		match r1 [Id: lookup_id]
+		qualNs.top = Id.obj->typedefOf
+	}
+
+def designated_qualifying_name 
+	['template' any_id]
+	{
+		# FIXME: nulling qualNs is not the right thing to do here.
+		qualNs.top = nil
+	}
+
+|	['template' any_id 
+		templ_arg_open template_argument_list_opt templ_arg_close]
+	{
+		# FIXME: nulling qualNs is not the right thing to do here.
+		qualNs.top = nil
+	}
+
+#
+# Id Expression
+#
+
+def id_expression 
+	lookup_id lookupId
+
+	[root_qual_opt nested_name_specifier_opt unknown_id]
+	{
+		lhs.lookupId = lookup_id in r3
+	}
+
+|	[root_qual_opt nested_name_specifier_opt identifier]
+	{
+		lhs.lookupId = lookup_id in r3
+	}
+
+|	[root_qual_opt nested_name_specifier_opt operator_function_id]
+	{
+		# Normally the token translation transfers the qualification. Since
+		# the operator_function_id does not end in a lookup we must do it ourselves.
+		ptr lang_object qualObj = qualNs.top
+		qualNs.top = nil
+
+		lhs.lookupId = construct lookup_id ["x"]
+		lhs.lookupId.data = '<operator_function_id>'
+		lhs.lookupId.qualObj = qualObj
+	}
+
+|	[root_qual_opt nested_name_specifier_opt conversion_function_id]
+	{
+		# Normally the token translation transfers the qualification. Since
+		# the operator_function_id does not } in a lookup we must do it ourselves.
+		ptr lang_object qualObj = qualNs.top
+		qualNs.top = nil
+
+		# Do we need qual reset here becauase operator_function_id does not do it?
+		lhs.lookupId = construct lookup_id ["x"]
+		lhs.lookupId.data = '<conversion_function_id>'
+		lhs.lookupId.qualObj = qualObj
+	}
+
+|	[root_qual_opt nested_name_specifier_opt '~' class_name]
+	{
+		lhs.lookupId = r4.lookupId
+	}
+
+|	[root_qual_opt nested_name_specifier_opt template_name]
+	{
+		lhs.lookupId = r3.lookupId
+	}
+		
+def template_name 
+	lookup_id lookupId
+
+	[template_id templ_arg_open template_argument_list_opt templ_arg_close]
+	{
+		lhs.lookupId = lookup_id in r1
+	}
+
+|	[template_id]
+	{
+		lhs.lookupId = lookup_id in r1
+	}
+
+
+#
+# Class Names
+#
+
+def class_name 
+	lookup_id lookupId
+
+	[class_id]
+	{
+		lhs.lookupId = lookup_id in r1
+	}
+
+|	[templ_class_id]
+	{
+		lhs.lookupId = lookup_id in r1
+	}
+
+|	[templ_class_id templ_arg_open template_argument_list_opt templ_arg_close]
+	{
+		# TODO: Look for a specialization.
+		lhs.lookupId = lookup_id in r1
+	}
+
+def templ_arg_open 
+	['<']
+	{
+		qualNs.push( nil )
+	}
+
+def templ_arg_close
+	['>']
+	{
+		qualNs.pop()
+	}
+
+def declaration 
+	[block_declaration] commit
+|	[function_definition] commit
+|	[template_declaration] commit
+|	[explicit_instantiation] commit
+|	[explicit_specialization] commit
+|	[linkage_specification] commit
+|	[namespace_definition] commit
+
+#
+# Declarations
+#
+
+def block_declaration 
+	[simple_declaration]
+|	[using_declaration]
+|	[using_directive]
+
+def simple_declaration 
+	[declaration_start simple_declaration_forms declaration_end ';']
+
+# Ordering is important for optimization. The form with the optional
+# decl_specifier_sing should go second.
+def simple_declaration_forms
+	[decl_specifier_mult_seq_opt decl_specifier_sing 
+		decl_specifier_mult_seq_opt init_declarator_list_opt]
+
+|	[decl_specifier_mult_seq_opt init_declarator_list_opt]
+
+def declaration_start 
+	[]
+	{
+		# LOG print( 'opening new declaration_data with templDecl: ', templDecl.top, '\n' )
+		declarationData.push( construct declaration_data (
+				isTypedef: 0, isFriend: 0, isTemplate: 0 ) [] )
+
+		# Transfer the template flag and reset it.
+		declarationData.top.isTemplate = templDecl.top
+		templDecl.push( 0 )
+	}
+
+def declaration_end 
+	[]
+	{
+		# LOG print( 'closing declaration_data\n' )
+		declarationData.pop()
+		templDecl.pop()
+	}
+
+def decl_specifier_sing 
+	[type_specifier_sing]
+	{
+		# Store the object type of the declaration (if any) for use
+		# by typedefs. 
+		declarationData.top.typeObj = r1.lookupId.obj
+	}
+
+def type_specifier_seq
+	lookup_id lookupId
+
+	[type_specifier_mult_seq_opt type_specifier_sing type_specifier_mult_seq_opt]
+	{
+		lhs.lookupId = r2.lookupId
+	}
+
+def type_specifier_sing
+	lookup_id lookupId
+
+	[simple_type_specifier]
+	{
+		lhs.lookupId = r1.lookupId
+	}
+		
+|	[class_specifier]
+	{
+		lhs.lookupId = construct lookup_id ["x"]
+		lhs.lookupId.data = '<class_specifier>'
+	}
+
+|	[enum_specifier]
+	{
+		lhs.lookupId = construct lookup_id ["x"]
+		lhs.lookupId.data = '<enum_specifier>'
+	}
+
+|	[elaborated_type_specifier]
+	{
+		lhs.lookupId = construct lookup_id ["x"]
+		lhs.lookupId.data = '<elaborated_type_specifier>'
+	}
+
+# Type specifier sequence without enum specifier or class specifier.
+def necs_type_specifier_seq
+	[type_specifier_mult_seq_opt necs_type_specifier_sing type_specifier_mult_seq_opt]
+
+# Type specifier singular without enum specifier or class specifier.
+def necs_type_specifier_sing 
+	[simple_type_specifier]
+|	[elaborated_type_specifier]
+
+def type_specifier_mult_seq_opt 
+	[type_specifier_mult_seq_opt type_specifier_mult]
+|	[]
+
+def type_specifier_mult_seq 
+	[type_specifier_mult_seq type_specifier_mult]
+|	[type_specifier_mult]
+
+def simple_type_specifier
+	lookup_id lookupId
+
+	[simple_type_specifier_name]
+	{
+		lhs.lookupId = r1.lookupId
+	}
+
+|	[simple_type_specifier_kw_seq]
+	{
+		lhs.lookupId = construct lookup_id ["x"]
+		lhs.lookupId.data = '<simple_type_specifier_kw_seq>'
+	}
+
+|	['typename' root_qual_opt nested_name_specifier type_name]
+	{
+		lhs.lookupId = r4.lookupId
+	}
+
+|	['typename' root_qual_opt nested_name_specifier identifier]
+	{
+		lhs.lookupId = lookup_id in r4
+	}
+
+|	['typename' root_qual_opt nested_name_specifier unknown_id]
+	{
+		lhs.lookupId = lookup_id in r4
+	}
+
+	# Extension.
+|	['__typeof' '(' identifier ')']
+	{
+		lhs.lookupId = construct lookup_id ["x"]
+		lhs.lookupId.data = '<simple_type_specifier_kw_seq>'
+	}
+
+def simple_type_specifier_name
+	lookup_id lookupId
+
+	[qual_type_name]
+	{
+		lhs.lookupId = r1.lookupId
+	}
+
+def simple_type_specifier_kw_seq 
+	[simple_type_specifier_kw_seq simple_type_specifier_kw]
+|	[simple_type_specifier_kw]
+
+def simple_type_specifier_kw 
+	['void']
+|	['char']
+|	['wchar_t']
+|	['bool']
+|	['int']
+|	['float']
+|	['double']
+|	['short']
+|	['long']
+|	['signed']
+|	['unsigned']
+
+def qual_type_name
+	lookup_id lookupId
+
+	[root_qual_opt nested_name_specifier_opt type_name]
+	{
+		lhs.lookupId = r3.lookupId
+	}
+
+def type_name
+	lookup_id lookupId
+
+	[class_name]
+	{
+		lhs.lookupId = r1.lookupId
+	}
+
+|	[enum_id]
+	{
+		lhs.lookupId = lookup_id in r1
+	}
+
+|	[typedef_id]
+	{
+		lhs.lookupId = lookup_id in r1
+	}
+
+# NOTE: the typename case is moved to simple type specifier
+# to take advantage of its conflict resolution.
+def elaborated_type_specifier
+	[class_key nested_name_specifier_opt class_head_name]
+	{
+		lookup_id Id = lookup_id in r3
+		str name = Id.data
+
+		# Get the ns the class is declared in.
+		ptr lang_object parentObj = declNs.top
+		if Id.qualObj
+			parentObj = Id.qualObj
+
+		# Look for the class in the given scope.
+		ptr lang_object declaredClass = findClass( parentObj, name )
+		if !declaredClass
+			declaredClass = findTemplateClass( parentObj, name )
+
+		if !declaredClass {
+			# LOG print( 'creating new class: ', name, '\n' )
+
+			# Class does not exist in the parent scope, create it.
+			int nsType = declaredClassType()
+
+			declaredClass = createLangObject( nsType, name, lookupNs.top )
+
+			# FIXME: handle friends. Make the class visible only if we are NOT
+			# in a friend declaration.  The new class object is necessary to
+			# properly process the body of the class.
+			if declarationData.top.isFriend == 0
+				insertObject( parentObj, name, declaredClass )
+		}
+	}
+
+	# TODO: Lookup type specialization.
+|	[class_key nested_name_specifier_opt templ_class_id
+		templ_arg_open template_argument_list_opt templ_arg_close]
+
+|	['enum' nested_name_specifier_opt enum_head_name]
+	{
+		# TODO: should look for existing enums of the same name.
+		lookup_id Id = lookup_id in r3
+		# LOG print( 'creating enumeration ', Id.data, '\n' )
+		ptr lang_object enum = createLangObject( EnumType, Id.data, lookupNs.top )
+		insertObject( declNs.top, Id.data, enum )
+	}
+
+def decl_specifier_mult_seq_opt 
+	[decl_specifier_mult_seq_opt decl_specifier_mult]
+|	[]
+
+def decl_specifier_mult_seq 
+	[decl_specifier_mult_seq decl_specifier_mult]
+|	[decl_specifier_mult]
+
+def decl_specifier_mult 
+	[type_specifier_mult]
+|	[storage_class_specifier]
+|	[function_specifier]
+
+|	['friend']
+	{
+		declarationData.top.isFriend = 1
+	}
+
+|	['typedef']
+	{
+		declarationData.top.isTypedef = 1
+	}
+
+def storage_class_specifier 
+	['auto']
+|	['register']
+|	['static']
+|	['extern']
+|	['mutable']
+
+def function_specifier 
+	['inline']
+|	['virtual']
+|	['explicit']
+
+def type_specifier_mult 
+	[cv_qualifier]
+
+def cv_qualifier 
+	['const']
+|	['volatile']
+|	['restrict']
+
+def cv_qualifier_rep 
+	[cv_qualifier_rep cv_qualifier]
+|	[]
+
+def namespace_definition 
+	[named_namespace_definition]
+|	[unnamed_namespace_definition]
+
+def named_namespace_definition
+	[original_namespace_definition]
+|	[extension_namespace_definition]
+
+#
+# Enumerations
+#
+
+def enum_specifier 
+	['enum' nested_name_specifier_opt 
+			enum_head_name '{' enumerator_list_opt '}']
+	{
+		# TODO: should look for existing enums of the same name.
+		lookup_id Id = lookup_id in r3
+		# LOG print( 'creating enumeration ', Id.data, '\n' )
+		ptr lang_object enum = createLangObject( EnumType, Id.data, lookupNs.top )
+		insertObject( declNs.top, Id.data, enum )
+	}
+
+|	['enum' '{' enumerator_list_opt '}']
+
+def enum_head_name
+	[class_id] 
+|	[templ_class_id]
+|	[namespace_id]
+|	[typedef_id]
+|	[enum_id]
+|	[identifier]
+|	[template_id]
+|	[unknown_id]
+
+def enumerator_list_opt 
+	[enumerator_list]
+|	[enumerator_list ',']
+|	[]
+
+def enumerator_list 
+	[enumerator_list ',' enumerator_definition]
+|	[enumerator_definition]
+
+def enumerator_definition 
+	[enumerator_id]
+	{
+		lookup_id Id = lookup_id in r1
+		ptr lang_object enumId = createLangObject( IdType, Id.data, lookupNs.top )
+		insertObject( declNs.top, Id.data, enumId )
+	}
+
+|	[enumerator_id '=' constant_expression]
+	{
+		lookup_id Id = lookup_id in r1
+		ptr lang_object enumId = createLangObject( IdType, Id.data, lookupNs.top )
+		insertObject( declNs.top, Id.data, enumId )
+	}
+
+def enumerator_id
+	[namespace_id] 
+|	[typedef_id]
+|	[enum_id]
+|	[class_id] 
+|	[templ_class_id]
+|	[template_id]
+|	[identifier]
+|	[unknown_id]
+
+#
+# Declarators
+#
+
+def init_declarator_list_opt 
+	[init_declarator_list]
+|	[]
+
+def init_declarator_list
+	[init_declarator_list ',' init_declarator]
+|	[init_declarator]
+
+def init_declarator
+	[declarator initializer_opt]
+
+def initializer_opt
+	['=' initializer_clause]
+|	['(' expression ')']
+|	[]
+
+def initializer_clause 
+	[assignment_expression]
+|	['{' initializer_list '}']
+|	['{' initializer_list ',' '}']
+|	['{' '}']
+
+def initializer_list
+	[initializer_list ',' initializer_clause]
+|	[initializer_clause]
+
+#
+# Expressions
+#
+
+def expression 
+	[expression ',' assignment_expression]
+|	[assignment_expression]
+
+def expression_opt
+	[expression]
+|	[]
+
+def constant_expression
+	[conditional_expression]
+
+def constant_expression_opt 
+	[constant_expression]
+|	[]
+
+def assignment_expression 
+	[conditional_expression]
+|	[logical_or_expression assignment_op assignment_expression]
+|	[throw_expression]
+
+def assignment_op 
+	['=']
+|	['*=']
+|	['/=']
+|	['%=']
+|	['+=']
+|	['-=']
+|	['>>=']
+|	['<<=']
+|	['&=']
+|	['^=']
+|	['|=']
+
+def conditional_expression 
+	[logical_or_expression]
+|	[logical_or_expression '?' expression ':' assignment_expression]
+
+def logical_or_expression 
+	[logical_or_expression '||' logical_and_expression]
+|	[logical_and_expression]
+
+def logical_and_expression 
+	[logical_and_expression '&&' inclusive_or_expression]
+|	[inclusive_or_expression]
+
+def inclusive_or_expression 
+	[inclusive_or_expression '|' exclusive_or_expression]
+|	[exclusive_or_expression]
+
+def exclusive_or_expression 
+	[exclusive_or_expression '^' and_expression]
+|	[and_expression]
+
+def and_expression 
+	[and_expression '&' equality_expression]
+|	[equality_expression]
+
+def equality_expression 
+	[equality_expression '==' relational_expression]
+|	[equality_expression '!=' relational_expression]
+|	[relational_expression]
+
+def relational_expression 
+	[relational_expression '<' shift_expression]
+|	[relational_expression '>' shift_expression]
+|	[relational_expression lt_eq shift_expression]
+|	[relational_expression gt_eq shift_expression]
+|	[shift_expression]
+
+def shift_expression 
+	[shift_expression shift_left additive_expression]
+|	[shift_expression shift_right additive_expression]
+|	[additive_expression]
+
+def additive_expression 
+	[additive_expression '+' multiplicative_expression]
+|	[additive_expression '-' multiplicative_expression]
+|	[multiplicative_expression]
+
+def multiplicative_expression 
+	[multiplicative_expression '*' pm_expression]
+|	[multiplicative_expression '/' pm_expression]
+|	[multiplicative_expression '%' pm_expression]
+|	[pm_expression]
+
+def pm_expression 
+	[pm_expression '->*' cast_expression]
+|	[pm_expression '.*' cast_expression]
+|	[cast_expression]
+
+def cast_expression 
+	[unary_expression]
+|	['(' type_id ')' cast_expression]
+
+def delete_expression 
+	[root_qual_opt 'delete' cast_expression]
+|	[root_qual_opt 'delete' '[' ']' cast_expression]
+
+def new_initializer_opt 
+	[new_initializer]
+|	[]
+
+def new_initializer 
+	['(' expression_opt ')']
+
+def direct_new_declarator 
+	['[' expression ']']
+|	[direct_new_declarator '[' constant_expression ']']
+
+def new_declarator_opt 
+	[new_declarator]
+|	[]
+
+def new_declarator 
+	[direct_new_declarator]
+|	[ptr_operator_seq direct_new_declarator]
+|	[ptr_operator_seq]
+
+def new_type_id 
+	[necs_type_specifier_seq new_declarator_opt]
+
+def new_placement 
+	['(' expression ')']
+
+def new_expression 
+	[root_qual_opt 'new' new_type_id new_initializer_opt]
+|	[root_qual_opt 'new' new_placement new_type_id new_initializer_opt]
+|	[root_qual_opt 'new' '(' type_id ')' new_initializer_opt]
+|	[root_qual_opt 'new' new_placement '(' type_id ')' new_initializer_opt]
+
+def unary_operator 
+	['*']
+|	['&']
+|	['+']
+|	['-']
+|	['!']
+|	['~']
+
+def unary_expression 
+	[postfix_expression]
+|	['++' cast_expression]
+|	['--' cast_expression]
+|	[unary_operator cast_expression]
+|	['sizeof' '(' type_id ')']
+|	['sizeof' unary_expression]
+|	[new_expression]
+|	[delete_expression]
+
+def function_style_type_conv 
+	[simple_type_specifier]
+
+
+def postfix_expression 
+	[primary_expression]
+|	[postfix_expression '[' expression ']']
+|	[postfix_expression '(' expression_opt ')']
+|	[function_style_type_conv '(' expression_opt ')']
+|	[member_request_expr dot_arrow id_expression]
+|	[member_request_expr dot_arrow pseudo_destructor_call]
+|	[postfix_expression '++']
+|	[postfix_expression '--']
+|	['dynamic_cast' templ_arg_open type_id templ_arg_close '(' expression ')']
+|	['static_cast' templ_arg_open type_id templ_arg_close '(' expression ')']
+|	['reinterpret_cast' templ_arg_open type_id templ_arg_close '(' expression ')']
+|	['const_cast' templ_arg_open type_id templ_arg_close '(' expression ')']
+|	['typeid' '(' expression ')']
+|	['typeid' '(' type_id ')']
+
+def pseudo_destructor_call
+	[root_qual_opt nested_name_specifier_opt '~' pdc_type_name]
+
+def primary_expression 
+	[expr_lit]
+|	['this']
+|	['(' expression ')']
+|	[id_expression]
+
+# This is an GNU extension.
+def primary_expression 
+	['(' '{' statement_rep '}' ')']
+
+def expr_lit 
+	[TK_IntegerDecimal]
+|	[TK_IntegerOctal]
+|	[TK_IntegerHex]
+|	[TK_SingleLit]
+|	[TK_Float]
+|	[double_lit_list]
+|	['true']
+|	['false']
+
+def double_lit_list 
+	[TK_DoubleLit double_lit_list]
+|	[TK_DoubleLit]
+
+def member_request_expr 
+	[postfix_expression]
+#	{
+#		# FIXME: If no proper type is found, we must fail.
+#		# LOG print( 'setting member request scope\n' )
+#		# qualNs.set( $1->type != 0 ? $1->type->getObject() : 0 );
+#	}
+
+def dot_arrow 
+	['->']
+|	['.']
+
+def pdc_type_name 
+	[enum_id]
+|	[typedef_id]
+
+#
+# Statements
+#
+
+def statement_rep 
+	[statement_rep statement]
+|	[]
+
+def statement 
+	[declaration_statement]
+|	[labeled_statement]
+|	[expression_statement]
+|	[compound_statement]
+|	[selection_statement]
+|	[iteration_statement]
+|	[jump_statement]
+|	[try_block]
+
+def labeled_statement 
+	[label_id ':' statement]
+|	['case' constant_expression ':' statement]
+|	['default' ':' statement]
+
+def label_id 
+	[unknown_id]
+|	[identifier]
+|	[class_id]
+|	[templ_class_id]
+|	[namespace_id]
+|	[typedef_id]
+|	[enum_id]
+|	[template_id]
+
+def compound_statement
+	['{' compound_begin statement_rep compound_end '}']
+
+def compound_begin 
+	[]
+	{
+		ptr lang_object newCompound = createLangObject( 0, '<compound_begin>', lookupNs.top  )
+		lookupNs.push( newCompound )
+		declNs.push( newCompound )
+		# LOG print( 'opening <compound>\n' )
+	}
+
+def compound_end 
+	[]
+	{
+		lookupNs.pop()
+		declNs.pop()
+		# LOG print( 'closing <compound>\n' )
+	}
+
+def selection_statement 
+	['if' '(' condition ')' statement elseif_clauses else_clause]
+|	['switch' '(' condition ')' statement]
+
+def elseif_clauses 
+	[elseif_clauses 'else' 'if' '(' condition ')' statement]
+|	[]
+
+def else_clause 
+	['else' statement]
+|	[]
+
+def iteration_statement
+	['while' '(' condition ')' statement]
+|	['do' statement 'while' '(' expression ')' ';']
+|	['for' '(' for_init_statement condition_opt ';' expression_opt ')' statement]
+
+def jump_statement 
+	['break' ';']
+|	['continue' ';']
+|	['return' expression_opt ';']
+|	['goto' any_id ';']
+
+def any_id
+	[unknown_id]
+|	[class_id]
+|	[namespace_id]
+|	[templ_class_id]
+|	[enum_id]
+|	[typedef_id]
+|	[identifier]
+|	[template_id]
+	
+
+def for_init_statement 
+	[expression_statement]
+|	[stmt_block_declaration_forms ';']
+
+def condition 
+	[expression]
+|	[type_specifier_seq declarator '=' assignment_expression]
+
+def condition_opt 
+	[condition]
+|	[]
+
+def expression_statement 
+	[expression ';']
+|	[';']
+
+def declaration_statement 
+	[stmt_block_declaration]
+
+def stmt_block_declaration 
+	[declaration_start stmt_block_declaration_forms declaration_end ';']
+|	[using_declaration]
+|	[using_directive]
+
+def stmt_block_declaration_forms
+	[decl_specifier_mult_seq_opt decl_specifier_sing decl_specifier_mult_seq_opt 
+		init_declarator_list_opt]
+|	[decl_specifier_mult_seq init_declarator_list_opt]
+
+#
+# Declarators
+#
+
+def declarator
+	ptr lang_object lookupObj
+
+	[ptr_operator_seq_opt declarator_id decl_array_or_param_rep declarator_end]
+	{
+		lhs.lookupObj = r4.lookupObj
+	}
+
+|	[ptr_operator_seq_opt '(' sub_declarator ')' decl_array_or_param_rep declarator_end]
+	{
+		lhs.lookupObj = r6.lookupObj
+	}
+
+def sub_declarator 
+	[ptr_operator_seq declarator_id decl_array_or_param_rep]
+|	[ptr_operator_seq '(' sub_declarator ')' decl_array_or_param_rep]
+|	['(' sub_declarator ')' decl_array_or_param_rep]
+|	[declarator_id decl_array_or_param_rep]
+
+def decl_array_or_param_rep 
+	[decl_array_or_param_rep decl_array_or_param]
+|	[]
+
+def decl_array_or_param 
+	['[' constant_expression_opt ']']
+|	['(' parameter_declaration_clause ')' cv_qualifier_rep exception_specification_opt]
+
+def declarator_id
+	[declarator_id_forms]
+	{
+		str name = r1.lookupId.data
+		ptr lang_object qualObj = r1.lookupId.qualObj
+
+		ptr lang_object parentObj = declNs.top
+		if qualObj {
+			parentObj = qualObj
+		}
+
+		# Decide if we are declaring a constructor/destructor.
+		bool isConstructor
+		if parentObj == r1.lookupId.obj {
+			isConstructor = true
+			# LOG print( 'making declarator ', name, ' a constructor/destructor\n' )
+		}
+
+		if parentObj->specializationOf && 
+				parentObj->specializationOf == r1.lookupId.obj
+		{
+			isConstructor = true
+			# LOG print( 'making declarator ', name, ' a constructor/destructor\n' )
+		}
+
+		ptr lang_object obj = nil
+		if name && !isConstructor && declarationData.top.isFriend == 0 {
+			if declarationData.top.isTypedef {
+				obj = createLangObject( TypedefType, name, lookupNs.top )
+				obj->typedefOf = declarationData.top.typeObj
+				insertObject( parentObj, name, obj )
+
+				# LOG print( 'making declarator ', name, ' a typedef\n' )
+			}
+			else {
+				if !qualObj {
+					if declarationData.top.isTemplate {
+						# If in a template declaration and the name is not qualified then
+						# create the template id.
+						obj = createLangObject( TemplateIdType, name, lookupNs.top )
+						#object->objType = declarationData.top.type
+						insertObject( declNs.top, name, obj )
+
+						# LOG print( 'making declarator ', name, ' a template id\n' )
+					}
+					else {
+						obj = createLangObject( IdType, name, lookupNs.top )
+						#object->objType = declarationData.top().type;
+						insertObject( declNs.top, name, obj )
+
+						# LOG print( 'making declarator ', name, ' an id\n' ) 
+					}
+				}
+			}
+		}
+
+		declaratorData.push( construct declarator_data (
+				qualObj: qualObj, lookupObj: lookupNs.top ) [] )
+
+		# If the declarator is qualified, push the qualification to the lookup
+		# stack. Also save it in the declarator data so it can be passed to a
+		# function body if needed.
+		if qualObj {
+			lookupNs.push( qualObj )
+			declaratorData.top.lookupObj = qualObj
+		}
+
+		# LOG print( 'reduced declarator_id: ', name, '\n' )
+	}
+
+# Undoes the setup done by declarator_id and pdc_start.
+def declarator_end
+	ptr lang_object lookupObj
+
+	[]
+	{
+		# Get the lookupObject from the scope and pass it up. If we are about to
+		# parse a function body it will be needed.
+		lhs.lookupObj = declaratorData.top.lookupObj
+
+		ptr lang_object pdcScope = declaratorData.top.pdcScope
+		ptr lang_object qualObj = declaratorData.top.qualObj
+
+		declaratorData.pop()
+
+		if pdcScope {
+			# LOG print( 'closing <pdc_scope>\n' )
+			lookupNs.pop()
+			declNs.pop()
+		}
+
+		if qualObj {
+			# LOG print( 'popping lookupNs\n' )
+			lookupNs.pop()
+		}
+	}
+
+def declarator_id_forms
+	lookup_id lookupId
+
+	[id_expression]
+	{
+		lhs.lookupId = r1.lookupId
+	}
+
+|	[root_qual_opt nested_name_specifier_opt type_name]
+	{
+		lhs.lookupId = r3.lookupId
+	}
+
+|	[root_qual_opt nested_name_specifier_opt '~' class_id]
+	{
+		lhs.lookupId = lookup_id in r4
+	}
+
+|	[root_qual_opt nested_name_specifier_opt '~' templ_class_id]
+	{
+		lhs.lookupId = lookup_id in r4
+	}
+
+def type_id
+	lookup_id lookupId
+
+	[type_specifier_seq abstract_declarator_opt]
+	{
+		lhs.lookupId = r1.lookupId
+	}
+
+def abstract_declarator_opt 
+	[abstract_declarator]
+|	[]
+
+def abstract_declarator
+	[ptr_operator_seq abstract_noid abstract_decl_array_or_param_seq_opt declarator_end]
+|	[ptr_operator_seq '(' sub_abstract_declarator ')' 
+		abstract_decl_array_or_param_seq_opt declarator_end]
+|	[abstract_noid abstract_decl_array_or_param_seq declarator_end]
+|	['(' sub_abstract_declarator ')' abstract_decl_array_or_param_seq_opt declarator_end]
+
+def sub_abstract_declarator
+	[ptr_operator_seq abstract_noid abstract_decl_array_or_param_seq_opt]
+
+|	[ptr_operator_seq '(' sub_abstract_declarator ')' 
+		abstract_decl_array_or_param_seq_opt]
+	
+|	['(' sub_abstract_declarator ')' abstract_decl_array_or_param_seq_opt]
+
+def abstract_noid 
+	[]
+	{
+		#  Make scope for declarator.
+		declaratorData.push( construct declarator_data [] )
+	}
+
+def abstract_decl_array_or_param_seq_opt
+	[abstract_decl_array_or_param_seq_opt abstract_decl_array_or_param]
+|	[]
+
+def abstract_decl_array_or_param_seq
+	[abstract_decl_array_or_param_seq abstract_decl_array_or_param]
+|	[abstract_decl_array_or_param]
+
+def abstract_decl_array_or_param
+	['[' constant_expression_opt ']']
+|	['(' parameter_declaration_clause ')' cv_qualifier_rep 
+		exception_specification_opt]
+
+def parameter_declaration_clause
+	[pdc_start parameter_declaration_list]
+|	[pdc_start parameter_declaration_list '...']
+|	[pdc_start parameter_declaration_list ',' '...']
+|	[pdc_start '...']
+|	[pdc_start]
+
+def pdc_start 
+	[]
+	{
+		if !declaratorData.top.pdcScope {
+			# We are going to need a scope for the declarator.
+			ptr lang_object pdcScope = createLangObject( 0, '<pdc_scope>', lookupNs.top )
+			lookupNs.push( pdcScope )
+			declNs.push( pdcScope )
+
+			declaratorData.top.pdcScope = pdcScope
+			declaratorData.top.lookupObj = pdcScope
+			# LOG print( 'opening <pdc_scope>\n' )
+		}
+	}
+
+def parameter_declaration_list 
+	[parameter_declaration_list ',' parameter_declaration]
+|	[parameter_declaration]
+
+def parameter_declaration 
+	[declaration_start parameter_declaration_forms declaration_end]
+
+# Ordering the productions such that decl_specifier_sing is tried first is good
+# for performance.
+def parameter_declaration_forms
+	[decl_specifier_mult_seq_opt decl_specifier_sing decl_specifier_mult_seq_opt 
+		param_maybe_declarator maybe_parameter_init]
+
+|	[decl_specifier_mult_seq param_maybe_declarator maybe_parameter_init]
+
+def param_maybe_declarator 
+	[abstract_declarator]
+|	[declarator]
+|	[]
+
+def maybe_parameter_init 
+	['=' constant_expression]
+|	[]
+
+def ptr_operator 
+	['&']
+|	[root_qual_opt nested_name_specifier_opt '*' cv_qualifier_rep]
+
+def ptr_operator_seq 
+	[ptr_operator_seq ptr_operator]
+|	[ptr_operator]
+
+def ptr_operator_seq_opt 
+	[ptr_operator_seq_opt ptr_operator]
+|	[]
+
+#
+# Functions
+#
+
+def function_definition
+	[function_def_declaration ctor_initializer_opt function_body function_def_end]
+
+def function_def_declaration
+	[declaration_start function_def_declaration_forms declaration_end]
+
+def function_def_declaration_forms 
+	[decl_specifier_mult_seq_opt decl_specifier_sing 
+		decl_specifier_mult_seq_opt function_def_declarator]
+|	[decl_specifier_mult_seq function_def_declarator]
+|	[function_def_declarator]
+
+def function_def_declarator 
+	[declarator]
+	{
+		# The lookupObj from the declarator is the deepest lookup object found
+		# while parsing the declarator. Make it visible in the function body.
+		# This could be the args, the qualObj, or the parent to the function.
+		lookupNs.push( r1.lookupObj )
+	}
+
+def function_def_end 
+	[]
+	{
+		# Pop the lookup object.
+		lookupNs.pop()
+	}
+
+def function_body
+	[function_body_begin '{' statement_rep function_body_end '}']
+
+def function_body_begin 
+	[]
+	{
+		ptr lang_object newFunctionBody = createLangObject( 0, 
+				'<function_body_begin>', lookupNs.top )
+		lookupNs.push( newFunctionBody )
+		declNs.push( newFunctionBody )
+		templDecl.push( 0 )
+		# LOG print( 'opening <function_body>\n' )
+	}
+
+def function_body_end 
+	[]
+	{
+		# First undoes the function body begin work. Then undoes the setup in
+		# function_def_declarator.
+		declNs.pop()
+		lookupNs.pop()
+		templDecl.pop()
+		# LOG print( 'closing <function_body>\n' )
+	}
+
+
+
+#
+# Classs
+#
+
+int declaredClassType()
+{
+	if declarationData.top.isTemplate {
+		return TemplateClassType
+	} else {
+		return ClassType
+	}
+}
+
+def class_specifier 
+	[class_head base_clause_opt '{' class_member_rep class_body_end '}']
+	{
+# FIXME: reparse not implemented yet
+#		# Visit class function bodies, but skip nested classes.
+#		for CFB: class_function_body in lhs {
+#			skipping class_specifier
+#
+#			# Reparse the text of the class function body as a function body
+#			function_body FB = reparse function_body( CFB )
+#
+#			# Replace the class function body with the parsed function body.
+#			CFB = construct class_function_body 
+#				[FB]
+#		}
+	}
+
+def class_head 
+	[class_key]
+	{
+		int nsType = declaredClassType()
+
+		# LOG print( 'creating new anonymous class\n' )
+		ptr lang_object newClass = createLangObject( nsType, 
+				'<anon_class>', lookupNs.top )
+		lookupNs.push( newClass )
+		declNs.push( newClass )
+	}
+
+|	[class_key nested_name_specifier_opt class_head_name]
+	{
+		lookup_id Id = lookup_id in r3
+		str name = Id.data
+
+		# Get the ns the class is declared in.
+		ptr lang_object parentObj = declNs.top
+		if Id.qualObj
+			parentObj = Id.qualObj
+
+		# Look for the class in the given scope.
+		ptr lang_object declaredClass = findClass( parentObj, name )
+		if !declaredClass
+			declaredClass = findTemplateClass( parentObj, name )
+
+		if !declaredClass {
+			# LOG print( 'creating new class: ', name, '\n' )
+
+			# Class does not exist in the parent scope, create it.
+			int nsType = declaredClassType()
+
+			declaredClass = createLangObject( nsType, name, lookupNs.top )
+
+			# FIXME: handle friends. Make the class visible only if we are NOT
+			# in a friend declaration.  The new class object is necessary to
+			# properly process the body of the class.
+			if declarationData.top.isFriend == 0
+				insertObject( parentObj, name, declaredClass )
+		}
+
+		# Push the found/new class.
+		lookupNs.push( declaredClass )
+		declNs.push( declaredClass )
+	}
+
+|	[class_key nested_name_specifier_opt templ_class_id
+		templ_arg_open template_argument_list_opt templ_arg_close]
+	{
+		match r3 [Id: lookup_id]
+		str id = Id.data
+		ptr lang_object classObj = Id.obj
+
+		# TODO: Try to find the specializaition in the template class object.
+		# TypeList typeList;
+		# makeTypeList( typeList, $6->last );
+
+		ptr lang_object declaredClass
+		#declaredClass = classObj->findSpecExact( typeList );
+		if !declaredClass {
+			# LOG print( 'making new template specialization\n' )
+			int nsType = declaredClassType()
+			declaredClass = createLangObject( nsType, id, lookupNs.top )
+			# LOG print( 'declaredClass: ', declaredClass, '\n' )
+			declaredClass->specializationOf = classObj
+			# $$->typeListMapEl = classObj->typeListMap.insert( typeList, declaredClass );
+		}
+
+		# Push the found/new class.
+		lookupNs.push( declaredClass )
+		declNs.push( declaredClass )
+	}
+
+def class_body_end 
+	[]
+	{
+		# Pop the class ns.
+		lookupNs.pop()
+		declNs.pop()
+
+		# LOG print( 'closing off class\n' )
+	}
+
+def class_head_name
+	[class_id]
+|	[templ_class_id]
+|	[namespace_id]
+|	[typedef_id]
+|	[enum_id]
+|	[unknown_id]
+|	[identifier]
+|	[template_id]
+
+def class_key 
+	['class']
+|	['struct']
+|	['union']
+
+def class_member_rep 
+	[class_member_rep class_member]
+|	[]
+
+def class_member 
+	[member_declaration]
+|	[access_specifier ':']
+
+def member_declaration 
+	[declaration_start member_declaration_forms declaration_end ';']
+|	[class_function_definition]
+|	[using_declaration]
+|	[template_declaration]
+
+def class_function_definition
+	[function_def_declaration ctor_initializer_opt class_function_body function_def_end]
+
+lex cfb_conts
+{
+	token cfb_open /'{'/
+	token cfb_close /'}'/
+	token cfb_string /
+				"'" ( [^'\\\n] | '\\' any )* "'" |
+				'"' ( [^"\\\n] | '\\' any )* '"'/
+	token cfb_comment /
+				( '/*' (any | '\n')* :>> '*/' ) |
+				( '//' any* :> '\n' )/
+	token cfb_data /[^{}'"/]+ | '/'/
+}
+
+def cfb_item
+	[cfb_data]
+|	[cfb_string]
+|	[cfb_comment]
+|	[cfb_open cfb_item* cfb_close]
+
+def cfb_conts
+	[cfb_item* cfb_close]
+
+
+
+def class_function_body
+#	['{' cfb_conts]
+#|	[function_body]
+	[function_body]
+
+# Get better performance if the form with decl_specifier_sing comes first.
+def member_declaration_forms
+	[decl_specifier_mult_seq_opt decl_specifier_sing 
+		decl_specifier_mult_seq_opt member_declarator_list_opt]
+
+def member_declaration_forms
+	[decl_specifier_mult_seq_opt member_declarator_list_opt]
+
+def member_declarator_list_opt 
+	[member_declarator_list]
+|	[]
+
+def member_declarator_list 
+	[member_declarator_list ',' member_declarator]
+|	[member_declarator]
+
+def member_declarator 
+	[declarator]
+|	[declarator '=' constant_expression]
+|	[declarator ':' constant_expression]
+|	[':' constant_expression]
+
+def access_specifier 
+	['private']
+|	['protected']
+|	['public']
+
+def access_specifier_opt 
+	[access_specifier]
+|	[]
+
+def using_declaration
+	['using' id_expression ';']
+	{
+		ptr lang_object obj = r2.lookupId.obj
+		if obj
+			insertObject( declNs.top, obj->name, obj )
+	}
+
+|	['using' type_id ';']
+	{
+		ptr lang_object obj = r2.lookupId.obj
+		if obj
+			insertObject( declNs.top, obj->name, obj )
+	}
+
+def using_directive
+	['using' 'namespace' root_qual_opt nested_name_specifier_opt 
+		namespace_id ';']
+	{
+		# This uses a simple, incomplete guard against cycles in the graph of
+		# using namespaces. A more sophisticated and complete guard would look
+		# for longer cycles as well. Note that even gcc 3.3.5 does not bother.
+		match r5 [Id: lookup_id]
+		ptr lang_object usingObject = Id.obj
+		ptr lang_object inObject = declNs.top
+		if usingObject != inObject
+			inObject->inherited.append( usingObject )
+	}
+
+
+#
+# Derived classes
+#
+
+def base_clause_opt 
+	[base_clause]
+|	[]
+
+def base_clause 
+	[':' base_specifier_list]
+
+def base_specifier_list 
+	[base_specifier_list ',' base_specifier]
+|	[base_specifier]
+
+int addBaseSpecifier( ptr lang_object inObject, ptr lang_object inheritedObject )
+{
+	# Resolve typedefs.
+	if inheritedObject->typeId == TypedefType
+		inheritedObject = inheritedObject->typedefOf
+
+	inObject->inherited.append( inheritedObject )
+}
+
+def base_specifier 
+	[root_qual_opt nested_name_specifier_opt type_name]
+	{
+		addBaseSpecifier( declNs.top, r3.lookupId.obj )
+	}
+
+|	['virtual' access_specifier_opt root_qual_opt nested_name_specifier_opt type_name]
+	{
+		addBaseSpecifier( declNs.top, r5.lookupId.obj )
+	}
+
+|	[access_specifier virtual_opt root_qual_opt nested_name_specifier_opt type_name]
+	{
+		addBaseSpecifier( declNs.top, r5.lookupId.obj )
+	}
+
+def virtual_opt 
+	['virtual']
+|	[]
+
+#
+# Special member functions
+#
+
+def conversion_function_id 
+	['operator' conversion_type_id]
+
+def conversion_type_id 
+	[necs_type_specifier_seq ptr_operator_seq_opt]
+
+def ctor_initializer_opt 
+	[ctor_initializer]
+|	[]
+
+def ctor_initializer
+	[':' mem_initializer_list]
+
+def mem_initializer_list 
+	[mem_initializer_list ',' mem_initializer]
+|	[mem_initializer]
+
+def mem_initializer 
+	[mem_initializer_id '(' expression_opt ')']
+
+def mem_initializer_id 
+	[root_qual_opt nested_name_specifier_opt unknown_id]
+|	[root_qual_opt nested_name_specifier_opt identifier]
+|	[root_qual_opt nested_name_specifier_opt type_name]
+|	[root_qual_opt nested_name_specifier_opt template_name]
+
+
+#
+# Overloading
+#
+def operator_function_id 
+	['operator' operator]
+
+def operator 
+	['+'] | ['-'] | ['*'] | ['/'] | ['='] | ['<'] | ['>'] | ['&'] | ['|'] |
+	['^'] | ['%'] | ['~'] |	['!'] | ['(' ')'] | ['[' ']'] | ['new'] |
+	['delete'] | ['->'] | ['++'] | ['--'] | ['*='] | ['/='] | ['%='] |
+	['+='] | ['-='] | ['>>='] | ['<<='] | ['&='] | ['^='] | ['|='] | ['=='] |
+	['!='] | ['&&'] | ['||'] | [lt_eq] | [gt_eq] | [shift_left] | [shift_right]
+
+def lt_eq 
+	['<' '=']
+#	try {
+#		if ( $2->leader != 0 ) {
+#			#ifdef LOG_REDUCE
+#			cerr << "rejecting less-than equals-to" << endl;
+#			#endif
+#			reject();
+#		}
+#	};
+
+def gt_eq 
+	['>' '=']
+#	try {
+#		if ( $2->leader != 0 ) {
+#			#ifdef LOG_REDUCE
+#			cerr << "rejecting greater-than equals-to" << endl;
+#			#endif
+#			reject();
+#		}
+#	};
+
+def shift_left 
+	['<' '<']
+#	try {
+#		if ( $2->leader != 0 ) {
+#			#ifdef LOG_REDUCE
+#			cerr << "rejecting shift left" << endl;
+#			#endif
+#			reject();
+#		}
+#	};
+
+def shift_right 
+	['>' '>']
+#	try {
+#		if ( $2->leader != 0 ) {
+#			#ifdef LOG_REDUCE
+#			cerr << "rejecting shift right" << endl;
+#			#endif
+#			reject();
+#		}
+#	};
+
+#
+# Templates
+#
+
+def template_declaration 
+	[template_declaration_params declaration]
+	{
+		templDecl.pop()
+		templateParamNs.pop()
+	}
+
+def template_declaration_params
+	['template' '<' tpl_start template_parameter_list '>']
+	{
+		templDecl.push( 1 )
+	}
+
+|	['export' 'template' '<' tpl_start template_parameter_list '>']
+	{
+		templDecl.push( 1 )
+	}
+
+def tpl_start 
+	[]
+	{
+		# Create a new scope for the template parameters.
+		ptr lang_object newTemplateParamScope = 
+			createLangObject( 0, '<tpl_start>', lookupNs.top )
+		templateParamNs.push( newTemplateParamScope )
+	}
+
+def template_parameter_list 
+	[template_parameter_list ',' template_parameter]
+|	[template_parameter]
+
+def template_parameter 
+	[type_parameter]
+|	[template_parameter_declaration]
+
+def template_parameter_declaration
+	[declaration_start template_parameter_declaration_forms declaration_end]
+
+def template_parameter_declaration_forms
+	[decl_specifier_mult_seq param_maybe_declarator maybe_parameter_init]
+
+|	[temp_param_decl_specifier_sing decl_specifier_mult_seq_opt 
+		param_maybe_declarator maybe_parameter_init]
+
+|	[decl_specifier_mult_seq temp_param_decl_specifier_sing 
+		decl_specifier_mult_seq_opt param_maybe_declarator maybe_parameter_init]
+
+def temp_param_decl_specifier_sing 
+	[temp_param_type_specifier_sing]
+
+# Template parameters cannot support elaborated type specifer or class specifier.
+def temp_param_type_specifier_sing 
+	[templ_simple_type_specifier]
+|	[enum_specifier]
+
+def templ_simple_type_specifier 
+	[simple_type_specifier_name]
+|	[simple_type_specifier_kw_seq]
+
+def type_parameter
+	['class' type_param_id type_param_init_opt]
+	{
+		lookup_id Id = lookup_id in r2
+		if Id {
+			# The lookup ns should be a template param scope.
+			ptr lang_object newClass = 
+				createLangObject( ClassType, Id.data, lookupNs.top )
+			insertObject( templateParamNs.top, Id.data, newClass )
+		}
+	}
+
+|	['typename' type_param_id type_param_init_opt]
+	{
+		lookup_id Id = lookup_id in r2
+		if Id {
+			# The lookup ns should be a template param scope.
+			ptr lang_object newClass = 
+				createLangObject( ClassType, Id.data, lookupNs.top )
+			insertObject( templateParamNs.top, Id.data, newClass )
+		}
+	}
+
+|	['template' '<' tpl_start template_parameter_list '>'
+			'class' type_param_id templ_type_param_init_opt]
+	{
+		lookup_id Id = lookup_id in r7
+		if Id {
+			ptr lang_object newClass = 
+				createLangObject( TemplateClassType, Id.data, lookupNs.top )
+			insertObject( templateParamNs.top, Id.data, newClass )
+		}
+	}
+
+def templ_type_param_init_opt 
+	['=' id_expression]
+|	[]
+
+def type_param_init_opt 
+	['=' type_id]
+|	[]
+
+def type_param_id 
+	[namespace_id]
+|	[typedef_id]
+|	[enum_id]
+|	[class_id] 
+|	[templ_class_id]
+|	[identifier]
+|	[template_id]
+|	[unknown_id]
+|	[] 
+
+def template_argument_list_opt 
+	[template_argument_list]
+|	[]
+
+def template_argument_list 
+	[template_argument_list ',' template_argument]
+|	[template_argument]
+
+def template_argument 
+	[type_id]
+|	[assignment_expression]
+
+def explicit_instantiation 
+	['template' declaration]
+|	[declaration_start decl_specifier_mult_seq 'template' declaration declaration_end]
+
+def explicit_specialization 
+	['template' '<' '>' declaration]
+
+## Not sure what this one is about?
+#explicit_specialization: 
+#	declaration_start decl_specifier_mult_seq KW_Template '<' '>' 
+#	declaration declaration_end;
+
+
+#
+# Original namespace definition
+#
+
+def original_namespace_definition
+	[orig_namespace_def_name '{' declaration* namespace_end '}']
+
+def orig_namespace_def_name ['namespace' unknown_id]
+	{
+		match r2 [Id: lookup_id]
+		ptr lang_object nspace = createLangObject(
+				NamespaceType, Id.data, lookupNs.top )
+
+		# Insert the new object into the dictionary of the parent.
+		insertObject( curNamespace.top, Id.data, nspace )
+
+		# Push the namespace 
+		curNamespace.push( nspace )
+		declNs.push( nspace )
+		lookupNs.push( nspace )
+
+		# LOG print( 'created original namespace: ', Id.data, '\n' )
+	}
+
+def namespace_end []
+	{
+		# Pop the namespace.
+		curNamespace.pop()
+		declNs.pop()
+		lookupNs.pop()
+
+		# LOG print( 'closed namespace\n' )
+	}
+
+#
+# Extension namespace definition
+#
+
+def extension_namespace_definition
+	[ext_namespace_def_name '{' declaration* namespace_end '}']
+
+def ext_namespace_def_name ['namespace' namespace_id]
+	{
+		match r2 [Id: lookup_id]
+		ptr lang_object nspace = Id.obj
+
+		# Push the namespace 
+		curNamespace.push( nspace )
+		declNs.push( nspace )
+		lookupNs.push( nspace )
+
+		# LOG print( 'found extended namespace: ', Id.data, '\n' )
+	}
+
+#
+# Unnamed namespace definition
+#
+def unnamed_namespace_definition
+	[unnamed_namespace_def_name '{' declaration* namespace_end '}']
+
+def unnamed_namespace_def_name ['namespace']
+	{
+		ptr lang_object nspace = createLangObject(
+				NamespaceType, '<unnamed_namespace>',
+				lookupNs.top )
+
+		# Push the namespace 
+		curNamespace.push( nspace )
+		declNs.push( nspace )
+		lookupNs.push( nspace )
+
+		# LOG print( 'parsed unnamed namespace\n' )
+	}
+
+#
+# linkage_specification
+#
+def linkage_specification 
+	['extern' TK_DoubleLit '{' declaration* '}']
+|	['extern' TK_DoubleLit declaration]
+
+#
+# Exception Handling.
+#
+
+def try_block 
+	['try' compound_statement handler_seq]
+
+def handler_seq 
+	[handler_seq handler]
+|	[handler]
+
+def handler 
+	['catch' '(' exception_declaration ')' compound_statement]
+
+def exception_declaration 
+	[type_specifier_seq declarator]
+|	[type_specifier_seq abstract_declarator]
+|	[type_specifier_seq]
+
+def exception_declaration 
+	['...']
+
+def throw_expression 
+	['throw' assignment_expression]
+|	['throw']
+
+def exception_specification_opt 
+	[exception_specification]
+|	[]
+
+def exception_specification 
+	['throw' '(' type_id_list_opt ')']
+
+def type_id_list_opt 
+	[type_id_list]
+|	[]
+
+def type_id_list 
+	[type_id_list ',' type_id]
+|	[type_id]
+
+def start
+	[declaration*]
+
+#
+# Grammar done.
+#
+
+int printObject( str indent, ptr lang_object obj )
+{
+	print( indent, obj->name )
+	
+	if obj->objectMap.length > 0
+		print( ' {\n' )
+	
+	object_map ChildNames = obj->objectMap
+	for MapEl: object_list in child( ChildNames ) {
+		for Obj: ptr lang_object in MapEl
+			printObject( indent + '  ', Obj )
+	}
+
+	if obj->objectMap.length > 0
+		print( indent, '}' )
+
+	print( '\n' )
+}
+
+int printNamespace()
+{
+	printObject( '', rootNamespace )
+}
+
+start S = parse start( stdin )
+#printNamespace()
+#print( '***** SUCCESS *****\n' )
+#print_xml( S )

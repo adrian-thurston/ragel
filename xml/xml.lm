@@ -1,0 +1,167 @@
+#
+# Definitions
+#
+
+rl xml_digit / (0x30..0x39) /
+
+rl base_char / 0x41..0x5A | 0x61..0x7A /
+
+rl char / 0x9 | 0xA | 0xD | 0x20..0x7f /
+
+rl letter / base_char /
+
+rl name_char / letter | digit | '.' | '-' | '_' | ':' | 0xb7 /
+
+rl name / (letter | '_' | ':') name_char* /
+
+#
+# Reference definitions. These appear in the 
+# top level and also in strings.
+#
+
+rl entity_ref_pat / '&' name ';' /
+
+rl char_ref_pat / '&#' [0-9]+ ';' | '&0x' [0-9a-fA-F]+ ';' /
+
+#
+# Single quotes.
+#
+lex sq
+{
+	token sq_close /'\''/
+
+	# References in single quotes
+	token sq_entity_ref /entity_ref_pat/
+	token sq_char_ref /char_ref_pat/
+
+	token sq_data / [^<&']+ /
+
+	def sq_item 
+		[ sq_data ]
+	|	[ sq_entity_ref ]
+	|	[ sq_char_ref ]
+
+	# The opening quote belongs to the tag region. 
+	def sq_string 
+		[ '\'' sq_item* sq_close ]
+}
+
+#
+# Double quotes.
+#
+lex dq
+{
+	token dq_close /'"'/
+
+	# References in double quotes
+	token dq_entity_ref /entity_ref_pat/
+	token dq_char_ref /char_ref_pat/
+
+	token dq_data / [^<&"]+ /
+
+	def dq_item 
+		[ dq_data ]
+	|	[ dq_entity_ref ]
+	|	[ dq_char_ref ]
+
+	# The opening quote belongs to the tag region. 
+	def dq_string 
+		[ '"' dq_item* dq_close ]
+}
+
+#
+# Tag elements. 
+#
+lex tag
+{
+	literal '\'', '\"', '=', '\/', '>'
+
+	# Within this region whitespace is not significant.
+	ignore xml_space / (0x20 | 0x9 | 0xD | 0xA)+ /
+
+	#
+	# Attributes
+	#
+	token attr_name / name /
+}
+
+#
+# Top Level
+#
+lex start
+{
+	#
+	# Comments
+	#
+
+	# Cannot contain '--'
+	rl char_no_dash / char - '-' /
+	token comment / '<!--' ( char_no_dash | '-' char_no_dash )* '-->' /
+
+
+	# Opening a tag.
+	literal '<'
+
+	#
+	# Character Data
+	#
+
+	token cdata / '<![CDATA[' char* :> ']]>'/
+	token char_data / [^<&]+ /
+	token entity_ref /entity_ref_pat/
+	token char_ref /char_ref_pat/
+}
+
+
+def attribute_value 
+	[ sq_string ]
+|	[ dq_string ]
+
+def attribute 
+	[ attr_name '=' attribute_value ]
+
+def empty_tag 
+	[ '<' attr_name attribute* '/' '>' ]
+
+def close_tag 
+	[ '<' '/' attr_name '>' ]
+
+def open_tag 
+	[ '<' attr_name attribute* '>' ]
+
+def tag 
+	[open_tag content close_tag]
+
+def content_item 
+	[tag]
+|	[empty_tag]
+|	[char_data]
+|	[entity_ref]
+|	[char_ref]
+|	[cdata]
+|	[comment]
+
+def content 
+	[content_item*]
+
+def document 
+	[content]
+
+def start 
+	[document]
+	{
+		for Switch:tag in lhs {
+			if match Switch
+					["<lm_switch>" SwitchContent:content "</lm_switch>"]
+			{
+				print( 'SWITCH\n' )
+				for Text:tag in SwitchContent {
+					if match Text
+							["<text>" TextContent:content "</text>"]
+					{
+						print( ' ', TextContent, '\n' )
+					}
+				}
+			}
+		}
+	}

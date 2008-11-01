@@ -1,0 +1,8 @@
+GET foo HTTP/1.1
+hello: foo
+hi: there
+	my
+ friend
+ 
+ from outter space
+

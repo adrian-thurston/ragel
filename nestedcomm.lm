@@ -1,0 +1,41 @@
+#
+# Tokens
+#
+
+# Any single character can be a literal
+lex start
+{
+	# Ignore whitespace.
+	ignore /[ \t\n\r\v]+/
+
+	# Open and close id
+	token id /[a-zA-Z_][a-zA-Z0-9_]*/
+
+	token open_paren /'('/ 
+	{
+		send_ignore( parse_stop nested_comment( stdin ) )
+	}
+}
+
+#
+# Token translation
+#
+
+lex nc_scan
+{
+	literal '(', ')'
+	token nc_data /[^()]+/
+}
+
+def nc_item 
+	[nc_data]
+|	[nested_comment]
+
+def nested_comment 
+	['(' nc_item* ')']
+
+def nested [id*]
+
+nested P = parse nested( stdin )
+print_xml( P )
+print( P, '\n' )

@@ -1,0 +1,11 @@
+#!/bin/bash
+#
+
+# Use this script to capture dns packets to a dump file. Then use extract to
+# break up the packets and strip the headers, leaving just dns packets.
+#
+# usage: bash dumpdns <dumpfile>
+
+[ -z "$1" ] && exit
+
+tcpdump -s 0 -w $1 udp port 53

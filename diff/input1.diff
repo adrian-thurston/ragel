@@ -1,0 +1,86 @@
+Index: fsmrun.cpp
+===================================================================
+--- fsmrun.cpp	(revision 4555)
++++ fsmrun.cpp	(working copy)
+@@ -150,7 +150,7 @@
+ 	peof = 0;
+ 	if ( parser != 0 ) {
+ 		region = parser->getNextRegion();
+-		cs = getStateFromNextRegion();
++		cs = tables->entryByRegion[region];
+ 	}
+ 	else {
+ 		region = 0;
+@@ -189,7 +189,7 @@
+ 
+ 	tokstart = 0;
+ 	region = parser->getNextRegion();
+-	cs = getStateFromNextRegion();
++	cs = tables->entryByRegion[region];
+ }
+ 
+ void FsmRun::sendToken( int id )
+@@ -222,7 +222,7 @@
+ 		parser = newParser;
+ 
+ 		region = parser->getNextRegion();
+-		cs = getStateFromNextRegion();
++		cs = tables->entryByRegion[region];
+ 	}
+ 	else {
+ 		#ifdef LOG_ACTIONS
+@@ -355,7 +355,7 @@
+ 
+ 			/* Set the current state from the next region. */
+ 			region = parser->getNextRegion();
+-			cs = getStateFromNextRegion();
++			cs = tables->entryByRegion[region];
+ 		}
+ 	}
+ 
+@@ -452,7 +452,7 @@
+ 		/* First thing check for error. */
+ 		if ( cs == tables->errorState ) {
+ 			if ( parser != 0 ) {
+-				if ( getStateFromNextRegion( 1 ) != 0 ) {
++				if ( parser->getNextRegion( 1 ) != 0 ) {
+ 					#ifdef LOG_BACKTRACK
+ 					cerr << "scanner failed, trying next region" << endl;
+ 					#endif
+@@ -462,7 +462,7 @@
+ 
+ 					parser->nextRegionInd += 1;
+ 					region = parser->getNextRegion();
+-					cs = getStateFromNextRegion();
++					cs = tables->entryByRegion[region];
+ 					cerr << "new token region: " << 
+ 							parser->tables->gbl->regionInfo[region].name << endl;
+ 					continue;
+@@ -495,7 +495,7 @@
+ 					}
+ 					else {
+ 						region = parser->getNextRegion();
+-						cs = getStateFromNextRegion();
++						cs = tables->entryByRegion[region];
+ 						cerr << "new token region: " << 
+ 								parser->tables->gbl->regionInfo[region].name << endl;
+ 						continue;
+Index: junk.cpp
+===================================================================
+--- 
++++ junk.cpp	(working copy)
+Index: fsmrun.h
+===================================================================
+--- fsmrun.h	(revision 4557)
++++ fsmrun.h	(working copy)
+@@ -197,10 +197,6 @@
+ 	void runOnInputStream( PdaRun *parser, InputStream &in );
+ 	void execute();
+ 
+-	/* Offset can be used to look at the next nextRegionInd. */
+-	int getStateFromNextRegion( int offset = 0 )
+-		{ return tables->entryByRegion[parser->getNextRegion(offset)]; }
+-
+ 	FsmTables *tables;
+ 	PdaRun *parser;
+ 	InputStream *inputStream;

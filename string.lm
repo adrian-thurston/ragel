@@ -1,0 +1,54 @@
+lex string
+{
+	token str_escape /'\\' any/
+	token str_chr /[^\\"]+/
+}
+
+def str_item 
+	[str_escape]
+|	[str_chr]
+
+def string 
+	['"' str_item* '"']
+
+lex start
+{
+	token ident /[a-zA-Z_]+/
+	token number /[0-9]+/
+
+	literal '+', '*', ';', '"', '\'', '(', ')'
+	literal '+=', '-=', '*='
+
+	ignore wp /[ \t\n]+/
+}
+
+def expr 
+	[expr '+' term]
+|	[term]
+
+def term 
+	[term '*' primary]
+|	[primary]
+
+def primary 
+	[number]
+|	[ident]
+|	[string]
+|	['(' expr ')']
+
+def expr_list 
+	[expr_list expr ';']
+|	[]
+
+def start 
+	[expr_list]
+	{
+		if match lhs 
+			~a + "%{{"; 1 * 2;
+		{
+			print( 'yes\n' )
+		}
+	}
+
+start S = parse start(stdin)
+print_xml( S )

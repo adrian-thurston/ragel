@@ -1,0 +1,14 @@
+
+var a;
+a := 1;
+
+head:
+
+a := a + 1;
+c := d;
+
+if a = 10 then
+	goto head;
+end
+
+hi := there;

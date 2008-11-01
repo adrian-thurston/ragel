@@ -1,0 +1,45 @@
+rl ident_char /[a-zA-Z_]/
+
+lex start
+{
+	# Tokens
+	token other /(^(ident_char|0|'\n'))+/
+
+	token here_close //
+	token id 
+		/ident_char+/
+		{
+			if HereId && HereId == match_text {
+				send( make_token( 
+					typeid here_close,
+					pull(stdin, match_length - 1) ) )
+			} else {
+				send( make_token( typeid id, pull(stdin, match_length) ) )
+			}
+		}
+
+	token nl /'\n'/
+}
+
+def here_name 
+	[id]
+	{
+		HereId = r1.data
+	}
+
+global str HereId
+
+def here_data 
+	[here_data_item*]
+
+def here_data_item 
+	[id]
+|	[other]
+|	[nl]
+
+def heredoc 
+	[here_name here_data here_close id nl]
+
+
+heredoc S = parse heredoc( stdin )
+print_xml(S)

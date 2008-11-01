@@ -1,0 +1,24 @@
+
+# Token names.
+lex start
+{
+	token id /[a-z]+/
+	ignore ws /[ \t\n]+/
+}
+
+token bang1 /'!'/
+token bang2 /'!'/
+
+def one [bang1 id id id]
+
+def two [bang2 id id id id]
+
+def prods 
+	[one]
+|	[two]
+
+def start
+	[prods]
+
+start S = parse start( stdin )
+match S "!aa bb cc dd"

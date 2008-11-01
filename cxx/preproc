@@ -1,0 +1,4 @@
+#!/bin/bash
+#
+
+g++ -E -undef -D'__attribute__(xyz)=' "$@" | sed 's/#.*$//'
