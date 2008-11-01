@@ -19,7 +19,7 @@ dnl   along with Colm; if not, write to the Free Software
 dnl   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
   
 AC_INIT(colm/main.cpp)
-AC_CONFIG_HEADER(common/config.h)
+AC_CONFIG_HEADER(colm/config.h)
 
 dnl Set to true if build system should generate parsers from ragel, kelbt, and
 dnl gperf sources. Set to false if generated files are included and not to be
@@ -74,6 +74,6 @@ fi
 fi # BUILD_PARSERS
 
 dnl write output files
-AC_OUTPUT(Makefile common/Makefile colm/Makefile)
+AC_OUTPUT(Makefile colm/Makefile)
 
 echo "configuration of colm complete"

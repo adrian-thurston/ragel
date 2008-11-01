@@ -18,7 +18,7 @@
 #   along with Colm; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
 
-INCS += -I../common -I../aapl
+INCS += -I../aapl
 DEFS +=
 
 CFLAGS += -g -Wall -Wwrite-strings
@@ -28,6 +28,7 @@ LDFLAGS +=
 CC_SRCS = \
 	compile.cpp \
 	bytecode.cpp \
+	tree.cpp \
 	fsmrun.cpp \
 	pdarun.cpp \
 	input.cpp \
@@ -54,17 +55,20 @@ CC_SRCS = \
 	closure.cpp \
 	fsmap.cpp \
 	dotgen.cpp \
-	tree.cpp
+	common.cpp
 
 RUNTIME_SRC = fsmrun.cpp pdarun.cpp bytecode.cpp list.cpp \
 	map.cpp string.cpp input.cpp tree.cpp
-GEN_SRC = lmscan.cpp lmparse.h lmparse.cpp 
+GEN_SRC = version.h lmscan.cpp lmparse.h lmparse.cpp 
 
 RUNTIME = runtime.a
 
-LIBS = ../common/common.a
+LIBS = 
 
 #*************************************
+
+# Get the version info.
+include ../version.mk
 
 PREFIX = @prefix@
 
@@ -86,6 +90,10 @@ colm: $(GEN_SRC) $(OBJS) $(LIBS)
 
 $(RUNTIME): $(RUNTIME_OBJS)
 	ar -cr $@ $(RUNTIME_OBJS)
+
+version.h: ../version.mk
+	echo '#define VERSION "$(VERSION)"' > version.h
+	echo '#define PUBDATE "$(PUBDATE)"' >> version.h
 
 ifeq ($(BUILD_PARSERS),true)
 

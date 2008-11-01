@@ -1649,7 +1649,7 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
-ac_config_headers="$ac_config_headers common/config.h"
+ac_config_headers="$ac_config_headers colm/config.h"
 
 
 BUILD_PARSERS=true
@@ -3120,7 +3120,7 @@ fi
 
 fi # BUILD_PARSERS
 
-ac_config_files="$ac_config_files Makefile common/Makefile colm/Makefile"
+ac_config_files="$ac_config_files Makefile colm/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -3674,9 +3674,8 @@ cat >>$CONFIG_STATUS <<\_ACEOF
 for ac_config_target in $ac_config_targets
 do
   case $ac_config_target in
-    "common/config.h") CONFIG_HEADERS="$CONFIG_HEADERS common/config.h" ;;
+    "colm/config.h") CONFIG_HEADERS="$CONFIG_HEADERS colm/config.h" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
-    "common/Makefile") CONFIG_FILES="$CONFIG_FILES common/Makefile" ;;
     "colm/Makefile") CONFIG_FILES="$CONFIG_FILES colm/Makefile" ;;
 
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5

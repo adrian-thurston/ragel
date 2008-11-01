@@ -19,7 +19,7 @@
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
 
 
-BUILD_SUBDIRS = common colm
+BUILD_SUBDIRS = colm
 ALL_SUBDIRS = $(BUILD_SUBDIRS) test
 
 #*************************************
