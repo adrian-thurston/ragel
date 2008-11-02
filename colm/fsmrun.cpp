@@ -82,8 +82,6 @@ void FsmRun::streamPush( const char *data, long length )
 		assert(false);
 	}
 	else {
-		cerr << "case 3" << endl;
-
 		/* Send back the second half of the current run buffer. */
 		RunBuf *dup = new RunBuf;
 		memcpy( dup, runBuf, sizeof(RunBuf) );
@@ -717,7 +715,12 @@ long PdaRun::undoParse( Tree *tree, CodeVect *rev )
 	numRetry += 1;
 	allReverseCode.transfer( *rev );
 
+	PdaRun *prevParser = fsmRun->parser;
+	fsmRun->parser = this;
+
 	parseToken( 0 );
+
+	fsmRun->parser = prevParser;
 
 	assert( stackTop->next == 0 );
 

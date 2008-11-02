@@ -1963,7 +1963,7 @@ again:
 		default: {
 			cerr << "UNKNOWN INSTRUCTION: " << (ulong)instr[-1] << 
 					" -- reverse code downref" << endl;
-			exit(1);
+			assert(false);
 			break;
 		}
 	}
@@ -4084,7 +4084,7 @@ again:
 		default: {
 			cerr << "UNKNOWN INSTRUCTION: " << (ulong)instr[-1] << 
 					" -- something is wrong" << endl;
-			exit(1);
+			assert(false);
 			break;
 		}
 	}

@@ -260,8 +260,10 @@ void PdaRun::commit()
 	 * was when we started. */
 	assert( sp == root );
 
-	/* Now clear all the rcode. */
-	rcode_downref_all( root, prg, &allReverseCode );
+	/* We cannot always clear all the rcode here. We may need to backup over
+	 * the parse statement. In the future we should compute when it is safe to
+	 * do so, but for now just leave everything until later. */
+	//rcode_downref_all( root, prg, &allReverseCode );
 }
 
 
