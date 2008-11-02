@@ -1,4 +1,4 @@
 #!/bin/bash
 #
 
-g++ -E -undef -D'__attribute__(xyz)=' "$@" | sed 's/#.*$//'
+g++ -E -undef -D'__attribute__(xyz)=' "$@" | sed 's/#.*$//' | grep -v '^[ \t]*$'
