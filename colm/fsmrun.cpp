@@ -46,6 +46,8 @@ FsmRun::FsmRun( Program *prg ) :
 	prg(prg),
 	tables(prg->rtd->fsmTables),
 	parser(0),
+	line(1),
+	col(1),
 	position(0)
 {
 }
@@ -389,7 +391,8 @@ void FsmRun::sendToken( long id )
 		sendQueuedTokens();
 	}
 	else {
-		makeToken( id, tokdata, false, 0 );
+		Kid *input = makeToken( id, tokdata, false, 0 );
+		sendLangEl( input );
 		assert( parser->queue == 0 );
 	}
 
@@ -416,7 +419,8 @@ void FsmRun::sendNamedLangEl()
 	if ( data != 0 )
 		tokdata = string_alloc_new( prg, data, length );
 
-	makeToken( klangEl->id, tokdata, true, bindId );
+	Kid *input = makeToken( klangEl->id, tokdata, true, bindId );
+	sendLangEl( input );
 }
 
 void FsmRun::set_AF_GROUP_MEM()
@@ -466,7 +470,7 @@ void FsmRun::translateLangEl( int id, Head *tokdata, bool namedLangEl, int bindI
 	set_AF_GROUP_MEM();
 }
 
-void FsmRun::makeToken( int id, Head *tokdata, bool namedLangEl, int bindId )
+Kid *FsmRun::makeToken( int id, Head *tokdata, bool namedLangEl, int bindId )
 {
 	/* Make the token object. */
 	long objectLength = parser->tables->gbl->lelInfo[id].objectLength;
@@ -503,7 +507,7 @@ void FsmRun::makeToken( int id, Head *tokdata, bool namedLangEl, int bindId )
 		tree_upref( input->tree );
 	}
 
-	sendLangEl( input );
+	return input;
 }
 
 /* Send back the accumulated ignore tokens. */
