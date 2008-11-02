@@ -607,7 +607,7 @@ struct Execution
 	long rcodeUnitLen;
 
 	void execute( Tree **root );
-	void rexecute( Tree **root, Code *revcode, CodeVect &allRev );
+	void rexecute( Tree **root, CodeVect *allRev );
 	void execute( Tree **&sp, Code *instr );
 	void rdownref( Code *instr );
 };

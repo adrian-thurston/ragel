@@ -85,6 +85,8 @@ void PdaRun::init()
 
 	/* Bindings are indexed at 1. Need a no-binding. */
 	bindings.push(0);
+
+	allReverseCode = new CodeVect;
 }
 
 long PdaRun::stackTopTarget()
@@ -559,7 +561,7 @@ parseError:
 				Execution execution( prg, reverseCode, this, 0, 0, 0 );
 
 				/* Do the reverse exeuction. */
-				execution.rexecute( root, 0, allReverseCode );
+				execution.rexecute( root, allReverseCode );
 				alg->flags &= ~AF_HAS_RCODE;
 			}
 

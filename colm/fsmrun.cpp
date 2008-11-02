@@ -237,7 +237,7 @@ void FsmRun::sendBackIgnore( Kid *ignore )
 					parser, 0, 0, 0 );
 
 			/* Do the reverse exeuction. */
-			execution.rexecute( parser->root, 0, parser->allReverseCode );
+			execution.rexecute( parser->root, parser->allReverseCode );
 			alg->flags &= ~AF_HAS_RCODE;
 		}
 
@@ -278,7 +278,7 @@ void FsmRun::sendBack( Kid *input )
 				parser, 0, 0, 0 );
 
 		/* Do the reverse exeuction. */
-		execution.rexecute( parser->root, 0, parser->allReverseCode );
+		execution.rexecute( parser->root, parser->allReverseCode );
 		alg->flags &= ~AF_HAS_RCODE;
 	}
 
@@ -717,7 +717,7 @@ long PdaRun::undoParse( Tree *tree, CodeVect *rev )
 	top->tree = tree;
 	stackTop = top;
 	numRetry += 1;
-	allReverseCode.transfer( *rev );
+	allReverseCode = rev;
 
 	PdaRun *prevParser = fsmRun->parser;
 	fsmRun->parser = this;

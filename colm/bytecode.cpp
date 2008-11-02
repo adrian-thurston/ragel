@@ -324,18 +324,18 @@ Tree *parse( Tree **&sp, Program *prg, Stream *stream,
 	tree_upref( tree );
 	parser.clean();
 
-	cv = new CodeVect;
-	cv->transfer( parser.allReverseCode );
+	/* Return the reverse code. */
+	cv = parser.allReverseCode;
 	return tree;
 }
 
-Tree *undo_parse( Tree **&sp, Program *prg, Stream *stream, 
+void undo_parse( Tree **&sp, Program *prg, Stream *stream, 
 		long parserId, Tree *tree, CodeVect *rev )
 {
 	PdaTables *tables = prg->rtd->parsers[parserId];
 	PdaRun parser( sp, prg, tables, stream->scanner, 0 );
 	parser.undoParse( tree, rev );
-	return 0;
+	delete rev;
 }
 
 Tree *stream_pull( Program *prg, Stream *stream, Tree *length )
@@ -1726,7 +1726,7 @@ void Program::run()
 
 	if ( rtd->rootCodeLen > 0 ) {
 		CodeVect reverseCode;
-		CodeVect allReverseCode;
+		CodeVect *allReverseCode = new CodeVect;
 		Execution execution( this, reverseCode, 0, rtd->rootCode, 0, 0 );
 		execution.execute( root );
 
@@ -1737,7 +1737,8 @@ void Program::run()
 
 		bool hasrcode = makeReverseCode( allReverseCode, reverseCode );
 		if ( hasrcode )
-			rcode_downref( root, this, allReverseCode.data );
+			rcode_downref( root, this, allReverseCode->data );
+		delete allReverseCode;
 	}
 }
 
@@ -1777,6 +1778,7 @@ void rcode_downref_all( Tree **stack_root, Program *prg, CodeVect *rev )
 		/* Backup over it. */
 		rev->tabLen -= len + 4;
 	}
+	delete rev;
 }
 
 void rcode_downref( Tree **stack_root, Program *prg, Code *instr )
@@ -1825,7 +1827,7 @@ again:
 			cerr << "IN_STREAM_PUSH_BKT" << endl;
 			#endif
 
-			// FIXME: Implement
+			tree_downref( prg, stream );
 			break;
 		}
 		case IN_LOAD_GLOBAL_BKT: {
@@ -1989,7 +1991,7 @@ void Execution::execute( Tree **root )
 	assert( sp == root );
 }
 
-bool makeReverseCode( CodeVect &all, CodeVect &reverseCode )
+bool makeReverseCode( CodeVect *all, CodeVect &reverseCode )
 {
 	/* Do we need to revert the left hand side? */
 
@@ -1997,7 +1999,7 @@ bool makeReverseCode( CodeVect &all, CodeVect &reverseCode )
 	if ( reverseCode.length() == 0 )
 		return false;
 
-	long prevAllLength = all.length();
+	long prevAllLength = all->length();
 
 	/* Go backwards, group by group, through the reverse code. Push each group
 	 * to the global reverse code stack. */
@@ -2006,13 +2008,13 @@ bool makeReverseCode( CodeVect &all, CodeVect &reverseCode )
 		p--;
 		long len = *p;
 		p = p - len;
-		all.append( p, len );
+		all->append( p, len );
 	}
 
 	/* Stop, then place a total length in the global stack. */
-	all.append( IN_STOP );
-	long length = all.length() - prevAllLength;
-	all.appendWord( length );
+	all->append( IN_STOP );
+	long length = all->length() - prevAllLength;
+	all->appendWord( length );
 
 	/* Clear the revere code buffer. */
 	reverseCode.tabLen = 0;
@@ -2020,16 +2022,16 @@ bool makeReverseCode( CodeVect &all, CodeVect &reverseCode )
 	return true;
 }
 
-void Execution::rexecute( Tree **root, Code *rcode, CodeVect &allRev )
+void Execution::rexecute( Tree **root, CodeVect *allRev )
 {
 	/* Read the length */
-	Code *prcode = allRev.data + allRev.length() - 4;
+	Code *prcode = allRev->data + allRev->length() - 4;
 	Word len;
 	read_word_p( len, prcode );
 
 	/* Find the start of block. */
-	long start = allRev.length() - len - 4;
-	prcode = allRev.data + start;
+	long start = allRev->length() - len - 4;
+	prcode = allRev->data + start;
 
 	/* Execute it. */
 	Tree **sp = root;
@@ -2037,7 +2039,7 @@ void Execution::rexecute( Tree **root, Code *rcode, CodeVect &allRev )
 	assert( sp == root );
 
 	/* Backup over it. */
-	allRev.tabLen -= len + 4;
+	allRev->tabLen -= len + 4;
 }
 
 void Execution::execute( Tree **&sp, Code *instr )
@@ -3079,6 +3081,7 @@ again:
 			#endif
 
 			undo_stream_push( sp, prg, (Stream*)stream, len );
+			tree_downref( prg, stream );
 			break;
 		}
 		case IN_PARSE_BKT: {

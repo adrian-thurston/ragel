@@ -436,7 +436,7 @@ struct PdaTables
 	RuntimeData *gbl;
 };
 
-bool makeReverseCode( CodeVect &all, CodeVect &reverseCode );
+bool makeReverseCode( CodeVect *all, CodeVect &reverseCode );
 
 typedef Vector<Tree*> Bindings;
 
@@ -495,7 +495,7 @@ struct PdaRun
 
 	/* Reused. */
 	CodeVect reverseCode;
-	CodeVect allReverseCode;
+	CodeVect *allReverseCode;
 
 	bool stopParsing;
 	long stopTarget;
