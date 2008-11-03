@@ -382,15 +382,24 @@ void FsmRun::sendToken( long id )
 	bool ctxDepParsing = prg->ctxDepParsing;
 	LangElInfo *lelInfo = parser->tables->gbl->lelInfo;
 
-	/* Copy the token data. */
+	/* Make the token data. */
 	long length = p-tokstart;
 	Head *tokdata = string_alloc_const( prg, tokstart, length );
 
 	if ( ctxDepParsing && lelInfo[id].frameId >= 0 ) {
+		/* We don't want the generation actions to automatically consume text
+		 * so reset p since the scanner leaves it at tokend. */
+		p = tokstart;
+		tokstart = 0;
+
 		translateLangEl( id, tokdata, false, 0 );
 		sendQueuedTokens();
 	}
 	else {
+		/* By default the match is consumed and this is what we need. Just
+		 * need to reset tokstart. */
+		tokstart = 0;
+
 		Kid *input = makeToken( id, tokdata, false, 0 );
 		sendLangEl( input );
 		assert( parser->queue == 0 );
@@ -439,13 +448,8 @@ void FsmRun::set_AF_GROUP_MEM()
 }
 
 /* 
- * Implmented:
- *  -shorten the match (possibly to zero length)
- *  -change the token to a new identifier 
- *  -change global state (it can, but it isn't reverted during backtracking).
- *
- * Not implemented:
- *  -invoke failure (and hence the backtracker)
+ * Not supported:
+ *  -invoke failure (the backtracker)
  */
 
 void FsmRun::translateLangEl( int id, Head *tokdata, bool namedLangEl, int bindId )
@@ -458,8 +462,6 @@ void FsmRun::translateLangEl( int id, Head *tokdata, bool namedLangEl, int bindI
 	Code *code = parser->tables->gbl->frameInfo[
 			parser->tables->gbl->lelInfo[id].frameId].code;
 	
-	p = tokstart;
-
 	/* Execute the translation. */
 	Execution execution( prg, parser->reverseCode, 
 			parser, code, 0, tokdata );
@@ -580,9 +582,6 @@ void FsmRun::sendLangEl( Kid *input )
 		}
 	}
 
-	/* Reset tokstart. */
-	tokstart = 0;
-
 	#ifdef COLM_LOG_PARSE
 	cerr << "new token region: " << 
 			parser->tables->gbl->regionInfo[region].name << endl;
@@ -610,14 +609,14 @@ void PdaRun::ignore( Tree *tree )
 
 void FsmRun::sendIgnore( long id )
 {
-	int length = p-tokstart;
-
 	#ifdef COLM_LOG_PARSE
 	cerr << "ignoring: " << parser->tables->gbl->lelInfo[id].name << endl;
 	#endif
 
 	/* Make the ignore string. */
+	int length = p - tokstart;
 	Head *ignoreStr = string_alloc_const( prg, tokstart, length );
+	tokstart = 0;
 	
 	Tree *tree = prg->treePool.allocate();
 	tree->refs = 1;
@@ -628,7 +627,6 @@ void FsmRun::sendIgnore( long id )
 	parser->ignore( tree );
 
 	/* Prepare for more scanning. */
-	tokstart = 0;
 	position += length;
 	region = parser->getNextRegion();
 	cs = tables->entryByRegion[region];
@@ -649,23 +647,11 @@ void FsmRun::emitToken( KlangEl *token )
 Head *FsmRun::extractToken( long length )
 {
 	/* How much do we have already? Tokstart may or may not be set. */
-	long have = 0;
-	if ( tokstart != 0 )
-		have = p - tokstart;
-	else
-		tokstart = p;
+	assert( tokstart == 0 );
 
 	/* The generated token length has been stuffed into tokdata. */
-	if ( tokstart + length > pe ) {
-		/* There is not enough data in the buffer to generate the token.
-		 * Shift data over and fill the buffer. */
-		if ( have > 0 ) {
-			/* There is data that needs to be shifted over. */
-			memmove( runBuf->buf, tokstart, have );
-			tokend -= (tokstart - runBuf->buf);
-			tokstart = runBuf->buf;
-		}
-		p = pe = runBuf->buf + have;
+	if ( p + length > pe ) {
+		p = pe = runBuf->buf;
 		peof = 0;
 
 		long space = runBuf->buf + FSM_BUFSIZE - pe;
@@ -677,12 +663,11 @@ Head *FsmRun::extractToken( long length )
 		pe = p + len;
 	}
 
-	if ( tokstart + length > pe )
+	if ( p + length > pe )
 		cerr << "NOT ENOUGH DATA TO FETCH TOKEN" << endp;
 
-	Head *tokdata = string_alloc_const( prg, tokstart, length );
-	p = tokstart + length;
-	tokstart = 0;
+	Head *tokdata = string_alloc_const( prg, p, length );
+	p += length;
 
 	return tokdata;
 }
