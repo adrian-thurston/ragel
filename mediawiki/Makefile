@@ -18,17 +18,26 @@
 #   along with Colm; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
 
-
 SRC = $(wildcard *.lm)
 BIN = $(SRC:%.lm=%.bin)
 COLM = ../../colm/colm
 
-all: $(BIN)
+all: pdump garticle mediawiki.bin
 
-$(BIN): $(COLM)
+pdump.cpp: pdump.rl
+	ragel -G2 -o pdump.cpp pdump.rl
 
-$(BIN): %.bin: %.lm
-	$(COLM) $<
+pdump: pdump.cpp
+	g++ -O3 -Wall -o pdump pdump.cpp
+
+garticle.cpp: garticle.rl
+	ragel -G2 -o garticle.cpp garticle.rl
+
+garticle: garticle.cpp
+	g++ -O3 -Wall -o garticle garticle.cpp
+
+mediawiki.bin: mediawiki.lm
+	$(COLM) mediawiki.lm
 
 clean:
-	rm -f *.cpp *.bin
+	rm -f mediawiki.cpp *.bin garticle.cpp garticle pdump.cpp pdump
