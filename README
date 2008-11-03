@@ -1,0 +1,43 @@
+BUILDING
+========
+
+Colm is currently supported only on Unix-like systems. It depends on the mmap
+function and it must be able to find g++ on the path.
+
+Building Colm from the source repository requires that you have ragel and kelbt
+installed. Building these two packages is straightforward. The usual
+./configure && make should be all that's needed. Alternatively, you may find
+packages for your system.
+
+http://www.complang.org/ragel/
+http://www.complang.org/kelbt/
+
+SYNTAX HIGHLIGHTING
+===================
+
+There is a vim syntax definition file colm.vim
+
+RUNNING
+=======
+
+The colm executable takes a Colm program and generates a .cpp file from it. It
+then compiles this program using g++. The g++ compile phase depends on include
+directories in the colm distribution, as well as a runtime library. Colm finds
+these using argv[0]:
+
+    -I dirname(argv[0])"../aapl"
+    -I dirname(argv[0])"../colm"
+    dirname(argv[0])"../colm/runtime.a"
+
+Therefore it is easiest to just run colm from the place it was built. This is
+temporary. In the future a proper install scheme will be provided.
+
+$ ./colm prog.lm
+
+Will produce:
+    prog.cpp
+    prog.bin
+
+The prog.bin program can then be run on some input:
+
+$ ./prog.bin < inputfile
