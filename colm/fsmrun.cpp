@@ -328,9 +328,11 @@ void FsmRun::sendEOF( )
 				parser, code, 0, 0 );
 		execution.execute( parser->root );
 
+		/* Mark generated tokens as belonging to a group. */
 		set_AF_GROUP_MEM();
 
-		sendQueuedTokens();
+		/* Send the generated tokens. */
+		send_queued_tokens( this, parser );
 	}
 
 	parser->send( input );
@@ -345,7 +347,7 @@ void FsmRun::sendEOF( )
 	cs = tables->entryByRegion[region];
 }
 
-void FsmRun::sendQueuedTokens()
+void send_queued_tokens( FsmRun *fsmRun, PdaRun *parser )
 {
 	while ( parser->queue != 0 ) {
 		/* Pull an item to send off the queue. */
@@ -361,14 +363,15 @@ void FsmRun::sendQueuedTokens()
 			#endif
 			
 			parser->ignore( send->tree );
-			prg->kidPool.free( send );
+			fsmRun->prg->kidPool.free( send );
 		}
 		else {
 			#ifdef COLM_LOG_PARSE
 			cerr << "sending queue item: " << 
 					parser->tables->gbl->lelInfo[send->tree->id].name << endl;
 			#endif
-			sendLangEl( send );
+
+			send_handle_error( fsmRun, parser, send );
 		}
 	}
 }
@@ -392,8 +395,7 @@ void FsmRun::sendToken( long id )
 		p = tokstart;
 		tokstart = 0;
 
-		translateLangEl( id, tokdata, false, 0 );
-		sendQueuedTokens();
+		generationAction( id, tokdata, false, 0 );
 	}
 	else {
 		/* By default the match is consumed and this is what we need. Just
@@ -401,8 +403,7 @@ void FsmRun::sendToken( long id )
 		tokstart = 0;
 
 		Kid *input = makeToken( id, tokdata, false, 0 );
-		sendLangEl( input );
-		assert( parser->queue == 0 );
+		send_handle_error( this, parser, input );
 	}
 
 	memset( mark_leave, 0, sizeof(mark_leave) );
@@ -429,9 +430,11 @@ void FsmRun::sendNamedLangEl()
 		tokdata = string_alloc_new( prg, data, length );
 
 	Kid *input = makeToken( klangEl->id, tokdata, true, bindId );
-	sendLangEl( input );
+	send_handle_error( this, parser, input );
 }
 
+/* Sets the AF_GROUP_MEM so the backtracker can tell which tokens were sent
+ * generated from a single action. */
 void FsmRun::set_AF_GROUP_MEM()
 {
 	/* Set AF_GROUP_MEM now. */
@@ -452,13 +455,14 @@ void FsmRun::set_AF_GROUP_MEM()
  *  -invoke failure (the backtracker)
  */
 
-void FsmRun::translateLangEl( int id, Head *tokdata, bool namedLangEl, int bindId )
+void FsmRun::generationAction( int id, Head *tokdata, bool namedLangEl, int bindId )
 {
 	#ifdef COLM_LOG_PARSE
-	cerr << "translating: " << 
+	cerr << "generation action: " << 
 			parser->tables->gbl->lelInfo[id].name << endl;
 	#endif
 
+	/* Find the code. */
 	Code *code = parser->tables->gbl->frameInfo[
 			parser->tables->gbl->lelInfo[id].frameId].code;
 	
@@ -467,9 +471,14 @@ void FsmRun::translateLangEl( int id, Head *tokdata, bool namedLangEl, int bindI
 			parser, code, 0, tokdata );
 	execution.execute( parser->root );
 
+	/* Finished with the match text. */
 	string_free( prg, tokdata );
 
+	/* Mark generated tokens as belonging to a group. */
 	set_AF_GROUP_MEM();
+
+	/* Send the queued tokens. */
+	send_queued_tokens( this, parser );
 }
 
 Kid *FsmRun::makeToken( int id, Head *tokdata, bool namedLangEl, int bindId )
@@ -556,7 +565,7 @@ void PdaRun::send( Kid *input )
 	parseToken( input );
 }
 
-void FsmRun::sendLangEl( Kid *input )
+void send_handle_error( FsmRun *fsmRun, PdaRun *parser, Kid *input )
 {
 	long id = input->tree->id;
 
@@ -570,14 +579,14 @@ void FsmRun::sendLangEl( Kid *input )
 	}
 	else {
 		/* Set the current state from the next region. */
-		region = parser->getNextRegion();
-		cs = tables->entryByRegion[region];
+		fsmRun->region = parser->getNextRegion();
+		fsmRun->cs = fsmRun->tables->entryByRegion[fsmRun->region];
 
 		if ( parser->isParserStopFinished() ) {
 			#ifdef COLM_LOG_PARSE
 			cerr << "stopping the parse" << endl;
 			#endif
-			cs = tables->errorState;
+			fsmRun->cs = fsmRun->tables->errorState;
 			parser->stopParsing = true;
 		}
 	}

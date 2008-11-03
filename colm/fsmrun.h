@@ -88,13 +88,11 @@ struct FsmRun
 
 	void set_AF_GROUP_MEM();
 
-	void sendLangEl( Kid *input );
 	Kid *makeToken( int id, Head *tokdata, bool namedLangEl, int bindId );
-	void translateLangEl( int id, Head *tokdata, bool namedLangEl, int bindId );
+	void generationAction( int id, Head *tokdata, bool namedLangEl, int bindId );
 	void sendNamedLangEl();
 	void sendEOF();
 	void sendIgnore( long id );
-	void sendQueuedTokens();
 	void sendToken( long id );
 
 	void sendBackIgnore( Kid *ignore );
@@ -130,5 +128,8 @@ struct FsmRun
 	char *mark_enter[32];
 	char *mark_leave[32];
 };
+
+void send_queued_tokens( FsmRun *fsmRun, PdaRun *parser );
+void send_handle_error( FsmRun *fsmRun, PdaRun *parser, Kid *input );
 
 #endif
