@@ -1062,9 +1062,7 @@ void FsmCodeGen::writeCode()
 		"int main( int argc, char **argv )\n"
 		"{\n"
 		"	Program program( true, &main_runtimeData );\n"
-		"	program.freshGlobal();\n"
 		"	program.run();\n"
-		"	program.clear();\n"
 		"	return 0;\n"
 		"}\n"
 		"\n";

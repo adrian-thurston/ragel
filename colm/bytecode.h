@@ -417,12 +417,12 @@ void xml_print_kid( Tree **&sp, Program *prg, Kid *kid, int depth );
 void parsed_downref( Tree **root, Program *prg, Tree *tree );
 Stream *open_stream( Program *prg, FILE *file );
 Tree *construct_string( Program *prg, Head *s );
-void list_free( Program *prg, List *list );
+void list_free( Program *prg, Tree **sp, List *list );
 void ignore_free( Program *prg, Tree *tree );
-void map_free( Program *prg, Map *map );
+void map_free( Program *prg, Tree **sp, Map *map );
 void stream_free( Program *prg, Stream *s );
 
-void tree_downref( Program *prg, Tree *tree );
+void tree_downref( Program *prg, Tree **sp, Tree *tree );
 void tree_upref( Tree *tree );
 Kid *tree_child( Program *prg, Tree *tree );
 Kid *tree_extract_child( Program *prg, Tree *tree );
@@ -575,9 +575,10 @@ struct Program
 	Tree *falseVal;
 
 	void run();
-	void clear();
-	void clearGlobal();
-	void freshGlobal();
+
+	void clear( Tree **sp );
+	void clearGlobal( Tree **sp );
+	void allocGlobal();
 
 	Kid *heap;
 

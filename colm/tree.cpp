@@ -25,16 +25,18 @@
 #include "fsmrun.h"
 #include "pdarun.h"
 
-void tree_free( Program *prg, Tree *tree )
+/* We can't make recursive calls here since the tree we are freeing may be
+ * very large. Need the VM stack. */
+void tree_free( Program *prg, Tree **sp, Tree *tree )
 {
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
 	long genericId = lelInfo[tree->id].genericId;
 	if ( genericId > 0 ) {
 		GenericInfo *generic = &prg->rtd->genericInfo[genericId];
 		if ( generic->type == GEN_LIST )
-			list_free( prg, (List*)tree );
+			list_free( prg, sp, (List*)tree );
 		else if ( generic->type == GEN_MAP )
-			map_free( prg, (Map*)tree );
+			map_free( prg, sp, (Map*)tree );
 		else
 			assert(false);
 	}
@@ -57,7 +59,7 @@ void tree_free( Program *prg, Tree *tree )
 		else { 
 			if ( tree->alg != 0 ) {
 				//assert( ! (tree->alg->flags & AF_HAS_RCODE) );
-				tree_downref( prg, tree->alg->parsed );
+				tree_downref( prg, sp, tree->alg->parsed );
 				prg->algPool.free( tree->alg );
 			}
 			string_free( prg, tree->tokdata );
@@ -65,7 +67,7 @@ void tree_free( Program *prg, Tree *tree )
 			Kid *child = tree->child;
 			while ( child != 0 ) {
 				Kid *next = child->next;
-				tree_downref( prg, child->tree );
+				tree_downref( prg, sp, child->tree );
 				prg->kidPool.free( child );
 				child = next;
 			}
@@ -81,13 +83,13 @@ void tree_upref( Tree *tree )
 		tree->refs += 1;
 }
 
-void tree_downref( Program *prg, Tree *tree )
+void tree_downref( Program *prg, Tree **sp, Tree *tree )
 {
 	if ( tree != 0 ) {
 		assert( tree->refs > 0 );
 		tree->refs -= 1;
 		if ( tree->refs == 0 )
-			tree_free( prg, tree );
+			tree_free( prg, sp, tree );
 	}
 }
 

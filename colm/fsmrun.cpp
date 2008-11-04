@@ -314,11 +314,11 @@ void FsmRun::sendBack( Kid *input )
 	Tree *lastBound = parser->bindings.top();
 	if ( lastBound == input->tree ) {
 		parser->bindings.pop();
-		tree_downref( prg, input->tree );
+		tree_downref( prg, parser->root, input->tree );
 	}
 
 	/* Downref the tree that was sent back and free the kid. */
-	tree_downref( prg, input->tree );
+	tree_downref( prg, parser->root, input->tree );
 	prg->kidPool.free( input );
 }
 
@@ -550,7 +550,7 @@ void PdaRun::sendBackIgnore()
 	fsmRun->sendBackIgnore( ignore );
 	while ( ignore != 0 ) {
 		Kid *next = ignore->next;
-		tree_downref( prg, ignore->tree );
+		tree_downref( prg, root, ignore->tree );
 		prg->kidPool.free( ignore );
 		ignore = next;
 	}

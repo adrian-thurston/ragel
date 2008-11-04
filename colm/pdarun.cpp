@@ -51,7 +51,7 @@ void PdaRun::clean()
 	Kid *kid = stackTop;
 	while ( kid != 0 ) {
 		Kid *next = kid->next;
-		tree_downref( prg, kid->tree );
+		tree_downref( prg, root, kid->tree );
 		prg->kidPool.free( kid );
 		kid = next;
 	}
@@ -215,7 +215,7 @@ head:
 
 	alg->flags |= AF_REV_FREED;
 
-	tree_downref( prg, alg->parsed );
+	tree_downref( prg, sp, alg->parsed );
 	alg->parsed = 0;
 
 	if ( sp != root )
@@ -567,7 +567,7 @@ parseError:
 
 			if ( alg->parsed != 0 ) {
 				/* Get the lhs, it may have been reverted. */
-				tree_downref( prg, undoLel->tree );
+				tree_downref( prg, root, undoLel->tree );
 				undoLel->tree = alg->parsed;
 			}
 
@@ -613,7 +613,7 @@ parseError:
 			}
 
 			/* Free the reduced item. */
-			tree_downref( prg, undoLel->tree );
+			tree_downref( prg, root, undoLel->tree );
 			prg->kidPool.free( undoLel );
 			prg->algPool.free( alg );
 		}
