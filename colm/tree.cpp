@@ -79,7 +79,7 @@ void tree_upref( Tree *tree )
 {
 	if ( tree != 0 )
 		tree->refs += 1;
-};
+}
 
 void tree_downref( Program *prg, Tree *tree )
 {
@@ -89,7 +89,7 @@ void tree_downref( Program *prg, Tree *tree )
 		if ( tree->refs == 0 )
 			tree_free( prg, tree );
 	}
-};
+}
 
 /* Find the first child of a tree. */
 Kid *tree_child( Program *prg, Tree *tree )

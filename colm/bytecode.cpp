@@ -335,7 +335,6 @@ void undo_parse( Tree **&sp, Program *prg, Stream *stream,
 	PdaTables *tables = prg->rtd->parsers[parserId];
 	PdaRun parser( sp, prg, tables, stream->scanner, 0 );
 	parser.undoParse( tree, rev );
-	delete rev;
 }
 
 Tree *stream_pull( Program *prg, Stream *stream, Tree *length )
@@ -1778,7 +1777,6 @@ void rcode_downref_all( Tree **stack_root, Program *prg, CodeVect *rev )
 		/* Backup over it. */
 		rev->tabLen -= len + 4;
 	}
-	delete rev;
 }
 
 void rcode_downref( Tree **stack_root, Program *prg, Code *instr )
@@ -1802,6 +1800,7 @@ again:
 			rcode_downref_all( stack_root, prg, (CodeVect*)wrev );
 			tree_downref( prg, stream );
 			tree_downref( prg, tree );
+			delete (CodeVect*)wrev;
 			break;
 		}
 		case IN_STREAM_PULL_BKT: {
@@ -3099,6 +3098,7 @@ again:
 
 			undo_parse( sp, prg, (Stream*)stream, parserId, tree, (CodeVect*)wrev );
 			tree_downref( prg, stream );
+			delete (CodeVect*)wrev;
 			break;
 		}
 		case IN_CONSTRUCT: {
