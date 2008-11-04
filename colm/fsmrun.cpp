@@ -47,7 +47,6 @@ FsmRun::FsmRun( Program *prg ) :
 	tables(prg->rtd->fsmTables),
 	parser(0),
 	line(1),
-	col(1),
 	position(0)
 {
 }
@@ -115,6 +114,28 @@ void FsmRun::streamPush( const char *data, long length )
 	}
 }
 
+/* Keep the position up to date after consuming text. */
+void update_position( FsmRun *fsmRun, const char *data, long length )
+{
+	for ( int i = 0; i < length; i++ ) {
+		if ( data[i] == '\n' )
+			fsmRun->line += 1;
+	}
+
+	fsmRun->position += length;
+}
+
+/* Keep the position up to date after sending back text. */
+void undo_position( FsmRun *fsmRun, const char *data, long length )
+{
+	for ( int i = 0; i < length; i++ ) {
+		if ( data[i] == '\n' )
+			fsmRun->line -= 1;
+	}
+
+	fsmRun->position -= length;
+}
+
 /* Should only be sending back whole tokens/ignores, therefore the send back
  * should never cross a buffer boundary. Either we slide back p, or we move to
  * a previous buffer and slide back p. */
@@ -160,7 +181,7 @@ void FsmRun::sendBackText( const char *data, long length )
 
 	assert( memcmp( data, p, length ) == 0 );
 		
-	position -= length;
+	undo_position( this, data, length );
 
 	/* We are adjusting p so this must be reset. */
 	tokstart = 0;
@@ -301,6 +322,23 @@ void FsmRun::sendBack( Kid *input )
 	prg->kidPool.free( input );
 }
 
+/* Sets the AF_GROUP_MEM so the backtracker can tell which tokens were sent
+ * generated from a single action. */
+void set_AF_GROUP_MEM( PdaRun *parser )
+{
+	/* Set AF_GROUP_MEM now. */
+	long sendCount = 0;
+	Kid *queued = parser->queue;
+	while ( queued != 0 ) {
+		if ( !(queued->tree->alg->flags & AF_IGNORE) ) {
+			if ( sendCount > 0 )
+				queued->tree->alg->flags |= AF_GROUP_MEM;
+			sendCount += 1;
+		}
+		queued = queued->next;
+	}
+}
+
 void FsmRun::sendEOF( )
 {
 	#ifdef COLM_LOG_PARSE
@@ -329,7 +367,7 @@ void FsmRun::sendEOF( )
 		execution.execute( parser->root );
 
 		/* Mark generated tokens as belonging to a group. */
-		set_AF_GROUP_MEM();
+		set_AF_GROUP_MEM( parser );
 
 		/* Send the generated tokens. */
 		send_queued_tokens( this, parser );
@@ -388,6 +426,7 @@ void FsmRun::sendToken( long id )
 	/* Make the token data. */
 	long length = p-tokstart;
 	Head *tokdata = string_alloc_const( prg, tokstart, length );
+	update_position( this, tokstart, length );
 
 	if ( ctxDepParsing && lelInfo[id].frameId >= 0 ) {
 		/* We don't want the generation actions to automatically consume text
@@ -433,23 +472,6 @@ void FsmRun::sendNamedLangEl()
 	send_handle_error( this, parser, input );
 }
 
-/* Sets the AF_GROUP_MEM so the backtracker can tell which tokens were sent
- * generated from a single action. */
-void FsmRun::set_AF_GROUP_MEM()
-{
-	/* Set AF_GROUP_MEM now. */
-	long sendCount = 0;
-	Kid *queued = parser->queue;
-	while ( queued != 0 ) {
-		if ( !(queued->tree->alg->flags & AF_IGNORE) ) {
-			if ( sendCount > 0 )
-				queued->tree->alg->flags |= AF_GROUP_MEM;
-			sendCount += 1;
-		}
-		queued = queued->next;
-	}
-}
-
 /* 
  * Not supported:
  *  -invoke failure (the backtracker)
@@ -475,7 +497,7 @@ void FsmRun::generationAction( int id, Head *tokdata, bool namedLangEl, int bind
 	string_free( prg, tokdata );
 
 	/* Mark generated tokens as belonging to a group. */
-	set_AF_GROUP_MEM();
+	set_AF_GROUP_MEM( parser );
 
 	/* Send the queued tokens. */
 	send_queued_tokens( this, parser );
@@ -543,10 +565,6 @@ Kid *PdaRun::extractIgnore()
 
 void PdaRun::send( Kid *input )
 {
-	long length = string_length( input->tree->tokdata );
-	//input->tree->pos = fsmRun->position;
-	fsmRun->position += length;
-
 	/* Pull the ignore tokens out and store in the token. */
 	Kid *ignore = extractIgnore();
 	if ( ignore != 0 ) {
@@ -625,6 +643,7 @@ void FsmRun::sendIgnore( long id )
 	/* Make the ignore string. */
 	int length = p - tokstart;
 	Head *ignoreStr = string_alloc_const( prg, tokstart, length );
+	update_position( this, tokstart, length );
 	tokstart = 0;
 	
 	Tree *tree = prg->treePool.allocate();
@@ -676,6 +695,7 @@ Head *FsmRun::extractToken( long length )
 		cerr << "NOT ENOUGH DATA TO FETCH TOKEN" << endp;
 
 	Head *tokdata = string_alloc_const( prg, p, length );
+	update_position( this, p, length );
 	p += length;
 
 	return tokdata;

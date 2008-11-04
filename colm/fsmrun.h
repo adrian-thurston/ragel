@@ -86,8 +86,6 @@ struct FsmRun
 	FsmRun( Program *prg );
 	~FsmRun();
 
-	void set_AF_GROUP_MEM();
-
 	Kid *makeToken( int id, Head *tokdata, bool namedLangEl, int bindId );
 	void generationAction( int id, Head *tokdata, bool namedLangEl, int bindId );
 	void sendNamedLangEl();
@@ -123,7 +121,7 @@ struct FsmRun
 	bool eofSent;
 	RunBuf *runBuf;
 	bool gotoResume;
-	long line, col;
+	long line;
 	long position;
 	char *mark_enter[32];
 	char *mark_leave[32];

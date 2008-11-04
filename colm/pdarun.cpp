@@ -628,12 +628,7 @@ _out:
 
 ostream &PdaRun::parse_error( int tokId, Tree *tree )
 {
-	/* Maintain the error count. */
-	// FIXME: what to put here?
-	// gblErrorCount += 1;
-
-	//cerr << token.loc.fileName << ":" << token.loc.line << ":" << token.loc.col << ": ";
-	cerr << "error: at token ";
+	cerr << "error:" << fsmRun->line << ": at token ";
 	if ( tokId < 128 )
 		cerr << "\"" << tables->gbl->lelInfo[tokId].name << "\"";
 	else 
