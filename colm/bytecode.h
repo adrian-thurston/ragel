@@ -398,84 +398,77 @@ struct TreePair
 struct Program;
 struct Stream;
 
+bool test_false( Program *prg, Tree *tree );
+
 Head *string_alloc_new( Program *prg, const char *data, long length );
 Head *string_alloc_const( Program *prg, const char *data, long length );
 Head *string_copy( Program *prg, Head *head );
 void string_free( Program *prg, Head *head );
-
-void print_str( Head *str );
-
 long string_length( Head *str );
 const char *string_data( Head *str );
 void string_shorten( Head *tokdata, long newlen );
-void ignore_data( Tree *tree, char *dest );
-long ignore_length( Tree *tree );
-void free_obj_data( Program *prg, Kid *attrs );
 Head *concat_str( Head *s1, Head *s2 );
-Word cmp_string( Head *s1, Head *s2 );
 Word str_atoi( Head *str );
-Head *int_to_str( Program *prg, Word i );
 Word str_uord16( Head *head );
 Word str_uord8( Head *head );
-Head *make_literal( Program *prg, long litoffset );
+Word cmp_string( Head *s1, Head *s2 );
+
+Head *int_to_str( Program *prg, Word i );
+
 void rcode_downref( Tree **stack_root, Program *prg, Code *instr );
 void rcode_downref_all( Tree **stack_root, Program *prg, CodeVect *cv );
-void xml_print_tree( Tree **&sp, Program *prg, Tree *tree );
-void xml_print_kid( Tree **&sp, Program *prg, Kid *kid, int depth );
 void parsed_downref( Tree **root, Program *prg, Tree *tree );
-Stream *open_stream( Program *prg, FILE *file );
+
+bool match_pattern( Tree **bindings, Program *prg, long pat, Kid *kid, bool checkNext );
+Head *make_literal( Program *prg, long litoffset );
 Tree *construct_string( Program *prg, Head *s );
+Tree *construct_integer( Program *prg, long i );
+Tree *construct_string( Program *prg, Head *s );
+Tree *construct_pointer( Program *prg, Tree *tree );
+Tree *construct_term( Program *prg, Word id, Head *tokdata );
+Tree *construct_replacement_tree( Tree **bindings, Program *prg, long pat );
+Tree *create_generic( Program *prg, long genericId );
+
+Tree *open_file( Program *prg, Tree *name );
+Stream *open_stream_fd( Program *prg, long fd );
+Stream *open_stream( Program *prg, FILE *file );
 
 void tree_downref( Program *prg, Tree **sp, Tree *tree );
 void tree_upref( Tree *tree );
 Kid *tree_child( Program *prg, Tree *tree );
 Kid *tree_extract_child( Program *prg, Tree *tree );
 Kid *tree_ignore( Program *prg, Tree *tree );
-void print_tree( Tree **&sp, Program *prg, Tree *tree );
-void print_tree( ostream &out, Tree **&sp, Program *prg, Tree *tree );
 bool tree_is_ignore( Program *prg, Kid *kid );
 Kid *kid_list_concat( Kid *list1, Kid *list2 );
-Tree *open_file( Program *prg, Tree *name );
-Stream *open_stream_fd( Program *prg, long fd );
+void ignore_data( Tree *tree, char *dest );
+long ignore_length( Tree *tree );
+Tree *split_tree( Program *prg, Tree *t );
 Tree *copy_tree( Program *prg, Tree *tree, Kid *oldNextDown, Kid *&newNextDown );
-Tree *create_generic( Program *prg, long genericId );
-void split_ref( Tree **&sp, Program *prg, Ref *fromRef );
-Tree *tree_search( Kid *kid, long id );
-Tree *map_find( Map *map, Tree *key );
-long map_length( Map *map );
+Tree *copy_real_tree( Program *prg, Tree *tree, Kid *oldNextDown, Kid *&newNextDown );
+Tree *make_tree( Tree **root, Program *prg, long nargs );
+Tree *make_token( Tree **root, Program *prg, long nargs );
+
+void print_tree( Tree **&sp, Program *prg, Tree *tree );
+void print_tree( ostream &out, Tree **&sp, Program *prg, Tree *tree );
+void print_str( Head *str );
+void xml_print_tree( Tree **&sp, Program *prg, Tree *tree );
+void xml_print_kid( Tree **&sp, Program *prg, Kid *kid, int depth );
+
 long list_length( List *list );
 void list_append( Program *prg, List *list, Tree *val );
 Tree *list_remove_end( Program *prg, List *list );
 Tree *get_list_mem( List *list, Word field );
 Tree *get_list_mem_split( Program *prg, List *list, Word field );
 Tree *set_list_mem( List *list, Half field, Tree *value );
-Tree *tree_search( Kid *kid, long id );
-Tree *tree_search( Tree *tree, long id );
+
+Tree *map_find( Map *map, Tree *key );
+long map_length( Map *map );
 bool map_insert( Program *prg, Map *map, Tree *key, Tree *element );
 void map_unremove( Program *prg, Map *map, Tree *key, Tree *element );
 Tree *map_uninsert( Program *prg, Map *map, Tree *key );
 Tree *map_store( Program *prg, Map *map, Tree *key, Tree *element );
 Tree *map_unstore( Program *prg, Map *map, Tree *key, Tree *existing );
-Tree *tree_iter_advance( Program *prg, Tree **&sp, TreeIter *iter );
-Tree *tree_iter_next_child( Program *prg, Tree **&sp, TreeIter *iter );
-Tree *tree_iter_prev_child( Program *prg, Tree **&sp, TreeIter *iter );
-bool match_pattern( Tree **bindings, Program *prg, long pat, Kid *kid, bool checkNext );
 TreePair map_remove( Program *prg, Map *map, Tree *key );
-
-Tree *construct_integer( Program *prg, long i );
-Tree *construct_string( Program *prg, Head *s );
-Tree *construct_pointer( Program *prg, Tree *tree );
-Tree *construct_term( Program *prg, Word id, Head *tokdata );
-bool test_false( Program *prg, Tree *tree );
-Tree *construct_replacement_tree( Tree **bindings, Program *prg, long pat );
-
-void split_iter_cur( Tree **&sp, Program *prg, TreeIter *iter );
-Tree *split_tree( Program *prg, Tree *t );
-Tree *copy_real_tree( Program *prg, Tree *tree, Kid *oldNextDown, Kid *&newNextDown );
-Tree *make_tree( Tree **root, Program *prg, PdaRun *parser, long nargs );
-Tree *make_token( Tree **root, Program *prg, PdaRun *parser, long nargs );
-Tree *tree_iter_deref_cur( TreeIter *iter );
-void ref_set_value( Ref *ref, Tree *v );
 
 Tree *get_ptr_val( Pointer *ptr );
 Tree *get_ptr_val_split( Program *prg, Pointer *ptr );
@@ -483,7 +476,17 @@ Tree *get_field( Tree *tree, Word field );
 Tree *get_field_split( Program *prg, Tree *tree, Word field );
 Tree *get_rhs_el( Program *prg, Tree *lhs, long position );
 void set_field( Program *prg, Tree *tree, long field, Tree *value );
+
+Tree *tree_iter_advance( Program *prg, Tree **&sp, TreeIter *iter );
+Tree *tree_iter_next_child( Program *prg, Tree **&sp, TreeIter *iter );
+Tree *tree_iter_prev_child( Program *prg, Tree **&sp, TreeIter *iter );
+Tree *tree_iter_deref_cur( TreeIter *iter );
 void set_triter_cur( TreeIter *iter, Tree *tree );
+void split_iter_cur( Tree **&sp, Program *prg, TreeIter *iter );
+void ref_set_value( Ref *ref, Tree *v );
+Tree *tree_search( Kid *kid, long id );
+Tree *tree_search( Tree *tree, long id );
+void split_ref( Tree **&sp, Program *prg, Ref *fromRef );
 
 /*
  * Maps

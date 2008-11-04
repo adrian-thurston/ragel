@@ -1806,7 +1806,7 @@ again:
 			cerr << "IN_MAKE_TOKEN " << (ulong) nargs << endl;
 			#endif
 
-			Tree *result = make_token( sp, prg, parser, nargs );
+			Tree *result = make_token( sp, prg, nargs );
 			for ( long i = 0; i < nargs; i++ )
 				tree_downref( prg, sp, pop() );
 			push( result );
@@ -1820,7 +1820,7 @@ again:
 			cerr << "IN_MAKE_TREE " << (ulong) nargs << endl;
 			#endif
 
-			Tree *result = make_tree( sp, prg, parser, nargs );
+			Tree *result = make_tree( sp, prg, nargs );
 			for ( long i = 0; i < nargs; i++ )
 				tree_downref( prg, sp, pop() );
 			push( result );

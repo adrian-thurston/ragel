@@ -275,7 +275,7 @@ Kid *construct_replacement_kid( Tree **bindings, Program *prg, Kid *prev, long p
 	return kid;
 }
 
-Tree *make_token( Tree **root, Program *prg, PdaRun *parser, long nargs )
+Tree *make_token( Tree **root, Program *prg, long nargs )
 {
 	Tree **const sp = root;
 	Tree **base = vm_ptop() + nargs;
@@ -315,7 +315,7 @@ Tree *make_token( Tree **root, Program *prg, PdaRun *parser, long nargs )
 	return tree;
 }
 
-Tree *make_tree( Tree **root, Program *prg, PdaRun *parser, long nargs )
+Tree *make_tree( Tree **root, Program *prg, long nargs )
 {
 	Tree **const sp = root;
 	Tree **base = vm_ptop() + nargs;
