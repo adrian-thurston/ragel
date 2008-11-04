@@ -102,9 +102,6 @@ long PdaRun::stackTopTarget()
 	return state;
 }
 
-#define push(i) (*(--sp) = (i))
-#define pop() (*sp++)
-
 bool beenCommitted( Kid *kid )
 {
 	return kid->tree->alg->flags & AF_COMMITTED;
@@ -133,7 +130,7 @@ head:
 
 	/* Recurse only on non-generated trees. */
 	if ( !(alg->flags & AF_GENERATED) && tree->child != 0 ) {
-		push( (Tree*)lel );
+		vm_push( (Tree*)lel );
 		lel = tree_child( prg, tree );
 
 		while ( lel != 0 ) {
@@ -144,7 +141,7 @@ head:
 			lel = lel->next;
 		}
 
-		lel = (Kid*)pop();
+		lel = (Kid*)vm_pop();
 	}
 
 	/* Commit */
@@ -191,7 +188,7 @@ head:
 
 	/* Recurse. */
 	if ( !(alg->flags & AF_GENERATED) && tree->child != 0 ) {
-		push( (Tree*)lel );
+		vm_push( (Tree*)lel );
 		lel = tree_child( prg, tree );
 
 		while ( lel != 0 ) {
@@ -202,7 +199,7 @@ head:
 			lel = lel->next;
 		}
 
-		lel = (Kid*)pop();
+		lel = (Kid*)vm_pop();
 	}
 
 	/* Commit */
@@ -246,13 +243,13 @@ void PdaRun::commit()
 	Kid *kid = stackTop;
 	long topLevel = 0;
 	while ( kid != 0 && !beenCommitted( kid ) ) {
-		push( (Tree*)kid );
+		vm_push( (Tree*)kid );
 		kid = kid->next;
 		topLevel += 1;
 	}
 
 	while ( topLevel > 0 ) {
-		kid = (Kid*)pop();
+		kid = (Kid*)vm_pop();
 		commitKid( sp, kid );
 		parsed_downref_kid( sp, prg, kid );
 		topLevel -= 1;

@@ -37,13 +37,6 @@ using std::ostream;
 typedef unsigned long ulong;
 typedef unsigned char uchar;
 
-#define read_word_p( i, p ) do { \
-	i = ((Word)  p[0]); \
-	i |= ((Word) p[1]) << 8; \
-	i |= ((Word) p[2]) << 16; \
-	i |= ((Word) p[3]) << 24; \
-} while(0)
-
 #define IN_LOAD_INT              0x01
 #define IN_LOAD_STR              0x02
 #define IN_LOAD_NIL              0x03
@@ -291,6 +284,10 @@ typedef unsigned char uchar;
 #define IFR_RIF 1    /* return iframe pointer */
 #define IFR_RFR 0    /* return frame pointer */
 
+#define vm_push(i) (*(--sp) = (i))
+#define vm_pop() (*sp++)
+#define vm_top() (*sp)
+#define vm_ptop() (sp)
 
 struct Kid;
 struct Tree;
@@ -305,6 +302,9 @@ struct Program;
 struct List;
 struct Map;
 struct Stream;
+struct Ref;
+struct TreeIter;
+struct Pointer;
 
 typedef unsigned char Code;
 typedef unsigned long Word;
@@ -387,6 +387,14 @@ struct Head
 	long length;
 };
 
+struct TreePair
+{
+	TreePair() : key(0), val(0) {}
+
+	Tree *key;
+	Tree *val;
+};
+
 struct Program;
 struct Stream;
 
@@ -427,6 +435,55 @@ void print_tree( Tree **&sp, Program *prg, Tree *tree );
 void print_tree( ostream &out, Tree **&sp, Program *prg, Tree *tree );
 bool tree_is_ignore( Program *prg, Kid *kid );
 Kid *kid_list_concat( Kid *list1, Kid *list2 );
+Tree *open_file( Program *prg, Tree *name );
+Stream *open_stream_fd( Program *prg, long fd );
+Tree *copy_tree( Program *prg, Tree *tree, Kid *oldNextDown, Kid *&newNextDown );
+Tree *create_generic( Program *prg, long genericId );
+void split_ref( Tree **&sp, Program *prg, Ref *fromRef );
+Tree *tree_search( Kid *kid, long id );
+Tree *map_find( Map *map, Tree *key );
+long map_length( Map *map );
+long list_length( List *list );
+void list_append( Program *prg, List *list, Tree *val );
+Tree *list_remove_end( Program *prg, List *list );
+Tree *get_list_mem( List *list, Word field );
+Tree *get_list_mem_split( Program *prg, List *list, Word field );
+Tree *set_list_mem( List *list, Half field, Tree *value );
+Tree *tree_search( Kid *kid, long id );
+Tree *tree_search( Tree *tree, long id );
+bool map_insert( Program *prg, Map *map, Tree *key, Tree *element );
+void map_unremove( Program *prg, Map *map, Tree *key, Tree *element );
+Tree *map_uninsert( Program *prg, Map *map, Tree *key );
+Tree *map_store( Program *prg, Map *map, Tree *key, Tree *element );
+Tree *map_unstore( Program *prg, Map *map, Tree *key, Tree *existing );
+Tree *tree_iter_advance( Program *prg, Tree **&sp, TreeIter *iter );
+Tree *tree_iter_next_child( Program *prg, Tree **&sp, TreeIter *iter );
+Tree *tree_iter_prev_child( Program *prg, Tree **&sp, TreeIter *iter );
+bool match_pattern( Tree **bindings, Program *prg, long pat, Kid *kid, bool checkNext );
+TreePair map_remove( Program *prg, Map *map, Tree *key );
+
+Tree *construct_integer( Program *prg, long i );
+Tree *construct_string( Program *prg, Head *s );
+Tree *construct_pointer( Program *prg, Tree *tree );
+Tree *construct_term( Program *prg, Word id, Head *tokdata );
+bool test_false( Program *prg, Tree *tree );
+Tree *construct_replacement_tree( Tree **bindings, Program *prg, long pat );
+
+void split_iter_cur( Tree **&sp, Program *prg, TreeIter *iter );
+Tree *split_tree( Program *prg, Tree *t );
+Tree *copy_real_tree( Program *prg, Tree *tree, Kid *oldNextDown, Kid *&newNextDown );
+Tree *make_tree( Tree **root, Program *prg, PdaRun *parser, long nargs );
+Tree *make_token( Tree **root, Program *prg, PdaRun *parser, long nargs );
+Tree *tree_iter_deref_cur( TreeIter *iter );
+void ref_set_value( Ref *ref, Tree *v );
+
+Tree *get_ptr_val( Pointer *ptr );
+Tree *get_ptr_val_split( Program *prg, Pointer *ptr );
+Tree *get_field( Tree *tree, Word field );
+Tree *get_field_split( Program *prg, Tree *tree, Word field );
+Tree *get_rhs_el( Program *prg, Tree *lhs, long position );
+void set_field( Program *prg, Tree *tree, long field, Tree *value );
+void set_triter_cur( TreeIter *iter, Tree *tree );
 
 /*
  * Maps
@@ -572,7 +629,7 @@ struct Program
 
 	void run();
 
-	void clear( Tree **sp );
+	void clear( Tree **vm_stack, Tree **sp );
 	void clearGlobal( Tree **sp );
 	void allocGlobal();
 
