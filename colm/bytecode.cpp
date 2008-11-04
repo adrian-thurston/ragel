@@ -637,41 +637,6 @@ Tree *get_ptr_val_split( Program *prg, Pointer *ptr )
 	return split;
 }
 
-void list_free( Program *prg, Tree **sp, List *list )
-{
-	ListEl *el = list->head;
-	while ( el != 0 ) {
-		ListEl *next = el->next;
-		tree_downref( prg, sp, el->value );
-		prg->listElPool.free( el );
-		el = next;
-	}
-	prg->mapElPool.free( (MapEl*)list );
-}
-
-
-void map_free( Program *prg, Tree **sp, Map *map )
-{
-	MapEl *el = map->head;
-	while ( el != 0 ) {
-		MapEl *next = el->next;
-		tree_downref( prg, sp, el->key );
-		tree_downref( prg, sp, el->tree );
-		prg->mapElPool.free( el );
-		el = next;
-	}
-	prg->mapElPool.free( (MapEl*)map );
-}
-
-void stream_free( Program *prg, Stream *s )
-{
-	delete s->scanner;
-	delete s->in;
-	if ( s->file != 0 )
-		fclose( s->file );
-	prg->mapElPool.free( (MapEl*)s );
-}
-
 void downref_local_trees( Program *prg, Tree **sp, Tree **frame, char *trees, long treesLen )
 {
 	for ( long i = 0; i < treesLen; i++ ) {

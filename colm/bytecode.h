@@ -417,10 +417,6 @@ void xml_print_kid( Tree **&sp, Program *prg, Kid *kid, int depth );
 void parsed_downref( Tree **root, Program *prg, Tree *tree );
 Stream *open_stream( Program *prg, FILE *file );
 Tree *construct_string( Program *prg, Head *s );
-void list_free( Program *prg, Tree **sp, List *list );
-void ignore_free( Program *prg, Tree *tree );
-void map_free( Program *prg, Tree **sp, Map *map );
-void stream_free( Program *prg, Stream *s );
 
 void tree_downref( Program *prg, Tree **sp, Tree *tree );
 void tree_upref( Tree *tree );

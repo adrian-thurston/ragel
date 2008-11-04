@@ -25,18 +25,52 @@
 #include "fsmrun.h"
 #include "pdarun.h"
 
+#define push(i) (*(--sp) = (i))
+#define pop() (*sp++)
+
+void stream_free( Program *prg, Stream *s )
+{
+	delete s->scanner;
+	delete s->in;
+	if ( s->file != 0 )
+		fclose( s->file );
+	prg->mapElPool.free( (MapEl*)s );
+}
+
 /* We can't make recursive calls here since the tree we are freeing may be
  * very large. Need the VM stack. */
 void tree_free( Program *prg, Tree **sp, Tree *tree )
 {
+	Tree **top = sp;
+
+free_tree:
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
 	long genericId = lelInfo[tree->id].genericId;
 	if ( genericId > 0 ) {
 		GenericInfo *generic = &prg->rtd->genericInfo[genericId];
-		if ( generic->type == GEN_LIST )
-			list_free( prg, sp, (List*)tree );
-		else if ( generic->type == GEN_MAP )
-			map_free( prg, sp, (Map*)tree );
+		if ( generic->type == GEN_LIST ) {
+			List *list = (List*) tree;
+			ListEl *el = list->head;
+			while ( el != 0 ) {
+				ListEl *next = el->next;
+				push( el->value );
+				prg->listElPool.free( el );
+				el = next;
+			}
+			prg->mapElPool.free( (MapEl*)list );
+		}
+		else if ( generic->type == GEN_MAP ) {
+			Map *map = (Map*)tree;
+			MapEl *el = map->head;
+			while ( el != 0 ) {
+				MapEl *next = el->next;
+				push( el->key );
+				push( el->tree );
+				prg->mapElPool.free( el );
+				el = next;
+			}
+			prg->mapElPool.free( (MapEl*)map );
+		}
 		else
 			assert(false);
 	}
@@ -50,7 +84,7 @@ void tree_free( Program *prg, Tree **sp, Tree *tree )
 			prg->treePool.free( tree );
 		else if ( tree->id == LEL_ID_PTR ) {
 			//Pointer *ptr = (Pointer*)tree;
-			//tree_downref( prg, ptr->value->tree );
+			//push( ptr->value->tree );
 			//prg->kidPool.free( ptr->value );
 			prg->treePool.free( tree );
 		}
@@ -59,7 +93,7 @@ void tree_free( Program *prg, Tree **sp, Tree *tree )
 		else { 
 			if ( tree->alg != 0 ) {
 				//assert( ! (tree->alg->flags & AF_HAS_RCODE) );
-				tree_downref( prg, sp, tree->alg->parsed );
+				push( tree->alg->parsed );
 				prg->algPool.free( tree->alg );
 			}
 			string_free( prg, tree->tokdata );
@@ -67,12 +101,23 @@ void tree_free( Program *prg, Tree **sp, Tree *tree )
 			Kid *child = tree->child;
 			while ( child != 0 ) {
 				Kid *next = child->next;
-				tree_downref( prg, sp, child->tree );
+				push( child->tree );
 				prg->kidPool.free( child );
 				child = next;
 			}
 
 			prg->treePool.free( tree );
+		}
+	}
+
+	/* Any trees to downref? */
+	while ( sp != top ) {
+		tree = pop();
+		if ( tree != 0 ) {
+			assert( tree->refs > 0 );
+			tree->refs -= 1;
+			if ( tree->refs == 0 )
+				goto free_tree;
 		}
 	}
 }
