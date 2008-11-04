@@ -1,4 +1,5 @@
 #!/bin/bash
 #
 
+echo 'struct __builtin_va_list {};'
 g++ -E -undef -D'__attribute__(xyz)=' "$@" | sed 's/#.*$//' | grep -v '^[ \t]*$'

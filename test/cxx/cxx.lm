@@ -1330,6 +1330,10 @@ def declarator_id_forms
 	{
 		lhs.lookupId = lookup_id in r4
 	}
+|	[root_qual_opt nested_name_specifier_opt '~' unknown_id]
+	{
+		lhs.lookupId = lookup_id in r4
+	}
 
 def type_id
 	lookup_id lookupId
@@ -2161,3 +2165,10 @@ start S = parse start( stdin )
 #printNamespace()
 #print( '***** SUCCESS *****\n' )
 #print_xml( S )
+#for DI: declarator_id in S {
+#	if match DI 
+#		[root_qual_opt nested_name_specifier_opt '~' UID:unknown_id]
+#	{
+#		print( UID, '\n' )
+#	}
+#}
