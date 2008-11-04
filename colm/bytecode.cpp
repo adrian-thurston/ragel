@@ -676,23 +676,27 @@ void iter_find( Program *prg, Tree **&sp, TreeIter *iter, bool tryFirst )
 {
 	bool anyTree = iter->searchId == prg->rtd->anyId;
 	Tree **top = iter->stackRoot;
+	Kid *child;
 
 rec_call:
 	if ( tryFirst && ( iter->ref.kid->tree->id == iter->searchId || anyTree ) )
 		return;
-	else if ( iter->ref.kid->tree->child != 0 ) {
-		push( (SW) iter->ref.next );
-		push( (SW) iter->ref.kid );
-		iter->ref.kid = iter->ref.kid->tree->child;
-		iter->ref.next = (Ref*)ptop();
-		while ( iter->ref.kid != 0 ) {
-			tryFirst = true;
-			goto rec_call;
-			rec_return:
-			iter->ref.kid = iter->ref.kid->next;
+	else {
+		child = tree_child( prg, iter->ref.kid->tree );
+		if ( child != 0 ) {
+			push( (SW) iter->ref.next );
+			push( (SW) iter->ref.kid );
+			iter->ref.kid = child;
+			iter->ref.next = (Ref*)ptop();
+			while ( iter->ref.kid != 0 ) {
+				tryFirst = true;
+				goto rec_call;
+				rec_return:
+				iter->ref.kid = iter->ref.kid->next;
+			}
+			iter->ref.kid = (Kid*)pop();
+			iter->ref.next = (Ref*)pop();
 		}
-		iter->ref.kid = (Kid*)pop();
-		iter->ref.next = (Ref*)pop();
 	}
 
 	if ( top != ptop() )
