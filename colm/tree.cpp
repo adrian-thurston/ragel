@@ -1042,81 +1042,78 @@ Tree *tree_iter_advance( Program *prg, Tree **&sp, TreeIter *iter )
 Tree *tree_iter_next_child( Program *prg, Tree **&sp, TreeIter *iter )
 {
 	assert( iter->stackSize == iter->stackRoot - vm_ptop() );
+	Kid *kid = 0;
 
 	if ( iter->ref.kid == 0 ) {
 		/* Kid is zero, start from the first child. */
-		if ( iter->rootRef.kid->tree->child == 0 ) {
-			iter->ref.kid = 0;
+		Kid *child = tree_child( prg, iter->rootRef.kid->tree );
+
+		if ( child == 0 )
 			iter->ref.next = 0;
-		}
 		else {
+			/* Make a reference to the root. */
 			vm_push( (SW) iter->rootRef.next );
 			vm_push( (SW) iter->rootRef.kid );
-			iter->ref.kid = iter->rootRef.kid->tree->child;
 			iter->ref.next = (Ref*)vm_ptop();
+
+			kid = child;
 		}
 	}
 	else {
-		iter->ref.kid = iter->ref.kid->next;
+		/* Start at next. */
+		kid = iter->ref.kid->next;
 	}
 
-	bool anyTree = iter->searchId == prg->rtd->anyId;
-	if ( ! anyTree ) {
+	if ( iter->searchId != prg->rtd->anyId ) {
 		/* Have a previous item, go to the next sibling. */
-		while ( iter->ref.kid != 0 && iter->ref.kid->tree->id != iter->searchId ) {
-			iter->ref.kid = iter->ref.kid->next;
-		}
+		while ( kid != 0 && kid->tree->id != iter->searchId )
+			kid = kid->next;
 	}
 
+	iter->ref.kid = kid;
 	iter->stackSize = iter->stackRoot - vm_ptop();
 
-	return (iter->ref.kid ? prg->trueVal : prg->falseVal );
+	return ( iter->ref.kid ? prg->trueVal : prg->falseVal );
 }
 
 Tree *tree_iter_prev_child( Program *prg, Tree **&sp, TreeIter *iter )
 {
 	assert( iter->stackSize == iter->stackRoot - vm_ptop() );
+	Kid *startAt = 0, *stopAt = 0, *kid = 0;
 
 	if ( iter->ref.kid == 0 ) {
 		/* Kid is zero, start from the first child. */
-		if ( iter->rootRef.kid->tree->child == 0 ) {
-			iter->ref.kid = 0;
+		Kid *child = tree_child( prg, iter->rootRef.kid->tree );
+
+		if ( child == 0 )
 			iter->ref.next = 0;
-		}
 		else {
 			vm_push( (SW) iter->rootRef.next );
 			vm_push( (SW) iter->rootRef.kid );
-
-			Kid *last = iter->rootRef.kid->tree->child;
-			while ( last->next != 0 )
-				last = last->next;
-
-			iter->ref.kid = last;
 			iter->ref.next = (Ref*)vm_ptop();
+
+			startAt = child;
+			stopAt = 0;
 		}
 	}
 	else {
 		/* Have a previous item, go to the prev sibling. */
-		Kid *wasAt = iter->ref.kid;
 		Kid *parent = (Kid*) vm_top();
-		Kid *cur = 0, *next = parent->tree->child;
 
-		while ( next != wasAt ) {
-			cur = next;
-			next = next->next;
-		}
-
-		iter->ref.kid = cur;
+		startAt = tree_child( prg, parent->tree );
+		stopAt = iter->ref.kid;
 	}
 
-	bool anyTree = iter->searchId == prg->rtd->anyId;
-	if ( ! anyTree ) {
-		/* Have a previous item, go to the next sibling. */
-		while ( iter->ref.kid != 0 && iter->ref.kid->tree->id != iter->searchId ) {
-			iter->ref.kid = iter->ref.kid->next;
-		}
+	while ( startAt != stopAt ) {
+		/* If looking for any, or if last the search type then
+		 * store the match. */
+		if ( iter->searchId == prg->rtd->anyId || 
+				startAt->tree->id == iter->searchId )
+			kid = startAt;
+		startAt = startAt->next;
 	}
 
+	iter->ref.kid = kid;
 	iter->stackSize = iter->stackRoot - vm_ptop();
 
 	return (iter->ref.kid ? prg->trueVal : prg->falseVal );
