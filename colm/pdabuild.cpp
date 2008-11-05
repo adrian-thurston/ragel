@@ -1284,11 +1284,11 @@ void ParseData::makeRuntimeData()
 		if ( block != 0 ) {
 			runtimeData->functionInfo[func->funcId].frameId = block->frameId;
 
-			runtimeData->frameInfo[block->frameId].codeWC = block->codeWC.data;
-			runtimeData->frameInfo[block->frameId].codeLenWC = block->codeWC.length();
-
 			runtimeData->frameInfo[block->frameId].code = block->code.data;
 			runtimeData->frameInfo[block->frameId].codeLen = block->code.length();
+
+			runtimeData->frameInfo[block->frameId].codeWC = block->codeWC.data;
+			runtimeData->frameInfo[block->frameId].codeLenWC = block->codeWC.length();
 
 			runtimeData->frameInfo[block->frameId].trees = block->trees.data;
 			runtimeData->frameInfo[block->frameId].treesLen = block->trees.length();

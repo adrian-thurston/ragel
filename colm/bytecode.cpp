@@ -2579,24 +2579,6 @@ again:
 			popn( size );
 			break;
 		}
-		case IN_CALL_WC: {
-			Half funcId;
-			read_half( funcId );
-
-			FunctionInfo *fi = &prg->rtd->functionInfo[funcId];
-
-			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_CALL_WC " << fi->name << endl;
-			#endif
-
-			push( 0 ); /* Return value. */
-			push( (SW)instr );
-			push( (SW)frame );
-
-			instr = prg->rtd->frameInfo[fi->frameId].codeWC;
-			frame = ptop();
-			break;
-		}
 		case IN_CALL_WV: {
 			Half funcId;
 			read_half( funcId );
@@ -2612,6 +2594,24 @@ again:
 			push( (SW)frame );
 
 			instr = prg->rtd->frameInfo[fi->frameId].code;
+			frame = ptop();
+			break;
+		}
+		case IN_CALL_WC: {
+			Half funcId;
+			read_half( funcId );
+
+			FunctionInfo *fi = &prg->rtd->functionInfo[funcId];
+
+			#ifdef COLM_LOG_BYTECODE
+			cerr << "IN_CALL_WC " << fi->name << endl;
+			#endif
+
+			push( 0 ); /* Return value. */
+			push( (SW)instr );
+			push( (SW)frame );
+
+			instr = prg->rtd->frameInfo[fi->frameId].codeWC;
 			frame = ptop();
 			break;
 		}

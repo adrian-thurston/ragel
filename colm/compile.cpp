@@ -1718,20 +1718,20 @@ void ParseData::addProdRHSVars( ObjectDef *localFrame, ProdElList *prodElList )
 	}
 }
 
-void ParseData::addProdRHSLoads( Definition *prod, long codeInsertPos )
+void ParseData::addProdRHSLoads( Definition *prod, long codeInsertPos, CodeVect &code )
 {
-	CodeVect code;
+	CodeVect loads;
 	long position = 0;
 	for ( ProdElList::Iter rhsEl = *prod->prodElList; rhsEl.lte(); rhsEl++, position++ ) {
 		if ( rhsEl->type == PdaFactor::ReferenceType ) {
 			if ( rhsEl->objField->beenReferenced ) {
-				code.append ( IN_INIT_RHS_EL );
-				code.appendHalf( position );
-				code.appendHalf( rhsEl->objField->offset );
+				loads.append ( IN_INIT_RHS_EL );
+				loads.appendHalf( position );
+				loads.appendHalf( rhsEl->objField->offset );
 			}
 		}
 	}
-	prod->redBlock->code.insert( codeInsertPos, code );
+	code.insert( codeInsertPos, loads );
 }
 
 void ParseData::addMatchLength( ObjectDef *frame, KlangEl *lel )
@@ -1955,7 +1955,7 @@ void ParseData::compileReductionCode( Definition *prod )
 	long frameSize = curLocalFrame->size();
 	block->code.setHalf( 1, frameSize );
 
-	addProdRHSLoads( prod, afterAllocFrame );
+	addProdRHSLoads( prod, afterAllocFrame, block->code );
 
 	block->code.append( IN_POP_LOCALS );
 	block->code.appendHalf( block->frameId );
@@ -2068,7 +2068,7 @@ void ParseData::compileRootBlock( )
 	 * block, but we need an empty local frame for the compile. */
 	compileContext = CompileRoot;
 	curLocalFrame = rootLocalFrame;
-	revertOn = true;
+	revertOn = false;
 
 	/* The block needs a frame id. */
 	block->frameId = nextFrameId++;

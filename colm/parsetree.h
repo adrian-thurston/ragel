@@ -1559,21 +1559,18 @@ struct LangStmt
 struct CodeBlock
 {
 	CodeBlock( StmtList *stmtList ) 
-		: stmtList(stmtList), localFrame(0), frameId(-1) {}
+		: frameId(-1), stmtList(stmtList), localFrame(0) {}
 
 	void compile( ParseData *pd, CodeVect &code );
 
+	long frameId;
 	StmtList *stmtList;
 	ObjectDef *localFrame;
 	CharSet trees;
 
-	/* Write revert version. */
-	CodeVect code;
-	long frameId;
-
-	/* Write commit versions. */
-	CodeVect codeWC;
-	long frameIdWC;
+	/* Each frame has two versions of 
+	 * the code: revert and commit. */
+	CodeVect code, codeWC;
 };
 
 struct Function
