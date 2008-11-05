@@ -1167,12 +1167,12 @@ void ParseData::makeRuntimeData()
 		runtimeData->rootCodeLen = 0;
 	}
 	else {
-		runtimeData->rootCode = rootCodeBlock->code.data;
-		runtimeData->rootCodeLen = rootCodeBlock->code.length();
+		runtimeData->rootCode = rootCodeBlock->codeWC.data;
+		runtimeData->rootCodeLen = rootCodeBlock->codeWC.length();
 	}
 
-	runtimeData->frameInfo[rootCodeBlock->frameId].code = 0;
-	runtimeData->frameInfo[rootCodeBlock->frameId].codeLen = 0;
+	runtimeData->frameInfo[rootCodeBlock->frameId].codeWV = 0;
+	runtimeData->frameInfo[rootCodeBlock->frameId].codeLenWV = 0;
 	runtimeData->frameInfo[rootCodeBlock->frameId].trees = rootCodeBlock->trees.data;
 	runtimeData->frameInfo[rootCodeBlock->frameId].treesLen = rootCodeBlock->trees.length();
 
@@ -1193,8 +1193,9 @@ void ParseData::makeRuntimeData()
 		CodeBlock *block = prod->redBlock;
 		if ( block != 0 ) {
 			runtimeData->prodInfo[count].frameId = block->frameId;
-			runtimeData->frameInfo[block->frameId].code = block->code.data;
-			runtimeData->frameInfo[block->frameId].codeLen = block->code.length();
+			runtimeData->frameInfo[block->frameId].codeWV = block->codeWV.data;
+			runtimeData->frameInfo[block->frameId].codeLenWV = block->codeWV.length();
+
 			runtimeData->frameInfo[block->frameId].trees = block->trees.data;
 			runtimeData->frameInfo[block->frameId].treesLen = block->trees.length();
 		}
@@ -1220,8 +1221,9 @@ void ParseData::makeRuntimeData()
 		CodeBlock *block = reg->preEofBlock;
 		if ( block != 0 ) {
 			runtimeData->regionInfo[regId].eofFrameId = block->frameId;
-			runtimeData->frameInfo[block->frameId].code = block->code.data;
-			runtimeData->frameInfo[block->frameId].codeLen = block->code.length();
+			runtimeData->frameInfo[block->frameId].codeWV = block->codeWV.data;
+			runtimeData->frameInfo[block->frameId].codeLenWV = block->codeWV.length();
+
 			runtimeData->frameInfo[block->frameId].trees = block->trees.data;
 			runtimeData->frameInfo[block->frameId].treesLen = block->trees.length();
 		}
@@ -1247,8 +1249,9 @@ void ParseData::makeRuntimeData()
 			CodeBlock *block = lel->transBlock;
 			if ( block != 0 ) {
 				runtimeData->lelInfo[i].frameId = block->frameId;
-				runtimeData->frameInfo[block->frameId].code = block->code.data;
-				runtimeData->frameInfo[block->frameId].codeLen = block->code.length();
+				runtimeData->frameInfo[block->frameId].codeWV = block->codeWV.data;
+				runtimeData->frameInfo[block->frameId].codeLenWV = block->codeWV.length();
+
 				runtimeData->frameInfo[block->frameId].trees = block->trees.data;
 				runtimeData->frameInfo[block->frameId].treesLen = block->trees.length();
 			}
@@ -1284,8 +1287,8 @@ void ParseData::makeRuntimeData()
 		if ( block != 0 ) {
 			runtimeData->functionInfo[func->funcId].frameId = block->frameId;
 
-			runtimeData->frameInfo[block->frameId].code = block->code.data;
-			runtimeData->frameInfo[block->frameId].codeLen = block->code.length();
+			runtimeData->frameInfo[block->frameId].codeWV = block->codeWV.data;
+			runtimeData->frameInfo[block->frameId].codeLenWV = block->codeWV.length();
 
 			runtimeData->frameInfo[block->frameId].codeWC = block->codeWC.data;
 			runtimeData->frameInfo[block->frameId].codeLenWC = block->codeWC.length();

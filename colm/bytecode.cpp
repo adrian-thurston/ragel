@@ -2593,7 +2593,7 @@ again:
 			push( (SW)instr );
 			push( (SW)frame );
 
-			instr = prg->rtd->frameInfo[fi->frameId].code;
+			instr = prg->rtd->frameInfo[fi->frameId].codeWV;
 			frame = ptop();
 			break;
 		}
@@ -2675,7 +2675,7 @@ again:
 			/* Now set up the first yeild. */
 			uiter->ref.kid = 0;
 			uiter->stackSize = uiter->stackRoot - ptop();
-			uiter->resume = prg->rtd->frameInfo[fi->frameId].code;
+			uiter->resume = prg->rtd->frameInfo[fi->frameId].codeWV;
 			uiter->frame = &uiter->stackRoot[-IFR_AA];
 
 			upref_uiter_args( frame, fi->argSize );

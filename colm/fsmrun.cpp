@@ -359,7 +359,7 @@ void FsmRun::sendEOF( )
 		cerr << "HAVE PRE_EOF BLOCK" << endl;
 		#endif
 
-		Code *code = parser->tables->gbl->frameInfo[frameId].code;
+		Code *code = parser->tables->gbl->frameInfo[frameId].codeWV;
 	
 		/* Execute the translation. */
 		Execution execution( prg, parser->reverseCode, 
@@ -486,7 +486,7 @@ void FsmRun::generationAction( int id, Head *tokdata, bool namedLangEl, int bind
 
 	/* Find the code. */
 	Code *code = parser->tables->gbl->frameInfo[
-			parser->tables->gbl->lelInfo[id].frameId].code;
+			parser->tables->gbl->lelInfo[id].frameId].codeWV;
 	
 	/* Execute the translation. */
 	Execution execution( prg, parser->reverseCode, 

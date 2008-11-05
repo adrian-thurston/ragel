@@ -349,8 +349,8 @@ struct ProdInfo
 
 struct FrameInfo
 {
-	Code *code;
-	long codeLen;
+	Code *codeWV;
+	long codeLenWV;
 	Code *codeWC;
 	long codeLenWC;
 	char *trees;

@@ -1570,7 +1570,7 @@ struct CodeBlock
 
 	/* Each frame has two versions of 
 	 * the code: revert and commit. */
-	CodeVect code, codeWC;
+	CodeVect codeWV, codeWC;
 };
 
 struct Function

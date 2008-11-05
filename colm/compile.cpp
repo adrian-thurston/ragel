@@ -1942,26 +1942,28 @@ void ParseData::compileReductionCode( Definition *prod )
 	revertOn = true;
 	block->frameId = nextFrameId++;
 
+	CodeVect &code = block->codeWV;
+
 	/* Add the alloc frame opcode. We don't have the right 
 	 * frame size yet. We will fill it in later. */
-	block->code.append( IN_INIT_LOCALS );
-	block->code.appendHalf( 0 );
-	long afterAllocFrame = block->code.length();
+	code.append( IN_INIT_LOCALS );
+	code.appendHalf( 0 );
+	long afterAllocFrame = code.length();
 
 	/* Compile the reduce block. */
-	block->compile( this, block->code );
+	block->compile( this, code );
 
 	/* We have the frame size now. Set in the alloc frame instruction. */
 	long frameSize = curLocalFrame->size();
-	block->code.setHalf( 1, frameSize );
+	code.setHalf( 1, frameSize );
 
-	addProdRHSLoads( prod, afterAllocFrame, block->code );
+	addProdRHSLoads( prod, afterAllocFrame, code );
 
-	block->code.append( IN_POP_LOCALS );
-	block->code.appendHalf( block->frameId );
-	block->code.appendHalf( frameSize );
+	code.append( IN_POP_LOCALS );
+	code.appendHalf( block->frameId );
+	code.appendHalf( frameSize );
 
-	block->code.append( IN_STOP );
+	code.append( IN_STOP );
 
 	/* Now that compilation is done variables are referenced. Make the local
 	 * trees descriptor. */
@@ -1991,23 +1993,25 @@ void ParseData::compileTranslateBlock( KlangEl *langEl )
 	initFunction( uniqueTypeInt, curLocalFrame, "send_ignore",
 			IN_IGNORE, IN_IGNORE, uniqueTypeAny, true );
 
+	CodeVect &code = block->codeWV;
+
 	/* Add the alloc frame opcode. We don't have the right 
 	 * frame size yet. We will fill it in later. */
-	block->code.append( IN_INIT_LOCALS );
-	block->code.appendHalf( 0 );
+	code.append( IN_INIT_LOCALS );
+	code.appendHalf( 0 );
 
 	/* Set the local frame and compile the reduce block. */
-	block->compile( this, block->code );
+	block->compile( this, code );
 
 	/* We have the frame size now. Set in the alloc frame instruction. */
 	long frameSize = curLocalFrame->size();
-	block->code.setHalf( 1, frameSize );
+	code.setHalf( 1, frameSize );
 
-	block->code.append( IN_POP_LOCALS );
-	block->code.appendHalf( block->frameId );
-	block->code.appendHalf( frameSize );
+	code.append( IN_POP_LOCALS );
+	code.appendHalf( block->frameId );
+	code.appendHalf( frameSize );
 
-	block->code.append( IN_STOP );
+	code.append( IN_STOP );
 
 	/* Now that compilation is done variables are referenced. Make the local
 	 * trees descriptor. */
@@ -2035,23 +2039,25 @@ void ParseData::compilePreEof( TokenRegion *region )
 	initFunction( uniqueTypeInt, curLocalFrame, "send_ignore",
 			IN_IGNORE, IN_IGNORE, uniqueTypeAny, true );
 
+	CodeVect &code = block->codeWV;
+
 	/* Add the alloc frame opcode. We don't have the right 
 	 * frame size yet. We will fill it in later. */
-	block->code.append( IN_INIT_LOCALS );
-	block->code.appendHalf( 0 );
+	code.append( IN_INIT_LOCALS );
+	code.appendHalf( 0 );
 
 	/* Set the local frame and compile the reduce block. */
-	block->compile( this, block->code );
+	block->compile( this, code );
 
 	/* We have the frame size now. Set in the alloc frame instruction. */
 	long frameSize = curLocalFrame->size();
-	block->code.setHalf( 1, frameSize );
+	code.setHalf( 1, frameSize );
 
-	block->code.append( IN_POP_LOCALS );
-	block->code.appendHalf( block->frameId );
-	block->code.appendHalf( frameSize );
+	code.append( IN_POP_LOCALS );
+	code.appendHalf( block->frameId );
+	code.appendHalf( frameSize );
 
-	block->code.append( IN_STOP );
+	code.append( IN_STOP );
 
 	/* Now that compilation is done variables are referenced. Make the local
 	 * trees descriptor. */
@@ -2073,22 +2079,25 @@ void ParseData::compileRootBlock( )
 	/* The block needs a frame id. */
 	block->frameId = nextFrameId++;
 
+	/* The root block is not reverted. */
+	CodeVect &code = block->codeWC;
+
 	/* Add the alloc frame opcode. We don't have the right 
 	 * frame size yet. We will fill it in later. */
-	block->code.append( IN_INIT_LOCALS );
-	block->code.appendHalf( 0 );
+	code.append( IN_INIT_LOCALS );
+	code.appendHalf( 0 );
 
-	block->compile( this, block->code );
+	block->compile( this, code );
 
 	/* We have the frame size now. Store it in frame init. */
 	long frameSize = curLocalFrame->size();
-	block->code.setHalf( 1, frameSize );
+	code.setHalf( 1, frameSize );
 
-	block->code.append( IN_POP_LOCALS );
-	block->code.appendHalf( block->frameId );
-	block->code.appendHalf( frameSize );
+	code.append( IN_POP_LOCALS );
+	code.appendHalf( block->frameId );
+	code.appendHalf( frameSize );
 
-	block->code.append( IN_STOP );
+	code.append( IN_STOP );
 
 	/* Make the local trees descriptor. */
 	findLocalTrees( block->trees );
@@ -2291,25 +2300,27 @@ void ParseData::compileUserIter( Function *func )
 
 	makeFuncVisible( func, true );
 
+	CodeVect &code = block->codeWV;
+
 	/* Add the alloc frame opcode. We don't have the right 
 	 * frame size yet. We will fill it in later. */
-	block->code.append( IN_INIT_LOCALS );
-	block->code.appendHalf( 0 );
+	code.append( IN_INIT_LOCALS );
+	code.appendHalf( 0 );
 
 	/* Compile the block. */
-	block->compile( this, block->code );
+	block->compile( this, code );
 
 	/* We have the frame size now. Set in the alloc frame instruction. */
 	int frameSize = func->localFrame->size();
-	block->code.setHalf( 1, frameSize );
+	code.setHalf( 1, frameSize );
 
 	/* Check for a return statement. */
 	if ( block->stmtList->length() == 0 ||
 			block->stmtList->tail->type != LangStmt::YieldType )
 	{
 		/* Push the return value. */
-		block->code.append( IN_LOAD_NIL );
-		block->code.append( IN_YIELD );
+		code.append( IN_LOAD_NIL );
+		code.append( IN_YIELD );
 	}
 
 	/* Now that compilation is done variables are referenced. Make the local
@@ -2375,7 +2386,7 @@ void ParseData::compileFunction( Function *func )
 
 	/* Compile once for revert. */
 	revertOn = true;
-	compileFunction( func, block->code );
+	compileFunction( func, block->codeWV );
 
 	/* Compile once for commit. */
 	revertOn = false;

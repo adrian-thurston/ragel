@@ -416,7 +416,7 @@ again:
 
 			/* Execution environment for the reduction code. */
 			Execution execution( prg, reverseCode, 
-					this, fi->code, redLel->tree, 0 );
+					this, fi->codeWV, redLel->tree, 0 );
 
 			/* Take a copy of the lhs and store it in alg. May need it during
 			 * reverse parsing. */
