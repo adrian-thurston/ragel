@@ -1567,7 +1567,11 @@ struct CodeBlock
 	ObjectDef *localFrame;
 	CharSet trees;
 
-	/* Write revert and write commit versions. */
+	/* Write commit versions. */
+	CodeVect codeWC;
+	long frameIdWC;
+
+	/* Write revert version. */
 	CodeVect code;
 	long frameId;
 };

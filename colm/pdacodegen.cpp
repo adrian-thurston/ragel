@@ -98,6 +98,23 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData )
 	 * Blocks of code in frames.
 	 */
 	for ( int i = 0; i < runtimeData->numFrames; i++ ) {
+		/* FIXME: horrible code cloning going on here. */
+		if ( runtimeData->frameInfo[i].codeLenWC > 0 ) {
+			out << "Code code_" << i << "_wc[] = {\n\t";
+
+			Code *block = runtimeData->frameInfo[i].codeWC;
+			for ( int j = 0; j < runtimeData->frameInfo[i].codeLenWC; j++ ) {
+				out << (unsigned long) block[j];
+
+				if ( j < runtimeData->frameInfo[i].codeLenWC-1 ) {
+					out << ", ";
+					if ( (j+1) % 8 == 0 )
+						out << "\n\t";
+				}
+			}
+			out << "\n};\n\n";
+		}
+
 		if ( runtimeData->frameInfo[i].codeLen > 0 ) {
 			out << "Code code_" << i << "[] = {\n\t";
 
@@ -188,6 +205,13 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData )
 	out << "FrameInfo " << frameInfo() << "[] = {\n";
 	for ( int i = 0; i < runtimeData->numFrames; i++ ) {
 		out << "\t{ ";
+
+		if ( runtimeData->frameInfo[i].codeLenWC > 0 )
+			out << "code_" << i << "_wc, ";
+		else
+			out << "0, ";
+
+		out << runtimeData->frameInfo[i].codeLenWC << ", ";
 
 		if ( runtimeData->frameInfo[i].codeLen > 0 )
 			out << "code_" << i << ", ";

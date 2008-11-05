@@ -787,6 +787,17 @@ again:
 			rcodeUnitLen = 1;
 			break;
 		}
+		case IN_LOAD_GLOBAL_WC: {
+			#ifdef COLM_LOG_BYTECODE
+			cerr << "IN_LOAD_GLOBAL_WC" << endl;
+			#endif
+
+			/* This is identical to the _R version, but using it for writing
+			 * would be confusing. */
+			tree_upref( prg->global );
+			push( prg->global );
+			break;
+		}
 		case IN_LOAD_GLOBAL_BKT: {
 			#ifdef COLM_LOG_BYTECODE
 			cerr << "IN_LOAD_GLOBAL_BKT" << endl;
@@ -2568,14 +2579,32 @@ again:
 			popn( size );
 			break;
 		}
-		case IN_CALL: {
+		case IN_CALL_WC: {
 			Half funcId;
 			read_half( funcId );
 
 			FunctionInfo *fi = &prg->rtd->functionInfo[funcId];
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_CALL " << fi->name << endl;
+			cerr << "IN_CALL_WC " << fi->name << endl;
+			#endif
+
+			push( 0 ); /* Return value. */
+			push( (SW)instr );
+			push( (SW)frame );
+
+			instr = prg->rtd->frameInfo[fi->frameId].codeWC;
+			frame = ptop();
+			break;
+		}
+		case IN_CALL_WV: {
+			Half funcId;
+			read_half( funcId );
+
+			FunctionInfo *fi = &prg->rtd->functionInfo[funcId];
+
+			#ifdef COLM_LOG_BYTECODE
+			cerr << "IN_CALL_WV " << fi->name << endl;
 			#endif
 
 			push( 0 ); /* Return value. */

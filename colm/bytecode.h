@@ -127,6 +127,7 @@ typedef unsigned char uchar;
 
 #define IN_LOAD_GLOBAL_R         0x59
 #define IN_LOAD_GLOBAL_WV        0x5a
+#define IN_LOAD_GLOBAL_WC        0x9d
 #define IN_LOAD_GLOBAL_BKT       0x5b
 
 #define IN_PTR_DEREF_R           0x5e
@@ -180,7 +181,8 @@ typedef unsigned char uchar;
 
 #define IN_HALT                  0x8a
 
-#define IN_CALL                  0x8b
+#define IN_CALL_WC               0x8b
+#define IN_CALL_WV               0x9c
 #define IN_RET                   0x8c
 #define IN_YIELD                 0x8d
 #define IN_STOP                  0x8e

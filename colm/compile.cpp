@@ -426,13 +426,19 @@ void LangVarRef::loadGlobalObj( ParseData *pd, CodeVect &code,
 	/* Start the search in the global object. */
 	ObjectDef *rootObj = pd->globalObjectDef;
 
-	if ( pd->revertOn && forWriting && lastPtrInQual < 0 ) {
+	if ( forWriting && lastPtrInQual < 0 ) {
 		/* If we are writing an no reference was found in the qualification
 		 * then load the gloabl with a revert. */
-		code.append( IN_LOAD_GLOBAL_WV );
+		if ( pd->revertOn )
+			code.append( IN_LOAD_GLOBAL_WV );
+		else
+			code.append( IN_LOAD_GLOBAL_WC );
 	}
-	else
+	else {
+		/* Either we are reading or we are loading a pointer that will be
+		 * dereferenced. */
 		code.append( IN_LOAD_GLOBAL_R );
+	}
 
 	loadQualification( pd, code, rootObj, lastPtrInQual, forWriting, true );
 }
@@ -2259,7 +2265,7 @@ void ParseData::makeFuncVisible( Function *func, bool isUserIter )
 	UniqueType *returnUT = func->typeRef != 0 ? 
 			func->typeRef->lookupType(this) : uniqueTypeInt;
 	ObjMethod *objMethod = new ObjMethod( returnUT, func->name, 
-			IN_CALL, IN_CALL, 
+			IN_CALL_WC, IN_CALL_WV, 
 			func->paramList->length(), paramUTs, func->paramList, false );
 	objMethod->funcId = func->funcId;
 	objMethod->useFuncId = true;
@@ -2361,12 +2367,17 @@ void ParseData::compileFunction( Function *func )
 	/* Set up the compilation context. */
 	compileContext = CompileFunction;
 	curFunction = func;
-	revertOn = true;
 
 	/* Assign a frame Id. */
 	block->frameId = nextFrameId++;
 
 	makeFuncVisible( func, false );
+
+	/* Compile once for revert and once for commit. */
+	revertOn = false;
+	compileFunction( func, block->codeWC );
+
+	revertOn = true;
 	compileFunction( func, block->code );
 
 	/* Now that compilation is done variables are referenced. Make the local
