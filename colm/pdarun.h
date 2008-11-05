@@ -349,10 +349,10 @@ struct ProdInfo
 
 struct FrameInfo
 {
-	Code *codeWC;
-	long codeLenWC;
 	Code *code;
 	long codeLen;
+	Code *codeWC;
+	long codeLenWC;
 	char *trees;
 	long treesLen;
 };

@@ -1142,12 +1142,12 @@ typedef DList<ObjField> ParameterList;
 struct ObjMethod
 {
 	ObjMethod( UniqueType *returnUT, String name, 
-			int opcodeWC, int opcodeWV, int numParams, 
+			int opcodeWV, int opcodeWC, int numParams, 
 			UniqueType **types, ParameterList *paramList, bool isConst )
 		: 
 			returnUT(returnUT),
 			returnTypeId(0), name(name), 
-			opcodeWC(opcodeWC), opcodeWV(opcodeWV), 
+			opcodeWV(opcodeWV), opcodeWC(opcodeWC), 
 			numParams(numParams), paramList(paramList), 
 			isConst(isConst), funcId(0), 
 			useFuncId(false), useCallObj(true), func(0), 
@@ -1160,8 +1160,8 @@ struct ObjMethod
 	UniqueType *returnUT;
 	long returnTypeId;
 	String name;
-	long opcodeWC;
 	long opcodeWV;
+	long opcodeWC;
 	long numParams;
 	UniqueType **paramUTs;
 	ParameterList *paramList;
@@ -1567,13 +1567,13 @@ struct CodeBlock
 	ObjectDef *localFrame;
 	CharSet trees;
 
-	/* Write commit versions. */
-	CodeVect codeWC;
-	long frameIdWC;
-
 	/* Write revert version. */
 	CodeVect code;
 	long frameId;
+
+	/* Write commit versions. */
+	CodeVect codeWC;
+	long frameIdWC;
 };
 
 struct Function

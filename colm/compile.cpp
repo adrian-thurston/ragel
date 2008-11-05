@@ -105,31 +105,31 @@ IterDef::IterDef( Type type, Function *func ) :
 {}
 
 ObjMethod *initFunction( UniqueType *retType, ObjectDef *obj, 
-		const String &name, int methIdWC, int methIdWV, bool isConst )
+		const String &name, int methIdWV, int methIdWC, bool isConst )
 {
 	ObjMethod *objMethod = new ObjMethod( retType, name, 
-			methIdWC, methIdWV, 0, 0, 0, isConst );
+			methIdWV, methIdWC, 0, 0, 0, isConst );
 	obj->objMethodMap->insert( name, objMethod );
 	return objMethod;
 }
 
 ObjMethod *initFunction( UniqueType *retType, ObjectDef *obj, 
-		const String &name, int methIdWC, int methIdWV, UniqueType *arg1, bool isConst )
+		const String &name, int methIdWV, int methIdWC, UniqueType *arg1, bool isConst )
 {
 	UniqueType *args[] = { arg1 };
 	ObjMethod *objMethod = new ObjMethod( retType, name, 
-			methIdWC, methIdWV, 1, args, 0, isConst );
+			methIdWV, methIdWC, 1, args, 0, isConst );
 	obj->objMethodMap->insert( name, objMethod );
 	return objMethod;
 }
 
 ObjMethod *initFunction( UniqueType *retType, ObjectDef *obj, 
-		const String &name, int methIdWC, int methIdWV, 
+		const String &name, int methIdWV, int methIdWC, 
 		UniqueType *arg1, UniqueType *arg2, bool isConst )
 {
 	UniqueType *args[] = { arg1, arg2 };
 	ObjMethod *objMethod = new ObjMethod( retType, name, 
-			methIdWC, methIdWV, 2, args, 0, isConst );
+			methIdWV, methIdWC, 2, args, 0, isConst );
 	obj->objMethodMap->insert( name, objMethod );
 	return objMethod;
 }
@@ -2115,13 +2115,13 @@ void ParseData::initMapFunctions( GenericType *gen )
 {
 	addLengthField( gen->objDef, IN_MAP_LENGTH );
 	initFunction( gen->utArg, gen->objDef, "find", 
-			IN_MAP_FIND, IN_MAP_FIND, gen->keyUT, true );
+			IN_MAP_FIND,      IN_MAP_FIND, gen->keyUT, true );
 	initFunction( uniqueTypeInt, gen->objDef, "insert", 
-			IN_MAP_INSERT_WC, IN_MAP_INSERT_WV, gen->keyUT, gen->utArg, false );
+			IN_MAP_INSERT_WV, IN_MAP_INSERT_WC, gen->keyUT, gen->utArg, false );
 	initFunction( uniqueTypeInt, gen->objDef, "store", 
-			IN_MAP_STORE_WC, IN_MAP_STORE_WV, gen->keyUT, gen->utArg, false );
+			IN_MAP_STORE_WV,  IN_MAP_STORE_WC, gen->keyUT, gen->utArg, false );
 	initFunction( gen->utArg, gen->objDef, "remove", 
-			IN_MAP_REMOVE_WC, IN_MAP_REMOVE_WV, gen->keyUT, false );
+			IN_MAP_REMOVE_WV, IN_MAP_REMOVE_WC, gen->keyUT, false );
 }
 
 void ParseData::initListFunctions( GenericType *gen )
@@ -2129,14 +2129,14 @@ void ParseData::initListFunctions( GenericType *gen )
 	addLengthField( gen->objDef, IN_LIST_LENGTH );
 
 	initFunction( uniqueTypeInt, gen->objDef, "append", 
-			IN_LIST_APPEND_WC, IN_LIST_APPEND_WV, gen->utArg, false );
+			IN_LIST_APPEND_WV, IN_LIST_APPEND_WC, gen->utArg, false );
 	initFunction( uniqueTypeInt, gen->objDef, "push", 
-			IN_LIST_APPEND_WC, IN_LIST_APPEND_WV, gen->utArg, false );
+			IN_LIST_APPEND_WV, IN_LIST_APPEND_WC, gen->utArg, false );
 
 	initFunction( gen->utArg, gen->objDef, "remove_end", 
-			IN_LIST_REMOVE_END_WC, IN_LIST_REMOVE_END_WV, false );
+			IN_LIST_REMOVE_END_WV, IN_LIST_REMOVE_END_WC, false );
 	initFunction( gen->utArg, gen->objDef, "pop", 
-			IN_LIST_REMOVE_END_WC, IN_LIST_REMOVE_END_WV, false );
+			IN_LIST_REMOVE_END_WV, IN_LIST_REMOVE_END_WC, false );
 }
 
 void ParseData::initListField( GenericType *gen, const char *name, int offset )
@@ -2172,9 +2172,9 @@ void ParseData::initVectorFunctions( GenericType *gen )
 {
 	addLengthField( gen->objDef, IN_VECTOR_LENGTH );
 	initFunction( uniqueTypeInt, gen->objDef, "append", 
-			IN_VECTOR_APPEND_WC, IN_VECTOR_APPEND_WV, gen->utArg, false );
+			IN_VECTOR_APPEND_WV, IN_VECTOR_APPEND_WC, gen->utArg, false );
 	initFunction( uniqueTypeInt, gen->objDef, "insert", 
-			IN_VECTOR_INSERT_WC, IN_VECTOR_INSERT_WV, uniqueTypeInt, gen->utArg, false );
+			IN_VECTOR_INSERT_WV, IN_VECTOR_INSERT_WC, uniqueTypeInt, gen->utArg, false );
 }
 
 void ParseData::resolveGenericTypes()
@@ -2265,7 +2265,7 @@ void ParseData::makeFuncVisible( Function *func, bool isUserIter )
 	UniqueType *returnUT = func->typeRef != 0 ? 
 			func->typeRef->lookupType(this) : uniqueTypeInt;
 	ObjMethod *objMethod = new ObjMethod( returnUT, func->name, 
-			IN_CALL_WC, IN_CALL_WV, 
+			IN_CALL_WV, IN_CALL_WC, 
 			func->paramList->length(), paramUTs, func->paramList, false );
 	objMethod->funcId = func->funcId;
 	objMethod->useFuncId = true;
@@ -2373,12 +2373,13 @@ void ParseData::compileFunction( Function *func )
 
 	makeFuncVisible( func, false );
 
-	/* Compile once for revert and once for commit. */
-	revertOn = false;
-	compileFunction( func, block->codeWC );
-
+	/* Compile once for revert. */
 	revertOn = true;
 	compileFunction( func, block->code );
+
+	/* Compile once for commit. */
+	revertOn = false;
+	compileFunction( func, block->codeWC );
 
 	/* Now that compilation is done variables are referenced. Make the local
 	 * trees descriptor. */
