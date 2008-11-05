@@ -1565,9 +1565,11 @@ struct CodeBlock
 
 	StmtList *stmtList;
 	ObjectDef *localFrame;
+	CharSet trees;
+
+	/* Write revert and write commit versions. */
 	CodeVect code;
 	long frameId;
-	CharSet trees;
 };
 
 struct Function

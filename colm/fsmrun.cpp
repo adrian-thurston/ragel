@@ -611,7 +611,7 @@ void send_handle_error( FsmRun *fsmRun, PdaRun *parser, Kid *input )
 
 	#ifdef COLM_LOG_PARSE
 	cerr << "new token region: " << 
-			parser->tables->gbl->regionInfo[region].name << endl;
+			parser->tables->gbl->regionInfo[fsmRun->region].name << endl;
 	#endif
 }
 

@@ -725,7 +725,10 @@ struct ParseData
 	void resolveMapElementOf( ObjectDef *container, ObjectDef *obj, ElementOf *elof );
 	void resolveElementOf( ObjectDef *obj );
 	void makeFuncVisible( Function *func, bool isUserIter );
+
+	void compileFunction( Function *func, CodeVect &code );
 	void compileFunction( Function *func );
+
 	void compileUserIter( Function *func );
 	void compilePreEof( TokenRegion *region );
 	void compileRootBlock();
@@ -877,6 +880,8 @@ struct ParseData
 
 	long nextLabelId;
 	ObjFieldMap *objFieldMap;
+
+	bool revertOn;
 };
 
 void afterOpMinimize( FsmGraph *fsm, bool lastInSeq = true );

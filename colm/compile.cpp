@@ -311,7 +311,7 @@ UniqueType *LangVarRef::loadFieldInstr( ParseData *pd, CodeVect &code,
 		/* The instruction, depends on whether or not we are reverting. */
 		if ( elUT->typeId == TYPE_ITER )
 			code.append( elUT->iterDef->inGetCurWC );
-		else if ( revert )
+		else if ( pd->revertOn && revert )
 			code.append( el->inGetWV );
 		else
 			code.append( el->inGetWC );
@@ -399,7 +399,7 @@ void LangVarRef::loadQualification( ParseData *pd, CodeVect &code,
 				/* Always dereference references when used for qualification. If
 				 * this is the last one then we must start with the reverse
 				 * execution business. */
-				if ( qi.pos() == lastPtrInQual && forWriting ) {
+				if ( pd->revertOn && qi.pos() == lastPtrInQual && forWriting ) {
 					/* This is like a global load. */
 					code.append( IN_PTR_DEREF_WV );
 				}
@@ -426,7 +426,7 @@ void LangVarRef::loadGlobalObj( ParseData *pd, CodeVect &code,
 	/* Start the search in the global object. */
 	ObjectDef *rootObj = pd->globalObjectDef;
 
-	if ( forWriting && lastPtrInQual < 0 ) {
+	if ( pd->revertOn && forWriting && lastPtrInQual < 0 ) {
 		/* If we are writing an no reference was found in the qualification
 		 * then load the gloabl with a revert. */
 		code.append( IN_LOAD_GLOBAL_WV );
@@ -571,7 +571,7 @@ void LangVarRef::setFieldInstr( ParseData *pd, CodeVect &code,
 	/* Ensure that the field is referenced. */
 	inObject->referenceField( pd, el );
 
-	if ( revert )
+	if ( pd->revertOn && revert )
 		code.append( el->inSetWV );
 	else
 		code.append( el->inSetWC );
@@ -767,7 +767,7 @@ void LangVarRef::callOperation( ParseData *pd, CodeVect &code, VarRefLookup &loo
 	bool revert = lookup.lastPtrInQual >= 0 || !isLocalRef(pd);
 	
 	/* The call instruction. */
-	if ( revert ) 
+	if ( pd->revertOn && revert ) 
 		code.append( lookup.objMethod->opcodeWV );
 	else
 		code.append( lookup.objMethod->opcodeWC );
@@ -1933,6 +1933,7 @@ void ParseData::compileReductionCode( Definition *prod )
 	/* Init the compilation context. */
 	compileContext = CompileReduction;
 	curLocalFrame = block->localFrame;
+	revertOn = true;
 	block->frameId = nextFrameId++;
 
 	/* Add the alloc frame opcode. We don't have the right 
@@ -1968,6 +1969,7 @@ void ParseData::compileTranslateBlock( KlangEl *langEl )
 	/* Set up compilation context. */
 	compileContext = CompileTranslation;
 	curLocalFrame = block->localFrame;
+	revertOn = true;
 	block->frameId = nextFrameId++;
 
 	/* References to the reduce item. */
@@ -2013,6 +2015,7 @@ void ParseData::compilePreEof( TokenRegion *region )
 	/* Set up compilation context. */
 	compileContext = CompileTranslation;
 	curLocalFrame = region->preEofBlock->localFrame;
+	revertOn = true;
 	block->frameId = nextFrameId++;
 
 	/* References to the reduce item. */
@@ -2053,10 +2056,15 @@ void ParseData::compileRootBlock( )
 {
 	CodeBlock *block = rootCodeBlock;
 
+	/* The root block never needs to be reverted. */
+
 	/* Set up the compile context. No locals are needed for the root code
 	 * block, but we need an empty local frame for the compile. */
 	compileContext = CompileRoot;
 	curLocalFrame = rootLocalFrame;
+	revertOn = true;
+
+	/* The block needs a frame id. */
 	block->frameId = nextFrameId++;
 
 	/* Add the alloc frame opcode. We don't have the right 
@@ -2272,6 +2280,7 @@ void ParseData::compileUserIter( Function *func )
 
 	compileContext = CompileFunction;
 	curFunction = func;
+	revertOn = true;
 	block->frameId = nextFrameId++;
 
 	makeFuncVisible( func, true );
@@ -2304,41 +2313,36 @@ void ParseData::compileUserIter( Function *func )
 	/* FIXME: Need to deal with the freeing of local trees. */
 }
 
-void ParseData::compileFunction( Function *func )
+/* Called for each type of function compile: revert and commit. */
+void ParseData::compileFunction( Function *func, CodeVect &code )
 {
 	CodeBlock *block = func->codeBlock;
 
-	compileContext = CompileFunction;
-	curFunction = func;
-	block->frameId = nextFrameId++;
-
-	makeFuncVisible( func, false );
-
 	/* Add the alloc frame opcode. We don't have the right 
 	 * frame size yet. We will fill it in later. */
-	block->code.append( IN_INIT_LOCALS );
-	block->code.appendHalf( 0 );
+	code.append( IN_INIT_LOCALS );
+	code.appendHalf( 0 );
 
 	/* Compile the block. */
-	block->compile( this, block->code );
+	block->compile( this, code );
 
 	/* We have the frame size now. Set in the alloc frame instruction. */
 	int frameSize = func->localFrame->size();
-	block->code.setHalf( 1, frameSize );
+	code.setHalf( 1, frameSize );
 
 	/* Check for a return statement. */
 	if ( block->stmtList->length() == 0 ||
 			block->stmtList->tail->type != LangStmt::ReturnType )
 	{
 		/* Push the return value. */
-		block->code.append( IN_LOAD_NIL );
-		block->code.append( IN_SAVE_RET );
+		code.append( IN_LOAD_NIL );
+		code.append( IN_SAVE_RET );
 	}
 
 	/* Compute the jump distance for the return jumps. */
 	for ( LongVect::Iter rj = returnJumps; rj.lte(); rj++ ) {
-		long distance = block->code.length() - *rj - 3;
-		block->code.setHalf( *rj+1, distance );
+		long distance = code.length() - *rj - 3;
+		code.setHalf( *rj+1, distance );
 	}
 
 	/* Reset the vector of return jumps. */
@@ -2346,8 +2350,24 @@ void ParseData::compileFunction( Function *func )
 
 	/* Return cleans up the stack (including the args) and leaves the return
 	 * value on the top. */
-	block->code.append( IN_RET );
-	block->code.appendHalf( func->funcId );
+	code.append( IN_RET );
+	code.appendHalf( func->funcId );
+}
+
+void ParseData::compileFunction( Function *func )
+{
+	CodeBlock *block = func->codeBlock;
+
+	/* Set up the compilation context. */
+	compileContext = CompileFunction;
+	curFunction = func;
+	revertOn = true;
+
+	/* Assign a frame Id. */
+	block->frameId = nextFrameId++;
+
+	makeFuncVisible( func, false );
+	compileFunction( func, block->code );
 
 	/* Now that compilation is done variables are referenced. Make the local
 	 * trees descriptor. */
