@@ -100,8 +100,6 @@ void send( Tree **root, Program *prg, PdaRun *parser, Tree *tree, bool ignore )
 		tree->id = prg->rtd->lelInfo[tree->id].termDupId;
 
 	tree->alg->flags |= AF_ARTIFICIAL;
-	if ( ignore )
-		tree->alg->flags |= AF_IGNORE;
 
 	/* FIXME: Do we need to remove the ignore tokens 
 	 * at this point? Will it cause a leak? */

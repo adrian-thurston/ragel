@@ -326,11 +326,13 @@ void FsmRun::sendBack( Kid *input )
  * generated from a single action. */
 void set_AF_GROUP_MEM( PdaRun *parser )
 {
-	/* Set AF_GROUP_MEM now. */
+	LangElInfo *lelInfo = parser->prg->rtd->lelInfo;
+
 	long sendCount = 0;
 	Kid *queued = parser->queue;
 	while ( queued != 0 ) {
-		if ( !(queued->tree->alg->flags & AF_IGNORE) ) {
+		/* Only bother with non-ignore tokens. */
+		if ( !lelInfo[queued->tree->id].ignore ) {
 			if ( sendCount > 0 )
 				queued->tree->alg->flags |= AF_GROUP_MEM;
 			sendCount += 1;
@@ -387,6 +389,8 @@ void FsmRun::sendEOF( )
 
 void send_queued_tokens( FsmRun *fsmRun, PdaRun *parser )
 {
+	LangElInfo *lelInfo = fsmRun->prg->rtd->lelInfo;
+
 	while ( parser->queue != 0 ) {
 		/* Pull an item to send off the queue. */
 		Kid *send = parser->queue;
@@ -394,7 +398,7 @@ void send_queued_tokens( FsmRun *fsmRun, PdaRun *parser )
 
 		/* Must clear next, since the parsing algorithm uses it. */
 		send->next = 0;
-		if ( send->tree->alg->flags & AF_IGNORE ) {
+		if ( lelInfo[send->tree->id].ignore ) {
 			#ifdef COLM_LOG_PARSE
 			cerr << "ignoring queued item: " << 
 					parser->tables->gbl->lelInfo[send->tree->id].name << endl;

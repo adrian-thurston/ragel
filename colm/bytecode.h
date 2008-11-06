@@ -247,8 +247,7 @@ typedef unsigned char uchar;
 #define AF_ARTIFICIAL  0x8
 #define AF_NAMED       0x10
 #define AF_GROUP_MEM   0x20
-#define AF_IGNORE      0x40
-#define AF_HAS_RCODE   0x80
+#define AF_HAS_RCODE   0x40
 
 /*
  * Call stack.
