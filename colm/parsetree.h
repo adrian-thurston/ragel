@@ -1317,40 +1317,40 @@ struct LangVarRef
 		: loc(loc), qual(qual), name(name) {}
 
 	UniqueType *loadFieldInstr( ParseData *pd, CodeVect &code, ObjectDef *inObject,
-			ObjField *el, bool forWriting, bool revert );
+			ObjField *el, bool forWriting, bool revert ) const;
 	void setFieldInstr( ParseData *pd, CodeVect &code, ObjectDef *inObject, 
-			ObjField *el, UniqueType *exprUT, bool revert );
+			ObjField *el, UniqueType *exprUT, bool revert ) const;
 
-	VarRefLookup lookupMethod( ParseData *pd );
-	VarRefLookup lookupField( ParseData *pd );
+	VarRefLookup lookupMethod( ParseData *pd ) const;
+	VarRefLookup lookupField( ParseData *pd ) const;
 
 	VarRefLookup lookupQualification( ParseData *pd, ObjectDef *rootDef ) const;
-	VarRefLookup lookupObj( ParseData *pd );
+	VarRefLookup lookupObj( ParseData *pd ) const;
 
-	bool isLocalRef( ParseData *pd );
+	bool isLocalRef( ParseData *pd ) const;
 	void loadQualification( ParseData *pd, CodeVect &code, ObjectDef *rootObj, 
-			int lastPtrInQual, bool forWriting, bool revert );
+			int lastPtrInQual, bool forWriting, bool revert ) const;
 	void loadLocalObj( ParseData *pd, CodeVect &code, 
-			int lastPtrInQual, bool forWriting );
+			int lastPtrInQual, bool forWriting ) const;
 	void loadGlobalObj( ParseData *pd, CodeVect &code, 
-			int lastPtrInQual, bool forWriting );
-	void loadObj( ParseData *pd, CodeVect &code, int lastPtrInQual, bool forWriting );
+			int lastPtrInQual, bool forWriting ) const;
+	void loadObj( ParseData *pd, CodeVect &code, int lastPtrInQual, bool forWriting ) const;
 
 	void setFieldIter( ParseData *pd, CodeVect &code, 
-			ObjectDef *inObject, UniqueType *objUT, UniqueType *exprType, bool revert );
+			ObjectDef *inObject, UniqueType *objUT, UniqueType *exprType, bool revert ) const;
 	void setFieldSearch( ParseData *pd, CodeVect &code, 
-			ObjectDef *inObject, UniqueType *exprType );
+			ObjectDef *inObject, UniqueType *exprType ) const;
 	void setField( ParseData *pd, CodeVect &code, 
-			ObjectDef *inObject, UniqueType *type, bool revert );
+			ObjectDef *inObject, UniqueType *type, bool revert ) const;
 
-	void assignValue( ParseData *pd, CodeVect &code, UniqueType *exprUT );
+	void assignValue( ParseData *pd, CodeVect &code, UniqueType *exprUT ) const;
 	ObjField **evaluateArgs( ParseData *pd, CodeVect &code, 
-			VarRefLookup &lookup, ExprVect *args );
-	void callOperation( ParseData *pd, CodeVect &code, VarRefLookup &lookup );
-	UniqueType *evaluateCall( ParseData *pd, CodeVect &code, ExprVect *args );
-	UniqueType *evaluate( ParseData *pd, CodeVect &code, bool forWriting = false );
-	ObjField *evaluateRef( ParseData *pd, CodeVect &code );
-	void resetActiveRefs( ParseData *pd, VarRefLookup &lookup, ObjField **paramRefs );
+			VarRefLookup &lookup, ExprVect *args ) const;
+	void callOperation( ParseData *pd, CodeVect &code, VarRefLookup &lookup ) const;
+	UniqueType *evaluateCall( ParseData *pd, CodeVect &code, ExprVect *args ) const;
+	UniqueType *evaluate( ParseData *pd, CodeVect &code, bool forWriting = false ) const;
+	ObjField *evaluateRef( ParseData *pd, CodeVect &code ) const;
+	void resetActiveRefs( ParseData *pd, VarRefLookup &lookup, ObjField **paramRefs ) const;
 
 	InputLoc loc;
 	QualItemVect *qual;
@@ -1416,17 +1416,17 @@ struct LangTerm
 	LangTerm( Type type, LangExpr *expr )
 		: type(type), expr(expr) {}
 
-	UniqueType *evaluateParse( ParseData *pd, CodeVect &code, bool stop );
-	UniqueType *evaluateNew( ParseData *pd, CodeVect &code );
-	UniqueType *evaluateConstruct( ParseData *pd, CodeVect &code );
-	UniqueType *evaluateTreeConstruct( ParseData *pd, CodeVect &code );
-	UniqueType *evaluateTermConstruct( ParseData *pd, CodeVect &code );
-	bool constructTermFromString( ParseData *pd );
-	UniqueType *evaluateMatch( ParseData *pd, CodeVect &code );
-	UniqueType *evaluate( ParseData *pd, CodeVect &code );
-	void assignFieldArgs( ParseData *pd, CodeVect &code, UniqueType *replUT );
-	UniqueType *evaluateMakeToken( ParseData *pd, CodeVect &code );
-	UniqueType *evaluateMakeTree( ParseData *pd, CodeVect &code );
+	UniqueType *evaluateParse( ParseData *pd, CodeVect &code, bool stop ) const;
+	UniqueType *evaluateNew( ParseData *pd, CodeVect &code ) const;
+	UniqueType *evaluateConstruct( ParseData *pd, CodeVect &code ) const;
+	UniqueType *evaluateTreeConstruct( ParseData *pd, CodeVect &code ) const;
+	UniqueType *evaluateTermConstruct( ParseData *pd, CodeVect &code ) const;
+	bool constructTermFromString( ParseData *pd ) const;
+	UniqueType *evaluateMatch( ParseData *pd, CodeVect &code ) const;
+	UniqueType *evaluate( ParseData *pd, CodeVect &code ) const;
+	void assignFieldArgs( ParseData *pd, CodeVect &code, UniqueType *replUT ) const;
+	UniqueType *evaluateMakeToken( ParseData *pd, CodeVect &code ) const;
+	UniqueType *evaluateMakeTree( ParseData *pd, CodeVect &code ) const;
 
 	InputLoc loc;
 	Type type;
@@ -1458,7 +1458,7 @@ struct LangExpr
 	LangExpr( LangTerm *term )
 		: type(TermType), term(term) {}
 
-	UniqueType *evaluate( ParseData *pd, CodeVect &code );
+	UniqueType *evaluate( ParseData *pd, CodeVect &code ) const;
 
 	InputLoc loc;
 	Type type;
@@ -1519,22 +1519,20 @@ struct LangStmt
 		type(type), varRef(varRef), expr(0), replacement(replacement), 
 		exprPtrVect(0), next(0) {}
 
-	LangStmt( const InputLoc &loc, Type type, const String &varName, 
+	/* ForIterType */
+	LangStmt( const InputLoc &loc, Type type, ObjField *objField, 
 			TypeRef *typeRef, LangTerm *langTerm, StmtList *stmtList ) : 
-		loc(loc), type(type), langTerm(langTerm), typeRef(typeRef), 
-		stmtList(stmtList), name(varName), next(0) {}
+		loc(loc), type(type), langTerm(langTerm), objField(objField), typeRef(typeRef), 
+		stmtList(stmtList), next(0) {}
 
 	LangStmt( Type type ) : 
 		type(type), next(0) {}
 
-	LangTerm *chooseDefaultIter( ParseData *pd );
-	void compileWhile( ParseData *pd, CodeVect &code );
-	void unscopeIterVariable( ParseData *pd, ObjField *iterObjField );
-	ObjField *createIterVariable( ParseData *pd, TypeRef *iterTypeRef );
-	void compileForIterBody( ParseData *pd, CodeVect &code, 
-			ObjField *iterObjField, LangVarRef *iterVarRef, UniqueType *iterUT );
-	void compileForIter( ParseData *pd, CodeVect &code );
-	void compile( ParseData *pd, CodeVect &code );
+	LangTerm *chooseDefaultIter( ParseData *pd, LangTerm *fromVarRef ) const;
+	void compileWhile( ParseData *pd, CodeVect &code ) const;
+	void compileForIterBody( ParseData *pd, CodeVect &code, UniqueType *iterUT ) const;
+	void compileForIter( ParseData *pd, CodeVect &code ) const;
+	void compile( ParseData *pd, CodeVect &code ) const;
 
 	InputLoc loc;
 	Type type;
@@ -1561,7 +1559,7 @@ struct CodeBlock
 	CodeBlock( StmtList *stmtList ) 
 		: frameId(-1), stmtList(stmtList), localFrame(0) {}
 
-	void compile( ParseData *pd, CodeVect &code );
+	void compile( ParseData *pd, CodeVect &code ) const;
 
 	long frameId;
 	StmtList *stmtList;

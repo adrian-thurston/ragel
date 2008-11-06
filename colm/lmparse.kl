@@ -943,8 +943,18 @@ statement: KW_While code_expr block_or_single
 	};
 statement: KW_For TK_Word ':' type_ref KW_In iter_call block_or_single
 	final {
+		/* Check for redeclaration. */
+		if ( pd->curLocalFrame->objFieldMap->find( $2->data ) != 0 )
+			error( $2->loc ) << "variable " << $2->data << " redeclared" << endp;
+
+		/* Note that we pass in a null type reference. This type is dependent
+		 * on the result of the iter_call lookup since it must contain a reference
+		 * to the iterator that is called. This lookup is done at compile time. */
+		ObjField *iterField = new ObjField( $2->loc, (TypeRef*)0, $2->data );
+		pd->curLocalFrame->objFieldMap->insert( $2->data, iterField );
+
 		$$->stmt = new LangStmt( $1->loc, LangStmt::ForIterType, 
-			$2->data, $4->typeRef, $6->langTerm, $7->stmtList );
+				iterField, $4->typeRef, $6->langTerm, $7->stmtList );
 	};
 statement: KW_Return code_expr
 	final {
