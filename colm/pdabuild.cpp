@@ -203,6 +203,17 @@ void ParseData::makeKlangElIds()
 			ptrKlangEl->name, ptrKlangEl );
 	assert( ptrMapEl != 0 );
 
+	/* Make a "_notoken" language element. This element is used when a
+	 * generation action fails to generate anything, but there is reverse code
+	 * that needs to be associated with a language element. This allows us to
+	 * always associate reverse code with the first language element produced
+	 * after a generation action. */
+	noTokenEl = new KlangEl( rootNamespace, strdup("_notoken"), KlangEl::Term );
+	noTokenEl->ignore = true;
+	langEls.prepend( noTokenEl );
+	SymbolMapEl *noTokenMapEl = rootNamespace->symbolMap.insert( noTokenEl->name, noTokenEl );
+	assert( noTokenMapEl != 0 );
+
 	/* Make the EOF language element. */
 	eofKlangEl = new KlangEl( rootNamespace, strdup("_eof"), KlangEl::Term );
 	langEls.prepend( eofKlangEl );
@@ -214,8 +225,6 @@ void ParseData::makeKlangElIds()
 	langEls.prepend( anyKlangEl );
 	SymbolMapEl *anyMapEl = rootNamespace->symbolMap.insert( anyKlangEl->name, anyKlangEl );
 	assert( anyMapEl != 0 );
-
-	/* Make a translate token language element. */
 
 	/* Make terminal language elements corresponding to each nonterminal in
 	 * the grammar. */

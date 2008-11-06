@@ -200,7 +200,6 @@ struct KlangEl : public DListEl<KlangEl>
 
 	GenericType *generic;
 
-
 	long parserId;
 };
 
@@ -778,6 +777,7 @@ struct ParseData
 	KlangEl *streamKlangEl;
 	KlangEl *anyKlangEl;
 	KlangEl *rootKlangEl;
+	KlangEl *noTokenEl;
 	KlangEl *eofKlangEl;
 	KlangEl *errorKlangEl;
 	KlangEl *defaultCharKlangEl;
