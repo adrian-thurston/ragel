@@ -1002,6 +1002,7 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop )
 		code.appendHalf( ut->langEl->id );
 	else 
 		code.appendHalf( 0 );
+	code.append( pd->revertOn );
 	return ut;
 }
 

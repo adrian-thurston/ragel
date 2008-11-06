@@ -118,10 +118,10 @@ void send( Tree **root, Program *prg, PdaRun *parser, Tree *tree, bool ignore )
 }
 
 Tree *parse( Tree **&sp, Program *prg, Stream *stream, 
-		long parserId, long stopId, CodeVect *&cv )
+		long parserId, long stopId, CodeVect *&cv, bool revertOn )
 {
 	PdaTables *tables = prg->rtd->parsers[parserId];
-	PdaRun parser( sp, prg, tables, stream->scanner, stopId );
+	PdaRun parser( sp, prg, tables, stream->scanner, stopId, revertOn );
 	parser.run();
 	parser.commit();
 	Tree *tree = parser.getParsedRoot( stopId > 0 );
@@ -137,7 +137,7 @@ void undo_parse( Tree **&sp, Program *prg, Stream *stream,
 		long parserId, Tree *tree, CodeVect *rev )
 {
 	PdaTables *tables = prg->rtd->parsers[parserId];
-	PdaRun parser( sp, prg, tables, stream->scanner, 0 );
+	PdaRun parser( sp, prg, tables, stream->scanner, 0, false );
 	parser.undoParse( tree, rev );
 }
 
@@ -1649,8 +1649,10 @@ again:
 		}
 		case IN_PARSE: {
 			Half parserId, stopId;
+			uchar revertOn;
 			read_half( parserId );
 			read_half( stopId );
+			read_byte( revertOn );
 
 			#ifdef COLM_LOG_BYTECODE
 			cerr << "IN_PARSE " << parserId << " " << stopId << endl;
@@ -1659,7 +1661,7 @@ again:
 			/* Comes back from parse upreffed. */
 			CodeVect *cv;
 			Tree *stream = pop();
-			Tree *res = parse( sp, prg, (Stream*)stream, parserId, stopId, cv );
+			Tree *res = parse( sp, prg, (Stream*)stream, parserId, stopId, cv, revertOn );
 			push( res );
 
 			/* Single unit. */

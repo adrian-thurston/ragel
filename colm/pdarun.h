@@ -445,7 +445,7 @@ typedef Vector<Tree*> Bindings;
 struct PdaRun
 {
 	PdaRun( Tree **root, Program *prg, PdaTables *tables, 
-			FsmRun *scanner, long stopTarget )
+			FsmRun *scanner, long stopTarget, bool revertOn )
 	:
 		root(root),
 		prg(prg),
@@ -454,7 +454,8 @@ struct PdaRun
 		stopParsing(false),
 		stopTarget(stopTarget),
 		queue(0),
-		queueLast(0)
+		queueLast(0),
+		revertOn(revertOn)
 	{
 	}
 
@@ -506,6 +507,8 @@ struct PdaRun
 	Kid *queue, *queueLast;
 
 	Bindings bindings;
+
+	bool revertOn;
 };
 
 void xml_print_list( RuntimeData *runtimeData, Kid *lel, int depth );
