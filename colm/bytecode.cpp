@@ -376,7 +376,7 @@ void Program::run()
 		cerr << "freeing the root reverse code" << endl;
 		#endif
 
-		bool hasrcode = makeReverseCode( allReverseCode, reverseCode );
+		bool hasrcode = make_reverse_code( allReverseCode, reverseCode );
 		if ( hasrcode )
 			rcode_downref( root, this, allReverseCode->data );
 		delete allReverseCode;
@@ -635,7 +635,7 @@ void Execution::execute( Tree **root )
 	assert( sp == root );
 }
 
-bool makeReverseCode( CodeVect *all, CodeVect &reverseCode )
+bool make_reverse_code( CodeVect *all, CodeVect &reverseCode )
 {
 	/* Do we need to revert the left hand side? */
 

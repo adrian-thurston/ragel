@@ -322,6 +322,27 @@ void FsmRun::sendBack( Kid *input )
 	prg->kidPool.free( input );
 }
 
+/* If no token was generated but there is reverse code then we must generate
+ * a fake token so we can attach the reverse code to it. */
+void add_notoken( Program *prg, PdaRun *parser )
+{
+	/* Check if there was anything generated. */
+	if ( parser->queue == 0 && parser->reverseCode.length() > 0 ) {
+		#ifdef COLM_LOG_PARSE
+		cerr << "found reverse code but no token, sending _notoken" << endl;
+		#endif
+
+		Tree *tree = prg->treePool.allocate();
+		tree->refs = 1;
+		tree->id = prg->rtd->noTokenId;
+		tree->tokdata = 0;
+
+		parser->queue = prg->kidPool.allocate();
+		parser->queue->tree = tree;
+		parser->queue->next = 0;
+	}
+}
+
 /* Sets the AF_GROUP_MEM so the backtracker can tell which tokens were sent
  * generated from a single action. */
 void set_AF_GROUP_MEM( PdaRun *parser )
@@ -370,53 +391,6 @@ void send_queued_tokens( FsmRun *fsmRun, PdaRun *parser )
 			send_handle_error( fsmRun, parser, send );
 		}
 	}
-}
-
-
-void FsmRun::sendEOF( )
-{
-	#ifdef COLM_LOG_PARSE
-	cerr << "token: _EOF" << endl;
-	#endif
-
-	Kid *input = prg->kidPool.allocate();
-	input->tree = prg->treePool.allocate();
-	input->tree->alg = prg->algPool.allocate();
-
-	input->tree->refs = 1;
-	input->tree->id = parser->tables->gbl->eofId;
-
-	bool ctxDepParsing = prg->ctxDepParsing;
-	long frameId = parser->tables->gbl->regionInfo[region].eofFrameId;
-	if ( ctxDepParsing && frameId >= 0 ) {
-		#ifdef COLM_LOG_PARSE
-		cerr << "HAVE PRE_EOF BLOCK" << endl;
-		#endif
-
-		Code *code = parser->tables->gbl->frameInfo[frameId].codeWV;
-	
-		/* Execute the translation. */
-		Execution execution( prg, parser->reverseCode, 
-				parser, code, 0, 0 );
-		execution.execute( parser->root );
-
-		/* Mark generated tokens as belonging to a group. */
-		set_AF_GROUP_MEM( parser );
-
-		/* Send the generated tokens. */
-		send_queued_tokens( this, parser );
-	}
-
-	parser->send( input );
-
-	if ( parser->errCount > 0 ) {
-		parser->parse_error( parser->tables->gbl->eofId, input->tree ) << 
-				"parse error" << endp;
-	}
-
-	tokstart = 0;
-	region = parser->getNextRegion();
-	cs = tables->entryByRegion[region];
 }
 
 void FsmRun::sendToken( long id )
@@ -477,6 +451,30 @@ void FsmRun::sendNamedLangEl()
 	send_handle_error( this, parser, input );
 }
 
+void execute_generation_action( Program *prg, PdaRun *parser, Code *code, Head *tokdata )
+{
+	/* Execute the translation. */
+	Execution execution( prg, parser->reverseCode, parser, code, 0, tokdata );
+	execution.execute( parser->root );
+
+	/* If there is revese code but nothing generated we need a noToken. */
+	add_notoken( prg, parser );
+
+	/* If there is reverse code then add_notoken will guarantee that the
+	 * queue is not empty. Pull the reverse code out and store in the
+	 * token. */
+	Tree *tree = parser->queue->tree;
+	bool hasrcode = make_reverse_code( parser->allReverseCode, parser->reverseCode );
+	if ( hasrcode ) {
+		if ( tree->alg == 0 )
+			tree->alg = prg->algPool.allocate();
+		tree->alg->flags |= AF_HAS_RCODE;
+	}
+
+	/* Mark generated tokens as belonging to a group. */
+	set_AF_GROUP_MEM( parser );
+}
+
 /* 
  * Not supported:
  *  -invoke failure (the backtracker)
@@ -492,17 +490,12 @@ void FsmRun::generationAction( int id, Head *tokdata, bool namedLangEl, int bind
 	/* Find the code. */
 	Code *code = parser->tables->gbl->frameInfo[
 			parser->tables->gbl->lelInfo[id].frameId].codeWV;
-	
-	/* Execute the translation. */
-	Execution execution( prg, parser->reverseCode, 
-			parser, code, 0, tokdata );
-	execution.execute( parser->root );
+
+	/* Execute the action and process the queue. */
+	execute_generation_action( prg, parser, code, tokdata );
 
 	/* Finished with the match text. */
 	string_free( prg, tokdata );
-
-	/* Mark generated tokens as belonging to a group. */
-	set_AF_GROUP_MEM( parser );
 
 	/* Send the queued tokens. */
 	send_queued_tokens( this, parser );
@@ -580,11 +573,6 @@ void PdaRun::send( Kid *input )
 		ignore->next = child;
 	}
 		
-	/* Pull the reverse code out and store in the token. */
-	bool hasrcode = makeReverseCode( allReverseCode, reverseCode );
-	if ( hasrcode )
-		input->tree->alg->flags |= AF_HAS_RCODE;
-
 	parseToken( input );
 }
 
@@ -625,14 +613,6 @@ void PdaRun::ignore( Tree *tree )
 	/* Add the ignore string to the head of the ignore list. */
 	Kid *ignore = prg->kidPool.allocate();
 	ignore->tree = tree;
-
-	/* Pull the reverse code out and store in the token. */
-	bool hasrcode = makeReverseCode( allReverseCode, reverseCode );
-	if ( hasrcode ) {
-		if ( tree->alg == 0 )
-			tree->alg = prg->algPool.allocate();
-		tree->alg->flags |= AF_HAS_RCODE;
-	}
 
 	/* Prepend it to the list of ignore tokens. */
 	ignore->next = accumIgnore;
@@ -705,6 +685,49 @@ Head *FsmRun::extractToken( long length )
 
 	return tokdata;
 }
+
+void FsmRun::sendEOF( )
+{
+	#ifdef COLM_LOG_PARSE
+	cerr << "token: _EOF" << endl;
+	#endif
+
+	Kid *input = prg->kidPool.allocate();
+	input->tree = prg->treePool.allocate();
+	input->tree->alg = prg->algPool.allocate();
+
+	input->tree->refs = 1;
+	input->tree->id = parser->tables->gbl->eofId;
+
+	bool ctxDepParsing = prg->ctxDepParsing;
+	long frameId = parser->tables->gbl->regionInfo[region].eofFrameId;
+	if ( ctxDepParsing && frameId >= 0 ) {
+		#ifdef COLM_LOG_PARSE
+		cerr << "HAVE PRE_EOF BLOCK" << endl;
+		#endif
+
+		/* Get the code for the pre-eof block. */
+		Code *code = parser->tables->gbl->frameInfo[frameId].codeWV;
+
+		/* Execute the action and process the queue. */
+		execute_generation_action( prg, parser, code, 0 );
+
+		/* Send the generated tokens. */
+		send_queued_tokens( this, parser );
+	}
+
+	parser->send( input );
+
+	if ( parser->errCount > 0 ) {
+		parser->parse_error( parser->tables->gbl->eofId, input->tree ) << 
+				"parse error" << endp;
+	}
+
+	tokstart = 0;
+	region = parser->getNextRegion();
+	cs = tables->entryByRegion[region];
+}
+
 
 void FsmRun::attachInputStream( InputStream *in )
 {

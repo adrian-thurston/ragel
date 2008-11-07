@@ -427,7 +427,7 @@ again:
 			execution.execute( root );
 
 			/* Pull out the reverse code, if any. */
-			bool hasrcode = makeReverseCode( allReverseCode, reverseCode );
+			bool hasrcode = make_reverse_code( allReverseCode, reverseCode );
 			if ( hasrcode )
 				redAlg->flags |= AF_HAS_RCODE;
 

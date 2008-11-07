@@ -777,7 +777,7 @@ struct ParseData
 	KlangEl *streamKlangEl;
 	KlangEl *anyKlangEl;
 	KlangEl *rootKlangEl;
-	KlangEl *noTokenEl;
+	KlangEl *noTokenKlangEl;
 	KlangEl *eofKlangEl;
 	KlangEl *errorKlangEl;
 	KlangEl *defaultCharKlangEl;

@@ -410,6 +410,7 @@ struct RuntimeData
 	long stringId;
 	long anyId;
 	long eofId;
+	long noTokenId;
 };
 
 struct PdaTables
@@ -438,7 +439,7 @@ struct PdaTables
 	RuntimeData *gbl;
 };
 
-bool makeReverseCode( CodeVect *all, CodeVect &reverseCode );
+bool make_reverse_code( CodeVect *all, CodeVect &reverseCode );
 
 typedef Vector<Tree*> Bindings;
 

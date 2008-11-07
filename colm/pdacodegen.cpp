@@ -406,7 +406,8 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData )
 		"	" << runtimeData->integerId << ",\n"
 		"	" << runtimeData->stringId << ",\n"
 		"	" << runtimeData->anyId << ",\n"
-		"	" << runtimeData->eofId << "\n"
+		"	" << runtimeData->eofId << ",\n"
+		"	" << runtimeData->noTokenId << "\n"
 		"};\n"
 		"\n";
 }

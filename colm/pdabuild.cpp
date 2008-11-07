@@ -208,10 +208,11 @@ void ParseData::makeKlangElIds()
 	 * that needs to be associated with a language element. This allows us to
 	 * always associate reverse code with the first language element produced
 	 * after a generation action. */
-	noTokenEl = new KlangEl( rootNamespace, strdup("_notoken"), KlangEl::Term );
-	noTokenEl->ignore = true;
-	langEls.prepend( noTokenEl );
-	SymbolMapEl *noTokenMapEl = rootNamespace->symbolMap.insert( noTokenEl->name, noTokenEl );
+	noTokenKlangEl = new KlangEl( rootNamespace, strdup("_notoken"), KlangEl::Term );
+	noTokenKlangEl->ignore = true;
+	langEls.prepend( noTokenKlangEl );
+	SymbolMapEl *noTokenMapEl = rootNamespace->symbolMap.insert( 
+			noTokenKlangEl->name, noTokenKlangEl );
 	assert( noTokenMapEl != 0 );
 
 	/* Make the EOF language element. */
@@ -252,27 +253,19 @@ void ParseData::makeKlangElIds()
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
 		/* Must be a term, and not any of the special reserved terminals.
 		 * Remember if the non terminal is a user non terminal. */
-		if ( lel->type == KlangEl::Term && lel != eofKlangEl && lel != errorKlangEl ) {
+		if ( lel->type == KlangEl::Term && 
+				lel != eofKlangEl && 
+				lel != errorKlangEl &&
+				lel != noTokenKlangEl )
+		{
 			lel->isUserTerm = true;
 			lel->id = nextSymbolId++;
 		}
 	}
 
-	/* Next assign to the eof token, which we always create. */
+	/* Next assign to the eof notoken, which we always create. */
 	eofKlangEl->id = nextSymbolId++;
-
-	/* First pass assigns to the user terminals. */
-	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
-		if ( lel->id < 0 ) {
-			/* Must be a term, and not any of the special reserved terminals.
-			 * Remember if the non terminal is a user non terminal. */
-			if ( lel->type == KlangEl::Term && lel != eofKlangEl && lel != errorKlangEl ) {
-				assert( false );
-				lel->isUserTerm = true;
-				lel->id = nextSymbolId++;
-			}
-		}
-	}
+	noTokenKlangEl->id = nextSymbolId++;
 
 	/* Possibly assign to the error language element. */
 	if ( errorKlangEl != 0 )
@@ -1385,6 +1378,7 @@ void ParseData::makeRuntimeData()
 	runtimeData->stringId = strKlangEl->id;
 	runtimeData->anyId = anyKlangEl->id;
 	runtimeData->eofId = eofKlangEl->id;
+	runtimeData->noTokenId = noTokenKlangEl->id;
 }
 
 /* Borrow alg->state for mapsTo. */
