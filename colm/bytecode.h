@@ -200,7 +200,8 @@ typedef unsigned char uchar;
 #define IN_MAKE_TOKEN            0x96
 #define IN_MAKE_TREE             0xb2
 #define IN_CONSTRUCT_TERM        0x9a
-#define IN_PARSE                 0xb1
+#define IN_PARSE_WV              0xb1
+#define IN_PARSE_WC              0xbe
 #define IN_PARSE_BKT             0xb3
 #define IN_STREAM_PULL           0xb4
 #define IN_STREAM_PULL_BKT       0xb5

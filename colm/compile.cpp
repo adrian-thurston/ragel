@@ -996,13 +996,20 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 	 * the type. */
 	ut->langEl->parserId = pd->nextParserId++;
 
-	code.append( IN_PARSE );
+	/* Parse instruction, dependent on whether or not we are
+	 * producing revert or commit code. */
+	if ( pd->revertOn )
+		code.append( IN_PARSE_WV );
+	else
+		code.append( IN_PARSE_WC );
+
+	/* The id of the parser, followed by the stop id. */
 	code.appendHalf( ut->langEl->parserId );
 	if ( stop )
 		code.appendHalf( ut->langEl->id );
 	else 
 		code.appendHalf( 0 );
-	code.append( pd->revertOn );
+
 	return ut;
 }
 

@@ -115,7 +115,7 @@ void send( Tree **root, Program *prg, PdaRun *parser, Tree *tree, bool ignore )
 	}
 }
 
-Tree *parse( Tree **&sp, Program *prg, Stream *stream, 
+Tree *call_parser( Tree **&sp, Program *prg, Stream *stream, 
 		long parserId, long stopId, CodeVect *&cv, bool revertOn )
 {
 	PdaTables *tables = prg->rtd->parsers[parserId];
@@ -126,8 +126,14 @@ Tree *parse( Tree **&sp, Program *prg, Stream *stream,
 	tree_upref( tree );
 	parser.clean();
 
-	/* Return the reverse code. */
-	cv = parser.allReverseCode;
+	/* Maybe return the reverse code. */
+	if ( revertOn )
+		cv = parser.allReverseCode;
+	else {
+		delete parser.allReverseCode;
+		cv = 0;
+	}
+
 	return tree;
 }
 
@@ -367,7 +373,6 @@ void Program::run()
 
 	if ( rtd->rootCodeLen > 0 ) {
 		CodeVect reverseCode;
-		CodeVect *allReverseCode = new CodeVect;
 		Execution execution( this, reverseCode, 0, rtd->rootCode, 0, 0 );
 		execution.execute( root );
 
@@ -376,10 +381,9 @@ void Program::run()
 		cerr << "freeing the root reverse code" << endl;
 		#endif
 
-		bool hasrcode = make_reverse_code( allReverseCode, reverseCode );
-		if ( hasrcode )
-			rcode_downref( root, this, allReverseCode->data );
-		delete allReverseCode;
+		/* The root code should all be commit code and reverseCode
+		 * should be empty. */
+		assert( reverseCode.length() == 0 );
 	}
 
 	/* Clear */
@@ -1645,21 +1649,19 @@ again:
 			tree_downref( prg, sp, tree );
 			break;
 		}
-		case IN_PARSE: {
+		case IN_PARSE_WV: {
 			Half parserId, stopId;
-			uchar revertOn;
 			read_half( parserId );
 			read_half( stopId );
-			read_byte( revertOn );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_PARSE " << parserId << " " << stopId << endl;
+			cerr << "IN_PARSE_WV " << parserId << " " << stopId << endl;
 			#endif
 
 			/* Comes back from parse upreffed. */
 			CodeVect *cv;
 			Tree *stream = pop();
-			Tree *res = parse( sp, prg, (Stream*)stream, parserId, stopId, cv, revertOn );
+			Tree *res = call_parser( sp, prg, (Stream*)stream, parserId, stopId, cv, true );
 			push( res );
 
 			/* Single unit. */
@@ -1670,6 +1672,24 @@ again:
 			reverseCode.appendWord( (Word) res );
 			reverseCode.appendWord( (Word) cv );
 			reverseCode.append( 15 );
+			break;
+		}
+		case IN_PARSE_WC: {
+			Half parserId, stopId;
+			read_half( parserId );
+			read_half( stopId );
+
+			#ifdef COLM_LOG_BYTECODE
+			cerr << "IN_PARSE_WC " << parserId << " " << stopId << endl;
+			#endif
+
+			/* Comes back from parse upreffed. */
+			CodeVect *cv;
+			Tree *stream = pop();
+			Tree *res = call_parser( sp, prg, (Stream*)stream, parserId, stopId, cv, false );
+			push( res );
+
+			tree_downref( prg, sp, (Tree*)stream );
 			break;
 		}
 		case IN_STREAM_PULL: {
