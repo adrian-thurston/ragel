@@ -198,16 +198,6 @@ void downref_local_trees( Program *prg, Tree **sp, Tree **frame, char *trees, lo
 	}
 }
 
-void upref_uiter_args( Tree **frame, long nargs )
-{
-	for ( long l = IFR_AA; l < IFR_AA + nargs; l++ ) {
-		#ifdef COLM_LOG_BYTECODE
-		cerr << "upref local " << l << endl;
-		#endif
-		tree_upref( local(l) );
-	}
-}
-
 UserIter *uiter_create( Tree **&sp, Program *prg, FunctionInfo *fi, long searchId )
 {
 	pushn( sizeof(UserIter) / sizeof(Word) );
@@ -2697,8 +2687,6 @@ again:
 			uiter->stackSize = uiter->stackRoot - ptop();
 			uiter->resume = prg->rtd->frameInfo[fi->frameId].codeWV;
 			uiter->frame = &uiter->stackRoot[-IFR_AA];
-
-			upref_uiter_args( frame, fi->argSize );
 			break;
 		}
 		case IN_UITER_DESTROY: {
