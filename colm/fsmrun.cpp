@@ -341,6 +341,38 @@ void set_AF_GROUP_MEM( PdaRun *parser )
 	}
 }
 
+void send_queued_tokens( FsmRun *fsmRun, PdaRun *parser )
+{
+	LangElInfo *lelInfo = fsmRun->prg->rtd->lelInfo;
+
+	while ( parser->queue != 0 ) {
+		/* Pull an item to send off the queue. */
+		Kid *send = parser->queue;
+		parser->queue = parser->queue->next;
+
+		/* Must clear next, since the parsing algorithm uses it. */
+		send->next = 0;
+		if ( lelInfo[send->tree->id].ignore ) {
+			#ifdef COLM_LOG_PARSE
+			cerr << "ignoring queued item: " << 
+					parser->tables->gbl->lelInfo[send->tree->id].name << endl;
+			#endif
+			
+			parser->ignore( send->tree );
+			fsmRun->prg->kidPool.free( send );
+		}
+		else {
+			#ifdef COLM_LOG_PARSE
+			cerr << "sending queue item: " << 
+					parser->tables->gbl->lelInfo[send->tree->id].name << endl;
+			#endif
+
+			send_handle_error( fsmRun, parser, send );
+		}
+	}
+}
+
+
 void FsmRun::sendEOF( )
 {
 	#ifdef COLM_LOG_PARSE
@@ -385,37 +417,6 @@ void FsmRun::sendEOF( )
 	tokstart = 0;
 	region = parser->getNextRegion();
 	cs = tables->entryByRegion[region];
-}
-
-void send_queued_tokens( FsmRun *fsmRun, PdaRun *parser )
-{
-	LangElInfo *lelInfo = fsmRun->prg->rtd->lelInfo;
-
-	while ( parser->queue != 0 ) {
-		/* Pull an item to send off the queue. */
-		Kid *send = parser->queue;
-		parser->queue = parser->queue->next;
-
-		/* Must clear next, since the parsing algorithm uses it. */
-		send->next = 0;
-		if ( lelInfo[send->tree->id].ignore ) {
-			#ifdef COLM_LOG_PARSE
-			cerr << "ignoring queued item: " << 
-					parser->tables->gbl->lelInfo[send->tree->id].name << endl;
-			#endif
-			
-			parser->ignore( send->tree );
-			fsmRun->prg->kidPool.free( send );
-		}
-		else {
-			#ifdef COLM_LOG_PARSE
-			cerr << "sending queue item: " << 
-					parser->tables->gbl->lelInfo[send->tree->id].name << endl;
-			#endif
-
-			send_handle_error( fsmRun, parser, send );
-		}
-	}
 }
 
 void FsmRun::sendToken( long id )
