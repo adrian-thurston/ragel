@@ -102,6 +102,20 @@ long PdaRun::stackTopTarget()
 	return state;
 }
 
+/*
+ * Local commit:
+ * 		-clears reparse flags underneath
+ * 		-must be possible to backtrack after
+ * Global commit (revertOn)
+ * 		-clears all reparse flags
+ * 		-must be possible to backtrack after
+ * Global commit (!revertOn)
+ * 		-clears all reparse flags
+ * 		-clears all 'parsed' reverse code
+ * 		-clears all reverse code
+ * 		-clears all alg structures
+ */
+
 bool beenCommitted( Kid *kid )
 {
 	return kid->tree->alg->flags & AF_COMMITTED;
@@ -204,7 +218,7 @@ head:
 
 	/* Commit */
 	#ifdef COLM_LOG_PARSE
-	cerr << "rev free visiting: " << 
+	cerr << "parsed_downref_kid visiting: " << 
 			prg->rtd->lelInfo[lel->tree->id].name << endl;
 	#endif
 
@@ -251,7 +265,10 @@ void PdaRun::commit()
 	while ( topLevel > 0 ) {
 		kid = (Kid*)vm_pop();
 		commitKid( sp, kid );
-		parsed_downref_kid( sp, prg, kid );
+
+		/* Can't do this here. See commitbt.lm. */
+		/* parsed_downref_kid( sp, prg, kid ); */
+
 		topLevel -= 1;
 	}
 
