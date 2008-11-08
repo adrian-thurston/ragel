@@ -121,7 +121,7 @@ Tree *call_parser( Tree **&sp, Program *prg, Stream *stream,
 	PdaTables *tables = prg->rtd->parsers[parserId];
 	PdaRun parser( sp, prg, tables, stream->scanner, stopId, revertOn );
 	parser.run();
-	parser.commit();
+	full_commit( &parser );
 	Tree *tree = parser.getParsedRoot( stopId > 0 );
 	tree_upref( tree );
 	parser.clean();
@@ -412,7 +412,7 @@ Execution::Execution( Program *prg, CodeVect &reverseCode,
 	}
 }
 
-void rcode_downref_all( Tree **sp, Program *prg, CodeVect *rev )
+void rcode_downref_all( Program *prg, Tree **sp, CodeVect *rev )
 {
 	while ( rev->length() > 0 ) {
 		/* Read the length */
@@ -425,14 +425,14 @@ void rcode_downref_all( Tree **sp, Program *prg, CodeVect *rev )
 		prcode = rev->data + start;
 
 		/* Execute it. */
-		rcode_downref( sp, prg, prcode );
+		rcode_downref( prg, sp, prcode );
 
 		/* Backup over it. */
 		rev->tabLen -= len + 4;
 	}
 }
 
-void rcode_downref( Tree **sp, Program *prg, Code *instr )
+void rcode_downref( Program *prg, Tree **sp, Code *instr )
 {
 again:
 	switch ( *instr++ ) {
@@ -449,8 +449,8 @@ again:
 			cerr << "IN_PARSE_BKT " << parserId << endl;
 			#endif
 
-			parsed_downref( sp, prg, tree );
-			rcode_downref_all( sp, prg, (CodeVect*)wrev );
+			parsed_downref( prg, sp, tree );
+			rcode_downref_all( prg, sp, (CodeVect*)wrev );
 			tree_downref( prg, sp, stream );
 			tree_downref( prg, sp, tree );
 			delete (CodeVect*)wrev;

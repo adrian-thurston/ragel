@@ -116,20 +116,15 @@ long PdaRun::stackTopTarget()
  * 		-clears all alg structures
  */
 
-bool beenCommitted( Kid *kid )
+bool been_committed( Kid *kid )
 {
 	return kid->tree->alg->flags & AF_COMMITTED;
-}
-
-bool beenFreed( Kid *kid )
-{
-	return kid->tree->alg->flags & AF_REV_FREED;
 }
 
 /* The top level of the stack is linked right-to-left. Trees underneath are
  * left to right natural order. */
 
-void PdaRun::commitKid( Tree **root, Kid *lel )
+void commit_kid( PdaRun *parser, Tree **root, Kid *lel )
 {
 	Alg *alg = 0;
 	Tree *tree = 0;
@@ -145,10 +140,10 @@ head:
 	/* Recurse only on non-generated trees. */
 	if ( !(alg->flags & AF_GENERATED) && tree->child != 0 ) {
 		vm_push( (Tree*)lel );
-		lel = tree_child( prg, tree );
+		lel = tree_child( parser->prg, tree );
 
 		while ( lel != 0 ) {
-			if ( !beenCommitted( lel ) )
+			if ( !been_committed( lel ) )
 				goto head;
 
 			upwards:
@@ -161,18 +156,18 @@ head:
 	/* Commit */
 	#ifdef COLM_LOG_PARSE
 	cerr << "commit visiting: " << 
-			prg->rtd->lelInfo[lel->tree->id].name << endl;
+			parser->prg->rtd->lelInfo[lel->tree->id].name << endl;
 	#endif
 
 	alg = lel->tree->alg;
 
 	/* Reset retries. */
 	if ( alg->retry_lower > 0 ) {
-		numRetry -= 1;
+		parser->numRetry -= 1;
 		alg->retry_lower = 0;
 	}
 	if ( alg->retry_upper > 0 ) {
-		numRetry -= 1;
+		parser->numRetry -= 1;
 		alg->retry_upper = 0;
 	}
 	alg->flags |= AF_COMMITTED;
@@ -180,10 +175,47 @@ head:
 	if ( sp != root )
 		goto upwards;
 
-	numRetry = 0;
+	parser->numRetry = 0;
 	assert( sp == root );
 }
 
+void full_commit( PdaRun *parser )
+{
+	#ifdef COLM_LOG_PARSE
+	cerr << "running full commit" << endl;
+	#endif
+	
+	Tree **sp = parser->root;
+	Kid *kid = parser->stackTop;
+	long topLevel = 0;
+	while ( kid != 0 && !been_committed( kid ) ) {
+		vm_push( (Tree*)kid );
+		kid = kid->next;
+		topLevel += 1;
+	}
+
+	while ( topLevel > 0 ) {
+		kid = (Kid*)vm_pop();
+		commit_kid( parser, sp, kid );
+		topLevel -= 1;
+	}
+
+	/* After running the commit the the stack should be where it 
+	 * was when we started. */
+	assert( sp == parser->root );
+
+	/* We cannot always clear all the rcode here. We may need to backup over
+	 * the parse statement. We depend on the context flag. */
+	if ( !parser->revertOn ) {
+		parsed_downref_all( parser );
+		rcode_downref_all( parser->prg, parser->root, parser->allReverseCode );
+	}
+}
+
+bool been_freed( Kid *kid )
+{
+	return kid->tree->alg->flags & AF_REV_FREED;
+}
 
 /* The top level of the stack is linked right-to-left. Trees underneath are
  * left to right natural order. */
@@ -206,7 +238,7 @@ head:
 		lel = tree_child( prg, tree );
 
 		while ( lel != 0 ) {
-			if ( !beenFreed( lel ) )
+			if ( !been_freed( lel ) )
 				goto head;
 
 			upwards:
@@ -235,7 +267,7 @@ head:
 	assert( sp == root );
 }
 
-void parsed_downref( Tree **root, Program *prg, Tree *tree )
+void parsed_downref( Program *prg, Tree **root, Tree *tree )
 {
 	#ifdef COLM_LOG_PARSE
 	cerr << "running parsed_downref on tree" << endl;
@@ -247,16 +279,16 @@ void parsed_downref( Tree **root, Program *prg, Tree *tree )
 	parsed_downref_kid( root, prg, &kid );
 }
 
-void PdaRun::commit()
+void parsed_downref_all( PdaRun *parser )
 {
 	#ifdef COLM_LOG_PARSE
-	cerr << "running full commit" << endl;
+	cerr << "running full parsed_downref" << endl;
 	#endif
 	
-	Tree **sp = root;
-	Kid *kid = stackTop;
+	Tree **sp = parser->root;
+	Kid *kid = parser->stackTop;
 	long topLevel = 0;
-	while ( kid != 0 && !beenCommitted( kid ) ) {
+	while ( kid != 0 && !been_freed( kid ) ) {
 		vm_push( (Tree*)kid );
 		kid = kid->next;
 		topLevel += 1;
@@ -264,24 +296,14 @@ void PdaRun::commit()
 
 	while ( topLevel > 0 ) {
 		kid = (Kid*)vm_pop();
-		commitKid( sp, kid );
-
-		/* Can't do this here. See commitbt.lm. */
-		/* parsed_downref_kid( sp, prg, kid ); */
-
+		parsed_downref_kid( sp, parser->prg, kid );
 		topLevel -= 1;
 	}
 
-	/* Affter running the commit the the stack should be where it 
+	/* After running the commit the the stack should be where it 
 	 * was when we started. */
-	assert( sp == root );
-
-	/* We cannot always clear all the rcode here. We may need to backup over
-	 * the parse statement. We depend on the context flag. */
-	if ( !revertOn )
-		rcode_downref_all( root, prg, allReverseCode );
+	assert( sp == parser->root );
 }
-
 
 /*
  * shift:         retry goes into lower of shifted node.
@@ -362,7 +384,7 @@ again:
 	}
 
 	if ( tables->commitLen[pos] != 0 )
-		commit();
+		full_commit( this );
 
 	if ( *action & act_rb ) {
 		int objectLength, reduction = *action >> 2;

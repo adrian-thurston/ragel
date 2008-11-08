@@ -418,9 +418,11 @@ Word cmp_string( Head *s1, Head *s2 );
 
 Head *int_to_str( Program *prg, Word i );
 
-void rcode_downref( Tree **stack_root, Program *prg, Code *instr );
-void rcode_downref_all( Tree **stack_root, Program *prg, CodeVect *cv );
-void parsed_downref( Tree **root, Program *prg, Tree *tree );
+void rcode_downref( Program *prg, Tree **stack_root, Code *instr );
+void rcode_downref_all( Program *prg, Tree **stack_root, CodeVect *cv );
+void parsed_downref( Program *prg, Tree **root, Tree *tree );
+void parsed_downref_all( PdaRun *parser );
+void full_commit( PdaRun *parser );
 
 bool match_pattern( Tree **bindings, Program *prg, long pat, Kid *kid, bool checkNext );
 Head *make_literal( Program *prg, long litoffset );
