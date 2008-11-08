@@ -1,0 +1,110 @@
+#
+# Local commit:
+# 		-clears reparse flags underneath
+# 		-must be possible to backtrack after
+# Global commit (revertOn)
+# 		-clears all reparse flags
+# 		-must be possible to backtrack after
+# Global commit (!revertOn)
+# 		-clears all reparse flags
+# 		-clears all 'parsed' reverse code
+# 		-clears all reverse code
+# 		-clears all alg structures
+#
+
+# This test shows that a global commit with revertOn cannot clear 'parsed'
+# items because it must entertain the possibility of backtracking.
+
+lex start
+{
+	ignore /[\t\n ]+/
+	literal '^', '|', '-', ',', ':', '!', '?', '.'
+	literal '(', ')', '{', '}', '*', '&', '+'
+
+	literal '--', ':>', ':>>', '<:', '->', '**'
+
+	token word /[a-zA-Z_][a-zA-Z0-9_]*/
+	token uint /[0-9]+/
+}
+
+
+def expression [term expression_op*]
+
+def expression_op
+	['|' term]
+|	['&' term]
+|	['-' term]
+|	['--' term]
+
+def term [factor_rep term_rest]
+
+# This list is done manually to get shortest match.
+def term_rest
+	[]
+|	[term_op term_rest]
+
+def term_op
+	[factor_rep]
+|	['.' factor_rep]
+|	[':>' factor_rep]
+|	[':>>' factor_rep]
+|	['<:' factor_rep]
+
+def factor_rep 
+	[factor_neg factor_rep_op*]
+
+def factor_rep_op
+	['*']
+|	['**']
+|	['?']
+|	['+']
+|	['{' factor_rep_num '}']
+|	['{' ',' factor_rep_num '}']
+|	['{' factor_rep_num ',' '}']
+|	['{' factor_rep_num ',' factor_rep_num '}']
+
+def factor_rep_num [uint]
+
+def factor_neg 
+	['!' factor_neg]
+|	['^' factor_neg]
+|	[factor]
+
+def factor 
+	[alphabet_num]
+|	[word]
+|	['(' expression ')']
+
+def alphabet_num 
+	[uint]
+
+global int i
+
+def suint
+	int i
+	[uint]
+	{
+		lhs.i = 0
+		i = 1
+		lhs = construct suint "1"
+	}
+
+def sub
+	[suint* '*']
+
+token item
+	sub S
+	/[0-9]+/
+	{
+		str M = pull(stdin, match_length)
+		sub S = parse sub(stdin)
+		send( make_token( typeid item, M, S ) )
+	}
+
+def stuff
+	[item* '!']
+|	[sub]
+
+stuff S = parse stuff(stdin)
+
+print_xml( S )
