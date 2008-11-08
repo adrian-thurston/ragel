@@ -1658,7 +1658,7 @@ PdaTables *ParseData::makePdaTables( PdaGraph *pdaGraph )
 	}
 
 	/* Get a pointer to the (yet unfilled) global runtime data. */
-	pdaTables->gbl = runtimeData;
+	pdaTables->rtd = runtimeData;
 
 	return pdaTables;
 }

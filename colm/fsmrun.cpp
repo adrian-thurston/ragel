@@ -193,7 +193,7 @@ void FsmRun::queueBack( Kid *input )
 
 	if ( alg->flags & AF_GROUP_MEM ) {
 		#ifdef COLM_LOG_PARSE
-		LangElInfo *lelInfo = parser->tables->gbl->lelInfo;
+		LangElInfo *lelInfo = parser->tables->rtd->lelInfo;
 		cerr << "queuing back: " << lelInfo[input->tree->id].name << endl;
 		#endif
 
@@ -237,7 +237,7 @@ void FsmRun::sendBackIgnore( Kid *ignore )
 	/* Ignore tokens are queued in reverse order. */
 	while ( tree_is_ignore( prg, ignore ) ) {
 		#ifdef COLM_LOG_PARSE
-		LangElInfo *lelInfo = parser->tables->gbl->lelInfo;
+		LangElInfo *lelInfo = parser->tables->rtd->lelInfo;
 		cerr << "sending back: " << lelInfo[ignore->tree->id].name;
 		if ( ignore->tree->alg != 0 && ignore->tree->alg->flags & AF_ARTIFICIAL )
 			cerr << " (artificial)";
@@ -269,7 +269,7 @@ void FsmRun::sendBackIgnore( Kid *ignore )
 void FsmRun::sendBack( Kid *input )
 {
 	#ifdef COLM_LOG_PARSE
-	LangElInfo *lelInfo = parser->tables->gbl->lelInfo;
+	LangElInfo *lelInfo = parser->tables->rtd->lelInfo;
 	cerr << "sending back: " << lelInfo[input->tree->id].name;
 	if ( input->tree->alg->flags & AF_ARTIFICIAL )
 		cerr << " (artificial)";
@@ -307,7 +307,7 @@ void FsmRun::sendBack( Kid *input )
 	sendBackIgnore( tree_ignore( prg, input->tree ) );
 
 	/* If eof was just sent back remember that it needs to be sent again. */
-	if ( input->tree->id == parser->tables->gbl->eofId )
+	if ( input->tree->id == parser->tables->rtd->eofId )
 		eofSent = false;
 
 	/* If the item is bound then store remove it from the bindings array. */
@@ -376,7 +376,7 @@ void send_queued_tokens( FsmRun *fsmRun, PdaRun *parser )
 		if ( lelInfo[send->tree->id].ignore ) {
 			#ifdef COLM_LOG_PARSE
 			cerr << "ignoring queued item: " << 
-					parser->tables->gbl->lelInfo[send->tree->id].name << endl;
+					parser->tables->rtd->lelInfo[send->tree->id].name << endl;
 			#endif
 			
 			parser->ignore( send->tree );
@@ -385,7 +385,7 @@ void send_queued_tokens( FsmRun *fsmRun, PdaRun *parser )
 		else {
 			#ifdef COLM_LOG_PARSE
 			cerr << "sending queue item: " << 
-					parser->tables->gbl->lelInfo[send->tree->id].name << endl;
+					parser->tables->rtd->lelInfo[send->tree->id].name << endl;
 			#endif
 
 			send_handle_error( fsmRun, parser, send );
@@ -396,11 +396,11 @@ void send_queued_tokens( FsmRun *fsmRun, PdaRun *parser )
 void FsmRun::sendToken( long id )
 {
 	#ifdef COLM_LOG_PARSE
-	cerr << "token: " << parser->tables->gbl->lelInfo[id].name << endl;
+	cerr << "token: " << parser->tables->rtd->lelInfo[id].name << endl;
 	#endif
 
 	bool ctxDepParsing = prg->ctxDepParsing;
-	LangElInfo *lelInfo = parser->tables->gbl->lelInfo;
+	LangElInfo *lelInfo = parser->tables->rtd->lelInfo;
 
 	/* Make the token data. */
 	long length = p-tokstart;
@@ -439,7 +439,7 @@ void FsmRun::sendNamedLangEl()
 		klangEl = klangEl->termDup;
 	
 	#ifdef COLM_LOG_PARSE
-	cerr << "named langEl: " << parser->tables->gbl->lelInfo[klangEl->id].name << endl;
+	cerr << "named langEl: " << parser->tables->rtd->lelInfo[klangEl->id].name << endl;
 	#endif
 
 	/* Copy the token data. */
@@ -484,12 +484,12 @@ void FsmRun::generationAction( int id, Head *tokdata, bool namedLangEl, int bind
 {
 	#ifdef COLM_LOG_PARSE
 	cerr << "generation action: " << 
-			parser->tables->gbl->lelInfo[id].name << endl;
+			parser->tables->rtd->lelInfo[id].name << endl;
 	#endif
 
 	/* Find the code. */
-	Code *code = parser->tables->gbl->frameInfo[
-			parser->tables->gbl->lelInfo[id].frameId].codeWV;
+	Code *code = parser->tables->rtd->frameInfo[
+			parser->tables->rtd->lelInfo[id].frameId].codeWV;
 
 	/* Execute the action and process the queue. */
 	execute_generation_action( prg, parser, code, tokdata );
@@ -504,7 +504,7 @@ void FsmRun::generationAction( int id, Head *tokdata, bool namedLangEl, int bind
 Kid *FsmRun::makeToken( int id, Head *tokdata, bool namedLangEl, int bindId )
 {
 	/* Make the token object. */
-	long objectLength = parser->tables->gbl->lelInfo[id].objectLength;
+	long objectLength = parser->tables->rtd->lelInfo[id].objectLength;
 	Kid *attrs = alloc_attrs( prg, objectLength );
 
 	Kid *input = 0;
@@ -604,7 +604,7 @@ void send_handle_error( FsmRun *fsmRun, PdaRun *parser, Kid *input )
 
 	#ifdef COLM_LOG_PARSE
 	cerr << "new token region: " << 
-			parser->tables->gbl->regionInfo[fsmRun->region].name << endl;
+			parser->tables->rtd->regionInfo[fsmRun->region].name << endl;
 	#endif
 }
 
@@ -622,7 +622,7 @@ void PdaRun::ignore( Tree *tree )
 void FsmRun::sendIgnore( long id )
 {
 	#ifdef COLM_LOG_PARSE
-	cerr << "ignoring: " << parser->tables->gbl->lelInfo[id].name << endl;
+	cerr << "ignoring: " << parser->tables->rtd->lelInfo[id].name << endl;
 	#endif
 
 	/* Make the ignore string. */
@@ -697,17 +697,17 @@ void FsmRun::sendEOF( )
 	input->tree->alg = prg->algPool.allocate();
 
 	input->tree->refs = 1;
-	input->tree->id = parser->tables->gbl->eofId;
+	input->tree->id = parser->tables->rtd->eofId;
 
 	bool ctxDepParsing = prg->ctxDepParsing;
-	long frameId = parser->tables->gbl->regionInfo[region].eofFrameId;
+	long frameId = parser->tables->rtd->regionInfo[region].eofFrameId;
 	if ( ctxDepParsing && frameId >= 0 ) {
 		#ifdef COLM_LOG_PARSE
 		cerr << "HAVE PRE_EOF BLOCK" << endl;
 		#endif
 
 		/* Get the code for the pre-eof block. */
-		Code *code = parser->tables->gbl->frameInfo[frameId].codeWV;
+		Code *code = parser->tables->rtd->frameInfo[frameId].codeWV;
 
 		/* Execute the action and process the queue. */
 		execute_generation_action( prg, parser, code, 0 );
@@ -719,7 +719,7 @@ void FsmRun::sendEOF( )
 	parser->send( input );
 
 	if ( parser->errCount > 0 ) {
-		parser->parse_error( parser->tables->gbl->eofId, input->tree ) << 
+		parser->parse_error( parser->tables->rtd->eofId, input->tree ) << 
 				"parse error" << endp;
 	}
 
@@ -848,9 +848,9 @@ long FsmRun::run( PdaRun *destParser )
 
 			/* Check for a default token in the region. If one is there
 			 * then send it and continue with the processing loop. */
-			if ( parser->tables->gbl->regionInfo[region].defaultToken >= 0 ) {
+			if ( parser->tables->rtd->regionInfo[region].defaultToken >= 0 ) {
 				tokstart = tokend = p;
-				sendToken( parser->tables->gbl->regionInfo[region].defaultToken );
+				sendToken( parser->tables->rtd->regionInfo[region].defaultToken );
 				continue;
 			}
 
@@ -869,7 +869,7 @@ long FsmRun::run( PdaRun *destParser )
 				cs = tables->entryByRegion[region];
 				#ifdef COLM_LOG_PARSE
 				cerr << "new token region: " << 
-						parser->tables->gbl->regionInfo[region].name << endl;
+						parser->tables->rtd->regionInfo[region].name << endl;
 				#endif
 				continue;
 			}
@@ -892,7 +892,7 @@ long FsmRun::run( PdaRun *destParser )
 					cs = tables->entryByRegion[region];
 					#ifdef COLM_LOG_PARSE
 					cerr << "new token region: " << 
-							parser->tables->gbl->regionInfo[region].name << endl;
+							parser->tables->rtd->regionInfo[region].name << endl;
 					#endif
 					continue;
 				}

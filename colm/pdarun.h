@@ -436,7 +436,7 @@ struct PdaTables
 	int numCommitLen;
 	int numRegionItems;
 
-	RuntimeData *gbl;
+	RuntimeData *rtd;
 };
 
 bool make_reverse_code( CodeVect *all, CodeVect &reverseCode );

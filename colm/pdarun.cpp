@@ -353,7 +353,7 @@ again:
 
 	if ( *action & act_sb ) {
 		#ifdef COLM_LOG_PARSE
-		cerr << "shifted: " << tables->gbl->lelInfo[lel->tree->id].name;
+		cerr << "shifted: " << tables->rtd->lelInfo[lel->tree->id].name;
 		#endif
 		input = input->next;
 		lel->tree->alg->state = cs;
@@ -361,10 +361,10 @@ again:
 		stackTop = lel;
 
 		/* If shifting a termDup then change it to the nonterm. */
-		if ( lel->tree->id < tables->gbl->firstNonTermId &&
-				tables->gbl->lelInfo[lel->tree->id].termDupId > 0 )
+		if ( lel->tree->id < tables->rtd->firstNonTermId &&
+				tables->rtd->lelInfo[lel->tree->id].termDupId > 0 )
 		{
-			lel->tree->id = tables->gbl->lelInfo[lel->tree->id].termDupId;
+			lel->tree->id = tables->rtd->lelInfo[lel->tree->id].termDupId;
 			lel->tree->alg->flags |= AF_GENERATED;
 		}
 
@@ -399,7 +399,7 @@ again:
 		redAlg = prg->algPool.allocate();
 
 		redLel->tree->refs = 1;
-		redLel->tree->id = tables->gbl->prodInfo[reduction].lhsId;
+		redLel->tree->id = tables->rtd->prodInfo[reduction].lhsId;
 
 		redLel->next = 0;
 		redAlg->causeReduce = 0;
@@ -408,11 +408,11 @@ again:
 		lel->tree->alg->retry_lower = 0;
 
 		/* Allocate the attributes. */
-		objectLength = tables->gbl->lelInfo[redLel->tree->id].objectLength;
+		objectLength = tables->rtd->lelInfo[redLel->tree->id].objectLength;
 		attrs = alloc_attrs( prg, objectLength );
 
 		/* Build the list of children. */
-		rhsLen = tables->gbl->prodInfo[reduction].length;
+		rhsLen = tables->rtd->prodInfo[reduction].length;
 		child = last = 0;
 		for ( int r = 0; r < rhsLen; r++ ) {
 			child = stackTop;
@@ -425,7 +425,7 @@ again:
 
 		#ifdef COLM_LOG_PARSE
 		cerr << "reduced: "
-				<< tables->gbl->prodInfo[reduction].name
+				<< tables->rtd->prodInfo[reduction].name
 				<< " rhsLen: " << rhsLen;
 		#endif
 		if ( action[1] == 0 )
@@ -449,9 +449,9 @@ again:
 
 		assert( redLel->tree->refs == 1 );
 
-		if ( prg->ctxDepParsing && tables->gbl->prodInfo[reduction].frameId >= 0 ) {
+		if ( prg->ctxDepParsing && tables->rtd->prodInfo[reduction].frameId >= 0 ) {
 			/* Frame info for reduction. */
-			FrameInfo *fi = &tables->gbl->frameInfo[tables->gbl->prodInfo[reduction].frameId];
+			FrameInfo *fi = &tables->rtd->frameInfo[tables->rtd->prodInfo[reduction].frameId];
 
 			/* Execution environment for the reduction code. */
 			Execution execution( prg, reverseCode, 
@@ -485,7 +485,7 @@ again:
 		if ( induceReject ) {
 			#ifdef COLM_LOG_PARSE
 			cerr << "error induced during reduction of " <<
-					tables->gbl->lelInfo[redLel->tree->id].name << endl;
+					tables->rtd->lelInfo[redLel->tree->id].name << endl;
 			#endif
 			redLel->tree->alg->state = cs;
 			redLel->next = stackTop;
@@ -560,12 +560,12 @@ parseError:
 
 		/* Either we are dealing with a terminal that was
 		 * shifted or a nonterminal that was reduced. */
-		if ( stackTop->tree->id < tables->gbl->firstNonTermId || 
+		if ( stackTop->tree->id < tables->rtd->firstNonTermId || 
 				(stackTop->tree->alg->flags & AF_GENERATED) )
 		{
 			#ifdef COLM_LOG_PARSE
 			cerr << "backing up over effective terminal: " <<
-					tables->gbl->lelInfo[stackTop->tree->id].name << endl;
+					tables->rtd->lelInfo[stackTop->tree->id].name << endl;
 			#endif
 
 			/* Pop the item from the stack. */
@@ -573,7 +573,7 @@ parseError:
 
 			/* Undo the translation from termDup. */
 			if ( undoLel->tree->alg->flags & AF_GENERATED ) {
-				undoLel->tree->id = tables->gbl->lelInfo[undoLel->tree->id].termDupId;
+				undoLel->tree->id = tables->rtd->lelInfo[undoLel->tree->id].termDupId;
 				undoLel->tree->alg->flags &= ~AF_GENERATED;
 			}
 
@@ -584,7 +584,7 @@ parseError:
 		else {
 			#ifdef COLM_LOG_PARSE
 			cerr << "backing up over non-terminal: " <<
-					tables->gbl->lelInfo[stackTop->tree->id].name << endl;
+					tables->rtd->lelInfo[stackTop->tree->id].name << endl;
 			#endif
 
 			/* Take the alg out of undoLel. */
@@ -666,9 +666,9 @@ ostream &PdaRun::parse_error( int tokId, Tree *tree )
 {
 	cerr << "error:" << fsmRun->line << ": at token ";
 	if ( tokId < 128 )
-		cerr << "\"" << tables->gbl->lelInfo[tokId].name << "\"";
+		cerr << "\"" << tables->rtd->lelInfo[tokId].name << "\"";
 	else 
-		cerr << tables->gbl->lelInfo[tokId].name;
+		cerr << tables->rtd->lelInfo[tokId].name;
 	if ( string_length( tree->tokdata ) > 0 ) {
 		cerr << " with data \"";
 		cerr.write( string_data( tree->tokdata ), 
