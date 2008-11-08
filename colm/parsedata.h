@@ -728,6 +728,7 @@ struct ParseData
 	void compileFunction( Function *func, CodeVect &code );
 	void compileFunction( Function *func );
 
+	void compileUserIter( Function *func, CodeVect &code );
 	void compileUserIter( Function *func );
 	void compilePreEof( TokenRegion *region );
 	void compileRootBlock();

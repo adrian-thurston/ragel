@@ -54,7 +54,8 @@ IterDef::IterDef( Type type ) :
 	useSearchUT(false)
 {
 	if ( type == Tree ) {
-		inCreate = IN_TRITER_FROM_REF;
+		inCreateWV = IN_TRITER_FROM_REF;
+		inCreateWC = IN_TRITER_FROM_REF;
 		inDestroy = IN_TRITER_DESTROY;
 		inAdvance = IN_TRITER_ADVANCE;
 
@@ -65,7 +66,8 @@ IterDef::IterDef( Type type ) :
 		useSearchUT = true;
 	}
 	else if ( type == Child ) {
-		inCreate = IN_TRITER_FROM_REF;
+		inCreateWV = IN_TRITER_FROM_REF;
+		inCreateWC = IN_TRITER_FROM_REF;
 		inDestroy = IN_TRITER_DESTROY;
 		inAdvance = IN_TRITER_NEXT_CHILD;
 
@@ -76,7 +78,8 @@ IterDef::IterDef( Type type ) :
 		useSearchUT = true;
 	}
 	else if ( type == RevChild ) {
-		inCreate = IN_TRITER_FROM_REF;
+		inCreateWV = IN_TRITER_FROM_REF;
+		inCreateWC = IN_TRITER_FROM_REF;
 		inDestroy = IN_TRITER_DESTROY;
 		inAdvance = IN_TRITER_PREV_CHILD;
 
@@ -95,7 +98,8 @@ IterDef::IterDef( Type type, Function *func ) :
 	func(func),
 	useFuncId(true),
 	useSearchUT(true),
-	inCreate(IN_UITER_CREATE),
+	inCreateWV(IN_UITER_CREATE_WV),
+	inCreateWC(IN_UITER_CREATE_WC),
 	inDestroy(IN_UITER_DESTROY),
 	inAdvance(IN_UITER_ADVANCE),
 	inGetCurR(IN_UITER_GET_CUR_R),
@@ -1482,7 +1486,11 @@ void LangStmt::compileForIter( ParseData *pd, CodeVect &code ) const
 	ObjField **paramRefs = iterCallTerm->varRef->evaluateArgs( 
 			pd, code, lookup, iterCallTerm->args );
 
-	code.append( iterUT->iterDef->inCreate );
+	if ( pd->revertOn )
+		code.append( iterUT->iterDef->inCreateWV );
+	else
+		code.append( iterUT->iterDef->inCreateWC );
+
 	code.appendHalf( objField->offset );
 	if ( lookup.objMethod->func != 0 )
 		code.appendHalf( lookup.objMethod->func->funcId );
@@ -2280,18 +2288,9 @@ void ParseData::makeFuncVisible( Function *func, bool isUserIter )
 	globalObjectDef->objMethodMap->insert( func->name, objMethod );
 }
 
-void ParseData::compileUserIter( Function *func )
+void ParseData::compileUserIter( Function *func, CodeVect &code )
 {
 	CodeBlock *block = func->codeBlock;
-
-	compileContext = CompileFunction;
-	curFunction = func;
-	revertOn = true;
-	block->frameId = nextFrameId++;
-
-	makeFuncVisible( func, true );
-
-	CodeVect &code = block->codeWV;
 
 	/* Add the alloc frame opcode. We don't have the right 
 	 * frame size yet. We will fill it in later. */
@@ -2313,6 +2312,26 @@ void ParseData::compileUserIter( Function *func )
 		code.append( IN_LOAD_NIL );
 		code.append( IN_YIELD );
 	}
+}
+
+void ParseData::compileUserIter( Function *func )
+{
+	CodeBlock *block = func->codeBlock;
+
+	/* Set up the context. */
+	compileContext = CompileFunction;
+	curFunction = func;
+	block->frameId = nextFrameId++;
+
+	/* Process the params, etc. */
+	makeFuncVisible( func, true );
+
+	/* Compile for revert and commit. */
+	revertOn = true;
+	compileUserIter( func, block->codeWV );
+
+	revertOn = false;
+	compileUserIter( func, block->codeWC );
 
 	/* Now that compilation is done variables are referenced. Make the local
 	 * trees descriptor. */

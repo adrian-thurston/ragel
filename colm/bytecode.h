@@ -117,7 +117,8 @@ typedef unsigned char uchar;
 #define IN_TRITER_DESTROY        0x41
 
 #define IN_UITER_DESTROY         0x52
-#define IN_UITER_CREATE          0x53
+#define IN_UITER_CREATE_WV       0x53
+#define IN_UITER_CREATE_WC       0xbf
 #define IN_UITER_ADVANCE         0x54
 #define IN_UITER_GET_CUR_R       0x55
 #define IN_UITER_GET_CUR_WC      0x56

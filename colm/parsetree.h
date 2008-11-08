@@ -1015,7 +1015,8 @@ struct IterDef
 	bool useFuncId;
 	bool useSearchUT;
 
-	Code inCreate;
+	Code inCreateWV;
+	Code inCreateWC;
 	Code inDestroy;
 	Code inAdvance;
 

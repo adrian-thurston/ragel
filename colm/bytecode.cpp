@@ -207,6 +207,20 @@ UserIter *uiter_create( Tree **&sp, Program *prg, FunctionInfo *fi, long searchI
 	return uiter;
 }
 
+void uiter_init( Program *prg, Tree **sp, UserIter *uiter, 
+		FunctionInfo *fi, bool revertOn )
+{
+	/* Set up the first yeild so when we resume it starts at the beginning. */
+	uiter->ref.kid = 0;
+	uiter->stackSize = uiter->stackRoot - ptop();
+	uiter->frame = &uiter->stackRoot[-IFR_AA];
+
+	if ( revertOn )
+		uiter->resume = prg->rtd->frameInfo[fi->frameId].codeWV;
+	else
+		uiter->resume = prg->rtd->frameInfo[fi->frameId].codeWC;
+}
+
 void tree_iter_destroy( Tree **&sp, TreeIter *iter )
 {
 	long curStackSize = iter->stackRoot - ptop();
@@ -2657,7 +2671,7 @@ again:
 			}
 			break;
 		}
-		case IN_UITER_CREATE: {
+		case IN_UITER_CREATE_WV: {
 			short field;
 			Half funcId, searchId;
 			read_half( field );
@@ -2665,7 +2679,7 @@ again:
 			read_half( searchId );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_UITER_CREATE " << field << " " << 
+			cerr << "IN_UITER_CREATE_WV " << field << " " << 
 					funcId << " " << searchId << endl;
 			#endif
 
@@ -2682,11 +2696,35 @@ again:
 			push( (SW)iframe ); /* Return iframe. */
 			push( (SW)frame );  /* Return frame. */
 
-			/* Now set up the first yeild. */
-			uiter->ref.kid = 0;
-			uiter->stackSize = uiter->stackRoot - ptop();
-			uiter->resume = prg->rtd->frameInfo[fi->frameId].codeWV;
-			uiter->frame = &uiter->stackRoot[-IFR_AA];
+			uiter_init( prg, sp, uiter, fi, true );
+			break;
+		}
+		case IN_UITER_CREATE_WC: {
+			short field;
+			Half funcId, searchId;
+			read_half( field );
+			read_half( funcId );
+			read_half( searchId );
+
+			#ifdef COLM_LOG_BYTECODE
+			cerr << "IN_UITER_CREATE_WC " << field << " " << 
+					funcId << " " << searchId << endl;
+			#endif
+
+			FunctionInfo *fi = prg->rtd->functionInfo + funcId;
+			UserIter *uiter = uiter_create( sp, prg, fi, searchId );
+			local(field) = (SW) uiter;
+
+			/* This is a setup similar to as a call, only the frame structure
+			 * is slightly different for user iterators. We aren't going to do
+			 * the call. We don't need to set up the return ip because the
+			 * uiter advance will set it. The frame we need to do because it
+			 * is set once for the lifetime of the iterator. */
+			push( 0 );            /* Return instruction pointer,  */
+			push( (SW)iframe ); /* Return iframe. */
+			push( (SW)frame );  /* Return frame. */
+
+			uiter_init( prg, sp, uiter, fi, false );
 			break;
 		}
 		case IN_UITER_DESTROY: {
