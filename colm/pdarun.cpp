@@ -136,22 +136,6 @@ head:
 	if ( alg->parsed != 0 )
 		tree = alg->parsed;
 
-	/* Recurse only on non-generated trees. */
-	if ( !(alg->flags & AF_GENERATED) && tree->child != 0 ) {
-		vm_push( (Tree*)lel );
-		lel = tree_child( parser->prg, tree );
-
-		while ( lel != 0 ) {
-			if ( !been_committed( lel ) )
-				goto head;
-
-			upwards:
-			lel = lel->next;
-		}
-
-		lel = (Kid*)vm_pop();
-	}
-
 	/* Commit */
 	#ifdef COLM_LOG_PARSE
 	cerr << "commit visiting: " << 
@@ -171,14 +155,41 @@ head:
 	}
 	alg->flags |= AF_COMMITTED;
 
-	if ( sp != root )
-		goto upwards;
+	/* Recurse only on non-generated trees. */
+	if ( !(alg->flags & AF_GENERATED) && tree->child != 0 ) {
+		vm_push( (Tree*)lel );
+		lel = tree_child( parser->prg, tree );
+
+		if ( lel != 0 ) {
+			while ( lel != 0 ) {
+				vm_push( (Tree*)lel );
+				lel = lel->next;
+			}
+
+			backwards:
+			lel = (Kid*)vm_pop();
+			if ( !been_committed( lel ) )
+				goto head;
+		}
+
+		upwards:
+		lel = (Kid*)vm_pop();
+	}
+
+
+	if ( sp != root ) {
+		Kid *next = (Kid*)vm_top();
+		if ( next->next == lel )
+			goto backwards;
+		else
+			goto upwards;
+	}
 
 	parser->numRetry = 0;
 	assert( sp == root );
 }
 
-void full_commit( PdaRun *parser )
+void commit_full( PdaRun *parser )
 {
 	#ifdef COLM_LOG_PARSE
 	cerr << "running full commit" << endl;
@@ -186,22 +197,11 @@ void full_commit( PdaRun *parser )
 	
 	Tree **sp = parser->root;
 	Kid *kid = parser->stackTop;
-	long topLevel = 0;
+
 	while ( kid != 0 && !been_committed( kid ) ) {
-		vm_push( (Tree*)kid );
-		kid = kid->next;
-		topLevel += 1;
-	}
-
-	while ( topLevel > 0 ) {
-		kid = (Kid*)vm_pop();
 		commit_kid( parser, sp, kid );
-		topLevel -= 1;
+		kid = kid->next;
 	}
-
-	/* After running the commit the the stack should be where it 
-	 * was when we started. */
-	assert( sp == parser->root );
 
 	/* We cannot always clear all the rcode here. We may need to backup over
 	 * the parse statement. We depend on the context flag. */
@@ -383,7 +383,7 @@ again:
 	}
 
 	if ( tables->commitLen[pos] != 0 )
-		full_commit( this );
+		commit_full( this );
 
 	if ( *action & act_rb ) {
 		int objectLength, reduction = *action >> 2;

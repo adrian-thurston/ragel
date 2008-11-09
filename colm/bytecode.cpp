@@ -121,7 +121,7 @@ Tree *call_parser( Tree **&sp, Program *prg, Stream *stream,
 	PdaTables *tables = prg->rtd->parsers[parserId];
 	PdaRun parser( sp, prg, tables, stream->scanner, stopId, revertOn );
 	parser.run();
-	full_commit( &parser );
+	commit_full( &parser );
 	Tree *tree = parser.getParsedRoot( stopId > 0 );
 	tree_upref( tree );
 	parser.clean();
