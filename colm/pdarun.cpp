@@ -122,8 +122,7 @@ bool been_committed( Kid *kid )
 }
 
 /* The top level of the stack is linked right-to-left. Trees underneath are
- * left to right natural order. */
-
+ * linked left-to-right. */
 void commit_kid( PdaRun *parser, Tree **root, Kid *lel )
 {
 	Alg *alg = 0;
@@ -459,8 +458,8 @@ again:
 
 			/* Take a copy of the lhs and store it in alg. May need it during
 			 * reverse parsing. */
-			redAlg->parsed = redLel->tree;
-			tree_upref( redAlg->parsed );
+			Tree *parsed = redLel->tree;
+			tree_upref( parsed );
 
 			/* Execute it. */
 			execution.execute( root );
@@ -473,6 +472,13 @@ again:
 			/* Transfer the lhs from the environment to redLel. It is uprefed
 			 * while in the environment. */
 			redLel->tree = execution.lhs;
+
+			/* If the lhs changed then store the original, otherwise downref
+			 * since we took a copy above. */
+			if ( parsed != redLel->tree )
+				redAlg->parsed = parsed;
+			else
+				tree_downref( prg, root, parsed );
 
 			/* Perhaps the execution environment is telling us we need to
 			 * reject the reduction. */
