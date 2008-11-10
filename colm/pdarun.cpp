@@ -138,14 +138,24 @@ bool been_committed( Kid *kid )
 	return kid->tree->alg->flags & AF_COMMITTED;
 }
 
+Code *backup_over_rcode( Code *rcode )
+{
+	Word len;
+	rcode -= 4;
+	read_word_p( len, rcode );
+	rcode -= len;
+	return rcode;
+}
+
 /* The top level of the stack is linked right-to-left. Trees underneath are
  * linked left-to-right. */
-void commit_kid( PdaRun *parser, Tree **root, Kid *lel, Code *&prcode )
+void commit_kid( PdaRun *parser, Tree **root, Kid *lel, Code *&rcode )
 {
 	Alg *alg = 0;
 	Tree *tree = 0;
 	Tree **sp = root;
 	Tree *restore = 0;
+	long causeReduce = 0;
 
 head:
 	/* Commit */
@@ -160,21 +170,50 @@ head:
 	if ( alg->parsed != 0 )
 		tree = alg->parsed;
 
+	/* Check for reverse code. */
 	restore = 0;
 	if ( alg->flags & AF_HAS_RCODE ) {
-		prcode -= 4;
-		Word len;
-		read_word_p( len, prcode );
-		prcode -= len;
-
-		if ( *prcode == IN_RESTORE_LHS ) {
-			cout << "has restore_lhs" << endl;
-			read_tree_p( restore, (prcode+1) );
+		/* If tree caused some reductions, now is not the right time to backup
+		 * over the reverse code. We need to backup over the reductions first. Store
+		 * the count of the reductions and do it when the count drops to zero. */
+		if ( alg->causeReduce > 0 ) {
+			/* The top reduce block does not correspond to this alg. */
+			#ifdef COLM_LOG_PARSE
+			cerr << "commit: causeReduce found, delaying backup: " << (long)alg->causeReduce << endl;
+			#endif
+			causeReduce = alg->causeReduce;
 		}
+		else {
+			rcode = backup_over_rcode( rcode );
 
+			if ( *rcode == IN_RESTORE_LHS ) {
+				#if COLM_LOG_PARSE
+				cerr << "commit: has restore_lhs" << endl;
+				#endif
+				read_tree_p( restore, (rcode+1) );
+			}
+		}
 	}
+
+	/* Assert that we have the right restore tree. */
 	assert( alg->parsed == restore );
 
+	/* Check causeReduce, might be time to backup over the reverse code
+	 * belonging to a nonterminal that caused previous reductions. */
+	if ( tree->id >= parser->tables->rtd->firstNonTermId &&
+			!(alg->flags & AF_GENERATED) && causeReduce > 0 )
+	{
+		causeReduce -= 1;
+
+		if ( causeReduce == 0 ) {
+			#ifdef COLM_LOG_PARSE
+			cerr << "commit: causeReduce dropped to zero, backing up over rcode" << endl;
+			#endif
+
+			/* Cause reduce just dropped down to zero. */
+			rcode = backup_over_rcode( rcode );
+		}
+	}
 
 	/* Reset retries. */
 	if ( alg->retry_lower > 0 ) {
@@ -231,10 +270,12 @@ void commit_full( PdaRun *parser )
 	Tree **sp = parser->root;
 	Kid *kid = parser->stackTop;
 
-	Code *prcode = parser->allReverseCode->data + parser->allReverseCode->length();
+	Code *rcode = parser->allReverseCode->data + parser->allReverseCode->length();
 
+	/* The top level of the stack is linked right to left. This is the
+	 * traversal order we need for committing. */
 	while ( kid != 0 && !been_committed( kid ) ) {
-		commit_kid( parser, sp, kid, prcode );
+		commit_kid( parser, sp, kid, rcode );
 		kid = kid->next;
 	}
 
@@ -506,6 +547,10 @@ again:
 			/* If the lhs changed then store the original, otherwise downref
 			 * since we took a copy above. */
 			if ( parsed != redLel->tree ) {
+				#ifdef COLM_LOG_PARSE
+				cerr << "lhs tree was modified, adding a restore instruction" << endl;
+				#endif
+
 				redAlg->parsed = parsed;
 				reverseCode.append( IN_RESTORE_LHS );
 				reverseCode.appendWord( (Word)parsed );
