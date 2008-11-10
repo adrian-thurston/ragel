@@ -40,6 +40,23 @@ using std::endl;
 #define upper 0xffff0000
 #define reject() induceReject = 1
 
+#define read_word_p( i, p ) do { \
+	i = ((Word)  p[0]); \
+	i |= ((Word) p[1]) << 8; \
+	i |= ((Word) p[2]) << 16; \
+	i |= ((Word) p[3]) << 24; \
+} while(0)
+
+#define read_tree_p( i, p ) do { \
+	Word w; \
+	w = ((Word)  p[0]); \
+	w |= ((Word) p[1]) << 8; \
+	w |= ((Word) p[2]) << 16; \
+	w |= ((Word) p[3]) << 24; \
+	i = (Tree*)w; \
+} while(0)
+
+
 Tree *PdaRun::getParsedRoot( bool stop )
 {
 	return stop ? stackTop->tree : stackTop->next->tree;
@@ -123,26 +140,41 @@ bool been_committed( Kid *kid )
 
 /* The top level of the stack is linked right-to-left. Trees underneath are
  * linked left-to-right. */
-void commit_kid( PdaRun *parser, Tree **root, Kid *lel )
+void commit_kid( PdaRun *parser, Tree **root, Kid *lel, Code *&prcode )
 {
 	Alg *alg = 0;
 	Tree *tree = 0;
 	Tree **sp = root;
+	Tree *restore = 0;
 
 head:
-	/* Load up the parsed tree. */
-	tree = lel->tree;
-	alg = tree->alg;
-	if ( alg->parsed != 0 )
-		tree = alg->parsed;
-
 	/* Commit */
 	#ifdef COLM_LOG_PARSE
 	cerr << "commit visiting: " << 
 			parser->prg->rtd->lelInfo[lel->tree->id].name << endl;
 	#endif
 
-	alg = lel->tree->alg;
+	/* Load up the parsed tree. */
+	tree = lel->tree;
+	alg = tree->alg;
+	if ( alg->parsed != 0 )
+		tree = alg->parsed;
+
+	restore = 0;
+	if ( alg->flags & AF_HAS_RCODE ) {
+		prcode -= 4;
+		Word len;
+		read_word_p( len, prcode );
+		prcode -= len;
+
+		if ( *prcode == IN_RESTORE_LHS ) {
+			cout << "has restore_lhs" << endl;
+			read_tree_p( restore, (prcode+1) );
+		}
+
+	}
+	assert( alg->parsed == restore );
+
 
 	/* Reset retries. */
 	if ( alg->retry_lower > 0 ) {
@@ -156,7 +188,7 @@ head:
 	alg->flags |= AF_COMMITTED;
 
 	/* Recurse only on non-generated trees. */
-	if ( !(alg->flags & AF_GENERATED) && tree->child != 0 ) {
+	if ( !(alg->flags & AF_GENERATED) && tree_child( parser->prg, tree ) != 0 ) {
 		vm_push( (Tree*)lel );
 		lel = tree_child( parser->prg, tree );
 
@@ -165,24 +197,25 @@ head:
 				vm_push( (Tree*)lel );
 				lel = lel->next;
 			}
+		}
+	}
 
-			backwards:
-			lel = (Kid*)vm_pop();
+backup:
+	if ( sp != root ) {
+		Kid *next = (Kid*)vm_pop();
+		if ( next->next == lel ) {
+			/* Moving backwards. */
+			lel = next;
+
 			if ( !been_committed( lel ) )
 				goto head;
 		}
+		else {
+			/* Moving upwards. */
+			lel = next;
+		}
 
-		upwards:
-		lel = (Kid*)vm_pop();
-	}
-
-
-	if ( sp != root ) {
-		Kid *next = (Kid*)vm_top();
-		if ( next->next == lel )
-			goto backwards;
-		else
-			goto upwards;
+		goto backup;
 	}
 
 	parser->numRetry = 0;
@@ -198,8 +231,10 @@ void commit_full( PdaRun *parser )
 	Tree **sp = parser->root;
 	Kid *kid = parser->stackTop;
 
+	Code *prcode = parser->allReverseCode->data + parser->allReverseCode->length();
+
 	while ( kid != 0 && !been_committed( kid ) ) {
-		commit_kid( parser, sp, kid );
+		commit_kid( parser, sp, kid, prcode );
 		kid = kid->next;
 	}
 
@@ -464,21 +499,26 @@ again:
 			/* Execute it. */
 			execution.execute( root );
 
-			/* Pull out the reverse code, if any. */
-			bool hasrcode = make_reverse_code( allReverseCode, reverseCode );
-			if ( hasrcode )
-				redAlg->flags |= AF_HAS_RCODE;
-
 			/* Transfer the lhs from the environment to redLel. It is uprefed
 			 * while in the environment. */
 			redLel->tree = execution.lhs;
 
 			/* If the lhs changed then store the original, otherwise downref
 			 * since we took a copy above. */
-			if ( parsed != redLel->tree )
+			if ( parsed != redLel->tree ) {
 				redAlg->parsed = parsed;
+				reverseCode.append( IN_RESTORE_LHS );
+				reverseCode.appendWord( (Word)parsed );
+				reverseCode.append( 5 );
+			}
 			else
 				tree_downref( prg, root, parsed );
+
+			/* Pull out the reverse code, if any. */
+			bool hasrcode = make_reverse_code( allReverseCode, reverseCode );
+			if ( hasrcode )
+				redAlg->flags |= AF_HAS_RCODE;
+
 
 			/* Perhaps the execution environment is telling us we need to
 			 * reject the reduction. */
@@ -598,6 +638,12 @@ parseError:
 			assert( alg != 0 );
 			undoLel->tree->alg = 0;
 
+			if ( alg->parsed != 0 ) {
+				/* Get the lhs, it may have been reverted. */
+				tree_downref( prg, root, undoLel->tree );
+				undoLel->tree = alg->parsed;
+			}
+
 			/* Check for an execution environment. */
 			if ( alg->flags & AF_HAS_RCODE ) {
 				Execution execution( prg, reverseCode, this, 0, 0, 0 );
@@ -605,12 +651,6 @@ parseError:
 				/* Do the reverse exeuction. */
 				execution.rexecute( root, allReverseCode );
 				alg->flags &= ~AF_HAS_RCODE;
-			}
-
-			if ( alg->parsed != 0 ) {
-				/* Get the lhs, it may have been reverted. */
-				tree_downref( prg, root, undoLel->tree );
-				undoLel->tree = alg->parsed;
 			}
 
 			/* Warm fuzzies ... */

@@ -37,6 +37,8 @@ using std::ostream;
 typedef unsigned long ulong;
 typedef unsigned char uchar;
 
+#define IN_RESTORE_LHS           0xc0
+
 #define IN_LOAD_INT              0x01
 #define IN_LOAD_STR              0x02
 #define IN_LOAD_NIL              0x03

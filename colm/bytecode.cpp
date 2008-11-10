@@ -436,6 +436,14 @@ void rcode_downref( Program *prg, Tree **sp, Code *instr )
 {
 again:
 	switch ( *instr++ ) {
+		case IN_RESTORE_LHS: {
+			Tree *lhs;
+			read_tree( lhs );
+			#ifdef COLM_LOG_BYTECODE
+			cerr << "IN_RESTORE_LHS" << endl;
+			#endif
+			break;
+		}
 		case IN_PARSE_BKT: {
 			Half parserId;
 			Tree *stream, *tree;
@@ -698,6 +706,15 @@ void Execution::execute( Tree **&sp, Code *instr )
 {
 again:
 	switch ( *instr++ ) {
+		case IN_RESTORE_LHS: {
+			Tree *lhs;
+			read_tree( lhs );
+
+			#ifdef COLM_LOG_BYTECODE
+			cerr << "IN_RESTORE_LHS" << endl;
+			#endif
+			break;
+		}
 		case IN_LOAD_NIL: {
 			#ifdef COLM_LOG_BYTECODE
 			cerr << "IN_LOAD_NIL" << endl;
