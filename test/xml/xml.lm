@@ -149,19 +149,20 @@ def document
 
 def start 
 	[document]
+
+start S = parse start(stdin)
+
+for Switch:tag in S {
+	if match Switch
+			["<lm_switch>" SwitchContent:content "</lm_switch>"]
 	{
-		for Switch:tag in lhs {
-			if match Switch
-					["<lm_switch>" SwitchContent:content "</lm_switch>"]
+		print( 'SWITCH\n' )
+		for Text:tag in SwitchContent {
+			if match Text
+					["<text>" TextContent:content "</text>"]
 			{
-				print( 'SWITCH\n' )
-				for Text:tag in SwitchContent {
-					if match Text
-							["<text>" TextContent:content "</text>"]
-					{
-						print( ' ', TextContent, '\n' )
-					}
-				}
+				print( ' ', TextContent, '\n' )
 			}
 		}
 	}
+}
