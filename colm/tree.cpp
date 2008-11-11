@@ -365,7 +365,9 @@ void print_str( Head *str )
 	cout.write( (char*)(str->data), str->length );
 }
 
-void print_ignore_list( Tree **&sp, Program *prg, Tree *tree )
+/* Note that this function causes recursion, thought it is not a big
+ * deal since the recursion it is only caused by nonterminals that are ignored. */
+void print_ignore_list( Tree **sp, Program *prg, Tree *tree )
 {
 	Kid *ignore = tree_ignore( prg, tree );
 
@@ -382,6 +384,7 @@ void print_ignore_list( Tree **&sp, Program *prg, Tree *tree )
 		print_tree( sp, prg, ignore->tree );
 	}
 }
+
 
 void print_kid( ostream &out, Tree **&sp, Program *prg, Kid *kid, bool printIgnore )
 {
@@ -475,72 +478,120 @@ void xml_escape_data( const char *data, long len )
 	}
 }
 
-void xml_print_kid( Tree **&sp, Program *prg, Kid *kid, int depth )
+/* Might be a good idea to include this in the print_xml_kid function since
+ * it is recursive and can eat up stac, however it's probably not a big deal
+ * since the additional stack depth is only caused for nonterminals that are
+ * ignored. */
+void print_xml_ignore_list( Tree **sp, Program *prg, Tree *tree, long depth )
 {
+	Kid *ignore = tree_ignore( prg, tree );
+	while ( tree_is_ignore( prg, ignore ) ) {
+		print_xml_kid( sp, prg, ignore, depth );
+		ignore = ignore->next;
+	}
+}
+
+
+void print_xml_kid( Tree **&sp, Program *prg, Kid *kid, int depth )
+{
+	Kid *child;
 	Tree **root = vm_ptop();
-	int i = 0;
+	long i, objectLength;
+	LangElInfo *lelInfo = prg->rtd->lelInfo;
+
+	long kidNum = 0;;
 
 rec_call:
-	for ( i = 0; i < depth; i++ )
-		cout << "  ";
 
-	if ( kid->tree == 0 )
+	if ( kid->tree == 0 ) {
+		for ( i = 0; i < depth; i++ )
+			cout << "  ";
+
 		cout << "NIL" << endl;
+	}
 	else {
-		cout << '<' << prg->rtd->lelInfo[kid->tree->id].name;
-		if ( kid->tree->child != 0 ) {
+		/* First print the ignore tokens. */
+		print_xml_ignore_list( sp, prg, kid->tree, depth );
+
+		for ( i = 0; i < depth; i++ )
+			cout << "  ";
+
+		/* Open the tag. Afterwards we will either print data underneath it or
+		 * we will close it off immediately. */
+		cout << '<' << lelInfo[kid->tree->id].name;
+
+		/* If the parent kid is a repeat then skip this node and go
+		 * right to the first child (repeated item). */
+		if ( vm_ptop() != root ) {
+			objectLength = lelInfo[((Kid*)vm_top())->tree->id].objectLength;
+			if ( kidNum < objectLength )
+				cout << " attr=" << kidNum;
+		}
+
+		objectLength = lelInfo[kid->tree->id].objectLength;
+		child = tree_child( prg, kid->tree );
+		if ( objectLength > 0 || child != 0 ) {
 			cout << '>' << endl;
+			vm_push( (SW) kidNum );
 			vm_push( (SW) kid );
+
+			kidNum = 0;
 			kid = kid->tree->child;
 			while ( kid != 0 ) {
-				depth++;
-				goto rec_call;
-				rec_return:
-				depth--;
+				if ( kid->tree == 0 || !lelInfo[kid->tree->id].ignore ) {
+					depth++;
+					goto rec_call;
+					rec_return:
+					depth--;
+				}
+				
 				kid = kid->next;
+				kidNum += 1;
 
 				/* If the parent kid is a repeat then skip this node and go
 				 * right to the first child (repeated item). */
-				if ( prg->rtd->lelInfo[((Kid*)vm_top())->tree->id].repeat )
+				if ( lelInfo[((Kid*)vm_top())->tree->id].repeat )
 					kid = kid->tree->child;
 			}
+
 			kid = (Kid*) vm_pop();
+			kidNum = (long) vm_pop();
 
 			for ( i = 0; i < depth; i++ )
 				cout << "  ";
-			cout << "</" << prg->rtd->lelInfo[kid->tree->id].name << '>' << endl;
+			cout << "</" << lelInfo[kid->tree->id].name << '>' << endl;
 		}
 		else if ( kid->tree->id == LEL_ID_PTR ) {
 			cout << '>' << (void*)((Pointer*)kid->tree)->value << 
-					"</" << prg->rtd->lelInfo[kid->tree->id].name << '>' << endl;
+					"</" << lelInfo[kid->tree->id].name << '>' << endl;
 		}
 		else if ( kid->tree->id == LEL_ID_BOOL ) {
 			if ( ((Int*)kid->tree)->value )
 				cout << ">true</";
 			else
 				cout << ">false</";
-			cout << prg->rtd->lelInfo[kid->tree->id].name << '>' << endl;
+			cout << lelInfo[kid->tree->id].name << '>' << endl;
 		}
 		else if ( kid->tree->id == LEL_ID_INT ) {
 			cout << '>' << ((Int*)kid->tree)->value << 
-					"</" << prg->rtd->lelInfo[kid->tree->id].name << '>' << endl;
+					"</" << lelInfo[kid->tree->id].name << '>' << endl;
 		}
 		else if ( kid->tree->id == LEL_ID_STR ) {
 			Head *head = (Head*) ((Str*)kid->tree)->value;
 
 			cout << '>';
 			xml_escape_data( (char*)(head->data), head->length );
-			cout << "</" << prg->rtd->lelInfo[kid->tree->id].name << '>' << endl;
+			cout << "</" << lelInfo[kid->tree->id].name << '>' << endl;
 		}
 		else if ( 0 < kid->tree->id && kid->tree->id < prg->rtd->firstNonTermId &&
 				kid->tree->tokdata != 0 && 
 				string_length( kid->tree->tokdata ) > 0 && 
-				!prg->rtd->lelInfo[kid->tree->id].literal )
+				!lelInfo[kid->tree->id].literal )
 		{
 			cout << '>';
 			xml_escape_data( string_data( kid->tree->tokdata ), 
 					string_length( kid->tree->tokdata ) );
-			cout << "</" << prg->rtd->lelInfo[kid->tree->id].name << '>' << endl;
+			cout << "</" << lelInfo[kid->tree->id].name << '>' << endl;
 		}
 		else
 			cout << "/>" << endl;
@@ -550,12 +601,12 @@ rec_call:
 		goto rec_return;
 }
 
-void xml_print_tree( Tree **&sp, Program *prg, Tree *tree )
+void print_xml_tree( Tree **&sp, Program *prg, Tree *tree )
 {
 	Kid kid;
 	kid.tree = tree;
 	kid.next = 0;
-	xml_print_kid( sp, prg, &kid, 0 );
+	print_xml_kid( sp, prg, &kid, 0 );
 }
 
 void stream_free( Program *prg, Stream *s )

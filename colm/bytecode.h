@@ -458,8 +458,8 @@ Tree *make_token( Tree **root, Program *prg, long nargs );
 void print_tree( Tree **&sp, Program *prg, Tree *tree );
 void print_tree( ostream &out, Tree **&sp, Program *prg, Tree *tree );
 void print_str( Head *str );
-void xml_print_tree( Tree **&sp, Program *prg, Tree *tree );
-void xml_print_kid( Tree **&sp, Program *prg, Kid *kid, int depth );
+void print_xml_tree( Tree **&sp, Program *prg, Tree *tree );
+void print_xml_kid( Tree **&sp, Program *prg, Kid *kid, int depth );
 
 long list_length( List *list );
 void list_append( Program *prg, List *list, Tree *val );

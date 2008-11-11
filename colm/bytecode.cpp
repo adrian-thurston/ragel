@@ -784,7 +784,7 @@ again:
 			#endif
 
 			Tree *tree = pop();
-			xml_print_tree( sp, prg, tree );
+			print_xml_tree( sp, prg, tree );
 			tree_downref( prg, sp, tree );
 			break;
 		}
