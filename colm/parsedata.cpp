@@ -1630,13 +1630,15 @@ void ParseData::parsePatterns()
 {
 	Program program( false, runtimeData );
 	FsmRun fsmRun( &program );
+	Tree **vm_stack = stack_alloc();
 
 	for ( ReplList::Iter repl = replList; repl.lte(); repl++ ) {
 		//cerr << "parsing replacement: " << repl->data << endl;
 		InputStreamRepl in( repl );
 		fsmRun.attachInputStream( &in );
 
-		repl->pdaRun = new PdaRun( 0, &program, repl->langEl->pdaTables, &fsmRun, 0, false );
+		repl->pdaRun = new PdaRun( vm_stack, &program,
+				repl->langEl->pdaTables, &fsmRun, 0, false );
 		repl->pdaRun->run();
 
 		//#ifdef COLM_LOG_COMPILE
@@ -1649,7 +1651,8 @@ void ParseData::parsePatterns()
 		InputStreamPattern in( pat );
 		fsmRun.attachInputStream( &in );
 
-		pat->pdaRun = new PdaRun( 0, &program, pat->langEl->pdaTables, &fsmRun, 0, false );
+		pat->pdaRun = new PdaRun( vm_stack, &program,
+				pat->langEl->pdaTables, &fsmRun, 0, false );
 		pat->pdaRun->run();
 
 		//#ifdef COLM_LOG_COMPILE

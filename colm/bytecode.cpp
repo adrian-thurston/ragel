@@ -350,6 +350,14 @@ void Program::allocGlobal()
 	global = tree;
 }
 
+Tree **stack_alloc()
+{
+	//return new Tree*[VM_STACK_SIZE];
+
+	return (Tree**)mmap( 0, sizeof(Tree*)*VM_STACK_SIZE,
+		PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, 0, 0 );
+}
+
 void Program::run()
 {
 	assert( sizeof(Int)      <= sizeof(Tree) );
@@ -366,9 +374,8 @@ void Program::run()
 	 * Allocate the VM stack.
 	 */
 
-	//vm_stack = new Tree*[VM_STACK_SIZE];
-	Tree **vm_stack = (Tree**)mmap( 0, sizeof(Tree*)*VM_STACK_SIZE,
-		PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, 0, 0 );
+	Tree **vm_stack = stack_alloc();
+
 	Tree **root = &vm_stack[VM_STACK_SIZE];
 
 	/*

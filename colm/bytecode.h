@@ -495,6 +495,8 @@ Tree *tree_search( Kid *kid, long id );
 Tree *tree_search( Tree *tree, long id );
 void split_ref( Tree **&sp, Program *prg, Ref *fromRef );
 
+Tree **stack_alloc();
+
 /*
  * Maps
  */
