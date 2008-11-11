@@ -149,13 +149,12 @@ Code *backup_over_rcode( Code *rcode )
 
 /* The top level of the stack is linked right-to-left. Trees underneath are
  * linked left-to-right. */
-void commit_kid( PdaRun *parser, Tree **root, Kid *lel, Code *&rcode )
+void commit_kid( PdaRun *parser, Tree **root, Kid *lel, Code *&rcode, long &causeReduce )
 {
 	Alg *alg = 0;
 	Tree *tree = 0;
 	Tree **sp = root;
 	Tree *restore = 0;
-	long causeReduce = 0;
 
 head:
 	/* Commit */
@@ -200,8 +199,9 @@ head:
 
 	/* Check causeReduce, might be time to backup over the reverse code
 	 * belonging to a nonterminal that caused previous reductions. */
-	if ( tree->id >= parser->tables->rtd->firstNonTermId &&
-			!(alg->flags & AF_GENERATED) && causeReduce > 0 )
+	if ( causeReduce > 0 && 
+			tree->id >= parser->tables->rtd->firstNonTermId &&
+			!(alg->flags & AF_GENERATED) )
 	{
 		causeReduce -= 1;
 
@@ -261,7 +261,7 @@ backup:
 	assert( sp == root );
 }
 
-void commit_full( PdaRun *parser )
+void commit_full( PdaRun *parser, long causeReduce )
 {
 	#ifdef COLM_LOG_PARSE
 	cerr << "running full commit" << endl;
@@ -275,7 +275,7 @@ void commit_full( PdaRun *parser )
 	/* The top level of the stack is linked right to left. This is the
 	 * traversal order we need for committing. */
 	while ( kid != 0 && !been_committed( kid ) ) {
-		commit_kid( parser, sp, kid, rcode );
+		commit_kid( parser, sp, kid, rcode, causeReduce );
 		kid = kid->next;
 	}
 
@@ -458,8 +458,15 @@ again:
 		#endif
 	}
 
-	if ( tables->commitLen[pos] != 0 )
-		commit_full( this );
+	if ( tables->commitLen[pos] != 0 ) {
+		long causeReduce = 0;
+		if ( input != 0 ) { 
+			Alg *alg = input->tree->alg;
+			if ( alg->flags & AF_HAS_RCODE )
+				causeReduce = alg->causeReduce;
+		}
+		commit_full( this, causeReduce );
+	}
 
 	if ( *action & act_rb ) {
 		int objectLength, reduction = *action >> 2;

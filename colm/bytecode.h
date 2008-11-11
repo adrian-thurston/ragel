@@ -424,7 +424,7 @@ void rcode_downref( Program *prg, Tree **stack_root, Code *instr );
 void rcode_downref_all( Program *prg, Tree **stack_root, CodeVect *cv );
 void parsed_downref( Program *prg, Tree **root, Tree *tree );
 void parsed_downref_all( PdaRun *parser );
-void commit_full( PdaRun *parser );
+void commit_full( PdaRun *parser, long commitReduce );
 
 bool match_pattern( Tree **bindings, Program *prg, long pat, Kid *kid, bool checkNext );
 Head *make_literal( Program *prg, long litoffset );
