@@ -449,6 +449,7 @@ again:
 			#ifdef COLM_LOG_BYTECODE
 			cerr << "IN_RESTORE_LHS" << endl;
 			#endif
+			tree_downref( prg, sp, lhs );
 			break;
 		}
 		case IN_PARSE_BKT: {
@@ -464,7 +465,6 @@ again:
 			cerr << "IN_PARSE_BKT " << parserId << endl;
 			#endif
 
-			parsed_downref( prg, sp, tree );
 			rcode_downref_all( prg, sp, (CodeVect*)wrev );
 			tree_downref( prg, sp, stream );
 			tree_downref( prg, sp, tree );

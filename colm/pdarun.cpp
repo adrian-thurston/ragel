@@ -178,7 +178,8 @@ head:
 		if ( alg->causeReduce > 0 ) {
 			/* The top reduce block does not correspond to this alg. */
 			#ifdef COLM_LOG_PARSE
-			cerr << "commit: causeReduce found, delaying backup: " << (long)alg->causeReduce << endl;
+			cerr << "commit: causeReduce found, delaying backup: " << 
+					(long)alg->causeReduce << endl;
 			#endif
 			causeReduce = alg->causeReduce;
 		}
@@ -281,104 +282,10 @@ void commit_full( PdaRun *parser, long causeReduce )
 
 	/* We cannot always clear all the rcode here. We may need to backup over
 	 * the parse statement. We depend on the context flag. */
-	if ( !parser->revertOn ) {
-		parsed_downref_all( parser );
+	if ( !parser->revertOn )
 		rcode_downref_all( parser->prg, parser->root, parser->allReverseCode );
-	}
 }
 
-bool been_freed( Kid *kid )
-{
-	return kid->tree->alg->flags & AF_REV_FREED;
-}
-
-/* The top level of the stack is linked right-to-left. Trees underneath are
- * left to right natural order. */
-void parsed_downref_kid( Tree **root, Program *prg, Kid *lel )
-{
-	Alg *alg = 0;
-	Tree *tree = 0;
-	Tree **sp = root;
-
-head:
-	/* Load up the right tree. */
-	tree = lel->tree;
-	alg = tree->alg;
-	if ( alg->parsed != 0 )
-		tree = alg->parsed;
-
-	/* Recurse. */
-	if ( !(alg->flags & AF_GENERATED) && tree->child != 0 ) {
-		vm_push( (Tree*)lel );
-		lel = tree_child( prg, tree );
-
-		while ( lel != 0 ) {
-			if ( !been_freed( lel ) )
-				goto head;
-
-			upwards:
-			lel = lel->next;
-		}
-
-		lel = (Kid*)vm_pop();
-	}
-
-	/* Commit */
-	#ifdef COLM_LOG_PARSE
-	cerr << "parsed_downref_kid visiting: " << 
-			prg->rtd->lelInfo[lel->tree->id].name << endl;
-	#endif
-
-	alg = lel->tree->alg;
-
-	alg->flags |= AF_REV_FREED;
-
-	tree_downref( prg, sp, alg->parsed );
-	alg->parsed = 0;
-
-	if ( sp != root )
-		goto upwards;
-
-	assert( sp == root );
-}
-
-void parsed_downref( Program *prg, Tree **root, Tree *tree )
-{
-	#ifdef COLM_LOG_PARSE
-	cerr << "running parsed_downref on tree" << endl;
-	#endif
-
-	Kid kid;
-	kid.next = 0;
-	kid.tree = tree;
-	parsed_downref_kid( root, prg, &kid );
-}
-
-void parsed_downref_all( PdaRun *parser )
-{
-	#ifdef COLM_LOG_PARSE
-	cerr << "running full parsed_downref" << endl;
-	#endif
-	
-	Tree **sp = parser->root;
-	Kid *kid = parser->stackTop;
-	long topLevel = 0;
-	while ( kid != 0 && !been_freed( kid ) ) {
-		vm_push( (Tree*)kid );
-		kid = kid->next;
-		topLevel += 1;
-	}
-
-	while ( topLevel > 0 ) {
-		kid = (Kid*)vm_pop();
-		parsed_downref_kid( sp, parser->prg, kid );
-		topLevel -= 1;
-	}
-
-	/* After running the commit the the stack should be where it 
-	 * was when we started. */
-	assert( sp == parser->root );
-}
 
 /*
  * shift:         retry goes into lower of shifted node.
