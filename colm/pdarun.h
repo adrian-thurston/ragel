@@ -40,7 +40,6 @@ struct FsmTables;
 struct Alg
 {
 	/* Parsing algorithm. */
-	Tree *parsed;
 	long state;
 	long region;
 	char causeReduce;

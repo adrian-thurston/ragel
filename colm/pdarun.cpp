@@ -193,9 +193,6 @@ head:
 		}
 	}
 
-	/* Assert that we have the right restore tree. */
-	assert( alg->parsed == restore );
-
 	if ( restore != 0 )
 		tree = restore;
 
@@ -466,7 +463,6 @@ again:
 				cerr << "lhs tree was modified, adding a restore instruction" << endl;
 				#endif
 
-				redAlg->parsed = parsed;
 				reverseCode.append( IN_RESTORE_LHS );
 				reverseCode.appendWord( (Word)parsed );
 				reverseCode.append( 5 );
@@ -611,7 +607,6 @@ parseError:
 				if ( execution.lhs != 0 ) {
 					/* Get the lhs, it may have been reverted. */
 					tree_downref( prg, root, undoLel->tree );
-					assert( execution.lhs == alg->parsed );
 					undoLel->tree = execution.lhs;
 				}
 			}
