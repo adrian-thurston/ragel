@@ -1631,13 +1631,14 @@ void ParseData::parsePatterns()
 	Program program( false, runtimeData );
 	FsmRun fsmRun( &program );
 	Tree **vm_stack = stack_alloc();
+	Tree **root = &vm_stack[VM_STACK_SIZE];
 
 	for ( ReplList::Iter repl = replList; repl.lte(); repl++ ) {
 		//cerr << "parsing replacement: " << repl->data << endl;
 		InputStreamRepl in( repl );
 		fsmRun.attachInputStream( &in );
 
-		repl->pdaRun = new PdaRun( vm_stack, &program,
+		repl->pdaRun = new PdaRun( root, &program,
 				repl->langEl->pdaTables, &fsmRun, 0, false );
 		repl->pdaRun->run();
 
@@ -1651,7 +1652,7 @@ void ParseData::parsePatterns()
 		InputStreamPattern in( pat );
 		fsmRun.attachInputStream( &in );
 
-		pat->pdaRun = new PdaRun( vm_stack, &program,
+		pat->pdaRun = new PdaRun( root, &program,
 				pat->langEl->pdaTables, &fsmRun, 0, false );
 		pat->pdaRun->run();
 

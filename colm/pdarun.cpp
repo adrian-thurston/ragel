@@ -470,8 +470,11 @@ again:
 				reverseCode.appendWord( (Word)parsed );
 				reverseCode.append( 5 );
 			}
-			else
+			else {
+				/* No change in the the lhs. Just free the parsed copy we
+				 * took. */
 				tree_downref( prg, root, parsed );
+			}
 
 			/* Pull out the reverse code, if any. */
 			bool hasrcode = make_reverse_code( allReverseCode, reverseCode );
@@ -597,12 +600,6 @@ parseError:
 			assert( alg != 0 );
 			undoLel->tree->alg = 0;
 
-			if ( alg->parsed != 0 ) {
-				/* Get the lhs, it may have been reverted. */
-				tree_downref( prg, root, undoLel->tree );
-				undoLel->tree = alg->parsed;
-			}
-
 			/* Check for an execution environment. */
 			if ( alg->flags & AF_HAS_RCODE ) {
 				Execution execution( prg, reverseCode, this, 0, 0, 0 );
@@ -610,6 +607,13 @@ parseError:
 				/* Do the reverse exeuction. */
 				execution.rexecute( root, allReverseCode );
 				alg->flags &= ~AF_HAS_RCODE;
+
+				if ( execution.lhs != 0 ) {
+					/* Get the lhs, it may have been reverted. */
+					tree_downref( prg, root, undoLel->tree );
+					assert( execution.lhs == alg->parsed );
+					undoLel->tree = execution.lhs;
+				}
 			}
 
 			/* Warm fuzzies ... */

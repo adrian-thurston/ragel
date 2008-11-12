@@ -375,7 +375,6 @@ void Program::run()
 	 */
 
 	Tree **vm_stack = stack_alloc();
-
 	Tree **root = &vm_stack[VM_STACK_SIZE];
 
 	/*
@@ -714,12 +713,14 @@ void Execution::execute( Tree **&sp, Code *instr )
 again:
 	switch ( *instr++ ) {
 		case IN_RESTORE_LHS: {
-			Tree *lhs;
-			read_tree( lhs );
+			Tree *restore;
+			read_tree( restore );
 
 			#ifdef COLM_LOG_BYTECODE
 			cerr << "IN_RESTORE_LHS" << endl;
 			#endif
+			assert( lhs == 0 );
+			lhs = restore;
 			break;
 		}
 		case IN_LOAD_NIL: {
