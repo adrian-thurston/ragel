@@ -166,8 +166,6 @@ head:
 	/* Load up the parsed tree. */
 	tree = lel->tree;
 	alg = tree->alg;
-	if ( alg->parsed != 0 )
-		tree = alg->parsed;
 
 	/* Check for reverse code. */
 	restore = 0;
@@ -197,6 +195,9 @@ head:
 
 	/* Assert that we have the right restore tree. */
 	assert( alg->parsed == restore );
+
+	if ( restore != 0 )
+		tree = restore;
 
 	/* Check causeReduce, might be time to backup over the reverse code
 	 * belonging to a nonterminal that caused previous reductions. */
@@ -480,7 +481,6 @@ again:
 			bool hasrcode = make_reverse_code( allReverseCode, reverseCode );
 			if ( hasrcode )
 				redAlg->flags |= AF_HAS_RCODE;
-
 
 			/* Perhaps the execution environment is telling us we need to
 			 * reject the reduction. */
