@@ -679,6 +679,10 @@ ObjField *LangVarRef::evaluateRef( ParseData *pd, CodeVect &code ) const
 	/* Note that we could have modified children. */
 	lookup.objField->refActive = true;
 
+	/* Whenever we take a reference we have to assume writing and that the
+	 * tree is dirty. */
+	lookup.objField->dirtyTree = true;
+
 	if ( lookup.objField->typeRef->iterDef != 0 ) {
 		code.append( lookup.objField->typeRef->iterDef->inRefFromCur );
 		code.appendHalf( lookup.objField->offset );
@@ -1285,6 +1289,9 @@ void LangVarRef::assignValue( ParseData *pd, CodeVect &code,
 	if ( lookup.objField->isConst )
 		error(loc) << "field \"" << name << "\" is const" << endp;
 
+	/* Writing guarantees the field is dirty. tree is dirty. */
+	lookup.objField->dirtyTree = true;
+
 	/* Check the types of the assignment and possibly cast. */
 	UniqueType *objUT = lookup.objField->typeRef->lookupType( pd );
 	assert( lookup.uniqueType == lookup.objField->typeRef->lookupType( pd ) );
@@ -1717,22 +1724,6 @@ void ParseData::addProdRHSVars( ObjectDef *localFrame, ProdElList *prodElList )
 	}
 }
 
-void ParseData::addProdRHSLoads( Definition *prod, long codeInsertPos, CodeVect &code )
-{
-	CodeVect loads;
-	long position = 0;
-	for ( ProdElList::Iter rhsEl = *prod->prodElList; rhsEl.lte(); rhsEl++, position++ ) {
-		if ( rhsEl->type == PdaFactor::ReferenceType ) {
-			if ( rhsEl->objField->beenReferenced ) {
-				loads.append ( IN_INIT_RHS_EL );
-				loads.appendHalf( position );
-				loads.appendHalf( rhsEl->objField->offset );
-			}
-		}
-	}
-	code.insert( codeInsertPos, loads );
-}
-
 void ParseData::addMatchLength( ObjectDef *frame, KlangEl *lel )
 {
 	/* Make the type ref. */
@@ -1931,6 +1922,42 @@ void ParseData::findLocalTrees( CharSet &trees )
 	}
 }
 
+void ParseData::addSaveLHS( Definition *prod, CodeVect &code, long &insertPos )
+{
+	CodeBlock *block = prod->redBlock;
+
+	/* If the lhs tree is dirty then we will need to save off the old lhs
+	 * before it gets modified. We want to avoid this for attribute
+	 * modifications. The computation of dirtyTree should deal with this for
+	 * us. */
+	ObjFieldMapEl *lhsFieldMapEl = block->localFrame->objFieldMap->find("lhs");
+	assert( lhsFieldMapEl != 0 );
+	ObjField *lhsField = lhsFieldMapEl->value;
+
+	if ( lhsField->dirtyTree )
+		code.insert( insertPos, IN_SAVE_LHS );
+}
+
+void ParseData::addProdRHSLoads( Definition *prod, CodeVect &code, long &insertPos )
+{
+	CodeVect loads;
+	long elPos = 0;
+	for ( ProdElList::Iter rhsEl = *prod->prodElList; rhsEl.lte(); rhsEl++, elPos++ ) {
+		if ( rhsEl->type == PdaFactor::ReferenceType ) {
+			if ( rhsEl->objField->beenReferenced ) {
+				loads.append ( IN_INIT_RHS_EL );
+				loads.appendHalf( elPos );
+				loads.appendHalf( rhsEl->objField->offset );
+			}
+		}
+	}
+
+	/* Insert and update the insert position. */
+	code.insert( insertPos, loads );
+	insertPos += loads.length();
+}
+
+
 void ParseData::compileReductionCode( Definition *prod )
 {
 	CodeBlock *block = prod->redBlock;
@@ -1947,7 +1974,7 @@ void ParseData::compileReductionCode( Definition *prod )
 	 * frame size yet. We will fill it in later. */
 	code.append( IN_INIT_LOCALS );
 	code.appendHalf( 0 );
-	long afterAllocFrame = code.length();
+	long afterInit = code.length();
 
 	/* Compile the reduce block. */
 	block->compile( this, code );
@@ -1956,7 +1983,12 @@ void ParseData::compileReductionCode( Definition *prod )
 	long frameSize = curLocalFrame->size();
 	code.setHalf( 1, frameSize );
 
-	addProdRHSLoads( prod, afterAllocFrame, code );
+	/* Might need to preserve the LHS for backtracking. The afterInit 
+	 * var may be updated by this call. */
+	addSaveLHS( prod, code, afterInit );
+
+	/* Might need to load right hand side values. */
+	addProdRHSLoads( prod, code, afterInit );
 
 	code.append( IN_POP_LOCALS );
 	code.appendHalf( block->frameId );

@@ -37,6 +37,7 @@ using std::ostream;
 typedef unsigned long ulong;
 typedef unsigned char uchar;
 
+#define IN_SAVE_LHS              0xc1
 #define IN_RESTORE_LHS           0xc0
 
 #define IN_LOAD_INT              0x01
@@ -662,7 +663,11 @@ struct Execution
 	Code *code;
 	Tree **frame;
 	Tree **iframe;
+
+	/* The left hand side passed in and the saved left hand side in case we
+	 * need to preserve it for backtracking before we write to it. */
 	Tree *lhs;
+	Tree *parsed;
 
 	Head *matchText;
 	bool reject;

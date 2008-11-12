@@ -407,6 +407,7 @@ Execution::Execution( Program *prg, CodeVect &reverseCode,
 	code(code), 
 	frame(0), iframe(0),
 	lhs(lhs),
+	parsed(0),
 	matchText(matchText),
 	reject(false), 
 	reverseCode(reverseCode),
@@ -711,6 +712,21 @@ void Execution::execute( Tree **&sp, Code *instr )
 {
 again:
 	switch ( *instr++ ) {
+		case IN_SAVE_LHS: {
+			#ifdef COLM_LOG_BYTECODE
+			cerr << "IN_SAVE_LHS" << endl;
+			#endif
+
+			assert( lhs != 0 );
+
+			/* Save and upref before writing. We don't generate a restore
+			 * here. Instead in the parser we will check if it actually
+			 * changed and insert the instruction then. The presence of this
+			 * instruction here is just a conservative approximation.  */
+			parsed = lhs;
+			tree_upref( parsed );
+			break;
+		}
 		case IN_RESTORE_LHS: {
 			Tree *restore;
 			read_tree( restore );

@@ -159,7 +159,7 @@ void commit_kid( PdaRun *parser, Tree **root, Kid *lel, Code *&rcode, long &caus
 head:
 	/* Commit */
 	#ifdef COLM_LOG_PARSE
-	cerr << "commit visiting: " << 
+	cerr << "commit: visiting " << 
 			parser->prg->rtd->lelInfo[lel->tree->id].name << endl;
 	#endif
 
@@ -444,11 +444,6 @@ again:
 			Execution execution( prg, reverseCode, 
 					this, fi->codeWV, redLel->tree, 0 );
 
-			/* Take a copy of the lhs and store it in alg. May need it during
-			 * reverse parsing. */
-			Tree *parsed = redLel->tree;
-			tree_upref( parsed );
-
 			/* Execute it. */
 			execution.execute( root );
 
@@ -456,21 +451,22 @@ again:
 			 * while in the environment. */
 			redLel->tree = execution.lhs;
 
-			/* If the lhs changed then store the original, otherwise downref
-			 * since we took a copy above. */
-			if ( parsed != redLel->tree ) {
+			/* If the lhs was saved and it changed then we need to restore the
+			 * original upon backtracking, otherwise downref since we took a
+			 * copy above. */
+			if ( execution.parsed != 0 && execution.parsed != redLel->tree ) {
 				#ifdef COLM_LOG_PARSE
 				cerr << "lhs tree was modified, adding a restore instruction" << endl;
 				#endif
 
 				reverseCode.append( IN_RESTORE_LHS );
-				reverseCode.appendWord( (Word)parsed );
+				reverseCode.appendWord( (Word)execution.parsed );
 				reverseCode.append( 5 );
 			}
 			else {
 				/* No change in the the lhs. Just free the parsed copy we
 				 * took. */
-				tree_downref( prg, root, parsed );
+				tree_downref( prg, root, execution.parsed );
 			}
 
 			/* Pull out the reverse code, if any. */

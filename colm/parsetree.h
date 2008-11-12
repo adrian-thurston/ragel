@@ -1187,6 +1187,7 @@ struct ObjField
 		isConst(false), 
 		isLhsEl(false), isRhsEl(false), 
 		refActive(false),
+		dirtyTree(false),
 		inGetR( IN_HALT ),
 		inGetWC( IN_HALT ),
 		inGetWV( IN_HALT ),
@@ -1206,6 +1207,12 @@ struct ObjField
 	bool isLhsEl;
 	bool isRhsEl;
 	bool refActive;
+	
+	/* True if some aspect of the tree has possibly been written to. This does
+	 * not include attributes. This is here so we can optimize the storage of
+	 * old lhs vars. If only a lhs attribute changes we don't need to preserve
+	 * the original for backtracking. */
+	bool dirtyTree;
 
 	Code inGetR;
 	Code inGetWC;
