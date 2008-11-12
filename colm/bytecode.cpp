@@ -337,8 +337,7 @@ void Program::clear( Tree **vm_stack, Tree **sp )
 	mapElPool.clear();
 
 	//reverseCode.empty();
-
-	memset( vm_stack, 0, sizeof(Tree*) * VM_STACK_SIZE);
+	//memset( vm_stack, 0, sizeof(Tree*) * VM_STACK_SIZE);
 }
 
 void Program::allocGlobal()
