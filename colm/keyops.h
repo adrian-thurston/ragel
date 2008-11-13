@@ -192,7 +192,7 @@ struct KeyOps
 	HostType *typeSubsumes( bool isSigned, long long maxVal )
 	{
 		for ( int i = 0; i < hostLang->numHostTypes; i++ ) {
-			if ( ( isSigned && hostLang->hostTypes[i].isSigned || !isSigned ) &&
+			if ( ( (isSigned && hostLang->hostTypes[i].isSigned) || !isSigned ) &&
 					maxVal <= hostLang->hostTypes[i].maxVal )
 				return hostLang->hostTypes + i;
 		}

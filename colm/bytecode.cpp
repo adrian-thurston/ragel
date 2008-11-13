@@ -194,7 +194,7 @@ void downref_local_trees( Program *prg, Tree **sp, Tree **frame, char *trees, lo
 		cerr << "local tree downref: " << (long)trees[i] << endl;
 		#endif
 
-		tree_downref( prg, sp, local(trees[i]) );
+		tree_downref( prg, sp, local((long)trees[i]) );
 	}
 }
 

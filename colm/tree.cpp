@@ -356,7 +356,7 @@ bool test_false( Program *prg, Tree *tree )
 	bool flse = ( 
 		tree == 0 ||
 		tree == prg->falseVal ||
-		tree->id == LEL_ID_INT && ((Int*)tree)->value == 0 );
+		( tree->id == LEL_ID_INT && ((Int*)tree)->value == 0 ) );
 	return flse;
 }
 

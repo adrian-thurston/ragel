@@ -517,7 +517,7 @@ void RedFsmBuild::makeStateList()
 
 	for ( StateList::Iter st = fsm->stateList; st.lte(); st++ ) {
 		/* Both or neither should be set. */
-		assert( !( st->eofTarget != 0 xor st->eofActionTable.length() > 0 ) );
+		assert( !( (st->eofTarget != 0) xor (st->eofActionTable.length() > 0) ) );
 
 		makeStateActions( st );
 		makeStateConditions( st );
