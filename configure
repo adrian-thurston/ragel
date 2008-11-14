@@ -1649,7 +1649,7 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
-ac_config_headers="$ac_config_headers common/config.h"
+ac_config_headers="$ac_config_headers ragel/config.h"
 
 
 BUILD_PARSERS=true
@@ -4115,7 +4115,7 @@ cat >>$CONFIG_STATUS <<\_ACEOF
 for ac_config_target in $ac_config_targets
 do
   case $ac_config_target in
-    "common/config.h") CONFIG_HEADERS="$CONFIG_HEADERS common/config.h" ;;
+    "ragel/config.h") CONFIG_HEADERS="$CONFIG_HEADERS ragel/config.h" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "common/Makefile") CONFIG_FILES="$CONFIG_FILES common/Makefile" ;;
     "ragel/Makefile") CONFIG_FILES="$CONFIG_FILES ragel/Makefile" ;;

@@ -1,5 +1,5 @@
 #
-#   Copyright 2001-2007 Adrian Thurston <thurston@complang.org>
+#   Copyright 2001-2008 Adrian Thurston <thurston@complang.org>
 #
 
 #   This file is part of Ragel.
@@ -18,7 +18,7 @@
 #   along with Ragel; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
 
-INCS += -I../common -I../aapl -I../redfsm
+INCS += -I../aapl
 DEFS +=
 
 CXXFLAGS += -g -Wall
@@ -27,19 +27,25 @@ LDFLAGS +=
 CC_SRCS = \
 	main.cpp parsetree.cpp parsedata.cpp fsmstate.cpp fsmbase.cpp \
 	fsmattach.cpp fsmmin.cpp fsmgraph.cpp fsmap.cpp xmlcodegen.cpp \
-	rlscan.cpp rlparse.cpp inputdata.cpp
+	rlscan.cpp rlparse.cpp inputdata.cpp common.cpp \
+	redfsm.cpp gendata.cpp xmltags.cpp xmlscan.cpp xmlparse.cpp \
+	cd-main.cpp cd-fsmcodegen.cpp \
+	cd-tabcodegen.cpp cd-ftabcodegen.cpp cd-flatcodegen.cpp \
+	cd-fflatcodegen.cpp cd-gotocodegen.cpp cd-fgotocodegen.cpp \
+	cd-ipgotocodegen.cpp cd-splitcodegen.cpp  \
+	java-main.cpp java-javacodegen.cpp \
+	ruby-main.cpp ruby-codegen.cpp ruby-tabcodegen.cpp ruby-ftabcodegen.cpp \
+	ruby-flatcodegen.cpp ruby-fflatcodegen.cpp ruby-rbx-gotocodegen.cpp \
+	csharp-main.cpp csharp-fsmcodegen.cpp \
+	csharp-tabcodegen.cpp csharp-ftabcodegen.cpp csharp-flatcodegen.cpp \
+	csharp-fflatcodegen.cpp csharp-gotocodegen.cpp csharp-fgotocodegen.cpp \
+	csharp-ipgotocodegen.cpp csharp-splitcodegen.cpp \
+	dot-main.cpp dot-gvdotgen.cpp 
 
-GEN_SRC = rlscan.cpp rlparse.h rlparse.cpp
+GEN_SRC = version.h rlscan.cpp rlparse.h rlparse.cpp \
+	xmltags.cpp xmlscan.cpp xmlparse.cpp xmlparse.h
 
-RAGEL_LIBS = ../common/common.a \
-	../redfsm/redfsm.a \
-	../rlgen-cd/rlgen-cd.a \
-	../rlgen-java/rlgen-java.a \
-	../rlgen-ruby/rlgen-ruby.a \
-	../rlgen-csharp/rlgen-csharp.a \
-	../rlgen-dot/rlgen-dot.a
-
-LIBS = $(RAGEL_LIBS)
+LIBS =
 MINGW_LIBS = -lpsapi
 
 #*************************************
@@ -57,11 +63,19 @@ endif
 OBJS = $(CC_SRCS:%.cpp=%.o)
 DEPS = $(CC_SRCS:%.cpp=.%.d)
 
+# Get the version info.
+include ../version.mk
+
 # Rules.
 all: ragel$(EXEEXT)
 
-ragel$(EXEEXT): $(GEN_SRC) $(OBJS) $(RAGEL_LIBS)
+ragel$(EXEEXT): $(GEN_SRC) $(OBJS)
 	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
+
+version.h: ../version.mk
+	echo '#define VERSION "$(VERSION)"' > version.h
+	echo '#define PUBDATE "$(PUBDATE)"' >> version.h
+	echo '#define PREFIX "$(prefix)"' >> version.h
 
 ifeq ($(BUILD_PARSERS),true)
 
@@ -77,6 +91,18 @@ rlscan.cpp: rlparse.h
 
 rlscan.cpp: rlscan.rl
 	ragel -G2 -o $@ $<
+
+xmlparse.h: xmlparse.kh
+	kelbt -o $@ $<
+
+xmlparse.cpp: xmlparse.kl xmlparse.kh
+	kelbt -o $@ $<
+
+xmlscan.cpp: xmlscan.rl
+	ragel -G2 -o xmlscan.cpp xmlscan.rl
+
+xmltags.cpp: xmltags.gperf
+	gperf -L C++ -t $< > $@
 
 endif
 
