@@ -30,7 +30,7 @@
 #include "parsedata.h"
 #include "parsetree.h"
 #include "mergesort.h"
-#include "xmlcodegen.h"
+#include "xml-codegen.h"
 #include "version.h"
 #include "xmlparse.h"
 #include "inputdata.h"

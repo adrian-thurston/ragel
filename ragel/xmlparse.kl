@@ -42,48 +42,6 @@ struct Token
 	InputLoc loc;
 };
 
-CodeGenData *makeCodeGen( const char *sourceFileName, const char *fsmName, 
-		ostream &out, bool wantComplete )
-{
-	CodeGenData *cgd = 0;
-	if ( generateDot )
-		cgd = dotMakeCodeGen( sourceFileName, fsmName, out, wantComplete );
-	else if ( hostLang == &hostLangC )
-		cgd = cdMakeCodeGen( sourceFileName, fsmName, out, wantComplete );
-	else if ( hostLang == &hostLangD )
-		cgd = cdMakeCodeGen( sourceFileName, fsmName, out, wantComplete );
-	else if ( hostLang == &hostLangJava )
-		cgd = javaMakeCodeGen( sourceFileName, fsmName, out, wantComplete );
-	else if ( hostLang == &hostLangRuby )
-		cgd = rubyMakeCodeGen( sourceFileName, fsmName, out, wantComplete );
-	else if ( hostLang == &hostLangCSharp )
-		cgd = csharpMakeCodeGen( sourceFileName, fsmName, out, wantComplete );
-	return cgd;
-}
-
-void lineDirective( ostream &out, const char *fileName, int line )
-{
-	if ( !generateDot ) {
-		if ( hostLang == &hostLangC )
-			cdLineDirective( out, fileName, line );
-		else if ( hostLang == &hostLangD )
-			cdLineDirective( out, fileName, line );
-		else if ( hostLang == &hostLangJava )
-			javaLineDirective( out, fileName, line );
-		else if ( hostLang == &hostLangRuby )
-			rubyLineDirective( out, fileName, line );
-		else if ( hostLang == &hostLangCSharp )
-			csharpLineDirective( out, fileName, line );
-	}
-}
-
-void genLineDirective( ostream &out )
-{
-	std::streambuf *sbuf = out.rdbuf();
-	output_filter *filter = static_cast<output_filter*>(sbuf);
-	lineDirective( out, filter->fileName, filter->line + 1 );
-}
-
 %%{
 
 parser XmlParser;

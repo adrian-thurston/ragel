@@ -26,23 +26,24 @@ LDFLAGS +=
 
 CC_SRCS = \
 	main.cpp parsetree.cpp parsedata.cpp fsmstate.cpp fsmbase.cpp \
-	fsmattach.cpp fsmmin.cpp fsmgraph.cpp fsmap.cpp xmlcodegen.cpp \
+	fsmattach.cpp fsmmin.cpp fsmgraph.cpp fsmap.cpp \
 	rlscan.cpp rlparse.cpp inputdata.cpp common.cpp \
-	redfsm.cpp gendata.cpp xmltags.cpp xmlscan.cpp xmlparse.cpp \
-	cd-fsmcodegen.cpp \
-	cd-tabcodegen.cpp cd-ftabcodegen.cpp cd-flatcodegen.cpp \
-	cd-fflatcodegen.cpp cd-gotocodegen.cpp cd-fgotocodegen.cpp \
-	cd-ipgotocodegen.cpp cd-splitcodegen.cpp  \
+	redfsm.cpp gendata.cpp \
+	cd-codegen.cpp \
+	cd-table.cpp cd-ftable.cpp cd-flat.cpp \
+	cd-fflat.cpp cd-goto.cpp cd-fgoto.cpp \
+	cd-ipgoto.cpp cd-split.cpp  \
 	java-codegen.cpp \
-	ruby-codegen.cpp ruby-tabcodegen.cpp ruby-ftabcodegen.cpp \
-	ruby-flatcodegen.cpp ruby-fflatcodegen.cpp rbx-gotocodegen.cpp \
-	cs-fsmcodegen.cpp cs-tabcodegen.cpp cs-ftabcodegen.cpp cs-flatcodegen.cpp \
-	cs-fflatcodegen.cpp cs-gotocodegen.cpp cs-fgotocodegen.cpp \
-	cs-ipgotocodegen.cpp cs-splitcodegen.cpp \
-	dot-codegen.cpp 
+	ruby-codegen.cpp ruby-table.cpp ruby-ftable.cpp \
+	ruby-flat.cpp ruby-fflat.cpp rbx-goto.cpp \
+	cs-codegen.cpp cs-table.cpp cs-ftable.cpp cs-flat.cpp \
+	cs-fflat.cpp cs-goto.cpp cs-fgoto.cpp \
+	cs-ipgoto.cpp cs-split.cpp \
+	dot-codegen.cpp \
+	xml-codegen.cpp \
 
 GEN_SRC = version.h rlscan.cpp rlparse.h rlparse.cpp \
-	xmltags.cpp xmlscan.cpp xmlparse.cpp xmlparse.h
+	xmltags.cpp xmlscan.cpp xmlparse.h
 
 LIBS =
 MINGW_LIBS = -lpsapi

@@ -33,11 +33,11 @@
 #include "common.h"
 
 #include "ragel.h"
-#include "ruby-tabcodegen.h"
-#include "ruby-ftabcodegen.h"
-#include "ruby-flatcodegen.h"
-#include "ruby-fflatcodegen.h"
-#include "rbx-gotocodegen.h"
+#include "ruby-table.h"
+#include "ruby-ftable.h"
+#include "ruby-flat.h"
+#include "ruby-fflat.h"
+#include "rbx-goto.h"
 
 using std::ostream;
 using std::ostringstream;
