@@ -24,7 +24,7 @@
 #include <sstream>
 #include "redfsm.h"
 #include "gendata.h"
-#include "ruby-rlgen-ruby.h"
+#include "ragel.h"
 #include "ruby-ftabcodegen.h"
 
 using std::ostream;

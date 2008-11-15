@@ -21,7 +21,7 @@
  */
 
 #include "ruby-flatcodegen.h"
-#include "ruby-rlgen-ruby.h"
+#include "ragel.h"
 #include "redfsm.h"
 #include "gendata.h"
 

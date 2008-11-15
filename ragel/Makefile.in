@@ -34,12 +34,12 @@ CC_SRCS = \
 	cd-fflatcodegen.cpp cd-gotocodegen.cpp cd-fgotocodegen.cpp \
 	cd-ipgotocodegen.cpp cd-splitcodegen.cpp  \
 	java-codegen.cpp \
-	ruby-main.cpp ruby-codegen.cpp ruby-tabcodegen.cpp ruby-ftabcodegen.cpp \
-	ruby-flatcodegen.cpp ruby-fflatcodegen.cpp ruby-rbx-gotocodegen.cpp \
+	ruby-codegen.cpp ruby-tabcodegen.cpp ruby-ftabcodegen.cpp \
+	ruby-flatcodegen.cpp ruby-fflatcodegen.cpp rbx-gotocodegen.cpp \
 	cs-fsmcodegen.cpp cs-tabcodegen.cpp cs-ftabcodegen.cpp cs-flatcodegen.cpp \
 	cs-fflatcodegen.cpp cs-gotocodegen.cpp cs-fgotocodegen.cpp \
 	cs-ipgotocodegen.cpp cs-splitcodegen.cpp \
-	dot-gvdotgen.cpp 
+	dot-codegen.cpp 
 
 GEN_SRC = version.h rlscan.cpp rlparse.h rlparse.cpp \
 	xmltags.cpp xmlscan.cpp xmlparse.cpp xmlparse.h

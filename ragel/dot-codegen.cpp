@@ -20,7 +20,7 @@
  */
 
 #include "ragel.h"
-#include "dot-gvdotgen.h"
+#include "dot-codegen.h"
 #include "gendata.h"
 
 using std::istream;

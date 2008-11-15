@@ -22,8 +22,9 @@
 
 #include <stdio.h>
 #include <string>
-#include "ruby-rlgen-ruby.h"
-#include "ruby-rbx-gotocodegen.h"
+
+#include "rbx-gotocodegen.h"
+#include "ragel.h"
 #include "redfsm.h"
 #include "bstmap.h"
 #include "gendata.h"
