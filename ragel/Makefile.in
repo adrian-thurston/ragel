@@ -33,7 +33,7 @@ CC_SRCS = \
 	cd-tabcodegen.cpp cd-ftabcodegen.cpp cd-flatcodegen.cpp \
 	cd-fflatcodegen.cpp cd-gotocodegen.cpp cd-fgotocodegen.cpp \
 	cd-ipgotocodegen.cpp cd-splitcodegen.cpp  \
-	java-main.cpp java-javacodegen.cpp \
+	java-codegen.cpp \
 	ruby-main.cpp ruby-codegen.cpp ruby-tabcodegen.cpp ruby-ftabcodegen.cpp \
 	ruby-flatcodegen.cpp ruby-fflatcodegen.cpp ruby-rbx-gotocodegen.cpp \
 	cs-fsmcodegen.cpp cs-tabcodegen.cpp cs-ftabcodegen.cpp cs-flatcodegen.cpp \
