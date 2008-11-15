@@ -29,18 +29,18 @@ CC_SRCS = \
 	fsmattach.cpp fsmmin.cpp fsmgraph.cpp fsmap.cpp \
 	rlscan.cpp rlparse.cpp inputdata.cpp common.cpp \
 	redfsm.cpp gendata.cpp \
-	cd-codegen.cpp \
-	cd-table.cpp cd-ftable.cpp cd-flat.cpp \
-	cd-fflat.cpp cd-goto.cpp cd-fgoto.cpp \
-	cd-ipgoto.cpp cd-split.cpp  \
-	java-codegen.cpp \
-	ruby-codegen.cpp ruby-table.cpp ruby-ftable.cpp \
-	ruby-flat.cpp ruby-fflat.cpp rbx-goto.cpp \
-	cs-codegen.cpp cs-table.cpp cs-ftable.cpp cs-flat.cpp \
-	cs-fflat.cpp cs-goto.cpp cs-fgoto.cpp \
-	cs-ipgoto.cpp cs-split.cpp \
-	dot-codegen.cpp \
-	xml-codegen.cpp \
+	cdcodegen.cpp \
+	cdtable.cpp cdftable.cpp cdflat.cpp \
+	cdfflat.cpp cdgoto.cpp cdfgoto.cpp \
+	cdipgoto.cpp cdsplit.cpp  \
+	javacodegen.cpp \
+	rubycodegen.cpp rubytable.cpp rubyftable.cpp \
+	rubyflat.cpp rubyfflat.cpp rbxgoto.cpp \
+	cscodegen.cpp cstable.cpp csftable.cpp csflat.cpp \
+	csfflat.cpp csgoto.cpp csfgoto.cpp \
+	csipgoto.cpp cssplit.cpp \
+	dotcodegen.cpp \
+	xmlcodegen.cpp \
 
 GEN_SRC = version.h rlscan.cpp rlparse.h rlparse.cpp \
 	xmltags.cpp xmlscan.cpp xmlparse.h
