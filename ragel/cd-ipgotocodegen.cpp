@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#include "cd-rlgen-cd.h"
+#include "ragel.h"
 #include "cd-ipgotocodegen.h"
 #include "redfsm.h"
 #include "gendata.h"

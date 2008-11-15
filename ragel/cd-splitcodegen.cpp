@@ -20,7 +20,7 @@
  */
 
 
-#include "cd-rlgen-cd.h"
+#include "ragel.h"
 #include "cd-splitcodegen.h"
 #include "gendata.h"
 #include <assert.h>

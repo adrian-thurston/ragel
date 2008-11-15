@@ -29,7 +29,7 @@ CC_SRCS = \
 	fsmattach.cpp fsmmin.cpp fsmgraph.cpp fsmap.cpp xmlcodegen.cpp \
 	rlscan.cpp rlparse.cpp inputdata.cpp common.cpp \
 	redfsm.cpp gendata.cpp xmltags.cpp xmlscan.cpp xmlparse.cpp \
-	cd-main.cpp cd-fsmcodegen.cpp \
+	cd-fsmcodegen.cpp \
 	cd-tabcodegen.cpp cd-ftabcodegen.cpp cd-flatcodegen.cpp \
 	cd-fflatcodegen.cpp cd-gotocodegen.cpp cd-fgotocodegen.cpp \
 	cd-ipgotocodegen.cpp cd-splitcodegen.cpp  \
