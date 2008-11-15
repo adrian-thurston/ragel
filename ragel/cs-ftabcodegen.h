@@ -1,5 +1,5 @@
 /*
- *  Copyright 2004-2006 Adrian Thurston <thurston@complang.org>
+ *  Copyright 2001-2006 Adrian Thurston <thurston@complang.org>
  *            2004 Erich Ocean <eric.ocean@ampede.com>
  *            2005 Alan West <alan@alanz.com>
  */
@@ -21,22 +21,23 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _FFLATCODEGEN_H
-#define _FFLATCODEGEN_H
+#ifndef _FTABCODEGEN_H
+#define _FTABCODEGEN_H
 
 #include <iostream>
-#include "csharp-flatcodegen.h"
+#include "cs-tabcodegen.h"
 
 /* Forwards. */
 struct CodeGenData;
 
+
 /*
- * CSharpFFlatCodeGen
+ * CSharpFTabCodeGen
  */
-class CSharpFFlatCodeGen : public CSharpFlatCodeGen
+class CSharpFTabCodeGen : public CSharpTabCodeGen
 {
 public:
-	CSharpFFlatCodeGen( ostream &out ) : CSharpFsmCodeGen(out), CSharpFlatCodeGen(out) {}
+	CSharpFTabCodeGen( ostream &out ) : CSharpFsmCodeGen(out), CSharpTabCodeGen(out) {}
 private:
 	std::ostream &TO_STATE_ACTION_SWITCH();
 	std::ostream &FROM_STATE_ACTION_SWITCH();
@@ -47,9 +48,9 @@ private:
 	virtual std::ostream &FROM_STATE_ACTION( RedStateAp *state );
 	virtual std::ostream &EOF_ACTION( RedStateAp *state );
 	virtual std::ostream &TRANS_ACTION( RedTransAp *trans );
-
 	virtual void writeData();
 	virtual void writeExec();
+	virtual void calcIndexSize();
 };
 
-#endif /* _FFLATCODEGEN_H */
+#endif /* _FTABCODEGEN_H */

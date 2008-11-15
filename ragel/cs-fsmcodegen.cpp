@@ -21,8 +21,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#include "csharp-rlgen-csharp.h"
-#include "csharp-fsmcodegen.h"
+#include "ragel.h"
+#include "cs-fsmcodegen.h"
 #include "redfsm.h"
 #include "gendata.h"
 #include <sstream>
@@ -30,12 +30,113 @@
 #include <string>
 #include <assert.h>
 
+/* Code generators. */
+#include "cs-tabcodegen.h"
+#include "cs-ftabcodegen.h"
+#include "cs-flatcodegen.h"
+#include "cs-fflatcodegen.h"
+#include "cs-gotocodegen.h"
+#include "cs-fgotocodegen.h"
+#include "cs-ipgotocodegen.h"
+#include "cs-splitcodegen.h"
 
 using std::ostream;
 using std::ostringstream;
 using std::string;
 using std::cerr;
 using std::endl;
+
+using std::istream;
+using std::ifstream;
+using std::ostream;
+using std::ios;
+using std::cin;
+using std::cout;
+using std::cerr;
+using std::endl;
+
+/* Invoked by the parser when the root element is opened. */
+ostream *csharpOpenOutput( const char *inputFile )
+{
+	if ( hostLang->lang != HostLang::CSharp ) {
+		error() << "this code generator is for C# only" << endl;
+		exit(1);
+	}
+
+	/* If the output format is code and no output file name is given, then
+	 * make a default. */
+	if ( outputFileName == 0 ) {
+		const char *ext = findFileExtension( inputFile );
+		if ( ext != 0 && strcmp( ext, ".rh" ) == 0 )
+			outputFileName = fileNameFromStem( inputFile, ".h" );
+		else
+			outputFileName = fileNameFromStem( inputFile, ".cs" );
+	}
+
+	/* Make sure we are not writing to the same file as the input file. */
+	if ( outputFileName != 0 && strcmp( inputFile, outputFileName  ) == 0 ) {
+		error() << "output file \"" << outputFileName  << 
+				"\" is the same as the input file" << endl;
+	}
+
+	if ( outputFileName != 0 ) {
+		/* Create the filter on the output and open it. */
+		outFilter = new output_filter( outputFileName );
+		outFilter->open( outputFileName, ios::out|ios::trunc );
+		if ( !outFilter->is_open() ) {
+			error() << "error opening " << outputFileName << " for writing" << endl;
+			exit(1);
+		}
+
+		/* Open the output stream, attaching it to the filter. */
+		outStream = new ostream( outFilter );
+	}
+	else {
+		/* Writing out ot std out. */
+		outStream = &cout;
+	}
+	return outStream;
+}
+
+/* Invoked by the parser when a ragel definition is opened. */
+CodeGenData *csharpMakeCodeGen( const char *sourceFileName, const char *fsmName, 
+		ostream &out, bool wantComplete )
+{
+	CodeGenData *codeGen = 0;
+
+	switch ( codeStyle ) {
+	case GenTables:
+		codeGen = new CSharpTabCodeGen(out);
+		break;
+	case GenFTables:
+		codeGen = new CSharpFTabCodeGen(out);
+		break;
+	case GenFlat:
+		codeGen = new CSharpFlatCodeGen(out);
+		break;
+	case GenFFlat:
+		codeGen = new CSharpFFlatCodeGen(out);
+		break;
+	case GenGoto:
+		codeGen = new CSharpGotoCodeGen(out);
+		break;
+	case GenFGoto:
+		codeGen = new CSharpFGotoCodeGen(out);
+		break;
+	case GenIpGoto:
+		codeGen = new CSharpIpGotoCodeGen(out);
+		break;
+	case GenSplit:
+		codeGen = new CSharpSplitCodeGen(out);
+		break;
+	}
+
+	codeGen->sourceFileName = sourceFileName;
+	codeGen->fsmName = fsmName;
+	codeGen->wantComplete = wantComplete;
+
+	return codeGen;
+}
 
 void csharpLineDirective( ostream &out, const char *fileName, int line )
 {

@@ -1,5 +1,5 @@
 /*
- *  Copyright 2001-2006 Adrian Thurston <thurston@complang.org>
+ *  Copyright 2004-2006 Adrian Thurston <thurston@complang.org>
  *            2004 Erich Ocean <eric.ocean@ampede.com>
  *            2005 Alan West <alan@alanz.com>
  */
@@ -21,11 +21,11 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _TABCODEGEN_H
-#define _TABCODEGEN_H
+#ifndef _FLATCODEGEN_H
+#define _FLATCODEGEN_H
 
 #include <iostream>
-#include "csharp-fsmcodegen.h"
+#include "cs-fsmcodegen.h"
 
 /* Forwards. */
 struct CodeGenData;
@@ -34,44 +34,36 @@ struct RedTransAp;
 struct RedStateAp;
 
 /*
- * TabCodeGen
+ * CSharpFlatCodeGen
  */
-class CSharpTabCodeGen : virtual public CSharpFsmCodeGen, public CSharpCodeGen
+class CSharpFlatCodeGen : virtual public CSharpFsmCodeGen, public CSharpCodeGen
 {
 public:
-	CSharpTabCodeGen( ostream &out ) : CSharpFsmCodeGen(out), CSharpCodeGen(out) {}
-	virtual ~CSharpTabCodeGen() { }
-	virtual void writeData();
-	virtual void writeExec();
+	CSharpFlatCodeGen( ostream &out ) : CSharpFsmCodeGen(out), CSharpCodeGen(out) {}
+	virtual ~CSharpFlatCodeGen() { }
 
 protected:
 	std::ostream &TO_STATE_ACTION_SWITCH();
 	std::ostream &FROM_STATE_ACTION_SWITCH();
 	std::ostream &EOF_ACTION_SWITCH();
 	std::ostream &ACTION_SWITCH();
-
-	std::ostream &COND_KEYS();
-	std::ostream &COND_SPACES();
 	std::ostream &KEYS();
 	std::ostream &INDICIES();
-	std::ostream &COND_OFFSETS();
-	std::ostream &KEY_OFFSETS();
-	std::ostream &INDEX_OFFSETS();
-	std::ostream &COND_LENS();
-	std::ostream &SINGLE_LENS();
-	std::ostream &RANGE_LENS();
+	std::ostream &FLAT_INDEX_OFFSET();
+	std::ostream &KEY_SPANS();
 	std::ostream &TO_STATE_ACTIONS();
 	std::ostream &FROM_STATE_ACTIONS();
 	std::ostream &EOF_ACTIONS();
 	std::ostream &EOF_TRANS();
 	std::ostream &TRANS_TARGS();
 	std::ostream &TRANS_ACTIONS();
-	std::ostream &TRANS_TARGS_WI();
-	std::ostream &TRANS_ACTIONS_WI();
-
 	void LOCATE_TRANS();
 
+	std::ostream &COND_INDEX_OFFSET();
 	void COND_TRANSLATE();
+	std::ostream &CONDS();
+	std::ostream &COND_KEYS();
+	std::ostream &COND_KEY_SPANS();
 
 	void GOTO( ostream &ret, int gotoDest, bool inFinish );
 	void CALL( ostream &ret, int callDest, int targState, bool inFinish );
@@ -88,15 +80,12 @@ protected:
 	virtual std::ostream &FROM_STATE_ACTION( RedStateAp *state );
 	virtual std::ostream &EOF_ACTION( RedStateAp *state );
 	virtual std::ostream &TRANS_ACTION( RedTransAp *trans );
-	virtual void calcIndexSize();
+
+	virtual void writeData();
+	virtual void writeExec();
 
 	void initVarTypes();
-	string klenType;
-	string keysType;
-	string signedKeysType;
-	string transType;
-	string actsType;
-	string nactsType;
+	string slenType, transType, actsType, nactsType, indsType, condsType;
 };
 
-#endif /* _TABCODEGEN_H */
+#endif /* _FLATCODEGEN_H */

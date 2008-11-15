@@ -1,5 +1,5 @@
 /*
- *  Copyright 2001-2006 Adrian Thurston <thurston@complang.org>
+ *  Copyright 2001-2007 Adrian Thurston <thurston@complang.org>
  */
 
 /*  This file is part of Ragel.
@@ -19,29 +19,17 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _RLCODEGEN_H
-#define _RLCODEGEN_H
-
+#include <stdlib.h>
+#include <string.h>
 #include <stdio.h>
 #include <iostream>
-#include "config.h"
-#include "avltree.h"
-#include "vector.h"
-#include "config.h"
+#include <fstream>
+#include <unistd.h>
+
 #include "common.h"
+#include "ragel.h"
+#include "xmlparse.h"
+#include "pcheck.h"
+#include "vector.h"
+#include "version.h"
 
-extern CodeStyleEnum codeStyle;
-
-
-/* IO filenames and stream. */
-extern bool graphvizDone;
-
-extern int gblErrorCount;
-
-/* Options. */
-extern int numSplitPartitions;
-extern bool noLineDirectives;
-
-std::ostream &error();
-
-#endif /* _RLCODEGEN_H */

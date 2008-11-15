@@ -22,7 +22,7 @@
 #ifndef _SPLITCODEGEN_H
 #define _SPLITCODEGEN_H
 
-#include "csharp-ipgotocodegen.h"
+#include "cs-ipgotocodegen.h"
 
 class CSharpSplitCodeGen : public CSharpIpGotoCodeGen
 {

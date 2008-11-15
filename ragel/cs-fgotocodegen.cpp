@@ -21,8 +21,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#include "csharp-rlgen-csharp.h"
-#include "csharp-fgotocodegen.h"
+#include "ragel.h"
+#include "cs-fgotocodegen.h"
 #include "redfsm.h"
 #include "gendata.h"
 #include "bstmap.h"

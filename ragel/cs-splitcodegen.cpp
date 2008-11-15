@@ -20,8 +20,8 @@
  */
 
 
-#include "csharp-rlgen-csharp.h"
-#include "csharp-splitcodegen.h"
+#include "ragel.h"
+#include "cs-splitcodegen.h"
 #include "gendata.h"
 #include <assert.h>
 

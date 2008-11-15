@@ -119,6 +119,6 @@ if test -n "$GMCS"; then
 fi
 
 dnl write output files
-AC_OUTPUT(Makefile common/Makefile ragel/Makefile redfsm/Makefile rlgen-cd/Makefile rlgen-java/Makefile rlgen-ruby/Makefile rlgen-dot/Makefile rlgen-csharp/Makefile doc/Makefile test/Makefile)
+AC_OUTPUT(Makefile ragel/Makefile doc/Makefile test/Makefile)
 
 echo "configuration of ragel complete"

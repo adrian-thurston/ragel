@@ -36,10 +36,9 @@ CC_SRCS = \
 	java-main.cpp java-javacodegen.cpp \
 	ruby-main.cpp ruby-codegen.cpp ruby-tabcodegen.cpp ruby-ftabcodegen.cpp \
 	ruby-flatcodegen.cpp ruby-fflatcodegen.cpp ruby-rbx-gotocodegen.cpp \
-	csharp-main.cpp csharp-fsmcodegen.cpp \
-	csharp-tabcodegen.cpp csharp-ftabcodegen.cpp csharp-flatcodegen.cpp \
-	csharp-fflatcodegen.cpp csharp-gotocodegen.cpp csharp-fgotocodegen.cpp \
-	csharp-ipgotocodegen.cpp csharp-splitcodegen.cpp \
+	cs-fsmcodegen.cpp cs-tabcodegen.cpp cs-ftabcodegen.cpp cs-flatcodegen.cpp \
+	cs-fflatcodegen.cpp cs-gotocodegen.cpp cs-fgotocodegen.cpp \
+	cs-ipgotocodegen.cpp cs-splitcodegen.cpp \
 	dot-main.cpp dot-gvdotgen.cpp 
 
 GEN_SRC = version.h rlscan.cpp rlparse.h rlparse.cpp \

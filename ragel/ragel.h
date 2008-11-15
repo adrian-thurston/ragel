@@ -81,4 +81,31 @@ void xmlEscapeHost( std::ostream &out, char *data, long len );
 typedef Vector<const char *> ArgsVector;
 extern ArgsVector includePaths;
 
+extern CodeStyleEnum codeStyle;
+
+/* IO filenames and stream. */
+extern bool graphvizDone;
+
+/* Options. */
+extern int numSplitPartitions;
+extern bool noLineDirectives;
+
+std::ostream &error();
+
+/* Target language and output style. */
+extern CodeStyleEnum codeStyle;
+
+/* Io globals. */
+extern std::istream *inStream;
+extern std::ostream *outStream;
+extern output_filter *outFilter;
+extern const char *outputFileName;
+
+/* Graphviz dot file generation. */
+extern bool graphvizDone;
+
+extern int numSplitPartitions;
+extern bool noLineDirectives;
+
+
 #endif /* _RAGEL_H */
