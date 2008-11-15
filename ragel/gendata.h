@@ -197,5 +197,4 @@ struct CodeGenData
 	ostream &source_error( const InputLoc &loc );
 };
 
-
-#endif /* _GENDATA_H */
+#endif

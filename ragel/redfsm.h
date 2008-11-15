@@ -527,4 +527,4 @@ struct RedFsmAp
 };
 
 
-#endif /* _REDFSM_H */
+#endif

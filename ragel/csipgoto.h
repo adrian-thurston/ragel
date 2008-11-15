@@ -72,4 +72,4 @@ protected:
 	void setLabelsNeeded();
 };
 
-#endif /* _IPGCODEGEN_H */
+#endif

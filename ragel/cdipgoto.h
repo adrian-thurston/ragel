@@ -21,8 +21,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _IPGCODEGEN_H
-#define _IPGCODEGEN_H
+#ifndef _CDIPGOTO_H
+#define _CDIPGOTO_H
 
 #include <iostream>
 #include "cdgoto.h"
@@ -92,5 +92,4 @@ struct DIpGotoCodeGen
 		FsmCodeGen(out), IpGotoCodeGen(out), DCodeGen(out) {}
 };
 
-
-#endif /* _IPGCODEGEN_H */
+#endif

@@ -45,5 +45,4 @@ private:
 	std::ostream &KEY( Key key );
 };
 
-
-#endif /* _GVDOTGEN_H */
+#endif

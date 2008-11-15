@@ -19,8 +19,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef RLPARSE_H
-#define RLPARSE_H
+#ifndef _RLPARSE_H
+#define _RLPARSE_H
 
 #include <iostream>
 #include "avltree.h"

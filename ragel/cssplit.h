@@ -50,4 +50,4 @@ public:
 	int currentPartition;
 };
 
-#endif /* _SPLITCODEGEN_H */
+#endif

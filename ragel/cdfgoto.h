@@ -21,8 +21,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _FGOTOCODEGEN_H
-#define _FGOTOCODEGEN_H
+#ifndef _CDFGOTO_H
+#define _CDFGOTO_H
 
 #include <iostream>
 #include "cdgoto.h"
@@ -72,4 +72,4 @@ struct DFGotoCodeGen
 		FsmCodeGen(out), FGotoCodeGen(out), DCodeGen(out) {}
 };
 
-#endif /* _FGOTOCODEGEN_H */
+#endif

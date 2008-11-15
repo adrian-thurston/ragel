@@ -52,4 +52,4 @@ struct Buffer
 	int length;
 };
 
-#endif /* _BUFFER_H */
+#endif

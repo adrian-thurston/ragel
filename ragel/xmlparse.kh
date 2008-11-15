@@ -209,4 +209,4 @@ int xml_parse( std::istream &input, const char *fileName,
 CodeGenData *makeCodeGen( const char *sourceFileName, 
 		const char *fsmName, ostream &out, bool wantComplete );
 
-#endif /* _XMLPARSE_H */
+#endif

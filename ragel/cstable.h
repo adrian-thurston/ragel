@@ -99,4 +99,4 @@ protected:
 	string nactsType;
 };
 
-#endif /* _TABCODEGEN_H */
+#endif

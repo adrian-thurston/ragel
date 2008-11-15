@@ -37,4 +37,4 @@
 #pragma warning( disable: 4244 4250 4355 4800 )
 #endif
 
-#endif /* _CONFIG_H */
+#endif

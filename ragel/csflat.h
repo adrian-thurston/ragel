@@ -21,8 +21,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _FLATCODEGEN_H
-#define _FLATCODEGEN_H
+#ifndef _CSFLAT_H
+#define _CSFLAT_H
 
 #include <iostream>
 #include "cscodegen.h"
@@ -88,4 +88,4 @@ protected:
 	string slenType, transType, actsType, nactsType, indsType, condsType;
 };
 
-#endif /* _FLATCODEGEN_H */
+#endif

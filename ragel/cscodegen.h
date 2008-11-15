@@ -21,8 +21,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _FSMCODEGEN_H
-#define _FSMCODEGEN_H
+#ifndef _CSCODEGEN_H
+#define _CSCODEGEN_H
 
 #include <iostream>
 #include <string>
@@ -204,4 +204,4 @@ public:
 
 #define MAX(a, b) (a > b ? a : b)
 
-#endif /* _FSMCODEGEN_H */
+#endif

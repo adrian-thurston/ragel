@@ -21,8 +21,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _FTABCODEGEN_H
-#define _FTABCODEGEN_H
+#ifndef _CSFTABLE_H
+#define _CSFTABLE_H
 
 #include <iostream>
 #include "cstable.h"
@@ -53,4 +53,4 @@ private:
 	virtual void calcIndexSize();
 };
 
-#endif /* _FTABCODEGEN_H */
+#endif

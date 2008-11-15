@@ -19,8 +19,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _XMLDOTGEN_H
-#define _XMLDOTGEN_H
+#ifndef _XMLCODEGEN_H
+#define _XMLCODEGEN_H
 
 #include <iostream>
 #include "avltree.h"
@@ -189,5 +189,4 @@ private:
 
 };
 
-
-#endif /* _XMLDOTGEN_H */
+#endif

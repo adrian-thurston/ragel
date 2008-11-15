@@ -21,8 +21,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _TABCODEGEN_H
-#define _TABCODEGEN_H
+#ifndef _CDTABLE_H
+#define _CDTABLE_H
 
 #include <iostream>
 #include "cdcodegen.h"
@@ -111,5 +111,4 @@ struct DTabCodeGen
 		FsmCodeGen(out), TabCodeGen(out), DCodeGen(out) {}
 };
 
-
-#endif /* _TABCODEGEN_H */
+#endif

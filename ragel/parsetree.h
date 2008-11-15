@@ -764,6 +764,4 @@ struct InlineItem
  * ptreetypes, which should be just typedef forwards. */
 struct InlineList : public DList<InlineItem> { };
 
-
-
-#endif /* _PARSETREE_H */
+#endif

@@ -86,5 +86,4 @@ public:
 	virtual void writeExec();
 };
 
-
-#endif /* _GOTOCODEGEN_H */
+#endif

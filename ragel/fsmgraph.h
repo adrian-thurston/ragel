@@ -1527,5 +1527,4 @@ struct FsmAp
 	bool checkSingleCharMachine( );
 };
 
-
-#endif /* _FSMGRAPH_H */
+#endif

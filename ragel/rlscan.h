@@ -127,4 +127,4 @@ struct Scanner
 	int lastToken;
 };
 
-#endif /* _RLSCAN_H */
+#endif

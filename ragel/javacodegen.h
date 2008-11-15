@@ -191,5 +191,4 @@ public:
 	void genLineDirective( ostream &out );
 };
 
-
 #endif

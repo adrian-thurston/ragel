@@ -395,4 +395,4 @@ enum RubyImplEnum
 	Rubinius
 };
 
-#endif /* _COMMON_H */
+#endif

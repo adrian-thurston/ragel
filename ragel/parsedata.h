@@ -403,4 +403,4 @@ typedef DList<InputItem> InputItemList;
 extern ParserDict parserDict;
 extern InputItemList inputItems;
 
-#endif /* _PARSEDATA_H */
+#endif

@@ -21,8 +21,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _FFLATCODEGEN_H
-#define _FFLATCODEGEN_H
+#ifndef _CSFFLAT_H
+#define _CSFFLAT_H
 
 #include <iostream>
 #include "csflat.h"
@@ -52,4 +52,4 @@ private:
 	virtual void writeExec();
 };
 
-#endif /* _FFLATCODEGEN_H */
+#endif

@@ -45,4 +45,4 @@ private:
 	const char **argv;
 };
 
-#endif /* _PCHECK_H */
+#endif

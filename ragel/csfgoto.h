@@ -21,8 +21,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _FGOTOCODEGEN_H
-#define _FGOTOCODEGEN_H
+#ifndef _CSFGOTO_H
+#define _CSFGOTO_H
 
 #include <iostream>
 #include "csgoto.h"
@@ -52,4 +52,4 @@ public:
 	virtual void writeExec();
 };
 
-#endif /* _FGOTOCODEGEN_H */
+#endif

@@ -21,8 +21,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _FFLATCODEGEN_H
-#define _FFLATCODEGEN_H
+#ifndef _CDFFLAT_H
+#define _CDFFLAT_H
 
 #include <iostream>
 #include "cdflat.h"
@@ -72,4 +72,4 @@ struct DFFlatCodeGen
 		FsmCodeGen(out), FFlatCodeGen(out), DCodeGen(out) {}
 };
 
-#endif /* _FFLATCODEGEN_H */
+#endif

@@ -21,8 +21,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _FSMCODEGEN_H
-#define _FSMCODEGEN_H
+#ifndef _CDCODEGEN_H
+#define _CDCODEGEN_H
 
 #include <iostream>
 #include <string>
@@ -222,4 +222,4 @@ public:
 	virtual void writeExports();
 };
 
-#endif /* _FSMCODEGEN_H */
+#endif

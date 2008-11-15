@@ -54,9 +54,6 @@ protected:
 	virtual void writeExec();
 };
 
-#endif /* _RUBY_FFLATCODEGEN_H */
-
-
 /*
  * Local Variables:
  * mode: c++
@@ -65,3 +62,4 @@ protected:
  * End:
  */
 
+#endif

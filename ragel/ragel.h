@@ -110,4 +110,4 @@ extern bool graphvizDone;
 extern int numSplitPartitions;
 extern bool noLineDirectives;
 
-#endif /* _RAGEL_H */
+#endif

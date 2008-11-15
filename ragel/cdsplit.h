@@ -19,8 +19,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _SPLITCODEGEN_H
-#define _SPLITCODEGEN_H
+#ifndef _CDSPLIT_H
+#define _CDSPLIT_H
 
 #include "cdipgoto.h"
 
@@ -67,5 +67,4 @@ struct DSplitCodeGen
 		FsmCodeGen(out), SplitCodeGen(out), DCodeGen(out) {}
 };
 
-
-#endif /* _SPLITCODEGEN_H */
+#endif
