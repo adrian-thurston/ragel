@@ -84,7 +84,10 @@ extern ArgsVector includePaths;
 extern CodeStyleEnum codeStyle;
 
 /* IO filenames and stream. */
+extern bool displayPrintables;
 extern bool graphvizDone;
+extern int gblErrorCount;
+
 
 /* Options. */
 extern int numSplitPartitions;
@@ -106,6 +109,5 @@ extern bool graphvizDone;
 
 extern int numSplitPartitions;
 extern bool noLineDirectives;
-
 
 #endif /* _RAGEL_H */
