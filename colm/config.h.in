@@ -22,15 +22,6 @@
 #ifndef _CONFIG_H
 #define _CONFIG_H
 
-/* Programs. */
-#undef GDC
-#undef GOBJC
-#undef CXX
-#undef CC
-#undef JAVAC
-#undef TXL
-#undef RUBY
-
 /* Configuration */
 #undef COLM_LOG
 #undef COLM_LOG_BYTECODE

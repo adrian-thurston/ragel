@@ -1429,7 +1429,7 @@ void fillNodes( Program *prg, Bindings &bindings, long &bindId,
 			ignore = ignore->next;
 		}
 
-		node.stop = kid->tree->alg->flags & AF_GENERATED;
+		node.stop = kid->tree->alg->flags & AF_TERM_DUP;
 
 		/* Recurse. */
 		fillNodes( prg, bindings, bindId, nodes, child );

@@ -36,6 +36,7 @@ struct FsmRun;
 struct KlangEl;
 struct PdaTables;
 struct FsmTables;
+struct InputStream;
 
 struct Alg
 {
@@ -57,10 +58,17 @@ struct Kid
 	Kid *next;
 };
 
+struct Ref
+{
+	Kid *kid;
+	Ref *next;
+};
+
 struct Tree
 {
-	/* First three must be overlaid. */
-	long id;
+	/* First four will be overlaid in other structures. */
+	short id;
+	unsigned short flags;
 	long refs;
 	Kid *child;
 
@@ -68,16 +76,11 @@ struct Tree
 	Alg *alg;
 };
 
-struct Ref
-{
-	Kid *kid;
-	Ref *next;
-};
-
 struct Int
 {
-	/* Must overlay over Tree. */
-	long id;
+	/* Must overlay Tree. */
+	short id;
+	unsigned short flags;
 	long refs;
 	Kid *child;
 
@@ -86,8 +89,9 @@ struct Int
 
 struct Pointer
 {
-	/* Must overlay over Tree. */
-	long id;
+	/* Must overlay Tree. */
+	short id;
+	unsigned short flags;
 	long refs;
 	Kid *child;
 
@@ -96,64 +100,18 @@ struct Pointer
 
 struct Str
 {
-	/* Must overlay over Tree. */
-	long id;
+	/* Must overlay Tree. */
+	short id;
+	unsigned short flags;
 	long refs;
 	Kid *child;
 
 	Head *value;
 };
 
-struct TreeIter
-{
-	TreeIter( const Ref &rootRef, int searchId, Tree **stackRoot ) : 
-		rootRef(rootRef), searchId(searchId), 
-		stackRoot(stackRoot), stackSize(0)
-	{
-		ref.kid = 0;
-		ref.next = 0;
-	}
-	
-	Ref rootRef;
-	Ref ref;
-	long searchId;
-	Tree **stackRoot;
-	long stackSize;
-};
-
-struct FunctionInfo
-{
-	const char *name;
-	long frameId;
-	long argSize;
-	long ntrees;
-	long frameSize;
-};
-
-struct UserIter
-{
-	UserIter( Tree **stackRoot, long argSize, long searchId ) : 
-		stackRoot(stackRoot), 
-		argSize(argSize), stackSize(0),
-		resume(0), frame(0), searchId(searchId)
-	{
-		ref.kid = 0;
-		ref.next = 0;
-	}
-		
-	/* The current item. */
-	Ref ref;
-	Tree **stackRoot;
-	long argSize;
-	long stackSize;
-	Code *resume;
-	Tree **frame;
-	long searchId;
-};
-
 struct ListEl
 {
-	/* Must overlay over kid. */
+	/* Must overlay kid. */
 	Tree *value;
 	ListEl *next;
 	ListEl *prev;
@@ -165,8 +123,9 @@ struct ListEl
 
 struct List
 {
-	/* Must overlay over tree. */
-	long id;
+	/* Must overlay Tree. */
+	short id;
+	unsigned short flags;
 	long refs;
 	ListEl *head;
 
@@ -190,6 +149,7 @@ struct List
 
 struct MapEl
 {
+	/* Must overlay Kid. */
 	Tree *tree;
 	MapEl *next;
 	MapEl *prev;
@@ -204,8 +164,9 @@ struct MapEl
 
 struct Map
 {
-	/* Must overlay over Tree. */
-	long id;
+	/* Must overlay Tree. */
+	short id;
+	unsigned short flags;
 	long refs;
 	MapEl *head;
 
@@ -281,12 +242,11 @@ struct Map
 	void attachRebal( MapEl *element, MapEl *parentEl, MapEl *lastLess );
 };
 
-struct InputStream;
-
 struct Stream
 {
-	/* Must overlay over Tree. */
-	long id;
+	/* Must overlay Tree. */
+	short id;
+	unsigned short flags;
 	long refs;
 	Kid *child;
 
@@ -294,6 +254,61 @@ struct Stream
 	InputStream *in;
 	FsmRun *scanner;
 };
+
+/*
+ * Iterators.
+ */
+
+struct TreeIter
+{
+	TreeIter( const Ref &rootRef, int searchId, Tree **stackRoot ) : 
+		rootRef(rootRef), searchId(searchId), 
+		stackRoot(stackRoot), stackSize(0)
+	{
+		ref.kid = 0;
+		ref.next = 0;
+	}
+	
+	Ref rootRef;
+	Ref ref;
+	long searchId;
+	Tree **stackRoot;
+	long stackSize;
+};
+
+struct FunctionInfo
+{
+	const char *name;
+	long frameId;
+	long argSize;
+	long ntrees;
+	long frameSize;
+};
+
+struct UserIter
+{
+	UserIter( Tree **stackRoot, long argSize, long searchId ) : 
+		stackRoot(stackRoot), 
+		argSize(argSize), stackSize(0),
+		resume(0), frame(0), searchId(searchId)
+	{
+		ref.kid = 0;
+		ref.next = 0;
+	}
+		
+	/* The current item. */
+	Ref ref;
+	Tree **stackRoot;
+	long argSize;
+	long stackSize;
+	Code *resume;
+	Tree **frame;
+	long searchId;
+};
+
+/*
+ * Program Data.
+ */
 
 struct PatReplInfo
 {

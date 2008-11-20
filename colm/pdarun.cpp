@@ -200,7 +200,7 @@ head:
 	 * belonging to a nonterminal that caused previous reductions. */
 	if ( causeReduce > 0 && 
 			tree->id >= parser->tables->rtd->firstNonTermId &&
-			!(alg->flags & AF_GENERATED) )
+			!(alg->flags & AF_TERM_DUP) )
 	{
 		causeReduce -= 1;
 
@@ -225,8 +225,8 @@ head:
 	}
 	alg->flags |= AF_COMMITTED;
 
-	/* Recurse only on non-generated trees. */
-	if ( !(alg->flags & AF_GENERATED) && tree_child( parser->prg, tree ) != 0 ) {
+	/* Do not recures on trees that are terminal dups. */
+	if ( !(alg->flags & AF_TERM_DUP) && tree_child( parser->prg, tree ) != 0 ) {
 		vm_push( (Tree*)lel );
 		lel = tree_child( parser->prg, tree );
 
@@ -345,7 +345,7 @@ again:
 				tables->rtd->lelInfo[lel->tree->id].termDupId > 0 )
 		{
 			lel->tree->id = tables->rtd->lelInfo[lel->tree->id].termDupId;
-			lel->tree->alg->flags |= AF_GENERATED;
+			lel->tree->alg->flags |= AF_TERM_DUP;
 		}
 
 		if ( action[1] == 0 )
@@ -561,7 +561,7 @@ parseError:
 		/* Either we are dealing with a terminal that was
 		 * shifted or a nonterminal that was reduced. */
 		if ( stackTop->tree->id < tables->rtd->firstNonTermId || 
-				(stackTop->tree->alg->flags & AF_GENERATED) )
+				(stackTop->tree->alg->flags & AF_TERM_DUP) )
 		{
 			#ifdef COLM_LOG_PARSE
 			cerr << "backing up over effective terminal: " <<
@@ -572,9 +572,9 @@ parseError:
 			stackTop = stackTop->next;
 
 			/* Undo the translation from termDup. */
-			if ( undoLel->tree->alg->flags & AF_GENERATED ) {
+			if ( undoLel->tree->alg->flags & AF_TERM_DUP ) {
 				undoLel->tree->id = tables->rtd->lelInfo[undoLel->tree->id].termDupId;
-				undoLel->tree->alg->flags &= ~AF_GENERATED;
+				undoLel->tree->alg->flags &= ~AF_TERM_DUP;
 			}
 
 			/* Queue it as next input item. */
