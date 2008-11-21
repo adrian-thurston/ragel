@@ -38,17 +38,6 @@ struct PdaTables;
 struct FsmTables;
 struct InputStream;
 
-struct Alg
-{
-	/* Parsing algorithm. */
-	long state;
-	long region;
-	char causeReduce;
-	char retry_lower;
-	char retry_upper;
-	char flags;
-};
-
 struct Kid
 {
 	/* The tree needs to be first since pointers to kids are used to reference

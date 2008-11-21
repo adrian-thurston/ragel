@@ -317,7 +317,6 @@ typedef unsigned char uchar;
 
 struct Kid;
 struct Tree;
-struct Alg;
 struct ListEl;
 struct MapEl;
 struct PdaTables;
@@ -653,7 +652,6 @@ struct Program
 
 	PoolAlloc<Kid> kidPool;
 	PoolAlloc<Tree> treePool;
-	PoolAlloc<Alg> algPool;
 	PoolAlloc<ListEl> listElPool;
 	PoolAlloc<MapEl> mapElPool;
 

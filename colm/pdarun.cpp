@@ -190,12 +190,12 @@ head:
 		}
 	}
 
-	/* FIXME: Need to sort out the storage of parse algorithm data. Is it in
-	 * the restored node or the original? This needs to be reconciled with the
-	 * parse and unparse algorithms. */
-
 	if ( restore != 0 )
 		tree = restore;
+
+	/* All the parse algorithm data except for the RCODE flag is in the
+	 * original. That is why we restore first, then we can clear the retry
+	 * values. */
 
 	/* Check causeReduce, might be time to backup over the reverse code
 	 * belonging to a nonterminal that caused previous reductions. */
@@ -376,22 +376,19 @@ again:
 	if ( *action & act_rb ) {
 		int objectLength, reduction = *action >> 2;
 		Kid *last, *redLel, *child, *attrs;
-		Alg *redAlg;
 
 		if ( input != 0 )
 			input->tree->causeReduce += 1;
 
 		redLel = prg->kidPool.allocate();
 		redLel->tree = prg->treePool.allocate();
-		redAlg = prg->algPool.allocate();
-
 		redLel->tree->refs = 1;
 		redLel->tree->id = tables->rtd->prodInfo[reduction].lhsId;
 
 		redLel->next = 0;
-		redAlg->causeReduce = 0;
-		redAlg->retry_lower = 0;
-		redAlg->retry_upper = lel->tree->retry_lower;
+		redLel->tree->causeReduce = 0;
+		redLel->tree->retry_lower = 0;
+		redLel->tree->retry_upper = lel->tree->retry_lower;
 		lel->tree->retry_lower = 0;
 
 		/* Allocate the attributes. */
@@ -416,9 +413,9 @@ again:
 				<< " rhsLen: " << rhsLen;
 		#endif
 		if ( action[1] == 0 )
-			redAlg->retry_upper = 0;
+			redLel->tree->retry_upper = 0;
 		else {
-			redAlg->retry_upper += 1;
+			redLel->tree->retry_upper += 1;
 			assert( lel->tree->retry_lower == 0 );
 			numRetry += 1;
 			#ifdef COLM_LOG_PARSE
@@ -472,22 +469,17 @@ again:
 			/* Pull out the reverse code, if any. */
 			bool hasrcode = make_reverse_code( allReverseCode, reverseCode );
 			if ( hasrcode )
-				redAlg->flags |= AF_HAS_RCODE;
+				redLel->tree->flags |= AF_HAS_RCODE;
 
 			/* Perhaps the execution environment is telling us we need to
 			 * reject the reduction. */
 			induceReject = execution.reject;
 		}
 
-		/* Save the algorithm data in the reduced tree. */
-		redLel->tree->state       = redAlg->state;
-		redLel->tree->region      = redAlg->region;
-		redLel->tree->causeReduce = redAlg->causeReduce;
-		redLel->tree->retry_lower = redAlg->retry_lower;
-		redLel->tree->retry_upper = redAlg->retry_upper;
-		redLel->tree->flags       = redAlg->flags;
-
-		prg->algPool.free( redAlg );
+		/* If the left hand side was replaced then the only parse algorithm
+		 * data that is contained in it will the AF_HAS_RCODE flag. Everthing
+		 * else will be in the original. This requires that we restore first
+		 * when going backwards and when doing a commit. */
 
 		if ( induceReject ) {
 			#ifdef COLM_LOG_PARSE
@@ -594,13 +586,6 @@ parseError:
 					tables->rtd->lelInfo[stackTop->tree->id].name << endl;
 			#endif
 
-			/* FIXME: Need to reconcile the storage of alg data here. */
-
-			/* Take the alg out of undoLel. */
-			//Alg *alg = undoLel->tree->alg;
-			//assert( alg != 0 );
-			//undoLel->tree->alg = 0;
-
 			/* Check for an execution environment. */
 			if ( undoLel->tree->flags & AF_HAS_RCODE ) {
 				Execution execution( prg, reverseCode, this, 0, 0, 0 );
@@ -615,6 +600,9 @@ parseError:
 					undoLel->tree = execution.lhs;
 				}
 			}
+
+			/* Only the RCODE flag was in the replaced lhs. All the rest is in
+			 * the the original. We read it after restoring. */
 
 			/* Warm fuzzies ... */
 			assert( undoLel == stackTop );
@@ -660,7 +648,6 @@ parseError:
 			/* Free the reduced item. */
 			tree_downref( prg, root, undoLel->tree );
 			prg->kidPool.free( undoLel );
-			//prg->algPool.free( alg );
 		}
 	}
 
