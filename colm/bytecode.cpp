@@ -93,13 +93,10 @@ void send( Tree **root, Program *prg, PdaRun *parser, Tree *tree, bool ignore )
 		tree_upref( tree );
 	}
 
-	assert( tree->alg == 0 );
-	tree->alg = prg->algPool.allocate();
-
 	if ( tree->id >= prg->rtd->firstNonTermId )
 		tree->id = prg->rtd->lelInfo[tree->id].termDupId;
 
-	tree->alg->flags |= AF_ARTIFICIAL;
+	tree->flags |= AF_ARTIFICIAL;
 
 	/* FIXME: Do we need to remove the ignore tokens 
 	 * at this point? Will it cause a leak? */

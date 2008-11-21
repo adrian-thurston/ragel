@@ -861,11 +861,11 @@ free_tree:
 		else if ( tree->id == LEL_ID_STREAM )
 			stream_free( prg, (Stream*) tree );
 		else { 
-			if ( tree->alg != 0 ) {
-				//assert( ! (tree->alg->flags & AF_HAS_RCODE) );
-				//vm_push( tree->alg->parsed );
-				prg->algPool.free( tree->alg );
-			}
+			//if ( tree->alg != 0 ) {
+			//	//assert( ! (tree->alg->flags & AF_HAS_RCODE) );
+			//	//vm_push( tree->alg->parsed );
+			//	prg->algPool.free( tree->alg );
+			//}
 			string_free( prg, tree->tokdata );
 
 			Kid *child = tree->child;

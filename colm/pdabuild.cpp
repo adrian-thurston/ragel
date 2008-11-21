@@ -1385,7 +1385,7 @@ void ParseData::makeRuntimeData()
 void mapNodes( Program *prg, int &count, Kid *kid )
 {
 	if ( kid != 0 ) {
-		kid->tree->alg->state = count++;
+		kid->tree->state = count++;
 
 		Kid *ignore = tree_ignore( prg, kid->tree );
 		while ( tree_is_ignore( prg, ignore ) ) {
@@ -1401,15 +1401,15 @@ void fillNodes( Program *prg, Bindings &bindings, long &bindId,
 		PatReplNode *nodes, Kid *kid )
 {
 	if ( kid != 0 ) {
-		long ind = kid->tree->alg->state;
+		long ind = kid->tree->state;
 		PatReplNode &node = nodes[ind++];
 
 		Kid *child = tree_child( prg, kid->tree );
 
 		/* Set up the fields. */
 		node.id = kid->tree->id;
-		node.child = child == 0 ? -1 : child->tree->alg->state;
-		node.next = kid->next == 0 ? -1 : kid->next->tree->alg->state;
+		node.child = child == 0 ? -1 : child->tree->state;
+		node.next = kid->next == 0 ? -1 : kid->next->tree->state;
 		node.length = string_length( kid->tree->tokdata );
 		node.data = string_data( kid->tree->tokdata );
 
@@ -1429,7 +1429,7 @@ void fillNodes( Program *prg, Bindings &bindings, long &bindId,
 			ignore = ignore->next;
 		}
 
-		node.stop = kid->tree->alg->flags & AF_TERM_DUP;
+		node.stop = kid->tree->flags & AF_TERM_DUP;
 
 		/* Recurse. */
 		fillNodes( prg, bindings, bindId, nodes, child );
@@ -1469,7 +1469,7 @@ void ParseData::fillInPatterns( Program *prg )
 
 	for ( PatternList::Iter pat = patternList; pat.lte(); pat++ ) {
 		runtimeData->patReplInfo[pat->patRepId].offset = 
-				pat->pdaRun->stackTop->next->tree->alg->state;
+				pat->pdaRun->stackTop->next->tree->state;
 
 		/* BindIds are indexed base one. */
 		runtimeData->patReplInfo[pat->patRepId].numBindings = 
@@ -1483,7 +1483,7 @@ void ParseData::fillInPatterns( Program *prg )
 
 	for ( ReplList::Iter repl = replList; repl.lte(); repl++ ) {
 		runtimeData->patReplInfo[repl->patRepId].offset = 
-				repl->pdaRun->stackTop->next->tree->alg->state;
+				repl->pdaRun->stackTop->next->tree->state;
 
 		/* BindIds are indexed base one. */
 		runtimeData->patReplInfo[repl->patRepId].numBindings = 

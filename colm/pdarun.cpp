@@ -90,9 +90,8 @@ void PdaRun::init()
 	/* Init the element allocation variables. */
 	stackTop = prg->kidPool.allocate();
 	stackTop->tree = prg->treePool.allocate();
-	stackTop->tree->alg = prg->algPool.allocate();
 
-	stackTop->tree->alg->state = -1;
+	stackTop->tree->state = -1;
 	stackTop->tree->refs = 1;
 	numRetry = 0;
 	errCount = 0;
@@ -109,12 +108,12 @@ void PdaRun::init()
 long PdaRun::stackTopTarget()
 {
 	long state;
-	if ( stackTop->tree->alg->state < 0 )
+	if ( stackTop->tree->state < 0 )
 		state = tables->startState;
 	else {
 		state = tables->targs[(int)tables->indicies[tables->offsets[
-				stackTop->tree->alg->state] + 
-				(stackTop->tree->id - tables->keys[stackTop->tree->alg->state<<1])]];
+				stackTop->tree->state] + 
+				(stackTop->tree->id - tables->keys[stackTop->tree->state<<1])]];
 	}
 	return state;
 }
@@ -135,7 +134,7 @@ long PdaRun::stackTopTarget()
 
 bool been_committed( Kid *kid )
 {
-	return kid->tree->alg->flags & AF_COMMITTED;
+	return kid->tree->flags & AF_COMMITTED;
 }
 
 Code *backup_over_rcode( Code *rcode )
@@ -151,7 +150,6 @@ Code *backup_over_rcode( Code *rcode )
  * linked left-to-right. */
 void commit_kid( PdaRun *parser, Tree **root, Kid *lel, Code *&rcode, long &causeReduce )
 {
-	Alg *alg = 0;
 	Tree *tree = 0;
 	Tree **sp = root;
 	Tree *restore = 0;
@@ -165,21 +163,20 @@ head:
 
 	/* Load up the parsed tree. */
 	tree = lel->tree;
-	alg = tree->alg;
 
 	/* Check for reverse code. */
 	restore = 0;
-	if ( alg->flags & AF_HAS_RCODE ) {
+	if ( tree->flags & AF_HAS_RCODE ) {
 		/* If tree caused some reductions, now is not the right time to backup
 		 * over the reverse code. We need to backup over the reductions first. Store
 		 * the count of the reductions and do it when the count drops to zero. */
-		if ( alg->causeReduce > 0 ) {
+		if ( tree->causeReduce > 0 ) {
 			/* The top reduce block does not correspond to this alg. */
 			#ifdef COLM_LOG_PARSE
 			cerr << "commit: causeReduce found, delaying backup: " << 
-					(long)alg->causeReduce << endl;
+					(long)tree->causeReduce << endl;
 			#endif
-			causeReduce = alg->causeReduce;
+			causeReduce = tree->causeReduce;
 		}
 		else {
 			rcode = backup_over_rcode( rcode );
@@ -193,6 +190,10 @@ head:
 		}
 	}
 
+	/* FIXME: Need to sort out the storage of parse algorithm data. Is it in
+	 * the restored node or the original? This needs to be reconciled with the
+	 * parse and unparse algorithms. */
+
 	if ( restore != 0 )
 		tree = restore;
 
@@ -200,7 +201,7 @@ head:
 	 * belonging to a nonterminal that caused previous reductions. */
 	if ( causeReduce > 0 && 
 			tree->id >= parser->tables->rtd->firstNonTermId &&
-			!(alg->flags & AF_TERM_DUP) )
+			!(tree->flags & AF_TERM_DUP) )
 	{
 		causeReduce -= 1;
 
@@ -215,18 +216,18 @@ head:
 	}
 
 	/* Reset retries. */
-	if ( alg->retry_lower > 0 ) {
+	if ( tree->retry_lower > 0 ) {
 		parser->numRetry -= 1;
-		alg->retry_lower = 0;
+		tree->retry_lower = 0;
 	}
-	if ( alg->retry_upper > 0 ) {
+	if ( tree->retry_upper > 0 ) {
 		parser->numRetry -= 1;
-		alg->retry_upper = 0;
+		tree->retry_upper = 0;
 	}
-	alg->flags |= AF_COMMITTED;
+	tree->flags |= AF_COMMITTED;
 
 	/* Do not recures on trees that are terminal dups. */
-	if ( !(alg->flags & AF_TERM_DUP) && tree_child( parser->prg, tree ) != 0 ) {
+	if ( !(tree->flags & AF_TERM_DUP) && tree_child( parser->prg, tree ) != 0 ) {
 		vm_push( (Tree*)lel );
 		lel = tree_child( parser->prg, tree );
 
@@ -308,9 +309,9 @@ void PdaRun::parseToken( Kid *input )
 	if ( cs < 0 )
 		return;
 
-	input->tree->alg->region = nextRegionInd;
-	input->tree->alg->state = cs;
-	if ( tables->tokenRegions[input->tree->alg->region+1] != 0 )
+	input->tree->region = nextRegionInd;
+	input->tree->state = cs;
+	if ( tables->tokenRegions[input->tree->region+1] != 0 )
 		numRetry += 1;
 
 again:
@@ -328,15 +329,15 @@ again:
 	induceReject = false;
 	targState = tables->targs[pos];
 	action = tables->actions + tables->actInds[pos];
-	if ( lel->tree->alg->retry_lower )
-		action += lel->tree->alg->retry_lower;
+	if ( lel->tree->retry_lower )
+		action += lel->tree->retry_lower;
 
 	if ( *action & act_sb ) {
 		#ifdef COLM_LOG_PARSE
 		cerr << "shifted: " << tables->rtd->lelInfo[lel->tree->id].name;
 		#endif
 		input = input->next;
-		lel->tree->alg->state = cs;
+		lel->tree->state = cs;
 		lel->next = stackTop;
 		stackTop = lel;
 
@@ -345,14 +346,14 @@ again:
 				tables->rtd->lelInfo[lel->tree->id].termDupId > 0 )
 		{
 			lel->tree->id = tables->rtd->lelInfo[lel->tree->id].termDupId;
-			lel->tree->alg->flags |= AF_TERM_DUP;
+			lel->tree->flags |= AF_TERM_DUP;
 		}
 
 		if ( action[1] == 0 )
-			lel->tree->alg->retry_lower = 0;
+			lel->tree->retry_lower = 0;
 		else {
-			lel->tree->alg->retry_lower += 1;
-			assert( lel->tree->alg->retry_upper == 0 );
+			lel->tree->retry_lower += 1;
+			assert( lel->tree->retry_upper == 0 );
 			numRetry += 1; /* FIXME: Has the retry already been counted? */
 			#ifdef COLM_LOG_PARSE
 			cerr << " retry: " << stackTop;
@@ -366,9 +367,8 @@ again:
 	if ( tables->commitLen[pos] != 0 ) {
 		long causeReduce = 0;
 		if ( input != 0 ) { 
-			Alg *alg = input->tree->alg;
-			if ( alg->flags & AF_HAS_RCODE )
-				causeReduce = alg->causeReduce;
+			if ( input->tree->flags & AF_HAS_RCODE )
+				causeReduce = input->tree->causeReduce;
 		}
 		commit_full( this, causeReduce );
 	}
@@ -379,7 +379,7 @@ again:
 		Alg *redAlg;
 
 		if ( input != 0 )
-			input->tree->alg->causeReduce += 1;
+			input->tree->causeReduce += 1;
 
 		redLel = prg->kidPool.allocate();
 		redLel->tree = prg->treePool.allocate();
@@ -391,8 +391,8 @@ again:
 		redLel->next = 0;
 		redAlg->causeReduce = 0;
 		redAlg->retry_lower = 0;
-		redAlg->retry_upper = lel->tree->alg->retry_lower;
-		lel->tree->alg->retry_lower = 0;
+		redAlg->retry_upper = lel->tree->retry_lower;
+		lel->tree->retry_lower = 0;
 
 		/* Allocate the attributes. */
 		objectLength = tables->rtd->lelInfo[redLel->tree->id].objectLength;
@@ -419,7 +419,7 @@ again:
 			redAlg->retry_upper = 0;
 		else {
 			redAlg->retry_upper += 1;
-			assert( lel->tree->alg->retry_lower == 0 );
+			assert( lel->tree->retry_lower == 0 );
 			numRetry += 1;
 			#ifdef COLM_LOG_PARSE
 			cerr << " retry: " << redLel;
@@ -432,7 +432,7 @@ again:
 
 		/* When the production is of zero length we stay in the same state.
 		 * Otherwise we use the state stored in the first child. */
-		targState = rhsLen == 0 ? cs : child->tree->alg->state;
+		targState = rhsLen == 0 ? cs : child->tree->state;
 
 		assert( redLel->tree->refs == 1 );
 
@@ -480,14 +480,21 @@ again:
 		}
 
 		/* Save the algorithm data in the reduced tree. */
-		redLel->tree->alg = redAlg;
+		redLel->tree->state       = redAlg->state;
+		redLel->tree->region      = redAlg->region;
+		redLel->tree->causeReduce = redAlg->causeReduce;
+		redLel->tree->retry_lower = redAlg->retry_lower;
+		redLel->tree->retry_upper = redAlg->retry_upper;
+		redLel->tree->flags       = redAlg->flags;
+
+		prg->algPool.free( redAlg );
 
 		if ( induceReject ) {
 			#ifdef COLM_LOG_PARSE
 			cerr << "error induced during reduction of " <<
 					tables->rtd->lelInfo[redLel->tree->id].name << endl;
 			#endif
-			redLel->tree->alg->state = cs;
+			redLel->tree->state = cs;
 			redLel->next = stackTop;
 			stackTop = redLel;
 			cs = targState;
@@ -513,9 +520,9 @@ parseError:
 
 	while ( 1 ) {
 		if ( input != 0 ) {
-			assert( input->tree->alg->retry_upper == 0 );
+			assert( input->tree->retry_upper == 0 );
 
-			if ( input->tree->alg->retry_lower != 0 ) {
+			if ( input->tree->retry_lower != 0 ) {
 				#ifdef COLM_LOG_PARSE
 				cerr << "found retry targ: " << input << endl;
 				#endif
@@ -524,14 +531,14 @@ parseError:
 				cerr << "found retry: " << input << endl;
 				#endif
 
-				cs = input->tree->alg->state;
+				cs = input->tree->state;
 				goto again;
 			}
 
 			/* If there is no retry and there are no reductions caused by the
 			 * current input token then we are finished with it. Send it back. */
-			if ( input->tree->alg->causeReduce == 0 ) {
-				int next = input->tree->alg->region + 1;
+			if ( input->tree->causeReduce == 0 ) {
+				int next = input->tree->region + 1;
 
 				fsmRun->queueBack( input );
 				input = 0;
@@ -561,7 +568,7 @@ parseError:
 		/* Either we are dealing with a terminal that was
 		 * shifted or a nonterminal that was reduced. */
 		if ( stackTop->tree->id < tables->rtd->firstNonTermId || 
-				(stackTop->tree->alg->flags & AF_TERM_DUP) )
+				(stackTop->tree->flags & AF_TERM_DUP) )
 		{
 			#ifdef COLM_LOG_PARSE
 			cerr << "backing up over effective terminal: " <<
@@ -572,9 +579,9 @@ parseError:
 			stackTop = stackTop->next;
 
 			/* Undo the translation from termDup. */
-			if ( undoLel->tree->alg->flags & AF_TERM_DUP ) {
+			if ( undoLel->tree->flags & AF_TERM_DUP ) {
 				undoLel->tree->id = tables->rtd->lelInfo[undoLel->tree->id].termDupId;
-				undoLel->tree->alg->flags &= ~AF_TERM_DUP;
+				undoLel->tree->flags &= ~AF_TERM_DUP;
 			}
 
 			/* Queue it as next input item. */
@@ -587,18 +594,20 @@ parseError:
 					tables->rtd->lelInfo[stackTop->tree->id].name << endl;
 			#endif
 
+			/* FIXME: Need to reconcile the storage of alg data here. */
+
 			/* Take the alg out of undoLel. */
-			Alg *alg = undoLel->tree->alg;
-			assert( alg != 0 );
-			undoLel->tree->alg = 0;
+			//Alg *alg = undoLel->tree->alg;
+			//assert( alg != 0 );
+			//undoLel->tree->alg = 0;
 
 			/* Check for an execution environment. */
-			if ( alg->flags & AF_HAS_RCODE ) {
+			if ( undoLel->tree->flags & AF_HAS_RCODE ) {
 				Execution execution( prg, reverseCode, this, 0, 0, 0 );
 
 				/* Do the reverse exeuction. */
 				execution.rexecute( root, allReverseCode );
-				alg->flags &= ~AF_HAS_RCODE;
+				undoLel->tree->flags &= ~AF_HAS_RCODE;
 
 				if ( execution.lhs != 0 ) {
 					/* Get the lhs, it may have been reverted. */
@@ -632,26 +641,26 @@ parseError:
 			/* If there is an input queued, this is one less reduction it has
 			 * caused. */
 			if ( input != 0 )
-				input->tree->alg->causeReduce -= 1;
+				input->tree->causeReduce -= 1;
 
-			if ( alg->retry_upper != 0 ) {
+			if ( undoLel->tree->retry_upper != 0 ) {
 				/* There is always an input item here because reduce
 				 * conflicts only happen on a lookahead character. */
 				assert( input != undoLel );
 				assert( input != 0 );
-				assert( alg->retry_lower == 0 );
-				assert( input->tree->alg->retry_upper == 0 );
+				assert( undoLel->tree->retry_lower == 0 );
+				assert( input->tree->retry_upper == 0 );
 
 				/* Transfer the retry from undoLel to input. */
-				input->tree->alg->retry_lower = alg->retry_upper;
-				input->tree->alg->retry_upper = 0;
-				input->tree->alg->state = stackTopTarget();
+				input->tree->retry_lower = undoLel->tree->retry_upper;
+				input->tree->retry_upper = 0;
+				input->tree->state = stackTopTarget();
 			}
 
 			/* Free the reduced item. */
 			tree_downref( prg, root, undoLel->tree );
 			prg->kidPool.free( undoLel );
-			prg->algPool.free( alg );
+			//prg->algPool.free( alg );
 		}
 	}
 

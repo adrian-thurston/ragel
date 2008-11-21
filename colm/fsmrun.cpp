@@ -189,9 +189,7 @@ void FsmRun::sendBackText( const char *data, long length )
 
 void FsmRun::queueBack( Kid *input )
 {
-	Alg *alg = input->tree->alg;
-
-	if ( alg->flags & AF_GROUP_MEM ) {
+	if ( input->tree->flags & AF_GROUP_MEM ) {
 		#ifdef COLM_LOG_PARSE
 		LangElInfo *lelInfo = parser->tables->rtd->lelInfo;
 		cerr << "queuing back: " << lelInfo[input->tree->id].name << endl;
@@ -245,21 +243,19 @@ void FsmRun::sendBackIgnore( Kid *ignore )
 		#endif
 
 		Head *head = ignore->tree->tokdata;
-		bool artificial = ignore->tree->alg != 0 && 
-				ignore->tree->alg->flags & AF_ARTIFICIAL;
+		bool artificial = ignore->tree->flags & AF_ARTIFICIAL;
 
 		if ( head != 0 && !artificial )
 			sendBackText( string_data( head ), head->length );
 
 		/* Check for reverse code. */
-		Alg *alg = ignore->tree->alg;
-		if ( alg != 0 && alg->flags & AF_HAS_RCODE ) {
+		if ( ignore->tree->flags & AF_HAS_RCODE ) {
 			Execution execution( prg, parser->reverseCode, 
 					parser, 0, 0, 0 );
 
 			/* Do the reverse exeuction. */
 			execution.rexecute( parser->root, parser->allReverseCode );
-			alg->flags &= ~AF_HAS_RCODE;
+			ignore->tree->flags &= ~AF_HAS_RCODE;
 		}
 
 		ignore = ignore->next;
@@ -271,13 +267,12 @@ void FsmRun::sendBack( Kid *input )
 	#ifdef COLM_LOG_PARSE
 	LangElInfo *lelInfo = parser->tables->rtd->lelInfo;
 	cerr << "sending back: " << lelInfo[input->tree->id].name;
-	if ( input->tree->alg->flags & AF_ARTIFICIAL )
+	if ( input->tree->flags & AF_ARTIFICIAL )
 		cerr << " (artificial)";
 	cerr << endl;
 	#endif
 
-	Alg *alg = input->tree->alg;
-	if ( alg->flags & AF_NAMED ) {
+	if ( input->tree->flags & AF_NAMED ) {
 		/* Send back anything that is in the buffer. */
 		inputStream->pushBack( p, pe-p );
 		p = pe = runBuf->buf;
@@ -287,20 +282,20 @@ void FsmRun::sendBack( Kid *input )
 		inputStream->pushBackNamed();
 	}
 
-	if ( !(alg->flags & AF_ARTIFICIAL) ) {
+	if ( !(input->tree->flags & AF_ARTIFICIAL) ) {
 		/* Push back the token data. */
 		sendBackText( string_data( input->tree->tokdata ), 
 				string_length( input->tree->tokdata ) );
 	}
 
 	/* Check for reverse code. */
-	if ( alg->flags & AF_HAS_RCODE ) {
+	if ( input->tree->flags & AF_HAS_RCODE ) {
 		Execution execution( prg, parser->reverseCode, 
 				parser, 0, 0, 0 );
 
 		/* Do the reverse exeuction. */
 		execution.rexecute( parser->root, parser->allReverseCode );
-		alg->flags &= ~AF_HAS_RCODE;
+		input->tree->flags &= ~AF_HAS_RCODE;
 	}
 
 	/* Always push back the ignore text. */
@@ -355,7 +350,7 @@ void set_AF_GROUP_MEM( PdaRun *parser )
 		/* Only bother with non-ignore tokens. */
 		if ( !lelInfo[queued->tree->id].ignore ) {
 			if ( sendCount > 0 )
-				queued->tree->alg->flags |= AF_GROUP_MEM;
+				queued->tree->flags |= AF_GROUP_MEM;
 			sendCount += 1;
 		}
 		queued = queued->next;
@@ -465,11 +460,8 @@ void execute_generation_action( Program *prg, PdaRun *parser, Code *code, Head *
 	 * token. */
 	Tree *tree = parser->queue->tree;
 	bool hasrcode = make_reverse_code( parser->allReverseCode, parser->reverseCode );
-	if ( hasrcode ) {
-		if ( tree->alg == 0 )
-			tree->alg = prg->algPool.allocate();
-		tree->alg->flags |= AF_HAS_RCODE;
-	}
+	if ( hasrcode )
+		tree->flags |= AF_HAS_RCODE;
 
 	/* Mark generated tokens as belonging to a group. */
 	set_AF_GROUP_MEM( parser );
@@ -510,10 +502,9 @@ Kid *FsmRun::makeToken( int id, Head *tokdata, bool namedLangEl, int bindId )
 	Kid *input = 0;
 	input = prg->kidPool.allocate();
 	input->tree = prg->treePool.allocate();
-	input->tree->alg = prg->algPool.allocate();
 
 	if ( namedLangEl )
-		input->tree->alg->flags |= AF_NAMED;
+		input->tree->flags |= AF_NAMED;
 
 	input->tree->refs = 1;
 	input->tree->id = id;
@@ -694,7 +685,6 @@ void FsmRun::sendEOF( )
 
 	Kid *input = prg->kidPool.allocate();
 	input->tree = prg->treePool.allocate();
-	input->tree->alg = prg->algPool.allocate();
 
 	input->tree->refs = 1;
 	input->tree->id = parser->tables->rtd->eofId;
@@ -770,7 +760,6 @@ long PdaRun::undoParse( Tree *tree, CodeVect *rev )
 
 	assert( stackTop->next == 0 );
 
-	prg->algPool.free( stackTop->tree->alg );
 	prg->treePool.free( stackTop->tree );
 	prg->kidPool.free( stackTop );
 	return 0;

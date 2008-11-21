@@ -74,8 +74,6 @@ struct Tree
 
 	Head *tokdata;
 
-	Alg *alg;
-
 	/* Parsing algorithm. */
 	long state;
 	long region;
