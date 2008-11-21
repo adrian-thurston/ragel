@@ -81,10 +81,10 @@ using std::endl;
 
 void send( Tree **root, Program *prg, PdaRun *parser, Tree *tree, bool ignore )
 {
-	/* If the tree already has an alg (it has been parsed) then we need to
-	 * send a copy of it because the parsing that we are about to do requires
-	 * a fresh alg. */
-	if ( tree->alg != 0 ) {
+	/* If the tree was produced by a parsing function then we need to send a
+	 * copy of it because the parsing that we are about to do requires fresh
+	 * parsing algorithm data. */
+	if ( tree->flags & AF_PARSED ) {
 		#ifdef COLM_LOG_BYTECODE
 		cerr << "copying tree in send because alg is set" << endl;
 		#endif
@@ -133,6 +133,9 @@ Tree *call_parser( Tree **&sp, Program *prg, Stream *stream,
 		delete parser.allReverseCode;
 		cv = 0;
 	}
+
+	/* Indicate that this tree came out of a parser. */
+	tree->flags |= AF_PARSED;
 
 	return tree;
 }

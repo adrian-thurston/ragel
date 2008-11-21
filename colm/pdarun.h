@@ -73,7 +73,15 @@ struct Tree
 	Kid *child;
 
 	Head *tokdata;
+
 	Alg *alg;
+
+	/* Parsing algorithm. */
+	long state;
+	long region;
+	char causeReduce;
+	char retry_lower;
+	char retry_upper;
 };
 
 struct Int

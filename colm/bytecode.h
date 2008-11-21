@@ -270,6 +270,10 @@ typedef unsigned char uchar;
 /* There is reverse code associated with this tree node. */
 #define AF_HAS_RCODE   0x20
 
+/* Tree was produced by a parse routine. This means the data fields for
+ * managing parsing fields will be active. */
+#define AF_PARSED      0x40
+
 /*
  * Call stack.
  */
