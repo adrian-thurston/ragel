@@ -39,6 +39,7 @@ using std::endl;
 #define lower 0x0000ffff
 #define upper 0xffff0000
 #define reject() induceReject = 1
+#define pt(var) ((ParseTree*)(var))
 
 #define read_word_p( i, p ) do { \
 	i = ((Word)  p[0]); \
@@ -89,7 +90,8 @@ void PdaRun::init()
 
 	/* Init the element allocation variables. */
 	stackTop = prg->kidPool.allocate();
-	stackTop->tree = prg->treePool.allocate();
+	stackTop->tree = (Tree*)prg->parseTreePool.allocate();
+	stackTop->tree->flags |= AF_PARSE_TREE;
 
 	stackTop->tree->state = -1;
 	stackTop->tree->refs = 1;
@@ -381,7 +383,8 @@ again:
 			input->tree->causeReduce += 1;
 
 		redLel = prg->kidPool.allocate();
-		redLel->tree = prg->treePool.allocate();
+		redLel->tree = (Tree*)prg->parseTreePool.allocate();
+		redLel->tree->flags |= AF_PARSE_TREE;
 		redLel->tree->refs = 1;
 		redLel->tree->id = tables->rtd->prodInfo[reduction].lhsId;
 

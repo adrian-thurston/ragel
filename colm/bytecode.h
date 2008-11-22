@@ -274,6 +274,9 @@ typedef unsigned char uchar;
  * managing parsing fields will be active. */
 #define AF_PARSED      0x40
 
+/* Tree was allocated as a ParseTree. */
+#define AF_PARSE_TREE  0x80
+
 /*
  * Call stack.
  */
@@ -317,6 +320,7 @@ typedef unsigned char uchar;
 
 struct Kid;
 struct Tree;
+struct ParseTree;
 struct ListEl;
 struct MapEl;
 struct PdaTables;
@@ -652,6 +656,7 @@ struct Program
 
 	PoolAlloc<Kid> kidPool;
 	PoolAlloc<Tree> treePool;
+	PoolAlloc<ParseTree> parseTreePool;
 	PoolAlloc<ListEl> listElPool;
 	PoolAlloc<MapEl> mapElPool;
 

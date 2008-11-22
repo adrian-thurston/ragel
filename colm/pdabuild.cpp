@@ -37,6 +37,8 @@
 /* Dumping the fsm. */
 #include "mergesort.h"
 
+#define pt(var) ((ParseTree*)(var))
+
 using namespace std;
 
 char startDefName[] = "start";

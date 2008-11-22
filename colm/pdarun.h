@@ -71,6 +71,25 @@ struct Tree
 	char retry_upper;
 };
 
+struct ParseTree
+{
+	/* Entire structure must overlay Tree. */
+	short id;
+	unsigned short flags;
+	long refs;
+	Kid *child;
+
+	Head *tokdata;
+
+	/* Parsing algorithm. */
+	long state;
+	long region;
+	char causeReduce;
+	char retry_lower;
+	char retry_upper;
+};
+
+
 struct Int
 {
 	/* Must overlay Tree. */

@@ -861,11 +861,6 @@ free_tree:
 		else if ( tree->id == LEL_ID_STREAM )
 			stream_free( prg, (Stream*) tree );
 		else { 
-			//if ( tree->alg != 0 ) {
-			//	//assert( ! (tree->alg->flags & AF_HAS_RCODE) );
-			//	//vm_push( tree->alg->parsed );
-			//	prg->algPool.free( tree->alg );
-			//}
 			string_free( prg, tree->tokdata );
 
 			Kid *child = tree->child;
@@ -876,7 +871,10 @@ free_tree:
 				child = next;
 			}
 
-			prg->treePool.free( tree );
+			if ( tree->flags & AF_PARSE_TREE )
+				prg->parseTreePool.free( (ParseTree*)tree );
+			else
+				prg->treePool.free( tree );
 		}
 	}
 

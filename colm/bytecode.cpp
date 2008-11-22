@@ -318,6 +318,10 @@ void Program::clear( Tree **vm_stack, Tree **sp )
 	if ( treeLost )
 		cerr << "warning lost trees: " << treeLost << endl;
 
+	long parseTreeLost = parseTreePool.numlost();
+	if ( parseTreeLost )
+		cerr << "warning lost parse trees: " << parseTreeLost << endl;
+
 	long listLost = listElPool.numlost();
 	if ( listLost )
 		cerr << "warning lost listEls: " << listLost << endl;
@@ -328,6 +332,7 @@ void Program::clear( Tree **vm_stack, Tree **sp )
 
 	kidPool.clear();
 	treePool.clear();
+	parseTreePool.clear();
 	listElPool.clear();
 	mapElPool.clear();
 

@@ -327,7 +327,8 @@ void add_notoken( Program *prg, PdaRun *parser )
 		cerr << "found reverse code but no token, sending _notoken" << endl;
 		#endif
 
-		Tree *tree = prg->treePool.allocate();
+		Tree *tree = (Tree*)prg->parseTreePool.allocate();
+		tree->flags |= AF_PARSE_TREE;
 		tree->refs = 1;
 		tree->id = prg->rtd->noTokenId;
 		tree->tokdata = 0;
@@ -501,7 +502,8 @@ Kid *FsmRun::makeToken( int id, Head *tokdata, bool namedLangEl, int bindId )
 
 	Kid *input = 0;
 	input = prg->kidPool.allocate();
-	input->tree = prg->treePool.allocate();
+	input->tree = (Tree*)prg->parseTreePool.allocate();
+	input->tree->flags |= AF_PARSE_TREE;
 
 	if ( namedLangEl )
 		input->tree->flags |= AF_NAMED;
@@ -622,7 +624,8 @@ void FsmRun::sendIgnore( long id )
 	update_position( this, tokstart, length );
 	tokstart = 0;
 	
-	Tree *tree = prg->treePool.allocate();
+	Tree *tree = (Tree*)prg->parseTreePool.allocate();
+	tree->flags |= AF_PARSE_TREE;
 	tree->refs = 1;
 	tree->id = id;
 	tree->tokdata = ignoreStr;
@@ -684,7 +687,8 @@ void FsmRun::sendEOF( )
 	#endif
 
 	Kid *input = prg->kidPool.allocate();
-	input->tree = prg->treePool.allocate();
+	input->tree = (Tree*)prg->parseTreePool.allocate();
+	input->tree->flags |= AF_PARSE_TREE;
 
 	input->tree->refs = 1;
 	input->tree->id = parser->tables->rtd->eofId;
