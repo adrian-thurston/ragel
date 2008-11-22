@@ -93,7 +93,7 @@ void PdaRun::init()
 	stackTop->tree = (Tree*)prg->parseTreePool.allocate();
 	stackTop->tree->flags |= AF_PARSE_TREE;
 
-	stackTop->tree->state = -1;
+	pt(stackTop->tree)->state = -1;
 	stackTop->tree->refs = 1;
 	numRetry = 0;
 	errCount = 0;
@@ -110,12 +110,12 @@ void PdaRun::init()
 long PdaRun::stackTopTarget()
 {
 	long state;
-	if ( stackTop->tree->state < 0 )
+	if ( pt(stackTop->tree)->state < 0 )
 		state = tables->startState;
 	else {
 		state = tables->targs[(int)tables->indicies[tables->offsets[
-				stackTop->tree->state] + 
-				(stackTop->tree->id - tables->keys[stackTop->tree->state<<1])]];
+				pt(stackTop->tree)->state] + 
+				(stackTop->tree->id - tables->keys[pt(stackTop->tree)->state<<1])]];
 	}
 	return state;
 }
@@ -172,13 +172,13 @@ head:
 		/* If tree caused some reductions, now is not the right time to backup
 		 * over the reverse code. We need to backup over the reductions first. Store
 		 * the count of the reductions and do it when the count drops to zero. */
-		if ( tree->causeReduce > 0 ) {
+		if ( pt(tree)->causeReduce > 0 ) {
 			/* The top reduce block does not correspond to this alg. */
 			#ifdef COLM_LOG_PARSE
 			cerr << "commit: causeReduce found, delaying backup: " << 
-					(long)tree->causeReduce << endl;
+					(long)pt(tree)->causeReduce << endl;
 			#endif
-			causeReduce = tree->causeReduce;
+			causeReduce = pt(tree)->causeReduce;
 		}
 		else {
 			rcode = backup_over_rcode( rcode );
@@ -218,13 +218,13 @@ head:
 	}
 
 	/* Reset retries. */
-	if ( tree->retry_lower > 0 ) {
+	if ( pt(tree)->retry_lower > 0 ) {
 		parser->numRetry -= 1;
-		tree->retry_lower = 0;
+		pt(tree)->retry_lower = 0;
 	}
-	if ( tree->retry_upper > 0 ) {
+	if ( pt(tree)->retry_upper > 0 ) {
 		parser->numRetry -= 1;
-		tree->retry_upper = 0;
+		pt(tree)->retry_upper = 0;
 	}
 	tree->flags |= AF_COMMITTED;
 
@@ -311,9 +311,9 @@ void PdaRun::parseToken( Kid *input )
 	if ( cs < 0 )
 		return;
 
-	input->tree->region = nextRegionInd;
-	input->tree->state = cs;
-	if ( tables->tokenRegions[input->tree->region+1] != 0 )
+	pt(input->tree)->region = nextRegionInd;
+	pt(input->tree)->state = cs;
+	if ( tables->tokenRegions[pt(input->tree)->region+1] != 0 )
 		numRetry += 1;
 
 again:
@@ -331,15 +331,15 @@ again:
 	induceReject = false;
 	targState = tables->targs[pos];
 	action = tables->actions + tables->actInds[pos];
-	if ( lel->tree->retry_lower )
-		action += lel->tree->retry_lower;
+	if ( pt(lel->tree)->retry_lower )
+		action += pt(lel->tree)->retry_lower;
 
 	if ( *action & act_sb ) {
 		#ifdef COLM_LOG_PARSE
-		cerr << "shifted: " << tables->rtd->lelInfo[lel->tree->id].name;
+		cerr << "shifted: " << tables->rtd->lelInfo[pt(lel->tree)->id].name;
 		#endif
 		input = input->next;
-		lel->tree->state = cs;
+		pt(lel->tree)->state = cs;
 		lel->next = stackTop;
 		stackTop = lel;
 
@@ -352,10 +352,10 @@ again:
 		}
 
 		if ( action[1] == 0 )
-			lel->tree->retry_lower = 0;
+			pt(lel->tree)->retry_lower = 0;
 		else {
-			lel->tree->retry_lower += 1;
-			assert( lel->tree->retry_upper == 0 );
+			pt(lel->tree)->retry_lower += 1;
+			assert( pt(lel->tree)->retry_upper == 0 );
 			numRetry += 1; /* FIXME: Has the retry already been counted? */
 			#ifdef COLM_LOG_PARSE
 			cerr << " retry: " << stackTop;
@@ -370,7 +370,7 @@ again:
 		long causeReduce = 0;
 		if ( input != 0 ) { 
 			if ( input->tree->flags & AF_HAS_RCODE )
-				causeReduce = input->tree->causeReduce;
+				causeReduce = pt(input->tree)->causeReduce;
 		}
 		commit_full( this, causeReduce );
 	}
@@ -380,7 +380,7 @@ again:
 		Kid *last, *redLel, *child, *attrs;
 
 		if ( input != 0 )
-			input->tree->causeReduce += 1;
+			pt(input->tree)->causeReduce += 1;
 
 		redLel = prg->kidPool.allocate();
 		redLel->tree = (Tree*)prg->parseTreePool.allocate();
@@ -389,10 +389,10 @@ again:
 		redLel->tree->id = tables->rtd->prodInfo[reduction].lhsId;
 
 		redLel->next = 0;
-		redLel->tree->causeReduce = 0;
-		redLel->tree->retry_lower = 0;
-		redLel->tree->retry_upper = lel->tree->retry_lower;
-		lel->tree->retry_lower = 0;
+		pt(redLel->tree)->causeReduce = 0;
+		pt(redLel->tree)->retry_lower = 0;
+		pt(redLel->tree)->retry_upper = pt(lel->tree)->retry_lower;
+		pt(lel->tree)->retry_lower = 0;
 
 		/* Allocate the attributes. */
 		objectLength = tables->rtd->lelInfo[redLel->tree->id].objectLength;
@@ -416,10 +416,10 @@ again:
 				<< " rhsLen: " << rhsLen;
 		#endif
 		if ( action[1] == 0 )
-			redLel->tree->retry_upper = 0;
+			pt(redLel->tree)->retry_upper = 0;
 		else {
-			redLel->tree->retry_upper += 1;
-			assert( lel->tree->retry_lower == 0 );
+			pt(redLel->tree)->retry_upper += 1;
+			assert( pt(lel->tree)->retry_lower == 0 );
 			numRetry += 1;
 			#ifdef COLM_LOG_PARSE
 			cerr << " retry: " << redLel;
@@ -432,7 +432,7 @@ again:
 
 		/* When the production is of zero length we stay in the same state.
 		 * Otherwise we use the state stored in the first child. */
-		targState = rhsLen == 0 ? cs : child->tree->state;
+		targState = rhsLen == 0 ? cs : pt(child->tree)->state;
 
 		assert( redLel->tree->refs == 1 );
 
@@ -489,7 +489,7 @@ again:
 			cerr << "error induced during reduction of " <<
 					tables->rtd->lelInfo[redLel->tree->id].name << endl;
 			#endif
-			redLel->tree->state = cs;
+			pt(redLel->tree)->state = cs;
 			redLel->next = stackTop;
 			stackTop = redLel;
 			cs = targState;
@@ -515,9 +515,9 @@ parseError:
 
 	while ( 1 ) {
 		if ( input != 0 ) {
-			assert( input->tree->retry_upper == 0 );
+			assert( pt(input->tree)->retry_upper == 0 );
 
-			if ( input->tree->retry_lower != 0 ) {
+			if ( pt(input->tree)->retry_lower != 0 ) {
 				#ifdef COLM_LOG_PARSE
 				cerr << "found retry targ: " << input << endl;
 				#endif
@@ -526,14 +526,14 @@ parseError:
 				cerr << "found retry: " << input << endl;
 				#endif
 
-				cs = input->tree->state;
+				cs = pt(input->tree)->state;
 				goto again;
 			}
 
 			/* If there is no retry and there are no reductions caused by the
 			 * current input token then we are finished with it. Send it back. */
-			if ( input->tree->causeReduce == 0 ) {
-				int next = input->tree->region + 1;
+			if ( pt(input->tree)->causeReduce == 0 ) {
+				int next = pt(input->tree)->region + 1;
 
 				fsmRun->queueBack( input );
 				input = 0;
@@ -632,20 +632,20 @@ parseError:
 			/* If there is an input queued, this is one less reduction it has
 			 * caused. */
 			if ( input != 0 )
-				input->tree->causeReduce -= 1;
+				pt(input->tree)->causeReduce -= 1;
 
-			if ( undoLel->tree->retry_upper != 0 ) {
+			if ( pt(undoLel->tree)->retry_upper != 0 ) {
 				/* There is always an input item here because reduce
 				 * conflicts only happen on a lookahead character. */
 				assert( input != undoLel );
 				assert( input != 0 );
-				assert( undoLel->tree->retry_lower == 0 );
-				assert( input->tree->retry_upper == 0 );
+				assert( pt(undoLel->tree)->retry_lower == 0 );
+				assert( pt(input->tree)->retry_upper == 0 );
 
 				/* Transfer the retry from undoLel to input. */
-				input->tree->retry_lower = undoLel->tree->retry_upper;
-				input->tree->retry_upper = 0;
-				input->tree->state = stackTopTarget();
+				pt(input->tree)->retry_lower = pt(undoLel->tree)->retry_upper;
+				pt(input->tree)->retry_upper = 0;
+				pt(input->tree)->state = stackTopTarget();
 			}
 
 			/* Free the reduced item. */

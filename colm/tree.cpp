@@ -290,7 +290,8 @@ Tree *make_token( Tree **root, Program *prg, long nargs )
 	Tree *tree;
 
 	if ( lelInfo[id].ignore ) {
-		tree = prg->treePool.allocate();
+		tree = (Tree*)prg->parseTreePool.allocate();
+		tree->flags |= AF_PARSE_TREE;
 		tree->refs = 1;
 		tree->id = id;
 		tree->tokdata = tokdata;
@@ -299,7 +300,8 @@ Tree *make_token( Tree **root, Program *prg, long nargs )
 		long objectLength = lelInfo[id].objectLength;
 		Kid *attrs = alloc_attrs( prg, objectLength );
 
-		tree = prg->treePool.allocate();
+		tree = (Tree*)prg->parseTreePool.allocate();
+		tree->flags |= AF_PARSE_TREE;
 		tree->id = id;
 		tree->refs = 1;
 		tree->tokdata = tokdata;
@@ -325,7 +327,8 @@ Tree *make_tree( Tree **root, Program *prg, long nargs )
 	long id = idInt->value;
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
 
-	Tree *tree = prg->treePool.allocate();
+	Tree *tree = (Tree*)prg->parseTreePool.allocate();
+	tree->flags |= AF_PARSE_TREE;
 	tree->id = id;
 	tree->refs = 1;
 
