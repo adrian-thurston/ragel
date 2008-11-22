@@ -624,8 +624,7 @@ void FsmRun::sendIgnore( long id )
 	update_position( this, tokstart, length );
 	tokstart = 0;
 	
-	Tree *tree = (Tree*)prg->parseTreePool.allocate();
-	tree->flags |= AF_PARSE_TREE;
+	Tree *tree = prg->treePool.allocate();
 	tree->refs = 1;
 	tree->id = id;
 	tree->tokdata = ignoreStr;

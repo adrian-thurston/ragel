@@ -77,21 +77,25 @@ using std::endl;
 	i |= ((Word) *instr++) << 8; \
 } while(0)
 
-/* Type conversions. */
-
-void send( Tree **root, Program *prg, PdaRun *parser, Tree *tree, bool ignore )
+Tree *prep_parse_tree( Program *prg, Tree *tree )
 {
 	/* If the tree was produced by a parsing function then we need to send a
 	 * copy of it because the parsing that we are about to do requires fresh
 	 * parsing algorithm data. */
-	if ( tree->flags & AF_PARSED ) {
+	if ( !(tree->flags & AF_PARSE_TREE) || tree->flags & AF_PARSED ) {
 		#ifdef COLM_LOG_BYTECODE
-		cerr << "copying tree in send because alg is set" << endl;
+		cerr << "copying tree in send function" << endl;
 		#endif
 		Kid *unused = 0;
-		tree = copy_real_tree( prg, tree, 0, unused );
+		tree = copy_real_tree( prg, tree, 0, unused, true );
 		tree_upref( tree );
 	}
+	return  tree;
+}
+
+void send( Tree **root, Program *prg, PdaRun *parser, Tree *tree, bool ignore )
+{
+	tree = prep_parse_tree( prg, tree );
 
 	if ( tree->id >= prg->rtd->firstNonTermId )
 		tree->id = prg->rtd->lelInfo[tree->id].termDupId;

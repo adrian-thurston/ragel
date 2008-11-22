@@ -621,13 +621,19 @@ void stream_free( Program *prg, Stream *s )
 	prg->mapElPool.free( (MapEl*)s );
 }
 
-Tree *copy_real_tree( Program *prg, Tree *tree, Kid *oldNextDown, Kid *&newNextDown )
+Tree *copy_real_tree( Program *prg, Tree *tree, Kid *oldNextDown, 
+		Kid *&newNextDown, bool parseTree )
 {
-	assert( tree->refs >= 2 );
-
 	/* Need to keep a lookout for next down. If 
 	 * copying it, return the copy. */
-	Tree *newTree = prg->treePool.allocate();
+	Tree *newTree;
+	if ( parseTree ) {
+		newTree = (Tree*) prg->parseTreePool.allocate();
+		newTree->flags |= AF_PARSE_TREE;
+	}
+	else {
+		newTree = prg->treePool.allocate();
+	}
 
 	newTree->id = tree->id;
 	newTree->tokdata = string_copy( prg, tree->tokdata );
@@ -735,6 +741,8 @@ Map *copy_map( Program *prg, Map *map, Kid *oldNextDown, Kid *&newNextDown )
 
 Tree *copy_tree( Program *prg, Tree *tree, Kid *oldNextDown, Kid *&newNextDown )
 {
+	assert( tree->refs >= 2 );
+
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
 	long genericId = lelInfo[tree->id].genericId;
 	if ( genericId > 0 ) {
@@ -754,8 +762,9 @@ Tree *copy_tree( Program *prg, Tree *tree, Kid *oldNextDown, Kid *&newNextDown )
 		assert(false);
 	else if ( tree->id == LEL_ID_STR )
 		assert(false);
-	else
-		tree = copy_real_tree( prg, tree, oldNextDown, newNextDown );
+	else {
+		tree = copy_real_tree( prg, tree, oldNextDown, newNextDown, false );
+	}
 
 	assert( tree->refs == 0 );
 	return tree;
