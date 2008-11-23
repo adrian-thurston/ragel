@@ -450,7 +450,7 @@ again:
 			/* Transfer the lhs from the environment to redLel. It is uprefed
 			 * while in the environment. */
 			redLel->tree = execution.lhs;
-			redLel->tree = prep_parse_tree( prg, redLel->tree );
+			redLel->tree = prep_parse_tree( prg, root, redLel->tree );
 
 			/* If the lhs was saved and it changed then we need to restore the
 			 * original upon backtracking, otherwise downref since we took a

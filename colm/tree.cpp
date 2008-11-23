@@ -290,8 +290,7 @@ Tree *make_token( Tree **root, Program *prg, long nargs )
 	Tree *tree;
 
 	if ( lelInfo[id].ignore ) {
-		tree = (Tree*)prg->parseTreePool.allocate();
-		tree->flags |= AF_PARSE_TREE;
+		tree = prg->treePool.allocate();
 		tree->refs = 1;
 		tree->id = id;
 		tree->tokdata = tokdata;
@@ -300,8 +299,7 @@ Tree *make_token( Tree **root, Program *prg, long nargs )
 		long objectLength = lelInfo[id].objectLength;
 		Kid *attrs = alloc_attrs( prg, objectLength );
 
-		tree = (Tree*)prg->parseTreePool.allocate();
-		tree->flags |= AF_PARSE_TREE;
+		tree = prg->treePool.allocate();
 		tree->id = id;
 		tree->refs = 1;
 		tree->tokdata = tokdata;
@@ -327,8 +325,7 @@ Tree *make_tree( Tree **root, Program *prg, long nargs )
 	long id = idInt->value;
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
 
-	Tree *tree = (Tree*)prg->parseTreePool.allocate();
-	tree->flags |= AF_PARSE_TREE;
+	Tree *tree = prg->treePool.allocate();
 	tree->id = id;
 	tree->refs = 1;
 
@@ -638,8 +635,6 @@ Tree *copy_real_tree( Program *prg, Tree *tree, Kid *oldNextDown,
 	newTree->id = tree->id;
 	newTree->tokdata = string_copy( prg, tree->tokdata );
 
-	tree->refs -= 1;
-
 	/* Copy the child list, will handle attributes, ignores 
 	 * and the children. */
 	Kid *child = tree->child, *last = 0;
@@ -673,76 +668,63 @@ Tree *copy_real_tree( Program *prg, Tree *tree, Kid *oldNextDown,
 
 List *copy_list( Program *prg, List *list, Kid *oldNextDown, Kid *&newNextDown )
 {
-	if ( list->refs > 1 ) {
-		#ifdef COLM_LOG_BYTECODE
-		cerr << "splitting list: " << list << " refs: " << 
-				list->refs << endl;
-		#endif
+	#ifdef COLM_LOG_BYTECODE
+	cerr << "splitting list: " << list << " refs: " << 
+			list->refs << endl;
+	#endif
 
-		/* Not a need copy. */
-		List *newList = (List*)prg->mapElPool.allocate();
-		newList->id = list->genericInfo->langElId;
-		newList->genericInfo = list->genericInfo;
+	/* Not a need copy. */
+	List *newList = (List*)prg->mapElPool.allocate();
+	newList->id = list->genericInfo->langElId;
+	newList->genericInfo = list->genericInfo;
 
-		list->refs -= 1;
+	ListEl *src = list->head;
+	while( src != 0 ) {
+		ListEl *newEl = prg->listElPool.allocate();
+		newEl->value = src->value;
+		tree_upref( newEl->value );
 
-		ListEl *src = list->head;
-		while( src != 0 ) {
-			ListEl *newEl = prg->listElPool.allocate();
-			newEl->value = src->value;
-			tree_upref( newEl->value );
+		newList->append( newEl );
 
-			newList->append( newEl );
+		/* Watch out for next down. */
+		if ( (Kid*)src == oldNextDown )
+			newNextDown = (Kid*)newEl;
 
-			/* Watch out for next down. */
-			if ( (Kid*)src == oldNextDown )
-				newNextDown = (Kid*)newEl;
-
-			src = src->next;
-		}
-
-		list = newList;
+		src = src->next;
 	}
-	return list;
-}
 
+	return newList;
+}
 	
 Map *copy_map( Program *prg, Map *map, Kid *oldNextDown, Kid *&newNextDown )
 {
-	if ( map->refs > 1 ) {
-		#ifdef COLM_LOG_BYTECODE
-		cerr << "splitting map: " << map << " refs: " << 
-				map->refs << endl;
-		#endif
+	#ifdef COLM_LOG_BYTECODE
+	cerr << "splitting map: " << map << " refs: " << 
+			map->refs << endl;
+	#endif
 
-		Map *newMap = (Map*)prg->mapElPool.allocate();
-		newMap->id = map->genericInfo->langElId;
-		newMap->genericInfo = map->genericInfo;
-		newMap->treeSize = map->treeSize;
-		newMap->root = 0;
+	Map *newMap = (Map*)prg->mapElPool.allocate();
+	newMap->id = map->genericInfo->langElId;
+	newMap->genericInfo = map->genericInfo;
+	newMap->treeSize = map->treeSize;
+	newMap->root = 0;
 
-		/* If there is a root, copy the tree. */
-		if ( map->root != 0 ) {
-			newMap->root = newMap->copyBranch( prg, map->root, 
-					oldNextDown, newNextDown );
-		}
-
-		map->refs -= 1;
-
-		for ( MapEl *el = newMap->head; el != 0; el = el->next ) {
-			assert( map->genericInfo->typeArg == TYPE_TREE );
-			tree_upref( el->tree );
-		}
-
-		map = newMap;
+	/* If there is a root, copy the tree. */
+	if ( map->root != 0 ) {
+		newMap->root = newMap->copyBranch( prg, map->root, 
+				oldNextDown, newNextDown );
 	}
-	return map;
+
+	for ( MapEl *el = newMap->head; el != 0; el = el->next ) {
+		assert( map->genericInfo->typeArg == TYPE_TREE );
+		tree_upref( el->tree );
+	}
+
+	return newMap;
 }
 
 Tree *copy_tree( Program *prg, Tree *tree, Kid *oldNextDown, Kid *&newNextDown )
 {
-	assert( tree->refs >= 2 );
-
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
 	long genericId = lelInfo[tree->id].genericId;
 	if ( genericId > 0 ) {
@@ -782,8 +764,14 @@ Tree *split_tree( Program *prg, Tree *tree )
 			#endif
 
 			Kid *oldNextDown = 0, *newNextDown = 0;
-			tree = copy_tree( prg, tree, oldNextDown, newNextDown );
-			tree_upref( tree );
+			Tree *newTree = copy_tree( prg, tree, oldNextDown, newNextDown );
+			tree_upref( newTree );
+
+			/* Downref the original. Don't need to consider freeing because
+			 * refs were > 1. */
+			tree->refs -= 1;
+
+			tree = newTree;
 		}
 
 		assert( tree->refs == 1 );
@@ -1401,6 +1389,10 @@ void split_ref( Tree **&sp, Program *prg, Ref *fromRef )
 			Tree *newTree = copy_tree( prg, ref->kid->tree, 
 					oldNextKidDown, newNextKidDown );
 			tree_upref( newTree );
+			
+			/* Downref the original. Don't need to consider freeing because
+			 * refs were > 1. */
+			ref->kid->tree->refs -= 1;
 
 			while ( ref != 0 && ref != nextDown ) {
 				next = ref->next;

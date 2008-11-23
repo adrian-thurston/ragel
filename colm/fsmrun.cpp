@@ -763,7 +763,7 @@ long PdaRun::undoParse( Tree *tree, CodeVect *rev )
 
 	assert( stackTop->next == 0 );
 
-	prg->treePool.free( stackTop->tree );
+	tree_downref( prg, root, stackTop->tree );
 	prg->kidPool.free( stackTop );
 	return 0;
 }

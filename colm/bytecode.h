@@ -478,7 +478,7 @@ Tree *copy_tree( Program *prg, Tree *tree, Kid *oldNextDown, Kid *&newNextDown )
 Tree *copy_real_tree( Program *prg, Tree *tree, Kid *oldNextDown, Kid *&newNextDown, bool parsed );
 Tree *make_tree( Tree **root, Program *prg, long nargs );
 Tree *make_token( Tree **root, Program *prg, long nargs );
-Tree *prep_parse_tree( Program *prg, Tree *tree );
+Tree *prep_parse_tree( Program *prg, Tree **sp, Tree *tree );
 
 void print_tree( Tree **&sp, Program *prg, Tree *tree );
 void print_tree( ostream &out, Tree **&sp, Program *prg, Tree *tree );

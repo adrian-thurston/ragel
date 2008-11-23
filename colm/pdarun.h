@@ -62,13 +62,6 @@ struct Tree
 	Kid *child;
 
 	Head *tokdata;
-
-	/* Parsing algorithm. */
-//	long state;
-//	long region;
-//	char causeReduce;
-//	char retry_lower;
-//	char retry_upper;
 };
 
 struct ParseTree

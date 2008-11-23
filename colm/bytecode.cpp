@@ -77,7 +77,7 @@ using std::endl;
 	i |= ((Word) *instr++) << 8; \
 } while(0)
 
-Tree *prep_parse_tree( Program *prg, Tree *tree )
+Tree *prep_parse_tree( Program *prg, Tree **sp, Tree *tree )
 {
 	/* If the tree was produced by a parsing function then we need to send a
 	 * copy of it because the parsing that we are about to do requires fresh
@@ -87,15 +87,19 @@ Tree *prep_parse_tree( Program *prg, Tree *tree )
 		cerr << "copying tree in send function" << endl;
 		#endif
 		Kid *unused = 0;
-		tree = copy_real_tree( prg, tree, 0, unused, true );
-		tree_upref( tree );
+		Tree *newTree = copy_real_tree( prg, tree, 0, unused, true );
+		tree_upref( newTree );
+
+		tree_downref( prg, sp, tree );
+
+		tree = newTree;
 	}
 	return  tree;
 }
 
 void send( Tree **root, Program *prg, PdaRun *parser, Tree *tree, bool ignore )
 {
-	tree = prep_parse_tree( prg, tree );
+	tree = prep_parse_tree( prg, root, tree );
 
 	if ( tree->id >= prg->rtd->firstNonTermId )
 		tree->id = prg->rtd->lelInfo[tree->id].termDupId;
