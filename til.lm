@@ -89,36 +89,80 @@ def goto_statement
 
 program P = parse program(stdin)
 
-for S:statement* in P
-{
-	if match S [L0: id ':' 
-			First: statement 
-			Rest: statement*]
-	{
-		for Check: statement* in Rest
-		{
-			if match Check 
-				['if' E: expression 'then' 
-					'goto' Targ: id ';'
-				'end'
-				T: statement*] &&
-				Targ == L0
-			{
-				# This truncates Rest
-				Check = construct statement* []
+#for S:statement* in P
+#{
+#	if match S [L0: id ':' 
+#			First: statement 
+#			Rest: statement*]
+#	{
+#		for Check: statement* in Rest
+#		{
+#			if match Check 
+#				['if' E: expression 'then' 
+#					'goto' Targ: id ';'
+#				'end'
+#				T: statement*]
+#			{
+#				# This truncates Rest
+#				Check = construct statement* []
+#
+#				# Replace the labeled statement through to the goto with a
+#				# do ... while.
+#				S = construct statement*
+#					['do'
+#						First
+#						Rest
+#					'while' E ';'
+#					T]
+#				break
+#			}
+#		}
+#	}
+#}
 
-				# Replace the labeled statement through to the goto with a
-				# do ... while.
-				S = construct statement*
-					['do'
-						First
-						Rest
-					'while' E ';'
-					T]
-				break
-			}
+for S: statement* in P
+{
+    if match S [Label: id ':' 
+            First: statement 
+            Rest: statement*]
+    {
+		expression Expr
+		statement* Following
+
+		# Look though the remaining statements for a goto back to the label.
+		# The repeat iterator yields only top-level statement lists. It
+		# restricts our search to the same nesting depth as the label.
+        for Check: statement* in Rest
+        {
+            if match Check 
+                ['if' E: expression 'then' 
+                    'goto' L:id ';'
+                'end'
+                SL: statement*]
+            {
+				Expr = E
+				Following = SL
+
+				# Check iterates over tails of Rest. Assigning an empty list
+				# to check truncates the Rest list. What we cut off is saved in
+				# Following (excluding the if statement).
+                Check = construct statement* []
+            }
+        }
+
+		# If a goto was found, then perform the rewrite.
+		if ( Expr )
+		{
+            # Replace the labelled statement through to the goto 
+			# with a do ... while.
+            S = construct statement*
+                ['do'
+                    First
+                    Rest
+                'while' Expr ';'
+                Following]
 		}
-	}
+    }
 }
 
 print(P, '\n')
