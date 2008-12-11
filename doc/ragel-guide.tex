@@ -1758,7 +1758,7 @@ instantiation that consumes input, can attempt to recover from errors.
 
 \sasp\verb|>!action     >err(name)     >err{...} | -- the start state\\
 \sasp\verb|<!action     <err(name)     <err{...} | -- any state except the start state\\
-\sasp\verb|$!action     $eof(name)     $err{...} | -- all states\\
+\sasp\verb|$!action     $err(name)     $err{...} | -- all states\\
 \sasp\verb|%!action     %err(name)     %err{...} | -- final states\\
 \sasp\verb|@!action     @err(name)     @err{...} | -- any state except final states\\
 \sasp\verb|<>!action    <>err(name)    <>err{...}| -- any except start and final (middle)
