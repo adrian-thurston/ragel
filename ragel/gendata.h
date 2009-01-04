@@ -87,6 +87,9 @@ struct CodeGenData
 	virtual void writeInit() {};
 	virtual void writeExec() {};
 	virtual void writeExports() {};
+	virtual void writeStart() {};
+	virtual void writeFirstFinal() {};
+	virtual void writeError() {};
 
 	/* This can also be overwridden to modify the processing of write
 	 * statements. */
@@ -195,6 +198,7 @@ struct CodeGenData
 
 	ostream &source_warning( const InputLoc &loc );
 	ostream &source_error( const InputLoc &loc );
+	void write_option_error( InputLoc &loc, char *arg );
 };
 
 #endif

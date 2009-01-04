@@ -895,6 +895,21 @@ void JavaTabCodeGen::writeExports()
 	}
 }
 
+void JavaTabCodeGen::writeStart()
+{
+	out << START_STATE_ID();
+}
+
+void JavaTabCodeGen::writeFirstFinal()
+{
+	out << FIRST_FINAL_STATE();
+}
+
+void JavaTabCodeGen::writeError()
+{
+	out << ERROR_STATE();
+}
+
 void JavaTabCodeGen::writeData()
 {
 	/* If there are any transtion functions then output the array. If there

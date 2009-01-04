@@ -66,6 +66,9 @@ public:
 
 	virtual void finishRagelDef();
 	virtual void writeInit();
+	virtual void writeStart();
+	virtual void writeFirstFinal();
+	virtual void writeError();
 
 protected:
 	string FSM_NAME();

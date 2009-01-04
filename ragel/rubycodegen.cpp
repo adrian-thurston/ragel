@@ -898,6 +898,22 @@ void RubyCodeGen::writeExports()
 	}
 }
 
+void RubyCodeGen::writeStart()
+{
+	out << START_STATE_ID();
+}
+
+void RubyCodeGen::writeFirstFinal()
+{
+	out << FIRST_FINAL_STATE();
+}
+
+void RubyCodeGen::writeError()
+{
+	out << ERROR_STATE();
+}
+
+
 /*
  * Local Variables:
  * mode: c++

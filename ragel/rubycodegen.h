@@ -123,6 +123,9 @@ public:
 protected:
 	virtual void writeExports();
 	virtual void writeInit();
+	virtual void writeStart();
+	virtual void writeFirstFinal();
+	virtual void writeError();
 
 	/* Determine if we should use indicies. */
 	virtual void calcIndexSize();

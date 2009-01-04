@@ -124,9 +124,9 @@ syntax cluster inlineItems contains=rlCodeCurly,ocComment,ocPreproc,ocLiteral,oc
 syntax region rlCodeCurly matchgroup=NONE start="{" end="}" contained contains=@inlineItems
 syntax region rlCodeSemi matchgroup=Type start="\<alphtype\>" start="\<getkey\>" start="\<access\>" start="\<variable\>" matchgroup=NONE end=";" contained contains=@inlineItems
 
-syntax region rlWrite matchgroup=Type start="\<write\>" matchgroup=NONE end=";" contained contains=rlWriteKeywords,rlWriteOptions
+syntax region rlWrite matchgroup=Type start="\<write\>" matchgroup=NONE end="[;)]" contained contains=rlWriteKeywords,rlWriteOptions
 
-syntax keyword rlWriteKeywords init data exec exports contained
+syntax keyword rlWriteKeywords init data exec exports start error first_final contained
 syntax keyword rlWriteOptions noerror nofinal noprefix noend nocs contained
 
 "

@@ -711,6 +711,11 @@ void CodeGenData::analyzeMachine()
 	setValueLimits();
 }
 
+void CodeGenData::write_option_error( InputLoc &loc, char *arg )
+{
+	source_warning(loc) << "unrecognized write option \"" << arg << "\"" << endl;
+}
+
 void CodeGenData::writeStatement( InputLoc &loc, int nargs, char **args )
 {
 	/* FIXME: This should be moved to the virtual functions in the code
@@ -728,10 +733,8 @@ void CodeGenData::writeStatement( InputLoc &loc, int nargs, char **args )
 				noPrefix = true;
 			else if ( strcmp( args[i], "nofinal" ) == 0 )
 				noFinal = true;
-			else {
-				source_warning(loc) << "unrecognized write option \"" << 
-						args[i] << "\"" << endl;
-			}
+			else
+				write_option_error( loc, args[i] );
 		}
 		writeData();
 	}
@@ -739,10 +742,8 @@ void CodeGenData::writeStatement( InputLoc &loc, int nargs, char **args )
 		for ( int i = 1; i < nargs; i++ ) {
 			if ( strcmp( args[i], "nocs" ) == 0 )
 				noCS = true;
-			else {
-				source_warning(loc) << "unrecognized write option \"" << 
-						args[i] << "\"" << endl;
-			}
+			else
+				write_option_error( loc, args[i] );
 		}
 		writeInit();
 	}
@@ -750,19 +751,30 @@ void CodeGenData::writeStatement( InputLoc &loc, int nargs, char **args )
 		for ( int i = 1; i < nargs; i++ ) {
 			if ( strcmp( args[i], "noend" ) == 0 )
 				noEnd = true;
-			else {
-				source_warning(loc) << "unrecognized write option \"" << 
-						args[i] << "\"" << endl;
-			}
+			else
+				write_option_error( loc, args[i] );
 		}
 		writeExec();
 	}
 	else if ( strcmp( args[0], "exports" ) == 0 ) {
-		for ( int i = 1; i < nargs; i++ ) {
-			source_warning(loc) << "unrecognized write option \"" << 
-					args[i] << "\"" << endl;
-		}
+		for ( int i = 1; i < nargs; i++ )
+			write_option_error( loc, args[i] );
 		writeExports();
+	}
+	else if ( strcmp( args[0], "start" ) == 0 ) {
+		for ( int i = 1; i < nargs; i++ )
+			write_option_error( loc, args[i] );
+		writeStart();
+	}
+	else if ( strcmp( args[0], "first_final" ) == 0 ) {
+		for ( int i = 1; i < nargs; i++ )
+			write_option_error( loc, args[i] );
+		writeFirstFinal();
+	}
+	else if ( strcmp( args[0], "error" ) == 0 ) {
+		for ( int i = 1; i < nargs; i++ )
+			write_option_error( loc, args[i] );
+		writeError();
 	}
 	else {
 		/* EMIT An error here. */

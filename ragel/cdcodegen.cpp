@@ -776,6 +776,20 @@ void FsmCodeGen::STATE_IDS()
 	}
 }
 
+void FsmCodeGen::writeStart()
+{
+	out << START_STATE_ID();
+}
+
+void FsmCodeGen::writeFirstFinal()
+{
+	out << FIRST_FINAL_STATE();
+}
+
+void FsmCodeGen::writeError()
+{
+	out << ERROR_STATE();
+}
 
 /*
  * Language specific, but style independent code generators functions.

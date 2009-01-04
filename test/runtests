@@ -51,7 +51,7 @@ shift $((OPTIND - 1));
 
 [ -z "$*" ] && set -- *.rl
 
-config=../common/config.h
+config=../ragel/config.h
 ragel=../ragel/ragel
 
 cxx_compiler=`sed '/^#define CXX/s/#define CXX *//p;d' $config`

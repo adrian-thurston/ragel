@@ -735,6 +735,22 @@ void CSharpFsmCodeGen::STATE_IDS()
 	}
 }
 
+
+void CSharpFsmCodeGen::writeStart()
+{
+	out << START_STATE_ID();
+}
+
+void CSharpFsmCodeGen::writeFirstFinal()
+{
+	out << FIRST_FINAL_STATE();
+}
+
+void CSharpFsmCodeGen::writeError()
+{
+	out << ERROR_STATE();
+}
+
 /*
  * C# Specific
  */
