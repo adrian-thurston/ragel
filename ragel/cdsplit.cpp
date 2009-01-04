@@ -76,7 +76,7 @@ void SplitCodeGen::GOTO_HEADER( RedStateAp *state, bool stateInPartition )
 
 	/* Advance and test buffer pos. */
 	if ( state->labelNeeded ) {
-		if ( hasEnd ) {
+		if ( !noEnd ) {
 			out <<
 				"	if ( ++" << P() << " == " << PE() << " )\n"
 				"		goto _out" << state->id << ";\n";
@@ -237,7 +237,7 @@ std::ostream &SplitCodeGen::PARTITION( int partition )
 			"\n";
 
 
-		if ( hasEnd ) {
+		if ( !noEnd ) {
 			outLabelUsed = true;
 			out << 
 				"	if ( ++" << P() << " == " << PE() << " )\n"
@@ -309,13 +309,13 @@ void SplitCodeGen::writeData()
 		"static const int " << START() << " = " << START_STATE_ID() << ";\n"
 		"\n";
 
-	if ( writeFirstFinal ) {
+	if ( !noFinal ) {
 		out <<
 			"static const int " << FIRST_FINAL() << " = " << FIRST_FINAL_STATE() << ";\n"
 			"\n";
 	}
 
-	if ( writeErr ) {
+	if ( !noError ) {
 		out <<
 			"static const int " << ERROR() << " = " << ERROR_STATE() << ";\n"
 			"\n";
@@ -388,7 +388,7 @@ void SplitCodeGen::writeExec()
 		"	{\n"
 		"	int _stat = 0;\n";
 
-	if ( hasEnd ) {
+	if ( !noEnd ) {
 		out <<
 			"	if ( " << P() << " == " << PE() << " )\n"
 			"		goto _out;\n";
@@ -400,7 +400,7 @@ void SplitCodeGen::writeExec()
 	 * partition-switch exit from the last partition. */
 	out << "_reenter:\n";
 
-	if ( hasEnd ) {
+	if ( !noEnd ) {
 		out <<
 			"	if ( ++" << P() << " == " << PE() << " )\n"
 			"		goto _out;\n";
@@ -425,7 +425,7 @@ void SplitCodeGen::writeExec()
 		"	if ( _stat )\n"
 		"		goto _reenter;\n";
 	
-	if ( hasEnd )
+	if ( !noEnd )
 		out << "	_out: {}\n";
 
 	out <<
@@ -507,7 +507,7 @@ void SplitCodeGen::setLabelsNeeded()
 		}
 	}
 
-	if ( hasEnd ) {
+	if ( !noEnd ) {
 		for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ )
 			st->outNeeded = st->labelNeeded;
 	}

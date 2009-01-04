@@ -177,7 +177,7 @@ void IpGotoCodeGen::GOTO_HEADER( RedStateAp *state )
 
 	/* Advance and test buffer pos. */
 	if ( state->labelNeeded ) {
-		if ( hasEnd ) {
+		if ( !noEnd ) {
 			out <<
 				"	if ( ++" << P() << " == " << PE() << " )\n"
 				"		goto _test_eof" << state->id << ";\n";
@@ -352,7 +352,7 @@ void IpGotoCodeGen::setLabelsNeeded()
 		}
 	}
 
-	if ( hasEnd ) {
+	if ( !noEnd ) {
 		for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 			if ( st != redFsm->errState )
 				st->outNeeded = st->labelNeeded;
@@ -381,7 +381,7 @@ void IpGotoCodeGen::writeExec()
 	if ( redFsm->anyConditions() )
 		out << "	" << WIDE_ALPH_TYPE() << " _widec;\n";
 
-	if ( hasEnd ) {
+	if ( !noEnd ) {
 		testEofUsed = true;
 		out << 
 			"	if ( " << P() << " == " << PE() << " )\n"
@@ -399,7 +399,7 @@ void IpGotoCodeGen::writeExec()
 			"	}\n"
 			"\n";
 
-		if ( hasEnd ) {
+		if ( !noEnd ) {
 			testEofUsed = true;
 			out << 
 				"	if ( ++" << P() << " == " << PE() << " )\n"

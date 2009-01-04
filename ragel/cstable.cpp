@@ -958,7 +958,7 @@ void CSharpTabCodeGen::writeExec()
 		"\n";
 //		"	" << PTR_CONST() << WIDE_ALPH_TYPE() << POINTER() << "_keys;\n"
 
-	if ( hasEnd ) {
+	if ( !noEnd ) {
 		testEofUsed = true;
 		out << 
 			"	if ( " << P() << " == " << PE() << " )\n"
@@ -1047,7 +1047,7 @@ void CSharpTabCodeGen::writeExec()
 			"		goto _out;\n";
 	}
 
-	if ( hasEnd ) {
+	if ( !noEnd ) {
 		out << 
 			"	if ( ++" << P() << " != " << PE() << " )\n"
 			"		goto _resume;\n";

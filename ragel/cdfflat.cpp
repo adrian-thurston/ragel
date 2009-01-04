@@ -266,7 +266,7 @@ void FFlatCodeGen::writeExec()
 			"	" << WIDE_ALPH_TYPE() << " _widec;\n";
 	}
 
-	if ( hasEnd ) {
+	if ( !noEnd ) {
 		testEofUsed = true;
 		out << 
 			"	if ( " << P() << " == " << PE() << " )\n"
@@ -337,7 +337,7 @@ void FFlatCodeGen::writeExec()
 			"		goto _out;\n";
 	}
 
-	if ( hasEnd ) {
+	if ( !noEnd ) {
 		out << 
 			"	if ( ++" << P() << " != " << PE() << " )\n"
 			"		goto _resume;\n";

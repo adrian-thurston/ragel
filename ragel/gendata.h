@@ -141,11 +141,11 @@ struct CodeGenData
 	ExportList exportList;
 
 	/* Write options. */
-	bool hasEnd;
-	bool dataPrefix;
-	bool writeFirstFinal;
-	bool writeErr;
-	bool writeCS;
+	bool noEnd;
+	bool noPrefix;
+	bool noFinal;
+	bool noError;
+	bool noCS;
 
 	void createMachine();
 	void initActionList( unsigned long length );

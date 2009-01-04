@@ -735,7 +735,7 @@ void CSharpFlatCodeGen::writeExec()
 
 	out << "\n";
 
-	if ( hasEnd ) {
+	if ( !noEnd ) {
 		testEofUsed = true;
 		out << 
 			"	if ( " << P() << " == " << PE() << " )\n"
@@ -819,7 +819,7 @@ void CSharpFlatCodeGen::writeExec()
 			"		goto _out;\n";
 	}
 
-	if ( hasEnd ) {
+	if ( !noEnd ) {
 		out << 
 			"	if ( ++" << P() << " != " << PE() << " )\n"
 			"		goto _resume;\n";

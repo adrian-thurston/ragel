@@ -717,7 +717,7 @@ void RbxGotoCodeGen::writeExec()
 
 	out << "\n";
 
-	if ( hasEnd ) {
+	if ( !noEnd ) {
 		outLabelUsed = true;
 		out << 
 			"	if ( " << P() << " == " << PE() << " )\n";
@@ -785,7 +785,7 @@ void RbxGotoCodeGen::writeExec()
 			"	end" << "\n";
 	}
 
-	if ( hasEnd ) {
+	if ( !noEnd ) {
 		out <<  "	"  << P() << " += 1\n"
 			"	if ( " << P() << " != " << PE() << " )\n";
 		rbxGoto(out << "		", "_resume") << "\n" <<

@@ -659,7 +659,7 @@ void CSharpFsmCodeGen::writeInit()
 {
 	out << "	{\n";
 
-	if ( writeCS )
+	if ( !noCS )
 		out << "\t" << CS() << " = " << START() << ";\n";
 	
 	/* If there are any calls, then the stack top needs initialization. */
@@ -677,7 +677,7 @@ void CSharpFsmCodeGen::writeInit()
 
 string CSharpFsmCodeGen::DATA_PREFIX()
 {
-	if ( dataPrefix )
+	if ( !noPrefix )
 		return FSM_NAME() + "_";
 	return "";
 }
@@ -718,10 +718,10 @@ void CSharpFsmCodeGen::STATE_IDS()
 	if ( redFsm->startState != 0 )
 		STATIC_VAR( "int", START() ) << " = " << START_STATE_ID() << ";\n";
 
-	if ( writeFirstFinal )
+	if ( !noFinal )
 		STATIC_VAR( "int" , FIRST_FINAL() ) << " = " << FIRST_FINAL_STATE() << ";\n";
 
-	if ( writeErr )
+	if ( !noError )
 		STATIC_VAR( "int", ERROR() ) << " = " << ERROR_STATE() << ";\n";
 
 	out << "\n";

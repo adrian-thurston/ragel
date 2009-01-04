@@ -299,7 +299,7 @@ void JavaTabCodeGen::INLINE_LIST( ostream &ret, GenInlineList *inlineList,
 
 string JavaTabCodeGen::DATA_PREFIX()
 {
-	if ( dataPrefix )
+	if ( !noPrefix )
 		return FSM_NAME() + "_";
 	return "";
 }
@@ -1016,10 +1016,10 @@ void JavaTabCodeGen::writeData()
 	if ( redFsm->startState != 0 )
 		STATIC_VAR( "int", START() ) << " = " << START_STATE_ID() << ";\n";
 
-	if ( writeFirstFinal )
+	if ( !noFinal )
 		STATIC_VAR( "int" , FIRST_FINAL() ) << " = " << FIRST_FINAL_STATE() << ";\n";
 
-	if ( writeErr )
+	if ( !noError )
 		STATIC_VAR( "int", ERROR() ) << " = " << ERROR_STATE() << ";\n";
 	
 	out << "\n";
@@ -1067,7 +1067,7 @@ void JavaTabCodeGen::writeExec()
 		"	switch ( _goto_targ ) {\n"
 		"	case 0:\n";
 
-	if ( hasEnd ) {
+	if ( !noEnd ) {
 		out << 
 			"	if ( " << P() << " == " << PE() << " ) {\n"
 			"		_goto_targ = " << _test_eof << ";\n"
@@ -1152,7 +1152,7 @@ void JavaTabCodeGen::writeExec()
 			"	}\n";
 	}
 
-	if ( hasEnd ) {
+	if ( !noEnd ) {
 		out << 
 			"	if ( ++" << P() << " != " << PE() << " ) {\n"
 			"		_goto_targ = " << _resume << ";\n"
@@ -1666,7 +1666,7 @@ void JavaTabCodeGen::writeInit()
 {
 	out << "	{\n";
 
-	if ( writeCS )
+	if ( !noCS )
 		out << "\t" << CS() << " = " << START() << ";\n";
 	
 	/* If there are any calls, then the stack top needs initialization. */

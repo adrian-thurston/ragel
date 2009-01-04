@@ -101,11 +101,11 @@ CodeGenData::CodeGenData( ostream &out )
 	dataExpr(0),
 	wantComplete(0),
 	hasLongestMatch(false),
-	hasEnd(true),
-	dataPrefix(true),
-	writeFirstFinal(true),
-	writeErr(true),
-	writeCS(true)
+	noEnd(false),
+	noPrefix(false),
+	noFinal(false),
+	noError(false),
+	noCS(false)
 {}
 
 
@@ -723,11 +723,11 @@ void CodeGenData::writeStatement( InputLoc &loc, int nargs, char **args )
 	if ( strcmp( args[0], "data" ) == 0 ) {
 		for ( int i = 1; i < nargs; i++ ) {
 			if ( strcmp( args[i], "noerror" ) == 0 )
-				writeErr = false;
+				noError = true;
 			else if ( strcmp( args[i], "noprefix" ) == 0 )
-				dataPrefix = false;
+				noPrefix = true;
 			else if ( strcmp( args[i], "nofinal" ) == 0 )
-				writeFirstFinal = false;
+				noFinal = true;
 			else {
 				source_warning(loc) << "unrecognized write option \"" << 
 						args[i] << "\"" << endl;
@@ -738,7 +738,7 @@ void CodeGenData::writeStatement( InputLoc &loc, int nargs, char **args )
 	else if ( strcmp( args[0], "init" ) == 0 ) {
 		for ( int i = 1; i < nargs; i++ ) {
 			if ( strcmp( args[i], "nocs" ) == 0 )
-				writeCS = false;
+				noCS = true;
 			else {
 				source_warning(loc) << "unrecognized write option \"" << 
 						args[i] << "\"" << endl;
@@ -749,7 +749,7 @@ void CodeGenData::writeStatement( InputLoc &loc, int nargs, char **args )
 	else if ( strcmp( args[0], "exec" ) == 0 ) {
 		for ( int i = 1; i < nargs; i++ ) {
 			if ( strcmp( args[i], "noend" ) == 0 )
-				hasEnd = false;
+				noEnd = true;
 			else {
 				source_warning(loc) << "unrecognized write option \"" << 
 						args[i] << "\"" << endl;

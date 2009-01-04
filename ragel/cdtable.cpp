@@ -954,7 +954,7 @@ void TabCodeGen::writeExec()
 		"	" << PTR_CONST() << WIDE_ALPH_TYPE() << POINTER() << "_keys;\n"
 		"\n";
 
-	if ( hasEnd ) {
+	if ( !noEnd ) {
 		testEofUsed = true;
 		out << 
 			"	if ( " << P() << " == " << PE() << " )\n"
@@ -1043,7 +1043,7 @@ void TabCodeGen::writeExec()
 			"		goto _out;\n";
 	}
 
-	if ( hasEnd ) {
+	if ( !noEnd ) {
 		out << 
 			"	if ( ++" << P() << " != " << PE() << " )\n"
 			"		goto _resume;\n";

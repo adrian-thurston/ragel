@@ -181,7 +181,7 @@ void RubyCodeGen::genLineDirective( ostream &out )
 
 string RubyCodeGen::DATA_PREFIX()
 {
-	if ( dataPrefix )
+	if ( !noPrefix )
 		return FSM_NAME() + "_";
 	return "";
 }
@@ -513,10 +513,10 @@ void RubyCodeGen::STATE_IDS()
 	if ( redFsm->startState != 0 )
 		STATIC_VAR( "int", START() ) << " = " << START_STATE_ID() << ";\n";
 
-	if ( writeFirstFinal )
+	if ( !noFinal )
 		STATIC_VAR( "int" , FIRST_FINAL() ) << " = " << FIRST_FINAL_STATE() << ";\n";
 
-	if ( writeErr )
+	if ( !noError )
 		STATIC_VAR( "int", ERROR() ) << " = " << ERROR_STATE() << ";\n";
 
 	out << "\n";
@@ -867,10 +867,10 @@ void RubyCodeGen::writeInit()
 	
 	out << "	" << P() << " ||= 0\n";
 
-	if ( hasEnd ) 
+	if ( !noEnd ) 
 		out << "	" << PE() << " ||= " << DATA() << ".length\n";
 
-	if ( writeCS )
+	if ( !noCS )
 		out << "	" << CS() << " = " << START() << "\n";
 
 	/* If there are any calls, then the stack top needs initialization. */

@@ -685,7 +685,7 @@ void RubyFlatCodeGen::writeExec()
 		"	_trigger_goto = false\n"
 		"	if _goto_level <= 0\n";
 	
-	if ( hasEnd ) {
+	if ( !noEnd ) {
 		out << 
 			"	if " << P() << " == " << PE() << "\n"
 			"		_goto_level = _test_eof\n"
@@ -792,7 +792,7 @@ void RubyFlatCodeGen::writeExec()
 
 	out << "	" << P() << " += 1\n";
 
-	if ( hasEnd ) {
+	if ( !noEnd ) {
 		out << 
 			"	if " << P() << " != " << PE() << "\n"
 			"		_goto_level = _resume\n"
