@@ -116,7 +116,7 @@ Key makeFsmKeyHex( char *str, const InputLoc &loc, ParseData *pd )
 	}
 
 	if ( unusedBits && keyOps->alphType->isSigned && ul >> (size * 8 - 1) )
-		ul |= (0xffffffff >> (size*8 ) ) << (size*8);
+		ul |= ( 0xffffffff >> (size*8) ) << (size*8);
 
 	return Key( (long)ul );
 }
