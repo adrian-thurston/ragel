@@ -15,7 +15,6 @@ programs:
 
  * ragel (the most recent version)
  * kelbt (the most recent version)
- * gperf
 
 To build the user guide the following extra programs are needed:
 

@@ -21,9 +21,9 @@ dnl   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 AC_INIT(ragel/main.cpp)
 AC_CONFIG_HEADER(ragel/config.h)
 
-dnl Set to true if build system should generate parsers from ragel, kelbt, and
-dnl gperf sources. Set to false if generated files are included and not to be
-dnl built (production).
+dnl Set to true if the build system should generate parsers from ragel and kelbt
+dnl sources. Set to false if generated files are included and not to be built
+dnl (production).
 AC_SUBST(BUILD_PARSERS,true)
 
 dnl Checks for programs.
@@ -49,15 +49,6 @@ AC_CHECK_PROG(RAGEL, ragel, ragel)
 if test -z "$RAGEL"; then
 	echo
 	echo "error: ragel is required to build the parsers"
-	echo
-	exit 1
-fi
-
-dnl Check for gperf
-AC_CHECK_PROG(GPERF, gperf, gperf)
-if test -z "$GPERF"; then
-	echo
-	echo "error: gperf is required to build the parsers"
 	echo
 	exit 1
 fi

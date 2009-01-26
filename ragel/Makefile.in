@@ -43,7 +43,7 @@ CC_SRCS = \
 	xmlcodegen.cpp \
 
 GEN_SRC = version.h rlscan.cpp rlparse.h rlparse.cpp \
-	xmltags.cpp xmlscan.cpp xmlparse.h
+	xmlscan.cpp xmlparse.h
 
 LIBS =
 MINGW_LIBS = -lpsapi
