@@ -122,6 +122,8 @@ void InputData::writeOutput()
 			cgd->writeStatement( ii->loc, ii->writeArgs.length()-1, ii->writeArgs.data );
 		}
 		else {
+			*outStream << '\n';
+			lineDirective( *outStream, inputFileName, ii->loc.line );
 			*outStream << ii->data.str();
 		}
 	}

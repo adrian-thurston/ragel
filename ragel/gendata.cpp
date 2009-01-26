@@ -722,7 +722,7 @@ void CodeGenData::writeStatement( InputLoc &loc, int nargs, char **args )
 	 * generators.
 	 *
 	 * Force a newline. */
-	out << "\n";
+	out << '\n';
 	genLineDirective( out );
 
 	if ( strcmp( args[0], "data" ) == 0 ) {
