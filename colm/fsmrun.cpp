@@ -237,7 +237,7 @@ void FsmRun::sendBackIgnore( Kid *ignore )
 		#ifdef COLM_LOG_PARSE
 		LangElInfo *lelInfo = parser->tables->rtd->lelInfo;
 		cerr << "sending back: " << lelInfo[ignore->tree->id].name;
-		if ( ignore->tree->alg != 0 && ignore->tree->alg->flags & AF_ARTIFICIAL )
+		if ( ignore->tree->flags & AF_ARTIFICIAL )
 			cerr << " (artificial)";
 		cerr << endl;
 		#endif
