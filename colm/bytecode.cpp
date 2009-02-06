@@ -2029,6 +2029,19 @@ again:
 			push( (SW)ref->kid );
 			break;
 		}
+		case IN_REF_FROM_QUAL_REF: {
+			short int field;
+			read_half( field );
+
+			#ifdef COLM_LOG_BYTECODE
+			cerr << "IN_REF_FROM_QUAL_REF " << field << endl;
+			#endif
+
+			Ref *ref = (Ref*)plocal(field);
+			push( (SW)ref );
+			push( (SW)ref->kid );
+			break;
+		}
 		case IN_TRITER_REF_FROM_CUR: {
 			short int field;
 			read_half( field );

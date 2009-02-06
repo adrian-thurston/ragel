@@ -353,6 +353,51 @@ ObjectDef *objDefFromUT( ParseData *pd, UniqueType *ut )
 	return objDef;
 }
 
+/* The qualification must start at a local frame. There cannot be any pointer. */
+long LangVarRef::loadQualificationRefs( ParseData *pd, CodeVect &code ) const
+{
+	long count = 0;
+	ObjectDef *rootObj = pd->curLocalFrame;
+
+	/* Start the search from the root object. */
+	ObjectDef *searchObjDef = rootObj;
+
+	for ( QualItemVect::Iter qi = *qual; qi.lte(); qi++ ) {
+		/* Lookup the field in the current qualification. */
+		ObjFieldMapEl *objDefMapEl = searchObjDef->objFieldMap->find( qi->data );
+		if ( objDefMapEl == 0 )
+			error(qi->loc) << "cannot resolve qualification " << qi->data << endp;
+		ObjField *el = objDefMapEl->value;
+
+		if ( qi.pos() > 0 ) {
+			code.append( IN_REF_FROM_QUAL_REF );
+			code.appendHalf( 0 );
+		}
+		else if ( el->typeRef->iterDef != 0 ) {
+			code.append( el->typeRef->iterDef->inRefFromCur );
+			code.appendHalf( el->offset );
+		}
+		else if ( el->typeRef->isRef ) {
+			code.append( IN_REF_FROM_REF );
+			code.appendHalf( el->offset );
+		}
+		else {
+			code.append( IN_REF_FROM_LOCAL );
+			code.appendHalf( el->offset );
+		}
+
+		UniqueType *elUT = el->typeRef->lookupType( pd );
+		if ( elUT->typeId == TYPE_ITER )
+			elUT = el->typeRef->searchTypeRef->lookupType( pd );
+		
+		assert( qi->type == QualItem::Dot );
+
+		searchObjDef = objDefFromUT( pd, elUT );
+		count += 1;
+	}
+	return count;
+}
+
 void LangVarRef::loadQualification( ParseData *pd, CodeVect &code, 
 		ObjectDef *rootObj, int lastPtrInQual, bool forWriting, bool revert ) const
 {
@@ -661,29 +706,63 @@ UniqueType *LangVarRef::evaluate( ParseData *pd, CodeVect &code, bool forWriting
 	return ut;
 }
 
+void LangVarRef::canTakeRef( ParseData *pd, VarRefLookup &lookup ) const
+{
+	bool canTake = false;
+
+	/* If the var is not a local, it must be an attribute accessed
+	 * via a local and attributes. */
+	if ( lookup.inObject->type == ObjectDef::FrameType )
+		canTake = true;
+	else if ( isLocalRef(pd) && lookup.lastPtrInQual < 0 && lookup.uniqueType->typeId != TYPE_PTR ) 
+		canTake = true;
+
+	if ( !canTake ) {
+		error(loc) << "can only take references of locals or "
+				"attributes accessed via a local" << endp;
+	}
+
+	if ( lookup.objField->refActive )
+		error(loc) << "reference currently active, cannot take another" << endp;
+}
+
 /* Return the field referenced. */
-ObjField *LangVarRef::evaluateRef( ParseData *pd, CodeVect &code ) const
+ObjField *LangVarRef::preEvaluateRef( ParseData *pd, CodeVect &code ) const
 {
 	/* Lookup the loadObj. */
 	VarRefLookup lookup = lookupField( pd );
 
-	if ( lookup.inObject->type != ObjectDef::FrameType )
-		error(loc) << "can only take references of local variables" << endl;
-	
-	if ( lookup.objField->refActive )
-		error(loc) << "reference current active, cannot take another" << endl;
+	canTakeRef( pd, lookup );
+
+	loadQualificationRefs( pd, code );
+
+	return lookup.objField;
+}
+
+/* Return the field referenced. */
+ObjField *LangVarRef::evaluateRef( ParseData *pd, CodeVect &code, long pushCount ) const
+{
+	/* Lookup the loadObj. */
+	VarRefLookup lookup = lookupField( pd );
+
+	canTakeRef( pd, lookup );
 
 	/* Ensure that the field is referenced. */
 	lookup.inObject->referenceField( pd, lookup.objField );
 
 	/* Note that we could have modified children. */
-	lookup.objField->refActive = true;
+	if ( qual->length() == 0 )
+		lookup.objField->refActive = true;
 
 	/* Whenever we take a reference we have to assume writing and that the
 	 * tree is dirty. */
 	lookup.objField->dirtyTree = true;
 
-	if ( lookup.objField->typeRef->iterDef != 0 ) {
+	if ( qual->length() > 0 ) {
+		code.append( IN_REF_FROM_QUAL_REF );
+		code.appendHalf( pushCount );
+	}
+	else if ( lookup.objField->typeRef->iterDef != 0 ) {
 		code.append( lookup.objField->typeRef->iterDef->inRefFromCur );
 		code.appendHalf( lookup.objField->offset );
 	}
@@ -717,10 +796,12 @@ ObjField **LangVarRef::evaluateArgs( ParseData *pd, CodeVect &code,
 
 	/* Evaluate and push the args. */
 	if ( args != 0 ) {
-		/* If we have the parameter list, initialize an iterator. */
+		/* We use this only if there is a paramter list. */
 		ParameterList::Iter p;
-		paramList != 0 && ( p = *paramList );
+		long pushCount = 0;
 
+		/* First pass we need to push object loads for reference parameters. */
+		paramList != 0 && ( p = *paramList );
 		for ( ExprVect::Iter pe = *args; pe.lte(); pe++ ) {
 			/* Get the expression and the UT for the arg. */
 			LangExpr *expression = *pe;
@@ -736,14 +817,47 @@ ObjField **LangVarRef::evaluateArgs( ParseData *pd, CodeVect &code,
 				/* Lookup the field. */
 				LangVarRef *varRef = expression->term->varRef;
 
-				ObjField *refOf = varRef->evaluateRef( pd, code );
+				ObjField *refOf = varRef->preEvaluateRef( pd, code );
 				paramRefs[pe.pos()] = refOf;
+
+				pushCount += varRef->qual->length() * 2;
+			}
+
+			/* Advance the parameter list iterator if we have it. */
+			paramList != 0 && p.increment();
+		}
+
+		paramList != 0 && ( p = *paramList );
+		for ( ExprVect::Iter pe = *args; pe.lte(); pe++ ) {
+			/* Get the expression and the UT for the arg. */
+			LangExpr *expression = *pe;
+			UniqueType *paramUT = lookup.objMethod->paramUTs[pe.pos()];
+
+			if ( paramUT->typeId == TYPE_REF ) {
+				
+				/* Make sure we are dealing with a variable reference. */
+				if ( expression->type != LangExpr::TermType )
+					error(loc) << "not a term: argument must be a local variable" << endp;
+				if ( expression->term->type != LangTerm::VarRefType )
+					error(loc) << "not a variable: argument must be a local variable" << endp;
+
+				/* Lookup the field. */
+				LangVarRef *varRef = expression->term->varRef;
+
+				pushCount -= varRef->qual->length() * 2;
+
+				ObjField *refOf = varRef->evaluateRef( pd, code, pushCount );
+				paramRefs[pe.pos()] = refOf;
+
+				pushCount += 2;
 			}
 			else {
 				UniqueType *exprUT = expression->evaluate( pd, code );
 
 				if ( !castAssignment( pd, code, paramUT, 0, exprUT ) )
 					error(loc) << "arg " << pe.pos()+1 << " is of the wrong type" << endp;
+
+				pushCount += 1;
 			}
 
 			/* Advance the parameter list iterator if we have it. */
@@ -1667,7 +1781,7 @@ void LangStmt::compile( ParseData *pd, CodeVect &code ) const
 		}
 		case YieldType: {
 			/* take a reference and yield it. Immediately reset the referece. */
-			ObjField *objField = varRef->evaluateRef( pd, code );
+			ObjField *objField = varRef->evaluateRef( pd, code, 0 );
 			objField->refActive = false;
 			code.append( IN_YIELD );
 			break;

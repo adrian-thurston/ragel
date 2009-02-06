@@ -525,7 +525,7 @@ rec_call:
 		if ( vm_ptop() != root ) {
 			objectLength = lelInfo[((Kid*)vm_top())->tree->id].objectLength;
 			if ( kidNum < objectLength )
-				cout << " attr=" << kidNum;
+				cout << " an=\"" << kidNum << '"';
 		}
 
 		objectLength = lelInfo[kid->tree->id].objectLength;

@@ -1343,6 +1343,7 @@ struct LangVarRef
 	void loadGlobalObj( ParseData *pd, CodeVect &code, 
 			int lastPtrInQual, bool forWriting ) const;
 	void loadObj( ParseData *pd, CodeVect &code, int lastPtrInQual, bool forWriting ) const;
+	void canTakeRef( ParseData *pd, VarRefLookup &lookup ) const;
 
 	void setFieldIter( ParseData *pd, CodeVect &code, 
 			ObjectDef *inObject, UniqueType *objUT, UniqueType *exprType, bool revert ) const;
@@ -1357,8 +1358,10 @@ struct LangVarRef
 	void callOperation( ParseData *pd, CodeVect &code, VarRefLookup &lookup ) const;
 	UniqueType *evaluateCall( ParseData *pd, CodeVect &code, ExprVect *args ) const;
 	UniqueType *evaluate( ParseData *pd, CodeVect &code, bool forWriting = false ) const;
-	ObjField *evaluateRef( ParseData *pd, CodeVect &code ) const;
+	ObjField *evaluateRef( ParseData *pd, CodeVect &code, long pushCount ) const;
+	ObjField *preEvaluateRef( ParseData *pd, CodeVect &code ) const;
 	void resetActiveRefs( ParseData *pd, VarRefLookup &lookup, ObjField **paramRefs ) const;
+	long loadQualificationRefs( ParseData *pd, CodeVect &code ) const;
 
 	InputLoc loc;
 	QualItemVect *qual;
