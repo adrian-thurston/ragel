@@ -27,7 +27,7 @@
 
 INCS += -I../aapl
 
-DEFS_COLM += -DCOLM_LOG
+DEFS_COLM += -DCOLM_LOG -DPREFIX='"$(prefix)"'
 DEFS_RT_P +=
 DEFS_RT_D += -DCOLM_LOG
 
@@ -67,8 +67,8 @@ ALL_SRC = $(COLM_SRC) $(RUNTIME_SRC)
 # Files in ALL_SRC that are generated.
 GEN_SRC = version.h lmscan.cpp lmparse.h lmparse.cpp 
 
-RUNTIME_P = runtime_p.a
-RUNTIME_D = runtime_d.a
+RUNTIME_P = libcolmp.a
+RUNTIME_D = libcolmd.a
 
 LIBS = 
 
@@ -77,7 +77,7 @@ LIBS =
 # Get the version info.
 include ../version.mk
 
-PREFIX = @prefix@
+prefix = @prefix@
 
 BUILD_PARSERS = @BUILD_PARSERS@
 
@@ -146,7 +146,16 @@ clean:
 	rm -f tags .*.d *.o colm $(EXTRA_CLEAN) $(RUNTIME_P) $(RUNTIME_D)
 
 install: all
-	install -d $(PREFIX)/bin
-	install -s colm $(PREFIX)/bin/colm
+	install -d $(prefix)/bin
+	install -d $(prefix)/include
+	install -d $(prefix)/include/colm
+	install -d $(prefix)/lib
+	install -s colm $(prefix)/bin/colm
+	install libcolmp.a libcolmd.a $(prefix)/lib
+	install ../aapl/astring.h ../aapl/avlcommon.h ../aapl/avlmap.h \
+		../aapl/compare.h ../aapl/dlcommon.h ../aapl/dlist.h \
+		../aapl/dlistval.h ../aapl/resize.h ../aapl/table.h \
+		../aapl/vector.h bytecode.h config.h fsmrun.h input.h \
+		pdarun.h $(prefix)/include/colm
 
 -include $(DEPS)

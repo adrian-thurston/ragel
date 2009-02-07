@@ -287,14 +287,17 @@ void compileOutput( const char *argv0 )
 	char command[length];
 	sprintf( command, 
 		"g++ -Wall -Wwrite-strings"
+		" -I%s"
 		" -I%s/../aapl"
-		" -I%s/../colm"
-		" -I%s/../common"
+		" -I" PREFIX "/include/colm"
 		" -g"
 		" -o %s"
 		" %s"
-		" %s/../colm/runtime_%c.a",
-		location, location, location, exec, outputFileName, location, logging ? 'd' : 'p' );
+		" -L %s"
+		" -L " PREFIX "/lib"
+		" -lcolm%c",
+		location, location,
+		exec, outputFileName, location, logging ? 'd' : 'p' );
 	if ( colm_log_compile ) {
 		cout << "compiling: " << outputFileName << endl;
 	}
