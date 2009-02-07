@@ -1815,9 +1815,16 @@ void LangStmt::compile( ParseData *pd, CodeVect &code ) const
 		}
 		case YieldType: {
 			/* take a reference and yield it. Immediately reset the referece. */
+			varRef->preEvaluateRef( pd, code );
 			ObjField *objField = varRef->evaluateRef( pd, code, 0 );
-			objField->refActive = false;
 			code.append( IN_YIELD );
+
+			if ( varRef->qual->length() > 0 ) {
+				code.append( IN_POP_N_WORDS );
+				code.appendHalf( (short)(varRef->qual->length()*2) );
+			}
+
+			objField->refActive = false;
 			break;
 		}
 	}
