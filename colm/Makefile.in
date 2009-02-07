@@ -18,6 +18,13 @@
 #   along with Colm; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
 
+
+# Logging:
+# colm: rt on/off
+# rt_prd: off
+# rt_db: on
+# rt_clm: rt on/off
+
 INCS += -I../aapl
 DEFS +=
 
@@ -25,13 +32,8 @@ CFLAGS += -g -Wall -Wwrite-strings
 LDFLAGS +=
 
 # Frequently changed ones first.
-CC_SRCS = \
+COLM_SRC = \
 	compile.cpp \
-	bytecode.cpp \
-	tree.cpp \
-	fsmrun.cpp \
-	pdarun.cpp \
-	input.cpp \
 	lmparse.cpp \
 	lmscan.cpp \
 	parsetree.cpp \
@@ -48,9 +50,6 @@ CC_SRCS = \
 	redfsm.cpp \
 	fsmexec.cpp \
 	main.cpp \
-	list.cpp \
-	map.cpp \
-	string.cpp \
 	redbuild.cpp \
 	closure.cpp \
 	fsmap.cpp \
@@ -59,6 +58,10 @@ CC_SRCS = \
 
 RUNTIME_SRC = fsmrun.cpp pdarun.cpp bytecode.cpp list.cpp \
 	map.cpp string.cpp input.cpp tree.cpp
+
+ALL_SRC = $(COLM_SRC) $(RUNTIME_SRC)
+
+# Files in ALL_SRC that are generated.
 GEN_SRC = version.h lmscan.cpp lmparse.h lmparse.cpp 
 
 RUNTIME = runtime.a
@@ -78,18 +81,19 @@ BUILD_PARSERS = @BUILD_PARSERS@
 CXX = @CXX@
 
 # Get objects and dependencies from sources.
-OBJS = $(CC_SRCS:%.cpp=%.o)
+COLM_OBJ = $(COLM_SRC:%.cpp=%.o)
+RUNTIME_OBJ = $(RUNTIME_SRC:%.cpp=%.o)
+
 DEPS = $(CC_SRCS:%.cpp=.%.d)
-RUNTIME_OBJS = $(RUNTIME_SRC:%.cpp=%.o)
 
 # Rules.
 all: colm $(RUNTIME)
 
-colm: $(GEN_SRC) $(OBJS) $(LIBS)
-	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
+colm: $(GEN_SRC) $(COLM_OBJ) $(RUNTIME_OBJ) $(LIBS)
+	$(CXX) $(LDFLAGS) -o $@ $(COLM_OBJ) $(RUNTIME_OBJ) $(LIBS)
 
-$(RUNTIME): $(RUNTIME_OBJS)
-	ar -cr $@ $(RUNTIME_OBJS)
+$(RUNTIME): $(RUNTIME_OBJ)
+	ar -cr $@ $(RUNTIME_OBJ)
 
 version.h: ../version.mk
 	echo '#define VERSION "$(VERSION)"' > version.h
