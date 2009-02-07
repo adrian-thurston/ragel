@@ -72,6 +72,7 @@ typedef unsigned char uchar;
 #define IN_INIT_LOCALS           0x18
 #define IN_POP_LOCALS            0xb0
 #define IN_POP                   0x19
+#define IN_POP_N_WORDS           0xa2
 #define IN_DUP_TOP               0x1a
 #define IN_REJECT                0x1b
 #define IN_MATCH                 0x1c
@@ -350,6 +351,7 @@ Kid *alloc_attrs( Program *prg, long length );
 void free_attrs( Program *prg, Kid *attrs );
 void set_attr( Tree *tree, long pos, Tree *val );
 Tree *get_attr( Tree *tree, long pos );
+Kid *get_attr_kid( Tree *tree, long pos );
 
 /* Return the size of a type in words. */
 template<class T> int sizeof_in_words()
@@ -509,6 +511,9 @@ Tree *get_field( Tree *tree, Word field );
 Tree *get_field_split( Program *prg, Tree *tree, Word field );
 Tree *get_rhs_el( Program *prg, Tree *lhs, long position );
 void set_field( Program *prg, Tree *tree, long field, Tree *value );
+
+/* For making references of attributes. */
+Kid *get_field_kid( Tree *tree, Word field );
 
 Tree *tree_iter_advance( Program *prg, Tree **&sp, TreeIter *iter );
 Tree *tree_iter_next_child( Program *prg, Tree **&sp, TreeIter *iter );

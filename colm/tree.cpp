@@ -68,6 +68,14 @@ Tree *get_attr( Tree *tree, long pos )
 	return cur->tree;
 }
 
+Kid *get_attr_kid( Tree *tree, long pos )
+{
+	Kid *cur = tree->child;
+	for ( long i = 0; i < pos; i++ )
+		cur = cur->next;
+	return cur;
+}
+
 Kid *copy_obj_data( Program *prg, long length, Kid *src )
 {
 	Kid *cur = 0;
@@ -1008,6 +1016,11 @@ void set_field( Program *prg, Tree *tree, long field, Tree *value )
 Tree *get_field( Tree *tree, Word field )
 {
 	return get_attr( tree, field );
+}
+
+Kid *get_field_kid( Tree *tree, Word field )
+{
+	return get_attr_kid( tree, field );
 }
 
 Tree *get_field_split( Program *prg, Tree *tree, Word field )

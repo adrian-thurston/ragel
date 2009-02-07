@@ -1200,6 +1200,17 @@ again:
 			tree_downref( prg, sp, val );
 			break;
 		}
+		case IN_POP_N_WORDS: {
+			short n;
+			read_half( n );
+
+			#ifdef COLM_LOG_BYTECODE
+			cerr << "IN_POP_N_WORDS " << n << endl;
+			#endif
+
+			popn( n );
+			break;
+		}
 		case IN_STR_ATOI: {
 			#ifdef COLM_LOG_BYTECODE
 			cerr << "IN_STR_ATOI" << endl;
@@ -2030,16 +2041,22 @@ again:
 			break;
 		}
 		case IN_REF_FROM_QUAL_REF: {
+			short int back;
 			short int field;
+			read_half( back );
 			read_half( field );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_REF_FROM_QUAL_REF " << field << endl;
+			cerr << "IN_REF_FROM_QUAL_REF " << back << " " << field << endl;
 			#endif
 
-			Ref *ref = (Ref*)plocal(field);
+			Ref *ref = (Ref*)(sp + back);
+
+			Tree *obj = ref->kid->tree;
+			Kid *attr_kid = get_field_kid( obj, field );
+
 			push( (SW)ref );
-			push( (SW)ref->kid );
+			push( (SW)attr_kid );
 			break;
 		}
 		case IN_TRITER_REF_FROM_CUR: {

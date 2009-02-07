@@ -372,6 +372,7 @@ long LangVarRef::loadQualificationRefs( ParseData *pd, CodeVect &code ) const
 		if ( qi.pos() > 0 ) {
 			code.append( IN_REF_FROM_QUAL_REF );
 			code.appendHalf( 0 );
+			code.appendHalf( el->offset );
 		}
 		else if ( el->typeRef->iterDef != 0 ) {
 			code.append( el->typeRef->iterDef->inRefFromCur );
@@ -761,6 +762,7 @@ ObjField *LangVarRef::evaluateRef( ParseData *pd, CodeVect &code, long pushCount
 	if ( qual->length() > 0 ) {
 		code.append( IN_REF_FROM_QUAL_REF );
 		code.appendHalf( pushCount );
+		code.appendHalf( lookup.objField->offset );
 	}
 	else if ( lookup.objField->typeRef->iterDef != 0 ) {
 		code.append( lookup.objField->typeRef->iterDef->inRefFromCur );
@@ -904,6 +906,32 @@ void LangVarRef::callOperation( ParseData *pd, CodeVect &code, VarRefLookup &loo
 		code.appendHalf( lookup.objMethod->funcId );
 }
 
+void LangVarRef::popPrePush( ParseData *pd, CodeVect &code, 
+		VarRefLookup &lookup, ExprVect *args ) const
+{
+	long popCount = 0;
+
+	/* Evaluate and push the args. */
+	if ( args != 0 ) {
+		/* We use this only if there is a paramter list. */
+		for ( ExprVect::Iter pe = *args; pe.lte(); pe++ ) {
+			/* Get the expression and the UT for the arg. */
+			LangExpr *expression = *pe;
+			UniqueType *paramUT = lookup.objMethod->paramUTs[pe.pos()];
+
+			if ( paramUT->typeId == TYPE_REF ) {
+				/* Lookup the field. */
+				LangVarRef *varRef = expression->term->varRef;
+				popCount += varRef->qual->length() * 2;
+			}
+		}
+		if ( popCount > 0 ) {
+			code.append( IN_POP_N_WORDS );
+			code.appendHalf( (short)popCount );
+		}
+	}
+}
+
 UniqueType *LangVarRef::evaluateCall( ParseData *pd, CodeVect &code, ExprVect *args ) const
 {
 	/* Evaluate the object. */
@@ -915,7 +943,9 @@ UniqueType *LangVarRef::evaluateCall( ParseData *pd, CodeVect &code, ExprVect *a
 	/* Write the call opcode. */
 	callOperation( pd, code, lookup );
 
-	resetActiveRefs( pd, lookup, paramRefs );
+	popPrePush( pd, code, lookup, args );
+
+	resetActiveRefs( pd, lookup, paramRefs);
 	delete[] paramRefs;
 
 	/* Return the type to the expression. */
