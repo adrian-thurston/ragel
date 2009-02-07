@@ -657,15 +657,15 @@ void ParseData::pdaActionOrder( PdaGraph *pdaGraph, KlangEl *rootEl )
 		}
 	}
 
-	#ifdef COLM_LOG_COMPILE
-	/* Warn about states with empty token region lists. */
-	for ( PdaStateList::Iter state = pdaGraph->stateList; state.lte(); state++ ) {
-		if ( state->regions.length() == 0 ) {
-			warning() << "state has an empty token region, state: " << 
-				state->stateNum << endl;
+	if ( colm_log_compile ) {
+		/* Warn about states with empty token region lists. */
+		for ( PdaStateList::Iter state = pdaGraph->stateList; state.lte(); state++ ) {
+			if ( state->regions.length() == 0 ) {
+				warning() << "state has an empty token region, state: " << 
+					state->stateNum << endl;
+			}
 		}
 	}
-	#endif
 
 	for ( PdaStateList::Iter state = pdaGraph->stateList; state.lte(); state++ ) {
 		assert( CmpDotSet::compare( state->dotSet, state->dotSet2 ) == 0 );

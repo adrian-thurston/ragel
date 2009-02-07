@@ -1642,9 +1642,11 @@ void ParseData::parsePatterns()
 				repl->langEl->pdaTables, &fsmRun, 0, false );
 		repl->pdaRun->run();
 
-		//#ifdef COLM_LOG_COMPILE
-		//xml_print_list( runtimeData, repl->pdaRun->stackTop, 0 );
-		//#endif
+			//#ifdef COLM_LOG_COMPILE
+			//if ( colm_log_compile ) {
+			//xml_print_list( runtimeData, repl->pdaRun->stackTop, 0 );
+			//#endif
+			//}
 	}
 
 	for ( PatternList::Iter pat = patternList; pat.lte(); pat++ ) {
@@ -1656,9 +1658,11 @@ void ParseData::parsePatterns()
 				pat->langEl->pdaTables, &fsmRun, 0, false );
 		pat->pdaRun->run();
 
-		//#ifdef COLM_LOG_COMPILE
-		//xml_print_list( runtimeData, pat->pdaRun->stackTop, 0 );
-		//#endif
+			//#ifdef COLM_LOG_COMPILE
+			//if ( colm_log_compile ) {
+			//xml_print_list( runtimeData, pat->pdaRun->stackTop, 0 );
+			//#endif
+			//}
 	}
 
 	fillInPatterns( &program );
@@ -1731,10 +1735,10 @@ void ParseData::semanticAnalysis()
 
 	FsmGraph *fsmGraph = makeScanner();
 
-	#ifdef COLM_LOG_COMPILE
-	printNameTree( fsmGraph->rootName );
-	printNameIndex( fsmGraph->nameIndex );
-	#endif
+	if ( colm_log_compile ) {
+		printNameTree( fsmGraph->rootName );
+		printNameIndex( fsmGraph->nameIndex );
+	}
 
 	prepGrammar();
 

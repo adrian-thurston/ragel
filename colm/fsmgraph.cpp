@@ -890,7 +890,7 @@ void FsmGraph::isolateStartState( )
 	setMisfitAccounting( false );
 }
 
-#ifdef COLM_LOG_CONDS
+#if COLM_LOG_CONDS
 void logCondSpace( CondSpace *condSpace )
 {
 	if ( condSpace == 0 )
@@ -948,7 +948,9 @@ void FsmGraph::findTransExpansions( ExpansionList &expansionList,
 				expansion->toValsList.append( targVals );
 
 			#ifdef COLM_LOG_CONDS
-			logNewExpansion( expansion );
+			if ( colm_log_conds ) {
+				logNewExpansion( expansion );
+			}
 			#endif
 			expansionList.append( expansion );
 		}
@@ -980,7 +982,9 @@ void FsmGraph::findCondExpInTrans( ExpansionList &expansionList, FsmState *state
 
 			expansionList.append( expansion );
 			#ifdef COLM_LOG_CONDS
-			logNewExpansion( expansion );
+			if ( colm_log_conds ) {
+				logNewExpansion( expansion );
+			}
 			#endif
 		}
 	}
@@ -1006,8 +1010,10 @@ void FsmGraph::findCondExpansions( ExpansionList &expansionList,
 
 			if ( srcOnlyCS.length() > 0 ) {
 				#ifdef COLM_LOG_CONDS
-				cerr << "there are " << srcOnlyCS.length() << " item(s) that are "
-							"only in the srcCS" << endl;
+				if ( colm_log_conds ) {
+					cerr << "there are " << srcOnlyCS.length() << " item(s) that are "
+								"only in the srcCS" << endl;
+				}
 				#endif
 
 				CondSet mergedCS = destCS;
@@ -1311,7 +1317,9 @@ void FsmGraph::findEmbedExpansions( ExpansionList &expansionList,
 					expansion->toCondSpace = newStateCond->condSpace;
 					expansion->toValsList.append( 1 );
 					#ifdef COLM_LOG_CONDS
-					logNewExpansion( expansion );
+					if ( colm_log_conds ) {
+						logNewExpansion( expansion );
+					}
 					#endif
 					expansionList.append( expansion );
 				}

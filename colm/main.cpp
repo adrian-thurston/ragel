@@ -232,9 +232,9 @@ void openOutput( )
 		}
 	}
 
-	#ifdef COLM_LOG_COMPILE
-	cerr << "opening output file: " << outputFileName << endl;
-	#endif
+	if ( colm_log_compile ) {
+		cerr << "opening output file: " << outputFileName << endl;
+	}
 
 	/* Make sure we are not writing to the same file as the input file. */
 	if ( outputFileName != 0 && strcmp( inputFileName, outputFileName  ) == 0 ) {
@@ -291,9 +291,9 @@ void compileOutput( const char *argv0 )
 		" %s"
 		" %s/../colm/runtime.a",
 		location, location, location, exec, outputFileName, location );
-	#ifdef COLM_LOG_COMPILE
-	cout << "compiling: " << outputFileName << endl;
-	#endif
+	if ( colm_log_compile ) {
+		cout << "compiling: " << outputFileName << endl;
+	}
 	int res = system( command );
 	if ( res != 0 )
 		cout << "there was a problem compiling the output" << endl;

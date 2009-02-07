@@ -159,8 +159,10 @@ void commit_kid( PdaRun *parser, Tree **root, Kid *lel, Code *&rcode, long &caus
 head:
 	/* Commit */
 	#ifdef COLM_LOG_PARSE
-	cerr << "commit: visiting " << 
-			parser->prg->rtd->lelInfo[lel->tree->id].name << endl;
+	if ( colm_log_parse ) {
+		cerr << "commit: visiting " << 
+				parser->prg->rtd->lelInfo[lel->tree->id].name << endl;
+	}
 	#endif
 
 	/* Load up the parsed tree. */
@@ -175,8 +177,10 @@ head:
 		if ( pt(tree)->causeReduce > 0 ) {
 			/* The top reduce block does not correspond to this alg. */
 			#ifdef COLM_LOG_PARSE
-			cerr << "commit: causeReduce found, delaying backup: " << 
-					(long)pt(tree)->causeReduce << endl;
+			if ( colm_log_parse ) {
+				cerr << "commit: causeReduce found, delaying backup: " << 
+						(long)pt(tree)->causeReduce << endl;
+			}
 			#endif
 			causeReduce = pt(tree)->causeReduce;
 		}
@@ -209,7 +213,9 @@ head:
 
 		if ( causeReduce == 0 ) {
 			#ifdef COLM_LOG_PARSE
-			cerr << "commit: causeReduce dropped to zero, backing up over rcode" << endl;
+			if ( colm_log_parse ) {
+				cerr << "commit: causeReduce dropped to zero, backing up over rcode" << endl;
+			}
 			#endif
 
 			/* Cause reduce just dropped down to zero. */
@@ -266,7 +272,9 @@ backup:
 void commit_full( PdaRun *parser, long causeReduce )
 {
 	#ifdef COLM_LOG_PARSE
-	cerr << "running full commit" << endl;
+	if ( colm_log_parse ) {
+		cerr << "running full commit" << endl;
+	}
 	#endif
 	
 	Tree **sp = parser->root;
@@ -336,7 +344,9 @@ again:
 
 	if ( *action & act_sb ) {
 		#ifdef COLM_LOG_PARSE
-		cerr << "shifted: " << tables->rtd->lelInfo[pt(lel->tree)->id].name;
+		if ( colm_log_parse ) {
+			cerr << "shifted: " << tables->rtd->lelInfo[pt(lel->tree)->id].name;
+		}
 		#endif
 		input = input->next;
 		pt(lel->tree)->state = cs;
@@ -358,11 +368,15 @@ again:
 			assert( pt(lel->tree)->retry_upper == 0 );
 			numRetry += 1; /* FIXME: Has the retry already been counted? */
 			#ifdef COLM_LOG_PARSE
-			cerr << " retry: " << stackTop;
+			if ( colm_log_parse ) {
+				cerr << " retry: " << stackTop;
+			}
 			#endif
 		}
 		#ifdef COLM_LOG_PARSE
-		cerr << endl;
+		if ( colm_log_parse ) {
+			cerr << endl;
+		}
 		#endif
 	}
 
@@ -411,9 +425,11 @@ again:
 		redLel->tree->child = kid_list_concat( attrs, child );
 
 		#ifdef COLM_LOG_PARSE
-		cerr << "reduced: "
-				<< tables->rtd->prodInfo[reduction].name
-				<< " rhsLen: " << rhsLen;
+		if ( colm_log_parse ) {
+			cerr << "reduced: "
+					<< tables->rtd->prodInfo[reduction].name
+					<< " rhsLen: " << rhsLen;
+		}
 		#endif
 		if ( action[1] == 0 )
 			pt(redLel->tree)->retry_upper = 0;
@@ -422,12 +438,16 @@ again:
 			assert( pt(lel->tree)->retry_lower == 0 );
 			numRetry += 1;
 			#ifdef COLM_LOG_PARSE
-			cerr << " retry: " << redLel;
+			if ( colm_log_parse ) {
+				cerr << " retry: " << redLel;
+			}
 			#endif
 		}
 
 		#ifdef COLM_LOG_PARSE
-		cerr << endl;
+		if ( colm_log_parse ) {
+			cerr << endl;
+		}
 		#endif
 
 		/* When the production is of zero length we stay in the same state.
@@ -457,7 +477,9 @@ again:
 			 * copy above. */
 			if ( execution.parsed != 0 && execution.parsed != redLel->tree ) {
 				#ifdef COLM_LOG_PARSE
-				cerr << "lhs tree was modified, adding a restore instruction" << endl;
+				if ( colm_log_parse ) {
+					cerr << "lhs tree was modified, adding a restore instruction" << endl;
+				}
 				#endif
 
 				reverseCode.append( IN_RESTORE_LHS );
@@ -487,8 +509,10 @@ again:
 
 		if ( induceReject ) {
 			#ifdef COLM_LOG_PARSE
-			cerr << "error induced during reduction of " <<
-					tables->rtd->lelInfo[redLel->tree->id].name << endl;
+			if ( colm_log_parse ) {
+				cerr << "error induced during reduction of " <<
+						tables->rtd->lelInfo[redLel->tree->id].name << endl;
+			}
 			#endif
 			pt(redLel->tree)->state = cs;
 			redLel->next = stackTop;
@@ -508,7 +532,9 @@ again:
 
 parseError:
 	#ifdef COLM_LOG_PARSE
-	cerr << "hit error, backtracking" << endl;
+	if ( colm_log_parse ) {
+		cerr << "hit error, backtracking" << endl;
+	}
 	#endif
 
 	if ( numRetry == 0 )
@@ -520,11 +546,15 @@ parseError:
 
 			if ( pt(input->tree)->retry_lower != 0 ) {
 				#ifdef COLM_LOG_PARSE
-				cerr << "found retry targ: " << input << endl;
+				if ( colm_log_parse ) {
+					cerr << "found retry targ: " << input << endl;
+				}
 				#endif
 				numRetry -= 1;
 				#ifdef COLM_LOG_PARSE
-				cerr << "found retry: " << input << endl;
+				if ( colm_log_parse ) {
+					cerr << "found retry: " << input << endl;
+				}
 				#endif
 
 				cs = pt(input->tree)->state;
@@ -540,7 +570,9 @@ parseError:
 				input = 0;
 				if ( tables->tokenRegions[next] != 0 ) {
 					#ifdef COLM_LOG_PARSE
-					cerr << "found a new region" << endl;
+					if ( colm_log_parse ) {
+						cerr << "found a new region" << endl;
+					}
 					#endif
 					numRetry -= 1;
 					cs = stackTopTarget();
@@ -567,8 +599,10 @@ parseError:
 				(stackTop->tree->flags & AF_TERM_DUP) )
 		{
 			#ifdef COLM_LOG_PARSE
-			cerr << "backing up over effective terminal: " <<
-					tables->rtd->lelInfo[stackTop->tree->id].name << endl;
+			if ( colm_log_parse ) {
+				cerr << "backing up over effective terminal: " <<
+						tables->rtd->lelInfo[stackTop->tree->id].name << endl;
+			}
 			#endif
 
 			/* Pop the item from the stack. */
@@ -586,8 +620,10 @@ parseError:
 		}
 		else {
 			#ifdef COLM_LOG_PARSE
-			cerr << "backing up over non-terminal: " <<
-					tables->rtd->lelInfo[stackTop->tree->id].name << endl;
+			if ( colm_log_parse ) {
+				cerr << "backing up over non-terminal: " <<
+						tables->rtd->lelInfo[stackTop->tree->id].name << endl;
+			}
 			#endif
 
 			/* Check for an execution environment. */

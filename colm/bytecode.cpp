@@ -77,6 +77,12 @@ using std::endl;
 	i |= ((Word) *instr++) << 8; \
 } while(0)
 
+int colm_log_bytecode = 1;
+int colm_log_parse = 1;
+int colm_log_match = 1;
+int colm_log_compile = 1;
+int colm_log_conds = 1;
+
 Tree *prep_parse_tree( Program *prg, Tree **sp, Tree *tree )
 {
 	/* If the tree was produced by a parsing function then we need to send a
@@ -84,7 +90,9 @@ Tree *prep_parse_tree( Program *prg, Tree **sp, Tree *tree )
 	 * parsing algorithm data. */
 	if ( !(tree->flags & AF_PARSE_TREE) || tree->flags & AF_PARSED ) {
 		#ifdef COLM_LOG_BYTECODE
-		cerr << "copying tree in send function" << endl;
+		if ( colm_log_bytecode ) {
+			cerr << "copying tree in send function" << endl;
+		}
 		#endif
 		Kid *unused = 0;
 		Tree *newTree = copy_real_tree( prg, tree, 0, unused, true );
@@ -199,7 +207,9 @@ void downref_local_trees( Program *prg, Tree **sp, Tree **frame, char *trees, lo
 {
 	for ( long i = 0; i < treesLen; i++ ) {
 		#ifdef COLM_LOG_BYTECODE
-		cerr << "local tree downref: " << (long)trees[i] << endl;
+		if ( colm_log_bytecode ) {
+			cerr << "local tree downref: " << (long)trees[i] << endl;
+		}
 		#endif
 
 		tree_downref( prg, sp, local((long)trees[i]) );
@@ -295,7 +305,9 @@ void Program::clearGlobal( Tree **sp )
 void Program::clear( Tree **vm_stack, Tree **sp )
 {
 	#ifdef COLM_LOG_BYTECODE
-	cerr << "clearing the prg" << endl;
+	if ( colm_log_bytecode ) {
+		cerr << "clearing the prg" << endl;
+	}
 	#endif
 
 	clearGlobal( sp );
@@ -395,7 +407,9 @@ void Program::run()
 
 		/* Pull out the reverse code and free it. */
 		#ifdef COLM_LOG_BYTECODE
-		cerr << "freeing the root reverse code" << endl;
+		if ( colm_log_bytecode ) {
+			cerr << "freeing the root reverse code" << endl;
+		}
 		#endif
 
 		/* The root code should all be commit code and reverseCode
@@ -454,7 +468,9 @@ again:
 			Tree *lhs;
 			read_tree( lhs );
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_RESTORE_LHS" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_RESTORE_LHS" << endl;
+			}
 			#endif
 			tree_downref( prg, sp, lhs );
 			break;
@@ -469,7 +485,9 @@ again:
 			read_word( wrev );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_PARSE_BKT " << parserId << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_PARSE_BKT " << parserId << endl;
+			}
 			#endif
 
 			rcode_downref_all( prg, sp, (CodeVect*)wrev );
@@ -484,7 +502,9 @@ again:
 			read_tree( str );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_STREAM_PULL_BKT" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_STREAM_PULL_BKT" << endl;
+			}
 			#endif
 
 			tree_downref( prg, sp, stream );
@@ -498,7 +518,9 @@ again:
 			read_word( len );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_STREAM_PUSH_BKT" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_STREAM_PUSH_BKT" << endl;
+			}
 			#endif
 
 			tree_downref( prg, sp, stream );
@@ -506,7 +528,9 @@ again:
 		}
 		case IN_LOAD_GLOBAL_BKT: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_LOAD_GLOBAL_BKT" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_LOAD_GLOBAL_BKT" << endl;
+			}
 			#endif
 			break;
 		}
@@ -515,7 +539,9 @@ again:
 			read_half( field );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_GET_FIELD_BKT " << field << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_GET_FIELD_BKT " << field << endl;
+			}
 			#endif
 			break;
 		}
@@ -526,7 +552,9 @@ again:
 			read_tree( val );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_SET_FIELD_BKT " << field << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_SET_FIELD_BKT " << field << endl;
+			}
 			#endif
 
 			tree_downref( prg, sp, val );
@@ -537,7 +565,9 @@ again:
 			read_tree( ptr );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_PTR_DEREF_BKT" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_PTR_DEREF_BKT" << endl;
+			}
 			#endif
 
 			tree_downref( prg, sp, ptr );
@@ -548,7 +578,9 @@ again:
 			read_word( oldval );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_SET_TOKEN_DATA_BKT " << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_SET_TOKEN_DATA_BKT " << endl;
+			}
 			#endif
 
 			Head *head = (Head*)oldval;
@@ -557,7 +589,9 @@ again:
 		}
 		case IN_LIST_APPEND_BKT: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_LIST_APPEND_BKT" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_LIST_APPEND_BKT" << endl;
+			}
 			#endif
 			break;
 		}
@@ -566,7 +600,9 @@ again:
 			read_tree( val );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_LIST_REMOVE_END_BKT" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_LIST_REMOVE_END_BKT" << endl;
+			}
 			#endif
 
 			tree_downref( prg, sp, val );
@@ -577,7 +613,9 @@ again:
 			read_half( field );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_GET_LIST_MEM_BKT " << field << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_GET_LIST_MEM_BKT " << field << endl;
+			}
 			#endif
 			break;
 		}
@@ -588,7 +626,9 @@ again:
 			read_tree( val );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_SET_LIST_MEM_BKT " << field << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_SET_LIST_MEM_BKT " << field << endl;
+			}
 			#endif
 
 			tree_downref( prg, sp, val );
@@ -601,7 +641,9 @@ again:
 			read_tree( key );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_MAP_INSERT_BKT" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_MAP_INSERT_BKT" << endl;
+			}
 			#endif
 			
 			tree_downref( prg, sp, key );
@@ -613,7 +655,9 @@ again:
 			read_tree( val );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_MAP_STORE_BKT" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_MAP_STORE_BKT" << endl;
+			}
 			#endif
 
 			tree_downref( prg, sp, key );
@@ -626,7 +670,9 @@ again:
 			read_tree( val );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_MAP_REMOVE_BKT" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_MAP_REMOVE_BKT" << endl;
+			}
 			#endif
 
 			tree_downref( prg, sp, key );
@@ -722,7 +768,9 @@ again:
 	switch ( *instr++ ) {
 		case IN_SAVE_LHS: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_SAVE_LHS" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_SAVE_LHS" << endl;
+			}
 			#endif
 
 			assert( lhs != 0 );
@@ -740,7 +788,9 @@ again:
 			read_tree( restore );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_RESTORE_LHS" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_RESTORE_LHS" << endl;
+			}
 			#endif
 			assert( lhs == 0 );
 			lhs = restore;
@@ -748,7 +798,9 @@ again:
 		}
 		case IN_LOAD_NIL: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_LOAD_NIL" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_LOAD_NIL" << endl;
+			}
 			#endif
 
 			push( 0 );
@@ -756,7 +808,9 @@ again:
 		}
 		case IN_LOAD_TRUE: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_LOAD_TRUE" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_LOAD_TRUE" << endl;
+			}
 			#endif
 
 			tree_upref( prg->trueVal );
@@ -765,7 +819,9 @@ again:
 		}
 		case IN_LOAD_FALSE: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_LOAD_FALSE" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_LOAD_FALSE" << endl;
+			}
 			#endif
 
 			tree_upref( prg->falseVal );
@@ -777,7 +833,9 @@ again:
 			read_word( i );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_LOAD_INT " << i << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_LOAD_INT " << i << endl;
+			}
 			#endif
 
 			Tree *tree = construct_integer( prg, i );
@@ -790,7 +848,9 @@ again:
 			read_word( offset );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_LOAD_STR " << offset << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_LOAD_STR " << offset << endl;
+			}
 			#endif
 
 			Head *lit = make_literal( prg, offset );
@@ -801,7 +861,9 @@ again:
 		}
 		case IN_PRINT: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_PRINT" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_PRINT" << endl;
+			}
 			#endif
 
 			Tree *tree = pop();
@@ -811,7 +873,9 @@ again:
 		}
 		case IN_PRINT_XML: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_PRINT_XML" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_PRINT_XML" << endl;
+			}
 			#endif
 
 			Tree *tree = pop();
@@ -821,7 +885,9 @@ again:
 		}
 		case IN_LOAD_GLOBAL_R: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_LOAD_GLOBAL_R" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_LOAD_GLOBAL_R" << endl;
+			}
 			#endif
 
 			tree_upref( prg->global );
@@ -830,7 +896,9 @@ again:
 		}
 		case IN_LOAD_GLOBAL_WV: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_LOAD_GLOBAL_WV" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_LOAD_GLOBAL_WV" << endl;
+			}
 			#endif
 
 			tree_upref( prg->global );
@@ -843,7 +911,9 @@ again:
 		}
 		case IN_LOAD_GLOBAL_WC: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_LOAD_GLOBAL_WC" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_LOAD_GLOBAL_WC" << endl;
+			}
 			#endif
 
 			/* This is identical to the _R version, but using it for writing
@@ -854,7 +924,9 @@ again:
 		}
 		case IN_LOAD_GLOBAL_BKT: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_LOAD_GLOBAL_BKT" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_LOAD_GLOBAL_BKT" << endl;
+			}
 			#endif
 
 			tree_upref( prg->global );
@@ -868,7 +940,9 @@ again:
 			read_half( field );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_INIT_RHS_EL " << position << " " << field << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_INIT_RHS_EL " << position << " " << field << endl;
+			}
 			#endif
 
 			Tree *val = get_rhs_el( prg, lhs, position );
@@ -881,7 +955,9 @@ again:
 			read_half( field );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_UITER_ADVANCE " << field << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_UITER_ADVANCE " << field << endl;
+			}
 			#endif
 
 			/* Get the iterator. */
@@ -903,7 +979,9 @@ again:
 			read_half( field );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_UITER_GET_CUR_R " << field << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_UITER_GET_CUR_R " << field << endl;
+			}
 			#endif
 
 			UserIter *uiter = (UserIter*) local(field);
@@ -917,7 +995,9 @@ again:
 			read_half( field );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_UITER_GET_CUR_WC " << field << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_UITER_GET_CUR_WC " << field << endl;
+			}
 			#endif
 
 			UserIter *uiter = (UserIter*) local(field);
@@ -932,7 +1012,9 @@ again:
 			read_half( field );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_UITER_SET_CUR_WC " << field << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_UITER_SET_CUR_WC " << field << endl;
+			}
 			#endif
 
 			Tree *t = pop();
@@ -948,7 +1030,9 @@ again:
 			read_half( field );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_GET_LOCAL_R " << field << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_GET_LOCAL_R " << field << endl;
+			}
 			#endif
 
 			Tree *val = local(field);
@@ -961,7 +1045,9 @@ again:
 			read_half( field );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_GET_LOCAL_WC " << field << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_GET_LOCAL_WC " << field << endl;
+			}
 			#endif
 
 			Tree *split = get_local_split( prg, frame, field );
@@ -974,7 +1060,9 @@ again:
 			read_half( field );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_SET_LOCAL_WC " << field << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_SET_LOCAL_WC " << field << endl;
+			}
 			#endif
 
 			Tree *val = pop();
@@ -984,7 +1072,9 @@ again:
 		}
 		case IN_SAVE_RET: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_SAVE_RET " << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_SAVE_RET " << endl;
+			}
 			#endif
 
 			Tree *val = pop();
@@ -996,7 +1086,9 @@ again:
 			read_half( field );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_GET_LOCAL_REF_R " << field << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_GET_LOCAL_REF_R " << field << endl;
+			}
 			#endif
 
 			Ref *ref = (Ref*) plocal(field);
@@ -1010,7 +1102,9 @@ again:
 			read_half( field );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_GET_LOCAL_REF_WC " << field << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_GET_LOCAL_REF_WC " << field << endl;
+			}
 			#endif
 
 			Ref *ref = (Ref*) plocal(field);
@@ -1025,7 +1119,9 @@ again:
 			read_half( field );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_SET_LOCAL_REF_WC " << field << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_SET_LOCAL_REF_WC " << field << endl;
+			}
 			#endif
 
 			Tree *val = pop();
@@ -1039,7 +1135,9 @@ again:
 			read_half( field );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_GET_FIELD_R " << field << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_GET_FIELD_R " << field << endl;
+			}
 			#endif
 
 			Tree *obj = pop();
@@ -1055,7 +1153,9 @@ again:
 			read_half( field );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_GET_FIELD_WC " << field << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_GET_FIELD_WC " << field << endl;
+			}
 			#endif
 
 			Tree *obj = pop();
@@ -1071,7 +1171,9 @@ again:
 			read_half( field );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_GET_FIELD_WV " << field << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_GET_FIELD_WV " << field << endl;
+			}
 			#endif
 
 			Tree *obj = pop();
@@ -1092,7 +1194,9 @@ again:
 			read_half( field );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_GET_FIELD_BKT " << field << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_GET_FIELD_BKT " << field << endl;
+			}
 			#endif
 
 			Tree *obj = pop();
@@ -1108,7 +1212,9 @@ again:
 			read_half( field );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_SET_FIELD_WC " << field << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_SET_FIELD_WC " << field << endl;
+			}
 			#endif
 
 			Tree *obj = pop();
@@ -1127,7 +1233,9 @@ again:
 			read_half( field );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_SET_FIELD_WV " << field << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_SET_FIELD_WV " << field << endl;
+			}
 			#endif
 
 			Tree *obj = pop();
@@ -1154,7 +1262,9 @@ again:
 			read_tree( val );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_SET_FIELD_BKT " << field << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_SET_FIELD_BKT " << field << endl;
+			}
 			#endif
 
 			Tree *obj = pop();
@@ -1172,7 +1282,9 @@ again:
 			read_half( field );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_SET_FIELD_LEAVE_WC " << field << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_SET_FIELD_LEAVE_WC " << field << endl;
+			}
 			#endif
 
 			/* Note that we don't downref the object here because we are
@@ -1193,7 +1305,9 @@ again:
 		}
 		case IN_POP: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_POP" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_POP" << endl;
+			}
 			#endif
 
 			Tree *val = pop();
@@ -1205,7 +1319,9 @@ again:
 			read_half( n );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_POP_N_WORDS " << n << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_POP_N_WORDS " << n << endl;
+			}
 			#endif
 
 			popn( n );
@@ -1213,7 +1329,9 @@ again:
 		}
 		case IN_STR_ATOI: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_STR_ATOI" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_STR_ATOI" << endl;
+			}
 			#endif
 
 			Str *str = (Str*)pop();
@@ -1226,7 +1344,9 @@ again:
 		}
 		case IN_INT_TO_STR: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_INT_TO_STR" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_INT_TO_STR" << endl;
+			}
 			#endif
 
 			Int *i = (Int*)pop();
@@ -1239,7 +1359,9 @@ again:
 		}
 		case IN_CONCAT_STR: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_CONCAT_STR" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_CONCAT_STR" << endl;
+			}
 			#endif
 
 			Str *s2 = (Str*)pop();
@@ -1254,7 +1376,9 @@ again:
 		}
 		case IN_STR_UORD8: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_STR_UORD8" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_STR_UORD8" << endl;
+			}
 			#endif
 
 			Str *str = (Str*)pop();
@@ -1267,7 +1391,9 @@ again:
 		}
 		case IN_STR_UORD16: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_STR_UORD16" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_STR_UORD16" << endl;
+			}
 			#endif
 
 			Str *str = (Str*)pop();
@@ -1281,7 +1407,9 @@ again:
 
 		case IN_STR_LENGTH: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_STR_LENGTH" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_STR_LENGTH" << endl;
+			}
 			#endif
 
 			Str *str = (Str*)pop();
@@ -1297,7 +1425,9 @@ again:
 			read_half( dist );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_JMP_FALSE " << dist << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_JMP_FALSE " << dist << endl;
+			}
 			#endif
 
 			Tree *tree = pop();
@@ -1311,7 +1441,9 @@ again:
 			read_half( dist );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_JMP_TRUE " << dist << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_JMP_TRUE " << dist << endl;
+			}
 			#endif
 
 			Tree *tree = pop();
@@ -1325,7 +1457,9 @@ again:
 			read_half( dist );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_JMP " << dist << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_JMP " << dist << endl;
+			}
 			#endif
 
 			instr += dist;
@@ -1333,7 +1467,9 @@ again:
 		}
 		case IN_REJECT: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_REJECT" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_REJECT" << endl;
+			}
 			#endif
 			reject = true;
 			break;
@@ -1344,7 +1480,9 @@ again:
 		 */
 		case IN_TST_EQL: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_TST_EQL" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_TST_EQL" << endl;
+			}
 			#endif
 
 			Tree *o2 = pop();
@@ -1359,7 +1497,9 @@ again:
 		}
 		case IN_TST_NOT_EQL: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_TST_NOT_EQL" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_TST_NOT_EQL" << endl;
+			}
 			#endif
 
 			Tree *o2 = pop();
@@ -1374,7 +1514,9 @@ again:
 		}
 		case IN_TST_LESS: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_TST_LESS" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_TST_LESS" << endl;
+			}
 			#endif
 
 			Tree *o2 = pop();
@@ -1389,7 +1531,9 @@ again:
 		}
 		case IN_TST_LESS_EQL: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_TST_LESS_EQL" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_TST_LESS_EQL" << endl;
+			}
 			#endif
 
 			Tree *o2 = pop();
@@ -1403,7 +1547,9 @@ again:
 		}
 		case IN_TST_GRTR: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_TST_GRTR" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_TST_GRTR" << endl;
+			}
 			#endif
 
 			Tree *o2 = pop();
@@ -1418,7 +1564,9 @@ again:
 		}
 		case IN_TST_GRTR_EQL: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_TST_GRTR_EQL" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_TST_GRTR_EQL" << endl;
+			}
 			#endif
 
 			Tree *o2 = (Tree*)pop();
@@ -1433,7 +1581,9 @@ again:
 		}
 		case IN_TST_LOGICAL_AND: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_TST_LOGICAL_AND" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_TST_LOGICAL_AND" << endl;
+			}
 			#endif
 
 			Tree *o2 = pop();
@@ -1450,7 +1600,9 @@ again:
 		}
 		case IN_TST_LOGICAL_OR: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_TST_LOGICAL_OR" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_TST_LOGICAL_OR" << endl;
+			}
 			#endif
 
 			Tree *o2 = pop();
@@ -1467,7 +1619,9 @@ again:
 		}
 		case IN_NOT: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_NOT" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_NOT" << endl;
+			}
 			#endif
 
 			Tree *tree = (Tree*)pop();
@@ -1481,7 +1635,9 @@ again:
 
 		case IN_ADD_INT: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_ADD_INT" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_ADD_INT" << endl;
+			}
 			#endif
 
 			Int *o2 = (Int*)pop();
@@ -1496,7 +1652,9 @@ again:
 		}
 		case IN_MULT_INT: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_MULT_INT" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_MULT_INT" << endl;
+			}
 			#endif
 
 			Int *o2 = (Int*)pop();
@@ -1511,7 +1669,9 @@ again:
 		}
 		case IN_SUB_INT: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_SUB_INT" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_SUB_INT" << endl;
+			}
 			#endif
 
 			Int *o2 = (Int*)pop();
@@ -1526,7 +1686,9 @@ again:
 		}
 		case IN_DUP_TOP: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_DUP_TOP" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_DUP_TOP" << endl;
+			}
 			#endif
 
 			Tree *val = top();
@@ -1541,7 +1703,9 @@ again:
 			read_half( searchTypeId );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_TRITER_FROM_REF " << field << " " << searchTypeId << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_TRITER_FROM_REF " << field << " " << searchTypeId << endl;
+			}
 			#endif
 
 			Ref rootRef;
@@ -1556,7 +1720,9 @@ again:
 			read_half( field );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_TRITER_DESTROY " << field << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_TRITER_DESTROY " << field << endl;
+			}
 			#endif
 
 			TreeIter *iter = (TreeIter*) plocal(field);
@@ -1568,7 +1734,9 @@ again:
 			read_word( id );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_TREE_SEARCH " << id << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_TREE_SEARCH " << id << endl;
+			}
 			#endif
 
 			Tree *tree = pop();
@@ -1583,7 +1751,9 @@ again:
 			read_half( field );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_TRITER_ADVANCE " << field << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_TRITER_ADVANCE " << field << endl;
+			}
 			#endif
 
 			TreeIter *iter = (TreeIter*) plocal(field);
@@ -1597,7 +1767,9 @@ again:
 			read_half( field );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_TRITER_NEXT_CHILD " << field << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_TRITER_NEXT_CHILD " << field << endl;
+			}
 			#endif
 
 			TreeIter *iter = (TreeIter*) plocal(field);
@@ -1611,7 +1783,9 @@ again:
 			read_half( field );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_TRITER_PREV_CHILD " << field << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_TRITER_PREV_CHILD " << field << endl;
+			}
 			#endif
 
 			TreeIter *iter = (TreeIter*) plocal(field);
@@ -1625,7 +1799,9 @@ again:
 			read_half( field );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_TRITER_GET_CUR_R " << field << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_TRITER_GET_CUR_R " << field << endl;
+			}
 			#endif
 			
 			TreeIter *iter = (TreeIter*) plocal(field);
@@ -1639,7 +1815,9 @@ again:
 			read_half( field );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_TRITER_GET_CUR_WC " << field << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_TRITER_GET_CUR_WC " << field << endl;
+			}
 			#endif
 			
 			TreeIter *iter = (TreeIter*) plocal(field);
@@ -1654,7 +1832,9 @@ again:
 			read_half( field );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_TRITER_SET_CUR_WC " << field << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_TRITER_SET_CUR_WC " << field << endl;
+			}
 			#endif
 
 			Tree *tree = pop();
@@ -1670,7 +1850,9 @@ again:
 			read_half( patternId );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_MATCH " << patternId << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_MATCH " << patternId << endl;
+			}
 			#endif
 
 			Tree *tree = pop();
@@ -1698,7 +1880,9 @@ again:
 			}
 
 			#ifdef COLM_LOG_MATCH
-			cerr << "match result: " << matched << endl;
+			if ( colm_log_match ) {
+				cerr << "match result: " << matched << endl;
+			}
 			#endif
 
 			Tree *result = matched ? tree : 0;
@@ -1718,7 +1902,9 @@ again:
 			read_half( stopId );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_PARSE_WV " << parserId << " " << stopId << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_PARSE_WV " << parserId << " " << stopId << endl;
+			}
 			#endif
 
 			/* Comes back from parse upreffed. */
@@ -1743,7 +1929,9 @@ again:
 			read_half( stopId );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_PARSE_WC " << parserId << " " << stopId << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_PARSE_WC " << parserId << " " << stopId << endl;
+			}
 			#endif
 
 			/* Comes back from parse upreffed. */
@@ -1757,7 +1945,9 @@ again:
 		}
 		case IN_STREAM_PULL: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_STREAM_PULL" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_STREAM_PULL" << endl;
+			}
 			#endif
 			Tree *len = pop();
 			Tree *stream = pop();
@@ -1781,7 +1971,9 @@ again:
 			read_tree( string );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_STREAM_PULL_BKT" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_STREAM_PULL_BKT" << endl;
+			}
 			#endif
 
 			undo_pull( prg, (Stream*)stream, string );
@@ -1793,7 +1985,9 @@ again:
 			/* FIXME: Need to check the refcounting here. */
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_STREAM_PUSH" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_STREAM_PUSH" << endl;
+			}
 			#endif
 			Tree *tree = pop();
 			Tree *stream = pop();
@@ -1817,7 +2011,9 @@ again:
 			read_word( len );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_STREAM_PUSH_BKT" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_STREAM_PUSH_BKT" << endl;
+			}
 			#endif
 
 			undo_stream_push( sp, prg, (Stream*)stream, len );
@@ -1834,7 +2030,9 @@ again:
 			read_word( wrev );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_PARSE_BKT " << parserId << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_PARSE_BKT " << parserId << endl;
+			}
 			#endif
 
 			undo_parse( sp, prg, (Stream*)stream, parserId, tree, (CodeVect*)wrev );
@@ -1847,7 +2045,9 @@ again:
 			read_half( patternId );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_CONSTRUCT " << patternId << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_CONSTRUCT " << patternId << endl;
+			}
 			#endif
 
 			int rootNode = prg->rtd->patReplInfo[patternId].offset;
@@ -1882,7 +2082,9 @@ again:
 			read_half( tokenId );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_CONSTRUCT_TERM " << tokenId << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_CONSTRUCT_TERM " << tokenId << endl;
+			}
 			#endif
 
 			/* Pop the string we are constructing the token from. */
@@ -1897,7 +2099,9 @@ again:
 			read_byte( nargs );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_MAKE_TOKEN " << (ulong) nargs << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_MAKE_TOKEN " << (ulong) nargs << endl;
+			}
 			#endif
 
 			Tree *result = make_token( sp, prg, nargs );
@@ -1911,7 +2115,9 @@ again:
 			read_byte( nargs );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_MAKE_TREE " << (ulong) nargs << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_MAKE_TREE " << (ulong) nargs << endl;
+			}
 			#endif
 
 			Tree *result = make_tree( sp, prg, nargs );
@@ -1922,7 +2128,9 @@ again:
 		}
 		case IN_SEND: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_SEND" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_SEND" << endl;
+			}
 			#endif
 
 			Tree *tree = pop();
@@ -1932,7 +2140,9 @@ again:
 		}
 		case IN_IGNORE: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_IGNORE" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_IGNORE" << endl;
+			}
 			#endif
 
 			Tree *tree = pop();
@@ -1942,7 +2152,9 @@ again:
 		}
 		case IN_TREE_NEW: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_TREE_NEW " << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_TREE_NEW " << endl;
+			}
 			#endif
 
 			Tree *tree = pop();
@@ -1953,7 +2165,9 @@ again:
 		}
 		case IN_PTR_DEREF_R: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_PTR_DEREF_R" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_PTR_DEREF_R" << endl;
+			}
 			#endif
 
 			Pointer *ptr = (Pointer*)pop();
@@ -1966,7 +2180,9 @@ again:
 		}
 		case IN_PTR_DEREF_WC: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_PTR_DEREF_WC" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_PTR_DEREF_WC" << endl;
+			}
 			#endif
 
 			Pointer *ptr = (Pointer*)pop();
@@ -1979,7 +2195,9 @@ again:
 		}
 		case IN_PTR_DEREF_WV: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_PTR_DEREF_WV" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_PTR_DEREF_WV" << endl;
+			}
 			#endif
 
 			Pointer *ptr = (Pointer*)pop();
@@ -2001,7 +2219,9 @@ again:
 			read_word( p );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_PTR_DEREF_BKT" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_PTR_DEREF_BKT" << endl;
+			}
 			#endif
 
 			Pointer *ptr = (Pointer*)p;
@@ -2018,7 +2238,9 @@ again:
 			read_half( field );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_REF_FROM_LOCAL " << field << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_REF_FROM_LOCAL " << field << endl;
+			}
 			#endif
 
 			/* First push the null next pointer, then the kid pointer. */
@@ -2032,7 +2254,9 @@ again:
 			read_half( field );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_REF_FROM_REF " << field << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_REF_FROM_REF " << field << endl;
+			}
 			#endif
 
 			Ref *ref = (Ref*)plocal(field);
@@ -2047,7 +2271,9 @@ again:
 			read_half( field );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_REF_FROM_QUAL_REF " << back << " " << field << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_REF_FROM_QUAL_REF " << back << " " << field << endl;
+			}
 			#endif
 
 			Ref *ref = (Ref*)(sp + back);
@@ -2064,7 +2290,9 @@ again:
 			read_half( field );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_TRITER_REF_FROM_CUR " << field << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_TRITER_REF_FROM_CUR " << field << endl;
+			}
 			#endif
 
 			/* Push the next pointer first, then the kid. */
@@ -2078,7 +2306,9 @@ again:
 			read_half( field );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_UITER_REF_FROM_CUR " << field << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_UITER_REF_FROM_CUR " << field << endl;
+			}
 			#endif
 
 			/* Push the next pointer first, then the kid. */
@@ -2089,7 +2319,9 @@ again:
 		}
 		case IN_GET_TOKEN_DATA_R: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_GET_TOKEN_DATA_R" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_GET_TOKEN_DATA_R" << endl;
+			}
 			#endif
 
 			Tree *tree = (Tree*) pop();
@@ -2102,7 +2334,9 @@ again:
 		}
 		case IN_SET_TOKEN_DATA_WC: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_SET_TOKEN_DATA_WC" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_SET_TOKEN_DATA_WC" << endl;
+			}
 			#endif
 
 			Tree *tree = pop();
@@ -2117,7 +2351,9 @@ again:
 		}
 		case IN_SET_TOKEN_DATA_WV: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_SET_TOKEN_DATA_WV" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_SET_TOKEN_DATA_WV" << endl;
+			}
 			#endif
 
 			Tree *tree = pop();
@@ -2139,7 +2375,9 @@ again:
 		}
 		case IN_SET_TOKEN_DATA_BKT: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_SET_TOKEN_DATA_BKT " << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_SET_TOKEN_DATA_BKT " << endl;
+			}
 			#endif
 
 			Word oldval;
@@ -2154,7 +2392,9 @@ again:
 		}
 		case IN_GET_TOKEN_POS_R: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_GET_TOKEN_POS_R" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_GET_TOKEN_POS_R" << endl;
+			}
 			#endif
 
 			Tree *tree = (Tree*) pop();
@@ -2169,7 +2409,9 @@ again:
 		}
 		case IN_GET_MATCH_LENGTH_R: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_GET_MATCH_LENGTH_R" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_GET_MATCH_LENGTH_R" << endl;
+			}
 			#endif
 			Tree *integer = construct_integer( prg, string_length(matchText) );
 			tree_upref( integer );
@@ -2178,7 +2420,9 @@ again:
 		}
 		case IN_GET_MATCH_TEXT_R: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_GET_MATCH_TEXT_R" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_GET_MATCH_TEXT_R" << endl;
+			}
 			#endif
 			Head *s = string_copy( prg, matchText );
 			Tree *tree = construct_string( prg, s );
@@ -2188,7 +2432,9 @@ again:
 		}
 		case IN_LIST_LENGTH: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_LIST_LENGTH" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_LIST_LENGTH" << endl;
+			}
 			#endif
 
 			List *list = (List*) pop();
@@ -2200,7 +2446,9 @@ again:
 		}
 		case IN_LIST_APPEND_WV: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_LIST_APPEND_WV" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_LIST_APPEND_WV" << endl;
+			}
 			#endif
 
 			Tree *obj = pop();
@@ -2221,7 +2469,9 @@ again:
 		}
 		case IN_LIST_APPEND_WC: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_LIST_APPEND_WC" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_LIST_APPEND_WC" << endl;
+			}
 			#endif
 
 			Tree *obj = pop();
@@ -2236,7 +2486,9 @@ again:
 		}
 		case IN_LIST_APPEND_BKT: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_LIST_APPEND_BKT" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_LIST_APPEND_BKT" << endl;
+			}
 			#endif
 
 			Tree *obj = pop();
@@ -2248,7 +2500,9 @@ again:
 		}
 		case IN_LIST_REMOVE_END_WC: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_LIST_REMOVE_END_WC" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_LIST_REMOVE_END_WC" << endl;
+			}
 			#endif
 
 			Tree *obj = pop();
@@ -2260,7 +2514,9 @@ again:
 		}
 		case IN_LIST_REMOVE_END_WV: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_LIST_REMOVE_END_WV" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_LIST_REMOVE_END_WV" << endl;
+			}
 			#endif
 
 			Tree *obj = pop();
@@ -2281,7 +2537,9 @@ again:
 		}
 		case IN_LIST_REMOVE_END_BKT: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_LIST_REMOVE_END_BKT" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_LIST_REMOVE_END_BKT" << endl;
+			}
 			#endif
 
 			Tree *val;
@@ -2298,7 +2556,9 @@ again:
 			read_half( field );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_GET_LIST_MEM_R " << field << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_GET_LIST_MEM_R " << field << endl;
+			}
 			#endif
 
 			Tree *obj = pop();
@@ -2314,7 +2574,9 @@ again:
 			read_half( field );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_GET_LIST_MEM_WC " << field << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_GET_LIST_MEM_WC " << field << endl;
+			}
 			#endif
 
 			Tree *obj = pop();
@@ -2330,7 +2592,9 @@ again:
 			read_half( field );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_GET_LIST_MEM_WV " << field << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_GET_LIST_MEM_WV " << field << endl;
+			}
 			#endif
 
 			Tree *obj = pop();
@@ -2351,7 +2615,9 @@ again:
 			read_half( field );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_GET_LIST_MEM_BKT " << field << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_GET_LIST_MEM_BKT " << field << endl;
+			}
 			#endif
 
 			Tree *obj = pop();
@@ -2367,7 +2633,9 @@ again:
 			read_half( field );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_SET_LIST_MEM_WC " << field << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_SET_LIST_MEM_WC " << field << endl;
+			}
 			#endif
 
 			Tree *obj = pop();
@@ -2383,7 +2651,9 @@ again:
 			read_half( field );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_SET_LIST_MEM_WV " << field << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_SET_LIST_MEM_WV " << field << endl;
+			}
 			#endif
 
 			Tree *obj = pop();
@@ -2408,7 +2678,9 @@ again:
 			read_tree( val );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_SET_LIST_MEM_BKT " << field << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_SET_LIST_MEM_BKT " << field << endl;
+			}
 			#endif
 
 			Tree *obj = pop();
@@ -2420,7 +2692,9 @@ again:
 		}
 		case IN_MAP_INSERT_WV: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_MAP_INSERT_WV" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_MAP_INSERT_WV" << endl;
+			}
 			#endif
 
 			Tree *obj = pop();
@@ -2454,7 +2728,9 @@ again:
 		}
 		case IN_MAP_INSERT_WC: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_MAP_INSERT_WC" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_MAP_INSERT_WC" << endl;
+			}
 			#endif
 
 			Tree *obj = pop();
@@ -2481,7 +2757,9 @@ again:
 			read_tree( key );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_MAP_INSERT_BKT" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_MAP_INSERT_BKT" << endl;
+			}
 			#endif
 			
 			Tree *obj = pop();
@@ -2497,7 +2775,9 @@ again:
 		}
 		case IN_MAP_STORE_WC: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_MAP_STORE_WC" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_MAP_STORE_WC" << endl;
+			}
 			#endif
 
 			Tree *obj = pop();
@@ -2518,7 +2798,9 @@ again:
 		}
 		case IN_MAP_STORE_WV: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_MAP_STORE_WV" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_MAP_STORE_WV" << endl;
+			}
 			#endif
 
 			Tree *obj = pop();
@@ -2553,7 +2835,9 @@ again:
 			read_tree( val );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_MAP_STORE_BKT" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_MAP_STORE_BKT" << endl;
+			}
 			#endif
 
 			Tree *obj = pop();
@@ -2569,7 +2853,9 @@ again:
 		}
 		case IN_MAP_REMOVE_WC: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_MAP_REMOVE_WC" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_MAP_REMOVE_WC" << endl;
+			}
 			#endif
 
 			Tree *obj = pop();
@@ -2585,7 +2871,9 @@ again:
 		}
 		case IN_MAP_REMOVE_WV: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_MAP_REMOVE_WV" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_MAP_REMOVE_WV" << endl;
+			}
 			#endif
 
 			Tree *obj = pop();
@@ -2612,7 +2900,9 @@ again:
 			read_tree( val );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_MAP_REMOVE_BKT" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_MAP_REMOVE_BKT" << endl;
+			}
 			#endif
 
 			/* Either both or neither. */
@@ -2627,7 +2917,9 @@ again:
 		}
 		case IN_MAP_LENGTH: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_MAP_LENGTH" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_MAP_LENGTH" << endl;
+			}
 			#endif
 
 			Tree *obj = pop();
@@ -2641,7 +2933,9 @@ again:
 		}
 		case IN_MAP_FIND: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_MAP_FIND" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_MAP_FIND" << endl;
+			}
 			#endif
 
 			Tree *obj = pop();
@@ -2659,7 +2953,9 @@ again:
 			read_half( size );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_INIT_LOCALS " << size << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_INIT_LOCALS " << size << endl;
+			}
 			#endif
 
 			frame = ptop();
@@ -2673,7 +2969,9 @@ again:
 			read_half( size );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_POP_LOCALS " << frameId << " " << size << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_POP_LOCALS " << frameId << " " << size << endl;
+			}
 			#endif
 
 			FrameInfo *fi = &prg->rtd->frameInfo[frameId];
@@ -2688,7 +2986,9 @@ again:
 			FunctionInfo *fi = &prg->rtd->functionInfo[funcId];
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_CALL_WV " << fi->name << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_CALL_WV " << fi->name << endl;
+			}
 			#endif
 
 			push( 0 ); /* Return value. */
@@ -2706,7 +3006,9 @@ again:
 			FunctionInfo *fi = &prg->rtd->functionInfo[funcId];
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_CALL_WC " << fi->name << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_CALL_WC " << fi->name << endl;
+			}
 			#endif
 
 			push( 0 ); /* Return value. */
@@ -2719,7 +3021,9 @@ again:
 		}
 		case IN_YIELD: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_YIELD" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_YIELD" << endl;
+			}
 			#endif
 
 			Kid *kid = (Kid*)pop();
@@ -2757,8 +3061,10 @@ again:
 			read_half( searchId );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_UITER_CREATE_WV " << field << " " << 
-					funcId << " " << searchId << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_UITER_CREATE_WV " << field << " " << 
+						funcId << " " << searchId << endl;
+			}
 			#endif
 
 			FunctionInfo *fi = prg->rtd->functionInfo + funcId;
@@ -2785,8 +3091,10 @@ again:
 			read_half( searchId );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_UITER_CREATE_WC " << field << " " << 
-					funcId << " " << searchId << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_UITER_CREATE_WC " << field << " " << 
+						funcId << " " << searchId << endl;
+			}
 			#endif
 
 			FunctionInfo *fi = prg->rtd->functionInfo + funcId;
@@ -2810,7 +3118,9 @@ again:
 			read_half( field );
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_UITER_DESTROY " << field << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_UITER_DESTROY " << field << endl;
+			}
 			#endif
 
 			UserIter *uiter = (UserIter*) local(field);
@@ -2824,7 +3134,9 @@ again:
 			FunctionInfo *fui = &prg->rtd->functionInfo[funcId];
 
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_RET " << fui->name << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_RET " << fui->name << endl;
+			}
 			#endif
 
 			FrameInfo *fi = &prg->rtd->frameInfo[fui->frameId];
@@ -2840,7 +3152,9 @@ again:
 		}
 		case IN_OPEN_FILE: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_OPEN_FILE" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_OPEN_FILE" << endl;
+			}
 			#endif
 
 			Tree *name = pop();
@@ -2852,7 +3166,9 @@ again:
 		}
 		case IN_GET_STDIN: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_GET_STDIN" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_GET_STDIN" << endl;
+			}
 			#endif
 
 			/* Pop the root object. */
@@ -2868,7 +3184,9 @@ again:
 		}
 		case IN_STOP: {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "IN_STOP" << endl;
+			if ( colm_log_bytecode ) {
+				cerr << "IN_STOP" << endl;
+			}
 			#endif
 
 			cout.flush();

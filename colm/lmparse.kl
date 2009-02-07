@@ -40,9 +40,9 @@ include "lmparse.kh";
 
 start: root_item_list
 	final {
-		#ifdef COLM_LOG_COMPILE
-		cerr << "parsing complete" << endl;
-		#endif
+		if ( colm_log_compile ) {
+			cerr << "parsing complete" << endl;
+		}
 
 		pd->rootCodeBlock = new CodeBlock( $1->stmtList );
 	};

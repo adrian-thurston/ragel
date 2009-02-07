@@ -808,7 +808,6 @@ bool FsmGraph::hasOutData( FsmState *state )
  * Setting Conditions.
  */
 
-
 void logNewExpansion( Expansion *exp );
 void logCondSpace( CondSpace *condSpace );
 
@@ -824,11 +823,13 @@ CondSpace *FsmGraph::addCondSpace( const CondSet &condSet )
 		condData->condSpaceMap.insert( condSpace );
 
 		#ifdef COLM_LOG_CONDS
-		cerr << "adding new condition space" << endl;
-		cerr << "  condition set: ";
-		logCondSpace( condSpace );
-		cerr << endl;
-		cerr << "  baseKey: " << baseKey.getVal() << endl;
+		if ( colm_log_conds ) {
+			cerr << "adding new condition space" << endl;
+			cerr << "  condition set: ";
+			logCondSpace( condSpace );
+			cerr << endl;
+			cerr << "  baseKey: " << baseKey.getVal() << endl;
+		}
 		#endif
 	}
 	return condSpace;
