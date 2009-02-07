@@ -1362,7 +1362,7 @@ struct LangVarRef
 	ObjField *preEvaluateRef( ParseData *pd, CodeVect &code ) const;
 	void resetActiveRefs( ParseData *pd, VarRefLookup &lookup, ObjField **paramRefs ) const;
 	long loadQualificationRefs( ParseData *pd, CodeVect &code ) const;
-	void popPrePush( ParseData *pd, CodeVect &code, 
+	void popRefQuals( ParseData *pd, CodeVect &code, 
 			VarRefLookup &lookup, ExprVect *args ) const;
 
 	InputLoc loc;

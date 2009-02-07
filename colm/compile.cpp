@@ -906,7 +906,7 @@ void LangVarRef::callOperation( ParseData *pd, CodeVect &code, VarRefLookup &loo
 		code.appendHalf( lookup.objMethod->funcId );
 }
 
-void LangVarRef::popPrePush( ParseData *pd, CodeVect &code, 
+void LangVarRef::popRefQuals( ParseData *pd, CodeVect &code, 
 		VarRefLookup &lookup, ExprVect *args ) const
 {
 	long popCount = 0;
@@ -943,7 +943,7 @@ UniqueType *LangVarRef::evaluateCall( ParseData *pd, CodeVect &code, ExprVect *a
 	/* Write the call opcode. */
 	callOperation( pd, code, lookup );
 
-	popPrePush( pd, code, lookup, args );
+	popRefQuals( pd, code, lookup, args );
 
 	resetActiveRefs( pd, lookup, paramRefs);
 	delete[] paramRefs;
@@ -1565,6 +1565,8 @@ void LangStmt::compileForIterBody( ParseData *pd,
 	/* Destroy the iterator. */
 	code.append( iterUT->iterDef->inDestroy );
 	code.appendHalf( objField->offset );
+
+	/* Clean up any prepush args. */
 }
 
 LangTerm *LangStmt::chooseDefaultIter( ParseData *pd, LangTerm *fromVarRef ) const
@@ -1654,6 +1656,8 @@ void LangStmt::compileForIter( ParseData *pd, CodeVect &code ) const
 	}
 
 	compileForIterBody( pd, code, iterUT );
+
+	iterCallTerm->varRef->popRefQuals( pd, code, lookup, iterCallTerm->args );
 
 	iterCallTerm->varRef->resetActiveRefs( pd, lookup, paramRefs );
 	delete[] paramRefs;
