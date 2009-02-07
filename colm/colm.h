@@ -47,6 +47,7 @@ extern const char *outputFileName;
 extern std::ostream *outStream;
 extern bool generateGraphviz;
 extern bool branchPointInfo;
+extern bool verbose, logging;
 extern bool addUniqueEmptyProductions;
 
 extern int gblErrorCount;

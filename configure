@@ -1207,15 +1207,6 @@ if test -n "$ac_init_help"; then
 
   cat <<\_ACEOF
 
-Optional Features:
-  --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
-  --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
-"turn on logging"
-"turns on bytecode logging"
-"turns on parse logging"
-"turns on match logging"
-"turns on compile logging"
-
 Some influential environment variables:
   CC          C compiler command
   CFLAGS      C compiler flags
@@ -2987,46 +2978,11 @@ fi
 
 
 # Logging features
-# Check whether --enable-log was given.
-if test "${enable_log+set}" = set; then
-  enableval=$enable_log; cat >>confdefs.h <<\_ACEOF
-#define COLM_LOG 1
-_ACEOF
-
-fi
-
-# Check whether --enable-log-bytecode was given.
-if test "${enable_log_bytecode+set}" = set; then
-  enableval=$enable_log_bytecode; cat >>confdefs.h <<\_ACEOF
-#define COLM_LOG_BYTECODE 1
-_ACEOF
-
-fi
-
-# Check whether --enable-log-parse was given.
-if test "${enable_log_parse+set}" = set; then
-  enableval=$enable_log_parse; cat >>confdefs.h <<\_ACEOF
-#define COLM_LOG_PARSE 1
-_ACEOF
-
-fi
-
-# Check whether --enable-log-match was given.
-if test "${enable_log_match+set}" = set; then
-  enableval=$enable_log_match; cat >>confdefs.h <<\_ACEOF
-#define COLM_LOG_MATCH 1
-_ACEOF
-
-fi
-
-# Check whether --enable-log-compile was given.
-if test "${enable_log_compile+set}" = set; then
-  enableval=$enable_log_compile; cat >>confdefs.h <<\_ACEOF
-#define COLM_LOG_COMPILE 1
-_ACEOF
-
-fi
-
+# AC_ARG_ENABLE(log, "turn on logging", AC_DEFINE(COLM_LOG))
+# AC_ARG_ENABLE(log-bytecode, "turns on bytecode logging", AC_DEFINE(COLM_LOG_BYTECODE))
+# AC_ARG_ENABLE(log-parse, "turns on parse logging", AC_DEFINE(COLM_LOG_PARSE))
+# AC_ARG_ENABLE(log-match, "turns on match logging", AC_DEFINE(COLM_LOG_MATCH))
+# AC_ARG_ENABLE(log-compile, "turns on compile logging", AC_DEFINE(COLM_LOG_COMPILE))
 
 if test $BUILD_PARSERS = true; then
 

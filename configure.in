@@ -41,15 +41,11 @@ dnl Check for definition of MAKE.
 AC_PROG_MAKE_SET
 
 # Logging features
-AC_ARG_ENABLE(log, "turn on logging", AC_DEFINE(COLM_LOG))
-AC_ARG_ENABLE(log-bytecode, "turns on bytecode logging", 
-		AC_DEFINE(COLM_LOG_BYTECODE))
-AC_ARG_ENABLE(log-parse, "turns on parse logging", 
-		AC_DEFINE(COLM_LOG_PARSE))
-AC_ARG_ENABLE(log-match, "turns on match logging", 
-		AC_DEFINE(COLM_LOG_MATCH))
-AC_ARG_ENABLE(log-compile, "turns on compile logging", 
-		AC_DEFINE(COLM_LOG_COMPILE))
+# AC_ARG_ENABLE(log, "turn on logging", AC_DEFINE(COLM_LOG))
+# AC_ARG_ENABLE(log-bytecode, "turns on bytecode logging", AC_DEFINE(COLM_LOG_BYTECODE))
+# AC_ARG_ENABLE(log-parse, "turns on parse logging", AC_DEFINE(COLM_LOG_PARSE))
+# AC_ARG_ENABLE(log-match, "turns on match logging", AC_DEFINE(COLM_LOG_MATCH))
+# AC_ARG_ENABLE(log-compile, "turns on compile logging", AC_DEFINE(COLM_LOG_COMPILE))
 
 if test $BUILD_PARSERS = true; then
 

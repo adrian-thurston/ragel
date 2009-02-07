@@ -583,7 +583,8 @@ template <class T> T *PoolAlloc<T>::allocate()
 	if ( pool == 0 ) {
 		if ( nextel == FRESH_BLOCK ) {
 			#ifdef COLM_LOG_BYTECODE
-			cerr << "allocating " << FRESH_BLOCK << " Elements of type T" << endl;
+			if ( colm_log_bytecode )
+				cerr << "allocating " << FRESH_BLOCK << " Elements of type T" << endl;
 			#endif
 
 			PoolBlock<T> *newBlock = new PoolBlock<T>;

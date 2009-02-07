@@ -1061,6 +1061,13 @@ void FsmCodeGen::writeCode()
 	out << 
 		"int main( int argc, char **argv )\n"
 		"{\n"
+		"	/* Always on because because logging is controlled with ifdefs in\n"
+		"	 * the runtime lib. */\n"
+		"	colm_log_bytecode = 1;\n"
+		"	colm_log_parse = 1;\n"
+		"	colm_log_match = 1;\n"
+		"	colm_log_compile = 1;\n"
+		"	colm_log_conds = 1;\n"
 		"	Program program( true, &main_runtimeData );\n"
 		"	program.run();\n"
 		"	return 0;\n"

@@ -73,6 +73,8 @@ const char *inputFileName = 0;
 const char *outputFileName = 0;
 
 bool generateGraphviz = false;
+bool verbose = false;
+bool logging = false;
 bool branchPointInfo = false;
 bool addUniqueEmptyProductions = false;
 
@@ -150,9 +152,11 @@ void usage()
 "usage: colm [options] file\n"
 "general:\n"
 "   -h, -H, -?, --help   print this usage and exit\n"
-"   -v, --version        print version information and exit\n"
+"   --version            print version information and exit\n"
 "   -o <file>            write output to <file>\n"
 "   -i                   show conflict information\n"
+"   -v                   make colm verbose\n"
+"   -l                   compile logging into the output executable\n"
 	;	
 }
 
@@ -289,8 +293,8 @@ void compileOutput( const char *argv0 )
 		" -g"
 		" -o %s"
 		" %s"
-		" %s/../colm/runtime.a",
-		location, location, location, exec, outputFileName, location );
+		" %s/../colm/runtime_%c.a",
+		location, location, location, exec, outputFileName, location, logging ? 'd' : 'p' );
 	if ( colm_log_compile ) {
 		cout << "compiling: " << outputFileName << endl;
 	}
@@ -301,12 +305,18 @@ void compileOutput( const char *argv0 )
 
 void process_args( int argc, const char **argv )
 {
-	ParamCheck pc( "io:S:M:vHh?-:s", argc, argv );
+	ParamCheck pc( "vlio:S:M:vHh?-:s", argc, argv );
 
 	while ( pc.check() ) {
 		switch ( pc.state ) {
 		case ParamCheck::match:
 			switch ( pc.parameter ) {
+			case 'v':
+				verbose = true;
+				break;
+			case 'l':
+				logging = true;
+				break;
 			case 'i':
 				branchPointInfo = true;
 				break;
@@ -322,10 +332,6 @@ void process_args( int argc, const char **argv )
 				}
 				break;
 
-			/* Version and help. */
-			case 'v':
-				version();
-				exit(0);
 			case 'H': case 'h': case '?':
 				usage();
 				exit(0);
@@ -371,6 +377,14 @@ void process_args( int argc, const char **argv )
 int main(int argc, const char **argv)
 {
 	process_args( argc, argv );
+
+	if ( verbose ) {
+		colm_log_bytecode = 1;
+		colm_log_parse = 1;
+		colm_log_match = 1;
+		colm_log_compile = 1;
+		colm_log_conds = 1;
+	}
 
 	/* Bail on above errors. */
 	if ( gblErrorCount > 0 )

@@ -77,11 +77,11 @@ using std::endl;
 	i |= ((Word) *instr++) << 8; \
 } while(0)
 
-int colm_log_bytecode = 1;
-int colm_log_parse = 1;
-int colm_log_match = 1;
-int colm_log_compile = 1;
-int colm_log_conds = 1;
+int colm_log_bytecode = 0;
+int colm_log_parse = 0;
+int colm_log_match = 0;
+int colm_log_compile = 0;
+int colm_log_conds = 0;
 
 Tree *prep_parse_tree( Program *prg, Tree **sp, Tree *tree )
 {

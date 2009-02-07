@@ -26,7 +26,10 @@
 # rt_clm: rt on/off
 
 INCS += -I../aapl
-DEFS +=
+
+DEFS_COLM += -DCOLM_LOG
+DEFS_RT_P +=
+DEFS_RT_D += -DCOLM_LOG
 
 CFLAGS += -g -Wall -Wwrite-strings
 LDFLAGS +=
@@ -64,7 +67,8 @@ ALL_SRC = $(COLM_SRC) $(RUNTIME_SRC)
 # Files in ALL_SRC that are generated.
 GEN_SRC = version.h lmscan.cpp lmparse.h lmparse.cpp 
 
-RUNTIME = runtime.a
+RUNTIME_P = runtime_p.a
+RUNTIME_D = runtime_d.a
 
 LIBS = 
 
@@ -82,18 +86,22 @@ CXX = @CXX@
 
 # Get objects and dependencies from sources.
 COLM_OBJ = $(COLM_SRC:%.cpp=%.o)
-RUNTIME_OBJ = $(RUNTIME_SRC:%.cpp=%.o)
+RUNTIME_OBJ_P = $(RUNTIME_SRC:%.cpp=%_p.o)
+RUNTIME_OBJ_D = $(RUNTIME_SRC:%.cpp=%_d.o)
 
-DEPS = $(CC_SRCS:%.cpp=.%.d)
+DEPS = $(COLM_SRC:%.cpp=.%.d) $(RUNTIME_SRC:%.cpp=.%_p.d) $(RUNTIME_SRC:%.cpp=.%_d.d)
 
 # Rules.
-all: colm $(RUNTIME)
+all: colm $(RUNTIME_P) $(RUNTIME_D)
 
-colm: $(GEN_SRC) $(COLM_OBJ) $(RUNTIME_OBJ) $(LIBS)
-	$(CXX) $(LDFLAGS) -o $@ $(COLM_OBJ) $(RUNTIME_OBJ) $(LIBS)
+colm: $(GEN_SRC) $(COLM_OBJ) $(RUNTIME_OBJ_D) $(LIBS)
+	$(CXX) $(LDFLAGS) -o $@ $(COLM_OBJ) $(RUNTIME_OBJ_D) $(LIBS)
 
-$(RUNTIME): $(RUNTIME_OBJ)
-	ar -cr $@ $(RUNTIME_OBJ)
+$(RUNTIME_P): $(RUNTIME_OBJ_P)
+	ar -cr $@ $^
+
+$(RUNTIME_D): $(RUNTIME_OBJ_D)
+	ar -cr $@ $^
 
 version.h: ../version.mk
 	echo '#define VERSION "$(VERSION)"' > version.h
@@ -114,9 +122,18 @@ lmscan.cpp: lmscan.rl
 
 endif
 
-%.o: %.cpp
-	@$(CXX) -M $(DEFS) $(INCS) $< > .$*.d
-	$(CXX) -c $(CFLAGS) $(DEFS) $(INCS) -o $@ $<
+$(COLM_OBJ): %.o: %.cpp
+	@$(CXX) -M $(DEFS_COLM) $(INCS) $< > .$*.d
+	$(CXX) -c $(CFLAGS) $(DEFS_COLM) $(INCS) -o $@ $<
+
+$(RUNTIME_OBJ_P): %_p.o: %.cpp
+	@$(CXX) -M -MT $@ $(DEFS_RT_P) $(INCS) $< > .$*_p.d
+	$(CXX) -c $(CFLAGS) $(DEFS_RT_P) $(INCS) -o $@ $<
+
+$(RUNTIME_OBJ_D): %_d.o: %.cpp
+	@$(CXX) -M -MT $@ $(DEFS_RT_D) $(INCS) $< > .$*_d.d
+	$(CXX) -c $(CFLAGS) $(DEFS_RT_D) $(INCS) -o $@ $<
+
 
 distclean: clean
 	rm -f Makefile config.h
@@ -126,7 +143,7 @@ EXTRA_CLEAN = $(GEN_SRC)
 endif
 
 clean:
-	rm -f tags .*.d *.o colm $(EXTRA_CLEAN) $(RUNTIME)
+	rm -f tags .*.d *.o colm $(EXTRA_CLEAN) $(RUNTIME_P) $(RUNTIME_D)
 
 install: all
 	install -d $(PREFIX)/bin
