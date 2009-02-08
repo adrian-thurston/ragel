@@ -22,7 +22,6 @@
 #include "parsedata.h"
 #include "fsmcodegen.h"
 #include "redfsm.h"
-#include "dotgen.h"
 #include "bstmap.h"
 #include "fsmrun.h"
 #include <sstream>

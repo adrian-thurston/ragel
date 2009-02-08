@@ -37,7 +37,6 @@
 #include "vector.h"
 #include "version.h"
 #include "fsmcodegen.h"
-#include "dotgen.h"
 
 using std::istream;
 using std::ifstream;
@@ -49,9 +48,7 @@ using std::cerr;
 using std::endl;
 
 /* Graphviz dot file generation. */
-bool graphvizDone = false;
-
-bool printPrintables = false;
+bool genGraphviz = false;
 
 using std::ostream;
 using std::istream;
@@ -308,7 +305,7 @@ void compileOutput( const char *argv0 )
 
 void process_args( int argc, const char **argv )
 {
-	ParamCheck pc( "vlio:S:M:vHh?-:s", argc, argv );
+	ParamCheck pc( "vlio:S:M:vHh?-:sV", argc, argv );
 
 	while ( pc.check() ) {
 		switch ( pc.state ) {
@@ -340,6 +337,9 @@ void process_args( int argc, const char **argv )
 				exit(0);
 			case 's':
 				printStatistics = true;
+				break;
+			case 'V':
+				generateGraphviz = true;
 				break;
 			case '-':
 				if ( strcasecmp(pc.parameterArg, "help") == 0 ) {
@@ -429,10 +429,21 @@ int main(int argc, const char **argv)
 	/* Initiate a compile following a parse. */
 	scanner.parser->pd->semanticAnalysis();
 
-	if ( outStream != 0 )
-		delete outStream;
+	/*
+	 * Write output.
+	 */
+	if ( generateGraphviz ) {
+		outStream = &cout;
+		scanner.parser->pd->writeDotFile();
+	}
+	else {
+		openOutput();
+		scanner.parser->pd->generateOutput();
+	
+		if ( outStream != 0 )
+			delete outStream;
 
-	compileOutput( argv[0] );
-
+		compileOutput( argv[0] );
+	}
 	return 0;
 }

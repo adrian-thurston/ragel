@@ -35,9 +35,7 @@
 #define PROGNAME "colm"
 
 /* IO filenames and stream. */
-extern bool printPrintables;
-extern bool graphvizDone;
-
+extern bool genGraphviz;
 extern int gblErrorCount;
 
 std::ostream &error();

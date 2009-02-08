@@ -1747,7 +1747,7 @@ void ParseData::semanticAnalysis()
 
 	/* Make the reduced fsm. */
 	RedFsmBuild reduce( sectionName, this, fsmGraph );
-	RedFsm *redFsm = reduce.reduceMachine();
+	redFsm = reduce.reduceMachine();
 
 	/* Build the parsers used for patterns and replacements. */
 	makePatternParsers();
@@ -1774,13 +1774,10 @@ void ParseData::semanticAnalysis()
 	
 	/* Parse patterns and replacements. */
 	parsePatterns();
+}
 
-	/*
-	 * Write output.
-	 */
-
-	openOutput();
-
+void ParseData::generateOutput()
+{
 	FsmCodeGen *fsmGen = new FsmCodeGen("<INPUT>", sectionName,
 			*outStream, redFsm, fsmTables );
 

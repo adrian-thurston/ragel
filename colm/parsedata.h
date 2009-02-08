@@ -743,6 +743,15 @@ struct ParseData
 	void resolveUses();
 	void createDefaultScanner();
 	void semanticAnalysis();
+	void generateOutput();
+
+	/* 
+	 * Graphviz Generation
+	 */
+	void writeTransList( PdaState *state );
+	void writeDotFile( PdaGraph *graph );
+	void writeDotFile( );
+	
 
 	/*
 	 * Data collected during the parse.
@@ -885,6 +894,8 @@ struct ParseData
 	ObjFieldMap *objFieldMap;
 
 	bool revertOn;
+
+	RedFsm *redFsm;
 };
 
 void afterOpMinimize( FsmGraph *fsm, bool lastInSeq = true );
