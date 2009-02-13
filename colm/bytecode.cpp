@@ -131,8 +131,8 @@ void send( Tree **root, Program *prg, PdaRun *parser, Tree *tree, bool ignore )
 Tree *call_parser( Tree **&sp, Program *prg, Stream *stream, 
 		long parserId, long stopId, CodeVect *&cv, bool revertOn )
 {
-	PdaTables *tables = prg->rtd->parsers[parserId];
-	PdaRun parser( sp, prg, tables, stream->scanner, stopId, revertOn );
+	PdaTables *tables = prg->rtd->pdaTables;
+	PdaRun parser( sp, prg, tables, parserId, stream->scanner, stopId, revertOn );
 	parser.run();
 	commit_full( &parser, 0 );
 	Tree *tree = parser.getParsedRoot( stopId > 0 );
@@ -156,8 +156,8 @@ Tree *call_parser( Tree **&sp, Program *prg, Stream *stream,
 void undo_parse( Tree **&sp, Program *prg, Stream *stream, 
 		long parserId, Tree *tree, CodeVect *rev )
 {
-	PdaTables *tables = prg->rtd->parsers[parserId];
-	PdaRun parser( sp, prg, tables, stream->scanner, 0, false );
+	PdaTables *tables = prg->rtd->pdaTables;
+	PdaRun parser( sp, prg, tables, parserId, stream->scanner, 0, false );
 	parser.undoParse( tree, rev );
 }
 

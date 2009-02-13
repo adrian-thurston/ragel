@@ -1603,29 +1603,6 @@ void InputStreamRepl::pushBackNamed()
 }
 
 
-void ParseData::makePatternParsers()
-{
-	for ( PatternList::Iter pat = patternList; pat.lte(); pat++ ) {
-		/* We assume the reduction action compilation phase was run before
-		 * pattern parsing and it decorated the pattern with the target type. */
-		assert( pat->langEl != 0 );
-		if ( pat->langEl->type != KlangEl::NonTerm )
-			error(pat->loc) << "pattern type is not a non-terminal" << endp;
-
-		/* Make a parser for the language element. */
-		makeParser( pat->langEl );
-	}
-
-	for ( ReplList::Iter repl = replList; repl.lte(); repl++ ) {
-		/* We assume the reduction action compilation phase was run before
-		 * replacement parsing decorated the replacement with the target type. */
-		assert( repl->langEl != 0 );
-
-		/* Make a parser for the language element. */
-		makeParser( repl->langEl );
-	}
-}
-
 void ParseData::parsePatterns()
 {
 	Program program( false, runtimeData );
@@ -1639,7 +1616,7 @@ void ParseData::parsePatterns()
 		fsmRun.attachInputStream( &in );
 
 		repl->pdaRun = new PdaRun( root, &program,
-				repl->langEl->pdaTables, &fsmRun, 0, false );
+				pdaTables, repl->langEl->parserId, &fsmRun, 0, false );
 		repl->pdaRun->run();
 
 			//#ifdef COLM_LOG_COMPILE
@@ -1655,7 +1632,7 @@ void ParseData::parsePatterns()
 		fsmRun.attachInputStream( &in );
 
 		pat->pdaRun = new PdaRun( root, &program,
-				pat->langEl->pdaTables, &fsmRun, 0, false );
+				pdaTables, pat->langEl->parserId, &fsmRun, 0, false );
 		pat->pdaRun->run();
 
 			//#ifdef COLM_LOG_COMPILE
@@ -1666,31 +1643,6 @@ void ParseData::parsePatterns()
 	}
 
 	fillInPatterns( &program );
-}
-
-void ParseData::verifyParseStopGrammar( KlangEl *langEl )
-{
-	PdaGraph *pdaGraph = langEl->pdaGraph;
-
-	/* Get the entry into the graph and traverse over the root. The resulting
-	 * state can have eof, nothing else can. */
-	PdaState *overStart = pdaGraph->followFsm( 
-			pdaGraph->startState,
-			langEl->rootDef->fsm );
-
-	/* The graph must reduce to root all on it's own. It cannot depend on
-	 * require EOF. */
-	for ( PdaStateList::Iter st = pdaGraph->stateList; st.lte(); st++ ) {
-		if ( st == overStart )
-			continue;
-
-		for ( TransMap::Iter tr = st->transMap; tr.lte(); tr++ ) {
-			if ( tr->value->lowKey == eofKlangEl->id ) {
-				/* This needs a better error message. Appears to be voodoo. */
-				error() << "grammar is not usable with parse_stop" << endp;
-			}
-		}
-	}
 }
 
 void ParseData::resolveUses()
@@ -1707,6 +1659,41 @@ void ParseData::resolveUses()
 			KlangEl *langEl = getKlangEl( this, nspace, lel->objectDefUses, KlangEl::Unknown );
 			lel->objectDef = langEl->objectDef;
 		}
+	}
+}
+
+void ParseData::collectParserEls( BstSet<KlangEl*> &parserEls )
+{
+	for ( PatternList::Iter pat = patternList; pat.lte(); pat++ ) {
+		/* We assume the reduction action compilation phase was run before
+		 * pattern parsing and it decorated the pattern with the target type. */
+		assert( pat->langEl != 0 );
+		if ( pat->langEl->type != KlangEl::NonTerm )
+			error(pat->loc) << "pattern type is not a non-terminal" << endp;
+
+		if ( pat->langEl->parserId < 0 ) {
+			/* Make a parser for the language element. */
+			parserEls.insert( pat->langEl );
+			pat->langEl->parserId = nextParserId++;
+		}
+	}
+
+	for ( ReplList::Iter repl = replList; repl.lte(); repl++ ) {
+		/* We assume the reduction action compilation phase was run before
+		 * replacement parsing decorated the replacement with the target type. */
+		assert( repl->langEl != 0 );
+
+		if ( repl->langEl->parserId < 0 ) {
+			/* Make a parser for the language element. */
+			parserEls.insert( repl->langEl );
+			repl->langEl->parserId = nextParserId++;
+		}
+	}
+
+	/* Make parsers that we need. */
+	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
+		if ( lel->parserId >= 0 )
+			parserEls.insert( lel );
 	}
 }
 
@@ -1749,18 +1736,10 @@ void ParseData::semanticAnalysis()
 	RedFsmBuild reduce( sectionName, this, fsmGraph );
 	redFsm = reduce.reduceMachine();
 
-	/* Build the parsers used for patterns and replacements. */
-	makePatternParsers();
+	BstSet<KlangEl*> parserEls;
+	collectParserEls( parserEls );
 
-	/* Make parsers that we need. */
-	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
-		if ( lel->parserId >= 0 ) {
-			makeParser( lel );
-
-			if ( lel->parseStop )
-				verifyParseStopGrammar( lel );
-		}
-	}
+	makeParser( parserEls );
 
 	/* Make the scanner tables. */
 	fsmTables = redFsm->makeFsmTables();
@@ -1787,13 +1766,10 @@ void ParseData::generateOutput()
 	fsmGen->writeCode();
 
 	/* Make parsers that we need. */
-	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
-		if ( lel->parserId >= 0 )
-			pdaGen->writeParserData( lel->parserId, lel->pdaTables );
-	}
+	pdaGen->writeParserData( 0, pdaTables );
 
 	/* Write the runtime data. */
-	pdaGen->writeRuntimeData( runtimeData );
+	pdaGen->writeRuntimeData( runtimeData, pdaTables );
 
 	outStream->flush();
 }

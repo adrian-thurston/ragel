@@ -1147,6 +1147,8 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 	/* Allocate a parser id. This will cause a parser to be built for
 	 * the type. */
 	ut->langEl->parserId = pd->nextParserId++;
+	if ( stop )
+		ut->langEl->parseStop = true;
 
 	/* Parse instruction, dependent on whether or not we are
 	 * producing revert or commit code. */

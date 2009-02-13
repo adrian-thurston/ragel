@@ -147,6 +147,7 @@ typedef Vector< TokenDef* > TokenDefVect;
 struct UniqueType;
 
 typedef Vector<KlangEl*> KlangElVect;
+typedef BstSet<KlangEl*> KlangElSet;
 
 /* A language element class. Can be a nonTerm or a term. */
 struct KlangEl : public DListEl<KlangEl>
@@ -178,6 +179,7 @@ struct KlangEl : public DListEl<KlangEl>
 	bool isRepeat;
 	bool isOpt;
 	bool parseStop;
+	bool isEOF;
 
 	/* Productions from the language element if it is a non-terminal. */
 	LelDefList defList;
@@ -185,9 +187,12 @@ struct KlangEl : public DListEl<KlangEl>
 	TokenDef *tokenDef;
 	Definition *rootDef;
 	KlangEl *termDup;
+	KlangEl *eofLel;
 
 	PdaGraph *pdaGraph;
 	PdaTables *pdaTables;
+
+	PdaState *startState;
 
 	CodeBlock *transBlock;
 
@@ -635,14 +640,14 @@ struct ParseData
 	void lalr1AddFollow2( PdaGraph *pdaGraph, PdaTrans *trans, long followKey, long prior );
 	void lalr1AddFollow1( PdaGraph *pdaGraph, PdaTrans *trans );
 
-	void lalr1AddFollowSets( PdaGraph *pdaGraph, KlangEl *rootEl );
+	void lalr1AddFollowSets( PdaGraph *pdaGraph, KlangElSet &parserEls );
 
 	void lr0BringInItem( PdaGraph *pdaGraph, PdaState *dest, PdaState *prodState, 
 			PdaTrans *expandFrom, Definition *prod );
 	void lr0InvokeClosure( PdaGraph *pdaGraph, PdaState *state );
 	void lr0CloseAllStates( PdaGraph *pdaGraph );
 
-	void lalr1GenerateParser( PdaGraph *pdaGraph, KlangEl *rootEl );
+	void lalr1GenerateParser( PdaGraph *pdaGraph, KlangElSet &parserEls );
 
 	void reduceActions( PdaGraph *pdaGraph );
 
@@ -657,13 +662,13 @@ struct ParseData
 	PdaState *followProd( PdaState *tabState, PdaState *prodState );
 	void findFollow( AlphSet &result, PdaState *overTab, 
 			PdaState *overSrc, Definition *parentDef );
-	void pdaActionOrder( PdaGraph *pdaGraph, KlangEl *rootEl );
+	void pdaActionOrder( PdaGraph *pdaGraph, KlangElSet &parserEls );
 	void pdaOrderFollow( KlangEl *rootEl, PdaState *tabState, 
 			PdaTrans *tabTrans, PdaTrans *srcTrans,
 			Definition *parentDef, Definition *definition, long &time );
 	void pdaOrderProd( KlangEl *rootEl, PdaState *tabState, 
 			PdaState *srcState, Definition *parentDef, long &time );
-	void analyzeMachine( PdaGraph *pdaGraph, KlangEl *rootEl );
+	void analyzeMachine( PdaGraph *pdaGraph, KlangElSet &parserEls );
 
 	void makeProdFsms();
 	void insertUniqueEmptyProductions();
@@ -688,12 +693,11 @@ struct ParseData
 	void addProdRHSLoads( Definition *prod, CodeVect &code, long &insertPos );
 
 	void prepGrammar();
-
-	void makePatternParsers();
 	void parsePatterns();
 
-	void makeParser( KlangEl *rootEl );
-	PdaGraph *makePdaGraph( KlangEl *rootEl );
+	void collectParserEls( KlangElSet &parserEls );
+	void makeParser( KlangElSet &parserEls );
+	PdaGraph *makePdaGraph( BstSet<KlangEl*> &parserEls  );
 	PdaTables *makePdaTables( PdaGraph *pdaGraph );
 
 	void fillInPatterns( Program *prg );
@@ -702,7 +706,7 @@ struct ParseData
 	/* Generate and write out the fsm. */
 	void generateGraphviz();
 
-	void verifyParseStopGrammar( KlangEl *langEl );
+	void verifyParseStopGrammar( KlangEl *langEl, PdaGraph *pdaGraph );
 
 	void initFieldInstructions( ObjField *el );
 	void initLocalInstructions( ObjField *el );
@@ -896,6 +900,9 @@ struct ParseData
 	bool revertOn;
 
 	RedFsm *redFsm;
+
+	PdaGraph *pdaGraph;
+	PdaTables *pdaTables;
 };
 
 void afterOpMinimize( FsmGraph *fsm, bool lastInSeq = true );

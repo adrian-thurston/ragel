@@ -724,7 +724,7 @@ void FsmRun::sendEOF( )
 	input->tree->flags |= AF_PARSE_TREE;
 
 	input->tree->refs = 1;
-	input->tree->id = parser->tables->rtd->eofId;
+	input->tree->id = parser->tables->rtd->eofLelIds[parser->parserId];
 
 	bool ctxDepParsing = prg->ctxDepParsing;
 	long frameId = parser->tables->rtd->regionInfo[region].eofFrameId;
@@ -748,7 +748,7 @@ void FsmRun::sendEOF( )
 	parser->send( input );
 
 	if ( parser->errCount > 0 ) {
-		parser->parse_error( parser->tables->rtd->eofId, input->tree ) << 
+		parser->parse_error( input->tree->id, input->tree ) << 
 				"parse error" << endp;
 	}
 

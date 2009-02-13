@@ -320,7 +320,7 @@ void ParseData::lalr1AddFollow1( PdaGraph *pdaGraph, PdaTrans *trans )
 }
 
 /* Add follow sets to an LR(0) graph to make it LALR(1). */
-void ParseData::lalr1AddFollowSets( PdaGraph *pdaGraph, KlangEl *rootEl )
+void ParseData::lalr1AddFollowSets( PdaGraph *pdaGraph, KlangElSet &parserEls )
 {
 	/* Make the state that all reduction actions go to. Since a reduction pops
 	 * states of the stack and sets the new target state, this state is
@@ -328,13 +328,15 @@ void ParseData::lalr1AddFollowSets( PdaGraph *pdaGraph, KlangEl *rootEl )
 	actionDestState = pdaGraph->addState();
 	pdaGraph->setFinState( actionDestState );
 
-	/* Get the entry into the graph and traverse over start. */
-	PdaState *overStart = pdaGraph->followFsm( pdaGraph->startState, rootEl->rootDef->fsm );
+	for ( KlangElSet::Iter pe = parserEls; pe.lte(); pe++ ) {
+		/* Get the entry into the graph and traverse over start. */
+		PdaState *overStart = pdaGraph->followFsm( (*pe)->startState, (*pe)->rootDef->fsm );
 
-	/* Add _eof after the initial _start. */
-	PdaTrans *eofTrans = pdaGraph->insertNewTrans( overStart, actionDestState, 
-			eofKlangEl->id, eofKlangEl->id );
-	eofTrans->isShift = true;
+		/* Add _eof after the initial _start. */
+		PdaTrans *eofTrans = pdaGraph->insertNewTrans( overStart, actionDestState, 
+				(*pe)->eofLel->id, (*pe)->eofLel->id );
+		eofTrans->isShift = true;
+	}
 
 	/* This was used during lr0 table construction. */
 	pdaGraph->transClosureQueue.abandon();
@@ -416,20 +418,26 @@ void ParseData::addDupTerms( PdaGraph *pdaGraph )
 }
 
 /* Generate a LALR(1) graph. */
-void ParseData::lalr1GenerateParser( PdaGraph *pdaGraph, KlangEl *rootEl )
+void ParseData::lalr1GenerateParser( PdaGraph *pdaGraph, KlangElSet &parserEls )
 {
 	/* Make the intial graph. */
 	pdaGraph->langElIndex = langElIndex;
 
-	PdaState *start = pdaGraph->addState();
-	pdaGraph->setStartState( start );
+	for ( Vector<KlangEl*>::Iter r = parserEls; r.lte(); r++ ) {
+		/* Create the entry point. */
+		PdaState *rs = pdaGraph->addState();
+		pdaGraph->entryStateSet.insert( rs );
 
-	start->stateSet = new PdaStateSet;
-	start->stateSet->insert( rootEl->rootDef->fsm->startState );
+		/* State set of just one state. */
+		rs->stateSet = new PdaStateSet;
+		rs->stateSet->insert( (*r)->rootDef->fsm->startState );
 
-	/* Queue the start state for closure. */
-	start->onClosureQueue = true;
-	pdaGraph->stateClosureQueue.append( start );
+		/* Queue the start state for closure. */
+		rs->onClosureQueue = true;
+		pdaGraph->stateClosureQueue.append( rs );
+
+		(*r)->startState = rs;
+	}
 
 	/* Run the lr0 closure. */
 	lr0CloseAllStates( pdaGraph );
@@ -441,7 +449,7 @@ void ParseData::lalr1GenerateParser( PdaGraph *pdaGraph, KlangEl *rootEl )
 	linkExpansions( pdaGraph );
 
 	/* Walk the graph adding follow sets to the LR(0) graph. */
-	lalr1AddFollowSets( pdaGraph, rootEl );
+	lalr1AddFollowSets( pdaGraph, parserEls );
 
 //	/* Set the commit on the final eof shift. */
 //	PdaTrans *overStart = pdaGraph->startState->findTrans( rootEl->id );

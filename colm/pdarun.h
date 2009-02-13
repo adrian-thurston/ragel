@@ -420,7 +420,9 @@ struct RuntimeData
 	long numLiterals;
 
 	FsmTables *fsmTables;
-	PdaTables **parsers;
+	PdaTables *pdaTables;
+	int *startStates;
+	int *eofLelIds;
 	long numParsers;
 
 	long globalSize;
@@ -437,7 +439,6 @@ struct RuntimeData
 struct PdaTables
 {
 	/* Parser table data. */
-	unsigned int startState;
 	int *indicies;
 	int *keys;
 	unsigned int *offsets;
@@ -466,12 +467,13 @@ typedef Vector<Tree*> Bindings;
 
 struct PdaRun
 {
-	PdaRun( Tree **root, Program *prg, PdaTables *tables, 
+	PdaRun( Tree **root, Program *prg, PdaTables *tables, int parserId,
 			FsmRun *scanner, long stopTarget, bool revertOn )
 	:
 		root(root),
 		prg(prg),
 		tables(tables), 
+		parserId(parserId), 
 		fsmRun(scanner), 
 		stopParsing(false),
 		stopTarget(stopTarget),
@@ -497,6 +499,7 @@ struct PdaRun
 
 	Program *prg;
 	PdaTables *tables;
+	int parserId;
 
 	FsmRun *fsmRun;
 

@@ -86,7 +86,8 @@ bool PdaRun::isParserStopFinished()
 
 void PdaRun::init()
 {
-	cs = tables->startState;
+	/* FIXME: need the right one here. */
+	cs = prg->rtd->startStates[parserId];
 
 	/* Init the element allocation variables. */
 	stackTop = prg->kidPool.allocate();
@@ -111,7 +112,7 @@ long PdaRun::stackTopTarget()
 {
 	long state;
 	if ( pt(stackTop->tree)->state < 0 )
-		state = tables->startState;
+		state = prg->rtd->startStates[parserId];
 	else {
 		state = tables->targs[(int)tables->indicies[tables->offsets[
 				pt(stackTop->tree)->state] + 

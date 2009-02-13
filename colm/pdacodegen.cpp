@@ -92,7 +92,7 @@ void PdaCodeGen::writeFirst()
 		"\n";
 }
 
-void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData )
+void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTables )
 {
 	/*
 	 * Blocks of code in frames.
@@ -355,10 +355,15 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData )
 		out << "0, ";
 	out << "};\n\n";
 
-	/* Parsers. */
-	out << "PdaTables *parsers[] = {\n\t";
+	out << "int startStates[] = {\n\t";
 	for ( long i = 0; i < runtimeData->numParsers; i++ ) {
-		out << "&pid_" << i << "_pdaTables,\n";
+		out << runtimeData->startStates[i] << ", ";
+	}
+	out << "};\n\n";
+
+	out << "int eofLelIds[] = {\n\t";
+	for ( long i = 0; i < runtimeData->numParsers; i++ ) {
+		out << runtimeData->eofLelIds[i] << ", ";
 	}
 	out << "};\n\n";
 
@@ -398,7 +403,8 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData )
 		"	" << runtimeData->numLiterals << ",\n"
 		"\n"
 		"	&fsmTables_start,\n"
-		"	parsers, " << runtimeData->numParsers << ",\n"
+		"	&pid_0_pdaTables,\n"
+		"	startStates, eofLelIds, " << runtimeData->numParsers << ",\n"
 		"\n"
 		"	" << runtimeData->globalSize << ",\n"
 		"\n"
@@ -415,8 +421,6 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData )
 void PdaCodeGen::writeParserData( long id, PdaTables *tables )
 {
 	String prefix = "pid_" + String(0, "%ld", id) + "_";
-	out << "unsigned int " << prefix << startState() << " = " <<
-		tables->startState << ";\n\n";
 
 	out << "int " << prefix << indicies() << "[] = {\n\t";
 	for ( int i = 0; i < tables->numIndicies; i++ ) {
@@ -529,7 +533,6 @@ void PdaCodeGen::writeParserData( long id, PdaTables *tables )
 	out << 
 		"PdaTables " << prefix << "pdaTables =\n"
 		"{\n"
-		"	" << prefix << startState() << ",\n"
 		"	" << prefix << indicies() << ",\n"
 		"	" << prefix << keys() << ",\n"
 		"	" << prefix << offsets() << ",\n"

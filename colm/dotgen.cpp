@@ -79,8 +79,12 @@ void ParseData::writeDotFile( PdaGraph *graph )
 	/* Define the psuedo states. Transitions will be done after the states
 	 * have been defined as either final or not final. */
 	out << 
-		"	node [ shape = point ];\n"
-		"	ENTRY [ label = \"\" ];\n"
+		"	node [ shape = point ];\n";
+	
+	for ( int i = 0; i < graph->entryStateSet.length(); i++ )
+		out << "\tENTRY" << i <<  " [ label = \"\" ];\n";
+
+	out << 
 		"\n"
 		"	node [ shape = circle, fixedsize = true, height = 0.2 ];\n";
 
@@ -94,8 +98,9 @@ void ParseData::writeDotFile( PdaGraph *graph )
 	for ( PdaStateList::Iter st = graph->stateList; st.lte(); st++ )
 		writeTransList( st );
 
-	/* Transitions into the start state. */
-	out << "	ENTRY -> " << graph->startState->stateNum << " [ label = \"\" ];\n";
+	/* Start state and other entry points. */
+	for ( PdaStateSet::Iter st = graph->entryStateSet; st.lte(); st++ )
+		out << "\tENTRY" << st.pos() << " -> " << (*st)->stateNum << " [ label = \"\" ];\n";
 
 	out <<
 		"}\n";
@@ -103,9 +108,6 @@ void ParseData::writeDotFile( PdaGraph *graph )
 
 void ParseData::writeDotFile()
 {
-	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
-		if ( lel->parserId >= 0 )
-			writeDotFile( lel->pdaGraph );
-	}
+	writeDotFile( pdaGraph );
 }
 

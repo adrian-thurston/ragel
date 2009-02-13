@@ -497,7 +497,11 @@ void PdaGraph::removeUnreachableStates()
 {
 	/* Mark all the states that can be reached 
 	 * through the existing set of entry points. */
-	markReachableFromHere( startState );
+	if ( startState != 0 )
+		markReachableFromHere( startState );
+
+	for ( PdaStateSet::Iter si = entryStateSet; si.lte(); si++ )
+		markReachableFromHere( *si );
 
 	/* Delete all states that are not marked
 	 * and unmark the ones that are marked. */

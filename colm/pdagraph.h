@@ -388,6 +388,7 @@ struct PdaGraph
 
 	/* The start state. */
 	PdaState *startState;
+	PdaStateSet entryStateSet;
 
 	/* The set of final states. */
 	PdaStateSet finStateSet;

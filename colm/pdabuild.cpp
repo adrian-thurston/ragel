@@ -73,9 +73,11 @@ KlangEl::KlangEl( Namespace *nspace, const String &name, Type type )
 	isRepeat(false),
 	isOpt(false),
 	parseStop(false),
+	isEOF(false),
 	tokenDef(0),
 	rootDef(0),
 	termDup(0),
+	eofLel(0),
 	pdaGraph(0),
 	pdaTables(0),
 	transBlock(0),
@@ -218,10 +220,11 @@ void ParseData::makeKlangElIds()
 	assert( noTokenMapEl != 0 );
 
 	/* Make the EOF language element. */
-	eofKlangEl = new KlangEl( rootNamespace, strdup("_eof"), KlangEl::Term );
-	langEls.prepend( eofKlangEl );
-	SymbolMapEl *eofMapEl = rootNamespace->symbolMap.insert( eofKlangEl->name, eofKlangEl );
-	assert( eofMapEl != 0 );
+	eofKlangEl = 0;
+//	eofKlangEl = new KlangEl( rootNamespace, strdup("_eof"), KlangEl::Term );
+//	langEls.prepend( eofKlangEl );
+//	SymbolMapEl *eofMapEl = rootNamespace->symbolMap.insert( eofKlangEl->name, eofKlangEl );
+//	assert( eofMapEl != 0 );
 
 	/* Make the "any" language element */
 	anyKlangEl = new KlangEl( rootNamespace, strdup("any"), KlangEl::NonTerm );
@@ -247,6 +250,25 @@ void ParseData::makeKlangElIds()
 		}
 	}
 
+	/* Make eof language elements for each user terminal. This is a bit excessive and
+	 * need to be reduced to the ones that we need parsers for, but we don't know that yet.
+	 * Another pass before this one is needed. */
+	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
+		if ( lel->eofLel == 0 &&
+				lel != eofKlangEl &&
+				lel != errorKlangEl &&
+				lel != noTokenKlangEl )
+		{
+			String name( lel->name.length() + 5, "_eof_%s", lel->name.data );
+			KlangEl *eofLel = new KlangEl( lel->nspace, name, KlangEl::Term );
+
+			langEls.append( eofLel );
+			lel->eofLel = eofLel;
+			eofLel->eofLel = lel;
+			eofLel->isEOF = true;
+		}
+	}
+
 	/* The first id 0 is reserved for the stack sentinal. A negative id means
 	 * error to the parsing function, inducing backtracking. */
 	nextSymbolId = 1;
@@ -256,7 +278,7 @@ void ParseData::makeKlangElIds()
 		/* Must be a term, and not any of the special reserved terminals.
 		 * Remember if the non terminal is a user non terminal. */
 		if ( lel->type == KlangEl::Term && 
-				lel != eofKlangEl && 
+				!lel->isEOF && 
 				lel != errorKlangEl &&
 				lel != noTokenKlangEl )
 		{
@@ -265,8 +287,15 @@ void ParseData::makeKlangElIds()
 		}
 	}
 
+	//eofKlangEl->id = nextSymbolId++;
+	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
+		/* Must be a term, and not any of the special reserved terminals.
+		 * Remember if the non terminal is a user non terminal. */
+		if ( lel->isEOF )
+			lel->id = nextSymbolId++;
+	}
+
 	/* Next assign to the eof notoken, which we always create. */
-	eofKlangEl->id = nextSymbolId++;
 	noTokenKlangEl->id = nextSymbolId++;
 
 	/* Possibly assign to the error language element. */
@@ -482,7 +511,7 @@ void ParseData::pdaOrderFollow( KlangEl *rootEl, PdaState *tabState,
 
 	AlphSet alphSet;
 	if ( parentDef == rootEl->rootDef )
-		alphSet.insert( eofKlangEl->id );
+		alphSet.insert( rootEl->eofLel->id );
 	else
 		findFollow( alphSet, overTab, overSrc, parentDef );		
 
@@ -519,7 +548,7 @@ void ParseData::addRegion( PdaState *tabState, long pdaKey )
 
 		/* If it is not the eof, then use the region associated 
 		 * with the token definition. */
-		if ( klangEl != eofKlangEl && klangEl->tokenDef != 0 )
+		if ( !klangEl->isEOF && klangEl->tokenDef != 0 )
 			region = klangEl->tokenDef->tokenRegion;
 
 		if ( region != 0 && !regionVectHas( tabState->regions, region ) )
@@ -620,7 +649,7 @@ void ParseData::pdaOrderProd( KlangEl *rootEl, PdaState *tabState,
 	}
 }
 
-void ParseData::pdaActionOrder( PdaGraph *pdaGraph, KlangEl *rootEl )
+void ParseData::pdaActionOrder( PdaGraph *pdaGraph, KlangElSet &parserEls )
 {
 	for ( PdaStateList::Iter state = pdaGraph->stateList; state.lte(); state++ ) {
 		assert( (state->stateBits & SB_ISMARKED) == 0 );
@@ -636,14 +665,16 @@ void ParseData::pdaActionOrder( PdaGraph *pdaGraph, KlangEl *rootEl )
 
 	/* Compute the action orderings, record the max value. */
 	long time = 1;
-	PdaState *startState = rootEl->rootDef->fsm->startState;
-	pdaOrderProd( rootEl, pdaGraph->startState, startState, rootEl->rootDef, time );
+	for ( KlangElSet::Iter pe = parserEls; pe.lte(); pe++ ) {
+		PdaState *startState = (*pe)->rootDef->fsm->startState;
+		pdaOrderProd( *pe, (*pe)->startState, startState, (*pe)->rootDef, time );
 
-	/* Walk over the start lang el and set the time for shift of
-	 * the eof action that completes the parse. */
-	PdaTrans *overStart = pdaGraph->startState->findTrans( rootEl->id );
-	PdaTrans *eofTrans = overStart->toState->findTrans( eofKlangEl->id );
-	eofTrans->actOrds[0] = time++;
+		/* Walk over the start lang el and set the time for shift of
+		 * the eof action that completes the parse. */
+		PdaTrans *overStart = (*pe)->startState->findTrans( (*pe)->id );
+		PdaTrans *eofTrans = overStart->toState->findTrans( (*pe)->eofLel->id );
+		eofTrans->actOrds[0] = time++;
+	}
 
 	for ( PdaStateList::Iter state = pdaGraph->stateList; state.lte(); state++ ) {
 		if ( state->regions.length() == 0 ) {
@@ -651,7 +682,8 @@ void ParseData::pdaActionOrder( PdaGraph *pdaGraph, KlangEl *rootEl )
 				/* There are no regions and EOF leaves the state. Add the eof
 				 * token region. */
 				PdaTrans *trans = tel->value;
-				if ( trans->lowKey == eofKlangEl->id )
+				KlangEl *lel = langElIndex[trans->lowKey];
+				if ( lel != 0 && lel->isEOF )
 					state->regions.append( eofTokenRegion );
 			}
 		}
@@ -859,7 +891,30 @@ void ParseData::reduceActions( PdaGraph *pdaGraph )
 	}
 }
 
-void ParseData::analyzeMachine( PdaGraph *pdaGraph, KlangEl *rootEl )
+void ParseData::verifyParseStopGrammar( KlangEl *langEl, PdaGraph *pdaGraph )
+{
+	/* Get the entry into the graph and traverse over the root. The resulting
+	 * state can have eof, nothing else can. */
+	PdaState *overStart = pdaGraph->followFsm( 
+			langEl->startState,
+			langEl->rootDef->fsm );
+
+	/* The graph must reduce to root all on it's own. It cannot depend on
+	 * require EOF. */
+	for ( PdaStateList::Iter st = pdaGraph->stateList; st.lte(); st++ ) {
+		if ( st == overStart )
+			continue;
+
+		for ( TransMap::Iter tr = st->transMap; tr.lte(); tr++ ) {
+			if ( tr->value->lowKey == langEl->eofLel->id ) {
+				/* This needs a better error message. Appears to be voodoo. */
+				error() << "grammar is not usable with parse_stop" << endp;
+			}
+		}
+	}
+}
+
+void ParseData::analyzeMachine( PdaGraph *pdaGraph, KlangElSet &parserEls )
 {
 	pdaGraph->maxState = pdaGraph->stateList.length() - 1;
 	pdaGraph->maxLelId = nextSymbolId - 1;
@@ -879,7 +934,7 @@ void ParseData::analyzeMachine( PdaGraph *pdaGraph, KlangEl *rootEl )
 		}
 	}
 
-	pdaActionOrder( pdaGraph, rootEl );
+	pdaActionOrder( pdaGraph, parserEls );
 	sortActions( pdaGraph );
 	advanceReductions( pdaGraph );
 	pdaGraph->setStateNumbers();
@@ -922,6 +977,10 @@ void ParseData::analyzeMachine( PdaGraph *pdaGraph, KlangEl *rootEl )
 			}
 		}
 	}
+
+	/* Verify that any type we parse_stop can actually be parsed that way. */
+	for ( KlangElSet::Iter pe = parserEls; pe.lte(); pe++ )
+		verifyParseStopGrammar(*pe, pdaGraph);
 }
 
 void ParseData::wrapNonTerminals()
@@ -1359,12 +1418,16 @@ void ParseData::makeRuntimeData()
 	}
 
 	runtimeData->fsmTables = fsmTables;
+	runtimeData->pdaTables = pdaTables;
 
-	runtimeData->parsers = new PdaTables*[nextParserId];
+	runtimeData->startStates = new int[nextParserId];
+	runtimeData->eofLelIds = new int[nextParserId];
 	runtimeData->numParsers = nextParserId;
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
-		if ( lel->parserId >= 0 )
-			runtimeData->parsers[lel->parserId] = lel->pdaTables;
+		if ( lel->parserId >= 0 ) {
+			runtimeData->startStates[lel->parserId] = lel->startState->stateNum;
+			runtimeData->eofLelIds[lel->parserId] = lel->eofLel->id;
+		}
 	}
 		
 
@@ -1379,7 +1442,7 @@ void ParseData::makeRuntimeData()
 	runtimeData->integerId = intKlangEl->id;
 	runtimeData->stringId = strKlangEl->id;
 	runtimeData->anyId = anyKlangEl->id;
-	runtimeData->eofId = eofKlangEl->id;
+	runtimeData->eofId = 0; //eofKlangEl->id;
 	runtimeData->noTokenId = noTokenKlangEl->id;
 }
 
@@ -1502,8 +1565,6 @@ PdaTables *ParseData::makePdaTables( PdaGraph *pdaGraph )
 {
 	int count, curOffset, pos;
 	PdaTables *pdaTables = new PdaTables;
-
-	pdaTables->startState = pdaGraph->startState->stateNum;
 
 	/*
 	 * Indicies.
@@ -1687,25 +1748,23 @@ void ParseData::prepGrammar()
 	runtimeData = new RuntimeData;
 }
 
-PdaGraph *ParseData::makePdaGraph( KlangEl *rootEl )
+PdaGraph *ParseData::makePdaGraph( KlangElSet &parserEls )
 {
 	//for ( DefList::Iter prod = prodList; prod.lte(); prod++ )
 	//	cerr << prod->prodId << " " << prod->data << endl;
 
 	PdaGraph *pdaGraph = new PdaGraph();
-	lalr1GenerateParser( pdaGraph, rootEl );
+	lalr1GenerateParser( pdaGraph, parserEls );
 	pdaGraph->setStateNumbers();
-	analyzeMachine( pdaGraph, rootEl );
+	analyzeMachine( pdaGraph, parserEls );
 
 	//cerr << "NUMBER OF STATES: " << pdaGraph->stateList.length() << endl;
 
 	return pdaGraph;
 }
 
-void ParseData::makeParser( KlangEl *rootEl )
+void ParseData::makeParser( KlangElSet &parserEls )
 {
-	if ( rootEl->pdaTables == 0 ) {
-		rootEl->pdaGraph = makePdaGraph( rootEl );
-		rootEl->pdaTables = makePdaTables( rootEl->pdaGraph );
-	}
+	pdaGraph = makePdaGraph( parserEls );
+	pdaTables = makePdaTables( pdaGraph );
 }
