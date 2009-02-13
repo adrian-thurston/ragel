@@ -316,7 +316,7 @@ void FsmRun::sendBack( Kid *input )
 	sendBackIgnore( tree_ignore( prg, input->tree ) );
 
 	/* If eof was just sent back remember that it needs to be sent again. */
-	if ( input->tree->id == parser->tables->rtd->eofId )
+	if ( input->tree->id == parser->tables->rtd->eofLelIds[parser->parserId] )
 		eofSent = false;
 
 	/* If the item is bound then store remove it from the bindings array. */

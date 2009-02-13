@@ -979,8 +979,11 @@ void ParseData::analyzeMachine( PdaGraph *pdaGraph, KlangElSet &parserEls )
 	}
 
 	/* Verify that any type we parse_stop can actually be parsed that way. */
-	for ( KlangElSet::Iter pe = parserEls; pe.lte(); pe++ )
-		verifyParseStopGrammar(*pe, pdaGraph);
+	for ( KlangElSet::Iter pe = parserEls; pe.lte(); pe++ ) {
+		KlangEl *lel = *pe;
+		if ( lel->parseStop )
+			verifyParseStopGrammar(lel , pdaGraph);
+	}
 }
 
 void ParseData::wrapNonTerminals()
