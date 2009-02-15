@@ -1386,6 +1386,7 @@ void ParseData::initEmptyScanners()
 
 InputStreamPattern::InputStreamPattern( Pattern *pattern )
 : 
+	InputStream(true),
 	pattern(pattern),
 	patItem(pattern->list->head),
 	offset(0),
@@ -1408,6 +1409,7 @@ KlangEl *InputStreamPattern::getLangEl( long &bindId, char *&data, long &length 
 	bindId = patItem->bindId;
 	data = 0;
 	length = 0;
+	line = patItem->loc.line;
 
 	patItem = patItem->next;
 	offset = 0;
@@ -1418,6 +1420,9 @@ KlangEl *InputStreamPattern::getLangEl( long &bindId, char *&data, long &length 
 
 int InputStreamPattern::getData( char *dest, int length )
 { 
+	if ( offset == 0 )
+		line = patItem->loc.line;
+
 	assert ( patItem->type == PatternItem::InputText );
 	int available = patItem->data.length() - offset;
 
@@ -1491,6 +1496,7 @@ void InputStreamPattern::pushBackNamed()
 
 InputStreamRepl::InputStreamRepl( Replacement *replacement )
 : 
+	InputStream(true),
 	replacement(replacement),
 	replItem(replacement->list->head),
 	offset(0),
@@ -1517,6 +1523,7 @@ KlangEl *InputStreamRepl::getLangEl( long &bindId, char *&data, long &length )
 
 	data = 0;
 	length = 0;
+	line = replItem->loc.line;
 
 	if ( replItem->type == ReplItem::FactorType ) {
 		if ( replItem->factor->literal != 0 ) {
@@ -1538,6 +1545,9 @@ KlangEl *InputStreamRepl::getLangEl( long &bindId, char *&data, long &length )
 
 int InputStreamRepl::getData( char *dest, int length )
 { 
+	if ( offset == 0 )
+		line = replItem->loc.line;
+
 	assert ( replItem->type == ReplItem::InputText );
 	int available = replItem->data.length() - offset;
 

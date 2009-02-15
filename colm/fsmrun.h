@@ -121,8 +121,6 @@ struct FsmRun
 	bool eofSent;
 	RunBuf *runBuf;
 	bool gotoResume;
-	long line;
-	long position;
 	char *mark_enter[32];
 	char *mark_leave[32];
 };

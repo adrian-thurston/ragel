@@ -399,7 +399,7 @@ litpat_el_list: ;
 
 litpat_el: TK_LitPat
 	final {
-		PatternItem *patternItem = new PatternItem( $1->data,
+		PatternItem *patternItem = new PatternItem( $1->loc, $1->data,
 			PatternItem::InputText );
 		patternItemList->append( patternItem );
 	};
@@ -444,7 +444,7 @@ pattern_el_type_or_lit: region_qual TK_Word opt_repeat
 	final {
 		PdaFactor *factor = new PdaFactor( $2->loc, false, $1->nspaceQual, 
 				$2->data, 0, $3->opt, $3->repeat );
-		$$->patternItem = new PatternItem( factor, PatternItem::FactorType );
+		$$->patternItem = new PatternItem( $2->loc, factor, PatternItem::FactorType );
 		patternItemList->append( $$->patternItem );
 	};
 
@@ -453,7 +453,7 @@ pattern_el_type_or_lit: region_qual TK_Literal opt_repeat
 		PdaLiteral *literal = new PdaLiteral( $2->loc, *$2 );
 		PdaFactor *factor = new PdaFactor( $2->loc, false, $1->nspaceQual, 
 				literal, 0, $3->opt, $3->repeat );
-		$$->patternItem = new PatternItem( factor, PatternItem::FactorType );
+		$$->patternItem = new PatternItem( $2->loc, factor, PatternItem::FactorType );
 		patternItemList->append( $$->patternItem );
 	};
 
@@ -488,7 +488,7 @@ litrepl_el_list: ;
 
 litrepl_el: TK_LitPat
 	final {
-		ReplItem *replItem = new ReplItem( ReplItem::InputText, $1->data );
+		ReplItem *replItem = new ReplItem( $1->loc, ReplItem::InputText, $1->data );
 		replItemList->append( replItem );
 	};
 
@@ -499,7 +499,7 @@ repl_el_list: ;
 
 repl_el: var_ref
 	final {
-		ReplItem *replItem = new ReplItem( ReplItem::VarRefType, $1->varRef );
+		ReplItem *replItem = new ReplItem( $1->varRef->loc, ReplItem::VarRefType, $1->varRef );
 		replItemList->append( replItem );
 	};
 
@@ -508,7 +508,7 @@ repl_el: region_qual TK_Literal
 		PdaLiteral *literal = new PdaLiteral( $2->loc, *$2 );
 		PdaFactor *factor = new PdaFactor( $2->loc, false, $1->nspaceQual, 
 				literal, 0, false, false );
-		ReplItem *replItem = new ReplItem( ReplItem::FactorType, factor );
+		ReplItem *replItem = new ReplItem( $2->loc, ReplItem::FactorType, factor );
 		replItemList->append( replItem );
 	};
 

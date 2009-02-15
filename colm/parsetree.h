@@ -907,14 +907,15 @@ struct PatternItem
 		InputText
 	};
 
-	PatternItem( const String &data, Type type ) : 
-			factor(0), data(data), type(type), region(0), 
+	PatternItem( const InputLoc &loc, const String &data, Type type ) : 
+			loc(loc), factor(0), data(data), type(type), region(0), 
 			varRef(0), bindId(0) {}
 
-	PatternItem( PdaFactor *factor, Type type ) : 
-			factor(factor), type(type), region(0), 
+	PatternItem( const InputLoc &loc, PdaFactor *factor, Type type ) : 
+			loc(loc), factor(factor), type(type), region(0), 
 			varRef(0), bindId(0) {}
 
+	InputLoc loc;
 	PdaFactor *factor;
 	String data;
 	Type type;
@@ -935,15 +936,16 @@ struct ReplItem
 		FactorType
 	};
 
-	ReplItem( Type type, const String &data ) : 
-		type(type), data(data), varRef(0), bindId(0) {}
+	ReplItem( const InputLoc &loc, Type type, const String &data ) : 
+		loc(loc), type(type), data(data), varRef(0), bindId(0) {}
 
-	ReplItem( Type type, LangVarRef *varRef ) : 
-		type(type), varRef(varRef), bindId(0) {}
+	ReplItem( const InputLoc &loc, Type type, LangVarRef *varRef ) : 
+		loc(loc), type(type), varRef(varRef), bindId(0) {}
 
-	ReplItem( Type type, PdaFactor *factor ) : 
-		type(type), factor(factor), bindId(0) {}
+	ReplItem( const InputLoc &loc, Type type, PdaFactor *factor ) : 
+		loc(loc), type(type), factor(factor), bindId(0) {}
 
+	InputLoc loc;
 	Type type;
 	String data;
 	LangVarRef *varRef;

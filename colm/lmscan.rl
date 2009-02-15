@@ -165,6 +165,9 @@ void Scanner::token( int type )
 		loc.line = line;
 		loc.col = column;
 
+		if ( tokdata != 0 && tokdata[toklen-1] == '\n' )
+			loc.line -= 1;
+
 		parser->token( loc, type, tokdata, toklen );
 	}
 
@@ -442,8 +445,6 @@ void Scanner::endSection( )
 
 		# Whitespace other than newline.
 		[ \t\r]+ => { updateCol(); };
-
-		# If we are in a single line machine then newline may end the spec.
 		NL => { updateCol(); };
 
 		# Consume eof.

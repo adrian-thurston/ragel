@@ -45,9 +45,7 @@ void operator<<( ostream &out, exit_object & )
 FsmRun::FsmRun( Program *prg ) :
 	prg(prg),
 	tables(prg->rtd->fsmTables),
-	parser(0),
-	line(1),
-	position(0)
+	parser(0)
 {
 }
 
@@ -119,23 +117,27 @@ void FsmRun::streamPush( const char *data, long length )
 /* Keep the position up to date after consuming text. */
 void update_position( FsmRun *fsmRun, const char *data, long length )
 {
-	for ( int i = 0; i < length; i++ ) {
-		if ( data[i] == '\n' )
-			fsmRun->line += 1;
+	if ( !fsmRun->inputStream->handlesLine ) {
+		for ( int i = 0; i < length; i++ ) {
+			if ( data[i] == '\n' )
+				fsmRun->inputStream->line += 1;
+		}
 	}
 
-	fsmRun->position += length;
+	fsmRun->inputStream->position += length;
 }
 
 /* Keep the position up to date after sending back text. */
 void undo_position( FsmRun *fsmRun, const char *data, long length )
 {
-	for ( int i = 0; i < length; i++ ) {
-		if ( data[i] == '\n' )
-			fsmRun->line -= 1;
+	if ( !fsmRun->inputStream->handlesLine ) {
+		for ( int i = 0; i < length; i++ ) {
+			if ( data[i] == '\n' )
+				fsmRun->inputStream->line -= 1;
+		}
 	}
 
-	fsmRun->position -= length;
+	fsmRun->inputStream->position -= length;
 }
 
 /* Should only be sending back whole tokens/ignores, therefore the send back
@@ -665,7 +667,7 @@ void FsmRun::sendIgnore( long id )
 	parser->ignore( tree );
 
 	/* Prepare for more scanning. */
-	position += length;
+	inputStream->position += length;
 	region = parser->getNextRegion();
 	cs = tables->entryByRegion[region];
 
@@ -769,7 +771,7 @@ void FsmRun::attachInputStream( InputStream *in )
 	p = pe = runBuf->buf;
 	peof = 0;
 	eofSent = false;
-	position = 0;
+	inputStream->position = 0;
 }
 
 long PdaRun::run()
@@ -937,7 +939,7 @@ long FsmRun::run( PdaRun *destParser )
 			}
 
 			/* Machine failed before finding a token. */
-			cerr << "SCANNER ERROR" << endp;
+			cerr << "error:" << inputStream->line << ": scanner error" << endp;
 		}
 
 		space = runBuf->buf + FSM_BUFSIZE - pe;

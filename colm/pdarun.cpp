@@ -701,7 +701,7 @@ _out:
 
 ostream &PdaRun::parse_error( int tokId, Tree *tree )
 {
-	cerr << "error:" << fsmRun->line << ": at token ";
+	cerr << "error:" << fsmRun->inputStream->line << ": at token ";
 	if ( tokId < 128 )
 		cerr << "\"" << tables->rtd->lelInfo[tokId].name << "\"";
 	else 

@@ -33,6 +33,11 @@ struct RunBuf;
 
 struct InputStream
 {
+	InputStream( bool handlesLine ) :
+		line(1),
+		position(0),
+		handlesLine(handlesLine) {}
+
 	virtual ~InputStream() {}
 
 	/* Basic functions. */
@@ -51,12 +56,20 @@ struct InputStream
 		{ assert( false ); return 0; }
 	virtual void pushBackNamed()
 		{ assert( false ); }
+	
+	long line;
+	long position;
+
+	/* This is set true for input streams that do their own line counting.
+	 * Causes FsmRun to ignore NLs. */
+	bool handlesLine;
 };
 
 struct InputStreamString : public InputStream
 {
-	InputStreamString( const String &data )
-		: data(data), offset(0), eof(false) {}
+	InputStreamString( const String &data ) : 
+		InputStream(false), 
+		data(data), offset(0), eof(false) {}
 
 	int getData( char *dest, int length );
 	int isEOF() { return eof; }
@@ -70,8 +83,9 @@ struct InputStreamString : public InputStream
 
 struct InputStreamFile : public InputStream
 {
-	InputStreamFile( FILE *file )
-		: file(file), queue(0) {}
+	InputStreamFile( FILE *file ) :
+		InputStream(false), 
+		file(file), queue(0) {}
 
 	int getData( char *dest, int length );
 	int isEOF();
@@ -85,8 +99,9 @@ struct InputStreamFile : public InputStream
 
 struct InputStreamFD : public InputStream
 {
-	InputStreamFD( long fd )
-		: fd(fd), eof(false), queue(0) {}
+	InputStreamFD( long fd ) :
+		InputStream(false), 
+		fd(fd), eof(false), queue(0) {}
 
 	int isEOF();
 	int needFlush();
