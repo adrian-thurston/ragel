@@ -86,11 +86,11 @@ void ParseData::writeDotFile( PdaGraph *graph )
 
 	out << 
 		"\n"
-		"	node [ shape = circle, fixedsize = true, height = 0.2 ];\n";
+		"	node [ shape = circle, fixedsize = true, height = 0.6 ];\n";
 
 	/* Walk the states. */
 	for ( PdaStateList::Iter st = graph->stateList; st.lte(); st++ )
-		out << "	" << st->stateNum << " [ label = \"\" ];\n";
+		out << "	" << st->stateNum << " [ label = \"" << st->stateNum << "\" ];\n";
 
 	out << "\n";
 
