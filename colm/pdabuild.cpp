@@ -699,24 +699,18 @@ void ParseData::pdaActionOrder( PdaGraph *pdaGraph, KlangElSet &parserEls )
 		}
 	}
 
+	/* Some actions may not have an ordering. I believe these to be actions
+	 * that result in a parse error and they arise because the state tables
+	 * are LALR(1) but the action ordering is LR(1). LALR(1) causes some
+	 * reductions that lead nowhere. */
 	for ( PdaStateList::Iter state = pdaGraph->stateList; state.lte(); state++ ) {
 		assert( CmpDotSet::compare( state->dotSet, state->dotSet2 ) == 0 );
 		for ( TransMap::Iter tel = state->transMap; tel.lte(); tel++ ) {
 			PdaTrans *trans = tel->value;
 			/* Check every action has an ordering. */
 			for ( ActDataList::Iter adl = trans->actOrds; adl.lte(); adl++ ) {
-				if ( *adl == 0 ) {
-					warning() << "action ordering for " << 
-						trans->actions[adl.pos()] << " is unset, state: " << 
-						state->stateNum << ", trans: ";
-
-					KlangEl *lel = langElIndex[trans->lowKey];
-					if ( lel == 0 )
-						cerr << (char)trans->lowKey << endl;
-					else
-						cerr << lel->name << endl;
+				if ( *adl == 0 )
 					*adl = time++;
-				}
 			}
 		}
 	}
