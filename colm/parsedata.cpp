@@ -1090,10 +1090,9 @@ void ParseData::createDefaultScanner()
 
 	/* Now create the one and only token -> "<chr>" / any /  */
 	name = "___DEFAULT_SCANNER_CHR";
-	defaultCharKlangEl = getKlangEl( this, defaultNamespace, 
-			name, KlangEl::Term );
-	assert( defaultCharKlangEl != 0 );
-	assert( defaultCharKlangEl->type == KlangEl::Term );
+	defaultCharKlangEl = getKlangEl( this, defaultNamespace, name );
+	assert( defaultCharKlangEl->type == KlangEl::Unknown );
+	defaultCharKlangEl->type = KlangEl::Term;
 
 	Join *join = new Join( new Expression( BT_Any ) );
 		
@@ -1138,7 +1137,7 @@ void ParseData::resolveReferenceFactor( PdaFactor *fact )
 	fact->nspace = nspace;
 
 	/* Look up the language element in the region. */
-	KlangEl *langEl = getKlangEl( this, nspace, fact->refName, KlangEl::Unknown );
+	KlangEl *langEl = getKlangEl( this, nspace, fact->refName );
 
 	if ( fact->opt ) {
 		/* If the factor is an opt, create the opt element and link the factor
@@ -1150,7 +1149,7 @@ void ParseData::resolveReferenceFactor( PdaFactor *fact )
 			fact->langEl = inDict->value;
 		}
 		else {
-			KlangEl *prodName = getKlangEl( this, nspace, optName, KlangEl::NonTerm );
+			KlangEl *prodName = getKlangEl( this, nspace, optName );
 			prodName->type = KlangEl::NonTerm;
 			prodName->isOpt = true;
 
@@ -1191,8 +1190,7 @@ void ParseData::resolveReferenceFactor( PdaFactor *fact )
 			fact->langEl = inDict->value;
 		}
 		else {
-			KlangEl *prodName = getKlangEl( this, nspace,
-					repeatName, KlangEl::NonTerm );
+			KlangEl *prodName = getKlangEl( this, nspace, repeatName );
 			prodName->type = KlangEl::NonTerm;
 			prodName->isRepeat = true;
 
@@ -1364,10 +1362,9 @@ void ParseData::initEmptyScanners()
 			InputLoc loc;
 			String name( reg->name.length() + 16, "__%s_DEF_PAT", reg->name.data );
 
-			KlangEl *lel = getKlangEl( this, rootNamespace,
-					name.data, KlangEl::Term );
-			assert( lel != 0 );
-			assert( lel->type == KlangEl::Term );
+			KlangEl *lel = getKlangEl( this, rootNamespace, name.data );
+			assert( lel->type == KlangEl::Unknown );
+			lel->type = KlangEl::Term;
 
 			Join *join = new Join( new Expression( BT_Any ) );
 				
@@ -1666,7 +1663,7 @@ void ParseData::resolveUses()
 				error() << "do not have namespace for resolving reference" << endp;
 	
 			/* Look up the language element in the region. */
-			KlangEl *langEl = getKlangEl( this, nspace, lel->objectDefUses, KlangEl::Unknown );
+			KlangEl *langEl = getKlangEl( this, nspace, lel->objectDefUses );
 			lel->objectDef = langEl->objectDef;
 		}
 	}

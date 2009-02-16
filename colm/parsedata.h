@@ -924,7 +924,6 @@ struct Parser;
 typedef AvlMap<String, Parser *, CmpStr> ParserDict;
 typedef AvlMapEl<String, Parser *> ParserDictEl;
 
-KlangEl *getKlangEl( ParseData *pd, Namespace *nspace,
-		const String &data, KlangEl::Type defType );
+KlangEl *getKlangEl( ParseData *pd, Namespace *nspace, const String &data );
 
 #endif /* _PARSEDATA_H */

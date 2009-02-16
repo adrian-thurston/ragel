@@ -173,13 +173,14 @@ generic_def: KW_Map TK_Word '[' type_ref type_ref ']'
 	final {
 		Namespace *nspace = namespaceStack.top();
 
-		KlangEl *langEl = getKlangEl( pd, nspace, $2->data, KlangEl::NonTerm );
+		KlangEl *langEl = getKlangEl( pd, nspace, $2->data );
 
 		/* Check that the element wasn't previously defined as something else. */
-		if ( langEl->type != KlangEl::Unknown && langEl->type != KlangEl::NonTerm ) {
-			error($1->loc) << "'" << curDefineId << 
+		if ( langEl->type != KlangEl::Unknown ) {
+			error($1->loc) << "'" << $2->data << 
 				"' already defined as something else" << endp;
 		}
+		langEl->type = KlangEl::NonTerm;
 
 		GenericType *generic = new GenericType( $2->data, GEN_MAP,
 				pd->nextGenericId++, langEl, $5->typeRef );
@@ -197,13 +198,14 @@ generic_def: KW_List TK_Word '[' type_ref ']'
 	final {
 		/* Get the language element. */
 		Namespace *nspace = namespaceStack.top();
-		KlangEl *langEl = getKlangEl( pd, nspace, $2->data, KlangEl::NonTerm );
+		KlangEl *langEl = getKlangEl( pd, nspace, $2->data );
 
 		/* Check that the element wasn't previously defined as something else. */
-		if ( langEl->type != KlangEl::Unknown && langEl->type != KlangEl::NonTerm ) {
-			error($1->loc) << "'" << curDefineId << 
+		if ( langEl->type != KlangEl::Unknown ) {
+			error($1->loc) << "'" << $2->data << 
 				"' already defined as something else" << endp;
 		}
+		langEl->type = KlangEl::NonTerm;
 
 		GenericType *generic = new GenericType( $2->data, GEN_LIST, 
 				pd->nextGenericId++, langEl, $4->typeRef );
@@ -249,8 +251,7 @@ global_def: KW_Global var_def opt_def_init
 cfl_def: cfl_def_head obj_var_list properties_list cfl_prod_list
 	final {
 		/* Get the language element. */
-		KlangEl *langEl = getKlangEl( pd, namespaceStack.top(), 
-				curDefineId, KlangEl::Unknown );
+		KlangEl *langEl = getKlangEl( pd, namespaceStack.top(), curDefineId );
 
 		/* Make a new object definition. */
 		ObjectDef *objectDef = new ObjectDef( ObjectDef::UserType, curDefineId, 
@@ -264,8 +265,7 @@ cfl_def_head: KW_Def TK_Word
 		curDefineId = $2->data;
 
 		/* Get the language element. */
-		KlangEl *langEl = getKlangEl( pd, namespaceStack.top(), 
-				$2->data, KlangEl::Unknown );
+		KlangEl *langEl = getKlangEl( pd, namespaceStack.top(), $2->data );
 
 		/* Check that the element wasn't previously defined as something else. */
 		if ( langEl->type != KlangEl::Unknown ) {
@@ -286,8 +286,7 @@ property:
 	KW_ReduceFirst
 	final {
 		/* Get the language element. */
-		KlangEl *prodName = getKlangEl( pd, namespaceStack.top(), 
-				curDefineId, KlangEl::Unknown );
+		KlangEl *prodName = getKlangEl( pd, namespaceStack.top(), curDefineId );
 		prodName->reduceFirst = true;
 	};
 
@@ -612,9 +611,9 @@ literal_item: TK_Literal
 			error( $1->loc ) << "literal already defined in this namespace" << endp;
 		else {
 			/* Create a token for the literal. */
-			KlangEl *newLangEl = getKlangEl( pd, nspace, name, KlangEl::Term );
-			assert( newLangEl != 0 );
-			assert( newLangEl->type == KlangEl::Term );
+			KlangEl *newLangEl = getKlangEl( pd, nspace, name );
+			assert( newLangEl->type == KlangEl::Unknown );
+			newLangEl->type = KlangEl::Term;
 			newLangEl->lit = $1->data;
 			newLangEl->isLiteral = true;
 
@@ -660,9 +659,9 @@ token_def:
 			name.setAs( 32, "_ignore_%.4x", pd->nextTokenId );
 
 		/* Create the token. */
-		KlangEl *tokEl = getKlangEl( pd, namespaceStack.top(), name, KlangEl::Term );
-		if ( tokEl->type != KlangEl::Unknown && tokEl->type != KlangEl::Term )
-			error($1->loc) << "'" << name << "' already defined as something else" << endp;
+		KlangEl *tokEl = getKlangEl( pd, namespaceStack.top(), name );
+		if ( tokEl->type != KlangEl::Unknown )
+			error($1->loc) << "'" << name << "' already defined" << endp;
 
 		tokEl->type = KlangEl::Term;
 		tokEl->ignore = ignore;
@@ -840,8 +839,7 @@ start_reduce:
 		$$->localFrame = $1->localFrame;
 
 		/* Get the language element. */
-		KlangEl *prodName = getKlangEl( pd, namespaceStack.top(), 
-			curDefineId, KlangEl::Unknown );
+		KlangEl *prodName = getKlangEl( pd, namespaceStack.top(), curDefineId );
 
 		/* References to the reduce item. */
 		pd->addProdRedObjectVar( pd->curLocalFrame, prodName );
@@ -1956,7 +1954,7 @@ void Parser::addRegularDef( const InputLoc &loc, Namespace *nspace,
 	}
 	else {
 		// Recover by ignoring the duplicate.
-		error(loc) << "fsm \"" << name << "\" previously defined" << endl;
+		error(loc) << "regular definition \"" << name << "\" already exists" << endl;
 	}
 }
 
@@ -1964,8 +1962,7 @@ void Parser::addProduction( InputLoc &loc, const String &name,
 		ProdElList *prodElList, bool commit, CodeBlock *redBlock )
 {
 	/* Get the language element. */
-	KlangEl *prodName = getKlangEl( pd, namespaceStack.top(), 
-			name, KlangEl::Unknown );
+	KlangEl *prodName = getKlangEl( pd, namespaceStack.top(), name );
 
 	assert( prodName->type == KlangEl::NonTerm );
 	Namespace *nspace = namespaceStack.top();

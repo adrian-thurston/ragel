@@ -125,15 +125,14 @@ PdaGraph *ProdElList::walk( ParseData *pd )
 }
 
 
-KlangEl *getKlangEl( ParseData *pd, Namespace *nspace,
-		const String &data, KlangEl::Type defType )
+KlangEl *getKlangEl( ParseData *pd, Namespace *nspace, const String &data )
 {
     /* If the id is already in the dict, it will be placed in last found. If
      * it is not there then it will be inserted and last found will be set to it. */
     SymbolMapEl *inDict = nspace->symbolMap.find( data );
     if ( inDict == 0 ) {
         /* Language element not there. Make the new lang el and insert.. */
-        KlangEl *langEl = new KlangEl( nspace, data, defType );
+        KlangEl *langEl = new KlangEl( nspace, data, KlangEl::Unknown );
         inDict = nspace->symbolMap.insert( langEl->name, langEl );
         pd->langEls.append( langEl );
     }
@@ -1191,8 +1190,9 @@ void ParseData::insertUniqueEmptyProductions()
 		/* Get a language element. */
 		char name[20];
 		sprintf(name, "U%li", prodList.length());
-		KlangEl *prodName = getKlangEl( this, rootNamespace,
-				name, KlangEl::NonTerm );
+		KlangEl *prodName = getKlangEl( this, rootNamespace, name );
+		assert( prodName->type == KlangEl::Unknown );
+		prodName->type = KlangEl::NonTerm;
 		Definition *newDef = new Definition( InputLoc(), prodName, 
 				0 /* FIXME new VarDef( name, 0 )*/, 
 				false, 0, prodList.length(), Definition::Production );
