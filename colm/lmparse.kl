@@ -246,17 +246,11 @@ global_def: KW_Global var_def opt_def_init
 		}
 	};
 
-cfl_def: KW_Def cfl_id obj_var_list properties_list cfl_prod_list
+cfl_def: cfl_def_head obj_var_list properties_list cfl_prod_list
 	final {
 		/* Get the language element. */
 		KlangEl *langEl = getKlangEl( pd, namespaceStack.top(), 
-				curDefineId, KlangEl::NonTerm );
-
-		/* Check that the element wasn't previously defined as something else. */
-		if ( langEl->type != KlangEl::Unknown && langEl->type != KlangEl::NonTerm ) {
-			error($1->loc) << "'" << curDefineId << 
-				"' already defined as something else" << endp;
-		}
+				curDefineId, KlangEl::Unknown );
 
 		/* Make a new object definition. */
 		ObjectDef *objectDef = new ObjectDef( ObjectDef::UserType, curDefineId, 
@@ -265,9 +259,21 @@ cfl_def: KW_Def cfl_id obj_var_list properties_list cfl_prod_list
 		langEl->objectDef = objectDef;
 	};
 
-cfl_id: TK_Word
+cfl_def_head: KW_Def TK_Word
 	final {
-		curDefineId = $1->data;
+		curDefineId = $2->data;
+
+		/* Get the language element. */
+		KlangEl *langEl = getKlangEl( pd, namespaceStack.top(), 
+				$2->data, KlangEl::Unknown );
+
+		/* Check that the element wasn't previously defined as something else. */
+		if ( langEl->type != KlangEl::Unknown ) {
+			error($2->loc) << "'" << curDefineId << 
+				"' has already been defined, maybe you want to use redef?" << endp;
+		}
+
+		langEl->type = KlangEl::NonTerm;
 	};
 
 cfl_prod_list: cfl_prod_list '|' define_prod;
@@ -281,7 +287,7 @@ property:
 	final {
 		/* Get the language element. */
 		KlangEl *prodName = getKlangEl( pd, namespaceStack.top(), 
-				curDefineId, KlangEl::NonTerm );
+				curDefineId, KlangEl::Unknown );
 		prodName->reduceFirst = true;
 	};
 
@@ -835,7 +841,7 @@ start_reduce:
 
 		/* Get the language element. */
 		KlangEl *prodName = getKlangEl( pd, namespaceStack.top(), 
-			curDefineId, KlangEl::NonTerm );
+			curDefineId, KlangEl::Unknown );
 
 		/* References to the reduce item. */
 		pd->addProdRedObjectVar( pd->curLocalFrame, prodName );
@@ -1959,32 +1965,24 @@ void Parser::addProduction( InputLoc &loc, const String &name,
 {
 	/* Get the language element. */
 	KlangEl *prodName = getKlangEl( pd, namespaceStack.top(), 
-			name, KlangEl::NonTerm );
+			name, KlangEl::Unknown );
 
-	/* Check that the element wasn't previously defined as something else. */
-	if ( prodName->type != KlangEl::Unknown 
-			&& prodName->type != KlangEl::NonTerm )
-	{
-		error(loc) << "'" << name << "' already defined as something else" << endp;
-	}
-	else {
-		Namespace *nspace = namespaceStack.top();
+	assert( prodName->type == KlangEl::NonTerm );
+	Namespace *nspace = namespaceStack.top();
 
-		prodName->type = KlangEl::NonTerm;
-		Definition *newDef = new Definition( loc, prodName, 
-				prodElList, commit, redBlock,
-				pd->prodList.length(), Definition::Production );
+	Definition *newDef = new Definition( loc, prodName, 
+		prodElList, commit, redBlock,
+		pd->prodList.length(), Definition::Production );
 
-		prodName->defList.append( newDef );
-		pd->prodList.append( newDef );
+	prodName->defList.append( newDef );
+	pd->prodList.append( newDef );
 
-		/* If the token has the same name as the region it is in, then also
-		 * insert it into the symbol map for the parent region. */
-		if ( strcmp( name, nspace->name ) == 0 ) {
-			/* Insert the name into the top of the region stack after popping the
-			 * region just created. We need it in the parent. */
-			nspace->parentNamespace->symbolMap.insert( name, prodName );
-		}
+	/* If the token has the same name as the region it is in, then also
+	 * insert it into the symbol map for the parent region. */
+	if ( strcmp( name, nspace->name ) == 0 ) {
+		/* Insert the name into the top of the region stack after popping the
+		 * region just created. We need it in the parent. */
+		nspace->parentNamespace->symbolMap.insert( name, prodName );
 	}
 }
 
