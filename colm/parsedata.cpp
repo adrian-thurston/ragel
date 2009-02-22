@@ -428,7 +428,8 @@ ParseData::ParseData( const String &fileName, const String &sectionName,
 	nextFrameId(0),
 	nextParserId(0),
 	nextLabelId(0),
-	revertOn(true)
+	revertOn(true),
+	predValue(0)
 {
 }
 
@@ -1243,11 +1244,23 @@ void ParseData::resolveFactor( PdaFactor *fact )
 	}
 }
 
+/* Resolves production els and computes the precedence of each prod. */
 void ParseData::resolveProductionEls()
 {
 	for ( DefList::Iter prod = prodList; prod.lte(); prod++ ) {
+		/* First resolve. */
 		for ( ProdElList::Iter fact = *prod->prodElList; fact.lte(); fact++ )
 			resolveFactor( fact );
+
+		/* Compute the precedence of the productions. */
+		for ( ProdElList::Iter fact = prod->prodElList->last(); fact.gtb(); fact-- ) {
+			/* Production inherits the precedence of the last terminal with
+			 * precedence. */
+			if ( fact->langEl->predType != PredNone ) {
+				prod->predOf = fact->langEl;
+				break;
+			}
+		}
 	}
 }
 

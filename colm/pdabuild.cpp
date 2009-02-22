@@ -85,7 +85,9 @@ KlangEl::KlangEl( Namespace *nspace, const String &name, Type type )
 	thisSize(0),
 	ofiOffset(0),
 	generic(0),
-	parserId(-1)
+	parserId(-1),
+	predType(PredNone),
+	predValue(0)
 {
 }
  
@@ -907,6 +909,65 @@ void ParseData::verifyParseStopGrammar( KlangEl *langEl, PdaGraph *pdaGraph )
 	}
 }
 
+KlangEl *ParseData::predOf( PdaTrans *trans, long action )
+{
+	KlangEl *lel;
+	if ( action == SHIFT_CODE )
+		lel = langElIndex[trans->lowKey];
+	else
+		lel = prodIdIndex[action >> 2]->predOf;
+	return lel;
+}
+
+bool ParseData::precedenceSwap( KlangEl *l1, KlangEl *l2 )
+{
+	bool swap = false;
+	if ( l2->predValue > l1->predValue )
+		swap = true;
+	else if ( l1->predValue == l2->predValue ) {
+		if ( l1->predType == PredLeft && trans->actions[i] == SHIFT_CODE )
+			swap = true;
+		else if ( l1->predType == PredRight && trans->actions[j] == SHIFT_CODE )
+			swap = true;
+	}
+	return swap;
+}
+
+void ParseData::resolvePrecedence( PdaGraph *pdaGraph )
+{
+	for ( PdaStateList::Iter state = pdaGraph->stateList; state.lte(); state++ ) {
+		assert( CmpDotSet::compare( state->dotSet, state->dotSet2 ) == 0 );
+		for ( TransMap::Iter tel = state->transMap; tel.lte(); tel++ ) {
+			PdaTrans *trans = tel->value;
+
+again:
+			/* Find action with precedence. */
+			for ( int i = 0; i < trans->actions.length(); i++ ) {
+				KlangEl *li = predOf( trans, trans->actions[i] );
+					
+				if ( li != 0 && li->predValue != PredNone ) {
+					/* Find another action with precedence. */
+					for ( int j = i+1; j < trans->actions.length(); j++ ) {
+						KlangEl *lj = predOf( trans, trans->actions[j] );
+
+						if ( lj != 0 && lj->predValue != PredNone ) {
+							/* Conflict to check. */
+							bool swap = precedenceSwap( li, lj );
+							
+							if ( swap ) {
+								long t = trans->actions[i];
+								trans->actions[i] = trans->actions[j];
+								trans->actions[j] = t;
+								goto again;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
 void ParseData::analyzeMachine( PdaGraph *pdaGraph, KlangElSet &parserEls )
 {
 	pdaGraph->maxState = pdaGraph->stateList.length() - 1;
@@ -929,6 +990,7 @@ void ParseData::analyzeMachine( PdaGraph *pdaGraph, KlangElSet &parserEls )
 
 	pdaActionOrder( pdaGraph, parserEls );
 	sortActions( pdaGraph );
+	resolvePrecedence( pdaGraph );
 	advanceReductions( pdaGraph );
 	pdaGraph->setStateNumbers();
 	reduceActions( pdaGraph );

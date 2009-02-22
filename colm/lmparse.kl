@@ -77,6 +77,7 @@ root_item: iter_def commit final { $$->stmt = 0; };
 root_item: global_def commit final { $$->stmt = $1->stmt; };
 root_item: statement commit final { $$->stmt = $1->stmt; };
 root_item: pre_eof commit final { $$->stmt = 0; };
+root_item: precedence commit final { $$->stmt = 0; };
 
 nonterm block_open
 {
@@ -246,6 +247,36 @@ global_def: KW_Global var_def opt_def_init
 			$$->stmt = new LangStmt( $2->objField->loc, 
 					$3->assignType, varRef, $3->expr );
 		}
+	};
+
+precedence: pred_type pred_token_list final { pd->predValue++; };
+
+pred_type: KW_Left final { predType = PredLeft; };
+pred_type: KW_Right final { predType = PredRight; };
+pred_type: KW_Nonassoc final { predType = PredNonassoc; };
+
+pred_token_list: pred_token_list ',' pred_token;
+pred_token_list: pred_token;
+
+pred_token: 
+	region_qual TK_Word 
+	final {
+		PdaFactor *factor = new PdaFactor( $2->loc, false, $1->nspaceQual,
+				$2->data, 0, false, false );
+		pd->resolveReferenceFactor( factor );
+		factor->langEl->predType = predType;
+		factor->langEl->predValue = pd->predValue;
+	};
+
+pred_token: 
+	region_qual TK_Literal 
+	final {
+		PdaLiteral *literal = new PdaLiteral( $2->loc, *$2 );
+		PdaFactor *factor = new PdaFactor( $2->loc, false, $1->nspaceQual,
+				literal, 0, false, false );
+		pd->resolveLiteralFactor( factor );
+		factor->langEl->predType = predType;
+		factor->langEl->predValue = pd->predValue;
 	};
 
 cfl_def: cfl_def_head obj_var_list properties_list cfl_prod_list
@@ -1970,7 +2001,7 @@ void Parser::addProduction( InputLoc &loc, const String &name,
 	Definition *newDef = new Definition( loc, prodName, 
 		prodElList, commit, redBlock,
 		pd->prodList.length(), Definition::Production );
-
+	
 	prodName->defList.append( newDef );
 	pd->prodList.append( newDef );
 

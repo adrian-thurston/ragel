@@ -390,6 +390,10 @@ void Scanner::endSection( )
 		'deref' => { token( KW_Deref ); };
 		'require' => { token( KW_Require ); };
 		'preeof' => { token( KW_Preeof ); };
+		'left' => { token( KW_Left ); };
+		'right' => { token( KW_Right ); };
+		'nonassoc' => { token( KW_Nonassoc ); };
+		'prec' => { token( KW_Prec ); };
 
 		# Identifiers.
 		ident => { token( TK_Word, ts, te ); } ;

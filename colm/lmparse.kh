@@ -60,6 +60,8 @@ struct Parser
 
 	token KW_Include, KW_Preeof;
 
+	token KW_Left, KW_Right, KW_Nonassoc, KW_Prec;
+
 	}%%
 
 	%% write instance_data;
@@ -99,6 +101,8 @@ struct Parser
 
 	String curDefineId;
 	ProdElList *curProdElList;
+
+	PredType predType;
 };
 
 %% write token_defs;

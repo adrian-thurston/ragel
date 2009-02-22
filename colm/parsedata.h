@@ -75,6 +75,8 @@ typedef Vector< PdaFactor* > FactorVect;
 typedef AvlMap<String, long, CmpStr> StringMap;
 typedef AvlMapEl<String, long> StringMapEl;
 
+enum PredType { PredLeft, PredRight, PredNonassoc, PredNone };
+
 /* Graph dictionary. */
 struct Definition 
 :
@@ -87,7 +89,7 @@ struct Definition
 		loc(loc), prodName(prodName), prodElList(prodElList), 
 		prodCommit(prodCommit), redBlock(redBlock), prodId(prodId), 
 		type(type), fsm(0), fsmLength(0), uniqueEmptyLeader(0), 
-		isLeftRec(false), localFrame(0), lhsField(0) {}
+		isLeftRec(false), localFrame(0), lhsField(0), predOf(0) {}
 
 	InputLoc loc;
 	KlangEl *prodName;
@@ -112,6 +114,8 @@ struct Definition
 
 	ObjectDef *localFrame;
 	ObjField *lhsField;
+
+	KlangEl *predOf;
 };
 
 struct CmpDefById
@@ -206,6 +210,9 @@ struct KlangEl : public DListEl<KlangEl>
 	GenericType *generic;
 
 	long parserId;
+
+	PredType predType;
+	long predValue;
 };
 
 struct PdaFactor
@@ -510,6 +517,9 @@ struct ParseData
 
 	void analyzeAction( Action *action, InlineList *inlineList );
 	void analyzeGraph( FsmGraph *graph );
+	void resolvePrecedence( PdaGraph *pdaGraph );
+	KlangEl *predOf( PdaTrans *trans, long action );
+	bool precedenceSwap( KlangEl *l1, KlangEl *l2 );
 
 	void initKeyOps();
 
@@ -903,6 +913,8 @@ struct ParseData
 
 	PdaGraph *pdaGraph;
 	PdaTables *pdaTables;
+
+	long predValue;
 };
 
 void afterOpMinimize( FsmGraph *fsm, bool lastInSeq = true );
