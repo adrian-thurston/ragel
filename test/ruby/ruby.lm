@@ -295,79 +295,58 @@ def opt_block_arg
 def block_arg
 	[tAMPER arg_value]
 
+right '='
+left 'rescue'
+right '?', ':'
+nonassoc '..', '...'
+left '||'
+left '&&'
+nonassoc '<=>', '==', '===', '!=', '=~', '!~'
+left '>', '>=', '<', '<='
+left '|', '^'
+left '&'
+left '<<', '>>'
+left '+', '-'
+left '*', '/', '%'
+#right tUMINUS_NUM tUMINUS
+right tUMINUS
+right '**'
+right '!', '~', tUPLUS
+
 def arg 
-	['defined?' arg]
-|	[arg_assign]
-
-def arg_assign
-	[lhs '=' arg_assign]
-|	[lhs '=' arg_assign 'rescue' arg]
-|	[arg_sel]
-
-def arg_sel
-	[arg_dot '?' arg_sel ':' arg_sel]
-|	[arg_dot]
-
-def arg_dot
-	[arg_logical '..' arg_dot]
-|	[arg_logical '...' arg_dot]
-|	[arg_logical]
-
-def arg_logical
-	[arg_eq '&&' arg_logical]
-|	[arg_eq '||' arg_logical]
-|	[arg_eq]
-
-def arg_eq
-	[arg_cmp '<=>' arg_eq]
-|	[arg_cmp '==' arg_eq]
-|	[arg_cmp '===' arg_eq]
-|	[arg_cmp '!=' arg_eq]
-|	[arg_cmp '=~' arg_eq]
-|	[arg_cmp '!~' arg_eq]
-|	[arg_cmp]
-
-def arg_cmp
-	[arg_bitor '>=' arg_cmp]
-|	[arg_bitor '<=' arg_cmp]
-|	[arg_bitor '>' arg_cmp]
-|	[arg_bitor '<' arg_cmp]
-|	[arg_bitor]
-
-def arg_bitor
-	[arg_bitand '|' arg_bitor]
-|	[arg_bitand '^' arg_bitor]
-|	[arg_bitand]
-
-def arg_bitand
-	[arg_shift '&' arg_bitand]
-|	[arg_shift]
-
-def arg_shift
-	[arg_add '<<' arg_shift]
-|	[arg_add '>>' arg_shift]
-|	[arg_add]
-
-def arg_add
-	[arg_mult '+' arg_add]
-|	[arg_mult '-' arg_add]
-|	[arg_mult]
-
-def arg_mult
-	[arg_pow '*' arg_mult]
-|	[arg_pow '/' arg_mult]
-|	[arg_pow '%' arg_mult]
-|	[arg_pow]
-
-def arg_pow
-	[arg_unary '**' arg_pow]
-|	[arg_unary]
-
-def arg_unary
-	['!' primary]
+	[lhs '=' arg]
+|	[lhs '=' arg 'rescue' arg]
+|	[arg '?' arg ':' arg]
+|	[arg '..' arg]
+|	[arg '...' arg]
+|	[arg '||' arg]
+|	[arg '&&' arg]
+|	[arg '<=>' arg]
+|	[arg '==' arg]
+|	[arg '===' arg]
+|	[arg '!=' arg]
+|	[arg '=~' arg]
+|	[arg '!~' arg]
+|	[arg '>' arg]
+|	[arg '>=' arg]
+|	[arg '<' arg]
+|	[arg '<=' arg]
+|	[arg '|' arg]
+|	[arg '^' arg]
+|	[arg '&' arg]
+|	[arg '<<' arg]
+|	[arg '>>' arg]
+|	[arg '+' arg]
+|	[arg '-' arg]
+|	[arg '*' arg]
+|	[arg '/' arg]
+|	[arg '%' arg]
+|	[arg '**' arg]
+|	['!' primary]
 |	['~' primary]
-|	[tUPLUS primary]
 |	[tUMINUS primary]
+|	[tUPLUS primary]
+|	['defined?' arg]
 |	[primary]
 
 def primary_value 
