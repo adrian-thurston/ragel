@@ -519,7 +519,7 @@ struct ParseData
 	void analyzeGraph( FsmGraph *graph );
 	void resolvePrecedence( PdaGraph *pdaGraph );
 	KlangEl *predOf( PdaTrans *trans, long action );
-	bool precedenceSwap( KlangEl *l1, KlangEl *l2 );
+	bool precedenceSwap( long action1, long action2, KlangEl *l1, KlangEl *l2 );
 
 	void initKeyOps();
 

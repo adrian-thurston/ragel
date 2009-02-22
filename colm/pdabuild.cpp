@@ -919,15 +919,16 @@ KlangEl *ParseData::predOf( PdaTrans *trans, long action )
 	return lel;
 }
 
-bool ParseData::precedenceSwap( KlangEl *l1, KlangEl *l2 )
+
+bool ParseData::precedenceSwap( long action1, long action2, KlangEl *l1, KlangEl *l2 )
 {
 	bool swap = false;
 	if ( l2->predValue > l1->predValue )
 		swap = true;
 	else if ( l1->predValue == l2->predValue ) {
-		if ( l1->predType == PredLeft && trans->actions[i] == SHIFT_CODE )
+		if ( l1->predType == PredLeft && action1 == SHIFT_CODE )
 			swap = true;
-		else if ( l1->predType == PredRight && trans->actions[j] == SHIFT_CODE )
+		else if ( l1->predType == PredRight && action2 == SHIFT_CODE )
 			swap = true;
 	}
 	return swap;
@@ -952,7 +953,8 @@ again:
 
 						if ( lj != 0 && lj->predValue != PredNone ) {
 							/* Conflict to check. */
-							bool swap = precedenceSwap( li, lj );
+							bool swap = precedenceSwap( trans->actions[i], 
+									trans->actions[j], li, lj );
 							
 							if ( swap ) {
 								long t = trans->actions[i];
