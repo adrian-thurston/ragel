@@ -934,12 +934,20 @@ bool ParseData::precedenceSwap( long action1, long action2, KlangEl *l1, KlangEl
 	return swap;
 }
 
+bool ParseData::precedenceRemoveBoth( KlangEl *l1, KlangEl *l2 )
+{
+	if ( l1->predValue == l2->predValue && l1->predType == PredNonassoc )
+		return true;
+	return false;
+}
+
 void ParseData::resolvePrecedence( PdaGraph *pdaGraph )
 {
 	for ( PdaStateList::Iter state = pdaGraph->stateList; state.lte(); state++ ) {
 		assert( CmpDotSet::compare( state->dotSet, state->dotSet2 ) == 0 );
-		for ( TransMap::Iter tel = state->transMap; tel.lte(); tel++ ) {
-			PdaTrans *trans = tel->value;
+		
+		for ( long t = 0; t < state->transMap.length(); /* increment at end */ ) {
+			PdaTrans *trans = state->transMap[t].value;
 
 again:
 			/* Find action with precedence. */
@@ -960,12 +968,24 @@ again:
 								long t = trans->actions[i];
 								trans->actions[i] = trans->actions[j];
 								trans->actions[j] = t;
-								goto again;
 							}
+
+							trans->actions.remove( j );
+							if ( precedenceRemoveBoth( li, lj ) )
+								trans->actions.remove( i );
+
+							goto again;
 						}
 					}
 				}
 			}
+
+			/* If there are still actions then move to the next one. If not,
+			 * (due to nonassoc) then remove the transition. */
+			if ( trans->actions.length() > 0 )
+				t += 1;
+			else
+				state->transMap.vremove( t );
 		}
 	}
 }

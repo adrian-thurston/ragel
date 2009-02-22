@@ -520,6 +520,7 @@ struct ParseData
 	void resolvePrecedence( PdaGraph *pdaGraph );
 	KlangEl *predOf( PdaTrans *trans, long action );
 	bool precedenceSwap( long action1, long action2, KlangEl *l1, KlangEl *l2 );
+	bool precedenceRemoveBoth( KlangEl *l1, KlangEl *l2 );
 
 	void initKeyOps();
 
