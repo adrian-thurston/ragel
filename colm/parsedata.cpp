@@ -1252,13 +1252,16 @@ void ParseData::resolveProductionEls()
 		for ( ProdElList::Iter fact = *prod->prodElList; fact.lte(); fact++ )
 			resolveFactor( fact );
 
-		/* Compute the precedence of the productions. */
-		for ( ProdElList::Iter fact = prod->prodElList->last(); fact.gtb(); fact-- ) {
-			/* Production inherits the precedence of the last terminal with
-			 * precedence. */
-			if ( fact->langEl->predType != PredNone ) {
-				prod->predOf = fact->langEl;
-				break;
+		/* If there is no explicit precdence ... */
+		if ( prod->predOf == 0 )  {
+			/* Compute the precedence of the productions. */
+			for ( ProdElList::Iter fact = prod->prodElList->last(); fact.gtb(); fact-- ) {
+				/* Production inherits the precedence of the last terminal with
+				 * precedence. */
+				if ( fact->langEl->predType != PredNone ) {
+					prod->predOf = fact->langEl;
+					break;
+				}
 			}
 		}
 	}

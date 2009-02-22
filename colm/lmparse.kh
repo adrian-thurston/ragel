@@ -79,7 +79,7 @@ struct Parser
 	void addRegularDef( const InputLoc &loc, Namespace *nspace, 
 		const String &name, JoinOrLm *joinOrLm, bool isInstance );
 	void addProduction( InputLoc &loc, const String &name, 
-		ProdElList *prodElList, bool commit, CodeBlock *redBlock );
+		ProdElList *prodElList, bool commit, CodeBlock *redBlock, KlangEl *predOf );
 
 	/* Report an error encountered by the parser. */
 	ostream &parse_error( int tokId, Token &token );

@@ -954,12 +954,12 @@ again:
 			for ( int i = 0; i < trans->actions.length(); i++ ) {
 				KlangEl *li = predOf( trans, trans->actions[i] );
 					
-				if ( li != 0 && li->predValue != PredNone ) {
+				if ( li != 0 && li->predType != PredNone ) {
 					/* Find another action with precedence. */
 					for ( int j = i+1; j < trans->actions.length(); j++ ) {
 						KlangEl *lj = predOf( trans, trans->actions[j] );
 
-						if ( lj != 0 && lj->predValue != PredNone ) {
+						if ( lj != 0 && lj->predType != PredNone ) {
 							/* Conflict to check. */
 							bool swap = precedenceSwap( trans->actions[i], 
 									trans->actions[j], li, lj );

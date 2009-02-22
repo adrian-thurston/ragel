@@ -189,7 +189,7 @@ generic_def: KW_Map TK_Word '[' type_ref type_ref ']'
 
 		/* Add one empty production. */
 		ProdElList *emptyList = new ProdElList;
-		addProduction( $1->loc, $2->data, emptyList, false, 0 );
+		addProduction( $1->loc, $2->data, emptyList, false, 0, 0 );
 
 		nspace->genericList.append( generic );
 		langEl->generic = generic;
@@ -213,7 +213,7 @@ generic_def: KW_List TK_Word '[' type_ref ']'
 
 		/* Add one empty production. */
 		ProdElList *emptyList = new ProdElList;
-		addProduction( $1->loc, $2->data, emptyList, false, 0 );
+		addProduction( $1->loc, $2->data, emptyList, false, 0, 0 );
 
 		nspace->genericList.append( generic );
 		langEl->generic = generic;
@@ -255,28 +255,38 @@ pred_type: KW_Left final { predType = PredLeft; };
 pred_type: KW_Right final { predType = PredRight; };
 pred_type: KW_Nonassoc final { predType = PredNonassoc; };
 
-pred_token_list: pred_token_list ',' pred_token;
-pred_token_list: pred_token;
+pred_token_list: pred_token_list ',' pred_token 
+	final {
+		$3->factor->langEl->predType = predType;
+		$3->factor->langEl->predValue = pd->predValue;
+	};
+
+pred_token_list: pred_token
+	final {
+		$1->factor->langEl->predType = predType;
+		$1->factor->langEl->predValue = pd->predValue;
+	};
+
+nonterm pred_token
+{
+	PdaFactor *factor;
+};
 
 pred_token: 
 	region_qual TK_Word 
 	final {
-		PdaFactor *factor = new PdaFactor( $2->loc, false, $1->nspaceQual,
+		$$->factor = new PdaFactor( $2->loc, false, $1->nspaceQual,
 				$2->data, 0, false, false );
-		pd->resolveReferenceFactor( factor );
-		factor->langEl->predType = predType;
-		factor->langEl->predValue = pd->predValue;
+		pd->resolveReferenceFactor( $$->factor );
 	};
 
 pred_token: 
 	region_qual TK_Literal 
 	final {
 		PdaLiteral *literal = new PdaLiteral( $2->loc, *$2 );
-		PdaFactor *factor = new PdaFactor( $2->loc, false, $1->nspaceQual,
+		$$->factor = new PdaFactor( $2->loc, false, $1->nspaceQual,
 				literal, 0, false, false );
-		pd->resolveLiteralFactor( factor );
-		factor->langEl->predType = predType;
-		factor->langEl->predValue = pd->predValue;
+		pd->resolveLiteralFactor( $$->factor );
 	};
 
 cfl_def: cfl_def_head obj_var_list properties_list cfl_prod_list
@@ -321,9 +331,27 @@ property:
 		prodName->reduceFirst = true;
 	};
 
-define_prod: '[' prod_el_list ']' opt_commit opt_reduce_code
+nonterm opt_prec
+{
+	KlangEl *predOf;
+};
+
+opt_prec:
 	final {
-		addProduction( $1->loc, curDefineId, curProdElList, $4->commit, $5->codeBlock ); 
+		$$->predOf = 0;
+	};
+
+opt_prec: 
+	KW_Prec pred_token
+	final {
+		$$->predOf = $2->factor->langEl;
+	};
+
+
+define_prod: '[' prod_el_list ']' opt_commit opt_reduce_code opt_prec
+	final {
+		addProduction( $1->loc, curDefineId, curProdElList, $4->commit, 
+				$5->codeBlock, $6->predOf ); 
 	};
 
 obj_var_list: obj_var_list var_def
@@ -1990,7 +2018,7 @@ void Parser::addRegularDef( const InputLoc &loc, Namespace *nspace,
 }
 
 void Parser::addProduction( InputLoc &loc, const String &name, 
-		ProdElList *prodElList, bool commit, CodeBlock *redBlock )
+		ProdElList *prodElList, bool commit, CodeBlock *redBlock, KlangEl *predOf )
 {
 	/* Get the language element. */
 	KlangEl *prodName = getKlangEl( pd, namespaceStack.top(), name );
@@ -2012,6 +2040,8 @@ void Parser::addProduction( InputLoc &loc, const String &name,
 		 * region just created. We need it in the parent. */
 		nspace->parentNamespace->symbolMap.insert( name, prodName );
 	}
+
+	newDef->predOf = predOf;
 }
 
 ostream &Parser::parse_error( int tokId, Token &token )
