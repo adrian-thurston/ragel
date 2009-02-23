@@ -1024,15 +1024,13 @@ def postfix_expression
 def pseudo_destructor_call
 	[root_qual_opt nested_name_specifier_opt '~' pdc_type_name]
 
-def primary_expression 
+def primary_expression
 	[expr_lit]
 |	['this']
 |	['(' expression ')']
 |	[id_expression]
-
 # This is an GNU extension.
-def primary_expression 
-	['(' '{' statement_rep '}' ')']
+|	['(' '{' statement_rep '}' ')']
 
 def expr_lit 
 	[TK_IntegerDecimal]
@@ -1678,9 +1676,7 @@ def class_function_body
 def member_declaration_forms
 	[decl_specifier_mult_seq_opt decl_specifier_sing 
 		decl_specifier_mult_seq_opt member_declarator_list_opt]
-
-def member_declaration_forms
-	[decl_specifier_mult_seq_opt member_declarator_list_opt]
+|	[decl_specifier_mult_seq_opt member_declarator_list_opt]
 
 def member_declarator_list_opt 
 	[member_declarator_list]
@@ -2107,9 +2103,7 @@ def exception_declaration
 	[type_specifier_seq declarator]
 |	[type_specifier_seq abstract_declarator]
 |	[type_specifier_seq]
-
-def exception_declaration 
-	['...']
+|	['...']
 
 def throw_expression 
 	['throw' assignment_expression]
