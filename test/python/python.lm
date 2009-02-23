@@ -290,10 +290,10 @@ def defparameter
 |	[parameter '=' expression]
   
 def sublist 
-	[parameter_list opt_comma]
+	[sublist_pl opt_comma]
 
-def parameter_list 
-	[parameter_list ',' parameter]
+def sublist_pl 
+	[sublist_pl ',' parameter]
 |	[parameter]
   
 def parameter 
@@ -359,8 +359,9 @@ def target_atom
 |	['(' target_list ')']
 |	['[' target_list ']']
 
-def target_ext_rep [target_ext target_ext_rep]
-def target_ext_rep []
+def target_ext_rep 
+	[target_ext target_ext_rep]
+|	[]
 
 def target_ext
 	[attributeref]
