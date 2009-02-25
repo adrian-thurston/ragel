@@ -1140,7 +1140,7 @@ void ParseData::resolveReferenceFactor( PdaFactor *fact )
 	/* Look up the language element in the region. */
 	KlangEl *langEl = getKlangEl( this, nspace, fact->refName );
 
-	if ( fact->opt ) {
+	if ( fact->repeatType == RepeatOpt ) {
 		/* If the factor is an opt, create the opt element and link the factor
 		 * to it. */
 		String optName( 32, "_opt_%s", fact->refName.data );
@@ -1158,7 +1158,7 @@ void ParseData::resolveReferenceFactor( PdaFactor *fact )
 
 			/* Build the first production of the repeat. */
 			PdaFactor *factor1 = new PdaFactor( InputLoc(), false, fact->nspaceQual, 
-					fact->refName, 0, false, false );
+					fact->refName, 0, RepeatNone, false, false );
 			prodElList1->append( factor1 );
 
 			Definition *newDef1 = new Definition( InputLoc(),
@@ -1181,7 +1181,7 @@ void ParseData::resolveReferenceFactor( PdaFactor *fact )
 			fact->langEl = prodName;
 		}
 	}
-	else if ( fact->repeat ) {
+	else if ( fact->repeatType == RepeatRepeat ) {
 		/* If the factor is a repeat, create the repeat element and link the
 		 * factor to it. */
 		String repeatName( 32, "_repeat_%s", fact->refName.data );
@@ -1199,9 +1199,9 @@ void ParseData::resolveReferenceFactor( PdaFactor *fact )
 
 			/* Build the first production of the repeat. */
 			PdaFactor *factor1 = new PdaFactor( InputLoc(), false, fact->nspaceQual, 
-					fact->refName, 0, false, false );
+					fact->refName, 0, RepeatNone, false, false );
 			PdaFactor *factor2 = new PdaFactor( InputLoc(), false, fact->nspaceQual, 
-					repeatName, 0, false, false );
+					repeatName, 0, RepeatNone, false, false );
 
 			prodElList1->append( factor1 );
 			prodElList1->append( factor2 );
@@ -1215,6 +1215,54 @@ void ParseData::resolveReferenceFactor( PdaFactor *fact )
 
 			/* Build the second production of the repeat. */
 			ProdElList *prodElList2 = new ProdElList;
+
+			Definition *newDef2 = new Definition( InputLoc(),
+					prodName, prodElList2, false, 0,
+					prodList.length(), Definition::Production );
+
+			prodName->defList.append( newDef2 );
+			prodList.append( newDef2 );
+
+			fact->langEl = prodName;
+		}
+	}
+	else if ( fact->repeatType == RepeatList ) {
+		/* If the factor is a repeat, create the repeat element and link the
+		 * factor to it. */
+		String repeatName( 32, "_list_%s", fact->refName.data );
+
+    	SymbolMapEl *inDict = nspace->symbolMap.find( repeatName );
+	    if ( inDict != 0 ) {
+			fact->langEl = inDict->value;
+		}
+		else {
+			KlangEl *prodName = getKlangEl( this, nspace, repeatName );
+			prodName->type = KlangEl::NonTerm;
+			prodName->isList = true;
+
+			/* Build the first production of the list. */
+			PdaFactor *factor1 = new PdaFactor( InputLoc(), false, fact->nspaceQual, 
+					fact->refName, 0, RepeatNone, false, false );
+			PdaFactor *factor2 = new PdaFactor( InputLoc(), false, fact->nspaceQual, 
+					repeatName, 0, RepeatNone, false, false );
+
+			ProdElList *prodElList1 = new ProdElList;
+			prodElList1->append( factor1 );
+			prodElList1->append( factor2 );
+
+			Definition *newDef1 = new Definition( InputLoc(),
+					prodName, prodElList1, false, 0,
+					prodList.length(), Definition::Production );
+
+			prodName->defList.append( newDef1 );
+			prodList.append( newDef1 );
+
+			/* Build the second production of the list. */
+			PdaFactor *factor3 = new PdaFactor( InputLoc(), false, fact->nspaceQual, 
+					fact->refName, 0, RepeatNone, false, false );
+
+			ProdElList *prodElList2 = new ProdElList;
+			prodElList2->append( factor3 );
 
 			Definition *newDef2 = new Definition( InputLoc(),
 					prodName, prodElList2, false, 0,

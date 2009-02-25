@@ -71,6 +71,7 @@ KlangEl::KlangEl( Namespace *nspace, const String &name, Type type )
 	reduceFirst(false),
 	isLiteral(false),
 	isRepeat(false),
+	isList(false),
 	isOpt(false),
 	parseStop(false),
 	isEOF(false),
@@ -1386,6 +1387,7 @@ void ParseData::makeRuntimeData()
 		if ( lel != 0 ) {
 			runtimeData->lelInfo[i].name = lel->fullLit;
 			runtimeData->lelInfo[i].repeat = lel->isRepeat;
+			runtimeData->lelInfo[i].list = lel->isList;
 			runtimeData->lelInfo[i].literal = lel->isLiteral;
 			runtimeData->lelInfo[i].ignore = lel->ignore;
 			runtimeData->lelInfo[i].frameId = -1;

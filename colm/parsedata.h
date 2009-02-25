@@ -181,6 +181,7 @@ struct KlangEl : public DListEl<KlangEl>
 	bool reduceFirst;
 	bool isLiteral;
 	bool isRepeat;
+	bool isList;
 	bool isOpt;
 	bool parseStop;
 	bool isEOF;
@@ -225,25 +226,26 @@ struct PdaFactor
 
 	/* Construct with a literal fsm. */
 	PdaFactor( const InputLoc &loc, bool commit, NamespaceQual *nspaceQual, 
-			PdaLiteral *literal, int priorVal, bool opt, bool repeat ) :
+			PdaLiteral *literal, int priorVal, RepeatType repeatType, bool opt, bool repeat ) :
 		loc(loc), commit(commit), nspaceQual(nspaceQual), 
-		literal(literal), langEl(0), priorVal(priorVal), opt(opt), repeat(repeat),
+		literal(literal), langEl(0), priorVal(priorVal), repeatType(repeatType),
 		nspace(0), type(LiteralType), objField(0) {}
 
 	/* Construct with a reference to a var def. */
 	PdaFactor( const InputLoc &loc, bool commit, NamespaceQual *nspaceQual, 
-			const String &refName, int priorVal, bool opt, bool repeat ) :
+			const String &refName, int priorVal, RepeatType repeatType, bool opt, bool repeat ) :
 		loc(loc), commit(commit), nspaceQual(nspaceQual), refName(refName),
-		literal(0), langEl(0), priorVal(priorVal), opt(opt), repeat(repeat), 
+		literal(0), langEl(0), priorVal(priorVal), repeatType(repeatType),
 		nspace(0), type(ReferenceType), objField(0) {}
 
 	PdaFactor( const InputLoc &loc, KlangEl *langEl ) :
 		loc(loc), commit(false), nspaceQual(0), literal(0), langEl(langEl), 
-		priorVal(0), opt(false), repeat(false), nspace(0), type(ReferenceType), objField(0) {}
+		priorVal(0), repeatType(RepeatNone), nspace(0),
+		type(ReferenceType), objField(0) {}
 
 	PdaFactor() :
 		commit(false), nspaceQual(0), 
-		literal(0), langEl(0), priorVal(0), opt(false), repeat(false),
+		literal(0), langEl(0), priorVal(0), repeatType(RepeatNone),
 		nspace(0), type(LiteralType), objField(0) {}
 
 	InputLoc loc;
@@ -253,8 +255,7 @@ struct PdaFactor
 	PdaLiteral *literal;
 	KlangEl *langEl;
 	int priorVal;
-	bool opt;
-	bool repeat;
+	RepeatType repeatType;
 	Namespace *nspace;
 	Type type;
 	ObjField *objField;

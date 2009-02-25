@@ -276,7 +276,7 @@ pred_token:
 	region_qual TK_Word 
 	final {
 		$$->factor = new PdaFactor( $2->loc, false, $1->nspaceQual,
-				$2->data, 0, false, false );
+				$2->data, 0, RepeatNone, false, false );
 		pd->resolveReferenceFactor( $$->factor );
 	};
 
@@ -285,7 +285,7 @@ pred_token:
 	final {
 		PdaLiteral *literal = new PdaLiteral( $2->loc, *$2 );
 		$$->factor = new PdaFactor( $2->loc, false, $1->nspaceQual,
-				literal, 0, false, false );
+				literal, 0, RepeatNone, false, false );
 		pd->resolveLiteralFactor( $$->factor );
 	};
 
@@ -383,15 +383,13 @@ nonterm basic_type_ref uses type_ref;
 basic_type_ref: region_qual TK_Word opt_repeat
 	final {
 		$$->typeRef = new TypeRef( $2->loc, $1->nspaceQual, $2->data );
-		$$->typeRef->isRepeat = $3->repeat;
-		$$->typeRef->isOpt = $3->opt;
+		$$->typeRef->repeatType = $3->repeatType;
 	};
 
 basic_type_ref: KW_Ptr region_qual TK_Word opt_repeat
 	final {
 		$$->typeRef = new TypeRef( $1->loc, $2->nspaceQual, $3->data );
-		$$->typeRef->isRepeat = $4->repeat;
-		$$->typeRef->isOpt = $4->opt;
+		$$->typeRef->repeatType = $4->repeatType;
 		$$->typeRef->isPtr = true;
 	};
 
@@ -507,7 +505,7 @@ nonterm pattern_el_type_or_lit
 pattern_el_type_or_lit: region_qual TK_Word opt_repeat
 	final {
 		PdaFactor *factor = new PdaFactor( $2->loc, false, $1->nspaceQual, 
-				$2->data, 0, $3->opt, $3->repeat );
+				$2->data, 0, $3->repeatType, $3->opt, $3->repeat );
 		$$->patternItem = new PatternItem( $2->loc, factor, PatternItem::FactorType );
 		patternItemList->append( $$->patternItem );
 	};
@@ -516,7 +514,7 @@ pattern_el_type_or_lit: region_qual TK_Literal opt_repeat
 	final {
 		PdaLiteral *literal = new PdaLiteral( $2->loc, *$2 );
 		PdaFactor *factor = new PdaFactor( $2->loc, false, $1->nspaceQual, 
-				literal, 0, $3->opt, $3->repeat );
+				literal, 0, $3->repeatType, $3->opt, $3->repeat );
 		$$->patternItem = new PatternItem( $2->loc, factor, PatternItem::FactorType );
 		patternItemList->append( $$->patternItem );
 	};
@@ -571,7 +569,7 @@ repl_el: region_qual TK_Literal
 	final {
 		PdaLiteral *literal = new PdaLiteral( $2->loc, *$2 );
 		PdaFactor *factor = new PdaFactor( $2->loc, false, $1->nspaceQual, 
-				literal, 0, false, false );
+				literal, 0, RepeatNone, false, false );
 		ReplItem *replItem = new ReplItem( $2->loc, ReplItem::FactorType, factor );
 		replItemList->append( replItem );
 	};
@@ -596,7 +594,7 @@ prod_el:
 	opt_commit region_qual TK_Word opt_repeat
 	final {
 		$$->factor = new PdaFactor( $3->loc, $1->commit, 
-				$2->nspaceQual, $3->data, 0, $4->opt, $4->repeat );
+				$2->nspaceQual, $3->data, 0, $4->repeatType, $4->opt, $4->repeat );
 	};
 
 prod_el: 
@@ -605,18 +603,20 @@ prod_el:
 		/* Create a new factor node going to a concat literal. */
 		PdaLiteral *literal = new PdaLiteral( $3->loc, *$3 );
 		$$->factor = new PdaFactor( $3->loc, $1->commit, $2->nspaceQual, 
-				literal, 0, $4->opt, $4->repeat );
+				literal, 0, $4->repeatType, $4->opt, $4->repeat );
 	};
 
 nonterm opt_repeat
 {
 	bool opt;
 	bool repeat;
+	RepeatType repeatType;
 };
 
-opt_repeat: '?' final { $$->opt = true; $$->repeat = false; };
-opt_repeat: '*' final { $$->opt = false; $$->repeat = true; };
-opt_repeat:     final { $$->opt = false; $$->repeat = false; };
+opt_repeat: '*' final { $$->opt = false; $$->repeat = true; $$->repeatType = RepeatRepeat; };
+opt_repeat: '+' final { $$->opt = false; $$->repeat = false; $$->repeatType = RepeatList; };
+opt_repeat: '?' final { $$->opt = true; $$->repeat = false; $$->repeatType = RepeatOpt; };
+opt_repeat:     final { $$->opt = false; $$->repeat = false; $$->repeatType = RepeatNone; };
 
 nonterm region_qual
 {

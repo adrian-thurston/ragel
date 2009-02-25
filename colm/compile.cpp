@@ -218,10 +218,12 @@ UniqueType *TypeRef::lookupType( ParseData *pd )
 		uniqueType = pd->findUniqueType( TYPE_TREE, factor->langEl );
 	else {
 		String name = typeName;
-		if ( isOpt )
+		if ( repeatType == RepeatOpt )
 			name.setAs( 32, "_opt_%s", name.data );
-		else if ( isRepeat )
+		else if ( repeatType == RepeatRepeat )
 			name.setAs( 32, "_repeat_%s", name.data );
+		else if ( repeatType == RepeatList )
+			name.setAs( 32, "_list_%s", name.data );
 
 		/* Not an iterator. May be a reference. */
 		uniqueType = lookupTypePart( pd, nspaceQual, name );

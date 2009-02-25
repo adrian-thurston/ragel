@@ -177,6 +177,7 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 		
 		/* Repeat, literal, ignore flags. */
 		out << ", " << runtimeData->lelInfo[i].repeat << ", " << 
+				runtimeData->lelInfo[i].list << ", " <<
 				runtimeData->lelInfo[i].literal << ", " <<
 				runtimeData->lelInfo[i].ignore << ", ";
 

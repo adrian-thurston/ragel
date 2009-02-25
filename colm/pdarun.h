@@ -341,6 +341,7 @@ struct LangElInfo
 {
 	const char *name;
 	bool repeat;
+	bool list;
 	bool literal;
 	bool ignore;
 

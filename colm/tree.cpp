@@ -560,6 +560,11 @@ rec_call:
 				 * right to the first child (repeated item). */
 				if ( lelInfo[((Kid*)vm_top())->tree->id].repeat )
 					kid = kid->tree->child;
+
+				/* If we have a kid and the parent is a list (recursive prod of
+				 * list) then go right to the first child. */
+				if ( kid != 0 && lelInfo[((Kid*)vm_top())->tree->id].list )
+					kid = kid->tree->child;
 			}
 
 			kid = (Kid*) vm_pop();
