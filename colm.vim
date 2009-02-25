@@ -56,7 +56,7 @@ syntax keyword Type
 	\ commit include literal iter
 	\ namespace lex reducefirst global include 
 	\ construct parse parse_stop match require
-	\ preeof
+	\ preeof left right nonassoc prec
 
 syntax keyword typeKeywords
 	\ int str bool any ref vector map list ptr
