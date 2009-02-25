@@ -479,7 +479,13 @@ void print_tree( ostream &out, Tree **&sp, Program *prg, Tree *tree )
 void xml_escape_data( const char *data, long len )
 {
 	for ( int i = 0; i < len; i++ ) {
-		if ( 32 <= data[i] && data[i] <= 126 )
+		if ( data[i] == '<' )
+			cout << "&lt;";
+		else if ( data[i] == '>' )
+			cout << "&gt;";
+		else if ( data[i] == '&' )
+			cout << "&amp;";
+		else if ( 32 <= data[i] && data[i] <= 126 )
 			cout << data[i];
 		else
 			cout << "&#" << ((unsigned)data[i]) << ';';
