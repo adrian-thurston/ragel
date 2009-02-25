@@ -687,6 +687,9 @@ struct ParseData
 	void printNonTermFirstSets();
 	void printFirstSets();
 
+	KlangEl *makeRepeatProd( Namespace *nspace, const String &repeatName, PdaFactor *fact );
+	KlangEl *makeListProd( Namespace *nspace, const String &listName, PdaFactor *fact );
+	KlangEl *makeOptProd( Namespace *nspace, const String &optName, PdaFactor *fact );
 	void resolveLiteralFactor( PdaFactor *fact );
 	void resolveReferenceFactor( PdaFactor *fact );
 	void resolveFactor( PdaFactor *fact );
