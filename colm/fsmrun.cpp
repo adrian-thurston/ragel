@@ -612,7 +612,7 @@ void PdaRun::ignore( Tree *tree )
 	accumIgnore = ignore;
 }
 
-void FsmRun::sendCtxDep( long id )
+void FsmRun::execGen( long id )
 {
 	#ifdef COLM_LOG_PARSE
 	if ( colm_log_parse ) {
@@ -635,88 +635,64 @@ void FsmRun::sendCtxDep( long id )
 
 void FsmRun::sendIgnore( long id )
 {
-	bool ctxDepParsing = prg->ctxDepParsing;
-	LangElInfo *lelInfo = parser->tables->rtd->lelInfo;
-	if ( ctxDepParsing && lelInfo[id].frameId >= 0 ) {
-		sendCtxDep( id );
+	#ifdef COLM_LOG_PARSE
+	if ( colm_log_parse ) {
+		cerr << "ignoring: " << parser->tables->rtd->lelInfo[id].name << endl;
 	}
-	else
-	{
-		#ifdef COLM_LOG_PARSE
-		if ( colm_log_parse ) {
-			cerr << "ignoring: " << parser->tables->rtd->lelInfo[id].name << endl;
-		}
-		#endif
+	#endif
 
-		/* Make the ignore string. */
-		int length = p - tokstart;
-		Head *ignoreStr = string_alloc_const( prg, tokstart, length );
-		update_position( this, tokstart, length );
-		tokstart = 0;
-		
-		Tree *tree = prg->treePool.allocate();
-		tree->refs = 1;
-		tree->id = id;
-		tree->tokdata = ignoreStr;
+	/* Make the ignore string. */
+	int length = p - tokstart;
+	Head *ignoreStr = string_alloc_const( prg, tokstart, length );
+	update_position( this, tokstart, length );
+	tokstart = 0;
+	
+	Tree *tree = prg->treePool.allocate();
+	tree->refs = 1;
+	tree->id = id;
+	tree->tokdata = ignoreStr;
 
-		/* Send it to the parser. */
-		parser->ignore( tree );
+	/* Send it to the parser. */
+	parser->ignore( tree );
 
-		/* Prepare for more scanning. */
-		inputStream->position += length;
-		region = parser->getNextRegion();
-		cs = tables->entryByRegion[region];
+	/* Prepare for more scanning. */
+	inputStream->position += length;
+	region = parser->getNextRegion();
+	cs = tables->entryByRegion[region];
 
-		memset( mark_leave, 0, sizeof(mark_leave) );
-	}
+	memset( mark_leave, 0, sizeof(mark_leave) );
 }
 
 void FsmRun::sendToken( long id )
 {
-	bool ctxDepParsing = prg->ctxDepParsing;
-	LangElInfo *lelInfo = parser->tables->rtd->lelInfo;
-	if ( ctxDepParsing && lelInfo[id].frameId >= 0 ) {
-		sendCtxDep( id );
+	#ifdef COLM_LOG_PARSE
+	if ( colm_log_parse ) {
+		cerr << "token: " << parser->tables->rtd->lelInfo[id].name << endl;
 	}
-	else {
-		#ifdef COLM_LOG_PARSE
-		if ( colm_log_parse ) {
-			cerr << "token: " << parser->tables->rtd->lelInfo[id].name << endl;
-		}
-		#endif
+	#endif
 
-		bool ctxDepParsing = prg->ctxDepParsing;
-		LangElInfo *lelInfo = parser->tables->rtd->lelInfo;
+	/* Make the token data. */
+	long length = p-tokstart;
+	Head *tokdata = string_alloc_const( prg, tokstart, length );
+	update_position( this, tokstart, length );
 
-		/* Make the token data. */
-		long length = p-tokstart;
-		Head *tokdata = string_alloc_const( prg, tokstart, length );
-		update_position( this, tokstart, length );
+	/* By default the match is consumed and this is what we need. Just
+	 * need to reset tokstart. */
+	tokstart = 0;
 
-		if ( ctxDepParsing && lelInfo[id].frameId >= 0 ) {
-			/* We don't want the generation actions to automatically consume text
-			 * so reset p since the scanner leaves it at tokend. */
-			p = tokstart;
-			tokstart = 0;
+	Kid *input = makeToken( id, tokdata, false, 0 );
+	send_handle_error( this, parser, input );
 
-			generationAction( id, tokdata, false, 0 );
-		}
-		else {
-			/* By default the match is consumed and this is what we need. Just
-			 * need to reset tokstart. */
-			tokstart = 0;
-
-			Kid *input = makeToken( id, tokdata, false, 0 );
-			send_handle_error( this, parser, input );
-		}
-
-		memset( mark_leave, 0, sizeof(mark_leave) );
-	}
+	memset( mark_leave, 0, sizeof(mark_leave) );
 }
 
 void FsmRun::emitToken( KlangEl *token )
 {
-	if ( token->ignore )
+	bool ctxDepParsing = prg->ctxDepParsing;
+	LangElInfo *lelInfo = parser->tables->rtd->lelInfo;
+	if ( ctxDepParsing && lelInfo[token->id].frameId >= 0 )
+		execGen( token->id );
+	else if ( token->ignore )
 		sendIgnore( token->id );
 	else
 		sendToken( token->id );

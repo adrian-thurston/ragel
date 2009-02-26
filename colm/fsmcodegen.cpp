@@ -197,7 +197,9 @@ void FsmCodeGen::SET_TOKSTART( ostream &ret, InlineItem *item )
 
 void FsmCodeGen::EMIT_TOKEN( ostream &ret, KlangEl *token )
 {
-	if ( token->ignore )
+	if ( token->transBlock != 0 )
+		ret << "	execGen( " << token->id << " );\n";
+	else if ( token->ignore )
 		ret << "	sendIgnore( " << token->id << " );\n";
 	else 
 		ret << "	sendToken( " << token->id << " );\n";
