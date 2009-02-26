@@ -984,6 +984,10 @@ statement: KW_Print '(' code_expr_list ')'
 	final {
 		$$->stmt = new LangStmt( $1->loc, LangStmt::PrintType, $3->exprVect );
 	};
+statement: KW_PrintXMLAC '(' code_expr_list ')'
+	final {
+		$$->stmt = new LangStmt( $1->loc, LangStmt::PrintXMLACType, $3->exprVect );
+	};
 statement: KW_PrintXML '(' code_expr_list ')'
 	final {
 		$$->stmt = new LangStmt( $1->loc, LangStmt::PrintXMLType, $3->exprVect );

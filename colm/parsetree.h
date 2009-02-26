@@ -1497,6 +1497,7 @@ struct LangStmt
 	enum Type {
 		AssignType,
 		PrintType,
+		PrintXMLACType,
 		PrintXMLType,
 		ExprType,
 		IfType,

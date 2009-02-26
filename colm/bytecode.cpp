@@ -871,6 +871,18 @@ again:
 			tree_downref( prg, sp, tree );
 			break;
 		}
+		case IN_PRINT_XML_AC: {
+			#ifdef COLM_LOG_BYTECODE
+			if ( colm_log_bytecode ) {
+				cerr << "IN_PRINT_XML_AC" << endl;
+			}
+			#endif
+
+			Tree *tree = pop();
+			print_xml_tree( sp, prg, tree, true );
+			tree_downref( prg, sp, tree );
+			break;
+		}
 		case IN_PRINT_XML: {
 			#ifdef COLM_LOG_BYTECODE
 			if ( colm_log_bytecode ) {
@@ -879,7 +891,7 @@ again:
 			#endif
 
 			Tree *tree = pop();
-			print_xml_tree( sp, prg, tree );
+			print_xml_tree( sp, prg, tree, false );
 			tree_downref( prg, sp, tree );
 			break;
 		}

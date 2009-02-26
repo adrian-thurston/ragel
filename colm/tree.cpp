@@ -500,13 +500,12 @@ void print_xml_ignore_list( Tree **sp, Program *prg, Tree *tree, long depth )
 {
 	Kid *ignore = tree_ignore( prg, tree );
 	while ( tree_is_ignore( prg, ignore ) ) {
-		print_xml_kid( sp, prg, ignore, depth );
+		print_xml_kid( sp, prg, ignore, true, depth );
 		ignore = ignore->next;
 	}
 }
 
-
-void print_xml_kid( Tree **&sp, Program *prg, Kid *kid, int depth )
+void print_xml_kid( Tree **&sp, Program *prg, Kid *kid, bool commAttr, int depth )
 {
 	Kid *child;
 	Tree **root = vm_ptop();
@@ -525,7 +524,8 @@ rec_call:
 	}
 	else {
 		/* First print the ignore tokens. */
-		print_xml_ignore_list( sp, prg, kid->tree, depth );
+		if ( commAttr )
+			print_xml_ignore_list( sp, prg, kid->tree, depth );
 
 		for ( i = 0; i < depth; i++ )
 			cout << "  ";
@@ -534,8 +534,7 @@ rec_call:
 		 * we will close it off immediately. */
 		cout << '<' << lelInfo[kid->tree->id].name;
 
-		/* If the parent kid is a repeat then skip this node and go
-		 * right to the first child (repeated item). */
+		/* If this is an attribute then give the node an attribute number. */
 		if ( vm_ptop() != root ) {
 			objectLength = lelInfo[((Kid*)vm_top())->tree->id].objectLength;
 			if ( kidNum < objectLength )
@@ -544,13 +543,18 @@ rec_call:
 
 		objectLength = lelInfo[kid->tree->id].objectLength;
 		child = tree_child( prg, kid->tree );
-		if ( objectLength > 0 || child != 0 ) {
+		if ( (commAttr && objectLength > 0) || child != 0 ) {
 			cout << '>' << endl;
 			vm_push( (SW) kidNum );
 			vm_push( (SW) kid );
 
 			kidNum = 0;
 			kid = kid->tree->child;
+
+			/* Skip over attributes if not printing comments and attributes. */
+			if ( ! commAttr )
+				kid = child;
+
 			while ( kid != 0 ) {
 				if ( kid->tree == 0 || !lelInfo[kid->tree->id].ignore ) {
 					depth++;
@@ -620,12 +624,12 @@ rec_call:
 		goto rec_return;
 }
 
-void print_xml_tree( Tree **&sp, Program *prg, Tree *tree )
+void print_xml_tree( Tree **&sp, Program *prg, Tree *tree, bool commAttr )
 {
 	Kid kid;
 	kid.tree = tree;
 	kid.next = 0;
-	print_xml_kid( sp, prg, &kid, 0 );
+	print_xml_kid( sp, prg, &kid, commAttr, 0 );
 }
 
 void stream_free( Program *prg, Stream *s )

@@ -52,7 +52,7 @@ struct Parser
 
 	# Language.
 	token KW_If, KW_While, KW_Else, KW_Elsif, KW_For, KW_Return, KW_Yield, KW_In,
-		KW_Break, KW_PrintXML, KW_Print, KW_Require;
+		KW_Break, KW_PrintXMLAC, KW_PrintXML, KW_Print, KW_Require;
 
 	# Patterns.
 	token KW_Match, KW_Construct, KW_Parse, KW_ParseStop, KW_New, KW_MakeToken,

@@ -1704,6 +1704,7 @@ void LangStmt::compile( ParseData *pd, CodeVect &code ) const
 {
 	switch ( type ) {
 		case PrintType: 
+		case PrintXMLACType:
 		case PrintXMLType: {
 			UniqueType **types = new UniqueType*[exprPtrVect->length()];
 			
@@ -1716,7 +1717,11 @@ void LangStmt::compile( ParseData *pd, CodeVect &code ) const
 				for ( ExprVect::Iter pex = *exprPtrVect; pex.lte(); pex++ )
 					code.append( IN_PRINT );
 			}
-			else {
+			else if ( type == PrintXMLACType ) {
+				for ( ExprVect::Iter pex = *exprPtrVect; pex.lte(); pex++ )
+					code.append( IN_PRINT_XML_AC );
+			}
+			else if ( type == PrintXMLType ) {
 				for ( ExprVect::Iter pex = *exprPtrVect; pex.lte(); pex++ )
 					code.append( IN_PRINT_XML );
 			}

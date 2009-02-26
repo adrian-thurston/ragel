@@ -355,7 +355,6 @@ void Scanner::endSection( )
 		'ignore' => { token( KW_Ignore ); };
 		'construct' => { token( KW_Construct ); };
 		'new' => { token( KW_New ); };
-		'print' => { token( KW_Print ); };
 		'if' => { token( KW_If ); };
 		'reject' => { token( KW_Reject ); };
 		'while' => { token( KW_While ); };
@@ -364,6 +363,8 @@ void Scanner::endSection( )
 		'match' => { token( KW_Match ); };
 		'for' => { token( KW_For ); };
 		'iter' => { token( KW_Iter ); };
+		'print' => { token( KW_Print ); };
+		'print_xml_ac' => { token( KW_PrintXMLAC ); };
 		'print_xml' => { token( KW_PrintXML ); };
 		'namespace' => { token( KW_Namespace ); };
 		'lex' => { token( KW_Lex ); };

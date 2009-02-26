@@ -183,7 +183,8 @@ typedef unsigned char uchar;
 #define IN_VECTOR_INSERT_BKT     0x84
 
 #define IN_PRINT                 0x87
-#define IN_PRINT_XML             0x88
+#define IN_PRINT_XML_AC          0x88
+#define IN_PRINT_XML             0xab
 
 #define IN_HALT                  0x8a
 
@@ -486,8 +487,8 @@ Tree *prep_parse_tree( Program *prg, Tree **sp, Tree *tree );
 void print_tree( Tree **&sp, Program *prg, Tree *tree );
 void print_tree( ostream &out, Tree **&sp, Program *prg, Tree *tree );
 void print_str( Head *str );
-void print_xml_tree( Tree **&sp, Program *prg, Tree *tree );
-void print_xml_kid( Tree **&sp, Program *prg, Kid *kid, int depth );
+void print_xml_tree( Tree **&sp, Program *prg, Tree *tree, bool commAttr );
+void print_xml_kid( Tree **&sp, Program *prg, Kid *kid, bool commAttr, int depth );
 
 long list_length( List *list );
 void list_append( Program *prg, List *list, Tree *val );
