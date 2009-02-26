@@ -623,7 +623,9 @@ void FsmRun::execGen( long id )
 	/* Make the token data. */
 	long length = p-tokstart;
 	Head *tokdata = string_alloc_const( prg, tokstart, length );
-	update_position( this, tokstart, length );
+
+	/* Note that we don't update the position now. It is done when the token
+	 * data is pulled from the stream. */
 
 	p = tokstart;
 	tokstart = 0;
@@ -656,7 +658,6 @@ void FsmRun::sendIgnore( long id )
 	parser->ignore( tree );
 
 	/* Prepare for more scanning. */
-	inputStream->position += length;
 	region = parser->getNextRegion();
 	cs = tables->entryByRegion[region];
 
