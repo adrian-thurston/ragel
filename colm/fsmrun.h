@@ -91,6 +91,7 @@ struct FsmRun
 	void sendNamedLangEl();
 	void sendEOF();
 	void sendIgnore( long id );
+	void sendCtxDep( long id );
 	void sendToken( long id );
 
 	void sendBackIgnore( Kid *ignore );
