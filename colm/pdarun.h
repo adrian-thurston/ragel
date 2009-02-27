@@ -353,6 +353,7 @@ struct LangElInfo
 
 	long termDupId;
 	long genericId;
+	long matchEnd;
 };
 
 struct ObjFieldInfo

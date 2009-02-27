@@ -94,6 +94,9 @@ void FsmRun::execAction( GenAction *genAction )
 		else if ( genAction->markType == MarkLeave )
 			mark_leave[field->offset] = p;
 	}
+
+	if ( genAction->markType == MarkMatchEnd )
+		mark_match_end[genAction->matchEndNum] = p;
 }
 
 void FsmRun::execute()

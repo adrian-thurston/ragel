@@ -1490,19 +1490,32 @@ field_init: TK_Word ':' code_expr
 
 nonterm opt_rl_join uses rl_join;
 
-opt_rl_join: rl_join
+opt_rl_join: rl_join opt_context
 	final {
 		$$->join = $1->join;
+		$$->context = $2->context;
+
+		if ( $2->context != 0 ) {
+			/* Create the enter and leaving actions that will mark the substring. */
+			Action *mark = new Action( MarkMatchEnd, 0 );
+			mark->matchEndNum = pd->nextMatchEndNum++;
+			pd->actionList.append( mark );
+
+			$$->join->context = $2->context;
+			$$->join->mark = mark;
+		}
 	};
 
 opt_rl_join:
 	final {
 		$$->join = 0;
+		$$->context = 0;
 	};
 
 nonterm rl_join
 {
 	Join *join;
+	Join *context;
 };
 
 rl_join: 
@@ -1517,6 +1530,12 @@ rl_join:
 	final {
 		$$->join = new Join( $1->expression );
 	};
+
+# Context at the end of a pattern that is not included in the match
+nonterm opt_context uses rl_join;
+
+opt_context: '@' rl_join final { $$->context = $2->join; };
+opt_context: final { $$->context = 0; };
 
 nonterm rl_expr
 {

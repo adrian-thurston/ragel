@@ -27,8 +27,10 @@
 
 enum MarkType
 {
+	MarkNone,
 	MarkEnter,
-	MarkLeave
+	MarkLeave,
+	MarkMatchEnd
 };
 
 typedef unsigned long long Size;

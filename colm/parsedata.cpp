@@ -429,7 +429,8 @@ ParseData::ParseData( const String &fileName, const String &sectionName,
 	nextParserId(0),
 	nextLabelId(0),
 	revertOn(true),
-	predValue(0)
+	predValue(0),
+	nextMatchEndNum(0)
 {
 }
 

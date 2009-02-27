@@ -65,6 +65,9 @@ struct GenAction
 		name(0),
 		inlineList(0), 
 		actionId(0),
+		markType(MarkNone),
+		objField(0),
+		matchEndNum(0),
 		numTransRefs(0),
 		numToStateRefs(0),
 		numFromStateRefs(0),
@@ -77,8 +80,9 @@ struct GenAction
 	char *name;
 	InlineList *inlineList;
 	int actionId;
-	ObjField *objField;
 	MarkType markType;
+	ObjField *objField;
+	long matchEndNum;
 
 	string nameOrLoc();
 

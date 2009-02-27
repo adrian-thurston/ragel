@@ -480,17 +480,17 @@ struct Join
 {
 	/* Construct with the first expression. */
 	Join( Expression *expr );
-	Join( const InputLoc &loc, Expression *expr );
 
 	/* Tree traversal. */
 	FsmGraph *walk( ParseData *pd );
-	FsmGraph *walkJoin( ParseData *pd );
 	void makeNameTree( ParseData *pd );
 	void resolveNameRefs( ParseData *pd );
 
 	/* Data. */
-	InputLoc loc;
 	ExprList exprList;
+
+	Join *context;
+	Action *mark;
 };
 
 /*

@@ -620,8 +620,12 @@ void FsmRun::execGen( long id )
 	}
 	#endif
 
+	LangElInfo *lelInfo = parser->tables->rtd->lelInfo;
+	if ( lelInfo[id].matchEnd >= 0 )
+		p = mark_match_end[lelInfo[id].matchEnd];
+
 	/* Make the token data. */
-	long length = p-tokstart;
+	long length = p - tokstart;
 	Head *tokdata = string_alloc_const( prg, tokstart, length );
 
 	/* Note that we don't update the position now. It is done when the token
@@ -633,6 +637,7 @@ void FsmRun::execGen( long id )
 	generationAction( id, tokdata, false, 0 );
 
 	memset( mark_leave, 0, sizeof(mark_leave) );
+	memset( mark_match_end, 0, sizeof(mark_match_end) );
 }
 
 void FsmRun::sendIgnore( long id )
@@ -642,6 +647,10 @@ void FsmRun::sendIgnore( long id )
 		cerr << "ignoring: " << parser->tables->rtd->lelInfo[id].name << endl;
 	}
 	#endif
+
+	LangElInfo *lelInfo = parser->tables->rtd->lelInfo;
+	if ( lelInfo[id].matchEnd >= 0 )
+		p = mark_match_end[lelInfo[id].matchEnd];
 
 	/* Make the ignore string. */
 	int length = p - tokstart;
@@ -662,6 +671,7 @@ void FsmRun::sendIgnore( long id )
 	cs = tables->entryByRegion[region];
 
 	memset( mark_leave, 0, sizeof(mark_leave) );
+	memset( mark_match_end, 0, sizeof(mark_match_end) );
 }
 
 void FsmRun::sendToken( long id )
@@ -672,8 +682,12 @@ void FsmRun::sendToken( long id )
 	}
 	#endif
 
+	LangElInfo *lelInfo = parser->tables->rtd->lelInfo;
+	if ( lelInfo[id].matchEnd >= 0 )
+		p = mark_match_end[lelInfo[id].matchEnd];
+
 	/* Make the token data. */
-	long length = p-tokstart;
+	long length = p - tokstart;
 	Head *tokdata = string_alloc_const( prg, tokstart, length );
 	update_position( this, tokstart, length );
 
@@ -685,6 +699,7 @@ void FsmRun::sendToken( long id )
 	send_handle_error( this, parser, input );
 
 	memset( mark_leave, 0, sizeof(mark_leave) );
+	memset( mark_match_end, 0, sizeof(mark_match_end) );
 }
 
 void FsmRun::emitToken( KlangEl *token )
@@ -836,6 +851,7 @@ long FsmRun::run( PdaRun *destParser )
 	region = parser->getNextRegion();
 	cs = tables->entryByRegion[region];
 	memset( mark_leave, 0, sizeof(mark_leave) );
+	memset( mark_match_end, 0, sizeof(mark_match_end) );
 
 	/* Start with the EOF test. The pattern and replacement input sources can
 	 * be EOF from the start. */

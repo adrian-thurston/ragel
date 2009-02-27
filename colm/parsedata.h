@@ -297,7 +297,9 @@ public:
 	:
 		loc(loc),
 		name(name),
+		markType(MarkNone),
 		objField(0),
+		matchEndNum(0),
 		inlineList(inlineList), 
 		actionId(-1),
 		numTransRefs(0),
@@ -315,6 +317,7 @@ public:
 		name("mark"),
 		markType(markType),
 		objField(objField),
+		matchEndNum(0),
 		inlineList(new InlineList), 
 		actionId(-1),
 		numTransRefs(0),
@@ -336,6 +339,7 @@ public:
 	
 	MarkType markType;
 	ObjField *objField;
+	long matchEndNum;
 
 	InlineList *inlineList;
 	int actionId;
@@ -920,6 +924,7 @@ struct ParseData
 	PdaTables *pdaTables;
 
 	long predValue;
+	long nextMatchEndNum;
 };
 
 void afterOpMinimize( FsmGraph *fsm, bool lastInSeq = true );

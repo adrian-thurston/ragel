@@ -329,6 +329,9 @@ void FsmCodeGen::ACTION( ostream &ret, GenAction *action, int targState, bool in
 			ret << "mark_leave[" << field->offset << "] = " << P() << ";\n";
 	}
 
+	if ( action->markType == MarkMatchEnd )
+		ret << "mark_match_end[" << action->matchEndNum << "] = " << P() << ";\n";
+
 	ret << "}\n";
 
 }

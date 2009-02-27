@@ -608,17 +608,10 @@ void JoinOrLm::resolveNameRefs( ParseData *pd )
 
 
 /* Construct with a location and the first expression. */
-Join::Join( const InputLoc &loc, Expression *expr )
-:
-	loc(loc)
-{
-	exprList.append( expr );
-}
-
-/* Construct with a location and the first expression. */
 Join::Join( Expression *expr )
 :
-	loc(loc)
+	context(0),
+	mark(0)
 {
 	exprList.append( expr );
 }
@@ -626,122 +619,44 @@ Join::Join( Expression *expr )
 /* Walk an expression node. */
 FsmGraph *Join::walk( ParseData *pd )
 {
-	if ( exprList.length() > 1 )
-		return walkJoin( pd );
-	else
-		return exprList.head->walk( pd );
-}
+	assert( exprList.length() == 1 );
 
-/* There is a list of expressions to join. */
-FsmGraph *Join::walkJoin( ParseData *pd )
-{
-	/* We enter into a new name scope. */
-	NameFrame nameFrame = pd->enterNameScope( true, 1 );
+	FsmGraph *retFsm = exprList.head->walk( pd );
 
-	/* Evaluate the machines. */
-	FsmGraph **fsms = new FsmGraph*[exprList.length()];
-	ExprList::Iter expr = exprList;
-	for ( int e = 0; e < exprList.length(); e++, expr++ )
-		fsms[e] = expr->walk( pd );
-	
-	/* Get the start and final names. Final is 
-	 * guaranteed to exist, start is not. */
-	NameInst *startName = pd->curNameInst->start;
-	NameInst *finalName = pd->curNameInst->final;
-
-	int startId = -1;
-	if ( startName != 0 ) {
-		/* Take note that there was an implicit link to the start machine. */
-		pd->localNameScope->referencedNames.append( startName );
-		startId = startName->id;
+	/* Maybe the the context. */
+	if ( context != 0 ) {
+		retFsm->leaveFsmAction( pd->curActionOrd++, mark );
+		FsmGraph *contextGraph = context->walk( pd );
+		retFsm->concatOp( contextGraph );
 	}
 
-	/* A final id of -1 indicates there is no epsilon that references the
-	 * final state, therefor do not create one or set an entry point to it. */
-	int finalId = -1;
-	if ( finalName->numRefs > 0 )
-		finalId = finalName->id;
-
-	/* Join machines 1 and up onto machine 0. */
-	FsmGraph *retFsm = fsms[0];
-	retFsm->joinOp( startId, finalId, fsms+1, exprList.length()-1 );
-
-	/* We can now unset entry points that are not longer used. */
-	pd->unsetObsoleteEntries( retFsm );
-
-	/* Pop the name scope. */
-	pd->popNameScope( nameFrame );
-
-	delete[] fsms;
 	return retFsm;
 }
 
 void Join::makeNameTree( ParseData *pd )
 {
-	if ( exprList.length() > 1 ) {
-		/* Create the new anonymous scope. */
-		NameInst *prevNameInst = pd->curNameInst;
-		pd->curNameInst = pd->addNameInst( loc, 0, false );
+	assert( exprList.length() == 1 );
 
-		/* Join scopes need an implicit "final" target. */
-		pd->curNameInst->final = new NameInst( InputLoc(), pd->curNameInst, "final", 
-				pd->nextNameId++, false );
+	/* Recurse into the single expression. */
+	exprList.head->makeNameTree( pd );
 
-		/* Recurse into all expressions in the list. */
-		for ( ExprList::Iter expr = exprList; expr.lte(); expr++ )
-			expr->makeNameTree( pd );
-
-		/* The name scope ends, pop the name instantiation. */
-		pd->curNameInst = prevNameInst;
-	}
-	else {
-		/* Recurse into the single expression. */
-		exprList.head->makeNameTree( pd );
-	}
+	/* Maybe the the context. */
+	if ( context != 0 )
+		context->makeNameTree( pd );
 }
 
 
 void Join::resolveNameRefs( ParseData *pd )
 {
 	/* Branch on whether or not there is to be a join. */
-	if ( exprList.length() > 1 ) {
-		/* The variable definition enters a new scope. */
-		NameFrame nameFrame = pd->enterNameScope( true, 1 );
+	assert( exprList.length() == 1 );
 
-		/* The join scope must contain a start label. */
-		NameSet resolved = pd->resolvePart( pd->localNameScope, "start", true );
-		if ( resolved.length() > 0 ) {
-			/* Take the first. */
-			pd->curNameInst->start = resolved[0];
-			if ( resolved.length() > 1 ) {
-				/* Complain about the multiple references. */
-				error(loc) << "multiple start labels" << endl;
-				errorStateLabels( resolved );
-			}
-		}
+	/* Recurse into the single expression. */
+	exprList.head->resolveNameRefs( pd );
 
-		/* Make sure there is a start label. */
-		if ( pd->curNameInst->start != 0 ) {
-			/* There is an implicit reference to start name. */
-			pd->curNameInst->start->numRefs += 1;
-		}
-		else {
-			/* No start label. Complain and recover by adding a label to the
-			 * adding one. Recover ignoring the problem. */
-			error(loc) << "no start label" << endl;
-		}
-
-		/* Recurse into all expressions in the list. */
-		for ( ExprList::Iter expr = exprList; expr.lte(); expr++ )
-			expr->resolveNameRefs( pd );
-
-		/* The name scope ends, pop the name instantiation. */
-		pd->popNameScope( nameFrame );
-	}
-	else {
-		/* Recurse into the single expression. */
-		exprList.head->resolveNameRefs( pd );
-	}
+	/* Maybe the the context. */
+	if ( context != 0 )
+		context->resolveNameRefs( pd );
 }
 
 /* Clean up after an expression node. */

@@ -124,6 +124,7 @@ struct FsmRun
 	bool gotoResume;
 	char *mark_enter[32];
 	char *mark_leave[32];
+	char *mark_match_end[32];
 };
 
 void send_queued_tokens( FsmRun *fsmRun, PdaRun *parser );
