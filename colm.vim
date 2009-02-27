@@ -72,6 +72,8 @@ syntax region defTypes matchgroup=defKeywords
 	\ start="\<rl\>" start="\<def\>" start="\<token\>" start="\<ignore\>"
 	\ matchgroup=Function end="[a-zA-Z_][a-zA-Z0-9_]*" end="/"me=e-1
 
+syntax sync match colmSyncPat grouphere NONE "([{}]|\<token\>|\<ignore\>|\<def\>)"
+
 "
 " Specifying Groups
 "
