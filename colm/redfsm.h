@@ -67,7 +67,7 @@ struct GenAction
 		actionId(0),
 		markType(MarkNone),
 		objField(0),
-		matchEndNum(0),
+		markId(-1),
 		numTransRefs(0),
 		numToStateRefs(0),
 		numFromStateRefs(0),
@@ -82,7 +82,7 @@ struct GenAction
 	int actionId;
 	MarkType markType;
 	ObjField *objField;
-	long matchEndNum;
+	long markId;
 
 	string nameOrLoc();
 

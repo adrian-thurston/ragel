@@ -279,6 +279,7 @@ struct PdaLiteral
 	long value;
 };
 
+
 /* Forwards. */
 using std::ostream;
 
@@ -299,7 +300,7 @@ public:
 		name(name),
 		markType(MarkNone),
 		objField(0),
-		matchEndNum(0),
+		markId(-1),
 		inlineList(inlineList), 
 		actionId(-1),
 		numTransRefs(0),
@@ -312,12 +313,12 @@ public:
 	{
 	}
 
-	Action( MarkType markType, ObjField *objField )
+	Action( MarkType markType, long markId )
 	:
 		name("mark"),
 		markType(markType),
-		objField(objField),
-		matchEndNum(0),
+		objField(0),
+		markId(markId),
 		inlineList(new InlineList), 
 		actionId(-1),
 		numTransRefs(0),
@@ -339,7 +340,7 @@ public:
 	
 	MarkType markType;
 	ObjField *objField;
-	long matchEndNum;
+	long markId;
 
 	InlineList *inlineList;
 	int actionId;

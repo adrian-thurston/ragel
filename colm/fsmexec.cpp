@@ -87,16 +87,8 @@ void FsmRun::execAction( GenAction *genAction )
 		}
 	}
 
-	if ( genAction->objField ) {
-		ObjField *field = genAction->objField;
-		if ( genAction->markType == MarkEnter )
-			mark_enter[field->offset] = p;
-		else if ( genAction->markType == MarkLeave )
-			mark_leave[field->offset] = p;
-	}
-
-	if ( genAction->markType == MarkMatchEnd )
-		mark_match_end[genAction->matchEndNum] = p;
+	if ( genAction->markType == MarkMark )
+		mark[genAction->markId] = p;
 }
 
 void FsmRun::execute()

@@ -511,15 +511,15 @@ Kid *FsmRun::makeToken( int id, Head *tokdata, bool namedLangEl, int bindId )
 	/* No children and ignores get added later. */
 	input->tree->child = attrs;
 
-	/* Set attributes for the labelled components. */
-	for ( int i = 0; i < 32; i++ ) {
-		if ( mark_leave[i] != 0 ) {
-			Head *data = string_alloc_new( prg, 
-					mark_enter[i], mark_leave[i] - mark_enter[i] );
-			set_attr( input->tree, i, construct_string( prg, data ) );
-			tree_upref( get_attr( input->tree, i ) );
-		}
-	}
+//	/* Set attributes for the labelled components. */
+//	for ( int i = 0; i < 32; i++ ) {
+//		if ( mark_leave[i] != 0 ) {
+//			Head *data = string_alloc_new( prg, 
+//					mark_enter[i], mark_leave[i] - mark_enter[i] );
+//			set_attr( input->tree, i, construct_string( prg, data ) );
+//			tree_upref( get_attr( input->tree, i ) );
+//		}
+//	}
 	
 	/* If the item is bound then store it in the bindings array. */
 	if ( bindId > 0 ) {
@@ -621,8 +621,8 @@ void FsmRun::execGen( long id )
 	#endif
 
 	LangElInfo *lelInfo = parser->tables->rtd->lelInfo;
-	if ( lelInfo[id].matchEnd >= 0 )
-		p = mark_match_end[lelInfo[id].matchEnd];
+	if ( lelInfo[id].markId >= 0 )
+		p = mark[lelInfo[id].markId];
 
 	/* Make the token data. */
 	long length = p - tokstart;
@@ -636,8 +636,7 @@ void FsmRun::execGen( long id )
 
 	generationAction( id, tokdata, false, 0 );
 
-	memset( mark_leave, 0, sizeof(mark_leave) );
-	memset( mark_match_end, 0, sizeof(mark_match_end) );
+	memset( mark, 0, sizeof(mark) );
 }
 
 void FsmRun::sendIgnore( long id )
@@ -649,8 +648,8 @@ void FsmRun::sendIgnore( long id )
 	#endif
 
 	LangElInfo *lelInfo = parser->tables->rtd->lelInfo;
-	if ( lelInfo[id].matchEnd >= 0 )
-		p = mark_match_end[lelInfo[id].matchEnd];
+	if ( lelInfo[id].markId >= 0 )
+		p = mark[lelInfo[id].markId];
 
 	/* Make the ignore string. */
 	int length = p - tokstart;
@@ -670,8 +669,7 @@ void FsmRun::sendIgnore( long id )
 	region = parser->getNextRegion();
 	cs = tables->entryByRegion[region];
 
-	memset( mark_leave, 0, sizeof(mark_leave) );
-	memset( mark_match_end, 0, sizeof(mark_match_end) );
+	memset( mark, 0, sizeof(mark) );
 }
 
 void FsmRun::sendToken( long id )
@@ -683,8 +681,8 @@ void FsmRun::sendToken( long id )
 	#endif
 
 	LangElInfo *lelInfo = parser->tables->rtd->lelInfo;
-	if ( lelInfo[id].matchEnd >= 0 )
-		p = mark_match_end[lelInfo[id].matchEnd];
+	if ( lelInfo[id].markId >= 0 )
+		p = mark[lelInfo[id].markId];
 
 	/* Make the token data. */
 	long length = p - tokstart;
@@ -698,8 +696,7 @@ void FsmRun::sendToken( long id )
 	Kid *input = makeToken( id, tokdata, false, 0 );
 	send_handle_error( this, parser, input );
 
-	memset( mark_leave, 0, sizeof(mark_leave) );
-	memset( mark_match_end, 0, sizeof(mark_match_end) );
+	memset( mark, 0, sizeof(mark) );
 }
 
 void FsmRun::emitToken( KlangEl *token )
@@ -850,8 +847,7 @@ long FsmRun::run( PdaRun *destParser )
 	tokend = 0;
 	region = parser->getNextRegion();
 	cs = tables->entryByRegion[region];
-	memset( mark_leave, 0, sizeof(mark_leave) );
-	memset( mark_match_end, 0, sizeof(mark_match_end) );
+	memset( mark, 0, sizeof(mark) );
 
 	/* Start with the EOF test. The pattern and replacement input sources can
 	 * be EOF from the start. */
@@ -998,8 +994,16 @@ long FsmRun::run( PdaRun *destParser )
 				runBuf->next->length = FSM_BUFSIZE - have;
 
 				/* Compute tokstart and tokend. */
-				tokend = runBuf->buf + (tokend - tokstart);
+				long dist = tokstart - runBuf->buf;
+
+				tokend -= dist;
 				tokstart = runBuf->buf;
+
+				/* Shift any markers. */
+				for ( int i = 0; i < MARK_SLOTS; i++ ) {
+					if ( mark[i] != 0 )
+						mark[i] -= dist;
+				}
 			}
 			p = pe = runBuf->buf + have;
 			peof = 0;

@@ -353,7 +353,7 @@ struct LangElInfo
 
 	long termDupId;
 	long genericId;
-	long matchEnd;
+	long markId;
 };
 
 struct ObjFieldInfo
@@ -385,6 +385,13 @@ struct RegionInfo
 	const char *name;
 	long defaultToken;
 	long eofFrameId;
+};
+
+struct CaptureAttr
+{
+	long mark_enter;
+	long mark_leave;
+	long offset;
 };
 
 struct RuntimeData
@@ -420,6 +427,8 @@ struct RuntimeData
 	long *litlen;
 	Head **literals;
 	long numLiterals;
+
+//	CaptureAttr *captureAttr;
 
 	FsmTables *fsmTables;
 	PdaTables *pdaTables;

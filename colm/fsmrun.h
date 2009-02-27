@@ -81,6 +81,8 @@ struct RunBuf
 	RunBuf *next;
 };
 
+#define MARK_SLOTS 32
+
 struct FsmRun
 {
 	FsmRun( Program *prg );
@@ -122,9 +124,7 @@ struct FsmRun
 	bool eofSent;
 	RunBuf *runBuf;
 	bool gotoResume;
-	char *mark_enter[32];
-	char *mark_leave[32];
-	char *mark_match_end[32];
+	char *mark[MARK_SLOTS];
 };
 
 void send_queued_tokens( FsmRun *fsmRun, PdaRun *parser );

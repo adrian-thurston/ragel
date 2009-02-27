@@ -1411,10 +1411,11 @@ void ParseData::makeRuntimeData()
 			runtimeData->lelInfo[i].termDupId = lel->termDup == 0 ? 0 : lel->termDup->id;
 			runtimeData->lelInfo[i].genericId = lel->generic == 0 ? 0 : lel->generic->id;
 
-			if ( lel->tokenDef != 0 && lel->tokenDef->join != 0 && lel->tokenDef->join->context != 0 )
-				runtimeData->lelInfo[i].matchEnd = lel->tokenDef->join->mark->matchEndNum;
+			if ( lel->tokenDef != 0 && lel->tokenDef->join != 0 && 
+					lel->tokenDef->join->context != 0 )
+				runtimeData->lelInfo[i].markId = lel->tokenDef->join->mark->markId;
 			else
-				runtimeData->lelInfo[i].matchEnd = -1;
+				runtimeData->lelInfo[i].markId = -1;
 		}
 		else {
 			memset(&runtimeData->lelInfo[i], 0, sizeof(LangElInfo) );
@@ -1504,6 +1505,8 @@ void ParseData::makeRuntimeData()
 		/* Length. */
 		runtimeData->litlen[el->value] = el->key.length();
 	}
+
+	/* FIXME: Captured attributes go here. */
 
 	runtimeData->fsmTables = fsmTables;
 	runtimeData->pdaTables = pdaTables;

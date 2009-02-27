@@ -193,7 +193,7 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 
 		out << runtimeData->lelInfo[i].genericId << ", ";
 
-		out << runtimeData->lelInfo[i].matchEnd;
+		out << runtimeData->lelInfo[i].markId;
 
 		out << " }";
 

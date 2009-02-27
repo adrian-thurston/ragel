@@ -432,7 +432,7 @@ void RedFsmBuild::newAction( int anum, char *name, int line, int col, Action *ac
 	redFsm->allActions[anum].inlineList = action->inlineList;
 	redFsm->allActions[anum].objField = action->objField;
 	redFsm->allActions[anum].markType = action->markType;
-	redFsm->allActions[anum].matchEndNum = action->matchEndNum;
+	redFsm->allActions[anum].markId = action->markId;
 }
 
 void RedFsmBuild::makeAction( Action *action )

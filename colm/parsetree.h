@@ -271,6 +271,18 @@ struct NamespaceQual
 	Namespace *getQual( ParseData *pd );
 };
 
+struct ReCapture
+{
+	ReCapture( ObjField *objField, Action *markEnter, Action *markLeave )
+		: objField(objField), markEnter(markEnter), markLeave(markLeave) {}
+
+	ObjField *objField;
+	Action *markEnter;
+	Action *markLeave;
+};
+
+typedef Vector<ReCapture> ReCaptureVect;
+
 struct TokenDef
 {
 	TokenDef( Join *join, KlangEl *token, InputLoc &semiLoc, 
@@ -295,6 +307,7 @@ struct TokenDef
 	bool inLmSelect;
 	Namespace *nspace;
 	TokenRegion *tokenRegion;
+	ReCaptureVect reCaptureVect;
 
 	TokenDef *prev, *next;
 };

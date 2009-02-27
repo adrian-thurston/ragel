@@ -321,16 +321,8 @@ void FsmCodeGen::ACTION( ostream &ret, GenAction *action, int targState, bool in
 	ret << "\t{";
 	INLINE_LIST( ret, action->inlineList, targState, inFinish );
 
-	if ( action->objField ) {
-		ObjField *field = action->objField;
-		if ( action->markType == MarkEnter )
-			ret << "mark_enter[" << field->offset << "] = " << P() << ";\n";
-		else if ( action->markType == MarkLeave )
-			ret << "mark_leave[" << field->offset << "] = " << P() << ";\n";
-	}
-
-	if ( action->markType == MarkMatchEnd )
-		ret << "mark_match_end[" << action->matchEndNum << "] = " << P() << ";\n";
+	if ( action->markId >= 0 )
+		ret << "mark[" << action->markId << "] = " << P() << ";\n";
 
 	ret << "}\n";
 

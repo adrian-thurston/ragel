@@ -103,6 +103,7 @@ struct Parser
 	ProdElList *curProdElList;
 
 	PredType predType;
+	ReCaptureVect reCaptureVect;
 };
 
 %% write token_defs;

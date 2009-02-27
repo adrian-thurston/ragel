@@ -734,6 +734,9 @@ token_def:
 		region->tokenDefList.append( tokenDef );
 		tokEl->tokenDef = tokenDef;
 
+		tokenDef->reCaptureVect = reCaptureVect;
+		reCaptureVect.empty();
+
 		/* Create the object def for the token. */
 		ObjectDef *objectDef = new ObjectDef( ObjectDef::UserType, name, 
 				pd->objFieldMap, new ObjMethodMap(), pd->nextObjectId++ ); 
@@ -841,6 +844,9 @@ rl_def:
 		/* Generic creation of machine for instantiation and assignment. */
 		JoinOrLm *joinOrLm = new JoinOrLm( $4->join );
 		addRegularDef( $2->loc, namespaceStack.top(), $2->data, joinOrLm, false );
+
+		if ( reCaptureVect.length() > 0 )
+			error($1->loc) << "rl definitions cannot capture vars" << endl;
 	};
 
 type class token_data
@@ -1497,8 +1503,7 @@ opt_rl_join: rl_join opt_context
 
 		if ( $2->context != 0 ) {
 			/* Create the enter and leaving actions that will mark the substring. */
-			Action *mark = new Action( MarkMatchEnd, 0 );
-			mark->matchEndNum = pd->nextMatchEndNum++;
+			Action *mark = new Action( MarkMark, pd->nextMatchEndNum++ );
 			pd->actionList.append( mark );
 
 			$$->join->context = $2->context;
@@ -1636,14 +1641,16 @@ factor_with_label:
 		pd->objFieldMap->insert( $1->data, objField );
 
 		/* Create the enter and leaving actions that will mark the substring. */
-		Action *enter = new Action( MarkEnter, objField );
-		Action *leave = new Action( MarkLeave, objField );
+		Action *enter = new Action( MarkMark, pd->nextMatchEndNum++ );
+		Action *leave = new Action( MarkMark, pd->nextMatchEndNum++ );
 		pd->actionList.append( enter );
 		pd->actionList.append( leave );
 		
 		/* Add entering and leaving actions. */
 		$$->factorWithAug->actions.append( ParserAction( $1->loc, at_start, 0, enter ) );
 		$$->factorWithAug->actions.append( ParserAction( $1->loc, at_leave, 0, leave ) );
+
+		reCaptureVect.append( ReCapture( objField, enter, leave ) );
 	};
 
 nonterm factor_with_ep
