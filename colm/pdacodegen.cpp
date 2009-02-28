@@ -193,7 +193,11 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 
 		out << runtimeData->lelInfo[i].genericId << ", ";
 
-		out << runtimeData->lelInfo[i].markId;
+		out << runtimeData->lelInfo[i].markId << ", ";
+
+		out << runtimeData->lelInfo[i].captureAttr << ", ";
+
+		out << runtimeData->lelInfo[i].numCaptureAttr;
 
 		out << " }";
 
@@ -370,6 +374,16 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 	}
 	out << "};\n\n";
 
+	out << "CaptureAttr captureAttr[] = {\n";
+	for ( long i = 0; i < runtimeData->numCapturedAttr; i++ ) {
+		out << "\t{ " << 
+			runtimeData->captureAttr[i].mark_enter << ", " <<
+			runtimeData->captureAttr[i].mark_leave << ", " <<
+			runtimeData->captureAttr[i].offset  << " },\n";
+	}
+
+	out << "};\n\n";
+
 	out <<
 		"RuntimeData main_runtimeData = \n"
 		"{\n"
@@ -404,6 +418,9 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 		"	" << litlen() << ",\n"
 		"	" << literals() << ",\n"
 		"	" << runtimeData->numLiterals << ",\n"
+		"\n"
+		"	captureAttr,\n"
+		"	" << runtimeData->numCapturedAttr << ",\n"
 		"\n"
 		"	&fsmTables_start,\n"
 		"	&pid_0_pdaTables,\n"

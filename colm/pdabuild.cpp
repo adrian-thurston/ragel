@@ -1506,7 +1506,29 @@ void ParseData::makeRuntimeData()
 		runtimeData->litlen[el->value] = el->key.length();
 	}
 
-	/* FIXME: Captured attributes go here. */
+	/* Captured attributes. Loop over tokens and count first. */
+	long numCapturedAttr = 0;
+	for ( RegionList::Iter reg = regionList; reg.lte(); reg++ ) {
+		for ( TokenDefList::Iter td = reg->tokenDefList; td.lte(); td++ )
+			numCapturedAttr += td->reCaptureVect.length();
+	}
+	runtimeData->captureAttr = new CaptureAttr[numCapturedAttr];
+	runtimeData->numCapturedAttr = numCapturedAttr;
+
+	count = 0;
+	for ( RegionList::Iter reg = regionList; reg.lte(); reg++ ) {
+		for ( TokenDefList::Iter td = reg->tokenDefList; td.lte(); td++ ) {
+			runtimeData->lelInfo[td->token->id].captureAttr = count;
+			runtimeData->lelInfo[td->token->id].numCaptureAttr = td->reCaptureVect.length();
+			for ( ReCaptureVect::Iter c = td->reCaptureVect; c.lte(); c++ ) {
+				runtimeData->captureAttr[count].mark_enter = c->markEnter->markId;
+				runtimeData->captureAttr[count].mark_leave = c->markLeave->markId;
+				runtimeData->captureAttr[count].offset = c->objField->offset;
+
+				count += 1;
+			}
+		}
+	}
 
 	runtimeData->fsmTables = fsmTables;
 	runtimeData->pdaTables = pdaTables;
@@ -1520,7 +1542,6 @@ void ParseData::makeRuntimeData()
 			runtimeData->eofLelIds[lel->parserId] = lel->eofLel->id;
 		}
 	}
-		
 
 	runtimeData->globalSize = globalObjectDef->size();
 

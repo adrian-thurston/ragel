@@ -511,15 +511,17 @@ Kid *FsmRun::makeToken( int id, Head *tokdata, bool namedLangEl, int bindId )
 	/* No children and ignores get added later. */
 	input->tree->child = attrs;
 
-//	/* Set attributes for the labelled components. */
-//	for ( int i = 0; i < 32; i++ ) {
-//		if ( mark_leave[i] != 0 ) {
-//			Head *data = string_alloc_new( prg, 
-//					mark_enter[i], mark_leave[i] - mark_enter[i] );
-//			set_attr( input->tree, i, construct_string( prg, data ) );
-//			tree_upref( get_attr( input->tree, i ) );
-//		}
-//	}
+	LangElInfo *lelInfo = parser->tables->rtd->lelInfo;
+	if ( lelInfo[id].numCaptureAttr > 0 ) {
+		for ( int i = 0; i < lelInfo[id].numCaptureAttr; i++ ) {
+			CaptureAttr *ca = &parser->tables->rtd->captureAttr[lelInfo[id].captureAttr + i];
+			Head *data = string_alloc_new( prg, 
+					mark[ca->mark_enter], mark[ca->mark_leave] - mark[ca->mark_enter] );
+			Tree *string = construct_string( prg, data );
+			set_attr( input->tree, ca->offset, string );
+			tree_upref( string );
+		}
+	}
 	
 	/* If the item is bound then store it in the bindings array. */
 	if ( bindId > 0 ) {

@@ -1650,7 +1650,7 @@ factor_with_label:
 		$$->factorWithAug->actions.append( ParserAction( $1->loc, at_start, 0, enter ) );
 		$$->factorWithAug->actions.append( ParserAction( $1->loc, at_leave, 0, leave ) );
 
-		reCaptureVect.append( ReCapture( objField, enter, leave ) );
+		reCaptureVect.append( ReCapture( enter, leave, objField ) );
 	};
 
 nonterm factor_with_ep

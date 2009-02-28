@@ -354,6 +354,8 @@ struct LangElInfo
 	long termDupId;
 	long genericId;
 	long markId;
+	long captureAttr;
+	long numCaptureAttr;
 };
 
 struct ObjFieldInfo
@@ -428,7 +430,8 @@ struct RuntimeData
 	Head **literals;
 	long numLiterals;
 
-//	CaptureAttr *captureAttr;
+	CaptureAttr *captureAttr;
+	long numCapturedAttr;
 
 	FsmTables *fsmTables;
 	PdaTables *pdaTables;

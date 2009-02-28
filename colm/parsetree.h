@@ -273,12 +273,12 @@ struct NamespaceQual
 
 struct ReCapture
 {
-	ReCapture( ObjField *objField, Action *markEnter, Action *markLeave )
-		: objField(objField), markEnter(markEnter), markLeave(markLeave) {}
+	ReCapture( Action *markEnter, Action *markLeave, ObjField *objField )
+		: markEnter(markEnter), markLeave(markLeave), objField(objField)  {}
 
-	ObjField *objField;
 	Action *markEnter;
 	Action *markLeave;
+	ObjField *objField;
 };
 
 typedef Vector<ReCapture> ReCaptureVect;
