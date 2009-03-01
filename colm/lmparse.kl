@@ -88,7 +88,8 @@ block_open: '{'
 	final {
 		/* Init the object representing the local frame. */
 		$$->localFrame = new ObjectDef( ObjectDef::FrameType, 
-				"local", new ObjFieldMap(), new ObjMethodMap(), pd->nextObjectId++ );
+				"local", new ObjFieldMap(), new ObjFieldList, 
+				new ObjMethodMap(), pd->nextObjectId++ );
 		pd->curLocalFrame = $$->localFrame;
 	};
 
@@ -239,6 +240,7 @@ global_def: KW_Global var_def opt_def_init
 			error($2->objField->loc) << "object field renamed" << endp;
 
 		globalObj->objFieldMap->insert( $2->objField->name, $2->objField );
+		globalObj->objFieldList->append( $2->objField );
 
 		if ( $3->expr != 0 ) {
 			LangVarRef *varRef = new LangVarRef( $2->objField->loc, 
@@ -296,7 +298,7 @@ cfl_def: cfl_def_head obj_var_list properties_list cfl_prod_list
 
 		/* Make a new object definition. */
 		ObjectDef *objectDef = new ObjectDef( ObjectDef::UserType, curDefineId, 
-				pd->objFieldMap, new ObjMethodMap(), pd->nextObjectId++ ); 
+				pd->objFieldMap, pd->objFieldList, new ObjMethodMap(), pd->nextObjectId++ ); 
 
 		langEl->objectDef = objectDef;
 	};
@@ -360,11 +362,13 @@ obj_var_list: obj_var_list var_def
 			error() << "object field renamed" << endp;
 
 		pd->objFieldMap->insert( $2->objField->name, $2->objField );
+		pd->objFieldList->append( $2->objField );
 	};
 
 obj_var_list:
 	final {
 		pd->objFieldMap = new ObjFieldMap;
+		pd->objFieldList = new ObjFieldList;
 	};
 
 
@@ -487,6 +491,7 @@ pattern_el: opt_label pattern_el_type_or_lit
 
 			/* Insert it into the field map. */
 			pd->curLocalFrame->objFieldMap->insert( $1->varRef->name, objField );
+			pd->curLocalFrame->objFieldList->append( objField );
 		}
 	};
 
@@ -739,7 +744,7 @@ token_def:
 
 		/* Create the object def for the token. */
 		ObjectDef *objectDef = new ObjectDef( ObjectDef::UserType, name, 
-				pd->objFieldMap, new ObjMethodMap(), pd->nextObjectId++ ); 
+				pd->objFieldMap, pd->objFieldList, new ObjMethodMap(), pd->nextObjectId++ ); 
 
 		tokEl->objectDef = objectDef;
 
@@ -973,6 +978,7 @@ statement: var_def opt_def_init
 
 		/* Insert it into the field map. */
 		pd->curLocalFrame->objFieldMap->insert( $1->objField->name, $1->objField );
+		pd->curLocalFrame->objFieldList->append( $1->objField );
 
 		if ( $2->expr != 0 ) {
 			LangVarRef *varRef = new LangVarRef( $1->objField->loc, 
@@ -1025,6 +1031,7 @@ statement: KW_For TK_Word ':' type_ref KW_In iter_call block_or_single
 		 * to the iterator that is called. This lookup is done at compile time. */
 		ObjField *iterField = new ObjField( $2->loc, (TypeRef*)0, $2->data );
 		pd->curLocalFrame->objFieldMap->insert( $2->data, iterField );
+		pd->curLocalFrame->objFieldList->append( iterField );
 
 		$$->stmt = new LangStmt( $1->loc, LangStmt::ForIterType, 
 				iterField, $4->typeRef, $6->langTerm, $7->stmtList );
@@ -1639,6 +1646,7 @@ factor_with_label:
 
 		/* Insert it into the map. */
 		pd->objFieldMap->insert( $1->data, objField );
+		pd->objFieldList->append( objField );
 
 		/* Create the enter and leaving actions that will mark the substring. */
 		Action *enter = new Action( MarkMark, pd->nextMatchEndNum++ );
@@ -2001,8 +2009,9 @@ void Parser::init()
 	/* Set up the global object. */
 	String global = "global";
 	ObjFieldMap *objFieldMap = new ObjFieldMap;
+	ObjFieldList *objFieldList = new ObjFieldList;
 	pd->globalObjectDef = new ObjectDef( ObjectDef::UserType, global, 
-			objFieldMap, new ObjMethodMap(), pd->nextObjectId++ ); 
+			objFieldMap, objFieldList, new ObjMethodMap(), pd->nextObjectId++ ); 
 	
 	/* The eofTokenRegion defaults to the root region. */
 	pd->eofTokenRegion = rootRegion;
@@ -2014,7 +2023,7 @@ void Parser::init()
 	pd->initGraphDict();
 
 	pd->rootLocalFrame = new ObjectDef( ObjectDef::FrameType, 
-				"local", new ObjFieldMap(), new ObjMethodMap(), 
+				"local", new ObjFieldMap(), new ObjFieldList(), new ObjMethodMap(), 
 				pd->nextObjectId++ );
 	pd->curLocalFrame = pd->rootLocalFrame;
 

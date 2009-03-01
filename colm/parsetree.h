@@ -30,6 +30,7 @@
 #include "bstset.h"
 #include "vector.h"
 #include "dlist.h"
+#include "dlistval.h"
 #include "astring.h"
 #include "bytecode.h"
 #include "avlbasic.h"
@@ -1247,6 +1248,8 @@ struct ObjField
 typedef AvlMap<String, ObjField*, CmpStr> ObjFieldMap;
 typedef AvlMapEl<String, ObjField*> ObjFieldMapEl;
 
+typedef DListVal<ObjField*> ObjFieldList;
+
 typedef DList<ObjField> ParameterList; 
 
 struct TemplateType;
@@ -1261,14 +1264,16 @@ struct ObjectDef
 	};
 
 	ObjectDef( Type type, String name, 
-			ObjFieldMap *objFieldMap, ObjMethodMap *objMethodMap, int id )
+			ObjFieldMap *objFieldMap, ObjFieldList *objFieldList, 
+			ObjMethodMap *objMethodMap, int id )
 	:
-		type(type), name(name), objFieldMap(objFieldMap), 
+		type(type), name(name), objFieldMap(objFieldMap), objFieldList(objFieldList),
 		objMethodMap(objMethodMap), id(id), nextOffset(0) {}
 
 	Type type;
 	String name;
 	ObjFieldMap *objFieldMap;	
+	ObjFieldList *objFieldList;
 	ObjMethodMap *objMethodMap;	
 
 	long id;

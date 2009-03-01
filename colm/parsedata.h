@@ -916,6 +916,7 @@ struct ParseData
 
 	long nextLabelId;
 	ObjFieldMap *objFieldMap;
+	ObjFieldList *objFieldList;
 
 	bool revertOn;
 

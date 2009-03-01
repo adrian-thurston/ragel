@@ -1861,6 +1861,7 @@ void ParseData::addProdRedObjectVar( ObjectDef *localFrame, KlangEl *nonTerm )
 	initLocalInstructions( el );
 
 	localFrame->objFieldMap->insert( el->name, el );
+	localFrame->objFieldList->append( el );
 }
 
 void ParseData::addProdRHSVars( ObjectDef *localFrame, ProdElList *prodElList )
@@ -1884,6 +1885,7 @@ void ParseData::addProdRHSVars( ObjectDef *localFrame, ProdElList *prodElList )
 			el->inGetR = IN_GET_LOCAL_R;
 
 			localFrame->objFieldMap->insert( el->name, el );
+			localFrame->objFieldList->append( el );
 		}
 	}
 }
@@ -1901,6 +1903,7 @@ void ParseData::addMatchLength( ObjectDef *frame, KlangEl *lel )
 	el->useOffset = false;
 	el->inGetR    = IN_GET_MATCH_LENGTH_R;
 	frame->objFieldMap->insert( el->name, el );
+	frame->objFieldList->append( el );
 }
 
 void ParseData::addMatchText( ObjectDef *frame, KlangEl *lel )
@@ -1916,6 +1919,7 @@ void ParseData::addMatchText( ObjectDef *frame, KlangEl *lel )
 	el->useOffset = false;
 	el->inGetR    = IN_GET_MATCH_TEXT_R;
 	frame->objFieldMap->insert( el->name, el );
+	frame->objFieldList->append( el );
 }
 
 void ParseData::initFieldInstructions( ObjField *el )
@@ -1944,9 +1948,10 @@ void ParseData::initLocalRefInstructions( ObjField *el )
 void ParseData::initIntObject( )
 {
 	ObjFieldMap *fieldMap = new ObjFieldMap;
+	ObjFieldList *fieldList = new ObjFieldList;
 	ObjMethodMap *methodMap = new ObjMethodMap;
 	intObj = new ObjectDef( ObjectDef::BuiltinType, "int", 
-			fieldMap, methodMap, nextObjectId++ );
+			fieldMap, fieldList, methodMap, nextObjectId++ );
 	intKlangEl->objectDef = intObj;
 
 	initFunction( uniqueTypeStr, intObj, "to_string", IN_INT_TO_STR, IN_INT_TO_STR, true );
@@ -1966,14 +1971,16 @@ void ParseData::addLengthField( ObjectDef *objDef, Code getLength )
 	el->inGetR = getLength;
 
 	objDef->objFieldMap->insert( el->name, el );
+	objDef->objFieldList->append( el );
 }
 
 void ParseData::initStrObject( )
 {
 	ObjFieldMap *fieldMap = new ObjFieldMap;
+	ObjFieldList *fieldList = new ObjFieldList;
 	ObjMethodMap *methodMap = new ObjMethodMap;
 	strObj = new ObjectDef( ObjectDef::BuiltinType, "str", 
-			fieldMap, methodMap, nextObjectId++ );
+			fieldMap, fieldList, methodMap, nextObjectId++ );
 	strKlangEl->objectDef = strObj;
 
 	initFunction( uniqueTypeInt, strObj, "atoi",   IN_STR_ATOI, IN_STR_ATOI, true );
@@ -1989,9 +1996,10 @@ void ParseData::initStrObject( )
 void ParseData::initStreamObject( )
 {
 	ObjFieldMap *fieldMap = new ObjFieldMap;
+	ObjFieldList *fieldList = new ObjFieldList;
 	ObjMethodMap *methodMap = new ObjMethodMap;
 	streamObj = new ObjectDef( ObjectDef::BuiltinType, "stream", 
-			fieldMap, methodMap, nextObjectId++ );
+			fieldMap, fieldList, methodMap, nextObjectId++ );
 	streamKlangEl->objectDef = streamObj;
 
 //	initFunction( uniqueTypeInt, strObj, "atoi",   IN_STR_ATOI, IN_STR_ATOI, true );
@@ -2043,15 +2051,18 @@ void ParseData::initTokenObjects( )
 {
 	/* Make a default object Definition. */
 	ObjFieldMap *fieldMap = new ObjFieldMap;
+	ObjFieldList *fieldList = new ObjFieldList;
 	ObjMethodMap *methodMap = new ObjMethodMap;
-	tokenObj = new ObjectDef( ObjectDef::BuiltinType, "token", fieldMap, 
+	tokenObj = new ObjectDef( ObjectDef::BuiltinType, "token", fieldMap, fieldList,
 			methodMap, nextObjectId++ );
 
 	ObjField *dataEl = makeDataEl();
 	tokenObj->objFieldMap->insert( dataEl->name, dataEl );
+	tokenObj->objFieldList->append( dataEl );
 
 	ObjField *posEl = makePosEl();
 	tokenObj->objFieldMap->insert( posEl->name, posEl );
+	tokenObj->objFieldList->append( posEl );
 
 
 	/* Give all user terminals the token object type. */
@@ -2063,10 +2074,12 @@ void ParseData::initTokenObjects( )
 				/* Create the "data" field. */
 				ObjField *dataEl = makeDataEl();
 				lel->objectDef->objFieldMap->insert( dataEl->name, dataEl );
+				lel->objectDef->objFieldList->append( dataEl );
 
 				/* Create the "pos" field. */
 				ObjField *posEl = makePosEl();
 				lel->objectDef->objFieldMap->insert( posEl->name, posEl );
+				lel->objectDef->objFieldList->append( posEl );
 			}
 		}
 	}
@@ -2305,13 +2318,13 @@ void ParseData::initAllLanguageObjects()
 		ObjectDef *obj = lel->objectDef;
 		if ( obj != 0 ) {
 			/* Init all fields of the object. */
-			for ( ObjFieldMap::Iter f = *obj->objFieldMap; f.lte(); f++ )
+			for ( ObjFieldList::Iter f = *obj->objFieldList; f.lte(); f++ )
 				obj->initField( this, f->value );
 		}
 	}
 
 	/* Init all fields of the global object. */
-	for ( ObjFieldMap::Iter f = *globalObjectDef->objFieldMap; f.lte(); f++ )
+	for ( ObjFieldList::Iter f = *globalObjectDef->objFieldList; f.lte(); f++ )
 		globalObjectDef->initField( this, f->value );
 }
 
@@ -2356,6 +2369,7 @@ void ParseData::initListField( GenericType *gen, const char *name, int offset )
 	el->inSetWV = IN_SET_LIST_MEM_WV;
 
 	gen->objDef->objFieldMap->insert( el->name, el );
+	gen->objDef->objFieldList->append( el );
 
 	el->useOffset = true;
 	el->beenReferenced = true;
@@ -2391,9 +2405,10 @@ void ParseData::resolveGenericTypes()
 				gen->keyUT = gen->keyTypeArg->lookupType( this );
 
 			ObjFieldMap *fieldMap = new ObjFieldMap;
+			ObjFieldList *fieldList = new ObjFieldList;
 			ObjMethodMap *methodMap = new ObjMethodMap;
 			gen->objDef = new ObjectDef( ObjectDef::BuiltinType, 
-					gen->name, fieldMap, methodMap, nextObjectId++ );
+					gen->name, fieldMap, fieldList, methodMap, nextObjectId++ );
 
 			switch ( gen->typeId ) {
 				case GEN_MAP: 
@@ -2429,6 +2444,7 @@ void ParseData::makeFuncVisible( Function *func, bool isUserIter )
 			error(param->loc) << "parameter " << param->name << " redeclared" << endp;
 
 		func->localFrame->objFieldMap->insert( param->name, param );
+		func->localFrame->objFieldList->append( param );
 		param->beenInitialized = true;
 		param->pos = paramPos;
 
@@ -2447,7 +2463,6 @@ void ParseData::makeFuncVisible( Function *func, bool isUserIter )
 	 * words containing the args. */
 	long paramOffset = 0;
 	for ( ParameterList::Iter param = *func->paramList; param.lte(); param++ ) {
-
 		/* Moving downward, and need the offset to point to the lower half of
 		 * the argument. */
 		paramOffset -= sizeOfField( paramUTs[param->pos] );
@@ -2649,6 +2664,7 @@ void ParseData::addStdin()
 	el->useOffset = false;
 	el->inGetR    = IN_GET_STDIN;
 	globalObjectDef->objFieldMap->insert( el->name, el );
+	globalObjectDef->objFieldList->append( el );
 }
 
 void ParseData::addStdout()
@@ -2664,6 +2680,7 @@ void ParseData::addStdout()
 	el->useOffset = false;
 	el->inGetR    = IN_GET_STDOUT;
 	globalObjectDef->objFieldMap->insert( el->name, el );
+	globalObjectDef->objFieldList->append( el );
 }
 
 void ParseData::addStderr()
@@ -2679,6 +2696,7 @@ void ParseData::addStderr()
 	el->useOffset = false;
 	el->inGetR    = IN_GET_STDERR;
 	globalObjectDef->objFieldMap->insert( el->name, el );
+	globalObjectDef->objFieldList->append( el );
 }
 
 void ParseData::initGlobalFunctions()
