@@ -259,6 +259,19 @@ Tree *construct_replacement_tree( Tree **bindings, Program *prg, long pat )
 
 		tree->child = kid_list_concat( attrs, 
 				kid_list_concat( ignore, child ) );
+
+		for ( int i = 0; i < lelInfo[tree->id].numCaptureAttr; i++ ) {
+			long ci = pat+1+i;
+			CaptureAttr *ca = prg->rtd->captureAttr + lelInfo[tree->id].captureAttr + i;
+			Tree *attr = prg->treePool.allocate();
+			attr->id = nodes[ci].id;
+			attr->refs = 1;
+			attr->tokdata = nodes[ci].length == 0 ? 0 :
+					string_alloc_const( prg, 
+					nodes[ci].data, nodes[ci].length );
+
+			set_attr( tree, ca->offset, attr );
+		}
 	}
 
 	return tree;

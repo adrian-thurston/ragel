@@ -1569,6 +1569,9 @@ void mapNodes( Program *prg, int &count, Kid *kid )
 			count += 1;
 			ignore = ignore->next;
 		}
+		
+		count += prg->rtd->lelInfo[kid->tree->id].numCaptureAttr;
+
 		mapNodes( prg, count, tree_child( prg, kid->tree ) );
 		mapNodes( prg, count, kid->next );
 	}
@@ -1590,6 +1593,7 @@ void fillNodes( Program *prg, Bindings &bindings, long &bindId,
 		node.length = string_length( kid->tree->tokdata );
 		node.data = string_data( kid->tree->tokdata );
 
+		/* Ignore items. */
 		Kid *ignore = tree_ignore( prg, kid->tree );
 		node.ignore = ignore == 0 ? -1 : ind;
 
@@ -1604,6 +1608,21 @@ void fillNodes( Program *prg, Bindings &bindings, long &bindId,
 			node.data = string_data( ignore->tree->tokdata );
 
 			ignore = ignore->next;
+		}
+
+		/* The captured attributes. */
+		for ( int i = 0; i < prg->rtd->lelInfo[kid->tree->id].numCaptureAttr; i++ ) {
+			CaptureAttr *cap = prg->rtd->captureAttr + 
+					prg->rtd->lelInfo[kid->tree->id].captureAttr + i;
+
+			Tree *attr = get_attr( kid->tree, cap->offset );
+
+			PatReplNode &node = nodes[ind++];
+			memset( &node, 0, sizeof(PatReplNode) );
+
+			node.id = attr->id;
+			node.length = string_length( attr->tokdata );
+			node.data = string_data( attr->tokdata );
 		}
 
 		node.stop = kid->tree->flags & AF_TERM_DUP;
