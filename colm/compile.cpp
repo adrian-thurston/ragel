@@ -2208,6 +2208,15 @@ void ParseData::compileTranslateBlock( KlangEl *langEl )
 	code.append( IN_INIT_LOCALS );
 	code.appendHalf( 0 );
 
+	if ( langEl->tokenDef->reCaptureVect.length() > 0 ) {
+		code.append( IN_INIT_CAPTURES );
+		code.append( langEl->tokenDef->reCaptureVect.length() );
+
+		ObjFieldList::Iter f = *curLocalFrame->objFieldList;
+		for ( int i = 0; i < langEl->tokenDef->reCaptureVect.length(); i++, f++ )
+			curLocalFrame->referenceField( this, f->value );
+	}
+
 	/* Set the local frame and compile the reduce block. */
 	block->compile( this, code );
 

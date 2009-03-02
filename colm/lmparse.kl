@@ -91,6 +91,20 @@ block_open: '{'
 				"local", new ObjFieldMap(), new ObjFieldList, 
 				new ObjMethodMap(), pd->nextObjectId++ );
 		pd->curLocalFrame = $$->localFrame;
+
+		/* Add captures to the local frame. We Depend on these becoming the
+		 * first local variables so we can compute their location. */
+
+		/* Make local variables corresponding to the local capture vector. */
+		for ( ReCaptureVect::Iter c = reCaptureVect; c.lte(); c++ )
+		{
+			ObjField *objField = new ObjField( c->objField->loc,
+					c->objField->typeRef, c->objField->name );
+
+			/* Insert it into the field map. */
+			pd->curLocalFrame->objFieldMap->insert( objField->name, objField );
+			pd->curLocalFrame->objFieldList->append( objField );
+		}
 	};
 
 block_close: '}' 
@@ -1987,7 +2001,6 @@ opt_commit: KW_Commit final { $$->commit = true; };
 
 void Parser::init()
 {
-
 	/* Set up the root namespace. */
 	const char *rootNamespaceName = "___ROOT_NAMESPACE";
 	Namespace *rootNamespace = new Namespace( InputLoc(), 

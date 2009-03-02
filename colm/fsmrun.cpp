@@ -265,7 +265,7 @@ void FsmRun::sendBackIgnore( Kid *ignore )
 		/* Check for reverse code. */
 		if ( ignore->tree->flags & AF_HAS_RCODE ) {
 			Execution execution( prg, parser->reverseCode, 
-					parser, 0, 0, 0 );
+					parser, 0, 0, 0, 0 );
 
 			/* Do the reverse exeuction. */
 			execution.rexecute( parser->root, parser->allReverseCode );
@@ -307,7 +307,7 @@ void FsmRun::sendBack( Kid *input )
 	/* Check for reverse code. */
 	if ( input->tree->flags & AF_HAS_RCODE ) {
 		Execution execution( prg, parser->reverseCode, 
-				parser, 0, 0, 0 );
+				parser, 0, 0, 0, 0 );
 
 		/* Do the reverse exeuction. */
 		execution.rexecute( parser->root, parser->allReverseCode );
@@ -441,10 +441,10 @@ void FsmRun::sendNamedLangEl()
 	send_handle_error( this, parser, input );
 }
 
-void execute_generation_action( Program *prg, PdaRun *parser, Code *code, Head *tokdata )
+void execute_generation_action( Program *prg, PdaRun *parser, Code *code, long id, Head *tokdata )
 {
 	/* Execute the translation. */
-	Execution execution( prg, parser->reverseCode, parser, code, 0, tokdata );
+	Execution execution( prg, parser->reverseCode, parser, code, 0, id, tokdata );
 	execution.execute( parser->root );
 
 	/* If there is revese code but nothing generated we need a noToken. */
@@ -481,7 +481,7 @@ void FsmRun::generationAction( int id, Head *tokdata, bool namedLangEl, int bind
 			parser->tables->rtd->lelInfo[id].frameId].codeWV;
 
 	/* Execute the action and process the queue. */
-	execute_generation_action( prg, parser, code, tokdata );
+	execute_generation_action( prg, parser, code, id, tokdata );
 
 	/* Finished with the match text. */
 	string_free( prg, tokdata );
@@ -518,8 +518,8 @@ Kid *FsmRun::makeToken( int id, Head *tokdata, bool namedLangEl, int bindId )
 			Head *data = string_alloc_new( prg, 
 					mark[ca->mark_enter], mark[ca->mark_leave] - mark[ca->mark_enter] );
 			Tree *string = construct_string( prg, data );
-			set_attr( input->tree, ca->offset, string );
 			tree_upref( string );
+			set_attr( input->tree, ca->offset, string );
 		}
 	}
 	
@@ -772,7 +772,7 @@ void FsmRun::sendEOF( )
 		Code *code = parser->tables->rtd->frameInfo[frameId].codeWV;
 
 		/* Execute the action and process the queue. */
-		execute_generation_action( prg, parser, code, 0 );
+		execute_generation_action( prg, parser, code, input->tree->id, 0 );
 
 		/* Send the generated tokens. */
 		send_queued_tokens( this, parser );

@@ -402,7 +402,7 @@ void Program::run()
 
 	if ( rtd->rootCodeLen > 0 ) {
 		CodeVect reverseCode;
-		Execution execution( this, reverseCode, 0, rtd->rootCode, 0, 0 );
+		Execution execution( this, reverseCode, 0, rtd->rootCode, 0, 0, 0 );
 		execution.execute( root );
 
 		/* Pull out the reverse code and free it. */
@@ -422,7 +422,7 @@ void Program::run()
 }
 
 Execution::Execution( Program *prg, CodeVect &reverseCode,
-		PdaRun *parser, Code *code, Tree *lhs, Head *matchText )
+		PdaRun *parser, Code *code, Tree *lhs, long genId, Head *matchText )
 : 
 	prg(prg), 
 	parser(parser), 
@@ -430,6 +430,7 @@ Execution::Execution( Program *prg, CodeVect &reverseCode,
 	frame(0), iframe(0),
 	lhs(lhs),
 	parsed(0),
+	genId(genId),
 	matchText(matchText),
 	reject(false), 
 	reverseCode(reverseCode),
@@ -943,6 +944,31 @@ again:
 
 			tree_upref( prg->global );
 			push( prg->global );
+			break;
+		}
+		case IN_INIT_CAPTURES: {
+			uchar ncaps;
+			read_byte( ncaps );
+
+			#ifdef COLM_LOG_BYTECODE
+			if ( colm_log_bytecode ) {
+				cerr << "IN_INIT_CAPTURES " << ncaps << endl;
+			}
+			#endif
+
+			/* If there are captures (this is a translate block) then copy them into
+			 * the local frame now. */
+			LangElInfo *lelInfo = prg->rtd->lelInfo;
+			char **mark = parser->fsmRun->mark;
+
+			for ( int i = 0; i < lelInfo[genId].numCaptureAttr; i++ ) {
+				CaptureAttr *ca = &prg->rtd->captureAttr[lelInfo[genId].captureAttr + i];
+				Head *data = string_alloc_new( prg, 
+						mark[ca->mark_enter], mark[ca->mark_leave] - mark[ca->mark_enter] );
+				Tree *string = construct_string( prg, data );
+				tree_upref( string );
+				set_local( frame, -1 - i, string );
+			}
 			break;
 		}
 		case IN_INIT_RHS_EL: {

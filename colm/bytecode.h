@@ -110,6 +110,7 @@ typedef unsigned char uchar;
 #define IN_GET_TOKEN_POS_R       0x35
 
 #define IN_INIT_RHS_EL           0x3b
+#define IN_INIT_CAPTURES         0xaa
 
 #define IN_TRITER_FROM_REF       0x3c
 #define IN_TRITER_ADVANCE        0x3d
@@ -688,7 +689,8 @@ struct Program
 struct Execution
 {
 	Execution( Program *prg, CodeVect &reverseCode,
-			PdaRun *parser, Code *code, Tree *lhs, Head *matchText );
+			PdaRun *parser, Code *code, Tree *lhs,
+			long genId, Head *matchText );
 
 	Program *prg;
 	PdaTables *pdaTables;
@@ -702,6 +704,7 @@ struct Execution
 	Tree *lhs;
 	Tree *parsed;
 
+	long genId;
 	Head *matchText;
 	bool reject;
 

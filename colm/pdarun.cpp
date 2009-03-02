@@ -463,7 +463,7 @@ again:
 
 			/* Execution environment for the reduction code. */
 			Execution execution( prg, reverseCode, 
-					this, fi->codeWV, redLel->tree, 0 );
+					this, fi->codeWV, redLel->tree, 0, 0 );
 
 			/* Execute it. */
 			execution.execute( root );
@@ -629,7 +629,7 @@ parseError:
 
 			/* Check for an execution environment. */
 			if ( undoLel->tree->flags & AF_HAS_RCODE ) {
-				Execution execution( prg, reverseCode, this, 0, 0, 0 );
+				Execution execution( prg, reverseCode, this, 0, 0, 0, 0 );
 
 				/* Do the reverse exeuction. */
 				execution.rexecute( root, allReverseCode );
