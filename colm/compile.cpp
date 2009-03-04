@@ -2091,7 +2091,9 @@ void ParseData::findLocalTrees( CharSet &trees )
 	 * the frame is is cleaned and so it must survive. */
 	for ( ObjFieldMap::Iter of = *curLocalFrame->objFieldMap; of.lte(); of++ ) {
 		ObjField *el = of->value;
-		if ( !el->isLhsEl && el->beenReferenced ) {
+		/* FIXME: This test needs to be improved. Match_text was getting
+		 * through before useOffset was tested. What will? */
+		if ( el->useOffset && !el->isLhsEl && el->beenReferenced ) {
 			UniqueType *ut = el->typeRef->lookupType( this );
 			if ( ut->typeId == TYPE_TREE || ut->typeId == TYPE_PTR )
 				trees.insert( el->offset );
