@@ -524,7 +524,6 @@ struct PdaRun
 	void parseToken( Kid *input );
 	bool isParserStopFinished();
 	void match( Kid *tree, Kid *pattern );
-	long run();
 	long undoParse( Tree *tree, CodeVect *rev );
 
 	void send( Kid *kid );

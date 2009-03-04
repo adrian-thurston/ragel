@@ -805,13 +805,6 @@ void FsmRun::attachInputStream( InputStream *in )
 	inputStream->position = 0;
 }
 
-long PdaRun::run()
-{
-	/* PDA must be init first to set next region. */
-	init();
-	return fsmRun->run( this );
-}
-
 long PdaRun::undoParse( Tree *tree, CodeVect *rev )
 {
 	/* PDA must be init first to set next region. */
@@ -843,6 +836,8 @@ long FsmRun::run( PdaRun *destParser )
 
 	PdaRun *prevParser = parser;
 	parser = destParser;
+
+	parser->init();
 
 	act = 0;
 	tokstart = 0;
