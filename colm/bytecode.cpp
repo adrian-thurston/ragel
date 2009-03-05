@@ -132,7 +132,7 @@ Tree *call_parser( Tree **&sp, Program *prg, Stream *stream,
 		long parserId, long stopId, CodeVect *&cv, bool revertOn )
 {
 	PdaTables *tables = prg->rtd->pdaTables;
-	PdaRun parser( sp, prg, tables, parserId, stream->scanner, stopId, revertOn );
+	PdaRun parser( sp, prg, tables, parserId, stream->fsmRun, stopId, revertOn );
 	stream->scanner->run( &parser );
 	commit_full( &parser, 0 );
 	Tree *tree = parser.getParsedRoot( stopId > 0 );
@@ -157,14 +157,14 @@ void undo_parse( Tree **&sp, Program *prg, Stream *stream,
 		long parserId, Tree *tree, CodeVect *rev )
 {
 	PdaTables *tables = prg->rtd->pdaTables;
-	PdaRun parser( sp, prg, tables, parserId, stream->scanner, 0, false );
+	PdaRun parser( sp, prg, tables, parserId, stream->fsmRun, 0, false );
 	parser.undoParse( tree, rev );
 }
 
 Tree *stream_pull( Program *prg, Stream *stream, Tree *length )
 {
 	long len = ((Int*)length)->value;
-	Head *tokdata = stream->scanner->extractToken( len );
+	Head *tokdata = stream->fsmRun->extractToken( len );
 	return construct_string( prg, tokdata );
 }
 
@@ -172,20 +172,20 @@ void undo_pull( Program *prg, Stream *stream, Tree *str )
 {
 	const char *data = string_data( ( (Str*)str )->value );
 	long length = string_length( ( (Str*)str )->value );
-	stream->scanner->sendBackText( data, length );
+	stream->fsmRun->sendBackText( data, length );
 }
 
 Word stream_push( Tree **&sp, Program *prg, Stream *stream, Tree *any )
 {
 	std::stringstream ss;
 	print_tree( ss, sp, prg, any );
-	stream->scanner->streamPush( ss.str().c_str(), ss.str().size());
+	stream->fsmRun->streamPush( ss.str().c_str(), ss.str().size());
 	return ss.str().size();
 }
 
 void undo_stream_push( Tree **&sp, Program *prg, Stream *stream, Word len )
 {
-	stream->scanner->undoStreamPush( len );
+	stream->fsmRun->undoStreamPush( len );
 }
 
 void set_local( Tree **frame, long field, Tree *tree )
@@ -3196,7 +3196,7 @@ again:
 			#endif
 
 			Tree *name = pop();
-			Tree *res = open_file( prg, name );
+			Tree *res = (Tree*)open_file( prg, name );
 			tree_upref( res );
 			push( res );
 			tree_downref( prg, sp, name );

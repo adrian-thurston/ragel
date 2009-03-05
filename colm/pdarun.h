@@ -259,7 +259,7 @@ struct Stream
 
 	FILE *file;
 	InputStream *in;
-	FsmRun *scanner;
+	FsmRun *fsmRun;
 };
 
 /*

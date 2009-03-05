@@ -465,7 +465,7 @@ Tree *construct_term( Program *prg, Word id, Head *tokdata );
 Tree *construct_replacement_tree( Tree **bindings, Program *prg, long pat );
 Tree *create_generic( Program *prg, long genericId );
 
-Tree *open_file( Program *prg, Tree *name );
+Stream *open_file( Program *prg, Tree *name );
 Stream *open_stream_fd( Program *prg, long fd );
 Stream *open_stream( Program *prg, FILE *file );
 
