@@ -514,7 +514,7 @@ void Scanner::do_scan()
 		if ( cs == rlscan_error ) {
 			/* Machine failed before finding a token. I'm not yet sure if this
 			 * is reachable. */
-			scan_error() << "scanner error" << endl;
+			scan_error() << "colm scanner error (metalanguage)" << endl;
 			exit(1);
 		}
 
