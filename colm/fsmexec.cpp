@@ -65,24 +65,24 @@ void FsmRun::execAction( GenAction *genAction )
 						lmi.lte(); lmi++ )
 				{
 					if ( lmi->inLmSelect && act == lmi->longestMatchId )
-						emitToken( lmi->token );
+						matchedToken = lmi->token->id;
 				}
 			}
-			gotoResume = true;
+			returnResult = true;
 			break;
 		case InlineItem::LmOnLast:
 			p += 1;
-			emitToken( item->longestMatchPart->token );
-			gotoResume = true;
+			matchedToken = item->longestMatchPart->token->id;
+			returnResult = true;
 			break;
 		case InlineItem::LmOnNext:
-			emitToken( item->longestMatchPart->token );
-			gotoResume = true;
+			matchedToken = item->longestMatchPart->token->id;
+			returnResult = true;
 			break;
 		case InlineItem::LmOnLagBehind:
 			p = tokend;
-			emitToken( item->longestMatchPart->token );
-			gotoResume = true;
+			matchedToken = item->longestMatchPart->token->id;
+			returnResult = true;
 			break;
 		}
 	}
@@ -99,7 +99,10 @@ void FsmRun::execute()
 	unsigned int _nacts;
 	const char *_keys;
 
-_resume:
+	/* Init the token match to nothing (the sentinal). */
+	matchedToken = 0;
+
+/*_resume:*/
 	if ( cs == tables->errorState )
 		goto out;
 
@@ -166,13 +169,13 @@ _match:
 	if ( tables->transActionsWI[_trans] == 0 )
 		goto _again;
 
-	gotoResume = false;
+	returnResult = false;
 	_acts = tables->actions + tables->transActionsWI[_trans];
 	_nacts = (unsigned int) *_acts++;
 	while ( _nacts-- > 0 )
 		execAction( tables->actionSwitch[*_acts++] );
-	if ( gotoResume )
-		goto _resume;
+	if ( returnResult )
+		return;
 
 _again:
 	_acts = tables->actions + tables->toStateActions[cs];
@@ -187,7 +190,7 @@ _again:
 		goto _loop_head;
 out:
 	if ( p == peof ) {
-		gotoResume = false;
+		returnResult = false;
 		_acts = tables->actions + tables->eofActions[cs];
 		_nacts = (unsigned int) *_acts++;
 
@@ -196,8 +199,8 @@ out:
 
 		while ( _nacts-- > 0 )
 			execAction( tables->actionSwitch[*_acts++] );
-		if ( gotoResume )
-			goto _resume;
+		if ( returnResult )
+			return;
 	}
 }
 

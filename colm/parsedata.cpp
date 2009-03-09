@@ -1576,14 +1576,14 @@ InputStreamRepl::InputStreamRepl( Replacement *replacement )
 
 int InputStreamRepl::isLangEl()
 { 
-	return replItem != 0 && 
-		( replItem->type == ReplItem::VarRefType || replItem->type == ReplItem::FactorType );
+	return replItem != 0 && ( replItem->type == ReplItem::VarRefType || 
+			replItem->type == ReplItem::FactorType );
 }
 
 int InputStreamRepl::shouldFlush()
 { 
-	return replItem == 0 || 
-		( replItem->type == ReplItem::VarRefType || replItem->type == ReplItem::FactorType );
+	return replItem == 0 || ( replItem->type == ReplItem::VarRefType ||
+			replItem->type == ReplItem::FactorType );
 }
 
 KlangEl *InputStreamRepl::getLangEl( long &bindId, char *&data, long &length )
@@ -1698,7 +1698,7 @@ void ParseData::parsePatterns()
 
 		repl->pdaRun = new PdaRun( root, &program,
 				pdaTables, repl->langEl->parserId, &fsmRun, 0, false );
-		fsmRun.run( repl->pdaRun );
+		parse( &fsmRun, repl->pdaRun );
 
 			//#ifdef COLM_LOG_COMPILE
 			//if ( colm_log_compile ) {
@@ -1714,7 +1714,7 @@ void ParseData::parsePatterns()
 
 		pat->pdaRun = new PdaRun( root, &program,
 				pdaTables, pat->langEl->parserId, &fsmRun, 0, false );
-		fsmRun.run( pat->pdaRun );
+		parse( &fsmRun, pat->pdaRun );
 
 			//#ifdef COLM_LOG_COMPILE
 			//if ( colm_log_compile ) {

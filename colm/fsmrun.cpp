@@ -44,8 +44,8 @@ void operator<<( ostream &out, exit_object & )
 
 FsmRun::FsmRun( Program *prg ) :
 	prg(prg),
-	tables(prg->rtd->fsmTables),
-	parser(0)
+	tables(prg->rtd->fsmTables)
+	//,parser(0)
 {
 }
 
@@ -192,12 +192,9 @@ void FsmRun::sendBackText( const char *data, long length )
 	assert( memcmp( data, p, length ) == 0 );
 		
 	undo_position( this, data, length );
-
-	/* We are adjusting p so this must be reset. */
-	tokstart = 0;
 }
 
-void FsmRun::queueBack( Kid *input )
+void FsmRun::queueBack( PdaRun *parser, Kid *input )
 {
 	if ( input->tree->flags & AF_GROUP_MEM ) {
 		#ifdef COLM_LOG_PARSE
@@ -230,7 +227,7 @@ void FsmRun::queueBack( Kid *input )
 			/* Send them back. */
 			while ( last != 0 ) {
 				Kid *next = last->next;
-				sendBack( last );
+				sendBack( parser, last );
 				last = next;
 			}
 
@@ -238,11 +235,11 @@ void FsmRun::queueBack( Kid *input )
 		}
 
 		/* Now that the queue is flushed, can send back the original item. */
-		sendBack( input );
+		sendBack( parser, input );
 	}
 }
 
-void FsmRun::sendBackIgnore( Kid *ignore )
+void FsmRun::sendBackIgnore( PdaRun *parser, Kid *ignore )
 {
 	/* Ignore tokens are queued in reverse order. */
 	while ( tree_is_ignore( prg, ignore ) ) {
@@ -276,7 +273,7 @@ void FsmRun::sendBackIgnore( Kid *ignore )
 	}
 }
 
-void FsmRun::sendBack( Kid *input )
+void FsmRun::sendBack( PdaRun *parser, Kid *input )
 {
 	#ifdef COLM_LOG_PARSE
 	if ( colm_log_parse ) {
@@ -315,7 +312,7 @@ void FsmRun::sendBack( Kid *input )
 	}
 
 	/* Always push back the ignore text. */
-	sendBackIgnore( tree_ignore( prg, input->tree ) );
+	sendBackIgnore( parser, tree_ignore( prg, input->tree ) );
 
 	/* If eof was just sent back remember that it needs to be sent again. */
 	if ( input->tree->id == parser->tables->rtd->eofLelIds[parser->parserId] )
@@ -397,10 +394,6 @@ void send_queued_tokens( FsmRun *fsmRun, PdaRun *parser )
 			
 			parser->ignore( send->tree );
 			fsmRun->prg->kidPool.free( send );
-
-			/* Set the current state from the next region. */
-			fsmRun->region = parser->getNextRegion();
-			fsmRun->cs = fsmRun->tables->entryByRegion[fsmRun->region];
 		}
 		else {
 			#ifdef COLM_LOG_PARSE
@@ -415,14 +408,58 @@ void send_queued_tokens( FsmRun *fsmRun, PdaRun *parser )
 	}
 }
 
-void FsmRun::sendNamedLangEl()
+Kid *make_token( FsmRun *fsmRun, PdaRun *parser, int id, Head *tokdata, bool
+		namedLangEl, int bindId )
+{
+	/* Make the token object. */
+	long objectLength = parser->tables->rtd->lelInfo[id].objectLength;
+	Kid *attrs = alloc_attrs( fsmRun->prg, objectLength );
+
+	Kid *input = 0;
+	input = fsmRun->prg->kidPool.allocate();
+	input->tree = (Tree*)fsmRun->prg->parseTreePool.allocate();
+	input->tree->flags |= AF_PARSE_TREE;
+
+	if ( namedLangEl )
+		input->tree->flags |= AF_NAMED;
+
+	input->tree->refs = 1;
+	input->tree->id = id;
+	input->tree->tokdata = tokdata;
+
+	/* No children and ignores get added later. */
+	input->tree->child = attrs;
+
+	LangElInfo *lelInfo = parser->tables->rtd->lelInfo;
+	if ( lelInfo[id].numCaptureAttr > 0 ) {
+		for ( int i = 0; i < lelInfo[id].numCaptureAttr; i++ ) {
+			CaptureAttr *ca = &parser->tables->rtd->captureAttr[lelInfo[id].captureAttr + i];
+			Head *data = string_alloc_new( fsmRun->prg, 
+					fsmRun->mark[ca->mark_enter], fsmRun->mark[ca->mark_leave]
+					- fsmRun->mark[ca->mark_enter] );
+			Tree *string = construct_string( fsmRun->prg, data );
+			tree_upref( string );
+			set_attr( input->tree, ca->offset, string );
+		}
+	}
+	
+	/* If the item is bound then store it in the bindings array. */
+	if ( bindId > 0 ) {
+		parser->bindings.push( input->tree );
+		tree_upref( input->tree );
+	}
+
+	return input;
+}
+
+void send_named_lang_el( FsmRun *fsmRun, PdaRun *parser )
 {
 	/* All three set by getLangEl. */
 	long bindId;
 	char *data;
 	long length;
 
-	KlangEl *klangEl = inputStream->getLangEl( bindId, data, length );
+	KlangEl *klangEl = fsmRun->inputStream->getLangEl( bindId, data, length );
 	if ( klangEl->termDup != 0 )
 		klangEl = klangEl->termDup;
 	
@@ -435,10 +472,10 @@ void FsmRun::sendNamedLangEl()
 	/* Copy the token data. */
 	Head *tokdata = 0;
 	if ( data != 0 )
-		tokdata = string_alloc_new( prg, data, length );
+		tokdata = string_alloc_new( fsmRun->prg, data, length );
 
-	Kid *input = makeToken( klangEl->id, tokdata, true, bindId );
-	send_handle_error( this, parser, input );
+	Kid *input = make_token( fsmRun, parser, klangEl->id, tokdata, true, bindId );
+	send_handle_error( fsmRun, parser, input );
 }
 
 void execute_generation_action( Program *prg, PdaRun *parser, Code *code, long id, Head *tokdata )
@@ -467,7 +504,8 @@ void execute_generation_action( Program *prg, PdaRun *parser, Code *code, long i
  *  -invoke failure (the backtracker)
  */
 
-void FsmRun::generationAction( int id, Head *tokdata, bool namedLangEl, int bindId )
+void generation_action( FsmRun *fsmRun, PdaRun *parser, int id, Head *tokdata,
+		bool namedLangEl, int bindId )
 {
 	#ifdef COLM_LOG_PARSE
 	if ( colm_log_parse ) {
@@ -481,66 +519,24 @@ void FsmRun::generationAction( int id, Head *tokdata, bool namedLangEl, int bind
 			parser->tables->rtd->lelInfo[id].frameId].codeWV;
 
 	/* Execute the action and process the queue. */
-	execute_generation_action( prg, parser, code, id, tokdata );
+	execute_generation_action( fsmRun->prg, parser, code, id, tokdata );
 
 	/* Finished with the match text. */
-	string_free( prg, tokdata );
+	string_free( fsmRun->prg, tokdata );
 
 	/* Send the queued tokens. */
-	send_queued_tokens( this, parser );
-}
-
-Kid *FsmRun::makeToken( int id, Head *tokdata, bool namedLangEl, int bindId )
-{
-	/* Make the token object. */
-	long objectLength = parser->tables->rtd->lelInfo[id].objectLength;
-	Kid *attrs = alloc_attrs( prg, objectLength );
-
-	Kid *input = 0;
-	input = prg->kidPool.allocate();
-	input->tree = (Tree*)prg->parseTreePool.allocate();
-	input->tree->flags |= AF_PARSE_TREE;
-
-	if ( namedLangEl )
-		input->tree->flags |= AF_NAMED;
-
-	input->tree->refs = 1;
-	input->tree->id = id;
-	input->tree->tokdata = tokdata;
-
-	/* No children and ignores get added later. */
-	input->tree->child = attrs;
-
-	LangElInfo *lelInfo = parser->tables->rtd->lelInfo;
-	if ( lelInfo[id].numCaptureAttr > 0 ) {
-		for ( int i = 0; i < lelInfo[id].numCaptureAttr; i++ ) {
-			CaptureAttr *ca = &parser->tables->rtd->captureAttr[lelInfo[id].captureAttr + i];
-			Head *data = string_alloc_new( prg, 
-					mark[ca->mark_enter], mark[ca->mark_leave] - mark[ca->mark_enter] );
-			Tree *string = construct_string( prg, data );
-			tree_upref( string );
-			set_attr( input->tree, ca->offset, string );
-		}
-	}
-	
-	/* If the item is bound then store it in the bindings array. */
-	if ( bindId > 0 ) {
-		parser->bindings.push( input->tree );
-		tree_upref( input->tree );
-	}
-
-	return input;
+	send_queued_tokens( fsmRun, parser );
 }
 
 /* Send back the accumulated ignore tokens. */
-void PdaRun::sendBackIgnore()
+void send_back_queued_ignore( PdaRun *parser )
 {
-	Kid *ignore = extractIgnore();
-	fsmRun->sendBackIgnore( ignore );
+	Kid *ignore = parser->extractIgnore();
+	parser->fsmRun->sendBackIgnore( parser, ignore );
 	while ( ignore != 0 ) {
 		Kid *next = ignore->next;
-		tree_downref( prg, root, ignore->tree );
-		prg->kidPool.free( ignore );
+		tree_downref( parser->prg, parser->root, ignore->tree );
+		parser->prg->kidPool.free( ignore );
 		ignore = next;
 	}
 }
@@ -580,27 +576,15 @@ void send_handle_error( FsmRun *fsmRun, PdaRun *parser, Kid *input )
 		parser->parse_error(id, input->tree) << "parse error" << endp;
 	}
 	else {
-		/* Set the current state from the next region. */
-		fsmRun->region = parser->getNextRegion();
-		fsmRun->cs = fsmRun->tables->entryByRegion[fsmRun->region];
-
 		if ( parser->isParserStopFinished() ) {
 			#ifdef COLM_LOG_PARSE
 			if ( colm_log_parse ) {
 				cerr << "stopping the parse" << endl;
 			}
 			#endif
-			fsmRun->cs = fsmRun->tables->errorState;
 			parser->stopParsing = true;
 		}
 	}
-
-	#ifdef COLM_LOG_PARSE
-	if ( colm_log_parse ) {
-		cerr << "new token region: " << 
-				parser->tables->rtd->regionInfo[fsmRun->region].name << endl;
-	}
-	#endif
 }
 
 void PdaRun::ignore( Tree *tree )
@@ -614,7 +598,7 @@ void PdaRun::ignore( Tree *tree )
 	accumIgnore = ignore;
 }
 
-void FsmRun::execGen( long id )
+void exec_gen( FsmRun *fsmRun, PdaRun *parser, long id )
 {
 	#ifdef COLM_LOG_PARSE
 	if ( colm_log_parse ) {
@@ -622,26 +606,18 @@ void FsmRun::execGen( long id )
 	}
 	#endif
 
-	LangElInfo *lelInfo = parser->tables->rtd->lelInfo;
-	if ( lelInfo[id].markId >= 0 )
-		p = mark[lelInfo[id].markId];
-
 	/* Make the token data. */
-	long length = p - tokstart;
-	Head *tokdata = string_alloc_const( prg, tokstart, length );
+	Head *tokdata = fsmRun->extractMatch();
 
 	/* Note that we don't update the position now. It is done when the token
 	 * data is pulled from the stream. */
 
-	p = tokstart;
-	tokstart = 0;
+	fsmRun->p = fsmRun->tokstart;
 
-	generationAction( id, tokdata, false, 0 );
-
-	memset( mark, 0, sizeof(mark) );
+	generation_action( fsmRun, parser, id, tokdata, false, 0 );
 }
 
-void FsmRun::sendIgnore( long id )
+void send_ignore( FsmRun *fsmRun, PdaRun *parser, long id )
 {
 	#ifdef COLM_LOG_PARSE
 	if ( colm_log_parse ) {
@@ -649,32 +625,26 @@ void FsmRun::sendIgnore( long id )
 	}
 	#endif
 
-	LangElInfo *lelInfo = parser->tables->rtd->lelInfo;
-	if ( lelInfo[id].markId >= 0 )
-		p = mark[lelInfo[id].markId];
-
 	/* Make the ignore string. */
-	int length = p - tokstart;
-	Head *ignoreStr = string_alloc_const( prg, tokstart, length );
-	update_position( this, tokstart, length );
-	tokstart = 0;
+	Head *ignoreStr = fsmRun->extractMatch();
+	update_position( fsmRun, fsmRun->tokstart, ignoreStr->length );
 	
-	Tree *tree = prg->treePool.allocate();
+	Tree *tree = fsmRun->prg->treePool.allocate();
 	tree->refs = 1;
 	tree->id = id;
 	tree->tokdata = ignoreStr;
 
 	/* Send it to the parser. */
 	parser->ignore( tree );
-
-	/* Prepare for more scanning. */
-	region = parser->getNextRegion();
-	cs = tables->entryByRegion[region];
-
-	memset( mark, 0, sizeof(mark) );
 }
 
-void FsmRun::sendToken( long id )
+Head *FsmRun::extractMatch()
+{
+	long length = p - tokstart;
+	return string_alloc_const( prg, tokstart, length );
+}
+
+void send_token( FsmRun *fsmRun, PdaRun *parser, long id )
 {
 	#ifdef COLM_LOG_PARSE
 	if ( colm_log_parse ) {
@@ -682,40 +652,17 @@ void FsmRun::sendToken( long id )
 	}
 	#endif
 
-	LangElInfo *lelInfo = parser->tables->rtd->lelInfo;
-	if ( lelInfo[id].markId >= 0 )
-		p = mark[lelInfo[id].markId];
-
 	/* Make the token data. */
-	long length = p - tokstart;
-	Head *tokdata = string_alloc_const( prg, tokstart, length );
-	update_position( this, tokstart, length );
+	Head *tokdata = fsmRun->extractMatch();
+	update_position( fsmRun, fsmRun->tokstart, tokdata->length );
 
-	/* By default the match is consumed and this is what we need. Just
-	 * need to reset tokstart. */
-	tokstart = 0;
-
-	Kid *input = makeToken( id, tokdata, false, 0 );
-	send_handle_error( this, parser, input );
-
-	memset( mark, 0, sizeof(mark) );
-}
-
-void FsmRun::emitToken( KlangEl *token )
-{
-	bool ctxDepParsing = prg->ctxDepParsing;
-	LangElInfo *lelInfo = parser->tables->rtd->lelInfo;
-	if ( ctxDepParsing && lelInfo[token->id].frameId >= 0 )
-		execGen( token->id );
-	else if ( token->ignore )
-		sendIgnore( token->id );
-	else
-		sendToken( token->id );
+	Kid *input = make_token( fsmRun, parser, id, tokdata, false, 0 );
+	send_handle_error( fsmRun, parser, input );
 }
 
 /* Load up a token, starting from tokstart if it is set. If not set then
  * start it at p. */
-Head *FsmRun::extractToken( long length )
+Head *FsmRun::extractPrefix( PdaRun *parser, long length )
 {
 	/* How much do we have already? Tokstart may or may not be set. */
 	assert( tokstart == 0 );
@@ -744,7 +691,7 @@ Head *FsmRun::extractToken( long length )
 	return tokdata;
 }
 
-void FsmRun::sendEOF( )
+void send_eof( FsmRun *fsmRun, PdaRun *parser )
 {
 	#ifdef COLM_LOG_PARSE
 	if ( colm_log_parse ) {
@@ -752,15 +699,15 @@ void FsmRun::sendEOF( )
 	}
 	#endif
 
-	Kid *input = prg->kidPool.allocate();
-	input->tree = (Tree*)prg->parseTreePool.allocate();
+	Kid *input = fsmRun->prg->kidPool.allocate();
+	input->tree = (Tree*)fsmRun->prg->parseTreePool.allocate();
 	input->tree->flags |= AF_PARSE_TREE;
 
 	input->tree->refs = 1;
 	input->tree->id = parser->tables->rtd->eofLelIds[parser->parserId];
 
-	bool ctxDepParsing = prg->ctxDepParsing;
-	long frameId = parser->tables->rtd->regionInfo[region].eofFrameId;
+	bool ctxDepParsing = fsmRun->prg->ctxDepParsing;
+	long frameId = parser->tables->rtd->regionInfo[fsmRun->region].eofFrameId;
 	if ( ctxDepParsing && frameId >= 0 ) {
 		#ifdef COLM_LOG_PARSE
 		if ( colm_log_parse ) {
@@ -772,10 +719,10 @@ void FsmRun::sendEOF( )
 		Code *code = parser->tables->rtd->frameInfo[frameId].codeWV;
 
 		/* Execute the action and process the queue. */
-		execute_generation_action( prg, parser, code, input->tree->id, 0 );
+		execute_generation_action( fsmRun->prg, parser, code, input->tree->id, 0 );
 
 		/* Send the generated tokens. */
-		send_queued_tokens( this, parser );
+		send_queued_tokens( fsmRun, parser );
 	}
 
 	parser->send( input );
@@ -784,10 +731,6 @@ void FsmRun::sendEOF( )
 		parser->parse_error( input->tree->id, input->tree ) << 
 				"parse error" << endp;
 	}
-
-	tokstart = 0;
-	region = parser->getNextRegion();
-	cs = tables->entryByRegion[region];
 }
 
 
@@ -816,12 +759,12 @@ long PdaRun::undoParse( Tree *tree, CodeVect *rev )
 	numRetry += 1;
 	allReverseCode = rev;
 
-	PdaRun *prevParser = fsmRun->parser;
-	fsmRun->parser = this;
+//	PdaRun *prevParser = fsmRun->parser;
+//	fsmRun->parser = this;
 
 	parseToken( 0 );
 
-	fsmRun->parser = prevParser;
+//	fsmRun->parser = prevParser;
 
 	assert( stackTop->next == 0 );
 
@@ -830,74 +773,136 @@ long PdaRun::undoParse( Tree *tree, CodeVect *rev )
 	return 0;
 }
 
-long FsmRun::run( PdaRun *destParser )
+#define SCAN_ERROR    -3
+#define SCAN_LANG_EL  -2
+#define SCAN_EOF      -1
+
+void scanner_error( FsmRun *fsmRun, PdaRun *parser )
 {
-	long space, prevState = cs;
+	if ( parser->getNextRegion( 1 ) != 0 ) {
+		#ifdef COLM_LOG_PARSE
+		if ( colm_log_parse ) {
+			cerr << "scanner failed, trying next region" << endl;
+		}
+		#endif
 
-	PdaRun *prevParser = parser;
-	parser = destParser;
+		/* May have accumulated ignore tokens from a previous region.
+		 * need to rescan them since we won't be sending tokens from
+		 * this region. */
+		send_back_queued_ignore( parser );
+		parser->nextRegionInd += 1;
+	}
+	else if ( parser->numRetry > 0 ) {
+		/* Invoke the parser's error handling. */
+		#ifdef COLM_LOG_PARSE
+		if ( colm_log_parse ) {
+			cerr << "invoking parse error from the scanner" << endl;
+		}
+		#endif
 
+		send_back_queued_ignore( parser );
+		parser->parseToken( 0 );
+
+		if ( parser->errCount > 0 ) {
+			/* Error occured in the top-level parser. */
+			cerr << "PARSE ERROR" << endp;
+		}
+	}
+	else {
+		/* There are no alternative scanning regions to try, nor are there any
+		 * alternatives stored in the current parse tree. No choice but to
+		 * kill the parse. */
+		cerr << "error:" << fsmRun->inputStream->line << ": scanner error" << endp;
+	}
+}
+
+void parse( FsmRun *fsmRun, PdaRun *parser )
+{
 	parser->init();
 
-	act = 0;
-	tokstart = 0;
-	tokend = 0;
-	region = parser->getNextRegion();
-	cs = tables->entryByRegion[region];
-	memset( mark, 0, sizeof(mark) );
-
-	/* Start with the EOF test. The pattern and replacement input sources can
-	 * be EOF from the start. */
-
 	while ( true ) {
-		/* Check for eof. */
- 		if ( p == pe && inputStream->isEOF() ) {
-			if ( tokstart != 0 ) {
-				/* If a token has been started, but not finshed 
-				 * this is an error. */
-				cs = tables->errorState;
-			}
-			else {
-				eofSent = true;
-				sendEOF();
-				if ( !eofSent )
-					continue;
+		int tokenId = fsmRun->scanToken( parser );
+
+		/* Check for EOF. */
+		if ( tokenId == SCAN_EOF ) {
+			fsmRun->eofSent = true;
+			send_eof( fsmRun, parser );
+			if ( fsmRun->eofSent )
 				break;
-			}
+			continue;
 		}
 
-		if ( p == pe ) {
-			/* We don't have any data. What is next in the input stream? */
-			if ( inputStream->isLangEl() )
-				sendNamedLangEl( );
-			else {
-				space = runBuf->buf + FSM_BUFSIZE - pe;
-			
-				if ( space == 0 )
-					cerr << "OUT OF BUFFER SPACE" << endp;
-			
-				int len = inputStream->getData( p, space );
-				pe = p + len;
-				if ( inputStream->needFlush() )
-					peof = pe;
-			}
+		/* Check for a named language element. */
+		if ( tokenId == SCAN_LANG_EL ) {
+			send_named_lang_el( fsmRun, parser );
+			continue;
 		}
 
-		execute();
+		/* Check for error. */
+		if ( tokenId == SCAN_ERROR ) {
+			scanner_error( fsmRun, parser );
+			continue;
+		}
+
+		bool ctxDepParsing = fsmRun->prg->ctxDepParsing;
+		LangElInfo *lelInfo = parser->tables->rtd->lelInfo;
+		if ( ctxDepParsing && lelInfo[tokenId].frameId >= 0 )
+			exec_gen( fsmRun, parser, tokenId );
+		else if ( lelInfo[tokenId].ignore )
+			send_ignore( fsmRun, parser, tokenId );
+		else
+			send_token( fsmRun, parser, tokenId );
 
 		/* Fall through here either when the input buffer has been exhausted
 		 * or the scanner is in an error state. Otherwise we must continue. */
-
-		if ( cs == tables->errorState && parser->stopParsing ) {
+		if ( parser->stopParsing ) {
 			#ifdef COLM_LOG_PARSE
 			if ( colm_log_parse ) {
 				cerr << "scanner has been stopped" << endl;
 			}
 			#endif
-			goto done;
+			break;
+		}
+	}
+}
+
+long FsmRun::scanToken( PdaRun *parser )
+{
+	/* Init the scanner vars. */
+	act = 0;
+	tokstart = 0;
+	tokend = 0;
+	matchedToken = 0;
+
+	/* Set the state using the state of the parser. */
+	region = parser->getNextRegion();
+	cs = tables->entryByRegion[region];
+
+	#ifdef COLM_LOG_PARSE
+	if ( colm_log_parse ) {
+		cerr << "scanning using token region: " << 
+				parser->tables->rtd->regionInfo[region].name << endl;
+	}
+	#endif
+
+	/* Clear the mark array. */
+	memset( mark, 0, sizeof(mark) );
+
+	while ( true ) {
+		execute();
+
+		/* First check if scanning stopped because we have a token. */
+		if ( matchedToken > 0 ) {
+			/* If the token has a marker indicating the end (due to trailing
+			 * context) then adjust p now. */
+			LangElInfo *lelInfo = parser->tables->rtd->lelInfo;
+			if ( lelInfo[matchedToken].markId >= 0 )
+				p = mark[lelInfo[matchedToken].markId];
+
+			return matchedToken;
 		}
 
-		/* First thing check for error. */
+		/* Check for error. */
 		if ( cs == tables->errorState ) {
 			/* If a token was started, but not finished (tokstart != 0) then
 			 * restore p to the beginning of that token. */
@@ -908,93 +913,70 @@ long FsmRun::run( PdaRun *destParser )
 			 * then send it and continue with the processing loop. */
 			if ( parser->tables->rtd->regionInfo[region].defaultToken >= 0 ) {
 				tokstart = tokend = p;
-				sendToken( parser->tables->rtd->regionInfo[region].defaultToken );
-				continue;
+				return parser->tables->rtd->regionInfo[region].defaultToken;
 			}
 
-			if ( parser->getNextRegion( 1 ) != 0 ) {
-				#ifdef COLM_LOG_PARSE
-				if ( colm_log_parse ) {
-					cerr << "scanner failed, trying next region" << endl;
-				}
-				#endif
-
-				/* May have accumulated ignore tokens from a previous region.
-				 * need to rescan them since we won't be sending tokens from
-				 * this region. */
-				parser->sendBackIgnore();
-
-				parser->nextRegionInd += 1;
-				region = parser->getNextRegion();
-				cs = tables->entryByRegion[region];
-				#ifdef COLM_LOG_PARSE
-				if ( colm_log_parse ) {
-					cerr << "new token region: " << 
-							parser->tables->rtd->regionInfo[region].name << endl;
-				}
-				#endif
-				continue;
-			}
-
-			if ( parser->numRetry > 0 ) {
-				/* Invoke the parser's error handling. */
-				#ifdef COLM_LOG_PARSE
-				if ( colm_log_parse ) {
-					cerr << "invoking parse error from the scanner" << endl;
-				}
-				#endif
-
-				parser->sendBackIgnore();
-				parser->parseToken( 0 );
-
-				if ( parser->errCount > 0 ) {
-					/* Error occured in the top-level parser. */
-					cerr << "PARSE ERROR" << endp;
-				}
-				else {
-					region = parser->getNextRegion();
-					cs = tables->entryByRegion[region];
-					#ifdef COLM_LOG_PARSE
-					if ( colm_log_parse ) {
-						cerr << "new token region: " << 
-								parser->tables->rtd->regionInfo[region].name << endl;
-					}
-					#endif
-					continue;
-				}
-			}
-
-			/* Machine failed before finding a token. */
-			cerr << "error:" << inputStream->line << ": scanner error" << endp;
+			return SCAN_ERROR;
 		}
 
-		space = runBuf->buf + FSM_BUFSIZE - pe;
+		/* Got here because the state machine didn't match a token or
+		 * encounter an error. Must be because we got to the end of the buffer
+		 * data. */
+		assert( p == pe );
+
+		/* Check for a named language element. Note that we can do this only
+		 * when p == pe otherwise we get ahead of what's already in the
+		 * buffer. */
+		if ( inputStream->isLangEl() )
+			return SCAN_LANG_EL;
+
+		/* Maybe need eof. */
+ 		if ( inputStream->isEOF() ) {
+			if ( tokstart != 0 ) {
+				/* If a token has been started, but not finshed 
+				 * this is an error. */
+				cs = tables->errorState;
+				return SCAN_ERROR;
+			}
+			else {
+				return SCAN_EOF;
+			}
+		}
+
+		/* There may be space left in the current buffer. If not then we need
+		 * to make some. */
+		long space = runBuf->buf + FSM_BUFSIZE - pe;
 		if ( space == 0 ) {
 			/* Create a new run buf. */
-			RunBuf *buf = new RunBuf;
-			buf->next = runBuf;
-			runBuf = buf;
+			RunBuf *newBuf = new RunBuf;
 
 			/* If partway through a token then preserve the prefix. */
 			long have = 0;
 
 			if ( tokstart == 0 ) {
-				/* No prefix, the previous buffer was filled. */
-				runBuf->next->length = FSM_BUFSIZE;
+				/* No prefix. We filled the previous buffer. */
+				runBuf->length = FSM_BUFSIZE;
 			}
 			else {
+				if ( tokstart == runBuf->buf ) {
+					/* A token is started and it is already at the beginning
+					 * of the current buffer. This means buffer is full and it
+					 * must be grown. Probably need to do this sooner. */
+					cerr << "OUT OF BUFFER SPACE" << endp;
+				}
+
 				/* There is data that needs to be shifted over. */
 				have = pe - tokstart;
-				memcpy( runBuf->buf, tokstart, have );
+				memcpy( newBuf->buf, tokstart, have );
 
 				/* Compute the length of the previous buffer. */
-				runBuf->next->length = FSM_BUFSIZE - have;
+				runBuf->length = FSM_BUFSIZE - have;
 
 				/* Compute tokstart and tokend. */
-				long dist = tokstart - runBuf->buf;
+				long dist = tokstart - newBuf->buf;
 
 				tokend -= dist;
-				tokstart = runBuf->buf;
+				tokstart = newBuf->buf;
 
 				/* Shift any markers. */
 				for ( int i = 0; i < MARK_SLOTS; i++ ) {
@@ -1002,13 +984,25 @@ long FsmRun::run( PdaRun *destParser )
 						mark[i] -= dist;
 				}
 			}
-			p = pe = runBuf->buf + have;
+
+			p = pe = newBuf->buf + have;
 			peof = 0;
+
+			newBuf->next = runBuf;
+			runBuf = newBuf;
 		}
+
+		/* We don't have any data. What is next in the input stream? */
+		space = runBuf->buf + FSM_BUFSIZE - pe;
+		assert( space > 0 );
+			
+		/* Get more data. */
+		int len = inputStream->getData( p, space );
+		pe = p + len;
+		if ( inputStream->needFlush() )
+			peof = pe;
 	}
 
-done:
-	parser = prevParser;
-	cs = prevState;
-	return 0;
+	/* Should not be reached. */
+	return SCAN_ERROR;
 }

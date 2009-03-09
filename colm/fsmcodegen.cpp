@@ -197,12 +197,14 @@ void FsmCodeGen::SET_TOKSTART( ostream &ret, InlineItem *item )
 
 void FsmCodeGen::EMIT_TOKEN( ostream &ret, KlangEl *token )
 {
-	if ( token->transBlock != 0 )
-		ret << "	execGen( " << token->id << " );\n";
-	else if ( token->ignore )
-		ret << "	sendIgnore( " << token->id << " );\n";
-	else 
-		ret << "	sendToken( " << token->id << " );\n";
+//	if ( token->transBlock != 0 )
+//		ret << "	execGen( " << token->id << " );\n";
+//	else if ( token->ignore )
+//		ret << "	sendIgnore( " << token->id << " );\n";
+//	else 
+//		ret << "	sendToken( " << token->id << " );\n";
+
+	ret << "	matchedToken = " << token->id << ";\n";
 }
 
 void FsmCodeGen::LM_SWITCH( ostream &ret, InlineItem *item, 
@@ -231,7 +233,7 @@ void FsmCodeGen::LM_SWITCH( ostream &ret, InlineItem *item,
 	ret << 
 		"	}\n"
 		"\t"
-		" goto _resume;\n";
+		" return;\n";
 }
 
 void FsmCodeGen::LM_ON_LAST( ostream &ret, InlineItem *item )
@@ -240,7 +242,7 @@ void FsmCodeGen::LM_ON_LAST( ostream &ret, InlineItem *item )
 
 	ret << "	" << P() << " += 1;\n";
 	EMIT_TOKEN( ret, item->longestMatchPart->token );
-	ret << "	goto _resume;\n";
+	ret << "	return;\n";
 }
 
 void FsmCodeGen::LM_ON_NEXT( ostream &ret, InlineItem *item )
@@ -248,7 +250,7 @@ void FsmCodeGen::LM_ON_NEXT( ostream &ret, InlineItem *item )
 	assert( item->longestMatchPart->token != 0 );
 
 	EMIT_TOKEN( ret, item->longestMatchPart->token );
-	ret << "	goto _resume;\n";
+	ret << "	return;\n";
 }
 
 void FsmCodeGen::LM_ON_LAG_BEHIND( ostream &ret, InlineItem *item )
@@ -257,7 +259,7 @@ void FsmCodeGen::LM_ON_LAG_BEHIND( ostream &ret, InlineItem *item )
 
 	ret << "	" << P() << " = " << TOKEND() << ";\n";
 	EMIT_TOKEN( ret, item->longestMatchPart->token );
-	ret << "	goto _resume;\n";
+	ret << "	return;\n";
 }
 
 
@@ -1010,7 +1012,7 @@ void FsmCodeGen::writeExec()
 	out <<
 		"void FsmRun::execute()\n"
 		"{\n"
-		"_resume:\n";
+		"/*_resume:*/\n";
 
 	if ( redFsm->errState != 0 ) {
 		out <<

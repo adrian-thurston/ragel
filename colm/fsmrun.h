@@ -83,38 +83,33 @@ struct RunBuf
 
 #define MARK_SLOTS 32
 
+void parse( FsmRun *fsmRun, PdaRun *parser );
+
 struct FsmRun
 {
 	FsmRun( Program *prg );
 	~FsmRun();
 
-	Kid *makeToken( int id, Head *tokdata, bool namedLangEl, int bindId );
-	void generationAction( int id, Head *tokdata, bool namedLangEl, int bindId );
-	void sendNamedLangEl();
-	void sendEOF();
-	void sendIgnore( long id );
-	void sendToken( long id );
-	void execGen( long id );
+	void sendEOF( PdaRun *parser );
 
-	void sendBackIgnore( Kid *ignore );
-	void sendBack( Kid *input );
-	void queueBack( Kid *input );
+	void sendBackIgnore( PdaRun *parser, Kid *ignore );
+	void sendBack( PdaRun *parser, Kid *input );
+	void queueBack( PdaRun *parser, Kid *input );
 	void sendBackText( const char *data, long length );
-	void emitToken( KlangEl *token );
 	void execAction( GenAction *action );
 
-	long run( PdaRun *parser );
+	long scanToken( PdaRun *parser );
 	void attachInputStream( InputStream *in );
 	void streamPush( const char *data, long length );
 	void undoStreamPush( long length );
 
-	Head *extractToken( long len );
+	Head *extractMatch();
+	Head *extractPrefix( PdaRun *parser, long len );
 
 	void execute();
 
 	Program *prg;
 	FsmTables *tables;
-	PdaRun *parser;
 	InputStream *inputStream;
 
 	/* FsmRun State. */
@@ -123,8 +118,9 @@ struct FsmRun
 	char *p, *pe, *peof;
 	bool eofSent;
 	RunBuf *runBuf;
-	bool gotoResume;
+	bool returnResult;
 	char *mark[MARK_SLOTS];
+	long matchedToken;
 };
 
 void send_queued_tokens( FsmRun *fsmRun, PdaRun *parser );

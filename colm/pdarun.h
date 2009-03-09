@@ -528,7 +528,6 @@ struct PdaRun
 
 	void send( Kid *kid );
 	void ignore( Tree *tree );
-	void sendBackIgnore();
 	Kid *extractIgnore();
 
 	/* Report an error encountered by the parser. */

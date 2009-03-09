@@ -133,7 +133,7 @@ Tree *call_parser( Tree **&sp, Program *prg, Stream *stream,
 {
 	PdaTables *tables = prg->rtd->pdaTables;
 	PdaRun parser( sp, prg, tables, parserId, stream->fsmRun, stopId, revertOn );
-	stream->fsmRun->run( &parser );
+	parse( stream->fsmRun, &parser );
 	commit_full( &parser, 0 );
 	Tree *tree = parser.getParsedRoot( stopId > 0 );
 	tree_upref( tree );
@@ -161,10 +161,10 @@ void undo_parse( Tree **&sp, Program *prg, Stream *stream,
 	parser.undoParse( tree, rev );
 }
 
-Tree *stream_pull( Program *prg, Stream *stream, Tree *length )
+Tree *stream_pull( Program *prg, PdaRun *parser, Stream *stream, Tree *length )
 {
 	long len = ((Int*)length)->value;
-	Head *tokdata = stream->fsmRun->extractToken( len );
+	Head *tokdata = stream->fsmRun->extractPrefix( parser, len );
 	return construct_string( prg, tokdata );
 }
 
@@ -1989,7 +1989,7 @@ again:
 			#endif
 			Tree *len = pop();
 			Tree *stream = pop();
-			Tree *string = stream_pull( prg, (Stream*)stream, len );
+			Tree *string = stream_pull( prg, parser, (Stream*)stream, len );
 			tree_upref( string );
 			push( string );
 
