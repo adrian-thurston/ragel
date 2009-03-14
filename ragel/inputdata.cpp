@@ -88,7 +88,7 @@ void InputData::openOutput()
 	}
 }
 
-void InputData::generateReduced()
+void InputData::prepareMachineGen()
 {
 	/* No machine spec or machine name given. Generate everything. */
 	for ( ParserDict::Iter parser = parserDict; parser.lte(); parser++ ) {
@@ -96,19 +96,15 @@ void InputData::generateReduced()
 		if ( pd->instanceList.length() > 0 )
 			pd->prepareMachineGen( 0 );
 	}
+}
 
-	openOutput();
-
-	if ( gblErrorCount > 0 )
-		return;
-
+void InputData::generateReduced()
+{
 	for ( ParserDict::Iter parser = parserDict; parser.lte(); parser++ ) {
 		ParseData *pd = parser->value->pd;
 		if ( pd->instanceList.length() > 0 )
 			pd->generateReduced( *this );
 	}
-
-	writeOutput();
 }
 
 void InputData::writeOutput()
@@ -121,7 +117,7 @@ void InputData::writeOutput()
 
 			cgd->writeStatement( ii->loc, ii->writeArgs.length()-1, ii->writeArgs.data );
 		}
-		else {
+		else /*if ( /!generateDot )*/ {
 			*outStream << '\n';
 			lineDirective( *outStream, inputFileName, ii->loc.line );
 			*outStream << ii->data.str();

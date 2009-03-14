@@ -125,8 +125,8 @@ void usage()
 "   -x                   Run the frontend only: emit XML intermediate format\n"
 "   -V                   Generate a dot file for Graphviz\n"
 "   -p                   Display printable characters on labels\n"
-"   -S <spec>            FSM specification to output (for rlgen-dot)\n"
-"   -M <machine>         Machine definition/instantiation to output (for rlgen-dot)\n"
+"   -S <spec>            FSM specification to output (for graphviz output)\n"
+"   -M <machine>         Machine definition/instantiation to output (for graphviz output)\n"
 "host language:\n"
 "   -C                   The host language is C, C++, Obj-C or Obj-C++ (default)\n"
 "   -D                   The host language is D\n"
@@ -489,8 +489,21 @@ void process( const char *inputFileName )
 
 	InputData inputData( inputFileName, outputActive, wantComplete );
 
-	/* Write the machines, then the surrounding code. */
+	/* Compiles machines. */
+	inputData.prepareMachineGen();
+
+	if ( gblErrorCount > 0 )
+		exit(1);
+
+	inputData.openOutput();
+
+	/* Generates the reduced machine, which we use to write output. */
 	inputData.generateReduced();
+
+	if ( gblErrorCount > 0 )
+		exit(1);
+
+	inputData.writeOutput();
 
 	/* Close the input and the intermediate file. */
 	delete inFile;
