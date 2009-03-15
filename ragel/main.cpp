@@ -82,7 +82,7 @@ bool frontendOnly = false;
 bool generateDot = false;
 
 /* Target language and output style. */
-CodeStyleEnum codeStyle = GenTables;
+CodeStyle codeStyle = GenTables;
 
 int numSplitPartitions = 0;
 bool noLineDirectives = false;

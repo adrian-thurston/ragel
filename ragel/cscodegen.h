@@ -48,12 +48,7 @@ struct RedAction;
 struct LongestMatch;
 struct LongestMatchPart;
 
-inline string itoa( int i )
-{
-	char buf[16];
-	sprintf( buf, "%i", i );
-	return buf;
-}
+string itoa( int i );
 
 /*
  * class CSharpFsmCodeGen

@@ -32,19 +32,6 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-/* Invoked by the parser when a ragel definition is opened. */
-CodeGenData *dotMakeCodeGen( const char *sourceFileName, const char *fsmName, 
-		ostream &out, bool wantComplete )
-{
-	CodeGenData *codeGen = new GraphvizDotGen(out);
-
-	codeGen->sourceFileName = sourceFileName;
-	codeGen->fsmName = fsmName;
-	codeGen->wantComplete = wantComplete;
-
-	return codeGen;
-}
-
 /* Override this so that write statement processing is ignored */
 void GraphvizDotGen::writeStatement( InputLoc &, int, char ** )
 {

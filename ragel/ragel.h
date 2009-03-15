@@ -32,6 +32,19 @@
 
 #define PROGNAME "ragel"
 
+/* Target output style. */
+enum CodeStyle
+{
+	GenTables,
+	GenFTables,
+	GenFlat,
+	GenFFlat,
+	GenGoto,
+	GenFGoto,
+	GenIpGoto,
+	GenSplit
+};
+
 /* To what degree are machine minimized. */
 enum MinimizeLevel {
 	MinimizeApprox,
@@ -47,6 +60,13 @@ enum MinimizeOpt {
 	MinimizeEveryOp
 };
 
+/* Target implementation */
+enum RubyImplEnum
+{
+	MRI,
+	Rubinius
+};
+
 /* Options. */
 extern MinimizeLevel minimizeLevel;
 extern MinimizeOpt minimizeOpt;
@@ -54,6 +74,7 @@ extern const char *machineSpec, *machineName;
 extern bool printStatistics;
 extern bool wantDupsRemoved;
 extern bool generateDot;
+extern RubyImplEnum rubyImpl;
 
 /* Error reporting format. */
 enum ErrorFormat {
@@ -81,7 +102,7 @@ void xmlEscapeHost( std::ostream &out, char *data, long len );
 typedef Vector<const char *> ArgsVector;
 extern ArgsVector includePaths;
 
-extern CodeStyleEnum codeStyle;
+extern CodeStyle codeStyle;
 
 /* IO filenames and stream. */
 extern bool displayPrintables;
@@ -96,7 +117,7 @@ extern bool noLineDirectives;
 std::ostream &error();
 
 /* Target language and output style. */
-extern CodeStyleEnum codeStyle;
+extern CodeStyle codeStyle;
 
 /* Io globals. */
 extern std::istream *inStream;

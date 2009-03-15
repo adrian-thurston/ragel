@@ -54,10 +54,9 @@ using std::cerr;
 using std::endl;
 
 /* Target ruby impl */
-extern RubyImplEnum rubyImpl;
 
 /* Target language and output style. */
-extern CodeStyleEnum codeStyle;
+extern CodeStyle codeStyle;
 
 /* Io globals. */
 extern istream *inStream;
@@ -73,47 +72,6 @@ extern int numSplitPartitions;
 /*
  * Callbacks invoked by the XML data parser.
  */
-
-/* Invoked by the parser when a ragel definition is opened. */
-CodeGenData *rubyMakeCodeGen( const char *sourceFileName, const char *fsmName, 
-		ostream &out, bool wantComplete )
-{
-	CodeGenData *codeGen = 0;
-	switch ( codeStyle ) {
-		case GenTables: 
-			codeGen = new RubyTabCodeGen(out);
-			break;
-		case GenFTables:
-			codeGen = new RubyFTabCodeGen(out);
-			break;
-		case GenFlat:
-			codeGen = new RubyFlatCodeGen(out);
-			break;
-		case GenFFlat:
-			codeGen = new RubyFFlatCodeGen(out);
-			break;
-		case GenGoto:
-			if ( rubyImpl == Rubinius ) {
-				codeGen = new RbxGotoCodeGen(out);
-			} else {
-				cout << "Goto style is still _very_ experimental " 
-					"and only supported using Rubinius.\n"
-					"You may want to enable the --rbx flag "
-					" to give it a try.\n";
-				exit(1);
-			}
-			break;
-		default:
-			cout << "Invalid code style\n";
-			exit(1);
-			break;
-	}
-	codeGen->sourceFileName = sourceFileName;
-	codeGen->fsmName = fsmName;
-	codeGen->wantComplete = wantComplete;
-
-	return codeGen;
-}
 
 
 void rubyLineDirective( ostream &out, const char *fileName, int line )

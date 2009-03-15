@@ -55,19 +55,6 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-/* Invoked by the parser when a ragel definition is opened. */
-CodeGenData *javaMakeCodeGen( const char *sourceFileName, const char *fsmName, 
-		ostream &out, bool wantComplete )
-{
-	CodeGenData *codeGen = new JavaTabCodeGen(out);
-
-	codeGen->sourceFileName = sourceFileName;
-	codeGen->fsmName = fsmName;
-	codeGen->wantComplete = wantComplete;
-
-	return codeGen;
-}
-
 void javaLineDirective( ostream &out, const char *fileName, int line )
 {
 	/* Write the preprocessor line info for to the input file. */

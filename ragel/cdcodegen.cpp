@@ -29,15 +29,6 @@
 #include <string>
 #include <assert.h>
 
-/* Code generators. */
-#include "cdtable.h"
-#include "cdftable.h"
-#include "cdflat.h"
-#include "cdfflat.h"
-#include "cdgoto.h"
-#include "cdfgoto.h"
-#include "cdipgoto.h"
-#include "cdsplit.h"
 
 using std::ostream;
 using std::ostringstream;
@@ -54,7 +45,6 @@ using std::cerr;
 using std::endl;
 
 /* Target language and output style. */
-extern CodeStyleEnum codeStyle;
 
 /* Io globals. */
 extern istream *inStream;
@@ -67,81 +57,6 @@ extern bool graphvizDone;
 
 extern int numSplitPartitions;
 extern bool noLineDirectives;
-
-/* Invoked by the parser when a ragel definition is opened. */
-CodeGenData *cdMakeCodeGen( const char *sourceFileName, const char *fsmName, 
-		ostream &out, bool wantComplete )
-{
-	CodeGenData *codeGen = 0;
-	switch ( hostLang->lang ) {
-	case HostLang::C:
-		switch ( codeStyle ) {
-		case GenTables:
-			codeGen = new CTabCodeGen(out);
-			break;
-		case GenFTables:
-			codeGen = new CFTabCodeGen(out);
-			break;
-		case GenFlat:
-			codeGen = new CFlatCodeGen(out);
-			break;
-		case GenFFlat:
-			codeGen = new CFFlatCodeGen(out);
-			break;
-		case GenGoto:
-			codeGen = new CGotoCodeGen(out);
-			break;
-		case GenFGoto:
-			codeGen = new CFGotoCodeGen(out);
-			break;
-		case GenIpGoto:
-			codeGen = new CIpGotoCodeGen(out);
-			break;
-		case GenSplit:
-			codeGen = new CSplitCodeGen(out);
-			break;
-		}
-		break;
-
-	case HostLang::D:
-		switch ( codeStyle ) {
-		case GenTables:
-			codeGen = new DTabCodeGen(out);
-			break;
-		case GenFTables:
-			codeGen = new DFTabCodeGen(out);
-			break;
-		case GenFlat:
-			codeGen = new DFlatCodeGen(out);
-			break;
-		case GenFFlat:
-			codeGen = new DFFlatCodeGen(out);
-			break;
-		case GenGoto:
-			codeGen = new DGotoCodeGen(out);
-			break;
-		case GenFGoto:
-			codeGen = new DFGotoCodeGen(out);
-			break;
-		case GenIpGoto:
-			codeGen = new DIpGotoCodeGen(out);
-			break;
-		case GenSplit:
-			codeGen = new DSplitCodeGen(out);
-			break;
-		}
-		break;
-
-	default: break;
-	}
-
-	codeGen->sourceFileName = sourceFileName;
-	codeGen->fsmName = fsmName;
-	codeGen->wantComplete = wantComplete;
-
-	return codeGen;
-}
-
 
 void cdLineDirective( ostream &out, const char *fileName, int line )
 {

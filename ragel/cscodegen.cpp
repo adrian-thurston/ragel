@@ -30,16 +30,6 @@
 #include <string>
 #include <assert.h>
 
-/* Code generators. */
-#include "cstable.h"
-#include "csftable.h"
-#include "csflat.h"
-#include "csfflat.h"
-#include "csgoto.h"
-#include "csfgoto.h"
-#include "csipgoto.h"
-#include "cssplit.h"
-
 using std::ostream;
 using std::ostringstream;
 using std::string;
@@ -54,46 +44,6 @@ using std::cin;
 using std::cout;
 using std::cerr;
 using std::endl;
-
-/* Invoked by the parser when a ragel definition is opened. */
-CodeGenData *csharpMakeCodeGen( const char *sourceFileName, const char *fsmName, 
-		ostream &out, bool wantComplete )
-{
-	CodeGenData *codeGen = 0;
-
-	switch ( codeStyle ) {
-	case GenTables:
-		codeGen = new CSharpTabCodeGen(out);
-		break;
-	case GenFTables:
-		codeGen = new CSharpFTabCodeGen(out);
-		break;
-	case GenFlat:
-		codeGen = new CSharpFlatCodeGen(out);
-		break;
-	case GenFFlat:
-		codeGen = new CSharpFFlatCodeGen(out);
-		break;
-	case GenGoto:
-		codeGen = new CSharpGotoCodeGen(out);
-		break;
-	case GenFGoto:
-		codeGen = new CSharpFGotoCodeGen(out);
-		break;
-	case GenIpGoto:
-		codeGen = new CSharpIpGotoCodeGen(out);
-		break;
-	case GenSplit:
-		codeGen = new CSharpSplitCodeGen(out);
-		break;
-	}
-
-	codeGen->sourceFileName = sourceFileName;
-	codeGen->fsmName = fsmName;
-	codeGen->wantComplete = wantComplete;
-
-	return codeGen;
-}
 
 void csharpLineDirective( ostream &out, const char *fileName, int line )
 {

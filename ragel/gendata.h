@@ -43,36 +43,14 @@ struct CodeGenData;
 typedef AvlMap<char *, CodeGenData*, CmpStr> CodeGenMap;
 typedef AvlMapEl<char *, CodeGenData*> CodeGenMapEl;
 
-/*
- * The interface to the parser
- */
-
-/* These functions must be implemented by the code generation executable.
- * The openOutput function is invoked when the root element is opened.  The
- * makeCodeGen function is invoked when a ragel_def element is opened. */
-std::ostream *cdOpenOutput( const char *inputFile );
-std::ostream *javaOpenOutput( const char *inputFile );
-std::ostream *rubyOpenOutput( const char *inputFile );
-std::ostream *csharpOpenOutput( const char *inputFile );
-std::ostream *dotOpenOutput( const char *inputFile );
-
-CodeGenData *cdMakeCodeGen( const char *sourceFileName, 
-		const char *fsmName, ostream &out, bool wantComplete );
-CodeGenData *javaMakeCodeGen( const char *sourceFileName, 
-		const char *fsmName, ostream &out, bool wantComplete );
-CodeGenData *rubyMakeCodeGen( const char *sourceFileName, 
-		const char *fsmName, ostream &out, bool wantComplete );
-CodeGenData *csharpMakeCodeGen( const char *sourceFileName, 
-		const char *fsmName, ostream &out, bool wantComplete );
-CodeGenData *dotMakeCodeGen( const char *sourceFileName, 
-		const char *fsmName, ostream &out, bool wantComplete );
-
 void cdLineDirective( ostream &out, const char *fileName, int line );
 void javaLineDirective( ostream &out, const char *fileName, int line );
 void rubyLineDirective( ostream &out, const char *fileName, int line );
 void csharpLineDirective( ostream &out, const char *fileName, int line );
 void genLineDirective( ostream &out );
 void lineDirective( ostream &out, const char *fileName, int line );
+
+string itoa( int i );
 
 /*********************************/
 

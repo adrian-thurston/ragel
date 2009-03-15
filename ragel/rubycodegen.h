@@ -29,13 +29,6 @@
 /* Integer array line length. */
 #define IALL 8
 
-inline string itoa( int i )
-{
-	char buf[16];
-	sprintf( buf, "%i", i );
-	return buf;
-}
-
 
 class RubyCodeGen : public CodeGenData
 {
