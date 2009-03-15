@@ -69,23 +69,96 @@ void InputData::generateSpecificReduced()
 	writeOutput();
 }
 
+/* Invoked by the parser when the root element is opened. */
+void InputData::dotDefaultFileName( const char *inputFile )
+{
+}
+
+
+/* Invoked by the parser when the root element is opened. */
+void InputData::cdDefaultFileName( const char *inputFile )
+{
+	/* If the output format is code and no output file name is given, then
+	 * make a default. */
+	if ( outputFileName == 0 ) {
+		const char *ext = findFileExtension( inputFile );
+		if ( ext != 0 && strcmp( ext, ".rh" ) == 0 )
+			outputFileName = fileNameFromStem( inputFile, ".h" );
+		else {
+			const char *defExtension = 0;
+			switch ( hostLang->lang ) {
+				case HostLang::C: defExtension = ".c"; break;
+				case HostLang::D: defExtension = ".d"; break;
+				default: break;
+			}
+			outputFileName = fileNameFromStem( inputFile, defExtension );
+		}
+	}
+}
+
+/* Invoked by the parser when the root element is opened. */
+void InputData::javaDefaultFileName( const char *inputFile )
+{
+	/* If the output format is code and no output file name is given, then
+	 * make a default. */
+	if ( outputFileName == 0 )
+		outputFileName = fileNameFromStem( inputFile, ".java" );
+}
+
+/* Invoked by the parser when the root element is opened. */
+void InputData::rubyDefaultFileName( const char *inputFile )
+{
+	/* If the output format is code and no output file name is given, then
+	 * make a default. */
+	if ( outputFileName == 0 )
+		outputFileName = fileNameFromStem( inputFile, ".rb" );
+}
+
+/* Invoked by the parser when the root element is opened. */
+void InputData::csharpDefaultFileName( const char *inputFile )
+{
+	/* If the output format is code and no output file name is given, then
+	 * make a default. */
+	if ( outputFileName == 0 ) {
+		const char *ext = findFileExtension( inputFile );
+		if ( ext != 0 && strcmp( ext, ".rh" ) == 0 )
+			outputFileName = fileNameFromStem( inputFile, ".h" );
+		else
+			outputFileName = fileNameFromStem( inputFile, ".cs" );
+	}
+}
 
 void InputData::openOutput()
 {
 	if ( generateDot )
-		outStream = dotOpenOutput( inputFileName );
+		dotDefaultFileName( inputFileName );
 	else if ( hostLang->lang == HostLang::C )
-		outStream = cdOpenOutput( inputFileName );
+		cdDefaultFileName( inputFileName );
 	else if ( hostLang->lang == HostLang::D )
-		outStream = cdOpenOutput( inputFileName );
+		cdDefaultFileName( inputFileName );
 	else if ( hostLang->lang == HostLang::Java )
-		outStream = javaOpenOutput( inputFileName );
+		javaDefaultFileName( inputFileName );
 	else if ( hostLang->lang == HostLang::Ruby )
-		outStream = rubyOpenOutput( inputFileName );
+		rubyDefaultFileName( inputFileName );
 	else if ( hostLang->lang == HostLang::CSharp )
-		outStream = csharpOpenOutput( inputFileName );
+		csharpDefaultFileName( inputFileName );
+
+	/* Make sure we are not writing to the same file as the input file. */
+	if ( outputFileName != 0 && strcmp( inputFileName, outputFileName  ) == 0 ) {
+		error() << "output file \"" << outputFileName  << 
+				"\" is the same as the input file" << endl;
+	}
+
+	if ( outputFileName != 0 ) {
+		/* Create the filter on the output and open it. */
+		outFilter = new output_filter( outputFileName );
+
+		/* Open the output stream, attaching it to the filter. */
+		outStream = new ostream( outFilter );
+	}
 	else {
-		assert( false );
+		/* Writing out ot std out. */
+		outStream = &cout;
 	}
 }
 

@@ -47,6 +47,12 @@ struct InputData
 	void openOutput2();
 	void generateReduced();
 	void prepareMachineGen();
+
+	void dotDefaultFileName( const char *inputFile );
+	void cdDefaultFileName( const char *inputFile );
+	void javaDefaultFileName( const char *inputFile );
+	void rubyDefaultFileName( const char *inputFile );
+	void csharpDefaultFileName( const char *inputFile );
 };
 
 #endif

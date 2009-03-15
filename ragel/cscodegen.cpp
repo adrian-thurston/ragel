@@ -55,44 +55,6 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-/* Invoked by the parser when the root element is opened. */
-ostream *csharpOpenOutput( const char *inputFile )
-{
-	if ( hostLang->lang != HostLang::CSharp ) {
-		error() << "this code generator is for C# only" << endl;
-		exit(1);
-	}
-
-	/* If the output format is code and no output file name is given, then
-	 * make a default. */
-	if ( outputFileName == 0 ) {
-		const char *ext = findFileExtension( inputFile );
-		if ( ext != 0 && strcmp( ext, ".rh" ) == 0 )
-			outputFileName = fileNameFromStem( inputFile, ".h" );
-		else
-			outputFileName = fileNameFromStem( inputFile, ".cs" );
-	}
-
-	/* Make sure we are not writing to the same file as the input file. */
-	if ( outputFileName != 0 && strcmp( inputFile, outputFileName  ) == 0 ) {
-		error() << "output file \"" << outputFileName  << 
-				"\" is the same as the input file" << endl;
-	}
-
-	if ( outputFileName != 0 ) {
-		/* Create the filter on the output and open it. */
-		outFilter = new output_filter( outputFileName );
-
-		/* Open the output stream, attaching it to the filter. */
-		outStream = new ostream( outFilter );
-	}
-	else {
-		/* Writing out ot std out. */
-		outStream = &cout;
-	}
-	return outStream;
-}
-
 /* Invoked by the parser when a ragel definition is opened. */
 CodeGenData *csharpMakeCodeGen( const char *sourceFileName, const char *fsmName, 
 		ostream &out, bool wantComplete )

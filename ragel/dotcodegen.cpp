@@ -32,29 +32,6 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-/* Invoked by the parser when the root element is opened. */
-ostream *dotOpenOutput( const char *inputFile )
-{
-	/* Make sure we are not writing to the same file as the input file. */
-	if ( outputFileName != 0 && strcmp( inputFile, outputFileName  ) == 0 ) {
-		error() << "output file \"" << outputFileName  << 
-				"\" is the same as the input file" << endl;
-	}
-
-	if ( outputFileName != 0 ) {
-		/* Create the filter on the output and open it. */
-		outFilter = new output_filter( outputFileName );
-
-		/* Open the output stream, attaching it to the filter. */
-		outStream = new ostream( outFilter );
-	}
-	else {
-		/* Writing out ot std out. */
-		outStream = &cout;
-	}
-	return outStream;
-}
-
 /* Invoked by the parser when a ragel definition is opened. */
 CodeGenData *dotMakeCodeGen( const char *sourceFileName, const char *fsmName, 
 		ostream &out, bool wantComplete )
