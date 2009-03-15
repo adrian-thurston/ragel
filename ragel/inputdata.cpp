@@ -123,7 +123,7 @@ void InputData::csharpDefaultFileName( const char *inputFile )
 	}
 }
 
-void InputData::openOutput()
+void InputData::makeOutputStream()
 {
 	if ( ! generateDot ) {
 		switch ( hostLang->lang ) {
@@ -162,7 +162,7 @@ void InputData::openOutput()
 	}
 }
 
-void InputData::openOutput2()
+void InputData::openOutput()
 {
 	if ( outFilter != 0 ) {
 		outFilter->open( outputFileName, ios::out|ios::trunc );

@@ -495,7 +495,7 @@ void process( const char *inputFileName )
 	if ( gblErrorCount > 0 )
 		exit(1);
 
-	inputData.openOutput();
+	inputData.makeOutputStream();
 
 	/* Generates the reduced machine, which we use to write output. */
 	inputData.generateReduced();
@@ -503,7 +503,7 @@ void process( const char *inputFileName )
 	if ( gblErrorCount > 0 )
 		exit(1);
 
-	inputData.openOutput2();
+	inputData.openOutput();
 	inputData.writeOutput();
 
 	/* Close the input and the intermediate file. */
