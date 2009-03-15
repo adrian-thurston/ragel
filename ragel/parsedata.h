@@ -399,12 +399,15 @@ struct InputItem
 
 struct Parser;
 
-typedef AvlMap<char*, Parser *, CmpStr> ParserDict;
-typedef AvlMapEl<char*, Parser *> ParserDictEl;
+typedef AvlMap<const char*, Parser*, CmpStr> ParserDict;
+typedef AvlMapEl<const char*, Parser*> ParserDictEl;
+
+typedef DList<Parser> ParserList;
 
 typedef DList<InputItem> InputItemList;
 
 extern ParserDict parserDict;
+extern ParserList parserList;
 extern InputItemList inputItems;
 
 #endif

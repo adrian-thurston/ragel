@@ -284,6 +284,7 @@ void Scanner::handleMachine()
 			pdEl->value = new Parser( fileName, machine, sectionLoc );
 			pdEl->value->init();
 			parserDict.insert( pdEl );
+			parserList.append( pdEl->value );
 		}
 
 		parser = pdEl->value;

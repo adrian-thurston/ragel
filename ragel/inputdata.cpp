@@ -25,50 +25,12 @@
 #include "parsedata.h"
 #include "rlparse.h"
 #include <iostream>
+#include "dotcodegen.h"
 
 using std::cout;
 using std::cerr;
 using std::endl;
 using std::ios;
-
-void InputData::generateSpecificReduced()
-{
-	if ( parserDict.length() > 0 ) {
-		/* There is either a machine spec or machine name given. */
-		ParseData *parseData = 0;
-		GraphDictEl *graphDictEl = 0;
-
-		/* Traverse the sections, break out when we find a section/machine
-		 * that matches the one specified. */
-		for ( ParserDict::Iter parser = parserDict; parser.lte(); parser++ ) {
-			ParseData *checkPd = parser->value->pd;
-			if ( machineSpec == 0 || strcmp( checkPd->sectionName, machineSpec ) == 0 ) {
-				GraphDictEl *checkGdEl = 0;
-				if ( machineName == 0 || (checkGdEl = 
-						checkPd->graphDict.find( machineName )) != 0 )
-				{
-					/* Have a machine spec and/or machine name that matches
-					 * the -M/-S options. */
-					parseData = checkPd;
-					graphDictEl = checkGdEl;
-					break;
-				}
-			}
-		}
-
-		if ( parseData == 0 )
-			error() << "could not locate machine specified with -S and/or -M" << endl;
-		else {
-			/* Section/Machine to emit was found. Prepare and emit it. */
-			parseData->prepareMachineGen( graphDictEl );
-			if ( gblErrorCount == 0 )
-				parseData->generateReduced( *this );
-		}
-	}
-
-	writeOutput();
-}
-
 
 /* Invoked by the parser when the root element is opened. */
 void InputData::cdDefaultFileName( const char *inputFile )
@@ -175,36 +137,82 @@ void InputData::openOutput()
 
 void InputData::prepareMachineGen()
 {
-	/* No machine spec or machine name given. Generate everything. */
-	for ( ParserDict::Iter parser = parserDict; parser.lte(); parser++ ) {
-		ParseData *pd = parser->value->pd;
-		if ( pd->instanceList.length() > 0 )
-			pd->prepareMachineGen( 0 );
+	if ( generateDot ) {
+		/* Locate a machine spec to generate dot output for. We can only emit.
+		 * Dot takes one graph at a time. */
+		if ( machineSpec != 0 ) {
+			/* Machine specified. */
+			ParserDictEl *pdEl = parserDict.find( machineSpec );
+			if ( pdEl == 0 )
+				error() << "could not locate machine specified with -S and/or -M" << endp;
+			dotGenParser = pdEl->value;
+		}
+		else { 
+			/* No machine spec given, just use the first one. */
+			if ( parserList.length() == 0 )
+				error() << "no machine specification to generate graphviz output" << endp;
+
+			dotGenParser = parserList.head;
+		}
+
+		GraphDictEl *gdEl = 0;
+
+		if ( machineName != 0 ) {
+			gdEl = dotGenParser->pd->graphDict.find( machineName );
+			if ( gdEl == 0 )
+				error() << "machine definition/instantiation not found" << endp;
+		}
+		else {
+			/* We are using the whole machine spec. Need to make sure there
+			 * are instances in the spec. */
+			if ( dotGenParser->pd->instanceList.length() == 0 )
+				error() << "no machine instantiations to generate graphviz output" << endp;
+		}
+
+		dotGenParser->pd->prepareMachineGen( gdEl );
+	}
+	else {
+		/* No machine spec or machine name given. Generate everything. */
+		for ( ParserDict::Iter parser = parserDict; parser.lte(); parser++ ) {
+			ParseData *pd = parser->value->pd;
+			if ( pd->instanceList.length() > 0 )
+				pd->prepareMachineGen( 0 );
+		}
 	}
 }
 
 void InputData::generateReduced()
 {
-	for ( ParserDict::Iter parser = parserDict; parser.lte(); parser++ ) {
-		ParseData *pd = parser->value->pd;
-		if ( pd->instanceList.length() > 0 )
-			pd->generateReduced( *this );
+	if ( generateDot ) {
+		dotGenParser->pd->generateReduced( *this );
+	}
+	else {
+		for ( ParserDict::Iter parser = parserDict; parser.lte(); parser++ ) {
+			ParseData *pd = parser->value->pd;
+			if ( pd->instanceList.length() > 0 )
+				pd->generateReduced( *this );
+		}
 	}
 }
 
 void InputData::writeOutput()
 {
-	for ( InputItemList::Iter ii = inputItems; ii.lte(); ii++ ) {
-		if ( ii->type == InputItem::Write ) {
-			CodeGenData *cgd = ii->pd->cgd;
-			::keyOps = &cgd->thisKeyOps;
+	if ( generateDot ) {
+		static_cast<GraphvizDotGen*>(dotGenParser->pd->cgd)->writeDotFile();
+	}
+	else {
+		for ( InputItemList::Iter ii = inputItems; ii.lte(); ii++ ) {
+			if ( ii->type == InputItem::Write ) {
+				CodeGenData *cgd = ii->pd->cgd;
+				::keyOps = &cgd->thisKeyOps;
 
-			cgd->writeStatement( ii->loc, ii->writeArgs.length()-1, ii->writeArgs.data );
-		}
-		else /*if ( /!generateDot )*/ {
-			*outStream << '\n';
-			lineDirective( *outStream, inputFileName, ii->loc.line );
-			*outStream << ii->data.str();
+				cgd->writeStatement( ii->loc, ii->writeArgs.length()-1, ii->writeArgs.data );
+			}
+			else {
+				*outStream << '\n';
+				lineDirective( *outStream, inputFileName, ii->loc.line );
+				*outStream << ii->data.str();
+			}
 		}
 	}
 }

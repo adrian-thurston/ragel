@@ -314,13 +314,6 @@ void GraphvizDotGen::writeDotFile( )
 
 void GraphvizDotGen::finishRagelDef()
 {
-	if ( !graphvizDone ) {
-		graphvizDone = true;
-
-		/* For dot file generation we want to pick default transitions. */
-		redFsm->chooseDefaultSpan();
-
-		/* Write out with it. */
-		writeDotFile();
-	}
+	/* For dot file generation we want to pick default transitions. */
+	redFsm->chooseDefaultSpan();
 }

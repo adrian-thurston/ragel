@@ -24,13 +24,16 @@
 
 #include "gendata.h"
 
+struct Parser;
+
 struct InputData
 {
 	InputData( const char *inputFileName, bool outputActive, bool wantComplete ) : 
 		inputFileName(inputFileName),
 		outStream(0),
 		outputActive(outputActive),
-		wantComplete(wantComplete)
+		wantComplete(wantComplete),
+		dotGenParser(0)
 	{}
 
 	/* The name of the root section, this does not change during an include. */
@@ -38,9 +41,9 @@ struct InputData
 	ostream *outStream;
 	bool outputActive;
 	bool wantComplete;
+	Parser *dotGenParser;
 
 	void writeOutput();
-	void generateSpecificReduced();
 	void makeOutputStream();
 	void openOutput();
 	void generateReduced();
