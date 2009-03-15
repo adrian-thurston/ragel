@@ -29,6 +29,7 @@
 using std::cout;
 using std::cerr;
 using std::endl;
+using std::ios;
 
 void InputData::generateSpecificReduced()
 {
@@ -85,6 +86,17 @@ void InputData::openOutput()
 		outStream = csharpOpenOutput( inputFileName );
 	else {
 		assert( false );
+	}
+}
+
+void InputData::openOutput2()
+{
+	if ( outFilter != 0 ) {
+		outFilter->open( outputFileName, ios::out|ios::trunc );
+		if ( !outFilter->is_open() ) {
+			error() << "error opening " << outputFileName << " for writing" << endl;
+			exit(1);
+		}
 	}
 }
 

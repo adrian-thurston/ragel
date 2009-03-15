@@ -44,11 +44,6 @@ ostream *dotOpenOutput( const char *inputFile )
 	if ( outputFileName != 0 ) {
 		/* Create the filter on the output and open it. */
 		outFilter = new output_filter( outputFileName );
-		outFilter->open( outputFileName, ios::out|ios::trunc );
-		if ( !outFilter->is_open() ) {
-			error() << "error opening " << outputFileName << " for writing" << endl;
-			exit(1);
-		}
 
 		/* Open the output stream, attaching it to the filter. */
 		outStream = new ostream( outFilter );

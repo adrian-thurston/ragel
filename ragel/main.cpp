@@ -503,6 +503,7 @@ void process( const char *inputFileName )
 	if ( gblErrorCount > 0 )
 		exit(1);
 
+	inputData.openOutput2();
 	inputData.writeOutput();
 
 	/* Close the input and the intermediate file. */

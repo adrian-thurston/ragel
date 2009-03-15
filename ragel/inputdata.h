@@ -44,6 +44,7 @@ struct InputData
 	void writeOutput();
 	void generateSpecificReduced();
 	void openOutput();
+	void openOutput2();
 	void generateReduced();
 	void prepareMachineGen();
 };
