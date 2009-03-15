@@ -39,8 +39,6 @@ struct InputData
 	bool outputActive;
 	bool wantComplete;
 
-	CodeGenMap codeGenMap;
-
 	void writeOutput();
 	void generateSpecificReduced();
 	void openOutput();

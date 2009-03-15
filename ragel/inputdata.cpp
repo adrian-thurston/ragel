@@ -196,8 +196,7 @@ void InputData::writeOutput()
 {
 	for ( InputItemList::Iter ii = inputItems; ii.lte(); ii++ ) {
 		if ( ii->type == InputItem::Write ) {
-			CodeGenMapEl *mapEl = codeGenMap.find( (char*)ii->name.c_str() );
-			CodeGenData *cgd = mapEl->value;
+			CodeGenData *cgd = ii->pd->cgd;
 			::keyOps = &cgd->thisKeyOps;
 
 			cgd->writeStatement( ii->loc, ii->writeArgs.length()-1, ii->writeArgs.data );

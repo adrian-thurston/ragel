@@ -454,7 +454,8 @@ ParseData::ParseData( const char *fileName, char *sectionName,
 	exportsRootName(0),
 	nextEpsilonResolvedLink(0),
 	nextLongestMatchId(1),
-	lmRequiresErrorState(false)
+	lmRequiresErrorState(false),
+	cgd(0)
 {
 	/* Initialize the dictionary of graphs. This is our symbol table. The
 	 * initialization needs to be done on construction which happens at the
@@ -1432,16 +1433,8 @@ void ParseData::generateReduced( InputData &inputData )
 {
 	beginProcessing();
 
-	/* Open the definition. */
-	CodeGenMapEl *mapEl = inputData.codeGenMap.find( sectionName );
-	CodeGenData *cgd = 0;
-	if ( mapEl != 0 )
-		cgd = mapEl->value;
-	else {
-		cgd = makeCodeGen( inputData.inputFileName, sectionName, 
-				*inputData.outStream, inputData.wantComplete );
-		inputData.codeGenMap.insert( sectionName, cgd );
-	}
+	cgd = makeCodeGen( inputData.inputFileName, sectionName, 
+			*inputData.outStream, inputData.wantComplete );
 
 	/* Make the generator. */
 	BackendGen backendGen( sectionName, this, sectionGraph, cgd );

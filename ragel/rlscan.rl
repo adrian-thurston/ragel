@@ -414,6 +414,7 @@ void Scanner::handleImport()
 			inputItem->loc.line = line;
 			inputItem->loc.col = column;
 			inputItem->name = parser->sectionName;
+			inputItem->pd = parser->pd;
 			inputItems.append( inputItem );
 		}
 	}

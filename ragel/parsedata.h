@@ -55,6 +55,7 @@ struct ReOrBlock;
 struct ReOrItem;
 struct LongestMatch;
 struct InputData;
+struct CodeGenData;
 typedef DList<LongestMatch> LmList;
 
 
@@ -356,6 +357,8 @@ struct ParseData
 	KeyOps thisKeyOps;
 
 	ExportList exportList;
+
+	CodeGenData *cgd;
 };
 
 void afterOpMinimize( FsmAp *fsm, bool lastInSeq = true );
@@ -382,6 +385,7 @@ struct InputItem
 	Type type;
 	std::ostringstream data;
 	std::string name;
+	ParseData *pd;
 	Vector<char *> writeArgs;
 
 	InputLoc loc;
