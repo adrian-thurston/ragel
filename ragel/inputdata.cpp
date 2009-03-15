@@ -69,11 +69,6 @@ void InputData::generateSpecificReduced()
 	writeOutput();
 }
 
-/* Invoked by the parser when the root element is opened. */
-void InputData::dotDefaultFileName( const char *inputFile )
-{
-}
-
 
 /* Invoked by the parser when the root element is opened. */
 void InputData::cdDefaultFileName( const char *inputFile )
@@ -130,26 +125,31 @@ void InputData::csharpDefaultFileName( const char *inputFile )
 
 void InputData::openOutput()
 {
-	if ( generateDot )
-		dotDefaultFileName( inputFileName );
-	else if ( hostLang->lang == HostLang::C )
-		cdDefaultFileName( inputFileName );
-	else if ( hostLang->lang == HostLang::D )
-		cdDefaultFileName( inputFileName );
-	else if ( hostLang->lang == HostLang::Java )
-		javaDefaultFileName( inputFileName );
-	else if ( hostLang->lang == HostLang::Ruby )
-		rubyDefaultFileName( inputFileName );
-	else if ( hostLang->lang == HostLang::CSharp )
-		csharpDefaultFileName( inputFileName );
-
-	/* Make sure we are not writing to the same file as the input file. */
-	if ( outputFileName != 0 && strcmp( inputFileName, outputFileName  ) == 0 ) {
-		error() << "output file \"" << outputFileName  << 
-				"\" is the same as the input file" << endl;
+	if ( ! generateDot ) {
+		switch ( hostLang->lang ) {
+			case HostLang::C:
+			case HostLang::D:
+				cdDefaultFileName( inputFileName );
+				break;
+			case HostLang::Java:
+				javaDefaultFileName( inputFileName );
+				break;
+			case HostLang::Ruby:
+				rubyDefaultFileName( inputFileName );
+				break;
+			case HostLang::CSharp:
+				csharpDefaultFileName( inputFileName );
+				break;
+		}
 	}
 
+	/* Make sure we are not writing to the same file as the input file. */
 	if ( outputFileName != 0 ) {
+		if ( strcmp( inputFileName, outputFileName  ) == 0 ) {
+			error() << "output file \"" << outputFileName  << 
+					"\" is the same as the input file" << endl;
+		}
+
 		/* Create the filter on the output and open it. */
 		outFilter = new output_filter( outputFileName );
 
