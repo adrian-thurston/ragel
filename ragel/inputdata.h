@@ -48,6 +48,7 @@ struct InputData
 	void openOutput();
 	void generateReduced();
 	void prepareMachineGen();
+	void terminateAllParsers();
 
 	void cdDefaultFileName( const char *inputFile );
 	void javaDefaultFileName( const char *inputFile );

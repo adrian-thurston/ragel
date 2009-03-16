@@ -469,19 +469,7 @@ void process( const char *inputFileName )
 	/* Finished, final check for errors.. */
 	if ( gblErrorCount > 0 )
 		exit(1);
-	
-	/* Now send EOF to all parsers. */
-	terminateAllParsers();
 
-	/* Finished, final check for errors.. */
-	if ( gblErrorCount > 0 )
-		exit(1);
-
-	/* Bail on above error. */
-	if ( gblErrorCount > 0 )
-		exit(1);
-
-	/* Locate the backend program */
 	if ( generateDot ) {
 		wantComplete = false;
 		outputActive = false;
@@ -489,6 +477,14 @@ void process( const char *inputFileName )
 
 	InputData inputData( inputFileName, outputActive, wantComplete );
 
+	/* Now send EOF to all parsers. */
+	inputData.terminateAllParsers();
+
+	/* Bail on above error. */
+	if ( gblErrorCount > 0 )
+		exit(1);
+
+	/* Locate the backend program */
 	/* Compiles machines. */
 	inputData.prepareMachineGen();
 

@@ -1449,19 +1449,6 @@ void ParseData::generateReduced( InputData &inputData )
 	}
 }
 
-/* Send eof to all parsers. */
-void terminateAllParsers( )
-{
-	/* FIXME: a proper token is needed here. Suppose we should use the
-	 * location of EOF in the last file that the parser was referenced in. */
-	InputLoc loc;
-	loc.fileName = "<EOF>";
-	loc.line = 0;
-	loc.col = 0;
-	for ( ParserDict::Iter pdel = parserDict; pdel.lte(); pdel++ )
-		pdel->value->token( loc, Parser_tk_eof, 0, 0 );
-}
-
 void writeLanguage( std::ostream &out )
 {
 	out << " lang=\"";

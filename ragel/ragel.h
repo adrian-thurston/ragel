@@ -96,7 +96,6 @@ std::ostream &warning( const InputLoc &loc );
 
 struct XmlParser;
 
-void terminateAllParsers( );
 void xmlEscapeHost( std::ostream &out, char *data, long len );
 
 typedef Vector<const char *> ArgsVector;
