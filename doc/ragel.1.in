@@ -62,7 +62,8 @@ Print version information and exit.
 Write output to file. If -o is not given, a default file name is chosen by
 replacing the file extenstion of the input file. For source files ending in .rh
 the suffix .h is used. For all other source files a suffix based on the output
-language is used (.c, .cpp, .m, .dot, etc.).
+language is used (.c, .cpp, .m, etc.). If -o is not given for Graphviz output
+the generated dot file is written to standard output.
 .TP
 .B \-s
 Print some statistics on standard error.
@@ -124,7 +125,7 @@ The host language is Ruby.
 Inhibit writing of #line directives.
 .TP
 .B \-T0
-(all host languages) Generate a table driven FSM. This is the default code style.
+(C/D/Java/Ruby/C#) Generate a table driven FSM. This is the default code style.
 The table driven
 FSM represents the state machine as static data. There are tables of states,
 transitions, indicies and actions. The current state is stored in a variable.
@@ -136,21 +137,21 @@ compile but results in slower running code. The table driven FSM is suitable
 for any FSM.
 .TP
 .B \-T1
-Generate a faster table driven FSM by expanding action lists in the action
+(C/D/Ruby/C#) Generate a faster table driven FSM by expanding action lists in the action
 execute code.
 .TP
 .B \-F0
-(C, D) Generate a flat table driven FSM. Transitions are represented as an array
+(C/D/Ruby/C#) Generate a flat table driven FSM. Transitions are represented as an array
 indexed by the current alphabet character. This eliminates the need for a
 binary search to locate transitions and produces faster code, however it is
 only suitable for small alphabets.
 .TP
 .B \-F1
-(C, D) Generate a faster flat table driven FSM by expanding action lists in the action
+(C/D/Ruby/C#) Generate a faster flat table driven FSM by expanding action lists in the action
 execute code.
 .TP
 .B \-G0
-(C, D) Generate a goto driven FSM. The goto driven FSM represents the state machine
+(C/D/C#) Generate a goto driven FSM. The goto driven FSM represents the state machine
 as a series of goto statements. While in the machine, the current state is
 stored by the processor's instruction pointer. The execution is a flat function
 where control is passed from state to state using gotos. In general, the goto
@@ -158,15 +159,15 @@ FSM produces faster code but results in a larger binary and a more expensive
 host language compile.
 .TP
 .B \-G1
-(C, D) Generate a faster goto driven FSM by expanding action lists in the action
+(C/D/C#) Generate a faster goto driven FSM by expanding action lists in the action
 execute code.
 .TP
 .B \-G2
-(C, D) Generate a really fast goto driven FSM by embedding action lists in the state
+(C/D) Generate a really fast goto driven FSM by embedding action lists in the state
 machine control code.
 .TP
 .B \-P<N>
-(C, D) N-Way Split really fast goto-driven FSM.
+(C/D) N-Way Split really fast goto-driven FSM.
 
 .SH RAGEL INPUT
 NOTE: This is a very brief description of Ragel input. Ragel is described in
