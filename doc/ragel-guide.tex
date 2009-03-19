@@ -1,5 +1,5 @@
 %
-%   Copyright 2001-2007 Adrian Thurston <thurston@complang.org>
+%   Copyright 2001-2009 Adrian Thurston <thurston@complang.org>
 %
 
 %   This file is part of Ragel.
@@ -1392,6 +1392,9 @@ by naming particular regular expression definitions with the \verb|-S| and
 improves the Ragel programming experience. It allows users to learn Ragel by
 experimentation and also to track down bugs caused by unintended
 nondeterminism.
+
+Ragel has another option to help debugging. The \verb|-x| option causes Ragel
+to emit the compiled machine in an XML format.
 
 \chapter{User Actions}
 
@@ -2969,48 +2972,20 @@ first found newline. On the next input read, the new data is placed after the
 partially read line and processing continues from the beginning of the line.
 An example of line-oriented processing is given in Figure \ref{line-oriented}.
 
+\section{Specifying the Host Language}
 
-\section{Running the Executables}
-
-Ragel is broken down into two parts: a frontend that compiles machines and
-emits them in an XML format, and a backend that generates code or a Graphviz
-Dot file from the XML data. The \verb|ragel| program normally manages the
-execution of the backend program to generate code. However, if the intermediate
-file format is needed, it can emitted with the \verb|-x| option to the
-\verb|ragel| program.
-
-The purpose of the XML-based intermediate format is to allow users to inspect
-their compiled state machines and to interface Ragel to other tools such as
-custom visualizers, code generators or analysis tools. The split also serves to
-reduce the complexity of the Ragel program by strictly separating the data
-structures and algorithms that are used to compile machines from those that are
-used to generate code. 
-
-\vspace{10pt}
-
-\noindent The frontend program \verb|ragel| takes as an argument the host
-language, compiles the state machine, then calls the appropriate backend program
-for code generation. The host language options are:
+The \verb|ragel| program has a number of options for specifying the host
+language. The host-language options are:
 
 \begin{itemize}
 \item \verb|-C  | for C/C++/Objective-C code (default)
 \item \verb|-D  | for D code.
 \item \verb|-J  | for Java code.
 \item \verb|-R  | for Ruby code.
+\item \verb|-A  | for C\# code.
 \end{itemize}
 
-\noindent There are four backend code generation programs. These are:
-
-\begin{itemize}
-\item \verb|rlgen-cd    | generate code for the C-based and D languages.
-\item \verb|rlgen-java  | generate code for the Java language.
-\item \verb|rlgen-ruby  | generate code for the Ruby language.
-\item \verb|rlgen-dot   | generate a Graphviz Dot file.
-\end{itemize}
-
-\noindent The rlgen-dot program is invoked using the \verb|-V| option.
-
-\section{Choosing a Generated Code Style (C/D/Java only)}
+\section{Choosing a Generated Code Style}
 \label{genout}
 
 There are three styles of code output to choose from. Code style affects the
@@ -3067,23 +3042,23 @@ preferred output format.
 
 \verbspace
 \begin{center}
-\begin{tabular}{|c|c|}
+\begin{tabular}{|c|c|c|}
 \hline
-\multicolumn{2}{|c|}{\bf Code Output Style Options} \\
+\multicolumn{3}{|c|}{\bf Code Output Style Options} \\
 \hline
-\verb|-T0|&binary search table-driven\\
+\verb|-T0|&binary search table-driven&C/D/Java/Ruby/C\#\\
 \hline
-\verb|-T1|&binary search, expanded actions\\
+\verb|-T1|&binary search, expanded actions&C/D/Ruby/C\#\\
 \hline
-\verb|-F0|&flat table-driven\\
+\verb|-F0|&flat table-driven&C/D/Ruby/C\#\\
 \hline
-\verb|-F1|&flat table, expanded actions\\
+\verb|-F1|&flat table, expanded actions&C/D/Ruby/C\#\\
 \hline
-\verb|-G0|&goto-driven\\
+\verb|-G0|&goto-driven&C/D/C\#\\
 \hline
-\verb|-G1|&goto, expanded actions\\
+\verb|-G1|&goto, expanded actions&C/D/C\#\\
 \hline
-\verb|-G2|&goto, in-place actions\\
+\verb|-G2|&goto, in-place actions&C/D\\
 \hline
 \end{tabular}
 \end{center}
