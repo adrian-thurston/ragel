@@ -338,7 +338,7 @@ void Scanner::handleInclude()
 				parser->includeHistory.append( IncludeHistoryItem( 
 						includeChecks[found], inclSectionName ) );
 
-				Scanner scanner( includeChecks[found], *inFile, parser,
+				Scanner scanner( id, includeChecks[found], *inFile, parser,
 						inclSectionName, includeDepth+1, false );
 				scanner.do_scan( );
 				delete inFile;
@@ -363,7 +363,7 @@ void Scanner::handleImport()
 				scan_error() << "import: attempted: \"" << *tried++ << '\"' << endl;
 		}
 
-		Scanner scanner( importChecks[found], *inFile, parser,
+		Scanner scanner( id, importChecks[found], *inFile, parser,
 				0, includeDepth+1, true );
 		scanner.do_scan( );
 		scanner.importToken( 0, 0, 0 );

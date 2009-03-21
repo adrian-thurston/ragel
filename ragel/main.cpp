@@ -71,8 +71,6 @@ using std::streamsize;
 MinimizeLevel minimizeLevel = MinimizePartition2;
 MinimizeOpt minimizeOpt = MinimizeMostOps;
 
-InputData id;
-
 /* Graphviz dot file generation. */
 const char *machineSpec = 0, *machineName = 0;
 bool machineSpecFound = false;
@@ -217,7 +215,7 @@ void escapeLineDirectivePath( std::ostream &out, char *path )
 	}
 }
 
-void processArgs( int argc, const char **argv )
+void processArgs( int argc, const char **argv, InputData &id )
 {
 	ParamCheck pc("xo:dnmleabjkS:M:I:CDJRAvHh?-:sT:F:G:P:LpV", argc, argv);
 
@@ -436,7 +434,7 @@ void processArgs( int argc, const char **argv )
 	}
 }
 
-void process()
+void process( InputData &id )
 {
 	/* Open the input file for reading. */
 	assert( id.inputFileName != 0 );
@@ -454,7 +452,7 @@ void process()
 	firstInputItem->loc.col = 1;
 	id.inputItems.append( firstInputItem );
 
-	Scanner scanner( id.inputFileName, *inFile, 0, 0, 0, false );
+	Scanner scanner( id, id.inputFileName, *inFile, 0, 0, 0, false );
 	scanner.do_scan();
 
 	/* Finished, final check for errors.. */
@@ -528,7 +526,9 @@ char *makeIntermedTemplate( const char *baseFileName )
 /* Main, process args and call yyparse to start scanning input. */
 int main( int argc, const char **argv )
 {
-	processArgs( argc, argv );
+	InputData id;
+
+	processArgs( argc, argv, id );
 
 	/* If -M or -S are given and we're not generating a dot file then invoke
 	 * the frontend. These options are not useful with code generators. */
@@ -554,10 +554,7 @@ int main( int argc, const char **argv )
 				"\" is the same as the input file" << endp;
 	}
 
-	process();
-
-	/* Clean up the intermediate. */
-	exit( 0 );
+	process( id );
 
 	return 0;
 }

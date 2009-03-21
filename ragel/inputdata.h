@@ -94,8 +94,9 @@ struct InputData
 	void javaDefaultFileName( const char *inputFile );
 	void rubyDefaultFileName( const char *inputFile );
 	void csharpDefaultFileName( const char *inputFile );
-};
 
-extern InputData id;
+	void writeLanguage( std::ostream &out );
+	void writeMachines( std::ostream &out, std::string hostData, const char *inputFileName );
+};
 
 #endif

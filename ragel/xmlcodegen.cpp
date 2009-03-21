@@ -1398,7 +1398,7 @@ void BackendGen::makeBackend()
 	close_ragel_def();
 }
 
-void writeLanguage( std::ostream &out )
+void InputData::writeLanguage( std::ostream &out )
 {
 	out << " lang=\"";
 	switch ( hostLang->lang ) {
@@ -1411,11 +1411,11 @@ void writeLanguage( std::ostream &out )
 	out << "\"";
 }
 
-void writeMachines( std::ostream &out, std::string hostData, const char *inputFileName )
+void InputData::writeMachines( std::ostream &out, std::string hostData, const char *inputFileName )
 {
 	if ( machineSpec == 0 && machineName == 0 ) {
 		/* No machine spec or machine name given. Generate everything. */
-		for ( ParserDict::Iter parser = id.parserDict; parser.lte(); parser++ ) {
+		for ( ParserDict::Iter parser = parserDict; parser.lte(); parser++ ) {
 			ParseData *pd = parser->value->pd;
 			if ( pd->instanceList.length() > 0 )
 				pd->prepareMachineGen( 0 );
@@ -1425,7 +1425,7 @@ void writeMachines( std::ostream &out, std::string hostData, const char *inputFi
 			out << "<ragel version=\"" VERSION "\" filename=\"" << inputFileName << "\"";
 			writeLanguage( out );
 			out << ">\n";
-			for ( ParserDict::Iter parser = id.parserDict; parser.lte(); parser++ ) {
+			for ( ParserDict::Iter parser = parserDict; parser.lte(); parser++ ) {
 				ParseData *pd = parser->value->pd;
 				if ( pd->instanceList.length() > 0 )
 					pd->generateXML( out );
@@ -1434,14 +1434,14 @@ void writeMachines( std::ostream &out, std::string hostData, const char *inputFi
 			out << "</ragel>\n";
 		}
 	}
-	else if ( id.parserDict.length() > 0 ) {
+	else if ( parserDict.length() > 0 ) {
 		/* There is either a machine spec or machine name given. */
 		ParseData *parseData = 0;
 		GraphDictEl *graphDictEl = 0;
 
 		/* Traverse the sections, break out when we find a section/machine
 		 * that matches the one specified. */
-		for ( ParserDict::Iter parser = id.parserDict; parser.lte(); parser++ ) {
+		for ( ParserDict::Iter parser = parserDict; parser.lte(); parser++ ) {
 			ParseData *checkPd = parser->value->pd;
 			if ( machineSpec == 0 || strcmp( checkPd->sectionName, machineSpec ) == 0 ) {
 				GraphDictEl *checkGdEl = 0;
