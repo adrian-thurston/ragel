@@ -98,16 +98,11 @@ struct XmlParser;
 
 void xmlEscapeHost( std::ostream &out, char *data, long len );
 
-typedef Vector<const char *> ArgsVector;
-extern ArgsVector includePaths;
-
 extern CodeStyle codeStyle;
 
 /* IO filenames and stream. */
 extern bool displayPrintables;
-extern bool graphvizDone;
 extern int gblErrorCount;
-
 
 /* Options. */
 extern int numSplitPartitions;
@@ -117,15 +112,6 @@ std::ostream &error();
 
 /* Target language and output style. */
 extern CodeStyle codeStyle;
-
-/* Io globals. */
-extern std::istream *inStream;
-extern std::ostream *outStream;
-extern output_filter *outFilter;
-extern const char *outputFileName;
-
-/* Graphviz dot file generation. */
-extern bool graphvizDone;
 
 extern int numSplitPartitions;
 extern bool noLineDirectives;

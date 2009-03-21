@@ -23,21 +23,65 @@
 #define _INPUT_DATA
 
 #include "gendata.h"
+#include <iostream>
+#include <sstream>
+
+struct Parser;
+struct ParseData;
+
+struct InputItem
+{
+	enum Type {
+		HostData,
+		Write,
+	};
+
+	Type type;
+	std::ostringstream data;
+	std::string name;
+	ParseData *pd;
+	Vector<char *> writeArgs;
+
+	InputLoc loc;
+
+	InputItem *prev, *next;
+};
 
 struct Parser;
 
+typedef AvlMap<const char*, Parser*, CmpStr> ParserDict;
+typedef AvlMapEl<const char*, Parser*> ParserDictEl;
+typedef DList<Parser> ParserList;
+typedef DList<InputItem> InputItemList;
+typedef Vector<const char *> ArgsVector;
+
 struct InputData
 {
-	InputData( const char *inputFileName ) : 
-		inputFileName(inputFileName),
+	InputData() : 
+		inputFileName(0),
+		outputFileName(0),
+		inStream(0),
 		outStream(0),
+		outFilter(0),
 		dotGenParser(0)
 	{}
 
 	/* The name of the root section, this does not change during an include. */
 	const char *inputFileName;
-	ostream *outStream;
+	const char *outputFileName;
+
+	/* Io globals. */
+	std::istream *inStream;
+	std::ostream *outStream;
+	output_filter *outFilter;
+
 	Parser *dotGenParser;
+
+	ParserDict parserDict;
+	ParserList parserList;
+	InputItemList inputItems;
+
+	ArgsVector includePaths;
 
 	void writeOutput();
 	void makeOutputStream();
@@ -51,5 +95,7 @@ struct InputData
 	void rubyDefaultFileName( const char *inputFile );
 	void csharpDefaultFileName( const char *inputFile );
 };
+
+extern InputData id;
 
 #endif

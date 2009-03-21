@@ -71,6 +71,8 @@ using std::streamsize;
 MinimizeLevel minimizeLevel = MinimizePartition2;
 MinimizeOpt minimizeOpt = MinimizeMostOps;
 
+InputData id;
+
 /* Graphviz dot file generation. */
 const char *machineSpec = 0, *machineName = 0;
 bool machineSpecFound = false;
@@ -87,21 +89,9 @@ int numSplitPartitions = 0;
 bool noLineDirectives = false;
 
 bool displayPrintables = false;
-bool graphvizDone = false;
 
 /* Target ruby impl */
 RubyImplEnum rubyImpl = MRI;
-
-ArgsVector includePaths;
-
-istream *inStream = 0;
-ostream *outStream = 0;
-output_filter *outFilter = 0;
-const char *outputFileName = 0;
-
-ParserDict parserDict;
-ParserList parserList;
-InputItemList inputItems;
 
 /* Print a summary of the options. */
 void usage()
@@ -227,7 +217,7 @@ void escapeLineDirectivePath( std::ostream &out, char *path )
 	}
 }
 
-void processArgs( int argc, const char **argv, const char *&inputFileName )
+void processArgs( int argc, const char **argv )
 {
 	ParamCheck pc("xo:dnmleabjkS:M:I:CDJRAvHh?-:sT:F:G:P:LpV", argc, argv);
 
@@ -249,11 +239,11 @@ void processArgs( int argc, const char **argv, const char *&inputFileName )
 			case 'o':
 				if ( *pc.paramArg == 0 )
 					error() << "a zero length output file name was given" << endl;
-				else if ( outputFileName != 0 )
+				else if ( id.outputFileName != 0 )
 					error() << "more than one output file name was given" << endl;
 				else {
 					/* Ok, remember the output file name. */
-					outputFileName = pc.paramArg;
+					id.outputFileName = pc.paramArg;
 				}
 				break;
 
@@ -316,7 +306,7 @@ void processArgs( int argc, const char **argv, const char *&inputFileName )
 				if ( *pc.paramArg == 0 )
 					error() << "please specify an argument to -I" << endl;
 				else {
-					includePaths.append( pc.paramArg );
+					id.includePaths.append( pc.paramArg );
 				}
 				break;
 
@@ -435,26 +425,24 @@ void processArgs( int argc, const char **argv, const char *&inputFileName )
 			/* It is interpreted as an input file. */
 			if ( *pc.curArg == 0 )
 				error() << "a zero length input file name was given" << endl;
-			else if ( inputFileName != 0 )
+			else if ( id.inputFileName != 0 )
 				error() << "more than one input file name was given" << endl;
 			else {
 				/* OK, Remember the filename. */
-				inputFileName = pc.curArg;
+				id.inputFileName = pc.curArg;
 			}
 			break;
 		}
 	}
 }
 
-void process( const char *inputFileName )
+void process()
 {
 	/* Open the input file for reading. */
-	assert( inputFileName != 0 );
-	ifstream *inFile = new ifstream( inputFileName );
+	assert( id.inputFileName != 0 );
+	ifstream *inFile = new ifstream( id.inputFileName );
 	if ( ! inFile->is_open() )
-		error() << "could not open " << inputFileName << " for reading" << endp;
-
-	InputData inputData( inputFileName );
+		error() << "could not open " << id.inputFileName << " for reading" << endp;
 
 	/* Used for just a few things. */
 	std::ostringstream hostData;
@@ -464,9 +452,9 @@ void process( const char *inputFileName )
 	firstInputItem->type = InputItem::HostData;
 	firstInputItem->loc.line = 1;
 	firstInputItem->loc.col = 1;
-	inputItems.append( firstInputItem );
+	id.inputItems.append( firstInputItem );
 
-	Scanner scanner( inputFileName, *inFile, 0, 0, 0, false );
+	Scanner scanner( id.inputFileName, *inFile, 0, 0, 0, false );
 	scanner.do_scan();
 
 	/* Finished, final check for errors.. */
@@ -474,7 +462,7 @@ void process( const char *inputFileName )
 		exit(1);
 
 	/* Now send EOF to all parsers. */
-	inputData.terminateAllParsers();
+	id.terminateAllParsers();
 
 	/* Bail on above error. */
 	if ( gblErrorCount > 0 )
@@ -482,21 +470,25 @@ void process( const char *inputFileName )
 
 	/* Locate the backend program */
 	/* Compiles machines. */
-	inputData.prepareMachineGen();
+	id.prepareMachineGen();
 
 	if ( gblErrorCount > 0 )
 		exit(1);
 
-	inputData.makeOutputStream();
+	id.makeOutputStream();
 
 	/* Generates the reduced machine, which we use to write output. */
-	inputData.generateReduced();
+	id.generateReduced();
 
 	if ( gblErrorCount > 0 )
 		exit(1);
+	
+	/*
+	 * From this point on we should not be reporting any errors.
+	 */
 
-	inputData.openOutput();
-	inputData.writeOutput();
+	id.openOutput();
+	id.writeOutput();
 
 	/* Close the input and the intermediate file. */
 	delete inFile;
@@ -507,18 +499,12 @@ void process( const char *inputFileName )
 
 	/* If writing to a file, delete the ostream, causing it to flush.
 	 * Standard out is flushed automatically. */
-	if ( outputFileName != 0 ) {
-		delete outStream;
-		delete outFilter;
+	if ( id.outputFileName != 0 ) {
+		delete id.outStream;
+		delete id.outFilter;
 	}
 
-	/* Finished, final check for errors.. */
-	if ( gblErrorCount > 0 ) {
-		/* If we opened an output file, remove it. */
-		if ( outputFileName != 0 )
-			unlink( outputFileName );
-		exit(1);
-	}
+	assert( gblErrorCount == 0 );
 }
 
 char *makeIntermedTemplate( const char *baseFileName )
@@ -539,55 +525,10 @@ char *makeIntermedTemplate( const char *baseFileName )
 	return result;
 };
 
-const char *openIntermed( const char *inputFileName, const char *outputFileName )
-{
-	srand(time(0));
-	const char *result = 0;
-
-	/* Which filename do we use as the base? */
-	const char *baseFileName = outputFileName != 0 ? outputFileName : inputFileName;
-
-	/* The template for the intermediate file name. */
-	const char *intermedFileName = makeIntermedTemplate( baseFileName );
-
-	/* Randomize the name and try to open. */
-	char fnChars[] = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-	char *firstX = strrchr( intermedFileName, 'X' ) - 5;
-	for ( int tries = 0; tries < 20; tries++ ) {
-		/* Choose a random name. */
-		for ( int x = 0; x < 6; x++ )
-			firstX[x] = fnChars[rand() % 52];
-
-		/* Try to open the file. */
-		int fd = ::open( intermedFileName, O_WRONLY|O_EXCL|O_CREAT, S_IRUSR|S_IWUSR );
-
-		if ( fd > 0 ) {
-			/* Success. Close the file immediately and return the name for use
-			 * by the child processes. */
-			::close( fd );
-			result = intermedFileName;
-			break;
-		}
-
-		if ( errno == EACCES ) {
-			error() << "failed to open temp file " << intermedFileName << 
-					", access denied" << endp;
-		}
-	}
-
-	if ( result == 0 )
-		error() << "abnormal error: cannot find unique name for temp file" << endp;
-
-	return result;
-}
-
-
-
 /* Main, process args and call yyparse to start scanning input. */
 int main( int argc, const char **argv )
 {
-	const char *inputFileName = 0;
-	processArgs( argc, argv, inputFileName );
+	processArgs( argc, argv );
 
 	/* If -M or -S are given and we're not generating a dot file then invoke
 	 * the frontend. These options are not useful with code generators. */
@@ -598,7 +539,7 @@ int main( int argc, const char **argv )
 
 	/* Require an input file. If we use standard in then we won't have a file
 	 * name on which to base the output. */
-	if ( inputFileName == 0 )
+	if ( id.inputFileName == 0 )
 		error() << "no input file given" << endl;
 
 	/* Bail on argument processing errors. */
@@ -606,14 +547,14 @@ int main( int argc, const char **argv )
 		exit(1);
 
 	/* Make sure we are not writing to the same file as the input file. */
-	if ( inputFileName != 0 && outputFileName != 0 && 
-			strcmp( inputFileName, outputFileName  ) == 0 )
+	if ( id.inputFileName != 0 && id.outputFileName != 0 && 
+			strcmp( id.inputFileName, id.outputFileName  ) == 0 )
 	{
-		error() << "output file \"" << outputFileName  << 
+		error() << "output file \"" << id.outputFileName  << 
 				"\" is the same as the input file" << endp;
 	}
 
-	process( inputFileName );
+	process();
 
 	/* Clean up the intermediate. */
 	exit( 0 );

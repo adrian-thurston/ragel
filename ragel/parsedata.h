@@ -375,39 +375,5 @@ FsmAp *dotStarFsm( ParseData *pd );
 
 void errorStateLabels( const NameSet &locations );
 
-struct InputItem
-{
-	enum Type {
-		HostData,
-		Write,
-	};
-
-	Type type;
-	std::ostringstream data;
-	std::string name;
-	ParseData *pd;
-	Vector<char *> writeArgs;
-
-	InputLoc loc;
-
-	InputItem *prev, *next;
-};
-
-/*
- * Global data.
- */
-
-struct Parser;
-
-typedef AvlMap<const char*, Parser*, CmpStr> ParserDict;
-typedef AvlMapEl<const char*, Parser*> ParserDictEl;
-
-typedef DList<Parser> ParserList;
-
-typedef DList<InputItem> InputItemList;
-
-extern ParserDict parserDict;
-extern ParserList parserList;
-extern InputItemList inputItems;
 
 #endif

@@ -25,6 +25,7 @@
 
 #include "ragel.h"
 #include "rlscan.h"
+#include "inputdata.h"
 
 //#define LOG_TOKENS
 
@@ -202,7 +203,7 @@ void Scanner::pass()
 	/* If no errors and we are at the bottom of the include stack (the
 	 * source file listed on the command line) then write out the data. */
 	if ( includeDepth == 0 && machineSpec == 0 && machineName == 0 )
-		inputItems.tail->data.write( ts, te-ts );
+		id.inputItems.tail->data.write( ts, te-ts );
 }
 
 /*
@@ -278,13 +279,13 @@ void Scanner::handleMachine()
 	if ( !importMachines && inclSectionTarg == 0 ) {
 		ignoreSection = false;
 
-		ParserDictEl *pdEl = parserDict.find( machine );
+		ParserDictEl *pdEl = id.parserDict.find( machine );
 		if ( pdEl == 0 ) {
 			pdEl = new ParserDictEl( machine );
 			pdEl->value = new Parser( fileName, machine, sectionLoc );
 			pdEl->value->init();
-			parserDict.insert( pdEl );
-			parserList.append( pdEl->value );
+			id.parserDict.insert( pdEl );
+			id.parserList.append( pdEl->value );
 		}
 
 		parser = pdEl->value;
@@ -416,20 +417,20 @@ void Scanner::handleImport()
 			inputItem->loc.col = column;
 			inputItem->name = parser->sectionName;
 			inputItem->pd = parser->pd;
-			inputItems.append( inputItem );
+			id.inputItems.append( inputItem );
 		}
 	}
 
 	action write_arg
 	{
 		if ( active() && machineSpec == 0 && machineName == 0 )
-			inputItems.tail->writeArgs.append( strdup(tokdata) );
+			id.inputItems.tail->writeArgs.append( strdup(tokdata) );
 	}
 
 	action write_close
 	{
 		if ( active() && machineSpec == 0 && machineName == 0 )
-			inputItems.tail->writeArgs.append( 0 );
+			id.inputItems.tail->writeArgs.append( 0 );
 	}
 
 	write_stmt =
@@ -538,7 +539,7 @@ void Scanner::endSection( )
 			inputItem->type = InputItem::HostData;
 			inputItem->loc.line = line;
 			inputItem->loc.col = column;
-			inputItems.append( inputItem );
+			id.inputItems.append( inputItem );
 		}
 	}
 }
@@ -582,7 +583,7 @@ char **Scanner::makeIncludePathChecks( const char *thisFileName,
 		}
 
 		/* Search from the include paths given on the command line. */
-		for ( ArgsVector::Iter incp = includePaths; incp.lte(); incp++ ) {
+		for ( ArgsVector::Iter incp = id.includePaths; incp.lte(); incp++ ) {
 			long pathLen = strlen( *incp );
 			long checkLen = pathLen + 1 + length;
 			char *check = new char[checkLen+1];

@@ -28,6 +28,8 @@
 #include "gendata.h"
 #include "inputdata.h"
 #include <string.h>
+#include "rlparse.h"
+#include "version.h"
 
 using namespace std;
 
@@ -1394,6 +1396,82 @@ void BackendGen::makeBackend()
 	makeMachine();
 
 	close_ragel_def();
+}
+
+void writeLanguage( std::ostream &out )
+{
+	out << " lang=\"";
+	switch ( hostLang->lang ) {
+		case HostLang::C:    out << "C"; break;
+		case HostLang::D:    out << "D"; break;
+		case HostLang::Java: out << "Java"; break;
+		case HostLang::Ruby: out << "Ruby"; break;
+		case HostLang::CSharp: out << "C#"; break;
+	}
+	out << "\"";
+}
+
+void writeMachines( std::ostream &out, std::string hostData, const char *inputFileName )
+{
+	if ( machineSpec == 0 && machineName == 0 ) {
+		/* No machine spec or machine name given. Generate everything. */
+		for ( ParserDict::Iter parser = id.parserDict; parser.lte(); parser++ ) {
+			ParseData *pd = parser->value->pd;
+			if ( pd->instanceList.length() > 0 )
+				pd->prepareMachineGen( 0 );
+		}
+
+		if ( gblErrorCount == 0 ) {
+			out << "<ragel version=\"" VERSION "\" filename=\"" << inputFileName << "\"";
+			writeLanguage( out );
+			out << ">\n";
+			for ( ParserDict::Iter parser = id.parserDict; parser.lte(); parser++ ) {
+				ParseData *pd = parser->value->pd;
+				if ( pd->instanceList.length() > 0 )
+					pd->generateXML( out );
+			}
+			out << hostData;
+			out << "</ragel>\n";
+		}
+	}
+	else if ( id.parserDict.length() > 0 ) {
+		/* There is either a machine spec or machine name given. */
+		ParseData *parseData = 0;
+		GraphDictEl *graphDictEl = 0;
+
+		/* Traverse the sections, break out when we find a section/machine
+		 * that matches the one specified. */
+		for ( ParserDict::Iter parser = id.parserDict; parser.lte(); parser++ ) {
+			ParseData *checkPd = parser->value->pd;
+			if ( machineSpec == 0 || strcmp( checkPd->sectionName, machineSpec ) == 0 ) {
+				GraphDictEl *checkGdEl = 0;
+				if ( machineName == 0 || (checkGdEl = 
+						checkPd->graphDict.find( machineName )) != 0 )
+				{
+					/* Have a machine spec and/or machine name that matches
+					 * the -M/-S options. */
+					parseData = checkPd;
+					graphDictEl = checkGdEl;
+					break;
+				}
+			}
+		}
+
+		if ( parseData == 0 )
+			error() << "could not locate machine specified with -S and/or -M" << endl;
+		else {
+			/* Section/Machine to emit was found. Prepare and emit it. */
+			parseData->prepareMachineGen( graphDictEl );
+			if ( gblErrorCount == 0 ) {
+				out << "<ragel version=\"" VERSION "\" filename=\"" << inputFileName << "\"";
+				writeLanguage( out );
+				out << ">\n";
+				parseData->generateXML( out );
+				out << hostData;
+				out << "</ragel>\n";
+			}
+		}
+	}
 }
 
 

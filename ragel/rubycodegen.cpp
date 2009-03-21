@@ -58,15 +58,6 @@ using std::endl;
 /* Target language and output style. */
 extern CodeStyle codeStyle;
 
-/* Io globals. */
-extern istream *inStream;
-extern ostream *outStream;
-extern output_filter *outFilter;
-extern const char *outputFileName;
-
-/* Graphviz dot file generation. */
-extern bool graphvizDone;
-
 extern int numSplitPartitions;
 
 /*
@@ -695,7 +686,6 @@ ostream &RubyCodeGen::source_error( const InputLoc &loc )
 
 void RubyCodeGen::finishRagelDef()
 {
-
 	if ( codeStyle == GenGoto || codeStyle == GenFGoto || 
 			codeStyle == GenIpGoto || codeStyle == GenSplit )
 	{
