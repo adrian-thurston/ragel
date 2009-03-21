@@ -29,10 +29,6 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-ParserDict parserDict;
-ParserList parserList;
-InputItemList inputItems;
-
 %%{
 
 parser Parser;

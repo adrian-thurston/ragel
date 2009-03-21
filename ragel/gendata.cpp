@@ -67,21 +67,23 @@ using std::cerr;
 using std::endl;
 
 /* Invoked by the parser when a ragel definition is opened. */
-CodeGenData *dotMakeCodeGen( const char *sourceFileName, const char *fsmName, 
-		ostream &out, bool wantComplete )
+CodeGenData *dotMakeCodeGen( const char *sourceFileName, const char *fsmName, ostream &out )
 {
 	CodeGenData *codeGen = new GraphvizDotGen(out);
 
 	codeGen->sourceFileName = sourceFileName;
 	codeGen->fsmName = fsmName;
-	codeGen->wantComplete = wantComplete;
+
+	/* For normal code generation we want a transition on every character so we never
+	 * end up in an undefined state. For graphviz this just clutters the
+	 * drawing so we turn it off. */
+	codeGen->wantComplete = false;
 
 	return codeGen;
 }
 
 /* Invoked by the parser when a ragel definition is opened. */
-CodeGenData *cdMakeCodeGen( const char *sourceFileName, const char *fsmName, 
-		ostream &out, bool wantComplete )
+CodeGenData *cdMakeCodeGen( const char *sourceFileName, const char *fsmName, ostream &out )
 {
 	CodeGenData *codeGen = 0;
 	switch ( hostLang->lang ) {
@@ -148,27 +150,23 @@ CodeGenData *cdMakeCodeGen( const char *sourceFileName, const char *fsmName,
 
 	codeGen->sourceFileName = sourceFileName;
 	codeGen->fsmName = fsmName;
-	codeGen->wantComplete = wantComplete;
 
 	return codeGen;
 }
 
 /* Invoked by the parser when a ragel definition is opened. */
-CodeGenData *javaMakeCodeGen( const char *sourceFileName, const char *fsmName, 
-		ostream &out, bool wantComplete )
+CodeGenData *javaMakeCodeGen( const char *sourceFileName, const char *fsmName, ostream &out )
 {
 	CodeGenData *codeGen = new JavaTabCodeGen(out);
 
 	codeGen->sourceFileName = sourceFileName;
 	codeGen->fsmName = fsmName;
-	codeGen->wantComplete = wantComplete;
 
 	return codeGen;
 }
 
 /* Invoked by the parser when a ragel definition is opened. */
-CodeGenData *rubyMakeCodeGen( const char *sourceFileName, const char *fsmName, 
-		ostream &out, bool wantComplete )
+CodeGenData *rubyMakeCodeGen( const char *sourceFileName, const char *fsmName, ostream &out )
 {
 	CodeGenData *codeGen = 0;
 	switch ( codeStyle ) {
@@ -202,14 +200,12 @@ CodeGenData *rubyMakeCodeGen( const char *sourceFileName, const char *fsmName,
 	}
 	codeGen->sourceFileName = sourceFileName;
 	codeGen->fsmName = fsmName;
-	codeGen->wantComplete = wantComplete;
 
 	return codeGen;
 }
 
 /* Invoked by the parser when a ragel definition is opened. */
-CodeGenData *csharpMakeCodeGen( const char *sourceFileName, const char *fsmName, 
-		ostream &out, bool wantComplete )
+CodeGenData *csharpMakeCodeGen( const char *sourceFileName, const char *fsmName, ostream &out )
 {
 	CodeGenData *codeGen = 0;
 
@@ -242,28 +238,26 @@ CodeGenData *csharpMakeCodeGen( const char *sourceFileName, const char *fsmName,
 
 	codeGen->sourceFileName = sourceFileName;
 	codeGen->fsmName = fsmName;
-	codeGen->wantComplete = wantComplete;
 
 	return codeGen;
 }
 
 
-CodeGenData *makeCodeGen( const char *sourceFileName, const char *fsmName, 
-		ostream &out, bool wantComplete )
+CodeGenData *makeCodeGen( const char *sourceFileName, const char *fsmName, ostream &out )
 {
 	CodeGenData *cgd = 0;
 	if ( generateDot )
-		cgd = dotMakeCodeGen( sourceFileName, fsmName, out, wantComplete );
+		cgd = dotMakeCodeGen( sourceFileName, fsmName, out );
 	else if ( hostLang == &hostLangC )
-		cgd = cdMakeCodeGen( sourceFileName, fsmName, out, wantComplete );
+		cgd = cdMakeCodeGen( sourceFileName, fsmName, out );
 	else if ( hostLang == &hostLangD )
-		cgd = cdMakeCodeGen( sourceFileName, fsmName, out, wantComplete );
+		cgd = cdMakeCodeGen( sourceFileName, fsmName, out );
 	else if ( hostLang == &hostLangJava )
-		cgd = javaMakeCodeGen( sourceFileName, fsmName, out, wantComplete );
+		cgd = javaMakeCodeGen( sourceFileName, fsmName, out );
 	else if ( hostLang == &hostLangRuby )
-		cgd = rubyMakeCodeGen( sourceFileName, fsmName, out, wantComplete );
+		cgd = rubyMakeCodeGen( sourceFileName, fsmName, out );
 	else if ( hostLang == &hostLangCSharp )
-		cgd = csharpMakeCodeGen( sourceFileName, fsmName, out, wantComplete );
+		cgd = csharpMakeCodeGen( sourceFileName, fsmName, out );
 	return cgd;
 }
 
@@ -322,7 +316,7 @@ CodeGenData::CodeGenData( ostream &out )
 	tokstartExpr(0),
 	tokendExpr(0),
 	dataExpr(0),
-	wantComplete(0),
+	wantComplete(true),
 	hasLongestMatch(false),
 	noEnd(false),
 	noPrefix(false),

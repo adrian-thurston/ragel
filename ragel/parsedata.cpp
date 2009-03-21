@@ -1433,8 +1433,7 @@ void ParseData::generateReduced( InputData &inputData )
 {
 	beginProcessing();
 
-	cgd = makeCodeGen( inputData.inputFileName, sectionName, 
-			*inputData.outStream, inputData.wantComplete );
+	cgd = makeCodeGen( inputData.inputFileName, sectionName, *inputData.outStream );
 
 	/* Make the generator. */
 	BackendGen backendGen( sectionName, this, sectionGraph, cgd );

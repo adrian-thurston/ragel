@@ -28,19 +28,15 @@ struct Parser;
 
 struct InputData
 {
-	InputData( const char *inputFileName, bool outputActive, bool wantComplete ) : 
+	InputData( const char *inputFileName ) : 
 		inputFileName(inputFileName),
 		outStream(0),
-		outputActive(outputActive),
-		wantComplete(wantComplete),
 		dotGenParser(0)
 	{}
 
 	/* The name of the root section, this does not change during an include. */
 	const char *inputFileName;
 	ostream *outStream;
-	bool outputActive;
-	bool wantComplete;
 	Parser *dotGenParser;
 
 	void writeOutput();

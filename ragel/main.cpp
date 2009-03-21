@@ -54,7 +54,6 @@
 #include "vector.h"
 #include "version.h"
 #include "common.h"
-#include "xmlparse.h"
 #include "inputdata.h"
 
 using std::istream;
@@ -99,6 +98,10 @@ istream *inStream = 0;
 ostream *outStream = 0;
 output_filter *outFilter = 0;
 const char *outputFileName = 0;
+
+ParserDict parserDict;
+ParserList parserList;
+InputItemList inputItems;
 
 /* Print a summary of the options. */
 void usage()
@@ -445,14 +448,13 @@ void processArgs( int argc, const char **argv, const char *&inputFileName )
 
 void process( const char *inputFileName )
 {
-	bool wantComplete = true;
-	bool outputActive = true;
-
 	/* Open the input file for reading. */
 	assert( inputFileName != 0 );
 	ifstream *inFile = new ifstream( inputFileName );
 	if ( ! inFile->is_open() )
 		error() << "could not open " << inputFileName << " for reading" << endp;
+
+	InputData inputData( inputFileName );
 
 	/* Used for just a few things. */
 	std::ostringstream hostData;
@@ -470,13 +472,6 @@ void process( const char *inputFileName )
 	/* Finished, final check for errors.. */
 	if ( gblErrorCount > 0 )
 		exit(1);
-
-	if ( generateDot ) {
-		wantComplete = false;
-		outputActive = false;
-	}
-
-	InputData inputData( inputFileName, outputActive, wantComplete );
 
 	/* Now send EOF to all parsers. */
 	inputData.terminateAllParsers();
@@ -593,7 +588,6 @@ int main( int argc, const char **argv )
 {
 	const char *inputFileName = 0;
 	processArgs( argc, argv, inputFileName );
-	
 
 	/* If -M or -S are given and we're not generating a dot file then invoke
 	 * the frontend. These options are not useful with code generators. */
