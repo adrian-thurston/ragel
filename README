@@ -10,7 +10,8 @@
 
 If you would like to modify Ragel and need to build Ragel's scanners and
 parsers from the specifications then set BUILD_PARSERS=true in the configure
-script and then run it. To build the parsers you will need the following
+script and then run it. This variable is normally set to false in the
+distribution tarballs and true in version control. You will need the following
 programs:
 
  * ragel (the most recent version)
