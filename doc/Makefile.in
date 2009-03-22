@@ -68,10 +68,6 @@ man: $(MANPAGES)
 man-install: man
 	install -d $(DESTDIR)$(mandir)/man1
 	install -m 644 ragel.1      $(DESTDIR)$(mandir)/man1/ragel.1
-	install -m 644 rlgen-dot.1  $(DESTDIR)$(mandir)/man1/rlgen-dot.1
-	install -m 644 rlgen-cd.1   $(DESTDIR)$(mandir)/man1/rlgen-cd.1
-	install -m 644 rlgen-java.1 $(DESTDIR)$(mandir)/man1/rlgen-java.1
-	install -m 644 rlgen-ruby.1 $(DESTDIR)$(mandir)/man1/rlgen-ruby.1
 
 install: all man-install
 	install -d $(DESTDIR)$(docdir)
