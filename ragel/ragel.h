@@ -74,6 +74,7 @@ extern const char *machineSpec, *machineName;
 extern bool printStatistics;
 extern bool wantDupsRemoved;
 extern bool generateDot;
+extern bool generateXML;
 extern RubyImplEnum rubyImpl;
 
 /* Error reporting format. */

@@ -96,7 +96,7 @@ struct InputData
 	void csharpDefaultFileName( const char *inputFile );
 
 	void writeLanguage( std::ostream &out );
-	void writeMachines( std::ostream &out, std::string hostData, const char *inputFileName );
+	void writeXML( std::ostream &out );
 };
 
 #endif

@@ -77,7 +77,7 @@ bool machineSpecFound = false;
 bool wantDupsRemoved = true;
 
 bool printStatistics = false;
-bool frontendOnly = false;
+bool generateXML = false;
 bool generateDot = false;
 
 /* Target language and output style. */
@@ -230,7 +230,7 @@ void processArgs( int argc, const char **argv, InputData &id )
 				break;
 
 			case 'x':
-				frontendOnly = true;
+				generateXML = true;
 				break;
 
 			/* Output. */
@@ -476,10 +476,12 @@ void process( InputData &id )
 	id.makeOutputStream();
 
 	/* Generates the reduced machine, which we use to write output. */
-	id.generateReduced();
+	if ( !generateXML ) {
+		id.generateReduced();
 
-	if ( gblErrorCount > 0 )
-		exit(1);
+		if ( gblErrorCount > 0 )
+			exit(1);
+	}
 	
 	/*
 	 * From this point on we should not be reporting any errors.
@@ -490,10 +492,6 @@ void process( InputData &id )
 
 	/* Close the input and the intermediate file. */
 	delete inFile;
-
-	/* Bail on above error. */
-	if ( gblErrorCount > 0 )
-		exit(1);
 
 	/* If writing to a file, delete the ostream, causing it to flush.
 	 * Standard out is flushed automatically. */
@@ -529,13 +527,6 @@ int main( int argc, const char **argv )
 	InputData id;
 
 	processArgs( argc, argv, id );
-
-	/* If -M or -S are given and we're not generating a dot file then invoke
-	 * the frontend. These options are not useful with code generators. */
-	if ( machineName != 0 || machineSpec != 0 ) {
-		if ( !generateDot )
-			frontendOnly = true;
-	}
 
 	/* Require an input file. If we use standard in then we won't have a file
 	 * name on which to base the output. */

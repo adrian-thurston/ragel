@@ -87,7 +87,7 @@ void InputData::csharpDefaultFileName( const char *inputFile )
 
 void InputData::makeOutputStream()
 {
-	if ( ! generateDot ) {
+	if ( ! generateDot && ! generateXML ) {
 		switch ( hostLang->lang ) {
 			case HostLang::C:
 			case HostLang::D:
@@ -183,9 +183,8 @@ void InputData::prepareMachineGen()
 
 void InputData::generateReduced()
 {
-	if ( generateDot ) {
+	if ( generateDot )
 		dotGenParser->pd->generateReduced( *this );
-	}
 	else {
 		for ( ParserDict::Iter parser = parserDict; parser.lte(); parser++ ) {
 			ParseData *pd = parser->value->pd;
@@ -211,9 +210,11 @@ void InputData::terminateAllParsers( )
 
 void InputData::writeOutput()
 {
-	if ( generateDot ) {
-		static_cast<GraphvizDotGen*>(dotGenParser->pd->cgd)->writeDotFile();
+	if ( generateXML ) {
+		writeXML( *outStream );
 	}
+	else if ( generateDot )
+		static_cast<GraphvizDotGen*>(dotGenParser->pd->cgd)->writeDotFile();
 	else {
 		for ( InputItemList::Iter ii = inputItems; ii.lte(); ii++ ) {
 			if ( ii->type == InputItem::Write ) {

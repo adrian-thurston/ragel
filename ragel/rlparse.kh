@@ -132,6 +132,8 @@ struct Parser
 
 	Vector<bool> exportContext;
 	IncludeHistory includeHistory;
+
+	Parser *prev, *next;
 };
 
 %% write token_defs;
