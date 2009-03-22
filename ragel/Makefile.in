@@ -1,5 +1,5 @@
 #
-#   Copyright 2001-2008 Adrian Thurston <thurston@complang.org>
+#   Copyright 2001-2009 Adrian Thurston <thurston@complang.org>
 #
 
 #   This file is part of Ragel.
@@ -42,8 +42,7 @@ CC_SRCS = \
 	dotcodegen.cpp \
 	xmlcodegen.cpp \
 
-GEN_SRC = version.h rlscan.cpp rlparse.h rlparse.cpp \
-	xmlscan.cpp xmlparse.h
+GEN_SRC = version.h rlscan.cpp rlparse.h rlparse.cpp
 
 LIBS =
 MINGW_LIBS = -lpsapi
@@ -91,18 +90,6 @@ rlscan.cpp: rlparse.h
 
 rlscan.cpp: rlscan.rl
 	ragel -G2 -o $@ $<
-
-xmlparse.h: xmlparse.kh
-	kelbt -o $@ $<
-
-xmlparse.cpp: xmlparse.kl xmlparse.kh
-	kelbt -o $@ $<
-
-xmlscan.cpp: xmlscan.rl
-	ragel -G2 -o xmlscan.cpp xmlscan.rl
-
-xmltags.cpp: xmltags.gperf
-	gperf -L C++ -t $< > $@
 
 endif
 

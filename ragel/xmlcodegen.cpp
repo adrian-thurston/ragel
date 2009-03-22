@@ -22,7 +22,6 @@
 
 #include "ragel.h"
 #include "xmlcodegen.h"
-#include "xmlparse.h"
 #include "parsedata.h"
 #include "fsmgraph.h"
 #include "gendata.h"

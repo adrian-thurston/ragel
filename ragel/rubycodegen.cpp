@@ -26,7 +26,6 @@
 #include "gendata.h"
 #include "ragel.h"
 #include "rubycodegen.h"
-#include "xmlparse.h"
 #include "pcheck.h"
 #include "vector.h"
 #include "version.h"
