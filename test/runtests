@@ -163,49 +163,42 @@ for test_case; do
 	case $lang in
 		c++)
 			lang_opt=-C;
-			codegen=../rlgen-cd/rlgen-cd;
 			code_suffix=cpp;
 			compiler=$cxx_compiler;
 			cflags="-pedantic -ansi -Wall -O3"
 		;;
 		d)
 			lang_opt=-D;
-			codegen=../rlgen-cd/rlgen-cd;
 			code_suffix=d;
 			compiler=$d_compiler;
 			cflags="-Wall -O3"
 		;;
 		c)
 			lang_opt=-C;
-			codegen=../rlgen-cd/rlgen-cd;
 			code_suffix=c;
 			compiler=$c_compiler;
 			cflags="-pedantic -ansi -Wall -O3"
 		;;
 		obj-c)
 			lang_opt=-C;
-			codegen=../rlgen-cd/rlgen-cd;
 			code_suffix=m;
 			compiler=$objc_compiler
 			cflags="-Wall -O3 -fno-strict-aliasing -lobjc"
 		;;
 		java)
 			lang_opt=-J;
-			codegen=../rlgen-java/rlgen-java;
 			code_suffix=java;
 			compiler=$java_compiler
 			cflags=""
 		;;
 		ruby)
 			lang_opt=-R;
-			codegen=../rlgen-ruby/rlgen-ruby;
 			code_suffix=rb;
 			compiler=$ruby_engine
 			cflags=""
 		;;
         csharp)
             lang_opt="-A";
-            codegen=../rlgen-csharp/rlgen-csharp;
             code_suffix=cs;
             compiler=$csharp_compiler
             cflags=""
