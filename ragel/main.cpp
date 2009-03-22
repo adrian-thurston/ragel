@@ -147,7 +147,7 @@ void usage()
 void version()
 {
 	cout << "Ragel State Machine Compiler version " VERSION << " " PUBDATE << endl <<
-			"Copyright (c) 2001-2008 by Adrian Thurston" << endl;
+			"Copyright (c) 2001-2009 by Adrian Thurston" << endl;
 	exit(0);
 }
 

@@ -1,3 +1,37 @@
+Ragel 6.4 - Mar 22, 2009
+========================
+ -Moved back to a single executable. The old intermediate format can still be
+  generated using the -x option. Ragel was split into frontend and backend
+  programs in version 5.0. This was done to encourage interoperability with
+  other tools. Since then, ragel has been made to work with qfsm, with ragel
+  producing the intermediate format and qfsm consuming it. However, there has
+  been no use of Ragel as a consumer of state machine data, with Ragel used as
+  a code generator for DFAs. This is not surprising given that much of the
+  complexity of Ragel is in the frontend, where the regular language to DFA
+  compilation happens. Since the full benefits of the split have not
+  materialized, and the split increases the complexity for users, Ragel has
+  been made once again into a single executable. 
+ -Applied a fix to the documentation Makefile from John D. Mitchell.
+ -Use CXXFLAGS instead of CFLAGS for C++ compiling. Patch from Diego
+  'Flameeyes' Pettenò.
+ -Added support for DESTDIR variable. Patch from Diego 'Flameeyes' Pettenò.
+ -Added a script called unicode2ragel.rb for generating unicode machines to
+  the examples directory. From Rakan El-Khalil.
+ -Fixed a copy-paste error in the documentation that was reported by Jose
+  Quinteiro.
+ -Added three new write commands:
+     write start;
+     write first_final;
+     write error;
+  These generate a reference to the start, first final and error state. When
+  there are many different machine specifications in one file it is easy to
+  get the prefix for these wrong (especially when you do a lot of copy-pasting
+  of boilerplate). The problem can be avoided by using write commands.
+ -Fixed a problem reading hex numbers that have the high bit set when the
+  alphabet is signed and we are on 64 bit. This was reported by _why. The fix
+  was provided by Wialliam Morgan. The literal 0xffffffff was used for a fully
+  set long when -1L should be used instead.
+
 Ragel 6.3 - Aug 29, 2008
 ========================
  -Fixed an assertion that is too strong. In the condition code we need to copy
