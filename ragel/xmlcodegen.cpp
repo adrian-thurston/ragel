@@ -464,13 +464,14 @@ void BackendGen::makeText( GenInlineList *outList, InlineItem *item )
 	outList->append( inlineItem );
 }
 
-void BackendGen::makeTargetItem( GenInlineList *outList, long entryId, GenInlineItem::Type type )
+void BackendGen::makeTargetItem( GenInlineList *outList, NameInst *nameTarg, 
+		GenInlineItem::Type type )
 {
 	long targetState;
 	if ( pd->generatingSectionSubset )
 		targetState = -1;
 	else {
-		EntryMapEl *targ = fsm->entryPoints.find( entryId );
+		EntryMapEl *targ = fsm->entryPoints.find( nameTarg->id );
 		targetState = targ->value->alg.stateNum;
 	}
 
@@ -627,19 +628,19 @@ void BackendGen::makeGenInlineList( GenInlineList *outList, InlineList *inList )
 			makeText( outList, item );
 			break;
 		case InlineItem::Goto:
-			makeTargetItem( outList, item->nameTarg->id, GenInlineItem::Goto );
+			makeTargetItem( outList, item->nameTarg, GenInlineItem::Goto );
 			break;
 		case InlineItem::GotoExpr:
 			makeSubList( outList, item->children, GenInlineItem::GotoExpr );
 			break;
 		case InlineItem::Call:
-			makeTargetItem( outList, item->nameTarg->id, GenInlineItem::Call );
+			makeTargetItem( outList, item->nameTarg, GenInlineItem::Call );
 			break;
 		case InlineItem::CallExpr:
 			makeSubList( outList, item->children, GenInlineItem::CallExpr );
 			break;
 		case InlineItem::Next:
-			makeTargetItem( outList, item->nameTarg->id, GenInlineItem::Next );
+			makeTargetItem( outList, item->nameTarg, GenInlineItem::Next );
 			break;
 		case InlineItem::NextExpr:
 			makeSubList( outList, item->children, GenInlineItem::NextExpr );
@@ -663,7 +664,7 @@ void BackendGen::makeGenInlineList( GenInlineList *outList, InlineList *inList )
 			outList->append( new GenInlineItem( InputLoc(), GenInlineItem::Targs ) );
 			break;
 		case InlineItem::Entry:
-			makeTargetItem( outList, item->nameTarg->id, GenInlineItem::Entry );
+			makeTargetItem( outList, item->nameTarg, GenInlineItem::Entry );
 			break;
 
 		case InlineItem::Hold:
