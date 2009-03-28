@@ -276,9 +276,9 @@ std::ostream &RubyFlatCodeGen::TRANS_ACTIONS()
 void RubyFlatCodeGen::LOCATE_TRANS()
 {
 	out <<
-		"	_keys = " << CS() << " << 1\n"
-		"	_inds = " << IO() << "[" << CS() << "]\n"
-		"	_slen = " << SP() << "[" << CS() << "]\n"
+		"	_keys = " << vCS() << " << 1\n"
+		"	_inds = " << IO() << "[" << vCS() << "]\n"
+		"	_slen = " << SP() << "[" << vCS() << "]\n"
 		"	_trans = if (   _slen > 0 && \n"
 		"			" << K() << "[_keys] <= " << GET_WIDE_KEY() << " && \n"
 		"			" << GET_WIDE_KEY() << " <= " << K() << "[_keys + 1] \n"
@@ -310,9 +310,9 @@ void RubyFlatCodeGen::COND_TRANSLATE()
 {
 	out << 
 		"	_widec = " << GET_KEY() << "\n"
-		"	_keys = " << CS() << " << 1\n"
-		"	_conds = " << CO() << "[" << CS() << "]\n"
-		"	_slen = " << CSP() << "[" << CS() << "]\n"
+		"	_keys = " << vCS() << " << 1\n"
+		"	_conds = " << CO() << "[" << vCS() << "]\n"
+		"	_slen = " << CSP() << "[" << vCS() << "]\n"
 		"	_cond = if ( _slen > 0 && \n" 
 		"		     " << CK() << "[_keys] <= " << GET_WIDE_KEY() << " &&\n" 
 		"		     " << GET_WIDE_KEY() << " <= " << CK() << "[_keys + 1]\n"
@@ -406,7 +406,7 @@ void RubyFlatCodeGen::GOTO( ostream &out, int gotoDest, bool inFinish )
 {
 	out << 
 		"	begin\n"
-		"		" << CS() << " = " << gotoDest << "\n"
+		"		" << vCS() << " = " << gotoDest << "\n"
 		"		_trigger_goto = true\n"
 		"		_goto_level = _again\n"
 		"		break\n"
@@ -422,9 +422,9 @@ void RubyFlatCodeGen::CALL( ostream &out, int callDest, int targState, bool inFi
 
 	out <<
 		"	begin\n"
-		"		" << STACK() << "[" << TOP() << "] = " << CS() << "\n"
+		"		" << STACK() << "[" << TOP() << "] = " << vCS() << "\n"
 		"		" << TOP() << "+= 1\n"
-		"		" << CS() << " = " << callDest << "\n"
+		"		" << vCS() << " = " << callDest << "\n"
 		"		_trigger_goto = true\n"
 		"		_goto_level = _again\n"
 		"		break\n"
@@ -443,9 +443,9 @@ void RubyFlatCodeGen::CALL_EXPR(ostream &out, GenInlineItem *ilItem, int targSta
 
 	out <<
 		"	begin\n"
-		"		" << STACK() << "[" << TOP() << "] = " << CS() << "\n"
+		"		" << STACK() << "[" << TOP() << "] = " << vCS() << "\n"
 		"		" << TOP() << " += 1\n"
-		"		" << CS() << " = (";
+		"		" << vCS() << " = (";
 	INLINE_LIST( out, ilItem->children, targState, inFinish );
 	out << ")\n";
 
@@ -464,7 +464,7 @@ void RubyFlatCodeGen::RET( ostream &out, bool inFinish )
 	out <<
 		"	begin\n"
 		"		" << TOP() << " -= 1\n"
-		"		" << CS() << " = " << STACK() << "[" << TOP() << "]\n";
+		"		" << vCS() << " = " << STACK() << "[" << TOP() << "]\n";
 
 	if ( postPopExpr != 0 ) {
 		out << "begin\n";
@@ -481,14 +481,14 @@ void RubyFlatCodeGen::RET( ostream &out, bool inFinish )
 
 void RubyFlatCodeGen::NEXT( ostream &ret, int nextDest, bool inFinish )
 {
-	ret << CS() << " = " << nextDest << ";";
+	ret << vCS() << " = " << nextDest << ";";
 }
 
 void RubyFlatCodeGen::GOTO_EXPR( ostream &out, GenInlineItem *ilItem, bool inFinish )
 {
 	out << 
 		"	begin\n"
-		"		" << CS() << " = (";
+		"		" << vCS() << " = (";
 	INLINE_LIST( out, ilItem->children, 0, inFinish );
 	out << ")\n";
 	out <<
@@ -500,7 +500,7 @@ void RubyFlatCodeGen::GOTO_EXPR( ostream &out, GenInlineItem *ilItem, bool inFin
 
 void RubyFlatCodeGen::NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
-	ret << CS() << " = (";
+	ret << vCS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish );
 	ret << ");";
 }
@@ -513,7 +513,7 @@ void RubyFlatCodeGen::CURS( ostream &ret, bool inFinish )
 
 void RubyFlatCodeGen::TARGS( ostream &ret, bool inFinish, int targState )
 {
-	ret << "(" << CS() << ")";
+	ret << "(" << vCS() << ")";
 }
 
 void RubyFlatCodeGen::BREAK( ostream &out, int targState )
@@ -695,7 +695,7 @@ void RubyFlatCodeGen::writeExec()
 
 	if ( redFsm->errState != 0 ) {
 		out << 
-			"	if " << CS() << " == " << redFsm->errState->id << "\n"
+			"	if " << vCS() << " == " << redFsm->errState->id << "\n"
 			"		_goto_level = _out\n"
 			"		next\n"
 			"	end\n";
@@ -708,7 +708,7 @@ void RubyFlatCodeGen::writeExec()
 
 	if ( redFsm->anyFromStateActions() ) {
 		out << 
-			"	_acts = " << FSA() << "[" << CS() << "]\n"
+			"	_acts = " << FSA() << "[" << vCS() << "]\n"
 			"	_nacts = " << A() << "[_acts]\n"
 			"	_acts += 1\n"
 			"	while _nacts > 0\n"
@@ -736,9 +736,9 @@ void RubyFlatCodeGen::writeExec()
 	}
 
 	if ( redFsm->anyRegCurStateRef() )
-		out << "	_ps = " << CS() << "\n";
+		out << "	_ps = " << vCS() << "\n";
 
-	out << "	" << CS() << " = " << TT() << "[_trans]\n";
+	out << "	" << vCS() << " = " << TT() << "[_trans]\n";
 
 	if ( redFsm->anyRegActions() ) {
 		out << 
@@ -767,7 +767,7 @@ void RubyFlatCodeGen::writeExec()
 
 	if ( redFsm->anyToStateActions() ) {
 		out <<
-			"	_acts = " << TSA() << "["  << CS() << "]\n"
+			"	_acts = " << TSA() << "["  << vCS() << "]\n"
 			"	_nacts = " << A() << "[_acts]\n"
 			"	_acts += 1\n"
 			"	while _nacts > 0\n"
@@ -784,7 +784,7 @@ void RubyFlatCodeGen::writeExec()
 
 	if ( redFsm->errState != 0 ) {
 		out << 
-			"	if " << CS() << " == " << redFsm->errState->id << "\n"
+			"	if " << vCS() << " == " << redFsm->errState->id << "\n"
 			"		_goto_level = _out\n"
 			"		next\n"
 			"	end\n";
@@ -812,12 +812,12 @@ void RubyFlatCodeGen::writeExec()
 
 	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
 		out << 
-			"	if " << P() << " == " << EOFV() << "\n";
+			"	if " << P() << " == " << vEOF() << "\n";
 
 		if ( redFsm->anyEofTrans() ) {
 			out <<
-				"	if " << ET() << "[" << CS() << "] > 0\n"
-				"		_trans = " << ET() << "[" << CS() << "] - 1;\n"
+				"	if " << ET() << "[" << vCS() << "] > 0\n"
+				"		_trans = " << ET() << "[" << vCS() << "] - 1;\n"
 				"		_goto_level = _eof_trans\n"
 				"		next;\n"
 				"	end\n";
@@ -826,7 +826,7 @@ void RubyFlatCodeGen::writeExec()
 		if ( redFsm->anyEofActions() ) {
 			out <<
 				"	begin\n"
-				"	__acts = " << EA() << "[" << CS() << "]\n"
+				"	__acts = " << EA() << "[" << vCS() << "]\n"
 				"	__nacts = " << A() << "[__acts]\n" << 
 				"	__acts += 1\n"
 				"	while ( __nacts > 0 ) \n"

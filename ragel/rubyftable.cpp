@@ -37,7 +37,7 @@ void RubyFTabCodeGen::GOTO( ostream &out, int gotoDest, bool inFinish )
 {
 	out << 
 		"	begin\n"
-		"		" << CS() << " = " << gotoDest << "\n"
+		"		" << vCS() << " = " << gotoDest << "\n"
 		"		_goto_level = _again\n"
 		"		next\n"
 		"	end\n";
@@ -47,7 +47,7 @@ void RubyFTabCodeGen::GOTO_EXPR( ostream &out, GenInlineItem *ilItem, bool inFin
 {
 	out << 
 		"	begin\n"
-		"		" << CS() << " = (";
+		"		" << vCS() << " = (";
 	INLINE_LIST( out, ilItem->children, 0, inFinish );
 	out << ")\n";
 	out <<
@@ -65,9 +65,9 @@ void RubyFTabCodeGen::CALL( ostream &out, int callDest, int targState, bool inFi
 
 	out <<
 		"	begin\n"
-		"		" << STACK() << "[" << TOP() << "] = " << CS() << "\n"
+		"		" << STACK() << "[" << TOP() << "] = " << vCS() << "\n"
 		"		" << TOP() << "+= 1\n"
-		"		" << CS() << " = " << callDest << "\n"
+		"		" << vCS() << " = " << callDest << "\n"
 		"		_goto_level = _again\n"
 		"		next\n"
 		"	end\n";
@@ -86,9 +86,9 @@ void RubyFTabCodeGen::CALL_EXPR(ostream &out, GenInlineItem *ilItem,
 
 	out <<
 		"	begin\n"
-		"		" << STACK() << "[" << TOP() << "] = " << CS() << "\n"
+		"		" << STACK() << "[" << TOP() << "] = " << vCS() << "\n"
 		"		" << TOP() << " += 1\n"
-		"		" << CS() << " = (";
+		"		" << vCS() << " = (";
 	INLINE_LIST( out, ilItem->children, targState, inFinish );
 	out << ")\n";
 
@@ -106,7 +106,7 @@ void RubyFTabCodeGen::RET( ostream &out, bool inFinish )
 	out <<
 		"	begin\n"
 		"		" << TOP() << " -= 1\n"
-		"		" << CS() << " = " << STACK() << "[" << TOP() << "]\n";
+		"		" << vCS() << " = " << STACK() << "[" << TOP() << "]\n";
 
 	if ( postPopExpr != 0 ) {
 		out << "begin\n";
@@ -396,7 +396,7 @@ void RubyFTabCodeGen::writeExec()
 
 	if ( redFsm->errState != 0 ) {
 		out << 
-			"	if " << CS() << " == " << redFsm->errState->id << "\n"
+			"	if " << vCS() << " == " << redFsm->errState->id << "\n"
 			"		_goto_level = _out\n"
 			"		next\n"
 			"	end\n";
@@ -409,7 +409,7 @@ void RubyFTabCodeGen::writeExec()
 	
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
-			"	case " << FSA() << "[" << CS() << "] \n";
+			"	case " << FSA() << "[" << vCS() << "] \n";
 			FROM_STATE_ACTION_SWITCH() <<
 			"	end # from state action switch \n"
 			"\n";
@@ -430,10 +430,10 @@ void RubyFTabCodeGen::writeExec()
 	}
 
 	if ( redFsm->anyRegCurStateRef() )
-		out << "	_ps = " << CS() << ";\n";
+		out << "	_ps = " << vCS() << ";\n";
 
 	out <<
-		"	" << CS() << " = " << TT() << "[_trans];\n"
+		"	" << vCS() << " = " << TT() << "[_trans];\n"
 		"\n";
 
 	if ( redFsm->anyRegActions() ) {
@@ -454,7 +454,7 @@ void RubyFTabCodeGen::writeExec()
 
 	if ( redFsm->anyToStateActions() ) {
 		out <<
-			"	case " << TSA() << "[" << CS() << "] \n";
+			"	case " << TSA() << "[" << vCS() << "] \n";
 			TO_STATE_ACTION_SWITCH() <<
 			"	end\n"
 			"\n";
@@ -462,7 +462,7 @@ void RubyFTabCodeGen::writeExec()
 
 	if ( redFsm->errState != 0 ) {
 		out << 
-			"	if " << CS() << " == " << redFsm->errState->id << "\n"
+			"	if " << vCS() << " == " << redFsm->errState->id << "\n"
 			"		_goto_level = _out\n"
 			"		next\n"
 			"	end\n";
@@ -490,12 +490,12 @@ void RubyFTabCodeGen::writeExec()
 
 	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
 		out <<
-			"	if " << P() << " == " << EOFV() << "\n";
+			"	if " << P() << " == " << vEOF() << "\n";
 
 		if ( redFsm->anyEofTrans() ) {
 			out <<
-				"	if " << ET() << "[" << CS() << "] > 0\n"
-				"		_trans = " << ET() << "[" << CS() << "] - 1;\n"
+				"	if " << ET() << "[" << vCS() << "] > 0\n"
+				"		_trans = " << ET() << "[" << vCS() << "] - 1;\n"
 				"		_goto_level = _eof_trans\n"
 				"		next;\n"
 				"	end\n";
@@ -504,7 +504,7 @@ void RubyFTabCodeGen::writeExec()
 		if ( redFsm->anyEofActions() ) {
 			out <<
 				"	begin\n"
-				"		case ( " << EA() << "[" << CS() << "] )\n";
+				"		case ( " << EA() << "[" << vCS() << "] )\n";
 				EOF_ACTION_SWITCH() <<
 				"		end\n"
 				"	end\n";

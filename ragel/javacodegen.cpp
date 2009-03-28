@@ -77,13 +77,13 @@ void JavaTabCodeGen::genLineDirective( ostream &out )
 
 void JavaTabCodeGen::GOTO( ostream &ret, int gotoDest, bool inFinish )
 {
-	ret << "{" << CS() << " = " << gotoDest << "; _goto_targ = " << _again << "; " << 
+	ret << "{" << vCS() << " = " << gotoDest << "; _goto_targ = " << _again << "; " << 
 			CTRL_FLOW() << "continue _goto;}";
 }
 
 void JavaTabCodeGen::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
-	ret << "{" << CS() << " = (";
+	ret << "{" << vCS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish );
 	ret << "); _goto_targ = " << _again << "; " << CTRL_FLOW() << "continue _goto;}";
 }
@@ -95,7 +95,7 @@ void JavaTabCodeGen::CALL( ostream &ret, int callDest, int targState, bool inFin
 		INLINE_LIST( ret, prePushExpr, 0, false );
 	}
 
-	ret << "{" << STACK() << "[" << TOP() << "++] = " << CS() << "; " << CS() << " = " << 
+	ret << "{" << STACK() << "[" << TOP() << "++] = " << vCS() << "; " << vCS() << " = " << 
 			callDest << "; _goto_targ = " << _again << "; " << CTRL_FLOW() << "continue _goto;}";
 
 	if ( prePushExpr != 0 )
@@ -109,7 +109,7 @@ void JavaTabCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targSta
 		INLINE_LIST( ret, prePushExpr, 0, false );
 	}
 
-	ret << "{" << STACK() << "[" << TOP() << "++] = " << CS() << "; " << CS() << " = (";
+	ret << "{" << STACK() << "[" << TOP() << "++] = " << vCS() << "; " << vCS() << " = (";
 	INLINE_LIST( ret, ilItem->children, targState, inFinish );
 	ret << "); _goto_targ = " << _again << "; " << CTRL_FLOW() << "continue _goto;}";
 
@@ -119,7 +119,7 @@ void JavaTabCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targSta
 
 void JavaTabCodeGen::RET( ostream &ret, bool inFinish )
 {
-	ret << "{" << CS() << " = " << STACK() << "[--" << TOP() << "];";
+	ret << "{" << vCS() << " = " << STACK() << "[--" << TOP() << "];";
 
 	if ( postPopExpr != 0 ) {
 		ret << "{";
@@ -138,12 +138,12 @@ void JavaTabCodeGen::BREAK( ostream &ret, int targState )
 
 void JavaTabCodeGen::NEXT( ostream &ret, int nextDest, bool inFinish )
 {
-	ret << CS() << " = " << nextDest << ";";
+	ret << vCS() << " = " << nextDest << ";";
 }
 
 void JavaTabCodeGen::NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
-	ret << CS() << " = (";
+	ret << vCS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish );
 	ret << ");";
 }
@@ -196,7 +196,7 @@ void JavaTabCodeGen::INLINE_LIST( ostream &ret, GenInlineList *inlineList,
 			ret << "(_ps)";
 			break;
 		case GenInlineItem::Targs:
-			ret << "(" << CS() << ")";
+			ret << "(" << vCS() << ")";
 			break;
 		case GenInlineItem::Entry:
 			ret << item->targState->id;
@@ -285,8 +285,8 @@ void JavaTabCodeGen::COND_TRANSLATE()
 {
 	out << 
 		"	_widec = " << GET_KEY() << ";\n"
-		"	_keys = " << CO() << "[" << CS() << "]*2\n;"
-		"	_klen = " << CL() << "[" << CS() << "];\n"
+		"	_keys = " << CO() << "[" << vCS() << "]*2\n;"
+		"	_klen = " << CL() << "[" << vCS() << "];\n"
 		"	if ( _klen > 0 ) {\n"
 		"		int _lower = _keys\n;"
 		"		int _mid;\n"
@@ -301,7 +301,7 @@ void JavaTabCodeGen::COND_TRANSLATE()
 		"			else if ( " << GET_WIDE_KEY() << " > " << CK() << "[_mid+1] )\n"
 		"				_lower = _mid + 2;\n"
 		"			else {\n"
-		"				switch ( " << C() << "[" << CO() << "[" << CS() << "]"
+		"				switch ( " << C() << "[" << CO() << "[" << vCS() << "]"
 							" + ((_mid - _keys)>>1)] ) {\n"
 		;
 
@@ -337,9 +337,9 @@ void JavaTabCodeGen::LOCATE_TRANS()
 {
 	out <<
 		"	_match: do {\n"
-		"	_keys = " << KO() << "[" << CS() << "]" << ";\n"
-		"	_trans = " << IO() << "[" << CS() << "];\n"
-		"	_klen = " << SL() << "[" << CS() << "];\n"
+		"	_keys = " << KO() << "[" << vCS() << "]" << ";\n"
+		"	_trans = " << IO() << "[" << vCS() << "];\n"
+		"	_klen = " << SL() << "[" << vCS() << "];\n"
 		"	if ( _klen > 0 ) {\n"
 		"		int _lower = _keys;\n"
 		"		int _mid;\n"
@@ -362,7 +362,7 @@ void JavaTabCodeGen::LOCATE_TRANS()
 		"		_trans += _klen;\n"
 		"	}\n"
 		"\n"
-		"	_klen = " << RL() << "[" << CS() << "];\n"
+		"	_klen = " << RL() << "[" << vCS() << "];\n"
 		"	if ( _klen > 0 ) {\n"
 		"		int _lower = _keys;\n"
 		"		int _mid;\n"
@@ -1036,7 +1036,7 @@ void JavaTabCodeGen::writeExec()
 
 	if ( redFsm->errState != 0 ) {
 		out << 
-			"	if ( " << CS() << " == " << redFsm->errState->id << " ) {\n"
+			"	if ( " << vCS() << " == " << redFsm->errState->id << " ) {\n"
 			"		_goto_targ = " << _out << ";\n"
 			"		continue _goto;\n"
 			"	}\n";
@@ -1046,7 +1046,7 @@ void JavaTabCodeGen::writeExec()
 
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
-			"	_acts = " << FSA() << "[" << CS() << "]" << ";\n"
+			"	_acts = " << FSA() << "[" << vCS() << "]" << ";\n"
 			"	_nacts = " << CAST("int") << " " << A() << "[_acts++];\n"
 			"	while ( _nacts-- > 0 ) {\n"
 			"		switch ( " << A() << "[_acts++] ) {\n";
@@ -1068,10 +1068,10 @@ void JavaTabCodeGen::writeExec()
 		out << "case " << _eof_trans << ":\n";
 
 	if ( redFsm->anyRegCurStateRef() )
-		out << "	_ps = " << CS() << ";\n";
+		out << "	_ps = " << vCS() << ";\n";
 
 	out <<
-		"	" << CS() << " = " << TT() << "[_trans];\n"
+		"	" << vCS() << " = " << TT() << "[_trans];\n"
 		"\n";
 
 	if ( redFsm->anyRegActions() ) {
@@ -1093,7 +1093,7 @@ void JavaTabCodeGen::writeExec()
 
 	if ( redFsm->anyToStateActions() ) {
 		out <<
-			"	_acts = " << TSA() << "[" << CS() << "]" << ";\n"
+			"	_acts = " << TSA() << "[" << vCS() << "]" << ";\n"
 			"	_nacts = " << CAST("int") << " " << A() << "[_acts++];\n"
 			"	while ( _nacts-- > 0 ) {\n"
 			"		switch ( " << A() << "[_acts++] ) {\n";
@@ -1105,7 +1105,7 @@ void JavaTabCodeGen::writeExec()
 
 	if ( redFsm->errState != 0 ) {
 		out << 
-			"	if ( " << CS() << " == " << redFsm->errState->id << " ) {\n"
+			"	if ( " << vCS() << " == " << redFsm->errState->id << " ) {\n"
 			"		_goto_targ = " << _out << ";\n"
 			"		continue _goto;\n"
 			"	}\n";
@@ -1129,13 +1129,13 @@ void JavaTabCodeGen::writeExec()
 
 	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
 		out <<
-			"	if ( " << P() << " == " << EOFV() << " )\n"
+			"	if ( " << P() << " == " << vEOF() << " )\n"
 			"	{\n";
 
 		if ( redFsm->anyEofTrans() ) {
 			out <<
-				"	if ( " << ET() << "[" << CS() << "] > 0 ) {\n"
-				"		_trans = " << ET() << "[" << CS() << "] - 1;\n"
+				"	if ( " << ET() << "[" << vCS() << "] > 0 ) {\n"
+				"		_trans = " << ET() << "[" << vCS() << "] - 1;\n"
 				"		_goto_targ = " << _eof_trans << ";\n"
 				"		continue _goto;\n"
 				"	}\n";
@@ -1143,7 +1143,7 @@ void JavaTabCodeGen::writeExec()
 
 		if ( redFsm->anyEofActions() ) {
 			out <<
-				"	int __acts = " << EA() << "[" << CS() << "]" << ";\n"
+				"	int __acts = " << EA() << "[" << vCS() << "]" << ";\n"
 				"	int __nacts = " << CAST("int") << " " << A() << "[__acts++];\n"
 				"	while ( __nacts-- > 0 ) {\n"
 				"		switch ( " << A() << "[__acts++] ) {\n";
@@ -1363,7 +1363,7 @@ string JavaTabCodeGen::PE()
 	return ret.str();
 }
 
-string JavaTabCodeGen::EOFV()
+string JavaTabCodeGen::vEOF()
 {
 	ostringstream ret;
 	if ( eofExpr == 0 )
@@ -1376,7 +1376,7 @@ string JavaTabCodeGen::EOFV()
 	return ret.str();
 }
 
-string JavaTabCodeGen::CS()
+string JavaTabCodeGen::vCS()
 {
 	ostringstream ret;
 	if ( csExpr == 0 )
@@ -1626,7 +1626,7 @@ void JavaTabCodeGen::writeInit()
 	out << "	{\n";
 
 	if ( !noCS )
-		out << "\t" << CS() << " = " << START() << ";\n";
+		out << "\t" << vCS() << " = " << START() << ";\n";
 	
 	/* If there are any calls, then the stack top needs initialization. */
 	if ( redFsm->anyActionCalls() || redFsm->anyActionRets() )

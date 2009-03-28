@@ -614,10 +614,10 @@ std::ostream &TabCodeGen::TRANS_ACTIONS_WI()
 void TabCodeGen::LOCATE_TRANS()
 {
 	out <<
-		"	_keys = " << ARR_OFF( K(), KO() + "[" + CS() + "]" ) << ";\n"
-		"	_trans = " << IO() << "[" << CS() << "];\n"
+		"	_keys = " << ARR_OFF( K(), KO() + "[" + vCS() + "]" ) << ";\n"
+		"	_trans = " << IO() << "[" << vCS() << "];\n"
 		"\n"
-		"	_klen = " << SL() << "[" << CS() << "];\n"
+		"	_klen = " << SL() << "[" << vCS() << "];\n"
 		"	if ( _klen > 0 ) {\n"
 		"		" << PTR_CONST() << WIDE_ALPH_TYPE() << POINTER() << "_lower = _keys;\n"
 		"		" << PTR_CONST() << WIDE_ALPH_TYPE() << POINTER() << "_mid;\n"
@@ -640,7 +640,7 @@ void TabCodeGen::LOCATE_TRANS()
 		"		_trans += _klen;\n"
 		"	}\n"
 		"\n"
-		"	_klen = " << RL() << "[" << CS() << "];\n"
+		"	_klen = " << RL() << "[" << vCS() << "];\n"
 		"	if ( _klen > 0 ) {\n"
 		"		" << PTR_CONST() << WIDE_ALPH_TYPE() << POINTER() << "_lower = _keys;\n"
 		"		" << PTR_CONST() << WIDE_ALPH_TYPE() << POINTER() << "_mid;\n"
@@ -666,13 +666,13 @@ void TabCodeGen::LOCATE_TRANS()
 
 void TabCodeGen::GOTO( ostream &ret, int gotoDest, bool inFinish )
 {
-	ret << "{" << CS() << " = " << gotoDest << "; " << 
+	ret << "{" << vCS() << " = " << gotoDest << "; " << 
 			CTRL_FLOW() << "goto _again;}";
 }
 
 void TabCodeGen::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
-	ret << "{" << CS() << " = (";
+	ret << "{" << vCS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
 	ret << "); " << CTRL_FLOW() << "goto _again;}";
 }
@@ -684,17 +684,17 @@ void TabCodeGen::CURS( ostream &ret, bool inFinish )
 
 void TabCodeGen::TARGS( ostream &ret, bool inFinish, int targState )
 {
-	ret << "(" << CS() << ")";
+	ret << "(" << vCS() << ")";
 }
 
 void TabCodeGen::NEXT( ostream &ret, int nextDest, bool inFinish )
 {
-	ret << CS() << " = " << nextDest << ";";
+	ret << vCS() << " = " << nextDest << ";";
 }
 
 void TabCodeGen::NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
-	ret << CS() << " = (";
+	ret << vCS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
 	ret << ");";
 }
@@ -706,7 +706,7 @@ void TabCodeGen::CALL( ostream &ret, int callDest, int targState, bool inFinish 
 		INLINE_LIST( ret, prePushExpr, 0, false, false );
 	}
 
-	ret << "{" << STACK() << "[" << TOP() << "++] = " << CS() << "; " << CS() << " = " << 
+	ret << "{" << STACK() << "[" << TOP() << "++] = " << vCS() << "; " << vCS() << " = " << 
 			callDest << "; " << CTRL_FLOW() << "goto _again;}";
 
 	if ( prePushExpr != 0 )
@@ -720,7 +720,7 @@ void TabCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, 
 		INLINE_LIST( ret, prePushExpr, 0, false, false );
 	}
 
-	ret << "{" << STACK() << "[" << TOP() << "++] = " << CS() << "; " << CS() << " = (";
+	ret << "{" << STACK() << "[" << TOP() << "++] = " << vCS() << "; " << vCS() << " = (";
 	INLINE_LIST( ret, ilItem->children, targState, inFinish, false );
 	ret << "); " << CTRL_FLOW() << "goto _again;}";
 
@@ -730,7 +730,7 @@ void TabCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, 
 
 void TabCodeGen::RET( ostream &ret, bool inFinish )
 {
-	ret << "{" << CS() << " = " << STACK() << "[--" << 
+	ret << "{" << vCS() << " = " << STACK() << "[--" << 
 			TOP() << "]; ";
 
 	if ( postPopExpr != 0 ) {
@@ -873,8 +873,8 @@ void TabCodeGen::COND_TRANSLATE()
 {
 	out << 
 		"	_widec = " << GET_KEY() << ";\n"
-		"	_klen = " << CL() << "[" << CS() << "];\n"
-		"	_keys = " << ARR_OFF( CK(), "(" + CO() + "[" + CS() + "]*2)" ) << ";\n"
+		"	_klen = " << CL() << "[" << vCS() << "];\n"
+		"	_keys = " << ARR_OFF( CK(), "(" + CO() + "[" + vCS() + "]*2)" ) << ";\n"
 		"	if ( _klen > 0 ) {\n"
 		"		" << PTR_CONST() << WIDE_ALPH_TYPE() << POINTER() << "_lower = _keys;\n"
 		"		" << PTR_CONST() << WIDE_ALPH_TYPE() << POINTER() << "_mid;\n"
@@ -889,7 +889,7 @@ void TabCodeGen::COND_TRANSLATE()
 		"			else if ( " << GET_WIDE_KEY() << " > _mid[1] )\n"
 		"				_lower = _mid + 2;\n"
 		"			else {\n"
-		"				switch ( " << C() << "[" << CO() << "[" << CS() << "]"
+		"				switch ( " << C() << "[" << CO() << "[" << vCS() << "]"
 							" + ((_mid - _keys)>>1)] ) {\n";
 
 	for ( CondSpaceList::Iter csi = condSpaceList; csi.lte(); csi++ ) {
@@ -964,7 +964,7 @@ void TabCodeGen::writeExec()
 	if ( redFsm->errState != 0 ) {
 		outLabelUsed = true;
 		out << 
-			"	if ( " << CS() << " == " << redFsm->errState->id << " )\n"
+			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
 			"		goto _out;\n";
 	}
 
@@ -972,7 +972,7 @@ void TabCodeGen::writeExec()
 
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
-			"	_acts = " << ARR_OFF( A(),  FSA() + "[" + CS() + "]" ) << ";\n"
+			"	_acts = " << ARR_OFF( A(),  FSA() + "[" + vCS() + "]" ) << ";\n"
 			"	_nacts = " << CAST(UINT()) << " *_acts++;\n"
 			"	while ( _nacts-- > 0 ) {\n"
 			"		switch ( *_acts++ ) {\n";
@@ -997,10 +997,10 @@ void TabCodeGen::writeExec()
 		out << "_eof_trans:\n";
 
 	if ( redFsm->anyRegCurStateRef() )
-		out << "	_ps = " << CS() << ";\n";
+		out << "	_ps = " << vCS() << ";\n";
 
 	out <<
-		"	" << CS() << " = " << TT() << "[_trans];\n"
+		"	" << vCS() << " = " << TT() << "[_trans];\n"
 		"\n";
 
 	if ( redFsm->anyRegActions() ) {
@@ -1025,7 +1025,7 @@ void TabCodeGen::writeExec()
 
 	if ( redFsm->anyToStateActions() ) {
 		out <<
-			"	_acts = " << ARR_OFF( A(), TSA() + "[" + CS() + "]" ) << ";\n"
+			"	_acts = " << ARR_OFF( A(), TSA() + "[" + vCS() + "]" ) << ";\n"
 			"	_nacts = " << CAST(UINT()) << " *_acts++;\n"
 			"	while ( _nacts-- > 0 ) {\n"
 			"		switch ( *_acts++ ) {\n";
@@ -1039,7 +1039,7 @@ void TabCodeGen::writeExec()
 	if ( redFsm->errState != 0 ) {
 		outLabelUsed = true;
 		out << 
-			"	if ( " << CS() << " == " << redFsm->errState->id << " )\n"
+			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
 			"		goto _out;\n";
 	}
 
@@ -1059,13 +1059,13 @@ void TabCodeGen::writeExec()
 	
 	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
 		out << 
-			"	if ( " << P() << " == " << EOFV() << " )\n"
+			"	if ( " << P() << " == " << vEOF() << " )\n"
 			"	{\n";
 
 		if ( redFsm->anyEofTrans() ) {
 			out <<
-				"	if ( " << ET() << "[" << CS() << "] > 0 ) {\n"
-				"		_trans = " << ET() << "[" << CS() << "] - 1;\n"
+				"	if ( " << ET() << "[" << vCS() << "] > 0 ) {\n"
+				"		_trans = " << ET() << "[" << vCS() << "] - 1;\n"
 				"		goto _eof_trans;\n"
 				"	}\n";
 		}
@@ -1074,7 +1074,7 @@ void TabCodeGen::writeExec()
 			out <<
 				"	" << PTR_CONST() << ARRAY_TYPE(redFsm->maxActArrItem) << 
 						POINTER() << "__acts = " << 
-						ARR_OFF( A(), EA() + "[" + CS() + "]" ) << ";\n"
+						ARR_OFF( A(), EA() + "[" + vCS() + "]" ) << ";\n"
 				"	" << UINT() << " __nacts = " << CAST(UINT()) << " *__acts++;\n"
 				"	while ( __nacts-- > 0 ) {\n"
 				"		switch ( *__acts++ ) {\n";

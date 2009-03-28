@@ -199,7 +199,7 @@ void CSharpFGotoCodeGen::writeExec()
 	if ( redFsm->errState != 0 ) {
 		outLabelUsed = true;
 		out << 
-			"	if ( " << CS() << " == " << redFsm->errState->id << " )\n"
+			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
 			"		goto _out;\n";
 	}
 
@@ -207,7 +207,7 @@ void CSharpFGotoCodeGen::writeExec()
 
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
-			"	switch ( " << FSA() << "[" << CS() << "] ) {\n";
+			"	switch ( " << FSA() << "[" << vCS() << "] ) {\n";
 			FROM_STATE_ACTION_SWITCH();
 			SWITCH_DEFAULT() <<
 			"	}\n"
@@ -215,7 +215,7 @@ void CSharpFGotoCodeGen::writeExec()
 	}
 
 	out << 
-		"	switch ( " << CS() << " ) {\n";
+		"	switch ( " << vCS() << " ) {\n";
 		STATE_GOTOS();
 		SWITCH_DEFAULT() <<
 		"	}\n"
@@ -230,7 +230,7 @@ void CSharpFGotoCodeGen::writeExec()
 
 	if ( redFsm->anyToStateActions() ) {
 		out <<
-			"	switch ( " << TSA() << "[" << CS() << "] ) {\n";
+			"	switch ( " << TSA() << "[" << vCS() << "] ) {\n";
 			TO_STATE_ACTION_SWITCH();
 			SWITCH_DEFAULT() <<
 			"	}\n"
@@ -240,7 +240,7 @@ void CSharpFGotoCodeGen::writeExec()
 	if ( redFsm->errState != 0 ) {
 		outLabelUsed = true;
 		out << 
-			"	if ( " << CS() << " == " << redFsm->errState->id << " )\n"
+			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
 			"		goto _out;\n";
 	}
 
@@ -260,12 +260,12 @@ void CSharpFGotoCodeGen::writeExec()
 
 	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
 		out <<
-			"	if ( " << P() << " == " << EOFV() << " )\n"
+			"	if ( " << P() << " == " << vEOF() << " )\n"
 			"	{\n";
 
 		if ( redFsm->anyEofTrans() ) {
 			out <<
-				"	switch ( " << CS() << " ) {\n";
+				"	switch ( " << vCS() << " ) {\n";
 
 			for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 				if ( st->eofTrans != 0 )
@@ -278,7 +278,7 @@ void CSharpFGotoCodeGen::writeExec()
 
 		if ( redFsm->anyEofActions() ) {
 			out <<
-				"	switch ( " << EA() << "[" << CS() << "] ) {\n";
+				"	switch ( " << EA() << "[" << vCS() << "] ) {\n";
 				EOF_ACTION_SWITCH();
 				SWITCH_DEFAULT() <<
 				"	}\n";

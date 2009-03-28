@@ -442,10 +442,10 @@ std::ostream &CSharpFlatCodeGen::TRANS_ACTIONS()
 void CSharpFlatCodeGen::LOCATE_TRANS()
 {
 	out <<
-		"	_keys = " << CS() << "<<1;\n"
-		"	_inds = " << IO() << "[" << CS() << "];\n"
+		"	_keys = " << vCS() << "<<1;\n"
+		"	_inds = " << IO() << "[" << vCS() << "];\n"
 		"\n"
-		"	_slen = " << SP() << "[" << CS() << "];\n"
+		"	_slen = " << SP() << "[" << vCS() << "];\n"
 		"	_trans = " << I() << "[_inds + (\n"
 		"		_slen > 0 && " << K() << "[_keys] <=" << GET_WIDE_KEY() << " &&\n"
 		"		" << GET_WIDE_KEY() << " <= " << K() <<"[_keys+1] ?\n"
@@ -455,13 +455,13 @@ void CSharpFlatCodeGen::LOCATE_TRANS()
 
 void CSharpFlatCodeGen::GOTO( ostream &ret, int gotoDest, bool inFinish )
 {
-	ret << "{" << CS() << " = " << gotoDest << "; " << 
+	ret << "{" << vCS() << " = " << gotoDest << "; " << 
 			CTRL_FLOW() << "goto _again;}";
 }
 
 void CSharpFlatCodeGen::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
-	ret << "{" << CS() << " = (";
+	ret << "{" << vCS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish );
 	ret << "); " << CTRL_FLOW() << "goto _again;}";
 }
@@ -473,17 +473,17 @@ void CSharpFlatCodeGen::CURS( ostream &ret, bool inFinish )
 
 void CSharpFlatCodeGen::TARGS( ostream &ret, bool inFinish, int targState )
 {
-	ret << "(" << CS() << ")";
+	ret << "(" << vCS() << ")";
 }
 
 void CSharpFlatCodeGen::NEXT( ostream &ret, int nextDest, bool inFinish )
 {
-	ret << CS() << " = " << nextDest << ";";
+	ret << vCS() << " = " << nextDest << ";";
 }
 
 void CSharpFlatCodeGen::NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
-	ret << CS() << " = (";
+	ret << vCS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish );
 	ret << ");";
 }
@@ -495,7 +495,7 @@ void CSharpFlatCodeGen::CALL( ostream &ret, int callDest, int targState, bool in
 		INLINE_LIST( ret, prePushExpr, 0, false );
 	}
 
-	ret << "{" << STACK() << "[" << TOP() << "++] = " << CS() << "; " << CS() << " = " << 
+	ret << "{" << STACK() << "[" << TOP() << "++] = " << vCS() << "; " << vCS() << " = " << 
 			callDest << "; " << CTRL_FLOW() << "goto _again;}";
 
 	if ( prePushExpr != 0 )
@@ -510,7 +510,7 @@ void CSharpFlatCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targ
 		INLINE_LIST( ret, prePushExpr, 0, false );
 	}
 
-	ret << "{" << STACK() << "[" << TOP() << "++] = " << CS() << "; " << CS() << " = (";
+	ret << "{" << STACK() << "[" << TOP() << "++] = " << vCS() << "; " << vCS() << " = (";
 	INLINE_LIST( ret, ilItem->children, targState, inFinish );
 	ret << "); " << CTRL_FLOW() << "goto _again;}";
 
@@ -521,7 +521,7 @@ void CSharpFlatCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targ
 
 void CSharpFlatCodeGen::RET( ostream &ret, bool inFinish )
 {
-	ret << "{" << CS() << " = " << STACK() << "[--" << TOP() << "];";
+	ret << "{" << vCS() << " = " << STACK() << "[--" << TOP() << "];";
 
 	if ( postPopExpr != 0 ) {
 		ret << "{";
@@ -640,12 +640,12 @@ void CSharpFlatCodeGen::COND_TRANSLATE()
 		"	_widec = " << GET_KEY() << ";\n";
 
 	out <<
-		"   _keys = " << CS() << "<<1;\n"
-		"   _conds = " << CO() << "[" << CS() << "];\n"
-//		"	_keys = " << ARR_OFF( CK(), "(" + CS() + "<<1)" ) << ";\n"
-//		"	_conds = " << ARR_OFF( C(), CO() + "[" + CS() + "]" ) << ";\n"
+		"   _keys = " << vCS() << "<<1;\n"
+		"   _conds = " << CO() << "[" << vCS() << "];\n"
+//		"	_keys = " << ARR_OFF( CK(), "(" + vCS() + "<<1)" ) << ";\n"
+//		"	_conds = " << ARR_OFF( C(), CO() + "[" + vCS() + "]" ) << ";\n"
 		"\n"
-		"	_slen = " << CSP() << "[" << CS() << "];\n"
+		"	_slen = " << CSP() << "[" << vCS() << "];\n"
 		"	if (_slen > 0 && " << CK() << "[_keys] <=" 
 			<< GET_WIDE_KEY() << " &&\n"
 		"		" << GET_WIDE_KEY() << " <= " << CK() << "[_keys+1])\n"
@@ -657,7 +657,7 @@ void CSharpFlatCodeGen::COND_TRANSLATE()
 	/*  XXX This version of the code doesn't work because Mono is weird.  Works
 	 *  fine in Microsoft's csc, even though the bug report filed claimed it
 	 *  didn't.
-		"	_slen = " << CSP() << "[" << CS() << "];\n"
+		"	_slen = " << CSP() << "[" << vCS() << "];\n"
 		"	_cond = _slen > 0 && " << CK() << "[_keys] <=" 
 			<< GET_WIDE_KEY() << " &&\n"
 		"		" << GET_WIDE_KEY() << " <= " << CK() << "[_keys+1] ?\n"
@@ -745,7 +745,7 @@ void CSharpFlatCodeGen::writeExec()
 	if ( redFsm->errState != 0 ) {
 		outLabelUsed = true;
 		out << 
-			"	if ( " << CS() << " == " << redFsm->errState->id << " )\n"
+			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
 			"		goto _out;\n";
 	}
 
@@ -753,7 +753,7 @@ void CSharpFlatCodeGen::writeExec()
 
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
-			"	_acts = " << FSA() << "[" << CS() << "];\n"
+			"	_acts = " << FSA() << "[" << vCS() << "];\n"
 			"	_nacts = " << A() << "[_acts++];\n"
 			"	while ( _nacts-- > 0 ) {\n"
 			"		switch ( " << A() << "[_acts++] ) {\n";
@@ -773,10 +773,10 @@ void CSharpFlatCodeGen::writeExec()
 		out << "_eof_trans:\n";
 
 	if ( redFsm->anyRegCurStateRef() )
-		out << "	_ps = " << CS() << ";\n";
+		out << "	_ps = " << vCS() << ";\n";
 
 	out <<
-		"	" << CS() << " = " << TT() << "[_trans];\n"
+		"	" << vCS() << " = " << TT() << "[_trans];\n"
 		"\n";
 
 	if ( redFsm->anyRegActions() ) {
@@ -801,7 +801,7 @@ void CSharpFlatCodeGen::writeExec()
 
 	if ( redFsm->anyToStateActions() ) {
 		out <<
-			"	_acts = " << TSA() << "[" << CS() << "];\n"
+			"	_acts = " << TSA() << "[" << vCS() << "];\n"
 			"	_nacts = " << A() << "[_acts++];\n"
 			"	while ( _nacts-- > 0 ) {\n"
 			"		switch ( " << A() << "[_acts++] ) {\n";
@@ -815,7 +815,7 @@ void CSharpFlatCodeGen::writeExec()
 	if ( redFsm->errState != 0 ) {
 		outLabelUsed = true;
 		out << 
-			"	if ( " << CS() << " == " << redFsm->errState->id << " )\n"
+			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
 			"		goto _out;\n";
 	}
 
@@ -835,14 +835,14 @@ void CSharpFlatCodeGen::writeExec()
 
 	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
 		out << 
-			"	if ( " << P() << " == " << EOFV() << " )\n"
+			"	if ( " << P() << " == " << vEOF() << " )\n"
 			"	{\n";
 
 		if ( redFsm->anyEofTrans() ) {
 			out <<
-				"	if ( " << ET() << "[" << CS() << "] > 0 ) {\n"
+				"	if ( " << ET() << "[" << vCS() << "] > 0 ) {\n"
 				"		_trans = " << CAST(transType) << " (" << ET() << 
-					"[" << CS() << "] - 1);\n"
+					"[" << vCS() << "] - 1);\n"
 				"		goto _eof_trans;\n"
 				"	}\n";
 		}
@@ -851,7 +851,7 @@ void CSharpFlatCodeGen::writeExec()
 			out <<
 				"	" << PTR_CONST() << ARRAY_TYPE(redFsm->maxActArrItem) << 
 						POINTER() << "__acts = " << 
-						EA() << "[" << CS() << "];\n"
+						EA() << "[" << vCS() << "];\n"
 				"	" << UINT() << " __nacts = " << CAST(UINT()) << " " <<
 							A() << "[__acts++];\n"
 				"	while ( __nacts-- > 0 ) {\n"

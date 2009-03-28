@@ -280,7 +280,7 @@ void CSharpFFlatCodeGen::writeExec()
 	if ( redFsm->errState != 0 ) {
 		outLabelUsed = true;
 		out << 
-			"	if ( " << CS() << " == " << redFsm->errState->id << " )\n"
+			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
 			"		goto _out;\n";
 	}
 
@@ -288,7 +288,7 @@ void CSharpFFlatCodeGen::writeExec()
 
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
-			"	switch ( " << FSA() << "[" << CS() << "] ) {\n";
+			"	switch ( " << FSA() << "[" << vCS() << "] ) {\n";
 			FROM_STATE_ACTION_SWITCH();
 			SWITCH_DEFAULT() <<
 			"	}\n"
@@ -304,10 +304,10 @@ void CSharpFFlatCodeGen::writeExec()
 		out << "_eof_trans:\n";
 	
 	if ( redFsm->anyRegCurStateRef() )
-		out << "	_ps = " << CS() << ";\n";
+		out << "	_ps = " << vCS() << ";\n";
 
 	out << 
-		"	" << CS() << " = " << TT() << "[_trans];\n\n";
+		"	" << vCS() << " = " << TT() << "[_trans];\n\n";
 
 	if ( redFsm->anyRegActions() ) {
 		out << 
@@ -327,7 +327,7 @@ void CSharpFFlatCodeGen::writeExec()
 
 	if ( redFsm->anyToStateActions() ) {
 		out <<
-			"	switch ( " << TSA() << "[" << CS() << "] ) {\n";
+			"	switch ( " << TSA() << "[" << vCS() << "] ) {\n";
 			TO_STATE_ACTION_SWITCH();
 			SWITCH_DEFAULT() <<
 			"	}\n"
@@ -337,7 +337,7 @@ void CSharpFFlatCodeGen::writeExec()
 	if ( redFsm->errState != 0 ) {
 		outLabelUsed = true;
 		out << 
-			"	if ( " << CS() << " == " << redFsm->errState->id << " )\n"
+			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
 			"		goto _out;\n";
 	}
 
@@ -357,21 +357,21 @@ void CSharpFFlatCodeGen::writeExec()
 
 	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
 		out <<
-			"	if ( " << P() << " == " << EOFV() << " )\n"
+			"	if ( " << P() << " == " << vEOF() << " )\n"
 			"	{\n";
 
 		if ( redFsm->anyEofTrans() ) {
 			out <<
-				"	if ( " << ET() << "[" << CS() << "] > 0 ) {\n"
+				"	if ( " << ET() << "[" << vCS() << "] > 0 ) {\n"
 				"		_trans = " << CAST(transType) << " (" << ET() <<
-					"[" << CS() << "] - 1);\n"
+					"[" << vCS() << "] - 1);\n"
 				"		goto _eof_trans;\n"
 				"	}\n";
 		}
 
 		if ( redFsm->anyEofActions() ) {
 			out <<
-				"	switch ( " << EA() << "[" << CS() << "] ) {\n";
+				"	switch ( " << EA() << "[" << vCS() << "] ) {\n";
 				EOF_ACTION_SWITCH();
 				SWITCH_DEFAULT() <<
 				"	}\n";

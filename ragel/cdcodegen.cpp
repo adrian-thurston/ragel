@@ -183,7 +183,7 @@ string FsmCodeGen::PE()
 	return ret.str();
 }
 
-string FsmCodeGen::EOFV()
+string FsmCodeGen::vEOF()
 {
 	ostringstream ret;
 	if ( eofExpr == 0 )
@@ -196,7 +196,7 @@ string FsmCodeGen::EOFV()
 	return ret.str();
 }
 
-string FsmCodeGen::CS()
+string FsmCodeGen::vCS()
 {
 	ostringstream ret;
 	if ( csExpr == 0 )
@@ -556,7 +556,7 @@ void FsmCodeGen::writeInit()
 	out << "	{\n";
 
 	if ( !noCS )
-		out << "\t" << CS() << " = " << START() << ";\n";
+		out << "\t" << vCS() << " = " << START() << ";\n";
 	
 	/* If there are any calls, then the stack top needs initialization. */
 	if ( redFsm->anyActionCalls() || redFsm->anyActionRets() )

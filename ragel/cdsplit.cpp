@@ -155,7 +155,7 @@ std::ostream &SplitCodeGen::PART_TRANS( int partition )
 				/* If the action contains a next, then we must preload the current
 				 * state since the action may or may not set it. */
 				if ( trans->action->anyNextStmt() )
-					out << "	" << CS() << " = " << trans->targ->id << ";\n";
+					out << "	" << vCS() << " = " << trans->targ->id << ";\n";
 
 				/* Write each action in the list. */
 				for ( GenActionTable::Iter item = trans->action->key; item.lte(); item++ ) {
@@ -174,7 +174,7 @@ std::ostream &SplitCodeGen::PART_TRANS( int partition )
 		if ( st->partitionBoundary ) {
 			out << 
 				"	pst" << st->id << ":\n" 
-				"	" << CS() << " = " << st->id << ";\n";
+				"	" << vCS() << " = " << st->id << ";\n";
 
 			if ( st->toStateAction != 0 ) {
 				/* Remember that we wrote an action. Write every action in the list. */
@@ -197,7 +197,7 @@ std::ostream &SplitCodeGen::EXIT_STATES( int partition )
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->partition == partition && st->outNeeded ) {
 			outLabelUsed = true;
-			out << "	_out" << st->id << ": " << CS() << " = " << 
+			out << "	_out" << st->id << ": " << vCS() << " = " << 
 					st->id << "; goto _out; \n";
 		}
 	}
@@ -230,7 +230,7 @@ std::ostream &SplitCodeGen::PARTITION( int partition )
 			"	goto _resume;\n"
 			"\n"
 			"_again:\n"
-			"	switch ( " << CS() << " ) {\n";
+			"	switch ( " << vCS() << " ) {\n";
 			AGAIN_CASES() <<
 			"	default: break;\n"
 			"	}\n"
@@ -254,7 +254,7 @@ std::ostream &SplitCodeGen::PARTITION( int partition )
 	}
 
 	out << 
-		"	switch ( " << CS() << " )\n	{\n";
+		"	switch ( " << vCS() << " )\n	{\n";
 		STATE_GOTOS( partition );
 		SWITCH_DEFAULT() <<
 		"	}\n";
@@ -413,7 +413,7 @@ void SplitCodeGen::writeExec()
 	out << "_resume:\n";
 
 	out << 
-		"	switch ( " << PM() << "[" << CS() << "] ) {\n";
+		"	switch ( " << PM() << "[" << vCS() << "] ) {\n";
 	for ( int p = 0; p < redFsm->nParts; p++ ) {
 		out <<
 			"	case " << p << ":\n"

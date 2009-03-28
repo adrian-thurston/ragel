@@ -386,8 +386,8 @@ std::ostream &CSharpGotoCodeGen::TRANSITIONS()
 
 		/* Destination state. */
 		if ( trans->action != 0 && trans->action->anyCurStateRef() )
-			out << "_ps = " << CS() << ";";
-		out << CS() << " = " << trans->targ->id << "; ";
+			out << "_ps = " << vCS() << ";";
+		out << vCS() << " = " << trans->targ->id << "; ";
 
 		if ( trans->action != 0 ) {
 			/* Write out the transition func. */
@@ -543,13 +543,13 @@ std::ostream &CSharpGotoCodeGen::FINISH_CASES()
 
 void CSharpGotoCodeGen::GOTO( ostream &ret, int gotoDest, bool inFinish )
 {
-	ret << "{" << CS() << " = " << gotoDest << "; " << 
+	ret << "{" << vCS() << " = " << gotoDest << "; " << 
 			CTRL_FLOW() << "goto _again;}";
 }
 
 void CSharpGotoCodeGen::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
-	ret << "{" << CS() << " = (";
+	ret << "{" << vCS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish );
 	ret << "); " << CTRL_FLOW() << "goto _again;}";
 }
@@ -561,17 +561,17 @@ void CSharpGotoCodeGen::CURS( ostream &ret, bool inFinish )
 
 void CSharpGotoCodeGen::TARGS( ostream &ret, bool inFinish, int targState )
 {
-	ret << "(" << CS() << ")";
+	ret << "(" << vCS() << ")";
 }
 
 void CSharpGotoCodeGen::NEXT( ostream &ret, int nextDest, bool inFinish )
 {
-	ret << CS() << " = " << nextDest << ";";
+	ret << vCS() << " = " << nextDest << ";";
 }
 
 void CSharpGotoCodeGen::NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
-	ret << CS() << " = (";
+	ret << vCS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish );
 	ret << ");";
 }
@@ -583,7 +583,7 @@ void CSharpGotoCodeGen::CALL( ostream &ret, int callDest, int targState, bool in
 		INLINE_LIST( ret, prePushExpr, 0, false );
 	}
 
-	ret << "{" << STACK() << "[" << TOP() << "++] = " << CS() << "; " << CS() << " = " << 
+	ret << "{" << STACK() << "[" << TOP() << "++] = " << vCS() << "; " << vCS() << " = " << 
 			callDest << "; " << CTRL_FLOW() << "goto _again;}";
 
 	if ( prePushExpr != 0 )
@@ -597,7 +597,7 @@ void CSharpGotoCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targ
 		INLINE_LIST( ret, prePushExpr, 0, false );
 	}
 
-	ret << "{" << STACK() << "[" << TOP() << "++] = " << CS() << "; " << CS() << " = (";
+	ret << "{" << STACK() << "[" << TOP() << "++] = " << vCS() << "; " << vCS() << " = (";
 	INLINE_LIST( ret, ilItem->children, targState, inFinish );
 	ret << "); " << CTRL_FLOW() << "goto _again;}";
 
@@ -607,7 +607,7 @@ void CSharpGotoCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targ
 
 void CSharpGotoCodeGen::RET( ostream &ret, bool inFinish )
 {
-	ret << "{" << CS() << " = " << STACK() << "[--" << TOP() << "];";
+	ret << "{" << vCS() << " = " << STACK() << "[--" << TOP() << "];";
 
 	if ( postPopExpr != 0 ) {
 		ret << "{";
@@ -690,7 +690,7 @@ void CSharpGotoCodeGen::writeExec()
 	if ( redFsm->errState != 0 ) {
 		outLabelUsed = true;
 		out << 
-			"	if ( " << CS() << " == " << redFsm->errState->id << " )\n"
+			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
 			"		goto _out;\n";
 	}
 
@@ -698,7 +698,7 @@ void CSharpGotoCodeGen::writeExec()
 
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
-			"	_acts = " << FSA() << "[" << CS() << "];\n"
+			"	_acts = " << FSA() << "[" << vCS() << "];\n"
 			"	_nacts = " << A() << "[_acts++];\n"
 			"	while ( _nacts-- > 0 ) {\n"
 			"		switch ( " << A() << "[_acts++] ) {\n";
@@ -710,7 +710,7 @@ void CSharpGotoCodeGen::writeExec()
 	}
 
 	out <<
-		"	switch ( " << CS() << " ) {\n";
+		"	switch ( " << vCS() << " ) {\n";
 		STATE_GOTOS();
 		SWITCH_DEFAULT() <<
 		"	}\n"
@@ -725,7 +725,7 @@ void CSharpGotoCodeGen::writeExec()
 
 	if ( redFsm->anyToStateActions() ) {
 		out <<
-			"	_acts = " << TSA() << "[" << CS() << "];\n"
+			"	_acts = " << TSA() << "[" << vCS() << "];\n"
 			"	_nacts = " << A() << "[_acts++];\n"
 			"	while ( _nacts-- > 0 ) {\n"
 			"		switch ( " << A() << "[_acts++] ) {\n";
@@ -739,7 +739,7 @@ void CSharpGotoCodeGen::writeExec()
 	if ( redFsm->errState != 0 ) {
 		outLabelUsed = true;
 		out << 
-			"	if ( " << CS() << " == " << redFsm->errState->id << " )\n"
+			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
 			"		goto _out;\n";
 	}
 
@@ -759,12 +759,12 @@ void CSharpGotoCodeGen::writeExec()
 
 	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
 		out << 
-			"	if ( " << P() << " == " << EOFV() << " )\n"
+			"	if ( " << P() << " == " << vEOF() << " )\n"
 			"	{\n";
 
 		if ( redFsm->anyEofTrans() ) {
 			out <<
-				"	switch ( " << CS() << " ) {\n";
+				"	switch ( " << vCS() << " ) {\n";
 
 			for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 				if ( st->eofTrans != 0 )
@@ -778,7 +778,7 @@ void CSharpGotoCodeGen::writeExec()
 		if ( redFsm->anyEofActions() ) {
 			out <<
 				"	" << ARRAY_TYPE(redFsm->maxActionLoc) << " __acts = " << 
-						EA() << "[" << CS() << "];\n"
+						EA() << "[" << vCS() << "];\n"
 				"	" << ARRAY_TYPE(redFsm->maxActArrItem) << " __nacts = " <<
 					A() << "[__acts++];\n"
 				"	while ( __nacts-- > 0 ) {\n"

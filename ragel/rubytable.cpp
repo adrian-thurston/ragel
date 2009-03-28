@@ -39,7 +39,7 @@ void RubyTabCodeGen::GOTO( ostream &out, int gotoDest, bool inFinish )
 {
 	out << 
 		"	begin\n"
-		"		" << CS() << " = " << gotoDest << "\n"
+		"		" << vCS() << " = " << gotoDest << "\n"
 		"		_trigger_goto = true\n"
 		"		_goto_level = _again\n"
 		"		break\n"
@@ -50,7 +50,7 @@ void RubyTabCodeGen::GOTO_EXPR( ostream &out, GenInlineItem *ilItem, bool inFini
 {
 	out << 
 		"	begin\n"
-		"		" << CS() << " = (";
+		"		" << vCS() << " = (";
 	INLINE_LIST( out, ilItem->children, 0, inFinish );
 	out << ")\n";
 	out <<
@@ -69,9 +69,9 @@ void RubyTabCodeGen::CALL( ostream &out, int callDest, int targState, bool inFin
 
 	out <<
 		"	begin\n"
-		"		" << STACK() << "[" << TOP() << "] = " << CS() << "\n"
+		"		" << STACK() << "[" << TOP() << "] = " << vCS() << "\n"
 		"		" << TOP() << "+= 1\n"
-		"		" << CS() << " = " << callDest << "\n"
+		"		" << vCS() << " = " << callDest << "\n"
 		"		_trigger_goto = true\n"
 		"		_goto_level = _again\n"
 		"		break\n"
@@ -90,9 +90,9 @@ void RubyTabCodeGen::CALL_EXPR(ostream &out, GenInlineItem *ilItem, int targStat
 
 	out <<
 		"	begin\n"
-		"		" << STACK() << "[" << TOP() << "] = " << CS() << "\n"
+		"		" << STACK() << "[" << TOP() << "] = " << vCS() << "\n"
 		"		" << TOP() << " += 1\n"
-		"		" << CS() << " = (";
+		"		" << vCS() << " = (";
 	INLINE_LIST( out, ilItem->children, targState, inFinish );
 	out << ")\n";
 
@@ -111,7 +111,7 @@ void RubyTabCodeGen::RET( ostream &out, bool inFinish )
 	out <<
 		"	begin\n"
 		"		" << TOP() << " -= 1\n"
-		"		" << CS() << " = " << STACK() << "[" << TOP() << "]\n";
+		"		" << vCS() << " = " << STACK() << "[" << TOP() << "]\n";
 
 	if ( postPopExpr != 0 ) {
 		out << "begin\n";
@@ -141,8 +141,8 @@ void RubyTabCodeGen::COND_TRANSLATE()
 {
 	out <<
 		"	_widec = " << GET_KEY() << "\n"
-		"	_keys = " << CO() << "[" << CS() << "]*2\n"
-		"	_klen = " << CL() << "[" << CS() << "]\n"
+		"	_keys = " << CO() << "[" << vCS() << "]*2\n"
+		"	_klen = " << CL() << "[" << vCS() << "]\n"
 		"	if _klen > 0\n"
 		"		_lower = _keys\n"
 		"		_upper = _keys + (_klen<<1) - 2\n"
@@ -154,7 +154,7 @@ void RubyTabCodeGen::COND_TRANSLATE()
 		"			elsif " << GET_WIDE_KEY() << " > " << CK() << "[_mid+1]\n"
 		"				_lower = _mid + 2\n"
 		"			else\n"
-		"				case " << C() << "[" << CO() << "[" << CS() << "]"
+		"				case " << C() << "[" << CO() << "[" << vCS() << "]"
 							" + ((_mid - _keys)>>1)]\n";
 
 	for ( CondSpaceList::Iter csi = condSpaceList; csi.lte(); csi++ ) {
@@ -182,9 +182,9 @@ void RubyTabCodeGen::COND_TRANSLATE()
 void RubyTabCodeGen::LOCATE_TRANS()
 {
 	out <<
-		"	_keys = " << KO() << "[" << CS() << "]\n"
-		"	_trans = " << IO() << "[" << CS() << "]\n"
-		"	_klen = " << SL() << "[" << CS() << "]\n"
+		"	_keys = " << KO() << "[" << vCS() << "]\n"
+		"	_trans = " << IO() << "[" << vCS() << "]\n"
+		"	_klen = " << SL() << "[" << vCS() << "]\n"
 		"	_break_match = false\n"
 		"	\n"
 		"	begin\n"
@@ -211,7 +211,7 @@ void RubyTabCodeGen::LOCATE_TRANS()
 		"	     _trans += _klen\n"
 		"	  end"
 		"\n"
-		"	  _klen = " << RL() << "[" << CS() << "]\n"
+		"	  _klen = " << RL() << "[" << vCS() << "]\n"
 		"	  if _klen > 0\n"
 		"	     _lower = _keys\n"
 		"	     _upper = _keys + (_klen << 1) - 2\n"
@@ -273,7 +273,7 @@ void RubyTabCodeGen::writeExec()
 
 	if ( redFsm->errState != 0 ) {
 		out << 
-			"	if " << CS() << " == " << redFsm->errState->id << "\n"
+			"	if " << vCS() << " == " << redFsm->errState->id << "\n"
 			"		_goto_level = _out\n"
 			"		next\n"
 			"	end\n";
@@ -286,7 +286,7 @@ void RubyTabCodeGen::writeExec()
 	
 	if ( redFsm->anyFromStateActions() ) {
 		out << 
-			"	_acts = " << FSA() << "[" << CS() << "]\n"
+			"	_acts = " << FSA() << "[" << vCS() << "]\n"
 			"	_nacts = " << A() << "[_acts]\n"
 			"	_acts += 1\n"
 			"	while _nacts > 0\n"
@@ -317,9 +317,9 @@ void RubyTabCodeGen::writeExec()
 	}
 
 	if ( redFsm->anyRegCurStateRef() )
-		out << "	_ps = " << CS() << "\n";
+		out << "	_ps = " << vCS() << "\n";
 
-	out << "	" << CS() << " = " << TT() << "[_trans]\n";
+	out << "	" << vCS() << " = " << TT() << "[_trans]\n";
 
 	if ( redFsm->anyRegActions() ) {
 		out << 
@@ -348,7 +348,7 @@ void RubyTabCodeGen::writeExec()
 
 	if ( redFsm->anyToStateActions() ) {
 		out <<
-			"	_acts = " << TSA() << "["  << CS() << "]\n"
+			"	_acts = " << TSA() << "["  << vCS() << "]\n"
 			"	_nacts = " << A() << "[_acts]\n"
 			"	_acts += 1\n"
 			"	while _nacts > 0\n"
@@ -366,7 +366,7 @@ void RubyTabCodeGen::writeExec()
 
 	if ( redFsm->errState != 0 ) {
 		out << 
-			"	if " << CS() << " == " << redFsm->errState->id << "\n"
+			"	if " << vCS() << " == " << redFsm->errState->id << "\n"
 			"		_goto_level = _out\n"
 			"		next\n"
 			"	end\n";
@@ -394,12 +394,12 @@ void RubyTabCodeGen::writeExec()
 
 	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
 		out << 
-			"	if " << P() << " == " << EOFV() << "\n";
+			"	if " << P() << " == " << vEOF() << "\n";
 
 		if ( redFsm->anyEofTrans() ) {
 			out <<
-				"	if " << ET() << "[" << CS() << "] > 0\n"
-				"		_trans = " << ET() << "[" << CS() << "] - 1;\n"
+				"	if " << ET() << "[" << vCS() << "] > 0\n"
+				"		_trans = " << ET() << "[" << vCS() << "] - 1;\n"
 				"		_goto_level = _eof_trans\n"
 				"		next;\n"
 				"	end\n";
@@ -407,7 +407,7 @@ void RubyTabCodeGen::writeExec()
 
 		if ( redFsm->anyEofActions() ) {
 			out << 
-				"	__acts = " << EA() << "[" << CS() << "]\n"
+				"	__acts = " << EA() << "[" << vCS() << "]\n"
 				"	__nacts = " << " " << A() << "[__acts]\n"
 				"	__acts += 1\n"
 				"	while __nacts > 0\n"
@@ -509,12 +509,12 @@ std::ostream &RubyTabCodeGen::ACTION_SWITCH()
 
 void RubyTabCodeGen::NEXT( ostream &ret, int nextDest, bool inFinish )
 {
-	ret << CS() << " = " << nextDest << ";";
+	ret << vCS() << " = " << nextDest << ";";
 }
 
 void RubyTabCodeGen::NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
-	ret << CS() << " = (";
+	ret << vCS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish );
 	ret << ");";
 }

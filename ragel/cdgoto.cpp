@@ -386,8 +386,8 @@ std::ostream &GotoCodeGen::TRANSITIONS()
 
 		/* Destination state. */
 		if ( trans->action != 0 && trans->action->anyCurStateRef() )
-			out << "_ps = " << CS() << ";";
-		out << CS() << " = " << trans->targ->id << "; ";
+			out << "_ps = " << vCS() << ";";
+		out << vCS() << " = " << trans->targ->id << "; ";
 
 		if ( trans->action != 0 ) {
 			/* Write out the transition func. */
@@ -543,13 +543,13 @@ std::ostream &GotoCodeGen::FINISH_CASES()
 
 void GotoCodeGen::GOTO( ostream &ret, int gotoDest, bool inFinish )
 {
-	ret << "{" << CS() << " = " << gotoDest << "; " << 
+	ret << "{" << vCS() << " = " << gotoDest << "; " << 
 			CTRL_FLOW() << "goto _again;}";
 }
 
 void GotoCodeGen::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
-	ret << "{" << CS() << " = (";
+	ret << "{" << vCS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
 	ret << "); " << CTRL_FLOW() << "goto _again;}";
 }
@@ -561,17 +561,17 @@ void GotoCodeGen::CURS( ostream &ret, bool inFinish )
 
 void GotoCodeGen::TARGS( ostream &ret, bool inFinish, int targState )
 {
-	ret << "(" << CS() << ")";
+	ret << "(" << vCS() << ")";
 }
 
 void GotoCodeGen::NEXT( ostream &ret, int nextDest, bool inFinish )
 {
-	ret << CS() << " = " << nextDest << ";";
+	ret << vCS() << " = " << nextDest << ";";
 }
 
 void GotoCodeGen::NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
-	ret << CS() << " = (";
+	ret << vCS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
 	ret << ");";
 }
@@ -583,7 +583,7 @@ void GotoCodeGen::CALL( ostream &ret, int callDest, int targState, bool inFinish
 		INLINE_LIST( ret, prePushExpr, 0, false, false );
 	}
 
-	ret << "{" << STACK() << "[" << TOP() << "++] = " << CS() << "; " << CS() << " = " << 
+	ret << "{" << STACK() << "[" << TOP() << "++] = " << vCS() << "; " << vCS() << " = " << 
 			callDest << "; " << CTRL_FLOW() << "goto _again;}";
 
 	if ( prePushExpr != 0 )
@@ -597,7 +597,7 @@ void GotoCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState,
 		INLINE_LIST( ret, prePushExpr, 0, false, false );
 	}
 
-	ret << "{" << STACK() << "[" << TOP() << "++] = " << CS() << "; " << CS() << " = (";
+	ret << "{" << STACK() << "[" << TOP() << "++] = " << vCS() << "; " << vCS() << " = (";
 	INLINE_LIST( ret, ilItem->children, targState, inFinish, false );
 	ret << "); " << CTRL_FLOW() << "goto _again;}";
 
@@ -607,7 +607,7 @@ void GotoCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState,
 
 void GotoCodeGen::RET( ostream &ret, bool inFinish )
 {
-	ret << "{" << CS() << " = " << STACK() << "[--" << TOP() << "];";
+	ret << "{" << vCS() << " = " << STACK() << "[--" << TOP() << "];";
 
 	if ( postPopExpr != 0 ) {
 		ret << "{";
@@ -690,7 +690,7 @@ void GotoCodeGen::writeExec()
 	if ( redFsm->errState != 0 ) {
 		outLabelUsed = true;
 		out << 
-			"	if ( " << CS() << " == " << redFsm->errState->id << " )\n"
+			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
 			"		goto _out;\n";
 	}
 
@@ -698,7 +698,7 @@ void GotoCodeGen::writeExec()
 
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
-			"	_acts = " << ARR_OFF( A(), FSA() + "[" + CS() + "]" ) << ";\n"
+			"	_acts = " << ARR_OFF( A(), FSA() + "[" + vCS() + "]" ) << ";\n"
 			"	_nacts = " << CAST(UINT()) << " *_acts++;\n"
 			"	while ( _nacts-- > 0 ) {\n"
 			"		switch ( *_acts++ ) {\n";
@@ -710,7 +710,7 @@ void GotoCodeGen::writeExec()
 	}
 
 	out <<
-		"	switch ( " << CS() << " ) {\n";
+		"	switch ( " << vCS() << " ) {\n";
 		STATE_GOTOS();
 		SWITCH_DEFAULT() <<
 		"	}\n"
@@ -725,7 +725,7 @@ void GotoCodeGen::writeExec()
 
 	if ( redFsm->anyToStateActions() ) {
 		out <<
-			"	_acts = " << ARR_OFF( A(), TSA() + "[" + CS() + "]" ) << ";\n"
+			"	_acts = " << ARR_OFF( A(), TSA() + "[" + vCS() + "]" ) << ";\n"
 			"	_nacts = " << CAST(UINT()) << " *_acts++;\n"
 			"	while ( _nacts-- > 0 ) {\n"
 			"		switch ( *_acts++ ) {\n";
@@ -739,7 +739,7 @@ void GotoCodeGen::writeExec()
 	if ( redFsm->errState != 0 ) {
 		outLabelUsed = true;
 		out << 
-			"	if ( " << CS() << " == " << redFsm->errState->id << " )\n"
+			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
 			"		goto _out;\n";
 	}
 
@@ -759,12 +759,12 @@ void GotoCodeGen::writeExec()
 
 	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
 		out << 
-			"	if ( " << P() << " == " << EOFV() << " )\n"
+			"	if ( " << P() << " == " << vEOF() << " )\n"
 			"	{\n";
 
 		if ( redFsm->anyEofTrans() ) {
 			out <<
-				"	switch ( " << CS() << " ) {\n";
+				"	switch ( " << vCS() << " ) {\n";
 
 			for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 				if ( st->eofTrans != 0 )
@@ -779,7 +779,7 @@ void GotoCodeGen::writeExec()
 			out <<
 				"	" << PTR_CONST() << ARRAY_TYPE(redFsm->maxActArrItem) << 
 						POINTER() << "__acts = " << 
-						ARR_OFF( A(), EA() + "[" + CS() + "]" ) << ";\n"
+						ARR_OFF( A(), EA() + "[" + vCS() + "]" ) << ";\n"
 				"	" << UINT() << " __nacts = " << CAST(UINT()) << " *__acts++;\n"
 				"	while ( __nacts-- > 0 ) {\n"
 				"		switch ( *__acts++ ) {\n";

@@ -408,8 +408,8 @@ std::ostream &RbxGotoCodeGen::TRANSITIONS()
 
 		/* Destination state. */
 		if ( trans->action != 0 && trans->action->anyCurStateRef() )
-			out << "_ps = " << CS() << "'n";
-		out << CS() << " = " << trans->targ->id << "\n";
+			out << "_ps = " << vCS() << "'n";
+		out << vCS() << " = " << trans->targ->id << "\n";
 
 		if ( trans->action != 0 ) {
 			/* Write out the transition func. */
@@ -567,14 +567,14 @@ std::ostream &RbxGotoCodeGen::FINISH_CASES()
 
 void RbxGotoCodeGen::GOTO( ostream &ret, int gotoDest, bool inFinish )
 {
-	ret << "begin\n" << CS() << " = " << gotoDest << " ";
+	ret << "begin\n" << vCS() << " = " << gotoDest << " ";
 	rbxGoto(ret, "_again") << 
 		"\nend\n";
 }
 
 void RbxGotoCodeGen::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
-	ret << "begin\n" << CS() << " = (";
+	ret << "begin\n" << vCS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish );
 	ret << ")";
 	rbxGoto(ret, "_again") << 
@@ -588,17 +588,17 @@ void RbxGotoCodeGen::CURS( ostream &ret, bool inFinish )
 
 void RbxGotoCodeGen::TARGS( ostream &ret, bool inFinish, int targState )
 {
-	ret << "(" << CS() << ")";
+	ret << "(" << vCS() << ")";
 }
 
 void RbxGotoCodeGen::NEXT( ostream &ret, int nextDest, bool inFinish )
 {
-	ret << CS() << " = " << nextDest << ";";
+	ret << vCS() << " = " << nextDest << ";";
 }
 
 void RbxGotoCodeGen::NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
-	ret << CS() << " = (";
+	ret << vCS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish );
 	ret << ");";
 }
@@ -611,7 +611,7 @@ void RbxGotoCodeGen::CALL( ostream &ret, int callDest, int targState, bool inFin
 	}
 
 	ret << "begin\n" 
-	    << STACK() << "[" << TOP() << "++] = " << CS() << "; " << CS() << " = " << 
+	    << STACK() << "[" << TOP() << "++] = " << vCS() << "; " << vCS() << " = " << 
 		callDest << "; ";
 	rbxGoto(ret, "_again") << 
 		"\nend\n";
@@ -627,7 +627,7 @@ void RbxGotoCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targSta
 		INLINE_LIST( ret, prePushExpr, 0, false );
 	}
 
-	ret << "begin\n" << STACK() << "[" << TOP() << "++] = " << CS() << "; " << CS() << " = (";
+	ret << "begin\n" << STACK() << "[" << TOP() << "++] = " << vCS() << "; " << vCS() << " = (";
 	INLINE_LIST( ret, ilItem->children, targState, inFinish );
 	ret << "); ";
 	rbxGoto(ret, "_again") << 
@@ -639,7 +639,7 @@ void RbxGotoCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targSta
 
 void RbxGotoCodeGen::RET( ostream &ret, bool inFinish )
 {
-	ret << "begin\n" << CS() << " = " << STACK() << "[--" << TOP() << "]; " ;
+	ret << "begin\n" << vCS() << " = " << STACK() << "[--" << TOP() << "]; " ;
 
 	if ( postPopExpr != 0 ) {
 		ret << "{";
@@ -728,7 +728,7 @@ void RbxGotoCodeGen::writeExec()
 	if ( redFsm->errState != 0 ) {
 		outLabelUsed = true;
 		out << 
-			"	if ( " << CS() << " == " << redFsm->errState->id << " )\n";
+			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n";
 		rbxGoto(out << "		", "_out") << "\n" <<
 			"	end\n";
 	}
@@ -738,7 +738,7 @@ void RbxGotoCodeGen::writeExec()
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
 
-			"	_acts = " << ARR_OFF( A(), FSA() + "[" + CS() + "]" ) << ";\n"
+			"	_acts = " << ARR_OFF( A(), FSA() + "[" + vCS() + "]" ) << ";\n"
 			"	_nacts = " << " *_acts++;\n"
 			"	while ( _nacts-- > 0 ) {\n"
 			"		switch ( *_acts++ ) {\n";
@@ -750,7 +750,7 @@ void RbxGotoCodeGen::writeExec()
 	}
 
 	out <<
-		"	case ( " << CS() << " )\n";
+		"	case ( " << vCS() << " )\n";
 	STATE_GOTOS();
 	out <<
 		"	end # case\n"
@@ -766,7 +766,7 @@ void RbxGotoCodeGen::writeExec()
 
 	if ( redFsm->anyToStateActions() ) {
 		out <<
-			"	_acts = " << ARR_OFF( A(), TSA() + "[" + CS() + "]" ) << ";\n"
+			"	_acts = " << ARR_OFF( A(), TSA() + "[" + vCS() + "]" ) << ";\n"
 			"	_nacts = " << " *_acts++;\n"
 			"	while ( _nacts-- > 0 ) {\n"
 			"		switch ( *_acts++ ) {\n";
@@ -780,7 +780,7 @@ void RbxGotoCodeGen::writeExec()
 	if ( redFsm->errState != 0 ) {
 		outLabelUsed = true;
 		out << 
-			"	if ( " << CS() << " == " << redFsm->errState->id << " )\n";
+			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n";
 		rbxGoto(out << "		", "_out") << "\n" <<
 			"	end" << "\n";
 	}
@@ -809,7 +809,7 @@ void RbxGotoCodeGen::writeEOF()
 		out << 
 			"	{\n"
 			"	 _acts = " << 
-			ARR_OFF( A(), EA() + "[" + CS() + "]" ) << ";\n"
+			ARR_OFF( A(), EA() + "[" + vCS() + "]" ) << ";\n"
 			"	" << " _nacts = " << " *_acts++;\n"
 			"	while ( _nacts-- > 0 ) {\n"
 			"		switch ( *_acts++ ) {\n";

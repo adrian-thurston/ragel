@@ -60,7 +60,7 @@ void CSharpIpGotoCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int ta
 		INLINE_LIST( ret, prePushExpr, 0, false );
 	}
 
-	ret << "{" << STACK() << "[" << TOP() << "++] = " << targState << "; " << CS() << " = (";
+	ret << "{" << STACK() << "[" << TOP() << "++] = " << targState << "; " << vCS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish );
 	ret << "); " << CTRL_FLOW() << "goto _again;}";
 
@@ -70,7 +70,7 @@ void CSharpIpGotoCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int ta
 
 void CSharpIpGotoCodeGen::RET( ostream &ret, bool inFinish )
 {
-	ret << "{" << CS() << " = " << STACK() << "[--" << TOP() << "];";
+	ret << "{" << vCS() << " = " << STACK() << "[--" << TOP() << "];";
 
 	if ( postPopExpr != 0 ) {
 		ret << "{";
@@ -83,19 +83,19 @@ void CSharpIpGotoCodeGen::RET( ostream &ret, bool inFinish )
 
 void CSharpIpGotoCodeGen::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
-	ret << "{" << CS() << " = (";
+	ret << "{" << vCS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish );
 	ret << "); " << CTRL_FLOW() << "goto _again;}";
 }
 
 void CSharpIpGotoCodeGen::NEXT( ostream &ret, int nextDest, bool inFinish )
 {
-	ret << CS() << " = " << nextDest << ";";
+	ret << vCS() << " = " << nextDest << ";";
 }
 
 void CSharpIpGotoCodeGen::NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
-	ret << CS() << " = (";
+	ret << vCS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish );
 	ret << ");";
 }
@@ -115,7 +115,7 @@ void CSharpIpGotoCodeGen::BREAK( ostream &ret, int targState )
 	/* FIXME: If this code generator is made active then BREAK generation
 	 * needs to check csForced. */
 	outLabelUsed = true;
-	ret << "{" << P() << "++; " << CS() << " = " << targState << 
+	ret << "{" << P() << "++; " << vCS() << " = " << targState << 
 			"; " << CTRL_FLOW() << "goto _out;}";
 }
 
@@ -137,7 +137,7 @@ bool CSharpIpGotoCodeGen::IN_TRANS_ACTIONS( RedStateAp *state )
 			/* If the action contains a next, then we must preload the current
 			 * state since the action may or may not set it. */
 			if ( trans->action->anyNextStmt() )
-				out << "	" << CS() << " = " << trans->targ->id << ";\n";
+				out << "	" << vCS() << " = " << trans->targ->id << ";\n";
 
 			/* Write each action in the list. */
 			for ( GenActionTable::Iter item = trans->action->key; item.lte(); item++ )
@@ -218,7 +218,7 @@ void CSharpIpGotoCodeGen::STATE_GOTO_ERROR()
 
 	/* Break out here. */
 	outLabelUsed = true;
-	out << CS() << " = " << state->id << ";\n";
+	out << vCS() << " = " << state->id << ";\n";
 	out << "	goto _out;\n";
 }
 
@@ -242,7 +242,7 @@ std::ostream &CSharpIpGotoCodeGen::EXIT_STATES()
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->outNeeded ) {
 			testEofUsed = true;
-			out << "	_test_eof" << st->id << ": " << CS() << " = " << 
+			out << "	_test_eof" << st->id << ": " << vCS() << " = " << 
 					st->id << "; goto _test_eof; \n";
 		}
 	}
@@ -387,7 +387,7 @@ void CSharpIpGotoCodeGen::writeExec()
 			"	goto _resume;\n"
 			"\n"
 			"_again:\n"
-			"	switch ( " << CS() << " ) {\n";
+			"	switch ( " << vCS() << " ) {\n";
 			AGAIN_CASES() <<
 			"	default: break;\n"
 			"	}\n"
@@ -408,7 +408,7 @@ void CSharpIpGotoCodeGen::writeExec()
 	}
 
 	out << 
-		"	switch ( " << CS() << " )\n	{\n";
+		"	switch ( " << vCS() << " )\n	{\n";
 		STATE_GOTOS();
 		SWITCH_DEFAULT() <<
 		"	}\n";
@@ -420,9 +420,9 @@ void CSharpIpGotoCodeGen::writeExec()
 
 	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
 		out <<
-			"	if ( " << P() << " == " << EOFV() << " )\n"
+			"	if ( " << P() << " == " << vEOF() << " )\n"
 			"	{\n"
-			"	switch ( " << CS() << " ) {\n";
+			"	switch ( " << vCS() << " ) {\n";
 			FINISH_CASES();
 			SWITCH_DEFAULT() <<
 			"	}\n"

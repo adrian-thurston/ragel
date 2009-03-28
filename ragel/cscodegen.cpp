@@ -188,7 +188,7 @@ string CSharpFsmCodeGen::PE()
 	return ret.str();
 }
 
-string CSharpFsmCodeGen::EOFV()
+string CSharpFsmCodeGen::vEOF()
 {
 	ostringstream ret;
 	if ( eofExpr == 0 )
@@ -201,7 +201,7 @@ string CSharpFsmCodeGen::EOFV()
 	return ret.str();
 }
 
-string CSharpFsmCodeGen::CS()
+string CSharpFsmCodeGen::vCS()
 {
 	ostringstream ret;
 	if ( csExpr == 0 )
@@ -567,7 +567,7 @@ void CSharpFsmCodeGen::writeInit()
 	out << "	{\n";
 
 	if ( !noCS )
-		out << "\t" << CS() << " = " << START() << ";\n";
+		out << "\t" << vCS() << " = " << START() << ";\n";
 	
 	/* If there are any calls, then the stack top needs initialization. */
 	if ( redFsm->anyActionCalls() || redFsm->anyActionRets() )

@@ -610,13 +610,13 @@ std::ostream &CSharpTabCodeGen::TRANS_ACTIONS_WI()
 
 void CSharpTabCodeGen::GOTO( ostream &ret, int gotoDest, bool inFinish )
 {
-	ret << "{" << CS() << " = " << gotoDest << "; " << 
+	ret << "{" << vCS() << " = " << gotoDest << "; " << 
 			CTRL_FLOW() << "goto _again;}";
 }
 
 void CSharpTabCodeGen::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
-	ret << "{" << CS() << " = (";
+	ret << "{" << vCS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish );
 	ret << "); " << CTRL_FLOW() << "goto _again;}";
 }
@@ -628,17 +628,17 @@ void CSharpTabCodeGen::CURS( ostream &ret, bool inFinish )
 
 void CSharpTabCodeGen::TARGS( ostream &ret, bool inFinish, int targState )
 {
-	ret << "(" << CS() << ")";
+	ret << "(" << vCS() << ")";
 }
 
 void CSharpTabCodeGen::NEXT( ostream &ret, int nextDest, bool inFinish )
 {
-	ret << CS() << " = " << nextDest << ";";
+	ret << vCS() << " = " << nextDest << ";";
 }
 
 void CSharpTabCodeGen::NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
-	ret << CS() << " = (";
+	ret << vCS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish );
 	ret << ");";
 }
@@ -650,7 +650,7 @@ void CSharpTabCodeGen::CALL( ostream &ret, int callDest, int targState, bool inF
 		INLINE_LIST( ret, prePushExpr, 0, false );
 	}
 
-	ret << "{" << STACK() << "[" << TOP() << "++] = " << CS() << "; " << CS() << " = " << 
+	ret << "{" << STACK() << "[" << TOP() << "++] = " << vCS() << "; " << vCS() << " = " << 
 			callDest << "; " << CTRL_FLOW() << "goto _again;}";
 
 	if ( prePushExpr != 0 )
@@ -664,7 +664,7 @@ void CSharpTabCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targS
 		INLINE_LIST( ret, prePushExpr, 0, false );
 	}
 
-	ret << "{" << STACK() << "[" << TOP() << "++] = " << CS() << "; " << CS() << " = (";
+	ret << "{" << STACK() << "[" << TOP() << "++] = " << vCS() << "; " << vCS() << " = (";
 	INLINE_LIST( ret, ilItem->children, targState, inFinish );
 	ret << "); " << CTRL_FLOW() << "goto _again;}";
 
@@ -674,7 +674,7 @@ void CSharpTabCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targS
 
 void CSharpTabCodeGen::RET( ostream &ret, bool inFinish )
 {
-	ret << "{" << CS() << " = " << STACK() << "[--" << 
+	ret << "{" << vCS() << " = " << STACK() << "[--" << 
 			TOP() << "]; ";
 
 	if ( postPopExpr != 0 ) {
@@ -816,10 +816,10 @@ void CSharpTabCodeGen::writeData()
 void CSharpTabCodeGen::LOCATE_TRANS()
 {
 	out <<
-		"	_keys = " << KO() + "[" + CS() + "]" << ";\n"
-		"	_trans = " << CAST(transType) << IO() << "[" << CS() << "];\n"
+		"	_keys = " << KO() + "[" + vCS() + "]" << ";\n"
+		"	_trans = " << CAST(transType) << IO() << "[" << vCS() << "];\n"
 		"\n"
-		"	_klen = " << SL() << "[" << CS() << "];\n"
+		"	_klen = " << SL() << "[" << vCS() << "];\n"
 		"	if ( _klen > 0 ) {\n"
 		"		" << signedKeysType << " _lower = _keys;\n"
 		"		" << signedKeysType << " _mid;\n"
@@ -844,7 +844,7 @@ void CSharpTabCodeGen::LOCATE_TRANS()
 		"		_trans += " << CAST(transType) << " _klen;\n"
 		"	}\n"
 		"\n"
-		"	_klen = " << RL() << "[" << CS() << "];\n"
+		"	_klen = " << RL() << "[" << vCS() << "];\n"
 		"	if ( _klen > 0 ) {\n"
 		"		" << signedKeysType << " _lower = _keys;\n"
 		"		" << signedKeysType << " _mid;\n"
@@ -874,8 +874,8 @@ void CSharpTabCodeGen::COND_TRANSLATE()
 {
 	out << 
 		"	_widec = " << GET_KEY() << ";\n"
-		"	_klen = " << CL() << "[" << CS() << "];\n"
-		"	_keys = " << CAST(keysType) << " ("<< CO() << "[" << CS() << "]*2);\n"
+		"	_klen = " << CL() << "[" << vCS() << "];\n"
+		"	_keys = " << CAST(keysType) << " ("<< CO() << "[" << vCS() << "]*2);\n"
 		"	if ( _klen > 0 ) {\n"
 		"		" << signedKeysType << " _lower = _keys;\n"
 		"		" << signedKeysType << " _mid;\n"
@@ -892,7 +892,7 @@ void CSharpTabCodeGen::COND_TRANSLATE()
 		"			else if ( " << GET_WIDE_KEY() << " > " << CK() << "[_mid+1] )\n"
 		"				_lower = " << CAST(signedKeysType) << " (_mid + 2);\n"
 		"			else {\n"
-		"				switch ( " << C() << "[" << CO() << "[" << CS() << "]"
+		"				switch ( " << C() << "[" << CO() << "[" << vCS() << "]"
 							" + ((_mid - _keys)>>1)] ) {\n";
 
 	for ( CondSpaceList::Iter csi = condSpaceList; csi.lte(); csi++ ) {
@@ -968,7 +968,7 @@ void CSharpTabCodeGen::writeExec()
 	if ( redFsm->errState != 0 ) {
 		outLabelUsed = true;
 		out << 
-			"	if ( " << CS() << " == " << redFsm->errState->id << " )\n"
+			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
 			"		goto _out;\n";
 	}
 
@@ -976,7 +976,7 @@ void CSharpTabCodeGen::writeExec()
 
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
-			"	_acts = " << FSA() << "[" + CS() + "]" << ";\n"
+			"	_acts = " << FSA() << "[" + vCS() + "]" << ";\n"
 			"	_nacts = " << A() << "[_acts++];\n"
 			"	while ( _nacts-- > 0 ) {\n"
 			"		switch ( " << A() << "[_acts++] ) {\n";
@@ -1001,10 +1001,10 @@ void CSharpTabCodeGen::writeExec()
 		out << "_eof_trans:\n";
 
 	if ( redFsm->anyRegCurStateRef() )
-		out << "	_ps = " << CS() << ";\n";
+		out << "	_ps = " << vCS() << ";\n";
 
 	out <<
-		"	" << CS() << " = " << TT() << "[_trans];\n"
+		"	" << vCS() << " = " << TT() << "[_trans];\n"
 		"\n";
 
 	if ( redFsm->anyRegActions() ) {
@@ -1029,7 +1029,7 @@ void CSharpTabCodeGen::writeExec()
 
 	if ( redFsm->anyToStateActions() ) {
 		out <<
-			"	_acts = " << TSA() << "[" << CS() << "]" << ";\n"
+			"	_acts = " << TSA() << "[" << vCS() << "]" << ";\n"
 			"	_nacts = " << A() << "[_acts++];\n"
 			"	while ( _nacts-- > 0 ) {\n"
 			"		switch ( " << A() << "[_acts++] ) {\n";
@@ -1043,7 +1043,7 @@ void CSharpTabCodeGen::writeExec()
 	if ( redFsm->errState != 0 ) {
 		outLabelUsed = true;
 		out << 
-			"	if ( " << CS() << " == " << redFsm->errState->id << " )\n"
+			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
 			"		goto _out;\n";
 	}
 
@@ -1063,14 +1063,14 @@ void CSharpTabCodeGen::writeExec()
 	
 	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
 		out << 
-			"	if ( " << P() << " == " << EOFV() << " )\n"
+			"	if ( " << P() << " == " << vEOF() << " )\n"
 			"	{\n";
 
 		if ( redFsm->anyEofTrans() ) {
 			out <<
-				"	if ( " << ET() << "[" << CS() << "] > 0 ) {\n"
+				"	if ( " << ET() << "[" << vCS() << "] > 0 ) {\n"
 				"		_trans = " << CAST(transType) << " (" << ET() <<
-					"[" << CS() << "] - 1);\n"
+					"[" << vCS() << "] - 1);\n"
 				"		goto _eof_trans;\n"
 				"	}\n";
 		}
@@ -1078,7 +1078,7 @@ void CSharpTabCodeGen::writeExec()
 		if ( redFsm->anyEofActions() ) {
 			out <<
 				"	" << actsType << " __acts = " << 
-						EA() << "[" << CS() << "]" << ";\n"
+						EA() << "[" << vCS() << "]" << ";\n"
 				"	" << nactsType << " __nacts = " << 
 				A() << "[__acts++];\n"
 				"	while ( __nacts-- > 0 ) {\n"

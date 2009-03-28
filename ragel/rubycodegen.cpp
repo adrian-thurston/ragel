@@ -157,7 +157,7 @@ string RubyCodeGen::PE()
 	return ret.str();
 }
 
-string RubyCodeGen::EOFV()
+string RubyCodeGen::vEOF()
 {
 	ostringstream ret;
 	if ( eofExpr == 0 )
@@ -170,7 +170,7 @@ string RubyCodeGen::EOFV()
 	return ret.str();
 }
 
-string RubyCodeGen::CS()
+string RubyCodeGen::vCS()
 {
 	ostringstream ret;
 	if ( csExpr == 0 )
@@ -536,7 +536,7 @@ void RubyCodeGen::INLINE_LIST( ostream &ret, GenInlineList *inlineList,
 			ret << "(_ps)";
 			break;
 		case GenInlineItem::Targs:
-			ret << "(" << CS() << ")";
+			ret << "(" << vCS() << ")";
 			break;
 		case GenInlineItem::Entry:
 			ret << item->targState->id;
@@ -775,7 +775,7 @@ void RubyCodeGen::writeInit()
 		out << "	" << PE() << " ||= " << DATA() << ".length\n";
 
 	if ( !noCS )
-		out << "	" << CS() << " = " << START() << "\n";
+		out << "	" << vCS() << " = " << START() << "\n";
 
 	/* If there are any calls, then the stack top needs initialization. */
 	if ( redFsm->anyActionCalls() || redFsm->anyActionRets() )

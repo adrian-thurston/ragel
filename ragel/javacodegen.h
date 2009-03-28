@@ -130,9 +130,9 @@ public:
 
 	string P();
 	string PE();
-	string EOFV();
+	string vEOF();
 
-	string CS();
+	string vCS();
 	string STACK();
 	string TOP();
 	string TOKSTART();

@@ -442,10 +442,10 @@ std::ostream &FlatCodeGen::TRANS_ACTIONS()
 void FlatCodeGen::LOCATE_TRANS()
 {
 	out <<
-		"	_keys = " << ARR_OFF( K(), "(" + CS() + "<<1)" ) << ";\n"
-		"	_inds = " << ARR_OFF( I(), IO() + "[" + CS() + "]" ) << ";\n"
+		"	_keys = " << ARR_OFF( K(), "(" + vCS() + "<<1)" ) << ";\n"
+		"	_inds = " << ARR_OFF( I(), IO() + "[" + vCS() + "]" ) << ";\n"
 		"\n"
-		"	_slen = " << SP() << "[" << CS() << "];\n"
+		"	_slen = " << SP() << "[" << vCS() << "];\n"
 		"	_trans = _inds[ _slen > 0 && _keys[0] <=" << GET_WIDE_KEY() << " &&\n"
 		"		" << GET_WIDE_KEY() << " <= _keys[1] ?\n"
 		"		" << GET_WIDE_KEY() << " - _keys[0] : _slen ];\n"
@@ -454,13 +454,13 @@ void FlatCodeGen::LOCATE_TRANS()
 
 void FlatCodeGen::GOTO( ostream &ret, int gotoDest, bool inFinish )
 {
-	ret << "{" << CS() << " = " << gotoDest << "; " << 
+	ret << "{" << vCS() << " = " << gotoDest << "; " << 
 			CTRL_FLOW() << "goto _again;}";
 }
 
 void FlatCodeGen::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
-	ret << "{" << CS() << " = (";
+	ret << "{" << vCS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
 	ret << "); " << CTRL_FLOW() << "goto _again;}";
 }
@@ -472,17 +472,17 @@ void FlatCodeGen::CURS( ostream &ret, bool inFinish )
 
 void FlatCodeGen::TARGS( ostream &ret, bool inFinish, int targState )
 {
-	ret << "(" << CS() << ")";
+	ret << "(" << vCS() << ")";
 }
 
 void FlatCodeGen::NEXT( ostream &ret, int nextDest, bool inFinish )
 {
-	ret << CS() << " = " << nextDest << ";";
+	ret << vCS() << " = " << nextDest << ";";
 }
 
 void FlatCodeGen::NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
-	ret << CS() << " = (";
+	ret << vCS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
 	ret << ");";
 }
@@ -494,7 +494,7 @@ void FlatCodeGen::CALL( ostream &ret, int callDest, int targState, bool inFinish
 		INLINE_LIST( ret, prePushExpr, 0, false, false );
 	}
 
-	ret << "{" << STACK() << "[" << TOP() << "++] = " << CS() << "; " << CS() << " = " << 
+	ret << "{" << STACK() << "[" << TOP() << "++] = " << vCS() << "; " << vCS() << " = " << 
 			callDest << "; " << CTRL_FLOW() << "goto _again;}";
 
 	if ( prePushExpr != 0 )
@@ -509,7 +509,7 @@ void FlatCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState,
 		INLINE_LIST( ret, prePushExpr, 0, false, false );
 	}
 
-	ret << "{" << STACK() << "[" << TOP() << "++] = " << CS() << "; " << CS() << " = (";
+	ret << "{" << STACK() << "[" << TOP() << "++] = " << vCS() << "; " << vCS() << " = (";
 	INLINE_LIST( ret, ilItem->children, targState, inFinish, false );
 	ret << "); " << CTRL_FLOW() << "goto _again;}";
 
@@ -520,7 +520,7 @@ void FlatCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState,
 
 void FlatCodeGen::RET( ostream &ret, bool inFinish )
 {
-	ret << "{" << CS() << " = " << STACK() << "[--" << TOP() << "];";
+	ret << "{" << vCS() << " = " << STACK() << "[--" << TOP() << "];";
 
 	if ( postPopExpr != 0 ) {
 		ret << "{";
@@ -639,10 +639,10 @@ void FlatCodeGen::COND_TRANSLATE()
 		"	_widec = " << GET_KEY() << ";\n";
 
 	out <<
-		"	_keys = " << ARR_OFF( CK(), "(" + CS() + "<<1)" ) << ";\n"
-		"	_conds = " << ARR_OFF( C(), CO() + "[" + CS() + "]" ) << ";\n"
+		"	_keys = " << ARR_OFF( CK(), "(" + vCS() + "<<1)" ) << ";\n"
+		"	_conds = " << ARR_OFF( C(), CO() + "[" + vCS() + "]" ) << ";\n"
 		"\n"
-		"	_slen = " << CSP() << "[" << CS() << "];\n"
+		"	_slen = " << CSP() << "[" << vCS() << "];\n"
 		"	_cond = _slen > 0 && _keys[0] <=" << GET_WIDE_KEY() << " &&\n"
 		"		" << GET_WIDE_KEY() << " <= _keys[1] ?\n"
 		"		_conds[" << GET_WIDE_KEY() << " - _keys[0]] : 0;\n"
@@ -724,7 +724,7 @@ void FlatCodeGen::writeExec()
 	if ( redFsm->errState != 0 ) {
 		outLabelUsed = true;
 		out << 
-			"	if ( " << CS() << " == " << redFsm->errState->id << " )\n"
+			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
 			"		goto _out;\n";
 	}
 
@@ -732,7 +732,7 @@ void FlatCodeGen::writeExec()
 
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
-			"	_acts = " << ARR_OFF( A(), FSA() + "[" + CS() + "]" ) << ";\n"
+			"	_acts = " << ARR_OFF( A(), FSA() + "[" + vCS() + "]" ) << ";\n"
 			"	_nacts = " << CAST(UINT()) << " *_acts++;\n"
 			"	while ( _nacts-- > 0 ) {\n"
 			"		switch ( *_acts++ ) {\n";
@@ -752,10 +752,10 @@ void FlatCodeGen::writeExec()
 		out << "_eof_trans:\n";
 
 	if ( redFsm->anyRegCurStateRef() )
-		out << "	_ps = " << CS() << ";\n";
+		out << "	_ps = " << vCS() << ";\n";
 
 	out <<
-		"	" << CS() << " = " << TT() << "[_trans];\n"
+		"	" << vCS() << " = " << TT() << "[_trans];\n"
 		"\n";
 
 	if ( redFsm->anyRegActions() ) {
@@ -780,7 +780,7 @@ void FlatCodeGen::writeExec()
 
 	if ( redFsm->anyToStateActions() ) {
 		out <<
-			"	_acts = " << ARR_OFF( A(),  TSA() + "[" + CS() + "]" ) << ";\n"
+			"	_acts = " << ARR_OFF( A(),  TSA() + "[" + vCS() + "]" ) << ";\n"
 			"	_nacts = " << CAST(UINT()) << " *_acts++;\n"
 			"	while ( _nacts-- > 0 ) {\n"
 			"		switch ( *_acts++ ) {\n";
@@ -794,7 +794,7 @@ void FlatCodeGen::writeExec()
 	if ( redFsm->errState != 0 ) {
 		outLabelUsed = true;
 		out << 
-			"	if ( " << CS() << " == " << redFsm->errState->id << " )\n"
+			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
 			"		goto _out;\n";
 	}
 
@@ -814,13 +814,13 @@ void FlatCodeGen::writeExec()
 
 	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
 		out << 
-			"	if ( " << P() << " == " << EOFV() << " )\n"
+			"	if ( " << P() << " == " << vEOF() << " )\n"
 			"	{\n";
 
 		if ( redFsm->anyEofTrans() ) {
 			out <<
-				"	if ( " << ET() << "[" << CS() << "] > 0 ) {\n"
-				"		_trans = " << ET() << "[" << CS() << "] - 1;\n"
+				"	if ( " << ET() << "[" << vCS() << "] > 0 ) {\n"
+				"		_trans = " << ET() << "[" << vCS() << "] - 1;\n"
 				"		goto _eof_trans;\n"
 				"	}\n";
 		}
@@ -829,7 +829,7 @@ void FlatCodeGen::writeExec()
 			out <<
 				"	" << PTR_CONST() << ARRAY_TYPE(redFsm->maxActArrItem) << 
 						POINTER() << "__acts = " << 
-						ARR_OFF( A(), EA() + "[" + CS() + "]" ) << ";\n"
+						ARR_OFF( A(), EA() + "[" + vCS() + "]" ) << ";\n"
 				"	" << UINT() << " __nacts = " << CAST(UINT()) << " *__acts++;\n"
 				"	while ( __nacts-- > 0 ) {\n"
 				"		switch ( *__acts++ ) {\n";

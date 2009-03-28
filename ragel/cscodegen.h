@@ -92,10 +92,10 @@ protected:
 
 	string P();
 	string PE();
-	string EOFV();
+	string vEOF();
 
 	string ACCESS();
-	string CS();
+	string vCS();
 	string STACK();
 	string TOP();
 	string TOKSTART();

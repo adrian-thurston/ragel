@@ -99,9 +99,9 @@ public:
 
 	string P();
 	string PE();
-	string EOFV();
+	string vEOF();
 
-	string CS();
+	string vCS();
 	string TOP();
 	string STACK();
 	string ACT();
