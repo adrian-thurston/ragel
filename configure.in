@@ -1,5 +1,5 @@
 dnl 
-dnl   Copyright 2001-2006 Adrian Thurston <thurston@complang.org>
+dnl   Copyright 2001-2009 Adrian Thurston <thurston@complang.org>
 dnl
 
 dnl   This file is part of Ragel.
@@ -18,23 +18,26 @@ dnl   You should have received a copy of the GNU General Public License
 dnl   along with Ragel; if not, write to the Free Software
 dnl   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
   
-AC_INIT(ragel/main.cpp)
+AC_INIT(ragel, 6.4)
+AM_INIT_AUTOMAKE
+
 AC_CONFIG_HEADER(ragel/config.h)
 
 dnl Set to true if the build system should generate parsers from ragel and kelbt
 dnl sources. Set to false if generated files are included and not to be built
 dnl (production).
-AC_SUBST(BUILD_PARSERS,true)
+build_parsers=yes;
+AM_CONDITIONAL(BUILD_PARSERS, [test "x$build_parsers" = "xyes"])
 
 dnl Checks for programs.
 AC_PROG_CC
 AC_PROG_CXX
 AC_CHECK_TOOL(AR, ar)
 AC_PROG_RANLIB
-AC_DEFINE_UNQUOTED(CC,$CC)
-AC_DEFINE_UNQUOTED(CXX,$CXX)
-AC_DEFINE_UNQUOTED(AR,$AR)
-AC_DEFINE_UNQUOTED(RANLIB,$RANLIB)
+#AC_DEFINE_UNQUOTED(CC,$CC)
+#AC_DEFINE_UNQUOTED(CXX,$CXX)
+#AC_DEFINE_UNQUOTED(AR,$AR)
+#AC_DEFINE_UNQUOTED(RANLIB,$RANLIB)
 
 dnl Set test on c++ compiler.
 AC_LANG_CPLUSPLUS
@@ -42,7 +45,7 @@ AC_LANG_CPLUSPLUS
 dnl Check for definition of MAKE.
 AC_PROG_MAKE_SET
 
-if test $BUILD_PARSERS = true; then
+if test "x$enable_parsers" = "xyes"; then
 
 dnl Check for Ragel
 AC_CHECK_PROG(RAGEL, ragel, ragel)
@@ -66,9 +69,9 @@ fi # BUILD_PARSERS
 
 dnl Check for the D compiler
 AC_CHECK_PROG(GDC, gdc, gdc)
-if test -n "$GDC"; then
-	AC_DEFINE_UNQUOTED(GDC,$GDC)
-fi
+#if test -n "$GDC"; then
+#	AC_DEFINE_UNQUOTED(GDC,$GDC)
+#fi
 
 dnl Check for the Objective-C compiler
 AC_MSG_CHECKING([for the Objective-C compiler])
@@ -79,7 +82,7 @@ GOBJC=""
 if gcc -x objective-c conftest.m -o conftest.bin 2>/dev/null; then
 	GOBJC="gcc -x objective-c"
 	AC_MSG_RESULT([yes])
-	AC_DEFINE_UNQUOTED(GOBJC,$GOBJC)
+#	AC_DEFINE_UNQUOTED(GOBJC,$GOBJC)
 else
 	AC_MSG_RESULT([no])
 fi
@@ -87,29 +90,29 @@ AC_SUBST(GOBJC)
 
 dnl Check for the Java compiler.
 AC_CHECK_PROG(JAVAC, javac, javac)
-if test -n "$JAVAC"; then
-	AC_DEFINE_UNQUOTED(JAVAC,$JAVAC)
-fi
+#if test -n "$JAVAC"; then
+#	AC_DEFINE_UNQUOTED(JAVAC,$JAVAC)
+#fi
 
 dnl Check for TXL.
 AC_CHECK_PROG(TXL, txl, txl)
-if test -n "$TXL"; then
-	AC_DEFINE_UNQUOTED(TXL,$TXL)
-fi
+#if test -n "$TXL"; then
+#	AC_DEFINE_UNQUOTED(TXL,$TXL)
+#fi
 
 dnl Check for Ruby.
 AC_CHECK_PROG(RUBY, ruby, ruby)
-if test -n "$RUBY"; then
-	AC_DEFINE_UNQUOTED(RUBY,$RUBY)
-fi
+#if test -n "$RUBY"; then
+#	AC_DEFINE_UNQUOTED(RUBY,$RUBY)
+#fi
 
 dnl Check for the C# compiler.
 AC_CHECK_PROG(GMCS, gmcs, gmcs)
-if test -n "$GMCS"; then
-	AC_DEFINE_UNQUOTED(GMCS,$GMCS)
-fi
+#if test -n "$GMCS"; then
+#	AC_DEFINE_UNQUOTED(GMCS,$GMCS)
+#fi
 
 dnl write output files
-AC_OUTPUT(Makefile ragel/Makefile doc/Makefile test/Makefile)
+AC_OUTPUT(Makefile ragel/Makefile aapl/Makefile doc/Makefile test/Makefile)
 
 echo "configuration of ragel complete"
