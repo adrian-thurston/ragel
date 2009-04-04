@@ -1,5 +1,5 @@
 #
-#   Copyright 2002-2006 Adrian Thurston <thurston@complang.org>
+#   Copyright 2002-2009 Adrian Thurston <thurston@complang.org>
 #
 
 #   This file is part of Ragel.
@@ -19,12 +19,16 @@
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
 
 
-test:
-	@./runtests
+TESTS = runtests
 
-clean:
-	rm -f *.c *.cpp *.m *.d *.java *.bin *.class *.exp \
-		*.out *_c.rl *_d.rl *_java.rl *_ruby.rl *_csharp.rl *.cs *.exe
 
-distclean: clean
-	rm -f Makefile
+#clean:
+#	rm -f *.c *.cpp *.m *.d *.java *.bin *.class *.exp \
+#		*.out *_c.rl *_d.rl *_java.rl *_ruby.rl *_csharp.rl *.cs *.exe
+#
+#distclean: clean
+#	rm -f Makefile
+#
+
+#Makefile: runtests
+

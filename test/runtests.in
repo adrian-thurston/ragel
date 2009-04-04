@@ -54,14 +54,14 @@ shift $((OPTIND - 1));
 config=../ragel/config.h
 ragel=../ragel/ragel
 
-cxx_compiler=`sed '/^#define CXX/s/#define CXX *//p;d' $config`
-c_compiler=`sed '/^#define CC/s/#define CC *//p;d' $config`
-objc_compiler=`sed '/^#define GOBJC/s/#define GOBJC *//p;d' $config`
-d_compiler=`sed '/^#define GDC/s/#define GDC *//p;d' $config`
-java_compiler=`sed '/#define JAVAC/s/#define JAVAC *//p;d' $config`
-txl_engine=`sed '/^#define TXL/s/#define TXL *//p;d' $config`
-ruby_engine=`sed '/^#define RUBY/s/#define RUBY *//p;d' $config`
-csharp_compiler=`sed '/#define GMCS/s/#define GMCS *//p;d' $config`
+cxx_compiler="@CXX@"
+c_compiler="@CC@"
+objc_compiler="@GOBJC@"
+d_compiler="@GDC@"
+java_compiler="@JAVAC@"
+txl_engine="@TXL@"
+ruby_engine="@RUBY@"
+csharp_compiler="@GMCS@"
 
 function test_error
 {

@@ -1,5 +1,5 @@
 
-SUBDIRS = ragel aapl
+SUBDIRS = ragel aapl test
 
 no_parsers = 's/build_parsers=yes/build_parsers=no/'
 

@@ -26,13 +26,9 @@ BUILT_SOURCES = \
 CLEANFILES = \
 	rlscan.cpp rlparse.h rlparse.cpp
 
-# Get the version info.
-include ../version.mk
-
-version.h: ../version.mk
-	echo '#define VERSION "$(VERSION)"' > version.h
+version.h: Makefile
+	echo '#define VERSION "$(PACKAGE_VERSION)"' > version.h
 	echo '#define PUBDATE "$(PUBDATE)"' >> version.h
-	echo '#define PREFIX "$(prefix)"' >> version.h
 
 if BUILD_PARSERS
 

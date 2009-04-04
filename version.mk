@@ -1,2 +1,0 @@
-VERSION = 6.4
-PUBDATE = March 2009
