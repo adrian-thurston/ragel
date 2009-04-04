@@ -100,8 +100,10 @@ AC_CHECK_PROG(GMCS, gmcs, gmcs)
 dnl write output files
 AC_OUTPUT(
 	[
-		Makefile ragel/Makefile aapl/Makefile doc/Makefile test/Makefile test/runtests
-		doc/ragel.1
+		Makefile ragel/Makefile aapl/Makefile 
+		doc/Makefile doc/ragel.1
+		contrib/Makefile
+		test/Makefile test/runtests
 	],
 	[chmod +x test/runtests]
 )

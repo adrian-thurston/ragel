@@ -1,5 +1,5 @@
 
-SUBDIRS = ragel aapl doc test
+SUBDIRS = ragel aapl doc test contrib
 
 dist_doc_DATA = ChangeLog
 
