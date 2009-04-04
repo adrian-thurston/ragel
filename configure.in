@@ -31,6 +31,9 @@ dnl (production).
 build_parsers=yes;
 AM_CONDITIONAL(BUILD_PARSERS, [test "x$build_parsers" = "xyes"])
 
+build_manual=yes;
+AM_CONDITIONAL(BUILD_MANUAL, [test "x$build_manual" = "xyes"])
+
 dnl Checks for programs.
 AC_PROG_CC
 AC_PROG_CXX
@@ -96,7 +99,10 @@ AC_CHECK_PROG(GMCS, gmcs, gmcs)
 
 dnl write output files
 AC_OUTPUT(
-	[Makefile ragel/Makefile aapl/Makefile doc/Makefile test/Makefile test/runtests],
+	[
+		Makefile ragel/Makefile aapl/Makefile doc/Makefile test/Makefile test/runtests
+		doc/ragel.1
+	],
 	[chmod +x test/runtests]
 )
 
