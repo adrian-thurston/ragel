@@ -23,14 +23,14 @@ ragel_SOURCES = \
 BUILT_SOURCES = \
 	rlscan.cpp rlparse.h rlparse.cpp version.h
 
-CLEANFILES = \
-	rlscan.cpp rlparse.h rlparse.cpp
-
 version.h: Makefile
 	echo '#define VERSION "$(PACKAGE_VERSION)"' > version.h
 	echo '#define PUBDATE "$(PUBDATE)"' >> version.h
 
 if BUILD_PARSERS
+
+CLEANFILES = \
+	rlscan.cpp rlparse.h rlparse.cpp
 
 rlparse.h: rlparse.kh
 	kelbt -o $@ $<
