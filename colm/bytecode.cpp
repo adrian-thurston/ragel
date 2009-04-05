@@ -133,7 +133,7 @@ Tree *call_parser( Tree **&sp, Program *prg, Stream *stream,
 {
 	PdaTables *tables = prg->rtd->pdaTables;
 	PdaRun parser( sp, prg, tables, parserId, stream->fsmRun, stopId, revertOn );
-	parse( stream->fsmRun, &parser );
+	parse( &parser );
 	commit_full( &parser, 0 );
 	Tree *tree = parser.getParsedRoot( stopId > 0 );
 	tree_upref( tree );

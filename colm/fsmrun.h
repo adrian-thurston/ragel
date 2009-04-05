@@ -83,7 +83,7 @@ struct RunBuf
 
 #define MARK_SLOTS 32
 
-void parse( FsmRun *fsmRun, PdaRun *parser );
+void parse( PdaRun *parser );
 
 struct FsmRun
 {

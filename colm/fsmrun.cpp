@@ -45,7 +45,6 @@ void operator<<( ostream &out, exit_object & )
 FsmRun::FsmRun( Program *prg ) :
 	prg(prg),
 	tables(prg->rtd->fsmTables)
-	//,parser(0)
 {
 }
 
@@ -816,11 +815,17 @@ void scanner_error( FsmRun *fsmRun, PdaRun *parser )
 	}
 }
 
-void parse( FsmRun *fsmRun, PdaRun *parser )
+void parse( PdaRun *parser )
 {
 	parser->init();
 
 	while ( true ) {
+		
+		/* Pull the current scanner from the parser. This can change during
+		 * parsing due to stream pushes, usually for the purpose of includes.
+		 * */
+		FsmRun *fsmRun = parser->fsmRun;
+
 		int tokenId = fsmRun->scanToken( parser );
 
 		/* Check for EOF. */
