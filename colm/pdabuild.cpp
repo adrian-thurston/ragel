@@ -1416,6 +1416,8 @@ void ParseData::makeRuntimeData()
 				runtimeData->lelInfo[i].markId = lel->tokenDef->join->mark->markId;
 			else
 				runtimeData->lelInfo[i].markId = -1;
+
+			runtimeData->lelInfo[i].numCaptureAttr = 0;
 		}
 		else {
 			memset(&runtimeData->lelInfo[i], 0, sizeof(LangElInfo) );
