@@ -91,7 +91,7 @@ void FsmRun::streamPush( const char *data, long length )
 		dup->offset = p - runBuf->buf;
 
 		/* Send it back. */
-		inputStream->pushBack( dup );
+		inputStream->pushBackBuf( dup );
 
 		/* Since the second half is gone the current buffer now ends at p. */
 		pe = p;
@@ -167,7 +167,7 @@ void FsmRun::sendBackText( const char *data, long length )
 		/* Flush out the input buffer. */
 		back->length = pe-p;
 		back->offset = 0;
-		inputStream->pushBack( back );
+		inputStream->pushBackBuf( back );
 
 		/* Set p and pe. */
 		assert( runBuf != 0 );
@@ -277,7 +277,9 @@ void FsmRun::sendBack( PdaRun *parser, Kid *input )
 	#ifdef COLM_LOG_PARSE
 	if ( colm_log_parse ) {
 		LangElInfo *lelInfo = parser->tables->rtd->lelInfo;
-		cerr << "sending back: " << lelInfo[input->tree->id].name;
+		cerr << "sending back: " << lelInfo[input->tree->id].name << "  text: ";
+		cerr.write( string_data( input->tree->tokdata ), 
+				string_length( input->tree->tokdata ) );
 		if ( input->tree->flags & AF_ARTIFICIAL )
 			cerr << " (artificial)";
 		cerr << endl;
@@ -285,9 +287,10 @@ void FsmRun::sendBack( PdaRun *parser, Kid *input )
 	#endif
 
 	if ( input->tree->flags & AF_NAMED ) {
-		/* Send back anything that is in the buffer. */
-		inputStream->pushBack( p, pe-p );
-		p = pe = runBuf->buf;
+		/* Send back anything that is in the buffer that has not been parsed
+		 * yet. */
+		inputStream->pushBackData( p, pe-p );
+		pe = p;
 
 		/* Send the named lang el back first, then send back any leading
 		 * whitespace. */
@@ -645,14 +648,17 @@ Head *FsmRun::extractMatch()
 
 void send_token( FsmRun *fsmRun, PdaRun *parser, long id )
 {
+	/* Make the token data. */
+	Head *tokdata = fsmRun->extractMatch();
+
 	#ifdef COLM_LOG_PARSE
 	if ( colm_log_parse ) {
-		cerr << "token: " << parser->tables->rtd->lelInfo[id].name << endl;
+		cerr << "token: " << parser->tables->rtd->lelInfo[id].name << "  text: ";
+		cerr.write( string_data( tokdata ), string_length( tokdata ) );
+		cerr << endl;
 	}
 	#endif
 
-	/* Make the token data. */
-	Head *tokdata = fsmRun->extractMatch();
 	update_position( fsmRun, fsmRun->tokstart, tokdata->length );
 
 	Kid *input = make_token( fsmRun, parser, id, tokdata, false, 0 );

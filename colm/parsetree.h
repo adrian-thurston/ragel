@@ -997,11 +997,12 @@ typedef DList<Pattern> PatternList;
 
 struct Replacement
 {
-	Replacement( Namespace *nspace, TokenRegion *region, 
-			ReplItemList *list, int patRepId ) :
-		nspace(nspace), region(region), list(list), patRepId(patRepId), langEl(0),
-		pdaRun(0), nextBindId(1) {}
+	Replacement( const InputLoc &loc, Namespace *nspace, 
+			TokenRegion *region, ReplItemList *list, int patRepId ) :
+		loc(loc), nspace(nspace), region(region), list(list), 
+		patRepId(patRepId), langEl(0), pdaRun(0), nextBindId(1) {}
 
+	InputLoc loc;
 	Namespace *nspace;
 	TokenRegion *region;
 	ReplItemList *list;

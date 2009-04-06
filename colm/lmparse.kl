@@ -1401,7 +1401,7 @@ code_factor:
 	final {
 		Namespace *nspace = namespaceStack.top();
 		TokenRegion *region = regionStack.top();
-		Replacement *replacement = new Replacement( nspace, region, replItemList, 
+		Replacement *replacement = new Replacement( $1->loc, nspace, region, replItemList, 
 				pd->nextPatReplId++ );
 		pd->replList.append( replacement );
 		$$->expr = new LangExpr( new LangTerm( $1->loc, LangTerm::ConstructType,

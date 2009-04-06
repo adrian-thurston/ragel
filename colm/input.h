@@ -44,11 +44,8 @@ struct InputStream
 	virtual int getData( char *dest, int length ) = 0;
 	virtual int isEOF() = 0;
 	virtual int needFlush() = 0;
-
-	virtual void pushBack( char *data, long len ) 
-		{ assert(false); }
-	virtual void pushBack( RunBuf *runBuf )
-		{ assert(false); }
+	virtual void pushBackData( char *data, long len ) = 0;
+	virtual void pushBackBuf( RunBuf *runBuf ) = 0;
 
 	/* Named language elements for patterns and replacements. */
 	virtual int isLangEl() { return false; }
@@ -74,7 +71,8 @@ struct InputStreamString : public InputStream
 	int getData( char *dest, int length );
 	int isEOF() { return eof; }
 	int needFlush() { return eof; }
-	void pushBack( char *data, long len );
+	void pushBackData( char *data, long len );
+	void pushBackBuf( RunBuf *runBuf );
 
 	String data;
 	int offset;
@@ -90,8 +88,8 @@ struct InputStreamFile : public InputStream
 	int getData( char *dest, int length );
 	int isEOF();
 	int needFlush();
-
-	void pushBack( RunBuf *runBuf );
+	void pushBackData( char *data, long len );
+	void pushBackBuf( RunBuf *runBuf );
 
 	FILE *file;
 	RunBuf *queue;
@@ -106,8 +104,8 @@ struct InputStreamFD : public InputStream
 	int isEOF();
 	int needFlush();
 	int getData( char *dest, int length );
-
-	void pushBack( RunBuf *runBuf );
+	void pushBackData( char *data, long len );
+	void pushBackBuf( RunBuf *runBuf );
 
 	long fd;
 	bool eof;
@@ -118,12 +116,15 @@ struct InputStreamPattern : public InputStream
 {
 	InputStreamPattern( Pattern *pattern );
 
-	int isLangEl();
 	int getData( char *dest, int length );
-	KlangEl *getLangEl( long &bindId, char *&data, long &length );
 	int isEOF();
 	int needFlush();
-	void pushBack( char *data, long len );
+	void pushBackData( char *data, long len );
+	void pushBackBuf( RunBuf *runBuf );
+
+	int isLangEl();
+	KlangEl *getLangEl( long &bindId, char *&data, long &length );
+
 	void pushBackNamed();
 
 	void backup();
@@ -144,7 +145,9 @@ struct InputStreamRepl : public InputStream
 	KlangEl *getLangEl( long &bindId, char *&data, long &length );
 	int isEOF();
 	int needFlush();
-	void pushBack( char *data, long len );
+	void pushBackData( char *data, long len );
+	void pushBackBuf( RunBuf *runBuf );
+
 	void pushBackNamed();
 
 	void backup();
