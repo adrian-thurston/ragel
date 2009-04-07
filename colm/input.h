@@ -44,7 +44,6 @@ struct InputStream
 	virtual int getData( char *dest, int length ) = 0;
 	virtual int isEOF() = 0;
 	virtual int needFlush() = 0;
-	virtual void pushBackData( char *data, long len ) = 0;
 	virtual void pushBackBuf( RunBuf *runBuf ) = 0;
 
 	/* Named language elements for patterns and replacements. */
@@ -71,7 +70,6 @@ struct InputStreamString : public InputStream
 	int getData( char *dest, int length );
 	int isEOF() { return eof; }
 	int needFlush() { return eof; }
-	void pushBackData( char *data, long len );
 	void pushBackBuf( RunBuf *runBuf );
 
 	String data;
@@ -88,7 +86,6 @@ struct InputStreamFile : public InputStream
 	int getData( char *dest, int length );
 	int isEOF();
 	int needFlush();
-	void pushBackData( char *data, long len );
 	void pushBackBuf( RunBuf *runBuf );
 
 	FILE *file;
@@ -104,7 +101,6 @@ struct InputStreamFD : public InputStream
 	int isEOF();
 	int needFlush();
 	int getData( char *dest, int length );
-	void pushBackData( char *data, long len );
 	void pushBackBuf( RunBuf *runBuf );
 
 	long fd;
@@ -119,7 +115,6 @@ struct InputStreamPattern : public InputStream
 	int getData( char *dest, int length );
 	int isEOF();
 	int needFlush();
-	void pushBackData( char *data, long len );
 	void pushBackBuf( RunBuf *runBuf );
 
 	int isLangEl();
@@ -145,7 +140,6 @@ struct InputStreamRepl : public InputStream
 	KlangEl *getLangEl( long &bindId, char *&data, long &length );
 	int isEOF();
 	int needFlush();
-	void pushBackData( char *data, long len );
 	void pushBackBuf( RunBuf *runBuf );
 
 	void pushBackNamed();

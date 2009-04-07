@@ -139,20 +139,8 @@ void undo_position( FsmRun *fsmRun, const char *data, long length )
 	fsmRun->inputStream->position -= length;
 }
 
-/* Should only be sending back whole tokens/ignores, therefore the send back
- * should never cross a buffer boundary. Either we slide back p, or we move to
- * a previous buffer and slide back p. */
-void FsmRun::sendBackText( const char *data, long length )
+void FsmRun::sendBackRunBufHead()
 {
-	#ifdef COLM_LOG_PARSE
-	if ( colm_log_parse ) {
-		cerr << "push back of " << length << " characters" << endl;
-	}
-	#endif
-
-	if ( length == 0 )
-		return;
-
 	if ( p == runBuf->buf ) {
 		#ifdef COLM_LOG_PARSE
 		if ( colm_log_parse ) {
@@ -170,9 +158,32 @@ void FsmRun::sendBackText( const char *data, long length )
 		inputStream->pushBackBuf( back );
 
 		/* Set p and pe. */
-		assert( runBuf != 0 );
+		if ( runBuf == 0 ) {
+			runBuf = new RunBuf;
+			runBuf->next = 0;
+			p = pe = runBuf->buf;
+		}
+
 		p = pe = runBuf->buf + runBuf->length;
 	}
+
+}
+
+/* Should only be sending back whole tokens/ignores, therefore the send back
+ * should never cross a buffer boundary. Either we slide back p, or we move to
+ * a previous buffer and slide back p. */
+void FsmRun::sendBackText( const char *data, long length )
+{
+	#ifdef COLM_LOG_PARSE
+	if ( colm_log_parse ) {
+		cerr << "push back of " << length << " characters" << endl;
+	}
+	#endif
+
+	if ( length == 0 )
+		return;
+
+	sendBackRunBufHead();
 
 	/* If there is data in the current buffer then the whole send back
 	 * should be in this buffer. */
@@ -287,10 +298,8 @@ void FsmRun::sendBack( PdaRun *parser, Kid *input )
 	#endif
 
 	if ( input->tree->flags & AF_NAMED ) {
-		/* Send back anything that is in the buffer that has not been parsed
-		 * yet. */
-		inputStream->pushBackData( p, pe-p );
-		pe = p;
+		/* Send back anything in the buffer that has not been parsed. */
+		sendBackRunBufHead();
 
 		/* Send the named lang el back first, then send back any leading
 		 * whitespace. */
@@ -826,7 +835,6 @@ void parse( PdaRun *parser )
 	parser->init();
 
 	while ( true ) {
-		
 		/* Pull the current scanner from the parser. This can change during
 		 * parsing due to stream pushes, usually for the purpose of includes.
 		 * */
@@ -938,8 +946,32 @@ long FsmRun::scanToken( PdaRun *parser )
 		/* Check for a named language element. Note that we can do this only
 		 * when p == pe otherwise we get ahead of what's already in the
 		 * buffer. */
-		if ( inputStream->isLangEl() )
+		if ( inputStream->isLangEl() ) {
+			/* Always break the runBuf on named language elements. This makes
+			 * backtracking simpler because it allows us to always push back
+			 * whole runBufs only. If we did not do this we could get half a
+			 * runBuf, a named langEl, then the second half full. During
+			 * backtracking we would need to push the halves back separately.
+			 * */
+			if ( p > runBuf->buf ) {
+				#ifdef COLM_LOG_PARSE
+				if ( colm_log_parse )
+					cerr << "have a langEl, making a new runBuf" << endl;
+				#endif
+
+				/* Compute the length of the current before before we move
+				 * past it. */
+				runBuf->length = p - runBuf->buf;;
+
+				/* Make the new one. */
+				RunBuf *newBuf = new RunBuf;
+				p = pe = newBuf->buf;
+				newBuf->next = runBuf;
+				runBuf = newBuf;
+			}
+
 			return SCAN_LANG_EL;
+		}
 
 		/* Maybe need eof. */
  		if ( inputStream->isEOF() ) {

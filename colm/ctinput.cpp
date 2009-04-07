@@ -22,6 +22,7 @@
 #include "parsedata.h"
 #include "parsetree.h"
 #include "input.h"
+#include "fsmrun.h"
 
 /*
  * Pattern
@@ -108,8 +109,11 @@ void InputStreamPattern::backup()
 		patItem = patItem->prev;
 }
 
-void InputStreamPattern::pushBackData( char *data, long length )
+void InputStreamPattern::pushBackBuf( RunBuf *runBuf )
 {
+	char *data = runBuf->buf + runBuf->offset;
+	long length = runBuf->length;
+
 	if ( length == 0 )
 		return;
 
@@ -124,11 +128,6 @@ void InputStreamPattern::pushBackData( char *data, long length )
 
 	offset -= length;
 	assert( memcmp( &patItem->data[offset], data, length ) == 0 );
-}
-
-void InputStreamPattern::pushBackBuf( RunBuf *runBuf )
-{
-	assert( false );
 }
 
 void InputStreamPattern::pushBackNamed()
@@ -237,10 +236,13 @@ void InputStreamRepl::backup()
 		replItem = replItem->prev;
 }
 
-void InputStreamRepl::pushBackData( char *data, long length )
+void InputStreamRepl::pushBackBuf( RunBuf *runBuf )
 {
+	char *data = runBuf->buf + runBuf->offset;
+	long length = runBuf->length;
+
 	if ( colm_log_parse ) {
-		cerr << "pushBackData: ";
+		cerr << "push back data: ";
 		cerr.write( data, length );
 		cerr << endl;
 	}
@@ -259,11 +261,6 @@ void InputStreamRepl::pushBackData( char *data, long length )
 
 	offset -= length;
 	assert( memcmp( &replItem->data[offset], data, length ) == 0 );
-}
-
-void InputStreamRepl::pushBackBuf( RunBuf *runBuf )
-{
-	assert( false );
 }
 
 void InputStreamRepl::pushBackNamed()

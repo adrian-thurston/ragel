@@ -48,15 +48,13 @@ int InputStreamString::getData( char *dest, int length )
 	return length;
 }
 
-void InputStreamString::pushBackData( char *data, long len )
-{
-	assert( len <= offset );
-	offset -= len;
-}
-
 void InputStreamString::pushBackBuf( RunBuf *runBuf )
 {
-	assert( false );
+	//char *data = runBuf->buf + runBuf->offset;
+	long length = runBuf->length;
+
+	assert( length <= offset );
+	offset -= length;
 }
 
 /*
@@ -96,11 +94,6 @@ int InputStreamFile::getData( char *dest, int length )
 	}
 }
 
-void InputStreamFile::pushBackData( char *data, long len )
-{
-	assert( false );
-}
-
 void InputStreamFile::pushBackBuf( RunBuf *runBuf )
 {
 	runBuf->next = queue;
@@ -125,11 +118,6 @@ void InputStreamFD::pushBackBuf( RunBuf *runBuf )
 {
 	runBuf->next = queue;
 	queue = runBuf;
-}
-
-void InputStreamFD::pushBackData( char *data, long len )
-{
-	assert( false );
 }
 
 int InputStreamFD::getData( char *dest, int length )

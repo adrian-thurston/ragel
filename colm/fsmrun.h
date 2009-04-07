@@ -92,6 +92,7 @@ struct FsmRun
 
 	void sendEOF( PdaRun *parser );
 
+	void sendBackRunBufHead();
 	void sendBackIgnore( PdaRun *parser, Kid *ignore );
 	void sendBack( PdaRun *parser, Kid *input );
 	void queueBack( PdaRun *parser, Kid *input );
