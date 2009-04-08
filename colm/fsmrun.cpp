@@ -624,6 +624,7 @@ void exec_gen( FsmRun *fsmRun, PdaRun *parser, long id )
 	 * data is pulled from the stream. */
 
 	fsmRun->p = fsmRun->tokstart;
+	fsmRun->tokstart = 0;
 
 	generation_action( fsmRun, parser, id, tokdata, false, 0 );
 }
@@ -678,7 +679,7 @@ void send_token( FsmRun *fsmRun, PdaRun *parser, long id )
  * start it at p. */
 Head *FsmRun::extractPrefix( PdaRun *parser, long length )
 {
-	/* How much do we have already? Tokstart may or may not be set. */
+	/* We should not be in the midst of getting a token. */
 	assert( tokstart == 0 );
 
 	/* The generated token length has been stuffed into tokdata. */
