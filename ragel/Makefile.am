@@ -27,6 +27,8 @@ version.h: Makefile
 	echo '#define VERSION "$(PACKAGE_VERSION)"' > version.h
 	echo '#define PUBDATE "$(PUBDATE)"' >> version.h
 
+EXTRA_DIST = rlscan.rl rlparse.kh rlparse.kl
+
 if BUILD_PARSERS
 
 CLEANFILES = \

@@ -31,6 +31,7 @@ dnl (production).
 build_parsers=yes;
 AM_CONDITIONAL(BUILD_PARSERS, [test "x$build_parsers" = "xyes"])
 
+dnl Set to true if the manual should be built.
 build_manual=yes;
 AM_CONDITIONAL(BUILD_MANUAL, [test "x$build_manual" = "xyes"])
 
@@ -46,7 +47,7 @@ AC_LANG_CPLUSPLUS
 dnl Check for definition of MAKE.
 AC_PROG_MAKE_SET
 
-if test "x$enable_parsers" = "xyes"; then
+if test "x$build_parsers" = "xyes"; then
 
 dnl Check for Ragel
 AC_CHECK_PROG(RAGEL, ragel, ragel)
