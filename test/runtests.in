@@ -119,10 +119,10 @@ function run_test()
 		exec_cmd=./$binary
 		[ $lang = java ] && exec_cmd="java ${root}"
 		[ $lang = ruby ] && exec_cmd="ruby ${code_src}"
-		[ $lang = csharp ] && exec_cmd="mono ${exec_cmd}"
+		[ $lang = csharp ] && [ "$csharp_compiler" = gmcs ] && exec_cmd="mono ${exec_cmd}"
 
 		$exec_cmd 2>&1 > $output;
-		if diff $expected_out $output > /dev/null; then
+		if diff --strip-trailing-cr $expected_out $output > /dev/null; then
 			echo "passed";
 		else
 			echo "FAILED";
