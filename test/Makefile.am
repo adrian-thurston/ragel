@@ -38,7 +38,7 @@ EXTRA_DIST = \
 	xmlcommon.rl langtrans_c.sh langtrans_csharp.sh langtrans_d.sh \
 	langtrans_java.sh langtrans_ruby.sh checkeofact.txl \
 	langtrans_csharp.txl langtrans_c.txl langtrans_d.txl langtrans_java.txl \
-	langtrans_ruby.txl testcase.txl
+	langtrans_ruby.txl testcase.txl cppscan1.h eofact.h mailbox1.h strings2.h
 
 CLEANFILES = \
 	*.c *.cpp *.m *.d *.java *.bin *.class *.exp \
