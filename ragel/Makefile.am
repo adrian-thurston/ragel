@@ -3,6 +3,8 @@ INCLUDES = -I../aapl
 
 bin_PROGRAMS = ragel
 
+ragel_CXXFLAGS = -Wall
+
 ragel_SOURCES = \
 	buffer.h cdgoto.h cscodegen.h csipgoto.h inputdata.h rbxgoto.h \
 	rubyflat.h cdcodegen.h cdipgoto.h csfflat.h cssplit.h javacodegen.h \

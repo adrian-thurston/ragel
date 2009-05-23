@@ -41,6 +41,9 @@ AC_PROG_CXX
 AC_CHECK_TOOL(AR, ar)
 AC_PROG_RANLIB
 
+# Default flags.
+CXXFLAGS="-g"
+
 dnl Set test on c++ compiler.
 AC_LANG_CPLUSPLUS
 
