@@ -507,7 +507,7 @@ char *makeIntermedTemplate( const char *baseFileName )
 {
 	char *result = 0;
 	const char *templ = "ragel-XXXXXX.xml";
-	char *lastSlash = strrchr( baseFileName, '/' );
+	const char *lastSlash = strrchr( baseFileName, '/' );
 	if ( lastSlash == 0 ) {
 		result = new char[strlen(templ)+1];
 		strcpy( result, templ );
