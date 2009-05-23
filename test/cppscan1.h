@@ -2,8 +2,8 @@
 #define _CPPSCAN1_H
 
 #include <iostream>
-#include <malloc.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstring>
 
 using namespace std;
 
