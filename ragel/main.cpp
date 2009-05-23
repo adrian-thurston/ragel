@@ -336,16 +336,17 @@ void processArgs( int argc, const char **argv, InputData &id )
 				printStatistics = true;
 				break;
 			case '-': {
-				char *eq = strchr( pc.paramArg, '=' );
+				char *arg = strdup( pc.paramArg );
+				char *eq = strchr( arg, '=' );
 
 				if ( eq != 0 )
 					*eq++ = 0;
 
-				if ( strcmp( pc.paramArg, "help" ) == 0 )
+				if ( strcmp( arg, "help" ) == 0 )
 					usage();
-				else if ( strcmp( pc.paramArg, "version" ) == 0 )
+				else if ( strcmp( arg, "version" ) == 0 )
 					version();
-				else if ( strcmp( pc.paramArg, "error-format" ) == 0 ) {
+				else if ( strcmp( arg, "error-format" ) == 0 ) {
 					if ( eq == 0 )
 						error() << "expecting '=value' for error-format" << endl;
 					else if ( strcmp( eq, "gnu" ) == 0 )
@@ -355,12 +356,13 @@ void processArgs( int argc, const char **argv, InputData &id )
 					else
 						error() << "invalid value for error-format" << endl;
 				}
-				else if ( strcmp( pc.paramArg, "rbx" ) == 0 )
+				else if ( strcmp( arg, "rbx" ) == 0 )
 					rubyImpl = Rubinius;
 				else {
 					error() << "--" << pc.paramArg << 
 							" is an invalid argument" << endl;
 				}
+				free( arg );
 				break;
 			}
 
