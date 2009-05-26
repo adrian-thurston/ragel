@@ -30,14 +30,11 @@ TARGS = \
 
 all: $(TARGS)
 
-distclean clean:
-	rm -Rf *.o *.c *.cpp $(TARGS)
+#%.o: %.c
+#	gcc $(CFLAGS) -Wall -g -c -O3 -o $@ $<
 
-%.o: %.c
-	gcc $(CFLAGS) -Wall -g -c -O3 -o $@ $<
-
-%.o: %.cpp
-	g++ $(CXXFLAGS) -Wall -g -c -O3 -o $@ $<
+#%.o: %.cpp
+#	g++ $(CXXFLAGS) -Wall -g -c -O3 -o $@ $<
 
 #########################################
 
