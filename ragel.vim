@@ -14,7 +14,8 @@ syntax region ocComment start="\/\*" end="\*\/"
 syntax match ocComment "\/\/.*$"
 
 " Anything preprocessor
-syntax match ocPreproc "#.*$"
+syntax match ocPreproc "#\(.\|\\\n\)*$"
+syntax region ocPreproc start="#" end="[^\\]$"
 
 " Strings
 syntax match ocLiteral "'\(\\.\|[^'\\]\)*'"
