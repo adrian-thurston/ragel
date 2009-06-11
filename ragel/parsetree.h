@@ -66,11 +66,12 @@ struct FactorWithNeg;
 struct Factor;
 struct Expression;
 struct Join;
-struct JoinOrLm;
+struct MachineDef;
 struct LongestMatch;
 struct LongestMatchPart;
 struct LmPartList;
 struct Range;
+struct LengthDef;
 
 /* Type of augmentation. Describes locations in the machine. */
 enum AugType
@@ -221,8 +222,8 @@ struct PriorityAug
  */
 struct VarDef
 {
-	VarDef( const char *name, JoinOrLm *joinOrLm )
-		: name(name), joinOrLm(joinOrLm), isExport(false) { }
+	VarDef( const char *name, MachineDef *machineDef )
+		: name(name), machineDef(machineDef), isExport(false) { }
 	
 	/* Parse tree traversal. */
 	FsmAp *walk( ParseData *pd );
@@ -230,7 +231,7 @@ struct VarDef
 	void resolveNameRefs( ParseData *pd );
 
 	const char *name;
-	JoinOrLm *joinOrLm;
+	MachineDef *machineDef;
 	bool isExport;
 };
 
@@ -322,17 +323,20 @@ struct LongestMatch
 /* List of Expressions. */
 typedef DList<Expression> ExprList;
 
-struct JoinOrLm
+struct MachineDef
 {
 	enum Type {
 		JoinType,
-		LongestMatchType
+		LongestMatchType,
+		LengthDefType
 	};
 
-	JoinOrLm( Join *join ) : 
-		join(join), longestMatch(0), type(JoinType) {}
-	JoinOrLm( LongestMatch *longestMatch ) :
-		join(0), longestMatch(longestMatch), type(LongestMatchType) {}
+	MachineDef( Join *join )
+		: join(join), longestMatch(0), lengthDef(0), type(JoinType) {}
+	MachineDef( LongestMatch *longestMatch )
+		: join(0), longestMatch(longestMatch), lengthDef(0), type(LongestMatchType) {}
+	MachineDef( LengthDef *lengthDef )
+		: join(0), longestMatch(0), lengthDef(lengthDef), type(LengthDefType) {}
 
 	FsmAp *walk( ParseData *pd );
 	void makeNameTree( ParseData *pd );
@@ -340,6 +344,7 @@ struct JoinOrLm
 	
 	Join *join;
 	LongestMatch *longestMatch;
+	LengthDef *lengthDef;
 	Type type;
 };
 

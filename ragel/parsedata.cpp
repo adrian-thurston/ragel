@@ -829,8 +829,8 @@ void ParseData::createBuiltin( const char *name, BuiltinMachine builtin )
 {
 	Expression *expression = new Expression( builtin );
 	Join *join = new Join( expression );
-	JoinOrLm *joinOrLm = new JoinOrLm( join );
-	VarDef *varDef = new VarDef( name, joinOrLm );
+	MachineDef *machineDef = new MachineDef( join );
+	VarDef *varDef = new VarDef( name, machineDef );
 	GraphDictEl *graphDictEl = new GraphDictEl( name, varDef );
 	graphDict.insert( graphDictEl );
 }

@@ -151,6 +151,17 @@ struct NameFrame
 	NameInst *prevLocalScope;
 };
 
+struct LengthDef
+{
+	LengthDef( char *name )
+		: name(name) {}
+
+	char *name;
+	LengthDef *prev, *next;
+};
+
+typedef DList<LengthDef> LengthDefList;
+
 /* Class to collect information about the machine during the 
  * parse of input. */
 struct ParseData
@@ -357,6 +368,7 @@ struct ParseData
 	KeyOps thisKeyOps;
 
 	ExportList exportList;
+	LengthDefList lengthDefList;
 
 	CodeGenData *cgd;
 };

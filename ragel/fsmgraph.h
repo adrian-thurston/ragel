@@ -57,6 +57,7 @@ struct StateAp;
 struct FsmAp;
 struct Action;
 struct LongestMatchPart;
+struct LengthDef;
 
 /* State list element for unambiguous access to list element. */
 struct FsmListEl 

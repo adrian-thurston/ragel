@@ -934,6 +934,7 @@ ifstream *Scanner::tryOpenInclude( char **pathChecks, long &found )
 
 	# Parser definitions. 
 	parser_def := |*
+		'length_cond' => { token( KW_Length ); };
 		'machine' => { token( KW_Machine ); };
 		'include' => { token( KW_Include ); };
 		'import' => { token( KW_Import ); };

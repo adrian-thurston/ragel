@@ -54,6 +54,18 @@ statement: variable_spec commit;
 statement: export_block commit;
 statement: pre_push_spec commit;
 statement: post_pop_spec commit;
+statement: length_spec commit;
+
+length_spec:
+	KW_Length TK_Word ';'
+	final {
+		LengthDef *lengthDef = new LengthDef( $2->data );
+		pd->lengthDefList.append( lengthDef );
+
+		/* Generic creation of machine for instantiation and assignment. */
+		MachineDef *machineDef = new MachineDef( lengthDef );
+		tryMachineDef( $2->loc, $2->data, machineDef, false );
+	};
 
 pre_push_spec:
 	KW_PrePush '{' inline_block '}' 
@@ -108,8 +120,8 @@ assignment:
 		}
 
 		/* Generic creation of machine for instantiation and assignment. */
-		JoinOrLm *joinOrLm = new JoinOrLm( $4->join );
-		tryMachineDef( $2->token.loc, $2->token.data, joinOrLm, isInstance );
+		MachineDef *machineDef = new MachineDef( $4->join );
+		tryMachineDef( $2->token.loc, $2->token.data, machineDef, isInstance );
 
 		if ( $1->isSet )
 			exportContext.remove( exportContext.length()-1 );
@@ -120,14 +132,14 @@ assignment:
 instantiation: 
 	opt_export machine_name TK_ColonEquals join_or_lm ';' final {
 		/* Generic creation of machine for instantiation and assignment. */
-		tryMachineDef( $2->token.loc, $2->token.data, $4->joinOrLm, true );
+		tryMachineDef( $2->token.loc, $2->token.data, $4->machineDef, true );
 
 		if ( $1->isSet )
 			exportContext.remove( exportContext.length()-1 );
 
 		/* Pass a location to join_or_lm */
-		if ( $4->joinOrLm->join != 0 )
-			$4->joinOrLm->join->loc = $3->loc;
+		if ( $4->machineDef->join != 0 )
+			$4->machineDef->join->loc = $3->loc;
 	};
 
 type token_type
@@ -230,12 +242,12 @@ opt_whitespace: ;
 
 nonterm join_or_lm
 {
-	JoinOrLm *joinOrLm;
+	MachineDef *machineDef;
 };
 
 join_or_lm: 
 	join final {
-		$$->joinOrLm = new JoinOrLm( $1->join );
+		$$->machineDef = new MachineDef( $1->join );
 	};
 join_or_lm:
 	TK_BarStar lm_part_list '*' '|' final {
@@ -245,7 +257,7 @@ join_or_lm:
 		pd->lmList.append( lm );
 		for ( LmPartList::Iter lmp = *($2->lmPartList); lmp.lte(); lmp++ )
 			lmp->longestMatch = lm;
-		$$->joinOrLm = new JoinOrLm( lm );
+		$$->machineDef = new MachineDef( lm );
 	};
 
 nonterm lm_part_list
@@ -1448,12 +1460,12 @@ int Parser::parseLangEl( int type, const Token *token )
 }
 
 void Parser::tryMachineDef( InputLoc &loc, char *name, 
-		JoinOrLm *joinOrLm, bool isInstance )
+		MachineDef *machineDef, bool isInstance )
 {
 	GraphDictEl *newEl = pd->graphDict.insert( name );
 	if ( newEl != 0 ) {
 		/* New element in the dict, all good. */
-		newEl->value = new VarDef( name, joinOrLm );
+		newEl->value = new VarDef( name, machineDef );
 		newEl->isInstance = isInstance;
 		newEl->loc = loc;
 		newEl->value->isExport = exportContext[exportContext.length()-1];

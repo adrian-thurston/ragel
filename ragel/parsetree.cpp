@@ -91,7 +91,7 @@ FsmAp *VarDef::walk( ParseData *pd )
 	NameFrame nameFrame = pd->enterNameScope( true, 1 );
 
 	/* Recurse on the expression. */
-	FsmAp *rtnVal = joinOrLm->walk( pd );
+	FsmAp *rtnVal = machineDef->walk( pd );
 	
 	/* Do the tranfer of local error actions. */
 	LocalErrDictEl *localErrDictEl = pd->localErrDict.find( name );
@@ -103,7 +103,7 @@ FsmAp *VarDef::walk( ParseData *pd )
 	/* If the expression below is a join operation with multiple expressions
 	 * then it just had epsilon transisions resolved. If it is a join
 	 * with only a single expression then run the epsilon op now. */
-	if ( joinOrLm->type == JoinOrLm::JoinType && joinOrLm->join->exprList.length() == 1 )
+	if ( machineDef->type == MachineDef::JoinType && machineDef->join->exprList.length() == 1 )
 		rtnVal->epsilonOp();
 
 	/* We can now unset entry points that are not longer used. */
@@ -125,11 +125,11 @@ void VarDef::makeNameTree( const InputLoc &loc, ParseData *pd )
 	NameInst *prevNameInst = pd->curNameInst;
 	pd->curNameInst = pd->addNameInst( loc, name, false );
 
-	if ( joinOrLm->type == JoinOrLm::LongestMatchType )
+	if ( machineDef->type == MachineDef::LongestMatchType )
 		pd->curNameInst->isLongestMatch = true;
 
 	/* Recurse. */
-	joinOrLm->makeNameTree( pd );
+	machineDef->makeNameTree( pd );
 
 	/* The name scope ends, pop the name instantiation. */
 	pd->curNameInst = prevNameInst;
@@ -141,7 +141,7 @@ void VarDef::resolveNameRefs( ParseData *pd )
 	NameFrame nameFrame = pd->enterNameScope( true, 1 );
 
 	/* Recurse. */
-	joinOrLm->resolveNameRefs( pd );
+	machineDef->resolveNameRefs( pd );
 	
 	/* The name scope ends, pop the name instantiation. */
 	pd->popNameScope( nameFrame );
@@ -524,7 +524,7 @@ FsmAp *LongestMatch::walk( ParseData *pd )
 	return rtnVal;
 }
 
-FsmAp *JoinOrLm::walk( ParseData *pd )
+FsmAp *MachineDef::walk( ParseData *pd )
 {
 	FsmAp *rtnVal = 0;
 	switch ( type ) {
@@ -534,11 +534,16 @@ FsmAp *JoinOrLm::walk( ParseData *pd )
 	case LongestMatchType:
 		rtnVal = longestMatch->walk( pd );
 		break;
+	case LengthDefType:
+		condData->lastCondKey.increment();
+		rtnVal = new FsmAp();
+		rtnVal->concatFsm( condData->lastCondKey );
+		break;
 	}
 	return rtnVal;
 }
 
-void JoinOrLm::makeNameTree( ParseData *pd )
+void MachineDef::makeNameTree( ParseData *pd )
 {
 	switch ( type ) {
 	case JoinType:
@@ -547,10 +552,12 @@ void JoinOrLm::makeNameTree( ParseData *pd )
 	case LongestMatchType:
 		longestMatch->makeNameTree( pd );
 		break;
+	case LengthDefType:
+		break;
 	}
 }
 
-void JoinOrLm::resolveNameRefs( ParseData *pd )
+void MachineDef::resolveNameRefs( ParseData *pd )
 {
 	switch ( type ) {
 	case JoinType:
@@ -558,6 +565,8 @@ void JoinOrLm::resolveNameRefs( ParseData *pd )
 		break;
 	case LongestMatchType:
 		longestMatch->resolveNameRefs( pd );
+		break;
+	case LengthDefType:
 		break;
 	}
 }
