@@ -1,5 +1,5 @@
 
-INCLUDES = -I../aapl
+INCLUDES = -I$(top_srcdir)/aapl
 
 bin_PROGRAMS = ragel
 
