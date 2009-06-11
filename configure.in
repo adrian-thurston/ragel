@@ -25,14 +25,18 @@ AM_INIT_AUTOMAKE
 AC_SUBST(PUBDATE)
 AC_CONFIG_HEADER(ragel/config.h)
 
+dnl Choose defaults for the build_parsers and build_manual vars. If the dist
+dnl file is present in the root then default to no, otherwise go for it.
+AC_CHECK_FILES( $srcdir/DIST, 
+	[ build_parsers=no; build_manual=no; ], 
+	[ build_parsers=yes; build_manual=yes; ] )
+
 dnl Set to true if the build system should generate parsers from ragel and kelbt
 dnl sources. Set to false if generated files are included and not to be built
 dnl (production).
-build_parsers=yes;
 AM_CONDITIONAL(BUILD_PARSERS, [test "x$build_parsers" = "xyes"])
 
 dnl Set to true if the manual should be built.
-build_manual=yes;
 AM_CONDITIONAL(BUILD_MANUAL, [test "x$build_manual" = "xyes"])
 
 dnl Checks for programs.
