@@ -32,6 +32,9 @@ syntax keyword ocKeyword throw try catch operator typeid
 syntax keyword ocKeyword and bitor xor compl bitand and_eq or_eq xor_eq not not_eq
 syntax keyword ocKeyword static_cast dynamic_cast
 
+" Java Keywords
+syntax keyword ocType byte short char int
+
 " Numbers
 syntax match ocNumber "[0-9][0-9]*"
 syntax match ocNumber "0x[0-9a-fA-F][0-9a-fA-F]*"

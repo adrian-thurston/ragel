@@ -32,6 +32,14 @@ syntax keyword ocKeyword throw try catch operator typeid
 syntax keyword ocKeyword and bitor xor compl bitand and_eq or_eq xor_eq not not_eq
 syntax keyword ocKeyword static_cast dynamic_cast
 
+" D Keywords
+syntax keyword ocType wchar dchar bit byte ubyte ushort uint ulong cent ucent 
+syntax keyword ocType cfloat ifloat cdouble idouble real creal ireal
+syntax keyword ocKeyword abstract alias align asm assert body cast debug delegate
+syntax keyword ocKeyword deprecated export final finally foreach function import in inout 
+syntax keyword ocKeyword interface invariant is mixin module out override package pragma
+syntax keyword ocKeyword super synchronized typeof unittest version with
+
 " Numbers
 syntax match ocNumber "[0-9][0-9]*"
 syntax match ocNumber "0x[0-9a-fA-F][0-9a-fA-F]*"
