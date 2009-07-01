@@ -5,42 +5,28 @@
 1. Build Requirements
 ---------------------
 
- * GNU Make
+ * Make
  * g++
 
 If you would like to modify Ragel and need to build Ragel's scanners and
-parsers from the specifications then set BUILD_PARSERS=true in the configure
-script and then run it. This variable is normally set to false in the
-distribution tarballs and true in version control. You will need the following
-programs:
+parsers from the specifications then set "build_parsers=yes" the DIST file and
+reconfigure. This variable is normally set to "no" in the distribution tarballs
+and "yes" in version control. You will need the following programs:
 
  * ragel (the most recent version)
  * kelbt (the most recent version)
 
-To build the user guide the following extra programs are needed:
+To build the user guide set "build_manual=yes" in the DIST file and
+reconfigure. You will need the following extra programs:
 
  * fig2dev
  * pdflatex
 
+2. Compilation and Installation
+-------------------------------
 
-2. Compilation
---------------
+Ragel uses autoconf and automake. 
 
-To configure type './configure'. The makefiles honour the --prefix option to
-specify where the program is to be installed to.
-
-To build the ragel program type 'make'.
-
-To build all the documentation cd to 'doc' and type 'make'. If you don't have
-all of the programs to build the user guide and just want the man page use
-'make man'.
-
-
-3. Installing
--------------
-
-The command 'make install' will build the programs and install them to
-$PREFIX/bin/.  A 'make install' in the doc directory will make and install all
-the documentation.  The man pages install to $PREFIX/man/man1/ and the user
-guide and ChangeLog install to $PREFIX/share/doc/ragel/. To install just the
-man page use 'make man-install'.
+$ ./configure --prefix=PREFIX
+$ make
+$ make install
