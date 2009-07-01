@@ -28,7 +28,7 @@ AC_CONFIG_HEADER(ragel/config.h)
 dnl Choose defaults for the build_parsers and build_manual vars. If the dist
 dnl file is present in the root then default to no, otherwise go for it.
 AC_CHECK_FILES( $srcdir/DIST, 
-	[ build_parsers=no; build_manual=no; ], 
+	[ . $srcdir/DIST; ], 
 	[ build_parsers=yes; build_manual=yes; ] )
 
 dnl Set to true if the build system should generate parsers from ragel and kelbt
@@ -54,9 +54,9 @@ AC_LANG_CPLUSPLUS
 dnl Check for definition of MAKE.
 AC_PROG_MAKE_SET
 
+# Checks to carry out if we are building parsers.
 if test "x$build_parsers" = "xyes"; then
 
-dnl Check for Ragel
 AC_CHECK_PROG(RAGEL, ragel, ragel)
 if test -z "$RAGEL"; then
 	echo
@@ -65,7 +65,6 @@ if test -z "$RAGEL"; then
 	exit 1
 fi
 
-dnl Check for Kelbt
 AC_CHECK_PROG(KELBT, kelbt, kelbt)
 if test -z "$KELBT"; then
 	echo
@@ -74,7 +73,28 @@ if test -z "$KELBT"; then
 	exit 1
 fi
 
-fi # BUILD_PARSERS
+fi 
+
+# Checks to carry out if we are building the manual.
+if test "x$build_manual" = "xyes"; then
+
+AC_CHECK_PROG(FIG2DEV, fig2dev, fig2dev)
+if test -z "$FIG2DEV"; then
+	echo
+	echo "error: fig2dev is required to build the manual"
+	echo
+	exit 1
+fi
+
+AC_CHECK_PROG(PDFLATEX, pdflatex, pdflatex)
+if test -z "$PDFLATEX"; then
+	echo
+	echo "error: pdflatex is required to build the manual"
+	echo
+	exit 1
+fi
+
+fi
 
 dnl Check for the D compiler
 AC_CHECK_PROG(GDC, gdc, gdc)

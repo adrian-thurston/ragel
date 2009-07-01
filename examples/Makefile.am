@@ -1,5 +1,5 @@
 #
-#   Copyright 2002-2007 Adrian Thurston <thurston@complang.org>
+#   Copyright 2002-2009 Adrian Thurston <thurston@complang.org>
 #
 
 #   This file is part of Ragel.
@@ -22,84 +22,64 @@ RAGEL = ../ragel/ragel
 FLEX = flex
 RE2C = re2c
 
-TARGS = \
+noinst_PROGRAMS = \
 	atoi awkemu clang concurrent cppscan format gotocallret mailbox params \
 	pullscan rlscan statechart 
 
-#########################################
+EXTRA_DIST = \
+	gotocallret.rl pullscan.rl concurrent.rl rlscan.rl statechart.rl \
+	params.rl clang.rl cppscan.rl format.rl awkemu.rl mailbox.rl atoi.rl
 
-all: $(TARGS)
-
-#%.o: %.c
-#	gcc $(CFLAGS) -Wall -g -c -O3 -o $@ $<
-
-#%.o: %.cpp
-#	g++ $(CXXFLAGS) -Wall -g -c -O3 -o $@ $<
-
-#########################################
-
-gotocallret: gotocallret.o
-	g++ -g -o gotocallret gotocallret.o 
+gotocallret_SOURCES = gotocallret.cpp
+pullscan_SOURCES = pullscan.c
+concurrent_SOURCES = concurrent.cpp
+rlscan_SOURCES = rlscan.cpp
+statechart_SOURCES = statechart.cpp 
+params_SOURCES = params.c
+clang_SOURCES = clang.c 
+cppscan_SOURCES = cppscan.cpp 
+format_SOURCES = format.c
+awkemu_SOURCES = awkemu.c
+mailbox_SOURCES = mailbox.cpp
+atoi_SOURCES = atoi.cpp
 
 gotocallret.cpp: gotocallret.rl
 	$(RAGEL) -G2 -o gotocallret.cpp gotocallret.rl 
 
-gotocallret.o: gotocallret.cpp
-	g++ -Wall -g -c -O3 -o $@ $<
-
-
-pullscan: pullscan.o
-	gcc -g -o $@ $<
-
 pullscan.c: pullscan.rl $(RAGEL) 
 	$(RAGEL) -G2 -o $@ pullscan.rl
-
-concurrent: concurrent.o
-	g++ -g -o concurrent concurrent.o 
 
 concurrent.cpp: concurrent.rl $(RAGEL)
 	$(RAGEL) -G2 -o concurrent.cpp concurrent.rl
 
-rlscan: rlscan.o
-	g++ -g -o rlscan rlscan.o 
-
 rlscan.cpp: rlscan.rl 
 	$(RAGEL) -G2 -o rlscan.cpp rlscan.rl
-
-statechart: statechart.o
-	g++ -g -o statechart statechart.o 
 
 statechart.cpp: statechart.rl 
 	$(RAGEL) -G2 -o statechart.cpp statechart.rl
 
-statechart.o: statechart.cpp
-	g++ -Wall -g -c -O3 -o $@ $<
-
-params: params.o 
-	gcc -g -o params params.o
-
 params.c: params.rl
 	$(RAGEL) -G2 -o params.c params.rl
-
-clang: clang.o 
-	gcc -g -o clang clang.o
 
 clang.c: clang.rl 
 	$(RAGEL) -G2 -o clang.c clang.rl
 
-optional: lex-cppscan re2c-cppscan
-
-cppscan: cppscan.o
-	g++ -g -o $@ $<
-
-lex-cppscan: lex-cppscan.o
-	g++ -g -o $@ $<
-	
-re2c-cppscan: re2c-cppscan.o
-	g++ -g -o $@ $<
-	
 cppscan.cpp: cppscan.rl 
 	$(RAGEL) -G2 -o $@ cppscan.rl
+
+format.c: format.rl
+	$(RAGEL) -G2 -o format.c format.rl
+
+awkemu.c: awkemu.rl
+	$(RAGEL) -G2 -o awkemu.c awkemu.rl
+
+mailbox.cpp: mailbox.rl
+	$(RAGEL) -G2 -o mailbox.cpp mailbox.rl
+
+atoi.cpp: atoi.rl
+	$(RAGEL) -G2 -o atoi.cpp atoi.rl
+
+###
 
 lex-cppscan.cpp: cppscan.lex
 	$(FLEX) -f -o $@ $<
@@ -109,31 +89,3 @@ re2c-cppscan.cpp: cppscan.rec
 
 example.cpp: example.rec
 	$(RE2C) -s $< > $@
-
-format: format.o 
-	gcc -g -o format format.o
-
-format.c: format.rl
-	$(RAGEL) -G2 -o format.c format.rl
-
-awkemu: awkemu.o
-	gcc -g -o awkemu awkemu.o
-
-awkemu.c: awkemu.rl
-	$(RAGEL) -G2 -o awkemu.c awkemu.rl
-
-
-mailbox: mailbox.o
-	g++ -g -o mailbox mailbox.o 
-
-mailbox.cpp: mailbox.rl
-	$(RAGEL) -G2 -o mailbox.cpp mailbox.rl
-
-atoi: atoi.o
-	g++ -g -o atoi atoi.o 
-
-atoi.cpp: atoi.rl
-	$(RAGEL) -G2 -o atoi.cpp atoi.rl
-
-atoi.o: atoi.cpp
-	g++ -Wall -g -c -O3 -o $@ $<
