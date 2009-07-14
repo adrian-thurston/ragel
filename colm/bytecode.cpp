@@ -373,8 +373,8 @@ Tree **stack_alloc()
 {
 	//return new Tree*[VM_STACK_SIZE];
 
-	return (Tree**)mmap( -1, sizeof(Tree*)*VM_STACK_SIZE,
-		PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, 0, 0 );
+	return (Tree**)mmap( 0, sizeof(Tree*)*VM_STACK_SIZE,
+		PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0 );
 }
 
 void Program::run()
