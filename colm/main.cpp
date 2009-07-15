@@ -290,13 +290,13 @@ void compileOutput( const char *argv0 )
 		" -g"
 		" -o %s"
 		" %s"
-		" -L %s"
-		" -L " PREFIX "/lib"
+		" -L%s"
+		" -L" PREFIX "/lib"
 		" -lcolm%c",
 		location, location,
 		exec, outputFileName, location, logging ? 'd' : 'p' );
 	if ( colm_log_compile ) {
-		cout << "compiling: " << outputFileName << endl;
+		cout << "compiling with: " << command << endl;
 	}
 	int res = system( command );
 	if ( res != 0 )
