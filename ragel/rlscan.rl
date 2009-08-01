@@ -485,7 +485,6 @@ void Scanner::token( int type, char *start, char *end )
 void Scanner::processToken( int type, char *tokdata, int toklen )
 {
 	int *p, *pe, *eof;
-	
 
 	if ( type < 0 )
 		p = pe = eof = 0;

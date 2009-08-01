@@ -516,7 +516,7 @@ void FsmCodeGen::ACTION( ostream &ret, GenAction *action, int targState,
 		bool inFinish, bool csForced )
 {
 	/* Write the preprocessor line info for going into the source file. */
-	cdLineDirective( ret, sourceFileName, action->loc.line );
+	cdLineDirective( ret, action->loc.fileName, action->loc.line );
 
 	/* Write the block and close it off. */
 	ret << "\t{";
@@ -527,7 +527,7 @@ void FsmCodeGen::ACTION( ostream &ret, GenAction *action, int targState,
 void FsmCodeGen::CONDITION( ostream &ret, GenAction *condition )
 {
 	ret << "\n";
-	cdLineDirective( ret, sourceFileName, condition->loc.line );
+	cdLineDirective( ret, condition->loc.fileName, condition->loc.line );
 	INLINE_LIST( ret, condition->inlineList, 0, false, false );
 }
 

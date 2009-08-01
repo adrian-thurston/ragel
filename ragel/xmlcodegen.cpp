@@ -1027,8 +1027,7 @@ void BackendGen::makeAction( Action *action )
 	GenInlineList *genList = new GenInlineList;
 	makeGenInlineList( genList, action->inlineList );
 
-	cgd->newAction( curAction++, action->name, 
-			action->loc.line, action->loc.col, genList );
+	cgd->newAction( curAction++, action->name, action->loc, genList );
 }
 
 

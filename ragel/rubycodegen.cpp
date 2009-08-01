@@ -271,13 +271,12 @@ string RubyCodeGen::FSM_NAME()
 void RubyCodeGen::ACTION( ostream &ret, GenAction *action, int targState, bool inFinish )
 {
 	/* Write the preprocessor line info for going into the source file. */
-	rubyLineDirective( ret, sourceFileName, action->loc.line );
+	rubyLineDirective( ret, action->loc.fileName, action->loc.line );
 
 	/* Write the block and close it off. */
 	ret << "		begin\n";
 	INLINE_LIST( ret, action->inlineList, targState, inFinish );
 	ret << "		end\n";
-	rubyLineDirective( ret, sourceFileName, action->loc.line );
 }
 
 
@@ -345,7 +344,7 @@ string RubyCodeGen::INT( int i )
 void RubyCodeGen::CONDITION( ostream &ret, GenAction *condition )
 {
 	ret << "\n";
-	rubyLineDirective( ret, sourceFileName, condition->loc.line );
+	rubyLineDirective( ret, condition->loc.fileName, condition->loc.line );
 	INLINE_LIST( ret, condition->inlineList, 0, false );
 }
 

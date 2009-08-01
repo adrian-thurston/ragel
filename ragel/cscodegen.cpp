@@ -527,7 +527,7 @@ string CSharpFsmCodeGen::LDIR_PATH( char *path )
 void CSharpFsmCodeGen::ACTION( ostream &ret, GenAction *action, int targState, bool inFinish )
 {
 	/* Write the preprocessor line info for going into the source file. */
-	csharpLineDirective( ret, sourceFileName, action->loc.line );
+	csharpLineDirective( ret, action->loc.fileName, action->loc.line );
 
 	/* Write the block and close it off. */
 	ret << "\t{";
@@ -538,7 +538,7 @@ void CSharpFsmCodeGen::ACTION( ostream &ret, GenAction *action, int targState, b
 void CSharpFsmCodeGen::CONDITION( ostream &ret, GenAction *condition )
 {
 	ret << "\n";
-	csharpLineDirective( ret, sourceFileName, condition->loc.line );
+	csharpLineDirective( ret, condition->loc.fileName, condition->loc.line );
 	INLINE_LIST( ret, condition->inlineList, 0, false );
 }
 

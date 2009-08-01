@@ -338,13 +338,12 @@ void CodeGenData::initActionList( unsigned long length )
 		actionList.append( allActions+a );
 }
 
-void CodeGenData::newAction( int anum, const char *name, int line, 
-		int col, GenInlineList *inlineList )
+void CodeGenData::newAction( int anum, const char *name,
+		const InputLoc &loc, GenInlineList *inlineList )
 {
 	allActions[anum].actionId = anum;
 	allActions[anum].name = name;
-	allActions[anum].loc.line = line;
-	allActions[anum].loc.col = col;
+	allActions[anum].loc = loc;
 	allActions[anum].inlineList = inlineList;
 }
 

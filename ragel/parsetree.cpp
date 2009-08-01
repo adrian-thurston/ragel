@@ -229,6 +229,7 @@ void LongestMatch::makeActions( ParseData *pd )
 	InputLoc loc;
 	loc.line = 1;
 	loc.col = 1;
+	loc.fileName = "NONE";
 
 	/* Create the error action. */
 	InlineList *il6 = new InlineList;

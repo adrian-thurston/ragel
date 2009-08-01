@@ -1586,7 +1586,7 @@ void JavaTabCodeGen::SUB_ACTION( ostream &ret, GenInlineItem *item,
 void JavaTabCodeGen::ACTION( ostream &ret, GenAction *action, int targState, bool inFinish )
 {
 	/* Write the preprocessor line info for going into the source file. */
-	javaLineDirective( ret, sourceFileName, action->loc.line );
+	javaLineDirective( ret, action->loc.fileName, action->loc.line );
 
 	/* Write the block and close it off. */
 	ret << "\t{";
@@ -1597,7 +1597,7 @@ void JavaTabCodeGen::ACTION( ostream &ret, GenAction *action, int targState, boo
 void JavaTabCodeGen::CONDITION( ostream &ret, GenAction *condition )
 {
 	ret << "\n";
-	javaLineDirective( ret, sourceFileName, condition->loc.line );
+	javaLineDirective( ret, condition->loc.fileName, condition->loc.line );
 	INLINE_LIST( ret, condition->inlineList, 0, false );
 }
 
