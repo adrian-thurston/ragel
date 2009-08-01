@@ -413,6 +413,7 @@ void Scanner::handleImport()
 		if ( active() && machineSpec == 0 && machineName == 0 ) {
 			InputItem *inputItem = new InputItem;
 			inputItem->type = InputItem::Write;
+			inputItem->loc.fileName = fileName;
 			inputItem->loc.line = line;
 			inputItem->loc.col = column;
 			inputItem->name = parser->sectionName;

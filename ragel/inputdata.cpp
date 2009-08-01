@@ -207,12 +207,22 @@ void InputData::terminateAllParsers( )
 		pdel->value->token( loc, Parser_tk_eof, 0, 0 );
 }
 
+void InputData::verifyWritesHaveData()
+{
+	if ( !generateXML && !generateDot ) {
+		for ( InputItemList::Iter ii = inputItems; ii.lte(); ii++ ) {
+			if ( ii->type == InputItem::Write ) {
+				if ( ii->pd->cgd == 0 )
+					error( ii->loc ) << "no machine instantiations to write" << endl;
+			}
+		}
+	}
+}
 
 void InputData::writeOutput()
 {
-	if ( generateXML ) {
+	if ( generateXML )
 		writeXML( *outStream );
-	}
 	else if ( generateDot )
 		static_cast<GraphvizDotGen*>(dotGenParser->pd->cgd)->writeDotFile();
 	else {

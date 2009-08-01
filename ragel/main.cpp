@@ -450,6 +450,7 @@ void process( InputData &id )
 	/* Make the first input item. */
 	InputItem *firstInputItem = new InputItem;
 	firstInputItem->type = InputItem::HostData;
+	firstInputItem->loc.fileName = id.inputFileName;
 	firstInputItem->loc.line = 1;
 	firstInputItem->loc.col = 1;
 	id.inputItems.append( firstInputItem );
@@ -484,7 +485,11 @@ void process( InputData &id )
 		if ( gblErrorCount > 0 )
 			exit(1);
 	}
-	
+
+	id.verifyWritesHaveData();
+	if ( gblErrorCount > 0 )
+		exit(1);
+
 	/*
 	 * From this point on we should not be reporting any errors.
 	 */

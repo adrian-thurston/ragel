@@ -83,6 +83,8 @@ struct InputData
 
 	ArgsVector includePaths;
 
+	void verifyWritesHaveData();
+
 	void writeOutput();
 	void makeOutputStream();
 	void openOutput();
