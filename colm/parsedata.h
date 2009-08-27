@@ -762,6 +762,7 @@ struct ParseData
 	void findLocalTrees( CharSet &trees );
 	void compileReductionCode( Definition *prod );
 	void resolveGenericTypes();
+	void removeNonUnparsableRepls();
 	void compileByteCode();
 
 	void resolveUses();

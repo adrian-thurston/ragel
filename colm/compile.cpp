@@ -1080,9 +1080,8 @@ UniqueType *LangTerm::evaluateTreeConstruct( ParseData *pd, CodeVect &code ) con
 
 UniqueType *LangTerm::evaluateTermConstruct( ParseData *pd, CodeVect &code ) const
 {
-	/* Going to make this replacement directly. Take it out of the list of
-	 * replacements so that we don't try to parse it. */
-	pd->replList.remove( replacement );
+	/* Do not try to parse this construct. */
+	replacement->parse = false;
 
 	/* Evaluate the initialization expressions. */
 	if ( fieldInitArgs != 0 && fieldInitArgs->length() > 0 ) {
@@ -2723,6 +2722,15 @@ void ParseData::initGlobalFunctions()
 	addStderr();
 }
 
+void ParseData::removeNonUnparsableRepls()
+{
+	for ( ReplList::Iter repl = replList; repl.lte(); ) {
+		Replacement *maybeDel = repl++;
+		if ( !maybeDel->parse )
+			replList.detach( maybeDel );
+	}
+}
+
 void ParseData::compileByteCode()
 {
 	initUniqueTypes();
@@ -2767,4 +2775,5 @@ void ParseData::compileByteCode()
 
 	/* Compile the init code */
 	compileRootBlock( );
+	removeNonUnparsableRepls();
 }

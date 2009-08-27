@@ -1000,7 +1000,7 @@ struct Replacement
 	Replacement( const InputLoc &loc, Namespace *nspace, 
 			TokenRegion *region, ReplItemList *list, int patRepId ) :
 		loc(loc), nspace(nspace), region(region), list(list), 
-		patRepId(patRepId), langEl(0), pdaRun(0), nextBindId(1) {}
+		patRepId(patRepId), langEl(0), pdaRun(0), nextBindId(1), parse(true) {}
 
 	InputLoc loc;
 	Namespace *nspace;
@@ -1010,6 +1010,7 @@ struct Replacement
 	KlangEl *langEl;
 	PdaRun *pdaRun;
 	long nextBindId;
+	bool parse;
 
 	Replacement *prev, *next;
 };
