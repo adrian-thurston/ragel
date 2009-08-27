@@ -2440,8 +2440,6 @@ void ParseData::resolveGenericTypes()
 
 void ParseData::makeFuncVisible( Function *func, bool isUserIter )
 {
-	/* Need an object for the local frame. */
-	curLocalFrame = func->codeBlock->localFrame;
 	func->localFrame = func->codeBlock->localFrame;
 
 	/* Set up the parameters. */
@@ -2544,8 +2542,8 @@ void ParseData::compileUserIter( Function *func )
 	curFunction = func;
 	block->frameId = nextFrameId++;
 
-	/* Process the params, etc. */
-	makeFuncVisible( func, true );
+	/* Need an object for the local frame. */
+	curLocalFrame = func->codeBlock->localFrame;
 
 	/* Compile for revert and commit. */
 	revertOn = true;
@@ -2613,7 +2611,8 @@ void ParseData::compileFunction( Function *func )
 	/* Assign a frame Id. */
 	block->frameId = nextFrameId++;
 
-	makeFuncVisible( func, false );
+	/* Need an object for the local frame. */
+	curLocalFrame = func->codeBlock->localFrame;
 
 	/* Compile once for revert. */
 	revertOn = true;
@@ -2744,8 +2743,11 @@ void ParseData::compileByteCode()
 
 	initGlobalFunctions();
 
-	/* The function info structure relies on functions being compile first,
-	 * then iterators. */
+	for ( FunctionList::Iter f = functionList; f.lte(); f++ )
+		makeFuncVisible( f, f->isUserIter );
+
+	/* This may be comment rot: The function info structure relies on functions
+	 * being compiled first, then iterators. */
 
 	/* Compile functions. */
 	for ( FunctionList::Iter f = functionList; f.lte(); f++ ) {
