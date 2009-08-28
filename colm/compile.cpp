@@ -368,10 +368,9 @@ long LangVarRef::loadQualificationRefs( ParseData *pd, CodeVect &code ) const
 
 	for ( QualItemVect::Iter qi = *qual; qi.lte(); qi++ ) {
 		/* Lookup the field in the current qualification. */
-		ObjFieldMapEl *objDefMapEl = searchObjDef->objFieldMap->find( qi->data );
-		if ( objDefMapEl == 0 )
+		ObjField *el = searchObjDef->findField( qi->data );
+		if ( el == 0 )
 			error(qi->loc) << "cannot resolve qualification " << qi->data << endp;
-		ObjField *el = objDefMapEl->value;
 
 		if ( qi.pos() > 0 ) {
 			code.append( IN_REF_FROM_QUAL_REF );
@@ -411,10 +410,9 @@ void LangVarRef::loadQualification( ParseData *pd, CodeVect &code,
 
 	for ( QualItemVect::Iter qi = *qual; qi.lte(); qi++ ) {
 		/* Lookup the field int the current qualification. */
-		ObjFieldMapEl *objDefMapEl = searchObjDef->objFieldMap->find( qi->data );
-		if ( objDefMapEl == 0 )
+		ObjField *el = searchObjDef->findField( qi->data );
+		if ( el == 0 )
 			error(qi->loc) << "cannot resolve qualification " << qi->data << endp;
-		ObjField *el = objDefMapEl->value;
 
 		if ( forWriting && el->refActive )
 			error(qi->loc) << "reference active, cannot write to object" << endp;
@@ -508,12 +506,12 @@ void LangVarRef::loadLocalObj( ParseData *pd, CodeVect &code,
 bool LangVarRef::isLocalRef( ParseData *pd ) const
 {
 	if ( qual->length() > 0 ) {
-		if ( pd->curLocalFrame->objFieldMap->find( qual->data[0].data ) != 0 )
+		if ( pd->curLocalFrame->findField( qual->data[0].data ) != 0 )
 			return true;
 	}
-	else if ( pd->curLocalFrame->objFieldMap->find( name ) != 0 )
+	else if ( pd->curLocalFrame->findField( name ) != 0 )
 		return true;
-	else if ( pd->curLocalFrame->objMethodMap->find( name ) != 0 )
+	else if ( pd->curLocalFrame->findMethod( name ) != 0 )
 		return true;
 
 	return false;
@@ -592,11 +590,9 @@ VarRefLookup LangVarRef::lookupField( ParseData *pd ) const
 	VarRefLookup lookup = lookupObj( pd );
 
 	/* Lookup the field. */
-	ObjFieldMapEl *objDefMapEl = lookup.inObject->objFieldMap->find( name );
-	if ( objDefMapEl == 0 )
+	ObjField *field = lookup.inObject->findField( name );
+	if ( field == 0 )
 		error(loc) << "cannot find name " << name << " in object" << endp;
-
-	ObjField *field = objDefMapEl->value;
 
 	lookup.objField = field;
 	lookup.uniqueType = field->typeRef->lookupType( pd );
@@ -675,22 +671,20 @@ bool castAssignment( ParseData *pd, CodeVect &code, UniqueType *destUT,
 void LangVarRef::setField( ParseData *pd, CodeVect &code, 
 		ObjectDef *inObject, UniqueType *exprUT, bool revert ) const
 {
-	ObjFieldMapEl *objDefMapEl = inObject->objFieldMap->find( name );
-	if ( objDefMapEl == 0 )
+	ObjField *el = inObject->findField( name );
+	if ( el == 0 )
 		error(loc) << "cannot find name " << name << " in object" << endp;
 
-	ObjField *el = objDefMapEl->value;
 	setFieldInstr( pd, code, inObject, el, exprUT, revert );
 }
 
 void LangVarRef::setFieldIter( ParseData *pd, CodeVect &code, 
 		ObjectDef *inObject, UniqueType *objUT, UniqueType *exprType, bool revert ) const
 {
-	ObjFieldMapEl *objDefMapEl = inObject->objFieldMap->find( name );
-	if ( objDefMapEl == 0 )
+	ObjField *el = inObject->findField( name );
+	if ( el == 0 )
 		error(loc) << "cannot find name " << name << " in object" << endp;
 
-	ObjField *el = objDefMapEl->value;
 	code.append( objUT->iterDef->inSetCurWC );
 	code.appendHalf( el->offset );
 }
@@ -1011,15 +1005,14 @@ void LangTerm::assignFieldArgs( ParseData *pd, CodeVect &code, UniqueType *replU
 		/* Note the reverse traversal. */
 		for ( FieldInitVect::Iter pi = fieldInitArgs->last(); pi.gtb(); pi-- ) {
 			FieldInit *fieldInit = *pi;
-			ObjFieldMapEl *el = objDef->objFieldMap->find( fieldInit->name );
-			if ( el == 0 ) {
+			ObjField *field = objDef->findField( fieldInit->name );
+			if ( field == 0 ) {
 				error(fieldInit->loc) << "failed to find init name " << 
 					fieldInit->name << " in object" << endp;
 			}
 
 			/* Lookup the type of the field and compare it to the type of the
 			 * expression. */
-			ObjField *field = el->value;
 			UniqueType *fieldUT = field->typeRef->lookupType( pd );
 			if ( !castAssignment( pd, code, fieldUT, 0, fieldInit->exprUT ) )
 				error(fieldInit->loc) << "type mismatch in initialization" << endp;
@@ -2109,9 +2102,8 @@ void ParseData::addSaveLHS( Definition *prod, CodeVect &code, long &insertPos )
 	 * before it gets modified. We want to avoid this for attribute
 	 * modifications. The computation of dirtyTree should deal with this for
 	 * us. */
-	ObjFieldMapEl *lhsFieldMapEl = block->localFrame->objFieldMap->find("lhs");
-	assert( lhsFieldMapEl != 0 );
-	ObjField *lhsField = lhsFieldMapEl->value;
+	ObjField *lhsField = block->localFrame->findField("lhs");
+	assert( lhsField != 0 );
 
 	if ( lhsField->dirtyTree )
 		code.insert( insertPos, IN_SAVE_LHS );
@@ -2449,7 +2441,7 @@ void ParseData::makeFuncVisible( Function *func, bool isUserIter )
 	for ( ParameterList::Iter param = *func->paramList; param.lte(); param++ ) {
 		paramUTs[paramPos] = param->typeRef->lookupType( this );
 
-		if ( func->localFrame->objFieldMap->find( param->name ) != 0 )
+		if ( func->localFrame->findField( param->name ) != 0 )
 			error(param->loc) << "parameter " << param->name << " redeclared" << endp;
 
 		func->localFrame->objFieldMap->insert( param->name, param );
