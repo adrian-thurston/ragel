@@ -232,15 +232,17 @@ UniqueType *TypeRef::lookupType( ParseData *pd )
 	return uniqueType;
 }
 
-ObjField *ObjectDef::findField( String name )
+ObjField *ObjectDef::findField( const String &name )
 {
 	ObjFieldMapEl *objDefMapEl = objFieldMap->find( name );
 	if ( objDefMapEl != 0 )
 		return objDefMapEl->value;
+	if ( parentScope != 0 )
+		return parentScope->findField( name );
 	return 0;
 }
-
-ObjMethod *ObjectDef::findMethod( String name )
+ 
+ObjMethod *ObjectDef::findMethod( const String &name )
 {
 	ObjMethodMapEl *objMethodMapEl = objMethodMap->find( name );
 	if ( objMethodMapEl != 0 )
@@ -534,10 +536,9 @@ VarRefLookup LangVarRef::lookupQualification( ParseData *pd, ObjectDef *rootDef 
 
 	for ( QualItemVect::Iter qi = *qual; qi.lte(); qi++ ) {
 		/* Lookup the field int the current qualification. */
-		ObjFieldMapEl *objDefMapEl = searchObjDef->objFieldMap->find( qi->data );
-		if ( objDefMapEl == 0 )
+		ObjField *el = searchObjDef->findField( qi->data );
+		if ( el == 0 )
 			error(qi->loc) << "cannot resolve qualification " << qi->data << endp;
-		ObjField *el = objDefMapEl->value;
 
 		/* Lookup the type of the field. */
 		UniqueType *qualUT = el->typeRef->lookupType( pd );

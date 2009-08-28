@@ -1270,7 +1270,7 @@ struct ObjectDef
 			ObjMethodMap *objMethodMap, int id )
 	:
 		type(type), name(name), objFieldMap(objFieldMap), objFieldList(objFieldList),
-		objMethodMap(objMethodMap), id(id), nextOffset(0) {}
+		objMethodMap(objMethodMap), id(id), nextOffset(0), parentScope(0) {}
 
 	Type type;
 	String name;
@@ -1285,11 +1285,15 @@ struct ObjectDef
 	void referenceField( ParseData *pd, ObjField *field );
 	void initField( ParseData *pd, ObjField *field );
 	void createCode( ParseData *pd, CodeVect &code );
-	ObjMethod *findMethod( String name );
-	ObjField *findField( String name );
+	ObjMethod *findMethod( const String &name );
+	ObjField *findField( const String &name );
+
 
 	long size() { return nextOffset; }
 	long sizeTrees() { return firstNonTree; }
+
+	/* For building a hierarchy of scopes. Scopes point up to their parent. */
+	ObjectDef *parentScope;
 
 	ObjectDef *prev, *next;
 };
