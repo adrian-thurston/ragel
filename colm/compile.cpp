@@ -53,7 +53,8 @@ IterDef::IterDef( Type type ) :
 	useFuncId(false),
 	useSearchUT(false)
 {
-	if ( type == Tree ) {
+	switch ( type ) {
+	case Tree:
 		inCreateWV = IN_TRITER_FROM_REF;
 		inCreateWC = IN_TRITER_FROM_REF;
 		inDestroy = IN_TRITER_DESTROY;
@@ -64,8 +65,8 @@ IterDef::IterDef( Type type ) :
 		inSetCurWC = IN_TRITER_SET_CUR_WC;
 		inRefFromCur = IN_TRITER_REF_FROM_CUR;
 		useSearchUT = true;
-	}
-	else if ( type == Child ) {
+		break;
+	case Child:
 		inCreateWV = IN_TRITER_FROM_REF;
 		inCreateWC = IN_TRITER_FROM_REF;
 		inDestroy = IN_TRITER_DESTROY;
@@ -76,8 +77,8 @@ IterDef::IterDef( Type type ) :
 		inSetCurWC = IN_TRITER_SET_CUR_WC;
 		inRefFromCur = IN_TRITER_REF_FROM_CUR;
 		useSearchUT = true;
-	}
-	else if ( type == RevChild ) {
+		break;
+	case RevChild:
 		inCreateWV = IN_TRITER_FROM_REF;
 		inCreateWC = IN_TRITER_FROM_REF;
 		inDestroy = IN_TRITER_DESTROY;
@@ -88,9 +89,37 @@ IterDef::IterDef( Type type ) :
 		inSetCurWC = IN_TRITER_SET_CUR_WC;
 		inRefFromCur = IN_TRITER_REF_FROM_CUR;
 		useSearchUT = true;
-	}
-	else
+		break;
+	
+	case Repeat:
+		inCreateWV = IN_TRITER_FROM_REF;
+		inCreateWC = IN_TRITER_FROM_REF;
+		inDestroy = IN_TRITER_DESTROY;
+		inAdvance = IN_TRITER_NEXT_REPEAT;
+
+		inGetCurR = IN_TRITER_GET_CUR_R;
+		inGetCurWC = IN_TRITER_GET_CUR_WC;
+		inSetCurWC = IN_TRITER_SET_CUR_WC;
+		inRefFromCur = IN_TRITER_REF_FROM_CUR;
+		useSearchUT = true;
+		break;
+
+	case RevRepeat:
+		inCreateWV = IN_TRITER_FROM_REF;
+		inCreateWC = IN_TRITER_FROM_REF;
+		inDestroy = IN_TRITER_DESTROY;
+		inAdvance = IN_TRITER_PREV_REPEAT;
+
+		inGetCurR = IN_TRITER_GET_CUR_R;
+		inGetCurWC = IN_TRITER_GET_CUR_WC;
+		inSetCurWC = IN_TRITER_SET_CUR_WC;
+		inRefFromCur = IN_TRITER_REF_FROM_CUR;
+		useSearchUT = true;
+		break;
+
+	case User:
 		assert(false);
+	}
 }
 
 IterDef::IterDef( Type type, Function *func ) : 
@@ -247,6 +276,8 @@ ObjMethod *ObjectDef::findMethod( const String &name )
 	ObjMethodMapEl *objMethodMapEl = objMethodMap->find( name );
 	if ( objMethodMapEl != 0 )
 		return objMethodMapEl->value;
+	if ( parentScope != 0 )
+		return parentScope->findMethod( name );
 	return 0;
 }
 
@@ -255,19 +286,22 @@ long sizeOfField( UniqueType *fieldUT )
 	long size = 0;
 	if ( fieldUT->typeId == TYPE_ITER ) {
 		/* Select on the iterator type. */
-		if ( fieldUT->iterDef->type == IterDef::Tree ||
-				fieldUT->iterDef->type == IterDef::Child ||
-				fieldUT->iterDef->type == IterDef::RevChild )
-			size = sizeof(TreeIter) / sizeof(Word);
-		else if ( fieldUT->iterDef->type == IterDef::User ) {
-			/* User iterators are just a pointer to the UserIter struct. The
-			 * struct needs to go right beneath the call to the user iterator
-			 * so it can be found by a yield. It is therefore allocated on the
-			 * stack right before the call. */
-			size = 1;
-		}
-		else {
-			assert(false);
+		switch ( fieldUT->iterDef->type ) {
+			case IterDef::Tree:
+			case IterDef::Child:
+			case IterDef::RevChild:
+			case IterDef::Repeat:
+			case IterDef::RevRepeat:
+				size = sizeof(TreeIter) / sizeof(Word);
+				break;
+
+			case IterDef::User:
+				/* User iterators are just a pointer to the UserIter struct. The
+				 * struct needs to go right beneath the call to the user iterator
+				 * so it can be found by a yield. It is therefore allocated on the
+				 * stack right before the call. */
+				size = 1;
+				break;
 		}
 	}
 	else if ( fieldUT->typeId == TYPE_REF )
@@ -2649,6 +2683,26 @@ void ParseData::makeDefaultIterators()
 				"rev_child", IN_HALT, IN_HALT, anyRefUT, true );
 
 		IterDef *triter = findIterDef( IterDef::RevChild );
+		objMethod->iterDef = triter;
+	}
+
+	/* Repeat iterator. */
+	{
+		UniqueType *anyRefUT = findUniqueType( TYPE_REF, anyKlangEl );
+		ObjMethod *objMethod = initFunction( uniqueTypeAny, globalObjectDef, 
+				"repeat", IN_HALT, IN_HALT, anyRefUT, true );
+
+		IterDef *triter = findIterDef( IterDef::Repeat );
+		objMethod->iterDef = triter;
+	}
+
+	/* Reverse repeat iterator. */
+	{
+		UniqueType *anyRefUT = findUniqueType( TYPE_REF, anyKlangEl );
+		ObjMethod *objMethod = initFunction( uniqueTypeAny, globalObjectDef, 
+				"rev_repeat", IN_HALT, IN_HALT, anyRefUT, true );
+
+		IterDef *triter = findIterDef( IterDef::RevRepeat );
 		objMethod->iterDef = triter;
 	}
 }

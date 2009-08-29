@@ -1832,6 +1832,36 @@ again:
 			push( res );
 			break;
 		}
+		case IN_TRITER_NEXT_REPEAT: {
+			short field;
+			read_half( field );
+
+			#ifdef COLM_LOG_BYTECODE
+			if ( colm_log_bytecode )
+				cerr << "IN_TRITER_NEXT_REPEAT " << field << endl;
+			#endif
+
+			TreeIter *iter = (TreeIter*) plocal(field);
+			Tree *res = tree_iter_next_repeat( prg, sp, iter );
+			tree_upref( res );
+			push( res );
+			break;
+		}
+		case IN_TRITER_PREV_REPEAT: {
+			short field;
+			read_half( field );
+
+			#ifdef COLM_LOG_BYTECODE
+			if ( colm_log_bytecode )
+				cerr << "IN_TRITER_PREV_REPEAT " << field << endl;
+			#endif
+
+			TreeIter *iter = (TreeIter*) plocal(field);
+			Tree *res = tree_iter_prev_repeat( prg, sp, iter );
+			tree_upref( res );
+			push( res );
+			break;
+		}
 		case IN_TRITER_GET_CUR_R: {
 			short field;
 			read_half( field );

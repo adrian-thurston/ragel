@@ -120,6 +120,8 @@ typedef unsigned char uchar;
 #define IN_TRITER_GET_CUR_WC     0x3f
 #define IN_TRITER_SET_CUR_WC     0x40
 #define IN_TRITER_DESTROY        0x41
+#define IN_TRITER_NEXT_REPEAT    0xac
+#define IN_TRITER_PREV_REPEAT    0xad
 
 #define IN_UITER_DESTROY         0x52
 #define IN_UITER_CREATE_WV       0x53
@@ -520,6 +522,8 @@ Kid *get_field_kid( Tree *tree, Word field );
 Tree *tree_iter_advance( Program *prg, Tree **&sp, TreeIter *iter );
 Tree *tree_iter_next_child( Program *prg, Tree **&sp, TreeIter *iter );
 Tree *tree_iter_prev_child( Program *prg, Tree **&sp, TreeIter *iter );
+Tree *tree_iter_next_repeat( Program *prg, Tree **&sp, TreeIter *iter );
+Tree *tree_iter_prev_repeat( Program *prg, Tree **&sp, TreeIter *iter );
 Tree *tree_iter_deref_cur( TreeIter *iter );
 void set_triter_cur( TreeIter *iter, Tree *tree );
 void split_iter_cur( Tree **&sp, Program *prg, TreeIter *iter );

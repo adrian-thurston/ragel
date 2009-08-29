@@ -1206,6 +1206,87 @@ Tree *tree_iter_prev_child( Program *prg, Tree **&sp, TreeIter *iter )
 	return (iter->ref.kid ? prg->trueVal : prg->falseVal );
 }
 
+Tree *tree_iter_next_repeat( Program *prg, Tree **&sp, TreeIter *iter )
+{
+	assert( iter->stackSize == iter->stackRoot - vm_ptop() );
+	Kid *kid = 0;
+
+	if ( iter->ref.kid == 0 ) {
+		/* Kid is zero, start from the first child. */
+		Kid *child = tree_child( prg, iter->rootRef.kid->tree );
+
+		if ( child == 0 )
+			iter->ref.next = 0;
+		else {
+			/* Make a reference to the root. */
+			vm_push( (SW) iter->rootRef.next );
+			vm_push( (SW) iter->rootRef.kid );
+			iter->ref.next = (Ref*)vm_ptop();
+
+			kid = child;
+		}
+	}
+	else {
+		/* Start at next. */
+		kid = iter->ref.kid->next;
+	}
+
+	if ( iter->searchId != prg->rtd->anyId ) {
+		/* Have a previous item, go to the next sibling. */
+		while ( kid != 0 && kid->tree->id != iter->searchId )
+			kid = kid->next;
+	}
+
+	iter->ref.kid = kid;
+	iter->stackSize = iter->stackRoot - vm_ptop();
+
+	return ( iter->ref.kid ? prg->trueVal : prg->falseVal );
+}
+
+Tree *tree_iter_prev_repeat( Program *prg, Tree **&sp, TreeIter *iter )
+{
+	assert( iter->stackSize == iter->stackRoot - vm_ptop() );
+	Kid *startAt = 0, *stopAt = 0, *kid = 0;
+
+	if ( iter->ref.kid == 0 ) {
+		/* Kid is zero, start from the first child. */
+		Kid *child = tree_child( prg, iter->rootRef.kid->tree );
+
+		if ( child == 0 )
+			iter->ref.next = 0;
+		else {
+			vm_push( (SW) iter->rootRef.next );
+			vm_push( (SW) iter->rootRef.kid );
+			iter->ref.next = (Ref*)vm_ptop();
+
+			startAt = child;
+			stopAt = 0;
+		}
+	}
+	else {
+		/* Have a previous item, go to the prev sibling. */
+		Kid *parent = (Kid*) vm_top();
+
+		startAt = tree_child( prg, parent->tree );
+		stopAt = iter->ref.kid;
+	}
+
+	while ( startAt != stopAt ) {
+		/* If looking for any, or if last the search type then
+		 * store the match. */
+		if ( iter->searchId == prg->rtd->anyId || 
+				startAt->tree->id == iter->searchId )
+			kid = startAt;
+		startAt = startAt->next;
+	}
+
+	iter->ref.kid = kid;
+	iter->stackSize = iter->stackRoot - vm_ptop();
+
+	return (iter->ref.kid ? prg->trueVal : prg->falseVal );
+}
+
+
 Tree *tree_search( Kid *kid, long id )
 {
 	if ( kid->tree->id == id )
