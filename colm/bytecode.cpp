@@ -1767,6 +1767,53 @@ again:
 			tree_iter_destroy( sp, iter );
 			break;
 		}
+		case IN_REV_TRITER_FROM_REF: {
+			short field;
+			Half searchTypeId;
+			read_half( field );
+			read_half( searchTypeId );
+
+			#ifdef COLM_LOG_BYTECODE
+			if ( colm_log_bytecode ) {
+				cerr << "IN_REV_TRITER_FROM_REF " << field << " " << searchTypeId << endl;
+			}
+			#endif
+
+			Ref rootRef;
+			rootRef.kid = (Kid*)pop();
+			rootRef.next = (Ref*)pop();
+
+			Tree **stackRoot = ptop();
+
+			int children = 0;
+			Kid *kid = tree_child( prg, rootRef.kid->tree );
+			while ( kid != 0 ) {
+				children++;
+				push( (SW) kid );
+				kid = kid->next;
+			}
+
+			void *mem = plocal(field);
+			new(mem) RevTreeIter( rootRef, searchTypeId, stackRoot, children );
+
+			break;
+		}
+		case IN_REV_TRITER_DESTROY: {
+			short field;
+			read_half( field );
+
+			#ifdef COLM_LOG_BYTECODE
+			if ( colm_log_bytecode ) {
+				cerr << "IN_REV_TRITER_DESTROY " << field << endl;
+			}
+			#endif
+
+			RevTreeIter *iter = (RevTreeIter*) plocal(field);
+			long curStackSize = iter->stackRoot - ptop();
+			assert( iter->stackSize == curStackSize );
+			popn( iter->stackSize );
+			break;
+		}
 		case IN_TREE_SEARCH: {
 			Word id;
 			read_word( id );
@@ -1816,18 +1863,18 @@ again:
 			push( res );
 			break;
 		}
-		case IN_TRITER_PREV_CHILD: {
+		case IN_REV_TRITER_PREV_CHILD: {
 			short field;
 			read_half( field );
 
 			#ifdef COLM_LOG_BYTECODE
 			if ( colm_log_bytecode ) {
-				cerr << "IN_TRITER_PREV_CHILD " << field << endl;
+				cerr << "IN_REV_TRITER_PREV_CHILD " << field << endl;
 			}
 			#endif
 
-			TreeIter *iter = (TreeIter*) plocal(field);
-			Tree *res = tree_iter_prev_child( prg, sp, iter );
+			RevTreeIter *iter = (RevTreeIter*) plocal(field);
+			Tree *res = tree_rev_iter_prev_child( prg, sp, iter );
 			tree_upref( res );
 			push( res );
 			break;

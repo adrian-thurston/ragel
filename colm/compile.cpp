@@ -79,10 +79,10 @@ IterDef::IterDef( Type type ) :
 		useSearchUT = true;
 		break;
 	case RevChild:
-		inCreateWV = IN_TRITER_FROM_REF;
-		inCreateWC = IN_TRITER_FROM_REF;
-		inDestroy = IN_TRITER_DESTROY;
-		inAdvance = IN_TRITER_PREV_CHILD;
+		inCreateWV = IN_REV_TRITER_FROM_REF;
+		inCreateWC = IN_REV_TRITER_FROM_REF;
+		inDestroy = IN_REV_TRITER_DESTROY;
+		inAdvance = IN_REV_TRITER_PREV_CHILD;
 
 		inGetCurR = IN_TRITER_GET_CUR_R;
 		inGetCurWC = IN_TRITER_GET_CUR_WC;
@@ -289,10 +289,12 @@ long sizeOfField( UniqueType *fieldUT )
 		switch ( fieldUT->iterDef->type ) {
 			case IterDef::Tree:
 			case IterDef::Child:
-			case IterDef::RevChild:
 			case IterDef::Repeat:
 			case IterDef::RevRepeat:
 				size = sizeof(TreeIter) / sizeof(Word);
+				break;
+			case IterDef::RevChild:
+				size = sizeof(RevTreeIter) / sizeof(Word);
 				break;
 
 			case IterDef::User:

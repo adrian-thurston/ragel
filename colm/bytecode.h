@@ -115,13 +115,16 @@ typedef unsigned char uchar;
 #define IN_TRITER_FROM_REF       0x3c
 #define IN_TRITER_ADVANCE        0x3d
 #define IN_TRITER_NEXT_CHILD     0x98
-#define IN_TRITER_PREV_CHILD     0x9b
 #define IN_TRITER_GET_CUR_R      0x3e
 #define IN_TRITER_GET_CUR_WC     0x3f
 #define IN_TRITER_SET_CUR_WC     0x40
 #define IN_TRITER_DESTROY        0x41
 #define IN_TRITER_NEXT_REPEAT    0xac
 #define IN_TRITER_PREV_REPEAT    0xad
+
+#define IN_REV_TRITER_FROM_REF   0xae
+#define IN_REV_TRITER_DESTROY    0xaf
+#define IN_REV_TRITER_PREV_CHILD 0x9b
 
 #define IN_UITER_DESTROY         0x52
 #define IN_UITER_CREATE_WV       0x53
@@ -339,6 +342,7 @@ struct Map;
 struct Stream;
 struct Ref;
 struct TreeIter;
+struct RevTreeIter;
 struct Pointer;
 
 typedef unsigned char Code;
@@ -521,7 +525,7 @@ Kid *get_field_kid( Tree *tree, Word field );
 
 Tree *tree_iter_advance( Program *prg, Tree **&sp, TreeIter *iter );
 Tree *tree_iter_next_child( Program *prg, Tree **&sp, TreeIter *iter );
-Tree *tree_iter_prev_child( Program *prg, Tree **&sp, TreeIter *iter );
+Tree *tree_rev_iter_prev_child( Program *prg, Tree **&sp, RevTreeIter *iter );
 Tree *tree_iter_next_repeat( Program *prg, Tree **&sp, TreeIter *iter );
 Tree *tree_iter_prev_repeat( Program *prg, Tree **&sp, TreeIter *iter );
 Tree *tree_iter_deref_cur( TreeIter *iter );
@@ -531,6 +535,7 @@ void ref_set_value( Ref *ref, Tree *v );
 Tree *tree_search( Kid *kid, long id );
 Tree *tree_search( Tree *tree, long id );
 void split_ref( Tree **&sp, Program *prg, Ref *fromRef );
+long tree_num_children( Program *prg, Tree *tree );
 
 Tree **stack_alloc();
 

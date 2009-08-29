@@ -645,6 +645,18 @@ void stream_free( Program *prg, Stream *s )
 	prg->mapElPool.free( (MapEl*)s );
 }
 
+long tree_num_children( Program *prg, Tree *tree )
+{
+	long children = 0;
+	Kid *child = tree_child( prg, tree );
+	while ( child != 0 ) {
+		children += 1;
+		child = child->next;
+	}
+
+	return children;
+}
+
 Tree *copy_real_tree( Program *prg, Tree *tree, Kid *oldNextDown, 
 		Kid *&newNextDown, bool parseTree )
 {
@@ -1163,44 +1175,43 @@ Tree *tree_iter_next_child( Program *prg, Tree **&sp, TreeIter *iter )
 	return ( iter->ref.kid ? prg->trueVal : prg->falseVal );
 }
 
-Tree *tree_iter_prev_child( Program *prg, Tree **&sp, TreeIter *iter )
+Tree *tree_rev_iter_prev_child( Program *prg, Tree **&sp, RevTreeIter *iter )
 {
 	assert( iter->stackSize == iter->stackRoot - vm_ptop() );
-	Kid *startAt = 0, *stopAt = 0, *kid = 0;
 
-	if ( iter->ref.kid == 0 ) {
-		/* Kid is zero, start from the first child. */
-		Kid *child = tree_child( prg, iter->rootRef.kid->tree );
-
-		if ( child == 0 )
-			iter->ref.next = 0;
-		else {
-			vm_push( (SW) iter->rootRef.next );
-			vm_push( (SW) iter->rootRef.kid );
-			iter->ref.next = (Ref*)vm_ptop();
-
-			startAt = child;
-			stopAt = 0;
+	if ( iter->kidAtYield != iter->ref.kid ) {
+		/* Need to reload the kids. */
+		Kid *kid = tree_child( prg, iter->rootRef.kid->tree );
+		Kid **dst = (Kid**)iter->stackRoot - 1;
+		while ( kid != 0 ) {
+			*dst-- = kid;
+			kid = kid->next;
 		}
 	}
+
+	if ( iter->ref.kid == 0 )
+		iter->cur = (Kid**)iter->stackRoot - iter->children;
+	else
+		iter->cur += 1;
+
+	if ( iter->searchId != prg->rtd->anyId ) {
+		/* Have a previous item, go to the next sibling. */
+		while ( iter->cur != (Kid**)iter->stackRoot && (*iter->cur)->tree->id != iter->searchId )
+			iter->cur += 1;
+	}
+
+	if ( iter->cur == (Kid**)iter->stackRoot ) {
+		iter->ref.next = 0;
+		iter->ref.kid = 0;
+	}
 	else {
-		/* Have a previous item, go to the prev sibling. */
-		Kid *parent = (Kid*) vm_top();
-
-		startAt = tree_child( prg, parent->tree );
-		stopAt = iter->ref.kid;
+		iter->ref.next = &iter->rootRef;
+		iter->ref.kid = *iter->cur;
 	}
 
-	while ( startAt != stopAt ) {
-		/* If looking for any, or if last the search type then
-		 * store the match. */
-		if ( iter->searchId == prg->rtd->anyId || 
-				startAt->tree->id == iter->searchId )
-			kid = startAt;
-		startAt = startAt->next;
-	}
+	/* We will use this to detect a split above the iterated tree. */
+	iter->kidAtYield = iter->ref.kid;
 
-	iter->ref.kid = kid;
 	iter->stackSize = iter->stackRoot - vm_ptop();
 
 	return (iter->ref.kid ? prg->trueVal : prg->falseVal );

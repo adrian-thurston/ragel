@@ -283,6 +283,29 @@ struct TreeIter
 	long stackSize;
 };
 
+/* This must overlay tree iter because some of the same bytecodes are used. */
+struct RevTreeIter
+{
+	RevTreeIter( const Ref &rootRef, int searchId, Tree **stackRoot, int children ) : 
+		rootRef(rootRef), searchId(searchId), 
+		stackRoot(stackRoot), stackSize(children), kidAtYield(0), children(children)
+	{
+		ref.kid = 0;
+		ref.next = 0;
+	}
+	
+	Ref rootRef;
+	Ref ref;
+	long searchId;
+	Tree **stackRoot;
+	long stackSize;
+
+	/* For detecting a split at the leaf. */
+	Kid *kidAtYield;
+	long children;
+	Kid **cur;
+};
+
 struct FunctionInfo
 {
 	const char *name;
