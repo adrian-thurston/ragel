@@ -1217,86 +1217,130 @@ Tree *tree_rev_iter_prev_child( Program *prg, Tree **&sp, RevTreeIter *iter )
 	return (iter->ref.kid ? prg->trueVal : prg->falseVal );
 }
 
+void iter_find_repeat( Program *prg, Tree **&sp, TreeIter *iter, bool tryFirst )
+{
+	bool anyTree = iter->searchId == prg->rtd->anyId;
+	Tree **top = iter->stackRoot;
+	Kid *child;
+
+rec_call:
+	if ( tryFirst && ( iter->ref.kid->tree->id == iter->searchId || anyTree ) )
+		return;
+	else {
+		/* The repeat iterator is just like the normal top-down-left-right,
+		 * execept it only goes into the children of a node if the node is the
+		 * root of the iteration, or if does not have any neighbours to the
+		 * right. */
+		if ( top == vm_ptop() || iter->ref.kid->next == 0  ) {
+			child = tree_child( prg, iter->ref.kid->tree );
+			if ( child != 0 ) {
+				vm_push( (SW) iter->ref.next );
+				vm_push( (SW) iter->ref.kid );
+				iter->ref.kid = child;
+				iter->ref.next = (Ref*)vm_ptop();
+				while ( iter->ref.kid != 0 ) {
+					tryFirst = true;
+					goto rec_call;
+					rec_return:
+					iter->ref.kid = iter->ref.kid->next;
+				}
+				iter->ref.kid = (Kid*)vm_pop();
+				iter->ref.next = (Ref*)vm_pop();
+			}
+		}
+	}
+
+	if ( top != vm_ptop() )
+		goto rec_return;
+	
+	iter->ref.kid = 0;
+}
+
 Tree *tree_iter_next_repeat( Program *prg, Tree **&sp, TreeIter *iter )
 {
 	assert( iter->stackSize == iter->stackRoot - vm_ptop() );
-	Kid *kid = 0;
 
 	if ( iter->ref.kid == 0 ) {
-		/* Kid is zero, start from the first child. */
-		Kid *child = tree_child( prg, iter->rootRef.kid->tree );
-
-		if ( child == 0 )
-			iter->ref.next = 0;
-		else {
-			/* Make a reference to the root. */
-			vm_push( (SW) iter->rootRef.next );
-			vm_push( (SW) iter->rootRef.kid );
-			iter->ref.next = (Ref*)vm_ptop();
-
-			kid = child;
-		}
+		/* Kid is zero, start from the root. */
+		iter->ref = iter->rootRef;
+		iter_find_repeat( prg, sp, iter, true );
 	}
 	else {
-		/* Start at next. */
-		kid = iter->ref.kid->next;
+		/* Have a previous item, continue searching from there. */
+		iter_find_repeat( prg, sp, iter, false );
 	}
 
-	if ( iter->searchId != prg->rtd->anyId ) {
-		/* Have a previous item, go to the next sibling. */
-		while ( kid != 0 && kid->tree->id != iter->searchId )
-			kid = kid->next;
-	}
-
-	iter->ref.kid = kid;
-	iter->stackSize = iter->stackRoot - vm_ptop();
-
-	return ( iter->ref.kid ? prg->trueVal : prg->falseVal );
-}
-
-Tree *tree_iter_prev_repeat( Program *prg, Tree **&sp, TreeIter *iter )
-{
-	assert( iter->stackSize == iter->stackRoot - vm_ptop() );
-	Kid *startAt = 0, *stopAt = 0, *kid = 0;
-
-	if ( iter->ref.kid == 0 ) {
-		/* Kid is zero, start from the first child. */
-		Kid *child = tree_child( prg, iter->rootRef.kid->tree );
-
-		if ( child == 0 )
-			iter->ref.next = 0;
-		else {
-			vm_push( (SW) iter->rootRef.next );
-			vm_push( (SW) iter->rootRef.kid );
-			iter->ref.next = (Ref*)vm_ptop();
-
-			startAt = child;
-			stopAt = 0;
-		}
-	}
-	else {
-		/* Have a previous item, go to the prev sibling. */
-		Kid *parent = (Kid*) vm_top();
-
-		startAt = tree_child( prg, parent->tree );
-		stopAt = iter->ref.kid;
-	}
-
-	while ( startAt != stopAt ) {
-		/* If looking for any, or if last the search type then
-		 * store the match. */
-		if ( iter->searchId == prg->rtd->anyId || 
-				startAt->tree->id == iter->searchId )
-			kid = startAt;
-		startAt = startAt->next;
-	}
-
-	iter->ref.kid = kid;
 	iter->stackSize = iter->stackRoot - vm_ptop();
 
 	return (iter->ref.kid ? prg->trueVal : prg->falseVal );
 }
 
+void iter_find_rev_repeat( Program *prg, Tree **&sp, TreeIter *iter, bool tryFirst )
+{
+	bool anyTree = iter->searchId == prg->rtd->anyId;
+	Tree **top = iter->stackRoot;
+	Kid *child;
+
+	if ( tryFirst ) {
+		while ( true ) {
+			if ( top == vm_ptop() || iter->ref.kid->next == 0 ) {
+				child = tree_child( prg, iter->ref.kid->tree );
+
+				if ( child == 0 )
+					break;
+				vm_push( (SW) iter->ref.next );
+				vm_push( (SW) iter->ref.kid );
+				iter->ref.kid = child;
+				iter->ref.next = (Ref*)vm_ptop();
+			}
+			else {
+				/* Not the top and not there is a next, go over to it. */
+				iter->ref.kid = iter->ref.kid->next;
+			}
+		}
+
+		return;
+	}
+
+	while ( true ) {
+		if ( top == vm_ptop() ) {
+			iter->ref.kid = 0;
+			return;
+		}
+		
+		if ( iter->ref.kid->next == 0 ) {
+			iter->ref.kid = iter->ref.next->kid->tree->child;
+		}
+		else {
+			iter->ref.kid = (Kid*)vm_pop();
+			iter->ref.next = (Ref*)vm_pop();
+		}
+
+		if ( iter->ref.kid->tree->id == iter->searchId || anyTree )
+			return;
+	}
+
+	return;
+}
+
+Tree *tree_iter_prev_repeat( Program *prg, Tree **&sp, TreeIter *iter )
+{
+	assert( iter->stackSize == iter->stackRoot - vm_ptop() );
+
+	if ( iter->ref.kid == 0 ) {
+		/* Kid is zero, start from the root. */
+		iter->ref = iter->rootRef;
+		iter_find_rev_repeat( prg, sp, iter, true );
+	}
+	else {
+		/* Have a previous item, continue searching from there. */
+		iter_find_rev_repeat( prg, sp, iter, false );
+	}
+
+	iter->stackSize = iter->stackRoot - vm_ptop();
+
+	return (iter->ref.kid ? prg->trueVal : prg->falseVal );
+}
 
 Tree *tree_search( Kid *kid, long id )
 {
