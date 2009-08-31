@@ -36,6 +36,7 @@ LDFLAGS +=
 
 # Frequently changed ones first.
 COLM_SRC = \
+	analysis.cpp \
 	compile.cpp \
 	lmparse.cpp \
 	lmscan.cpp \

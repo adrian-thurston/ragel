@@ -1143,7 +1143,7 @@ struct TypeRef
 		isPtr(false), isRef(false), repeatType(RepeatNone),
 		uniqueType(0) {}
 
-
+	void analyze( ParseData *pd ) const;
 	UniqueType *lookupType( ParseData *pd );
 
 	InputLoc loc;
@@ -1356,6 +1356,8 @@ struct LangVarRef
 	LangVarRef( const InputLoc &loc, QualItemVect *qual, String name )
 		: loc(loc), qual(qual), name(name) {}
 
+	void analyze( ParseData *pd ) const;
+
 	UniqueType *loadFieldInstr( ParseData *pd, CodeVect &code, ObjectDef *inObject,
 			ObjField *el, bool forWriting, bool revert ) const;
 	void setFieldInstr( ParseData *pd, CodeVect &code, ObjectDef *inObject, 
@@ -1461,6 +1463,8 @@ struct LangTerm
 	LangTerm( Type type, LangExpr *expr )
 		: type(type), expr(expr) {}
 
+	void analyze( ParseData *pd ) const;
+
 	UniqueType *evaluateParse( ParseData *pd, CodeVect &code, bool stop ) const;
 	UniqueType *evaluateNew( ParseData *pd, CodeVect &code ) const;
 	UniqueType *evaluateConstruct( ParseData *pd, CodeVect &code ) const;
@@ -1502,6 +1506,8 @@ struct LangExpr
 
 	LangExpr( LangTerm *term )
 		: type(TermType), term(term) {}
+
+	void analyze( ParseData *pd ) const;
 
 	UniqueType *evaluate( ParseData *pd, CodeVect &code ) const;
 
@@ -1574,6 +1580,8 @@ struct LangStmt
 	LangStmt( Type type ) : 
 		type(type), next(0) {}
 
+	void analyze( ParseData *pd ) const;
+
 	LangTerm *chooseDefaultIter( ParseData *pd, LangTerm *fromVarRef ) const;
 	void compileWhile( ParseData *pd, CodeVect &code ) const;
 	void compileForIterBody( ParseData *pd, CodeVect &code, UniqueType *iterUT ) const;
@@ -1606,6 +1614,7 @@ struct CodeBlock
 		: frameId(-1), stmtList(stmtList), localFrame(0) {}
 
 	void compile( ParseData *pd, CodeVect &code ) const;
+	void analyze( ParseData *pd ) const;
 
 	long frameId;
 	StmtList *stmtList;

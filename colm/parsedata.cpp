@@ -1128,7 +1128,7 @@ void ParseData::resolveLiteralFactor( PdaFactor *fact )
 	fact->langEl = tokenDef->token;
 }
 
-KlangEl *ParseData::makeRepeatProd( Namespace *nspace, const String &repeatName, PdaFactor *fact )
+KlangEl *ParseData::makeRepeatProd( Namespace *nspace, const String &repeatName, NamespaceQual *nspaceQual, const String &name )
 {
 	KlangEl *prodName = getKlangEl( this, nspace, repeatName );
 	prodName->type = KlangEl::NonTerm;
@@ -1137,9 +1137,9 @@ KlangEl *ParseData::makeRepeatProd( Namespace *nspace, const String &repeatName,
 	ProdElList *prodElList1 = new ProdElList;
 
 	/* Build the first production of the repeat. */
-	PdaFactor *factor1 = new PdaFactor( InputLoc(), false, fact->nspaceQual, 
-			fact->refName, 0, RepeatNone, false, false );
-	PdaFactor *factor2 = new PdaFactor( InputLoc(), false, fact->nspaceQual, 
+	PdaFactor *factor1 = new PdaFactor( InputLoc(), false, nspaceQual, 
+			name, 0, RepeatNone, false, false );
+	PdaFactor *factor2 = new PdaFactor( InputLoc(), false, nspaceQual, 
 			repeatName, 0, RepeatNone, false, false );
 
 	prodElList1->append( factor1 );
@@ -1165,16 +1165,16 @@ KlangEl *ParseData::makeRepeatProd( Namespace *nspace, const String &repeatName,
 	return prodName;
 }
 
-KlangEl *ParseData::makeListProd( Namespace *nspace, const String &listName, PdaFactor *fact )
+KlangEl *ParseData::makeListProd( Namespace *nspace, const String &listName, NamespaceQual *nspaceQual, const String &name )
 {
 	KlangEl *prodName = getKlangEl( this, nspace, listName );
 	prodName->type = KlangEl::NonTerm;
 	prodName->isList = true;
 
 	/* Build the first production of the list. */
-	PdaFactor *factor1 = new PdaFactor( InputLoc(), false, fact->nspaceQual, 
-			fact->refName, 0, RepeatNone, false, false );
-	PdaFactor *factor2 = new PdaFactor( InputLoc(), false, fact->nspaceQual, 
+	PdaFactor *factor1 = new PdaFactor( InputLoc(), false, nspaceQual, 
+			name, 0, RepeatNone, false, false );
+	PdaFactor *factor2 = new PdaFactor( InputLoc(), false, nspaceQual, 
 			listName, 0, RepeatNone, false, false );
 
 	ProdElList *prodElList1 = new ProdElList;
@@ -1189,8 +1189,8 @@ KlangEl *ParseData::makeListProd( Namespace *nspace, const String &listName, Pda
 	prodList.append( newDef1 );
 
 	/* Build the second production of the list. */
-	PdaFactor *factor3 = new PdaFactor( InputLoc(), false, fact->nspaceQual, 
-			fact->refName, 0, RepeatNone, false, false );
+	PdaFactor *factor3 = new PdaFactor( InputLoc(), false, nspaceQual, 
+			name, 0, RepeatNone, false, false );
 
 	ProdElList *prodElList2 = new ProdElList;
 	prodElList2->append( factor3 );
@@ -1205,7 +1205,7 @@ KlangEl *ParseData::makeListProd( Namespace *nspace, const String &listName, Pda
 	return prodName;
 }
 
-KlangEl *ParseData::makeOptProd( Namespace *nspace, const String &optName, PdaFactor *fact )
+KlangEl *ParseData::makeOptProd( Namespace *nspace, const String &optName, NamespaceQual *nspaceQual, const String &name )
 {
 	KlangEl *prodName = getKlangEl( this, nspace, optName );
 	prodName->type = KlangEl::NonTerm;
@@ -1214,8 +1214,8 @@ KlangEl *ParseData::makeOptProd( Namespace *nspace, const String &optName, PdaFa
 	ProdElList *prodElList1 = new ProdElList;
 
 	/* Build the first production of the repeat. */
-	PdaFactor *factor1 = new PdaFactor( InputLoc(), false, fact->nspaceQual, 
-			fact->refName, 0, RepeatNone, false, false );
+	PdaFactor *factor1 = new PdaFactor( InputLoc(), false, nspaceQual, 
+			name, 0, RepeatNone, false, false );
 	prodElList1->append( factor1 );
 
 	Definition *newDef1 = new Definition( InputLoc(),
@@ -1260,7 +1260,7 @@ void ParseData::resolveReferenceFactor( PdaFactor *fact )
 	    if ( inDict != 0 )
 			fact->langEl = inDict->value;
 		else
-			fact->langEl = makeRepeatProd( nspace, repeatName, fact );;
+			fact->langEl = makeRepeatProd( nspace, repeatName, fact->nspaceQual, fact->refName );
 	}
 	else if ( fact->repeatType == RepeatList ) {
 		/* If the factor is a repeat, create the repeat element and link the
@@ -1271,7 +1271,7 @@ void ParseData::resolveReferenceFactor( PdaFactor *fact )
 	    if ( inDict != 0 )
 			fact->langEl = inDict->value;
 		else
-			fact->langEl = makeListProd( nspace, listName, fact );
+			fact->langEl = makeListProd( nspace, listName, fact->nspaceQual, fact->refName );
 	}
 	else if ( fact->repeatType == RepeatOpt ) {
 		/* If the factor is an opt, create the opt element and link the factor
@@ -1282,7 +1282,7 @@ void ParseData::resolveReferenceFactor( PdaFactor *fact )
 	    if ( inDict != 0 )
 			fact->langEl = inDict->value;
 		else
-			fact->langEl = makeOptProd( nspace, optName, fact );
+			fact->langEl = makeOptProd( nspace, optName, fact->nspaceQual, fact->refName );
 	}
 	else {
 		/* The factor is not a repeat. Link to the language element. */
@@ -1566,12 +1566,14 @@ void ParseData::semanticAnalysis()
 	initLongestMatchData();
 	createDefaultScanner();
 
-	/* This needs to happen before the scanner is built. */
-	resolveProductionEls();
-
 	/* Resolve pattern and replacement elements. */
 	resolvePatternEls();
 	resolveReplacementEls();
+
+	analyzeParseTree();
+
+	/* This needs to happen before the scanner is built. */
+	resolveProductionEls();
 
 	/* Fill any empty scanners with a default token. */
 	initEmptyScanners();

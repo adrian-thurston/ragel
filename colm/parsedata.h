@@ -692,9 +692,9 @@ struct ParseData
 	void printNonTermFirstSets();
 	void printFirstSets();
 
-	KlangEl *makeRepeatProd( Namespace *nspace, const String &repeatName, PdaFactor *fact );
-	KlangEl *makeListProd( Namespace *nspace, const String &listName, PdaFactor *fact );
-	KlangEl *makeOptProd( Namespace *nspace, const String &optName, PdaFactor *fact );
+	KlangEl *makeRepeatProd( Namespace *nspace, const String &repeatName, NamespaceQual *nspaceQual, const String &name );
+	KlangEl *makeListProd( Namespace *nspace, const String &listName, NamespaceQual *nspaceQual, const String &name );
+	KlangEl *makeOptProd( Namespace *nspace, const String &optName, NamespaceQual *nspaceQual, const String &name );
 	void resolveLiteralFactor( PdaFactor *fact );
 	void resolveReferenceFactor( PdaFactor *fact );
 	void resolveFactor( PdaFactor *fact );
@@ -751,9 +751,16 @@ struct ParseData
 	void resolveElementOf( ObjectDef *obj );
 	void makeFuncVisible( Function *func, bool isUserIter );
 
+	void analyzeFunction( Function *func );
+	void analyzeUserIter( Function *func );
+	void analyzePreEof( TokenRegion *region );
+	void analyzeRootBlock();
+	void analyzeTranslateBlock( KlangEl *langEl );
+	void analyzeReductionCode( Definition *prod );
+	void analyzeParseTree();
+
 	void compileFunction( Function *func, CodeVect &code );
 	void compileFunction( Function *func );
-
 	void compileUserIter( Function *func, CodeVect &code );
 	void compileUserIter( Function *func );
 	void compilePreEof( TokenRegion *region );
