@@ -393,7 +393,7 @@ void print_ignore_list( Tree **sp, Program *prg, Tree *tree )
 	/* Pop them off and print. */
 	while ( vm_ptop() != root ) {
 		ignore = (Kid*) vm_pop();
-		print_tree( sp, prg, ignore->tree );
+		print_tree( cout, sp, prg, ignore->tree );
 	}
 }
 
@@ -456,22 +456,10 @@ rec_call:
 		goto rec_return;
 }
 
-void print_tree( Tree **&sp, Program *prg, Tree *tree )
-{
-	if ( tree == 0 )
-		cout << "NIL";
-	else {
-		Kid kid;
-		kid.tree = tree;
-		kid.next = 0;
-		print_kid( cout, sp, prg, &kid, false );
-	}
-}
-
 void print_tree( ostream &out, Tree **&sp, Program *prg, Tree *tree )
 {
 	if ( tree == 0 )
-		cout << "NIL";
+		out << "NIL";
 	else {
 		Kid kid;
 		kid.tree = tree;

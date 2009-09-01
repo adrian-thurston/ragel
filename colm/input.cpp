@@ -34,15 +34,15 @@ using std::endl;
 
 int InputStreamString::getData( char *dest, int length )
 { 
-	int available = data.length() - offset;
+	int available = dlen - offset;
 
 	if ( available < length )
 		length = available;
 
-	memcpy( dest, data.data+offset, length );
+	memcpy( dest, data+offset, length );
 	offset += length;
 
-	if ( offset == data.length() )
+	if ( offset == dlen )
 		eof = true;
 
 	return length;

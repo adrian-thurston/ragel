@@ -63,16 +63,17 @@ struct InputStream
 
 struct InputStreamString : public InputStream
 {
-	InputStreamString( const String &data ) : 
+	InputStreamString( const char *data, long dlen ) :
 		InputStream(false), 
-		data(data), offset(0), eof(false) {}
+		data(data), dlen(dlen), offset(0), eof(false) {}
 
 	int getData( char *dest, int length );
 	int isEOF() { return eof; }
 	int needFlush() { return eof; }
 	void pushBackBuf( RunBuf *runBuf );
 
-	String data;
+	const char *data;
+	long dlen;
 	int offset;
 	bool eof;
 };

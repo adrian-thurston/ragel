@@ -29,10 +29,13 @@
 #include <sstream>
 #include <alloca.h>
 #include <sys/mman.h>
+#include <sstream>
 
 using std::cout;
 using std::cerr;
 using std::endl;
+using std::ostringstream;
+using std::string;
 
 #define push(i) (*(--sp) = (i))
 #define pop() (*sp++)
@@ -158,8 +161,13 @@ Tree *call_tree_parser( Tree **&sp, Program *prg, Tree *input,
 {
 	PdaTables *tables = prg->rtd->pdaTables;
 
-	String s("hello");
-	InputStreamString inputStream( s );
+	/* Collect the tree data. */
+	ostringstream s;
+	print_tree( s, sp, prg, input );
+
+	/* Set up the input stream. */
+	string s2 = s.str();
+	InputStreamString inputStream( s2.c_str(), strlen( s2.c_str() ) );
 	FsmRun fsmRun( prg );
 	fsmRun.attachInputStream( &inputStream );
 
@@ -899,7 +907,7 @@ again:
 			#endif
 
 			Tree *tree = pop();
-			print_tree( sp, prg, tree );
+			print_tree( cout, sp, prg, tree );
 			tree_downref( prg, sp, tree );
 			break;
 		}

@@ -1177,7 +1177,11 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 
 	/* Allocate a parser id. This will cause a parser to be built for
 	 * the type. */
-	ut->langEl->parserId = pd->nextParserId++;
+	if ( ut->langEl->parserId < 0 )
+		ut->langEl->parserId = pd->nextParserId++;
+
+	/* If this is a parse stop then we need to verify that the type is
+	 * compatible with parse stop. */
 	if ( stop )
 		ut->langEl->parseStop = true;
 
@@ -1191,7 +1195,7 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 	}
 	else if ( argUT->typeId == TYPE_TREE ) {
 		if ( pd->revertOn )
-			assert(false);
+			code.append( IN_PARSE_TREE_WC );
 		else
 			code.append( IN_PARSE_TREE_WC );
 	}
