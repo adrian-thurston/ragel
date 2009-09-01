@@ -1172,8 +1172,8 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 		error(loc) << "expecting one argument" << endp;
 
 	UniqueType *argUT = args->data[0]->evaluate( pd, code );
-	if ( argUT != pd->uniqueTypeStream )
-		error(loc) << "single argument must be a stream" << endp;
+	if ( argUT != pd->uniqueTypeStream && argUT->typeId != TYPE_TREE )
+		error(loc) << "single argument must be a stream or a tree" << endp;
 
 	/* Allocate a parser id. This will cause a parser to be built for
 	 * the type. */
@@ -1181,12 +1181,20 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 	if ( stop )
 		ut->langEl->parseStop = true;
 
-	/* Parse instruction, dependent on whether or not we are
-	 * producing revert or commit code. */
-	if ( pd->revertOn )
-		code.append( IN_PARSE_WV );
-	else
-		code.append( IN_PARSE_WC );
+	if ( argUT == pd->uniqueTypeStream ) {
+		/* Parse instruction, dependent on whether or not we are
+		 * producing revert or commit code. */
+		if ( pd->revertOn )
+			code.append( IN_PARSE_WV );
+		else
+			code.append( IN_PARSE_WC );
+	}
+	else if ( argUT->typeId == TYPE_TREE ) {
+		if ( pd->revertOn )
+			assert(false);
+		else
+			code.append( IN_PARSE_TREE_WC );
+	}
 
 	/* The id of the parser, followed by the stop id. */
 	code.appendHalf( ut->langEl->parserId );

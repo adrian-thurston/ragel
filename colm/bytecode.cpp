@@ -153,6 +153,37 @@ Tree *call_parser( Tree **&sp, Program *prg, Stream *stream,
 	return tree;
 }
 
+Tree *call_tree_parser( Tree **&sp, Program *prg, Tree *input, 
+		long parserId, long stopId, CodeVect *&cv, bool revertOn )
+{
+	PdaTables *tables = prg->rtd->pdaTables;
+
+	String s("hello");
+	InputStreamString inputStream( s );
+	FsmRun fsmRun( prg );
+	fsmRun.attachInputStream( &inputStream );
+
+	PdaRun parser( sp, prg, tables, parserId, &fsmRun, stopId, revertOn );
+	parse( &parser );
+	commit_full( &parser, 0 );
+	Tree *tree = parser.getParsedRoot( stopId > 0 );
+	tree_upref( tree );
+	parser.clean();
+
+	/* Maybe return the reverse code. */
+	if ( revertOn )
+		cv = parser.allReverseCode;
+	else {
+		delete parser.allReverseCode;
+		cv = 0;
+	}
+
+	/* Indicate that this tree came out of a parser. */
+	tree->flags |= AF_PARSED;
+
+	return tree;
+}
+
 void undo_parse( Tree **&sp, Program *prg, Stream *stream, 
 		long parserId, Tree *tree, CodeVect *rev )
 {
@@ -2056,6 +2087,26 @@ again:
 			push( res );
 
 			tree_downref( prg, sp, (Tree*)stream );
+			break;
+		}
+		case IN_PARSE_TREE_WC: {
+			Half parserId, stopId;
+			read_half( parserId );
+			read_half( stopId );
+
+			#ifdef COLM_LOG_BYTECODE
+			if ( colm_log_bytecode ) {
+				cerr << "IN_PARSE_TREE_WC " << parserId << " " << stopId << endl;
+			}
+			#endif
+
+			/* Comes back from parse upreffed. */
+			CodeVect *cv;
+			Tree *input = pop();
+			Tree *res = call_tree_parser( sp, prg, input, parserId, stopId, cv, false );
+			push( res );
+
+			tree_downref( prg, sp, input );
 			break;
 		}
 		case IN_STREAM_PULL: {
