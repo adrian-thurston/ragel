@@ -5,11 +5,6 @@ lex start
 	token id /[a-zA-Z_]+/
 }
 
-lex other
-{
-	token t /any/
-}
-
 def item 
 	[id]
 |	['(' item* ')']
