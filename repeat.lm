@@ -1,5 +1,3 @@
-# Scanner for tag names.
-#
 lex start
 {
 	ignore /space+/
@@ -12,13 +10,9 @@ lex other
 	token t /any/
 }
 
-def fudge
-	int i
-	['(' item* ')']
-
 def item 
 	[id]
-|	[fudge]
+|	['(' item* ')']
 
 def start 
 	[item*]
