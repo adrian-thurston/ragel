@@ -1,0 +1,34 @@
+# Scanner for tag names.
+#
+lex start
+{
+	ignore /space+/
+	literal '*', '(', ')'
+	token id /[a-zA-Z_]+/
+}
+
+lex other
+{
+	token t /any/
+}
+
+def fudge
+	int i
+	['(' item* ')']
+
+def item 
+	[id]
+|	[fudge]
+
+def start 
+	[item*]
+
+start Input = parse start( stdin )
+
+match Input [ItemList: item*]
+
+for I1: item* in repeat( ItemList )
+	print( I1, '\n' )
+
+for I2: item* in rev_repeat( ItemList )
+	print( I2, '\n' )
