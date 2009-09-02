@@ -102,8 +102,7 @@ block_open: '{'
 					c->objField->typeRef, c->objField->name );
 
 			/* Insert it into the field map. */
-			pd->curLocalFrame->objFieldMap->insert( objField->name, objField );
-			pd->curLocalFrame->objFieldList->append( objField );
+			pd->curLocalFrame->insertField( objField->name, objField );
 		}
 	};
 
@@ -250,11 +249,10 @@ global_def: KW_Global var_def opt_def_init
 		$$->stmt = 0;
 		ObjectDef *globalObj = pd->globalObjectDef;
 
-		if ( globalObj->objFieldMap->find( $2->objField->name ) != 0 )
+		if ( globalObj->findField( $2->objField->name ) != 0 )
 			error($2->objField->loc) << "object field renamed" << endp;
 
-		globalObj->objFieldMap->insert( $2->objField->name, $2->objField );
-		globalObj->objFieldList->append( $2->objField );
+		globalObj->insertField( $2->objField->name, $2->objField );
 
 		if ( $3->expr != 0 ) {
 			LangVarRef *varRef = new LangVarRef( $2->objField->loc, 
@@ -309,12 +307,7 @@ cfl_def: cfl_def_head obj_var_list properties_list cfl_prod_list
 	final {
 		/* Get the language element. */
 		KlangEl *langEl = getKlangEl( pd, namespaceStack.top(), curDefineId );
-
-		/* Make a new object definition. */
-		ObjectDef *objectDef = new ObjectDef( ObjectDef::UserType, curDefineId, 
-				pd->objFieldMap, pd->objFieldList, new ObjMethodMap(), pd->nextObjectId++ ); 
-
-		langEl->objectDef = objectDef;
+		langEl->objectDef = pd->objectDef;
 	};
 
 cfl_def_head: KW_Def TK_Word
@@ -372,17 +365,16 @@ define_prod: '[' prod_el_list ']' opt_commit opt_reduce_code opt_prec
 
 obj_var_list: obj_var_list var_def
 	final {
-		if ( pd->objFieldMap->find( $2->objField->name ) != 0 )
+		if ( pd->objectDef->findField( $2->objField->name ) != 0 )
 			error() << "object field renamed" << endp;
 
-		pd->objFieldMap->insert( $2->objField->name, $2->objField );
-		pd->objFieldList->append( $2->objField );
+		pd->objectDef->insertField( $2->objField->name, $2->objField );
 	};
 
 obj_var_list:
 	final {
-		pd->objFieldMap = new ObjFieldMap;
-		pd->objFieldList = new ObjFieldList;
+		pd->objectDef = new ObjectDef( ObjectDef::UserType, curDefineId, 
+				new ObjFieldMap, new ObjFieldList, new ObjMethodMap(), pd->nextObjectId++ ); 
 	};
 
 
@@ -495,7 +487,7 @@ pattern_el: opt_label pattern_el_type_or_lit
 		$2->patternItem->varRef = $1->varRef;
 
 		if ( $1->varRef != 0 ) {
-			if ( pd->curLocalFrame->objFieldMap->find( $1->varRef->name ) != 0 ) {
+			if ( pd->curLocalFrame->findField( $1->varRef->name ) != 0 ) {
 				error( $1->varRef->loc ) << "variable " << $1->varRef->name << 
 						" redeclared" << endp;
 			}
@@ -504,8 +496,7 @@ pattern_el: opt_label pattern_el_type_or_lit
 			ObjField *objField = new ObjField( InputLoc(), typeRef, $1->varRef->name );
 
 			/* Insert it into the field map. */
-			pd->curLocalFrame->objFieldMap->insert( $1->varRef->name, objField );
-			pd->curLocalFrame->objFieldList->append( objField );
+			pd->curLocalFrame->insertField( $1->varRef->name, objField );
 		}
 	};
 
@@ -756,11 +747,7 @@ token_def:
 		tokenDef->reCaptureVect = reCaptureVect;
 		reCaptureVect.empty();
 
-		/* Create the object def for the token. */
-		ObjectDef *objectDef = new ObjectDef( ObjectDef::UserType, name, 
-				pd->objFieldMap, pd->objFieldList, new ObjMethodMap(), pd->nextObjectId++ ); 
-
-		tokEl->objectDef = objectDef;
+		tokEl->objectDef = pd->objectDef;
 
 		/* This is created and pushed in the name. */
 		if ( !pd->insideRegion ) {
@@ -800,7 +787,7 @@ token_def_name:
 
 		$$->name = name;
 		pd->insideRegion = regionStack.top() != pd->rootRegion;
-		pd->tokenDefName = name;
+		curDefineId = name;
 
 		if ( !pd->insideRegion ) {
 			/* If not inside a region, make one for the token. */
@@ -985,14 +972,13 @@ statement: var_def opt_def_init
 		$$->stmt = 0;
 
 		/* Check for redeclaration. */
-		if ( pd->curLocalFrame->objFieldMap->find( $1->objField->name ) != 0 ) {
+		if ( pd->curLocalFrame->findField( $1->objField->name ) != 0 ) {
 			error( $1->objField->loc ) << "variable " << $1->objField->name <<
 					" redeclared" << endp;
 		}
 
 		/* Insert it into the field map. */
-		pd->curLocalFrame->objFieldMap->insert( $1->objField->name, $1->objField );
-		pd->curLocalFrame->objFieldList->append( $1->objField );
+		pd->curLocalFrame->insertField( $1->objField->name, $1->objField );
 
 		if ( $2->expr != 0 ) {
 			LangVarRef *varRef = new LangVarRef( $1->objField->loc, 
@@ -1037,15 +1023,14 @@ statement: KW_While code_expr block_or_single
 statement: KW_For TK_Word ':' type_ref KW_In iter_call block_or_single
 	final {
 		/* Check for redeclaration. */
-		if ( pd->curLocalFrame->objFieldMap->find( $2->data ) != 0 )
+		if ( pd->curLocalFrame->findField( $2->data ) != 0 )
 			error( $2->loc ) << "variable " << $2->data << " redeclared" << endp;
 
 		/* Note that we pass in a null type reference. This type is dependent
 		 * on the result of the iter_call lookup since it must contain a reference
 		 * to the iterator that is called. This lookup is done at compile time. */
 		ObjField *iterField = new ObjField( $2->loc, (TypeRef*)0, $2->data );
-		pd->curLocalFrame->objFieldMap->insert( $2->data, iterField );
-		pd->curLocalFrame->objFieldList->append( iterField );
+		pd->curLocalFrame->insertField( $2->data, iterField );
 
 		$$->stmt = new LangStmt( $1->loc, LangStmt::ForIterType, 
 				iterField, $4->typeRef, $6->langTerm, $7->stmtList );
@@ -1650,7 +1635,7 @@ factor_with_label:
 	TK_Word ':' factor_with_label final {
 		$$->factorWithAug = $3->factorWithAug;
 
-		if ( pd->objFieldMap->find( $1->data ) != 0 )
+		if ( pd->objectDef->findField( $1->data ) != 0 )
 			error($1->loc) << "label name \"" << $1->data << "\" already in use" << endp;
 
 		/* Create the object field. */
@@ -1659,8 +1644,7 @@ factor_with_label:
 		ObjField *objField = new ObjField( $1->loc, typeRef, $1->data );
 
 		/* Insert it into the map. */
-		pd->objFieldMap->insert( $1->data, objField );
-		pd->objFieldList->append( objField );
+		pd->objectDef->insertField( $1->data, objField );
 
 		/* Create the enter and leaving actions that will mark the substring. */
 		Action *enter = new Action( MarkMark, pd->nextMatchEndNum++ );
@@ -2021,10 +2005,8 @@ void Parser::init()
 
 	/* Set up the global object. */
 	String global = "global";
-	ObjFieldMap *objFieldMap = new ObjFieldMap;
-	ObjFieldList *objFieldList = new ObjFieldList;
 	pd->globalObjectDef = new ObjectDef( ObjectDef::UserType, global, 
-			objFieldMap, objFieldList, new ObjMethodMap(), pd->nextObjectId++ ); 
+			new ObjFieldMap, new ObjFieldList, new ObjMethodMap(), pd->nextObjectId++ ); 
 	
 	/* The eofTokenRegion defaults to the root region. */
 	pd->eofTokenRegion = rootRegion;

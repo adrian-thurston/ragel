@@ -1287,7 +1287,7 @@ struct ObjectDef
 	void createCode( ParseData *pd, CodeVect &code );
 	ObjMethod *findMethod( const String &name );
 	ObjField *findField( const String &name );
-
+	void insertField( const String &name, ObjField *value );
 
 	long size() { return nextOffset; }
 	long sizeTrees() { return firstNonTree; }

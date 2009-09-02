@@ -223,6 +223,7 @@ typedef unsigned char uchar;
 #define IN_SEND                  0xb6
 #define IN_IGNORE                0xb7
 #define IN_PARSE_TREE_WC         0xc3
+#define IN_PARSE_TREE_WV         0xc4
 
 #define IN_OPEN_FILE             0xb8
 #define IN_GET_STDIN             0xb9

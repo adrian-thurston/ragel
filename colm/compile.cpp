@@ -261,6 +261,12 @@ UniqueType *TypeRef::lookupType( ParseData *pd )
 	return uniqueType;
 }
 
+void ObjectDef::insertField( const String &name, ObjField *value )
+{
+	objFieldMap->insert( name, value );
+	objFieldList->append( value );
+}
+
 ObjField *ObjectDef::findField( const String &name )
 {
 	ObjFieldMapEl *objDefMapEl = objFieldMap->find( name );
@@ -1195,7 +1201,7 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 	}
 	else if ( argUT->typeId == TYPE_TREE ) {
 		if ( pd->revertOn )
-			code.append( IN_PARSE_TREE_WC );
+			code.append( IN_PARSE_TREE_WV );
 		else
 			code.append( IN_PARSE_TREE_WC );
 	}
@@ -1901,8 +1907,7 @@ void ParseData::addProdRedObjectVar( ObjectDef *localFrame, KlangEl *nonTerm )
 
 	initLocalInstructions( el );
 
-	localFrame->objFieldMap->insert( el->name, el );
-	localFrame->objFieldList->append( el );
+	localFrame->insertField( el->name, el );
 }
 
 void ParseData::addProdRHSVars( ObjectDef *localFrame, ProdElList *prodElList )
@@ -1925,8 +1930,7 @@ void ParseData::addProdRHSVars( ObjectDef *localFrame, ProdElList *prodElList )
 			/* Only ever fetch for reading since they are constant. */
 			el->inGetR = IN_GET_LOCAL_R;
 
-			localFrame->objFieldMap->insert( el->name, el );
-			localFrame->objFieldList->append( el );
+			localFrame->insertField( el->name, el );
 		}
 	}
 }
@@ -1943,8 +1947,7 @@ void ParseData::addMatchLength( ObjectDef *frame, KlangEl *lel )
 	el->isConst = true;
 	el->useOffset = false;
 	el->inGetR    = IN_GET_MATCH_LENGTH_R;
-	frame->objFieldMap->insert( el->name, el );
-	frame->objFieldList->append( el );
+	frame->insertField( el->name, el );
 }
 
 void ParseData::addMatchText( ObjectDef *frame, KlangEl *lel )
@@ -1959,8 +1962,7 @@ void ParseData::addMatchText( ObjectDef *frame, KlangEl *lel )
 	el->isConst = true;
 	el->useOffset = false;
 	el->inGetR    = IN_GET_MATCH_TEXT_R;
-	frame->objFieldMap->insert( el->name, el );
-	frame->objFieldList->append( el );
+	frame->insertField( el->name, el );
 }
 
 void ParseData::initFieldInstructions( ObjField *el )
@@ -2011,8 +2013,7 @@ void ParseData::addLengthField( ObjectDef *objDef, Code getLength )
 	el->useOffset = false;
 	el->inGetR = getLength;
 
-	objDef->objFieldMap->insert( el->name, el );
-	objDef->objFieldList->append( el );
+	objDef->insertField( el->name, el );
 }
 
 void ParseData::initStrObject( )
@@ -2098,12 +2099,10 @@ void ParseData::initTokenObjects( )
 			methodMap, nextObjectId++ );
 
 	ObjField *dataEl = makeDataEl();
-	tokenObj->objFieldMap->insert( dataEl->name, dataEl );
-	tokenObj->objFieldList->append( dataEl );
+	tokenObj->insertField( dataEl->name, dataEl );
 
 	ObjField *posEl = makePosEl();
-	tokenObj->objFieldMap->insert( posEl->name, posEl );
-	tokenObj->objFieldList->append( posEl );
+	tokenObj->insertField( posEl->name, posEl );
 
 
 	/* Give all user terminals the token object type. */
@@ -2114,13 +2113,11 @@ void ParseData::initTokenObjects( )
 			else {
 				/* Create the "data" field. */
 				ObjField *dataEl = makeDataEl();
-				lel->objectDef->objFieldMap->insert( dataEl->name, dataEl );
-				lel->objectDef->objFieldList->append( dataEl );
+				lel->objectDef->insertField( dataEl->name, dataEl );
 
 				/* Create the "pos" field. */
 				ObjField *posEl = makePosEl();
-				lel->objectDef->objFieldMap->insert( posEl->name, posEl );
-				lel->objectDef->objFieldList->append( posEl );
+				lel->objectDef->insertField( posEl->name, posEl );
 			}
 		}
 	}
@@ -2419,8 +2416,7 @@ void ParseData::initListField( GenericType *gen, const char *name, int offset )
 	el->inSetWC = IN_SET_LIST_MEM_WC;
 	el->inSetWV = IN_SET_LIST_MEM_WV;
 
-	gen->objDef->objFieldMap->insert( el->name, el );
-	gen->objDef->objFieldList->append( el );
+	gen->objDef->insertField( el->name, el );
 
 	el->useOffset = true;
 	el->beenReferenced = true;
@@ -2492,8 +2488,7 @@ void ParseData::makeFuncVisible( Function *func, bool isUserIter )
 		if ( func->localFrame->findField( param->name ) != 0 )
 			error(param->loc) << "parameter " << param->name << " redeclared" << endp;
 
-		func->localFrame->objFieldMap->insert( param->name, param );
-		func->localFrame->objFieldList->append( param );
+		func->localFrame->insertField( param->name, param );
 		param->beenInitialized = true;
 		param->pos = paramPos;
 
@@ -2733,8 +2728,7 @@ void ParseData::addStdin()
 	el->isConst = true;
 	el->useOffset = false;
 	el->inGetR    = IN_GET_STDIN;
-	globalObjectDef->objFieldMap->insert( el->name, el );
-	globalObjectDef->objFieldList->append( el );
+	globalObjectDef->insertField( el->name, el );
 }
 
 void ParseData::addStdout()
@@ -2749,8 +2743,7 @@ void ParseData::addStdout()
 	el->isConst = true;
 	el->useOffset = false;
 	el->inGetR    = IN_GET_STDOUT;
-	globalObjectDef->objFieldMap->insert( el->name, el );
-	globalObjectDef->objFieldList->append( el );
+	globalObjectDef->insertField( el->name, el );
 }
 
 void ParseData::addStderr()
@@ -2765,8 +2758,7 @@ void ParseData::addStderr()
 	el->isConst = true;
 	el->useOffset = false;
 	el->inGetR    = IN_GET_STDERR;
-	globalObjectDef->objFieldMap->insert( el->name, el );
-	globalObjectDef->objFieldList->append( el );
+	globalObjectDef->insertField( el->name, el );
 }
 
 void ParseData::initGlobalFunctions()

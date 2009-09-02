@@ -913,7 +913,6 @@ struct ParseData
 	GeneratesType generatesType;
 	bool generatesIgnore;
 	bool insideRegion;
-	String tokenDefName;
 
 	StringMap literalStrings;
 
@@ -923,8 +922,7 @@ struct ParseData
 	ObjectDef *rootLocalFrame;
 
 	long nextLabelId;
-	ObjFieldMap *objFieldMap;
-	ObjFieldList *objFieldList;
+	ObjectDef *objectDef;
 
 	bool revertOn;
 
