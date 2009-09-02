@@ -372,14 +372,14 @@ bool test_false( Program *prg, Tree *tree )
 	return flse;
 }
 
-void print_str( Head *str )
+void print_str( ostream &out, Head *str )
 {
-	cout.write( (char*)(str->data), str->length );
+	out.write( (char*)(str->data), str->length );
 }
 
 /* Note that this function causes recursion, thought it is not a big
  * deal since the recursion it is only caused by nonterminals that are ignored. */
-void print_ignore_list( Tree **sp, Program *prg, Tree *tree )
+void print_ignore_list( ostream &out, Tree **sp, Program *prg, Tree *tree )
 {
 	Kid *ignore = tree_ignore( prg, tree );
 
@@ -393,7 +393,7 @@ void print_ignore_list( Tree **sp, Program *prg, Tree *tree )
 	/* Pop them off and print. */
 	while ( vm_ptop() != root ) {
 		ignore = (Kid*) vm_pop();
-		print_tree( cout, sp, prg, ignore->tree );
+		print_tree( out, sp, prg, ignore->tree );
 	}
 }
 
@@ -408,7 +408,7 @@ rec_call:
 	 * be associated with terminals and nonterminals. */
 	if ( printIgnore && tree_ignore( prg, kid->tree ) != 0 ) {
 		/* Ignorelists are reversed. */
-		print_ignore_list( sp, prg, kid->tree );
+		print_ignore_list( out, sp, prg, kid->tree );
 		printIgnore = false;
 	}
 
@@ -427,7 +427,7 @@ rec_call:
 		else if ( kid->tree->id == LEL_ID_PTR )
 			out << '#' << (void*) ((Pointer*)kid->tree)->value;
 		else if ( kid->tree->id == LEL_ID_STR )
-			print_str( ((Str*)kid->tree)->value );
+			print_str( out, ((Str*)kid->tree)->value );
 		else if ( kid->tree->id == LEL_ID_STREAM )
 			out << '#' << (void*) ((Stream*)kid->tree)->file;
 		else if ( kid->tree->tokdata != 0 && 
