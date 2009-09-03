@@ -1287,7 +1287,7 @@ void iter_find_rev_repeat( Program *prg, Tree **&sp, TreeIter *iter, bool tryFir
 			}
 		}
 
-		return;
+		goto first;
 	}
 
 	while ( true ) {
@@ -1297,13 +1297,17 @@ void iter_find_rev_repeat( Program *prg, Tree **&sp, TreeIter *iter, bool tryFir
 		}
 		
 		if ( iter->ref.kid->next == 0 ) {
-			iter->ref.kid = iter->ref.next->kid->tree->child;
+			/* Go up one and then down. Remember we can't use iter->ref.next
+			 * because the chain may have been split, setting it null (to
+			 * prevent repeated walks up). */
+			Ref *ref = (Ref*)vm_ptop();
+			iter->ref.kid = ref->kid->tree->child;
 		}
 		else {
 			iter->ref.kid = (Kid*)vm_pop();
 			iter->ref.next = (Ref*)vm_pop();
 		}
-
+first:
 		if ( iter->ref.kid->tree->id == iter->searchId || anyTree )
 			return;
 	}
