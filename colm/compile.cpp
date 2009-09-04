@@ -2343,6 +2343,9 @@ void ParseData::compileRootBlock( )
 	code.append( IN_INIT_LOCALS );
 	code.appendHalf( 0 );
 
+	code.append( IN_LOAD_ARGV );
+	code.appendHalf( argv1Offset() );
+
 	block->compile( this, code );
 
 	/* We have the frame size now. Store it in frame init. */
@@ -2761,6 +2764,36 @@ void ParseData::addStderr()
 	globalObjectDef->insertField( el->name, el );
 }
 
+int ParseData::argv1Offset()
+{
+	for ( ObjFieldList::Iter field = *globalObjectDef->objFieldList;
+			field.lte(); field++ )
+	{
+		if ( field->value->isArgv1 ) {
+			globalObjectDef->referenceField( this, field->value );
+			return field->value->offset;
+		}
+	}
+	assert(false);
+}
+
+void ParseData::addArgv1()
+{
+	TypeRef *typeRef = new TypeRef( InputLoc(), uniqueTypeStr );
+
+	ObjField *el = new ObjField( InputLoc(), typeRef, "argv2" );
+
+	globalObjectDef->insertField( el->name, el );
+
+	typeRef = new TypeRef( InputLoc(), uniqueTypeStr );
+
+	el = new ObjField( InputLoc(), typeRef, "argv1" );
+	el->isArgv1 = true;
+	el->isConst = true;
+
+	globalObjectDef->insertField( el->name, el );
+}
+
 void ParseData::initGlobalFunctions()
 {
 	ObjMethod *method;
@@ -2772,6 +2805,7 @@ void ParseData::initGlobalFunctions()
 	addStdin();
 	addStdout();
 	addStderr();
+	addArgv1();
 }
 
 void ParseData::removeNonUnparsableRepls()

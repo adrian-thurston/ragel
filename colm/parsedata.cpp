@@ -1453,7 +1453,7 @@ void ParseData::initEmptyScanners()
 
 void ParseData::parsePatterns()
 {
-	Program program( false, runtimeData );
+	Program program( 0, 0, false, runtimeData );
 	FsmRun fsmRun( &program );
 	Tree **vm_stack = stack_alloc();
 	Tree **root = &vm_stack[VM_STACK_SIZE];

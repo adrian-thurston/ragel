@@ -738,9 +738,11 @@ struct ParseData
 	void initListFunctions( GenericType *gen );
 	void initVectorFunctions( GenericType *gen );
 
+	int argv1Offset();
 	void addStdin();
 	void addStdout();
 	void addStderr();
+	void addArgv1();
 	void initGlobalFunctions();
 	void makeDefaultIterators();
 	void addLengthField( ObjectDef *objDef, Code getLength );

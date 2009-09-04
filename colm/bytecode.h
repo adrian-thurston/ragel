@@ -229,6 +229,7 @@ typedef unsigned char uchar;
 #define IN_GET_STDIN             0xb9
 #define IN_GET_STDOUT            0xba
 #define IN_GET_STDERR            0xbb
+#define IN_LOAD_ARGV             0xcf
 
 
 /* Types */
@@ -669,7 +670,10 @@ struct Int;
 
 struct Program
 {
-	Program( bool ctxDepParsing, RuntimeData *rtd );
+	Program( int argc, char **argv, bool ctxDepParsing, RuntimeData *rtd );
+
+	int argc;
+	char **argv;
 
 	bool ctxDepParsing;
 	RuntimeData *rtd;

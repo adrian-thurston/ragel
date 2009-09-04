@@ -303,8 +303,9 @@ void user_iter_destroy( Tree **&sp, UserIter *uiter )
  * Execution environment
  */
 
-Program::Program( bool ctxDepParsing, RuntimeData *rtd )
+Program::Program( int argc, char **argv, bool ctxDepParsing, RuntimeData *rtd )
 :
+	argc(argc), argv(argv),
 	ctxDepParsing(ctxDepParsing),
 	rtd(rtd),
 	global(0),
@@ -3354,6 +3355,23 @@ again:
 
 			tree_upref( (Tree*)prg->stdinVal );
 			push( (Tree*)prg->stdinVal );
+			break;
+		}
+		case IN_LOAD_ARGV: {
+			Half field;
+			read_half( field );
+			#ifdef COLM_LOG_BYTECODE
+			if ( colm_log_bytecode ) {
+				cerr << "IN_LOAD_ARGV " << field << endl;
+			}
+			#endif
+
+			if ( prg->argc >= 2 ) {
+				Head *head = string_alloc_const( prg, prg->argv[1], strlen(prg->argv[1]) );
+				Tree *tree = construct_string( prg, head );
+				tree_upref( tree );
+				set_field( prg, prg->global, field, tree );
+			}
 			break;
 		}
 		case IN_STOP: {

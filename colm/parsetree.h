@@ -1211,6 +1211,7 @@ struct ObjField
 		isConst(false), 
 		isLhsEl(false), isRhsEl(false), 
 		refActive(false),
+		isArgv1(false),
 		dirtyTree(false),
 		inGetR( IN_HALT ),
 		inGetWC( IN_HALT ),
@@ -1231,6 +1232,7 @@ struct ObjField
 	bool isLhsEl;
 	bool isRhsEl;
 	bool refActive;
+	bool isArgv1;
 	
 	/* True if some aspect of the tree has possibly been written to. This does
 	 * not include attributes. This is here so we can optimize the storage of

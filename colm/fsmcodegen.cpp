@@ -1066,7 +1066,7 @@ void FsmCodeGen::writeCode()
 		"	colm_log_match = 1;\n"
 		"	colm_log_compile = 1;\n"
 		"	colm_log_conds = 1;\n"
-		"	Program program( true, &main_runtimeData );\n"
+		"	Program program( argc, argv, true, &main_runtimeData );\n"
 		"	program.run();\n"
 		"	return 0;\n"
 		"}\n"
