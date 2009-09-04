@@ -561,16 +561,39 @@ Kid *PdaRun::extractIgnore()
 
 void PdaRun::send( Kid *input )
 {
+	/* Need to preserve the layout under a tree:
+	 *    attributes, ignore tokens, grammar children. */
+
 	/* Pull the ignore tokens out and store in the token. */
 	Kid *ignore = extractIgnore();
 	if ( ignore != 0 ) {
-		Kid *child = input->tree->child;
-		input->tree->child = ignore;
-		while ( ignore->next != 0 )
-			ignore = ignore->next;
-		ignore->next = child;
+		if ( input->tree->child == 0 ) {
+			/* No children, set the ignore as the first child. */
+			input->tree->child = ignore;
+		}
+		else {
+			/* There are children. Find where the attribute list ends and the
+			 * grammatical children begin. */
+			LangElInfo *lelInfo = prg->rtd->lelInfo;
+			long objectLength = lelInfo[input->tree->id].objectLength;
+			Kid *attrEnd = 0, *childBegin = input->tree->child;
+			for ( long a = 0; a < objectLength; a++ ) {
+				attrEnd = childBegin;
+				childBegin = childBegin->next;
+			}
+
+			if ( attrEnd == 0 ) {
+				/* No attributes. concat ignore + the existing list. */
+				input->tree->child = kid_list_concat( ignore, input->tree->child );
+			}
+			else {
+				/* There are attributes. concat child, ignore, childBegin. */
+				attrEnd->next = 0;
+				input->tree->child = kid_list_concat( input->tree->child, kid_list_concat( ignore, childBegin ) );
+			}
+		}
 	}
-		
+
 	parseToken( input );
 }
 
