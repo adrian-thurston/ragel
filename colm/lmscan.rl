@@ -58,14 +58,11 @@ ostream &Scanner::scan_error()
 	return cerr;
 }
 
-bool Scanner::recursiveInclude( char *inclFileName, char *inclSectionName )
+bool Scanner::recursiveInclude( const char *inclFileName )
 {
 	for ( IncludeStack::Iter si = includeStack; si.lte(); si++ ) {
-		if ( strcmp( si->fileName, inclFileName ) == 0 &&
-				strcmp( si->sectionName, inclSectionName ) == 0 )
-		{
+		if ( strcmp( si->fileName, inclFileName ) == 0 )
 			return true;
-		}
 	}
 	return false;	
 }
@@ -103,53 +100,55 @@ void Scanner::token( int type )
 
 	action handle_include
 	{
-		#if 0
-		char *inclSectionName = word;
-		char *inclFileName = 0;
+		String src( lit, lit_len );
+		String fileName;
+		bool unused;
 
-		/* Implement defaults for the input file and section name. */
-		if ( inclSectionName == 0 )
-			inclSectionName = parser->sectionName;
+		/* Need a location. */
+		InputLoc here;
+		here.fileName = fileName;
+		here.line = line;
+		here.col = column;
 
-		if ( lit != 0 ) 
-			inclFileName = prepareFileName( lit, lit_len );
-		else
-			inclFileName = fileName;
+		prepareLitString( fileName, unused, src, here );
+
+		if ( recursiveInclude( fileName ) )
+			scan_error() << "include: this is a recursive include operation" << endl;
 
 		/* Check for a recursive include structure. Add the current file/section
 		 * name then check if what we are including is already in the stack. */
-		includeStack.append( IncludeStackItem( fileName, parser->sectionName ) );
+		includeStack.append( IncludeStackItem( fileName ) );
 
-		if ( recursiveInclude( inclFileName, inclSectionName ) )
-			scan_error() << "include: this is a recursive include operation" << endl;
-		else {
-			/* Open the input file for reading. */
-			ifstream *inFile = new ifstream( inclFileName );
-			if ( ! inFile->is_open() ) {
-				scan_error() << "include: could not open " << 
-						inclFileName << " for reading" << endl;
-			}
-
-			Scanner scanner( inclFileName, *inFile, output, parser,
-					inclSectionName, includeDepth+1 );
-			scanner.do_scan( );
-			delete inFile;
+		/* Open the input file for reading. */
+		ifstream *inFile = new ifstream( fileName );
+		if ( ! inFile->is_open() ) {
+			scan_error() << "include: could not open " << 
+					fileName << " for reading" << endl;
 		}
+
+		Scanner scanner( fileName, *inFile, output, parser, includeDepth+1 );
+		scanner.scan();
+		delete inFile;
 
 		/* Remove the last element (len-1) */
 		includeStack.remove( -1 );
-		#endif
 	}
 
 	include_target = 
 		TK_Literal >clear_words @store_lit;
 
 	include_stmt =
-		( KW_Include include_target ';' ) @handle_include
+		( KW_Include include_target ) @handle_include
 		<>err incl_err <>eof incl_err;
 
 	action handle_token
 	{
+//	cout << Parser_lelNames[type] << " ";
+//	if ( start != 0 ) {
+//		cout.write( start, end-start );
+//	}
+//	cout << endl;
+
 		InputLoc loc;
 
 		#ifdef PRINT_TOKENS
@@ -395,6 +394,7 @@ void Scanner::endSection( )
 		'right' => { token( KW_Right ); };
 		'nonassoc' => { token( KW_Nonassoc ); };
 		'prec' => { token( KW_Prec ); };
+		'include' => {token( KW_Include ); };
 
 		# Identifiers.
 		ident => { token( TK_Word, ts, te ); } ;
@@ -461,7 +461,7 @@ void Scanner::endSection( )
 
 %% write data;
 
-void Scanner::do_scan()
+void Scanner::scan()
 {
 	int bufsize = 8;
 	char *buf = new char[bufsize];
@@ -537,15 +537,13 @@ void Scanner::do_scan()
 		}
 	}
 	delete[] buf;
+}
 
+void Scanner::eof()
+{
 	InputLoc loc;
 	loc.fileName = "<EOF>";
 	loc.line = line;
 	loc.col = 1;
 	parser->token( loc, Parser_tk_eof, 0, 0 );
-}
-
-void scan( char *fileName, istream &input, ostream &output )
-{
-	Scanner scanner( fileName, input, output, 0, 0, 0 );
 }

@@ -46,46 +46,33 @@ extern char *Parser_lelNames[];
  * is used to detect and recursive include structure. */
 struct IncludeStackItem
 {
-	IncludeStackItem( char *fileName, char *sectionName )
-		: fileName(fileName), sectionName(sectionName) {}
+	IncludeStackItem( const char *fileName )
+		: fileName(fileName) {}
 
-	char *fileName;
-	char *sectionName;
+	const char *fileName;
 };
 
 typedef Vector<IncludeStackItem> IncludeStack;
 
 struct Scanner
 {
-	Scanner( const char *fileName, istream &input, ostream &output,
-			Parser *inclToParser, char *inclSectionTarg,
-			int includeDepth )
+	Scanner( const char *fileName, istream &input, ostream &output, Parser *includeToParser, int includeDepth )
 	: 
 		fileName(fileName), input(input), output(output),
-		inclToParser(inclToParser),
-		inclSectionTarg(inclSectionTarg),
 		includeDepth(includeDepth),
 		line(1), column(1), lastnl(0), 
 		parserExistsError(false),
 		whitespaceOn(true)
 	{
-		parser = new Parser( fileName, "machine", InputLoc() );
-		parser->init();
+		if ( includeToParser != 0 )
+			parser = includeToParser;
+		else {
+			parser = new Parser( fileName, "machine", InputLoc() );
+			parser->init();
+		}
 	}
 
-	bool recursiveInclude( char *inclFileName, char *inclSectionName );
-
-	#if 0
-	char *prepareFileName( char *fileName, int len )
-	{
-		bool caseInsensitive;
-		Token tokenFnStr, tokenRes;
-		tokenFnStr.data = fileName;
-		tokenFnStr.length = len;
-		tokenFnStr.prepareLitString( tokenRes, caseInsensitive );
-		return tokenRes.data;
-	}
-	#endif
+	bool recursiveInclude( const char *inclFileName );
 
 	void sectionParseInit();
 	void token( int type, char *start, char *end );
@@ -93,14 +80,13 @@ struct Scanner
 	void token( int type );
 	void updateCol();
 	void endSection();
-	void do_scan();
+	void scan();
+	void eof();
 	ostream &scan_error();
 
 	const char *fileName;
 	istream &input;
 	ostream &output;
-	Parser *inclToParser;
-	char *inclSectionTarg;
 	int includeDepth;
 
 	int cs;

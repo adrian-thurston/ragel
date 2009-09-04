@@ -419,8 +419,9 @@ int main(int argc, const char **argv)
 	if ( gblErrorCount > 0 )
 		exit(1);
 
-	Scanner scanner( inputFileName, *inStream, cout, 0, 0, 0 );
-	scanner.do_scan();
+	Scanner scanner( inputFileName, *inStream, cout, 0, 0 );
+	scanner.scan();
+	scanner.eof();
 
 	/* Parsing complete, check for errors.. */
 	if ( gblErrorCount > 0 )
