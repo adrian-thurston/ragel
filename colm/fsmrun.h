@@ -104,7 +104,6 @@ struct FsmRun
 	void streamPush( const char *data, long length );
 	void undoStreamPush( long length );
 
-	Head *extractMatch();
 	Head *extractPrefix( PdaRun *parser, long len );
 
 	void execute();
@@ -126,5 +125,6 @@ struct FsmRun
 
 void send_queued_tokens( FsmRun *fsmRun, PdaRun *parser );
 void send_handle_error( FsmRun *fsmRun, PdaRun *parser, Kid *input );
+Head *extract_match( FsmRun *fsmRun );
 
 #endif

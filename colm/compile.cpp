@@ -1161,10 +1161,7 @@ UniqueType *LangTerm::evaluateConstruct( ParseData *pd, CodeVect &code ) const
 	/* If the type is a token and the replacement contains just a string then
 	 * construct a token using the text of the string. Otherwise do a normal
 	 * tree construct. */
-	if ( constructTermFromString( pd ) )
-		return evaluateTermConstruct( pd, code );
-	else
-		return evaluateTreeConstruct( pd, code );
+	return evaluateTreeConstruct( pd, code );
 }
 
 UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) const

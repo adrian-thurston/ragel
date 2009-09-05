@@ -641,7 +641,7 @@ void exec_gen( FsmRun *fsmRun, PdaRun *parser, long id )
 	#endif
 
 	/* Make the token data. */
-	Head *tokdata = fsmRun->extractMatch();
+	Head *tokdata = extract_match( fsmRun );
 
 	/* Note that we don't update the position now. It is done when the token
 	 * data is pulled from the stream. */
@@ -661,7 +661,7 @@ void send_ignore( FsmRun *fsmRun, PdaRun *parser, long id )
 	#endif
 
 	/* Make the ignore string. */
-	Head *ignoreStr = fsmRun->extractMatch();
+	Head *ignoreStr = extract_match( fsmRun );
 	update_position( fsmRun, fsmRun->tokstart, ignoreStr->length );
 	
 	Tree *tree = fsmRun->prg->treePool.allocate();
@@ -673,16 +673,16 @@ void send_ignore( FsmRun *fsmRun, PdaRun *parser, long id )
 	parser->ignore( tree );
 }
 
-Head *FsmRun::extractMatch()
+Head *extract_match( FsmRun *fsmRun )
 {
-	long length = p - tokstart;
-	return string_alloc_const( prg, tokstart, length );
+	long length = fsmRun->p - fsmRun->tokstart;
+	return string_alloc_const( fsmRun->prg, fsmRun->tokstart, length );
 }
 
 void send_token( FsmRun *fsmRun, PdaRun *parser, long id )
 {
 	/* Make the token data. */
-	Head *tokdata = fsmRun->extractMatch();
+	Head *tokdata = extract_match( fsmRun );
 
 	#ifdef COLM_LOG_PARSE
 	if ( colm_log_parse ) {
