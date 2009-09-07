@@ -706,11 +706,12 @@ struct Program
 struct Execution
 {
 	Execution( Program *prg, CodeVect &reverseCode,
-			PdaRun *parser, Code *code, Tree *lhs,
+			FsmRun *fsmRun, PdaRun *parser, Code *code, Tree *lhs,
 			long genId, Head *matchText );
 
 	Program *prg;
 	PdaTables *pdaTables;
+	FsmRun *fsmRun;
 	PdaRun *parser;
 	Code *code;
 	Tree **frame;

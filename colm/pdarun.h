@@ -515,13 +515,12 @@ typedef Vector<Tree*> Bindings;
 
 struct PdaRun
 {
-	PdaRun( Tree **root, Program *prg, PdaTables *tables, int parserId,
-			FsmRun *scanner, long stopTarget, bool revertOn )
+	PdaRun( Program *prg, PdaTables *tables, int parserId,
+			long stopTarget, bool revertOn )
 	:
 		prg(prg),
 		tables(tables), 
 		parserId(parserId), 
-		fsmRun(scanner), 
 		stopParsing(false),
 		stopTarget(stopTarget),
 		queue(0),
@@ -543,8 +542,6 @@ struct PdaRun
 	Program *prg;
 	PdaTables *tables;
 	int parserId;
-
-	FsmRun *fsmRun;
 
 	long stackTopTarget();
 	void init();
@@ -576,10 +573,10 @@ struct PdaRun
 void clean_parser( Tree **root, PdaRun *pdaRun );
 long scan_token( FsmRun *fsmRun, PdaRun *pdaRun );
 void ignore( PdaRun *pdaRun, Tree *tree );
-void send( Tree **sp, PdaRun *pdaRun, Kid *input );
-void parse_token( Tree **sp, PdaRun *pdaRun, Kid *input );
-long undo_parse( Tree **sp, PdaRun *pdaRun, Tree *tree, CodeVect *rev );
-
+void send( Tree **sp, FsmRun *fsmRun, PdaRun *pdaRun, Kid *input );
+void parse_token( Tree **sp, FsmRun *fsmRun, PdaRun *pdaRun, Kid *input );
+long undo_parse( Tree **sp, FsmRun *fsmRun, PdaRun *pdaRun, Tree *tree, CodeVect *rev );
 void xml_print_list( RuntimeData *runtimeData, Kid *lel, int depth );
+ostream &parse_error( FsmRun *fsmRun, PdaRun *pdaRun, int tokId, Tree *tree );
 
 #endif /* _PDARUN_H */

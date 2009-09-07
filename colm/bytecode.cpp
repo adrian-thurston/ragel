@@ -135,7 +135,7 @@ Tree *call_parser( Tree **&sp, Program *prg, Stream *stream,
 		long parserId, long stopId, CodeVect *&cv, bool revertOn )
 {
 	PdaTables *tables = prg->rtd->pdaTables;
-	PdaRun parser( sp, prg, tables, parserId, stream->fsmRun, stopId, revertOn );
+	PdaRun parser( prg, tables, parserId, stopId, revertOn );
 	parse( sp, stream->fsmRun, &parser );
 	commit_full( sp, &parser, 0 );
 	Tree *tree = get_parsed_root( &parser, stopId > 0 );
@@ -171,7 +171,7 @@ Tree *call_tree_parser( Tree **&sp, Program *prg, Tree *input,
 	FsmRun fsmRun( prg );
 	fsmRun.attachInputStream( &inputStream );
 
-	PdaRun parser( sp, prg, tables, parserId, &fsmRun, stopId, revertOn );
+	PdaRun parser( prg, tables, parserId, stopId, revertOn );
 	parse( sp, &fsmRun, &parser );
 	commit_full( sp, &parser, 0 );
 	Tree *tree = get_parsed_root( &parser, stopId > 0 );
@@ -196,8 +196,8 @@ void undo_parse( Tree **&sp, Program *prg, Stream *stream,
 		long parserId, Tree *tree, CodeVect *rev )
 {
 	PdaTables *tables = prg->rtd->pdaTables;
-	PdaRun parser( sp, prg, tables, parserId, stream->fsmRun, 0, false );
-	undo_parse( sp, &parser, tree, rev );
+	PdaRun parser( prg, tables, parserId, 0, false );
+	undo_parse( sp, stream->fsmRun, &parser, tree, rev );
 }
 
 Tree *stream_pull( Program *prg, PdaRun *parser, Stream *stream, Tree *length )
@@ -443,7 +443,7 @@ void Program::run()
 
 	if ( rtd->rootCodeLen > 0 ) {
 		CodeVect reverseCode;
-		Execution execution( this, reverseCode, 0, rtd->rootCode, 0, 0, 0 );
+		Execution execution( this, reverseCode, 0, 0, rtd->rootCode, 0, 0, 0 );
 		execution.execute( root );
 
 		/* Pull out the reverse code and free it. */
@@ -463,9 +463,11 @@ void Program::run()
 }
 
 Execution::Execution( Program *prg, CodeVect &reverseCode,
-		PdaRun *parser, Code *code, Tree *lhs, long genId, Head *matchText )
+		FsmRun *fsmRun, PdaRun *parser, Code *code, Tree *lhs,
+		long genId, Head *matchText )
 : 
 	prg(prg), 
+	fsmRun(fsmRun),
 	parser(parser), 
 	code(code), 
 	frame(0), iframe(0),
@@ -1000,7 +1002,7 @@ again:
 			/* If there are captures (this is a translate block) then copy them into
 			 * the local frame now. */
 			LangElInfo *lelInfo = prg->rtd->lelInfo;
-			char **mark = parser->fsmRun->mark;
+			char **mark = fsmRun->mark;
 
 			for ( int i = 0; i < lelInfo[genId].numCaptureAttr; i++ ) {
 				CaptureAttr *ca = &prg->rtd->captureAttr[lelInfo[genId].captureAttr + i];

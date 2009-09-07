@@ -301,7 +301,7 @@ void commit_full( Tree **sp, PdaRun *parser, long causeReduce )
  * shift-reduce:  cannot be a retry
  */
 
-void parse_token( Tree **sp, PdaRun *pdaRun, Kid *input )
+void parse_token( Tree **sp, FsmRun *fsmRun, PdaRun *pdaRun, Kid *input )
 {
 	int pos, targState;
 	unsigned int *action;
@@ -463,7 +463,7 @@ again:
 
 			/* Execution environment for the reduction code. */
 			Execution execution( pdaRun->prg, pdaRun->reverseCode, 
-					pdaRun, fi->codeWV, redLel->tree, 0, 0 );
+					fsmRun, pdaRun, fi->codeWV, redLel->tree, 0, 0 );
 
 			/* Execute it. */
 			execution.execute( sp );
@@ -567,7 +567,7 @@ parseError:
 			if ( pt(input->tree)->causeReduce == 0 ) {
 				int next = pt(input->tree)->region + 1;
 
-				queue_back( sp, pdaRun->fsmRun, pdaRun, input );
+				queue_back( sp, fsmRun, pdaRun, input );
 				input = 0;
 				if ( pdaRun->tables->tokenRegions[next] != 0 ) {
 					#ifdef COLM_LOG_PARSE
@@ -629,7 +629,7 @@ parseError:
 
 			/* Check for an execution environment. */
 			if ( undoLel->tree->flags & AF_HAS_RCODE ) {
-				Execution execution( pdaRun->prg, pdaRun->reverseCode, pdaRun, 0, 0, 0, 0 );
+				Execution execution( pdaRun->prg, pdaRun->reverseCode, fsmRun, pdaRun, 0, 0, 0, 0 );
 
 				/* Do the reverse exeuction. */
 				execution.rexecute( sp, pdaRun->allReverseCode );
@@ -699,13 +699,13 @@ _out:
 	pdaRun->nextRegionInd = pdaRun->tables->tokenRegionInds[pdaRun->cs];
 }
 
-ostream &PdaRun::parse_error( int tokId, Tree *tree )
+ostream &parse_error( FsmRun *fsmRun, PdaRun *pdaRun, int tokId, Tree *tree )
 {
 	cerr << "error:" << fsmRun->inputStream->line << ": at token ";
 	if ( tokId < 128 )
-		cerr << "\"" << tables->rtd->lelInfo[tokId].name << "\"";
+		cerr << "\"" << pdaRun->tables->rtd->lelInfo[tokId].name << "\"";
 	else 
-		cerr << tables->rtd->lelInfo[tokId].name;
+		cerr << pdaRun->tables->rtd->lelInfo[tokId].name;
 	if ( string_length( tree->tokdata ) > 0 ) {
 		cerr << " with data \"";
 		cerr.write( string_data( tree->tokdata ), 

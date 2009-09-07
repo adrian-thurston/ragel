@@ -1467,8 +1467,8 @@ void ParseData::parsePatterns()
 		InputStreamRepl in( repl );
 		fsmRun.attachInputStream( &in );
 
-		repl->pdaRun = new PdaRun( root, &program,
-				pdaTables, repl->langEl->parserId, &fsmRun, 0, false );
+		repl->pdaRun = new PdaRun( &program,
+				pdaTables, repl->langEl->parserId, 0, false );
 		parse( root, &fsmRun, repl->pdaRun );
 
 			//#ifdef COLM_LOG_COMPILE
@@ -1487,8 +1487,8 @@ void ParseData::parsePatterns()
 		InputStreamPattern in( pat );
 		fsmRun.attachInputStream( &in );
 
-		pat->pdaRun = new PdaRun( root, &program,
-				pdaTables, pat->langEl->parserId, &fsmRun, 0, false );
+		pat->pdaRun = new PdaRun( &program,
+				pdaTables, pat->langEl->parserId, 0, false );
 		parse( root, &fsmRun, pat->pdaRun );
 
 			//#ifdef COLM_LOG_COMPILE

@@ -271,7 +271,7 @@ void send_back_ignore( Tree **sp, FsmRun *fsmRun, PdaRun *pdaRun, Kid *ignore )
 		/* Check for reverse code. */
 		if ( ignore->tree->flags & AF_HAS_RCODE ) {
 			Execution execution( fsmRun->prg, pdaRun->reverseCode, 
-					pdaRun, 0, 0, 0, 0 );
+					fsmRun, pdaRun, 0, 0, 0, 0 );
 
 			/* Do the reverse exeuction. */
 			execution.rexecute( sp, pdaRun->allReverseCode );
@@ -314,7 +314,7 @@ void send_back( Tree **sp, FsmRun *fsmRun, PdaRun *parser, Kid *input )
 	/* Check for reverse code. */
 	if ( input->tree->flags & AF_HAS_RCODE ) {
 		Execution execution( fsmRun->prg, parser->reverseCode, 
-				parser, 0, 0, 0, 0 );
+				fsmRun, parser, 0, 0, 0, 0 );
 
 		/* Do the reverse exeuction. */
 		execution.rexecute( sp, parser->allReverseCode );
@@ -488,10 +488,10 @@ void send_named_lang_el( Tree **sp, FsmRun *fsmRun, PdaRun *parser )
 	send_handle_error( sp, fsmRun, parser, input );
 }
 
-void execute_generation_action( Tree **sp, Program *prg, PdaRun *pdaRun, Code *code, long id, Head *tokdata )
+void execute_generation_action( Tree **sp, Program *prg, FsmRun *fsmRun, PdaRun *pdaRun, Code *code, long id, Head *tokdata )
 {
 	/* Execute the translation. */
-	Execution execution( prg, pdaRun->reverseCode, pdaRun, code, 0, id, tokdata );
+	Execution execution( prg, pdaRun->reverseCode, fsmRun, pdaRun, code, 0, id, tokdata );
 	execution.execute( sp );
 
 	/* If there is revese code but nothing generated we need a noToken. */
@@ -529,7 +529,7 @@ void generation_action( Tree **sp, FsmRun *fsmRun, PdaRun *pdaRun, int id, Head 
 			pdaRun->tables->rtd->lelInfo[id].frameId].codeWV;
 
 	/* Execute the action and process the queue. */
-	execute_generation_action( sp, fsmRun->prg, pdaRun, code, id, tokdata );
+	execute_generation_action( sp, fsmRun->prg, fsmRun, pdaRun, code, id, tokdata );
 
 	/* Finished with the match text. */
 	string_free( fsmRun->prg, tokdata );
@@ -546,10 +546,10 @@ Kid *extract_ignore( PdaRun *pdaRun )
 }
 
 /* Send back the accumulated ignore tokens. */
-void send_back_queued_ignore( Tree **sp, PdaRun *pdaRun )
+void send_back_queued_ignore( Tree **sp, FsmRun *fsmRun, PdaRun *pdaRun )
 {
 	Kid *ignore = extract_ignore( pdaRun );
-	send_back_ignore( sp, pdaRun->fsmRun, pdaRun, ignore );
+	send_back_ignore( sp, fsmRun, pdaRun, ignore );
 	while ( ignore != 0 ) {
 		Kid *next = ignore->next;
 		tree_downref( pdaRun->prg, sp, ignore->tree );
@@ -558,7 +558,7 @@ void send_back_queued_ignore( Tree **sp, PdaRun *pdaRun )
 	}
 }
 
-void send( Tree **sp, PdaRun *pdaRun, Kid *input )
+void send( Tree **sp, FsmRun *fsmRun, PdaRun *pdaRun, Kid *input )
 {
 	/* Need to preserve the layout under a tree:
 	 *    attributes, ignore tokens, grammar children. */
@@ -593,7 +593,7 @@ void send( Tree **sp, PdaRun *pdaRun, Kid *input )
 		}
 	}
 
-	parse_token( sp, pdaRun, input );
+	parse_token( sp, fsmRun, pdaRun, input );
 }
 
 void send_handle_error( Tree **sp, FsmRun *fsmRun, PdaRun *pdaRun, Kid *input )
@@ -601,12 +601,12 @@ void send_handle_error( Tree **sp, FsmRun *fsmRun, PdaRun *pdaRun, Kid *input )
 	long id = input->tree->id;
 
 	/* Send the token to the parser. */
-	send( sp, pdaRun, input );
+	send( sp, fsmRun, pdaRun, input );
 		
 	/* Check the result. */
 	if ( pdaRun->errCount > 0 ) {
 		/* Error occured in the top-level parser. */
-		pdaRun->parse_error(id, input->tree) << "parse error" << endp;
+		parse_error(fsmRun, pdaRun, id, input->tree) << "parse error" << endp;
 	}
 	else {
 		if ( pdaRun->isParserStopFinished() ) {
@@ -756,16 +756,16 @@ void send_eof( Tree **sp, FsmRun *fsmRun, PdaRun *pdaRun )
 		Code *code = pdaRun->tables->rtd->frameInfo[frameId].codeWV;
 
 		/* Execute the action and process the queue. */
-		execute_generation_action( sp, fsmRun->prg, pdaRun, code, input->tree->id, 0 );
+		execute_generation_action( sp, fsmRun->prg, fsmRun, pdaRun, code, input->tree->id, 0 );
 
 		/* Send the generated tokens. */
 		send_queued_tokens( sp, fsmRun, pdaRun );
 	}
 
-	send( sp, pdaRun, input );
+	send( sp, fsmRun, pdaRun, input );
 
 	if ( pdaRun->errCount > 0 ) {
-		pdaRun->parse_error( input->tree->id, input->tree ) << 
+		parse_error( fsmRun, pdaRun, input->tree->id, input->tree ) << 
 				"parse error" << endp;
 	}
 }
@@ -785,7 +785,7 @@ void FsmRun::attachInputStream( InputStream *in )
 	inputStream->position = 0;
 }
 
-long undo_parse( Tree **sp, PdaRun *pdaRun, Tree *tree, CodeVect *rev )
+long undo_parse( Tree **sp, FsmRun *fsmRun, PdaRun *pdaRun, Tree *tree, CodeVect *rev )
 {
 	/* PDA must be init first to set next region. */
 	pdaRun->init();
@@ -799,7 +799,7 @@ long undo_parse( Tree **sp, PdaRun *pdaRun, Tree *tree, CodeVect *rev )
 //	PdaRun *prevParser = fsmRun->parser;
 //	fsmRun->parser = this;
 
-	parse_token( sp, pdaRun, 0 );
+	parse_token( sp, fsmRun, pdaRun, 0 );
 
 //	fsmRun->parser = prevParser;
 
@@ -814,9 +814,9 @@ long undo_parse( Tree **sp, PdaRun *pdaRun, Tree *tree, CodeVect *rev )
 #define SCAN_LANG_EL  -2
 #define SCAN_EOF      -1
 
-void scanner_error( Tree **sp, FsmRun *fsmRun, PdaRun *parser )
+void scanner_error( Tree **sp, FsmRun *fsmRun, PdaRun *pdaRun )
 {
-	if ( parser->getNextRegion( 1 ) != 0 ) {
+	if ( pdaRun->getNextRegion( 1 ) != 0 ) {
 		#ifdef COLM_LOG_PARSE
 		if ( colm_log_parse ) {
 			cerr << "scanner failed, trying next region" << endl;
@@ -826,10 +826,10 @@ void scanner_error( Tree **sp, FsmRun *fsmRun, PdaRun *parser )
 		/* May have accumulated ignore tokens from a previous region.
 		 * need to rescan them since we won't be sending tokens from
 		 * this region. */
-		send_back_queued_ignore( sp, parser );
-		parser->nextRegionInd += 1;
+		send_back_queued_ignore( sp, fsmRun, pdaRun );
+		pdaRun->nextRegionInd += 1;
 	}
-	else if ( parser->numRetry > 0 ) {
+	else if ( pdaRun->numRetry > 0 ) {
 		/* Invoke the parser's error handling. */
 		#ifdef COLM_LOG_PARSE
 		if ( colm_log_parse ) {
@@ -837,10 +837,10 @@ void scanner_error( Tree **sp, FsmRun *fsmRun, PdaRun *parser )
 		}
 		#endif
 
-		send_back_queued_ignore( sp, parser );
-		parse_token( sp, parser, 0 );
+		send_back_queued_ignore( sp, fsmRun, pdaRun );
+		parse_token( sp, fsmRun, pdaRun, 0 );
 
-		if ( parser->errCount > 0 ) {
+		if ( pdaRun->errCount > 0 ) {
 			/* Error occured in the top-level parser. */
 			cerr << "PARSE ERROR" << endp;
 		}
@@ -861,8 +861,6 @@ void parse( Tree **sp, FsmRun *fsmRun, PdaRun *pdaRun )
 		/* Pull the current scanner from the parser. This can change during
 		 * parsing due to stream pushes, usually for the purpose of includes.
 		 * */
-		fsmRun = pdaRun->fsmRun;
-
 		int tokenId = scan_token( fsmRun, pdaRun );
 
 		/* Check for EOF. */
