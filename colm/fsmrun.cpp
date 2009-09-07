@@ -384,7 +384,7 @@ void set_AF_GROUP_MEM( PdaRun *parser )
 	}
 }
 
-void send_queued_tokens( FsmRun *fsmRun, PdaRun *parser )
+void send_queued_tokens( Tree **sp, FsmRun *fsmRun, PdaRun *parser )
 {
 	LangElInfo *lelInfo = fsmRun->prg->rtd->lelInfo;
 
@@ -403,7 +403,7 @@ void send_queued_tokens( FsmRun *fsmRun, PdaRun *parser )
 			}
 			#endif
 			
-			parser->ignore( send->tree );
+			ignore( parser, send->tree );
 			fsmRun->prg->kidPool.free( send );
 		}
 		else {
@@ -414,7 +414,7 @@ void send_queued_tokens( FsmRun *fsmRun, PdaRun *parser )
 			}
 			#endif
 
-			send_handle_error( fsmRun, parser, send );
+			send_handle_error( sp, fsmRun, parser, send );
 		}
 	}
 }
@@ -463,7 +463,7 @@ Kid *make_token( FsmRun *fsmRun, PdaRun *parser, int id, Head *tokdata, bool
 	return input;
 }
 
-void send_named_lang_el( FsmRun *fsmRun, PdaRun *parser )
+void send_named_lang_el( Tree **sp, FsmRun *fsmRun, PdaRun *parser )
 {
 	/* All three set by getLangEl. */
 	long bindId;
@@ -486,28 +486,28 @@ void send_named_lang_el( FsmRun *fsmRun, PdaRun *parser )
 		tokdata = string_alloc_new( fsmRun->prg, data, length );
 
 	Kid *input = make_token( fsmRun, parser, klangEl->id, tokdata, true, bindId );
-	send_handle_error( fsmRun, parser, input );
+	send_handle_error( sp, fsmRun, parser, input );
 }
 
-void execute_generation_action( Program *prg, PdaRun *parser, Code *code, long id, Head *tokdata )
+void execute_generation_action( Tree **sp, Program *prg, PdaRun *pdaRun, Code *code, long id, Head *tokdata )
 {
 	/* Execute the translation. */
-	Execution execution( prg, parser->reverseCode, parser, code, 0, id, tokdata );
-	execution.execute( parser->root );
+	Execution execution( prg, pdaRun->reverseCode, pdaRun, code, 0, id, tokdata );
+	execution.execute( sp );
 
 	/* If there is revese code but nothing generated we need a noToken. */
-	add_notoken( prg, parser );
+	add_notoken( prg, pdaRun );
 
 	/* If there is reverse code then add_notoken will guarantee that the
 	 * queue is not empty. Pull the reverse code out and store in the
 	 * token. */
-	Tree *tree = parser->queue->tree;
-	bool hasrcode = make_reverse_code( parser->allReverseCode, parser->reverseCode );
+	Tree *tree = pdaRun->queue->tree;
+	bool hasrcode = make_reverse_code( pdaRun->allReverseCode, pdaRun->reverseCode );
 	if ( hasrcode )
 		tree->flags |= AF_HAS_RCODE;
 
 	/* Mark generated tokens as belonging to a group. */
-	set_AF_GROUP_MEM( parser );
+	set_AF_GROUP_MEM( pdaRun );
 }
 
 /* 
@@ -515,57 +515,57 @@ void execute_generation_action( Program *prg, PdaRun *parser, Code *code, long i
  *  -invoke failure (the backtracker)
  */
 
-void generation_action( FsmRun *fsmRun, PdaRun *parser, int id, Head *tokdata,
+void generation_action( Tree **sp, FsmRun *fsmRun, PdaRun *pdaRun, int id, Head *tokdata,
 		bool namedLangEl, int bindId )
 {
 	#ifdef COLM_LOG_PARSE
 	if ( colm_log_parse ) {
 		cerr << "generation action: " << 
-				parser->tables->rtd->lelInfo[id].name << endl;
+				pdaRun->tables->rtd->lelInfo[id].name << endl;
 	}
 	#endif
 
 	/* Find the code. */
-	Code *code = parser->tables->rtd->frameInfo[
-			parser->tables->rtd->lelInfo[id].frameId].codeWV;
+	Code *code = pdaRun->tables->rtd->frameInfo[
+			pdaRun->tables->rtd->lelInfo[id].frameId].codeWV;
 
 	/* Execute the action and process the queue. */
-	execute_generation_action( fsmRun->prg, parser, code, id, tokdata );
+	execute_generation_action( sp, fsmRun->prg, pdaRun, code, id, tokdata );
 
 	/* Finished with the match text. */
 	string_free( fsmRun->prg, tokdata );
 
 	/* Send the queued tokens. */
-	send_queued_tokens( fsmRun, parser );
+	send_queued_tokens( sp, fsmRun, pdaRun );
+}
+
+Kid *extract_ignore( PdaRun *pdaRun )
+{
+	Kid *ignore = pdaRun->accumIgnore;
+	pdaRun->accumIgnore = 0;
+	return ignore;
 }
 
 /* Send back the accumulated ignore tokens. */
-void send_back_queued_ignore( PdaRun *parser )
+void send_back_queued_ignore( Tree **sp, PdaRun *pdaRun )
 {
-	Kid *ignore = parser->extractIgnore();
-	parser->fsmRun->sendBackIgnore( parser, ignore );
+	Kid *ignore = extract_ignore( pdaRun );
+	pdaRun->fsmRun->sendBackIgnore( pdaRun, ignore );
 	while ( ignore != 0 ) {
 		Kid *next = ignore->next;
-		tree_downref( parser->prg, parser->root, ignore->tree );
-		parser->prg->kidPool.free( ignore );
+		tree_downref( pdaRun->prg, sp, ignore->tree );
+		pdaRun->prg->kidPool.free( ignore );
 		ignore = next;
 	}
 }
 
-Kid *PdaRun::extractIgnore()
-{
-	Kid *ignore = accumIgnore;
-	accumIgnore = 0;
-	return ignore;
-}
-
-void PdaRun::send( Kid *input )
+void send( PdaRun *pdaRun, Kid *input )
 {
 	/* Need to preserve the layout under a tree:
 	 *    attributes, ignore tokens, grammar children. */
 
 	/* Pull the ignore tokens out and store in the token. */
-	Kid *ignore = extractIgnore();
+	Kid *ignore = extract_ignore( pdaRun );
 	if ( ignore != 0 ) {
 		if ( input->tree->child == 0 ) {
 			/* No children, set the ignore as the first child. */
@@ -574,7 +574,7 @@ void PdaRun::send( Kid *input )
 		else {
 			/* There are children. Find where the attribute list ends and the
 			 * grammatical children begin. */
-			LangElInfo *lelInfo = prg->rtd->lelInfo;
+			LangElInfo *lelInfo = pdaRun->prg->rtd->lelInfo;
 			long objectLength = lelInfo[input->tree->id].objectLength;
 			Kid *attrEnd = 0, *childBegin = input->tree->child;
 			for ( long a = 0; a < objectLength; a++ ) {
@@ -594,49 +594,49 @@ void PdaRun::send( Kid *input )
 		}
 	}
 
-	parseToken( input );
+	parse_token( pdaRun, input );
 }
 
-void send_handle_error( FsmRun *fsmRun, PdaRun *parser, Kid *input )
+void send_handle_error( Tree **sp, FsmRun *fsmRun, PdaRun *pdaRun, Kid *input )
 {
 	long id = input->tree->id;
 
 	/* Send the token to the parser. */
-	parser->send( input );
+	send( pdaRun, input );
 		
 	/* Check the result. */
-	if ( parser->errCount > 0 ) {
+	if ( pdaRun->errCount > 0 ) {
 		/* Error occured in the top-level parser. */
-		parser->parse_error(id, input->tree) << "parse error" << endp;
+		pdaRun->parse_error(id, input->tree) << "parse error" << endp;
 	}
 	else {
-		if ( parser->isParserStopFinished() ) {
+		if ( pdaRun->isParserStopFinished() ) {
 			#ifdef COLM_LOG_PARSE
 			if ( colm_log_parse ) {
 				cerr << "stopping the parse" << endl;
 			}
 			#endif
-			parser->stopParsing = true;
+			pdaRun->stopParsing = true;
 		}
 	}
 }
 
-void PdaRun::ignore( Tree *tree )
+void ignore( PdaRun *pdaRun, Tree *tree )
 {
 	/* Add the ignore string to the head of the ignore list. */
-	Kid *ignore = prg->kidPool.allocate();
+	Kid *ignore = pdaRun->prg->kidPool.allocate();
 	ignore->tree = tree;
 
 	/* Prepend it to the list of ignore tokens. */
-	ignore->next = accumIgnore;
-	accumIgnore = ignore;
+	ignore->next = pdaRun->accumIgnore;
+	pdaRun->accumIgnore = ignore;
 }
 
-void exec_gen( FsmRun *fsmRun, PdaRun *parser, long id )
+void exec_gen( Tree **sp, FsmRun *fsmRun, PdaRun *pdaRun, long id )
 {
 	#ifdef COLM_LOG_PARSE
 	if ( colm_log_parse ) {
-		cerr << "token gen action: " << parser->tables->rtd->lelInfo[id].name << endl;
+		cerr << "token gen action: " << pdaRun->tables->rtd->lelInfo[id].name << endl;
 	}
 	#endif
 
@@ -649,14 +649,14 @@ void exec_gen( FsmRun *fsmRun, PdaRun *parser, long id )
 	fsmRun->p = fsmRun->tokstart;
 	fsmRun->tokstart = 0;
 
-	generation_action( fsmRun, parser, id, tokdata, false, 0 );
+	generation_action( sp, fsmRun, pdaRun, id, tokdata, false, 0 );
 }
 
-void send_ignore( FsmRun *fsmRun, PdaRun *parser, long id )
+void send_ignore( FsmRun *fsmRun, PdaRun *pdaRun, long id )
 {
 	#ifdef COLM_LOG_PARSE
 	if ( colm_log_parse ) {
-		cerr << "ignoring: " << parser->tables->rtd->lelInfo[id].name << endl;
+		cerr << "ignoring: " << pdaRun->tables->rtd->lelInfo[id].name << endl;
 	}
 	#endif
 
@@ -669,8 +669,8 @@ void send_ignore( FsmRun *fsmRun, PdaRun *parser, long id )
 	tree->id = id;
 	tree->tokdata = ignoreStr;
 
-	/* Send it to the parser. */
-	parser->ignore( tree );
+	/* Send it to the pdaRun. */
+	ignore( pdaRun, tree );
 }
 
 Head *extract_match( FsmRun *fsmRun )
@@ -679,7 +679,7 @@ Head *extract_match( FsmRun *fsmRun )
 	return string_alloc_const( fsmRun->prg, fsmRun->tokstart, length );
 }
 
-void send_token( FsmRun *fsmRun, PdaRun *parser, long id )
+void send_token( Tree **sp, FsmRun *fsmRun, PdaRun *parser, long id )
 {
 	/* Make the token data. */
 	Head *tokdata = extract_match( fsmRun );
@@ -695,7 +695,7 @@ void send_token( FsmRun *fsmRun, PdaRun *parser, long id )
 	update_position( fsmRun, fsmRun->tokstart, tokdata->length );
 
 	Kid *input = make_token( fsmRun, parser, id, tokdata, false, 0 );
-	send_handle_error( fsmRun, parser, input );
+	send_handle_error( sp, fsmRun, parser, input );
 }
 
 /* Load up a token, starting from tokstart if it is set. If not set then
@@ -729,7 +729,7 @@ Head *FsmRun::extractPrefix( PdaRun *parser, long length )
 	return tokdata;
 }
 
-void send_eof( FsmRun *fsmRun, PdaRun *parser )
+void send_eof( Tree **sp, FsmRun *fsmRun, PdaRun *pdaRun )
 {
 	#ifdef COLM_LOG_PARSE
 	if ( colm_log_parse ) {
@@ -742,10 +742,10 @@ void send_eof( FsmRun *fsmRun, PdaRun *parser )
 	input->tree->flags |= AF_PARSE_TREE;
 
 	input->tree->refs = 1;
-	input->tree->id = parser->tables->rtd->eofLelIds[parser->parserId];
+	input->tree->id = pdaRun->tables->rtd->eofLelIds[pdaRun->parserId];
 
 	bool ctxDepParsing = fsmRun->prg->ctxDepParsing;
-	long frameId = parser->tables->rtd->regionInfo[fsmRun->region].eofFrameId;
+	long frameId = pdaRun->tables->rtd->regionInfo[fsmRun->region].eofFrameId;
 	if ( ctxDepParsing && frameId >= 0 ) {
 		#ifdef COLM_LOG_PARSE
 		if ( colm_log_parse ) {
@@ -754,19 +754,19 @@ void send_eof( FsmRun *fsmRun, PdaRun *parser )
 		#endif
 
 		/* Get the code for the pre-eof block. */
-		Code *code = parser->tables->rtd->frameInfo[frameId].codeWV;
+		Code *code = pdaRun->tables->rtd->frameInfo[frameId].codeWV;
 
 		/* Execute the action and process the queue. */
-		execute_generation_action( fsmRun->prg, parser, code, input->tree->id, 0 );
+		execute_generation_action( sp, fsmRun->prg, pdaRun, code, input->tree->id, 0 );
 
 		/* Send the generated tokens. */
-		send_queued_tokens( fsmRun, parser );
+		send_queued_tokens( sp, fsmRun, pdaRun );
 	}
 
-	parser->send( input );
+	send( pdaRun, input );
 
-	if ( parser->errCount > 0 ) {
-		parser->parse_error( input->tree->id, input->tree ) << 
+	if ( pdaRun->errCount > 0 ) {
+		pdaRun->parse_error( input->tree->id, input->tree ) << 
 				"parse error" << endp;
 	}
 }
@@ -800,7 +800,7 @@ long PdaRun::undoParse( Tree *tree, CodeVect *rev )
 //	PdaRun *prevParser = fsmRun->parser;
 //	fsmRun->parser = this;
 
-	parseToken( 0 );
+	parse_token( this, 0 );
 
 //	fsmRun->parser = prevParser;
 
@@ -815,7 +815,7 @@ long PdaRun::undoParse( Tree *tree, CodeVect *rev )
 #define SCAN_LANG_EL  -2
 #define SCAN_EOF      -1
 
-void scanner_error( FsmRun *fsmRun, PdaRun *parser )
+void scanner_error( Tree **sp, FsmRun *fsmRun, PdaRun *parser )
 {
 	if ( parser->getNextRegion( 1 ) != 0 ) {
 		#ifdef COLM_LOG_PARSE
@@ -827,7 +827,7 @@ void scanner_error( FsmRun *fsmRun, PdaRun *parser )
 		/* May have accumulated ignore tokens from a previous region.
 		 * need to rescan them since we won't be sending tokens from
 		 * this region. */
-		send_back_queued_ignore( parser );
+		send_back_queued_ignore( sp, parser );
 		parser->nextRegionInd += 1;
 	}
 	else if ( parser->numRetry > 0 ) {
@@ -838,8 +838,8 @@ void scanner_error( FsmRun *fsmRun, PdaRun *parser )
 		}
 		#endif
 
-		send_back_queued_ignore( parser );
-		parser->parseToken( 0 );
+		send_back_queued_ignore( sp, parser );
+		parse_token( parser, 0 );
 
 		if ( parser->errCount > 0 ) {
 			/* Error occured in the top-level parser. */
@@ -854,22 +854,22 @@ void scanner_error( FsmRun *fsmRun, PdaRun *parser )
 	}
 }
 
-void parse( Tree **sp, PdaRun *parser )
+void parse( Tree **sp, FsmRun *fsmRun, PdaRun *pdaRun )
 {
-	parser->init();
+	pdaRun->init();
 
 	while ( true ) {
 		/* Pull the current scanner from the parser. This can change during
 		 * parsing due to stream pushes, usually for the purpose of includes.
 		 * */
-		FsmRun *fsmRun = parser->fsmRun;
+		fsmRun = pdaRun->fsmRun;
 
-		int tokenId = scan_token( fsmRun, parser );
+		int tokenId = scan_token( fsmRun, pdaRun );
 
 		/* Check for EOF. */
 		if ( tokenId == SCAN_EOF ) {
 			fsmRun->eofSent = true;
-			send_eof( fsmRun, parser );
+			send_eof( sp, fsmRun, pdaRun );
 			if ( fsmRun->eofSent )
 				break;
 			continue;
@@ -877,28 +877,28 @@ void parse( Tree **sp, PdaRun *parser )
 
 		/* Check for a named language element. */
 		if ( tokenId == SCAN_LANG_EL ) {
-			send_named_lang_el( fsmRun, parser );
+			send_named_lang_el( sp, fsmRun, pdaRun );
 			continue;
 		}
 
 		/* Check for error. */
 		if ( tokenId == SCAN_ERROR ) {
-			scanner_error( fsmRun, parser );
+			scanner_error( sp, fsmRun, pdaRun );
 			continue;
 		}
 
 		bool ctxDepParsing = fsmRun->prg->ctxDepParsing;
-		LangElInfo *lelInfo = parser->tables->rtd->lelInfo;
+		LangElInfo *lelInfo = pdaRun->tables->rtd->lelInfo;
 		if ( ctxDepParsing && lelInfo[tokenId].frameId >= 0 )
-			exec_gen( fsmRun, parser, tokenId );
+			exec_gen( sp, fsmRun, pdaRun, tokenId );
 		else if ( lelInfo[tokenId].ignore )
-			send_ignore( fsmRun, parser, tokenId );
+			send_ignore( fsmRun, pdaRun, tokenId );
 		else
-			send_token( fsmRun, parser, tokenId );
+			send_token( sp, fsmRun, pdaRun, tokenId );
 
 		/* Fall through here either when the input buffer has been exhausted
 		 * or the scanner is in an error state. Otherwise we must continue. */
-		if ( parser->stopParsing ) {
+		if ( pdaRun->stopParsing ) {
 			#ifdef COLM_LOG_PARSE
 			if ( colm_log_parse ) {
 				cerr << "scanner has been stopped" << endl;

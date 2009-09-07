@@ -83,7 +83,7 @@ struct RunBuf
 
 #define MARK_SLOTS 32
 
-void parse( Tree **sp, PdaRun *parser );
+void parse( Tree **sp, FsmRun *fsmRun, PdaRun *parser );
 
 struct FsmRun
 {
@@ -124,7 +124,7 @@ struct FsmRun
 };
 
 void send_queued_tokens( FsmRun *fsmRun, PdaRun *parser );
-void send_handle_error( FsmRun *fsmRun, PdaRun *parser, Kid *input );
+void send_handle_error( Tree **sp, FsmRun *fsmRun, PdaRun *parser, Kid *input );
 Head *extract_match( FsmRun *fsmRun );
 
 #endif

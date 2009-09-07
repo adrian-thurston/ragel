@@ -552,13 +552,10 @@ struct PdaRun
 	void init();
 	void commitKid( Tree **root, Kid *lel );
 	void commit();
-	void parseToken( Kid *input );
 	bool isParserStopFinished();
 	void match( Kid *tree, Kid *pattern );
 	long undoParse( Tree *tree, CodeVect *rev );
 
-	void send( Kid *kid );
-	void ignore( Tree *tree );
 	Kid *extractIgnore();
 
 	/* Report an error encountered by the parser. */
@@ -581,6 +578,9 @@ struct PdaRun
 
 void clean_parser( Tree **root, PdaRun *pdaRun );
 long scan_token( FsmRun *fsmRun, PdaRun *pdaRun );
+void ignore( PdaRun *pdaRun, Tree *tree );
+void send( PdaRun *pdaRun, Kid *input );
+void parse_token( PdaRun *pdaRun, Kid *input );
 
 void xml_print_list( RuntimeData *runtimeData, Kid *lel, int depth );
 
