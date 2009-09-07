@@ -197,7 +197,7 @@ void undo_parse( Tree **&sp, Program *prg, Stream *stream,
 {
 	PdaTables *tables = prg->rtd->pdaTables;
 	PdaRun parser( sp, prg, tables, parserId, stream->fsmRun, 0, false );
-	parser.undoParse( tree, rev );
+	undo_parse( &parser, tree, rev );
 }
 
 Tree *stream_pull( Program *prg, PdaRun *parser, Stream *stream, Tree *length )
@@ -211,7 +211,7 @@ void undo_pull( Program *prg, Stream *stream, Tree *str )
 {
 	const char *data = string_data( ( (Str*)str )->value );
 	long length = string_length( ( (Str*)str )->value );
-	stream->fsmRun->sendBackText( data, length );
+	send_back_text( stream->fsmRun, data, length );
 }
 
 Word stream_push( Tree **&sp, Program *prg, Stream *stream, Tree *any )

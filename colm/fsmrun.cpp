@@ -139,9 +139,9 @@ void undo_position( FsmRun *fsmRun, const char *data, long length )
 	fsmRun->inputStream->position -= length;
 }
 
-void FsmRun::sendBackRunBufHead()
+void send_back_runbuf_head( FsmRun *fsmRun )
 {
-	if ( p == runBuf->buf ) {
+	if ( fsmRun->p == fsmRun->runBuf->buf ) {
 		#ifdef COLM_LOG_PARSE
 		if ( colm_log_parse ) {
 			cerr << "pushing back runbuf" << endl;
@@ -149,30 +149,29 @@ void FsmRun::sendBackRunBufHead()
 		#endif
 
 		/* Move to the next run buffer. */
-		RunBuf *back = runBuf;
-		runBuf = runBuf->next;
+		RunBuf *back = fsmRun->runBuf;
+		fsmRun->runBuf = fsmRun->runBuf->next;
 		
 		/* Flush out the input buffer. */
-		back->length = pe-p;
+		back->length = fsmRun->pe - fsmRun->p;
 		back->offset = 0;
-		inputStream->pushBackBuf( back );
+		fsmRun->inputStream->pushBackBuf( back );
 
 		/* Set p and pe. */
-		if ( runBuf == 0 ) {
-			runBuf = new RunBuf;
-			runBuf->next = 0;
-			p = pe = runBuf->buf;
+		if ( fsmRun->runBuf == 0 ) {
+			fsmRun->runBuf = new RunBuf;
+			fsmRun->runBuf->next = 0;
+			fsmRun->p = fsmRun->pe = fsmRun->runBuf->buf;
 		}
 
-		p = pe = runBuf->buf + runBuf->length;
+		fsmRun->p = fsmRun->pe = fsmRun->runBuf->buf + fsmRun->runBuf->length;
 	}
-
 }
 
 /* Should only be sending back whole tokens/ignores, therefore the send back
  * should never cross a buffer boundary. Either we slide back p, or we move to
  * a previous buffer and slide back p. */
-void FsmRun::sendBackText( const char *data, long length )
+void send_back_text( FsmRun *fsmRun, const char *data, long length )
 {
 	#ifdef COLM_LOG_PARSE
 	if ( colm_log_parse ) {
@@ -183,28 +182,28 @@ void FsmRun::sendBackText( const char *data, long length )
 	if ( length == 0 )
 		return;
 
-	sendBackRunBufHead();
+	send_back_runbuf_head( fsmRun );
 
 	/* If there is data in the current buffer then the whole send back
 	 * should be in this buffer. */
-	assert( (p - runBuf->buf) >= length );
+	assert( (fsmRun->p - fsmRun->runBuf->buf) >= length );
 
 	/* slide p back. */
-	p -= length;
+	fsmRun->p -= length;
 
 	#ifdef COLM_LOG_PARSE
 	if ( colm_log_parse ) {
-		if ( memcmp( data, p, length ) != 0 )
+		if ( memcmp( data, fsmRun->p, length ) != 0 )
 			cerr << "mismatch of pushed back text" << endl;
 	}
 	#endif
 
-	assert( memcmp( data, p, length ) == 0 );
+	assert( memcmp( data, fsmRun->p, length ) == 0 );
 		
-	undo_position( this, data, length );
+	undo_position( fsmRun, data, length );
 }
 
-void FsmRun::queueBack( PdaRun *parser, Kid *input )
+void queue_back( FsmRun *fsmRun, PdaRun *parser, Kid *input )
 {
 	if ( input->tree->flags & AF_GROUP_MEM ) {
 		#ifdef COLM_LOG_PARSE
@@ -237,7 +236,7 @@ void FsmRun::queueBack( PdaRun *parser, Kid *input )
 			/* Send them back. */
 			while ( last != 0 ) {
 				Kid *next = last->next;
-				sendBack( parser, last );
+				send_back( fsmRun, parser, last );
 				last = next;
 			}
 
@@ -245,17 +244,17 @@ void FsmRun::queueBack( PdaRun *parser, Kid *input )
 		}
 
 		/* Now that the queue is flushed, can send back the original item. */
-		sendBack( parser, input );
+		send_back( fsmRun, parser, input );
 	}
 }
 
-void FsmRun::sendBackIgnore( PdaRun *parser, Kid *ignore )
+void send_back_ignore( FsmRun *fsmRun, PdaRun *pdaRun, Kid *ignore )
 {
 	/* Ignore tokens are queued in reverse order. */
-	while ( tree_is_ignore( prg, ignore ) ) {
+	while ( tree_is_ignore( fsmRun->prg, ignore ) ) {
 		#ifdef COLM_LOG_PARSE
 		if ( colm_log_parse ) {
-			LangElInfo *lelInfo = parser->tables->rtd->lelInfo;
+			LangElInfo *lelInfo = pdaRun->tables->rtd->lelInfo;
 			cerr << "sending back: " << lelInfo[ignore->tree->id].name;
 			if ( ignore->tree->flags & AF_ARTIFICIAL )
 				cerr << " (artificial)";
@@ -267,15 +266,15 @@ void FsmRun::sendBackIgnore( PdaRun *parser, Kid *ignore )
 		bool artificial = ignore->tree->flags & AF_ARTIFICIAL;
 
 		if ( head != 0 && !artificial )
-			sendBackText( string_data( head ), head->length );
+			send_back_text( fsmRun, string_data( head ), head->length );
 
 		/* Check for reverse code. */
 		if ( ignore->tree->flags & AF_HAS_RCODE ) {
-			Execution execution( prg, parser->reverseCode, 
-					parser, 0, 0, 0, 0 );
+			Execution execution( fsmRun->prg, pdaRun->reverseCode, 
+					pdaRun, 0, 0, 0, 0 );
 
 			/* Do the reverse exeuction. */
-			execution.rexecute( parser->root, parser->allReverseCode );
+			execution.rexecute( pdaRun->root, pdaRun->allReverseCode );
 			ignore->tree->flags &= ~AF_HAS_RCODE;
 		}
 
@@ -283,7 +282,7 @@ void FsmRun::sendBackIgnore( PdaRun *parser, Kid *ignore )
 	}
 }
 
-void FsmRun::sendBack( PdaRun *parser, Kid *input )
+void send_back( FsmRun *fsmRun, PdaRun *parser, Kid *input )
 {
 	#ifdef COLM_LOG_PARSE
 	if ( colm_log_parse ) {
@@ -299,22 +298,22 @@ void FsmRun::sendBack( PdaRun *parser, Kid *input )
 
 	if ( input->tree->flags & AF_NAMED ) {
 		/* Send back anything in the buffer that has not been parsed. */
-		sendBackRunBufHead();
+		send_back_runbuf_head( fsmRun );
 
 		/* Send the named lang el back first, then send back any leading
 		 * whitespace. */
-		inputStream->pushBackNamed();
+		fsmRun->inputStream->pushBackNamed();
 	}
 
 	if ( !(input->tree->flags & AF_ARTIFICIAL) ) {
 		/* Push back the token data. */
-		sendBackText( string_data( input->tree->tokdata ), 
+		send_back_text( fsmRun, string_data( input->tree->tokdata ), 
 				string_length( input->tree->tokdata ) );
 	}
 
 	/* Check for reverse code. */
 	if ( input->tree->flags & AF_HAS_RCODE ) {
-		Execution execution( prg, parser->reverseCode, 
+		Execution execution( fsmRun->prg, parser->reverseCode, 
 				parser, 0, 0, 0, 0 );
 
 		/* Do the reverse exeuction. */
@@ -323,22 +322,22 @@ void FsmRun::sendBack( PdaRun *parser, Kid *input )
 	}
 
 	/* Always push back the ignore text. */
-	sendBackIgnore( parser, tree_ignore( prg, input->tree ) );
+	send_back_ignore( fsmRun, parser, tree_ignore( fsmRun->prg, input->tree ) );
 
 	/* If eof was just sent back remember that it needs to be sent again. */
 	if ( input->tree->id == parser->tables->rtd->eofLelIds[parser->parserId] )
-		eofSent = false;
+		fsmRun->eofSent = false;
 
 	/* If the item is bound then store remove it from the bindings array. */
 	Tree *lastBound = parser->bindings.top();
 	if ( lastBound == input->tree ) {
 		parser->bindings.pop();
-		tree_downref( prg, parser->root, input->tree );
+		tree_downref( fsmRun->prg, parser->root, input->tree );
 	}
 
 	/* Downref the tree that was sent back and free the kid. */
-	tree_downref( prg, parser->root, input->tree );
-	prg->kidPool.free( input );
+	tree_downref( fsmRun->prg, parser->root, input->tree );
+	fsmRun->prg->kidPool.free( input );
 }
 
 /* If no token was generated but there is reverse code then we must generate
@@ -550,7 +549,7 @@ Kid *extract_ignore( PdaRun *pdaRun )
 void send_back_queued_ignore( Tree **sp, PdaRun *pdaRun )
 {
 	Kid *ignore = extract_ignore( pdaRun );
-	pdaRun->fsmRun->sendBackIgnore( pdaRun, ignore );
+	send_back_ignore( pdaRun->fsmRun, pdaRun, ignore );
 	while ( ignore != 0 ) {
 		Kid *next = ignore->next;
 		tree_downref( pdaRun->prg, sp, ignore->tree );
@@ -786,28 +785,28 @@ void FsmRun::attachInputStream( InputStream *in )
 	inputStream->position = 0;
 }
 
-long PdaRun::undoParse( Tree *tree, CodeVect *rev )
+long undo_parse( PdaRun *pdaRun, Tree *tree, CodeVect *rev )
 {
 	/* PDA must be init first to set next region. */
-	init();
-	Kid *top = prg->kidPool.allocate();
-	top->next = stackTop;
+	pdaRun->init();
+	Kid *top = pdaRun->prg->kidPool.allocate();
+	top->next = pdaRun->stackTop;
 	top->tree = tree;
-	stackTop = top;
-	numRetry += 1;
-	allReverseCode = rev;
+	pdaRun->stackTop = top;
+	pdaRun->numRetry += 1;
+	pdaRun->allReverseCode = rev;
 
 //	PdaRun *prevParser = fsmRun->parser;
 //	fsmRun->parser = this;
 
-	parse_token( this, 0 );
+	parse_token( pdaRun, 0 );
 
 //	fsmRun->parser = prevParser;
 
-	assert( stackTop->next == 0 );
+	assert( pdaRun->stackTop->next == 0 );
 
-	tree_downref( prg, root, stackTop->tree );
-	prg->kidPool.free( stackTop );
+	tree_downref( pdaRun->prg, pdaRun->root, pdaRun->stackTop->tree );
+	pdaRun->prg->kidPool.free( pdaRun->stackTop );
 	return 0;
 }
 

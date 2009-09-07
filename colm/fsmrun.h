@@ -90,13 +90,6 @@ struct FsmRun
 	FsmRun( Program *prg );
 	~FsmRun();
 
-	void sendEOF( PdaRun *parser );
-
-	void sendBackRunBufHead();
-	void sendBackIgnore( PdaRun *parser, Kid *ignore );
-	void sendBack( PdaRun *parser, Kid *input );
-	void queueBack( PdaRun *parser, Kid *input );
-	void sendBackText( const char *data, long length );
 	void execAction( GenAction *action );
 
 	long scanToken( PdaRun *parser );
@@ -126,5 +119,9 @@ struct FsmRun
 void send_queued_tokens( FsmRun *fsmRun, PdaRun *parser );
 void send_handle_error( Tree **sp, FsmRun *fsmRun, PdaRun *parser, Kid *input );
 Head *extract_match( FsmRun *fsmRun );
+void send_back_text( FsmRun *fsmRun, const char *data, long length );
+void send_back_ignore( FsmRun *fsmRun, PdaRun *parser, Kid *ignore );
+void send_back( FsmRun *fsmRun, PdaRun *parser, Kid *input );
+void queue_back( FsmRun *fsmRun, PdaRun *parser, Kid *input );
 
 #endif
