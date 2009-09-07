@@ -542,9 +542,6 @@ struct PdaRun
 	int getNextRegion( int offset = 0 )
 		{ return tables->tokenRegions[nextRegionInd+offset]; }
 
-	Tree *getParsedRoot( bool stop );
-	void clean();
-
 	Program *prg;
 	PdaTables *tables;
 	int parserId;
@@ -581,6 +578,9 @@ struct PdaRun
 
 	bool revertOn;
 };
+
+void clean_parser( Tree **root, PdaRun *pdaRun );
+long scan_token( FsmRun *fsmRun, PdaRun *pdaRun );
 
 void xml_print_list( RuntimeData *runtimeData, Kid *lel, int depth );
 

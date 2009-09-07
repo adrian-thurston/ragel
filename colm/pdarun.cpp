@@ -58,19 +58,19 @@ using std::endl;
 } while(0)
 
 
-Tree *PdaRun::getParsedRoot( bool stop )
+Tree *get_parsed_root( PdaRun *pdaRun, bool stop )
 {
-	return stop ? stackTop->tree : stackTop->next->tree;
+	return stop ? pdaRun->stackTop->tree : pdaRun->stackTop->next->tree;
 }
 
-void PdaRun::clean()
+void clean_parser( Tree **sp, PdaRun *pdaRun )
 {
-	/* Traverse the stack, cleaning. */
-	Kid *kid = stackTop;
+	/* Traverse the stack, downreffing. */
+	Kid *kid = pdaRun->stackTop;
 	while ( kid != 0 ) {
 		Kid *next = kid->next;
-		tree_downref( prg, root, kid->tree );
-		prg->kidPool.free( kid );
+		tree_downref( pdaRun->prg, sp, kid->tree );
+		pdaRun->prg->kidPool.free( kid );
 		kid = next;
 	}
 }
@@ -270,7 +270,7 @@ backup:
 	assert( sp == root );
 }
 
-void commit_full( PdaRun *parser, long causeReduce )
+void commit_full( Tree **sp, PdaRun *parser, long causeReduce )
 {
 	#ifdef COLM_LOG_PARSE
 	if ( colm_log_parse ) {
@@ -278,9 +278,7 @@ void commit_full( PdaRun *parser, long causeReduce )
 	}
 	#endif
 	
-	Tree **sp = parser->root;
 	Kid *kid = parser->stackTop;
-
 	Code *rcode = parser->allReverseCode->data + parser->allReverseCode->length();
 
 	/* The top level of the stack is linked right to left. This is the
@@ -293,7 +291,7 @@ void commit_full( PdaRun *parser, long causeReduce )
 	/* We cannot always clear all the rcode here. We may need to backup over
 	 * the parse statement. We depend on the context flag. */
 	if ( !parser->revertOn )
-		rcode_downref_all( parser->prg, parser->root, parser->allReverseCode );
+		rcode_downref_all( parser->prg, sp, parser->allReverseCode );
 }
 
 
@@ -387,7 +385,7 @@ again:
 			if ( input->tree->flags & AF_HAS_RCODE )
 				causeReduce = pt(input->tree)->causeReduce;
 		}
-		commit_full( this, causeReduce );
+		commit_full( this->root, this, causeReduce );
 	}
 
 	if ( *action & act_rb ) {

@@ -459,11 +459,12 @@ Word cmp_string( Head *s1, Head *s2 );
 
 Head *int_to_str( Program *prg, Word i );
 
-void rcode_downref( Program *prg, Tree **stack_root, Code *instr );
-void rcode_downref_all( Program *prg, Tree **stack_root, CodeVect *cv );
-void parsed_downref( Program *prg, Tree **root, Tree *tree );
+void rcode_downref( Program *prg, Tree **sp, Code *instr );
+void rcode_downref_all( Program *prg, Tree **sp, CodeVect *cv );
+void parsed_downref( Program *prg, Tree **sp, Tree *tree );
 void parsed_downref_all( PdaRun *parser );
-void commit_full( PdaRun *parser, long commitReduce );
+void commit_full( Tree **sp, PdaRun *parser, long commitReduce );
+Tree *get_parsed_root( PdaRun *pdaRun, bool stop );
 
 bool match_pattern( Tree **bindings, Program *prg, long pat, Kid *kid, bool checkNext );
 Head *make_literal( Program *prg, long litoffset );

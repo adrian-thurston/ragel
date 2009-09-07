@@ -136,11 +136,11 @@ Tree *call_parser( Tree **&sp, Program *prg, Stream *stream,
 {
 	PdaTables *tables = prg->rtd->pdaTables;
 	PdaRun parser( sp, prg, tables, parserId, stream->fsmRun, stopId, revertOn );
-	parse( &parser );
-	commit_full( &parser, 0 );
-	Tree *tree = parser.getParsedRoot( stopId > 0 );
+	parse( sp, &parser );
+	commit_full( sp, &parser, 0 );
+	Tree *tree = get_parsed_root( &parser, stopId > 0 );
 	tree_upref( tree );
-	parser.clean();
+	clean_parser( sp, &parser );
 
 	/* Maybe return the reverse code. */
 	if ( revertOn )
@@ -172,11 +172,11 @@ Tree *call_tree_parser( Tree **&sp, Program *prg, Tree *input,
 	fsmRun.attachInputStream( &inputStream );
 
 	PdaRun parser( sp, prg, tables, parserId, &fsmRun, stopId, revertOn );
-	parse( &parser );
-	commit_full( &parser, 0 );
-	Tree *tree = parser.getParsedRoot( stopId > 0 );
+	parse( sp, &parser );
+	commit_full( sp, &parser, 0 );
+	Tree *tree = get_parsed_root( &parser, stopId > 0 );
 	tree_upref( tree );
-	parser.clean();
+	clean_parser( sp, &parser );
 
 	/* Maybe return the reverse code. */
 	if ( revertOn )

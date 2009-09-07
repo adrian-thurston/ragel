@@ -854,7 +854,7 @@ void scanner_error( FsmRun *fsmRun, PdaRun *parser )
 	}
 }
 
-void parse( PdaRun *parser )
+void parse( Tree **sp, PdaRun *parser )
 {
 	parser->init();
 
@@ -864,7 +864,7 @@ void parse( PdaRun *parser )
 		 * */
 		FsmRun *fsmRun = parser->fsmRun;
 
-		int tokenId = fsmRun->scanToken( parser );
+		int tokenId = scan_token( fsmRun, parser );
 
 		/* Check for EOF. */
 		if ( tokenId == SCAN_EOF ) {
@@ -909,54 +909,54 @@ void parse( PdaRun *parser )
 	}
 }
 
-long FsmRun::scanToken( PdaRun *parser )
+long scan_token( FsmRun *fsmRun, PdaRun *pdaRun )
 {
 	/* Init the scanner vars. */
-	act = 0;
-	tokstart = 0;
-	tokend = 0;
-	matchedToken = 0;
+	fsmRun->act = 0;
+	fsmRun->tokstart = 0;
+	fsmRun->tokend = 0;
+	fsmRun->matchedToken = 0;
 
 	/* Set the state using the state of the parser. */
-	region = parser->getNextRegion();
-	cs = tables->entryByRegion[region];
+	fsmRun->region = pdaRun->getNextRegion();
+	fsmRun->cs = fsmRun->tables->entryByRegion[fsmRun->region];
 
 	#ifdef COLM_LOG_PARSE
 	if ( colm_log_parse ) {
 		cerr << "scanning using token region: " << 
-				parser->tables->rtd->regionInfo[region].name << endl;
+				pdaRun->tables->rtd->regionInfo[fsmRun->region].name << endl;
 	}
 	#endif
 
 	/* Clear the mark array. */
-	memset( mark, 0, sizeof(mark) );
+	memset( fsmRun->mark, 0, sizeof(fsmRun->mark) );
 
 	while ( true ) {
-		execute();
+		fsmRun->execute();
 
 		/* First check if scanning stopped because we have a token. */
-		if ( matchedToken > 0 ) {
+		if ( fsmRun->matchedToken > 0 ) {
 			/* If the token has a marker indicating the end (due to trailing
 			 * context) then adjust p now. */
-			LangElInfo *lelInfo = parser->tables->rtd->lelInfo;
-			if ( lelInfo[matchedToken].markId >= 0 )
-				p = mark[lelInfo[matchedToken].markId];
+			LangElInfo *lelInfo = pdaRun->tables->rtd->lelInfo;
+			if ( lelInfo[fsmRun->matchedToken].markId >= 0 )
+				fsmRun->p = fsmRun->mark[lelInfo[fsmRun->matchedToken].markId];
 
-			return matchedToken;
+			return fsmRun->matchedToken;
 		}
 
 		/* Check for error. */
-		if ( cs == tables->errorState ) {
+		if ( fsmRun->cs == fsmRun->tables->errorState ) {
 			/* If a token was started, but not finished (tokstart != 0) then
 			 * restore p to the beginning of that token. */
-			if ( tokstart != 0 )
-				p = tokstart;
+			if ( fsmRun->tokstart != 0 )
+				fsmRun->p = fsmRun->tokstart;
 
 			/* Check for a default token in the region. If one is there
 			 * then send it and continue with the processing loop. */
-			if ( parser->tables->rtd->regionInfo[region].defaultToken >= 0 ) {
-				tokstart = tokend = p;
-				return parser->tables->rtd->regionInfo[region].defaultToken;
+			if ( pdaRun->tables->rtd->regionInfo[fsmRun->region].defaultToken >= 0 ) {
+				fsmRun->tokstart = fsmRun->tokend = fsmRun->p;
+				return pdaRun->tables->rtd->regionInfo[fsmRun->region].defaultToken;
 			}
 
 			return SCAN_ERROR;
@@ -965,19 +965,19 @@ long FsmRun::scanToken( PdaRun *parser )
 		/* Got here because the state machine didn't match a token or
 		 * encounter an error. Must be because we got to the end of the buffer
 		 * data. */
-		assert( p == pe );
+		assert( fsmRun->p == fsmRun->pe );
 
 		/* Check for a named language element. Note that we can do this only
 		 * when p == pe otherwise we get ahead of what's already in the
 		 * buffer. */
-		if ( inputStream->isLangEl() ) {
+		if ( fsmRun->inputStream->isLangEl() ) {
 			/* Always break the runBuf on named language elements. This makes
 			 * backtracking simpler because it allows us to always push back
 			 * whole runBufs only. If we did not do this we could get half a
 			 * runBuf, a named langEl, then the second half full. During
 			 * backtracking we would need to push the halves back separately.
 			 * */
-			if ( p > runBuf->buf ) {
+			if ( fsmRun->p > fsmRun->runBuf->buf ) {
 				#ifdef COLM_LOG_PARSE
 				if ( colm_log_parse )
 					cerr << "have a langEl, making a new runBuf" << endl;
@@ -985,24 +985,24 @@ long FsmRun::scanToken( PdaRun *parser )
 
 				/* Compute the length of the current before before we move
 				 * past it. */
-				runBuf->length = p - runBuf->buf;;
+				fsmRun->runBuf->length = fsmRun->p - fsmRun->runBuf->buf;;
 
 				/* Make the new one. */
 				RunBuf *newBuf = new RunBuf;
-				p = pe = newBuf->buf;
-				newBuf->next = runBuf;
-				runBuf = newBuf;
+				fsmRun->p = fsmRun->pe = newBuf->buf;
+				newBuf->next = fsmRun->runBuf;
+				fsmRun->runBuf = newBuf;
 			}
 
 			return SCAN_LANG_EL;
 		}
 
 		/* Maybe need eof. */
- 		if ( inputStream->isEOF() ) {
-			if ( tokstart != 0 ) {
+ 		if ( fsmRun->inputStream->isEOF() ) {
+			if ( fsmRun->tokstart != 0 ) {
 				/* If a token has been started, but not finshed 
 				 * this is an error. */
-				cs = tables->errorState;
+				fsmRun->cs = fsmRun->tables->errorState;
 				return SCAN_ERROR;
 			}
 			else {
@@ -1012,7 +1012,7 @@ long FsmRun::scanToken( PdaRun *parser )
 
 		/* There may be space left in the current buffer. If not then we need
 		 * to make some. */
-		long space = runBuf->buf + FSM_BUFSIZE - pe;
+		long space = fsmRun->runBuf->buf + FSM_BUFSIZE - fsmRun->pe;
 		if ( space == 0 ) {
 			/* Create a new run buf. */
 			RunBuf *newBuf = new RunBuf;
@@ -1020,12 +1020,12 @@ long FsmRun::scanToken( PdaRun *parser )
 			/* If partway through a token then preserve the prefix. */
 			long have = 0;
 
-			if ( tokstart == 0 ) {
+			if ( fsmRun->tokstart == 0 ) {
 				/* No prefix. We filled the previous buffer. */
-				runBuf->length = FSM_BUFSIZE;
+				fsmRun->runBuf->length = FSM_BUFSIZE;
 			}
 			else {
-				if ( tokstart == runBuf->buf ) {
+				if ( fsmRun->tokstart == fsmRun->runBuf->buf ) {
 					/* A token is started and it is already at the beginning
 					 * of the current buffer. This means buffer is full and it
 					 * must be grown. Probably need to do this sooner. */
@@ -1033,41 +1033,41 @@ long FsmRun::scanToken( PdaRun *parser )
 				}
 
 				/* There is data that needs to be shifted over. */
-				have = pe - tokstart;
-				memcpy( newBuf->buf, tokstart, have );
+				have = fsmRun->pe - fsmRun->tokstart;
+				memcpy( newBuf->buf, fsmRun->tokstart, have );
 
 				/* Compute the length of the previous buffer. */
-				runBuf->length = FSM_BUFSIZE - have;
+				fsmRun->runBuf->length = FSM_BUFSIZE - have;
 
 				/* Compute tokstart and tokend. */
-				long dist = tokstart - newBuf->buf;
+				long dist = fsmRun->tokstart - newBuf->buf;
 
-				tokend -= dist;
-				tokstart = newBuf->buf;
+				fsmRun->tokend -= dist;
+				fsmRun->tokstart = newBuf->buf;
 
 				/* Shift any markers. */
 				for ( int i = 0; i < MARK_SLOTS; i++ ) {
-					if ( mark[i] != 0 )
-						mark[i] -= dist;
+					if ( fsmRun->mark[i] != 0 )
+						fsmRun->mark[i] -= dist;
 				}
 			}
 
-			p = pe = newBuf->buf + have;
-			peof = 0;
+			fsmRun->p = fsmRun->pe = newBuf->buf + have;
+			fsmRun->peof = 0;
 
-			newBuf->next = runBuf;
-			runBuf = newBuf;
+			newBuf->next = fsmRun->runBuf;
+			fsmRun->runBuf = newBuf;
 		}
 
 		/* We don't have any data. What is next in the input stream? */
-		space = runBuf->buf + FSM_BUFSIZE - pe;
+		space = fsmRun->runBuf->buf + FSM_BUFSIZE - fsmRun->pe;
 		assert( space > 0 );
 			
 		/* Get more data. */
-		int len = inputStream->getData( p, space );
-		pe = p + len;
-		if ( inputStream->needFlush() )
-			peof = pe;
+		int len = fsmRun->inputStream->getData( fsmRun->p, space );
+		fsmRun->pe = fsmRun->p + len;
+		if ( fsmRun->inputStream->needFlush() )
+			fsmRun->peof = fsmRun->pe;
 	}
 
 	/* Should not be reached. */
