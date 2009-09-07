@@ -1,5 +1,5 @@
 /*
- *  Copyright 2007 Adrian Thurston <thurston@complang.org>
+ *  Copyright 2007-2009 Adrian Thurston <thurston@complang.org>
  */
 
 /*  This file is part of Colm.
@@ -518,7 +518,6 @@ struct PdaRun
 	PdaRun( Tree **root, Program *prg, PdaTables *tables, int parserId,
 			FsmRun *scanner, long stopTarget, bool revertOn )
 	:
-		root(root),
 		prg(prg),
 		tables(tables), 
 		parserId(parserId), 
@@ -531,7 +530,6 @@ struct PdaRun
 	{
 	}
 
-	Tree **root;
 	int numRetry;
 	Kid *stackTop;
 	int errCount;
@@ -578,9 +576,9 @@ struct PdaRun
 void clean_parser( Tree **root, PdaRun *pdaRun );
 long scan_token( FsmRun *fsmRun, PdaRun *pdaRun );
 void ignore( PdaRun *pdaRun, Tree *tree );
-void send( PdaRun *pdaRun, Kid *input );
-void parse_token( PdaRun *pdaRun, Kid *input );
-long undo_parse( PdaRun *pdaRun, Tree *tree, CodeVect *rev );
+void send( Tree **sp, PdaRun *pdaRun, Kid *input );
+void parse_token( Tree **sp, PdaRun *pdaRun, Kid *input );
+long undo_parse( Tree **sp, PdaRun *pdaRun, Tree *tree, CodeVect *rev );
 
 void xml_print_list( RuntimeData *runtimeData, Kid *lel, int depth );
 

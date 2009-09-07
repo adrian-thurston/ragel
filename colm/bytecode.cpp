@@ -197,7 +197,7 @@ void undo_parse( Tree **&sp, Program *prg, Stream *stream,
 {
 	PdaTables *tables = prg->rtd->pdaTables;
 	PdaRun parser( sp, prg, tables, parserId, stream->fsmRun, 0, false );
-	undo_parse( &parser, tree, rev );
+	undo_parse( sp, &parser, tree, rev );
 }
 
 Tree *stream_pull( Program *prg, PdaRun *parser, Stream *stream, Tree *length )

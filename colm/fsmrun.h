@@ -1,5 +1,5 @@
 /*
- *  Copyright 2007 Adrian Thurston <thurston@complang.org>
+ *  Copyright 2007-2009 Adrian Thurston <thurston@complang.org>
  */
 
 /*  This file is part of Colm.
@@ -83,8 +83,6 @@ struct RunBuf
 
 #define MARK_SLOTS 32
 
-void parse( Tree **sp, FsmRun *fsmRun, PdaRun *parser );
-
 struct FsmRun
 {
 	FsmRun( Program *prg );
@@ -92,11 +90,9 @@ struct FsmRun
 
 	void execAction( GenAction *action );
 
-	long scanToken( PdaRun *parser );
 	void attachInputStream( InputStream *in );
 	void streamPush( const char *data, long length );
 	void undoStreamPush( long length );
-
 	Head *extractPrefix( PdaRun *parser, long len );
 
 	void execute();
@@ -120,8 +116,9 @@ void send_queued_tokens( FsmRun *fsmRun, PdaRun *parser );
 void send_handle_error( Tree **sp, FsmRun *fsmRun, PdaRun *parser, Kid *input );
 Head *extract_match( FsmRun *fsmRun );
 void send_back_text( FsmRun *fsmRun, const char *data, long length );
-void send_back_ignore( FsmRun *fsmRun, PdaRun *parser, Kid *ignore );
-void send_back( FsmRun *fsmRun, PdaRun *parser, Kid *input );
-void queue_back( FsmRun *fsmRun, PdaRun *parser, Kid *input );
+void send_back_ignore( Tree **sp, FsmRun *fsmRun, PdaRun *parser, Kid *ignore );
+void send_back( Tree **sp, FsmRun *fsmRun, PdaRun *parser, Kid *input );
+void queue_back( Tree **sp, FsmRun *fsmRun, PdaRun *parser, Kid *input );
+void parse( Tree **sp, FsmRun *fsmRun, PdaRun *parser );
 
 #endif

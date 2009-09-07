@@ -1,5 +1,5 @@
 /*
- *  Copyright 2007 Adrian Thurston <thurston@complang.org>
+ *  Copyright 2007-2009 Adrian Thurston <thurston@complang.org>
  */
 
 /*  This file is part of Colm.
@@ -203,7 +203,7 @@ void send_back_text( FsmRun *fsmRun, const char *data, long length )
 	undo_position( fsmRun, data, length );
 }
 
-void queue_back( FsmRun *fsmRun, PdaRun *parser, Kid *input )
+void queue_back( Tree **sp, FsmRun *fsmRun, PdaRun *parser, Kid *input )
 {
 	if ( input->tree->flags & AF_GROUP_MEM ) {
 		#ifdef COLM_LOG_PARSE
@@ -236,7 +236,7 @@ void queue_back( FsmRun *fsmRun, PdaRun *parser, Kid *input )
 			/* Send them back. */
 			while ( last != 0 ) {
 				Kid *next = last->next;
-				send_back( fsmRun, parser, last );
+				send_back( sp, fsmRun, parser, last );
 				last = next;
 			}
 
@@ -244,11 +244,11 @@ void queue_back( FsmRun *fsmRun, PdaRun *parser, Kid *input )
 		}
 
 		/* Now that the queue is flushed, can send back the original item. */
-		send_back( fsmRun, parser, input );
+		send_back( sp, fsmRun, parser, input );
 	}
 }
 
-void send_back_ignore( FsmRun *fsmRun, PdaRun *pdaRun, Kid *ignore )
+void send_back_ignore( Tree **sp, FsmRun *fsmRun, PdaRun *pdaRun, Kid *ignore )
 {
 	/* Ignore tokens are queued in reverse order. */
 	while ( tree_is_ignore( fsmRun->prg, ignore ) ) {
@@ -274,7 +274,7 @@ void send_back_ignore( FsmRun *fsmRun, PdaRun *pdaRun, Kid *ignore )
 					pdaRun, 0, 0, 0, 0 );
 
 			/* Do the reverse exeuction. */
-			execution.rexecute( pdaRun->root, pdaRun->allReverseCode );
+			execution.rexecute( sp, pdaRun->allReverseCode );
 			ignore->tree->flags &= ~AF_HAS_RCODE;
 		}
 
@@ -282,7 +282,7 @@ void send_back_ignore( FsmRun *fsmRun, PdaRun *pdaRun, Kid *ignore )
 	}
 }
 
-void send_back( FsmRun *fsmRun, PdaRun *parser, Kid *input )
+void send_back( Tree **sp, FsmRun *fsmRun, PdaRun *parser, Kid *input )
 {
 	#ifdef COLM_LOG_PARSE
 	if ( colm_log_parse ) {
@@ -317,12 +317,12 @@ void send_back( FsmRun *fsmRun, PdaRun *parser, Kid *input )
 				parser, 0, 0, 0, 0 );
 
 		/* Do the reverse exeuction. */
-		execution.rexecute( parser->root, parser->allReverseCode );
+		execution.rexecute( sp, parser->allReverseCode );
 		input->tree->flags &= ~AF_HAS_RCODE;
 	}
 
 	/* Always push back the ignore text. */
-	send_back_ignore( fsmRun, parser, tree_ignore( fsmRun->prg, input->tree ) );
+	send_back_ignore( sp, fsmRun, parser, tree_ignore( fsmRun->prg, input->tree ) );
 
 	/* If eof was just sent back remember that it needs to be sent again. */
 	if ( input->tree->id == parser->tables->rtd->eofLelIds[parser->parserId] )
@@ -332,11 +332,11 @@ void send_back( FsmRun *fsmRun, PdaRun *parser, Kid *input )
 	Tree *lastBound = parser->bindings.top();
 	if ( lastBound == input->tree ) {
 		parser->bindings.pop();
-		tree_downref( fsmRun->prg, parser->root, input->tree );
+		tree_downref( fsmRun->prg, sp, input->tree );
 	}
 
 	/* Downref the tree that was sent back and free the kid. */
-	tree_downref( fsmRun->prg, parser->root, input->tree );
+	tree_downref( fsmRun->prg, sp, input->tree );
 	fsmRun->prg->kidPool.free( input );
 }
 
@@ -549,7 +549,7 @@ Kid *extract_ignore( PdaRun *pdaRun )
 void send_back_queued_ignore( Tree **sp, PdaRun *pdaRun )
 {
 	Kid *ignore = extract_ignore( pdaRun );
-	send_back_ignore( pdaRun->fsmRun, pdaRun, ignore );
+	send_back_ignore( sp, pdaRun->fsmRun, pdaRun, ignore );
 	while ( ignore != 0 ) {
 		Kid *next = ignore->next;
 		tree_downref( pdaRun->prg, sp, ignore->tree );
@@ -558,7 +558,7 @@ void send_back_queued_ignore( Tree **sp, PdaRun *pdaRun )
 	}
 }
 
-void send( PdaRun *pdaRun, Kid *input )
+void send( Tree **sp, PdaRun *pdaRun, Kid *input )
 {
 	/* Need to preserve the layout under a tree:
 	 *    attributes, ignore tokens, grammar children. */
@@ -593,7 +593,7 @@ void send( PdaRun *pdaRun, Kid *input )
 		}
 	}
 
-	parse_token( pdaRun, input );
+	parse_token( sp, pdaRun, input );
 }
 
 void send_handle_error( Tree **sp, FsmRun *fsmRun, PdaRun *pdaRun, Kid *input )
@@ -601,7 +601,7 @@ void send_handle_error( Tree **sp, FsmRun *fsmRun, PdaRun *pdaRun, Kid *input )
 	long id = input->tree->id;
 
 	/* Send the token to the parser. */
-	send( pdaRun, input );
+	send( sp, pdaRun, input );
 		
 	/* Check the result. */
 	if ( pdaRun->errCount > 0 ) {
@@ -762,7 +762,7 @@ void send_eof( Tree **sp, FsmRun *fsmRun, PdaRun *pdaRun )
 		send_queued_tokens( sp, fsmRun, pdaRun );
 	}
 
-	send( pdaRun, input );
+	send( sp, pdaRun, input );
 
 	if ( pdaRun->errCount > 0 ) {
 		pdaRun->parse_error( input->tree->id, input->tree ) << 
@@ -785,7 +785,7 @@ void FsmRun::attachInputStream( InputStream *in )
 	inputStream->position = 0;
 }
 
-long undo_parse( PdaRun *pdaRun, Tree *tree, CodeVect *rev )
+long undo_parse( Tree **sp, PdaRun *pdaRun, Tree *tree, CodeVect *rev )
 {
 	/* PDA must be init first to set next region. */
 	pdaRun->init();
@@ -799,13 +799,13 @@ long undo_parse( PdaRun *pdaRun, Tree *tree, CodeVect *rev )
 //	PdaRun *prevParser = fsmRun->parser;
 //	fsmRun->parser = this;
 
-	parse_token( pdaRun, 0 );
+	parse_token( sp, pdaRun, 0 );
 
 //	fsmRun->parser = prevParser;
 
 	assert( pdaRun->stackTop->next == 0 );
 
-	tree_downref( pdaRun->prg, pdaRun->root, pdaRun->stackTop->tree );
+	tree_downref( pdaRun->prg, sp, pdaRun->stackTop->tree );
 	pdaRun->prg->kidPool.free( pdaRun->stackTop );
 	return 0;
 }
@@ -838,7 +838,7 @@ void scanner_error( Tree **sp, FsmRun *fsmRun, PdaRun *parser )
 		#endif
 
 		send_back_queued_ignore( sp, parser );
-		parse_token( parser, 0 );
+		parse_token( sp, parser, 0 );
 
 		if ( parser->errCount > 0 ) {
 			/* Error occured in the top-level parser. */

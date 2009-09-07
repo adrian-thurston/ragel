@@ -1,5 +1,5 @@
 /*
- *  Copyright 2007 Adrian Thurston <thurston@complang.org>
+ *  Copyright 2007-2009 Adrian Thurston <thurston@complang.org>
  */
 
 /*  This file is part of Colm.
@@ -301,7 +301,7 @@ void commit_full( Tree **sp, PdaRun *parser, long causeReduce )
  * shift-reduce:  cannot be a retry
  */
 
-void parse_token( PdaRun *pdaRun, Kid *input )
+void parse_token( Tree **sp, PdaRun *pdaRun, Kid *input )
 {
 	int pos, targState;
 	unsigned int *action;
@@ -328,10 +328,12 @@ again:
 		goto _out;
 
 	lel = input;
-	if ( lel->tree->id < pdaRun->tables->keys[pdaRun->cs<<1] || lel->tree->id > pdaRun->tables->keys[(pdaRun->cs<<1)+1] )
+	if ( lel->tree->id < pdaRun->tables->keys[pdaRun->cs<<1] ||
+			lel->tree->id > pdaRun->tables->keys[(pdaRun->cs<<1)+1] )
 		goto parseError;
 
-	pos = pdaRun->tables->indicies[pdaRun->tables->offsets[pdaRun->cs] + (lel->tree->id - pdaRun->tables->keys[pdaRun->cs<<1])];
+	pos = pdaRun->tables->indicies[pdaRun->tables->offsets[pdaRun->cs] 
+			+ (lel->tree->id - pdaRun->tables->keys[pdaRun->cs<<1])];
 	if ( pos < 0 )
 		goto parseError;
 
@@ -385,7 +387,7 @@ again:
 			if ( input->tree->flags & AF_HAS_RCODE )
 				causeReduce = pt(input->tree)->causeReduce;
 		}
-		commit_full( pdaRun->root, pdaRun, causeReduce );
+		commit_full( sp, pdaRun, causeReduce );
 	}
 
 	if ( *action & act_rb ) {
@@ -464,12 +466,12 @@ again:
 					pdaRun, fi->codeWV, redLel->tree, 0, 0 );
 
 			/* Execute it. */
-			execution.execute( pdaRun->root );
+			execution.execute( sp );
 
 			/* Transfer the lhs from the environment to redLel. It is uprefed
 			 * while in the environment. */
 			redLel->tree = execution.lhs;
-			redLel->tree = prep_parse_tree( pdaRun->prg, pdaRun->root, redLel->tree );
+			redLel->tree = prep_parse_tree( pdaRun->prg, sp, redLel->tree );
 
 			/* If the lhs was saved and it changed then we need to restore the
 			 * original upon backtracking, otherwise downref since we took a
@@ -488,7 +490,7 @@ again:
 			else {
 				/* No change in the the lhs. Just free the parsed copy we
 				 * took. */
-				tree_downref( pdaRun->prg, pdaRun->root, execution.parsed );
+				tree_downref( pdaRun->prg, sp, execution.parsed );
 			}
 
 			/* Pull out the reverse code, if any. */
@@ -565,7 +567,7 @@ parseError:
 			if ( pt(input->tree)->causeReduce == 0 ) {
 				int next = pt(input->tree)->region + 1;
 
-				queue_back( pdaRun->fsmRun, pdaRun, input );
+				queue_back( sp, pdaRun->fsmRun, pdaRun, input );
 				input = 0;
 				if ( pdaRun->tables->tokenRegions[next] != 0 ) {
 					#ifdef COLM_LOG_PARSE
@@ -630,12 +632,12 @@ parseError:
 				Execution execution( pdaRun->prg, pdaRun->reverseCode, pdaRun, 0, 0, 0, 0 );
 
 				/* Do the reverse exeuction. */
-				execution.rexecute( pdaRun->root, pdaRun->allReverseCode );
+				execution.rexecute( sp, pdaRun->allReverseCode );
 				undoLel->tree->flags &= ~AF_HAS_RCODE;
 
 				if ( execution.lhs != 0 ) {
 					/* Get the lhs, it may have been reverted. */
-					tree_downref( pdaRun->prg, pdaRun->root, undoLel->tree );
+					tree_downref( pdaRun->prg, sp, undoLel->tree );
 					undoLel->tree = execution.lhs;
 				}
 			}
@@ -685,7 +687,7 @@ parseError:
 			}
 
 			/* Free the reduced item. */
-			tree_downref( pdaRun->prg, pdaRun->root, undoLel->tree );
+			tree_downref( pdaRun->prg, sp, undoLel->tree );
 			pdaRun->prg->kidPool.free( undoLel );
 		}
 	}
