@@ -249,6 +249,17 @@ struct Map
 	void attachRebal( MapEl *element, MapEl *parentEl, MapEl *lastLess );
 };
 
+struct Accum
+{
+	/* Must overlay Tree. */
+	short id;
+	unsigned short flags;
+	long refs;
+	Kid *child;
+
+	GenericInfo *genericInfo;
+};
+
 struct Stream
 {
 	/* Must overlay Tree. */

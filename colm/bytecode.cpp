@@ -425,6 +425,7 @@ void Program::run()
 	assert( sizeof(Map)      <= sizeof(MapEl) );
 	assert( sizeof(List)     <= sizeof(MapEl) );
 	assert( sizeof(Stream)   <= sizeof(MapEl) );
+	assert( sizeof(Accum)    <= sizeof(MapEl) );
 
 	/* Allocate the global variable. */
 	allocGlobal();

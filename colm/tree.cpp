@@ -831,6 +831,13 @@ Tree *create_generic( Program *prg, long genericId )
 			newGeneric = (Tree*) list;
 			break;
 		}
+		case GEN_ACCUM: {
+			Accum *accum = (Accum*)prg->mapElPool.allocate();
+			accum->id = genericInfo->langElId;
+			accum->genericInfo = genericInfo;
+			newGeneric = (Tree*) accum;
+			break;
+		}
 		default:
 			assert(false);
 			return 0;
@@ -873,6 +880,10 @@ free_tree:
 				el = next;
 			}
 			prg->mapElPool.free( (MapEl*)map );
+		}
+		else if ( generic->type == GEN_ACCUM ) {
+			Accum *accum = (Accum*)tree;
+			prg->mapElPool.free( (MapEl*)accum );
 		}
 		else
 			assert(false);

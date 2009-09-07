@@ -242,6 +242,32 @@ generic_def: KW_Vector TK_Word '[' type_ref ']'
 		nspace->genericList.append( generic );
 	};
 
+
+generic_def: KW_Accum TK_Word '[' type_ref ']'
+	final {
+		/* Get the language element. */
+		Namespace *nspace = namespaceStack.top();
+		KlangEl *langEl = getKlangEl( pd, nspace, $2->data );
+
+		/* Check that the element wasn't previously defined as something else. */
+		if ( langEl->type != KlangEl::Unknown ) {
+			error($1->loc) << "'" << $2->data << 
+				"' already defined as something else" << endp;
+		}
+
+		langEl->type = KlangEl::NonTerm;
+
+		GenericType *generic = new GenericType( $2->data, GEN_ACCUM, 
+				pd->nextGenericId++, langEl, $4->typeRef );
+
+		/* Add one empty production. */
+		ProdElList *emptyList = new ProdElList;
+		addProduction( $1->loc, $2->data, emptyList, false, 0, 0 );
+
+		nspace->genericList.append( generic );
+		langEl->generic = generic;
+	};
+
 nonterm global_def uses statement;
 
 global_def: KW_Global var_def opt_def_init

@@ -370,6 +370,7 @@ void Scanner::endSection( )
 		'map' => { token( KW_Map ); };
 		'list' => { token( KW_List ); };
 		'vector' => { token( KW_Vector ); };
+		'accum' => { token( KW_Accum ); };
 		'return' => { token( KW_Return ); };
 		'break' => { token( KW_Break ); };
 		'yield' => { token( KW_Yield ); };

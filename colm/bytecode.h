@@ -243,6 +243,7 @@ typedef unsigned char uchar;
 #define GEN_LIST      0x10
 #define GEN_MAP       0x11
 #define GEN_VECTOR    0x12
+#define GEN_ACCUM     0x13
 
 /* Allocation, number of items. */
 #define FRESH_BLOCK 8128                    
