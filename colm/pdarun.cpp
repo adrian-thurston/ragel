@@ -301,7 +301,7 @@ void commit_full( Tree **sp, PdaRun *parser, long causeReduce )
  * shift-reduce:  cannot be a retry
  */
 
-void parse_token( Tree **sp, FsmRun *fsmRun, PdaRun *pdaRun, Kid *input )
+void parse_token( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, Kid *input )
 {
 	int pos, targState;
 	unsigned int *action;
@@ -567,7 +567,7 @@ parseError:
 			if ( pt(input->tree)->causeReduce == 0 ) {
 				int next = pt(input->tree)->region + 1;
 
-				queue_back( sp, fsmRun, pdaRun, input );
+				queue_back( sp, inputStream, fsmRun, pdaRun, input );
 				input = 0;
 				if ( pdaRun->tables->tokenRegions[next] != 0 ) {
 					#ifdef COLM_LOG_PARSE
@@ -699,9 +699,9 @@ _out:
 	pdaRun->nextRegionInd = pdaRun->tables->tokenRegionInds[pdaRun->cs];
 }
 
-ostream &parse_error( FsmRun *fsmRun, PdaRun *pdaRun, int tokId, Tree *tree )
+ostream &parse_error( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, int tokId, Tree *tree )
 {
-	cerr << "error:" << fsmRun->inputStream->line << ": at token ";
+	cerr << "error:" << inputStream->line << ": at token ";
 	if ( tokId < 128 )
 		cerr << "\"" << pdaRun->tables->rtd->lelInfo[tokId].name << "\"";
 	else 

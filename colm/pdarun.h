@@ -571,12 +571,11 @@ struct PdaRun
 };
 
 void clean_parser( Tree **root, PdaRun *pdaRun );
-long scan_token( FsmRun *fsmRun, PdaRun *pdaRun );
 void ignore( PdaRun *pdaRun, Tree *tree );
-void send( Tree **sp, FsmRun *fsmRun, PdaRun *pdaRun, Kid *input );
-void parse_token( Tree **sp, FsmRun *fsmRun, PdaRun *pdaRun, Kid *input );
-long undo_parse( Tree **sp, FsmRun *fsmRun, PdaRun *pdaRun, Tree *tree, CodeVect *rev );
+void send( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, Kid *input );
+void parse_token( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, Kid *input );
+long undo_parse( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, Tree *tree, CodeVect *rev );
 void xml_print_list( RuntimeData *runtimeData, Kid *lel, int depth );
-ostream &parse_error( FsmRun *fsmRun, PdaRun *pdaRun, int tokId, Tree *tree );
+ostream &parse_error( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, int tokId, Tree *tree );
 
 #endif /* _PDARUN_H */

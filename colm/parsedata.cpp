@@ -1469,7 +1469,7 @@ void ParseData::parsePatterns()
 
 		repl->pdaRun = new PdaRun( &program,
 				pdaTables, repl->langEl->parserId, 0, false );
-		parse( root, &fsmRun, repl->pdaRun );
+		parse( root, &in, &fsmRun, repl->pdaRun );
 
 			//#ifdef COLM_LOG_COMPILE
 			//if ( colm_log_compile ) {
@@ -1489,7 +1489,7 @@ void ParseData::parsePatterns()
 
 		pat->pdaRun = new PdaRun( &program,
 				pdaTables, pat->langEl->parserId, 0, false );
-		parse( root, &fsmRun, pat->pdaRun );
+		parse( root, &in, &fsmRun, pat->pdaRun );
 
 			//#ifdef COLM_LOG_COMPILE
 			//if ( colm_log_compile ) {

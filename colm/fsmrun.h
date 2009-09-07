@@ -88,18 +88,12 @@ struct FsmRun
 	FsmRun( Program *prg );
 	~FsmRun();
 
-	void execAction( GenAction *action );
-
 	void attachInputStream( InputStream *in );
-	void streamPush( const char *data, long length );
-	void undoStreamPush( long length );
-	Head *extractPrefix( PdaRun *parser, long len );
-
+	void execAction( GenAction *action );
 	void execute();
 
 	Program *prg;
 	FsmTables *tables;
-	InputStream *inputStream;
 
 	/* FsmRun State. */
 	long region, cs, act;
@@ -112,13 +106,17 @@ struct FsmRun
 	long matchedToken;
 };
 
-void send_queued_tokens( FsmRun *fsmRun, PdaRun *parser );
-void send_handle_error( Tree **sp, FsmRun *fsmRun, PdaRun *parser, Kid *input );
+void send_queued_tokens( InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser );
+void send_handle_error( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser, Kid *input );
 Head *extract_match( FsmRun *fsmRun );
-void send_back_text( FsmRun *fsmRun, const char *data, long length );
-void send_back_ignore( Tree **sp, FsmRun *fsmRun, PdaRun *parser, Kid *ignore );
-void send_back( Tree **sp, FsmRun *fsmRun, PdaRun *parser, Kid *input );
-void queue_back( Tree **sp, FsmRun *fsmRun, PdaRun *parser, Kid *input );
-void parse( Tree **sp, FsmRun *fsmRun, PdaRun *parser );
+void send_back_ignore( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser, Kid *ignore );
+void send_back( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser, Kid *input );
+void queue_back( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser, Kid *input );
+void parse( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser );
+long scan_token( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun );
+Head *extract_prefix( InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser, long length );
+void send_back_text( InputStream *inputStream, FsmRun *fsmRun, const char *data, long length );
+void stream_push( InputStream *inputStream, FsmRun *fsmRun, const char *data, long length );
+void undo_stream_push( FsmRun *fsmRun, long length );
 
 #endif

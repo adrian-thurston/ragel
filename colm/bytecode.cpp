@@ -136,7 +136,7 @@ Tree *call_parser( Tree **&sp, Program *prg, Stream *stream,
 {
 	PdaTables *tables = prg->rtd->pdaTables;
 	PdaRun parser( prg, tables, parserId, stopId, revertOn );
-	parse( sp, stream->fsmRun, &parser );
+	parse( sp, stream->in, stream->fsmRun, &parser );
 	commit_full( sp, &parser, 0 );
 	Tree *tree = get_parsed_root( &parser, stopId > 0 );
 	tree_upref( tree );
@@ -172,7 +172,7 @@ Tree *call_tree_parser( Tree **&sp, Program *prg, Tree *input,
 	fsmRun.attachInputStream( &inputStream );
 
 	PdaRun parser( prg, tables, parserId, stopId, revertOn );
-	parse( sp, &fsmRun, &parser );
+	parse( sp, &inputStream, &fsmRun, &parser );
 	commit_full( sp, &parser, 0 );
 	Tree *tree = get_parsed_root( &parser, stopId > 0 );
 	tree_upref( tree );
@@ -197,13 +197,13 @@ void undo_parse( Tree **&sp, Program *prg, Stream *stream,
 {
 	PdaTables *tables = prg->rtd->pdaTables;
 	PdaRun parser( prg, tables, parserId, 0, false );
-	undo_parse( sp, stream->fsmRun, &parser, tree, rev );
+	undo_parse( sp, stream->in, stream->fsmRun, &parser, tree, rev );
 }
 
 Tree *stream_pull( Program *prg, PdaRun *parser, Stream *stream, Tree *length )
 {
 	long len = ((Int*)length)->value;
-	Head *tokdata = stream->fsmRun->extractPrefix( parser, len );
+	Head *tokdata = extract_prefix( stream->in, stream->fsmRun, parser, len );
 	return construct_string( prg, tokdata );
 }
 
@@ -211,20 +211,20 @@ void undo_pull( Program *prg, Stream *stream, Tree *str )
 {
 	const char *data = string_data( ( (Str*)str )->value );
 	long length = string_length( ( (Str*)str )->value );
-	send_back_text( stream->fsmRun, data, length );
+	send_back_text( stream->in, stream->fsmRun, data, length );
 }
 
 Word stream_push( Tree **&sp, Program *prg, Stream *stream, Tree *any )
 {
 	std::stringstream ss;
 	print_tree( ss, sp, prg, any );
-	stream->fsmRun->streamPush( ss.str().c_str(), ss.str().size());
+	stream_push( stream->in, stream->fsmRun, ss.str().c_str(), ss.str().size());
 	return ss.str().size();
 }
 
 void undo_stream_push( Tree **&sp, Program *prg, Stream *stream, Word len )
 {
-	stream->fsmRun->undoStreamPush( len );
+	undo_stream_push( stream->fsmRun, len );
 }
 
 void set_local( Tree **frame, long field, Tree *tree )
