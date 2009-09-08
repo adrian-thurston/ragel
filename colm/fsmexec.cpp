@@ -30,7 +30,7 @@
 #include "pdarun.h"
 #include "colm.h"
 
-void FsmRun::execAction( GenAction *genAction )
+void exec_action( FsmRun *fsmRun, GenAction *genAction )
 {
 	for ( InlineList::Iter item = *genAction->inlineList; item.lte(); item++ ) {
 		switch ( item->type ) {
@@ -38,60 +38,60 @@ void FsmRun::execAction( GenAction *genAction )
 			assert(false);
 			break;
 		case InlineItem::LmSetActId:
-			act = item->longestMatchPart->longestMatchId;
+			fsmRun->act = item->longestMatchPart->longestMatchId;
 			break;
 		case InlineItem::LmSetTokEnd:
-			tokend = p + 1;
+			fsmRun->tokend = fsmRun->p + 1;
 			break;
 		case InlineItem::LmInitTokStart:
 			assert(false);
 			break;
 		case InlineItem::LmInitAct:
-			act = 0;
+			fsmRun->act = 0;
 			break;
 		case InlineItem::LmSetTokStart:
-			tokstart = p;
+			fsmRun->tokstart = fsmRun->p;
 			break;
 		case InlineItem::LmSwitch:
 			/* If the switch handles error then we also forced the error state. It
 			 * will exist. */
-			p = tokend;
-			if ( item->tokenRegion->lmSwitchHandlesError && act == 0 ) {
-				p = tokstart;
-				cs = tables->errorState;
+			fsmRun->p = fsmRun->tokend;
+			if ( item->tokenRegion->lmSwitchHandlesError && fsmRun->act == 0 ) {
+				fsmRun->p = fsmRun->tokstart;
+				fsmRun->cs = fsmRun->tables->errorState;
 			}
 			else {
 				for ( TokenDefList::Iter lmi = item->tokenRegion->tokenDefList; 
 						lmi.lte(); lmi++ )
 				{
-					if ( lmi->inLmSelect && act == lmi->longestMatchId )
-						matchedToken = lmi->token->id;
+					if ( lmi->inLmSelect && fsmRun->act == lmi->longestMatchId )
+						fsmRun->matchedToken = lmi->token->id;
 				}
 			}
-			returnResult = true;
+			fsmRun->returnResult = true;
 			break;
 		case InlineItem::LmOnLast:
-			p += 1;
-			matchedToken = item->longestMatchPart->token->id;
-			returnResult = true;
+			fsmRun->p += 1;
+			fsmRun->matchedToken = item->longestMatchPart->token->id;
+			fsmRun->returnResult = true;
 			break;
 		case InlineItem::LmOnNext:
-			matchedToken = item->longestMatchPart->token->id;
-			returnResult = true;
+			fsmRun->matchedToken = item->longestMatchPart->token->id;
+			fsmRun->returnResult = true;
 			break;
 		case InlineItem::LmOnLagBehind:
-			p = tokend;
-			matchedToken = item->longestMatchPart->token->id;
-			returnResult = true;
+			fsmRun->p = fsmRun->tokend;
+			fsmRun->matchedToken = item->longestMatchPart->token->id;
+			fsmRun->returnResult = true;
 			break;
 		}
 	}
 
 	if ( genAction->markType == MarkMark )
-		mark[genAction->markId] = p;
+		fsmRun->mark[genAction->markId] = fsmRun->p;
 }
 
-void FsmRun::execute()
+void execute( FsmRun *fsmRun )
 {
 	int _klen;
 	unsigned int _trans;
@@ -100,25 +100,25 @@ void FsmRun::execute()
 	const char *_keys;
 
 	/* Init the token match to nothing (the sentinal). */
-	matchedToken = 0;
+	fsmRun->matchedToken = 0;
 
 /*_resume:*/
-	if ( cs == tables->errorState )
+	if ( fsmRun->cs == fsmRun->tables->errorState )
 		goto out;
 
-	if ( p == pe )
+	if ( fsmRun->p == fsmRun->pe )
 		goto out;
 
 _loop_head:
-	_acts = tables->actions + tables->fromStateActions[cs];
+	_acts = fsmRun->tables->actions + fsmRun->tables->fromStateActions[fsmRun->cs];
 	_nacts = (unsigned int) *_acts++;
 	while ( _nacts-- > 0 )
-		execAction( tables->actionSwitch[*_acts++] );
+		exec_action( fsmRun, fsmRun->tables->actionSwitch[*_acts++] );
 
-	_keys = tables->transKeys + tables->keyOffsets[cs];
-	_trans = tables->indexOffsets[cs];
+	_keys = fsmRun->tables->transKeys + fsmRun->tables->keyOffsets[fsmRun->cs];
+	_trans = fsmRun->tables->indexOffsets[fsmRun->cs];
 
-	_klen = tables->singleLengths[cs];
+	_klen = fsmRun->tables->singleLengths[fsmRun->cs];
 	if ( _klen > 0 ) {
 		const char *_lower = _keys;
 		const char *_mid;
@@ -128,9 +128,9 @@ _loop_head:
 				break;
 
 			_mid = _lower + ((_upper-_lower) >> 1);
-			if ( (*p) < *_mid )
+			if ( (*fsmRun->p) < *_mid )
 				_upper = _mid - 1;
-			else if ( (*p) > *_mid )
+			else if ( (*fsmRun->p) > *_mid )
 				_lower = _mid + 1;
 			else {
 				_trans += (_mid - _keys);
@@ -141,7 +141,7 @@ _loop_head:
 		_trans += _klen;
 	}
 
-	_klen = tables->rangeLengths[cs];
+	_klen = fsmRun->tables->rangeLengths[fsmRun->cs];
 	if ( _klen > 0 ) {
 		const char *_lower = _keys;
 		const char *_mid;
@@ -151,9 +151,9 @@ _loop_head:
 				break;
 
 			_mid = _lower + (((_upper-_lower) >> 1) & ~1);
-			if ( (*p) < _mid[0] )
+			if ( (*fsmRun->p) < _mid[0] )
 				_upper = _mid - 2;
-			else if ( (*p) > _mid[1] )
+			else if ( (*fsmRun->p) > _mid[1] )
 				_lower = _mid + 2;
 			else {
 				_trans += ((_mid - _keys)>>1);
@@ -164,42 +164,42 @@ _loop_head:
 	}
 
 _match:
-	cs = tables->transTargsWI[_trans];
+	fsmRun->cs = fsmRun->tables->transTargsWI[_trans];
 
-	if ( tables->transActionsWI[_trans] == 0 )
+	if ( fsmRun->tables->transActionsWI[_trans] == 0 )
 		goto _again;
 
-	returnResult = false;
-	_acts = tables->actions + tables->transActionsWI[_trans];
+	fsmRun->returnResult = false;
+	_acts = fsmRun->tables->actions + fsmRun->tables->transActionsWI[_trans];
 	_nacts = (unsigned int) *_acts++;
 	while ( _nacts-- > 0 )
-		execAction( tables->actionSwitch[*_acts++] );
-	if ( returnResult )
+		exec_action( fsmRun, fsmRun->tables->actionSwitch[*_acts++] );
+	if ( fsmRun->returnResult )
 		return;
 
 _again:
-	_acts = tables->actions + tables->toStateActions[cs];
+	_acts = fsmRun->tables->actions + fsmRun->tables->toStateActions[fsmRun->cs];
 	_nacts = (unsigned int) *_acts++;
 	while ( _nacts-- > 0 )
-		execAction( tables->actionSwitch[*_acts++] );
+		exec_action( fsmRun, fsmRun->tables->actionSwitch[*_acts++] );
 
-	if ( cs == tables->errorState )
+	if ( fsmRun->cs == fsmRun->tables->errorState )
 		goto out;
 
-	if ( ++p != pe )
+	if ( ++fsmRun->p != fsmRun->pe )
 		goto _loop_head;
 out:
-	if ( p == peof ) {
-		returnResult = false;
-		_acts = tables->actions + tables->eofActions[cs];
+	if ( fsmRun->p == fsmRun->peof ) {
+		fsmRun->returnResult = false;
+		_acts = fsmRun->tables->actions + fsmRun->tables->eofActions[fsmRun->cs];
 		_nacts = (unsigned int) *_acts++;
 
-		if ( tables->eofTargs[cs] >= 0 )
-			cs = tables->eofTargs[cs];
+		if ( fsmRun->tables->eofTargs[fsmRun->cs] >= 0 )
+			fsmRun->cs = fsmRun->tables->eofTargs[fsmRun->cs];
 
 		while ( _nacts-- > 0 )
-			execAction( tables->actionSwitch[*_acts++] );
-		if ( returnResult )
+			exec_action( fsmRun, fsmRun->tables->actionSwitch[*_acts++] );
+		if ( fsmRun->returnResult )
 			return;
 	}
 }

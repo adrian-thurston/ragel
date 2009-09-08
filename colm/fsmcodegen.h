@@ -95,7 +95,7 @@ protected:
 	string UINT();
 	string GET_KEY();
 
-	string ACCESS() { return ""; }
+	string ACCESS() { return "fsmRun->"; }
 
 	string P() { return ACCESS() + "p"; }
 	string PE() { return ACCESS() + "pe"; }
@@ -111,6 +111,7 @@ protected:
 	string TOKSTART() { return ACCESS() + "tokstart"; }
 	string TOKEND() { return ACCESS() + "tokend"; }
 	string ACT() { return ACCESS() + "act"; }
+	string MATCHED_TOKEN() { return ACCESS() + "matchedToken"; }
 
 	string DATA_PREFIX();
 
@@ -118,7 +119,7 @@ protected:
 	string ERROR() { return DATA_PREFIX() + "error"; }
 	string FIRST_FINAL() { return DATA_PREFIX() + "first_final"; }
 
-	string entryByRegion() { return DATA_PREFIX() + "entryByRegion"; }
+	string ENTRY_BY_REGION() { return DATA_PREFIX() + "entryByRegion"; }
 
 
 	void INLINE_LIST( ostream &ret, InlineList *inlineList, 

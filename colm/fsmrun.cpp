@@ -771,16 +771,16 @@ void send_eof( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaR
 }
 
 
-void FsmRun::attachInputStream( InputStream *in )
+void attach_input_stream( InputStream *in, FsmRun *fsmRun )
 {
 	/* Run buffers need to stick around because 
 	 * token strings point into them. */
-	runBuf = new RunBuf;
-	runBuf->next = 0;
+	fsmRun->runBuf = new RunBuf;
+	fsmRun->runBuf->next = 0;
 
-	p = pe = runBuf->buf;
-	peof = 0;
-	eofSent = false;
+	fsmRun->p = fsmRun->pe = fsmRun->runBuf->buf;
+	fsmRun->peof = 0;
+	fsmRun->eofSent = false;
 	in->position = 0;
 }
 
@@ -928,7 +928,7 @@ long scan_token( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
 	memset( fsmRun->mark, 0, sizeof(fsmRun->mark) );
 
 	while ( true ) {
-		fsmRun->execute();
+		execute( fsmRun );
 
 		/* First check if scanning stopped because we have a token. */
 		if ( fsmRun->matchedToken > 0 ) {

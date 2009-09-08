@@ -204,7 +204,7 @@ void FsmCodeGen::EMIT_TOKEN( ostream &ret, KlangEl *token )
 //	else 
 //		ret << "	sendToken( " << token->id << " );\n";
 
-	ret << "	matchedToken = " << token->id << ";\n";
+	ret << "	" << MATCHED_TOKEN() << " = " << token->id << ";\n";
 }
 
 void FsmCodeGen::LM_SWITCH( ostream &ret, InlineItem *item, 
@@ -938,7 +938,7 @@ void FsmCodeGen::writeData()
 	out << "static const int " << ERROR() << " = " << ERROR_STATE() << ";\n";
 	out << "\n";
 
-	out << "long " << entryByRegion() << "[] = {\n\t";
+	out << "long " << ENTRY_BY_REGION() << "[] = {\n\t";
 	for ( int i = 0; i < fsmTables->numRegions; i++ ) {
 		out << fsmTables->entryByRegion[i];
 
@@ -965,7 +965,7 @@ void FsmCodeGen::writeData()
 		" 0, "         /* fromStateActions */
 		" 0, "         /* eofActions */
 		" 0,\n"        /* eofTargs */
-		"	" << entryByRegion() << ",\n"
+		"	" << ENTRY_BY_REGION() << ",\n"
 
 		"\n"
 		"	0, "       /* numStates */
@@ -1010,7 +1010,7 @@ void FsmCodeGen::writeExec()
 	setLabelsNeeded();
 
 	out <<
-		"void FsmRun::execute()\n"
+		"void execute( FsmRun *fsmRun )\n"
 		"{\n"
 		"/*_resume:*/\n";
 
@@ -1021,7 +1021,7 @@ void FsmCodeGen::writeExec()
 	}
 
 	out <<
-		"	if ( p == pe )\n"
+		"	if ( " << P() << " == " << PE() << " )\n"
 		"		goto out_switch;\n"
 		"	--" << P() << ";\n"
 		"\n"

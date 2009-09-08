@@ -115,7 +115,7 @@ Stream *open_stream_file( Program *prg, FILE *file )
 	res->file = file;
 	res->in = new InputStreamFile( file );
 	res->fsmRun = new FsmRun( prg );
-	res->fsmRun->attachInputStream( res->in );
+	attach_input_stream( res->in, res->fsmRun );
 	return res;
 }
 
@@ -125,7 +125,7 @@ Stream *open_stream_fd( Program *prg, long fd )
 	res->id = LEL_ID_STREAM;
 	res->in = new InputStreamFD( fd );
 	res->fsmRun = new FsmRun( prg );
-	res->fsmRun->attachInputStream( res->in );
+	attach_input_stream( res->in, res->fsmRun );
 	return res;
 }
 

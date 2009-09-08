@@ -169,7 +169,7 @@ Tree *call_tree_parser( Tree **&sp, Program *prg, Tree *input,
 	string s2 = s.str();
 	InputStreamString inputStream( s2.c_str(), strlen( s2.c_str() ) );
 	FsmRun fsmRun( prg );
-	fsmRun.attachInputStream( &inputStream );
+	attach_input_stream( &inputStream, &fsmRun );
 
 	PdaRun parser( prg, tables, parserId, stopId, revertOn );
 	parse( sp, &inputStream, &fsmRun, &parser );

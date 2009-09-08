@@ -88,10 +88,6 @@ struct FsmRun
 	FsmRun( Program *prg );
 	~FsmRun();
 
-	void attachInputStream( InputStream *in );
-	void execAction( GenAction *action );
-	void execute();
-
 	Program *prg;
 	FsmTables *tables;
 
@@ -106,6 +102,9 @@ struct FsmRun
 	long matchedToken;
 };
 
+void exec_action( FsmRun *fsmRun, GenAction *genAction );
+void execute( FsmRun *fsmRun );
+void attach_input_stream( InputStream *in, FsmRun *fsmRun );
 void send_queued_tokens( InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser );
 void send_handle_error( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser, Kid *input );
 Head *extract_match( FsmRun *fsmRun );
