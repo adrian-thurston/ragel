@@ -55,6 +55,7 @@ struct InputStream
 	
 	RunBuf *runBuf;
 	char *data, *de, *deof;
+	char *token;
 
 	long line;
 	long position;

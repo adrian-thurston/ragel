@@ -645,8 +645,8 @@ void exec_gen( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaR
 	/* Note that we don't update the position now. It is done when the token
 	 * data is pulled from the stream. */
 
-	inputStream->data = fsmRun->tokstart;
-	fsmRun->tokstart = 0;
+	inputStream->data = inputStream->token;
+	inputStream->token = 0;
 
 	generation_action( sp, inputStream, fsmRun, pdaRun, id, tokdata, false, 0 );
 }
@@ -661,7 +661,7 @@ void send_ignore( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long
 
 	/* Make the ignore string. */
 	Head *ignoreStr = extract_match( inputStream, fsmRun );
-	update_position( inputStream, fsmRun->tokstart, ignoreStr->length );
+	update_position( inputStream, inputStream->token, ignoreStr->length );
 	
 	Tree *tree = fsmRun->prg->treePool.allocate();
 	tree->refs = 1;
@@ -674,8 +674,8 @@ void send_ignore( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long
 
 Head *extract_match( InputStream *inputStream, FsmRun *fsmRun )
 {
-	long length = inputStream->data - fsmRun->tokstart;
-	return string_alloc_const( fsmRun->prg, fsmRun->tokstart, length );
+	long length = inputStream->data - inputStream->token;
+	return string_alloc_const( fsmRun->prg, inputStream->token, length );
 }
 
 void send_token( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser, long id )
@@ -691,7 +691,7 @@ void send_token( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pa
 	}
 	#endif
 
-	update_position( inputStream, fsmRun->tokstart, tokdata->length );
+	update_position( inputStream, inputStream->token, tokdata->length );
 
 	Kid *input = make_token( fsmRun, parser, id, tokdata, false, 0 );
 	send_handle_error( sp, inputStream, fsmRun, parser, input );
@@ -702,7 +702,7 @@ void send_token( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pa
 Head *extract_prefix( InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser, long length )
 {
 	/* We should not be in the midst of getting a token. */
-	assert( fsmRun->tokstart == 0 );
+	assert( inputStream->token == 0 );
 
 	/* The generated token length has been stuffed into tokdata. */
 	if ( inputStream->data + length > inputStream->de ) {
@@ -911,6 +911,7 @@ long scan_token( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
 	fsmRun->tokstart = 0;
 	fsmRun->tokend = 0;
 	fsmRun->matchedToken = 0;
+	inputStream->token = 0;
 
 	/* Set the state using the state of the parser. */
 	fsmRun->region = pdaRun->getNextRegion();
@@ -930,12 +931,14 @@ long scan_token( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
 		fsmRun->p = inputStream->data;
 		fsmRun->pe = inputStream->de;
 		fsmRun->peof = inputStream->deof;
+		fsmRun->tokstart = inputStream->token;
 
 		fsm_execute( inputStream, fsmRun );
 
 		inputStream->data = fsmRun->p;
 		inputStream->de = fsmRun->pe;
 		inputStream->deof = fsmRun->peof;
+		inputStream->token = fsmRun->tokstart;
 
 		/* First check if scanning stopped because we have a token. */
 		if ( fsmRun->matchedToken > 0 ) {
@@ -952,13 +955,13 @@ long scan_token( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
 		if ( fsmRun->cs == fsmRun->tables->errorState ) {
 			/* If a token was started, but not finished (tokstart != 0) then
 			 * restore data to the beginning of that token. */
-			if ( fsmRun->tokstart != 0 )
-				inputStream->data = fsmRun->tokstart;
+			if ( inputStream->token != 0 )
+				inputStream->data = inputStream->token;
 
 			/* Check for a default token in the region. If one is there
 			 * then send it and continue with the processing loop. */
 			if ( pdaRun->tables->rtd->regionInfo[fsmRun->region].defaultToken >= 0 ) {
-				fsmRun->tokstart = fsmRun->tokend = inputStream->data;
+				inputStream->token = fsmRun->tokend = inputStream->data;
 				return pdaRun->tables->rtd->regionInfo[fsmRun->region].defaultToken;
 			}
 
@@ -1002,7 +1005,7 @@ long scan_token( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
 
 		/* Maybe need eof. */
  		if ( inputStream->isEOF() ) {
-			if ( fsmRun->tokstart != 0 ) {
+			if ( inputStream->token != 0 ) {
 				/* If a token has been started, but not finshed 
 				 * this is an error. */
 				fsmRun->cs = fsmRun->tables->errorState;
@@ -1023,12 +1026,12 @@ long scan_token( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
 			/* If partway through a token then preserve the prefix. */
 			long have = 0;
 
-			if ( fsmRun->tokstart == 0 ) {
+			if ( inputStream->token == 0 ) {
 				/* No prefix. We filled the previous buffer. */
 				inputStream->runBuf->length = FSM_BUFSIZE;
 			}
 			else {
-				if ( fsmRun->tokstart == inputStream->runBuf->buf ) {
+				if ( inputStream->token == inputStream->runBuf->buf ) {
 					/* A token is started and it is already at the beginning
 					 * of the current buffer. This means buffer is full and it
 					 * must be grown. Probably need to do this sooner. */
@@ -1036,17 +1039,17 @@ long scan_token( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
 				}
 
 				/* There is data that needs to be shifted over. */
-				have = inputStream->de - fsmRun->tokstart;
-				memcpy( newBuf->buf, fsmRun->tokstart, have );
+				have = inputStream->de - inputStream->token;
+				memcpy( newBuf->buf, inputStream->token, have );
 
 				/* Compute the length of the previous buffer. */
 				inputStream->runBuf->length = FSM_BUFSIZE - have;
 
 				/* Compute tokstart and tokend. */
-				long dist = fsmRun->tokstart - newBuf->buf;
+				long dist = inputStream->token - newBuf->buf;
 
 				fsmRun->tokend -= dist;
-				fsmRun->tokstart = newBuf->buf;
+				inputStream->token = newBuf->buf;
 
 				/* Shift any markers. */
 				for ( int i = 0; i < MARK_SLOTS; i++ ) {
