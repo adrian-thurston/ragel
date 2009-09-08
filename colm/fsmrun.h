@@ -96,7 +96,6 @@ struct FsmRun
 	char *tokstart, *tokend;
 	char *p, *pe, *peof;
 	bool eofSent;
-	RunBuf *runBuf;
 	bool returnResult;
 	char *mark[MARK_SLOTS];
 	long matchedToken;
@@ -116,6 +115,6 @@ long scan_token( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun );
 Head *extract_prefix( InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser, long length );
 void send_back_text( InputStream *inputStream, FsmRun *fsmRun, const char *data, long length );
 void stream_push( InputStream *inputStream, FsmRun *fsmRun, const char *data, long length );
-void undo_stream_push( FsmRun *fsmRun, long length );
+void undo_stream_push( InputStream *inputStream, FsmRun *fsmRun, long length );
 
 #endif

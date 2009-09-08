@@ -58,10 +58,10 @@ FsmRun::~FsmRun()
 //	}
 }
 
-void undo_stream_push( FsmRun *fsmRun, long length )
+void undo_stream_push( InputStream *inputStream, FsmRun *fsmRun, long length )
 {
 	long remainder = fsmRun->pe - fsmRun->p;
-	memmove( fsmRun->runBuf->buf, fsmRun->runBuf->buf + length, remainder );
+	memmove( inputStream->runBuf->buf, inputStream->runBuf->buf + length, remainder );
 	fsmRun->pe -= length;
 }
 
@@ -73,43 +73,43 @@ void stream_push( InputStream *inputStream, FsmRun *fsmRun, const char *data, lo
 	}
 	#endif
 
-	if ( fsmRun->p == fsmRun->runBuf->buf ) {
+	if ( fsmRun->p == inputStream->runBuf->buf ) {
 		cerr << "case 1" << endl;
 		assert(false);
 	}
-	else if ( fsmRun->p == (fsmRun->runBuf->buf + fsmRun->runBuf->length) ) {
+	else if ( fsmRun->p == (inputStream->runBuf->buf + inputStream->runBuf->length) ) {
 		cerr << "case 2" << endl;
 		assert(false);
 	}
 	else {
 		/* Send back the second half of the current run buffer. */
 		RunBuf *dup = new RunBuf;
-		memcpy( dup, fsmRun->runBuf, sizeof(RunBuf) );
+		memcpy( dup, inputStream->runBuf, sizeof(RunBuf) );
 
 		/* Need to fix the offset. */
-		dup->length = fsmRun->pe - fsmRun->runBuf->buf;
-		dup->offset = fsmRun->p - fsmRun->runBuf->buf;
+		dup->length = fsmRun->pe - inputStream->runBuf->buf;
+		dup->offset = fsmRun->p - inputStream->runBuf->buf;
 
 		/* Send it back. */
 		inputStream->pushBackBuf( dup );
 
 		/* Since the second half is gone the current buffer now ends at p. */
 		fsmRun->pe = fsmRun->p;
-		fsmRun->runBuf->length = fsmRun->p - fsmRun->runBuf->buf;
+		inputStream->runBuf->length = fsmRun->p - inputStream->runBuf->buf;
 
 		/* Create a new buffer for the data. This is the easy implementation.
 		 * Something better is needed here. It puts a max on the amount of
 		 * data that can be pushed back to the stream. */
 		assert( length < FSM_BUFSIZE );
 		RunBuf *newBuf = new RunBuf;
-		newBuf->next = fsmRun->runBuf;
+		newBuf->next = inputStream->runBuf;
 		newBuf->offset = 0;
 		newBuf->length = length;
 		memcpy( newBuf->buf, data, length );
 
 		fsmRun->p = newBuf->buf;
 		fsmRun->pe = newBuf->buf + newBuf->length;
-		fsmRun->runBuf = newBuf;
+		inputStream->runBuf = newBuf;
 	}
 }
 
@@ -141,7 +141,7 @@ void undo_position( InputStream *inputStream, const char *data, long length )
 
 void send_back_runbuf_head( InputStream *inputStream, FsmRun *fsmRun )
 {
-	if ( fsmRun->p == fsmRun->runBuf->buf ) {
+	if ( fsmRun->p == inputStream->runBuf->buf ) {
 		#ifdef COLM_LOG_PARSE
 		if ( colm_log_parse ) {
 			cerr << "pushing back runbuf" << endl;
@@ -149,8 +149,8 @@ void send_back_runbuf_head( InputStream *inputStream, FsmRun *fsmRun )
 		#endif
 
 		/* Move to the next run buffer. */
-		RunBuf *back = fsmRun->runBuf;
-		fsmRun->runBuf = fsmRun->runBuf->next;
+		RunBuf *back = inputStream->runBuf;
+		inputStream->runBuf = inputStream->runBuf->next;
 		
 		/* Flush out the input buffer. */
 		back->length = fsmRun->pe - fsmRun->p;
@@ -158,13 +158,13 @@ void send_back_runbuf_head( InputStream *inputStream, FsmRun *fsmRun )
 		inputStream->pushBackBuf( back );
 
 		/* Set p and pe. */
-		if ( fsmRun->runBuf == 0 ) {
-			fsmRun->runBuf = new RunBuf;
-			fsmRun->runBuf->next = 0;
-			fsmRun->p = fsmRun->pe = fsmRun->runBuf->buf;
+		if ( inputStream->runBuf == 0 ) {
+			inputStream->runBuf = new RunBuf;
+			inputStream->runBuf->next = 0;
+			fsmRun->p = fsmRun->pe = inputStream->runBuf->buf;
 		}
 
-		fsmRun->p = fsmRun->pe = fsmRun->runBuf->buf + fsmRun->runBuf->length;
+		fsmRun->p = fsmRun->pe = inputStream->runBuf->buf + inputStream->runBuf->length;
 	}
 }
 
@@ -186,7 +186,7 @@ void send_back_text( InputStream *inputStream, FsmRun *fsmRun, const char *data,
 
 	/* If there is data in the current buffer then the whole send back
 	 * should be in this buffer. */
-	assert( (fsmRun->p - fsmRun->runBuf->buf) >= length );
+	assert( (fsmRun->p - inputStream->runBuf->buf) >= length );
 
 	/* slide p back. */
 	fsmRun->p -= length;
@@ -706,10 +706,10 @@ Head *extract_prefix( InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser, 
 
 	/* The generated token length has been stuffed into tokdata. */
 	if ( fsmRun->p + length > fsmRun->pe ) {
-		fsmRun->p = fsmRun->pe = fsmRun->runBuf->buf;
+		fsmRun->p = fsmRun->pe = inputStream->runBuf->buf;
 		fsmRun->peof = 0;
 
-		long space = fsmRun->runBuf->buf + FSM_BUFSIZE - fsmRun->pe;
+		long space = inputStream->runBuf->buf + FSM_BUFSIZE - fsmRun->pe;
 			
 		if ( space == 0 )
 			cerr << "OUT OF BUFFER SPACE" << endp;
@@ -771,17 +771,17 @@ void send_eof( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaR
 }
 
 
-void attach_input_stream( InputStream *in, FsmRun *fsmRun )
+void attach_input_stream( InputStream *inputStream, FsmRun *fsmRun )
 {
 	/* Run buffers need to stick around because 
 	 * token strings point into them. */
-	fsmRun->runBuf = new RunBuf;
-	fsmRun->runBuf->next = 0;
+	inputStream->runBuf = new RunBuf;
+	inputStream->runBuf->next = 0;
 
-	fsmRun->p = fsmRun->pe = fsmRun->runBuf->buf;
+	fsmRun->p = fsmRun->pe = inputStream->runBuf->buf;
 	fsmRun->peof = 0;
 	fsmRun->eofSent = false;
-	in->position = 0;
+	inputStream->position = 0;
 }
 
 long undo_parse( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, Tree *tree, CodeVect *rev )
@@ -973,7 +973,7 @@ long scan_token( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
 			 * runBuf, a named langEl, then the second half full. During
 			 * backtracking we would need to push the halves back separately.
 			 * */
-			if ( fsmRun->p > fsmRun->runBuf->buf ) {
+			if ( fsmRun->p > inputStream->runBuf->buf ) {
 				#ifdef COLM_LOG_PARSE
 				if ( colm_log_parse )
 					cerr << "have a langEl, making a new runBuf" << endl;
@@ -981,13 +981,13 @@ long scan_token( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
 
 				/* Compute the length of the current before before we move
 				 * past it. */
-				fsmRun->runBuf->length = fsmRun->p - fsmRun->runBuf->buf;;
+				inputStream->runBuf->length = fsmRun->p - inputStream->runBuf->buf;;
 
 				/* Make the new one. */
 				RunBuf *newBuf = new RunBuf;
 				fsmRun->p = fsmRun->pe = newBuf->buf;
-				newBuf->next = fsmRun->runBuf;
-				fsmRun->runBuf = newBuf;
+				newBuf->next = inputStream->runBuf;
+				inputStream->runBuf = newBuf;
 			}
 
 			return SCAN_LANG_EL;
@@ -1008,7 +1008,7 @@ long scan_token( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
 
 		/* There may be space left in the current buffer. If not then we need
 		 * to make some. */
-		long space = fsmRun->runBuf->buf + FSM_BUFSIZE - fsmRun->pe;
+		long space = inputStream->runBuf->buf + FSM_BUFSIZE - fsmRun->pe;
 		if ( space == 0 ) {
 			/* Create a new run buf. */
 			RunBuf *newBuf = new RunBuf;
@@ -1018,10 +1018,10 @@ long scan_token( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
 
 			if ( fsmRun->tokstart == 0 ) {
 				/* No prefix. We filled the previous buffer. */
-				fsmRun->runBuf->length = FSM_BUFSIZE;
+				inputStream->runBuf->length = FSM_BUFSIZE;
 			}
 			else {
-				if ( fsmRun->tokstart == fsmRun->runBuf->buf ) {
+				if ( fsmRun->tokstart == inputStream->runBuf->buf ) {
 					/* A token is started and it is already at the beginning
 					 * of the current buffer. This means buffer is full and it
 					 * must be grown. Probably need to do this sooner. */
@@ -1033,7 +1033,7 @@ long scan_token( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
 				memcpy( newBuf->buf, fsmRun->tokstart, have );
 
 				/* Compute the length of the previous buffer. */
-				fsmRun->runBuf->length = FSM_BUFSIZE - have;
+				inputStream->runBuf->length = FSM_BUFSIZE - have;
 
 				/* Compute tokstart and tokend. */
 				long dist = fsmRun->tokstart - newBuf->buf;
@@ -1051,12 +1051,12 @@ long scan_token( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
 			fsmRun->p = fsmRun->pe = newBuf->buf + have;
 			fsmRun->peof = 0;
 
-			newBuf->next = fsmRun->runBuf;
-			fsmRun->runBuf = newBuf;
+			newBuf->next = inputStream->runBuf;
+			inputStream->runBuf = newBuf;
 		}
 
 		/* We don't have any data. What is next in the input stream? */
-		space = fsmRun->runBuf->buf + FSM_BUFSIZE - fsmRun->pe;
+		space = inputStream->runBuf->buf + FSM_BUFSIZE - fsmRun->pe;
 		assert( space > 0 );
 			
 		/* Get more data. */

@@ -224,7 +224,7 @@ Word stream_push( Tree **&sp, Program *prg, Stream *stream, Tree *any )
 
 void undo_stream_push( Tree **&sp, Program *prg, Stream *stream, Word len )
 {
-	undo_stream_push( stream->fsmRun, len );
+	undo_stream_push( stream->in, stream->fsmRun, len );
 }
 
 void set_local( Tree **frame, long field, Tree *tree )

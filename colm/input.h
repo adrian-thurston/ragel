@@ -53,6 +53,8 @@ struct InputStream
 	virtual void pushBackNamed()
 		{ assert( false ); }
 	
+	RunBuf *runBuf;
+
 	long line;
 	long position;
 
