@@ -95,7 +95,6 @@ struct FsmRun
 	long region, cs, act;
 	char *tokstart, *tokend;
 	char *p, *pe, *peof;
-	bool eofSent;
 	bool returnResult;
 	char *mark[MARK_SLOTS];
 	long matchedToken;
@@ -103,7 +102,7 @@ struct FsmRun
 
 void exec_action( FsmRun *fsmRun, GenAction *genAction );
 void fsm_execute( InputStream *inputStream, FsmRun *fsmRun );
-void attach_input_stream( InputStream *in, FsmRun *fsmRun );
+void init_input_stream( InputStream *in );
 void send_queued_tokens( InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser );
 void send_handle_error( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser, Kid *input );
 Head *extract_match( InputStream *inputStream, FsmRun *fsmRun );

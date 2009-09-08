@@ -326,7 +326,7 @@ void send_back( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *par
 
 	/* If eof was just sent back remember that it needs to be sent again. */
 	if ( input->tree->id == parser->tables->rtd->eofLelIds[parser->parserId] )
-		fsmRun->eofSent = false;
+		inputStream->eofSent = false;
 
 	/* If the item is bound then store remove it from the bindings array. */
 	Tree *lastBound = parser->bindings.top();
@@ -770,7 +770,7 @@ void send_eof( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaR
 	}
 }
 
-void attach_input_stream( InputStream *inputStream, FsmRun *fsmRun )
+void init_input_stream( InputStream *inputStream )
 {
 	/* Run buffers need to stick around because 
 	 * token strings point into them. */
@@ -779,7 +779,7 @@ void attach_input_stream( InputStream *inputStream, FsmRun *fsmRun )
 
 	inputStream->data = inputStream->de = inputStream->runBuf->buf;
 	inputStream->deof = 0;
-	fsmRun->eofSent = false;
+	inputStream->eofSent = false;
 	inputStream->position = 0;
 }
 
@@ -863,9 +863,9 @@ void parse( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun 
 
 		/* Check for EOF. */
 		if ( tokenId == SCAN_EOF ) {
-			fsmRun->eofSent = true;
+			inputStream->eofSent = true;
 			send_eof( sp, inputStream, fsmRun, pdaRun );
-			if ( fsmRun->eofSent )
+			if ( inputStream->eofSent )
 				break;
 			continue;
 		}

@@ -168,9 +168,9 @@ Tree *call_tree_parser( Tree **&sp, Program *prg, Tree *input,
 	/* Set up the input stream. */
 	string s2 = s.str();
 	InputStreamString inputStream( s2.c_str(), strlen( s2.c_str() ) );
-	FsmRun fsmRun( prg );
-	attach_input_stream( &inputStream, &fsmRun );
+	init_input_stream( &inputStream );
 
+	FsmRun fsmRun( prg );
 	PdaRun parser( prg, tables, parserId, stopId, revertOn );
 	parse( sp, &inputStream, &fsmRun, &parser );
 	commit_full( sp, &parser, 0 );

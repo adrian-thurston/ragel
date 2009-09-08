@@ -1465,7 +1465,7 @@ void ParseData::parsePatterns()
 		}
 
 		InputStreamRepl in( repl );
-		attach_input_stream( &in, &fsmRun );
+		init_input_stream( &in );
 
 		repl->pdaRun = new PdaRun( &program,
 				pdaTables, repl->langEl->parserId, 0, false );
@@ -1485,7 +1485,7 @@ void ParseData::parsePatterns()
 		}
 
 		InputStreamPattern in( pat );
-		attach_input_stream( &in, &fsmRun );
+		init_input_stream( &in );
 
 		pat->pdaRun = new PdaRun( &program,
 				pdaTables, pat->langEl->parserId, 0, false );
