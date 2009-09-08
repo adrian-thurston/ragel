@@ -60,9 +60,9 @@ FsmRun::~FsmRun()
 
 void undo_stream_push( InputStream *inputStream, FsmRun *fsmRun, long length )
 {
-	long remainder = fsmRun->de - fsmRun->data;
+	long remainder = inputStream->de - inputStream->data;
 	memmove( inputStream->runBuf->buf, inputStream->runBuf->buf + length, remainder );
-	fsmRun->de -= length;
+	inputStream->de -= length;
 }
 
 void stream_push( InputStream *inputStream, FsmRun *fsmRun, const char *data, long length )
@@ -73,11 +73,11 @@ void stream_push( InputStream *inputStream, FsmRun *fsmRun, const char *data, lo
 	}
 	#endif
 
-	if ( fsmRun->data == inputStream->runBuf->buf ) {
+	if ( inputStream->data == inputStream->runBuf->buf ) {
 		cerr << "case 1" << endl;
 		assert(false);
 	}
-	else if ( fsmRun->data == (inputStream->runBuf->buf + inputStream->runBuf->length) ) {
+	else if ( inputStream->data == (inputStream->runBuf->buf + inputStream->runBuf->length) ) {
 		cerr << "case 2" << endl;
 		assert(false);
 	}
@@ -87,15 +87,15 @@ void stream_push( InputStream *inputStream, FsmRun *fsmRun, const char *data, lo
 		memcpy( dup, inputStream->runBuf, sizeof(RunBuf) );
 
 		/* Need to fix the offset. */
-		dup->length = fsmRun->de - inputStream->runBuf->buf;
-		dup->offset = fsmRun->data - inputStream->runBuf->buf;
+		dup->length = inputStream->de - inputStream->runBuf->buf;
+		dup->offset = inputStream->data - inputStream->runBuf->buf;
 
 		/* Send it back. */
 		inputStream->pushBackBuf( dup );
 
 		/* Since the second half is gone the current buffer now ends at data. */
-		fsmRun->de = fsmRun->data;
-		inputStream->runBuf->length = fsmRun->data - inputStream->runBuf->buf;
+		inputStream->de = inputStream->data;
+		inputStream->runBuf->length = inputStream->data - inputStream->runBuf->buf;
 
 		/* Create a new buffer for the data. This is the easy implementation.
 		 * Something better is needed here. It puts a max on the amount of
@@ -107,8 +107,8 @@ void stream_push( InputStream *inputStream, FsmRun *fsmRun, const char *data, lo
 		newBuf->length = length;
 		memcpy( newBuf->buf, data, length );
 
-		fsmRun->data = newBuf->buf;
-		fsmRun->de = newBuf->buf + newBuf->length;
+		inputStream->data = newBuf->buf;
+		inputStream->de = newBuf->buf + newBuf->length;
 		inputStream->runBuf = newBuf;
 	}
 }
@@ -141,7 +141,7 @@ void undo_position( InputStream *inputStream, const char *data, long length )
 
 void send_back_runbuf_head( InputStream *inputStream, FsmRun *fsmRun )
 {
-	if ( fsmRun->data == inputStream->runBuf->buf ) {
+	if ( inputStream->data == inputStream->runBuf->buf ) {
 		#ifdef COLM_LOG_PARSE
 		if ( colm_log_parse ) {
 			cerr << "pushing back runbuf" << endl;
@@ -153,7 +153,7 @@ void send_back_runbuf_head( InputStream *inputStream, FsmRun *fsmRun )
 		inputStream->runBuf = inputStream->runBuf->next;
 		
 		/* Flush out the input buffer. */
-		back->length = fsmRun->de - fsmRun->data;
+		back->length = inputStream->de - inputStream->data;
 		back->offset = 0;
 		inputStream->pushBackBuf( back );
 
@@ -161,10 +161,10 @@ void send_back_runbuf_head( InputStream *inputStream, FsmRun *fsmRun )
 		if ( inputStream->runBuf == 0 ) {
 			inputStream->runBuf = new RunBuf;
 			inputStream->runBuf->next = 0;
-			fsmRun->data = fsmRun->de = inputStream->runBuf->buf;
+			inputStream->data = inputStream->de = inputStream->runBuf->buf;
 		}
 
-		fsmRun->data = fsmRun->de = inputStream->runBuf->buf + inputStream->runBuf->length;
+		inputStream->data = inputStream->de = inputStream->runBuf->buf + inputStream->runBuf->length;
 	}
 }
 
@@ -186,19 +186,19 @@ void send_back_text( InputStream *inputStream, FsmRun *fsmRun, const char *data,
 
 	/* If there is data in the current buffer then the whole send back
 	 * should be in this buffer. */
-	assert( (fsmRun->data - inputStream->runBuf->buf) >= length );
+	assert( (inputStream->data - inputStream->runBuf->buf) >= length );
 
 	/* slide data back. */
-	fsmRun->data -= length;
+	inputStream->data -= length;
 
 	#ifdef COLM_LOG_PARSE
 	if ( colm_log_parse ) {
-		if ( memcmp( data, fsmRun->data, length ) != 0 )
+		if ( memcmp( data, inputStream->data, length ) != 0 )
 			cerr << "mismatch of pushed back text" << endl;
 	}
 	#endif
 
-	assert( memcmp( data, fsmRun->data, length ) == 0 );
+	assert( memcmp( data, inputStream->data, length ) == 0 );
 		
 	undo_position( inputStream, data, length );
 }
@@ -640,12 +640,12 @@ void exec_gen( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaR
 	#endif
 
 	/* Make the token data. */
-	Head *tokdata = extract_match( fsmRun );
+	Head *tokdata = extract_match( inputStream, fsmRun );
 
 	/* Note that we don't update the position now. It is done when the token
 	 * data is pulled from the stream. */
 
-	fsmRun->data = fsmRun->tokstart;
+	inputStream->data = fsmRun->tokstart;
 	fsmRun->tokstart = 0;
 
 	generation_action( sp, inputStream, fsmRun, pdaRun, id, tokdata, false, 0 );
@@ -660,7 +660,7 @@ void send_ignore( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long
 	#endif
 
 	/* Make the ignore string. */
-	Head *ignoreStr = extract_match( fsmRun );
+	Head *ignoreStr = extract_match( inputStream, fsmRun );
 	update_position( inputStream, fsmRun->tokstart, ignoreStr->length );
 	
 	Tree *tree = fsmRun->prg->treePool.allocate();
@@ -672,16 +672,16 @@ void send_ignore( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long
 	ignore( pdaRun, tree );
 }
 
-Head *extract_match( FsmRun *fsmRun )
+Head *extract_match( InputStream *inputStream, FsmRun *fsmRun )
 {
-	long length = fsmRun->data - fsmRun->tokstart;
+	long length = inputStream->data - fsmRun->tokstart;
 	return string_alloc_const( fsmRun->prg, fsmRun->tokstart, length );
 }
 
 void send_token( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser, long id )
 {
 	/* Make the token data. */
-	Head *tokdata = extract_match( fsmRun );
+	Head *tokdata = extract_match( inputStream, fsmRun );
 
 	#ifdef COLM_LOG_PARSE
 	if ( colm_log_parse ) {
@@ -705,25 +705,25 @@ Head *extract_prefix( InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser, 
 	assert( fsmRun->tokstart == 0 );
 
 	/* The generated token length has been stuffed into tokdata. */
-	if ( fsmRun->data + length > fsmRun->de ) {
-		fsmRun->data = fsmRun->de = inputStream->runBuf->buf;
-		fsmRun->deof = 0;
+	if ( inputStream->data + length > inputStream->de ) {
+		inputStream->data = inputStream->de = inputStream->runBuf->buf;
+		inputStream->deof = 0;
 
-		long space = inputStream->runBuf->buf + FSM_BUFSIZE - fsmRun->de;
+		long space = inputStream->runBuf->buf + FSM_BUFSIZE - inputStream->de;
 			
 		if ( space == 0 )
 			cerr << "OUT OF BUFFER SPACE" << endp;
 			
-		long len = inputStream->getData( fsmRun->data, space );
-		fsmRun->de = fsmRun->data + len;
+		long len = inputStream->getData( inputStream->data, space );
+		inputStream->de = inputStream->data + len;
 	}
 
-	if ( fsmRun->data + length > fsmRun->de )
+	if ( inputStream->data + length > inputStream->de )
 		cerr << "NOT ENOUGH DATA TO FETCH TOKEN" << endp;
 
-	Head *tokdata = string_alloc_const( fsmRun->prg, fsmRun->data, length );
-	update_position( inputStream, fsmRun->data, length );
-	fsmRun->data += length;
+	Head *tokdata = string_alloc_const( fsmRun->prg, inputStream->data, length );
+	update_position( inputStream, inputStream->data, length );
+	inputStream->data += length;
 
 	return tokdata;
 }
@@ -777,8 +777,8 @@ void attach_input_stream( InputStream *inputStream, FsmRun *fsmRun )
 	inputStream->runBuf = new RunBuf;
 	inputStream->runBuf->next = 0;
 
-	fsmRun->data = fsmRun->de = inputStream->data = inputStream->runBuf->buf;
-	fsmRun->deof = 0;
+	inputStream->data = inputStream->de = inputStream->runBuf->buf;
+	inputStream->deof = 0;
 	fsmRun->eofSent = false;
 	inputStream->position = 0;
 }
@@ -927,15 +927,15 @@ long scan_token( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
 	memset( fsmRun->mark, 0, sizeof(fsmRun->mark) );
 
 	while ( true ) {
-		fsmRun->p = fsmRun->data;
-		fsmRun->pe = fsmRun->de;
-		fsmRun->peof = fsmRun->deof;
+		fsmRun->p = inputStream->data;
+		fsmRun->pe = inputStream->de;
+		fsmRun->peof = inputStream->deof;
 
 		fsm_execute( inputStream, fsmRun );
 
-		fsmRun->data = fsmRun->p;
-		fsmRun->de = fsmRun->pe;
-		fsmRun->deof = fsmRun->peof;
+		inputStream->data = fsmRun->p;
+		inputStream->de = fsmRun->pe;
+		inputStream->deof = fsmRun->peof;
 
 		/* First check if scanning stopped because we have a token. */
 		if ( fsmRun->matchedToken > 0 ) {
@@ -943,7 +943,7 @@ long scan_token( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
 			 * context) then adjust data now. */
 			LangElInfo *lelInfo = pdaRun->tables->rtd->lelInfo;
 			if ( lelInfo[fsmRun->matchedToken].markId >= 0 )
-				fsmRun->data = fsmRun->mark[lelInfo[fsmRun->matchedToken].markId];
+				inputStream->data = fsmRun->mark[lelInfo[fsmRun->matchedToken].markId];
 
 			return fsmRun->matchedToken;
 		}
@@ -953,12 +953,12 @@ long scan_token( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
 			/* If a token was started, but not finished (tokstart != 0) then
 			 * restore data to the beginning of that token. */
 			if ( fsmRun->tokstart != 0 )
-				fsmRun->data = fsmRun->tokstart;
+				inputStream->data = fsmRun->tokstart;
 
 			/* Check for a default token in the region. If one is there
 			 * then send it and continue with the processing loop. */
 			if ( pdaRun->tables->rtd->regionInfo[fsmRun->region].defaultToken >= 0 ) {
-				fsmRun->tokstart = fsmRun->tokend = fsmRun->data;
+				fsmRun->tokstart = fsmRun->tokend = inputStream->data;
 				return pdaRun->tables->rtd->regionInfo[fsmRun->region].defaultToken;
 			}
 
@@ -968,7 +968,7 @@ long scan_token( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
 		/* Got here because the state machine didn't match a token or
 		 * encounter an error. Must be because we got to the end of the buffer
 		 * data. */
-		assert( fsmRun->data == fsmRun->de );
+		assert( inputStream->data == inputStream->de );
 
 		/* Check for a named language element. Note that we can do this only
 		 * when data == de otherwise we get ahead of what's already in the
@@ -980,7 +980,7 @@ long scan_token( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
 			 * runBuf, a named langEl, then the second half full. During
 			 * backtracking we would need to push the halves back separately.
 			 * */
-			if ( fsmRun->data > inputStream->runBuf->buf ) {
+			if ( inputStream->data > inputStream->runBuf->buf ) {
 				#ifdef COLM_LOG_PARSE
 				if ( colm_log_parse )
 					cerr << "have a langEl, making a new runBuf" << endl;
@@ -988,11 +988,11 @@ long scan_token( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
 
 				/* Compute the length of the current before before we move
 				 * past it. */
-				inputStream->runBuf->length = fsmRun->data - inputStream->runBuf->buf;;
+				inputStream->runBuf->length = inputStream->data - inputStream->runBuf->buf;;
 
 				/* Make the new one. */
 				RunBuf *newBuf = new RunBuf;
-				fsmRun->data = fsmRun->de = newBuf->buf;
+				inputStream->data = inputStream->de = newBuf->buf;
 				newBuf->next = inputStream->runBuf;
 				inputStream->runBuf = newBuf;
 			}
@@ -1015,7 +1015,7 @@ long scan_token( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
 
 		/* There may be space left in the current buffer. If not then we need
 		 * to make some. */
-		long space = inputStream->runBuf->buf + FSM_BUFSIZE - fsmRun->de;
+		long space = inputStream->runBuf->buf + FSM_BUFSIZE - inputStream->de;
 		if ( space == 0 ) {
 			/* Create a new run buf. */
 			RunBuf *newBuf = new RunBuf;
@@ -1036,7 +1036,7 @@ long scan_token( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
 				}
 
 				/* There is data that needs to be shifted over. */
-				have = fsmRun->de - fsmRun->tokstart;
+				have = inputStream->de - fsmRun->tokstart;
 				memcpy( newBuf->buf, fsmRun->tokstart, have );
 
 				/* Compute the length of the previous buffer. */
@@ -1055,22 +1055,22 @@ long scan_token( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
 				}
 			}
 
-			fsmRun->data = fsmRun->de = newBuf->buf + have;
-			fsmRun->deof = 0;
+			inputStream->data = inputStream->de = newBuf->buf + have;
+			inputStream->deof = 0;
 
 			newBuf->next = inputStream->runBuf;
 			inputStream->runBuf = newBuf;
 		}
 
 		/* We don't have any data. What is next in the input stream? */
-		space = inputStream->runBuf->buf + FSM_BUFSIZE - fsmRun->de;
+		space = inputStream->runBuf->buf + FSM_BUFSIZE - inputStream->de;
 		assert( space > 0 );
 			
 		/* Get more data. */
-		int len = inputStream->getData( fsmRun->data, space );
-		fsmRun->de = fsmRun->data + len;
+		int len = inputStream->getData( inputStream->data, space );
+		inputStream->de = inputStream->data + len;
 		if ( inputStream->needFlush() )
-			fsmRun->deof = fsmRun->de;
+			inputStream->deof = inputStream->de;
 	}
 
 	/* Should not be reached. */
