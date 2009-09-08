@@ -101,12 +101,7 @@ protected:
 	string PE() { return ACCESS() + "pe"; }
 	string PEOF() { return ACCESS() + "peof"; }
 
-	string BUF() { return ACCESS() + "buf"; }
-	string HAVE() { return ACCESS() + "have"; }
-	string IGNLEN() { return ACCESS() + "ignlen"; }
-
 	string CS();
-	string STACK() { return ACCESS() + "stack"; }
 	string TOP() { return ACCESS() + "top"; }
 	string TOKSTART() { return ACCESS() + "tokstart"; }
 	string TOKEND() { return ACCESS() + "tokend"; }

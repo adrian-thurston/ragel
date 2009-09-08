@@ -1010,7 +1010,7 @@ void FsmCodeGen::writeExec()
 	setLabelsNeeded();
 
 	out <<
-		"void execute( FsmRun *fsmRun )\n"
+		"void fsm_execute( InputStream *inputStream, FsmRun *fsmRun )\n"
 		"{\n"
 		"/*_resume:*/\n";
 

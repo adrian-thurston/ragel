@@ -94,6 +94,7 @@ struct FsmRun
 	/* FsmRun State. */
 	long region, cs, act;
 	char *tokstart, *tokend;
+	char *data, *de, *deof;
 	char *p, *pe, *peof;
 	bool eofSent;
 	bool returnResult;
@@ -102,7 +103,7 @@ struct FsmRun
 };
 
 void exec_action( FsmRun *fsmRun, GenAction *genAction );
-void execute( FsmRun *fsmRun );
+void fsm_execute( InputStream *inputStream, FsmRun *fsmRun );
 void attach_input_stream( InputStream *in, FsmRun *fsmRun );
 void send_queued_tokens( InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser );
 void send_handle_error( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser, Kid *input );
