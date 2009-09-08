@@ -693,6 +693,11 @@ bool castAssignment( ParseData *pd, CodeVect &code, UniqueType *destUT,
 	if ( destUT->typeId == TYPE_REF && srcUT->typeId == TYPE_TREE &&
 			destUT->langEl == srcUT->langEl )
 		return true;
+
+	/* Setting a tree from a reference. */
+	if ( destUT->typeId == TYPE_TREE && srcUT->typeId == TYPE_REF &&
+			destUT->langEl == srcUT->langEl )
+		return true;
 	
 	/* Setting an iterator from a tree. */
 	if ( destUT->typeId == TYPE_ITER && srcUT->typeId == TYPE_TREE && 

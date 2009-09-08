@@ -83,8 +83,8 @@ void PdaCodeGen::writeFirst()
 		" * This code is generated\n"
 		"*/\n"
 		"\n"
-		"#include \"pdarun.h\"\n"
-		"#include \"fsmrun.h\"\n"
+		"#include <colm/pdarun.h>\n"
+		"#include <colm/fsmrun.h>\n"
 		"\n"
 		"extern RuntimeData main_runtimeData;\n";
 

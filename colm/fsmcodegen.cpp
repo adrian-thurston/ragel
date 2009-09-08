@@ -1049,7 +1049,7 @@ void FsmCodeGen::writeCode()
 		"#include <stdio.h>\n"
 		"#include <stdlib.h>\n"
 		"#include <string.h>\n"
-		"#include \"config.h\"\n"
+		"#include <colm/config.h>\n"
 		"\n"
 		"\n";
 

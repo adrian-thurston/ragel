@@ -260,9 +260,18 @@ void openOutput( )
 	}
 }
 
-void compileOutput( const char *argv0 )
+void compileOutputCommand( const char *command )
 {
-	/* Find the location of us. */
+	if ( colm_log_compile )
+		cout << "compiling with: " << command << endl;
+	int res = system( command );
+	if ( res != 0 )
+		cout << "there was a problem compiling the output" << endl;
+}
+
+void compileOutputPath( const char *argv0 )
+{
+	/* Find the location of the colm program that is executing. */
 	char *location = strdup( argv0 );
 	char *last = location + strlen(location) - 1;
 	while ( true ) {
@@ -284,23 +293,50 @@ void compileOutput( const char *argv0 )
 	char command[length];
 	sprintf( command, 
 		"g++ -Wall -Wwrite-strings"
-		" -I%s"
-		" -I%s/../aapl"
-		" -I" PREFIX "/include/colm"
+		" -I" PREFIX "/include"
+		" -g"
+		" -o %s"
+		" %s"
+		" -L" PREFIX "/lib"
+		" -lcolm%c",
+		exec, outputFileName, logging ? 'd' : 'p' );
+
+	compileOutputCommand( command );
+}
+
+void compileOutputRelative( const char *argv0 )
+{
+	/* Find the location of the colm program that is executing. */
+	char *location = strdup( argv0 );
+	char *last = strrchr( location, '/' );
+	assert( last != 0 );
+	last[1] = 0;
+
+	char *exec = fileNameFromStem( outputFileName, ".bin" );
+
+	int length = 1024 + 3*strlen(location) + strlen(outputFileName) + strlen(exec);
+	char command[length];
+	sprintf( command, 
+		"g++ -Wall -Wwrite-strings"
+		" -I%s.."
+		" -I%s../aapl"
 		" -g"
 		" -o %s"
 		" %s"
 		" -L%s"
-		" -L" PREFIX "/lib"
 		" -lcolm%c",
 		location, location,
 		exec, outputFileName, location, logging ? 'd' : 'p' );
-	if ( colm_log_compile ) {
-		cout << "compiling with: " << command << endl;
-	}
-	int res = system( command );
-	if ( res != 0 )
-		cout << "there was a problem compiling the output" << endl;
+	
+	compileOutputCommand( command );
+}
+
+void compileOutput( const char *argv0 )
+{
+	if ( strchr( argv0, '/' ) == 0 )
+		compileOutputPath( argv0 );
+	else
+		compileOutputRelative( argv0 );
 }
 
 void process_args( int argc, const char **argv )
