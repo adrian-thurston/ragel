@@ -19,8 +19,10 @@ accum output
 
 output Output = construct output []
 
-Output << 
-	"hello ( [Input] ) there
+for Id: id in Input {
+	Output <<
+		"( [Id] )
+}
 
 start S = Output.finish()
 
