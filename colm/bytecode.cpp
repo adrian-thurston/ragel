@@ -443,7 +443,7 @@ void Program::run()
 
 	if ( rtd->rootCodeLen > 0 ) {
 		CodeVect reverseCode;
-		Execution execution( this, reverseCode, 0, 0, rtd->rootCode, 0, 0, 0 );
+		Execution execution( this, reverseCode, 0, rtd->rootCode, 0, 0, 0, 0 );
 		execution.execute( root );
 
 		/* Pull out the reverse code and free it. */
@@ -463,11 +463,10 @@ void Program::run()
 }
 
 Execution::Execution( Program *prg, CodeVect &reverseCode,
-		FsmRun *fsmRun, PdaRun *parser, Code *code, Tree *lhs,
-		long genId, Head *matchText )
+		PdaRun *parser, Code *code, Tree *lhs,
+		long genId, Head *matchText, char **captures )
 : 
 	prg(prg), 
-	fsmRun(fsmRun),
 	parser(parser), 
 	code(code), 
 	frame(0), iframe(0),
@@ -477,7 +476,8 @@ Execution::Execution( Program *prg, CodeVect &reverseCode,
 	matchText(matchText),
 	reject(false), 
 	reverseCode(reverseCode),
-	rcodeUnitLen(0)
+	rcodeUnitLen(0),
+	captures(captures)
 {
 	if ( lhs != 0 ) {
 		assert( lhs->refs == 1 );
@@ -1002,7 +1002,7 @@ again:
 			/* If there are captures (this is a translate block) then copy them into
 			 * the local frame now. */
 			LangElInfo *lelInfo = prg->rtd->lelInfo;
-			char **mark = fsmRun->mark;
+			char **mark = captures;
 
 			for ( int i = 0; i < lelInfo[genId].numCaptureAttr; i++ ) {
 				CaptureAttr *ca = &prg->rtd->captureAttr[lelInfo[genId].captureAttr + i];

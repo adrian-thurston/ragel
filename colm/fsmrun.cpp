@@ -271,7 +271,7 @@ void send_back_ignore( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaR
 		/* Check for reverse code. */
 		if ( ignore->tree->flags & AF_HAS_RCODE ) {
 			Execution execution( fsmRun->prg, pdaRun->reverseCode, 
-					fsmRun, pdaRun, 0, 0, 0, 0 );
+					pdaRun, 0, 0, 0, 0, fsmRun->mark );
 
 			/* Do the reverse exeuction. */
 			execution.rexecute( sp, pdaRun->allReverseCode );
@@ -314,7 +314,7 @@ void send_back( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *par
 	/* Check for reverse code. */
 	if ( input->tree->flags & AF_HAS_RCODE ) {
 		Execution execution( fsmRun->prg, parser->reverseCode, 
-				fsmRun, parser, 0, 0, 0, 0 );
+				parser, 0, 0, 0, 0, fsmRun->mark );
 
 		/* Do the reverse exeuction. */
 		execution.rexecute( sp, parser->allReverseCode );
@@ -491,7 +491,7 @@ void send_named_lang_el( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, Pd
 void execute_generation_action( Tree **sp, Program *prg, FsmRun *fsmRun, PdaRun *pdaRun, Code *code, long id, Head *tokdata )
 {
 	/* Execute the translation. */
-	Execution execution( prg, pdaRun->reverseCode, fsmRun, pdaRun, code, 0, id, tokdata );
+	Execution execution( prg, pdaRun->reverseCode, pdaRun, code, 0, id, tokdata, fsmRun->mark );
 	execution.execute( sp );
 
 	/* If there is revese code but nothing generated we need a noToken. */
