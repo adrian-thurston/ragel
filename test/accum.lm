@@ -1,0 +1,28 @@
+lex start
+{
+	ignore /space+/
+	literal '*', '(', ')'
+	token id /[a-zA-Z_]+/
+}
+
+def item 
+	[id]
+|	['(' item* ')']
+
+def start 
+	[item*]
+
+start Input = parse start( stdin )
+
+accum output 
+	[start]
+
+output Output = construct output []
+
+Output << 
+	"hello ( [Input] ) there
+
+start S = Output.finish()
+
+print( S, '\n' )
+
