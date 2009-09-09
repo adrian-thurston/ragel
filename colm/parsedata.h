@@ -701,6 +701,7 @@ struct ParseData
 	void resolveProductionEls();
 	void resolvePatternEls();
 	void resolveReplacementEls();
+	void resolveAccumEls();
 
 	void addMatchText( ObjectDef *frame, KlangEl *lel );
 	void addMatchLength( ObjectDef *frame, KlangEl *lel );
@@ -737,6 +738,7 @@ struct ParseData
 	void initListFields( GenericType *gen );
 	void initListFunctions( GenericType *gen );
 	void initVectorFunctions( GenericType *gen );
+	void initAccumFunctions( GenericType *gen );
 
 	int argv1Offset();
 	void addStdin();
@@ -847,6 +849,7 @@ struct ParseData
 
 	PatternList patternList;
 	ReplList replList;
+	AccumTextList accumTextList;
 
 	ObjectDef *globalObjectDef;
 

@@ -1749,6 +1749,48 @@ void LangStmt::compileWhile( ParseData *pd, CodeVect &code ) const
 	pd->breakJumps.empty();
 }
 
+void LangStmt::evaluateAccumItems( ParseData *pd, CodeVect &code ) const
+{
+	/* Assign bind ids to the variables in the replacement. */
+	for ( ReplItemList::Iter item = *accumText->list; item.lte(); item++ ) {
+		varRef->evaluate( pd, code );
+
+		switch ( item->type ) {
+		case ReplItem::FactorType: {
+			String result;
+			bool unusedCI;
+			prepareLitString( result, unusedCI, 
+					item->factor->literal->token.data,
+					item->factor->literal->token.loc );
+
+			/* Make sure we have this string. */
+			StringMapEl *mapEl = 0;
+			if ( pd->literalStrings.insert( result, &mapEl ) )
+				mapEl->value = pd->literalStrings.length()-1;
+
+			code.append( IN_LOAD_STR );
+			code.appendWord( mapEl->value );
+			break;
+		}
+		case ReplItem::InputText: {
+			/* Make sure we have this string. */
+			StringMapEl *mapEl = 0;
+			if ( pd->literalStrings.insert( item->data, &mapEl ) )
+				mapEl->value = pd->literalStrings.length()-1;
+
+			code.append( IN_LOAD_STR );
+			code.appendWord( mapEl->value );
+			break;
+		}
+		case ReplItem::VarRefType:
+			item->varRef->evaluate( pd, code );
+			break;
+		}
+
+		code.append( IN_PARSE_FRAG_WC );
+	}
+}
+
 void LangStmt::compile( ParseData *pd, CodeVect &code ) const
 {
 	switch ( type ) {
@@ -1883,6 +1925,10 @@ void LangStmt::compile( ParseData *pd, CodeVect &code ) const
 			}
 
 			objField->refActive = false;
+			break;
+		}
+		case AccumType: {
+			evaluateAccumItems( pd, code );
 			break;
 		}
 	}
@@ -2447,6 +2493,12 @@ void ParseData::initVectorFunctions( GenericType *gen )
 			IN_VECTOR_INSERT_WV, IN_VECTOR_INSERT_WC, uniqueTypeInt, gen->utArg, false );
 }
 
+void ParseData::initAccumFunctions( GenericType *gen )
+{
+	initFunction( gen->utArg, gen->objDef, "finish", 
+			IN_ACCUM_FINISH_WC, IN_ACCUM_FINISH_WC, false );
+}
+
 void ParseData::resolveGenericTypes()
 {
 	for ( NamespaceList::Iter ns = namespaceList; ns.lte(); ns++ ) {
@@ -2472,6 +2524,9 @@ void ParseData::resolveGenericTypes()
 					break;
 				case GEN_VECTOR:
 					initVectorFunctions( gen );
+					break;
+				case GEN_ACCUM:
+					initAccumFunctions( gen );
 					break;
 			}
 

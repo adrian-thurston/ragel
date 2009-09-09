@@ -1429,6 +1429,22 @@ void ParseData::resolveReplacementEls()
 	}
 }
 
+void ParseData::resolveAccumEls()
+{
+	for ( AccumTextList::Iter accum = accumTextList; accum.lte(); accum++ ) {
+		for ( ReplItemList::Iter item = *accum->list; item.lte(); item++ ) {
+			switch ( item->type ) {
+			case ReplItem::FactorType:
+				resolveFactor( item->factor );
+				break;
+			case ReplItem::InputText:
+			case ReplItem::VarRefType:
+				break;
+			}
+		}
+	}
+}
+
 void ParseData::initEmptyScanners()
 {
 	for ( RegionList::Iter reg = regionList; reg.lte(); reg++ ) {
@@ -1569,6 +1585,7 @@ void ParseData::semanticAnalysis()
 	/* Resolve pattern and replacement elements. */
 	resolvePatternEls();
 	resolveReplacementEls();
+	resolveAccumEls();
 
 	analyzeParseTree();
 

@@ -1017,6 +1017,27 @@ struct Replacement
 
 typedef DList<Replacement> ReplList;
 
+struct AccumText
+{
+	AccumText( const InputLoc &loc, Namespace *nspace, 
+			TokenRegion *region, ReplItemList *list ) :
+		loc(loc), nspace(nspace), region(region), list(list), 
+		langEl(0), pdaRun(0), nextBindId(1), parse(true) {}
+
+	InputLoc loc;
+	Namespace *nspace;
+	TokenRegion *region;
+	ReplItemList *list;
+	KlangEl *langEl;
+	PdaRun *pdaRun;
+	long nextBindId;
+	bool parse;
+
+	AccumText *prev, *next;
+};
+
+typedef DList<AccumText> AccumTextList;
+
 struct UserIter;
 struct Function;
 
@@ -1574,6 +1595,10 @@ struct LangStmt
 		type(type), varRef(varRef), expr(0), replacement(replacement), 
 		exprPtrVect(0), next(0) {}
 
+	LangStmt( Type type, LangVarRef *varRef, AccumText *accumText ) : 
+		type(type), varRef(varRef), expr(0), accumText(accumText), 
+		exprPtrVect(0), next(0) {}
+
 	/* ForIterType */
 	LangStmt( const InputLoc &loc, Type type, ObjField *objField, 
 			TypeRef *typeRef, LangTerm *langTerm, StmtList *stmtList ) : 
@@ -1585,6 +1610,7 @@ struct LangStmt
 
 	void analyze( ParseData *pd ) const;
 
+	void evaluateAccumItems( ParseData *pd, CodeVect &code ) const;
 	LangTerm *chooseDefaultIter( ParseData *pd, LangTerm *fromVarRef ) const;
 	void compileWhile( ParseData *pd, CodeVect &code ) const;
 	void compileForIterBody( ParseData *pd, CodeVect &code, UniqueType *iterUT ) const;
@@ -1599,6 +1625,7 @@ struct LangStmt
 	TypeRef *typeRef;
 	LangExpr *expr;
 	Replacement *replacement;
+	AccumText *accumText;
 	ExprVect *exprPtrVect;
 	FieldInitVect *fieldInitVect;
 	StmtList *stmtList;

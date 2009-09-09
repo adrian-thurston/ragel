@@ -558,7 +558,7 @@ void send_back_queued_ignore( Tree **sp, InputStream *inputStream, FsmRun *fsmRu
 	}
 }
 
-void send( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, Kid *input )
+void send_with_ignore( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, Kid *input )
 {
 	/* Need to preserve the layout under a tree:
 	 *    attributes, ignore tokens, grammar children. */
@@ -601,7 +601,7 @@ void send_handle_error( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, Pda
 	long id = input->tree->id;
 
 	/* Send the token to the parser. */
-	send( sp, inputStream, fsmRun, pdaRun, input );
+	send_with_ignore( sp, inputStream, fsmRun, pdaRun, input );
 		
 	/* Check the result. */
 	if ( pdaRun->errCount > 0 ) {
@@ -762,7 +762,7 @@ void send_eof( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaR
 		send_queued_tokens( sp, inputStream, fsmRun, pdaRun );
 	}
 
-	send( sp, inputStream, fsmRun, pdaRun, input );
+	send_with_ignore( sp, inputStream, fsmRun, pdaRun, input );
 
 	if ( pdaRun->errCount > 0 ) {
 		parse_error( inputStream, fsmRun, pdaRun, input->tree->id, input->tree ) << 
@@ -902,6 +902,46 @@ void parse( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun 
 			break;
 		}
 	}
+}
+
+void parse_frag( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
+{
+	while ( true ) {
+		/* Pull the current scanner from the parser. This can change during
+		 * parsing due to stream pushes, usually for the purpose of includes.
+		 * */
+		int tokenId = scan_token( inputStream, fsmRun, pdaRun );
+
+		/* Check for EOF. */
+		if ( tokenId == SCAN_EOF )
+			break;
+
+		/* Check for a named language element. */
+		if ( tokenId == SCAN_LANG_EL ) {
+			send_named_lang_el( sp, inputStream, fsmRun, pdaRun );
+			continue;
+		}
+
+		/* Check for error. */
+		if ( tokenId == SCAN_ERROR ) {
+			scanner_error( sp, inputStream, fsmRun, pdaRun );
+			continue;
+		}
+
+		bool ctxDepParsing = fsmRun->prg->ctxDepParsing;
+		LangElInfo *lelInfo = pdaRun->tables->rtd->lelInfo;
+		if ( ctxDepParsing && lelInfo[tokenId].frameId >= 0 )
+			exec_gen( sp, inputStream, fsmRun, pdaRun, tokenId );
+		else if ( lelInfo[tokenId].ignore )
+			send_ignore( inputStream, fsmRun, pdaRun, tokenId );
+		else
+			send_token( sp, inputStream, fsmRun, pdaRun, tokenId );
+	}
+}
+
+void parse_frag_finish( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
+{
+	send_eof( sp, inputStream, fsmRun, pdaRun );
 }
 
 long scan_token( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )

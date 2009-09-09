@@ -224,6 +224,8 @@ typedef unsigned char uchar;
 #define IN_IGNORE                0xb7
 #define IN_PARSE_TREE_WC         0xc3
 #define IN_PARSE_TREE_WV         0xc4
+#define IN_PARSE_FRAG_WC         0xd0
+#define IN_ACCUM_FINISH_WC       0xd1
 
 #define IN_OPEN_FILE             0xb8
 #define IN_GET_STDIN             0xb9

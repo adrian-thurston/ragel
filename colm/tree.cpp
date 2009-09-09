@@ -836,6 +836,9 @@ Tree *create_generic( Program *prg, long genericId )
 			accum->pdaRun = new PdaRun( prg, prg->rtd->pdaTables, 
 					genericInfo->parserId, false, false );
 			newGeneric = (Tree*) accum;
+
+			/* Start off the parsing process. */
+			accum->pdaRun->init();
 			break;
 		}
 		default:

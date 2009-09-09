@@ -163,12 +163,12 @@ Tree *call_tree_parser( Tree **&sp, Program *prg, Tree *input,
 	PdaTables *tables = prg->rtd->pdaTables;
 
 	/* Collect the tree data. */
-	ostringstream s;
-	print_tree( s, sp, prg, input );
+	ostringstream sout;
+	print_tree( sout, sp, prg, input );
 
 	/* Set up the input stream. */
-	string s2 = s.str();
-	InputStreamString inputStream( s2.c_str(), strlen( s2.c_str() ) );
+	string s = sout.str();
+	InputStreamString inputStream( s.c_str(), strlen( s.c_str() ) );
 	init_input_stream( &inputStream );
 
 	FsmRun fsmRun( prg );
@@ -186,6 +186,41 @@ Tree *call_tree_parser( Tree **&sp, Program *prg, Tree *input,
 		delete parser.allReverseCode;
 		cv = 0;
 	}
+
+	/* Indicate that this tree came out of a parser. */
+	tree->flags |= AF_PARSED;
+
+	return tree;
+}
+
+void call_parser_frag( Tree **&sp, Program *prg, Tree *input, Accum *parser )
+{
+	/* Collect the tree data. */
+	ostringstream sout;
+	print_tree( sout, sp, prg, input );
+
+	/* Set up the input stream. */
+	string s = sout.str();
+	InputStreamString inputStream( s.c_str(), strlen( s.c_str() ) );
+	init_input_stream( &inputStream );
+
+	parse_frag( sp, &inputStream, parser->fsmRun, parser->pdaRun );
+}
+
+Tree *parser_frag_finish( Tree **&sp, Program *prg, Accum *accum )
+{
+	/* Set up the input stream. */
+	InputStreamString inputStream( "", 0 );
+	init_input_stream( &inputStream );
+
+	parse_frag_finish( sp, &inputStream, accum->fsmRun, accum->pdaRun );
+
+	commit_full( sp, accum->pdaRun, 0 );
+	Tree *tree = get_parsed_root( accum->pdaRun, false );
+	tree_upref( tree );
+	clean_parser( sp, accum->pdaRun );
+
+	delete accum->pdaRun->allReverseCode;
 
 	/* Indicate that this tree came out of a parser. */
 	tree->flags |= AF_PARSED;
@@ -2121,6 +2156,33 @@ again:
 			push( res );
 
 			tree_downref( prg, sp, input );
+			break;
+		}
+		case IN_PARSE_FRAG_WC: {
+			#ifdef COLM_LOG_BYTECODE
+			if ( colm_log_bytecode ) {
+				cerr << "IN_PARSE_FRAG_WC " << endl;
+			}
+			#endif
+
+			Tree *input = pop();
+			Tree *parser = pop();
+			call_parser_frag( sp, prg, input, (Accum*)parser );
+			tree_downref( prg, sp, input );
+			tree_downref( prg, sp, parser );
+			break;
+		}
+		case IN_ACCUM_FINISH_WC: {
+			#ifdef COLM_LOG_BYTECODE
+			if ( colm_log_bytecode ) {
+				cerr << "IN_ACCUM_FINISH_WC " << endl;
+			}
+			#endif
+
+			Tree *parser = pop();
+			Tree *result = parser_frag_finish( sp, prg, (Accum*)parser );
+			push( result );
+			tree_downref( prg, sp, parser );
 			break;
 		}
 		case IN_STREAM_PULL: {

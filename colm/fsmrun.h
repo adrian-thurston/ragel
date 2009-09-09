@@ -110,6 +110,8 @@ void send_back_ignore( Tree **sp, InputStream *inputStream, PdaRun *parser, Kid 
 void send_back( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser, Kid *input );
 void queue_back( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser, Kid *input );
 void parse( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser );
+void parse_frag( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser );
+void parse_frag_finish( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser );
 long scan_token( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun );
 Head *extract_prefix( InputStream *inputStream, PdaRun *parser, long length );
 void send_back_text( InputStream *inputStream, const char *data, long length );
