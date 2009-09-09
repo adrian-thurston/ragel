@@ -114,7 +114,6 @@ Stream *open_stream_file( Program *prg, FILE *file )
 	res->id = LEL_ID_STREAM;
 	res->file = file;
 	res->in = new InputStreamFile( file );
-	res->fsmRun = new FsmRun( prg );
 	init_input_stream( res->in );
 	return res;
 }
@@ -124,7 +123,6 @@ Stream *open_stream_fd( Program *prg, long fd )
 	Stream *res = (Stream*)prg->mapElPool.allocate();
 	res->id = LEL_ID_STREAM;
 	res->in = new InputStreamFD( fd );
-	res->fsmRun = new FsmRun( prg );
 	init_input_stream( res->in );
 	return res;
 }
@@ -626,7 +624,6 @@ void print_xml_tree( Tree **&sp, Program *prg, Tree *tree, bool commAttr )
 
 void stream_free( Program *prg, Stream *s )
 {
-	delete s->fsmRun;
 	delete s->in;
 	if ( s->file != 0 )
 		fclose( s->file );

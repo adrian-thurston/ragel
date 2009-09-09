@@ -135,8 +135,9 @@ Tree *call_parser( Tree **&sp, Program *prg, Stream *stream,
 		long parserId, long stopId, CodeVect *&cv, bool revertOn )
 {
 	PdaTables *tables = prg->rtd->pdaTables;
+	FsmRun fsmRun( prg );
 	PdaRun parser( prg, tables, parserId, stopId, revertOn );
-	parse( sp, stream->in, stream->fsmRun, &parser );
+	parse( sp, stream->in, &fsmRun, &parser );
 	commit_full( sp, &parser, 0 );
 	Tree *tree = get_parsed_root( &parser, stopId > 0 );
 	tree_upref( tree );
@@ -196,14 +197,15 @@ void undo_parse( Tree **&sp, Program *prg, Stream *stream,
 		long parserId, Tree *tree, CodeVect *rev )
 {
 	PdaTables *tables = prg->rtd->pdaTables;
+	FsmRun fsmRun( prg );
 	PdaRun parser( prg, tables, parserId, 0, false );
-	undo_parse( sp, stream->in, stream->fsmRun, &parser, tree, rev );
+	undo_parse( sp, stream->in, &fsmRun, &parser, tree, rev );
 }
 
 Tree *stream_pull( Program *prg, PdaRun *parser, Stream *stream, Tree *length )
 {
 	long len = ((Int*)length)->value;
-	Head *tokdata = extract_prefix( stream->in, stream->fsmRun, parser, len );
+	Head *tokdata = extract_prefix( stream->in, parser, len );
 	return construct_string( prg, tokdata );
 }
 
@@ -211,20 +213,20 @@ void undo_pull( Program *prg, Stream *stream, Tree *str )
 {
 	const char *data = string_data( ( (Str*)str )->value );
 	long length = string_length( ( (Str*)str )->value );
-	send_back_text( stream->in, stream->fsmRun, data, length );
+	send_back_text( stream->in, data, length );
 }
 
 Word stream_push( Tree **&sp, Program *prg, Stream *stream, Tree *any )
 {
 	std::stringstream ss;
 	print_tree( ss, sp, prg, any );
-	stream_push( stream->in, stream->fsmRun, ss.str().c_str(), ss.str().size());
+	stream_push( stream->in, ss.str().c_str(), ss.str().size());
 	return ss.str().size();
 }
 
 void undo_stream_push( Tree **&sp, Program *prg, Stream *stream, Word len )
 {
-	undo_stream_push( stream->in, stream->fsmRun, len );
+	undo_stream_push( stream->in, len );
 }
 
 void set_local( Tree **frame, long field, Tree *tree )

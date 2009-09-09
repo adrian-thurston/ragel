@@ -58,14 +58,14 @@ FsmRun::~FsmRun()
 //	}
 }
 
-void undo_stream_push( InputStream *inputStream, FsmRun *fsmRun, long length )
+void undo_stream_push( InputStream *inputStream, long length )
 {
 	long remainder = inputStream->de - inputStream->data;
 	memmove( inputStream->runBuf->buf, inputStream->runBuf->buf + length, remainder );
 	inputStream->de -= length;
 }
 
-void stream_push( InputStream *inputStream, FsmRun *fsmRun, const char *data, long length )
+void stream_push( InputStream *inputStream, const char *data, long length )
 {
 	#ifdef COLM_LOG_PARSE
 	if ( colm_log_parse ) {
@@ -139,7 +139,7 @@ void undo_position( InputStream *inputStream, const char *data, long length )
 	inputStream->position -= length;
 }
 
-void send_back_runbuf_head( InputStream *inputStream, FsmRun *fsmRun )
+void send_back_runbuf_head( InputStream *inputStream )
 {
 	if ( inputStream->data == inputStream->runBuf->buf ) {
 		#ifdef COLM_LOG_PARSE
@@ -171,7 +171,7 @@ void send_back_runbuf_head( InputStream *inputStream, FsmRun *fsmRun )
 /* Should only be sending back whole tokens/ignores, therefore the send back
  * should never cross a buffer boundary. Either we slide back data, or we move to
  * a previous buffer and slide back data. */
-void send_back_text( InputStream *inputStream, FsmRun *fsmRun, const char *data, long length )
+void send_back_text( InputStream *inputStream, const char *data, long length )
 {
 	#ifdef COLM_LOG_PARSE
 	if ( colm_log_parse ) {
@@ -182,7 +182,7 @@ void send_back_text( InputStream *inputStream, FsmRun *fsmRun, const char *data,
 	if ( length == 0 )
 		return;
 
-	send_back_runbuf_head( inputStream, fsmRun );
+	send_back_runbuf_head( inputStream );
 
 	/* If there is data in the current buffer then the whole send back
 	 * should be in this buffer. */
@@ -248,10 +248,10 @@ void queue_back( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pa
 	}
 }
 
-void send_back_ignore( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, Kid *ignore )
+void send_back_ignore( Tree **sp, InputStream *inputStream, PdaRun *pdaRun, Kid *ignore )
 {
 	/* Ignore tokens are queued in reverse order. */
-	while ( tree_is_ignore( fsmRun->prg, ignore ) ) {
+	while ( tree_is_ignore( pdaRun->prg, ignore ) ) {
 		#ifdef COLM_LOG_PARSE
 		if ( colm_log_parse ) {
 			LangElInfo *lelInfo = pdaRun->tables->rtd->lelInfo;
@@ -266,12 +266,12 @@ void send_back_ignore( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaR
 		bool artificial = ignore->tree->flags & AF_ARTIFICIAL;
 
 		if ( head != 0 && !artificial )
-			send_back_text( inputStream, fsmRun, string_data( head ), head->length );
+			send_back_text( inputStream, string_data( head ), head->length );
 
 		/* Check for reverse code. */
 		if ( ignore->tree->flags & AF_HAS_RCODE ) {
-			Execution execution( fsmRun->prg, pdaRun->reverseCode, 
-					pdaRun, 0, 0, 0, 0, fsmRun->mark );
+			Execution execution( pdaRun->prg, pdaRun->reverseCode, 
+					pdaRun, 0, 0, 0, 0, 0 );
 
 			/* Do the reverse exeuction. */
 			execution.rexecute( sp, pdaRun->allReverseCode );
@@ -298,7 +298,7 @@ void send_back( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *par
 
 	if ( input->tree->flags & AF_NAMED ) {
 		/* Send back anything in the buffer that has not been parsed. */
-		send_back_runbuf_head( inputStream, fsmRun );
+		send_back_runbuf_head( inputStream );
 
 		/* Send the named lang el back first, then send back any leading
 		 * whitespace. */
@@ -307,14 +307,14 @@ void send_back( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *par
 
 	if ( !(input->tree->flags & AF_ARTIFICIAL) ) {
 		/* Push back the token data. */
-		send_back_text( inputStream, fsmRun, string_data( input->tree->tokdata ), 
+		send_back_text( inputStream, string_data( input->tree->tokdata ), 
 				string_length( input->tree->tokdata ) );
 	}
 
 	/* Check for reverse code. */
 	if ( input->tree->flags & AF_HAS_RCODE ) {
-		Execution execution( fsmRun->prg, parser->reverseCode, 
-				parser, 0, 0, 0, 0, fsmRun->mark );
+		Execution execution( parser->prg, parser->reverseCode, 
+				parser, 0, 0, 0, 0, 0 );
 
 		/* Do the reverse exeuction. */
 		execution.rexecute( sp, parser->allReverseCode );
@@ -322,7 +322,7 @@ void send_back( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *par
 	}
 
 	/* Always push back the ignore text. */
-	send_back_ignore( sp, inputStream, fsmRun, parser, tree_ignore( fsmRun->prg, input->tree ) );
+	send_back_ignore( sp, inputStream, parser, tree_ignore( fsmRun->prg, input->tree ) );
 
 	/* If eof was just sent back remember that it needs to be sent again. */
 	if ( input->tree->id == parser->tables->rtd->eofLelIds[parser->parserId] )
@@ -549,7 +549,7 @@ Kid *extract_ignore( PdaRun *pdaRun )
 void send_back_queued_ignore( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
 {
 	Kid *ignore = extract_ignore( pdaRun );
-	send_back_ignore( sp, inputStream, fsmRun, pdaRun, ignore );
+	send_back_ignore( sp, inputStream, pdaRun, ignore );
 	while ( ignore != 0 ) {
 		Kid *next = ignore->next;
 		tree_downref( pdaRun->prg, sp, ignore->tree );
@@ -640,7 +640,7 @@ void exec_gen( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaR
 	#endif
 
 	/* Make the token data. */
-	Head *tokdata = extract_match( inputStream, fsmRun );
+	Head *tokdata = extract_match( pdaRun->prg, inputStream );
 
 	/* Note that we don't update the position now. It is done when the token
 	 * data is pulled from the stream. */
@@ -660,7 +660,7 @@ void send_ignore( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long
 	#endif
 
 	/* Make the ignore string. */
-	Head *ignoreStr = extract_match( inputStream, fsmRun );
+	Head *ignoreStr = extract_match( pdaRun->prg, inputStream );
 	update_position( inputStream, inputStream->token, ignoreStr->length );
 	
 	Tree *tree = fsmRun->prg->treePool.allocate();
@@ -672,16 +672,16 @@ void send_ignore( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long
 	ignore( pdaRun, tree );
 }
 
-Head *extract_match( InputStream *inputStream, FsmRun *fsmRun )
+Head *extract_match( Program *prg, InputStream *inputStream )
 {
 	long length = inputStream->data - inputStream->token;
-	return string_alloc_const( fsmRun->prg, inputStream->token, length );
+	return string_alloc_const( prg, inputStream->token, length );
 }
 
 void send_token( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser, long id )
 {
 	/* Make the token data. */
-	Head *tokdata = extract_match( inputStream, fsmRun );
+	Head *tokdata = extract_match( parser->prg, inputStream );
 
 	#ifdef COLM_LOG_PARSE
 	if ( colm_log_parse ) {
@@ -699,7 +699,7 @@ void send_token( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pa
 
 /* Load up a token, starting from tokstart if it is set. If not set then
  * start it at data. */
-Head *extract_prefix( InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser, long length )
+Head *extract_prefix( InputStream *inputStream, PdaRun *parser, long length )
 {
 	/* We should not be in the midst of getting a token. */
 	assert( inputStream->token == 0 );
@@ -721,7 +721,7 @@ Head *extract_prefix( InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser, 
 	if ( inputStream->data + length > inputStream->de )
 		cerr << "NOT ENOUGH DATA TO FETCH TOKEN" << endp;
 
-	Head *tokdata = string_alloc_const( fsmRun->prg, inputStream->data, length );
+	Head *tokdata = string_alloc_const( parser->prg, inputStream->data, length );
 	update_position( inputStream, inputStream->data, length );
 	inputStream->data += length;
 

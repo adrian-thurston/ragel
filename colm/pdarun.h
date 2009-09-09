@@ -270,7 +270,6 @@ struct Stream
 
 	FILE *file;
 	InputStream *in;
-	FsmRun *fsmRun;
 };
 
 /*

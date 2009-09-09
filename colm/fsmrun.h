@@ -105,15 +105,15 @@ void fsm_execute( InputStream *inputStream, FsmRun *fsmRun );
 void init_input_stream( InputStream *in );
 void send_queued_tokens( InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser );
 void send_handle_error( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser, Kid *input );
-Head *extract_match( InputStream *inputStream, FsmRun *fsmRun );
-void send_back_ignore( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser, Kid *ignore );
+Head *extract_match( Program *prg, InputStream *inputStream );
+void send_back_ignore( Tree **sp, InputStream *inputStream, PdaRun *parser, Kid *ignore );
 void send_back( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser, Kid *input );
 void queue_back( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser, Kid *input );
 void parse( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser );
 long scan_token( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun );
-Head *extract_prefix( InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser, long length );
-void send_back_text( InputStream *inputStream, FsmRun *fsmRun, const char *data, long length );
-void stream_push( InputStream *inputStream, FsmRun *fsmRun, const char *data, long length );
-void undo_stream_push( InputStream *inputStream, FsmRun *fsmRun, long length );
+Head *extract_prefix( InputStream *inputStream, PdaRun *parser, long length );
+void send_back_text( InputStream *inputStream, const char *data, long length );
+void stream_push( InputStream *inputStream, const char *data, long length );
+void undo_stream_push( InputStream *inputStream, long length );
 
 #endif
