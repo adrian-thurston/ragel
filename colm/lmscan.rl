@@ -322,11 +322,9 @@ void Scanner::endSection( )
 			fret;
 		};
 		NL => {
-			if ( litBuf.length > 0 ) {
-				litBuf.append( '\n' );
-				token( TK_LitPat, litBuf.data, litBuf.data+litBuf.length );
-				litBuf.clear();
-			}
+			litBuf.append( '\n' );
+			token( TK_LitPat, litBuf.data, litBuf.data+litBuf.length );
+			litBuf.clear();
 			token( '"' );
 			fret;
 		};
