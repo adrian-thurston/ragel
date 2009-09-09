@@ -554,6 +554,7 @@ struct GenericInfo
 	long keyOffset;
 	long keyType;
 	long langElId;
+	long parserId;
 };
 
 long cmp_tree( const Tree *tree1, const Tree *tree2 );

@@ -43,7 +43,7 @@ struct Parser
 		TK_DoubleArrow, TK_StarStar, TK_NameSep, TK_DashDash, TK_DoubleEql,
 		TK_NotEql, TK_DoubleColon, TK_LessEql, TK_GrtrEql, TK_RightArrow,
 		TK_LitPat, TK_AmpAmp, TK_BarBar, TK_SqOpen, TK_SqOpenNeg, TK_SqClose,
-		TK_Dash, TK_ReChar;
+		TK_Dash, TK_ReChar, TK_LtLt;
 
 	# Defining things.
 	token KW_Rl, KW_Def, KW_Lex, KW_Ignore, KW_Token, KW_Commit, KW_Namespace,

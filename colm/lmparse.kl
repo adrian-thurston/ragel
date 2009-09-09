@@ -1073,6 +1073,10 @@ statement: KW_Yield var_ref
 	final {
 		$$->stmt = new LangStmt( LangStmt::YieldType, $2->varRef );
 	};
+statement: var_ref TK_LtLt repl_list
+	final {
+		$$->stmt = new LangStmt( LangStmt::AccumType, $1->varRef );
+	};
 
 nonterm opt_require_stmt uses statement;
 

@@ -1538,7 +1538,8 @@ struct LangStmt
 		ReturnType,
 		YieldType,
 		ForIterType,
-		BreakType
+		BreakType,
+		AccumType
 	};
 
 	LangStmt( const InputLoc &loc, Type type, FieldInitVect *fieldInitVect ) : 

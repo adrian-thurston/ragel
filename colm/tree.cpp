@@ -832,6 +832,9 @@ Tree *create_generic( Program *prg, long genericId )
 			Accum *accum = (Accum*)prg->mapElPool.allocate();
 			accum->id = genericInfo->langElId;
 			accum->genericInfo = genericInfo;
+			accum->fsmRun = new FsmRun( prg );
+			accum->pdaRun = new PdaRun( prg, prg->rtd->pdaTables, 
+					genericInfo->parserId, false, false );
 			newGeneric = (Tree*) accum;
 			break;
 		}
@@ -880,6 +883,9 @@ free_tree:
 		}
 		else if ( generic->type == GEN_ACCUM ) {
 			Accum *accum = (Accum*)tree;
+			/* FIXME: Need to clean up here. */
+			delete accum->fsmRun;
+			delete accum->pdaRun;
 			prg->mapElPool.free( (MapEl*)accum );
 		}
 		else

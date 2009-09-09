@@ -445,6 +445,7 @@ void Scanner::endSection( )
 		'->' => { token( TK_RightArrow ); };
 		'&&' => { token( TK_AmpAmp ); };
 		'||' => { token( TK_BarBar ); };
+		'<<' => { token( TK_LtLt ); };
 		
 		('+' | '-' | '*' | '/' | '(' | ')' | '@' | '$' ) => { token( *ts ); };
 

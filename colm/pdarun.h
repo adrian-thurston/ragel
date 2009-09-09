@@ -258,6 +258,8 @@ struct Accum
 	Kid *child;
 
 	GenericInfo *genericInfo;
+	FsmRun *fsmRun;
+	PdaRun *pdaRun;
 };
 
 struct Stream
