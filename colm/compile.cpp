@@ -2526,6 +2526,8 @@ void ParseData::resolveGenericTypes()
 					initVectorFunctions( gen );
 					break;
 				case GEN_ACCUM:
+					/* Need to generate a parser for the type. */
+					gen->utArg->langEl->parserId = nextParserId++;
 					initAccumFunctions( gen );
 					break;
 			}
