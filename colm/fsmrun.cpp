@@ -383,14 +383,14 @@ void set_AF_GROUP_MEM( PdaRun *parser )
 	}
 }
 
-void send_queued_tokens( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser )
+void send_queued_tokens( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
 {
 	LangElInfo *lelInfo = fsmRun->prg->rtd->lelInfo;
 
-	while ( parser->queue != 0 ) {
+	while ( pdaRun->queue != 0 ) {
 		/* Pull an item to send off the queue. */
-		Kid *send = parser->queue;
-		parser->queue = parser->queue->next;
+		Kid *send = pdaRun->queue;
+		pdaRun->queue = pdaRun->queue->next;
 
 		/* Must clear next, since the parsing algorithm uses it. */
 		send->next = 0;
@@ -398,22 +398,22 @@ void send_queued_tokens( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, Pd
 			#ifdef COLM_LOG_PARSE
 			if ( colm_log_parse ) {
 				cerr << "ignoring queued item: " << 
-						parser->tables->rtd->lelInfo[send->tree->id].name << endl;
+						pdaRun->tables->rtd->lelInfo[send->tree->id].name << endl;
 			}
 			#endif
 			
-			ignore( parser, send->tree );
+			ignore( pdaRun, send->tree );
 			fsmRun->prg->kidPool.free( send );
 		}
 		else {
 			#ifdef COLM_LOG_PARSE
 			if ( colm_log_parse ) {
 				cerr << "sending queue item: " << 
-						parser->tables->rtd->lelInfo[send->tree->id].name << endl;
+						pdaRun->tables->rtd->lelInfo[send->tree->id].name << endl;
 			}
 			#endif
 
-			send_handle_error( sp, inputStream, fsmRun, parser, send );
+			send_handle_error( sp, inputStream, fsmRun, pdaRun, send );
 		}
 	}
 }
@@ -488,7 +488,8 @@ void send_named_lang_el( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, Pd
 	send_handle_error( sp, inputStream, fsmRun, parser, input );
 }
 
-void execute_generation_action( Tree **sp, Program *prg, FsmRun *fsmRun, PdaRun *pdaRun, Code *code, long id, Head *tokdata )
+void execute_generation_action( Tree **sp, Program *prg, FsmRun *fsmRun, PdaRun *pdaRun, 
+		Code *code, long id, Head *tokdata )
 {
 	/* Execute the translation. */
 	Execution execution( prg, pdaRun->reverseCode, pdaRun, code, 0, id, tokdata, fsmRun->mark );
@@ -742,6 +743,10 @@ void send_eof( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaR
 
 	input->tree->refs = 1;
 	input->tree->id = pdaRun->tables->rtd->eofLelIds[pdaRun->parserId];
+
+	/* Set the state using the state of the parser. */
+	fsmRun->region = pdaRun->getNextRegion();
+	fsmRun->cs = fsmRun->tables->entryByRegion[fsmRun->region];
 
 	bool ctxDepParsing = fsmRun->prg->ctxDepParsing;
 	long frameId = pdaRun->tables->rtd->regionInfo[fsmRun->region].eofFrameId;

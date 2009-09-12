@@ -709,12 +709,12 @@ struct Program
 struct Execution
 {
 	Execution( Program *prg, CodeVect &reverseCode,
-			PdaRun *parser, Code *code, Tree *lhs,
+			PdaRun *pdaRun, Code *code, Tree *lhs,
 			long genId, Head *matchText, char **captures );
 
 	Program *prg;
 	PdaTables *pdaTables;
-	PdaRun *parser;
+	PdaRun *pdaRun;
 	Code *code;
 	Tree **frame;
 	Tree **iframe;

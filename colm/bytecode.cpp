@@ -108,7 +108,7 @@ Tree *prep_parse_tree( Program *prg, Tree **sp, Tree *tree )
 	return  tree;
 }
 
-void send( Tree **root, Program *prg, PdaRun *parser, Tree *tree, bool ignore )
+void send_tree( Tree **root, Program *prg, PdaRun *pdaRun, Tree *tree, bool ignore )
 {
 	tree = prep_parse_tree( prg, root, tree );
 
@@ -123,11 +123,11 @@ void send( Tree **root, Program *prg, PdaRun *parser, Tree *tree, bool ignore )
 	Kid *kid = prg->kidPool.allocate();
 	kid->tree = tree;
 
-	if ( parser->queue == 0 )
-		parser->queue = parser->queueLast = kid;
+	if ( pdaRun->queue == 0 )
+		pdaRun->queue = pdaRun->queueLast = kid;
 	else {
-		parser->queueLast->next = kid;
-		parser->queueLast = kid;
+		pdaRun->queueLast->next = kid;
+		pdaRun->queueLast = kid;
 	}
 }
 
@@ -136,18 +136,18 @@ Tree *call_parser( Tree **&sp, Program *prg, Stream *stream,
 {
 	PdaTables *tables = prg->rtd->pdaTables;
 	FsmRun fsmRun( prg );
-	PdaRun parser( prg, tables, parserId, stopId, revertOn );
-	parse( sp, stream->in, &fsmRun, &parser );
-	commit_full( sp, &parser, 0 );
-	Tree *tree = get_parsed_root( &parser, stopId > 0 );
+	PdaRun pdaRun( prg, tables, parserId, stopId, revertOn );
+	parse( sp, stream->in, &fsmRun, &pdaRun );
+	commit_full( sp, &pdaRun, 0 );
+	Tree *tree = get_parsed_root( &pdaRun, stopId > 0 );
 	tree_upref( tree );
-	clean_parser( sp, &parser );
+	clean_parser( sp, &pdaRun );
 
 	/* Maybe return the reverse code. */
 	if ( revertOn )
-		cv = parser.allReverseCode;
+		cv = pdaRun.allReverseCode;
 	else {
-		delete parser.allReverseCode;
+		delete pdaRun.allReverseCode;
 		cv = 0;
 	}
 
@@ -172,18 +172,18 @@ Tree *call_tree_parser( Tree **&sp, Program *prg, Tree *input,
 	init_input_stream( &inputStream );
 
 	FsmRun fsmRun( prg );
-	PdaRun parser( prg, tables, parserId, stopId, revertOn );
-	parse( sp, &inputStream, &fsmRun, &parser );
-	commit_full( sp, &parser, 0 );
-	Tree *tree = get_parsed_root( &parser, stopId > 0 );
+	PdaRun pdaRun( prg, tables, parserId, stopId, revertOn );
+	parse( sp, &inputStream, &fsmRun, &pdaRun );
+	commit_full( sp, &pdaRun, 0 );
+	Tree *tree = get_parsed_root( &pdaRun, stopId > 0 );
 	tree_upref( tree );
-	clean_parser( sp, &parser );
+	clean_parser( sp, &pdaRun );
 
 	/* Maybe return the reverse code. */
 	if ( revertOn )
-		cv = parser.allReverseCode;
+		cv = pdaRun.allReverseCode;
 	else {
-		delete parser.allReverseCode;
+		delete pdaRun.allReverseCode;
 		cv = 0;
 	}
 
@@ -193,19 +193,30 @@ Tree *call_tree_parser( Tree **&sp, Program *prg, Tree *input,
 	return tree;
 }
 
-void call_parser_frag( Tree **&sp, Program *prg, Tree *input, Accum *parser )
+void call_parser_frag( Tree **&sp, Program *prg, Tree *input, Accum *accum )
 {
-	/* Collect the tree data. */
-	ostringstream sout;
-	print_tree( sout, sp, prg, input );
+	if ( input->id == LEL_ID_STR ) {
+		/* Collect the tree data. */
+		ostringstream sout;
+		print_tree( sout, sp, prg, input );
 
-	/* Set up the input stream. */
-	string s = sout.str();
-	InputStreamString inputStream( s.c_str(), strlen( s.c_str() ) );
-	init_input_stream( &inputStream );
+		/* Set up the input stream. */
+		string s = sout.str();
+		InputStreamString inputStream( s.c_str(), strlen( s.c_str() ) );
+		init_input_stream( &inputStream );
 
-	parse_frag( sp, &inputStream, parser->fsmRun, parser->pdaRun );
+		parse_frag( sp, &inputStream, accum->fsmRun, accum->pdaRun );
+	}
+	else {
+		InputStreamString inputStream( "", 0 );
+		init_input_stream( &inputStream );
+
+		tree_upref( input );
+		send_tree( sp, prg, accum->pdaRun, input, false );
+		send_queued_tokens( sp, &inputStream, accum->fsmRun, accum->pdaRun );
+	}
 }
+
 
 Tree *parser_frag_finish( Tree **&sp, Program *prg, Accum *accum )
 {
@@ -233,14 +244,14 @@ void undo_parse( Tree **&sp, Program *prg, Stream *stream,
 {
 	PdaTables *tables = prg->rtd->pdaTables;
 	FsmRun fsmRun( prg );
-	PdaRun parser( prg, tables, parserId, 0, false );
-	undo_parse( sp, stream->in, &fsmRun, &parser, tree, rev );
+	PdaRun pdaRun( prg, tables, parserId, 0, false );
+	undo_parse( sp, stream->in, &fsmRun, &pdaRun, tree, rev );
 }
 
-Tree *stream_pull( Program *prg, PdaRun *parser, Stream *stream, Tree *length )
+Tree *stream_pull( Program *prg, PdaRun *pdaRun, Stream *stream, Tree *length )
 {
 	long len = ((Int*)length)->value;
-	Head *tokdata = extract_prefix( stream->in, parser, len );
+	Head *tokdata = extract_prefix( stream->in, pdaRun, len );
 	return construct_string( prg, tokdata );
 }
 
@@ -500,11 +511,11 @@ void Program::run()
 }
 
 Execution::Execution( Program *prg, CodeVect &reverseCode,
-		PdaRun *parser, Code *code, Tree *lhs,
+		PdaRun *pdaRun, Code *code, Tree *lhs,
 		long genId, Head *matchText, char **captures )
 : 
 	prg(prg), 
-	parser(parser), 
+	pdaRun(pdaRun), 
 	code(code), 
 	frame(0), iframe(0),
 	lhs(lhs),
@@ -2166,10 +2177,10 @@ again:
 			#endif
 
 			Tree *input = pop();
-			Tree *parser = pop();
-			call_parser_frag( sp, prg, input, (Accum*)parser );
+			Tree *accum = pop();
+			call_parser_frag( sp, prg, input, (Accum*)accum );
 			tree_downref( prg, sp, input );
-			tree_downref( prg, sp, parser );
+			tree_downref( prg, sp, accum );
 			break;
 		}
 		case IN_ACCUM_FINISH_WC: {
@@ -2179,10 +2190,10 @@ again:
 			}
 			#endif
 
-			Tree *parser = pop();
-			Tree *result = parser_frag_finish( sp, prg, (Accum*)parser );
+			Tree *accum = pop();
+			Tree *result = parser_frag_finish( sp, prg, (Accum*)accum );
 			push( result );
-			tree_downref( prg, sp, parser );
+			tree_downref( prg, sp, accum );
 			break;
 		}
 		case IN_STREAM_PULL: {
@@ -2193,7 +2204,7 @@ again:
 			#endif
 			Tree *len = pop();
 			Tree *stream = pop();
-			Tree *string = stream_pull( prg, parser, (Stream*)stream, len );
+			Tree *string = stream_pull( prg, pdaRun, (Stream*)stream, len );
 			tree_upref( string );
 			push( string );
 
@@ -2376,7 +2387,7 @@ again:
 			#endif
 
 			Tree *tree = pop();
-			send( sp, prg, parser, tree, false );
+			send_tree( sp, prg, pdaRun, tree, false );
 			push( 0 );
 			break;
 		}
@@ -2388,7 +2399,7 @@ again:
 			#endif
 
 			Tree *tree = pop();
-			send( sp, prg, parser, tree, true );
+			send_tree( sp, prg, pdaRun, tree, true );
 			push( 0 );
 			break;
 		}

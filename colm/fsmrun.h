@@ -103,7 +103,7 @@ struct FsmRun
 void exec_action( FsmRun *fsmRun, GenAction *genAction );
 void fsm_execute( InputStream *inputStream, FsmRun *fsmRun );
 void init_input_stream( InputStream *in );
-void send_queued_tokens( InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser );
+void send_queued_tokens( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun );
 void send_handle_error( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser, Kid *input );
 Head *extract_match( Program *prg, InputStream *inputStream );
 void send_back_ignore( Tree **sp, InputStream *inputStream, PdaRun *parser, Kid *ignore );
