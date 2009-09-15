@@ -24,9 +24,7 @@
 
 #include "vector.h"
 #include "resize.h"
-#include "dlist.h"
 #include "config.h"
-#include "avlmap.h"
 
 #include <iostream>
 

@@ -25,9 +25,7 @@
 
 #include "config.h"
 #include "fsmrun.h"
-#include "redfsm.h"
 #include "parsedata.h"
-#include "parsetree.h"
 #include "pdarun.h"
 #include "colm.h"
 

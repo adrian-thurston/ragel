@@ -22,7 +22,8 @@
 #ifndef _INPUT_H
 #define _INPUT_H
 
-#include "astring.h"
+#include <assert.h>
+#include <stdio.h>
 
 struct KlangEl;
 struct Pattern;

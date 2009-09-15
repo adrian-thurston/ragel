@@ -22,7 +22,6 @@
 #ifndef _FSMRUN_H
 #define _FSMRUN_H
 
-#include "astring.h"
 #include "pdarun.h"
 #include "input.h"
 

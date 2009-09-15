@@ -23,10 +23,8 @@
 #define _PDARUN_H
 
 #include <iostream>
-#include "dlistval.h"
 #include "bytecode.h"
 #include "vector.h"
-#include "dlist.h"
 
 using std::ostream;
 
