@@ -22,8 +22,7 @@
 #ifndef _BYTECODE_H
 #define _BYTECODE_H
 
-#include "vector.h"
-#include "resize.h"
+#include "rtvector.h"
 #include "config.h"
 
 #include <iostream>
@@ -375,7 +374,7 @@ template<class T> int sizeof_in_words()
 /* 
  * Code Vector
  */
-struct CodeVect : public Vector<Code>
+struct CodeVect : public RtVector<Code>
 {
 	void appendHalf( Half half )
 	{

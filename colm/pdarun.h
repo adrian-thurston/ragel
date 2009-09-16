@@ -24,7 +24,7 @@
 
 #include <iostream>
 #include "bytecode.h"
-#include "vector.h"
+#include "rtvector.h"
 
 using std::ostream;
 
@@ -510,7 +510,7 @@ struct PdaTables
 
 bool make_reverse_code( CodeVect *all, CodeVect &reverseCode );
 
-typedef Vector<Tree*> Bindings;
+typedef RtVector<Tree*> Bindings;
 
 struct PdaRun
 {
