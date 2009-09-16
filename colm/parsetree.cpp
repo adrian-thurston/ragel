@@ -28,6 +28,7 @@
 /* Parsing. */
 #include "lmparse.h"
 #include "parsetree.h"
+#include "input.h"
 
 using namespace std;
 ostream &operator<<( ostream &out, const NameRef &nameRef );

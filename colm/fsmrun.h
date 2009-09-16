@@ -116,5 +116,8 @@ Head *extract_prefix( InputStream *inputStream, PdaRun *parser, long length );
 void send_back_text( InputStream *inputStream, const char *data, long length );
 void stream_push( InputStream *inputStream, const char *data, long length );
 void undo_stream_push( InputStream *inputStream, long length );
+void send_named_lang_el( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser );
+Kid *make_token( FsmRun *fsmRun, PdaRun *parser, int id, Head *tokdata, bool namedLangEl, int bindId );
+
 
 #endif

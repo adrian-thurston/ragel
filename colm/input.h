@@ -24,6 +24,7 @@
 
 #include <assert.h>
 #include <stdio.h>
+#include <iostream>
 
 struct KlangEl;
 struct Pattern;
@@ -31,6 +32,10 @@ struct PatternItem;
 struct Replacement;
 struct ReplItem;
 struct RunBuf;
+
+struct exit_object { };
+extern exit_object endp;
+void operator<<( std::ostream &out, exit_object & );
 
 struct InputStream
 {

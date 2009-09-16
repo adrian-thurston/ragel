@@ -25,9 +25,7 @@
 
 #include "config.h"
 #include "fsmrun.h"
-#include "parsedata.h"
 #include "pdarun.h"
-#include "colm.h"
 
 using std::cerr;
 using std::endl;
@@ -458,32 +456,6 @@ Kid *make_token( FsmRun *fsmRun, PdaRun *parser, int id, Head *tokdata, bool
 	}
 
 	return input;
-}
-
-void send_named_lang_el( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser )
-{
-	/* All three set by getLangEl. */
-	long bindId;
-	char *data;
-	long length;
-
-	KlangEl *klangEl = inputStream->getLangEl( bindId, data, length );
-	if ( klangEl->termDup != 0 )
-		klangEl = klangEl->termDup;
-	
-	#ifdef COLM_LOG_PARSE
-	if ( colm_log_parse ) {
-		cerr << "named langEl: " << parser->tables->rtd->lelInfo[klangEl->id].name << endl;
-	}
-	#endif
-
-	/* Copy the token data. */
-	Head *tokdata = 0;
-	if ( data != 0 )
-		tokdata = string_alloc_new( fsmRun->prg, data, length );
-
-	Kid *input = make_token( fsmRun, parser, klangEl->id, tokdata, true, bindId );
-	send_handle_error( sp, inputStream, fsmRun, parser, input );
 }
 
 void execute_generation_action( Tree **sp, Program *prg, FsmRun *fsmRun, PdaRun *pdaRun, 

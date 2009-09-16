@@ -25,6 +25,7 @@
 #include "config.h"
 #include "lmparse.h"
 #include "colm.h"
+#include "input.h"
 
 using std::cout;
 using std::cerr;

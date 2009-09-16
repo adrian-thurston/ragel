@@ -129,12 +129,12 @@ $(COLM_OBJ): %.o: %.cpp
 	$(CXX) -c $(CFLAGS) $(DEFS_COLM) $(INCS) -o $@ $<
 
 $(RUNTIME_OBJ_P): %_p.o: %.cpp
-	@$(CXX) -M -MT $@ $(DEFS_RT_P) $(INCS) $< > .$*_p.d
-	$(CXX) -c $(CFLAGS) $(DEFS_RT_P) $(INCS) -o $@ $<
+	@$(CXX) -M -MT $@ $(DEFS_RT_P) $< > .$*_p.d
+	$(CXX) -c $(CFLAGS) $(DEFS_RT_P) -o $@ $<
 
 $(RUNTIME_OBJ_D): %_d.o: %.cpp
-	@$(CXX) -M -MT $@ $(DEFS_RT_D) $(INCS) $< > .$*_d.d
-	$(CXX) -c $(CFLAGS) $(DEFS_RT_D) $(INCS) -o $@ $<
+	@$(CXX) -M -MT $@ $(DEFS_RT_D) $< > .$*_d.d
+	$(CXX) -c $(CFLAGS) $(DEFS_RT_D) -o $@ $<
 
 
 distclean: clean

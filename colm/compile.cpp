@@ -1,5 +1,5 @@
 /*
- *  Copyright 2007 Adrian Thurston <thurston@complang.org>
+ *  Copyright 2007-2009 Adrian Thurston <thurston@complang.org>
  */
 
 /*  This file is part of Colm.
@@ -21,6 +21,7 @@
 
 #include "bytecode.h"
 #include "parsedata.h"
+#include "input.h"
 #include <iostream>
 #include <assert.h>
 

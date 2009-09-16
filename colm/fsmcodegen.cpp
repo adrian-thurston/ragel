@@ -1049,12 +1049,20 @@ void FsmCodeGen::writeCode()
 		"#include <stdio.h>\n"
 		"#include <stdlib.h>\n"
 		"#include <string.h>\n"
+		"#include <assert.h>\n"
 		"#include <colm/config.h>\n"
 		"\n"
 		"\n";
 
 	writeData();
 	writeExec();
+
+	/* Referenced in the runtime lib, but used only in the compiler. */
+	out <<
+		"void send_named_lang_el( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser )\n"
+		"{\n"
+		"	assert(false);\n"
+		"}\n";
 
 	out << 
 		"int main( int argc, char **argv )\n"

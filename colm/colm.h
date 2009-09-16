@@ -57,10 +57,6 @@ std::ostream &error( int first_line, int first_column );
 std::ostream &warning( ); 
 std::ostream &warning( int first_line, int first_column );
 
-struct exit_object { };
-extern exit_object endp;
-void operator<<( std::ostream &out, exit_object & );
-
 extern std::ostream *outStream;
 extern bool printStatistics;
 
