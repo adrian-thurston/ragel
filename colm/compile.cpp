@@ -1073,7 +1073,7 @@ void LangTerm::assignFieldArgs( ParseData *pd, CodeVect &code, UniqueType *replU
 	}
 }
 
-UniqueType *LangTerm::evaluateTreeConstruct( ParseData *pd, CodeVect &code ) const
+UniqueType *LangTerm::evaluateConstruct( ParseData *pd, CodeVect &code ) const
 {
 	/* Evaluate the initialization expressions. */
 	if ( fieldInitArgs != 0 && fieldInitArgs->length() > 0 ) {
@@ -1085,14 +1085,14 @@ UniqueType *LangTerm::evaluateTreeConstruct( ParseData *pd, CodeVect &code ) con
 
 	/* Assign bind ids to the variables in the replacement. */
 	for ( ReplItemList::Iter item = *replacement->list; item.lte(); item++ ) {
-		if ( item->varRef != 0 )
+		if ( item->expr != 0 )
 			item->bindId = replacement->nextBindId++;
 	}
 
 	/* Evaluate variable references. */
 	for ( ReplItemList::Iter item = replacement->list->last(); item.gtb(); item-- ) {
-		if ( item->type == ReplItem::VarRefType ) {
-			UniqueType *ut = item->varRef->evaluate( pd, code );
+		if ( item->type == ReplItem::ExprType ) {
+			UniqueType *ut = item->expr->evaluate( pd, code );
 		
 			if ( ut->typeId != TYPE_TREE )
 				error() << "variables used in replacements must be trees" << endp;
@@ -1117,57 +1117,6 @@ UniqueType *LangTerm::evaluateTreeConstruct( ParseData *pd, CodeVect &code ) con
 	assignFieldArgs( pd, code, replUT );
 
 	return replUT;
-}
-
-
-UniqueType *LangTerm::evaluateTermConstruct( ParseData *pd, CodeVect &code ) const
-{
-	/* Do not try to parse this construct. */
-	replacement->parse = false;
-
-	/* Evaluate the initialization expressions. */
-	if ( fieldInitArgs != 0 && fieldInitArgs->length() > 0 ) {
-		for ( FieldInitVect::Iter pi = *fieldInitArgs; pi.lte(); pi++ ) {
-			FieldInit *fieldInit = *pi;
-			fieldInit->exprUT = fieldInit->expr->evaluate( pd, code );
-		}
-	}
-
-	UniqueType *replUT = typeRef->lookupType( pd );
-
-	/* Evaluate the expression that we are constructing the term with and make
-	 * the term. */
-	ReplItem *replItem = replacement->list->head;
-	replItem->varRef->evaluate( pd, code );
-	code.append( IN_CONSTRUCT_TERM );
-	code.appendHalf( replUT->langEl->id );
-
-	assignFieldArgs( pd, code, replUT );
-	return replUT;
-}
-
-bool LangTerm::constructTermFromString( ParseData *pd ) const
-{
-	UniqueType *replUT = typeRef->lookupType( pd );
-	if ( replUT->typeId == TYPE_TREE && replUT->langEl->id < pd->firstNonTermId ) {
-		if ( replacement->list->length() == 1 ) {
-			ReplItem *replItem = replacement->list->head;
-			if ( replItem->type == ReplItem::VarRefType ) {
-				VarRefLookup lookup = replItem->varRef->lookupField( pd );
-				if ( lookup.uniqueType == pd->uniqueTypeStr )
-					return true;
-			}
-		}
-	}
-	return false;
-}
-
-UniqueType *LangTerm::evaluateConstruct( ParseData *pd, CodeVect &code ) const
-{
-	/* If the type is a token and the replacement contains just a string then
-	 * construct a token using the text of the string. Otherwise do a normal
-	 * tree construct. */
-	return evaluateTreeConstruct( pd, code );
 }
 
 UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) const
@@ -1783,8 +1732,8 @@ void LangStmt::evaluateAccumItems( ParseData *pd, CodeVect &code ) const
 			code.appendWord( mapEl->value );
 			break;
 		}
-		case ReplItem::VarRefType:
-			item->varRef->evaluate( pd, code );
+		case ReplItem::ExprType:
+			item->expr->evaluate( pd, code );
 			break;
 		}
 

@@ -596,9 +596,9 @@ litrepl_el: '[' repl_el_list ']';
 repl_el_list: repl_el_list repl_el;
 repl_el_list: ;
 
-repl_el: var_ref
+repl_el: code_expr
 	final {
-		ReplItem *replItem = new ReplItem( $1->varRef->loc, ReplItem::VarRefType, $1->varRef );
+		ReplItem *replItem = new ReplItem( $1->expr->loc, ReplItem::ExprType, $1->expr );
 		replItemList->append( replItem );
 	};
 

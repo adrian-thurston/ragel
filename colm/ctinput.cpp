@@ -152,19 +152,19 @@ InputStreamRepl::InputStreamRepl( Replacement *replacement )
 
 int InputStreamRepl::isLangEl()
 { 
-	return replItem != 0 && ( replItem->type == ReplItem::VarRefType || 
+	return replItem != 0 && ( replItem->type == ReplItem::ExprType || 
 			replItem->type == ReplItem::FactorType );
 }
 
 int InputStreamRepl::shouldFlush()
 { 
-	return replItem == 0 || ( replItem->type == ReplItem::VarRefType ||
+	return replItem == 0 || ( replItem->type == ReplItem::ExprType ||
 			replItem->type == ReplItem::FactorType );
 }
 
 KlangEl *InputStreamRepl::getLangEl( long &bindId, char *&data, long &length )
 { 
-	KlangEl *klangEl = replItem->type == ReplItem::VarRefType ? 
+	KlangEl *klangEl = replItem->type == ReplItem::ExprType ? 
 			replItem->langEl : replItem->factor->langEl;
 	bindId = replItem->bindId;
 

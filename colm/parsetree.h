@@ -940,29 +940,30 @@ struct PatternItem
 	PatternItem *prev, *next;
 };
 
+struct LangExpr;
 typedef DList<PatternItem> PatternItemList;
 
 struct ReplItem
 {
 	enum Type { 
 		InputText, 
-		VarRefType,
+		ExprType,
 		FactorType
 	};
 
 	ReplItem( const InputLoc &loc, Type type, const String &data ) : 
-		loc(loc), type(type), data(data), varRef(0), bindId(0) {}
+		loc(loc), type(type), data(data), expr(0), bindId(0) {}
 
-	ReplItem( const InputLoc &loc, Type type, LangVarRef *varRef ) : 
-		loc(loc), type(type), varRef(varRef), bindId(0) {}
+	ReplItem( const InputLoc &loc, Type type, LangExpr *expr ) : 
+		loc(loc), type(type), expr(expr), bindId(0) {}
 
 	ReplItem( const InputLoc &loc, Type type, PdaFactor *factor ) : 
-		loc(loc), type(type), factor(factor), bindId(0) {}
+		loc(loc), type(type), expr(expr), factor(factor), bindId(0) {}
 
 	InputLoc loc;
 	Type type;
 	String data;
-	LangVarRef *varRef;
+	LangExpr *expr;
 	KlangEl *langEl;
 	PdaFactor *factor;
 	long bindId;
@@ -1321,7 +1322,6 @@ struct ObjectDef
 	ObjectDef *prev, *next;
 };
 
-struct LangExpr;
 typedef Vector<LangExpr*> ExprVect;
 typedef Vector<String> StringVect;
 
@@ -1491,9 +1491,6 @@ struct LangTerm
 	UniqueType *evaluateParse( ParseData *pd, CodeVect &code, bool stop ) const;
 	UniqueType *evaluateNew( ParseData *pd, CodeVect &code ) const;
 	UniqueType *evaluateConstruct( ParseData *pd, CodeVect &code ) const;
-	UniqueType *evaluateTreeConstruct( ParseData *pd, CodeVect &code ) const;
-	UniqueType *evaluateTermConstruct( ParseData *pd, CodeVect &code ) const;
-	bool constructTermFromString( ParseData *pd ) const;
 	UniqueType *evaluateMatch( ParseData *pd, CodeVect &code ) const;
 	UniqueType *evaluate( ParseData *pd, CodeVect &code ) const;
 	void assignFieldArgs( ParseData *pd, CodeVect &code, UniqueType *replUT ) const;

@@ -1422,7 +1422,7 @@ void ParseData::resolveReplacementEls()
 				resolveFactor( item->factor );
 				break;
 			case ReplItem::InputText:
-			case ReplItem::VarRefType:
+			case ReplItem::ExprType:
 				break;
 			}
 		}
@@ -1438,7 +1438,7 @@ void ParseData::resolveAccumEls()
 				resolveFactor( item->factor );
 				break;
 			case ReplItem::InputText:
-			case ReplItem::VarRefType:
+			case ReplItem::ExprType:
 				break;
 			}
 		}
