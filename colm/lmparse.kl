@@ -179,9 +179,9 @@ param_var_def: reference_type_ref TK_Word
 
 nonterm reference_type_ref uses type_ref;
 
-reference_type_ref: KW_Ref region_qual TK_Word
+reference_type_ref: KW_Ref type_ref
 	final {
-		$$->typeRef = new TypeRef( $1->loc, $2->nspaceQual, $3->data );
+		$$->typeRef = $2->typeRef;
 		$$->typeRef->isRef = true;
 	};
 
@@ -596,18 +596,17 @@ litrepl_el: '[' repl_el_list ']';
 repl_el_list: repl_el_list repl_el;
 repl_el_list: ;
 
-repl_el: code_expr
-	final {
-		ReplItem *replItem = new ReplItem( $1->expr->loc, ReplItem::ExprType, $1->expr );
-		replItemList->append( replItem );
-	};
-
 repl_el: region_qual TK_Literal
 	final {
 		PdaLiteral *literal = new PdaLiteral( $2->loc, *$2 );
 		PdaFactor *factor = new PdaFactor( $2->loc, false, $1->nspaceQual, 
 				literal, 0, RepeatNone, false, false );
 		ReplItem *replItem = new ReplItem( $2->loc, ReplItem::FactorType, factor );
+		replItemList->append( replItem );
+	};
+repl_el: code_expr
+	final {
+		ReplItem *replItem = new ReplItem( $1->expr->loc, ReplItem::ExprType, $1->expr );
 		replItemList->append( replItem );
 	};
 
