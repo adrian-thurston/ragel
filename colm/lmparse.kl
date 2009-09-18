@@ -579,19 +579,19 @@ init_repl_list:
 		replItemList = new ReplItemList;
 	};
 
-replacement: '"' litrepl_el_list '"';
+replacement: '"' lit_repl_el_list '"';
 replacement: '[' repl_el_list ']';
 
-litrepl_el_list: litrepl_el_list litrepl_el;
-litrepl_el_list: ;
+lit_repl_el_list: lit_repl_el_list lit_repl_el;
+lit_repl_el_list: ;
 
-litrepl_el: TK_LitPat
+lit_repl_el: TK_LitPat
 	final {
 		ReplItem *replItem = new ReplItem( $1->loc, ReplItem::InputText, $1->data );
 		replItemList->append( replItem );
 	};
 
-litrepl_el: '[' repl_el_list ']';
+lit_repl_el: '[' repl_el_list ']';
 
 repl_el_list: repl_el_list repl_el;
 repl_el_list: ;
@@ -610,7 +610,48 @@ repl_el: code_expr
 		replItemList->append( replItem );
 	};
 
-repl_el: '"' litrepl_el_list '"';
+repl_el: '"' lit_repl_el_list '"';
+
+accum_list: accum_list accum;
+accum_list: init_accum_list accum;
+
+init_accum_list: 
+	final {
+		replItemList = new ReplItemList;
+	};
+
+accum: '"' lit_accum_el_list '"';
+accum: '[' accum_el_list ']';
+
+lit_accum_el_list: lit_accum_el_list lit_accum_el;
+lit_accum_el_list: ;
+
+lit_accum_el: TK_LitPat
+	final {
+		ReplItem *replItem = new ReplItem( $1->loc, ReplItem::InputText, $1->data );
+		replItemList->append( replItem );
+	};
+
+lit_accum_el: '[' accum_el_list ']';
+
+accum_el_list: accum_el_list accum_el;
+accum_el_list: ;
+
+#accum_el: region_qual TK_Literal
+#	final {
+#		PdaLiteral *literal = new PdaLiteral( $2->loc, *$2 );
+#		PdaFactor *factor = new PdaFactor( $2->loc, false, $1->nspaceQual, 
+#				literal, 0, RepeatNone, false, false );
+#		ReplItem *replItem = new ReplItem( $2->loc, ReplItem::FactorType, factor );
+#		replItemList->append( replItem );
+#	};
+accum_el: code_expr
+	final {
+		ReplItem *replItem = new ReplItem( $1->expr->loc, ReplItem::ExprType, $1->expr );
+		replItemList->append( replItem );
+	};
+
+accum_el: '"' lit_accum_el_list '"';
 
 prod_el_list: 
 	prod_el_list prod_el 
@@ -1073,7 +1114,7 @@ statement: KW_Yield var_ref
 	final {
 		$$->stmt = new LangStmt( LangStmt::YieldType, $2->varRef );
 	};
-statement: var_ref TK_LtLt repl_list
+statement: var_ref TK_LtLt accum_list
 	final {
 		Namespace *nspace = namespaceStack.top();
 		TokenRegion *region = regionStack.top();

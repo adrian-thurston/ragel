@@ -154,8 +154,7 @@ install: all
 	install -d $(prefix)/lib
 	install -s colm $(prefix)/bin/colm
 	install libcolmp.a libcolmd.a $(prefix)/lib
-	install \
-		rtvector.h bytecode.h config.h fsmrun.h input.h \
-		pdarun.h $(prefix)/include/colm
+	install rtvector.h bytecode.h config.h fsmrun.h \
+		input.h pdarun.h $(prefix)/include/colm
 
 -include $(DEPS)
