@@ -1378,6 +1378,10 @@ code_unary: '!' code_factor
 	final {
 		$$->expr = new LangExpr( $1->loc, '!', $2->expr );
 	};
+code_unary: '$' code_factor
+	final {
+		$$->expr = new LangExpr( $1->loc, '$', $2->expr );
+	};
 code_unary: code_factor
 	final {
 		$$->expr = $1->expr;

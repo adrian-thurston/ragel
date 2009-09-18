@@ -156,6 +156,18 @@ Tree *call_parser( Tree **&sp, Program *prg, Stream *stream,
 	return tree;
 }
 
+Head *tree_to_str( Tree **sp, Program *prg, Tree *tree )
+{
+	/* Collect the tree data. */
+	ostringstream sout;
+	print_tree( sout, sp, prg, tree );
+
+	/* Set up the input stream. */
+	string s = sout.str();
+	return string_alloc_new( prg, s.c_str(), s.size() );
+}
+
+
 Tree *call_tree_parser( Tree **&sp, Program *prg, Tree *input, 
 		long parserId, long stopId, CodeVect *&cv, bool revertOn )
 {
@@ -1483,6 +1495,21 @@ again:
 			tree_upref( str );
 			push( str );
 			tree_downref( prg, sp, (Tree*) i );
+			break;
+		}
+		case IN_TREE_TO_STR: {
+			#ifdef COLM_LOG_BYTECODE
+			if ( colm_log_bytecode ) {
+				cerr << "IN_TREE_TO_STR" << endl;
+			}
+			#endif
+
+			Tree *tree = pop();
+			Head *res = tree_to_str( sp, prg, tree );
+			Tree *str = construct_string( prg, res );
+			tree_upref( str );
+			push( str );
+			tree_downref( prg, sp, tree );
 			break;
 		}
 		case IN_CONCAT_STR: {

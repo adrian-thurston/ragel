@@ -1398,6 +1398,12 @@ UniqueType *LangExpr::evaluate( ParseData *pd, CodeVect &code ) const
 					code.append( IN_NOT );
 					return pd->uniqueTypeBool;
 				}
+				case '$': {
+					right->evaluate( pd, code );
+					code.append( IN_TREE_TO_STR );
+					return pd->uniqueTypeStr;
+					
+				}
 				case OP_Deref: {
 					UniqueType *ut = right->evaluate( pd, code );
 					if ( ut->typeId != TYPE_PTR )

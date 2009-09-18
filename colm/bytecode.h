@@ -205,6 +205,7 @@ typedef unsigned char uchar;
 #define IN_STR_SORD32            0x94
 
 #define IN_INT_TO_STR            0x99
+#define IN_TREE_TO_STR           0xcc
 
 #define IN_CREATE_TOKEN          0x95
 #define IN_MAKE_TOKEN            0x96
