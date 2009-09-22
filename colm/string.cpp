@@ -125,6 +125,37 @@ Head *concat_str( Head *s1, Head *s2 )
 	return head;
 }
 
+Head *string_toupper( Head *s )
+{
+	/* Init space for the data. */
+	long len = s->length;
+	Head *head = init_str_space( len );
+
+	/* Copy in the data. */
+	const char *src = s->data;
+	char *dst = (char*)(head+1);
+	for ( int i = 0; i < len; i++ )
+		*dst++ = toupper( *src++ );
+		
+	return head;
+}
+
+Head *string_tolower( Head *s )
+{
+	/* Init space for the data. */
+	long len = s->length;
+	Head *head = init_str_space( len );
+
+	/* Copy in the data. */
+	const char *src = s->data;
+	char *dst = (char*)(head+1);
+	for ( int i = 0; i < len; i++ )
+		*dst++ = tolower( *src++ );
+		
+	return head;
+}
+
+
 /* Compare two strings. If identical returns 1, otherwise 0. */
 Word cmp_string( Head *s1, Head *s2 )
 {

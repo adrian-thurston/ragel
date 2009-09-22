@@ -230,6 +230,8 @@ typedef unsigned char uchar;
 #define IN_GET_STDOUT            0xba
 #define IN_GET_STDERR            0xbb
 #define IN_LOAD_ARGV             0xcf
+#define IN_TO_UPPER              0xce
+#define IN_TO_LOWER              0xcd
 
 
 /* Types */
@@ -489,6 +491,8 @@ Word str_atoi( Head *str );
 Word str_uord16( Head *head );
 Word str_uord8( Head *head );
 Word cmp_string( Head *s1, Head *s2 );
+Head *string_toupper( Head *s );
+Head *string_tolower( Head *s );
 
 Head *int_to_str( Program *prg, Word i );
 

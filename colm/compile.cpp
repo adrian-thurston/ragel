@@ -2817,6 +2817,14 @@ void ParseData::initGlobalFunctions()
 		IN_OPEN_FILE, IN_OPEN_FILE, uniqueTypeStr, true );
 	method->useCallObj = false;
 
+	method = initFunction( uniqueTypeStr, globalObjectDef, "tolower",
+		IN_TO_LOWER, IN_TO_LOWER, uniqueTypeStr, true );
+	method->useCallObj = false;
+
+	method = initFunction( uniqueTypeStr, globalObjectDef, "toupper",
+		IN_TO_UPPER, IN_TO_UPPER, uniqueTypeStr, true );
+	method->useCallObj = false;
+
 	addStdin();
 	addStdout();
 	addStderr();

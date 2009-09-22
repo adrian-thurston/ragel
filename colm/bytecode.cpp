@@ -3465,6 +3465,34 @@ again:
 			push( retVal );
 			break;
 		}
+		case IN_TO_UPPER: {
+			#ifdef COLM_LOG_BYTECODE
+			if ( colm_log_bytecode ) {
+				cerr << "IN_TO_UPPER" << endl;
+			}
+			#endif
+			Tree *in = pop();
+			Head *head = string_toupper( in->tokdata );
+			Tree *upper = construct_string( prg, head );
+			tree_upref( upper );
+			push( upper );
+			tree_downref( prg, sp, in );
+			break;
+		}
+		case IN_TO_LOWER: {
+			#ifdef COLM_LOG_BYTECODE
+			if ( colm_log_bytecode ) {
+				cerr << "IN_TO_LOWER" << endl;
+			}
+			#endif
+			Tree *in = pop();
+			Head *head = string_tolower( in->tokdata );
+			Tree *lower = construct_string( prg, head );
+			tree_upref( lower );
+			push( lower );
+			tree_downref( prg, sp, in );
+			break;
+		}
 		case IN_OPEN_FILE: {
 			#ifdef COLM_LOG_BYTECODE
 			if ( colm_log_bytecode ) {
