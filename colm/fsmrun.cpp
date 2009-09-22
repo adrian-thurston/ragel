@@ -421,6 +421,9 @@ Kid *make_token( FsmRun *fsmRun, PdaRun *parser, int id, Head *tokdata, bool
 	long objectLength = parser->tables->rtd->lelInfo[id].objectLength;
 	Kid *attrs = alloc_attrs( fsmRun->prg, objectLength );
 
+	Record *record = fsmRun->prg->record( fsmRun->prg->nextPos++ );
+	record->col = record->line = 0;
+
 	Kid *input = 0;
 	input = fsmRun->prg->kidPool.allocate();
 	input->tree = (Tree*)fsmRun->prg->parseTreePool.allocate();

@@ -420,6 +420,39 @@ struct CodeVect : public RtVector<Code>
 		{ insertWord( pos, (Word) tree ); }
 };
 
+struct File
+{
+	File *prev, *next;
+};
+
+struct Record
+{
+	File *file;
+	long line;
+	long col;
+};
+
+struct Level4
+{
+	Record records[256];
+};
+
+struct Level3
+{
+	Level4 *level4[256];
+};
+
+struct Level2
+{
+	Level3 *level3[256];
+};
+
+struct Level1
+{
+	Level2 *level2[256];
+};
+
+
 /*
  * Strings
  */
@@ -702,6 +735,10 @@ struct Program
 	Stream *stdinVal;
 	Stream *stdoutVal;
 	Stream *stderrVal;
+
+	Record *record( unsigned int pos );
+	Level1 *level1;
+	unsigned long nextPos;
 };
 
 struct Execution

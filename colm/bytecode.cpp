@@ -371,7 +371,9 @@ Program::Program( int argc, char **argv, bool ctxDepParsing, RuntimeData *rtd )
 	heap(0),
 	stdinVal(0),
 	stdoutVal(0),
-	stderrVal(0)
+	stderrVal(0),
+	level1(0),
+	nextPos(0)
 {
 	Int *trueInt = (Int*) treePool.allocate();
 	trueInt->id = LEL_ID_BOOL;
@@ -385,6 +387,40 @@ Program::Program( int argc, char **argv, bool ctxDepParsing, RuntimeData *rtd )
 
 	trueVal = (Tree*)trueInt;
 	falseVal = (Tree*)falseInt;
+}
+
+Record *Program::record( unsigned int pos )
+{
+	unsigned int l1 = (pos & 0xff000000) >> 24;
+	unsigned int l2 = (pos & 0x00ff0000) >> 16;
+	unsigned int l3 = (pos & 0x0000ff00) >> 8;
+	unsigned int l4 = (pos & 0x000000ff);
+
+	if ( level1 == 0 ) {
+		level1 = new Level1;
+		memset( level1, 0, sizeof(Level1) );
+	}
+
+	Level2 *level2 = level1->level2[l1];
+	if ( level2 == 0 ) {
+		level2 = level1->level2[l1] = new Level2;
+		memset( level2, 0, sizeof(Level2) );
+	}
+
+	Level3 *level3 = level2->level3[l2];
+	if ( level3 == 0 ) {
+		level3 = level2->level3[l2] = new Level3;
+		memset( level3, 0, sizeof(Level3) );
+	}
+
+	Level4 *level4 = level3->level4[l3];
+	if ( level4 == 0 ) {
+		level4 = level3->level4[l3] = new Level4;
+		memset( level4, 0, sizeof(Level4) );
+	}
+
+	Record *record = &level4->records[l4];
+	return record;
 }
 
 void Program::clearGlobal( Tree **sp )
