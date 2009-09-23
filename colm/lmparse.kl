@@ -571,6 +571,10 @@ opt_label:
 		$$->varRef = 0;
 	};
 
+#
+# Replacement
+#
+
 repl_list: repl_list replacement;
 repl_list: init_repl_list replacement;
 
@@ -612,6 +616,10 @@ repl_el: code_expr
 
 repl_el: '"' lit_repl_el_list '"';
 
+#
+# Accum
+#
+
 accum_list: accum_list accum;
 accum_list: init_accum_list accum;
 
@@ -652,6 +660,52 @@ accum_el: code_expr
 	};
 
 accum_el: '"' lit_accum_el_list '"';
+
+
+#
+# String
+#
+
+string_list: string_list string;
+string_list: init_string_list string;
+
+init_string_list: 
+	final {
+		replItemList = new ReplItemList;
+	};
+
+string: '"' lit_string_el_list '"';
+string: '[' string_el_list ']';
+
+lit_string_el_list: lit_string_el_list lit_string_el;
+lit_string_el_list: ;
+
+lit_string_el: TK_LitPat
+	final {
+		ReplItem *replItem = new ReplItem( $1->loc, ReplItem::InputText, $1->data );
+		replItemList->append( replItem );
+	};
+
+lit_string_el: '[' string_el_list ']';
+
+string_el_list: string_el_list string_el;
+string_el_list: ;
+
+#accum_el: region_qual TK_Literal
+#	final {
+#		PdaLiteral *literal = new PdaLiteral( $2->loc, *$2 );
+#		PdaFactor *factor = new PdaFactor( $2->loc, false, $1->nspaceQual, 
+#				literal, 0, RepeatNone, false, false );
+#		ReplItem *replItem = new ReplItem( $2->loc, ReplItem::FactorType, factor );
+#		replItemList->append( replItem );
+#	};
+string_el: code_expr
+	final {
+		ReplItem *replItem = new ReplItem( $1->expr->loc, ReplItem::ExprType, $1->expr );
+		replItemList->append( replItem );
+	};
+
+string_el: '"' lit_string_el_list '"';
 
 prod_el_list: 
 	prod_el_list prod_el 
@@ -1526,6 +1580,10 @@ code_factor: KW_MakeToken '(' opt_code_expr_list ')'
 code_factor: KW_Deref code_expr
 	final {
 		$$->expr = new LangExpr( $1->loc, OP_Deref, $2->expr );
+	};
+code_factor: string_list
+	final {
+		$$->expr = new LangExpr( new LangTerm( replItemList ) );
 	};
 
 nonterm opt_field_init uses field_init_list;

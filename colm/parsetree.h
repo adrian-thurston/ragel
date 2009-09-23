@@ -1445,7 +1445,8 @@ struct LangTerm
 		ParseType,
 		ParseStopType,
 		MakeTreeType,
-		MakeTokenType
+		MakeTokenType,
+		EmbedStringType
 	};
 
 	LangTerm( Type type, LangVarRef *varRef )
@@ -1485,6 +1486,9 @@ struct LangTerm
 
 	LangTerm( Type type, LangExpr *expr )
 		: type(type), expr(expr) {}
+	
+	LangTerm( ReplItemList *replItemList )
+		: type(EmbedStringType), replItemList(replItemList) {}
 
 	void analyze( ParseData *pd ) const;
 
@@ -1496,6 +1500,7 @@ struct LangTerm
 	void assignFieldArgs( ParseData *pd, CodeVect &code, UniqueType *replUT ) const;
 	UniqueType *evaluateMakeToken( ParseData *pd, CodeVect &code ) const;
 	UniqueType *evaluateMakeTree( ParseData *pd, CodeVect &code ) const;
+	UniqueType *evaluateEmbedString( ParseData *pd, CodeVect &code ) const;
 
 	InputLoc loc;
 	Type type;
@@ -1508,6 +1513,7 @@ struct LangTerm
 	FieldInitVect *fieldInitArgs;
 	Replacement *replacement;
 	LangExpr *expr;
+	ReplItemList *replItemList;
 };
 
 struct LangExpr

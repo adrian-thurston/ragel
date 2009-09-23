@@ -1168,6 +1168,51 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 	return ut;
 }
 
+UniqueType *LangTerm::evaluateEmbedString( ParseData *pd, CodeVect &code ) const
+{
+	/* Assign bind ids to the variables in the replacement. */
+	for ( ReplItemList::Iter item = *replItemList; item.lte(); item++ ) {
+		switch ( item->type ) {
+		case ReplItem::FactorType: {
+			String result;
+			bool unusedCI;
+			prepareLitString( result, unusedCI, 
+					item->factor->literal->token.data,
+					item->factor->literal->token.loc );
+
+			/* Make sure we have this string. */
+			StringMapEl *mapEl = 0;
+			if ( pd->literalStrings.insert( result, &mapEl ) )
+				mapEl->value = pd->literalStrings.length()-1;
+
+			code.append( IN_LOAD_STR );
+			code.appendWord( mapEl->value );
+			break;
+		}
+		case ReplItem::InputText: {
+			/* Make sure we have this string. */
+			StringMapEl *mapEl = 0;
+			if ( pd->literalStrings.insert( item->data, &mapEl ) )
+				mapEl->value = pd->literalStrings.length()-1;
+
+			code.append( IN_LOAD_STR );
+			code.appendWord( mapEl->value );
+			break;
+		}
+		case ReplItem::ExprType:
+			item->expr->evaluate( pd, code );
+			break;
+		}
+
+	}
+
+	long items = replItemList->length();
+	for ( long i = 0; i < items-1; i++ )
+		code.append( IN_CONCAT_STR );
+
+	return pd->uniqueTypeStr;
+}
+
 UniqueType *LangTerm::evaluate( ParseData *pd, CodeVect &code ) const
 {
 	switch ( type ) {
@@ -1242,6 +1287,9 @@ UniqueType *LangTerm::evaluate( ParseData *pd, CodeVect &code ) const
 			code.appendWord( ut->langEl->id );
 			return ut;
 		};
+		case EmbedStringType: {
+			return evaluateEmbedString( pd, code );
+		}
 	}
 	return 0;
 }
