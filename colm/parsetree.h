@@ -1612,6 +1612,7 @@ struct LangStmt
 		type(type), next(0) {}
 
 	void analyze( ParseData *pd ) const;
+	void analyzeAccumItems( ParseData *pd ) const;
 
 	void evaluateAccumItems( ParseData *pd, CodeVect &code ) const;
 	LangTerm *chooseDefaultIter( ParseData *pd, LangTerm *fromVarRef ) const;

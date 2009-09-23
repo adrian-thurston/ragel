@@ -35,9 +35,6 @@ void TypeRef::analyze( ParseData *pd ) const
 	if ( nspace == 0 )
 		error(loc) << "do not have namespace for resolving reference" << endp;
 	
-	/* Look up the language element in the region. */
-	KlangEl *langEl = getKlangEl( pd, nspace, typeName );
-
 	if ( repeatType == RepeatRepeat ) {
 		/* If the factor is a repeat, create the repeat element and link the
 		 * factor to it. */
@@ -69,11 +66,29 @@ void TypeRef::analyze( ParseData *pd ) const
 
 void LangTerm::analyze( ParseData *pd ) const
 {
+	/* FIXME: implementation missing here. */
 	switch ( type ) {
 		case ConstructType: {
 			typeRef->analyze( pd );
 			break;
 		}
+		case VarRefType:
+		case MethodCallType:
+		case NumberType:
+		case StringType:
+		case MatchType:
+		case NewType:
+		case TypeIdType:
+		case SearchType:
+		case NilType:
+		case TrueType:
+		case FalseType:
+		case ParseType:
+		case ParseStopType:
+		case MakeTreeType:
+		case MakeTokenType:
+		case EmbedStringType:
+			break;
 	}
 }
 
@@ -96,6 +111,24 @@ void LangExpr::analyze( ParseData *pd ) const
 		}
 		case TermType: {
 			term->analyze( pd );
+			break;
+		}
+	}
+}
+
+void LangStmt::analyzeAccumItems( ParseData *pd ) const
+{
+	/* Assign bind ids to the variables in the replacement. */
+	for ( ReplItemList::Iter item = *accumText->list; item.lte(); item++ ) {
+		varRef->analyze( pd );
+
+		switch ( item->type ) {
+		case ReplItem::FactorType:
+			break;
+		case ReplItem::InputText:
+			break;
+		case ReplItem::ExprType:
+			item->expr->analyze( pd );
 			break;
 		}
 	}
@@ -168,6 +201,10 @@ void LangStmt::analyze( ParseData *pd ) const
 		case YieldType: {
 			/* take a reference and yield it. Immediately reset the referece. */
 			varRef->analyze( pd );
+			break;
+		}
+		case AccumType: {
+			//for ( )
 			break;
 		}
 	}
