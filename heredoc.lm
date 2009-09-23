@@ -24,7 +24,7 @@ lex start
 def here_name 
 	[id]
 	{
-		HereId = r1.data
+		HereId = $r1
 	}
 
 global str HereId
