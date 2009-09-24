@@ -731,6 +731,7 @@ Tree *copy_real_tree( Program *prg, Tree *tree, Kid *oldNextDown,
 	}
 
 	newTree->id = tree->id;
+	newTree->position = tree->position;
 	newTree->tokdata = string_copy( prg, tree->tokdata );
 
 	/* Copy the child list, will handle attributes, ignores 
