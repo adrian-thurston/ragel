@@ -60,6 +60,7 @@ struct Tree
 	Kid *child;
 
 	Head *tokdata;
+	unsigned long position;
 };
 
 struct ParseTree
@@ -71,6 +72,7 @@ struct ParseTree
 	Kid *child;
 
 	Head *tokdata;
+	unsigned long position;
 
 	/* Parsing algorithm. */
 	long state;
@@ -79,7 +81,6 @@ struct ParseTree
 	char retry_lower;
 	char retry_upper;
 };
-
 
 struct Int
 {

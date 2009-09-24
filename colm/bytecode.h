@@ -429,9 +429,11 @@ struct File
 
 struct Record
 {
+	Tree *ignore;
 	File *file;
 	long line;
-	long col;
+	long column;
+	long byte;
 };
 
 struct Level4
@@ -533,8 +535,8 @@ Tree *make_tree( Tree **root, Program *prg, long nargs );
 Tree *make_token( Tree **root, Program *prg, long nargs );
 Tree *prep_parse_tree( Program *prg, Tree **sp, Tree *tree );
 
-void print_tree( Tree **&sp, Program *prg, Tree *tree );
 void print_tree( ostream &out, Tree **&sp, Program *prg, Tree *tree );
+void print_tree2( ostream &out, Tree **&sp, Program *prg, Tree *tree );
 void print_str( Head *str );
 void print_xml_tree( Tree **&sp, Program *prg, Tree *tree, bool commAttr );
 void print_xml_kid( Tree **&sp, Program *prg, Kid *kid, bool commAttr, int depth );

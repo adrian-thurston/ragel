@@ -553,6 +553,12 @@ void Program::run()
 		assert( reverseCode.length() == 0 );
 	}
 
+	for ( unsigned long i = 0; i < nextPos; i++ ) {
+		Record *r = record( i );
+		if ( r->ignore != 0 )
+			tree_downref( this, root, r->ignore );
+	}
+
 	/* Clear */
 	clear( vm_stack, root );
 }

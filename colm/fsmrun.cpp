@@ -114,17 +114,23 @@ void update_position( InputStream *inputStream, const char *data, long length )
 {
 	if ( !inputStream->handlesLine ) {
 		for ( int i = 0; i < length; i++ ) {
-			if ( data[i] == '\n' )
+			if ( data[i] != '\n' )
+				inputStream->column += 1;
+			else {
 				inputStream->line += 1;
+				inputStream->column = 1;
+			}
 		}
 	}
 
-	inputStream->position += length;
+	inputStream->byte += length;
 }
 
 /* Keep the position up to date after sending back text. */
 void undo_position( InputStream *inputStream, const char *data, long length )
 {
+	/* FIXME: this needs to fetch the position information from the parsed
+	 * token and restore based on that.. */
 	if ( !inputStream->handlesLine ) {
 		for ( int i = 0; i < length; i++ ) {
 			if ( data[i] == '\n' )
@@ -132,7 +138,7 @@ void undo_position( InputStream *inputStream, const char *data, long length )
 		}
 	}
 
-	inputStream->position -= length;
+	inputStream->byte -= length;
 }
 
 void send_back_runbuf_head( InputStream *inputStream )
@@ -414,15 +420,18 @@ void send_queued_tokens( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, Pd
 	}
 }
 
-Kid *make_token( FsmRun *fsmRun, PdaRun *parser, int id, Head *tokdata, bool
-		namedLangEl, int bindId )
+Kid *make_token( InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser, int id,
+		Head *tokdata, bool namedLangEl, int bindId )
 {
 	/* Make the token object. */
 	long objectLength = parser->tables->rtd->lelInfo[id].objectLength;
 	Kid *attrs = alloc_attrs( fsmRun->prg, objectLength );
 
-	Record *record = fsmRun->prg->record( fsmRun->prg->nextPos++ );
-	record->col = record->line = 0;
+	unsigned long position = fsmRun->prg->nextPos++;
+	Record *record = fsmRun->prg->record( position );
+	record->line = inputStream->line;
+	record->column = inputStream->column;
+	record->byte = inputStream->byte;
 
 	Kid *input = 0;
 	input = fsmRun->prg->kidPool.allocate();
@@ -435,6 +444,7 @@ Kid *make_token( FsmRun *fsmRun, PdaRun *parser, int id, Head *tokdata, bool
 	input->tree->refs = 1;
 	input->tree->id = id;
 	input->tree->tokdata = tokdata;
+	input->tree->position = position;
 
 	/* No children and ignores get added later. */
 	input->tree->child = attrs;
@@ -642,6 +652,13 @@ void send_ignore( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long
 	tree->id = id;
 	tree->tokdata = ignoreStr;
 
+	Record *record = fsmRun->prg->record( fsmRun->prg->nextPos++ );
+	record->line = inputStream->line;
+	record->column = inputStream->column;
+	record->byte = inputStream->byte;
+	record->ignore = tree;
+	tree_upref( tree );
+
 	/* Send it to the pdaRun. */
 	ignore( pdaRun, tree );
 }
@@ -667,7 +684,7 @@ void send_token( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pa
 
 	update_position( inputStream, inputStream->token, tokdata->length );
 
-	Kid *input = make_token( fsmRun, parser, id, tokdata, false, 0 );
+	Kid *input = make_token( inputStream, fsmRun, parser, id, tokdata, false, 0 );
 	send_handle_error( sp, inputStream, fsmRun, parser, input );
 }
 
@@ -758,7 +775,11 @@ void init_input_stream( InputStream *inputStream )
 	inputStream->data = inputStream->de = inputStream->runBuf->buf;
 	inputStream->deof = 0;
 	inputStream->eofSent = false;
-	inputStream->position = 0;
+
+	/* FIXME: correct values here. */
+	inputStream->line = 0;
+	inputStream->column = 0;
+	inputStream->byte = 0;
 }
 
 long undo_parse( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, Tree *tree, CodeVect *rev )

@@ -41,7 +41,8 @@ struct InputStream
 {
 	InputStream( bool handlesLine ) :
 		line(1),
-		position(0),
+		column(1),
+		byte(0),
 		handlesLine(handlesLine) {}
 
 	virtual ~InputStream() {}
@@ -65,7 +66,8 @@ struct InputStream
 	bool eofSent;
 
 	long line;
-	long position;
+	long column;
+	long byte;
 
 	/* This is set true for input streams that do their own line counting.
 	 * Causes FsmRun to ignore NLs. */
