@@ -57,10 +57,10 @@ struct Tree
 	short id;
 	unsigned short flags;
 	long refs;
+	unsigned long position;
 	Kid *child;
 
 	Head *tokdata;
-	unsigned long position;
 };
 
 struct ParseTree
@@ -69,10 +69,10 @@ struct ParseTree
 	short id;
 	unsigned short flags;
 	long refs;
+	unsigned long position;
 	Kid *child;
 
 	Head *tokdata;
-	unsigned long position;
 
 	/* Parsing algorithm. */
 	long state;
@@ -88,6 +88,7 @@ struct Int
 	short id;
 	unsigned short flags;
 	long refs;
+	unsigned long position;
 	Kid *child;
 
 	long value;
@@ -99,6 +100,7 @@ struct Pointer
 	short id;
 	unsigned short flags;
 	long refs;
+	unsigned long position;
 	Kid *child;
 
 	Kid *value;
@@ -110,6 +112,7 @@ struct Str
 	short id;
 	unsigned short flags;
 	long refs;
+	unsigned long position;
 	Kid *child;
 
 	Head *value;
@@ -133,6 +136,7 @@ struct List
 	short id;
 	unsigned short flags;
 	long refs;
+	unsigned long position;
 	ListEl *head;
 
 	ListEl *tail;
@@ -174,6 +178,7 @@ struct Map
 	short id;
 	unsigned short flags;
 	long refs;
+	unsigned long position;
 	MapEl *head;
 
 	MapEl *tail;
@@ -254,6 +259,7 @@ struct Accum
 	short id;
 	unsigned short flags;
 	long refs;
+	unsigned long position;
 	Kid *child;
 
 	GenericInfo *genericInfo;
@@ -267,6 +273,7 @@ struct Stream
 	short id;
 	unsigned short flags;
 	long refs;
+	unsigned long position;
 	Kid *child;
 
 	FILE *file;
