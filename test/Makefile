@@ -23,7 +23,8 @@ SRC = $(wildcard *.lm)
 BIN = $(SRC:%.lm=%.bin)
 SUBDIRS = xml python http diff html cxx ruby mediawiki
 
-all: $(BIN) $(SUBDIRS)
+all: 
+	./runtests
 
 .PHONY: $(SUBDIRS)
 
