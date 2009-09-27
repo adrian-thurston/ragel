@@ -608,13 +608,13 @@ repl_el: region_qual TK_Literal
 		ReplItem *replItem = new ReplItem( $2->loc, ReplItem::FactorType, factor );
 		replItemList->append( replItem );
 	};
+repl_el: '"' lit_repl_el_list '"';
+
 repl_el: code_expr
 	final {
 		ReplItem *replItem = new ReplItem( $1->expr->loc, ReplItem::ExprType, $1->expr );
 		replItemList->append( replItem );
 	};
-
-repl_el: '"' lit_repl_el_list '"';
 
 #
 # Accum
