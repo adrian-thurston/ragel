@@ -1,0 +1,15 @@
+#!/bin/bash
+#
+
+TESTS="dns.lm"
+COLM="../colm/colm"
+
+for t in $TESTS; do
+	echo $COLM $t
+	root=${t%.lm}
+	./$root.bin < $root.in > $root.out
+	if ! diff -u $root.out $root.exp; then
+		echo FAILURE
+		exit 1
+	fi
+done
