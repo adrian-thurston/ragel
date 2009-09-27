@@ -21,4 +21,4 @@ def start
 	[prods]
 
 start S = parse start( stdin )
-match S "!aa bb cc dd"
+print_xml( match S "!aa bb cc dd" )

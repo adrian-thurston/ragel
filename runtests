@@ -1,11 +1,12 @@
 #!/bin/bash
 #
 
-TESTS="dns.lm"
+TESTS="backtrack1.lm backtrack2.lm dns.lm accum.lm"
 COLM="../colm/colm"
 
 for t in $TESTS; do
-	echo $COLM $t
+	echo "testing $t"
+	$COLM $t
 	root=${t%.lm}
 	./$root.bin < $root.in > $root.out
 	if ! diff -u $root.out $root.exp; then
