@@ -29,9 +29,9 @@ Head *string_copy( Program *prg, Head *head )
 	Head *result = 0;
 	if ( head != 0 ) {
 		if ( (char*)(head+1) == head->data )
-			result = string_alloc_new( prg, head->data, head->length );
+			result = string_alloc_full( prg, head->data, head->length );
 		else
-			result = string_alloc_const( prg, head->data, head->length );
+			result = string_alloc_pointer( prg, head->data, head->length );
 	}
 	return result;
 }
@@ -39,13 +39,16 @@ Head *string_copy( Program *prg, Head *head )
 void string_free( Program *prg, Head *head )
 {
 	if ( head != 0 ) {
+		if ( head->location != 0 )
+			prg->locationPool.free( head->location );
+
 		if ( (char*)(head+1) == head->data ) {
 			/* Full string allocation. */
 			free( head );
 		}
 		else {
 			/* Just a string head. */
-			prg->kidPool.free( (Kid*)head );
+			prg->headPool.free( head );
 		}
 	}
 }
@@ -86,7 +89,7 @@ Head *init_str_space( long length )
 }
 
 /* Create from a c-style string. */
-Head *string_alloc_new( Program *prg, const char *data, long length )
+Head *string_alloc_full( Program *prg, const char *data, long length )
 {
 	/* Init space for the data. */
 	Head *head = init_str_space( length );
@@ -98,10 +101,10 @@ Head *string_alloc_new( Program *prg, const char *data, long length )
 }
 
 /* Create from a c-style string. */
-Head *string_alloc_const( Program *prg, const char *data, long length )
+Head *string_alloc_pointer( Program *prg, const char *data, long length )
 {
 	/* Find the length and allocate the space for the shared string. */
-	Head *head = (Head*) prg->kidPool.allocate();
+	Head *head = prg->headPool.allocate();
 
 	/* Init the header. */
 	head->data = data;
@@ -180,7 +183,7 @@ Head *int_to_str( Program *prg, Word i )
 {
 	char data[20];
 	sprintf( data, "%ld", i );
-	return string_alloc_new( prg, data, strlen(data) );
+	return string_alloc_full( prg, data, strlen(data) );
 }
 
 Word str_uord16( Head *head )
@@ -201,7 +204,7 @@ Word str_uord8( Head *head )
 
 Head *make_literal( Program *prg, long offset )
 {
-	return string_alloc_const( prg,
+	return string_alloc_pointer( prg,
 			prg->rtd->litdata[offset],
 			prg->rtd->litlen[offset] );
 }

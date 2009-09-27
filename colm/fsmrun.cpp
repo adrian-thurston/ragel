@@ -427,12 +427,6 @@ Kid *make_token( InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser, int i
 	long objectLength = parser->tables->rtd->lelInfo[id].objectLength;
 	Kid *attrs = alloc_attrs( fsmRun->prg, objectLength );
 
-	unsigned long position = fsmRun->prg->nextPos++;
-	Record *record = fsmRun->prg->record( position );
-	record->line = inputStream->line;
-	record->column = inputStream->column;
-	record->byte = inputStream->byte;
-
 	Kid *input = 0;
 	input = fsmRun->prg->kidPool.allocate();
 	input->tree = (Tree*)fsmRun->prg->parseTreePool.allocate();
@@ -444,7 +438,6 @@ Kid *make_token( InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser, int i
 	input->tree->refs = 1;
 	input->tree->id = id;
 	input->tree->tokdata = tokdata;
-	input->tree->position = position;
 
 	/* No children and ignores get added later. */
 	input->tree->child = attrs;
@@ -453,7 +446,7 @@ Kid *make_token( InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser, int i
 	if ( lelInfo[id].numCaptureAttr > 0 ) {
 		for ( int i = 0; i < lelInfo[id].numCaptureAttr; i++ ) {
 			CaptureAttr *ca = &parser->tables->rtd->captureAttr[lelInfo[id].captureAttr + i];
-			Head *data = string_alloc_new( fsmRun->prg, 
+			Head *data = string_alloc_full( fsmRun->prg, 
 					fsmRun->mark[ca->mark_enter], fsmRun->mark[ca->mark_leave]
 					- fsmRun->mark[ca->mark_enter] );
 			Tree *string = construct_string( fsmRun->prg, data );
@@ -652,13 +645,6 @@ void send_ignore( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long
 	tree->id = id;
 	tree->tokdata = ignoreStr;
 
-	Record *record = fsmRun->prg->record( fsmRun->prg->nextPos++ );
-	record->line = inputStream->line;
-	record->column = inputStream->column;
-	record->byte = inputStream->byte;
-	record->ignore = tree;
-	tree_upref( tree );
-
 	/* Send it to the pdaRun. */
 	ignore( pdaRun, tree );
 }
@@ -666,7 +652,12 @@ void send_ignore( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long
 Head *extract_match( Program *prg, InputStream *inputStream )
 {
 	long length = inputStream->data - inputStream->token;
-	return string_alloc_const( prg, inputStream->token, length );
+	Head *head = string_alloc_pointer( prg, inputStream->token, length );
+	head->location = prg->locationPool.allocate();
+	head->location->line = inputStream->line;
+	head->location->column = inputStream->column;
+	head->location->byte = inputStream->byte;
+	return head;
 }
 
 void send_token( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser, long id )
@@ -712,7 +703,7 @@ Head *extract_prefix( InputStream *inputStream, PdaRun *parser, long length )
 	if ( inputStream->data + length > inputStream->de )
 		cerr << "NOT ENOUGH DATA TO FETCH TOKEN" << endp;
 
-	Head *tokdata = string_alloc_const( parser->prg, inputStream->data, length );
+	Head *tokdata = string_alloc_pointer( parser->prg, inputStream->data, length );
 	update_position( inputStream, inputStream->data, length );
 	inputStream->data += length;
 

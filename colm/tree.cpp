@@ -189,7 +189,7 @@ Kid *construct_ignore_list( Program *prg, long pat )
 
 	Kid *first = 0, *last = 0;
 	while ( ignore >= 0 ) {
-		Head *ignoreData = string_alloc_const( prg, nodes[ignore].data, nodes[ignore].length );
+		Head *ignoreData = string_alloc_pointer( prg, nodes[ignore].data, nodes[ignore].length );
 
 		Tree *ignTree = prg->treePool.allocate();
 		ignTree->refs = 1;
@@ -235,7 +235,7 @@ Tree *construct_replacement_tree( Tree **bindings, Program *prg, long pat )
 		tree->id = nodes[pat].id;
 		tree->refs = 1;
 		tree->tokdata = nodes[pat].length == 0 ? 0 :
-				string_alloc_const( prg, 
+				string_alloc_pointer( prg, 
 				nodes[pat].data, nodes[pat].length );
 
 		int objectLength = lelInfo[tree->id].objectLength;
@@ -255,7 +255,7 @@ Tree *construct_replacement_tree( Tree **bindings, Program *prg, long pat )
 			attr->id = nodes[ci].id;
 			attr->refs = 1;
 			attr->tokdata = nodes[ci].length == 0 ? 0 :
-					string_alloc_const( prg, 
+					string_alloc_pointer( prg, 
 					nodes[ci].data, nodes[ci].length );
 
 			set_attr( tree, ca->offset, attr );
@@ -465,81 +465,6 @@ void print_tree( ostream &out, Tree **&sp, Program *prg, Tree *tree )
 	}
 }
 
-void print_kid2( ostream &out, Tree **&sp, Program *prg, Kid *kid, bool )
-{
-	Tree **root = vm_ptop();
-	Kid *child;
-	bool lpValid = false;
-	unsigned long lastPosition;
-
-rec_call:
-	if ( kid->tree->id < prg->rtd->firstNonTermId ) {
-		if ( lpValid ) {
-			if ( lastPosition < kid->tree->position ) {
-				for ( unsigned long p = lastPosition+1; p < kid->tree->position; p++ ) {
-					Record *r = prg->record( p );
-					if ( !r->ignore )
-						break;
-					print_tree( out, sp, prg, r->ignore );
-				}
-			}
-		}
-
-		if ( kid->tree->id == LEL_ID_INT )
-			out << ((Int*)kid->tree)->value;
-		else if ( kid->tree->id == LEL_ID_BOOL ) {
-			if ( ((Int*)kid->tree)->value )
-				out << "true";
-			else
-				out << "false";
-		}
-		else if ( kid->tree->id == LEL_ID_PTR )
-			out << '#' << (void*) ((Pointer*)kid->tree)->value;
-		else if ( kid->tree->id == LEL_ID_STR )
-			print_str( out, ((Str*)kid->tree)->value );
-		else if ( kid->tree->id == LEL_ID_STREAM )
-			out << '#' << (void*) ((Stream*)kid->tree)->file;
-		else if ( kid->tree->tokdata != 0 && 
-				string_length( kid->tree->tokdata ) > 0 )
-		{
-			out.write( string_data( kid->tree->tokdata ), 
-					string_length( kid->tree->tokdata ) );
-		}
-
-		lastPosition = kid->tree->position;
-		lpValid = true;
-	}
-	else {
-		/* Non-terminal. */
-		child = tree_child( prg, kid->tree );
-		if ( child != 0 ) {
-			vm_push( (SW)kid );
-			kid = child;
-			while ( kid != 0 ) {
-				goto rec_call;
-				rec_return:
-				kid = kid->next;
-			}
-			kid = (Kid*)vm_pop();
-		}
-	}
-
-	if ( vm_ptop() != root )
-		goto rec_return;
-}
-
-void print_tree2( ostream &out, Tree **&sp, Program *prg, Tree *tree )
-{
-	if ( tree == 0 )
-		out << "NIL";
-	else {
-		Kid kid;
-		kid.tree = tree;
-		kid.next = 0;
-		print_kid2( out, sp, prg, &kid, false );
-	}
-}
-
 void xml_escape_data( const char *data, long len )
 {
 	for ( int i = 0; i < len; i++ ) {
@@ -731,7 +656,6 @@ Tree *copy_real_tree( Program *prg, Tree *tree, Kid *oldNextDown,
 	}
 
 	newTree->id = tree->id;
-	newTree->position = tree->position;
 	newTree->tokdata = string_copy( prg, tree->tokdata );
 
 	/* Copy the child list, will handle attributes, ignores 

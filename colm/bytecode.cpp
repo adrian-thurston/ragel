@@ -164,7 +164,7 @@ Head *tree_to_str( Tree **sp, Program *prg, Tree *tree )
 
 	/* Set up the input stream. */
 	string s = sout.str();
-	return string_alloc_new( prg, s.c_str(), s.size() );
+	return string_alloc_full( prg, s.c_str(), s.size() );
 }
 
 
@@ -371,9 +371,7 @@ Program::Program( int argc, char **argv, bool ctxDepParsing, RuntimeData *rtd )
 	heap(0),
 	stdinVal(0),
 	stdoutVal(0),
-	stderrVal(0),
-	level1(0),
-	nextPos(0)
+	stderrVal(0)
 {
 	Int *trueInt = (Int*) treePool.allocate();
 	trueInt->id = LEL_ID_BOOL;
@@ -387,40 +385,6 @@ Program::Program( int argc, char **argv, bool ctxDepParsing, RuntimeData *rtd )
 
 	trueVal = (Tree*)trueInt;
 	falseVal = (Tree*)falseInt;
-}
-
-Record *Program::record( unsigned int pos )
-{
-	unsigned int l1 = (pos & 0xff000000) >> 24;
-	unsigned int l2 = (pos & 0x00ff0000) >> 16;
-	unsigned int l3 = (pos & 0x0000ff00) >> 8;
-	unsigned int l4 = (pos & 0x000000ff);
-
-	if ( level1 == 0 ) {
-		level1 = new Level1;
-		memset( level1, 0, sizeof(Level1) );
-	}
-
-	Level2 *level2 = level1->level2[l1];
-	if ( level2 == 0 ) {
-		level2 = level1->level2[l1] = new Level2;
-		memset( level2, 0, sizeof(Level2) );
-	}
-
-	Level3 *level3 = level2->level3[l2];
-	if ( level3 == 0 ) {
-		level3 = level2->level3[l2] = new Level3;
-		memset( level3, 0, sizeof(Level3) );
-	}
-
-	Level4 *level4 = level3->level4[l3];
-	if ( level4 == 0 ) {
-		level4 = level3->level4[l3] = new Level4;
-		memset( level4, 0, sizeof(Level4) );
-	}
-
-	Record *record = &level4->records[l4];
-	return record;
 }
 
 void Program::clearGlobal( Tree **sp )
@@ -467,29 +431,38 @@ void Program::clear( Tree **vm_stack, Tree **sp )
 
 	long kidLost = kidPool.numlost();
 	if ( kidLost )
-		cerr << "warning lost kids: " << kidLost << endl;
+		cerr << "warning: lost kids: " << kidLost << endl;
 
 	long treeLost = treePool.numlost();
 	if ( treeLost )
-		cerr << "warning lost trees: " << treeLost << endl;
+		cerr << "warning: lost trees: " << treeLost << endl;
 
 	long parseTreeLost = parseTreePool.numlost();
 	if ( parseTreeLost )
-		cerr << "warning lost parse trees: " << parseTreeLost << endl;
+		cerr << "warning: lost parse trees: " << parseTreeLost << endl;
 
 	long listLost = listElPool.numlost();
 	if ( listLost )
-		cerr << "warning lost listEls: " << listLost << endl;
+		cerr << "warning: lost listEls: " << listLost << endl;
 
 	long mapLost = mapElPool.numlost();
 	if ( mapLost )
-		cerr << "warning lost mapEls: " << mapLost << endl;
+		cerr << "warning: lost mapEls: " << mapLost << endl;
+
+	long headLost = headPool.numlost();
+	if ( headLost )
+		cerr << "warning: lost heads: " << headLost << endl;
+
+	long locationLost = locationPool.numlost();
+	if ( locationLost )
+		cerr << "warning: lost locations: " << locationLost << endl;
 
 	kidPool.clear();
 	treePool.clear();
 	parseTreePool.clear();
 	listElPool.clear();
 	mapElPool.clear();
+	locationPool.clear();
 
 	//reverseCode.empty();
 	//memset( vm_stack, 0, sizeof(Tree*) * VM_STACK_SIZE);
@@ -551,12 +524,6 @@ void Program::run()
 		/* The root code should all be commit code and reverseCode
 		 * should be empty. */
 		assert( reverseCode.length() == 0 );
-	}
-
-	for ( unsigned long i = 0; i < nextPos; i++ ) {
-		Record *r = record( i );
-		if ( r->ignore != 0 )
-			tree_downref( this, root, r->ignore );
 	}
 
 	/* Clear */
@@ -1107,7 +1074,7 @@ again:
 
 			for ( int i = 0; i < lelInfo[genId].numCaptureAttr; i++ ) {
 				CaptureAttr *ca = &prg->rtd->captureAttr[lelInfo[genId].captureAttr + i];
-				Head *data = string_alloc_new( prg, 
+				Head *data = string_alloc_full( prg, 
 						mark[ca->mark_enter], mark[ca->mark_leave] - mark[ca->mark_enter] );
 				Tree *string = construct_string( prg, data );
 				tree_upref( string );
@@ -2719,13 +2686,13 @@ again:
 			#endif
 
 			Tree *tree = (Tree*) pop();
-			Tree *integer = construct_integer( prg, 0 );
-			tree_upref( integer );
+			Tree *integer = 0;
+			if ( tree->tokdata->location ) {
+				integer = construct_integer( prg, tree->tokdata->location->byte );
+				tree_upref( integer );
+			}
 			push( integer );
 			tree_downref( prg, sp, tree );
-
-			/* Requires a new implementation. */
-			assert( false );
 			break;
 		}
 		case IN_GET_MATCH_LENGTH_R: {
@@ -3541,7 +3508,7 @@ again:
 			#endif
 
 			if ( prg->argc >= 2 ) {
-				Head *head = string_alloc_const( prg, prg->argv[1], strlen(prg->argv[1]) );
+				Head *head = string_alloc_pointer( prg, prg->argv[1], strlen(prg->argv[1]) );
 				Tree *tree = construct_string( prg, head );
 				tree_upref( tree );
 				set_field( prg, prg->global, field, tree );

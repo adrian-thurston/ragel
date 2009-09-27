@@ -422,38 +422,19 @@ struct CodeVect : public RtVector<Code>
 		{ insertWord( pos, (Word) tree ); }
 };
 
+/* Location information. */
+
 struct File
 {
 	File *prev, *next;
 };
 
-struct Record
+struct Location
 {
-	Tree *ignore;
 	File *file;
 	long line;
 	long column;
 	long byte;
-};
-
-struct Level4
-{
-	Record records[256];
-};
-
-struct Level3
-{
-	Level4 *level4[256];
-};
-
-struct Level2
-{
-	Level3 *level3[256];
-};
-
-struct Level1
-{
-	Level2 *level2[256];
 };
 
 
@@ -466,6 +447,7 @@ struct Head
 {
 	const char *data;
 	long length;
+	Location *location;
 };
 
 struct TreePair
@@ -481,8 +463,8 @@ struct Stream;
 
 bool test_false( Program *prg, Tree *tree );
 
-Head *string_alloc_new( Program *prg, const char *data, long length );
-Head *string_alloc_const( Program *prg, const char *data, long length );
+Head *string_alloc_full( Program *prg, const char *data, long length );
+Head *string_alloc_pointer( Program *prg, const char *data, long length );
 Head *string_copy( Program *prg, Head *head );
 void string_free( Program *prg, Head *head );
 long string_length( Head *str );
@@ -634,7 +616,6 @@ template <class T> T *PoolAlloc<T>::allocate()
 	//#ifdef COLM_LOG_BYTECODE
 	//cerr << "allocating in: " << __PRETTY_FUNCTION__ << endl;
 	//#endif
-
 	T *newEl = 0;
 	if ( pool == 0 ) {
 		if ( nextel == FRESH_BLOCK ) {
@@ -726,6 +707,8 @@ struct Program
 	PoolAlloc<ParseTree> parseTreePool;
 	PoolAlloc<ListEl> listElPool;
 	PoolAlloc<MapEl> mapElPool;
+	PoolAlloc<Head> headPool;
+	PoolAlloc<Location> locationPool;
 
 	Tree *trueVal;
 	Tree *falseVal;
@@ -741,10 +724,6 @@ struct Program
 	Stream *stdinVal;
 	Stream *stdoutVal;
 	Stream *stderrVal;
-
-	Record *record( unsigned int pos );
-	Level1 *level1;
-	unsigned long nextPos;
 };
 
 struct Execution
