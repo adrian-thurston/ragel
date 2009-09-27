@@ -21,7 +21,7 @@
 
 SRC = $(wildcard *.lm)
 BIN = $(SRC:%.lm=%.bin)
-SUBDIRS = xml python http dns diff html cxx ruby mediawiki
+SUBDIRS = xml python http diff html cxx ruby mediawiki
 
 all: $(BIN) $(SUBDIRS)
 
