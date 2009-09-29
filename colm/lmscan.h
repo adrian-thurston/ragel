@@ -53,10 +53,14 @@ struct IncludeStackItem
 };
 
 typedef Vector<IncludeStackItem> IncludeStack;
+typedef Vector<const char *> ArgsVector;
+
+extern ArgsVector includePaths;
 
 struct Scanner
 {
-	Scanner( const char *fileName, istream &input, ostream &output, Parser *includeToParser, int includeDepth )
+	Scanner( const char *fileName, istream &input, 
+			ostream &output, Parser *includeToParser, int includeDepth )
 	: 
 		fileName(fileName), input(input), output(output),
 		includeDepth(includeDepth),
@@ -72,6 +76,8 @@ struct Scanner
 		}
 	}
 
+	ifstream *tryOpenInclude( char **pathChecks, long &found );
+	char **makeIncludePathChecks( const char *thisFileName, const char *fileName );
 	bool recursiveInclude( const char *inclFileName );
 
 	void sectionParseInit();

@@ -75,6 +75,8 @@ bool logging = false;
 bool branchPointInfo = false;
 bool addUniqueEmptyProductions = false;
 
+ArgsVector includePaths;
+
 /* Print version information. */
 void version();
 

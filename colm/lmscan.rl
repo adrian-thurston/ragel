@@ -87,6 +87,76 @@ void Scanner::token( int type )
 	token( type, 0, 0 );
 }
 
+bool isAbsolutePath( const char *path )
+{
+	return path[0] == '/';
+}
+
+ifstream *Scanner::tryOpenInclude( char **pathChecks, long &found )
+{
+	char **check = pathChecks;
+	ifstream *inFile = new ifstream;
+	
+	while ( *check != 0 ) {
+		inFile->open( *check );
+		if ( inFile->is_open() ) {
+			found = check - pathChecks;
+			return inFile;
+		}
+		check += 1;
+	}
+
+	found = -1;
+	delete inFile;
+	return 0;
+}
+
+char **Scanner::makeIncludePathChecks( const char *thisFileName, const char *fileName )
+{
+	char **checks = 0;
+	long nextCheck = 0;
+	char *data = strdup(fileName);
+	long length = strlen(fileName);
+
+	/* Absolute path? */
+	if ( isAbsolutePath( data ) ) {
+		checks = new char*[2];
+		checks[nextCheck++] = data;
+	}
+	else {
+		/* Search from the the location of the current file. */
+		checks = new char *[2 + includePaths.length()];
+		const char *lastSlash = strrchr( thisFileName, '/' );
+		if ( lastSlash == 0 )
+			checks[nextCheck++] = data;
+		else {
+			long givenPathLen = (lastSlash - thisFileName) + 1;
+			long checklen = givenPathLen + length;
+			char *check = new char[checklen+1];
+			memcpy( check, thisFileName, givenPathLen );
+			memcpy( check+givenPathLen, data, length );
+			check[checklen] = 0;
+			checks[nextCheck++] = check;
+		}
+
+		/* Search from the include paths given on the command line. */
+		for ( ArgsVector::Iter incp = includePaths; incp.lte(); incp++ ) {
+			long pathLen = strlen( *incp );
+			long checkLen = pathLen + 1 + length;
+			char *check = new char[checkLen+1];
+			memcpy( check, *incp, pathLen );
+			check[pathLen] = '/';
+			memcpy( check+pathLen+1, data, length );
+			check[checkLen] = 0;
+			checks[nextCheck++] = check;
+		}
+	}
+
+	checks[nextCheck] = 0;
+	return checks;
+}
+
+
 %%{
 	machine section_parse;
 	import "lmparse.h";
@@ -111,20 +181,22 @@ void Scanner::token( int type )
 		here.col = column;
 
 		prepareLitString( fileName, unused, src, here );
+		char **checks = makeIncludePathChecks( this->fileName, fileName );
 
-		if ( recursiveInclude( fileName ) )
+		/* Open the input file for reading. */
+		long found = 0;
+		ifstream *inFile = tryOpenInclude( checks, found );
+		if ( inFile == 0 ) {
+			scan_error() << "include: could not open " << 
+					fileName << " for reading" << endl;
+		}
+
+		if ( recursiveInclude( checks[found] ) )
 			scan_error() << "include: this is a recursive include operation" << endl;
 
 		/* Check for a recursive include structure. Add the current file/section
 		 * name then check if what we are including is already in the stack. */
-		includeStack.append( IncludeStackItem( fileName ) );
-
-		/* Open the input file for reading. */
-		ifstream *inFile = new ifstream( fileName );
-		if ( ! inFile->is_open() ) {
-			scan_error() << "include: could not open " << 
-					fileName << " for reading" << endl;
-		}
+		includeStack.append( IncludeStackItem( checks[found] ) );
 
 		Scanner scanner( fileName, *inFile, output, parser, includeDepth+1 );
 		scanner.scan();
