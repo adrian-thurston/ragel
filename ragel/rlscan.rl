@@ -556,18 +556,21 @@ bool isAbsolutePath( const char *path )
 char **Scanner::makeIncludePathChecks( const char *thisFileName, 
 		const char *fileName, int fnlen )
 {
-	char **checks = new char*[2];
+	char **checks = 0;
 	long nextCheck = 0;
-
-	bool caseInsensitive = false;
 	long length = 0;
+	bool caseInsensitive = false;
 	char *data = prepareLitString( InputLoc(), fileName, fnlen, 
 			length, caseInsensitive );
 
 	/* Absolute path? */
-	if ( isAbsolutePath( data ) )
+	if ( isAbsolutePath( data ) ) {
+		checks = new char*[2];
 		checks[nextCheck++] = data;
+	}
 	else {
+		checks = new char*[2 + id.includePaths.length()];
+
 		/* Search from the the location of the current file. */
 		const char *lastSlash = strrchr( thisFileName, PATH_SEP );
 		if ( lastSlash == 0 )
