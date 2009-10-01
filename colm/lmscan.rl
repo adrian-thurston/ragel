@@ -190,20 +190,22 @@ char **Scanner::makeIncludePathChecks( const char *thisFileName, const char *fil
 			scan_error() << "include: could not open " << 
 					fileName << " for reading" << endl;
 		}
+		else {
+			/* Only proceed with the include if it was found. */
+			if ( recursiveInclude( checks[found] ) )
+				scan_error() << "include: this is a recursive include operation" << endl;
 
-		if ( recursiveInclude( checks[found] ) )
-			scan_error() << "include: this is a recursive include operation" << endl;
+			/* Check for a recursive include structure. Add the current file/section
+			 * name then check if what we are including is already in the stack. */
+			includeStack.append( IncludeStackItem( checks[found] ) );
 
-		/* Check for a recursive include structure. Add the current file/section
-		 * name then check if what we are including is already in the stack. */
-		includeStack.append( IncludeStackItem( checks[found] ) );
+			Scanner scanner( fileName, *inFile, output, parser, includeDepth+1 );
+			scanner.scan();
+			delete inFile;
 
-		Scanner scanner( fileName, *inFile, output, parser, includeDepth+1 );
-		scanner.scan();
-		delete inFile;
-
-		/* Remove the last element (len-1) */
-		includeStack.remove( -1 );
+			/* Remove the last element (len-1) */
+			includeStack.remove( -1 );
+		}
 	}
 
 	include_target = 

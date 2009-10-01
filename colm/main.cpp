@@ -343,12 +343,15 @@ void compileOutput( const char *argv0 )
 
 void process_args( int argc, const char **argv )
 {
-	ParamCheck pc( "vlio:S:M:vHh?-:sV", argc, argv );
+	ParamCheck pc( "I:vlio:S:M:vHh?-:sV", argc, argv );
 
 	while ( pc.check() ) {
 		switch ( pc.state ) {
 		case ParamCheck::match:
 			switch ( pc.parameter ) {
+			case 'I':
+				includePaths.append( pc.parameterArg );
+				break;
 			case 'v':
 				verbose = true;
 				break;
