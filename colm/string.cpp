@@ -83,6 +83,7 @@ Head *init_str_space( long length )
 	/* Init the header. */
 	head->data = (char*)(head+1);
 	head->length = length;
+	head->location = 0;
 
 	/* Save the pointer to the data. */
 	return head;
