@@ -139,7 +139,8 @@ void LangStmt::analyze( ParseData *pd ) const
 	switch ( type ) {
 		case PrintType: 
 		case PrintXMLACType:
-		case PrintXMLType: {
+		case PrintXMLType:
+		case PrintStreamType: {
 			/* Push the args backwards. */
 			for ( ExprVect::Iter pex = exprPtrVect->last(); pex.gtb(); pex-- )
 				(*pex)->analyze( pd );

@@ -1555,6 +1555,7 @@ struct LangStmt
 		PrintType,
 		PrintXMLACType,
 		PrintXMLType,
+		PrintStreamType,
 		ExprType,
 		IfType,
 		RejectType,

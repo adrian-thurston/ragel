@@ -972,39 +972,69 @@ again:
 			break;
 		}
 		case IN_PRINT: {
+			int n;
+			read_byte( n );
 			#ifdef COLM_LOG_BYTECODE
 			if ( colm_log_bytecode ) {
-				cerr << "IN_PRINT" << endl;
+				cerr << "IN_PRINT " << n << endl;
 			}
 			#endif
 
-			Tree *tree = pop();
-			print_tree( cout, sp, prg, tree );
-			tree_downref( prg, sp, tree );
+			while ( n-- > 0 ) {
+				Tree *tree = pop();
+				print_tree( cout, sp, prg, tree );
+				tree_downref( prg, sp, tree );
+			}
 			break;
 		}
 		case IN_PRINT_XML_AC: {
+			int n;
+			read_byte( n );
 			#ifdef COLM_LOG_BYTECODE
 			if ( colm_log_bytecode ) {
-				cerr << "IN_PRINT_XML_AC" << endl;
+				cerr << "IN_PRINT_XML_AC" << n << endl;
 			}
 			#endif
 
-			Tree *tree = pop();
-			print_xml_tree( sp, prg, tree, true );
-			tree_downref( prg, sp, tree );
+			while ( n-- > 0 ) {
+				Tree *tree = pop();
+				print_xml_tree( sp, prg, tree, true );
+				tree_downref( prg, sp, tree );
+			}
 			break;
 		}
 		case IN_PRINT_XML: {
+			int n;
+			read_byte( n );
 			#ifdef COLM_LOG_BYTECODE
 			if ( colm_log_bytecode ) {
-				cerr << "IN_PRINT_XML" << endl;
+				cerr << "IN_PRINT_XML" << n << endl;
 			}
 			#endif
 
-			Tree *tree = pop();
-			print_xml_tree( sp, prg, tree, false );
-			tree_downref( prg, sp, tree );
+			while ( n-- > 0 ) {
+				Tree *tree = pop();
+				print_xml_tree( sp, prg, tree, false );
+				tree_downref( prg, sp, tree );
+			}
+			break;
+		}
+		case IN_PRINT_STREAM: {
+			int n;
+			read_byte( n );
+			#ifdef COLM_LOG_BYTECODE
+			if ( colm_log_bytecode ) {
+				cerr << "IN_PRINT_STREAM" << n << endl;
+			}
+			#endif
+
+			Stream *stream = (Stream*)pop();
+			while ( n-- > 0 ) {
+				Tree *tree = pop();
+				print_tree2( stream->file, sp, prg, tree );
+				tree_downref( prg, sp, tree );
+			}
+			tree_downref( prg, sp, (Tree*)stream );
 			break;
 		}
 		case IN_LOAD_GLOBAL_R: {
@@ -3473,11 +3503,13 @@ again:
 			}
 			#endif
 
+			Tree *mode = pop();
 			Tree *name = pop();
-			Tree *res = (Tree*)open_file( prg, name );
+			Tree *res = (Tree*)open_file( prg, name, mode );
 			tree_upref( res );
 			push( res );
 			tree_downref( prg, sp, name );
+			tree_downref( prg, sp, mode );
 			break;
 		}
 		case IN_GET_STDIN: {

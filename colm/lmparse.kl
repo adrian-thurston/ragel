@@ -1125,6 +1125,10 @@ statement: KW_PrintXML '(' code_expr_list ')'
 	final {
 		$$->stmt = new LangStmt( $1->loc, LangStmt::PrintXMLType, $3->exprVect );
 	};
+statement: KW_PrintStream '(' code_expr_list ')'
+	final {
+		$$->stmt = new LangStmt( $1->loc, LangStmt::PrintStreamType, $3->exprVect );
+	};
 statement: code_expr
 	final {
 		$$->stmt = new LangStmt( InputLoc(), LangStmt::ExprType, $1->expr );

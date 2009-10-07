@@ -126,10 +126,23 @@ Stream *open_stream_fd( Program *prg, long fd )
 	return res;
 }
 
-Stream *open_file( Program *prg, Tree *name )
+Stream *open_file( Program *prg, Tree *name, Tree *mode )
 {
-	Head *head = ((Str*)name)->value;
-	FILE *file = fopen( string_data(head), "rb" );
+	Head *headName = ((Str*)name)->value;
+	Head *headMode = ((Str*)mode)->value;
+
+	const char *givenMode = string_data(headMode);
+	const char *fopenMode = 0;
+	if ( strcmp( givenMode, "r" ) == 0 )
+		fopenMode = "rb";
+	else if ( strcmp( givenMode, "w" ) == 0 )
+		fopenMode = "wb";
+	else {
+		cerr << "unknown file open mode: " << givenMode << endl;
+		exit(1);
+	}
+
+	FILE *file = fopen( string_data(headName), fopenMode );
 	return open_stream_file( prg, file );
 }
 
@@ -374,6 +387,11 @@ void print_str( ostream &out, Head *str )
 	out.write( (char*)(str->data), str->length );
 }
 
+void print_str2( FILE *out, Head *str )
+{
+	fwrite( (char*)(str->data), str->length, 1, out );
+}
+
 /* Note that this function causes recursion, thought it is not a big
  * deal since the recursion it is only caused by nonterminals that are ignored. */
 void print_ignore_list( ostream &out, Tree **sp, Program *prg, Tree *tree )
@@ -391,6 +409,26 @@ void print_ignore_list( ostream &out, Tree **sp, Program *prg, Tree *tree )
 	while ( vm_ptop() != root ) {
 		ignore = (Kid*) vm_pop();
 		print_tree( out, sp, prg, ignore->tree );
+	}
+}
+
+/* Note that this function causes recursion, thought it is not a big
+ * deal since the recursion it is only caused by nonterminals that are ignored. */
+void print_ignore_list2( FILE *out, Tree **sp, Program *prg, Tree *tree )
+{
+	Kid *ignore = tree_ignore( prg, tree );
+
+	/* Record the root of the stack and push everything. */
+	Tree **root = vm_ptop();
+	while ( tree_is_ignore( prg, ignore ) ) {
+		vm_push( (SW)ignore );
+		ignore = ignore->next;
+	}
+
+	/* Pop them off and print. */
+	while ( vm_ptop() != root ) {
+		ignore = (Kid*) vm_pop();
+		print_tree2( out, sp, prg, ignore->tree );
 	}
 }
 
@@ -462,6 +500,77 @@ void print_tree( ostream &out, Tree **&sp, Program *prg, Tree *tree )
 		kid.tree = tree;
 		kid.next = 0;
 		print_kid( out, sp, prg, &kid, false );
+	}
+}
+
+
+void print_kid2( FILE *out, Tree **&sp, Program *prg, Kid *kid, bool printIgnore )
+{
+	Tree **root = vm_ptop();
+	Kid *child;
+
+rec_call:
+	/* If not currently skipping ignore data, then print it. Ignore data can
+	 * be associated with terminals and nonterminals. */
+	if ( printIgnore && tree_ignore( prg, kid->tree ) != 0 ) {
+		/* Ignorelists are reversed. */
+		print_ignore_list2( out, sp, prg, kid->tree );
+		printIgnore = false;
+	}
+
+	if ( kid->tree->id < prg->rtd->firstNonTermId ) {
+		/* Always turn on ignore printing when we get to a token. */
+		printIgnore = true;
+
+		if ( kid->tree->id == LEL_ID_INT )
+			fprintf( out, "%ld", ((Int*)kid->tree)->value );
+		else if ( kid->tree->id == LEL_ID_BOOL ) {
+			if ( ((Int*)kid->tree)->value )
+				fprintf( out, "true" );
+			else
+				fprintf( out, "false" );
+		}
+		else if ( kid->tree->id == LEL_ID_PTR )
+			fprintf( out, "#%p", (void*) ((Pointer*)kid->tree)->value );
+		else if ( kid->tree->id == LEL_ID_STR )
+			print_str2( out, ((Str*)kid->tree)->value );
+		else if ( kid->tree->id == LEL_ID_STREAM )
+			fprintf( out, "#%p", ((Stream*)kid->tree)->file );
+		else if ( kid->tree->tokdata != 0 && 
+				string_length( kid->tree->tokdata ) > 0 )
+		{
+			fwrite( string_data( kid->tree->tokdata ), 
+					string_length( kid->tree->tokdata ), 1, out );
+		}
+	}
+	else {
+		/* Non-terminal. */
+		child = tree_child( prg, kid->tree );
+		if ( child != 0 ) {
+			vm_push( (SW)kid );
+			kid = child;
+			while ( kid != 0 ) {
+				goto rec_call;
+				rec_return:
+				kid = kid->next;
+			}
+			kid = (Kid*)vm_pop();
+		}
+	}
+
+	if ( vm_ptop() != root )
+		goto rec_return;
+}
+
+void print_tree2( FILE *out, Tree **&sp, Program *prg, Tree *tree )
+{
+	if ( tree == 0 )
+		fprintf( out, "NIL" );
+	else {
+		Kid kid;
+		kid.tree = tree;
+		kid.next = 0;
+		print_kid2( out, sp, prg, &kid, false );
 	}
 }
 

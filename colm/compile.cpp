@@ -1800,7 +1800,8 @@ void LangStmt::compile( ParseData *pd, CodeVect &code ) const
 	switch ( type ) {
 		case PrintType: 
 		case PrintXMLACType:
-		case PrintXMLType: {
+		case PrintXMLType:
+		case PrintStreamType: {
 			UniqueType **types = new UniqueType*[exprPtrVect->length()];
 			
 			/* Push the args backwards. */
@@ -1809,16 +1810,21 @@ void LangStmt::compile( ParseData *pd, CodeVect &code ) const
 
 			/* Run the printing forwards. */
 			if ( type == PrintType ) {
-				for ( ExprVect::Iter pex = *exprPtrVect; pex.lte(); pex++ )
-					code.append( IN_PRINT );
+				code.append( IN_PRINT );
+				code.append( exprPtrVect->length() );
 			}
 			else if ( type == PrintXMLACType ) {
-				for ( ExprVect::Iter pex = *exprPtrVect; pex.lte(); pex++ )
-					code.append( IN_PRINT_XML_AC );
+				code.append( IN_PRINT_XML_AC );
+				code.append( exprPtrVect->length() );
 			}
 			else if ( type == PrintXMLType ) {
-				for ( ExprVect::Iter pex = *exprPtrVect; pex.lte(); pex++ )
-					code.append( IN_PRINT_XML );
+				code.append( IN_PRINT_XML );
+				code.append( exprPtrVect->length() );
+			}
+			else if ( type == PrintStreamType ) {
+				/* Minus one because the first arg is the stream. */
+				code.append( IN_PRINT_STREAM );
+				code.append( exprPtrVect->length() - 1 );
 			}
 
 			delete[] types;
@@ -2861,8 +2867,8 @@ void ParseData::initGlobalFunctions()
 {
 	ObjMethod *method;
 
-	method = initFunction( uniqueTypeStream, globalObjectDef, "open_file",
-		IN_OPEN_FILE, IN_OPEN_FILE, uniqueTypeStr, true );
+	method = initFunction( uniqueTypeStream, globalObjectDef, "open",
+		IN_OPEN_FILE, IN_OPEN_FILE, uniqueTypeStr, uniqueTypeStr, true );
 	method->useCallObj = false;
 
 	method = initFunction( uniqueTypeStr, globalObjectDef, "tolower",

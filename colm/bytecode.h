@@ -188,6 +188,7 @@ typedef unsigned char uchar;
 #define IN_PRINT                 0x87
 #define IN_PRINT_XML_AC          0x88
 #define IN_PRINT_XML             0xab
+#define IN_PRINT_STREAM          0xd2
 
 #define IN_HALT                  0x8a
 
@@ -497,7 +498,7 @@ Tree *construct_term( Program *prg, Word id, Head *tokdata );
 Tree *construct_replacement_tree( Tree **bindings, Program *prg, long pat );
 Tree *create_generic( Program *prg, long genericId );
 
-Stream *open_file( Program *prg, Tree *name );
+Stream *open_file( Program *prg, Tree *name, Tree *mode );
 Stream *open_stream_fd( Program *prg, long fd );
 Stream *open_stream( Program *prg, FILE *file );
 
@@ -518,7 +519,7 @@ Tree *make_token( Tree **root, Program *prg, long nargs );
 Tree *prep_parse_tree( Program *prg, Tree **sp, Tree *tree );
 
 void print_tree( ostream &out, Tree **&sp, Program *prg, Tree *tree );
-void print_tree2( ostream &out, Tree **&sp, Program *prg, Tree *tree );
+void print_tree2( FILE *out, Tree **&sp, Program *prg, Tree *tree );
 void print_str( Head *str );
 void print_xml_tree( Tree **&sp, Program *prg, Tree *tree, bool commAttr );
 void print_xml_kid( Tree **&sp, Program *prg, Kid *kid, bool commAttr, int depth );

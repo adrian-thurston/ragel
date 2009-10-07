@@ -434,6 +434,7 @@ void Scanner::endSection( )
 		'match' => { token( KW_Match ); };
 		'for' => { token( KW_For ); };
 		'iter' => { token( KW_Iter ); };
+		'prints' => { token( KW_PrintStream ); };
 		'print' => { token( KW_Print ); };
 		'print_xml_ac' => { token( KW_PrintXMLAC ); };
 		'print_xml' => { token( KW_PrintXML ); };
