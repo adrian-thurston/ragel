@@ -1,0 +1,51 @@
+lex args
+{
+	literal '-'
+	token file /^('-'|0)(^0)*/
+}
+
+lex opts
+{
+	token single /[qvh]/
+	token with_opt /[oi]/
+}
+
+token word /(^0)+/
+token zero /0/
+
+def item
+	[file zero]
+|	['-' single* zero]
+|	['-' with_opt zero? word zero]
+
+def args 
+	[word zero item*]
+
+accum arg_parser [args] 
+arg_parser ArgParser = 
+	construct arg_parser []
+
+argv_list ArgV = argv
+for A: str in ArgV
+	ArgParser << [A '\0']
+
+args Args = ArgParser.finish()
+
+
+for Item: item in Args {
+	if match Item 
+			['-' SL: single* zero]
+	{
+		for S: single in SL
+			print( "single: [$S]\n" )
+	}
+	elsif match Item 
+			['-' W: with_opt zero? Opt: word zero]
+	{
+		print( "with opt: [$W] -> [$Opt]\n" )
+	}
+	else {
+		print ("file: [$Item]\n" )
+	}
+}
+
