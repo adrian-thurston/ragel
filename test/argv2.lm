@@ -44,8 +44,10 @@ for Item: item in Args {
 	{
 		print( "with opt: [$W] -> [$Opt]\n" )
 	}
-	else {
-		print ("file: [$Item]\n" )
+	elsif match Item
+			[F: file zero]
+	{
+		print ("file: [$F]\n" )
 	}
 }
 
