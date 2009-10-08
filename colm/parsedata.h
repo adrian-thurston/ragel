@@ -692,9 +692,12 @@ struct ParseData
 	void printNonTermFirstSets();
 	void printFirstSets();
 
-	KlangEl *makeRepeatProd( Namespace *nspace, const String &repeatName, NamespaceQual *nspaceQual, const String &name );
-	KlangEl *makeListProd( Namespace *nspace, const String &listName, NamespaceQual *nspaceQual, const String &name );
-	KlangEl *makeOptProd( Namespace *nspace, const String &optName, NamespaceQual *nspaceQual, const String &name );
+	KlangEl *makeRepeatProd( Namespace *nspace, const String &repeatName, 
+			NamespaceQual *nspaceQual, const String &name );
+	KlangEl *makeListProd( Namespace *nspace, const String &listName,
+			NamespaceQual *nspaceQual, const String &name );
+	KlangEl *makeOptProd( Namespace *nspace, const String &optName,
+			NamespaceQual *nspaceQual, const String &name );
 	void resolveLiteralFactor( PdaFactor *fact );
 	void resolveReferenceFactor( PdaFactor *fact );
 	void resolveFactor( PdaFactor *fact );
@@ -740,11 +743,11 @@ struct ParseData
 	void initVectorFunctions( GenericType *gen );
 	void initAccumFunctions( GenericType *gen );
 
-	int argv1Offset();
 	void addStdin();
 	void addStdout();
 	void addStderr();
-	void addArgv1();
+	void addArgv();
+	int argvOffset();
 	void initGlobalFunctions();
 	void makeDefaultIterators();
 	void addLengthField( ObjectDef *objDef, Code getLength );
@@ -938,6 +941,8 @@ struct ParseData
 
 	long predValue;
 	long nextMatchEndNum;
+
+	KlangEl *argvListKlangEl;
 };
 
 void afterOpMinimize( FsmGraph *fsm, bool lastInSeq = true );

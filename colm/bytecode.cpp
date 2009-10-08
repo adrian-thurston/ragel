@@ -358,6 +358,20 @@ void user_iter_destroy( Tree **&sp, UserIter *uiter )
 	popn( argSize );
 }
 
+Tree *construct_argv( Program *prg, int argc, char **argv )
+{
+	Tree *list = create_generic( prg, 1 );
+	tree_upref( list );
+	for ( int i = 0; i < argc; i++ ) {
+		Head *head = string_alloc_pointer( prg, argv[i], strlen(argv[i]) );
+		Tree *arg = construct_string( prg, head );
+		tree_upref( arg );
+		list_append( prg, (List*)list, arg );
+	}
+	return list;
+}
+
+
 /*
  * Execution environment
  */
@@ -3539,12 +3553,9 @@ again:
 			}
 			#endif
 
-			if ( prg->argc >= 2 ) {
-				Head *head = string_alloc_pointer( prg, prg->argv[1], strlen(prg->argv[1]) );
-				Tree *tree = construct_string( prg, head );
-				tree_upref( tree );
-				set_field( prg, prg->global, field, tree );
-			}
+			/* Tree comes back upreffed. */
+			Tree *tree = construct_argv( prg, prg->argc, prg->argv );
+			set_field( prg, prg->global, field, tree );
 			break;
 		}
 		case IN_STOP: {

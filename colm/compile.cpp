@@ -2402,7 +2402,7 @@ void ParseData::compileRootBlock( )
 	code.appendHalf( 0 );
 
 	code.append( IN_LOAD_ARGV );
-	code.appendHalf( argv1Offset() );
+	code.appendHalf( argvOffset() );
 
 	block->compile( this, code );
 
@@ -2833,34 +2833,29 @@ void ParseData::addStderr()
 	globalObjectDef->insertField( el->name, el );
 }
 
-int ParseData::argv1Offset()
+void ParseData::addArgv()
+{
+	/* Make the type ref. */
+	TypeRef *typeRef = new TypeRef( InputLoc(), findUniqueType( TYPE_TREE, argvListKlangEl ) );
+
+	/* Create the field and insert it into the map. */
+	ObjField *el = new ObjField( InputLoc(), typeRef, "argv" );
+	el->isArgv = true;
+	el->isConst = true;
+	globalObjectDef->insertField( el->name, el );
+}
+
+int ParseData::argvOffset()
 {
 	for ( ObjFieldList::Iter field = *globalObjectDef->objFieldList;
 			field.lte(); field++ )
 	{
-		if ( field->value->isArgv1 ) {
+		if ( field->value->isArgv ) {
 			globalObjectDef->referenceField( this, field->value );
 			return field->value->offset;
 		}
 	}
 	assert(false);
-}
-
-void ParseData::addArgv1()
-{
-	TypeRef *typeRef = new TypeRef( InputLoc(), uniqueTypeStr );
-
-	ObjField *el = new ObjField( InputLoc(), typeRef, "argv2" );
-
-	globalObjectDef->insertField( el->name, el );
-
-	typeRef = new TypeRef( InputLoc(), uniqueTypeStr );
-
-	el = new ObjField( InputLoc(), typeRef, "argv1" );
-	el->isArgv1 = true;
-	el->isConst = true;
-
-	globalObjectDef->insertField( el->name, el );
 }
 
 void ParseData::initGlobalFunctions()
@@ -2882,7 +2877,7 @@ void ParseData::initGlobalFunctions()
 	addStdin();
 	addStdout();
 	addStderr();
-	addArgv1();
+	addArgv();
 }
 
 void ParseData::removeNonUnparsableRepls()

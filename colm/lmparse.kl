@@ -2165,6 +2165,32 @@ void Parser::init()
 	pd->curLocalFrame = pd->rootLocalFrame;
 
 	%% write init;
+
+	addArgvList();
+}
+
+void Parser::addArgvList()
+{
+	/* Get the language element. */
+	Namespace *nspace = namespaceStack.top();
+	KlangEl *langEl = getKlangEl( pd, nspace, "argv_list" );
+	langEl->type = KlangEl::NonTerm;
+
+	NamespaceQual *nspaceQual = new NamespaceQual( namespaceStack.top(), regionStack.top() );
+	TypeRef *typeRef = new TypeRef( InputLoc(), nspaceQual, "str" );
+	GenericType *generic = new GenericType( "argv_list", GEN_LIST, 
+			pd->nextGenericId++, langEl, typeRef );
+	/* Add one empty production. */
+	ProdElList *emptyList = new ProdElList;
+	addProduction( InputLoc(), "argv_list", emptyList, false, 0, 0 );
+
+	nspace->genericList.append( generic );
+	langEl->generic = generic;
+
+	pd->argvListKlangEl = langEl;
+
+	/* Assume this in the VM. */
+	assert( generic->id == 1 );
 }
 
 int Parser::parseLangEl( int type, const Token *token )
@@ -2193,7 +2219,7 @@ void Parser::addRegularDef( const InputLoc &loc, Namespace *nspace,
 	}
 }
 
-void Parser::addProduction( InputLoc &loc, const String &name, 
+void Parser::addProduction( const InputLoc &loc, const String &name, 
 		ProdElList *prodElList, bool commit, CodeBlock *redBlock, KlangEl *predOf )
 {
 	/* Get the language element. */
