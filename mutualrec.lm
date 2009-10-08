@@ -1,0 +1,15 @@
+
+int f1( int i )
+{
+	return f2( i + 1 ) + 1
+}
+
+int f2( int i )
+{
+	if i < 10 
+		return f1( i + 1 ) + 1
+	else
+		return i
+}
+
+print( "f1() = [$f1(0)]\n" )
