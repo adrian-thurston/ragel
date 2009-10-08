@@ -179,7 +179,7 @@ Tree *call_tree_parser( Tree **&sp, Program *prg, Tree *input,
 
 	/* Set up the input stream. */
 	string s = sout.str();
-	InputStreamString inputStream( s.c_str(), strlen( s.c_str() ) );
+	InputStreamString inputStream( s.c_str(), s.size() );
 	init_input_stream( &inputStream );
 
 	FsmRun fsmRun( prg );
@@ -213,7 +213,7 @@ void call_parser_frag( Tree **&sp, Program *prg, Tree *input, Accum *accum )
 
 		/* Set up the input stream. */
 		string s = sout.str();
-		InputStreamString inputStream( s.c_str(), strlen( s.c_str() ) );
+		InputStreamString inputStream( s.c_str(), s.size() );
 		init_input_stream( &inputStream );
 
 		parse_frag( sp, &inputStream, accum->fsmRun, accum->pdaRun );
