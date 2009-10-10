@@ -8,30 +8,47 @@ lex opts
 {
 	token single /[qvh]/
 	token with_opt /[oi]/
+	token dash /'-'/
+	literal 'help', 'verbose', 'input', '='
 }
+
+def long
+	['help']
+|	['verbose']
+
+def long_with_opt
+	['input']
+
+def long_eqals
+	['=']
+|	[zero]
 
 token word /(^0)+/
 token zero /0/
 
 def item
-	[file zero]
-|	['-' single* zero]
+	['-' single* zero]
 |	['-' with_opt zero? word zero]
+|	['-' dash long zero]
+|	['-' dash long_with_opt long_eqals word zero]
+|	[file zero]
 
 def args 
 	[word zero item*]
 
+# The argument parser. Using an accumulator so we can send nulls after each
+# arg.
 accum arg_parser [args] 
 arg_parser ArgParser = 
 	construct arg_parser []
 
+# Parse the args and extract the result into Args.
 argv_list ArgV = argv
 for A: str in ArgV
 	ArgParser << [A '\0']
-
 args Args = ArgParser.finish()
 
-
+# Process the args.
 for Item: item in Args {
 	if match Item 
 			['-' SL: single* zero]
@@ -45,9 +62,19 @@ for Item: item in Args {
 		print( "with opt: [$W] -> [$Opt]\n" )
 	}
 	elsif match Item
+			['-' dash L: long zero]
+	{
+		print("long: [$L]\n" )
+	}
+	elsif match Item
+			['-' dash LO: long_with_opt long_eqals LongOpt: word zero]
+	{
+		print("long: [$LO] -> [$LongOpt]\n" )
+	}
+	elsif match Item
 			[F: file zero]
 	{
-		print ("file: [$F]\n" )
+		print("file: [$F]\n" )
 	}
 }
 
