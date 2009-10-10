@@ -4,3 +4,7 @@ single: h
 with opt: o -> output
 with opt: i -> input
 file: file
+long: input -> foo
+long: input -> bar
+long: help
+long: verbose
