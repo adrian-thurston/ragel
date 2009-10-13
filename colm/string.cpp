@@ -24,6 +24,13 @@
 #include <assert.h>
 #include <string.h>
 
+/* 
+ * In this system strings are not null terminated. Often strings come from a
+ * parse, in which case the string is just a pointer into the the data string.
+ * A block in a parsed stream can house many tokens and there is no room for
+ * nulls.
+ */
+
 Head *string_copy( Program *prg, Head *head )
 {
 	Head *result = 0;

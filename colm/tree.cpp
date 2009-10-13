@@ -133,16 +133,21 @@ Stream *open_file( Program *prg, Tree *name, Tree *mode )
 
 	const char *givenMode = string_data(headMode);
 	const char *fopenMode = 0;
-	if ( strcmp( givenMode, "r" ) == 0 )
+	if ( memcmp( givenMode, "r", string_length(headMode) ) == 0 )
 		fopenMode = "rb";
-	else if ( strcmp( givenMode, "w" ) == 0 )
+	else if ( memcmp( givenMode, "w", string_length(headMode) ) == 0 )
 		fopenMode = "wb";
 	else {
 		cerr << "unknown file open mode: " << givenMode << endl;
 		exit(1);
 	}
-
-	FILE *file = fopen( string_data(headName), fopenMode );
+	
+	/* Need to make a C-string (null terminated). */
+	char *fileName = new char[string_length(headName)+1];
+	memcpy( fileName, string_data(headName), string_length(headName) );
+	fileName[string_length(headName)] = 0;
+	FILE *file = fopen( fileName, fopenMode );
+	delete[] fileName;
 	return open_stream_file( prg, file );
 }
 
