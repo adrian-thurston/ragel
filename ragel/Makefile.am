@@ -47,6 +47,6 @@ rlparse.cpp: rlparse.kl rlparse.kh
 rlscan.cpp: rlparse.h
 
 rlscan.cpp: rlscan.rl
-	ragel -G2 -o $@ $<
+	ragel -G2 -I$(builddir) -o $@ $<
 
 endif
