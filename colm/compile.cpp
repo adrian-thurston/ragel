@@ -2874,6 +2874,9 @@ void ParseData::initGlobalFunctions()
 		IN_TO_UPPER, IN_TO_UPPER, uniqueTypeStr, true );
 	method->useCallObj = false;
 
+	method = initFunction( uniqueTypeInt, globalObjectDef, "exit",
+		IN_EXIT, IN_EXIT, uniqueTypeInt, true );
+
 	addStdin();
 	addStdout();
 	addStderr();

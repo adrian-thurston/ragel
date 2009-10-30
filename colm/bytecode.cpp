@@ -3510,6 +3510,17 @@ again:
 			tree_downref( prg, sp, in );
 			break;
 		}
+		case IN_EXIT: {
+			#ifdef COLM_LOG_BYTECODE
+			if ( colm_log_bytecode ) {
+				cerr << "IN_EXIT" << endl;
+			}
+			#endif
+
+			Int *status = (Int*)pop();
+			exit( status->value );
+			break;
+		}
 		case IN_OPEN_FILE: {
 			#ifdef COLM_LOG_BYTECODE
 			if ( colm_log_bytecode ) {
