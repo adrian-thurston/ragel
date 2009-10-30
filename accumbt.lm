@@ -1,0 +1,42 @@
+
+# Token names.
+lex start
+{
+	token number /[0-9]+/
+	token id /[a-z]+/
+	token string /'"' [^"]* '"'/
+	ignore ws / [ \t\n]+ /
+}
+
+def prefix [id]
+
+def choice1
+	[number number]
+|	[number]
+
+def choice2 
+	[string id]
+|	[number number]
+|	[id number]
+|	[number]
+
+token EOF /ws+/
+
+def start 
+	[prefix choice1 choice2 string id id EOF]
+
+accum input [start]
+
+input I = construct input []
+
+I << " id "
+I << " 77 "
+I << " 88 "
+I << " \"hello\" "
+I << " dude "
+I << " dude "
+
+start S = I.finish()
+S = match S 
+	~id 77 88 "hello" dude dude
+print_xml( S )
