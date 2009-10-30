@@ -1,0 +1,4 @@
+
+print( 'before\n' )
+exit( 1 )
+print( 'after\n' )
