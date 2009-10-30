@@ -121,7 +121,7 @@ Stream *open_stream_fd( Program *prg, long fd )
 {
 	Stream *res = (Stream*)prg->mapElPool.allocate();
 	res->id = LEL_ID_STREAM;
-	res->in = new InputStreamFD( fd );
+	res->in = new InputStreamFd( fd );
 	init_input_stream( res->in );
 	return res;
 }

@@ -103,23 +103,23 @@ void InputStreamFile::pushBackBuf( RunBuf *runBuf )
  * FD
  */
 
-int InputStreamFD::isEOF()
+int InputStreamFd::isEOF()
 {
 	return queue == 0 && eof;
 }
 
-int InputStreamFD::needFlush()
+int InputStreamFd::needFlush()
 {
 	return queue == 0 && eof;
 }
 
-void InputStreamFD::pushBackBuf( RunBuf *runBuf )
+void InputStreamFd::pushBackBuf( RunBuf *runBuf )
 {
 	runBuf->next = queue;
 	queue = runBuf;
 }
 
-int InputStreamFD::getData( char *dest, int length )
+int InputStreamFd::getData( char *dest, int length )
 {
 	/* If there is any data in queue, read from that first. */
 	if ( queue != 0 ) {

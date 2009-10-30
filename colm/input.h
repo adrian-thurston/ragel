@@ -106,9 +106,9 @@ struct InputStreamFile : public InputStream
 	RunBuf *queue;
 };
 
-struct InputStreamFD : public InputStream
+struct InputStreamFd : public InputStream
 {
-	InputStreamFD( long fd ) :
+	InputStreamFd( long fd ) :
 		InputStream(false), 
 		fd(fd), eof(false), queue(0) {}
 
@@ -121,6 +121,32 @@ struct InputStreamFD : public InputStream
 	bool eof;
 	RunBuf *queue;
 };
+
+struct AccumData
+{
+	const char *data;
+	long length;
+
+	AccumData *prev, *next;
+};
+
+struct InputStreamAccum : public InputStream
+{
+	InputStreamAccum() :
+		InputStream(false), 
+		eof(false), queue(0) {}
+
+	int isEOF();
+	int needFlush();
+	int getData( char *dest, int length );
+	void pushBackBuf( RunBuf *runBuf );
+
+	AccumData *adHead, *adTail;
+
+	bool eof;
+	RunBuf *queue;
+};
+
 
 struct InputStreamPattern : public InputStream
 {
