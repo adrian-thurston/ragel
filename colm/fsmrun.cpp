@@ -798,9 +798,10 @@ long undo_parse( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pd
 	return 0;
 }
 
-#define SCAN_ERROR    -3
-#define SCAN_LANG_EL  -2
-#define SCAN_EOF      -1
+#define SCAN_TRY_AGAIN_LATER   -4
+#define SCAN_ERROR             -3
+#define SCAN_LANG_EL           -2
+#define SCAN_EOF               -1
 
 void scanner_error( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
 {
@@ -872,6 +873,10 @@ void parse( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun 
 			continue;
 		}
 
+		if ( tokenId == SCAN_TRY_AGAIN_LATER )
+			break;
+
+		/* Send a token. */
 		bool ctxDepParsing = fsmRun->prg->ctxDepParsing;
 		LangElInfo *lelInfo = pdaRun->tables->rtd->lelInfo;
 		if ( ctxDepParsing && lelInfo[tokenId].frameId >= 0 )
@@ -1045,6 +1050,11 @@ long scan_token( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
 				return SCAN_EOF;
 			}
 		}
+
+		/* Maybe need to pause parsing until more data is inserted into the
+		 * input stream. */
+		if ( inputStream->tryAgainLater() )
+			return SCAN_TRY_AGAIN_LATER;
 
 		/* There may be space left in the current buffer. If not then we need
 		 * to make some. */

@@ -26,6 +26,17 @@
 #include <stdio.h>
 #include <iostream>
 
+
+/*
+ * parser <- fsmrun <- input 
+ *
+ * Activities we need to support:
+ *
+ * 1. Stuff data into an input stream each time we <<
+ * 2. Detach an input stream, and attach another when we include
+ *
+ */
+
 struct KlangEl;
 struct Pattern;
 struct PatternItem;
@@ -52,6 +63,9 @@ struct InputStream
 	virtual int isEOF() = 0;
 	virtual int needFlush() = 0;
 	virtual void pushBackBuf( RunBuf *runBuf ) = 0;
+
+	virtual bool tryAgainLater()
+		{ return 0; }
 
 	/* Named language elements for patterns and replacements. */
 	virtual int isLangEl() { return false; }
@@ -140,6 +154,8 @@ struct InputStreamAccum : public InputStream
 	int needFlush();
 	int getData( char *dest, int length );
 	void pushBackBuf( RunBuf *runBuf );
+
+	virtual bool tryAgainLater();
 
 	AccumData *adHead, *adTail;
 

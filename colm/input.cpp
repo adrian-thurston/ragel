@@ -144,3 +144,32 @@ int InputStreamFd::getData( char *dest, int length )
 		return got;
 	}
 }
+
+/*
+ * Accum
+ */
+
+int InputStreamAccum::isEOF()
+{
+	return 0;
+}
+
+int InputStreamAccum::needFlush()
+{
+	return 0;
+}
+
+int InputStreamAccum::getData( char *dest, int length )
+{
+	return 0;
+}
+
+void InputStreamAccum::pushBackBuf( RunBuf *runBuf )
+{
+
+}
+
+bool InputStreamAccum::tryAgainLater()
+{
+	return 0;
+}
