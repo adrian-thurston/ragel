@@ -136,7 +136,7 @@ Tree *call_parser( Tree **&sp, Program *prg, Stream *stream,
 	PdaTables *tables = prg->rtd->pdaTables;
 	FsmRun fsmRun( prg );
 	PdaRun pdaRun( prg, tables, parserId, stopId, revertOn );
-	parse( sp, stream->in, &fsmRun, &pdaRun );
+	parse( sp, &pdaRun, &fsmRun, stream->in );
 	commit_full( sp, &pdaRun, 0 );
 	Tree *tree = get_parsed_root( &pdaRun, stopId > 0 );
 	tree_upref( tree );
@@ -184,7 +184,7 @@ Tree *call_tree_parser( Tree **&sp, Program *prg, Tree *input,
 
 	FsmRun fsmRun( prg );
 	PdaRun pdaRun( prg, tables, parserId, stopId, revertOn );
-	parse( sp, &inputStream, &fsmRun, &pdaRun );
+	parse( sp, &pdaRun, &fsmRun, &inputStream );
 	commit_full( sp, &pdaRun, 0 );
 	Tree *tree = get_parsed_root( &pdaRun, stopId > 0 );
 	tree_upref( tree );
@@ -216,7 +216,7 @@ void call_parser_frag( Tree **&sp, Program *prg, Tree *input, Accum *accum )
 		InputStreamString inputStream( s.c_str(), s.size() );
 		init_input_stream( &inputStream );
 
-		parse_frag( sp, &inputStream, accum->fsmRun, accum->pdaRun );
+		parse_frag( sp, accum->pdaRun, accum->fsmRun, &inputStream );
 	}
 	else {
 		InputStreamString inputStream( "", 0 );
@@ -235,7 +235,7 @@ Tree *parser_frag_finish( Tree **&sp, Program *prg, Accum *accum )
 	InputStreamString inputStream( "", 0 );
 	init_input_stream( &inputStream );
 
-	parse_frag_finish( sp, &inputStream, accum->fsmRun, accum->pdaRun );
+	parse_frag_finish( sp, accum->pdaRun, accum->fsmRun, &inputStream );
 
 	commit_full( sp, accum->pdaRun, 0 );
 	Tree *tree = get_parsed_root( accum->pdaRun, false );
@@ -266,11 +266,11 @@ Tree *stream_pull( Program *prg, FsmRun *fsmRun, Stream *stream, Tree *length )
 	return construct_string( prg, tokdata );
 }
 
-void undo_pull( Program *prg, Stream *stream, Tree *str )
+void undo_pull( Program *prg, FsmRun *fsmRun, Stream *stream, Tree *str )
 {
 	const char *data = string_data( ( (Str*)str )->value );
 	long length = string_length( ( (Str*)str )->value );
-	send_back_text( stream->in, data, length );
+	send_back_text( fsmRun, stream->in, data, length );
 }
 
 Word stream_push( Tree **&sp, Program *prg, FsmRun *fsmRun, Stream *stream, Tree *any )
@@ -2309,7 +2309,7 @@ again:
 			}
 			#endif
 
-			undo_pull( prg, (Stream*)stream, string );
+			undo_pull( prg, fsmRun, (Stream*)stream, string );
 			tree_downref( prg, sp, stream );
 			tree_downref( prg, sp, string );
 			break;

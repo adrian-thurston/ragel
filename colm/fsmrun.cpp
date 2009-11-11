@@ -142,7 +142,7 @@ void undo_position( InputStream *inputStream, const char *data, long length )
 	inputStream->byte -= length;
 }
 
-void send_back_runbuf_head( InputStream *inputStream )
+void send_back_runbuf_head( FsmRun *fsmRun, InputStream *inputStream )
 {
 	if ( inputStream->data == inputStream->runBuf->buf ) {
 		#ifdef COLM_LOG_PARSE
@@ -174,7 +174,7 @@ void send_back_runbuf_head( InputStream *inputStream )
 /* Should only be sending back whole tokens/ignores, therefore the send back
  * should never cross a buffer boundary. Either we slide back data, or we move to
  * a previous buffer and slide back data. */
-void send_back_text( InputStream *inputStream, const char *data, long length )
+void send_back_text( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length )
 {
 	#ifdef COLM_LOG_PARSE
 	if ( colm_log_parse ) {
@@ -185,7 +185,7 @@ void send_back_text( InputStream *inputStream, const char *data, long length )
 	if ( length == 0 )
 		return;
 
-	send_back_runbuf_head( inputStream );
+	send_back_runbuf_head( fsmRun, inputStream );
 
 	/* If there is data in the current buffer then the whole send back
 	 * should be in this buffer. */
@@ -269,7 +269,7 @@ void send_back_ignore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *i
 		bool artificial = ignore->tree->flags & AF_ARTIFICIAL;
 
 		if ( head != 0 && !artificial )
-			send_back_text( inputStream, string_data( head ), head->length );
+			send_back_text( fsmRun, inputStream, string_data( head ), head->length );
 
 		/* Check for reverse code. */
 		if ( ignore->tree->flags & AF_HAS_RCODE ) {
@@ -301,7 +301,7 @@ void send_back( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStr
 
 	if ( input->tree->flags & AF_NAMED ) {
 		/* Send back anything in the buffer that has not been parsed. */
-		send_back_runbuf_head( inputStream );
+		send_back_runbuf_head( fsmRun, inputStream );
 
 		/* Send the named lang el back first, then send back any leading
 		 * whitespace. */
@@ -310,7 +310,7 @@ void send_back( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStr
 
 	if ( !(input->tree->flags & AF_ARTIFICIAL) ) {
 		/* Push back the token data. */
-		send_back_text( inputStream, string_data( input->tree->tokdata ), 
+		send_back_text( fsmRun, inputStream, string_data( input->tree->tokdata ), 
 				string_length( input->tree->tokdata ) );
 	}
 
@@ -421,11 +421,11 @@ void send_queued_tokens( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream 
 	}
 }
 
-Kid *make_token( InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser, int id,
+Kid *make_token( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, int id,
 		Head *tokdata, bool namedLangEl, int bindId )
 {
 	/* Make the token object. */
-	long objectLength = parser->tables->rtd->lelInfo[id].objectLength;
+	long objectLength = pdaRun->tables->rtd->lelInfo[id].objectLength;
 	Kid *attrs = alloc_attrs( fsmRun->prg, objectLength );
 
 	Kid *input = 0;
@@ -443,10 +443,10 @@ Kid *make_token( InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser, int i
 	/* No children and ignores get added later. */
 	input->tree->child = attrs;
 
-	LangElInfo *lelInfo = parser->tables->rtd->lelInfo;
+	LangElInfo *lelInfo = pdaRun->tables->rtd->lelInfo;
 	if ( lelInfo[id].numCaptureAttr > 0 ) {
 		for ( int i = 0; i < lelInfo[id].numCaptureAttr; i++ ) {
-			CaptureAttr *ca = &parser->tables->rtd->captureAttr[lelInfo[id].captureAttr + i];
+			CaptureAttr *ca = &pdaRun->tables->rtd->captureAttr[lelInfo[id].captureAttr + i];
 			Head *data = string_alloc_full( fsmRun->prg, 
 					fsmRun->mark[ca->mark_enter], fsmRun->mark[ca->mark_leave]
 					- fsmRun->mark[ca->mark_enter] );
@@ -458,7 +458,7 @@ Kid *make_token( InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser, int i
 	
 	/* If the item is bound then store it in the bindings array. */
 	if ( bindId > 0 ) {
-		parser->bindings.push( input->tree );
+		pdaRun->bindings.push( input->tree );
 		tree_upref( input->tree );
 	}
 
@@ -676,7 +676,7 @@ void send_token( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pd
 
 	update_position( inputStream, inputStream->token, tokdata->length );
 
-	Kid *input = make_token( inputStream, fsmRun, pdaRun, id, tokdata, false, 0 );
+	Kid *input = make_token( pdaRun, fsmRun, inputStream, id, tokdata, false, 0 );
 	send_handle_error( sp, pdaRun, fsmRun, inputStream, input );
 }
 
@@ -843,7 +843,7 @@ void scanner_error( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun 
 	}
 }
 
-void parse( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
+void parse( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 {
 	pdaRun->init();
 
@@ -851,7 +851,7 @@ void parse( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun 
 		/* Pull the current scanner from the parser. This can change during
 		 * parsing due to inputStream pushes, usually for the purpose of includes.
 		 * */
-		int tokenId = scan_token( inputStream, fsmRun, pdaRun );
+		int tokenId = scan_token( pdaRun, fsmRun, inputStream );
 
 		/* Check for EOF. */
 		if ( tokenId == SCAN_EOF ) {
@@ -864,7 +864,7 @@ void parse( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun 
 
 		/* Check for a named language element. */
 		if ( tokenId == SCAN_LANG_EL ) {
-			send_named_lang_el( sp, inputStream, fsmRun, pdaRun );
+			send_named_lang_el( sp, pdaRun, fsmRun, inputStream );
 			continue;
 		}
 
@@ -900,13 +900,13 @@ void parse( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun 
 	}
 }
 
-void parse_frag( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
+void parse_frag( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 {
 	while ( true ) {
 		/* Pull the current scanner from the parser. This can change during
 		 * parsing due to inputStream pushes, usually for the purpose of includes.
 		 * */
-		int tokenId = scan_token( inputStream, fsmRun, pdaRun );
+		int tokenId = scan_token( pdaRun, fsmRun, inputStream );
 
 		/* Check for EOF. */
 		if ( tokenId == SCAN_EOF )
@@ -914,7 +914,7 @@ void parse_frag( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pd
 
 		/* Check for a named language element. */
 		if ( tokenId == SCAN_LANG_EL ) {
-			send_named_lang_el( sp, inputStream, fsmRun, pdaRun );
+			send_named_lang_el( sp, pdaRun, fsmRun, inputStream );
 			continue;
 		}
 
@@ -935,12 +935,12 @@ void parse_frag( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pd
 	}
 }
 
-void parse_frag_finish( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
+void parse_frag_finish( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 {
 	send_eof( sp, inputStream, fsmRun, pdaRun );
 }
 
-long scan_token( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
+long scan_token( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 {
 	/* Init the scanner vars. */
 	fsmRun->act = 0;
@@ -969,7 +969,7 @@ long scan_token( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
 		fsmRun->peof = inputStream->deof;
 		fsmRun->tokstart = inputStream->token;
 
-		fsm_execute( inputStream, fsmRun );
+		fsm_execute( fsmRun, inputStream );
 
 		inputStream->data = fsmRun->p;
 		inputStream->de = fsmRun->pe;

@@ -1010,7 +1010,7 @@ void FsmCodeGen::writeExec()
 	setLabelsNeeded();
 
 	out <<
-		"void fsm_execute( InputStream *inputStream, FsmRun *fsmRun )\n"
+		"void fsm_execute( FsmRun *fsmRun, InputStream *inputStream )\n"
 		"{\n"
 		"/*_resume:*/\n";
 
@@ -1059,7 +1059,7 @@ void FsmCodeGen::writeCode()
 
 	/* Referenced in the runtime lib, but used only in the compiler. */
 	out <<
-		"void send_named_lang_el( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser )\n"
+		"void send_named_lang_el( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )\n"
 		"{\n"
 		"	assert(false);\n"
 		"}\n";

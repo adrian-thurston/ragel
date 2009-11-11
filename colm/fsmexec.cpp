@@ -91,7 +91,7 @@ void exec_action( FsmRun *fsmRun, GenAction *genAction )
 		fsmRun->mark[genAction->markId] = fsmRun->p;
 }
 
-void fsm_execute( InputStream *inputStream, FsmRun *fsmRun )
+void fsm_execute( FsmRun *fsmRun, InputStream *inputStream )
 {
 	int _klen;
 	unsigned int _trans;

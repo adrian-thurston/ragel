@@ -269,7 +269,7 @@ void InputStreamRepl::pushBackNamed()
 	offset = replItem->data.length();
 }
 
-void send_named_lang_el( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser )
+void send_named_lang_el( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 {
 	/* All three set by getLangEl. */
 	long bindId;
@@ -282,7 +282,7 @@ void send_named_lang_el( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, Pd
 	
 	#ifdef COLM_LOG_PARSE
 	if ( colm_log_parse ) {
-		cerr << "named langEl: " << parser->tables->rtd->lelInfo[klangEl->id].name << endl;
+		cerr << "named langEl: " << pdaRun->tables->rtd->lelInfo[klangEl->id].name << endl;
 	}
 	#endif
 
@@ -291,8 +291,8 @@ void send_named_lang_el( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, Pd
 	if ( data != 0 )
 		tokdata = string_alloc_full( fsmRun->prg, data, length );
 
-	Kid *input = make_token( inputStream, fsmRun, parser, klangEl->id, tokdata, true, bindId );
-	send_handle_error( sp, parser, fsmRun, inputStream, input );
+	Kid *input = make_token( pdaRun, fsmRun, inputStream, klangEl->id, tokdata, true, bindId );
+	send_handle_error( sp, pdaRun, fsmRun, inputStream, input );
 }
 
 
