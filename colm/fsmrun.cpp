@@ -250,7 +250,7 @@ void queue_back( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pa
 	}
 }
 
-void send_back_ignore( Tree **sp, InputStream *inputStream, PdaRun *pdaRun, Kid *ignore )
+void send_back_ignore( Tree **sp, InputStream *inputStream, PdaRun *pdaRun, FsmRun *fsmRun, Kid *ignore )
 {
 	/* Ignore tokens are queued in reverse order. */
 	while ( tree_is_ignore( pdaRun->prg, ignore ) ) {
@@ -273,7 +273,7 @@ void send_back_ignore( Tree **sp, InputStream *inputStream, PdaRun *pdaRun, Kid 
 		/* Check for reverse code. */
 		if ( ignore->tree->flags & AF_HAS_RCODE ) {
 			Execution execution( pdaRun->prg, pdaRun->reverseCode, 
-					pdaRun, 0, 0, 0, 0, 0 );
+					pdaRun, fsmRun, 0, 0, 0, 0, 0 );
 
 			/* Do the reverse exeuction. */
 			execution.rexecute( sp, pdaRun->allReverseCode );
@@ -284,11 +284,11 @@ void send_back_ignore( Tree **sp, InputStream *inputStream, PdaRun *pdaRun, Kid 
 	}
 }
 
-void send_back( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser, Kid *input )
+void send_back( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, Kid *input )
 {
 	#ifdef COLM_LOG_PARSE
 	if ( colm_log_parse ) {
-		LangElInfo *lelInfo = parser->tables->rtd->lelInfo;
+		LangElInfo *lelInfo = pdaRun->tables->rtd->lelInfo;
 		cerr << "sending back: " << lelInfo[input->tree->id].name << "  text: ";
 		cerr.write( string_data( input->tree->tokdata ), 
 				string_length( input->tree->tokdata ) );
@@ -315,25 +315,25 @@ void send_back( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *par
 
 	/* Check for reverse code. */
 	if ( input->tree->flags & AF_HAS_RCODE ) {
-		Execution execution( parser->prg, parser->reverseCode, 
-				parser, 0, 0, 0, 0, 0 );
+		Execution execution( pdaRun->prg, pdaRun->reverseCode, 
+				pdaRun, fsmRun, 0, 0, 0, 0, 0 );
 
 		/* Do the reverse exeuction. */
-		execution.rexecute( sp, parser->allReverseCode );
+		execution.rexecute( sp, pdaRun->allReverseCode );
 		input->tree->flags &= ~AF_HAS_RCODE;
 	}
 
 	/* Always push back the ignore text. */
-	send_back_ignore( sp, inputStream, parser, tree_ignore( fsmRun->prg, input->tree ) );
+	send_back_ignore( sp, inputStream, pdaRun, fsmRun, tree_ignore( fsmRun->prg, input->tree ) );
 
 	/* If eof was just sent back remember that it needs to be sent again. */
-	if ( input->tree->id == parser->tables->rtd->eofLelIds[parser->parserId] )
+	if ( input->tree->id == pdaRun->tables->rtd->eofLelIds[pdaRun->parserId] )
 		inputStream->eofSent = false;
 
 	/* If the item is bound then store remove it from the bindings array. */
-	Tree *lastBound = parser->bindings.top();
+	Tree *lastBound = pdaRun->bindings.top();
 	if ( lastBound == input->tree ) {
-		parser->bindings.pop();
+		pdaRun->bindings.pop();
 		tree_downref( fsmRun->prg, sp, input->tree );
 	}
 
@@ -468,7 +468,7 @@ void execute_generation_action( Tree **sp, Program *prg, FsmRun *fsmRun, PdaRun 
 		Code *code, long id, Head *tokdata )
 {
 	/* Execute the translation. */
-	Execution execution( prg, pdaRun->reverseCode, pdaRun, code, 0, id, tokdata, fsmRun->mark );
+	Execution execution( prg, pdaRun->reverseCode, pdaRun, fsmRun, code, 0, id, tokdata, fsmRun->mark );
 	execution.execute( sp );
 
 	/* If there is revese code but nothing generated we need a noToken. */
@@ -526,7 +526,7 @@ Kid *extract_ignore( PdaRun *pdaRun )
 void send_back_queued_ignore( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
 {
 	Kid *ignore = extract_ignore( pdaRun );
-	send_back_ignore( sp, inputStream, pdaRun, ignore );
+	send_back_ignore( sp, inputStream, pdaRun, fsmRun, ignore );
 	while ( ignore != 0 ) {
 		Kid *next = ignore->next;
 		tree_downref( pdaRun->prg, sp, ignore->tree );
@@ -681,7 +681,7 @@ void send_token( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pa
 
 /* Load up a token, starting from tokstart if it is set. If not set then
  * start it at data. */
-Head *extract_prefix( InputStream *inputStream, PdaRun *parser, long length )
+Head *extract_prefix( Program *prg, FsmRun *fsmRun, InputStream *inputStream, long length )
 {
 	/* We should not be in the midst of getting a token. */
 	assert( inputStream->token == 0 );
@@ -703,7 +703,7 @@ Head *extract_prefix( InputStream *inputStream, PdaRun *parser, long length )
 	if ( inputStream->data + length > inputStream->de )
 		cerr << "NOT ENOUGH DATA TO FETCH TOKEN" << endp;
 
-	Head *tokdata = string_alloc_pointer( parser->prg, inputStream->data, length );
+	Head *tokdata = string_alloc_pointer( prg, inputStream->data, length );
 	update_position( inputStream, inputStream->data, length );
 	inputStream->data += length;
 

@@ -112,7 +112,7 @@ void parse( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser 
 void parse_frag( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser );
 void parse_frag_finish( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser );
 long scan_token( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun );
-Head *extract_prefix( InputStream *inputStream, PdaRun *parser, long length );
+Head *extract_prefix( Program *prg, FsmRun *fsmRun, InputStream *inputStream, long length );
 void send_back_text( InputStream *inputStream, const char *data, long length );
 void stream_push( InputStream *inputStream, const char *data, long length );
 void undo_stream_push( InputStream *inputStream, long length );

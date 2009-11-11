@@ -463,7 +463,7 @@ again:
 
 			/* Execution environment for the reduction code. */
 			Execution execution( pdaRun->prg, pdaRun->reverseCode, 
-					pdaRun, fi->codeWV, redLel->tree, 0, 0, fsmRun->mark );
+					pdaRun, fsmRun, fi->codeWV, redLel->tree, 0, 0, fsmRun->mark );
 
 			/* Execute it. */
 			execution.execute( sp );
@@ -629,7 +629,8 @@ parseError:
 
 			/* Check for an execution environment. */
 			if ( undoLel->tree->flags & AF_HAS_RCODE ) {
-				Execution execution( pdaRun->prg, pdaRun->reverseCode, pdaRun, 0, 0, 0, 0, fsmRun->mark );
+				Execution execution( pdaRun->prg, pdaRun->reverseCode, pdaRun, fsmRun,
+						0, 0, 0, 0, fsmRun->mark );
 
 				/* Do the reverse exeuction. */
 				execution.rexecute( sp, pdaRun->allReverseCode );

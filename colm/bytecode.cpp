@@ -259,10 +259,10 @@ void undo_parse( Tree **&sp, Program *prg, Stream *stream,
 	undo_parse( sp, stream->in, &fsmRun, &pdaRun, tree, rev );
 }
 
-Tree *stream_pull( Program *prg, PdaRun *pdaRun, Stream *stream, Tree *length )
+Tree *stream_pull( Program *prg, FsmRun *fsmRun, Stream *stream, Tree *length )
 {
 	long len = ((Int*)length)->value;
-	Head *tokdata = extract_prefix( stream->in, pdaRun, len );
+	Head *tokdata = extract_prefix( prg, fsmRun, stream->in, len );
 	return construct_string( prg, tokdata );
 }
 
@@ -525,7 +525,7 @@ void Program::run()
 
 	if ( rtd->rootCodeLen > 0 ) {
 		CodeVect reverseCode;
-		Execution execution( this, reverseCode, 0, rtd->rootCode, 0, 0, 0, 0 );
+		Execution execution( this, reverseCode, 0, 0, rtd->rootCode, 0, 0, 0, 0 );
 		execution.execute( root );
 
 		/* Pull out the reverse code and free it. */
@@ -545,11 +545,12 @@ void Program::run()
 }
 
 Execution::Execution( Program *prg, CodeVect &reverseCode,
-		PdaRun *pdaRun, Code *code, Tree *lhs,
+		PdaRun *pdaRun, FsmRun *fsmRun, Code *code, Tree *lhs,
 		long genId, Head *matchText, char **captures )
 : 
 	prg(prg), 
 	pdaRun(pdaRun), 
+	fsmRun(fsmRun), 
 	code(code), 
 	frame(0), iframe(0),
 	lhs(lhs),
@@ -2283,7 +2284,7 @@ again:
 			#endif
 			Tree *len = pop();
 			Tree *stream = pop();
-			Tree *string = stream_pull( prg, pdaRun, (Stream*)stream, len );
+			Tree *string = stream_pull( prg, fsmRun, (Stream*)stream, len );
 			tree_upref( string );
 			push( string );
 
