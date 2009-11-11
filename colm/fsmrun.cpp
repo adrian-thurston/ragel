@@ -54,14 +54,14 @@ FsmRun::~FsmRun()
 //	}
 }
 
-void undo_stream_push( InputStream *inputStream, long length )
+void undo_stream_push( FsmRun *fsmRun, InputStream *inputStream, long length )
 {
 	long remainder = inputStream->de - inputStream->data;
 	memmove( inputStream->runBuf->buf, inputStream->runBuf->buf + length, remainder );
 	inputStream->de -= length;
 }
 
-void stream_push( InputStream *inputStream, const char *data, long length )
+void stream_push( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length )
 {
 	#ifdef COLM_LOG_PARSE
 	if ( colm_log_parse ) {

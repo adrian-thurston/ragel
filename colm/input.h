@@ -50,6 +50,7 @@ struct PatternItem;
 struct Replacement;
 struct ReplItem;
 struct RunBuf;
+struct FsmRun;
 
 struct exit_object { };
 extern exit_object endp;
@@ -58,6 +59,8 @@ void operator<<( std::ostream &out, exit_object & );
 struct InputStream
 {
 	InputStream( bool handlesLine ) :
+		hasData(0),
+		runBuf(0),
 		line(1),
 		column(1),
 		byte(0),
@@ -81,7 +84,9 @@ struct InputStream
 	virtual void pushBackNamed()
 		{ assert( false ); }
 	
+	FsmRun *hasData;
 	RunBuf *runBuf;
+
 	char *data, *de, *deof;
 	char *token;
 	bool eofSent;

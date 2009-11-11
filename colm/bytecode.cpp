@@ -273,17 +273,17 @@ void undo_pull( Program *prg, Stream *stream, Tree *str )
 	send_back_text( stream->in, data, length );
 }
 
-Word stream_push( Tree **&sp, Program *prg, Stream *stream, Tree *any )
+Word stream_push( Tree **&sp, Program *prg, FsmRun *fsmRun, Stream *stream, Tree *any )
 {
 	std::stringstream ss;
 	print_tree( ss, sp, prg, any );
-	stream_push( stream->in, ss.str().c_str(), ss.str().size());
+	stream_push( fsmRun, stream->in, ss.str().c_str(), ss.str().size());
 	return ss.str().size();
 }
 
-void undo_stream_push( Tree **&sp, Program *prg, Stream *stream, Word len )
+void undo_stream_push( Tree **&sp, Program *prg, FsmRun *fsmRun, Stream *stream, Word len )
 {
-	undo_stream_push( stream->in, len );
+	undo_stream_push( fsmRun, stream->in, len );
 }
 
 void set_local( Tree **frame, long field, Tree *tree )
@@ -2325,7 +2325,7 @@ again:
 			Tree *tree = pop();
 			Tree *stream = pop();
 			Word len = stream_push( sp, prg, 
-					(Stream*)stream, tree );
+					fsmRun, (Stream*)stream, tree );
 			push( 0 );
 
 			/* Single unit. */
@@ -2349,7 +2349,7 @@ again:
 			}
 			#endif
 
-			undo_stream_push( sp, prg, (Stream*)stream, len );
+			undo_stream_push( sp, prg, fsmRun, (Stream*)stream, len );
 			tree_downref( prg, sp, stream );
 			break;
 		}

@@ -114,11 +114,10 @@ void parse_frag_finish( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, Pda
 long scan_token( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun );
 Head *extract_prefix( Program *prg, FsmRun *fsmRun, InputStream *inputStream, long length );
 void send_back_text( InputStream *inputStream, const char *data, long length );
-void stream_push( InputStream *inputStream, const char *data, long length );
-void undo_stream_push( InputStream *inputStream, long length );
+void stream_push( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length );
+void undo_stream_push( FsmRun *fsmRun, InputStream *inputStream, long length );
 void send_named_lang_el( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser );
 Kid *make_token( InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser, int id,
 		Head *tokdata, bool namedLangEl, int bindId );
-
 
 #endif
