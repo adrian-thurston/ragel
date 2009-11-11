@@ -567,7 +567,7 @@ parseError:
 			if ( pt(input->tree)->causeReduce == 0 ) {
 				int next = pt(input->tree)->region + 1;
 
-				queue_back( sp, inputStream, fsmRun, pdaRun, input );
+				queue_back( sp, pdaRun, fsmRun, inputStream, input );
 				input = 0;
 				if ( pdaRun->tables->tokenRegions[next] != 0 ) {
 					#ifdef COLM_LOG_PARSE

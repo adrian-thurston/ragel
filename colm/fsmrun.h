@@ -90,6 +90,8 @@ struct FsmRun
 	Program *prg;
 	FsmTables *tables;
 
+	RunBuf *runBuf;
+
 	/* FsmRun State. */
 	long region, cs, act;
 	char *tokstart, *tokend;
@@ -102,19 +104,18 @@ struct FsmRun
 void exec_action( FsmRun *fsmRun, GenAction *genAction );
 void fsm_execute( InputStream *inputStream, FsmRun *fsmRun );
 void init_input_stream( InputStream *in );
-void send_queued_tokens( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun );
-void send_handle_error( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser, Kid *input );
+void send_queued_tokens( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
+void send_handle_error( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
 Head *extract_match( Program *prg, InputStream *inputStream );
-void send_back_ignore( Tree **sp, InputStream *inputStream, PdaRun *parser, Kid *ignore );
-void send_back( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser, Kid *input );
-void queue_back( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser, Kid *input );
+void send_back( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
+void queue_back( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
 void parse( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser );
 void parse_frag( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser );
 void parse_frag_finish( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser );
 long scan_token( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun );
 Head *extract_prefix( Program *prg, FsmRun *fsmRun, InputStream *inputStream, long length );
 void send_back_text( InputStream *inputStream, const char *data, long length );
-void stream_push( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length );
+void inputStream( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length );
 void undo_stream_push( FsmRun *fsmRun, InputStream *inputStream, long length );
 void send_named_lang_el( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser );
 Kid *make_token( InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser, int id,

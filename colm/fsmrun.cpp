@@ -40,7 +40,8 @@ void operator<<( ostream &out, exit_object & )
 
 FsmRun::FsmRun( Program *prg ) :
 	prg(prg),
-	tables(prg->rtd->fsmTables)
+	tables(prg->rtd->fsmTables),
+	runBuf(0)
 {
 }
 
@@ -95,7 +96,7 @@ void stream_push( FsmRun *fsmRun, InputStream *inputStream, const char *data, lo
 
 		/* Create a new buffer for the data. This is the easy implementation.
 		 * Something better is needed here. It puts a max on the amount of
-		 * data that can be pushed back to the stream. */
+		 * data that can be pushed back to the inputStream. */
 		assert( length < FSM_BUFSIZE );
 		RunBuf *newBuf = new RunBuf;
 		newBuf->next = inputStream->runBuf;
@@ -205,29 +206,29 @@ void send_back_text( InputStream *inputStream, const char *data, long length )
 	undo_position( inputStream, data, length );
 }
 
-void queue_back( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser, Kid *input )
+void queue_back( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input )
 {
 	if ( input->tree->flags & AF_GROUP_MEM ) {
 		#ifdef COLM_LOG_PARSE
 		if ( colm_log_parse ) {
-			LangElInfo *lelInfo = parser->tables->rtd->lelInfo;
+			LangElInfo *lelInfo = pdaRun->tables->rtd->lelInfo;
 			cerr << "queuing back: " << lelInfo[input->tree->id].name << endl;
 		}
 		#endif
 
-		if ( parser->queue == 0 )
-			parser->queue = parser->queueLast = input;
+		if ( pdaRun->queue == 0 )
+			pdaRun->queue = pdaRun->queueLast = input;
 		else {
-			parser->queueLast->next = input;
-			parser->queueLast = input;
+			pdaRun->queueLast->next = input;
+			pdaRun->queueLast = input;
 		}
 	}
 	else {
 		/* If there are queued items send them back starting at the tail
 		 * (newest). */
-		if ( parser->queue != 0 ) {
+		if ( pdaRun->queue != 0 ) {
 			/* Reverse the list. */
-			Kid *kid = parser->queue, *last = 0;
+			Kid *kid = pdaRun->queue, *last = 0;
 			while ( kid != 0 ) {
 				Kid *next = kid->next;
 				kid->next = last;
@@ -238,19 +239,19 @@ void queue_back( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pa
 			/* Send them back. */
 			while ( last != 0 ) {
 				Kid *next = last->next;
-				send_back( sp, inputStream, fsmRun, parser, last );
+				send_back( sp, pdaRun, fsmRun, inputStream, last );
 				last = next;
 			}
 
-			parser->queue = 0;
+			pdaRun->queue = 0;
 		}
 
 		/* Now that the queue is flushed, can send back the original item. */
-		send_back( sp, inputStream, fsmRun, parser, input );
+		send_back( sp, pdaRun, fsmRun, inputStream, input );
 	}
 }
 
-void send_back_ignore( Tree **sp, InputStream *inputStream, PdaRun *pdaRun, FsmRun *fsmRun, Kid *ignore )
+void send_back_ignore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *ignore )
 {
 	/* Ignore tokens are queued in reverse order. */
 	while ( tree_is_ignore( pdaRun->prg, ignore ) ) {
@@ -284,7 +285,7 @@ void send_back_ignore( Tree **sp, InputStream *inputStream, PdaRun *pdaRun, FsmR
 	}
 }
 
-void send_back( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, Kid *input )
+void send_back( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input )
 {
 	#ifdef COLM_LOG_PARSE
 	if ( colm_log_parse ) {
@@ -324,7 +325,7 @@ void send_back( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pda
 	}
 
 	/* Always push back the ignore text. */
-	send_back_ignore( sp, inputStream, pdaRun, fsmRun, tree_ignore( fsmRun->prg, input->tree ) );
+	send_back_ignore( sp, pdaRun, fsmRun, inputStream, tree_ignore( fsmRun->prg, input->tree ) );
 
 	/* If eof was just sent back remember that it needs to be sent again. */
 	if ( input->tree->id == pdaRun->tables->rtd->eofLelIds[pdaRun->parserId] )
@@ -385,7 +386,7 @@ void set_AF_GROUP_MEM( PdaRun *parser )
 	}
 }
 
-void send_queued_tokens( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
+void send_queued_tokens( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 {
 	LangElInfo *lelInfo = fsmRun->prg->rtd->lelInfo;
 
@@ -415,7 +416,7 @@ void send_queued_tokens( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, Pd
 			}
 			#endif
 
-			send_handle_error( sp, inputStream, fsmRun, pdaRun, send );
+			send_handle_error( sp, pdaRun, fsmRun, inputStream, send );
 		}
 	}
 }
@@ -512,7 +513,7 @@ void generation_action( Tree **sp, InputStream *inputStream, FsmRun *fsmRun,
 	string_free( fsmRun->prg, tokdata );
 
 	/* Send the queued tokens. */
-	send_queued_tokens( sp, inputStream, fsmRun, pdaRun );
+	send_queued_tokens( sp, pdaRun, fsmRun, inputStream );
 }
 
 Kid *extract_ignore( PdaRun *pdaRun )
@@ -526,7 +527,7 @@ Kid *extract_ignore( PdaRun *pdaRun )
 void send_back_queued_ignore( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
 {
 	Kid *ignore = extract_ignore( pdaRun );
-	send_back_ignore( sp, inputStream, pdaRun, fsmRun, ignore );
+	send_back_ignore( sp, pdaRun, fsmRun, inputStream, ignore );
 	while ( ignore != 0 ) {
 		Kid *next = ignore->next;
 		tree_downref( pdaRun->prg, sp, ignore->tree );
@@ -535,7 +536,7 @@ void send_back_queued_ignore( Tree **sp, InputStream *inputStream, FsmRun *fsmRu
 	}
 }
 
-void send_with_ignore( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, Kid *input )
+void send_with_ignore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input )
 {
 	/* Need to preserve the layout under a tree:
 	 *    attributes, ignore tokens, grammar children. */
@@ -573,12 +574,12 @@ void send_with_ignore( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaR
 	parse_token( sp, inputStream, fsmRun, pdaRun, input );
 }
 
-void send_handle_error( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, Kid *input )
+void send_handle_error( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input )
 {
 	long id = input->tree->id;
 
 	/* Send the token to the parser. */
-	send_with_ignore( sp, inputStream, fsmRun, pdaRun, input );
+	send_with_ignore( sp, pdaRun, fsmRun, inputStream, input );
 		
 	/* Check the result. */
 	if ( pdaRun->errCount > 0 ) {
@@ -620,7 +621,7 @@ void exec_gen( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaR
 	Head *tokdata = extract_match( pdaRun->prg, inputStream );
 
 	/* Note that we don't update the position now. It is done when the token
-	 * data is pulled from the stream. */
+	 * data is pulled from the inputStream. */
 
 	inputStream->data = inputStream->token;
 	inputStream->token = 0;
@@ -660,14 +661,14 @@ Head *extract_match( Program *prg, InputStream *inputStream )
 	return head;
 }
 
-void send_token( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *parser, long id )
+void send_token( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long id )
 {
 	/* Make the token data. */
-	Head *tokdata = extract_match( parser->prg, inputStream );
+	Head *tokdata = extract_match( pdaRun->prg, inputStream );
 
 	#ifdef COLM_LOG_PARSE
 	if ( colm_log_parse ) {
-		cerr << "token: " << parser->tables->rtd->lelInfo[id].name << "  text: ";
+		cerr << "token: " << pdaRun->tables->rtd->lelInfo[id].name << "  text: ";
 		cerr.write( string_data( tokdata ), string_length( tokdata ) );
 		cerr << endl;
 	}
@@ -675,8 +676,8 @@ void send_token( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pa
 
 	update_position( inputStream, inputStream->token, tokdata->length );
 
-	Kid *input = make_token( inputStream, fsmRun, parser, id, tokdata, false, 0 );
-	send_handle_error( sp, inputStream, fsmRun, parser, input );
+	Kid *input = make_token( inputStream, fsmRun, pdaRun, id, tokdata, false, 0 );
+	send_handle_error( sp, pdaRun, fsmRun, inputStream, input );
 }
 
 /* Load up a token, starting from tokstart if it is set. If not set then
@@ -745,10 +746,10 @@ void send_eof( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaR
 		execute_generation_action( sp, fsmRun->prg, fsmRun, pdaRun, code, input->tree->id, 0 );
 
 		/* Send the generated tokens. */
-		send_queued_tokens( sp, inputStream, fsmRun, pdaRun );
+		send_queued_tokens( sp, pdaRun, fsmRun, inputStream );
 	}
 
-	send_with_ignore( sp, inputStream, fsmRun, pdaRun, input );
+	send_with_ignore( sp, pdaRun, fsmRun, inputStream, input );
 
 	if ( pdaRun->errCount > 0 ) {
 		parse_error( inputStream, fsmRun, pdaRun, input->tree->id, input->tree ) << 
@@ -848,7 +849,7 @@ void parse( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun 
 
 	while ( true ) {
 		/* Pull the current scanner from the parser. This can change during
-		 * parsing due to stream pushes, usually for the purpose of includes.
+		 * parsing due to inputStream pushes, usually for the purpose of includes.
 		 * */
 		int tokenId = scan_token( inputStream, fsmRun, pdaRun );
 
@@ -903,7 +904,7 @@ void parse_frag( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pd
 {
 	while ( true ) {
 		/* Pull the current scanner from the parser. This can change during
-		 * parsing due to stream pushes, usually for the purpose of includes.
+		 * parsing due to inputStream pushes, usually for the purpose of includes.
 		 * */
 		int tokenId = scan_token( inputStream, fsmRun, pdaRun );
 
@@ -1052,7 +1053,7 @@ long scan_token( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
 		}
 
 		/* Maybe need to pause parsing until more data is inserted into the
-		 * input stream. */
+		 * input inputStream. */
 		if ( inputStream->tryAgainLater() )
 			return SCAN_TRY_AGAIN_LATER;
 
@@ -1105,7 +1106,7 @@ long scan_token( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
 			inputStream->runBuf = newBuf;
 		}
 
-		/* We don't have any data. What is next in the input stream? */
+		/* We don't have any data. What is next in the input inputStream? */
 		space = inputStream->runBuf->buf + FSM_BUFSIZE - inputStream->de;
 		assert( space > 0 );
 			

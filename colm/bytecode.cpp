@@ -224,7 +224,7 @@ void call_parser_frag( Tree **&sp, Program *prg, Tree *input, Accum *accum )
 
 		tree_upref( input );
 		send_tree( sp, prg, accum->pdaRun, input, false );
-		send_queued_tokens( sp, &inputStream, accum->fsmRun, accum->pdaRun );
+		send_queued_tokens( sp, accum->pdaRun, accum->fsmRun, &inputStream );
 	}
 }
 
