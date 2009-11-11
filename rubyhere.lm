@@ -6,7 +6,7 @@ lex start
 	ignore /[ \t\n]+/
 	token id /ident_pattern/
 	token number /number_pattern/
-	literal '<<', '*', ',', '(', ')'
+	literal '<<', '*', ',', '(', ')', '!'
 }
 
 global str HereId
@@ -81,9 +81,12 @@ def statement
 
 token foobar /any*/
 
-def start 
-	[statement*]
+def item
+	[statement '!']
 |	[foobar]
+
+def start 
+	[item*]
 
 start S = parse start( stdin )
 print_xml(S)
