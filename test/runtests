@@ -29,7 +29,7 @@ for t in $TESTS; do
 	fi
 
 	# Test output.
-	if ! diff -u $root.out $root.exp; then
+	if ! diff -u $root.exp $root.out; then
 		echo FAILURE
 		exit 1
 	fi

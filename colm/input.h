@@ -60,7 +60,7 @@ struct InputStream
 {
 	InputStream( bool handlesLine ) :
 		hasData(0),
-		runBuf(0),
+		//runBuf(0),
 		line(1),
 		column(1),
 		byte(0),
@@ -75,7 +75,7 @@ struct InputStream
 	virtual void pushBackBuf( RunBuf *runBuf ) = 0;
 
 	virtual bool tryAgainLater()
-		{ return 0; }
+		{ return false; }
 
 	/* Named language elements for patterns and replacements. */
 	virtual int isLangEl() { return false; }
@@ -85,7 +85,7 @@ struct InputStream
 		{ assert( false ); }
 	
 	FsmRun *hasData;
-	RunBuf *runBuf;
+	//RunBuf *runBuf;
 
 	char *data, *de, *deof;
 	char *token;
@@ -150,27 +150,34 @@ struct InputStreamFd : public InputStream
 
 struct AccumData
 {
-	const char *data;
+	char *data;
 	long length;
 
-	AccumData *prev, *next;
+	AccumData *next;
 };
 
 struct InputStreamAccum : public InputStream
 {
-	InputStreamAccum() :
+	InputStreamAccum()
+	:
 		InputStream(false), 
-		eof(false), queue(0) {}
+		head(0), tail(0),
+		flush(false),
+		offset(0), eof(false), queue(0)
+	{}
 
 	int isEOF();
 	int needFlush();
 	int getData( char *dest, int length );
 	void pushBackBuf( RunBuf *runBuf );
 
-	virtual bool tryAgainLater();
+	bool tryAgainLater();
 
-	AccumData *adHead, *adTail;
+	AccumData *head, *tail;
+	void append( const char *data, long len );
 
+	bool flush;
+	long offset;
 	bool eof;
 	RunBuf *queue;
 };

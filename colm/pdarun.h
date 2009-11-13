@@ -35,6 +35,7 @@ struct KlangEl;
 struct PdaTables;
 struct FsmTables;
 struct InputStream;
+struct InputStreamAccum;
 
 struct Kid
 {
@@ -255,8 +256,10 @@ struct Accum
 	Kid *child;
 
 	GenericInfo *genericInfo;
-	FsmRun *fsmRun;
+
 	PdaRun *pdaRun;
+	FsmRun *fsmRun;
+	InputStreamAccum *inputStream;
 };
 
 struct Stream

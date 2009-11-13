@@ -133,10 +133,16 @@ void send_tree( Tree **root, Program *prg, PdaRun *pdaRun, Tree *tree, bool igno
 Tree *call_parser( Tree **&sp, Program *prg, Stream *stream, 
 		long parserId, long stopId, CodeVect *&cv, bool revertOn )
 {
+	//cout << "hasData: " << stream->in->hasData << endl;
+
 	PdaTables *tables = prg->rtd->pdaTables;
-	FsmRun fsmRun( prg );
+	FsmRun fsmRunTmp( prg );
+	FsmRun *fsmRun = &fsmRunTmp;
+	if ( stream->in->hasData != 0 )
+		fsmRun = stream->in->hasData;
+		
 	PdaRun pdaRun( prg, tables, parserId, stopId, revertOn );
-	parse( sp, &pdaRun, &fsmRun, stream->in );
+	parse( sp, &pdaRun, fsmRun, stream->in );
 	commit_full( sp, &pdaRun, 0 );
 	Tree *tree = get_parsed_root( &pdaRun, stopId > 0 );
 	tree_upref( tree );
@@ -211,31 +217,28 @@ void call_parser_frag( Tree **&sp, Program *prg, Tree *input, Accum *accum )
 		ostringstream sout;
 		print_tree( sout, sp, prg, input );
 
-		/* Set up the input stream. */
+		/* Load it into the input. */
 		string s = sout.str();
-		InputStreamString inputStream( s.c_str(), s.size() );
-		init_input_stream( &inputStream );
+		accum->inputStream->append( s.c_str(), s.size() );
 
-		parse_frag( sp, accum->pdaRun, accum->fsmRun, &inputStream );
+		/* Parse. */
+		parse_frag( sp, accum->pdaRun, accum->fsmRun, accum->inputStream );
 	}
 	else {
-		InputStreamString inputStream( "", 0 );
-		init_input_stream( &inputStream );
+		/* Cause a flush */
+		accum->inputStream->flush = true;
+		parse_frag( sp, accum->pdaRun, accum->fsmRun, accum->inputStream );
 
 		tree_upref( input );
 		send_tree( sp, prg, accum->pdaRun, input, false );
-		send_queued_tokens( sp, accum->pdaRun, accum->fsmRun, &inputStream );
+		send_queued_tokens( sp, accum->pdaRun, accum->fsmRun, accum->inputStream );
 	}
 }
 
 
 Tree *parser_frag_finish( Tree **&sp, Program *prg, Accum *accum )
 {
-	/* Set up the input stream. */
-	InputStreamString inputStream( "", 0 );
-	init_input_stream( &inputStream );
-
-	parse_frag_finish( sp, accum->pdaRun, accum->fsmRun, &inputStream );
+	parse_frag_finish( sp, accum->pdaRun, accum->fsmRun, accum->inputStream );
 
 	commit_full( sp, accum->pdaRun, 0 );
 	Tree *tree = get_parsed_root( accum->pdaRun, false );
@@ -254,9 +257,9 @@ void undo_parse( Tree **&sp, Program *prg, Stream *stream,
 		long parserId, Tree *tree, CodeVect *rev )
 {
 	PdaTables *tables = prg->rtd->pdaTables;
-	FsmRun fsmRun( prg );
+//	FsmRun fsmRun( prg );
 	PdaRun pdaRun( prg, tables, parserId, 0, false );
-	undo_parse( sp, stream->in, &fsmRun, &pdaRun, tree, rev );
+	undo_parse( sp, stream->in, stream->in->hasData, &pdaRun, tree, rev );
 }
 
 Tree *stream_pull( Program *prg, FsmRun *fsmRun, Stream *stream, Tree *length )

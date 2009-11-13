@@ -151,25 +151,71 @@ int InputStreamFd::getData( char *dest, int length )
 
 int InputStreamAccum::isEOF()
 {
-	return 0;
-}
-
-int InputStreamAccum::needFlush()
-{
-	return 0;
-}
-
-int InputStreamAccum::getData( char *dest, int length )
-{
-	return 0;
-}
-
-void InputStreamAccum::pushBackBuf( RunBuf *runBuf )
-{
-
+	return eof;
 }
 
 bool InputStreamAccum::tryAgainLater()
 {
-	return 0;
+	if ( !flush && head == 0 && tail == 0 )
+		return true;
+
+	return false;
+}
+
+int InputStreamAccum::needFlush()
+{
+	if ( flush ) {
+		flush = false;
+		return true;
+	}
+
+	if ( eof )
+		return true;
+		
+	return false;
+}
+
+int InputStreamAccum::getData( char *dest, int length )
+{
+	if ( head == 0 )
+		return 0;
+
+	int available = head->length - offset;
+
+	if ( available < length )
+		length = available;
+
+	memcpy( dest, head->data + offset, length );
+	offset += length;
+
+	if ( offset == head->length ) {
+		head = head->next;
+		if ( head == 0 )
+			tail = 0;
+		offset = 0;
+	}
+
+	return length;
+}
+
+void InputStreamAccum::pushBackBuf( RunBuf *runBuf )
+{
+}
+
+void InputStreamAccum::append( const char *data, long len )
+{
+	AccumData *ad = new AccumData;
+	if ( head == 0 ) {
+		head = tail = ad;
+		ad->next = 0;
+	}
+	else {
+		tail->next = ad;
+		ad->next = 0;
+		tail = ad;
+	}
+
+	ad->data = new char[len];
+	memcpy( ad->data, data, len );
+	ad->length = len;
 }

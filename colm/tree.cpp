@@ -945,13 +945,17 @@ Tree *create_generic( Program *prg, long genericId )
 			Accum *accum = (Accum*)prg->mapElPool.allocate();
 			accum->id = genericInfo->langElId;
 			accum->genericInfo = genericInfo;
-			accum->fsmRun = new FsmRun( prg );
 			accum->pdaRun = new PdaRun( prg, prg->rtd->pdaTables, 
 					genericInfo->parserId, false, false );
-			newGeneric = (Tree*) accum;
+			accum->fsmRun = new FsmRun( prg );
+			accum->inputStream = new InputStreamAccum();
 
 			/* Start off the parsing process. */
 			accum->pdaRun->init();
+			init_fsm_run( accum->fsmRun, accum->inputStream );
+			init_scan_token( accum->pdaRun, accum->fsmRun, accum->inputStream );
+
+			newGeneric = (Tree*) accum;
 			break;
 		}
 		default:

@@ -103,6 +103,7 @@ struct FsmRun
 
 void exec_action( FsmRun *fsmRun, GenAction *genAction );
 void fsm_execute( FsmRun *fsmRun, InputStream *inputStream );
+void init_fsm_run( FsmRun *fsmRun, InputStream *in );
 void init_input_stream( InputStream *in );
 void send_queued_tokens( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
 void send_handle_error( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
@@ -121,5 +122,9 @@ void undo_stream_push( FsmRun *fsmRun, InputStream *inputStream, long length );
 void send_named_lang_el( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
 Kid *make_token( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, int id,
 		Head *tokdata, bool namedLangEl, int bindId );
+
+void init_scan_token( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
+long scan_token( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
+
 
 #endif
