@@ -87,8 +87,8 @@ struct InputStream
 	FsmRun *hasData;
 	//RunBuf *runBuf;
 
-	char *data, *de, *deof;
-	char *token;
+//	char *data, *de, *deof;
+//	char *token;
 	bool eofSent;
 
 	long line;

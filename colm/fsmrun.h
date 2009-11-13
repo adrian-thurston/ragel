@@ -107,7 +107,7 @@ void init_fsm_run( FsmRun *fsmRun, InputStream *in );
 void init_input_stream( InputStream *in );
 void send_queued_tokens( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
 void send_handle_error( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
-Head *extract_match( Program *prg, InputStream *inputStream );
+Head *extract_match( Program *prg, FsmRun *fsmRun, InputStream *inputStream );
 void send_back( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
 void queue_back( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
 void parse( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
