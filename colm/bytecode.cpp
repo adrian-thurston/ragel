@@ -136,7 +136,7 @@ struct ParserRet
 	FsmRun *fsmRun;
 };
 
-void call_parser( ParserRet &ret, Tree **&sp, Program *prg, Stream *stream, 
+void call_parser( ParserRet &ret, Tree **&sp, Program *prg, InputStream *inputStream,
 		long parserId, long stopId, CodeVect *&cv, bool revertOn )
 {
 	PdaTables *tables = prg->rtd->pdaTables;
@@ -144,9 +144,9 @@ void call_parser( ParserRet &ret, Tree **&sp, Program *prg, Stream *stream,
 	PdaRun pdaRun( prg, tables, fsmRun, parserId, stopId, revertOn );
 
 	init_pda_run( &pdaRun );
-	init_fsm_run( fsmRun, stream->in );
+	init_fsm_run( fsmRun, inputStream );
 	new_token( &pdaRun, fsmRun );
-	parse_loop( sp, &pdaRun, fsmRun, stream->in );
+	parse_loop( sp, &pdaRun, fsmRun, inputStream );
 
 	commit_full( sp, &pdaRun, 0 );
 	Tree *tree = get_parsed_root( &pdaRun, stopId > 0 );
@@ -168,19 +168,7 @@ void call_parser( ParserRet &ret, Tree **&sp, Program *prg, Stream *stream,
 	ret.fsmRun = fsmRun;
 }
 
-Head *tree_to_str( Tree **sp, Program *prg, Tree *tree )
-{
-	/* Collect the tree data. */
-	ostringstream sout;
-	print_tree( sout, sp, prg, tree );
-
-	/* Set up the input stream. */
-	string s = sout.str();
-	return string_alloc_full( prg, s.c_str(), s.size() );
-}
-
-
-Tree *call_tree_parser( Tree **&sp, Program *prg, Tree *input, 
+void call_tree_parser( ParserRet &ret, Tree **&sp, Program *prg, Tree *input, 
 		long parserId, long stopId, CodeVect *&cv, bool revertOn )
 {
 	/* Collect the tree data. */
@@ -192,32 +180,18 @@ Tree *call_tree_parser( Tree **&sp, Program *prg, Tree *input,
 	InputStreamString inputStream( s.c_str(), s.size() );
 	init_input_stream( &inputStream );
 
-	PdaTables *tables = prg->rtd->pdaTables;
-	FsmRun *fsmRun = new FsmRun( prg );
-	PdaRun pdaRun( prg, tables, fsmRun, parserId, stopId, revertOn );
+	call_parser( ret, sp, prg, &inputStream, parserId, stopId, cv, revertOn );
+}
 
-	init_pda_run( &pdaRun );
-	init_fsm_run( fsmRun, &inputStream );
-	new_token( &pdaRun, fsmRun );
-	parse_loop( sp, &pdaRun, fsmRun, &inputStream );
+Head *tree_to_str( Tree **sp, Program *prg, Tree *tree )
+{
+	/* Collect the tree data. */
+	ostringstream sout;
+	print_tree( sout, sp, prg, tree );
 
-	commit_full( sp, &pdaRun, 0 );
-	Tree *tree = get_parsed_root( &pdaRun, stopId > 0 );
-	tree_upref( tree );
-	clean_parser( sp, &pdaRun );
-
-	/* Maybe return the reverse code. */
-	if ( revertOn )
-		cv = pdaRun.allReverseCode;
-	else {
-		delete pdaRun.allReverseCode;
-		cv = 0;
-	}
-
-	/* Indicate that this tree came out of a parser. */
-	tree->flags |= AF_PARSED;
-
-	return tree;
+	/* Set up the input stream. */
+	string s = sout.str();
+	return string_alloc_full( prg, s.c_str(), s.size() );
 }
 
 void call_parser_frag( Tree **&sp, Program *prg, Tree *input, Accum *accum )
@@ -2213,7 +2187,7 @@ again:
 			CodeVect *cv;
 			Tree *stream = pop();
 			ParserRet ret;
-			call_parser( ret, sp, prg, (Stream*)stream, parserId, stopId, cv, true );
+			call_parser( ret, sp, prg, ((Stream*)stream)->in, parserId, stopId, cv, true );
 			push( ret.tree );
 
 			/* Single unit. */
@@ -2242,7 +2216,7 @@ again:
 			CodeVect *cv;
 			Tree *stream = pop();
 			ParserRet ret;
-			call_parser( ret, sp, prg, (Stream*)stream, parserId, stopId, cv, false );
+			call_parser( ret, sp, prg, ((Stream*)stream)->in, parserId, stopId, cv, false );
 			push( ret.tree );
 
 			tree_downref( prg, sp, (Tree*)stream );
@@ -2262,8 +2236,9 @@ again:
 			/* Comes back from parse upreffed. */
 			CodeVect *cv;
 			Tree *input = pop();
-			Tree *res = call_tree_parser( sp, prg, input, parserId, stopId, cv, false );
-			push( res );
+			ParserRet ret;
+			call_tree_parser( ret, sp, prg, input, parserId, stopId, cv, false );
+			push( ret.tree );
 
 			tree_downref( prg, sp, input );
 			break;
