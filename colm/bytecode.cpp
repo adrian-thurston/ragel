@@ -248,7 +248,8 @@ void call_parser_frag( Tree **&sp, Program *prg, Tree *input, Accum *accum )
 
 Tree *parser_frag_finish( Tree **&sp, Program *prg, Accum *accum )
 {
-	parse_frag_finish( sp, accum->pdaRun, accum->fsmRun, accum->inputStream );
+	accum->inputStream->eof = true;
+	parse_loop( sp, accum->pdaRun, accum->fsmRun, accum->inputStream );
 
 	commit_full( sp, accum->pdaRun, 0 );
 	Tree *tree = get_parsed_root( accum->pdaRun, false );

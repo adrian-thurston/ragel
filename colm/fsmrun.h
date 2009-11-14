@@ -112,7 +112,6 @@ Head *extract_match( Program *prg, FsmRun *fsmRun, InputStream *inputStream );
 void send_back( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
 void queue_back_tree( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
 void parse_loop( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
-void parse_frag_finish( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
 long scan_token( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
 void send_back_text( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length );
 

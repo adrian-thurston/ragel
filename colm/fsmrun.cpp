@@ -862,6 +862,9 @@ void new_token( PdaRun *pdaRun, FsmRun *fsmRun )
 long scan_token( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 {
 	while ( true ) {
+		if ( inputStream->needFlush() )
+			fsmRun->peof = fsmRun->pe;
+
 		fsm_execute( fsmRun, inputStream );
 
 		/* First check if scanning stopped because we have a token. */
@@ -1003,8 +1006,6 @@ long scan_token( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 		/* Get more data. */
 		int len = inputStream->getData( fsmRun->p, space );
 		fsmRun->pe = fsmRun->p + len;
-		if ( inputStream->needFlush() )
-			fsmRun->peof = fsmRun->pe;
 	}
 
 	/* Should not be reached. */
@@ -1112,9 +1113,3 @@ void parse_loop( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputSt
 		}
 	}
 }
-
-void parse_frag_finish( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
-{
-	send_eof( sp, inputStream, fsmRun, pdaRun );
-}
-
