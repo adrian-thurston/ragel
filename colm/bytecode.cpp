@@ -130,18 +130,18 @@ void send_tree( Tree **root, Program *prg, PdaRun *pdaRun, Tree *tree, bool igno
 	}
 }
 
-Tree *call_parser( Tree **&sp, Program *prg, Stream *stream, 
+struct ParserRet
+{
+	Tree *tree;
+	FsmRun *fsmRun;
+};
+
+void call_parser( ParserRet &ret, Tree **&sp, Program *prg, Stream *stream, 
 		long parserId, long stopId, CodeVect *&cv, bool revertOn )
 {
-	//cout << "hasData: " << stream->in->hasData << endl;
-
 	PdaTables *tables = prg->rtd->pdaTables;
-	FsmRun fsmRunTmp( prg );
-	FsmRun *fsmRun = &fsmRunTmp;
-	if ( stream->in->hasData != 0 )
-		fsmRun = stream->in->hasData;
-		
-	PdaRun pdaRun( prg, tables, parserId, stopId, revertOn );
+	FsmRun *fsmRun = new FsmRun( prg );
+	PdaRun pdaRun( prg, tables, fsmRun, parserId, stopId, revertOn );
 	parse( sp, &pdaRun, fsmRun, stream->in );
 	commit_full( sp, &pdaRun, 0 );
 	Tree *tree = get_parsed_root( &pdaRun, stopId > 0 );
@@ -159,7 +159,8 @@ Tree *call_parser( Tree **&sp, Program *prg, Stream *stream,
 	/* Indicate that this tree came out of a parser. */
 	tree->flags |= AF_PARSED;
 
-	return tree;
+	ret.tree = tree;
+	ret.fsmRun = fsmRun;
 }
 
 Head *tree_to_str( Tree **sp, Program *prg, Tree *tree )
@@ -189,7 +190,7 @@ Tree *call_tree_parser( Tree **&sp, Program *prg, Tree *input,
 	init_input_stream( &inputStream );
 
 	FsmRun fsmRun( prg );
-	PdaRun pdaRun( prg, tables, parserId, stopId, revertOn );
+	PdaRun pdaRun( prg, tables, &fsmRun, parserId, stopId, revertOn );
 	parse( sp, &pdaRun, &fsmRun, &inputStream );
 	commit_full( sp, &pdaRun, 0 );
 	Tree *tree = get_parsed_root( &pdaRun, stopId > 0 );
@@ -253,13 +254,13 @@ Tree *parser_frag_finish( Tree **&sp, Program *prg, Accum *accum )
 	return tree;
 }
 
-void undo_parse( Tree **&sp, Program *prg, Stream *stream, 
+void undo_parse( Tree **&sp, Program *prg, FsmRun *fsmRun, Stream *stream, 
 		long parserId, Tree *tree, CodeVect *rev )
 {
 	PdaTables *tables = prg->rtd->pdaTables;
 //	FsmRun fsmRun( prg );
-	PdaRun pdaRun( prg, tables, parserId, 0, false );
-	undo_parse( sp, stream->in, stream->in->hasData, &pdaRun, tree, rev );
+	PdaRun pdaRun( prg, tables, fsmRun, parserId, 0, false );
+	undo_parse( sp, stream->in, fsmRun, &pdaRun, tree, rev );
 }
 
 Tree *stream_pull( Program *prg, FsmRun *fsmRun, Stream *stream, Tree *length )
@@ -269,11 +270,13 @@ Tree *stream_pull( Program *prg, FsmRun *fsmRun, Stream *stream, Tree *length )
 	return construct_string( prg, tokdata );
 }
 
+
 void undo_pull( Program *prg, FsmRun *fsmRun, Stream *stream, Tree *str )
 {
 	const char *data = string_data( ( (Str*)str )->value );
 	long length = string_length( ( (Str*)str )->value );
-	send_back_text( fsmRun, stream->in, data, length );
+//	send_back_text( fsmRun, stream->in, data, length );
+	undo_stream_pull( fsmRun, stream->in, data, length );
 }
 
 Word stream_push( Tree **&sp, Program *prg, FsmRun *fsmRun, Stream *stream, Tree *any )
@@ -608,8 +611,9 @@ again:
 		case IN_PARSE_BKT: {
 			Half parserId;
 			Tree *stream, *tree;
-			Word wrev;
+			Word fsmRet, wrev;
 			read_half( parserId );
+			read_word( fsmRet );
 			read_tree( stream );
 			read_tree( tree );
 			read_word( wrev );
@@ -2199,17 +2203,19 @@ again:
 			/* Comes back from parse upreffed. */
 			CodeVect *cv;
 			Tree *stream = pop();
-			Tree *res = call_parser( sp, prg, (Stream*)stream, parserId, stopId, cv, true );
-			push( res );
+			ParserRet ret;
+			call_parser( ret, sp, prg, (Stream*)stream, parserId, stopId, cv, true );
+			push( ret.tree );
 
 			/* Single unit. */
-			tree_upref( res );
+			tree_upref( ret.tree );
 			reverseCode.append( IN_PARSE_BKT );
 			reverseCode.appendHalf( parserId );
+			reverseCode.appendWord( (Word) ret.fsmRun );
 			reverseCode.appendWord( (Word) stream );
-			reverseCode.appendWord( (Word) res );
+			reverseCode.appendWord( (Word) ret.tree );
 			reverseCode.appendWord( (Word) cv );
-			reverseCode.append( 15 );
+			reverseCode.append( 19 );
 			break;
 		}
 		case IN_PARSE_WC: {
@@ -2226,8 +2232,9 @@ again:
 			/* Comes back from parse upreffed. */
 			CodeVect *cv;
 			Tree *stream = pop();
-			Tree *res = call_parser( sp, prg, (Stream*)stream, parserId, stopId, cv, false );
-			push( res );
+			ParserRet ret;
+			call_parser( ret, sp, prg, (Stream*)stream, parserId, stopId, cv, false );
+			push( ret.tree );
 
 			tree_downref( prg, sp, (Tree*)stream );
 			break;
@@ -2359,8 +2366,9 @@ again:
 		case IN_PARSE_BKT: {
 			Half parserId;
 			Tree *stream, *tree;
-			Word wrev;
+			Word fsmRet, wrev;
 			read_half( parserId );
+			read_word( fsmRet );
 			read_tree( stream );
 			read_tree( tree );
 			read_word( wrev );
@@ -2371,7 +2379,7 @@ again:
 			}
 			#endif
 
-			undo_parse( sp, prg, (Stream*)stream, parserId, tree, (CodeVect*)wrev );
+			undo_parse( sp, prg, (FsmRun*)fsmRet, (Stream*)stream, parserId, tree, (CodeVect*)wrev );
 			tree_downref( prg, sp, stream );
 			delete (CodeVect*)wrev;
 			break;

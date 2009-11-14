@@ -1471,7 +1471,6 @@ void ParseData::initEmptyScanners()
 void ParseData::parsePatterns()
 {
 	Program program( 0, 0, false, runtimeData );
-	FsmRun fsmRun( &program );
 	Tree **vm_stack = stack_alloc();
 	Tree **root = &vm_stack[VM_STACK_SIZE];
 
@@ -1484,9 +1483,10 @@ void ParseData::parsePatterns()
 		InputStreamRepl in( repl );
 		init_input_stream( &in );
 
+		FsmRun *fsmRun = new FsmRun( &program );
 		repl->pdaRun = new PdaRun( &program,
-				pdaTables, repl->langEl->parserId, 0, false );
-		parse( root, repl->pdaRun, &fsmRun, &in );
+				pdaTables, fsmRun, repl->langEl->parserId, 0, false );
+		parse( root, repl->pdaRun, fsmRun, &in );
 
 			//#ifdef COLM_LOG_COMPILE
 			//if ( colm_log_compile ) {
@@ -1504,9 +1504,10 @@ void ParseData::parsePatterns()
 		InputStreamPattern in( pat );
 		init_input_stream( &in );
 
+		FsmRun *fsmRun = new FsmRun( &program );
 		pat->pdaRun = new PdaRun( &program,
-				pdaTables, pat->langEl->parserId, 0, false );
-		parse( root, pat->pdaRun, &fsmRun, &in );
+				pdaTables, fsmRun, pat->langEl->parserId, 0, false );
+		parse( root, pat->pdaRun, fsmRun, &in );
 
 			//#ifdef COLM_LOG_COMPILE
 			//if ( colm_log_compile ) {

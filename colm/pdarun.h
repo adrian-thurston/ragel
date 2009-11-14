@@ -516,11 +516,12 @@ typedef RtVector<Tree*> Bindings;
 
 struct PdaRun
 {
-	PdaRun( Program *prg, PdaTables *tables, int parserId,
+	PdaRun( Program *prg, PdaTables *tables, FsmRun *fsmRun, int parserId,
 			long stopTarget, bool revertOn )
 	:
 		prg(prg),
 		tables(tables), 
+		fsmRun(fsmRun),
 		parserId(parserId), 
 		stopParsing(false),
 		stopTarget(stopTarget),
@@ -542,6 +543,7 @@ struct PdaRun
 
 	Program *prg;
 	PdaTables *tables;
+	FsmRun *fsmRun;
 	int parserId;
 
 	long stackTopTarget();

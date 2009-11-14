@@ -41,7 +41,8 @@ void operator<<( ostream &out, exit_object & )
 FsmRun::FsmRun( Program *prg ) :
 	prg(prg),
 	tables(prg->rtd->fsmTables),
-	runBuf(0)
+	runBuf(0),
+	haveDataOf(0)
 {
 }
 
@@ -55,11 +56,31 @@ FsmRun::~FsmRun()
 //	}
 }
 
+void undo_stream_pull( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length )
+{
+	#ifdef COLM_LOG_PARSE
+	if ( colm_log_parse ) {
+		cerr << "undoing stream pull" << endl;
+	}
+	#endif
+
+	take_back_buffered( inputStream );
+	inputStream->hasData = fsmRun;
+	fsmRun->haveDataOf = inputStream;
+	assert( fsmRun->p - length >= fsmRun->runBuf->buf );
+	fsmRun->p -= length;
+}
+
 void undo_stream_push( FsmRun *fsmRun, InputStream *inputStream, long length )
 {
-	long remainder = fsmRun->pe - fsmRun->p;
-	memmove( fsmRun->runBuf->buf, fsmRun->runBuf->buf + length, remainder );
-	fsmRun->pe -= length;
+	take_back_buffered( inputStream );
+
+	char tmp[length];
+	int have = 0;
+	while ( have < length ) {
+		int res = inputStream->getData( tmp, length-have );
+		have += res;
+	}
 }
 
 void stream_push( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length )
@@ -70,45 +91,21 @@ void stream_push( FsmRun *fsmRun, InputStream *inputStream, const char *data, lo
 	}
 	#endif
 
-	if ( fsmRun->p == fsmRun->runBuf->buf ) {
-		cerr << "case 1" << endl;
-		assert(false);
-	}
-	else if ( fsmRun->p == (fsmRun->runBuf->buf + fsmRun->runBuf->length) ) {
-		cerr << "case 2" << endl;
-		assert(false);
-	}
-	else {
-		/* Send back the second half of the current run buffer. */
-		RunBuf *dup = new RunBuf;
-		memcpy( dup, fsmRun->runBuf, sizeof(RunBuf) );
+	take_back_buffered( inputStream );
 
-		/* Need to fix the offset. */
-		dup->length = fsmRun->pe - fsmRun->runBuf->buf;
-		dup->offset = fsmRun->p - fsmRun->runBuf->buf;
+	/* Create a new buffer for the data. This is the easy implementation.
+	 * Something better is needed here. It puts a max on the amount of
+	 * data that can be pushed back to the inputStream. */
+	assert( length < FSM_BUFSIZE );
+	RunBuf *newBuf = new RunBuf;
+	newBuf->next = fsmRun->runBuf;
+	newBuf->offset = 0;
+	newBuf->length = length;
+	memcpy( newBuf->buf, data, length );
 
-		/* Send it back. */
-		inputStream->pushBackBuf( dup );
-
-		/* Since the second half is gone the current buffer now ends at data. */
-		fsmRun->pe = fsmRun->p;
-		fsmRun->runBuf->length = fsmRun->p - fsmRun->runBuf->buf;
-
-		/* Create a new buffer for the data. This is the easy implementation.
-		 * Something better is needed here. It puts a max on the amount of
-		 * data that can be pushed back to the inputStream. */
-		assert( length < FSM_BUFSIZE );
-		RunBuf *newBuf = new RunBuf;
-		newBuf->next = fsmRun->runBuf;
-		newBuf->offset = 0;
-		newBuf->length = length;
-		memcpy( newBuf->buf, data, length );
-
-		fsmRun->p = newBuf->buf;
-		fsmRun->pe = newBuf->buf + newBuf->length;
-		fsmRun->runBuf = newBuf;
-	}
+	inputStream->pushBackBuf( newBuf );
 }
+
 
 /* Keep the position up to date after consuming text. */
 void update_position( InputStream *inputStream, const char *data, long length )
@@ -140,6 +137,37 @@ void undo_position( InputStream *inputStream, const char *data, long length )
 	}
 
 	inputStream->byte -= length;
+}
+
+void take_back_buffered( InputStream *inputStream )
+{
+	if ( inputStream->hasData != 0 ) {
+		FsmRun *fsmRun = inputStream->hasData;
+
+		if ( fsmRun->runBuf != 0 ) {
+			if ( fsmRun->pe - fsmRun->p > 0 ) {
+				#ifdef COLM_LOG_PARSE
+				if ( colm_log_parse ) {
+					cerr << "taking back buffered" << endl;
+				}
+				#endif
+
+				RunBuf *split = new RunBuf;
+				memcpy( split->buf, fsmRun->p, fsmRun->pe - fsmRun->p );
+
+				split->length = fsmRun->pe - fsmRun->p;
+				split->offset = 0;
+				split->next = 0;
+
+				fsmRun->pe = fsmRun->p;
+
+				inputStream->pushBackBuf( split );
+			}
+		}
+
+		inputStream->hasData = 0;
+		fsmRun->haveDataOf = 0;
+	}
 }
 
 void send_back_runbuf_head( FsmRun *fsmRun, InputStream *inputStream )
@@ -187,7 +215,7 @@ void send_back_text( FsmRun *fsmRun, InputStream *inputStream, const char *data,
 
 	send_back_runbuf_head( fsmRun, inputStream );
 
-	/* If there is data in the current buffer then the whole send back
+	/* If there is data in the current buffer then send the whole send back
 	 * should be in this buffer. */
 	assert( (fsmRun->p - fsmRun->runBuf->buf) >= length );
 
@@ -699,6 +727,8 @@ Head *extract_prefix( Program *prg, FsmRun *fsmRun, InputStream *inputStream, lo
 			
 		long len = inputStream->getData( fsmRun->p, space );
 		fsmRun->pe = fsmRun->p + len;
+		fsmRun->haveDataOf = inputStream;
+		inputStream->hasData = fsmRun;
 	}
 
 	if ( fsmRun->p + length > fsmRun->pe )
@@ -764,12 +794,8 @@ void init_fsm_run( FsmRun *fsmRun, InputStream *in )
 	fsmRun->runBuf = new RunBuf;
 	fsmRun->runBuf->next = 0;
 
-	in->hasData = fsmRun;
-
 	fsmRun->p = fsmRun->pe = fsmRun->runBuf->buf;
 	fsmRun->peof = 0;
-
-	in->eofSent = false;
 }
 
 void init_input_stream( InputStream *inputStream )
@@ -852,10 +878,12 @@ void scanner_error( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun 
 void parse( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 {
 	pdaRun->init();
-	if ( fsmRun != inputStream->hasData )
-		init_fsm_run( fsmRun, inputStream );
+	init_fsm_run( fsmRun, inputStream );
+
+	take_back_buffered( inputStream );
 
 	while ( true ) {
+
 		/* Pull the current scanner from the parser. This can change during
 		 * parsing due to inputStream pushes, usually for the purpose of includes.
 		 * */
@@ -907,6 +935,8 @@ void parse( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream 
 			break;
 		}
 	}
+
+	take_back_buffered( inputStream );
 }
 
 void parse_frag( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
@@ -1121,6 +1151,9 @@ long scan_token( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 		/* Get more data. */
 		int len = inputStream->getData( fsmRun->p, space );
 		fsmRun->pe = fsmRun->p + len;
+		fsmRun->haveDataOf = inputStream;
+		inputStream->hasData = fsmRun;
+
 		if ( inputStream->needFlush() )
 			fsmRun->peof = fsmRun->pe;
 	}

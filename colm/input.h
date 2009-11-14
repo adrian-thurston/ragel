@@ -60,7 +60,7 @@ struct InputStream
 {
 	InputStream( bool handlesLine ) :
 		hasData(0),
-		//runBuf(0),
+		eofSent(false),
 		line(1),
 		column(1),
 		byte(0),
@@ -85,10 +85,7 @@ struct InputStream
 		{ assert( false ); }
 	
 	FsmRun *hasData;
-	//RunBuf *runBuf;
 
-//	char *data, *de, *deof;
-//	char *token;
 	bool eofSent;
 
 	long line;

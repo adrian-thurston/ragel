@@ -945,9 +945,9 @@ Tree *create_generic( Program *prg, long genericId )
 			Accum *accum = (Accum*)prg->mapElPool.allocate();
 			accum->id = genericInfo->langElId;
 			accum->genericInfo = genericInfo;
-			accum->pdaRun = new PdaRun( prg, prg->rtd->pdaTables, 
-					genericInfo->parserId, false, false );
 			accum->fsmRun = new FsmRun( prg );
+			accum->pdaRun = new PdaRun( prg, prg->rtd->pdaTables, 
+					accum->fsmRun, genericInfo->parserId, false, false );
 			accum->inputStream = new InputStreamAccum();
 
 			/* Start off the parsing process. */
