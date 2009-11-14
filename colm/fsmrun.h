@@ -85,7 +85,6 @@ struct RunBuf
 struct FsmRun
 {
 	FsmRun( Program *prg );
-	~FsmRun();
 
 	Program *prg;
 	FsmTables *tables;
@@ -111,25 +110,23 @@ void send_queued_tokens( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream 
 void send_handle_error( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
 Head *extract_match( Program *prg, FsmRun *fsmRun, InputStream *inputStream );
 void send_back( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
-void queue_back( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
+void queue_back_tree( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
 void parse( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
 void parse_frag( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
 void parse_frag_finish( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
 long scan_token( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
-Head *extract_prefix( Program *prg, FsmRun *fsmRun, InputStream *inputStream, long length );
 void send_back_text( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length );
-void inputStream( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length );
+
+Head *stream_pull( Program *prg, FsmRun *fsmRun, InputStream *inputStream, long length );
 void stream_push( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length );
 void undo_stream_push( FsmRun *fsmRun, InputStream *inputStream, long length );
 void undo_stream_pull( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length );
+
 void send_named_lang_el( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
 Kid *make_token( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, int id,
 		Head *tokdata, bool namedLangEl, int bindId );
 
 void init_scan_token( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
 long scan_token( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
-void take_back_buffered( InputStream *inputStream );
-
-
 
 #endif

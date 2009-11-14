@@ -265,7 +265,7 @@ void undo_parse( Tree **&sp, Program *prg, FsmRun *fsmRun, Stream *stream,
 Tree *stream_pull( Program *prg, FsmRun *fsmRun, Stream *stream, Tree *length )
 {
 	long len = ((Int*)length)->value;
-	Head *tokdata = extract_prefix( prg, fsmRun, stream->in, len );
+	Head *tokdata = stream_pull( prg, fsmRun, stream->in, len );
 	return construct_string( prg, tokdata );
 }
 
