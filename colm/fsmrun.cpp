@@ -626,7 +626,8 @@ void send_with_ignore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *i
 			else {
 				/* There are attributes. concat child, ignore, childBegin. */
 				attrEnd->next = 0;
-				input->tree->child = kid_list_concat( input->tree->child, kid_list_concat( ignore, childBegin ) );
+				input->tree->child = kid_list_concat( input->tree->child, 
+						kid_list_concat( ignore, childBegin ) );
 			}
 		}
 	}
@@ -810,7 +811,8 @@ long undo_parse( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pd
 		Tree *tree, CodeVect *rev )
 {
 	/* PDA must be init first to set next region. */
-	pdaRun->init();
+	init_pda_run( pdaRun );
+
 	Kid *top = pdaRun->prg->kidPool.allocate();
 	top->next = pdaRun->stackTop;
 	top->tree = tree;
@@ -827,7 +829,7 @@ long undo_parse( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pd
 	return 0;
 }
 
-void init_scan_token( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
+void new_token( PdaRun *pdaRun, FsmRun *fsmRun )
 {
 	/* Init the scanner vars. */
 	fsmRun->act = 0;
@@ -1049,22 +1051,24 @@ void scanner_error( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun 
 }
 
 
-void parse( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
+void parse_loop( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 {
-	pdaRun->init();
-	init_fsm_run( fsmRun, inputStream );
-
 	while ( true ) {
 		/* Pull the current scanner from the parser. This can change during
 		 * parsing due to inputStream pushes, usually for the purpose of includes.
 		 * */
-		init_scan_token( pdaRun, fsmRun, inputStream );
 		int tokenId = scan_token( pdaRun, fsmRun, inputStream );
+
+		if ( tokenId == SCAN_TRY_AGAIN_LATER )
+			break;
 
 		/* Check for EOF. */
 		if ( tokenId == SCAN_EOF ) {
 			inputStream->eofSent = true;
 			send_eof( sp, inputStream, fsmRun, pdaRun );
+
+			new_token( pdaRun, fsmRun );
+
 			if ( inputStream->eofSent )
 				break;
 			continue;
@@ -1073,17 +1077,16 @@ void parse( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream 
 		/* Check for a named language element. */
 		if ( tokenId == SCAN_LANG_EL ) {
 			send_named_lang_el( sp, pdaRun, fsmRun, inputStream );
+			new_token( pdaRun, fsmRun );
 			continue;
 		}
 
 		/* Check for error. */
 		if ( tokenId == SCAN_ERROR ) {
 			scanner_error( sp, inputStream, fsmRun, pdaRun );
+			new_token( pdaRun, fsmRun );
 			continue;
 		}
-
-		if ( tokenId == SCAN_TRY_AGAIN_LATER )
-			break;
 
 		/* Send a token. */
 		bool ctxDepParsing = fsmRun->prg->ctxDepParsing;
@@ -1095,6 +1098,8 @@ void parse( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream 
 		else
 			send_token( sp, inputStream, fsmRun, pdaRun, tokenId );
 
+		new_token( pdaRun, fsmRun );
+
 		/* Fall through here either when the input buffer has been exhausted
 		 * or the scanner is in an error state. Otherwise we must continue. */
 		if ( pdaRun->stopParsing ) {
@@ -1105,47 +1110,6 @@ void parse( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream 
 			#endif
 			break;
 		}
-	}
-}
-
-void parse_frag( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
-{
-	while ( true ) {
-		/* Pull the current scanner from the parser. This can change during
-		 * parsing due to inputStream pushes, usually for the purpose of includes.
-		 * */
-		int tokenId = scan_token( pdaRun, fsmRun, inputStream );
-
-		/* Check for EOF. */
-		if ( tokenId == SCAN_EOF )
-			break;
-
-		/* Check for a named language element. */
-		if ( tokenId == SCAN_LANG_EL ) {
-			send_named_lang_el( sp, pdaRun, fsmRun, inputStream );
-			continue;
-		}
-
-		/* Check for error. */
-		if ( tokenId == SCAN_ERROR ) {
-			scanner_error( sp, inputStream, fsmRun, pdaRun );
-			init_scan_token( pdaRun, fsmRun, inputStream );
-			continue;
-		}
-
-		if ( tokenId == SCAN_TRY_AGAIN_LATER )
-			break;
-
-		bool ctxDepParsing = fsmRun->prg->ctxDepParsing;
-		LangElInfo *lelInfo = pdaRun->tables->rtd->lelInfo;
-		if ( ctxDepParsing && lelInfo[tokenId].frameId >= 0 )
-			exec_gen( sp, inputStream, fsmRun, pdaRun, tokenId );
-		else if ( lelInfo[tokenId].ignore )
-			send_ignore( inputStream, fsmRun, pdaRun, tokenId );
-		else
-			send_token( sp, inputStream, fsmRun, pdaRun, tokenId );
-
-		init_scan_token( pdaRun, fsmRun, inputStream );
 	}
 }
 

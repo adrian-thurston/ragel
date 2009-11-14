@@ -84,28 +84,28 @@ bool PdaRun::isParserStopFinished()
 	return done;
 }
 
-void PdaRun::init()
+void init_pda_run( PdaRun *pdaRun )
 {
 	/* FIXME: need the right one here. */
-	cs = prg->rtd->startStates[parserId];
+	pdaRun->cs = pdaRun->prg->rtd->startStates[pdaRun->parserId];
 
 	/* Init the element allocation variables. */
-	stackTop = prg->kidPool.allocate();
-	stackTop->tree = (Tree*)prg->parseTreePool.allocate();
-	stackTop->tree->flags |= AF_PARSE_TREE;
+	pdaRun->stackTop = pdaRun->prg->kidPool.allocate();
+	pdaRun->stackTop->tree = (Tree*)pdaRun->prg->parseTreePool.allocate();
+	pdaRun->stackTop->tree->flags |= AF_PARSE_TREE;
 
-	pt(stackTop->tree)->state = -1;
-	stackTop->tree->refs = 1;
-	numRetry = 0;
-	errCount = 0;
-	nextRegionInd = tables->tokenRegionInds[cs];
-	stopParsing = false;
-	accumIgnore = 0;
+	pt(pdaRun->stackTop->tree)->state = -1;
+	pdaRun->stackTop->tree->refs = 1;
+	pdaRun->numRetry = 0;
+	pdaRun->errCount = 0;
+	pdaRun->nextRegionInd = pdaRun->tables->tokenRegionInds[pdaRun->cs];
+	pdaRun->stopParsing = false;
+	pdaRun->accumIgnore = 0;
 
 	/* Bindings are indexed at 1. Need a no-binding. */
-	bindings.push(0);
+	pdaRun->bindings.push(0);
 
-	allReverseCode = new CodeVect;
+	pdaRun->allReverseCode = new CodeVect;
 }
 
 long PdaRun::stackTopTarget()

@@ -951,9 +951,9 @@ Tree *create_generic( Program *prg, long genericId )
 			accum->inputStream = new InputStreamAccum();
 
 			/* Start off the parsing process. */
-			accum->pdaRun->init();
+			init_pda_run( accum->pdaRun );
 			init_fsm_run( accum->fsmRun, accum->inputStream );
-			init_scan_token( accum->pdaRun, accum->fsmRun, accum->inputStream );
+			new_token( accum->pdaRun, accum->fsmRun );
 
 			newGeneric = (Tree*) accum;
 			break;

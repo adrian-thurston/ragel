@@ -1486,13 +1486,11 @@ void ParseData::parsePatterns()
 		FsmRun *fsmRun = new FsmRun( &program );
 		repl->pdaRun = new PdaRun( &program,
 				pdaTables, fsmRun, repl->langEl->parserId, 0, false );
-		parse( root, repl->pdaRun, fsmRun, &in );
 
-			//#ifdef COLM_LOG_COMPILE
-			//if ( colm_log_compile ) {
-			//xml_print_list( runtimeData, repl->pdaRun->stackTop, 0 );
-			//#endif
-			//}
+		init_pda_run( repl->pdaRun );
+		init_fsm_run( fsmRun, &in );
+		new_token( repl->pdaRun, fsmRun );
+		parse_loop( root, repl->pdaRun, fsmRun, &in );
 	}
 
 	for ( PatternList::Iter pat = patternList; pat.lte(); pat++ ) {
@@ -1507,13 +1505,11 @@ void ParseData::parsePatterns()
 		FsmRun *fsmRun = new FsmRun( &program );
 		pat->pdaRun = new PdaRun( &program,
 				pdaTables, fsmRun, pat->langEl->parserId, 0, false );
-		parse( root, pat->pdaRun, fsmRun, &in );
 
-			//#ifdef COLM_LOG_COMPILE
-			//if ( colm_log_compile ) {
-			//xml_print_list( runtimeData, pat->pdaRun->stackTop, 0 );
-			//#endif
-			//}
+		init_pda_run( pat->pdaRun );
+		init_fsm_run( fsmRun, &in );
+		new_token( pat->pdaRun, fsmRun );
+		parse_loop( root, pat->pdaRun, fsmRun, &in );
 	}
 
 	fillInPatterns( &program );

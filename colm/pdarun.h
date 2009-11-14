@@ -547,7 +547,6 @@ struct PdaRun
 	int parserId;
 
 	long stackTopTarget();
-	void init();
 	void commitKid( Tree **root, Kid *lel );
 	void commit();
 	bool isParserStopFinished();
@@ -575,10 +574,13 @@ struct PdaRun
 
 void clean_parser( Tree **root, PdaRun *pdaRun );
 void ignore( PdaRun *pdaRun, Tree *tree );
-void send_with_ignore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
+void send_with_ignore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
+		InputStream *inputStream, Kid *input );
 void parse_token( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, Kid *input );
-long undo_parse( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, Tree *tree, CodeVect *rev );
+long undo_parse( Tree **sp, InputStream *inputStream, FsmRun *fsmRun,
+		PdaRun *pdaRun, Tree *tree, CodeVect *rev );
 void xml_print_list( RuntimeData *runtimeData, Kid *lel, int depth );
 ostream &parse_error( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, int tokId, Tree *tree );
+void init_pda_run( PdaRun *pdaRun );
 
 #endif /* _PDARUN_H */

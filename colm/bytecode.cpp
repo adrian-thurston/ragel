@@ -142,7 +142,12 @@ void call_parser( ParserRet &ret, Tree **&sp, Program *prg, Stream *stream,
 	PdaTables *tables = prg->rtd->pdaTables;
 	FsmRun *fsmRun = new FsmRun( prg );
 	PdaRun pdaRun( prg, tables, fsmRun, parserId, stopId, revertOn );
-	parse( sp, &pdaRun, fsmRun, stream->in );
+
+	init_pda_run( &pdaRun );
+	init_fsm_run( fsmRun, stream->in );
+	new_token( &pdaRun, fsmRun );
+	parse_loop( sp, &pdaRun, fsmRun, stream->in );
+
 	commit_full( sp, &pdaRun, 0 );
 	Tree *tree = get_parsed_root( &pdaRun, stopId > 0 );
 	tree_upref( tree );
@@ -178,8 +183,6 @@ Head *tree_to_str( Tree **sp, Program *prg, Tree *tree )
 Tree *call_tree_parser( Tree **&sp, Program *prg, Tree *input, 
 		long parserId, long stopId, CodeVect *&cv, bool revertOn )
 {
-	PdaTables *tables = prg->rtd->pdaTables;
-
 	/* Collect the tree data. */
 	ostringstream sout;
 	print_tree( sout, sp, prg, input );
@@ -189,9 +192,15 @@ Tree *call_tree_parser( Tree **&sp, Program *prg, Tree *input,
 	InputStreamString inputStream( s.c_str(), s.size() );
 	init_input_stream( &inputStream );
 
-	FsmRun fsmRun( prg );
-	PdaRun pdaRun( prg, tables, &fsmRun, parserId, stopId, revertOn );
-	parse( sp, &pdaRun, &fsmRun, &inputStream );
+	PdaTables *tables = prg->rtd->pdaTables;
+	FsmRun *fsmRun = new FsmRun( prg );
+	PdaRun pdaRun( prg, tables, fsmRun, parserId, stopId, revertOn );
+
+	init_pda_run( &pdaRun );
+	init_fsm_run( fsmRun, &inputStream );
+	new_token( &pdaRun, fsmRun );
+	parse_loop( sp, &pdaRun, fsmRun, &inputStream );
+
 	commit_full( sp, &pdaRun, 0 );
 	Tree *tree = get_parsed_root( &pdaRun, stopId > 0 );
 	tree_upref( tree );
@@ -223,12 +232,12 @@ void call_parser_frag( Tree **&sp, Program *prg, Tree *input, Accum *accum )
 		accum->inputStream->append( s.c_str(), s.size() );
 
 		/* Parse. */
-		parse_frag( sp, accum->pdaRun, accum->fsmRun, accum->inputStream );
+		parse_loop( sp, accum->pdaRun, accum->fsmRun, accum->inputStream );
 	}
 	else {
 		/* Cause a flush */
 		accum->inputStream->flush = true;
-		parse_frag( sp, accum->pdaRun, accum->fsmRun, accum->inputStream );
+		parse_loop( sp, accum->pdaRun, accum->fsmRun, accum->inputStream );
 
 		tree_upref( input );
 		send_tree( sp, prg, accum->pdaRun, input, false );
