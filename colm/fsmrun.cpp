@@ -229,6 +229,12 @@ void send_back_text( FsmRun *fsmRun, InputStream *inputStream, const char *data,
 	}
 	#endif
 
+	if ( inputStream->hasData != 0 && inputStream->hasData != fsmRun ) {
+		take_back_buffered( inputStream );
+		inputStream->hasData = fsmRun;
+		fsmRun->haveDataOf = inputStream;
+	}
+
 	assert( memcmp( data, fsmRun->p, length ) == 0 );
 		
 	undo_position( inputStream, data, length );

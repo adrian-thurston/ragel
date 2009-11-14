@@ -258,7 +258,6 @@ void undo_parse( Tree **&sp, Program *prg, FsmRun *fsmRun, Stream *stream,
 		long parserId, Tree *tree, CodeVect *rev )
 {
 	PdaTables *tables = prg->rtd->pdaTables;
-//	FsmRun fsmRun( prg );
 	PdaRun pdaRun( prg, tables, fsmRun, parserId, 0, false );
 	undo_parse( sp, stream->in, fsmRun, &pdaRun, tree, rev );
 }
