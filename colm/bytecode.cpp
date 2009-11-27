@@ -97,17 +97,12 @@ Tree *prep_parse_tree( Program *prg, Tree **sp, Tree *tree )
 		}
 		#endif
 		Kid *unused = 0;
-		Tree *newTree = copy_real_tree( prg, tree, 0, unused, true );
-		tree_upref( newTree );
-
-		tree_downref( prg, sp, tree );
-
-		tree = newTree;
+		tree = copy_real_tree( prg, tree, 0, unused, true );
 	}
 	return  tree;
 }
 
-void send_tree( Tree **root, Program *prg, PdaRun *pdaRun, Tree *tree, bool ignore )
+void send_tree( Program *prg, Tree **root, PdaRun *pdaRun, Tree *tree, bool ignore )
 {
 	tree = prep_parse_tree( prg, root, tree );
 
@@ -115,6 +110,8 @@ void send_tree( Tree **root, Program *prg, PdaRun *pdaRun, Tree *tree, bool igno
 		tree->id = prg->rtd->lelInfo[tree->id].termDupId;
 
 	tree->flags |= AF_ARTIFICIAL;
+		
+	tree_upref( tree );
 
 	/* FIXME: Do we need to remove the ignore tokens 
 	 * at this point? Will it cause a leak? */
@@ -213,8 +210,7 @@ void call_parser_frag( Tree **&sp, Program *prg, Tree *input, Accum *accum )
 		accum->inputStream->flush = true;
 		parse_loop( sp, accum->pdaRun, accum->fsmRun, accum->inputStream );
 
-		tree_upref( input );
-		send_tree( sp, prg, accum->pdaRun, input, false );
+		send_tree( prg, sp, accum->pdaRun, input, false );
 		send_queued_tokens( sp, accum->pdaRun, accum->fsmRun, accum->inputStream );
 	}
 }
@@ -2524,8 +2520,10 @@ again:
 			#endif
 
 			Tree *tree = pop();
-			send_tree( sp, prg, pdaRun, tree, false );
+			send_tree( prg, sp, pdaRun, tree, false );
 			push( 0 );
+
+			tree_downref( prg, sp, tree );
 			break;
 		}
 		case IN_IGNORE: {
@@ -2536,8 +2534,10 @@ again:
 			#endif
 
 			Tree *tree = pop();
-			send_tree( sp, prg, pdaRun, tree, true );
+			send_tree( prg, sp, pdaRun, tree, true );
 			push( 0 );
+
+			tree_downref( prg, sp, tree );
 			break;
 		}
 		case IN_TREE_NEW: {
