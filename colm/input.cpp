@@ -27,6 +27,13 @@
 using std::cerr;
 using std::endl;
 
+bool InputStream::isTree()
+{ 
+	if ( queue != 0 && queue->type == 1 )
+		return true;
+	return false;
+}
+
 /*
  * String
  */

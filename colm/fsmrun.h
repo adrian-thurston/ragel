@@ -74,7 +74,12 @@ struct FsmTables
 
 struct RunBuf
 {
+	RunBuf()
+		:type(0) {}
+
 	char buf[FSM_BUFSIZE];
+	long type;
+	Tree *tree;
 	long length;
 	long offset;
 	RunBuf *next;
@@ -117,6 +122,7 @@ void send_back_text( FsmRun *fsmRun, InputStream *inputStream, const char *data,
 
 Head *stream_pull( Program *prg, FsmRun *fsmRun, InputStream *inputStream, long length );
 void stream_push( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length );
+void stream_push( FsmRun *fsmRun, InputStream *inputStream, Tree *tree );
 void undo_stream_push( FsmRun *fsmRun, InputStream *inputStream, long length );
 void undo_stream_pull( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length );
 

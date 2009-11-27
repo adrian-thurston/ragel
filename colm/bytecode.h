@@ -235,6 +235,9 @@ typedef unsigned char uchar;
 #define IN_TO_LOWER              0xa4
 #define IN_EXIT                  0xa5
 
+#define IN_STREAM_PUSH2          0xa6
+#define IN_STREAM_PUSH2_BKT      0xa7
+
 
 /* Types */
 #define TYPE_NIL      0x01

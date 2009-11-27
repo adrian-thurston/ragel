@@ -37,7 +37,7 @@ InputStreamPattern::InputStreamPattern( Pattern *pattern )
 	flush(false)
 {}
 
-int InputStreamPattern::isLangEl()
+bool InputStreamPattern::isLangEl()
 { 
 	return patItem != 0 && patItem->type == PatternItem::FactorType;
 }
@@ -150,7 +150,7 @@ InputStreamRepl::InputStreamRepl( Replacement *replacement )
 	flush(false)
 {}
 
-int InputStreamRepl::isLangEl()
+bool InputStreamRepl::isLangEl()
 { 
 	return replItem != 0 && ( replItem->type == ReplItem::ExprType || 
 			replItem->type == ReplItem::FactorType );
@@ -294,5 +294,4 @@ void send_named_lang_el( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream 
 	Kid *input = make_token( pdaRun, fsmRun, inputStream, klangEl->id, tokdata, true, bindId );
 	send_handle_error( sp, pdaRun, fsmRun, inputStream, input );
 }
-
 

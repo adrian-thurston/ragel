@@ -64,7 +64,9 @@ struct InputStream
 		line(1),
 		column(1),
 		byte(0),
-		handlesLine(handlesLine) {}
+		handlesLine(handlesLine),
+		queue(0)
+	{}
 
 	virtual ~InputStream() {}
 
@@ -78,7 +80,8 @@ struct InputStream
 		{ return false; }
 
 	/* Named language elements for patterns and replacements. */
-	virtual int isLangEl() { return false; }
+	virtual bool isTree();
+	virtual bool isLangEl() { return false; }
 	virtual KlangEl *getLangEl( long &bindId, char *&data, long &length )
 		{ assert( false ); return 0; }
 	virtual void pushBackNamed()
@@ -95,6 +98,8 @@ struct InputStream
 	/* This is set true for input streams that do their own line counting.
 	 * Causes FsmRun to ignore NLs. */
 	bool handlesLine;
+
+	RunBuf *queue;
 };
 
 struct InputStreamString : public InputStream
@@ -118,7 +123,8 @@ struct InputStreamFile : public InputStream
 {
 	InputStreamFile( FILE *file ) :
 		InputStream(false), 
-		file(file), queue(0) {}
+		file(file)
+	{}
 
 	int getData( char *dest, int length );
 	int isEOF();
@@ -126,14 +132,14 @@ struct InputStreamFile : public InputStream
 	void pushBackBuf( RunBuf *runBuf );
 
 	FILE *file;
-	RunBuf *queue;
 };
 
 struct InputStreamFd : public InputStream
 {
 	InputStreamFd( long fd ) :
 		InputStream(false), 
-		fd(fd), eof(false), queue(0) {}
+		fd(fd), eof(false)
+	{}
 
 	int isEOF();
 	int needFlush();
@@ -142,7 +148,6 @@ struct InputStreamFd : public InputStream
 
 	long fd;
 	bool eof;
-	RunBuf *queue;
 };
 
 struct AccumData
@@ -160,7 +165,8 @@ struct InputStreamAccum : public InputStream
 		InputStream(false), 
 		head(0), tail(0),
 		flush(false),
-		offset(0), eof(false), queue(0)
+		offset(0),
+		eof(false)
 	{}
 
 	int isEOF();
@@ -176,7 +182,6 @@ struct InputStreamAccum : public InputStream
 	bool flush;
 	long offset;
 	bool eof;
-	RunBuf *queue;
 };
 
 
@@ -189,7 +194,7 @@ struct InputStreamPattern : public InputStream
 	int needFlush();
 	void pushBackBuf( RunBuf *runBuf );
 
-	int isLangEl();
+	bool isLangEl();
 	KlangEl *getLangEl( long &bindId, char *&data, long &length );
 
 	void pushBackNamed();
@@ -207,7 +212,7 @@ struct InputStreamRepl : public InputStream
 {
 	InputStreamRepl( Replacement *replacement );
 
-	int isLangEl();
+	bool isLangEl();
 	int getData( char *dest, int length );
 	KlangEl *getLangEl( long &bindId, char *&data, long &length );
 	int isEOF();

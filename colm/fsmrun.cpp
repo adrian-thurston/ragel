@@ -188,6 +188,30 @@ void stream_push( FsmRun *fsmRun, InputStream *inputStream, const char *data, lo
 	inputStream->pushBackBuf( newBuf );
 }
 
+void stream_push( FsmRun *fsmRun, InputStream *inputStream, Tree *tree )
+{
+	#ifdef COLM_LOG_PARSE
+	if ( colm_log_parse ) {
+		cerr << "readying fake push" << endl;
+	}
+	#endif
+
+	take_back_buffered( inputStream );
+
+	/* Create a new buffer for the data. This is the easy implementation.
+	 * Something better is needed here. It puts a max on the amount of
+	 * data that can be pushed back to the inputStream. */
+	RunBuf *newBuf = new RunBuf;
+	newBuf->next = fsmRun->runBuf;
+	newBuf->offset = 0;
+	newBuf->length = 0;
+	newBuf->type = 1;
+	newBuf->tree = tree;
+	newBuf->next = inputStream->queue;
+	inputStream->queue = newBuf;
+	tree_upref( tree );
+}
+
 void undo_stream_push( FsmRun *fsmRun, InputStream *inputStream, long length )
 {
 	take_back_buffered( inputStream );
@@ -854,6 +878,7 @@ void new_token( PdaRun *pdaRun, FsmRun *fsmRun )
 }
 
 
+#define SCAN_TREE              -5
 #define SCAN_TRY_AGAIN_LATER   -4
 #define SCAN_ERROR             -3
 #define SCAN_LANG_EL           -2
@@ -903,7 +928,7 @@ long scan_token( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 		/* Check for a named language element. Note that we can do this only
 		 * when data == de otherwise we get ahead of what's already in the
 		 * buffer. */
-		if ( inputStream->isLangEl() ) {
+		if ( inputStream->isLangEl() || inputStream->isTree() ) {
 			/* Always break the runBuf on named language elements. This makes
 			 * backtracking simpler because it allows us to always push back
 			 * whole runBufs only. If we did not do this we could get half a
@@ -927,7 +952,10 @@ long scan_token( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 				fsmRun->runBuf = newBuf;
 			}
 
-			return SCAN_LANG_EL;
+			if ( inputStream->isLangEl() )
+				return SCAN_LANG_EL;
+			else
+				return SCAN_TREE;
 		}
 
 		/* Maybe need eof. */
@@ -1051,6 +1079,17 @@ void scanner_error( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun 
 	}
 }
 
+void send_tree( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
+{
+	RunBuf *runBuf = inputStream->queue;
+	inputStream->queue = inputStream->queue->next;
+
+	Kid *input = fsmRun->prg->kidPool.allocate();
+	input->tree = runBuf->tree;
+	delete runBuf;
+	send_handle_error( sp, pdaRun, fsmRun, inputStream, input );
+}
+
 
 void parse_loop( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 {
@@ -1078,6 +1117,12 @@ void parse_loop( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputSt
 		/* Check for a named language element. */
 		if ( tokenId == SCAN_LANG_EL ) {
 			send_named_lang_el( sp, pdaRun, fsmRun, inputStream );
+			new_token( pdaRun, fsmRun );
+			continue;
+		}
+
+		if ( tokenId == SCAN_TREE ) {
+			send_tree( sp, pdaRun, fsmRun, inputStream );
 			new_token( pdaRun, fsmRun );
 			continue;
 		}

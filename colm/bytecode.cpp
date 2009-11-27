@@ -270,6 +270,14 @@ Word stream_push( Tree **&sp, Program *prg, FsmRun *fsmRun, Stream *stream, Tree
 	return ss.str().size();
 }
 
+Word stream_push2( Tree **&sp, Program *prg, FsmRun *fsmRun, Stream *stream, Tree *any )
+{
+	std::stringstream ss;
+	print_tree( ss, sp, prg, any );
+	stream_push( fsmRun, stream->in, any );
+	return ss.str().size();
+}
+
 void undo_stream_push( Tree **&sp, Program *prg, FsmRun *fsmRun, Stream *stream, Word len )
 {
 	undo_stream_push( fsmRun, stream->in, len );
@@ -637,6 +645,21 @@ again:
 			#ifdef COLM_LOG_BYTECODE
 			if ( colm_log_bytecode ) {
 				cerr << "IN_STREAM_PUSH_BKT" << endl;
+			}
+			#endif
+
+			tree_downref( prg, sp, stream );
+			break;
+		}
+		case IN_STREAM_PUSH2_BKT: {
+			Tree *stream;
+			Word len;
+			read_tree( stream );
+			read_word( len );
+
+			#ifdef COLM_LOG_BYTECODE
+			if ( colm_log_bytecode ) {
+				cerr << "IN_STREAM_PUSH2_BKT" << endl;
 			}
 			#endif
 
@@ -2340,6 +2363,45 @@ again:
 			#ifdef COLM_LOG_BYTECODE
 			if ( colm_log_bytecode ) {
 				cerr << "IN_STREAM_PUSH_BKT" << endl;
+			}
+			#endif
+
+			undo_stream_push( sp, prg, fsmRun, (Stream*)stream, len );
+			tree_downref( prg, sp, stream );
+			break;
+		}
+		case IN_STREAM_PUSH2: {
+			/* FIXME: Need to check the refcounting here. */
+
+			#ifdef COLM_LOG_BYTECODE
+			if ( colm_log_bytecode ) {
+				cerr << "IN_STREAM_PUSH" << endl;
+			}
+			#endif
+			Tree *tree = pop();
+			Tree *stream = pop();
+			Word len = stream_push2( sp, prg, 
+					fsmRun, (Stream*)stream, tree );
+			push( 0 );
+
+			/* Single unit. */
+			reverseCode.append( IN_STREAM_PUSH2_BKT );
+			reverseCode.appendWord( (Word)stream );
+			reverseCode.appendWord( len );
+			reverseCode.append( 9 );
+
+			tree_downref( prg, sp, tree );
+			break;
+		}
+		case IN_STREAM_PUSH2_BKT: {
+			Tree *stream;
+			Word len;
+			read_tree( stream );
+			read_word( len );
+
+			#ifdef COLM_LOG_BYTECODE
+			if ( colm_log_bytecode ) {
+				cerr << "IN_STREAM_PUSH2_BKT" << endl;
 			}
 			#endif
 

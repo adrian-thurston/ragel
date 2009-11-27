@@ -2292,6 +2292,8 @@ void ParseData::compileTranslateBlock( KlangEl *langEl )
 			IN_STREAM_PULL, IN_STREAM_PULL, uniqueTypeStream, uniqueTypeInt, true );
 	initFunction( uniqueTypeInt, curLocalFrame, "push",
 			IN_STREAM_PUSH, IN_STREAM_PUSH, uniqueTypeStream, uniqueTypeAny, true );
+	initFunction( uniqueTypeInt, curLocalFrame, "push2",
+			IN_STREAM_PUSH2, IN_STREAM_PUSH2, uniqueTypeStream, uniqueTypeAny, true );
 
 	initFunction( uniqueTypeInt, curLocalFrame, "send",
 			IN_SEND, IN_SEND, uniqueTypeAny, true );
