@@ -270,12 +270,12 @@ Word stream_push( Tree **&sp, Program *prg, FsmRun *fsmRun, Stream *stream, Tree
 	return ss.str().size();
 }
 
-Word stream_push2( Tree **&sp, Program *prg, FsmRun *fsmRun, Stream *stream, Tree *any )
+Word stream_push2( Program *prg, Tree **&sp, FsmRun *fsmRun, Stream *stream, Tree *tree )
 {
-	std::stringstream ss;
-	print_tree( ss, sp, prg, any );
-	stream_push( fsmRun, stream->in, any );
-	return ss.str().size();
+	tree = prep_parse_tree( prg, sp, tree );
+	tree->flags |= AF_ARTIFICIAL;
+	stream_push( fsmRun, stream->in, tree );
+	return 0;
 }
 
 void undo_stream_push( Tree **&sp, Program *prg, FsmRun *fsmRun, Stream *stream, Word len )
@@ -2380,14 +2380,14 @@ again:
 			#endif
 			Tree *tree = pop();
 			Tree *stream = pop();
-			Word len = stream_push2( sp, prg, 
-					fsmRun, (Stream*)stream, tree );
+			tree_upref( tree );
+			stream_push2( prg, sp, fsmRun, (Stream*)stream, tree );
 			push( 0 );
 
 			/* Single unit. */
 			reverseCode.append( IN_STREAM_PUSH2_BKT );
 			reverseCode.appendWord( (Word)stream );
-			reverseCode.appendWord( len );
+			reverseCode.appendWord( 0 );
 			reverseCode.append( 9 );
 
 			tree_downref( prg, sp, tree );
@@ -2405,7 +2405,7 @@ again:
 			}
 			#endif
 
-			undo_stream_push( sp, prg, fsmRun, (Stream*)stream, len );
+			//undo_stream_push( sp, prg, fsmRun, (Stream*)stream, 0 );
 			tree_downref( prg, sp, stream );
 			break;
 		}

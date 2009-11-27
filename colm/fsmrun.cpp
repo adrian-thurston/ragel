@@ -188,6 +188,18 @@ void stream_push( FsmRun *fsmRun, InputStream *inputStream, const char *data, lo
 	inputStream->pushBackBuf( newBuf );
 }
 
+void undo_stream_push( FsmRun *fsmRun, InputStream *inputStream, long length )
+{
+	take_back_buffered( inputStream );
+
+	char tmp[length];
+	int have = 0;
+	while ( have < length ) {
+		int res = inputStream->getData( tmp, length-have );
+		have += res;
+	}
+}
+
 void stream_push( FsmRun *fsmRun, InputStream *inputStream, Tree *tree )
 {
 	#ifdef COLM_LOG_PARSE
@@ -212,17 +224,6 @@ void stream_push( FsmRun *fsmRun, InputStream *inputStream, Tree *tree )
 	tree_upref( tree );
 }
 
-void undo_stream_push( FsmRun *fsmRun, InputStream *inputStream, long length )
-{
-	take_back_buffered( inputStream );
-
-	char tmp[length];
-	int have = 0;
-	while ( have < length ) {
-		int res = inputStream->getData( tmp, length-have );
-		have += res;
-	}
-}
 
 void send_back_runbuf_head( FsmRun *fsmRun, InputStream *inputStream )
 {
