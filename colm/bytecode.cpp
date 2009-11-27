@@ -2371,7 +2371,7 @@ again:
 
 			#ifdef COLM_LOG_BYTECODE
 			if ( colm_log_bytecode ) {
-				cerr << "IN_STREAM_PUSH" << endl;
+				cerr << "IN_STREAM_PUSH2" << endl;
 			}
 			#endif
 			Tree *tree = pop();

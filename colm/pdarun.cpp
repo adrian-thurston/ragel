@@ -313,6 +313,9 @@ void parse_token( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *p
 	if ( input == 0 )
 		goto parseError;
 
+	/* The tree we are given, must be parse tree size. */
+	assert( input->tree->flags & AF_PARSE_TREE );
+
 	/* This will cause input to be lost. This 
 	 * path should be Should be traced. */
 	if ( pdaRun->cs < 0 )
