@@ -124,6 +124,7 @@ Head *stream_pull( Program *prg, FsmRun *fsmRun, InputStream *inputStream, long 
 void stream_push( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length );
 void stream_push( FsmRun *fsmRun, InputStream *inputStream, Tree *tree );
 void undo_stream_push( FsmRun *fsmRun, InputStream *inputStream, long length );
+void undo_stream_push( FsmRun *fsmRun, InputStream *inputStream );
 void undo_stream_pull( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length );
 
 void send_named_lang_el( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );

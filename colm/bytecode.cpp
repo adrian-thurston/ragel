@@ -269,6 +269,10 @@ Word stream_push( Tree **&sp, Program *prg, FsmRun *fsmRun, Stream *stream, Tree
 Word stream_push2( Program *prg, Tree **&sp, FsmRun *fsmRun, Stream *stream, Tree *tree )
 {
 	tree = prep_parse_tree( prg, sp, tree );
+
+	if ( tree->id >= prg->rtd->firstNonTermId )
+		tree->id = prg->rtd->lelInfo[tree->id].termDupId;
+
 	tree->flags |= AF_ARTIFICIAL;
 	stream_push( fsmRun, stream->in, tree );
 	return 0;
@@ -277,6 +281,11 @@ Word stream_push2( Program *prg, Tree **&sp, FsmRun *fsmRun, Stream *stream, Tre
 void undo_stream_push( Tree **&sp, Program *prg, FsmRun *fsmRun, Stream *stream, Word len )
 {
 	undo_stream_push( fsmRun, stream->in, len );
+}
+
+void undo_stream_push( Tree **&sp, Program *prg, FsmRun *fsmRun, Stream *stream )
+{
+	undo_stream_push( fsmRun, stream->in );
 }
 
 void set_local( Tree **frame, long field, Tree *tree )
@@ -2401,7 +2410,7 @@ again:
 			}
 			#endif
 
-			//undo_stream_push( sp, prg, fsmRun, (Stream*)stream, 0 );
+			undo_stream_push( sp, prg, fsmRun, (Stream*)stream );
 			tree_downref( prg, sp, stream );
 			break;
 		}

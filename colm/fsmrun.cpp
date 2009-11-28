@@ -151,6 +151,8 @@ Head *stream_pull( Program *prg, FsmRun *fsmRun, InputStream *inputStream, long 
 	return tokdata;
 }
 
+void send_back_runbuf_head( FsmRun *fsmRun, InputStream *inputStream );
+
 void undo_stream_pull( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length )
 {
 	#ifdef COLM_LOG_PARSE
@@ -160,6 +162,9 @@ void undo_stream_pull( FsmRun *fsmRun, InputStream *inputStream, const char *dat
 	#endif
 
 	connect( fsmRun, inputStream );
+
+	if ( fsmRun->p == fsmRun->pe && fsmRun->p == fsmRun->runBuf->buf )
+		send_back_runbuf_head( fsmRun, inputStream );
 
 	assert( fsmRun->p - length >= fsmRun->runBuf->buf );
 	fsmRun->p -= length;
@@ -198,6 +203,14 @@ void undo_stream_push( FsmRun *fsmRun, InputStream *inputStream, long length )
 		int res = inputStream->getData( tmp, length-have );
 		have += res;
 	}
+}
+
+void undo_stream_push( FsmRun *fsmRun, InputStream *inputStream )
+{
+	take_back_buffered( inputStream );
+	assert( inputStream->queue->type == 1 );
+	/* FIXME: leak here. */
+	inputStream->queue = inputStream->queue->next;
 }
 
 void stream_push( FsmRun *fsmRun, InputStream *inputStream, Tree *tree )
@@ -393,11 +406,18 @@ void send_back( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStr
 		inputStream->pushBackNamed();
 	}
 
-	if ( !(input->tree->flags & AF_ARTIFICIAL) ) {
-		/* Push back the token data. */
-		send_back_text( fsmRun, inputStream, string_data( input->tree->tokdata ), 
-				string_length( input->tree->tokdata ) );
+	if ( input->tree->flags & AF_ARTIFICIAL ) {
+		stream_push( fsmRun, inputStream, input->tree );
+		send_back_ignore( sp, pdaRun, fsmRun, inputStream, tree_ignore( fsmRun->prg, input->tree ) );
+		fsmRun->prg->kidPool.free( input );
+		///* Always push back the ignore text. */
+		//send_back_ignore( sp, pdaRun, fsmRun, inputStream, tree_ignore( fsmRun->prg, input->tree ) );
+		return;
 	}
+
+	/* Push back the token data. */
+	send_back_text( fsmRun, inputStream, string_data( input->tree->tokdata ), 
+			string_length( input->tree->tokdata ) );
 
 	/* Check for reverse code. */
 	if ( input->tree->flags & AF_HAS_RCODE ) {
