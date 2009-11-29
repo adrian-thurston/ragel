@@ -53,44 +53,44 @@ void free_attrs( Program *prg, Kid *attrs )
 
 void set_attr( Tree *tree, long pos, Tree *val )
 {
-	Kid *cur = tree->child;
+	Kid *kid = tree->child;
+
+	if ( tree->flags & AF_LEFT_IGNORE )
+		kid = kid->next;
+	if ( tree->flags & AF_RIGHT_IGNORE )
+		kid = kid->next;
+
 	for ( long i = 0; i < pos; i++ )
-		cur = cur->next;
-	cur->tree = val;
+		kid = kid->next;
+	kid->tree = val;
 }
 
 Tree *get_attr( Tree *tree, long pos )
 {
-	Kid *cur = tree->child;
+	Kid *kid = tree->child;
+
+	if ( tree->flags & AF_LEFT_IGNORE )
+		kid = kid->next;
+	if ( tree->flags & AF_RIGHT_IGNORE )
+		kid = kid->next;
+
 	for ( long i = 0; i < pos; i++ )
-		cur = cur->next;
-	return cur->tree;
+		kid = kid->next;
+	return kid->tree;
 }
 
 Kid *get_attr_kid( Tree *tree, long pos )
 {
-	Kid *cur = tree->child;
+	Kid *kid = tree->child;
+
+	if ( tree->flags & AF_LEFT_IGNORE )
+		kid = kid->next;
+	if ( tree->flags & AF_RIGHT_IGNORE )
+		kid = kid->next;
+
 	for ( long i = 0; i < pos; i++ )
-		cur = cur->next;
-	return cur;
-}
-
-Kid *copy_obj_data( Program *prg, long length, Kid *src )
-{
-	Kid *cur = 0;
-	for ( long i = 0; i < length; i++ ) {
-		Kid *next = cur;
-		cur = prg->kidPool.allocate();
-		cur->next = next;
-	}
-
-	Kid *dest = cur;
-	for ( long i = 0; i < length; i++ ) {
-		dest->tree = src->tree;
-		dest = dest->next;
-		src = src->next;
-	}
-	return cur;
+		kid = kid->next;
+	return kid;
 }
 
 Kid *kid_list_concat( Kid *list1, Kid *list2 )
@@ -405,7 +405,7 @@ void print_ignore_list( ostream &out, Tree **sp, Program *prg, Tree *tree )
 
 	/* Record the root of the stack and push everything. */
 	Tree **root = vm_ptop();
-	while ( tree_is_ignore( prg, ignore ) ) {
+	while ( ignore != 0 ) {
 		vm_push( (SW)ignore );
 		ignore = ignore->next;
 	}
@@ -425,7 +425,7 @@ void print_ignore_list2( FILE *out, Tree **sp, Program *prg, Tree *tree )
 
 	/* Record the root of the stack and push everything. */
 	Tree **root = vm_ptop();
-	while ( tree_is_ignore( prg, ignore ) ) {
+	while ( ignore != 0 ) {
 		vm_push( (SW)ignore );
 		ignore = ignore->next;
 	}
@@ -602,7 +602,7 @@ void xml_escape_data( const char *data, long len )
 void print_xml_ignore_list( Tree **sp, Program *prg, Tree *tree, long depth )
 {
 	Kid *ignore = tree_ignore( prg, tree );
-	while ( tree_is_ignore( prg, ignore ) ) {
+	while ( ignore != 0 ) {
 		print_xml_kid( sp, prg, ignore, true, depth );
 		ignore = ignore->next;
 	}
@@ -755,6 +755,28 @@ long tree_num_children( Program *prg, Tree *tree )
 	return children;
 }
 
+Kid *copy_ignore_list( Program *prg, Kid *ignoreHeader )
+{
+	Kid *newHeader = prg->kidPool.allocate();
+	Kid *last = 0, *ic = (Kid*)ignoreHeader->tree;
+	while ( ic != 0 ) {
+		Kid *newIc = prg->kidPool.allocate();
+
+		newIc->tree = ic->tree;
+		newIc->tree->refs += 1;
+
+		/* List pointers. */
+		if ( last == 0 )
+			newHeader->tree = (Tree*)newIc;
+		else
+			last->next = newIc;
+
+		ic = ic->next;
+		last = newIc;
+	}
+	return newHeader;
+}
+
 Tree *copy_real_tree( Program *prg, Tree *tree, Kid *oldNextDown, 
 		Kid *&newNextDown, bool parseTree )
 {
@@ -772,32 +794,56 @@ Tree *copy_real_tree( Program *prg, Tree *tree, Kid *oldNextDown,
 	newTree->id = tree->id;
 	newTree->tokdata = string_copy( prg, tree->tokdata );
 
-	/* Copy the child list, will handle attributes, ignores 
-	 * and the children. */
+	/* Copy the child list. Start with ignores, then the list. */
 	Kid *child = tree->child, *last = 0;
-	while ( child != 0 ) {
-		Kid *newChild = prg->kidPool.allocate();
 
-		/* Store the first child. */
-		if ( newTree->child == 0 )
-			newTree->child = newChild;
+	/* Left ignores. */
+	if ( tree->flags & AF_LEFT_IGNORE ) {
+		newTree->flags |= AF_LEFT_IGNORE;
+		Kid *newHeader = copy_ignore_list( prg, child );
+
+		/* Always the head. */
+		newTree->child = newHeader;
+
+		child = child->next;
+		last = newHeader;
+	}
+
+	/* Right ignores. */
+	if ( tree->flags & AF_RIGHT_IGNORE ) {
+		newTree->flags |= AF_RIGHT_IGNORE;
+		Kid *newHeader = copy_ignore_list( prg, child );
+		if ( last == 0 )
+			newTree->child = newHeader;
+		else
+			last->next = newHeader;
+		child = child->next;
+		last = newHeader;
+	}
+
+	/* Attributes and children. */
+	while ( child != 0 ) {
+		Kid *newKid = prg->kidPool.allocate();
 
 		/* Watch out for next down. */
 		if ( child == oldNextDown )
-			newNextDown = newChild;
+			newNextDown = newKid;
 
-		newChild->tree = child->tree;
-		newChild->next = 0;
+		newKid->tree = child->tree;
+		newKid->next = 0;
 
 		/* May be an attribute. */
-		if ( newChild->tree != 0 )
-			newChild->tree->refs += 1;
+		if ( newKid->tree != 0 )
+			newKid->tree->refs += 1;
 
-		if ( last != 0 )
-			last->next = newChild;
+		/* Store the first child. */
+		if ( last == 0 )
+			newTree->child = newKid;
+		else
+			last->next = newKid;
 
 		child = child->next;
-		last = newChild;
+		last = newKid;
 	}
 	
 	return newTree;
@@ -1029,8 +1075,39 @@ free_tree:
 			stream_free( prg, (Stream*) tree );
 		else { 
 			string_free( prg, tree->tokdata );
-
 			Kid *child = tree->child;
+
+			/* Left ignore trees. */
+			if ( tree->flags & AF_LEFT_IGNORE ) {
+				Kid *ic = (Kid*)child->tree;
+				while ( ic != 0 ) {
+					Kid *next = ic->next;
+					vm_push( ic->tree );
+					prg->kidPool.free( ic );
+					ic = next;
+				}
+			
+				Kid *next = child->next;
+				prg->kidPool.free( child );
+				child = next;
+			}
+
+			/* Right ignore trees. */
+			if ( tree->flags & AF_RIGHT_IGNORE ) {
+				Kid *ic = (Kid*)child->tree;
+				while ( ic != 0 ) {
+					Kid *next = ic->next;
+					vm_push( ic->tree );
+					prg->kidPool.free( ic );
+					ic = next;
+				}
+
+				Kid *next = child->next;
+				prg->kidPool.free( child );
+				child = next;
+			}
+
+			/* Attributes and grammar-based children. */
 			while ( child != 0 ) {
 				Kid *next = child->next;
 				vm_push( child->tree );
@@ -1079,14 +1156,16 @@ Kid *tree_child( Program *prg, Tree *tree )
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
 	Kid *kid = tree->child;
 
+	if ( tree->flags & AF_LEFT_IGNORE )
+		kid = kid->next;
+	if ( tree->flags & AF_RIGHT_IGNORE )
+		kid = kid->next;
+
 	/* Skip over attributes. */
 	long objectLength = lelInfo[tree->id].objectLength;
 	for ( long a = 0; a < objectLength; a++ )
 		kid = kid->next;
 
-	/* Skip over ignore tokens. */
-	while ( kid != 0 && lelInfo[kid->tree->id].ignore )
-		kid = kid->next;
 	return kid;
 }
 
@@ -1096,15 +1175,14 @@ Kid *tree_extract_child( Program *prg, Tree *tree )
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
 	Kid *kid = tree->child, *last = 0;
 
+	if ( tree->flags & AF_LEFT_IGNORE )
+		kid = kid->next;
+	if ( tree->flags & AF_RIGHT_IGNORE )
+		kid = kid->next;
+
 	/* Skip over attributes. */
 	long objectLength = lelInfo[tree->id].objectLength;
 	for ( long a = 0; a < objectLength; a++ ) {
-		last = kid;
-		kid = kid->next;
-	}
-
-	/* Skip over ignore tokens. */
-	while ( kid != 0 && lelInfo[kid->tree->id].ignore ) {
 		last = kid;
 		kid = kid->next;
 	}
@@ -1120,24 +1198,9 @@ Kid *tree_extract_child( Program *prg, Tree *tree )
 
 Kid *tree_ignore( Program *prg, Tree *tree )
 {
-	LangElInfo *lelInfo = prg->rtd->lelInfo;
-	Kid *ignore = tree->child;
-
-	/* Skip over attributes. */
-	long objectLength = lelInfo[tree->id].objectLength;
-	for ( long a = 0; a < objectLength; a++ )
-		ignore = ignore->next;
-
-	/* Check for ignore tokens, there may not be any. */
-	if ( ignore != 0 && !lelInfo[ignore->tree->id].ignore )
-		ignore = 0;
-	return ignore;
-}
-
-bool tree_is_ignore( Program *prg, Kid *kid )
-{
-	LangElInfo *lelInfo = prg->rtd->lelInfo;
-	return kid != 0 && lelInfo[kid->tree->id].ignore;
+	if ( tree->flags & AF_LEFT_IGNORE )
+		return (Kid*)tree->child->tree;
+	return 0;
 }
 
 Tree *tree_iter_deref_cur( TreeIter *iter )

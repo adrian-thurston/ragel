@@ -297,6 +297,9 @@ typedef unsigned char uchar;
 /* Tree was allocated as a ParseTree. */
 #define AF_PARSE_TREE  0x80
 
+#define AF_LEFT_IGNORE   0x100
+#define AF_RIGHT_IGNORE  0x200
+
 /*
  * Call stack.
  */
@@ -511,7 +514,6 @@ void tree_upref( Tree *tree );
 Kid *tree_child( Program *prg, Tree *tree );
 Kid *tree_extract_child( Program *prg, Tree *tree );
 Kid *tree_ignore( Program *prg, Tree *tree );
-bool tree_is_ignore( Program *prg, Kid *kid );
 Kid *kid_list_concat( Kid *list1, Kid *list2 );
 void ignore_data( Tree *tree, char *dest );
 long ignore_length( Tree *tree );

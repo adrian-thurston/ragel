@@ -1568,7 +1568,7 @@ void mapNodes( Program *prg, int &count, Kid *kid )
 		pt(kid->tree)->state = count++;
 
 		Kid *ignore = tree_ignore( prg, kid->tree );
-		while ( tree_is_ignore( prg, ignore ) ) {
+		while ( ignore != 0 ) {
 			count += 1;
 			ignore = ignore->next;
 		}

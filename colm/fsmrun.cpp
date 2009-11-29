@@ -351,7 +351,7 @@ void queue_back_tree( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *in
 void send_back_ignore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *ignore )
 {
 	/* Ignore tokens are queued in reverse order. */
-	while ( tree_is_ignore( pdaRun->prg, ignore ) ) {
+	while ( ignore != 0 ) {
 		#ifdef COLM_LOG_PARSE
 		if ( colm_log_parse ) {
 			LangElInfo *lelInfo = pdaRun->tables->rtd->lelInfo;
@@ -649,31 +649,20 @@ void send_with_ignore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *i
 	/* Pull the ignore tokens out and store in the token. */
 	Kid *ignore = extract_ignore( pdaRun );
 	if ( ignore != 0 ) {
-		if ( input->tree->child == 0 ) {
-			/* No children, set the ignore as the first child. */
-			input->tree->child = ignore;
+		if ( input->tree->flags & AF_LEFT_IGNORE ) {
+			/* Need to merge. */
+			Kid *ignoreHead = input->tree->child;
+			ignoreHead->tree = (Tree*) kid_list_concat( ignore, (Kid*)ignoreHead->tree );
+
 		}
 		else {
-			/* There are children. Find where the attribute list ends and the
-			 * grammatical children begin. */
-			LangElInfo *lelInfo = pdaRun->prg->rtd->lelInfo;
-			long objectLength = lelInfo[input->tree->id].objectLength;
-			Kid *attrEnd = 0, *childBegin = input->tree->child;
-			for ( long a = 0; a < objectLength; a++ ) {
-				attrEnd = childBegin;
-				childBegin = childBegin->next;
-			}
+			/* Insert an ignore head in the child list. */
+			Kid *ignoreHead = pdaRun->prg->kidPool.allocate();
+			ignoreHead->next = input->tree->child;
+			input->tree->child = ignoreHead;
 
-			if ( attrEnd == 0 ) {
-				/* No attributes. concat ignore + the existing list. */
-				input->tree->child = kid_list_concat( ignore, input->tree->child );
-			}
-			else {
-				/* There are attributes. concat child, ignore, childBegin. */
-				attrEnd->next = 0;
-				input->tree->child = kid_list_concat( input->tree->child, 
-						kid_list_concat( ignore, childBegin ) );
-			}
+			ignoreHead->tree = (Tree*) ignore;
+			input->tree->flags |= AF_LEFT_IGNORE;
 		}
 	}
 
