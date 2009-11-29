@@ -1124,35 +1124,29 @@ void parse_loop( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputSt
 			continue;
 		}
 
-		/* Check for a named language element. */
-		if ( tokenId == SCAN_LANG_EL ) {
-			send_named_lang_el( sp, pdaRun, fsmRun, inputStream );
-			new_token( pdaRun, fsmRun );
-			continue;
-		}
-
-		if ( tokenId == SCAN_TREE ) {
-			send_tree( sp, pdaRun, fsmRun, inputStream );
-			new_token( pdaRun, fsmRun );
-			continue;
-		}
-
-		/* Check for error. */
 		if ( tokenId == SCAN_ERROR ) {
+			/* Error. */
 			scanner_error( sp, inputStream, fsmRun, pdaRun );
-			new_token( pdaRun, fsmRun );
-			continue;
 		}
-
-		/* Send a token. */
-		bool ctxDepParsing = fsmRun->prg->ctxDepParsing;
-		LangElInfo *lelInfo = pdaRun->tables->rtd->lelInfo;
-		if ( ctxDepParsing && lelInfo[tokenId].frameId >= 0 )
-			exec_gen( sp, inputStream, fsmRun, pdaRun, tokenId );
-		else if ( lelInfo[tokenId].ignore )
-			send_ignore( inputStream, fsmRun, pdaRun, tokenId );
-		else
-			send_token( sp, inputStream, fsmRun, pdaRun, tokenId );
+		else if ( tokenId == SCAN_LANG_EL ) {
+			/* A named language element (parsing colm program). */
+			send_named_lang_el( sp, pdaRun, fsmRun, inputStream );
+		}
+		else if ( tokenId == SCAN_TREE ) {
+			/* Check for a tree. */
+			send_tree( sp, pdaRun, fsmRun, inputStream );
+		}
+		else {
+			/* Plain token. */
+			bool ctxDepParsing = fsmRun->prg->ctxDepParsing;
+			LangElInfo *lelInfo = pdaRun->tables->rtd->lelInfo;
+			if ( ctxDepParsing && lelInfo[tokenId].frameId >= 0 )
+				exec_gen( sp, inputStream, fsmRun, pdaRun, tokenId );
+			else if ( lelInfo[tokenId].ignore )
+				send_ignore( inputStream, fsmRun, pdaRun, tokenId );
+			else
+				send_token( sp, inputStream, fsmRun, pdaRun, tokenId );
+		}
 
 		new_token( pdaRun, fsmRun );
 
