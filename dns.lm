@@ -43,7 +43,7 @@ token RR_UNKNOWN
 		elsif rr_type_value == 16
 			id = typeid RR_TXT
 
-		send( make_token( id, '' ) )
+		push2( stdin, make_token( id, '' ) )
 	}
 
 # Convert two octets in network order into an unsigned 16 bit value.
@@ -200,7 +200,7 @@ token nb_empty /''/
 token nbytes_data
 	/''/
 	{
-		send( make_token( typeid nbytes_data, pull(stdin, nbytes) ) )
+		push2( stdin, make_token( typeid nbytes_data, pull(stdin, nbytes) ) )
 	}
 
 def nbytes
@@ -271,7 +271,7 @@ def ttl
 token rdata_bytes
 	/''/
 	{
-		send( make_token( typeid rdata_bytes, pull(stdin, rdata_length) ) )
+		push2( stdin, make_token( typeid rdata_bytes, pull(stdin, rdata_length) ) )
 	}
 
 def rdlength 

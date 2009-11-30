@@ -10,11 +10,11 @@ lex start
 		/ident_char+/
 		{
 			if HereId && HereId == match_text {
-				send( make_token( 
+				push2( stdin, make_token( 
 					typeid here_close,
 					pull(stdin, match_length - 1) ) )
 			} else {
-				send( make_token( typeid id, pull(stdin, match_length) ) )
+				push2( stdin, make_token( typeid id, pull(stdin, match_length) ) )
 			}
 		}
 
