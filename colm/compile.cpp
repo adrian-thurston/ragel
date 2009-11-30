@@ -2023,6 +2023,23 @@ void ParseData::addMatchText( ObjectDef *frame, KlangEl *lel )
 	frame->insertField( el->name, el );
 }
 
+void ParseData::addInput( ObjectDef *frame, KlangEl *lel )
+{
+	/* Make the type ref. */
+	TypeRef *typeRef = new TypeRef( InputLoc(), uniqueTypeStream );
+
+	/* Create the field and insert it into the map. */
+	ObjField *el = new ObjField( InputLoc(), typeRef, "input" );
+	el->beenReferenced = true;
+	el->beenInitialized = true;
+	el->isConst   = false;
+	el->useOffset = false;
+	el->inGetR    = IN_LOAD_INPUT_R;
+	el->inGetWV   = IN_LOAD_INPUT_WV;
+	el->inGetWC   = IN_LOAD_INPUT_WC;
+	frame->insertField( el->name, el );
+}
+
 void ParseData::initFieldInstructions( ObjField *el )
 {
 	el->inGetR =   IN_GET_FIELD_R;
@@ -2288,6 +2305,7 @@ void ParseData::compileTranslateBlock( KlangEl *langEl )
 	/* References to the reduce item. */
 	addMatchLength( curLocalFrame, langEl );
 	addMatchText( curLocalFrame, langEl );
+	addInput( curLocalFrame, langEl );
 	initFunction( uniqueTypeStr, curLocalFrame, "pull",
 			IN_STREAM_PULL, IN_STREAM_PULL, uniqueTypeStream, uniqueTypeInt, true );
 	initFunction( uniqueTypeInt, curLocalFrame, "push",

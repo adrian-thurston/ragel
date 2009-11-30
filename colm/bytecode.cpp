@@ -133,11 +133,12 @@ struct ParserRet
 	FsmRun *fsmRun;
 };
 
-void call_parser( ParserRet &ret, Tree **&sp, Program *prg, InputStream *inputStream,
+void call_parser( ParserRet &ret, Tree **&sp, Program *prg, InputStream *inputStream, Stream *stream,
 		long parserId, long stopId, CodeVect *&cv, bool revertOn )
 {
 	PdaTables *tables = prg->rtd->pdaTables;
 	FsmRun *fsmRun = new FsmRun( prg );
+	fsmRun->curStream = (Tree*)stream;
 	PdaRun pdaRun( prg, tables, fsmRun, parserId, stopId, revertOn );
 
 	init_pda_run( &pdaRun );
@@ -177,7 +178,7 @@ void call_tree_parser( ParserRet &ret, Tree **&sp, Program *prg, Tree *input,
 	InputStreamString inputStream( s.c_str(), s.size() );
 	init_input_stream( &inputStream );
 
-	call_parser( ret, sp, prg, &inputStream, parserId, stopId, cv, revertOn );
+	call_parser( ret, sp, prg, &inputStream, 0, parserId, stopId, cv, revertOn );
 }
 
 Head *tree_to_str( Tree **sp, Program *prg, Tree *tree )
@@ -679,6 +680,14 @@ again:
 			#endif
 			break;
 		}
+		case IN_LOAD_INPUT_BKT: {
+			#ifdef COLM_LOG_BYTECODE
+			if ( colm_log_bytecode ) {
+				cerr << "IN_LOAD_INPUT_BKT" << endl;
+			}
+			#endif
+			break;
+		}
 		case IN_GET_FIELD_BKT: {
 			short field;
 			read_half( field );
@@ -921,7 +930,7 @@ again:
 			assert( lhs != 0 );
 
 			/* Save and upref before writing. We don't generate a restore
-			 * here. Instead in the parser we will check if it actually
+			 * here. Instead, in the parser we will check if it actually
 			 * changed and insert the instruction then. The presence of this
 			 * instruction here is just a conservative approximation.  */
 			parsed = lhs;
@@ -1118,6 +1127,56 @@ again:
 
 			tree_upref( prg->global );
 			push( prg->global );
+			break;
+		}
+		case IN_LOAD_INPUT_R: {
+			#ifdef COLM_LOG_BYTECODE
+			if ( colm_log_bytecode ) {
+				cerr << "IN_LOAD_INPUT_R" << endl;
+			}
+			#endif
+
+			tree_upref( fsmRun->curStream );
+			push( fsmRun->curStream );
+			break;
+		}
+		case IN_LOAD_INPUT_WV: {
+			#ifdef COLM_LOG_BYTECODE
+			if ( colm_log_bytecode ) {
+				cerr << "IN_LOAD_INPUT_WV" << endl;
+			}
+			#endif
+
+			tree_upref( fsmRun->curStream );
+			push( fsmRun->curStream );
+
+			/* Set up the reverse instruction. */
+			reverseCode.append( IN_LOAD_INPUT_BKT );
+			rcodeUnitLen = 1;
+			break;
+		}
+		case IN_LOAD_INPUT_WC: {
+			#ifdef COLM_LOG_BYTECODE
+			if ( colm_log_bytecode ) {
+				cerr << "IN_LOAD_INPUT_WC" << endl;
+			}
+			#endif
+
+			/* This is identical to the _R version, but using it for writing
+			 * would be confusing. */
+			tree_upref( fsmRun->curStream );
+			push( fsmRun->curStream );
+			break;
+		}
+		case IN_LOAD_INPUT_BKT: {
+			#ifdef COLM_LOG_BYTECODE
+			if ( colm_log_bytecode ) {
+				cerr << "IN_LOAD_INPUT_BKT" << endl;
+			}
+			#endif
+
+			tree_upref( fsmRun->curStream );
+			push( fsmRun->curStream );
 			break;
 		}
 		case IN_INIT_CAPTURES: {
@@ -2215,7 +2274,7 @@ again:
 			CodeVect *cv;
 			Tree *stream = pop();
 			ParserRet ret;
-			call_parser( ret, sp, prg, ((Stream*)stream)->in, parserId, stopId, cv, true );
+			call_parser( ret, sp, prg, ((Stream*)stream)->in, (Stream*)stream, parserId, stopId, cv, true );
 			push( ret.tree );
 
 			/* Single unit. */
@@ -2244,7 +2303,7 @@ again:
 			CodeVect *cv;
 			Tree *stream = pop();
 			ParserRet ret;
-			call_parser( ret, sp, prg, ((Stream*)stream)->in, parserId, stopId, cv, false );
+			call_parser( ret, sp, prg, ((Stream*)stream)->in, (Stream*)stream, parserId, stopId, cv, false );
 			push( ret.tree );
 
 			tree_downref( prg, sp, (Tree*)stream );

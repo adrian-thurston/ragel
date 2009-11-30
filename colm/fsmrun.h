@@ -105,6 +105,7 @@ struct FsmRun
 	long matchedToken;
 
 	InputStream *haveDataOf;
+	Tree *curStream;
 };
 
 void exec_action( FsmRun *fsmRun, GenAction *genAction );

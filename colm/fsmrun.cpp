@@ -42,7 +42,8 @@ FsmRun::FsmRun( Program *prg ) :
 	prg(prg),
 	tables(prg->rtd->fsmTables),
 	runBuf(0),
-	haveDataOf(0)
+	haveDataOf(0),
+	curStream(0)
 {
 }
 
