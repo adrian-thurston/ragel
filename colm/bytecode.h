@@ -219,8 +219,6 @@ typedef unsigned char uchar;
 #define IN_STREAM_PULL_BKT       0x95
 #define IN_STREAM_PUSH           0x96
 #define IN_STREAM_PUSH_BKT       0x97
-#define IN_SEND                  0x98
-#define IN_IGNORE                0x99
 #define IN_PARSE_TREE_WC         0x9a
 #define IN_PARSE_TREE_WV         0x9b
 #define IN_PARSE_FRAG_WC         0x9c
@@ -237,6 +235,7 @@ typedef unsigned char uchar;
 
 #define IN_STREAM_PUSH2          0xa6
 #define IN_STREAM_PUSH2_BKT      0xa7
+#define IN_IGNORE                0x99
 
 
 /* Types */

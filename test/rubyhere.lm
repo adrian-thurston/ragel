@@ -33,7 +33,7 @@ lex here_start
 			push( stdin, ROL )
 
 			# Send the here_id token. Attach the heredoc data as an attribute.
-			send( make_token( typeid here_id, HereId, HereData ) )
+			push2( stdin, make_token( typeid here_id, HereId, HereData ) )
 		}
 }
 
@@ -43,12 +43,12 @@ lex here_data
 		/ ident_pattern '\n' /
 		{
 			if match_text == HereId + '\n' {
-				send( make_token( 
+				push2( stdin, make_token( 
 					typeid here_close_id,
 					pull(stdin, match_length) ) )
 			}
 			else 
-				send( make_token( typeid here_line, pull(stdin, match_length) ) )
+				push2( stdin, make_token( typeid here_line, pull(stdin, match_length) ) )
 		}
 
 	token here_line

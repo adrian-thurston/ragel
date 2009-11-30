@@ -2295,8 +2295,8 @@ void ParseData::compileTranslateBlock( KlangEl *langEl )
 	initFunction( uniqueTypeInt, curLocalFrame, "push2",
 			IN_STREAM_PUSH2, IN_STREAM_PUSH2, uniqueTypeStream, uniqueTypeAny, true );
 
-	initFunction( uniqueTypeInt, curLocalFrame, "send",
-			IN_SEND, IN_SEND, uniqueTypeAny, true );
+//	initFunction( uniqueTypeInt, curLocalFrame, "send",
+//			IN_SEND, IN_SEND, uniqueTypeAny, true );
 	initFunction( uniqueTypeInt, curLocalFrame, "send_ignore",
 			IN_IGNORE, IN_IGNORE, uniqueTypeAny, true );
 
@@ -2350,8 +2350,8 @@ void ParseData::compilePreEof( TokenRegion *region )
 //	initFunction( uniqueTypeStr, curLocalFrame, "pull",
 //			IN_STREAM_PULL, IN_STREAM_PULL, uniqueTypeStream, uniqueTypeInt, true );
 
-	initFunction( uniqueTypeInt, curLocalFrame, "send",
-			IN_SEND, IN_SEND, uniqueTypeAny, true );
+//	initFunction( uniqueTypeInt, curLocalFrame, "send",
+//			IN_SEND, IN_SEND, uniqueTypeAny, true );
 	initFunction( uniqueTypeInt, curLocalFrame, "send_ignore",
 			IN_IGNORE, IN_IGNORE, uniqueTypeAny, true );
 

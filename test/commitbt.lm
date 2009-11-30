@@ -98,7 +98,7 @@ token item
 	{
 		str M = pull(stdin, match_length)
 		sub S = parse sub(stdin)
-		send( make_token( typeid item, M, S ) )
+		push2( stdin, make_token( typeid item, M, S ) )
 	}
 
 def stuff

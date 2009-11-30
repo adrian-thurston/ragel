@@ -266,7 +266,7 @@ Word stream_push( Tree **&sp, Program *prg, FsmRun *fsmRun, Stream *stream, Tree
 	return ss.str().size();
 }
 
-Word stream_push2( Program *prg, Tree **&sp, FsmRun *fsmRun, Stream *stream, Tree *tree )
+Word stream_push2( Program *prg, Tree **&sp, FsmRun *fsmRun, InputStream *inputStream, Tree *tree )
 {
 	tree = prep_parse_tree( prg, sp, tree );
 
@@ -274,7 +274,7 @@ Word stream_push2( Program *prg, Tree **&sp, FsmRun *fsmRun, Stream *stream, Tre
 		tree->id = prg->rtd->lelInfo[tree->id].termDupId;
 
 	tree->flags |= AF_ARTIFICIAL;
-	stream_push( fsmRun, stream->in, tree );
+	stream_push( fsmRun, inputStream, tree );
 	return 0;
 }
 
@@ -668,7 +668,7 @@ again:
 			}
 			#endif
 
-			tree_downref( prg, sp, stream );
+			//tree_downref( prg, sp, stream );
 			break;
 		}
 		case IN_LOAD_GLOBAL_BKT: {
@@ -2386,12 +2386,12 @@ again:
 			Tree *tree = pop();
 			Tree *stream = pop();
 			tree_upref( tree );
-			stream_push2( prg, sp, fsmRun, (Stream*)stream, tree );
+			stream_push2( prg, sp, fsmRun, ((Stream*)stream)->in, tree );
 			push( 0 );
 
 			/* Single unit. */
 			reverseCode.append( IN_STREAM_PUSH2_BKT );
-			reverseCode.appendWord( (Word)stream );
+			reverseCode.appendWord( (Word)((Stream*)stream)->in );
 			reverseCode.appendWord( 0 );
 			reverseCode.append( 9 );
 
@@ -2410,8 +2410,8 @@ again:
 			}
 			#endif
 
-			undo_stream_push( sp, prg, fsmRun, (Stream*)stream );
-			tree_downref( prg, sp, stream );
+			undo_stream_push( fsmRun, (InputStream*)stream );
+			//tree_downref( prg, sp, stream );
 			break;
 		}
 		case IN_PARSE_BKT: {
@@ -2519,20 +2519,6 @@ again:
 			for ( long i = 0; i < nargs; i++ )
 				tree_downref( prg, sp, pop() );
 			push( result );
-			break;
-		}
-		case IN_SEND: {
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode ) {
-				cerr << "IN_SEND" << endl;
-			}
-			#endif
-
-			Tree *tree = pop();
-			send_tree( prg, sp, pdaRun, tree, false );
-			push( 0 );
-
-			tree_downref( prg, sp, tree );
 			break;
 		}
 		case IN_IGNORE: {
