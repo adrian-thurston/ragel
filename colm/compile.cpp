@@ -538,12 +538,18 @@ void LangVarRef::loadGlobalObj( ParseData *pd, CodeVect &code,
 	loadQualification( pd, code, rootObj, lastPtrInQual, forWriting, true );
 }
 
+void LangVarRef::loadCustom( ParseData *pd, CodeVect &code, 
+		int lastPtrInQual, bool forWriting ) const
+{
+	/* Start the search in the local frame. */
+	loadQualification( pd, code, pd->curLocalFrame, lastPtrInQual, forWriting, true );
+}
+
 void LangVarRef::loadLocalObj( ParseData *pd, CodeVect &code, 
 		int lastPtrInQual, bool forWriting ) const
 {
 	/* Start the search in the local frame. */
-	ObjectDef *rootObj = pd->curLocalFrame;
-	loadQualification( pd, code, rootObj, lastPtrInQual, forWriting, false );
+	loadQualification( pd, code, pd->curLocalFrame, lastPtrInQual, forWriting, false );
 }
 
 bool LangVarRef::isLocalRef( ParseData *pd ) const
@@ -560,10 +566,35 @@ bool LangVarRef::isLocalRef( ParseData *pd ) const
 	return false;
 }
 
+bool LangVarRef::isCustom( ParseData *pd ) const
+{
+	if ( qual->length() > 0 ) {
+		ObjField *field = pd->curLocalFrame->findField( qual->data[0].data );
+		if ( field != 0 && field->isCustom )
+			return true;
+	}
+	else {
+		ObjField *field = pd->curLocalFrame->findField( name );
+		if ( field != 0 ) {
+			if ( field->isCustom )
+				return true;
+		}
+		else {
+			ObjMethod *method = pd->curLocalFrame->findMethod( name );
+			if ( method != 0 && method->isCustom )
+				return true;
+		}
+	
+	}
+	return false;
+}
+
 void LangVarRef::loadObj( ParseData *pd, CodeVect &code, 
 		int lastPtrInQual, bool forWriting ) const
 {
-	if ( isLocalRef( pd ) )
+	if ( isCustom( pd ) )
+		loadCustom( pd, code, lastPtrInQual, forWriting );
+	else if ( isLocalRef( pd ) )
 		loadLocalObj( pd, code, lastPtrInQual, forWriting );
 	else
 		loadGlobalObj( pd, code, lastPtrInQual, forWriting );
@@ -2034,6 +2065,7 @@ void ParseData::addInput( ObjectDef *frame, KlangEl *lel )
 	el->beenInitialized = true;
 	el->isConst   = false;
 	el->useOffset = false;
+	el->isCustom  = true;
 	el->inGetR    = IN_LOAD_INPUT_R;
 	el->inGetWV   = IN_LOAD_INPUT_WV;
 	el->inGetWC   = IN_LOAD_INPUT_WC;
@@ -2118,6 +2150,8 @@ void ParseData::initStreamObject( )
 	streamObj = new ObjectDef( ObjectDef::BuiltinType, "stream", 
 			fieldMap, fieldList, methodMap, nextObjectId++ );
 	streamKlangEl->objectDef = streamObj;
+
+	initFunction( uniqueTypeStr, streamObj, "pull",  IN_STREAM_PULL, IN_STREAM_PULL, uniqueTypeInt, false );
 
 //	initFunction( uniqueTypeInt, strObj, "atoi",   IN_STR_ATOI, IN_STR_ATOI, true );
 //	initFunction( uniqueTypeInt, strObj, "uord8",  IN_STR_UORD8,  IN_STR_UORD8, true );

@@ -628,9 +628,8 @@ again:
 			break;
 		}
 		case IN_STREAM_PULL_BKT: {
-			Tree *stream, *str;
-			read_tree( stream );
-			read_tree( str );
+			Tree *string;
+			read_tree( string );
 
 			#ifdef COLM_LOG_BYTECODE
 			if ( colm_log_bytecode ) {
@@ -638,8 +637,7 @@ again:
 			}
 			#endif
 
-			tree_downref( prg, sp, stream );
-			tree_downref( prg, sp, str );
+			tree_downref( prg, sp, string );
 			break;
 		}
 		case IN_STREAM_PUSH_BKT: {
@@ -2363,8 +2361,8 @@ again:
 				cerr << "IN_STREAM_PULL" << endl;
 			}
 			#endif
-			Tree *len = pop();
 			Tree *stream = pop();
+			Tree *len = pop();
 			Tree *string = stream_pull( prg, fsmRun, (Stream*)stream, len );
 			tree_upref( string );
 			push( string );
@@ -2372,17 +2370,19 @@ again:
 			/* Single unit. */
 			tree_upref( string );
 			reverseCode.append( IN_STREAM_PULL_BKT );
-			reverseCode.appendWord( (Word) stream );
 			reverseCode.appendWord( (Word) string );
-			reverseCode.append( 9 );
+			rcodeUnitLen += 5;
+			reverseCode.append( rcodeUnitLen );
 
+			tree_downref( prg, sp, stream );
 			tree_downref( prg, sp, len );
 			break;
 		}
 		case IN_STREAM_PULL_BKT: {
-			Tree *stream, *string;
-			read_tree( stream );
+			Tree *string;
 			read_tree( string );
+
+			Tree *stream = pop();
 
 			#ifdef COLM_LOG_BYTECODE
 			if ( colm_log_bytecode ) {

@@ -1191,14 +1191,21 @@ struct ObjMethod
 	ObjMethod( UniqueType *returnUT, String name, 
 			int opcodeWV, int opcodeWC, int numParams, 
 			UniqueType **types, ParameterList *paramList, bool isConst )
-		: 
-			returnUT(returnUT),
-			returnTypeId(0), name(name), 
-			opcodeWV(opcodeWV), opcodeWC(opcodeWC), 
-			numParams(numParams), paramList(paramList), 
-			isConst(isConst), funcId(0), 
-			useFuncId(false), useCallObj(true), func(0), 
-			iterDef(0)
+	: 
+		returnUT(returnUT),
+		returnTypeId(0),
+		name(name), 
+		opcodeWV(opcodeWV),
+		opcodeWC(opcodeWC), 
+		numParams(numParams),
+		paramList(paramList), 
+		isConst(isConst),
+		funcId(0), 
+		useFuncId(false),
+		useCallObj(true),
+		isCustom(false),
+		func(0), 
+		iterDef(0)
 	{
 		this->paramUTs = new UniqueType*[numParams];
 		memcpy( this->paramUTs, types, sizeof(UniqueType*)*numParams );
@@ -1216,6 +1223,7 @@ struct ObjMethod
 	long funcId;
 	bool useFuncId;
 	bool useCallObj;
+	bool isCustom;
 	Function *func;
 	IterDef *iterDef;
 };
@@ -1234,6 +1242,7 @@ struct ObjField
 		isLhsEl(false), isRhsEl(false), 
 		refActive(false),
 		isArgv(false),
+		isCustom(false),
 		dirtyTree(false),
 		inGetR( IN_HALT ),
 		inGetWC( IN_HALT ),
@@ -1255,6 +1264,7 @@ struct ObjField
 	bool isRhsEl;
 	bool refActive;
 	bool isArgv;
+	bool isCustom;
 	
 	/* True if some aspect of the tree has possibly been written to. This does
 	 * not include attributes. This is here so we can optimize the storage of
@@ -1392,9 +1402,12 @@ struct LangVarRef
 	VarRefLookup lookupQualification( ParseData *pd, ObjectDef *rootDef ) const;
 	VarRefLookup lookupObj( ParseData *pd ) const;
 
+	bool isCustom( ParseData *pd ) const;
 	bool isLocalRef( ParseData *pd ) const;
 	void loadQualification( ParseData *pd, CodeVect &code, ObjectDef *rootObj, 
 			int lastPtrInQual, bool forWriting, bool revert ) const;
+	void loadCustom( ParseData *pd, CodeVect &code, 
+			int lastPtrInQual, bool forWriting ) const;
 	void loadLocalObj( ParseData *pd, CodeVect &code, 
 			int lastPtrInQual, bool forWriting ) const;
 	void loadGlobalObj( ParseData *pd, CodeVect &code, 
