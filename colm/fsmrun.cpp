@@ -171,7 +171,7 @@ void undo_stream_pull( FsmRun *fsmRun, InputStream *inputStream, const char *dat
 	fsmRun->p -= length;
 }
 
-void stream_push( InputStream *inputStream, const char *data, long length )
+void stream_push_text( InputStream *inputStream, const char *data, long length )
 {
 	#ifdef COLM_LOG_PARSE
 	if ( colm_log_parse ) {
@@ -192,25 +192,7 @@ void stream_push( InputStream *inputStream, const char *data, long length )
 	inputStream->pushBackBuf( newBuf );
 }
 
-void undo_stream_push( FsmRun *fsmRun, InputStream *inputStream, long length )
-{
-	take_back_buffered( inputStream );
-
-	if ( inputStream->queue->type == 0 ) {
-		char tmp[length];
-		int have = 0;
-		while ( have < length ) {
-			int res = inputStream->getData( tmp, length-have );
-			have += res;
-		}
-	}
-	else {
-		/* FIXME: leak here. */
-		inputStream->queue = inputStream->queue->next;
-	}
-}
-
-void stream_push( InputStream *inputStream, Tree *tree )
+void stream_push_tree( InputStream *inputStream, Tree *tree )
 {
 	#ifdef COLM_LOG_PARSE
 	if ( colm_log_parse ) {
@@ -228,7 +210,26 @@ void stream_push( InputStream *inputStream, Tree *tree )
 	newBuf->tree = tree;
 	newBuf->next = inputStream->queue;
 	inputStream->queue = newBuf;
-	tree_upref( tree );
+}
+
+void undo_stream_push( Tree **sp, FsmRun *fsmRun, InputStream *inputStream, long length )
+{
+	take_back_buffered( inputStream );
+
+	if ( inputStream->queue->type == 0 ) {
+		char tmp[length];
+		int have = 0;
+		while ( have < length ) {
+			int res = inputStream->getData( tmp, length-have );
+			have += res;
+		}
+	}
+	else {
+		/* FIXME: leak here. */
+		RunBuf *rb = inputStream->queue;
+		inputStream->queue = inputStream->queue->next;
+		tree_downref( fsmRun->prg, sp, rb->tree );
+	}
 }
 
 
@@ -401,8 +402,23 @@ void send_back( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStr
 	}
 
 	if ( input->tree->flags & AF_ARTIFICIAL ) {
-		stream_push( inputStream, input->tree );
-		send_back_ignore( sp, pdaRun, fsmRun, inputStream, tree_ignore( fsmRun->prg, input->tree ) );
+		tree_upref( input->tree );
+		stream_push_tree( inputStream, input->tree );
+
+		/* FIXME: need to undo the merge of ignore tokens. */
+		Kid *leftIgnore = 0;
+		if ( input->tree->flags & AF_LEFT_IGNORE ) {
+			leftIgnore = (Kid*)input->tree->child->tree;
+			//input->tree->flags &= ~AF_LEFT_IGNORE;
+			//input->tree->child = input->tree->child->next;
+		}
+
+		//if ( input->tree->flags & AF_RIGHT_IGNORE ) {
+		//	cerr << "need to pull out ignore" << endl;
+		//}
+
+		send_back_ignore( sp, pdaRun, fsmRun, inputStream, leftIgnore );
+		tree_downref( pdaRun->prg, sp, input->tree );
 		fsmRun->prg->kidPool.free( input );
 		///* Always push back the ignore text. */
 		//send_back_ignore( sp, pdaRun, fsmRun, inputStream, tree_ignore( fsmRun->prg, input->tree ) );

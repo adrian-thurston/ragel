@@ -313,8 +313,9 @@ void parse_token( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *p
 	if ( input == 0 )
 		goto parseError;
 
-	/* The tree we are given, must be parse tree size. */
+	/* The tree we are given must be parse tree size. It also must have a single reference. */
 	assert( input->tree->flags & AF_PARSE_TREE );
+	assert( input->tree->refs > 0 );
 
 	/* This will cause input to be lost. This 
 	 * path should be Should be traced. */
@@ -471,11 +472,6 @@ again:
 			/* Execute it. */
 			execution.execute( sp );
 
-			/* Transfer the lhs from the environment to redLel. It is uprefed
-			 * while in the environment. */
-			redLel->tree = execution.lhs;
-			redLel->tree = prep_parse_tree( pdaRun->prg, sp, redLel->tree );
-
 			/* If the lhs was saved and it changed then we need to restore the
 			 * original upon backtracking, otherwise downref since we took a
 			 * copy above. */
@@ -486,14 +482,14 @@ again:
 				}
 				#endif
 
+				/* Transfer the lhs from the environment to redLel. */
+				redLel->tree = prep_parse_tree( pdaRun->prg, sp, execution.lhs );
+				tree_upref( redLel->tree );
+				tree_downref( pdaRun->prg, sp, execution.lhs );
+
 				pdaRun->reverseCode.append( IN_RESTORE_LHS );
 				pdaRun->reverseCode.appendWord( (Word)execution.parsed );
 				pdaRun->reverseCode.append( 5 );
-			}
-			else {
-				/* No change in the the lhs. Just free the parsed copy we
-				 * took. */
-				tree_downref( pdaRun->prg, sp, execution.parsed );
 			}
 
 			/* Pull out the reverse code, if any. */

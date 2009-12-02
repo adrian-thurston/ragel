@@ -777,6 +777,7 @@ Kid *copy_ignore_list( Program *prg, Kid *ignoreHeader )
 	return newHeader;
 }
 
+/* New tree has zero ref. */
 Tree *copy_real_tree( Program *prg, Tree *tree, Kid *oldNextDown, 
 		Kid *&newNextDown, bool parseTree )
 {

@@ -98,11 +98,11 @@ Tree *prep_parse_tree( Program *prg, Tree **sp, Tree *tree )
 		#endif
 		Kid *unused = 0;
 		tree = copy_real_tree( prg, tree, 0, unused, true );
-	}
+ 	}
 	return  tree;
 }
 
-void send_tree( Program *prg, Tree **root, PdaRun *pdaRun, Tree *tree, bool ignore )
+void send_tree_from_exec( Program *prg, Tree **root, PdaRun *pdaRun, Tree *tree, bool ignore )
 {
 	tree = prep_parse_tree( prg, root, tree );
 
@@ -110,9 +110,9 @@ void send_tree( Program *prg, Tree **root, PdaRun *pdaRun, Tree *tree, bool igno
 		tree->id = prg->rtd->lelInfo[tree->id].termDupId;
 
 	tree->flags |= AF_ARTIFICIAL;
-		
-	tree_upref( tree );
 
+	tree_upref( tree );
+		
 	/* FIXME: Do we need to remove the ignore tokens 
 	 * at this point? Will it cause a leak? */
 
@@ -211,7 +211,7 @@ void call_parser_frag( Tree **&sp, Program *prg, Tree *input, Accum *accum )
 		accum->inputStream->flush = true;
 		parse_loop( sp, accum->pdaRun, accum->fsmRun, accum->inputStream );
 
-		send_tree( prg, sp, accum->pdaRun, input, false );
+		send_tree_from_exec( prg, sp, accum->pdaRun, input, false );
 		send_queued_tokens( sp, accum->pdaRun, accum->fsmRun, accum->inputStream );
 	}
 }
@@ -263,7 +263,7 @@ Word stream_push( Program *prg, Tree **&sp, Stream *stream, Tree *tree )
 	if ( tree->id == LEL_ID_STR ) {
 		std::stringstream ss;
 		print_tree( ss, sp, prg, tree );
-		stream_push( stream->in, ss.str().c_str(), ss.str().size());
+		stream_push_text( stream->in, ss.str().c_str(), ss.str().size());
 		return ss.str().size();
 	}
 	else {
@@ -273,14 +273,10 @@ Word stream_push( Program *prg, Tree **&sp, Stream *stream, Tree *tree )
 			tree->id = prg->rtd->lelInfo[tree->id].termDupId;
 
 		tree->flags |= AF_ARTIFICIAL;
-		stream_push( stream->in, tree );
+		tree_upref( tree );
+		stream_push_tree( stream->in, tree );
 		return 0;
 	}
-}
-
-void undo_stream_push( Tree **&sp, Program *prg, FsmRun *fsmRun, Stream *stream, Word len )
-{
-	undo_stream_push( fsmRun, stream->in, len );
 }
 
 void set_local( Tree **frame, long field, Tree *tree )
@@ -907,7 +903,7 @@ again:
 			 * changed and insert the instruction then. The presence of this
 			 * instruction here is just a conservative approximation.  */
 			parsed = lhs;
-			tree_upref( parsed );
+			//tree_upref( parsed );
 			break;
 		}
 		case IN_RESTORE_LHS: {
@@ -2371,8 +2367,6 @@ again:
 			break;
 		}
 		case IN_STREAM_PUSH: {
-			/* FIXME: Need to check the refcounting here. */
-
 			#ifdef COLM_LOG_BYTECODE
 			if ( colm_log_bytecode ) {
 				cerr << "IN_STREAM_PUSH" << endl;
@@ -2380,7 +2374,6 @@ again:
 			#endif
 			Tree *stream = pop();
 			Tree *tree = pop();
-			tree_upref( tree );
 			Word len = stream_push( prg, sp, ((Stream*)stream), tree );
 			push( 0 );
 
@@ -2390,6 +2383,7 @@ again:
 			rcodeUnitLen += 5;
 			reverseCode.append( rcodeUnitLen );
 
+			tree_downref( prg, sp, stream );
 			tree_downref( prg, sp, tree );
 			break;
 		}
@@ -2405,7 +2399,7 @@ again:
 			}
 			#endif
 
-			undo_stream_push( fsmRun, ((Stream*)stream)->in, len );
+			undo_stream_push( sp, fsmRun, ((Stream*)stream)->in, len );
 			tree_downref( prg, sp, stream );
 			break;
 		}
@@ -2524,7 +2518,7 @@ again:
 			#endif
 
 			Tree *tree = pop();
-			send_tree( prg, sp, pdaRun, tree, true );
+			send_tree_from_exec( prg, sp, pdaRun, tree, true );
 			push( 0 );
 
 			tree_downref( prg, sp, tree );

@@ -649,11 +649,15 @@ template <class T> T *PoolAlloc<T>::allocate()
 
 template <class T> void PoolAlloc<T>::free( T *el )
 {
-	//#ifdef COLM_LOG_BYTECODE
-	//cerr << "freeing in: " << __PRETTY_FUNCTION__ << endl;
-	//#endif
+	#if 0
+	/* Some sanity checking. Best not to normally run with this on. */
+	char *p = (char*)el + sizeof(PoolItem*);
+	char *pe = (char*)el + sizeof(T);
+	for ( ; p < pe; p++ )
+		assert( *p != 0xcc );
+	memset( el, 0xcc, sizeof(T) );
+	#endif
 
-	memset( el, 0, sizeof(T) );
 	PoolItem *pi = (PoolItem*) el;
 	pi->next = pool;
 	pool = pi;
