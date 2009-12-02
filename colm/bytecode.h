@@ -217,8 +217,6 @@ typedef unsigned char uchar;
 #define IN_PARSE_BKT             0x93
 #define IN_STREAM_PULL           0x94
 #define IN_STREAM_PULL_BKT       0x95
-#define IN_STREAM_PUSH           0x96
-#define IN_STREAM_PUSH_BKT       0x97
 #define IN_PARSE_TREE_WC         0x9a
 #define IN_PARSE_TREE_WV         0x9b
 #define IN_PARSE_FRAG_WC         0x9c
@@ -233,8 +231,8 @@ typedef unsigned char uchar;
 #define IN_TO_LOWER              0xa4
 #define IN_EXIT                  0xa5
 
-#define IN_STREAM_PUSH2          0xa6
-#define IN_STREAM_PUSH2_BKT      0xa7
+#define IN_STREAM_PUSH           0x96
+#define IN_STREAM_PUSH_BKT       0x97
 #define IN_IGNORE                0x99
 #define IN_LOAD_INPUT_R          0xa8
 #define IN_LOAD_INPUT_WV         0xa9

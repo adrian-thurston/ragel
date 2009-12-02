@@ -255,38 +255,32 @@ void undo_pull( Program *prg, FsmRun *fsmRun, Stream *stream, Tree *str )
 {
 	const char *data = string_data( ( (Str*)str )->value );
 	long length = string_length( ( (Str*)str )->value );
-//	send_back_text( fsmRun, stream->in, data, length );
 	undo_stream_pull( fsmRun, stream->in, data, length );
 }
 
-Word stream_push( Tree **&sp, Program *prg, FsmRun *fsmRun, Stream *stream, Tree *any )
+Word stream_push( Program *prg, Tree **&sp, Stream *stream, Tree *tree )
 {
-	std::stringstream ss;
-	print_tree( ss, sp, prg, any );
-	stream_push( fsmRun, stream->in, ss.str().c_str(), ss.str().size());
-	return ss.str().size();
-}
+	if ( tree->id == LEL_ID_STR ) {
+		std::stringstream ss;
+		print_tree( ss, sp, prg, tree );
+		stream_push( stream->in, ss.str().c_str(), ss.str().size());
+		return ss.str().size();
+	}
+	else {
+		tree = prep_parse_tree( prg, sp, tree );
 
-Word stream_push2( Program *prg, Tree **&sp, FsmRun *fsmRun, InputStream *inputStream, Tree *tree )
-{
-	tree = prep_parse_tree( prg, sp, tree );
+		if ( tree->id >= prg->rtd->firstNonTermId )
+			tree->id = prg->rtd->lelInfo[tree->id].termDupId;
 
-	if ( tree->id >= prg->rtd->firstNonTermId )
-		tree->id = prg->rtd->lelInfo[tree->id].termDupId;
-
-	tree->flags |= AF_ARTIFICIAL;
-	stream_push( fsmRun, inputStream, tree );
-	return 0;
+		tree->flags |= AF_ARTIFICIAL;
+		stream_push( stream->in, tree );
+		return 0;
+	}
 }
 
 void undo_stream_push( Tree **&sp, Program *prg, FsmRun *fsmRun, Stream *stream, Word len )
 {
 	undo_stream_push( fsmRun, stream->in, len );
-}
-
-void undo_stream_push( Tree **&sp, Program *prg, FsmRun *fsmRun, Stream *stream )
-{
-	undo_stream_push( fsmRun, stream->in );
 }
 
 void set_local( Tree **frame, long field, Tree *tree )
@@ -641,9 +635,7 @@ again:
 			break;
 		}
 		case IN_STREAM_PUSH_BKT: {
-			Tree *stream;
 			Word len;
-			read_tree( stream );
 			read_word( len );
 
 			#ifdef COLM_LOG_BYTECODE
@@ -651,23 +643,6 @@ again:
 				cerr << "IN_STREAM_PUSH_BKT" << endl;
 			}
 			#endif
-
-			tree_downref( prg, sp, stream );
-			break;
-		}
-		case IN_STREAM_PUSH2_BKT: {
-			Tree *stream;
-			Word len;
-			read_tree( stream );
-			read_word( len );
-
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode ) {
-				cerr << "IN_STREAM_PUSH2_BKT" << endl;
-			}
-			#endif
-
-			//tree_downref( prg, sp, stream );
 			break;
 		}
 		case IN_LOAD_GLOBAL_BKT: {
@@ -2403,26 +2378,26 @@ again:
 				cerr << "IN_STREAM_PUSH" << endl;
 			}
 			#endif
-			Tree *tree = pop();
 			Tree *stream = pop();
-			Word len = stream_push( sp, prg, 
-					fsmRun, (Stream*)stream, tree );
+			Tree *tree = pop();
+			tree_upref( tree );
+			Word len = stream_push( prg, sp, ((Stream*)stream), tree );
 			push( 0 );
 
 			/* Single unit. */
 			reverseCode.append( IN_STREAM_PUSH_BKT );
-			reverseCode.appendWord( (Word)stream );
 			reverseCode.appendWord( len );
-			reverseCode.append( 9 );
+			rcodeUnitLen += 5;
+			reverseCode.append( rcodeUnitLen );
 
 			tree_downref( prg, sp, tree );
 			break;
 		}
 		case IN_STREAM_PUSH_BKT: {
-			Tree *stream;
 			Word len;
-			read_tree( stream );
 			read_word( len );
+
+			Tree *stream = pop();
 
 			#ifdef COLM_LOG_BYTECODE
 			if ( colm_log_bytecode ) {
@@ -2430,47 +2405,8 @@ again:
 			}
 			#endif
 
-			undo_stream_push( sp, prg, fsmRun, (Stream*)stream, len );
+			undo_stream_push( fsmRun, ((Stream*)stream)->in, len );
 			tree_downref( prg, sp, stream );
-			break;
-		}
-		case IN_STREAM_PUSH2: {
-			/* FIXME: Need to check the refcounting here. */
-
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode ) {
-				cerr << "IN_STREAM_PUSH2" << endl;
-			}
-			#endif
-			Tree *tree = pop();
-			Tree *stream = pop();
-			tree_upref( tree );
-			stream_push2( prg, sp, fsmRun, ((Stream*)stream)->in, tree );
-			push( 0 );
-
-			/* Single unit. */
-			reverseCode.append( IN_STREAM_PUSH2_BKT );
-			reverseCode.appendWord( (Word)((Stream*)stream)->in );
-			reverseCode.appendWord( 0 );
-			reverseCode.append( 9 );
-
-			tree_downref( prg, sp, tree );
-			break;
-		}
-		case IN_STREAM_PUSH2_BKT: {
-			Tree *stream;
-			Word len;
-			read_tree( stream );
-			read_word( len );
-
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode ) {
-				cerr << "IN_STREAM_PUSH2_BKT" << endl;
-			}
-			#endif
-
-			undo_stream_push( fsmRun, (InputStream*)stream );
-			//tree_downref( prg, sp, stream );
 			break;
 		}
 		case IN_PARSE_BKT: {

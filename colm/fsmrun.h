@@ -75,7 +75,12 @@ struct FsmTables
 struct RunBuf
 {
 	RunBuf()
-		:type(0) {}
+	:
+		type(0),
+		length(0),
+		offset(0),
+		next(0)
+	{}
 
 	char buf[FSM_BUFSIZE];
 	long type;
@@ -122,11 +127,11 @@ long scan_token( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
 void send_back_text( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length );
 
 Head *stream_pull( Program *prg, FsmRun *fsmRun, InputStream *inputStream, long length );
-void stream_push( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length );
-void stream_push( FsmRun *fsmRun, InputStream *inputStream, Tree *tree );
-void undo_stream_push( FsmRun *fsmRun, InputStream *inputStream, long length );
-void undo_stream_push( FsmRun *fsmRun, InputStream *inputStream );
+void stream_push( InputStream *inputStream, const char *data, long length );
+void stream_push( InputStream *inputStream, Tree *tree );
 void undo_stream_pull( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length );
+void undo_stream_push( FsmRun *fsmRun, InputStream *inputStream );
+void undo_stream_push( FsmRun *fsmRun, InputStream *inputStream, long length );
 
 void send_named_lang_el( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
 Kid *make_token( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, int id,

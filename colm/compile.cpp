@@ -2152,15 +2152,7 @@ void ParseData::initStreamObject( )
 	streamKlangEl->objectDef = streamObj;
 
 	initFunction( uniqueTypeStr, streamObj, "pull",  IN_STREAM_PULL, IN_STREAM_PULL, uniqueTypeInt, false );
-
-//	initFunction( uniqueTypeInt, strObj, "atoi",   IN_STR_ATOI, IN_STR_ATOI, true );
-//	initFunction( uniqueTypeInt, strObj, "uord8",  IN_STR_UORD8,  IN_STR_UORD8, true );
-//	initFunction( uniqueTypeInt, strObj, "sord8",  IN_STR_SORD8,  IN_STR_SORD8, true );
-//	initFunction( uniqueTypeInt, strObj, "uord16", IN_STR_UORD16, IN_STR_UORD16, true );
-//	initFunction( uniqueTypeInt, strObj, "sord16", IN_STR_SORD16, IN_STR_SORD16, true );
-//	initFunction( uniqueTypeInt, strObj, "uord32", IN_STR_UORD32, IN_STR_UORD32, true );
-//	initFunction( uniqueTypeInt, strObj, "sord32", IN_STR_SORD32, IN_STR_SORD32, true );
-//	addLengthField( strObj, IN_STR_LENGTH );
+	initFunction( uniqueTypeStr, streamObj, "push",  IN_STREAM_PUSH, IN_STREAM_PUSH, uniqueTypeAny, false );
 }
 
 ObjField *ParseData::makeDataEl()
@@ -2340,12 +2332,6 @@ void ParseData::compileTranslateBlock( KlangEl *langEl )
 	addMatchLength( curLocalFrame, langEl );
 	addMatchText( curLocalFrame, langEl );
 	addInput( curLocalFrame, langEl );
-	initFunction( uniqueTypeStr, curLocalFrame, "pull",
-			IN_STREAM_PULL, IN_STREAM_PULL, uniqueTypeStream, uniqueTypeInt, true );
-	initFunction( uniqueTypeInt, curLocalFrame, "push",
-			IN_STREAM_PUSH, IN_STREAM_PUSH, uniqueTypeStream, uniqueTypeAny, true );
-	initFunction( uniqueTypeInt, curLocalFrame, "push2",
-			IN_STREAM_PUSH2, IN_STREAM_PUSH2, uniqueTypeStream, uniqueTypeAny, true );
 
 //	initFunction( uniqueTypeInt, curLocalFrame, "send",
 //			IN_SEND, IN_SEND, uniqueTypeAny, true );

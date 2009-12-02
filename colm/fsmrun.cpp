@@ -171,7 +171,7 @@ void undo_stream_pull( FsmRun *fsmRun, InputStream *inputStream, const char *dat
 	fsmRun->p -= length;
 }
 
-void stream_push( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length )
+void stream_push( InputStream *inputStream, const char *data, long length )
 {
 	#ifdef COLM_LOG_PARSE
 	if ( colm_log_parse ) {
@@ -186,8 +186,6 @@ void stream_push( FsmRun *fsmRun, InputStream *inputStream, const char *data, lo
 	 * data that can be pushed back to the inputStream. */
 	assert( length < FSM_BUFSIZE );
 	RunBuf *newBuf = new RunBuf;
-	newBuf->next = fsmRun->runBuf;
-	newBuf->offset = 0;
 	newBuf->length = length;
 	memcpy( newBuf->buf, data, length );
 
@@ -198,23 +196,21 @@ void undo_stream_push( FsmRun *fsmRun, InputStream *inputStream, long length )
 {
 	take_back_buffered( inputStream );
 
-	char tmp[length];
-	int have = 0;
-	while ( have < length ) {
-		int res = inputStream->getData( tmp, length-have );
-		have += res;
+	if ( inputStream->queue->type == 0 ) {
+		char tmp[length];
+		int have = 0;
+		while ( have < length ) {
+			int res = inputStream->getData( tmp, length-have );
+			have += res;
+		}
+	}
+	else {
+		/* FIXME: leak here. */
+		inputStream->queue = inputStream->queue->next;
 	}
 }
 
-void undo_stream_push( FsmRun *fsmRun, InputStream *inputStream )
-{
-	take_back_buffered( inputStream );
-	assert( inputStream->queue->type == 1 );
-	/* FIXME: leak here. */
-	inputStream->queue = inputStream->queue->next;
-}
-
-void stream_push( FsmRun *fsmRun, InputStream *inputStream, Tree *tree )
+void stream_push( InputStream *inputStream, Tree *tree )
 {
 	#ifdef COLM_LOG_PARSE
 	if ( colm_log_parse ) {
@@ -228,9 +224,6 @@ void stream_push( FsmRun *fsmRun, InputStream *inputStream, Tree *tree )
 	 * Something better is needed here. It puts a max on the amount of
 	 * data that can be pushed back to the inputStream. */
 	RunBuf *newBuf = new RunBuf;
-	newBuf->next = fsmRun->runBuf;
-	newBuf->offset = 0;
-	newBuf->length = 0;
 	newBuf->type = 1;
 	newBuf->tree = tree;
 	newBuf->next = inputStream->queue;
@@ -408,7 +401,7 @@ void send_back( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStr
 	}
 
 	if ( input->tree->flags & AF_ARTIFICIAL ) {
-		stream_push( fsmRun, inputStream, input->tree );
+		stream_push( inputStream, input->tree );
 		send_back_ignore( sp, pdaRun, fsmRun, inputStream, tree_ignore( fsmRun->prg, input->tree ) );
 		fsmRun->prg->kidPool.free( input );
 		///* Always push back the ignore text. */
