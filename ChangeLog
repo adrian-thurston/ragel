@@ -1,3 +1,30 @@
+Ragel 6.6 - Dec 2, 2009
+=======================
+ -Applied a number of patches from Diego Elio 'Flameeyes' Pettenò. Should not
+  be modifying the program's arguments. Problem raised by const correctness in
+  gcc 4.4. Other const-correctness and include fixes provided.
+ -Fixed improper allocation of checks in makeIncludePathChecks.
+ -Fixed segfault when there are no machine instantiations.
+ -Fixed wrong line directives. Line directives need to use the fileName stored
+  in the InputLoc stuctures from the parse trees, not the root source file,
+  otherwise actions in included files will have the wrong source file names
+  associated with the text.
+ -Made a number of build system improvements. We locate the DIST file using
+  $srcdir and source it. It contains settings for build_parsers and
+  build_manual. This allows the user of a dist to enable only one.
+ -Added missing files to doc/Makefile.am and examples/Makefile.am.
+ -Added checks for pdflatex and fig2dev is build_manual is on.
+ -Use automake --foreign so we don't need to have INSTALL and NEWS present.
+ -Ragel VIM syntax files should be specialized by host language. Updated the
+  VIM syntax files.
+ -Just discovered that $srcdir is available in the configure script for
+  checking for the existence of a file created by dist-hook. This lets us write
+  a test that knows the difference between a distribution tarball and something
+  from the repos. The building of the parsers and the manual can now be
+  automatically turned off in a make dist tarball.
+ -Added examples to the dist. Added unicode2ragel.rb to EXTRA_DIST in contrib.
+ -Moved unicode2ragel.rb to the contrib directory.
+
 Ragel 6.5 - May 18, 2009
 ========================
  -Fixed a bug in graphviz generation. Ragel crashed when using -V and -M and
