@@ -17,11 +17,6 @@ Ragel 6.6 - Dec 2, 2009
  -Use automake --foreign so we don't need to have INSTALL and NEWS present.
  -Ragel VIM syntax files should be specialized by host language. Updated the
   VIM syntax files.
- -Just discovered that $srcdir is available in the configure script for
-  checking for the existence of a file created by dist-hook. This lets us write
-  a test that knows the difference between a distribution tarball and something
-  from the repos. The building of the parsers and the manual can now be
-  automatically turned off in a make dist tarball.
  -Added examples to the dist. Added unicode2ragel.rb to EXTRA_DIST in contrib.
  -Moved unicode2ragel.rb to the contrib directory.
 
