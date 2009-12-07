@@ -20,12 +20,22 @@ AC_DEFUN([CHECK_RAGEL], [
 
   dnl We set RAGEL to false so that it would execute the "false"
   dnl command if needed.
-  AS_IF([test x"$RAGEL" = x"no"], [RAGEL=false])
+  AS_IF([test x"$RAGEL" = x"no"],
+        [RAGEL=false],
+	AS_IF([test x"$2" != "x"],
+	      [ragel_version=`$RAGEL --version | sed -n -e '1s:.*version \(@<:@0-9@:>@\.@<:@0-9@:>@\) .*:\1:p'`
+	       ragel_version_compare=`echo $ragel_version | tr -d .`
+	       ragel_wanted_version=`echo $2 | tr -d .`
+	       AS_IF([test $ragel_version_compare -lt $ragel_wanted_version],
+	             [AC_MSG_WARN([Found Ragel $ragel_version but Ragel $2 requested])
+		      RAGEL=false
+		     ])
+	      ]))
 
   dnl Only test the need if not found
   AS_IF([test x"$RAGEL" = x"false"], [
     AC_MSG_CHECKING([whether we need ragel to regenerate sources])
-    AS_IF([test -a ${srcdir}/$1], [ragel_needed=no], [ragel_needed=yes])
+    AS_IF([test -a "${srcdir}/$1"], [ragel_needed=no], [ragel_needed=yes])
     AC_MSG_RESULT([$ragel_needed])
 
     AS_IF([test x"$ragel_needed" = x"yes"],
@@ -37,7 +47,7 @@ You can find Ragel at http://www.complang.org/ragel/dnl
 ])
 
 AC_DEFUN([CHECK_RAGEL_AM], [
-  CHECK_RAGEL([$1])
+  CHECK_RAGEL([$1], [$2])
 
   AM_CONDITIONAL([HAVE_RAGEL], [test x"$RAGEL" != x"false"])
 ])
