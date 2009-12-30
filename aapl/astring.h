@@ -444,10 +444,15 @@ template<class T> StrTmpl<T>::StrTmpl( long lenGuess, const char *format, ... )
 	/* Write to the temporary buffer. */
 	va_start( args, format );
 
+	va_start( args, format );
 	long written = vsnprintf( data, lenGuess+1, format, args );
+	va_end( args );
+
 	if ( written > lenGuess ) {
 		setSpace( written );
+		va_start( args, format );
 		written = vsnprintf( data, written+1, format, args );
+		va_end( args );
 	}
 	chop( written );
 
