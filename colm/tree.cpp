@@ -1532,28 +1532,36 @@ Tree *tree_iter_prev_repeat( Program *prg, Tree **&sp, TreeIter *iter )
 	return (iter->ref.kid ? prg->trueVal : prg->falseVal );
 }
 
-Tree *tree_search( Kid *kid, long id )
+Tree *tree_search( Program *prg, Kid *kid, long id )
 {
+	/* This node the one? */
 	if ( kid->tree->id == id )
 		return kid->tree;
 
 	Tree *res = 0;
-	if ( kid->tree->child != 0 )
-		res = tree_search( kid->tree->child, id );
+
+	/* Search children. */
+	Kid *child = tree_child( prg, kid->tree );
+	if ( child != 0 )
+		res = tree_search( prg, child, id );
 	
+	/* Search siblings. */
 	if ( res == 0 && kid->next != 0 )
-		res = tree_search( kid->next, id );
+		res = tree_search( prg, kid->next, id );
 
 	return res;	
 }
 
-Tree *tree_search( Tree *tree, long id )
+Tree *tree_search( Program *prg, Tree *tree, long id )
 {
 	Tree *res = 0;
 	if ( tree->id == id )
 		res = tree;
-	else if ( tree->child != 0 )
-		res = tree_search( tree->child, id );
+	else {
+		Kid *child = tree_child( prg, tree );
+		if ( child != 0 )
+			res = tree_search( prg, child, id );
+	}
 	return res;
 }
 

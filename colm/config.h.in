@@ -43,5 +43,7 @@ extern int colm_log_match;
 extern int colm_log_compile;
 extern int colm_log_conds;
 
+/* The size of `long', as computed by sizeof. */
+#undef SIZEOF_LONG
 
 #endif /* _CONFIG_H */

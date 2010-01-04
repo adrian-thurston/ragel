@@ -58,21 +58,51 @@ using std::string;
 	i |= ((Word) p[3]) << 24; \
 } while(0)
 
-#define read_word( i ) do { \
-	i = ((Word) *instr++); \
-	i |= ((Word) *instr++) << 8; \
-	i |= ((Word) *instr++) << 16; \
-	i |= ((Word) *instr++) << 24; \
-} while(0)
+/* There are better ways. */
+#if SIZEOF_LONG == 4
+	#define read_word( i ) do { \
+		i = ((Word) *instr++); \
+		i |= ((Word) *instr++) << 8; \
+		i |= ((Word) *instr++) << 16; \
+		i |= ((Word) *instr++) << 24; \
+	} while(0)
+#else
+	#define read_word( i ) do { \
+		i = ((Word) *instr++); \
+		i |= ((Word) *instr++) << 8; \
+		i |= ((Word) *instr++) << 16; \
+		i |= ((Word) *instr++) << 24; \
+		i |= ((Word) *instr++) << 32; \
+		i |= ((Word) *instr++) << 40; \
+		i |= ((Word) *instr++) << 48; \
+		i |= ((Word) *instr++) << 56; \
+	} while(0)
+#endif
 
-#define read_tree( i ) do { \
-	Word w; \
-	w = ((Word) *instr++); \
-	w |= ((Word) *instr++) << 8; \
-	w |= ((Word) *instr++) << 16; \
-	w |= ((Word) *instr++) << 24; \
-	i = (Tree*) w; \
-} while(0)
+/* There are better ways. */
+#if SIZEOF_LONG == 4
+	#define read_tree( i ) do { \
+		Word w; \
+		w = ((Word) *instr++); \
+		w |= ((Word) *instr++) << 8; \
+		w |= ((Word) *instr++) << 16; \
+		w |= ((Word) *instr++) << 24; \
+		i = (Tree*) w; \
+	} while(0)
+#else
+	#define read_tree( i ) do { \
+		Word w; \
+		w = ((Word) *instr++); \
+		w |= ((Word) *instr++) << 8; \
+		w |= ((Word) *instr++) << 16; \
+		w |= ((Word) *instr++) << 24; \
+		w |= ((Word) *instr++) << 32; \
+		w |= ((Word) *instr++) << 40; \
+		w |= ((Word) *instr++) << 48; \
+		w |= ((Word) *instr++) << 56; \
+		i = (Tree*) w; \
+	} while(0)
+#endif
 
 #define read_half( i ) do { \
 	i = ((Word) *instr++); \
@@ -564,19 +594,19 @@ void rcode_downref_all( Program *prg, Tree **sp, CodeVect *rev )
 {
 	while ( rev->length() > 0 ) {
 		/* Read the length */
-		Code *prcode = rev->data + rev->length() - 4;
+		Code *prcode = rev->data + rev->length() - SIZEOF_WORD;
 		Word len;
 		read_word_p( len, prcode );
 
 		/* Find the start of block. */
-		long start = rev->length() - len - 4;
+		long start = rev->length() - len - SIZEOF_WORD;
 		prcode = rev->data + start;
 
 		/* Execute it. */
 		rcode_downref( prg, sp, prcode );
 
 		/* Backup over it. */
-		rev->tabLen -= len + 4;
+		rev->tabLen -= len + SIZEOF_WORD;
 	}
 }
 
@@ -868,12 +898,12 @@ bool make_reverse_code( CodeVect *all, CodeVect &reverseCode )
 void Execution::rexecute( Tree **root, CodeVect *allRev )
 {
 	/* Read the length */
-	Code *prcode = allRev->data + allRev->length() - 4;
+	Code *prcode = allRev->data + allRev->length() - SIZEOF_WORD;
 	Word len;
 	read_word_p( len, prcode );
 
 	/* Find the start of block. */
-	long start = allRev->length() - len - 4;
+	long start = allRev->length() - len - SIZEOF_WORD;
 	prcode = allRev->data + start;
 
 	/* Execute it. */
@@ -882,7 +912,7 @@ void Execution::rexecute( Tree **root, CodeVect *allRev )
 	assert( sp == root );
 
 	/* Backup over it. */
-	allRev->tabLen -= len + 4;
+	allRev->tabLen -= len + SIZEOF_WORD;
 }
 
 void Execution::execute( Tree **&sp, Code *instr )
@@ -1071,7 +1101,7 @@ again:
 
 			/* Set up the reverse instruction. */
 			reverseCode.append( IN_LOAD_GLOBAL_BKT );
-			rcodeUnitLen = 1;
+			rcodeUnitLen = SIZEOF_CODE;
 			break;
 		}
 		case IN_LOAD_GLOBAL_WC: {
@@ -1121,7 +1151,7 @@ again:
 
 			/* Set up the reverse instruction. */
 			reverseCode.append( IN_LOAD_INPUT_BKT );
-			rcodeUnitLen = 1;
+			rcodeUnitLen = SIZEOF_CODE;
 			break;
 		}
 		case IN_LOAD_INPUT_WC: {
@@ -1426,7 +1456,7 @@ again:
 			/* Set up the reverse instruction. */
 			reverseCode.append( IN_GET_FIELD_BKT );
 			reverseCode.appendHalf( field );
-			rcodeUnitLen += 3;
+			rcodeUnitLen += SIZEOF_CODE + SIZEOF_HALF;
 			break;
 		}
 		case IN_GET_FIELD_BKT: {
@@ -1490,7 +1520,7 @@ again:
 			reverseCode.append( IN_SET_FIELD_BKT );
 			reverseCode.appendHalf( field );
 			reverseCode.appendWord( (Word)prev );
-			rcodeUnitLen += 7;
+			rcodeUnitLen += SIZEOF_CODE + SIZEOF_HALF + SIZEOF_WORD;
 			reverseCode.append( rcodeUnitLen );
 			/* FLUSH */
 			break;
@@ -2042,7 +2072,7 @@ again:
 			#endif
 
 			Tree *tree = pop();
-			Tree *res = tree_search( tree, id );
+			Tree *res = tree_search( prg, tree, id );
 			tree_upref( res );
 			push( res );
 			tree_downref( prg, sp, tree );
@@ -2254,7 +2284,7 @@ again:
 			reverseCode.appendWord( (Word) stream );
 			reverseCode.appendWord( (Word) ret.tree );
 			reverseCode.appendWord( (Word) cv );
-			reverseCode.append( 19 );
+			reverseCode.append( SIZEOF_CODE + SIZEOF_HALF + SIZEOF_WORD*4 );
 			break;
 		}
 		case IN_PARSE_WC: {
@@ -2342,7 +2372,7 @@ again:
 			tree_upref( string );
 			reverseCode.append( IN_STREAM_PULL_BKT );
 			reverseCode.appendWord( (Word) string );
-			rcodeUnitLen += 5;
+			rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
 			reverseCode.append( rcodeUnitLen );
 
 			tree_downref( prg, sp, stream );
@@ -2380,7 +2410,7 @@ again:
 			/* Single unit. */
 			reverseCode.append( IN_STREAM_PUSH_BKT );
 			reverseCode.appendWord( len );
-			rcodeUnitLen += 5;
+			rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
 			reverseCode.append( rcodeUnitLen );
 
 			tree_downref( prg, sp, stream );
@@ -2585,7 +2615,7 @@ again:
 			/* This is an initial global load. Need to reverse execute it. */
 			reverseCode.append( IN_PTR_DEREF_BKT );
 			reverseCode.appendWord( (Word) ptr );
-			rcodeUnitLen = 5;
+			rcodeUnitLen = SIZEOF_CODE + SIZEOF_WORD;
 			break;
 		}
 		case IN_PTR_DEREF_BKT: {
@@ -2740,7 +2770,7 @@ again:
 			/* Set up reverse code. Needs no args. */
 			reverseCode.append( IN_SET_TOKEN_DATA_BKT );
 			reverseCode.appendWord( (Word)oldval );
-			rcodeUnitLen += 5;
+			rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
 			reverseCode.append( rcodeUnitLen );
 
 			tree_downref( prg, sp, tree );
@@ -2836,7 +2866,7 @@ again:
 
 			/* Set up reverse code. Needs no args. */
 			reverseCode.append( IN_LIST_APPEND_BKT );
-			rcodeUnitLen += 1;
+			rcodeUnitLen += SIZEOF_CODE;
 			reverseCode.append( rcodeUnitLen );
 			/* FLUSH */
 			break;
@@ -2904,7 +2934,7 @@ again:
 			tree_upref( end );
 			reverseCode.append( IN_LIST_REMOVE_END_BKT );
 			reverseCode.appendWord( (Word)end );
-			rcodeUnitLen += 5;
+			rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
 			reverseCode.append( rcodeUnitLen );
 			/* FLUSH */
 			break;
@@ -2981,7 +3011,7 @@ again:
 			/* Set up the reverse instruction. */
 			reverseCode.append( IN_GET_LIST_MEM_BKT );
 			reverseCode.appendHalf( field );
-			rcodeUnitLen += 3;
+			rcodeUnitLen += SIZEOF_CODE + SIZEOF_HALF;
 			break;
 		}
 		case IN_GET_LIST_MEM_BKT: {
@@ -3040,7 +3070,7 @@ again:
 			reverseCode.append( IN_SET_LIST_MEM_BKT );
 			reverseCode.appendHalf( field );
 			reverseCode.appendWord( (Word)existing );
-			rcodeUnitLen += 7;
+			rcodeUnitLen += SIZEOF_CODE + SIZEOF_HALF + SIZEOF_WORD;
 			reverseCode.append( rcodeUnitLen );
 			/* FLUSH */
 			break;
@@ -3091,7 +3121,7 @@ again:
 			reverseCode.append( IN_MAP_INSERT_BKT );
 			reverseCode.append( inserted );
 			reverseCode.appendWord( (Word)key );
-			rcodeUnitLen += 6;
+			rcodeUnitLen += SIZEOF_CODE + SIZEOF_CODE + SIZEOF_WORD;
 			reverseCode.append( rcodeUnitLen );
 
 			if ( ! inserted ) {
@@ -3192,7 +3222,7 @@ again:
 			reverseCode.append( IN_MAP_STORE_BKT );
 			reverseCode.appendWord( (Word)key );
 			reverseCode.appendWord( (Word)existing );
-			rcodeUnitLen += 9;
+			rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD + SIZEOF_WORD;
 			reverseCode.append( rcodeUnitLen );
 			/* FLUSH */
 
@@ -3261,7 +3291,7 @@ again:
 			reverseCode.append( IN_MAP_REMOVE_BKT );
 			reverseCode.appendWord( (Word)pair.key );
 			reverseCode.appendWord( (Word)pair.val );
-			rcodeUnitLen += 9;
+			rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD + SIZEOF_WORD;
 			reverseCode.append( rcodeUnitLen );
 
 			tree_downref( prg, sp, obj );

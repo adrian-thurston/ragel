@@ -143,7 +143,7 @@ bool been_committed( Kid *kid )
 Code *backup_over_rcode( Code *rcode )
 {
 	Word len;
-	rcode -= 4;
+	rcode -= SIZEOF_WORD;
 	read_word_p( len, rcode );
 	rcode -= len;
 	return rcode;
@@ -489,7 +489,7 @@ again:
 
 				pdaRun->reverseCode.append( IN_RESTORE_LHS );
 				pdaRun->reverseCode.appendWord( (Word)execution.parsed );
-				pdaRun->reverseCode.append( 5 );
+				pdaRun->reverseCode.append( SIZEOF_CODE + SIZEOF_WORD );
 			}
 
 			/* Pull out the reverse code, if any. */

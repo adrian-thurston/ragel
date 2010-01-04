@@ -258,7 +258,7 @@ typedef unsigned char uchar;
 
 /* Virtual machine stack size, number of pointers. 
  * This will be mmapped. */
-#define VM_STACK_SIZE (4*1024ll*1024ll) 
+#define VM_STACK_SIZE (SIZEOF_WORD*1024ll*1024ll) 
 
 /* Known language element ids. */
 #define LEL_ID_PTR    1
@@ -364,6 +364,12 @@ typedef unsigned char Code;
 typedef unsigned long Word;
 typedef unsigned long Half;
 
+/* Can't use sizeof() because we have used types that are bigger than the
+ * serial representation. */
+#define SIZEOF_CODE 1
+#define SIZEOF_HALF 2
+#define SIZEOF_WORD sizeof(Word)
+
 typedef Tree *SW;
 typedef Tree **StackPtr;
 typedef Tree **&StackRef;
@@ -402,6 +408,12 @@ struct CodeVect : public RtVector<Code>
 		append( (word>>8) & 0xff );
 		append( (word>>16) & 0xff );
 		append( (word>>24) & 0xff );
+		#if SIZEOF_LONG == 8
+		append( (word>>32) & 0xff );
+		append( (word>>40) & 0xff );
+		append( (word>>48) & 0xff );
+		append( (word>>56) & 0xff );
+		#endif
 	}
 
 	void setHalf( long pos, Half half )
@@ -420,11 +432,17 @@ struct CodeVect : public RtVector<Code>
 
 	void insertWord( long pos, Word word )
 	{
-		/* not optimal. */
+		/* not at all optimal. */
 		insert( pos, word & 0xff );
 		insert( pos+1, (word>>8) & 0xff );
 		insert( pos+2, (word>>16) & 0xff );
 		insert( pos+3, (word>>24) & 0xff );
+		#if SIZEOF_LONG == 8
+		insert( pos+4, (word>>32) & 0xff );
+		insert( pos+5, (word>>40) & 0xff );
+		insert( pos+6, (word>>48) & 0xff );
+		insert( pos+7, (word>>56) & 0xff );
+		#endif
 	}
 	
 	void insertTree( long pos, Tree *tree )
@@ -566,8 +584,8 @@ Tree *tree_iter_deref_cur( TreeIter *iter );
 void set_triter_cur( TreeIter *iter, Tree *tree );
 void split_iter_cur( Tree **&sp, Program *prg, TreeIter *iter );
 void ref_set_value( Ref *ref, Tree *v );
-Tree *tree_search( Kid *kid, long id );
-Tree *tree_search( Tree *tree, long id );
+Tree *tree_search( Program *prg, Kid *kid, long id );
+Tree *tree_search( Program *prg, Tree *tree, long id );
 void split_ref( Tree **&sp, Program *prg, Ref *fromRef );
 long tree_num_children( Program *prg, Tree *tree );
 
