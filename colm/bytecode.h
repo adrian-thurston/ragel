@@ -530,7 +530,7 @@ Stream *open_stream( Program *prg, FILE *file );
 
 void tree_downref( Program *prg, Tree **sp, Tree *tree );
 void tree_upref( Tree *tree );
-Kid *tree_child( Program *prg, Tree *tree );
+Kid *tree_child( Program *prg, const Tree *tree );
 Kid *tree_extract_child( Program *prg, Tree *tree );
 Kid *tree_ignore( Program *prg, Tree *tree );
 Kid *kid_list_concat( Kid *list1, Kid *list2 );
@@ -556,7 +556,7 @@ Tree *get_list_mem( List *list, Word field );
 Tree *get_list_mem_split( Program *prg, List *list, Word field );
 Tree *set_list_mem( List *list, Half field, Tree *value );
 
-Tree *map_find( Map *map, Tree *key );
+Tree *map_find( Program *prg, Map *map, Tree *key );
 long map_length( Map *map );
 bool map_insert( Program *prg, Map *map, Tree *key, Tree *element );
 void map_unremove( Program *prg, Map *map, Tree *key, Tree *element );
@@ -604,7 +604,7 @@ struct GenericInfo
 	long parserId;
 };
 
-long cmp_tree( const Tree *tree1, const Tree *tree2 );
+long cmp_tree( Program *prg, const Tree *tree1, const Tree *tree2 );
 
 /*
  * Runtime environment

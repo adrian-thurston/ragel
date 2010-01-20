@@ -1153,7 +1153,7 @@ void tree_downref( Program *prg, Tree **sp, Tree *tree )
 }
 
 /* Find the first child of a tree. */
-Kid *tree_child( Program *prg, Tree *tree )
+Kid *tree_child( Program *prg, const Tree *tree )
 {
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
 	Kid *kid = tree->child;
@@ -1587,7 +1587,7 @@ void map_unremove( Program *prg, Map *map, Tree *key, Tree *element )
 
 Tree *map_uninsert( Program *prg, Map *map, Tree *key )
 {
-	MapEl *el = map->detach( key );
+	MapEl *el = map->detach( prg, key );
 	Tree *val = el->tree;
 	prg->mapElPool.free( el );
 	return val;
@@ -1614,21 +1614,21 @@ Tree *map_unstore( Program *prg, Map *map, Tree *key, Tree *existing )
 {
 	Tree *stored = 0;
 	if ( existing == 0 ) {
-		MapEl *mapEl = map->detach( key );
+		MapEl *mapEl = map->detach( prg, key );
 		stored = mapEl->tree;
 		prg->mapElPool.free( mapEl );
 	}
 	else {
-		MapEl *mapEl = map->find( key );
+		MapEl *mapEl = map->find( prg, key );
 		stored = mapEl->tree;
 		mapEl->tree = existing;
 	}
 	return stored;
 }
 
-Tree *map_find( Map *map, Tree *key )
+Tree *map_find( Program *prg, Map *map, Tree *key )
 {
-	MapEl *mapEl = map->find( key );
+	MapEl *mapEl = map->find( prg, key );
 	return mapEl == 0 ? 0 : mapEl->tree;
 }
 
@@ -1720,10 +1720,10 @@ Tree *set_list_mem( List *list, Half field, Tree *value )
 
 TreePair map_remove( Program *prg, Map *map, Tree *key )
 {
-	MapEl *mapEl = map->find( key );
+	MapEl *mapEl = map->find( prg, key );
 	TreePair result;
 	if ( mapEl != 0 ) {
-		map->detach( mapEl );
+		map->detach( prg, mapEl );
 		result.key = mapEl->key;
 		result.val = mapEl->tree;
 		prg->mapElPool.free( mapEl );
@@ -1800,7 +1800,7 @@ void split_iter_cur( Tree **&sp, Program *prg, TreeIter *iter )
 	split_ref( sp, prg, &iter->ref );
 }
 
-long cmp_tree( const Tree *tree1, const Tree *tree2 )
+long cmp_tree( Program *prg, const Tree *tree1, const Tree *tree2 )
 {
 	long cmpres = 0;
 	if ( tree1 == 0 ) {
@@ -1844,8 +1844,8 @@ long cmp_tree( const Tree *tree1, const Tree *tree2 )
 		}
 	}
 
-	Kid *kid1 = tree1->child;
-	Kid *kid2 = tree2->child;
+	Kid *kid1 = tree_child( prg, tree1 );
+	Kid *kid2 = tree_child( prg, tree2 );
 
 	while ( true ) {
 		if ( kid1 == 0 && kid2 == 0 )
@@ -1855,7 +1855,7 @@ long cmp_tree( const Tree *tree1, const Tree *tree2 )
 		else if ( kid1 != 0 && kid2 == 0 )
 			return 1;
 		else {
-			cmpres = cmp_tree( kid1->tree, kid2->tree );
+			cmpres = cmp_tree( prg, kid1->tree, kid2->tree );
 			if ( cmpres != 0 )
 				return cmpres;
 		}

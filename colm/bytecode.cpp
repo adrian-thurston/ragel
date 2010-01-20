@@ -1772,7 +1772,7 @@ again:
 
 			Tree *o2 = pop();
 			Tree *o1 = pop();
-			long r = cmp_tree( o1, o2 );
+			long r = cmp_tree( prg, o1, o2 );
 			Tree *val = r ? prg->falseVal : prg->trueVal;
 			tree_upref( val );
 			push( val );
@@ -1789,7 +1789,7 @@ again:
 
 			Tree *o2 = pop();
 			Tree *o1 = pop();
-			long r = cmp_tree( o1, o2 );
+			long r = cmp_tree( prg, o1, o2 );
 			Tree *val = r ? prg->trueVal : prg->falseVal;
 			tree_upref( val );
 			push( val );
@@ -1806,7 +1806,7 @@ again:
 
 			Tree *o2 = pop();
 			Tree *o1 = pop();
-			long r = cmp_tree( o1, o2 );
+			long r = cmp_tree( prg, o1, o2 );
 			Tree *val = r < 0 ? prg->trueVal : prg->falseVal;
 			tree_upref( val );
 			push( val );
@@ -1823,7 +1823,7 @@ again:
 
 			Tree *o2 = pop();
 			Tree *o1 = pop();
-			long r = cmp_tree( o1, o2 );
+			long r = cmp_tree( prg, o1, o2 );
 			Tree *val = r <= 0 ? prg->trueVal : prg->falseVal;
 			tree_upref( val );
 			push( val );
@@ -1839,7 +1839,7 @@ again:
 
 			Tree *o2 = pop();
 			Tree *o1 = pop();
-			long r = cmp_tree( o1, o2 );
+			long r = cmp_tree( prg, o1, o2 );
 			Tree *val = r > 0 ? prg->trueVal : prg->falseVal;
 			tree_upref( val );
 			push( val );
@@ -1856,7 +1856,7 @@ again:
 
 			Tree *o2 = (Tree*)pop();
 			Tree *o1 = (Tree*)pop();
-			long r = cmp_tree( o1, o2 );
+			long r = cmp_tree( prg, o1, o2 );
 			Tree *val = r >= 0 ? prg->trueVal : prg->falseVal;
 			tree_upref( val );
 			push( val );
@@ -3344,7 +3344,7 @@ again:
 
 			Tree *obj = pop();
 			Tree *key = pop();
-			Tree *result = map_find( (Map*)obj, key );
+			Tree *result = map_find( prg, (Map*)obj, key );
 			tree_upref( result );
 			push( result );
 

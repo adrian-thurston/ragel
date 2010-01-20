@@ -186,29 +186,29 @@ struct Map
 	void listAddAfter( MapEl *prev_el, MapEl *new_el );
 	void listAbandon();
 
-	int compare( const Tree *w1, const Tree *w2 ) const
-		{ return cmp_tree( w1, w2 ); }
+	int compare( Program *prg, const Tree *w1, const Tree *w2 ) const
+		{ return cmp_tree( prg, w1, w2 ); }
 
 	/* Insert a element into the tree. */
-	MapEl *insert( MapEl *element, MapEl **lastFound = 0 );
+	MapEl *insert( Program *prg, MapEl *element, MapEl **lastFound = 0 );
 
-	MapEl *insert( Program *p, Tree *key, MapEl **lastFound = 0 );
+	MapEl *insert( Program *prg, Tree *key, MapEl **lastFound = 0 );
 
 	/* Find a element in the tree. Returns the element if 
 	 * key exists, false otherwise. */
-	MapEl *find( Tree *key ) const;
+	MapEl *find( Program *prg, Tree *key ) const;
 
 	/* Detach a element from the tree. */
-	MapEl *detach( Tree *key );
+	MapEl *detach( Program *prg, Tree *key );
 
 	/* Detach and delete a element from the tree. */
-	bool remove( Tree *key );
+	bool remove( Program *prg, Tree *key );
 
 	/* Detach a element from the tree. */
-	MapEl *detach( MapEl *element );
+	MapEl *detach( Program *prg, MapEl *element );
 
 	/* Detach and delete a element from the tree. */
-	void remove( MapEl *element );
+	void remove( Program *prg, MapEl *element );
 
 	/* Free all memory used by tree. */
 	void empty();

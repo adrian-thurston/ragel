@@ -193,7 +193,7 @@ void Map::attachRebal( MapEl *element, MapEl *parentEl, MapEl *lastLess )
  * 
  * \returns The element inserted upon success, null upon failure.
  */
-MapEl *Map::insert( MapEl *element, MapEl **lastFound )
+MapEl *Map::insert( Program *prg, MapEl *element, MapEl **lastFound )
 {
 	long keyRelation;
 	MapEl *curEl = root, *parentEl = 0;
@@ -210,7 +210,7 @@ MapEl *Map::insert( MapEl *element, MapEl **lastFound )
 			return element;
 		}
 
-		keyRelation = compare( element->getKey(),
+		keyRelation = compare( prg, element->getKey(),
 				curEl->getKey() );
 
 		/* Do we go left? */
@@ -243,7 +243,7 @@ MapEl *Map::insert( MapEl *element, MapEl **lastFound )
  * 
  * \returns The new element upon success, null upon failure.
  */
-MapEl *Map::insert( Program *p, Tree *key, MapEl **lastFound )
+MapEl *Map::insert( Program *prg, Tree *key, MapEl **lastFound )
 {
 	long keyRelation;
 	MapEl *curEl = root, *parentEl = 0;
@@ -254,7 +254,7 @@ MapEl *Map::insert( Program *p, Tree *key, MapEl **lastFound )
 			/* We are at an external element and did not find the key we were
 			 * looking for. Create the new element, attach it underneath the leaf
 			 * and rebalance. */
-			MapEl *element = p->mapElPool.allocate();
+			MapEl *element = prg->mapElPool.allocate();
 			element->key = key;
 			element->tree = 0;
 			attachRebal( element, parentEl, lastLess );
@@ -264,7 +264,7 @@ MapEl *Map::insert( Program *p, Tree *key, MapEl **lastFound )
 			return element;
 		}
 
-		keyRelation = compare( key, curEl->getKey() );
+		keyRelation = compare( prg, key, curEl->getKey() );
 
 		/* Do we go left? */
 		if ( keyRelation < 0 ) {
@@ -290,13 +290,13 @@ MapEl *Map::insert( Program *p, Tree *key, MapEl **lastFound )
  *
  * \returns The element if key exists, null if the key does not exist.
  */
-MapEl *Map::find( Tree *key ) const
+MapEl *Map::find( Program *prg, Tree *key ) const
 {
 	MapEl *curEl = root;
 	long keyRelation;
 
 	while (curEl) {
-		keyRelation = compare( key, curEl->getKey() );
+		keyRelation = compare( prg, key, curEl->getKey() );
 
 		/* Do we go left? */
 		if ( keyRelation < 0 )
@@ -320,11 +320,11 @@ MapEl *Map::find( Tree *key ) const
  *
  * \returns The element detached if the key is found, othewise returns null.
  */
-MapEl *Map::detach( Tree *key )
+MapEl *Map::detach( Program *prg, Tree *key )
 {
-	MapEl *element = find( key );
+	MapEl *element = find( prg, key );
 	if ( element ) {
-		detach(element);
+		detach( prg, element );
 	}
 
 	return element;
@@ -335,16 +335,16 @@ MapEl *Map::detach( Tree *key )
  *
  * \returns True if the element was found and deleted, false otherwise.
  */
-bool Map::remove( Tree *key )
+bool Map::remove( Program *prg, Tree *key )
 {
 	/* Assume not found. */
 	bool retVal = false;
 
 	/* Look for the key. */
-	MapEl *element = find( key );
+	MapEl *element = find( prg, key );
 	if ( element != 0 ) {
 		/* If found, detach the element and delete. */
-		detach( element );
+		detach( prg, element );
 		delete element;
 		retVal = true;
 	}
@@ -357,10 +357,10 @@ bool Map::remove( Tree *key )
  *
  * If the element is not in the tree then undefined behaviour results.
  */
-void Map::remove(MapEl *element)
+void Map::remove( Program *prg, MapEl *element )
 {
 	/* Detach and delete. */
-	detach(element);
+	detach( prg, element );
 	delete element;
 }
 
@@ -371,7 +371,7 @@ void Map::remove(MapEl *element)
  * 
  * \returns The element given.
  */
-MapEl *Map::detach(MapEl *element)
+MapEl *Map::detach( Program *prg, MapEl *element )
 {
 	MapEl *replacement, *fixfrom;
 	long lheight, rheight;
