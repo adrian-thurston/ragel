@@ -5,7 +5,7 @@ COLM="../colm/colm"
 TESTS="
 	backtrack1.lm backtrack2.lm dns.lm accum.lm
 	mutualrec.lm argv1.lm argv2.lm exit.lm rubyhere.lm
-	translate1.lm
+	translate1.lm construct1.lm
 "
 
 for t in $TESTS; do
