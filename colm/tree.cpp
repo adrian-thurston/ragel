@@ -242,11 +242,12 @@ Tree *construct_replacement_tree( Tree **bindings, Program *prg, long pat )
 		/* All bindings have been uprefed. */
 		tree = bindings[nodes[pat].bindId];
 
-		long ignore = nodes[pat].ignore;
-		if ( ignore >= 0 ) {
-			tree = split_tree( prg, tree );
-			tree->child = construct_ignore_list( prg, pat );
-		}
+		/* FIXME: Need to to deal with the construction of ignore trees. */
+//		long ignore = nodes[pat].ignore;
+//		if ( ignore >= 0 ) {
+//			tree = split_tree( prg, tree );
+//			tree->child = construct_ignore_list( prg, pat );
+//		}
 	}
 	else {
 		tree = prg->treePool.allocate();
@@ -259,7 +260,7 @@ Tree *construct_replacement_tree( Tree **bindings, Program *prg, long pat )
 		int objectLength = lelInfo[tree->id].objectLength;
 
 		Kid *attrs = alloc_attrs( prg, objectLength );
-		Kid *ignore = construct_ignore_list( prg, pat );
+		Kid *ignore = 0;//construct_ignore_list( prg, pat );
 		Kid *child = construct_replacement_kid( bindings, prg, 
 				0, nodes[pat].child );
 
