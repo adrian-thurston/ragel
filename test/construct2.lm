@@ -1,0 +1,11 @@
+
+lex start
+{
+	ignore /[ \t\n]+/
+	token id /[a-z]+/
+	literal ',', '.', '*', '(', ')'
+}
+
+def lang [id*]
+
+print( construct lang "a b c", '\n' )

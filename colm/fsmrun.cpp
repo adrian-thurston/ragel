@@ -663,7 +663,6 @@ void send_with_ignore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *i
 			/* Need to merge. */
 			Kid *ignoreHead = input->tree->child;
 			ignoreHead->tree = (Tree*) kid_list_concat( ignore, (Kid*)ignoreHead->tree );
-
 		}
 		else {
 			/* Insert an ignore head in the child list. */

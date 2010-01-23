@@ -23,6 +23,7 @@
 #include "bytecode.h"
 #include <assert.h>
 #include <string.h>
+#include <stdio.h>
 
 /* 
  * In this system strings are not null terminated. Often strings come from a
