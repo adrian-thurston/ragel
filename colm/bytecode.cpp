@@ -424,20 +424,6 @@ Program::Program( int argc, char **argv, bool ctxDepParsing, RuntimeData *rtd )
 	falseVal = (Tree*)falseInt;
 }
 
-void Program::clearGlobal( Tree **sp )
-{
-	/* Downref all the fields in the global object. */
-	for ( int g = 0; g < rtd->globalSize; g++ ) {
-		//assert( get_attr( global, g )->refs == 1 );
-		tree_downref( this, sp, get_attr( global, g ) );
-	}
-
-	/* Free the global object. */
-	if ( rtd->globalSize > 0 )
-		free_attrs( this, global->child );
-	treePool.free( global );
-}
-
 void Program::clear( Tree **vm_stack, Tree **sp )
 {
 	#ifdef COLM_LOG_BYTECODE
@@ -512,6 +498,20 @@ void Program::allocGlobal()
 	tree->child = alloc_attrs( this, rtd->globalSize );
 	tree->refs = 1;
 	global = tree;
+}
+
+void Program::clearGlobal( Tree **sp )
+{
+	/* Downref all the fields in the global object. */
+	for ( int g = 0; g < rtd->globalSize; g++ ) {
+		//assert( get_attr( global, g )->refs == 1 );
+		tree_downref( this, sp, get_attr( global, g ) );
+	}
+
+	/* Free the global object. */
+	if ( rtd->globalSize > 0 )
+		free_attrs( this, global->child );
+	treePool.free( global );
 }
 
 Tree **stack_alloc()
@@ -675,6 +675,14 @@ again:
 			#ifdef COLM_LOG_BYTECODE
 			if ( colm_log_bytecode ) {
 				cerr << "IN_LOAD_GLOBAL_BKT" << endl;
+			}
+			#endif
+			break;
+		}
+		case IN_LOAD_CONTEXT_BKT: {
+			#ifdef COLM_LOG_BYTECODE
+			if ( colm_log_bytecode ) {
+				cerr << "IN_LOAD_CONTEXT_BKT" << endl;
 			}
 			#endif
 			break;
@@ -1076,6 +1084,56 @@ again:
 				tree_downref( prg, sp, tree );
 			}
 			tree_downref( prg, sp, (Tree*)stream );
+			break;
+		}
+		case IN_LOAD_CONTEXT_R: {
+			#ifdef COLM_LOG_BYTECODE
+			if ( colm_log_bytecode ) {
+				cerr << "IN_LOAD_CONTEXT_R" << endl;
+			}
+			#endif
+
+			tree_upref( pdaRun->context );
+			push( pdaRun->context );
+			break;
+		}
+		case IN_LOAD_CONTEXT_WV: {
+			#ifdef COLM_LOG_BYTECODE
+			if ( colm_log_bytecode ) {
+				cerr << "IN_LOAD_CONTEXT_WV" << endl;
+			}
+			#endif
+
+			tree_upref( pdaRun->context );
+			push( pdaRun->context );
+
+			/* Set up the reverse instruction. */
+			reverseCode.append( IN_LOAD_CONTEXT_BKT );
+			rcodeUnitLen = SIZEOF_CODE;
+			break;
+		}
+		case IN_LOAD_CONTEXT_WC: {
+			#ifdef COLM_LOG_BYTECODE
+			if ( colm_log_bytecode ) {
+				cerr << "IN_LOAD_CONTEXT_WC" << endl;
+			}
+			#endif
+
+			/* This is identical to the _R version, but using it for writing
+			 * would be confusing. */
+			tree_upref( pdaRun->context );
+			push( pdaRun->context );
+			break;
+		}
+		case IN_LOAD_CONTEXT_BKT: {
+			#ifdef COLM_LOG_BYTECODE
+			if ( colm_log_bytecode ) {
+				cerr << "IN_LOAD_CONTEXT_BKT" << endl;
+			}
+			#endif
+
+			tree_upref( prg->global );
+			push( prg->global );
 			break;
 		}
 		case IN_LOAD_GLOBAL_R: {

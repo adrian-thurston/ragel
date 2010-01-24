@@ -71,6 +71,7 @@ root_item: rl_def commit final { $$->stmt = 0; };
 root_item: token_def commit final { $$->stmt = 0; };
 root_item: cfl_def commit final { $$->stmt = 0; };
 root_item: region_def commit final { $$->stmt = 0; };
+root_item: context_def commit final { $$->stmt = 0; };
 root_item: namespace_def commit final { $$->stmt = 0; };
 root_item: function_def commit final { $$->stmt = 0; };
 root_item: generic_def commit final { $$->stmt = 0; };
@@ -274,12 +275,20 @@ nonterm global_def uses statement;
 global_def: KW_Global var_def opt_def_init
 	final {
 		$$->stmt = 0;
-		ObjectDef *globalObj = pd->globalObjectDef;
 
-		if ( globalObj->findField( $2->objField->name ) != 0 )
+		ObjectDef *object;
+		if ( contextStack.length() == 0 )
+			object = pd->globalObjectDef;
+		else {
+			Context *context = contextStack.top();
+			$2->objField->context = context;
+			object = context->contextObjDef;
+		}
+
+		if ( object->findField( $2->objField->name ) != 0 )
 			error($2->objField->loc) << "object field renamed" << endp;
 
-		globalObj->insertField( $2->objField->name, $2->objField );
+		object->insertField( $2->objField->name, $2->objField );
 
 		if ( $3->expr != 0 ) {
 			LangVarRef *varRef = new LangVarRef( $2->objField->loc, 
@@ -466,8 +475,7 @@ region_head:
 
 namespace_def: 
 	namespace_head '{' root_item_list '}'
-	final{
-		/* Pop the top of the stack. */
+	final {
 		namespaceStack.pop();
 	};
 
@@ -480,6 +488,63 @@ namespace_head:
 		namespaceStack.top()->childNamespaces.append( nspace );
 		pd->namespaceList.append( nspace );
 		namespaceStack.push( nspace );
+	};
+
+context_var_def: 
+	var_def 
+	final {
+		ObjectDef *object;
+		if ( contextStack.length() == 0 )
+			error($1->loc) << "internal error: no context stack items found" << endp;
+
+		Context *context = contextStack.top();
+		$1->objField->context = context;
+		object = context->contextObjDef;
+
+		if ( object->findField( $1->objField->name ) != 0 )
+			error($1->objField->loc) << "object field renamed" << endp;
+
+		object->insertField( $1->objField->name, $1->objField );
+	};
+
+
+context_item: context_var_def commit;
+context_item: literal_def commit;
+context_item: rl_def commit;
+context_item: token_def commit;
+context_item: cfl_def commit;
+context_item: region_def commit;
+context_item: context_def commit;
+context_item: function_def commit;
+context_item: generic_def commit;
+context_item: iter_def commit;
+context_item: pre_eof commit;
+context_item: precedence commit;
+
+context_item_list:
+	context_item_list context_item;
+context_item_list:
+	;
+
+context_def: 
+	context_head '{' context_item_list '}'
+	final {
+		contextStack.pop();
+	};
+
+context_head:
+	KW_Context TK_Word
+	final {
+		Namespace *nspace = namespaceStack.top();
+		KlangEl *lel = getKlangEl( pd, nspace, $2->data );
+		Context *context = new Context( $1->loc, lel );
+		contextStack.push( context );
+
+		context->contextObjDef = new ObjectDef( ObjectDef::UserType, "context", 
+				new ObjFieldMap, new ObjFieldList, new ObjMethodMap(), pd->nextObjectId++ ); 
+
+		lel->context = context;
+		cout << lel->context << endl;
 	};
 
 pattern_list: pattern_list pattern;
@@ -944,6 +1009,7 @@ opt_translate:
 	final { 
 		$$->transBlock = new CodeBlock( $2->stmtList );
 		$$->transBlock->localFrame = $1->localFrame;
+		$$->transBlock->context = contextStack.length() == 0 ? 0 : contextStack.top();
 	};
 
 opt_translate: 
@@ -960,6 +1026,7 @@ pre_eof:
 
 		CodeBlock *codeBlock = new CodeBlock( $3->stmtList );
 		codeBlock->localFrame = $2->localFrame;
+		codeBlock->context = contextStack.length() == 0 ? 0 : contextStack.top();
 
 		TokenRegion *region = regionStack.top();
 		region->preEofBlock = codeBlock;
@@ -1021,6 +1088,7 @@ opt_reduce_code:
 	final { 
 		$$->codeBlock = new CodeBlock( $2->stmtList );
 		$$->codeBlock->localFrame = $1->localFrame;
+		$$->codeBlock->context = contextStack.length() == 0 ? 0 : contextStack.top();
 	};
 
 nonterm start_reduce uses block_open;

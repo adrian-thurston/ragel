@@ -515,6 +515,29 @@ void LangVarRef::loadQualification( ParseData *pd, CodeVect &code,
 	}
 }
 
+void LangVarRef::loadContextObj( ParseData *pd, CodeVect &code, 
+		int lastPtrInQual, bool forWriting ) const
+{
+	/* Start the search in the global object. */
+	ObjectDef *rootObj = pd->context->contextObjDef;
+
+	if ( forWriting && lastPtrInQual < 0 ) {
+		/* If we are writing an no reference was found in the qualification
+		 * then load the gloabl with a revert. */
+		if ( pd->revertOn )
+			code.append( IN_LOAD_CONTEXT_WV );
+		else
+			code.append( IN_LOAD_CONTEXT_WC );
+	}
+	else {
+		/* Either we are reading or we are loading a pointer that will be
+		 * dereferenced. */
+		code.append( IN_LOAD_CONTEXT_R );
+	}
+
+	loadQualification( pd, code, rootObj, lastPtrInQual, forWriting, true );
+}
+
 void LangVarRef::loadGlobalObj( ParseData *pd, CodeVect &code, 
 		int lastPtrInQual, bool forWriting ) const
 {
@@ -566,6 +589,22 @@ bool LangVarRef::isLocalRef( ParseData *pd ) const
 	return false;
 }
 
+bool LangVarRef::isContextRef( ParseData *pd ) const
+{
+	if ( pd->context != 0 ) {
+		if ( qual->length() > 0 ) {
+			if ( pd->context->contextObjDef->findField( qual->data[0].data ) != 0 )
+				return true;
+		}
+		else if ( pd->context->contextObjDef->findField( name ) != 0 )
+			return true;
+		else if ( pd->context->contextObjDef->findMethod( name ) != 0 )
+			return true;
+	}
+
+	return false;
+}
+
 bool LangVarRef::isCustom( ParseData *pd ) const
 {
 	if ( qual->length() > 0 ) {
@@ -596,6 +635,8 @@ void LangVarRef::loadObj( ParseData *pd, CodeVect &code,
 		loadCustom( pd, code, lastPtrInQual, forWriting );
 	else if ( isLocalRef( pd ) )
 		loadLocalObj( pd, code, lastPtrInQual, forWriting );
+	else if ( isContextRef( pd ) )
+		loadContextObj( pd, code, lastPtrInQual, forWriting );
 	else
 		loadGlobalObj( pd, code, lastPtrInQual, forWriting );
 }
@@ -652,6 +693,8 @@ VarRefLookup LangVarRef::lookupObj( ParseData *pd ) const
 	ObjectDef *rootDef;
 	if ( isLocalRef( pd ) )
 		rootDef = pd->curLocalFrame;
+	else if ( isContextRef( pd ) )
+		rootDef = pd->context->contextObjDef;
 	else
 		rootDef = pd->globalObjectDef;
 
@@ -806,7 +849,6 @@ void LangVarRef::canTakeRef( ParseData *pd, VarRefLookup &lookup ) const
 /* Return the field referenced. */
 ObjField *LangVarRef::preEvaluateRef( ParseData *pd, CodeVect &code ) const
 {
-	/* Lookup the loadObj. */
 	VarRefLookup lookup = lookupField( pd );
 
 	canTakeRef( pd, lookup );
@@ -819,7 +861,6 @@ ObjField *LangVarRef::preEvaluateRef( ParseData *pd, CodeVect &code ) const
 /* Return the field referenced. */
 ObjField *LangVarRef::evaluateRef( ParseData *pd, CodeVect &code, long pushCount ) const
 {
-	/* Lookup the loadObj. */
 	VarRefLookup lookup = lookupField( pd );
 
 	canTakeRef( pd, lookup );
@@ -2475,6 +2516,16 @@ void ParseData::initAllLanguageObjects()
 	/* Init all fields of the global object. */
 	for ( ObjFieldList::Iter f = *globalObjectDef->objFieldList; f.lte(); f++ )
 		globalObjectDef->initField( this, f->value );
+	
+	/* Init all fields of all context objects. */
+	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
+		if ( lel->context != 0 ) {
+			cout << "initializing fields for context " << lel->name << endl;
+
+			for ( ObjFieldList::Iter f = *globalObjectDef->objFieldList; f.lte(); f++ )
+				globalObjectDef->initField( this, f->value );
+		}
+	}
 }
 
 void ParseData::initMapFunctions( GenericType *gen )
@@ -2961,14 +3012,22 @@ void ParseData::compileByteCode()
 
 	/* Compile the reduction code. */
 	for ( DefList::Iter prod = prodList; prod.lte(); prod++ ) {
-		if ( prod->redBlock != 0 )
+		if ( prod->redBlock != 0 ) {
+			if ( prod->redBlock->context != 0 )
+				context = prod->redBlock->context;
 			compileReductionCode( prod );
+			context = 0;
+		}
 	}
 
 	/* Compile the token translation code. */
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
-		if ( lel->transBlock != 0 )
+		if ( lel->transBlock != 0 ) {
+			if ( lel->transBlock->context != 0 )
+				context = lel->transBlock->context;
 			compileTranslateBlock( lel );
+			context = 0;
+		}
 	}
 
 	/* Compile preeof blocks. */

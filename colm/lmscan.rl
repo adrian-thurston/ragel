@@ -469,6 +469,7 @@ void Scanner::endSection( )
 		'nonassoc' => { token( KW_Nonassoc ); };
 		'prec' => { token( KW_Prec ); };
 		'include' => {token( KW_Include ); };
+		'context' => {token( KW_Context ); };
 
 		# Identifiers.
 		ident => { token( TK_Word, ts, te ); } ;

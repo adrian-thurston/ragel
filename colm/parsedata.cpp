@@ -431,7 +431,8 @@ ParseData::ParseData( const String &fileName, const String &sectionName,
 	revertOn(true),
 	predValue(0),
 	nextMatchEndNum(0),
-	argvListKlangEl(0)
+	argvListKlangEl(0),
+	context(0)
 {
 }
 

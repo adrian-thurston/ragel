@@ -189,6 +189,9 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 
 		out << runtimeData->lelInfo[i].objectLength << ", ";
 
+		out << runtimeData->lelInfo[i].contextTypeId << ", ";
+		out << runtimeData->lelInfo[i].contextLength << ", ";
+
 		out << runtimeData->lelInfo[i].termDupId << ", ";
 
 		out << runtimeData->lelInfo[i].genericId << ", ";
@@ -375,6 +378,12 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 	}
 	out << "};\n\n";
 
+	out << "int parserLelIds[] = {\n\t";
+	for ( long i = 0; i < runtimeData->numParsers; i++ ) {
+		out << runtimeData->parserLelIds[i] << ", ";
+	}
+	out << "};\n\n";
+
 	out << "CaptureAttr captureAttr[] = {\n";
 	for ( long i = 0; i < runtimeData->numCapturedAttr; i++ ) {
 		out << "\t{ " << 
@@ -425,7 +434,7 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 		"\n"
 		"	&fsmTables_start,\n"
 		"	&pid_0_pdaTables,\n"
-		"	startStates, eofLelIds, " << runtimeData->numParsers << ",\n"
+		"	startStates, eofLelIds, parserLelIds, " << runtimeData->numParsers << ",\n"
 		"\n"
 		"	" << runtimeData->globalSize << ",\n"
 		"\n"

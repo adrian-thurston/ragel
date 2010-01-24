@@ -98,6 +98,7 @@ struct Join;
 struct JoinOrLm;
 struct TokenRegion;
 struct Namespace;
+struct Context;
 struct TokenDef;
 struct TokenDefList;
 struct Range;
@@ -280,6 +281,22 @@ struct ReCapture
 	Action *markEnter;
 	Action *markLeave;
 	ObjField *objField;
+};
+
+typedef Vector<Context*> ContextVect;
+
+struct Context
+{
+	Context( InputLoc &loc, KlangEl *lel )
+	:
+		loc(loc),
+		lel(lel)
+	{}
+
+	InputLoc loc;
+	KlangEl *lel;
+
+	ObjectDef *contextObjDef;
 };
 
 typedef Vector<ReCapture> ReCaptureVect;
@@ -1234,7 +1251,9 @@ typedef AvlMapEl<String, ObjMethod*> ObjMethodMapEl;
 struct ObjField
 {
 	ObjField( const InputLoc &loc, TypeRef *typeRef, const String &name ) : 
-		loc(loc), typeRef(typeRef), name(name), pos(0), offset(0),
+		loc(loc), typeRef(typeRef), name(name), 
+		context(0),
+		pos(0), offset(0),
 		beenReferenced(false),
 		beenInitialized(false),
 		useOffset(true),
@@ -1254,6 +1273,7 @@ struct ObjField
 	InputLoc loc;
 	TypeRef *typeRef;
 	String name;
+	Context *context;
 	long pos;
 	long offset;
 	bool beenReferenced;
@@ -1404,12 +1424,14 @@ struct LangVarRef
 
 	bool isCustom( ParseData *pd ) const;
 	bool isLocalRef( ParseData *pd ) const;
+	bool isContextRef( ParseData *pd ) const;
 	void loadQualification( ParseData *pd, CodeVect &code, ObjectDef *rootObj, 
 			int lastPtrInQual, bool forWriting, bool revert ) const;
 	void loadCustom( ParseData *pd, CodeVect &code, 
 			int lastPtrInQual, bool forWriting ) const;
 	void loadLocalObj( ParseData *pd, CodeVect &code, 
 			int lastPtrInQual, bool forWriting ) const;
+	void loadContextObj( ParseData *pd, CodeVect &code, int lastPtrInQual, bool forWriting ) const;
 	void loadGlobalObj( ParseData *pd, CodeVect &code, 
 			int lastPtrInQual, bool forWriting ) const;
 	void loadObj( ParseData *pd, CodeVect &code, int lastPtrInQual, bool forWriting ) const;
@@ -1659,7 +1681,11 @@ struct LangStmt
 struct CodeBlock
 {
 	CodeBlock( StmtList *stmtList ) 
-		: frameId(-1), stmtList(stmtList), localFrame(0) {}
+	:
+		frameId(-1),
+		stmtList(stmtList),
+		localFrame(0),
+		context(0) {}
 
 	void compile( ParseData *pd, CodeVect &code ) const;
 	void analyze( ParseData *pd ) const;
@@ -1668,6 +1694,7 @@ struct CodeBlock
 	StmtList *stmtList;
 	ObjectDef *localFrame;
 	CharSet trees;
+	Context *context;
 
 	/* Each frame has two versions of 
 	 * the code: revert and commit. */

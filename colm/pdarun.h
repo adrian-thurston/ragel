@@ -372,6 +372,8 @@ struct PatReplNode
 	bool stop;
 };
 
+/* FIXME: should have a descriptor for object types to give the length. */
+
 struct LangElInfo
 {
 	const char *name;
@@ -385,6 +387,9 @@ struct LangElInfo
 	long objectTypeId;
 	long ofiOffset;
 	long objectLength;
+
+	long contextTypeId;
+	long contextLength;
 
 	long termDupId;
 	long genericId;
@@ -472,6 +477,7 @@ struct RuntimeData
 	PdaTables *pdaTables;
 	int *startStates;
 	int *eofLelIds;
+	int *parserLelIds;
 	long numParsers;
 
 	long globalSize;
@@ -527,7 +533,8 @@ struct PdaRun
 		stopTarget(stopTarget),
 		queue(0),
 		queueLast(0),
-		revertOn(revertOn)
+		revertOn(revertOn),
+		context(0)
 	{
 	}
 
@@ -570,6 +577,10 @@ struct PdaRun
 	Bindings bindings;
 
 	bool revertOn;
+
+	Tree *context;
+	void clearContext( Tree **sp );
+	void allocContext();
 };
 
 void clean_parser( Tree **root, PdaRun *pdaRun );

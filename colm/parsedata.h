@@ -214,6 +214,8 @@ struct KlangEl : public DListEl<KlangEl>
 
 	PredType predType;
 	long predValue;
+
+	Context *context;
 };
 
 struct PdaFactor
@@ -944,6 +946,8 @@ struct ParseData
 	long nextMatchEndNum;
 
 	KlangEl *argvListKlangEl;
+
+	Context *context;
 };
 
 void afterOpMinimize( FsmGraph *fsm, bool lastInSeq = true );

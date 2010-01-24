@@ -88,7 +88,8 @@ KlangEl::KlangEl( Namespace *nspace, const String &name, Type type )
 	generic(0),
 	parserId(-1),
 	predType(PredNone),
-	predValue(0)
+	predValue(0),
+	context(0)
 {
 }
  
@@ -1402,12 +1403,23 @@ void ParseData::makeRuntimeData()
 				runtimeData->frameInfo[block->frameId].treesLen = block->trees.length();
 			}
 
+			
 			runtimeData->lelInfo[i].objectTypeId = 
 					lel->objectDef == 0 ? 0 : lel->objectDef->id;
 			runtimeData->lelInfo[i].ofiOffset = lel->ofiOffset;
 			runtimeData->lelInfo[i].objectLength = 
 					( lel->objectDef == 0 || lel->objectDef == tokenObj ) ? 0 : 
 					lel->objectDef->size();
+
+			runtimeData->lelInfo[i].contextTypeId =
+					lel->context == 0 ? 0 : lel->context->contextObjDef->id;
+			runtimeData->lelInfo[i].contextLength = lel->context == 0 ? 0 :
+					lel->context->contextObjDef->size();
+			if ( lel->context != 0 ) {
+				cout << "type: " << runtimeData->lelInfo[i].contextTypeId << " length: " << 
+					runtimeData->lelInfo[i].contextLength << endl;
+			}
+
 			runtimeData->lelInfo[i].termDupId = lel->termDup == 0 ? 0 : lel->termDup->id;
 			runtimeData->lelInfo[i].genericId = lel->generic == 0 ? 0 : lel->generic->id;
 
@@ -1536,13 +1548,16 @@ void ParseData::makeRuntimeData()
 	runtimeData->fsmTables = fsmTables;
 	runtimeData->pdaTables = pdaTables;
 
+	/* FIXME: need a parser descriptor. */
 	runtimeData->startStates = new int[nextParserId];
 	runtimeData->eofLelIds = new int[nextParserId];
+	runtimeData->parserLelIds = new int[nextParserId];
 	runtimeData->numParsers = nextParserId;
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
 		if ( lel->parserId >= 0 ) {
 			runtimeData->startStates[lel->parserId] = lel->startState->stateNum;
 			runtimeData->eofLelIds[lel->parserId] = lel->eofLel->id;
+			runtimeData->parserLelIds[lel->parserId] = lel->id;
 		}
 	}
 
