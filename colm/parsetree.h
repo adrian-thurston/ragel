@@ -1714,7 +1714,8 @@ struct Function
 		funcId(funcId),
 		isUserIter(isUserIter),
 		paramListSize(0),
-		paramUTs(0)
+		paramUTs(0),
+		inContext(0)
 	{}
 
 	TransBlock *transBlock;
@@ -1727,6 +1728,7 @@ struct Function
 	bool isUserIter;
 	long paramListSize;
 	UniqueType **paramUTs;
+	Context *inContext;
 
 	Function *prev, *next;
 };

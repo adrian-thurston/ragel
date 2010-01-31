@@ -133,6 +133,9 @@ function_def:
 		Function *newFunction = new Function( $1->typeRef, $2->data, 
 				$4->paramList, codeBlock, pd->nextFuncId++, false );
 		pd->functionList.append( newFunction );
+
+		if ( contextStack.length() > 0 )
+			newFunction->inContext = contextStack.top();
 	};
 
 nonterm opt_param_list uses param_list;
@@ -339,20 +342,13 @@ pred_token:
 		pd->resolveLiteralFactor( $$->factor );
 	};
 
-context_cfl_def: cfl_def_head obj_var_list properties_list cfl_prod_list
-	final {
-		/* Get the language element. */
-		KlangEl *langEl = getKlangEl( pd, namespaceStack.top(), curDefineId );
-		langEl->objectDef = pd->objectDef;
-		langEl->contextIn = contextStack.top();
-	};
-
-
 cfl_def: cfl_def_head obj_var_list properties_list cfl_prod_list
 	final {
 		/* Get the language element. */
 		KlangEl *langEl = getKlangEl( pd, namespaceStack.top(), curDefineId );
 		langEl->objectDef = pd->objectDef;
+		if ( contextStack.length() > 0 )
+			langEl->contextIn = contextStack.top();
 	};
 
 cfl_def_head: KW_Def TK_Word
@@ -521,7 +517,7 @@ context_item: context_var_def commit;
 context_item: literal_def commit;
 context_item: rl_def commit;
 context_item: token_def commit;
-context_item: context_cfl_def commit;
+context_item: cfl_def commit;
 context_item: region_def commit;
 context_item: context_def commit;
 context_item: function_def commit;

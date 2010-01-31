@@ -3067,10 +3067,13 @@ void ParseData::compileByteCode()
 
 	/* Compile functions. */
 	for ( FunctionList::Iter f = functionList; f.lte(); f++ ) {
+		if ( f->inContext != 0 )
+			context = f->inContext;
 		if ( f->isUserIter )
 			compileUserIter( f );
 		else
 			compileFunction( f );
+		context = 0;
 	}
 
 	/* Compile the reduction code. */
