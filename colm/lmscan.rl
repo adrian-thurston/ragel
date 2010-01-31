@@ -425,6 +425,7 @@ void Scanner::endSection( )
 		'def' => { token( KW_Def ); };
 		'ignore' => { token( KW_Ignore ); };
 		'construct' => { token( KW_Construct ); };
+		'cons' => { token( KW_Construct ); };
 		'new' => { token( KW_New ); };
 		'if' => { token( KW_If ); };
 		'reject' => { token( KW_Reject ); };
@@ -444,6 +445,7 @@ void Scanner::endSection( )
 		'list' => { token( KW_List ); };
 		'vector' => { token( KW_Vector ); };
 		'accum' => { token( KW_Accum ); };
+		'parser' => { token( KW_Accum ); };
 		'return' => { token( KW_Return ); };
 		'break' => { token( KW_Break ); };
 		'yield' => { token( KW_Yield ); };

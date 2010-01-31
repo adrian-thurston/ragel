@@ -215,7 +215,8 @@ struct KlangEl : public DListEl<KlangEl>
 	PredType predType;
 	long predValue;
 
-	Context *context;
+	Context *contextDef;
+	Context *contextIn;
 };
 
 struct PdaFactor
@@ -745,6 +746,8 @@ struct ParseData
 	void initListFunctions( GenericType *gen );
 	void initVectorFunctions( GenericType *gen );
 	void initAccumFunctions( GenericType *gen );
+	void initAccumFields( GenericType *gen );
+	void initCtxField( GenericType *gen );
 
 	void addStdin();
 	void addStdout();

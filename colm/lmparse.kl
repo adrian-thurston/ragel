@@ -339,6 +339,15 @@ pred_token:
 		pd->resolveLiteralFactor( $$->factor );
 	};
 
+context_cfl_def: cfl_def_head obj_var_list properties_list cfl_prod_list
+	final {
+		/* Get the language element. */
+		KlangEl *langEl = getKlangEl( pd, namespaceStack.top(), curDefineId );
+		langEl->objectDef = pd->objectDef;
+		langEl->contextIn = contextStack.top();
+	};
+
+
 cfl_def: cfl_def_head obj_var_list properties_list cfl_prod_list
 	final {
 		/* Get the language element. */
@@ -512,7 +521,7 @@ context_item: context_var_def commit;
 context_item: literal_def commit;
 context_item: rl_def commit;
 context_item: token_def commit;
-context_item: cfl_def commit;
+context_item: context_cfl_def commit;
 context_item: region_def commit;
 context_item: context_def commit;
 context_item: function_def commit;
@@ -537,14 +546,24 @@ context_head:
 	final {
 		Namespace *nspace = namespaceStack.top();
 		KlangEl *lel = getKlangEl( pd, nspace, $2->data );
+
 		Context *context = new Context( $1->loc, lel );
 		contextStack.push( context );
 
-		context->contextObjDef = new ObjectDef( ObjectDef::UserType, "context", 
+		context->contextObjDef = new ObjectDef( ObjectDef::UserType, $2->data, 
 				new ObjFieldMap, new ObjFieldList, new ObjMethodMap(), pd->nextObjectId++ ); 
 
-		lel->context = context;
-		cout << lel->context << endl;
+		/* Check that the element wasn't previously defined as something else. */
+		if ( lel->type != KlangEl::Unknown ) {
+			error($2->loc) << "'" << curDefineId << 
+				"' has already been defined, maybe you want to use redef?" << endp;
+		}
+		lel->type = KlangEl::NonTerm;
+		ProdElList *prodElList = new ProdElList;
+		addProduction( $1->loc, $2->data, prodElList, false, 0, 0 );
+
+		lel->contextDef = context;
+		lel->objectDef = context->contextObjDef;
 	};
 
 pattern_list: pattern_list pattern;

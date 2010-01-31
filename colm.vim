@@ -55,8 +55,8 @@ syntax match tlNumber "false"
 syntax keyword Type
 	\ commit include literal iter
 	\ namespace lex reducefirst global include 
-	\ construct parse parse_stop match require
-	\ preeof left right nonassoc prec accum context
+	\ construct cons parse parse_stop match require
+	\ preeof left right nonassoc prec accum context parser alias
 
 syntax keyword typeKeywords
 	\ int str bool any ref vector map list ptr

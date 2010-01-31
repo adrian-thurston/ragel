@@ -854,7 +854,7 @@ long undo_parse( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pd
 		Tree *tree, CodeVect *rev )
 {
 	/* PDA must be init first to set next region. */
-	init_pda_run( pdaRun );
+	init_pda_run( pdaRun, 0 );
 
 	Kid *top = pdaRun->prg->kidPool.allocate();
 	top->next = pdaRun->stackTop;

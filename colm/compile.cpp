@@ -1198,12 +1198,36 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 		error(loc) << "can only parse trees" << endl;
 	
 	/* Should be one arg, a stream. */
-	if ( args == 0 || args->length() != 1 )
-		error(loc) << "expecting one argument" << endp;
+	if ( args == 0 || ( args->length() != 1 && args->length() != 2 ) )
+		error(loc) << "expecting one or two args" << endp;
+	
+	int context, input;
+	if ( ut->langEl->contextIn == 0 ) {
+		if ( args->length() != 1 )
+			error(loc) << "parse command requires just input" << endp;
+		context = -1;
+		input = 0;
+	}
+	else {
+		if ( args->length() != 2 )
+			error(loc) << "parse command requires context and input" << endp;
+		context = 0;
+		input = 1;
+	}
+	
+	if ( context < 0 ) {
+		code.append( IN_LOAD_NIL );
+	}
+	else {
+		UniqueType *argUT = args->data[context]->evaluate( pd, code );
+		if ( argUT != pd->uniqueTypeStream && argUT->typeId != TYPE_TREE )
+			error(loc) << "context argument must be a stream or a tree" << endp;
+	}
 
-	UniqueType *argUT = args->data[0]->evaluate( pd, code );
+
+	UniqueType *argUT = args->data[input]->evaluate( pd, code );
 	if ( argUT != pd->uniqueTypeStream && argUT->typeId != TYPE_TREE )
-		error(loc) << "single argument must be a stream or a tree" << endp;
+		error(loc) << "input argument must be a stream or a tree" << endp;
 
 	/* Allocate a parser id. This will cause a parser to be built for
 	 * the type. */
@@ -2505,27 +2529,17 @@ void ParseData::initAllLanguageObjects()
 {
 	/* Init all user object fields (need consistent size). */
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
-		ObjectDef *obj = lel->objectDef;
-		if ( obj != 0 ) {
+		ObjectDef *objDef = lel->objectDef;
+		if ( objDef != 0 ) {
 			/* Init all fields of the object. */
-			for ( ObjFieldList::Iter f = *obj->objFieldList; f.lte(); f++ )
-				obj->initField( this, f->value );
+			for ( ObjFieldList::Iter f = *objDef->objFieldList; f.lte(); f++ )
+				objDef->initField( this, f->value );
 		}
 	}
 
 	/* Init all fields of the global object. */
 	for ( ObjFieldList::Iter f = *globalObjectDef->objFieldList; f.lte(); f++ )
 		globalObjectDef->initField( this, f->value );
-	
-	/* Init all fields of all context objects. */
-	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
-		if ( lel->context != 0 ) {
-			cout << "initializing fields for context " << lel->name << endl;
-
-			for ( ObjFieldList::Iter f = *globalObjectDef->objFieldList; f.lte(); f++ )
-				globalObjectDef->initField( this, f->value );
-		}
-	}
 }
 
 void ParseData::initMapFunctions( GenericType *gen )
@@ -2596,8 +2610,37 @@ void ParseData::initVectorFunctions( GenericType *gen )
 
 void ParseData::initAccumFunctions( GenericType *gen )
 {
-	initFunction( gen->utArg, gen->objDef, "finish", 
-			IN_ACCUM_FINISH_WC, IN_ACCUM_FINISH_WC, false );
+	initFunction( gen->utArg, gen->objDef, "finish", IN_ACCUM_FINISH_WC, IN_ACCUM_FINISH_WC, false );
+}
+
+void ParseData::initCtxField( GenericType *gen )
+{
+	KlangEl *langEl = gen->utArg->langEl;
+	Context *context = langEl->contextIn;
+
+	/* Make the type ref and create the field. */
+	UniqueType *ctxUT = findUniqueType( TYPE_TREE, context->lel );
+	TypeRef *typeRef = new TypeRef( InputLoc(), ctxUT );
+	ObjField *el = new ObjField( InputLoc(), typeRef, "ctx" );
+
+	el->inGetR =  IN_GET_ACCUM_CTX_R;
+	el->inGetWC = IN_GET_ACCUM_CTX_WC;
+	el->inGetWV = IN_GET_ACCUM_CTX_WV;
+	el->inSetWC = IN_SET_ACCUM_CTX_WC;
+	el->inSetWV = IN_SET_ACCUM_CTX_WV;
+
+	gen->objDef->insertField( el->name, el );
+
+	el->useOffset = false;
+	el->beenReferenced = true;
+	el->beenInitialized = true;
+}
+
+void ParseData::initAccumFields( GenericType *gen )
+{
+	KlangEl *langEl = gen->utArg->langEl;
+	if ( langEl->contextIn != 0 )
+		initCtxField( gen );
 }
 
 void ParseData::resolveGenericTypes()
@@ -2630,6 +2673,7 @@ void ParseData::resolveGenericTypes()
 					/* Need to generate a parser for the type. */
 					gen->utArg->langEl->parserId = nextParserId++;
 					initAccumFunctions( gen );
+					initAccumFields( gen );
 					break;
 			}
 

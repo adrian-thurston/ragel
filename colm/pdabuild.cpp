@@ -89,7 +89,8 @@ KlangEl::KlangEl( Namespace *nspace, const String &name, Type type )
 	parserId(-1),
 	predType(PredNone),
 	predValue(0),
-	context(0)
+	contextDef(0),
+	contextIn(0)
 {
 }
  
@@ -1411,14 +1412,14 @@ void ParseData::makeRuntimeData()
 					( lel->objectDef == 0 || lel->objectDef == tokenObj ) ? 0 : 
 					lel->objectDef->size();
 
-			runtimeData->lelInfo[i].contextTypeId =
-					lel->context == 0 ? 0 : lel->context->contextObjDef->id;
-			runtimeData->lelInfo[i].contextLength = lel->context == 0 ? 0 :
-					lel->context->contextObjDef->size();
-			if ( lel->context != 0 ) {
-				cout << "type: " << runtimeData->lelInfo[i].contextTypeId << " length: " << 
-					runtimeData->lelInfo[i].contextLength << endl;
-			}
+//			runtimeData->lelInfo[i].contextTypeId = 0;
+//					lel->context == 0 ? 0 : lel->context->contextObjDef->id;
+//			runtimeData->lelInfo[i].contextLength = 0; //lel->context == 0 ? 0 :
+//					lel->context->contextObjDef->size();
+//			if ( lel->context != 0 ) {
+//				cout << "type: " << runtimeData->lelInfo[i].contextTypeId << " length: " << 
+//					runtimeData->lelInfo[i].contextLength << endl;
+//			}
 
 			runtimeData->lelInfo[i].termDupId = lel->termDup == 0 ? 0 : lel->termDup->id;
 			runtimeData->lelInfo[i].genericId = lel->generic == 0 ? 0 : lel->generic->id;

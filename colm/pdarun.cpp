@@ -74,7 +74,7 @@ void clean_parser( Tree **sp, PdaRun *pdaRun )
 		kid = next;
 	}
 
-	pdaRun->clearContext( sp );
+//	pdaRun->clearContext( sp );
 }
 
 bool PdaRun::isParserStopFinished()
@@ -86,7 +86,7 @@ bool PdaRun::isParserStopFinished()
 	return done;
 }
 
-void init_pda_run( PdaRun *pdaRun )
+void init_pda_run( PdaRun *pdaRun, Tree *context )
 {
 	/* FIXME: need the right one here. */
 	pdaRun->cs = pdaRun->prg->rtd->startStates[pdaRun->parserId];
@@ -109,37 +109,13 @@ void init_pda_run( PdaRun *pdaRun )
 
 	pdaRun->allReverseCode = new CodeVect;
 
-	pdaRun->allocContext();
-}
-
-void PdaRun::allocContext()
-{
-	long id = prg->rtd->parserLelIds[parserId];
-	if ( prg->rtd->lelInfo[id].contextTypeId != 0 ) {
-		cout << "runtime allocating context for parser of LEL " << prg->rtd->lelInfo[id].name << endl;
-
-		Tree *tree = prg->treePool.allocate();
-		tree->child = alloc_attrs( prg, prg->rtd->lelInfo[id].contextLength );
-		tree->refs = 1;
-		context = tree;
-	}
+	pdaRun->context = split_tree( pdaRun->prg, context );
 }
 
 void PdaRun::clearContext( Tree **sp )
 {
-	long id = prg->rtd->parserLelIds[parserId];
-	if ( prg->rtd->lelInfo[id].contextTypeId != 0 ) {
-		/* Downref all the fields first. */
-		for ( int c = 0; c < prg->rtd->lelInfo[id].contextLength; c++ ) {
-			//assert( get_attr( global, g )->refs == 1 );
-			tree_downref( prg, sp, get_attr( context, c ) );
-		}
-
-		/* Free the global object. */
-		if ( prg->rtd->lelInfo[id].contextLength > 0 )
-			free_attrs( prg, context->child );
-		prg->treePool.free( context );
-	}
+	if ( context != 0 )
+		tree_downref( prg, sp, context );
 }
 
 

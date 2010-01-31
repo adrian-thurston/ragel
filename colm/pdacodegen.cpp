@@ -189,8 +189,8 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 
 		out << runtimeData->lelInfo[i].objectLength << ", ";
 
-		out << runtimeData->lelInfo[i].contextTypeId << ", ";
-		out << runtimeData->lelInfo[i].contextLength << ", ";
+//		out << runtimeData->lelInfo[i].contextTypeId << ", ";
+//		out << runtimeData->lelInfo[i].contextLength << ", ";
 
 		out << runtimeData->lelInfo[i].termDupId << ", ";
 

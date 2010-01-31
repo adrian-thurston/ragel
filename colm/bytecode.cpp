@@ -163,7 +163,7 @@ struct ParserRet
 	FsmRun *fsmRun;
 };
 
-void call_parser( ParserRet &ret, Tree **&sp, Program *prg, InputStream *inputStream, Stream *stream,
+void call_parser( ParserRet &ret, Tree **&sp, Program *prg, Tree *context, InputStream *inputStream, Stream *stream,
 		long parserId, long stopId, CodeVect *&cv, bool revertOn )
 {
 	PdaTables *tables = prg->rtd->pdaTables;
@@ -171,7 +171,7 @@ void call_parser( ParserRet &ret, Tree **&sp, Program *prg, InputStream *inputSt
 	fsmRun->curStream = (Tree*)stream;
 	PdaRun pdaRun( prg, tables, fsmRun, parserId, stopId, revertOn );
 
-	init_pda_run( &pdaRun );
+	init_pda_run( &pdaRun, context );
 	init_fsm_run( fsmRun, inputStream );
 	new_token( &pdaRun, fsmRun );
 	parse_loop( sp, &pdaRun, fsmRun, inputStream );
@@ -196,6 +196,12 @@ void call_parser( ParserRet &ret, Tree **&sp, Program *prg, InputStream *inputSt
 	ret.fsmRun = fsmRun;
 }
 
+
+void parser_accum_set_ctx( Tree **&sp, Program *prg, Accum *accum, Tree *val )
+{
+	accum->pdaRun->context = split_tree( prg, val );
+}
+
 void call_tree_parser( ParserRet &ret, Tree **&sp, Program *prg, Tree *input, 
 		long parserId, long stopId, CodeVect *&cv, bool revertOn )
 {
@@ -208,7 +214,7 @@ void call_tree_parser( ParserRet &ret, Tree **&sp, Program *prg, Tree *input,
 	InputStreamString inputStream( s.c_str(), s.size() );
 	init_input_stream( &inputStream );
 
-	call_parser( ret, sp, prg, &inputStream, 0, parserId, stopId, cv, revertOn );
+	call_parser( ret, sp, prg, 0, &inputStream, 0, parserId, stopId, cv, revertOn );
 }
 
 Head *tree_to_str( Tree **sp, Program *prg, Tree *tree )
@@ -2330,8 +2336,9 @@ again:
 			/* Comes back from parse upreffed. */
 			CodeVect *cv;
 			Tree *stream = pop();
+			Tree *context = pop();
 			ParserRet ret;
-			call_parser( ret, sp, prg, ((Stream*)stream)->in, (Stream*)stream, parserId, stopId, cv, true );
+			call_parser( ret, sp, prg, context, ((Stream*)stream)->in, (Stream*)stream, parserId, stopId, cv, true );
 			push( ret.tree );
 
 			/* Single unit. */
@@ -2359,8 +2366,9 @@ again:
 			/* Comes back from parse upreffed. */
 			CodeVect *cv;
 			Tree *stream = pop();
+			Tree *context = pop();
 			ParserRet ret;
-			call_parser( ret, sp, prg, ((Stream*)stream)->in, (Stream*)stream, parserId, stopId, cv, false );
+			call_parser( ret, sp, prg, context, ((Stream*)stream)->in, (Stream*)stream, parserId, stopId, cv, false );
 			push( ret.tree );
 
 			tree_downref( prg, sp, (Tree*)stream );
@@ -2401,6 +2409,42 @@ again:
 			tree_downref( prg, sp, accum );
 			break;
 		}
+
+		case IN_GET_ACCUM_CTX_R: {
+			#ifdef COLM_LOG_BYTECODE
+			if ( colm_log_bytecode ) {
+				cerr << "IN_GET_ACCUM_CTX_R" << endl;
+			}
+			#endif
+
+			Tree *obj = pop();
+			Tree *ctx = ((Accum*)obj)->pdaRun->context;
+			tree_upref( ctx );
+			push( ctx );
+			tree_downref( prg, sp, obj );
+			break;
+		}
+
+		case IN_SET_ACCUM_CTX_WC: {
+			#ifdef COLM_LOG_BYTECODE
+			if ( colm_log_bytecode ) {
+				cerr << "IN_SET_ACCUM_CTX_WC" << endl;
+			}
+			#endif
+
+			Tree *obj = pop();
+			Tree *val = pop();
+			parser_accum_set_ctx( sp, prg, (Accum*)obj, val );
+			tree_downref( prg, sp, obj );
+			break;
+		}
+
+//		case IN_GET_ACCUM_CTX_WC:
+//		case IN_GET_ACCUM_CTX_WV:
+//		case IN_SET_ACCUM_CTX_WC:
+//		case IN_SET_ACCUM_CTX_WV:
+//			break;
+
 		case IN_ACCUM_FINISH_WC: {
 			#ifdef COLM_LOG_BYTECODE
 			if ( colm_log_bytecode ) {

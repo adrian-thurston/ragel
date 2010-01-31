@@ -244,6 +244,12 @@ typedef unsigned char uchar;
 #define IN_LOAD_CONTEXT_WC       0xae
 #define IN_LOAD_CONTEXT_BKT      0xaf
 
+#define IN_GET_ACCUM_CTX_R       0xb0
+#define IN_GET_ACCUM_CTX_WC      0xb1
+#define IN_GET_ACCUM_CTX_WV      0xb2
+#define IN_SET_ACCUM_CTX_WC      0xb3
+#define IN_SET_ACCUM_CTX_WV      0xb4
+
 
 /* Types */
 #define TYPE_NIL      0x01
