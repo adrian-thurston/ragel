@@ -1,0 +1,33 @@
+context ctx
+{
+	int i
+	int j
+	int k
+
+	lex start
+	{
+		ignore /space+/
+		literal '*', '(', ')'
+		token id /[a-zA-Z_]+/ 
+	}
+
+	def foo [id]
+
+	def item 
+		[id]
+	|	[foo]
+	|	['(' item* ')']
+		{
+			i = 0
+			j = i + 1
+			k = j + 1
+			print( k, '\n' )
+		}
+
+	def start 
+		[item*]
+}
+
+ctx CTX = cons ctx[]
+start Input = parse start( CTX, stdin )
+print( Input, '\n' )
