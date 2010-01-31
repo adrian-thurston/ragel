@@ -2137,6 +2137,24 @@ void ParseData::addInput( ObjectDef *frame, KlangEl *lel )
 	frame->insertField( el->name, el );
 }
 
+void ParseData::addCtx( ObjectDef *frame, KlangEl *lel )
+{
+	/* Make the type ref. */
+	TypeRef *typeRef = new TypeRef( InputLoc(), uniqueTypeStream );
+
+	/* Create the field and insert it into the map. */
+	ObjField *el = new ObjField( InputLoc(), typeRef, "ctx" );
+	el->beenReferenced = true;
+	el->beenInitialized = true;
+	el->isConst   = false;
+	el->useOffset = false;
+	el->isCustom  = true;
+	el->inGetR    = IN_LOAD_CTX_R;
+	el->inGetWV   = IN_LOAD_CTX_WV;
+	el->inGetWC   = IN_LOAD_CTX_WC;
+	frame->insertField( el->name, el );
+}
+
 void ParseData::initFieldInstructions( ObjField *el )
 {
 	el->inGetR =   IN_GET_FIELD_R;
@@ -2397,6 +2415,7 @@ void ParseData::compileTranslateBlock( KlangEl *langEl )
 	addMatchLength( curLocalFrame, langEl );
 	addMatchText( curLocalFrame, langEl );
 	addInput( curLocalFrame, langEl );
+	addCtx( curLocalFrame, langEl );
 
 //	initFunction( uniqueTypeInt, curLocalFrame, "send",
 //			IN_SEND, IN_SEND, uniqueTypeAny, true );

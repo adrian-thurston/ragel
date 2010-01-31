@@ -712,6 +712,7 @@ struct ParseData
 	void addMatchText( ObjectDef *frame, KlangEl *lel );
 	void addMatchLength( ObjectDef *frame, KlangEl *lel );
 	void addInput( ObjectDef *frame, KlangEl *lel );
+	void addCtx( ObjectDef *frame, KlangEl *lel );
 	void addTransTokVar( ObjectDef *frame, KlangEl *lel );
 	void addProdRHSVars( ObjectDef *localFrame, ProdElList *prodElList );
 	void addProdRedObjectVar( ObjectDef *localFrame, KlangEl *langEl );

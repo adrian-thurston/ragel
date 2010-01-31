@@ -250,6 +250,11 @@ typedef unsigned char uchar;
 #define IN_SET_ACCUM_CTX_WC      0xb3
 #define IN_SET_ACCUM_CTX_WV      0xb4
 
+#define IN_LOAD_CTX_R            0xb5
+#define IN_LOAD_CTX_WC           0xb6
+#define IN_LOAD_CTX_WV           0xb7
+#define IN_LOAD_CTX_BKT          0xb8
+
 
 /* Types */
 #define TYPE_NIL      0x01

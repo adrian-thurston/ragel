@@ -703,9 +703,15 @@ repl_el: code_expr
 #
 # Accum
 #
+accumulate: init_repl_list accum_list;
+accumulate: init_repl_list code_expr
+	final {
+		ReplItem *replItem = new ReplItem( $2->expr->loc, ReplItem::ExprType, $2->expr );
+		replItemList->append( replItem );
+	};
 
 accum_list: accum_list accum;
-accum_list: init_accum_list accum;
+accum_list: accum;
 
 init_accum_list: 
 	final {
@@ -966,6 +972,9 @@ token_def:
 			JoinOrLm *joinOrLm = new JoinOrLm( join );
 			addRegularDef( $1->loc, namespaceStack.top(), name, joinOrLm, false );
 		}
+
+		if ( contextStack.length() > 0 )
+			tokEl->contextIn = contextStack.top();
 	};
 
 nonterm token_or_ignore
@@ -1259,7 +1268,7 @@ statement: KW_Yield var_ref
 	final {
 		$$->stmt = new LangStmt( LangStmt::YieldType, $2->varRef );
 	};
-statement: var_ref TK_LtLt accum_list
+statement: var_ref TK_LtLt accumulate
 	final {
 		Namespace *nspace = namespaceStack.top();
 		TokenRegion *region = regionStack.top();
@@ -1619,8 +1628,31 @@ code_factor:
 	};
 code_factor: KW_Parse type_ref '(' opt_code_expr_list ')'
 	final {
-		$$->expr = new LangExpr( new LangTerm( $1->loc, 
-				LangTerm::ParseType, $2->typeRef ) );
+		String parserName = $2->typeRef->typeName + "_parser";
+
+		/* Get the language element. */
+		Namespace *nspace = namespaceStack.top();
+		KlangEl *langEl = getKlangEl( pd, nspace, parserName );
+
+		/* Check that the element wasn't previously defined as something else. */
+		if ( langEl->type != KlangEl::Unknown ) {
+			error($1->loc) << "'" << parserName << 
+				"' already defined as something else" << endp;
+		}
+
+		langEl->type = KlangEl::NonTerm;
+
+		GenericType *generic = new GenericType( parserName, GEN_ACCUM, 
+				pd->nextGenericId++, langEl, $2->typeRef );
+
+		/* Add one empty production. */
+		ProdElList *emptyList = new ProdElList;
+		addProduction( $1->loc, parserName, emptyList, false, 0, 0 );
+
+		nspace->genericList.append( generic );
+		langEl->generic = generic;
+
+		$$->expr = new LangExpr( new LangTerm( $1->loc, LangTerm::ParseType, $2->typeRef ) );
 		$$->expr->term->args = $4->exprVect;
 	};
 code_factor: KW_ParseStop type_ref '(' opt_code_expr_list ')'

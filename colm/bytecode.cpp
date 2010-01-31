@@ -180,6 +180,7 @@ void call_parser( ParserRet &ret, Tree **&sp, Program *prg, Tree *context, Input
 	Tree *tree = get_parsed_root( &pdaRun, stopId > 0 );
 	tree_upref( tree );
 	clean_parser( sp, &pdaRun );
+	pdaRun.clearContext( sp );
 
 	/* Maybe return the reverse code. */
 	if ( revertOn )
@@ -199,7 +200,8 @@ void call_parser( ParserRet &ret, Tree **&sp, Program *prg, Tree *context, Input
 
 void parser_accum_set_ctx( Tree **&sp, Program *prg, Accum *accum, Tree *val )
 {
-	accum->pdaRun->context = split_tree( prg, val );
+	accum->pdaRun->context = val;
+	tree_upref( val );
 }
 
 void call_tree_parser( ParserRet &ret, Tree **&sp, Program *prg, Tree *input, 
@@ -241,6 +243,9 @@ void call_parser_frag( Tree **&sp, Program *prg, Tree *input, Accum *accum )
 
 		/* Parse. */
 		parse_loop( sp, accum->pdaRun, accum->fsmRun, accum->inputStream );
+	}
+	else if ( input->id == LEL_ID_STREAM ) {
+		parse_loop( sp, accum->pdaRun, accum->fsmRun, ((Stream*)input)->in );
 	}
 	else {
 		/* Cause a flush */
@@ -1240,6 +1245,56 @@ again:
 
 			tree_upref( fsmRun->curStream );
 			push( fsmRun->curStream );
+			break;
+		}
+		case IN_LOAD_CTX_R: {
+			#ifdef COLM_LOG_BYTECODE
+			if ( colm_log_bytecode ) {
+				cerr << "IN_LOAD_CTX_R" << endl;
+			}
+			#endif
+
+			tree_upref( pdaRun->context );
+			push( pdaRun->context );
+			break;
+		}
+		case IN_LOAD_CTX_WV: {
+			#ifdef COLM_LOG_BYTECODE
+			if ( colm_log_bytecode ) {
+				cerr << "IN_LOAD_CTX_WV" << endl;
+			}
+			#endif
+
+			tree_upref( pdaRun->context );
+			push( pdaRun->context );
+
+			/* Set up the reverse instruction. */
+			reverseCode.append( IN_LOAD_INPUT_BKT );
+			rcodeUnitLen = SIZEOF_CODE;
+			break;
+		}
+		case IN_LOAD_CTX_WC: {
+			#ifdef COLM_LOG_BYTECODE
+			if ( colm_log_bytecode ) {
+				cerr << "IN_LOAD_CTX_WC" << endl;
+			}
+			#endif
+
+			/* This is identical to the _R version, but using it for writing
+			 * would be confusing. */
+			tree_upref( pdaRun->context );
+			push( pdaRun->context );
+			break;
+		}
+		case IN_LOAD_CTX_BKT: {
+			#ifdef COLM_LOG_BYTECODE
+			if ( colm_log_bytecode ) {
+				cerr << "IN_LOAD_CTX_BKT" << endl;
+			}
+			#endif
+
+			tree_upref( pdaRun->context );
+			push( pdaRun->context );
 			break;
 		}
 		case IN_INIT_CAPTURES: {
@@ -2436,6 +2491,7 @@ again:
 			Tree *val = pop();
 			parser_accum_set_ctx( sp, prg, (Accum*)obj, val );
 			tree_downref( prg, sp, obj );
+			tree_downref( prg, sp, val );
 			break;
 		}
 
