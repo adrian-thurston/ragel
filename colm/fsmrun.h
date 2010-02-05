@@ -121,11 +121,9 @@ void init_input_stream( InputStream *in );
 void send_queued_tokens( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
 void send_handle_error( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
 Head *extract_match( Program *prg, FsmRun *fsmRun, InputStream *inputStream );
-void send_back( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
-void queue_back_tree( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
-void parse_loop( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
+void queueBackTree( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
+void parseLoop( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
 long scan_token( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
-void send_back_text( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length );
 
 Head *stream_pull( Program *prg, FsmRun *fsmRun, InputStream *inputStream, long length );
 void stream_push_text( InputStream *inputStream, const char *data, long length );
@@ -137,7 +135,7 @@ void send_named_lang_el( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream 
 Kid *make_token( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, int id,
 		Head *tokdata, bool namedLangEl, int bindId );
 
-void new_token( PdaRun *pdaRun, FsmRun *fsmRun );
+void newToken( PdaRun *pdaRun, FsmRun *fsmRun );
 long scan_token( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
 
 #endif

@@ -1490,8 +1490,8 @@ void ParseData::parsePatterns()
 
 		init_pda_run( repl->pdaRun, 0 );
 		init_fsm_run( fsmRun, &in );
-		new_token( repl->pdaRun, fsmRun );
-		parse_loop( root, repl->pdaRun, fsmRun, &in );
+		newToken( repl->pdaRun, fsmRun );
+		parseLoop( root, repl->pdaRun, fsmRun, &in );
 	}
 
 	for ( PatternList::Iter pat = patternList; pat.lte(); pat++ ) {
@@ -1509,8 +1509,8 @@ void ParseData::parsePatterns()
 
 		init_pda_run( pat->pdaRun, 0 );
 		init_fsm_run( fsmRun, &in );
-		new_token( pat->pdaRun, fsmRun );
-		parse_loop( root, pat->pdaRun, fsmRun, &in );
+		newToken( pat->pdaRun, fsmRun );
+		parseLoop( root, pat->pdaRun, fsmRun, &in );
 	}
 
 	fillInPatterns( &program );

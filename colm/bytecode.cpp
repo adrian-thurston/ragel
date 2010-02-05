@@ -163,7 +163,8 @@ struct ParserRet
 	FsmRun *fsmRun;
 };
 
-void call_parser( ParserRet &ret, Tree **&sp, Program *prg, Tree *context, InputStream *inputStream, Stream *stream,
+void call_parser( ParserRet &ret, Tree **&sp, Program *prg, 
+		Tree *context, InputStream *inputStream, Stream *stream,
 		long parserId, long stopId, CodeVect *&cv, bool revertOn )
 {
 	PdaTables *tables = prg->rtd->pdaTables;
@@ -173,8 +174,8 @@ void call_parser( ParserRet &ret, Tree **&sp, Program *prg, Tree *context, Input
 
 	init_pda_run( &pdaRun, context );
 	init_fsm_run( fsmRun, inputStream );
-	new_token( &pdaRun, fsmRun );
-	parse_loop( sp, &pdaRun, fsmRun, inputStream );
+	newToken( &pdaRun, fsmRun );
+	parseLoop( sp, &pdaRun, fsmRun, inputStream );
 
 	commit_full( sp, &pdaRun, 0 );
 	Tree *tree = get_parsed_root( &pdaRun, stopId > 0 );
@@ -242,15 +243,15 @@ void call_parser_frag( Tree **&sp, Program *prg, Tree *input, Accum *accum )
 		accum->inputStream->append( s.c_str(), s.size() );
 
 		/* Parse. */
-		parse_loop( sp, accum->pdaRun, accum->fsmRun, accum->inputStream );
+		parseLoop( sp, accum->pdaRun, accum->fsmRun, accum->inputStream );
 	}
 	else if ( input->id == LEL_ID_STREAM ) {
-		parse_loop( sp, accum->pdaRun, accum->fsmRun, ((Stream*)input)->in );
+		parseLoop( sp, accum->pdaRun, accum->fsmRun, ((Stream*)input)->in );
 	}
 	else {
 		/* Cause a flush */
 		accum->inputStream->flush = true;
-		parse_loop( sp, accum->pdaRun, accum->fsmRun, accum->inputStream );
+		parseLoop( sp, accum->pdaRun, accum->fsmRun, accum->inputStream );
 
 		send_tree_from_exec( prg, sp, accum->pdaRun, input, false );
 		send_queued_tokens( sp, accum->pdaRun, accum->fsmRun, accum->inputStream );
@@ -261,7 +262,7 @@ void undo_call_parser_frag( Tree **&sp, Program *prg, Accum *accum, long consume
 {
 	accum->pdaRun->numRetry += 1;
 	accum->pdaRun->targetConsumed = consumed;
-	parse_token( sp, accum->inputStream, accum->fsmRun, accum->pdaRun, 0 );
+	parseToken( sp, accum->pdaRun, accum->fsmRun, accum->inputStream, 0 );
 	accum->pdaRun->targetConsumed = -1;
 	accum->pdaRun->numRetry -= 1;
 }
@@ -269,7 +270,7 @@ void undo_call_parser_frag( Tree **&sp, Program *prg, Accum *accum, long consume
 Tree *parser_frag_finish( Tree **&sp, Program *prg, Accum *accum )
 {
 	accum->inputStream->eof = true;
-	parse_loop( sp, accum->pdaRun, accum->fsmRun, accum->inputStream );
+	parseLoop( sp, accum->pdaRun, accum->fsmRun, accum->inputStream );
 
 	commit_full( sp, accum->pdaRun, 0 );
 	Tree *tree = get_parsed_root( accum->pdaRun, false );
@@ -289,7 +290,7 @@ void undo_parse( Tree **&sp, Program *prg, FsmRun *fsmRun, Stream *stream,
 {
 	PdaTables *tables = prg->rtd->pdaTables;
 	PdaRun pdaRun( prg, tables, fsmRun, parserId, 0, false );
-	undo_parse( sp, stream->in, fsmRun, &pdaRun, tree, rev );
+	undoParse( sp, &pdaRun, fsmRun, stream->in, tree, rev );
 }
 
 Tree *stream_pull( Program *prg, FsmRun *fsmRun, Stream *stream, Tree *length )
@@ -2401,7 +2402,8 @@ again:
 			Tree *stream = pop();
 			Tree *context = pop();
 			ParserRet ret;
-			call_parser( ret, sp, prg, context, ((Stream*)stream)->in, (Stream*)stream, parserId, stopId, cv, true );
+			call_parser( ret, sp, prg, context, ((Stream*)stream)->in, 
+				(Stream*)stream, parserId, stopId, cv, true );
 			push( ret.tree );
 
 			/* Single unit. */
@@ -2431,7 +2433,8 @@ again:
 			Tree *stream = pop();
 			Tree *context = pop();
 			ParserRet ret;
-			call_parser( ret, sp, prg, context, ((Stream*)stream)->in, (Stream*)stream, parserId, stopId, cv, false );
+			call_parser( ret, sp, prg, context, ((Stream*)stream)->in, 
+				(Stream*)stream, parserId, stopId, cv, false );
 			push( ret.tree );
 
 			tree_downref( prg, sp, (Tree*)stream );

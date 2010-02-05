@@ -1015,7 +1015,7 @@ Tree *create_generic( Program *prg, long genericId )
 			/* Start off the parsing process. */
 			init_pda_run( accum->pdaRun, 0 );
 			init_fsm_run( accum->fsmRun, accum->inputStream );
-			new_token( accum->pdaRun, accum->fsmRun );
+			newToken( accum->pdaRun, accum->fsmRun );
 
 			newGeneric = (Tree*) accum;
 			break;

@@ -312,7 +312,7 @@ void commit_full( Tree **sp, PdaRun *parser, long causeReduce )
  * shift-reduce:  cannot be a retry
  */
 
-void parse_token( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, Kid *input )
+void parseToken( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input )
 {
 	int pos, targState;
 	unsigned int *action;
@@ -577,7 +577,7 @@ parseError:
 			if ( pt(input->tree)->causeReduce == 0 ) {
 				int next = pt(input->tree)->region + 1;
 
-				queue_back_tree( sp, pdaRun, fsmRun, inputStream, input );
+				queueBackTree( sp, pdaRun, fsmRun, inputStream, input );
 				input = 0;
 				if ( pdaRun->tables->tokenRegions[next] != 0 ) {
 					#ifdef COLM_LOG_PARSE
