@@ -47,6 +47,26 @@ FsmRun::FsmRun( Program *prg ) :
 {
 }
 
+void incrementConsumed( PdaRun *pdaRun )
+{
+	pdaRun->consumed += 1;
+
+	#ifdef COLM_LOG_PARSE
+	if ( colm_log_parse )
+		cerr << "consumed up to " << pdaRun->consumed << endl;
+	#endif
+}
+
+void decrementConsumed( PdaRun *pdaRun )
+{
+	pdaRun->consumed -= 1;
+
+	#ifdef COLM_LOG_PARSE
+	if ( colm_log_parse )
+		cerr << "consumed down to " << pdaRun->consumed << endl;
+	#endif
+}
+
 /* Keep the position up to date after consuming text. */
 void update_position( InputStream *inputStream, const char *data, long length )
 {
@@ -363,6 +383,8 @@ void send_back_ignore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *i
 		if ( head != 0 && !artificial )
 			send_back_text( fsmRun, inputStream, string_data( head ), head->length );
 
+		decrementConsumed( pdaRun );
+
 		/* Check for reverse code. */
 		if ( ignore->tree->flags & AF_HAS_RCODE ) {
 			Execution execution( pdaRun->prg, pdaRun->reverseCode, 
@@ -400,6 +422,8 @@ void send_back( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStr
 		 * whitespace. */
 		inputStream->pushBackNamed();
 	}
+
+	decrementConsumed( pdaRun );
 
 	if ( input->tree->flags & AF_ARTIFICIAL ) {
 		tree_upref( input->tree );
@@ -451,6 +475,15 @@ void send_back( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStr
 	if ( lastBound == input->tree ) {
 		pdaRun->bindings.pop();
 		tree_downref( fsmRun->prg, sp, input->tree );
+	}
+
+	if ( pdaRun->consumed == pdaRun->targetConsumed ) {
+		#ifdef COLM_LOG_PARSE
+		if ( colm_log_parse )
+			cerr << "trigger parse stop, consumed = target = " << pdaRun->targetConsumed << endl;
+		#endif
+		
+		pdaRun->stop = true;
 	}
 
 	/* Downref the tree that was sent back and free the kid. */
@@ -519,7 +552,9 @@ void send_queued_tokens( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream 
 						pdaRun->tables->rtd->lelInfo[send->tree->id].name << endl;
 			}
 			#endif
-			
+
+			incrementConsumed( pdaRun );
+
 			ignore( pdaRun, send->tree );
 			fsmRun->prg->kidPool.free( send );
 		}
@@ -530,6 +565,8 @@ void send_queued_tokens( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream 
 						pdaRun->tables->rtd->lelInfo[send->tree->id].name << endl;
 			}
 			#endif
+
+			incrementConsumed( pdaRun );
 
 			send_handle_error( sp, pdaRun, fsmRun, inputStream, send );
 		}
@@ -750,6 +787,8 @@ void send_ignore( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long
 	tree->id = id;
 	tree->tokdata = ignoreStr;
 
+	incrementConsumed( pdaRun );
+
 	/* Send it to the pdaRun. */
 	ignore( pdaRun, tree );
 }
@@ -781,6 +820,9 @@ void send_token( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pd
 	update_position( inputStream, fsmRun->tokstart, tokdata->length );
 
 	Kid *input = make_token( pdaRun, fsmRun, inputStream, id, tokdata, false, 0 );
+
+	incrementConsumed( pdaRun );
+
 	send_handle_error( sp, pdaRun, fsmRun, inputStream, input );
 }
 
@@ -863,6 +905,7 @@ long undo_parse( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pd
 	pdaRun->numRetry += 1;
 	pdaRun->allReverseCode = rev;
 
+	pdaRun->stop = false;
 	parse_token( sp, inputStream, fsmRun, pdaRun, 0 );
 
 	assert( pdaRun->stackTop->next == 0 );
@@ -1103,15 +1146,21 @@ void send_tree( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStr
 	RunBuf *runBuf = inputStream->queue;
 	inputStream->queue = inputStream->queue->next;
 
+	/* FIXME: using runbufs here for this is a poor use of memory. */
 	Kid *input = fsmRun->prg->kidPool.allocate();
 	input->tree = runBuf->tree;
 	delete runBuf;
+
+	incrementConsumed( pdaRun );
+
 	send_handle_error( sp, pdaRun, fsmRun, inputStream, input );
 }
 
 
 void parse_loop( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 {
+	pdaRun->stop = false;
+
 	while ( true ) {
 		/* Pull the current scanner from the parser. This can change during
 		 * parsing due to inputStream pushes, usually for the purpose of includes.
@@ -1167,6 +1216,11 @@ void parse_loop( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputSt
 				cerr << "scanner has been stopped" << endl;
 			}
 			#endif
+			break;
+		}
+
+		if ( pdaRun->stop ) {
+			cerr << "parsing has been stopped by consumedCount" << endl;
 			break;
 		}
 	}

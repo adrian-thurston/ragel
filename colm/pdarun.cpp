@@ -604,6 +604,15 @@ parseError:
 		if ( undoLel->next == 0 )
 			break;
 
+		if ( pdaRun->stop ) {
+			#ifdef COLM_LOG_PARSE
+			if ( colm_log_parse ) {
+				cerr << "stopping the backtracking, consumed is " << pdaRun->consumed << endl;
+			}
+			#endif
+			goto _out;
+		}
+
 		/* Either we are dealing with a terminal that was
 		 * shifted or a nonterminal that was reduced. */
 		if ( pdaRun->stackTop->tree->id < pdaRun->tables->rtd->firstNonTermId || 

@@ -1887,7 +1887,10 @@ void LangStmt::evaluateAccumItems( ParseData *pd, CodeVect &code ) const
 			break;
 		}
 
-		code.append( IN_PARSE_FRAG_WC );
+		if ( pd->revertOn )
+			code.append( IN_PARSE_FRAG_WV );
+		else
+			code.append( IN_PARSE_FRAG_WC );
 	}
 }
 

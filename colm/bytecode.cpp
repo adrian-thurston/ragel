@@ -257,6 +257,14 @@ void call_parser_frag( Tree **&sp, Program *prg, Tree *input, Accum *accum )
 	}
 }
 
+void undo_call_parser_frag( Tree **&sp, Program *prg, Accum *accum, long consumed )
+{
+	accum->pdaRun->numRetry += 1;
+	accum->pdaRun->targetConsumed = consumed;
+	parse_token( sp, accum->inputStream, accum->fsmRun, accum->pdaRun, 0 );
+	accum->pdaRun->targetConsumed = -1;
+	accum->pdaRun->numRetry -= 1;
+}
 
 Tree *parser_frag_finish( Tree **&sp, Program *prg, Accum *accum )
 {
@@ -2460,7 +2468,48 @@ again:
 			Tree *input = pop();
 			Tree *accum = pop();
 			call_parser_frag( sp, prg, input, (Accum*)accum );
+
 			tree_downref( prg, sp, input );
+			tree_downref( prg, sp, accum );
+			break;
+		}
+
+		case IN_PARSE_FRAG_WV: {
+			#ifdef COLM_LOG_BYTECODE
+			if ( colm_log_bytecode ) {
+				cerr << "IN_PARSE_FRAG_WV " << endl;
+			}
+			#endif
+
+			Tree *input = pop();
+			Tree *accum = pop();
+			long consumed = ((Accum*)accum)->pdaRun->consumed;
+			call_parser_frag( sp, prg, input, (Accum*)accum );
+			tree_downref( prg, sp, input );
+			//tree_downref( prg, sp, accum );
+
+			reverseCode.append( IN_PARSE_FRAG_BKT );
+			reverseCode.appendWord( (Word) accum );
+			reverseCode.appendWord( consumed );
+			reverseCode.append( SIZEOF_CODE + SIZEOF_WORD + SIZEOF_WORD );
+			break;
+		}
+
+		case IN_PARSE_FRAG_BKT: {
+			Tree *accum;
+			long consumed;
+			read_tree( accum );
+			read_word( consumed );
+
+			#ifdef COLM_LOG_BYTECODE
+			if ( colm_log_bytecode )
+				cerr << "IN_PARSE_FRAG_BKT " << consumed << endl;
+			#endif
+
+//			Tree *input = pop();
+//			Tree *accum = pop();
+			undo_call_parser_frag( sp, prg, (Accum*)accum, consumed );
+//			tree_downref( prg, sp, input );
 			tree_downref( prg, sp, accum );
 			break;
 		}

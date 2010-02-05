@@ -292,6 +292,9 @@ void send_named_lang_el( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream 
 		tokdata = string_alloc_full( fsmRun->prg, data, length );
 
 	Kid *input = make_token( pdaRun, fsmRun, inputStream, klangEl->id, tokdata, true, bindId );
+
+	pdaRun->consumed += 1;
+
 	send_handle_error( sp, pdaRun, fsmRun, inputStream, input );
 }
 

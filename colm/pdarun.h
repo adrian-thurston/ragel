@@ -534,7 +534,9 @@ struct PdaRun
 		queue(0),
 		queueLast(0),
 		revertOn(revertOn),
-		context(0)
+		context(0),
+		consumed(0),
+		targetConsumed(-1)
 	{
 	}
 
@@ -580,6 +582,12 @@ struct PdaRun
 
 	Tree *context;
 	void clearContext( Tree **sp );
+
+	//bool fragStop;
+	bool stop;
+
+	long consumed;
+	long targetConsumed;
 };
 
 void clean_parser( Tree **root, PdaRun *pdaRun );
