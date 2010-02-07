@@ -2422,11 +2422,6 @@ void ParseData::compileTranslateBlock( KlangEl *langEl )
 	addInput( curLocalFrame, langEl );
 	addCtx( curLocalFrame, langEl );
 
-//	initFunction( uniqueTypeInt, curLocalFrame, "send",
-//			IN_SEND, IN_SEND, uniqueTypeAny, true );
-	initFunction( uniqueTypeInt, curLocalFrame, "send_ignore",
-			IN_IGNORE, IN_IGNORE, uniqueTypeAny, true );
-
 	CodeVect &code = block->codeWV;
 
 	/* Add the alloc frame opcode. We don't have the right 
@@ -2476,11 +2471,6 @@ void ParseData::compilePreEof( TokenRegion *region )
 //	addMatchText( curLocalFrame, langEl );
 //	initFunction( uniqueTypeStr, curLocalFrame, "pull",
 //			IN_STREAM_PULL, IN_STREAM_PULL, uniqueTypeStream, uniqueTypeInt, true );
-
-//	initFunction( uniqueTypeInt, curLocalFrame, "send",
-//			IN_SEND, IN_SEND, uniqueTypeAny, true );
-	initFunction( uniqueTypeInt, curLocalFrame, "send_ignore",
-			IN_IGNORE, IN_IGNORE, uniqueTypeAny, true );
 
 	CodeVect &code = block->codeWV;
 

@@ -236,7 +236,6 @@ typedef unsigned char uchar;
 #define IN_STREAM_PUSH           0x96
 #define IN_STREAM_PUSH_BKT       0x97
 #define IN_STREAM_PUSH_IGNORE    0xbb
-#define IN_IGNORE                0x99
 #define IN_LOAD_INPUT_R          0xa8
 #define IN_LOAD_INPUT_WV         0xa9
 #define IN_LOAD_INPUT_WC         0xaa

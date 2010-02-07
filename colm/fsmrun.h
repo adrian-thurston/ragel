@@ -143,5 +143,7 @@ Kid *make_token( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, int i
 
 void newToken( PdaRun *pdaRun, FsmRun *fsmRun );
 long scan_token( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
+void incrementConsumed( PdaRun *pdaRun );
+void ignore( PdaRun *pdaRun, Tree *tree );
 
 #endif

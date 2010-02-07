@@ -132,9 +132,10 @@ Tree *prep_parse_tree( Program *prg, Tree **sp, Tree *tree )
 	return  tree;
 }
 
-void send_tree_from_exec( Program *prg, Tree **root, PdaRun *pdaRun, Tree *tree, bool ignore )
+void sendTreeFrag( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream,
+		Tree *tree, bool ignore )
 {
-	tree = prep_parse_tree( prg, root, tree );
+	tree = prep_parse_tree( prg, sp, tree );
 
 	if ( tree->id >= prg->rtd->firstNonTermId )
 		tree->id = prg->rtd->lelInfo[tree->id].termDupId;
@@ -146,14 +147,36 @@ void send_tree_from_exec( Program *prg, Tree **root, PdaRun *pdaRun, Tree *tree,
 	/* FIXME: Do we need to remove the ignore tokens 
 	 * at this point? Will it cause a leak? */
 
-	Kid *kid = prg->kidPool.allocate();
-	kid->tree = tree;
+	Kid *send = prg->kidPool.allocate();
+	send->tree = tree;
 
-	if ( pdaRun->queue == 0 )
-		pdaRun->queue = pdaRun->queueLast = kid;
+	LangElInfo *lelInfo = pdaRun->prg->rtd->lelInfo;
+
+	/* Must clear next, since the parsing algorithm uses it. */
+	if ( lelInfo[send->tree->id].ignore ) {
+		#ifdef COLM_LOG_PARSE
+		if ( colm_log_parse ) {
+			cerr << "ignoring queued item: " << 
+					pdaRun->tables->rtd->lelInfo[send->tree->id].name << endl;
+		}
+		#endif
+
+		incrementConsumed( pdaRun );
+
+		::ignore( pdaRun, send->tree );
+		pdaRun->prg->kidPool.free( send );
+	}
 	else {
-		pdaRun->queueLast->next = kid;
-		pdaRun->queueLast = kid;
+		#ifdef COLM_LOG_PARSE
+		if ( colm_log_parse ) {
+			cerr << "sending queue item: " << 
+					pdaRun->tables->rtd->lelInfo[send->tree->id].name << endl;
+		}
+		#endif
+
+		incrementConsumed( pdaRun );
+
+		send_handle_error( sp, pdaRun, fsmRun, inputStream, send );
 	}
 }
 
@@ -253,8 +276,7 @@ void call_parser_frag( Tree **&sp, Program *prg, Tree *input, Accum *accum )
 		accum->inputStream->flush = true;
 		parseLoop( sp, accum->pdaRun, accum->fsmRun, accum->inputStream );
 
-		send_tree_from_exec( prg, sp, accum->pdaRun, input, false );
-		send_queued_tokens( sp, accum->pdaRun, accum->fsmRun, accum->inputStream );
+		sendTreeFrag( prg, sp, accum->pdaRun, accum->fsmRun, accum->inputStream, input, false );
 	}
 }
 
@@ -2773,20 +2795,6 @@ again:
 			for ( long i = 0; i < nargs; i++ )
 				tree_downref( prg, sp, pop() );
 			push( result );
-			break;
-		}
-		case IN_IGNORE: {
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode ) {
-				cerr << "IN_IGNORE" << endl;
-			}
-			#endif
-
-			Tree *tree = pop();
-			send_tree_from_exec( prg, sp, pdaRun, tree, true );
-			push( 0 );
-
-			tree_downref( prg, sp, tree );
 			break;
 		}
 		case IN_TREE_NEW: {
