@@ -13,7 +13,7 @@ lex start
 
 	token open_paren /'('/ 
 	{
-		send_ignore( parse_stop nested_comment( stdin ) )
+		input.push_ignore( parse_stop nested_comment( stdin ) )
 	}
 }
 
@@ -38,4 +38,5 @@ def nested [id*]
 
 nested P = parse nested( stdin )
 print_xml( P )
+print_xml_ac( P )
 print( P, '\n' )
