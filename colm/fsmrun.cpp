@@ -449,51 +449,30 @@ void sendBack( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStre
 /* This is the entry point for the perser to send back tokens. */
 void queueBackTree( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input )
 {
-	if ( input->tree->flags & AF_GROUP_MEM ) {
-		/* Tokens sent as a group from a translation action need to be sent
-		 * back as one. Queue them up until the leader arrives. */
-		#ifdef COLM_LOG_PARSE
-		if ( colm_log_parse ) {
-			LangElInfo *lelInfo = pdaRun->tables->rtd->lelInfo;
-			cerr << "queuing back: " << lelInfo[input->tree->id].name << endl;
+	/* If there are queued items send them back starting at the tail
+	 * (newest). */
+	if ( pdaRun->queue != 0 ) {
+		/* Reverse the list. */
+		Kid *kid = pdaRun->queue, *last = 0;
+		while ( kid != 0 ) {
+			Kid *next = kid->next;
+			kid->next = last;
+			last = kid;
+			kid = next;
 		}
-		#endif
 
-		/* FIXME: I think this is the wrong order. The sending of individual
-		 * queued tokens is a pop, so this should be a push. */
-		if ( pdaRun->queue == 0 )
-			pdaRun->queue = pdaRun->queueLast = input;
-		else {
-			pdaRun->queueLast->next = input;
-			pdaRun->queueLast = input;
+		/* Send them back. */
+		while ( last != 0 ) {
+			Kid *next = last->next;
+			sendBack( sp, pdaRun, fsmRun, inputStream, last );
+			last = next;
 		}
+
+		pdaRun->queue = 0;
 	}
-	else {
-		/* If there are queued items send them back starting at the tail
-		 * (newest). */
-		if ( pdaRun->queue != 0 ) {
-			/* Reverse the list. */
-			Kid *kid = pdaRun->queue, *last = 0;
-			while ( kid != 0 ) {
-				Kid *next = kid->next;
-				kid->next = last;
-				last = kid;
-				kid = next;
-			}
 
-			/* Send them back. */
-			while ( last != 0 ) {
-				Kid *next = last->next;
-				sendBack( sp, pdaRun, fsmRun, inputStream, last );
-				last = next;
-			}
-
-			pdaRun->queue = 0;
-		}
-
-		/* Now that the queue is flushed, can send back the original item. */
-		sendBack( sp, pdaRun, fsmRun, inputStream, input );
-	}
+	/* Now that the queue is flushed, can send back the original item. */
+	sendBack( sp, pdaRun, fsmRun, inputStream, input );
 }
 
 /* If no token was generated but there is reverse code then we must generate
@@ -517,25 +496,6 @@ void add_notoken( Program *prg, PdaRun *parser )
 		parser->queue = prg->kidPool.allocate();
 		parser->queue->tree = tree;
 		parser->queue->next = 0;
-	}
-}
-
-/* Sets the AF_GROUP_MEM so the backtracker can tell which tokens were sent
- * generated from a single action. */
-void set_AF_GROUP_MEM( PdaRun *parser )
-{
-	LangElInfo *lelInfo = parser->prg->rtd->lelInfo;
-
-	long sendCount = 0;
-	Kid *queued = parser->queue;
-	while ( queued != 0 ) {
-		/* Only bother with non-ignore tokens. */
-		if ( !lelInfo[queued->tree->id].ignore ) {
-			if ( sendCount > 0 )
-				queued->tree->flags |= AF_GROUP_MEM;
-			sendCount += 1;
-		}
-		queued = queued->next;
 	}
 }
 
@@ -639,9 +599,6 @@ void execute_generation_action( Tree **sp, Program *prg, FsmRun *fsmRun, PdaRun 
 	bool hasrcode = make_reverse_code( pdaRun->allReverseCode, pdaRun->reverseCode );
 	if ( hasrcode )
 		tree->flags |= AF_HAS_RCODE;
-
-	/* Mark generated tokens as belonging to a group. */
-	set_AF_GROUP_MEM( pdaRun );
 }
 
 /* 
