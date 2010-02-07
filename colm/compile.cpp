@@ -2239,6 +2239,8 @@ void ParseData::initStreamObject( )
 
 	initFunction( uniqueTypeStr, streamObj, "pull",  IN_STREAM_PULL, IN_STREAM_PULL, uniqueTypeInt, false );
 	initFunction( uniqueTypeStr, streamObj, "push",  IN_STREAM_PUSH, IN_STREAM_PUSH, uniqueTypeAny, false );
+	initFunction( uniqueTypeStr, streamObj, "push_ignore",  
+			IN_STREAM_PUSH_IGNORE, IN_STREAM_PUSH_IGNORE, uniqueTypeAny, false );
 }
 
 ObjField *ParseData::makeDataEl()

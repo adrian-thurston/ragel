@@ -237,7 +237,7 @@ void stream_push_text( InputStream *inputStream, const char *data, long length )
 	inputStream->pushBackBuf( newBuf );
 }
 
-void stream_push_tree( InputStream *inputStream, Tree *tree )
+void streamPushTree( InputStream *inputStream, Tree *tree, bool ignore )
 {
 	#ifdef COLM_LOG_PARSE
 	if ( colm_log_parse ) {
@@ -251,7 +251,7 @@ void stream_push_tree( InputStream *inputStream, Tree *tree )
 	 * Something better is needed here. It puts a max on the amount of
 	 * data that can be pushed back to the inputStream. */
 	RunBuf *newBuf = new RunBuf;
-	newBuf->type = 1;
+	newBuf->type = ignore ? RunBuf::Ignore : RunBuf::Token;
 	newBuf->tree = tree;
 	newBuf->next = inputStream->queue;
 	inputStream->queue = newBuf;
@@ -261,7 +261,7 @@ void undo_stream_push( Tree **sp, FsmRun *fsmRun, InputStream *inputStream, long
 {
 	take_back_buffered( inputStream );
 
-	if ( inputStream->queue->type == 0 ) {
+	if ( inputStream->queue->type == RunBuf::Data ) {
 		char tmp[length];
 		int have = 0;
 		while ( have < length ) {
@@ -381,7 +381,7 @@ void sendBack( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStre
 
 	if ( input->tree->flags & AF_ARTIFICIAL ) {
 		tree_upref( input->tree );
-		stream_push_tree( inputStream, input->tree );
+		streamPushTree( inputStream, input->tree, false );
 
 		/* FIXME: need to undo the merge of ignore tokens. */
 		Kid *leftIgnore = 0;
@@ -944,7 +944,32 @@ void newToken( PdaRun *pdaRun, FsmRun *fsmRun )
 	memset( fsmRun->mark, 0, sizeof(fsmRun->mark) );
 }
 
+void breakRunBuf( FsmRun *fsmRun )
+{
+	/* We break the runbuf on named language elements and trees. This makes
+	 * backtracking simpler because it allows us to always push back whole
+	 * runBufs only. If we did not do this we could get half a runBuf, a named
+	 * langEl, then the second half full. During backtracking we would need to
+	 * push the halves back separately. */
+	if ( fsmRun->p > fsmRun->runBuf->buf ) {
+		#ifdef COLM_LOG_PARSE
+		if ( colm_log_parse )
+			cerr << "have a langEl, making a new runBuf" << endl;
+		#endif
 
+		/* Compute the length of the current before before we move
+		 * past it. */
+		fsmRun->runBuf->length = fsmRun->p - fsmRun->runBuf->buf;;
+
+		/* Make the new one. */
+		RunBuf *newBuf = new RunBuf;
+		fsmRun->p = fsmRun->pe = newBuf->buf;
+		newBuf->next = fsmRun->runBuf;
+		fsmRun->runBuf = newBuf;
+	}
+}
+
+#define SCAN_IGNORE            -6
 #define SCAN_TREE              -5
 #define SCAN_TRY_AGAIN_LATER   -4
 #define SCAN_ERROR             -3
@@ -992,37 +1017,20 @@ long scan_token( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 		 * data. */
 		assert( fsmRun->p == fsmRun->pe );
 
-		/* Check for a named language element. Note that we can do this only
-		 * when data == de otherwise we get ahead of what's already in the
-		 * buffer. */
-		if ( inputStream->isLangEl() || inputStream->isTree() ) {
-			/* Always break the runBuf on named language elements. This makes
-			 * backtracking simpler because it allows us to always push back
-			 * whole runBufs only. If we did not do this we could get half a
-			 * runBuf, a named langEl, then the second half full. During
-			 * backtracking we would need to push the halves back separately.
-			 * */
-			if ( fsmRun->p > fsmRun->runBuf->buf ) {
-				#ifdef COLM_LOG_PARSE
-				if ( colm_log_parse )
-					cerr << "have a langEl, making a new runBuf" << endl;
-				#endif
-
-				/* Compute the length of the current before before we move
-				 * past it. */
-				fsmRun->runBuf->length = fsmRun->p - fsmRun->runBuf->buf;;
-
-				/* Make the new one. */
-				RunBuf *newBuf = new RunBuf;
-				fsmRun->p = fsmRun->pe = newBuf->buf;
-				newBuf->next = fsmRun->runBuf;
-				fsmRun->runBuf = newBuf;
-			}
-
-			if ( inputStream->isLangEl() )
-				return SCAN_LANG_EL;
-			else
-				return SCAN_TREE;
+		/* Check for a named language element or constructed trees. Note that
+		 * we can do this only when data == de otherwise we get ahead of what's
+		 * already in the buffer. */
+		if ( inputStream->isLangEl() ) {
+			breakRunBuf( fsmRun );
+			return SCAN_LANG_EL;
+		}
+		else if ( inputStream->isTree() ) {
+			breakRunBuf( fsmRun );
+			return SCAN_TREE;
+		}
+		else if ( inputStream->isIgnore() ) {
+			breakRunBuf( fsmRun );
+			return SCAN_IGNORE;
 		}
 
 		/* Maybe need eof. */
@@ -1146,7 +1154,7 @@ void scanner_error( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun 
 	}
 }
 
-void send_tree( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
+void sendTree( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 {
 	RunBuf *runBuf = inputStream->queue;
 	inputStream->queue = inputStream->queue->next;
@@ -1161,6 +1169,19 @@ void send_tree( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStr
 	send_handle_error( sp, pdaRun, fsmRun, inputStream, input );
 }
 
+void sendTreeIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
+{
+	RunBuf *runBuf = inputStream->queue;
+	inputStream->queue = inputStream->queue->next;
+
+	/* FIXME: using runbufs here for this is a poor use of memory. */
+	Tree *tree = runBuf->tree;
+	delete runBuf;
+
+	incrementConsumed( pdaRun );
+
+	ignore( pdaRun, tree );
+}
 
 void parseLoop( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 {
@@ -1196,8 +1217,12 @@ void parseLoop( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStr
 			send_named_lang_el( sp, pdaRun, fsmRun, inputStream );
 		}
 		else if ( tokenId == SCAN_TREE ) {
-			/* Check for a tree. */
-			send_tree( sp, pdaRun, fsmRun, inputStream );
+			/* A tree already built. */
+			sendTree( sp, pdaRun, fsmRun, inputStream );
+		}
+		else if ( tokenId == SCAN_IGNORE ) {
+			/* A tree to ignore. */
+			sendTreeIgnore( sp, pdaRun, fsmRun, inputStream );
 		}
 		else {
 			/* Plain token. */

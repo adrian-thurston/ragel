@@ -29,10 +29,18 @@ using std::endl;
 
 bool InputStream::isTree()
 { 
-	if ( queue != 0 && queue->type == 1 )
+	if ( queue != 0 && queue->type == RunBuf::Token )
 		return true;
 	return false;
 }
+
+bool InputStream::isIgnore()
+{ 
+	if ( queue != 0 && queue->type == RunBuf::Ignore )
+		return true;
+	return false;
+}
+
 
 /*
  * String

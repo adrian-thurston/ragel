@@ -674,6 +674,7 @@ rec_call:
 				kid = child;
 
 			while ( kid != 0 ) {
+				/* FIXME: I don't think we need this check for ignore any more. */
 				if ( kid->tree == 0 || !lelInfo[kid->tree->id].ignore ) {
 					depth++;
 					goto rec_call;

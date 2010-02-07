@@ -74,9 +74,15 @@ struct FsmTables
 
 struct RunBuf
 {
+	enum Type {
+		Data,
+		Token,
+		Ignore
+	};
+
 	RunBuf()
 	:
-		type(0),
+		type(Data),
 		tree(0),
 		length(0),
 		offset(0),
@@ -84,7 +90,7 @@ struct RunBuf
 	{}
 
 	char buf[FSM_BUFSIZE];
-	long type;
+	Type type;
 	Tree *tree;
 	long length;
 	long offset;
@@ -127,7 +133,7 @@ long scan_token( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
 
 Head *stream_pull( Program *prg, FsmRun *fsmRun, InputStream *inputStream, long length );
 void stream_push_text( InputStream *inputStream, const char *data, long length );
-void stream_push_tree( InputStream *inputStream, Tree *tree );
+void streamPushTree( InputStream *inputStream, Tree *tree, bool ignore );
 void undo_stream_pull( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length );
 void undo_stream_push( Tree **sp, FsmRun *fsmRun, InputStream *inputStream, long length );
 

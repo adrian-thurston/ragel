@@ -81,6 +81,7 @@ struct InputStream
 
 	/* Named language elements for patterns and replacements. */
 	virtual bool isTree();
+	virtual bool isIgnore();
 	virtual bool isLangEl() { return false; }
 	virtual KlangEl *getLangEl( long &bindId, char *&data, long &length )
 		{ assert( false ); return 0; }

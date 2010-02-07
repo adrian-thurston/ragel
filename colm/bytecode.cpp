@@ -308,9 +308,13 @@ void undo_pull( Program *prg, FsmRun *fsmRun, Stream *stream, Tree *str )
 	undo_stream_pull( fsmRun, stream->in, data, length );
 }
 
-Word stream_push( Program *prg, Tree **&sp, Stream *stream, Tree *tree )
+Word stream_push( Program *prg, Tree **&sp, Stream *stream, Tree *tree, bool ignore )
 {
 	if ( tree->id == LEL_ID_STR ) {
+		/* This should become a compile error. If it's text, it's up to the
+		 * scanner to decide. Want to force it then send a token. */
+		assert( !ignore );
+			
 		std::stringstream ss;
 		print_tree( ss, sp, prg, tree );
 		stream_push_text( stream->in, ss.str().c_str(), ss.str().size());
@@ -324,7 +328,7 @@ Word stream_push( Program *prg, Tree **&sp, Stream *stream, Tree *tree )
 
 		tree->flags |= AF_ARTIFICIAL;
 		tree_upref( tree );
-		stream_push_tree( stream->in, tree );
+		streamPushTree( stream->in, tree, ignore );
 		return 0;
 	}
 }
@@ -2614,7 +2618,28 @@ again:
 			#endif
 			Tree *stream = pop();
 			Tree *tree = pop();
-			Word len = stream_push( prg, sp, ((Stream*)stream), tree );
+			Word len = stream_push( prg, sp, ((Stream*)stream), tree, false );
+			push( 0 );
+
+			/* Single unit. */
+			reverseCode.append( IN_STREAM_PUSH_BKT );
+			reverseCode.appendWord( len );
+			rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
+			reverseCode.append( rcodeUnitLen );
+
+			tree_downref( prg, sp, stream );
+			tree_downref( prg, sp, tree );
+			break;
+		}
+		case IN_STREAM_PUSH_IGNORE: {
+			#ifdef COLM_LOG_BYTECODE
+			if ( colm_log_bytecode ) {
+				cerr << "IN_STREAM_PUSH_IGNORE" << endl;
+			}
+			#endif
+			Tree *stream = pop();
+			Tree *tree = pop();
+			Word len = stream_push( prg, sp, ((Stream*)stream), tree, true );
 			push( 0 );
 
 			/* Single unit. */
