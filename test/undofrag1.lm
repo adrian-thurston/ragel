@@ -48,7 +48,7 @@ context ctx
 SP << "a b{c}"
 
 ctx CTX = cons ctx []
-start Input = parse start( CTX, stdin )
+ctx::start Input = parse ctx::start( CTX, stdin )
 
 SP << "{e}f g"
 

@@ -19,15 +19,18 @@ context ctx
 	|	['(' item* ')']
 		{
 			i = 0
-			j = i + 1
-			k = j + 1
-			print( k, '\n' )
 		}
 
 	def start 
 		[item*]
 }
 
-ctx CTX = cons ctx[]
-ctx::start Input = parse ctx::start( CTX, stdin )
+
+parser start_parser [ctx::start]
+start_parser SP = cons start_parser[]
+SP.ctx = cons ctx []
+SP << stdin
+ctx::start Input = SP.finish()
 print( Input, '\n' )
+
+

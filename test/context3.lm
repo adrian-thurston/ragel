@@ -13,21 +13,30 @@ context ctx
 
 	def foo [id]
 
+	int f()
+	{
+		i = i + 1
+	}
+
 	def item 
 		[id]
 	|	[foo]
 	|	['(' item* ')']
 		{
 			i = 0
-			j = i + 1
-			k = j + 1
-			print( k, '\n' )
+			f()
+			f()
+			f()
+			print( i, '\n' )
 		}
+	
 
 	def start 
 		[item*]
 }
 
-ctx CTX = cons ctx[]
+ctx CTX = cons ctx []
 ctx::start Input = parse ctx::start( CTX, stdin )
 print( Input, '\n' )
+
+

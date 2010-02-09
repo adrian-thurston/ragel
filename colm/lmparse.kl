@@ -535,12 +535,19 @@ context_def:
 	context_head '{' context_item_list '}'
 	final {
 		contextStack.pop();
+		namespaceStack.pop();
 	};
 
 context_head:
 	KW_Context TK_Word
 	final {
-		Namespace *nspace = namespaceStack.top();
+		/* Make the new namespace. */
+		Namespace *nspace = new Namespace( InputLoc(), $2->data,
+				pd->namespaceList.length(), namespaceStack.top() );
+		namespaceStack.top()->childNamespaces.append( nspace );
+		pd->namespaceList.append( nspace );
+		namespaceStack.push( nspace );
+
 		KlangEl *lel = getKlangEl( pd, nspace, $2->data );
 
 		Context *context = new Context( $1->loc, lel );
@@ -2057,21 +2064,30 @@ rl_factor:
 	TK_Word final {
 		/* Find the named graph. */
 		Namespace *nspace = namespaceStack.top();
-		GraphDictEl *gdNode = nspace->graphDict.find( $1->data );
-		if ( gdNode == 0 ) {
+
+		while ( nspace != 0 ) {
+			GraphDictEl *gdNode = nspace->graphDict.find( $1->data );
+			if ( gdNode != 0 ) {
+				if ( gdNode->isInstance ) {
+					/* Recover by retuning null as the factor node. */
+					error($1->loc) << "references to graph instantiations not allowed "
+							"in expressions" << endl;
+					$$->factor = 0;
+				}
+				else {
+					/* Create a factor node that is a lookup of an expression. */
+					$$->factor = new Factor( $1->loc, gdNode->value );
+				}
+				break;
+			}
+
+			nspace = nspace->parentNamespace;
+		}
+
+		if ( nspace == 0 ) {
 			/* Recover by returning null as the factor node. */
 			error($1->loc) << "graph lookup of \"" << $1->data << "\" failed" << endl;
 			$$->factor = 0;
-		}
-		else if ( gdNode->isInstance ) {
-			/* Recover by retuning null as the factor node. */
-			error($1->loc) << "references to graph instantiations not allowed "
-					"in expressions" << endl;
-			$$->factor = 0;
-		}
-		else {
-			/* Create a factor node that is a lookup of an expression. */
-			$$->factor = new Factor( $1->loc, gdNode->value );
 		}
 	};
 rl_factor:

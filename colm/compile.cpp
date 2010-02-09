@@ -226,11 +226,15 @@ UniqueType *TypeRef::lookupTypePart( ParseData *pd,
 	if ( nspace == 0 )
 		error(loc) << "do not have region for resolving reference" << endp;
 
-	/* Search for the token in the region by name. */
-	SymbolMapEl *inDict = nspace->symbolMap.find( name );
-	if ( inDict != 0 ) {
-		long typeId = ( isPtr ? TYPE_PTR : ( isRef ? TYPE_REF : TYPE_TREE ) );
-		return pd->findUniqueType( typeId, inDict->value );
+	while ( nspace != 0 ) {
+		/* Search for the token in the region by name. */
+		SymbolMapEl *inDict = nspace->symbolMap.find( name );
+		if ( inDict != 0 ) {
+			long typeId = ( isPtr ? TYPE_PTR : ( isRef ? TYPE_REF : TYPE_TREE ) );
+			return pd->findUniqueType( typeId, inDict->value );
+		}
+
+		nspace = nspace->parentNamespace;
 	}
 
 	error(loc) << "unknown type in typeof expression" << endp;
