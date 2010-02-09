@@ -49,6 +49,6 @@ context ctx
 }
 
 ctx CTX = cons ctx []
-start Input = parse start( CTX, stdin )
+ctx::start Input = parse ctx::start( CTX, stdin )
 
 print( Input )
