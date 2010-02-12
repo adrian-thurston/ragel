@@ -1525,6 +1525,9 @@ struct LangTerm
 	LangTerm( ReplItemList *replItemList )
 		: type(EmbedStringType), replItemList(replItemList) {}
 
+	LangTerm( const InputLoc &loc, Type type, TypeRef *typeRef, KlangEl *langEl, Replacement *replacement )
+		: loc(loc), type(type), varRef(0), typeRef(typeRef), langEl(langEl), replacement(replacement) {}
+	
 	void analyze( ParseData *pd ) const;
 
 	UniqueType *evaluateParse( ParseData *pd, CodeVect &code, bool stop ) const;
@@ -1546,6 +1549,7 @@ struct LangTerm
 	TypeRef *typeRef;
 	Pattern *pattern;
 	FieldInitVect *fieldInitArgs;
+	KlangEl *langEl;
 	Replacement *replacement;
 	LangExpr *expr;
 	ReplItemList *replItemList;

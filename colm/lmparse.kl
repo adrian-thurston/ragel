@@ -1655,14 +1655,48 @@ code_factor: KW_Parse type_ref '(' opt_code_expr_list ')'
 		nspace->genericList.append( generic );
 		langEl->generic = generic;
 
-		$$->expr = new LangExpr( new LangTerm( $1->loc, LangTerm::ParseType, $2->typeRef ) );
+		Replacement *replacement = new Replacement( $1->loc, nspace, pd->rootRegion,
+				new ReplItemList, pd->nextPatReplId++ );
+		pd->replList.append( replacement );
+
+		$$->expr = new LangExpr( new LangTerm( $1->loc, LangTerm::ParseType, $2->typeRef, langEl, replacement ) );
 		$$->expr->term->args = $4->exprVect;
 	};
 code_factor: KW_ParseStop type_ref '(' opt_code_expr_list ')'
 	final {
-		$$->expr = new LangExpr( new LangTerm( $1->loc, 
-				LangTerm::ParseStopType, $2->typeRef ) );
+		/* This is a silly clone. To be fixed later. */
+		String parserName = $2->typeRef->typeName + "_parser";
+
+		/* Get the language element. */
+		Namespace *nspace = namespaceStack.top();
+		KlangEl *langEl = getKlangEl( pd, nspace, parserName );
+
+		/* Check that the element wasn't previously defined as something else. */
+		if ( langEl->type != KlangEl::Unknown ) {
+			error($1->loc) << "'" << parserName << 
+				"' already defined as something else" << endp;
+		}
+
+		langEl->type = KlangEl::NonTerm;
+
+		GenericType *generic = new GenericType( parserName, GEN_ACCUM, 
+				pd->nextGenericId++, langEl, $2->typeRef );
+
+		/* Add one empty production. */
+		ProdElList *emptyList = new ProdElList;
+		addProduction( $1->loc, parserName, emptyList, false, 0, 0 );
+
+		nspace->genericList.append( generic );
+		langEl->generic = generic;
+
+		Replacement *replacement = new Replacement( $1->loc, nspace, pd->rootRegion,
+				new ReplItemList, pd->nextPatReplId++ );
+		pd->replList.append( replacement );
+
+		$$->expr = new LangExpr( new LangTerm( $1->loc, LangTerm::ParseStopType, 
+				$2->typeRef, langEl, replacement ) );
 		$$->expr->term->args = $4->exprVect;
+
 	};
 code_factor: KW_TypeId type_ref
 	final {

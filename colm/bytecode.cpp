@@ -39,6 +39,7 @@ using std::string;
 #define push(i) (*(--sp) = (i))
 #define pop() (*sp++)
 #define top() (*sp)
+#define top_off(n) (sp[n])
 #define ptop() (sp)
 #define popn(n) (sp += (n))
 #define pushn(n) (sp -= (n))
@@ -224,8 +225,7 @@ void call_parser( ParserRet &ret, Tree **&sp, Program *prg,
 
 void parser_accum_set_ctx( Tree **&sp, Program *prg, Accum *accum, Tree *val )
 {
-	accum->pdaRun->context = val;
-	tree_upref( val );
+	accum->pdaRun->context = split_tree( prg, val );
 }
 
 void call_tree_parser( ParserRet &ret, Tree **&sp, Program *prg, Tree *input, 
@@ -269,7 +269,9 @@ void call_parser_frag( Tree **&sp, Program *prg, Tree *input, Accum *accum )
 		parseLoop( sp, accum->pdaRun, accum->fsmRun, accum->inputStream );
 	}
 	else if ( input->id == LEL_ID_STREAM ) {
-		parseLoop( sp, accum->pdaRun, accum->fsmRun, ((Stream*)input)->in );
+		Stream *stream = (Stream*)input;
+		accum->fsmRun->curStream = input;
+		parseLoop( sp, accum->pdaRun, accum->fsmRun, stream->in );
 	}
 	else {
 		/* Cause a flush */
@@ -1178,8 +1180,8 @@ again:
 			}
 			#endif
 
-			tree_upref( prg->global );
-			push( prg->global );
+			tree_upref( pdaRun->context );
+			push( pdaRun->context );
 			break;
 		}
 		case IN_LOAD_GLOBAL_R: {
@@ -2123,6 +2125,21 @@ again:
 			tree_downref( prg, sp, (Tree*)o2 );
 			break;
 		}
+		case IN_DUP_TOP_OFF: {
+			short off;
+			read_half( off );
+
+			#ifdef COLM_LOG_BYTECODE
+			if ( colm_log_bytecode ) {
+				cerr << "IN_DUP_N " << off << endl;
+			}
+			#endif
+
+			Tree *val = top_off(off);
+			tree_upref( val );
+			push( val );
+			break;
+		}
 		case IN_DUP_TOP: {
 			#ifdef COLM_LOG_BYTECODE
 			if ( colm_log_bytecode ) {
@@ -2569,7 +2586,7 @@ again:
 			Tree *val = pop();
 			parser_accum_set_ctx( sp, prg, (Accum*)obj, val );
 			tree_downref( prg, sp, obj );
-			tree_downref( prg, sp, val );
+			//tree_downref( prg, sp, val );
 			break;
 		}
 

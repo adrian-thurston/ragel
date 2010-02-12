@@ -71,6 +71,7 @@ typedef unsigned char uchar;
 #define IN_POP                   0x1b
 #define IN_POP_N_WORDS           0x1c
 #define IN_DUP_TOP               0x1d
+#define IN_DUP_TOP_OFF           0xbc
 #define IN_REJECT                0x1e
 #define IN_MATCH                 0x1f
 #define IN_CONSTRUCT             0x20

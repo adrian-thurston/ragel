@@ -65,6 +65,7 @@ struct InputStream
 		column(1),
 		byte(0),
 		handlesLine(handlesLine),
+		later(false),
 		queue(0)
 	{}
 
@@ -76,8 +77,7 @@ struct InputStream
 	virtual int needFlush() = 0;
 	virtual void pushBackBuf( RunBuf *runBuf ) = 0;
 
-	virtual bool tryAgainLater()
-		{ return false; }
+	virtual bool tryAgainLater();
 
 	/* Named language elements for patterns and replacements. */
 	virtual bool isTree();
@@ -99,6 +99,7 @@ struct InputStream
 	/* This is set true for input streams that do their own line counting.
 	 * Causes FsmRun to ignore NLs. */
 	bool handlesLine;
+	bool later;
 
 	RunBuf *queue;
 };

@@ -27,6 +27,14 @@
 using std::cerr;
 using std::endl;
 
+bool InputStream::tryAgainLater()
+{
+	if ( later )
+		return true;
+
+	return false;
+}
+
 bool InputStream::isTree()
 { 
 	if ( queue != 0 && queue->type == RunBuf::Token )
@@ -57,7 +65,8 @@ int InputStreamString::getData( char *dest, int length )
 	offset += length;
 
 	if ( offset == dlen )
-		eof = true;
+		//eof = true;
+		later = true;
 
 	return length;
 }
@@ -155,7 +164,8 @@ int InputStreamFd::getData( char *dest, int length )
 	else {
 		long got = read( fd, dest, length );
 		if ( got == 0 )
-			eof = true;
+			later = true;
+		//	eof = true;
 		return got;
 	}
 }
@@ -171,7 +181,7 @@ int InputStreamAccum::isEOF()
 
 bool InputStreamAccum::tryAgainLater()
 {
-	if ( !flush && head == 0 && tail == 0 )
+	if ( later || ( !flush && head == 0 && tail == 0  ))
 		return true;
 
 	return false;

@@ -1218,6 +1218,9 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 		context = 0;
 		input = 1;
 	}
+
+	code.append( IN_CONSTRUCT );
+	code.appendHalf( replacement->patRepId );
 	
 	if ( context < 0 ) {
 		code.append( IN_LOAD_NIL );
@@ -1228,6 +1231,13 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 			error(loc) << "context argument must be a stream or a tree" << endp;
 	}
 
+	code.append( IN_DUP_TOP_OFF );
+	code.appendHalf( 1 );
+
+	/* FIXME: need to select right one here. */
+	code.append( IN_SET_ACCUM_CTX_WC );
+
+	code.append( IN_DUP_TOP );
 
 	UniqueType *argUT = args->data[input]->evaluate( pd, code );
 	if ( argUT != pd->uniqueTypeStream && argUT->typeId != TYPE_TREE )
@@ -1246,24 +1256,34 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 	if ( argUT == pd->uniqueTypeStream ) {
 		/* Parse instruction, dependent on whether or not we are
 		 * producing revert or commit code. */
-		if ( pd->revertOn )
-			code.append( IN_PARSE_WV );
-		else
-			code.append( IN_PARSE_WC );
+		if ( pd->revertOn ) {
+			code.append( IN_PARSE_FRAG_WV );
+		}
+		else {
+			code.append( IN_PARSE_FRAG_WC );
+		}
 	}
 	else if ( argUT->typeId == TYPE_TREE ) {
-		if ( pd->revertOn )
-			code.append( IN_PARSE_TREE_WV );
-		else
-			code.append( IN_PARSE_TREE_WC );
+		if ( pd->revertOn ) {
+			code.append( IN_PARSE_FRAG_WV );
+		}
+		else {
+			code.append( IN_PARSE_FRAG_WC );
+		}
 	}
 
 	/* The id of the parser, followed by the stop id. */
-	code.appendHalf( ut->langEl->parserId );
-	if ( stop )
-		code.appendHalf( ut->langEl->id );
-	else 
-		code.appendHalf( 0 );
+//	code.appendHalf( ut->langEl->parserId );
+//	if ( stop )
+//		code.appendHalf( ut->langEl->id );
+//	else 
+//		code.appendHalf( 0 );
+	
+	code.append( IN_ACCUM_FINISH_WC );
+
+	/* Lookup the type of the replacement and store it in the replacement
+	 * object so that replacement parsing has a target. */
+	replacement->langEl = langEl;
 
 	return ut;
 }
