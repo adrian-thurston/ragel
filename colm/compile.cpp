@@ -1274,12 +1274,15 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 
 	/* The id of the parser, followed by the stop id. */
 //	code.appendHalf( ut->langEl->parserId );
-//	if ( stop )
-//		code.appendHalf( ut->langEl->id );
-//	else 
-//		code.appendHalf( 0 );
+	if ( stop )
+		code.appendHalf( ut->langEl->id );
+	else 
+		code.appendHalf( 0 );
 	
-	code.append( IN_ACCUM_FINISH_WC );
+	if ( pd->revertOn )
+		code.append( IN_ACCUM_FINISH_WV );
+	else
+		code.append( IN_ACCUM_FINISH_WC );
 
 	/* Lookup the type of the replacement and store it in the replacement
 	 * object so that replacement parsing has a target. */
@@ -1915,6 +1918,8 @@ void LangStmt::evaluateAccumItems( ParseData *pd, CodeVect &code ) const
 			code.append( IN_PARSE_FRAG_WV );
 		else
 			code.append( IN_PARSE_FRAG_WC );
+
+		code.appendHalf( 0 );
 	}
 }
 
@@ -2648,7 +2653,8 @@ void ParseData::initVectorFunctions( GenericType *gen )
 
 void ParseData::initAccumFunctions( GenericType *gen )
 {
-	initFunction( gen->utArg, gen->objDef, "finish", IN_ACCUM_FINISH_WC, IN_ACCUM_FINISH_WC, false );
+	initFunction( gen->utArg, gen->objDef, "finish", 
+			IN_ACCUM_FINISH_WV, IN_ACCUM_FINISH_WC, false );
 }
 
 void ParseData::initCtxField( GenericType *gen )
