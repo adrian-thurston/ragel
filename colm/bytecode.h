@@ -34,7 +34,7 @@ using std::ostream;
 typedef unsigned long ulong;
 typedef unsigned char uchar;
 
-#define IN_SAVE_LHS              0x00
+#define IN_SAVE_LHS              0xbe
 #define IN_RESTORE_LHS           0x01
 
 #define IN_LOAD_INT              0x02
@@ -213,18 +213,24 @@ typedef unsigned char uchar;
 #define IN_MAKE_TOKEN            0x8e
 #define IN_MAKE_TREE             0x8f
 #define IN_CONSTRUCT_TERM        0x90
-#define IN_PARSE_WV              0x91
-#define IN_PARSE_WC              0x92
-#define IN_PARSE_BKT             0x93
+
+
 #define IN_STREAM_PULL           0x94
 #define IN_STREAM_PULL_BKT       0x95
-#define IN_PARSE_TREE_WC         0x9a
-#define IN_PARSE_TREE_WV         0x9b
+
+//#define IN_PARSE_WV              0x91
+//#define IN_PARSE_WC              0x92
+//#define IN_PARSE_BKT             0x93
+//#define IN_PARSE_TREE_WC         0x9a
+//#define IN_PARSE_TREE_WV         0x9b
+
 #define IN_PARSE_FRAG_WC         0x9c
 #define IN_PARSE_FRAG_WV         0xb9
 #define IN_PARSE_FRAG_BKT        0xba
-#define IN_ACCUM_FINISH_WC       0x9d
-#define IN_ACCUM_FINISH_WV       0xbd
+
+#define IN_PARSE_FINISH_WC       0x9d
+#define IN_PARSE_FINISH_WV       0xbd
+#define IN_PARSE_FINISH_BKT      0xbf
 
 #define IN_OPEN_FILE             0x9e
 #define IN_GET_STDIN             0x9f

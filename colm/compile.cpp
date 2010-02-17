@@ -1280,9 +1280,9 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 		code.appendHalf( 0 );
 	
 	if ( pd->revertOn )
-		code.append( IN_ACCUM_FINISH_WV );
+		code.append( IN_PARSE_FINISH_WV );
 	else
-		code.append( IN_ACCUM_FINISH_WC );
+		code.append( IN_PARSE_FINISH_WC );
 
 	/* Lookup the type of the replacement and store it in the replacement
 	 * object so that replacement parsing has a target. */
@@ -2654,7 +2654,7 @@ void ParseData::initVectorFunctions( GenericType *gen )
 void ParseData::initAccumFunctions( GenericType *gen )
 {
 	initFunction( gen->utArg, gen->objDef, "finish", 
-			IN_ACCUM_FINISH_WV, IN_ACCUM_FINISH_WC, false );
+			IN_PARSE_FINISH_WV, IN_PARSE_FINISH_WC, false );
 }
 
 void ParseData::initCtxField( GenericType *gen )

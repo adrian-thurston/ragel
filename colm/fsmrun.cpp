@@ -596,7 +596,7 @@ void execute_generation_action( Tree **sp, Program *prg, FsmRun *fsmRun, PdaRun 
 	 * queue is not empty. Pull the reverse code out and store in the
 	 * token. */
 	Tree *tree = pdaRun->queue->tree;
-	bool hasrcode = make_reverse_code( pdaRun->allReverseCode, pdaRun->reverseCode );
+	bool hasrcode = makeReverseCode( pdaRun->allReverseCode, pdaRun->reverseCode );
 	if ( hasrcode )
 		tree->flags |= AF_HAS_RCODE;
 }
@@ -854,8 +854,7 @@ void init_input_stream( InputStream *inputStream )
 	inputStream->byte = 0;
 }
 
-long undoParse( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream,
-		Tree *tree, CodeVect *rev )
+long undoParse( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Tree *tree )
 {
 	/* PDA must be init first to set next region. */
 	init_pda_run( pdaRun, 0 );
@@ -865,7 +864,6 @@ long undoParse( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStr
 	top->tree = tree;
 	pdaRun->stackTop = top;
 	pdaRun->numRetry += 1;
-	pdaRun->allReverseCode = rev;
 
 	pdaRun->stop = false;
 	parseToken( sp, pdaRun, fsmRun, inputStream, 0 );

@@ -504,7 +504,7 @@ again:
 			}
 
 			/* Pull out the reverse code, if any. */
-			bool hasrcode = make_reverse_code( pdaRun->allReverseCode, pdaRun->reverseCode );
+			bool hasrcode = makeReverseCode( pdaRun->allReverseCode, pdaRun->reverseCode );
 			if ( hasrcode )
 				redLel->tree->flags |= AF_HAS_RCODE;
 

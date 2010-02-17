@@ -516,7 +516,7 @@ struct PdaTables
 	RuntimeData *rtd;
 };
 
-bool make_reverse_code( CodeVect *all, CodeVect &reverseCode );
+bool makeReverseCode( CodeVect *all, CodeVect &reverseCode );
 
 typedef RtVector<Tree*> Bindings;
 
@@ -595,8 +595,7 @@ void ignore( PdaRun *pdaRun, Tree *tree );
 void send_with_ignore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
 		InputStream *inputStream, Kid *input );
 void parseToken( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
-long undoParse( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, 
-		Tree *tree, CodeVect *rev );
+long undoParse( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Tree *tree );
 void xml_print_list( RuntimeData *runtimeData, Kid *lel, int depth );
 ostream &parse_error( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, int tokId, Tree *tree );
 void init_pda_run( PdaRun *pdaRun, Tree *tree );
