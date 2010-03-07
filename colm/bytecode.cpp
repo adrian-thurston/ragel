@@ -271,10 +271,15 @@ Tree *parse_finish( Tree **&sp, Program *prg, Accum *accum, bool revertOn )
 
 	Tree *tree = 0;
 
-	//commit_full( sp, accum->pdaRun, 0 );
+	if ( !revertOn )
+		commit_full( sp, accum->pdaRun, 0 );
+	
 	tree = get_parsed_root( accum->pdaRun, accum->pdaRun->stopTarget > 0 );
 	tree_upref( tree );
 	tree = split_tree( prg, tree );
+
+	if ( !revertOn )
+		clean_parser( sp, accum->pdaRun );
 
 	/* Indicate that this tree came out of a parser. */
 	tree->flags |= AF_PARSED;
@@ -641,8 +646,10 @@ again:
 
 		case IN_PARSE_STREAM_BKT: {
 			Tree *accum;
+			Tree *input;
 			long consumed;
 			read_tree( accum );
+			read_tree( input );
 			read_word( consumed );
 
 			#ifdef COLM_LOG_BYTECODE
@@ -655,8 +662,10 @@ again:
 		}
 		case IN_PARSE_FRAG_BKT: {
 			Tree *accum;
+			Tree *input;
 			long consumed;
 			read_tree( accum );
+			read_tree( input );
 			read_word( consumed );
 
 			#ifdef COLM_LOG_BYTECODE
