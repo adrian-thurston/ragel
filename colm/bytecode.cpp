@@ -269,14 +269,11 @@ Tree *parse_finish( Tree **&sp, Program *prg, Accum *accum, bool revertOn )
 		parseLoop( sp, accum->pdaRun, accum->fsmRun, accum->inputStream );
 	}
 
-	Tree *tree = 0;
-
 	if ( !revertOn )
 		commit_full( sp, accum->pdaRun, 0 );
 	
-	tree = get_parsed_root( accum->pdaRun, accum->pdaRun->stopTarget > 0 );
+	Tree *tree = get_parsed_root( accum->pdaRun, accum->pdaRun->stopTarget > 0 );
 	tree_upref( tree );
-	tree = split_tree( prg, tree );
 
 	if ( !revertOn )
 		clean_parser( sp, accum->pdaRun );

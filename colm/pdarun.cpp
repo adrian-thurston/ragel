@@ -73,7 +73,7 @@ void clean_parser( Tree **sp, PdaRun *pdaRun )
 		pdaRun->prg->kidPool.free( kid );
 		kid = next;
 	}
-
+	pdaRun->stackTop = 0;
 //	pdaRun->clearContext( sp );
 }
 
