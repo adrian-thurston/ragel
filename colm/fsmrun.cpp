@@ -108,7 +108,8 @@ void take_back_buffered( InputStream *inputStream )
 			if ( fsmRun->pe - fsmRun->p > 0 ) {
 				#ifdef COLM_LOG_PARSE
 				if ( colm_log_parse ) {
-					cerr << "taking back buffered" << endl;
+					cerr << "taking back buffered fsmRun: " << fsmRun << 
+							" input stream: " << inputStream << endl;
 				}
 				#endif
 
@@ -132,9 +133,19 @@ void take_back_buffered( InputStream *inputStream )
 
 void connect( FsmRun *fsmRun, InputStream *inputStream )
 {
-	if ( inputStream->hasData != 0 && inputStream->hasData != fsmRun )
+	if ( inputStream->hasData != 0 && inputStream->hasData != fsmRun ) {
 		take_back_buffered( inputStream );
+	}
 	
+	if ( inputStream->hasData != fsmRun ) {
+		#ifdef COLM_LOG_PARSE
+		if ( colm_log_parse ) {
+			cerr << "connecting fsmRun: " << fsmRun << " and input stream " <<
+					inputStream << endl;
+		}
+		#endif
+	}
+
 	inputStream->hasData = fsmRun;
 	fsmRun->haveDataOf = inputStream;
 }

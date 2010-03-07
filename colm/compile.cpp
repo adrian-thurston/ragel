@@ -1256,12 +1256,10 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 	if ( argUT == pd->uniqueTypeStream ) {
 		/* Parse instruction, dependent on whether or not we are
 		 * producing revert or commit code. */
-		if ( pd->revertOn ) {
-			code.append( IN_PARSE_FRAG_WV );
-		}
-		else {
-			code.append( IN_PARSE_FRAG_WC );
-		}
+		if ( pd->revertOn )
+			code.append( IN_PARSE_STREAM_WV );
+		else
+			code.append( IN_PARSE_STREAM_WC );
 	}
 	else if ( argUT->typeId == TYPE_TREE ) {
 		if ( pd->revertOn ) {
@@ -1881,6 +1879,7 @@ void LangStmt::evaluateAccumItems( ParseData *pd, CodeVect &code ) const
 	/* Assign bind ids to the variables in the replacement. */
 	for ( ReplItemList::Iter item = *accumText->list; item.lte(); item++ ) {
 		varRef->evaluate( pd, code );
+		UniqueType *exprUT = 0;
 
 		switch ( item->type ) {
 		case ReplItem::FactorType: {
@@ -1897,6 +1896,7 @@ void LangStmt::evaluateAccumItems( ParseData *pd, CodeVect &code ) const
 
 			code.append( IN_LOAD_STR );
 			code.appendWord( mapEl->value );
+			exprUT = pd->uniqueTypeStr;
 			break;
 		}
 		case ReplItem::InputText: {
@@ -1907,17 +1907,30 @@ void LangStmt::evaluateAccumItems( ParseData *pd, CodeVect &code ) const
 
 			code.append( IN_LOAD_STR );
 			code.appendWord( mapEl->value );
+			exprUT = pd->uniqueTypeStr;
 			break;
 		}
 		case ReplItem::ExprType:
-			item->expr->evaluate( pd, code );
+			exprUT = item->expr->evaluate( pd, code );
 			break;
 		}
 
-		if ( pd->revertOn )
-			code.append( IN_PARSE_FRAG_WV );
-		else
-			code.append( IN_PARSE_FRAG_WC );
+		if ( exprUT == pd->uniqueTypeStream ) {
+			/* Parse instruction, dependent on whether or not we are
+			 * producing revert or commit code. */
+			if ( pd->revertOn )
+				code.append( IN_PARSE_STREAM_WV );
+			else
+				code.append( IN_PARSE_STREAM_WC );
+		}
+		else {
+			if ( pd->revertOn ) {
+				code.append( IN_PARSE_FRAG_WV );
+			}
+			else {
+				code.append( IN_PARSE_FRAG_WC );
+			}
+		}
 
 		code.appendHalf( 0 );
 	}

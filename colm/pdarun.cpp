@@ -88,6 +88,12 @@ bool PdaRun::isParserStopFinished()
 
 void init_pda_run( PdaRun *pdaRun, Tree *context )
 {
+	#ifdef COLM_LOG_PARSE
+	if ( colm_log_parse ) {
+		cerr << "init_pda_run" << endl;
+	}
+	#endif
+
 	/* FIXME: need the right one here. */
 	pdaRun->cs = pdaRun->prg->rtd->startStates[pdaRun->parserId];
 

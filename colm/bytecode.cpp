@@ -189,7 +189,7 @@ struct ParserRet
 	FsmRun *fsmRun;
 };
 
-void parser_accum_set_ctx( Tree **&sp, Program *prg, Accum *accum, Tree *val )
+void parser_set_ctx( Tree **&sp, Program *prg, Accum *accum, Tree *val )
 {
 	accum->pdaRun->context = split_tree( prg, val );
 }
@@ -205,11 +205,21 @@ Head *tree_to_str( Tree **sp, Program *prg, Tree *tree )
 	return string_alloc_full( prg, s.c_str(), s.size() );
 }
 
-void call_parser_frag( Tree **&sp, Program *prg, Tree *input, Accum *accum, long stopId )
+void parse_stream( Tree **&sp, Program *prg, Tree *input, Accum *accum, long stopId )
+{
+	accum->pdaRun->stopTarget = stopId;
+
+	Stream *stream = (Stream*)input;
+	accum->fsmRun->curStream = input;
+	parseLoop( sp, accum->pdaRun, accum->fsmRun, stream->in );
+}
+
+void parse_frag( Tree **&sp, Program *prg, Tree *input, Accum *accum, long stopId )
 {
 	accum->pdaRun->stopTarget = stopId;
 
 	if ( input->id == LEL_ID_STR ) {
+		//assert(false);
 		/* Collect the tree data. */
 		ostringstream sout;
 		print_tree( sout, sp, prg, input );
@@ -221,12 +231,8 @@ void call_parser_frag( Tree **&sp, Program *prg, Tree *input, Accum *accum, long
 		/* Parse. */
 		parseLoop( sp, accum->pdaRun, accum->fsmRun, accum->inputStream );
 	}
-	else if ( input->id == LEL_ID_STREAM ) {
-		Stream *stream = (Stream*)input;
-		accum->fsmRun->curStream = input;
-		parseLoop( sp, accum->pdaRun, accum->fsmRun, stream->in );
-	}
 	else {
+		//assert(false);
 		/* Cause a flush */
 		accum->inputStream->flush = true;
 		parseLoop( sp, accum->pdaRun, accum->fsmRun, accum->inputStream );
@@ -235,7 +241,16 @@ void call_parser_frag( Tree **&sp, Program *prg, Tree *input, Accum *accum, long
 	}
 }
 
-void undo_call_parser_frag( Tree **&sp, Program *prg, Accum *accum, long consumed )
+void undo_parse_stream( Tree **&sp, Program *prg, Stream *input, Accum *accum, long consumed )
+{
+	accum->pdaRun->numRetry += 1;
+	accum->pdaRun->targetConsumed = consumed;
+	parseToken( sp, accum->pdaRun, accum->fsmRun, input->in, 0 );
+	accum->pdaRun->targetConsumed = -1;
+	accum->pdaRun->numRetry -= 1;
+}
+
+void undo_parse_frag( Tree **&sp, Program *prg, Accum *accum, long consumed )
 {
 	accum->pdaRun->numRetry += 1;
 	accum->pdaRun->targetConsumed = consumed;
@@ -244,7 +259,7 @@ void undo_call_parser_frag( Tree **&sp, Program *prg, Accum *accum, long consume
 	accum->pdaRun->numRetry -= 1;
 }
 
-Tree *parser_frag_finish( Tree **&sp, Program *prg, Accum *accum, bool revertOn )
+Tree *parse_finish( Tree **&sp, Program *prg, Accum *accum, bool revertOn )
 {
 	if ( accum->pdaRun->stopTarget > 0 ) {
 
@@ -256,10 +271,10 @@ Tree *parser_frag_finish( Tree **&sp, Program *prg, Accum *accum, bool revertOn 
 
 	Tree *tree = 0;
 
-	commit_full( sp, accum->pdaRun, 0 );
+	//commit_full( sp, accum->pdaRun, 0 );
 	tree = get_parsed_root( accum->pdaRun, accum->pdaRun->stopTarget > 0 );
 	tree_upref( tree );
-	clean_parser( sp, accum->pdaRun );
+	tree = split_tree( prg, tree );
 
 	/* Indicate that this tree came out of a parser. */
 	tree->flags |= AF_PARSED;
@@ -624,6 +639,20 @@ again:
 			break;
 		}
 
+		case IN_PARSE_STREAM_BKT: {
+			Tree *accum;
+			long consumed;
+			read_tree( accum );
+			read_word( consumed );
+
+			#ifdef COLM_LOG_BYTECODE
+			if ( colm_log_bytecode )
+				cerr << "IN_PARSE_STREAM_BKT " << consumed << endl;
+			#endif
+			
+			tree_downref( prg, sp, accum );
+			break;
+		}
 		case IN_PARSE_FRAG_BKT: {
 			Tree *accum;
 			long consumed;
@@ -2415,7 +2444,7 @@ again:
 
 			Tree *obj = pop();
 			Tree *val = pop();
-			parser_accum_set_ctx( sp, prg, (Accum*)obj, val );
+			parser_set_ctx( sp, prg, (Accum*)obj, val );
 			tree_downref( prg, sp, obj );
 			//tree_downref( prg, sp, val );
 			break;
@@ -2426,6 +2455,71 @@ again:
 //		case IN_SET_ACCUM_CTX_WC:
 //		case IN_SET_ACCUM_CTX_WV:
 //			break;
+
+		case IN_PARSE_STREAM_WC: {
+			Half stopId;
+			read_half( stopId );
+
+			#ifdef COLM_LOG_BYTECODE
+			if ( colm_log_bytecode ) {
+				cerr << "IN_PARSE_STREAM_WC " << endl;
+			}
+			#endif
+
+			Tree *stream = pop();
+			Tree *accum = pop();
+			parse_stream( sp, prg, stream, (Accum*)accum, stopId );
+
+			tree_downref( prg, sp, stream );
+			tree_downref( prg, sp, accum );
+			break;
+		}
+
+		case IN_PARSE_STREAM_WV: {
+			Half stopId;
+			read_half( stopId );
+
+			#ifdef COLM_LOG_BYTECODE
+			if ( colm_log_bytecode ) {
+				cerr << "IN_PARSE_STREAM_WV " << endl;
+			}
+			#endif
+
+			Tree *stream = pop();
+			Tree *accum = pop();
+			long consumed = ((Accum*)accum)->pdaRun->consumed;
+			parse_stream( sp, prg, stream, (Accum*)accum, stopId );
+			tree_downref( prg, sp, stream );
+			//tree_downref( prg, sp, accum );
+
+			reverseCode.append( IN_PARSE_STREAM_BKT );
+			reverseCode.appendWord( (Word) accum );
+			reverseCode.appendWord( (Word) stream );
+			reverseCode.appendWord( consumed );
+			reverseCode.append( SIZEOF_CODE + 3 * SIZEOF_WORD );
+			break;
+		}
+
+		case IN_PARSE_STREAM_BKT: {
+			Tree *accum;
+			Tree *input;
+			long consumed;
+			read_tree( accum );
+			read_tree( input );
+			read_word( consumed );
+
+			#ifdef COLM_LOG_BYTECODE
+			if ( colm_log_bytecode )
+				cerr << "IN_PARSE_STREAM_BKT " << consumed << endl;
+			#endif
+
+//			Tree *input = pop();
+//			Tree *accum = pop();
+			undo_parse_stream( sp, prg, (Stream*)input, (Accum*)accum, consumed );
+//			tree_downref( prg, sp, input );
+			tree_downref( prg, sp, accum );
+			break;
+		}
 
 		case IN_PARSE_FRAG_WC: {
 			Half stopId;
@@ -2439,7 +2533,7 @@ again:
 
 			Tree *input = pop();
 			Tree *accum = pop();
-			call_parser_frag( sp, prg, input, (Accum*)accum, stopId );
+			parse_frag( sp, prg, input, (Accum*)accum, stopId );
 
 			tree_downref( prg, sp, input );
 			tree_downref( prg, sp, accum );
@@ -2459,21 +2553,24 @@ again:
 			Tree *input = pop();
 			Tree *accum = pop();
 			long consumed = ((Accum*)accum)->pdaRun->consumed;
-			call_parser_frag( sp, prg, input, (Accum*)accum, stopId );
+			parse_frag( sp, prg, input, (Accum*)accum, stopId );
 			tree_downref( prg, sp, input );
 			//tree_downref( prg, sp, accum );
 
 			reverseCode.append( IN_PARSE_FRAG_BKT );
 			reverseCode.appendWord( (Word) accum );
+			reverseCode.appendWord( (Word) input );
 			reverseCode.appendWord( consumed );
-			reverseCode.append( SIZEOF_CODE + SIZEOF_WORD + SIZEOF_WORD );
+			reverseCode.append( SIZEOF_CODE + 3 * SIZEOF_WORD );
 			break;
 		}
 
 		case IN_PARSE_FRAG_BKT: {
 			Tree *accum;
+			Tree *input;
 			long consumed;
 			read_tree( accum );
+			read_tree( input );
 			read_word( consumed );
 
 			#ifdef COLM_LOG_BYTECODE
@@ -2483,7 +2580,7 @@ again:
 
 //			Tree *input = pop();
 //			Tree *accum = pop();
-			undo_call_parser_frag( sp, prg, (Accum*)accum, consumed );
+			undo_parse_frag( sp, prg, (Accum*)accum, consumed );
 //			tree_downref( prg, sp, input );
 			tree_downref( prg, sp, accum );
 			break;
@@ -2497,7 +2594,7 @@ again:
 			#endif
 
 			Tree *accum = pop();
-			Tree *result = parser_frag_finish( sp, prg, (Accum*)accum, false );
+			Tree *result = parse_finish( sp, prg, (Accum*)accum, false );
 			push( result );
 			tree_downref( prg, sp, accum );
 			break;
@@ -2510,7 +2607,7 @@ again:
 			#endif
 
 			Tree *accum = pop();
-			Tree *result = parser_frag_finish( sp, prg, (Accum*)accum, true );
+			Tree *result = parse_finish( sp, prg, (Accum*)accum, true );
 			push( result );
 			tree_downref( prg, sp, accum );
 
@@ -2535,11 +2632,14 @@ again:
 			}
 			#endif
 
+			/* This needs an implementation. */
+
 			//Accum *accum = (Accum*)accumTree;
+			//cerr << accum->pdaRun->allReverseCode << endl;
 			//undoParse( sp, accum->pdaRun, accum->fsmRun, accum->inputStream, tree );
 
 			//Tree *accum = pop();
-			//Tree *result = parser_frag_finish( sp, prg, (Accum*)accum );
+			//Tree *result = parse_finish( sp, prg, (Accum*)accum );
 			//push( result );
 			//tree_downref( prg, sp, accum );
 			break;
@@ -2642,30 +2742,6 @@ again:
 			tree_downref( prg, sp, stream );
 			break;
 		}
-#if 0
-		case IN_PARSE_BKT: {
-			Half parserId;
-			Tree *stream, *tree;
-			Word fsmRet, wrev;
-
-			read_half( parserId );
-			read_word( fsmRet );
-			read_tree( stream );
-			read_tree( tree );
-			read_word( wrev );
-
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode ) {
-				cerr << "IN_PARSE_BKT " << parserId << endl;
-			}
-			#endif
-
-			undo_parse( sp, prg, (FsmRun*)fsmRet, (Stream*)stream, parserId, tree, (CodeVect*)wrev );
-			tree_downref( prg, sp, stream );
-			delete (CodeVect*)wrev;
-			break;
-		}
-#endif
 		case IN_CONSTRUCT: {
 			Half patternId;
 			read_half( patternId );
