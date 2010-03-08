@@ -846,7 +846,7 @@ void send_eof( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaR
 	}
 }
 
-void init_fsm_run( FsmRun *fsmRun, InputStream *in )
+void init_fsm_run( FsmRun *fsmRun )
 {
 	/* Run buffers need to stick around because 
 	 * token strings point into them. */

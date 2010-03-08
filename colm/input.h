@@ -61,6 +61,8 @@ struct InputStream
 	InputStream( bool handlesLine ) :
 		hasData(0),
 		eofSent(false),
+		flush(false),
+		eof(false),
 		line(1),
 		column(1),
 		byte(0),
@@ -76,7 +78,7 @@ struct InputStream
 	virtual int isEOF() = 0;
 	virtual int needFlush() = 0;
 	virtual void pushBackBuf( RunBuf *runBuf ) = 0;
-
+	virtual void append( const char *data, long len ) = 0;
 	virtual bool tryAgainLater();
 
 	/* Named language elements for patterns and replacements. */
@@ -91,6 +93,8 @@ struct InputStream
 	FsmRun *hasData;
 
 	bool eofSent;
+	bool flush;
+	bool eof;
 
 	long line;
 	long column;
@@ -108,17 +112,17 @@ struct InputStreamString : public InputStream
 {
 	InputStreamString( const char *data, long dlen ) :
 		InputStream(false), 
-		data(data), dlen(dlen), offset(0), eof(false) {}
+		data(data), dlen(dlen), offset(0) {}
 
 	int getData( char *dest, int length );
 	int isEOF() { return eof; }
 	int needFlush() { return eof; }
 	void pushBackBuf( RunBuf *runBuf );
+	void append( const char *data, long len ) {}
 
 	const char *data;
 	long dlen;
 	int offset;
-	bool eof;
 };
 
 struct InputStreamFile : public InputStream
@@ -132,6 +136,7 @@ struct InputStreamFile : public InputStream
 	int isEOF();
 	int needFlush();
 	void pushBackBuf( RunBuf *runBuf );
+	void append( const char *data, long len ) {}
 
 	FILE *file;
 };
@@ -140,16 +145,16 @@ struct InputStreamFd : public InputStream
 {
 	InputStreamFd( long fd ) :
 		InputStream(false), 
-		fd(fd), eof(false)
+		fd(fd)
 	{}
 
 	int isEOF();
 	int needFlush();
 	int getData( char *dest, int length );
 	void pushBackBuf( RunBuf *runBuf );
+	void append( const char *data, long len ) {}
 
 	long fd;
-	bool eof;
 };
 
 struct AccumData
@@ -166,24 +171,20 @@ struct InputStreamAccum : public InputStream
 	:
 		InputStream(false), 
 		head(0), tail(0),
-		flush(false),
-		offset(0),
-		eof(false)
+		offset(0)
 	{}
 
 	int isEOF();
 	int needFlush();
 	int getData( char *dest, int length );
 	void pushBackBuf( RunBuf *runBuf );
+	void append( const char *data, long len );
 
 	bool tryAgainLater();
 
 	AccumData *head, *tail;
-	void append( const char *data, long len );
 
-	bool flush;
 	long offset;
-	bool eof;
 };
 
 
@@ -195,6 +196,7 @@ struct InputStreamPattern : public InputStream
 	int isEOF();
 	int needFlush();
 	void pushBackBuf( RunBuf *runBuf );
+	void append( const char *data, long len ) {}
 
 	bool isLangEl();
 	KlangEl *getLangEl( long &bindId, char *&data, long &length );
@@ -207,7 +209,6 @@ struct InputStreamPattern : public InputStream
 	Pattern *pattern;
 	PatternItem *patItem;
 	int offset;
-	bool flush;
 };
 
 struct InputStreamRepl : public InputStream
@@ -220,6 +221,7 @@ struct InputStreamRepl : public InputStream
 	int isEOF();
 	int needFlush();
 	void pushBackBuf( RunBuf *runBuf );
+	void append( const char *data, long len ) {}
 
 	void pushBackNamed();
 
@@ -229,7 +231,6 @@ struct InputStreamRepl : public InputStream
 	Replacement *replacement;
 	ReplItem *replItem;
 	int offset;
-	bool flush;
 };
 
 #endif /* _INPUT_H */

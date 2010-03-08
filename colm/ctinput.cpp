@@ -33,8 +33,7 @@ InputStreamPattern::InputStreamPattern( Pattern *pattern )
 	InputStream(true),
 	pattern(pattern),
 	patItem(pattern->list->head),
-	offset(0),
-	flush(false)
+	offset(0)
 {}
 
 bool InputStreamPattern::isLangEl()
@@ -146,8 +145,7 @@ InputStreamRepl::InputStreamRepl( Replacement *replacement )
 	InputStream(true),
 	replacement(replacement),
 	replItem(replacement->list->head),
-	offset(0),
-	flush(false)
+	offset(0)
 {}
 
 bool InputStreamRepl::isLangEl()

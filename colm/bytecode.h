@@ -228,6 +228,14 @@ typedef unsigned char uchar;
 #define IN_PARSE_STREAM_WV       0xc1
 #define IN_PARSE_STREAM_BKT      0xc2
 
+#define IN_EXTRACT_INPUT_WC      0xc3
+#define IN_EXTRACT_INPUT_WV      0xc4
+#define IN_EXTRACT_INPUT_BKT     0xc5
+
+#define IN_STREAM_APPEND_WC      0xc6
+#define IN_STREAM_APPEND_WV      0xc7
+#define IN_STREAM_APPEND_BKT     0xc8
+
 #define IN_PARSE_FRAG_WC         0x9c
 #define IN_PARSE_FRAG_WV         0xb9
 #define IN_PARSE_FRAG_BKT        0xba
@@ -235,6 +243,8 @@ typedef unsigned char uchar;
 #define IN_PARSE_FINISH_WC       0x9d
 #define IN_PARSE_FINISH_WV       0xbd
 #define IN_PARSE_FINISH_BKT      0xbf
+
+#define IN_PARSE_EXTRACT_INPUT 
 
 #define IN_OPEN_FILE             0x9e
 #define IN_GET_STDIN             0x9f
@@ -281,7 +291,7 @@ typedef unsigned char uchar;
 #define GEN_LIST      0x10
 #define GEN_MAP       0x11
 #define GEN_VECTOR    0x12
-#define GEN_ACCUM     0x13
+#define GEN_PARSER    0x13
 
 /* Allocation, number of items. */
 #define FRESH_BLOCK 8128                    

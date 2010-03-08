@@ -937,8 +937,11 @@ Tree *copy_tree( Program *prg, Tree *tree, Kid *oldNextDown, Kid *&newNextDown )
 			tree = (Tree*) copy_list( prg, (List*) tree, oldNextDown, newNextDown );
 		else if ( generic->type == GEN_MAP )
 			tree = (Tree*) copy_map( prg, (Map*) tree, oldNextDown, newNextDown );
-		else
+		else if ( generic->type == GEN_PARSER ) {
+			/* Need to figure out the semantics here. */
+			cerr << "ATTEMPT TO COPY PARSER" << endl;
 			assert(false);
+		}
 	}
 	else if ( tree->id == LEL_ID_PTR )
 		assert(false);
@@ -1004,18 +1007,17 @@ Tree *create_generic( Program *prg, long genericId )
 			newGeneric = (Tree*) list;
 			break;
 		}
-		case GEN_ACCUM: {
+		case GEN_PARSER: {
 			Accum *accum = (Accum*)prg->mapElPool.allocate();
 			accum->id = genericInfo->langElId;
 			accum->genericInfo = genericInfo;
 			accum->fsmRun = new FsmRun( prg );
 			accum->pdaRun = new PdaRun( prg, prg->rtd->pdaTables, 
 					accum->fsmRun, genericInfo->parserId, false, false );
-			accum->inputStream = new InputStreamAccum();
 
 			/* Start off the parsing process. */
 			init_pda_run( accum->pdaRun, 0 );
-			init_fsm_run( accum->fsmRun, accum->inputStream );
+			init_fsm_run( accum->fsmRun );
 			newToken( accum->pdaRun, accum->fsmRun );
 
 			newGeneric = (Tree*) accum;
@@ -1064,7 +1066,7 @@ free_tree:
 			}
 			prg->mapElPool.free( (MapEl*)map );
 		}
-		else if ( generic->type == GEN_ACCUM ) {
+		else if ( generic->type == GEN_PARSER ) {
 			Accum *accum = (Accum*)tree;
 			/* FIXME: Need to clean up here. */
 			delete accum->fsmRun;

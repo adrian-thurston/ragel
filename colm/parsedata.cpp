@@ -1489,7 +1489,7 @@ void ParseData::parsePatterns()
 				pdaTables, fsmRun, repl->langEl->parserId, 0, false );
 
 		init_pda_run( repl->pdaRun, 0 );
-		init_fsm_run( fsmRun, &in );
+		init_fsm_run( fsmRun );
 		newToken( repl->pdaRun, fsmRun );
 		parseLoop( root, repl->pdaRun, fsmRun, &in );
 	}
@@ -1508,7 +1508,7 @@ void ParseData::parsePatterns()
 				pdaTables, fsmRun, pat->langEl->parserId, 0, false );
 
 		init_pda_run( pat->pdaRun, 0 );
-		init_fsm_run( fsmRun, &in );
+		init_fsm_run( fsmRun );
 		newToken( pat->pdaRun, fsmRun );
 		parseLoop( root, pat->pdaRun, fsmRun, &in );
 	}

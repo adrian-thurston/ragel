@@ -1219,26 +1219,11 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 		input = 1;
 	}
 
+	/* Make the parser. */
 	code.append( IN_CONSTRUCT );
 	code.appendHalf( replacement->patRepId );
-	
-	if ( context < 0 ) {
-		code.append( IN_LOAD_NIL );
-	}
-	else {
-		UniqueType *argUT = args->data[context]->evaluate( pd, code );
-		if ( argUT != pd->uniqueTypeStream && argUT->typeId != TYPE_TREE )
-			error(loc) << "context argument must be a stream or a tree" << endp;
-	}
 
-	code.append( IN_DUP_TOP_OFF );
-	code.appendHalf( 1 );
-
-	/* FIXME: need to select right one here. */
-	code.append( IN_SET_ACCUM_CTX_WC );
-
-	code.append( IN_DUP_TOP );
-
+	/* Evaluate the parse args. */
 	UniqueType *argUT = args->data[input]->evaluate( pd, code );
 	if ( argUT != pd->uniqueTypeStream && argUT->typeId != TYPE_TREE )
 		error(loc) << "input argument must be a stream or a tree" << endp;
@@ -1252,6 +1237,26 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 	 * compatible with parse stop. */
 	if ( stop )
 		ut->langEl->parseStop = true;
+
+	if ( context < 0 ) {
+		code.append( IN_LOAD_NIL );
+	}
+	else {
+		UniqueType *argUT = args->data[context]->evaluate( pd, code );
+		if ( argUT != pd->uniqueTypeStream && argUT->typeId != TYPE_TREE )
+			error(loc) << "context argument must be a stream or a tree" << endp;
+	}
+
+	/* Get a copy of the parser. */
+	code.append( IN_DUP_TOP_OFF );
+	code.appendHalf( 2 );
+
+	/* FIXME: need to select right one here. */
+	code.append( IN_SET_ACCUM_CTX_WC );
+
+	/* Get a copy of the parser. */
+	code.append( IN_DUP_TOP_OFF );
+	code.appendHalf( 1 );
 
 	if ( argUT == pd->uniqueTypeStream ) {
 		/* Parse instruction, dependent on whether or not we are
@@ -1878,9 +1883,7 @@ void LangStmt::evaluateAccumItems( ParseData *pd, CodeVect &code ) const
 {
 	/* Assign bind ids to the variables in the replacement. */
 	for ( ReplItemList::Iter item = *accumText->list; item.lte(); item++ ) {
-		varRef->evaluate( pd, code );
 		UniqueType *exprUT = 0;
-
 		switch ( item->type ) {
 		case ReplItem::FactorType: {
 			String result;
@@ -1915,21 +1918,21 @@ void LangStmt::evaluateAccumItems( ParseData *pd, CodeVect &code ) const
 			break;
 		}
 
+		varRef->evaluate( pd, code );
+
 		if ( exprUT == pd->uniqueTypeStream ) {
-			/* Parse instruction, dependent on whether or not we are
-			 * producing revert or commit code. */
+			/* Parse instruction, dependent on whether or not we are producing
+			 * revert or commit code. */
 			if ( pd->revertOn )
 				code.append( IN_PARSE_STREAM_WV );
 			else
 				code.append( IN_PARSE_STREAM_WC );
 		}
 		else {
-			if ( pd->revertOn ) {
+			if ( pd->revertOn )
 				code.append( IN_PARSE_FRAG_WV );
-			}
-			else {
+			else
 				code.append( IN_PARSE_FRAG_WC );
-			}
 		}
 
 		code.appendHalf( 0 );
@@ -2726,7 +2729,7 @@ void ParseData::resolveGenericTypes()
 				case GEN_VECTOR:
 					initVectorFunctions( gen );
 					break;
-				case GEN_ACCUM:
+				case GEN_PARSER:
 					/* Need to generate a parser for the type. */
 					gen->utArg->langEl->parserId = nextParserId++;
 					initAccumFunctions( gen );
