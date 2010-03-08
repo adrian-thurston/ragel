@@ -1223,6 +1223,29 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 	code.append( IN_CONSTRUCT );
 	code.appendHalf( replacement->patRepId );
 
+	/* 
+	 * First load the context into the parser.
+	 */
+	if ( context < 0 ) {
+		code.append( IN_LOAD_NIL );
+	}
+	else {
+		UniqueType *argUT = args->data[context]->evaluate( pd, code );
+		if ( argUT != pd->uniqueTypeStream && argUT->typeId != TYPE_TREE )
+			error(loc) << "context argument must be a stream or a tree" << endp;
+	}
+
+	/* Load the parser. */
+	code.append( IN_DUP_TOP_OFF );
+	code.appendHalf( 1 );
+
+	/* FIXME: need to select right one here. */
+	code.append( IN_SET_ACCUM_CTX_WC );
+
+	/*
+	 * Call the parser.
+	 */
+
 	/* Evaluate the parse args. */
 	UniqueType *argUT = args->data[input]->evaluate( pd, code );
 	if ( argUT != pd->uniqueTypeStream && argUT->typeId != TYPE_TREE )
@@ -1238,21 +1261,6 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 	if ( stop )
 		ut->langEl->parseStop = true;
 
-	if ( context < 0 ) {
-		code.append( IN_LOAD_NIL );
-	}
-	else {
-		UniqueType *argUT = args->data[context]->evaluate( pd, code );
-		if ( argUT != pd->uniqueTypeStream && argUT->typeId != TYPE_TREE )
-			error(loc) << "context argument must be a stream or a tree" << endp;
-	}
-
-	/* Get a copy of the parser. */
-	code.append( IN_DUP_TOP_OFF );
-	code.appendHalf( 2 );
-
-	/* FIXME: need to select right one here. */
-	code.append( IN_SET_ACCUM_CTX_WC );
 
 	/* Get a copy of the parser. */
 	code.append( IN_DUP_TOP_OFF );
@@ -1275,13 +1283,16 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 		}
 	}
 
-	/* The id of the parser, followed by the stop id. */
-//	code.appendHalf( ut->langEl->parserId );
+	/* The stop id. */
 	if ( stop )
 		code.appendHalf( ut->langEl->id );
 	else 
 		code.appendHalf( 0 );
-	
+
+	/*
+	 * Finish the parser.
+	 */
+
 	if ( pd->revertOn )
 		code.append( IN_PARSE_FINISH_WV );
 	else
