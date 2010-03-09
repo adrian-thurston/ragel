@@ -2495,9 +2495,9 @@ again:
 			#endif
 
 			Tree *accum = pop();
-			Tree *input = extract_input( prg, (Accum*)accum );
-			tree_upref( input );
-			push( input );
+//			Tree *input = extract_input( prg, (Accum*)accum );
+//			tree_upref( input );
+//			push( input );
 			tree_downref( prg, sp, accum );
 			break;
 		}
@@ -2510,13 +2510,13 @@ again:
 			#endif
 
 			Tree *accum = pop();
-			Tree *input = extract_input( prg, (Accum*)accum );
-			tree_upref( input );
-			push( input );
+//			Tree *input = extract_input( prg, (Accum*)accum );
+//			tree_upref( input );
+//			push( input );
 			tree_downref( prg, sp, accum );
-
-			reverseCode.append( IN_EXTRACT_INPUT_BKT );
-			rcodeUnitLen += SIZEOF_CODE;
+//
+//			reverseCode.append( IN_EXTRACT_INPUT_BKT );
+//			rcodeUnitLen += SIZEOF_CODE;
 			break;
 		}
 

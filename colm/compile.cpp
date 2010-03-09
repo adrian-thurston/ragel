@@ -1219,7 +1219,9 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 		input = 1;
 	}
 
-	/* Make the parser. */
+	/* 
+	 * Make the parser.
+	 */
 	code.append( IN_CONSTRUCT );
 	code.appendHalf( replacement->patRepId );
 
@@ -1243,7 +1245,7 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 	code.append( IN_SET_ACCUM_CTX_WC );
 
 	/*
-	 * Call the parser.
+	 * Evaluate the parse arg.
 	 */
 
 	/* Evaluate the parse args. */
@@ -1261,12 +1263,11 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 	if ( stop )
 		ut->langEl->parseStop = true;
 
-
-	/* Get a copy of the parser. */
-	code.append( IN_DUP_TOP_OFF );
-	code.appendHalf( 1 );
-
 	if ( argUT == pd->uniqueTypeStream ) {
+		/* Get a copy of the parser. */
+		code.append( IN_DUP_TOP_OFF );
+		code.appendHalf( 1 );
+
 		/* Parse instruction, dependent on whether or not we are
 		 * producing revert or commit code. */
 		if ( pd->revertOn )
@@ -1274,13 +1275,25 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 		else
 			code.append( IN_PARSE_STREAM_WC );
 	}
-	else if ( argUT->typeId == TYPE_TREE ) {
-		if ( pd->revertOn ) {
+	else {
+		/* Get a copy of the parser. */
+		code.append( IN_DUP_TOP_OFF );
+		code.appendHalf( 1 );
+
+		/* Not a stream. Get the input first. */
+		if ( pd->revertOn )
+			code.append( IN_EXTRACT_INPUT_WV );
+		else
+			code.append( IN_EXTRACT_INPUT_WC );
+
+		/* Get a copy of the parser. */
+		code.append( IN_DUP_TOP_OFF );
+		code.appendHalf( 1 );
+
+		if ( pd->revertOn )
 			code.append( IN_PARSE_FRAG_WV );
-		}
-		else {
+		else
 			code.append( IN_PARSE_FRAG_WC );
-		}
 	}
 
 	/* The stop id. */
@@ -1892,6 +1905,8 @@ void LangStmt::compileWhile( ParseData *pd, CodeVect &code ) const
 
 void LangStmt::evaluateAccumItems( ParseData *pd, CodeVect &code ) const
 {
+	varRef->evaluate( pd, code );
+
 	/* Assign bind ids to the variables in the replacement. */
 	for ( ReplItemList::Iter item = *accumText->list; item.lte(); item++ ) {
 		UniqueType *exprUT = 0;
@@ -1929,9 +1944,10 @@ void LangStmt::evaluateAccumItems( ParseData *pd, CodeVect &code ) const
 			break;
 		}
 
-		varRef->evaluate( pd, code );
-
 		if ( exprUT == pd->uniqueTypeStream ) {
+			code.append( IN_DUP_TOP_OFF );
+			code.appendHalf( 1 );
+
 			/* Parse instruction, dependent on whether or not we are producing
 			 * revert or commit code. */
 			if ( pd->revertOn )
@@ -1940,6 +1956,18 @@ void LangStmt::evaluateAccumItems( ParseData *pd, CodeVect &code ) const
 				code.append( IN_PARSE_STREAM_WC );
 		}
 		else {
+			code.append( IN_DUP_TOP_OFF );
+			code.appendHalf( 1 );
+
+			/* Not a stream. Get the input first. */
+			if ( pd->revertOn )
+				code.append( IN_EXTRACT_INPUT_WV );
+			else
+				code.append( IN_EXTRACT_INPUT_WC );
+
+			code.append( IN_DUP_TOP_OFF );
+			code.appendHalf( 1 );
+
 			if ( pd->revertOn )
 				code.append( IN_PARSE_FRAG_WV );
 			else
@@ -1948,6 +1976,7 @@ void LangStmt::evaluateAccumItems( ParseData *pd, CodeVect &code ) const
 
 		code.appendHalf( 0 );
 	}
+	code.append( IN_POP );
 }
 
 void LangStmt::compile( ParseData *pd, CodeVect &code ) const
