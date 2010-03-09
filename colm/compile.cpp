@@ -1286,14 +1286,17 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 		else
 			code.append( IN_EXTRACT_INPUT_WC );
 
+		/* FIXME: need the reverse version. */
+		code.append( IN_STREAM_APPEND_WC );
+
 		/* Get a copy of the parser. */
 		code.append( IN_DUP_TOP_OFF );
 		code.appendHalf( 1 );
 
 		if ( pd->revertOn )
-			code.append( IN_PARSE_FRAG_WV );
+			code.append( IN_PARSE_STREAM_WV );
 		else
-			code.append( IN_PARSE_FRAG_WC );
+			code.append( IN_PARSE_STREAM_WC );
 	}
 
 	/* The stop id. */
@@ -1965,13 +1968,16 @@ void LangStmt::evaluateAccumItems( ParseData *pd, CodeVect &code ) const
 			else
 				code.append( IN_EXTRACT_INPUT_WC );
 
+			/* FIXME: need the reverse version. */
+			code.append( IN_STREAM_APPEND_WC );
+
 			code.append( IN_DUP_TOP_OFF );
 			code.appendHalf( 1 );
 
 			if ( pd->revertOn )
-				code.append( IN_PARSE_FRAG_WV );
+				code.append( IN_PARSE_STREAM_WV );
 			else
-				code.append( IN_PARSE_FRAG_WC );
+				code.append( IN_PARSE_STREAM_WC );
 		}
 
 		code.appendHalf( 0 );

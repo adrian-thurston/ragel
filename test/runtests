@@ -8,7 +8,7 @@ TESTS="
 	translate1.lm translate2.lm
 	construct1.lm construct2.lm construct3.lm
 	treecmp1.lm context1.lm context2.lm context3.lm undofrag1.lm
-	nestedcomm.lm
+	nestedcomm.lm reparse.lm
 "
 
 for t in $TESTS; do

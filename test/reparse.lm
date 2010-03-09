@@ -1,0 +1,22 @@
+lex start
+{
+	ignore /space+/
+	literal '*', '(', ')'
+	token id /[a-zA-Z_]+/
+}
+
+def item 
+	[id]
+|	['(' item* ')']
+
+def start 
+	[item*]
+
+item* Input = parse item*( stdin )
+
+start S = cons start[ Input ]
+
+start Again = parse start( Input )
+
+print( Again, '\n' )
+
