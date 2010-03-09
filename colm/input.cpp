@@ -49,6 +49,17 @@ bool InputStream::isIgnore()
 	return false;
 }
 
+Tree *InputStream::getTree()
+{
+	RunBuf *runBuf = queue;
+	queue = queue->next;
+
+	/* FIXME: using runbufs here for this is a poor use of memory. */
+	Tree *tree = runBuf->tree;
+	delete runBuf;
+	return tree;
+}
+
 
 /*
  * String
@@ -194,6 +205,9 @@ int InputStreamAccum::needFlush()
 		return true;
 	}
 
+	if ( head != 0 )
+		return true;
+
 	if ( eof )
 		return true;
 		
@@ -244,3 +258,58 @@ void InputStreamAccum::append( const char *data, long len )
 	memcpy( ad->data, data, len );
 	ad->length = len;
 }
+
+void InputStreamAccum::append( Tree *tree )
+{
+	AccumData *ad = new AccumData;
+	ad->type = AccumData::TreeType;
+	if ( head == 0 ) {
+		head = tail = ad;
+		ad->next = 0;
+	}
+	else {
+		tail->next = ad;
+		ad->next = 0;
+		tail = ad;
+	}
+
+	ad->tree = tree;
+	ad->data = 0;
+	ad->length = 0;
+}
+
+bool InputStreamAccum::isTree()
+{ 
+	if ( queue != 0 && queue->type == RunBuf::Token )
+		return true;
+
+	if ( head != 0 && head->type == AccumData::TreeType )
+		return true;
+
+	return false;
+}
+
+Tree *InputStreamAccum::getTree()
+{
+	if ( queue != 0 && queue->type == RunBuf::Token ) {
+		RunBuf *runBuf = queue;
+		queue = queue->next;
+
+		/* FIXME: using runbufs here for this is a poor use of memory. */
+		Tree *tree = runBuf->tree;
+		delete runBuf;
+		return tree;
+	}
+	else if ( head != 0 && head->type == AccumData::TreeType ) {
+		AccumData *ad = head;
+		head = head->next;
+		if ( head == 0 )
+			tail = 0;
+		Tree *tree = ad->tree;
+		delete ad;
+		return tree;
+	}
+
+	assert( false );
+}
+

@@ -51,6 +51,7 @@ struct Replacement;
 struct ReplItem;
 struct RunBuf;
 struct FsmRun;
+struct Tree;
 
 struct exit_object { };
 extern exit_object endp;
@@ -79,10 +80,12 @@ struct InputStream
 	virtual int needFlush() = 0;
 	virtual void pushBackBuf( RunBuf *runBuf ) = 0;
 	virtual void append( const char *data, long len ) = 0;
+	virtual void append( Tree *tree ) = 0;
 	virtual bool tryAgainLater();
 
 	/* Named language elements for patterns and replacements. */
 	virtual bool isTree();
+	virtual Tree *getTree();
 	virtual bool isIgnore();
 	virtual bool isLangEl() { return false; }
 	virtual KlangEl *getLangEl( long &bindId, char *&data, long &length )
@@ -119,6 +122,7 @@ struct InputStreamString : public InputStream
 	int needFlush() { return eof; }
 	void pushBackBuf( RunBuf *runBuf );
 	void append( const char *data, long len ) {}
+	void append( Tree *tree ) {}
 
 	const char *data;
 	long dlen;
@@ -137,6 +141,7 @@ struct InputStreamFile : public InputStream
 	int needFlush();
 	void pushBackBuf( RunBuf *runBuf );
 	void append( const char *data, long len ) {}
+	void append( Tree *tree ) {}
 
 	FILE *file;
 };
@@ -153,14 +158,25 @@ struct InputStreamFd : public InputStream
 	int getData( char *dest, int length );
 	void pushBackBuf( RunBuf *runBuf );
 	void append( const char *data, long len ) {}
+	void append( Tree *tree ) {}
 
 	long fd;
 };
 
 struct AccumData
 {
+	enum Type {
+		TreeType,
+		DataType
+	};
+
+	AccumData()
+		: type(DataType) {}
+
+	Type type;
 	char *data;
 	long length;
+	Tree *tree;
 
 	AccumData *next;
 };
@@ -179,6 +195,9 @@ struct InputStreamAccum : public InputStream
 	int getData( char *dest, int length );
 	void pushBackBuf( RunBuf *runBuf );
 	void append( const char *data, long len );
+	void append( Tree *tree );
+	bool isTree();
+	Tree *getTree();
 
 	bool tryAgainLater();
 
@@ -197,6 +216,7 @@ struct InputStreamPattern : public InputStream
 	int needFlush();
 	void pushBackBuf( RunBuf *runBuf );
 	void append( const char *data, long len ) {}
+	virtual void append( Tree *tree ) {}
 
 	bool isLangEl();
 	KlangEl *getLangEl( long &bindId, char *&data, long &length );
@@ -222,6 +242,7 @@ struct InputStreamRepl : public InputStream
 	int needFlush();
 	void pushBackBuf( RunBuf *runBuf );
 	void append( const char *data, long len ) {}
+	virtual void append( Tree *tree ) {}
 
 	void pushBackNamed();
 

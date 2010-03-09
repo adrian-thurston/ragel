@@ -227,6 +227,31 @@ void parse_stream( Tree **&sp, Program *prg, Tree *input, Accum *accum, long sto
 	parseLoop( sp, accum->pdaRun, accum->fsmRun, stream->in );
 }
 
+void stream_append( Tree **&sp, Program *prg, Tree *input, Accum *accum )
+{
+//	accum->pdaRun->stopTarget = stopId;
+//	Stream *stream = (Stream*) extract_input( prg, accum );
+
+	if ( input->id == LEL_ID_STR ) {
+		//assert(false);
+		/* Collect the tree data. */
+		ostringstream sout;
+		print_tree( sout, sp, prg, input );
+
+		/* Load it into the input. */
+		string s = sout.str();
+//		stream->in->append( s.c_str(), s.size() );
+	}
+	else {
+		//assert(false);
+		/* Cause a flush */
+//		stream->in->flush = true;
+//		parseLoop( sp, accum->pdaRun, accum->fsmRun, stream->in );
+//
+//		sendTreeFrag( prg, sp, accum->pdaRun, accum->fsmRun, stream->in, input, false );
+	}
+}
+
 void parse_frag( Tree **&sp, Program *prg, Tree *input, Accum *accum, long stopId )
 {
 	accum->pdaRun->stopTarget = stopId;
@@ -248,10 +273,23 @@ void parse_frag( Tree **&sp, Program *prg, Tree *input, Accum *accum, long stopI
 	else {
 		//assert(false);
 		/* Cause a flush */
-		stream->in->flush = true;
+
+		input = prep_parse_tree( prg, sp, input );
+
+		if ( input->id >= prg->rtd->firstNonTermId )
+			input->id = prg->rtd->lelInfo[input->id].termDupId;
+
+		input->flags |= AF_ARTIFICIAL;
+
+		tree_upref( input );
+		stream->in->append( input );
+
 		parseLoop( sp, accum->pdaRun, accum->fsmRun, stream->in );
 
-		sendTreeFrag( prg, sp, accum->pdaRun, accum->fsmRun, stream->in, input, false );
+//		stream->in->flush = true;
+//		parseLoop( sp, accum->pdaRun, accum->fsmRun, stream->in );
+
+//		sendTreeFrag( prg, sp, accum->pdaRun, accum->fsmRun, stream->in, input, false );
 	}
 }
 
@@ -2596,6 +2634,18 @@ again:
 		}
 
 		case IN_STREAM_APPEND_WC: {
+			#ifdef COLM_LOG_BYTECODE
+			if ( colm_log_bytecode ) {
+				cerr << "IN_PARSE_FRAG_WC " << endl;
+			}
+			#endif
+
+			Tree *accum = pop();
+			Tree *input = pop();
+			stream_append( sp, prg, input, (Accum*)accum );
+
+			tree_downref( prg, sp, input );
+			tree_downref( prg, sp, accum );
 		}
 		case IN_STREAM_APPEND_WV: {
 		}

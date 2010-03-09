@@ -1122,13 +1122,14 @@ void scanner_error( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun 
 
 void sendTree( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 {
-	RunBuf *runBuf = inputStream->queue;
-	inputStream->queue = inputStream->queue->next;
-
-	/* FIXME: using runbufs here for this is a poor use of memory. */
+//	RunBuf *runBuf = inputStream->queue;
+//	inputStream->queue = inputStream->queue->next;
+//
+//	/* FIXME: using runbufs here for this is a poor use of memory. */
+//	input->tree = runBuf->tree;
+//	delete runBuf;
 	Kid *input = fsmRun->prg->kidPool.allocate();
-	input->tree = runBuf->tree;
-	delete runBuf;
+	input->tree = inputStream->getTree();
 
 	incrementConsumed( pdaRun );
 
