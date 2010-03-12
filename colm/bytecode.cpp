@@ -120,18 +120,19 @@ int colm_log_conds = 0;
 
 Tree *prep_parse_tree( Program *prg, Tree **sp, Tree *tree )
 {
-	/* If the tree was produced by a parsing function then we need to send a
-	 * copy of it because the parsing that we are about to do requires fresh
-	 * parsing algorithm data. */
-	if ( !(tree->flags & AF_PARSE_TREE) || tree->flags & AF_PARSED ) {
-		#ifdef COLM_LOG_BYTECODE
-		if ( colm_log_bytecode ) {
-			cerr << "copying tree in send function" << endl;
-		}
-		#endif
-		Kid *unused = 0;
-		tree = copy_real_tree( prg, tree, 0, unused, true );
- 	}
+	/* Seems like we need to always copy here. If it isn't a parse tree it
+	 * needs to be made into one. If it is then we need to make a new one in
+	 * case the old one is still in use by some parsing routine. The case were
+	 * we might be able to avoid a copy would be that it's a parse tree
+	 * already, but it's owning parser is completely finished with it. */
+
+	#ifdef COLM_LOG_BYTECODE
+	if ( colm_log_bytecode ) {
+		cerr << "copying tree in send function" << endl;
+	}
+	#endif
+	Kid *unused = 0;
+	tree = copy_real_tree( prg, tree, 0, unused, true );
 	return  tree;
 }
 
@@ -2676,9 +2677,8 @@ again:
 				cerr << "IN_STREAM_APPEND_BKT" << endl;
 			}
 			#endif
-
-			//undo_stream_push( sp, fsmRun, ((Stream*)stream)->in, len );
-			//tree_downref( prg, sp, stream );
+			/* This needs an implementation. */
+			assert( false );
 			break;
 		}
 
