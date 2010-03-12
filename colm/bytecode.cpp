@@ -2625,10 +2625,7 @@ again:
 				cerr << "IN_PARSE_STREAM_BKT " << consumed << endl;
 			#endif
 
-//			Tree *input = pop();
-//			Tree *accum = pop();
 			undo_parse_stream( sp, prg, (Stream*)input, (Accum*)accum, consumed );
-//			tree_downref( prg, sp, input );
 			tree_downref( prg, sp, accum );
 			break;
 		}
@@ -2645,13 +2642,44 @@ again:
 			stream_append( sp, prg, input, (Stream*)stream );
 
 			tree_downref( prg, sp, input );
-			//tree_downref( prg, sp, stream );
 			push( stream );
 			break;
 		}
 		case IN_STREAM_APPEND_WV: {
+			#ifdef COLM_LOG_BYTECODE
+			if ( colm_log_bytecode ) {
+				cerr << "IN_STREAM_APPEND_WV " << endl;
+			}
+			#endif
+
+			Tree *stream = pop();
+			Tree *input = pop();
+			stream_append( sp, prg, input, (Stream*)stream );
+
+			tree_upref( stream );
+			push( stream );
+
+			reverseCode.append( IN_STREAM_APPEND_BKT );
+			reverseCode.appendWord( (Word) stream );
+			reverseCode.appendWord( (Word) input );
+			reverseCode.append( SIZEOF_CODE + 2 * SIZEOF_WORD );
+			break;
 		}
 		case IN_STREAM_APPEND_BKT: {
+			Tree *stream;
+			Tree *input;
+			read_tree( stream );
+			read_tree( input );
+
+			#ifdef COLM_LOG_BYTECODE
+			if ( colm_log_bytecode ) {
+				cerr << "IN_STREAM_APPEND_BKT" << endl;
+			}
+			#endif
+
+			//undo_stream_push( sp, fsmRun, ((Stream*)stream)->in, len );
+			//tree_downref( prg, sp, stream );
+			break;
 		}
 
 		case IN_PARSE_FRAG_WC: {
@@ -2817,10 +2845,10 @@ again:
 			tree_downref( prg, sp, string );
 			break;
 		}
-		case IN_STREAM_PUSH: {
+		case IN_STREAM_PUSH_WV: {
 			#ifdef COLM_LOG_BYTECODE
 			if ( colm_log_bytecode ) {
-				cerr << "IN_STREAM_PUSH" << endl;
+				cerr << "IN_STREAM_PUSH_WV" << endl;
 			}
 			#endif
 			Tree *stream = pop();
@@ -2838,10 +2866,10 @@ again:
 			tree_downref( prg, sp, tree );
 			break;
 		}
-		case IN_STREAM_PUSH_IGNORE: {
+		case IN_STREAM_PUSH_IGNORE_WV: {
 			#ifdef COLM_LOG_BYTECODE
 			if ( colm_log_bytecode ) {
-				cerr << "IN_STREAM_PUSH_IGNORE" << endl;
+				cerr << "IN_STREAM_PUSH_IGNORE_WV" << endl;
 			}
 			#endif
 			Tree *stream = pop();

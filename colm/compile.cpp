@@ -2329,9 +2329,9 @@ void ParseData::initStreamObject( )
 	streamKlangEl->objectDef = streamObj;
 
 	initFunction( uniqueTypeStr, streamObj, "pull",  IN_STREAM_PULL, IN_STREAM_PULL, uniqueTypeInt, false );
-	initFunction( uniqueTypeStr, streamObj, "push",  IN_STREAM_PUSH, IN_STREAM_PUSH, uniqueTypeAny, false );
+	initFunction( uniqueTypeStr, streamObj, "push",  IN_STREAM_PUSH_WV, IN_STREAM_PUSH_WV, uniqueTypeAny, false );
 	initFunction( uniqueTypeStr, streamObj, "push_ignore",  
-			IN_STREAM_PUSH_IGNORE, IN_STREAM_PUSH_IGNORE, uniqueTypeAny, false );
+			IN_STREAM_PUSH_IGNORE_WV, IN_STREAM_PUSH_IGNORE_WV, uniqueTypeAny, false );
 }
 
 ObjField *ParseData::makeDataEl()
