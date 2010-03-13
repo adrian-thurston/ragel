@@ -216,29 +216,49 @@ int InputStreamAccum::needFlush()
 
 int InputStreamAccum::getData( char *dest, int length )
 {
-	if ( head == 0 )
-		return 0;
-
-	int available = head->length - offset;
-
-	if ( available < length )
-		length = available;
-
-	memcpy( dest, head->data + offset, length );
-	offset += length;
-
-	if ( offset == head->length ) {
-		head = head->next;
-		if ( head == 0 )
-			tail = 0;
-		offset = 0;
+	/* If there is any data in queue, read from that first. */
+	if ( queue != 0 ) {
+		long avail = queue->length - queue->offset;
+		if ( length >= avail ) {
+			memcpy( dest, &queue->buf[queue->offset], avail );
+			RunBuf *del = queue;
+			queue = queue->next;
+			delete del;
+			return avail;
+		}
+		else {
+			memcpy( dest, &queue->buf[queue->offset], length );
+			queue->offset += length;
+			return length;
+		}
 	}
+	else {
+		if ( head == 0 )
+			return 0;
 
-	return length;
+		int available = head->length - offset;
+
+		if ( available < length )
+			length = available;
+
+		memcpy( dest, head->data + offset, length );
+		offset += length;
+
+		if ( offset == head->length ) {
+			head = head->next;
+			if ( head == 0 )
+				tail = 0;
+			offset = 0;
+		}
+
+		return length;
+	}
 }
 
 void InputStreamAccum::pushBackBuf( RunBuf *runBuf )
 {
+	runBuf->next = queue;
+	queue = runBuf;
 }
 
 void InputStreamAccum::append( const char *data, long len )
