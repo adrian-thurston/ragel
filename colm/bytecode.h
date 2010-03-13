@@ -236,10 +236,6 @@ typedef unsigned char uchar;
 #define IN_STREAM_APPEND_WV      0xc7
 #define IN_STREAM_APPEND_BKT     0xc8
 
-#define IN_PARSE_FRAG_WC         0x9c
-#define IN_PARSE_FRAG_WV         0xb9
-#define IN_PARSE_FRAG_BKT        0xba
-
 #define IN_PARSE_FINISH_WC       0x9d
 #define IN_PARSE_FINISH_WV       0xbd
 #define IN_PARSE_FINISH_BKT      0xbf

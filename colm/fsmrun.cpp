@@ -268,6 +268,17 @@ void streamPushTree( InputStream *inputStream, Tree *tree, bool ignore )
 	inputStream->queue = newBuf;
 }
 
+void undo_stream_append( Tree **sp, FsmRun *fsmRun, InputStream *inputStream, long length )
+{
+	take_back_buffered( inputStream );
+
+	#ifdef COLM_LOG_BYTECODE
+	if ( colm_log_bytecode ) {
+		cerr << "IN_STREAM_APPEND_BKT" << endl;
+	}
+	#endif
+}
+
 void undo_stream_push( Tree **sp, FsmRun *fsmRun, InputStream *inputStream, long length )
 {
 	take_back_buffered( inputStream );

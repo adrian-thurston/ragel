@@ -253,6 +253,10 @@ void stream_append( Tree **&sp, Program *prg, Tree *input, Stream *stream )
 	}
 }
 
+void undo_stream_append( Tree **&sp, Program *prg, Tree *input, Stream *stream )
+{
+}
+
 void parse_frag( Tree **&sp, Program *prg, Tree *input, Accum *accum, long stopId )
 {
 	accum->pdaRun->stopTarget = stopId;
@@ -705,6 +709,22 @@ again:
 			#endif
 			break;
 		}
+		case IN_STREAM_APPEND_BKT: {
+			Tree *stream;
+			Tree *input;
+			read_tree( stream );
+			read_tree( input );
+
+			#ifdef COLM_LOG_BYTECODE
+			if ( colm_log_bytecode ) {
+				cerr << "IN_STREAM_APPEND_BKT" << endl;
+			}
+			#endif
+
+			tree_downref( prg, sp, stream );
+			tree_downref( prg, sp, input );
+			break;
+		}
 		case IN_PARSE_STREAM_BKT: {
 			Tree *accum;
 			Tree *input;
@@ -716,22 +736,6 @@ again:
 			#ifdef COLM_LOG_BYTECODE
 			if ( colm_log_bytecode )
 				cerr << "IN_PARSE_STREAM_BKT " << consumed << endl;
-			#endif
-			
-			tree_downref( prg, sp, accum );
-			break;
-		}
-		case IN_PARSE_FRAG_BKT: {
-			Tree *accum;
-			Tree *input;
-			long consumed;
-			read_tree( accum );
-			read_tree( input );
-			read_word( consumed );
-
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode )
-				cerr << "IN_PARSE_FRAG_BKT " << consumed << endl;
 			#endif
 			
 			tree_downref( prg, sp, accum );
@@ -2677,73 +2681,10 @@ again:
 				cerr << "IN_STREAM_APPEND_BKT" << endl;
 			}
 			#endif
-			/* This needs an implementation. */
-			assert( false );
-			break;
-		}
 
-		case IN_PARSE_FRAG_WC: {
-			Half stopId;
-			read_half( stopId );
-
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode ) {
-				cerr << "IN_PARSE_FRAG_WC " << endl;
-			}
-			#endif
-
-			Tree *accum = pop();
-			Tree *input = pop();
-			parse_frag( sp, prg, input, (Accum*)accum, stopId );
-
+			undo_stream_append( sp, prg, input, (Stream*)stream );
+			tree_downref( prg, sp, stream );
 			tree_downref( prg, sp, input );
-			tree_downref( prg, sp, accum );
-			break;
-		}
-
-		case IN_PARSE_FRAG_WV: {
-			Half stopId;
-			read_half( stopId );
-
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode ) {
-				cerr << "IN_PARSE_FRAG_WV " << endl;
-			}
-			#endif
-
-			Tree *accum = pop();
-			Tree *input = pop();
-			long consumed = ((Accum*)accum)->pdaRun->consumed;
-			parse_frag( sp, prg, input, (Accum*)accum, stopId );
-			tree_downref( prg, sp, input );
-			//tree_downref( prg, sp, accum );
-
-			reverseCode.append( IN_PARSE_FRAG_BKT );
-			reverseCode.appendWord( (Word) accum );
-			reverseCode.appendWord( (Word) input );
-			reverseCode.appendWord( consumed );
-			reverseCode.append( SIZEOF_CODE + 3 * SIZEOF_WORD );
-			break;
-		}
-
-		case IN_PARSE_FRAG_BKT: {
-			Tree *accum;
-			Tree *input;
-			long consumed;
-			read_tree( accum );
-			read_tree( input );
-			read_word( consumed );
-
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode )
-				cerr << "IN_PARSE_FRAG_BKT " << consumed << endl;
-			#endif
-
-//			Tree *input = pop();
-//			Tree *accum = pop();
-			undo_parse_frag( sp, prg, (Accum*)accum, consumed );
-//			tree_downref( prg, sp, input );
-			tree_downref( prg, sp, accum );
 			break;
 		}
 
