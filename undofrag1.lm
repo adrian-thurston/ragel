@@ -31,11 +31,12 @@ context ctx
 
 	def A [] {
 		print( 'A\n' )
-		SP << "{ d }"
+		SP << "{ A{d} }"
 	}
 
 	def B [] {
 		print( 'B\n' )
+		SP << "{ B{d} }"
 	}
 	
 
