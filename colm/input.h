@@ -69,7 +69,8 @@ struct RunBuf
 		tree(0),
 		length(0),
 		offset(0),
-		next(0)
+		next(0),
+		prev(0)
 	{}
 
 	char buf[FSM_BUFSIZE];
@@ -77,7 +78,7 @@ struct RunBuf
 	Tree *tree;
 	long length;
 	long offset;
-	RunBuf *next;
+	RunBuf *next, *prev;
 };
 
 
@@ -97,7 +98,8 @@ struct InputStream
 		byte(0),
 		handlesLine(handlesLine),
 		later(false),
-		queue2(0)
+		queue(0),
+		queueTail(0)
 	{}
 
 	virtual ~InputStream() {}
@@ -136,42 +138,51 @@ struct InputStream
 	bool handlesLine;
 	bool later;
 
-	RunBuf *queue2;
+	RunBuf *queue;
+	RunBuf *queueTail;
 
 	RunBuf *head()
 	{
-		return queue2;
+		return queue;
 	}
 
 	RunBuf *popHead()
 	{
-		RunBuf *ret = queue2;
-		queue2 = queue2->next;
+		RunBuf *ret = queue;
+		queue = queue->next;
+		if ( queue == 0 )
+			queueTail = 0;
 		return ret;
 	}
 
 	void prepend( RunBuf *runBuf )
 	{
-		runBuf->next = queue2;
-		queue2 = runBuf;
+		runBuf->next = queue;
+		queue = runBuf;
+
+		if ( queueTail == 0 )
+			queueTail = queue;
 	}
 
 	void reverseQueue()
 	{
-		RunBuf *last = 0, *cur = queue2;
+		RunBuf *last = 0, *cur = queue;
+		queueTail = queue;
+
 		while ( cur != 0 ) {
 			/* Save for moving ahead. */
 			RunBuf *next = cur->next;
 
 			/* Reverse. */
 			cur->next = last;
+			cur->prev = next;
 			
 			/* Move ahead. */
 			last = cur;
 			cur = next;
 		}
 
-		queue2 = last;
+		queue = last;
 	}
 };
 
