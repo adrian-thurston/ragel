@@ -228,7 +228,7 @@ void parse_stream( Tree **&sp, Program *prg, Tree *input, Accum *accum, long sto
 	parseLoop( sp, accum->pdaRun, accum->fsmRun, stream->in );
 }
 
-void stream_append( Tree **&sp, Program *prg, Tree *input, Stream *stream )
+Word stream_append( Tree **&sp, Program *prg, Tree *input, Stream *stream )
 {
 	if ( input->id == LEL_ID_STR ) {
 		//assert(false);
@@ -239,6 +239,7 @@ void stream_append( Tree **&sp, Program *prg, Tree *input, Stream *stream )
 		/* Load it into the input. */
 		string s = sout.str();
 		stream->in->append( s.c_str(), s.size() );
+		return s.size();
 	}
 	else {
 		input = prep_parse_tree( prg, sp, input );
@@ -250,11 +251,8 @@ void stream_append( Tree **&sp, Program *prg, Tree *input, Stream *stream )
 
 		tree_upref( input );
 		stream->in->append( input );
+		return 0;
 	}
-}
-
-void undo_stream_append( Tree **&sp, Program *prg, Tree *input, Stream *stream )
-{
 }
 
 void parse_frag( Tree **&sp, Program *prg, Tree *input, Accum *accum, long stopId )
@@ -712,8 +710,10 @@ again:
 		case IN_STREAM_APPEND_BKT: {
 			Tree *stream;
 			Tree *input;
+			Word len;
 			read_tree( stream );
 			read_tree( input );
+			read_word( len );
 
 			#ifdef COLM_LOG_BYTECODE
 			if ( colm_log_bytecode ) {
@@ -2659,7 +2659,7 @@ again:
 
 			Tree *stream = pop();
 			Tree *input = pop();
-			stream_append( sp, prg, input, (Stream*)stream );
+			Word len = stream_append( sp, prg, input, (Stream*)stream );
 
 			tree_upref( stream );
 			push( stream );
@@ -2667,14 +2667,17 @@ again:
 			reverseCode.append( IN_STREAM_APPEND_BKT );
 			reverseCode.appendWord( (Word) stream );
 			reverseCode.appendWord( (Word) input );
-			reverseCode.append( SIZEOF_CODE + 2 * SIZEOF_WORD );
+			reverseCode.appendWord( (Word) len );
+			reverseCode.append( SIZEOF_CODE + 3 * SIZEOF_WORD );
 			break;
 		}
 		case IN_STREAM_APPEND_BKT: {
 			Tree *stream;
 			Tree *input;
+			Word len;
 			read_tree( stream );
 			read_tree( input );
+			read_word( len );
 
 			#ifdef COLM_LOG_BYTECODE
 			if ( colm_log_bytecode ) {
@@ -2682,7 +2685,7 @@ again:
 			}
 			#endif
 
-			undo_stream_append( sp, prg, input, (Stream*)stream );
+			undo_stream_append( prg, sp, ((Stream*)stream)->in, len );
 			tree_downref( prg, sp, stream );
 			tree_downref( prg, sp, input );
 			break;
@@ -2840,7 +2843,7 @@ again:
 			}
 			#endif
 
-			undo_stream_push( sp, fsmRun, ((Stream*)stream)->in, len );
+			undo_stream_push( prg, sp, ((Stream*)stream)->in, len );
 			tree_downref( prg, sp, stream );
 			break;
 		}

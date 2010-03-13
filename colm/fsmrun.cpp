@@ -229,11 +229,11 @@ void undo_stream_pull( FsmRun *fsmRun, InputStream *inputStream, const char *dat
 
 void stream_push_text( InputStream *inputStream, const char *data, long length )
 {
-	#ifdef COLM_LOG_PARSE
-	if ( colm_log_parse ) {
-		cerr << "readying fake push" << endl;
-	}
-	#endif
+//	#ifdef COLM_LOG_PARSE
+//	if ( colm_log_parse ) {
+//		cerr << "readying fake push" << endl;
+//	}
+//	#endif
 
 	take_back_buffered( inputStream );
 
@@ -250,11 +250,11 @@ void stream_push_text( InputStream *inputStream, const char *data, long length )
 
 void streamPushTree( InputStream *inputStream, Tree *tree, bool ignore )
 {
-	#ifdef COLM_LOG_PARSE
-	if ( colm_log_parse ) {
-		cerr << "readying fake push" << endl;
-	}
-	#endif
+//	#ifdef COLM_LOG_PARSE
+//	if ( colm_log_parse ) {
+//		cerr << "readying fake push" << endl;
+//	}
+//	#endif
 
 	take_back_buffered( inputStream );
 
@@ -268,18 +268,25 @@ void streamPushTree( InputStream *inputStream, Tree *tree, bool ignore )
 	inputStream->queue = newBuf;
 }
 
-void undo_stream_append( Tree **sp, FsmRun *fsmRun, InputStream *inputStream, long length )
+void reverseQueue( InputStream *inputStream )
 {
-	take_back_buffered( inputStream );
+	RunBuf *last = 0, *cur = inputStream->queue;
+	while ( cur != 0 ) {
+		/* Save for moving ahead. */
+		RunBuf *next = cur->next;
 
-	#ifdef COLM_LOG_BYTECODE
-	if ( colm_log_bytecode ) {
-		cerr << "IN_STREAM_APPEND_BKT" << endl;
+		/* Reverse. */
+		cur->next = last;
+		
+		/* Move ahead. */
+		last = cur;
+		cur = next;
 	}
-	#endif
+
+	inputStream->queue = last;
 }
 
-void undo_stream_push( Tree **sp, FsmRun *fsmRun, InputStream *inputStream, long length )
+void undo_stream_push( Program *prg, Tree **sp, InputStream *inputStream, long length )
 {
 	take_back_buffered( inputStream );
 
@@ -295,8 +302,18 @@ void undo_stream_push( Tree **sp, FsmRun *fsmRun, InputStream *inputStream, long
 		/* FIXME: leak here. */
 		RunBuf *rb = inputStream->queue;
 		inputStream->queue = inputStream->queue->next;
-		tree_downref( fsmRun->prg, sp, rb->tree );
+		tree_downref( prg, sp, rb->tree );
 	}
+}
+
+void undo_stream_append( Program *prg, Tree **sp, InputStream *inputStream, long length )
+{
+	/* This is due to pure lazyness. */
+	reverseQueue( inputStream );
+
+	undo_stream_push( prg, sp, inputStream, length );
+
+	reverseQueue( inputStream );
 }
 
 
@@ -418,8 +435,7 @@ void sendBack( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStre
 		//}
 
 		sendBackIgnore( sp, pdaRun, fsmRun, inputStream, leftIgnore );
-		tree_downref( pdaRun->prg, sp, input->tree );
-		fsmRun->prg->kidPool.free( input );
+
 		///* Always push back the ignore text. */
 		//sendBackIgnore( sp, pdaRun, fsmRun, inputStream, tree_ignore( fsmRun->prg, input->tree ) );
 	}
@@ -451,20 +467,20 @@ void sendBack( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStre
 			pdaRun->bindings.pop();
 			tree_downref( fsmRun->prg, sp, input->tree );
 		}
-
-		if ( pdaRun->consumed == pdaRun->targetConsumed ) {
-			#ifdef COLM_LOG_PARSE
-			if ( colm_log_parse )
-				cerr << "trigger parse stop, consumed = target = " << pdaRun->targetConsumed << endl;
-			#endif
-			
-			pdaRun->stop = true;
-		}
-
-		/* Downref the tree that was sent back and free the kid. */
-		tree_downref( fsmRun->prg, sp, input->tree );
-		fsmRun->prg->kidPool.free( input );
 	}
+
+	if ( pdaRun->consumed == pdaRun->targetConsumed ) {
+		#ifdef COLM_LOG_PARSE
+		if ( colm_log_parse )
+			cerr << "trigger parse stop, consumed = target = " << pdaRun->targetConsumed << endl;
+		#endif
+			
+		pdaRun->stop = true;
+	}
+
+	/* Downref the tree that was sent back and free the kid. */
+	tree_downref( fsmRun->prg, sp, input->tree );
+	fsmRun->prg->kidPool.free( input );
 }
 
 

@@ -135,7 +135,9 @@ Head *stream_pull( Program *prg, FsmRun *fsmRun, InputStream *inputStream, long 
 void stream_push_text( InputStream *inputStream, const char *data, long length );
 void streamPushTree( InputStream *inputStream, Tree *tree, bool ignore );
 void undo_stream_pull( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length );
-void undo_stream_push( Tree **sp, FsmRun *fsmRun, InputStream *inputStream, long length );
+
+void undo_stream_push( Program *prg, Tree **sp, InputStream *inputStream, long length );
+void undo_stream_append( Program *prg, Tree **sp, InputStream *inputStream, long length );
 
 void send_named_lang_el( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
 Kid *make_token( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, int id,
