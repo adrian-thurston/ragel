@@ -25,9 +25,6 @@
 #include "pdarun.h"
 #include "input.h"
 
-#define FSM_BUFSIZE 8192
-//#define FSM_BUFSIZE 8
-
 struct GenAction;
 struct KlangEl;
 struct PdaRun;
@@ -70,31 +67,6 @@ struct FsmTables
 
 	GenAction **actionSwitch;
 	long numActionSwitch;
-};
-
-struct RunBuf
-{
-	enum Type {
-		Data,
-		Token,
-		Ignore
-	};
-
-	RunBuf()
-	:
-		type(Data),
-		tree(0),
-		length(0),
-		offset(0),
-		next(0)
-	{}
-
-	char buf[FSM_BUFSIZE];
-	Type type;
-	Tree *tree;
-	long length;
-	long offset;
-	RunBuf *next;
 };
 
 #define MARK_SLOTS 32

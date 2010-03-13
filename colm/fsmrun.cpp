@@ -264,33 +264,15 @@ void streamPushTree( InputStream *inputStream, Tree *tree, bool ignore )
 	RunBuf *newBuf = new RunBuf;
 	newBuf->type = ignore ? RunBuf::Ignore : RunBuf::Token;
 	newBuf->tree = tree;
-	newBuf->next = inputStream->queue;
-	inputStream->queue = newBuf;
-}
 
-void reverseQueue( InputStream *inputStream )
-{
-	RunBuf *last = 0, *cur = inputStream->queue;
-	while ( cur != 0 ) {
-		/* Save for moving ahead. */
-		RunBuf *next = cur->next;
-
-		/* Reverse. */
-		cur->next = last;
-		
-		/* Move ahead. */
-		last = cur;
-		cur = next;
-	}
-
-	inputStream->queue = last;
+	inputStream->prepend( newBuf );
 }
 
 void undo_stream_push( Program *prg, Tree **sp, InputStream *inputStream, long length )
 {
 	take_back_buffered( inputStream );
 
-	if ( inputStream->queue->type == RunBuf::Data ) {
+	if ( inputStream->head()->type == RunBuf::Data ) {
 		char tmp[length];
 		int have = 0;
 		while ( have < length ) {
@@ -300,8 +282,7 @@ void undo_stream_push( Program *prg, Tree **sp, InputStream *inputStream, long l
 	}
 	else {
 		/* FIXME: leak here. */
-		RunBuf *rb = inputStream->queue;
-		inputStream->queue = inputStream->queue->next;
+		RunBuf *rb = inputStream->popHead();
 		tree_downref( prg, sp, rb->tree );
 	}
 }
@@ -309,11 +290,9 @@ void undo_stream_push( Program *prg, Tree **sp, InputStream *inputStream, long l
 void undo_stream_append( Program *prg, Tree **sp, InputStream *inputStream, long length )
 {
 	/* This is due to pure lazyness. */
-	reverseQueue( inputStream );
-
+	inputStream->reverseQueue();
 	undo_stream_push( prg, sp, inputStream, length );
-
-	reverseQueue( inputStream );
+	inputStream->reverseQueue();
 }
 
 
@@ -1165,8 +1144,7 @@ void sendTree( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStre
 
 void sendTreeIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 {
-	RunBuf *runBuf = inputStream->queue;
-	inputStream->queue = inputStream->queue->next;
+	RunBuf *runBuf = inputStream->popHead();
 
 	/* FIXME: using runbufs here for this is a poor use of memory. */
 	Tree *tree = runBuf->tree;

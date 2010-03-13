@@ -26,6 +26,8 @@
 #include <stdio.h>
 #include <iostream>
 
+#define FSM_BUFSIZE 8192
+//#define FSM_BUFSIZE 8
 
 /*
  * pdaRun <- fsmRun <- stream 
@@ -53,6 +55,32 @@ struct RunBuf;
 struct FsmRun;
 struct Tree;
 
+struct RunBuf
+{
+	enum Type {
+		Data,
+		Token,
+		Ignore
+	};
+
+	RunBuf()
+	:
+		type(Data),
+		tree(0),
+		length(0),
+		offset(0),
+		next(0)
+	{}
+
+	char buf[FSM_BUFSIZE];
+	Type type;
+	Tree *tree;
+	long length;
+	long offset;
+	RunBuf *next;
+};
+
+
 struct exit_object { };
 extern exit_object endp;
 void operator<<( std::ostream &out, exit_object & );
@@ -69,7 +97,7 @@ struct InputStream
 		byte(0),
 		handlesLine(handlesLine),
 		later(false),
-		queue(0)
+		queue2(0)
 	{}
 
 	virtual ~InputStream() {}
@@ -108,7 +136,43 @@ struct InputStream
 	bool handlesLine;
 	bool later;
 
-	RunBuf *queue;
+	RunBuf *queue2;
+
+	RunBuf *head()
+	{
+		return queue2;
+	}
+
+	RunBuf *popHead()
+	{
+		RunBuf *ret = queue2;
+		queue2 = queue2->next;
+		return ret;
+	}
+
+	void prepend( RunBuf *runBuf )
+	{
+		runBuf->next = queue2;
+		queue2 = runBuf;
+	}
+
+	void reverseQueue()
+	{
+		RunBuf *last = 0, *cur = queue2;
+		while ( cur != 0 ) {
+			/* Save for moving ahead. */
+			RunBuf *next = cur->next;
+
+			/* Reverse. */
+			cur->next = last;
+			
+			/* Move ahead. */
+			last = cur;
+			cur = next;
+		}
+
+		queue2 = last;
+	}
 };
 
 struct InputStreamString : public InputStream
@@ -186,7 +250,7 @@ struct InputStreamAccum : public InputStream
 	InputStreamAccum()
 	:
 		InputStream(false), 
-		head(0), tail(0),
+		adHead(0), adTail(0),
 		offset(0)
 	{}
 
@@ -201,7 +265,7 @@ struct InputStreamAccum : public InputStream
 
 	bool tryAgainLater();
 
-	AccumData *head, *tail;
+	AccumData *adHead, *adTail;
 
 	long offset;
 };

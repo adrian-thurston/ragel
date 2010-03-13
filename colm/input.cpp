@@ -37,22 +37,21 @@ bool InputStream::tryAgainLater()
 
 bool InputStream::isTree()
 { 
-	if ( queue != 0 && queue->type == RunBuf::Token )
+	if ( head() != 0 && head()->type == RunBuf::Token )
 		return true;
 	return false;
 }
 
 bool InputStream::isIgnore()
 { 
-	if ( queue != 0 && queue->type == RunBuf::Ignore )
+	if ( head() != 0 && head()->type == RunBuf::Ignore )
 		return true;
 	return false;
 }
 
 Tree *InputStream::getTree()
 {
-	RunBuf *runBuf = queue;
-	queue = queue->next;
+	RunBuf *runBuf = popHead();
 
 	/* FIXME: using runbufs here for this is a poor use of memory. */
 	Tree *tree = runBuf->tree;
@@ -97,29 +96,28 @@ void InputStreamString::pushBackBuf( RunBuf *runBuf )
 
 int InputStreamFile::isEOF()
 {
-	return queue == 0 && feof( file );
+	return head() == 0 && feof( file );
 }
 
 int InputStreamFile::needFlush()
 {
-	return queue == 0 && feof( file );
+	return head() == 0 && feof( file );
 }
 
 int InputStreamFile::getData( char *dest, int length )
 {
-	/* If there is any data in queue, read from that first. */
-	if ( queue != 0 ) {
-		long avail = queue->length - queue->offset;
+	/* If there is any data in queue2, read from that first. */
+	if ( head() != 0 ) {
+		long avail = head()->length - head()->offset;
 		if ( length >= avail ) {
-			memcpy( dest, &queue->buf[queue->offset], avail );
-			RunBuf *del = queue;
-			queue = queue->next;
+			memcpy( dest, &head()->buf[head()->offset], avail );
+			RunBuf *del = popHead();
 			delete del;
 			return avail;
 		}
 		else {
-			memcpy( dest, &queue->buf[queue->offset], length );
-			queue->offset += length;
+			memcpy( dest, &head()->buf[head()->offset], length );
+			head()->offset += length;
 			return length;
 		}
 	}
@@ -130,8 +128,7 @@ int InputStreamFile::getData( char *dest, int length )
 
 void InputStreamFile::pushBackBuf( RunBuf *runBuf )
 {
-	runBuf->next = queue;
-	queue = runBuf;
+	prepend( runBuf );
 }
 
 /*
@@ -140,35 +137,33 @@ void InputStreamFile::pushBackBuf( RunBuf *runBuf )
 
 int InputStreamFd::isEOF()
 {
-	return queue == 0 && eof;
+	return head() == 0 && eof;
 }
 
 int InputStreamFd::needFlush()
 {
-	return queue == 0 && eof;
+	return head() == 0 && eof;
 }
 
 void InputStreamFd::pushBackBuf( RunBuf *runBuf )
 {
-	runBuf->next = queue;
-	queue = runBuf;
+	prepend( runBuf );
 }
 
 int InputStreamFd::getData( char *dest, int length )
 {
-	/* If there is any data in queue, read from that first. */
-	if ( queue != 0 ) {
-		long avail = queue->length - queue->offset;
+	/* If there is any data in queue2, read from that first. */
+	if ( head() != 0 ) {
+		long avail = head()->length - head()->offset;
 		if ( length >= avail ) {
-			memcpy( dest, &queue->buf[queue->offset], avail );
-			RunBuf *del = queue;
-			queue = queue->next;
+			memcpy( dest, &head()->buf[head()->offset], avail );
+			RunBuf *del = popHead();
 			delete del;
 			return avail;
 		}
 		else {
-			memcpy( dest, &queue->buf[queue->offset], length );
-			queue->offset += length;
+			memcpy( dest, &head()->buf[head()->offset], length );
+			head()->offset += length;
 			return length;
 		}
 	}
@@ -192,7 +187,7 @@ int InputStreamAccum::isEOF()
 
 bool InputStreamAccum::tryAgainLater()
 {
-	if ( later || ( !flush && head == 0 && tail == 0  ))
+	if ( later || ( !flush && adHead == 0 && adTail == 0  ))
 		return true;
 
 	return false;
@@ -205,7 +200,7 @@ int InputStreamAccum::needFlush()
 		return true;
 	}
 
-	if ( head != 0 )
+	if ( adHead != 0 )
 		return true;
 
 	if ( eof )
@@ -216,38 +211,37 @@ int InputStreamAccum::needFlush()
 
 int InputStreamAccum::getData( char *dest, int length )
 {
-	/* If there is any data in queue, read from that first. */
-	if ( queue != 0 ) {
-		long avail = queue->length - queue->offset;
+	/* If there is any data in queue2, read from that first. */
+	if ( head() != 0 ) {
+		long avail = head()->length - head()->offset;
 		if ( length >= avail ) {
-			memcpy( dest, &queue->buf[queue->offset], avail );
-			RunBuf *del = queue;
-			queue = queue->next;
+			memcpy( dest, &head()->buf[head()->offset], avail );
+			RunBuf *del = popHead();
 			delete del;
 			return avail;
 		}
 		else {
-			memcpy( dest, &queue->buf[queue->offset], length );
-			queue->offset += length;
+			memcpy( dest, &head()->buf[head()->offset], length );
+			head()->offset += length;
 			return length;
 		}
 	}
 	else {
-		if ( head == 0 )
+		if ( adHead == 0 )
 			return 0;
 
-		int available = head->length - offset;
+		int available = adHead->length - offset;
 
 		if ( available < length )
 			length = available;
 
-		memcpy( dest, head->data + offset, length );
+		memcpy( dest, adHead->data + offset, length );
 		offset += length;
 
-		if ( offset == head->length ) {
-			head = head->next;
-			if ( head == 0 )
-				tail = 0;
+		if ( offset == adHead->length ) {
+			adHead = adHead->next;
+			if ( adHead == 0 )
+				adTail = 0;
 			offset = 0;
 		}
 
@@ -257,21 +251,20 @@ int InputStreamAccum::getData( char *dest, int length )
 
 void InputStreamAccum::pushBackBuf( RunBuf *runBuf )
 {
-	runBuf->next = queue;
-	queue = runBuf;
+	prepend( runBuf );
 }
 
 void InputStreamAccum::append( const char *data, long len )
 {
 	AccumData *ad = new AccumData;
-	if ( head == 0 ) {
-		head = tail = ad;
+	if ( adHead == 0 ) {
+		adHead = adTail = ad;
 		ad->next = 0;
 	}
 	else {
-		tail->next = ad;
+		adTail->next = ad;
 		ad->next = 0;
-		tail = ad;
+		adTail = ad;
 	}
 
 	ad->data = new char[len];
@@ -283,14 +276,14 @@ void InputStreamAccum::append( Tree *tree )
 {
 	AccumData *ad = new AccumData;
 	ad->type = AccumData::TreeType;
-	if ( head == 0 ) {
-		head = tail = ad;
+	if ( adHead == 0 ) {
+		adHead = adTail = ad;
 		ad->next = 0;
 	}
 	else {
-		tail->next = ad;
+		adTail->next = ad;
 		ad->next = 0;
-		tail = ad;
+		adTail = ad;
 	}
 
 	ad->tree = tree;
@@ -300,10 +293,10 @@ void InputStreamAccum::append( Tree *tree )
 
 bool InputStreamAccum::isTree()
 { 
-	if ( queue != 0 && queue->type == RunBuf::Token )
+	if ( head() != 0 && head()->type == RunBuf::Token )
 		return true;
 
-	if ( head != 0 && head->type == AccumData::TreeType )
+	if ( adHead != 0 && adHead->type == AccumData::TreeType )
 		return true;
 
 	return false;
@@ -311,20 +304,19 @@ bool InputStreamAccum::isTree()
 
 Tree *InputStreamAccum::getTree()
 {
-	if ( queue != 0 && queue->type == RunBuf::Token ) {
-		RunBuf *runBuf = queue;
-		queue = queue->next;
+	if ( head() != 0 && head()->type == RunBuf::Token ) {
+		RunBuf *runBuf = popHead();
 
 		/* FIXME: using runbufs here for this is a poor use of memory. */
 		Tree *tree = runBuf->tree;
 		delete runBuf;
 		return tree;
 	}
-	else if ( head != 0 && head->type == AccumData::TreeType ) {
-		AccumData *ad = head;
-		head = head->next;
-		if ( head == 0 )
-			tail = 0;
+	else if ( adHead != 0 && adHead->type == AccumData::TreeType ) {
+		AccumData *ad = adHead;
+		adHead = adHead->next;
+		if ( adHead == 0 )
+			adTail = 0;
 		Tree *tree = ad->tree;
 		delete ad;
 		return tree;
