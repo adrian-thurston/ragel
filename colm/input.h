@@ -97,8 +97,7 @@ struct InputStream
 		byte(0),
 		handlesLine(handlesLine),
 		later(false),
-		queue(0), queueTail(0),
-		_adHead(0), _adTail(0)
+		queue(0), queueTail(0)
 	{}
 
 	virtual ~InputStream() {}
@@ -140,28 +139,26 @@ struct InputStream
 	RunBuf *queue;
 	RunBuf *queueTail;
 
-	RunBuf *_adHead, *_adTail;
-
-	RunBuf *adHead() { return _adHead; }
-	RunBuf *adTail() { return _adTail; }
+	RunBuf *adHead() { return queue; }
+	RunBuf *adTail() { return queueTail; }
 
 	void consumeAd()
 	{
-		_adHead = _adHead->next;
-		if ( _adHead == 0 )
-			_adTail = 0;
+		queue = queue->next;
+		if ( queue == 0 )
+			queue = 0;
 	}
 
 	void appendAd( RunBuf *ad )
 	{
-		if ( _adHead == 0 ) {
-			_adHead = _adTail = ad;
+		if ( queue == 0 ) {
+			queue = queueTail = ad;
 			ad->next = 0;
 		}
 		else {
-			_adTail->next = ad;
+			queueTail->next = ad;
 			ad->next = 0;
-			_adTail = ad;
+			queueTail = ad;
 		}
 	}
 
