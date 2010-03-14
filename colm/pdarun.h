@@ -259,7 +259,6 @@ struct Accum
 
 	PdaRun *pdaRun;
 	FsmRun *fsmRun;
-	//InputStreamAccum *inputStream;
 	Stream *stream;
 };
 

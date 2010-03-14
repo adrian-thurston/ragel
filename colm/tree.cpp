@@ -1072,6 +1072,7 @@ free_tree:
 			delete accum->fsmRun;
 			accum->pdaRun->clearContext( sp );
 			delete accum->pdaRun;
+			tree_downref( prg, sp, (Tree*)accum->stream );
 			prg->mapElPool.free( (MapEl*)accum );
 		}
 		else
