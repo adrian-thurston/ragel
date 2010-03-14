@@ -114,7 +114,7 @@ void take_back_buffered( InputStream *inputStream )
 				#endif
 
 				RunBuf *split = new RunBuf;
-				memcpy( split->buf, fsmRun->p, fsmRun->pe - fsmRun->p );
+				memcpy( split->data, fsmRun->p, fsmRun->pe - fsmRun->p );
 
 				split->length = fsmRun->pe - fsmRun->p;
 				split->offset = 0;
@@ -159,10 +159,10 @@ Head *stream_pull( Program *prg, FsmRun *fsmRun, InputStream *inputStream, long 
 
 	/* The generated token length has been stuffed into tokdata. */
 	if ( fsmRun->p + length > fsmRun->pe ) {
-		fsmRun->p = fsmRun->pe = fsmRun->runBuf->buf;
+		fsmRun->p = fsmRun->pe = fsmRun->runBuf->data;
 		fsmRun->peof = 0;
 
-		long space = fsmRun->runBuf->buf + FSM_BUFSIZE - fsmRun->pe;
+		long space = fsmRun->runBuf->data + FSM_BUFSIZE - fsmRun->pe;
 			
 		if ( space == 0 )
 			cerr << "OUT OF BUFFER SPACE" << endp;
@@ -204,10 +204,10 @@ void send_back_runbuf_head( FsmRun *fsmRun, InputStream *inputStream )
 	if ( fsmRun->runBuf == 0 ) {
 		fsmRun->runBuf = new RunBuf;
 		fsmRun->runBuf->next = 0;
-		fsmRun->p = fsmRun->pe = fsmRun->runBuf->buf;
+		fsmRun->p = fsmRun->pe = fsmRun->runBuf->data;
 	}
 
-	fsmRun->p = fsmRun->pe = fsmRun->runBuf->buf + fsmRun->runBuf->length;
+	fsmRun->p = fsmRun->pe = fsmRun->runBuf->data + fsmRun->runBuf->length;
 }
 
 void undo_stream_pull( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length )
@@ -220,10 +220,10 @@ void undo_stream_pull( FsmRun *fsmRun, InputStream *inputStream, const char *dat
 
 	connect( fsmRun, inputStream );
 
-	if ( fsmRun->p == fsmRun->pe && fsmRun->p == fsmRun->runBuf->buf )
+	if ( fsmRun->p == fsmRun->pe && fsmRun->p == fsmRun->runBuf->data )
 		send_back_runbuf_head( fsmRun, inputStream );
 
-	assert( fsmRun->p - length >= fsmRun->runBuf->buf );
+	assert( fsmRun->p - length >= fsmRun->runBuf->data );
 	fsmRun->p -= length;
 }
 
@@ -243,7 +243,7 @@ void stream_push_text( InputStream *inputStream, const char *data, long length )
 	assert( length < FSM_BUFSIZE );
 	RunBuf *newBuf = new RunBuf;
 	newBuf->length = length;
-	memcpy( newBuf->buf, data, length );
+	memcpy( newBuf->data, data, length );
 
 	inputStream->pushBackBuf( newBuf );
 }
@@ -312,12 +312,12 @@ void sendBackText( FsmRun *fsmRun, InputStream *inputStream, const char *data, l
 	if ( length == 0 )
 		return;
 
-	if ( fsmRun->p == fsmRun->runBuf->buf )
+	if ( fsmRun->p == fsmRun->runBuf->data )
 		send_back_runbuf_head( fsmRun, inputStream );
 
 	/* If there is data in the current buffer then send the whole send back
 	 * should be in this buffer. */
-	assert( (fsmRun->p - fsmRun->runBuf->buf) >= length );
+	assert( (fsmRun->p - fsmRun->runBuf->data) >= length );
 
 	/* slide data back. */
 	fsmRun->p -= length;
@@ -387,7 +387,7 @@ void sendBack( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStre
 
 	if ( input->tree->flags & AF_NAMED ) {
 		/* Send back anything in the buffer that has not been parsed. */
-		if ( fsmRun->p == fsmRun->runBuf->buf )
+		if ( fsmRun->p == fsmRun->runBuf->data )
 			send_back_runbuf_head( fsmRun, inputStream );
 
 		/* Send the named lang el back first, then send back any leading
@@ -859,7 +859,7 @@ void init_fsm_run( FsmRun *fsmRun )
 	fsmRun->runBuf = new RunBuf;
 	fsmRun->runBuf->next = 0;
 
-	fsmRun->p = fsmRun->pe = fsmRun->runBuf->buf;
+	fsmRun->p = fsmRun->pe = fsmRun->runBuf->data;
 	fsmRun->peof = 0;
 }
 
@@ -923,7 +923,7 @@ void breakRunBuf( FsmRun *fsmRun )
 	 * runBufs only. If we did not do this we could get half a runBuf, a named
 	 * langEl, then the second half full. During backtracking we would need to
 	 * push the halves back separately. */
-	if ( fsmRun->p > fsmRun->runBuf->buf ) {
+	if ( fsmRun->p > fsmRun->runBuf->data ) {
 		#ifdef COLM_LOG_PARSE
 		if ( colm_log_parse )
 			cerr << "have a langEl, making a new runBuf" << endl;
@@ -931,11 +931,11 @@ void breakRunBuf( FsmRun *fsmRun )
 
 		/* Compute the length of the current before before we move
 		 * past it. */
-		fsmRun->runBuf->length = fsmRun->p - fsmRun->runBuf->buf;;
+		fsmRun->runBuf->length = fsmRun->p - fsmRun->runBuf->data;;
 
 		/* Make the new one. */
 		RunBuf *newBuf = new RunBuf;
-		fsmRun->p = fsmRun->pe = newBuf->buf;
+		fsmRun->p = fsmRun->pe = newBuf->data;
 		newBuf->next = fsmRun->runBuf;
 		fsmRun->runBuf = newBuf;
 	}
@@ -1025,7 +1025,7 @@ long scan_token( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 
 		/* There may be space left in the current buffer. If not then we need
 		 * to make some. */
-		long space = fsmRun->runBuf->buf + FSM_BUFSIZE - fsmRun->pe;
+		long space = fsmRun->runBuf->data + FSM_BUFSIZE - fsmRun->pe;
 		if ( space == 0 ) {
 			/* Create a new run buf. */
 			RunBuf *newBuf = new RunBuf;
@@ -1038,7 +1038,7 @@ long scan_token( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 				fsmRun->runBuf->length = FSM_BUFSIZE;
 			}
 			else {
-				if ( fsmRun->tokstart == fsmRun->runBuf->buf ) {
+				if ( fsmRun->tokstart == fsmRun->runBuf->data ) {
 					/* A token is started and it is already at the beginning
 					 * of the current buffer. This means buffer is full and it
 					 * must be grown. Probably need to do this sooner. */
@@ -1047,16 +1047,16 @@ long scan_token( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 
 				/* There is data that needs to be shifted over. */
 				have = fsmRun->pe - fsmRun->tokstart;
-				memcpy( newBuf->buf, fsmRun->tokstart, have );
+				memcpy( newBuf->data, fsmRun->tokstart, have );
 
 				/* Compute the length of the previous buffer. */
 				fsmRun->runBuf->length = FSM_BUFSIZE - have;
 
 				/* Compute tokstart and tokend. */
-				long dist = fsmRun->tokstart - newBuf->buf;
+				long dist = fsmRun->tokstart - newBuf->data;
 
 				fsmRun->tokend -= dist;
-				fsmRun->tokstart = newBuf->buf;
+				fsmRun->tokstart = newBuf->data;
 
 				/* Shift any markers. */
 				for ( int i = 0; i < MARK_SLOTS; i++ ) {
@@ -1065,7 +1065,7 @@ long scan_token( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 				}
 			}
 
-			fsmRun->p = fsmRun->pe = newBuf->buf + have;
+			fsmRun->p = fsmRun->pe = newBuf->data + have;
 			fsmRun->peof = 0;
 
 			newBuf->next = fsmRun->runBuf;
@@ -1073,7 +1073,7 @@ long scan_token( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 		}
 
 		/* We don't have any data. What is next in the input inputStream? */
-		space = fsmRun->runBuf->buf + FSM_BUFSIZE - fsmRun->pe;
+		space = fsmRun->runBuf->data + FSM_BUFSIZE - fsmRun->pe;
 		assert( space > 0 );
 			
 		connect( fsmRun, inputStream );

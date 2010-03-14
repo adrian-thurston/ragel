@@ -110,7 +110,7 @@ void InputStreamPattern::backup()
 
 void InputStreamPattern::pushBackBuf( RunBuf *runBuf )
 {
-	char *data = runBuf->buf + runBuf->offset;
+	char *data = runBuf->data + runBuf->offset;
 	long length = runBuf->length;
 
 	if ( length == 0 )
@@ -236,7 +236,7 @@ void InputStreamRepl::backup()
 
 void InputStreamRepl::pushBackBuf( RunBuf *runBuf )
 {
-	char *data = runBuf->buf + runBuf->offset;
+	char *data = runBuf->data + runBuf->offset;
 	long length = runBuf->length;
 
 	if ( colm_log_parse ) {

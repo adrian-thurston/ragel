@@ -110,13 +110,13 @@ int InputStreamFile::getData( char *dest, int length )
 	if ( head() != 0 ) {
 		long avail = head()->length - head()->offset;
 		if ( length >= avail ) {
-			memcpy( dest, &head()->buf[head()->offset], avail );
+			memcpy( dest, &head()->data[head()->offset], avail );
 			RunBuf *del = popHead();
 			delete del;
 			return avail;
 		}
 		else {
-			memcpy( dest, &head()->buf[head()->offset], length );
+			memcpy( dest, &head()->data[head()->offset], length );
 			head()->offset += length;
 			return length;
 		}
@@ -156,13 +156,13 @@ int InputStreamFd::getData( char *dest, int length )
 	if ( head() != 0 ) {
 		long avail = head()->length - head()->offset;
 		if ( length >= avail ) {
-			memcpy( dest, &head()->buf[head()->offset], avail );
+			memcpy( dest, &head()->data[head()->offset], avail );
 			RunBuf *del = popHead();
 			delete del;
 			return avail;
 		}
 		else {
-			memcpy( dest, &head()->buf[head()->offset], length );
+			memcpy( dest, &head()->data[head()->offset], length );
 			head()->offset += length;
 			return length;
 		}
@@ -215,13 +215,13 @@ int InputStreamAccum::getData( char *dest, int length )
 	if ( head() != 0 ) {
 		long avail = head()->length - head()->offset;
 		if ( length >= avail ) {
-			memcpy( dest, &head()->buf[head()->offset], avail );
+			memcpy( dest, &head()->data[head()->offset], avail );
 			RunBuf *del = popHead();
 			delete del;
 			return avail;
 		}
 		else {
-			memcpy( dest, &head()->buf[head()->offset], length );
+			memcpy( dest, &head()->data[head()->offset], length );
 			head()->offset += length;
 			return length;
 		}

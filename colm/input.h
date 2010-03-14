@@ -66,17 +66,17 @@ struct RunBuf
 	RunBuf()
 	:
 		type(DataType),
-		tree(0),
 		length(0),
+		tree(0),
 		offset(0),
 		next(0),
 		prev(0)
 	{}
 
-	char buf[FSM_BUFSIZE];
 	Type type;
-	Tree *tree;
+	char data[FSM_BUFSIZE];
 	long length;
+	Tree *tree;
 	long offset;
 	RunBuf *next, *prev;
 };
