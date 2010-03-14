@@ -139,17 +139,21 @@ struct InputStream
 	RunBuf *queue;
 	RunBuf *queueTail;
 
-	RunBuf *adHead() { return queue; }
-	RunBuf *adTail() { return queueTail; }
 
-	void consumeAd()
+	RunBuf *head() { return queue; }
+	RunBuf *tail() { return queueTail; }
+
+
+	RunBuf *popHead()
 	{
+		RunBuf *ret = queue;
 		queue = queue->next;
 		if ( queue == 0 )
-			queue = 0;
+			queueTail = 0;
+		return ret;
 	}
 
-	void appendAd( RunBuf *ad )
+	void append( RunBuf *ad )
 	{
 		if ( queue == 0 ) {
 			queue = queueTail = ad;
@@ -160,20 +164,6 @@ struct InputStream
 			ad->next = 0;
 			queueTail = ad;
 		}
-	}
-
-	RunBuf *head()
-	{
-		return queue;
-	}
-
-	RunBuf *popHead()
-	{
-		RunBuf *ret = queue;
-		queue = queue->next;
-		if ( queue == 0 )
-			queueTail = 0;
-		return ret;
 	}
 
 	void prepend( RunBuf *runBuf )
