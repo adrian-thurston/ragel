@@ -26,6 +26,10 @@
 #include <stdio.h>
 #include <iostream>
 
+struct exit_object { };
+extern exit_object endp;
+void operator<<( std::ostream &out, exit_object & );
+
 #define FSM_BUFSIZE 8192
 //#define FSM_BUFSIZE 8
 
@@ -81,10 +85,6 @@ struct RunBuf
 	RunBuf *next, *prev;
 };
 
-struct exit_object { };
-extern exit_object endp;
-void operator<<( std::ostream &out, exit_object & );
-
 struct InputStream
 {
 	InputStream( bool handlesLine ) :
@@ -139,10 +139,8 @@ struct InputStream
 	RunBuf *queue;
 	RunBuf *queueTail;
 
-
 	RunBuf *head() { return queue; }
 	RunBuf *tail() { return queueTail; }
-
 
 	RunBuf *popHead()
 	{
@@ -150,29 +148,37 @@ struct InputStream
 		queue = queue->next;
 		if ( queue == 0 )
 			queueTail = 0;
+		else
+			queue->prev = 0;
 		return ret;
 	}
 
-	void append( RunBuf *ad )
+	void append( RunBuf *runBuf )
 	{
 		if ( queue == 0 ) {
-			queue = queueTail = ad;
-			ad->next = 0;
+			runBuf->prev = runBuf->next = 0;
+			queue = queueTail = runBuf;
 		}
 		else {
-			queueTail->next = ad;
-			ad->next = 0;
-			queueTail = ad;
+			queueTail->next = runBuf;
+			runBuf->prev = queueTail;
+			runBuf->next = 0;
+			queueTail = runBuf;
 		}
 	}
 
 	void prepend( RunBuf *runBuf )
 	{
-		runBuf->next = queue;
-		queue = runBuf;
-
-		if ( queueTail == 0 )
-			queueTail = queue;
+		if ( queue == 0 ) {
+			runBuf->prev = runBuf->next = 0;
+			queue = queueTail = runBuf;
+		}
+		else {
+			queue->prev = runBuf;
+			runBuf->prev = 0;
+			runBuf->next = queue;
+			queue = runBuf;
+		}
 	}
 
 	void reverseQueue()
