@@ -254,24 +254,25 @@ void InputStreamAccum::pushBackBuf( RunBuf *runBuf )
 
 void InputStreamAccum::append( const char *data, long len )
 {
-	AccumData *ad = new AccumData;
+	RunBuf *ad = new RunBuf;
 
 	appendAd( ad );
 
-	ad->data = new char[len];
+	/* FIXME: need to deal with this. */
+	assert( len < (int)sizeof(ad->data) );
+
 	memcpy( ad->data, data, len );
 	ad->length = len;
 }
 
 void InputStreamAccum::append( Tree *tree )
 {
-	AccumData *ad = new AccumData;
-	ad->type = AccumData::TokenType;
+	RunBuf *ad = new RunBuf;
 
 	appendAd( ad );
 
+	ad->type = RunBuf::TokenType;
 	ad->tree = tree;
-	ad->data = 0;
 	ad->length = 0;
 }
 
@@ -280,7 +281,7 @@ bool InputStreamAccum::isTree()
 	if ( head() != 0 && head()->type == RunBuf::TokenType )
 		return true;
 
-	if ( adHead() != 0 && adHead()->type == AccumData::TokenType )
+	if ( adHead() != 0 && adHead()->type == RunBuf::TokenType )
 		return true;
 
 	return false;
@@ -296,8 +297,8 @@ Tree *InputStreamAccum::getTree()
 		delete runBuf;
 		return tree;
 	}
-	else if ( adHead() != 0 && adHead()->type == AccumData::TokenType ) {
-		AccumData *ad = adHead();
+	else if ( adHead() != 0 && adHead()->type == RunBuf::TokenType ) {
+		RunBuf *ad = adHead();
 
 		consumeAd();
 

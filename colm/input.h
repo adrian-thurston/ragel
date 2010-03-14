@@ -81,26 +81,6 @@ struct RunBuf
 	RunBuf *next, *prev;
 };
 
-//typedef RunBuf AccumData;
-struct AccumData
-{
-	enum Type {
-		DataType,
-		TokenType
-	};
-
-	AccumData()
-		: type(DataType) {}
-
-	Type type;
-	char *data;
-	long length;
-	Tree *tree;
-
-	AccumData *next;
-};
-
-
 struct exit_object { };
 extern exit_object endp;
 void operator<<( std::ostream &out, exit_object & );
@@ -160,10 +140,10 @@ struct InputStream
 	RunBuf *queue;
 	RunBuf *queueTail;
 
-	AccumData *_adHead, *_adTail;
+	RunBuf *_adHead, *_adTail;
 
-	AccumData *adHead() { return _adHead; }
-	AccumData *adTail() { return _adTail; }
+	RunBuf *adHead() { return _adHead; }
+	RunBuf *adTail() { return _adTail; }
 
 	void consumeAd()
 	{
@@ -172,7 +152,7 @@ struct InputStream
 			_adTail = 0;
 	}
 
-	void appendAd( AccumData *ad )
+	void appendAd( RunBuf *ad )
 	{
 		if ( _adHead == 0 ) {
 			_adHead = _adTail = ad;
