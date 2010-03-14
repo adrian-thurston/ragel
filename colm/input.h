@@ -58,14 +58,14 @@ struct Tree;
 struct RunBuf
 {
 	enum Type {
-		Data,
-		Token,
-		Ignore
+		DataType,
+		TokenType,
+		IgnoreType
 	};
 
 	RunBuf()
 	:
-		type(Data),
+		type(DataType),
 		tree(0),
 		length(0),
 		offset(0),
@@ -79,6 +79,25 @@ struct RunBuf
 	long length;
 	long offset;
 	RunBuf *next, *prev;
+};
+
+//typedef RunBuf AccumData;
+struct AccumData
+{
+	enum Type {
+		DataType,
+		TokenType
+	};
+
+	AccumData()
+		: type(DataType) {}
+
+	Type type;
+	char *data;
+	long length;
+	Tree *tree;
+
+	AccumData *next;
 };
 
 
@@ -98,8 +117,8 @@ struct InputStream
 		byte(0),
 		handlesLine(handlesLine),
 		later(false),
-		queue(0),
-		queueTail(0)
+		queue(0), queueTail(0),
+		_adHead(0), _adTail(0)
 	{}
 
 	virtual ~InputStream() {}
@@ -140,6 +159,31 @@ struct InputStream
 
 	RunBuf *queue;
 	RunBuf *queueTail;
+
+	AccumData *_adHead, *_adTail;
+
+	AccumData *adHead() { return _adHead; }
+	AccumData *adTail() { return _adTail; }
+
+	void consumeAd()
+	{
+		_adHead = _adHead->next;
+		if ( _adHead == 0 )
+			_adTail = 0;
+	}
+
+	void appendAd( AccumData *ad )
+	{
+		if ( _adHead == 0 ) {
+			_adHead = _adTail = ad;
+			ad->next = 0;
+		}
+		else {
+			_adTail->next = ad;
+			ad->next = 0;
+			_adTail = ad;
+		}
+	}
 
 	RunBuf *head()
 	{
@@ -238,30 +282,11 @@ struct InputStreamFd : public InputStream
 	long fd;
 };
 
-struct AccumData
-{
-	enum Type {
-		TreeType,
-		DataType
-	};
-
-	AccumData()
-		: type(DataType) {}
-
-	Type type;
-	char *data;
-	long length;
-	Tree *tree;
-
-	AccumData *next;
-};
-
 struct InputStreamAccum : public InputStream
 {
 	InputStreamAccum()
 	:
 		InputStream(false), 
-		adHead(0), adTail(0),
 		offset(0)
 	{}
 
@@ -276,7 +301,6 @@ struct InputStreamAccum : public InputStream
 
 	bool tryAgainLater();
 
-	AccumData *adHead, *adTail;
 
 	long offset;
 };

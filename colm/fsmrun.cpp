@@ -262,7 +262,7 @@ void streamPushTree( InputStream *inputStream, Tree *tree, bool ignore )
 	 * Something better is needed here. It puts a max on the amount of
 	 * data that can be pushed back to the inputStream. */
 	RunBuf *newBuf = new RunBuf;
-	newBuf->type = ignore ? RunBuf::Ignore : RunBuf::Token;
+	newBuf->type = ignore ? RunBuf::IgnoreType : RunBuf::TokenType;
 	newBuf->tree = tree;
 
 	inputStream->prepend( newBuf );
@@ -272,7 +272,7 @@ void undo_stream_push( Program *prg, Tree **sp, InputStream *inputStream, long l
 {
 	take_back_buffered( inputStream );
 
-	if ( inputStream->head()->type == RunBuf::Data ) {
+	if ( inputStream->head()->type == RunBuf::DataType ) {
 		char tmp[length];
 		int have = 0;
 		while ( have < length ) {
