@@ -27,7 +27,77 @@
 using std::cerr;
 using std::endl;
 
+int InputStream::getData( char *dest, int length )
+{
+	return getDataImpl( dest, length );
+}
+
+int InputStream::isEof()
+{
+	return isEofImpl();
+}
+
+int InputStream::needFlush()
+{
+	return needFlushImpl();
+}
+
+void InputStream::pushBackBuf( RunBuf *runBuf )
+{
+	pushBackBufImpl( runBuf );
+}
+
+void InputStream::append( const char *data, long len )
+{
+	return appendImpl( data, len );
+}
+
+void InputStream::append( Tree *tree )
+{
+	return appendImpl( tree );
+}
+
 bool InputStream::tryAgainLater()
+{
+	return tryAgainLaterImpl();
+}
+
+bool InputStream::isTree()
+{
+	return isTreeImpl();
+}
+
+Tree *InputStream::getTree()
+{
+	return getTreeImpl();
+}
+
+bool InputStream::isIgnore()
+{
+	return isIgnoreImpl();
+}
+
+bool InputStream::isLangEl()
+{
+	return isLangElImpl();
+}
+
+KlangEl *InputStream::getLangEl( long &bindId, char *&data, long &length )
+{
+	return getLangElImpl( bindId, data, length );
+}
+
+void InputStream::pushBackNamed()
+{
+	return pushBackNamedImpl();
+}
+
+/* 
+ * Implementation
+ */
+
+
+bool InputStream::tryAgainLaterImpl()
 {
 	if ( later )
 		return true;
@@ -35,21 +105,21 @@ bool InputStream::tryAgainLater()
 	return false;
 }
 
-bool InputStream::isTree()
+bool InputStream::isTreeImpl()
 { 
 	if ( head() != 0 && head()->type == RunBuf::TokenType )
 		return true;
 	return false;
 }
 
-bool InputStream::isIgnore()
+bool InputStream::isIgnoreImpl()
 { 
 	if ( head() != 0 && head()->type == RunBuf::IgnoreType )
 		return true;
 	return false;
 }
 
-Tree *InputStream::getTree()
+Tree *InputStream::getTreeImpl()
 {
 	RunBuf *runBuf = popHead();
 
@@ -64,7 +134,7 @@ Tree *InputStream::getTree()
  * String
  */
 
-int InputStreamString::getData( char *dest, int length )
+int InputStreamString::getDataImpl( char *dest, int length )
 { 
 	int available = dlen - offset;
 
@@ -81,7 +151,7 @@ int InputStreamString::getData( char *dest, int length )
 	return length;
 }
 
-void InputStreamString::pushBackBuf( RunBuf *runBuf )
+void InputStreamString::pushBackBufImpl( RunBuf *runBuf )
 {
 	//char *data = runBuf->buf + runBuf->offset;
 	long length = runBuf->length;
@@ -94,17 +164,17 @@ void InputStreamString::pushBackBuf( RunBuf *runBuf )
  * File
  */
 
-int InputStreamFile::isEOF()
+int InputStreamFile::isEofImpl()
 {
 	return head() == 0 && feof( file );
 }
 
-int InputStreamFile::needFlush()
+int InputStreamFile::needFlushImpl()
 {
 	return head() == 0 && feof( file );
 }
 
-int InputStreamFile::getData( char *dest, int length )
+int InputStreamFile::getDataImpl( char *dest, int length )
 {
 	/* If there is any data in queue2, read from that first. */
 	if ( head() != 0 ) {
@@ -126,7 +196,7 @@ int InputStreamFile::getData( char *dest, int length )
 	}
 }
 
-void InputStreamFile::pushBackBuf( RunBuf *runBuf )
+void InputStreamFile::pushBackBufImpl( RunBuf *runBuf )
 {
 	prepend( runBuf );
 }
@@ -135,22 +205,22 @@ void InputStreamFile::pushBackBuf( RunBuf *runBuf )
  * FD
  */
 
-int InputStreamFd::isEOF()
+int InputStreamFd::isEofImpl()
 {
 	return head() == 0 && eof;
 }
 
-int InputStreamFd::needFlush()
+int InputStreamFd::needFlushImpl()
 {
 	return head() == 0 && eof;
 }
 
-void InputStreamFd::pushBackBuf( RunBuf *runBuf )
+void InputStreamFd::pushBackBufImpl( RunBuf *runBuf )
 {
 	prepend( runBuf );
 }
 
-int InputStreamFd::getData( char *dest, int length )
+int InputStreamFd::getDataImpl( char *dest, int length )
 {
 	/* If there is any data in queue2, read from that first. */
 	if ( head() != 0 ) {
@@ -180,12 +250,12 @@ int InputStreamFd::getData( char *dest, int length )
  * Accum
  */
 
-int InputStreamAccum::isEOF()
+int InputStreamAccum::isEofImpl()
 {
 	return eof;
 }
 
-bool InputStreamAccum::tryAgainLater()
+bool InputStreamAccum::tryAgainLaterImpl()
 {
 	if ( later || ( !flush && head() == 0 ))
 		return true;
@@ -193,7 +263,7 @@ bool InputStreamAccum::tryAgainLater()
 	return false;
 }
 
-int InputStreamAccum::needFlush()
+int InputStreamAccum::needFlushImpl()
 {
 	if ( flush ) {
 		flush = false;
@@ -209,7 +279,7 @@ int InputStreamAccum::needFlush()
 	return false;
 }
 
-int InputStreamAccum::getData( char *dest, int length )
+int InputStreamAccum::getDataImpl( char *dest, int length )
 {
 	/* If there is any data in queue2, read from that first. */
 	if ( head() != 0 ) {
@@ -229,12 +299,12 @@ int InputStreamAccum::getData( char *dest, int length )
 	return 0;
 }
 
-void InputStreamAccum::pushBackBuf( RunBuf *runBuf )
+void InputStreamAccum::pushBackBufImpl( RunBuf *runBuf )
 {
 	prepend( runBuf );
 }
 
-void InputStreamAccum::append( const char *data, long len )
+void InputStreamAccum::appendImpl( const char *data, long len )
 {
 	RunBuf *ad = new RunBuf;
 
@@ -247,7 +317,7 @@ void InputStreamAccum::append( const char *data, long len )
 	ad->length = len;
 }
 
-void InputStreamAccum::append( Tree *tree )
+void InputStreamAccum::appendImpl( Tree *tree )
 {
 	RunBuf *ad = new RunBuf;
 
@@ -258,7 +328,7 @@ void InputStreamAccum::append( Tree *tree )
 	ad->length = 0;
 }
 
-bool InputStreamAccum::isTree()
+bool InputStreamAccum::isTreeImpl()
 { 
 	if ( head() != 0 && head()->type == RunBuf::TokenType )
 		return true;
@@ -266,7 +336,7 @@ bool InputStreamAccum::isTree()
 	return false;
 }
 
-Tree *InputStreamAccum::getTree()
+Tree *InputStreamAccum::getTreeImpl()
 {
 	if ( head() != 0 && head()->type == RunBuf::TokenType ) {
 		RunBuf *runBuf = popHead();

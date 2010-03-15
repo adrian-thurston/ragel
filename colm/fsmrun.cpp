@@ -1006,7 +1006,7 @@ long scan_token( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 		}
 
 		/* Maybe need eof. */
- 		if ( inputStream->isEOF() ) {
+ 		if ( inputStream->isEof() ) {
 			if ( fsmRun->tokstart != 0 ) {
 				/* If a token has been started, but not finshed 
 				 * this is an error. */
