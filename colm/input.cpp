@@ -29,12 +29,30 @@ using std::endl;
 
 int InputStream::getData( char *dest, int length )
 {
-	return getDataImpl( dest, length );
+	/* If there is any data in the rubuf queue then read that first. */
+	if ( head() != 0 ) {
+		long avail = head()->length - head()->offset;
+		if ( length >= avail ) {
+			memcpy( dest, &head()->data[head()->offset], avail );
+			RunBuf *del = popHead();
+			delete del;
+			return avail;
+		}
+		else {
+			memcpy( dest, &head()->data[head()->offset], length );
+			head()->offset += length;
+			return length;
+		}
+	}
+	else {
+		/* No stored data, call the impl version. */
+		return getDataImpl( dest, length );
+	}
 }
 
 int InputStream::isEof()
 {
-	return isEofImpl();
+	return head() == 0 && isEofImpl();
 }
 
 int InputStream::needFlush()
@@ -166,7 +184,7 @@ void InputStreamString::pushBackBufImpl( RunBuf *runBuf )
 
 int InputStreamFile::isEofImpl()
 {
-	return head() == 0 && feof( file );
+	return feof( file );
 }
 
 int InputStreamFile::needFlushImpl()
@@ -176,24 +194,7 @@ int InputStreamFile::needFlushImpl()
 
 int InputStreamFile::getDataImpl( char *dest, int length )
 {
-	/* If there is any data in queue2, read from that first. */
-	if ( head() != 0 ) {
-		long avail = head()->length - head()->offset;
-		if ( length >= avail ) {
-			memcpy( dest, &head()->data[head()->offset], avail );
-			RunBuf *del = popHead();
-			delete del;
-			return avail;
-		}
-		else {
-			memcpy( dest, &head()->data[head()->offset], length );
-			head()->offset += length;
-			return length;
-		}
-	}
-	else {
-		return fread( dest, 1, length, file );
-	}
+	return fread( dest, 1, length, file );
 }
 
 void InputStreamFile::pushBackBufImpl( RunBuf *runBuf )
@@ -207,7 +208,7 @@ void InputStreamFile::pushBackBufImpl( RunBuf *runBuf )
 
 int InputStreamFd::isEofImpl()
 {
-	return head() == 0 && eof;
+	return eof;
 }
 
 int InputStreamFd::needFlushImpl()
@@ -222,28 +223,11 @@ void InputStreamFd::pushBackBufImpl( RunBuf *runBuf )
 
 int InputStreamFd::getDataImpl( char *dest, int length )
 {
-	/* If there is any data in queue2, read from that first. */
-	if ( head() != 0 ) {
-		long avail = head()->length - head()->offset;
-		if ( length >= avail ) {
-			memcpy( dest, &head()->data[head()->offset], avail );
-			RunBuf *del = popHead();
-			delete del;
-			return avail;
-		}
-		else {
-			memcpy( dest, &head()->data[head()->offset], length );
-			head()->offset += length;
-			return length;
-		}
-	}
-	else {
-		long got = read( fd, dest, length );
-		if ( got == 0 )
-			later = true;
-		//	eof = true;
-		return got;
-	}
+	long got = read( fd, dest, length );
+	if ( got == 0 )
+		later = true;
+	//	eof = true;
+	return got;
 }
 
 /*
@@ -281,21 +265,7 @@ int InputStreamAccum::needFlushImpl()
 
 int InputStreamAccum::getDataImpl( char *dest, int length )
 {
-	/* If there is any data in queue2, read from that first. */
-	if ( head() != 0 ) {
-		long avail = head()->length - head()->offset;
-		if ( length >= avail ) {
-			memcpy( dest, &head()->data[head()->offset], avail );
-			RunBuf *del = popHead();
-			delete del;
-			return avail;
-		}
-		else {
-			memcpy( dest, &head()->data[head()->offset], length );
-			head()->offset += length;
-			return length;
-		}
-	}
+	/* No source of data, it is all done with RunBuf list appends. */
 	return 0;
 }
 
