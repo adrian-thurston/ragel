@@ -283,7 +283,6 @@ struct InputStreamAccum : public InputStream
 	void appendImpl( const char *data, long len );
 	void appendImpl( Tree *tree );
 	bool isTreeImpl();
-	Tree *getTreeImpl();
 
 	bool tryAgainLaterImpl();
 

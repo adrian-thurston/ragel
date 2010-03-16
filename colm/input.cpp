@@ -87,6 +87,15 @@ bool InputStream::isTree()
 
 Tree *InputStream::getTree()
 {
+	if ( head() != 0 && head()->type == RunBuf::TokenType ) {
+		RunBuf *runBuf = popHead();
+
+		/* FIXME: using runbufs here for this is a poor use of memory. */
+		Tree *tree = runBuf->tree;
+		delete runBuf;
+		return tree;
+	}
+
 	return getTreeImpl();
 }
 
@@ -139,12 +148,7 @@ bool InputStream::isIgnoreImpl()
 
 Tree *InputStream::getTreeImpl()
 {
-	RunBuf *runBuf = popHead();
-
-	/* FIXME: using runbufs here for this is a poor use of memory. */
-	Tree *tree = runBuf->tree;
-	delete runBuf;
-	return tree;
+	return 0;
 }
 
 
@@ -304,19 +308,5 @@ bool InputStreamAccum::isTreeImpl()
 		return true;
 
 	return false;
-}
-
-Tree *InputStreamAccum::getTreeImpl()
-{
-	if ( head() != 0 && head()->type == RunBuf::TokenType ) {
-		RunBuf *runBuf = popHead();
-
-		/* FIXME: using runbufs here for this is a poor use of memory. */
-		Tree *tree = runBuf->tree;
-		delete runBuf;
-		return tree;
-	}
-
-	return 0;
 }
 
