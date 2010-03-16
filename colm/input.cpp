@@ -258,7 +258,7 @@ int InputStreamAccum::needFlushImpl()
 		return true;
 	}
 
-	if ( head() != 0 )
+	if ( head() != 0 && head()->type != RunBuf::DataType )
 		return true;
 
 	if ( eof )
