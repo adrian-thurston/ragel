@@ -200,40 +200,6 @@ struct InputStream
 	}
 };
 
-struct InputStreamStatic : public InputStream
-{
-	InputStreamStatic( bool handlesLine )
-		: InputStream( handlesLine ) {}
-
-	int getData( char *dest, int length );
-	int isEof();
-	int needFlush();
-	void pushBackBuf( RunBuf *runBuf );
-	void append( const char *data, long len );
-	void append( Tree *tree );
-	bool tryAgainLater();
-	bool isTree();
-	Tree *getTree();
-	bool isIgnore();
-	bool isLangEl();
-	KlangEl *getLangEl( long &bindId, char *&data, long &length );
-	void pushBackNamed();
-
-	virtual int getDataImpl( char *dest, int length ) = 0;
-	virtual int isEofImpl() = 0;
-	virtual int needFlushImpl() = 0;
-	virtual void pushBackBufImpl( RunBuf *runBuf ) = 0;
-	virtual void appendImpl( const char *data, long len ) = 0;
-	virtual void appendImpl( Tree *tree ) = 0;
-	virtual bool tryAgainLaterImpl();
-	virtual bool isTreeImpl();
-	virtual Tree *getTreeImpl();
-	virtual bool isIgnoreImpl();
-	virtual bool isLangElImpl() { return false; }
-	virtual KlangEl *getLangElImpl( long &bindId, char *&data, long &length ) { assert( false ); return 0; }
-	virtual void pushBackNamedImpl() { assert( false ); }
-};
-
 struct InputStreamDynamic : public InputStream
 {
 	InputStreamDynamic( bool handlesLine )
@@ -341,25 +307,33 @@ struct InputStreamAccum : public InputStreamDynamic
 	long offset;
 };
 
+struct InputStreamStatic : public InputStream
+{
+	InputStreamStatic( bool handlesLine )
+		: InputStream( handlesLine ) {}
+
+	void append( const char *data, long len ) { assert(false); }
+	void append( Tree *tree ) { assert(false); }
+
+	bool tryAgainLater();
+	bool isTree() { return false; }
+	bool isIgnore() { return false; }
+	Tree *getTree() { assert(false); }
+};
 
 struct InputStreamPattern : public InputStreamStatic
 {
 	InputStreamPattern( Pattern *pattern );
 
-	int getDataImpl( char *dest, int length );
-	int isEofImpl();
-	int needFlushImpl();
-	void pushBackBufImpl( RunBuf *runBuf );
-	void appendImpl( const char *data, long len ) {}
-	virtual void appendImpl( Tree *tree ) {}
-
-	bool isLangElImpl();
-	KlangEl *getLangElImpl( long &bindId, char *&data, long &length );
-
-	void pushBackNamedImpl();
-
-	void backup();
+	int getData( char *dest, int length );
+	int isEof();
+	int needFlush();
+	void pushBackBuf( RunBuf *runBuf );
+	bool isLangEl();
+	KlangEl *getLangEl( long &bindId, char *&data, long &length );
+	void pushBackNamed();
 	int shouldFlush();
+	void backup();
 
 	Pattern *pattern;
 	PatternItem *patItem;
@@ -370,17 +344,13 @@ struct InputStreamRepl : public InputStreamStatic
 {
 	InputStreamRepl( Replacement *replacement );
 
-	bool isLangElImpl();
-	int getDataImpl( char *dest, int length );
-	KlangEl *getLangElImpl( long &bindId, char *&data, long &length );
-	int isEofImpl();
-	int needFlushImpl();
-	void pushBackBufImpl( RunBuf *runBuf );
-	void appendImpl( const char *data, long len ) {}
-	virtual void appendImpl( Tree *tree ) {}
-
-	void pushBackNamedImpl();
-
+	bool isLangEl();
+	int getData( char *dest, int length );
+	KlangEl *getLangEl( long &bindId, char *&data, long &length );
+	int isEof();
+	int needFlush();
+	void pushBackBuf( RunBuf *runBuf );
+	void pushBackNamed();
 	void backup();
 	int shouldFlush();
 

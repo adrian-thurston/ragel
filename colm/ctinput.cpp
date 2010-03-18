@@ -24,106 +24,18 @@
 #include "input.h"
 #include "fsmrun.h"
 
-/* 
- * Base compile-time input streams.
- */
-
-int InputStreamStatic::getData( char *dest, int length )
-{
-	/* No stored data, call the impl version. */
-	return getDataImpl( dest, length );
-}
-
-int InputStreamStatic::isEof()
-{
-	return isEofImpl();
-}
-
-int InputStreamStatic::needFlush()
-{
-	return needFlushImpl();
-}
-
-void InputStreamStatic::pushBackBuf( RunBuf *runBuf )
-{
-	pushBackBufImpl( runBuf );
-}
-
-void InputStreamStatic::append( const char *data, long len )
-{
-	return appendImpl( data, len );
-}
-
-void InputStreamStatic::append( Tree *tree )
-{
-	return appendImpl( tree );
-}
-
-bool InputStreamStatic::tryAgainLater()
-{
-	return tryAgainLaterImpl();
-}
-
-bool InputStreamStatic::isTree()
-{
-	return isTreeImpl();
-}
-
-Tree *InputStreamStatic::getTree()
-{
-	return getTreeImpl();
-}
-
-bool InputStreamStatic::isIgnore()
-{
-	return isIgnoreImpl();
-}
-
-bool InputStreamStatic::isLangEl()
-{
-	return isLangElImpl();
-}
-
-KlangEl *InputStreamStatic::getLangEl( long &bindId, char *&data, long &length )
-{
-	return getLangElImpl( bindId, data, length );
-}
-
-void InputStreamStatic::pushBackNamed()
-{
-	return pushBackNamedImpl();
-}
 
 /* 
  * Implementation
  */
 
 
-bool InputStreamStatic::tryAgainLaterImpl()
+bool InputStreamStatic::tryAgainLater()
 {
 	if ( later )
 		return true;
 
 	return false;
-}
-
-bool InputStreamStatic::isTreeImpl()
-{ 
-	if ( head() != 0 && head()->type == RunBuf::TokenType )
-		return true;
-	return false;
-}
-
-bool InputStreamStatic::isIgnoreImpl()
-{ 
-	if ( head() != 0 && head()->type == RunBuf::IgnoreType )
-		return true;
-	return false;
-}
-
-Tree *InputStreamStatic::getTreeImpl()
-{
-	return 0;
 }
 
 
@@ -139,7 +51,7 @@ InputStreamPattern::InputStreamPattern( Pattern *pattern )
 	offset(0)
 {}
 
-bool InputStreamPattern::isLangElImpl()
+bool InputStreamPattern::isLangEl()
 { 
 	return patItem != 0 && patItem->type == PatternItem::FactorType;
 }
@@ -149,7 +61,7 @@ int InputStreamPattern::shouldFlush()
 	return patItem == 0 || patItem->type == PatternItem::FactorType;
 }
 
-KlangEl *InputStreamPattern::getLangElImpl( long &bindId, char *&data, long &length )
+KlangEl *InputStreamPattern::getLangEl( long &bindId, char *&data, long &length )
 { 
 	KlangEl *klangEl = patItem->factor->langEl;
 	bindId = patItem->bindId;
@@ -164,7 +76,7 @@ KlangEl *InputStreamPattern::getLangElImpl( long &bindId, char *&data, long &len
 }
 
 
-int InputStreamPattern::getDataImpl( char *dest, int length )
+int InputStreamPattern::getData( char *dest, int length )
 { 
 	if ( offset == 0 )
 		line = patItem->loc.line;
@@ -192,12 +104,12 @@ int InputStreamPattern::getDataImpl( char *dest, int length )
 	return length;
 }
 
-int InputStreamPattern::isEofImpl()
+int InputStreamPattern::isEof()
 {
 	return patItem == 0;
 }
 
-int InputStreamPattern::needFlushImpl()
+int InputStreamPattern::needFlush()
 {
 	return flush;
 }
@@ -210,7 +122,7 @@ void InputStreamPattern::backup()
 		patItem = patItem->prev;
 }
 
-void InputStreamPattern::pushBackBufImpl( RunBuf *runBuf )
+void InputStreamPattern::pushBackBuf( RunBuf *runBuf )
 {
 	char *data = runBuf->data + runBuf->offset;
 	long length = runBuf->length;
@@ -231,7 +143,7 @@ void InputStreamPattern::pushBackBufImpl( RunBuf *runBuf )
 	assert( memcmp( &patItem->data[offset], data, length ) == 0 );
 }
 
-void InputStreamPattern::pushBackNamedImpl()
+void InputStreamPattern::pushBackNamed()
 {
 	backup();
 	offset = patItem->data.length();
@@ -250,7 +162,7 @@ InputStreamRepl::InputStreamRepl( Replacement *replacement )
 	offset(0)
 {}
 
-bool InputStreamRepl::isLangElImpl()
+bool InputStreamRepl::isLangEl()
 { 
 	return replItem != 0 && ( replItem->type == ReplItem::ExprType || 
 			replItem->type == ReplItem::FactorType );
@@ -262,7 +174,7 @@ int InputStreamRepl::shouldFlush()
 			replItem->type == ReplItem::FactorType );
 }
 
-KlangEl *InputStreamRepl::getLangElImpl( long &bindId, char *&data, long &length )
+KlangEl *InputStreamRepl::getLangEl( long &bindId, char *&data, long &length )
 { 
 	KlangEl *klangEl = replItem->type == ReplItem::ExprType ? 
 			replItem->langEl : replItem->factor->langEl;
@@ -290,7 +202,7 @@ KlangEl *InputStreamRepl::getLangElImpl( long &bindId, char *&data, long &length
 	return klangEl;
 }
 
-int InputStreamRepl::getDataImpl( char *dest, int length )
+int InputStreamRepl::getData( char *dest, int length )
 { 
 	if ( offset == 0 )
 		line = replItem->loc.line;
@@ -318,12 +230,12 @@ int InputStreamRepl::getDataImpl( char *dest, int length )
 	return length;
 }
 
-int InputStreamRepl::isEofImpl()
+int InputStreamRepl::isEof()
 {
 	return replItem == 0;
 }
 
-int InputStreamRepl::needFlushImpl()
+int InputStreamRepl::needFlush()
 {
 	return flush;
 }
@@ -336,7 +248,7 @@ void InputStreamRepl::backup()
 		replItem = replItem->prev;
 }
 
-void InputStreamRepl::pushBackBufImpl( RunBuf *runBuf )
+void InputStreamRepl::pushBackBuf( RunBuf *runBuf )
 {
 	char *data = runBuf->data + runBuf->offset;
 	long length = runBuf->length;
@@ -363,7 +275,7 @@ void InputStreamRepl::pushBackBufImpl( RunBuf *runBuf )
 	assert( memcmp( &replItem->data[offset], data, length ) == 0 );
 }
 
-void InputStreamRepl::pushBackNamedImpl()
+void InputStreamRepl::pushBackNamed()
 {
 	backup();
 	offset = replItem->data.length();
@@ -371,7 +283,7 @@ void InputStreamRepl::pushBackNamedImpl()
 
 void send_named_lang_el( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 {
-	/* All three set by getLangElImpl. */
+	/* All three set by getLangEl. */
 	long bindId;
 	char *data;
 	long length;
