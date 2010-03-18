@@ -117,21 +117,6 @@ struct InputStream
 	virtual void pushBackNamed() = 0;
 
 	/* Basic functions. */
-	virtual int getDataImpl( char *dest, int length ) = 0;
-	virtual int isEofImpl() = 0;
-	virtual int needFlushImpl() = 0;
-	virtual void pushBackBufImpl( RunBuf *runBuf ) = 0;
-	virtual void appendImpl( const char *data, long len ) = 0;
-	virtual void appendImpl( Tree *tree ) = 0;
-	virtual bool tryAgainLaterImpl();
-
-	/* Named language elements for patterns and replacements. */
-	virtual bool isTreeImpl();
-	virtual Tree *getTreeImpl();
-	virtual bool isIgnoreImpl();
-	virtual bool isLangElImpl() { return false; }
-	virtual KlangEl *getLangElImpl( long &bindId, char *&data, long &length ) { assert( false ); return 0; }
-	virtual void pushBackNamedImpl() { assert( false ); }
 	
 	FsmRun *hasData;
 
@@ -233,6 +218,20 @@ struct InputStreamStatic : public InputStream
 	bool isLangEl();
 	KlangEl *getLangEl( long &bindId, char *&data, long &length );
 	void pushBackNamed();
+
+	virtual int getDataImpl( char *dest, int length ) = 0;
+	virtual int isEofImpl() = 0;
+	virtual int needFlushImpl() = 0;
+	virtual void pushBackBufImpl( RunBuf *runBuf ) = 0;
+	virtual void appendImpl( const char *data, long len ) = 0;
+	virtual void appendImpl( Tree *tree ) = 0;
+	virtual bool tryAgainLaterImpl();
+	virtual bool isTreeImpl();
+	virtual Tree *getTreeImpl();
+	virtual bool isIgnoreImpl();
+	virtual bool isLangElImpl() { return false; }
+	virtual KlangEl *getLangElImpl( long &bindId, char *&data, long &length ) { assert( false ); return 0; }
+	virtual void pushBackNamedImpl() { assert( false ); }
 };
 
 struct InputStreamDynamic : public InputStream
@@ -253,6 +252,20 @@ struct InputStreamDynamic : public InputStream
 	bool isLangEl();
 	KlangEl *getLangEl( long &bindId, char *&data, long &length );
 	void pushBackNamed();
+
+	virtual int getDataImpl( char *dest, int length ) = 0;
+	virtual int isEofImpl() = 0;
+	virtual int needFlushImpl() = 0;
+	virtual void pushBackBufImpl( RunBuf *runBuf ) = 0;
+	virtual void appendImpl( const char *data, long len ) = 0;
+	virtual void appendImpl( Tree *tree ) = 0;
+	virtual bool tryAgainLaterImpl();
+	virtual bool isTreeImpl();
+	virtual Tree *getTreeImpl();
+	virtual bool isIgnoreImpl();
+	virtual bool isLangElImpl() { return false; }
+	virtual KlangEl *getLangElImpl( long &bindId, char *&data, long &length ) { assert( false ); return 0; }
+	virtual void pushBackNamedImpl() { assert( false ); }
 };
 
 struct InputStreamString : public InputStreamDynamic

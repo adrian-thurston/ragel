@@ -24,6 +24,109 @@
 #include "input.h"
 #include "fsmrun.h"
 
+/* 
+ * Base compile-time input streams.
+ */
+
+int InputStreamStatic::getData( char *dest, int length )
+{
+	/* No stored data, call the impl version. */
+	return getDataImpl( dest, length );
+}
+
+int InputStreamStatic::isEof()
+{
+	return isEofImpl();
+}
+
+int InputStreamStatic::needFlush()
+{
+	return needFlushImpl();
+}
+
+void InputStreamStatic::pushBackBuf( RunBuf *runBuf )
+{
+	pushBackBufImpl( runBuf );
+}
+
+void InputStreamStatic::append( const char *data, long len )
+{
+	return appendImpl( data, len );
+}
+
+void InputStreamStatic::append( Tree *tree )
+{
+	return appendImpl( tree );
+}
+
+bool InputStreamStatic::tryAgainLater()
+{
+	return tryAgainLaterImpl();
+}
+
+bool InputStreamStatic::isTree()
+{
+	return isTreeImpl();
+}
+
+Tree *InputStreamStatic::getTree()
+{
+	return getTreeImpl();
+}
+
+bool InputStreamStatic::isIgnore()
+{
+	return isIgnoreImpl();
+}
+
+bool InputStreamStatic::isLangEl()
+{
+	return isLangElImpl();
+}
+
+KlangEl *InputStreamStatic::getLangEl( long &bindId, char *&data, long &length )
+{
+	return getLangElImpl( bindId, data, length );
+}
+
+void InputStreamStatic::pushBackNamed()
+{
+	return pushBackNamedImpl();
+}
+
+/* 
+ * Implementation
+ */
+
+
+bool InputStreamStatic::tryAgainLaterImpl()
+{
+	if ( later )
+		return true;
+
+	return false;
+}
+
+bool InputStreamStatic::isTreeImpl()
+{ 
+	if ( head() != 0 && head()->type == RunBuf::TokenType )
+		return true;
+	return false;
+}
+
+bool InputStreamStatic::isIgnoreImpl()
+{ 
+	if ( head() != 0 && head()->type == RunBuf::IgnoreType )
+		return true;
+	return false;
+}
+
+Tree *InputStreamStatic::getTreeImpl()
+{
+	return 0;
+}
+
+
 /*
  * Pattern
  */

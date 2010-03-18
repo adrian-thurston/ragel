@@ -27,97 +27,9 @@
 using std::cerr;
 using std::endl;
 
-int InputStreamStatic::getData( char *dest, int length )
-{
-	/* If there is any data in the rubuf queue then read that first. */
-	if ( head() != 0 ) {
-		long avail = head()->length - head()->offset;
-		if ( length >= avail ) {
-			memcpy( dest, &head()->data[head()->offset], avail );
-			RunBuf *del = popHead();
-			delete del;
-			return avail;
-		}
-		else {
-			memcpy( dest, &head()->data[head()->offset], length );
-			head()->offset += length;
-			return length;
-		}
-	}
-	else {
-		/* No stored data, call the impl version. */
-		return getDataImpl( dest, length );
-	}
-}
-
-int InputStreamStatic::isEof()
-{
-	return head() == 0 && isEofImpl();
-}
-
-int InputStreamStatic::needFlush()
-{
-	return needFlushImpl();
-}
-
-void InputStreamStatic::pushBackBuf( RunBuf *runBuf )
-{
-	pushBackBufImpl( runBuf );
-}
-
-void InputStreamStatic::append( const char *data, long len )
-{
-	return appendImpl( data, len );
-}
-
-void InputStreamStatic::append( Tree *tree )
-{
-	return appendImpl( tree );
-}
-
-bool InputStreamStatic::tryAgainLater()
-{
-	return tryAgainLaterImpl();
-}
-
-bool InputStreamStatic::isTree()
-{
-	return isTreeImpl();
-}
-
-Tree *InputStreamStatic::getTree()
-{
-	if ( head() != 0 && head()->type == RunBuf::TokenType ) {
-		RunBuf *runBuf = popHead();
-
-		/* FIXME: using runbufs here for this is a poor use of memory. */
-		Tree *tree = runBuf->tree;
-		delete runBuf;
-		return tree;
-	}
-
-	return getTreeImpl();
-}
-
-bool InputStreamStatic::isIgnore()
-{
-	return isIgnoreImpl();
-}
-
-bool InputStreamStatic::isLangEl()
-{
-	return isLangElImpl();
-}
-
-KlangEl *InputStreamStatic::getLangEl( long &bindId, char *&data, long &length )
-{
-	return getLangElImpl( bindId, data, length );
-}
-
-void InputStreamStatic::pushBackNamed()
-{
-	return pushBackNamedImpl();
-}
+/* 
+ * Base run-time input streams.
+ */
 
 int InputStreamDynamic::getData( char *dest, int length )
 {
@@ -216,7 +128,7 @@ void InputStreamDynamic::pushBackNamed()
  */
 
 
-bool InputStream::tryAgainLaterImpl()
+bool InputStreamDynamic::tryAgainLaterImpl()
 {
 	if ( later )
 		return true;
@@ -224,21 +136,21 @@ bool InputStream::tryAgainLaterImpl()
 	return false;
 }
 
-bool InputStream::isTreeImpl()
+bool InputStreamDynamic::isTreeImpl()
 { 
 	if ( head() != 0 && head()->type == RunBuf::TokenType )
 		return true;
 	return false;
 }
 
-bool InputStream::isIgnoreImpl()
+bool InputStreamDynamic::isIgnoreImpl()
 { 
 	if ( head() != 0 && head()->type == RunBuf::IgnoreType )
 		return true;
 	return false;
 }
 
-Tree *InputStream::getTreeImpl()
+Tree *InputStreamDynamic::getTreeImpl()
 {
 	return 0;
 }
