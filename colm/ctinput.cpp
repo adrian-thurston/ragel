@@ -30,7 +30,7 @@
 
 InputStreamPattern::InputStreamPattern( Pattern *pattern )
 : 
-	InputStream(true),
+	InputStreamStatic(true),
 	pattern(pattern),
 	patItem(pattern->list->head),
 	offset(0)
@@ -141,7 +141,7 @@ void InputStreamPattern::pushBackNamedImpl()
 
 InputStreamRepl::InputStreamRepl( Replacement *replacement )
 : 
-	InputStream(true),
+	InputStreamStatic(true),
 	replacement(replacement),
 	replItem(replacement->list->head),
 	offset(0)

@@ -27,7 +27,7 @@
 using std::cerr;
 using std::endl;
 
-int InputStream::getData( char *dest, int length )
+int InputStreamStatic::getData( char *dest, int length )
 {
 	/* If there is any data in the rubuf queue then read that first. */
 	if ( head() != 0 ) {
@@ -50,42 +50,42 @@ int InputStream::getData( char *dest, int length )
 	}
 }
 
-int InputStream::isEof()
+int InputStreamStatic::isEof()
 {
 	return head() == 0 && isEofImpl();
 }
 
-int InputStream::needFlush()
+int InputStreamStatic::needFlush()
 {
 	return needFlushImpl();
 }
 
-void InputStream::pushBackBuf( RunBuf *runBuf )
+void InputStreamStatic::pushBackBuf( RunBuf *runBuf )
 {
 	pushBackBufImpl( runBuf );
 }
 
-void InputStream::append( const char *data, long len )
+void InputStreamStatic::append( const char *data, long len )
 {
 	return appendImpl( data, len );
 }
 
-void InputStream::append( Tree *tree )
+void InputStreamStatic::append( Tree *tree )
 {
 	return appendImpl( tree );
 }
 
-bool InputStream::tryAgainLater()
+bool InputStreamStatic::tryAgainLater()
 {
 	return tryAgainLaterImpl();
 }
 
-bool InputStream::isTree()
+bool InputStreamStatic::isTree()
 {
 	return isTreeImpl();
 }
 
-Tree *InputStream::getTree()
+Tree *InputStreamStatic::getTree()
 {
 	if ( head() != 0 && head()->type == RunBuf::TokenType ) {
 		RunBuf *runBuf = popHead();
@@ -99,22 +99,114 @@ Tree *InputStream::getTree()
 	return getTreeImpl();
 }
 
-bool InputStream::isIgnore()
+bool InputStreamStatic::isIgnore()
 {
 	return isIgnoreImpl();
 }
 
-bool InputStream::isLangEl()
+bool InputStreamStatic::isLangEl()
 {
 	return isLangElImpl();
 }
 
-KlangEl *InputStream::getLangEl( long &bindId, char *&data, long &length )
+KlangEl *InputStreamStatic::getLangEl( long &bindId, char *&data, long &length )
 {
 	return getLangElImpl( bindId, data, length );
 }
 
-void InputStream::pushBackNamed()
+void InputStreamStatic::pushBackNamed()
+{
+	return pushBackNamedImpl();
+}
+
+int InputStreamDynamic::getData( char *dest, int length )
+{
+	/* If there is any data in the rubuf queue then read that first. */
+	if ( head() != 0 ) {
+		long avail = head()->length - head()->offset;
+		if ( length >= avail ) {
+			memcpy( dest, &head()->data[head()->offset], avail );
+			RunBuf *del = popHead();
+			delete del;
+			return avail;
+		}
+		else {
+			memcpy( dest, &head()->data[head()->offset], length );
+			head()->offset += length;
+			return length;
+		}
+	}
+	else {
+		/* No stored data, call the impl version. */
+		return getDataImpl( dest, length );
+	}
+}
+
+int InputStreamDynamic::isEof()
+{
+	return head() == 0 && isEofImpl();
+}
+
+int InputStreamDynamic::needFlush()
+{
+	return needFlushImpl();
+}
+
+void InputStreamDynamic::pushBackBuf( RunBuf *runBuf )
+{
+	pushBackBufImpl( runBuf );
+}
+
+void InputStreamDynamic::append( const char *data, long len )
+{
+	return appendImpl( data, len );
+}
+
+void InputStreamDynamic::append( Tree *tree )
+{
+	return appendImpl( tree );
+}
+
+bool InputStreamDynamic::tryAgainLater()
+{
+	return tryAgainLaterImpl();
+}
+
+bool InputStreamDynamic::isTree()
+{
+	return isTreeImpl();
+}
+
+Tree *InputStreamDynamic::getTree()
+{
+	if ( head() != 0 && head()->type == RunBuf::TokenType ) {
+		RunBuf *runBuf = popHead();
+
+		/* FIXME: using runbufs here for this is a poor use of memory. */
+		Tree *tree = runBuf->tree;
+		delete runBuf;
+		return tree;
+	}
+
+	return getTreeImpl();
+}
+
+bool InputStreamDynamic::isIgnore()
+{
+	return isIgnoreImpl();
+}
+
+bool InputStreamDynamic::isLangEl()
+{
+	return isLangElImpl();
+}
+
+KlangEl *InputStreamDynamic::getLangEl( long &bindId, char *&data, long &length )
+{
+	return getLangElImpl( bindId, data, length );
+}
+
+void InputStreamDynamic::pushBackNamed()
 {
 	return pushBackNamedImpl();
 }
