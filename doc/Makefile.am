@@ -20,8 +20,6 @@
 
 man_MANS = ragel.1 
 
-dist_doc_DATA = ragel-guide.pdf
-
 EXTRA_DIST = ragel-guide.tex \
 	bmconcat.fig bmregex.fig dropdown.fig exdoneact.fig \
 	exoutact1.fig exstrongsubtr.fig lines2.fig smallscanner.fig bmnull.fig \
@@ -33,6 +31,8 @@ EXTRA_DIST = ragel-guide.tex \
 	opstar.fig
 
 if BUILD_MANUAL
+
+dist_doc_DATA = ragel-guide.pdf
 
 .fig.pdf:
 	fig2dev -L pdf $< $@
