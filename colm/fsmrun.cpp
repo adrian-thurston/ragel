@@ -271,28 +271,17 @@ void streamPushTree( InputStream *inputStream, Tree *tree, bool ignore )
 void undo_stream_push( Program *prg, Tree **sp, InputStream *inputStream, long length )
 {
 	take_back_buffered( inputStream );
-
-	if ( inputStream->head()->type == RunBuf::DataType ) {
-		char tmp[length];
-		int have = 0;
-		while ( have < length ) {
-			int res = inputStream->getData( tmp, length-have );
-			have += res;
-		}
-	}
-	else {
-		/* FIXME: leak here. */
-		RunBuf *rb = inputStream->popHead();
-		tree_downref( prg, sp, rb->tree );
-	}
+	Tree *tree = inputStream->undoPush( length );
+	if ( tree != 0 )
+		tree_downref( prg, sp, tree );
 }
 
 void undo_stream_append( Program *prg, Tree **sp, InputStream *inputStream, long length )
 {
-	/* This is due to pure lazyness. */
-	inputStream->reverseQueue();
-	undo_stream_push( prg, sp, inputStream, length );
-	inputStream->reverseQueue();
+	take_back_buffered( inputStream );
+	Tree *tree = inputStream->undoAppend( length );
+	if ( tree != 0 )
+		tree_downref( prg, sp, tree );
 }
 
 

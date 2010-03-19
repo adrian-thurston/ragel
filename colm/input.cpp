@@ -54,6 +54,27 @@ int InputStreamDynamic::getData( char *dest, int length )
 	}
 }
 
+int InputStreamDynamic::getDataRev( char *dest, int length )
+{
+	/* If there is any data in the rubuf queue then read that first. */
+	if ( tail() != 0 ) {
+		long avail = tail()->length - tail()->offset;
+		if ( length >= avail ) {
+			memcpy( dest, &head()->data[head()->offset], avail );
+			RunBuf *del = popTail();
+			delete del;
+			return avail;
+		}
+		else {
+			memcpy( dest, &head()->data[head()->offset], length );
+			head()->offset += length;
+			return length;
+		}
+	}
+	return 0;
+}
+
+
 int InputStreamDynamic::isEof()
 {
 	return head() == 0 && isEofImpl();
@@ -121,6 +142,46 @@ KlangEl *InputStreamDynamic::getLangEl( long &bindId, char *&data, long &length 
 void InputStreamDynamic::pushBackNamed()
 {
 	return pushBackNamedImpl();
+}
+
+Tree *InputStreamDynamic::undoPush( int length )
+{
+	if ( head()->type == RunBuf::DataType ) {
+		char tmp[length];
+		int have = 0;
+		while ( have < length ) {
+			int res = getData( tmp, length-have );
+			have += res;
+		}
+		return 0;
+	}
+	else {
+		/* FIXME: leak here. */
+		RunBuf *rb = popHead();
+		Tree *tree = rb->tree;
+		delete rb;
+		return tree;
+	}
+}
+
+Tree *InputStreamDynamic::undoAppend( int length )
+{
+	if ( tail()->type == RunBuf::DataType ) {
+		char tmp[length];
+		int have = 0;
+		while ( have < length ) {
+			int res = getDataRev( tmp, length-have );
+			have += res;
+		}
+		return 0;
+	}
+	else {
+		/* FIXME: leak here. */
+		RunBuf *rb = popTail();
+		Tree *tree = rb->tree;
+		delete rb;
+		return tree;
+	}
 }
 
 /* 

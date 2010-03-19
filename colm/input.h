@@ -115,6 +115,8 @@ struct InputStream
 	virtual bool isLangEl() = 0;
 	virtual KlangEl *getLangEl( long &bindId, char *&data, long &length ) = 0;
 	virtual void pushBackNamed() = 0;
+	virtual Tree *undoPush( int length ) = 0;
+	virtual Tree *undoAppend( int length ) = 0;
 
 	/* Basic functions. */
 	
@@ -150,6 +152,17 @@ struct InputStream
 		return ret;
 	}
 
+	RunBuf *popTail()
+	{
+		RunBuf *ret = queueTail;
+		queueTail = queue->prev;
+		if ( queueTail == 0 )
+			queue = 0;
+		else
+			queueTail->next = 0;
+		return ret;
+	}
+
 	void append( RunBuf *runBuf )
 	{
 		if ( queue == 0 ) {
@@ -177,27 +190,6 @@ struct InputStream
 			queue = runBuf;
 		}
 	}
-
-	void reverseQueue()
-	{
-		RunBuf *last = 0, *cur = queue;
-		queueTail = queue;
-
-		while ( cur != 0 ) {
-			/* Save for moving ahead. */
-			RunBuf *next = cur->next;
-
-			/* Reverse. */
-			cur->next = last;
-			cur->prev = next;
-			
-			/* Move ahead. */
-			last = cur;
-			cur = next;
-		}
-
-		queue = last;
-	}
 };
 
 struct InputStreamDynamic : public InputStream
@@ -218,6 +210,9 @@ struct InputStreamDynamic : public InputStream
 	bool isLangEl();
 	KlangEl *getLangEl( long &bindId, char *&data, long &length );
 	void pushBackNamed();
+	Tree *undoPush( int length );
+	int getDataRev( char *dest, int length );
+	Tree *undoAppend( int length );
 
 	virtual int getDataImpl( char *dest, int length ) = 0;
 	virtual int isEofImpl() = 0;
@@ -319,6 +314,8 @@ struct InputStreamStatic : public InputStream
 	bool isTree() { return false; }
 	bool isIgnore() { return false; }
 	Tree *getTree() { assert(false); }
+	Tree *undoPush( int ) { assert( false ); }
+	Tree *undoAppend( int ) { assert( false ); }
 };
 
 struct InputStreamPattern : public InputStreamStatic
