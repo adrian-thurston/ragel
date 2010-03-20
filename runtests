@@ -10,6 +10,7 @@ TESTS="
 	treecmp1.lm context1.lm context2.lm context3.lm
 	undofrag1.lm undofrag2.lm 
 	nestedcomm.lm reparse.lm
+	btscan1.lm btscan2.lm
 "
 
 for t in $TESTS; do

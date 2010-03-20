@@ -1,0 +1,40 @@
+namespace r1
+{
+	lex r1
+	{
+		literal '!', 'a', 'b'
+		ignore /[ \n\t]+/
+	}
+
+	def line [ '!' 'a' 'b' 'b' 'a']
+}
+
+namespace r2
+{
+	lex r2
+	{
+		literal '!'
+		token id /[a-zA-Z_]+/
+		ignore /[ \n\t]+/
+	}
+
+	def line [ '!' id ]
+}
+
+def item 
+	[r1::line]
+|	[r2::line]
+
+def btscan 
+	[item*]
+
+parser btscan_parser [btscan]
+
+btscan_parser Parser = cons btscan_parser []
+
+Parser << "!ab"
+Parser << "b "
+Parser << "!ab"
+Parser << "ba !aab\n"
+
+print_xml(Parser.finish())
