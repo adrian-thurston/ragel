@@ -1,0 +1,37 @@
+lex args
+{   
+	literal '-'
+	token file /^('-'|0)(^0)*/
+}
+
+token word /(^0)+/
+token zero /0/ 
+
+lex opts
+{
+	token single /[qvh]/
+	token with_opt /[oi]/
+}
+
+def item
+	[file zero]
+|	['-' single* zero]
+|	['-' with_opt zero? word zero]
+
+def args 
+	[word zero item*]
+
+accum arg_parser [args] 
+
+arg_parser ArgParser =
+construct arg_parser []
+
+argv_list ArgV = argv
+for A: str in ArgV 
+	ArgParser << [A '\0']
+
+args Args = ArgParser.finish() 
+
+print_xml( Args )
+
+
