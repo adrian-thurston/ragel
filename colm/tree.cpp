@@ -1070,6 +1070,7 @@ free_tree:
 			Accum *accum = (Accum*)tree;
 			/* FIXME: Need to clean up here. */
 			delete accum->fsmRun;
+			clean_parser( sp, accum->pdaRun );
 			accum->pdaRun->clearContext( sp );
 			delete accum->pdaRun;
 			tree_downref( prg, sp, (Tree*)accum->stream );

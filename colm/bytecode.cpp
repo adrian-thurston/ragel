@@ -305,17 +305,6 @@ void undo_parse_stream( Tree **&sp, Program *prg, Stream *input, Accum *accum, l
 	accum->pdaRun->numRetry -= 1;
 }
 
-void undo_parse_frag( Tree **&sp, Program *prg, Accum *accum, long consumed )
-{
-#if 0
-	accum->pdaRun->numRetry += 1;
-	accum->pdaRun->targetConsumed = consumed;
-	parseToken( sp, accum->pdaRun, accum->fsmRun, accum->inputStream, 0 );
-	accum->pdaRun->targetConsumed = -1;
-	accum->pdaRun->numRetry -= 1;
-#endif
-}
-
 Tree *parse_finish( Tree **&sp, Program *prg, Accum *accum, bool revertOn )
 {
 	Stream *stream = (Stream*)extract_input( prg, accum );
@@ -739,6 +728,7 @@ again:
 			#endif
 			
 			tree_downref( prg, sp, accum );
+			tree_downref( prg, sp, input );
 			break;
 		}
 		case IN_PARSE_FINISH_BKT: {
@@ -756,7 +746,6 @@ again:
 
 			tree_downref( prg, sp, accumTree );
 			tree_downref( prg, sp, tree );
-
 			break;
 		}
 		case IN_STREAM_PULL_BKT: {
@@ -2606,7 +2595,8 @@ again:
 
 			long consumed = ((Accum*)accum)->pdaRun->consumed;
 			parse_stream( sp, prg, stream, (Accum*)accum, stopId );
-			tree_downref( prg, sp, stream );
+
+			//tree_downref( prg, sp, stream );
 			//tree_downref( prg, sp, accum );
 
 			reverseCode.append( IN_PARSE_STREAM_BKT );
@@ -2631,7 +2621,9 @@ again:
 			#endif
 
 			undo_parse_stream( sp, prg, (Stream*)input, (Accum*)accum, consumed );
+
 			tree_downref( prg, sp, accum );
+			tree_downref( prg, sp, input );
 			break;
 		}
 
@@ -2714,9 +2706,8 @@ again:
 			Tree *accum = pop();
 			Tree *result = parse_finish( sp, prg, (Accum*)accum, true );
 			push( result );
-			tree_downref( prg, sp, accum );
 
-			tree_upref( accum );
+			tree_upref( result );
 			reverseCode.append( IN_PARSE_FINISH_BKT );
 			reverseCode.appendWord( (Word) accum );
 			reverseCode.appendWord( (Word) result );
@@ -2738,15 +2729,8 @@ again:
 			#endif
 
 			/* This needs an implementation. */
-
-			//Accum *accum = (Accum*)accumTree;
-			//cerr << accum->pdaRun->allReverseCode << endl;
-			//undoParse( sp, accum->pdaRun, accum->fsmRun, accum->inputStream, tree );
-
-			//Tree *accum = pop();
-			//Tree *result = parse_finish( sp, prg, (Accum*)accum );
-			//push( result );
-			//tree_downref( prg, sp, accum );
+			tree_downref( prg, sp, accumTree );
+			tree_downref( prg, sp, tree );
 			break;
 		}
 		case IN_STREAM_PULL: {

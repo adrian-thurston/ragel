@@ -183,7 +183,7 @@ Head *stream_pull( Program *prg, FsmRun *fsmRun, InputStream *inputStream, long 
 	return tokdata;
 }
 
-void send_back_runbuf_head( FsmRun *fsmRun, InputStream *inputStream )
+void sendBackRunBufHead( FsmRun *fsmRun, InputStream *inputStream )
 {
 	#ifdef COLM_LOG_PARSE
 	if ( colm_log_parse ) {
@@ -221,7 +221,7 @@ void undo_stream_pull( FsmRun *fsmRun, InputStream *inputStream, const char *dat
 	connect( fsmRun, inputStream );
 
 	if ( fsmRun->p == fsmRun->pe && fsmRun->p == fsmRun->runBuf->data )
-		send_back_runbuf_head( fsmRun, inputStream );
+		sendBackRunBufHead( fsmRun, inputStream );
 
 	assert( fsmRun->p - length >= fsmRun->runBuf->data );
 	fsmRun->p -= length;
@@ -302,7 +302,7 @@ void sendBackText( FsmRun *fsmRun, InputStream *inputStream, const char *data, l
 		return;
 
 	if ( fsmRun->p == fsmRun->runBuf->data )
-		send_back_runbuf_head( fsmRun, inputStream );
+		sendBackRunBufHead( fsmRun, inputStream );
 
 	/* If there is data in the current buffer then send the whole send back
 	 * should be in this buffer. */
@@ -377,7 +377,7 @@ void sendBack( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStre
 	if ( input->tree->flags & AF_NAMED ) {
 		/* Send back anything in the buffer that has not been parsed. */
 		if ( fsmRun->p == fsmRun->runBuf->data )
-			send_back_runbuf_head( fsmRun, inputStream );
+			sendBackRunBufHead( fsmRun, inputStream );
 
 		/* Send the named lang el back first, then send back any leading
 		 * whitespace. */
