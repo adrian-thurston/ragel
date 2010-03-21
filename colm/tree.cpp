@@ -1069,10 +1069,10 @@ free_tree:
 		}
 		else if ( generic->type == GEN_PARSER ) {
 			Accum *accum = (Accum*)tree;
-			/* FIXME: Need to clean up here. */
 			delete accum->fsmRun;
 			cleanParser( sp, accum->pdaRun );
 			accum->pdaRun->clearContext( sp );
+			rcode_downref_all( prg, sp, accum->pdaRun->allReverseCode );
 			delete accum->pdaRun;
 			tree_downref( prg, sp, (Tree*)accum->stream );
 			prg->mapElPool.free( (MapEl*)accum );
