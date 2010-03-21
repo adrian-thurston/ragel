@@ -665,9 +665,9 @@ void send_with_ignore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *i
 	Kid *ignore = extract_ignore( pdaRun );
 	if ( ignore != 0 ) {
 		if ( input->tree->flags & AF_LEFT_IGNORE ) {
-			/* Need to merge. */
+			/* FIXME: Leak here. */
 			Kid *ignoreHead = input->tree->child;
-			ignoreHead->tree = (Tree*) kid_list_concat( ignore, (Kid*)ignoreHead->tree );
+			ignoreHead->tree = (Tree*) ignore;
 		}
 		else {
 			/* Insert an ignore head in the child list. */
@@ -677,6 +677,14 @@ void send_with_ignore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *i
 
 			ignoreHead->tree = (Tree*) ignore;
 			input->tree->flags |= AF_LEFT_IGNORE;
+		}
+	}
+	else {
+		/* Need to remove any existing ignore data. */
+		if ( input->tree->flags & AF_LEFT_IGNORE ) {
+			/* FIXME: leak here. */
+			input->tree->child = input->tree->child->next;
+			input->tree->flags = input->tree->flags & ~AF_LEFT_IGNORE ;
 		}
 	}
 

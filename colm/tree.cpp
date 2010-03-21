@@ -107,6 +107,7 @@ Kid *kid_list_concat( Kid *list1, Kid *list2 )
 	return list1;
 }
 
+
 Stream *open_stream_file( Program *prg, FILE *file )
 {
 	Stream *res = (Stream*)prg->mapElPool.allocate();
