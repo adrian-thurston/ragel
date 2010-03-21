@@ -298,11 +298,13 @@ void parse_frag( Tree **&sp, Program *prg, Tree *input, Accum *accum, long stopI
 
 void undo_parse_stream( Tree **&sp, Program *prg, Stream *input, Accum *accum, long consumed )
 {
-	accum->pdaRun->numRetry += 1;
-	accum->pdaRun->targetConsumed = consumed;
-	parseToken( sp, accum->pdaRun, accum->fsmRun, input->in, 0 );
-	accum->pdaRun->targetConsumed = -1;
-	accum->pdaRun->numRetry -= 1;
+	if ( consumed < accum->pdaRun->consumed ) {
+		accum->pdaRun->numRetry += 1;
+		accum->pdaRun->targetConsumed = consumed;
+		parseToken( sp, accum->pdaRun, accum->fsmRun, input->in, 0 );
+		accum->pdaRun->targetConsumed = -1;
+		accum->pdaRun->numRetry -= 1;
+	}
 }
 
 Tree *parse_finish( Tree **&sp, Program *prg, Accum *accum, bool revertOn )
@@ -2731,7 +2733,7 @@ again:
 				cerr << "IN_PARSE_FINISH_BKT " << consumed << endl;
 			#endif
 
-			//undo_parse_stream( sp, prg, ((Accum*)parser)->stream, (Accum*)parser, consumed );
+			undo_parse_stream( sp, prg, ((Accum*)parser)->stream, (Accum*)parser, consumed );
 
 			/* This needs an implementation. */
 			tree_downref( prg, sp, parser );
