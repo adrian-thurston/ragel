@@ -656,6 +656,16 @@ void sendBackQueuedIgnore( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, 
 	}
 }
 
+void clearIgnoreList( Program *prg, Tree **sp, Kid *kid )
+{
+	while ( kid != 0 ) {
+		Kid *next = kid->next;
+		tree_downref( prg, sp, kid->tree );
+		prg->kidPool.free( kid );
+		kid = next;
+	}
+}
+
 void sendWithIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input )
 {
 	/* Need to preserve the layout under a tree:
@@ -667,6 +677,7 @@ void sendWithIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inp
 		if ( input->tree->flags & AF_LEFT_IGNORE ) {
 			/* FIXME: Leak here. */
 			Kid *ignoreHead = input->tree->child;
+			clearIgnoreList( pdaRun->prg, sp, (Kid*) ignoreHead->tree );
 			ignoreHead->tree = (Tree*) ignore;
 		}
 		else {
@@ -683,6 +694,10 @@ void sendWithIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inp
 		/* Need to remove any existing ignore data. */
 		if ( input->tree->flags & AF_LEFT_IGNORE ) {
 			/* FIXME: leak here. */
+			Kid *ignoreHead = input->tree->child;
+			clearIgnoreList( pdaRun->prg, sp, (Kid*)ignoreHead->tree );
+			pdaRun->prg->kidPool.free( ignoreHead );
+
 			input->tree->child = input->tree->child->next;
 			input->tree->flags = input->tree->flags & ~AF_LEFT_IGNORE ;
 		}
