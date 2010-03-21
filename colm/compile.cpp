@@ -1271,9 +1271,9 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 		/* Parse instruction, dependent on whether or not we are
 		 * producing revert or commit code. */
 		if ( pd->revertOn )
-			code.append( IN_PARSE_STREAM_WV );
+			code.append( IN_PARSE_FRAG_WV );
 		else
-			code.append( IN_PARSE_STREAM_WC );
+			code.append( IN_PARSE_FRAG_WC );
 	}
 	else {
 		/* Get a copy of the parser. */
@@ -1296,9 +1296,9 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 		code.appendHalf( 1 );
 
 		if ( pd->revertOn )
-			code.append( IN_PARSE_STREAM_WV );
+			code.append( IN_PARSE_FRAG_WV );
 		else
-			code.append( IN_PARSE_STREAM_WC );
+			code.append( IN_PARSE_FRAG_WC );
 	}
 
 	/* The stop id. */
@@ -1956,9 +1956,9 @@ void LangStmt::evaluateAccumItems( ParseData *pd, CodeVect &code ) const
 			/* Parse instruction, dependent on whether or not we are producing
 			 * revert or commit code. */
 			if ( pd->revertOn )
-				code.append( IN_PARSE_STREAM_WV );
+				code.append( IN_PARSE_FRAG_WV );
 			else
-				code.append( IN_PARSE_STREAM_WC );
+				code.append( IN_PARSE_FRAG_WC );
 		}
 		else {
 			code.append( IN_DUP_TOP_OFF );
@@ -1979,9 +1979,9 @@ void LangStmt::evaluateAccumItems( ParseData *pd, CodeVect &code ) const
 			code.appendHalf( 1 );
 
 			if ( pd->revertOn )
-				code.append( IN_PARSE_STREAM_WV );
+				code.append( IN_PARSE_FRAG_WV );
 			else
-				code.append( IN_PARSE_STREAM_WC );
+				code.append( IN_PARSE_FRAG_WC );
 		}
 
 		code.appendHalf( 0 );
@@ -2720,7 +2720,7 @@ void ParseData::initVectorFunctions( GenericType *gen )
 void ParseData::initAccumFunctions( GenericType *gen )
 {
 	initFunction( gen->utArg, gen->objDef, "finish", 
-			IN_PARSE_FINISH_WV, IN_PARSE_FINISH_WC, false );
+			IN_PARSE_FINISH_WV, IN_PARSE_FINISH_WC, true );
 }
 
 void ParseData::initCtxField( GenericType *gen )

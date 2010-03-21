@@ -826,6 +826,8 @@ void send_eof( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaR
 	}
 	#endif
 
+	incrementConsumed( pdaRun );
+
 	Kid *input = fsmRun->prg->kidPool.allocate();
 	input->tree = (Tree*)fsmRun->prg->parseTreePool.allocate();
 	input->tree->flags |= AF_PARSE_TREE;

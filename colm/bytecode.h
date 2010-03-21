@@ -224,9 +224,9 @@ typedef unsigned char uchar;
 //#define IN_PARSE_TREE_WC         0x9a
 //#define IN_PARSE_TREE_WV         0x9b
 
-#define IN_PARSE_STREAM_WC       0xc0
-#define IN_PARSE_STREAM_WV       0xc1
-#define IN_PARSE_STREAM_BKT      0xc2
+#define IN_PARSE_FRAG_WC         0xc0
+#define IN_PARSE_FRAG_WV         0xc1
+#define IN_PARSE_FRAG_BKT        0xc2
 
 #define IN_EXTRACT_INPUT_WC      0xc3
 #define IN_EXTRACT_INPUT_WV      0xc4

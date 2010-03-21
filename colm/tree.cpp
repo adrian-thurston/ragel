@@ -952,6 +952,8 @@ Tree *copy_tree( Program *prg, Tree *tree, Kid *oldNextDown, Kid *&newNextDown )
 		assert(false);
 	else if ( tree->id == LEL_ID_STR )
 		assert(false);
+	else if ( tree->id == LEL_ID_STREAM )
+		assert(false);
 	else {
 		tree = copy_real_tree( prg, tree, oldNextDown, newNextDown, false );
 	}
