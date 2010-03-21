@@ -94,8 +94,8 @@ struct FsmRun
 
 void exec_action( FsmRun *fsmRun, GenAction *genAction );
 void fsm_execute( FsmRun *fsmRun, InputStream *inputStream );
-void init_fsm_run( FsmRun *fsmRun );
-void init_input_stream( InputStream *in );
+void initFsmRun( FsmRun *fsmRun );
+void initInputStream( InputStream *in );
 void send_queued_tokens( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
 void send_handle_error( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
 Head *extract_match( Program *prg, FsmRun *fsmRun, InputStream *inputStream );

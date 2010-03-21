@@ -590,14 +590,12 @@ struct PdaRun
 	long targetConsumed;
 };
 
-void clean_parser( Tree **root, PdaRun *pdaRun );
+void cleanParser( Tree **root, PdaRun *pdaRun );
 void ignore( PdaRun *pdaRun, Tree *tree );
-void send_with_ignore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
-		InputStream *inputStream, Kid *input );
 void parseToken( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
 long undoParse( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Tree *tree );
 void xml_print_list( RuntimeData *runtimeData, Kid *lel, int depth );
 ostream &parse_error( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, int tokId, Tree *tree );
-void init_pda_run( PdaRun *pdaRun, Tree *tree );
+void initPdaRun( PdaRun *pdaRun, Tree *tree );
 
 #endif /* _PDARUN_H */

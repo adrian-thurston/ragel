@@ -58,12 +58,12 @@ using std::endl;
 } while(0)
 
 
-Tree *get_parsed_root( PdaRun *pdaRun, bool stop )
+Tree *getParsedRoot( PdaRun *pdaRun, bool stop )
 {
 	return stop ? pdaRun->stackTop->tree : pdaRun->stackTop->next->tree;
 }
 
-void clean_parser( Tree **sp, PdaRun *pdaRun )
+void cleanParser( Tree **sp, PdaRun *pdaRun )
 {
 	/* Traverse the stack, downreffing. */
 	Kid *kid = pdaRun->stackTop;
@@ -86,11 +86,11 @@ bool PdaRun::isParserStopFinished()
 	return done;
 }
 
-void init_pda_run( PdaRun *pdaRun, Tree *context )
+void initPdaRun( PdaRun *pdaRun, Tree *context )
 {
 	#ifdef COLM_LOG_PARSE
 	if ( colm_log_parse ) {
-		cerr << "init_pda_run" << endl;
+		cerr << "initializing PdaRun" << endl;
 	}
 	#endif
 

@@ -114,7 +114,7 @@ Stream *open_stream_file( Program *prg, FILE *file )
 	res->id = LEL_ID_STREAM;
 	res->file = file;
 	res->in = new InputStreamFile( file );
-	init_input_stream( res->in );
+	initInputStream( res->in );
 	return res;
 }
 
@@ -123,7 +123,7 @@ Stream *open_stream_fd( Program *prg, long fd )
 	Stream *res = (Stream*)prg->mapElPool.allocate();
 	res->id = LEL_ID_STREAM;
 	res->in = new InputStreamFd( fd );
-	init_input_stream( res->in );
+	initInputStream( res->in );
 	return res;
 }
 
@@ -1017,8 +1017,8 @@ Tree *create_generic( Program *prg, long genericId )
 					accum->fsmRun, genericInfo->parserId, false, false );
 
 			/* Start off the parsing process. */
-			init_pda_run( accum->pdaRun, 0 );
-			init_fsm_run( accum->fsmRun );
+			initPdaRun( accum->pdaRun, 0 );
+			initFsmRun( accum->fsmRun );
 			newToken( accum->pdaRun, accum->fsmRun );
 
 			newGeneric = (Tree*) accum;
@@ -1071,7 +1071,7 @@ free_tree:
 			Accum *accum = (Accum*)tree;
 			/* FIXME: Need to clean up here. */
 			delete accum->fsmRun;
-			clean_parser( sp, accum->pdaRun );
+			cleanParser( sp, accum->pdaRun );
 			accum->pdaRun->clearContext( sp );
 			delete accum->pdaRun;
 			tree_downref( prg, sp, (Tree*)accum->stream );

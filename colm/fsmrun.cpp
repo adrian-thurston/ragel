@@ -644,7 +644,7 @@ Kid *extract_ignore( PdaRun *pdaRun )
 }
 
 /* Send back the accumulated ignore tokens. */
-void send_back_queued_ignore( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
+void sendBackQueuedIgnore( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
 {
 	Kid *ignore = extract_ignore( pdaRun );
 	sendBackIgnore( sp, pdaRun, fsmRun, inputStream, ignore );
@@ -656,7 +656,7 @@ void send_back_queued_ignore( Tree **sp, InputStream *inputStream, FsmRun *fsmRu
 	}
 }
 
-void send_with_ignore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input )
+void sendWithIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input )
 {
 	/* Need to preserve the layout under a tree:
 	 *    attributes, ignore tokens, grammar children. */
@@ -696,7 +696,7 @@ void send_handle_error( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *
 	long id = input->tree->id;
 
 	/* Send the token to the parser. */
-	send_with_ignore( sp, pdaRun, fsmRun, inputStream, input );
+	sendWithIgnore( sp, pdaRun, fsmRun, inputStream, input );
 		
 	/* Check the result. */
 	if ( pdaRun->errCount > 0 ) {
@@ -841,7 +841,7 @@ void send_eof( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaR
 		send_queued_tokens( sp, pdaRun, fsmRun, inputStream );
 	}
 
-	send_with_ignore( sp, pdaRun, fsmRun, inputStream, input );
+	sendWithIgnore( sp, pdaRun, fsmRun, inputStream, input );
 
 	if ( pdaRun->errCount > 0 ) {
 		parse_error( inputStream, fsmRun, pdaRun, input->tree->id, input->tree ) << 
@@ -849,7 +849,7 @@ void send_eof( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaR
 	}
 }
 
-void init_fsm_run( FsmRun *fsmRun )
+void initFsmRun( FsmRun *fsmRun )
 {
 	/* Run buffers need to stick around because 
 	 * token strings point into them. */
@@ -860,7 +860,7 @@ void init_fsm_run( FsmRun *fsmRun )
 	fsmRun->peof = 0;
 }
 
-void init_input_stream( InputStream *inputStream )
+void initInputStream( InputStream *inputStream )
 {
 	/* FIXME: correct values here. */
 	inputStream->line = 0;
@@ -871,7 +871,7 @@ void init_input_stream( InputStream *inputStream )
 long undoParse( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Tree *tree )
 {
 	/* PDA must be init first to set next region. */
-	init_pda_run( pdaRun, 0 );
+	initPdaRun( pdaRun, 0 );
 
 	Kid *top = pdaRun->prg->kidPool.allocate();
 	top->next = pdaRun->stackTop;
@@ -1096,7 +1096,7 @@ void scanner_error( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun 
 		/* May have accumulated ignore tokens from a previous region.
 		 * need to rescan them since we won't be sending tokens from
 		 * this region. */
-		send_back_queued_ignore( sp, inputStream, fsmRun, pdaRun );
+		sendBackQueuedIgnore( sp, inputStream, fsmRun, pdaRun );
 		pdaRun->nextRegionInd += 1;
 	}
 	else if ( pdaRun->numRetry > 0 ) {
@@ -1107,7 +1107,7 @@ void scanner_error( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun 
 		}
 		#endif
 
-		send_back_queued_ignore( sp, inputStream, fsmRun, pdaRun );
+		sendBackQueuedIgnore( sp, inputStream, fsmRun, pdaRun );
 		parseToken( sp, pdaRun, fsmRun, inputStream, 0 );
 
 		if ( pdaRun->errCount > 0 ) {

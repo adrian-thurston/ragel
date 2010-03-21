@@ -320,11 +320,11 @@ Tree *parse_finish( Tree **&sp, Program *prg, Accum *accum, bool revertOn )
 	if ( !revertOn )
 		commit_full( sp, accum->pdaRun, 0 );
 	
-	Tree *tree = get_parsed_root( accum->pdaRun, accum->pdaRun->stopTarget > 0 );
+	Tree *tree = getParsedRoot( accum->pdaRun, accum->pdaRun->stopTarget > 0 );
 	tree_upref( tree );
 
 	if ( !revertOn )
-		clean_parser( sp, accum->pdaRun );
+		cleanParser( sp, accum->pdaRun );
 
 	/* Indicate that this tree came out of a parser. */
 	tree->flags |= AF_PARSED;
