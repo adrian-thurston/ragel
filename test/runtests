@@ -8,7 +8,7 @@ TESTS="
 	translate1.lm translate2.lm
 	construct1.lm construct2.lm construct3.lm
 	treecmp1.lm context1.lm context2.lm context3.lm
-	undofrag1.lm undofrag2.lm 
+	undofrag1.lm undofrag2.lm undofrag3.lm
 	nestedcomm.lm reparse.lm
 	btscan1.lm btscan2.lm
 "

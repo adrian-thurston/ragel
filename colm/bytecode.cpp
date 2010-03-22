@@ -304,6 +304,9 @@ void undo_parse_stream( Tree **&sp, Program *prg, Stream *input, Accum *accum, l
 		parseToken( sp, accum->pdaRun, accum->fsmRun, input->in, 0 );
 		accum->pdaRun->targetConsumed = -1;
 		accum->pdaRun->numRetry -= 1;
+
+		accum->fsmRun->region = accum->pdaRun->getNextRegion();
+		accum->fsmRun->cs = accum->fsmRun->tables->entryByRegion[accum->fsmRun->region];
 	}
 }
 
@@ -2734,6 +2737,7 @@ again:
 			#endif
 
 			undo_parse_stream( sp, prg, ((Accum*)parser)->stream, (Accum*)parser, consumed );
+			((Accum*)parser)->stream->in->eof = false;
 
 			/* This needs an implementation. */
 			tree_downref( prg, sp, parser );

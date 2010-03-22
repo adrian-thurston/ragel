@@ -604,6 +604,7 @@ parseError:
 					}
 					#endif
 
+					pdaRun->cs = pdaRun->stackTopTarget();
 					goto _out;
 				}
 			}
