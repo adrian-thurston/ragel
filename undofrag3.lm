@@ -1,0 +1,45 @@
+lex start
+{
+	ignore /[ \t]+/
+	literal '*', '(', ')', '^', ';', '\n', '.'
+	token id /[a-zA-Z_]+/
+}
+
+parser out_parser [out]
+global out_parser Out = construct out_parser []
+
+def out_item
+	[id]
+|	['(' item* ')']
+
+def out 
+	[out_item*]
+
+def item 
+	[id]
+	{
+		Out << r1
+	}
+|	['(' item* ')']
+	{
+		Out << '('
+		Out << r2
+		Out << ')'
+	}
+
+def A1 []
+def A2 []
+
+def F
+	[]
+	{
+		print_xml( Out.finish() )
+	}
+
+
+def start 
+	[A1 item* F '.' '^']
+|	[A2 item* F '.' ';' '\n']
+
+start Input = parse start( stdin )
+print( Input )
