@@ -253,7 +253,7 @@ void InputStreamString::pushBackBufImpl( RunBuf *runBuf )
 
 int InputStreamFile::isEofImpl()
 {
-	return feof( file );
+	return eof;
 }
 
 int InputStreamFile::needFlushImpl()
@@ -263,7 +263,10 @@ int InputStreamFile::needFlushImpl()
 
 int InputStreamFile::getDataImpl( char *dest, int length )
 {
-	return fread( dest, 1, length, file );
+	size_t res = fread( dest, 1, length, file );
+	if ( res < (size_t) length )
+		later = true;
+	return res;
 }
 
 void InputStreamFile::pushBackBufImpl( RunBuf *runBuf )
@@ -295,7 +298,6 @@ int InputStreamFd::getDataImpl( char *dest, int length )
 	long got = read( fd, dest, length );
 	if ( got == 0 )
 		later = true;
-	//	eof = true;
 	return got;
 }
 
