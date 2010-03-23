@@ -78,7 +78,7 @@ lex start
 		{
 			# Need to shorten to take off the newline.
 			# Turn it into ignore.
-			send_ignore( make_token( typeid WS, pull(stdin, match_length - 1) ) )
+			input.push_ignore( make_token( typeid WS, input.pull(match_length - 1) ) )
 		}
 
 	# Find and ignore comments.
@@ -86,7 +86,7 @@ lex start
 		/ '#' [^\n]* '\n' /
 		{
 			# Need to shorten to take off the newline. Turn it into ignore.
-			send_ignore( make_token( typeid WS, pull(stdin, match_length - 1) ) )
+			input.push_ignore( make_token( typeid WS, input.pull(match_length - 1) ) )
 		}
 
 	# These tokens are generated
@@ -98,8 +98,8 @@ lex start
 	token INDENTATION 
 		/'\n' [ \t]*/
 		{
-			# First the newline.
-			send( make_token( typeid NEWLINE, '' ) )
+			# We have squared up INDENTs and DEDENTs. Ignore the entire match.
+			input.push_ignore( make_token( typeid WS, input.pull(match_length) ) )
 
 			# We have already sent the newline, compute the indentation level.
 			int data_length = match_length - 1
@@ -107,7 +107,7 @@ lex start
 			if data_length > IndentStack.top {
 				# The indentation level is more than the level on the top
 				# of the stack. This is an indent event. Send as an INDENT.
-				send( make_token( typeid INDENT, '' ) )
+				input.push( make_token( typeid INDENT, '' ) )
 
 				# Push to the stack as per python manual.
 				IndentStack.push( data_length )
@@ -120,15 +120,15 @@ lex start
 					IndentStack.pop()
 
 					# Send as a DEDENT
-					send( make_token( typeid DEDENT, '' ) )
+					input.push( make_token( typeid DEDENT, '' ) )
 				}
 			}
 
 			# FIXME: if data.length is now > top of stack then error. This
 			# means the outdent does not match anything.
 
-			# We have squared up INDENTs and DEDENTs. Ignore the entire match.
-			send_ignore( make_token( typeid WS, pull(stdin, match_length) ) )
+			# First the newline.
+			input.push( make_token( typeid NEWLINE, '' ) )
 		}
 }
 
