@@ -233,8 +233,8 @@ lex start
 				id = found->typeId
 
 			any LookupId = make_token( typeid lookup_id, 
-					pull(stdin, match_length), found, qualObj )
-			send( make_tree( id, LookupId ) )
+					input.pull(match_length), found, qualObj )
+			input.push( make_tree( id, LookupId ) )
 
 		}
 
