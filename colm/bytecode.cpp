@@ -219,6 +219,15 @@ Tree *extract_input( Program *prg, Accum *accum )
 	return (Tree*)accum->stream;
 }
 
+void set_input( Program *prg, Tree **sp, Accum *accum, Stream *stream )
+{
+	if ( accum->stream != 0 )
+		tree_downref( prg, sp, (Tree*)accum->stream );
+
+	accum->stream = stream;
+	tree_upref( (Tree*)accum->stream );
+}
+
 void parse_stream( Tree **&sp, Program *prg, Tree *input, Accum *accum, long stopId )
 {
 	accum->pdaRun->stopTarget = stopId;
@@ -2564,6 +2573,21 @@ again:
 			if ( colm_log_bytecode )
 				cerr << "IN_EXTRACT_INPUT_BKT" << endl;
 			#endif
+			break;
+		}
+
+		case IN_SET_INPUT_WC: {
+			#ifdef COLM_LOG_BYTECODE
+			if ( colm_log_bytecode ) {
+				cerr << "IN_SET_INPUT_WC " << endl;
+			}
+			#endif
+
+			Tree *accum = pop();
+			Tree *input = pop();
+			set_input( prg, sp, (Accum*)accum, (Stream*)input );
+			tree_downref( prg, sp, accum );
+			tree_downref( prg, sp, input );
 			break;
 		}
 

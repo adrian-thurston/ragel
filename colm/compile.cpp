@@ -1263,6 +1263,18 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 	if ( stop )
 		ut->langEl->parseStop = true;
 
+	/* If the arg is a stream then install it in the parser. */
+	if ( argUT == pd->uniqueTypeStream ) {
+		code.append( IN_DUP_TOP );
+
+		/* Get a copy of the parser. */
+		code.append( IN_DUP_TOP_OFF );
+		code.appendHalf( 2 );
+	
+		code.append( IN_SET_INPUT_WC );
+	}
+
+
 	if ( argUT == pd->uniqueTypeStream ) {
 		/* Get a copy of the parser. */
 		code.append( IN_DUP_TOP_OFF );

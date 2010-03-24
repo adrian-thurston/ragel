@@ -232,6 +232,8 @@ typedef unsigned char uchar;
 #define IN_EXTRACT_INPUT_WV      0xc4
 #define IN_EXTRACT_INPUT_BKT     0xc5
 
+#define IN_SET_INPUT_WC          0xc9
+
 #define IN_STREAM_APPEND_WC      0xc6
 #define IN_STREAM_APPEND_WV      0xc7
 #define IN_STREAM_APPEND_BKT     0xc8
