@@ -1,41 +1,47 @@
 #!/bin/bash
 #
 
-COLM="../colm/colm"
-TESTS="
-	backtrack1.lm backtrack2.lm dns.lm accum1.lm accum2.lm accum3.lm
-	mutualrec.lm argv1.lm argv2.lm exit.lm rubyhere.lm
-	translate1.lm translate2.lm
-	construct1.lm construct2.lm construct3.lm
-	treecmp1.lm context1.lm context2.lm context3.lm
-	undofrag1.lm undofrag2.lm undofrag3.lm
-	nestedcomm.lm reparse.lm
-	btscan1.lm btscan2.lm
-"
+TESTS="`cat TESTS`"
+GENMF="$0"
+COLM="`dirname $GENMF`/../colm/colm"
 
 echo -n "TESTS ="
 for t in $TESTS; do
 	echo " \\"
 	echo -n "	$t"
 done
+echo
+echo
 
-echo
-echo
-echo 'BINS = $(TESTS:%.lm=%.bin)'
-echo 'OUTS = $(TESTS:%.lm=%.out)'
-echo 'DIFFS = $(TESTS:%.lm=%.diff)'
+echo -n "DIFFS ="
+
+shopt -s nullglob
+for t in $TESTS; do
+	root=${t%.lm}
+	set -- ${root}*.in
+	if [ $# = 0 ]; then
+		echo " \\"
+		echo -n "	$root.diff"
+	else
+		for i; do
+			echo " \\"
+			echo -n "	${i%.in}.diff"
+		done
+	fi
+done
 echo 
+echo
+
 echo 'all: Makefile $(DIFFS)'
 echo
-echo 'Makefile: genmf'
-echo '	./genmf > Makefile'
+echo "Makefile: $GENMF"
+echo "	$GENMF > Makefile"
 echo
+
 
 for t in $TESTS; do
 	root=${t%.lm}
-
-	echo "$root.diff: $root.out $root.exp"
-	echo "	@ diff -u $root.exp $root.out > $root.diff || ( cat $root.diff; rm $root.diff )"
+	input=${root}*.in
 
 	# Are there any arguments.
 	if test -f $root.args; then
@@ -44,12 +50,28 @@ for t in $TESTS; do
 		args=""
 	fi
 
-	echo "$root.out: $root.bin"
-	if test -f "$root.in"; then
-		echo "	./$root.bin $args < $root.in > $root.out"
-	else
+	set -- ${root}*.in
+	if [ $# = 0 ]; then
+		echo "$root.diff: $root.out $root.exp"
+		echo "	@diff -u $root.exp $root.out > $root.diff || ( cat $root.diff; rm $root.diff )"
+		echo
+		echo "$root.out: $root.bin"
 		echo "	./$root.bin $args > $root.out"
+		echo
+	else
+		for i; do
+			i=${i%.in}
+			echo "$i.diff: $i.out $i.exp"
+			echo "	@diff -u $i.exp $i.out > $i.diff || ( cat $i.diff; rm $i.diff )"
+			echo
+			echo "$i.out: $root.bin"
+			echo "	./$root.bin $args < $i.in > $i.out"
+			echo
+		done
 	fi
+
 	echo "$root.bin: $t $COLM"
 	echo "	$COLM $t"
 done
+exit
+
