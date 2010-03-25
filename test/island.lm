@@ -49,9 +49,9 @@ def top_item
 
 def start 
 	[top_item*]
-	{
-		print_xml(lhs)
-	}
+
+start S = parse start( stdin )
+print_xml(S)
 
 #pattern start
 #	~class { func() { func() { 1+{2}} } } func() {{a}} 

@@ -173,6 +173,7 @@ nonterm param_var_def uses var_def;
 param_var_def: var_def
 	final {
 		$$->objField = $1->objField;
+		$$->objField->isParam = true;
 	};
 param_var_def: reference_type_ref TK_Word
 	final {

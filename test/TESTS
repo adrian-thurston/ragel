@@ -33,5 +33,6 @@ TESTS="
 	reparse.lm
 	btscan1.lm
 	btscan2.lm
+	island.lm
 	func.lm
 "
