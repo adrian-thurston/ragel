@@ -43,7 +43,7 @@ echo
 echo '$(SUBDIRS):'
 echo '	cd $@ && $(MAKE)'
 echo
-echo "Makefile: $GENMF"
+echo "Makefile: $GENMF TESTS"
 echo "	$GENMF > Makefile"
 echo
 

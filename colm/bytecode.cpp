@@ -328,6 +328,7 @@ Tree *parse_finish( Tree **&sp, Program *prg, Accum *accum, bool revertOn )
 	}
 	else {
 		stream->in->eof = true;
+		stream->in->later = false;
 		parseLoop( sp, accum->pdaRun, accum->fsmRun, stream->in );
 	}
 

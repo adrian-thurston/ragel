@@ -719,9 +719,16 @@ def keyword_arguments
 def keyword_item 
 	[identifier '=' expression]
 
+int print_stmts( start S )
+{
+	for Stmt: statement in S
+		print( 'STMT: ', Stmt, '\n' )
+}
 
 start S = parse start( stdin )
-#print_xml( S )
+print_xml( S )
+print( S, '\n' )
+print_stmts( S )
 print_target_subscriptions_and_slicings( S )
 print_primary_subscriptions_and_slicings( S )
 print( '*** SUCCESS ***\n' )
