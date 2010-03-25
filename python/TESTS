@@ -1,1 +1,6 @@
-python.lm
+#!/bin/bash
+#
+
+TESTS="
+	python.lm
+"

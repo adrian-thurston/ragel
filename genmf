@@ -1,9 +1,13 @@
 #!/bin/bash
 #
 
-TESTS="`cat TESTS`"
+source TESTS
+
 GENMF="$0"
 COLM="`dirname $GENMF`/../colm/colm"
+
+echo "SUBDIRS = " $SUBDIRS
+echo
 
 echo -n "TESTS ="
 for t in $TESTS; do
@@ -32,7 +36,12 @@ done
 echo 
 echo
 
-echo 'all: Makefile $(DIFFS)'
+echo 'all: Makefile $(DIFFS) $(SUBDIRS)'
+echo
+echo '.PHONY: $(SUBDIRS)'
+echo
+echo '$(SUBDIRS):'
+echo '	cd $@ && $(MAKE)'
 echo
 echo "Makefile: $GENMF"
 echo "	$GENMF > Makefile"
