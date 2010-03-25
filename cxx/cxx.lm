@@ -183,7 +183,8 @@ lex start
 			'if', 'else', 'while', 'do', 'for', 'break', 'continue',
 			'return', 'goto'
 
-	literal '__typeof'
+	# Extensions
+	literal '__typeof', '__is_pod', '__is_empty'
 
 	literal '{', '}', ';', ',', '=', '(', ')', ':', '&', '*', '[', ']', '~', '+', '-',
 		'/', '<', '>', '|', '^', '%', '!', '?', '.'
@@ -599,7 +600,7 @@ def simple_type_specifier
 	}
 
 	# Extension.
-|	['__typeof' '(' identifier ')']
+|	['__typeof' '(' expression ')']
 	{
 		lhs.lookupId = construct lookup_id ["x"]
 		lhs.lookupId.data = '<simple_type_specifier_kw_seq>'
@@ -1029,8 +1030,10 @@ def primary_expression
 |	['this']
 |	['(' expression ')']
 |	[id_expression]
-# This is an GNU extension.
+# GNU extensions
 |	['(' '{' statement_rep '}' ')']
+|	['__is_pod' '(' type_id ')']
+|	['__is_empty' '(' type_id ')']
 
 def expr_lit 
 	[TK_IntegerDecimal]
