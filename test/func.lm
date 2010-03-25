@@ -1,0 +1,34 @@
+
+lex start
+{
+    literal '{', '}'
+    literal 'struct', 'type'
+    token id /[A-Za-z_][A-Za-z_0-9]*/
+
+    ignore /'/*' any* :>> '*/'/
+    ignore /[ \t\r\n]+/
+}
+
+def attribute
+    ['type' id]
+
+def struct
+    ['struct' id '{' attribute* '}']
+
+def program
+    [struct*]
+
+int func( program P )
+{
+}
+
+int main()
+{
+    stream InputFile = open( 'func.in', "r" )
+    program P = parse program( InputFile )
+	func( P )
+	print( P )
+}
+
+main()
+
