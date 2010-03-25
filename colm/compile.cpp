@@ -2427,7 +2427,7 @@ void ParseData::findLocalTrees( CharSet &trees )
 		ObjField *el = of->value;
 		/* FIXME: This test needs to be improved. Match_text was getting
 		 * through before useOffset was tested. What will? */
-		if ( el->useOffset && !el->isLhsEl && el->beenReferenced ) {
+		if ( el->useOffset && !el->isLhsEl && ( el->beenReferenced || el->isParam ) ) {
 			UniqueType *ut = el->typeRef->lookupType( this );
 			if ( ut->typeId == TYPE_TREE || ut->typeId == TYPE_PTR )
 				trees.insert( el->offset );

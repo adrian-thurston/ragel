@@ -1262,6 +1262,7 @@ struct ObjField
 		refActive(false),
 		isArgv(false),
 		isCustom(false),
+		isParam(false),
 		dirtyTree(false),
 		inGetR( IN_HALT ),
 		inGetWC( IN_HALT ),
@@ -1285,6 +1286,7 @@ struct ObjField
 	bool refActive;
 	bool isArgv;
 	bool isCustom;
+	bool isParam;
 	
 	/* True if some aspect of the tree has possibly been written to. This does
 	 * not include attributes. This is here so we can optimize the storage of
