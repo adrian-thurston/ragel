@@ -138,7 +138,26 @@ iter bottomup_rightleft( ref any T )
 # Testing
 #
 
-for C: expression in bottomup_leftright( S ) 
+print( 'bottomup_leftright\n' )
+for T1: any in bottomup_leftright( S ) 
 {
-	print_xml( C )
+	print( T1, '\n' )
+}
+
+print( 'bottomup_rightleft\n' )
+for T2: any in bottomup_rightleft( S ) 
+{
+	print( T2, '\n' )
+}
+
+print( 'topdown_leftright\n' )
+for T3: any in topdown_leftright( S ) 
+{
+	print( T3, '\n' )
+}
+
+print( 'topdown_rightleft\n' )
+for T4: any in topdown_rightleft( S ) 
+{
+	print( T4, '\n' )
 }
