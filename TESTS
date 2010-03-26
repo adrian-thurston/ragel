@@ -37,4 +37,5 @@ TESTS="
 	func.lm
 	travs1.lm
 	constructex.lm
+	rediv.lm
 "
