@@ -35,4 +35,6 @@ TESTS="
 	btscan2.lm
 	island.lm
 	func.lm
+	travs1.lm
+	constructex.lm
 "

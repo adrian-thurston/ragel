@@ -89,5 +89,10 @@ iter fixed_point( ref any T )
 	}
 }
 
-print( S, '\n' )
 
+for T: any in fixed_point( S ) 
+{
+	print( T, '\n' )
+}
+
+print( S, '\n' )
