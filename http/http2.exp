@@ -1,0 +1,65 @@
+HTTP/1.0 200 OK
+Date: Fri, 31 Dec 1999 23:59:59 GMT
+Content-Type: text/plain
+
+<request>
+  <request_line>
+    <method>GET</method>
+    <' '/>
+    <request_uri>/hithere/</request_uri>
+    <' '/>
+    <http_version>
+      <'HTTP/'/>
+      <http_number>1.1</http_number>
+    </http_version>
+    <CRLF>&#13;&#10;</CRLF>
+  </request_line>
+  <_repeat_header>
+    <header>
+      <field_name>Host</field_name>
+      <':'/>
+      <field_value> localhost:3535&#13;&#10;</field_value>
+    </header>
+    <header>
+      <field_name>User-Agent</field_name>
+      <':'/>
+      <field_value> Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.8.1.12) Gecko/20080207 Ubuntu/7.10 (gutsy) Firefox/2.0.0.12&#13;&#10;</field_value>
+    </header>
+    <header>
+      <field_name>Accept</field_name>
+      <':'/>
+      <field_value> text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5&#13;&#10;</field_value>
+    </header>
+    <header>
+      <field_name>Accept-Language</field_name>
+      <':'/>
+      <field_value> en-us,en;q=0.5&#13;&#10;</field_value>
+    </header>
+    <header>
+      <field_name>Accept-Encoding</field_name>
+      <':'/>
+      <field_value> gzip,deflate&#13;&#10;</field_value>
+    </header>
+    <header>
+      <field_name>Accept-Charset</field_name>
+      <':'/>
+      <field_value> ISO-8859-1,utf-8;q=0.7,*;q=0.7&#13;&#10;</field_value>
+    </header>
+    <header>
+      <field_name>Keep-Alive</field_name>
+      <':'/>
+      <field_value> 300&#13;&#10;</field_value>
+    </header>
+    <header>
+      <field_name>Connection</field_name>
+      <':'/>
+      <field_value> keep-alive&#13;&#10;</field_value>
+    </header>
+    <header>
+      <field_name>Cache-Control</field_name>
+      <':'/>
+      <field_value> max-age=0&#13;&#10;</field_value>
+    </header>
+  </_repeat_header>
+  <CRLF>&#13;&#10;</CRLF>
+</request>
