@@ -4,6 +4,8 @@
 SUBDIRS="
 	python
 	html
+	xml
+	http
 "
 
 TESTS="

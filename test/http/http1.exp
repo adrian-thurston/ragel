@@ -1,0 +1,19 @@
+HTTP/1.0 200 OK
+Date: Fri, 31 Dec 1999 23:59:59 GMT
+Content-Type: text/plain
+
+<request>
+  <request_line>
+    <method>GET</method>
+    <' '/>
+    <request_uri>/hi/there/</request_uri>
+    <' '/>
+    <http_version>
+      <'HTTP/'/>
+      <http_number>1.1</http_number>
+    </http_version>
+    <CRLF>&#13;&#10;</CRLF>
+  </request_line>
+  <_repeat_header/>
+  <CRLF>&#13;&#10;</CRLF>
+</request>

@@ -1,0 +1,30 @@
+HTTP/1.0 200 OK
+Date: Fri, 31 Dec 1999 23:59:59 GMT
+Content-Type: text/plain
+
+<request>
+  <request_line>
+    <method>GET</method>
+    <' '/>
+    <request_uri>foo</request_uri>
+    <' '/>
+    <http_version>
+      <'HTTP/'/>
+      <http_number>1.1</http_number>
+    </http_version>
+    <CRLF>&#13;&#10;</CRLF>
+  </request_line>
+  <_repeat_header>
+    <header>
+      <field_name>hello</field_name>
+      <':'/>
+      <field_value> foo&#13;&#10;</field_value>
+    </header>
+    <header>
+      <field_name>hi</field_name>
+      <':'/>
+      <field_value> there&#13;&#10;&#9;my&#13;&#10; friend&#13;&#10; &#13;&#10; from outter space&#13;&#10;</field_value>
+    </header>
+  </_repeat_header>
+  <CRLF>&#13;&#10;</CRLF>
+</request>
