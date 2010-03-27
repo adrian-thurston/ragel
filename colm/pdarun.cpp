@@ -69,7 +69,7 @@ void cleanParser( Tree **sp, PdaRun *pdaRun )
 	Kid *kid = pdaRun->stackTop;
 	while ( kid != 0 ) {
 		Kid *next = kid->next;
-		tree_downref( pdaRun->prg, sp, kid->tree );
+		treeDownref( pdaRun->prg, sp, kid->tree );
 		pdaRun->prg->kidPool.free( kid );
 		kid = next;
 	}
@@ -115,13 +115,13 @@ void initPdaRun( PdaRun *pdaRun, Tree *context )
 
 	pdaRun->allReverseCode = new CodeVect;
 
-	pdaRun->context = split_tree( pdaRun->prg, context );
+	pdaRun->context = splitTree( pdaRun->prg, context );
 }
 
 void PdaRun::clearContext( Tree **sp )
 {
 	if ( context != 0 )
-		tree_downref( prg, sp, context );
+		treeDownref( prg, sp, context );
 }
 
 
@@ -501,8 +501,8 @@ again:
 
 				/* Transfer the lhs from the environment to redLel. */
 				redLel->tree = prepParseTree( pdaRun->prg, sp, execution.lhs );
-				tree_upref( redLel->tree );
-				tree_downref( pdaRun->prg, sp, execution.lhs );
+				treeUpref( redLel->tree );
+				treeDownref( pdaRun->prg, sp, execution.lhs );
 
 				pdaRun->reverseCode.append( IN_RESTORE_LHS );
 				pdaRun->reverseCode.appendWord( (Word)execution.parsed );
@@ -665,7 +665,7 @@ parseError:
 
 				if ( execution.lhs != 0 ) {
 					/* Get the lhs, it may have been reverted. */
-					tree_downref( pdaRun->prg, sp, undoLel->tree );
+					treeDownref( pdaRun->prg, sp, undoLel->tree );
 					undoLel->tree = execution.lhs;
 				}
 			}
@@ -715,7 +715,7 @@ parseError:
 			}
 
 			/* Free the reduced item. */
-			tree_downref( pdaRun->prg, sp, undoLel->tree );
+			treeDownref( pdaRun->prg, sp, undoLel->tree );
 			pdaRun->prg->kidPool.free( undoLel );
 		}
 	}

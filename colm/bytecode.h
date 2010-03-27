@@ -522,7 +522,7 @@ struct TreePair
 struct Program;
 struct Stream;
 
-bool test_false( Program *prg, Tree *tree );
+bool testFalse( Program *prg, Tree *tree );
 
 Head *string_alloc_full( Program *prg, const char *data, long length );
 Head *string_alloc_pointer( Program *prg, const char *data, long length );
@@ -550,38 +550,35 @@ Tree *getParsedRoot( PdaRun *pdaRun, bool stop );
 
 bool match_pattern( Tree **bindings, Program *prg, long pat, Kid *kid, bool checkNext );
 Head *make_literal( Program *prg, long litoffset );
-Tree *construct_string( Program *prg, Head *s );
-Tree *construct_integer( Program *prg, long i );
-Tree *construct_string( Program *prg, Head *s );
-Tree *construct_pointer( Program *prg, Tree *tree );
-Tree *construct_term( Program *prg, Word id, Head *tokdata );
-Tree *construct_replacement_tree( Tree **bindings, Program *prg, long pat );
-Tree *create_generic( Program *prg, long genericId );
+Tree *constructString( Program *prg, Head *s );
+Tree *constructInteger( Program *prg, long i );
+Tree *constructPointer( Program *prg, Tree *tree );
+Tree *constructTerm( Program *prg, Word id, Head *tokdata );
+Tree *constructReplacementTree( Tree **bindings, Program *prg, long pat );
+Tree *createGeneric( Program *prg, long genericId );
 
-Stream *open_file( Program *prg, Tree *name, Tree *mode );
-Stream *open_stream_fd( Program *prg, long fd );
-Stream *open_stream( Program *prg, FILE *file );
+Stream *openFile( Program *prg, Tree *name, Tree *mode );
+Stream *openStreamFd( Program *prg, long fd );
 
-void tree_downref( Program *prg, Tree **sp, Tree *tree );
-void tree_upref( Tree *tree );
+void treeDownref( Program *prg, Tree **sp, Tree *tree );
+void treeUpref( Tree *tree );
 Kid *tree_child( Program *prg, const Tree *tree );
 Kid *tree_extract_child( Program *prg, Tree *tree );
 Kid *tree_ignore( Program *prg, Tree *tree );
 Kid *kidListConcat( Kid *list1, Kid *list2 );
 void ignore_data( Tree *tree, char *dest );
 long ignore_length( Tree *tree );
-Tree *split_tree( Program *prg, Tree *t );
-Tree *copy_tree( Program *prg, Tree *tree, Kid *oldNextDown, Kid *&newNextDown );
-Tree *copy_real_tree( Program *prg, Tree *tree, Kid *oldNextDown, Kid *&newNextDown, bool parsed );
+Tree *splitTree( Program *prg, Tree *t );
+Tree *copyRealTree( Program *prg, Tree *tree, Kid *oldNextDown, Kid *&newNextDown, bool parsed );
 Tree *makeTree( Tree **root, Program *prg, long nargs );
 Tree *makeToken( Tree **root, Program *prg, long nargs );
 Tree *prepParseTree( Program *prg, Tree **sp, Tree *tree );
 
-void print_tree( ostream &out, Tree **&sp, Program *prg, Tree *tree );
-void print_tree2( FILE *out, Tree **&sp, Program *prg, Tree *tree );
+void printTree( ostream &out, Tree **&sp, Program *prg, Tree *tree );
+void printTree2( FILE *out, Tree **&sp, Program *prg, Tree *tree );
 void print_str( Head *str );
-void print_xml_tree( Tree **&sp, Program *prg, Tree *tree, bool commAttr );
-void print_xml_kid( Tree **&sp, Program *prg, Kid *kid, bool commAttr, int depth );
+void printXmlTree( Tree **&sp, Program *prg, Tree *tree, bool commAttr );
+void printXmlKid( Tree **&sp, Program *prg, Kid *kid, bool commAttr, int depth );
 
 long list_length( List *list );
 void list_append( Program *prg, List *list, Tree *val );
@@ -621,7 +618,6 @@ void ref_set_value( Ref *ref, Tree *v );
 Tree *tree_search( Program *prg, Kid *kid, long id );
 Tree *tree_search( Program *prg, Tree *tree, long id );
 void split_ref( Tree **&sp, Program *prg, Ref *fromRef );
-long tree_num_children( Program *prg, Tree *tree );
 
 Tree **stackAlloc();
 

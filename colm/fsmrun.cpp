@@ -273,7 +273,7 @@ void undoStreamPush( Program *prg, Tree **sp, InputStream *inputStream, long len
 	takeBackBuffered( inputStream );
 	Tree *tree = inputStream->undoPush( length );
 	if ( tree != 0 )
-		tree_downref( prg, sp, tree );
+		treeDownref( prg, sp, tree );
 }
 
 void undoStreamAppend( Program *prg, Tree **sp, InputStream *inputStream, long length )
@@ -281,7 +281,7 @@ void undoStreamAppend( Program *prg, Tree **sp, InputStream *inputStream, long l
 	takeBackBuffered( inputStream );
 	Tree *tree = inputStream->undoAppend( length );
 	if ( tree != 0 )
-		tree_downref( prg, sp, tree );
+		treeDownref( prg, sp, tree );
 }
 
 
@@ -387,7 +387,7 @@ void sendBack( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStre
 	decrementConsumed( pdaRun );
 
 	if ( input->tree->flags & AF_ARTIFICIAL ) {
-		tree_upref( input->tree );
+		treeUpref( input->tree );
 		streamPushTree( inputStream, input->tree, false );
 
 		/* FIXME: need to undo the merge of ignore tokens. */
@@ -433,7 +433,7 @@ void sendBack( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStre
 		Tree *lastBound = pdaRun->bindings.top();
 		if ( lastBound == input->tree ) {
 			pdaRun->bindings.pop();
-			tree_downref( fsmRun->prg, sp, input->tree );
+			treeDownref( fsmRun->prg, sp, input->tree );
 		}
 	}
 
@@ -447,7 +447,7 @@ void sendBack( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStre
 	}
 
 	/* Downref the tree that was sent back and free the kid. */
-	tree_downref( fsmRun->prg, sp, input->tree );
+	treeDownref( fsmRun->prg, sp, input->tree );
 	fsmRun->prg->kidPool.free( input );
 }
 
@@ -573,8 +573,8 @@ Kid *makeToken( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, int id
 			Head *data = string_alloc_full( fsmRun->prg, 
 					fsmRun->mark[ca->mark_enter], fsmRun->mark[ca->mark_leave]
 					- fsmRun->mark[ca->mark_enter] );
-			Tree *string = construct_string( fsmRun->prg, data );
-			tree_upref( string );
+			Tree *string = constructString( fsmRun->prg, data );
+			treeUpref( string );
 			setAttr( input->tree, ca->offset, string );
 		}
 	}
@@ -582,7 +582,7 @@ Kid *makeToken( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, int id
 	/* If the item is bound then store it in the bindings array. */
 	if ( bindId > 0 ) {
 		pdaRun->bindings.push( input->tree );
-		tree_upref( input->tree );
+		treeUpref( input->tree );
 	}
 
 	return input;
@@ -650,7 +650,7 @@ void sendBackQueuedIgnore( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, 
 	sendBackIgnore( sp, pdaRun, fsmRun, inputStream, ignore );
 	while ( ignore != 0 ) {
 		Kid *next = ignore->next;
-		tree_downref( pdaRun->prg, sp, ignore->tree );
+		treeDownref( pdaRun->prg, sp, ignore->tree );
 		pdaRun->prg->kidPool.free( ignore );
 		ignore = next;
 	}
@@ -660,7 +660,7 @@ void clearIgnoreList( Program *prg, Tree **sp, Kid *kid )
 {
 	while ( kid != 0 ) {
 		Kid *next = kid->next;
-		tree_downref( prg, sp, kid->tree );
+		treeDownref( prg, sp, kid->tree );
 		prg->kidPool.free( kid );
 		kid = next;
 	}
@@ -901,7 +901,7 @@ long undoParse( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStr
 
 	assert( pdaRun->stackTop->next == 0 );
 
-	tree_downref( pdaRun->prg, sp, pdaRun->stackTop->tree );
+	treeDownref( pdaRun->prg, sp, pdaRun->stackTop->tree );
 	pdaRun->prg->kidPool.free( pdaRun->stackTop );
 	return 0;
 }

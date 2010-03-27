@@ -108,7 +108,7 @@ Kid *kidListConcat( Kid *list1, Kid *list2 )
 }
 
 
-Stream *open_stream_file( Program *prg, FILE *file )
+Stream *openStreamFile( Program *prg, FILE *file )
 {
 	Stream *res = (Stream*)prg->mapElPool.allocate();
 	res->id = LEL_ID_STREAM;
@@ -118,7 +118,7 @@ Stream *open_stream_file( Program *prg, FILE *file )
 	return res;
 }
 
-Stream *open_stream_fd( Program *prg, long fd )
+Stream *openStreamFd( Program *prg, long fd )
 {
 	Stream *res = (Stream*)prg->mapElPool.allocate();
 	res->id = LEL_ID_STREAM;
@@ -127,7 +127,7 @@ Stream *open_stream_fd( Program *prg, long fd )
 	return res;
 }
 
-Stream *open_file( Program *prg, Tree *name, Tree *mode )
+Stream *openFile( Program *prg, Tree *name, Tree *mode )
 {
 	Head *headName = ((Str*)name)->value;
 	Head *headMode = ((Str*)mode)->value;
@@ -149,10 +149,10 @@ Stream *open_file( Program *prg, Tree *name, Tree *mode )
 	fileName[string_length(headName)] = 0;
 	FILE *file = fopen( fileName, fopenMode );
 	delete[] fileName;
-	return open_stream_file( prg, file );
+	return openStreamFile( prg, file );
 }
 
-Tree *construct_integer( Program *prg, long i )
+Tree *constructInteger( Program *prg, long i )
 {
 	Int *integer = (Int*) prg->treePool.allocate();
 	integer->id = LEL_ID_INT;
@@ -161,7 +161,7 @@ Tree *construct_integer( Program *prg, long i )
 	return (Tree*)integer;
 }
 
-Tree *construct_string( Program *prg, Head *s )
+Tree *constructString( Program *prg, Head *s )
 {
 	Str *str = (Str*) prg->treePool.allocate();
 	str->id = LEL_ID_STR;
@@ -170,7 +170,7 @@ Tree *construct_string( Program *prg, Head *s )
 	return (Tree*)str;
 }
 
-Tree *construct_pointer( Program *prg, Tree *tree )
+Tree *constructPointer( Program *prg, Tree *tree )
 {
 	Kid *kid = prg->kidPool.allocate();
 	kid->tree = tree;
@@ -184,7 +184,7 @@ Tree *construct_pointer( Program *prg, Tree *tree )
 	return (Tree*)pointer;
 }
 
-Tree *construct_term( Program *prg, Word id, Head *tokdata )
+Tree *constructTerm( Program *prg, Word id, Head *tokdata )
 {
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
 
@@ -199,9 +199,9 @@ Tree *construct_term( Program *prg, Word id, Head *tokdata )
 	return tree;
 }
 
-Kid *construct_replacement_kid( Tree **bindings, Program *prg, Kid *prev, long pat );
+Kid *constructReplacementKid( Tree **bindings, Program *prg, Kid *prev, long pat );
 
-Kid *construct_ignore_list( Program *prg, long pat )
+Kid *constructIgnoreList( Program *prg, long pat )
 {
 	PatReplNode *nodes = prg->rtd->patReplNodes;
 	long ignore = nodes[pat].ignore;
@@ -233,7 +233,7 @@ Kid *construct_ignore_list( Program *prg, long pat )
 
 /* Returns an uprefed tree. Saves us having to downref and bindings to zero to
  * return a zero-ref tree. */
-Tree *construct_replacement_tree( Tree **bindings, Program *prg, long pat )
+Tree *constructReplacementTree( Tree **bindings, Program *prg, long pat )
 {
 	PatReplNode *nodes = prg->rtd->patReplNodes;
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
@@ -245,9 +245,9 @@ Tree *construct_replacement_tree( Tree **bindings, Program *prg, long pat )
 
 		long ignore = nodes[pat].ignore;
 		if ( ignore >= 0 ) {
-			Kid *ignore = construct_ignore_list( prg, pat );
+			Kid *ignore = constructIgnoreList( prg, pat );
 
-			tree = split_tree( prg, tree );
+			tree = splitTree( prg, tree );
 
 			Kid *ignoreHead = prg->kidPool.allocate();
 			ignoreHead->next = tree->child;
@@ -268,8 +268,8 @@ Tree *construct_replacement_tree( Tree **bindings, Program *prg, long pat )
 		int objectLength = lelInfo[tree->id].objectLength;
 
 		Kid *attrs = allocAttrs( prg, objectLength );
-		Kid *ignore = construct_ignore_list( prg, pat );
-		Kid *child = construct_replacement_kid( bindings, prg, 
+		Kid *ignore = constructIgnoreList( prg, pat );
+		Kid *child = constructReplacementKid( bindings, prg, 
 				0, nodes[pat].child );
 
 		tree->child = kidListConcat( attrs, child );
@@ -299,17 +299,17 @@ Tree *construct_replacement_tree( Tree **bindings, Program *prg, long pat )
 	return tree;
 }
 
-Kid *construct_replacement_kid( Tree **bindings, Program *prg, Kid *prev, long pat )
+Kid *constructReplacementKid( Tree **bindings, Program *prg, Kid *prev, long pat )
 {
 	PatReplNode *nodes = prg->rtd->patReplNodes;
 	Kid *kid = 0;
 
 	if ( pat != -1 ) {
 		kid = prg->kidPool.allocate();
-		kid->tree = construct_replacement_tree( bindings, prg, pat );
+		kid->tree = constructReplacementTree( bindings, prg, pat );
 
 		/* Recurse down next. */
-		Kid *next = construct_replacement_kid( bindings, prg, 
+		Kid *next = constructReplacementKid( bindings, prg, 
 				kid, nodes[pat].next );
 
 		kid->next = next;
@@ -352,7 +352,7 @@ Tree *makeToken( Tree **root, Program *prg, long nargs )
 		assert( nargs-2 <= objectLength );
 		for ( long id = 0; id < nargs-2; id++ ) {
 			setAttr( tree, id, base[-3-id] );
-			tree_upref( getAttr( tree, id) );
+			treeUpref( getAttr( tree, id) );
 		}
 	}
 	return tree;
@@ -379,7 +379,7 @@ Tree *makeTree( Tree **root, Program *prg, long nargs )
 	for ( long id = 0; id < nargs-1; id++ ) {
 		Kid *kid = prg->kidPool.allocate();
 		kid->tree = base[-2-id];
-		tree_upref( kid->tree );
+		treeUpref( kid->tree );
 
 		if ( last == 0 )
 			child = kid;
@@ -394,7 +394,7 @@ Tree *makeTree( Tree **root, Program *prg, long nargs )
 	return tree;
 }
 
-bool test_false( Program *prg, Tree *tree )
+bool testFalse( Program *prg, Tree *tree )
 {
 	bool flse = ( 
 		tree == 0 ||
@@ -403,19 +403,19 @@ bool test_false( Program *prg, Tree *tree )
 	return flse;
 }
 
-void print_str( ostream &out, Head *str )
+void printStr( ostream &out, Head *str )
 {
 	out.write( (char*)(str->data), str->length );
 }
 
-void print_str2( FILE *out, Head *str )
+void printStr2( FILE *out, Head *str )
 {
 	fwrite( (char*)(str->data), str->length, 1, out );
 }
 
 /* Note that this function causes recursion, thought it is not a big
  * deal since the recursion it is only caused by nonterminals that are ignored. */
-void print_ignore_list( ostream &out, Tree **sp, Program *prg, Tree *tree )
+void printIgnoreList( ostream &out, Tree **sp, Program *prg, Tree *tree )
 {
 	Kid *ignore = tree_ignore( prg, tree );
 
@@ -429,13 +429,13 @@ void print_ignore_list( ostream &out, Tree **sp, Program *prg, Tree *tree )
 	/* Pop them off and print. */
 	while ( vm_ptop() != root ) {
 		ignore = (Kid*) vm_pop();
-		print_tree( out, sp, prg, ignore->tree );
+		printTree( out, sp, prg, ignore->tree );
 	}
 }
 
 /* Note that this function causes recursion, thought it is not a big
  * deal since the recursion it is only caused by nonterminals that are ignored. */
-void print_ignore_list2( FILE *out, Tree **sp, Program *prg, Tree *tree )
+void printIgnoreList2( FILE *out, Tree **sp, Program *prg, Tree *tree )
 {
 	Kid *ignore = tree_ignore( prg, tree );
 
@@ -449,12 +449,12 @@ void print_ignore_list2( FILE *out, Tree **sp, Program *prg, Tree *tree )
 	/* Pop them off and print. */
 	while ( vm_ptop() != root ) {
 		ignore = (Kid*) vm_pop();
-		print_tree2( out, sp, prg, ignore->tree );
+		printTree2( out, sp, prg, ignore->tree );
 	}
 }
 
 
-void print_kid( ostream &out, Tree **&sp, Program *prg, Kid *kid, bool printIgnore )
+void printKid( ostream &out, Tree **&sp, Program *prg, Kid *kid, bool printIgnore )
 {
 	Tree **root = vm_ptop();
 	Kid *child;
@@ -464,7 +464,7 @@ rec_call:
 	 * be associated with terminals and nonterminals. */
 	if ( printIgnore && tree_ignore( prg, kid->tree ) != 0 ) {
 		/* Ignorelists are reversed. */
-		print_ignore_list( out, sp, prg, kid->tree );
+		printIgnoreList( out, sp, prg, kid->tree );
 		printIgnore = false;
 	}
 
@@ -483,7 +483,7 @@ rec_call:
 		else if ( kid->tree->id == LEL_ID_PTR )
 			out << '#' << (void*) ((Pointer*)kid->tree)->value;
 		else if ( kid->tree->id == LEL_ID_STR )
-			print_str( out, ((Str*)kid->tree)->value );
+			printStr( out, ((Str*)kid->tree)->value );
 		else if ( kid->tree->id == LEL_ID_STREAM )
 			out << '#' << (void*) ((Stream*)kid->tree)->file;
 		else if ( kid->tree->tokdata != 0 && 
@@ -512,7 +512,7 @@ rec_call:
 		goto rec_return;
 }
 
-void print_tree( ostream &out, Tree **&sp, Program *prg, Tree *tree )
+void printTree( ostream &out, Tree **&sp, Program *prg, Tree *tree )
 {
 	if ( tree == 0 )
 		out << "NIL";
@@ -520,12 +520,12 @@ void print_tree( ostream &out, Tree **&sp, Program *prg, Tree *tree )
 		Kid kid;
 		kid.tree = tree;
 		kid.next = 0;
-		print_kid( out, sp, prg, &kid, false );
+		printKid( out, sp, prg, &kid, false );
 	}
 }
 
 
-void print_kid2( FILE *out, Tree **&sp, Program *prg, Kid *kid, bool printIgnore )
+void printKid2( FILE *out, Tree **&sp, Program *prg, Kid *kid, bool printIgnore )
 {
 	Tree **root = vm_ptop();
 	Kid *child;
@@ -535,7 +535,7 @@ rec_call:
 	 * be associated with terminals and nonterminals. */
 	if ( printIgnore && tree_ignore( prg, kid->tree ) != 0 ) {
 		/* Ignorelists are reversed. */
-		print_ignore_list2( out, sp, prg, kid->tree );
+		printIgnoreList2( out, sp, prg, kid->tree );
 		printIgnore = false;
 	}
 
@@ -554,7 +554,7 @@ rec_call:
 		else if ( kid->tree->id == LEL_ID_PTR )
 			fprintf( out, "#%p", (void*) ((Pointer*)kid->tree)->value );
 		else if ( kid->tree->id == LEL_ID_STR )
-			print_str2( out, ((Str*)kid->tree)->value );
+			printStr2( out, ((Str*)kid->tree)->value );
 		else if ( kid->tree->id == LEL_ID_STREAM )
 			fprintf( out, "#%p", ((Stream*)kid->tree)->file );
 		else if ( kid->tree->tokdata != 0 && 
@@ -583,7 +583,7 @@ rec_call:
 		goto rec_return;
 }
 
-void print_tree2( FILE *out, Tree **&sp, Program *prg, Tree *tree )
+void printTree2( FILE *out, Tree **&sp, Program *prg, Tree *tree )
 {
 	if ( tree == 0 )
 		fprintf( out, "NIL" );
@@ -591,11 +591,11 @@ void print_tree2( FILE *out, Tree **&sp, Program *prg, Tree *tree )
 		Kid kid;
 		kid.tree = tree;
 		kid.next = 0;
-		print_kid2( out, sp, prg, &kid, false );
+		printKid2( out, sp, prg, &kid, false );
 	}
 }
 
-void xml_escape_data( const char *data, long len )
+void xmlEscapeData( const char *data, long len )
 {
 	for ( int i = 0; i < len; i++ ) {
 		if ( data[i] == '<' )
@@ -611,20 +611,20 @@ void xml_escape_data( const char *data, long len )
 	}
 }
 
-/* Might be a good idea to include this in the print_xml_kid function since
+/* Might be a good idea to include this in the printXmlKid function since
  * it is recursive and can eat up stac, however it's probably not a big deal
  * since the additional stack depth is only caused for nonterminals that are
  * ignored. */
-void print_xml_ignore_list( Tree **sp, Program *prg, Tree *tree, long depth )
+void printXmlIgnoreList( Tree **sp, Program *prg, Tree *tree, long depth )
 {
 	Kid *ignore = tree_ignore( prg, tree );
 	while ( ignore != 0 ) {
-		print_xml_kid( sp, prg, ignore, true, depth );
+		printXmlKid( sp, prg, ignore, true, depth );
 		ignore = ignore->next;
 	}
 }
 
-void print_xml_kid( Tree **&sp, Program *prg, Kid *kid, bool commAttr, int depth )
+void printXmlKid( Tree **&sp, Program *prg, Kid *kid, bool commAttr, int depth )
 {
 	Kid *child;
 	Tree **root = vm_ptop();
@@ -644,7 +644,7 @@ rec_call:
 	else {
 		/* First print the ignore tokens. */
 		if ( commAttr )
-			print_xml_ignore_list( sp, prg, kid->tree, depth );
+			printXmlIgnoreList( sp, prg, kid->tree, depth );
 
 		for ( i = 0; i < depth; i++ )
 			cout << "  ";
@@ -723,7 +723,7 @@ rec_call:
 			Head *head = (Head*) ((Str*)kid->tree)->value;
 
 			cout << '>';
-			xml_escape_data( (char*)(head->data), head->length );
+			xmlEscapeData( (char*)(head->data), head->length );
 			cout << "</" << lelInfo[kid->tree->id].name << '>' << endl;
 		}
 		else if ( 0 < kid->tree->id && kid->tree->id < prg->rtd->firstNonTermId &&
@@ -732,7 +732,7 @@ rec_call:
 				!lelInfo[kid->tree->id].literal )
 		{
 			cout << '>';
-			xml_escape_data( string_data( kid->tree->tokdata ), 
+			xmlEscapeData( string_data( kid->tree->tokdata ), 
 					string_length( kid->tree->tokdata ) );
 			cout << "</" << lelInfo[kid->tree->id].name << '>' << endl;
 		}
@@ -744,15 +744,15 @@ rec_call:
 		goto rec_return;
 }
 
-void print_xml_tree( Tree **&sp, Program *prg, Tree *tree, bool commAttr )
+void printXmlTree( Tree **&sp, Program *prg, Tree *tree, bool commAttr )
 {
 	Kid kid;
 	kid.tree = tree;
 	kid.next = 0;
-	print_xml_kid( sp, prg, &kid, commAttr, 0 );
+	printXmlKid( sp, prg, &kid, commAttr, 0 );
 }
 
-void stream_free( Program *prg, Stream *s )
+void streamFree( Program *prg, Stream *s )
 {
 	delete s->in;
 	if ( s->file != 0 )
@@ -760,19 +760,7 @@ void stream_free( Program *prg, Stream *s )
 	prg->mapElPool.free( (MapEl*)s );
 }
 
-long tree_num_children( Program *prg, Tree *tree )
-{
-	long children = 0;
-	Kid *child = tree_child( prg, tree );
-	while ( child != 0 ) {
-		children += 1;
-		child = child->next;
-	}
-
-	return children;
-}
-
-Kid *copy_ignore_list( Program *prg, Kid *ignoreHeader )
+Kid *copyIgnoreList( Program *prg, Kid *ignoreHeader )
 {
 	Kid *newHeader = prg->kidPool.allocate();
 	Kid *last = 0, *ic = (Kid*)ignoreHeader->tree;
@@ -795,7 +783,7 @@ Kid *copy_ignore_list( Program *prg, Kid *ignoreHeader )
 }
 
 /* New tree has zero ref. */
-Tree *copy_real_tree( Program *prg, Tree *tree, Kid *oldNextDown, 
+Tree *copyRealTree( Program *prg, Tree *tree, Kid *oldNextDown, 
 		Kid *&newNextDown, bool parseTree )
 {
 	/* Need to keep a lookout for next down. If 
@@ -818,7 +806,7 @@ Tree *copy_real_tree( Program *prg, Tree *tree, Kid *oldNextDown,
 	/* Left ignores. */
 	if ( tree->flags & AF_LEFT_IGNORE ) {
 		newTree->flags |= AF_LEFT_IGNORE;
-		Kid *newHeader = copy_ignore_list( prg, child );
+		Kid *newHeader = copyIgnoreList( prg, child );
 
 		/* Always the head. */
 		newTree->child = newHeader;
@@ -830,7 +818,7 @@ Tree *copy_real_tree( Program *prg, Tree *tree, Kid *oldNextDown,
 	/* Right ignores. */
 	if ( tree->flags & AF_RIGHT_IGNORE ) {
 		newTree->flags |= AF_RIGHT_IGNORE;
-		Kid *newHeader = copy_ignore_list( prg, child );
+		Kid *newHeader = copyIgnoreList( prg, child );
 		if ( last == 0 )
 			newTree->child = newHeader;
 		else
@@ -867,7 +855,7 @@ Tree *copy_real_tree( Program *prg, Tree *tree, Kid *oldNextDown,
 	return newTree;
 }
 
-List *copy_list( Program *prg, List *list, Kid *oldNextDown, Kid *&newNextDown )
+List *copyList( Program *prg, List *list, Kid *oldNextDown, Kid *&newNextDown )
 {
 	#ifdef COLM_LOG_BYTECODE
 	if ( colm_log_bytecode ) {
@@ -885,7 +873,7 @@ List *copy_list( Program *prg, List *list, Kid *oldNextDown, Kid *&newNextDown )
 	while( src != 0 ) {
 		ListEl *newEl = prg->listElPool.allocate();
 		newEl->value = src->value;
-		tree_upref( newEl->value );
+		treeUpref( newEl->value );
 
 		newList->append( newEl );
 
@@ -899,7 +887,7 @@ List *copy_list( Program *prg, List *list, Kid *oldNextDown, Kid *&newNextDown )
 	return newList;
 }
 	
-Map *copy_map( Program *prg, Map *map, Kid *oldNextDown, Kid *&newNextDown )
+Map *copyMap( Program *prg, Map *map, Kid *oldNextDown, Kid *&newNextDown )
 {
 	#ifdef COLM_LOG_BYTECODE
 	if ( colm_log_bytecode ) {
@@ -922,22 +910,22 @@ Map *copy_map( Program *prg, Map *map, Kid *oldNextDown, Kid *&newNextDown )
 
 	for ( MapEl *el = newMap->head; el != 0; el = el->next ) {
 		assert( map->genericInfo->typeArg == TYPE_TREE );
-		tree_upref( el->tree );
+		treeUpref( el->tree );
 	}
 
 	return newMap;
 }
 
-Tree *copy_tree( Program *prg, Tree *tree, Kid *oldNextDown, Kid *&newNextDown )
+Tree *copyTree( Program *prg, Tree *tree, Kid *oldNextDown, Kid *&newNextDown )
 {
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
 	long genericId = lelInfo[tree->id].genericId;
 	if ( genericId > 0 ) {
 		GenericInfo *generic = &prg->rtd->genericInfo[genericId];
 		if ( generic->type == GEN_LIST )
-			tree = (Tree*) copy_list( prg, (List*) tree, oldNextDown, newNextDown );
+			tree = (Tree*) copyList( prg, (List*) tree, oldNextDown, newNextDown );
 		else if ( generic->type == GEN_MAP )
-			tree = (Tree*) copy_map( prg, (Map*) tree, oldNextDown, newNextDown );
+			tree = (Tree*) copyMap( prg, (Map*) tree, oldNextDown, newNextDown );
 		else if ( generic->type == GEN_PARSER ) {
 			/* Need to figure out the semantics here. */
 			cerr << "ATTEMPT TO COPY PARSER" << endl;
@@ -955,14 +943,14 @@ Tree *copy_tree( Program *prg, Tree *tree, Kid *oldNextDown, Kid *&newNextDown )
 	else if ( tree->id == LEL_ID_STREAM )
 		assert(false);
 	else {
-		tree = copy_real_tree( prg, tree, oldNextDown, newNextDown, false );
+		tree = copyRealTree( prg, tree, oldNextDown, newNextDown, false );
 	}
 
 	assert( tree->refs == 0 );
 	return tree;
 }
 
-Tree *split_tree( Program *prg, Tree *tree )
+Tree *splitTree( Program *prg, Tree *tree )
 {
 	if ( tree != 0 ) {
 		assert( tree->refs >= 1 );
@@ -976,8 +964,8 @@ Tree *split_tree( Program *prg, Tree *tree )
 			#endif
 
 			Kid *oldNextDown = 0, *newNextDown = 0;
-			Tree *newTree = copy_tree( prg, tree, oldNextDown, newNextDown );
-			tree_upref( newTree );
+			Tree *newTree = copyTree( prg, tree, oldNextDown, newNextDown );
+			treeUpref( newTree );
 
 			/* Downref the original. Don't need to consider freeing because
 			 * refs were > 1. */
@@ -991,7 +979,7 @@ Tree *split_tree( Program *prg, Tree *tree )
 	return tree;
 }
 
-Tree *create_generic( Program *prg, long genericId )
+Tree *createGeneric( Program *prg, long genericId )
 {
 	GenericInfo *genericInfo = &prg->rtd->genericInfo[genericId];
 	Tree *newGeneric = 0;
@@ -1037,7 +1025,7 @@ Tree *create_generic( Program *prg, long genericId )
 
 /* We can't make recursive calls here since the tree we are freeing may be
  * very large. Need the VM stack. */
-void tree_free( Program *prg, Tree **sp, Tree *tree )
+void treeFree( Program *prg, Tree **sp, Tree *tree )
 {
 	Tree **top = sp;
 
@@ -1076,7 +1064,7 @@ free_tree:
 			accum->pdaRun->clearContext( sp );
 			rcodeDownrefAll( prg, sp, accum->pdaRun->allReverseCode );
 			delete accum->pdaRun;
-			tree_downref( prg, sp, (Tree*)accum->stream );
+			treeDownref( prg, sp, (Tree*)accum->stream );
 			prg->mapElPool.free( (MapEl*)accum );
 		}
 		else
@@ -1097,7 +1085,7 @@ free_tree:
 			prg->treePool.free( tree );
 		}
 		else if ( tree->id == LEL_ID_STREAM )
-			stream_free( prg, (Stream*) tree );
+			streamFree( prg, (Stream*) tree );
 		else { 
 			string_free( prg, tree->tokdata );
 			Kid *child = tree->child;
@@ -1159,19 +1147,19 @@ free_tree:
 	}
 }
 
-void tree_upref( Tree *tree )
+void treeUpref( Tree *tree )
 {
 	if ( tree != 0 )
 		tree->refs += 1;
 }
 
-void tree_downref( Program *prg, Tree **sp, Tree *tree )
+void treeDownref( Program *prg, Tree **sp, Tree *tree )
 {
 	if ( tree != 0 ) {
 		assert( tree->refs > 0 );
 		tree->refs -= 1;
 		if ( tree->refs == 0 )
-			tree_free( prg, sp, tree );
+			treeFree( prg, sp, tree );
 	}
 }
 
@@ -1273,7 +1261,7 @@ Kid *get_field_kid( Tree *tree, Word field )
 Tree *get_field_split( Program *prg, Tree *tree, Word field )
 {
 	Tree *val = getAttr( tree, field );
-	Tree *split = split_tree( prg, val );
+	Tree *split = splitTree( prg, val );
 	setAttr( tree, field, split );
 	return split;
 }
@@ -1291,7 +1279,7 @@ Tree *get_ptr_val( Pointer *ptr )
 Tree *get_ptr_val_split( Program *prg, Pointer *ptr )
 {
 	Tree *val = ptr->value->tree;
-	Tree *split = split_tree( prg, val );
+	Tree *split = splitTree( prg, val );
 	ptr->value->tree = split;
 	return split;
 }
@@ -1704,11 +1692,11 @@ Tree *get_list_mem_split( Program *prg, List *list, Word field )
 	Tree *sv = 0;
 	switch ( field ) {
 		case 0: 
-			sv = split_tree( prg, list->head->value );
+			sv = splitTree( prg, list->head->value );
 			list->head->value = sv; 
 			break;
 		case 1: 
-			sv = split_tree( prg, list->tail->value );
+			sv = splitTree( prg, list->tail->value );
 			list->tail->value = sv; 
 			break;
 		default:
@@ -1784,9 +1772,9 @@ void split_ref( Tree **&sp, Program *prg, Ref *fromRef )
 			Kid *oldNextKidDown = nextDown != 0 ? nextDown->kid : 0;
 			Kid *newNextKidDown = 0;
 
-			Tree *newTree = copy_tree( prg, ref->kid->tree, 
+			Tree *newTree = copyTree( prg, ref->kid->tree, 
 					oldNextKidDown, newNextKidDown );
-			tree_upref( newTree );
+			treeUpref( newTree );
 			
 			/* Downref the original. Don't need to consider freeing because
 			 * refs were > 1. */
