@@ -38,6 +38,10 @@ echo
 
 echo 'all: Makefile $(DIFFS) $(SUBDIRS)'
 echo
+echo '.PHONY: clean'
+echo 'clean:'
+echo '	rm *.bin'
+echo
 echo '.PHONY: $(SUBDIRS)'
 echo
 echo '$(SUBDIRS):'

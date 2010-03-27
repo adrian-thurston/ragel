@@ -1,0 +1,3 @@
+<wrapper foo=bar1 foo=bar2><t1 a=b c=d>
+	<t2 e=f></t2>
+</t1></wrapper>
