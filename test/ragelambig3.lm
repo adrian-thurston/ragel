@@ -24,6 +24,7 @@ def expression
 |	[expression '--' term_short]
 |	[term_short]
 
+# Works, but is confusing.
 def term_short 
 	reducefirst
 	[term]
@@ -62,3 +63,5 @@ def factor
 def alphabet_num 
 	[uint]
 |	['-' uint]
+
+parse start( stdin )

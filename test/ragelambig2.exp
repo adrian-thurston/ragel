@@ -1,0 +1,31 @@
+<start>
+  <expression>
+    <expression>
+      <term>
+        <factor_with_rep>
+          <factor_with_neg>
+            <factor>
+              <alphabet_num>
+                <uint>1</uint>
+              </alphabet_num>
+            </factor>
+          </factor_with_neg>
+        </factor_with_rep>
+        <more_term/>
+      </term>
+    </expression>
+    <'-'/>
+    <term>
+      <factor_with_rep>
+        <factor_with_neg>
+          <factor>
+            <alphabet_num>
+              <uint>1</uint>
+            </alphabet_num>
+          </factor>
+        </factor_with_neg>
+      </factor_with_rep>
+      <more_term/>
+    </term>
+  </expression>
+</start>

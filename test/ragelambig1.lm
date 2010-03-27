@@ -27,9 +27,8 @@ def expression
 def term 
 	[term factor_with_rep]
 	{
-		if match lhs [term '-' uint] {
+		if match lhs [term '-' uint]
 			reject
-		}
 	}
 |	[term '.' factor_with_rep]
 |	[term ':>' factor_with_rep]
@@ -63,3 +62,5 @@ def factor
 def alphabet_num 
 	[uint]
 |	['-' uint]
+
+parse start( stdin )
