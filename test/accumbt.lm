@@ -34,7 +34,7 @@ I << " 77 "
 I << " 88 "
 I << " \"hello\" "
 I << " dude "
-I << " dude "
+I << " dude\n"
 
 start S = I.finish()
 S = match S 
