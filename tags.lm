@@ -56,11 +56,10 @@ def close_tag
 		match lhs [Id:id]
 		match TS [Top:id Rest:tag_stack]
 
-		if Id.data == Top.data {
+		if Id.data == Top.data
 			TS = construct tag_stack [Rest]
-		} else {
+		else
 			reject
-		}
 	}
 
 def tag 
@@ -80,3 +79,5 @@ def start
 		print_xml( lhs )
 		print( 'failed\n' )
 	}
+
+parse start(stdin)

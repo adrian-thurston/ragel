@@ -1,0 +1,16 @@
+old_id = NIL
+new_id = 11
+old_id = NIL
+new_id = 10
+this is item2
+<start>
+  <item2>
+    <e2 an="0"/>
+    <'!'/>
+    <'a'/>
+    <super_id>b</super_id>
+    <super_id>b</super_id>
+    <'a'/>
+  </item2>
+  <';\n'/>
+</start>

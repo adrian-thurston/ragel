@@ -10,11 +10,12 @@ lex start
 		/ident_char+/
 		{
 			if HereId && HereId == match_text {
-				push2( stdin, make_token( 
+				input.push( make_token( 
 					typeid here_close,
-					pull(stdin, match_length - 1) ) )
-			} else {
-				push2( stdin, make_token( typeid id, pull(stdin, match_length) ) )
+					input.pull(match_length - 1) ) )
+			}
+			else {
+				input.push( make_token( typeid id, input.pull(match_length) ) )
 			}
 		}
 
@@ -41,5 +42,5 @@ def heredoc
 	[here_name here_data here_close id nl]
 
 
-heredoc S = parse heredoc( stdin )
+heredoc S = parse heredoc(stdin)
 print_xml(S)

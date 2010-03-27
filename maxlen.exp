@@ -1,0 +1,22 @@
+<start>
+  <restricted_list>
+    <open/>
+    <_repeat_item>
+      <item>
+        <id>a</id>
+      </item>
+      <item>
+        <id>b</id>
+      </item>
+      <item>
+        <id>c</id>
+      </item>
+    </_repeat_item>
+  </restricted_list>
+  <_repeat_id>
+    <id>d</id>
+    <id>e</id>
+    <id>f</id>
+    <id>g</id>
+  </_repeat_id>
+</start>
