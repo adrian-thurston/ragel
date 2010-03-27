@@ -53,4 +53,5 @@ TESTS="
 	counting3.lm
 	counting4.lm
 	til.lm
+	matchex.lm
 "
