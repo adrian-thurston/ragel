@@ -73,7 +73,7 @@ lex close_id
 			}
 		}
 
-		send( make_token( send_id, pull(stdin, match_length) ) )
+		input.push( make_token( send_id, input.pull(match_length) ) )
 	}
 }
 
@@ -287,8 +287,7 @@ int close( ref start Start )
 
         if should_close( TagId )
         {
-			close_id CloseId = construct close_id 
-				[TagId.data]
+			close_id CloseId = parse close_id (TagId.data)
 
             opt_close_tag CloseTag = 
                 construct opt_close_tag ['</' CloseId '>']
@@ -302,6 +301,6 @@ int close( ref start Start )
 
 start HTML = parse start( stdin )
 flatten( HTML )
-#print_xml( HTML )
+print_xml( HTML )
 printLinks( HTML )
 
