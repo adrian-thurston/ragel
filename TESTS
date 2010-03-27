@@ -46,4 +46,8 @@ TESTS="
 	ragelambig2.lm
 	ragelambig3.lm
 	ragelambig4.lm
+	counting1.lm
+	counting2.lm
+	counting3.lm
+	counting4.lm
 "

@@ -80,3 +80,5 @@ def start
 			}
 		}
 	}
+
+parse start( stdin )

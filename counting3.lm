@@ -90,3 +90,5 @@ def start
 		}
 		print( '*** SUCCESS ***\n' )
 	}
+
+parse start( stdin )
