@@ -564,7 +564,7 @@ struct PdaRun
 	Kid *extractIgnore();
 
 	/* Report an error encountered by the parser. */
-	ostream &parse_error( int tokId, Tree *tree );
+	ostream &parseError( int tokId, Tree *tree );
 
 	/* Reused. */
 	CodeVect reverseCode;
@@ -595,7 +595,7 @@ void ignore( PdaRun *pdaRun, Tree *tree );
 void parseToken( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
 long undoParse( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Tree *tree );
 void xml_print_list( RuntimeData *runtimeData, Kid *lel, int depth );
-ostream &parse_error( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, int tokId, Tree *tree );
+ostream &parseError( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, int tokId, Tree *tree );
 void initPdaRun( PdaRun *pdaRun, Tree *tree );
 
 #endif /* _PDARUN_H */

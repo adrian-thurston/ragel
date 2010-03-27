@@ -68,7 +68,7 @@ void decrementConsumed( PdaRun *pdaRun )
 }
 
 /* Keep the position up to date after consuming text. */
-void update_position( InputStream *inputStream, const char *data, long length )
+void updatePosition( InputStream *inputStream, const char *data, long length )
 {
 	if ( !inputStream->handlesLine ) {
 		for ( int i = 0; i < length; i++ ) {
@@ -85,7 +85,7 @@ void update_position( InputStream *inputStream, const char *data, long length )
 }
 
 /* Keep the position up to date after sending back text. */
-void undo_position( InputStream *inputStream, const char *data, long length )
+void undoPosition( InputStream *inputStream, const char *data, long length )
 {
 	/* FIXME: this needs to fetch the position information from the parsed
 	 * token and restore based on that.. */
@@ -99,7 +99,7 @@ void undo_position( InputStream *inputStream, const char *data, long length )
 	inputStream->byte -= length;
 }
 
-void take_back_buffered( InputStream *inputStream )
+void takeBackBuffered( InputStream *inputStream )
 {
 	if ( inputStream->hasData != 0 ) {
 		FsmRun *fsmRun = inputStream->hasData;
@@ -134,7 +134,7 @@ void take_back_buffered( InputStream *inputStream )
 void connect( FsmRun *fsmRun, InputStream *inputStream )
 {
 	if ( inputStream->hasData != 0 && inputStream->hasData != fsmRun ) {
-		take_back_buffered( inputStream );
+		takeBackBuffered( inputStream );
 	}
 	
 	if ( inputStream->hasData != fsmRun ) {
@@ -152,7 +152,7 @@ void connect( FsmRun *fsmRun, InputStream *inputStream )
 
 /* Load up a token, starting from tokstart if it is set. If not set then
  * start it at data. */
-Head *stream_pull( Program *prg, FsmRun *fsmRun, InputStream *inputStream, long length )
+Head *streamPull( Program *prg, FsmRun *fsmRun, InputStream *inputStream, long length )
 {
 	/* We should not be in the midst of getting a token. */
 	assert( fsmRun->tokstart == 0 );
@@ -177,7 +177,7 @@ Head *stream_pull( Program *prg, FsmRun *fsmRun, InputStream *inputStream, long 
 		cerr << "NOT ENOUGH DATA TO FETCH TOKEN" << endp;
 
 	Head *tokdata = string_alloc_pointer( prg, fsmRun->p, length );
-	update_position( inputStream, fsmRun->p, length );
+	updatePosition( inputStream, fsmRun->p, length );
 	fsmRun->p += length;
 
 	return tokdata;
@@ -235,7 +235,7 @@ void stream_push_text( InputStream *inputStream, const char *data, long length )
 //	}
 //	#endif
 
-	take_back_buffered( inputStream );
+	takeBackBuffered( inputStream );
 
 	/* Create a new buffer for the data. This is the easy implementation.
 	 * Something better is needed here. It puts a max on the amount of
@@ -256,7 +256,7 @@ void streamPushTree( InputStream *inputStream, Tree *tree, bool ignore )
 //	}
 //	#endif
 
-	take_back_buffered( inputStream );
+	takeBackBuffered( inputStream );
 
 	/* Create a new buffer for the data. This is the easy implementation.
 	 * Something better is needed here. It puts a max on the amount of
@@ -268,17 +268,17 @@ void streamPushTree( InputStream *inputStream, Tree *tree, bool ignore )
 	inputStream->prepend( newBuf );
 }
 
-void undo_stream_push( Program *prg, Tree **sp, InputStream *inputStream, long length )
+void undoStreamPush( Program *prg, Tree **sp, InputStream *inputStream, long length )
 {
-	take_back_buffered( inputStream );
+	takeBackBuffered( inputStream );
 	Tree *tree = inputStream->undoPush( length );
 	if ( tree != 0 )
 		tree_downref( prg, sp, tree );
 }
 
-void undo_stream_append( Program *prg, Tree **sp, InputStream *inputStream, long length )
+void undoStreamAppend( Program *prg, Tree **sp, InputStream *inputStream, long length )
 {
-	take_back_buffered( inputStream );
+	takeBackBuffered( inputStream );
 	Tree *tree = inputStream->undoAppend( length );
 	if ( tree != 0 )
 		tree_downref( prg, sp, tree );
@@ -320,7 +320,7 @@ void sendBackText( FsmRun *fsmRun, InputStream *inputStream, const char *data, l
 
 	assert( memcmp( data, fsmRun->p, length ) == 0 );
 		
-	undo_position( inputStream, data, length );
+	undoPosition( inputStream, data, length );
 }
 
 void sendBackIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *ignore )
@@ -483,7 +483,7 @@ void queueBackTree( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inpu
 
 /* If no token was generated but there is reverse code then we must generate
  * a fake token so we can attach the reverse code to it. */
-void add_notoken( Program *prg, PdaRun *parser )
+void addNoToken( Program *prg, PdaRun *parser )
 {
 	/* Check if there was anything generated. */
 	if ( parser->queue == 0 && parser->reverseCode.length() > 0 ) {
@@ -505,7 +505,7 @@ void add_notoken( Program *prg, PdaRun *parser )
 	}
 }
 
-void send_queued_tokens( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
+void sendQueuedTokens( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 {
 	LangElInfo *lelInfo = fsmRun->prg->rtd->lelInfo;
 
@@ -539,17 +539,17 @@ void send_queued_tokens( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream 
 
 			incrementConsumed( pdaRun );
 
-			send_handle_error( sp, pdaRun, fsmRun, inputStream, send );
+			sendHandleError( sp, pdaRun, fsmRun, inputStream, send );
 		}
 	}
 }
 
-Kid *make_token( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, int id,
+Kid *makeToken( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, int id,
 		Head *tokdata, bool namedLangEl, int bindId )
 {
 	/* Make the token object. */
 	long objectLength = pdaRun->tables->rtd->lelInfo[id].objectLength;
-	Kid *attrs = alloc_attrs( fsmRun->prg, objectLength );
+	Kid *attrs = allocAttrs( fsmRun->prg, objectLength );
 
 	Kid *input = 0;
 	input = fsmRun->prg->kidPool.allocate();
@@ -575,7 +575,7 @@ Kid *make_token( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, int i
 					- fsmRun->mark[ca->mark_enter] );
 			Tree *string = construct_string( fsmRun->prg, data );
 			tree_upref( string );
-			set_attr( input->tree, ca->offset, string );
+			setAttr( input->tree, ca->offset, string );
 		}
 	}
 	
@@ -588,7 +588,7 @@ Kid *make_token( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, int i
 	return input;
 }
 
-void execute_generation_action( Tree **sp, Program *prg, FsmRun *fsmRun, PdaRun *pdaRun, 
+void executeGenerationAction( Tree **sp, Program *prg, FsmRun *fsmRun, PdaRun *pdaRun, 
 		Code *code, long id, Head *tokdata )
 {
 	/* Execute the translation. */
@@ -596,9 +596,9 @@ void execute_generation_action( Tree **sp, Program *prg, FsmRun *fsmRun, PdaRun 
 	execution.execute( sp );
 
 	/* If there is revese code but nothing generated we need a noToken. */
-	add_notoken( prg, pdaRun );
+	addNoToken( prg, pdaRun );
 
-	/* If there is reverse code then add_notoken will guarantee that the
+	/* If there is reverse code then addNoToken will guarantee that the
 	 * queue is not empty. Pull the reverse code out and store in the
 	 * token. */
 	Tree *tree = pdaRun->queue->tree;
@@ -612,7 +612,7 @@ void execute_generation_action( Tree **sp, Program *prg, FsmRun *fsmRun, PdaRun 
  *  -invoke failure (the backtracker)
  */
 
-void generation_action( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, 
+void generationAction( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, 
 		PdaRun *pdaRun, int id, Head *tokdata, bool namedLangEl, int bindId )
 {
 	#ifdef COLM_LOG_PARSE
@@ -627,16 +627,16 @@ void generation_action( Tree **sp, InputStream *inputStream, FsmRun *fsmRun,
 			pdaRun->tables->rtd->lelInfo[id].frameId].codeWV;
 
 	/* Execute the action and process the queue. */
-	execute_generation_action( sp, fsmRun->prg, fsmRun, pdaRun, code, id, tokdata );
+	executeGenerationAction( sp, fsmRun->prg, fsmRun, pdaRun, code, id, tokdata );
 
 	/* Finished with the match text. */
 	string_free( fsmRun->prg, tokdata );
 
 	/* Send the queued tokens. */
-	send_queued_tokens( sp, pdaRun, fsmRun, inputStream );
+	sendQueuedTokens( sp, pdaRun, fsmRun, inputStream );
 }
 
-Kid *extract_ignore( PdaRun *pdaRun )
+Kid *extractIgnore( PdaRun *pdaRun )
 {
 	Kid *ignore = pdaRun->accumIgnore;
 	pdaRun->accumIgnore = 0;
@@ -646,7 +646,7 @@ Kid *extract_ignore( PdaRun *pdaRun )
 /* Send back the accumulated ignore tokens. */
 void sendBackQueuedIgnore( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
 {
-	Kid *ignore = extract_ignore( pdaRun );
+	Kid *ignore = extractIgnore( pdaRun );
 	sendBackIgnore( sp, pdaRun, fsmRun, inputStream, ignore );
 	while ( ignore != 0 ) {
 		Kid *next = ignore->next;
@@ -672,7 +672,7 @@ void sendWithIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inp
 	 *    attributes, ignore tokens, grammar children. */
 
 	/* Pull the ignore tokens out and store in the token. */
-	Kid *ignore = extract_ignore( pdaRun );
+	Kid *ignore = extractIgnore( pdaRun );
 	if ( ignore != 0 ) {
 		if ( input->tree->flags & AF_LEFT_IGNORE ) {
 			/* FIXME: Leak here. */
@@ -706,7 +706,7 @@ void sendWithIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inp
 	parseToken( sp, pdaRun, fsmRun, inputStream, input );
 }
 
-void send_handle_error( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input )
+void sendHandleError( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input )
 {
 	long id = input->tree->id;
 
@@ -716,7 +716,7 @@ void send_handle_error( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *
 	/* Check the result. */
 	if ( pdaRun->errCount > 0 ) {
 		/* Error occured in the top-level parser. */
-		parse_error( inputStream, fsmRun, pdaRun, id, input->tree ) << "parse error" << endp;
+		parseError( inputStream, fsmRun, pdaRun, id, input->tree ) << "parse error" << endp;
 	}
 	else {
 		if ( pdaRun->isParserStopFinished() ) {
@@ -741,7 +741,7 @@ void ignore( PdaRun *pdaRun, Tree *tree )
 	pdaRun->accumIgnore = ignore;
 }
 
-void exec_gen( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long id )
+void execGen( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long id )
 {
 	#ifdef COLM_LOG_PARSE
 	if ( colm_log_parse ) {
@@ -750,7 +750,7 @@ void exec_gen( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaR
 	#endif
 
 	/* Make the token data. */
-	Head *tokdata = extract_match( pdaRun->prg, fsmRun, inputStream );
+	Head *tokdata = extractMatch( pdaRun->prg, fsmRun, inputStream );
 
 	/* Note that we don't update the position now. It is done when the token
 	 * data is pulled from the inputStream. */
@@ -758,10 +758,10 @@ void exec_gen( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaR
 	fsmRun->p = fsmRun->tokstart;
 	fsmRun->tokstart = 0;
 
-	generation_action( sp, inputStream, fsmRun, pdaRun, id, tokdata, false, 0 );
+	generationAction( sp, inputStream, fsmRun, pdaRun, id, tokdata, false, 0 );
 }
 
-void send_ignore( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long id )
+void sendIgnore( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long id )
 {
 	#ifdef COLM_LOG_PARSE
 	if ( colm_log_parse ) {
@@ -770,8 +770,8 @@ void send_ignore( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long
 	#endif
 
 	/* Make the ignore string. */
-	Head *ignoreStr = extract_match( pdaRun->prg, fsmRun, inputStream );
-	update_position( inputStream, fsmRun->tokstart, ignoreStr->length );
+	Head *ignoreStr = extractMatch( pdaRun->prg, fsmRun, inputStream );
+	updatePosition( inputStream, fsmRun->tokstart, ignoreStr->length );
 	
 	Tree *tree = fsmRun->prg->treePool.allocate();
 	tree->refs = 1;
@@ -784,7 +784,7 @@ void send_ignore( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long
 	ignore( pdaRun, tree );
 }
 
-Head *extract_match( Program *prg, FsmRun *fsmRun, InputStream *inputStream )
+Head *extractMatch( Program *prg, FsmRun *fsmRun, InputStream *inputStream )
 {
 	long length = fsmRun->p - fsmRun->tokstart;
 	Head *head = string_alloc_pointer( prg, fsmRun->tokstart, length );
@@ -795,10 +795,10 @@ Head *extract_match( Program *prg, FsmRun *fsmRun, InputStream *inputStream )
 	return head;
 }
 
-void send_token( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long id )
+void sendToken( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long id )
 {
 	/* Make the token data. */
-	Head *tokdata = extract_match( pdaRun->prg, fsmRun, inputStream );
+	Head *tokdata = extractMatch( pdaRun->prg, fsmRun, inputStream );
 
 	#ifdef COLM_LOG_PARSE
 	if ( colm_log_parse ) {
@@ -808,17 +808,17 @@ void send_token( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pd
 	}
 	#endif
 
-	update_position( inputStream, fsmRun->tokstart, tokdata->length );
+	updatePosition( inputStream, fsmRun->tokstart, tokdata->length );
 
-	Kid *input = make_token( pdaRun, fsmRun, inputStream, id, tokdata, false, 0 );
+	Kid *input = makeToken( pdaRun, fsmRun, inputStream, id, tokdata, false, 0 );
 
 	incrementConsumed( pdaRun );
 
-	send_handle_error( sp, pdaRun, fsmRun, inputStream, input );
+	sendHandleError( sp, pdaRun, fsmRun, inputStream, input );
 }
 
 
-void send_eof( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
+void sendEof( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
 {
 	#ifdef COLM_LOG_PARSE
 	if ( colm_log_parse ) {
@@ -852,16 +852,16 @@ void send_eof( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaR
 		Code *code = pdaRun->tables->rtd->frameInfo[frameId].codeWV;
 
 		/* Execute the action and process the queue. */
-		execute_generation_action( sp, fsmRun->prg, fsmRun, pdaRun, code, input->tree->id, 0 );
+		executeGenerationAction( sp, fsmRun->prg, fsmRun, pdaRun, code, input->tree->id, 0 );
 
 		/* Send the generated tokens. */
-		send_queued_tokens( sp, pdaRun, fsmRun, inputStream );
+		sendQueuedTokens( sp, pdaRun, fsmRun, inputStream );
 	}
 
 	sendWithIgnore( sp, pdaRun, fsmRun, inputStream, input );
 
 	if ( pdaRun->errCount > 0 ) {
-		parse_error( inputStream, fsmRun, pdaRun, input->tree->id, input->tree ) << 
+		parseError( inputStream, fsmRun, pdaRun, input->tree->id, input->tree ) << 
 				"parse error" << endp;
 	}
 }
@@ -962,7 +962,7 @@ void breakRunBuf( FsmRun *fsmRun )
 #define SCAN_LANG_EL           -2
 #define SCAN_EOF               -1
 
-long scan_token( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
+long scanToken( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 {
 	while ( true ) {
 		if ( inputStream->needFlush() )
@@ -1101,7 +1101,7 @@ long scan_token( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 	return SCAN_ERROR;
 }
 
-void scanner_error( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
+void scannerError( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
 {
 	if ( pdaRun->getNextRegion( 1 ) != 0 ) {
 		#ifdef COLM_LOG_PARSE
@@ -1153,7 +1153,7 @@ void sendTree( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStre
 
 	incrementConsumed( pdaRun );
 
-	send_handle_error( sp, pdaRun, fsmRun, inputStream, input );
+	sendHandleError( sp, pdaRun, fsmRun, inputStream, input );
 }
 
 void sendTreeIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
@@ -1177,7 +1177,7 @@ void parseLoop( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStr
 		/* Pull the current scanner from the parser. This can change during
 		 * parsing due to inputStream pushes, usually for the purpose of includes.
 		 * */
-		int tokenId = scan_token( pdaRun, fsmRun, inputStream );
+		int tokenId = scanToken( pdaRun, fsmRun, inputStream );
 
 		if ( tokenId == SCAN_TRY_AGAIN_LATER )
 			break;
@@ -1185,7 +1185,7 @@ void parseLoop( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStr
 		/* Check for EOF. */
 		if ( tokenId == SCAN_EOF ) {
 			inputStream->eofSent = true;
-			send_eof( sp, inputStream, fsmRun, pdaRun );
+			sendEof( sp, inputStream, fsmRun, pdaRun );
 
 			newToken( pdaRun, fsmRun );
 
@@ -1196,7 +1196,7 @@ void parseLoop( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStr
 
 		if ( tokenId == SCAN_ERROR ) {
 			/* Error. */
-			scanner_error( sp, inputStream, fsmRun, pdaRun );
+			scannerError( sp, inputStream, fsmRun, pdaRun );
 		}
 		else if ( tokenId == SCAN_LANG_EL ) {
 			/* A named language element (parsing colm program). */
@@ -1215,11 +1215,11 @@ void parseLoop( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStr
 			bool ctxDepParsing = fsmRun->prg->ctxDepParsing;
 			LangElInfo *lelInfo = pdaRun->tables->rtd->lelInfo;
 			if ( ctxDepParsing && lelInfo[tokenId].frameId >= 0 )
-				exec_gen( sp, inputStream, fsmRun, pdaRun, tokenId );
+				execGen( sp, inputStream, fsmRun, pdaRun, tokenId );
 			else if ( lelInfo[tokenId].ignore )
-				send_ignore( inputStream, fsmRun, pdaRun, tokenId );
+				sendIgnore( inputStream, fsmRun, pdaRun, tokenId );
 			else
-				send_token( sp, inputStream, fsmRun, pdaRun, tokenId );
+				sendToken( sp, inputStream, fsmRun, pdaRun, tokenId );
 		}
 
 		newToken( pdaRun, fsmRun );

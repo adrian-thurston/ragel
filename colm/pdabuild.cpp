@@ -1634,7 +1634,7 @@ void fillNodes( Program *prg, Bindings &bindings, long &bindId,
 			CaptureAttr *cap = prg->rtd->captureAttr + 
 					prg->rtd->lelInfo[kid->tree->id].captureAttr + i;
 
-			Tree *attr = get_attr( kid->tree, cap->offset );
+			Tree *attr = getAttr( kid->tree, cap->offset );
 
 			PatReplNode &node = nodes[ind++];
 			memset( &node, 0, sizeof(PatReplNode) );

@@ -152,12 +152,12 @@ long PdaRun::stackTopTarget()
  * 		-clears all alg structures
  */
 
-bool been_committed( Kid *kid )
+bool beenCommitted( Kid *kid )
 {
 	return kid->tree->flags & AF_COMMITTED;
 }
 
-Code *backup_over_rcode( Code *rcode )
+Code *backupOverRcode( Code *rcode )
 {
 	Word len;
 	rcode -= SIZEOF_WORD;
@@ -168,7 +168,7 @@ Code *backup_over_rcode( Code *rcode )
 
 /* The top level of the stack is linked right-to-left. Trees underneath are
  * linked left-to-right. */
-void commit_kid( PdaRun *parser, Tree **root, Kid *lel, Code *&rcode, long &causeReduce )
+void commitKid( PdaRun *parser, Tree **root, Kid *lel, Code *&rcode, long &causeReduce )
 {
 	Tree *tree = 0;
 	Tree **sp = root;
@@ -203,7 +203,7 @@ head:
 			causeReduce = pt(tree)->causeReduce;
 		}
 		else {
-			rcode = backup_over_rcode( rcode );
+			rcode = backupOverRcode( rcode );
 
 			if ( *rcode == IN_RESTORE_LHS ) {
 				#if COLM_LOG_PARSE
@@ -237,7 +237,7 @@ head:
 			#endif
 
 			/* Cause reduce just dropped down to zero. */
-			rcode = backup_over_rcode( rcode );
+			rcode = backupOverRcode( rcode );
 		}
 	}
 
@@ -272,7 +272,7 @@ backup:
 			/* Moving backwards. */
 			lel = next;
 
-			if ( !been_committed( lel ) )
+			if ( !beenCommitted( lel ) )
 				goto head;
 		}
 		else {
@@ -287,7 +287,7 @@ backup:
 	assert( sp == root );
 }
 
-void commit_full( Tree **sp, PdaRun *parser, long causeReduce )
+void commitFull( Tree **sp, PdaRun *parser, long causeReduce )
 {
 	#ifdef COLM_LOG_PARSE
 	if ( colm_log_parse ) {
@@ -300,15 +300,15 @@ void commit_full( Tree **sp, PdaRun *parser, long causeReduce )
 
 	/* The top level of the stack is linked right to left. This is the
 	 * traversal order we need for committing. */
-	while ( kid != 0 && !been_committed( kid ) ) {
-		commit_kid( parser, sp, kid, rcode, causeReduce );
+	while ( kid != 0 && !beenCommitted( kid ) ) {
+		commitKid( parser, sp, kid, rcode, causeReduce );
 		kid = kid->next;
 	}
 
 	/* We cannot always clear all the rcode here. We may need to backup over
 	 * the parse statement. We depend on the context flag. */
 	if ( !parser->revertOn )
-		rcode_downref_all( parser->prg, sp, parser->allReverseCode );
+		rcodeDownrefAll( parser->prg, sp, parser->allReverseCode );
 }
 
 
@@ -408,7 +408,7 @@ again:
 			if ( input->tree->flags & AF_HAS_RCODE )
 				causeReduce = pt(input->tree)->causeReduce;
 		}
-		commit_full( sp, pdaRun, causeReduce );
+		commitFull( sp, pdaRun, causeReduce );
 	}
 
 	if ( *action & act_rb ) {
@@ -432,7 +432,7 @@ again:
 
 		/* Allocate the attributes. */
 		objectLength = pdaRun->tables->rtd->lelInfo[redLel->tree->id].objectLength;
-		attrs = alloc_attrs( pdaRun->prg, objectLength );
+		attrs = allocAttrs( pdaRun->prg, objectLength );
 
 		/* Build the list of children. */
 		rhsLen = pdaRun->tables->rtd->prodInfo[reduction].length;
@@ -444,7 +444,7 @@ again:
 			last = child;
 		}
 
-		redLel->tree->child = kid_list_concat( attrs, child );
+		redLel->tree->child = kidListConcat( attrs, child );
 
 		#ifdef COLM_LOG_PARSE
 		if ( colm_log_parse ) {
@@ -500,7 +500,7 @@ again:
 				#endif
 
 				/* Transfer the lhs from the environment to redLel. */
-				redLel->tree = prep_parse_tree( pdaRun->prg, sp, execution.lhs );
+				redLel->tree = prepParseTree( pdaRun->prg, sp, execution.lhs );
 				tree_upref( redLel->tree );
 				tree_downref( pdaRun->prg, sp, execution.lhs );
 
@@ -727,7 +727,7 @@ _out:
 	pdaRun->nextRegionInd = pdaRun->tables->tokenRegionInds[pdaRun->cs];
 }
 
-ostream &parse_error( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, int tokId, Tree *tree )
+ostream &parseError( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, int tokId, Tree *tree )
 {
 	cerr << "error:" << inputStream->line << ": at token ";
 	if ( tokId < 128 )

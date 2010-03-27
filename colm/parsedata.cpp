@@ -1472,7 +1472,7 @@ void ParseData::initEmptyScanners()
 void ParseData::parsePatterns()
 {
 	Program program( 0, 0, false, runtimeData );
-	Tree **vm_stack = stack_alloc();
+	Tree **vm_stack = stackAlloc();
 	Tree **root = &vm_stack[VM_STACK_SIZE];
 
 	for ( ReplList::Iter repl = replList; repl.lte(); repl++ ) {

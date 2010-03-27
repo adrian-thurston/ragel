@@ -30,7 +30,7 @@ using std::cerr;
 using std::endl;
 using std::ostream;
 
-Kid *alloc_attrs( Program *prg, long length )
+Kid *allocAttrs( Program *prg, long length )
 {
 	Kid *cur = 0;
 	for ( long i = 0; i < length; i++ ) {
@@ -41,7 +41,7 @@ Kid *alloc_attrs( Program *prg, long length )
 	return cur;
 }
 
-void free_attrs( Program *prg, Kid *attrs )
+void freeAttrs( Program *prg, Kid *attrs )
 {
 	Kid *cur = attrs;
 	while ( cur != 0 ) {
@@ -51,7 +51,7 @@ void free_attrs( Program *prg, Kid *attrs )
 	}
 }
 
-void set_attr( Tree *tree, long pos, Tree *val )
+void setAttr( Tree *tree, long pos, Tree *val )
 {
 	Kid *kid = tree->child;
 
@@ -65,7 +65,7 @@ void set_attr( Tree *tree, long pos, Tree *val )
 	kid->tree = val;
 }
 
-Tree *get_attr( Tree *tree, long pos )
+Tree *getAttr( Tree *tree, long pos )
 {
 	Kid *kid = tree->child;
 
@@ -79,7 +79,7 @@ Tree *get_attr( Tree *tree, long pos )
 	return kid->tree;
 }
 
-Kid *get_attr_kid( Tree *tree, long pos )
+Kid *getAttrKid( Tree *tree, long pos )
 {
 	Kid *kid = tree->child;
 
@@ -93,7 +93,7 @@ Kid *get_attr_kid( Tree *tree, long pos )
 	return kid;
 }
 
-Kid *kid_list_concat( Kid *list1, Kid *list2 )
+Kid *kidListConcat( Kid *list1, Kid *list2 )
 {
 	if ( list1 == 0 )
 		return list2;
@@ -194,7 +194,7 @@ Tree *construct_term( Program *prg, Word id, Head *tokdata )
 	tree->tokdata = tokdata;
 
 	int objectLength = lelInfo[tree->id].objectLength;
-	tree->child = alloc_attrs( prg, objectLength );
+	tree->child = allocAttrs( prg, objectLength );
 
 	return tree;
 }
@@ -267,12 +267,12 @@ Tree *construct_replacement_tree( Tree **bindings, Program *prg, long pat )
 
 		int objectLength = lelInfo[tree->id].objectLength;
 
-		Kid *attrs = alloc_attrs( prg, objectLength );
+		Kid *attrs = allocAttrs( prg, objectLength );
 		Kid *ignore = construct_ignore_list( prg, pat );
 		Kid *child = construct_replacement_kid( bindings, prg, 
 				0, nodes[pat].child );
 
-		tree->child = kid_list_concat( attrs, child );
+		tree->child = kidListConcat( attrs, child );
 		if ( ignore != 0 ) {
 			Kid *ignoreHead = prg->kidPool.allocate();
 			ignoreHead->next = tree->child;
@@ -292,7 +292,7 @@ Tree *construct_replacement_tree( Tree **bindings, Program *prg, long pat )
 					string_alloc_pointer( prg, 
 					nodes[ci].data, nodes[ci].length );
 
-			set_attr( tree, ca->offset, attr );
+			setAttr( tree, ca->offset, attr );
 		}
 	}
 
@@ -318,7 +318,7 @@ Kid *construct_replacement_kid( Tree **bindings, Program *prg, Kid *prev, long p
 	return kid;
 }
 
-Tree *make_token( Tree **root, Program *prg, long nargs )
+Tree *makeToken( Tree **root, Program *prg, long nargs )
 {
 	Tree **const sp = root;
 	Tree **base = vm_ptop() + nargs;
@@ -340,7 +340,7 @@ Tree *make_token( Tree **root, Program *prg, long nargs )
 	}
 	else {
 		long objectLength = lelInfo[id].objectLength;
-		Kid *attrs = alloc_attrs( prg, objectLength );
+		Kid *attrs = allocAttrs( prg, objectLength );
 
 		tree = prg->treePool.allocate();
 		tree->id = id;
@@ -351,14 +351,14 @@ Tree *make_token( Tree **root, Program *prg, long nargs )
 
 		assert( nargs-2 <= objectLength );
 		for ( long id = 0; id < nargs-2; id++ ) {
-			set_attr( tree, id, base[-3-id] );
-			tree_upref( get_attr( tree, id) );
+			setAttr( tree, id, base[-3-id] );
+			tree_upref( getAttr( tree, id) );
 		}
 	}
 	return tree;
 }
 
-Tree *make_tree( Tree **root, Program *prg, long nargs )
+Tree *makeTree( Tree **root, Program *prg, long nargs )
 {
 	Tree **const sp = root;
 	Tree **base = vm_ptop() + nargs;
@@ -373,7 +373,7 @@ Tree *make_tree( Tree **root, Program *prg, long nargs )
 	tree->refs = 1;
 
 	long objectLength = lelInfo[id].objectLength;
-	Kid *attrs = alloc_attrs( prg, objectLength );
+	Kid *attrs = allocAttrs( prg, objectLength );
 
 	Kid *last = 0, *child = 0;
 	for ( long id = 0; id < nargs-1; id++ ) {
@@ -389,7 +389,7 @@ Tree *make_tree( Tree **root, Program *prg, long nargs )
 		last = kid;
 	}
 
-	tree->child = kid_list_concat( attrs, child );
+	tree->child = kidListConcat( attrs, child );
 
 	return tree;
 }
@@ -1074,7 +1074,7 @@ free_tree:
 			delete accum->fsmRun;
 			cleanParser( sp, accum->pdaRun );
 			accum->pdaRun->clearContext( sp );
-			rcode_downref_all( prg, sp, accum->pdaRun->allReverseCode );
+			rcodeDownrefAll( prg, sp, accum->pdaRun->allReverseCode );
 			delete accum->pdaRun;
 			tree_downref( prg, sp, (Tree*)accum->stream );
 			prg->mapElPool.free( (MapEl*)accum );
@@ -1257,24 +1257,24 @@ void set_field( Program *prg, Tree *tree, long field, Tree *value )
 	assert( tree->refs == 1 );
 	if ( value != 0 )
 		assert( value->refs >= 1 );
-	set_attr( tree, field, value );
+	setAttr( tree, field, value );
 }
 
 Tree *get_field( Tree *tree, Word field )
 {
-	return get_attr( tree, field );
+	return getAttr( tree, field );
 }
 
 Kid *get_field_kid( Tree *tree, Word field )
 {
-	return get_attr_kid( tree, field );
+	return getAttrKid( tree, field );
 }
 
 Tree *get_field_split( Program *prg, Tree *tree, Word field )
 {
-	Tree *val = get_attr( tree, field );
+	Tree *val = getAttr( tree, field );
 	Tree *split = split_tree( prg, val );
-	set_attr( tree, field, split );
+	setAttr( tree, field, split );
 	return split;
 }
 

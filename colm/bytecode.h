@@ -1,5 +1,5 @@
 /*
- *  Copyright 2007 Adrian Thurston <thurston@complang.org>
+ *  Copyright 2007-2010 Adrian Thurston <thurston@complang.org>
  */
 
 /*  This file is part of Colm.
@@ -410,11 +410,11 @@ typedef Tree **&StackRef;
 
 Tree **alloc_obj_data( long length );
 
-Kid *alloc_attrs( Program *prg, long length );
-void free_attrs( Program *prg, Kid *attrs );
-void set_attr( Tree *tree, long pos, Tree *val );
-Tree *get_attr( Tree *tree, long pos );
-Kid *get_attr_kid( Tree *tree, long pos );
+Kid *allocAttrs( Program *prg, long length );
+void freeAttrs( Program *prg, Kid *attrs );
+void setAttr( Tree *tree, long pos, Tree *val );
+Tree *getAttr( Tree *tree, long pos );
+Kid *getAttrKid( Tree *tree, long pos );
 
 /* Return the size of a type in words. */
 template<class T> int sizeof_in_words()
@@ -541,11 +541,11 @@ Head *string_tolower( Head *s );
 
 Head *int_to_str( Program *prg, Word i );
 
-void rcode_downref( Program *prg, Tree **sp, Code *instr );
-void rcode_downref_all( Program *prg, Tree **sp, CodeVect *cv );
+void rcodeDownref( Program *prg, Tree **sp, Code *instr );
+void rcodeDownrefAll( Program *prg, Tree **sp, CodeVect *cv );
 void parsed_downref( Program *prg, Tree **sp, Tree *tree );
 void parsed_downref_all( PdaRun *parser );
-void commit_full( Tree **sp, PdaRun *parser, long commitReduce );
+void commitFull( Tree **sp, PdaRun *parser, long commitReduce );
 Tree *getParsedRoot( PdaRun *pdaRun, bool stop );
 
 bool match_pattern( Tree **bindings, Program *prg, long pat, Kid *kid, bool checkNext );
@@ -567,15 +567,15 @@ void tree_upref( Tree *tree );
 Kid *tree_child( Program *prg, const Tree *tree );
 Kid *tree_extract_child( Program *prg, Tree *tree );
 Kid *tree_ignore( Program *prg, Tree *tree );
-Kid *kid_list_concat( Kid *list1, Kid *list2 );
+Kid *kidListConcat( Kid *list1, Kid *list2 );
 void ignore_data( Tree *tree, char *dest );
 long ignore_length( Tree *tree );
 Tree *split_tree( Program *prg, Tree *t );
 Tree *copy_tree( Program *prg, Tree *tree, Kid *oldNextDown, Kid *&newNextDown );
 Tree *copy_real_tree( Program *prg, Tree *tree, Kid *oldNextDown, Kid *&newNextDown, bool parsed );
-Tree *make_tree( Tree **root, Program *prg, long nargs );
-Tree *make_token( Tree **root, Program *prg, long nargs );
-Tree *prep_parse_tree( Program *prg, Tree **sp, Tree *tree );
+Tree *makeTree( Tree **root, Program *prg, long nargs );
+Tree *makeToken( Tree **root, Program *prg, long nargs );
+Tree *prepParseTree( Program *prg, Tree **sp, Tree *tree );
 
 void print_tree( ostream &out, Tree **&sp, Program *prg, Tree *tree );
 void print_tree2( FILE *out, Tree **&sp, Program *prg, Tree *tree );
@@ -623,7 +623,7 @@ Tree *tree_search( Program *prg, Tree *tree, long id );
 void split_ref( Tree **&sp, Program *prg, Ref *fromRef );
 long tree_num_children( Program *prg, Tree *tree );
 
-Tree **stack_alloc();
+Tree **stackAlloc();
 
 /*
  * Maps

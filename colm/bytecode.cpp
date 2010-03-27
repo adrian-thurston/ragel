@@ -118,7 +118,7 @@ int colm_log_match = 0;
 int colm_log_compile = 0;
 int colm_log_conds = 0;
 
-Tree *prep_parse_tree( Program *prg, Tree **sp, Tree *tree )
+Tree *prepParseTree( Program *prg, Tree **sp, Tree *tree )
 {
 	/* Seems like we need to always copy here. If it isn't a parse tree it
 	 * needs to be made into one. If it is then we need to make a new one in
@@ -139,7 +139,7 @@ Tree *prep_parse_tree( Program *prg, Tree **sp, Tree *tree )
 void sendTreeFrag( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream,
 		Tree *tree, bool ignore )
 {
-	tree = prep_parse_tree( prg, sp, tree );
+	tree = prepParseTree( prg, sp, tree );
 
 	if ( tree->id >= prg->rtd->firstNonTermId )
 		tree->id = prg->rtd->lelInfo[tree->id].termDupId;
@@ -180,22 +180,16 @@ void sendTreeFrag( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, Inpu
 
 		incrementConsumed( pdaRun );
 
-		send_handle_error( sp, pdaRun, fsmRun, inputStream, send );
+		sendHandleError( sp, pdaRun, fsmRun, inputStream, send );
 	}
 }
 
-struct ParserRet
-{
-	Tree *tree;
-	FsmRun *fsmRun;
-};
-
-void parser_set_ctx( Tree **&sp, Program *prg, Accum *accum, Tree *val )
+void parserSetContext( Tree **&sp, Program *prg, Accum *accum, Tree *val )
 {
 	accum->pdaRun->context = split_tree( prg, val );
 }
 
-Head *tree_to_str( Tree **sp, Program *prg, Tree *tree )
+Head *treeToStr( Tree **sp, Program *prg, Tree *tree )
 {
 	/* Collect the tree data. */
 	ostringstream sout;
@@ -206,7 +200,7 @@ Head *tree_to_str( Tree **sp, Program *prg, Tree *tree )
 	return string_alloc_full( prg, s.c_str(), s.size() );
 }
 
-Tree *extract_input( Program *prg, Accum *accum )
+Tree *extractInput( Program *prg, Accum *accum )
 {
 	if ( accum->stream == 0 ) {
 		Stream *res = (Stream*)prg->mapElPool.allocate();
@@ -251,7 +245,7 @@ Word stream_append( Tree **&sp, Program *prg, Tree *input, Stream *stream )
 		return s.size();
 	}
 	else {
-		input = prep_parse_tree( prg, sp, input );
+		input = prepParseTree( prg, sp, input );
 
 		if ( input->id >= prg->rtd->firstNonTermId )
 			input->id = prg->rtd->lelInfo[input->id].termDupId;
@@ -264,10 +258,10 @@ Word stream_append( Tree **&sp, Program *prg, Tree *input, Stream *stream )
 	}
 }
 
-void parse_frag( Tree **&sp, Program *prg, Tree *input, Accum *accum, long stopId )
+void parseFrag( Tree **&sp, Program *prg, Tree *input, Accum *accum, long stopId )
 {
 	accum->pdaRun->stopTarget = stopId;
-	Stream *stream = (Stream*) extract_input( prg, accum );
+	Stream *stream = (Stream*) extractInput( prg, accum );
 
 	if ( input->id == LEL_ID_STR ) {
 		//assert(false);
@@ -286,7 +280,7 @@ void parse_frag( Tree **&sp, Program *prg, Tree *input, Accum *accum, long stopI
 		//assert(false);
 		/* Cause a flush */
 
-		input = prep_parse_tree( prg, sp, input );
+		input = prepParseTree( prg, sp, input );
 
 		if ( input->id >= prg->rtd->firstNonTermId )
 			input->id = prg->rtd->lelInfo[input->id].termDupId;
@@ -305,7 +299,7 @@ void parse_frag( Tree **&sp, Program *prg, Tree *input, Accum *accum, long stopI
 	}
 }
 
-void undo_parse_stream( Tree **&sp, Program *prg, Stream *input, Accum *accum, long consumed )
+void undoParseStream( Tree **&sp, Program *prg, Stream *input, Accum *accum, long consumed )
 {
 	if ( consumed < accum->pdaRun->consumed ) {
 		accum->pdaRun->numRetry += 1;
@@ -319,9 +313,9 @@ void undo_parse_stream( Tree **&sp, Program *prg, Stream *input, Accum *accum, l
 	}
 }
 
-Tree *parse_finish( Tree **&sp, Program *prg, Accum *accum, bool revertOn )
+Tree *parseFinish( Tree **&sp, Program *prg, Accum *accum, bool revertOn )
 {
-	Stream *stream = (Stream*)extract_input( prg, accum );
+	Stream *stream = (Stream*)extractInput( prg, accum );
 
 	if ( accum->pdaRun->stopTarget > 0 ) {
 
@@ -333,7 +327,7 @@ Tree *parse_finish( Tree **&sp, Program *prg, Accum *accum, bool revertOn )
 	}
 
 	if ( !revertOn )
-		commit_full( sp, accum->pdaRun, 0 );
+		commitFull( sp, accum->pdaRun, 0 );
 	
 	Tree *tree = getParsedRoot( accum->pdaRun, accum->pdaRun->stopTarget > 0 );
 	tree_upref( tree );
@@ -347,22 +341,22 @@ Tree *parse_finish( Tree **&sp, Program *prg, Accum *accum, bool revertOn )
 	return tree;
 }
 
-Tree *stream_pull( Program *prg, FsmRun *fsmRun, Stream *stream, Tree *length )
+Tree *streamPull( Program *prg, FsmRun *fsmRun, Stream *stream, Tree *length )
 {
 	long len = ((Int*)length)->value;
-	Head *tokdata = stream_pull( prg, fsmRun, stream->in, len );
+	Head *tokdata = streamPull( prg, fsmRun, stream->in, len );
 	return construct_string( prg, tokdata );
 }
 
 
-void undo_pull( Program *prg, FsmRun *fsmRun, Stream *stream, Tree *str )
+void undoPull( Program *prg, FsmRun *fsmRun, Stream *stream, Tree *str )
 {
 	const char *data = string_data( ( (Str*)str )->value );
 	long length = string_length( ( (Str*)str )->value );
 	undo_stream_pull( fsmRun, stream->in, data, length );
 }
 
-Word stream_push( Program *prg, Tree **&sp, Stream *stream, Tree *tree, bool ignore )
+Word streamPush( Program *prg, Tree **&sp, Stream *stream, Tree *tree, bool ignore )
 {
 	if ( tree->id == LEL_ID_STR ) {
 		/* This should become a compile error. If it's text, it's up to the
@@ -375,7 +369,7 @@ Word stream_push( Program *prg, Tree **&sp, Stream *stream, Tree *tree, bool ign
 		return ss.str().size();
 	}
 	else {
-		tree = prep_parse_tree( prg, sp, tree );
+		tree = prepParseTree( prg, sp, tree );
 
 		if ( tree->id >= prg->rtd->firstNonTermId )
 			tree->id = prg->rtd->lelInfo[tree->id].termDupId;
@@ -387,14 +381,14 @@ Word stream_push( Program *prg, Tree **&sp, Stream *stream, Tree *tree, bool ign
 	}
 }
 
-void set_local( Tree **frame, long field, Tree *tree )
+void setLocal( Tree **frame, long field, Tree *tree )
 {
 	if ( tree != 0 )
 		assert( tree->refs >= 1 );
 	local(field) = tree;
 }
 
-Tree *get_local_split( Program *prg, Tree **frame, long field )
+Tree *getLocalSplit( Program *prg, Tree **frame, long field )
 {
 	Tree *val = local(field);
 	Tree *split = split_tree( prg, val );
@@ -402,7 +396,7 @@ Tree *get_local_split( Program *prg, Tree **frame, long field )
 	return split;
 }
 
-void downref_local_trees( Program *prg, Tree **sp, Tree **frame, char *trees, long treesLen )
+void downrefLocalTrees( Program *prg, Tree **sp, Tree **frame, char *trees, long treesLen )
 {
 	for ( long i = 0; i < treesLen; i++ ) {
 		#ifdef COLM_LOG_BYTECODE
@@ -415,7 +409,7 @@ void downref_local_trees( Program *prg, Tree **sp, Tree **frame, char *trees, lo
 	}
 }
 
-UserIter *uiter_create( Tree **&sp, Program *prg, FunctionInfo *fi, long searchId )
+UserIter *uiterCreate( Tree **&sp, Program *prg, FunctionInfo *fi, long searchId )
 {
 	pushn( sizeof(UserIter) / sizeof(Word) );
 	void *mem = ptop();
@@ -424,7 +418,7 @@ UserIter *uiter_create( Tree **&sp, Program *prg, FunctionInfo *fi, long searchI
 	return uiter;
 }
 
-void uiter_init( Program *prg, Tree **sp, UserIter *uiter, 
+void uiterInit( Program *prg, Tree **sp, UserIter *uiter, 
 		FunctionInfo *fi, bool revertOn )
 {
 	/* Set up the first yeild so when we resume it starts at the beginning. */
@@ -438,14 +432,14 @@ void uiter_init( Program *prg, Tree **sp, UserIter *uiter,
 		uiter->resume = prg->rtd->frameInfo[fi->frameId].codeWC;
 }
 
-void tree_iter_destroy( Tree **&sp, TreeIter *iter )
+void treeIterDestroy( Tree **&sp, TreeIter *iter )
 {
 	long curStackSize = iter->stackRoot - ptop();
 	assert( iter->stackSize == curStackSize );
 	popn( iter->stackSize );
 }
 
-void user_iter_destroy( Tree **&sp, UserIter *uiter )
+void userIterDestroy( Tree **&sp, UserIter *uiter )
 {
 	/* We should always be coming from a yield. The current stack size will be
 	 * nonzero and the stack size in the iterator will be correct. */
@@ -459,7 +453,7 @@ void user_iter_destroy( Tree **&sp, UserIter *uiter )
 	popn( argSize );
 }
 
-Tree *construct_argv( Program *prg, int argc, char **argv )
+Tree *constructArgv( Program *prg, int argc, char **argv )
 {
 	Tree *list = create_generic( prg, 1 );
 	tree_upref( list );
@@ -573,7 +567,7 @@ void Program::allocGlobal()
 {
 	/* Alloc the global. */
 	Tree *tree = treePool.allocate();
-	tree->child = alloc_attrs( this, rtd->globalSize );
+	tree->child = allocAttrs( this, rtd->globalSize );
 	tree->refs = 1;
 	global = tree;
 }
@@ -582,17 +576,17 @@ void Program::clearGlobal( Tree **sp )
 {
 	/* Downref all the fields in the global object. */
 	for ( int g = 0; g < rtd->globalSize; g++ ) {
-		//assert( get_attr( global, g )->refs == 1 );
-		tree_downref( this, sp, get_attr( global, g ) );
+		//assert( getAttr( global, g )->refs == 1 );
+		tree_downref( this, sp, getAttr( global, g ) );
 	}
 
 	/* Free the global object. */
 	if ( rtd->globalSize > 0 )
-		free_attrs( this, global->child );
+		freeAttrs( this, global->child );
 	treePool.free( global );
 }
 
-Tree **stack_alloc()
+Tree **stackAlloc()
 {
 	//return new Tree*[VM_STACK_SIZE];
 
@@ -617,7 +611,7 @@ void Program::run()
 	 * Allocate the VM stack.
 	 */
 
-	Tree **vm_stack = stack_alloc();
+	Tree **vm_stack = stackAlloc();
 	Tree **root = &vm_stack[VM_STACK_SIZE];
 
 	/*
@@ -668,7 +662,7 @@ Execution::Execution( Program *prg, CodeVect &reverseCode,
 	}
 }
 
-void rcode_downref_all( Program *prg, Tree **sp, CodeVect *rev )
+void rcodeDownrefAll( Program *prg, Tree **sp, CodeVect *rev )
 {
 	while ( rev->length() > 0 ) {
 		/* Read the length */
@@ -681,14 +675,14 @@ void rcode_downref_all( Program *prg, Tree **sp, CodeVect *rev )
 		prcode = rev->data + start;
 
 		/* Execute it. */
-		rcode_downref( prg, sp, prcode );
+		rcodeDownref( prg, sp, prcode );
 
 		/* Backup over it. */
 		rev->tabLen -= len + SIZEOF_WORD;
 	}
 }
 
-void rcode_downref( Program *prg, Tree **sp, Code *instr )
+void rcodeDownref( Program *prg, Tree **sp, Code *instr )
 {
 again:
 	switch ( *instr++ ) {
@@ -1425,7 +1419,7 @@ again:
 						mark[ca->mark_enter], mark[ca->mark_leave] - mark[ca->mark_enter] );
 				Tree *string = construct_string( prg, data );
 				tree_upref( string );
-				set_local( frame, -1 - i, string );
+				setLocal( frame, -1 - i, string );
 			}
 			break;
 		}
@@ -1546,7 +1540,7 @@ again:
 			}
 			#endif
 
-			Tree *split = get_local_split( prg, frame, field );
+			Tree *split = getLocalSplit( prg, frame, field );
 			tree_upref( split );
 			push( split );
 			break;
@@ -1563,7 +1557,7 @@ again:
 
 			Tree *val = pop();
 			tree_downref( prg, sp, local(field) );
-			set_local( frame, field, val );
+			setLocal( frame, field, val );
 			break;
 		}
 		case IN_SAVE_RET: {
@@ -1861,7 +1855,7 @@ again:
 			#endif
 
 			Tree *tree = pop();
-			Head *res = tree_to_str( sp, prg, tree );
+			Head *res = treeToStr( sp, prg, tree );
 			Tree *str = construct_string( prg, res );
 			tree_upref( str );
 			push( str );
@@ -2252,7 +2246,7 @@ again:
 			#endif
 
 			TreeIter *iter = (TreeIter*) plocal(field);
-			tree_iter_destroy( sp, iter );
+			treeIterDestroy( sp, iter );
 			break;
 		}
 		case IN_REV_TRITER_FROM_REF: {
@@ -2524,7 +2518,7 @@ again:
 
 			Tree *obj = pop();
 			Tree *val = pop();
-			parser_set_ctx( sp, prg, (Accum*)obj, val );
+			parserSetContext( sp, prg, (Accum*)obj, val );
 			tree_downref( prg, sp, obj );
 			//tree_downref( prg, sp, val );
 			break;
@@ -2544,7 +2538,7 @@ again:
 			#endif
 
 			Tree *accum = pop();
-			Tree *input = extract_input( prg, (Accum*)accum );
+			Tree *input = extractInput( prg, (Accum*)accum );
 			tree_upref( input );
 			push( input );
 			tree_downref( prg, sp, accum );
@@ -2559,7 +2553,7 @@ again:
 			#endif
 
 			Tree *accum = pop();
-			Tree *input = extract_input( prg, (Accum*)accum );
+			Tree *input = extractInput( prg, (Accum*)accum );
 			tree_upref( input );
 			push( input );
 			tree_downref( prg, sp, accum );
@@ -2642,7 +2636,7 @@ again:
 			}
 			#endif
 
-			undo_stream_append( prg, sp, ((Stream*)stream)->in, len );
+			undoStreamAppend( prg, sp, ((Stream*)stream)->in, len );
 			tree_downref( prg, sp, stream );
 			tree_downref( prg, sp, input );
 			break;
@@ -2707,7 +2701,7 @@ again:
 				cerr << "IN_PARSE_FRAG_BKT " << consumed << endl;
 			#endif
 
-			undo_parse_stream( sp, prg, (Stream*)input, (Accum*)accum, consumed );
+			undoParseStream( sp, prg, (Stream*)input, (Accum*)accum, consumed );
 
 			tree_downref( prg, sp, accum );
 			tree_downref( prg, sp, input );
@@ -2722,7 +2716,7 @@ again:
 			#endif
 
 			Tree *accum = pop();
-			Tree *result = parse_finish( sp, prg, (Accum*)accum, false );
+			Tree *result = parseFinish( sp, prg, (Accum*)accum, false );
 			push( result );
 			tree_downref( prg, sp, accum );
 			break;
@@ -2736,7 +2730,7 @@ again:
 
 			Tree *accum = pop();
 			long consumed = ((Accum*)accum)->pdaRun->consumed;
-			Tree *result = parse_finish( sp, prg, (Accum*)accum, true );
+			Tree *result = parseFinish( sp, prg, (Accum*)accum, true );
 			push( result );
 
 			tree_upref( result );
@@ -2761,7 +2755,7 @@ again:
 				cerr << "IN_PARSE_FINISH_BKT " << consumed << endl;
 			#endif
 
-			undo_parse_stream( sp, prg, ((Accum*)parser)->stream, (Accum*)parser, consumed );
+			undoParseStream( sp, prg, ((Accum*)parser)->stream, (Accum*)parser, consumed );
 			((Accum*)parser)->stream->in->eof = false;
 
 			/* This needs an implementation. */
@@ -2777,7 +2771,7 @@ again:
 			#endif
 			Tree *stream = pop();
 			Tree *len = pop();
-			Tree *string = stream_pull( prg, fsmRun, (Stream*)stream, len );
+			Tree *string = streamPull( prg, fsmRun, (Stream*)stream, len );
 			tree_upref( string );
 			push( string );
 
@@ -2804,7 +2798,7 @@ again:
 			}
 			#endif
 
-			undo_pull( prg, fsmRun, (Stream*)stream, string );
+			undoPull( prg, fsmRun, (Stream*)stream, string );
 			tree_downref( prg, sp, stream );
 			tree_downref( prg, sp, string );
 			break;
@@ -2817,7 +2811,7 @@ again:
 			#endif
 			Tree *stream = pop();
 			Tree *tree = pop();
-			Word len = stream_push( prg, sp, ((Stream*)stream), tree, false );
+			Word len = streamPush( prg, sp, ((Stream*)stream), tree, false );
 			push( 0 );
 
 			/* Single unit. */
@@ -2838,7 +2832,7 @@ again:
 			#endif
 			Tree *stream = pop();
 			Tree *tree = pop();
-			Word len = stream_push( prg, sp, ((Stream*)stream), tree, true );
+			Word len = streamPush( prg, sp, ((Stream*)stream), tree, true );
 			push( 0 );
 
 			/* Single unit. */
@@ -2863,7 +2857,7 @@ again:
 			}
 			#endif
 
-			undo_stream_push( prg, sp, ((Stream*)stream)->in, len );
+			undoStreamPush( prg, sp, ((Stream*)stream)->in, len );
 			tree_downref( prg, sp, stream );
 			break;
 		}
@@ -2931,7 +2925,7 @@ again:
 			}
 			#endif
 
-			Tree *result = make_token( sp, prg, nargs );
+			Tree *result = makeToken( sp, prg, nargs );
 			for ( long i = 0; i < nargs; i++ )
 				tree_downref( prg, sp, pop() );
 			push( result );
@@ -2947,7 +2941,7 @@ again:
 			}
 			#endif
 
-			Tree *result = make_tree( sp, prg, nargs );
+			Tree *result = makeTree( sp, prg, nargs );
 			for ( long i = 0; i < nargs; i++ )
 				tree_downref( prg, sp, pop() );
 			push( result );
@@ -3778,7 +3772,7 @@ again:
 			#endif
 
 			FrameInfo *fi = &prg->rtd->frameInfo[frameId];
-			downref_local_trees( prg, sp, frame, fi->trees, fi->treesLen );
+			downrefLocalTrees( prg, sp, frame, fi->trees, fi->treesLen );
 			popn( size );
 			break;
 		}
@@ -3871,7 +3865,7 @@ again:
 			#endif
 
 			FunctionInfo *fi = prg->rtd->functionInfo + funcId;
-			UserIter *uiter = uiter_create( sp, prg, fi, searchId );
+			UserIter *uiter = uiterCreate( sp, prg, fi, searchId );
 			local(field) = (SW) uiter;
 
 			/* This is a setup similar to as a call, only the frame structure
@@ -3883,7 +3877,7 @@ again:
 			push( (SW)iframe ); /* Return iframe. */
 			push( (SW)frame );  /* Return frame. */
 
-			uiter_init( prg, sp, uiter, fi, true );
+			uiterInit( prg, sp, uiter, fi, true );
 			break;
 		}
 		case IN_UITER_CREATE_WC: {
@@ -3901,7 +3895,7 @@ again:
 			#endif
 
 			FunctionInfo *fi = prg->rtd->functionInfo + funcId;
-			UserIter *uiter = uiter_create( sp, prg, fi, searchId );
+			UserIter *uiter = uiterCreate( sp, prg, fi, searchId );
 			local(field) = (SW) uiter;
 
 			/* This is a setup similar to as a call, only the frame structure
@@ -3913,7 +3907,7 @@ again:
 			push( (SW)iframe ); /* Return iframe. */
 			push( (SW)frame );  /* Return frame. */
 
-			uiter_init( prg, sp, uiter, fi, false );
+			uiterInit( prg, sp, uiter, fi, false );
 			break;
 		}
 		case IN_UITER_DESTROY: {
@@ -3927,7 +3921,7 @@ again:
 			#endif
 
 			UserIter *uiter = (UserIter*) local(field);
-			user_iter_destroy( sp, uiter );
+			userIterDestroy( sp, uiter );
 			break;
 		}
 		case IN_RET: {
@@ -3943,7 +3937,7 @@ again:
 			#endif
 
 			FrameInfo *fi = &prg->rtd->frameInfo[fui->frameId];
-			downref_local_trees( prg, sp, frame, fi->trees, fi->treesLen );
+			downrefLocalTrees( prg, sp, frame, fi->trees, fi->treesLen );
 
 			popn( fui->frameSize );
 			frame = (Tree**) pop();
@@ -4036,7 +4030,7 @@ again:
 			#endif
 
 			/* Tree comes back upreffed. */
-			Tree *tree = construct_argv( prg, prg->argc, prg->argv );
+			Tree *tree = constructArgv( prg, prg->argc, prg->argv );
 			set_field( prg, prg->global, field, tree );
 			break;
 		}

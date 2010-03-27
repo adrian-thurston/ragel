@@ -96,23 +96,23 @@ void exec_action( FsmRun *fsmRun, GenAction *genAction );
 void fsm_execute( FsmRun *fsmRun, InputStream *inputStream );
 void initFsmRun( FsmRun *fsmRun );
 void initInputStream( InputStream *in );
-void send_queued_tokens( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
-void send_handle_error( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
-Head *extract_match( Program *prg, FsmRun *fsmRun, InputStream *inputStream );
+void sendQueuedTokens( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
+void sendHandleError( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
+Head *extractMatch( Program *prg, FsmRun *fsmRun, InputStream *inputStream );
 void queueBackTree( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
 void parseLoop( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
 long scan_token( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
 
-Head *stream_pull( Program *prg, FsmRun *fsmRun, InputStream *inputStream, long length );
+Head *streamPull( Program *prg, FsmRun *fsmRun, InputStream *inputStream, long length );
 void stream_push_text( InputStream *inputStream, const char *data, long length );
 void streamPushTree( InputStream *inputStream, Tree *tree, bool ignore );
 void undo_stream_pull( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length );
 
-void undo_stream_push( Program *prg, Tree **sp, InputStream *inputStream, long length );
-void undo_stream_append( Program *prg, Tree **sp, InputStream *inputStream, long length );
+void undoStreamPush( Program *prg, Tree **sp, InputStream *inputStream, long length );
+void undoStreamAppend( Program *prg, Tree **sp, InputStream *inputStream, long length );
 
 void send_named_lang_el( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
-Kid *make_token( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, int id,
+Kid *makeToken( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, int id,
 		Head *tokdata, bool namedLangEl, int bindId );
 
 void newToken( PdaRun *pdaRun, FsmRun *fsmRun );
