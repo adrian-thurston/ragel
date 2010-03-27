@@ -1,0 +1,7 @@
+var a;
+a := 1;do
+
+a := a + 1;
+c := d;while a = 10;
+
+hi := there;
