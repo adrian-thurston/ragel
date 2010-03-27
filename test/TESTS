@@ -38,4 +38,5 @@ TESTS="
 	travs1.lm
 	constructex.lm
 	rediv.lm
+	liftattrs.lm
 "
