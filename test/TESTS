@@ -3,6 +3,7 @@
 
 SUBDIRS="
 	python
+	html
 "
 
 TESTS="
