@@ -54,4 +54,9 @@ TESTS="
 	counting4.lm
 	til.lm
 	matchex.lm
+	maxlen.lm
+	superid.lm
+	tags.lm
+	heredoc.lm
+	commitbt.lm
 "

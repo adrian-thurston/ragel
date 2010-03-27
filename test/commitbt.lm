@@ -1,3 +1,5 @@
+# 2010: I'm not sure what the following means.
+
 #
 # Local commit:
 # 		-clears reparse flags underneath
@@ -12,8 +14,8 @@
 # 		-clears all alg structures
 #
 
-# This test shows that a global commit with revertOn cannot clear 'parsed'
-# items because it must entertain the possibility of backtracking.
+# This test shows that a global commit with revertOn correctly does not clear
+# 'parsed' items because it must entertain the possibility of backtracking.
 
 lex start
 {
@@ -84,9 +86,9 @@ def suint
 	int i
 	[uint]
 	{
-		lhs.i = 0
-		i = 1
-		lhs = construct suint "1"
+		#lhs.i = 0
+		#i = 1
+		#lhs = construct suint "1"
 	}
 
 def sub
@@ -96,15 +98,16 @@ token item
 	sub S
 	/[0-9]+/
 	{
-		str M = pull(stdin, match_length)
-		sub S = parse sub(stdin)
-		push2( stdin, make_token( typeid item, M, S ) )
+		str M = input.pull(match_length)
+		sub S = parse_stop sub(input)
+		input.push( make_token( typeid item, M, S ) )
 	}
 
+token EOL /'\n'/
+
 def stuff
-	[item* '!']
+	[item* '!' EOL]
 |	[sub]
 
-stuff S = parse stuff(stdin)
-
+stuff S = parse stuff( stdin  )
 print_xml( S )

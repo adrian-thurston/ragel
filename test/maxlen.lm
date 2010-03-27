@@ -42,3 +42,4 @@ def restricted_list
 def start 
 	[restricted_list id*]
 
+print_xml( parse start(stdin) )
