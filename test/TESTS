@@ -52,4 +52,5 @@ TESTS="
 	counting2.lm
 	counting3.lm
 	counting4.lm
+	til.lm
 "
