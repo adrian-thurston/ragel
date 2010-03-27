@@ -63,3 +63,5 @@ def factor
 def alphabet_num 
 	[uint]
 |	['-' uint]
+
+parse start( stdin )

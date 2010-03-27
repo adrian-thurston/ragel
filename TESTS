@@ -39,4 +39,11 @@ TESTS="
 	constructex.lm
 	rediv.lm
 	liftattrs.lm
+	mailbox.lm
+	string.lm
+	repeat.lm
+	ragelambig1.lm
+	ragelambig2.lm
+	ragelambig3.lm
+	ragelambig4.lm
 "
