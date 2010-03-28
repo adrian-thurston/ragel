@@ -132,11 +132,11 @@ Stream *openFile( Program *prg, Tree *name, Tree *mode )
 	Head *headName = ((Str*)name)->value;
 	Head *headMode = ((Str*)mode)->value;
 
-	const char *givenMode = string_data(headMode);
+	const char *givenMode = stringData(headMode);
 	const char *fopenMode = 0;
-	if ( memcmp( givenMode, "r", string_length(headMode) ) == 0 )
+	if ( memcmp( givenMode, "r", stringLength(headMode) ) == 0 )
 		fopenMode = "rb";
-	else if ( memcmp( givenMode, "w", string_length(headMode) ) == 0 )
+	else if ( memcmp( givenMode, "w", stringLength(headMode) ) == 0 )
 		fopenMode = "wb";
 	else {
 		cerr << "unknown file open mode: " << givenMode << endl;
@@ -144,9 +144,9 @@ Stream *openFile( Program *prg, Tree *name, Tree *mode )
 	}
 	
 	/* Need to make a C-string (null terminated). */
-	char *fileName = new char[string_length(headName)+1];
-	memcpy( fileName, string_data(headName), string_length(headName) );
-	fileName[string_length(headName)] = 0;
+	char *fileName = new char[stringLength(headName)+1];
+	memcpy( fileName, stringData(headName), stringLength(headName) );
+	fileName[stringLength(headName)] = 0;
 	FILE *file = fopen( fileName, fopenMode );
 	delete[] fileName;
 	return openStreamFile( prg, file );
@@ -208,7 +208,7 @@ Kid *constructIgnoreList( Program *prg, long pat )
 
 	Kid *first = 0, *last = 0;
 	while ( ignore >= 0 ) {
-		Head *ignoreData = string_alloc_pointer( prg, nodes[ignore].data, nodes[ignore].length );
+		Head *ignoreData = stringAllocPointer( prg, nodes[ignore].data, nodes[ignore].length );
 
 		Tree *ignTree = prg->treePool.allocate();
 		ignTree->refs = 1;
@@ -262,7 +262,7 @@ Tree *constructReplacementTree( Tree **bindings, Program *prg, long pat )
 		tree->id = nodes[pat].id;
 		tree->refs = 1;
 		tree->tokdata = nodes[pat].length == 0 ? 0 :
-				string_alloc_pointer( prg, 
+				stringAllocPointer( prg, 
 				nodes[pat].data, nodes[pat].length );
 
 		int objectLength = lelInfo[tree->id].objectLength;
@@ -289,7 +289,7 @@ Tree *constructReplacementTree( Tree **bindings, Program *prg, long pat )
 			attr->id = nodes[ci].id;
 			attr->refs = 1;
 			attr->tokdata = nodes[ci].length == 0 ? 0 :
-					string_alloc_pointer( prg, 
+					stringAllocPointer( prg, 
 					nodes[ci].data, nodes[ci].length );
 
 			setAttr( tree, ca->offset, attr );
@@ -327,7 +327,7 @@ Tree *makeToken( Tree **root, Program *prg, long nargs )
 	Str *textStr = (Str*)base[-2];
 
 	long id = idInt->value;
-	Head *tokdata = string_copy( prg, textStr->value );
+	Head *tokdata = stringCopy( prg, textStr->value );
 
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
 	Tree *tree;
@@ -417,7 +417,7 @@ void printStr2( FILE *out, Head *str )
  * deal since the recursion it is only caused by nonterminals that are ignored. */
 void printIgnoreList( ostream &out, Tree **sp, Program *prg, Tree *tree )
 {
-	Kid *ignore = tree_ignore( prg, tree );
+	Kid *ignore = treeIgnore( prg, tree );
 
 	/* Record the root of the stack and push everything. */
 	Tree **root = vm_ptop();
@@ -437,7 +437,7 @@ void printIgnoreList( ostream &out, Tree **sp, Program *prg, Tree *tree )
  * deal since the recursion it is only caused by nonterminals that are ignored. */
 void printIgnoreList2( FILE *out, Tree **sp, Program *prg, Tree *tree )
 {
-	Kid *ignore = tree_ignore( prg, tree );
+	Kid *ignore = treeIgnore( prg, tree );
 
 	/* Record the root of the stack and push everything. */
 	Tree **root = vm_ptop();
@@ -462,7 +462,7 @@ void printKid( ostream &out, Tree **&sp, Program *prg, Kid *kid, bool printIgnor
 rec_call:
 	/* If not currently skipping ignore data, then print it. Ignore data can
 	 * be associated with terminals and nonterminals. */
-	if ( printIgnore && tree_ignore( prg, kid->tree ) != 0 ) {
+	if ( printIgnore && treeIgnore( prg, kid->tree ) != 0 ) {
 		/* Ignorelists are reversed. */
 		printIgnoreList( out, sp, prg, kid->tree );
 		printIgnore = false;
@@ -487,15 +487,15 @@ rec_call:
 		else if ( kid->tree->id == LEL_ID_STREAM )
 			out << '#' << (void*) ((Stream*)kid->tree)->file;
 		else if ( kid->tree->tokdata != 0 && 
-				string_length( kid->tree->tokdata ) > 0 )
+				stringLength( kid->tree->tokdata ) > 0 )
 		{
-			out.write( string_data( kid->tree->tokdata ), 
-					string_length( kid->tree->tokdata ) );
+			out.write( stringData( kid->tree->tokdata ), 
+					stringLength( kid->tree->tokdata ) );
 		}
 	}
 	else {
 		/* Non-terminal. */
-		child = tree_child( prg, kid->tree );
+		child = treeChild( prg, kid->tree );
 		if ( child != 0 ) {
 			vm_push( (SW)kid );
 			kid = child;
@@ -533,7 +533,7 @@ void printKid2( FILE *out, Tree **&sp, Program *prg, Kid *kid, bool printIgnore 
 rec_call:
 	/* If not currently skipping ignore data, then print it. Ignore data can
 	 * be associated with terminals and nonterminals. */
-	if ( printIgnore && tree_ignore( prg, kid->tree ) != 0 ) {
+	if ( printIgnore && treeIgnore( prg, kid->tree ) != 0 ) {
 		/* Ignorelists are reversed. */
 		printIgnoreList2( out, sp, prg, kid->tree );
 		printIgnore = false;
@@ -558,15 +558,15 @@ rec_call:
 		else if ( kid->tree->id == LEL_ID_STREAM )
 			fprintf( out, "#%p", ((Stream*)kid->tree)->file );
 		else if ( kid->tree->tokdata != 0 && 
-				string_length( kid->tree->tokdata ) > 0 )
+				stringLength( kid->tree->tokdata ) > 0 )
 		{
-			fwrite( string_data( kid->tree->tokdata ), 
-					string_length( kid->tree->tokdata ), 1, out );
+			fwrite( stringData( kid->tree->tokdata ), 
+					stringLength( kid->tree->tokdata ), 1, out );
 		}
 	}
 	else {
 		/* Non-terminal. */
-		child = tree_child( prg, kid->tree );
+		child = treeChild( prg, kid->tree );
 		if ( child != 0 ) {
 			vm_push( (SW)kid );
 			kid = child;
@@ -617,7 +617,7 @@ void xmlEscapeData( const char *data, long len )
  * ignored. */
 void printXmlIgnoreList( Tree **sp, Program *prg, Tree *tree, long depth )
 {
-	Kid *ignore = tree_ignore( prg, tree );
+	Kid *ignore = treeIgnore( prg, tree );
 	while ( ignore != 0 ) {
 		printXmlKid( sp, prg, ignore, true, depth );
 		ignore = ignore->next;
@@ -661,7 +661,7 @@ rec_call:
 		}
 
 		objectLength = lelInfo[kid->tree->id].objectLength;
-		child = tree_child( prg, kid->tree );
+		child = treeChild( prg, kid->tree );
 		if ( (commAttr && objectLength > 0) || child != 0 ) {
 			cout << '>' << endl;
 			vm_push( (SW) kidNum );
@@ -728,12 +728,12 @@ rec_call:
 		}
 		else if ( 0 < kid->tree->id && kid->tree->id < prg->rtd->firstNonTermId &&
 				kid->tree->tokdata != 0 && 
-				string_length( kid->tree->tokdata ) > 0 && 
+				stringLength( kid->tree->tokdata ) > 0 && 
 				!lelInfo[kid->tree->id].literal )
 		{
 			cout << '>';
-			xmlEscapeData( string_data( kid->tree->tokdata ), 
-					string_length( kid->tree->tokdata ) );
+			xmlEscapeData( stringData( kid->tree->tokdata ), 
+					stringLength( kid->tree->tokdata ) );
 			cout << "</" << lelInfo[kid->tree->id].name << '>' << endl;
 		}
 		else
@@ -798,7 +798,7 @@ Tree *copyRealTree( Program *prg, Tree *tree, Kid *oldNextDown,
 	}
 
 	newTree->id = tree->id;
-	newTree->tokdata = string_copy( prg, tree->tokdata );
+	newTree->tokdata = stringCopy( prg, tree->tokdata );
 
 	/* Copy the child list. Start with ignores, then the list. */
 	Kid *child = tree->child, *last = 0;
@@ -1073,7 +1073,7 @@ free_tree:
 	else {
 		if ( tree->id == LEL_ID_STR ) {
 			Str *str = (Str*) tree;
-			string_free( prg, str->value );
+			stringFree( prg, str->value );
 			prg->treePool.free( tree );
 		}
 		else if ( tree->id == LEL_ID_BOOL || tree->id == LEL_ID_INT )
@@ -1087,7 +1087,7 @@ free_tree:
 		else if ( tree->id == LEL_ID_STREAM )
 			streamFree( prg, (Stream*) tree );
 		else { 
-			string_free( prg, tree->tokdata );
+			stringFree( prg, tree->tokdata );
 			Kid *child = tree->child;
 
 			/* Left ignore trees. */
@@ -1164,7 +1164,7 @@ void treeDownref( Program *prg, Tree **sp, Tree *tree )
 }
 
 /* Find the first child of a tree. */
-Kid *tree_child( Program *prg, const Tree *tree )
+Kid *treeChild( Program *prg, const Tree *tree )
 {
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
 	Kid *kid = tree->child;
@@ -1183,7 +1183,7 @@ Kid *tree_child( Program *prg, const Tree *tree )
 }
 
 /* Find the first child of a tree. */
-Kid *tree_extract_child( Program *prg, Tree *tree )
+Kid *treeExtractChild( Program *prg, Tree *tree )
 {
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
 	Kid *kid = tree->child, *last = 0;
@@ -1209,19 +1209,19 @@ Kid *tree_extract_child( Program *prg, Tree *tree )
 }
 
 
-Kid *tree_ignore( Program *prg, Tree *tree )
+Kid *treeIgnore( Program *prg, Tree *tree )
 {
 	if ( tree->flags & AF_LEFT_IGNORE )
 		return (Kid*)tree->child->tree;
 	return 0;
 }
 
-Tree *tree_iter_deref_cur( TreeIter *iter )
+Tree *treeIterDerefCur( TreeIter *iter )
 {
 	return iter->ref.kid == 0 ? 0 : iter->ref.kid->tree;
 }
 
-void ref_set_value( Ref *ref, Tree *v )
+void refSetValue( Ref *ref, Tree *v )
 {
 	Kid *firstKid = ref->kid;
 	while ( ref != 0 && ref->kid == firstKid ) {
@@ -1230,9 +1230,9 @@ void ref_set_value( Ref *ref, Tree *v )
 	}
 }
 
-Tree *get_rhs_el( Program *prg, Tree *lhs, long position )
+Tree *getRhsEl( Program *prg, Tree *lhs, long position )
 {
-	Kid *pos = tree_child( prg, lhs );
+	Kid *pos = treeChild( prg, lhs );
 	while ( position > 0 ) {
 		pos = pos->next;
 		position -= 1;
@@ -1240,7 +1240,7 @@ Tree *get_rhs_el( Program *prg, Tree *lhs, long position )
 	return pos->tree;
 }
 
-void set_field( Program *prg, Tree *tree, long field, Tree *value )
+void setField( Program *prg, Tree *tree, long field, Tree *value )
 {
 	assert( tree->refs == 1 );
 	if ( value != 0 )
@@ -1248,17 +1248,17 @@ void set_field( Program *prg, Tree *tree, long field, Tree *value )
 	setAttr( tree, field, value );
 }
 
-Tree *get_field( Tree *tree, Word field )
+Tree *getField( Tree *tree, Word field )
 {
 	return getAttr( tree, field );
 }
 
-Kid *get_field_kid( Tree *tree, Word field )
+Kid *getFieldKid( Tree *tree, Word field )
 {
 	return getAttrKid( tree, field );
 }
 
-Tree *get_field_split( Program *prg, Tree *tree, Word field )
+Tree *getFieldSplit( Program *prg, Tree *tree, Word field )
 {
 	Tree *val = getAttr( tree, field );
 	Tree *split = splitTree( prg, val );
@@ -1266,17 +1266,17 @@ Tree *get_field_split( Program *prg, Tree *tree, Word field )
 	return split;
 }
 
-void set_triter_cur( TreeIter *iter, Tree *tree )
+void setTriterCur( TreeIter *iter, Tree *tree )
 {
 	iter->ref.kid->tree = tree;
 }
 
-Tree *get_ptr_val( Pointer *ptr )
+Tree *getPtrVal( Pointer *ptr )
 {
 	return ptr->value->tree;
 }
 
-Tree *get_ptr_val_split( Program *prg, Pointer *ptr )
+Tree *getPtrValSplit( Program *prg, Pointer *ptr )
 {
 	Tree *val = ptr->value->tree;
 	Tree *split = splitTree( prg, val );
@@ -1284,7 +1284,7 @@ Tree *get_ptr_val_split( Program *prg, Pointer *ptr )
 	return split;
 }
 
-void iter_find( Program *prg, Tree **&sp, TreeIter *iter, bool tryFirst )
+void iterFind( Program *prg, Tree **&sp, TreeIter *iter, bool tryFirst )
 {
 	bool anyTree = iter->searchId == prg->rtd->anyId;
 	Tree **top = iter->stackRoot;
@@ -1294,7 +1294,7 @@ rec_call:
 	if ( tryFirst && ( iter->ref.kid->tree->id == iter->searchId || anyTree ) )
 		return;
 	else {
-		child = tree_child( prg, iter->ref.kid->tree );
+		child = treeChild( prg, iter->ref.kid->tree );
 		if ( child != 0 ) {
 			vm_push( (SW) iter->ref.next );
 			vm_push( (SW) iter->ref.kid );
@@ -1317,18 +1317,18 @@ rec_call:
 	iter->ref.kid = 0;
 }
 
-Tree *tree_iter_advance( Program *prg, Tree **&sp, TreeIter *iter )
+Tree *treeIterAdvance( Program *prg, Tree **&sp, TreeIter *iter )
 {
 	assert( iter->stackSize == iter->stackRoot - vm_ptop() );
 
 	if ( iter->ref.kid == 0 ) {
 		/* Kid is zero, start from the root. */
 		iter->ref = iter->rootRef;
-		iter_find( prg, sp, iter, true );
+		iterFind( prg, sp, iter, true );
 	}
 	else {
 		/* Have a previous item, continue searching from there. */
-		iter_find( prg, sp, iter, false );
+		iterFind( prg, sp, iter, false );
 	}
 
 	iter->stackSize = iter->stackRoot - vm_ptop();
@@ -1336,14 +1336,14 @@ Tree *tree_iter_advance( Program *prg, Tree **&sp, TreeIter *iter )
 	return (iter->ref.kid ? prg->trueVal : prg->falseVal );
 }
 
-Tree *tree_iter_next_child( Program *prg, Tree **&sp, TreeIter *iter )
+Tree *treeIterNextChild( Program *prg, Tree **&sp, TreeIter *iter )
 {
 	assert( iter->stackSize == iter->stackRoot - vm_ptop() );
 	Kid *kid = 0;
 
 	if ( iter->ref.kid == 0 ) {
 		/* Kid is zero, start from the first child. */
-		Kid *child = tree_child( prg, iter->rootRef.kid->tree );
+		Kid *child = treeChild( prg, iter->rootRef.kid->tree );
 
 		if ( child == 0 )
 			iter->ref.next = 0;
@@ -1373,13 +1373,13 @@ Tree *tree_iter_next_child( Program *prg, Tree **&sp, TreeIter *iter )
 	return ( iter->ref.kid ? prg->trueVal : prg->falseVal );
 }
 
-Tree *tree_rev_iter_prev_child( Program *prg, Tree **&sp, RevTreeIter *iter )
+Tree *treeRevIterPrevChild( Program *prg, Tree **&sp, RevTreeIter *iter )
 {
 	assert( iter->stackSize == iter->stackRoot - vm_ptop() );
 
 	if ( iter->kidAtYield != iter->ref.kid ) {
 		/* Need to reload the kids. */
-		Kid *kid = tree_child( prg, iter->rootRef.kid->tree );
+		Kid *kid = treeChild( prg, iter->rootRef.kid->tree );
 		Kid **dst = (Kid**)iter->stackRoot - 1;
 		while ( kid != 0 ) {
 			*dst-- = kid;
@@ -1415,7 +1415,7 @@ Tree *tree_rev_iter_prev_child( Program *prg, Tree **&sp, RevTreeIter *iter )
 	return (iter->ref.kid ? prg->trueVal : prg->falseVal );
 }
 
-void iter_find_repeat( Program *prg, Tree **&sp, TreeIter *iter, bool tryFirst )
+void iterFindRepeat( Program *prg, Tree **&sp, TreeIter *iter, bool tryFirst )
 {
 	bool anyTree = iter->searchId == prg->rtd->anyId;
 	Tree **top = iter->stackRoot;
@@ -1430,7 +1430,7 @@ rec_call:
 		 * root of the iteration, or if does not have any neighbours to the
 		 * right. */
 		if ( top == vm_ptop() || iter->ref.kid->next == 0  ) {
-			child = tree_child( prg, iter->ref.kid->tree );
+			child = treeChild( prg, iter->ref.kid->tree );
 			if ( child != 0 ) {
 				vm_push( (SW) iter->ref.next );
 				vm_push( (SW) iter->ref.kid );
@@ -1454,18 +1454,18 @@ rec_call:
 	iter->ref.kid = 0;
 }
 
-Tree *tree_iter_next_repeat( Program *prg, Tree **&sp, TreeIter *iter )
+Tree *treeIterNextRepeat( Program *prg, Tree **&sp, TreeIter *iter )
 {
 	assert( iter->stackSize == iter->stackRoot - vm_ptop() );
 
 	if ( iter->ref.kid == 0 ) {
 		/* Kid is zero, start from the root. */
 		iter->ref = iter->rootRef;
-		iter_find_repeat( prg, sp, iter, true );
+		iterFindRepeat( prg, sp, iter, true );
 	}
 	else {
 		/* Have a previous item, continue searching from there. */
-		iter_find_repeat( prg, sp, iter, false );
+		iterFindRepeat( prg, sp, iter, false );
 	}
 
 	iter->stackSize = iter->stackRoot - vm_ptop();
@@ -1482,7 +1482,7 @@ void iter_find_rev_repeat( Program *prg, Tree **&sp, TreeIter *iter, bool tryFir
 	if ( tryFirst ) {
 		while ( true ) {
 			if ( top == vm_ptop() || iter->ref.kid->next == 0 ) {
-				child = tree_child( prg, iter->ref.kid->tree );
+				child = treeChild( prg, iter->ref.kid->tree );
 
 				if ( child == 0 )
 					break;
@@ -1525,7 +1525,7 @@ first:
 	return;
 }
 
-Tree *tree_iter_prev_repeat( Program *prg, Tree **&sp, TreeIter *iter )
+Tree *treeIterPrevRepeat( Program *prg, Tree **&sp, TreeIter *iter )
 {
 	assert( iter->stackSize == iter->stackRoot - vm_ptop() );
 
@@ -1544,7 +1544,7 @@ Tree *tree_iter_prev_repeat( Program *prg, Tree **&sp, TreeIter *iter )
 	return (iter->ref.kid ? prg->trueVal : prg->falseVal );
 }
 
-Tree *tree_search( Program *prg, Kid *kid, long id )
+Tree *treeSearch( Program *prg, Kid *kid, long id )
 {
 	/* This node the one? */
 	if ( kid->tree->id == id )
@@ -1553,31 +1553,31 @@ Tree *tree_search( Program *prg, Kid *kid, long id )
 	Tree *res = 0;
 
 	/* Search children. */
-	Kid *child = tree_child( prg, kid->tree );
+	Kid *child = treeChild( prg, kid->tree );
 	if ( child != 0 )
-		res = tree_search( prg, child, id );
+		res = treeSearch( prg, child, id );
 	
 	/* Search siblings. */
 	if ( res == 0 && kid->next != 0 )
-		res = tree_search( prg, kid->next, id );
+		res = treeSearch( prg, kid->next, id );
 
 	return res;	
 }
 
-Tree *tree_search( Program *prg, Tree *tree, long id )
+Tree *treeSearch( Program *prg, Tree *tree, long id )
 {
 	Tree *res = 0;
 	if ( tree->id == id )
 		res = tree;
 	else {
-		Kid *child = tree_child( prg, tree );
+		Kid *child = treeChild( prg, tree );
 		if ( child != 0 )
-			res = tree_search( prg, child, id );
+			res = treeSearch( prg, child, id );
 	}
 	return res;
 }
 
-bool map_insert( Program *prg, Map *map, Tree *key, Tree *element )
+bool mapInsert( Program *prg, Map *map, Tree *key, Tree *element )
 {
 	MapEl *mapEl = map->insert( prg, key );
 
@@ -1589,14 +1589,14 @@ bool map_insert( Program *prg, Map *map, Tree *key, Tree *element )
 	return false;
 }
 
-void map_unremove( Program *prg, Map *map, Tree *key, Tree *element )
+void mapUnremove( Program *prg, Map *map, Tree *key, Tree *element )
 {
 	MapEl *mapEl = map->insert( prg, key );
 	assert( mapEl != 0 );
 	mapEl->tree = element;
 }
 
-Tree *map_uninsert( Program *prg, Map *map, Tree *key )
+Tree *mapUninsert( Program *prg, Map *map, Tree *key )
 {
 	MapEl *el = map->detach( prg, key );
 	Tree *val = el->tree;
@@ -1604,7 +1604,7 @@ Tree *map_uninsert( Program *prg, Map *map, Tree *key )
 	return val;
 }
 
-Tree *map_store( Program *prg, Map *map, Tree *key, Tree *element )
+Tree *mapStore( Program *prg, Map *map, Tree *key, Tree *element )
 {
 	Tree *oldTree = 0;
 	MapEl *elInTree = 0;
@@ -1621,7 +1621,7 @@ Tree *map_store( Program *prg, Map *map, Tree *key, Tree *element )
 	return oldTree;
 }
 
-Tree *map_unstore( Program *prg, Map *map, Tree *key, Tree *existing )
+Tree *mapUnstore( Program *prg, Map *map, Tree *key, Tree *existing )
 {
 	Tree *stored = 0;
 	if ( existing == 0 ) {
@@ -1637,23 +1637,23 @@ Tree *map_unstore( Program *prg, Map *map, Tree *key, Tree *existing )
 	return stored;
 }
 
-Tree *map_find( Program *prg, Map *map, Tree *key )
+Tree *mapFind( Program *prg, Map *map, Tree *key )
 {
 	MapEl *mapEl = map->find( prg, key );
 	return mapEl == 0 ? 0 : mapEl->tree;
 }
 
-long map_length( Map *map )
+long mapLength( Map *map )
 {
 	return map->length();
 }
 
-long list_length( List *list )
+long listLength( List *list )
 {
 	return list->length();
 }
 
-void list_append( Program *prg, List *list, Tree *val )
+void listAppend( Program *prg, List *list, Tree *val )
 {
 	assert( list->refs == 1 );
 	if ( val != 0 )
@@ -1663,14 +1663,14 @@ void list_append( Program *prg, List *list, Tree *val )
 	list->append( listEl );
 }
 
-Tree *list_remove_end( Program *prg, List *list )
+Tree *listRemoveEnd( Program *prg, List *list )
 {
 	Tree *tree = list->tail->value;
 	prg->listElPool.free( list->detachLast() );
 	return tree;
 }
 
-Tree *get_list_mem( List *list, Word field )
+Tree *getListMem( List *list, Word field )
 {
 	Tree *result = 0;
 	switch ( field ) {
@@ -1687,7 +1687,7 @@ Tree *get_list_mem( List *list, Word field )
 	return result;
 }
 
-Tree *get_list_mem_split( Program *prg, List *list, Word field )
+Tree *getListMemSplit( Program *prg, List *list, Word field )
 {
 	Tree *sv = 0;
 	switch ( field ) {
@@ -1706,7 +1706,7 @@ Tree *get_list_mem_split( Program *prg, List *list, Word field )
 	return sv;
 }
 
-Tree *set_list_mem( List *list, Half field, Tree *value )
+Tree *setListMem( List *list, Half field, Tree *value )
 {
 	assert( list->refs == 1 );
 	if ( value != 0 )
@@ -1729,7 +1729,7 @@ Tree *set_list_mem( List *list, Half field, Tree *value )
 	return existing;
 }
 
-TreePair map_remove( Program *prg, Map *map, Tree *key )
+TreePair mapRemove( Program *prg, Map *map, Tree *key )
 {
 	MapEl *mapEl = map->find( prg, key );
 	TreePair result;
@@ -1743,7 +1743,7 @@ TreePair map_remove( Program *prg, Map *map, Tree *key )
 	return result;
 }
 
-void split_ref( Tree **&sp, Program *prg, Ref *fromRef )
+void splitRef( Tree **&sp, Program *prg, Ref *fromRef )
 {
 	/* Go up the chain of kids, turing the pointers down. */
 	Ref *last = 0, *ref = fromRef, *next = 0;
@@ -1803,15 +1803,15 @@ void split_ref( Tree **&sp, Program *prg, Ref *fromRef )
 	}
 }
 
-void split_iter_cur( Tree **&sp, Program *prg, TreeIter *iter )
+void splitIterCur( Tree **&sp, Program *prg, TreeIter *iter )
 {
 	if ( iter->ref.kid == 0 )
 		return;
 	
-	split_ref( sp, prg, &iter->ref );
+	splitRef( sp, prg, &iter->ref );
 }
 
-long cmp_tree( Program *prg, const Tree *tree1, const Tree *tree2 )
+long cmpTree( Program *prg, const Tree *tree1, const Tree *tree2 )
 {
 	long cmpres = 0;
 	if ( tree1 == 0 ) {
@@ -1839,7 +1839,7 @@ long cmp_tree( Program *prg, const Tree *tree1, const Tree *tree2 )
 			return 1;
 	}
 	else if ( tree1->id == LEL_ID_STR ) {
-		cmpres = cmp_string( ((Str*)tree1)->value, ((Str*)tree2)->value );
+		cmpres = cmpString( ((Str*)tree1)->value, ((Str*)tree2)->value );
 		if ( cmpres != 0 )
 			return cmpres;
 	}
@@ -1849,14 +1849,14 @@ long cmp_tree( Program *prg, const Tree *tree1, const Tree *tree2 )
 		else if ( tree1->tokdata != 0 && tree2->tokdata == 0 )
 			return 1;
 		else if ( tree1->tokdata != 0 && tree2->tokdata != 0 ) {
-			cmpres = cmp_string( tree1->tokdata, tree2->tokdata );
+			cmpres = cmpString( tree1->tokdata, tree2->tokdata );
 			if ( cmpres != 0 )
 				return cmpres;
 		}
 	}
 
-	Kid *kid1 = tree_child( prg, tree1 );
-	Kid *kid2 = tree_child( prg, tree2 );
+	Kid *kid1 = treeChild( prg, tree1 );
+	Kid *kid2 = treeChild( prg, tree2 );
 
 	while ( true ) {
 		if ( kid1 == 0 && kid2 == 0 )
@@ -1866,7 +1866,7 @@ long cmp_tree( Program *prg, const Tree *tree1, const Tree *tree2 )
 		else if ( kid1 != 0 && kid2 == 0 )
 			return 1;
 		else {
-			cmpres = cmp_tree( prg, kid1->tree, kid2->tree );
+			cmpres = cmpTree( prg, kid1->tree, kid2->tree );
 			if ( cmpres != 0 )
 				return cmpres;
 		}
@@ -1877,14 +1877,14 @@ long cmp_tree( Program *prg, const Tree *tree1, const Tree *tree2 )
 
 /* This must traverse in the same order that the bindId assignments are done
  * in. */
-bool match_pattern( Tree **bindings, Program *prg, long pat, Kid *kid, bool checkNext )
+bool matchPattern( Tree **bindings, Program *prg, long pat, Kid *kid, bool checkNext )
 {
 	PatReplNode *nodes = prg->rtd->patReplNodes;
 
 	#ifdef COLM_LOG_MATCH
 	if ( colm_log_match ) {
 		LangElInfo *lelInfo = prg->rtd->lelInfo;
-		cerr << "match_pattern " << ( pat == -1 ? "NULL" : lelInfo[nodes[pat].id].name ) <<
+		cerr << "match pattern " << ( pat == -1 ? "NULL" : lelInfo[nodes[pat].id].name ) <<
 				" vs " << ( kid == 0 ? "NULL" : lelInfo[kid->tree->id].name ) << endl;
 	}
 	#endif
@@ -1896,12 +1896,12 @@ bool match_pattern( Tree **bindings, Program *prg, long pat, Kid *kid, bool chec
 			 * the data against the token data. */
 			if ( nodes[pat].data != 0 ) {
 				/* Check the length of token text. */
-				if ( nodes[pat].length != string_length( kid->tree->tokdata ) )
+				if ( nodes[pat].length != stringLength( kid->tree->tokdata ) )
 					return false;
 
 				/* Check the token text data. */
 				if ( nodes[pat].length > 0 && memcmp( nodes[pat].data, 
-						string_data( kid->tree->tokdata ), nodes[pat].length ) != 0 )
+						stringData( kid->tree->tokdata ), nodes[pat].length ) != 0 )
 					return false;
 			}
 
@@ -1919,15 +1919,15 @@ bool match_pattern( Tree **bindings, Program *prg, long pat, Kid *kid, bool chec
 			 * down the children. */
 			if ( !nodes[pat].stop ) {
 				/* Check for failure down child branch. */
-				bool childCheck = match_pattern( bindings, prg, 
-						nodes[pat].child, tree_child( prg, kid->tree ), true );
+				bool childCheck = matchPattern( bindings, prg, 
+						nodes[pat].child, treeChild( prg, kid->tree ), true );
 				if ( ! childCheck )
 					return false;
 			}
 
 			/* If checking next, then look for failure there. */
 			if ( checkNext ) {
-				bool nextCheck = match_pattern( bindings, prg, 
+				bool nextCheck = matchPattern( bindings, prg, 
 						nodes[pat].next, kid->next, true );
 				if ( ! nextCheck )
 					return false;

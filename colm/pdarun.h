@@ -187,7 +187,7 @@ struct Map
 	void listAbandon();
 
 	int compare( Program *prg, const Tree *w1, const Tree *w2 ) const
-		{ return cmp_tree( prg, w1, w2 ); }
+		{ return cmpTree( prg, w1, w2 ); }
 
 	/* Insert a element into the tree. */
 	MapEl *insert( Program *prg, MapEl *element, MapEl **lastFound = 0 );

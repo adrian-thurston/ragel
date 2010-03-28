@@ -1583,7 +1583,7 @@ void mapNodes( Program *prg, int &count, Kid *kid )
 	if ( kid != 0 ) {
 		pt(kid->tree)->state = count++;
 
-		Kid *ignore = tree_ignore( prg, kid->tree );
+		Kid *ignore = treeIgnore( prg, kid->tree );
 		while ( ignore != 0 ) {
 			count += 1;
 			ignore = ignore->next;
@@ -1591,7 +1591,7 @@ void mapNodes( Program *prg, int &count, Kid *kid )
 		
 		count += prg->rtd->lelInfo[kid->tree->id].numCaptureAttr;
 
-		mapNodes( prg, count, tree_child( prg, kid->tree ) );
+		mapNodes( prg, count, treeChild( prg, kid->tree ) );
 		mapNodes( prg, count, kid->next );
 	}
 }
@@ -1603,17 +1603,17 @@ void fillNodes( Program *prg, Bindings &bindings, long &bindId,
 		long ind = pt(kid->tree)->state;
 		PatReplNode &node = nodes[ind++];
 
-		Kid *child = tree_child( prg, kid->tree );
+		Kid *child = treeChild( prg, kid->tree );
 
 		/* Set up the fields. */
 		node.id = kid->tree->id;
 		node.child = child == 0 ? -1 : pt(child->tree)->state;
 		node.next = kid->next == 0 ? -1 : pt(kid->next->tree)->state;
-		node.length = string_length( kid->tree->tokdata );
-		node.data = string_data( kid->tree->tokdata );
+		node.length = stringLength( kid->tree->tokdata );
+		node.data = stringData( kid->tree->tokdata );
 
 		/* Ignore items. */
-		Kid *ignore = tree_ignore( prg, kid->tree );
+		Kid *ignore = treeIgnore( prg, kid->tree );
 		node.ignore = ignore == 0 ? -1 : ind;
 
 		while ( ignore != 0 ) {
@@ -1623,8 +1623,8 @@ void fillNodes( Program *prg, Bindings &bindings, long &bindId,
 			node.id = ignore->tree->id;
 			node.next = ignore->next == 0 ? -1 : ind;
 			
-			node.length = string_length( ignore->tree->tokdata );
-			node.data = string_data( ignore->tree->tokdata );
+			node.length = stringLength( ignore->tree->tokdata );
+			node.data = stringData( ignore->tree->tokdata );
 
 			ignore = ignore->next;
 		}
@@ -1640,8 +1640,8 @@ void fillNodes( Program *prg, Bindings &bindings, long &bindId,
 			memset( &node, 0, sizeof(PatReplNode) );
 
 			node.id = attr->id;
-			node.length = string_length( attr->tokdata );
-			node.data = string_data( attr->tokdata );
+			node.length = stringLength( attr->tokdata );
+			node.data = stringData( attr->tokdata );
 		}
 
 		node.stop = kid->tree->flags & AF_TERM_DUP;

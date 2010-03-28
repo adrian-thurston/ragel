@@ -176,7 +176,7 @@ Head *streamPull( Program *prg, FsmRun *fsmRun, InputStream *inputStream, long l
 	if ( fsmRun->p + length > fsmRun->pe )
 		cerr << "NOT ENOUGH DATA TO FETCH TOKEN" << endp;
 
-	Head *tokdata = string_alloc_pointer( prg, fsmRun->p, length );
+	Head *tokdata = stringAllocPointer( prg, fsmRun->p, length );
 	updatePosition( inputStream, fsmRun->p, length );
 	fsmRun->p += length;
 
@@ -341,7 +341,7 @@ void sendBackIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inp
 		bool artificial = ignore->tree->flags & AF_ARTIFICIAL;
 
 		if ( head != 0 && !artificial )
-			sendBackText( fsmRun, inputStream, string_data( head ), head->length );
+			sendBackText( fsmRun, inputStream, stringData( head ), head->length );
 
 		decrementConsumed( pdaRun );
 
@@ -366,8 +366,8 @@ void sendBack( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStre
 	if ( colm_log_parse ) {
 		LangElInfo *lelInfo = pdaRun->tables->rtd->lelInfo;
 		cerr << "sending back: " << lelInfo[input->tree->id].name << "  text: ";
-		cerr.write( string_data( input->tree->tokdata ), 
-				string_length( input->tree->tokdata ) );
+		cerr.write( stringData( input->tree->tokdata ), 
+				stringLength( input->tree->tokdata ) );
 		if ( input->tree->flags & AF_ARTIFICIAL )
 			cerr << " (artificial)";
 		cerr << endl;
@@ -405,12 +405,12 @@ void sendBack( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStre
 		sendBackIgnore( sp, pdaRun, fsmRun, inputStream, leftIgnore );
 
 		///* Always push back the ignore text. */
-		//sendBackIgnore( sp, pdaRun, fsmRun, inputStream, tree_ignore( fsmRun->prg, input->tree ) );
+		//sendBackIgnore( sp, pdaRun, fsmRun, inputStream, treeIgnore( fsmRun->prg, input->tree ) );
 	}
 	else {
 		/* Push back the token data. */
-		sendBackText( fsmRun, inputStream, string_data( input->tree->tokdata ), 
-				string_length( input->tree->tokdata ) );
+		sendBackText( fsmRun, inputStream, stringData( input->tree->tokdata ), 
+				stringLength( input->tree->tokdata ) );
 
 		/* Check for reverse code. */
 		if ( input->tree->flags & AF_HAS_RCODE ) {
@@ -423,7 +423,7 @@ void sendBack( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStre
 		}
 
 		/* Always push back the ignore text. */
-		sendBackIgnore( sp, pdaRun, fsmRun, inputStream, tree_ignore( fsmRun->prg, input->tree ) );
+		sendBackIgnore( sp, pdaRun, fsmRun, inputStream, treeIgnore( fsmRun->prg, input->tree ) );
 
 		/* If eof was just sent back remember that it needs to be sent again. */
 		if ( input->tree->id == pdaRun->tables->rtd->eofLelIds[pdaRun->parserId] )
@@ -570,7 +570,7 @@ Kid *makeToken( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, int id
 	if ( lelInfo[id].numCaptureAttr > 0 ) {
 		for ( int i = 0; i < lelInfo[id].numCaptureAttr; i++ ) {
 			CaptureAttr *ca = &pdaRun->tables->rtd->captureAttr[lelInfo[id].captureAttr + i];
-			Head *data = string_alloc_full( fsmRun->prg, 
+			Head *data = stringAllocFull( fsmRun->prg, 
 					fsmRun->mark[ca->mark_enter], fsmRun->mark[ca->mark_leave]
 					- fsmRun->mark[ca->mark_enter] );
 			Tree *string = constructString( fsmRun->prg, data );
@@ -630,7 +630,7 @@ void generationAction( Tree **sp, InputStream *inputStream, FsmRun *fsmRun,
 	executeGenerationAction( sp, fsmRun->prg, fsmRun, pdaRun, code, id, tokdata );
 
 	/* Finished with the match text. */
-	string_free( fsmRun->prg, tokdata );
+	stringFree( fsmRun->prg, tokdata );
 
 	/* Send the queued tokens. */
 	sendQueuedTokens( sp, pdaRun, fsmRun, inputStream );
@@ -787,7 +787,7 @@ void sendIgnore( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long 
 Head *extractMatch( Program *prg, FsmRun *fsmRun, InputStream *inputStream )
 {
 	long length = fsmRun->p - fsmRun->tokstart;
-	Head *head = string_alloc_pointer( prg, fsmRun->tokstart, length );
+	Head *head = stringAllocPointer( prg, fsmRun->tokstart, length );
 	head->location = prg->locationPool.allocate();
 	head->location->line = inputStream->line;
 	head->location->column = inputStream->column;
@@ -803,7 +803,7 @@ void sendToken( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pda
 	#ifdef COLM_LOG_PARSE
 	if ( colm_log_parse ) {
 		cerr << "token: " << pdaRun->tables->rtd->lelInfo[id].name << "  text: ";
-		cerr.write( string_data( tokdata ), string_length( tokdata ) );
+		cerr.write( stringData( tokdata ), stringLength( tokdata ) );
 		cerr << endl;
 	}
 	#endif

@@ -32,19 +32,19 @@
  * nulls.
  */
 
-Head *string_copy( Program *prg, Head *head )
+Head *stringCopy( Program *prg, Head *head )
 {
 	Head *result = 0;
 	if ( head != 0 ) {
 		if ( (char*)(head+1) == head->data )
-			result = string_alloc_full( prg, head->data, head->length );
+			result = stringAllocFull( prg, head->data, head->length );
 		else
-			result = string_alloc_pointer( prg, head->data, head->length );
+			result = stringAllocPointer( prg, head->data, head->length );
 	}
 	return result;
 }
 
-void string_free( Program *prg, Head *head )
+void stringFree( Program *prg, Head *head )
 {
 	if ( head != 0 ) {
 		if ( head->location != 0 )
@@ -61,27 +61,27 @@ void string_free( Program *prg, Head *head )
 	}
 }
 
-const char *string_data( Head *head )
+const char *stringData( Head *head )
 {
 	if ( head == 0 )
 		return 0;
 	return head->data;
 }
 
-long string_length( Head *head )
+long stringLength( Head *head )
 {
 	if ( head == 0 )
 		return 0;
 	return head->length;
 }
 
-void string_shorten( Head *head, long newlen )
+void stringShorten( Head *head, long newlen )
 {
 	assert( newlen <= head->length );
 	head->length = newlen;
 }
 
-Head *init_str_space( long length )
+Head *initStrSpace( long length )
 {
 	/* Find the length and allocate the space for the shared string. */
 	Head *head = (Head*) malloc( sizeof(Head) + length );
@@ -98,10 +98,10 @@ Head *init_str_space( long length )
 }
 
 /* Create from a c-style string. */
-Head *string_alloc_full( Program *prg, const char *data, long length )
+Head *stringAllocFull( Program *prg, const char *data, long length )
 {
 	/* Init space for the data. */
-	Head *head = init_str_space( length );
+	Head *head = initStrSpace( length );
 
 	/* Copy in the data. */
 	memcpy( (head+1), data, length );
@@ -110,7 +110,7 @@ Head *string_alloc_full( Program *prg, const char *data, long length )
 }
 
 /* Create from a c-style string. */
-Head *string_alloc_pointer( Program *prg, const char *data, long length )
+Head *stringAllocPointer( Program *prg, const char *data, long length )
 {
 	/* Find the length and allocate the space for the shared string. */
 	Head *head = prg->headPool.allocate();
@@ -122,13 +122,13 @@ Head *string_alloc_pointer( Program *prg, const char *data, long length )
 	return head;
 }
 
-Head *concat_str( Head *s1, Head *s2 )
+Head *concatStr( Head *s1, Head *s2 )
 {
 	long s1Len = s1->length;
 	long s2Len = s2->length;
 
 	/* Init space for the data. */
-	Head *head = init_str_space( s1Len + s2Len );
+	Head *head = initStrSpace( s1Len + s2Len );
 
 	/* Copy in the data. */
 	memcpy( (head+1), s1->data, s1Len );
@@ -137,11 +137,11 @@ Head *concat_str( Head *s1, Head *s2 )
 	return head;
 }
 
-Head *string_toupper( Head *s )
+Head *stringToUpper( Head *s )
 {
 	/* Init space for the data. */
 	long len = s->length;
-	Head *head = init_str_space( len );
+	Head *head = initStrSpace( len );
 
 	/* Copy in the data. */
 	const char *src = s->data;
@@ -152,11 +152,11 @@ Head *string_toupper( Head *s )
 	return head;
 }
 
-Head *string_tolower( Head *s )
+Head *stringToLower( Head *s )
 {
 	/* Init space for the data. */
 	long len = s->length;
-	Head *head = init_str_space( len );
+	Head *head = initStrSpace( len );
 
 	/* Copy in the data. */
 	const char *src = s->data;
@@ -169,7 +169,7 @@ Head *string_tolower( Head *s )
 
 
 /* Compare two strings. If identical returns 1, otherwise 0. */
-Word cmp_string( Head *s1, Head *s2 )
+Word cmpString( Head *s1, Head *s2 )
 {
 	if ( s1->length < s2->length )
 		return -1;
@@ -182,20 +182,20 @@ Word cmp_string( Head *s1, Head *s2 )
 	}
 }
 
-Word str_atoi( Head *str )
+Word strAtoi( Head *str )
 {
 	int res = atoi( (char*)(str->data) );
 	return res;
 }
 
-Head *int_to_str( Program *prg, Word i )
+Head *intToStr( Program *prg, Word i )
 {
 	char data[20];
 	sprintf( data, "%ld", i );
-	return string_alloc_full( prg, data, strlen(data) );
+	return stringAllocFull( prg, data, strlen(data) );
 }
 
-Word str_uord16( Head *head )
+Word strUord16( Head *head )
 {
 	uchar *data = (uchar*)(head->data);
 	ulong res;
@@ -204,16 +204,16 @@ Word str_uord16( Head *head )
 	return res;
 }
 
-Word str_uord8( Head *head )
+Word strUord8( Head *head )
 {
 	uchar *data = (uchar*)(head->data);
 	ulong res = (ulong)data[0];
 	return res;
 }
 
-Head *make_literal( Program *prg, long offset )
+Head *makeLiteral( Program *prg, long offset )
 {
-	return string_alloc_pointer( prg,
+	return stringAllocPointer( prg,
 			prg->rtd->litdata[offset],
 			prg->rtd->litlen[offset] );
 }

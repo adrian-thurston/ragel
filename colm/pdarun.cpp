@@ -253,9 +253,9 @@ head:
 	tree->flags |= AF_COMMITTED;
 
 	/* Do not recures on trees that are terminal dups. */
-	if ( !(tree->flags & AF_TERM_DUP) && tree_child( parser->prg, tree ) != 0 ) {
+	if ( !(tree->flags & AF_TERM_DUP) && treeChild( parser->prg, tree ) != 0 ) {
 		vm_push( (Tree*)lel );
-		lel = tree_child( parser->prg, tree );
+		lel = treeChild( parser->prg, tree );
 
 		if ( lel != 0 ) {
 			while ( lel != 0 ) {
@@ -680,7 +680,7 @@ parseError:
 			pdaRun->stackTop = pdaRun->stackTop->next;
 
 			/* Extract the real children from the child list. */
-			Kid *first = tree_extract_child( pdaRun->prg, undoLel->tree );
+			Kid *first = treeExtractChild( pdaRun->prg, undoLel->tree );
 
 			/* Walk the child list and and push the items onto the parsing
 			 * stack one at a time. */
@@ -734,10 +734,10 @@ ostream &parseError( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, i
 		cerr << "\"" << pdaRun->tables->rtd->lelInfo[tokId].name << "\"";
 	else 
 		cerr << pdaRun->tables->rtd->lelInfo[tokId].name;
-	if ( string_length( tree->tokdata ) > 0 ) {
+	if ( stringLength( tree->tokdata ) > 0 ) {
 		cerr << " with data \"";
-		cerr.write( string_data( tree->tokdata ), 
-				string_length( tree->tokdata ) );
+		cerr.write( stringData( tree->tokdata ), 
+				stringLength( tree->tokdata ) );
 		cerr << "\"";
 	}
 	cerr << ": ";

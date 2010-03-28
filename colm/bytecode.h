@@ -408,8 +408,6 @@ typedef Tree *SW;
 typedef Tree **StackPtr;
 typedef Tree **&StackRef;
 
-Tree **alloc_obj_data( long length );
-
 Kid *allocAttrs( Program *prg, long length );
 void freeAttrs( Program *prg, Kid *attrs );
 void setAttr( Tree *tree, long pos, Tree *val );
@@ -524,32 +522,30 @@ struct Stream;
 
 bool testFalse( Program *prg, Tree *tree );
 
-Head *string_alloc_full( Program *prg, const char *data, long length );
-Head *string_alloc_pointer( Program *prg, const char *data, long length );
-Head *string_copy( Program *prg, Head *head );
-void string_free( Program *prg, Head *head );
-long string_length( Head *str );
-const char *string_data( Head *str );
-void string_shorten( Head *tokdata, long newlen );
-Head *concat_str( Head *s1, Head *s2 );
-Word str_atoi( Head *str );
-Word str_uord16( Head *head );
-Word str_uord8( Head *head );
-Word cmp_string( Head *s1, Head *s2 );
-Head *string_toupper( Head *s );
-Head *string_tolower( Head *s );
+Head *stringAllocFull( Program *prg, const char *data, long length );
+Head *stringAllocPointer( Program *prg, const char *data, long length );
+Head *stringCopy( Program *prg, Head *head );
+void stringFree( Program *prg, Head *head );
+long stringLength( Head *str );
+const char *stringData( Head *str );
+void stringShorten( Head *tokdata, long newlen );
+Head *concatStr( Head *s1, Head *s2 );
+Word strAtoi( Head *str );
+Word strUord16( Head *head );
+Word strUord8( Head *head );
+Word cmpString( Head *s1, Head *s2 );
+Head *stringToUpper( Head *s );
+Head *stringToLower( Head *s );
 
-Head *int_to_str( Program *prg, Word i );
+Head *intToStr( Program *prg, Word i );
 
 void rcodeDownref( Program *prg, Tree **sp, Code *instr );
 void rcodeDownrefAll( Program *prg, Tree **sp, CodeVect *cv );
-void parsed_downref( Program *prg, Tree **sp, Tree *tree );
-void parsed_downref_all( PdaRun *parser );
 void commitFull( Tree **sp, PdaRun *parser, long commitReduce );
 Tree *getParsedRoot( PdaRun *pdaRun, bool stop );
 
-bool match_pattern( Tree **bindings, Program *prg, long pat, Kid *kid, bool checkNext );
-Head *make_literal( Program *prg, long litoffset );
+bool matchPattern( Tree **bindings, Program *prg, long pat, Kid *kid, bool checkNext );
+Head *makeLiteral( Program *prg, long litoffset );
 Tree *constructString( Program *prg, Head *s );
 Tree *constructInteger( Program *prg, long i );
 Tree *constructPointer( Program *prg, Tree *tree );
@@ -562,12 +558,10 @@ Stream *openStreamFd( Program *prg, long fd );
 
 void treeDownref( Program *prg, Tree **sp, Tree *tree );
 void treeUpref( Tree *tree );
-Kid *tree_child( Program *prg, const Tree *tree );
-Kid *tree_extract_child( Program *prg, Tree *tree );
-Kid *tree_ignore( Program *prg, Tree *tree );
+Kid *treeChild( Program *prg, const Tree *tree );
+Kid *treeExtractChild( Program *prg, Tree *tree );
+Kid *treeIgnore( Program *prg, Tree *tree );
 Kid *kidListConcat( Kid *list1, Kid *list2 );
-void ignore_data( Tree *tree, char *dest );
-long ignore_length( Tree *tree );
 Tree *splitTree( Program *prg, Tree *t );
 Tree *copyRealTree( Program *prg, Tree *tree, Kid *oldNextDown, Kid *&newNextDown, bool parsed );
 Tree *makeTree( Tree **root, Program *prg, long nargs );
@@ -576,48 +570,47 @@ Tree *prepParseTree( Program *prg, Tree **sp, Tree *tree );
 
 void printTree( ostream &out, Tree **&sp, Program *prg, Tree *tree );
 void printTree2( FILE *out, Tree **&sp, Program *prg, Tree *tree );
-void print_str( Head *str );
 void printXmlTree( Tree **&sp, Program *prg, Tree *tree, bool commAttr );
 void printXmlKid( Tree **&sp, Program *prg, Kid *kid, bool commAttr, int depth );
 
-long list_length( List *list );
-void list_append( Program *prg, List *list, Tree *val );
-Tree *list_remove_end( Program *prg, List *list );
-Tree *get_list_mem( List *list, Word field );
-Tree *get_list_mem_split( Program *prg, List *list, Word field );
-Tree *set_list_mem( List *list, Half field, Tree *value );
+long listLength( List *list );
+void listAppend( Program *prg, List *list, Tree *val );
+Tree *listRemoveEnd( Program *prg, List *list );
+Tree *getListMem( List *list, Word field );
+Tree *getListMemSplit( Program *prg, List *list, Word field );
+Tree *setListMem( List *list, Half field, Tree *value );
 
-Tree *map_find( Program *prg, Map *map, Tree *key );
-long map_length( Map *map );
-bool map_insert( Program *prg, Map *map, Tree *key, Tree *element );
-void map_unremove( Program *prg, Map *map, Tree *key, Tree *element );
-Tree *map_uninsert( Program *prg, Map *map, Tree *key );
-Tree *map_store( Program *prg, Map *map, Tree *key, Tree *element );
-Tree *map_unstore( Program *prg, Map *map, Tree *key, Tree *existing );
-TreePair map_remove( Program *prg, Map *map, Tree *key );
+Tree *mapFind( Program *prg, Map *map, Tree *key );
+long mapLength( Map *map );
+bool mapInsert( Program *prg, Map *map, Tree *key, Tree *element );
+void mapUnremove( Program *prg, Map *map, Tree *key, Tree *element );
+Tree *mapUninsert( Program *prg, Map *map, Tree *key );
+Tree *mapStore( Program *prg, Map *map, Tree *key, Tree *element );
+Tree *mapUnstore( Program *prg, Map *map, Tree *key, Tree *existing );
+TreePair mapRemove( Program *prg, Map *map, Tree *key );
 
-Tree *get_ptr_val( Pointer *ptr );
-Tree *get_ptr_val_split( Program *prg, Pointer *ptr );
-Tree *get_field( Tree *tree, Word field );
-Tree *get_field_split( Program *prg, Tree *tree, Word field );
-Tree *get_rhs_el( Program *prg, Tree *lhs, long position );
-void set_field( Program *prg, Tree *tree, long field, Tree *value );
+Tree *getPtrVal( Pointer *ptr );
+Tree *getPtrValSplit( Program *prg, Pointer *ptr );
+Tree *getField( Tree *tree, Word field );
+Tree *getFieldSplit( Program *prg, Tree *tree, Word field );
+Tree *getRhsEl( Program *prg, Tree *lhs, long position );
+void setField( Program *prg, Tree *tree, long field, Tree *value );
 
 /* For making references of attributes. */
-Kid *get_field_kid( Tree *tree, Word field );
+Kid *getFieldKid( Tree *tree, Word field );
 
-Tree *tree_iter_advance( Program *prg, Tree **&sp, TreeIter *iter );
-Tree *tree_iter_next_child( Program *prg, Tree **&sp, TreeIter *iter );
-Tree *tree_rev_iter_prev_child( Program *prg, Tree **&sp, RevTreeIter *iter );
-Tree *tree_iter_next_repeat( Program *prg, Tree **&sp, TreeIter *iter );
-Tree *tree_iter_prev_repeat( Program *prg, Tree **&sp, TreeIter *iter );
-Tree *tree_iter_deref_cur( TreeIter *iter );
-void set_triter_cur( TreeIter *iter, Tree *tree );
-void split_iter_cur( Tree **&sp, Program *prg, TreeIter *iter );
-void ref_set_value( Ref *ref, Tree *v );
-Tree *tree_search( Program *prg, Kid *kid, long id );
-Tree *tree_search( Program *prg, Tree *tree, long id );
-void split_ref( Tree **&sp, Program *prg, Ref *fromRef );
+Tree *treeIterAdvance( Program *prg, Tree **&sp, TreeIter *iter );
+Tree *treeIterNextChild( Program *prg, Tree **&sp, TreeIter *iter );
+Tree *treeRevIterPrevChild( Program *prg, Tree **&sp, RevTreeIter *iter );
+Tree *treeIterNextRepeat( Program *prg, Tree **&sp, TreeIter *iter );
+Tree *treeIterPrevRepeat( Program *prg, Tree **&sp, TreeIter *iter );
+Tree *treeIterDerefCur( TreeIter *iter );
+void setTriterCur( TreeIter *iter, Tree *tree );
+void splitIterCur( Tree **&sp, Program *prg, TreeIter *iter );
+void refSetValue( Ref *ref, Tree *v );
+Tree *treeSearch( Program *prg, Kid *kid, long id );
+Tree *treeSearch( Program *prg, Tree *tree, long id );
+void splitRef( Tree **&sp, Program *prg, Ref *fromRef );
 
 Tree **stackAlloc();
 
@@ -634,7 +627,7 @@ struct GenericInfo
 	long parserId;
 };
 
-long cmp_tree( Program *prg, const Tree *tree1, const Tree *tree2 );
+long cmpTree( Program *prg, const Tree *tree1, const Tree *tree2 );
 
 /*
  * Runtime environment

@@ -301,7 +301,7 @@ void send_named_lang_el( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream 
 	/* Copy the token data. */
 	Head *tokdata = 0;
 	if ( data != 0 )
-		tokdata = string_alloc_full( fsmRun->prg, data, length );
+		tokdata = stringAllocFull( fsmRun->prg, data, length );
 
 	Kid *input = makeToken( pdaRun, fsmRun, inputStream, klangEl->id, tokdata, true, bindId );
 
