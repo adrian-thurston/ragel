@@ -2190,6 +2190,23 @@ again:
 			treeDownref( prg, sp, (Tree*)o2 );
 			break;
 		}
+		case IN_DIV_INT: {
+			#ifdef COLM_LOG_BYTECODE
+			if ( colm_log_bytecode ) {
+				cerr << "IN_DIV_INT" << endl;
+			}
+			#endif
+
+			Int *o2 = (Int*)pop();
+			Int *o1 = (Int*)pop();
+			long r = o1->value / o2->value;
+			Tree *tree = constructInteger( prg, r );
+			treeUpref( tree );
+			push( tree );
+			treeDownref( prg, sp, (Tree*)o1 );
+			treeDownref( prg, sp, (Tree*)o2 );
+			break;
+		}
 		case IN_SUB_INT: {
 			#ifdef COLM_LOG_BYTECODE
 			if ( colm_log_bytecode ) {

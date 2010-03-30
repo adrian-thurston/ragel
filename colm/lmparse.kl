@@ -922,14 +922,32 @@ literal_item: TK_Literal
 		}
 	};
 
+
+# These two productions are responsible for setting and unsetting the Regular
+# language scanning context.
+enter_rl:
+	try {
+		enterRl = true;
+	}
+	undo {
+		enterRl = false;
+	};
+leave_rl:
+	try {
+		enterRl = false;
+	}
+	undo {
+		enterRl = true;
+	};
+
 token_def: 
 	token_or_ignore token_def_name obj_var_list
-	'/' opt_rl_join '/' opt_translate
+	enter_rl '/' opt_rl_join leave_rl '/' opt_translate
 	final {
 		bool ignore = $1->ignore;
 		String name = $2->name;
-		Join *join = $5->join;
-		CodeBlock *transBlock = $7->transBlock;
+		Join *join = $6->join;
+		CodeBlock *transBlock = $9->transBlock;
 
 		/* Check the region if this is for an ignore. */
 		if ( ignore && !pd->insideRegion )
@@ -1066,10 +1084,10 @@ pre_eof:
 	};
 
 rl_def:
-	KW_Rl machine_name '/' rl_join '/'
+	KW_Rl machine_name enter_rl '/' rl_join leave_rl '/'
 	final {
 		/* Generic creation of machine for instantiation and assignment. */
-		JoinOrLm *joinOrLm = new JoinOrLm( $4->join );
+		JoinOrLm *joinOrLm = new JoinOrLm( $5->join );
 		addRegularDef( $2->loc, namespaceStack.top(), $2->data, joinOrLm, false );
 
 		if ( reCaptureVect.length() > 0 )
@@ -1565,6 +1583,11 @@ nonterm code_multiplicitive uses code_expr;
 code_multiplicitive: code_multiplicitive '*' code_unary
 	final {
 		$$->expr = new LangExpr( $2->loc, $1->expr, '*', $3->expr );
+	};
+
+code_multiplicitive: code_multiplicitive '/' code_unary
+	final {
+		$$->expr = new LangExpr( $2->loc, $1->expr, '/', $3->expr );
 	};
 
 code_multiplicitive: code_unary

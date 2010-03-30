@@ -70,7 +70,7 @@ struct Parser
 	int parseLangEl( int type, const Token *token );
 
 	Parser( const char *fileName, const char *sectionName, const InputLoc &sectionLoc )
-		: sectionName(sectionName)
+		: sectionName(sectionName), enterRl(false)
 	{
 		pd = new ParseData( fileName, sectionName, sectionLoc, std::cout );
 	}
@@ -106,6 +106,8 @@ struct Parser
 
 	PredType predType;
 	ReCaptureVect reCaptureVect;
+
+	bool enterRl;
 };
 
 %% write token_defs;

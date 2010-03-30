@@ -46,6 +46,7 @@ typedef unsigned char uchar;
 #define IN_ADD_INT               0x07
 #define IN_SUB_INT               0x08
 #define IN_MULT_INT              0x09
+#define IN_DIV_INT               0xd0
 
 #define IN_TST_EQL               0x0a
 #define IN_TST_NOT_EQL           0x0b

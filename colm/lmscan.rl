@@ -480,7 +480,8 @@ void Scanner::endSection( )
 
 		'/' => { 
 			token( '/' ); 
-			fcall regular_type;
+			if ( parser->enterRl )
+				fcall regular_type;
 		};
 
 		"~" [^\n]* NL => { 

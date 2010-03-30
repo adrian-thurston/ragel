@@ -1508,6 +1508,19 @@ UniqueType *LangExpr::evaluate( ParseData *pd, CodeVect &code ) const
 							"operator for these types" << endp;
 					break;
 				}
+				case '/': {
+					UniqueType *lt = left->evaluate( pd, code );
+					UniqueType *rt = right->evaluate( pd, code );
+
+					if ( lt == pd->uniqueTypeInt && rt == pd->uniqueTypeInt ) {
+						code.append( IN_DIV_INT );
+						return pd->uniqueTypeInt;
+					}
+
+					error(loc) << "do not have an division"
+							"operator for these types" << endp;
+					break;
+				}
 				case OP_DoubleEql: {
 					UniqueType *lt = left->evaluate( pd, code );
 					UniqueType *rt = right->evaluate( pd, code );
