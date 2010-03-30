@@ -62,4 +62,5 @@ TESTS="
 	tags.lm
 	heredoc.lm
 	commitbt.lm
+	sprintf.lm
 "
