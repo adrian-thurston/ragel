@@ -2333,6 +2333,9 @@ void ParseData::initStrObject( )
 	initFunction( uniqueTypeInt, strObj, "uord32", IN_STR_UORD32, IN_STR_UORD32, true );
 	initFunction( uniqueTypeInt, strObj, "sord32", IN_STR_SORD32, IN_STR_SORD32, true );
 	addLengthField( strObj, IN_STR_LENGTH );
+
+	initFunction( uniqueTypeStr, globalObjectDef, "sprintf", 
+			IN_SPRINTF, IN_SPRINTF, uniqueTypeStr, uniqueTypeInt, true );
 }
 
 void ParseData::initStreamObject( )

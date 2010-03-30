@@ -277,6 +277,8 @@ typedef unsigned char uchar;
 #define IN_LOAD_CTX_WV           0xb7
 #define IN_LOAD_CTX_BKT          0xb8
 
+#define IN_SPRINTF               0xcf
+
 
 /* Types */
 #define TYPE_NIL      0x01
@@ -393,6 +395,8 @@ struct Ref;
 struct TreeIter;
 struct RevTreeIter;
 struct Pointer;
+struct Str;
+struct Int;
 
 typedef unsigned char Code;
 typedef unsigned long Word;
@@ -536,6 +540,7 @@ Word strUord8( Head *head );
 Word cmpString( Head *s1, Head *s2 );
 Head *stringToUpper( Head *s );
 Head *stringToLower( Head *s );
+Head *stringSprintf( Program *prg, Str *format, Int *integer );
 
 Head *intToStr( Program *prg, Word i );
 

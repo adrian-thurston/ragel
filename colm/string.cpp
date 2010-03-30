@@ -218,3 +218,11 @@ Head *makeLiteral( Program *prg, long offset )
 			prg->rtd->litlen[offset] );
 }
 
+Head *stringSprintf( Program *prg, Str *format, Int *integer )
+{
+	Head *formatHead = format->value;
+	long written = snprintf( 0, 0, stringData(formatHead), integer->value );
+	Head *head = initStrSpace( written+1 );
+	written = snprintf( (char*)head->data, written+1, stringData(formatHead), integer->value );
+	return head;
+}

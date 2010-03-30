@@ -213,7 +213,7 @@ Tree *extractInput( Program *prg, Accum *accum )
 	return (Tree*)accum->stream;
 }
 
-void set_input( Program *prg, Tree **sp, Accum *accum, Stream *stream )
+void setInput( Program *prg, Tree **sp, Accum *accum, Stream *stream )
 {
 	if ( accum->stream != 0 )
 		treeDownref( prg, sp, (Tree*)accum->stream );
@@ -222,7 +222,7 @@ void set_input( Program *prg, Tree **sp, Accum *accum, Stream *stream )
 	treeUpref( (Tree*)accum->stream );
 }
 
-void parse_stream( Tree **&sp, Program *prg, Tree *input, Accum *accum, long stopId )
+void parseStream( Tree **&sp, Program *prg, Tree *input, Accum *accum, long stopId )
 {
 	accum->pdaRun->stopTarget = stopId;
 
@@ -231,7 +231,7 @@ void parse_stream( Tree **&sp, Program *prg, Tree *input, Accum *accum, long sto
 	parseLoop( sp, accum->pdaRun, accum->fsmRun, stream->in );
 }
 
-Word stream_append( Tree **&sp, Program *prg, Tree *input, Stream *stream )
+Word streamAppend( Tree **&sp, Program *prg, Tree *input, Stream *stream )
 {
 	if ( input->id == LEL_ID_STR ) {
 		//assert(false);
@@ -1817,6 +1817,24 @@ again:
 			popn( n );
 			break;
 		}
+		case IN_SPRINTF: {
+			#ifdef COLM_LOG_BYTECODE
+			if ( colm_log_bytecode ) {
+				cerr << "IN_SPRINTF" << endl;
+			}
+			#endif
+
+			pop();
+			Tree *integer = pop();
+			Tree *format = pop();
+			Head *res = stringSprintf( prg, (Str*)format, (Int*)integer );
+			Tree *str = constructString( prg, res );
+			treeUpref( str );
+			push( str );
+			treeDownref( prg, sp, integer );
+			treeDownref( prg, sp, format );
+			break;
+		}
 		case IN_STR_ATOI: {
 			#ifdef COLM_LOG_BYTECODE
 			if ( colm_log_bytecode ) {
@@ -2580,7 +2598,7 @@ again:
 
 			Tree *accum = pop();
 			Tree *input = pop();
-			set_input( prg, sp, (Accum*)accum, (Stream*)input );
+			setInput( prg, sp, (Accum*)accum, (Stream*)input );
 			treeDownref( prg, sp, accum );
 			treeDownref( prg, sp, input );
 			break;
@@ -2595,7 +2613,7 @@ again:
 
 			Tree *stream = pop();
 			Tree *input = pop();
-			stream_append( sp, prg, input, (Stream*)stream );
+			streamAppend( sp, prg, input, (Stream*)stream );
 
 			treeDownref( prg, sp, input );
 			push( stream );
@@ -2610,7 +2628,7 @@ again:
 
 			Tree *stream = pop();
 			Tree *input = pop();
-			Word len = stream_append( sp, prg, input, (Stream*)stream );
+			Word len = streamAppend( sp, prg, input, (Stream*)stream );
 
 			treeUpref( stream );
 			push( stream );
@@ -2654,7 +2672,7 @@ again:
 			Tree *accum = pop();
 			Tree *stream = pop();
 
-			parse_stream( sp, prg, stream, (Accum*)accum, stopId );
+			parseStream( sp, prg, stream, (Accum*)accum, stopId );
 
 			treeDownref( prg, sp, stream );
 			treeDownref( prg, sp, accum );
@@ -2675,7 +2693,7 @@ again:
 			Tree *stream = pop();
 
 			long consumed = ((Accum*)accum)->pdaRun->consumed;
-			parse_stream( sp, prg, stream, (Accum*)accum, stopId );
+			parseStream( sp, prg, stream, (Accum*)accum, stopId );
 
 			//treeDownref( prg, sp, stream );
 			//treeDownref( prg, sp, accum );
