@@ -63,4 +63,5 @@ TESTS="
 	heredoc.lm
 	commitbt.lm
 	sprintf.lm
+	div.lm
 "

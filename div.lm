@@ -1,0 +1,6 @@
+
+int i = 0
+while ( i < 34 ) {
+	print( i / 4, '\n' )
+	i = i + 1
+}
