@@ -748,12 +748,13 @@ template <class T> long PoolAlloc<T>::numlost()
 	return lost;
 }
 
-struct Int;
+void initProgram( Program *program, int argc, char **argv,
+		bool ctxDepParsing, RuntimeData *rtd );
+void clearProgram( Program *prg, Tree **vm_stack, Tree **sp );
+void runProgram( Program *prg );
 
 struct Program
 {
-	Program( int argc, char **argv, bool ctxDepParsing, RuntimeData *rtd );
-
 	int argc;
 	char **argv;
 
@@ -772,10 +773,7 @@ struct Program
 	Tree *trueVal;
 	Tree *falseVal;
 
-	void run();
 
-	void clear( Tree **vm_stack, Tree **sp );
-	void clearGlobal( Tree **sp );
 	void allocGlobal();
 
 	Kid *heap;
@@ -785,11 +783,12 @@ struct Program
 	Stream *stderrVal;
 };
 
+
 struct Execution
 {
 	Execution( Program *prg, CodeVect &reverseCode,
-			PdaRun *pdaRun, FsmRun *fsmRun, Code *code, Tree *lhs,
-			long genId, Head *matchText, char **captures );
+		PdaRun *pdaRun, FsmRun *fsmRun, Code *code, Tree *lhs,
+		long genId, Head *matchText, char **captures );
 
 	Program *prg;
 	PdaTables *pdaTables;

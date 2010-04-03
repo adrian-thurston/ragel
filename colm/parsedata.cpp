@@ -1471,7 +1471,9 @@ void ParseData::initEmptyScanners()
 
 void ParseData::parsePatterns()
 {
-	Program program( 0, 0, false, runtimeData );
+	Program prg;
+	initProgram( &prg, 0, 0, false, runtimeData );
+
 	Tree **vm_stack = stackAlloc();
 	Tree **root = &vm_stack[VM_STACK_SIZE];
 
@@ -1484,8 +1486,8 @@ void ParseData::parsePatterns()
 		InputStreamRepl in( repl );
 		initInputStream( &in );
 
-		FsmRun *fsmRun = new FsmRun( &program );
-		repl->pdaRun = new PdaRun( &program,
+		FsmRun *fsmRun = new FsmRun( &prg );
+		repl->pdaRun = new PdaRun( &prg,
 				pdaTables, fsmRun, repl->langEl->parserId, 0, false );
 
 		initPdaRun( repl->pdaRun, 0 );
@@ -1503,8 +1505,8 @@ void ParseData::parsePatterns()
 		InputStreamPattern in( pat );
 		initInputStream( &in );
 
-		FsmRun *fsmRun = new FsmRun( &program );
-		pat->pdaRun = new PdaRun( &program,
+		FsmRun *fsmRun = new FsmRun( &prg );
+		pat->pdaRun = new PdaRun( &prg,
 				pdaTables, fsmRun, pat->langEl->parserId, 0, false );
 
 		initPdaRun( pat->pdaRun, 0 );
@@ -1513,7 +1515,7 @@ void ParseData::parsePatterns()
 		parseLoop( root, pat->pdaRun, fsmRun, &in );
 	}
 
-	fillInPatterns( &program );
+	fillInPatterns( &prg );
 }
 
 void ParseData::resolveUses()

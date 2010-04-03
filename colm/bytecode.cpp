@@ -136,7 +136,8 @@ Tree *prepParseTree( Program *prg, Tree **sp, Tree *tree )
 	return  tree;
 }
 
-void sendTreeFrag( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream,
+void sendTreeFrag( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, 
+		InputStream *inputStream,
 		Tree *tree, bool ignore )
 {
 	tree = prepParseTree( prg, sp, tree );
@@ -471,32 +472,48 @@ Tree *constructArgv( Program *prg, int argc, char **argv )
  * Execution environment
  */
 
-Program::Program( int argc, char **argv, bool ctxDepParsing, RuntimeData *rtd )
-:
-	argc(argc), argv(argv),
-	ctxDepParsing(ctxDepParsing),
-	rtd(rtd),
-	global(0),
-	heap(0),
-	stdinVal(0),
-	stdoutVal(0),
-	stderrVal(0)
+void initProgram( Program *prg, int argc, char **argv, bool ctxDepParsing, 
+		RuntimeData *rtd )
 {
-	Int *trueInt = (Int*) treePool.allocate();
+	prg->argc = argc;
+	prg->argv = argv;
+	prg->ctxDepParsing = ctxDepParsing;
+	prg->rtd = rtd;
+	prg->global = 0;
+	prg->heap = 0;
+	prg->stdinVal = 0;
+	prg->stdoutVal = 0;
+	prg->stderrVal = 0;
+
+	Int *trueInt = (Int*) prg->treePool.allocate();
 	trueInt->id = LEL_ID_BOOL;
 	trueInt->refs = 1;
 	trueInt->value = 1;
 
-	Int *falseInt = (Int*) treePool.allocate();
+	Int *falseInt = (Int*) prg->treePool.allocate();
 	falseInt->id = LEL_ID_BOOL;
 	falseInt->refs = 1;
 	falseInt->value = 0;
 
-	trueVal = (Tree*)trueInt;
-	falseVal = (Tree*)falseInt;
+	prg->trueVal = (Tree*)trueInt;
+	prg->falseVal = (Tree*)falseInt;
 }
 
-void Program::clear( Tree **vm_stack, Tree **sp )
+void clearGlobal( Program *prg, Tree **sp )
+{
+	/* Downref all the fields in the global object. */
+	for ( int g = 0; g < prg->rtd->globalSize; g++ ) {
+		//assert( getAttr( global, g )->refs == 1 );
+		treeDownref( prg, sp, getAttr( prg->global, g ) );
+	}
+
+	/* Free the global object. */
+	if ( prg->rtd->globalSize > 0 )
+		freeAttrs( prg, prg->global->child );
+	prg->treePool.free( prg->global );
+}
+
+void clearProgram( Program *prg, Tree **vm_stack, Tree **sp )
 {
 	#ifdef COLM_LOG_BYTECODE
 	if ( colm_log_bytecode ) {
@@ -504,60 +521,60 @@ void Program::clear( Tree **vm_stack, Tree **sp )
 	}
 	#endif
 
-	clearGlobal( sp );
+	clearGlobal( prg, sp );
 
 	/* Clear the heap. */
-	Kid *a = heap;
+	Kid *a = prg->heap;
 	while ( a != 0 ) {
 		Kid *next = a->next;
-		treeDownref( this, sp, a->tree );
-		kidPool.free( a );
+		treeDownref( prg, sp, a->tree );
+		prg->kidPool.free( a );
 		a = next;
 	}
 
 	//assert( trueVal->refs == 1 );
 	//assert( falseVal->refs == 1 );
-	treeDownref( this, sp, trueVal );
-	treeDownref( this, sp, falseVal );
+	treeDownref( prg, sp, prg->trueVal );
+	treeDownref( prg, sp, prg->falseVal );
 
-	treeDownref( this, sp, (Tree*)stdinVal );
-	treeDownref( this, sp, (Tree*)stdoutVal );
-	treeDownref( this, sp, (Tree*)stderrVal );
+	treeDownref( prg, sp, (Tree*)prg->stdinVal );
+	treeDownref( prg, sp, (Tree*)prg->stdoutVal );
+	treeDownref( prg, sp, (Tree*)prg->stderrVal );
 
-	long kidLost = kidPool.numlost();
+	long kidLost = prg->kidPool.numlost();
 	if ( kidLost )
 		cerr << "warning: lost kids: " << kidLost << endl;
 
-	long treeLost = treePool.numlost();
+	long treeLost = prg->treePool.numlost();
 	if ( treeLost )
 		cerr << "warning: lost trees: " << treeLost << endl;
 
-	long parseTreeLost = parseTreePool.numlost();
+	long parseTreeLost = prg->parseTreePool.numlost();
 	if ( parseTreeLost )
 		cerr << "warning: lost parse trees: " << parseTreeLost << endl;
 
-	long listLost = listElPool.numlost();
+	long listLost = prg->listElPool.numlost();
 	if ( listLost )
 		cerr << "warning: lost listEls: " << listLost << endl;
 
-	long mapLost = mapElPool.numlost();
+	long mapLost = prg->mapElPool.numlost();
 	if ( mapLost )
 		cerr << "warning: lost mapEls: " << mapLost << endl;
 
-	long headLost = headPool.numlost();
+	long headLost = prg->headPool.numlost();
 	if ( headLost )
 		cerr << "warning: lost heads: " << headLost << endl;
 
-	long locationLost = locationPool.numlost();
+	long locationLost = prg->locationPool.numlost();
 	if ( locationLost )
 		cerr << "warning: lost locations: " << locationLost << endl;
 
-	kidPool.clear();
-	treePool.clear();
-	parseTreePool.clear();
-	listElPool.clear();
-	mapElPool.clear();
-	locationPool.clear();
+	prg->kidPool.clear();
+	prg->treePool.clear();
+	prg->parseTreePool.clear();
+	prg->listElPool.clear();
+	prg->mapElPool.clear();
+	prg->locationPool.clear();
 
 	//reverseCode.empty();
 	//memset( vm_stack, 0, sizeof(Tree*) * VM_STACK_SIZE);
@@ -572,20 +589,6 @@ void Program::allocGlobal()
 	global = tree;
 }
 
-void Program::clearGlobal( Tree **sp )
-{
-	/* Downref all the fields in the global object. */
-	for ( int g = 0; g < rtd->globalSize; g++ ) {
-		//assert( getAttr( global, g )->refs == 1 );
-		treeDownref( this, sp, getAttr( global, g ) );
-	}
-
-	/* Free the global object. */
-	if ( rtd->globalSize > 0 )
-		freeAttrs( this, global->child );
-	treePool.free( global );
-}
-
 Tree **stackAlloc()
 {
 	//return new Tree*[VM_STACK_SIZE];
@@ -594,7 +597,7 @@ Tree **stackAlloc()
 		PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0 );
 }
 
-void Program::run()
+void runProgram( Program *prg )
 {
 	assert( sizeof(Int)      <= sizeof(Tree) );
 	assert( sizeof(Str)      <= sizeof(Tree) );
@@ -605,7 +608,7 @@ void Program::run()
 	assert( sizeof(Accum)    <= sizeof(MapEl) );
 
 	/* Allocate the global variable. */
-	allocGlobal();
+	prg->allocGlobal();
 
 	/* 
 	 * Allocate the VM stack.
@@ -618,9 +621,9 @@ void Program::run()
 	 * Execute
 	 */
 
-	if ( rtd->rootCodeLen > 0 ) {
+	if ( prg->rtd->rootCodeLen > 0 ) {
 		CodeVect reverseCode;
-		Execution execution( this, reverseCode, 0, 0, rtd->rootCode, 0, 0, 0, 0 );
+		Execution execution( prg, reverseCode, 0, 0, prg->rtd->rootCode, 0, 0, 0, 0 );
 		execution.execute( root );
 
 		/* Pull out the reverse code and free it. */
@@ -636,7 +639,7 @@ void Program::run()
 	}
 
 	/* Clear */
-	clear( vm_stack, root );
+	clearProgram( prg, vm_stack, root );
 }
 
 Execution::Execution( Program *prg, CodeVect &reverseCode,
