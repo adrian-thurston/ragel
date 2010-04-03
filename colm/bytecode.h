@@ -752,6 +752,7 @@ void initProgram( Program *program, int argc, char **argv,
 		bool ctxDepParsing, RuntimeData *rtd );
 void clearProgram( Program *prg, Tree **vm_stack, Tree **sp );
 void runProgram( Program *prg );
+void allocGlobal( Program *prg );
 
 struct Program
 {
@@ -774,7 +775,6 @@ struct Program
 	Tree *falseVal;
 
 
-	void allocGlobal();
 
 	Kid *heap;
 
@@ -807,8 +807,6 @@ struct Execution
 	long rcodeUnitLen;
 	char **captures;
 
-	void execute( Tree **root );
-	void rexecute( Tree **root, CodeVect *allRev );
 	void execute( Tree **&sp, Code *instr );
 	void rdownref( Code *instr );
 };
@@ -816,5 +814,8 @@ struct Execution
 void initExecution( Execution *exec, Program *prg, CodeVect *reverseCode,
 		PdaRun *pdaRun, FsmRun *fsmRun, Code *code, Tree *lhs,
 		long genId, Head *matchText, char **captures );
+
+void rexecute( Execution *exec, Tree **root, CodeVect *allRev );
+void execute( Execution *exec, Tree **root );
 
 #endif

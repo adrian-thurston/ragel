@@ -580,13 +580,13 @@ void clearProgram( Program *prg, Tree **vm_stack, Tree **sp )
 	//memset( vm_stack, 0, sizeof(Tree*) * VM_STACK_SIZE);
 }
 
-void Program::allocGlobal()
+void allocGlobal( Program *prg )
 {
 	/* Alloc the global. */
-	Tree *tree = treePool.allocate();
-	tree->child = allocAttrs( this, rtd->globalSize );
+	Tree *tree = prg->treePool.allocate();
+	tree->child = allocAttrs( prg, prg->rtd->globalSize );
 	tree->refs = 1;
-	global = tree;
+	prg->global = tree;
 }
 
 Tree **stackAlloc()
@@ -608,7 +608,7 @@ void runProgram( Program *prg )
 	assert( sizeof(Accum)    <= sizeof(MapEl) );
 
 	/* Allocate the global variable. */
-	prg->allocGlobal();
+	allocGlobal( prg );
 
 	/* 
 	 * Allocate the VM stack.
@@ -625,7 +625,7 @@ void runProgram( Program *prg )
 		CodeVect reverseCode;
 		Execution execution;
 		initExecution( &execution, prg, &reverseCode, 0, 0, prg->rtd->rootCode, 0, 0, 0, 0 );
-		execution.execute( root );
+		execute( &execution, root );
 
 		/* Pull out the reverse code and free it. */
 		#ifdef COLM_LOG_BYTECODE
@@ -968,21 +968,21 @@ again:
 	goto again;
 }
 
-void Execution::execute( Tree **root )
+void execute( Execution *exec, Tree **root )
 {
 	Tree **sp = root;
 
 	/* If we have a lhs push it to the stack. */
-	bool haveLhs = lhs != 0;
+	bool haveLhs = exec->lhs != 0;
 	if ( haveLhs )
-		push( lhs );
+		push( exec->lhs );
 
 	/* Execution loop. */
-	execute( sp, code );
+	exec->execute( sp, exec->code );
 
 	/* Take the lhs off the stack. */
 	if ( haveLhs )
-		lhs = (Tree*) pop();
+		exec->lhs = (Tree*) pop();
 
 	assert( sp == root );
 }
@@ -1018,7 +1018,7 @@ bool makeReverseCode( CodeVect *all, CodeVect &reverseCode )
 	return true;
 }
 
-void Execution::rexecute( Tree **root, CodeVect *allRev )
+void rexecute( Execution *exec, Tree **root, CodeVect *allRev )
 {
 	/* Read the length */
 	Code *prcode = allRev->data + allRev->length() - SIZEOF_WORD;
@@ -1031,7 +1031,7 @@ void Execution::rexecute( Tree **root, CodeVect *allRev )
 
 	/* Execute it. */
 	Tree **sp = root;
-	execute( sp, prcode );
+	exec->execute( sp, prcode );
 	assert( sp == root );
 
 	/* Backup over it. */

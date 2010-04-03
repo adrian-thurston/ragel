@@ -483,17 +483,17 @@ again:
 			FrameInfo *fi = &pdaRun->tables->rtd->frameInfo[pdaRun->tables->rtd->prodInfo[reduction].frameId];
 
 			/* Execution environment for the reduction code. */
-			Execution execution;
-			initExecution( &execution, pdaRun->prg, &pdaRun->reverseCode, 
+			Execution exec;
+			initExecution( &exec, pdaRun->prg, &pdaRun->reverseCode, 
 					pdaRun, fsmRun, fi->codeWV, redLel->tree, 0, 0, fsmRun->mark );
 
 			/* Execute it. */
-			execution.execute( sp );
+			execute( &exec, sp );
 
 			/* If the lhs was saved and it changed then we need to restore the
 			 * original upon backtracking, otherwise downref since we took a
 			 * copy above. */
-			if ( execution.parsed != 0 && execution.parsed != redLel->tree ) {
+			if ( exec.parsed != 0 && exec.parsed != redLel->tree ) {
 				#ifdef COLM_LOG_PARSE
 				if ( colm_log_parse ) {
 					cerr << "lhs tree was modified, adding a restore instruction" << endl;
@@ -501,12 +501,12 @@ again:
 				#endif
 
 				/* Transfer the lhs from the environment to redLel. */
-				redLel->tree = prepParseTree( pdaRun->prg, sp, execution.lhs );
+				redLel->tree = prepParseTree( pdaRun->prg, sp, exec.lhs );
 				treeUpref( redLel->tree );
-				treeDownref( pdaRun->prg, sp, execution.lhs );
+				treeDownref( pdaRun->prg, sp, exec.lhs );
 
 				pdaRun->reverseCode.append( IN_RESTORE_LHS );
-				pdaRun->reverseCode.appendWord( (Word)execution.parsed );
+				pdaRun->reverseCode.appendWord( (Word)exec.parsed );
 				pdaRun->reverseCode.append( SIZEOF_CODE + SIZEOF_WORD );
 			}
 
@@ -517,7 +517,7 @@ again:
 
 			/* Perhaps the execution environment is telling us we need to
 			 * reject the reduction. */
-			induceReject = execution.reject;
+			induceReject = exec.reject;
 		}
 
 		/* If the left hand side was replaced then the only parse algorithm
@@ -657,18 +657,18 @@ parseError:
 
 			/* Check for an execution environment. */
 			if ( undoLel->tree->flags & AF_HAS_RCODE ) {
-				Execution execution;
-				initExecution( &execution, pdaRun->prg, &pdaRun->reverseCode, 
+				Execution exec;
+				initExecution( &exec, pdaRun->prg, &pdaRun->reverseCode, 
 						pdaRun, fsmRun, 0, 0, 0, 0, fsmRun->mark );
 
 				/* Do the reverse exeuction. */
-				execution.rexecute( sp, pdaRun->allReverseCode );
+				rexecute( &exec, sp, pdaRun->allReverseCode );
 				undoLel->tree->flags &= ~AF_HAS_RCODE;
 
-				if ( execution.lhs != 0 ) {
+				if ( exec.lhs != 0 ) {
 					/* Get the lhs, it may have been reverted. */
 					treeDownref( pdaRun->prg, sp, undoLel->tree );
-					undoLel->tree = execution.lhs;
+					undoLel->tree = exec.lhs;
 				}
 			}
 
