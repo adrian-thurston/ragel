@@ -783,13 +783,8 @@ struct Program
 	Stream *stderrVal;
 };
 
-
 struct Execution
 {
-	Execution( Program *prg, CodeVect &reverseCode,
-		PdaRun *pdaRun, FsmRun *fsmRun, Code *code, Tree *lhs,
-		long genId, Head *matchText, char **captures );
-
 	Program *prg;
 	PdaTables *pdaTables;
 	PdaRun *pdaRun;
@@ -808,7 +803,7 @@ struct Execution
 	bool reject;
 
 	/* Reverse code. */
-	CodeVect &reverseCode;
+	CodeVect *reverseCode;
 	long rcodeUnitLen;
 	char **captures;
 
@@ -817,5 +812,9 @@ struct Execution
 	void execute( Tree **&sp, Code *instr );
 	void rdownref( Code *instr );
 };
+
+void initExecution( Execution *exec, Program *prg, CodeVect *reverseCode,
+		PdaRun *pdaRun, FsmRun *fsmRun, Code *code, Tree *lhs,
+		long genId, Head *matchText, char **captures );
 
 #endif
