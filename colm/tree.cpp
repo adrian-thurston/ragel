@@ -30,6 +30,19 @@ using std::cerr;
 using std::endl;
 using std::ostream;
 
+void initUserIter( UserIter *userIter, Tree **stackRoot, long argSize, long searchId )
+{
+	userIter->stackRoot = stackRoot;
+	userIter->argSize = argSize;
+	userIter->stackSize = 0;
+	userIter->resume = 0;
+	userIter->frame = 0;
+	userIter->searchId = searchId;
+
+	userIter->ref.kid = 0;
+	userIter->ref.next = 0;
+}
+
 Kid *allocAttrs( Program *prg, long length )
 {
 	Kid *cur = 0;

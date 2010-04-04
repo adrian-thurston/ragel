@@ -329,15 +329,6 @@ struct FunctionInfo
 
 struct UserIter
 {
-	UserIter( Tree **stackRoot, long argSize, long searchId ) : 
-		stackRoot(stackRoot), 
-		argSize(argSize), stackSize(0),
-		resume(0), frame(0), searchId(searchId)
-	{
-		ref.kid = 0;
-		ref.next = 0;
-	}
-		
 	/* The current item. */
 	Ref ref;
 	Tree **stackRoot;
@@ -347,6 +338,9 @@ struct UserIter
 	Tree **frame;
 	long searchId;
 };
+
+void initUserIter( UserIter *userIter, Tree **stackRoot, long argSize, long searchId );
+
 
 /*
  * Program Data.

@@ -45,10 +45,10 @@ using std::hex;
 #define ptop() (sp)
 #define popn(n) (sp += (n))
 #define pushn(n) (sp -= (n))
-#define local(o) (frame[o])
-#define plocal(o) (&frame[o])
-#define local_iframe(o) (iframe[o])
-#define plocal_iframe(o) (&iframe[o])
+#define local(o) (exec->frame[o])
+#define plocal(o) (&exec->frame[o])
+#define local_iframe(o) (exec->iframe[o])
+#define plocal_iframe(o) (&exec->iframe[o])
 
 #define read_byte( i ) do { \
 	i = ((uchar) *instr++); \
@@ -386,14 +386,14 @@ void setLocal( Tree **frame, long field, Tree *tree )
 {
 	if ( tree != 0 )
 		assert( tree->refs >= 1 );
-	local(field) = tree;
+	frame[field] = tree;
 }
 
 Tree *getLocalSplit( Program *prg, Tree **frame, long field )
 {
-	Tree *val = local(field);
+	Tree *val = frame[field];
 	Tree *split = splitTree( prg, val );
-	local(field) = split;
+	frame[field] = split;
 	return split;
 }
 
@@ -406,7 +406,7 @@ void downrefLocalTrees( Program *prg, Tree **sp, Tree **frame, char *trees, long
 		}
 		#endif
 
-		treeDownref( prg, sp, local((long)trees[i]) );
+		treeDownref( prg, sp, frame[((long)trees[i])] );
 	}
 }
 
@@ -415,7 +415,8 @@ UserIter *uiterCreate( Tree **&sp, Program *prg, FunctionInfo *fi, long searchId
 	pushn( sizeof(UserIter) / sizeof(Word) );
 	void *mem = ptop();
 
-	UserIter *uiter = new(mem) UserIter( ptop(), fi->argSize, searchId );
+	UserIter *uiter = new(mem) UserIter;
+	initUserIter( uiter, ptop(), fi->argSize, searchId );
 	return uiter;
 }
 
@@ -576,7 +577,7 @@ void clearProgram( Program *prg, Tree **vm_stack, Tree **sp )
 	prg->mapElPool.clear();
 	prg->locationPool.clear();
 
-	//reverseCode->empty();
+	//exec->reverseCode->empty();
 	//memset( vm_stack, 0, sizeof(Tree*) * VM_STACK_SIZE);
 }
 
@@ -968,23 +969,19 @@ again:
 	goto again;
 }
 
-void execute( Execution *exec, Tree **root )
+void execute( Execution *exec, Tree **sp )
 {
-	Tree **sp = root;
-
 	/* If we have a lhs push it to the stack. */
 	bool haveLhs = exec->lhs != 0;
 	if ( haveLhs )
 		push( exec->lhs );
 
 	/* Execution loop. */
-	exec->execute( sp, exec->code );
+	execute( exec, sp, exec->code );
 
 	/* Take the lhs off the stack. */
 	if ( haveLhs )
 		exec->lhs = (Tree*) pop();
-
-	assert( sp == root );
 }
 
 bool makeReverseCode( CodeVect *all, CodeVect &reverseCode )
@@ -1031,15 +1028,20 @@ void rexecute( Execution *exec, Tree **root, CodeVect *allRev )
 
 	/* Execute it. */
 	Tree **sp = root;
-	exec->execute( sp, prcode );
+	execute( exec, sp, prcode );
 	assert( sp == root );
 
 	/* Backup over it. */
 	allRev->tabLen -= len + SIZEOF_WORD;
 }
 
-void Execution::execute( Tree **&sp, Code *instr )
+void execute( Execution *exec, Tree **sp, Code *instr )
 {
+	/* When we exit we are going to verify that we did not eat up any stack
+	 * space. */
+	Tree **root = sp;
+	Program *prg = exec->prg;
+
 again:
 	switch ( *instr++ ) {
 		case IN_SAVE_LHS: {
@@ -1049,13 +1051,13 @@ again:
 			}
 			#endif
 
-			assert( lhs != 0 );
+			assert( exec->lhs != 0 );
 
 			/* Save and upref before writing. We don't generate a restore
 			 * here. Instead, in the parser we will check if it actually
 			 * changed and insert the instruction then. The presence of this
 			 * instruction here is just a conservative approximation.  */
-			parsed = lhs;
+			exec->parsed = exec->lhs;
 			//treeUpref( parsed );
 			break;
 		}
@@ -1068,8 +1070,8 @@ again:
 				cerr << "IN_RESTORE_LHS" << endl;
 			}
 			#endif
-			assert( lhs == 0 );
-			lhs = restore;
+			assert( exec->lhs == 0 );
+			exec->lhs = restore;
 			break;
 		}
 		case IN_LOAD_NIL: {
@@ -1208,8 +1210,8 @@ again:
 			}
 			#endif
 
-			treeUpref( pdaRun->context );
-			push( pdaRun->context );
+			treeUpref( exec->pdaRun->context );
+			push( exec->pdaRun->context );
 			break;
 		}
 		case IN_LOAD_CONTEXT_WV: {
@@ -1219,12 +1221,12 @@ again:
 			}
 			#endif
 
-			treeUpref( pdaRun->context );
-			push( pdaRun->context );
+			treeUpref( exec->pdaRun->context );
+			push( exec->pdaRun->context );
 
 			/* Set up the reverse instruction. */
-			reverseCode->append( IN_LOAD_CONTEXT_BKT );
-			rcodeUnitLen = SIZEOF_CODE;
+			exec->reverseCode->append( IN_LOAD_CONTEXT_BKT );
+			exec->rcodeUnitLen = SIZEOF_CODE;
 			break;
 		}
 		case IN_LOAD_CONTEXT_WC: {
@@ -1236,8 +1238,8 @@ again:
 
 			/* This is identical to the _R version, but using it for writing
 			 * would be confusing. */
-			treeUpref( pdaRun->context );
-			push( pdaRun->context );
+			treeUpref( exec->pdaRun->context );
+			push( exec->pdaRun->context );
 			break;
 		}
 		case IN_LOAD_CONTEXT_BKT: {
@@ -1247,8 +1249,8 @@ again:
 			}
 			#endif
 
-			treeUpref( pdaRun->context );
-			push( pdaRun->context );
+			treeUpref( exec->pdaRun->context );
+			push( exec->pdaRun->context );
 			break;
 		}
 		case IN_LOAD_GLOBAL_R: {
@@ -1273,8 +1275,8 @@ again:
 			push( prg->global );
 
 			/* Set up the reverse instruction. */
-			reverseCode->append( IN_LOAD_GLOBAL_BKT );
-			rcodeUnitLen = SIZEOF_CODE;
+			exec->reverseCode->append( IN_LOAD_GLOBAL_BKT );
+			exec->rcodeUnitLen = SIZEOF_CODE;
 			break;
 		}
 		case IN_LOAD_GLOBAL_WC: {
@@ -1308,8 +1310,8 @@ again:
 			}
 			#endif
 
-			treeUpref( fsmRun->curStream );
-			push( fsmRun->curStream );
+			treeUpref( exec->fsmRun->curStream );
+			push( exec->fsmRun->curStream );
 			break;
 		}
 		case IN_LOAD_INPUT_WV: {
@@ -1319,12 +1321,12 @@ again:
 			}
 			#endif
 
-			treeUpref( fsmRun->curStream );
-			push( fsmRun->curStream );
+			treeUpref( exec->fsmRun->curStream );
+			push( exec->fsmRun->curStream );
 
 			/* Set up the reverse instruction. */
-			reverseCode->append( IN_LOAD_INPUT_BKT );
-			rcodeUnitLen = SIZEOF_CODE;
+			exec->reverseCode->append( IN_LOAD_INPUT_BKT );
+			exec->rcodeUnitLen = SIZEOF_CODE;
 			break;
 		}
 		case IN_LOAD_INPUT_WC: {
@@ -1336,8 +1338,8 @@ again:
 
 			/* This is identical to the _R version, but using it for writing
 			 * would be confusing. */
-			treeUpref( fsmRun->curStream );
-			push( fsmRun->curStream );
+			treeUpref( exec->fsmRun->curStream );
+			push( exec->fsmRun->curStream );
 			break;
 		}
 		case IN_LOAD_INPUT_BKT: {
@@ -1347,8 +1349,8 @@ again:
 			}
 			#endif
 
-			treeUpref( fsmRun->curStream );
-			push( fsmRun->curStream );
+			treeUpref( exec->fsmRun->curStream );
+			push( exec->fsmRun->curStream );
 			break;
 		}
 		case IN_LOAD_CTX_R: {
@@ -1358,8 +1360,8 @@ again:
 			}
 			#endif
 
-			treeUpref( pdaRun->context );
-			push( pdaRun->context );
+			treeUpref( exec->pdaRun->context );
+			push( exec->pdaRun->context );
 			break;
 		}
 		case IN_LOAD_CTX_WV: {
@@ -1369,12 +1371,12 @@ again:
 			}
 			#endif
 
-			treeUpref( pdaRun->context );
-			push( pdaRun->context );
+			treeUpref( exec->pdaRun->context );
+			push( exec->pdaRun->context );
 
 			/* Set up the reverse instruction. */
-			reverseCode->append( IN_LOAD_INPUT_BKT );
-			rcodeUnitLen = SIZEOF_CODE;
+			exec->reverseCode->append( IN_LOAD_INPUT_BKT );
+			exec->rcodeUnitLen = SIZEOF_CODE;
 			break;
 		}
 		case IN_LOAD_CTX_WC: {
@@ -1386,8 +1388,8 @@ again:
 
 			/* This is identical to the _R version, but using it for writing
 			 * would be confusing. */
-			treeUpref( pdaRun->context );
-			push( pdaRun->context );
+			treeUpref( exec->pdaRun->context );
+			push( exec->pdaRun->context );
 			break;
 		}
 		case IN_LOAD_CTX_BKT: {
@@ -1397,8 +1399,8 @@ again:
 			}
 			#endif
 
-			treeUpref( pdaRun->context );
-			push( pdaRun->context );
+			treeUpref( exec->pdaRun->context );
+			push( exec->pdaRun->context );
 			break;
 		}
 		case IN_INIT_CAPTURES: {
@@ -1414,15 +1416,15 @@ again:
 			/* If there are captures (this is a translate block) then copy them into
 			 * the local frame now. */
 			LangElInfo *lelInfo = prg->rtd->lelInfo;
-			char **mark = captures;
+			char **mark = exec->captures;
 
-			for ( int i = 0; i < lelInfo[genId].numCaptureAttr; i++ ) {
-				CaptureAttr *ca = &prg->rtd->captureAttr[lelInfo[genId].captureAttr + i];
+			for ( int i = 0; i < lelInfo[exec->genId].numCaptureAttr; i++ ) {
+				CaptureAttr *ca = &prg->rtd->captureAttr[lelInfo[exec->genId].captureAttr + i];
 				Head *data = stringAllocFull( prg, 
 						mark[ca->mark_enter], mark[ca->mark_leave] - mark[ca->mark_enter] );
 				Tree *string = constructString( prg, data );
 				treeUpref( string );
-				setLocal( frame, -1 - i, string );
+				setLocal( exec->frame, -1 - i, string );
 			}
 			break;
 		}
@@ -1438,7 +1440,7 @@ again:
 			}
 			#endif
 
-			Tree *val = getRhsEl( prg, lhs, position );
+			Tree *val = getRhsEl( prg, exec->lhs, position );
 			treeUpref( val );
 			local(field) = val;
 			break;
@@ -1463,8 +1465,8 @@ again:
 			uiter->stackRoot[-IFR_AA + IFR_RIN] = (SW)instr;
 
 			instr = uiter->resume;
-			frame = uiter->frame;
-			iframe = &uiter->stackRoot[-IFR_AA];
+			exec->frame = uiter->frame;
+			exec->iframe = &uiter->stackRoot[-IFR_AA];
 			break;
 		}
 		case IN_UITER_GET_CUR_R: {
@@ -1543,7 +1545,7 @@ again:
 			}
 			#endif
 
-			Tree *split = getLocalSplit( prg, frame, field );
+			Tree *split = getLocalSplit( prg, exec->frame, field );
 			treeUpref( split );
 			push( split );
 			break;
@@ -1560,7 +1562,7 @@ again:
 
 			Tree *val = pop();
 			treeDownref( prg, sp, local(field) );
-			setLocal( frame, field, val );
+			setLocal( exec->frame, field, val );
 			break;
 		}
 		case IN_SAVE_RET: {
@@ -1677,9 +1679,9 @@ again:
 			push( split );
 
 			/* Set up the reverse instruction. */
-			reverseCode->append( IN_GET_FIELD_BKT );
-			reverseCode->appendHalf( field );
-			rcodeUnitLen += SIZEOF_CODE + SIZEOF_HALF;
+			exec->reverseCode->append( IN_GET_FIELD_BKT );
+			exec->reverseCode->appendHalf( field );
+			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_HALF;
 			break;
 		}
 		case IN_GET_FIELD_BKT: {
@@ -1740,11 +1742,11 @@ again:
 			setField( prg, obj, field, val );
 
 			/* Set up the reverse instruction. */
-			reverseCode->append( IN_SET_FIELD_BKT );
-			reverseCode->appendHalf( field );
-			reverseCode->appendWord( (Word)prev );
-			rcodeUnitLen += SIZEOF_CODE + SIZEOF_HALF + SIZEOF_WORD;
-			reverseCode->append( rcodeUnitLen );
+			exec->reverseCode->append( IN_SET_FIELD_BKT );
+			exec->reverseCode->appendHalf( field );
+			exec->reverseCode->appendWord( (Word)prev );
+			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_HALF + SIZEOF_WORD;
+			exec->reverseCode->append( exec->rcodeUnitLen );
 			/* FLUSH */
 			break;
 		}
@@ -1997,7 +1999,7 @@ again:
 				cerr << "IN_REJECT" << endl;
 			}
 			#endif
-			reject = true;
+			exec->reject = true;
 			break;
 		}
 
@@ -2596,8 +2598,8 @@ again:
 			push( input );
 			treeDownref( prg, sp, accum );
 //
-//			reverseCode->append( IN_EXTRACT_INPUT_BKT );
-//			rcodeUnitLen += SIZEOF_CODE;
+//			exec->reverseCode->append( IN_EXTRACT_INPUT_BKT );
+//			exec->rcodeUnitLen += SIZEOF_CODE;
 			break;
 		}
 
@@ -2653,11 +2655,11 @@ again:
 			treeUpref( stream );
 			push( stream );
 
-			reverseCode->append( IN_STREAM_APPEND_BKT );
-			reverseCode->appendWord( (Word) stream );
-			reverseCode->appendWord( (Word) input );
-			reverseCode->appendWord( (Word) len );
-			reverseCode->append( SIZEOF_CODE + 3 * SIZEOF_WORD );
+			exec->reverseCode->append( IN_STREAM_APPEND_BKT );
+			exec->reverseCode->appendWord( (Word) stream );
+			exec->reverseCode->appendWord( (Word) input );
+			exec->reverseCode->appendWord( (Word) len );
+			exec->reverseCode->append( SIZEOF_CODE + 3 * SIZEOF_WORD );
 			break;
 		}
 		case IN_STREAM_APPEND_BKT: {
@@ -2718,11 +2720,11 @@ again:
 			//treeDownref( prg, sp, stream );
 			//treeDownref( prg, sp, accum );
 
-			reverseCode->append( IN_PARSE_FRAG_BKT );
-			reverseCode->appendWord( (Word) accum );
-			reverseCode->appendWord( (Word) stream );
-			reverseCode->appendWord( consumed );
-			reverseCode->append( SIZEOF_CODE + 3 * SIZEOF_WORD );
+			exec->reverseCode->append( IN_PARSE_FRAG_BKT );
+			exec->reverseCode->appendWord( (Word) accum );
+			exec->reverseCode->appendWord( (Word) stream );
+			exec->reverseCode->appendWord( consumed );
+			exec->reverseCode->append( SIZEOF_CODE + 3 * SIZEOF_WORD );
 			break;
 		}
 
@@ -2772,11 +2774,11 @@ again:
 			push( result );
 
 			treeUpref( result );
-			reverseCode->append( IN_PARSE_FINISH_BKT );
-			reverseCode->appendWord( (Word) accum );
-			reverseCode->appendWord( (Word) result );
-			reverseCode->appendWord( (Word) consumed );
-			reverseCode->append( SIZEOF_CODE + 3*SIZEOF_WORD );
+			exec->reverseCode->append( IN_PARSE_FINISH_BKT );
+			exec->reverseCode->appendWord( (Word) accum );
+			exec->reverseCode->appendWord( (Word) result );
+			exec->reverseCode->appendWord( (Word) consumed );
+			exec->reverseCode->append( SIZEOF_CODE + 3*SIZEOF_WORD );
 			break;
 		}
 		case IN_PARSE_FINISH_BKT: {
@@ -2809,16 +2811,16 @@ again:
 			#endif
 			Tree *stream = pop();
 			Tree *len = pop();
-			Tree *string = streamPull( prg, fsmRun, (Stream*)stream, len );
+			Tree *string = streamPull( prg, exec->fsmRun, (Stream*)stream, len );
 			treeUpref( string );
 			push( string );
 
 			/* Single unit. */
 			treeUpref( string );
-			reverseCode->append( IN_STREAM_PULL_BKT );
-			reverseCode->appendWord( (Word) string );
-			rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
-			reverseCode->append( rcodeUnitLen );
+			exec->reverseCode->append( IN_STREAM_PULL_BKT );
+			exec->reverseCode->appendWord( (Word) string );
+			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
+			exec->reverseCode->append( exec->rcodeUnitLen );
 
 			treeDownref( prg, sp, stream );
 			treeDownref( prg, sp, len );
@@ -2836,7 +2838,7 @@ again:
 			}
 			#endif
 
-			undoPull( prg, fsmRun, (Stream*)stream, string );
+			undoPull( prg, exec->fsmRun, (Stream*)stream, string );
 			treeDownref( prg, sp, stream );
 			treeDownref( prg, sp, string );
 			break;
@@ -2853,10 +2855,10 @@ again:
 			push( 0 );
 
 			/* Single unit. */
-			reverseCode->append( IN_STREAM_PUSH_BKT );
-			reverseCode->appendWord( len );
-			rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
-			reverseCode->append( rcodeUnitLen );
+			exec->reverseCode->append( IN_STREAM_PUSH_BKT );
+			exec->reverseCode->appendWord( len );
+			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
+			exec->reverseCode->append( exec->rcodeUnitLen );
 
 			treeDownref( prg, sp, stream );
 			treeDownref( prg, sp, tree );
@@ -2874,10 +2876,10 @@ again:
 			push( 0 );
 
 			/* Single unit. */
-			reverseCode->append( IN_STREAM_PUSH_BKT );
-			reverseCode->appendWord( len );
-			rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
-			reverseCode->append( rcodeUnitLen );
+			exec->reverseCode->append( IN_STREAM_PUSH_BKT );
+			exec->reverseCode->appendWord( len );
+			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
+			exec->reverseCode->append( exec->rcodeUnitLen );
 
 			treeDownref( prg, sp, stream );
 			treeDownref( prg, sp, tree );
@@ -2964,8 +2966,10 @@ again:
 			#endif
 
 			Tree *result = makeToken( sp, prg, nargs );
-			for ( long i = 0; i < nargs; i++ )
-				treeDownref( prg, sp, pop() );
+			for ( long i = 0; i < nargs; i++ ) {
+				Tree *arg = pop();
+				treeDownref( prg, sp, arg );
+			}
 			push( result );
 			break;
 		}
@@ -2980,8 +2984,10 @@ again:
 			#endif
 
 			Tree *result = makeTree( sp, prg, nargs );
-			for ( long i = 0; i < nargs; i++ )
-				treeDownref( prg, sp, pop() );
+			for ( long i = 0; i < nargs; i++ ) {
+				Tree *arg = pop();
+				treeDownref( prg, sp, arg );
+			}
 			push( result );
 			break;
 		}
@@ -3044,9 +3050,9 @@ again:
 			push( dval );
 
 			/* This is an initial global load. Need to reverse execute it. */
-			reverseCode->append( IN_PTR_DEREF_BKT );
-			reverseCode->appendWord( (Word) ptr );
-			rcodeUnitLen = SIZEOF_CODE + SIZEOF_WORD;
+			exec->reverseCode->append( IN_PTR_DEREF_BKT );
+			exec->reverseCode->appendWord( (Word) ptr );
+			exec->rcodeUnitLen = SIZEOF_CODE + SIZEOF_WORD;
 			break;
 		}
 		case IN_PTR_DEREF_BKT: {
@@ -3199,10 +3205,10 @@ again:
 			tree->tokdata = head;
 
 			/* Set up reverse code. Needs no args. */
-			reverseCode->append( IN_SET_TOKEN_DATA_BKT );
-			reverseCode->appendWord( (Word)oldval );
-			rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
-			reverseCode->append( rcodeUnitLen );
+			exec->reverseCode->append( IN_SET_TOKEN_DATA_BKT );
+			exec->reverseCode->appendWord( (Word)oldval );
+			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
+			exec->reverseCode->append( exec->rcodeUnitLen );
 
 			treeDownref( prg, sp, tree );
 			treeDownref( prg, sp, val );
@@ -3248,7 +3254,7 @@ again:
 				cerr << "IN_GET_MATCH_LENGTH_R" << endl;
 			}
 			#endif
-			Tree *integer = constructInteger( prg, stringLength(matchText) );
+			Tree *integer = constructInteger( prg, stringLength(exec->matchText) );
 			treeUpref( integer );
 			push( integer );
 			break;
@@ -3259,7 +3265,7 @@ again:
 				cerr << "IN_GET_MATCH_TEXT_R" << endl;
 			}
 			#endif
-			Head *s = stringCopy( prg, matchText );
+			Head *s = stringCopy( prg, exec->matchText );
 			Tree *tree = constructString( prg, s );
 			treeUpref( tree );
 			push( tree );
@@ -3296,9 +3302,9 @@ again:
 			push( prg->trueVal );
 
 			/* Set up reverse code. Needs no args. */
-			reverseCode->append( IN_LIST_APPEND_BKT );
-			rcodeUnitLen += SIZEOF_CODE;
-			reverseCode->append( rcodeUnitLen );
+			exec->reverseCode->append( IN_LIST_APPEND_BKT );
+			exec->rcodeUnitLen += SIZEOF_CODE;
+			exec->reverseCode->append( exec->rcodeUnitLen );
 			/* FLUSH */
 			break;
 		}
@@ -3363,10 +3369,10 @@ again:
 			/* Set up reverse. The result comes off the list downrefed.
 			 * Need it up referenced for the reverse code too. */
 			treeUpref( end );
-			reverseCode->append( IN_LIST_REMOVE_END_BKT );
-			reverseCode->appendWord( (Word)end );
-			rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
-			reverseCode->append( rcodeUnitLen );
+			exec->reverseCode->append( IN_LIST_REMOVE_END_BKT );
+			exec->reverseCode->appendWord( (Word)end );
+			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
+			exec->reverseCode->append( exec->rcodeUnitLen );
 			/* FLUSH */
 			break;
 		}
@@ -3440,9 +3446,9 @@ again:
 			push( val );
 
 			/* Set up the reverse instruction. */
-			reverseCode->append( IN_GET_LIST_MEM_BKT );
-			reverseCode->appendHalf( field );
-			rcodeUnitLen += SIZEOF_CODE + SIZEOF_HALF;
+			exec->reverseCode->append( IN_GET_LIST_MEM_BKT );
+			exec->reverseCode->appendHalf( field );
+			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_HALF;
 			break;
 		}
 		case IN_GET_LIST_MEM_BKT: {
@@ -3498,11 +3504,11 @@ again:
 			Tree *existing = setListMem( (List*)obj, field, val );
 
 			/* Set up the reverse instruction. */
-			reverseCode->append( IN_SET_LIST_MEM_BKT );
-			reverseCode->appendHalf( field );
-			reverseCode->appendWord( (Word)existing );
-			rcodeUnitLen += SIZEOF_CODE + SIZEOF_HALF + SIZEOF_WORD;
-			reverseCode->append( rcodeUnitLen );
+			exec->reverseCode->append( IN_SET_LIST_MEM_BKT );
+			exec->reverseCode->appendHalf( field );
+			exec->reverseCode->appendWord( (Word)existing );
+			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_HALF + SIZEOF_WORD;
+			exec->reverseCode->append( exec->rcodeUnitLen );
 			/* FLUSH */
 			break;
 		}
@@ -3549,11 +3555,11 @@ again:
 
 			/* Need to upref key for storage in reverse code. */
 			treeUpref( key );
-			reverseCode->append( IN_MAP_INSERT_BKT );
-			reverseCode->append( inserted );
-			reverseCode->appendWord( (Word)key );
-			rcodeUnitLen += SIZEOF_CODE + SIZEOF_CODE + SIZEOF_WORD;
-			reverseCode->append( rcodeUnitLen );
+			exec->reverseCode->append( IN_MAP_INSERT_BKT );
+			exec->reverseCode->append( inserted );
+			exec->reverseCode->appendWord( (Word)key );
+			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_CODE + SIZEOF_WORD;
+			exec->reverseCode->append( exec->rcodeUnitLen );
 
 			if ( ! inserted ) {
 				treeDownref( prg, sp, key );
@@ -3650,11 +3656,11 @@ again:
 			/* Set up the reverse instruction. */
 			treeUpref( key );
 			treeUpref( existing );
-			reverseCode->append( IN_MAP_STORE_BKT );
-			reverseCode->appendWord( (Word)key );
-			reverseCode->appendWord( (Word)existing );
-			rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD + SIZEOF_WORD;
-			reverseCode->append( rcodeUnitLen );
+			exec->reverseCode->append( IN_MAP_STORE_BKT );
+			exec->reverseCode->appendWord( (Word)key );
+			exec->reverseCode->appendWord( (Word)existing );
+			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD + SIZEOF_WORD;
+			exec->reverseCode->append( exec->rcodeUnitLen );
 			/* FLUSH */
 
 			treeDownref( prg, sp, obj );
@@ -3719,11 +3725,11 @@ again:
 			push( pair.val );
 
 			/* Reverse instruction. */
-			reverseCode->append( IN_MAP_REMOVE_BKT );
-			reverseCode->appendWord( (Word)pair.key );
-			reverseCode->appendWord( (Word)pair.val );
-			rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD + SIZEOF_WORD;
-			reverseCode->append( rcodeUnitLen );
+			exec->reverseCode->append( IN_MAP_REMOVE_BKT );
+			exec->reverseCode->appendWord( (Word)pair.key );
+			exec->reverseCode->appendWord( (Word)pair.val );
+			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD + SIZEOF_WORD;
+			exec->reverseCode->append( exec->rcodeUnitLen );
 
 			treeDownref( prg, sp, obj );
 			treeDownref( prg, sp, key );
@@ -3793,7 +3799,7 @@ again:
 			}
 			#endif
 
-			frame = ptop();
+			exec->frame = ptop();
 			pushn( size );
 			memset( ptop(), 0, sizeof(Word) * size );
 			break;
@@ -3810,7 +3816,7 @@ again:
 			#endif
 
 			FrameInfo *fi = &prg->rtd->frameInfo[frameId];
-			downrefLocalTrees( prg, sp, frame, fi->trees, fi->treesLen );
+			downrefLocalTrees( prg, sp, exec->frame, fi->trees, fi->treesLen );
 			popn( size );
 			break;
 		}
@@ -3828,10 +3834,10 @@ again:
 
 			push( 0 ); /* Return value. */
 			push( (SW)instr );
-			push( (SW)frame );
+			push( (SW)exec->frame );
 
 			instr = prg->rtd->frameInfo[fi->frameId].codeWV;
-			frame = ptop();
+			exec->frame = ptop();
 			break;
 		}
 		case IN_CALL_WC: {
@@ -3848,10 +3854,10 @@ again:
 
 			push( 0 ); /* Return value. */
 			push( (SW)instr );
-			push( (SW)frame );
+			push( (SW)exec->frame );
 
 			instr = prg->rtd->frameInfo[fi->frameId].codeWC;
-			frame = ptop();
+			exec->frame = ptop();
 			break;
 		}
 		case IN_YIELD: {
@@ -3874,12 +3880,12 @@ again:
 				uiter->ref.next = next;
 				uiter->stackSize = uiter->stackRoot - ptop();
 				uiter->resume = instr;
-				uiter->frame = frame;
+				uiter->frame = exec->frame;
 
 				/* Restore the instruction and frame pointer. */
 				instr = (Code*) local_iframe(IFR_RIN);
-				frame = (Tree**) local_iframe(IFR_RFR);
-				iframe = (Tree**) local_iframe(IFR_RIF);
+				exec->frame = (Tree**) local_iframe(IFR_RFR);
+				exec->iframe = (Tree**) local_iframe(IFR_RIF);
 
 				/* Return the yield result on the top of the stack. */
 				Tree *result = uiter->ref.kid != 0 ? prg->trueVal : prg->falseVal;
@@ -3912,8 +3918,8 @@ again:
 			 * uiter advance will set it. The frame we need to do because it
 			 * is set once for the lifetime of the iterator. */
 			push( 0 );            /* Return instruction pointer,  */
-			push( (SW)iframe ); /* Return iframe. */
-			push( (SW)frame );  /* Return frame. */
+			push( (SW)exec->iframe ); /* Return iframe. */
+			push( (SW)exec->frame );  /* Return frame. */
 
 			uiterInit( prg, sp, uiter, fi, true );
 			break;
@@ -3942,8 +3948,8 @@ again:
 			 * uiter advance will set it. The frame we need to do because it
 			 * is set once for the lifetime of the iterator. */
 			push( 0 );            /* Return instruction pointer,  */
-			push( (SW)iframe ); /* Return iframe. */
-			push( (SW)frame );  /* Return frame. */
+			push( (SW)exec->iframe ); /* Return iframe. */
+			push( (SW)exec->frame );  /* Return frame. */
 
 			uiterInit( prg, sp, uiter, fi, false );
 			break;
@@ -3975,10 +3981,10 @@ again:
 			#endif
 
 			FrameInfo *fi = &prg->rtd->frameInfo[fui->frameId];
-			downrefLocalTrees( prg, sp, frame, fi->trees, fi->treesLen );
+			downrefLocalTrees( prg, sp, exec->frame, fi->trees, fi->treesLen );
 
 			popn( fui->frameSize );
-			frame = (Tree**) pop();
+			exec->frame = (Tree**) pop();
 			instr = (Code*) pop();
 			Tree *retVal = pop();
 			popn( fui->argSize );
@@ -4048,7 +4054,8 @@ again:
 			#endif
 
 			/* Pop the root object. */
-			treeDownref( prg, sp, pop() );
+			Tree *obj = pop();
+			treeDownref( prg, sp, obj );
 			if ( prg->stdinVal == 0 ) {
 				prg->stdinVal = openStreamFd( prg, 0 );
 				treeUpref( (Tree*)prg->stdinVal );
@@ -4080,7 +4087,7 @@ again:
 			#endif
 
 			cout.flush();
-			return;
+			goto out;
 		}
 
 		/* Halt is a default instruction given by the compiler when it is
@@ -4100,4 +4107,7 @@ again:
 		}
 	}
 	goto again;
+
+out:
+	assert( sp == root );
 }

@@ -774,8 +774,6 @@ struct Program
 	Tree *trueVal;
 	Tree *falseVal;
 
-
-
 	Kid *heap;
 
 	Stream *stdinVal;
@@ -807,15 +805,14 @@ struct Execution
 	long rcodeUnitLen;
 	char **captures;
 
-	void execute( Tree **&sp, Code *instr );
-	void rdownref( Code *instr );
 };
 
 void initExecution( Execution *exec, Program *prg, CodeVect *reverseCode,
 		PdaRun *pdaRun, FsmRun *fsmRun, Code *code, Tree *lhs,
 		long genId, Head *matchText, char **captures );
 
-void rexecute( Execution *exec, Tree **root, CodeVect *allRev );
-void execute( Execution *exec, Tree **root );
+void rexecute( Execution *exec, Tree **sp, CodeVect *allRev );
+void execute( Execution *exec, Tree **sp );
+void execute( Execution *exec, Tree **sp, Code *instr );
 
 #endif
