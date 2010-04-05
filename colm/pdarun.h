@@ -162,9 +162,6 @@ struct MapEl
 	MapEl *left, *right, *parent;
 	long height;
 	Tree *key;
-
-	Tree *getKey() const 
-		{ return key; }
 };
 
 struct Map
@@ -184,10 +181,6 @@ struct Map
 	MapEl *listDetach( MapEl *el );
 	void listAddBefore( MapEl *next_el, MapEl *new_el );
 	void listAddAfter( MapEl *prev_el, MapEl *new_el );
-	void listAbandon();
-
-	int compare( Program *prg, const Tree *w1, const Tree *w2 ) const
-		{ return cmpTree( prg, w1, w2 ); }
 
 	/* Insert a element into the tree. */
 	MapEl *insert( Program *prg, MapEl *element, MapEl **lastFound = 0 );
@@ -209,9 +202,6 @@ struct Map
 
 	/* Detach and delete a element from the tree. */
 	void remove( Program *prg, MapEl *element );
-
-	/* Free all memory used by tree. */
-	void empty();
 
 	/** \brief Return the number of elements in the tree. */
 	long length() const { return treeSize; }
@@ -246,6 +236,9 @@ struct Map
 	/* Once an insertion point is found at a leaf then do the insert. */
 	void attachRebal( MapEl *element, MapEl *parentEl, MapEl *lastLess );
 };
+
+void mapListAbandon( Map *map );
+void mapEmpty( Map *map );
 
 struct Accum
 {

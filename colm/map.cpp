@@ -21,22 +21,22 @@
 
 #include "pdarun.h"
 
-void Map::listAbandon()
+void mapListAbandon( Map *map )
 {
-	head = tail = 0;
+	map->head = map->tail = 0;
 }
 
-void Map::listAddBefore( MapEl *next_el, MapEl *new_el )
+void mapListAddBefore( Map *map, MapEl *next_el, MapEl *new_el )
 {
 	/* Set the next pointer of the new element to next_el. We do
 	 * this regardless of the state of the list. */
 	new_el->next = next_el; 
 
 	/* Set reverse pointers. */
-	if (next_el == 0) {
+	if ( next_el == 0 ) {
 		/* There is no next elememnt. We are inserting at the tail. */
-		new_el->prev = tail;
-		tail = new_el;
+		new_el->prev = map->tail;
+		map->tail = new_el;
 	} 
 	else {
 		/* There is a next element and we can access next's previous. */
@@ -45,9 +45,9 @@ void Map::listAddBefore( MapEl *next_el, MapEl *new_el )
 	} 
 
 	/* Set forward pointers. */
-	if (new_el->prev == 0) {
+	if ( new_el->prev == 0 ) {
 		/* There is no previous element. Set the head pointer.*/
-		head = new_el;
+		map->head = new_el;
 	}
 	else {
 		/* There is a previous element, set it's next pointer to new_el. */
@@ -55,7 +55,7 @@ void Map::listAddBefore( MapEl *next_el, MapEl *new_el )
 	}
 }
 
-void Map::listAddAfter( MapEl *prev_el, MapEl *new_el )
+void mapListAddAfter( Map *map, MapEl *prev_el, MapEl *new_el )
 {
 	/* Set the previous pointer of new_el to prev_el. We do
 	 * this regardless of the state of the list. */
@@ -64,8 +64,8 @@ void Map::listAddAfter( MapEl *prev_el, MapEl *new_el )
 	/* Set forward pointers. */
 	if (prev_el == 0) {
 		/* There was no prev_el, we are inserting at the head. */
-		new_el->next = head;
-		head = new_el;
+		new_el->next = map->head;
+		map->head = new_el;
 	} 
 	else {
 		/* There was a prev_el, we can access previous next. */
@@ -76,7 +76,7 @@ void Map::listAddAfter( MapEl *prev_el, MapEl *new_el )
 	/* Set reverse pointers. */
 	if (new_el->next == 0) {
 		/* There is no next element. Set the tail pointer. */
-		tail = new_el;
+		map->tail = new_el;
 	}
 	else {
 		/* There is a next element. Set it's prev pointer. */
@@ -120,7 +120,7 @@ MapEl *Map::copyBranch( Program *p, MapEl *el, Kid *oldNextDown, Kid *&newNextDo
 		newEl->left->parent = newEl;
 	}
 
-	listAddAfter( tail, newEl );
+	mapListAddAfter( this, tail, newEl );
 
 	/* If the right tree is there, copy it. */
 	if ( newEl->right ) {
@@ -153,19 +153,19 @@ void Map::attachRebal( MapEl *element, MapEl *parentEl, MapEl *lastLess )
 		if ( lastLess == parentEl ) {
 			parentEl->left = element;
 
-			listAddBefore( parentEl, element );
+			mapListAddBefore( this, parentEl, element );
 		}
 		else {
 			parentEl->right = element;
 
-			listAddAfter( parentEl, element );
+			mapListAddAfter( this, parentEl, element );
 		}
 	}
 	else {
 		/* No parent element so we are inserting the root. */
 		root = element;
 
-		listAddAfter( tail, element );
+		mapListAddAfter( this, tail, element );
 	}
 
 	/* Recalculate the heights. */
@@ -210,8 +210,8 @@ MapEl *Map::insert( Program *prg, MapEl *element, MapEl **lastFound )
 			return element;
 		}
 
-		keyRelation = compare( prg, element->getKey(),
-				curEl->getKey() );
+		keyRelation = cmpTree( prg,
+			element->key, curEl->key );
 
 		/* Do we go left? */
 		if ( keyRelation < 0 ) {
@@ -264,7 +264,7 @@ MapEl *Map::insert( Program *prg, Tree *key, MapEl **lastFound )
 			return element;
 		}
 
-		keyRelation = compare( prg, key, curEl->getKey() );
+		keyRelation = cmpTree( prg, key, curEl->key );
 
 		/* Do we go left? */
 		if ( keyRelation < 0 ) {
@@ -295,8 +295,8 @@ MapEl *Map::find( Program *prg, Tree *key ) const
 	MapEl *curEl = root;
 	long keyRelation;
 
-	while (curEl) {
-		keyRelation = compare( prg, key, curEl->getKey() );
+	while ( curEl != 0 ) {
+		keyRelation = cmpTree( prg, key, curEl->key );
 
 		/* Do we go left? */
 		if ( keyRelation < 0 )
@@ -490,16 +490,16 @@ MapEl *Map::detach( Program *prg, MapEl *element )
 }
 
 
-void Map::empty()
+void mapEmpty( Map *map )
 {
-	if ( root ) {
+	if ( map->root ) {
 		/* Recursively delete from the tree structure. */
-		deleteChildrenOf(root);
-		delete root;
-		root = 0;
-		treeSize = 0;
+		map->deleteChildrenOf(map->root);
+		delete map->root;
+		map->root = 0;
+		map->treeSize = 0;
 
-		listAbandon();
+		mapListAbandon( map );
 	}
 }
 
