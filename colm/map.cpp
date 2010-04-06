@@ -84,17 +84,17 @@ void mapListAddAfter( Map *map, MapEl *prev_el, MapEl *new_el )
 	}
 }
 
-MapEl *Map::listDetach(MapEl *el)
+MapEl *mapListDetach( Map *map, MapEl *el )
 {
 	/* Set forward pointers to skip over el. */
-	if (el->prev == 0) 
-		head = el->next; 
+	if ( el->prev == 0 ) 
+		map->head = el->next; 
 	else
 		el->prev->next = el->next; 
 
 	/* Set reverse pointers to skip over el. */
-	if (el->next == 0) 
-		tail = el->prev; 
+	if ( el->next == 0 ) 
+		map->tail = el->prev; 
 	else
 		el->next->prev = el->prev; 
 
@@ -104,7 +104,7 @@ MapEl *Map::listDetach(MapEl *el)
 
 
 /* Recursive worker for tree copying. */
-MapEl *Map::copyBranch( Program *p, MapEl *el, Kid *oldNextDown, Kid *&newNextDown )
+MapEl *mapCopyBranch( Program *p, Map *map, MapEl *el, Kid *oldNextDown, Kid *&newNextDown )
 {
 	/* Duplicate element. Either the base element's copy constructor or defaul
 	 * constructor will get called. Both will suffice for initting the
@@ -116,15 +116,15 @@ MapEl *Map::copyBranch( Program *p, MapEl *el, Kid *oldNextDown, Kid *&newNextDo
 
 	/* If the left tree is there, copy it. */
 	if ( newEl->left ) {
-		newEl->left = copyBranch( p, newEl->left, oldNextDown, newNextDown );
+		newEl->left = mapCopyBranch( p, map, newEl->left, oldNextDown, newNextDown );
 		newEl->left->parent = newEl;
 	}
 
-	mapListAddAfter( this, tail, newEl );
+	mapListAddAfter( map, map->tail, newEl );
 
 	/* If the right tree is there, copy it. */
 	if ( newEl->right ) {
-		newEl->right = copyBranch( p, newEl->right, oldNextDown, newNextDown );
+		newEl->right = mapCopyBranch( p, map, newEl->right, oldNextDown, newNextDown );
 		newEl->right->parent = newEl;
 	}
 
@@ -132,10 +132,10 @@ MapEl *Map::copyBranch( Program *p, MapEl *el, Kid *oldNextDown, Kid *&newNextDo
 }
 
 /* Once an insertion position is found, attach a element to the tree. */
-void Map::attachRebal( MapEl *element, MapEl *parentEl, MapEl *lastLess )
+void mapAttachRebal( Map *map, MapEl *element, MapEl *parentEl, MapEl *lastLess )
 {
 	/* Increment the number of element in the tree. */
-	treeSize += 1;
+	map->treeSize += 1;
 
 	/* Set element's parent. */
 	element->parent = parentEl;
@@ -153,33 +153,33 @@ void Map::attachRebal( MapEl *element, MapEl *parentEl, MapEl *lastLess )
 		if ( lastLess == parentEl ) {
 			parentEl->left = element;
 
-			mapListAddBefore( this, parentEl, element );
+			mapListAddBefore( map, parentEl, element );
 		}
 		else {
 			parentEl->right = element;
 
-			mapListAddAfter( this, parentEl, element );
+			mapListAddAfter( map, parentEl, element );
 		}
 	}
 	else {
 		/* No parent element so we are inserting the root. */
-		root = element;
+		map->root = element;
 
-		mapListAddAfter( this, tail, element );
+		mapListAddAfter( map, map->tail, element );
 	}
 
 	/* Recalculate the heights. */
-	recalcHeights(parentEl);
+	map->recalcHeights( parentEl );
 
 	/* Find the first unbalance. */
-	MapEl *ub = findFirstUnbalGP(element);
+	MapEl *ub = map->findFirstUnbalGP( element );
 
 	/* rebalance. */
 	if ( ub != 0 )
 	{
 		/* We assert that after this single rotation the 
 		 * tree is now properly balanced. */
-		rebalance(ub);
+		map->rebalance( ub );
 	}
 }
 
@@ -193,17 +193,17 @@ void Map::attachRebal( MapEl *element, MapEl *parentEl, MapEl *lastLess )
  * 
  * \returns The element inserted upon success, null upon failure.
  */
-MapEl *Map::insert( Program *prg, MapEl *element, MapEl **lastFound )
+MapEl *mapInsert( Program *prg, Map *map, MapEl *element, MapEl **lastFound )
 {
 	long keyRelation;
-	MapEl *curEl = root, *parentEl = 0;
+	MapEl *curEl = map->root, *parentEl = 0;
 	MapEl *lastLess = 0;
 
 	while (true) {
 		if ( curEl == 0 ) {
 			/* We are at an external element and did not find the key we were
 			 * looking for. Attach underneath the leaf and rebalance. */
-			attachRebal( element, parentEl, lastLess );
+			mapAttachRebal( map, element, parentEl, lastLess );
 
 			if ( lastFound != 0 )
 				*lastFound = element;
@@ -243,10 +243,10 @@ MapEl *Map::insert( Program *prg, MapEl *element, MapEl **lastFound )
  * 
  * \returns The new element upon success, null upon failure.
  */
-MapEl *Map::insert( Program *prg, Tree *key, MapEl **lastFound )
+MapEl *mapInsert( Program *prg, Map *map, Tree *key, MapEl **lastFound )
 {
 	long keyRelation;
-	MapEl *curEl = root, *parentEl = 0;
+	MapEl *curEl = map->root, *parentEl = 0;
 	MapEl *lastLess = 0;
 
 	while (true) {
@@ -257,7 +257,7 @@ MapEl *Map::insert( Program *prg, Tree *key, MapEl **lastFound )
 			MapEl *element = prg->mapElPool.allocate();
 			element->key = key;
 			element->tree = 0;
-			attachRebal( element, parentEl, lastLess );
+			mapAttachRebal( map, element, parentEl, lastLess );
 
 			if ( lastFound != 0 )
 				*lastFound = element;
@@ -290,9 +290,9 @@ MapEl *Map::insert( Program *prg, Tree *key, MapEl **lastFound )
  *
  * \returns The element if key exists, null if the key does not exist.
  */
-MapEl *Map::find( Program *prg, Tree *key ) const
+MapEl *mapImplFind( Program *prg, Map *map, Tree *key )
 {
-	MapEl *curEl = root;
+	MapEl *curEl = map->root;
 	long keyRelation;
 
 	while ( curEl != 0 ) {
@@ -322,7 +322,7 @@ MapEl *Map::find( Program *prg, Tree *key ) const
  */
 MapEl *Map::detach( Program *prg, Tree *key )
 {
-	MapEl *element = find( prg, key );
+	MapEl *element = mapImplFind( prg, this, key );
 	if ( element ) {
 		detach( prg, element );
 	}
@@ -341,7 +341,7 @@ bool Map::remove( Program *prg, Tree *key )
 	bool retVal = false;
 
 	/* Look for the key. */
-	MapEl *element = find( prg, key );
+	MapEl *element = mapImplFind( prg, this, key );
 	if ( element != 0 ) {
 		/* If found, detach the element and delete. */
 		detach( prg, element );
@@ -377,7 +377,7 @@ MapEl *Map::detach( Program *prg, MapEl *element )
 	long lheight, rheight;
 
 	/* Remove the element from the ordered list. */
-	listDetach( element );
+	mapListDetach( this, element );
 
 	/* Update treeSize. */
 	treeSize--;

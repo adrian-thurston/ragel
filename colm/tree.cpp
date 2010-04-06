@@ -917,7 +917,7 @@ Map *copyMap( Program *prg, Map *map, Kid *oldNextDown, Kid *&newNextDown )
 
 	/* If there is a root, copy the tree. */
 	if ( map->root != 0 ) {
-		newMap->root = newMap->copyBranch( prg, map->root, 
+		newMap->root = mapCopyBranch( prg, newMap, map->root, 
 				oldNextDown, newNextDown );
 	}
 
@@ -1592,7 +1592,7 @@ Tree *treeSearch( Program *prg, Tree *tree, long id )
 
 bool mapInsert( Program *prg, Map *map, Tree *key, Tree *element )
 {
-	MapEl *mapEl = map->insert( prg, key );
+	MapEl *mapEl = mapInsert( prg, map, key );
 
 	if ( mapEl != 0 ) {
 		mapEl->tree = element;
@@ -1604,7 +1604,7 @@ bool mapInsert( Program *prg, Map *map, Tree *key, Tree *element )
 
 void mapUnremove( Program *prg, Map *map, Tree *key, Tree *element )
 {
-	MapEl *mapEl = map->insert( prg, key );
+	MapEl *mapEl = mapInsert( prg, map, key );
 	assert( mapEl != 0 );
 	mapEl->tree = element;
 }
@@ -1621,7 +1621,7 @@ Tree *mapStore( Program *prg, Map *map, Tree *key, Tree *element )
 {
 	Tree *oldTree = 0;
 	MapEl *elInTree = 0;
-	MapEl *mapEl = map->insert( prg, key, &elInTree );
+	MapEl *mapEl = mapInsert( prg, map, key, &elInTree );
 
 	if ( mapEl != 0 )
 		mapEl->tree = element;
@@ -1643,7 +1643,7 @@ Tree *mapUnstore( Program *prg, Map *map, Tree *key, Tree *existing )
 		prg->mapElPool.free( mapEl );
 	}
 	else {
-		MapEl *mapEl = map->find( prg, key );
+		MapEl *mapEl = mapImplFind( prg, map, key );
 		stored = mapEl->tree;
 		mapEl->tree = existing;
 	}
@@ -1652,7 +1652,7 @@ Tree *mapUnstore( Program *prg, Map *map, Tree *key, Tree *existing )
 
 Tree *mapFind( Program *prg, Map *map, Tree *key )
 {
-	MapEl *mapEl = map->find( prg, key );
+	MapEl *mapEl = mapImplFind( prg, map, key );
 	return mapEl == 0 ? 0 : mapEl->tree;
 }
 
@@ -1744,7 +1744,7 @@ Tree *setListMem( List *list, Half field, Tree *value )
 
 TreePair mapRemove( Program *prg, Map *map, Tree *key )
 {
-	MapEl *mapEl = map->find( prg, key );
+	MapEl *mapEl = mapImplFind( prg, map, key );
 	TreePair result;
 	if ( mapEl != 0 ) {
 		map->detach( prg, mapEl );

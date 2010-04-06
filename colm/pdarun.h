@@ -178,18 +178,8 @@ struct Map
 	GenericInfo *genericInfo;
 
 	/* List functions. */
-	MapEl *listDetach( MapEl *el );
 	void listAddBefore( MapEl *next_el, MapEl *new_el );
 	void listAddAfter( MapEl *prev_el, MapEl *new_el );
-
-	/* Insert a element into the tree. */
-	MapEl *insert( Program *prg, MapEl *element, MapEl **lastFound = 0 );
-
-	MapEl *insert( Program *prg, Tree *key, MapEl **lastFound = 0 );
-
-	/* Find a element in the tree. Returns the element if 
-	 * key exists, false otherwise. */
-	MapEl *find( Program *prg, Tree *key ) const;
 
 	/* Detach a element from the tree. */
 	MapEl *detach( Program *prg, Tree *key );
@@ -205,9 +195,6 @@ struct Map
 
 	/** \brief Return the number of elements in the tree. */
 	long length() const { return treeSize; }
-
-	/* Recursive worker for the copy constructor. */
-	MapEl *copyBranch( Program *p, MapEl *element, Kid *oldNextDown, Kid *&newNextDown );
 
 	/* Recursively delete element in the tree. */
 	void deleteChildrenOf(MapEl *n);
@@ -239,6 +226,11 @@ struct Map
 
 void mapListAbandon( Map *map );
 void mapEmpty( Map *map );
+MapEl *mapListDetach( MapEl *el );
+MapEl *mapCopyBranch( Program *p, Map *map, MapEl *el, Kid *oldNextDown, Kid *&newNextDown );
+MapEl *mapInsert( Program *prg, Map *map, MapEl *element, MapEl **lastFound = 0 );
+MapEl *mapInsert( Program *prg, Map *map, Tree *key, MapEl **lastFound = 0 );
+MapEl *mapImplFind( Program *prg, Map *map, Tree *key );
 
 struct Accum
 {
