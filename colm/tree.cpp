@@ -1611,7 +1611,7 @@ void mapUnremove( Program *prg, Map *map, Tree *key, Tree *element )
 
 Tree *mapUninsert( Program *prg, Map *map, Tree *key )
 {
-	MapEl *el = map->detach( prg, key );
+	MapEl *el = mapDetach( prg, map, key );
 	Tree *val = el->tree;
 	prg->mapElPool.free( el );
 	return val;
@@ -1638,7 +1638,7 @@ Tree *mapUnstore( Program *prg, Map *map, Tree *key, Tree *existing )
 {
 	Tree *stored = 0;
 	if ( existing == 0 ) {
-		MapEl *mapEl = map->detach( prg, key );
+		MapEl *mapEl = mapDetach( prg, map, key );
 		stored = mapEl->tree;
 		prg->mapElPool.free( mapEl );
 	}
@@ -1658,7 +1658,7 @@ Tree *mapFind( Program *prg, Map *map, Tree *key )
 
 long mapLength( Map *map )
 {
-	return map->length();
+	return map->treeSize;
 }
 
 long listLength( List *list )
@@ -1747,7 +1747,7 @@ TreePair mapRemove( Program *prg, Map *map, Tree *key )
 	MapEl *mapEl = mapImplFind( prg, map, key );
 	TreePair result;
 	if ( mapEl != 0 ) {
-		map->detach( prg, mapEl );
+		mapDetach( prg, map, mapEl );
 		result.key = mapEl->key;
 		result.val = mapEl->tree;
 		prg->mapElPool.free( mapEl );

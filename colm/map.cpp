@@ -21,6 +21,8 @@
 
 #include "pdarun.h"
 
+MapEl *mapRebalance( Map *map, MapEl *n );
+
 void mapListAbandon( Map *map )
 {
 	map->head = map->tail = 0;
@@ -169,17 +171,17 @@ void mapAttachRebal( Map *map, MapEl *element, MapEl *parentEl, MapEl *lastLess 
 	}
 
 	/* Recalculate the heights. */
-	map->recalcHeights( parentEl );
+	mapRecalcHeights( map, parentEl );
 
 	/* Find the first unbalance. */
-	MapEl *ub = map->findFirstUnbalGP( element );
+	MapEl *ub = mapFindFirstUnbalGP( map, element );
 
 	/* rebalance. */
 	if ( ub != 0 )
 	{
 		/* We assert that after this single rotation the 
 		 * tree is now properly balanced. */
-		map->rebalance( ub );
+		mapRebalance( map, ub );
 	}
 }
 
@@ -320,12 +322,11 @@ MapEl *mapImplFind( Program *prg, Map *map, Tree *key )
  *
  * \returns The element detached if the key is found, othewise returns null.
  */
-MapEl *Map::detach( Program *prg, Tree *key )
+MapEl *mapDetach( Program *prg, Map *map, Tree *key )
 {
-	MapEl *element = mapImplFind( prg, this, key );
-	if ( element ) {
-		detach( prg, element );
-	}
+	MapEl *element = mapImplFind( prg, map, key );
+	if ( element )
+		mapDetach( prg, map, element );
 
 	return element;
 }
@@ -335,16 +336,16 @@ MapEl *Map::detach( Program *prg, Tree *key )
  *
  * \returns True if the element was found and deleted, false otherwise.
  */
-bool Map::remove( Program *prg, Tree *key )
+bool mapImplRemove( Program *prg, Map *map, Tree *key )
 {
 	/* Assume not found. */
 	bool retVal = false;
 
 	/* Look for the key. */
-	MapEl *element = mapImplFind( prg, this, key );
+	MapEl *element = mapImplFind( prg, map, key );
 	if ( element != 0 ) {
 		/* If found, detach the element and delete. */
-		detach( prg, element );
+		mapDetach( prg, map, element );
 		delete element;
 		retVal = true;
 	}
@@ -357,10 +358,10 @@ bool Map::remove( Program *prg, Tree *key )
  *
  * If the element is not in the tree then undefined behaviour results.
  */
-void Map::remove( Program *prg, MapEl *element )
+void mapImplRemove( Program *prg, Map *map, MapEl *element )
 {
 	/* Detach and delete. */
-	detach( prg, element );
+	mapDetach( prg, map, element );
 	delete element;
 }
 
@@ -371,16 +372,16 @@ void Map::remove( Program *prg, MapEl *element )
  * 
  * \returns The element given.
  */
-MapEl *Map::detach( Program *prg, MapEl *element )
+MapEl *mapDetach( Program *prg, Map *map, MapEl *element )
 {
 	MapEl *replacement, *fixfrom;
 	long lheight, rheight;
 
 	/* Remove the element from the ordered list. */
-	mapListDetach( this, element );
+	mapListDetach( map, element );
 
 	/* Update treeSize. */
-	treeSize--;
+	map->treeSize--;
 
 	/* Find a replacement element. */
 	if (element->right)
@@ -398,8 +399,8 @@ MapEl *Map::detach( Program *prg, MapEl *element )
 		else
 			fixfrom = replacement->parent;
 
-		removeEl(replacement, replacement->right);
-		replaceEl(element, replacement);
+		mapRemoveEl( map, replacement, replacement->right );
+		mapReplaceEl( map, element, replacement );
 	}
 	else if (element->left)
 	{
@@ -416,8 +417,8 @@ MapEl *Map::detach( Program *prg, MapEl *element )
 		else
 			fixfrom = replacement->parent;
 
-		removeEl(replacement, replacement->left);
-		replaceEl(element, replacement);
+		mapRemoveEl( map, replacement, replacement->left );
+		mapReplaceEl( map, element, replacement );
 	}
 	else
 	{
@@ -425,7 +426,7 @@ MapEl *Map::detach( Program *prg, MapEl *element )
 		fixfrom = element->parent;
 
 		/* The element we are deleting is a leaf element. */
-		removeEl(element, 0);
+		mapRemoveEl( map, element, 0 );
 	}
 
 	/* If fixfrom is null it means we just deleted
@@ -434,10 +435,10 @@ MapEl *Map::detach( Program *prg, MapEl *element )
 		return element;
 
 	/* Fix the heights after the deletion. */
-	recalcHeights(fixfrom);
+	mapRecalcHeights( map, fixfrom );
 
 	/* Fix every unbalanced element going up in the tree. */
-	MapEl *ub = findFirstUnbalEl(fixfrom);
+	MapEl *ub = mapFindFirstUnbalEl( map, fixfrom );
 	while ( ub )
 	{
 		/* Find the element to rebalance by moving down from the first unbalanced
@@ -480,13 +481,35 @@ MapEl *Map::detach( Program *prg, MapEl *element )
 		/* rebalance returns the grandparant of the subtree formed
 		 * by the element that were rebalanced.
 		 * We must continue upward from there rebalancing. */
-		fixfrom = rebalance(ub);
+		fixfrom = mapRebalance( map, ub );
 
 		/* Find the next unbalaced element. */
-		ub = findFirstUnbalEl(fixfrom);
+		ub = mapFindFirstUnbalEl( map, fixfrom );
 	}
 
 	return element;
+}
+
+/* Recursively delete all the children of a element. */
+void mapDeleteChildrenOf( Map *map, MapEl *element )
+{
+	/* Recurse left. */
+	if ( element->left ) {
+		mapDeleteChildrenOf( map, element->left );
+
+		/* Delete left element. */
+		delete element->left;
+		element->left = 0;
+	}
+
+	/* Recurse right. */
+	if ( element->right ) {
+		mapDeleteChildrenOf( map, element->right );
+
+		/* Delete right element. */
+		delete element->right;
+		element->left = 0;
+	}
 }
 
 
@@ -494,7 +517,7 @@ void mapEmpty( Map *map )
 {
 	if ( map->root ) {
 		/* Recursively delete from the tree structure. */
-		map->deleteChildrenOf(map->root);
+		mapDeleteChildrenOf( map, map->root );
 		delete map->root;
 		map->root = 0;
 		map->treeSize = 0;
@@ -503,31 +526,9 @@ void mapEmpty( Map *map )
 	}
 }
 
-/* Recursively delete all the children of a element. */
-void Map::deleteChildrenOf( MapEl *element )
-{
-	/* Recurse left. */
-	if (element->left) {
-		deleteChildrenOf(element->left);
-
-		/* Delete left element. */
-		delete element->left;
-		element->left = 0;
-	}
-
-	/* Recurse right. */
-	if (element->right) {
-		deleteChildrenOf(element->right);
-
-		/* Delete right element. */
-		delete element->right;
-		element->left = 0;
-	}
-}
-
 /* rebalance from a element whose gradparent is unbalanced. Only
  * call on a element that has a grandparent. */
-MapEl *Map::rebalance(MapEl *n)
+MapEl *mapRebalance( Map *map, MapEl *n )
 {
 	long lheight, rheight;
 	MapEl *a, *b, *c;
@@ -621,7 +622,7 @@ MapEl *Map::rebalance(MapEl *n)
 
 	/* Tie b to the great grandparent. */
 	if ( ggp == 0 )
-		root = b;
+		map->root = b;
 	else if ( ggp->left == gp )
 		ggp->left = b;
 	else
@@ -676,20 +677,19 @@ MapEl *Map::rebalance(MapEl *n)
 	b->height = (lheight > rheight ? lheight : rheight) + 1;
 
 	/* Fix height of b's parents. */
-	recalcHeights(ggp);
+	mapRecalcHeights( map, ggp );
 	return ggp;
 }
 
 /* Recalculates the heights of all the ancestors of element. */
-void Map::recalcHeights(MapEl *element)
+void mapRecalcHeights( Map *map, MapEl *element )
 {
-	long lheight, rheight, new_height;
 	while ( element != 0 )
 	{
-		lheight = element->left ? element->left->height : 0;
-		rheight = element->right ? element->right->height : 0;
+		long lheight = element->left ? element->left->height : 0;
+		long rheight = element->right ? element->right->height : 0;
 
-		new_height = (lheight > rheight ? lheight : rheight) + 1;
+		long new_height = (lheight > rheight ? lheight : rheight) + 1;
 
 		/* If there is no chage in the height, then there will be no
 		 * change in any of the ancestor's height. We can stop going up.
@@ -704,7 +704,7 @@ void Map::recalcHeights(MapEl *element)
 }
 
 /* Finds the first element whose grandparent is unbalanced. */
-MapEl *Map::findFirstUnbalGP(MapEl *element)
+MapEl *mapFindFirstUnbalGP( Map *map, MapEl *element )
 {
 	long lheight, rheight, balanceProp;
 	MapEl *gp;
@@ -732,7 +732,7 @@ MapEl *Map::findFirstUnbalGP(MapEl *element)
 
 
 /* Finds the first element that is unbalanced. */
-MapEl *Map::findFirstUnbalEl(MapEl *element)
+MapEl *mapFindFirstUnbalEl( Map *map, MapEl *element )
 {
 	if ( element == 0 )
 		return 0;
@@ -754,7 +754,7 @@ MapEl *Map::findFirstUnbalEl(MapEl *element)
 }
 
 /* Replace a element in the tree with another element not in the tree. */
-void Map::replaceEl(MapEl *element, MapEl *replacement)
+void mapReplaceEl( Map *map, MapEl *element, MapEl *replacement )
 {
 	MapEl *parent = element->parent,
 			*left = element->left,
@@ -775,29 +775,31 @@ void Map::replaceEl(MapEl *element, MapEl *replacement)
 		else
 			parent->right = replacement;
 	}
-	else
-		root = replacement;
+	else {
+		map->root = replacement;
+	}
 
 	replacement->height = element->height;
 }
 
 /* Removes a element from a tree and puts filler in it's place.
  * Filler should be null or a child of element. */
-void Map::removeEl(MapEl *element, MapEl *filler)
+void mapRemoveEl( Map *map, MapEl *element, MapEl *filler )
 {
 	MapEl *parent = element->parent;
 
 	if (parent)
 	{
-		if (parent->left == element)
+		if ( parent->left == element )
 			parent->left = filler;
 		else
 			parent->right = filler;
 	}
-	else
-		root = filler;
+	else {
+		map->root = filler;
+	}
 
-	if (filler)
+	if ( filler )
 		filler->parent = parent;
 
 	return;

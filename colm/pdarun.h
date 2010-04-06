@@ -177,51 +177,6 @@ struct Map
 	long treeSize;
 	GenericInfo *genericInfo;
 
-	/* List functions. */
-	void listAddBefore( MapEl *next_el, MapEl *new_el );
-	void listAddAfter( MapEl *prev_el, MapEl *new_el );
-
-	/* Detach a element from the tree. */
-	MapEl *detach( Program *prg, Tree *key );
-
-	/* Detach and delete a element from the tree. */
-	bool remove( Program *prg, Tree *key );
-
-	/* Detach a element from the tree. */
-	MapEl *detach( Program *prg, MapEl *element );
-
-	/* Detach and delete a element from the tree. */
-	void remove( Program *prg, MapEl *element );
-
-	/** \brief Return the number of elements in the tree. */
-	long length() const { return treeSize; }
-
-	/* Recursively delete element in the tree. */
-	void deleteChildrenOf(MapEl *n);
-
-	/* rebalance the tree beginning at the leaf whose 
-	 * grandparent is unbalanced. */
-	MapEl *rebalance(MapEl *start);
-
-	/* Move up the tree from a given element, recalculating the heights. */
-	void recalcHeights(MapEl *start);
-
-	/* Move up the tree and find the first element whose 
-	 * grand-parent is unbalanced. */
-	MapEl *findFirstUnbalGP(MapEl *start);
-
-	/* Move up the tree and find the first element which is unbalanced. */
-	MapEl *findFirstUnbalEl(MapEl *start);
-
-	/* Replace a element in the tree with another element not in the tree. */
-	void replaceEl(MapEl *element, MapEl *replacement);
-
-	/* Remove a element from the tree and put another (normally a child of element)
-	 * in its place. */
-	void removeEl(MapEl *element, MapEl *filler);
-
-	/* Once an insertion point is found at a leaf then do the insert. */
-	void attachRebal( MapEl *element, MapEl *parentEl, MapEl *lastLess );
 };
 
 void mapListAbandon( Map *map );
@@ -231,6 +186,19 @@ MapEl *mapCopyBranch( Program *p, Map *map, MapEl *el, Kid *oldNextDown, Kid *&n
 MapEl *mapInsert( Program *prg, Map *map, MapEl *element, MapEl **lastFound = 0 );
 MapEl *mapInsert( Program *prg, Map *map, Tree *key, MapEl **lastFound = 0 );
 MapEl *mapImplFind( Program *prg, Map *map, Tree *key );
+MapEl *mapDetach( Program *prg, Map *map, Tree *key );
+MapEl *mapDetach( Program *prg, Map *map, MapEl *element );
+void mapImplRemove( Program *prg, Map *map, MapEl *element );
+bool mapImplRemove( Program *prg, Map *map, Tree *key );
+MapEl *mapFindFirstUnbalEl( Map *map, MapEl *element );
+MapEl *mapFindFirstUnbalGP( Map *map, MapEl *element );
+void mapListAddBefore( Map *map, MapEl *next_el, MapEl *new_el );
+void mapListAddAfter( Map *map, MapEl *prev_el, MapEl *new_el );
+void mapDeleteChildrenOf( Map *map, MapEl *n );
+void mapRecalcHeights( Map *map, MapEl *start );
+void mapReplaceEl( Map *map, MapEl *element, MapEl *replacement );
+void mapRemoveEl( Map *map, MapEl *element, MapEl *filler );
+void mapAttachRebal( Map *map, MapEl *element, MapEl *parentEl, MapEl *lastLess );
 
 struct Accum
 {
