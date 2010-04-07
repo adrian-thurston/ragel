@@ -5,4 +5,4 @@ class C
 	void g();
 };
 
-typename C c;
+//typename C c;
