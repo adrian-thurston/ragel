@@ -64,6 +64,9 @@ COLM_SRC = \
 RUNTIME_SRC = fsmrun.cpp pdarun.cpp bytecode.cpp list.cpp \
 	map.cpp string.cpp input.cpp tree.cpp pool.cpp
 
+RUNTIME_SRC_C = mapc.c
+
+
 ALL_SRC = $(COLM_SRC) $(RUNTIME_SRC)
 
 # Files in ALL_SRC that are generated.
@@ -91,18 +94,21 @@ COLM_OBJ = $(COLM_SRC:%.cpp=%.o)
 RUNTIME_OBJ_P = $(RUNTIME_SRC:%.cpp=%_p.o)
 RUNTIME_OBJ_D = $(RUNTIME_SRC:%.cpp=%_d.o)
 
+RUNTIME_OBJ_C_P = $(RUNTIME_SRC_C:%.c=%_p.o)
+RUNTIME_OBJ_C_D = $(RUNTIME_SRC_C:%.c=%_d.o)
+
 DEPS = $(COLM_SRC:%.cpp=.%.d) $(RUNTIME_SRC:%.cpp=.%_p.d) $(RUNTIME_SRC:%.cpp=.%_d.d)
 
 # Rules.
 all: colm $(RUNTIME_P) $(RUNTIME_D)
 
-colm: $(GEN_SRC) $(COLM_OBJ) $(RUNTIME_OBJ_D) $(LIBS)
-	$(CXX) $(LDFLAGS) -o $@ $(COLM_OBJ) $(RUNTIME_OBJ_D) $(LIBS)
+colm: $(GEN_SRC) $(COLM_OBJ) $(RUNTIME_OBJ_D) $(RUNTIME_OBJ_C_D) $(LIBS)
+	$(CXX) $(LDFLAGS) -o $@ $(COLM_OBJ) $(RUNTIME_OBJ_D) $(RUNTIME_OBJ_C_D) $(LIBS)
 
-$(RUNTIME_P): $(RUNTIME_OBJ_P)
+$(RUNTIME_P): $(RUNTIME_OBJ_P) $(RUNTIME_OBJ_C_P)
 	ar -cr $@ $^
 
-$(RUNTIME_D): $(RUNTIME_OBJ_D)
+$(RUNTIME_D): $(RUNTIME_OBJ_D) $(RUNTIME_OBJ_C_D)
 	ar -cr $@ $^
 
 version.h: ../version.mk
@@ -135,6 +141,15 @@ $(RUNTIME_OBJ_P): %_p.o: %.cpp
 $(RUNTIME_OBJ_D): %_d.o: %.cpp
 	@$(CXX) -M -MT $@ $(DEFS_RT_D) $< > .$*_d.d
 	$(CXX) -c $(CFLAGS) $(DEFS_RT_D) -o $@ $<
+
+$(RUNTIME_OBJ_C_P): %_p.o: %.c
+	@$(CC) -M -MT $@ $(DEFS_RT_P) $< > .$*_p.d
+	$(CC) -c $(CFLAGS) $(DEFS_RT_P) -o $@ $<
+
+$(RUNTIME_OBJ_C_D): %_d.o: %.c
+	@$(CC) -M -MT $@ $(DEFS_RT_D) $< > .$*_d.d
+	$(CC) -c $(CFLAGS) $(DEFS_RT_D) -o $@ $<
+
 
 
 distclean: clean
