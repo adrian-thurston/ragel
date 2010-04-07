@@ -450,7 +450,7 @@ void sendBack( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStre
 
 	/* Downref the tree that was sent back and free the kid. */
 	treeDownref( fsmRun->prg, sp, input->tree );
-	fsmRun->prg->kidPool.free( input );
+	kidFree( fsmRun->prg, input );
 }
 
 
@@ -529,7 +529,7 @@ void sendQueuedTokens( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *i
 			incrementConsumed( pdaRun );
 
 			ignore( pdaRun, send->tree );
-			fsmRun->prg->kidPool.free( send );
+			kidFree( fsmRun->prg, send );
 		}
 		else {
 			#ifdef COLM_LOG_PARSE
@@ -654,7 +654,7 @@ void sendBackQueuedIgnore( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, 
 	while ( ignore != 0 ) {
 		Kid *next = ignore->next;
 		treeDownref( pdaRun->prg, sp, ignore->tree );
-		pdaRun->prg->kidPool.free( ignore );
+		kidFree( pdaRun->prg, ignore );
 		ignore = next;
 	}
 }
@@ -664,7 +664,7 @@ void clearIgnoreList( Program *prg, Tree **sp, Kid *kid )
 	while ( kid != 0 ) {
 		Kid *next = kid->next;
 		treeDownref( prg, sp, kid->tree );
-		prg->kidPool.free( kid );
+		kidFree( prg, kid );
 		kid = next;
 	}
 }
@@ -699,7 +699,7 @@ void sendWithIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inp
 			/* FIXME: leak here. */
 			Kid *ignoreHead = input->tree->child;
 			clearIgnoreList( pdaRun->prg, sp, (Kid*)ignoreHead->tree );
-			pdaRun->prg->kidPool.free( ignoreHead );
+			kidFree( pdaRun->prg, ignoreHead );
 
 			input->tree->child = input->tree->child->next;
 			input->tree->flags = input->tree->flags & ~AF_LEFT_IGNORE ;
@@ -905,7 +905,7 @@ long undoParse( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStr
 	assert( pdaRun->stackTop->next == 0 );
 
 	treeDownref( pdaRun->prg, sp, pdaRun->stackTop->tree );
-	pdaRun->prg->kidPool.free( pdaRun->stackTop );
+	kidFree( pdaRun->prg, pdaRun->stackTop );
 	return 0;
 }
 

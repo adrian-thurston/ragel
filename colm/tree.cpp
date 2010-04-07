@@ -59,7 +59,7 @@ void freeAttrs( Program *prg, Kid *attrs )
 	Kid *cur = attrs;
 	while ( cur != 0 ) {
 		Kid *next = cur->next;
-		prg->kidPool.free( cur );
+		kidFree( prg, cur );
 		cur = next;
 	}
 }
@@ -770,7 +770,7 @@ void streamFree( Program *prg, Stream *s )
 	delete s->in;
 	if ( s->file != 0 )
 		fclose( s->file );
-	prg->mapElPool.free( (MapEl*)s );
+	mapElFree( prg, (MapEl*)s );
 }
 
 Kid *copyIgnoreList( Program *prg, Kid *ignoreHeader )
@@ -1053,10 +1053,10 @@ free_tree:
 			while ( el != 0 ) {
 				ListEl *next = el->next;
 				vm_push( el->value );
-				prg->listElPool.free( el );
+				listElFree( prg, el );
 				el = next;
 			}
-			prg->mapElPool.free( (MapEl*)list );
+			mapElFree( prg, (MapEl*)list );
 		}
 		else if ( generic->type == GEN_MAP ) {
 			Map *map = (Map*)tree;
@@ -1065,10 +1065,10 @@ free_tree:
 				MapEl *next = el->next;
 				vm_push( el->key );
 				vm_push( el->tree );
-				prg->mapElPool.free( el );
+				mapElFree( prg, el );
 				el = next;
 			}
-			prg->mapElPool.free( (MapEl*)map );
+			mapElFree( prg, (MapEl*)map );
 		}
 		else if ( generic->type == GEN_PARSER ) {
 			Accum *accum = (Accum*)tree;
@@ -1078,7 +1078,7 @@ free_tree:
 			rcodeDownrefAll( prg, sp, accum->pdaRun->allReverseCode );
 			delete accum->pdaRun;
 			treeDownref( prg, sp, (Tree*)accum->stream );
-			prg->mapElPool.free( (MapEl*)accum );
+			mapElFree( prg, (MapEl*)accum );
 		}
 		else
 			assert(false);
@@ -1087,15 +1087,15 @@ free_tree:
 		if ( tree->id == LEL_ID_STR ) {
 			Str *str = (Str*) tree;
 			stringFree( prg, str->value );
-			prg->treePool.free( tree );
+			treeFree( prg, tree );
 		}
 		else if ( tree->id == LEL_ID_BOOL || tree->id == LEL_ID_INT )
-			prg->treePool.free( tree );
+			treeFree( prg, tree );
 		else if ( tree->id == LEL_ID_PTR ) {
 			//Pointer *ptr = (Pointer*)tree;
 			//vm_push( ptr->value->tree );
-			//prg->kidPool.free( ptr->value );
-			prg->treePool.free( tree );
+			//kidFree( prg, ptr->value );
+			treeFree( prg, tree );
 		}
 		else if ( tree->id == LEL_ID_STREAM )
 			streamFree( prg, (Stream*) tree );
@@ -1109,12 +1109,12 @@ free_tree:
 				while ( ic != 0 ) {
 					Kid *next = ic->next;
 					vm_push( ic->tree );
-					prg->kidPool.free( ic );
+					kidFree( prg, ic );
 					ic = next;
 				}
 			
 				Kid *next = child->next;
-				prg->kidPool.free( child );
+				kidFree( prg, child );
 				child = next;
 			}
 
@@ -1124,12 +1124,12 @@ free_tree:
 				while ( ic != 0 ) {
 					Kid *next = ic->next;
 					vm_push( ic->tree );
-					prg->kidPool.free( ic );
+					kidFree( prg, ic );
 					ic = next;
 				}
 
 				Kid *next = child->next;
-				prg->kidPool.free( child );
+				kidFree( prg, child );
 				child = next;
 			}
 
@@ -1137,14 +1137,14 @@ free_tree:
 			while ( child != 0 ) {
 				Kid *next = child->next;
 				vm_push( child->tree );
-				prg->kidPool.free( child );
+				kidFree( prg, child );
 				child = next;
 			}
 
 			if ( tree->flags & AF_PARSE_TREE )
-				prg->parseTreePool.free( (ParseTree*)tree );
+				parseTreeFree( prg, (ParseTree*)tree );
 			else
-				prg->treePool.free( tree );
+				treeFree( prg, tree );
 		}
 	}
 
@@ -1613,7 +1613,7 @@ Tree *mapUninsert( Program *prg, Map *map, Tree *key )
 {
 	MapEl *el = mapDetach( prg, map, key );
 	Tree *val = el->tree;
-	prg->mapElPool.free( el );
+	mapElFree( prg, el );
 	return val;
 }
 
@@ -1640,7 +1640,7 @@ Tree *mapUnstore( Program *prg, Map *map, Tree *key, Tree *existing )
 	if ( existing == 0 ) {
 		MapEl *mapEl = mapDetach( prg, map, key );
 		stored = mapEl->tree;
-		prg->mapElPool.free( mapEl );
+		mapElFree( prg, mapEl );
 	}
 	else {
 		MapEl *mapEl = mapImplFind( prg, map, key );
@@ -1679,7 +1679,7 @@ void listAppend( Program *prg, List *list, Tree *val )
 Tree *listRemoveEnd( Program *prg, List *list )
 {
 	Tree *tree = list->tail->value;
-	prg->listElPool.free( list->detachLast() );
+	listElFree( prg, list->detachLast() );
 	return tree;
 }
 
@@ -1750,7 +1750,7 @@ TreePair mapRemove( Program *prg, Map *map, Tree *key )
 		mapDetach( prg, map, mapEl );
 		result.key = mapEl->key;
 		result.val = mapEl->tree;
-		prg->mapElPool.free( mapEl );
+		mapElFree( prg, mapEl );
 	}
 
 	return result;

@@ -169,7 +169,7 @@ void sendTreeFrag( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
 		incrementConsumed( pdaRun );
 
 		::ignore( pdaRun, send->tree );
-		pdaRun->prg->kidPool.free( send );
+		kidFree( pdaRun->prg, send );
 	}
 	else {
 		#ifdef COLM_LOG_PARSE
@@ -511,7 +511,7 @@ void clearGlobal( Program *prg, Tree **sp )
 	/* Free the global object. */
 	if ( prg->rtd->globalSize > 0 )
 		freeAttrs( prg, prg->global->child );
-	prg->treePool.free( prg->global );
+	treeFree( prg, prg->global );
 }
 
 void clearProgram( Program *prg, Tree **vm_stack, Tree **sp )
@@ -529,7 +529,7 @@ void clearProgram( Program *prg, Tree **vm_stack, Tree **sp )
 	while ( a != 0 ) {
 		Kid *next = a->next;
 		treeDownref( prg, sp, a->tree );
-		prg->kidPool.free( a );
+		kidFree( prg, a );
 		a = next;
 	}
 
@@ -542,40 +542,40 @@ void clearProgram( Program *prg, Tree **vm_stack, Tree **sp )
 	treeDownref( prg, sp, (Tree*)prg->stdoutVal );
 	treeDownref( prg, sp, (Tree*)prg->stderrVal );
 
-	long kidLost = prg->kidPool.numLost();
+	long kidLost = kidNumLost( prg );
 	if ( kidLost )
 		cerr << "warning: lost kids: " << kidLost << endl;
 
-	long treeLost = prg->treePool.numLost();
+	long treeLost = treeNumLost( prg );
 	if ( treeLost )
 		cerr << "warning: lost trees: " << treeLost << endl;
 
-	long parseTreeLost = prg->parseTreePool.numLost();
+	long parseTreeLost = parseTreeNumLost( prg );
 	if ( parseTreeLost )
 		cerr << "warning: lost parse trees: " << parseTreeLost << endl;
 
-	long listLost = prg->listElPool.numLost();
+	long listLost = listElNumLost( prg );
 	if ( listLost )
 		cerr << "warning: lost listEls: " << listLost << endl;
 
-	long mapLost = prg->mapElPool.numLost();
+	long mapLost = mapElNumLost( prg );
 	if ( mapLost )
 		cerr << "warning: lost mapEls: " << mapLost << endl;
 
-	long headLost = prg->headPool.numLost();
+	long headLost = headNumLost( prg );
 	if ( headLost )
 		cerr << "warning: lost heads: " << headLost << endl;
 
-	long locationLost = prg->locationPool.numLost();
+	long locationLost = locationNumLost( prg );
 	if ( locationLost )
 		cerr << "warning: lost locations: " << locationLost << endl;
 
-	prg->kidPool.clear();
-	prg->treePool.clear();
-	prg->parseTreePool.clear();
-	prg->listElPool.clear();
-	prg->mapElPool.clear();
-	prg->locationPool.clear();
+	kidClear( prg );
+	treeClear( prg );
+	parseTreeClear( prg );
+	listElClear( prg );
+	mapElClear( prg );
+	locationClear( prg );
 
 	//exec->reverseCode->empty();
 	//memset( vm_stack, 0, sizeof(Tree*) * VM_STACK_SIZE);

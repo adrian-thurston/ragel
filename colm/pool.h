@@ -49,9 +49,9 @@ template <class T> struct PoolAlloc
 	{}
 
 	T *_allocate();
-	void free( T *el );
-	void clear();
-	long numLost();
+	void _free( T *el );
+	void _clear();
+	long _numLost();
 
 private:
 
@@ -88,7 +88,7 @@ template <class T> T *PoolAlloc<T>::_allocate()
 	return newEl;
 }
 
-template <class T> void PoolAlloc<T>::free( T *el )
+template <class T> void PoolAlloc<T>::_free( T *el )
 {
 	#if 0
 	/* Some sanity checking. Best not to normally run with this on. */
@@ -104,7 +104,7 @@ template <class T> void PoolAlloc<T>::free( T *el )
 	pool = pi;
 }
 
-template <class T> void PoolAlloc<T>::clear()
+template <class T> void PoolAlloc<T>::_clear()
 {
 	PoolBlock<T> *block = head;
 	while ( block != 0 ) {
@@ -118,7 +118,7 @@ template <class T> void PoolAlloc<T>::clear()
 	pool = 0;
 }
 
-template <class T> long PoolAlloc<T>::numLost()
+template <class T> long PoolAlloc<T>::_numLost()
 {
 	/* Count the number of items allocated. */
 	long lost = 0;
@@ -154,36 +154,36 @@ struct Location;
 Kid *kidAllocate( Program *prg );
 void kidFree( Program *prg, Kid *el );
 void kidClear( Program *prg );
-long kidNumlost( Program *prg );
+long kidNumLost( Program *prg );
 
 Tree *treeAllocate( Program *prg );
 void treeFree( Program *prg, Tree *el );
 void treeClear( Program *prg );
-long treeNumlost( Program *prg );
+long treeNumLost( Program *prg );
 
 ParseTree *parseTreeAllocate( Program *prg );
 void parseTreeFree( Program *prg, ParseTree *el );
 void parseTreeClear( Program *prg );
-long parseTreeNumlost( Program *prg );
+long parseTreeNumLost( Program *prg );
 
 ListEl *listElAllocate( Program *prg );
 void listElFree( Program *prg, ListEl *el );
 void listElClear( Program *prg );
-long listElNumlost( Program *prg );
+long listElNumLost( Program *prg );
 
 MapEl *mapElAllocate( Program *prg );
 void mapElFree( Program *prg, MapEl *el );
 void mapElClear( Program *prg );
-long mapElNumlost( Program *prg );
+long mapElNumLost( Program *prg );
 
 Head *headAllocate( Program *prg );
 void headFree( Program *prg, Head *el );
 void headClear( Program *prg );
-long headNumlost( Program *prg );
+long headNumLost( Program *prg );
 
 Location *locationAllocate( Program *prg );
 void locationFree( Program *prg, Location *el );
 void locationClear( Program *prg );
-long locationNumlost( Program *prg );
+long locationNumLost( Program *prg );
 
 #endif

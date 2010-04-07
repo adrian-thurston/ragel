@@ -9,17 +9,17 @@ Kid *kidAllocate( Program *prg )
 
 void kidFree( Program *prg, Kid *el )
 {
-	prg->kidPool.free( el );
+	prg->kidPool._free( el );
 }
 
 void kidClear( Program *prg )
 {
-	prg->kidPool.clear();
+	prg->kidPool._clear();
 }
 
-long kidNumlost( Program *prg )
+long kidNumLost( Program *prg )
 {
-	return prg->kidPool.numLost();
+	return prg->kidPool._numLost();
 }
 
 Tree *treeAllocate( Program *prg )
@@ -29,17 +29,17 @@ Tree *treeAllocate( Program *prg )
 
 void treeFree( Program *prg, Tree *el )
 {
-	prg->treePool.free( el );
+	prg->treePool._free( el );
 }
 
 void treeClear( Program *prg )
 {
-	prg->treePool.clear();
+	prg->treePool._clear();
 }
 
-long treeNumlost( Program *prg )
+long treeNumLost( Program *prg )
 {
-	return prg->treePool.numLost();
+	return prg->treePool._numLost();
 }
 
 ParseTree *parseTreeAllocate( Program *prg )
@@ -49,17 +49,17 @@ ParseTree *parseTreeAllocate( Program *prg )
 
 void parseTreeFree( Program *prg, ParseTree *el )
 {
-	prg->parseTreePool.free( el );
+	prg->parseTreePool._free( el );
 }
 
 void parseTreeClear( Program *prg )
 {
-	prg->parseTreePool.clear();
+	prg->parseTreePool._clear();
 }
 
-long parseTreeNumlost( Program *prg )
+long parseTreeNumLost( Program *prg )
 {
-	return prg->parseTreePool.numLost();
+	return prg->parseTreePool._numLost();
 }
 
 ListEl *listElAllocate( Program *prg )
@@ -69,17 +69,17 @@ ListEl *listElAllocate( Program *prg )
 
 void listElFree( Program *prg, ListEl *el )
 {
-	prg->listElPool.free( el );
+	prg->listElPool._free( el );
 }
 
 void listElClear( Program *prg )
 {
-	prg->listElPool.clear();
+	prg->listElPool._clear();
 }
 
-long listElNumlost( Program *prg )
+long listElNumLost( Program *prg )
 {
-	return prg->listElPool.numLost();
+	return prg->listElPool._numLost();
 }
 
 MapEl *mapElAllocate( Program *prg )
@@ -89,17 +89,17 @@ MapEl *mapElAllocate( Program *prg )
 
 void mapElFree( Program *prg, MapEl *el )
 {
-	prg->mapElPool.free( el );
+	prg->mapElPool._free( el );
 }
 
 void mapElClear( Program *prg )
 {
-	prg->mapElPool.clear();
+	prg->mapElPool._clear();
 }
 
-long mapElNumlost( Program *prg )
+long mapElNumLost( Program *prg )
 {
-	return prg->mapElPool.numLost();
+	return prg->mapElPool._numLost();
 }
 
 Head *headAllocate( Program *prg )
@@ -109,17 +109,17 @@ Head *headAllocate( Program *prg )
 
 void headFree( Program *prg, Head *el )
 {
-	prg->headPool.free( el );
+	prg->headPool._free( el );
 }
 
 void headClear( Program *prg )
 {
-	prg->headPool.clear();
+	prg->headPool._clear();
 }
 
-long headNumlost( Program *prg )
+long headNumLost( Program *prg )
 {
-	return prg->headPool.numLost();
+	return prg->headPool._numLost();
 }
 
 Location *locationAllocate( Program *prg )
@@ -129,16 +129,16 @@ Location *locationAllocate( Program *prg )
 
 void locationFree( Program *prg, Location *el )
 {
-	prg->locationPool.free( el );
+	prg->locationPool._free( el );
 }
 
 void locationClear( Program *prg )
 {
-	prg->locationPool.clear();
+	prg->locationPool._clear();
 }
 
-long locationNumlost( Program *prg )
+long locationNumLost( Program *prg )
 {
-	return prg->locationPool.numLost();
+	return prg->locationPool._numLost();
 }
 

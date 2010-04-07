@@ -48,7 +48,7 @@ void stringFree( Program *prg, Head *head )
 {
 	if ( head != 0 ) {
 		if ( head->location != 0 )
-			prg->locationPool.free( head->location );
+			locationFree( prg, head->location );
 
 		if ( (char*)(head+1) == head->data ) {
 			/* Full string allocation. */
@@ -56,7 +56,7 @@ void stringFree( Program *prg, Head *head )
 		}
 		else {
 			/* Just a string head. */
-			prg->headPool.free( head );
+			headFree( prg, head );
 		}
 	}
 }

@@ -70,7 +70,7 @@ void cleanParser( Tree **sp, PdaRun *pdaRun )
 	while ( kid != 0 ) {
 		Kid *next = kid->next;
 		treeDownref( pdaRun->prg, sp, kid->tree );
-		pdaRun->prg->kidPool.free( kid );
+		kidFree( pdaRun->prg, kid );
 		kid = next;
 	}
 	pdaRun->stackTop = 0;
@@ -718,7 +718,7 @@ parseError:
 
 			/* Free the reduced item. */
 			treeDownref( pdaRun->prg, sp, undoLel->tree );
-			pdaRun->prg->kidPool.free( undoLel );
+			kidFree( pdaRun->prg, undoLel );
 		}
 	}
 
