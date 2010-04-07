@@ -48,7 +48,7 @@ Kid *allocAttrs( Program *prg, long length )
 	Kid *cur = 0;
 	for ( long i = 0; i < length; i++ ) {
 		Kid *next = cur;
-		cur = prg->kidPool.allocate();
+		cur = kidAllocate( prg );
 		cur->next = next;
 	}
 	return cur;
@@ -167,7 +167,7 @@ Stream *openFile( Program *prg, Tree *name, Tree *mode )
 
 Tree *constructInteger( Program *prg, long i )
 {
-	Int *integer = (Int*) prg->treePool.allocate();
+	Int *integer = (Int*) treeAllocate( prg );
 	integer->id = LEL_ID_INT;
 	integer->value = i;
 
@@ -176,7 +176,7 @@ Tree *constructInteger( Program *prg, long i )
 
 Tree *constructString( Program *prg, Head *s )
 {
-	Str *str = (Str*) prg->treePool.allocate();
+	Str *str = (Str*) treeAllocate( prg );
 	str->id = LEL_ID_STR;
 	str->value = s;
 
@@ -185,12 +185,12 @@ Tree *constructString( Program *prg, Head *s )
 
 Tree *constructPointer( Program *prg, Tree *tree )
 {
-	Kid *kid = prg->kidPool.allocate();
+	Kid *kid = kidAllocate( prg );
 	kid->tree = tree;
 	kid->next = prg->heap;
 	prg->heap = kid;
 
-	Pointer *pointer = (Pointer*) prg->treePool.allocate();
+	Pointer *pointer = (Pointer*) treeAllocate( prg );
 	pointer->id = LEL_ID_PTR;
 	pointer->value = kid;
 	
@@ -201,7 +201,7 @@ Tree *constructTerm( Program *prg, Word id, Head *tokdata )
 {
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
 
-	Tree *tree = prg->treePool.allocate();
+	Tree *tree = treeAllocate( prg );
 	tree->id = id;
 	tree->refs = 0;
 	tree->tokdata = tokdata;
@@ -223,12 +223,12 @@ Kid *constructIgnoreList( Program *prg, long pat )
 	while ( ignore >= 0 ) {
 		Head *ignoreData = stringAllocPointer( prg, nodes[ignore].data, nodes[ignore].length );
 
-		Tree *ignTree = prg->treePool.allocate();
+		Tree *ignTree = treeAllocate( prg );
 		ignTree->refs = 1;
 		ignTree->id = nodes[ignore].id;
 		ignTree->tokdata = ignoreData;
 
-		Kid *ignKid = prg->kidPool.allocate();
+		Kid *ignKid = kidAllocate( prg );
 		ignKid->tree = ignTree;
 		ignKid->next = 0;
 
@@ -262,7 +262,7 @@ Tree *constructReplacementTree( Tree **bindings, Program *prg, long pat )
 
 			tree = splitTree( prg, tree );
 
-			Kid *ignoreHead = prg->kidPool.allocate();
+			Kid *ignoreHead = kidAllocate( prg );
 			ignoreHead->next = tree->child;
 			tree->child = ignoreHead;
 
@@ -271,7 +271,7 @@ Tree *constructReplacementTree( Tree **bindings, Program *prg, long pat )
 		}
 	}
 	else {
-		tree = prg->treePool.allocate();
+		tree = treeAllocate( prg );
 		tree->id = nodes[pat].id;
 		tree->refs = 1;
 		tree->tokdata = nodes[pat].length == 0 ? 0 :
@@ -287,7 +287,7 @@ Tree *constructReplacementTree( Tree **bindings, Program *prg, long pat )
 
 		tree->child = kidListConcat( attrs, child );
 		if ( ignore != 0 ) {
-			Kid *ignoreHead = prg->kidPool.allocate();
+			Kid *ignoreHead = kidAllocate( prg );
 			ignoreHead->next = tree->child;
 			tree->child = ignoreHead;
 
@@ -298,7 +298,7 @@ Tree *constructReplacementTree( Tree **bindings, Program *prg, long pat )
 		for ( int i = 0; i < lelInfo[tree->id].numCaptureAttr; i++ ) {
 			long ci = pat+1+i;
 			CaptureAttr *ca = prg->rtd->captureAttr + lelInfo[tree->id].captureAttr + i;
-			Tree *attr = prg->treePool.allocate();
+			Tree *attr = treeAllocate( prg );
 			attr->id = nodes[ci].id;
 			attr->refs = 1;
 			attr->tokdata = nodes[ci].length == 0 ? 0 :
@@ -318,7 +318,7 @@ Kid *constructReplacementKid( Tree **bindings, Program *prg, Kid *prev, long pat
 	Kid *kid = 0;
 
 	if ( pat != -1 ) {
-		kid = prg->kidPool.allocate();
+		kid = kidAllocate( prg );
 		kid->tree = constructReplacementTree( bindings, prg, pat );
 
 		/* Recurse down next. */
@@ -346,7 +346,7 @@ Tree *makeToken( Tree **root, Program *prg, long nargs )
 	Tree *tree;
 
 	if ( lelInfo[id].ignore ) {
-		tree = prg->treePool.allocate();
+		tree = treeAllocate( prg );
 		tree->refs = 1;
 		tree->id = id;
 		tree->tokdata = tokdata;
@@ -355,7 +355,7 @@ Tree *makeToken( Tree **root, Program *prg, long nargs )
 		long objectLength = lelInfo[id].objectLength;
 		Kid *attrs = allocAttrs( prg, objectLength );
 
-		tree = prg->treePool.allocate();
+		tree = treeAllocate( prg );
 		tree->id = id;
 		tree->refs = 1;
 		tree->tokdata = tokdata;
@@ -381,7 +381,7 @@ Tree *makeTree( Tree **root, Program *prg, long nargs )
 	long id = idInt->value;
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
 
-	Tree *tree = prg->treePool.allocate();
+	Tree *tree = treeAllocate( prg );
 	tree->id = id;
 	tree->refs = 1;
 
@@ -390,7 +390,7 @@ Tree *makeTree( Tree **root, Program *prg, long nargs )
 
 	Kid *last = 0, *child = 0;
 	for ( long id = 0; id < nargs-1; id++ ) {
-		Kid *kid = prg->kidPool.allocate();
+		Kid *kid = kidAllocate( prg );
 		kid->tree = base[-2-id];
 		treeUpref( kid->tree );
 
@@ -775,10 +775,10 @@ void streamFree( Program *prg, Stream *s )
 
 Kid *copyIgnoreList( Program *prg, Kid *ignoreHeader )
 {
-	Kid *newHeader = prg->kidPool.allocate();
+	Kid *newHeader = kidAllocate( prg );
 	Kid *last = 0, *ic = (Kid*)ignoreHeader->tree;
 	while ( ic != 0 ) {
-		Kid *newIc = prg->kidPool.allocate();
+		Kid *newIc = kidAllocate( prg );
 
 		newIc->tree = ic->tree;
 		newIc->tree->refs += 1;
@@ -807,7 +807,7 @@ Tree *copyRealTree( Program *prg, Tree *tree, Kid *oldNextDown,
 		newTree->flags |= AF_PARSE_TREE;
 	}
 	else {
-		newTree = prg->treePool.allocate();
+		newTree = treeAllocate( prg );
 	}
 
 	newTree->id = tree->id;
@@ -842,7 +842,7 @@ Tree *copyRealTree( Program *prg, Tree *tree, Kid *oldNextDown,
 
 	/* Attributes and children. */
 	while ( child != 0 ) {
-		Kid *newKid = prg->kidPool.allocate();
+		Kid *newKid = kidAllocate( prg );
 
 		/* Watch out for next down. */
 		if ( child == oldNextDown )

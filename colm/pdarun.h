@@ -176,7 +176,6 @@ struct Map
 	MapEl *root;
 	long treeSize;
 	GenericInfo *genericInfo;
-
 };
 
 void mapListAbandon( Map *map );

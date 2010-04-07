@@ -501,7 +501,7 @@ void addNoToken( Program *prg, PdaRun *parser )
 		tree->id = prg->rtd->noTokenId;
 		tree->tokdata = 0;
 
-		parser->queue = prg->kidPool.allocate();
+		parser->queue = kidAllocate( prg );
 		parser->queue->tree = tree;
 		parser->queue->next = 0;
 	}
@@ -554,7 +554,7 @@ Kid *makeToken( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, int id
 	Kid *attrs = allocAttrs( fsmRun->prg, objectLength );
 
 	Kid *input = 0;
-	input = fsmRun->prg->kidPool.allocate();
+	input = kidAllocate( fsmRun->prg );
 	input->tree = (Tree*)fsmRun->prg->parseTreePool.allocate();
 	input->tree->flags |= AF_PARSE_TREE;
 
@@ -685,7 +685,7 @@ void sendWithIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inp
 		}
 		else {
 			/* Insert an ignore head in the child list. */
-			Kid *ignoreHead = pdaRun->prg->kidPool.allocate();
+			Kid *ignoreHead = kidAllocate( pdaRun->prg );
 			ignoreHead->next = input->tree->child;
 			input->tree->child = ignoreHead;
 
@@ -736,7 +736,7 @@ void sendHandleError( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *in
 void ignore( PdaRun *pdaRun, Tree *tree )
 {
 	/* Add the ignore string to the head of the ignore list. */
-	Kid *ignore = pdaRun->prg->kidPool.allocate();
+	Kid *ignore = kidAllocate( pdaRun->prg );
 	ignore->tree = tree;
 
 	/* Prepend it to the list of ignore tokens. */
@@ -776,7 +776,7 @@ void sendIgnore( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long 
 	Head *ignoreStr = extractMatch( pdaRun->prg, fsmRun, inputStream );
 	updatePosition( inputStream, fsmRun->tokstart, ignoreStr->length );
 	
-	Tree *tree = fsmRun->prg->treePool.allocate();
+	Tree *tree = treeAllocate( fsmRun->prg );
 	tree->refs = 1;
 	tree->id = id;
 	tree->tokdata = ignoreStr;
@@ -831,7 +831,7 @@ void sendEof( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRu
 
 	incrementConsumed( pdaRun );
 
-	Kid *input = fsmRun->prg->kidPool.allocate();
+	Kid *input = kidAllocate( fsmRun->prg );
 	input->tree = (Tree*)fsmRun->prg->parseTreePool.allocate();
 	input->tree->flags |= AF_PARSE_TREE;
 
@@ -893,7 +893,7 @@ long undoParse( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStr
 	/* PDA must be init first to set next region. */
 	initPdaRun( pdaRun, 0 );
 
-	Kid *top = pdaRun->prg->kidPool.allocate();
+	Kid *top = kidAllocate( pdaRun->prg );
 	top->next = pdaRun->stackTop;
 	top->tree = tree;
 	pdaRun->stackTop = top;
@@ -1151,7 +1151,7 @@ void sendTree( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStre
 //	/* FIXME: using runbufs here for this is a poor use of memory. */
 //	input->tree = runBuf->tree;
 //	delete runBuf;
-	Kid *input = fsmRun->prg->kidPool.allocate();
+	Kid *input = kidAllocate( fsmRun->prg );
 	input->tree = inputStream->getTree();
 
 	incrementConsumed( pdaRun );

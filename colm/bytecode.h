@@ -24,6 +24,7 @@
 
 #include "rtvector.h"
 #include "config.h"
+#include "pool.h"
 
 #include <iostream>
 
@@ -293,9 +294,6 @@ typedef unsigned char uchar;
 #define GEN_MAP       0x11
 #define GEN_VECTOR    0x12
 #define GEN_PARSER    0x13
-
-/* Allocation, number of items. */
-#define FRESH_BLOCK 8128                    
 
 /* Virtual machine stack size, number of pointers. 
  * This will be mmapped. */
@@ -638,115 +636,6 @@ long cmpTree( Program *prg, const Tree *tree1, const Tree *tree2 );
 /*
  * Runtime environment
  */
-
-struct PoolItem
-{
-	PoolItem *next;
-};
-
-template <class T> struct PoolBlock
-{
-	T data[FRESH_BLOCK];
-	PoolBlock<T> *next;
-};
-
-template <class T> struct PoolAlloc
-{
-	PoolAlloc() : 
-		head(0), nextel(FRESH_BLOCK), pool(0)
-	{}
-
-	T *allocate();
-	void free( T *el );
-	void clear();
-	long numlost();
-
-	PoolBlock<T> *head;
-	long nextel;
-	PoolItem *pool;
-};
-
-template <class T> T *PoolAlloc<T>::allocate()
-{
-	//#ifdef COLM_LOG_BYTECODE
-	//cerr << "allocating in: " << __PRETTY_FUNCTION__ << endl;
-	//#endif
-	T *newEl = 0;
-	if ( pool == 0 ) {
-		if ( nextel == FRESH_BLOCK ) {
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode )
-				cerr << "allocating " << FRESH_BLOCK << " Elements of type T" << endl;
-			#endif
-
-			PoolBlock<T> *newBlock = new PoolBlock<T>;
-			newBlock->next = head;
-			head = newBlock;
-			nextel = 0;
-		}
-		newEl = &head->data[nextel++];
-	}
-	else {
-		newEl = (T*)pool;
-		pool = pool->next;
-	}
-	memset( newEl, 0, sizeof(T) );
-	return newEl;
-}
-
-template <class T> void PoolAlloc<T>::free( T *el )
-{
-	#if 0
-	/* Some sanity checking. Best not to normally run with this on. */
-	char *p = (char*)el + sizeof(PoolItem*);
-	char *pe = (char*)el + sizeof(T);
-	for ( ; p < pe; p++ )
-		assert( *p != 0xcc );
-	memset( el, 0xcc, sizeof(T) );
-	#endif
-
-	PoolItem *pi = (PoolItem*) el;
-	pi->next = pool;
-	pool = pi;
-}
-
-template <class T> void PoolAlloc<T>::clear()
-{
-	PoolBlock<T> *block = head;
-	while ( block != 0 ) {
-		PoolBlock<T> *next = block->next;
-		delete block;
-		block = next;
-	}
-
-	head = 0;
-	nextel = 0;
-	pool = 0;
-}
-
-template <class T> long PoolAlloc<T>::numlost()
-{
-	/* Count the number of items allocated. */
-	long lost = 0;
-	PoolBlock<T> *block = head;
-	if ( block != 0 ) {
-		lost = nextel;
-		block = block->next;
-		while ( block != 0 ) {
-			lost += FRESH_BLOCK;
-			block = block->next;
-		}
-	}
-
-	/* Subtract. Items that are on the free list. */
-	PoolItem *pi = pool;
-	while ( pi != 0 ) {
-		lost -= 1;
-		pi = pi->next;
-	}
-
-	return lost;
-}
 
 void initProgram( Program *program, int argc, char **argv,
 		bool ctxDepParsing, RuntimeData *rtd );

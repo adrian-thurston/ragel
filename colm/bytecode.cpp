@@ -152,7 +152,7 @@ void sendTreeFrag( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
 	/* FIXME: Do we need to remove the ignore tokens 
 	 * at this point? Will it cause a leak? */
 
-	Kid *send = prg->kidPool.allocate();
+	Kid *send = kidAllocate( prg );
 	send->tree = tree;
 
 	LangElInfo *lelInfo = pdaRun->prg->rtd->lelInfo;
@@ -486,12 +486,12 @@ void initProgram( Program *prg, int argc, char **argv, bool ctxDepParsing,
 	prg->stdoutVal = 0;
 	prg->stderrVal = 0;
 
-	Int *trueInt = (Int*) prg->treePool.allocate();
+	Int *trueInt = (Int*) treeAllocate( prg );
 	trueInt->id = LEL_ID_BOOL;
 	trueInt->refs = 1;
 	trueInt->value = 1;
 
-	Int *falseInt = (Int*) prg->treePool.allocate();
+	Int *falseInt = (Int*) treeAllocate( prg );
 	falseInt->id = LEL_ID_BOOL;
 	falseInt->refs = 1;
 	falseInt->value = 0;
@@ -542,31 +542,31 @@ void clearProgram( Program *prg, Tree **vm_stack, Tree **sp )
 	treeDownref( prg, sp, (Tree*)prg->stdoutVal );
 	treeDownref( prg, sp, (Tree*)prg->stderrVal );
 
-	long kidLost = prg->kidPool.numlost();
+	long kidLost = prg->kidPool.numLost();
 	if ( kidLost )
 		cerr << "warning: lost kids: " << kidLost << endl;
 
-	long treeLost = prg->treePool.numlost();
+	long treeLost = prg->treePool.numLost();
 	if ( treeLost )
 		cerr << "warning: lost trees: " << treeLost << endl;
 
-	long parseTreeLost = prg->parseTreePool.numlost();
+	long parseTreeLost = prg->parseTreePool.numLost();
 	if ( parseTreeLost )
 		cerr << "warning: lost parse trees: " << parseTreeLost << endl;
 
-	long listLost = prg->listElPool.numlost();
+	long listLost = prg->listElPool.numLost();
 	if ( listLost )
 		cerr << "warning: lost listEls: " << listLost << endl;
 
-	long mapLost = prg->mapElPool.numlost();
+	long mapLost = prg->mapElPool.numLost();
 	if ( mapLost )
 		cerr << "warning: lost mapEls: " << mapLost << endl;
 
-	long headLost = prg->headPool.numlost();
+	long headLost = prg->headPool.numLost();
 	if ( headLost )
 		cerr << "warning: lost heads: " << headLost << endl;
 
-	long locationLost = prg->locationPool.numlost();
+	long locationLost = prg->locationPool.numLost();
 	if ( locationLost )
 		cerr << "warning: lost locations: " << locationLost << endl;
 
@@ -584,7 +584,7 @@ void clearProgram( Program *prg, Tree **vm_stack, Tree **sp )
 void allocGlobal( Program *prg )
 {
 	/* Alloc the global. */
-	Tree *tree = prg->treePool.allocate();
+	Tree *tree = treeAllocate( prg );
 	tree->child = allocAttrs( prg, prg->rtd->globalSize );
 	tree->refs = 1;
 	prg->global = tree;

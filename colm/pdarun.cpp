@@ -98,7 +98,7 @@ void initPdaRun( PdaRun *pdaRun, Tree *context )
 	pdaRun->cs = pdaRun->prg->rtd->startStates[pdaRun->parserId];
 
 	/* Init the element allocation variables. */
-	pdaRun->stackTop = pdaRun->prg->kidPool.allocate();
+	pdaRun->stackTop = kidAllocate( pdaRun->prg );
 	pdaRun->stackTop->tree = (Tree*)pdaRun->prg->parseTreePool.allocate();
 	pdaRun->stackTop->tree->flags |= AF_PARSE_TREE;
 
@@ -418,7 +418,7 @@ again:
 		if ( input != 0 )
 			pt(input->tree)->causeReduce += 1;
 
-		redLel = pdaRun->prg->kidPool.allocate();
+		redLel = kidAllocate( pdaRun->prg );
 		redLel->tree = (Tree*)pdaRun->prg->parseTreePool.allocate();
 		redLel->tree->flags |= AF_PARSE_TREE;
 		redLel->tree->refs = 1;

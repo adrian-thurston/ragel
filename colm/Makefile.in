@@ -59,10 +59,10 @@ COLM_SRC = \
 	fsmap.cpp \
 	dotgen.cpp \
 	pcheck.cpp \
-	ctinput.cpp
+	ctinput.cpp \
 
 RUNTIME_SRC = fsmrun.cpp pdarun.cpp bytecode.cpp list.cpp \
-	map.cpp string.cpp input.cpp tree.cpp
+	map.cpp string.cpp input.cpp tree.cpp pool.cpp
 
 ALL_SRC = $(COLM_SRC) $(RUNTIME_SRC)
 
