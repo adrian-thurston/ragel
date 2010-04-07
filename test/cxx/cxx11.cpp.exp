@@ -1,0 +1,152 @@
+***** SUCCESS *****
+<start>
+  <_repeat_declaration>
+    <declaration>
+      <block_declaration>
+        <simple_declaration>
+          <declaration_start/>
+          <simple_declaration_forms>
+            <decl_specifier_mult_seq_opt/>
+            <decl_specifier_sing>
+              <type_specifier_sing>
+                <simple_type_specifier an="0">
+                  <simple_type_specifier_kw_seq an="0">
+                    <simple_type_specifier_kw>
+                      <'int'/>
+                    </simple_type_specifier_kw>
+                  </simple_type_specifier_kw_seq>
+                </simple_type_specifier>
+              </type_specifier_sing>
+            </decl_specifier_sing>
+            <decl_specifier_mult_seq_opt/>
+            <init_declarator_list_opt>
+              <init_declarator_list>
+                <init_declarator>
+                  <declarator>
+                    <ptr_operator_seq_opt an="0"/>
+                    <declarator_id>
+                      <declarator_id_forms>
+                        <id_expression an="0">
+                          <root_qual_opt an="0"/>
+                          <nested_name_specifier_opt/>
+                          <unknown_id>
+                            <lookup_id>f</lookup_id>
+                          </unknown_id>
+                        </id_expression>
+                      </declarator_id_forms>
+                    </declarator_id>
+                    <decl_array_or_param_rep>
+                      <decl_array_or_param_rep/>
+                      <decl_array_or_param>
+                        <'('/>
+                        <parameter_declaration_clause>
+                          <pdc_start/>
+                          <parameter_declaration_list>
+                            <parameter_declaration_list>
+                              <parameter_declaration>
+                                <declaration_start/>
+                                <parameter_declaration_forms>
+                                  <decl_specifier_mult_seq_opt/>
+                                  <decl_specifier_sing>
+                                    <type_specifier_sing>
+                                      <simple_type_specifier an="0">
+                                        <simple_type_specifier_kw_seq an="0">
+                                          <simple_type_specifier_kw>
+                                            <'int'/>
+                                          </simple_type_specifier_kw>
+                                        </simple_type_specifier_kw_seq>
+                                      </simple_type_specifier>
+                                    </type_specifier_sing>
+                                  </decl_specifier_sing>
+                                  <decl_specifier_mult_seq_opt/>
+                                  <param_maybe_declarator>
+                                    <abstract_declarator>
+                                      <'('/>
+                                      <sub_abstract_declarator>
+                                        <ptr_operator_seq>
+                                          <ptr_operator>
+                                            <root_qual_opt/>
+                                            <nested_name_specifier_opt/>
+                                            <'*'/>
+                                            <cv_qualifier_rep/>
+                                          </ptr_operator>
+                                        </ptr_operator_seq>
+                                        <abstract_noid/>
+                                        <abstract_decl_array_or_param_seq_opt/>
+                                      </sub_abstract_declarator>
+                                      <')'/>
+                                      <abstract_decl_array_or_param_seq_opt>
+                                        <abstract_decl_array_or_param_seq_opt>
+                                          <abstract_decl_array_or_param_seq_opt/>
+                                          <abstract_decl_array_or_param>
+                                            <'['/>
+                                            <constant_expression_opt/>
+                                            <']'/>
+                                          </abstract_decl_array_or_param>
+                                        </abstract_decl_array_or_param_seq_opt>
+                                        <abstract_decl_array_or_param>
+                                          <'('/>
+                                          <parameter_declaration_clause>
+                                            <pdc_start/>
+                                          </parameter_declaration_clause>
+                                          <')'/>
+                                          <cv_qualifier_rep/>
+                                          <exception_specification_opt/>
+                                        </abstract_decl_array_or_param>
+                                      </abstract_decl_array_or_param_seq_opt>
+                                      <declarator_end/>
+                                    </abstract_declarator>
+                                  </param_maybe_declarator>
+                                  <maybe_parameter_init/>
+                                </parameter_declaration_forms>
+                                <declaration_end/>
+                              </parameter_declaration>
+                            </parameter_declaration_list>
+                            <','/>
+                            <parameter_declaration>
+                              <declaration_start/>
+                              <parameter_declaration_forms>
+                                <decl_specifier_mult_seq_opt/>
+                                <decl_specifier_sing>
+                                  <type_specifier_sing>
+                                    <simple_type_specifier an="0">
+                                      <simple_type_specifier_kw_seq an="0">
+                                        <simple_type_specifier_kw>
+                                          <'void'/>
+                                        </simple_type_specifier_kw>
+                                      </simple_type_specifier_kw_seq>
+                                    </simple_type_specifier>
+                                  </type_specifier_sing>
+                                </decl_specifier_sing>
+                                <decl_specifier_mult_seq_opt/>
+                                <param_maybe_declarator/>
+                                <maybe_parameter_init/>
+                              </parameter_declaration_forms>
+                              <declaration_end/>
+                            </parameter_declaration>
+                          </parameter_declaration_list>
+                        </parameter_declaration_clause>
+                        <')'/>
+                        <cv_qualifier_rep/>
+                        <exception_specification_opt/>
+                      </decl_array_or_param>
+                    </decl_array_or_param_rep>
+                    <declarator_end/>
+                  </declarator>
+                  <initializer_opt/>
+                </init_declarator>
+              </init_declarator_list>
+            </init_declarator_list_opt>
+          </simple_declaration_forms>
+          <declaration_end/>
+          <';'/>
+        </simple_declaration>
+      </block_declaration>
+    </declaration>
+  </_repeat_declaration>
+</start>
+***** NAMSPACES *****
+<root_namespace> {
+  f
+}
+***** UNKNOWN DECLARATORS *****

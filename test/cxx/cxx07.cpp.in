@@ -9,9 +9,9 @@ class C
 
 C c;
 
-void function( int i, int j );
+void function( int i, int j )
 {
-	asdlkf
+	function();
 }
 
 

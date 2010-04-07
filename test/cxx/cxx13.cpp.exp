@@ -1,0 +1,332 @@
+***** SUCCESS *****
+<start>
+  <_repeat_declaration>
+    <declaration>
+      <block_declaration>
+        <simple_declaration>
+          <declaration_start/>
+          <simple_declaration_forms>
+            <decl_specifier_mult_seq_opt/>
+            <decl_specifier_sing>
+              <type_specifier_sing>
+                <class_specifier an="0">
+                  <class_head>
+                    <class_key>
+                      <'class'/>
+                    </class_key>
+                    <nested_name_specifier_opt/>
+                    <class_head_name>
+                      <unknown_id>
+                        <lookup_id>C</lookup_id>
+                      </unknown_id>
+                    </class_head_name>
+                  </class_head>
+                  <base_clause_opt/>
+                  <'{'/>
+                  <class_member_rep>
+                    <class_member_rep>
+                      <class_member_rep/>
+                      <class_member>
+                        <member_declaration>
+                          <declaration_start/>
+                          <member_declaration_forms>
+                            <decl_specifier_mult_seq_opt/>
+                            <decl_specifier_sing>
+                              <type_specifier_sing>
+                                <class_specifier an="0">
+                                  <class_head>
+                                    <class_key>
+                                      <'class'/>
+                                    </class_key>
+                                    <nested_name_specifier_opt/>
+                                    <class_head_name>
+                                      <unknown_id>
+                                        <lookup_id>D</lookup_id>
+                                      </unknown_id>
+                                    </class_head_name>
+                                  </class_head>
+                                  <base_clause_opt/>
+                                  <'{'/>
+                                  <class_member_rep/>
+                                  <class_body_end/>
+                                  <'}'/>
+                                </class_specifier>
+                              </type_specifier_sing>
+                            </decl_specifier_sing>
+                            <decl_specifier_mult_seq_opt/>
+                            <member_declarator_list_opt/>
+                          </member_declaration_forms>
+                          <declaration_end/>
+                          <';'/>
+                        </member_declaration>
+                      </class_member>
+                    </class_member_rep>
+                    <class_member>
+                      <member_declaration>
+                        <declaration_start/>
+                        <member_declaration_forms>
+                          <decl_specifier_mult_seq_opt/>
+                          <decl_specifier_sing>
+                            <type_specifier_sing>
+                              <simple_type_specifier an="0">
+                                <simple_type_specifier_kw_seq an="0">
+                                  <simple_type_specifier_kw>
+                                    <'int'/>
+                                  </simple_type_specifier_kw>
+                                </simple_type_specifier_kw_seq>
+                              </simple_type_specifier>
+                            </type_specifier_sing>
+                          </decl_specifier_sing>
+                          <decl_specifier_mult_seq_opt/>
+                          <member_declarator_list_opt>
+                            <member_declarator_list>
+                              <member_declarator>
+                                <declarator>
+                                  <ptr_operator_seq_opt an="0"/>
+                                  <declarator_id>
+                                    <declarator_id_forms>
+                                      <id_expression an="0">
+                                        <root_qual_opt an="0"/>
+                                        <nested_name_specifier_opt/>
+                                        <unknown_id>
+                                          <lookup_id>f</lookup_id>
+                                        </unknown_id>
+                                      </id_expression>
+                                    </declarator_id_forms>
+                                  </declarator_id>
+                                  <decl_array_or_param_rep>
+                                    <decl_array_or_param_rep/>
+                                    <decl_array_or_param>
+                                      <'('/>
+                                      <parameter_declaration_clause>
+                                        <pdc_start/>
+                                      </parameter_declaration_clause>
+                                      <')'/>
+                                      <cv_qualifier_rep/>
+                                      <exception_specification_opt/>
+                                    </decl_array_or_param>
+                                  </decl_array_or_param_rep>
+                                  <declarator_end/>
+                                </declarator>
+                              </member_declarator>
+                            </member_declarator_list>
+                          </member_declarator_list_opt>
+                        </member_declaration_forms>
+                        <declaration_end/>
+                        <';'/>
+                      </member_declaration>
+                    </class_member>
+                  </class_member_rep>
+                  <class_body_end/>
+                  <'}'/>
+                </class_specifier>
+              </type_specifier_sing>
+            </decl_specifier_sing>
+            <decl_specifier_mult_seq_opt/>
+            <init_declarator_list_opt/>
+          </simple_declaration_forms>
+          <declaration_end/>
+          <';'/>
+        </simple_declaration>
+      </block_declaration>
+    </declaration>
+    <declaration>
+      <function_definition>
+        <function_def_declaration>
+          <declaration_start/>
+          <function_def_declaration_forms>
+            <decl_specifier_mult_seq_opt/>
+            <decl_specifier_sing>
+              <type_specifier_sing>
+                <simple_type_specifier an="0">
+                  <simple_type_specifier_kw_seq an="0">
+                    <simple_type_specifier_kw>
+                      <'int'/>
+                    </simple_type_specifier_kw>
+                  </simple_type_specifier_kw_seq>
+                </simple_type_specifier>
+              </type_specifier_sing>
+            </decl_specifier_sing>
+            <decl_specifier_mult_seq_opt/>
+            <function_def_declarator>
+              <declarator>
+                <ptr_operator_seq_opt an="0"/>
+                <declarator_id>
+                  <declarator_id_forms>
+                    <id_expression an="0">
+                      <root_qual_opt an="0"/>
+                      <nested_name_specifier_opt/>
+                      <unknown_id>
+                        <lookup_id>f</lookup_id>
+                      </unknown_id>
+                    </id_expression>
+                  </declarator_id_forms>
+                </declarator_id>
+                <decl_array_or_param_rep>
+                  <decl_array_or_param_rep/>
+                  <decl_array_or_param>
+                    <'('/>
+                    <parameter_declaration_clause>
+                      <pdc_start/>
+                    </parameter_declaration_clause>
+                    <')'/>
+                    <cv_qualifier_rep/>
+                    <exception_specification_opt/>
+                  </decl_array_or_param>
+                </decl_array_or_param_rep>
+                <declarator_end/>
+              </declarator>
+            </function_def_declarator>
+          </function_def_declaration_forms>
+          <declaration_end/>
+        </function_def_declaration>
+        <ctor_initializer_opt/>
+        <function_body>
+          <function_body_begin/>
+          <'{'/>
+          <statement_rep/>
+          <function_body_end/>
+          <'}'/>
+        </function_body>
+        <function_def_end/>
+      </function_definition>
+    </declaration>
+    <declaration>
+      <function_definition>
+        <function_def_declaration>
+          <declaration_start/>
+          <function_def_declaration_forms>
+            <decl_specifier_mult_seq_opt/>
+            <decl_specifier_sing>
+              <type_specifier_sing>
+                <simple_type_specifier an="0">
+                  <simple_type_specifier_kw_seq an="0">
+                    <simple_type_specifier_kw>
+                      <'int'/>
+                    </simple_type_specifier_kw>
+                  </simple_type_specifier_kw_seq>
+                </simple_type_specifier>
+              </type_specifier_sing>
+            </decl_specifier_sing>
+            <decl_specifier_mult_seq_opt/>
+            <function_def_declarator>
+              <declarator>
+                <ptr_operator_seq_opt an="0"/>
+                <declarator_id>
+                  <declarator_id_forms>
+                    <id_expression an="0">
+                      <root_qual_opt an="0"/>
+                      <nested_name_specifier_opt>
+                        <nested_name_specifier_opt/>
+                        <qualifying_name>
+                          <class_name>
+                            <class_id an="0">
+                              <lookup_id>C</lookup_id>
+                            </class_id>
+                          </class_name>
+                        </qualifying_name>
+                        <'::'/>
+                      </nested_name_specifier_opt>
+                      <identifier>
+                        <lookup_id>f</lookup_id>
+                      </identifier>
+                    </id_expression>
+                  </declarator_id_forms>
+                </declarator_id>
+                <decl_array_or_param_rep>
+                  <decl_array_or_param_rep/>
+                  <decl_array_or_param>
+                    <'('/>
+                    <parameter_declaration_clause>
+                      <pdc_start/>
+                    </parameter_declaration_clause>
+                    <')'/>
+                    <cv_qualifier_rep/>
+                    <exception_specification_opt/>
+                  </decl_array_or_param>
+                </decl_array_or_param_rep>
+                <declarator_end/>
+              </declarator>
+            </function_def_declarator>
+          </function_def_declaration_forms>
+          <declaration_end/>
+        </function_def_declaration>
+        <ctor_initializer_opt/>
+        <function_body>
+          <function_body_begin/>
+          <'{'/>
+          <statement_rep>
+            <statement_rep/>
+            <statement>
+              <declaration_statement>
+                <stmt_block_declaration>
+                  <declaration_start/>
+                  <stmt_block_declaration_forms>
+                    <decl_specifier_mult_seq_opt/>
+                    <decl_specifier_sing>
+                      <type_specifier_sing>
+                        <simple_type_specifier an="0">
+                          <simple_type_specifier_name an="0">
+                            <qual_type_name an="0">
+                              <root_qual_opt an="0"/>
+                              <nested_name_specifier_opt/>
+                              <type_name>
+                                <class_name an="0">
+                                  <class_id an="0">
+                                    <lookup_id>D</lookup_id>
+                                  </class_id>
+                                </class_name>
+                              </type_name>
+                            </qual_type_name>
+                          </simple_type_specifier_name>
+                        </simple_type_specifier>
+                      </type_specifier_sing>
+                    </decl_specifier_sing>
+                    <decl_specifier_mult_seq_opt/>
+                    <init_declarator_list_opt>
+                      <init_declarator_list>
+                        <init_declarator>
+                          <declarator>
+                            <ptr_operator_seq_opt an="0"/>
+                            <declarator_id>
+                              <declarator_id_forms>
+                                <id_expression an="0">
+                                  <root_qual_opt an="0"/>
+                                  <nested_name_specifier_opt/>
+                                  <unknown_id>
+                                    <lookup_id>d</lookup_id>
+                                  </unknown_id>
+                                </id_expression>
+                              </declarator_id_forms>
+                            </declarator_id>
+                            <decl_array_or_param_rep/>
+                            <declarator_end/>
+                          </declarator>
+                          <initializer_opt/>
+                        </init_declarator>
+                      </init_declarator_list>
+                    </init_declarator_list_opt>
+                  </stmt_block_declaration_forms>
+                  <declaration_end/>
+                  <';'/>
+                </stmt_block_declaration>
+              </declaration_statement>
+            </statement>
+          </statement_rep>
+          <function_body_end/>
+          <'}'/>
+        </function_body>
+        <function_def_end/>
+      </function_definition>
+    </declaration>
+  </_repeat_declaration>
+</start>
+***** NAMSPACES *****
+<root_namespace> {
+  C {
+    D
+    f
+  }
+  f
+}
+***** UNKNOWN DECLARATORS *****

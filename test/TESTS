@@ -6,6 +6,7 @@ SUBDIRS="
 	html
 	xml
 	http
+	cxx
 "
 
 TESTS="

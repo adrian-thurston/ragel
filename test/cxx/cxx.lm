@@ -2159,13 +2159,15 @@ int printNamespace()
 }
 
 start S = parse start( stdin )
-#printNamespace()
-#print( '***** SUCCESS *****\n' )
-#print_xml( S )
-#for DI: declarator_id in S {
-#	if match DI 
-#		[root_qual_opt nested_name_specifier_opt '~' UID:unknown_id]
-#	{
-#		print( UID, '\n' )
-#	}
-#}
+print( '***** SUCCESS *****\n' )
+print_xml( S )
+print( '***** NAMSPACES *****\n' )
+printNamespace()
+print( '***** UNKNOWN DECLARATORS *****\n' )
+for DI: declarator_id in S {
+	if match DI 
+		[root_qual_opt nested_name_specifier_opt '~' UID: unknown_id]
+	{
+		print( UID, '\n' )
+	}
+}
