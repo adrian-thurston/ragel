@@ -48,7 +48,7 @@ template <class T> struct PoolAlloc
 		head(0), nextel(FRESH_BLOCK), pool(0)
 	{}
 
-	T *allocate();
+	T *_allocate();
 	void free( T *el );
 	void clear();
 	long numLost();
@@ -60,7 +60,7 @@ private:
 	PoolItem *pool;
 };
 
-template <class T> T *PoolAlloc<T>::allocate()
+template <class T> T *PoolAlloc<T>::_allocate()
 {
 	//#ifdef COLM_LOG_BYTECODE
 	//cerr << "allocating in: " << __PRETTY_FUNCTION__ << endl;

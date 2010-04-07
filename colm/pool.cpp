@@ -4,7 +4,7 @@
 
 Kid *kidAllocate( Program *prg )
 {
-	return prg->kidPool.allocate();
+	return prg->kidPool._allocate();
 }
 
 void kidFree( Program *prg, Kid *el )
@@ -24,7 +24,7 @@ long kidNumlost( Program *prg )
 
 Tree *treeAllocate( Program *prg )
 {
-	return prg->treePool.allocate();
+	return prg->treePool._allocate();
 }
 
 void treeFree( Program *prg, Tree *el )
@@ -44,7 +44,7 @@ long treeNumlost( Program *prg )
 
 ParseTree *parseTreeAllocate( Program *prg )
 {
-	return prg->parseTreePool.allocate();
+	return prg->parseTreePool._allocate();
 }
 
 void parseTreeFree( Program *prg, ParseTree *el )
@@ -64,7 +64,7 @@ long parseTreeNumlost( Program *prg )
 
 ListEl *listElAllocate( Program *prg )
 {
-	return prg->listElPool.allocate();
+	return prg->listElPool._allocate();
 }
 
 void listElFree( Program *prg, ListEl *el )
@@ -84,7 +84,7 @@ long listElNumlost( Program *prg )
 
 MapEl *mapElAllocate( Program *prg )
 {
-	return prg->mapElPool.allocate();
+	return prg->mapElPool._allocate();
 }
 
 void mapElFree( Program *prg, MapEl *el )
@@ -104,7 +104,7 @@ long mapElNumlost( Program *prg )
 
 Head *headAllocate( Program *prg )
 {
-	return prg->headPool.allocate();
+	return prg->headPool._allocate();
 }
 
 void headFree( Program *prg, Head *el )
@@ -124,7 +124,7 @@ long headNumlost( Program *prg )
 
 Location *locationAllocate( Program *prg )
 {
-	return prg->locationPool.allocate();
+	return prg->locationPool._allocate();
 }
 
 void locationFree( Program *prg, Location *el )

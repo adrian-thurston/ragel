@@ -113,7 +113,7 @@ Head *stringAllocFull( Program *prg, const char *data, long length )
 Head *stringAllocPointer( Program *prg, const char *data, long length )
 {
 	/* Find the length and allocate the space for the shared string. */
-	Head *head = prg->headPool.allocate();
+	Head *head = headAllocate( prg );
 
 	/* Init the header. */
 	head->data = data;

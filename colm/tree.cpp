@@ -123,7 +123,7 @@ Kid *kidListConcat( Kid *list1, Kid *list2 )
 
 Stream *openStreamFile( Program *prg, FILE *file )
 {
-	Stream *res = (Stream*)prg->mapElPool.allocate();
+	Stream *res = (Stream*)mapElAllocate( prg );
 	res->id = LEL_ID_STREAM;
 	res->file = file;
 	res->in = new InputStreamFile( file );
@@ -133,7 +133,7 @@ Stream *openStreamFile( Program *prg, FILE *file )
 
 Stream *openStreamFd( Program *prg, long fd )
 {
-	Stream *res = (Stream*)prg->mapElPool.allocate();
+	Stream *res = (Stream*)mapElAllocate( prg );
 	res->id = LEL_ID_STREAM;
 	res->in = new InputStreamFd( fd );
 	initInputStream( res->in );
@@ -803,7 +803,7 @@ Tree *copyRealTree( Program *prg, Tree *tree, Kid *oldNextDown,
 	 * copying it, return the copy. */
 	Tree *newTree;
 	if ( parseTree ) {
-		newTree = (Tree*) prg->parseTreePool.allocate();
+		newTree = (Tree*) parseTreeAllocate( prg );
 		newTree->flags |= AF_PARSE_TREE;
 	}
 	else {
@@ -878,13 +878,13 @@ List *copyList( Program *prg, List *list, Kid *oldNextDown, Kid *&newNextDown )
 	#endif
 
 	/* Not a need copy. */
-	List *newList = (List*)prg->mapElPool.allocate();
+	List *newList = (List*)mapElAllocate( prg );
 	newList->id = list->genericInfo->langElId;
 	newList->genericInfo = list->genericInfo;
 
 	ListEl *src = list->head;
 	while( src != 0 ) {
-		ListEl *newEl = prg->listElPool.allocate();
+		ListEl *newEl = listElAllocate( prg );
 		newEl->value = src->value;
 		treeUpref( newEl->value );
 
@@ -909,7 +909,7 @@ Map *copyMap( Program *prg, Map *map, Kid *oldNextDown, Kid *&newNextDown )
 	}
 	#endif
 
-	Map *newMap = (Map*)prg->mapElPool.allocate();
+	Map *newMap = (Map*)mapElAllocate( prg );
 	newMap->id = map->genericInfo->langElId;
 	newMap->genericInfo = map->genericInfo;
 	newMap->treeSize = map->treeSize;
@@ -998,21 +998,21 @@ Tree *createGeneric( Program *prg, long genericId )
 	Tree *newGeneric = 0;
 	switch ( genericInfo->type ) {
 		case GEN_MAP: {
-			Map *map = (Map*)prg->mapElPool.allocate();
+			Map *map = (Map*)mapElAllocate( prg );
 			map->id = genericInfo->langElId;
 			map->genericInfo = genericInfo;
 			newGeneric = (Tree*) map;
 			break;
 		}
 		case GEN_LIST: {
-			List *list = (List*)prg->mapElPool.allocate();
+			List *list = (List*)mapElAllocate( prg );
 			list->id = genericInfo->langElId;
 			list->genericInfo = genericInfo;
 			newGeneric = (Tree*) list;
 			break;
 		}
 		case GEN_PARSER: {
-			Accum *accum = (Accum*)prg->mapElPool.allocate();
+			Accum *accum = (Accum*)mapElAllocate( prg );
 			accum->id = genericInfo->langElId;
 			accum->genericInfo = genericInfo;
 			accum->fsmRun = new FsmRun( prg );
@@ -1671,7 +1671,7 @@ void listAppend( Program *prg, List *list, Tree *val )
 	assert( list->refs == 1 );
 	if ( val != 0 )
 		assert( val->refs >= 1 );
-	ListEl *listEl = prg->listElPool.allocate();
+	ListEl *listEl = listElAllocate( prg );
 	listEl->value = val;
 	list->append( listEl );
 }

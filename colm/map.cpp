@@ -111,7 +111,7 @@ MapEl *mapCopyBranch( Program *p, Map *map, MapEl *el, Kid *oldNextDown, Kid *&n
 	/* Duplicate element. Either the base element's copy constructor or defaul
 	 * constructor will get called. Both will suffice for initting the
 	 * pointers to null when they need to be. */
-	MapEl *newEl = p->mapElPool.allocate();
+	MapEl *newEl = mapElAllocate( p );
 
 	if ( (Kid*)el == oldNextDown )
 		newNextDown = (Kid*)newEl;
@@ -256,7 +256,7 @@ MapEl *mapInsert( Program *prg, Map *map, Tree *key, MapEl **lastFound )
 			/* We are at an external element and did not find the key we were
 			 * looking for. Create the new element, attach it underneath the leaf
 			 * and rebalance. */
-			MapEl *element = prg->mapElPool.allocate();
+			MapEl *element = mapElAllocate( prg );
 			element->key = key;
 			element->tree = 0;
 			mapAttachRebal( map, element, parentEl, lastLess );

@@ -204,7 +204,7 @@ Head *treeToStr( Tree **sp, Program *prg, Tree *tree )
 Tree *extractInput( Program *prg, Accum *accum )
 {
 	if ( accum->stream == 0 ) {
-		Stream *res = (Stream*)prg->mapElPool.allocate();
+		Stream *res = (Stream*)mapElAllocate( prg );
 		res->id = LEL_ID_STREAM;
 		res->in = new InputStreamAccum();
 		treeUpref( (Tree*)res );

@@ -99,7 +99,7 @@ void initPdaRun( PdaRun *pdaRun, Tree *context )
 
 	/* Init the element allocation variables. */
 	pdaRun->stackTop = kidAllocate( pdaRun->prg );
-	pdaRun->stackTop->tree = (Tree*)pdaRun->prg->parseTreePool.allocate();
+	pdaRun->stackTop->tree = (Tree*)parseTreeAllocate( pdaRun->prg );
 	pdaRun->stackTop->tree->flags |= AF_PARSE_TREE;
 
 	pt(pdaRun->stackTop->tree)->state = -1;
@@ -419,7 +419,7 @@ again:
 			pt(input->tree)->causeReduce += 1;
 
 		redLel = kidAllocate( pdaRun->prg );
-		redLel->tree = (Tree*)pdaRun->prg->parseTreePool.allocate();
+		redLel->tree = (Tree*)parseTreeAllocate( pdaRun->prg );
 		redLel->tree->flags |= AF_PARSE_TREE;
 		redLel->tree->refs = 1;
 		redLel->tree->id = pdaRun->tables->rtd->prodInfo[reduction].lhsId;

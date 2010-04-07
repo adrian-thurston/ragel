@@ -495,7 +495,7 @@ void addNoToken( Program *prg, PdaRun *parser )
 		}
 		#endif
 
-		Tree *tree = (Tree*)prg->parseTreePool.allocate();
+		Tree *tree = (Tree*)parseTreeAllocate( prg );
 		tree->flags |= AF_PARSE_TREE;
 		tree->refs = 1;
 		tree->id = prg->rtd->noTokenId;
@@ -555,7 +555,7 @@ Kid *makeToken( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, int id
 
 	Kid *input = 0;
 	input = kidAllocate( fsmRun->prg );
-	input->tree = (Tree*)fsmRun->prg->parseTreePool.allocate();
+	input->tree = (Tree*)parseTreeAllocate( fsmRun->prg );
 	input->tree->flags |= AF_PARSE_TREE;
 
 	if ( namedLangEl )
@@ -791,7 +791,7 @@ Head *extractMatch( Program *prg, FsmRun *fsmRun, InputStream *inputStream )
 {
 	long length = fsmRun->p - fsmRun->tokstart;
 	Head *head = stringAllocPointer( prg, fsmRun->tokstart, length );
-	head->location = prg->locationPool.allocate();
+	head->location = locationAllocate( prg );
 	head->location->line = inputStream->line;
 	head->location->column = inputStream->column;
 	head->location->byte = inputStream->byte;
@@ -832,7 +832,7 @@ void sendEof( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRu
 	incrementConsumed( pdaRun );
 
 	Kid *input = kidAllocate( fsmRun->prg );
-	input->tree = (Tree*)fsmRun->prg->parseTreePool.allocate();
+	input->tree = (Tree*)parseTreeAllocate( fsmRun->prg );
 	input->tree->flags |= AF_PARSE_TREE;
 
 	input->tree->refs = 1;
