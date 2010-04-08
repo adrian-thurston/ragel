@@ -381,14 +381,14 @@ struct Kid;
 struct Tree;
 struct ParseTree;
 struct ListEl;
-struct MapEl;
+typedef struct _MapEl MapEl;
 struct PdaTables;
 struct RuntimeData;
 struct FsmRun;
 struct PdaRun;
 struct Program;
 struct List;
-struct Map;
+typedef struct _Map Map;
 struct Stream;
 struct Ref;
 struct TreeIter;
@@ -621,7 +621,7 @@ Tree **stackAlloc();
 /*
  * Maps
  */
-struct GenericInfo
+typedef struct _GenericInfo
 {
 	long type;
 	long typeArg;
@@ -629,7 +629,7 @@ struct GenericInfo
 	long keyType;
 	long langElId;
 	long parserId;
-};
+} GenericInfo;
 
 long cmpTree( Program *prg, const Tree *tree1, const Tree *tree2 );
 

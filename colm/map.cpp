@@ -23,11 +23,6 @@
 
 MapEl *mapRebalance( Map *map, MapEl *n );
 
-void mapListAbandon( Map *map )
-{
-	map->head = map->tail = 0;
-}
-
 void mapListAddBefore( Map *map, MapEl *next_el, MapEl *new_el )
 {
 	/* Set the next pointer of the new element to next_el. We do

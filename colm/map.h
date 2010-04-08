@@ -19,12 +19,30 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-/* Nothing Yet */
+typedef struct _MapEl MapEl;
+typedef struct _GenericInfo GenericInfo;
 
-#include "map.h"
-
-void mapListAbandon( Map *map )
+typedef struct _Map
 {
-	map->head = map->tail = 0;
+	/* Must overlay Tree. */
+	short id;
+	unsigned short flags;
+	long refs;
+	MapEl *head;
+
+	MapEl *tail;
+	MapEl *root;
+	long treeSize;
+	GenericInfo *genericInfo;
+} Map;
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
+void mapListAbandon( Map *map );
+
+#if defined(__cplusplus)
 }
+#endif
 

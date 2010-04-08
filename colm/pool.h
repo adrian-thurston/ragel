@@ -147,7 +147,7 @@ struct Kid;
 struct Tree;
 struct ParseTree;
 struct ListEl;
-struct MapEl;
+typedef struct _MapEl MapEl;
 struct Head;
 struct Location;
 
