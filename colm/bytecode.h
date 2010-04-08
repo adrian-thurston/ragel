@@ -378,7 +378,7 @@ typedef unsigned char uchar;
 #define vm_ptop() (sp)
 
 struct Kid;
-struct Tree;
+typedef struct _Tree Tree;
 struct ParseTree;
 struct ListEl;
 typedef struct _MapEl MapEl;

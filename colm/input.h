@@ -57,7 +57,7 @@ struct Replacement;
 struct ReplItem;
 struct RunBuf;
 struct FsmRun;
-struct Tree;
+typedef struct _Tree Tree;
 
 struct RunBuf
 {

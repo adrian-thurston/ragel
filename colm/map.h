@@ -19,8 +19,23 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-typedef struct _MapEl MapEl;
+#ifndef _MAP_H
+#define _MAP_H
+
 typedef struct _GenericInfo GenericInfo;
+typedef struct _Tree Tree;
+
+typedef struct _MapEl
+{
+	/* Must overlay Kid. */
+	Tree *tree;
+	struct _MapEl *next;
+	struct _MapEl *prev;
+
+	struct _MapEl *left, *right, *parent;
+	long height;
+	Tree *key;
+} MapEl;
 
 typedef struct _Map
 {
@@ -41,8 +56,12 @@ extern "C" {
 #endif
 
 void mapListAbandon( Map *map );
+void mapRemoveEl( Map *map, MapEl *element, MapEl *filler );
+void mapReplaceEl( Map *map, MapEl *element, MapEl *replacement );
 
 #if defined(__cplusplus)
 }
+#endif
+
 #endif
 

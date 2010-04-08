@@ -144,7 +144,7 @@ template <class T> long PoolAlloc<T>::_numLost()
 
 struct Program;
 struct Kid;
-struct Tree;
+typedef struct _Tree Tree;
 struct ParseTree;
 struct ListEl;
 typedef struct _MapEl MapEl;

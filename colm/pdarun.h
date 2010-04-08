@@ -28,7 +28,7 @@
 
 using std::ostream;
 
-struct Tree;
+typedef struct _Tree Tree;
 struct ParseData;
 struct FsmRun;
 struct KlangEl;
@@ -52,7 +52,7 @@ struct Ref
 	Ref *next;
 };
 
-struct Tree
+typedef struct _Tree
 {
 	/* First four will be overlaid in other structures. */
 	short id;
@@ -61,7 +61,7 @@ struct Tree
 	Kid *child;
 
 	Head *tokdata;
-};
+} Tree;
 
 struct ParseTree
 {
@@ -152,18 +152,6 @@ struct List
 		{ return listLen; }
 };
 
-typedef struct _MapEl
-{
-	/* Must overlay Kid. */
-	Tree *tree;
-	MapEl *next;
-	MapEl *prev;
-
-	MapEl *left, *right, *parent;
-	long height;
-	Tree *key;
-} MapEl;
-
 #include "map.h"
 
 void mapEmpty( Map *map );
@@ -182,8 +170,6 @@ void mapListAddBefore( Map *map, MapEl *next_el, MapEl *new_el );
 void mapListAddAfter( Map *map, MapEl *prev_el, MapEl *new_el );
 void mapDeleteChildrenOf( Map *map, MapEl *n );
 void mapRecalcHeights( Map *map, MapEl *start );
-void mapReplaceEl( Map *map, MapEl *element, MapEl *replacement );
-void mapRemoveEl( Map *map, MapEl *element, MapEl *filler );
 void mapAttachRebal( Map *map, MapEl *element, MapEl *parentEl, MapEl *lastLess );
 
 struct Accum
