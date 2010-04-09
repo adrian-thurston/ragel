@@ -56,6 +56,13 @@ extern "C" {
 #endif
 
 void mapListAbandon( Map *map );
+
+void mapDeleteChildrenOf( Map *map, MapEl *element );
+void mapEmpty( Map *map );
+MapEl *mapRebalance( Map *map, MapEl *n );
+void mapRecalcHeights( Map *map, MapEl *element );
+MapEl *mapFindFirstUnbalGP( Map *map, MapEl *element );
+MapEl *mapFindFirstUnbalEl( Map *map, MapEl *element );
 void mapRemoveEl( Map *map, MapEl *element, MapEl *filler );
 void mapReplaceEl( Map *map, MapEl *element, MapEl *replacement );
 

@@ -154,23 +154,18 @@ struct List
 
 #include "map.h"
 
-void mapEmpty( Map *map );
 MapEl *mapListDetach( MapEl *el );
 MapEl *mapCopyBranch( Program *p, Map *map, MapEl *el, Kid *oldNextDown, Kid *&newNextDown );
 MapEl *mapInsert( Program *prg, Map *map, MapEl *element, MapEl **lastFound = 0 );
 MapEl *mapInsert( Program *prg, Map *map, Tree *key, MapEl **lastFound = 0 );
 MapEl *mapImplFind( Program *prg, Map *map, Tree *key );
-MapEl *mapDetach( Program *prg, Map *map, Tree *key );
-MapEl *mapDetach( Program *prg, Map *map, MapEl *element );
 void mapImplRemove( Program *prg, Map *map, MapEl *element );
 bool mapImplRemove( Program *prg, Map *map, Tree *key );
-MapEl *mapFindFirstUnbalEl( Map *map, MapEl *element );
-MapEl *mapFindFirstUnbalGP( Map *map, MapEl *element );
 void mapListAddBefore( Map *map, MapEl *next_el, MapEl *new_el );
 void mapListAddAfter( Map *map, MapEl *prev_el, MapEl *new_el );
-void mapDeleteChildrenOf( Map *map, MapEl *n );
-void mapRecalcHeights( Map *map, MapEl *start );
 void mapAttachRebal( Map *map, MapEl *element, MapEl *parentEl, MapEl *lastLess );
+MapEl *mapDetachByKey( Program *prg, Map *map, Tree *key );
+MapEl *mapDetach( Program *prg, Map *map, MapEl *element );
 
 struct Accum
 {

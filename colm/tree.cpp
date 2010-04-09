@@ -1611,7 +1611,7 @@ void mapUnremove( Program *prg, Map *map, Tree *key, Tree *element )
 
 Tree *mapUninsert( Program *prg, Map *map, Tree *key )
 {
-	MapEl *el = mapDetach( prg, map, key );
+	MapEl *el = mapDetachByKey( prg, map, key );
 	Tree *val = el->tree;
 	mapElFree( prg, el );
 	return val;
@@ -1638,7 +1638,7 @@ Tree *mapUnstore( Program *prg, Map *map, Tree *key, Tree *existing )
 {
 	Tree *stored = 0;
 	if ( existing == 0 ) {
-		MapEl *mapEl = mapDetach( prg, map, key );
+		MapEl *mapEl = mapDetachByKey( prg, map, key );
 		stored = mapEl->tree;
 		mapElFree( prg, mapEl );
 	}
