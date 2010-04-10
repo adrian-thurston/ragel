@@ -30,13 +30,13 @@
 
 using std::ostringstream;
 
-string GenAction::nameOrLoc()
+string nameOrLoc( GenAction *genAction )
 {
-	if ( name != 0 )
-		return string(name);
+	if ( genAction->name != 0 )
+		return string(genAction->name);
 	else {
 		ostringstream ret;
-		ret << loc.line << ":" << loc.col;
+		ret << genAction->loc.line << ":" << genAction->loc.col;
 		return ret.str();
 	}
 }
@@ -799,9 +799,9 @@ void RedFsm::analyzeActionList( RedAction *redAct, InlineList *inlineList )
 void RedFsm::assignActionIds()
 {
 	int nextActionId = 0;
-	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
+	for ( GenActionList::Iter act = genActionList; act.lte(); act++ ) {
 		/* Only ever interested in referenced actions. */
-		if ( act->numRefs() > 0 )
+		if ( numRefs( act ) > 0 )
 			act->actionId = nextActionId++;
 	}
 }
@@ -813,7 +813,7 @@ void RedFsm::analyzeMachine()
 	findFinalActionRefs();
 
 	/* Check if there are any calls in action code. */
-	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
+	for ( GenActionList::Iter act = genActionList; act.lte(); act++ ) {
 		/* Record the occurrence of various kinds of actions. */
 		if ( act->numToStateRefs > 0 )
 			bAnyToStateActions = true;
@@ -1083,9 +1083,9 @@ FsmTables *RedFsm::makeFsmTables()
 
 	/* The array pointing to actions. */
 	pos = 0;
-	fsmTables->numActionSwitch = actionList.length();
+	fsmTables->numActionSwitch = genActionList.length();
 	fsmTables->actionSwitch = new GenAction*[fsmTables->numActionSwitch];
-	for ( GenActionList::Iter act = actionList; act.lte(); act++ )
+	for ( GenActionList::Iter act = genActionList; act.lte(); act++ )
 		fsmTables->actionSwitch[pos++] = act;
 	
 	/*

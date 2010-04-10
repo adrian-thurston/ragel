@@ -48,33 +48,13 @@ using std::string;
 
 struct RedState;
 struct InlineList;
-struct GenAction;
 struct FsmTables;
 struct ParseData;
 struct ObjField;
 
-typedef DList<GenAction> GenActionList;
-
 /* Element in list of actions. Contains the string for the code to exectute. */
-struct GenAction 
-:
-	public DListEl<GenAction>
+typedef struct _GenAction 
 {
-	GenAction( )
-	:
-		name(0),
-		inlineList(0), 
-		actionId(0),
-		markType(MarkNone),
-		objField(0),
-		markId(0),
-		numTransRefs(0),
-		numToStateRefs(0),
-		numFromStateRefs(0),
-		numEofRefs(0)
-	{
-	}
-
 	/* Data collected during parse. */
 	InputLoc loc;
 	char *name;
@@ -84,16 +64,26 @@ struct GenAction
 	ObjField *objField;
 	long markId;
 
-	string nameOrLoc();
 
-	/* Number of references in the final machine. */
-	int numRefs() 
-		{ return numTransRefs + numToStateRefs + numFromStateRefs + numEofRefs; }
 	int numTransRefs;
 	int numToStateRefs;
 	int numFromStateRefs;
 	int numEofRefs;
-};
+
+	struct _GenAction *prev, *next;
+} GenAction;
+
+typedef DList<GenAction> GenActionList;
+string nameOrLoc( GenAction *genAction );
+
+/* Number of references in the final machine. */
+inline int numRefs( GenAction *genAction ) 
+{
+	return genAction->numTransRefs + 
+		genAction->numToStateRefs + 
+		genAction->numFromStateRefs + 
+		genAction->numEofRefs;
+}
 
 
 /* Forwards. */
@@ -400,7 +390,7 @@ struct RedFsm
 	Condition *allConditions;
 	GenCondSpace *allCondSpaces;
 	RedState *allStates;
-	GenActionList actionList;
+	GenActionList genActionList;
 	ConditionList conditionList;
 	CondSpaceList condSpaceList;
 	EntryIdVect entryPointIds;

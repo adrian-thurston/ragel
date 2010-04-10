@@ -43,8 +43,9 @@ RedFsmBuild::RedFsmBuild( char *fsmName, ParseData *pd, FsmGraph *fsm )
 void RedFsmBuild::initActionList( unsigned long length )
 { 
 	redFsm->allActions = new GenAction[length];
+	memset( redFsm->allActions, 0, sizeof(GenAction) * length );
 	for ( unsigned long a = 0; a < length; a++ )
-		redFsm->actionList.append( redFsm->allActions+a );
+		redFsm->genActionList.append( redFsm->allActions+a );
 }
 
 

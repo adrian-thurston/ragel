@@ -25,7 +25,7 @@
 #include "pdarun.h"
 #include "input.h"
 
-struct GenAction;
+typedef struct _GenAction GenAction;
 struct KlangEl;
 struct PdaRun;
 struct ParseData;

@@ -435,7 +435,7 @@ string FsmCodeGen::CAST( string type )
 std::ostream &FsmCodeGen::TO_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
-	for ( GenActionList::Iter act = redFsm->actionList; act.lte(); act++ ) {
+	for ( GenActionList::Iter act = redFsm->genActionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numToStateRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
@@ -451,7 +451,7 @@ std::ostream &FsmCodeGen::TO_STATE_ACTION_SWITCH()
 std::ostream &FsmCodeGen::FROM_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
-	for ( GenActionList::Iter act = redFsm->actionList; act.lte(); act++ ) {
+	for ( GenActionList::Iter act = redFsm->genActionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numFromStateRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
@@ -467,7 +467,7 @@ std::ostream &FsmCodeGen::FROM_STATE_ACTION_SWITCH()
 std::ostream &FsmCodeGen::ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
-	for ( GenActionList::Iter act = redFsm->actionList; act.lte(); act++ ) {
+	for ( GenActionList::Iter act = redFsm->genActionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numTransRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
