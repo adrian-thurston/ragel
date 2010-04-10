@@ -27,7 +27,7 @@
 
 enum MarkType
 {
-	MarkNone,
+	MarkNone = 0,
 	MarkMark
 };
 

@@ -323,8 +323,8 @@ void FsmCodeGen::ACTION( ostream &ret, GenAction *action, int targState, bool in
 	ret << "\t{";
 	INLINE_LIST( ret, action->inlineList, targState, inFinish );
 
-	if ( action->markId >= 0 )
-		ret << "mark[" << action->markId << "] = " << P() << ";\n";
+	if ( action->markId > 0 )
+		ret << "mark[" << action->markId-1 << "] = " << P() << ";\n";
 
 	ret << "}\n";
 

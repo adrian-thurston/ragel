@@ -67,7 +67,7 @@ struct GenAction
 		actionId(0),
 		markType(MarkNone),
 		objField(0),
-		markId(-1),
+		markId(0),
 		numTransRefs(0),
 		numToStateRefs(0),
 		numFromStateRefs(0),

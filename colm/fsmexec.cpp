@@ -88,7 +88,7 @@ void exec_action( FsmRun *fsmRun, GenAction *genAction )
 	}
 
 	if ( genAction->markType == MarkMark )
-		fsmRun->mark[genAction->markId] = fsmRun->p;
+		fsmRun->mark[genAction->markId-1] = fsmRun->p;
 }
 
 void fsm_execute( FsmRun *fsmRun, InputStream *inputStream )
