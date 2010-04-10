@@ -2,143 +2,265 @@
 #include "pdarun.h"
 #include "pool.h"
 
+
+void initPoolAlloc( PoolAlloc *poolAlloc, int sizeofT )
+{
+	poolAlloc->head = 0;
+	poolAlloc->nextel = FRESH_BLOCK;
+	poolAlloc->pool = 0;
+	poolAlloc->sizeofT = sizeofT;
+}
+
+void *poolAllocAllocate( PoolAlloc *poolAlloc )
+{
+	//#ifdef COLM_LOG_BYTECODE
+	//cerr << "allocating in: " << __PRETTY_FUNCTION__ << endl;
+	//#endif
+	void *newEl = 0;
+	if ( poolAlloc->pool == 0 ) {
+		if ( poolAlloc->nextel == FRESH_BLOCK ) {
+			//#ifdef COLM_LOG_BYTECODE
+			//if ( colm_log_bytecode )
+			//	cerr << "allocating " << FRESH_BLOCK << " Elements of type T" << endl;
+			//#endif
+
+			PoolBlock *newBlock = (PoolBlock*)malloc( sizeof(PoolBlock) );
+			newBlock->data = malloc( poolAlloc->sizeofT * FRESH_BLOCK );
+			newBlock->next = poolAlloc->head;
+			poolAlloc->head = newBlock;
+			poolAlloc->nextel = 0;
+		}
+
+		newEl = (char*)poolAlloc->head->data + poolAlloc->sizeofT * poolAlloc->nextel++;
+	}
+	else {
+		newEl = poolAlloc->pool;
+		poolAlloc->pool = poolAlloc->pool->next;
+	}
+	memset( newEl, 0, poolAlloc->sizeofT );
+	return newEl;
+}
+
+void poolAllocFree( PoolAlloc *poolAlloc, void *el )
+{
+	#if 0
+	/* Some sanity checking. Best not to normally run with this on. */
+	char *p = (char*)el + sizeof(PoolItem*);
+	char *pe = (char*)el + sizeof(T);
+	for ( ; p < pe; p++ )
+		assert( *p != 0xcc );
+	memset( el, 0xcc, sizeof(T) );
+	#endif
+
+	PoolItem *pi = (PoolItem*) el;
+	pi->next = poolAlloc->pool;
+	poolAlloc->pool = pi;
+}
+
+void poolAllocClear( PoolAlloc *poolAlloc )
+{
+	PoolBlock *block = poolAlloc->head;
+	while ( block != 0 ) {
+		PoolBlock *next = block->next;
+		free( block->data );
+		free( block );
+		block = next;
+	}
+
+	poolAlloc->head = 0;
+	poolAlloc->nextel = 0;
+	poolAlloc->pool = 0;
+}
+
+long poolAllocNumLost( PoolAlloc *poolAlloc )
+{
+	/* Count the number of items allocated. */
+	long lost = 0;
+	PoolBlock *block = poolAlloc->head;
+	if ( block != 0 ) {
+		lost = poolAlloc->nextel;
+		block = block->next;
+		while ( block != 0 ) {
+			lost += FRESH_BLOCK;
+			block = block->next;
+		}
+	}
+
+	/* Subtract. Items that are on the free list. */
+	PoolItem *pi = poolAlloc->pool;
+	while ( pi != 0 ) {
+		lost -= 1;
+		pi = pi->next;
+	}
+
+	return lost;
+}
+
+/* 
+ * Kid
+ */
+
 Kid *kidAllocate( Program *prg )
 {
-	return (Kid*)prg->kidPool._allocate();
+	return (Kid*) poolAllocAllocate( &prg->kidPool );
 }
 
 void kidFree( Program *prg, Kid *el )
 {
-	prg->kidPool._free( el );
+	poolAllocFree( &prg->kidPool, el );
 }
 
 void kidClear( Program *prg )
 {
-	prg->kidPool._clear();
+	poolAllocClear( &prg->kidPool );
 }
 
 long kidNumLost( Program *prg )
 {
-	return prg->kidPool._numLost();
+	return poolAllocNumLost( &prg->kidPool );
 }
+
+/* 
+ * Tree
+ */
 
 Tree *treeAllocate( Program *prg )
 {
-	return (Tree*)prg->treePool._allocate();
+	return (Tree*) poolAllocAllocate( &prg->treePool );
 }
 
 void treeFree( Program *prg, Tree *el )
 {
-	prg->treePool._free( el );
+	poolAllocFree( &prg->treePool, el );
 }
 
 void treeClear( Program *prg )
 {
-	prg->treePool._clear();
+	poolAllocClear( &prg->treePool );
 }
 
 long treeNumLost( Program *prg )
 {
-	return prg->treePool._numLost();
+	return poolAllocNumLost( &prg->treePool );
 }
+
+/* 
+ * ParseTree
+ */
 
 ParseTree *parseTreeAllocate( Program *prg )
 {
-	return (ParseTree*)prg->parseTreePool._allocate();
+	return (ParseTree*) poolAllocAllocate( &prg->parseTreePool );
 }
 
 void parseTreeFree( Program *prg, ParseTree *el )
 {
-	prg->parseTreePool._free( el );
+	poolAllocFree( &prg->parseTreePool, el );
 }
 
 void parseTreeClear( Program *prg )
 {
-	prg->parseTreePool._clear();
+	poolAllocClear( &prg->parseTreePool );
 }
 
 long parseTreeNumLost( Program *prg )
 {
-	return prg->parseTreePool._numLost();
+	return poolAllocNumLost( &prg->parseTreePool );
 }
+
+/* 
+ * ListEl
+ */
 
 ListEl *listElAllocate( Program *prg )
 {
-	return (ListEl*)prg->listElPool._allocate();
+	return (ListEl*) poolAllocAllocate( &prg->listElPool );
 }
 
 void listElFree( Program *prg, ListEl *el )
 {
-	prg->listElPool._free( el );
+	poolAllocFree( &prg->listElPool, el );
 }
 
 void listElClear( Program *prg )
 {
-	prg->listElPool._clear();
+	poolAllocClear( &prg->listElPool );
 }
 
 long listElNumLost( Program *prg )
 {
-	return prg->listElPool._numLost();
+	return poolAllocNumLost( &prg->listElPool );
 }
+
+/* 
+ * MapEl
+ */
 
 MapEl *mapElAllocate( Program *prg )
 {
-	return (MapEl*)prg->mapElPool._allocate();
+	return (MapEl*) poolAllocAllocate( &prg->mapElPool );
 }
 
 void mapElFree( Program *prg, MapEl *el )
 {
-	prg->mapElPool._free( el );
+	poolAllocFree( &prg->mapElPool, el );
 }
 
 void mapElClear( Program *prg )
 {
-	prg->mapElPool._clear();
+	poolAllocClear( &prg->mapElPool );
 }
 
 long mapElNumLost( Program *prg )
 {
-	return prg->mapElPool._numLost();
+	return poolAllocNumLost( &prg->mapElPool );
 }
+
+/* 
+ * Head
+ */
 
 Head *headAllocate( Program *prg )
 {
-	return (Head*)prg->headPool._allocate();
+	return (Head*) poolAllocAllocate( &prg->headPool );
 }
 
 void headFree( Program *prg, Head *el )
 {
-	prg->headPool._free( el );
+	poolAllocFree( &prg->headPool, el );
 }
 
 void headClear( Program *prg )
 {
-	prg->headPool._clear();
+	poolAllocClear( &prg->headPool );
 }
 
 long headNumLost( Program *prg )
 {
-	return prg->headPool._numLost();
+	return poolAllocNumLost( &prg->headPool );
 }
+
+/* 
+ * Location
+ */
 
 Location *locationAllocate( Program *prg )
 {
-	return (Location*)prg->locationPool._allocate();
+	return (Location*) poolAllocAllocate( &prg->locationPool );
 }
 
 void locationFree( Program *prg, Location *el )
 {
-	prg->locationPool._free( el );
+	poolAllocFree( &prg->locationPool, el );
 }
 
 void locationClear( Program *prg )
 {
-	prg->locationPool._clear();
+	poolAllocClear( &prg->locationPool );
 }
 
 long locationNumLost( Program *prg )
 {
-	return prg->locationPool._numLost();
+	return poolAllocNumLost( &prg->locationPool );
 }
 

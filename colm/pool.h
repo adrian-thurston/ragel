@@ -31,119 +31,26 @@ using std::ostream;
 /* Allocation, number of items. */
 #define FRESH_BLOCK 8128                    
 
-struct PoolItem
-{
-	PoolItem *next;
-};
-
 struct PoolBlock
 {
 	void *data;
 	PoolBlock *next;
 };
 
-template <class T> struct PoolAlloc
+struct PoolItem
 {
-	PoolAlloc() : 
-		head(0), nextel(FRESH_BLOCK), pool(0)
-	{}
+	PoolItem *next;
+};
 
-	void *_allocate();
-	void _free( void *el );
-	void _clear();
-	long _numLost();
-
-private:
-
+struct PoolAlloc
+{
 	PoolBlock *head;
 	long nextel;
 	PoolItem *pool;
+	int sizeofT;
 };
 
-template <class T> void *PoolAlloc<T>::_allocate()
-{
-	//#ifdef COLM_LOG_BYTECODE
-	//cerr << "allocating in: " << __PRETTY_FUNCTION__ << endl;
-	//#endif
-	void *newEl = 0;
-	if ( pool == 0 ) {
-		if ( nextel == FRESH_BLOCK ) {
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode )
-				cerr << "allocating " << FRESH_BLOCK << " Elements of type T" << endl;
-			#endif
-
-			PoolBlock *newBlock = new PoolBlock;
-			newBlock->data = malloc( sizeof(T) * FRESH_BLOCK );
-			newBlock->next = head;
-			head = newBlock;
-			nextel = 0;
-		}
-
-		newEl = (char*)head->data + sizeof(T) * nextel++;
-	}
-	else {
-		newEl = pool;
-		pool = pool->next;
-	}
-	memset( newEl, 0, sizeof(T) );
-	return newEl;
-}
-
-template <class T> void PoolAlloc<T>::_free( void *el )
-{
-	#if 0
-	/* Some sanity checking. Best not to normally run with this on. */
-	char *p = (char*)el + sizeof(PoolItem*);
-	char *pe = (char*)el + sizeof(T);
-	for ( ; p < pe; p++ )
-		assert( *p != 0xcc );
-	memset( el, 0xcc, sizeof(T) );
-	#endif
-
-	PoolItem *pi = (PoolItem*) el;
-	pi->next = pool;
-	pool = pi;
-}
-
-template <class T> void PoolAlloc<T>::_clear()
-{
-	PoolBlock *block = head;
-	while ( block != 0 ) {
-		PoolBlock *next = block->next;
-		free( block->data );
-		delete block;
-		block = next;
-	}
-
-	head = 0;
-	nextel = 0;
-	pool = 0;
-}
-
-template <class T> long PoolAlloc<T>::_numLost()
-{
-	/* Count the number of items allocated. */
-	long lost = 0;
-	PoolBlock *block = head;
-	if ( block != 0 ) {
-		lost = nextel;
-		block = block->next;
-		while ( block != 0 ) {
-			lost += FRESH_BLOCK;
-			block = block->next;
-		}
-	}
-
-	/* Subtract. Items that are on the free list. */
-	PoolItem *pi = pool;
-	while ( pi != 0 ) {
-		lost -= 1;
-		pi = pi->next;
-	}
-
-	return lost;
-}
+void initPoolAlloc( PoolAlloc *poolAlloc, int sizeofT );
 
 struct Program;
 typedef struct _Kid Kid;

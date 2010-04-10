@@ -25,6 +25,8 @@
 #include "rtvector.h"
 #include "config.h"
 #include "pool.h"
+#include "pdarun2.h"
+#include "map.h"
 
 #include <iostream>
 
@@ -617,13 +619,13 @@ struct Program
 	RuntimeData *rtd;
 	Tree *global;
 
-	PoolAlloc<Kid> kidPool;
-	PoolAlloc<Tree> treePool;
-	PoolAlloc<ParseTree> parseTreePool;
-	PoolAlloc<ListEl> listElPool;
-	PoolAlloc<MapEl> mapElPool;
-	PoolAlloc<Head> headPool;
-	PoolAlloc<Location> locationPool;
+	PoolAlloc kidPool;
+	PoolAlloc treePool;
+	PoolAlloc parseTreePool;
+	PoolAlloc listElPool;
+	PoolAlloc mapElPool;
+	PoolAlloc headPool;
+	PoolAlloc locationPool;
 
 	Tree *trueVal;
 	Tree *falseVal;

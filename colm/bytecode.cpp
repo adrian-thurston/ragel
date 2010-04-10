@@ -486,6 +486,14 @@ void initProgram( Program *prg, int argc, char **argv, bool ctxDepParsing,
 	prg->stdoutVal = 0;
 	prg->stderrVal = 0;
 
+	initPoolAlloc( &prg->kidPool, sizeof(Kid) );
+	initPoolAlloc( &prg->treePool, sizeof(Tree) );
+	initPoolAlloc( &prg->parseTreePool, sizeof(ParseTree) );
+	initPoolAlloc( &prg->listElPool, sizeof(ListEl) );
+	initPoolAlloc( &prg->mapElPool, sizeof(MapEl) );
+	initPoolAlloc( &prg->headPool, sizeof(Head) );
+	initPoolAlloc( &prg->locationPool, sizeof(Location) );
+
 	Int *trueInt = (Int*) treeAllocate( prg );
 	trueInt->id = LEL_ID_BOOL;
 	trueInt->refs = 1;
