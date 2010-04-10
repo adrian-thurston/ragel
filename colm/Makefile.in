@@ -61,10 +61,10 @@ COLM_SRC = \
 	pcheck.cpp \
 	ctinput.cpp \
 
-RUNTIME_SRC = fsmrun.cpp pdarun.cpp bytecode.cpp list.cpp \
+RUNTIME_SRC = fsmrun.cpp pdarun.cpp bytecode.cpp \
 	map.cpp string.cpp input.cpp tree.cpp pool.cpp
 
-RUNTIME_SRC_C = map2.c fsmrun2.c
+RUNTIME_SRC_C = map2.c fsmrun2.c list.c
 
 
 ALL_SRC = $(COLM_SRC) $(RUNTIME_SRC)

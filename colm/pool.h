@@ -143,13 +143,13 @@ template <class T> long PoolAlloc<T>::_numLost()
 }
 
 struct Program;
-struct Kid;
+typedef struct _Kid Kid;
 typedef struct _Tree Tree;
-struct ParseTree;
-struct ListEl;
+typedef struct _ParseTree ParseTree;
+typedef struct _ListEl ListEl;
 typedef struct _MapEl MapEl;
-struct Head;
-struct Location;
+typedef struct _Head Head;
+typedef struct _Location Location;
 
 Kid *kidAllocate( Program *prg );
 void kidFree( Program *prg, Kid *el );

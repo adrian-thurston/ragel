@@ -19,9 +19,9 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#include "pdarun.h"
+#include "pdarun2.h"
 
-void List::addAfter(ListEl *prev_el, ListEl *new_el)
+void listAddAfter( List *list, ListEl *prev_el, ListEl *new_el )
 {
 	/* Set the previous pointer of new_el to prev_el. We do
 	 * this regardless of the state of the list. */
@@ -30,8 +30,8 @@ void List::addAfter(ListEl *prev_el, ListEl *new_el)
 	/* Set forward pointers. */
 	if (prev_el == 0) {
 		/* There was no prev_el, we are inserting at the head. */
-		new_el->next = head;
-		head = new_el;
+		new_el->next = list->head;
+		list->head = new_el;
 	} 
 	else {
 		/* There was a prev_el, we can access previous next. */
@@ -42,7 +42,7 @@ void List::addAfter(ListEl *prev_el, ListEl *new_el)
 	/* Set reverse pointers. */
 	if (new_el->next == 0) {
 		/* There is no next element. Set the tail pointer. */
-		tail = new_el;
+		list->tail = new_el;
 	}
 	else {
 		/* There is a next element. Set it's prev pointer. */
@@ -50,10 +50,10 @@ void List::addAfter(ListEl *prev_el, ListEl *new_el)
 	}
 
 	/* Update list length. */
-	listLen++;
+	list->listLen++;
 }
 
-void List::addBefore(ListEl *next_el, ListEl *new_el)
+void listAddBefore( List *list, ListEl *next_el, ListEl *new_el)
 {
 	/* Set the next pointer of the new element to next_el. We do
 	 * this regardless of the state of the list. */
@@ -62,8 +62,8 @@ void List::addBefore(ListEl *next_el, ListEl *new_el)
 	/* Set reverse pointers. */
 	if (next_el == 0) {
 		/* There is no next elememnt. We are inserting at the tail. */
-		new_el->prev = tail;
-		tail = new_el;
+		new_el->prev = list->tail;
+		list->tail = new_el;
 	} 
 	else {
 		/* There is a next element and we can access next's previous. */
@@ -74,32 +74,32 @@ void List::addBefore(ListEl *next_el, ListEl *new_el)
 	/* Set forward pointers. */
 	if (new_el->prev == 0) {
 		/* There is no previous element. Set the head pointer.*/
-		head = new_el;
+		list->head = new_el;
 	}
 	else {
 		/* There is a previous element, set it's next pointer to new_el. */
 		new_el->prev->next = new_el;
 	}
 
-	listLen++;
+	list->listLen++;
 }
 
-ListEl *List::detach(ListEl *el)
+ListEl *listDetach( List *list, ListEl *el )
 {
 	/* Set forward pointers to skip over el. */
 	if (el->prev == 0) 
-		head = el->next; 
+		list->head = el->next; 
 	else
 		el->prev->next = el->next; 
 
 	/* Set reverse pointers to skip over el. */
 	if (el->next == 0) 
-		tail = el->prev; 
+		list->tail = el->prev; 
 	else
 		el->next->prev = el->prev; 
 
 	/* Update List length and return element we detached. */
-	listLen--;
+	list->listLen--;
 	return el;
 }
 

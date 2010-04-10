@@ -26,6 +26,7 @@
 #include "bytecode.h"
 #include "rtvector.h"
 #include "fsmrun2.h"
+#include "pdarun2.h"
 
 using std::ostream;
 
@@ -36,121 +37,6 @@ struct KlangEl;
 struct PdaTables;
 struct InputStream;
 struct InputStreamAccum;
-
-struct Kid
-{
-	/* The tree needs to be first since pointers to kids are used to reference
-	 * trees on the stack. A pointer to the word that is a Tree* is cast to
-	 * a Kid*. */
-	Tree *tree;
-	Kid *next;
-};
-
-struct Ref
-{
-	Kid *kid;
-	Ref *next;
-};
-
-typedef struct _Tree
-{
-	/* First four will be overlaid in other structures. */
-	short id;
-	unsigned short flags;
-	long refs;
-	Kid *child;
-
-	Head *tokdata;
-} Tree;
-
-struct ParseTree
-{
-	/* Entire structure must overlay Tree. */
-	short id;
-	unsigned short flags;
-	long refs;
-	Kid *child;
-
-	Head *tokdata;
-
-	/* Parsing algorithm. */
-	long state;
-	long region;
-	char causeReduce;
-	char retry_lower;
-	char retry_upper;
-};
-
-struct Int
-{
-	/* Must overlay Tree. */
-	short id;
-	unsigned short flags;
-	long refs;
-	Kid *child;
-
-	long value;
-};
-
-struct Pointer
-{
-	/* Must overlay Tree. */
-	short id;
-	unsigned short flags;
-	long refs;
-	Kid *child;
-
-	Kid *value;
-};
-
-struct Str
-{
-	/* Must overlay Tree. */
-	short id;
-	unsigned short flags;
-	long refs;
-	Kid *child;
-
-	Head *value;
-};
-
-struct ListEl
-{
-	/* Must overlay kid. */
-	Tree *value;
-	ListEl *next;
-	ListEl *prev;
-
-	ListEl() { }
-	ListEl( Tree *value )
-		: value(value) { }
-};
-
-struct List
-{
-	/* Must overlay Tree. */
-	short id;
-	unsigned short flags;
-	long refs;
-	ListEl *head;
-
-	ListEl *tail;
-	long listLen;
-	GenericInfo *genericInfo;
-
-	void prepend(ListEl *new_el) { addBefore(head, new_el); }
-	void append(ListEl *new_el)  { addAfter(tail, new_el); }
-
-	void addAfter( ListEl *prev_el, ListEl *new_el );
-	void addBefore( ListEl *next_el, ListEl *new_el );
-
-	ListEl *detachFirst()        { return detach(head); }
-	ListEl *detachLast()         { return detach(tail); }
-	ListEl *detach(ListEl *el);
-
-	long length() const 
-		{ return listLen; }
-};
 
 #include "map.h"
 

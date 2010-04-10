@@ -888,7 +888,7 @@ List *copyList( Program *prg, List *list, Kid *oldNextDown, Kid *&newNextDown )
 		newEl->value = src->value;
 		treeUpref( newEl->value );
 
-		newList->append( newEl );
+		listAppend( newList, newEl );
 
 		/* Watch out for next down. */
 		if ( (Kid*)src == oldNextDown )
@@ -1661,11 +1661,6 @@ long mapLength( Map *map )
 	return map->treeSize;
 }
 
-long listLength( List *list )
-{
-	return list->length();
-}
-
 void listAppend( Program *prg, List *list, Tree *val )
 {
 	assert( list->refs == 1 );
@@ -1673,13 +1668,13 @@ void listAppend( Program *prg, List *list, Tree *val )
 		assert( val->refs >= 1 );
 	ListEl *listEl = listElAllocate( prg );
 	listEl->value = val;
-	list->append( listEl );
+	listAppend( list, listEl );
 }
 
 Tree *listRemoveEnd( Program *prg, List *list )
 {
 	Tree *tree = list->tail->value;
-	listElFree( prg, list->detachLast() );
+	listElFree( prg, listDetachLast( list ) );
 	return tree;
 }
 

@@ -377,25 +377,25 @@ typedef unsigned char uchar;
 #define vm_top() (*sp)
 #define vm_ptop() (sp)
 
-struct Kid;
+typedef struct _Kid Kid;
 typedef struct _Tree Tree;
-struct ParseTree;
-struct ListEl;
+typedef struct _ParseTree ParseTree;
+typedef struct _ListEl ListEl;
 typedef struct _MapEl MapEl;
 struct PdaTables;
 struct RuntimeData;
 struct FsmRun;
 struct PdaRun;
 struct Program;
-struct List;
+typedef struct _List List;
 typedef struct _Map Map;
 struct Stream;
-struct Ref;
+typedef struct _Ref Ref;
 struct TreeIter;
 struct RevTreeIter;
-struct Pointer;
-struct Str;
-struct Int;
+typedef struct _Pointer Pointer;
+typedef struct _Str Str;
+typedef struct _Int Int;
 
 typedef unsigned char Code;
 typedef unsigned long Word;
@@ -486,31 +486,10 @@ struct CodeVect : public RtVector<Code>
 
 /* Location information. */
 
-struct File
-{
-	File *prev, *next;
-};
-
-struct Location
-{
-	File *file;
-	long line;
-	long column;
-	long byte;
-};
-
 
 /*
  * Strings
  */
-
-/* Header located just before string data. */
-struct Head
-{
-	const char *data;
-	long length;
-	Location *location;
-};
 
 struct TreePair
 {
@@ -577,7 +556,6 @@ void printTree2( FILE *out, Tree **&sp, Program *prg, Tree *tree );
 void printXmlTree( Tree **&sp, Program *prg, Tree *tree, bool commAttr );
 void printXmlKid( Tree **&sp, Program *prg, Kid *kid, bool commAttr, int depth );
 
-long listLength( List *list );
 void listAppend( Program *prg, List *list, Tree *val );
 Tree *listRemoveEnd( Program *prg, List *list );
 Tree *getListMem( List *list, Word field );
@@ -617,19 +595,6 @@ Tree *treeSearch( Program *prg, Tree *tree, long id );
 void splitRef( Tree **&sp, Program *prg, Ref *fromRef );
 
 Tree **stackAlloc();
-
-/*
- * Maps
- */
-typedef struct _GenericInfo
-{
-	long type;
-	long typeArg;
-	long keyOffset;
-	long keyType;
-	long langElId;
-	long parserId;
-} GenericInfo;
 
 long cmpTree( Program *prg, const Tree *tree1, const Tree *tree2 );
 

@@ -29,7 +29,7 @@ struct GenAction;
 struct KlangEl;
 struct PdaRun;
 struct ParseData;
-struct Kid;
+typedef struct _Kid Kid;
 struct Pattern;
 struct PatternItem;
 struct Replacement;
