@@ -417,7 +417,7 @@ struct GenericType
 
 typedef DList<GenericType> GenericList;
 
-struct UserIter;
+typedef struct _UserIter UserIter;
 typedef AvlMap<String, UserIter*, CmpStr> UserIterMap;
 typedef AvlMapEl<String, UserIter*> UserIterMapEl;
 
@@ -1056,7 +1056,6 @@ struct AccumText
 
 typedef DList<AccumText> AccumTextList;
 
-struct UserIter;
 struct Function;
 
 struct IterDef

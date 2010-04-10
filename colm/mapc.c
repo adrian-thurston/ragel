@@ -28,7 +28,135 @@ void mapListAbandon( Map *map )
 	map->head = map->tail = 0;
 }
 
+void mapListAddBefore( Map *map, MapEl *next_el, MapEl *new_el )
+{
+	/* Set the next pointer of the new element to next_el. We do
+	 * this regardless of the state of the list. */
+	new_el->next = next_el; 
 
+	/* Set reverse pointers. */
+	if ( next_el == 0 ) {
+		/* There is no next elememnt. We are inserting at the tail. */
+		new_el->prev = map->tail;
+		map->tail = new_el;
+	} 
+	else {
+		/* There is a next element and we can access next's previous. */
+		new_el->prev = next_el->prev;
+		next_el->prev = new_el;
+	} 
+
+	/* Set forward pointers. */
+	if ( new_el->prev == 0 ) {
+		/* There is no previous element. Set the head pointer.*/
+		map->head = new_el;
+	}
+	else {
+		/* There is a previous element, set it's next pointer to new_el. */
+		new_el->prev->next = new_el;
+	}
+}
+
+void mapListAddAfter( Map *map, MapEl *prev_el, MapEl *new_el )
+{
+	/* Set the previous pointer of new_el to prev_el. We do
+	 * this regardless of the state of the list. */
+	new_el->prev = prev_el; 
+
+	/* Set forward pointers. */
+	if (prev_el == 0) {
+		/* There was no prev_el, we are inserting at the head. */
+		new_el->next = map->head;
+		map->head = new_el;
+	} 
+	else {
+		/* There was a prev_el, we can access previous next. */
+		new_el->next = prev_el->next;
+		prev_el->next = new_el;
+	} 
+
+	/* Set reverse pointers. */
+	if (new_el->next == 0) {
+		/* There is no next element. Set the tail pointer. */
+		map->tail = new_el;
+	}
+	else {
+		/* There is a next element. Set it's prev pointer. */
+		new_el->next->prev = new_el;
+	}
+}
+
+
+MapEl *mapListDetach( Map *map, MapEl *el )
+{
+	/* Set forward pointers to skip over el. */
+	if ( el->prev == 0 ) 
+		map->head = el->next; 
+	else
+		el->prev->next = el->next; 
+
+	/* Set reverse pointers to skip over el. */
+	if ( el->next == 0 ) 
+		map->tail = el->prev; 
+	else
+		el->next->prev = el->prev; 
+
+	/* Update List length and return element we detached. */
+	return el;
+}
+
+
+/* Once an insertion position is found, attach a element to the tree. */
+void mapAttachRebal( Map *map, MapEl *element, MapEl *parentEl, MapEl *lastLess )
+{
+	/* Increment the number of element in the tree. */
+	map->treeSize += 1;
+
+	/* Set element's parent. */
+	element->parent = parentEl;
+
+	/* New element always starts as a leaf with height 1. */
+	element->left = 0;
+	element->right = 0;
+	element->height = 1;
+
+	/* Are we inserting in the tree somewhere? */
+	if ( parentEl != 0 ) {
+		/* We have a parent so we are somewhere in the tree. If the parent
+		 * equals lastLess, then the last traversal in the insertion went
+		 * left, otherwise it went right. */
+		if ( lastLess == parentEl ) {
+			parentEl->left = element;
+
+			mapListAddBefore( map, parentEl, element );
+		}
+		else {
+			parentEl->right = element;
+
+			mapListAddAfter( map, parentEl, element );
+		}
+	}
+	else {
+		/* No parent element so we are inserting the root. */
+		map->root = element;
+
+		mapListAddAfter( map, map->tail, element );
+	}
+
+	/* Recalculate the heights. */
+	mapRecalcHeights( map, parentEl );
+
+	/* Find the first unbalance. */
+	MapEl *ub = mapFindFirstUnbalGP( map, element );
+
+	/* rebalance. */
+	if ( ub != 0 )
+	{
+		/* We assert that after this single rotation the 
+		 * tree is now properly balanced. */
+		mapRebalance( map, ub );
+	}
+}
 
 #if 0
 /* Recursively delete all the children of a element. */

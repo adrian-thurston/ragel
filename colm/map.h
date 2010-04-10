@@ -57,6 +57,10 @@ extern "C" {
 
 void mapListAbandon( Map *map );
 
+void mapListAddBefore( Map *map, MapEl *next_el, MapEl *new_el );
+void mapListAddAfter( Map *map, MapEl *prev_el, MapEl *new_el );
+MapEl *mapListDetach( Map *map, MapEl *el );
+void mapAttachRebal( Map *map, MapEl *element, MapEl *parentEl, MapEl *lastLess );
 void mapDeleteChildrenOf( Map *map, MapEl *element );
 void mapEmpty( Map *map );
 MapEl *mapRebalance( Map *map, MapEl *n );

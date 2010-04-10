@@ -154,20 +154,16 @@ struct List
 
 #include "map.h"
 
-MapEl *mapListDetach( MapEl *el );
-MapEl *mapCopyBranch( Program *p, Map *map, MapEl *el, Kid *oldNextDown, Kid *&newNextDown );
+MapEl *mapCopyBranch( Program *prg, Map *map, MapEl *el, Kid *oldNextDown, Kid *&newNextDown );
 MapEl *mapInsert( Program *prg, Map *map, MapEl *element, MapEl **lastFound = 0 );
 MapEl *mapInsert( Program *prg, Map *map, Tree *key, MapEl **lastFound = 0 );
 MapEl *mapImplFind( Program *prg, Map *map, Tree *key );
 void mapImplRemove( Program *prg, Map *map, MapEl *element );
 bool mapImplRemove( Program *prg, Map *map, Tree *key );
-void mapListAddBefore( Map *map, MapEl *next_el, MapEl *new_el );
-void mapListAddAfter( Map *map, MapEl *prev_el, MapEl *new_el );
-void mapAttachRebal( Map *map, MapEl *element, MapEl *parentEl, MapEl *lastLess );
 MapEl *mapDetachByKey( Program *prg, Map *map, Tree *key );
 MapEl *mapDetach( Program *prg, Map *map, MapEl *element );
 
-struct Accum
+typedef struct _Accum
 {
 	/* Must overlay Tree. */
 	short id;
@@ -180,7 +176,7 @@ struct Accum
 	PdaRun *pdaRun;
 	FsmRun *fsmRun;
 	Stream *stream;
-};
+} Accum;
 
 struct Stream
 {
@@ -238,16 +234,16 @@ struct RevTreeIter
 	Kid **cur;
 };
 
-struct FunctionInfo
+typedef struct _FunctionInfo
 {
 	const char *name;
 	long frameId;
 	long argSize;
 	long ntrees;
 	long frameSize;
-};
+} FunctionInfo;
 
-struct UserIter
+typedef struct _UserIter
 {
 	/* The current item. */
 	Ref ref;
@@ -257,7 +253,7 @@ struct UserIter
 	Code *resume;
 	Tree **frame;
 	long searchId;
-};
+} UserIter;
 
 void initUserIter( UserIter *userIter, Tree **stackRoot, long argSize, long searchId );
 
@@ -266,13 +262,13 @@ void initUserIter( UserIter *userIter, Tree **stackRoot, long argSize, long sear
  * Program Data.
  */
 
-struct PatReplInfo
+typedef struct _PatReplInfo
 {
 	long offset;
 	long numBindings;
-};
+} PatReplInfo;
 
-struct PatReplNode
+typedef struct _PatReplNode
 {
 	long id;
 	long next;
@@ -284,11 +280,11 @@ struct PatReplNode
 
 	/* Just match nonterminal, don't go inside. */
 	bool stop;
-};
+} PatReplNode;
 
 /* FIXME: should have a descriptor for object types to give the length. */
 
-struct LangElInfo
+typedef struct _LangElInfo
 {
 	const char *name;
 	bool repeat;
@@ -310,23 +306,23 @@ struct LangElInfo
 	long markId;
 	long captureAttr;
 	long numCaptureAttr;
-};
+} LangElInfo;
 
-struct ObjFieldInfo
+typedef struct _ObjFieldInfo
 {
 	int typeId;
-};
+} ObjFieldInfo;
 
-struct ProdInfo
+typedef struct _ProdInfo
 {
 	long length;
 	unsigned long lhsId;
 	const char *name;
 	long frameId;
 	bool lhsUpref;
-};
+} ProdInfo;
 
-struct FrameInfo
+typedef struct _FrameInfo
 {
 	Code *codeWV;
 	long codeLenWV;
@@ -334,21 +330,21 @@ struct FrameInfo
 	long codeLenWC;
 	char *trees;
 	long treesLen;
-};
+} FrameInfo;
 
-struct RegionInfo
+typedef struct _RegionInfo
 {
 	const char *name;
 	long defaultToken;
 	long eofFrameId;
-};
+} RegionInfo;
 
-struct CaptureAttr
+typedef struct _CaptureAttr
 {
 	long mark_enter;
 	long mark_leave;
 	long offset;
-};
+} CaptureAttr;
 
 struct RuntimeData
 {
