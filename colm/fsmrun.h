@@ -25,7 +25,7 @@
 #include "pdarun.h"
 #include "input.h"
 
-typedef struct _GenAction GenAction;
+struct GenAction;
 struct KlangEl;
 struct PdaRun;
 struct ParseData;
@@ -35,46 +35,10 @@ struct PatternItem;
 struct Replacement;
 struct ReplItem;
 
-struct FsmTables
-{
-	long *actions;
-	long *keyOffsets;
-	char *transKeys;
-	long *singleLengths;
-	long *rangeLengths;
-	long *indexOffsets;
-	long *transTargsWI;
-	long *transActionsWI;
-	long *toStateActions;
-	long *fromStateActions;
-	long *eofActions;
-	long *eofTargs;
-	long *entryByRegion;
-
-	long numStates;
-	long numActions;
-	long numTransKeys;
-	long numSingleLengths;
-	long numRangeLengths;
-	long numIndexOffsets;
-	long numTransTargsWI;
-	long numTransActionsWI;
-	long numRegions;
-
-	long startState;
-	long firstFinal;
-	long errorState;
-
-	GenAction **actionSwitch;
-	long numActionSwitch;
-};
-
-#define MARK_SLOTS 32
+#include "fsmrun2.h"
 
 struct FsmRun
 {
-	FsmRun( Program *prg );
-
 	Program *prg;
 	FsmTables *tables;
 
@@ -92,9 +56,9 @@ struct FsmRun
 	Tree *curStream;
 };
 
-void exec_action( FsmRun *fsmRun, GenAction *genAction );
-void fsm_execute( FsmRun *fsmRun, InputStream *inputStream );
-void initFsmRun( FsmRun *fsmRun );
+void execAction( FsmRun *fsmRun, GenAction *genAction );
+void fsmExecute( FsmRun *fsmRun, InputStream *inputStream );
+void initFsmRun( FsmRun *fsmRun, Program *prg );
 void initInputStream( InputStream *in );
 void sendQueuedTokens( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
 void sendHandleError( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
@@ -106,7 +70,7 @@ long scan_token( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
 Head *streamPull( Program *prg, FsmRun *fsmRun, InputStream *inputStream, long length );
 void stream_push_text( InputStream *inputStream, const char *data, long length );
 void streamPushTree( InputStream *inputStream, Tree *tree, bool ignore );
-void undo_stream_pull( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length );
+void undoStreamPull( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length );
 
 void undoStreamPush( Program *prg, Tree **sp, InputStream *inputStream, long length );
 void undoStreamAppend( Program *prg, Tree **sp, InputStream *inputStream, long length );

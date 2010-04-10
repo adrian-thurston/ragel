@@ -1015,13 +1015,13 @@ Tree *createGeneric( Program *prg, long genericId )
 			Accum *accum = (Accum*)mapElAllocate( prg );
 			accum->id = genericInfo->langElId;
 			accum->genericInfo = genericInfo;
-			accum->fsmRun = new FsmRun( prg );
+			accum->fsmRun = new FsmRun;
 			accum->pdaRun = new PdaRun( prg, prg->rtd->pdaTables, 
 					accum->fsmRun, genericInfo->parserId, false, false );
 
 			/* Start off the parsing process. */
 			initPdaRun( accum->pdaRun, 0 );
-			initFsmRun( accum->fsmRun );
+			initFsmRun( accum->fsmRun, prg );
 			newToken( accum->pdaRun, accum->fsmRun );
 
 			newGeneric = (Tree*) accum;

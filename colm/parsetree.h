@@ -34,6 +34,7 @@
 #include "astring.h"
 #include "bytecode.h"
 #include "avlbasic.h"
+#include "fsmrun2.h"
 
 /* Operators that are represented with single symbol characters. */
 #define OP_DoubleEql 'e'
@@ -47,7 +48,6 @@
 struct NameInst;
 struct FsmGraph;
 struct RedFsm;
-struct FsmTables;
 struct FsmRun;
 struct ObjectDef;
 struct ElementOf;

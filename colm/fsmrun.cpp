@@ -38,14 +38,23 @@ void operator<<( ostream &out, exit_object & )
 	exit(1);
 }
 
-FsmRun::FsmRun( Program *prg ) :
-	prg(prg),
-	tables(prg->rtd->fsmTables),
-	runBuf(0),
-	haveDataOf(0),
-	curStream(0)
+void initFsmRun( FsmRun *fsmRun, Program *prg )
 {
+	fsmRun->prg = prg;
+	fsmRun->tables = prg->rtd->fsmTables;
+	fsmRun->runBuf = 0;
+	fsmRun->haveDataOf = 0;
+	fsmRun->curStream = 0;
+
+	/* Run buffers need to stick around because 
+	 * token strings point into them. */
+	fsmRun->runBuf = new RunBuf;
+	fsmRun->runBuf->next = 0;
+
+	fsmRun->p = fsmRun->pe = fsmRun->runBuf->data;
+	fsmRun->peof = 0;
 }
+
 
 void incrementConsumed( PdaRun *pdaRun )
 {
@@ -210,7 +219,7 @@ void sendBackRunBufHead( FsmRun *fsmRun, InputStream *inputStream )
 	fsmRun->p = fsmRun->pe = fsmRun->runBuf->data + fsmRun->runBuf->length;
 }
 
-void undo_stream_pull( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length )
+void undoStreamPull( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length )
 {
 	#ifdef COLM_LOG_PARSE
 	if ( colm_log_parse ) {
@@ -869,17 +878,6 @@ void sendEof( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRu
 	}
 }
 
-void initFsmRun( FsmRun *fsmRun )
-{
-	/* Run buffers need to stick around because 
-	 * token strings point into them. */
-	fsmRun->runBuf = new RunBuf;
-	fsmRun->runBuf->next = 0;
-
-	fsmRun->p = fsmRun->pe = fsmRun->runBuf->data;
-	fsmRun->peof = 0;
-}
-
 void initInputStream( InputStream *inputStream )
 {
 	/* FIXME: correct values here. */
@@ -971,7 +969,7 @@ long scanToken( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 		if ( inputStream->needFlush() )
 			fsmRun->peof = fsmRun->pe;
 
-		fsm_execute( fsmRun, inputStream );
+		fsmExecute( fsmRun, inputStream );
 
 		/* First check if scanning stopped because we have a token. */
 		if ( fsmRun->matchedToken > 0 ) {

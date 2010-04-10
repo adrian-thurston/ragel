@@ -30,7 +30,7 @@
 #include "pdarun.h"
 #include "colm.h"
 
-void exec_action( FsmRun *fsmRun, GenAction *genAction )
+void execAction( FsmRun *fsmRun, GenAction *genAction )
 {
 	for ( InlineList::Iter item = *genAction->inlineList; item.lte(); item++ ) {
 		switch ( item->type ) {
@@ -91,7 +91,7 @@ void exec_action( FsmRun *fsmRun, GenAction *genAction )
 		fsmRun->mark[genAction->markId-1] = fsmRun->p;
 }
 
-void fsm_execute( FsmRun *fsmRun, InputStream *inputStream )
+void fsmExecute( FsmRun *fsmRun, InputStream *inputStream )
 {
 	int _klen;
 	unsigned int _trans;
@@ -113,7 +113,7 @@ _loop_head:
 	_acts = fsmRun->tables->actions + fsmRun->tables->fromStateActions[fsmRun->cs];
 	_nacts = (unsigned int) *_acts++;
 	while ( _nacts-- > 0 )
-		exec_action( fsmRun, fsmRun->tables->actionSwitch[*_acts++] );
+		execAction( fsmRun, fsmRun->tables->actionSwitch[*_acts++] );
 
 	_keys = fsmRun->tables->transKeys + fsmRun->tables->keyOffsets[fsmRun->cs];
 	_trans = fsmRun->tables->indexOffsets[fsmRun->cs];
@@ -173,7 +173,7 @@ _match:
 	_acts = fsmRun->tables->actions + fsmRun->tables->transActionsWI[_trans];
 	_nacts = (unsigned int) *_acts++;
 	while ( _nacts-- > 0 )
-		exec_action( fsmRun, fsmRun->tables->actionSwitch[*_acts++] );
+		execAction( fsmRun, fsmRun->tables->actionSwitch[*_acts++] );
 	if ( fsmRun->returnResult )
 		return;
 
@@ -181,7 +181,7 @@ _again:
 	_acts = fsmRun->tables->actions + fsmRun->tables->toStateActions[fsmRun->cs];
 	_nacts = (unsigned int) *_acts++;
 	while ( _nacts-- > 0 )
-		exec_action( fsmRun, fsmRun->tables->actionSwitch[*_acts++] );
+		execAction( fsmRun, fsmRun->tables->actionSwitch[*_acts++] );
 
 	if ( fsmRun->cs == fsmRun->tables->errorState )
 		goto out;
@@ -198,7 +198,7 @@ out:
 			fsmRun->cs = fsmRun->tables->eofTargs[fsmRun->cs];
 
 		while ( _nacts-- > 0 )
-			exec_action( fsmRun, fsmRun->tables->actionSwitch[*_acts++] );
+			execAction( fsmRun, fsmRun->tables->actionSwitch[*_acts++] );
 		if ( fsmRun->returnResult )
 			return;
 	}

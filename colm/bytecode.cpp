@@ -354,7 +354,7 @@ void undoPull( Program *prg, FsmRun *fsmRun, Stream *stream, Tree *str )
 {
 	const char *data = stringData( ( (Str*)str )->value );
 	long length = stringLength( ( (Str*)str )->value );
-	undo_stream_pull( fsmRun, stream->in, data, length );
+	undoStreamPull( fsmRun, stream->in, data, length );
 }
 
 Word streamPush( Program *prg, Tree **&sp, Stream *stream, Tree *tree, bool ignore )

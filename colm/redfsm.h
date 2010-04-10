@@ -39,6 +39,8 @@
 #include "sbstset.h"
 #include "sbsttable.h"
 #include "colm.h"
+#include "fsmrun.h"
+#include "fsmrun2.h"
 
 #define TRANS_ERR_TRANS   0
 #define STATE_ERR_STATE   0
@@ -48,12 +50,11 @@ using std::string;
 
 struct RedState;
 struct InlineList;
-struct FsmTables;
 struct ParseData;
 struct ObjField;
 
 /* Element in list of actions. Contains the string for the code to exectute. */
-typedef struct _GenAction 
+struct GenAction 
 {
 	/* Data collected during parse. */
 	InputLoc loc;
@@ -64,14 +65,13 @@ typedef struct _GenAction
 	ObjField *objField;
 	long markId;
 
-
 	int numTransRefs;
 	int numToStateRefs;
 	int numFromStateRefs;
 	int numEofRefs;
 
-	struct _GenAction *prev, *next;
-} GenAction;
+	GenAction *prev, *next;
+};
 
 typedef DList<GenAction> GenActionList;
 string nameOrLoc( GenAction *genAction );

@@ -1486,12 +1486,12 @@ void ParseData::parsePatterns()
 		InputStreamRepl in( repl );
 		initInputStream( &in );
 
-		FsmRun *fsmRun = new FsmRun( &prg );
+		FsmRun *fsmRun = new FsmRun;
 		repl->pdaRun = new PdaRun( &prg,
 				pdaTables, fsmRun, repl->langEl->parserId, 0, false );
 
 		initPdaRun( repl->pdaRun, 0 );
-		initFsmRun( fsmRun );
+		initFsmRun( fsmRun, &prg );
 		newToken( repl->pdaRun, fsmRun );
 		parseLoop( root, repl->pdaRun, fsmRun, &in );
 	}
@@ -1505,12 +1505,12 @@ void ParseData::parsePatterns()
 		InputStreamPattern in( pat );
 		initInputStream( &in );
 
-		FsmRun *fsmRun = new FsmRun( &prg );
+		FsmRun *fsmRun = new FsmRun;
 		pat->pdaRun = new PdaRun( &prg,
 				pdaTables, fsmRun, pat->langEl->parserId, 0, false );
 
 		initPdaRun( pat->pdaRun, 0 );
-		initFsmRun( fsmRun );
+		initFsmRun( fsmRun, &prg );
 		newToken( pat->pdaRun, fsmRun );
 		parseLoop( root, pat->pdaRun, fsmRun, &in );
 	}

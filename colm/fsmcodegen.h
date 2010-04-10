@@ -38,7 +38,7 @@ using std::ostream;
 /* Forwards. */
 struct RedFsm;
 struct RedState;
-typedef struct _GenAction GenAction;
+struct GenAction;
 struct NameInst;
 struct RedAction;
 struct LongestMatch;
