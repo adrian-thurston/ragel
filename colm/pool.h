@@ -36,10 +36,10 @@ struct PoolItem
 	PoolItem *next;
 };
 
-template <class T> struct PoolBlock
+struct PoolBlock
 {
-	T data[FRESH_BLOCK];
-	PoolBlock<T> *next;
+	void *data;
+	PoolBlock *next;
 };
 
 template <class T> struct PoolAlloc
@@ -48,24 +48,24 @@ template <class T> struct PoolAlloc
 		head(0), nextel(FRESH_BLOCK), pool(0)
 	{}
 
-	T *_allocate();
-	void _free( T *el );
+	void *_allocate();
+	void _free( void *el );
 	void _clear();
 	long _numLost();
 
 private:
 
-	PoolBlock<T> *head;
+	PoolBlock *head;
 	long nextel;
 	PoolItem *pool;
 };
 
-template <class T> T *PoolAlloc<T>::_allocate()
+template <class T> void *PoolAlloc<T>::_allocate()
 {
 	//#ifdef COLM_LOG_BYTECODE
 	//cerr << "allocating in: " << __PRETTY_FUNCTION__ << endl;
 	//#endif
-	T *newEl = 0;
+	void *newEl = 0;
 	if ( pool == 0 ) {
 		if ( nextel == FRESH_BLOCK ) {
 			#ifdef COLM_LOG_BYTECODE
@@ -73,22 +73,24 @@ template <class T> T *PoolAlloc<T>::_allocate()
 				cerr << "allocating " << FRESH_BLOCK << " Elements of type T" << endl;
 			#endif
 
-			PoolBlock<T> *newBlock = new PoolBlock<T>;
+			PoolBlock *newBlock = new PoolBlock;
+			newBlock->data = malloc( sizeof(T) * FRESH_BLOCK );
 			newBlock->next = head;
 			head = newBlock;
 			nextel = 0;
 		}
-		newEl = &head->data[nextel++];
+
+		newEl = (char*)head->data + sizeof(T) * nextel++;
 	}
 	else {
-		newEl = (T*)pool;
+		newEl = pool;
 		pool = pool->next;
 	}
 	memset( newEl, 0, sizeof(T) );
 	return newEl;
 }
 
-template <class T> void PoolAlloc<T>::_free( T *el )
+template <class T> void PoolAlloc<T>::_free( void *el )
 {
 	#if 0
 	/* Some sanity checking. Best not to normally run with this on. */
@@ -106,9 +108,10 @@ template <class T> void PoolAlloc<T>::_free( T *el )
 
 template <class T> void PoolAlloc<T>::_clear()
 {
-	PoolBlock<T> *block = head;
+	PoolBlock *block = head;
 	while ( block != 0 ) {
-		PoolBlock<T> *next = block->next;
+		PoolBlock *next = block->next;
+		free( block->data );
 		delete block;
 		block = next;
 	}
@@ -122,7 +125,7 @@ template <class T> long PoolAlloc<T>::_numLost()
 {
 	/* Count the number of items allocated. */
 	long lost = 0;
-	PoolBlock<T> *block = head;
+	PoolBlock *block = head;
 	if ( block != 0 ) {
 		lost = nextel;
 		block = block->next;
