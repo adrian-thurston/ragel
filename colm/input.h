@@ -220,7 +220,6 @@ struct InputStreamDynamic : public InputStream
 
 	int getData( char *dest, int length );
 	int isEof();
-	int needFlush();
 	void pushBackBuf( RunBuf *runBuf );
 	void append( const char *data, long len );
 	void append( Tree *tree );
@@ -236,13 +235,9 @@ struct InputStreamDynamic : public InputStream
 	Tree *undoAppend( int length );
 
 	virtual int getDataImpl( char *dest, int length ) = 0;
-	virtual int isEofImpl() = 0;
-	virtual int needFlushImpl() = 0;
 	virtual void pushBackBufImpl( RunBuf *runBuf ) = 0;
 	virtual void appendImpl( const char *data, long len ) = 0;
 	virtual void appendImpl( Tree *tree ) = 0;
-	virtual bool tryAgainLaterImpl();
-	virtual Tree *getTreeImpl();
 	virtual KlangEl *getLangElImpl( long &bindId, char *&data, long &length ) { assert( false ); return 0; }
 	virtual void pushBackNamedImpl() { assert( false ); }
 };
@@ -253,9 +248,8 @@ struct InputStreamString : public InputStreamDynamic
 		InputStreamDynamic(false), 
 		data(data), dlen(dlen), offset(0) {}
 
+	int needFlush() { return eof; }
 	int getDataImpl( char *dest, int length );
-	int isEofImpl() { return eof; }
-	int needFlushImpl() { return eof; }
 	void pushBackBufImpl( RunBuf *runBuf );
 	void appendImpl( const char *data, long len ) {}
 	void appendImpl( Tree *tree ) {}
@@ -272,9 +266,9 @@ struct InputStreamFile : public InputStreamDynamic
 		file(file)
 	{}
 
+	int needFlush();
+
 	int getDataImpl( char *dest, int length );
-	int isEofImpl();
-	int needFlushImpl();
 	void pushBackBufImpl( RunBuf *runBuf );
 	void appendImpl( const char *data, long len ) {}
 	void appendImpl( Tree *tree ) {}
@@ -289,8 +283,7 @@ struct InputStreamFd : public InputStreamDynamic
 		fd(fd)
 	{}
 
-	int isEofImpl();
-	int needFlushImpl();
+	int needFlush();
 	int getDataImpl( char *dest, int length );
 	void pushBackBufImpl( RunBuf *runBuf );
 	void appendImpl( const char *data, long len ) {}
@@ -307,17 +300,21 @@ struct InputStreamAccum : public InputStreamDynamic
 		offset(0)
 	{}
 
-	int isEofImpl();
-	int needFlushImpl();
+	bool tryAgainLater();
+	int needFlush();
+
 	int getDataImpl( char *dest, int length );
 	void pushBackBufImpl( RunBuf *runBuf );
 	void appendImpl( const char *data, long len );
 	void appendImpl( Tree *tree );
 
-	bool tryAgainLaterImpl();
 
 	long offset;
 };
+
+/*
+ * The compile-time input streams.
+ */
 
 struct InputStreamStatic : public InputStream
 {

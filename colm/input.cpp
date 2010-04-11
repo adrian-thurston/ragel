@@ -89,15 +89,9 @@ int InputStreamDynamic::getDataRev( char *dest, int length )
 	return 0;
 }
 
-
 int InputStreamDynamic::isEof()
 {
-	return head() == 0 && isEofImpl();
-}
-
-int InputStreamDynamic::needFlush()
-{
-	return needFlushImpl();
+	return head() == 0 && eof;
 }
 
 void InputStreamDynamic::pushBackBuf( RunBuf *runBuf )
@@ -117,7 +111,10 @@ void InputStreamDynamic::append( Tree *tree )
 
 bool InputStreamDynamic::tryAgainLater()
 {
-	return tryAgainLaterImpl();
+	if ( later )
+		return true;
+
+	return false;
 }
 
 bool InputStreamDynamic::isTree()
@@ -138,7 +135,7 @@ Tree *InputStreamDynamic::getTree()
 		return tree;
 	}
 
-	return getTreeImpl();
+	return 0;
 }
 
 bool InputStreamDynamic::isIgnore()
@@ -198,25 +195,6 @@ Tree *InputStreamDynamic::undoAppend( int length )
 	}
 }
 
-/* 
- * Implementation
- */
-
-
-bool InputStreamDynamic::tryAgainLaterImpl()
-{
-	if ( later )
-		return true;
-
-	return false;
-}
-
-Tree *InputStreamDynamic::getTreeImpl()
-{
-	return 0;
-}
-
-
 /*
  * String
  */
@@ -251,12 +229,7 @@ void InputStreamString::pushBackBufImpl( RunBuf *runBuf )
  * File
  */
 
-int InputStreamFile::isEofImpl()
-{
-	return eof;
-}
-
-int InputStreamFile::needFlushImpl()
+int InputStreamFile::needFlush()
 {
 	return head() == 0 && feof( file );
 }
@@ -278,12 +251,7 @@ void InputStreamFile::pushBackBufImpl( RunBuf *runBuf )
  * FD
  */
 
-int InputStreamFd::isEofImpl()
-{
-	return eof;
-}
-
-int InputStreamFd::needFlushImpl()
+int InputStreamFd::needFlush()
 {
 	return head() == 0 && eof;
 }
@@ -305,12 +273,7 @@ int InputStreamFd::getDataImpl( char *dest, int length )
  * Accum
  */
 
-int InputStreamAccum::isEofImpl()
-{
-	return eof;
-}
-
-bool InputStreamAccum::tryAgainLaterImpl()
+bool InputStreamAccum::tryAgainLater()
 {
 	if ( later || ( !flush && head() == 0 ))
 		return true;
@@ -318,7 +281,7 @@ bool InputStreamAccum::tryAgainLaterImpl()
 	return false;
 }
 
-int InputStreamAccum::needFlushImpl()
+int InputStreamAccum::needFlush()
 {
 	if ( flush ) {
 		flush = false;
