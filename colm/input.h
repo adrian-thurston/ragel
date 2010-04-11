@@ -228,7 +228,7 @@ struct InputStreamDynamic : public InputStream
 	bool isTree();
 	Tree *getTree();
 	bool isIgnore();
-	bool isLangEl();
+	bool isLangEl() { return false; }
 	KlangEl *getLangEl( long &bindId, char *&data, long &length );
 	void pushBackNamed();
 	Tree *undoPush( int length );
@@ -242,10 +242,7 @@ struct InputStreamDynamic : public InputStream
 	virtual void appendImpl( const char *data, long len ) = 0;
 	virtual void appendImpl( Tree *tree ) = 0;
 	virtual bool tryAgainLaterImpl();
-	virtual bool isTreeImpl();
 	virtual Tree *getTreeImpl();
-	virtual bool isIgnoreImpl();
-	virtual bool isLangElImpl() { return false; }
 	virtual KlangEl *getLangElImpl( long &bindId, char *&data, long &length ) { assert( false ); return 0; }
 	virtual void pushBackNamedImpl() { assert( false ); }
 };
@@ -316,7 +313,6 @@ struct InputStreamAccum : public InputStreamDynamic
 	void pushBackBufImpl( RunBuf *runBuf );
 	void appendImpl( const char *data, long len );
 	void appendImpl( Tree *tree );
-	bool isTreeImpl();
 
 	bool tryAgainLaterImpl();
 

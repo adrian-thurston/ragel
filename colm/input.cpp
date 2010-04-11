@@ -122,7 +122,9 @@ bool InputStreamDynamic::tryAgainLater()
 
 bool InputStreamDynamic::isTree()
 {
-	return isTreeImpl();
+	if ( head() != 0 && head()->type == RunBuf::TokenType )
+		return true;
+	return false;
 }
 
 Tree *InputStreamDynamic::getTree()
@@ -141,12 +143,9 @@ Tree *InputStreamDynamic::getTree()
 
 bool InputStreamDynamic::isIgnore()
 {
-	return isIgnoreImpl();
-}
-
-bool InputStreamDynamic::isLangEl()
-{
-	return isLangElImpl();
+	if ( head() != 0 && head()->type == RunBuf::IgnoreType )
+		return true;
+	return false;
 }
 
 KlangEl *InputStreamDynamic::getLangEl( long &bindId, char *&data, long &length )
@@ -209,20 +208,6 @@ bool InputStreamDynamic::tryAgainLaterImpl()
 	if ( later )
 		return true;
 
-	return false;
-}
-
-bool InputStreamDynamic::isTreeImpl()
-{ 
-	if ( head() != 0 && head()->type == RunBuf::TokenType )
-		return true;
-	return false;
-}
-
-bool InputStreamDynamic::isIgnoreImpl()
-{ 
-	if ( head() != 0 && head()->type == RunBuf::IgnoreType )
-		return true;
 	return false;
 }
 
@@ -382,13 +367,5 @@ void InputStreamAccum::appendImpl( Tree *tree )
 	ad->type = RunBuf::TokenType;
 	ad->tree = tree;
 	ad->length = 0;
-}
-
-bool InputStreamAccum::isTreeImpl()
-{ 
-	if ( head() != 0 && head()->type == RunBuf::TokenType )
-		return true;
-
-	return false;
 }
 
