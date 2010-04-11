@@ -94,21 +94,6 @@ int InputStreamDynamic::isEof()
 	return head() == 0 && eof;
 }
 
-void InputStreamDynamic::pushBackBuf( RunBuf *runBuf )
-{
-	pushBackBufImpl( runBuf );
-}
-
-void InputStreamDynamic::append( const char *data, long len )
-{
-	return appendImpl( data, len );
-}
-
-void InputStreamDynamic::append( Tree *tree )
-{
-	return appendImpl( tree );
-}
-
 bool InputStreamDynamic::tryAgainLater()
 {
 	if ( later )
@@ -143,16 +128,6 @@ bool InputStreamDynamic::isIgnore()
 	if ( head() != 0 && head()->type == RunBuf::IgnoreType )
 		return true;
 	return false;
-}
-
-KlangEl *InputStreamDynamic::getLangEl( long &bindId, char *&data, long &length )
-{
-	return getLangElImpl( bindId, data, length );
-}
-
-void InputStreamDynamic::pushBackNamed()
-{
-	return pushBackNamedImpl();
 }
 
 Tree *InputStreamDynamic::undoPush( int length )
@@ -216,7 +191,7 @@ int InputStreamString::getDataImpl( char *dest, int length )
 	return length;
 }
 
-void InputStreamString::pushBackBufImpl( RunBuf *runBuf )
+void InputStreamString::pushBackBuf( RunBuf *runBuf )
 {
 	//char *data = runBuf->buf + runBuf->offset;
 	long length = runBuf->length;
@@ -242,7 +217,7 @@ int InputStreamFile::getDataImpl( char *dest, int length )
 	return res;
 }
 
-void InputStreamFile::pushBackBufImpl( RunBuf *runBuf )
+void InputStreamFile::pushBackBuf( RunBuf *runBuf )
 {
 	prepend( runBuf );
 }
@@ -256,7 +231,7 @@ int InputStreamFd::needFlush()
 	return head() == 0 && eof;
 }
 
-void InputStreamFd::pushBackBufImpl( RunBuf *runBuf )
+void InputStreamFd::pushBackBuf( RunBuf *runBuf )
 {
 	prepend( runBuf );
 }
@@ -303,12 +278,12 @@ int InputStreamAccum::getDataImpl( char *dest, int length )
 	return 0;
 }
 
-void InputStreamAccum::pushBackBufImpl( RunBuf *runBuf )
+void InputStreamAccum::pushBackBuf( RunBuf *runBuf )
 {
 	prepend( runBuf );
 }
 
-void InputStreamAccum::appendImpl( const char *data, long len )
+void InputStreamAccum::append( const char *data, long len )
 {
 	RunBuf *ad = new RunBuf;
 
@@ -321,7 +296,7 @@ void InputStreamAccum::appendImpl( const char *data, long len )
 	ad->length = len;
 }
 
-void InputStreamAccum::appendImpl( Tree *tree )
+void InputStreamAccum::append( Tree *tree )
 {
 	RunBuf *ad = new RunBuf;
 
