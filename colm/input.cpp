@@ -130,6 +130,48 @@ bool InputStreamDynamic::isIgnore()
 	return false;
 }
 
+void InputStreamDynamic::pushText( const char *data, long length )
+{
+//	#ifdef COLM_LOG_PARSE
+//	if ( colm_log_parse ) {
+//		cerr << "readying fake push" << endl;
+//	}
+//	#endif
+
+//	takeBackBuffered( inputStream );
+
+	/* Create a new buffer for the data. This is the easy implementation.
+	 * Something better is needed here. It puts a max on the amount of
+	 * data that can be pushed back to the inputStream. */
+	assert( length < FSM_BUFSIZE );
+
+	RunBuf *newBuf = new RunBuf;
+	newBuf->length = length;
+	memcpy( newBuf->data, data, length );
+
+	pushBackBuf( newBuf );
+}
+
+void InputStreamDynamic::pushTree( Tree *tree, bool ignore )
+{
+//	#ifdef COLM_LOG_PARSE
+//	if ( colm_log_parse ) {
+//		cerr << "readying fake push" << endl;
+//	}
+//	#endif
+
+//	takeBackBuffered( inputStream );
+
+	/* Create a new buffer for the data. This is the easy implementation.
+	 * Something better is needed here. It puts a max on the amount of
+	 * data that can be pushed back to the inputStream. */
+	RunBuf *newBuf = new RunBuf;
+	newBuf->type = ignore ? RunBuf::IgnoreType : RunBuf::TokenType;
+	newBuf->tree = tree;
+
+	prepend( newBuf );
+}
+
 Tree *InputStreamDynamic::undoPush( int length )
 {
 	if ( head()->type == RunBuf::DataType ) {

@@ -117,21 +117,24 @@ struct InputStream
 
 	virtual ~InputStream() {}
 
-	virtual int getData( char *dest, int length ) = 0;
-	virtual int isEof() = 0;
-	virtual int needFlush() = 0;
-	virtual void pushBackBuf( RunBuf *runBuf ) = 0;
-	virtual void append( const char *data, long len ) = 0;
-	virtual void append( Tree *tree ) = 0;
-	virtual bool tryAgainLater() = 0;
 	virtual bool isTree() = 0;
-	virtual Tree *getTree() = 0;
 	virtual bool isIgnore() = 0;
 	virtual bool isLangEl() = 0;
+	virtual int isEof() = 0;
+	virtual int needFlush() = 0;
+	virtual bool tryAgainLater() = 0;
+	virtual int getData( char *dest, int length ) = 0;
+	virtual int getDataImpl( char *dest, int length ) = 0;
+	virtual Tree *getTree() = 0;
 	virtual KlangEl *getLangEl( long &bindId, char *&data, long &length ) = 0;
-	virtual void pushBackNamed() = 0;
+	virtual void pushTree( Tree *tree, bool ignore ) = 0;
+	virtual void pushText( const char *data, long len ) = 0;
 	virtual Tree *undoPush( int length ) = 0;
+	virtual void append( const char *data, long len ) = 0;
+	virtual void append( Tree *tree ) = 0;
 	virtual Tree *undoAppend( int length ) = 0;
+	virtual void pushBackNamed() = 0;
+	virtual void pushBackBuf( RunBuf *runBuf ) = 0;
 
 	/* Basic functions. */
 	
@@ -226,14 +229,15 @@ struct InputStreamDynamic : public InputStream
 	bool isTree();
 	Tree *getTree();
 	bool isIgnore();
+	int getDataRev( char *dest, int length );
+	Tree *undoAppend( int length );
+	void pushText( const char *data, long len );
+	void pushTree( Tree *tree, bool ignore );
+	Tree *undoPush( int length );
 	bool isLangEl() { return false; }
 	KlangEl *getLangEl( long &bindId, char *&data, long &length ) { assert(false); return 0; }
 	void pushBackNamed() { assert(false); }
-	Tree *undoPush( int length );
-	int getDataRev( char *dest, int length );
-	Tree *undoAppend( int length );
 
-	virtual int getDataImpl( char *dest, int length ) = 0;
 };
 
 struct InputStreamString : public InputStreamDynamic
@@ -319,6 +323,8 @@ struct InputStreamStatic : public InputStream
 	Tree *getTree() { assert(false); }
 	Tree *undoPush( int ) { assert( false ); }
 	Tree *undoAppend( int ) { assert( false ); }
+	void pushTree( Tree *tree, bool ignore ) { assert( false ); }
+	void pushText( const char *data, long len ) { assert( false ); }
 };
 
 struct InputStreamPattern : public InputStreamStatic
@@ -328,6 +334,7 @@ struct InputStreamPattern : public InputStreamStatic
 	static InputFuncs patternFuncs;
 
 	int getData( char *dest, int length );
+	int getDataImpl( char *dest, int length ) { return 0; }
 	int isEof();
 	int needFlush();
 	void pushBackBuf( RunBuf *runBuf );
@@ -350,6 +357,7 @@ struct InputStreamRepl : public InputStreamStatic
 
 	bool isLangEl();
 	int getData( char *dest, int length );
+	int getDataImpl( char *dest, int length ) { return 0; }
 	KlangEl *getLangEl( long &bindId, char *&data, long &length );
 	int isEof();
 	int needFlush();

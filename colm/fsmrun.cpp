@@ -236,7 +236,7 @@ void undoStreamPull( FsmRun *fsmRun, InputStream *inputStream, const char *data,
 	fsmRun->p -= length;
 }
 
-void stream_push_text( InputStream *inputStream, const char *data, long length )
+void streamPushText( InputStream *inputStream, const char *data, long length )
 {
 //	#ifdef COLM_LOG_PARSE
 //	if ( colm_log_parse ) {
@@ -245,16 +245,7 @@ void stream_push_text( InputStream *inputStream, const char *data, long length )
 //	#endif
 
 	takeBackBuffered( inputStream );
-
-	/* Create a new buffer for the data. This is the easy implementation.
-	 * Something better is needed here. It puts a max on the amount of
-	 * data that can be pushed back to the inputStream. */
-	assert( length < FSM_BUFSIZE );
-	RunBuf *newBuf = new RunBuf;
-	newBuf->length = length;
-	memcpy( newBuf->data, data, length );
-
-	inputStream->pushBackBuf( newBuf );
+	inputStream->pushText( data, length );
 }
 
 void streamPushTree( InputStream *inputStream, Tree *tree, bool ignore )
@@ -266,15 +257,7 @@ void streamPushTree( InputStream *inputStream, Tree *tree, bool ignore )
 //	#endif
 
 	takeBackBuffered( inputStream );
-
-	/* Create a new buffer for the data. This is the easy implementation.
-	 * Something better is needed here. It puts a max on the amount of
-	 * data that can be pushed back to the inputStream. */
-	RunBuf *newBuf = new RunBuf;
-	newBuf->type = ignore ? RunBuf::IgnoreType : RunBuf::TokenType;
-	newBuf->tree = tree;
-
-	inputStream->prepend( newBuf );
+	inputStream->pushTree( tree, ignore );
 }
 
 void undoStreamPush( Program *prg, Tree **sp, InputStream *inputStream, long length )

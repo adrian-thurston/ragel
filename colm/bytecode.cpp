@@ -366,7 +366,7 @@ Word streamPush( Program *prg, Tree **&sp, Stream *stream, Tree *tree, bool igno
 			
 		std::stringstream ss;
 		printTree( ss, sp, prg, tree );
-		stream_push_text( stream->in, ss.str().c_str(), ss.str().size());
+		streamPushText( stream->in, ss.str().c_str(), ss.str().size());
 		return ss.str().size();
 	}
 	else {

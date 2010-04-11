@@ -68,7 +68,7 @@ void parseLoop( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStr
 long scan_token( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
 
 Head *streamPull( Program *prg, FsmRun *fsmRun, InputStream *inputStream, long length );
-void stream_push_text( InputStream *inputStream, const char *data, long length );
+void streamPushText( InputStream *inputStream, const char *data, long length );
 void streamPushTree( InputStream *inputStream, Tree *tree, bool ignore );
 void undoStreamPull( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length );
 
