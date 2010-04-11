@@ -62,7 +62,7 @@ typedef struct _Tree Tree;
 struct RunBuf
 {
 	enum Type {
-		DataType,
+		DataType = 0,
 		TokenType,
 		IgnoreType
 	};
@@ -85,9 +85,17 @@ struct RunBuf
 	RunBuf *next, *prev;
 };
 
+struct InputStream;
+
+struct InputFuncs
+{
+	int (*getData)( InputStream *is, char *dest, int length );
+};
+
 struct InputStream
 {
-	InputStream( bool handlesLine ) :
+	InputStream( bool handlesLine )
+	:
 		hasData(0),
 		eofSent(false),
 		flush(false),
@@ -97,8 +105,15 @@ struct InputStream
 		byte(0),
 		handlesLine(handlesLine),
 		later(false),
-		queue(0), queueTail(0)
-	{}
+		queue(0), 
+		queueTail(0)
+	{
+		funcs = &baseFuncs;
+	}
+
+	InputFuncs *funcs;
+
+	static InputFuncs baseFuncs;
 
 	virtual ~InputStream() {}
 
@@ -195,7 +210,13 @@ struct InputStream
 struct InputStreamDynamic : public InputStream
 {
 	InputStreamDynamic( bool handlesLine )
-		: InputStream( handlesLine ) {}
+	:
+		InputStream( handlesLine )
+	{
+		funcs = &dynamicFuncs;
+	}
+
+	static InputFuncs dynamicFuncs;
 
 	int getData( char *dest, int length );
 	int isEof();
@@ -322,6 +343,8 @@ struct InputStreamPattern : public InputStreamStatic
 {
 	InputStreamPattern( Pattern *pattern );
 
+	static InputFuncs patternFuncs;
+
 	int getData( char *dest, int length );
 	int isEof();
 	int needFlush();
@@ -340,6 +363,8 @@ struct InputStreamPattern : public InputStreamStatic
 struct InputStreamRepl : public InputStreamStatic
 {
 	InputStreamRepl( Replacement *replacement );
+
+	static InputFuncs replFuncs;
 
 	bool isLangEl();
 	int getData( char *dest, int length );

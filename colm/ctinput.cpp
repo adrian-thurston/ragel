@@ -49,7 +49,14 @@ InputStreamPattern::InputStreamPattern( Pattern *pattern )
 	pattern(pattern),
 	patItem(pattern->list->head),
 	offset(0)
-{}
+{
+	funcs = &patternFuncs;
+}
+
+InputFuncs InputStreamPattern::patternFuncs =
+{
+	0
+};
 
 bool InputStreamPattern::isLangEl()
 { 
@@ -160,7 +167,14 @@ InputStreamRepl::InputStreamRepl( Replacement *replacement )
 	replacement(replacement),
 	replItem(replacement->list->head),
 	offset(0)
-{}
+{
+	funcs = &replFuncs;
+}
+
+InputFuncs InputStreamRepl::replFuncs =
+{
+	0
+};
 
 bool InputStreamRepl::isLangEl()
 { 

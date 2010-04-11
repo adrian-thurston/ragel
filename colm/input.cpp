@@ -27,9 +27,24 @@
 using std::cerr;
 using std::endl;
 
+InputFuncs InputStream::baseFuncs =
+{
+	0
+};
+
 /* 
  * Base run-time input streams.
  */
+
+int inputStreamDynamicGetData( InputStream *is, char *dest, int length )
+{
+	return 0;
+}
+
+InputFuncs InputStreamDynamic::dynamicFuncs =
+{
+	&inputStreamDynamicGetData
+};
 
 int InputStreamDynamic::getData( char *dest, int length )
 {
