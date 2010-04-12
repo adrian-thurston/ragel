@@ -1057,12 +1057,14 @@ void FsmCodeGen::writeCode()
 	writeData();
 	writeExec();
 
-	/* Referenced in the runtime lib, but used only in the compiler. */
+	/* Referenced in the runtime lib, but used only in the compiler. Probably
+	 * should use the preprocessor to make these go away. */
 	out <<
-		"void send_named_lang_el( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )\n"
-		"{\n"
-		"	assert(false);\n"
-		"}\n";
+		"void sendNamedLangEl( Tree **, PdaRun *, FsmRun *, InputStream * ) {}\n"
+		"void initStaticFuncs() {}\n"
+		"void initPatternFuncs() {}\n"
+		"void initReplFuncs() {}\n"
+		"void initInputFuncs();\n";
 
 	out << 
 		"int main( int argc, char **argv )\n"
@@ -1074,6 +1076,7 @@ void FsmCodeGen::writeCode()
 		"	colm_log_match = 1;\n"
 		"	colm_log_compile = 1;\n"
 		"	colm_log_conds = 1;\n"
+		"	initInputFuncs();\n"
 		"	Program program;\n"
 		"	initProgram( &program, argc, argv, true, &main_runtimeData );\n"
 		"	runProgram( &program );\n"

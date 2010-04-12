@@ -63,6 +63,8 @@ using std::endl;
 /* Target language and output style. */
 char defExtension[] = ".cpp";
 
+void initInputFuncs();
+
 /* Io globals. */
 istream *inStream = 0;
 ostream *outStream = 0;
@@ -429,6 +431,7 @@ int main(int argc, const char **argv)
 		colm_log_compile = 1;
 		colm_log_conds = 1;
 	}
+	initInputFuncs();
 
 	/* Bail on above errors. */
 	if ( gblErrorCount > 0 )
@@ -459,6 +462,7 @@ int main(int argc, const char **argv)
 	/* Bail on above errors. */
 	if ( gblErrorCount > 0 )
 		exit(1);
+
 
 	Scanner scanner( inputFileName, *inStream, cout, 0, 0 );
 	scanner.scan();

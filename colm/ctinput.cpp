@@ -24,6 +24,9 @@
 #include "input.h"
 #include "fsmrun.h"
 
+InputFuncs staticFuncs;
+InputFuncs patternFuncs;
+InputFuncs replFuncs;
 
 /* 
  * Implementation
@@ -36,6 +39,11 @@ bool InputStreamStatic::tryAgainLater()
 		return true;
 
 	return false;
+}
+
+void initStaticFuncs()
+{
+	memcpy( &staticFuncs, &baseFuncs, sizeof(InputFuncs) );
 }
 
 
@@ -52,11 +60,6 @@ InputStreamPattern::InputStreamPattern( Pattern *pattern )
 {
 	funcs = &patternFuncs;
 }
-
-InputFuncs InputStreamPattern::patternFuncs =
-{
-	0
-};
 
 bool InputStreamPattern::isLangEl()
 { 
@@ -82,7 +85,36 @@ KlangEl *InputStreamPattern::getLangEl( long &bindId, char *&data, long &length 
 	return klangEl;
 }
 
+int inputStreamPatternGetData( InputStream *_is, char *dest, int length )
+{ 
+	InputStreamPattern *is = (InputStreamPattern*)_is;
+	if ( is->offset == 0 )
+		is->line = is->patItem->loc.line;
 
+	assert ( is->patItem->type == PatternItem::InputText );
+	int available = is->patItem->data.length() - is->offset;
+
+	if ( available < length )
+		length = available;
+
+	memcpy( dest, is->patItem->data.data + is->offset, length );
+	is->offset += length;
+
+	if ( is->offset == is->patItem->data.length() ) {
+		/* Read up to the end of the data. Advance the
+		 * pattern item. */
+		is->patItem = is->patItem->next;
+		is->offset = 0;
+		is->flush = is->shouldFlush();
+	}
+	else {
+		/* There is more data in this buffer. Don't flush. */
+		is->flush = false;
+	}
+	return length;
+}
+
+#if 0
 int InputStreamPattern::getData( char *dest, int length )
 { 
 	if ( offset == 0 )
@@ -110,6 +142,7 @@ int InputStreamPattern::getData( char *dest, int length )
 	}
 	return length;
 }
+#endif
 
 int InputStreamPattern::isEof()
 {
@@ -157,6 +190,13 @@ void InputStreamPattern::pushBackNamed()
 }
 
 
+void initPatternFuncs()
+{
+	memcpy( &patternFuncs, &staticFuncs, sizeof(InputFuncs) );
+	patternFuncs.getData = &inputStreamPatternGetData;
+}
+
+
 /*
  * Replacement
  */
@@ -170,11 +210,6 @@ InputStreamRepl::InputStreamRepl( Replacement *replacement )
 {
 	funcs = &replFuncs;
 }
-
-InputFuncs InputStreamRepl::replFuncs =
-{
-	0
-};
 
 bool InputStreamRepl::isLangEl()
 { 
@@ -216,6 +251,37 @@ KlangEl *InputStreamRepl::getLangEl( long &bindId, char *&data, long &length )
 	return klangEl;
 }
 
+int inputStreamReplGetData( InputStream *_is, char *dest, int length )
+{ 
+	InputStreamRepl *is = (InputStreamRepl*)_is;
+
+	if ( is->offset == 0 )
+		is->line = is->replItem->loc.line;
+
+	assert ( is->replItem->type == ReplItem::InputText );
+	int available = is->replItem->data.length() - is->offset;
+
+	if ( available < length )
+		length = available;
+
+	memcpy( dest, is->replItem->data.data+is->offset, length );
+	is->offset += length;
+
+	if ( is->offset == is->replItem->data.length() ) {
+		/* Read up to the end of the data. Advance the
+		 * replacement item. */
+		is->replItem = is->replItem->next;
+		is->offset = 0;
+		is->flush = is->shouldFlush();
+	}
+	else {
+		/* There is more data in this buffer. Don't flush. */
+		is->flush = false;
+	}
+	return length;
+}
+
+#if 0
 int InputStreamRepl::getData( char *dest, int length )
 { 
 	if ( offset == 0 )
@@ -243,6 +309,7 @@ int InputStreamRepl::getData( char *dest, int length )
 	}
 	return length;
 }
+#endif
 
 int InputStreamRepl::isEof()
 {
@@ -295,7 +362,7 @@ void InputStreamRepl::pushBackNamed()
 	offset = replItem->data.length();
 }
 
-void send_named_lang_el( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
+void sendNamedLangEl( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 {
 	/* All three set by getLangEl. */
 	long bindId;
@@ -324,3 +391,9 @@ void send_named_lang_el( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream 
 	sendHandleError( sp, pdaRun, fsmRun, inputStream, input );
 }
 
+
+void initReplFuncs()
+{
+	memcpy( &replFuncs, &staticFuncs, sizeof(InputFuncs) );
+	replFuncs.getData = &inputStreamReplGetData;
+}

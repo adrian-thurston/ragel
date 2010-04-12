@@ -89,8 +89,27 @@ struct InputStream;
 
 struct InputFuncs
 {
+	bool (*isTree)( InputStream *is );
+	bool (*isIgnore)( InputStream *is );
+	bool (*isLangEl)( InputStream *is );
+	int (*isEof)( InputStream *is );
+	int (*needFlush)( InputStream *is );
+	bool (*tryAgainLater)( InputStream *is );
 	int (*getData)( InputStream *is, char *dest, int length );
+	int (*getDataImpl)( InputStream *is, char *dest, int length );
+	Tree *(*getTree)( InputStream *is );
+	KlangEl *(*getLangEl)( InputStream *is, long &bindId, char *&data, long &length );
+	void (*pushTree)( InputStream *is, Tree *tree, bool ignore );
+	void (*pushText)( InputStream *is, const char *data, long len );
+	Tree *(*undoPush)( InputStream *is, int length );
+	void (*appendText)( InputStream *is, const char *data, long len );
+	void (*appendTree)( InputStream *is, Tree *tree );
+	Tree *(*undoAppend)( InputStream *is, int length );
+	void (*pushBackNamed)( InputStream *is );
+	void (*pushBackBuf)( InputStream *is, RunBuf *runBuf );
 };
+
+extern InputFuncs baseFuncs;
 
 struct InputStream
 {
@@ -113,8 +132,6 @@ struct InputStream
 
 	InputFuncs *funcs;
 
-	static InputFuncs baseFuncs;
-
 	virtual ~InputStream() {}
 
 	virtual bool isTree() = 0;
@@ -123,7 +140,7 @@ struct InputStream
 	virtual int isEof() = 0;
 	virtual int needFlush() = 0;
 	virtual bool tryAgainLater() = 0;
-	virtual int getData( char *dest, int length ) = 0;
+//	virtual int getData( char *dest, int length ) = 0;
 	virtual int getDataImpl( char *dest, int length ) = 0;
 	virtual Tree *getTree() = 0;
 	virtual KlangEl *getLangEl( long &bindId, char *&data, long &length ) = 0;
@@ -210,6 +227,8 @@ struct InputStream
 	}
 };
 
+extern InputFuncs dynamicFuncs;
+
 struct InputStreamDynamic : public InputStream
 {
 	InputStreamDynamic( bool handlesLine )
@@ -219,9 +238,7 @@ struct InputStreamDynamic : public InputStream
 		funcs = &dynamicFuncs;
 	}
 
-	static InputFuncs dynamicFuncs;
-
-	int getData( char *dest, int length );
+//	int getData( char *dest, int length );
 	int isEof();
 	void append( const char *data, long len ) {}
 	void append( Tree *tree ) {}
@@ -240,11 +257,16 @@ struct InputStreamDynamic : public InputStream
 
 };
 
+extern InputFuncs stringFuncs;
+
 struct InputStreamString : public InputStreamDynamic
 {
 	InputStreamString( const char *data, long dlen ) :
 		InputStreamDynamic(false), 
-		data(data), dlen(dlen), offset(0) {}
+		data(data), dlen(dlen), offset(0)
+	{
+		funcs = &stringFuncs;
+	}
 
 	int needFlush() { return eof; }
 	void pushBackBuf( RunBuf *runBuf );
@@ -256,12 +278,17 @@ struct InputStreamString : public InputStreamDynamic
 	int offset;
 };
 
+extern InputFuncs fileFuncs;
+
 struct InputStreamFile : public InputStreamDynamic
 {
 	InputStreamFile( FILE *file ) :
 		InputStreamDynamic(false), 
 		file(file)
-	{}
+	{
+		funcs = &fileFuncs;
+	}
+
 
 	int needFlush();
 	void pushBackBuf( RunBuf *runBuf );
@@ -271,12 +298,17 @@ struct InputStreamFile : public InputStreamDynamic
 	FILE *file;
 };
 
+extern InputFuncs fdFuncs;
+
 struct InputStreamFd : public InputStreamDynamic
 {
 	InputStreamFd( long fd ) :
 		InputStreamDynamic(false), 
 		fd(fd)
-	{}
+	{
+		funcs = &fdFuncs;
+	}
+
 
 	int needFlush();
 	void pushBackBuf( RunBuf *runBuf );
@@ -286,13 +318,17 @@ struct InputStreamFd : public InputStreamDynamic
 	long fd;
 };
 
+extern InputFuncs accumFuncs;
+
 struct InputStreamAccum : public InputStreamDynamic
 {
 	InputStreamAccum()
 	:
 		InputStreamDynamic(false), 
 		offset(0)
-	{}
+	{
+		funcs = &accumFuncs;
+	}
 
 	long offset;
 
@@ -309,10 +345,13 @@ struct InputStreamAccum : public InputStreamDynamic
  * The compile-time input streams.
  */
 
+extern InputFuncs staticFuncs;
+
 struct InputStreamStatic : public InputStream
 {
 	InputStreamStatic( bool handlesLine )
 		: InputStream( handlesLine ) {}
+
 
 	void append( const char *data, long len ) { assert(false); }
 	void append( Tree *tree ) { assert(false); }
@@ -327,13 +366,13 @@ struct InputStreamStatic : public InputStream
 	void pushText( const char *data, long len ) { assert( false ); }
 };
 
+extern InputFuncs patternFuncs;
+
 struct InputStreamPattern : public InputStreamStatic
 {
 	InputStreamPattern( Pattern *pattern );
 
-	static InputFuncs patternFuncs;
-
-	int getData( char *dest, int length );
+//	int getData( char *dest, int length );
 	int getDataImpl( char *dest, int length ) { return 0; }
 	int isEof();
 	int needFlush();
@@ -349,14 +388,14 @@ struct InputStreamPattern : public InputStreamStatic
 	int offset;
 };
 
+extern InputFuncs replFuncs;
+
 struct InputStreamRepl : public InputStreamStatic
 {
 	InputStreamRepl( Replacement *replacement );
 
-	static InputFuncs replFuncs;
-
 	bool isLangEl();
-	int getData( char *dest, int length );
+//	int getData( char *dest, int length );
 	int getDataImpl( char *dest, int length ) { return 0; }
 	KlangEl *getLangEl( long &bindId, char *&data, long &length );
 	int isEof();

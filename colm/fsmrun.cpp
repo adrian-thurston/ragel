@@ -178,7 +178,7 @@ Head *streamPull( Program *prg, FsmRun *fsmRun, InputStream *inputStream, long l
 
 		connect( fsmRun, inputStream );
 			
-		long len = inputStream->getData( fsmRun->p, space );
+		long len = inputStream->funcs->getData( inputStream, fsmRun->p, space );
 		fsmRun->pe = fsmRun->p + len;
 	}
 
@@ -1077,7 +1077,7 @@ long scanToken( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 		connect( fsmRun, inputStream );
 
 		/* Get more data. */
-		int len = inputStream->getData( fsmRun->p, space );
+		int len = inputStream->funcs->getData( inputStream, fsmRun->p, space );
 		fsmRun->pe = fsmRun->p + len;
 	}
 
@@ -1184,7 +1184,7 @@ void parseLoop( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStr
 		}
 		else if ( tokenId == SCAN_LANG_EL ) {
 			/* A named language element (parsing colm program). */
-			send_named_lang_el( sp, pdaRun, fsmRun, inputStream );
+			sendNamedLangEl( sp, pdaRun, fsmRun, inputStream );
 		}
 		else if ( tokenId == SCAN_TREE ) {
 			/* A tree already built. */

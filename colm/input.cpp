@@ -27,25 +27,67 @@
 using std::cerr;
 using std::endl;
 
-InputFuncs InputStream::baseFuncs =
+void initDynamicFuncs();
+void initStringFuncs();
+void initFileFuncs();
+void initFdFuncs();
+void initAccumFuncs();
+
+void initStaticFuncs();
+void initPatternFuncs();
+void initReplFuncs();
+
+InputFuncs baseFuncs;
+InputFuncs accumFuncs;
+InputFuncs dynamicFuncs;
+InputFuncs stringFuncs;
+InputFuncs fileFuncs;
+InputFuncs fdFuncs;
+
+void initInputFuncs()
 {
-	0
-};
+	memset( &baseFuncs, 0, sizeof(InputFuncs) );
+
+	initDynamicFuncs();
+	initStringFuncs();
+	initFileFuncs();
+	initFdFuncs();
+	initAccumFuncs();
+	initStaticFuncs();
+	initPatternFuncs();
+	initReplFuncs();
+}
 
 /* 
  * Base run-time input streams.
  */
 
-int inputStreamDynamicGetData( InputStream *is, char *dest, int length )
+int inputStreamDynamicGetData( InputStream *_is, char *dest, int length )
 {
-	return 0;
+	InputStreamDynamic *is = (InputStreamDynamic*)_is;
+
+	/* If there is any data in the rubuf queue then read that first. */
+	if ( is->head() != 0 ) {
+		long avail = is->head()->length - is->head()->offset;
+		if ( length >= avail ) {
+			memcpy( dest, &is->head()->data[is->head()->offset], avail );
+			RunBuf *del = is->popHead();
+			delete del;
+			return avail;
+		}
+		else {
+			memcpy( dest, &is->head()->data[is->head()->offset], length );
+			is->head()->offset += length;
+			return length;
+		}
+	}
+	else {
+		/* No stored data, call the impl version. */
+		return is->getDataImpl( dest, length );
+	}
 }
 
-InputFuncs InputStreamDynamic::dynamicFuncs =
-{
-	&inputStreamDynamicGetData
-};
-
+#if 0
 int InputStreamDynamic::getData( char *dest, int length )
 {
 	/* If there is any data in the rubuf queue then read that first. */
@@ -68,6 +110,7 @@ int InputStreamDynamic::getData( char *dest, int length )
 		return getDataImpl( dest, length );
 	}
 }
+#endif
 
 int InputStreamDynamic::getDataRev( char *dest, int length )
 {
@@ -178,7 +221,7 @@ Tree *InputStreamDynamic::undoPush( int length )
 		char tmp[length];
 		int have = 0;
 		while ( have < length ) {
-			int res = getData( tmp, length-have );
+			int res = this->funcs->getData( this, tmp, length-have );
 			have += res;
 		}
 		return 0;
@@ -212,6 +255,13 @@ Tree *InputStreamDynamic::undoAppend( int length )
 	}
 }
 
+
+void initDynamicFuncs()
+{
+	memcpy( &dynamicFuncs, &baseFuncs, sizeof(InputFuncs) );
+	dynamicFuncs.getData = &inputStreamDynamicGetData;
+}
+
 /*
  * String
  */
@@ -242,6 +292,12 @@ void InputStreamString::pushBackBuf( RunBuf *runBuf )
 	offset -= length;
 }
 
+void initStringFuncs()
+{
+	memcpy( &stringFuncs, &dynamicFuncs, sizeof(InputFuncs) );
+}
+
+
 /*
  * File
  */
@@ -262,6 +318,11 @@ int InputStreamFile::getDataImpl( char *dest, int length )
 void InputStreamFile::pushBackBuf( RunBuf *runBuf )
 {
 	prepend( runBuf );
+}
+
+void initFileFuncs()
+{
+	memcpy( &fileFuncs, &dynamicFuncs, sizeof(InputFuncs) );
 }
 
 /*
@@ -285,6 +346,12 @@ int InputStreamFd::getDataImpl( char *dest, int length )
 		later = true;
 	return got;
 }
+
+void initFdFuncs()
+{
+	memcpy( &fdFuncs, &dynamicFuncs, sizeof(InputFuncs) );
+}
+
 
 /*
  * Accum
@@ -347,5 +414,11 @@ void InputStreamAccum::append( Tree *tree )
 	ad->type = RunBuf::TokenType;
 	ad->tree = tree;
 	ad->length = 0;
+}
+
+
+void initAccumFuncs()
+{
+	memcpy( &accumFuncs, &dynamicFuncs, sizeof(InputFuncs) );
 }
 
