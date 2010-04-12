@@ -62,6 +62,27 @@ void initInputFuncs()
  * Base run-time input streams.
  */
 
+bool inputStreamDynamicIsTree( InputStream *_is )
+{
+	InputStreamDynamic *is = (InputStreamDynamic*)_is;
+	if ( is->head() != 0 && is->head()->type == RunBuf::TokenType )
+		return true;
+	return false;
+}
+
+bool inputStreamDynamicIsIgnore( InputStream *_is )
+{
+	InputStreamDynamic *is = (InputStreamDynamic*)_is;
+	if ( is->head() != 0 && is->head()->type == RunBuf::IgnoreType )
+		return true;
+	return false;
+}
+
+bool inputStreamDynamicIsLangEl( InputStream *_is )
+{
+	return false;
+}
+
 int inputStreamDynamicGetData( InputStream *_is, char *dest, int length )
 {
 	InputStreamDynamic *is = (InputStreamDynamic*)_is;
@@ -86,31 +107,6 @@ int inputStreamDynamicGetData( InputStream *_is, char *dest, int length )
 		return is->getDataImpl( dest, length );
 	}
 }
-
-#if 0
-int InputStreamDynamic::getData( char *dest, int length )
-{
-	/* If there is any data in the rubuf queue then read that first. */
-	if ( head() != 0 ) {
-		long avail = head()->length - head()->offset;
-		if ( length >= avail ) {
-			memcpy( dest, &head()->data[head()->offset], avail );
-			RunBuf *del = popHead();
-			delete del;
-			return avail;
-		}
-		else {
-			memcpy( dest, &head()->data[head()->offset], length );
-			head()->offset += length;
-			return length;
-		}
-	}
-	else {
-		/* No stored data, call the impl version. */
-		return getDataImpl( dest, length );
-	}
-}
-#endif
 
 int InputStreamDynamic::getDataRev( char *dest, int length )
 {
@@ -145,13 +141,6 @@ bool InputStreamDynamic::tryAgainLater()
 	return false;
 }
 
-bool InputStreamDynamic::isTree()
-{
-	if ( head() != 0 && head()->type == RunBuf::TokenType )
-		return true;
-	return false;
-}
-
 Tree *InputStreamDynamic::getTree()
 {
 	if ( head() != 0 && head()->type == RunBuf::TokenType ) {
@@ -164,13 +153,6 @@ Tree *InputStreamDynamic::getTree()
 	}
 
 	return 0;
-}
-
-bool InputStreamDynamic::isIgnore()
-{
-	if ( head() != 0 && head()->type == RunBuf::IgnoreType )
-		return true;
-	return false;
 }
 
 void InputStreamDynamic::pushText( const char *data, long length )
@@ -259,6 +241,9 @@ Tree *InputStreamDynamic::undoAppend( int length )
 void initDynamicFuncs()
 {
 	memcpy( &dynamicFuncs, &baseFuncs, sizeof(InputFuncs) );
+	dynamicFuncs.isTree = &inputStreamDynamicIsTree;
+	dynamicFuncs.isIgnore = &inputStreamDynamicIsIgnore;
+	dynamicFuncs.isLangEl = &inputStreamDynamicIsLangEl;
 	dynamicFuncs.getData = &inputStreamDynamicGetData;
 }
 

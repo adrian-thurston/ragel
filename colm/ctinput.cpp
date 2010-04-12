@@ -32,6 +32,16 @@ InputFuncs replFuncs;
  * Implementation
  */
 
+bool inputStreamStaticIsTree( InputStream *is )
+{
+	return false;
+}
+
+bool inputStreamStaticIsIgnore( InputStream *is )
+{
+	return false;
+}
+
 
 bool InputStreamStatic::tryAgainLater()
 {
@@ -44,6 +54,8 @@ bool InputStreamStatic::tryAgainLater()
 void initStaticFuncs()
 {
 	memcpy( &staticFuncs, &baseFuncs, sizeof(InputFuncs) );
+	staticFuncs.isTree = &inputStreamStaticIsTree;
+	staticFuncs.isIgnore = &inputStreamStaticIsIgnore;
 }
 
 
@@ -61,9 +73,10 @@ InputStreamPattern::InputStreamPattern( Pattern *pattern )
 	funcs = &patternFuncs;
 }
 
-bool InputStreamPattern::isLangEl()
+bool inputStreamPatternIsLangEl( InputStream *_is )
 { 
-	return patItem != 0 && patItem->type == PatternItem::FactorType;
+	InputStreamPattern *is = (InputStreamPattern*) _is;
+	return is->patItem != 0 && is->patItem->type == PatternItem::FactorType;
 }
 
 int InputStreamPattern::shouldFlush()
@@ -113,36 +126,6 @@ int inputStreamPatternGetData( InputStream *_is, char *dest, int length )
 	}
 	return length;
 }
-
-#if 0
-int InputStreamPattern::getData( char *dest, int length )
-{ 
-	if ( offset == 0 )
-		line = patItem->loc.line;
-
-	assert ( patItem->type == PatternItem::InputText );
-	int available = patItem->data.length() - offset;
-
-	if ( available < length )
-		length = available;
-
-	memcpy( dest, patItem->data.data+offset, length );
-	offset += length;
-
-	if ( offset == patItem->data.length() ) {
-		/* Read up to the end of the data. Advance the
-		 * pattern item. */
-		patItem = patItem->next;
-		offset = 0;
-		flush = shouldFlush();
-	}
-	else {
-		/* There is more data in this buffer. Don't flush. */
-		flush = false;
-	}
-	return length;
-}
-#endif
 
 int InputStreamPattern::isEof()
 {
@@ -194,6 +177,7 @@ void initPatternFuncs()
 {
 	memcpy( &patternFuncs, &staticFuncs, sizeof(InputFuncs) );
 	patternFuncs.getData = &inputStreamPatternGetData;
+	patternFuncs.isLangEl = &inputStreamPatternIsLangEl;
 }
 
 
@@ -211,10 +195,11 @@ InputStreamRepl::InputStreamRepl( Replacement *replacement )
 	funcs = &replFuncs;
 }
 
-bool InputStreamRepl::isLangEl()
+bool inputStreamReplIsLangEl( InputStream *_is )
 { 
-	return replItem != 0 && ( replItem->type == ReplItem::ExprType || 
-			replItem->type == ReplItem::FactorType );
+	InputStreamRepl *is = (InputStreamRepl*)_is;
+	return is->replItem != 0 && ( is->replItem->type == ReplItem::ExprType || 
+			is->replItem->type == ReplItem::FactorType );
 }
 
 int InputStreamRepl::shouldFlush()
@@ -280,36 +265,6 @@ int inputStreamReplGetData( InputStream *_is, char *dest, int length )
 	}
 	return length;
 }
-
-#if 0
-int InputStreamRepl::getData( char *dest, int length )
-{ 
-	if ( offset == 0 )
-		line = replItem->loc.line;
-
-	assert ( replItem->type == ReplItem::InputText );
-	int available = replItem->data.length() - offset;
-
-	if ( available < length )
-		length = available;
-
-	memcpy( dest, replItem->data.data+offset, length );
-	offset += length;
-
-	if ( offset == replItem->data.length() ) {
-		/* Read up to the end of the data. Advance the
-		 * replacement item. */
-		replItem = replItem->next;
-		offset = 0;
-		flush = shouldFlush();
-	}
-	else {
-		/* There is more data in this buffer. Don't flush. */
-		flush = false;
-	}
-	return length;
-}
-#endif
 
 int InputStreamRepl::isEof()
 {
@@ -396,4 +351,5 @@ void initReplFuncs()
 {
 	memcpy( &replFuncs, &staticFuncs, sizeof(InputFuncs) );
 	replFuncs.getData = &inputStreamReplGetData;
+	replFuncs.isLangEl = &inputStreamReplIsLangEl;
 }

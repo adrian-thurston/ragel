@@ -134,13 +134,9 @@ struct InputStream
 
 	virtual ~InputStream() {}
 
-	virtual bool isTree() = 0;
-	virtual bool isIgnore() = 0;
-	virtual bool isLangEl() = 0;
 	virtual int isEof() = 0;
 	virtual int needFlush() = 0;
 	virtual bool tryAgainLater() = 0;
-//	virtual int getData( char *dest, int length ) = 0;
 	virtual int getDataImpl( char *dest, int length ) = 0;
 	virtual Tree *getTree() = 0;
 	virtual KlangEl *getLangEl( long &bindId, char *&data, long &length ) = 0;
@@ -238,23 +234,18 @@ struct InputStreamDynamic : public InputStream
 		funcs = &dynamicFuncs;
 	}
 
-//	int getData( char *dest, int length );
 	int isEof();
 	void append( const char *data, long len ) {}
 	void append( Tree *tree ) {}
 	bool tryAgainLater();
-	bool isTree();
 	Tree *getTree();
-	bool isIgnore();
 	int getDataRev( char *dest, int length );
 	Tree *undoAppend( int length );
 	void pushText( const char *data, long len );
 	void pushTree( Tree *tree, bool ignore );
 	Tree *undoPush( int length );
-	bool isLangEl() { return false; }
 	KlangEl *getLangEl( long &bindId, char *&data, long &length ) { assert(false); return 0; }
 	void pushBackNamed() { assert(false); }
-
 };
 
 extern InputFuncs stringFuncs;
@@ -357,8 +348,6 @@ struct InputStreamStatic : public InputStream
 	void append( Tree *tree ) { assert(false); }
 
 	bool tryAgainLater();
-	bool isTree() { return false; }
-	bool isIgnore() { return false; }
 	Tree *getTree() { assert(false); }
 	Tree *undoPush( int ) { assert( false ); }
 	Tree *undoAppend( int ) { assert( false ); }
@@ -372,12 +361,10 @@ struct InputStreamPattern : public InputStreamStatic
 {
 	InputStreamPattern( Pattern *pattern );
 
-//	int getData( char *dest, int length );
 	int getDataImpl( char *dest, int length ) { return 0; }
 	int isEof();
 	int needFlush();
 	void pushBackBuf( RunBuf *runBuf );
-	bool isLangEl();
 	KlangEl *getLangEl( long &bindId, char *&data, long &length );
 	void pushBackNamed();
 	int shouldFlush();
@@ -394,8 +381,6 @@ struct InputStreamRepl : public InputStreamStatic
 {
 	InputStreamRepl( Replacement *replacement );
 
-	bool isLangEl();
-//	int getData( char *dest, int length );
 	int getDataImpl( char *dest, int length ) { return 0; }
 	KlangEl *getLangEl( long &bindId, char *&data, long &length );
 	int isEof();

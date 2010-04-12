@@ -990,15 +990,15 @@ long scanToken( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 		/* Check for a named language element or constructed trees. Note that
 		 * we can do this only when data == de otherwise we get ahead of what's
 		 * already in the buffer. */
-		if ( inputStream->isLangEl() ) {
+		if ( inputStream->funcs->isLangEl( inputStream ) ) {
 			breakRunBuf( fsmRun );
 			return SCAN_LANG_EL;
 		}
-		else if ( inputStream->isTree() ) {
+		else if ( inputStream->funcs->isTree( inputStream ) ) {
 			breakRunBuf( fsmRun );
 			return SCAN_TREE;
 		}
-		else if ( inputStream->isIgnore() ) {
+		else if ( inputStream->funcs->isIgnore( inputStream ) ) {
 			breakRunBuf( fsmRun );
 			return SCAN_IGNORE;
 		}
