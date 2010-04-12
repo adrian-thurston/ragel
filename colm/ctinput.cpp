@@ -127,14 +127,16 @@ int inputStreamPatternGetData( InputStream *_is, char *dest, int length )
 	return length;
 }
 
-int InputStreamPattern::isEof()
+bool inputStreamPatternIsEof( InputStream *_is )
 {
-	return patItem == 0;
+	InputStreamPattern *is = (InputStreamPattern*)_is;
+	return is->patItem == 0;
 }
 
-int InputStreamPattern::needFlush()
+int inputStreamPatternNeedFlush( InputStream *_is )
 {
-	return flush;
+	InputStreamPattern *is = (InputStreamPattern*)_is;
+	return is->flush;
 }
 
 void InputStreamPattern::backup()
@@ -178,6 +180,8 @@ void initPatternFuncs()
 	memcpy( &patternFuncs, &staticFuncs, sizeof(InputFuncs) );
 	patternFuncs.getData = &inputStreamPatternGetData;
 	patternFuncs.isLangEl = &inputStreamPatternIsLangEl;
+	patternFuncs.isEof = &inputStreamPatternIsEof;
+	patternFuncs.needFlush = &inputStreamPatternNeedFlush;
 }
 
 
@@ -266,14 +270,16 @@ int inputStreamReplGetData( InputStream *_is, char *dest, int length )
 	return length;
 }
 
-int InputStreamRepl::isEof()
+bool inputStreamReplIsEof( InputStream *_is )
 {
-	return replItem == 0;
+	InputStreamRepl *is = (InputStreamRepl*)_is;
+	return is->replItem == 0;
 }
 
-int InputStreamRepl::needFlush()
+int inputStreamReplNeedFlush( InputStream *_is )
 {
-	return flush;
+	InputStreamRepl *is = (InputStreamRepl*)_is;
+	return is->flush;
 }
 
 void InputStreamRepl::backup()
@@ -352,4 +358,6 @@ void initReplFuncs()
 	memcpy( &replFuncs, &staticFuncs, sizeof(InputFuncs) );
 	replFuncs.getData = &inputStreamReplGetData;
 	replFuncs.isLangEl = &inputStreamReplIsLangEl;
+	replFuncs.isEof = &inputStreamReplIsEof;
+	replFuncs.needFlush = &inputStreamReplNeedFlush;
 }

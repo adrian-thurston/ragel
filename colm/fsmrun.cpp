@@ -949,7 +949,7 @@ void breakRunBuf( FsmRun *fsmRun )
 long scanToken( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 {
 	while ( true ) {
-		if ( inputStream->needFlush() )
+		if ( inputStream->funcs->needFlush( inputStream ) )
 			fsmRun->peof = fsmRun->pe;
 
 		fsmExecute( fsmRun, inputStream );
@@ -1004,7 +1004,7 @@ long scanToken( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 		}
 
 		/* Maybe need eof. */
- 		if ( inputStream->isEof() ) {
+ 		if ( inputStream->funcs->isEof( inputStream ) ) {
 			if ( fsmRun->tokstart != 0 ) {
 				/* If a token has been started, but not finshed 
 				 * this is an error. */

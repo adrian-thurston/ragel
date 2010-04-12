@@ -83,6 +83,11 @@ bool inputStreamDynamicIsLangEl( InputStream *_is )
 	return false;
 }
 
+bool inputStreamDynamicIsEof( InputStream *_is )
+{
+	return _is->head() == 0 && _is->eof;
+}
+
 int inputStreamDynamicGetData( InputStream *_is, char *dest, int length )
 {
 	InputStreamDynamic *is = (InputStreamDynamic*)_is;
@@ -126,11 +131,6 @@ int InputStreamDynamic::getDataRev( char *dest, int length )
 		}
 	}
 	return 0;
-}
-
-int InputStreamDynamic::isEof()
-{
-	return head() == 0 && eof;
 }
 
 bool InputStreamDynamic::tryAgainLater()
@@ -244,12 +244,19 @@ void initDynamicFuncs()
 	dynamicFuncs.isTree = &inputStreamDynamicIsTree;
 	dynamicFuncs.isIgnore = &inputStreamDynamicIsIgnore;
 	dynamicFuncs.isLangEl = &inputStreamDynamicIsLangEl;
+	dynamicFuncs.isEof = &inputStreamDynamicIsEof;
+
 	dynamicFuncs.getData = &inputStreamDynamicGetData;
 }
 
 /*
  * String
  */
+
+int inputStreamStringNeedFlush( InputStream *is )
+{
+	return is->eof;
+}
 
 int InputStreamString::getDataImpl( char *dest, int length )
 { 
@@ -280,6 +287,7 @@ void InputStreamString::pushBackBuf( RunBuf *runBuf )
 void initStringFuncs()
 {
 	memcpy( &stringFuncs, &dynamicFuncs, sizeof(InputFuncs) );
+	stringFuncs.needFlush = &inputStreamStringNeedFlush;
 }
 
 
@@ -287,9 +295,10 @@ void initStringFuncs()
  * File
  */
 
-int InputStreamFile::needFlush()
+int inputStreamFileNeedFlush( InputStream *_is )
 {
-	return head() == 0 && feof( file );
+	InputStreamFile *is = (InputStreamFile*)_is;
+	return is->head() == 0 && feof( is->file );
 }
 
 int InputStreamFile::getDataImpl( char *dest, int length )
@@ -308,15 +317,16 @@ void InputStreamFile::pushBackBuf( RunBuf *runBuf )
 void initFileFuncs()
 {
 	memcpy( &fileFuncs, &dynamicFuncs, sizeof(InputFuncs) );
+	fileFuncs.needFlush = &inputStreamFileNeedFlush;
 }
 
 /*
  * FD
  */
 
-int InputStreamFd::needFlush()
+int inputStreamFdNeedFlush( InputStream *is )
 {
-	return head() == 0 && eof;
+	return is->head() == 0 && is->eof;
 }
 
 void InputStreamFd::pushBackBuf( RunBuf *runBuf )
@@ -335,6 +345,7 @@ int InputStreamFd::getDataImpl( char *dest, int length )
 void initFdFuncs()
 {
 	memcpy( &fdFuncs, &dynamicFuncs, sizeof(InputFuncs) );
+	fdFuncs.needFlush = &inputStreamFdNeedFlush;
 }
 
 
@@ -350,17 +361,19 @@ bool InputStreamAccum::tryAgainLater()
 	return false;
 }
 
-int InputStreamAccum::needFlush()
+int inputStreamAccumNeedFlush( InputStream *_is )
 {
-	if ( flush ) {
-		flush = false;
+	InputStream *is = (InputStream*)_is;
+
+	if ( is->flush ) {
+		is->flush = false;
 		return true;
 	}
 
-	if ( head() != 0 && head()->type != RunBuf::DataType )
+	if ( is->head() != 0 && is->head()->type != RunBuf::DataType )
 		return true;
 
-	if ( eof )
+	if ( is->eof )
 		return true;
 		
 	return false;
@@ -405,5 +418,6 @@ void InputStreamAccum::append( Tree *tree )
 void initAccumFuncs()
 {
 	memcpy( &accumFuncs, &dynamicFuncs, sizeof(InputFuncs) );
+	accumFuncs.needFlush = &inputStreamAccumNeedFlush;
 }
 

@@ -92,7 +92,7 @@ struct InputFuncs
 	bool (*isTree)( InputStream *is );
 	bool (*isIgnore)( InputStream *is );
 	bool (*isLangEl)( InputStream *is );
-	int (*isEof)( InputStream *is );
+	bool (*isEof)( InputStream *is );
 	int (*needFlush)( InputStream *is );
 	bool (*tryAgainLater)( InputStream *is );
 	int (*getData)( InputStream *is, char *dest, int length );
@@ -134,8 +134,6 @@ struct InputStream
 
 	virtual ~InputStream() {}
 
-	virtual int isEof() = 0;
-	virtual int needFlush() = 0;
 	virtual bool tryAgainLater() = 0;
 	virtual int getDataImpl( char *dest, int length ) = 0;
 	virtual Tree *getTree() = 0;
@@ -234,7 +232,6 @@ struct InputStreamDynamic : public InputStream
 		funcs = &dynamicFuncs;
 	}
 
-	int isEof();
 	void append( const char *data, long len ) {}
 	void append( Tree *tree ) {}
 	bool tryAgainLater();
@@ -259,7 +256,6 @@ struct InputStreamString : public InputStreamDynamic
 		funcs = &stringFuncs;
 	}
 
-	int needFlush() { return eof; }
 	void pushBackBuf( RunBuf *runBuf );
 
 	int getDataImpl( char *dest, int length );
@@ -281,7 +277,6 @@ struct InputStreamFile : public InputStreamDynamic
 	}
 
 
-	int needFlush();
 	void pushBackBuf( RunBuf *runBuf );
 
 	int getDataImpl( char *dest, int length );
@@ -301,7 +296,6 @@ struct InputStreamFd : public InputStreamDynamic
 	}
 
 
-	int needFlush();
 	void pushBackBuf( RunBuf *runBuf );
 
 	int getDataImpl( char *dest, int length );
@@ -324,7 +318,6 @@ struct InputStreamAccum : public InputStreamDynamic
 	long offset;
 
 	bool tryAgainLater();
-	int needFlush();
 	void pushBackBuf( RunBuf *runBuf );
 	void append( const char *data, long len );
 	void append( Tree *tree );
@@ -362,8 +355,6 @@ struct InputStreamPattern : public InputStreamStatic
 	InputStreamPattern( Pattern *pattern );
 
 	int getDataImpl( char *dest, int length ) { return 0; }
-	int isEof();
-	int needFlush();
 	void pushBackBuf( RunBuf *runBuf );
 	KlangEl *getLangEl( long &bindId, char *&data, long &length );
 	void pushBackNamed();
@@ -383,8 +374,6 @@ struct InputStreamRepl : public InputStreamStatic
 
 	int getDataImpl( char *dest, int length ) { return 0; }
 	KlangEl *getLangEl( long &bindId, char *&data, long &length );
-	int isEof();
-	int needFlush();
 	void pushBackBuf( RunBuf *runBuf );
 	void pushBackNamed();
 	void backup();
