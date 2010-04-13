@@ -242,7 +242,7 @@ Word streamAppend( Tree **&sp, Program *prg, Tree *input, Stream *stream )
 
 		/* Load it into the input. */
 		string s = sout.str();
-		stream->in->append( s.c_str(), s.size() );
+		stream->in->funcs->appendData( stream->in, s.c_str(), s.size() );
 		return s.size();
 	}
 	else {
@@ -254,7 +254,7 @@ Word streamAppend( Tree **&sp, Program *prg, Tree *input, Stream *stream )
 		input->flags |= AF_ARTIFICIAL;
 
 		treeUpref( input );
-		stream->in->append( input );
+		stream->in->funcs->appendTree( stream->in, input );
 		return 0;
 	}
 }
@@ -272,7 +272,7 @@ void parseFrag( Tree **&sp, Program *prg, Tree *input, Accum *accum, long stopId
 
 		/* Load it into the input. */
 		string s = sout.str();
-		stream->in->append( s.c_str(), s.size() );
+		stream->in->funcs->appendData( stream->in, s.c_str(), s.size() );
 
 		/* Parse. */
 		parseLoop( sp, accum->pdaRun, accum->fsmRun, stream->in );
@@ -289,7 +289,7 @@ void parseFrag( Tree **&sp, Program *prg, Tree *input, Accum *accum, long stopId
 		input->flags |= AF_ARTIFICIAL;
 
 		treeUpref( input );
-		stream->in->append( input );
+		stream->in->funcs->appendTree( stream->in, input );
 
 		parseLoop( sp, accum->pdaRun, accum->fsmRun, stream->in );
 

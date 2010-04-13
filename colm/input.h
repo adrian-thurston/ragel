@@ -102,7 +102,7 @@ struct InputFuncs
 	void (*pushTree)( InputStream *is, Tree *tree, bool ignore );
 	void (*pushText)( InputStream *is, const char *data, long len );
 	Tree *(*undoPush)( InputStream *is, int length );
-	void (*appendText)( InputStream *is, const char *data, long len );
+	void (*appendData)( InputStream *is, const char *data, long len );
 	void (*appendTree)( InputStream *is, Tree *tree );
 	Tree *(*undoAppend)( InputStream *is, int length );
 	void (*pushBackNamed)( InputStream *is );
@@ -134,17 +134,11 @@ struct InputStream
 
 	virtual ~InputStream() {}
 
-	//virtual int getDataImpl( char *dest, int length ) = 0;
-	virtual Tree *getTree() = 0;
-	virtual KlangEl *getLangEl( long &bindId, char *&data, long &length ) = 0;
 	virtual void pushTree( Tree *tree, bool ignore ) = 0;
 	virtual void pushText( const char *data, long len ) = 0;
 	virtual Tree *undoPush( int length ) = 0;
-	virtual void append( const char *data, long len ) = 0;
-	virtual void append( Tree *tree ) = 0;
 	virtual Tree *undoAppend( int length ) = 0;
 	virtual void pushBackNamed() = 0;
-	virtual void pushBackBuf( RunBuf *runBuf ) = 0;
 
 	/* Basic functions. */
 	
@@ -231,15 +225,10 @@ struct InputStreamDynamic : public InputStream
 		funcs = &dynamicFuncs;
 	}
 
-	void append( const char *data, long len ) {}
-	void append( Tree *tree ) {}
-	Tree *getTree();
-	int getDataRev( char *dest, int length );
 	Tree *undoAppend( int length );
 	void pushText( const char *data, long len );
 	void pushTree( Tree *tree, bool ignore );
 	Tree *undoPush( int length );
-	KlangEl *getLangEl( long &bindId, char *&data, long &length ) { assert(false); return 0; }
 	void pushBackNamed() { assert(false); }
 };
 
@@ -253,8 +242,6 @@ struct InputStreamString : public InputStreamDynamic
 	{
 		funcs = &stringFuncs;
 	}
-
-	void pushBackBuf( RunBuf *runBuf );
 
 	const char *data;
 	long dlen;
@@ -272,9 +259,6 @@ struct InputStreamFile : public InputStreamDynamic
 		funcs = &fileFuncs;
 	}
 
-
-	void pushBackBuf( RunBuf *runBuf );
-
 	FILE *file;
 };
 
@@ -288,9 +272,6 @@ struct InputStreamFd : public InputStreamDynamic
 	{
 		funcs = &fdFuncs;
 	}
-
-
-	void pushBackBuf( RunBuf *runBuf );
 
 	long fd;
 };
@@ -308,10 +289,6 @@ struct InputStreamAccum : public InputStreamDynamic
 	}
 
 	long offset;
-
-	void pushBackBuf( RunBuf *runBuf );
-	void append( const char *data, long len );
-	void append( Tree *tree );
 };
 
 /*
@@ -325,11 +302,6 @@ struct InputStreamStatic : public InputStream
 	InputStreamStatic( bool handlesLine )
 		: InputStream( handlesLine ) {}
 
-
-	void append( const char *data, long len ) { assert(false); }
-	void append( Tree *tree ) { assert(false); }
-
-	Tree *getTree() { assert(false); }
 	Tree *undoPush( int ) { assert( false ); }
 	Tree *undoAppend( int ) { assert( false ); }
 	void pushTree( Tree *tree, bool ignore ) { assert( false ); }
@@ -342,11 +314,7 @@ struct InputStreamPattern : public InputStreamStatic
 {
 	InputStreamPattern( Pattern *pattern );
 
-	void pushBackBuf( RunBuf *runBuf );
-	KlangEl *getLangEl( long &bindId, char *&data, long &length );
 	void pushBackNamed();
-	int shouldFlush();
-	void backup();
 
 	Pattern *pattern;
 	PatternItem *patItem;
@@ -359,11 +327,7 @@ struct InputStreamRepl : public InputStreamStatic
 {
 	InputStreamRepl( Replacement *replacement );
 
-	KlangEl *getLangEl( long &bindId, char *&data, long &length );
-	void pushBackBuf( RunBuf *runBuf );
 	void pushBackNamed();
-	void backup();
-	int shouldFlush();
 
 	Replacement *replacement;
 	ReplItem *replItem;

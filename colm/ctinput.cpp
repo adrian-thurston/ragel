@@ -81,22 +81,24 @@ bool inputStreamPatternIsLangEl( InputStream *_is )
 	return is->patItem != 0 && is->patItem->type == PatternItem::FactorType;
 }
 
-int InputStreamPattern::shouldFlush()
+int inputStreamPatternShouldFlush( InputStreamPattern *is )
 { 
-	return patItem == 0 || patItem->type == PatternItem::FactorType;
+	return is->patItem == 0 || is->patItem->type == PatternItem::FactorType;
 }
 
-KlangEl *InputStreamPattern::getLangEl( long &bindId, char *&data, long &length )
+KlangEl *inputStreamPatternGetLangEl( InputStream *_is, long &bindId, char *&data, long &length )
 { 
-	KlangEl *klangEl = patItem->factor->langEl;
-	bindId = patItem->bindId;
+	InputStreamPattern *is = (InputStreamPattern*)_is;
+
+	KlangEl *klangEl = is->patItem->factor->langEl;
+	bindId = is->patItem->bindId;
 	data = 0;
 	length = 0;
-	line = patItem->loc.line;
+	is->line = is->patItem->loc.line;
 
-	patItem = patItem->next;
-	offset = 0;
-	flush = false;
+	is->patItem = is->patItem->next;
+	is->offset = 0;
+	is->flush = false;
 	return klangEl;
 }
 
@@ -120,7 +122,7 @@ int inputStreamPatternGetData( InputStream *_is, char *dest, int length )
 		 * pattern item. */
 		is->patItem = is->patItem->next;
 		is->offset = 0;
-		is->flush = is->shouldFlush();
+		is->flush = inputStreamPatternShouldFlush( is );
 	}
 	else {
 		/* There is more data in this buffer. Don't flush. */
@@ -141,16 +143,18 @@ int inputStreamPatternNeedFlush( InputStream *_is )
 	return is->flush;
 }
 
-void InputStreamPattern::backup()
+void inputStreamPatternBackup( InputStreamPattern *is )
 {
-	if ( patItem == 0 )
-		patItem = pattern->list->tail;
+	if ( is->patItem == 0 )
+		is->patItem = is->pattern->list->tail;
 	else
-		patItem = patItem->prev;
+		is->patItem = is->patItem->prev;
 }
 
-void InputStreamPattern::pushBackBuf( RunBuf *runBuf )
+void inputStreamPatternPushBackBuf( InputStream *_is, RunBuf *runBuf )
 {
+	InputStreamPattern *is = (InputStreamPattern*)_is;
+
 	char *data = runBuf->data + runBuf->offset;
 	long length = runBuf->length;
 
@@ -158,21 +162,21 @@ void InputStreamPattern::pushBackBuf( RunBuf *runBuf )
 		return;
 
 	/* While pushing back past the current pattern item start. */
-	while ( length > offset ) {
-		length -= offset;
-		if ( offset > 0 )
-			assert( memcmp( patItem->data, data-length, offset ) == 0 );
-		backup();
-		offset = patItem->data.length();
+	while ( length > is->offset ) {
+		length -= is->offset;
+		if ( is->offset > 0 )
+			assert( memcmp( is->patItem->data, data-length, is->offset ) == 0 );
+		inputStreamPatternBackup( is );
+		is->offset = is->patItem->data.length();
 	}
 
-	offset -= length;
-	assert( memcmp( &patItem->data[offset], data, length ) == 0 );
+	is->offset -= length;
+	assert( memcmp( &is->patItem->data[is->offset], data, length ) == 0 );
 }
 
 void InputStreamPattern::pushBackNamed()
 {
-	backup();
+	inputStreamPatternBackup( this );
 	offset = patItem->data.length();
 }
 
@@ -184,6 +188,8 @@ void initPatternFuncs()
 	patternFuncs.isLangEl = &inputStreamPatternIsLangEl;
 	patternFuncs.isEof = &inputStreamPatternIsEof;
 	patternFuncs.needFlush = &inputStreamPatternNeedFlush;
+	patternFuncs.getLangEl = &inputStreamPatternGetLangEl;
+	patternFuncs.pushBackBuf = &inputStreamPatternPushBackBuf;
 }
 
 
@@ -208,37 +214,39 @@ bool inputStreamReplIsLangEl( InputStream *_is )
 			is->replItem->type == ReplItem::FactorType );
 }
 
-int InputStreamRepl::shouldFlush()
+int inputStreamReplShouldFlush( InputStreamRepl *is )
 { 
-	return replItem == 0 || ( replItem->type == ReplItem::ExprType ||
-			replItem->type == ReplItem::FactorType );
+	return is->replItem == 0 || ( is->replItem->type == ReplItem::ExprType ||
+			is->replItem->type == ReplItem::FactorType );
 }
 
-KlangEl *InputStreamRepl::getLangEl( long &bindId, char *&data, long &length )
+KlangEl *inputStreamReplGetLangEl( InputStream *_is, long &bindId, char *&data, long &length )
 { 
-	KlangEl *klangEl = replItem->type == ReplItem::ExprType ? 
-			replItem->langEl : replItem->factor->langEl;
-	bindId = replItem->bindId;
+	InputStreamRepl *is = (InputStreamRepl*)_is;
+
+	KlangEl *klangEl = is->replItem->type == ReplItem::ExprType ? 
+			is->replItem->langEl : is->replItem->factor->langEl;
+	bindId = is->replItem->bindId;
 
 	data = 0;
 	length = 0;
-	line = replItem->loc.line;
+	is->line = is->replItem->loc.line;
 
-	if ( replItem->type == ReplItem::FactorType ) {
-		if ( replItem->factor->literal != 0 ) {
+	if ( is->replItem->type == ReplItem::FactorType ) {
+		if ( is->replItem->factor->literal != 0 ) {
 			bool unusedCI;
-			prepareLitString( replItem->data, unusedCI, 
-					replItem->factor->literal->token.data,
-					replItem->factor->literal->token.loc );
+			prepareLitString( is->replItem->data, unusedCI, 
+					is->replItem->factor->literal->token.data,
+					is->replItem->factor->literal->token.loc );
 
-			data = replItem->data;
-			length = replItem->data.length();
+			data = is->replItem->data;
+			length = is->replItem->data.length();
 		}
 	}
 
-	replItem = replItem->next;
-	offset = 0;
-	flush = false;
+	is->replItem = is->replItem->next;
+	is->offset = 0;
+	is->flush = false;
 	return klangEl;
 }
 
@@ -263,7 +271,7 @@ int inputStreamReplGetData( InputStream *_is, char *dest, int length )
 		 * replacement item. */
 		is->replItem = is->replItem->next;
 		is->offset = 0;
-		is->flush = is->shouldFlush();
+		is->flush = inputStreamReplShouldFlush( is );
 	}
 	else {
 		/* There is more data in this buffer. Don't flush. */
@@ -284,16 +292,18 @@ int inputStreamReplNeedFlush( InputStream *_is )
 	return is->flush;
 }
 
-void InputStreamRepl::backup()
+void inputStreamReplBackup( InputStreamRepl *is )
 {
-	if ( replItem == 0 )
-		replItem = replacement->list->tail;
+	if ( is->replItem == 0 )
+		is->replItem = is->replacement->list->tail;
 	else
-		replItem = replItem->prev;
+		is->replItem = is->replItem->prev;
 }
 
-void InputStreamRepl::pushBackBuf( RunBuf *runBuf )
+void inputStreamReplPushBackBuf( InputStream *_is, RunBuf *runBuf )
 {
+	InputStreamRepl *is = (InputStreamRepl*)_is;
+
 	char *data = runBuf->data + runBuf->offset;
 	long length = runBuf->length;
 
@@ -307,22 +317,33 @@ void InputStreamRepl::pushBackBuf( RunBuf *runBuf )
 		return;
 
 	/* While pushing back past the current pattern item start. */
-	while ( length > offset ) {
-		length -= offset;
-		if ( offset > 0 ) 
-			assert( memcmp( replItem->data, data-length, offset ) == 0 );
-		backup();
-		offset = replItem->data.length();
+	while ( length > is->offset ) {
+		length -= is->offset;
+		if ( is->offset > 0 ) 
+			assert( memcmp( is->replItem->data, data-length, is->offset ) == 0 );
+		inputStreamReplBackup( is );
+		is->offset = is->replItem->data.length();
 	}
 
-	offset -= length;
-	assert( memcmp( &replItem->data[offset], data, length ) == 0 );
+	is->offset -= length;
+	assert( memcmp( &is->replItem->data[is->offset], data, length ) == 0 );
 }
 
 void InputStreamRepl::pushBackNamed()
 {
-	backup();
+	inputStreamReplBackup( this );
 	offset = replItem->data.length();
+}
+
+void initReplFuncs()
+{
+	memcpy( &replFuncs, &staticFuncs, sizeof(InputFuncs) );
+	replFuncs.getData = &inputStreamReplGetData;
+	replFuncs.isLangEl = &inputStreamReplIsLangEl;
+	replFuncs.isEof = &inputStreamReplIsEof;
+	replFuncs.needFlush = &inputStreamReplNeedFlush;
+	replFuncs.getLangEl = &inputStreamReplGetLangEl;
+	replFuncs.pushBackBuf = &inputStreamReplPushBackBuf;
 }
 
 void sendNamedLangEl( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
@@ -332,7 +353,7 @@ void sendNamedLangEl( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *in
 	char *data;
 	long length;
 
-	KlangEl *klangEl = inputStream->getLangEl( bindId, data, length );
+	KlangEl *klangEl = inputStream->funcs->getLangEl( inputStream, bindId, data, length );
 	if ( klangEl->termDup != 0 )
 		klangEl = klangEl->termDup;
 	
@@ -354,12 +375,3 @@ void sendNamedLangEl( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *in
 	sendHandleError( sp, pdaRun, fsmRun, inputStream, input );
 }
 
-
-void initReplFuncs()
-{
-	memcpy( &replFuncs, &staticFuncs, sizeof(InputFuncs) );
-	replFuncs.getData = &inputStreamReplGetData;
-	replFuncs.isLangEl = &inputStreamReplIsLangEl;
-	replFuncs.isEof = &inputStreamReplIsEof;
-	replFuncs.needFlush = &inputStreamReplNeedFlush;
-}

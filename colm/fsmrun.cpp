@@ -131,7 +131,7 @@ void takeBackBuffered( InputStream *inputStream )
 
 				fsmRun->pe = fsmRun->p;
 
-				inputStream->pushBackBuf( split );
+				inputStream->funcs->pushBackBuf( inputStream, split );
 			}
 		}
 
@@ -207,7 +207,7 @@ void sendBackRunBufHead( FsmRun *fsmRun, InputStream *inputStream )
 	/* Flush out the input buffer. */
 	back->length = fsmRun->pe - fsmRun->p;
 	back->offset = 0;
-	inputStream->pushBackBuf( back );
+	inputStream->funcs->pushBackBuf( inputStream, back );
 
 	/* Set data and de. */
 	if ( fsmRun->runBuf == 0 ) {
@@ -1133,7 +1133,7 @@ void sendTree( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStre
 //	input->tree = runBuf->tree;
 //	delete runBuf;
 	Kid *input = kidAllocate( fsmRun->prg );
-	input->tree = inputStream->getTree();
+	input->tree = inputStream->funcs->getTree( inputStream );
 
 	incrementConsumed( pdaRun );
 
