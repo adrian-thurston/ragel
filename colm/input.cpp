@@ -109,7 +109,7 @@ int inputStreamDynamicGetData( InputStream *_is, char *dest, int length )
 	}
 	else {
 		/* No stored data, call the impl version. */
-		return is->getDataImpl( dest, length );
+		return is->funcs->getDataImpl( _is, dest, length );
 	}
 }
 
@@ -133,9 +133,10 @@ int InputStreamDynamic::getDataRev( char *dest, int length )
 	return 0;
 }
 
-bool InputStreamDynamic::tryAgainLater()
+bool inputStreamDynamicTryAgainLater( InputStream *_is )
 {
-	if ( later )
+	InputStreamDynamic *is = (InputStreamDynamic*)_is;
+	if ( is->later )
 		return true;
 
 	return false;
@@ -245,7 +246,7 @@ void initDynamicFuncs()
 	dynamicFuncs.isIgnore = &inputStreamDynamicIsIgnore;
 	dynamicFuncs.isLangEl = &inputStreamDynamicIsLangEl;
 	dynamicFuncs.isEof = &inputStreamDynamicIsEof;
-
+	dynamicFuncs.tryAgainLater = &inputStreamDynamicTryAgainLater;
 	dynamicFuncs.getData = &inputStreamDynamicGetData;
 }
 
@@ -258,19 +259,22 @@ int inputStreamStringNeedFlush( InputStream *is )
 	return is->eof;
 }
 
-int InputStreamString::getDataImpl( char *dest, int length )
+int inputStreamStringGetDataImpl( InputStream *_is, char *dest, int length )
 { 
-	int available = dlen - offset;
+	InputStreamString *is = (InputStreamString*)_is;
+
+	int available = is->dlen - is->offset;
 
 	if ( available < length )
 		length = available;
 
-	memcpy( dest, data+offset, length );
-	offset += length;
+	memcpy( dest, is->data+is->offset, length );
+	is->offset += length;
 
-	if ( offset == dlen )
+	if ( is->offset == is->dlen ) {
 		//eof = true;
-		later = true;
+		is->later = true;
+	}
 
 	return length;
 }
@@ -288,6 +292,7 @@ void initStringFuncs()
 {
 	memcpy( &stringFuncs, &dynamicFuncs, sizeof(InputFuncs) );
 	stringFuncs.needFlush = &inputStreamStringNeedFlush;
+	stringFuncs.getDataImpl = &inputStreamStringGetDataImpl;
 }
 
 
@@ -301,11 +306,12 @@ int inputStreamFileNeedFlush( InputStream *_is )
 	return is->head() == 0 && feof( is->file );
 }
 
-int InputStreamFile::getDataImpl( char *dest, int length )
+int inputStreamFileGetDataImpl( InputStream *_is, char *dest, int length )
 {
-	size_t res = fread( dest, 1, length, file );
+	InputStreamFile *is = (InputStreamFile*)_is;
+	size_t res = fread( dest, 1, length, is->file );
 	if ( res < (size_t) length )
-		later = true;
+		is->later = true;
 	return res;
 }
 
@@ -318,6 +324,7 @@ void initFileFuncs()
 {
 	memcpy( &fileFuncs, &dynamicFuncs, sizeof(InputFuncs) );
 	fileFuncs.needFlush = &inputStreamFileNeedFlush;
+	fileFuncs.getDataImpl = &inputStreamFileGetDataImpl;
 }
 
 /*
@@ -334,11 +341,12 @@ void InputStreamFd::pushBackBuf( RunBuf *runBuf )
 	prepend( runBuf );
 }
 
-int InputStreamFd::getDataImpl( char *dest, int length )
+int inputStreamFdGetDataImpl( InputStream *_is, char *dest, int length )
 {
-	long got = read( fd, dest, length );
+	InputStreamFd *is = (InputStreamFd*)_is;
+	long got = read( is->fd, dest, length );
 	if ( got == 0 )
-		later = true;
+		is->later = true;
 	return got;
 }
 
@@ -346,6 +354,7 @@ void initFdFuncs()
 {
 	memcpy( &fdFuncs, &dynamicFuncs, sizeof(InputFuncs) );
 	fdFuncs.needFlush = &inputStreamFdNeedFlush;
+	fdFuncs.getDataImpl = &inputStreamFdGetDataImpl;
 }
 
 
@@ -353,9 +362,10 @@ void initFdFuncs()
  * Accum
  */
 
-bool InputStreamAccum::tryAgainLater()
+bool inputStreamAccumTryAgainLater( InputStream *_is )
 {
-	if ( later || ( !flush && head() == 0 ))
+	InputStreamAccum *is = (InputStreamAccum*)_is;
+	if ( is->later || ( !is->flush && is->head() == 0 ))
 		return true;
 
 	return false;
@@ -379,7 +389,7 @@ int inputStreamAccumNeedFlush( InputStream *_is )
 	return false;
 }
 
-int InputStreamAccum::getDataImpl( char *dest, int length )
+int inputStreamAccumGetDataImpl( InputStream *is, char *dest, int length )
 {
 	/* No source of data, it is all done with RunBuf list appends. */
 	return 0;
@@ -419,5 +429,7 @@ void initAccumFuncs()
 {
 	memcpy( &accumFuncs, &dynamicFuncs, sizeof(InputFuncs) );
 	accumFuncs.needFlush = &inputStreamAccumNeedFlush;
+	accumFuncs.tryAgainLater = &inputStreamAccumTryAgainLater;
+	accumFuncs.getDataImpl = &inputStreamAccumGetDataImpl;
 }
 

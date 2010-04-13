@@ -134,8 +134,7 @@ struct InputStream
 
 	virtual ~InputStream() {}
 
-	virtual bool tryAgainLater() = 0;
-	virtual int getDataImpl( char *dest, int length ) = 0;
+	//virtual int getDataImpl( char *dest, int length ) = 0;
 	virtual Tree *getTree() = 0;
 	virtual KlangEl *getLangEl( long &bindId, char *&data, long &length ) = 0;
 	virtual void pushTree( Tree *tree, bool ignore ) = 0;
@@ -234,7 +233,6 @@ struct InputStreamDynamic : public InputStream
 
 	void append( const char *data, long len ) {}
 	void append( Tree *tree ) {}
-	bool tryAgainLater();
 	Tree *getTree();
 	int getDataRev( char *dest, int length );
 	Tree *undoAppend( int length );
@@ -258,8 +256,6 @@ struct InputStreamString : public InputStreamDynamic
 
 	void pushBackBuf( RunBuf *runBuf );
 
-	int getDataImpl( char *dest, int length );
-
 	const char *data;
 	long dlen;
 	int offset;
@@ -279,8 +275,6 @@ struct InputStreamFile : public InputStreamDynamic
 
 	void pushBackBuf( RunBuf *runBuf );
 
-	int getDataImpl( char *dest, int length );
-
 	FILE *file;
 };
 
@@ -297,8 +291,6 @@ struct InputStreamFd : public InputStreamDynamic
 
 
 	void pushBackBuf( RunBuf *runBuf );
-
-	int getDataImpl( char *dest, int length );
 
 	long fd;
 };
@@ -317,12 +309,9 @@ struct InputStreamAccum : public InputStreamDynamic
 
 	long offset;
 
-	bool tryAgainLater();
 	void pushBackBuf( RunBuf *runBuf );
 	void append( const char *data, long len );
 	void append( Tree *tree );
-
-	int getDataImpl( char *dest, int length );
 };
 
 /*
@@ -340,7 +329,6 @@ struct InputStreamStatic : public InputStream
 	void append( const char *data, long len ) { assert(false); }
 	void append( Tree *tree ) { assert(false); }
 
-	bool tryAgainLater();
 	Tree *getTree() { assert(false); }
 	Tree *undoPush( int ) { assert( false ); }
 	Tree *undoAppend( int ) { assert( false ); }
@@ -354,7 +342,6 @@ struct InputStreamPattern : public InputStreamStatic
 {
 	InputStreamPattern( Pattern *pattern );
 
-	int getDataImpl( char *dest, int length ) { return 0; }
 	void pushBackBuf( RunBuf *runBuf );
 	KlangEl *getLangEl( long &bindId, char *&data, long &length );
 	void pushBackNamed();
@@ -372,7 +359,6 @@ struct InputStreamRepl : public InputStreamStatic
 {
 	InputStreamRepl( Replacement *replacement );
 
-	int getDataImpl( char *dest, int length ) { return 0; }
 	KlangEl *getLangEl( long &bindId, char *&data, long &length );
 	void pushBackBuf( RunBuf *runBuf );
 	void pushBackNamed();

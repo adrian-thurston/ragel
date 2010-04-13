@@ -43,9 +43,10 @@ bool inputStreamStaticIsIgnore( InputStream *is )
 }
 
 
-bool InputStreamStatic::tryAgainLater()
+bool inputStreamStaticTryAgainLater( InputStream *_is )
 {
-	if ( later )
+	InputStreamStatic *is = (InputStreamStatic*)_is;
+	if ( is->later )
 		return true;
 
 	return false;
@@ -56,6 +57,7 @@ void initStaticFuncs()
 	memcpy( &staticFuncs, &baseFuncs, sizeof(InputFuncs) );
 	staticFuncs.isTree = &inputStreamStaticIsTree;
 	staticFuncs.isIgnore = &inputStreamStaticIsIgnore;
+	staticFuncs.tryAgainLater = &inputStreamStaticTryAgainLater;
 }
 
 

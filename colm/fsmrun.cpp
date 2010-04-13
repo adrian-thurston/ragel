@@ -1018,7 +1018,7 @@ long scanToken( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 
 		/* Maybe need to pause parsing until more data is inserted into the
 		 * input inputStream. */
-		if ( inputStream->tryAgainLater() )
+		if ( inputStream->funcs->tryAgainLater( inputStream ) )
 			return SCAN_TRY_AGAIN_LATER;
 
 		/* There may be space left in the current buffer. If not then we need
