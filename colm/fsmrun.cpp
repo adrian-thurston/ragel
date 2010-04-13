@@ -245,7 +245,7 @@ void streamPushText( InputStream *inputStream, const char *data, long length )
 //	#endif
 
 	takeBackBuffered( inputStream );
-	inputStream->pushText( data, length );
+	inputStream->funcs->pushText( inputStream, data, length );
 }
 
 void streamPushTree( InputStream *inputStream, Tree *tree, bool ignore )
@@ -257,13 +257,13 @@ void streamPushTree( InputStream *inputStream, Tree *tree, bool ignore )
 //	#endif
 
 	takeBackBuffered( inputStream );
-	inputStream->pushTree( tree, ignore );
+	inputStream->funcs->pushTree( inputStream, tree, ignore );
 }
 
 void undoStreamPush( Program *prg, Tree **sp, InputStream *inputStream, long length )
 {
 	takeBackBuffered( inputStream );
-	Tree *tree = inputStream->undoPush( length );
+	Tree *tree = inputStream->funcs->undoPush( inputStream, length );
 	if ( tree != 0 )
 		treeDownref( prg, sp, tree );
 }
@@ -271,7 +271,7 @@ void undoStreamPush( Program *prg, Tree **sp, InputStream *inputStream, long len
 void undoStreamAppend( Program *prg, Tree **sp, InputStream *inputStream, long length )
 {
 	takeBackBuffered( inputStream );
-	Tree *tree = inputStream->undoAppend( length );
+	Tree *tree = inputStream->funcs->undoAppend( inputStream, length );
 	if ( tree != 0 )
 		treeDownref( prg, sp, tree );
 }
@@ -374,7 +374,7 @@ void sendBack( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStre
 
 		/* Send the named lang el back first, then send back any leading
 		 * whitespace. */
-		inputStream->pushBackNamed();
+		inputStream->funcs->pushBackNamed( inputStream );
 	}
 
 	decrementConsumed( pdaRun );

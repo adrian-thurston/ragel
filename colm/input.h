@@ -134,12 +134,6 @@ struct InputStream
 
 	virtual ~InputStream() {}
 
-	virtual void pushTree( Tree *tree, bool ignore ) = 0;
-	virtual void pushText( const char *data, long len ) = 0;
-	virtual Tree *undoPush( int length ) = 0;
-	virtual Tree *undoAppend( int length ) = 0;
-	virtual void pushBackNamed() = 0;
-
 	/* Basic functions. */
 	
 	FsmRun *hasData;
@@ -224,12 +218,6 @@ struct InputStreamDynamic : public InputStream
 	{
 		funcs = &dynamicFuncs;
 	}
-
-	Tree *undoAppend( int length );
-	void pushText( const char *data, long len );
-	void pushTree( Tree *tree, bool ignore );
-	Tree *undoPush( int length );
-	void pushBackNamed() { assert(false); }
 };
 
 extern InputFuncs stringFuncs;
@@ -301,11 +289,6 @@ struct InputStreamStatic : public InputStream
 {
 	InputStreamStatic( bool handlesLine )
 		: InputStream( handlesLine ) {}
-
-	Tree *undoPush( int ) { assert( false ); }
-	Tree *undoAppend( int ) { assert( false ); }
-	void pushTree( Tree *tree, bool ignore ) { assert( false ); }
-	void pushText( const char *data, long len ) { assert( false ); }
 };
 
 extern InputFuncs patternFuncs;
@@ -313,8 +296,6 @@ extern InputFuncs patternFuncs;
 struct InputStreamPattern : public InputStreamStatic
 {
 	InputStreamPattern( Pattern *pattern );
-
-	void pushBackNamed();
 
 	Pattern *pattern;
 	PatternItem *patItem;
@@ -326,8 +307,6 @@ extern InputFuncs replFuncs;
 struct InputStreamRepl : public InputStreamStatic
 {
 	InputStreamRepl( Replacement *replacement );
-
-	void pushBackNamed();
 
 	Replacement *replacement;
 	ReplItem *replItem;

@@ -174,10 +174,11 @@ void inputStreamPatternPushBackBuf( InputStream *_is, RunBuf *runBuf )
 	assert( memcmp( &is->patItem->data[is->offset], data, length ) == 0 );
 }
 
-void InputStreamPattern::pushBackNamed()
+void inputStreamPatternPushBackNamed( InputStream *_is )
 {
-	inputStreamPatternBackup( this );
-	offset = patItem->data.length();
+	InputStreamPattern *is = (InputStreamPattern*)_is;
+	inputStreamPatternBackup( is );
+	is->offset = is->patItem->data.length();
 }
 
 
@@ -190,6 +191,7 @@ void initPatternFuncs()
 	patternFuncs.needFlush = &inputStreamPatternNeedFlush;
 	patternFuncs.getLangEl = &inputStreamPatternGetLangEl;
 	patternFuncs.pushBackBuf = &inputStreamPatternPushBackBuf;
+	patternFuncs.pushBackNamed = &inputStreamPatternPushBackNamed;
 }
 
 
@@ -329,10 +331,12 @@ void inputStreamReplPushBackBuf( InputStream *_is, RunBuf *runBuf )
 	assert( memcmp( &is->replItem->data[is->offset], data, length ) == 0 );
 }
 
-void InputStreamRepl::pushBackNamed()
+void inputStreamReplPushBackNamed( InputStream *_is )
 {
-	inputStreamReplBackup( this );
-	offset = replItem->data.length();
+	InputStreamRepl *is = (InputStreamRepl*)_is;
+
+	inputStreamReplBackup( is );
+	is->offset = is->replItem->data.length();
 }
 
 void initReplFuncs()
@@ -344,6 +348,7 @@ void initReplFuncs()
 	replFuncs.needFlush = &inputStreamReplNeedFlush;
 	replFuncs.getLangEl = &inputStreamReplGetLangEl;
 	replFuncs.pushBackBuf = &inputStreamReplPushBackBuf;
+	replFuncs.pushBackNamed = &inputStreamReplPushBackNamed;
 }
 
 void sendNamedLangEl( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )

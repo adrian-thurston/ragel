@@ -158,8 +158,10 @@ Tree *inputStreamDynamicGetTree( InputStream *_is )
 	return 0;
 }
 
-void InputStreamDynamic::pushText( const char *data, long length )
+void inputStreamDynamicPushText( InputStream *_is, const char *data, long length )
 {
+	InputStreamDynamic *is = (InputStreamDynamic*)_is;
+
 //	#ifdef COLM_LOG_PARSE
 //	if ( colm_log_parse ) {
 //		cerr << "readying fake push" << endl;
@@ -177,11 +179,12 @@ void InputStreamDynamic::pushText( const char *data, long length )
 	newBuf->length = length;
 	memcpy( newBuf->data, data, length );
 
-	funcs->pushBackBuf( this, newBuf );
+	is->funcs->pushBackBuf( is, newBuf );
 }
 
-void InputStreamDynamic::pushTree( Tree *tree, bool ignore )
+void inputStreamDynamicPushTree( InputStream *_is, Tree *tree, bool ignore )
 {
+	InputStreamDynamic *is = (InputStreamDynamic*)_is;
 //	#ifdef COLM_LOG_PARSE
 //	if ( colm_log_parse ) {
 //		cerr << "readying fake push" << endl;
@@ -197,43 +200,45 @@ void InputStreamDynamic::pushTree( Tree *tree, bool ignore )
 	newBuf->type = ignore ? RunBuf::IgnoreType : RunBuf::TokenType;
 	newBuf->tree = tree;
 
-	prepend( newBuf );
+	is->prepend( newBuf );
 }
 
-Tree *InputStreamDynamic::undoPush( int length )
+Tree *inputStreamDynamicUndoPush( InputStream *_is, int length )
 {
-	if ( head()->type == RunBuf::DataType ) {
+	InputStreamDynamic *is = (InputStreamDynamic*)_is;
+	if ( is->head()->type == RunBuf::DataType ) {
 		char tmp[length];
 		int have = 0;
 		while ( have < length ) {
-			int res = this->funcs->getData( this, tmp, length-have );
+			int res = is->funcs->getData( is, tmp, length-have );
 			have += res;
 		}
 		return 0;
 	}
 	else {
 		/* FIXME: leak here. */
-		RunBuf *rb = popHead();
+		RunBuf *rb = is->popHead();
 		Tree *tree = rb->tree;
 		delete rb;
 		return tree;
 	}
 }
 
-Tree *InputStreamDynamic::undoAppend( int length )
+Tree *inputStreamDynamicUndoAppend( InputStream *_is, int length )
 {
-	if ( tail()->type == RunBuf::DataType ) {
+	InputStreamDynamic *is = (InputStreamDynamic*)_is;
+	if ( is->tail()->type == RunBuf::DataType ) {
 		char tmp[length];
 		int have = 0;
 		while ( have < length ) {
-			int res = inputStreamDynamicGetDataRev( this, tmp, length-have );
+			int res = inputStreamDynamicGetDataRev( is, tmp, length-have );
 			have += res;
 		}
 		return 0;
 	}
 	else {
 		/* FIXME: leak here. */
-		RunBuf *rb = popTail();
+		RunBuf *rb = is->popTail();
 		Tree *tree = rb->tree;
 		delete rb;
 		return tree;
@@ -251,6 +256,10 @@ void initDynamicFuncs()
 	dynamicFuncs.tryAgainLater = &inputStreamDynamicTryAgainLater;
 	dynamicFuncs.getData = &inputStreamDynamicGetData;
 	dynamicFuncs.getTree = &inputStreamDynamicGetTree;
+	dynamicFuncs.pushTree = &inputStreamDynamicPushTree;
+	dynamicFuncs.undoPush = &inputStreamDynamicUndoPush;
+	dynamicFuncs.undoAppend = &inputStreamDynamicUndoAppend;
+	dynamicFuncs.pushText = &inputStreamDynamicPushText;
 }
 
 /*
