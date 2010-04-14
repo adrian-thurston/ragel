@@ -44,6 +44,38 @@ InputFuncs stringFuncs;
 InputFuncs fileFuncs;
 InputFuncs fdFuncs;
 
+InputStream *newInputStreamFile( FILE *file )
+{
+	InputStream *is = (InputStream*)malloc(sizeof(InputStream));
+	memset( is, 0, sizeof(InputStream) );
+	is->line = 1;
+	is->column = 1;
+	is->file = file;
+	is->funcs = &fileFuncs;
+	return is;
+}
+
+InputStream *newInputStreamFd( long fd )
+{
+	InputStream *is = (InputStream*)malloc(sizeof(InputStream));
+	memset( is, 0, sizeof(InputStream) );
+	is->line = 1;
+	is->column = 1;
+	is->fd = fd;
+	is->funcs = &fdFuncs;
+	return is;
+}
+
+InputStream *newInputStreamAccum()
+{
+	InputStream *is = (InputStream*)malloc(sizeof(InputStream));
+	memset( is, 0, sizeof(InputStream) );
+	is->line = 1;
+	is->column = 1;
+	is->funcs = &accumFuncs;
+	return is;
+}
+
 RunBuf *InputStream::popHead()
 {
 	RunBuf *ret = queue;

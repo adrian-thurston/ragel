@@ -126,7 +126,7 @@ Stream *openStreamFile( Program *prg, FILE *file )
 	Stream *res = (Stream*)mapElAllocate( prg );
 	res->id = LEL_ID_STREAM;
 	res->file = file;
-	res->in = new InputStream( file );
+	res->in = newInputStreamFile( file );
 	initInputStream( res->in );
 	return res;
 }
@@ -135,7 +135,7 @@ Stream *openStreamFd( Program *prg, long fd )
 {
 	Stream *res = (Stream*)mapElAllocate( prg );
 	res->id = LEL_ID_STREAM;
-	res->in = new InputStream( fd );
+	res->in = newInputStreamFd( fd );
 	initInputStream( res->in );
 	return res;
 }
@@ -767,7 +767,7 @@ void printXmlTree( Tree **&sp, Program *prg, Tree *tree, bool commAttr )
 
 void streamFree( Program *prg, Stream *s )
 {
-	delete s->in;
+	free( s->in );
 	if ( s->file != 0 )
 		fclose( s->file );
 	mapElFree( prg, (MapEl*)s );

@@ -64,24 +64,15 @@ void initStaticFuncs()
  * Pattern
  */
 
-InputStream::InputStream( Pattern *pattern )
-: 
-	hasData(0),
-	eofSent(false),
-	flush(false),
-	eof(false),
-	line(1),
-	column(1),
-	byte(0),
-	handlesLine(true),
-	later(false),
-	queue(0), 
-	queueTail(0),
-	offset(0),
-	pattern(pattern),
-	patItem(pattern->list->head)
+InputStream *newInputStreamPattern( Pattern *pattern )
 {
-	funcs = &patternFuncs;
+	InputStream *is = (InputStream*)malloc(sizeof(InputStream));
+	memset( is, 0, sizeof(InputStream) );
+	is->handlesLine = true;
+	is->pattern = pattern;
+	is->patItem = pattern->list->head;
+	is->funcs = &patternFuncs;
+	return is;
 }
 
 bool inputStreamPatternIsLangEl( InputStream *is )
@@ -199,24 +190,15 @@ void initPatternFuncs()
  * Replacement
  */
 
-InputStream::InputStream( Replacement *replacement )
-: 
-	hasData(0),
-	eofSent(false),
-	flush(false),
-	eof(false),
-	line(1),
-	column(1),
-	byte(0),
-	handlesLine(true),
-	later(false),
-	queue(0), 
-	queueTail(0),
-	offset(0),
-	replacement(replacement),
-	replItem(replacement->list->head)
+InputStream *newInputStreamRepl( Replacement *replacement )
 {
-	funcs = &replFuncs;
+	InputStream *is = (InputStream*)malloc(sizeof(InputStream));
+	memset( is, 0, sizeof(InputStream) );
+	is->handlesLine = true;
+	is->replacement = replacement;
+	is->replItem = replacement->list->head;
+	is->funcs = &replFuncs;
+	return is;
 }
 
 bool inputStreamReplIsLangEl( InputStream *is )

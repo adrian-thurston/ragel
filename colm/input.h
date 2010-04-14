@@ -118,104 +118,10 @@ extern InputFuncs staticFuncs;
 extern InputFuncs patternFuncs;
 extern InputFuncs replFuncs;
 
-
-
 struct InputStream
 {
-	InputStream( bool handlesLine )
-	:
-		hasData(0),
-		eofSent(false),
-		flush(false),
-		eof(false),
-		line(1),
-		column(1),
-		byte(0),
-		handlesLine(handlesLine),
-		later(false),
-		queue(0), 
-		queueTail(0)
-	{
-		funcs = &baseFuncs;
-	}
-
-	InputStream( const char *data, long dlen ) :
-		hasData(0),
-		eofSent(false),
-		flush(false),
-		eof(false),
-		line(1),
-		column(1),
-		byte(0),
-		handlesLine(false), 
-		later(false),
-		queue(0), 
-		queueTail(0),
-		data(data), 
-		dlen(dlen),
-		offset(0)
-	{
-		funcs = &stringFuncs;
-	}
-
-	InputStream( FILE *file ) :
-		hasData(0),
-		eofSent(false),
-		flush(false),
-		eof(false),
-		line(1),
-		column(1),
-		byte(0),
-		handlesLine(false),
-		later(false),
-		queue(0), 
-		queueTail(0),
-		file(file)
-	{
-		funcs = &fileFuncs;
-	}
-
-	InputStream( long fd ) :
-		hasData(0),
-		eofSent(false),
-		flush(false),
-		eof(false),
-		line(1),
-		column(1),
-		byte(0),
-		handlesLine(false),
-		later(false),
-		queue(0), 
-		queueTail(0),
-		fd(fd)
-	{
-		funcs = &fdFuncs;
-	}
-
-	InputStream() :
-		hasData(0),
-		eofSent(false),
-		flush(false),
-		eof(false),
-		line(1),
-		column(1),
-		byte(0),
-		handlesLine(false),
-		later(false),
-		queue(0), 
-		queueTail(0),
-		offset(0)
-	{
-		funcs = &accumFuncs;
-	}
-
-	InputStream( Pattern *pattern );
-	InputStream( Replacement *replacement );
-
 	InputFuncs *funcs;
 
-	/* Basic functions. */
-	
 	FsmRun *hasData;
 
 	bool eofSent;
@@ -255,5 +161,10 @@ struct InputStream
 	ReplItem *replItem;
 };
 
-#endif /* _INPUT_H */
+InputStream *newInputStreamPattern( Pattern *pattern );
+InputStream *newInputStreamRepl( Replacement *replacement );
+InputStream *newInputStreamFile( FILE *file );
+InputStream *newInputStreamFd( long fd );
+InputStream *newInputStreamAccum();
 
+#endif /* _INPUT_H */

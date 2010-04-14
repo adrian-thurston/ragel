@@ -1483,8 +1483,8 @@ void ParseData::parsePatterns()
 					repl->loc.line << ' ' << repl->loc.col << endl;
 		}
 
-		InputStream in( repl );
-		initInputStream( &in );
+		InputStream *in = newInputStreamRepl( repl );
+		initInputStream( in );
 
 		FsmRun *fsmRun = new FsmRun;
 		repl->pdaRun = new PdaRun( &prg,
@@ -1493,7 +1493,8 @@ void ParseData::parsePatterns()
 		initPdaRun( repl->pdaRun, 0 );
 		initFsmRun( fsmRun, &prg );
 		newToken( repl->pdaRun, fsmRun );
-		parseLoop( root, repl->pdaRun, fsmRun, &in );
+		parseLoop( root, repl->pdaRun, fsmRun, in );
+		free(in);
 	}
 
 	for ( PatternList::Iter pat = patternList; pat.lte(); pat++ ) {
@@ -1502,8 +1503,8 @@ void ParseData::parsePatterns()
 					pat->loc.line << ' ' << pat->loc.col << endl;
 		}
 
-		InputStream in( pat );
-		initInputStream( &in );
+		InputStream *in = newInputStreamPattern( pat );
+		initInputStream( in );
 
 		FsmRun *fsmRun = new FsmRun;
 		pat->pdaRun = new PdaRun( &prg,
@@ -1512,7 +1513,8 @@ void ParseData::parsePatterns()
 		initPdaRun( pat->pdaRun, 0 );
 		initFsmRun( fsmRun, &prg );
 		newToken( pat->pdaRun, fsmRun );
-		parseLoop( root, pat->pdaRun, fsmRun, &in );
+		parseLoop( root, pat->pdaRun, fsmRun, in );
+		free( in );
 	}
 
 	fillInPatterns( &prg );
