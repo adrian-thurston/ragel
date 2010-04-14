@@ -126,7 +126,7 @@ Stream *openStreamFile( Program *prg, FILE *file )
 	Stream *res = (Stream*)mapElAllocate( prg );
 	res->id = LEL_ID_STREAM;
 	res->file = file;
-	res->in = new InputStreamFile( file );
+	res->in = new InputStream( file );
 	initInputStream( res->in );
 	return res;
 }
@@ -135,7 +135,7 @@ Stream *openStreamFd( Program *prg, long fd )
 {
 	Stream *res = (Stream*)mapElAllocate( prg );
 	res->id = LEL_ID_STREAM;
-	res->in = new InputStreamFd( fd );
+	res->in = new InputStream( fd );
 	initInputStream( res->in );
 	return res;
 }

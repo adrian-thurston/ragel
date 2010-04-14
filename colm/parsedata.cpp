@@ -1483,7 +1483,7 @@ void ParseData::parsePatterns()
 					repl->loc.line << ' ' << repl->loc.col << endl;
 		}
 
-		InputStreamRepl in( repl );
+		InputStream in( repl );
 		initInputStream( &in );
 
 		FsmRun *fsmRun = new FsmRun;
@@ -1502,7 +1502,7 @@ void ParseData::parsePatterns()
 					pat->loc.line << ' ' << pat->loc.col << endl;
 		}
 
-		InputStreamPattern in( pat );
+		InputStream in( pat );
 		initInputStream( &in );
 
 		FsmRun *fsmRun = new FsmRun;

@@ -43,9 +43,8 @@ bool inputStreamStaticIsIgnore( InputStream *is )
 }
 
 
-bool inputStreamStaticTryAgainLater( InputStream *_is )
+bool inputStreamStaticTryAgainLater( InputStream *is )
 {
-	InputStreamStatic *is = (InputStreamStatic*)_is;
 	if ( is->later )
 		return true;
 
@@ -65,31 +64,38 @@ void initStaticFuncs()
  * Pattern
  */
 
-InputStreamPattern::InputStreamPattern( Pattern *pattern )
+InputStream::InputStream( Pattern *pattern )
 : 
-	InputStreamStatic(true),
+	hasData(0),
+	eofSent(false),
+	flush(false),
+	eof(false),
+	line(1),
+	column(1),
+	byte(0),
+	handlesLine(true),
+	later(false),
+	queue(0), 
+	queueTail(0),
+	offset(0),
 	pattern(pattern),
-	patItem(pattern->list->head),
-	offset(0)
+	patItem(pattern->list->head)
 {
 	funcs = &patternFuncs;
 }
 
-bool inputStreamPatternIsLangEl( InputStream *_is )
+bool inputStreamPatternIsLangEl( InputStream *is )
 { 
-	InputStreamPattern *is = (InputStreamPattern*) _is;
 	return is->patItem != 0 && is->patItem->type == PatternItem::FactorType;
 }
 
-int inputStreamPatternShouldFlush( InputStreamPattern *is )
+int inputStreamPatternShouldFlush( InputStream *is )
 { 
 	return is->patItem == 0 || is->patItem->type == PatternItem::FactorType;
 }
 
-KlangEl *inputStreamPatternGetLangEl( InputStream *_is, long &bindId, char *&data, long &length )
+KlangEl *inputStreamPatternGetLangEl( InputStream *is, long &bindId, char *&data, long &length )
 { 
-	InputStreamPattern *is = (InputStreamPattern*)_is;
-
 	KlangEl *klangEl = is->patItem->factor->langEl;
 	bindId = is->patItem->bindId;
 	data = 0;
@@ -102,9 +108,8 @@ KlangEl *inputStreamPatternGetLangEl( InputStream *_is, long &bindId, char *&dat
 	return klangEl;
 }
 
-int inputStreamPatternGetData( InputStream *_is, char *dest, int length )
+int inputStreamPatternGetData( InputStream *is, char *dest, int length )
 { 
-	InputStreamPattern *is = (InputStreamPattern*)_is;
 	if ( is->offset == 0 )
 		is->line = is->patItem->loc.line;
 
@@ -131,19 +136,17 @@ int inputStreamPatternGetData( InputStream *_is, char *dest, int length )
 	return length;
 }
 
-bool inputStreamPatternIsEof( InputStream *_is )
+bool inputStreamPatternIsEof( InputStream *is )
 {
-	InputStreamPattern *is = (InputStreamPattern*)_is;
 	return is->patItem == 0;
 }
 
-int inputStreamPatternNeedFlush( InputStream *_is )
+int inputStreamPatternNeedFlush( InputStream *is )
 {
-	InputStreamPattern *is = (InputStreamPattern*)_is;
 	return is->flush;
 }
 
-void inputStreamPatternBackup( InputStreamPattern *is )
+void inputStreamPatternBackup( InputStream *is )
 {
 	if ( is->patItem == 0 )
 		is->patItem = is->pattern->list->tail;
@@ -151,10 +154,8 @@ void inputStreamPatternBackup( InputStreamPattern *is )
 		is->patItem = is->patItem->prev;
 }
 
-void inputStreamPatternPushBackBuf( InputStream *_is, RunBuf *runBuf )
+void inputStreamPatternPushBackBuf( InputStream *is, RunBuf *runBuf )
 {
-	InputStreamPattern *is = (InputStreamPattern*)_is;
-
 	char *data = runBuf->data + runBuf->offset;
 	long length = runBuf->length;
 
@@ -174,9 +175,8 @@ void inputStreamPatternPushBackBuf( InputStream *_is, RunBuf *runBuf )
 	assert( memcmp( &is->patItem->data[is->offset], data, length ) == 0 );
 }
 
-void inputStreamPatternPushBackNamed( InputStream *_is )
+void inputStreamPatternPushBackNamed( InputStream *is )
 {
-	InputStreamPattern *is = (InputStreamPattern*)_is;
 	inputStreamPatternBackup( is );
 	is->offset = is->patItem->data.length();
 }
@@ -199,33 +199,40 @@ void initPatternFuncs()
  * Replacement
  */
 
-InputStreamRepl::InputStreamRepl( Replacement *replacement )
+InputStream::InputStream( Replacement *replacement )
 : 
-	InputStreamStatic(true),
+	hasData(0),
+	eofSent(false),
+	flush(false),
+	eof(false),
+	line(1),
+	column(1),
+	byte(0),
+	handlesLine(true),
+	later(false),
+	queue(0), 
+	queueTail(0),
+	offset(0),
 	replacement(replacement),
-	replItem(replacement->list->head),
-	offset(0)
+	replItem(replacement->list->head)
 {
 	funcs = &replFuncs;
 }
 
-bool inputStreamReplIsLangEl( InputStream *_is )
+bool inputStreamReplIsLangEl( InputStream *is )
 { 
-	InputStreamRepl *is = (InputStreamRepl*)_is;
 	return is->replItem != 0 && ( is->replItem->type == ReplItem::ExprType || 
 			is->replItem->type == ReplItem::FactorType );
 }
 
-int inputStreamReplShouldFlush( InputStreamRepl *is )
+int inputStreamReplShouldFlush( InputStream *is )
 { 
 	return is->replItem == 0 || ( is->replItem->type == ReplItem::ExprType ||
 			is->replItem->type == ReplItem::FactorType );
 }
 
-KlangEl *inputStreamReplGetLangEl( InputStream *_is, long &bindId, char *&data, long &length )
+KlangEl *inputStreamReplGetLangEl( InputStream *is, long &bindId, char *&data, long &length )
 { 
-	InputStreamRepl *is = (InputStreamRepl*)_is;
-
 	KlangEl *klangEl = is->replItem->type == ReplItem::ExprType ? 
 			is->replItem->langEl : is->replItem->factor->langEl;
 	bindId = is->replItem->bindId;
@@ -252,10 +259,8 @@ KlangEl *inputStreamReplGetLangEl( InputStream *_is, long &bindId, char *&data, 
 	return klangEl;
 }
 
-int inputStreamReplGetData( InputStream *_is, char *dest, int length )
+int inputStreamReplGetData( InputStream *is, char *dest, int length )
 { 
-	InputStreamRepl *is = (InputStreamRepl*)_is;
-
 	if ( is->offset == 0 )
 		is->line = is->replItem->loc.line;
 
@@ -282,19 +287,17 @@ int inputStreamReplGetData( InputStream *_is, char *dest, int length )
 	return length;
 }
 
-bool inputStreamReplIsEof( InputStream *_is )
+bool inputStreamReplIsEof( InputStream *is )
 {
-	InputStreamRepl *is = (InputStreamRepl*)_is;
 	return is->replItem == 0;
 }
 
-int inputStreamReplNeedFlush( InputStream *_is )
+int inputStreamReplNeedFlush( InputStream *is )
 {
-	InputStreamRepl *is = (InputStreamRepl*)_is;
 	return is->flush;
 }
 
-void inputStreamReplBackup( InputStreamRepl *is )
+void inputStreamReplBackup( InputStream *is )
 {
 	if ( is->replItem == 0 )
 		is->replItem = is->replacement->list->tail;
@@ -302,10 +305,8 @@ void inputStreamReplBackup( InputStreamRepl *is )
 		is->replItem = is->replItem->prev;
 }
 
-void inputStreamReplPushBackBuf( InputStream *_is, RunBuf *runBuf )
+void inputStreamReplPushBackBuf( InputStream *is, RunBuf *runBuf )
 {
-	InputStreamRepl *is = (InputStreamRepl*)_is;
-
 	char *data = runBuf->data + runBuf->offset;
 	long length = runBuf->length;
 
@@ -331,10 +332,8 @@ void inputStreamReplPushBackBuf( InputStream *_is, RunBuf *runBuf )
 	assert( memcmp( &is->replItem->data[is->offset], data, length ) == 0 );
 }
 
-void inputStreamReplPushBackNamed( InputStream *_is )
+void inputStreamReplPushBackNamed( InputStream *is )
 {
-	InputStreamRepl *is = (InputStreamRepl*)_is;
-
 	inputStreamReplBackup( is );
 	is->offset = is->replItem->data.length();
 }

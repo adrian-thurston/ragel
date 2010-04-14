@@ -110,6 +110,15 @@ struct InputFuncs
 };
 
 extern InputFuncs baseFuncs;
+extern InputFuncs stringFuncs;
+extern InputFuncs fileFuncs;
+extern InputFuncs fdFuncs;
+extern InputFuncs accumFuncs;
+extern InputFuncs staticFuncs;
+extern InputFuncs patternFuncs;
+extern InputFuncs replFuncs;
+
+
 
 struct InputStream
 {
@@ -130,9 +139,80 @@ struct InputStream
 		funcs = &baseFuncs;
 	}
 
-	InputFuncs *funcs;
+	InputStream( const char *data, long dlen ) :
+		hasData(0),
+		eofSent(false),
+		flush(false),
+		eof(false),
+		line(1),
+		column(1),
+		byte(0),
+		handlesLine(false), 
+		later(false),
+		queue(0), 
+		queueTail(0),
+		data(data), 
+		dlen(dlen),
+		offset(0)
+	{
+		funcs = &stringFuncs;
+	}
 
-	virtual ~InputStream() {}
+	InputStream( FILE *file ) :
+		hasData(0),
+		eofSent(false),
+		flush(false),
+		eof(false),
+		line(1),
+		column(1),
+		byte(0),
+		handlesLine(false),
+		later(false),
+		queue(0), 
+		queueTail(0),
+		file(file)
+	{
+		funcs = &fileFuncs;
+	}
+
+	InputStream( long fd ) :
+		hasData(0),
+		eofSent(false),
+		flush(false),
+		eof(false),
+		line(1),
+		column(1),
+		byte(0),
+		handlesLine(false),
+		later(false),
+		queue(0), 
+		queueTail(0),
+		fd(fd)
+	{
+		funcs = &fdFuncs;
+	}
+
+	InputStream() :
+		hasData(0),
+		eofSent(false),
+		flush(false),
+		eof(false),
+		line(1),
+		column(1),
+		byte(0),
+		handlesLine(false),
+		later(false),
+		queue(0), 
+		queueTail(0),
+		offset(0)
+	{
+		funcs = &accumFuncs;
+	}
+
+	InputStream( Pattern *pattern );
+	InputStream( Replacement *replacement );
+
+	InputFuncs *funcs;
 
 	/* Basic functions. */
 	
@@ -157,160 +237,22 @@ struct InputStream
 	RunBuf *head() { return queue; }
 	RunBuf *tail() { return queueTail; }
 
-	RunBuf *popHead()
-	{
-		RunBuf *ret = queue;
-		queue = queue->next;
-		if ( queue == 0 )
-			queueTail = 0;
-		else
-			queue->prev = 0;
-		return ret;
-	}
-
-	RunBuf *popTail()
-	{
-		RunBuf *ret = queueTail;
-		queueTail = queue->prev;
-		if ( queueTail == 0 )
-			queue = 0;
-		else
-			queueTail->next = 0;
-		return ret;
-	}
-
-	void append( RunBuf *runBuf )
-	{
-		if ( queue == 0 ) {
-			runBuf->prev = runBuf->next = 0;
-			queue = queueTail = runBuf;
-		}
-		else {
-			queueTail->next = runBuf;
-			runBuf->prev = queueTail;
-			runBuf->next = 0;
-			queueTail = runBuf;
-		}
-	}
-
-	void prepend( RunBuf *runBuf )
-	{
-		if ( queue == 0 ) {
-			runBuf->prev = runBuf->next = 0;
-			queue = queueTail = runBuf;
-		}
-		else {
-			queue->prev = runBuf;
-			runBuf->prev = 0;
-			runBuf->next = queue;
-			queue = runBuf;
-		}
-	}
-};
-
-extern InputFuncs dynamicFuncs;
-
-struct InputStreamDynamic : public InputStream
-{
-	InputStreamDynamic( bool handlesLine )
-	:
-		InputStream( handlesLine )
-	{
-		funcs = &dynamicFuncs;
-	}
-};
-
-extern InputFuncs stringFuncs;
-
-struct InputStreamString : public InputStreamDynamic
-{
-	InputStreamString( const char *data, long dlen ) :
-		InputStreamDynamic(false), 
-		data(data), dlen(dlen), offset(0)
-	{
-		funcs = &stringFuncs;
-	}
-
 	const char *data;
 	long dlen;
 	int offset;
-};
-
-extern InputFuncs fileFuncs;
-
-struct InputStreamFile : public InputStreamDynamic
-{
-	InputStreamFile( FILE *file ) :
-		InputStreamDynamic(false), 
-		file(file)
-	{
-		funcs = &fileFuncs;
-	}
 
 	FILE *file;
-};
-
-extern InputFuncs fdFuncs;
-
-struct InputStreamFd : public InputStreamDynamic
-{
-	InputStreamFd( long fd ) :
-		InputStreamDynamic(false), 
-		fd(fd)
-	{
-		funcs = &fdFuncs;
-	}
-
 	long fd;
-};
 
-extern InputFuncs accumFuncs;
-
-struct InputStreamAccum : public InputStreamDynamic
-{
-	InputStreamAccum()
-	:
-		InputStreamDynamic(false), 
-		offset(0)
-	{
-		funcs = &accumFuncs;
-	}
-
-	long offset;
-};
-
-/*
- * The compile-time input streams.
- */
-
-extern InputFuncs staticFuncs;
-
-struct InputStreamStatic : public InputStream
-{
-	InputStreamStatic( bool handlesLine )
-		: InputStream( handlesLine ) {}
-};
-
-extern InputFuncs patternFuncs;
-
-struct InputStreamPattern : public InputStreamStatic
-{
-	InputStreamPattern( Pattern *pattern );
+	RunBuf *popHead();
+	RunBuf *popTail();
+	void append( RunBuf *runBuf );
+	void prepend( RunBuf *runBuf );
 
 	Pattern *pattern;
 	PatternItem *patItem;
-	int offset;
-};
-
-extern InputFuncs replFuncs;
-
-struct InputStreamRepl : public InputStreamStatic
-{
-	InputStreamRepl( Replacement *replacement );
-
 	Replacement *replacement;
 	ReplItem *replItem;
-	int offset;
 };
 
 #endif /* _INPUT_H */

@@ -206,7 +206,7 @@ Tree *extractInput( Program *prg, Accum *accum )
 	if ( accum->stream == 0 ) {
 		Stream *res = (Stream*)mapElAllocate( prg );
 		res->id = LEL_ID_STREAM;
-		res->in = new InputStreamAccum();
+		res->in = new InputStream();
 		treeUpref( (Tree*)res );
 		accum->stream = res;
 	}

@@ -44,6 +44,56 @@ InputFuncs stringFuncs;
 InputFuncs fileFuncs;
 InputFuncs fdFuncs;
 
+RunBuf *InputStream::popHead()
+{
+	RunBuf *ret = queue;
+	queue = queue->next;
+	if ( queue == 0 )
+		queueTail = 0;
+	else
+		queue->prev = 0;
+	return ret;
+}
+
+RunBuf *InputStream::popTail()
+{
+	RunBuf *ret = queueTail;
+	queueTail = queue->prev;
+	if ( queueTail == 0 )
+		queue = 0;
+	else
+		queueTail->next = 0;
+	return ret;
+}
+
+void InputStream::append( RunBuf *runBuf )
+{
+	if ( queue == 0 ) {
+		runBuf->prev = runBuf->next = 0;
+		queue = queueTail = runBuf;
+	}
+	else {
+		queueTail->next = runBuf;
+		runBuf->prev = queueTail;
+		runBuf->next = 0;
+		queueTail = runBuf;
+	}
+}
+
+void InputStream::prepend( RunBuf *runBuf )
+{
+	if ( queue == 0 ) {
+		runBuf->prev = runBuf->next = 0;
+		queue = queueTail = runBuf;
+	}
+	else {
+		queue->prev = runBuf;
+		runBuf->prev = 0;
+		runBuf->next = queue;
+		queue = runBuf;
+	}
+}
+
 void initInputFuncs()
 {
 	memset( &baseFuncs, 0, sizeof(InputFuncs) );
@@ -62,36 +112,32 @@ void initInputFuncs()
  * Base run-time input streams.
  */
 
-bool inputStreamDynamicIsTree( InputStream *_is )
+bool inputStreamDynamicIsTree( InputStream *is )
 {
-	InputStreamDynamic *is = (InputStreamDynamic*)_is;
 	if ( is->head() != 0 && is->head()->type == RunBuf::TokenType )
 		return true;
 	return false;
 }
 
-bool inputStreamDynamicIsIgnore( InputStream *_is )
+bool inputStreamDynamicIsIgnore( InputStream *is )
 {
-	InputStreamDynamic *is = (InputStreamDynamic*)_is;
 	if ( is->head() != 0 && is->head()->type == RunBuf::IgnoreType )
 		return true;
 	return false;
 }
 
-bool inputStreamDynamicIsLangEl( InputStream *_is )
+bool inputStreamDynamicIsLangEl( InputStream *is )
 {
 	return false;
 }
 
-bool inputStreamDynamicIsEof( InputStream *_is )
+bool inputStreamDynamicIsEof( InputStream *is )
 {
-	return _is->head() == 0 && _is->eof;
+	return is->head() == 0 && is->eof;
 }
 
-int inputStreamDynamicGetData( InputStream *_is, char *dest, int length )
+int inputStreamDynamicGetData( InputStream *is, char *dest, int length )
 {
-	InputStreamDynamic *is = (InputStreamDynamic*)_is;
-
 	/* If there is any data in the rubuf queue then read that first. */
 	if ( is->head() != 0 ) {
 		long avail = is->head()->length - is->head()->offset;
@@ -109,11 +155,11 @@ int inputStreamDynamicGetData( InputStream *_is, char *dest, int length )
 	}
 	else {
 		/* No stored data, call the impl version. */
-		return is->funcs->getDataImpl( _is, dest, length );
+		return is->funcs->getDataImpl( is, dest, length );
 	}
 }
 
-int inputStreamDynamicGetDataRev( InputStreamDynamic *is, char *dest, int length )
+int inputStreamDynamicGetDataRev( InputStream *is, char *dest, int length )
 {
 	/* If there is any data in the rubuf queue then read that first. */
 	if ( is->tail() != 0 ) {
@@ -133,19 +179,16 @@ int inputStreamDynamicGetDataRev( InputStreamDynamic *is, char *dest, int length
 	return 0;
 }
 
-bool inputStreamDynamicTryAgainLater( InputStream *_is )
+bool inputStreamDynamicTryAgainLater( InputStream *is )
 {
-	InputStreamDynamic *is = (InputStreamDynamic*)_is;
 	if ( is->later )
 		return true;
 
 	return false;
 }
 
-Tree *inputStreamDynamicGetTree( InputStream *_is )
+Tree *inputStreamDynamicGetTree( InputStream *is )
 {
-	InputStreamDynamic *is = (InputStreamDynamic*)_is;
-
 	if ( is->head() != 0 && is->head()->type == RunBuf::TokenType ) {
 		RunBuf *runBuf = is->popHead();
 
@@ -158,10 +201,8 @@ Tree *inputStreamDynamicGetTree( InputStream *_is )
 	return 0;
 }
 
-void inputStreamDynamicPushText( InputStream *_is, const char *data, long length )
+void inputStreamDynamicPushText( InputStream *is, const char *data, long length )
 {
-	InputStreamDynamic *is = (InputStreamDynamic*)_is;
-
 //	#ifdef COLM_LOG_PARSE
 //	if ( colm_log_parse ) {
 //		cerr << "readying fake push" << endl;
@@ -182,9 +223,8 @@ void inputStreamDynamicPushText( InputStream *_is, const char *data, long length
 	is->funcs->pushBackBuf( is, newBuf );
 }
 
-void inputStreamDynamicPushTree( InputStream *_is, Tree *tree, bool ignore )
+void inputStreamDynamicPushTree( InputStream *is, Tree *tree, bool ignore )
 {
-	InputStreamDynamic *is = (InputStreamDynamic*)_is;
 //	#ifdef COLM_LOG_PARSE
 //	if ( colm_log_parse ) {
 //		cerr << "readying fake push" << endl;
@@ -203,9 +243,8 @@ void inputStreamDynamicPushTree( InputStream *_is, Tree *tree, bool ignore )
 	is->prepend( newBuf );
 }
 
-Tree *inputStreamDynamicUndoPush( InputStream *_is, int length )
+Tree *inputStreamDynamicUndoPush( InputStream *is, int length )
 {
-	InputStreamDynamic *is = (InputStreamDynamic*)_is;
 	if ( is->head()->type == RunBuf::DataType ) {
 		char tmp[length];
 		int have = 0;
@@ -224,9 +263,8 @@ Tree *inputStreamDynamicUndoPush( InputStream *_is, int length )
 	}
 }
 
-Tree *inputStreamDynamicUndoAppend( InputStream *_is, int length )
+Tree *inputStreamDynamicUndoAppend( InputStream *is, int length )
 {
-	InputStreamDynamic *is = (InputStreamDynamic*)_is;
 	if ( is->tail()->type == RunBuf::DataType ) {
 		char tmp[length];
 		int have = 0;
@@ -271,10 +309,8 @@ int inputStreamStringNeedFlush( InputStream *is )
 	return is->eof;
 }
 
-int inputStreamStringGetDataImpl( InputStream *_is, char *dest, int length )
+int inputStreamStringGetDataImpl( InputStream *is, char *dest, int length )
 { 
-	InputStreamString *is = (InputStreamString*)_is;
-
 	int available = is->dlen - is->offset;
 
 	if ( available < length )
@@ -291,10 +327,8 @@ int inputStreamStringGetDataImpl( InputStream *_is, char *dest, int length )
 	return length;
 }
 
-void inputStreamStringPushBackBuf( InputStream *_is, RunBuf *runBuf )
+void inputStreamStringPushBackBuf( InputStream *is, RunBuf *runBuf )
 {
-	InputStreamString *is = (InputStreamString*)_is;
-
 	//char *data = runBuf->buf + runBuf->offset;
 	long length = runBuf->length;
 
@@ -315,15 +349,13 @@ void initStringFuncs()
  * File
  */
 
-int inputStreamFileNeedFlush( InputStream *_is )
+int inputStreamFileNeedFlush( InputStream *is )
 {
-	InputStreamFile *is = (InputStreamFile*)_is;
 	return is->head() == 0 && feof( is->file );
 }
 
-int inputStreamFileGetDataImpl( InputStream *_is, char *dest, int length )
+int inputStreamFileGetDataImpl( InputStream *is, char *dest, int length )
 {
-	InputStreamFile *is = (InputStreamFile*)_is;
 	size_t res = fread( dest, 1, length, is->file );
 	if ( res < (size_t) length )
 		is->later = true;
@@ -357,9 +389,8 @@ void inputStreamFdPushBackBuf( InputStream *is, RunBuf *runBuf )
 	is->prepend( runBuf );
 }
 
-int inputStreamFdGetDataImpl( InputStream *_is, char *dest, int length )
+int inputStreamFdGetDataImpl( InputStream *is, char *dest, int length )
 {
-	InputStreamFd *is = (InputStreamFd*)_is;
 	long got = read( is->fd, dest, length );
 	if ( got == 0 )
 		is->later = true;
@@ -379,19 +410,16 @@ void initFdFuncs()
  * Accum
  */
 
-bool inputStreamAccumTryAgainLater( InputStream *_is )
+bool inputStreamAccumTryAgainLater( InputStream *is )
 {
-	InputStreamAccum *is = (InputStreamAccum*)_is;
 	if ( is->later || ( !is->flush && is->head() == 0 ))
 		return true;
 
 	return false;
 }
 
-int inputStreamAccumNeedFlush( InputStream *_is )
+int inputStreamAccumNeedFlush( InputStream *is )
 {
-	InputStream *is = (InputStream*)_is;
-
 	if ( is->flush ) {
 		is->flush = false;
 		return true;
