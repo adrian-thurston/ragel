@@ -22,13 +22,7 @@
 #ifndef _INPUT_H
 #define _INPUT_H
 
-#include <assert.h>
 #include <stdio.h>
-#include <iostream>
-
-struct exit_object { };
-extern exit_object endp;
-void operator<<( std::ostream &out, exit_object & );
 
 #define FSM_BUFSIZE 8192
 //#define FSM_BUFSIZE 8
@@ -55,51 +49,42 @@ struct Pattern;
 struct PatternItem;
 struct Replacement;
 struct ReplItem;
-struct RunBuf;
 struct FsmRun;
 typedef struct _Tree Tree;
 
-struct RunBuf
+enum RunBufType {
+	RunBufDataType = 0,
+	RunBufTokenType,
+	RunBufIgnoreType
+};
+
+typedef struct _RunBuf
 {
-	enum Type {
-		DataType = 0,
-		TokenType,
-		IgnoreType
-	};
-
-	RunBuf()
-	:
-		type(DataType),
-		length(0),
-		tree(0),
-		offset(0),
-		next(0),
-		prev(0)
-	{}
-
-	Type type;
+	enum RunBufType type;
 	char data[FSM_BUFSIZE];
 	long length;
 	Tree *tree;
 	long offset;
-	RunBuf *next, *prev;
-};
+	struct _RunBuf *next, *prev;
+} RunBuf;
 
-struct InputStream;
+RunBuf *newRunBuf();
+
+typedef struct _InputStream InputStream;
 
 struct InputFuncs
 {
-	bool (*isTree)( InputStream *is );
-	bool (*isIgnore)( InputStream *is );
-	bool (*isLangEl)( InputStream *is );
-	bool (*isEof)( InputStream *is );
+	int (*isTree)( InputStream *is );
+	int (*isIgnore)( InputStream *is );
+	int (*isLangEl)( InputStream *is );
+	int (*isEof)( InputStream *is );
 	int (*needFlush)( InputStream *is );
-	bool (*tryAgainLater)( InputStream *is );
+	int (*tryAgainLater)( InputStream *is );
 	int (*getData)( InputStream *is, char *dest, int length );
 	int (*getDataImpl)( InputStream *is, char *dest, int length );
 	Tree *(*getTree)( InputStream *is );
-	KlangEl *(*getLangEl)( InputStream *is, long &bindId, char *&data, long &length );
-	void (*pushTree)( InputStream *is, Tree *tree, bool ignore );
+	struct KlangEl *(*getLangEl)( InputStream *is, long *bindId, char **data, long *length );
+	void (*pushTree)( InputStream *is, Tree *tree, int ignore );
 	void (*pushText)( InputStream *is, const char *data, long len );
 	Tree *(*undoPush)( InputStream *is, int length );
 	void (*appendData)( InputStream *is, const char *data, long len );
@@ -109,24 +94,24 @@ struct InputFuncs
 	void (*pushBackBuf)( InputStream *is, RunBuf *runBuf );
 };
 
-extern InputFuncs baseFuncs;
-extern InputFuncs stringFuncs;
-extern InputFuncs fileFuncs;
-extern InputFuncs fdFuncs;
-extern InputFuncs accumFuncs;
-extern InputFuncs staticFuncs;
-extern InputFuncs patternFuncs;
-extern InputFuncs replFuncs;
+extern struct InputFuncs baseFuncs;
+extern struct InputFuncs stringFuncs;
+extern struct InputFuncs fileFuncs;
+extern struct InputFuncs fdFuncs;
+extern struct InputFuncs accumFuncs;
+extern struct InputFuncs staticFuncs;
+extern struct InputFuncs patternFuncs;
+extern struct InputFuncs replFuncs;
 
-struct InputStream
+struct _InputStream
 {
-	InputFuncs *funcs;
+	struct InputFuncs *funcs;
 
-	FsmRun *hasData;
+	struct FsmRun *hasData;
 
-	bool eofSent;
-	bool flush;
-	bool eof;
+	char eofSent;
+	char flush;
+	char eof;
 
 	long line;
 	long column;
@@ -134,8 +119,8 @@ struct InputStream
 
 	/* This is set true for input streams that do their own line counting.
 	 * Causes FsmRun to ignore NLs. */
-	bool handlesLine;
-	bool later;
+	int handlesLine;
+	int later;
 
 	RunBuf *queue;
 	RunBuf *queueTail;

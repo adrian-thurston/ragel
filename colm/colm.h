@@ -84,4 +84,5 @@ void xmlEscapeHost( std::ostream &out, char *data, int len );
 void openOutput();
 void escapeLiteralString( std::ostream &out, const char *data );
 
+
 #endif /* _COLM_H */

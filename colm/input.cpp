@@ -27,6 +27,13 @@
 using std::cerr;
 using std::endl;
 
+RunBuf *newRunBuf()
+{
+	RunBuf *rb = (RunBuf*)malloc(sizeof(RunBuf));
+	memset( rb, 0, sizeof(RunBuf) );
+	return rb;
+}
+
 void initDynamicFuncs();
 void initStringFuncs();
 void initFileFuncs();
@@ -75,6 +82,7 @@ InputStream *newInputStreamAccum()
 	is->funcs = &accumFuncs;
 	return is;
 }
+
 
 RunBuf *InputStream::popHead()
 {
@@ -144,26 +152,26 @@ void initInputFuncs()
  * Base run-time input streams.
  */
 
-bool inputStreamDynamicIsTree( InputStream *is )
+int inputStreamDynamicIsTree( InputStream *is )
 {
-	if ( is->head() != 0 && is->head()->type == RunBuf::TokenType )
+	if ( is->head() != 0 && is->head()->type == RunBufTokenType )
 		return true;
 	return false;
 }
 
-bool inputStreamDynamicIsIgnore( InputStream *is )
+int inputStreamDynamicIsIgnore( InputStream *is )
 {
-	if ( is->head() != 0 && is->head()->type == RunBuf::IgnoreType )
+	if ( is->head() != 0 && is->head()->type == RunBufIgnoreType )
 		return true;
 	return false;
 }
 
-bool inputStreamDynamicIsLangEl( InputStream *is )
+int inputStreamDynamicIsLangEl( InputStream *is )
 {
 	return false;
 }
 
-bool inputStreamDynamicIsEof( InputStream *is )
+int inputStreamDynamicIsEof( InputStream *is )
 {
 	return is->head() == 0 && is->eof;
 }
@@ -211,7 +219,7 @@ int inputStreamDynamicGetDataRev( InputStream *is, char *dest, int length )
 	return 0;
 }
 
-bool inputStreamDynamicTryAgainLater( InputStream *is )
+int inputStreamDynamicTryAgainLater( InputStream *is )
 {
 	if ( is->later )
 		return true;
@@ -221,7 +229,7 @@ bool inputStreamDynamicTryAgainLater( InputStream *is )
 
 Tree *inputStreamDynamicGetTree( InputStream *is )
 {
-	if ( is->head() != 0 && is->head()->type == RunBuf::TokenType ) {
+	if ( is->head() != 0 && is->head()->type == RunBufTokenType ) {
 		RunBuf *runBuf = is->popHead();
 
 		/* FIXME: using runbufs here for this is a poor use of memory. */
@@ -248,14 +256,14 @@ void inputStreamDynamicPushText( InputStream *is, const char *data, long length 
 	 * data that can be pushed back to the inputStream. */
 	assert( length < FSM_BUFSIZE );
 
-	RunBuf *newBuf = new RunBuf;
+	RunBuf *newBuf = newRunBuf();
 	newBuf->length = length;
 	memcpy( newBuf->data, data, length );
 
 	is->funcs->pushBackBuf( is, newBuf );
 }
 
-void inputStreamDynamicPushTree( InputStream *is, Tree *tree, bool ignore )
+void inputStreamDynamicPushTree( InputStream *is, Tree *tree, int ignore )
 {
 //	#ifdef COLM_LOG_PARSE
 //	if ( colm_log_parse ) {
@@ -268,8 +276,8 @@ void inputStreamDynamicPushTree( InputStream *is, Tree *tree, bool ignore )
 	/* Create a new buffer for the data. This is the easy implementation.
 	 * Something better is needed here. It puts a max on the amount of
 	 * data that can be pushed back to the inputStream. */
-	RunBuf *newBuf = new RunBuf;
-	newBuf->type = ignore ? RunBuf::IgnoreType : RunBuf::TokenType;
+	RunBuf *newBuf = newRunBuf();
+	newBuf->type = ignore ? RunBufIgnoreType : RunBufTokenType;
 	newBuf->tree = tree;
 
 	is->prepend( newBuf );
@@ -277,7 +285,7 @@ void inputStreamDynamicPushTree( InputStream *is, Tree *tree, bool ignore )
 
 Tree *inputStreamDynamicUndoPush( InputStream *is, int length )
 {
-	if ( is->head()->type == RunBuf::DataType ) {
+	if ( is->head()->type == RunBufDataType ) {
 		char tmp[length];
 		int have = 0;
 		while ( have < length ) {
@@ -297,7 +305,7 @@ Tree *inputStreamDynamicUndoPush( InputStream *is, int length )
 
 Tree *inputStreamDynamicUndoAppend( InputStream *is, int length )
 {
-	if ( is->tail()->type == RunBuf::DataType ) {
+	if ( is->tail()->type == RunBufDataType ) {
 		char tmp[length];
 		int have = 0;
 		while ( have < length ) {
@@ -442,7 +450,7 @@ void initFdFuncs()
  * Accum
  */
 
-bool inputStreamAccumTryAgainLater( InputStream *is )
+int inputStreamAccumTryAgainLater( InputStream *is )
 {
 	if ( is->later || ( !is->flush && is->head() == 0 ))
 		return true;
@@ -457,7 +465,7 @@ int inputStreamAccumNeedFlush( InputStream *is )
 		return true;
 	}
 
-	if ( is->head() != 0 && is->head()->type != RunBuf::DataType )
+	if ( is->head() != 0 && is->head()->type != RunBufDataType )
 		return true;
 
 	if ( is->eof )
@@ -481,7 +489,7 @@ void inputStreamAccumAppendData( InputStream *_is, const char *data, long len )
 {
 	InputStream *is = (InputStream*)_is;
 
-	RunBuf *ad = new RunBuf;
+	RunBuf *ad = newRunBuf();
 	is->InputStream::append( ad );
 
 	/* FIXME: need to deal with this. */
@@ -495,11 +503,11 @@ void inputStreamAccumAppendTree( InputStream *_is, Tree *tree )
 {
 	InputStream *is = (InputStream*)_is;
 
-	RunBuf *ad = new RunBuf;
+	RunBuf *ad = newRunBuf();
 
 	is->InputStream::append( ad );
 
-	ad->type = RunBuf::TokenType;
+	ad->type = RunBufTokenType;
 	ad->tree = tree;
 	ad->length = 0;
 }

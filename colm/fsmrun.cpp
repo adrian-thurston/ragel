@@ -48,7 +48,7 @@ void initFsmRun( FsmRun *fsmRun, Program *prg )
 
 	/* Run buffers need to stick around because 
 	 * token strings point into them. */
-	fsmRun->runBuf = new RunBuf;
+	fsmRun->runBuf = newRunBuf();
 	fsmRun->runBuf->next = 0;
 
 	fsmRun->p = fsmRun->pe = fsmRun->runBuf->data;
@@ -122,7 +122,7 @@ void takeBackBuffered( InputStream *inputStream )
 				}
 				#endif
 
-				RunBuf *split = new RunBuf;
+				RunBuf *split = newRunBuf();
 				memcpy( split->data, fsmRun->p, fsmRun->pe - fsmRun->p );
 
 				split->length = fsmRun->pe - fsmRun->p;
@@ -211,7 +211,7 @@ void sendBackRunBufHead( FsmRun *fsmRun, InputStream *inputStream )
 
 	/* Set data and de. */
 	if ( fsmRun->runBuf == 0 ) {
-		fsmRun->runBuf = new RunBuf;
+		fsmRun->runBuf = newRunBuf();
 		fsmRun->runBuf->next = 0;
 		fsmRun->p = fsmRun->pe = fsmRun->runBuf->data;
 	}
@@ -932,7 +932,7 @@ void breakRunBuf( FsmRun *fsmRun )
 		fsmRun->runBuf->length = fsmRun->p - fsmRun->runBuf->data;;
 
 		/* Make the new one. */
-		RunBuf *newBuf = new RunBuf;
+		RunBuf *newBuf = newRunBuf();
 		fsmRun->p = fsmRun->pe = newBuf->data;
 		newBuf->next = fsmRun->runBuf;
 		fsmRun->runBuf = newBuf;
@@ -1026,7 +1026,7 @@ long scanToken( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 		long space = fsmRun->runBuf->data + FSM_BUFSIZE - fsmRun->pe;
 		if ( space == 0 ) {
 			/* Create a new run buf. */
-			RunBuf *newBuf = new RunBuf;
+			RunBuf *newBuf = newRunBuf();
 
 			/* If partway through a token then preserve the prefix. */
 			long have = 0;

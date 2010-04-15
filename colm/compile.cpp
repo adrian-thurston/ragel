@@ -21,6 +21,7 @@
 
 #include "bytecode.h"
 #include "parsedata.h"
+#include "fsmrun.h"
 #include "input.h"
 #include <iostream>
 #include <assert.h>

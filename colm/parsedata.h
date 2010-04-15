@@ -45,6 +45,7 @@
 
 using std::ostream;
 
+
 /* Forwards. */
 struct RedFsm;
 struct KlangEl;

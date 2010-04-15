@@ -32,18 +32,18 @@ InputFuncs replFuncs;
  * Implementation
  */
 
-bool inputStreamStaticIsTree( InputStream *is )
+int inputStreamStaticIsTree( InputStream *is )
 {
 	return false;
 }
 
-bool inputStreamStaticIsIgnore( InputStream *is )
+int inputStreamStaticIsIgnore( InputStream *is )
 {
 	return false;
 }
 
 
-bool inputStreamStaticTryAgainLater( InputStream *is )
+int inputStreamStaticTryAgainLater( InputStream *is )
 {
 	if ( is->later )
 		return true;
@@ -75,7 +75,7 @@ InputStream *newInputStreamPattern( Pattern *pattern )
 	return is;
 }
 
-bool inputStreamPatternIsLangEl( InputStream *is )
+int inputStreamPatternIsLangEl( InputStream *is )
 { 
 	return is->patItem != 0 && is->patItem->type == PatternItem::FactorType;
 }
@@ -85,12 +85,12 @@ int inputStreamPatternShouldFlush( InputStream *is )
 	return is->patItem == 0 || is->patItem->type == PatternItem::FactorType;
 }
 
-KlangEl *inputStreamPatternGetLangEl( InputStream *is, long &bindId, char *&data, long &length )
+KlangEl *inputStreamPatternGetLangEl( InputStream *is, long *bindId, char **data, long *length )
 { 
 	KlangEl *klangEl = is->patItem->factor->langEl;
-	bindId = is->patItem->bindId;
-	data = 0;
-	length = 0;
+	*bindId = is->patItem->bindId;
+	*data = 0;
+	*length = 0;
 	is->line = is->patItem->loc.line;
 
 	is->patItem = is->patItem->next;
@@ -127,7 +127,7 @@ int inputStreamPatternGetData( InputStream *is, char *dest, int length )
 	return length;
 }
 
-bool inputStreamPatternIsEof( InputStream *is )
+int inputStreamPatternIsEof( InputStream *is )
 {
 	return is->patItem == 0;
 }
@@ -201,7 +201,7 @@ InputStream *newInputStreamRepl( Replacement *replacement )
 	return is;
 }
 
-bool inputStreamReplIsLangEl( InputStream *is )
+int inputStreamReplIsLangEl( InputStream *is )
 { 
 	return is->replItem != 0 && ( is->replItem->type == ReplItem::ExprType || 
 			is->replItem->type == ReplItem::FactorType );
@@ -213,14 +213,14 @@ int inputStreamReplShouldFlush( InputStream *is )
 			is->replItem->type == ReplItem::FactorType );
 }
 
-KlangEl *inputStreamReplGetLangEl( InputStream *is, long &bindId, char *&data, long &length )
+KlangEl *inputStreamReplGetLangEl( InputStream *is, long *bindId, char **data, long *length )
 { 
 	KlangEl *klangEl = is->replItem->type == ReplItem::ExprType ? 
 			is->replItem->langEl : is->replItem->factor->langEl;
-	bindId = is->replItem->bindId;
+	*bindId = is->replItem->bindId;
 
-	data = 0;
-	length = 0;
+	*data = 0;
+	*length = 0;
 	is->line = is->replItem->loc.line;
 
 	if ( is->replItem->type == ReplItem::FactorType ) {
@@ -230,8 +230,8 @@ KlangEl *inputStreamReplGetLangEl( InputStream *is, long &bindId, char *&data, l
 					is->replItem->factor->literal->token.data,
 					is->replItem->factor->literal->token.loc );
 
-			data = is->replItem->data;
-			length = is->replItem->data.length();
+			*data = is->replItem->data;
+			*length = is->replItem->data.length();
 		}
 	}
 
@@ -269,7 +269,7 @@ int inputStreamReplGetData( InputStream *is, char *dest, int length )
 	return length;
 }
 
-bool inputStreamReplIsEof( InputStream *is )
+int inputStreamReplIsEof( InputStream *is )
 {
 	return is->replItem == 0;
 }
@@ -339,7 +339,7 @@ void sendNamedLangEl( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *in
 	char *data;
 	long length;
 
-	KlangEl *klangEl = inputStream->funcs->getLangEl( inputStream, bindId, data, length );
+	KlangEl *klangEl = inputStream->funcs->getLangEl( inputStream, &bindId, &data, &length );
 	if ( klangEl->termDup != 0 )
 		klangEl = klangEl->termDup;
 	

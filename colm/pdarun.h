@@ -26,6 +26,7 @@
 #include "bytecode.h"
 #include "rtvector.h"
 #include "fsmrun2.h"
+#include "input.h"
 #include "pdarun2.h"
 
 using std::ostream;
@@ -35,7 +36,6 @@ struct ParseData;
 struct FsmRun;
 struct KlangEl;
 struct PdaTables;
-struct InputStream;
 struct InputStreamAccum;
 
 #include "map.h"
