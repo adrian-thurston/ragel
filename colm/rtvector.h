@@ -27,25 +27,24 @@
 #include <stdlib.h>
 #include <assert.h>
 
-
-/* If needed is greater than existing, give twice needed. */
-#define EXPN_UP( existing, needed ) \
-		needed > existing ? (needed<<1) : existing
-	
-/* If needed is less than 1 quarter existing, give twice needed. */
-#define EXPN_DOWN( existing, needed ) \
-		needed < (existing>>2) ? (needed<<1) : existing
-
 template < class T > class RtVector
 {
 public:
 	static inline long upResize( long existing, long needed )
-		{ return EXPN_UP( existing, needed ); }
-	static inline long downResize( long existing, long needed )
-		{ return EXPN_DOWN( existing, needed ); }
+	{ 
+		return needed > existing ? (needed<<1) : existing;
+	}
 
-#undef EXPN_UP
-#undef EXPN_DOWN
+	static inline long downResize( long existing, long needed )
+	{
+		return needed < (existing>>2) ? (needed<<1) : existing;
+	}
+
+	RtVector() :
+		data(0),
+		tabLen(0),
+		allocLen(0)
+	{ }
 
 	long length() const
 		{ return tabLen; }
@@ -54,19 +53,6 @@ public:
 	long tabLen;
 	long allocLen;
 
-	/**
-	 * \brief Initialize an empty vector with no space allocated.  
-	 *
-	 * If a linear resizer is used, the step defaults to 256 units of T. For a
-	 * runtime vector both up and down allocation schemes default to
-	 * Exponential.
-	 */
-	RtVector() :
-		data(0),
-		tabLen(0),
-		allocLen(0)
-	
-	{ }
 
 	/* Free all mem used by the vector. */
 	~RtVector() { empty(); }
@@ -79,96 +65,18 @@ public:
 	void pop() { remove( tabLen - 1 ); }
 	T &top() { return data[tabLen - 1]; }
 
-	/*@{*/
-	/**
-	 * \brief Insert one element at position pos.
-	 *
-	 * Elements in the vector from pos onward are shifted one space to the
-	 * right. The copy constructor is used to place the element into this
-	 * vector. If pos is greater than the length of the vector then undefined
-	 * behaviour results. If pos is negative then it is treated as an offset
-	 * relative to the length of the vector.
-	 */
-	void insert(long pos, const T &val)    { insert(pos, &val, 1); }
-
-	/* Insert an array of values. */
-	void insert(long pos, const T *val, long len);
-
-	/**
-	 * \brief Insert all the elements from another vector at position pos.
-	 *
-	 * Elements in this vector from pos onward are shifted v.tabLen spaces to
-	 * the right. The element's copy constructor is used to copy the items
-	 * into this vector. The other vector is left unchanged. If pos is off the
-	 * end of the vector, then undefined behaviour results. If pos is negative
-	 * then it is treated as an offset relative to the length of the vector.
-	 * Equivalent to vector.insert(pos, other.data, other.tabLen).
-	 */
-	void insert(long pos, const RtVector &v) { insert(pos, v.data, v.tabLen); }
-
 	void remove(long pos)                 { remove(pos, 1); }
-
-	/* Delete a number of elements. */
 	void remove(long pos, long len);
-	/*@}*/
 
-	/* Replace with an array of values. */
-	void replace(long pos, const T *val, long len);
-
-	/* Replace len items at pos with newly constructed objects. */
-	void replaceNew(long pos, long len);
-	/*@}*/
-
-	/*@{*/
-	/**
-	 * \brief Set the contents of the vector to be val exactly.
-	 *
-	 * The vector becomes one element in length. Destructors are called on any
-	 * existing elements in the vector. The element's copy constructor is used
-	 * to place the val in the vector.
-	 */
-	void setAs(const T &val)             { setAs(&val, 1); }
-
-	/* Set to the contents of an array. */
-	void setAs(const T *val, long len);
-
-	/**
-	 * \brief Set the vector to exactly the contents of another vector.
-	 *
-	 * The vector becomes v.tabLen elements in length. Destructors are called
-	 * on any existing elements. Copy constructors are used to place the new
-	 * elements in the vector.
-	 */
-	void setAs(const RtVector &v)          { setAs(v.data, v.tabLen); }
-
-	/* Set as len copies of item. */
-
-	/*@{*/
-	/** 
-	 * \brief Append one elment to the end of the vector.
-	 *
-	 * Copy constructor is used to place the element in the vector.
-	 */
 	void append(const T &val)                { replace(tabLen, &val, 1); }
-
-	/**
-	 * \brief Append len elements to the end of the vector. 
-	 *
-	 * Copy constructors are used to place the elements in the vector. 
-	 */
 	void append(const T *val, long len)       { replace(tabLen, val, len); }
-
-	/**
-	 * \brief Append the contents of another vector.
-	 *
-	 * The other vector is left unchanged. Copy constructors are used to place the
-	 * elements in the vector.
-	 */
-	void append(const RtVector &v)             { replace(tabLen, v.data, v.tabLen); }
 
 protected:
 	void upResize(long len);
 	void downResize(long len);
+
+private:
+	void replace(long pos, const T *val, long len);
 };
 
 
@@ -240,49 +148,6 @@ template<class T> void RtVector<T>::
 	}
 }
 
-/**
- * \brief Set the contents of the vector to be len elements exactly. 
- *
- * The vector becomes len elements in length. Destructors are called on any
- * existing elements in the vector. Copy constructors are used to place the
- * new elements in the vector. 
- */
-template<class T> void RtVector<T>::
-		setAs(const T *val, long len)
-{
-	/* Call All destructors. */
-	long i;
-	T *pos = data;
-	for ( i = 0; i < tabLen; pos++, i++ )
-		pos->~T();
-
-	/* Adjust the allocated length. */
-	if ( len < tabLen )
-		downResize( len );
-	else if ( len > tabLen )
-		upResize( len );
-
-	/* Set the new data length to exactly len. */
-	tabLen = len;	
-	
-	/* Copy data in. */
-	T *dst = data;
-	const T *src = val;
-	for ( i = 0; i < len; i++, dst++, src++ )
-		new(dst) T(*src);
-}
-
-/**
- * \brief Replace len elements at position pos.
- *
- * If there are existing elements at the positions to be replaced, then
- * destructors are called before the space is used. Copy constructors are used
- * to place the elements into the vector. It is allowable for the pos and
- * length to specify a replacement that overwrites existing elements and
- * creates new ones.  If pos is greater than the length of the vector then
- * undefined behaviour results. If pos is negative, then it is treated as an
- * offset relative to the length of the vector.
- */
 template<class T> void RtVector<T>::
 		replace(long pos, const T *val, long len)
 {
@@ -324,78 +189,6 @@ template<class T> void RtVector<T>::
 		new(dst) T(*src);
 }
 
-/**
- * \brief Replace at position pos with len copies of an item.
- *
- * If there are existing elements at the positions to be replaced, then
- * destructors are called before the space is used. The copy constructor is
- * used to place the element into this vector. It is allowable for the pos and
- * length to specify a replacement that overwrites existing elements and
- * creates new ones. If pos is greater than the length of the vector then
- * undefined behaviour results.  If pos is negative, then it is treated as an
- * offset relative to the length of the vector.
- */
-
-/**
- * \brief Replace at position pos with len new elements.
- *
- * If there are existing elements at the positions to be replaced, then
- * destructors are called before the space is used. The default constructor is
- * used to initialize the new elements. It is allowable for the pos and length
- * to specify a replacement that overwrites existing elements and creates new
- * ones. If pos is greater than the length of the vector then undefined
- * behaviour results. If pos is negative, then it is treated as an offset
- * relative to the length of the vector.
- */
-template<class T> void RtVector<T>::
-		replaceNew(long pos, long len)
-{
-	long endPos, i;
-	T *item;
-
-	/* If we are given a negative position to replace at then
-	 * treat it as a position relative to the length. */
-	if ( pos < 0 )
-		pos = tabLen + pos;
-
-	/* The end is the one past the last item that we want
-	 * to write to. */
-	endPos = pos + len;
-
-	/* Make sure we have enough space. */
-	if ( endPos > tabLen ) {
-		upResize( endPos );
-
-		/* Delete any objects we need to delete. */
-		item = data + pos;
-		for ( i = pos; i < tabLen; i++, item++ )
-			item->~T();
-		
-		/* We are extending the vector, set the new data length. */
-		tabLen = endPos;
-	}
-	else {
-		/* Delete any objects we need to delete. */
-		item = data + pos;
-		for ( i = pos; i < endPos; i++, item++ )
-			item->~T();
-	}
-
-	/* Copy data in using copy constructor. */
-	T *dst = data + pos;
-	for ( long i = 0; i < len; i++, dst++ )
-		new(dst) T();
-}
-
-/**
- * \brief Remove len elements at position pos.
- *
- * Destructor is called on all elements removed. Elements to the right of pos
- * are shifted len spaces to the left to take up the free space. If pos is
- * greater than or equal to the length of the vector then undefined behavior
- * results. If pos is negative then it is treated as an offset relative to the
- * length of the vector.
- */
 template<class T> void RtVector<T>::
 		remove(long pos, long len)
 {
@@ -432,47 +225,6 @@ template<class T> void RtVector<T>::
 	/* Set the new data length. */
 	tabLen = newLen;
 }
-
-/**
- * \brief Insert len elements at position pos.
- *
- * Elements in the vector from pos onward are shifted len spaces to the right.
- * The copy constructor is used to place the elements into this vector. If pos
- * is greater than the length of the vector then undefined behaviour results.
- * If pos is negative then it is treated as an offset relative to the length
- * of the vector.
- */
-template<class T> void RtVector<T>::
-		insert(long pos, const T *val, long len)
-{
-	/* If we are given a negative position to insert at then
-	 * treat it as a position relative to the length. */
-	if ( pos < 0 )
-		pos = tabLen + pos;
-	
-	/* Calculate the new length. */
-	long newLen = tabLen + len;
-
-	/* Up resize, we are growing. */
-	upResize( newLen );
-
-	/* Shift over data at insert spot if needed. */
-	if ( len > 0 && pos < tabLen ) {
-		memmove(data + pos + len, data + pos,
-				sizeof(T)*(tabLen-pos));
-	}
-
-	/* Copy data in element by element. */
-	T *dst = data + pos;
-	const T *src = val;
-	for ( long i = 0; i < len; i++, dst++, src++ )
-		new(dst) T(*src);
-
-	/* Set the new length. */
-	tabLen = newLen;
-}
-
-
 
 #endif 
 
