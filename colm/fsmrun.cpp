@@ -26,6 +26,7 @@
 #include "config.h"
 #include "fsmrun.h"
 #include "pdarun.h"
+#include "debug.h"
 
 using std::cerr;
 using std::endl;
@@ -41,23 +42,14 @@ void operator<<( ostream &out, exit_object & )
 void incrementConsumed( PdaRun *pdaRun )
 {
 	pdaRun->consumed += 1;
-
-	#ifdef COLM_LOG_PARSE
-	if ( colm_log_parse )
-		cerr << "consumed up to " << pdaRun->consumed << endl;
-	#endif
+	debug( REALM_PARSE, "consumed up to %ld\n", pdaRun->consumed );
 }
 
 void decrementConsumed( PdaRun *pdaRun )
 {
 	pdaRun->consumed -= 1;
-
-	#ifdef COLM_LOG_PARSE
-	if ( colm_log_parse )
-		cerr << "consumed down to " << pdaRun->consumed << endl;
-	#endif
+	debug( REALM_PARSE, "consumed down to %ld\n", pdaRun->consumed );
 }
-
 
 void takeBackBuffered( InputStream *inputStream )
 {

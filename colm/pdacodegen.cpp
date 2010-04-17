@@ -85,6 +85,7 @@ void PdaCodeGen::writeFirst()
 		"\n"
 		"#include <colm/pdarun.h>\n"
 		"#include <colm/fsmrun.h>\n"
+		"#include <colm/debug.h>\n"
 		"\n"
 		"extern RuntimeData main_runtimeData;\n";
 
@@ -176,10 +177,10 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 		out << "\"";
 		
 		/* Repeat, literal, ignore flags. */
-		out << ", " << runtimeData->lelInfo[i].repeat << ", " << 
-				runtimeData->lelInfo[i].list << ", " <<
-				runtimeData->lelInfo[i].literal << ", " <<
-				runtimeData->lelInfo[i].ignore << ", ";
+		out << ", " << (int)runtimeData->lelInfo[i].repeat << ", " << 
+				(int)runtimeData->lelInfo[i].list << ", " <<
+				(int)runtimeData->lelInfo[i].literal << ", " <<
+				(int)runtimeData->lelInfo[i].ignore << ", ";
 
 		out << runtimeData->lelInfo[i].frameId << ", ";
 
@@ -253,7 +254,7 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 		out << runtimeData->prodInfo[i].lhsId << ", ";
 		out << '"' << runtimeData->prodInfo[i].name << "\", ";
 		out << runtimeData->prodInfo[i].frameId << ", ";
-		out << runtimeData->prodInfo[i].lhsUpref;
+		out << (int)runtimeData->prodInfo[i].lhsUpref;
 
 		out << " }";
 
@@ -291,7 +292,7 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 
 		out << node.ignore << ", ";
 
-		out << node.stop << " },\n";
+		out << (int)node.stop << " },\n";
 	}
 	out << "};\n\n";
 

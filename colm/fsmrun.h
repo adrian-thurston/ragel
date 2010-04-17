@@ -70,7 +70,9 @@ Kid *makeToken( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, int id
 		Head *tokdata, bool namedLangEl, int bindId );
 
 void newToken( PdaRun *pdaRun, FsmRun *fsmRun );
-void incrementConsumed( PdaRun *pdaRun );
 void ignore( PdaRun *pdaRun, Tree *tree );
+
+void incrementConsumed( PdaRun *pdaRun );
+void decrementConsumed( PdaRun *pdaRun );
 
 #endif

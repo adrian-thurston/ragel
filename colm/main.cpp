@@ -28,6 +28,7 @@
 #include <sstream>
 
 #include "colm.h"
+#include "debug.h"
 #include "lmscan.h"
 #include "pcheck.h"
 #include "vector.h"
@@ -428,6 +429,7 @@ int main(int argc, const char **argv)
 		colm_log_match = 1;
 		colm_log_compile = 1;
 		colm_log_conds = 1;
+		colmActiveRealm = 0xffffffff;
 	}
 	initInputFuncs();
 

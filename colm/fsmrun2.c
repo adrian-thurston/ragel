@@ -84,3 +84,5 @@ void undoPosition( InputStream *inputStream, const char *data, long length )
 
 	inputStream->byte -= length;
 }
+
+

@@ -64,7 +64,7 @@ COLM_SRC = \
 RUNTIME_SRC = fsmrun.cpp pdarun.cpp bytecode.cpp \
 	map.cpp string.cpp tree.cpp pool.cpp
 
-RUNTIME_SRC_C = map2.c fsmrun2.c list.c input.c
+RUNTIME_SRC_C = map2.c fsmrun2.c list.c input.c debug.c
 
 
 ALL_SRC = $(COLM_SRC) $(RUNTIME_SRC)
@@ -169,7 +169,7 @@ install: all
 	install -d $(prefix)/lib
 	install -s colm $(prefix)/bin/colm
 	install libcolmp.a libcolmd.a $(prefix)/lib
-	install rtvector.h bytecode.h config.h fsmrun.h \
+	install rtvector.h bytecode.h config.h fsmrun.h debug.h pool.h pdarun2.h fsmrun2.h map.h \
 		input.h pdarun.h $(prefix)/include/colm
 
 -include $(DEPS)
