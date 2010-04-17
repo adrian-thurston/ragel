@@ -26,6 +26,8 @@
 extern "C" {
 #endif
 
+#define MARK_SLOTS 32
+
 typedef struct _FsmTables
 {
 	long *actions;
@@ -63,7 +65,5 @@ typedef struct _FsmTables
 #ifdef __cplusplus
 }
 #endif
-
-#define MARK_SLOTS 32
 
 #endif

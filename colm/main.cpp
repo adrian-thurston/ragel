@@ -63,8 +63,6 @@ using std::endl;
 /* Target language and output style. */
 char defExtension[] = ".cpp";
 
-void initInputFuncs();
-
 /* Io globals. */
 istream *inStream = 0;
 ostream *outStream = 0;

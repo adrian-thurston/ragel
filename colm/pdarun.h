@@ -35,7 +35,6 @@ typedef struct _Tree Tree;
 struct ParseData;
 struct FsmRun;
 struct KlangEl;
-struct PdaTables;
 struct InputStreamAccum;
 
 #include "map.h"
@@ -64,32 +63,12 @@ typedef struct _Accum
 	Stream *stream;
 } Accum;
 
-struct Stream
-{
-	/* Must overlay Tree. */
-	short id;
-	unsigned short flags;
-	long refs;
-	Kid *child;
-
-	FILE *file;
-	InputStream *in;
-};
-
 /*
  * Iterators.
  */
 
 struct TreeIter
 {
-	TreeIter( const Ref &rootRef, int searchId, Tree **stackRoot ) : 
-		rootRef(rootRef), searchId(searchId), 
-		stackRoot(stackRoot), stackSize(0)
-	{
-		ref.kid = 0;
-		ref.next = 0;
-	}
-	
 	Ref rootRef;
 	Ref ref;
 	long searchId;
@@ -97,17 +76,19 @@ struct TreeIter
 	long stackSize;
 };
 
+inline void initTreeIter( TreeIter *treeIter, const Ref *rootRef, int searchId, Tree **stackRoot )
+{
+	treeIter->rootRef = *rootRef;
+	treeIter->searchId = searchId;
+	treeIter->stackRoot = stackRoot;
+	treeIter->stackSize = 0;
+	treeIter->ref.kid = 0;
+	treeIter->ref.next = 0;
+}
+
 /* This must overlay tree iter because some of the same bytecodes are used. */
 struct RevTreeIter
 {
-	RevTreeIter( const Ref &rootRef, int searchId, Tree **stackRoot, int children ) : 
-		rootRef(rootRef), searchId(searchId), 
-		stackRoot(stackRoot), stackSize(children), kidAtYield(0), children(children)
-	{
-		ref.kid = 0;
-		ref.next = 0;
-	}
-	
 	Ref rootRef;
 	Ref ref;
 	long searchId;
@@ -120,197 +101,20 @@ struct RevTreeIter
 	Kid **cur;
 };
 
-typedef struct _FunctionInfo
+inline void initRevTreeIter( RevTreeIter *revTriter, const Ref *rootRef, 
+		int searchId, Tree **stackRoot, int children )
 {
-	const char *name;
-	long frameId;
-	long argSize;
-	long ntrees;
-	long frameSize;
-} FunctionInfo;
-
-typedef struct _UserIter
-{
-	/* The current item. */
-	Ref ref;
-	Tree **stackRoot;
-	long argSize;
-	long stackSize;
-	Code *resume;
-	Tree **frame;
-	long searchId;
-} UserIter;
+	revTriter->rootRef = *rootRef;
+	revTriter->searchId = searchId;
+	revTriter->stackRoot = stackRoot;
+	revTriter->stackSize = children;
+	revTriter->kidAtYield = 0;
+	revTriter->children = children;
+	revTriter->ref.kid = 0;
+	revTriter->ref.next = 0;
+}
 
 void initUserIter( UserIter *userIter, Tree **stackRoot, long argSize, long searchId );
-
-
-/*
- * Program Data.
- */
-
-typedef struct _PatReplInfo
-{
-	long offset;
-	long numBindings;
-} PatReplInfo;
-
-typedef struct _PatReplNode
-{
-	long id;
-	long next;
-	long child;
-	long bindId;
-	const char *data;
-	long length;
-	long ignore;
-
-	/* Just match nonterminal, don't go inside. */
-	bool stop;
-} PatReplNode;
-
-/* FIXME: should have a descriptor for object types to give the length. */
-
-typedef struct _LangElInfo
-{
-	const char *name;
-	bool repeat;
-	bool list;
-	bool literal;
-	bool ignore;
-
-	long frameId;
-
-	long objectTypeId;
-	long ofiOffset;
-	long objectLength;
-
-//	long contextTypeId;
-//	long contextLength;
-
-	long termDupId;
-	long genericId;
-	long markId;
-	long captureAttr;
-	long numCaptureAttr;
-} LangElInfo;
-
-typedef struct _ObjFieldInfo
-{
-	int typeId;
-} ObjFieldInfo;
-
-typedef struct _ProdInfo
-{
-	long length;
-	unsigned long lhsId;
-	const char *name;
-	long frameId;
-	bool lhsUpref;
-} ProdInfo;
-
-typedef struct _FrameInfo
-{
-	Code *codeWV;
-	long codeLenWV;
-	Code *codeWC;
-	long codeLenWC;
-	char *trees;
-	long treesLen;
-} FrameInfo;
-
-typedef struct _RegionInfo
-{
-	const char *name;
-	long defaultToken;
-	long eofFrameId;
-} RegionInfo;
-
-typedef struct _CaptureAttr
-{
-	long mark_enter;
-	long mark_leave;
-	long offset;
-} CaptureAttr;
-
-struct RuntimeData
-{
-	LangElInfo *lelInfo;
-	long numLangEls;
-
-	ProdInfo *prodInfo;
-	long numProds;
-
-	RegionInfo *regionInfo;
-	long numRegions;
-
-	Code *rootCode;
-	long rootCodeLen;
-
-	FrameInfo *frameInfo;
-	long numFrames;
-
-	FunctionInfo *functionInfo;
-	long numFunctions;
-
-	PatReplInfo *patReplInfo;
-	long numPatterns;
-
-	PatReplNode *patReplNodes;
-	long numPatternNodes;
-
-	GenericInfo *genericInfo;
-	long numGenerics;
-
-	const char **litdata;
-	long *litlen;
-	Head **literals;
-	long numLiterals;
-
-	CaptureAttr *captureAttr;
-	long numCapturedAttr;
-
-	FsmTables *fsmTables;
-	PdaTables *pdaTables;
-	int *startStates;
-	int *eofLelIds;
-	int *parserLelIds;
-	long numParsers;
-
-	long globalSize;
-
-	long firstNonTermId;
-
-	long integerId;
-	long stringId;
-	long anyId;
-	long eofId;
-	long noTokenId;
-};
-
-struct PdaTables
-{
-	/* Parser table data. */
-	int *indicies;
-	int *keys;
-	unsigned int *offsets;
-	unsigned int *targs;
-	unsigned int *actInds;
-	unsigned int *actions;
-	int *commitLen;
-	int *tokenRegionInds;
-	int *tokenRegions;
-
-	int numIndicies;
-	int numKeys;
-	int numStates;
-	int numTargs;
-	int numActInds;
-	int numActions;
-	int numCommitLen;
-	int numRegionItems;
-
-	RuntimeData *rtd;
-};
 
 bool makeReverseCode( CodeVect *all, CodeVect &reverseCode );
 
@@ -386,12 +190,13 @@ struct PdaRun
 	long targetConsumed;
 };
 
+void initPdaRun( PdaRun *pdaRun, Tree *tree );
+
 void cleanParser( Tree **root, PdaRun *pdaRun );
 void ignore( PdaRun *pdaRun, Tree *tree );
 void parseToken( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
 long undoParse( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Tree *tree );
 void xml_print_list( RuntimeData *runtimeData, Kid *lel, int depth );
 ostream &parseError( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, int tokId, Tree *tree );
-void initPdaRun( PdaRun *pdaRun, Tree *tree );
 
 #endif /* _PDARUN_H */

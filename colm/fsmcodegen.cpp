@@ -1061,10 +1061,10 @@ void FsmCodeGen::writeCode()
 	 * should use the preprocessor to make these go away. */
 	out <<
 		"void sendNamedLangEl( Tree **, PdaRun *, FsmRun *, InputStream * ) {}\n"
-		"void initStaticFuncs() {}\n"
-		"void initPatternFuncs() {}\n"
-		"void initReplFuncs() {}\n"
-		"void initInputFuncs();\n";
+		"extern \"C\" void initStaticFuncs() {}\n"
+		"extern \"C\" void initPatternFuncs() {}\n"
+		"extern \"C\" void initReplFuncs() {}\n"
+		"extern \"C\" void initInputFuncs();\n";
 
 	out << 
 		"int main( int argc, char **argv )\n"

@@ -24,6 +24,10 @@
 
 #include <stdio.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define FSM_BUFSIZE 8192
 //#define FSM_BUFSIZE 8
 
@@ -125,9 +129,6 @@ struct _InputStream
 	RunBuf *queue;
 	RunBuf *queueTail;
 
-	RunBuf *head() { return queue; }
-	RunBuf *tail() { return queueTail; }
-
 	const char *data;
 	long dlen;
 	int offset;
@@ -135,21 +136,29 @@ struct _InputStream
 	FILE *file;
 	long fd;
 
-	RunBuf *popHead();
-	RunBuf *popTail();
-	void append( RunBuf *runBuf );
-	void prepend( RunBuf *runBuf );
-
-	Pattern *pattern;
-	PatternItem *patItem;
-	Replacement *replacement;
-	ReplItem *replItem;
+	struct Pattern *pattern;
+	struct PatternItem *patItem;
+	struct Replacement *replacement;
+	struct ReplItem *replItem;
 };
 
-InputStream *newInputStreamPattern( Pattern *pattern );
-InputStream *newInputStreamRepl( Replacement *replacement );
+RunBuf *inputStreamHead( InputStream *is );
+RunBuf *inputStreamTail( InputStream *is );
+RunBuf *inputStreamPopHead( InputStream *is );
+RunBuf *inputStreamPopTail( InputStream *is );
+void inputStreamAppend( InputStream *is, RunBuf *runBuf );
+void inputStreamPrepend( InputStream *is, RunBuf *runBuf );
+
+InputStream *newInputStreamPattern( struct Pattern *pattern );
+InputStream *newInputStreamRepl( struct Replacement *replacement );
 InputStream *newInputStreamFile( FILE *file );
 InputStream *newInputStreamFd( long fd );
 InputStream *newInputStreamAccum();
+
+void initInputFuncs();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _INPUT_H */

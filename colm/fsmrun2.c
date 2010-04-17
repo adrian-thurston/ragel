@@ -20,3 +20,6 @@
  */
 
 #include "fsmrun2.h"
+#include "input.h"
+
+

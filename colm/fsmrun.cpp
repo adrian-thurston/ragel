@@ -55,7 +55,6 @@ void initFsmRun( FsmRun *fsmRun, Program *prg )
 	fsmRun->peof = 0;
 }
 
-
 void incrementConsumed( PdaRun *pdaRun )
 {
 	pdaRun->consumed += 1;
@@ -869,27 +868,6 @@ void initInputStream( InputStream *inputStream )
 	inputStream->byte = 0;
 }
 
-long undoParse( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Tree *tree )
-{
-	/* PDA must be init first to set next region. */
-	initPdaRun( pdaRun, 0 );
-
-	Kid *top = kidAllocate( pdaRun->prg );
-	top->next = pdaRun->stackTop;
-	top->tree = tree;
-	pdaRun->stackTop = top;
-	pdaRun->numRetry += 1;
-
-	pdaRun->stop = false;
-	parseToken( sp, pdaRun, fsmRun, inputStream, 0 );
-
-	assert( pdaRun->stackTop->next == 0 );
-
-	treeDownref( pdaRun->prg, sp, pdaRun->stackTop->tree );
-	kidFree( pdaRun->prg, pdaRun->stackTop );
-	return 0;
-}
-
 void newToken( PdaRun *pdaRun, FsmRun *fsmRun )
 {
 	/* Init the scanner vars. */
@@ -1142,7 +1120,7 @@ void sendTree( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStre
 
 void sendTreeIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 {
-	RunBuf *runBuf = inputStream->popHead();
+	RunBuf *runBuf = inputStreamPopHead( inputStream );
 
 	/* FIXME: using runbufs here for this is a poor use of memory. */
 	Tree *tree = runBuf->tree;

@@ -384,14 +384,9 @@ typedef struct _Tree Tree;
 typedef struct _ParseTree ParseTree;
 typedef struct _ListEl ListEl;
 typedef struct _MapEl MapEl;
-struct PdaTables;
-struct RuntimeData;
-struct FsmRun;
 struct PdaRun;
-struct Program;
 typedef struct _List List;
 typedef struct _Map Map;
-struct Stream;
 typedef struct _Ref Ref;
 struct TreeIter;
 struct RevTreeIter;
@@ -399,9 +394,6 @@ typedef struct _Pointer Pointer;
 typedef struct _Str Str;
 typedef struct _Int Int;
 
-typedef unsigned char Code;
-typedef unsigned long Word;
-typedef unsigned long Half;
 
 /* Can't use sizeof() because we have used types that are bigger than the
  * serial representation. */
@@ -500,9 +492,6 @@ struct TreePair
 	Tree *key;
 	Tree *val;
 };
-
-struct Program;
-struct Stream;
 
 bool testFalse( Program *prg, Tree *tree );
 
@@ -609,33 +598,6 @@ void initProgram( Program *program, int argc, char **argv,
 void clearProgram( Program *prg, Tree **vm_stack, Tree **sp );
 void runProgram( Program *prg );
 void allocGlobal( Program *prg );
-
-struct Program
-{
-	int argc;
-	char **argv;
-
-	bool ctxDepParsing;
-	RuntimeData *rtd;
-	Tree *global;
-
-	PoolAlloc kidPool;
-	PoolAlloc treePool;
-	PoolAlloc parseTreePool;
-	PoolAlloc listElPool;
-	PoolAlloc mapElPool;
-	PoolAlloc headPool;
-	PoolAlloc locationPool;
-
-	Tree *trueVal;
-	Tree *falseVal;
-
-	Kid *heap;
-
-	Stream *stdinVal;
-	Stream *stdoutVal;
-	Stream *stderrVal;
-};
 
 struct Execution
 {

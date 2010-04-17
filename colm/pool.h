@@ -52,7 +52,7 @@ struct PoolAlloc
 
 void initPoolAlloc( PoolAlloc *poolAlloc, int sizeofT );
 
-struct Program;
+typedef struct _Program Program;
 typedef struct _Kid Kid;
 typedef struct _Tree Tree;
 typedef struct _ParseTree ParseTree;

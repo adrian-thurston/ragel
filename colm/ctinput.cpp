@@ -51,7 +51,7 @@ int inputStreamStaticTryAgainLater( InputStream *is )
 	return false;
 }
 
-void initStaticFuncs()
+extern "C" void initStaticFuncs()
 {
 	memcpy( &staticFuncs, &baseFuncs, sizeof(InputFuncs) );
 	staticFuncs.isTree = &inputStreamStaticIsTree;
@@ -173,7 +173,7 @@ void inputStreamPatternPushBackNamed( InputStream *is )
 }
 
 
-void initPatternFuncs()
+extern "C" void initPatternFuncs()
 {
 	memcpy( &patternFuncs, &staticFuncs, sizeof(InputFuncs) );
 	patternFuncs.getData = &inputStreamPatternGetData;
@@ -320,7 +320,7 @@ void inputStreamReplPushBackNamed( InputStream *is )
 	is->offset = is->replItem->data.length();
 }
 
-void initReplFuncs()
+extern "C" void initReplFuncs()
 {
 	memcpy( &replFuncs, &staticFuncs, sizeof(InputFuncs) );
 	replFuncs.getData = &inputStreamReplGetData;

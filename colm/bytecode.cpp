@@ -2280,7 +2280,7 @@ again:
 			rootRef.kid = (Kid*)pop();
 			rootRef.next = (Ref*)pop();
 			void *mem = plocal(field);
-			new(mem) TreeIter( rootRef, searchTypeId, ptop() );
+			initTreeIter( (TreeIter*)mem, &rootRef, searchTypeId, ptop() );
 			break;
 		}
 		case IN_TRITER_DESTROY: {
@@ -2324,8 +2324,7 @@ again:
 			}
 
 			void *mem = plocal(field);
-			new(mem) RevTreeIter( rootRef, searchTypeId, stackRoot, children );
-
+			initRevTreeIter( (RevTreeIter*)mem, &rootRef, searchTypeId, stackRoot, children );
 			break;
 		}
 		case IN_REV_TRITER_DESTROY: {
