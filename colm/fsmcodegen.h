@@ -28,6 +28,7 @@
 #include "keyops.h"
 #include "parsedata.h"
 #include "redfsm.h"
+#include "fsmrun.h"
 
 using std::string;
 using std::ostream;
@@ -45,7 +46,6 @@ struct LongestMatch;
 struct TokenDef;
 struct InlineList;
 struct InlineItem;
-struct FsmRun;
 struct NameInst;
 struct FsmCodeGen;
 

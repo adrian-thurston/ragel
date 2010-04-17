@@ -48,7 +48,7 @@
 struct NameInst;
 struct FsmGraph;
 struct RedFsm;
-struct FsmRun;
+struct _FsmRun;
 struct ObjectDef;
 struct ElementOf;
 struct UniqueType;

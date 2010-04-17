@@ -26,6 +26,7 @@
 #include "avltree.h"
 #include "fsmgraph.h"
 #include "parsedata.h"
+#include "fsmrun2.h"
 
 /* Forwards. */
 struct FsmTrans;
@@ -33,7 +34,6 @@ struct FsmGraph;
 struct ParseData;
 struct FsmCodeGen;
 struct RedFsm;
-struct FsmRun;
 struct GenCondSpace;
 struct Condition;
 

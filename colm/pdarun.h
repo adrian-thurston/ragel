@@ -33,7 +33,6 @@ using std::ostream;
 
 typedef struct _Tree Tree;
 struct ParseData;
-struct FsmRun;
 struct KlangEl;
 struct InputStreamAccum;
 

@@ -149,15 +149,14 @@ typedef struct _List
 void listAddAfter( List *list, ListEl *prev_el, ListEl *new_el );
 void listAddBefore( List *list, ListEl *next_el, ListEl *new_el );
 
-inline void listPrepend( List *list, ListEl *new_el) { listAddBefore(list, list->head, new_el); }
-inline void listAppend( List *list, ListEl *new_el)  { listAddAfter(list, list->tail, new_el); }
+void listPrepend( List *list, ListEl *new_el );
+void listAppend( List *list, ListEl *new_el );
 
 ListEl *listDetach( List *list, ListEl *el );
-inline ListEl *listDetachFirst(List *list )        { return listDetach(list, list->head); }
-inline ListEl *listDetachLast(List *list )         { return listDetach(list, list->tail); }
+ListEl *listDetachFirst(List *list );
+ListEl *listDetachLast(List *list );
 
-inline long listLength(List *list)
-	{ return list->listLen; }
+long listLength(List *list);
 
 typedef struct _Stream
 {
@@ -213,7 +212,7 @@ typedef struct _PatReplNode
 	long ignore;
 
 	/* Just match nonterminal, don't go inside. */
-	bool stop;
+	unsigned char stop;
 } PatReplNode;
 
 /* FIXME: should have a descriptor for object types to give the length. */
@@ -221,10 +220,10 @@ typedef struct _PatReplNode
 typedef struct _LangElInfo
 {
 	const char *name;
-	bool repeat;
-	bool list;
-	bool literal;
-	bool ignore;
+	unsigned char repeat;
+	unsigned char list;
+	unsigned char literal;
+	unsigned char ignore;
 
 	long frameId;
 
@@ -253,7 +252,7 @@ typedef struct _ProdInfo
 	unsigned long lhsId;
 	const char *name;
 	long frameId;
-	bool lhsUpref;
+	unsigned char lhsUpref;
 } ProdInfo;
 
 typedef struct _FrameInfo
@@ -360,22 +359,42 @@ typedef struct _PdaTables
 	RuntimeData *rtd;
 } PdaTables;
 
+
+struct PoolBlock
+{
+	void *data;
+	struct PoolBlock *next;
+};
+
+struct PoolItem
+{
+	struct PoolItem *next;
+};
+
+struct PoolAlloc
+{
+	struct PoolBlock *head;
+	long nextel;
+	struct PoolItem *pool;
+	int sizeofT;
+};
+
 typedef struct _Program
 {
 	int argc;
 	char **argv;
 
-	bool ctxDepParsing;
+	unsigned char ctxDepParsing;
 	RuntimeData *rtd;
 	Tree *global;
 
-	PoolAlloc kidPool;
-	PoolAlloc treePool;
-	PoolAlloc parseTreePool;
-	PoolAlloc listElPool;
-	PoolAlloc mapElPool;
-	PoolAlloc headPool;
-	PoolAlloc locationPool;
+	struct PoolAlloc kidPool;
+	struct PoolAlloc treePool;
+	struct PoolAlloc parseTreePool;
+	struct PoolAlloc listElPool;
+	struct PoolAlloc mapElPool;
+	struct PoolAlloc headPool;
+	struct PoolAlloc locationPool;
 
 	Tree *trueVal;
 	Tree *falseVal;

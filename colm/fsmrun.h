@@ -46,28 +46,9 @@ void operator<<( std::ostream &out, exit_object & );
 
 #include "fsmrun2.h"
 
-struct FsmRun
-{
-	Program *prg;
-	FsmTables *tables;
-
-	RunBuf *runBuf;
-
-	/* FsmRun State. */
-	long region, cs, act;
-	char *tokstart, *tokend;
-	char *p, *pe, *peof;
-	bool returnResult;
-	char *mark[MARK_SLOTS];
-	long matchedToken;
-
-	InputStream *haveDataOf;
-	Tree *curStream;
-};
-
 void execAction( FsmRun *fsmRun, GenAction *genAction );
 void fsmExecute( FsmRun *fsmRun, InputStream *inputStream );
-void initFsmRun( FsmRun *fsmRun, Program *prg );
+
 void initInputStream( InputStream *in );
 void sendQueuedTokens( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
 void sendHandleError( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );

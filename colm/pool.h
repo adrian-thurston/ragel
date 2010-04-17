@@ -22,35 +22,10 @@
 #ifndef _POOL_H
 #define _POOL_H
 
-#include <iostream>
-
-using std::cerr;
-using std::endl;
-using std::ostream;
-
 /* Allocation, number of items. */
 #define FRESH_BLOCK 8128                    
 
-struct PoolBlock
-{
-	void *data;
-	PoolBlock *next;
-};
-
-struct PoolItem
-{
-	PoolItem *next;
-};
-
-struct PoolAlloc
-{
-	PoolBlock *head;
-	long nextel;
-	PoolItem *pool;
-	int sizeofT;
-};
-
-void initPoolAlloc( PoolAlloc *poolAlloc, int sizeofT );
+void initPoolAlloc( struct PoolAlloc *poolAlloc, int sizeofT );
 
 typedef struct _Program Program;
 typedef struct _Kid Kid;

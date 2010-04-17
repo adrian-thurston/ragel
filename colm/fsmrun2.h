@@ -22,6 +22,8 @@
 #ifndef _FSMRUN2_H
 #define _FSMRUN2_H
 
+#include "input.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -61,6 +63,31 @@ typedef struct _FsmTables
 	struct GenAction **actionSwitch;
 	long numActionSwitch;
 } FsmTables;
+
+struct _Program;
+
+typedef struct _FsmRun
+{
+	struct _Program *prg;
+	FsmTables *tables;
+
+	RunBuf *runBuf;
+
+	/* FsmRun State. */
+	long region, cs, act;
+	char *tokstart, *tokend;
+	char *p, *pe, *peof;
+	int returnResult;
+	char *mark[MARK_SLOTS];
+	long matchedToken;
+
+	InputStream *haveDataOf;
+	struct _Tree *curStream;
+} FsmRun;
+
+void initFsmRun( FsmRun *fsmRun, struct _Program *prg );
+void updatePosition( InputStream *inputStream, const char *data, long length );
+void undoPosition( InputStream *inputStream, const char *data, long length );
 
 #ifdef __cplusplus
 }

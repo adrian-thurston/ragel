@@ -38,23 +38,6 @@ void operator<<( ostream &out, exit_object & )
 	exit(1);
 }
 
-void initFsmRun( FsmRun *fsmRun, Program *prg )
-{
-	fsmRun->prg = prg;
-	fsmRun->tables = prg->rtd->fsmTables;
-	fsmRun->runBuf = 0;
-	fsmRun->haveDataOf = 0;
-	fsmRun->curStream = 0;
-
-	/* Run buffers need to stick around because 
-	 * token strings point into them. */
-	fsmRun->runBuf = newRunBuf();
-	fsmRun->runBuf->next = 0;
-
-	fsmRun->p = fsmRun->pe = fsmRun->runBuf->data;
-	fsmRun->peof = 0;
-}
-
 void incrementConsumed( PdaRun *pdaRun )
 {
 	pdaRun->consumed += 1;
@@ -75,37 +58,6 @@ void decrementConsumed( PdaRun *pdaRun )
 	#endif
 }
 
-/* Keep the position up to date after consuming text. */
-void updatePosition( InputStream *inputStream, const char *data, long length )
-{
-	if ( !inputStream->handlesLine ) {
-		for ( int i = 0; i < length; i++ ) {
-			if ( data[i] != '\n' )
-				inputStream->column += 1;
-			else {
-				inputStream->line += 1;
-				inputStream->column = 1;
-			}
-		}
-	}
-
-	inputStream->byte += length;
-}
-
-/* Keep the position up to date after sending back text. */
-void undoPosition( InputStream *inputStream, const char *data, long length )
-{
-	/* FIXME: this needs to fetch the position information from the parsed
-	 * token and restore based on that.. */
-	if ( !inputStream->handlesLine ) {
-		for ( int i = 0; i < length; i++ ) {
-			if ( data[i] == '\n' )
-				inputStream->line -= 1;
-		}
-	}
-
-	inputStream->byte -= length;
-}
 
 void takeBackBuffered( InputStream *inputStream )
 {
