@@ -411,13 +411,6 @@ void setAttr( Tree *tree, long pos, Tree *val );
 Tree *getAttr( Tree *tree, long pos );
 Kid *getAttrKid( Tree *tree, long pos );
 
-/* Return the size of a type in words. */
-template<class T> int sizeof_in_words()
-{
-	assert( (sizeof(T) % sizeof(Word)) == 0 );
-	return sizeof(T) / sizeof(Word);
-}
-
 /* 
  * Code Vector
  */

@@ -1016,11 +1016,11 @@ Tree *createGeneric( Program *prg, long genericId )
 			accum->id = genericInfo->langElId;
 			accum->genericInfo = genericInfo;
 			accum->fsmRun = new FsmRun;
-			accum->pdaRun = new PdaRun( prg, prg->rtd->pdaTables, 
-					accum->fsmRun, genericInfo->parserId, false, false );
+			accum->pdaRun = new PdaRun;
 
 			/* Start off the parsing process. */
-			initPdaRun( accum->pdaRun, 0 );
+			initPdaRun( accum->pdaRun, prg, prg->rtd->pdaTables, 
+					accum->fsmRun, genericInfo->parserId, false, false, 0 );
 			initFsmRun( accum->fsmRun, prg );
 			newToken( accum->pdaRun, accum->fsmRun );
 
@@ -1074,7 +1074,7 @@ free_tree:
 			Accum *accum = (Accum*)tree;
 			delete accum->fsmRun;
 			cleanParser( sp, accum->pdaRun );
-			accum->pdaRun->clearContext( sp );
+			clearContext( accum->pdaRun, sp );
 			rcodeDownrefAll( prg, sp, accum->pdaRun->allReverseCode );
 			delete accum->pdaRun;
 			treeDownref( prg, sp, (Tree*)accum->stream );

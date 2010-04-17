@@ -309,7 +309,7 @@ void undoParseStream( Tree **&sp, Program *prg, Stream *input, Accum *accum, lon
 		accum->pdaRun->targetConsumed = -1;
 		accum->pdaRun->numRetry -= 1;
 
-		accum->fsmRun->region = accum->pdaRun->getNextRegion();
+		accum->fsmRun->region = pdaRunGetNextRegion( accum->pdaRun, 0 );
 		accum->fsmRun->cs = accum->fsmRun->tables->entryByRegion[accum->fsmRun->region];
 	}
 }

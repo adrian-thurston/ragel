@@ -57,6 +57,11 @@ using std::endl;
 	i = (Tree*)w; \
 } while(0)
 
+/* Offset can be used to look at the next nextRegionInd. */
+int pdaRunGetNextRegion( PdaRun *pdaRun, int offset = 0 )
+{
+	return pdaRun->tables->tokenRegions[pdaRun->nextRegionInd+offset];
+}
 
 Tree *getParsedRoot( PdaRun *pdaRun, bool stop )
 {
@@ -77,17 +82,27 @@ void cleanParser( Tree **sp, PdaRun *pdaRun )
 //	pdaRun->clearContext( sp );
 }
 
-bool PdaRun::isParserStopFinished()
+bool isParserStopFinished( PdaRun *pdaRun )
 {
 	bool done = 
-			stackTop->next != 0 && 
-			stackTop->next->next == 0 &&
-			stackTop->tree->id == stopTarget;
+			pdaRun->stackTop->next != 0 && 
+			pdaRun->stackTop->next->next == 0 &&
+			pdaRun->stackTop->tree->id == pdaRun->stopTarget;
 	return done;
 }
 
-void initPdaRun( PdaRun *pdaRun, Tree *context )
+void initPdaRun( PdaRun *pdaRun, Program *prg, PdaTables *tables,
+		FsmRun *fsmRun, int parserId, long stopTarget, bool revertOn, Tree *context )
 {
+	memset( pdaRun, 0, sizeof(PdaRun) );
+	pdaRun->prg = prg;
+	pdaRun->tables = tables;
+	pdaRun->fsmRun = fsmRun;
+	pdaRun->parserId = parserId;
+	pdaRun->stopTarget = stopTarget;
+	pdaRun->revertOn = revertOn;
+	pdaRun->targetConsumed = -1;
+
 	#ifdef COLM_LOG_PARSE
 	if ( colm_log_parse ) {
 		cerr << "initializing PdaRun" << endl;
@@ -118,22 +133,22 @@ void initPdaRun( PdaRun *pdaRun, Tree *context )
 	pdaRun->context = splitTree( pdaRun->prg, context );
 }
 
-void PdaRun::clearContext( Tree **sp )
+void clearContext( PdaRun *pdaRun, Tree **sp )
 {
-	if ( context != 0 )
-		treeDownref( prg, sp, context );
+	if ( pdaRun->context != 0 )
+		treeDownref( pdaRun->prg, sp, pdaRun->context );
 }
 
 
-long PdaRun::stackTopTarget()
+long stackTopTarget( PdaRun *pdaRun )
 {
 	long state;
-	if ( pt(stackTop->tree)->state < 0 )
-		state = prg->rtd->startStates[parserId];
+	if ( pt(pdaRun->stackTop->tree)->state < 0 )
+		state = pdaRun->prg->rtd->startStates[pdaRun->parserId];
 	else {
-		state = tables->targs[(int)tables->indicies[tables->offsets[
-				pt(stackTop->tree)->state] + 
-				(stackTop->tree->id - tables->keys[pt(stackTop->tree)->state<<1])]];
+		state = pdaRun->tables->targs[(int)pdaRun->tables->indicies[pdaRun->tables->offsets[
+				pt(pdaRun->stackTop->tree)->state] + 
+				(pdaRun->stackTop->tree->id - pdaRun->tables->keys[pt(pdaRun->stackTop->tree)->state<<1])]];
 	}
 	return state;
 }
@@ -593,7 +608,7 @@ parseError:
 					}
 					#endif
 					pdaRun->numRetry -= 1;
-					pdaRun->cs = pdaRun->stackTopTarget();
+					pdaRun->cs = stackTopTarget( pdaRun );
 					pdaRun->nextRegionInd = next;
 					return;
 				}
@@ -605,7 +620,7 @@ parseError:
 					}
 					#endif
 
-					pdaRun->cs = pdaRun->stackTopTarget();
+					pdaRun->cs = stackTopTarget( pdaRun );
 					goto _out;
 				}
 			}
@@ -713,7 +728,7 @@ parseError:
 				/* Transfer the retry from undoLel to input. */
 				pt(input->tree)->retry_lower = pt(undoLel->tree)->retry_upper;
 				pt(input->tree)->retry_upper = 0;
-				pt(input->tree)->state = pdaRun->stackTopTarget();
+				pt(input->tree)->state = stackTopTarget( pdaRun );
 			}
 
 			/* Free the reduced item. */

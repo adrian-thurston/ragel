@@ -657,7 +657,7 @@ void sendHandleError( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *in
 		parseError( inputStream, fsmRun, pdaRun, id, input->tree ) << "parse error" << endp;
 	}
 	else {
-		if ( pdaRun->isParserStopFinished() ) {
+		if ( isParserStopFinished( pdaRun ) ) {
 			#ifdef COLM_LOG_PARSE
 			if ( colm_log_parse ) {
 				cerr << "stopping the parse" << endl;
@@ -774,7 +774,7 @@ void sendEof( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRu
 	input->tree->id = pdaRun->tables->rtd->eofLelIds[pdaRun->parserId];
 
 	/* Set the state using the state of the parser. */
-	fsmRun->region = pdaRun->getNextRegion();
+	fsmRun->region = pdaRunGetNextRegion( pdaRun, 0 );
 	fsmRun->cs = fsmRun->tables->entryByRegion[fsmRun->region];
 
 	bool ctxDepParsing = fsmRun->prg->ctxDepParsing;
@@ -822,7 +822,7 @@ void newToken( PdaRun *pdaRun, FsmRun *fsmRun )
 	fsmRun->tokstart = 0;
 
 	/* Set the state using the state of the parser. */
-	fsmRun->region = pdaRun->getNextRegion();
+	fsmRun->region = pdaRunGetNextRegion( pdaRun, 0 );
 	fsmRun->cs = fsmRun->tables->entryByRegion[fsmRun->region];
 
 	#ifdef COLM_LOG_PARSE
@@ -1009,7 +1009,7 @@ long scanToken( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 
 void scannerError( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
 {
-	if ( pdaRun->getNextRegion( 1 ) != 0 ) {
+	if ( pdaRunGetNextRegion( pdaRun, 1 ) != 0 ) {
 		#ifdef COLM_LOG_PARSE
 		if ( colm_log_parse ) {
 			cerr << "scanner failed, trying next region" << endl;

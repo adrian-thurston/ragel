@@ -113,57 +113,21 @@ inline void initRevTreeIter( RevTreeIter *revTriter, const Ref *rootRef,
 	revTriter->ref.next = 0;
 }
 
-void initUserIter( UserIter *userIter, Tree **stackRoot, long argSize, long searchId );
-
-bool makeReverseCode( CodeVect *all, CodeVect &reverseCode );
-
 typedef RtVector<Tree*> Bindings;
 
 struct PdaRun
 {
-	PdaRun( Program *prg, PdaTables *tables, FsmRun *fsmRun, int parserId,
-			long stopTarget, bool revertOn )
-	:
-		prg(prg),
-		tables(tables), 
-		fsmRun(fsmRun),
-		parserId(parserId), 
-		stopParsing(false),
-		stopTarget(stopTarget),
-		queue(0),
-		queueLast(0),
-		revertOn(revertOn),
-		context(0),
-		consumed(0),
-		targetConsumed(-1)
-	{
-	}
-
 	int numRetry;
 	Kid *stackTop;
 	int errCount;
 	int cs;
 	int nextRegionInd;
 
-	/* Offset can be used to look at the next nextRegionInd. */
-	int getNextRegion( int offset = 0 )
-		{ return tables->tokenRegions[nextRegionInd+offset]; }
 
 	Program *prg;
 	PdaTables *tables;
 	FsmRun *fsmRun;
 	int parserId;
-
-	long stackTopTarget();
-	void commitKid( Tree **root, Kid *lel );
-	void commit();
-	bool isParserStopFinished();
-	void match( Kid *tree, Kid *pattern );
-
-	Kid *extractIgnore();
-
-	/* Report an error encountered by the parser. */
-	ostream &parseError( int tokId, Tree *tree );
 
 	/* Reused. */
 	CodeVect reverseCode;
@@ -180,7 +144,6 @@ struct PdaRun
 	bool revertOn;
 
 	Tree *context;
-	void clearContext( Tree **sp );
 
 	//bool fragStop;
 	bool stop;
@@ -189,7 +152,25 @@ struct PdaRun
 	long targetConsumed;
 };
 
-void initPdaRun( PdaRun *pdaRun, Tree *tree );
+void initUserIter( UserIter *userIter, Tree **stackRoot, long argSize, long searchId );
+
+bool makeReverseCode( CodeVect *all, CodeVect &reverseCode );
+
+
+void initPdaRun( PdaRun *pdaRun, Program *prg, PdaTables *tables,
+		FsmRun *fsmRun, int parserId, long stopTarget, bool revertOn, Tree *context );
+
+void clearContext( PdaRun *pdaRun, Tree **sp );
+Kid *extractIgnore( PdaRun *pdaRun );
+long stackTopTarget( PdaRun *pdaRun );
+void commitKid( PdaRun *pdaRun, Tree **root, Kid *lel );
+void runCommit( PdaRun *pdaRun );
+bool isParserStopFinished( PdaRun *pdaRun );
+void pdaRunMatch(  PdaRun *pdaRun, Kid *tree, Kid *pattern );
+
+
+/* Offset can be used to look at the next nextRegionInd. */
+int pdaRunGetNextRegion( PdaRun *pdaRun, int offset );
 
 void cleanParser( Tree **root, PdaRun *pdaRun );
 void ignore( PdaRun *pdaRun, Tree *tree );
