@@ -56,6 +56,68 @@ struct ObjField;
 struct TransBlock;
 struct CodeBlock;
 
+/* 
+ * Code Vector
+ */
+struct CodeVect : public Vector<Code>
+{
+	void appendHalf( Half half )
+	{
+		/* not optimal. */
+		append( half & 0xff );
+		append( (half>>8) & 0xff );
+	}
+	
+	void appendWord( Word word )
+	{
+		/* not optimal. */
+		append( word & 0xff );
+		append( (word>>8) & 0xff );
+		append( (word>>16) & 0xff );
+		append( (word>>24) & 0xff );
+		#if SIZEOF_LONG == 8
+		append( (word>>32) & 0xff );
+		append( (word>>40) & 0xff );
+		append( (word>>48) & 0xff );
+		append( (word>>56) & 0xff );
+		#endif
+	}
+
+	void setHalf( long pos, Half half )
+	{
+		/* not optimal. */
+		data[pos] = half & 0xff;
+		data[pos+1] = (half>>8) & 0xff;
+	}
+	
+	void insertHalf( long pos, Half half )
+	{
+		/* not optimal. */
+		insert( pos, half & 0xff );
+		insert( pos+1, (half>>8) & 0xff );
+	}
+
+	void insertWord( long pos, Word word )
+	{
+		/* not at all optimal. */
+		insert( pos, word & 0xff );
+		insert( pos+1, (word>>8) & 0xff );
+		insert( pos+2, (word>>16) & 0xff );
+		insert( pos+3, (word>>24) & 0xff );
+		#if SIZEOF_LONG == 8
+		insert( pos+4, (word>>32) & 0xff );
+		insert( pos+5, (word>>40) & 0xff );
+		insert( pos+6, (word>>48) & 0xff );
+		insert( pos+7, (word>>56) & 0xff );
+		#endif
+	}
+	
+	void insertTree( long pos, Tree *tree )
+		{ insertWord( pos, (Word) tree ); }
+};
+
+
+
 /* Types of builtin machines. */
 enum BuiltinMachine
 {

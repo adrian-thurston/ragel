@@ -631,7 +631,7 @@ void runProgram( Program *prg )
 	 */
 
 	if ( prg->rtd->rootCodeLen > 0 ) {
-		CodeVect reverseCode;
+		RtCodeVect reverseCode;
 		Execution execution;
 		initExecution( &execution, prg, &reverseCode, 0, 0, prg->rtd->rootCode, 0, 0, 0, 0 );
 		execute( &execution, root );
@@ -652,7 +652,7 @@ void runProgram( Program *prg )
 	clearProgram( prg, vm_stack, root );
 }
 
-void initExecution( Execution *exec, Program *prg, CodeVect *reverseCode,
+void initExecution( Execution *exec, Program *prg, RtCodeVect *reverseCode,
 		PdaRun *pdaRun, FsmRun *fsmRun, Code *code, Tree *lhs,
 		long genId, Head *matchText, char **captures )
 {
@@ -674,7 +674,7 @@ void initExecution( Execution *exec, Program *prg, CodeVect *reverseCode,
 	assert( lhs == 0 || lhs->refs == 1 );
 }
 
-void rcodeDownrefAll( Program *prg, Tree **sp, CodeVect *rev )
+void rcodeDownrefAll( Program *prg, Tree **sp, RtCodeVect *rev )
 {
 	while ( rev->length() > 0 ) {
 		/* Read the length */
@@ -992,7 +992,7 @@ void execute( Execution *exec, Tree **sp )
 		exec->lhs = (Tree*) pop();
 }
 
-bool makeReverseCode( CodeVect *all, CodeVect &reverseCode )
+bool makeReverseCode( RtCodeVect *all, RtCodeVect &reverseCode )
 {
 	/* Do we need to revert the left hand side? */
 
@@ -1023,7 +1023,7 @@ bool makeReverseCode( CodeVect *all, CodeVect &reverseCode )
 	return true;
 }
 
-void rexecute( Execution *exec, Tree **root, CodeVect *allRev )
+void rexecute( Execution *exec, Tree **root, RtCodeVect *allRev )
 {
 	/* Read the length */
 	Code *prcode = allRev->data + allRev->length() - SIZEOF_WORD;

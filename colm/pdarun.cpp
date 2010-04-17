@@ -128,7 +128,7 @@ void initPdaRun( PdaRun *pdaRun, Program *prg, PdaTables *tables,
 	/* Bindings are indexed at 1. Need a no-binding. */
 	pdaRun->bindings.push(0);
 
-	pdaRun->allReverseCode = new CodeVect;
+	pdaRun->allReverseCode = new RtCodeVect;
 
 	pdaRun->context = splitTree( pdaRun->prg, context );
 }

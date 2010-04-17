@@ -130,8 +130,8 @@ struct PdaRun
 	int parserId;
 
 	/* Reused. */
-	CodeVect reverseCode;
-	CodeVect *allReverseCode;
+	RtCodeVect reverseCode;
+	RtCodeVect *allReverseCode;
 
 	bool stopParsing;
 	long stopTarget;
@@ -154,7 +154,7 @@ struct PdaRun
 
 void initUserIter( UserIter *userIter, Tree **stackRoot, long argSize, long searchId );
 
-bool makeReverseCode( CodeVect *all, CodeVect &reverseCode );
+bool makeReverseCode( RtCodeVect *all, RtCodeVect &reverseCode );
 
 
 void initPdaRun( PdaRun *pdaRun, Program *prg, PdaTables *tables,

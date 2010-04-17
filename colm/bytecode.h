@@ -411,10 +411,12 @@ void setAttr( Tree *tree, long pos, Tree *val );
 Tree *getAttr( Tree *tree, long pos );
 Kid *getAttrKid( Tree *tree, long pos );
 
+/* Location information. */
+
 /* 
  * Code Vector
  */
-struct CodeVect : public RtVector<Code>
+struct RtCodeVect : public RtVector<Code>
 {
 	void appendHalf( Half half )
 	{
@@ -471,8 +473,6 @@ struct CodeVect : public RtVector<Code>
 		{ insertWord( pos, (Word) tree ); }
 };
 
-/* Location information. */
-
 
 /*
  * Strings
@@ -507,7 +507,7 @@ Head *stringSprintf( Program *prg, Str *format, Int *integer );
 Head *intToStr( Program *prg, Word i );
 
 void rcodeDownref( Program *prg, Tree **sp, Code *instr );
-void rcodeDownrefAll( Program *prg, Tree **sp, CodeVect *cv );
+void rcodeDownrefAll( Program *prg, Tree **sp, RtCodeVect *cv );
 void commitFull( Tree **sp, PdaRun *parser, long commitReduce );
 Tree *getParsedRoot( PdaRun *pdaRun, bool stop );
 
@@ -612,17 +612,17 @@ struct Execution
 	bool reject;
 
 	/* Reverse code. */
-	CodeVect *reverseCode;
+	RtCodeVect *reverseCode;
 	long rcodeUnitLen;
 	char **captures;
 
 };
 
-void initExecution( Execution *exec, Program *prg, CodeVect *reverseCode,
+void initExecution( Execution *exec, Program *prg, RtCodeVect *reverseCode,
 		PdaRun *pdaRun, FsmRun *fsmRun, Code *code, Tree *lhs,
 		long genId, Head *matchText, char **captures );
 
-void rexecute( Execution *exec, Tree **sp, CodeVect *allRev );
+void rexecute( Execution *exec, Tree **sp, RtCodeVect *allRev );
 void execute( Execution *exec, Tree **sp );
 void execute( Execution *exec, Tree **sp, Code *instr );
 
