@@ -22,10 +22,8 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "bytecode.h"
-#include "pdarun.h"
+#include "pdarun2.h"
 #include "pool.h"
-
 
 void initPoolAlloc( PoolAlloc *poolAlloc, int sizeofT )
 {
@@ -220,7 +218,7 @@ long listElNumLost( Program *prg )
  * MapEl
  */
 
-extern "C" MapEl *mapElAllocate( Program *prg )
+MapEl *mapElAllocate( Program *prg )
 {
 	return (MapEl*) poolAllocAllocate( &prg->mapElPool );
 }

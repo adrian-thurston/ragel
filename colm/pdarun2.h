@@ -371,24 +371,24 @@ typedef struct _PdaTables
 } PdaTables;
 
 
-struct PoolBlock
+typedef struct _PoolBlock
 {
 	void *data;
-	struct PoolBlock *next;
-};
+	struct _PoolBlock *next;
+} PoolBlock;
 
-struct PoolItem
+typedef struct _PoolItem
 {
-	struct PoolItem *next;
-};
+	struct _PoolItem *next;
+} PoolItem;
 
-struct PoolAlloc
+typedef struct _PoolAlloc
 {
-	struct PoolBlock *head;
+	PoolBlock *head;
 	long nextel;
-	struct PoolItem *pool;
+	PoolItem *pool;
 	int sizeofT;
-};
+} PoolAlloc;
 
 typedef struct _Program
 {
@@ -399,13 +399,13 @@ typedef struct _Program
 	RuntimeData *rtd;
 	Tree *global;
 
-	struct PoolAlloc kidPool;
-	struct PoolAlloc treePool;
-	struct PoolAlloc parseTreePool;
-	struct PoolAlloc listElPool;
-	struct PoolAlloc mapElPool;
-	struct PoolAlloc headPool;
-	struct PoolAlloc locationPool;
+	PoolAlloc kidPool;
+	PoolAlloc treePool;
+	PoolAlloc parseTreePool;
+	PoolAlloc listElPool;
+	PoolAlloc mapElPool;
+	PoolAlloc headPool;
+	PoolAlloc locationPool;
 
 	Tree *trueVal;
 	Tree *falseVal;

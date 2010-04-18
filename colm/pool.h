@@ -25,16 +25,14 @@
 /* Allocation, number of items. */
 #define FRESH_BLOCK 8128                    
 
-void initPoolAlloc( struct PoolAlloc *poolAlloc, int sizeofT );
+#include "pdarun2.h"
+#include "map.h"
 
-typedef struct _Program Program;
-typedef struct _Kid Kid;
-typedef struct _Tree Tree;
-typedef struct _ParseTree ParseTree;
-typedef struct _ListEl ListEl;
-typedef struct _MapEl MapEl;
-typedef struct _Head Head;
-typedef struct _Location Location;
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void initPoolAlloc( PoolAlloc *poolAlloc, int sizeofT );
 
 Kid *kidAllocate( Program *prg );
 void kidFree( Program *prg, Kid *el );
@@ -56,7 +54,7 @@ void listElFree( Program *prg, ListEl *el );
 void listElClear( Program *prg );
 long listElNumLost( Program *prg );
 
-extern "C" MapEl *mapElAllocate( Program *prg );
+MapEl *mapElAllocate( Program *prg );
 void mapElFree( Program *prg, MapEl *el );
 void mapElClear( Program *prg );
 long mapElNumLost( Program *prg );
@@ -70,5 +68,9 @@ Location *locationAllocate( Program *prg );
 void locationFree( Program *prg, Location *el );
 void locationClear( Program *prg );
 long locationNumLost( Program *prg );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
