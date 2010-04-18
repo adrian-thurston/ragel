@@ -21,6 +21,7 @@
 
 /* Nothing Yet */
 
+#include "pdarun2.h"
 #include "map.h"
 
 void mapListAbandon( Map *map )
@@ -476,5 +477,31 @@ void mapRemoveEl( Map *map, MapEl *element, MapEl *filler )
 	return;
 }
 
+/* Recursive worker for tree copying. */
+MapEl *mapCopyBranch( Program *prg, Map *map, MapEl *el, Kid *oldNextDown, Kid **newNextDown )
+{
+	/* Duplicate element. Either the base element's copy constructor or defaul
+	 * constructor will get called. Both will suffice for initting the
+	 * pointers to null when they need to be. */
+	MapEl *newEl = mapElAllocate( prg );
 
+	if ( (Kid*)el == oldNextDown )
+		*newNextDown = (Kid*)newEl;
+
+	/* If the left tree is there, copy it. */
+	if ( newEl->left ) {
+		newEl->left = mapCopyBranch( prg, map, newEl->left, oldNextDown, newNextDown );
+		newEl->left->parent = newEl;
+	}
+
+	mapListAddAfter( map, map->tail, newEl );
+
+	/* If the right tree is there, copy it. */
+	if ( newEl->right ) {
+		newEl->right = mapCopyBranch( prg, map, newEl->right, oldNextDown, newNextDown );
+		newEl->right->parent = newEl;
+	}
+
+	return newEl;
+}
 

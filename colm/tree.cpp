@@ -920,7 +920,7 @@ Map *copyMap( Program *prg, Map *map, Kid *oldNextDown, Kid *&newNextDown )
 	/* If there is a root, copy the tree. */
 	if ( map->root != 0 ) {
 		newMap->root = mapCopyBranch( prg, newMap, map->root, 
-				oldNextDown, newNextDown );
+				oldNextDown, &newNextDown );
 	}
 
 	for ( MapEl *el = newMap->head; el != 0; el = el->next ) {
@@ -1594,7 +1594,7 @@ Tree *treeSearch( Program *prg, Tree *tree, long id )
 
 bool mapInsert( Program *prg, Map *map, Tree *key, Tree *element )
 {
-	MapEl *mapEl = mapInsert( prg, map, key );
+	MapEl *mapEl = mapInsertKey( prg, map, key, 0 );
 
 	if ( mapEl != 0 ) {
 		mapEl->tree = element;
@@ -1606,7 +1606,7 @@ bool mapInsert( Program *prg, Map *map, Tree *key, Tree *element )
 
 void mapUnremove( Program *prg, Map *map, Tree *key, Tree *element )
 {
-	MapEl *mapEl = mapInsert( prg, map, key );
+	MapEl *mapEl = mapInsertKey( prg, map, key, 0 );
 	assert( mapEl != 0 );
 	mapEl->tree = element;
 }
@@ -1623,7 +1623,7 @@ Tree *mapStore( Program *prg, Map *map, Tree *key, Tree *element )
 {
 	Tree *oldTree = 0;
 	MapEl *elInTree = 0;
-	MapEl *mapEl = mapInsert( prg, map, key, &elInTree );
+	MapEl *mapEl = mapInsertKey( prg, map, key, &elInTree );
 
 	if ( mapEl != 0 )
 		mapEl->tree = element;

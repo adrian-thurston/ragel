@@ -24,45 +24,8 @@
 
 MapEl *mapRebalance( Map *map, MapEl *n );
 
-/* Recursive worker for tree copying. */
-MapEl *mapCopyBranch( Program *prg, Map *map, MapEl *el, Kid *oldNextDown, Kid *&newNextDown )
-{
-	/* Duplicate element. Either the base element's copy constructor or defaul
-	 * constructor will get called. Both will suffice for initting the
-	 * pointers to null when they need to be. */
-	MapEl *newEl = mapElAllocate( prg );
 
-	if ( (Kid*)el == oldNextDown )
-		newNextDown = (Kid*)newEl;
-
-	/* If the left tree is there, copy it. */
-	if ( newEl->left ) {
-		newEl->left = mapCopyBranch( prg, map, newEl->left, oldNextDown, newNextDown );
-		newEl->left->parent = newEl;
-	}
-
-	mapListAddAfter( map, map->tail, newEl );
-
-	/* If the right tree is there, copy it. */
-	if ( newEl->right ) {
-		newEl->right = mapCopyBranch( prg, map, newEl->right, oldNextDown, newNextDown );
-		newEl->right->parent = newEl;
-	}
-
-	return newEl;
-}
-
-/**
- * \brief Insert an existing element into the tree. 
- *
- * If the insert succeeds and lastFound is given then it is set to the element
- * inserted. If the insert fails then lastFound is set to the existing element in
- * the tree that has the same key as element. If the element's avl pointers are
- * already in use then undefined behaviour results.
- * 
- * \returns The element inserted upon success, null upon failure.
- */
-MapEl *mapInsert( Program *prg, Map *map, MapEl *element, MapEl **lastFound )
+MapEl *mapInsertEl( Program *prg, Map *map, MapEl *element, MapEl **lastFound )
 {
 	long keyRelation;
 	MapEl *curEl = map->root, *parentEl = 0;
@@ -112,7 +75,7 @@ MapEl *mapInsert( Program *prg, Map *map, MapEl *element, MapEl **lastFound )
  * 
  * \returns The new element upon success, null upon failure.
  */
-MapEl *mapInsert( Program *prg, Map *map, Tree *key, MapEl **lastFound )
+MapEl *mapInsertKey( Program *prg, Map *map, Tree *key, MapEl **lastFound )
 {
 	long keyRelation;
 	MapEl *curEl = map->root, *parentEl = 0;
@@ -203,7 +166,7 @@ MapEl *mapDetachByKey( Program *prg, Map *map, Tree *key )
  *
  * \returns True if the element was found and deleted, false otherwise.
  */
-bool mapImplRemove( Program *prg, Map *map, Tree *key )
+bool mapImplRemoveKey( Program *prg, Map *map, Tree *key )
 {
 	/* Assume not found. */
 	bool retVal = false;
@@ -225,7 +188,7 @@ bool mapImplRemove( Program *prg, Map *map, Tree *key )
  *
  * If the element is not in the tree then undefined behaviour results.
  */
-void mapImplRemove( Program *prg, Map *map, MapEl *element )
+void mapImplRemoveEl( Program *prg, Map *map, MapEl *element )
 {
 	/* Detach and delete. */
 	mapDetach( prg, map, element );

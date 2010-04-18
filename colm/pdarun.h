@@ -35,49 +35,21 @@ typedef struct _Tree Tree;
 
 #include "map.h"
 
-typedef struct _PdaRun
-{
-	int numRetry;
-	Kid *stackTop;
-	int errCount;
-	int cs;
-	int nextRegionInd;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-	Program *prg;
-	PdaTables *tables;
-	FsmRun *fsmRun;
-	int parserId;
+MapEl *mapCopyBranch( Program *prg, Map *map, MapEl *el, _Kid *oldNextDown, Kid **newNextDown );
 
-	/* Reused. */
-	RtCodeVect reverseCode;
-	RtCodeVect *allReverseCode;
+#ifdef __cplusplus
+}
+#endif
 
-	bool stopParsing;
-	long stopTarget;
-
-	Kid *accumIgnore;
-	Kid *queue, *queueLast;
-
-	Bindings *bindings;
-
-	bool revertOn;
-
-	Tree *context;
-
-	//bool fragStop;
-	bool stop;
-
-	long consumed;
-	long targetConsumed;
-} PdaRun;
-
-
-MapEl *mapCopyBranch( Program *prg, Map *map, MapEl *el, Kid *oldNextDown, Kid *&newNextDown );
-MapEl *mapInsert( Program *prg, Map *map, MapEl *element, MapEl **lastFound = 0 );
-MapEl *mapInsert( Program *prg, Map *map, Tree *key, MapEl **lastFound = 0 );
+MapEl *mapInsertEl( Program *prg, Map *map, MapEl *element, MapEl **lastFound );
+MapEl *mapInsertKey( Program *prg, Map *map, Tree *key, MapEl **lastFound );
 MapEl *mapImplFind( Program *prg, Map *map, Tree *key );
-void mapImplRemove( Program *prg, Map *map, MapEl *element );
-bool mapImplRemove( Program *prg, Map *map, Tree *key );
+void mapImplRemoveEl( Program *prg, Map *map, MapEl *element );
+bool mapImplRemoveKey( Program *prg, Map *map, Tree *key );
 MapEl *mapDetachByKey( Program *prg, Map *map, Tree *key );
 MapEl *mapDetach( Program *prg, Map *map, MapEl *element );
 
@@ -88,21 +60,6 @@ MapEl *mapDetach( Program *prg, Map *map, MapEl *element );
 void initTreeIter( TreeIter *treeIter, const Ref *rootRef, int searchId, Tree **stackRoot );
 void initRevTreeIter( RevTreeIter *revTriter, const Ref *rootRef, 
 		int searchId, Tree **stackRoot, int children );
-
-typedef struct _Accum
-{
-	/* Must overlay Tree. */
-	short id;
-	unsigned short flags;
-	long refs;
-	Kid *child;
-
-	GenericInfo *genericInfo;
-
-	PdaRun *pdaRun;
-	FsmRun *fsmRun;
-	Stream *stream;
-} Accum;
 
 
 void initUserIter( UserIter *userIter, Tree **stackRoot, long argSize, long searchId );

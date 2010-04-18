@@ -22,8 +22,6 @@
 #ifndef _MAP_H
 #define _MAP_H
 
-typedef struct _GenericInfo GenericInfo;
-typedef struct _Tree Tree;
 
 typedef struct _MapEl
 {
@@ -69,6 +67,7 @@ MapEl *mapFindFirstUnbalGP( Map *map, MapEl *element );
 MapEl *mapFindFirstUnbalEl( Map *map, MapEl *element );
 void mapRemoveEl( Map *map, MapEl *element, MapEl *filler );
 void mapReplaceEl( Map *map, MapEl *element, MapEl *replacement );
+
 
 #if defined(__cplusplus)
 }

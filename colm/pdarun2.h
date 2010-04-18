@@ -13,6 +13,16 @@ typedef unsigned long Word;
 typedef unsigned long Half;
 struct Bindings;
 
+typedef struct _RtCodeVect
+{
+	Code *data;
+	long tabLen;
+	long allocLen;
+
+	/* FIXME: leak when freed. */
+} RtCodeVect;
+
+
 typedef struct _File
 {
 	struct _File *prev;
@@ -430,6 +440,101 @@ typedef struct _RevTreeIter
 	long children;
 	Kid **cur;
 } RevTreeIter;
+
+typedef struct _PdaRun
+{
+	int numRetry;
+	Kid *stackTop;
+	int errCount;
+	int cs;
+	int nextRegionInd;
+
+	Program *prg;
+	PdaTables *tables;
+	FsmRun *fsmRun;
+	int parserId;
+
+	/* Reused. */
+	RtCodeVect reverseCode;
+	RtCodeVect *allReverseCode;
+
+	int stopParsing;
+	long stopTarget;
+
+	Kid *accumIgnore;
+	Kid *queue, *queueLast;
+
+	struct Bindings *bindings;
+
+	int revertOn;
+
+	Tree *context;
+
+	//bool fragStop;
+	int stop;
+
+	long consumed;
+	long targetConsumed;
+} PdaRun;
+
+typedef struct AccumStruct
+{
+	/* Must overlay Tree. */
+	short id;
+	unsigned short flags;
+	long refs;
+	Kid *child;
+
+	GenericInfo *genericInfo;
+
+	PdaRun *pdaRun;
+	FsmRun *fsmRun;
+	Stream *stream;
+} Accum;
+
+void rtCodeVectReplace( RtCodeVect *vect, long pos, const Code *val, long len );
+void rtCodeVectEmpty( RtCodeVect *vect );
+void rtCodeVectRemove( RtCodeVect *vect, long pos, long len );
+
+void initRtCodeVect( RtCodeVect *codeVect );
+
+//inline static void remove( RtCodeVect *vect, long pos );
+inline static void append( RtCodeVect *vect, const Code val );
+inline static void append2( RtCodeVect *vect, const Code *val, long len );
+inline static void appendHalf( RtCodeVect *vect, Half half );
+inline static void appendWord( RtCodeVect *vect, Word word );
+
+inline static void append2( RtCodeVect *vect, const Code *val, long len )
+{
+	rtCodeVectReplace( vect, vect->tabLen, val, len );
+}
+
+inline static void append( RtCodeVect *vect, const Code val )
+{
+	rtCodeVectReplace( vect, vect->tabLen, &val, 1 );
+}
+
+inline static void appendHalf( RtCodeVect *vect, Half half )
+{
+	/* not optimal. */
+	append( vect, half & 0xff );
+	append( vect, (half>>8) & 0xff );
+}
+
+inline static void appendWord( RtCodeVect *vect, Word word )
+{
+	/* not optimal. */
+	append( vect, word & 0xff );
+	append( vect, (word>>8) & 0xff );
+	append( vect, (word>>16) & 0xff );
+	append( vect, (word>>24) & 0xff );
+	#if SIZEOF_LONG == 8
+	append( vect, (word>>32) & 0xff );
+	append( vect, (word>>40) & 0xff );
+	append( vect, (word>>48) & 0xff );
+	append( vect, (word>>56) & 0xff );
+	#endif
+}
 
 
 #ifdef __cplusplus

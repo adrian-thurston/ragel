@@ -220,7 +220,7 @@ long listElNumLost( Program *prg )
  * MapEl
  */
 
-MapEl *mapElAllocate( Program *prg )
+extern "C" MapEl *mapElAllocate( Program *prg )
 {
 	return (MapEl*) poolAllocAllocate( &prg->mapElPool );
 }

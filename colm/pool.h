@@ -56,7 +56,7 @@ void listElFree( Program *prg, ListEl *el );
 void listElClear( Program *prg );
 long listElNumLost( Program *prg );
 
-MapEl *mapElAllocate( Program *prg );
+extern "C" MapEl *mapElAllocate( Program *prg );
 void mapElFree( Program *prg, MapEl *el );
 void mapElClear( Program *prg );
 long mapElNumLost( Program *prg );
