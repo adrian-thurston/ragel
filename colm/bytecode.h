@@ -409,41 +409,6 @@ void setAttr( Tree *tree, long pos, Tree *val );
 Tree *getAttr( Tree *tree, long pos );
 Kid *getAttrKid( Tree *tree, long pos );
 
-/* Location information. */
-
-/* 
- * Code Vector
- */
-struct RtCodeVect : public RtVector<Code>
-{
-	void appendHalf( Half half )
-	{
-		/* not optimal. */
-		append( half & 0xff );
-		append( (half>>8) & 0xff );
-	}
-	
-	void appendWord( Word word )
-	{
-		/* not optimal. */
-		append( word & 0xff );
-		append( (word>>8) & 0xff );
-		append( (word>>16) & 0xff );
-		append( (word>>24) & 0xff );
-		#if SIZEOF_LONG == 8
-		append( (word>>32) & 0xff );
-		append( (word>>40) & 0xff );
-		append( (word>>48) & 0xff );
-		append( (word>>56) & 0xff );
-		#endif
-	}
-};
-
-
-/*
- * Strings
- */
-
 struct TreePair
 {
 	TreePair() : key(0), val(0) {}

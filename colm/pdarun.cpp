@@ -151,6 +151,9 @@ void initPdaRun( PdaRun *pdaRun, Program *prg, PdaTables *tables,
 	initBindings( pdaRun );
 
 	pdaRun->allReverseCode = new RtCodeVect;
+	initRtCodeVect( pdaRun->allReverseCode );
+
+	initRtCodeVect( &pdaRun->reverseCode );
 
 	pdaRun->context = splitTree( pdaRun->prg, context );
 }

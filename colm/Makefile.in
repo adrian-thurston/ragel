@@ -62,7 +62,7 @@ COLM_SRC = \
 	ctinput.cpp \
 
 RUNTIME_SRC = fsmrun.cpp pdarun.cpp bytecode.cpp \
-	map.cpp string.cpp tree.cpp pool.cpp
+	map.cpp string.cpp tree.cpp pool.cpp codevect.cpp
 
 RUNTIME_SRC_C = map2.c fsmrun2.c list.c input.c debug.c
 

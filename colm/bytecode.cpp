@@ -633,6 +633,7 @@ void runProgram( Program *prg )
 	if ( prg->rtd->rootCodeLen > 0 ) {
 		RtCodeVect reverseCode;
 		Execution execution;
+		initRtCodeVect( &reverseCode );
 		initExecution( &execution, prg, &reverseCode, 0, 0, prg->rtd->rootCode, 0, 0, 0, 0 );
 		execute( &execution, root );
 

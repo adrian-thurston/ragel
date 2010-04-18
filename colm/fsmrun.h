@@ -42,7 +42,6 @@ struct exit_object { };
 extern exit_object endp;
 void operator<<( std::ostream &out, exit_object & );
 
-
 #include "fsmrun2.h"
 
 void execAction( FsmRun *fsmRun, GenAction *genAction );
