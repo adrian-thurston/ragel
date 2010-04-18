@@ -295,7 +295,6 @@ void sendBackIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inp
 	}
 }
 
-
 void sendBack( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input )
 {
 	#ifdef COLM_LOG_PARSE
@@ -367,11 +366,7 @@ void sendBack( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStre
 			inputStream->eofSent = false;
 
 		/* If the item is bound then store remove it from the bindings array. */
-		Tree *lastBound = pdaRun->bindings.top();
-		if ( lastBound == input->tree ) {
-			pdaRun->bindings.pop();
-			treeDownref( fsmRun->prg, sp, input->tree );
-		}
+		unbind( fsmRun->prg, sp, pdaRun, input->tree );
 	}
 
 	if ( pdaRun->consumed == pdaRun->targetConsumed ) {
@@ -481,6 +476,7 @@ void sendQueuedTokens( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *i
 	}
 }
 
+
 Kid *makeToken( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, int id,
 		Head *tokdata, bool namedLangEl, int bindId )
 {
@@ -515,12 +511,8 @@ Kid *makeToken( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, int id
 			setAttr( input->tree, ca->offset, string );
 		}
 	}
-	
-	/* If the item is bound then store it in the bindings array. */
-	if ( bindId > 0 ) {
-		pdaRun->bindings.push( input->tree );
-		treeUpref( input->tree );
-	}
+
+	makeTokenPushBinding( pdaRun, bindId, input->tree );
 
 	return input;
 }

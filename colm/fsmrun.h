@@ -75,4 +75,8 @@ void ignore( PdaRun *pdaRun, Tree *tree );
 void incrementConsumed( PdaRun *pdaRun );
 void decrementConsumed( PdaRun *pdaRun );
 
+void initBindings( PdaRun *pdaRun );
+void makeTokenPushBinding( PdaRun *pdaRun, int bindId, Tree *tree );
+void unbind( Program *prg, Tree **sp, PdaRun *pdaRun, Tree *tree );
+
 #endif

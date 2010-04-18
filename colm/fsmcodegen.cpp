@@ -1061,6 +1061,9 @@ void FsmCodeGen::writeCode()
 	 * should use the preprocessor to make these go away. */
 	out <<
 		"void sendNamedLangEl( Tree **, PdaRun *, FsmRun *, InputStream * ) {}\n"
+		"void initBindings( PdaRun *pdaRun ) {}\n"
+		"void makeTokenPushBinding( PdaRun *pdaRun, int bindId, Tree *tree ) {}\n"
+		"void unbind( Program *prg, Tree **sp, PdaRun *pdaRun, Tree *tree ) {}\n"
 		"extern \"C\" void initStaticFuncs() {}\n"
 		"extern \"C\" void initPatternFuncs() {}\n"
 		"extern \"C\" void initReplFuncs() {}\n"

@@ -1596,7 +1596,7 @@ void mapNodes( Program *prg, int &count, Kid *kid )
 	}
 }
 
-void fillNodes( Program *prg, Bindings &bindings, long &bindId, 
+void fillNodes( Program *prg, Bindings *bindings, long &bindId, 
 		PatReplNode *nodes, Kid *kid )
 {
 	if ( kid != 0 ) {
@@ -1652,7 +1652,7 @@ void fillNodes( Program *prg, Bindings &bindings, long &bindId,
 		/* Since the parser is bottom up the bindings are in a bottom up
 		 * traversal order. Check after recursing. */
 		node.bindId = 0;
-		if ( bindings.data[bindId] == kid->tree ) {
+		if ( bindings->data[bindId] == kid->tree ) {
 			/* Remember that binding ids are indexed from one. */
 			node.bindId = bindId++;
 
@@ -1688,7 +1688,7 @@ void ParseData::fillInPatterns( Program *prg )
 
 		/* BindIds are indexed base one. */
 		runtimeData->patReplInfo[pat->patRepId].numBindings = 
-				pat->pdaRun->bindings.length() - 1;
+				pat->pdaRun->bindings->length() - 1;
 
 		/* Init the bind */
 		long bindId = 1;
@@ -1702,7 +1702,7 @@ void ParseData::fillInPatterns( Program *prg )
 
 		/* BindIds are indexed base one. */
 		runtimeData->patReplInfo[repl->patRepId].numBindings = 
-				repl->pdaRun->bindings.length() - 1;
+				repl->pdaRun->bindings->length() - 1;
 
 		long bindId = 1;
 		fillNodes( prg, repl->pdaRun->bindings, bindId,

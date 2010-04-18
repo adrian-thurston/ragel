@@ -361,3 +361,28 @@ void sendNamedLangEl( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *in
 	sendHandleError( sp, pdaRun, fsmRun, inputStream, input );
 }
 
+void initBindings( PdaRun *pdaRun )
+{
+	/* Bindings are indexed at 1. Need a no-binding. */
+	pdaRun->bindings = new Bindings;
+	pdaRun->bindings->push(0);
+}
+
+void makeTokenPushBinding( PdaRun *pdaRun, int bindId, Tree *tree )
+{
+	/* If the item is bound then store it in the bindings array. */
+	if ( bindId > 0 ) {
+		pdaRun->bindings->push( tree );
+		treeUpref( tree );
+	}
+}
+
+void unbind( Program *prg, Tree **sp, PdaRun *pdaRun, Tree *tree )
+{
+	Tree *lastBound = pdaRun->bindings->top();
+	if ( lastBound == tree ) {
+		pdaRun->bindings->pop();
+		treeDownref( prg, sp, tree );
+	}
+}
+

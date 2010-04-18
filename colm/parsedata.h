@@ -68,6 +68,13 @@ struct ProdElList;
 struct PdaLiteral;
 struct Definition;
 
+/* A pointer to this is in PdaRun, but it's specification is not known by the
+ * runtime code. The runtime functions that access it are defined in
+ * ctinput.cpp and stubbed in fsmcodegen.cpp */
+struct Bindings
+	: public Vector<Tree*>
+{};
+
 struct DefListEl { Definition *prev, *next; };
 struct LelDefListEl { Definition *prev, *next; };
 typedef Vector< KlangEl* > KlangElVect;

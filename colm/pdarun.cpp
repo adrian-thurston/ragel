@@ -125,8 +125,7 @@ void initPdaRun( PdaRun *pdaRun, Program *prg, PdaTables *tables,
 	pdaRun->stopParsing = false;
 	pdaRun->accumIgnore = 0;
 
-	/* Bindings are indexed at 1. Need a no-binding. */
-	pdaRun->bindings.push(0);
+	initBindings( pdaRun );
 
 	pdaRun->allReverseCode = new RtCodeVect;
 

@@ -113,7 +113,7 @@ inline void initRevTreeIter( RevTreeIter *revTriter, const Ref *rootRef,
 	revTriter->ref.next = 0;
 }
 
-typedef RtVector<Tree*> Bindings;
+struct Bindings;
 
 struct PdaRun
 {
@@ -139,7 +139,7 @@ struct PdaRun
 	Kid *accumIgnore;
 	Kid *queue, *queueLast;
 
-	Bindings bindings;
+	Bindings *bindings;
 
 	bool revertOn;
 
