@@ -32,97 +32,16 @@
 using std::ostream;
 
 typedef struct _Tree Tree;
-struct ParseData;
-struct KlangEl;
-struct InputStreamAccum;
 
 #include "map.h"
 
-MapEl *mapCopyBranch( Program *prg, Map *map, MapEl *el, Kid *oldNextDown, Kid *&newNextDown );
-MapEl *mapInsert( Program *prg, Map *map, MapEl *element, MapEl **lastFound = 0 );
-MapEl *mapInsert( Program *prg, Map *map, Tree *key, MapEl **lastFound = 0 );
-MapEl *mapImplFind( Program *prg, Map *map, Tree *key );
-void mapImplRemove( Program *prg, Map *map, MapEl *element );
-bool mapImplRemove( Program *prg, Map *map, Tree *key );
-MapEl *mapDetachByKey( Program *prg, Map *map, Tree *key );
-MapEl *mapDetach( Program *prg, Map *map, MapEl *element );
-
-typedef struct _Accum
-{
-	/* Must overlay Tree. */
-	short id;
-	unsigned short flags;
-	long refs;
-	Kid *child;
-
-	GenericInfo *genericInfo;
-
-	PdaRun *pdaRun;
-	FsmRun *fsmRun;
-	Stream *stream;
-} Accum;
-
-/*
- * Iterators.
- */
-
-struct TreeIter
-{
-	Ref rootRef;
-	Ref ref;
-	long searchId;
-	Tree **stackRoot;
-	long stackSize;
-};
-
-inline void initTreeIter( TreeIter *treeIter, const Ref *rootRef, int searchId, Tree **stackRoot )
-{
-	treeIter->rootRef = *rootRef;
-	treeIter->searchId = searchId;
-	treeIter->stackRoot = stackRoot;
-	treeIter->stackSize = 0;
-	treeIter->ref.kid = 0;
-	treeIter->ref.next = 0;
-}
-
-/* This must overlay tree iter because some of the same bytecodes are used. */
-struct RevTreeIter
-{
-	Ref rootRef;
-	Ref ref;
-	long searchId;
-	Tree **stackRoot;
-	long stackSize;
-
-	/* For detecting a split at the leaf. */
-	Kid *kidAtYield;
-	long children;
-	Kid **cur;
-};
-
-inline void initRevTreeIter( RevTreeIter *revTriter, const Ref *rootRef, 
-		int searchId, Tree **stackRoot, int children )
-{
-	revTriter->rootRef = *rootRef;
-	revTriter->searchId = searchId;
-	revTriter->stackRoot = stackRoot;
-	revTriter->stackSize = children;
-	revTriter->kidAtYield = 0;
-	revTriter->children = children;
-	revTriter->ref.kid = 0;
-	revTriter->ref.next = 0;
-}
-
-struct Bindings;
-
-struct PdaRun
+typedef struct _PdaRun
 {
 	int numRetry;
 	Kid *stackTop;
 	int errCount;
 	int cs;
 	int nextRegionInd;
-
 
 	Program *prg;
 	PdaTables *tables;
@@ -150,7 +69,41 @@ struct PdaRun
 
 	long consumed;
 	long targetConsumed;
-};
+} PdaRun;
+
+
+MapEl *mapCopyBranch( Program *prg, Map *map, MapEl *el, Kid *oldNextDown, Kid *&newNextDown );
+MapEl *mapInsert( Program *prg, Map *map, MapEl *element, MapEl **lastFound = 0 );
+MapEl *mapInsert( Program *prg, Map *map, Tree *key, MapEl **lastFound = 0 );
+MapEl *mapImplFind( Program *prg, Map *map, Tree *key );
+void mapImplRemove( Program *prg, Map *map, MapEl *element );
+bool mapImplRemove( Program *prg, Map *map, Tree *key );
+MapEl *mapDetachByKey( Program *prg, Map *map, Tree *key );
+MapEl *mapDetach( Program *prg, Map *map, MapEl *element );
+
+/*
+ * Iterators.
+ */
+
+void initTreeIter( TreeIter *treeIter, const Ref *rootRef, int searchId, Tree **stackRoot );
+void initRevTreeIter( RevTreeIter *revTriter, const Ref *rootRef, 
+		int searchId, Tree **stackRoot, int children );
+
+typedef struct _Accum
+{
+	/* Must overlay Tree. */
+	short id;
+	unsigned short flags;
+	long refs;
+	Kid *child;
+
+	GenericInfo *genericInfo;
+
+	PdaRun *pdaRun;
+	FsmRun *fsmRun;
+	Stream *stream;
+} Accum;
+
 
 void initUserIter( UserIter *userIter, Tree **stackRoot, long argSize, long searchId );
 

@@ -11,6 +11,7 @@ extern "C" {
 typedef unsigned char Code;
 typedef unsigned long Word;
 typedef unsigned long Half;
+struct Bindings;
 
 typedef struct _File
 {
@@ -406,6 +407,29 @@ typedef struct _Program
 	Stream *stderrVal;
 } Program;
 
+typedef struct _TreeIter
+{
+	Ref rootRef;
+	Ref ref;
+	long searchId;
+	Tree **stackRoot;
+	long stackSize;
+} TreeIter;
+
+/* This must overlay tree iter because some of the same bytecodes are used. */
+typedef struct _RevTreeIter
+{
+	Ref rootRef;
+	Ref ref;
+	long searchId;
+	Tree **stackRoot;
+	long stackSize;
+
+	/* For detecting a split at the leaf. */
+	Kid *kidAtYield;
+	long children;
+	Kid **cur;
+} RevTreeIter;
 
 
 #ifdef __cplusplus

@@ -384,15 +384,13 @@ typedef struct _Tree Tree;
 typedef struct _ParseTree ParseTree;
 typedef struct _ListEl ListEl;
 typedef struct _MapEl MapEl;
-struct PdaRun;
 typedef struct _List List;
 typedef struct _Map Map;
 typedef struct _Ref Ref;
-struct TreeIter;
-struct RevTreeIter;
 typedef struct _Pointer Pointer;
 typedef struct _Str Str;
 typedef struct _Int Int;
+typedef struct _PdaRun PdaRun;
 
 
 /* Can't use sizeof() because we have used types that are bigger than the

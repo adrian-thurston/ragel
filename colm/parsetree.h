@@ -55,6 +55,7 @@ struct UniqueType;
 struct ObjField;
 struct TransBlock;
 struct CodeBlock;
+typedef struct _PdaRun PdaRun;
 
 /* 
  * Code Vector
@@ -1052,7 +1053,6 @@ struct ReplItem
 
 typedef DList<ReplItem> ReplItemList;
 
-struct PdaRun;
 
 struct Pattern
 {

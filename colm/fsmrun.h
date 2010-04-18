@@ -27,7 +27,6 @@
 
 struct GenAction;
 struct KlangEl;
-struct PdaRun;
 struct ParseData;
 typedef struct _Kid Kid;
 struct Pattern;
