@@ -511,7 +511,7 @@ void splitRef( Tree **&sp, Program *prg, Ref *fromRef );
 
 Tree **stackAlloc();
 
-long cmpTree( Program *prg, const Tree *tree1, const Tree *tree2 );
+extern "C" long cmpTree( Program *prg, const Tree *tree1, const Tree *tree2 );
 
 /*
  * Runtime environment

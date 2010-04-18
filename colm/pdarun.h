@@ -45,13 +45,8 @@ MapEl *mapCopyBranch( Program *prg, Map *map, MapEl *el, _Kid *oldNextDown, Kid 
 }
 #endif
 
-MapEl *mapInsertEl( Program *prg, Map *map, MapEl *element, MapEl **lastFound );
-MapEl *mapInsertKey( Program *prg, Map *map, Tree *key, MapEl **lastFound );
-MapEl *mapImplFind( Program *prg, Map *map, Tree *key );
 void mapImplRemoveEl( Program *prg, Map *map, MapEl *element );
 bool mapImplRemoveKey( Program *prg, Map *map, Tree *key );
-MapEl *mapDetachByKey( Program *prg, Map *map, Tree *key );
-MapEl *mapDetach( Program *prg, Map *map, MapEl *element );
 
 /*
  * Iterators.

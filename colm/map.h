@@ -67,6 +67,13 @@ MapEl *mapFindFirstUnbalGP( Map *map, MapEl *element );
 MapEl *mapFindFirstUnbalEl( Map *map, MapEl *element );
 void mapRemoveEl( Map *map, MapEl *element, MapEl *filler );
 void mapReplaceEl( Map *map, MapEl *element, MapEl *replacement );
+MapEl *mapInsertEl( Program *prg, Map *map, MapEl *element, MapEl **lastFound );
+MapEl *mapInsertKey( Program *prg, Map *map, Tree *key, MapEl **lastFound );
+MapEl *mapImplFind( Program *prg, Map *map, Tree *key );
+MapEl *mapDetachByKey( Program *prg, Map *map, Tree *key );
+MapEl *mapDetach( Program *prg, Map *map, MapEl *element );
+
+long cmpTree( Program *prg, const Tree *tree1, const Tree *tree2 );
 
 
 #if defined(__cplusplus)

@@ -1821,7 +1821,7 @@ void splitIterCur( Tree **&sp, Program *prg, TreeIter *iter )
 	splitRef( sp, prg, &iter->ref );
 }
 
-long cmpTree( Program *prg, const Tree *tree1, const Tree *tree2 )
+extern "C" long cmpTree( Program *prg, const Tree *tree1, const Tree *tree2 )
 {
 	long cmpres = 0;
 	if ( tree1 == 0 ) {
