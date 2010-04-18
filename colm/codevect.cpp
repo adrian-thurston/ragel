@@ -21,6 +21,12 @@
 
 #include "rtvector.h"
 
+#include <new>
+#include <string.h>
+#include <stdlib.h>
+#include <assert.h>
+
+
 void initRtCodeVect( RtCodeVect *vect )
 {
 	vect->data = 0;

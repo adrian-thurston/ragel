@@ -24,6 +24,7 @@
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 /* 
  * In this system strings are not null terminated. Often strings come from a

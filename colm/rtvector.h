@@ -22,11 +22,6 @@
 #ifndef _RT_VECTOR_H
 #define _RT_VECTOR_H
 
-#include <new>
-#include <string.h>
-#include <stdlib.h>
-#include <assert.h>
-
 typedef unsigned char Code;
 typedef unsigned long Word;
 typedef unsigned long Half;
@@ -39,50 +34,58 @@ void rtCodeVectRemove( RtCodeVect *vect, long pos, long len );
 
 void initRtCodeVect( RtCodeVect *codeVect );
 
+inline static void remove( RtCodeVect *vect, long pos );
+inline static void append( RtCodeVect *vect, const Code *val, long len );
+inline static void append( RtCodeVect *vect, const Code &val );
+inline static void appendHalf( RtCodeVect *vect, Half half );
+inline static void appendWord( RtCodeVect *vect, Word word );
+
 struct RtCodeVect
 {
-	long length() const
-		{ return tabLen; }
-
 	Code *data;
 	long tabLen;
 	long allocLen;
 
-	/* Free all mem used by the vector. */
-	~RtCodeVect() { rtCodeVectEmpty( this ); }
-
-	/* Stack operations. */
-	void push( const Code &t ) { append( t ); }
-	void pop() { remove( tabLen - 1 ); }
-	Code &top() { return data[tabLen - 1]; }
-
-	void remove(long pos)                 { rtCodeVectRemove( this, pos, 1 ); }
-
-	void append(const Code &val)                { rtCodeVectReplace( this, tabLen, &val, 1 ); }
-	void append(const Code *val, long len)       { rtCodeVectReplace( this, tabLen, val, len ); }
-
-	void appendHalf( Half half )
-	{
-		/* not optimal. */
-		append( half & 0xff );
-		append( (half>>8) & 0xff );
-	}
-	
-	void appendWord( Word word )
-	{
-		/* not optimal. */
-		append( word & 0xff );
-		append( (word>>8) & 0xff );
-		append( (word>>16) & 0xff );
-		append( (word>>24) & 0xff );
-		#if SIZEOF_LONG == 8
-		append( (word>>32) & 0xff );
-		append( (word>>40) & 0xff );
-		append( (word>>48) & 0xff );
-		append( (word>>56) & 0xff );
-		#endif
-	}
+	/* FIXME: leak when freed. */
 };
+
+inline static void remove( RtCodeVect *vect, long pos )
+{
+	rtCodeVectRemove( vect, pos, 1 );
+}
+
+inline static void append( RtCodeVect *vect, const Code *val, long len )
+{
+	rtCodeVectReplace( vect, vect->tabLen, val, len );
+}
+
+inline static void append( RtCodeVect *vect, const Code &val )
+{
+	rtCodeVectReplace( vect, vect->tabLen, &val, 1 );
+}
+
+inline static void appendHalf( RtCodeVect *vect, Half half )
+{
+	/* not optimal. */
+	append( vect, half & 0xff );
+	append( vect, (half>>8) & 0xff );
+}
+
+inline static void appendWord( RtCodeVect *vect, Word word )
+{
+	/* not optimal. */
+	append( vect, word & 0xff );
+	append( vect, (word>>8) & 0xff );
+	append( vect, (word>>16) & 0xff );
+	append( vect, (word>>24) & 0xff );
+	#if SIZEOF_LONG == 8
+	append( vect, (word>>32) & 0xff );
+	append( vect, (word>>40) & 0xff );
+	append( vect, (word>>48) & 0xff );
+	append( vect, (word>>56) & 0xff );
+	#endif
+}
+
 
 #endif 
 

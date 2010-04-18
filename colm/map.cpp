@@ -20,6 +20,7 @@
  */
 
 #include "pdarun.h"
+#include <assert.h>
 
 MapEl *mapRebalance( Map *map, MapEl *n );
 

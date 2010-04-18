@@ -418,7 +418,7 @@ void queueBackTree( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inpu
 void addNoToken( Program *prg, PdaRun *parser )
 {
 	/* Check if there was anything generated. */
-	if ( parser->queue == 0 && parser->reverseCode.length() > 0 ) {
+	if ( parser->queue == 0 && parser->reverseCode.tabLen > 0 ) {
 		#ifdef COLM_LOG_PARSE
 		if ( colm_log_parse ) {
 			cerr << "found reverse code but no token, sending _notoken" << endl;

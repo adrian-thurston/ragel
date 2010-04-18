@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <fstream>
 #include <string>
+#include <string.h>
 
 #include "config.h"
 #include "pdarun.h"
@@ -336,7 +337,7 @@ void commitFull( Tree **sp, PdaRun *parser, long causeReduce )
 	#endif
 	
 	Kid *kid = parser->stackTop;
-	Code *rcode = parser->allReverseCode->data + parser->allReverseCode->length();
+	Code *rcode = parser->allReverseCode->data + parser->allReverseCode->tabLen;
 
 	/* The top level of the stack is linked right to left. This is the
 	 * traversal order we need for committing. */
@@ -545,9 +546,9 @@ again:
 				treeUpref( redLel->tree );
 				treeDownref( pdaRun->prg, sp, exec.lhs );
 
-				pdaRun->reverseCode.append( IN_RESTORE_LHS );
-				pdaRun->reverseCode.appendWord( (Word)exec.parsed );
-				pdaRun->reverseCode.append( SIZEOF_CODE + SIZEOF_WORD );
+				append( &pdaRun->reverseCode, IN_RESTORE_LHS );
+				appendWord( &pdaRun->reverseCode, (Word)exec.parsed );
+				append( &pdaRun->reverseCode, SIZEOF_CODE + SIZEOF_WORD );
 			}
 
 			/* Pull out the reverse code, if any. */
