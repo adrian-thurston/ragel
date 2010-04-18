@@ -21,7 +21,6 @@
 
 #include "rtvector.h"
 
-#include <new>
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -57,14 +56,14 @@ static void upResize( RtCodeVect *vect, long len )
 		if ( vect->data != 0 ) {
 			/* Table exists already, resize it up. */
 			vect->data = (Code*) realloc( vect->data, sizeof(Code) * newLen );
-			if ( vect->data == 0 )
-				throw std::bad_alloc();
+			//if ( vect->data == 0 )
+			//	throw std::bad_alloc();
 		}
 		else {
 			/* Create the data. */
 			vect->data = (Code*) malloc( sizeof(Code) * newLen );
-			if ( vect->data == 0 )
-				throw std::bad_alloc();
+			//if ( vect->data == 0 )
+			//	throw std::bad_alloc();
 		}
 	}
 }
@@ -87,8 +86,8 @@ static void downResize( RtCodeVect *vect, long len)
 		else {
 			/* Not shrinking to size zero, realloc it to the smaller size. */
 			vect->data = (Code*) realloc( vect->data, sizeof(Code) * newLen );
-			if ( vect->data == 0 )
-				throw std::bad_alloc();
+			//if ( vect->data == 0 )
+			//	throw std::bad_alloc();
 		}
 	}
 }
@@ -98,9 +97,9 @@ void rtCodeVectEmpty( RtCodeVect *vect )
 {
 	if ( vect->data != 0 ) {
 		/* Call All destructors. */
-		Code *pos = vect->data;
-		for ( long i = 0; i < vect->tabLen; pos++, i++ )
-			pos->~Code();
+		//Code *pos = vect->data;
+		//for ( long i = 0; i < vect->tabLen; pos++, i++ )
+		//	pos->~Code();
 
 		/* Free the data space. */
 		free( vect->data );
@@ -129,8 +128,8 @@ void rtCodeVectReplace( RtCodeVect *vect, long pos, const Code *val, long len )
 
 		/* Delete any objects we need to delete. */
 		item = vect->data + pos;
-		for ( i = pos; i < vect->tabLen; i++, item++ )
-			item->~Code();
+		//for ( i = pos; i < vect->tabLen; i++, item++ )
+		//	item->~Code();
 		
 		/* We are extending the vector, set the new data length. */
 		vect->tabLen = endPos;
@@ -138,21 +137,21 @@ void rtCodeVectReplace( RtCodeVect *vect, long pos, const Code *val, long len )
 	else {
 		/* Delete any objects we need to delete. */
 		item = vect->data + pos;
-		for ( i = pos; i < endPos; i++, item++ )
-			item->~Code();
+		//for ( i = pos; i < endPos; i++, item++ )
+		//	item->~Code();
 	}
 
 	/* Copy data in using copy constructor. */
 	Code *dst = vect->data + pos;
 	const Code *src = val;
 	for ( i = 0; i < len; i++, dst++, src++ )
-		new(dst) Code(*src);
+		*dst = *src;
 }
 
 void rtCodeVectRemove( RtCodeVect *vect, long pos, long len )
 {
 	long newLen, lenToSlideOver, endPos;
-	Code *dst, *item;
+	Code *dst;//, *item;
 
 	/* If we are given a negative position to remove at then
 	 * treat it as a position relative to the length. */
@@ -169,9 +168,9 @@ void rtCodeVectRemove( RtCodeVect *vect, long pos, long len )
 	dst = vect->data + pos;
 
 	/* Call Destructors. */
-	item = dst;
-	for ( long i = 0; i < len; i += 1, item += 1 )
-		item->~Code();
+//	item = dst;
+//	for ( long i = 0; i < len; i += 1, item += 1 )
+//		item->~Code();
 	
 	/* Shift data over if necessary. */
 	lenToSlideOver = vect->tabLen - endPos;	

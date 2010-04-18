@@ -1013,7 +1013,7 @@ bool makeReverseCode( RtCodeVect *all, RtCodeVect &reverseCode )
 		p--;
 		long len = *p;
 		p = p - len;
-		append( all, p, len );
+		append2( all, p, len );
 	}
 
 	/* Stop, then place a total length in the global stack. */

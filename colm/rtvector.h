@@ -22,11 +22,22 @@
 #ifndef _RT_VECTOR_H
 #define _RT_VECTOR_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef unsigned char Code;
 typedef unsigned long Word;
 typedef unsigned long Half;
 
-struct RtCodeVect;
+typedef struct _RtCodeVect
+{
+	Code *data;
+	long tabLen;
+	long allocLen;
+
+	/* FIXME: leak when freed. */
+} RtCodeVect;
 
 void rtCodeVectReplace( RtCodeVect *vect, long pos, const Code *val, long len );
 void rtCodeVectEmpty( RtCodeVect *vect );
@@ -34,32 +45,18 @@ void rtCodeVectRemove( RtCodeVect *vect, long pos, long len );
 
 void initRtCodeVect( RtCodeVect *codeVect );
 
-inline static void remove( RtCodeVect *vect, long pos );
-inline static void append( RtCodeVect *vect, const Code *val, long len );
-inline static void append( RtCodeVect *vect, const Code &val );
+//inline static void remove( RtCodeVect *vect, long pos );
+inline static void append( RtCodeVect *vect, const Code val );
+inline static void append2( RtCodeVect *vect, const Code *val, long len );
 inline static void appendHalf( RtCodeVect *vect, Half half );
 inline static void appendWord( RtCodeVect *vect, Word word );
 
-struct RtCodeVect
-{
-	Code *data;
-	long tabLen;
-	long allocLen;
-
-	/* FIXME: leak when freed. */
-};
-
-inline static void remove( RtCodeVect *vect, long pos )
-{
-	rtCodeVectRemove( vect, pos, 1 );
-}
-
-inline static void append( RtCodeVect *vect, const Code *val, long len )
+inline static void append2( RtCodeVect *vect, const Code *val, long len )
 {
 	rtCodeVectReplace( vect, vect->tabLen, val, len );
 }
 
-inline static void append( RtCodeVect *vect, const Code &val )
+inline static void append( RtCodeVect *vect, const Code val )
 {
 	rtCodeVectReplace( vect, vect->tabLen, &val, 1 );
 }
@@ -86,6 +83,9 @@ inline static void appendWord( RtCodeVect *vect, Word word )
 	#endif
 }
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif 
 
