@@ -20,6 +20,7 @@
  */
 
 #include "rtvector.h"
+#include "pdarun.h"
 
 #include <string.h>
 #include <stdlib.h>

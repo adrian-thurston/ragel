@@ -996,20 +996,20 @@ void execute( Execution *exec, Tree **sp )
 		exec->lhs = (Tree*) pop();
 }
 
-bool makeReverseCode( RtCodeVect *all, RtCodeVect &reverseCode )
+int makeReverseCode( RtCodeVect *all, RtCodeVect *reverseCode )
 {
 	/* Do we need to revert the left hand side? */
 
 	/* Check if there was anything generated. */
-	if ( reverseCode.tabLen == 0 )
+	if ( reverseCode->tabLen == 0 )
 		return false;
 
 	long prevAllLength = all->tabLen;
 
 	/* Go backwards, group by group, through the reverse code. Push each group
 	 * to the global reverse code stack. */
-	Code *p = reverseCode.data + reverseCode.tabLen;
-	while ( p != reverseCode.data ) {
+	Code *p = reverseCode->data + reverseCode->tabLen;
+	while ( p != reverseCode->data ) {
 		p--;
 		long len = *p;
 		p = p - len;
@@ -1022,7 +1022,7 @@ bool makeReverseCode( RtCodeVect *all, RtCodeVect &reverseCode )
 	appendWord( all, length );
 
 	/* Clear the revere code buffer. */
-	reverseCode.tabLen = 0;
+	reverseCode->tabLen = 0;
 
 	return true;
 }

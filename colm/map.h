@@ -22,6 +22,9 @@
 #ifndef _MAP_H
 #define _MAP_H
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 typedef struct _MapEl
 {
@@ -49,10 +52,6 @@ typedef struct _Map
 	GenericInfo *genericInfo;
 } Map;
 
-#if defined(__cplusplus)
-extern "C" {
-#endif
-
 void mapListAbandon( Map *map );
 
 void mapListAddBefore( Map *map, MapEl *next_el, MapEl *new_el );
@@ -72,8 +71,23 @@ MapEl *mapInsertKey( Program *prg, Map *map, Tree *key, MapEl **lastFound );
 MapEl *mapImplFind( Program *prg, Map *map, Tree *key );
 MapEl *mapDetachByKey( Program *prg, Map *map, Tree *key );
 MapEl *mapDetach( Program *prg, Map *map, MapEl *element );
+MapEl *mapCopyBranch( Program *prg, Map *map, MapEl *el, Kid *oldNextDown, Kid **newNextDown );
 
 long cmpTree( Program *prg, const Tree *tree1, const Tree *tree2 );
+
+void mapImplRemoveEl( Program *prg, Map *map, MapEl *element );
+int mapImplRemoveKey( Program *prg, Map *map, Tree *key );
+
+/*
+ * Iterators.
+ */
+
+void initTreeIter( TreeIter *treeIter, const Ref *rootRef, int searchId, Tree **stackRoot );
+void initRevTreeIter( RevTreeIter *revTriter, const Ref *rootRef, 
+		int searchId, Tree **stackRoot, int children );
+
+
+void initUserIter( UserIter *userIter, Tree **stackRoot, long argSize, long searchId );
 
 
 #if defined(__cplusplus)

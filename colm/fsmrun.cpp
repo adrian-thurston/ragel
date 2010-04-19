@@ -26,11 +26,12 @@
 #include "config.h"
 #include "fsmrun.h"
 #include "pdarun.h"
-#include "pdarun2.h"
 #include "debug.h"
+#include "bytecode.h"
 
 using std::cerr;
 using std::endl;
+using std::ostream;
 
 exit_object endp;
 
@@ -38,25 +39,6 @@ void operator<<( ostream &out, exit_object & )
 {
 	out << endl;
 	exit(1);
-}
-
-void connect( FsmRun *fsmRun, InputStream *inputStream )
-{
-	if ( inputStream->hasData != 0 && inputStream->hasData != fsmRun ) {
-		takeBackBuffered( inputStream );
-	}
-	
-	if ( inputStream->hasData != fsmRun ) {
-		#ifdef COLM_LOG_PARSE
-		if ( colm_log_parse ) {
-			cerr << "connecting fsmRun: " << fsmRun << " and input stream " <<
-					inputStream << endl;
-		}
-		#endif
-	}
-
-	inputStream->hasData = fsmRun;
-	fsmRun->haveDataOf = inputStream;
 }
 
 /* Load up a token, starting from tokstart if it is set. If not set then
@@ -489,7 +471,7 @@ void executeGenerationAction( Tree **sp, Program *prg, FsmRun *fsmRun, PdaRun *p
 	 * queue is not empty. Pull the reverse code out and store in the
 	 * token. */
 	Tree *tree = pdaRun->queue->tree;
-	bool hasrcode = makeReverseCode( pdaRun->allReverseCode, pdaRun->reverseCode );
+	bool hasrcode = makeReverseCode( pdaRun->allReverseCode, &pdaRun->reverseCode );
 	if ( hasrcode )
 		tree->flags |= AF_HAS_RCODE;
 }
@@ -603,7 +585,8 @@ void sendHandleError( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *in
 	/* Check the result. */
 	if ( pdaRun->errCount > 0 ) {
 		/* Error occured in the top-level parser. */
-		parseError( inputStream, fsmRun, pdaRun, id, input->tree ) << "parse error" << endp;
+		parseError( inputStream, fsmRun, pdaRun, id, input->tree );
+		cerr << "parse error" << endp;
 	}
 	else {
 		if ( isParserStopFinished( pdaRun ) ) {
@@ -748,8 +731,8 @@ void sendEof( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRu
 	sendWithIgnore( sp, pdaRun, fsmRun, inputStream, input );
 
 	if ( pdaRun->errCount > 0 ) {
-		parseError( inputStream, fsmRun, pdaRun, input->tree->id, input->tree ) << 
-				"parse error" << endp;
+		parseError( inputStream, fsmRun, pdaRun, input->tree->id, input->tree );
+		cerr<< "parse error" << endp;
 	}
 }
 

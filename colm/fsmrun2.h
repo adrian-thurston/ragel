@@ -89,6 +89,7 @@ void initFsmRun( FsmRun *fsmRun, struct _Program *prg );
 void updatePosition( InputStream *inputStream, const char *data, long length );
 void undoPosition( InputStream *inputStream, const char *data, long length );
 void takeBackBuffered( InputStream *inputStream );
+void connect( FsmRun *fsmRun, InputStream *inputStream );
 
 
 #ifdef __cplusplus

@@ -29,6 +29,7 @@
 #include "config.h"
 #include "pdarun.h"
 #include "fsmrun.h"
+#include "bytecode.h"
 
 using std::ostream;
 using std::cout;
@@ -106,7 +107,7 @@ void cleanParser( Tree **sp, PdaRun *pdaRun )
 //	pdaRun->clearContext( sp );
 }
 
-bool isParserStopFinished( PdaRun *pdaRun )
+int isParserStopFinished( PdaRun *pdaRun )
 {
 	bool done = 
 			pdaRun->stackTop->next != 0 && 
@@ -115,8 +116,8 @@ bool isParserStopFinished( PdaRun *pdaRun )
 	return done;
 }
 
-void initPdaRun( PdaRun *pdaRun, Program *prg, PdaTables *tables,
-		FsmRun *fsmRun, int parserId, long stopTarget, bool revertOn, Tree *context )
+extern "C" void initPdaRun( PdaRun *pdaRun, Program *prg, PdaTables *tables,
+		FsmRun *fsmRun, int parserId, long stopTarget, int revertOn, Tree *context )
 {
 	memset( pdaRun, 0, sizeof(PdaRun) );
 	pdaRun->prg = prg;
@@ -552,7 +553,7 @@ again:
 			}
 
 			/* Pull out the reverse code, if any. */
-			bool hasrcode = makeReverseCode( pdaRun->allReverseCode, pdaRun->reverseCode );
+			bool hasrcode = makeReverseCode( pdaRun->allReverseCode, &pdaRun->reverseCode );
 			if ( hasrcode )
 				redLel->tree->flags |= AF_HAS_RCODE;
 
@@ -770,7 +771,7 @@ _out:
 	pdaRun->nextRegionInd = pdaRun->tables->tokenRegionInds[pdaRun->cs];
 }
 
-ostream &parseError( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, int tokId, Tree *tree )
+void parseError( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, int tokId, Tree *tree )
 {
 	cerr << "error:" << inputStream->line << ": at token ";
 	if ( tokId < 128 )
@@ -784,6 +785,4 @@ ostream &parseError( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, i
 		cerr << "\"";
 	}
 	cerr << ": ";
-	
-	return cerr;
 }

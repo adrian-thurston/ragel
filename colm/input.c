@@ -21,7 +21,7 @@
 
 #include "input.h"
 #include "fsmrun2.h"
-#include "pdarun2.h"
+#include "pdarun.h"
 
 #include <stdio.h>
 #include <stdlib.h>

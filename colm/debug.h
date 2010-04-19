@@ -26,7 +26,7 @@ extern "C" {
 #ifdef COLM_LOG
 #define debug( realm, fmt, ...) _debug( realm, fmt, __VA_ARGS__ )
 #else
-#	define debug( realm, fmt, ...) 
+#define debug( realm, fmt, ...) 
 #endif
 
 int _debug( long realm, const char *fmt, ... );

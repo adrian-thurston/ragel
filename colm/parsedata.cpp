@@ -35,6 +35,7 @@
 #include "pdacodegen.h"
 #include "fsmcodegen.h"
 #include "fsmrun.h"
+#include "pdarun.h"
 
 using namespace std;
 using std::ostringstream;

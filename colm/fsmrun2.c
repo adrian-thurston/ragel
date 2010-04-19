@@ -20,7 +20,7 @@
  */
 
 #include "fsmrun2.h"
-#include "pdarun2.h"
+#include "pdarun.h"
 #include "input.h"
 #include "debug.h"
 
@@ -126,3 +126,19 @@ void takeBackBuffered( InputStream *inputStream )
 		fsmRun->haveDataOf = 0;
 	}
 }
+
+void connect( FsmRun *fsmRun, InputStream *inputStream )
+{
+	if ( inputStream->hasData != 0 && inputStream->hasData != fsmRun ) {
+		takeBackBuffered( inputStream );
+	}
+	
+#ifdef COLM_LOG
+	if ( inputStream->hasData != fsmRun )
+		debug( REALM_PARSE, "connecting fsmRun: %p and input stream %p\n", fsmRun, inputStream );
+#endif
+
+	inputStream->hasData = fsmRun;
+	fsmRun->haveDataOf = inputStream;
+}
+

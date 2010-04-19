@@ -68,7 +68,6 @@ Kid *makeToken( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, int id
 		Head *tokdata, bool namedLangEl, int bindId );
 
 void newToken( PdaRun *pdaRun, FsmRun *fsmRun );
-void ignore( PdaRun *pdaRun, Tree *tree );
 
 void initBindings( PdaRun *pdaRun );
 void makeTokenPushBinding( PdaRun *pdaRun, int bindId, Tree *tree );

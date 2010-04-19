@@ -19,7 +19,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#include "pdarun2.h"
+#include "pdarun.h"
 
 void listAddAfter( List *list, ListEl *prev_el, ListEl *new_el )
 {
