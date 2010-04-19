@@ -536,6 +536,8 @@ inline static void appendWord( RtCodeVect *vect, Word word )
 	#endif
 }
 
+void incrementConsumed( PdaRun *pdaRun );
+void decrementConsumed( PdaRun *pdaRun );
 
 #ifdef __cplusplus
 }

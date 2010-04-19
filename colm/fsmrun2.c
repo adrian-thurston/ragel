@@ -22,6 +22,9 @@
 #include "fsmrun2.h"
 #include "pdarun2.h"
 #include "input.h"
+#include "debug.h"
+
+#include <string.h>
 
 void listPrepend( List *list, ListEl *new_el) { listAddBefore(list, list->head, new_el); }
 void listAppend( List *list, ListEl *new_el)  { listAddAfter(list, list->tail, new_el); }
@@ -85,4 +88,41 @@ void undoPosition( InputStream *inputStream, const char *data, long length )
 	inputStream->byte -= length;
 }
 
+void incrementConsumed( PdaRun *pdaRun )
+{
+	pdaRun->consumed += 1;
+	debug( REALM_PARSE, "consumed up to %ld\n", pdaRun->consumed );
+}
 
+void decrementConsumed( PdaRun *pdaRun )
+{
+	pdaRun->consumed -= 1;
+	debug( REALM_PARSE, "consumed down to %ld\n", pdaRun->consumed );
+}
+
+void takeBackBuffered( InputStream *inputStream )
+{
+	if ( inputStream->hasData != 0 ) {
+		FsmRun *fsmRun = inputStream->hasData;
+
+		if ( fsmRun->runBuf != 0 ) {
+			if ( fsmRun->pe - fsmRun->p > 0 ) {
+				debug( REALM_PARSE, "taking back buffered fsmRun: %p input stream: %p\n", fsmRun, inputStream );
+
+				RunBuf *split = newRunBuf();
+				memcpy( split->data, fsmRun->p, fsmRun->pe - fsmRun->p );
+
+				split->length = fsmRun->pe - fsmRun->p;
+				split->offset = 0;
+				split->next = 0;
+
+				fsmRun->pe = fsmRun->p;
+
+				inputStream->funcs->pushBackBuf( inputStream, split );
+			}
+		}
+
+		inputStream->hasData = 0;
+		fsmRun->haveDataOf = 0;
+	}
+}

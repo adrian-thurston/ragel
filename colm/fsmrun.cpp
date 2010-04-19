@@ -26,6 +26,7 @@
 #include "config.h"
 #include "fsmrun.h"
 #include "pdarun.h"
+#include "pdarun2.h"
 #include "debug.h"
 
 using std::cerr;
@@ -37,50 +38,6 @@ void operator<<( ostream &out, exit_object & )
 {
 	out << endl;
 	exit(1);
-}
-
-void incrementConsumed( PdaRun *pdaRun )
-{
-	pdaRun->consumed += 1;
-	debug( REALM_PARSE, "consumed up to %ld\n", pdaRun->consumed );
-}
-
-void decrementConsumed( PdaRun *pdaRun )
-{
-	pdaRun->consumed -= 1;
-	debug( REALM_PARSE, "consumed down to %ld\n", pdaRun->consumed );
-}
-
-void takeBackBuffered( InputStream *inputStream )
-{
-	if ( inputStream->hasData != 0 ) {
-		FsmRun *fsmRun = inputStream->hasData;
-
-		if ( fsmRun->runBuf != 0 ) {
-			if ( fsmRun->pe - fsmRun->p > 0 ) {
-				#ifdef COLM_LOG_PARSE
-				if ( colm_log_parse ) {
-					cerr << "taking back buffered fsmRun: " << fsmRun << 
-							" input stream: " << inputStream << endl;
-				}
-				#endif
-
-				RunBuf *split = newRunBuf();
-				memcpy( split->data, fsmRun->p, fsmRun->pe - fsmRun->p );
-
-				split->length = fsmRun->pe - fsmRun->p;
-				split->offset = 0;
-				split->next = 0;
-
-				fsmRun->pe = fsmRun->p;
-
-				inputStream->funcs->pushBackBuf( inputStream, split );
-			}
-		}
-
-		inputStream->hasData = 0;
-		fsmRun->haveDataOf = 0;
-	}
 }
 
 void connect( FsmRun *fsmRun, InputStream *inputStream )
