@@ -584,6 +584,14 @@ void ignore( PdaRun *pdaRun, Tree *tree );
 void parseToken( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
 long undoParse( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Tree *tree );
 void xml_print_list( RuntimeData *runtimeData, Kid *lel, int depth );
+Head *streamPull( Program *prg, FsmRun *fsmRun, InputStream *inputStream, long length );
+Head *stringAllocPointer( Program *prg, const char *data, long length );
+void streamPushText( InputStream *inputStream, const char *data, long length );
+void streamPushTree( InputStream *inputStream, Tree *tree, int ignore );
+void undoStreamPush( Program *prg, Tree **sp, InputStream *inputStream, long length );
+void undoStreamAppend( Program *prg, Tree **sp, InputStream *inputStream, long length );
+void sendBackText( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length );
+
 
 #ifdef __cplusplus
 }

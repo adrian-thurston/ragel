@@ -55,14 +55,6 @@ void queueBackTree( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inpu
 void parseLoop( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
 long scan_token( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
 
-Head *streamPull( Program *prg, FsmRun *fsmRun, InputStream *inputStream, long length );
-void streamPushText( InputStream *inputStream, const char *data, long length );
-void streamPushTree( InputStream *inputStream, Tree *tree, bool ignore );
-void undoStreamPull( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length );
-
-void undoStreamPush( Program *prg, Tree **sp, InputStream *inputStream, long length );
-void undoStreamAppend( Program *prg, Tree **sp, InputStream *inputStream, long length );
-
 void sendNamedLangEl( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
 Kid *makeToken( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, int id,
 		Head *tokdata, bool namedLangEl, int bindId );

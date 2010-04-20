@@ -23,8 +23,10 @@
 #include "pdarun.h"
 #include "input.h"
 #include "debug.h"
+#include "tree.h"
 
 #include <string.h>
+#include <assert.h>
 
 void listPrepend( List *list, ListEl *new_el) { listAddBefore(list, list->head, new_el); }
 void listAppend( List *list, ListEl *new_el)  { listAddAfter(list, list->tail, new_el); }
@@ -141,4 +143,146 @@ void connect( FsmRun *fsmRun, InputStream *inputStream )
 	inputStream->hasData = fsmRun;
 	fsmRun->haveDataOf = inputStream;
 }
+
+/* Load up a token, starting from tokstart if it is set. If not set then
+ * start it at data. */
+Head *streamPull( Program *prg, FsmRun *fsmRun, InputStream *inputStream, long length )
+{
+	/* We should not be in the midst of getting a token. */
+	assert( fsmRun->tokstart == 0 );
+
+	/* The generated token length has been stuffed into tokdata. */
+	if ( fsmRun->p + length > fsmRun->pe ) {
+		fsmRun->p = fsmRun->pe = fsmRun->runBuf->data;
+		fsmRun->peof = 0;
+
+		long space = fsmRun->runBuf->data + FSM_BUFSIZE - fsmRun->pe;
+			
+		if ( space == 0 )
+			fatal( "OUT OF BUFFER SPACE\n" );
+
+		connect( fsmRun, inputStream );
+			
+		long len = inputStream->funcs->getData( inputStream, fsmRun->p, space );
+		fsmRun->pe = fsmRun->p + len;
+	}
+
+	if ( fsmRun->p + length > fsmRun->pe )
+		fatal( "NOT ENOUGH DATA TO FETCH TOKEN\n" );
+
+	Head *tokdata = stringAllocPointer( prg, fsmRun->p, length );
+	updatePosition( inputStream, fsmRun->p, length );
+	fsmRun->p += length;
+
+	return tokdata;
+}
+
+void sendBackRunBufHead( FsmRun *fsmRun, InputStream *inputStream )
+{
+	debug( REALM_PARSE, "pushing back runbuf\n" );
+
+	/* Move to the next run buffer. */
+	RunBuf *back = fsmRun->runBuf;
+	fsmRun->runBuf = fsmRun->runBuf->next;
+		
+	/* Flush out the input buffer. */
+	back->length = fsmRun->pe - fsmRun->p;
+	back->offset = 0;
+	inputStream->funcs->pushBackBuf( inputStream, back );
+
+	/* Set data and de. */
+	if ( fsmRun->runBuf == 0 ) {
+		fsmRun->runBuf = newRunBuf();
+		fsmRun->runBuf->next = 0;
+		fsmRun->p = fsmRun->pe = fsmRun->runBuf->data;
+	}
+
+	fsmRun->p = fsmRun->pe = fsmRun->runBuf->data + fsmRun->runBuf->length;
+}
+
+void undoStreamPull( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length )
+{
+	debug( REALM_PARSE, "undoing stream pull\n" );
+
+	connect( fsmRun, inputStream );
+
+	if ( fsmRun->p == fsmRun->pe && fsmRun->p == fsmRun->runBuf->data )
+		sendBackRunBufHead( fsmRun, inputStream );
+
+	assert( fsmRun->p - length >= fsmRun->runBuf->data );
+	fsmRun->p -= length;
+}
+
+void streamPushText( InputStream *inputStream, const char *data, long length )
+{
+//	#ifdef COLM_LOG_PARSE
+//	if ( colm_log_parse ) {
+//		cerr << "readying fake push" << endl;
+//	}
+//	#endif
+
+	takeBackBuffered( inputStream );
+	inputStream->funcs->pushText( inputStream, data, length );
+}
+
+void streamPushTree( InputStream *inputStream, Tree *tree, int ignore )
+{
+//	#ifdef COLM_LOG_PARSE
+//	if ( colm_log_parse ) {
+//		cerr << "readying fake push" << endl;
+//	}
+//	#endif
+
+	takeBackBuffered( inputStream );
+	inputStream->funcs->pushTree( inputStream, tree, ignore );
+}
+
+void undoStreamPush( Program *prg, Tree **sp, InputStream *inputStream, long length )
+{
+	takeBackBuffered( inputStream );
+	Tree *tree = inputStream->funcs->undoPush( inputStream, length );
+	if ( tree != 0 )
+		treeDownref( prg, sp, tree );
+}
+
+void undoStreamAppend( Program *prg, Tree **sp, InputStream *inputStream, long length )
+{
+	takeBackBuffered( inputStream );
+	Tree *tree = inputStream->funcs->undoAppend( inputStream, length );
+	if ( tree != 0 )
+		treeDownref( prg, sp, tree );
+}
+
+/* Should only be sending back whole tokens/ignores, therefore the send back
+ * should never cross a buffer boundary. Either we slide back data, or we move to
+ * a previous buffer and slide back data. */
+void sendBackText( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length )
+{
+	connect( fsmRun, inputStream );
+
+	debug( REALM_PARSE, "push back of %ld characters\n", length );
+
+	if ( length == 0 )
+		return;
+
+	if ( fsmRun->p == fsmRun->runBuf->data )
+		sendBackRunBufHead( fsmRun, inputStream );
+
+	/* If there is data in the current buffer then send the whole send back
+	 * should be in this buffer. */
+	assert( (fsmRun->p - fsmRun->runBuf->data) >= length );
+
+	/* slide data back. */
+	fsmRun->p -= length;
+
+	#if COLM_LOG
+	if ( memcmp( data, fsmRun->p, length ) != 0 )
+		debug( REALM_PARSE, "mismatch of pushed back text\n" );
+	#endif
+
+	assert( memcmp( data, fsmRun->p, length ) == 0 );
+		
+	undoPosition( inputStream, data, length );
+}
+
 

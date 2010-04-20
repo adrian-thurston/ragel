@@ -19,26 +19,18 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifdef __cplusplus
+#ifndef _TREE_H
+#define _TREE_H
+
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
-void fatal( const char *fmt, ... );
+void treeDownref( Program *prg, Tree **sp, Tree *tree );
 
-#ifdef COLM_LOG
-#define debug( realm, ... ) _debug( realm, __VA_ARGS__ )
-#else
-#define debug( realm, ... ) 
-#endif
-
-int _debug( long realm, const char *fmt, ... );
-extern long colmActiveRealm;
-
-#define REALM_BYTECODE    0x00000001
-#define REALM_PARSE       0x00000002
-#define REALM_MATCH       0x00000004
-#define REALM_COMPILE     0x00000008
-
-#ifdef __cplusplus
+#if defined(__cplusplus)
 }
 #endif
+
+#endif
+

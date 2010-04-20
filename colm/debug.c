@@ -22,6 +22,7 @@
 #include "debug.h"
 #include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 long colmActiveRealm = 0;
 
@@ -36,4 +37,13 @@ int _debug( long realm, const char *fmt, ... )
 	}
 
 	return result;
+}
+
+void fatal( const char *fmt, ... )
+{
+	va_list args;
+	va_start( args, fmt );
+	vfprintf( stderr, fmt, args );
+	va_end( args );
+	exit(1);
 }

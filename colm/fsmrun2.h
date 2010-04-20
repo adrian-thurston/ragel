@@ -90,6 +90,8 @@ void updatePosition( InputStream *inputStream, const char *data, long length );
 void undoPosition( InputStream *inputStream, const char *data, long length );
 void takeBackBuffered( InputStream *inputStream );
 void connect( FsmRun *fsmRun, InputStream *inputStream );
+void sendBackRunBufHead( FsmRun *fsmRun, InputStream *inputStream );
+void undoStreamPull( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length );
 
 
 #ifdef __cplusplus

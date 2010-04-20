@@ -420,7 +420,6 @@ struct TreePair
 bool testFalse( Program *prg, Tree *tree );
 
 Head *stringAllocFull( Program *prg, const char *data, long length );
-Head *stringAllocPointer( Program *prg, const char *data, long length );
 Head *stringCopy( Program *prg, Head *head );
 void stringFree( Program *prg, Head *head );
 long stringLength( Head *str );
@@ -454,7 +453,8 @@ Tree *createGeneric( Program *prg, long genericId );
 Stream *openFile( Program *prg, Tree *name, Tree *mode );
 Stream *openStreamFd( Program *prg, long fd );
 
-void treeDownref( Program *prg, Tree **sp, Tree *tree );
+#include "tree.h"
+
 void treeUpref( Tree *tree );
 Kid *treeChild( Program *prg, const Tree *tree );
 Kid *treeExtractChild( Program *prg, Tree *tree );
