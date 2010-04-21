@@ -26,6 +26,11 @@
 
 long colmActiveRealm = 0;
 
+int _check_realm( long realm )
+{
+	return ( colmActiveRealm & realm );
+}
+
 int _debug( long realm, const char *fmt, ... )
 {
 	int result = 0;

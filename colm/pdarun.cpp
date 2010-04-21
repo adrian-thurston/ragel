@@ -30,6 +30,7 @@
 #include "pdarun.h"
 #include "fsmrun.h"
 #include "bytecode.h"
+#include "bytecode2.h"
 
 using std::ostream;
 using std::cout;

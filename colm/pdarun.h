@@ -575,7 +575,6 @@ void runCommit( PdaRun *pdaRun );
 int isParserStopFinished( PdaRun *pdaRun );
 void pdaRunMatch(  PdaRun *pdaRun, Kid *tree, Kid *pattern );
 
-
 /* Offset can be used to look at the next nextRegionInd. */
 int pdaRunGetNextRegion( PdaRun *pdaRun, int offset );
 
@@ -584,14 +583,20 @@ void ignore( PdaRun *pdaRun, Tree *tree );
 void parseToken( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
 long undoParse( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Tree *tree );
 void xml_print_list( RuntimeData *runtimeData, Kid *lel, int depth );
+
 Head *streamPull( Program *prg, FsmRun *fsmRun, InputStream *inputStream, long length );
 Head *stringAllocPointer( Program *prg, const char *data, long length );
+long stringLength( Head *str );
+
 void streamPushText( InputStream *inputStream, const char *data, long length );
 void streamPushTree( InputStream *inputStream, Tree *tree, int ignore );
 void undoStreamPush( Program *prg, Tree **sp, InputStream *inputStream, long length );
 void undoStreamAppend( Program *prg, Tree **sp, InputStream *inputStream, long length );
 void sendBackText( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length );
-
+void sendBackIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *ignore );
+const char *stringData( Head *str );
+void sendBack( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
+void unbind( Program *prg, Tree **sp, PdaRun *pdaRun, Tree *tree );
 
 #ifdef __cplusplus
 }

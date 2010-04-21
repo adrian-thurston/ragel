@@ -26,7 +26,10 @@
 extern "C" {
 #endif
 
+void treeUpref( Tree *tree );
 void treeDownref( Program *prg, Tree **sp, Tree *tree );
+long cmpTree( Program *prg, const Tree *tree1, const Tree *tree2 );
+Kid *treeIgnore( Program *prg, Tree *tree );
 
 #if defined(__cplusplus)
 }

@@ -27,11 +27,14 @@ void fatal( const char *fmt, ... );
 
 #ifdef COLM_LOG
 #define debug( realm, ... ) _debug( realm, __VA_ARGS__ )
+#define check_realm( realm ) _check_realm( realm )
 #else
 #define debug( realm, ... ) 
+#define check_realm( realm ) 
 #endif
 
 int _debug( long realm, const char *fmt, ... );
+int _check_realm( long realm );
 extern long colmActiveRealm;
 
 #define REALM_BYTECODE    0x00000001

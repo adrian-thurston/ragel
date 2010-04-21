@@ -24,9 +24,14 @@
 #include "input.h"
 #include "debug.h"
 #include "tree.h"
+#include "bytecode2.h"
+#include "pool.h"
 
 #include <string.h>
 #include <assert.h>
+
+#define false 0
+#define true 1
 
 void listPrepend( List *list, ListEl *new_el) { listAddBefore(list, list->head, new_el); }
 void listAppend( List *list, ListEl *new_el)  { listAddAfter(list, list->tail, new_el); }
@@ -283,6 +288,125 @@ void sendBackText( FsmRun *fsmRun, InputStream *inputStream, const char *data, l
 	assert( memcmp( data, fsmRun->p, length ) == 0 );
 		
 	undoPosition( inputStream, data, length );
+}
+
+void sendBackIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *ignore )
+{
+	/* Ignore tokens are queued in reverse order. */
+	while ( ignore != 0 ) {
+		#ifdef COLM_LOG
+		LangElInfo *lelInfo = pdaRun->tables->rtd->lelInfo;
+		debug( REALM_PARSE, "sending back: %s%s\n",
+			lelInfo[ignore->tree->id].name, 
+			ignore->tree->flags & AF_ARTIFICIAL ? " (artificial)" : "" );
+		#endif
+
+		Head *head = ignore->tree->tokdata;
+		int artificial = ignore->tree->flags & AF_ARTIFICIAL;
+
+		if ( head != 0 && !artificial )
+			sendBackText( fsmRun, inputStream, stringData( head ), head->length );
+
+		decrementConsumed( pdaRun );
+
+		/* Check for reverse code. */
+		if ( ignore->tree->flags & AF_HAS_RCODE ) {
+			Execution exec;
+			initExecution( &exec, pdaRun->prg, &pdaRun->reverseCode, 
+					pdaRun, fsmRun, 0, 0, 0, 0, 0 );
+
+			/* Do the reverse exeuction. */
+			rexecute( &exec, sp, pdaRun->allReverseCode );
+			ignore->tree->flags &= ~AF_HAS_RCODE;
+		}
+
+		ignore = ignore->next;
+	}
+}
+
+void sendBack( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input )
+{
+	#ifdef COLM_LOG
+	LangElInfo *lelInfo = pdaRun->tables->rtd->lelInfo;
+	debug( REALM_PARSE, "sending back: %s  text: %.*s%s\n", 
+			lelInfo[input->tree->id].name, 
+			stringLength( input->tree->tokdata ), 
+			stringData( input->tree->tokdata ), 
+			input->tree->flags & AF_ARTIFICIAL ? " (artificial)" : "" );
+	#endif
+
+	if ( input->tree->flags & AF_NAMED ) {
+		/* Send back anything in the buffer that has not been parsed. */
+		if ( fsmRun->p == fsmRun->runBuf->data )
+			sendBackRunBufHead( fsmRun, inputStream );
+
+		/* Send the named lang el back first, then send back any leading
+		 * whitespace. */
+		inputStream->funcs->pushBackNamed( inputStream );
+	}
+
+	decrementConsumed( pdaRun );
+
+	if ( input->tree->flags & AF_ARTIFICIAL ) {
+		treeUpref( input->tree );
+		streamPushTree( inputStream, input->tree, false );
+
+		/* FIXME: need to undo the merge of ignore tokens. */
+		Kid *leftIgnore = 0;
+		if ( input->tree->flags & AF_LEFT_IGNORE ) {
+			leftIgnore = (Kid*)input->tree->child->tree;
+			//input->tree->flags &= ~AF_LEFT_IGNORE;
+			//input->tree->child = input->tree->child->next;
+		}
+
+		//if ( input->tree->flags & AF_RIGHT_IGNORE ) {
+		//	cerr << "need to pull out ignore" << endl;
+		//}
+
+		sendBackIgnore( sp, pdaRun, fsmRun, inputStream, leftIgnore );
+
+		///* Always push back the ignore text. */
+		//sendBackIgnore( sp, pdaRun, fsmRun, inputStream, treeIgnore( fsmRun->prg, input->tree ) );
+	}
+	else {
+		/* Push back the token data. */
+		sendBackText( fsmRun, inputStream, stringData( input->tree->tokdata ), 
+				stringLength( input->tree->tokdata ) );
+
+		/* Check for reverse code. */
+		if ( input->tree->flags & AF_HAS_RCODE ) {
+			Execution exec;
+			initExecution( &exec, pdaRun->prg, &pdaRun->reverseCode, 
+					pdaRun, fsmRun, 0, 0, 0, 0, 0 );
+
+			/* Do the reverse exeuction. */
+			rexecute( &exec, sp, pdaRun->allReverseCode );
+			input->tree->flags &= ~AF_HAS_RCODE;
+		}
+
+		/* Always push back the ignore text. */
+		sendBackIgnore( sp, pdaRun, fsmRun, inputStream, treeIgnore( fsmRun->prg, input->tree ) );
+
+		/* If eof was just sent back remember that it needs to be sent again. */
+		if ( input->tree->id == pdaRun->tables->rtd->eofLelIds[pdaRun->parserId] )
+			inputStream->eofSent = false;
+
+		/* If the item is bound then store remove it from the bindings array. */
+		unbind( fsmRun->prg, sp, pdaRun, input->tree );
+	}
+
+	if ( pdaRun->consumed == pdaRun->targetConsumed ) {
+		#ifdef COLM_LOG_PARSE
+		if ( colm_log_parse )
+			cerr << "trigger parse stop, consumed = target = " << pdaRun->targetConsumed << endl;
+		#endif
+			
+		pdaRun->stop = true;
+	}
+
+	/* Downref the tree that was sent back and free the kid. */
+	treeDownref( fsmRun->prg, sp, input->tree );
+	kidFree( fsmRun->prg, input );
 }
 
 
