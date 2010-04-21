@@ -586,7 +586,6 @@ void xml_print_list( RuntimeData *runtimeData, Kid *lel, int depth );
 
 Head *streamPull( Program *prg, FsmRun *fsmRun, InputStream *inputStream, long length );
 Head *stringAllocPointer( Program *prg, const char *data, long length );
-long stringLength( Head *str );
 
 void streamPushText( InputStream *inputStream, const char *data, long length );
 void streamPushTree( InputStream *inputStream, Tree *tree, int ignore );
@@ -594,9 +593,23 @@ void undoStreamPush( Program *prg, Tree **sp, InputStream *inputStream, long len
 void undoStreamAppend( Program *prg, Tree **sp, InputStream *inputStream, long length );
 void sendBackText( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length );
 void sendBackIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *ignore );
-const char *stringData( Head *str );
 void sendBack( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
 void unbind( Program *prg, Tree **sp, PdaRun *pdaRun, Tree *tree );
+void queueBackTree( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
+void addNoToken( Program *prg, PdaRun *parser );
+void sendQueuedTokens( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
+void sendHandleError( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
+Kid *makeToken( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, int id,
+		Head *tokdata, int namedLangEl, int bindId );
+void makeTokenPushBinding( PdaRun *pdaRun, int bindId, Tree *tree );
+void executeGenerationAction( Tree **sp, Program *prg, FsmRun *fsmRun, PdaRun *pdaRun, 
+		Code *code, long id, Head *tokdata );
+void generationAction( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, 
+		PdaRun *pdaRun, int id, Head *tokdata, int namedLangEl, int bindId );
+Kid *extractIgnore( PdaRun *pdaRun );
+void sendBackQueuedIgnore( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun );
+void clearIgnoreList( Program *prg, Tree **sp, Kid *kid );
+void sendWithIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
 
 #ifdef __cplusplus
 }

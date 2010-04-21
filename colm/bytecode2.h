@@ -397,11 +397,36 @@ typedef struct _Execution
 
 } Execution;
 
+long stringLength( Head *str );
+const char *stringData( Head *str );
+Head *stringAllocFull( Program *prg, const char *data, long length );
+Head *stringCopy( Program *prg, Head *head );
+void stringFree( Program *prg, Head *head );
+void stringShorten( Head *tokdata, long newlen );
+Head *concatStr( Head *s1, Head *s2 );
+Word strAtoi( Head *str );
+Word strUord16( Head *head );
+Word strUord8( Head *head );
+Word cmpString( Head *s1, Head *s2 );
+Head *stringToUpper( Head *s );
+Head *stringToLower( Head *s );
+Head *stringSprintf( Program *prg, Str *format, Int *integer );
+
+Tree *constructString( Program *prg, Head *s );
+
 void initExecution( Execution *exec, Program *prg, RtCodeVect *reverseCode,
 		PdaRun *pdaRun, FsmRun *fsmRun, Code *code, Tree *lhs,
 		long genId, Head *matchText, char **captures );
 
 void rexecute( Execution *exec, Tree **sp, RtCodeVect *allRev );
+
+Kid *allocAttrs( Program *prg, long length );
+void freeAttrs( Program *prg, Kid *attrs );
+void setAttr( Tree *tree, long pos, Tree *val );
+Tree *getAttr( Tree *tree, long pos );
+Kid *getAttrKid( Tree *tree, long pos );
+
+void execute( Execution *exec, Tree **sp );
 
 #ifdef __cplusplus
 }

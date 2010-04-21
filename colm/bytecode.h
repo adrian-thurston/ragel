@@ -60,11 +60,6 @@ typedef Tree *SW;
 typedef Tree **StackPtr;
 typedef Tree **&StackRef;
 
-Kid *allocAttrs( Program *prg, long length );
-void freeAttrs( Program *prg, Kid *attrs );
-void setAttr( Tree *tree, long pos, Tree *val );
-Tree *getAttr( Tree *tree, long pos );
-Kid *getAttrKid( Tree *tree, long pos );
 
 struct TreePair
 {
@@ -75,20 +70,6 @@ struct TreePair
 };
 
 bool testFalse( Program *prg, Tree *tree );
-
-Head *stringAllocFull( Program *prg, const char *data, long length );
-Head *stringCopy( Program *prg, Head *head );
-void stringFree( Program *prg, Head *head );
-void stringShorten( Head *tokdata, long newlen );
-Head *concatStr( Head *s1, Head *s2 );
-Word strAtoi( Head *str );
-Word strUord16( Head *head );
-Word strUord8( Head *head );
-Word cmpString( Head *s1, Head *s2 );
-Head *stringToUpper( Head *s );
-Head *stringToLower( Head *s );
-Head *stringSprintf( Program *prg, Str *format, Int *integer );
-
 Head *intToStr( Program *prg, Word i );
 
 void rcodeDownref( Program *prg, Tree **sp, Code *instr );
@@ -98,7 +79,6 @@ Tree *getParsedRoot( PdaRun *pdaRun, bool stop );
 
 bool matchPattern( Tree **bindings, Program *prg, long pat, Kid *kid, bool checkNext );
 Head *makeLiteral( Program *prg, long litoffset );
-Tree *constructString( Program *prg, Head *s );
 Tree *constructInteger( Program *prg, long i );
 Tree *constructPointer( Program *prg, Tree *tree );
 Tree *constructTerm( Program *prg, Word id, Head *tokdata );
@@ -174,7 +154,6 @@ void clearProgram( Program *prg, Tree **vm_stack, Tree **sp );
 void runProgram( Program *prg );
 void allocGlobal( Program *prg );
 
-void execute( Execution *exec, Tree **sp );
-void execute( Execution *exec, Tree **sp, Code *instr );
+void executeCode( Execution *exec, Tree **sp, Code *instr );
 
 #endif

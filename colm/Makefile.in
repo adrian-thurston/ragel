@@ -59,7 +59,7 @@ COLM_SRC = \
 	fsmap.cpp \
 	dotgen.cpp \
 	pcheck.cpp \
-	ctinput.cpp \
+	ctinput.cpp
 
 RUNTIME_SRC = fsmrun.cpp pdarun.cpp bytecode.cpp string.cpp tree.cpp 
 RUNTIME_SRC_C = map.c fsmrun2.c list.c input.c debug.c codevect.c pool.c

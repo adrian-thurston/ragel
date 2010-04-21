@@ -989,7 +989,7 @@ void execute( Execution *exec, Tree **sp )
 		push( exec->lhs );
 
 	/* Execution loop. */
-	execute( exec, sp, exec->code );
+	executeCode( exec, sp, exec->code );
 
 	/* Take the lhs off the stack. */
 	if ( haveLhs )
@@ -1040,14 +1040,14 @@ void rexecute( Execution *exec, Tree **root, RtCodeVect *allRev )
 
 	/* Execute it. */
 	Tree **sp = root;
-	execute( exec, sp, prcode );
+	executeCode( exec, sp, prcode );
 	assert( sp == root );
 
 	/* Backup over it. */
 	allRev->tabLen -= len + SIZEOF_WORD;
 }
 
-void execute( Execution *exec, Tree **sp, Code *instr )
+void executeCode( Execution *exec, Tree **sp, Code *instr )
 {
 	/* When we exit we are going to verify that we did not eat up any stack
 	 * space. */

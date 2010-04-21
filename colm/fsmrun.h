@@ -48,20 +48,12 @@ void execAction( FsmRun *fsmRun, GenAction *genAction );
 void fsmExecute( FsmRun *fsmRun, InputStream *inputStream );
 
 void initInputStream( InputStream *in );
-void sendQueuedTokens( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
-void sendHandleError( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
 Head *extractMatch( Program *prg, FsmRun *fsmRun, InputStream *inputStream );
-void queueBackTree( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
 void parseLoop( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
 long scan_token( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
-
 void sendNamedLangEl( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
-Kid *makeToken( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, int id,
-		Head *tokdata, bool namedLangEl, int bindId );
-
 void newToken( PdaRun *pdaRun, FsmRun *fsmRun );
 
 void initBindings( PdaRun *pdaRun );
-void makeTokenPushBinding( PdaRun *pdaRun, int bindId, Tree *tree );
 
 #endif
