@@ -70,7 +70,6 @@ struct TreePair
 };
 
 bool testFalse( Program *prg, Tree *tree );
-Head *intToStr( Program *prg, Word i );
 
 void rcodeDownref( Program *prg, Tree **sp, Code *instr );
 void rcodeDownrefAll( Program *prg, Tree **sp, RtCodeVect *cv );
@@ -78,7 +77,6 @@ void commitFull( Tree **sp, PdaRun *parser, long commitReduce );
 Tree *getParsedRoot( PdaRun *pdaRun, bool stop );
 
 bool matchPattern( Tree **bindings, Program *prg, long pat, Kid *kid, bool checkNext );
-Head *makeLiteral( Program *prg, long litoffset );
 Tree *constructInteger( Program *prg, long i );
 Tree *constructPointer( Program *prg, Tree *tree );
 Tree *constructTerm( Program *prg, Word id, Head *tokdata );

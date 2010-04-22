@@ -412,6 +412,9 @@ Head *stringToUpper( Head *s );
 Head *stringToLower( Head *s );
 Head *stringSprintf( Program *prg, Str *format, Int *integer );
 
+Head *makeLiteral( Program *prg, long litoffset );
+Head *intToStr( Program *prg, Word i );
+
 Tree *constructString( Program *prg, Head *s );
 
 void initExecution( Execution *exec, Program *prg, RtCodeVect *reverseCode,

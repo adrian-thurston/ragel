@@ -21,11 +21,12 @@
 
 #include "pool.h"
 #include "pdarun.h"
-#include "bytecode.h"
+#include "bytecode2.h"
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
 
 /* 
  * In this system strings are not null terminated. Often strings come from a
@@ -87,8 +88,8 @@ Head *initStrSpace( long length )
 {
 	/* Find the length and allocate the space for the shared string. */
 	Head *head = (Head*) malloc( sizeof(Head) + length );
-	if ( head == 0 )
-		throw std::bad_alloc();
+	//if ( head == 0 )
+	//	throw std::bad_alloc();
 
 	/* Init the header. */
 	head->data = (char*)(head+1);
@@ -148,7 +149,8 @@ Head *stringToUpper( Head *s )
 	/* Copy in the data. */
 	const char *src = s->data;
 	char *dst = (char*)(head+1);
-	for ( int i = 0; i < len; i++ )
+	int i;
+	for ( i = 0; i < len; i++ )
 		*dst++ = toupper( *src++ );
 		
 	return head;
@@ -163,7 +165,8 @@ Head *stringToLower( Head *s )
 	/* Copy in the data. */
 	const char *src = s->data;
 	char *dst = (char*)(head+1);
-	for ( int i = 0; i < len; i++ )
+	int i;
+	for ( i = 0; i < len; i++ )
 		*dst++ = tolower( *src++ );
 		
 	return head;
