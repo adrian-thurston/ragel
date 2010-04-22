@@ -48,7 +48,6 @@ void execAction( FsmRun *fsmRun, GenAction *genAction );
 void fsmExecute( FsmRun *fsmRun, InputStream *inputStream );
 
 void initInputStream( InputStream *in );
-Head *extractMatch( Program *prg, FsmRun *fsmRun, InputStream *inputStream );
 void parseLoop( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
 long scan_token( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
 void sendNamedLangEl( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );

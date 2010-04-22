@@ -650,4 +650,141 @@ void sendWithIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inp
 	parseToken( sp, pdaRun, fsmRun, inputStream, input );
 }
 
+void sendHandleError( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input )
+{
+	long id = input->tree->id;
+
+	/* Send the token to the parser. */
+	sendWithIgnore( sp, pdaRun, fsmRun, inputStream, input );
+		
+	/* Check the result. */
+	if ( pdaRun->errCount > 0 ) {
+		/* Error occured in the top-level parser. */
+		parseError( inputStream, fsmRun, pdaRun, id, input->tree );
+		fatal( "parse error\n" );
+	}
+	else {
+		if ( isParserStopFinished( pdaRun ) ) {
+			debug( REALM_PARSE, "stopping the parse\n" );
+			pdaRun->stopParsing = true;
+		}
+	}
+}
+
+void ignore( PdaRun *pdaRun, Tree *tree )
+{
+	/* Add the ignore string to the head of the ignore list. */
+	Kid *ignore = kidAllocate( pdaRun->prg );
+	ignore->tree = tree;
+
+	/* Prepend it to the list of ignore tokens. */
+	ignore->next = pdaRun->accumIgnore;
+	pdaRun->accumIgnore = ignore;
+}
+
+void execGen( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long id )
+{
+	debug( REALM_PARSE, "token gen action: %s\n", 
+			pdaRun->tables->rtd->lelInfo[id].name );
+
+	/* Make the token data. */
+	Head *tokdata = extractMatch( pdaRun->prg, fsmRun, inputStream );
+
+	/* Note that we don't update the position now. It is done when the token
+	 * data is pulled from the inputStream. */
+
+	fsmRun->p = fsmRun->tokstart;
+	fsmRun->tokstart = 0;
+
+	generationAction( sp, inputStream, fsmRun, pdaRun, id, tokdata, false, 0 );
+}
+
+void sendIgnore( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long id )
+{
+	debug( REALM_PARSE, "ignoring: %s\n", pdaRun->tables->rtd->lelInfo[id].name );
+
+	/* Make the ignore string. */
+	Head *ignoreStr = extractMatch( pdaRun->prg, fsmRun, inputStream );
+	updatePosition( inputStream, fsmRun->tokstart, ignoreStr->length );
+	
+	Tree *tree = treeAllocate( fsmRun->prg );
+	tree->refs = 1;
+	tree->id = id;
+	tree->tokdata = ignoreStr;
+
+	incrementConsumed( pdaRun );
+
+	/* Send it to the pdaRun. */
+	ignore( pdaRun, tree );
+}
+
+Head *extractMatch( Program *prg, FsmRun *fsmRun, InputStream *inputStream )
+{
+	long length = fsmRun->p - fsmRun->tokstart;
+	Head *head = stringAllocPointer( prg, fsmRun->tokstart, length );
+	head->location = locationAllocate( prg );
+	head->location->line = inputStream->line;
+	head->location->column = inputStream->column;
+	head->location->byte = inputStream->byte;
+	return head;
+}
+
+void sendToken( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long id )
+{
+	/* Make the token data. */
+	Head *tokdata = extractMatch( pdaRun->prg, fsmRun, inputStream );
+
+	debug( REALM_PARSE, "token: %s  text: %.*s\n",
+		pdaRun->tables->rtd->lelInfo[id].name,
+		stringData( tokdata ), stringLength( tokdata ) );
+
+	updatePosition( inputStream, fsmRun->tokstart, tokdata->length );
+
+	Kid *input = makeToken( pdaRun, fsmRun, inputStream, id, tokdata, false, 0 );
+
+	incrementConsumed( pdaRun );
+
+	sendHandleError( sp, pdaRun, fsmRun, inputStream, input );
+}
+
+void sendEof( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
+{
+	debug( REALM_PARSE, "token: _EOF\n" );
+
+	incrementConsumed( pdaRun );
+
+	Kid *input = kidAllocate( fsmRun->prg );
+	input->tree = (Tree*)parseTreeAllocate( fsmRun->prg );
+	input->tree->flags |= AF_PARSE_TREE;
+
+	input->tree->refs = 1;
+	input->tree->id = pdaRun->tables->rtd->eofLelIds[pdaRun->parserId];
+
+	/* Set the state using the state of the parser. */
+	fsmRun->region = pdaRunGetNextRegion( pdaRun, 0 );
+	fsmRun->cs = fsmRun->tables->entryByRegion[fsmRun->region];
+
+	int ctxDepParsing = fsmRun->prg->ctxDepParsing;
+	long frameId = pdaRun->tables->rtd->regionInfo[fsmRun->region].eofFrameId;
+	if ( ctxDepParsing && frameId >= 0 ) {
+		debug( REALM_PARSE, "HAVE PRE_EOF BLOCK\n" );
+
+		/* Get the code for the pre-eof block. */
+		Code *code = pdaRun->tables->rtd->frameInfo[frameId].codeWV;
+
+		/* Execute the action and process the queue. */
+		executeGenerationAction( sp, fsmRun->prg, fsmRun, pdaRun, code, input->tree->id, 0 );
+
+		/* Send the generated tokens. */
+		sendQueuedTokens( sp, pdaRun, fsmRun, inputStream );
+	}
+
+	sendWithIgnore( sp, pdaRun, fsmRun, inputStream, input );
+
+	if ( pdaRun->errCount > 0 ) {
+		parseError( inputStream, fsmRun, pdaRun, input->tree->id, input->tree );
+		fatal( "parse error\n" );
+	}
+}
+
 

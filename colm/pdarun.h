@@ -610,6 +610,13 @@ Kid *extractIgnore( PdaRun *pdaRun );
 void sendBackQueuedIgnore( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun );
 void clearIgnoreList( Program *prg, Tree **sp, Kid *kid );
 void sendWithIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
+Head *extractMatch( Program *prg, FsmRun *fsmRun, InputStream *inputStream );
+void execGen( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long id );
+void sendIgnore( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long id );
+Head *extractMatch( Program *prg, FsmRun *fsmRun, InputStream *inputStream );
+void sendToken( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long id );
+void sendEof( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun );
+
 
 #ifdef __cplusplus
 }
