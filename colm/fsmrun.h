@@ -45,13 +45,8 @@ void operator<<( std::ostream &out, exit_object & );
 #include "fsmrun2.h"
 
 void execAction( FsmRun *fsmRun, GenAction *genAction );
-void fsmExecute( FsmRun *fsmRun, InputStream *inputStream );
 
-void initInputStream( InputStream *in );
-void parseLoop( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
 long scan_token( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
-void sendNamedLangEl( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
-void newToken( PdaRun *pdaRun, FsmRun *fsmRun );
 
 void initBindings( PdaRun *pdaRun );
 

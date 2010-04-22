@@ -25,6 +25,7 @@
 #include <fstream>
 #include <string>
 #include <string.h>
+#include <stdlib.h>
 
 #include "config.h"
 #include "pdarun.h"
@@ -36,6 +37,14 @@ using std::ostream;
 using std::cout;
 using std::cerr;
 using std::endl;
+
+exit_object endp;
+
+void operator<<( ostream &out, exit_object & )
+{
+	out << endl;
+	exit(1);
+}
 
 #define act_sb 0x1
 #define act_rb 0x2

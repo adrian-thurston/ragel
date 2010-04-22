@@ -616,6 +616,12 @@ void sendIgnore( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long 
 Head *extractMatch( Program *prg, FsmRun *fsmRun, InputStream *inputStream );
 void sendToken( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long id );
 void sendEof( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun );
+void initInputStream( InputStream *in );
+void newToken( PdaRun *pdaRun, FsmRun *fsmRun );
+void breakRunBuf( FsmRun *fsmRun );
+void fsmExecute( FsmRun *fsmRun, InputStream *inputStream );
+void sendNamedLangEl( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
+void parseLoop( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
 
 
 #ifdef __cplusplus
