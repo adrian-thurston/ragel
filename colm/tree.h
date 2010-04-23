@@ -34,6 +34,20 @@ Kid *treeChild( Program *prg, const Tree *tree );
 Kid *kidListConcat( Kid *list1, Kid *list2 );
 Kid *treeExtractChild( Program *prg, Tree *tree );
 
+Tree *constructInteger( Program *prg, long i );
+Tree *constructPointer( Program *prg, Tree *tree );
+Tree *constructTerm( Program *prg, Word id, Head *tokdata );
+Tree *constructReplacementTree( Tree **bindings, Program *prg, long pat );
+Tree *createGeneric( Program *prg, long genericId );
+
+Tree *makeToken2( Tree **root, Program *prg, long nargs );
+int testFalse( Program *prg, Tree *tree );
+Tree *makeTree( Tree **root, Program *prg, long nargs );
+Stream *openFile( Program *prg, Tree *name, Tree *mode );
+Stream *openStreamFd( Program *prg, long fd );
+Kid *copyIgnoreList( Program *prg, Kid *ignoreHeader );
+void streamFree( Program *prg, Stream *s );
+
 #if defined(__cplusplus)
 }
 #endif

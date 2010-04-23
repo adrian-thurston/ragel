@@ -371,6 +371,8 @@ typedef unsigned char uchar;
 #define vm_top() (*sp)
 #define vm_ptop() (sp)
 
+typedef Tree *SW;
+typedef Tree **StackPtr;
 
 
 /* Can't use sizeof() because we have used types that are bigger than the
@@ -444,6 +446,7 @@ void rcodeDownrefAll( Program *prg, Tree **sp, RtCodeVect *cv );
 void commitFull( Tree **sp, PdaRun *parser, long commitReduce );
 Tree *getParsedRoot( PdaRun *pdaRun, int stop );
 Tree *prepParseTree( Program *prg, Tree **sp, Tree *tree );
+void printTree2( FILE *out, Tree **sp, Program *prg, Tree *tree );
 
 #ifdef __cplusplus
 }

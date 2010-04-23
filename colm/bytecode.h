@@ -50,11 +50,6 @@ typedef struct _Int Int;
 typedef struct _PdaRun PdaRun;
 
 
-typedef Tree *SW;
-typedef Tree **StackPtr;
-typedef Tree **&StackRef;
-
-
 struct TreePair
 {
 	TreePair() : key(0), val(0) {}
@@ -63,28 +58,17 @@ struct TreePair
 	Tree *val;
 };
 
-bool testFalse( Program *prg, Tree *tree );
 
 void rcodeDownref( Program *prg, Tree **sp, Code *instr );
 
 bool matchPattern( Tree **bindings, Program *prg, long pat, Kid *kid, bool checkNext );
-Tree *constructInteger( Program *prg, long i );
-Tree *constructPointer( Program *prg, Tree *tree );
-Tree *constructTerm( Program *prg, Word id, Head *tokdata );
-Tree *constructReplacementTree( Tree **bindings, Program *prg, long pat );
-Tree *createGeneric( Program *prg, long genericId );
 
-Stream *openFile( Program *prg, Tree *name, Tree *mode );
-Stream *openStreamFd( Program *prg, long fd );
 
 #include "tree.h"
 
 Tree *copyRealTree( Program *prg, Tree *tree, Kid *oldNextDown, Kid *&newNextDown, bool parsed );
-Tree *makeTree( Tree **root, Program *prg, long nargs );
-Tree *makeToken( Tree **root, Program *prg, long nargs );
 
 void printTree( ostream &out, Tree **&sp, Program *prg, Tree *tree );
-void printTree2( FILE *out, Tree **&sp, Program *prg, Tree *tree );
 void printXmlTree( Tree **&sp, Program *prg, Tree *tree, bool commAttr );
 void printXmlKid( Tree **&sp, Program *prg, Kid *kid, bool commAttr, int depth );
 

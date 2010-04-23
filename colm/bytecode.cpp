@@ -2985,7 +2985,7 @@ again:
 			}
 			#endif
 
-			Tree *result = makeToken( sp, prg, nargs );
+			Tree *result = makeToken2( sp, prg, nargs );
 			for ( long i = 0; i < nargs; i++ ) {
 				Tree *arg = pop();
 				treeDownref( prg, sp, arg );
