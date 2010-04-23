@@ -48,6 +48,5 @@ void execAction( FsmRun *fsmRun, GenAction *genAction );
 
 long scan_token( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
 
-void initBindings( PdaRun *pdaRun );
 
 #endif

@@ -19,32 +19,22 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#include <iostream>
+#include "config.h"
+#include "debug.h"
+#include "pdarun.h"
+#include "fsmrun2.h"
+#include "bytecode2.h"
+#include "tree.h"
+#include "pool.h"
+
 #include <errno.h>
 #include <stdio.h>
-#include <fstream>
-#include <string>
 #include <string.h>
 #include <stdlib.h>
+#include <assert.h>
 
-#include "config.h"
-#include "pdarun.h"
-#include "fsmrun.h"
-#include "bytecode.h"
-#include "bytecode2.h"
-
-using std::ostream;
-using std::cout;
-using std::cerr;
-using std::endl;
-
-exit_object endp;
-
-void operator<<( ostream &out, exit_object & )
-{
-	out << endl;
-	exit(1);
-}
+#define true 1
+#define false 0
 
 #define act_sb 0x1
 #define act_rb 0x2
@@ -93,12 +83,12 @@ void initRevTreeIter( RevTreeIter *revTriter, const Ref *rootRef,
 }
 
 /* Offset can be used to look at the next nextRegionInd. */
-int pdaRunGetNextRegion( PdaRun *pdaRun, int offset = 0 )
+int pdaRunGetNextRegion( PdaRun *pdaRun, int offset )
 {
 	return pdaRun->tables->tokenRegions[pdaRun->nextRegionInd+offset];
 }
 
-Tree *getParsedRoot( PdaRun *pdaRun, bool stop )
+Tree *getParsedRoot( PdaRun *pdaRun, int stop )
 {
 	return stop ? pdaRun->stackTop->tree : pdaRun->stackTop->next->tree;
 }
@@ -119,14 +109,14 @@ void cleanParser( Tree **sp, PdaRun *pdaRun )
 
 int isParserStopFinished( PdaRun *pdaRun )
 {
-	bool done = 
+	int done = 
 			pdaRun->stackTop->next != 0 && 
 			pdaRun->stackTop->next->next == 0 &&
 			pdaRun->stackTop->tree->id == pdaRun->stopTarget;
 	return done;
 }
 
-extern "C" void initPdaRun( PdaRun *pdaRun, Program *prg, PdaTables *tables,
+void initPdaRun( PdaRun *pdaRun, Program *prg, PdaTables *tables,
 		FsmRun *fsmRun, int parserId, long stopTarget, int revertOn, Tree *context )
 {
 	memset( pdaRun, 0, sizeof(PdaRun) );
@@ -138,11 +128,7 @@ extern "C" void initPdaRun( PdaRun *pdaRun, Program *prg, PdaTables *tables,
 	pdaRun->revertOn = revertOn;
 	pdaRun->targetConsumed = -1;
 
-	#ifdef COLM_LOG_PARSE
-	if ( colm_log_parse ) {
-		cerr << "initializing PdaRun" << endl;
-	}
-	#endif
+	debug( REALM_PARSE, "initializing PdaRun\n" );
 
 	/* FIXME: need the right one here. */
 	pdaRun->cs = pdaRun->prg->rtd->startStates[pdaRun->parserId];
@@ -162,7 +148,7 @@ extern "C" void initPdaRun( PdaRun *pdaRun, Program *prg, PdaTables *tables,
 
 	initBindings( pdaRun );
 
-	pdaRun->allReverseCode = new RtCodeVect;
+	pdaRun->allReverseCode = malloc( sizeof(RtCodeVect) );
 	initRtCodeVect( pdaRun->allReverseCode );
 
 	initRtCodeVect( &pdaRun->reverseCode );
@@ -204,7 +190,7 @@ long stackTopTarget( PdaRun *pdaRun )
  * 		-clears all alg structures
  */
 
-bool beenCommitted( Kid *kid )
+int beenCommitted( Kid *kid )
 {
 	return kid->tree->flags & AF_COMMITTED;
 }
@@ -220,7 +206,7 @@ Code *backupOverRcode( Code *rcode )
 
 /* The top level of the stack is linked right-to-left. Trees underneath are
  * linked left-to-right. */
-void commitKid( PdaRun *parser, Tree **root, Kid *lel, Code *&rcode, long &causeReduce )
+void commitKid2( PdaRun *parser, Tree **root, Kid *lel, Code **rcode, long *causeReduce )
 {
 	Tree *tree = 0;
 	Tree **sp = root;
@@ -228,12 +214,8 @@ void commitKid( PdaRun *parser, Tree **root, Kid *lel, Code *&rcode, long &cause
 
 head:
 	/* Commit */
-	#ifdef COLM_LOG_PARSE
-	if ( colm_log_parse ) {
-		cerr << "commit: visiting " << 
-				parser->prg->rtd->lelInfo[lel->tree->id].name << endl;
-	}
-	#endif
+	debug( REALM_PARSE, "commit: visiting %s\n",
+			parser->prg->rtd->lelInfo[lel->tree->id].name );
 
 	/* Load up the parsed tree. */
 	tree = lel->tree;
@@ -246,22 +228,22 @@ head:
 		 * the count of the reductions and do it when the count drops to zero. */
 		if ( pt(tree)->causeReduce > 0 ) {
 			/* The top reduce block does not correspond to this alg. */
-			#ifdef COLM_LOG_PARSE
-			if ( colm_log_parse ) {
-				cerr << "commit: causeReduce found, delaying backup: " << 
-						(long)pt(tree)->causeReduce << endl;
-			}
-			#endif
-			causeReduce = pt(tree)->causeReduce;
+//			#ifdef COLM_LOG_PARSE
+//			if ( colm_log_parse ) {
+//				cerr << "commit: causeReduce found, delaying backup: " << 
+//						(long)pt(tree)->causeReduce << endl;
+//			}
+//			#endif
+			*causeReduce = pt(tree)->causeReduce;
 		}
 		else {
-			rcode = backupOverRcode( rcode );
+			*rcode = backupOverRcode( *rcode );
 
-			if ( *rcode == IN_RESTORE_LHS ) {
-				#if COLM_LOG_PARSE
-				cerr << "commit: has restore_lhs" << endl;
-				#endif
-				read_tree_p( restore, (rcode+1) );
+			if ( **rcode == IN_RESTORE_LHS ) {
+//				#if COLM_LOG_PARSE
+//				cerr << "commit: has restore_lhs" << endl;
+//				#endif
+				read_tree_p( restore, (*rcode+1) );
 			}
 		}
 	}
@@ -275,21 +257,21 @@ head:
 
 	/* Check causeReduce, might be time to backup over the reverse code
 	 * belonging to a nonterminal that caused previous reductions. */
-	if ( causeReduce > 0 && 
+	if ( *causeReduce > 0 && 
 			tree->id >= parser->tables->rtd->firstNonTermId &&
 			!(tree->flags & AF_TERM_DUP) )
 	{
-		causeReduce -= 1;
+		*causeReduce -= 1;
 
-		if ( causeReduce == 0 ) {
-			#ifdef COLM_LOG_PARSE
-			if ( colm_log_parse ) {
-				cerr << "commit: causeReduce dropped to zero, backing up over rcode" << endl;
-			}
-			#endif
+		if ( *causeReduce == 0 ) {
+//			#ifdef COLM_LOG_PARSE
+//			if ( colm_log_parse ) {
+//				cerr << "commit: causeReduce dropped to zero, backing up over rcode" << endl;
+//			}
+//			#endif
 
 			/* Cause reduce just dropped down to zero. */
-			rcode = backupOverRcode( rcode );
+			*rcode = backupOverRcode( *rcode );
 		}
 	}
 
@@ -341,11 +323,11 @@ backup:
 
 void commitFull( Tree **sp, PdaRun *parser, long causeReduce )
 {
-	#ifdef COLM_LOG_PARSE
-	if ( colm_log_parse ) {
-		cerr << "running full commit" << endl;
-	}
-	#endif
+//	#ifdef COLM_LOG_PARSE
+//	if ( colm_log_parse ) {
+//		cerr << "running full commit" << endl;
+//	}
+//	#endif
 	
 	Kid *kid = parser->stackTop;
 	Code *rcode = parser->allReverseCode->data + parser->allReverseCode->tabLen;
@@ -353,7 +335,7 @@ void commitFull( Tree **sp, PdaRun *parser, long causeReduce )
 	/* The top level of the stack is linked right to left. This is the
 	 * traversal order we need for committing. */
 	while ( kid != 0 && !beenCommitted( kid ) ) {
-		commitKid( parser, sp, kid, rcode, causeReduce );
+		commitKid2( parser, sp, kid, &rcode, &causeReduce );
 		kid = kid->next;
 	}
 
@@ -376,7 +358,7 @@ void parseToken( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputSt
 	unsigned int *action;
 	int rhsLen;
 	Kid *lel;
-	bool induceReject;
+	int induceReject;
 
 	/* The scanner will send a null token if it can't find a token. */
 	if ( input == 0 )
@@ -417,11 +399,11 @@ again:
 		action += pt(lel->tree)->retry_lower;
 
 	if ( *action & act_sb ) {
-		#ifdef COLM_LOG_PARSE
-		if ( colm_log_parse ) {
-			cerr << "shifted: " << pdaRun->tables->rtd->lelInfo[pt(lel->tree)->id].name;
-		}
-		#endif
+//		#ifdef COLM_LOG_PARSE
+//		if ( colm_log_parse ) {
+//			cerr << "shifted: " << pdaRun->tables->rtd->lelInfo[pt(lel->tree)->id].name;
+//		}
+//		#endif
 		input = input->next;
 		pt(lel->tree)->state = pdaRun->cs;
 		lel->next = pdaRun->stackTop;
@@ -441,17 +423,17 @@ again:
 			pt(lel->tree)->retry_lower += 1;
 			assert( pt(lel->tree)->retry_upper == 0 );
 			pdaRun->numRetry += 1; /* FIXME: Has the retry already been counted? */
-			#ifdef COLM_LOG_PARSE
-			if ( colm_log_parse ) {
-				cerr << " retry: " << pdaRun->stackTop;
-			}
-			#endif
+//			#ifdef COLM_LOG_PARSE
+//			if ( colm_log_parse ) {
+//				cerr << " retry: " << pdaRun->stackTop;
+//			}
+//			#endif
 		}
-		#ifdef COLM_LOG_PARSE
-		if ( colm_log_parse ) {
-			cerr << endl;
-		}
-		#endif
+//		#ifdef COLM_LOG_PARSE
+//		if ( colm_log_parse ) {
+//			cerr << endl;
+//		}
+//		#endif
 	}
 
 	if ( pdaRun->tables->commitLen[pos] != 0 ) {
@@ -464,7 +446,7 @@ again:
 	}
 
 	if ( *action & act_rb ) {
-		int objectLength, reduction = *action >> 2;
+		int r, objectLength, reduction = *action >> 2;
 		Kid *last, *redLel, *child, *attrs;
 
 		if ( input != 0 )
@@ -489,7 +471,7 @@ again:
 		/* Build the list of children. */
 		rhsLen = pdaRun->tables->rtd->prodInfo[reduction].length;
 		child = last = 0;
-		for ( int r = 0; r < rhsLen; r++ ) {
+		for ( r = 0; r < rhsLen; r++ ) {
 			child = pdaRun->stackTop;
 			pdaRun->stackTop = pdaRun->stackTop->next;
 			child->next = last;
@@ -498,31 +480,31 @@ again:
 
 		redLel->tree->child = kidListConcat( attrs, child );
 
-		#ifdef COLM_LOG_PARSE
-		if ( colm_log_parse ) {
-			cerr << "reduced: "
-					<< pdaRun->tables->rtd->prodInfo[reduction].name
-					<< " rhsLen: " << rhsLen;
-		}
-		#endif
+//		#ifdef COLM_LOG_PARSE
+//		if ( colm_log_parse ) {
+//			cerr << "reduced: "
+//					<< pdaRun->tables->rtd->prodInfo[reduction].name
+//					<< " rhsLen: " << rhsLen;
+//		}
+//		#endif
 		if ( action[1] == 0 )
 			pt(redLel->tree)->retry_upper = 0;
 		else {
 			pt(redLel->tree)->retry_upper += 1;
 			assert( pt(lel->tree)->retry_lower == 0 );
 			pdaRun->numRetry += 1;
-			#ifdef COLM_LOG_PARSE
-			if ( colm_log_parse ) {
-				cerr << " retry: " << redLel;
-			}
-			#endif
+//			#ifdef COLM_LOG_PARSE
+//			if ( colm_log_parse ) {
+//				cerr << " retry: " << redLel;
+//			}
+//			#endif
 		}
 
-		#ifdef COLM_LOG_PARSE
-		if ( colm_log_parse ) {
-			cerr << endl;
-		}
-		#endif
+//		#ifdef COLM_LOG_PARSE
+//		if ( colm_log_parse ) {
+//			cerr << endl;
+//		}
+//		#endif
 
 		/* When the production is of zero length we stay in the same state.
 		 * Otherwise we use the state stored in the first child. */
@@ -546,11 +528,11 @@ again:
 			 * original upon backtracking, otherwise downref since we took a
 			 * copy above. */
 			if ( exec.parsed != 0 && exec.parsed != redLel->tree ) {
-				#ifdef COLM_LOG_PARSE
-				if ( colm_log_parse ) {
-					cerr << "lhs tree was modified, adding a restore instruction" << endl;
-				}
-				#endif
+//				#ifdef COLM_LOG_PARSE
+//				if ( colm_log_parse ) {
+//					cerr << "lhs tree was modified, adding a restore instruction" << endl;
+//				}
+//				#endif
 
 				/* Transfer the lhs from the environment to redLel. */
 				redLel->tree = prepParseTree( pdaRun->prg, sp, exec.lhs );
@@ -563,7 +545,7 @@ again:
 			}
 
 			/* Pull out the reverse code, if any. */
-			bool hasrcode = makeReverseCode( pdaRun->allReverseCode, &pdaRun->reverseCode );
+			int hasrcode = makeReverseCode( pdaRun->allReverseCode, &pdaRun->reverseCode );
 			if ( hasrcode )
 				redLel->tree->flags |= AF_HAS_RCODE;
 
@@ -578,12 +560,12 @@ again:
 		 * when going backwards and when doing a commit. */
 
 		if ( induceReject ) {
-			#ifdef COLM_LOG_PARSE
-			if ( colm_log_parse ) {
-				cerr << "error induced during reduction of " <<
-						pdaRun->tables->rtd->lelInfo[redLel->tree->id].name << endl;
-			}
-			#endif
+//			#ifdef COLM_LOG_PARSE
+//			if ( colm_log_parse ) {
+//				cerr << "error induced during reduction of " <<
+//						pdaRun->tables->rtd->lelInfo[redLel->tree->id].name << endl;
+//			}
+//			#endif
 			pt(redLel->tree)->state = pdaRun->cs;
 			redLel->next = pdaRun->stackTop;
 			pdaRun->stackTop = redLel;
@@ -601,12 +583,12 @@ again:
 	goto again;
 
 parseError:
-	#ifdef COLM_LOG_PARSE
-	if ( colm_log_parse ) {
-		cerr << "hit error, backtracking" << endl;
-	}
-	#endif
-
+//	#ifdef COLM_LOG_PARSE
+//	if ( colm_log_parse ) {
+//		cerr << "hit error, backtracking" << endl;
+//	}
+//	#endif
+//
 	if ( pdaRun->numRetry == 0 )
 		goto fail;
 
@@ -615,17 +597,17 @@ parseError:
 			assert( pt(input->tree)->retry_upper == 0 );
 
 			if ( pt(input->tree)->retry_lower != 0 ) {
-				#ifdef COLM_LOG_PARSE
-				if ( colm_log_parse ) {
-					cerr << "found retry targ: " << input << endl;
-				}
-				#endif
+//				#ifdef COLM_LOG_PARSE
+//				if ( colm_log_parse ) {
+//					cerr << "found retry targ: " << input << endl;
+//				}
+//				#endif
 				pdaRun->numRetry -= 1;
-				#ifdef COLM_LOG_PARSE
-				if ( colm_log_parse ) {
-					cerr << "found retry: " << input << endl;
-				}
-				#endif
+//				#ifdef COLM_LOG_PARSE
+//				if ( colm_log_parse ) {
+//					cerr << "found retry: " << input << endl;
+//				}
+//				#endif
 
 				pdaRun->cs = pt(input->tree)->state;
 				goto again;
@@ -639,11 +621,11 @@ parseError:
 				queueBackTree( sp, pdaRun, fsmRun, inputStream, input );
 				input = 0;
 				if ( pdaRun->tables->tokenRegions[next] != 0 ) {
-					#ifdef COLM_LOG_PARSE
-					if ( colm_log_parse ) {
-						cerr << "found a new region" << endl;
-					}
-					#endif
+//					#ifdef COLM_LOG_PARSE
+//					if ( colm_log_parse ) {
+//						cerr << "found a new region" << endl;
+//					}
+//					#endif
 					pdaRun->numRetry -= 1;
 					pdaRun->cs = stackTopTarget( pdaRun );
 					pdaRun->nextRegionInd = next;
@@ -651,11 +633,11 @@ parseError:
 				}
 
 				if ( pdaRun->stop ) {
-					#ifdef COLM_LOG_PARSE
-					if ( colm_log_parse ) {
-						cerr << "stopping the backtracking, consumed is " << pdaRun->consumed << endl;
-					}
-					#endif
+//					#ifdef COLM_LOG_PARSE
+//					if ( colm_log_parse ) {
+//						cerr << "stopping the backtracking, consumed is " << pdaRun->consumed << endl;
+//					}
+//					#endif
 
 					pdaRun->cs = stackTopTarget( pdaRun );
 					goto _out;
@@ -679,12 +661,12 @@ parseError:
 		if ( pdaRun->stackTop->tree->id < pdaRun->tables->rtd->firstNonTermId || 
 				(pdaRun->stackTop->tree->flags & AF_TERM_DUP) )
 		{
-			#ifdef COLM_LOG_PARSE
-			if ( colm_log_parse ) {
-				cerr << "backing up over effective terminal: " <<
-						pdaRun->tables->rtd->lelInfo[pdaRun->stackTop->tree->id].name << endl;
-			}
-			#endif
+//			#ifdef COLM_LOG_PARSE
+//			if ( colm_log_parse ) {
+//				cerr << "backing up over effective terminal: " <<
+//						pdaRun->tables->rtd->lelInfo[pdaRun->stackTop->tree->id].name << endl;
+//			}
+//			#endif
 
 			/* Pop the item from the stack. */
 			pdaRun->stackTop = pdaRun->stackTop->next;
@@ -700,12 +682,12 @@ parseError:
 			input = undoLel;
 		}
 		else {
-			#ifdef COLM_LOG_PARSE
-			if ( colm_log_parse ) {
-				cerr << "backing up over non-terminal: " <<
-						pdaRun->tables->rtd->lelInfo[pdaRun->stackTop->tree->id].name << endl;
-			}
-			#endif
+//			#ifdef COLM_LOG_PARSE
+//			if ( colm_log_parse ) {
+//				cerr << "backing up over non-terminal: " <<
+//						pdaRun->tables->rtd->lelInfo[pdaRun->stackTop->tree->id].name << endl;
+//			}
+//			#endif
 
 			/* Check for an execution environment. */
 			if ( undoLel->tree->flags & AF_HAS_RCODE ) {
@@ -781,18 +763,3 @@ _out:
 	pdaRun->nextRegionInd = pdaRun->tables->tokenRegionInds[pdaRun->cs];
 }
 
-void parseError( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, int tokId, Tree *tree )
-{
-	cerr << "error:" << inputStream->line << ": at token ";
-	if ( tokId < 128 )
-		cerr << "\"" << pdaRun->tables->rtd->lelInfo[tokId].name << "\"";
-	else 
-		cerr << pdaRun->tables->rtd->lelInfo[tokId].name;
-	if ( stringLength( tree->tokdata ) > 0 ) {
-		cerr << " with data \"";
-		cerr.write( stringData( tree->tokdata ), 
-				stringLength( tree->tokdata ) );
-		cerr << "\"";
-	}
-	cerr << ": ";
-}

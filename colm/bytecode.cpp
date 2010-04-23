@@ -41,6 +41,15 @@ using std::ostringstream;
 using std::string;
 using std::hex;
 
+exit_object endp;
+
+void operator<<( ostream &out, exit_object & )
+{
+	out << endl;
+	exit(1);
+}
+
+
 #define push(i) (*(--sp) = (i))
 #define pop() (*sp++)
 #define top() (*sp)
@@ -4121,4 +4130,20 @@ again:
 
 out:
 	assert( sp == root );
+}
+
+void parseError( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, int tokId, Tree *tree )
+{
+	cerr << "error:" << inputStream->line << ": at token ";
+	if ( tokId < 128 )
+		cerr << "\"" << pdaRun->tables->rtd->lelInfo[tokId].name << "\"";
+	else 
+		cerr << pdaRun->tables->rtd->lelInfo[tokId].name;
+	if ( stringLength( tree->tokdata ) > 0 ) {
+		cerr << " with data \"";
+		cerr.write( stringData( tree->tokdata ), 
+				stringLength( tree->tokdata ) );
+		cerr << "\"";
+	}
+	cerr << ": ";
 }

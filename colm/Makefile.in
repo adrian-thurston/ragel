@@ -61,8 +61,8 @@ COLM_SRC = \
 	pcheck.cpp \
 	ctinput.cpp
 
-RUNTIME_SRC = pdarun.cpp bytecode.cpp tree.cpp 
-RUNTIME_SRC_C = map.c fsmrun.c list.c input.c debug.c codevect.c pool.c string.c
+RUNTIME_SRC = bytecode.cpp tree.cpp 
+RUNTIME_SRC_C = map.c fsmrun.c pdarun.c list.c input.c debug.c codevect.c pool.c string.c
 
 
 ALL_SRC = $(COLM_SRC) $(RUNTIME_SRC)
@@ -148,8 +148,6 @@ $(RUNTIME_OBJ_C_P): %_p.o: %.c
 $(RUNTIME_OBJ_C_D): %_d.o: %.c
 	@$(CC) -M -MT $@ $(DEFS_RT_D) $< > .$*_d.d
 	$(CC) -c $(CFLAGS) $(DEFS_RT_D) -o $@ $<
-
-
 
 distclean: clean
 	rm -f Makefile config.h

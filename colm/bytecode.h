@@ -50,12 +50,6 @@ typedef struct _Int Int;
 typedef struct _PdaRun PdaRun;
 
 
-/* Can't use sizeof() because we have used types that are bigger than the
- * serial representation. */
-#define SIZEOF_CODE 1
-#define SIZEOF_HALF 2
-#define SIZEOF_WORD sizeof(Word)
-
 typedef Tree *SW;
 typedef Tree **StackPtr;
 typedef Tree **&StackRef;
@@ -72,9 +66,6 @@ struct TreePair
 bool testFalse( Program *prg, Tree *tree );
 
 void rcodeDownref( Program *prg, Tree **sp, Code *instr );
-void rcodeDownrefAll( Program *prg, Tree **sp, RtCodeVect *cv );
-void commitFull( Tree **sp, PdaRun *parser, long commitReduce );
-Tree *getParsedRoot( PdaRun *pdaRun, bool stop );
 
 bool matchPattern( Tree **bindings, Program *prg, long pat, Kid *kid, bool checkNext );
 Tree *constructInteger( Program *prg, long i );
@@ -88,14 +79,9 @@ Stream *openStreamFd( Program *prg, long fd );
 
 #include "tree.h"
 
-Kid *treeChild( Program *prg, const Tree *tree );
-Kid *treeExtractChild( Program *prg, Tree *tree );
-Kid *kidListConcat( Kid *list1, Kid *list2 );
-Tree *splitTree( Program *prg, Tree *t );
 Tree *copyRealTree( Program *prg, Tree *tree, Kid *oldNextDown, Kid *&newNextDown, bool parsed );
 Tree *makeTree( Tree **root, Program *prg, long nargs );
 Tree *makeToken( Tree **root, Program *prg, long nargs );
-Tree *prepParseTree( Program *prg, Tree **sp, Tree *tree );
 
 void printTree( ostream &out, Tree **&sp, Program *prg, Tree *tree );
 void printTree2( FILE *out, Tree **&sp, Program *prg, Tree *tree );

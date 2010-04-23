@@ -622,7 +622,9 @@ void breakRunBuf( FsmRun *fsmRun );
 void fsmExecute( FsmRun *fsmRun, InputStream *inputStream );
 void sendNamedLangEl( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
 void parseLoop( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
-
+void initBindings( PdaRun *pdaRun );
+void commitKid2( PdaRun *parser, Tree **root, Kid *lel, Code **rcode, long *causeReduce );
+Tree *getParsedRoot( PdaRun *pdaRun, int stop );
 
 #ifdef __cplusplus
 }

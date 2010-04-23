@@ -371,6 +371,14 @@ typedef unsigned char uchar;
 #define vm_top() (*sp)
 #define vm_ptop() (sp)
 
+
+
+/* Can't use sizeof() because we have used types that are bigger than the
+ * serial representation. */
+#define SIZEOF_CODE 1
+#define SIZEOF_HALF 2
+#define SIZEOF_WORD sizeof(Word)
+
 typedef struct _Execution
 {
 	Program *prg;
@@ -430,6 +438,12 @@ Tree *getAttr( Tree *tree, long pos );
 Kid *getAttrKid( Tree *tree, long pos );
 
 void execute( Execution *exec, Tree **sp );
+
+Tree *splitTree( Program *prg, Tree *t );
+void rcodeDownrefAll( Program *prg, Tree **sp, RtCodeVect *cv );
+void commitFull( Tree **sp, PdaRun *parser, long commitReduce );
+Tree *getParsedRoot( PdaRun *pdaRun, int stop );
+Tree *prepParseTree( Program *prg, Tree **sp, Tree *tree );
 
 #ifdef __cplusplus
 }
