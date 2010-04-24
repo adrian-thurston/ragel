@@ -50,49 +50,14 @@ typedef struct _Int Int;
 typedef struct _PdaRun PdaRun;
 
 
-struct TreePair
-{
-	TreePair() : key(0), val(0) {}
-
-	Tree *key;
-	Tree *val;
-};
-
-
 void rcodeDownref( Program *prg, Tree **sp, Code *instr );
 
-
-
 #include "tree.h"
-
 
 void printTree( ostream &out, Tree **&sp, Program *prg, Tree *tree );
 void printXmlTree( Tree **&sp, Program *prg, Tree *tree, bool commAttr );
 void printXmlKid( Tree **&sp, Program *prg, Kid *kid, bool commAttr, int depth );
 
-void listAppend( Program *prg, List *list, Tree *val );
-Tree *listRemoveEnd( Program *prg, List *list );
-Tree *getListMem( List *list, Word field );
-Tree *getListMemSplit( Program *prg, List *list, Word field );
-Tree *setListMem( List *list, Half field, Tree *value );
-
-Tree *mapFind( Program *prg, Map *map, Tree *key );
-long mapLength( Map *map );
-int mapInsert( Program *prg, Map *map, Tree *key, Tree *element );
-void mapUnremove( Program *prg, Map *map, Tree *key, Tree *element );
-Tree *mapUninsert( Program *prg, Map *map, Tree *key );
-Tree *mapStore( Program *prg, Map *map, Tree *key, Tree *element );
-Tree *mapUnstore( Program *prg, Map *map, Tree *key, Tree *existing );
-TreePair mapRemove( Program *prg, Map *map, Tree *key );
-
-
-Tree *treeIterAdvance( Program *prg, Tree **&sp, TreeIter *iter );
-Tree *treeIterNextChild( Program *prg, Tree **&sp, TreeIter *iter );
-Tree *treeRevIterPrevChild( Program *prg, Tree **&sp, RevTreeIter *iter );
-Tree *treeIterNextRepeat( Program *prg, Tree **&sp, TreeIter *iter );
-Tree *treeIterPrevRepeat( Program *prg, Tree **&sp, TreeIter *iter );
-
-void splitIterCur( Tree **&sp, Program *prg, TreeIter *iter );
 Tree **stackAlloc();
 
 /*
@@ -106,6 +71,5 @@ void runProgram( Program *prg );
 void allocGlobal( Program *prg );
 
 void executeCode( Execution *exec, Tree **sp, Code *instr );
-void splitRef( Tree **&sp, Program *prg, Ref *fromRef );
 
 #endif

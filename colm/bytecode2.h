@@ -447,6 +447,7 @@ void commitFull( Tree **sp, PdaRun *parser, long commitReduce );
 Tree *getParsedRoot( PdaRun *pdaRun, int stop );
 Tree *prepParseTree( Program *prg, Tree **sp, Tree *tree );
 void printTree2( FILE *out, Tree **sp, Program *prg, Tree *tree );
+void splitRef( Tree ***sp, Program *prg, Ref *fromRef );
 
 #ifdef __cplusplus
 }

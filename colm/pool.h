@@ -27,6 +27,7 @@
 
 #include "pdarun.h"
 #include "map.h"
+#include "tree.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -68,6 +69,9 @@ Location *locationAllocate( Program *prg );
 void locationFree( Program *prg, Location *el );
 void locationClear( Program *prg );
 long locationNumLost( Program *prg );
+
+/* Wrong place. */
+TreePair mapRemove( Program *prg, Map *map, Tree *key );
 
 #ifdef __cplusplus
 }

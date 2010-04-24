@@ -26,6 +26,15 @@
 extern "C" {
 #endif
 
+typedef struct _TreePair
+{
+//	TreePair() : key(0), val(0) {}
+
+	Tree *key;
+	Tree *val;
+} TreePair;
+
+
 void treeUpref( Tree *tree );
 void treeDownref( Program *prg, Tree **sp, Tree *tree );
 long cmpTree( Program *prg, const Tree *tree1, const Tree *tree2 );
@@ -67,7 +76,20 @@ Tree *treeIterDerefCur( TreeIter *iter );
 /* For making references of attributes. */
 Kid *getFieldKid( Tree *tree, Word field );
 
-Tree *copyRealTree( Program *prg, Tree *tree, Kid *oldNextDown, Kid *&newNextDown, int parsed );
+Tree *copyRealTree( Program *prg, Tree *tree, Kid *oldNextDown, Kid **newNextDown, int parsed );
+void splitIterCur( Tree ***psp, Program *prg, TreeIter *iter );
+Tree *setListMem( List *list, Half field, Tree *value );
+
+void listAppend2( Program *prg, List *list, Tree *val );
+Tree *listRemoveEnd( Program *prg, List *list );
+Tree *getListMem( List *list, Word field );
+Tree *getListMemSplit( Program *prg, List *list, Word field );
+
+Tree *treeIterAdvance( Program *prg, Tree ***psp, TreeIter *iter );
+Tree *treeIterNextChild( Program *prg, Tree ***psp, TreeIter *iter );
+Tree *treeRevIterPrevChild( Program *prg, Tree ***psp, RevTreeIter *iter );
+Tree *treeIterNextRepeat( Program *prg, Tree ***psp, TreeIter *iter );
+Tree *treeIterPrevRepeat( Program *prg, Tree ***psp, TreeIter *iter );
 
 #if defined(__cplusplus)
 }

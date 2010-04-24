@@ -89,6 +89,14 @@ void initRevTreeIter( RevTreeIter *revTriter, const Ref *rootRef,
 
 void initUserIter( UserIter *userIter, Tree **stackRoot, long argSize, long searchId );
 
+Tree *mapFind( Program *prg, Map *map, Tree *key );
+long mapLength( Map *map );
+Tree *mapUnstore( Program *prg, Map *map, Tree *key, Tree *existing );
+int mapInsert( Program *prg, Map *map, Tree *key, Tree *element );
+void mapUnremove( Program *prg, Map *map, Tree *key, Tree *element );
+Tree *mapUninsert( Program *prg, Map *map, Tree *key );
+Tree *mapStore( Program *prg, Map *map, Tree *key, Tree *element );
+
 
 #if defined(__cplusplus)
 }

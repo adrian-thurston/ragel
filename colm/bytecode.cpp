@@ -144,7 +144,7 @@ Tree *prepParseTree( Program *prg, Tree **sp, Tree *tree )
 	}
 	#endif
 	Kid *unused = 0;
-	tree = copyRealTree( prg, tree, 0, unused, true );
+	tree = copyRealTree( prg, tree, 0, &unused, true );
 	return  tree;
 }
 
@@ -475,7 +475,7 @@ Tree *constructArgv( Program *prg, int argc, char **argv )
 		Head *head = stringAllocPointer( prg, argv[i], strlen(argv[i]) );
 		Tree *arg = constructString( prg, head );
 		treeUpref( arg );
-		listAppend( prg, (List*)list, arg );
+		listAppend2( prg, (List*)list, arg );
 	}
 	return list;
 }
@@ -1517,7 +1517,7 @@ again:
 			#endif
 
 			UserIter *uiter = (UserIter*) local(field);
-			splitRef( sp, prg, &uiter->ref );
+			splitRef( &sp, prg, &uiter->ref );
 			Tree *split = uiter->ref.kid->tree;
 			treeUpref( split );
 			push( split );
@@ -1535,7 +1535,7 @@ again:
 
 			Tree *t = pop();
 			UserIter *uiter = (UserIter*) local(field);
-			splitRef( sp, prg, &uiter->ref );
+			splitRef( &sp, prg, &uiter->ref );
 			Tree *old = uiter->ref.kid->tree;
 			uiter->ref.kid->tree = t;
 			treeDownref( prg, sp, old );
@@ -1624,7 +1624,7 @@ again:
 			#endif
 
 			Ref *ref = (Ref*) plocal(field);
-			splitRef( sp, prg, ref );
+			splitRef( &sp, prg, ref );
 			Tree *val = ref->kid->tree;
 			treeUpref( val );
 			push( val );
@@ -1642,7 +1642,7 @@ again:
 
 			Tree *val = pop();
 			Ref *ref = (Ref*) plocal(field);
-			splitRef( sp, prg, ref );
+			splitRef( &sp, prg, ref );
 			refSetValue( ref, val );
 			break;
 		}
@@ -2384,7 +2384,7 @@ again:
 			#endif
 
 			TreeIter *iter = (TreeIter*) plocal(field);
-			Tree *res = treeIterAdvance( prg, sp, iter );
+			Tree *res = treeIterAdvance( prg, &sp, iter );
 			treeUpref( res );
 			push( res );
 			break;
@@ -2400,7 +2400,7 @@ again:
 			#endif
 
 			TreeIter *iter = (TreeIter*) plocal(field);
-			Tree *res = treeIterNextChild( prg, sp, iter );
+			Tree *res = treeIterNextChild( prg, &sp, iter );
 			treeUpref( res );
 			push( res );
 			break;
@@ -2416,7 +2416,7 @@ again:
 			#endif
 
 			RevTreeIter *iter = (RevTreeIter*) plocal(field);
-			Tree *res = treeRevIterPrevChild( prg, sp, iter );
+			Tree *res = treeRevIterPrevChild( prg, &sp, iter );
 			treeUpref( res );
 			push( res );
 			break;
@@ -2431,7 +2431,7 @@ again:
 			#endif
 
 			TreeIter *iter = (TreeIter*) plocal(field);
-			Tree *res = treeIterNextRepeat( prg, sp, iter );
+			Tree *res = treeIterNextRepeat( prg, &sp, iter );
 			treeUpref( res );
 			push( res );
 			break;
@@ -2446,7 +2446,7 @@ again:
 			#endif
 
 			TreeIter *iter = (TreeIter*) plocal(field);
-			Tree *res = treeIterPrevRepeat( prg, sp, iter );
+			Tree *res = treeIterPrevRepeat( prg, &sp, iter );
 			treeUpref( res );
 			push( res );
 			break;
@@ -2478,7 +2478,7 @@ again:
 			#endif
 			
 			TreeIter *iter = (TreeIter*) plocal(field);
-			splitIterCur( sp, prg, iter );
+			splitIterCur( &sp, prg, iter );
 			Tree *tree = treeIterDerefCur( iter );
 			treeUpref( tree );
 			push( tree );
@@ -2496,7 +2496,7 @@ again:
 
 			Tree *tree = pop();
 			TreeIter *iter = (TreeIter*) plocal(field);
-			splitIterCur( sp, prg, iter );
+			splitIterCur( &sp, prg, iter );
 			Tree *old = treeIterDerefCur( iter );
 			setTriterCur( iter, tree );
 			treeDownref( prg, sp, old );
@@ -3317,7 +3317,7 @@ again:
 
 			treeDownref( prg, sp, obj );
 
-			listAppend( prg, (List*)obj, val );
+			listAppend2( prg, (List*)obj, val );
 			treeUpref( prg->trueVal );
 			push( prg->trueVal );
 
@@ -3340,7 +3340,7 @@ again:
 
 			treeDownref( prg, sp, obj );
 
-			listAppend( prg, (List*)obj, val );
+			listAppend2( prg, (List*)obj, val );
 			treeUpref( prg->trueVal );
 			push( prg->trueVal );
 			break;
@@ -3409,7 +3409,7 @@ again:
 			Tree *obj = pop();
 			treeDownref( prg, sp, obj );
 
-			listAppend( prg, (List*)obj, val );
+			listAppend2( prg, (List*)obj, val );
 			break;
 		}
 		case IN_GET_LIST_MEM_R: {
