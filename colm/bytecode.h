@@ -64,12 +64,5 @@ Tree **stackAlloc();
  * Runtime environment
  */
 
-void initProgram( Program *program, int argc, char **argv,
-		bool ctxDepParsing, RuntimeData *rtd );
-void clearProgram( Program *prg, Tree **vm_stack, Tree **sp );
-void runProgram( Program *prg );
-void allocGlobal( Program *prg );
-
-void executeCode( Execution *exec, Tree **sp, Code *instr );
 
 #endif

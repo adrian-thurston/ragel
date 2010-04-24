@@ -32,12 +32,10 @@ using std::cerr;
 using std::endl;
 using std::ostream;
 
-
 void printStr( ostream &out, Head *str )
 {
 	out.write( (char*)(str->data), str->length );
 }
-
 
 /* Note that this function causes recursion, thought it is not a big
  * deal since the recursion it is only caused by nonterminals that are ignored. */

@@ -156,6 +156,9 @@ InputStream *newInputStreamFd( long fd );
 InputStream *newInputStreamAccum();
 
 void initInputFuncs();
+void initStaticFuncs();
+void initPatternFuncs();
+void initReplFuncs();
 
 #ifdef __cplusplus
 }

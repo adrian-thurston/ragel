@@ -933,9 +933,11 @@ void FsmCodeGen::setLabelsNeeded()
 
 void FsmCodeGen::writeData()
 {
-	out << "static const int " << START() << " = " << START_STATE_ID() << ";\n";
-	out << "static const int " << FIRST_FINAL() << " = " << FIRST_FINAL_STATE() << ";\n";
-	out << "static const int " << ERROR() << " = " << ERROR_STATE() << ";\n";
+	out << "#define " << START() << " " << START_STATE_ID() << "\n";
+	out << "#define " << FIRST_FINAL() << " " << FIRST_FINAL_STATE() << "\n";
+	out << "#define " << ERROR() << " " << ERROR_STATE() << "\n";
+	out << "#define false 0\n";
+	out << "#define true 1\n";
 	out << "\n";
 
 	out << "long " << ENTRY_BY_REGION() << "[] = {\n\t";
@@ -1051,6 +1053,8 @@ void FsmCodeGen::writeCode()
 		"#include <string.h>\n"
 		"#include <assert.h>\n"
 		"#include <colm/config.h>\n"
+		"#include <colm/input.h>\n"
+		"#include <colm/tree.h>\n"
 		"\n"
 		"\n";
 
@@ -1060,14 +1064,14 @@ void FsmCodeGen::writeCode()
 	/* Referenced in the runtime lib, but used only in the compiler. Probably
 	 * should use the preprocessor to make these go away. */
 	out <<
-		"void sendNamedLangEl( Tree **, PdaRun *, FsmRun *, InputStream * ) {}\n"
+		"void sendNamedLangEl( Tree **tree, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream ) {}\n"
 		"void initBindings( PdaRun *pdaRun ) {}\n"
 		"void makeTokenPushBinding( PdaRun *pdaRun, int bindId, Tree *tree ) {}\n"
 		"void unbind( Program *prg, Tree **sp, PdaRun *pdaRun, Tree *tree ) {}\n"
-		"extern \"C\" void initStaticFuncs() {}\n"
-		"extern \"C\" void initPatternFuncs() {}\n"
-		"extern \"C\" void initReplFuncs() {}\n"
-		"extern \"C\" void initInputFuncs();\n";
+		"void initStaticFuncs() {}\n"
+		"void initPatternFuncs() {}\n"
+		"void initReplFuncs() {}\n"
+		"void initInputFuncs();\n";
 
 	out << 
 		"int main( int argc, char **argv )\n"

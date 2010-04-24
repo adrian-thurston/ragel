@@ -61,9 +61,6 @@ using std::cerr;
 using std::cin;
 using std::endl;
 
-/* Target language and output style. */
-char defExtension[] = ".cpp";
-
 /* Io globals. */
 istream *inStream = 0;
 ostream *outStream = 0;
@@ -231,7 +228,7 @@ void openOutput( )
 		if ( ext != 0 && strcmp( ext, ".rh" ) == 0 )
 			outputFileName = fileNameFromStem( inputFileName, ".h" );
 		else {
-			const char *defExtension = ".cpp";
+			const char *defExtension = ".c";
 			outputFileName = fileNameFromStem( inputFileName, defExtension );
 		}
 	}

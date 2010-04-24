@@ -449,6 +449,14 @@ Tree *prepParseTree( Program *prg, Tree **sp, Tree *tree );
 void printTree2( FILE *out, Tree **sp, Program *prg, Tree *tree );
 void splitRef( Tree ***sp, Program *prg, Ref *fromRef );
 
+void initProgram( Program *program, int argc, char **argv,
+		int ctxDepParsing, RuntimeData *rtd );
+void clearProgram( Program *prg, Tree **vm_stack, Tree **sp );
+void runProgram( Program *prg );
+void allocGlobal( Program *prg );
+
+void executeCode( Execution *exec, Tree **sp, Code *instr );
+
 #ifdef __cplusplus
 }
 #endif

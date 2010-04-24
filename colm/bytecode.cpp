@@ -485,7 +485,7 @@ Tree *constructArgv( Program *prg, int argc, char **argv )
  * Execution environment
  */
 
-void initProgram( Program *prg, int argc, char **argv, bool ctxDepParsing, 
+void initProgram( Program *prg, int argc, char **argv, int ctxDepParsing, 
 		RuntimeData *rtd )
 {
 	prg->argc = argc;
@@ -1169,7 +1169,7 @@ again:
 
 			while ( n-- > 0 ) {
 				Tree *tree = pop();
-				printTree( cout, sp, prg, tree );
+				printTree2( stdout, sp, prg, tree );
 				treeDownref( prg, sp, tree );
 			}
 			break;
