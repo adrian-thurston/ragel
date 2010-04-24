@@ -91,6 +91,25 @@ Tree *treeRevIterPrevChild( Program *prg, Tree ***psp, RevTreeIter *iter );
 Tree *treeIterNextRepeat( Program *prg, Tree ***psp, TreeIter *iter );
 Tree *treeIterPrevRepeat( Program *prg, Tree ***psp, TreeIter *iter );
 
+void printXmlTree( Tree **sp, Program *prg, Tree *tree, int commAttr );
+
+
+/* An automatically grown buffer for collecting tokens. Always reuses space;
+ * never down resizes. */
+typedef struct _StrCollect
+{
+
+	char *data;
+	int allocated;
+	int length;
+} StrCollect;
+
+void initStrCollect( StrCollect *collect );
+void strCollectDestroy( StrCollect *collect );
+void strCollectAppend( StrCollect *collect, char *data, long len );
+void strCollectClear( StrCollect *collect );
+
+
 #if defined(__cplusplus)
 }
 #endif

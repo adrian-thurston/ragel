@@ -57,7 +57,7 @@ void printIgnoreList( ostream &out, Tree **sp, Program *prg, Tree *tree )
 	}
 }
 
-void printKid( ostream &out, Tree **&sp, Program *prg, Kid *kid, bool printIgnore )
+void printKid( ostream &out, Tree **sp, Program *prg, Kid *kid, bool printIgnore )
 {
 	Tree **root = vm_ptop();
 	Kid *child;
@@ -115,7 +115,7 @@ rec_call:
 		goto rec_return;
 }
 
-void printTree( ostream &out, Tree **&sp, Program *prg, Tree *tree )
+void printTree( ostream &out, Tree **sp, Program *prg, Tree *tree )
 {
 	if ( tree == 0 )
 		out << "NIL";
@@ -128,159 +128,3 @@ void printTree( ostream &out, Tree **&sp, Program *prg, Tree *tree )
 }
 
 
-void xmlEscapeData( const char *data, long len )
-{
-	for ( int i = 0; i < len; i++ ) {
-		if ( data[i] == '<' )
-			cout << "&lt;";
-		else if ( data[i] == '>' )
-			cout << "&gt;";
-		else if ( data[i] == '&' )
-			cout << "&amp;";
-		else if ( 32 <= data[i] && data[i] <= 126 )
-			cout << data[i];
-		else
-			cout << "&#" << ((unsigned)data[i]) << ';';
-	}
-}
-
-/* Might be a good idea to include this in the printXmlKid function since
- * it is recursive and can eat up stac, however it's probably not a big deal
- * since the additional stack depth is only caused for nonterminals that are
- * ignored. */
-void printXmlIgnoreList( Tree **sp, Program *prg, Tree *tree, long depth )
-{
-	Kid *ignore = treeIgnore( prg, tree );
-	while ( ignore != 0 ) {
-		printXmlKid( sp, prg, ignore, true, depth );
-		ignore = ignore->next;
-	}
-}
-
-void printXmlKid( Tree **&sp, Program *prg, Kid *kid, bool commAttr, int depth )
-{
-	Kid *child;
-	Tree **root = vm_ptop();
-	long i, objectLength;
-	LangElInfo *lelInfo = prg->rtd->lelInfo;
-
-	long kidNum = 0;;
-
-rec_call:
-
-	if ( kid->tree == 0 ) {
-		for ( i = 0; i < depth; i++ )
-			cout << "  ";
-
-		cout << "NIL" << endl;
-	}
-	else {
-		/* First print the ignore tokens. */
-		if ( commAttr )
-			printXmlIgnoreList( sp, prg, kid->tree, depth );
-
-		for ( i = 0; i < depth; i++ )
-			cout << "  ";
-
-		/* Open the tag. Afterwards we will either print data underneath it or
-		 * we will close it off immediately. */
-		cout << '<' << lelInfo[kid->tree->id].name;
-
-		/* If this is an attribute then give the node an attribute number. */
-		if ( vm_ptop() != root ) {
-			objectLength = lelInfo[((Kid*)vm_top())->tree->id].objectLength;
-			if ( kidNum < objectLength )
-				cout << " an=\"" << kidNum << '"';
-		}
-
-		objectLength = lelInfo[kid->tree->id].objectLength;
-		child = treeChild( prg, kid->tree );
-		if ( (commAttr && objectLength > 0) || child != 0 ) {
-			cout << '>' << endl;
-			vm_push( (SW) kidNum );
-			vm_push( (SW) kid );
-
-			kidNum = 0;
-			kid = kid->tree->child;
-
-			/* Skip over attributes if not printing comments and attributes. */
-			if ( ! commAttr )
-				kid = child;
-
-			while ( kid != 0 ) {
-				/* FIXME: I don't think we need this check for ignore any more. */
-				if ( kid->tree == 0 || !lelInfo[kid->tree->id].ignore ) {
-					depth++;
-					goto rec_call;
-					rec_return:
-					depth--;
-				}
-				
-				kid = kid->next;
-				kidNum += 1;
-
-				/* If the parent kid is a repeat then skip this node and go
-				 * right to the first child (repeated item). */
-				if ( lelInfo[((Kid*)vm_top())->tree->id].repeat )
-					kid = kid->tree->child;
-
-				/* If we have a kid and the parent is a list (recursive prod of
-				 * list) then go right to the first child. */
-				if ( kid != 0 && lelInfo[((Kid*)vm_top())->tree->id].list )
-					kid = kid->tree->child;
-			}
-
-			kid = (Kid*) vm_pop();
-			kidNum = (long) vm_pop();
-
-			for ( i = 0; i < depth; i++ )
-				cout << "  ";
-			cout << "</" << lelInfo[kid->tree->id].name << '>' << endl;
-		}
-		else if ( kid->tree->id == LEL_ID_PTR ) {
-			cout << '>' << (void*)((Pointer*)kid->tree)->value << 
-					"</" << lelInfo[kid->tree->id].name << '>' << endl;
-		}
-		else if ( kid->tree->id == LEL_ID_BOOL ) {
-			if ( ((Int*)kid->tree)->value )
-				cout << ">true</";
-			else
-				cout << ">false</";
-			cout << lelInfo[kid->tree->id].name << '>' << endl;
-		}
-		else if ( kid->tree->id == LEL_ID_INT ) {
-			cout << '>' << ((Int*)kid->tree)->value << 
-					"</" << lelInfo[kid->tree->id].name << '>' << endl;
-		}
-		else if ( kid->tree->id == LEL_ID_STR ) {
-			Head *head = (Head*) ((Str*)kid->tree)->value;
-
-			cout << '>';
-			xmlEscapeData( (char*)(head->data), head->length );
-			cout << "</" << lelInfo[kid->tree->id].name << '>' << endl;
-		}
-		else if ( 0 < kid->tree->id && kid->tree->id < prg->rtd->firstNonTermId &&
-				kid->tree->tokdata != 0 && 
-				stringLength( kid->tree->tokdata ) > 0 && 
-				!lelInfo[kid->tree->id].literal )
-		{
-			cout << '>';
-			xmlEscapeData( stringData( kid->tree->tokdata ), 
-					stringLength( kid->tree->tokdata ) );
-			cout << "</" << lelInfo[kid->tree->id].name << '>' << endl;
-		}
-		else
-			cout << "/>" << endl;
-	}
-
-	if ( vm_ptop() != root )
-		goto rec_return;
-}
-
-void printXmlTree( Tree **&sp, Program *prg, Tree *tree, bool commAttr )
-{
-	Kid kid;
-	kid.tree = tree;
-	kid.next = 0;
-	printXmlKid( sp, prg, &kid, commAttr, 0 );
-}

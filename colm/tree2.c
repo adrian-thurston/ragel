@@ -32,6 +32,8 @@
 #define true 1
 #define false 0
 
+#define BUFFER_INITIAL_SIZE 4096
+
 void initUserIter( UserIter *userIter, Tree **stackRoot, long argSize, long searchId )
 {
 	userIter->stackRoot = stackRoot;
@@ -1622,7 +1624,7 @@ Tree *treeIterNextRepeat( Program *prg, Tree ***psp, TreeIter *iter )
 	return (iter->ref.kid ? prg->trueVal : prg->falseVal );
 }
 
-void iter_find_rev_repeat( Program *prg, Tree ***psp, TreeIter *iter, int tryFirst )
+void iterFindRevRepeat( Program *prg, Tree ***psp, TreeIter *iter, int tryFirst )
 {
 	Tree **sp = *psp;
 	int anyTree = iter->searchId == prg->rtd->anyId;
@@ -1685,11 +1687,11 @@ Tree *treeIterPrevRepeat( Program *prg, Tree ***psp, TreeIter *iter )
 	if ( iter->ref.kid == 0 ) {
 		/* Kid is zero, start from the root. */
 		iter->ref = iter->rootRef;
-		iter_find_rev_repeat( prg, psp, iter, true );
+		iterFindRevRepeat( prg, psp, iter, true );
 	}
 	else {
 		/* Have a previous item, continue searching from there. */
-		iter_find_rev_repeat( prg, psp, iter, false );
+		iterFindRevRepeat( prg, psp, iter, false );
 	}
 
 	iter->stackSize = iter->stackRoot - *psp;
@@ -1730,4 +1732,191 @@ Tree *treeSearch2( Program *prg, Tree *tree, long id )
 	return res;
 }
 
+void xmlEscapeData( FILE *out, const char *data, long len )
+{
+	int i;
+	for ( i = 0; i < len; i++ ) {
+		if ( data[i] == '<' )
+			fprintf( out, "&lt;" );
+		else if ( data[i] == '>' )
+			fprintf( out, "&gt;" );
+		else if ( data[i] == '&' )
+			fprintf( out, "&amp;" );
+		else if ( 32 <= data[i] && data[i] <= 126 )
+			fprintf( out, "%c", data[i] );
+		else
+			fprintf( out, "&#%u;", ((unsigned)data[i]) );
+	}
+}
 
+void printXmlKid( FILE *out, Tree **sp, Program *prg, Kid *kid, int commAttr, int depth );
+
+/* Might be a good idea to include this in the printXmlKid function since
+ * it is recursive and can eat up stac, however it's probably not a big deal
+ * since the additional stack depth is only caused for nonterminals that are
+ * ignored. */
+void printXmlIgnoreList( FILE *out, Tree **sp, Program *prg, Tree *tree, long depth )
+{
+	Kid *ignore = treeIgnore( prg, tree );
+	while ( ignore != 0 ) {
+		printXmlKid( out, sp, prg, ignore, true, depth );
+		ignore = ignore->next;
+	}
+}
+
+void printXmlKid( FILE *out, Tree **sp, Program *prg, Kid *kid, int commAttr, int depth )
+{
+	Kid *child;
+	Tree **root = vm_ptop();
+	long i, objectLength;
+	LangElInfo *lelInfo = prg->rtd->lelInfo;
+
+	long kidNum = 0;;
+
+rec_call:
+
+	if ( kid->tree == 0 ) {
+		for ( i = 0; i < depth; i++ )
+			fprintf( out, "  " );
+
+		fprintf( out, "NIL\n" );
+	}
+	else {
+		/* First print the ignore tokens. */
+		if ( commAttr )
+			printXmlIgnoreList( out, sp, prg, kid->tree, depth );
+
+		for ( i = 0; i < depth; i++ )
+			fprintf( out, "  " );
+
+		/* Open the tag. Afterwards we will either print data underneath it or
+		 * we will close it off immediately. */
+		fprintf( out, "<%s", lelInfo[kid->tree->id].name );
+
+		/* If this is an attribute then give the node an attribute number. */
+		if ( vm_ptop() != root ) {
+			objectLength = lelInfo[((Kid*)vm_top())->tree->id].objectLength;
+			if ( kidNum < objectLength )
+				fprintf( out, " an=\"%ld\"", kidNum );
+		}
+
+		objectLength = lelInfo[kid->tree->id].objectLength;
+		child = treeChild( prg, kid->tree );
+		if ( (commAttr && objectLength > 0) || child != 0 ) {
+			fprintf( out, ">\n" );
+			vm_push( (SW) kidNum );
+			vm_push( (SW) kid );
+
+			kidNum = 0;
+			kid = kid->tree->child;
+
+			/* Skip over attributes if not printing comments and attributes. */
+			if ( ! commAttr )
+				kid = child;
+
+			while ( kid != 0 ) {
+				/* FIXME: I don't think we need this check for ignore any more. */
+				if ( kid->tree == 0 || !lelInfo[kid->tree->id].ignore ) {
+					depth++;
+					goto rec_call;
+					rec_return:
+					depth--;
+				}
+				
+				kid = kid->next;
+				kidNum += 1;
+
+				/* If the parent kid is a repeat then skip this node and go
+				 * right to the first child (repeated item). */
+				if ( lelInfo[((Kid*)vm_top())->tree->id].repeat )
+					kid = kid->tree->child;
+
+				/* If we have a kid and the parent is a list (recursive prod of
+				 * list) then go right to the first child. */
+				if ( kid != 0 && lelInfo[((Kid*)vm_top())->tree->id].list )
+					kid = kid->tree->child;
+			}
+
+			kid = (Kid*) vm_pop();
+			kidNum = (long) vm_pop();
+
+			for ( i = 0; i < depth; i++ )
+				fprintf( out, "  " );
+			fprintf( out, "</%s>\n", lelInfo[kid->tree->id].name );
+		}
+		else if ( kid->tree->id == LEL_ID_PTR ) {
+			fprintf( out, ">%p</%s>\n", (void*)((Pointer*)kid->tree)->value,
+					lelInfo[kid->tree->id].name );
+		}
+		else if ( kid->tree->id == LEL_ID_BOOL ) {
+			if ( ((Int*)kid->tree)->value )
+				fprintf( out, ">true</" );
+			else
+				fprintf( out, ">false</" );
+			fprintf( out, "%s>\n", lelInfo[kid->tree->id].name );
+		}
+		else if ( kid->tree->id == LEL_ID_INT ) {
+			fprintf( out, ">%ld</%s>\n", ((Int*)kid->tree)->value,
+					lelInfo[kid->tree->id].name );
+		}
+		else if ( kid->tree->id == LEL_ID_STR ) {
+			Head *head = (Head*) ((Str*)kid->tree)->value;
+
+			fprintf( out, ">" );
+			xmlEscapeData( out, (char*)(head->data), head->length );
+			fprintf( out, "</%s>\n", lelInfo[kid->tree->id].name );
+		}
+		else if ( 0 < kid->tree->id && kid->tree->id < prg->rtd->firstNonTermId &&
+				kid->tree->tokdata != 0 && 
+				stringLength( kid->tree->tokdata ) > 0 && 
+				!lelInfo[kid->tree->id].literal )
+		{
+			fprintf( out, ">" );
+			xmlEscapeData( out, stringData( kid->tree->tokdata ), 
+					stringLength( kid->tree->tokdata ) );
+			fprintf( out, "</%s>\n", lelInfo[kid->tree->id].name );
+		}
+		else {
+			fprintf( out, "/>\n" );
+		}
+	}
+
+	if ( vm_ptop() != root )
+		goto rec_return;
+}
+
+void printXmlTree( Tree **sp, Program *prg, Tree *tree, int commAttr )
+{
+	Kid kid;
+	kid.tree = tree;
+	kid.next = 0;
+	printXmlKid( stdout, sp, prg, &kid, commAttr, 0 );
+}
+
+void initStrCollect( StrCollect *collect )
+{
+	collect->data = (char*) malloc( BUFFER_INITIAL_SIZE );
+	collect->allocated = BUFFER_INITIAL_SIZE;
+	collect->length = 0;
+}
+
+void strCollectDestroy( StrCollect *collect )
+{
+	free( collect->data );
+}
+
+void strCollectAppend( StrCollect *collect, char *data, long len )
+{
+	long newLen = collect->length + len;
+	if ( newLen > collect->allocated ) {
+		collect->allocated *= newLen * 2;
+		collect->data = (char*) realloc( collect->data, collect->allocated );
+	}
+	memcpy( collect->data + collect->length, data, len );
+	collect->length += len;
+}
+		
+void strCollectClear( StrCollect *collect )
+{
+	collect->length = 0;
+}
