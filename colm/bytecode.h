@@ -61,12 +61,10 @@ struct TreePair
 
 void rcodeDownref( Program *prg, Tree **sp, Code *instr );
 
-bool matchPattern( Tree **bindings, Program *prg, long pat, Kid *kid, bool checkNext );
 
 
 #include "tree.h"
 
-Tree *copyRealTree( Program *prg, Tree *tree, Kid *oldNextDown, Kid *&newNextDown, bool parsed );
 
 void printTree( ostream &out, Tree **&sp, Program *prg, Tree *tree );
 void printXmlTree( Tree **&sp, Program *prg, Tree *tree, bool commAttr );
@@ -80,36 +78,21 @@ Tree *setListMem( List *list, Half field, Tree *value );
 
 Tree *mapFind( Program *prg, Map *map, Tree *key );
 long mapLength( Map *map );
-bool mapInsert( Program *prg, Map *map, Tree *key, Tree *element );
+int mapInsert( Program *prg, Map *map, Tree *key, Tree *element );
 void mapUnremove( Program *prg, Map *map, Tree *key, Tree *element );
 Tree *mapUninsert( Program *prg, Map *map, Tree *key );
 Tree *mapStore( Program *prg, Map *map, Tree *key, Tree *element );
 Tree *mapUnstore( Program *prg, Map *map, Tree *key, Tree *existing );
 TreePair mapRemove( Program *prg, Map *map, Tree *key );
 
-Tree *getPtrVal( Pointer *ptr );
-Tree *getPtrValSplit( Program *prg, Pointer *ptr );
-Tree *getField( Tree *tree, Word field );
-Tree *getFieldSplit( Program *prg, Tree *tree, Word field );
-Tree *getRhsEl( Program *prg, Tree *lhs, long position );
-void setField( Program *prg, Tree *tree, long field, Tree *value );
-
-/* For making references of attributes. */
-Kid *getFieldKid( Tree *tree, Word field );
 
 Tree *treeIterAdvance( Program *prg, Tree **&sp, TreeIter *iter );
 Tree *treeIterNextChild( Program *prg, Tree **&sp, TreeIter *iter );
 Tree *treeRevIterPrevChild( Program *prg, Tree **&sp, RevTreeIter *iter );
 Tree *treeIterNextRepeat( Program *prg, Tree **&sp, TreeIter *iter );
 Tree *treeIterPrevRepeat( Program *prg, Tree **&sp, TreeIter *iter );
-Tree *treeIterDerefCur( TreeIter *iter );
-void setTriterCur( TreeIter *iter, Tree *tree );
-void splitIterCur( Tree **&sp, Program *prg, TreeIter *iter );
-void refSetValue( Ref *ref, Tree *v );
-Tree *treeSearch( Program *prg, Kid *kid, long id );
-Tree *treeSearch( Program *prg, Tree *tree, long id );
-void splitRef( Tree **&sp, Program *prg, Ref *fromRef );
 
+void splitIterCur( Tree **&sp, Program *prg, TreeIter *iter );
 Tree **stackAlloc();
 
 /*
@@ -123,5 +106,6 @@ void runProgram( Program *prg );
 void allocGlobal( Program *prg );
 
 void executeCode( Execution *exec, Tree **sp, Code *instr );
+void splitRef( Tree **&sp, Program *prg, Ref *fromRef );
 
 #endif

@@ -47,6 +47,27 @@ Stream *openFile( Program *prg, Tree *name, Tree *mode );
 Stream *openStreamFd( Program *prg, long fd );
 Kid *copyIgnoreList( Program *prg, Kid *ignoreHeader );
 void streamFree( Program *prg, Stream *s );
+Tree *copyTree( Program *prg, Tree *tree, Kid *oldNextDown, Kid **newNextDown );
+
+Tree *getPtrVal( Pointer *ptr );
+Tree *getPtrValSplit( Program *prg, Pointer *ptr );
+Tree *getField( Tree *tree, Word field );
+Tree *getFieldSplit( Program *prg, Tree *tree, Word field );
+Tree *getRhsEl( Program *prg, Tree *lhs, long position );
+void setField( Program *prg, Tree *tree, long field, Tree *value );
+
+void setTriterCur( TreeIter *iter, Tree *tree );
+void refSetValue( Ref *ref, Tree *v );
+Tree *treeSearch( Program *prg, Kid *kid, long id );
+Tree *treeSearch2( Program *prg, Tree *tree, long id );
+
+int matchPattern( Tree **bindings, Program *prg, long pat, Kid *kid, int checkNext );
+Tree *treeIterDerefCur( TreeIter *iter );
+
+/* For making references of attributes. */
+Kid *getFieldKid( Tree *tree, Word field );
+
+Tree *copyRealTree( Program *prg, Tree *tree, Kid *oldNextDown, Kid *&newNextDown, int parsed );
 
 #if defined(__cplusplus)
 }

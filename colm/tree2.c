@@ -547,3 +547,580 @@ Kid *copyIgnoreList( Program *prg, Kid *ignoreHeader )
 	}
 	return newHeader;
 }
+
+/* New tree has zero ref. */
+Tree *copyRealTree( Program *prg, Tree *tree, Kid *oldNextDown, 
+		Kid **newNextDown, int parseTree )
+{
+	/* Need to keep a lookout for next down. If 
+	 * copying it, return the copy. */
+	Tree *newTree;
+	if ( parseTree ) {
+		newTree = (Tree*) parseTreeAllocate( prg );
+		newTree->flags |= AF_PARSE_TREE;
+	}
+	else {
+		newTree = treeAllocate( prg );
+	}
+
+	newTree->id = tree->id;
+	newTree->tokdata = stringCopy( prg, tree->tokdata );
+
+	/* Copy the child list. Start with ignores, then the list. */
+	Kid *child = tree->child, *last = 0;
+
+	/* Left ignores. */
+	if ( tree->flags & AF_LEFT_IGNORE ) {
+		newTree->flags |= AF_LEFT_IGNORE;
+		Kid *newHeader = copyIgnoreList( prg, child );
+
+		/* Always the head. */
+		newTree->child = newHeader;
+
+		child = child->next;
+		last = newHeader;
+	}
+
+	/* Right ignores. */
+	if ( tree->flags & AF_RIGHT_IGNORE ) {
+		newTree->flags |= AF_RIGHT_IGNORE;
+		Kid *newHeader = copyIgnoreList( prg, child );
+		if ( last == 0 )
+			newTree->child = newHeader;
+		else
+			last->next = newHeader;
+		child = child->next;
+		last = newHeader;
+	}
+
+	/* Attributes and children. */
+	while ( child != 0 ) {
+		Kid *newKid = kidAllocate( prg );
+
+		/* Watch out for next down. */
+		if ( child == oldNextDown )
+			*newNextDown = newKid;
+
+		newKid->tree = child->tree;
+		newKid->next = 0;
+
+		/* May be an attribute. */
+		if ( newKid->tree != 0 )
+			newKid->tree->refs += 1;
+
+		/* Store the first child. */
+		if ( last == 0 )
+			newTree->child = newKid;
+		else
+			last->next = newKid;
+
+		child = child->next;
+		last = newKid;
+	}
+	
+	return newTree;
+}
+
+List *copyList( Program *prg, List *list, Kid *oldNextDown, Kid **newNextDown )
+{
+	#ifdef COLM_LOG_BYTECODE
+	if ( colm_log_bytecode ) {
+		cerr << "splitting list: " << list << " refs: " << 
+				list->refs << endl;
+	}
+	#endif
+
+	/* Not a need copy. */
+	List *newList = (List*)mapElAllocate( prg );
+	newList->id = list->genericInfo->langElId;
+	newList->genericInfo = list->genericInfo;
+
+	ListEl *src = list->head;
+	while( src != 0 ) {
+		ListEl *newEl = listElAllocate( prg );
+		newEl->value = src->value;
+		treeUpref( newEl->value );
+
+		listAppend( newList, newEl );
+
+		/* Watch out for next down. */
+		if ( (Kid*)src == oldNextDown )
+			*newNextDown = (Kid*)newEl;
+
+		src = src->next;
+	}
+
+	return newList;
+}
+	
+Map *copyMap( Program *prg, Map *map, Kid *oldNextDown, Kid **newNextDown )
+{
+	#ifdef COLM_LOG_BYTECODE
+	if ( colm_log_bytecode ) {
+		cerr << "splitting map: " << map << " refs: " << 
+				map->refs << endl;
+	}
+	#endif
+
+	Map *newMap = (Map*)mapElAllocate( prg );
+	newMap->id = map->genericInfo->langElId;
+	newMap->genericInfo = map->genericInfo;
+	newMap->treeSize = map->treeSize;
+	newMap->root = 0;
+
+	/* If there is a root, copy the tree. */
+	if ( map->root != 0 ) {
+		newMap->root = mapCopyBranch( prg, newMap, map->root, 
+				oldNextDown, newNextDown );
+	}
+	MapEl *el;
+	for ( el = newMap->head; el != 0; el = el->next ) {
+		assert( map->genericInfo->typeArg == TYPE_TREE );
+		treeUpref( el->tree );
+	}
+
+	return newMap;
+}
+
+Tree *copyTree( Program *prg, Tree *tree, Kid *oldNextDown, Kid **newNextDown )
+{
+	LangElInfo *lelInfo = prg->rtd->lelInfo;
+	long genericId = lelInfo[tree->id].genericId;
+	if ( genericId > 0 ) {
+		GenericInfo *generic = &prg->rtd->genericInfo[genericId];
+		if ( generic->type == GEN_LIST )
+			tree = (Tree*) copyList( prg, (List*) tree, oldNextDown, newNextDown );
+		else if ( generic->type == GEN_MAP )
+			tree = (Tree*) copyMap( prg, (Map*) tree, oldNextDown, newNextDown );
+		else if ( generic->type == GEN_PARSER ) {
+			/* Need to figure out the semantics here. */
+			fatal( "ATTEMPT TO COPY PARSER\n" );
+			assert(false);
+		}
+	}
+	else if ( tree->id == LEL_ID_PTR )
+		assert(false);
+	else if ( tree->id == LEL_ID_BOOL )
+		assert(false);
+	else if ( tree->id == LEL_ID_INT )
+		assert(false);
+	else if ( tree->id == LEL_ID_STR )
+		assert(false);
+	else if ( tree->id == LEL_ID_STREAM )
+		assert(false);
+	else {
+		tree = copyRealTree( prg, tree, oldNextDown, newNextDown, false );
+	}
+
+	assert( tree->refs == 0 );
+	return tree;
+}
+
+Tree *splitTree( Program *prg, Tree *tree )
+{
+	if ( tree != 0 ) {
+		assert( tree->refs >= 1 );
+
+		if ( tree->refs > 1 ) {
+			#ifdef COLM_LOG_BYTECODE
+			if ( colm_log_bytecode ) {
+				cerr << "splitting tree: " << tree << " refs: " << 
+						tree->refs << endl;
+			}
+			#endif
+
+			Kid *oldNextDown = 0, *newNextDown = 0;
+			Tree *newTree = copyTree( prg, tree, oldNextDown, &newNextDown );
+			treeUpref( newTree );
+
+			/* Downref the original. Don't need to consider freeing because
+			 * refs were > 1. */
+			tree->refs -= 1;
+
+			tree = newTree;
+		}
+
+		assert( tree->refs == 1 );
+	}
+	return tree;
+}
+
+Tree *createGeneric( Program *prg, long genericId )
+{
+	GenericInfo *genericInfo = &prg->rtd->genericInfo[genericId];
+	Tree *newGeneric = 0;
+	switch ( genericInfo->type ) {
+		case GEN_MAP: {
+			Map *map = (Map*)mapElAllocate( prg );
+			map->id = genericInfo->langElId;
+			map->genericInfo = genericInfo;
+			newGeneric = (Tree*) map;
+			break;
+		}
+		case GEN_LIST: {
+			List *list = (List*)mapElAllocate( prg );
+			list->id = genericInfo->langElId;
+			list->genericInfo = genericInfo;
+			newGeneric = (Tree*) list;
+			break;
+		}
+		case GEN_PARSER: {
+			Accum *accum = (Accum*)mapElAllocate( prg );
+			accum->id = genericInfo->langElId;
+			accum->genericInfo = genericInfo;
+			accum->fsmRun = malloc( sizeof(FsmRun) );
+			accum->pdaRun = malloc( sizeof(PdaRun) );
+
+			/* Start off the parsing process. */
+			initPdaRun( accum->pdaRun, prg, prg->rtd->pdaTables, 
+					accum->fsmRun, genericInfo->parserId, false, false, 0 );
+			initFsmRun( accum->fsmRun, prg );
+			newToken( accum->pdaRun, accum->fsmRun );
+
+			newGeneric = (Tree*) accum;
+			break;
+		}
+		default:
+			assert(false);
+			return 0;
+	}
+
+	return newGeneric;
+}
+
+
+/* We can't make recursive calls here since the tree we are freeing may be
+ * very large. Need the VM stack. */
+void treeFreeRec( Program *prg, Tree **sp, Tree *tree )
+{
+	Tree **top = sp;
+	LangElInfo *lelInfo;
+	long genericId;
+
+free_tree:
+	lelInfo = prg->rtd->lelInfo;
+	genericId = lelInfo[tree->id].genericId;
+	if ( genericId > 0 ) {
+		GenericInfo *generic = &prg->rtd->genericInfo[genericId];
+		if ( generic->type == GEN_LIST ) {
+			List *list = (List*) tree;
+			ListEl *el = list->head;
+			while ( el != 0 ) {
+				ListEl *next = el->next;
+				vm_push( el->value );
+				listElFree( prg, el );
+				el = next;
+			}
+			mapElFree( prg, (MapEl*)list );
+		}
+		else if ( generic->type == GEN_MAP ) {
+			Map *map = (Map*)tree;
+			MapEl *el = map->head;
+			while ( el != 0 ) {
+				MapEl *next = el->next;
+				vm_push( el->key );
+				vm_push( el->tree );
+				mapElFree( prg, el );
+				el = next;
+			}
+			mapElFree( prg, (MapEl*)map );
+		}
+		else if ( generic->type == GEN_PARSER ) {
+			Accum *accum = (Accum*)tree;
+			free( accum->fsmRun );
+			cleanParser( sp, accum->pdaRun );
+			clearContext( accum->pdaRun, sp );
+			rcodeDownrefAll( prg, sp, accum->pdaRun->allReverseCode );
+			free( accum->pdaRun );
+			treeDownref( prg, sp, (Tree*)accum->stream );
+			mapElFree( prg, (MapEl*)accum );
+		}
+		else
+			assert(false);
+	}
+	else {
+		if ( tree->id == LEL_ID_STR ) {
+			Str *str = (Str*) tree;
+			stringFree( prg, str->value );
+			treeFree( prg, tree );
+		}
+		else if ( tree->id == LEL_ID_BOOL || tree->id == LEL_ID_INT )
+			treeFree( prg, tree );
+		else if ( tree->id == LEL_ID_PTR ) {
+			//Pointer *ptr = (Pointer*)tree;
+			//vm_push( ptr->value->tree );
+			//kidFree( prg, ptr->value );
+			treeFree( prg, tree );
+		}
+		else if ( tree->id == LEL_ID_STREAM )
+			streamFree( prg, (Stream*) tree );
+		else { 
+			stringFree( prg, tree->tokdata );
+			Kid *child = tree->child;
+
+			/* Left ignore trees. */
+			if ( tree->flags & AF_LEFT_IGNORE ) {
+				Kid *ic = (Kid*)child->tree;
+				while ( ic != 0 ) {
+					Kid *next = ic->next;
+					vm_push( ic->tree );
+					kidFree( prg, ic );
+					ic = next;
+				}
+			
+				Kid *next = child->next;
+				kidFree( prg, child );
+				child = next;
+			}
+
+			/* Right ignore trees. */
+			if ( tree->flags & AF_RIGHT_IGNORE ) {
+				Kid *ic = (Kid*)child->tree;
+				while ( ic != 0 ) {
+					Kid *next = ic->next;
+					vm_push( ic->tree );
+					kidFree( prg, ic );
+					ic = next;
+				}
+
+				Kid *next = child->next;
+				kidFree( prg, child );
+				child = next;
+			}
+
+			/* Attributes and grammar-based children. */
+			while ( child != 0 ) {
+				Kid *next = child->next;
+				vm_push( child->tree );
+				kidFree( prg, child );
+				child = next;
+			}
+
+			if ( tree->flags & AF_PARSE_TREE )
+				parseTreeFree( prg, (ParseTree*)tree );
+			else
+				treeFree( prg, tree );
+		}
+	}
+
+	/* Any trees to downref? */
+	while ( sp != top ) {
+		tree = vm_pop();
+		if ( tree != 0 ) {
+			assert( tree->refs > 0 );
+			tree->refs -= 1;
+			if ( tree->refs == 0 )
+				goto free_tree;
+		}
+	}
+}
+
+void treeUpref( Tree *tree )
+{
+	if ( tree != 0 )
+		tree->refs += 1;
+}
+
+void treeDownref( Program *prg, Tree **sp, Tree *tree )
+{
+	if ( tree != 0 ) {
+		assert( tree->refs > 0 );
+		tree->refs -= 1;
+		if ( tree->refs == 0 )
+			treeFreeRec( prg, sp, tree );
+	}
+}
+
+/* Find the first child of a tree. */
+Kid *treeChild( Program *prg, const Tree *tree )
+{
+	LangElInfo *lelInfo = prg->rtd->lelInfo;
+	Kid *kid = tree->child;
+
+	if ( tree->flags & AF_LEFT_IGNORE )
+		kid = kid->next;
+	if ( tree->flags & AF_RIGHT_IGNORE )
+		kid = kid->next;
+
+	/* Skip over attributes. */
+	long objectLength = lelInfo[tree->id].objectLength;
+	long a;
+	for ( a = 0; a < objectLength; a++ )
+		kid = kid->next;
+
+	return kid;
+}
+
+/* Find the first child of a tree. */
+Kid *treeExtractChild( Program *prg, Tree *tree )
+{
+	LangElInfo *lelInfo = prg->rtd->lelInfo;
+	Kid *kid = tree->child, *last = 0;
+
+	if ( tree->flags & AF_LEFT_IGNORE )
+		kid = kid->next;
+	if ( tree->flags & AF_RIGHT_IGNORE )
+		kid = kid->next;
+
+	/* Skip over attributes. */
+	long objectLength = lelInfo[tree->id].objectLength;
+	long a;
+	for ( a = 0; a < objectLength; a++ ) {
+		last = kid;
+		kid = kid->next;
+	}
+
+	if ( last == 0 )
+		tree->child = 0;
+	else
+		last->next = 0;
+
+	return kid;
+}
+
+
+Kid *treeIgnore( Program *prg, Tree *tree )
+{
+	if ( tree->flags & AF_LEFT_IGNORE )
+		return (Kid*)tree->child->tree;
+	return 0;
+}
+
+Tree *treeIterDerefCur( TreeIter *iter )
+{
+	return iter->ref.kid == 0 ? 0 : iter->ref.kid->tree;
+}
+
+void refSetValue( Ref *ref, Tree *v )
+{
+	Kid *firstKid = ref->kid;
+	while ( ref != 0 && ref->kid == firstKid ) {
+		ref->kid->tree = v;
+		ref = ref->next;
+	}
+}
+
+Tree *getRhsEl( Program *prg, Tree *lhs, long position )
+{
+	Kid *pos = treeChild( prg, lhs );
+	while ( position > 0 ) {
+		pos = pos->next;
+		position -= 1;
+	}
+	return pos->tree;
+}
+
+void setField( Program *prg, Tree *tree, long field, Tree *value )
+{
+	assert( tree->refs == 1 );
+	if ( value != 0 )
+		assert( value->refs >= 1 );
+	setAttr( tree, field, value );
+}
+
+Tree *getField( Tree *tree, Word field )
+{
+	return getAttr( tree, field );
+}
+
+Kid *getFieldKid( Tree *tree, Word field )
+{
+	return getAttrKid( tree, field );
+}
+
+Tree *getFieldSplit( Program *prg, Tree *tree, Word field )
+{
+	Tree *val = getAttr( tree, field );
+	Tree *split = splitTree( prg, val );
+	setAttr( tree, field, split );
+	return split;
+}
+
+void setTriterCur( TreeIter *iter, Tree *tree )
+{
+	iter->ref.kid->tree = tree;
+}
+
+Tree *getPtrVal( Pointer *ptr )
+{
+	return ptr->value->tree;
+}
+
+Tree *getPtrValSplit( Program *prg, Pointer *ptr )
+{
+	Tree *val = ptr->value->tree;
+	Tree *split = splitTree( prg, val );
+	ptr->value->tree = split;
+	return split;
+}
+
+/* This must traverse in the same order that the bindId assignments are done
+ * in. */
+int matchPattern( Tree **bindings, Program *prg, long pat, Kid *kid, int checkNext )
+{
+	PatReplNode *nodes = prg->rtd->patReplNodes;
+
+	#ifdef COLM_LOG_MATCH
+	if ( colm_log_match ) {
+		LangElInfo *lelInfo = prg->rtd->lelInfo;
+		cerr << "match pattern " << ( pat == -1 ? "NULL" : lelInfo[nodes[pat].id].name ) <<
+				" vs " << ( kid == 0 ? "NULL" : lelInfo[kid->tree->id].name ) << endl;
+	}
+	#endif
+
+	/* match node, recurse on children. */
+	if ( pat != -1 && kid != 0 ) {
+		if ( nodes[pat].id == kid->tree->id ) {
+			/* If the pattern node has data, then this means we need to match
+			 * the data against the token data. */
+			if ( nodes[pat].data != 0 ) {
+				/* Check the length of token text. */
+				if ( nodes[pat].length != stringLength( kid->tree->tokdata ) )
+					return false;
+
+				/* Check the token text data. */
+				if ( nodes[pat].length > 0 && memcmp( nodes[pat].data, 
+						stringData( kid->tree->tokdata ), nodes[pat].length ) != 0 )
+					return false;
+			}
+
+			/* No failure, all okay. */
+			if ( nodes[pat].bindId > 0 ) {
+				#ifdef COLM_LOG_MATCH
+				if ( colm_log_match ) {
+					cerr << "bindId: " << nodes[pat].bindId << endl;
+				}
+				#endif
+				bindings[nodes[pat].bindId] = kid->tree;
+			}
+
+			/* If we didn't match a terminal duplicate of a nonterm then check
+			 * down the children. */
+			if ( !nodes[pat].stop ) {
+				/* Check for failure down child branch. */
+				int childCheck = matchPattern( bindings, prg, 
+						nodes[pat].child, treeChild( prg, kid->tree ), true );
+				if ( ! childCheck )
+					return false;
+			}
+
+			/* If checking next, then look for failure there. */
+			if ( checkNext ) {
+				int nextCheck = matchPattern( bindings, prg, 
+						nodes[pat].next, kid->next, true );
+				if ( ! nextCheck )
+					return false;
+			}
+
+			return true;
+		}
+	}
+	else if ( pat == -1 && kid == 0 ) {
+		/* Both null is a match. */
+		return 1;
+	}
+
+	return false;
+}
+
+

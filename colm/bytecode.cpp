@@ -2367,7 +2367,7 @@ again:
 			#endif
 
 			Tree *tree = pop();
-			Tree *res = treeSearch( prg, tree, id );
+			Tree *res = treeSearch2( prg, tree, id );
 			treeUpref( res );
 			push( res );
 			treeDownref( prg, sp, tree );
