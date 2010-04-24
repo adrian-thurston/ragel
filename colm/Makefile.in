@@ -61,7 +61,7 @@ COLM_SRC = \
 	pcheck.cpp \
 	ctinput.cpp
 
-RUNTIME_SRC = bytecode.cpp tree.cpp 
+RUNTIME_SRC = bytecode.cpp 
 RUNTIME_SRC_C = map.c fsmrun.c pdarun.c list.c input.c debug.c codevect.c pool.c string.c tree2.c
 
 

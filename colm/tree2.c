@@ -1905,7 +1905,7 @@ void strCollectDestroy( StrCollect *collect )
 	free( collect->data );
 }
 
-void strCollectAppend( StrCollect *collect, char *data, long len )
+void strCollectAppend( StrCollect *collect, const char *data, long len )
 {
 	long newLen = collect->length + len;
 	if ( newLen > collect->allocated ) {
@@ -1920,3 +1920,114 @@ void strCollectClear( StrCollect *collect )
 {
 	collect->length = 0;
 }
+
+#define INT_SZ 32
+
+void printStr( StrCollect *collect, Head *str )
+{
+	strCollectAppend( collect, (char*)(str->data), str->length );
+}
+
+/* Note that this function causes recursion, thought it is not a big
+ * deal since the recursion it is only caused by nonterminals that are ignored. */
+void printIgnoreList( StrCollect *collect, Tree **sp, Program *prg, Tree *tree )
+{
+	Kid *ignore = treeIgnore( prg, tree );
+
+	/* Record the root of the stack and push everything. */
+	Tree **root = vm_ptop();
+	while ( ignore != 0 ) {
+		vm_push( (SW)ignore );
+		ignore = ignore->next;
+	}
+
+	/* Pop them off and print. */
+	while ( vm_ptop() != root ) {
+		ignore = (Kid*) vm_pop();
+		printTree( collect, sp, prg, ignore->tree );
+	}
+}
+
+void printKid( StrCollect *collect, Tree **sp, Program *prg, Kid *kid, int printIgnore )
+{
+	Tree **root = vm_ptop();
+	Kid *child;
+
+rec_call:
+	/* If not currently skipping ignore data, then print it. Ignore data can
+	 * be associated with terminals and nonterminals. */
+	if ( printIgnore && treeIgnore( prg, kid->tree ) != 0 ) {
+		/* Ignorelists are reversed. */
+		printIgnoreList( collect, sp, prg, kid->tree );
+		printIgnore = false;
+	}
+
+	if ( kid->tree->id < prg->rtd->firstNonTermId ) {
+		/* Always turn on ignore printing when we get to a token. */
+		printIgnore = true;
+
+		if ( kid->tree->id == LEL_ID_INT ) {
+			char buf[INT_SZ];
+			sprintf( buf, "%ld", ((Int*)kid->tree)->value );
+			strCollectAppend( collect, buf, strlen(buf) );
+		}
+		else if ( kid->tree->id == LEL_ID_BOOL ) {
+			if ( ((Int*)kid->tree)->value )
+				strCollectAppend( collect, "true", 4 );
+			else
+				strCollectAppend( collect, "false", 5 );
+		}
+		else if ( kid->tree->id == LEL_ID_PTR ) {
+			char buf[INT_SZ];
+			strCollectAppend( collect, "#", 1 );
+			sprintf( buf, "%p", (void*) ((Pointer*)kid->tree)->value );
+			strCollectAppend( collect, buf, strlen(buf) );
+		}
+		else if ( kid->tree->id == LEL_ID_STR ) {
+			printStr( collect, ((Str*)kid->tree)->value );
+		}
+		else if ( kid->tree->id == LEL_ID_STREAM ) {
+			char buf[INT_SZ];
+			strCollectAppend( collect, "#", 1 );
+			sprintf( buf, "%p", (void*) ((Stream*)kid->tree)->file );
+			strCollectAppend( collect, buf, strlen(buf) );
+		}
+		else if ( kid->tree->tokdata != 0 && 
+				stringLength( kid->tree->tokdata ) > 0 )
+		{
+			strCollectAppend( collect, stringData( kid->tree->tokdata ), 
+					stringLength( kid->tree->tokdata ) );
+		}
+	}
+	else {
+		/* Non-terminal. */
+		child = treeChild( prg, kid->tree );
+		if ( child != 0 ) {
+			vm_push( (SW)kid );
+			kid = child;
+			while ( kid != 0 ) {
+				goto rec_call;
+				rec_return:
+				kid = kid->next;
+			}
+			kid = (Kid*)vm_pop();
+		}
+	}
+
+	if ( vm_ptop() != root )
+		goto rec_return;
+}
+
+void printTree( StrCollect *collect, Tree **sp, Program *prg, Tree *tree )
+{
+	if ( tree == 0 )
+		strCollectAppend( collect, "NIL", 3 );
+	else {
+		Kid kid;
+		kid.tree = tree;
+		kid.next = 0;
+		printKid( collect, sp, prg, &kid, false );
+	}
+}
+
+

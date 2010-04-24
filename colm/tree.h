@@ -106,9 +106,10 @@ typedef struct _StrCollect
 
 void initStrCollect( StrCollect *collect );
 void strCollectDestroy( StrCollect *collect );
-void strCollectAppend( StrCollect *collect, char *data, long len );
+void strCollectAppend( StrCollect *collect, const char *data, long len );
 void strCollectClear( StrCollect *collect );
 
+void printTree( StrCollect *collect, Tree **sp, Program *prg, Tree *tree );
 
 #if defined(__cplusplus)
 }

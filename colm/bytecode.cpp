@@ -205,12 +205,17 @@ void parserSetContext( Tree **&sp, Program *prg, Accum *accum, Tree *val )
 Head *treeToStr( Tree **sp, Program *prg, Tree *tree )
 {
 	/* Collect the tree data. */
-	ostringstream sout;
-	printTree( sout, sp, prg, tree );
+	StrCollect collect;
+	initStrCollect( &collect );
+
+	printTree( &collect, sp, prg, tree );
 
 	/* Set up the input stream. */
-	string s = sout.str();
-	return stringAllocFull( prg, s.c_str(), s.size() );
+	Head *ret = stringAllocFull( prg, collect.data, collect.length );
+
+	strCollectDestroy( &collect );
+
+	return ret;
 }
 
 Tree *extractInput( Program *prg, Accum *accum )
@@ -249,13 +254,17 @@ Word streamAppend( Tree **&sp, Program *prg, Tree *input, Stream *stream )
 	if ( input->id == LEL_ID_STR ) {
 		//assert(false);
 		/* Collect the tree data. */
-		ostringstream sout;
-		printTree( sout, sp, prg, input );
+		StrCollect collect;
+		initStrCollect( &collect );
+		printTree( &collect, sp, prg, input );
 
 		/* Load it into the input. */
-		string s = sout.str();
-		stream->in->funcs->appendData( stream->in, s.c_str(), s.size() );
-		return s.size();
+		stream->in->funcs->appendData( stream->in, collect.data, collect.length );
+
+		long length = collect.length;
+		strCollectDestroy( &collect );
+
+		return length;
 	}
 	else {
 		input = prepParseTree( prg, sp, input );
@@ -279,15 +288,17 @@ void parseFrag( Tree **&sp, Program *prg, Tree *input, Accum *accum, long stopId
 	if ( input->id == LEL_ID_STR ) {
 		//assert(false);
 		/* Collect the tree data. */
-		ostringstream sout;
-		printTree( sout, sp, prg, input );
+		StrCollect collect;
+		initStrCollect( &collect );
+		printTree( &collect, sp, prg, input );
 
 		/* Load it into the input. */
-		string s = sout.str();
-		stream->in->funcs->appendData( stream->in, s.c_str(), s.size() );
+		stream->in->funcs->appendData( stream->in, collect.data, collect.length );
 
 		/* Parse. */
 		parseLoop( sp, accum->pdaRun, accum->fsmRun, stream->in );
+
+		strCollectDestroy( &collect );
 	}
 	else {
 		//assert(false);
@@ -376,10 +387,16 @@ Word streamPush( Program *prg, Tree **&sp, Stream *stream, Tree *tree, bool igno
 		 * scanner to decide. Want to force it then send a token. */
 		assert( !ignore );
 			
-		std::stringstream ss;
-		printTree( ss, sp, prg, tree );
-		streamPushText( stream->in, ss.str().c_str(), ss.str().size());
-		return ss.str().size();
+		/* Collect the tree data. */
+		StrCollect collect;
+		initStrCollect( &collect );
+		printTree( &collect, sp, prg, tree );
+
+		streamPushText( stream->in, collect.data, collect.length );
+		long length = collect.length;
+		strCollectDestroy( &collect );
+
+		return length;
 	}
 	else {
 		tree = prepParseTree( prg, sp, tree );

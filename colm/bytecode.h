@@ -55,7 +55,6 @@ void rcodeDownref( Program *prg, Tree **sp, Code *instr );
 #include "tree.h"
 
 Tree **stackAlloc();
-void printTree( ostream &out, Tree **sp, Program *prg, Tree *tree );
 
 /*
  * Runtime environment
