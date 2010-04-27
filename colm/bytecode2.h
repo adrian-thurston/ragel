@@ -456,6 +456,8 @@ void runProgram( Program *prg );
 void allocGlobal( Program *prg );
 
 void executeCode( Execution *exec, Tree **sp, Code *instr );
+void rcodeDownref( Program *prg, Tree **sp, Code *instr );
+Tree **stackAlloc();
 
 #ifdef __cplusplus
 }

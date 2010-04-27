@@ -28,8 +28,6 @@ extern "C" {
 
 typedef struct _TreePair
 {
-//	TreePair() : key(0), val(0) {}
-
 	Tree *key;
 	Tree *val;
 } TreePair;

@@ -358,7 +358,9 @@ void parseToken( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputSt
 	unsigned int *action;
 	int rhsLen;
 	Kid *lel;
+	int owner;
 	int induceReject;
+	int indPos;
 
 	/* The scanner will send a null token if it can't find a token. */
 	if ( input == 0 )
@@ -387,8 +389,14 @@ again:
 			lel->tree->id > pdaRun->tables->keys[(pdaRun->cs<<1)+1] )
 		goto parseError;
 
-	pos = pdaRun->tables->indicies[pdaRun->tables->offsets[pdaRun->cs] 
-			+ (lel->tree->id - pdaRun->tables->keys[pdaRun->cs<<1])];
+	indPos = pdaRun->tables->offsets[pdaRun->cs] + 
+		(lel->tree->id - pdaRun->tables->keys[pdaRun->cs<<1]);
+
+	owner = pdaRun->tables->owners[indPos];
+	if ( owner != pdaRun->cs )
+		goto parseError;
+
+	pos = pdaRun->tables->indicies[indPos];
 	if ( pos < 0 )
 		goto parseError;
 

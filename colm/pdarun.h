@@ -370,6 +370,7 @@ typedef struct _PdaTables
 {
 	/* Parser table data. */
 	int *indicies;
+	int *owners;
 	int *keys;
 	unsigned int *offsets;
 	unsigned int *targs;
@@ -579,7 +580,7 @@ void pdaRunMatch(  PdaRun *pdaRun, Kid *tree, Kid *pattern );
 int pdaRunGetNextRegion( PdaRun *pdaRun, int offset );
 
 void cleanParser( Tree **root, PdaRun *pdaRun );
-void ignore( PdaRun *pdaRun, Tree *tree );
+void ignoreTree( PdaRun *pdaRun, Tree *tree );
 void parseToken( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
 long undoParse( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Tree *tree );
 void xml_print_list( RuntimeData *runtimeData, Kid *lel, int depth );

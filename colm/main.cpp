@@ -292,7 +292,7 @@ void compileOutputPath( const char *argv0 )
 	int length = 1024 + 3*strlen(location) + strlen(outputFileName) + strlen(exec);
 	char command[length];
 	sprintf( command, 
-		"g++ -Wall -Wwrite-strings"
+		"gcc -Wall -Wwrite-strings"
 		" -I" PREFIX "/include"
 		" -g"
 		" -o %s"
@@ -317,7 +317,7 @@ void compileOutputRelative( const char *argv0 )
 	int length = 1024 + 3*strlen(location) + strlen(outputFileName) + strlen(exec);
 	char command[length];
 	sprintf( command, 
-		"g++ -Wall -Wwrite-strings"
+		"gcc -Wall -Wwrite-strings"
 		" -I%s.."
 		" -I%s../aapl"
 		" -g"

@@ -37,6 +37,8 @@ int _debug( long realm, const char *fmt, ... );
 int _check_realm( long realm );
 extern long colmActiveRealm;
 
+void message( const char *fmt, ... );
+
 #define REALM_BYTECODE    0x00000001
 #define REALM_PARSE       0x00000002
 #define REALM_MATCH       0x00000004

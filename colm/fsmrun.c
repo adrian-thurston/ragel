@@ -473,7 +473,7 @@ void sendQueuedTokens( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *i
 
 			incrementConsumed( pdaRun );
 
-			ignore( pdaRun, send->tree );
+			ignoreTree( pdaRun, send->tree );
 			kidFree( fsmRun->prg, send );
 		}
 		else {
@@ -668,7 +668,7 @@ void sendHandleError( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *in
 	}
 }
 
-void ignore( PdaRun *pdaRun, Tree *tree )
+void ignoreTree( PdaRun *pdaRun, Tree *tree )
 {
 	/* Add the ignore string to the head of the ignore list. */
 	Kid *ignore = kidAllocate( pdaRun->prg );
@@ -712,7 +712,7 @@ void sendIgnore( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long 
 	incrementConsumed( pdaRun );
 
 	/* Send it to the pdaRun. */
-	ignore( pdaRun, tree );
+	ignoreTree( pdaRun, tree );
 }
 
 Head *extractMatch( Program *prg, FsmRun *fsmRun, InputStream *inputStream )
@@ -1046,7 +1046,7 @@ void sendTreeIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inp
 
 	incrementConsumed( pdaRun );
 
-	ignore( pdaRun, tree );
+	ignoreTree( pdaRun, tree );
 }
 
 void parseLoop( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )

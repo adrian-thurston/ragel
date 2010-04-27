@@ -1711,13 +1711,65 @@ void ParseData::fillInPatterns( Program *prg )
 }
 
 
+
+int ParseData::findIndexOff( PdaTables *pdaTables, PdaGraph *pdaGraph, PdaState *state, int &curLen )
+{
+	for ( int start = 0; start < curLen;  ) {
+		int offset = start;
+		for ( TransMap::Iter trans = state->transMap; trans.lte(); trans++ ) {
+			if ( pdaTables->owners[offset] != -1 )
+				goto next_start;
+
+			offset++;
+			if ( ! trans.last() ) {
+				TransMap::Iter next = trans.next();
+				offset += next->key - trans->key - 1;
+			}
+		}
+
+		/* Got though the whole list without a conflict. */
+		return start;
+
+next_start:
+		start++;
+	}
+
+	return curLen;
+}
+
+struct CmpSpan
+{
+	static int compare( PdaState *state1, PdaState *state2 )
+	{
+		int dist1 = 0, dist2 = 0;
+
+		if ( state1->transMap.length() > 0 ) {
+			TransMap::Iter first1 = state1->transMap.first();
+			TransMap::Iter last1 = state1->transMap.last();
+			dist1 = last1->key - first1->key;
+		}
+
+		if ( state2->transMap.length() > 0 ) {
+			TransMap::Iter first2 = state2->transMap.first();
+			TransMap::Iter last2 = state2->transMap.last();
+			dist2 = last2->key - first2->key;
+		}
+
+		if ( dist1 < dist2 )
+			return 1;
+		else if ( dist2 < dist1 )
+			return -1;
+		return 0;
+	}
+};
+
 PdaTables *ParseData::makePdaTables( PdaGraph *pdaGraph )
 {
-	int count, curOffset, pos;
+	int count, pos;
 	PdaTables *pdaTables = new PdaTables;
 
 	/*
-	 * Indicies.
+	 * Counting max indices.
 	 */
 	count = 0;
 	for ( PdaStateList::Iter state = pdaGraph->stateList; state.lte(); state++ ) {
@@ -1725,26 +1777,63 @@ PdaTables *ParseData::makePdaTables( PdaGraph *pdaGraph )
 			count++;
 			if ( ! trans.last() ) {
 				TransMap::Iter next = trans.next();
-				for ( long key = trans->key+1; key < next->key; key++ )
-					count++;
+				count +=  next->key - trans->key - 1;
 			}
 		}
 	}
-	pdaTables->indicies = new int[count];
-	pdaTables->numIndicies = count;
 
-	count = 0;
-	for ( PdaStateList::Iter state = pdaGraph->stateList; state.lte(); state++ ) {
+
+	/* Allocate indicies and owners. */
+	pdaTables->numIndicies = count;
+	pdaTables->indicies = new int[count];
+	pdaTables->owners = new int[count];
+	for ( long i = 0; i < count; i++ ) {
+		pdaTables->indicies[i] = -1;
+		pdaTables->owners[i] = -1;
+	}
+
+	/* Allocate offsets. */
+	int numStates = pdaGraph->stateList.length(); 
+	pdaTables->offsets = new unsigned int[numStates];
+	pdaTables->numStates = numStates;
+
+	/* Place transitions into indicies/owners */
+	PdaState **states = new PdaState*[numStates];
+	long ds = 0;
+	for ( PdaStateList::Iter state = pdaGraph->stateList; state.lte(); state++ )
+		states[ds++] = state;
+
+	/* Sorting baseded on span length. Gives an improvement, but incures a
+	 * cost. Off for now. */
+	//MergeSort< PdaState*, CmpSpan > mergeSort;
+	//mergeSort.sort( states, numStates );
+	
+	int indLen = 0;
+	for ( int s = 0; s < numStates; s++ ) {
+		PdaState *state = states[s];
+
+		int indOff = findIndexOff( pdaTables, pdaGraph, state, indLen );
+		pdaTables->offsets[state->stateNum] = indOff;
+
 		for ( TransMap::Iter trans = state->transMap; trans.lte(); trans++ ) {
-			pdaTables->indicies[count++] = trans->value->actionSetEl->key.id;
+			pdaTables->indicies[indOff] = trans->value->actionSetEl->key.id;
+			pdaTables->owners[indOff] = state->stateNum;
+			indOff++;
 
 			if ( ! trans.last() ) {
 				TransMap::Iter next = trans.next();
-				for ( long key = trans->key+1; key < next->key; key++ )
-					pdaTables->indicies[count++] = -1;
+				indOff += next->key - trans->key - 1;
 			}
 		}
+
+		if ( indOff > indLen )
+			indLen = indOff;
 	}
+
+	/* We allocated the max, but cmpression gives us less. */
+	pdaTables->numIndicies = indLen;
+	delete[] states;
+	
 
 	/*
 	 * Keys
@@ -1766,26 +1855,6 @@ PdaTables *ParseData::makePdaTables( PdaGraph *pdaGraph )
 			pdaTables->keys[count+1] = last->key;
 		}
 		count += 2;
-	}
-
-	/*
-	 * Offsets
-	 */
-	count = pdaGraph->stateList.length(); 
-	pdaTables->offsets = new unsigned int[count];
-	pdaTables->numStates = count;
-
-	count = 0;
-	curOffset = 0;
-	for ( PdaStateList::Iter state = pdaGraph->stateList; state.lte(); state++ ) {
-		pdaTables->offsets[count++] = curOffset;
-
-		/* Increment the offset. */
-		if ( state->transMap.length() > 0 ) {
-			TransMap::Iter first = state->transMap.first();
-			TransMap::Iter last = state->transMap.last();
-			curOffset += last->key - first->key + 1;
-		}
 	}
 
 	/*

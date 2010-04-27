@@ -41,6 +41,12 @@ using namespace std;
 using std::ostringstream;
 
 char machineMain[] = "main";
+exit_object endp;
+void operator<<( ostream &out, exit_object & )
+{
+	out << endl;
+	exit(1);
+}
 
 /* Perform minimization after an operation according 
  * to the command line args. */

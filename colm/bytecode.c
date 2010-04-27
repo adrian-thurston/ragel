@@ -19,36 +19,28 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#include <iostream>
-#include <iomanip>
-#include <sstream>
 #include <alloca.h>
 #include <sys/mman.h>
-#include <sstream>
 #include <string.h>
 #include <assert.h>
 #include <stdlib.h>
 
-#include "bytecode.h"
 #include "pdarun.h"
-#include "fsmrun.h"
-#include "pdarun.h"
+#include "fsmrun2.h"
+#include "tree.h"
+#include "bytecode2.h"
+#include "pool.h"
+#include "debug.h"
+#include "config.h"
 
-using std::cout;
-using std::cerr;
-using std::endl;
-using std::ostringstream;
-using std::string;
-using std::hex;
+#undef COLM_LOG
+#undef COLM_LOG_BYTECODE
+#undef COLM_LOG_PARSE
+#undef COLM_LOG_MATCH
+#undef COLM_LOG_COMPILE
 
-exit_object endp;
-
-void operator<<( ostream &out, exit_object & )
-{
-	out << endl;
-	exit(1);
-}
-
+#define true 1
+#define false 0
 
 #define push(i) (*(--sp) = (i))
 #define pop() (*sp++)
@@ -145,12 +137,12 @@ Tree *prepParseTree( Program *prg, Tree **sp, Tree *tree )
 	#endif
 	Kid *unused = 0;
 	tree = copyRealTree( prg, tree, 0, &unused, true );
-	return  tree;
+	return tree;
 }
 
 void sendTreeFrag( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, 
 		InputStream *inputStream,
-		Tree *tree, bool ignore )
+		Tree *tree, int ignore )
 {
 	tree = prepParseTree( prg, sp, tree );
 
@@ -180,7 +172,7 @@ void sendTreeFrag( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
 
 		incrementConsumed( pdaRun );
 
-		::ignore( pdaRun, send->tree );
+		ignoreTree( pdaRun, send->tree );
 		kidFree( pdaRun->prg, send );
 	}
 	else {
@@ -197,7 +189,7 @@ void sendTreeFrag( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
 	}
 }
 
-void parserSetContext( Tree **&sp, Program *prg, Accum *accum, Tree *val )
+void parserSetContext( Tree **sp, Program *prg, Accum *accum, Tree *val )
 {
 	accum->pdaRun->context = splitTree( prg, val );
 }
@@ -240,7 +232,7 @@ void setInput( Program *prg, Tree **sp, Accum *accum, Stream *stream )
 	treeUpref( (Tree*)accum->stream );
 }
 
-void parseStream( Tree **&sp, Program *prg, Tree *input, Accum *accum, long stopId )
+void parseStream( Tree **sp, Program *prg, Tree *input, Accum *accum, long stopId )
 {
 	accum->pdaRun->stopTarget = stopId;
 
@@ -249,7 +241,7 @@ void parseStream( Tree **&sp, Program *prg, Tree *input, Accum *accum, long stop
 	parseLoop( sp, accum->pdaRun, accum->fsmRun, stream->in );
 }
 
-Word streamAppend( Tree **&sp, Program *prg, Tree *input, Stream *stream )
+Word streamAppend( Tree **sp, Program *prg, Tree *input, Stream *stream )
 {
 	if ( input->id == LEL_ID_STR ) {
 		//assert(false);
@@ -280,7 +272,7 @@ Word streamAppend( Tree **&sp, Program *prg, Tree *input, Stream *stream )
 	}
 }
 
-void parseFrag( Tree **&sp, Program *prg, Tree *input, Accum *accum, long stopId )
+void parseFrag( Tree **sp, Program *prg, Tree *input, Accum *accum, long stopId )
 {
 	accum->pdaRun->stopTarget = stopId;
 	Stream *stream = (Stream*) extractInput( prg, accum );
@@ -323,7 +315,7 @@ void parseFrag( Tree **&sp, Program *prg, Tree *input, Accum *accum, long stopId
 	}
 }
 
-void undoParseStream( Tree **&sp, Program *prg, Stream *input, Accum *accum, long consumed )
+void undoParseStream( Tree **sp, Program *prg, Stream *input, Accum *accum, long consumed )
 {
 	if ( consumed < accum->pdaRun->consumed ) {
 		accum->pdaRun->numRetry += 1;
@@ -337,7 +329,7 @@ void undoParseStream( Tree **&sp, Program *prg, Stream *input, Accum *accum, lon
 	}
 }
 
-Tree *parseFinish( Tree **&sp, Program *prg, Accum *accum, bool revertOn )
+Tree *parseFinish( Tree **sp, Program *prg, Accum *accum, int revertOn )
 {
 	Stream *stream = (Stream*)extractInput( prg, accum );
 
@@ -365,7 +357,7 @@ Tree *parseFinish( Tree **&sp, Program *prg, Accum *accum, bool revertOn )
 	return tree;
 }
 
-Tree *streamPull( Program *prg, FsmRun *fsmRun, Stream *stream, Tree *length )
+Tree *streamPull2( Program *prg, FsmRun *fsmRun, Stream *stream, Tree *length )
 {
 	long len = ((Int*)length)->value;
 	Head *tokdata = streamPull( prg, fsmRun, stream->in, len );
@@ -380,7 +372,7 @@ void undoPull( Program *prg, FsmRun *fsmRun, Stream *stream, Tree *str )
 	undoStreamPull( fsmRun, stream->in, data, length );
 }
 
-Word streamPush( Program *prg, Tree **&sp, Stream *stream, Tree *tree, bool ignore )
+Word streamPush( Program *prg, Tree **sp, Stream *stream, Tree *tree, int ignore )
 {
 	if ( tree->id == LEL_ID_STR ) {
 		/* This should become a compile error. If it's text, it's up to the
@@ -428,7 +420,8 @@ Tree *getLocalSplit( Program *prg, Tree **frame, long field )
 
 void downrefLocalTrees( Program *prg, Tree **sp, Tree **frame, char *trees, long treesLen )
 {
-	for ( long i = 0; i < treesLen; i++ ) {
+	long i;
+	for ( i = 0; i < treesLen; i++ ) {
 		#ifdef COLM_LOG_BYTECODE
 		if ( colm_log_bytecode ) {
 			cerr << "local tree downref: " << (long)trees[i] << endl;
@@ -439,18 +432,20 @@ void downrefLocalTrees( Program *prg, Tree **sp, Tree **frame, char *trees, long
 	}
 }
 
-UserIter *uiterCreate( Tree **&sp, Program *prg, FunctionInfo *fi, long searchId )
+UserIter *uiterCreate( Tree ***psp, Program *prg, FunctionInfo *fi, long searchId )
 {
+	Tree **sp = *psp;
 	pushn( sizeof(UserIter) / sizeof(Word) );
 	void *mem = ptop();
 
-	UserIter *uiter = new(mem) UserIter;
+	UserIter *uiter = mem;
 	initUserIter( uiter, ptop(), fi->argSize, searchId );
+	*psp = sp;
 	return uiter;
 }
 
 void uiterInit( Program *prg, Tree **sp, UserIter *uiter, 
-		FunctionInfo *fi, bool revertOn )
+		FunctionInfo *fi, int revertOn )
 {
 	/* Set up the first yeild so when we resume it starts at the beginning. */
 	uiter->ref.kid = 0;
@@ -463,15 +458,19 @@ void uiterInit( Program *prg, Tree **sp, UserIter *uiter,
 		uiter->resume = prg->rtd->frameInfo[fi->frameId].codeWC;
 }
 
-void treeIterDestroy( Tree **&sp, TreeIter *iter )
+void treeIterDestroy( Tree ***psp, TreeIter *iter )
 {
+	Tree **sp = *psp;
 	long curStackSize = iter->stackRoot - ptop();
 	assert( iter->stackSize == curStackSize );
 	popn( iter->stackSize );
+	*psp = sp;
 }
 
-void userIterDestroy( Tree **&sp, UserIter *uiter )
+void userIterDestroy( Tree ***psp, UserIter *uiter )
 {
+	Tree **sp = *psp;
+
 	/* We should always be coming from a yield. The current stack size will be
 	 * nonzero and the stack size in the iterator will be correct. */
 	long curStackSize = uiter->stackRoot - ptop();
@@ -482,13 +481,16 @@ void userIterDestroy( Tree **&sp, UserIter *uiter )
 	popn( uiter->stackRoot - ptop() );
 	popn( sizeof(UserIter) / sizeof(Word) );
 	popn( argSize );
+
+	*psp = sp;
 }
 
 Tree *constructArgv( Program *prg, int argc, char **argv )
 {
 	Tree *list = createGeneric( prg, 1 );
 	treeUpref( list );
-	for ( int i = 0; i < argc; i++ ) {
+	int i;
+	for ( i = 0; i < argc; i++ ) {
 		Head *head = stringAllocPointer( prg, argv[i], strlen(argv[i]) );
 		Tree *arg = constructString( prg, head );
 		treeUpref( arg );
@@ -540,7 +542,8 @@ void initProgram( Program *prg, int argc, char **argv, int ctxDepParsing,
 void clearGlobal( Program *prg, Tree **sp )
 {
 	/* Downref all the fields in the global object. */
-	for ( int g = 0; g < prg->rtd->globalSize; g++ ) {
+	int g;
+	for ( g = 0; g < prg->rtd->globalSize; g++ ) {
 		//assert( getAttr( global, g )->refs == 1 );
 		treeDownref( prg, sp, getAttr( prg->global, g ) );
 	}
@@ -581,31 +584,31 @@ void clearProgram( Program *prg, Tree **vm_stack, Tree **sp )
 
 	long kidLost = kidNumLost( prg );
 	if ( kidLost )
-		cerr << "warning: lost kids: " << kidLost << endl;
+		message( "warning: lost kids: %ld\n", kidLost );
 
 	long treeLost = treeNumLost( prg );
 	if ( treeLost )
-		cerr << "warning: lost trees: " << treeLost << endl;
+		message( "warning: lost trees: %ld\n", treeLost );
 
 	long parseTreeLost = parseTreeNumLost( prg );
 	if ( parseTreeLost )
-		cerr << "warning: lost parse trees: " << parseTreeLost << endl;
+		message( "warning: lost parse trees: %ld\n", parseTreeLost );
 
 	long listLost = listElNumLost( prg );
 	if ( listLost )
-		cerr << "warning: lost listEls: " << listLost << endl;
+		message( "warning: lost listEls: %ld\n", listLost );
 
 	long mapLost = mapElNumLost( prg );
 	if ( mapLost )
-		cerr << "warning: lost mapEls: " << mapLost << endl;
+		message( "warning: lost mapEls: %ld\n", mapLost );
 
 	long headLost = headNumLost( prg );
 	if ( headLost )
-		cerr << "warning: lost heads: " << headLost << endl;
+		message( "warning: lost heads: %ld\n", headLost );
 
 	long locationLost = locationNumLost( prg );
 	if ( locationLost )
-		cerr << "warning: lost locations: " << locationLost << endl;
+		message( "warning: lost locations: %ld\n", locationLost );
 
 	kidClear( prg );
 	treeClear( prg );
@@ -998,8 +1001,7 @@ again:
 			return;
 		}
 		default: {
-			cerr << "UNKNOWN INSTRUCTION: 0x" << hex << (ulong)instr[-1] << 
-					" -- reverse code downref" << endl;
+			fatal( "UNKNOWN INSTRUCTION: -- reverse code downref\n" );
 			assert(false);
 			break;
 		}
@@ -1010,7 +1012,7 @@ again:
 void execute( Execution *exec, Tree **sp )
 {
 	/* If we have a lhs push it to the stack. */
-	bool haveLhs = exec->lhs != 0;
+	int haveLhs = exec->lhs != 0;
 	if ( haveLhs )
 		push( exec->lhs );
 
@@ -1456,7 +1458,8 @@ again:
 			LangElInfo *lelInfo = prg->rtd->lelInfo;
 			char **mark = exec->captures;
 
-			for ( int i = 0; i < lelInfo[exec->genId].numCaptureAttr; i++ ) {
+			int i;
+			for ( i = 0; i < lelInfo[exec->genId].numCaptureAttr; i++ ) {
 				CaptureAttr *ca = &prg->rtd->captureAttr[lelInfo[exec->genId].captureAttr + i];
 				Head *data = stringAllocFull( prg, 
 						mark[ca->mark_enter], mark[ca->mark_leave] - mark[ca->mark_enter] );
@@ -1867,7 +1870,8 @@ again:
 			}
 			#endif
 
-			pop();
+			Tree *f = pop();
+			f++;
 			Tree *integer = pop();
 			Tree *format = pop();
 			Head *res = stringSprintf( prg, (Str*)format, (Int*)integer );
@@ -2324,7 +2328,7 @@ again:
 			#endif
 
 			TreeIter *iter = (TreeIter*) plocal(field);
-			treeIterDestroy( sp, iter );
+			treeIterDestroy( &sp, iter );
 			break;
 		}
 		case IN_REV_TRITER_FROM_REF: {
@@ -2544,12 +2548,13 @@ again:
 			Kid kid;
 			kid.tree = tree;
 			kid.next = 0;
-			bool matched = matchPattern( bindings, prg, rootNode, &kid, false );
+			int matched = matchPattern( bindings, prg, rootNode, &kid, false );
 
 			if ( !matched )
 				memset( bindings, 0, sizeof(Tree*)*(1+numBindings) );
 			else {
-				for ( int b = 1; b <= numBindings; b++ )
+				int b;
+				for ( b = 1; b <= numBindings; b++ )
 					assert( bindings[b] != 0 );
 			}
 
@@ -2562,7 +2567,8 @@ again:
 			Tree *result = matched ? tree : 0;
 			treeUpref( result );
 			push( result ? tree : 0 );
-			for ( int b = 1; b <= numBindings; b++ ) {
+			int b;
+			for ( b = 1; b <= numBindings; b++ ) {
 				treeUpref( bindings[b] );
 				push( bindings[b] );
 			}
@@ -2848,7 +2854,7 @@ again:
 			#endif
 			Tree *stream = pop();
 			Tree *len = pop();
-			Tree *string = streamPull( prg, exec->fsmRun, (Stream*)stream, len );
+			Tree *string = streamPull2( prg, exec->fsmRun, (Stream*)stream, len );
 			treeUpref( string );
 			push( string );
 
@@ -2954,7 +2960,8 @@ again:
 			int numBindings = prg->rtd->patReplInfo[patternId].numBindings;
 			Tree *bindings[1+numBindings];
 
-			for ( int b = 1; b <= numBindings; b++ ) {
+			int b;
+			for ( b = 1; b <= numBindings; b++ ) {
 				bindings[b] = pop();
 				assert( bindings[b] != 0 );
 			}
@@ -3003,7 +3010,8 @@ again:
 			#endif
 
 			Tree *result = makeToken2( sp, prg, nargs );
-			for ( long i = 0; i < nargs; i++ ) {
+			long i;
+			for ( i = 0; i < nargs; i++ ) {
 				Tree *arg = pop();
 				treeDownref( prg, sp, arg );
 			}
@@ -3021,7 +3029,8 @@ again:
 			#endif
 
 			Tree *result = makeTree( sp, prg, nargs );
-			for ( long i = 0; i < nargs; i++ ) {
+			long i;
+			for ( i = 0; i < nargs; i++ ) {
 				Tree *arg = pop();
 				treeDownref( prg, sp, arg );
 			}
@@ -3581,7 +3590,7 @@ again:
 
 			treeDownref( prg, sp, obj );
 
-			bool inserted = mapInsert( prg, (Map*)obj, key, val );
+			int inserted = mapInsert( prg, (Map*)obj, key, val );
 			Tree *result = inserted ? prg->trueVal : prg->falseVal;
 			treeUpref( result );
 			push( result );
@@ -3617,7 +3626,7 @@ again:
 
 			treeDownref( prg, sp, obj );
 
-			bool inserted = mapInsert( prg, (Map*)obj, key, val );
+			int inserted = mapInsert( prg, (Map*)obj, key, val );
 			Tree *result = inserted ? prg->trueVal : prg->falseVal;
 			treeUpref( result );
 			push( result );
@@ -3784,7 +3793,7 @@ again:
 			#endif
 
 			/* Either both or neither. */
-			assert( ( key == 0 ) xor ( val != 0 ) );
+			assert( ( key == 0 ) ^ ( val != 0 ) );
 
 			Tree *obj = pop();
 			if ( key != 0 )
@@ -3946,7 +3955,7 @@ again:
 			#endif
 
 			FunctionInfo *fi = prg->rtd->functionInfo + funcId;
-			UserIter *uiter = uiterCreate( sp, prg, fi, searchId );
+			UserIter *uiter = uiterCreate( &sp, prg, fi, searchId );
 			local(field) = (SW) uiter;
 
 			/* This is a setup similar to as a call, only the frame structure
@@ -3976,7 +3985,7 @@ again:
 			#endif
 
 			FunctionInfo *fi = prg->rtd->functionInfo + funcId;
-			UserIter *uiter = uiterCreate( sp, prg, fi, searchId );
+			UserIter *uiter = uiterCreate( &sp, prg, fi, searchId );
 			local(field) = (SW) uiter;
 
 			/* This is a setup similar to as a call, only the frame structure
@@ -4002,7 +4011,7 @@ again:
 			#endif
 
 			UserIter *uiter = (UserIter*) local(field);
-			userIterDestroy( sp, uiter );
+			userIterDestroy( &sp, uiter );
 			break;
 		}
 		case IN_RET: {
@@ -4123,7 +4132,7 @@ again:
 			}
 			#endif
 
-			cout.flush();
+			fflush( stdout );
 			goto out;
 		}
 
@@ -4132,13 +4141,12 @@ again:
 		 * and can represent "not implemented" or "compiler error" because a
 		 * variable holding instructions was not properly initialize. */
 		case IN_HALT: {
-			cerr << "IN_HALT -- compiler did something wrong" << endl;
+			fatal( "IN_HALT -- compiler did something wrong\n" );
 			exit(1);
 			break;
 		}
 		default: {
-			cerr << "UNKNOWN INSTRUCTION: 0x" << hex << (ulong)instr[-1] << 
-					" -- something is wrong" << endl;
+			fatal( "UNKNOWN INSTRUCTION: -- something is wrong\n" );
 			assert(false);
 			break;
 		}
@@ -4151,16 +4159,17 @@ out:
 
 void parseError( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, int tokId, Tree *tree )
 {
-	cerr << "error:" << inputStream->line << ": at token ";
-	if ( tokId < 128 )
-		cerr << "\"" << pdaRun->tables->rtd->lelInfo[tokId].name << "\"";
-	else 
-		cerr << pdaRun->tables->rtd->lelInfo[tokId].name;
-	if ( stringLength( tree->tokdata ) > 0 ) {
-		cerr << " with data \"";
-		cerr.write( stringData( tree->tokdata ), 
-				stringLength( tree->tokdata ) );
-		cerr << "\"";
-	}
-	cerr << ": ";
+	fprintf( stderr, "error: %ld:\n", inputStream->line );
+//	cerr << "error:" << inputStream->line << ": at token ";
+//	if ( tokId < 128 )
+//		cerr << "\"" << pdaRun->tables->rtd->lelInfo[tokId].name << "\"";
+////	else 
+//		cerr << pdaRun->tables->rtd->lelInfo[tokId].name;
+//	if ( stringLength( tree->tokdata ) > 0 ) {
+//		cerr << " with data \"";
+//		cerr.write( stringData( tree->tokdata ), 
+//				stringLength( tree->tokdata ) );
+//		cerr << "\"";
+//	}
+//	cerr << ": ";
 }

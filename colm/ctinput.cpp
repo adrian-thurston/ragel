@@ -24,6 +24,10 @@
 #include "input.h"
 #include "fsmrun.h"
 
+#include <iostream>
+using std::cerr;
+using std::endl;
+
 InputFuncs staticFuncs;
 InputFuncs patternFuncs;
 InputFuncs replFuncs;

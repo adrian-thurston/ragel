@@ -685,6 +685,7 @@ struct ParseData
 	bool makeFirstSetProd( Definition *prod, PdaState *state );
 	void makeFirstSets();
 
+	int findIndexOff( PdaTables *pdaTables, PdaGraph *pdaGraph, PdaState *state, int &currLen );
 	void trySetTime( PdaTrans *trans, long code, long &time );
 	void addRegion( PdaState *tabState, long pdaKey );
 	PdaState *followProd( PdaState *tabState, PdaState *prodState );

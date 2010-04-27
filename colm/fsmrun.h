@@ -44,9 +44,6 @@ void operator<<( std::ostream &out, exit_object & );
 
 #include "fsmrun2.h"
 
-void execAction( FsmRun *fsmRun, GenAction *genAction );
-
-long scan_token( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
 
 
 #endif

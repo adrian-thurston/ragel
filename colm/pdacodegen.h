@@ -58,6 +58,7 @@ struct PdaCodeGen
 
 	String startState() { return PARSER() + "startState"; }
 	String indicies() { return PARSER() + "indicies"; }
+	String owners() { return PARSER() + "owners"; }
 	String keys() { return PARSER() + "keys"; }
 	String offsets() { return PARSER() + "offsets"; }
 	String targs() { return PARSER() + "targs"; }

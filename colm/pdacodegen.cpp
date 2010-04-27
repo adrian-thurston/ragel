@@ -466,6 +466,18 @@ void PdaCodeGen::writeParserData( long id, PdaTables *tables )
 	}
 	out << "\n};\n\n";
 
+	out << "int " << prefix << owners() << "[] = {\n\t";
+	for ( int i = 0; i < tables->numIndicies; i++ ) {
+		out << tables->owners[i];
+
+		if ( i < tables->numIndicies-1 ) {
+			out << ", ";
+			if ( (i+1) % 8 == 0 )
+				out << "\n\t";
+		}
+	}
+	out << "\n};\n\n";
+
 	out << "int " << prefix << keys() << "[] = {\n\t";
 	for ( int i = 0; i < tables->numKeys; i++ ) {
 		out << tables->keys[i];
@@ -566,6 +578,7 @@ void PdaCodeGen::writeParserData( long id, PdaTables *tables )
 		"PdaTables " << prefix << "pdaTables =\n"
 		"{\n"
 		"	" << prefix << indicies() << ",\n"
+		"	" << prefix << owners() << ",\n"
 		"	" << prefix << keys() << ",\n"
 		"	" << prefix << offsets() << ",\n"
 		"	" << prefix << targs() << ",\n"
