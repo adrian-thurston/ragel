@@ -22,7 +22,7 @@
 #include "pdarun.h"
 #include "tree.h"
 #include "pool.h"
-#include "bytecode2.h"
+#include "bytecode.h"
 #include "debug.h"
 #include "map.h"
 #include <string.h>

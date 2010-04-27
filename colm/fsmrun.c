@@ -24,7 +24,7 @@
 #include "input.h"
 #include "debug.h"
 #include "tree.h"
-#include "bytecode2.h"
+#include "bytecode.h"
 #include "pool.h"
 
 #include <string.h>

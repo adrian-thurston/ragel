@@ -21,7 +21,7 @@
 
 #include "pool.h"
 #include "pdarun.h"
-#include "bytecode2.h"
+#include "bytecode.h"
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>

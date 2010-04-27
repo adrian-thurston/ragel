@@ -86,7 +86,7 @@ void PdaCodeGen::writeFirst()
 		"#include <colm/pdarun.h>\n"
 		"#include <colm/fsmrun2.h>\n"
 		"#include <colm/debug.h>\n"
-		"#include <colm/bytecode2.h>\n"
+		"#include <colm/bytecode.h>\n"
 		"\n"
 		"extern RuntimeData main_runtimeData;\n";
 
