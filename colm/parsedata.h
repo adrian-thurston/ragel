@@ -45,6 +45,9 @@
 
 using std::ostream;
 
+struct exit_object { };
+extern exit_object endp;
+void operator<<( std::ostream &out, exit_object & );
 
 /* Forwards. */
 struct RedFsm;

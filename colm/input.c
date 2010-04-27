@@ -20,7 +20,7 @@
  */
 
 #include "input.h"
-#include "fsmrun2.h"
+#include "fsmrun.h"
 #include "pdarun.h"
 
 #include <stdio.h>

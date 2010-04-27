@@ -1,5 +1,5 @@
 /*
- *  Copyright 2007-2009 Adrian Thurston <thurston@complang.org>
+ *  Copyright 2007-2010 Adrian Thurston <thurston@complang.org>
  */
 
 /*  This file is part of Colm.
@@ -19,31 +19,83 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _FSMRUN_H
-#define _FSMRUN_H
+#ifndef _FSMRUN2_H
+#define _FSMRUN2_H
 
-#include "pdarun.h"
 #include "input.h"
 
-struct GenAction;
-struct KlangEl;
-struct ParseData;
-typedef struct _Kid Kid;
-struct Pattern;
-struct PatternItem;
-struct Replacement;
-struct ReplItem;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include <assert.h>
-#include <stdio.h>
-#include <iostream>
+#define MARK_SLOTS 32
 
-struct exit_object { };
-extern exit_object endp;
-void operator<<( std::ostream &out, exit_object & );
+typedef struct _FsmTables
+{
+	long *actions;
+	long *keyOffsets;
+	char *transKeys;
+	long *singleLengths;
+	long *rangeLengths;
+	long *indexOffsets;
+	long *transTargsWI;
+	long *transActionsWI;
+	long *toStateActions;
+	long *fromStateActions;
+	long *eofActions;
+	long *eofTargs;
+	long *entryByRegion;
 
-#include "fsmrun2.h"
+	long numStates;
+	long numActions;
+	long numTransKeys;
+	long numSingleLengths;
+	long numRangeLengths;
+	long numIndexOffsets;
+	long numTransTargsWI;
+	long numTransActionsWI;
+	long numRegions;
+
+	long startState;
+	long firstFinal;
+	long errorState;
+
+	struct GenAction **actionSwitch;
+	long numActionSwitch;
+} FsmTables;
+
+struct _Program;
+
+typedef struct _FsmRun
+{
+	struct _Program *prg;
+	FsmTables *tables;
+
+	RunBuf *runBuf;
+
+	/* FsmRun State. */
+	long region, cs, act;
+	char *tokstart, *tokend;
+	char *p, *pe, *peof;
+	int returnResult;
+	char *mark[MARK_SLOTS];
+	long matchedToken;
+
+	InputStream *haveDataOf;
+	struct _Tree *curStream;
+} FsmRun;
+
+void initFsmRun( FsmRun *fsmRun, struct _Program *prg );
+void updatePosition( InputStream *inputStream, const char *data, long length );
+void undoPosition( InputStream *inputStream, const char *data, long length );
+void takeBackBuffered( InputStream *inputStream );
+void connect( FsmRun *fsmRun, InputStream *inputStream );
+void sendBackRunBufHead( FsmRun *fsmRun, InputStream *inputStream );
+void undoStreamPull( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length );
 
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif

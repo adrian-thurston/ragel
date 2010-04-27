@@ -26,7 +26,7 @@
 #include <stdlib.h>
 
 #include "pdarun.h"
-#include "fsmrun2.h"
+#include "fsmrun.h"
 #include "tree.h"
 #include "bytecode.h"
 #include "pool.h"

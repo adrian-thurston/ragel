@@ -23,7 +23,7 @@
 #define _PDARUN_H
 
 #include "input.h"
-#include "fsmrun2.h"
+#include "fsmrun.h"
 
 #ifdef __cplusplus
 extern "C" {

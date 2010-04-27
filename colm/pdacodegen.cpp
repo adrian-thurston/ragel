@@ -84,7 +84,7 @@ void PdaCodeGen::writeFirst()
 		"*/\n"
 		"\n"
 		"#include <colm/pdarun.h>\n"
-		"#include <colm/fsmrun2.h>\n"
+		"#include <colm/fsmrun.h>\n"
 		"#include <colm/debug.h>\n"
 		"#include <colm/bytecode.h>\n"
 		"\n"

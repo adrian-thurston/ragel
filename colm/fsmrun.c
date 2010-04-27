@@ -19,7 +19,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#include "fsmrun2.h"
+#include "fsmrun.h"
 #include "pdarun.h"
 #include "input.h"
 #include "debug.h"

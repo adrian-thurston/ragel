@@ -22,7 +22,7 @@
 #include "config.h"
 #include "debug.h"
 #include "pdarun.h"
-#include "fsmrun2.h"
+#include "fsmrun.h"
 #include "bytecode.h"
 #include "tree.h"
 #include "pool.h"

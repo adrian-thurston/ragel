@@ -40,7 +40,7 @@
 #include "sbsttable.h"
 #include "colm.h"
 #include "fsmrun.h"
-#include "fsmrun2.h"
+#include "fsmrun.h"
 
 #define TRANS_ERR_TRANS   0
 #define STATE_ERR_STATE   0
