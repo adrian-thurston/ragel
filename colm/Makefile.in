@@ -66,6 +66,10 @@ RUNTIME_SRC = \
 	list.c input.c debug.c \
 	codevect.c pool.c string.c tree.c bytecode.c
 
+RUNTIME_HDR = \
+	bytecode.h config.h debug.h pool.h fsmrun.h map.h tree.h
+	
+
 # Files in ALL_SRC that are generated.
 GEN_SRC = version.h lmscan.cpp lmparse.h lmparse.cpp 
 
@@ -154,7 +158,6 @@ install: all
 	install -d $(prefix)/lib
 	install -s colm $(prefix)/bin/colm
 	install libcolmp.a libcolmd.a $(prefix)/lib
-	install rtvector.h bytecode.h config.h fsmrun.h debug.h pool.h fsmrun2.h map.h \
-		input.h pdarun.h $(prefix)/include/colm
+	install $(RUNTIME_HDR) $(prefix)/include/colm
 
 -include $(DEPS)
