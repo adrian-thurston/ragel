@@ -67,7 +67,7 @@ RUNTIME_SRC = \
 	codevect.c pool.c string.c tree.c bytecode.c
 
 RUNTIME_HDR = \
-	bytecode.h config.h debug.h pool.h fsmrun.h map.h tree.h
+	bytecode.h config.h debug.h pool.h input.h fsmrun.h pdarun.h map.h tree.h
 	
 
 # Files in ALL_SRC that are generated.
