@@ -329,6 +329,40 @@ string FsmCodeGen::KEY( Key key )
 	return ret.str();
 }
 
+bool FsmCodeGen::isAlphTypeSigned()
+{
+	return keyOps->isSigned;
+}
+
+bool FsmCodeGen::isWideAlphTypeSigned()
+{
+	string ret;
+	if ( redFsm->maxKey <= keyOps->maxKey )
+		return isAlphTypeSigned();
+	else {
+		long long maxKeyVal = redFsm->maxKey.getLongLong();
+		HostType *wideType = keyOps->typeSubsumes( keyOps->isSigned, maxKeyVal );
+		return wideType->isSigned;
+	}
+}
+
+string FsmCodeGen::WIDE_KEY( RedStateAp *state, Key key )
+{
+	if ( state->stateCondList.length() > 0 ) {
+		ostringstream ret;
+		if ( isWideAlphTypeSigned() )
+			ret << key.getVal();
+		else
+			ret << (unsigned long) key.getVal() << 'u';
+		return ret.str();
+	}
+	else {
+		return KEY( key );
+	}
+}
+
+
+
 void FsmCodeGen::EXEC( ostream &ret, GenInlineItem *item, int targState, int inFinish )
 {
 	/* The parser gives fexec two children. The double brackets are for D

@@ -73,6 +73,7 @@ protected:
 	string GET_WIDE_KEY( RedStateAp *state );
 	string TABS( int level );
 	string KEY( Key key );
+	string WIDE_KEY( RedStateAp *state, Key key );
 	string LDIR_PATH( char *path );
 	void ACTION( ostream &ret, GenAction *action, int targState, 
 			bool inFinish, bool csForced );
@@ -80,6 +81,9 @@ protected:
 	string ALPH_TYPE();
 	string WIDE_ALPH_TYPE();
 	string ARRAY_TYPE( unsigned long maxVal );
+
+	bool isAlphTypeSigned();
+	bool isWideAlphTypeSigned();
 
 	virtual string ARR_OFF( string ptr, string offset ) = 0;
 	virtual string CAST( string type ) = 0;

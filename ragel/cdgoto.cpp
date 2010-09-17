@@ -118,7 +118,7 @@ void GotoCodeGen::emitSingleSwitch( RedStateAp *state )
 	if ( numSingles == 1 ) {
 		/* If there is a single single key then write it out as an if. */
 		out << "\tif ( " << GET_WIDE_KEY(state) << " == " << 
-				KEY(data[0].lowKey) << " )\n\t\t"; 
+				WIDE_KEY(state, data[0].lowKey) << " )\n\t\t"; 
 
 		/* Virtual function for writing the target of the transition. */
 		TRANS_GOTO(data[0].value, 0) << "\n";
@@ -129,7 +129,7 @@ void GotoCodeGen::emitSingleSwitch( RedStateAp *state )
 
 		/* Write out the single indicies. */
 		for ( int j = 0; j < numSingles; j++ ) {
-			out << "\t\tcase " << KEY(data[j].lowKey) << ": ";
+			out << "\t\tcase " << WIDE_KEY(state, data[j].lowKey) << ": ";
 			TRANS_GOTO(data[j].value, 0) << "\n";
 		}
 		
@@ -158,10 +158,10 @@ void GotoCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int h
 	if ( anyLower && anyHigher ) {
 		/* Can go lower and higher than mid. */
 		out << TABS(level) << "if ( " << GET_WIDE_KEY(state) << " < " << 
-				KEY(data[mid].lowKey) << " ) {\n";
+				WIDE_KEY(state, data[mid].lowKey) << " ) {\n";
 		emitRangeBSearch( state, level+1, low, mid-1 );
 		out << TABS(level) << "} else if ( " << GET_WIDE_KEY(state) << " > " << 
-				KEY(data[mid].highKey) << " ) {\n";
+				WIDE_KEY(state, data[mid].highKey) << " ) {\n";
 		emitRangeBSearch( state, level+1, mid+1, high );
 		out << TABS(level) << "} else\n";
 		TRANS_GOTO(data[mid].value, level+1) << "\n";
@@ -169,7 +169,7 @@ void GotoCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int h
 	else if ( anyLower && !anyHigher ) {
 		/* Can go lower than mid but not higher. */
 		out << TABS(level) << "if ( " << GET_WIDE_KEY(state) << " < " << 
-				KEY(data[mid].lowKey) << " ) {\n";
+				WIDE_KEY(state, data[mid].lowKey) << " ) {\n";
 		emitRangeBSearch( state, level+1, low, mid-1 );
 
 		/* if the higher is the highest in the alphabet then there is no
@@ -180,14 +180,14 @@ void GotoCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int h
 		}
 		else {
 			out << TABS(level) << "} else if ( " << GET_WIDE_KEY(state) << " <= " << 
-					KEY(data[mid].highKey) << " )\n";
+					WIDE_KEY(state, data[mid].highKey) << " )\n";
 			TRANS_GOTO(data[mid].value, level+1) << "\n";
 		}
 	}
 	else if ( !anyLower && anyHigher ) {
 		/* Can go higher than mid but not lower. */
 		out << TABS(level) << "if ( " << GET_WIDE_KEY(state) << " > " << 
-				KEY(data[mid].highKey) << " ) {\n";
+				WIDE_KEY(state, data[mid].highKey) << " ) {\n";
 		emitRangeBSearch( state, level+1, mid+1, high );
 
 		/* If the lower end is the lowest in the alphabet then there is no
@@ -198,7 +198,7 @@ void GotoCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int h
 		}
 		else {
 			out << TABS(level) << "} else if ( " << GET_WIDE_KEY(state) << " >= " << 
-					KEY(data[mid].lowKey) << " )\n";
+					WIDE_KEY(state, data[mid].lowKey) << " )\n";
 			TRANS_GOTO(data[mid].value, level+1) << "\n";
 		}
 	}
@@ -206,18 +206,18 @@ void GotoCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int h
 		/* Cannot go higher or lower than mid. It's mid or bust. What
 		 * tests to do depends on limits of alphabet. */
 		if ( !limitLow && !limitHigh ) {
-			out << TABS(level) << "if ( " << KEY(data[mid].lowKey) << " <= " << 
+			out << TABS(level) << "if ( " << WIDE_KEY(state, data[mid].lowKey) << " <= " << 
 					GET_WIDE_KEY(state) << " && " << GET_WIDE_KEY(state) << " <= " << 
-					KEY(data[mid].highKey) << " )\n";
+					WIDE_KEY(state, data[mid].highKey) << " )\n";
 			TRANS_GOTO(data[mid].value, level+1) << "\n";
 		}
 		else if ( limitLow && !limitHigh ) {
 			out << TABS(level) << "if ( " << GET_WIDE_KEY(state) << " <= " << 
-					KEY(data[mid].highKey) << " )\n";
+					WIDE_KEY(state, data[mid].highKey) << " )\n";
 			TRANS_GOTO(data[mid].value, level+1) << "\n";
 		}
 		else if ( !limitLow && limitHigh ) {
-			out << TABS(level) << "if ( " << KEY(data[mid].lowKey) << " <= " << 
+			out << TABS(level) << "if ( " << WIDE_KEY(state, data[mid].lowKey) << " <= " << 
 					GET_WIDE_KEY(state) << " )\n";
 			TRANS_GOTO(data[mid].value, level+1) << "\n";
 		}
