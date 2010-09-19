@@ -716,8 +716,8 @@ void CSharpFlatCodeGen::writeExec()
 			redFsm->anyRegActions() || redFsm->anyFromStateActions() )
 	{
 		out << 
-			"	" << actsType << " _acts;\n"
-			"	" << nactsType << " _nacts;\n"; 
+			"	int _acts;\n"
+			"	int _nacts;\n"; 
 	}
 
 	out <<
@@ -877,8 +877,6 @@ void CSharpFlatCodeGen::initVarTypes()
 {
 	slenType = ARRAY_TYPE(MAX(redFsm->maxSpan, redFsm->maxCondSpan));
 	transType = ARRAY_TYPE(redFsm->maxIndex+1);
-	actsType = ARRAY_TYPE(redFsm->maxActionLoc);
-	nactsType = ARRAY_TYPE(redFsm->maxActArrItem);
 	indsType = ARRAY_TYPE(redFsm->maxFlatIndexOffset);
 	condsType = ARRAY_TYPE(redFsm->maxCondIndexOffset);
 }
