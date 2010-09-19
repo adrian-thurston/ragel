@@ -1,3 +1,10 @@
+Ragel 6.7
+=========
+ -The C# _acts and _nacts vars should not be typed based on the size of the
+  array elements they point to. Fixes a bug reported by Attila Sztupák.
+ -Fix for the C code generator: when comparing the wide type against a literal
+  we need to pick the right signedness for the literal.
+  
 Ragel 6.6 - Dec 2, 2009
 =======================
  -Applied a number of patches from Diego Elio 'Flameeyes' Pettenò. Should not
