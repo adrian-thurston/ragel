@@ -134,7 +134,7 @@ maximally continuous.  One is free to specify an entire parser using a single
 regular expression.  The single-expression model affords concise and elegant
 descriptions of languages and the generation of very simple, fast and robust
 code.  Ragel compiles executable finite state machines from a high level regular language
-notation. Ragel targets C, C++, Objective-C, D, Java and Ruby.
+notation. Ragel targets C, C++, Objective-C, D, Go, Java and Ruby.
 
 In addition to building state machines from regular expressions, Ragel allows
 the programmer to directly specify state machines with state charts. These two
@@ -199,7 +199,7 @@ deterministic finite state automaton. Since every regular language has a state
 machine representation and vice versa, the terms regular language and state
 machine (or just machine) will be used interchangeably in this document.
 
-Ragel outputs machines to C, C++, Objective-C, D, Java or Ruby code. The output is
+Ragel outputs machines to C, C++, Objective-C, D, Go, Java or Ruby code. The output is
 designed to be generic and is not bound to any particular input or processing
 method. A Ragel machine expects to have data passed to it in buffer blocks.
 When there is no more input, the machine can be queried for acceptance.  In
@@ -2503,7 +2503,7 @@ stream. These can live in any scope. Control of the input processing loop is
 also possible: the user may break out of the processing loop and return to it
 at any time.
 
-In the case of C and D host languages, Ragel is able to generate very
+In the case of the C, D, and Go host languages, Ragel is able to generate very
 fast-running code that implements state machines as directly executable code.
 Since very large files strain the host language compiler, table-based code
 generation is also supported. In the future we hope to provide a partitioned,
@@ -2561,7 +2561,7 @@ int main( int argc, char **argv )
 
 There are a number of variables that Ragel expects the user to declare. At a
 very minimum the \verb|cs|, \verb|p| and \verb|pe| variables must be declared.
-In Java and Ruby code the \verb|data| variable must also be declared. If
+In Go, Java and Ruby code the \verb|data| variable must also be declared. If
 EOF actions are used then the \verb|eof| variable is required. If
 stack-based state machine control flow statements are used then the
 \verb|stack| and \verb|top| variables are required. If a scanner is declared
@@ -2577,21 +2577,21 @@ execution loop, but not from within.
 
 \item \verb|p| - Data pointer. In C/D code this variable is expected to be a
 pointer to the character data to process. It should be initialized to the
-beginning of the data block on every run of the machine. In Java and Ruby it is
+beginning of the data block on every run of the machine. In Go, Java and Ruby it is
 used as an offset to \verb|data| and must be an integer. In this case it should
 be initialized to zero on every run of the machine.
 
 \item \verb|pe| - Data end pointer. This should be initialized to \verb|p| plus
-the data length on every run of the machine. In Java and Ruby code this should
+the data length on every run of the machine. In Go, Java and Ruby code this should
 be initialized to the data length.
 
 \item \verb|eof| - End of file pointer. This should be set to \verb|pe| when
 the buffer block being processed is the last one, otherwise it should be set to
-null. In Java and Ruby code \verb|-1| must be used instead of null. If the EOF
+null. In Go, Java and Ruby code \verb|-1| must be used instead of null. If the EOF
 event can be known only after the final buffer block has been processed, then
 it is possible to set \verb|p = pe = eof| and run the execute block.
 
-\item \verb|data| - This variable is only required in Java and Ruby code. It
+\item \verb|data| - This variable is only required in Go, Java and Ruby code. It
 must be an array containting the data to process.
 
 \item \verb|stack| - This must be an array of integers. It is used to store
@@ -2605,7 +2605,7 @@ to \verb|stack|, giving the next available spot on the top of the stack.
 \item \verb|act| - This must be an integer value. It is a variable sometimes
 used by scanner code to keep track of the most recent successful pattern match.
 
-\item \verb|ts| - This must be a pointer to character data. In Java and
+\item \verb|ts| - This must be a pointer to character data. In Go, Java and
 Ruby code this must be an integer. See Section \ref{generating-scanners} for
 more information.
 
@@ -2623,7 +2623,7 @@ alphtype unsigned int;
 The alphtype statement specifies the alphabet data type that the machine
 operates on. During the compilation of the machine, integer literals are
 expected to be in the range of possible values of the alphtype. The default
-is always \verb|char|.
+is \verb|char| for all languages except Go where the default is \verb|byte|.
 
 \begin{multicols}{2}
 \setlength{\columnseprule}{1pt} 
@@ -2635,6 +2635,23 @@ C/C++/Objective-C:
           long      unsigned long
 \end{verbatim}
 
+Go:
+\begin{verbatim}
+          byte
+          int8      uint8
+          int16     uint16
+          int32     uint32
+          int
+\end{verbatim}
+
+Ruby: 
+\begin{verbatim}
+          char 
+          int
+\end{verbatim}
+
+\columnbreak
+
 Java:
 \begin{verbatim}
           char 
@@ -2642,9 +2659,6 @@ Java:
           short 
           int
 \end{verbatim}
-
-
-\columnbreak
 
 D:
 \begin{verbatim}
@@ -2656,11 +2670,6 @@ D:
           dchar
 \end{verbatim}
 
-Ruby: 
-\begin{verbatim}
-          char 
-          int
-\end{verbatim}
 \end{multicols}
 
 \section{Getkey Statement}
@@ -2705,7 +2714,7 @@ The variable statement specifies how to access a specific
 variable. All of the variables that are declared by the user and
 used by Ragel can be changed. This includes \verb|p|, \verb|pe|, \verb|eof|, \verb|cs|,
 \verb|top|, \verb|stack|, \verb|ts|, \verb|te| and \verb|act|.
-In Ruby and Java code generation the \verb|data| variable can also be changed.
+In Go, Ruby and Java code generation the \verb|data| variable can also be changed.
 
 \section{Pre-Push Statement}
 \label{prepush}
@@ -3008,6 +3017,7 @@ language. The host-language options are:
 \begin{itemize}
 \item \verb|-C  | for C/C++/Objective-C code (default)
 \item \verb|-D  | for D code.
+\item \verb|-Z  | for Go code.
 \item \verb|-J  | for Java code.
 \item \verb|-R  | for Ruby code.
 \item \verb|-A  | for C\# code.
@@ -3086,7 +3096,7 @@ preferred output format.
 \hline
 \verb|-G1|&goto, expanded actions&C/D/C\#\\
 \hline
-\verb|-G2|&goto, in-place actions&C/D\\
+\verb|-G2|&goto, in-place actions&C/D/Go\\
 \hline
 \end{tabular}
 \end{center}
@@ -3569,7 +3579,8 @@ context-dependent nature. The prevalence of variable-length fields in
 communication protocols motivated us to introduce semantic conditions into
 the Ragel language.
 
-A semantic condition is a block of user code that is executed immediately
+A semantic condition is a block of user code that is interpreted as an
+expression and evaluated immediately
 before a transition is taken. If the code returns a value of true, the
 transition may be taken.  We can now embed code that extracts the length of a
 field, then proceed to match $n$ data values.

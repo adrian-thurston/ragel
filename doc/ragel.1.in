@@ -30,7 +30,7 @@ ragel \- compile regular languages into executable state machines
 .I file
 .SH DESCRIPTION
 Ragel compiles executable finite state machines from regular languages.  
-Ragel can generate C, C++, Objective-C, D, or Java code. Ragel state
+Ragel can generate C, C++, Objective-C, D, Go, or Java code. Ragel state
 machines can not only recognize byte
 sequences as regular expression machines do, but can also execute code at
 arbitrary points in the recognition of a regular language.  User code is
@@ -118,6 +118,9 @@ The host language is D.
 .B \-J
 The host language is Java.
 .TP
+.B \-Z
+The host language is Go.  Must be used with -G2 option.
+.TP
 .B \-R
 The host language is Ruby.
 .TP
@@ -163,7 +166,7 @@ host language compile.
 execute code.
 .TP
 .B \-G2
-(C/D) Generate a really fast goto driven FSM by embedding action lists in the state
+(C/D/Go) Generate a really fast goto driven FSM by embedding action lists in the state
 machine control code.
 .TP
 .B \-P<N>
@@ -645,10 +648,12 @@ Return to the target state of the transition on which the last fcall was made.
 .I fbreak;
 Save the current state and immediately break out of the machine.
 .SH CREDITS
-Ragel was written by Adrian Thurston <thurston@complang.org>.  Objective-C
-output contributed by Erich Ocean. D output contributed by Alan West. Ruby
-output contributed by Victor Hugo Borja. C Sharp code generation contributed by
-Daniel Tang. Contributions to Java code generation by Colin Fleming.
+Ragel was written by Adrian Thurston <thurston@complang.org>.
+Objective-C output contributed by Erich Ocean. D output contributed by
+Alan West. Ruby output contributed by Victor Hugo Borja. C Sharp code
+generation contributed by Daniel Tang. Contributions to Java code
+generation by Colin Fleming.  Go code generation contributed by
+Justine Tunney.
 .SH "SEE ALSO"
 .BR re2c (1),
 .BR flex (1)

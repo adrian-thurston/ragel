@@ -74,6 +74,18 @@ HostType hostTypesD[] =
 	{ "dchar",   0,  "dchar",   false,  0,         UINT_MAX,    4 }
 };
 
+HostType hostTypesGo[] = 
+{
+	{ "byte",    0,  "ubyte",  false,  0,         UCHAR_MAX,   1 },
+	{ "int8",    0,  "byte",   true,   CHAR_MIN,  CHAR_MAX,    1 },
+	{ "uint8",   0,  "ubyte",  false,  0,         UCHAR_MAX,   1 },
+	{ "int16",   0,  "short",  true,   SHRT_MIN,  SHRT_MAX,    2 },
+	{ "uint16",  0,  "ushort", false,  0,         USHRT_MAX,   2 },
+	{ "int32",   0,  "int",    true,   INT_MIN,   INT_MAX,     4 },
+	{ "uint32",  0,  "uint",   false,  0,         UINT_MAX,    4 },
+	{ "int",     0,  "long",   true,   LONG_MIN,  LONG_MAX,    sizeof(long) },
+};
+
 HostType hostTypesJava[] = 
 {
 	{ "byte",    0,  "byte",   true,   CHAR_MIN,  CHAR_MAX,    1 },
@@ -104,6 +116,7 @@ HostType hostTypesCSharp[] =
 
 HostLang hostLangC =    { HostLang::C,    hostTypesC,    8, hostTypesC+0,    true };
 HostLang hostLangD =    { HostLang::D,    hostTypesD,    9, hostTypesD+2,    true };
+HostLang hostLangGo =   { HostLang::Go,   hostTypesGo,   7, hostTypesGo+0,   false };
 HostLang hostLangJava = { HostLang::Java, hostTypesJava, 4, hostTypesJava+2, false };
 HostLang hostLangRuby = { HostLang::Ruby, hostTypesRuby, 2, hostTypesRuby+0, false };
 HostLang hostLangCSharp = { HostLang::CSharp, hostTypesCSharp, 9, hostTypesCSharp+4, true };

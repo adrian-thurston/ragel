@@ -25,6 +25,8 @@ missed.
 
 * C# code generation contributed by Daniel Tang.
 
+* Go code generation contributed by Justine Tunney.
+
 * Feedback, Packaging, and Fixes provided by:
 
     Bob Tennent, Robert Lemmen, Tobias Jahn, Cris Bailiff, Buddy Betts,

@@ -49,6 +49,8 @@
 
 #include "javacodegen.h"
 
+#include "goipgoto.h"
+
 #include "rubytable.h"
 #include "rubyftable.h"
 #include "rubyflat.h"
@@ -166,6 +168,27 @@ CodeGenData *javaMakeCodeGen( const char *sourceFileName, const char *fsmName, o
 }
 
 /* Invoked by the parser when a ragel definition is opened. */
+CodeGenData *goMakeCodeGen( const char *sourceFileName, const char *fsmName, ostream &out )
+{
+	CodeGenData *codeGen;
+
+	switch ( codeStyle ) {
+	case GenIpGoto:
+		codeGen = new GoIpGotoCodeGen(out);
+		break;
+	default:
+		cerr << "I only support the -G2 output style for Go.  Please "
+			"rerun ragel including this flag.\n";
+		exit(1);
+	}
+
+	codeGen->sourceFileName = sourceFileName;
+	codeGen->fsmName = fsmName;
+
+	return codeGen;
+}
+
+/* Invoked by the parser when a ragel definition is opened. */
 CodeGenData *rubyMakeCodeGen( const char *sourceFileName, const char *fsmName, ostream &out )
 {
 	CodeGenData *codeGen = 0;
@@ -252,6 +275,8 @@ CodeGenData *makeCodeGen( const char *sourceFileName, const char *fsmName, ostre
 		cgd = cdMakeCodeGen( sourceFileName, fsmName, out );
 	else if ( hostLang == &hostLangD )
 		cgd = cdMakeCodeGen( sourceFileName, fsmName, out );
+	else if ( hostLang == &hostLangGo )
+		cgd = goMakeCodeGen( sourceFileName, fsmName, out );
 	else if ( hostLang == &hostLangJava )
 		cgd = javaMakeCodeGen( sourceFileName, fsmName, out );
 	else if ( hostLang == &hostLangRuby )
@@ -268,6 +293,8 @@ void lineDirective( ostream &out, const char *fileName, int line )
 			cdLineDirective( out, fileName, line );
 		else if ( hostLang == &hostLangD )
 			cdLineDirective( out, fileName, line );
+		else if ( hostLang == &hostLangGo )
+			gothicLineDirective( out, fileName, line );
 		else if ( hostLang == &hostLangJava )
 			javaLineDirective( out, fileName, line );
 		else if ( hostLang == &hostLangRuby )

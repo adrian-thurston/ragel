@@ -121,6 +121,7 @@ void usage()
 "host language:\n"
 "   -C                   The host language is C, C++, Obj-C or Obj-C++ (default)\n"
 "   -D                   The host language is D\n"
+"   -Z                   The host language is Go\n"
 "   -J                   The host language is Java\n"
 "   -R                   The host language is Ruby\n"
 "   -A                   The host language is C#\n"
@@ -217,7 +218,7 @@ void escapeLineDirectivePath( std::ostream &out, char *path )
 
 void processArgs( int argc, const char **argv, InputData &id )
 {
-	ParamCheck pc("xo:dnmleabjkS:M:I:CDJRAvHh?-:sT:F:G:P:LpV", argc, argv);
+	ParamCheck pc("xo:dnmleabjkS:M:I:CDJZRAvHh?-:sT:F:G:P:LpV", argc, argv);
 
 	/* FIXME: Need to check code styles VS langauge. */
 
@@ -314,6 +315,9 @@ void processArgs( int argc, const char **argv, InputData &id )
 				break;
 			case 'D':
 				hostLang = &hostLangD;
+				break;
+			case 'Z':
+				hostLang = &hostLangGo;
 				break;
 			case 'J':
 				hostLang = &hostLangJava;

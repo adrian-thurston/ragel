@@ -124,7 +124,7 @@ struct HostLang
 	/* Target language. */
 	enum Lang
 	{
-		C, D, Java, Ruby, CSharp
+		C, D, Go, Java, Ruby, CSharp
 	};
 
 	Lang lang;
@@ -138,6 +138,7 @@ extern HostLang *hostLang;
 
 extern HostLang hostLangC;
 extern HostLang hostLangD;
+extern HostLang hostLangGo;
 extern HostLang hostLangJava;
 extern HostLang hostLangRuby;
 extern HostLang hostLangCSharp;

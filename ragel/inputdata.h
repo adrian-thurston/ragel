@@ -93,6 +93,7 @@ struct InputData
 	void terminateAllParsers();
 
 	void cdDefaultFileName( const char *inputFile );
+	void goDefaultFileName( const char *inputFile );
 	void javaDefaultFileName( const char *inputFile );
 	void rubyDefaultFileName( const char *inputFile );
 	void csharpDefaultFileName( const char *inputFile );
