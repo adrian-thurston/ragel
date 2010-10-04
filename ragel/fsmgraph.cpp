@@ -1302,6 +1302,8 @@ void FsmAp::findEmbedExpansions( ExpansionList &expansionList,
 				if ( transCond.s1Tel.lowKey <= keyOps->maxKey ) {
 					assert( transCond.s1Tel.highKey <= keyOps->maxKey );
 
+					CondBit *condBit = addCondBit( condAction );
+
 					/* Make a new state cond. */
 					StateCond *newStateCond = new StateCond( transCond.s1Tel.lowKey,
 							transCond.s1Tel.highKey );

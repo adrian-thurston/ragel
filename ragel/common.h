@@ -73,6 +73,10 @@ public:
 	 * key implementation can hold. */
 	Size availableSpace() const;
 
+	/* Returns the number of bits available in the key implementation. */
+	static int bits()
+		{ return sizeof( long ) * 8; }
+
 	bool isUpper() const { return ( 'A' <= key && key <= 'Z' ); }
 	bool isLower() const { return ( 'a' <= key && key <= 'z' ); }
 	bool isPrintable() const
@@ -187,12 +191,11 @@ struct KeyOps
 				(long long)key2.key - 
 				(long long)key1.key + 1) : 
 			(unsigned long long)(
-				(unsigned long)key2.key) - 
-				(unsigned long long)((unsigned long)key1.key) + 1;
+				(unsigned long long)key2.key - 
+				(unsigned long long)key1.key + 1);
 	}
 
-	Size alphSize()
-		{ return span( minKey, maxKey ); }
+	Size alphSize() { return span( minKey, maxKey ); }
 
 	HostType *typeSubsumes( long long maxVal )
 	{

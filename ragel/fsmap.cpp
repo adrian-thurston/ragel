@@ -830,6 +830,21 @@ bool FsmAp::hasOutData( StateAp *state )
 void logNewExpansion( Expansion *exp );
 void logCondSpace( CondSpace *condSpace );
 
+CondBit *FsmAp::addCondBit( Action *condition )
+{
+	CondBit *condBit = condData->condBitMap.find( condition );
+	if ( condBit == 0 ) {
+		if ( condData->nextCondBit > Key::bits() ) {
+			throw FsmConstructFail( FsmConstructFail::CondNoKeySpace );
+		}
+
+		condBit = new CondBit( condition, condData->nextCondBit++ );
+		condData->condBitMap.insert( condBit );
+	}
+
+	return condBit;
+}
+
 CondSpace *FsmAp::addCondSpace( const CondSet &condSet )
 {
 	CondSpace *condSpace = condData->condSpaceMap.find( condSet );

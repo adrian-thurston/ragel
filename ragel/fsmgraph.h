@@ -571,6 +571,7 @@ typedef CmpSTable< OutCond, CmpOutCond > CmpOutCondSet;
 typedef BstSet< Action*, CmpCondId > CondSet;
 typedef CmpTable< Action*, CmpCondId > CmpCondSet;
 
+/* Descriptor for a set of conditions. */
 struct CondSpace
 	: public AvlTreeEl<CondSpace>
 {
@@ -587,6 +588,21 @@ struct CondSpace
 typedef Vector<CondSpace*> CondSpaceVect;
 
 typedef AvlTree<CondSpace, CondSet, CmpCondSet> CondSpaceMap;
+
+/* Descriptor for a single condition. */
+struct CondBit
+	: public AvlTreeEl<CondBit>
+{
+	CondBit( Action *condition, int bit )
+		: condition(condition), bit(bit) {}
+
+	Action *getKey() { return condition; }
+
+	Action *condition;
+	int bit;
+};
+
+typedef AvlTree<CondBit, Action*> CondBitMap;
 
 struct StateCond
 {
@@ -647,6 +663,9 @@ struct CondData
 	Key lastCondKey;
 
 	CondSpaceMap condSpaceMap;
+
+	CondBitMap condBitMap;
+	int nextCondBit;
 };
 
 extern CondData *condData;
@@ -1154,6 +1173,7 @@ struct FsmAp
 
 	/* Set conditions. */
 	CondSpace *addCondSpace( const CondSet &condSet );
+	CondBit *addCondBit( Action *condition );
 
 	void findEmbedExpansions( ExpansionList &expansionList, 
 		StateAp *destState, Action *condAction, bool sense );

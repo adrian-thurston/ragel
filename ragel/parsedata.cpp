@@ -920,6 +920,7 @@ void ParseData::initKeyOps( )
 	}
 
 	thisCondData.lastCondKey = thisKeyOps.maxKey;
+	thisCondData.nextCondBit = alphType->size * 8;
 }
 
 void ParseData::printNameInst( NameInst *nameInst, int level )
