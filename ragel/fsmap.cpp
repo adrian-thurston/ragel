@@ -1,5 +1,5 @@
 /*
- *  Copyright 2002-2004 Adrian Thurston <thurston@complang.org>
+ *  Copyright 2002-2004, 2010 Adrian Thurston <thurston@complang.org>
  */
 
 /*  This file is part of Ragel.
@@ -849,18 +849,7 @@ CondSpace *FsmAp::addCondSpace( const CondSet &condSet )
 {
 	CondSpace *condSpace = condData->condSpaceMap.find( condSet );
 	if ( condSpace == 0 ) {
-		/* Do we have enough keyspace left? */
-		Size availableSpace = condData->lastCondKey.availableSpace();
-		Size neededSpace = (1 << condSet.length() ) * keyOps->alphSize();
-		if ( neededSpace > availableSpace )
-			throw FsmConstructFail( FsmConstructFail::CondNoKeySpace );
-
-		Key baseKey = condData->lastCondKey;
-		baseKey.increment();
-		condData->lastCondKey += (1 << condSet.length() ) * keyOps->alphSize();
-
 		condSpace = new CondSpace( condSet );
-		condSpace->baseKey = baseKey;
 		condData->condSpaceMap.insert( condSpace );
 
 		#ifdef LOG_CONDS
@@ -868,7 +857,6 @@ CondSpace *FsmAp::addCondSpace( const CondSet &condSet )
 		cerr << "  condition set: ";
 		logCondSpace( condSpace );
 		cerr << endl;
-		cerr << "  baseKey: " << baseKey.getVal() << endl;
 		#endif
 	}
 	return condSpace;

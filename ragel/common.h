@@ -54,6 +54,7 @@ public:
 	friend inline bool operator>=( const Key key1, const Key key2 );
 	friend inline bool operator==( const Key key1, const Key key2 );
 	friend inline bool operator!=( const Key key1, const Key key2 );
+	friend inline Key operator|( const Key key1, const Key key2 );
 
 	friend struct KeyOps;
 	
@@ -301,6 +302,12 @@ inline Key operator/(const Key key1, const Key key2)
 	/* FIXME: must be made aware of isSigned. */
 	return key1.key / key2.key;
 }
+
+inline Key operator|( const Key key1, const Key key2 )
+{
+	return key1.key | key2.key;
+}
+
 
 /* Filter on the output stream that keeps track of the number of lines
  * output. */

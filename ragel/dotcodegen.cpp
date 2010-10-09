@@ -131,7 +131,7 @@ std::ostream &GraphvizDotGen::ACTION( RedAction *action )
 std::ostream &GraphvizDotGen::ONCHAR( Key lowKey, Key highKey )
 {
 	GenCondSpace *condSpace;
-	if ( lowKey > keyOps->maxKey && (condSpace=findCondSpace(lowKey, highKey) ) ) {
+	if ( false && lowKey > keyOps->maxKey && (condSpace=findCondSpace(lowKey, highKey) ) ) {
 		Key values = ( lowKey - condSpace->baseKey ) / keyOps->alphSize();
 
 		lowKey = keyOps->minKey + 

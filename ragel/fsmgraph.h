@@ -1,5 +1,5 @@
 /*
- *  Copyright 2001-2007 Adrian Thurston <thurston@complang.org>
+ *  Copyright 2001-2007, 2010 Adrian Thurston <thurston@complang.org>
  */
 
 /*  This file is part of Ragel.
@@ -40,7 +40,7 @@
 #include "avlmap.h"
 #include "ragel.h"
 
-//#define LOG_CONDS
+#define LOG_CONDS
 
 /* Flags that control merging. */
 #define STB_GRAPH1     0x01
@@ -624,7 +624,8 @@ struct Expansion
 	Expansion( Key lowKey, Key highKey ) :
 		lowKey(lowKey), highKey(highKey),
 		fromTrans(0), fromCondSpace(0), 
-		toCondSpace(0) {}
+		toCondSpace(0),
+		remove(false) {}
 	
 	~Expansion()
 	{
@@ -637,10 +638,10 @@ struct Expansion
 
 	TransAp *fromTrans;
 	CondSpace *fromCondSpace;
-	long fromVals;
 
 	CondSpace *toCondSpace;
 	LongVect toValsList;
+	bool remove;
 
 	Expansion *prev, *next;
 };
@@ -657,13 +658,9 @@ struct Removal
 
 struct CondData
 {
-	CondData() : lastCondKey(0) {}
-
-	/* Condition info. */
-	Key lastCondKey;
+	CondData() : nextCondBit(0) {}
 
 	CondSpaceMap condSpaceMap;
-
 	CondBitMap condBitMap;
 	int nextCondBit;
 };
