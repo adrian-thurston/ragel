@@ -582,6 +582,7 @@ struct CondSpace
 
 	CondSet condSet;
 	Key baseKey;
+	unsigned long bitField;
 	long condSpaceId;
 };
 

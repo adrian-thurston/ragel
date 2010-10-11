@@ -1097,7 +1097,7 @@ void BackendGen::makeConditions()
 
 		for ( CondSpaceMap::Iter cs = condData->condSpaceMap; cs.lte(); cs++ ) {
 			long id = cs->condSpaceId;
-			cgd->newCondSpace( curCondSpace, id, cs->baseKey );
+			cgd->newCondSpace( curCondSpace, id, cs->baseKey, cs->bitField );
 			for ( CondSet::Iter csi = cs->condSet; csi.lte(); csi++ )
 				cgd->condSpaceItem( curCondSpace, (*csi)->actionId );
 			curCondSpace += 1;

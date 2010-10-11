@@ -1220,9 +1220,9 @@ void FsmAp::mergeStates( MergeData &md, StateAp *destState, StateAp *srcState )
 	ExpansionList expList1;
 	ExpansionList expList2;
 
-//	findTransExpansions( expList1, destState, srcState );
+	findTransExpansions( expList1, destState, srcState );
 	findCondExpansions( expList1, destState, srcState );
-//	findTransExpansions( expList2, srcState, destState );
+	findTransExpansions( expList2, srcState, destState );
 	findCondExpansions( expList2, srcState, destState );
 
 	mergeStateConds( destState, srcState );

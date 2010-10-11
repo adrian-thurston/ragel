@@ -852,6 +852,12 @@ CondSpace *FsmAp::addCondSpace( const CondSet &condSet )
 		condSpace = new CondSpace( condSet );
 		condData->condSpaceMap.insert( condSpace );
 
+		condSpace->bitField = 0;
+		for ( CondSet::Iter csi = condSet; csi.lte(); csi++ ) {
+			CondBit *condBit = addCondBit( *csi );
+			condSpace->bitField |= ( 0x1 << condBit->bit );
+		}
+
 		#ifdef LOG_CONDS
 		cerr << "adding new condition space" << endl;
 		cerr << "  condition set: ";

@@ -299,12 +299,21 @@ typedef DList<Condition> ConditionList;
 struct GenCondSpace
 {
 	Key baseKey;
+	unsigned long bitField;
 	GenCondSet condSet;
 	int condSpaceId;
 
 	GenCondSpace *next, *prev;
 };
 typedef DList<GenCondSpace> CondSpaceList;
+
+struct GenCondBit
+{
+	GenAction *condition;
+	int bit;
+	GenCondBit *next, *prev;
+};
+typedef DList<GenCondBit> CondBitList;
 
 struct GenStateCond
 {
