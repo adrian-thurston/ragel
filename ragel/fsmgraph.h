@@ -1,5 +1,5 @@
 /*
- *  Copyright 2001-2007, 2010 Adrian Thurston <thurston@complang.org>
+ *  Copyright 2001-2007 Adrian Thurston <thurston@complang.org>
  */
 
 /*  This file is part of Ragel.
@@ -40,7 +40,7 @@
 #include "avlmap.h"
 #include "ragel.h"
 
-#define LOG_CONDS
+//#define LOG_CONDS
 
 /* Flags that control merging. */
 #define STB_GRAPH1     0x01
@@ -571,7 +571,6 @@ typedef CmpSTable< OutCond, CmpOutCond > CmpOutCondSet;
 typedef BstSet< Action*, CmpCondId > CondSet;
 typedef CmpTable< Action*, CmpCondId > CmpCondSet;
 
-/* Descriptor for a set of conditions. */
 struct CondSpace
 	: public AvlTreeEl<CondSpace>
 {
@@ -582,28 +581,12 @@ struct CondSpace
 
 	CondSet condSet;
 	Key baseKey;
-	unsigned long bitField;
 	long condSpaceId;
 };
 
 typedef Vector<CondSpace*> CondSpaceVect;
 
 typedef AvlTree<CondSpace, CondSet, CmpCondSet> CondSpaceMap;
-
-/* Descriptor for a single condition. */
-struct CondBit
-	: public AvlTreeEl<CondBit>
-{
-	CondBit( Action *condition, int bit )
-		: condition(condition), bit(bit) {}
-
-	Action *getKey() { return condition; }
-
-	Action *condition;
-	int bit;
-};
-
-typedef AvlTree<CondBit, Action*> CondBitMap;
 
 struct StateCond
 {
@@ -625,8 +608,7 @@ struct Expansion
 	Expansion( Key lowKey, Key highKey ) :
 		lowKey(lowKey), highKey(highKey),
 		fromTrans(0), fromCondSpace(0), 
-		toCondSpace(0),
-		remove(false) {}
+		toCondSpace(0) {}
 	
 	~Expansion()
 	{
@@ -639,10 +621,10 @@ struct Expansion
 
 	TransAp *fromTrans;
 	CondSpace *fromCondSpace;
+	long fromVals;
 
 	CondSpace *toCondSpace;
 	LongVect toValsList;
-	bool remove;
 
 	Expansion *prev, *next;
 };
@@ -659,11 +641,12 @@ struct Removal
 
 struct CondData
 {
-	CondData() : nextCondBit(0) {}
+	CondData() : lastCondKey(0) {}
+
+	/* Condition info. */
+	Key lastCondKey;
 
 	CondSpaceMap condSpaceMap;
-	CondBitMap condBitMap;
-	int nextCondBit;
 };
 
 extern CondData *condData;
@@ -1171,7 +1154,6 @@ struct FsmAp
 
 	/* Set conditions. */
 	CondSpace *addCondSpace( const CondSet &condSet );
-	CondBit *addCondBit( Action *condition );
 
 	void findEmbedExpansions( ExpansionList &expansionList, 
 		StateAp *destState, Action *condAction, bool sense );

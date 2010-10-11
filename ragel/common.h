@@ -54,7 +54,6 @@ public:
 	friend inline bool operator>=( const Key key1, const Key key2 );
 	friend inline bool operator==( const Key key1, const Key key2 );
 	friend inline bool operator!=( const Key key1, const Key key2 );
-	friend inline Key operator|( const Key key1, const Key key2 );
 
 	friend struct KeyOps;
 	
@@ -73,10 +72,6 @@ public:
 	/* Returns the distance from the key value to the maximum value that the
 	 * key implementation can hold. */
 	Size availableSpace() const;
-
-	/* Returns the number of bits available in the key implementation. */
-	static int bits()
-		{ return sizeof( long ) * 8; }
 
 	bool isUpper() const { return ( 'A' <= key && key <= 'Z' ); }
 	bool isLower() const { return ( 'a' <= key && key <= 'z' ); }
@@ -192,11 +187,12 @@ struct KeyOps
 				(long long)key2.key - 
 				(long long)key1.key + 1) : 
 			(unsigned long long)(
-				(unsigned long long)key2.key - 
-				(unsigned long long)key1.key + 1);
+				(unsigned long)key2.key) - 
+				(unsigned long long)((unsigned long)key1.key) + 1;
 	}
 
-	Size alphSize() { return span( minKey, maxKey ); }
+	Size alphSize()
+		{ return span( minKey, maxKey ); }
 
 	HostType *typeSubsumes( long long maxVal )
 	{
@@ -302,12 +298,6 @@ inline Key operator/(const Key key1, const Key key2)
 	/* FIXME: must be made aware of isSigned. */
 	return key1.key / key2.key;
 }
-
-inline Key operator|( const Key key1, const Key key2 )
-{
-	return key1.key | key2.key;
-}
-
 
 /* Filter on the output stream that keeps track of the number of lines
  * output. */

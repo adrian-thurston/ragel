@@ -92,7 +92,6 @@ struct CodeGenData
 	RedAction *allActionTables;
 	Condition *allConditions;
 	GenCondSpace *allCondSpaces;
-	GenCondBit *allCondBits;
 	RedStateAp *allStates;
 	NameInst **nameIndex;
 	int startState;
@@ -100,7 +99,6 @@ struct CodeGenData
 	GenActionList actionList;
 	ConditionList conditionList;
 	CondSpaceList condSpaceList;
-	CondBitList condBitList;
 	GenInlineList *getKeyExpr;
 	GenInlineList *accessExpr;
 	GenInlineList *prePushExpr;
@@ -152,10 +150,10 @@ struct CodeGenData
 	void setForcedErrorState()
 		{ redFsm->forcedErrorState = true; }
 
+	
 	void initCondSpaceList( ulong length );
-	void initCondBitList( ulong length );
 	void condSpaceItem( int cnum, long condActionId );
-	void newCondSpace( int cnum, int condSpaceId, Key baseKey, unsigned long bitField );
+	void newCondSpace( int cnum, int condSpaceId, Key baseKey );
 
 	void initStateCondList( int snum, ulong length );
 	void addStateCond( int snum, Key lowKey, Key highKey, long condNum );

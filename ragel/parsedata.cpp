@@ -919,7 +919,7 @@ void ParseData::initKeyOps( )
 		thisKeyOps.maxKey = makeFsmKeyNum( upperNum, rangeHighLoc, this );
 	}
 
-	thisCondData.nextCondBit = alphType->size * 8;
+	thisCondData.lastCondKey = thisKeyOps.maxKey;
 }
 
 void ParseData::printNameInst( NameInst *nameInst, int level )

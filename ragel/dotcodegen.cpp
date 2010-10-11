@@ -134,8 +134,10 @@ std::ostream &GraphvizDotGen::ONCHAR( Key lowKey, Key highKey )
 	if ( lowKey > keyOps->maxKey && (condSpace=findCondSpace(lowKey, highKey) ) ) {
 		Key values = ( lowKey - condSpace->baseKey ) / keyOps->alphSize();
 
-		lowKey = lowKey & ~condSpace->bitField;
-		highKey = lowKey & ~condSpace->bitField;
+		lowKey = keyOps->minKey + 
+			(lowKey - condSpace->baseKey - keyOps->alphSize() * values.getVal());
+		highKey = keyOps->minKey + 
+			(highKey - condSpace->baseKey - keyOps->alphSize() * values.getVal());
 		KEY( lowKey );
 		if ( lowKey != highKey ) {
 			out << "..";

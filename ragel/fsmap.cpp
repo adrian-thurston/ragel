@@ -1,5 +1,5 @@
 /*
- *  Copyright 2002-2004, 2010 Adrian Thurston <thurston@complang.org>
+ *  Copyright 2002-2004 Adrian Thurston <thurston@complang.org>
  */
 
 /*  This file is part of Ragel.
@@ -830,39 +830,30 @@ bool FsmAp::hasOutData( StateAp *state )
 void logNewExpansion( Expansion *exp );
 void logCondSpace( CondSpace *condSpace );
 
-CondBit *FsmAp::addCondBit( Action *condition )
-{
-	CondBit *condBit = condData->condBitMap.find( condition );
-	if ( condBit == 0 ) {
-		if ( condData->nextCondBit > Key::bits() ) {
-			throw FsmConstructFail( FsmConstructFail::CondNoKeySpace );
-		}
-
-		condBit = new CondBit( condition, condData->nextCondBit++ );
-		condData->condBitMap.insert( condBit );
-	}
-
-	return condBit;
-}
-
 CondSpace *FsmAp::addCondSpace( const CondSet &condSet )
 {
 	CondSpace *condSpace = condData->condSpaceMap.find( condSet );
 	if ( condSpace == 0 ) {
-		condSpace = new CondSpace( condSet );
-		condData->condSpaceMap.insert( condSpace );
+		/* Do we have enough keyspace left? */
+		Size availableSpace = condData->lastCondKey.availableSpace();
+		Size neededSpace = (1 << condSet.length() ) * keyOps->alphSize();
+		if ( neededSpace > availableSpace )
+			throw FsmConstructFail( FsmConstructFail::CondNoKeySpace );
 
-		condSpace->bitField = 0;
-		for ( CondSet::Iter csi = condSet; csi.lte(); csi++ ) {
-			CondBit *condBit = addCondBit( *csi );
-			condSpace->bitField |= ( 0x1 << condBit->bit );
-		}
+		Key baseKey = condData->lastCondKey;
+		baseKey.increment();
+		condData->lastCondKey += (1 << condSet.length() ) * keyOps->alphSize();
+
+		condSpace = new CondSpace( condSet );
+		condSpace->baseKey = baseKey;
+		condData->condSpaceMap.insert( condSpace );
 
 		#ifdef LOG_CONDS
 		cerr << "adding new condition space" << endl;
 		cerr << "  condition set: ";
 		logCondSpace( condSpace );
 		cerr << endl;
+		cerr << "  baseKey: " << baseKey.getVal() << endl;
 		#endif
 	}
 	return condSpace;

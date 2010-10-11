@@ -1,5 +1,5 @@
 /*
- *  Copyright 2001, 2002, 2006, 2010 Adrian Thurston <thurston@complang.org>
+ *  Copyright 2001, 2002, 2006 Adrian Thurston <thurston@complang.org>
  */
 
 /*  This file is part of Ragel.
@@ -913,6 +913,7 @@ void logNewExpansion( Expansion *exp )
 	cerr << "  fromCondSpace: ";
 	logCondSpace( exp->fromCondSpace );
 	cerr << endl;
+	cerr << "  fromVals: " << exp->fromVals << endl;
 
 	cerr << "  toCondSpace: ";
 	logCondSpace( exp->toCondSpace );
@@ -928,8 +929,7 @@ void logNewExpansion( Expansion *exp )
 void FsmAp::findTransExpansions( ExpansionList &expansionList, 
 		StateAp *destState, StateAp *srcState )
 {
-	PairIter<TransAp, StateCond> transCond( 
-			destState->outList.head,
+	PairIter<TransAp, StateCond> transCond( destState->outList.head,
 			srcState->stateCondList.head );
 	for ( ; !transCond.end(); transCond++ ) {
 		if ( transCond.userState == RangeOverlap ) {
@@ -939,23 +939,13 @@ void FsmAp::findTransExpansions( ExpansionList &expansionList,
 			expansion->fromTrans->fromState = 0;
 			expansion->fromTrans->toState = transCond.s1Tel.trans->toState;
 			expansion->fromCondSpace = 0;
+			expansion->fromVals = 0;
 			CondSpace *srcCS = transCond.s2Tel.trans->condSpace;
 			expansion->toCondSpace = srcCS;
 
 			long numTargVals = (1 << srcCS->condSet.length());
-
-			for ( long targVals = 0; targVals < numTargVals; targVals++ ) {
-				long long targBits = 0;
-				for ( CondSet::Iter csi = srcCS->condSet; csi.lte(); csi++ ) {
-					if ( targVals & (1 << csi.pos()) ) {
-						CondBit *exCondBit = addCondBit( *csi );
-						targBits |= 1 << exCondBit->bit;
-					}
-				}
-
-				if ( targBits != 0 )
-					expansion->toValsList.append( targBits );
-			}
+			for ( long targVals = 0; targVals < numTargVals; targVals++ )
+				expansion->toValsList.append( targVals );
 
 			#ifdef LOG_CONDS
 			logNewExpansion( expansion );
@@ -971,27 +961,28 @@ void FsmAp::findCondExpInTrans( ExpansionList &expansionList, StateAp *state,
 {
 	/* Make condition-space low and high keys for searching. */
 	TransAp searchTrans;
-	searchTrans.lowKey = fromVals + lowKey;
-	searchTrans.highKey = fromVals + highKey;
+	searchTrans.lowKey = fromCondSpace->baseKey + fromVals * keyOps->alphSize() + 
+			(lowKey - keyOps->minKey);
+	searchTrans.highKey = fromCondSpace->baseKey + fromVals * keyOps->alphSize() + 
+			(highKey - keyOps->minKey);
 	searchTrans.prev = searchTrans.next = 0;
-	cerr << searchTrans.lowKey.getVal() << endl;
-	cerr << searchTrans.highKey.getVal() << endl;
 
 	PairIter<TransAp> pairIter( state->outList.head, &searchTrans );
 	for ( ; !pairIter.end(); pairIter++ ) {
 		if ( pairIter.userState == RangeOverlap ) {
 			/* Need to make character-space low and high keys from the range
 			 * overlap for the expansion object. */
-			Key expLowKey = pairIter.s1Tel.lowKey;
-				// - fromCondSpace->baseKey - fromVals * keyOps->alphSize() + keyOps->minKey;
-			Key expHighKey = pairIter.s1Tel.highKey;
-				// - fromCondSpace->baseKey - fromVals * keyOps->alphSize() + keyOps->minKey;
+			Key expLowKey = pairIter.s1Tel.lowKey - fromCondSpace->baseKey - fromVals *
+					keyOps->alphSize() + keyOps->minKey;
+			Key expHighKey = pairIter.s1Tel.highKey - fromCondSpace->baseKey - fromVals *
+					keyOps->alphSize() + keyOps->minKey;
 
 			Expansion *expansion = new Expansion( expLowKey, expHighKey );
 			expansion->fromTrans = new TransAp(*pairIter.s1Tel.trans);
 			expansion->fromTrans->fromState = 0;
 			expansion->fromTrans->toState = pairIter.s1Tel.trans->toState;
 			expansion->fromCondSpace = fromCondSpace;
+			expansion->fromVals = fromVals;
 			expansion->toCondSpace = toCondSpace;
 			expansion->toValsList = toValsList;
 
@@ -1006,8 +997,7 @@ void FsmAp::findCondExpInTrans( ExpansionList &expansionList, StateAp *state,
 void FsmAp::findCondExpansions( ExpansionList &expansionList, 
 		StateAp *destState, StateAp *srcState )
 {
-	PairIter<StateCond, StateCond> condCond( 
-			destState->stateCondList.head,
+	PairIter<StateCond, StateCond> condCond( destState->stateCondList.head,
 			srcState->stateCondList.head );
 	for ( ; !condCond.end(); condCond++ ) {
 		if ( condCond.userState == RangeOverlap ) {
@@ -1036,37 +1026,32 @@ void FsmAp::findCondExpansions( ExpansionList &expansionList,
 
 				/* Loop all values in the dest space. */
 				for ( long destVals = 0; destVals < (1 << destLen); destVals++ ) {
-					long destBits = 0;
+					long basicVals = 0;
 					for ( CondSet::Iter csi = destCS; csi.lte(); csi++ ) {
 						if ( destVals & (1 << csi.pos()) ) {
-							CondBit *exCondBit = addCondBit( *csi );
-							destBits |= 1 << exCondBit->bit;
+							Action **cim = mergedCS.find( *csi );
+							long bitPos = (cim - mergedCS.data);
+							basicVals |= 1 << bitPos;
 						}
 					}
-
-					#ifdef LOG_CONDS
-					cerr << "destVals: " << destBits << endl;
-					#endif
 
 					/* Loop all new values. */
 					LongVect expandToVals;
 					for ( long soVals = 0; soVals < (1 << srcOnlyLen); soVals++ ) {
-						long targBits = destBits;
+						long targVals = basicVals;
 						for ( CondSet::Iter csi = srcOnlyCS; csi.lte(); csi++ ) {
 							if ( soVals & (1 << csi.pos()) ) {
-								CondBit *exCondBit = addCondBit( *csi );
-								targBits |= 1 << exCondBit->bit;
+								Action **cim = mergedCS.find( *csi );
+								long bitPos = (cim - mergedCS.data);
+								targVals |= 1 << bitPos;
 							}
 						}
-						#ifdef LOG_CONDS
-						cerr << "targBits: " << targBits << std::endl;
-						#endif
-						expandToVals.append( targBits );
+						expandToVals.append( targVals );
 					}
 
 					findCondExpInTrans( expansionList, destState, 
 							condCond.s1Tel.lowKey, condCond.s1Tel.highKey, 
-							fromCondSpace, toCondSpace, destBits, expandToVals );
+							fromCondSpace, toCondSpace, destVals, expandToVals );
 				}
 			}
 		}
@@ -1077,14 +1062,18 @@ void FsmAp::doExpand( MergeData &md, StateAp *destState, ExpansionList &expList1
 {
 	for ( ExpansionList::Iter exp = expList1; exp.lte(); exp++ ) {
 		for ( LongVect::Iter to = exp->toValsList; to.lte(); to++ ) {
+			long targVals = *to;
+
 			/* We will use the copy of the transition that was made when the
 			 * expansion was created. It will get used multiple times. Each
 			 * time we must set up the keys, everything else is constant and
 			 * and already prepared. */
 			TransAp *srcTrans = exp->fromTrans;
 
-			srcTrans->lowKey = *to | exp->lowKey;
-			srcTrans->highKey = *to | exp->highKey;
+			srcTrans->lowKey = exp->toCondSpace->baseKey +
+					targVals * keyOps->alphSize() + (exp->lowKey - keyOps->minKey);
+			srcTrans->highKey = exp->toCondSpace->baseKey +
+					targVals * keyOps->alphSize() + (exp->highKey - keyOps->minKey);
 
 			TransList srcList;
 			srcList.append( srcTrans );
@@ -1098,48 +1087,48 @@ void FsmAp::doExpand( MergeData &md, StateAp *destState, ExpansionList &expList1
 void FsmAp::doRemove( MergeData &md, StateAp *destState, ExpansionList &expList1 )
 {
 	for ( ExpansionList::Iter exp = expList1; exp.lte(); exp++ ) {
-		if ( exp->remove ) {
-			Removal removal;
-			if ( exp->fromCondSpace == 0 ) {
-				removal.lowKey = exp->lowKey;
-				removal.highKey = exp->highKey;
-			}
-			else {
-				removal.lowKey = exp->lowKey;
-				removal.highKey = exp->lowKey;
-			}
-			removal.next = 0;
-
-			TransList destList;
-			PairIter<TransAp, Removal> pairIter( destState->outList.head, &removal );
-			for ( ; !pairIter.end(); pairIter++ ) {
-				switch ( pairIter.userState ) {
-				case RangeInS1: {
-					TransAp *destTrans = pairIter.s1Tel.trans;
-					destTrans->lowKey = pairIter.s1Tel.lowKey;
-					destTrans->highKey = pairIter.s1Tel.highKey;
-					destList.append( destTrans );
-					break;
-				}
-				case RangeInS2:
-					break;
-				case RangeOverlap: {
-					TransAp *trans = pairIter.s1Tel.trans;
-					detachTrans( trans->fromState, trans->toState, trans );
-					delete trans;
-					break;
-				}
-				case BreakS1: {
-					pairIter.s1Tel.trans = dupTrans( destState, 
-							pairIter.s1Tel.trans );
-					break;
-				}
-				case BreakS2:
-					break;
-				}
-			}
-			destState->outList.transfer( destList );
+		Removal removal;
+		if ( exp->fromCondSpace == 0 ) {
+			removal.lowKey = exp->lowKey;
+			removal.highKey = exp->highKey;
 		}
+		else {
+			removal.lowKey = exp->fromCondSpace->baseKey + 
+				exp->fromVals * keyOps->alphSize() + (exp->lowKey - keyOps->minKey);
+			removal.highKey = exp->fromCondSpace->baseKey + 
+				exp->fromVals * keyOps->alphSize() + (exp->highKey - keyOps->minKey);
+		}
+		removal.next = 0;
+
+		TransList destList;
+		PairIter<TransAp, Removal> pairIter( destState->outList.head, &removal );
+		for ( ; !pairIter.end(); pairIter++ ) {
+			switch ( pairIter.userState ) {
+			case RangeInS1: {
+				TransAp *destTrans = pairIter.s1Tel.trans;
+				destTrans->lowKey = pairIter.s1Tel.lowKey;
+				destTrans->highKey = pairIter.s1Tel.highKey;
+				destList.append( destTrans );
+				break;
+			}
+			case RangeInS2:
+				break;
+			case RangeOverlap: {
+				TransAp *trans = pairIter.s1Tel.trans;
+				detachTrans( trans->fromState, trans->toState, trans );
+				delete trans;
+				break;
+			}
+			case BreakS1: {
+				pairIter.s1Tel.trans = dupTrans( destState, 
+						pairIter.s1Tel.trans );
+				break;
+			}
+			case BreakS2:
+				break;
+			}
+		}
+		destState->outList.transfer( destList );
 	}
 }
 
@@ -1304,11 +1293,8 @@ void FsmAp::fillInStates( MergeData &md )
 void FsmAp::findEmbedExpansions( ExpansionList &expansionList, 
 		StateAp *destState, Action *condAction, bool sense )
 {
-	CondBit *condBit = addCondBit( condAction );
-
 	StateCondList destList;
-	PairIter<TransAp, StateCond> transCond( 
-			destState->outList.head,
+	PairIter<TransAp, StateCond> transCond( destState->outList.head,
 			destState->stateCondList.head );
 	for ( ; !transCond.end(); transCond++ ) {
 		switch ( transCond.userState ) {
@@ -1322,26 +1308,23 @@ void FsmAp::findEmbedExpansions( ExpansionList &expansionList,
 					newStateCond->condSpace = addCondSpace( CondSet( condAction ) );
 					destList.append( newStateCond );
 
-					if ( sense ) {
-						/* Create the expansion. */
-						Expansion *expansion = new Expansion( transCond.s1Tel.lowKey,
-								transCond.s1Tel.highKey );
-						expansion->fromTrans = new TransAp( *transCond.s1Tel.trans );
-						expansion->fromTrans->fromState = 0;
-						expansion->fromTrans->toState = transCond.s1Tel.trans->toState;
-						expansion->fromCondSpace = 0;
-						expansion->toCondSpace = newStateCond->condSpace;
-						expansion->toValsList.append( 1 << condBit->bit );
-						expansion->remove = true;
-						#ifdef LOG_CONDS
-						logNewExpansion( expansion );
-						#endif
-						expansionList.append( expansion );
-					}
+					/* Create the expansion. */
+					Expansion *expansion = new Expansion( transCond.s1Tel.lowKey,
+							transCond.s1Tel.highKey );
+					expansion->fromTrans = new TransAp(*transCond.s1Tel.trans);
+					expansion->fromTrans->fromState = 0;
+					expansion->fromTrans->toState = transCond.s1Tel.trans->toState;
+					expansion->fromCondSpace = 0;
+					expansion->fromVals = 0;
+					expansion->toCondSpace = newStateCond->condSpace;
+					expansion->toValsList.append( sense?1:0 );
+					#ifdef LOG_CONDS
+					logNewExpansion( expansion );
+					#endif
+					expansionList.append( expansion );
 				}
 				break;
 			}
-			case RangeOverlap:
 			case RangeInS2: {
 				/* Enhance state cond and find the expansion. */
 				StateCond *stateCond = transCond.s2Tel.trans;
@@ -1358,31 +1341,35 @@ void FsmAp::findEmbedExpansions( ExpansionList &expansionList,
 				stateCond->condSpace = toCondSpace;
 				destList.append( stateCond );
 
-				if ( sense  )  {
-					/* Loop all values in the dest space. */
-					for ( long destVals = 0; destVals < (1 << destLen); destVals++ ) {
-						long destBits = 0;
-						for ( CondSet::Iter csi = destCS; csi.lte(); csi++ ) {
-							if ( destVals & (1 << csi.pos()) ) {
-								CondBit *exCondBit = addCondBit( *csi );
-								destBits |= 1 << exCondBit->bit;
-							}
+				/* Loop all values in the dest space. */
+				for ( long destVals = 0; destVals < (1 << destLen); destVals++ ) {
+					long basicVals = 0;
+					for ( CondSet::Iter csi = destCS; csi.lte(); csi++ ) {
+						if ( destVals & (1 << csi.pos()) ) {
+							Action **cim = mergedCS.find( *csi );
+							long bitPos = (cim - mergedCS.data);
+							basicVals |= 1 << bitPos;
 						}
-
-						long targVals = destBits;
-						targVals |= 1 << condBit->bit;
-						
-						LongVect expandToVals( targVals );
-						findCondExpInTrans( expansionList, destState, 
-							transCond.s2Tel.lowKey, transCond.s2Tel.highKey, 
-							fromCondSpace, toCondSpace, destVals, expandToVals );
 					}
+
+					long targVals = basicVals;
+					Action **cim = mergedCS.find( condAction );
+					long bitPos = (cim - mergedCS.data);
+					targVals |= (sense?1:0) << bitPos;
+					
+					LongVect expandToVals( targVals );
+					findCondExpInTrans( expansionList, destState, 
+						transCond.s2Tel.lowKey, transCond.s2Tel.highKey, 
+						fromCondSpace, toCondSpace, destVals, expandToVals );
 				}
 				break;
 			}
 
+
+			case RangeOverlap:
 			case BreakS1:
 			case BreakS2:
+				assert( false );
 				break;
 		}
 	}
@@ -1392,7 +1379,6 @@ void FsmAp::findEmbedExpansions( ExpansionList &expansionList,
 
 void FsmAp::embedCondition( StateAp *state, Action *condAction, bool sense )
 {
-	/* The plan: make it work with unsigned alptypes first. */
 	MergeData md;
 	ExpansionList expList;
 

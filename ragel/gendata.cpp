@@ -591,19 +591,11 @@ void CodeGenData::initCondSpaceList( ulong length )
 		condSpaceList.append( allCondSpaces + c );
 }
 
-void CodeGenData::newCondSpace( int cnum, int condSpaceId, Key baseKey, unsigned long bitField )
+void CodeGenData::newCondSpace( int cnum, int condSpaceId, Key baseKey )
 {
 	GenCondSpace *cond = allCondSpaces + cnum;
 	cond->condSpaceId = condSpaceId;
 	cond->baseKey = baseKey;
-	cond->bitField = bitField;
-}
-
-void CodeGenData::initCondBitList( ulong length )
-{
-	allCondBits = new GenCondBit[length];
-	for ( ulong c = 0; c < length; c++ )
-		condBitList.append( allCondBits + c );
 }
 
 void CodeGenData::condSpaceItem( int cnum, long condActionId )
