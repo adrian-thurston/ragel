@@ -189,7 +189,12 @@ Word cmpString( Head *s1, Head *s2 )
 
 Word strAtoi( Head *str )
 {
-	int res = atoi( (char*)(str->data) );
+	/* FIXME: need to implement this by hand. There is no null terminator. */
+	char *nulled = (char*)malloc( str->length + 1 );
+	memcpy( nulled, str->data, str->length );
+	nulled[str->length] = 0;
+	int res = atoi( nulled );
+	free( nulled );
 	return res;
 }
 
