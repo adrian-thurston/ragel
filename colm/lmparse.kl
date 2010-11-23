@@ -1218,6 +1218,7 @@ nonterm statement
 {
 	LangStmt *stmt;
 };
+nonterm for_scope uses statement;
 
 statement: var_def opt_def_init 
 	final {
@@ -1279,21 +1280,28 @@ statement: KW_While scope_push code_expr block_or_single scope_pop
 	final {
 		$$->stmt = new LangStmt( LangStmt::WhileType, $3->expr, $4->stmtList );
 	};
-statement: KW_For scope_push TK_Word ':' type_ref KW_In iter_call block_or_single scope_pop
+
+for_scope: TK_Word ':' type_ref KW_In iter_call block_or_single
 	final {
 		/* Check for redeclaration. */
-		if ( pd->curLocalFrame->checkRedecl( $3->data ) != 0 )
-			error( $3->loc ) << "variable " << $3->data << " redeclared" << endp;
+		if ( pd->curLocalFrame->checkRedecl( $1->data ) != 0 )
+			error( $1->loc ) << "variable " << $1->data << " redeclared" << endp;
 
 		/* Note that we pass in a null type reference. This type is dependent
 		 * on the result of the iter_call lookup since it must contain a reference
 		 * to the iterator that is called. This lookup is done at compile time. */
-		ObjField *iterField = new ObjField( $3->loc, (TypeRef*)0, $3->data );
-		pd->curLocalFrame->insertField( $3->data, iterField );
+		ObjField *iterField = new ObjField( $1->loc, (TypeRef*)0, $1->data );
+		pd->curLocalFrame->insertField( $1->data, iterField );
 
 		$$->stmt = new LangStmt( $1->loc, LangStmt::ForIterType, 
-				iterField, $5->typeRef, $7->langTerm, $8->stmtList );
+				iterField, $3->typeRef, $5->langTerm, $6->stmtList );
 	};
+
+statement: KW_For scope_push for_scope scope_pop
+	final {
+		$$->stmt = $3->stmt;
+	};
+
 statement: KW_Return code_expr
 	final {
 		$$->stmt = new LangStmt( $1->loc, LangStmt::ReturnType, $2->expr );
