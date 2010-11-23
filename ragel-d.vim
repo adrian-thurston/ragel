@@ -54,7 +54,7 @@ syntax match anyId "[a-zA-Z_][a-zA-Z_0-9]*"
 syntax keyword fsmType fpc fc fcurs fbuf fblen ftargs fstack
 syntax keyword fsmKeyword fhold fgoto fcall fret fentry fnext fexec fbreak
 
-syntax cluster rlItems contains=rlComment,rlLiteral,rlAugmentOps,rlOtherOps,rlKeywords,rlWrite,rlCodeCurly,rlCodeSemi,rlNumber,anyId,rlLabelColon,rlExprKeywords
+syntax cluster rlItems contains=rlComment,rlLiteral,rlAugmentOps,rlOtherOps,rlKeywords,rlWrite,rlCodeCurly,rlCodeSemi,rlNumber,anyId,rlLabelColon,rlExprKeywords,rlBuiltIns
 
 syntax region machineSpec1 matchgroup=beginRL start="%%{" end="}%%" contains=@rlItems
 syntax region machineSpec2 matchgroup=beginRL start="%%[^{]"rs=e-1 end="$" keepend contains=@rlItems
@@ -91,6 +91,9 @@ syntax match rlOtherOps "<:" contained
 " syntax keyword rlKeywords machine action context include range contained
 syntax keyword rlKeywords machine action context include import export prepush postpop contained
 syntax keyword rlExprKeywords when inwhen outwhen err lerr eof from to contained
+
+" Built-in rules
+syntax keyword rlBuiltIns any ascii extend alpha digit alnum lower upper xdigit cntrl graph print punct space zlen empty contained
 
 " Case Labels
 syntax keyword caseLabelKeyword case contained
@@ -152,5 +155,6 @@ hi link fsmKeyword Keyword
 hi link anyLabel Label
 hi link caseLabelKeyword Keyword
 hi link beginRL Type
+hi link rlBuiltIns Constant
  
 let b:current_syntax = "ragel"
