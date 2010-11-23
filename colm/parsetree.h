@@ -1693,6 +1693,7 @@ struct LangStmt
 		PrintStreamType,
 		ExprType,
 		IfType,
+		ElseType,
 		RejectType,
 		WhileType,
 		ReturnType,
@@ -1724,7 +1725,10 @@ struct LangStmt
 	LangStmt( Type type, LangExpr *expr, StmtList *stmtList ) : 
 		type(type), expr(expr), stmtList(stmtList), next(0) {}
 
-	LangStmt( Type type, LangExpr *expr, StmtList *stmtList, StmtList *elsePart ) : 
+	LangStmt( Type type, StmtList *stmtList ) : 
+		type(type), stmtList(stmtList), next(0) {}
+
+	LangStmt( Type type, LangExpr *expr, StmtList *stmtList, LangStmt *elsePart ) : 
 		type(type), expr(expr), stmtList(stmtList), elsePart(elsePart), next(0) {}
 
 	LangStmt( const InputLoc &loc, Type type ) : 
@@ -1769,7 +1773,8 @@ struct LangStmt
 	ExprVect *exprPtrVect;
 	FieldInitVect *fieldInitVect;
 	StmtList *stmtList;
-	StmtList *elsePart;
+	/* Either another if, or an else. */
+	LangStmt *elsePart;
 	String name;
 
 	/* Normally you don't need to initialize double list pointers, however, we

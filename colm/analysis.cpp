@@ -159,11 +159,12 @@ void LangStmt::analyze( ParseData *pd ) const
 			for ( StmtList::Iter stmt = *stmtList; stmt.lte(); stmt++ )
 				stmt->analyze( pd );
 
-			if ( elsePart != 0 ) {
-				for ( StmtList::Iter stmt = *elsePart; stmt.lte(); stmt++ )
-					stmt->analyze( pd );
-			}
+			if ( elsePart != 0 )
+				elsePart->analyze( pd );
 
+			break;
+		}
+		case ElseType: {
 			break;
 		}
 		case RejectType:

@@ -1268,9 +1268,9 @@ statement: code_expr
 	final {
 		$$->stmt = new LangStmt( InputLoc(), LangStmt::ExprType, $1->expr );
 	};
-statement: KW_If code_expr block_or_single elsif_list
+statement: if_stmt
 	final {
-		$$->stmt = new LangStmt( LangStmt::IfType, $2->expr, $3->stmtList, $4->stmtList );
+		$$->stmt = $1->stmt;
 	};
 statement: KW_Reject
 	final {
@@ -1378,26 +1378,36 @@ iter_call: TK_Word
 			new LangVarRef( $1->loc, new QualItemVect, $1->data ) );
 	};
 
+#
+# If Statements
+#
+#   IF
+#     IF
+#       Else
+
+nonterm if_stmt uses statement;
+
+if_stmt: KW_If code_expr block_or_single elsif_list
+	final {
+		$$->stmt = new LangStmt( LangStmt::IfType, $2->expr, $3->stmtList, $4->stmt );
+	};
+
 nonterm elsif_list
 {
-	StmtList *stmtList;
+	LangStmt *stmt;
 };
 
 elsif_list: 
 	elsif_clause elsif_list
 	final {
 		/* Put any of the followng elseif part, an else, or null into the elsePart. */
-		$1->stmt->elsePart = $2->stmtList;
-
-		/* Make a statement list with jsut the elseif clause in it. It will go into
-		 * some else part. */
-		$$->stmtList = new StmtList;
-		$$->stmtList->append( $1->stmt );
+		$$->stmt = $1->stmt;
+		$$->stmt->elsePart = $2->stmt;
 	};
 elsif_list:
 	optional_else
 	final {
-		$$->stmtList = $1->stmtList;
+		$$->stmt = $1->stmt;
 	};
 
 nonterm elsif_clause
@@ -1413,18 +1423,18 @@ elsif_clause:
 
 nonterm optional_else
 {
-	StmtList *stmtList;
+	LangStmt *stmt;
 };
 
 optional_else: 
 	KW_Else block_or_single
 	final {
-		$$->stmtList = $2->stmtList;
+		$$->stmt = new LangStmt( LangStmt::ElseType, $2->stmtList );
 	};
 
 optional_else: 
 	final {
-		$$->stmtList = 0;
+		$$->stmt = 0;
 	};
 
 nonterm code_expr_list

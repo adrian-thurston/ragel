@@ -2157,14 +2157,19 @@ void LangStmt::compile( ParseData *pd, CodeVect &code ) const
 
 			if ( elsePart != 0 ) {
 				/* Compile the else branch. */
-				for ( StmtList::Iter stmt = *elsePart; stmt.lte(); stmt++ )
-					stmt->compile( pd, code );
+				elsePart->compile( pd, code );
 
 				/* Set the distance for jump over the else part. */
 				distance = code.length() - jumpPastElse - 3;
 				code.setHalf( jumpPastElse+1, distance );
 			}
 
+			break;
+		}
+		case ElseType: {
+			/* Compile the else branch. */
+			for ( StmtList::Iter stmt = *stmtList; stmt.lte(); stmt++ )
+				stmt->compile( pd, code );
 			break;
 		}
 		case RejectType: {
