@@ -291,7 +291,7 @@ global_def: KW_Global var_def opt_def_init
 			object = context->contextObjDef;
 		}
 
-		if ( object->findField( $2->objField->name ) != 0 )
+		if ( object->checkRedecl( $2->objField->name ) != 0 )
 			error($2->objField->loc) << "object field renamed" << endp;
 
 		object->insertField( $2->objField->name, $2->objField );
@@ -409,7 +409,7 @@ define_prod: '[' prod_el_list ']' opt_commit opt_reduce_code opt_prec
 
 obj_var_list: obj_var_list var_def
 	final {
-		if ( pd->objectDef->findField( $2->objField->name ) != 0 )
+		if ( pd->objectDef->checkRedecl( $2->objField->name ) != 0 )
 			error() << "object field renamed" << endp;
 
 		pd->objectDef->insertField( $2->objField->name, $2->objField );
@@ -509,7 +509,7 @@ context_var_def:
 		$1->objField->context = context;
 		object = context->contextObjDef;
 
-		if ( object->findField( $1->objField->name ) != 0 )
+		if ( object->checkRedecl( $1->objField->name ) != 0 )
 			error($1->objField->loc) << "object field renamed" << endp;
 
 		object->insertField( $1->objField->name, $1->objField );
@@ -604,7 +604,7 @@ pattern_el: opt_label pattern_el_type_or_lit
 		$2->patternItem->varRef = $1->varRef;
 
 		if ( $1->varRef != 0 ) {
-			if ( pd->curLocalFrame->findField( $1->varRef->name ) != 0 ) {
+			if ( pd->curLocalFrame->checkRedecl( $1->varRef->name ) != 0 ) {
 				error( $1->varRef->loc ) << "variable " << $1->varRef->name << 
 						" redeclared" << endp;
 			}
@@ -1202,6 +1202,18 @@ opt_def_init:
 		$$->expr = 0;
 	};
 
+scope_push:
+	final {
+		pd->curLocalFrame->pushScope();
+		//cout << "push scope" << endl;
+	};
+
+scope_pop: 
+	final {
+		pd->curLocalFrame->popScope();
+		//cout << "pop scope" << endl;
+	};
+
 nonterm statement
 {
 	LangStmt *stmt;
@@ -1213,13 +1225,15 @@ statement: var_def opt_def_init
 		$$->stmt = 0;
 
 		/* Check for redeclaration. */
-		if ( pd->curLocalFrame->findField( $1->objField->name ) != 0 ) {
+		if ( pd->curLocalFrame->checkRedecl( $1->objField->name ) != 0 ) {
 			error( $1->objField->loc ) << "variable " << $1->objField->name <<
 					" redeclared" << endp;
 		}
 
 		/* Insert it into the field map. */
 		pd->curLocalFrame->insertField( $1->objField->name, $1->objField );
+
+		//cout << "var def " << $1->objField->name << endl;
 
 		if ( $2->expr != 0 ) {
 			LangVarRef *varRef = new LangVarRef( $1->objField->loc, 
@@ -1261,24 +1275,24 @@ statement: KW_Reject
 	final {
 		$$->stmt = new LangStmt( $1->loc, LangStmt::RejectType );
 	};
-statement: KW_While code_expr block_or_single
+statement: KW_While scope_push code_expr block_or_single scope_pop
 	final {
-		$$->stmt = new LangStmt( LangStmt::WhileType, $2->expr, $3->stmtList );
+		$$->stmt = new LangStmt( LangStmt::WhileType, $3->expr, $4->stmtList );
 	};
-statement: KW_For TK_Word ':' type_ref KW_In iter_call block_or_single
+statement: KW_For scope_push TK_Word ':' type_ref KW_In iter_call block_or_single scope_pop
 	final {
 		/* Check for redeclaration. */
-		if ( pd->curLocalFrame->findField( $2->data ) != 0 )
-			error( $2->loc ) << "variable " << $2->data << " redeclared" << endp;
+		if ( pd->curLocalFrame->checkRedecl( $3->data ) != 0 )
+			error( $3->loc ) << "variable " << $3->data << " redeclared" << endp;
 
 		/* Note that we pass in a null type reference. This type is dependent
 		 * on the result of the iter_call lookup since it must contain a reference
 		 * to the iterator that is called. This lookup is done at compile time. */
-		ObjField *iterField = new ObjField( $2->loc, (TypeRef*)0, $2->data );
-		pd->curLocalFrame->insertField( $2->data, iterField );
+		ObjField *iterField = new ObjField( $3->loc, (TypeRef*)0, $3->data );
+		pd->curLocalFrame->insertField( $3->data, iterField );
 
 		$$->stmt = new LangStmt( $1->loc, LangStmt::ForIterType, 
-				iterField, $4->typeRef, $6->langTerm, $7->stmtList );
+				iterField, $5->typeRef, $7->langTerm, $8->stmtList );
 	};
 statement: KW_Return code_expr
 	final {
@@ -1959,7 +1973,7 @@ factor_with_label:
 	TK_Word ':' factor_with_label final {
 		$$->factorWithAug = $3->factorWithAug;
 
-		if ( pd->objectDef->findField( $1->data ) != 0 )
+		if ( pd->objectDef->checkRedecl( $1->data ) != 0 )
 			error($1->loc) << "label name \"" << $1->data << "\" already in use" << endp;
 
 		/* Create the object field. */

@@ -268,17 +268,79 @@ UniqueType *TypeRef::lookupType( ParseData *pd )
 	return uniqueType;
 }
 
+void ObjectDef::iterPushScope()
+{
+	//cout << "iter push scope ";
+	if ( scope->childIter == 0 ) {
+		scope->childIter = scope->children.head;
+	}
+	else {
+		scope->childIter = scope->childIter->next;
+		/* Resetting. */
+		if ( scope->childIter == 0 )
+			scope ->childIter = scope->children.head;
+	}
+
+	scope = scope->childIter;
+}
+
+void ObjectDef::iterPopScope()
+{
+	//cout << "iter pop scope" << endl;
+	scope = scope->parentScope;
+}
+
+void ObjectDef::pushScope()
+{
+	ObjNameScope *newScope = new ObjNameScope;
+	newScope->objFieldMap = new ObjFieldMap;
+
+	newScope->parentScope = scope;
+	scope->children.append( newScope );
+
+	scope = newScope;
+}
+
+void ObjectDef::popScope()
+{
+	scope = scope->parentScope;
+}
+
 void ObjectDef::insertField( const String &name, ObjField *value )
 {
-	objFieldMap->insert( name, value );
+	scope->objFieldMap->insert( name, value );
 	objFieldList->append( value );
+}
+
+/* Recurisve find through a single object def's scope. */
+ObjField *ObjectDef::findFieldInScope( const String &name, ObjNameScope *inScope )
+{
+	ObjFieldMapEl *objDefMapEl = inScope->objFieldMap->find( name );
+	if ( objDefMapEl != 0 )
+		return objDefMapEl->value;
+	if ( inScope->parentScope != 0 )
+		return findFieldInScope( name, inScope->parentScope );
+	return 0;
+}
+
+ObjField *ObjectDef::checkRedecl( const String &name )
+{
+	//cout << "looking for " << name << endl;
+	ObjFieldMapEl *objDefMapEl = scope->objFieldMap->find( name );
+	if ( objDefMapEl != 0 )
+		return objDefMapEl->value;
+	if ( parentScope != 0 )
+		return parentScope->findField( name );
+	return 0;
+
 }
 
 ObjField *ObjectDef::findField( const String &name )
 {
-	ObjFieldMapEl *objDefMapEl = objFieldMap->find( name );
-	if ( objDefMapEl != 0 )
-		return objDefMapEl->value;
+	//cout << "looking for " << name << endl;
+	ObjField *objField = findFieldInScope( name, scope );
+	if ( objField != 0 )
+		return objField;
 	if ( parentScope != 0 )
 		return parentScope->findField( name );
 	return 0;
@@ -1844,6 +1906,8 @@ LangTerm *LangStmt::chooseDefaultIter( ParseData *pd, LangTerm *fromVarRef ) con
 
 void LangStmt::compileForIter( ParseData *pd, CodeVect &code ) const
 {
+	pd->curLocalFrame->iterPushScope();
+
 	LangTerm *iterCallTerm = langTerm;
 	if ( iterCallTerm->type != LangTerm::MethodCallType )
 		iterCallTerm = chooseDefaultIter( pd, langTerm );
@@ -1900,10 +1964,14 @@ void LangStmt::compileForIter( ParseData *pd, CodeVect &code ) const
 
 	iterCallTerm->varRef->resetActiveRefs( pd, lookup, paramRefs );
 	delete[] paramRefs;
+
+	pd->curLocalFrame->iterPopScope();
 }
 
 void LangStmt::compileWhile( ParseData *pd, CodeVect &code ) const
 {
+	pd->curLocalFrame->iterPushScope();
+
 	/* Generate code for the while test. Remember the top. */
 	long top = code.length();
 	expr->evaluate( pd, code );
@@ -1933,6 +2001,8 @@ void LangStmt::compileWhile( ParseData *pd, CodeVect &code ) const
 		code.setHalf( *brk+1, distance );
 	}
 	pd->breakJumps.empty();
+
+	pd->curLocalFrame->iterPopScope();
 }
 
 void LangStmt::evaluateAccumItems( ParseData *pd, CodeVect &code ) const
@@ -2441,8 +2511,8 @@ void ParseData::findLocalTrees( CharSet &trees )
 {
 	/* We exlcude "lhs" from being downrefed because we need to use if after
 	 * the frame is is cleaned and so it must survive. */
-	for ( ObjFieldMap::Iter of = *curLocalFrame->objFieldMap; of.lte(); of++ ) {
-		ObjField *el = of->value;
+	for ( ObjFieldList::Iter ol = *curLocalFrame->objFieldList; ol.lte(); ol++ ) {
+		ObjField *el = ol->value;
 		/* FIXME: This test needs to be improved. Match_text was getting
 		 * through before useOffset was tested. What will? */
 		if ( el->useOffset && !el->isLhsEl && ( el->beenReferenced || el->isParam ) ) {

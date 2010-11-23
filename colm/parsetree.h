@@ -1373,6 +1373,25 @@ typedef DList<ObjField> ParameterList;
 
 struct TemplateType;
 
+/* Tree of name scopes for an object def. All of the object fields inside this
+ * tree live in one object def. This is used for scoping names in functions. */
+struct ObjNameScope
+{
+	ObjNameScope()
+		: parentScope(0), childIter(0)
+	{}
+
+	ObjFieldMap *objFieldMap;	
+
+	ObjNameScope *parentScope;
+	DList<ObjNameScope> children;
+
+	/* For iteration after declaration. */
+	ObjNameScope *childIter;
+
+	ObjNameScope *prev, *next;
+};
+
 struct ObjectDef
 {
 	enum Type {
@@ -1386,14 +1405,26 @@ struct ObjectDef
 			ObjFieldMap *objFieldMap, ObjFieldList *objFieldList, 
 			ObjMethodMap *objMethodMap, int id )
 	:
-		type(type), name(name), objFieldMap(objFieldMap), objFieldList(objFieldList),
-		objMethodMap(objMethodMap), id(id), nextOffset(0), parentScope(0) {}
+		type(type), name(name), /*objFieldMap(objFieldMap),*/ objFieldList(objFieldList),
+		objMethodMap(objMethodMap), id(id), nextOffset(0), parentScope(0)
+	{
+		scope = new ObjNameScope;
+		scope->objFieldMap = objFieldMap;
+	}
 
 	Type type;
 	String name;
-	ObjFieldMap *objFieldMap;	
+//	ObjFieldMap *objFieldMap;	
 	ObjFieldList *objFieldList;
 	ObjMethodMap *objMethodMap;	
+
+	/* Head of stack of name scopes. */
+	ObjNameScope *scope;
+
+	void pushScope();
+	void popScope();
+	void iterPushScope();
+	void iterPopScope();
 
 	long id;
 	long nextOffset;
@@ -1402,7 +1433,9 @@ struct ObjectDef
 	void referenceField( ParseData *pd, ObjField *field );
 	void initField( ParseData *pd, ObjField *field );
 	void createCode( ParseData *pd, CodeVect &code );
+	ObjField *checkRedecl( const String &name );
 	ObjMethod *findMethod( const String &name );
+	ObjField *findFieldInScope( const String &name, ObjNameScope *inScope );
 	ObjField *findField( const String &name );
 	void insertField( const String &name, ObjField *value );
 
