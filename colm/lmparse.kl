@@ -1327,9 +1327,9 @@ statement: var_ref TK_LtLt accumulate
 nonterm opt_require_stmt uses statement;
 
 opt_require_stmt: 
-	require_pattern lang_stmt_list
+	scope_push require_pattern lang_stmt_list scope_pop
 	final {
-		$$->stmt = new LangStmt( LangStmt::IfType, $1->expr, $2->stmtList, 0 );
+		$$->stmt = new LangStmt( LangStmt::IfType, $2->expr, $3->stmtList, 0 );
 	};
 opt_require_stmt:
 	final {
@@ -1381,15 +1381,12 @@ iter_call: TK_Word
 #
 # If Statements
 #
-#   IF
-#     IF
-#       Else
 
 nonterm if_stmt uses statement;
 
-if_stmt: KW_If code_expr block_or_single elsif_list
+if_stmt: KW_If scope_push code_expr block_or_single scope_pop elsif_list
 	final {
-		$$->stmt = new LangStmt( LangStmt::IfType, $2->expr, $3->stmtList, $4->stmt );
+		$$->stmt = new LangStmt( LangStmt::IfType, $3->expr, $4->stmtList, $6->stmt );
 	};
 
 nonterm elsif_list
@@ -1416,9 +1413,9 @@ nonterm elsif_clause
 };
 
 elsif_clause: 
-	KW_Elsif code_expr block_or_single
+	KW_Elsif scope_push code_expr block_or_single scope_pop
 	final {
-		$$->stmt = new LangStmt( LangStmt::IfType, $2->expr, $3->stmtList, 0 );
+		$$->stmt = new LangStmt( LangStmt::IfType, $3->expr, $4->stmtList, 0 );
 	};
 
 nonterm optional_else
@@ -1427,9 +1424,9 @@ nonterm optional_else
 };
 
 optional_else: 
-	KW_Else block_or_single
+	KW_Else scope_push block_or_single scope_pop
 	final {
-		$$->stmt = new LangStmt( LangStmt::ElseType, $2->stmtList );
+		$$->stmt = new LangStmt( LangStmt::ElseType, $3->stmtList );
 	};
 
 optional_else: 
@@ -1437,6 +1434,9 @@ optional_else:
 		$$->stmt = 0;
 	};
 
+#
+# Code Expression Lists.
+#
 nonterm code_expr_list
 {
 	ExprVect *exprVect;

@@ -161,7 +161,6 @@ void LangStmt::analyze( ParseData *pd ) const
 
 			if ( elsePart != 0 )
 				elsePart->analyze( pd );
-
 			break;
 		}
 		case ElseType: {

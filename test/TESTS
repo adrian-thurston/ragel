@@ -65,4 +65,5 @@ TESTS="
 	commitbt.lm
 	sprintf.lm
 	div.lm
+	scope1.lm
 "

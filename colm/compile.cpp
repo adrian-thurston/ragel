@@ -2129,6 +2129,8 @@ void LangStmt::compile( ParseData *pd, CodeVect &code ) const
 			break;
 		}
 		case IfType: {
+			pd->curLocalFrame->iterPushScope();
+
 			long jumpFalse, jumpPastElse, distance;
 
 			/* Evaluate the test. */
@@ -2155,6 +2157,8 @@ void LangStmt::compile( ParseData *pd, CodeVect &code ) const
 			distance = code.length() - jumpFalse - 3;
 			code.setHalf( jumpFalse+1, distance );
 
+			pd->curLocalFrame->iterPopScope();
+
 			if ( elsePart != 0 ) {
 				/* Compile the else branch. */
 				elsePart->compile( pd, code );
@@ -2167,9 +2171,13 @@ void LangStmt::compile( ParseData *pd, CodeVect &code ) const
 			break;
 		}
 		case ElseType: {
+			pd->curLocalFrame->iterPushScope();
+
 			/* Compile the else branch. */
 			for ( StmtList::Iter stmt = *stmtList; stmt.lte(); stmt++ )
 				stmt->compile( pd, code );
+
+			pd->curLocalFrame->iterPopScope();
 			break;
 		}
 		case RejectType: {

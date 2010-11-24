@@ -1,0 +1,30 @@
+
+int f()
+{
+	int i = 0
+	int j = 100
+
+	while i < 4 {
+		int j = 200
+		if ( i < 1 ) {
+			int j = 300
+			print( "i: [$i] j: [$j]\n" )
+		}
+		elsif ( i < 2 ) {
+			int j = 300
+			print( "i: [$i] j: [$j]\n" )
+		}
+		elsif ( i < 3 ) {
+			print( "i: [$i] j: [$j]\n" )
+		}
+		else {
+			print( "i: [$i] j: [$j]\n" )
+		}
+
+		i = i + 1
+	}
+
+	print( "j: [$j]\n" )
+}
+
+f()
