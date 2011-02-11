@@ -125,7 +125,7 @@ void usage()
 "   -J                   The host language is Java\n"
 "   -R                   The host language is Ruby\n"
 "   -A                   The host language is C#\n"
-"line direcives: (C/D/C#)\n"
+"line directives: (C/D/Ruby/C#)\n"
 "   -L                   Inhibit writing of #line directives\n"
 "code style: (C/D/Java/Ruby/C#)\n"
 "   -T0                  Table driven FSM (default)\n"

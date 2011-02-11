@@ -58,6 +58,7 @@ using std::endl;
 extern CodeStyle codeStyle;
 
 extern int numSplitPartitions;
+extern bool noLineDirectives;
 
 /*
  * Callbacks invoked by the XML data parser.
@@ -66,6 +67,9 @@ extern int numSplitPartitions;
 
 void rubyLineDirective( ostream &out, const char *fileName, int line )
 {
+	if ( noLineDirectives )
+		return;
+
 	/* Write a comment containing line info. */
 	out << "# line " << line  << " \"";
 	for ( const char *pc = fileName; *pc != 0; pc++ ) {
