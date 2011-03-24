@@ -156,10 +156,10 @@ nonterm param_list
 	ParameterList *paramList;
 };
 
-param_list: param_list ',' param_var_def
+param_list: param_list param_var_def
 	final {
 		$$->paramList = $1->paramList;
-		$$->paramList->append( $3->objField );
+		$$->paramList->append( $2->objField );
 	};
 
 param_list: param_var_def
@@ -171,16 +171,14 @@ param_list: param_var_def
 
 nonterm param_var_def uses var_def;
 
-param_var_def: var_def
+param_var_def: TK_Word ':' type_ref
 	final {
-		$$->objField = $1->objField;
+		$$->objField = new ObjField( $1->loc, $3->typeRef, $1->data );
 		$$->objField->isParam = true;
 	};
-param_var_def: reference_type_ref TK_Word
+param_var_def: TK_Word ':' reference_type_ref
 	final {
-		/* Return an object field object. The user of this nonterminal must
-		 * load it into the approrpriate map and do error checking. */
-		$$->objField = new ObjField( $2->loc, $1->typeRef, $2->data );
+		$$->objField = new ObjField( $1->loc, $3->typeRef, $1->data );
 		$$->objField->isParam = true;
 	};
 
@@ -453,11 +451,11 @@ nonterm var_def
 	ObjField *objField;
 };
 
-var_def: type_ref TK_Word
+var_def: TK_Word ':' type_ref
 	final {
 		/* Return an object field object. The user of this nonterminal must
 		 * load it into the approrpriate map and do error checking. */
-		$$->objField = new ObjField( $2->loc, $1->typeRef, $2->data );
+		$$->objField = new ObjField( $1->loc, $3->typeRef, $1->data );
 	};
 
 region_def: 

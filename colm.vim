@@ -31,7 +31,7 @@ syntax region rlTypeRegion matchgroup=regionDelimiter start="/" end="/"
 	\ contains=@rlTypes
 
 syntax region cflTypeRegion matchgroup=regionDelimiter start="\[" end="\]"
-	\ contains=cflTypeRegion,patRegion,otLit,typeKeywords
+	\ contains=cflTypeRegion,patRegion,otLit,typeKeywords,varCapture,qual
 syntax region patRegion matchgroup=String start="\"" end="\"" end="\n"
 	\ contains=char,cflTypeRegion
 
@@ -67,6 +67,8 @@ syntax keyword Keyword
 	\ new deref
 
 syntax match tokenName "[a-zA-Z_][a-zA-Z_0-9]*" contained
+syntax match varCapture "[a-zA-Z_][a-zA-Z_0-9]*:" 
+syntax match qual "[a-zA-Z_][a-zA-Z_0-9]*::" 
 
 syntax region defTypes matchgroup=defKeywords
 	\ start="\<rl\>" start="\<def\>" start="\<token\>" start="\<ignore\>"
@@ -87,5 +89,6 @@ hi link typeKeywords Type
 hi link regionDelimiter Type
 hi link char String
 hi link tokenName Function
+hi link varCapture Identifier
  
 let b:current_syntax = "colm"
