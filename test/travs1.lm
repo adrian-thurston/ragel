@@ -63,13 +63,13 @@ def factor
 def alphabet_num 
 	[uint]
 
-start S = parse start(stdin)
+S: start = parse start(stdin)
 
 #
 # Top-Down, Left-Right
 #
 
-int do_topdown_leftright( ref any T )
+int do_topdown_leftright( T: ref any )
 {
 	for C:any in child(T) {
 		yield C
@@ -77,7 +77,7 @@ int do_topdown_leftright( ref any T )
 	}
 }
 
-iter topdown_leftright( ref any T )
+iter topdown_leftright( T: ref any )
 {
 	do_topdown_leftright( T )
 }
@@ -86,7 +86,7 @@ iter topdown_leftright( ref any T )
 # Bottom-Up, Left-Right
 #
 
-int do_bottomup_leftright( ref any T )
+int do_bottomup_leftright( T: ref any )
 {
 	for C:any in child(T) {
 		do_bottomup_leftright( C )
@@ -94,7 +94,7 @@ int do_bottomup_leftright( ref any T )
 	}
 }
 
-iter bottomup_leftright( ref any T )
+iter bottomup_leftright( T: ref any )
 {
 	do_bottomup_leftright( T )
 }
@@ -104,7 +104,7 @@ iter bottomup_leftright( ref any T )
 # Top-Down, Right-Left
 #
 
-int do_topdown_rightleft( ref any T )
+int do_topdown_rightleft( T: ref any )
 {
 	for C:any in rev_child(T) {
 		yield C
@@ -112,7 +112,7 @@ int do_topdown_rightleft( ref any T )
 	}
 }
 
-iter topdown_rightleft( ref any T )
+iter topdown_rightleft( T: ref any )
 {
 	do_topdown_rightleft( T )
 }
@@ -121,7 +121,7 @@ iter topdown_rightleft( ref any T )
 # Bottom-Up, Right-Left
 #
 
-int do_bottomup_rightleft( ref any T )
+int do_bottomup_rightleft( T: ref any )
 {
 	for C:any in rev_child(T) {
 		do_bottomup_rightleft( C )
@@ -129,7 +129,7 @@ int do_bottomup_rightleft( ref any T )
 	}
 }
 
-iter bottomup_rightleft( ref any T )
+iter bottomup_rightleft( T: ref any )
 {
 	do_bottomup_rightleft( T )
 }

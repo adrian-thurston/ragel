@@ -3,11 +3,11 @@ rl ident_char /[a-zA-Z_]/
 
 # List used as a stack of indentations.
 list indent_stack [int]
-global indent_stack IndentStack = construct indent_stack []
+global IndentStack: indent_stack = construct indent_stack []
 IndentStack.push( 0 )
 
 # Has a newline been sent for this '\n' .. whitespace match. 
-global int newline_sent = 0
+global newline_sent: int = 0
 
 # Tokens. 
 lex start
@@ -102,7 +102,7 @@ lex start
 			input.push_ignore( make_token( typeid WS, input.pull(match_length) ) )
 
 			# We have already sent the newline, compute the indentation level.
-			int data_length = match_length - 1
+			data_length: int = match_length - 1
 
 			if data_length > IndentStack.top {
 				# The indentation level is more than the level on the top
@@ -135,7 +135,7 @@ lex start
 # Blank lines or comment lines at the beginning of the file.
 token LEADER / ( [ \t]* ('#' [^\n]*)? '\n' )* /
 
-int print_target_subscriptions_and_slicings( start Start )
+int print_target_subscriptions_and_slicings( Start: start )
 {
 	for TI: target_ext in Start {
 		if match TI [subscription] {
@@ -153,9 +153,9 @@ int print_target_subscriptions_and_slicings( start Start )
 	
 }
 
-int print_primary_subscriptions_and_slicings( start Start )
+int print_primary_subscriptions_and_slicings( Start: start )
 {
-	for PI:primary_ext in Start {
+	for PI: primary_ext in Start {
 		if match PI [subscription] {
 			print( 'PRIMARY SUBSCRIPTION: ', PI, '\n' )
 		}
@@ -719,13 +719,13 @@ def keyword_arguments
 def keyword_item 
 	[identifier '=' expression]
 
-int print_stmts( start S )
+int print_stmts( S: start )
 {
 	for Stmt: statement in S
 		print( 'STMT: ', Stmt, '\n' )
 }
 
-start S = parse start( stdin )
+S: start = parse start( stdin )
 print_xml( S )
 print( S, '\n' )
 print_stmts( S )

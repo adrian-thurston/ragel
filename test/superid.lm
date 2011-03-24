@@ -14,7 +14,7 @@ lex start
 	ignore ws / [ \n\t]+ /
 }
 
-global int trans_id_to
+global trans_id_to: int
 
 def e1 
 	[]
@@ -25,7 +25,7 @@ def e1
 	}
 
 def item1 
-	str msg
+	msg: str
 
 	[ e1 '!' 'a' super_id super_id 'a']
 	{
@@ -41,7 +41,7 @@ def e2
 	}
 
 def item2 
-	str msg
+	msg: str
 
 	[ e2 '!' 'a' super_id super_id 'a']
 	{

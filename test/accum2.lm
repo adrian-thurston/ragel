@@ -1,8 +1,8 @@
 context ctx
 {
-	int i
-	int j
-	int k
+	i: int
+	j: int
+	k: int
 
 	lex start
 	{
@@ -27,10 +27,10 @@ context ctx
 
 
 parser start_parser [ctx::start]
-start_parser SP = cons start_parser[]
+SP: start_parser = cons start_parser[]
 SP.ctx = cons ctx []
 SP << stdin
-ctx::start Input = SP.finish()
+Input: ctx::start = SP.finish()
 print( Input, '\n' )
 
 

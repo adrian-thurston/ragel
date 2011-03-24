@@ -1,10 +1,10 @@
 
-int f1( int i )
+int f1( i: int )
 {
 	return f2( i + 1 ) + 1
 }
 
-int f2( int i )
+int f2( i: int )
 {
 	if i < 10 
 		return f1( i + 1 ) + 1

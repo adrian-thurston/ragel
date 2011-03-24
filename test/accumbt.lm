@@ -27,7 +27,7 @@ def start
 
 accum input [start]
 
-input I = construct input []
+I: input = construct input []
 
 I << " id "
 I << " 77 "
@@ -36,7 +36,7 @@ I << " \"hello\" "
 I << " dude "
 I << " dude\n"
 
-start S = I.finish()
+S: start = I.finish()
 S = match S 
 	~id 77 88 "hello" dude dude
 print_xml( S )

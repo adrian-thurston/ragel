@@ -4,8 +4,8 @@ token octet /any/
 
 # Filled in during the parsing of resource records. Determine what RR_UNKNOWN
 # translates to.
-global int rr_type_value
-global int rr_class_value
+global rr_type_value: int 
+global rr_class_value: int 
 
 # Tokens generated from RR_UNKNOWN. Used to pick the kind 
 # of resource record to attempt to parse.
@@ -29,7 +29,7 @@ token RR_TXT //       # 16 text strings
 token RR_UNKNOWN 
 	/''/
 	{
-		int id = typeid RR_UNKNOWN
+		id: int = typeid RR_UNKNOWN
 		if rr_type_value == 1
 			id = typeid RR_A
 		elsif rr_type_value == 2
@@ -47,7 +47,7 @@ token RR_UNKNOWN
 	}
 
 # Convert two octets in network order into an unsigned 16 bit value.
-int network_uord16( octet o1, octet o2 )
+int network_uord16( o1: octet o2: octet )
 {
 	return o1.data.uord8() * 256 + o2.data.uord8()
 }
@@ -56,10 +56,10 @@ int network_uord16( octet o1, octet o2 )
 def message
 	[header questions answers authorities additionals]
 
-global int question_count
-global int answer_count
-global int authority_count
-global int additional_count
+global question_count: int
+global answer_count: int
+global authority_count: int
+global additional_count: int
 
 #    Message Header
 #
@@ -94,8 +94,7 @@ def header_fields
 	[octet octet]
 
 def count
-	int count
-
+	count: int
 	[octet octet]
 	{
 		lhs.count = network_uord16( r1, r2 )
@@ -116,9 +115,9 @@ def count
 #
 
 list count_stack [int]
-global count_stack CL = construct count_stack []
+global CL: count_stack = construct count_stack []
 
-int start_list( int count )
+int start_list( count: int )
 {
 	CL.push( count )
 }
@@ -165,7 +164,7 @@ def name_end
 	# Zero length ending
 	[octet]
 	{
-		int val = r1.data.uord8()
+		val: int = r1.data.uord8()
 		if val != 0 {
 			reject
 		}
@@ -177,7 +176,7 @@ def name_end
 	#   +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
 |	[octet octet]
 	{
-		int val = r1.data.uord8()
+		val: int = r1.data.uord8()
 		if val < 64 {
 			reject
 		}
@@ -188,7 +187,7 @@ def name_end
 #
 
 # How many to get
-global int nbytes
+global nbytes: int
 
 # We use this token to eliminate the lookahead that would be needed to cause a
 # reduce of part_len. This forces whatever comes before nbytes to be reduced before 
@@ -215,7 +214,7 @@ def part_len
 	{
 		# A name part list is terminated either by a zero length or a pointer,
 		# which must have the two high bits set.
-		int count = r1.data.uord8()
+		count: int = r1.data.uord8()
 		if count == 0 || count >= 64 {
 			reject
 		} else {
@@ -259,7 +258,7 @@ def rr_type
 	}
 
 def rr_class 
-	int value
+	value: int
 	[octet octet]
 	{
 		rr_class_value = network_uord16( r1, r2 )
@@ -280,7 +279,7 @@ def rdlength
 		rdata_length = network_uord16( r1, r2 )
 	}
 
-global int rdata_length
+global rdata_length: int
 	
 def rdata
 	[RR_UNKNOWN rdata_bytes]
@@ -419,7 +418,7 @@ def start
 # Grammar End.
 #
 
-int print_RR_UNKNOWN( start s )
+int print_RR_UNKNOWN( s: start )
 {
 	for I:rdata in s {
 		if match I [u:RR_UNKNOWN rdata_bytes] {
@@ -428,7 +427,7 @@ int print_RR_UNKNOWN( start s )
 	}
 }
 
-int print_RR_A( start s )
+int print_RR_A( s: start )
 {
 	for I:rdata in s {
 		if match I [RR_A o1:octet o2:octet o3:octet o4:octet] {
@@ -440,7 +439,7 @@ int print_RR_A( start s )
 
 map name_map [int name]
 
-int print_name( name n, name_map m )
+int print_name( n: name m: name_map )
 {
 	for P: name_part in n {
 		match P [part_len D:nbytes]
@@ -449,40 +448,40 @@ int print_name( name n, name_map m )
 
 	for E:name_end in n {
 		if match E [o1:octet o2:octet] {
-			int val = (o1.data.uord8() - 192) * 256 + o2.data.uord8()
+			val: int = (o1.data.uord8() - 192) * 256 + o2.data.uord8()
 			print( '[', val, ']' )
-			name nameInMap = m.find( val )
+			nameInMap: name = m.find( val )
 			print_name( nameInMap, m )
 		}
 	}
 }
 
-int print_all_names( start s )
+int print_all_names( s: start )
 {
-	for M:message in s {
-		name_map m = construct name_map []
+	for M: message in s {
+		m: name_map = construct name_map []
 
-		octet O = octet in M
+		O: octet = octet in M
 
-		for N:name in M {
+		for N: name in M {
 			match N [name_part* E:name_end]
 
 			for NP: name_part* in N {
 				if match NP [L:octet nbytes name_part*] {
-					int messageOffset = L.pos - O.pos
-					name n = construct name [NP E]
+					messageOffset: int = L.pos - O.pos
+					n: name = construct name [NP E]
 					m.insert( messageOffset, n )
 				}
 			}
 		}
 
-		for I:name in M {
+		for I: name in M {
 			print_name( I, m )
 			print( '\n' )
 		}
 	}
 }
 
-start S = parse start( stdin )
+S: start = parse start( stdin )
 print_all_names( S )
 print( '*** SUCCESS ***\n' )

@@ -58,7 +58,7 @@ def header
 def request
 	[request_line header* CRLF]
 
-request R = parse_stop request( stdin )
+R: request = parse_stop request( stdin )
 
 print( 'HTTP/1.0 200 OK\r\n' )
 print( 'Date: Fri, 31 Dec 1999 23:59:59 GMT\r\n' )

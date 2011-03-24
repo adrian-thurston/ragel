@@ -28,7 +28,7 @@ def here_name
 		HereId = $r1
 	}
 
-global str HereId
+global HereId: str
 
 def here_data 
 	[here_data_item*]
@@ -42,5 +42,5 @@ def heredoc
 	[here_name here_data here_close id nl]
 
 
-heredoc S = parse heredoc(stdin)
+S: heredoc = parse heredoc(stdin)
 print_xml(S)

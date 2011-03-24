@@ -15,14 +15,14 @@ lex start
 	token id /rl_id/
 }
 
-global int num
-global int allow = 3
+global num: int
+global allow: int = 3
 
 def item 
 	[id]
 	{
 		num = num + 1
-		int toomuch = allow+1
+		toomuch: int = allow+1
 		if num == toomuch {
 			reject
 		}

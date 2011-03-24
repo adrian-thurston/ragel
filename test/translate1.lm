@@ -4,7 +4,7 @@ lex start
 	literal '*', '(', ')'
 	token id /[a-zA-Z_]+/ 
 		{
-			str t = input.pull( match_length )
+			t: str = input.pull( match_length )
 			input.push( make_token( typeid id, t ) )
 		}
 }
@@ -19,6 +19,6 @@ def item
 def start 
 	[item*]
 
-start Input = parse start( stdin )
+Input: start = parse start( stdin )
 print( Input, '\n' )
 

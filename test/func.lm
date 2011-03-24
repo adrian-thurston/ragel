@@ -18,14 +18,14 @@ def struct
 def program
     [struct*]
 
-int func( program P )
+int func( P: program )
 {
 }
 
 int main()
 {
-    stream InputFile = open( 'func.in', "r" )
-    program P = parse program( InputFile )
+    InputFile: stream = open( 'func.in', "r" )
+    P: program = parse program( InputFile )
 	func( P )
 	print( P )
 }

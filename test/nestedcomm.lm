@@ -36,7 +36,7 @@ def nested_comment
 
 def nested [id*]
 
-nested P = parse nested( stdin )
+P: nested = parse nested( stdin )
 print_xml( P )
 print_xml_ac( P )
 print( P, '\n' )

@@ -80,10 +80,10 @@ def factor
 def alphabet_num 
 	[uint]
 
-global int i
+global i: int
 
 def suint
-	int i
+	i: int
 	[uint]
 	{
 		#lhs.i = 0
@@ -95,11 +95,11 @@ def sub
 	[suint* '*']
 
 token item
-	sub S
+	S: sub
 	/[0-9]+/
 	{
-		str M = input.pull(match_length)
-		sub S = parse_stop sub(input)
+		M: str = input.pull(match_length)
+		S: sub = parse_stop sub(input)
 		input.push( make_token( typeid item, M, S ) )
 	}
 
@@ -109,5 +109,5 @@ def stuff
 	[item* '!' EOL]
 |	[sub]
 
-stuff S = parse stuff( stdin  )
+S: stuff = parse stuff( stdin  )
 print_xml( S )

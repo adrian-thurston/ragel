@@ -12,7 +12,7 @@ def item
 def start 
 	[item*]
 
-start Input = parse start( stdin )
+Input: start = parse start( stdin )
 
 match Input [ItemList: item*]
 

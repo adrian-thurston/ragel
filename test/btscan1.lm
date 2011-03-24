@@ -28,7 +28,7 @@ def item
 def btscan 
 	[item*]
 
-btscan P = parse btscan( stdin )
+P: btscan P = parse btscan( stdin )
 
 match P ~!abb !abba !aab
 print_xml(P)

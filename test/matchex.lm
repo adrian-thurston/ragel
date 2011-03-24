@@ -21,7 +21,7 @@ def item
 	[tag]
 |	[id]
 
-tag Tag = parse tag( stdin )
+Tag: tag = parse tag( stdin )
 
 # Style: List of literal text and types.
 match Tag ["<person name=" Val1:id attr*">" item* "</person>"]

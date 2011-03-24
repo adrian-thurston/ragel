@@ -33,8 +33,8 @@ def item
 # List production one. The condition stops the 
 # greedy list when it has gone too far.
 def count_items
-	int target
-	int count
+	target: int
+	count: int
 
 	[count_items item]
 	{
@@ -50,7 +50,7 @@ def count_items
 	# List production two, the base.
 |	[number]
 	{
-		match lhs [Number:number]
+		match lhs [Number: number]
 		lhs.target = Number.data.atoi()
 		lhs.count = 0
 	}
@@ -69,11 +69,11 @@ def counted_list
 def start 
 	[counted_list*]
 	{
-		for List:counted_list in lhs {
+		for List: counted_list in lhs {
 			match List [CountItems:count_items]
 			print( 'num items: ', CountItems.target, '\n' )
 
-			int i = 1
+			i: int = 1
 			for Item:item in CountItems {
 				print( '  item ', i, ': ', Item, '\n' )
 				i = i + 1

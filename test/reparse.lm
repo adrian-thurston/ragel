@@ -12,11 +12,11 @@ def item
 def start 
 	[item*]
 
-item* Input = parse item*( stdin )
+Input: item* = parse item*( stdin )
 
-start S = cons start[ Input ]
+S: start = cons start[ Input ]
 
-start Again = parse start( Input )
+Again: start = parse start( Input )
 
 print( Again, '\n' )
 

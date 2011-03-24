@@ -30,7 +30,7 @@ def btscan
 
 parser btscan_parser [btscan]
 
-btscan_parser Parser = cons btscan_parser []
+Parser: btscan_parser = cons btscan_parser []
 
 Parser << "!ab"
 Parser << "b "
