@@ -21,15 +21,15 @@ def item
 	[tag]
 |	[id]
 
-tag PersonTag = parse tag( stdin )
+PersonTag: tag = parse tag( stdin )
 
 match PersonTag 
 	["<person name=" Val:id attr*">" item* "</person>"]
 
-tag NameTag1 = construct tag 
+NameTag1: tag = construct tag 
 	["<name type=person>" Val "</name>"]
 
-tag NameTag2 = construct tag 
+NameTag2: tag = construct tag 
 	"<name type=person>[Val]</name>"
 
 print( NameTag1, '\n' )

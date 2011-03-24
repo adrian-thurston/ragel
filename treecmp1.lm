@@ -11,8 +11,8 @@ lex start
 def four_ids
 	[id id id id]
 
-id B = construct id "b"
-four_ids Input = parse four_ids( stdin )
+B: id = construct id "b"
+Input: four_ids = parse four_ids( stdin )
 
 for Id: id in Input {
 	if ( Id == B )

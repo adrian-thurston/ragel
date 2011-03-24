@@ -11,6 +11,6 @@ lex start
 def four_ids
 	[id id id id]
 
-four_ids Constructed = construct four_ids "a  b  c  d"
+Constructed: four_ids = construct four_ids "a  b  c  d"
 print_xml( Constructed )
 

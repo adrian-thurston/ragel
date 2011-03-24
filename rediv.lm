@@ -84,7 +84,7 @@ def start
 	[statement*]
 
 
-start S = parse start( stdin )
+S: start = parse start( stdin )
 
 for I:orlit_item in S {
 	if match I [orlit_chr] {

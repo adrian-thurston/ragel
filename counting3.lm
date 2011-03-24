@@ -26,8 +26,8 @@ lex start
 # Global Data
 #
 
-global int target
-global int count
+global target: int
+global count: int
 
 #
 # Productions
@@ -78,12 +78,12 @@ def start
 	[counted_list*]
 	{
 
-		for List:counted_list in lhs {
-			match List [Count:number Items:count_items]
+		for List: counted_list in lhs {
+			match List [Count: number Items: count_items]
 			print( 'num items: ', Count.data.atoi(), '\n' )
 
-			int i = 1
-			for Item:item in Items {
+			i: int = 1
+			for Item: item in Items {
 				print( '  item ', i, ': ', Item, '\n' )
 				i = i + 1
 			}

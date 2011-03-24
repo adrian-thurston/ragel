@@ -87,7 +87,7 @@ def labelled_statement
 def goto_statement
 	['goto' id ';']
 
-program P = parse program(stdin)
+P: program = parse program(stdin)
 
 #for S:statement* in P
 #{
@@ -126,8 +126,8 @@ for S: statement* in P
             First: statement 
             Rest: statement*]
     {
-		expression Expr
-		statement* Following
+		Expr: expression
+		Following: statement*
 
 		# Look though the remaining statements for a goto back to the label.
 		# The repeat iterator yields only top-level statement lists. It

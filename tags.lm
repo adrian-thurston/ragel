@@ -32,7 +32,7 @@ def tag_stack
 	[id tag_stack]
 |	[]
 
-global tag_stack TS = construct tag_stack ["sentinal"]
+global TS: tag_stack = construct tag_stack ["sentinal"]
 
 #
 # Productions
@@ -53,8 +53,8 @@ def open_tag
 def close_tag 
 	[id]
 	{
-		match lhs [Id:id]
-		match TS [Top:id Rest:tag_stack]
+		match lhs [Id: id]
+		match TS [Top: id Rest: tag_stack]
 
 		if Id.data == Top.data
 			TS = construct tag_stack [Rest]

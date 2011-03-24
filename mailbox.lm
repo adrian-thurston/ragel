@@ -40,5 +40,5 @@ def message
 def start 
 	[message*]
 
-start S = parse start( stdin )
+S: start = parse start( stdin )
 print_xml( S )

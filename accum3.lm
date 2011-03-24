@@ -23,14 +23,13 @@ def args
 
 accum arg_parser [args] 
 
-arg_parser ArgParser =
-construct arg_parser []
+ArgParser: arg_parser = cons arg_parser []
 
-argv_list ArgV = argv
+ArgV: argv_list ArgV = argv
 for A: str in ArgV 
 	ArgParser << [A '\0']
 
-args Args = ArgParser.finish() 
+Args: args = ArgParser.finish() 
 
 print_xml( Args )
 

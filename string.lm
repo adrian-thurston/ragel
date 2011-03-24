@@ -50,5 +50,5 @@ def start
 		}
 	}
 
-start S = parse start(stdin)
+S: start = parse start(stdin)
 print_xml( S )

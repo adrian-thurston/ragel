@@ -24,7 +24,7 @@ lex start
 # Global Data
 #
 
-global int target
+global target: int
 
 #
 # Productions
@@ -45,7 +45,7 @@ def item
 
 # Type definition for the count_items nonterminal.
 def count_items
-	int count
+	count: int
 
 	# List production one. The condition stops the 
 	# greedy list when it has gone too far.
@@ -82,7 +82,7 @@ def start
 			match List [Count:number Items:count_items]
 			print( 'num items: ', Count.data.atoi(), '\n' )
 
-			int i = 1
+			i: int = 1
 			for Item:item in Items {
 				print( '  item ', i,  ': ', Item, '\n' )
 				i = i + 1

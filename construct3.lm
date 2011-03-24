@@ -12,5 +12,5 @@ def item [id] | [bigger]
 
 def lang [item*]
 
-bigger B = construct bigger "( b1 b2 )"
+B: bigger = construct bigger "( b1 b2 )"
 print( construct lang "a [B] c", '\n' )

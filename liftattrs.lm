@@ -43,13 +43,13 @@ def item_list
 	[item_list tag]
 |	[]
 
-item_list IL = parse item_list(stdin)
+IL: item_list = parse item_list(stdin)
 
 # Get the item list
 match IL [RootItemList: item_list]
 
 # List for collecting the attrs we pull out.
-attr_list CollectedAttrs = construct attr_list []
+CollectedAttrs: attr_list = construct attr_list []
 
 # Iterate through all attributes
 for AttrListIter:attr_list in RootItemList {

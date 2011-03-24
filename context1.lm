@@ -1,8 +1,8 @@
 context ctx
 {
-	int i
-	int j
-	int k
+	i: int
+	j: int
+	k: int
 
 	lex start
 	{
@@ -28,6 +28,6 @@ context ctx
 		[item*]
 }
 
-ctx CTX = cons ctx[]
-ctx::start Input = parse ctx::start( CTX, stdin )
+CTX: ctx = cons ctx[]
+Input: ctx::start = parse ctx::start( CTX, stdin )
 print( Input, '\n' )

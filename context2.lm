@@ -11,7 +11,7 @@ context ruby_here
 		literal '<<', '*', ',', '(', ')', '!'
 	}
 
-	str HereId
+	HereId: str
 
 	token rest_of_line /[^\n]*'\n'/
 
@@ -19,17 +19,17 @@ context ruby_here
 	{
 		ignore /[ \t\n]+/
 		token here_id
-			here_data HereData
+			HereData: here_data
 			/ident_pattern/
 			{
 				# Take the text of the here_id from the input stream.
 				HereId = input.pull( match_length )
 
 				# Get the data up to the rest of the line.
-				rest_of_line ROL = parse_stop rest_of_line( ctx, input )
+				ROL: rest_of_line = parse_stop rest_of_line( ctx, input )
 
 				# Parse the heredoc data.
-				here_data HereData = parse_stop here_data( ctx, input )
+				HereData: here_data = parse_stop here_data( ctx, input )
 
 				# Push the rest-of-line data back to the input stream.
 				input.push( $ROL )
@@ -91,7 +91,7 @@ context ruby_here
 		[item*]
 }
 
-ruby_here CTX = cons ruby_here []
+CTX: ruby_here = cons ruby_here []
 
-ruby_here::start S = parse ruby_here::start( CTX, stdin )
+S: ruby_here::start = parse ruby_here::start( CTX, stdin )
 print_xml(S)

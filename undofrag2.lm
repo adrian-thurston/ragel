@@ -6,7 +6,7 @@ lex start
 }
 
 parser out_parser [out]
-global out_parser Out = construct out_parser []
+global Out: out_parser = construct out_parser []
 
 def out_item
 	[id]
@@ -35,5 +35,5 @@ def start
 	[A1 item* '^']
 |	[A2 item* ';' '\n']
 
-start Input = parse start( stdin )
+Input: start = parse start( stdin )
 print( Input )

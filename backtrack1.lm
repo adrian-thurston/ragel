@@ -19,6 +19,6 @@ def E
 def start 
 	[E]
 
-start S = parse start( stdin )
-start R = match S ~ 9 + 9
+S: start = parse start( stdin )
+R: start = match S ~ 9 + 9
 print_xml( R )

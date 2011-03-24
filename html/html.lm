@@ -62,11 +62,11 @@ lex close_id
 	{
 		# If it is in the tag stack then it is a close_id. If not then it's a
 		# stray_close_id.
-		int send_id = typeid stray_close_id
+		send_id: int = typeid stray_close_id
 
-		tag_stack LocalTagStack = TagStack
-		for Tag:tag_id in LocalTagStack {
-			tag_id T = Tag
+		LocalTagStack: tag_stack = TagStack
+		for Tag: tag_id in LocalTagStack {
+			T: tag_id = Tag
 			if match_text == T.data {
 				send_id = typeid close_id
 				break
@@ -85,7 +85,7 @@ def tag_stack
 	[tag_id tag_stack]
 |	[]
 
-global tag_stack TagStack = construct tag_stack []
+global TagStack: tag_stack = construct tag_stack []
 
 #
 # Document Type
@@ -194,13 +194,13 @@ def start
 # END GRAMMAR
 #
 
-int addDefaultAltTags( ref start Start )
+int addDefaultAltTags( Start: ref start )
 {
 	for T: open_tag in Start {
 		require T 
 			["<img" AttrList: attr* '>']
 		
-		bool haveAlt = false
+		haveAlt: bool = false
 		for A: attr in T {
 			if match A ["alt=" attr_val]
 				haveAlt = true
@@ -218,7 +218,7 @@ int addDefaultAltTags( ref start Start )
 	}
 }
 
-int printLinks( start Start )
+int printLinks( Start: start )
 {
 	for A:tag in Start {
 		require A
@@ -232,19 +232,19 @@ int printLinks( start Start )
 }
 
 
-bool should_close( tag_id TI )
+bool should_close( TI: tag_id )
 {
 	return true
 }
 
-bool should_flatten( tag_id TI )
+bool should_flatten( TI: tag_id )
 {
 	return true
 }
 
 # Finds unclosed tags and puts the content after the tag. Afterwards
 # all unclosed tags will be empty 'inside'.
-int flatten( ref start Start )
+int flatten( Start: ref start )
 {
     for TL: item* in Start {
         require TL
@@ -266,7 +266,7 @@ int flatten( ref start Start )
 				}
 			}
 
-			opt_close_tag EmptyCloseTag = 
+			EmptyCloseTag: opt_close_tag = 
 				construct opt_close_tag []
 
 			# Close the tag and put inside after it.
@@ -276,7 +276,7 @@ int flatten( ref start Start )
     }
 }
 
-int close( ref start Start )
+int close( Start: ref start )
 {
     for TL: item in Start {
         require TL
@@ -287,9 +287,9 @@ int close( ref start Start )
 
         if should_close( TagId )
         {
-			close_id CloseId = parse close_id (TagId.data)
+			CloseId: close_id = parse close_id( TagId.data )
 
-            opt_close_tag CloseTag = 
+            CloseTag: opt_close_tag = 
                 construct opt_close_tag ['</' CloseId '>']
 
             # Close the tag and put inside after it.
@@ -299,7 +299,7 @@ int close( ref start Start )
     }
 }
 
-start HTML = parse start( stdin )
+HTML: start = parse start( stdin )
 flatten( HTML )
 print_xml( HTML )
 printLinks( HTML )

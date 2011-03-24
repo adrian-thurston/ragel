@@ -150,7 +150,7 @@ def document
 def start 
 	[document]
 
-start S = parse start(stdin)
+S: start = parse start(stdin)
 
 for Switch:tag in S {
 	if match Switch

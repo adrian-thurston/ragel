@@ -1,17 +1,17 @@
 
 int f()
 {
-	int i = 0
-	int j = 100
+	i: int = 0
+	j: int = 100
 
 	while i < 4 {
-		int j = 200
+		j: int = 200
 		if ( i < 1 ) {
-			int j = 300
+			j: int = 300
 			print( "i: [$i] j: [$j]\n" )
 		}
 		elsif ( i < 2 ) {
-			int j = 300
+			j: int = 300
 			print( "i: [$i] j: [$j]\n" )
 		}
 		elsif ( i < 3 ) {

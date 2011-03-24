@@ -48,7 +48,7 @@ context ctx
 	|	[B item* ';\n']
 }
 
-ctx CTX = cons ctx []
-ctx::start Input = parse ctx::start( CTX, stdin )
+CTX: ctx = cons ctx []
+Input: ctx::start = parse ctx::start( CTX, stdin )
 
 print( Input )

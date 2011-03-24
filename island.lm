@@ -50,8 +50,8 @@ def top_item
 def start 
 	[top_item*]
 
-start S = parse start( stdin )
-print_xml(S)
+S: start = parse start( stdin )
+print_xml( S )
 
 #pattern start
 #	~class { func() { func() { 1+{2}} } } func() {{a}} 
