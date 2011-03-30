@@ -24,7 +24,7 @@ int func( P: program )
 
 int main()
 {
-    InputFile: stream = open( 'func.in', "r" )
+    InputFile: stream = open( 'func.in' "r" )
     P: program = parse program( InputFile )
 	func( P )
 	print( P )

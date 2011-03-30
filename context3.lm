@@ -27,7 +27,7 @@ context ctx
 			f()
 			f()
 			f()
-			print( i, '\n' )
+			print( i '\n' )
 		}
 	
 
@@ -36,7 +36,7 @@ context ctx
 }
 
 CTX: ctx = cons ctx []
-Input: ctx::start = parse ctx::start( CTX, stdin )
-print( Input, '\n' )
+Input: ctx::start = parse ctx::start( CTX stdin )
+print( Input '\n' )
 
 

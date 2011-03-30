@@ -39,4 +39,4 @@ def nested [id*]
 P: nested = parse nested( stdin )
 print_xml( P )
 print_xml_ac( P )
-print( P, '\n' )
+print( P '\n' )

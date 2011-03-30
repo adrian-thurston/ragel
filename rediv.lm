@@ -88,7 +88,7 @@ S: start = parse start( stdin )
 
 for I:orlit_item in S {
 	if match I [orlit_chr] {
-		print( I, '\n' )
+		print( I '\n' )
 	}
 }
 print_xml( S )

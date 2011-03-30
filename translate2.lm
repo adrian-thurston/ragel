@@ -24,9 +24,9 @@ context ctx
 		token ddd /'...'/ {
 			print('translating\n')
 			input.pull( match_length )
-			input.push( make_token( typeid id, "dot" ) )
-			input.push( make_token( typeid id, "dot" ) )
-			input.push( make_token( typeid id, "dot" ) )
+			input.push( make_token( typeid id "dot" ) )
+			input.push( make_token( typeid id "dot" ) )
+			input.push( make_token( typeid id "dot" ) )
 		}
 	}
 
@@ -49,6 +49,6 @@ context ctx
 }
 
 CTX: ctx = cons ctx []
-Input: ctx::start = parse ctx::start( CTX, stdin )
+Input: ctx::start = parse ctx::start( CTX stdin )
 
 print( Input )

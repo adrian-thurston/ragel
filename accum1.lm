@@ -26,5 +26,4 @@ for Id: id in Input {
 
 S: start = Output.finish()
 
-print( S, '\n' )
-
+print( S '\n' )

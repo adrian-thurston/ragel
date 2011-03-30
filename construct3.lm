@@ -13,4 +13,4 @@ def item [id] | [bigger]
 def lang [item*]
 
 B: bigger = construct bigger "( b1 b2 )"
-print( construct lang "a [B] c", '\n' )
+print( construct lang "a [B] c" '\n' )

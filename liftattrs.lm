@@ -71,4 +71,4 @@ for AttrListIter:attr_list in RootItemList {
 IL = construct item_list 
 	["<wrapper" CollectedAttrs ">" RootItemList "</wrapper>"]
 
-print( IL, '\n' )
+print( IL '\n' )

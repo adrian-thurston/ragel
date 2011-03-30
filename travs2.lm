@@ -92,7 +92,7 @@ iter fixed_point( ref any T )
 
 for T: any in fixed_point( S ) 
 {
-	print( T, '\n' )
+	print( T '\n' )
 }
 
-print( S, '\n' )
+print( S '\n' )

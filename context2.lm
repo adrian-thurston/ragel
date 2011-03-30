@@ -26,16 +26,16 @@ context ruby_here
 				HereId = input.pull( match_length )
 
 				# Get the data up to the rest of the line.
-				ROL: rest_of_line = parse_stop rest_of_line( ctx, input )
+				ROL: rest_of_line = parse_stop rest_of_line( ctx input )
 
 				# Parse the heredoc data.
-				HereData: here_data = parse_stop here_data( ctx, input )
+				HereData: here_data = parse_stop here_data( ctx input )
 
 				# Push the rest-of-line data back to the input stream.
 				input.push( $ROL )
 
 				# Send the here_id token. Attach the heredoc data as an attribute.
-				input.push( make_token( typeid here_id, HereId, HereData ) )
+				input.push( make_token( typeid here_id HereId HereData ) )
 			}
 	}
 
@@ -46,11 +46,11 @@ context ruby_here
 			{
 				if match_text == HereId + '\n' {
 					input.push( make_token( 
-						typeid here_close_id,
+						typeid here_close_id
 						input.pull( match_length ) ) )
 				}
 				else 
-					input.push( make_token( typeid here_line, input.pull(match_length) ) )
+					input.push( make_token( typeid here_line input.pull(match_length) ) )
 			}
 
 		token here_line
@@ -93,5 +93,5 @@ context ruby_here
 
 CTX: ruby_here = cons ruby_here []
 
-S: ruby_here::start = parse ruby_here::start( CTX, stdin )
+S: ruby_here::start = parse ruby_here::start( CTX stdin )
 print_xml(S)

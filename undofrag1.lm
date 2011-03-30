@@ -48,9 +48,9 @@ context ctx
 SP << "a b{c}"
 
 CTX: ctx = cons ctx []
-Input: ctx::start = parse ctx::start( CTX, stdin )
+Input: ctx::start = parse ctx::start( CTX stdin )
 
 SP << "{e}f g"
 
 print( Input )
-print( SP.finish(), '\n' )
+print( SP.finish() '\n' )

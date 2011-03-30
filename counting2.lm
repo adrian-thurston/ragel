@@ -71,11 +71,11 @@ def start
 	{
 		for List: counted_list in lhs {
 			match List [CountItems:count_items]
-			print( 'num items: ', CountItems.target, '\n' )
+			print( 'num items: ' CountItems.target '\n' )
 
 			i: int = 1
 			for Item:item in CountItems {
-				print( '  item ', i, ': ', Item, '\n' )
+				print( '  item ' i ': ' Item '\n' )
 				i = i + 1
 			}
 		}

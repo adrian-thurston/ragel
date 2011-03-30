@@ -31,6 +31,6 @@ SP: start_parser = cons start_parser[]
 SP.ctx = cons ctx []
 SP << stdin
 Input: ctx::start = SP.finish()
-print( Input, '\n' )
+print( Input '\n' )
 
 

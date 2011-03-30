@@ -73,7 +73,7 @@ lex close_id
 			}
 		}
 
-		input.push( make_token( send_id, input.pull(match_length) ) )
+		input.push( make_token( send_id input.pull(match_length) ) )
 	}
 }
 
@@ -226,7 +226,7 @@ int printLinks( Start: start )
 
 		for Attr: attr in AttrList {
 			if match Attr ["href = " AttrVal: attr_val]
-				print( 'link: ', I, '\ntarget: ', AttrVal, '\n\n' )
+				print( 'link: ' I '\ntarget: ' AttrVal '\n\n' )
 		}
 	}
 }
