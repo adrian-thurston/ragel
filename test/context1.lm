@@ -21,7 +21,7 @@ context ctx
 			i = 0
 			j = i + 1
 			k = j + 1
-			print( k, '\n' )
+			print( k '\n' )
 		}
 
 	def start 
@@ -29,5 +29,5 @@ context ctx
 }
 
 CTX: ctx = cons ctx[]
-Input: ctx::start = parse ctx::start( CTX, stdin )
-print( Input, '\n' )
+Input: ctx::start = parse ctx::start( CTX stdin )
+print( Input '\n' )

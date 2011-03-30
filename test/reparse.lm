@@ -18,5 +18,5 @@ S: start = cons start[ Input ]
 
 Again: start = parse start( Input )
 
-print( Again, '\n' )
+print( Again '\n' )
 

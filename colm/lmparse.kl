@@ -1440,10 +1440,10 @@ nonterm code_expr_list
 	ExprVect *exprVect;
 };
 
-code_expr_list: code_expr_list ',' code_expr
+code_expr_list: code_expr_list code_expr
 	final {
 		$$->exprVect = $1->exprVect;
-		$$->exprVect->append( $3->expr );
+		$$->exprVect->append( $2->expr );
 	};
 code_expr_list: code_expr
 	final {
@@ -1829,10 +1829,10 @@ nonterm field_init_list
 	FieldInitVect *fieldInitVect;
 };
 
-field_init_list: field_init_list ',' field_init
+field_init_list: field_init_list field_init
 	final {
 		$$->fieldInitVect = $1->fieldInitVect;
-		$$->fieldInitVect->append( $3->fieldInit );
+		$$->fieldInitVect->append( $2->fieldInit );
 	};
 field_init_list: field_init
 	final {

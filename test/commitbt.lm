@@ -100,7 +100,7 @@ token item
 	{
 		M: str = input.pull(match_length)
 		S: sub = parse_stop sub(input)
-		input.push( make_token( typeid item, M, S ) )
+		input.push( make_token( typeid item M S ) )
 	}
 
 token EOL /'\n'/

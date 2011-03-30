@@ -5,7 +5,7 @@ lex start
 
 	token id /'a'|'b'/
 	{
-		input.push( make_token( trans_id_to, input.pull(match_length) ) )
+		input.push( make_token( trans_id_to input.pull(match_length) ) )
 	}
 	
 	token super_id //
@@ -19,9 +19,9 @@ global trans_id_to: int
 def e1 
 	[]
 	{
-		print( 'old_id = ', trans_id_to, '\n' )
+		print( 'old_id = ' trans_id_to '\n' )
 		trans_id_to = typeid foo
-		print( 'new_id = ', trans_id_to, '\n' )
+		print( 'new_id = ' trans_id_to '\n' )
 	}
 
 def item1 
@@ -35,9 +35,9 @@ def item1
 def e2 
 	[]
 	{
-		print( 'old_id = ', trans_id_to, '\n' )
+		print( 'old_id = ' trans_id_to '\n' )
 		trans_id_to = typeid super_id
-		print( 'new_id = ', trans_id_to, '\n' )
+		print( 'new_id = ' trans_id_to '\n' )
 	}
 
 def item2 

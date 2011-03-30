@@ -43,7 +43,7 @@ token RR_UNKNOWN
 		elsif rr_type_value == 16
 			id = typeid RR_TXT
 
-		input.push( make_token( id, '' ) )
+		input.push( make_token( id '' ) )
 	}
 
 # Convert two octets in network order into an unsigned 16 bit value.
@@ -97,7 +97,7 @@ def count
 	count: int
 	[octet octet]
 	{
-		lhs.count = network_uord16( r1, r2 )
+		lhs.count = network_uord16( r1 r2 )
 	}
 
 #
@@ -199,7 +199,7 @@ token nb_empty /''/
 token nbytes_data
 	/''/
 	{
-		input.push( make_token( typeid nbytes_data, input.pull(nbytes) ) )
+		input.push( make_token( typeid nbytes_data input.pull(nbytes) ) )
 	}
 
 def nbytes
@@ -254,14 +254,14 @@ def resource_record
 def rr_type 
 	[octet octet]
 	{
-		rr_type_value = network_uord16( r1, r2 )
+		rr_type_value = network_uord16( r1 r2 )
 	}
 
 def rr_class 
 	value: int
 	[octet octet]
 	{
-		rr_class_value = network_uord16( r1, r2 )
+		rr_class_value = network_uord16( r1 r2 )
 	}
 
 def ttl 
@@ -270,13 +270,13 @@ def ttl
 token rdata_bytes
 	/''/
 	{
-		input.push( make_token( typeid rdata_bytes, input.pull(rdata_length) ) )
+		input.push( make_token( typeid rdata_bytes input.pull(rdata_length) ) )
 	}
 
 def rdlength 
 	[octet octet]
 	{
-		rdata_length = network_uord16( r1, r2 )
+		rdata_length = network_uord16( r1 r2 )
 	}
 
 global rdata_length: int
@@ -431,8 +431,8 @@ int print_RR_A( s: start )
 {
 	for I:rdata in s {
 		if match I [RR_A o1:octet o2:octet o3:octet o4:octet] {
-			print( 'RR_A: ', o1.data.uord8(), '.', o2.data.uord8(), '.', 
-					o3.data.uord8(), '.', o4.data.uord8(), '\n' )
+			print( 'RR_A: ' o1.data.uord8() '.' o2.data.uord8() '.' 
+					o3.data.uord8() '.' o4.data.uord8() '\n' )
 		}
 	}
 }
@@ -443,15 +443,15 @@ int print_name( n: name m: name_map )
 {
 	for P: name_part in n {
 		match P [part_len D:nbytes]
-		print( D, '.' )
+		print( D '.' )
 	}
 
 	for E:name_end in n {
 		if match E [o1:octet o2:octet] {
 			val: int = (o1.data.uord8() - 192) * 256 + o2.data.uord8()
-			print( '[', val, ']' )
+			print( '[' val ']' )
 			nameInMap: name = m.find( val )
-			print_name( nameInMap, m )
+			print_name( nameInMap m )
 		}
 	}
 }
@@ -470,13 +470,13 @@ int print_all_names( s: start )
 				if match NP [L:octet nbytes name_part*] {
 					messageOffset: int = L.pos - O.pos
 					n: name = construct name [NP E]
-					m.insert( messageOffset, n )
+					m.insert( messageOffset n )
 				}
 			}
 		}
 
 		for I: name in M {
-			print_name( I, m )
+			print_name( I m )
 			print( '\n' )
 		}
 	}

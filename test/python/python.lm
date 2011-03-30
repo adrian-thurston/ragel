@@ -78,7 +78,7 @@ lex start
 		{
 			# Need to shorten to take off the newline.
 			# Turn it into ignore.
-			input.push_ignore( make_token( typeid WS, input.pull(match_length - 1) ) )
+			input.push_ignore( make_token( typeid WS input.pull(match_length - 1) ) )
 		}
 
 	# Find and ignore comments.
@@ -86,7 +86,7 @@ lex start
 		/ '#' [^\n]* '\n' /
 		{
 			# Need to shorten to take off the newline. Turn it into ignore.
-			input.push_ignore( make_token( typeid WS, input.pull(match_length - 1) ) )
+			input.push_ignore( make_token( typeid WS input.pull(match_length - 1) ) )
 		}
 
 	# These tokens are generated
@@ -99,7 +99,7 @@ lex start
 		/'\n' [ \t]*/
 		{
 			# We have squared up INDENTs and DEDENTs. Ignore the entire match.
-			input.push_ignore( make_token( typeid WS, input.pull(match_length) ) )
+			input.push_ignore( make_token( typeid WS input.pull(match_length) ) )
 
 			# We have already sent the newline, compute the indentation level.
 			data_length: int = match_length - 1
@@ -107,7 +107,7 @@ lex start
 			if data_length > IndentStack.top {
 				# The indentation level is more than the level on the top
 				# of the stack. This is an indent event. Send as an INDENT.
-				input.push( make_token( typeid INDENT, '' ) )
+				input.push( make_token( typeid INDENT '' ) )
 
 				# Push to the stack as per python manual.
 				IndentStack.push( data_length )
@@ -120,7 +120,7 @@ lex start
 					IndentStack.pop()
 
 					# Send as a DEDENT
-					input.push( make_token( typeid DEDENT, '' ) )
+					input.push( make_token( typeid DEDENT '' ) )
 				}
 			}
 
@@ -128,7 +128,7 @@ lex start
 			# means the outdent does not match anything.
 
 			# First the newline.
-			input.push( make_token( typeid NEWLINE, '' ) )
+			input.push( make_token( typeid NEWLINE '' ) )
 		}
 }
 
@@ -139,15 +139,15 @@ int print_target_subscriptions_and_slicings( Start: start )
 {
 	for TI: target_ext in Start {
 		if match TI [subscription] {
-			print( 'TARGET SUBSCRIPTION: ', TI, '\n' )
+			print( 'TARGET SUBSCRIPTION: ' TI '\n' )
 		}
 
 		if match TI [simple_slicing] {
-			print( 'TARGET SIMPLE SLICING: ', TI, '\n' )
+			print( 'TARGET SIMPLE SLICING: ' TI '\n' )
 		}
 
 		if match TI [extended_slicing] {
-			print( 'TARGET EXTENDED SLICING: ', TI, '\n' )
+			print( 'TARGET EXTENDED SLICING: ' TI '\n' )
 		}
 	}
 	
@@ -157,15 +157,15 @@ int print_primary_subscriptions_and_slicings( Start: start )
 {
 	for PI: primary_ext in Start {
 		if match PI [subscription] {
-			print( 'PRIMARY SUBSCRIPTION: ', PI, '\n' )
+			print( 'PRIMARY SUBSCRIPTION: ' PI '\n' )
 		}
 
 		if match PI [simple_slicing] {
-			print( 'PRIMARY SIMPLE SLICING: ', PI, '\n' )
+			print( 'PRIMARY SIMPLE SLICING: ' PI '\n' )
 		}
 
 		if match PI [extended_slicing] {
-			print( 'PRIMARY EXTENDED SLICING: ', PI, '\n' )
+			print( 'PRIMARY EXTENDED SLICING: ' PI '\n' )
 		}
 	}
 }
@@ -722,12 +722,12 @@ def keyword_item
 int print_stmts( S: start )
 {
 	for Stmt: statement in S
-		print( 'STMT: ', Stmt, '\n' )
+		print( 'STMT: ' Stmt '\n' )
 }
 
 S: start = parse start( stdin )
 print_xml( S )
-print( S, '\n' )
+print( S '\n' )
 print_stmts( S )
 print_target_subscriptions_and_slicings( S )
 print_primary_subscriptions_and_slicings( S )

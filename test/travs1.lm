@@ -141,23 +141,23 @@ iter bottomup_rightleft( T: ref any )
 print( 'bottomup_leftright\n' )
 for T1: any in bottomup_leftright( S ) 
 {
-	print( T1, '\n' )
+	print( T1 '\n' )
 }
 
 print( 'bottomup_rightleft\n' )
 for T2: any in bottomup_rightleft( S ) 
 {
-	print( T2, '\n' )
+	print( T2 '\n' )
 }
 
 print( 'topdown_leftright\n' )
 for T3: any in topdown_leftright( S ) 
 {
-	print( T3, '\n' )
+	print( T3 '\n' )
 }
 
 print( 'topdown_rightleft\n' )
 for T4: any in topdown_rightleft( S ) 
 {
-	print( T4, '\n' )
+	print( T4 '\n' )
 }

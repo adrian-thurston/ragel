@@ -8,4 +8,4 @@ lex start
 
 def lang [id*]
 
-print( construct lang "a b c", '\n' )
+print( construct lang "a b c" '\n' )
