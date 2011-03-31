@@ -1,5 +1,6 @@
 /*
  *  Copyright 2006-2007 Adrian Thurston <thurston@complang.org>
+ *  Copyright 2011 Josef Goettgens
  */
 
 /*  This file is part of Ragel.
@@ -613,6 +614,16 @@ ifstream *Scanner::tryOpenInclude( char **pathChecks, long &found )
 			found = check - pathChecks;
 			return inFile;
 		}
+
+		/* 
+		 * 03/26/2011 jg:
+		 * Don't rely on sloppy runtime behaviour: reset the state of the stream explicitly.
+		 * If inFile->open() fails, which happens when include dirs are tested, the fail bit
+		 * is set by the runtime library. Currently the VS runtime library opens new files,
+		 * but when it comes to reading it refuses to work.
+		 */
+		inFile->clear();
+
 		check += 1;
 	}
 
