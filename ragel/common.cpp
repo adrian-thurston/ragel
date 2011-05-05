@@ -49,6 +49,9 @@ HostType hostTypesC[] =
 #define U16BIT_MIN 0
 #define U16BIT_MAX 65535
 
+#define S31BIT_MIN -1073741824l
+#define S31BIT_MAX 1073741823l
+
 #define S32BIT_MIN –2147483648l
 #define S32BIT_MAX 2147483647l
 
@@ -114,12 +117,19 @@ HostType hostTypesCSharp[] =
 	{ "ulong",   0,  "ulong",   false,  0,         ULONG_MAX,   8 }
 };
 
+HostType hostTypesOCaml[] =
+{
+//  { "char",   0,  "char",     false,  0,          UCHAR_MAX,  1 },
+  { "int",    0,  "int",      true,   S31BIT_MIN, S31BIT_MAX, 4 },
+};
+
 HostLang hostLangC =    { HostLang::C,    hostTypesC,    8, hostTypesC+0,    true };
 HostLang hostLangD =    { HostLang::D,    hostTypesD,    9, hostTypesD+2,    true };
 HostLang hostLangGo =   { HostLang::Go,   hostTypesGo,   7, hostTypesGo+0,   false };
 HostLang hostLangJava = { HostLang::Java, hostTypesJava, 4, hostTypesJava+2, false };
 HostLang hostLangRuby = { HostLang::Ruby, hostTypesRuby, 2, hostTypesRuby+0, false };
 HostLang hostLangCSharp = { HostLang::CSharp, hostTypesCSharp, 9, hostTypesCSharp+4, true };
+HostLang hostLangOCaml = { HostLang::OCaml, hostTypesOCaml, 1, hostTypesOCaml+0, false };
 
 HostLang *hostLang = &hostLangC;
 

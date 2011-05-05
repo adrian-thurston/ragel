@@ -48,6 +48,7 @@ void javaLineDirective( ostream &out, const char *fileName, int line );
 void gothicLineDirective( ostream &out, const char *fileName, int line );
 void rubyLineDirective( ostream &out, const char *fileName, int line );
 void csharpLineDirective( ostream &out, const char *fileName, int line );
+void ocamlLineDirective( ostream &out, const char *fileName, int line );
 void genLineDirective( ostream &out );
 void lineDirective( ostream &out, const char *fileName, int line );
 

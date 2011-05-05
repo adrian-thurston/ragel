@@ -1407,6 +1407,7 @@ void InputData::writeLanguage( std::ostream &out )
 		case HostLang::Java: out << "Java"; break;
 		case HostLang::Ruby: out << "Ruby"; break;
 		case HostLang::CSharp: out << "C#"; break;
+		case HostLang::OCaml: out << "OCaml"; break;
 	}
 	out << "\"";
 }
