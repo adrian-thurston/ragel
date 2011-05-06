@@ -75,7 +75,7 @@ protected:
 	string KEY( Key key );
 	string WIDE_KEY( RedStateAp *state, Key key );
 	string LDIR_PATH( char *path );
-	void ACTION( ostream &ret, GenAction *action, int targState, 
+	virtual void ACTION( ostream &ret, GenAction *action, int targState, 
 			bool inFinish, bool csForced );
 	void CONDITION( ostream &ret, GenAction *condition );
 	string ALPH_TYPE();
@@ -153,7 +153,7 @@ protected:
 	void SET_TOKSTART( ostream &ret, GenInlineItem *item );
 	void SET_TOKEND( ostream &ret, GenInlineItem *item );
 	void GET_TOKEND( ostream &ret, GenInlineItem *item );
-	void SUB_ACTION( ostream &ret, GenInlineItem *item, 
+	virtual void SUB_ACTION( ostream &ret, GenInlineItem *item, 
 			int targState, bool inFinish, bool csForced );
 	void STATE_IDS();
 
@@ -161,6 +161,7 @@ protected:
 	string FIRST_FINAL_STATE();
 
 	virtual string PTR_CONST() = 0;
+	virtual string PTR_CONST_END() = 0;
 	virtual ostream &OPEN_ARRAY( string type, string name ) = 0;
 	virtual ostream &CLOSE_ARRAY() = 0;
 	virtual ostream &STATIC_VAR( string type, string name ) = 0;
@@ -199,6 +200,7 @@ public:
 	virtual string CAST( string type );
 	virtual string UINT();
 	virtual string PTR_CONST();
+	virtual string PTR_CONST_END();
 	virtual string CTRL_FLOW();
 
 	virtual void writeExports();
@@ -219,9 +221,36 @@ public:
 	virtual string CAST( string type );
 	virtual string UINT();
 	virtual string PTR_CONST();
+	virtual string PTR_CONST_END();
 	virtual string CTRL_FLOW();
 
 	virtual void writeExports();
+};
+
+class D2CodeGen : virtual public FsmCodeGen
+{
+public:
+	D2CodeGen( ostream &out ) : FsmCodeGen(out) {}
+
+	virtual string NULL_ITEM();
+	virtual string POINTER();
+	virtual ostream &SWITCH_DEFAULT();
+	virtual ostream &OPEN_ARRAY( string type, string name );
+	virtual ostream &CLOSE_ARRAY();
+	virtual ostream &STATIC_VAR( string type, string name );
+	virtual string ARR_OFF( string ptr, string offset );
+	virtual string CAST( string type );
+	virtual string UINT();
+	virtual string PTR_CONST();
+	virtual string PTR_CONST_END();
+	virtual string CTRL_FLOW();
+
+	virtual void writeExports();
+	virtual void SUB_ACTION( ostream &ret, GenInlineItem *item, 
+			int targState, bool inFinish, bool csForced );
+	virtual void ACTION( ostream &ret, GenAction *action, int targState, 
+			bool inFinish, bool csForced );
+
 };
 
 #endif

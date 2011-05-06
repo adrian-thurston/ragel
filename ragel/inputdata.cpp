@@ -46,6 +46,7 @@ void InputData::cdDefaultFileName( const char *inputFile )
 			switch ( hostLang->lang ) {
 				case HostLang::C: defExtension = ".c"; break;
 				case HostLang::D: defExtension = ".d"; break;
+				case HostLang::D2: defExtension = ".d"; break;
 				default: break;
 			}
 			outputFileName = fileNameFromStem( inputFile, defExtension );
@@ -109,6 +110,7 @@ void InputData::makeOutputStream()
 		switch ( hostLang->lang ) {
 			case HostLang::C:
 			case HostLang::D:
+			case HostLang::D2:
 				cdDefaultFileName( inputFileName );
 				break;
 			case HostLang::Java:

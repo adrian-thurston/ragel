@@ -219,7 +219,7 @@ void escapeLineDirectivePath( std::ostream &out, char *path )
 
 void processArgs( int argc, const char **argv, InputData &id )
 {
-	ParamCheck pc("xo:dnmleabjkS:M:I:CDJZRAOvHh?-:sT:F:G:P:LpV", argc, argv);
+	ParamCheck pc("xo:dnmleabjkS:M:I:CDEJZRAOvHh?-:sT:F:G:P:LpV", argc, argv);
 
 	/* FIXME: Need to check code styles VS langauge. */
 
@@ -316,6 +316,9 @@ void processArgs( int argc, const char **argv, InputData &id )
 				break;
 			case 'D':
 				hostLang = &hostLangD;
+				break;
+			case 'E':
+				hostLang = &hostLangD2;
 				break;
 			case 'Z':
 				hostLang = &hostLangGo;

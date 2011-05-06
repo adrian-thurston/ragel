@@ -92,4 +92,14 @@ struct DIpGotoCodeGen
 		FsmCodeGen(out), IpGotoCodeGen(out), DCodeGen(out) {}
 };
 
+/*
+ * class D2IpGotoCodeGen
+ */
+struct D2IpGotoCodeGen
+	: public IpGotoCodeGen, public D2CodeGen
+{
+	D2IpGotoCodeGen( ostream &out ) : 
+		FsmCodeGen(out), IpGotoCodeGen(out), D2CodeGen(out) {}
+};
+
 #endif

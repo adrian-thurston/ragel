@@ -125,6 +125,7 @@ HostType hostTypesOCaml[] =
 
 HostLang hostLangC =    { HostLang::C,    hostTypesC,    8, hostTypesC+0,    true };
 HostLang hostLangD =    { HostLang::D,    hostTypesD,    9, hostTypesD+2,    true };
+HostLang hostLangD2 =    { HostLang::D2,    hostTypesD,    9, hostTypesD+2,    true };
 HostLang hostLangGo =   { HostLang::Go,   hostTypesGo,   7, hostTypesGo+0,   false };
 HostLang hostLangJava = { HostLang::Java, hostTypesJava, 4, hostTypesJava+2, false };
 HostLang hostLangRuby = { HostLang::Ruby, hostTypesRuby, 2, hostTypesRuby+0, false };

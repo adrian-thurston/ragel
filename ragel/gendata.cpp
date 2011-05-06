@@ -153,6 +153,35 @@ CodeGenData *cdMakeCodeGen( const char *sourceFileName, const char *fsmName, ost
 		}
 		break;
 
+	case HostLang::D2:
+		switch ( codeStyle ) {
+		case GenTables:
+			codeGen = new D2TabCodeGen(out);
+			break;
+		case GenFTables:
+			codeGen = new D2FTabCodeGen(out);
+			break;
+		case GenFlat:
+			codeGen = new D2FlatCodeGen(out);
+			break;
+		case GenFFlat:
+			codeGen = new D2FFlatCodeGen(out);
+			break;
+		case GenGoto:
+			codeGen = new D2GotoCodeGen(out);
+			break;
+		case GenFGoto:
+			codeGen = new D2FGotoCodeGen(out);
+			break;
+		case GenIpGoto:
+			codeGen = new D2IpGotoCodeGen(out);
+			break;
+		case GenSplit:
+			codeGen = new D2SplitCodeGen(out);
+			break;
+		}
+		break;
+
 	default: break;
 	}
 
@@ -313,6 +342,8 @@ CodeGenData *makeCodeGen( const char *sourceFileName, const char *fsmName, ostre
 		cgd = cdMakeCodeGen( sourceFileName, fsmName, out );
 	else if ( hostLang == &hostLangD )
 		cgd = cdMakeCodeGen( sourceFileName, fsmName, out );
+	else if ( hostLang == &hostLangD2 )
+		cgd = cdMakeCodeGen( sourceFileName, fsmName, out );
 	else if ( hostLang == &hostLangGo )
 		cgd = goMakeCodeGen( sourceFileName, fsmName, out );
 	else if ( hostLang == &hostLangJava )
@@ -332,6 +363,8 @@ void lineDirective( ostream &out, const char *fileName, int line )
 		if ( hostLang == &hostLangC )
 			cdLineDirective( out, fileName, line );
 		else if ( hostLang == &hostLangD )
+			cdLineDirective( out, fileName, line );
+		else if ( hostLang == &hostLangD2 )
 			cdLineDirective( out, fileName, line );
 		else if ( hostLang == &hostLangGo )
 			gothicLineDirective( out, fileName, line );
