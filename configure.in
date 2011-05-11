@@ -91,6 +91,6 @@ fi
 fi # build_parsers
 
 dnl write output files
-AC_OUTPUT(Makefile colm/Makefile)
+AC_OUTPUT(Makefile colm/Makefile aapl/Makefile)
 
 echo "configuration of colm complete"

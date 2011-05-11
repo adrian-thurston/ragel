@@ -74,12 +74,11 @@
 # ADT install: $(INSTALL_SUBDIRS)
 # ADT 
 
-
 SUBDIRS = colm
-DIST_SUBDIRS = $(SUBDIRS) aapl test
+DIST_SUBDIRS = $(SUBDIRS) aapl 
 
-#dist_doc_DATA = CREDITS ChangeLog
-#EXTRA_DIST = ragel.vim
+dist_doc_DATA =  colm.vim
+EXTRA_DIST = colm.vim
 
 # This file is checked for by the configure script and its existence causes the
 # parsers and the manual to not be built when the distribution is built.

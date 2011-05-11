@@ -155,6 +155,11 @@ colm_LDADD = libcolmp.a
 # ADT DEFS_COLM += -DCOLM_LOG -DPREFIX='"$(prefix)"'
 
 colm_SOURCES = \
+	buffer.h bytecode.h colm.h debug.h dotgen.h fsmcodegen.h fsmgraph.h \
+	fsmrun.h input.h keyops.h lmparse.h lmscan.h map.h parsedata.h \
+	parsetree.h pcheck.h pdacodegen.h pdagraph.h pdarun.h pool.h redbuild.h \
+	redfsm.h rtvector.h tree.h version.h \
+	\
 	analysis.cpp compile.cpp lmparse.cpp lmscan.cpp parsetree.cpp \
 	parsedata.cpp fsmstate.cpp fsmbase.cpp fsmattach.cpp fsmmin.cpp \
 	fsmgraph.cpp pdagraph.cpp pdabuild.cpp pdacodegen.cpp fsmcodegen.cpp \
@@ -163,3 +168,8 @@ colm_SOURCES = \
 
 BUILT_SOURCES = \
 	version.h lmscan.cpp lmparse.h lmparse.cpp 
+
+version.h: Makefile
+	echo '#define VERSION "$(PACKAGE_VERSION)"' > version.h
+	echo '#define PUBDATE "$(PUBDATE)"' >> version.h
+
