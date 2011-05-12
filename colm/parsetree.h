@@ -45,6 +45,10 @@
 #define OP_LogicalOr 'o'
 #define OP_Deref 'd'
 
+#if SIZEOF_LONG != 4 && SIZEOF_LONG != 8 
+	#error "SIZEOF_LONG contained an unexpected value"
+#endif
+
 struct NameInst;
 struct FsmGraph;
 struct RedFsm;

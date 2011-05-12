@@ -24,9 +24,14 @@
 
 #include "input.h"
 #include "fsmrun.h"
+#include "config.h"
 
 #ifdef __cplusplus
 extern "C" {
+#endif
+
+#if SIZEOF_LONG != 4 && SIZEOF_LONG != 8 
+	#error "SIZEOF_LONG contained an unexpected value"
 #endif
 
 typedef unsigned char Code;

@@ -33,6 +33,10 @@
 #include "debug.h"
 #include "config.h"
 
+#if SIZEOF_LONG != 4 && SIZEOF_LONG != 8 
+	#error "SIZEOF_LONG contained an unexpected value"
+#endif
+
 #undef COLM_LOG
 #undef COLM_LOG_BYTECODE
 #undef COLM_LOG_PARSE

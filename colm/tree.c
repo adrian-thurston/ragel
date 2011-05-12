@@ -626,12 +626,12 @@ Tree *copyRealTree( Program *prg, Tree *tree, Kid *oldNextDown,
 
 List *copyList( Program *prg, List *list, Kid *oldNextDown, Kid **newNextDown )
 {
-	#ifdef COLM_LOG_BYTECODE
-	if ( colm_log_bytecode ) {
-		cerr << "splitting list: " << list << " refs: " << 
-				list->refs << endl;
-	}
-	#endif
+//	#ifdef COLM_LOG_BYTECODE
+//	if ( colm_log_bytecode ) {
+//		cerr << "splitting list: " << list << " refs: " << 
+//				list->refs << endl;
+//	}
+//	#endif
 
 	/* Not a need copy. */
 	List *newList = (List*)mapElAllocate( prg );
@@ -658,12 +658,12 @@ List *copyList( Program *prg, List *list, Kid *oldNextDown, Kid **newNextDown )
 	
 Map *copyMap( Program *prg, Map *map, Kid *oldNextDown, Kid **newNextDown )
 {
-	#ifdef COLM_LOG_BYTECODE
-	if ( colm_log_bytecode ) {
-		cerr << "splitting map: " << map << " refs: " << 
-				map->refs << endl;
-	}
-	#endif
+//	#ifdef COLM_LOG_BYTECODE
+//	if ( colm_log_bytecode ) {
+//		cerr << "splitting map: " << map << " refs: " << 
+//				map->refs << endl;
+//	}
+//	#endif
 
 	Map *newMap = (Map*)mapElAllocate( prg );
 	newMap->id = map->genericInfo->langElId;
@@ -725,12 +725,12 @@ Tree *splitTree( Program *prg, Tree *tree )
 		assert( tree->refs >= 1 );
 
 		if ( tree->refs > 1 ) {
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode ) {
-				cerr << "splitting tree: " << tree << " refs: " << 
-						tree->refs << endl;
-			}
-			#endif
+//			#ifdef COLM_LOG_BYTECODE
+//			if ( colm_log_bytecode ) {
+//				cerr << "splitting tree: " << tree << " refs: " << 
+//						tree->refs << endl;
+//			}
+//			#endif
 
 			Kid *oldNextDown = 0, *newNextDown = 0;
 			Tree *newTree = copyTree( prg, tree, oldNextDown, &newNextDown );
@@ -1063,13 +1063,13 @@ int matchPattern( Tree **bindings, Program *prg, long pat, Kid *kid, int checkNe
 {
 	PatReplNode *nodes = prg->rtd->patReplNodes;
 
-	#ifdef COLM_LOG_MATCH
-	if ( colm_log_match ) {
-		LangElInfo *lelInfo = prg->rtd->lelInfo;
-		cerr << "match pattern " << ( pat == -1 ? "NULL" : lelInfo[nodes[pat].id].name ) <<
-				" vs " << ( kid == 0 ? "NULL" : lelInfo[kid->tree->id].name ) << endl;
-	}
-	#endif
+//	#ifdef COLM_LOG_MATCH
+//	if ( colm_log_match ) {
+//		LangElInfo *lelInfo = prg->rtd->lelInfo;
+//		cerr << "match pattern " << ( pat == -1 ? "NULL" : lelInfo[nodes[pat].id].name ) <<
+//				" vs " << ( kid == 0 ? "NULL" : lelInfo[kid->tree->id].name ) << endl;
+//	}
+//	#endif
 
 	/* match node, recurse on children. */
 	if ( pat != -1 && kid != 0 ) {
@@ -1089,11 +1089,11 @@ int matchPattern( Tree **bindings, Program *prg, long pat, Kid *kid, int checkNe
 
 			/* No failure, all okay. */
 			if ( nodes[pat].bindId > 0 ) {
-				#ifdef COLM_LOG_MATCH
-				if ( colm_log_match ) {
-					cerr << "bindId: " << nodes[pat].bindId << endl;
-				}
-				#endif
+//				#ifdef COLM_LOG_MATCH
+//				if ( colm_log_match ) {
+//					cerr << "bindId: " << nodes[pat].bindId << endl;
+//				}
+//				#endif
 				bindings[nodes[pat].bindId] = kid->tree;
 			}
 
@@ -1207,12 +1207,12 @@ void splitRef( Tree ***psp, Program *prg, Ref *fromRef )
 	/* Now traverse the list, which goes down. */
 	while ( ref != 0 ) {
 		if ( ref->kid->tree->refs > 1 ) {
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode ) {
-				cerr << "splitting tree: " << ref->kid << " refs: " << 
-						ref->kid->tree->refs << endl;
-			}
-			#endif
+//			#ifdef COLM_LOG_BYTECODE
+//			if ( colm_log_bytecode ) {
+//				cerr << "splitting tree: " << ref->kid << " refs: " << 
+//						ref->kid->tree->refs << endl;
+//			}
+//			#endif
 
 			Ref *nextDown = ref->next;
 			while ( nextDown != 0 && nextDown->kid == ref->kid )

@@ -556,12 +556,12 @@ void executeGenerationAction( Tree **sp, Program *prg, FsmRun *fsmRun, PdaRun *p
 void generationAction( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, 
 		PdaRun *pdaRun, int id, Head *tokdata, int namedLangEl, int bindId )
 {
-	#ifdef COLM_LOG_PARSE
-	if ( colm_log_parse ) {
-		cerr << "generation action: " << 
-				pdaRun->tables->rtd->lelInfo[id].name << endl;
-	}
-	#endif
+//	#ifdef COLM_LOG_PARSE
+//	if ( colm_log_parse ) {
+//		cerr << "generation action: " << 
+//				pdaRun->tables->rtd->lelInfo[id].name << endl;
+//	}
+//	#endif
 
 	/* Find the code. */
 	Code *code = pdaRun->tables->rtd->frameInfo[
@@ -984,11 +984,11 @@ long scanToken( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 void scannerError( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
 {
 	if ( pdaRunGetNextRegion( pdaRun, 1 ) != 0 ) {
-		#ifdef COLM_LOG_PARSE
-		if ( colm_log_parse ) {
-			cerr << "scanner failed, trying next region" << endl;
-		}
-		#endif
+//		#ifdef COLM_LOG_PARSE
+//		if ( colm_log_parse ) {
+//			cerr << "scanner failed, trying next region" << endl;
+//		}
+//		#endif
 
 		/* May have accumulated ignore tokens from a previous region.
 		 * need to rescan them since we won't be sending tokens from
@@ -997,12 +997,12 @@ void scannerError( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *
 		pdaRun->nextRegionInd += 1;
 	}
 	else if ( pdaRun->numRetry > 0 ) {
-		/* Invoke the parser's error handling. */
-		#ifdef COLM_LOG_PARSE
-		if ( colm_log_parse ) {
-			cerr << "invoking parse error from the scanner" << endl;
-		}
-		#endif
+//		/* Invoke the parser's error handling. */
+//		#ifdef COLM_LOG_PARSE
+//		if ( colm_log_parse ) {
+//			cerr << "invoking parse error from the scanner" << endl;
+//		}
+//		#endif
 
 		sendBackQueuedIgnore( sp, inputStream, fsmRun, pdaRun );
 		parseToken( sp, pdaRun, fsmRun, inputStream, 0 );
