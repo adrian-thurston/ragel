@@ -78,20 +78,6 @@
 # ADT 	echo '#define VERSION "$(VERSION)"' > version.h
 # ADT 	echo '#define PUBDATE "$(PUBDATE)"' >> version.h
 # ADT 
-# ADT ifeq ($(BUILD_PARSERS),true)
-# ADT 
-# ADT lmparse.h: lmparse.kh
-# ADT 	kelbt -o $@ $<
-# ADT 
-# ADT lmparse.cpp: lmparse.kl lmparse.kh
-# ADT 	kelbt -o $@ $<
-# ADT 
-# ADT lmscan.cpp: lmparse.h
-# ADT 
-# ADT lmscan.cpp: lmscan.rl
-# ADT 	ragel -G2 -o $@ $<
-# ADT 
-# ADT endif
 # ADT 
 # ADT $(COLM_OBJ): %.o: %.cpp
 # ADT 	@$(CXX) -M $(DEFS_COLM) $(INCS) $< > .$*.d
@@ -153,6 +139,21 @@ colm_CXXFLAGS = \
 colm_LDADD = libcolmp.a
 
 # ADT DEFS_COLM += -DCOLM_LOG -DPREFIX='"$(prefix)"'
+
+if BUILD_PARSERS
+ 
+lmparse.h: lmparse.kh
+	kelbt -o $@ $<
+
+lmparse.cpp: lmparse.kl lmparse.kh
+	kelbt -o $@ $<
+
+lmscan.cpp: lmparse.h
+
+lmscan.cpp: lmscan.rl
+	ragel -G2 -o $@ $<
+ 
+endif
 
 colm_SOURCES = \
 	buffer.h bytecode.h colm.h debug.h dotgen.h fsmcodegen.h fsmgraph.h \
