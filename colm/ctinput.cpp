@@ -1,5 +1,5 @@
 /*
- *  Copyright 2007-2009 Adrian Thurston <thurston@complang.org>
+ *  Copyright 2007-2011 Adrian Thurston <thurston@complang.org>
  */
 
 /*  This file is part of Colm.

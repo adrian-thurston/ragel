@@ -1,5 +1,5 @@
 /*
- *  Copyright 2010 Adrian Thurston <thurston@complang.org>
+ *  Copyright 2010-2011 Adrian Thurston <thurston@complang.org>
  */
 
 /*  This file is part of Aapl.
