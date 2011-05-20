@@ -4,6 +4,8 @@
 	write data;
 }%%
 
+let fail fmt = Printf.ksprintf failwith fmt
+
 let atoi data =
   let cs = ref 0 in
   let p = ref 0 in
@@ -28,7 +30,7 @@ let atoi data =
 		res := (-1) * !res ;
 
 	if !cs < atoi_first_final then
-    T.fail "atoi: cs %d < %d" !cs atoi_first_final;
+    fail "atoi: cs %d < %d" !cs atoi_first_final;
 
 	!res 
 ;;

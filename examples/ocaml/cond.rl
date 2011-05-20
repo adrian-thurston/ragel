@@ -2,6 +2,8 @@
 %% machine cond;
 %% write data;
 
+let fail fmt = Printf.ksprintf failwith fmt
+
 let run data =
   let cs = ref 0 in
   let p = ref 0 in
@@ -22,7 +24,7 @@ let run data =
 	}%%
 
 	if !cs < cond_first_final then
-    T.fail "parsing failed"
+    fail "parsing failed"
 
 let () =
   run "d2:aac"

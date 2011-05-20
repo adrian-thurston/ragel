@@ -23,6 +23,8 @@
 %% machine rpn;
 %% write data;
 
+let fail fmt = Printf.ksprintf failwith fmt
+
 let rpn data =
 	let (cs, p, pe) = (ref 0, ref 0, ref (String.length data)) in
 	let mark = ref 0 in
@@ -57,13 +59,13 @@ let rpn data =
 	if !cs < rpn_first_final then
   begin
 		if !p = !pe then
-			T.fail "unexpected eof"
+			fail "unexpected eof"
 		else
-			T.fail "error at position %d" !p
+			fail "error at position %d" !p
   end;
 
 	if Stack.is_empty st then
-		T.fail "rpn stack empty on result"
+		fail "rpn stack empty on result"
   else
   	Stack.pop st
 

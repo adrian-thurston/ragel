@@ -21,11 +21,13 @@
   write data;
 }%%
 
+let fail fmt = Printf.ksprintf failwith fmt
+
 let () =
   let expect = ref [`Pat1; `Any; `Pat2; `Any; `Any; `Any; ] in
   let got z = match !expect with
-    | [] -> T.fail "nothing more expected"
-    | x::xs -> expect := xs; if z <> x then T.fail "mismatch"
+    | [] -> fail "nothing more expected"
+    | x::xs -> expect := xs; if z <> x then fail "mismatch"
   in
   let ts = ref 0 and te = ref 0 and cs = ref 0 and act = ref 0 in
   let data = "araabccde" in

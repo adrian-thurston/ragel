@@ -76,6 +76,8 @@
 
 %% write data nofinal;
 
+let fail fmt = Printf.ksprintf failwith fmt
+
 let () =
 	let data = String.create 2048 in
 	let cs = ref 0 and act = ref 0 and have = ref 0 and curlin = ref 1 in
@@ -91,7 +93,7 @@ let () =
 		if space = 0 then
 			(* We've used up the entire buffer storing an already-parsed token
 			 * prefix that must be preserved. *)
-			T.fail "OUT OF BUFFER SPACE";
+			fail "OUT OF BUFFER SPACE";
 
     let len = Unix.read Unix.stdin data !p space in
 		let pe = ref (!p + len) in
@@ -102,7 +104,7 @@ let () =
 		%% write exec;
 
 		if !cs = clang_error then
-			T.fail "PARSE ERROR";
+			fail "PARSE ERROR";
 
 		if !ts = -1 then
 			have := 0
