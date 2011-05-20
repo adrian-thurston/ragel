@@ -1256,6 +1256,16 @@ UniqueType *LangTerm::evaluateConstruct( ParseData *pd, CodeVect &code ) const
 
 	assignFieldArgs( pd, code, replUT );
 
+	if ( varRef != 0 ) {
+		code.append( IN_DUP_TOP );
+
+		/* Get the type of the variable being assigned to. */
+		VarRefLookup lookup = varRef->lookupField( pd );
+
+		varRef->loadObj( pd, code, lookup.lastPtrInQual, false );
+		varRef->setField( pd, code, lookup.inObject, replUT, false );
+	}
+
 	return replUT;
 }
 
@@ -1395,6 +1405,16 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 	/* Lookup the type of the replacement and store it in the replacement
 	 * object so that replacement parsing has a target. */
 	replacement->langEl = langEl;
+
+	if ( varRef != 0 ) {
+		code.append( IN_DUP_TOP );
+
+		/* Get the type of the variable being assigned to. */
+		VarRefLookup lookup = varRef->lookupField( pd );
+
+		varRef->loadObj( pd, code, lookup.lastPtrInQual, false );
+		varRef->setField( pd, code, lookup.inObject, ut, false );
+	}
 
 	return ut;
 }

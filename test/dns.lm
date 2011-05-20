@@ -459,7 +459,7 @@ int print_name( n: name m: name_map )
 int print_all_names( s: start )
 {
 	for M: message in s {
-		m: name_map = construct name_map []
+		construct m: name_map []
 
 		O: octet = octet in M
 
@@ -467,9 +467,9 @@ int print_all_names( s: start )
 			match N [name_part* E:name_end]
 
 			for NP: name_part* in N {
-				if match NP [L:octet nbytes name_part*] {
+				if match NP [L: octet nbytes name_part*] {
 					messageOffset: int = L.pos - O.pos
-					n: name = construct name [NP E]
+					construct n: name [NP E]
 					m.insert( messageOffset n )
 				}
 			}

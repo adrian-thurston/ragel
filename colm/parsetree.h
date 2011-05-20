@@ -1619,6 +1619,11 @@ struct LangTerm
 		: loc(loc), type(type), typeRef(typeRef), fieldInitArgs(fieldInitArgs), 
 		replacement(replacement) {}
 
+	LangTerm( const InputLoc &loc, Type type, LangVarRef *varRef, ObjField *objField,
+			TypeRef *typeRef, FieldInitVect *fieldInitArgs, Replacement *replacement )
+		: loc(loc), type(type), varRef(varRef), objField(objField), typeRef(typeRef), 
+			fieldInitArgs(fieldInitArgs), replacement(replacement) {}
+
 	LangTerm( Type type, LangExpr *expr )
 		: type(type), expr(expr) {}
 	
@@ -1627,6 +1632,9 @@ struct LangTerm
 
 	LangTerm( const InputLoc &loc, Type type, TypeRef *typeRef, KlangEl *langEl, Replacement *replacement )
 		: loc(loc), type(type), varRef(0), typeRef(typeRef), langEl(langEl), replacement(replacement) {}
+
+	LangTerm( const InputLoc &loc, Type type, LangVarRef *varRef, ObjField *objField, TypeRef *typeRef, KlangEl *langEl, Replacement *replacement )
+		: loc(loc), type(type), varRef(varRef), objField(objField), typeRef(typeRef), langEl(langEl), replacement(replacement) {}
 	
 	void analyze( ParseData *pd ) const;
 
@@ -1646,6 +1654,7 @@ struct LangTerm
 	ExprVect *args;
 	NamespaceQual *nspaceQual;
 	String data;
+	ObjField *objField;
 	TypeRef *typeRef;
 	Pattern *pattern;
 	FieldInitVect *fieldInitArgs;

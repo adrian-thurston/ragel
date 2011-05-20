@@ -1640,7 +1640,16 @@ code_unary: code_factor
 		$$->expr = $1->expr;
 	};
 
+nonterm opt_capture uses var_def;
 
+opt_capture: TK_Word ':'
+	final {
+		$$->objField = new ObjField( $1->loc, 0, $1->data );
+	};
+opt_capture:
+	final {
+		$$->objField = 0;
+	};
 
 nonterm code_factor uses code_expr;
 
@@ -1675,19 +1684,36 @@ code_factor: KW_New code_factor
 		$$->expr = new LangExpr( new LangTerm( LangTerm::NewType, $2->expr ) );
 	};
 code_factor: 
-	KW_Construct type_ref opt_field_init repl_list
+	KW_Construct opt_capture type_ref opt_field_init repl_list
 	final {
 		Namespace *nspace = namespaceStack.top();
 		TokenRegion *region = regionStack.top();
 		Replacement *replacement = new Replacement( $1->loc, nspace, region, replItemList, 
 				pd->nextPatReplId++ );
 		pd->replList.append( replacement );
+		
+		LangVarRef *varRef = 0;
+		if ( $2->objField != 0 )
+			varRef = new LangVarRef( $2->objField->loc, new QualItemVect, $2->objField->name );
+
 		$$->expr = new LangExpr( new LangTerm( $1->loc, LangTerm::ConstructType,
-				$2->typeRef, $3->fieldInitVect, replacement ) );
+				varRef, $2->objField, $3->typeRef, $4->fieldInitVect, replacement ) );
+
+		/* Check for redeclaration. */
+		if ( $2->objField != 0 ) {
+			if ( pd->curLocalFrame->checkRedecl( $2->objField->name ) != 0 ) {
+				error( $2->objField->loc ) << "variable " << $2->objField->name <<
+						" redeclared" << endp;
+			}
+
+			/* Insert it into the field map. */
+			$2->objField->typeRef = $3->typeRef;
+			pd->curLocalFrame->insertField( $2->objField->name, $2->objField );
+		}
 	};
-code_factor: KW_Parse type_ref '(' opt_code_expr_list ')'
+code_factor: KW_Parse opt_capture type_ref '(' opt_code_expr_list ')'
 	final {
-		String parserName = $2->typeRef->typeName + "_parser";
+		String parserName = $3->typeRef->typeName + "_parser";
 
 		/* Get the language element. */
 		Namespace *nspace = namespaceStack.top();
@@ -1702,7 +1728,7 @@ code_factor: KW_Parse type_ref '(' opt_code_expr_list ')'
 		langEl->type = KlangEl::NonTerm;
 
 		GenericType *generic = new GenericType( parserName, GEN_PARSER, 
-				pd->nextGenericId++, langEl, $2->typeRef );
+				pd->nextGenericId++, langEl, $3->typeRef );
 
 		/* Add one empty production. */
 		ProdElList *emptyList = new ProdElList;
@@ -1715,13 +1741,30 @@ code_factor: KW_Parse type_ref '(' opt_code_expr_list ')'
 				new ReplItemList, pd->nextPatReplId++ );
 		pd->replList.append( replacement );
 
-		$$->expr = new LangExpr( new LangTerm( $1->loc, LangTerm::ParseType, $2->typeRef, langEl, replacement ) );
-		$$->expr->term->args = $4->exprVect;
+		LangVarRef *varRef = 0;
+		if ( $2->objField != 0 )
+			varRef = new LangVarRef( $2->objField->loc, new QualItemVect, $2->objField->name );
+
+		$$->expr = new LangExpr( new LangTerm( $1->loc, LangTerm::ParseType,
+				varRef, $2->objField, $3->typeRef, langEl, replacement ) );
+		$$->expr->term->args = $5->exprVect;
+
+		/* Check for redeclaration. */
+		if ( $2->objField != 0 ) {
+			if ( pd->curLocalFrame->checkRedecl( $2->objField->name ) != 0 ) {
+				error( $2->objField->loc ) << "variable " << $2->objField->name <<
+						" redeclared" << endp;
+			}
+
+			/* Insert it into the field map. */
+			$2->objField->typeRef = $3->typeRef;
+			pd->curLocalFrame->insertField( $2->objField->name, $2->objField );
+		}
 	};
-code_factor: KW_ParseStop type_ref '(' opt_code_expr_list ')'
+code_factor: KW_ParseStop opt_capture type_ref '(' opt_code_expr_list ')'
 	final {
 		/* This is a silly clone. To be fixed later. */
-		String parserName = $2->typeRef->typeName + "_parser";
+		String parserName = $3->typeRef->typeName + "_parser";
 
 		/* Get the language element. */
 		Namespace *nspace = namespaceStack.top();
@@ -1736,7 +1779,7 @@ code_factor: KW_ParseStop type_ref '(' opt_code_expr_list ')'
 		langEl->type = KlangEl::NonTerm;
 
 		GenericType *generic = new GenericType( parserName, GEN_PARSER, 
-				pd->nextGenericId++, langEl, $2->typeRef );
+				pd->nextGenericId++, langEl, $3->typeRef );
 
 		/* Add one empty production. */
 		ProdElList *emptyList = new ProdElList;
@@ -1749,9 +1792,25 @@ code_factor: KW_ParseStop type_ref '(' opt_code_expr_list ')'
 				new ReplItemList, pd->nextPatReplId++ );
 		pd->replList.append( replacement );
 
+		LangVarRef *varRef = 0;
+		if ( $2->objField != 0 )
+			varRef = new LangVarRef( $2->objField->loc, new QualItemVect, $2->objField->name );
+
 		$$->expr = new LangExpr( new LangTerm( $1->loc, LangTerm::ParseStopType, 
-				$2->typeRef, langEl, replacement ) );
-		$$->expr->term->args = $4->exprVect;
+				varRef, $2->objField, $3->typeRef, langEl, replacement ) );
+		$$->expr->term->args = $5->exprVect;
+
+		/* Check for redeclaration. */
+		if ( $2->objField != 0 ) {
+			if ( pd->curLocalFrame->checkRedecl( $2->objField->name ) != 0 ) {
+				error( $2->objField->loc ) << "variable " << $2->objField->name <<
+						" redeclared" << endp;
+			}
+
+			/* Insert it into the field map. */
+			$2->objField->typeRef = $3->typeRef;
+			pd->curLocalFrame->insertField( $2->objField->name, $2->objField );
+		}
 
 	};
 code_factor: KW_TypeId type_ref
