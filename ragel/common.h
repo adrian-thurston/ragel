@@ -114,6 +114,8 @@ struct HostType
 	const char *data2;
 	const char *internalName;
 	bool isSigned;
+	bool isOrd;
+	bool isChar;
 	long long minVal;
 	long long maxVal;
 	unsigned int size;

@@ -340,8 +340,10 @@ string CSharpFsmCodeGen::ALPHA_KEY( Key key )
 	if (key.getVal() > 0xFFFF) {
 		ret << key.getVal();
 	} else {
-		ret << "'\\u" << std::hex << std::setw(4) << std::setfill('0') << 
-			key.getVal() << "'";
+		if ( keyOps->alphType->isChar )
+			ret << "'\\u" << std::hex << std::setw(4) << std::setfill('0') << key.getVal() << "'";
+		else
+			ret << key.getVal();
 	}
 	//ret << "(char) " << key.getVal();
 	return ret.str();
