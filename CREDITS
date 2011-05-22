@@ -27,6 +27,10 @@ missed.
 
 * Go code generation contributed by Justine Tunney.
 
+* D2 patch from Johannes Pfau.
+
+* OCaml patch from ygrek.
+
 * Feedback, Packaging, and Fixes provided by:
 
     Bob Tennent, Robert Lemmen, Tobias Jahn, Cris Bailiff, Buddy Betts,

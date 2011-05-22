@@ -1,10 +1,24 @@
-Ragel 6.7
-=========
- -The C# _acts and _nacts vars should not be typed based on the size of the
-  array elements they point to. Fixes a bug reported by Attila Sztupák.
- -Fix for the C code generator: when comparing the wide type against a literal
-  we need to pick the right signedness for the literal.
-  
+Ragel 6.7 - May 22, 2011
+========================
+ -The C vim file now supports L,l on the end of literal numbers, other syntax
+  highlighting fixes.
+ -Added an explicit cast when modifying _trans to eliminate compiler warnings 
+  on Windows/VC++
+ -Fix for ruby 1.9 compatibility.
+ -Fix for include directories (-I option) on Windows/VC++
+ -Can now rename data variable in C# code generator.
+ -Fix for non-char alphtype in C# code generator.
+ -Fix for signedness of wide char in C code generator. when comparing the wide
+  type against a literal we need to pick the right signedness for the literal.
+ -Fixed arithmetic overflow in generated C# code. The C# _acts and _nacts vars
+  should not be typed based on the size of the array elements they point to.
+  Fixes a bug reported by Attila Sztupák.
+ -Made the -L option work for Ruby.
+ -Enhanced ragel.m4 (from Diego).
+ -Applied GO patch from Justine Tunney.
+ -Applied D2 patch from Johannes Pfau.
+ -Applied Ocaml patch from ygrek.
+
 Ragel 6.6 - Dec 2, 2009
 =======================
  -Applied a number of patches from Diego Elio 'Flameeyes' Pettenò. Should not
