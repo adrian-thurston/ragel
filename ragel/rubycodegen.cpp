@@ -311,8 +311,9 @@ string RubyCodeGen::GET_KEY()
 		ret << ")";
 	}
 	else {
-		/* Expression for retrieving the key, use simple dereference. */
-		ret << DATA() << "[" << P() << "]";
+		/* Expression for retrieving the key, use dereference and read ordinal,
+		 * for compatibility with Ruby 1.9. */
+		ret << DATA() << "[" << P() << "].ord";
 	}
 	return ret.str();
 }
