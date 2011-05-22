@@ -672,7 +672,12 @@ string CSharpCodeGen::GET_KEY()
 	}
 	else {
 		/* Expression for retrieving the key, use simple dereference. */
-		ret << "data[" << P() << "]";
+		if ( dataExpr == 0 )
+			ret << "data";
+		else
+			INLINE_LIST( ret, dataExpr, 0, false );
+
+		ret << "[" << P() << "]";
 	}
 	return ret.str();
 }
