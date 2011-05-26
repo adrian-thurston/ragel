@@ -1198,6 +1198,38 @@ struct UniqueType : public AvlTreeEl<UniqueType>
 	IterDef *iterDef;
 };
 
+/*
+ *  type_ref -> qualified_name
+ *  type_ref -> '*' type_ref
+ *  type_ref -> '&' type_ref
+ *  type_ref -> list type_ref type_ref
+ *  type_ref -> map type_ref type_ref
+ *  type_ref -> vector type_ref
+ *  type_ref -> parser type_ref
+ *  type_ref -> iter_tree type_ref
+ *  type_ref -> iter_child type_ref
+ *  type_ref -> iter_revchild type_ref
+ *  type_ref -> iter_repeat type_ref
+ *  type_ref -> iter_revrepeat type_ref
+ *  type_ref -> iter_user type_ref
+ *
+ *  type -> nil
+ *  type -> def term 
+ *  type -> def nonterm
+ *  type -> '*' type
+ *  type -> '&' type
+ *  type -> list type 
+ *  type -> map type type
+ *  type -> vector type
+ *  type -> parser type
+ *  type -> iter_tree type
+ *  type -> iter_child type
+ *  type -> iter_revchild type
+ *  type -> iter_repeat type
+ *  type -> iter_revrepeat type
+ *  type -> iter_user type
+ */
+
 struct CmpUniqueType
 {
 	static int compare( const UniqueType &ut1, const UniqueType &ut2 );
