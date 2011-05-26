@@ -35,7 +35,7 @@
 # ADT LDFLAGS +=
 # ADT 
 # ADT # Files in ALL_SRC that are generated.
-# ADT GEN_SRC = version.h lmscan.cpp lmparse.h lmparse.cpp 
+# ADT GEN_SRC = version.h lmscan.cc lmparse.h lmparse.cc 
 # ADT 
 # ADT RUNTIME_P = libcolmp.a
 # ADT RUNTIME_D = libcolmd.a
@@ -56,11 +56,11 @@
 # ADT CC = @CC@
 # ADT 
 # ADT # Get objects and dependencies from sources.
-# ADT COLM_OBJ = $(COLM_SRC:%.cpp=%.o)
+# ADT COLM_OBJ = $(COLM_SRC:%.cc=%.o)
 # ADT RUNTIME_OBJ_P = $(RUNTIME_SRC:%.c=%_p.o)
 # ADT RUNTIME_OBJ_D = $(RUNTIME_SRC:%.c=%_d.o)
 # ADT 
-# ADT DEPS = $(COLM_SRC:%.cpp=.%.d) $(RUNTIME_SRC:%.c=.%_p.d) $(RUNTIME_SRC:%.c=.%_d.d)
+# ADT DEPS = $(COLM_SRC:%.cc=.%.d) $(RUNTIME_SRC:%.c=.%_p.d) $(RUNTIME_SRC:%.c=.%_d.d)
 # ADT 
 # ADT # Rules.
 # ADT all: colm $(RUNTIME_P) $(RUNTIME_D)
@@ -79,7 +79,7 @@
 # ADT 	echo '#define PUBDATE "$(PUBDATE)"' >> version.h
 # ADT 
 # ADT 
-# ADT $(COLM_OBJ): %.o: %.cpp
+# ADT $(COLM_OBJ): %.o: %.cc
 # ADT 	@$(CXX) -M $(DEFS_COLM) $(INCS) $< > .$*.d
 # ADT 	$(CXX) -c $(CFLAGS) $(DEFS_COLM) $(INCS) -o $@ $<
 # ADT 
@@ -145,12 +145,12 @@ if BUILD_PARSERS
 lmparse.h: lmparse.kh
 	kelbt -o $@ $<
 
-lmparse.cpp: lmparse.kl lmparse.kh
+lmparse.cc: lmparse.kl lmparse.kh
 	kelbt -o $@ $<
 
-lmscan.cpp: lmparse.h
+lmscan.cc: lmparse.h
 
-lmscan.cpp: lmscan.rl
+lmscan.cc: lmscan.rl
 	ragel -G2 -o $@ $<
  
 endif
@@ -161,14 +161,14 @@ colm_SOURCES = \
 	parsetree.h pcheck.h pdacodegen.h pdagraph.h pdarun.h pool.h redbuild.h \
 	redfsm.h rtvector.h tree.h version.h \
 	\
-	analysis.cpp compile.cpp lmparse.cpp lmscan.cpp parsetree.cpp \
-	parsedata.cpp fsmstate.cpp fsmbase.cpp fsmattach.cpp fsmmin.cpp \
-	fsmgraph.cpp pdagraph.cpp pdabuild.cpp pdacodegen.cpp fsmcodegen.cpp \
-	redfsm.cpp fsmexec.cpp main.cpp redbuild.cpp closure.cpp fsmap.cpp \
-	dotgen.cpp pcheck.cpp ctinput.cpp
+	analysis.cc compile.cc lmparse.cc lmscan.cc parsetree.cc \
+	parsedata.cc fsmstate.cc fsmbase.cc fsmattach.cc fsmmin.cc \
+	fsmgraph.cc pdagraph.cc pdabuild.cc pdacodegen.cc fsmcodegen.cc \
+	redfsm.cc fsmexec.cc main.cc redbuild.cc closure.cc fsmap.cc \
+	dotgen.cc pcheck.cc ctinput.cc
 
 BUILT_SOURCES = \
-	version.h lmscan.cpp lmparse.h lmparse.cpp 
+	version.h lmscan.cc lmparse.h lmparse.cc 
 
 version.h: Makefile
 	echo '#define VERSION "$(PACKAGE_VERSION)"' > version.h

@@ -430,6 +430,42 @@ type_ref: basic_type_ref
 		$$->typeRef = $1->typeRef;
 	};
 
+type_ref: KW_Map '<' type_ref type_ref '>'
+	final {
+		Namespace *nspace = namespaceStack.top();
+
+		/* FIXME: Need uniqe name allocator for types. */
+		static int mapId = 0;
+		String name( 36, "__map%d", mapId++ );
+
+		KlangEl *langEl = getKlangEl( pd, nspace, name );
+
+		/* Check that the element wasn't previously defined as something else. */
+		if ( langEl->type != KlangEl::Unknown ) {
+			error($1->loc) << "'" << name  << 
+				"' already defined as something else" << endp;
+		}
+		langEl->type = KlangEl::NonTerm;
+
+		GenericType *generic = new GenericType( name, GEN_MAP,
+				pd->nextGenericId++, 0, $4->typeRef );
+		generic->keyTypeArg = $3->typeRef;
+
+		/* Add one empty production. */
+		ProdElList *emptyList = new ProdElList;
+		addProduction( $1->loc, String(), emptyList, false, 0, 0 );
+
+		nspace->genericList.append( generic );
+		langEl->generic = generic;
+
+		NamespaceQual *nspaceQual = new NamespaceQual( namespaceStack.top(), regionStack.top() );
+		$$->typeRef = new TypeRef( InputLoc(), nspaceQual, name );
+	};
+
+type_ref: KW_List '<' type_ref '>';
+type_ref: KW_Vector '<' type_ref '>';
+type_ref: KW_Accum '<' type_ref '>';
+
 nonterm basic_type_ref uses type_ref;
 
 basic_type_ref: region_qual TK_Word opt_repeat
@@ -444,6 +480,7 @@ basic_type_ref: KW_Ptr region_qual TK_Word opt_repeat
 		$$->typeRef->repeatType = $4->repeatType;
 		$$->typeRef->isPtr = true;
 	};
+
 
 nonterm var_def
 {
