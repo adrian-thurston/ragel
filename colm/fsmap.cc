@@ -20,6 +20,7 @@
  */
 
 #include "config.h"
+#include "defs.h"
 #include "fsmgraph.h"
 #include <iostream>
 

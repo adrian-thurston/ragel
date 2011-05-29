@@ -23,6 +23,7 @@
 #include <iostream>
 
 #include "config.h"
+#include "defs.h"
 #include "fsmrun.h"
 #include "redfsm.h"
 #include "parsedata.h"

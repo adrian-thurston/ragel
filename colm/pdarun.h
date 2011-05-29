@@ -25,6 +25,7 @@
 #include "input.h"
 #include "fsmrun.h"
 #include "config.h"
+#include "defs.h"
 
 #ifdef __cplusplus
 extern "C" {

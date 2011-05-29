@@ -1053,6 +1053,7 @@ void FsmCodeGen::writeCode()
 		"#include <string.h>\n"
 		"#include <assert.h>\n"
 		"#include <colm/config.h>\n"
+		"#include <colm/defs.h>\n"
 		"#include <colm/input.h>\n"
 		"#include <colm/tree.h>\n"
 		"\n"

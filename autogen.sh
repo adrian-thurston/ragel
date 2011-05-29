@@ -3,6 +3,6 @@
 
 libtoolize --copy --force
 aclocal
-# autoheader 
+autoheader 
 automake --foreign --add-missing 
 autoconf

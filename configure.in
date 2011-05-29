@@ -24,7 +24,7 @@ PUBDATE="May 2011"
 AM_INIT_AUTOMAKE([foreign])
 
 AC_SUBST(PUBDATE)
-AC_CONFIG_HEADER(colm/config.h)
+AC_CONFIG_HEADER([colm/config.h colm/defs.h])
 
 dnl Choose defaults for the build_parsers and build_manual vars. If the dist
 dnl file is present in the root then default to no, otherwise go for it.

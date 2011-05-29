@@ -23,6 +23,7 @@
 #include <iostream>
 
 #include "config.h"
+#include "defs.h"
 #include "fsmgraph.h"
 #include "mergesort.h"
 

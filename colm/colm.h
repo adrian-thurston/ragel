@@ -29,6 +29,7 @@
 #include <string>
 
 #include "config.h"
+#include "defs.h"
 #include "avltree.h"
 #include "keyops.h"
 
