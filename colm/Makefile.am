@@ -121,7 +121,7 @@ RUNTIME_SRC = \
 	codevect.c pool.c string.c tree.c bytecode.c
 
 RUNTIME_HDR = \
-	bytecode.h config.h debug.h pool.h input.h \
+	bytecode.h config.h defs.h debug.h pool.h input.h \
 	fsmrun.h pdarun.h map.h tree.h
 
 lib_LIBRARIES = libcolmp.a libcolmd.a
@@ -166,6 +166,10 @@ colm_SOURCES = \
 	fsmgraph.cc pdagraph.cc pdabuild.cc pdacodegen.cc fsmcodegen.cc \
 	redfsm.cc fsmexec.cc main.cc redbuild.cc closure.cc fsmap.cc \
 	dotgen.cc pcheck.cc ctinput.cc
+
+colmincdir = $(includedir)/colm
+
+colminc_HEADERS = $(RUNTIME_HDR)
 
 BUILT_SOURCES = \
 	version.h lmscan.cc lmparse.h lmparse.cc 

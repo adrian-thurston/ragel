@@ -26,6 +26,9 @@
 #include <fstream>
 #include <unistd.h>
 #include <sstream>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #include "colm.h"
 #include "debug.h"
@@ -269,7 +272,7 @@ void compileOutputCommand( const char *command )
 		cout << "there was a problem compiling the output" << endl;
 }
 
-void compileOutputPath( const char *argv0 )
+void compileOutputInstalled( const char *argv0 )
 {
 	/* Find the location of the colm program that is executing. */
 	char *location = strdup( argv0 );
@@ -304,7 +307,7 @@ void compileOutputPath( const char *argv0 )
 	compileOutputCommand( command );
 }
 
-void compileOutputRelative( const char *argv0 )
+void compileOutputInSource( const char *argv0 )
 {
 	/* Find the location of the colm program that is executing. */
 	char *location = strdup( argv0 );
@@ -331,12 +334,24 @@ void compileOutputRelative( const char *argv0 )
 	compileOutputCommand( command );
 }
 
-void compileOutput( const char *argv0 )
+bool inSourceTree( const char *argv0 )
 {
-	if ( strchr( argv0, '/' ) == 0 )
-		compileOutputPath( argv0 );
-	else
-		compileOutputRelative( argv0 );
+	const char *lastSlash = strrchr( argv0, '/' );
+	if ( lastSlash != 0 ) {
+		int rootLen = lastSlash - argv0 + 1;
+		char *mainPath = new char[rootLen + 16];
+		memcpy( mainPath, argv0, rootLen );
+		strcpy( mainPath + rootLen, "main.cc" );
+
+		struct stat sb;
+		int res = stat( mainPath, &sb );
+		delete[] mainPath;
+
+		if ( res == 0 && S_ISREG( sb.st_mode ) )
+			return true;
+	}
+
+	return false;
 }
 
 void process_args( int argc, const char **argv )
@@ -486,7 +501,11 @@ int main(int argc, const char **argv)
 		if ( outStream != 0 )
 			delete outStream;
 
-		compileOutput( argv[0] );
+		if ( inSourceTree( argv[0] ) )
+			compileOutputInSource( argv[0] );
+		else
+			compileOutputInstalled( argv[0] );
 	}
+
 	return 0;
 }
