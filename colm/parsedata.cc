@@ -1593,7 +1593,7 @@ void ParseData::semanticAnalysis()
 	resolveReplacementEls();
 	resolveAccumEls();
 
-	analyzeParseTree();
+	resolveParseTree();
 
 	/* This needs to happen before the scanner is built. */
 	resolveProductionEls();

@@ -777,13 +777,13 @@ struct ParseData
 	void resolveElementOf( ObjectDef *obj );
 	void makeFuncVisible( Function *func, bool isUserIter );
 
-	void analyzeFunction( Function *func );
-	void analyzeUserIter( Function *func );
-	void analyzePreEof( TokenRegion *region );
-	void analyzeRootBlock();
-	void analyzeTranslateBlock( KlangEl *langEl );
-	void analyzeReductionCode( Definition *prod );
-	void analyzeParseTree();
+	void resolveFunction( Function *func );
+	void resolveUserIter( Function *func );
+	void resolvePreEof( TokenRegion *region );
+	void resolveRootBlock();
+	void resolveTranslateBlock( KlangEl *langEl );
+	void resolveReductionCode( Definition *prod );
+	void resolveParseTree();
 
 	void compileFunction( Function *func, CodeVect &code );
 	void compileFunction( Function *func );

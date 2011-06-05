@@ -27,7 +27,7 @@
 
 using std::cout;
 
-void TypeRef::analyze( ParseData *pd ) const
+void TypeRef::resolve( ParseData *pd ) const
 {
 	/* Look for the production's associated region. */
 	Namespace *nspace = nspaceQual->getQual( pd );
@@ -64,12 +64,12 @@ void TypeRef::analyze( ParseData *pd ) const
 	}
 }
 
-void LangTerm::analyze( ParseData *pd ) const
+void LangTerm::resolve( ParseData *pd ) const
 {
 	/* FIXME: implementation missing here. */
 	switch ( type ) {
 		case ConstructType: {
-			typeRef->analyze( pd );
+			typeRef->resolve( pd );
 			break;
 		}
 		case VarRefType:
@@ -92,35 +92,35 @@ void LangTerm::analyze( ParseData *pd ) const
 	}
 }
 
-void LangVarRef::analyze( ParseData *pd ) const
+void LangVarRef::resolve( ParseData *pd ) const
 {
 
 }
 
-void LangExpr::analyze( ParseData *pd ) const
+void LangExpr::resolve( ParseData *pd ) const
 {
 	switch ( type ) {
 		case BinaryType: {
-			left->analyze( pd );
-			right->analyze( pd );
+			left->resolve( pd );
+			right->resolve( pd );
 			break;
 		}
 		case UnaryType: {
-			right->analyze( pd );
+			right->resolve( pd );
 			break;
 		}
 		case TermType: {
-			term->analyze( pd );
+			term->resolve( pd );
 			break;
 		}
 	}
 }
 
-void LangStmt::analyzeAccumItems( ParseData *pd ) const
+void LangStmt::resolveAccumItems( ParseData *pd ) const
 {
 	/* Assign bind ids to the variables in the replacement. */
 	for ( ReplItemList::Iter item = *accumText->list; item.lte(); item++ ) {
-		varRef->analyze( pd );
+		varRef->resolve( pd );
 
 		switch ( item->type ) {
 		case ReplItem::FactorType:
@@ -128,13 +128,13 @@ void LangStmt::analyzeAccumItems( ParseData *pd ) const
 		case ReplItem::InputText:
 			break;
 		case ReplItem::ExprType:
-			item->expr->analyze( pd );
+			item->expr->resolve( pd );
 			break;
 		}
 	}
 }
 
-void LangStmt::analyze( ParseData *pd ) const
+void LangStmt::resolve( ParseData *pd ) const
 {
 	switch ( type ) {
 		case PrintType: 
@@ -143,24 +143,24 @@ void LangStmt::analyze( ParseData *pd ) const
 		case PrintStreamType: {
 			/* Push the args backwards. */
 			for ( ExprVect::Iter pex = exprPtrVect->last(); pex.gtb(); pex-- )
-				(*pex)->analyze( pd );
+				(*pex)->resolve( pd );
 			break;
 		}
 		case ExprType: {
 			/* Evaluate the exrepssion, then pop it immediately. */
-			expr->analyze( pd );
+			expr->resolve( pd );
 			break;
 		}
 		case IfType: {
 			/* Evaluate the test. */
-			expr->analyze( pd );
+			expr->resolve( pd );
 
 			/* Analyze the if true branch. */
 			for ( StmtList::Iter stmt = *stmtList; stmt.lte(); stmt++ )
-				stmt->analyze( pd );
+				stmt->resolve( pd );
 
 			if ( elsePart != 0 )
-				elsePart->analyze( pd );
+				elsePart->resolve( pd );
 			break;
 		}
 		case ElseType: {
@@ -169,31 +169,31 @@ void LangStmt::analyze( ParseData *pd ) const
 		case RejectType:
 			break;
 		case WhileType: {
-			expr->analyze( pd );
+			expr->resolve( pd );
 
 			/* Compute the while block. */
 			for ( StmtList::Iter stmt = *stmtList; stmt.lte(); stmt++ )
-				stmt->analyze( pd );
+				stmt->resolve( pd );
 			break;
 		}
 		case AssignType: {
 			/* Evaluate the exrepssion. */
-			expr->analyze( pd );
+			expr->resolve( pd );
 			break;
 		}
 		case ForIterType: {
 			/* Evaluate and push the arguments. */
-			langTerm->analyze( pd );
+			langTerm->resolve( pd );
 
 			/* Compile the contents. */
 			for ( StmtList::Iter stmt = *stmtList; stmt.lte(); stmt++ )
-				stmt->analyze( pd );
+				stmt->resolve( pd );
 
 			break;
 		}
 		case ReturnType: {
 			/* Evaluate the exrepssion. */
-			expr->analyze( pd );
+			expr->resolve( pd );
 			break;
 		}
 		case BreakType: {
@@ -201,7 +201,7 @@ void LangStmt::analyze( ParseData *pd ) const
 		}
 		case YieldType: {
 			/* take a reference and yield it. Immediately reset the referece. */
-			varRef->analyze( pd );
+			varRef->resolve( pd );
 			break;
 		}
 		case AccumType: {
@@ -211,77 +211,77 @@ void LangStmt::analyze( ParseData *pd ) const
 	}
 }
 
-void CodeBlock::analyze( ParseData *pd ) const
+void CodeBlock::resolve( ParseData *pd ) const
 {
 	for ( StmtList::Iter stmt = *stmtList; stmt.lte(); stmt++ )
-		stmt->analyze( pd );
+		stmt->resolve( pd );
 }
 
-void ParseData::analyzeFunction( Function *func )
+void ParseData::resolveFunction( Function *func )
 {
 	CodeBlock *block = func->codeBlock;
-	block->analyze( this );
+	block->resolve( this );
 }
 
-void ParseData::analyzeUserIter( Function *func )
+void ParseData::resolveUserIter( Function *func )
 {
 	CodeBlock *block = func->codeBlock;
-	block->analyze( this );
+	block->resolve( this );
 }
 
-void ParseData::analyzePreEof( TokenRegion *region )
+void ParseData::resolvePreEof( TokenRegion *region )
 {
 	CodeBlock *block = region->preEofBlock;
-	block->analyze( this );
+	block->resolve( this );
 }
 
-void ParseData::analyzeRootBlock()
+void ParseData::resolveRootBlock()
 {
 	CodeBlock *block = rootCodeBlock;
-	block->analyze( this );
+	block->resolve( this );
 }
 
-void ParseData::analyzeTranslateBlock( KlangEl *langEl )
+void ParseData::resolveTranslateBlock( KlangEl *langEl )
 {
 	CodeBlock *block = langEl->transBlock;
-	block->analyze( this );
+	block->resolve( this );
 }
 
-void ParseData::analyzeReductionCode( Definition *prod )
+void ParseData::resolveReductionCode( Definition *prod )
 {
 	CodeBlock *block = prod->redBlock;
-	block->analyze( this );
+	block->resolve( this );
 }
 
-void ParseData::analyzeParseTree()
+void ParseData::resolveParseTree()
 {
 	/* Compile functions. */
 	for ( FunctionList::Iter f = functionList; f.lte(); f++ ) {
 		if ( f->isUserIter )
-			analyzeUserIter( f );
+			resolveUserIter( f );
 		else
-			analyzeFunction( f );
+			resolveFunction( f );
 	}
 
 	/* Compile the reduction code. */
 	for ( DefList::Iter prod = prodList; prod.lte(); prod++ ) {
 		if ( prod->redBlock != 0 )
-			analyzeReductionCode( prod );
+			resolveReductionCode( prod );
 	}
 
 	/* Compile the token translation code. */
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
 		if ( lel->transBlock != 0 )
-			analyzeTranslateBlock( lel );
+			resolveTranslateBlock( lel );
 	}
 
 	/* Compile preeof blocks. */
 	for ( RegionList::Iter r = regionList; r.lte(); r++ ) {
 		if ( r->preEofBlock != 0 )
-			analyzePreEof( r );
+			resolvePreEof( r );
 	}
 
 	/* Compile the init code */
-	analyzeRootBlock( );
+	resolveRootBlock( );
 }
 
