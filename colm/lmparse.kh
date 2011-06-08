@@ -26,6 +26,8 @@
 #include "avltree.h"
 #include "parsedata.h"
 
+#define PROPERTY_REDUCE_FIRST 0x1
+
 struct Parser
 {
 	%%{

@@ -346,11 +346,19 @@ pred_token:
 cfl_def: cfl_def_head obj_var_list properties_list cfl_prod_list
 	final {
 		/* Get the language element. */
-		KlangEl *langEl = getKlangEl( pd, namespaceStack.top(), curDefineId );
+		KlangEl *langEl = $1->langEl;
 		langEl->objectDef = pd->objectDef;
 		if ( contextStack.length() > 0 )
 			langEl->contextIn = contextStack.top();
+
+		if ( $3->property & PROPERTY_REDUCE_FIRST )
+			langEl->reduceFirst = true;
 	};
+
+nonterm cfl_def_head
+{
+	KlangEl *langEl;
+};
 
 cfl_def_head: KW_Def TK_Word
 	final {
@@ -366,20 +374,32 @@ cfl_def_head: KW_Def TK_Word
 		}
 
 		langEl->type = KlangEl::NonTerm;
+		$$->langEl = langEl;
 	};
 
 cfl_prod_list: cfl_prod_list '|' define_prod;
 cfl_prod_list: define_prod;
 
-properties_list: properties_list property;
-properties_list: ;
+nonterm property
+{
+	long property;
+};
+
+nonterm properties_list uses property;
+
+properties_list: properties_list property
+	final {
+		$$->property = $1->property | $2->property;
+	};
+properties_list: 
+	final {
+		$$->property = 0;
+	};
 
 property: 
 	KW_ReduceFirst
 	final {
-		/* Get the language element. */
-		KlangEl *prodName = getKlangEl( pd, namespaceStack.top(), curDefineId );
-		prodName->reduceFirst = true;
+		$$->property = PROPERTY_REDUCE_FIRST;
 	};
 
 nonterm opt_prec
