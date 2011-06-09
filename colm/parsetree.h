@@ -542,6 +542,8 @@ struct Namespace
 	NamespaceVect childNamespaces;
 
 	Namespace *next, *prev;
+
+	void declare( ParseData *pd );
 };
 
 typedef DList<Namespace> NamespaceList;
@@ -1662,11 +1664,12 @@ struct LangTerm
 	LangTerm( ReplItemList *replItemList )
 		: type(EmbedStringType), replItemList(replItemList) {}
 
-	LangTerm( const InputLoc &loc, Type type, TypeRef *typeRef, KlangEl *langEl, Replacement *replacement )
-		: loc(loc), type(type), varRef(0), typeRef(typeRef), langEl(langEl), replacement(replacement) {}
-
-	LangTerm( const InputLoc &loc, Type type, LangVarRef *varRef, ObjField *objField, TypeRef *typeRef, KlangEl *langEl, Replacement *replacement )
-		: loc(loc), type(type), varRef(varRef), objField(objField), typeRef(typeRef), langEl(langEl), replacement(replacement) {}
+	LangTerm( const InputLoc &loc, Type type, LangVarRef *varRef,
+			ObjField *objField, TypeRef *typeRef, GenericType *generic,
+			Replacement *replacement )
+		: loc(loc), type(type), varRef(varRef), objField(objField),
+			typeRef(typeRef), generic(generic),
+			replacement(replacement) {}
 	
 	void resolve( ParseData *pd ) const;
 
@@ -1690,7 +1693,7 @@ struct LangTerm
 	TypeRef *typeRef;
 	Pattern *pattern;
 	FieldInitVect *fieldInitArgs;
-	KlangEl *langEl;
+	GenericType *generic;
 	Replacement *replacement;
 	LangExpr *expr;
 	ReplItemList *replItemList;

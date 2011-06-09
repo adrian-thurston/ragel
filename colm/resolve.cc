@@ -285,3 +285,43 @@ void ParseData::resolveParseTree()
 	resolveRootBlock( );
 }
 
+void Namespace::declare( ParseData *pd )
+{
+	for ( GenericList::Iter g = genericList; g.lte(); g++ ) {
+		//std::cout << "generic " << g->name << std::endl;
+
+		KlangEl *langEl = getKlangEl( pd, this, g->name );
+
+		/* Check that the element wasn't previously defined as something else. */
+		if ( langEl->type != KlangEl::Unknown ) {
+			error() << "'" << g->name << 
+				"' already defined as something else" << endp;
+		}
+		langEl->type = KlangEl::NonTerm;
+
+		/* Add one empty production. */
+		ProdElList *emptyList = new ProdElList;
+		//addProduction( g->loc, langEl, emptyList, false, 0, 0 );
+
+		{
+			KlangEl *prodName = langEl;
+			assert( prodName->type == KlangEl::NonTerm );
+
+			Definition *newDef = new Definition( loc, prodName, 
+				emptyList, false, 0,
+				pd->prodList.length(), Definition::Production );
+			
+			prodName->defList.append( newDef );
+			pd->prodList.append( newDef );
+			newDef->predOf = 0;
+		}
+
+		langEl->generic = g;
+		g->langEl = langEl;
+	}
+
+	for ( NamespaceVect::Iter c = childNamespaces; c.lte(); c++ ) {
+		//std::cout << "namespace " << (*c)->name << std::endl;
+		(*c)->declare( pd );
+	}
+}

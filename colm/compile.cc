@@ -1404,7 +1404,7 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 
 	/* Lookup the type of the replacement and store it in the replacement
 	 * object so that replacement parsing has a target. */
-	replacement->langEl = langEl;
+	replacement->langEl = generic->langEl;
 
 	if ( varRef != 0 ) {
 		code.append( IN_DUP_TOP );
@@ -3214,7 +3214,7 @@ void ParseData::addStderr()
 void ParseData::addArgv()
 {
 	/* Make the type ref. */
-	TypeRef *typeRef = new TypeRef( InputLoc(), findUniqueType( TYPE_TREE, argvListKlangEl ) );
+	TypeRef *typeRef = new TypeRef( InputLoc(), findUniqueType( TYPE_TREE, argvList->langEl ) );
 
 	/* Create the field and insert it into the map. */
 	ObjField *el = new ObjField( InputLoc(), typeRef, "argv" );

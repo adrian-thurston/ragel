@@ -961,7 +961,7 @@ struct ParseData
 	long predValue;
 	long nextMatchEndNum;
 
-	KlangEl *argvListKlangEl;
+	GenericType *argvList;
 
 	Context *context;
 };

@@ -438,7 +438,7 @@ ParseData::ParseData( const String &fileName, const String &sectionName,
 	revertOn(true),
 	predValue(0),
 	nextMatchEndNum(0),
-	argvListKlangEl(0),
+	argvList(0),
 	context(0)
 {
 }
@@ -1579,6 +1579,8 @@ void ParseData::semanticAnalysis()
 {
 	beginProcessing();
 	initKeyOps();
+
+	rootNamespace->declare( this );
 
 	/* Resolve uses statements. */
 	resolveUses();
