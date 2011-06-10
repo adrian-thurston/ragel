@@ -320,6 +320,19 @@ void Namespace::declare( ParseData *pd )
 		g->langEl = langEl;
 	}
 
+	for ( LiteralDict::Iter l = literalDict; l.lte(); l++  ) {
+		/* Create a token for the literal. */
+		KlangEl *newLangEl = getKlangEl( pd, this, l->value->name );
+		assert( newLangEl->type == KlangEl::Unknown );
+		newLangEl->type = KlangEl::Term;
+		newLangEl->lit = l->value->literal;
+		newLangEl->isLiteral = true;
+		newLangEl->tokenDef = l->value;
+
+		l->value->token = newLangEl;
+	}
+
+
 	for ( NamespaceVect::Iter c = childNamespaces; c.lte(); c++ ) {
 		//std::cout << "namespace " << (*c)->name << std::endl;
 		(*c)->declare( pd );

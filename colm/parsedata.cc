@@ -1107,7 +1107,7 @@ void ParseData::createDefaultScanner()
 
 	Join *join = new Join( new Expression( BT_Any ) );
 		
-	TokenDef *tokenDef = new TokenDef( join, defaultCharKlangEl, loc, 
+	TokenDef *tokenDef = new TokenDef( name, String(), join, defaultCharKlangEl, loc, 
 			nextTokenId++, rootNamespace, defaultRegion );
 	defaultRegion->tokenDefList.append( tokenDef );
 	defaultCharKlangEl->tokenDef = tokenDef;
@@ -1133,7 +1133,7 @@ void ParseData::resolveLiteralFactor( PdaFactor *fact )
 	if ( ldel == 0 )
 		cerr << "could not resolve literal: " << fact->literal->token << endp;
 
-	TokenDef *tokenDef = ldel->value->tokenDef;
+	TokenDef *tokenDef = ldel->value;
 	fact->langEl = tokenDef->token;
 }
 
@@ -1461,14 +1461,14 @@ void ParseData::initEmptyScanners()
 			InputLoc loc;
 			String name( reg->name.length() + 16, "__%s_DEF_PAT", reg->name.data );
 
-			KlangEl *lel = getKlangEl( this, rootNamespace, name.data );
+			KlangEl *lel = getKlangEl( this, rootNamespace, name );
 			assert( lel->type == KlangEl::Unknown );
 			lel->type = KlangEl::Term;
 
 			Join *join = new Join( new Expression( BT_Any ) );
 				
-			TokenDef *tokenDef = new TokenDef( join, lel, loc, nextTokenId++,
-					rootNamespace, reg );
+			TokenDef *tokenDef = new TokenDef( name, String(), join, 
+					lel, loc, nextTokenId++, rootNamespace, reg );
 			reg->tokenDefList.append( tokenDef );
 			lel->tokenDef = tokenDef;
 		}

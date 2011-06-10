@@ -292,8 +292,8 @@ void prepareLitString( String &result, bool &caseInsensitive,
 
 std::ostream &operator<<(std::ostream &out, const Token &token );
 
-typedef AvlMap< String, KlangEl*, CmpStr > LiteralDict;
-typedef AvlMapEl< String, KlangEl* > LiteralDictEl;
+typedef AvlMap< String, TokenDef*, CmpStr > LiteralDict;
+typedef AvlMapEl< String, TokenDef* > LiteralDictEl;
 
 /* Store the value and type of a priority augmentation. */
 struct PriorityAug
@@ -370,15 +370,18 @@ typedef Vector<ReCapture> ReCaptureVect;
 
 struct TokenDef
 {
-	TokenDef( Join *join, KlangEl *token, InputLoc &semiLoc, 
+	TokenDef( const String &name, const String &literal, Join *join,
+		KlangEl *token, InputLoc &semiLoc, 
 		int longestMatchId, Namespace *nspace, TokenRegion *tokenRegion )
 	: 
-		join(join), action(0), token(token), semiLoc(semiLoc), 
+		name(name), literal(literal), join(join), action(0), token(token), semiLoc(semiLoc), 
 		longestMatchId(longestMatchId), inLmSelect(false), 
 		nspace(nspace), tokenRegion(tokenRegion) {}
 
 	InputLoc getLoc();
 	
+	String name;
+	String literal;
 	Join *join;
 	Action *action;
 	KlangEl *token;
