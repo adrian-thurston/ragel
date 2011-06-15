@@ -430,6 +430,20 @@ struct TokenDefListReg : DListMel<TokenDef, TokenDefPtr1> {};
 struct TokenDefListNs : DListMel<TokenDef, TokenDefPtr2> {};
 struct NtDefList : DList<NtDef> {};
 
+struct ContextDef
+{
+	ContextDef( const String &name, Context *context, Namespace *nspace )
+		: name(name), context(context), nspace(nspace) {}
+
+	String name;
+	Context *context;
+	Namespace *nspace;
+
+	ContextDef *prev, *next;
+};
+
+struct ContextDefList : DList<ContextDef> {};
+
 /* Symbol Map. */
 typedef AvlMap< String, KlangEl*, CmpStr > SymbolMap;
 typedef AvlMapEl< String, KlangEl* > SymbolMapEl;
@@ -566,6 +580,9 @@ struct Namespace
 
 	/* List of nonterminal defs in the namespace. */
 	NtDefList ntDefList;
+
+	/* List of context definitions for encapsulating the data of a parser. */
+	ContextDefList contextDefList;
 
 	/* Dictionary of symbols within the region. */
 	SymbolMap symbolMap;

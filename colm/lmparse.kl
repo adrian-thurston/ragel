@@ -610,25 +610,14 @@ context_head:
 		pd->namespaceList.append( nspace );
 		namespaceStack.push( nspace );
 
-		KlangEl *lel = getKlangEl( pd, nspace, $2->data );
-
-		Context *context = new Context( $1->loc, lel );
+		Context *context = new Context( $1->loc, 0 );
 		contextStack.push( context );
+
+		ContextDef *contextDef = new ContextDef( $2->data, context, nspace );
+		nspace->contextDefList.append( contextDef );
 
 		context->contextObjDef = new ObjectDef( ObjectDef::UserType, $2->data, 
 				new ObjFieldMap, new ObjFieldList, new ObjMethodMap(), pd->nextObjectId++ ); 
-
-		/* Check that the element wasn't previously defined as something else. */
-		if ( lel->type != KlangEl::Unknown ) {
-			error($2->loc) << "'" << curDefineId << 
-				"' has already been defined, maybe you want to use redef?" << endp;
-		}
-		lel->type = KlangEl::NonTerm;
-		ProdElList *prodElList = new ProdElList;
-		addProduction( $1->loc, $2->data, prodElList, false, 0, 0 );
-
-		lel->contextDef = context;
-		lel->objectDef = context->contextObjDef;
 	};
 
 pattern_list: pattern_list pattern;

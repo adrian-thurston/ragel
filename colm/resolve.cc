@@ -332,6 +332,46 @@ void Namespace::declare( ParseData *pd )
 		l->value->token = newLangEl;
 	}
 
+	for ( ContextDefList::Iter c = contextDefList; c.lte(); c++ ) {
+
+		KlangEl *lel = getKlangEl( pd, this, c->name );
+
+		/* Check that the element wasn't previously defined as something else. */
+		if ( lel->type != KlangEl::Unknown ) {
+			error(c->context->loc) << "'" << c->name << 
+				"' has already been defined, maybe you want to use redef?" << endp;
+		}
+		lel->type = KlangEl::NonTerm;
+		ProdElList *emptyList = new ProdElList;
+		//addProduction( c->context->loc, c->name, emptyList, false, 0, 0 );
+
+		{
+			KlangEl *prodName = lel;
+			assert( prodName->type == KlangEl::NonTerm );
+
+			Definition *newDef = new Definition( loc, prodName, 
+				emptyList, false, 0,
+				pd->prodList.length(), Definition::Production );
+			
+			prodName->defList.append( newDef );
+			pd->prodList.append( newDef );
+			newDef->predOf = 0;
+
+			/* If the token has the same name as the region it is in, then also
+			 * insert it into the symbol map for the parent region. */
+			if ( strcmp( c->name, this->name ) == 0 ) {
+				/* Insert the name into the top of the region stack after popping the
+				 * region just created. We need it in the parent. */
+				this->parentNamespace->symbolMap.insert( c->name, prodName );
+			}
+		}
+
+		c->context->lel = lel;
+		lel->contextDef = c->context;
+		lel->objectDef = c->context->contextObjDef;
+
+	}
+
 
 	for ( NamespaceVect::Iter c = childNamespaces; c.lte(); c++ ) {
 		//std::cout << "namespace " << (*c)->name << std::endl;
