@@ -333,7 +333,6 @@ void Namespace::declare( ParseData *pd )
 	}
 
 	for ( ContextDefList::Iter c = contextDefList; c.lte(); c++ ) {
-
 		KlangEl *lel = getKlangEl( pd, this, c->name );
 
 		/* Check that the element wasn't previously defined as something else. */
@@ -369,9 +368,26 @@ void Namespace::declare( ParseData *pd )
 		c->context->lel = lel;
 		lel->contextDef = c->context;
 		lel->objectDef = c->context->contextObjDef;
-
 	}
 
+	for ( TokenDefListNs::Iter t = tokenDefList; t.lte(); t++ ) {
+		/* Literals already taken care of. */
+		if ( ! t->isLiteral ) {
+			/* Create the token. */
+			KlangEl *tokEl = getKlangEl( pd, this, t->name );
+			if ( tokEl->type != KlangEl::Unknown )
+				error(InputLoc()) << "'" << t->name << "' already defined" << endp;
+
+			tokEl->type = KlangEl::Term;
+			tokEl->ignore = t->ignore;
+			tokEl->transBlock = t->codeBlock;
+			tokEl->objectDef = t->objectDef;
+			tokEl->contextIn = t->contextIn;
+			tokEl->tokenDef = t;
+
+			t->token = tokEl;
+		}
+	}
 
 	for ( NamespaceVect::Iter c = childNamespaces; c.lte(); c++ ) {
 		//std::cout << "namespace " << (*c)->name << std::endl;

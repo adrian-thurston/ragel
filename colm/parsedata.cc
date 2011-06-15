@@ -1107,8 +1107,9 @@ void ParseData::createDefaultScanner()
 
 	Join *join = new Join( new Expression( BT_Any ) );
 		
-	TokenDef *tokenDef = new TokenDef( name, String(), join, defaultCharKlangEl, loc, 
-			nextTokenId++, rootNamespace, defaultRegion );
+	TokenDef *tokenDef = new TokenDef( name, String(), false, false, 
+			join, 0, defaultCharKlangEl, loc, nextTokenId++, 
+			rootNamespace, defaultRegion, 0, 0, 0 );
 	defaultRegion->tokenDefList.append( tokenDef );
 	defaultCharKlangEl->tokenDef = tokenDef;
 }
@@ -1467,8 +1468,8 @@ void ParseData::initEmptyScanners()
 
 			Join *join = new Join( new Expression( BT_Any ) );
 				
-			TokenDef *tokenDef = new TokenDef( name, String(), join, 
-					lel, loc, nextTokenId++, rootNamespace, reg );
+			TokenDef *tokenDef = new TokenDef( name, String(), false, false, join, 
+					0, lel, loc, nextTokenId++, rootNamespace, reg, 0, 0, 0 );
 			reg->tokenDefList.append( tokenDef );
 			lel->tokenDef = tokenDef;
 		}

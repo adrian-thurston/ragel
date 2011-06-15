@@ -2151,7 +2151,7 @@ void LangStmt::compile( ParseData *pd, CodeVect &code ) const
 		case IfType: {
 			pd->curLocalFrame->iterPushScope();
 
-			long jumpFalse, jumpPastElse, distance;
+			long jumpFalse = 0, jumpPastElse = 0, distance = 0;
 
 			/* Evaluate the test. */
 			expr->evaluate( pd, code );

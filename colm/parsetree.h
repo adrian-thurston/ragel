@@ -385,20 +385,30 @@ struct TokenDef
 	public TokenDefPtr1, 
 	public TokenDefPtr2
 {
-	TokenDef( const String &name, const String &literal, Join *join,
-		KlangEl *token, InputLoc &semiLoc, 
-		int longestMatchId, Namespace *nspace, TokenRegion *tokenRegion )
+	TokenDef( const String &name, const String &literal, bool isLiteral, bool ignore,
+		Join *join, CodeBlock *codeBlock, KlangEl *token, InputLoc &semiLoc, 
+		int longestMatchId, Namespace *nspace, TokenRegion *tokenRegion,
+		ReCaptureVect *pReCaptureVect, ObjectDef *objectDef, Context *contextIn )
 	: 
-		name(name), literal(literal), join(join), action(0), token(token), semiLoc(semiLoc), 
+		name(name), literal(literal), isLiteral(isLiteral), ignore(ignore), join(join), action(0),
+		codeBlock(codeBlock), token(token), semiLoc(semiLoc), 
 		longestMatchId(longestMatchId), inLmSelect(false), 
-		nspace(nspace), tokenRegion(tokenRegion) {}
+		nspace(nspace), tokenRegion(tokenRegion), objectDef(objectDef),
+		contextIn(contextIn)
+	{
+		if ( pReCaptureVect != 0 )
+			reCaptureVect = *pReCaptureVect;
+	}
 
 	InputLoc getLoc();
 	
 	String name;
 	String literal;
+	bool isLiteral;
+	bool ignore;
 	Join *join;
 	Action *action;
+	CodeBlock *codeBlock;
 	KlangEl *token;
 	InputLoc semiLoc;
 
@@ -411,6 +421,8 @@ struct TokenDef
 	Namespace *nspace;
 	TokenRegion *tokenRegion;
 	ReCaptureVect reCaptureVect;
+	ObjectDef *objectDef;
+	Context *contextIn;
 };
 
 struct NtDef
