@@ -353,6 +353,10 @@ cfl_def: cfl_def_head obj_var_list properties_list cfl_prod_list
 
 		if ( $3->property & PROPERTY_REDUCE_FIRST )
 			langEl->reduceFirst = true;
+
+		Namespace *nspace = namespaceStack.top();
+		NtDef *ntDef = new NtDef( $1->langEl->name, nspace );
+		nspace->ntDefList.append( ntDef );
 	};
 
 nonterm cfl_def_head
@@ -970,6 +974,8 @@ literal_item: TK_Literal
 			region->tokenDefList.append( tokenDef );
 			ldel = nspace->literalDict.insert( interp, tokenDef );
 			pd->nextTokenId += 1;
+
+			nspace->tokenDefList.append( tokenDef );
 		}
 
 		if ( !insideRegion ) {
@@ -1032,6 +1038,7 @@ token_def:
 		TokenDef *tokenDef = new TokenDef( name, String(), join, tokEl, $1->loc, 
 				pd->nextTokenId++, nspace, region );
 		region->tokenDefList.append( tokenDef );
+		nspace->tokenDefList.append( tokenDef );
 		tokEl->tokenDef = tokenDef;
 
 		tokenDef->reCaptureVect = reCaptureVect;

@@ -994,7 +994,7 @@ void ParseData::analyzeAction( Action *action, InlineList *inlineList )
 		/* Need to recurse into longest match items. */
 		if ( item->type == InlineItem::LmSwitch ) {
 			TokenRegion *lm = item->tokenRegion;
-			for ( TokenDefList::Iter lmi = lm->tokenDefList; lmi.lte(); lmi++ ) {
+			for ( TokenDefListReg::Iter lmi = lm->tokenDefList; lmi.lte(); lmi++ ) {
 				if ( lmi->action != 0 )
 					analyzeAction( action, lmi->action->inlineList );
 			}

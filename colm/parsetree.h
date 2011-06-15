@@ -31,6 +31,7 @@
 #include "vector.h"
 #include "dlist.h"
 #include "dlistval.h"
+#include "dlistmel.h"
 #include "astring.h"
 #include "bytecode.h"
 #include "avlbasic.h"
@@ -167,7 +168,8 @@ struct TokenRegion;
 struct Namespace;
 struct Context;
 struct TokenDef;
-struct TokenDefList;
+struct TokenDefListReg;
+struct TokenDefListNs;
 struct Range;
 struct KlangEl;
 
@@ -368,7 +370,20 @@ struct Context
 
 typedef Vector<ReCapture> ReCaptureVect;
 
+struct TokenDefPtr1
+{
+	TokenDef *prev, *next;
+};
+
+struct TokenDefPtr2
+{
+	TokenDef *prev, *next;
+};
+
 struct TokenDef
+:
+	public TokenDefPtr1, 
+	public TokenDefPtr2
 {
 	TokenDef( const String &name, const String &literal, Join *join,
 		KlangEl *token, InputLoc &semiLoc, 
@@ -396,12 +411,24 @@ struct TokenDef
 	Namespace *nspace;
 	TokenRegion *tokenRegion;
 	ReCaptureVect reCaptureVect;
+};
 
-	TokenDef *prev, *next;
+struct NtDef
+{
+	NtDef( const String &name, Namespace *nspace )
+	: 
+		name(name), nspace(nspace) {}
+
+	String name;
+	Namespace *nspace;
+
+	NtDef *prev, *next;
 };
 
 /* Declare a new type so that ptreetypes.h need not include dlist.h. */
-struct TokenDefList : DList<TokenDef> {};
+struct TokenDefListReg : DListMel<TokenDef, TokenDefPtr1> {};
+struct TokenDefListNs : DListMel<TokenDef, TokenDefPtr2> {};
+struct NtDefList : DList<NtDef> {};
 
 /* Symbol Map. */
 typedef AvlMap< String, KlangEl*, CmpStr > SymbolMap;
@@ -432,7 +459,7 @@ struct TokenRegion
 	void restart( FsmGraph *graph, FsmTrans *trans );
 
 	InputLoc loc;
-	TokenDefList tokenDefList;
+	TokenDefListReg tokenDefList;
 	String name;
 	int id;
 
@@ -533,6 +560,12 @@ struct Namespace
 	/* Literal patterns and the dictionary mapping literals to the underlying
 	 * tokens. */
 	LiteralDict literalDict;
+
+	/* List of tokens defs in the namespace. */
+	TokenDefListNs tokenDefList;
+
+	/* List of nonterminal defs in the namespace. */
+	NtDefList ntDefList;
 
 	/* Dictionary of symbols within the region. */
 	SymbolMap symbolMap;

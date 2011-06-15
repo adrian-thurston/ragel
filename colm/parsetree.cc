@@ -205,7 +205,7 @@ Action *TokenRegion::newAction( ParseData *pd, const InputLoc &loc,
 void TokenRegion::makeActions( ParseData *pd )
 {
 	/* Make actions that set the action id. */
-	for ( TokenDefList::Iter lmi = tokenDefList; lmi.lte(); lmi++ ) {
+	for ( TokenDefListReg::Iter lmi = tokenDefList; lmi.lte(); lmi++ ) {
 		/* For each part create actions for setting the match type.  We need
 		 * to do this so that the actions will go into the actionIndex. */
 		InlineList *inlineList = new InlineList;
@@ -217,7 +217,7 @@ void TokenRegion::makeActions( ParseData *pd )
 	}
 
 	/* Make actions that execute the user action and restart on the last character. */
-	for ( TokenDefList::Iter lmi = tokenDefList; lmi.lte(); lmi++ ) {
+	for ( TokenDefListReg::Iter lmi = tokenDefList; lmi.lte(); lmi++ ) {
 		/* For each part create actions for setting the match type.  We need
 		 * to do this so that the actions will go into the actionIndex. */
 		InlineList *inlineList = new InlineList;
@@ -231,7 +231,7 @@ void TokenRegion::makeActions( ParseData *pd )
 	/* Make actions that execute the user action and restart on the next
 	 * character.  These actions will set tokend themselves (it is the current
 	 * char). */
-	for ( TokenDefList::Iter lmi = tokenDefList; lmi.lte(); lmi++ ) {
+	for ( TokenDefListReg::Iter lmi = tokenDefList; lmi.lte(); lmi++ ) {
 		/* For each part create actions for setting the match type.  We need
 		 * to do this so that the actions will go into the actionIndex. */
 		InlineList *inlineList = new InlineList;
@@ -244,7 +244,7 @@ void TokenRegion::makeActions( ParseData *pd )
 
 	/* Make actions that execute the user action and restart at tokend. These
 	 * actions execute some time after matching the last char. */
-	for ( TokenDefList::Iter lmi = tokenDefList; lmi.lte(); lmi++ ) {
+	for ( TokenDefListReg::Iter lmi = tokenDefList; lmi.lte(); lmi++ ) {
 		/* For each part create actions for setting the match type.  We need
 		 * to do this so that the actions will go into the actionIndex. */
 		InlineList *inlineList = new InlineList;
@@ -292,7 +292,7 @@ void TokenRegion::makeNameTree( ParseData *pd )
 	regionNameInst = pd->curNameInst;
 
 	/* Recurse into all parts of the longest match operator. */
-	for ( TokenDefList::Iter td = tokenDefList; td.lte(); td++ ) {
+	for ( TokenDefListReg::Iter td = tokenDefList; td.lte(); td++ ) {
 		/* Watch out for patternless tokens. */
 		if ( td->join != 0 ) 
 			td->join->makeNameTree( pd );
@@ -314,7 +314,7 @@ void TokenRegion::resolveNameRefs( ParseData *pd )
 	NameFrame nameFrame = pd->enterNameScope( true, 1 );
 
 	/* Take an action reference for each longest match item and recurse. */
-	for ( TokenDefList::Iter lmi = tokenDefList; lmi.lte(); lmi++ ) {
+	for ( TokenDefListReg::Iter lmi = tokenDefList; lmi.lte(); lmi++ ) {
 		/* Watch out for patternless tokens. */
 		if ( lmi->join != 0 )
 			lmi->join->resolveNameRefs( pd );
@@ -520,7 +520,7 @@ FsmGraph *TokenRegion::walk( ParseData *pd )
 	/* Make each part of the longest match. */
 	int numParts = 0;
 	FsmGraph **parts = new FsmGraph*[tokenDefList.length()];
-	for ( TokenDefList::Iter lmi = tokenDefList; lmi.lte(); lmi++ ) {
+	for ( TokenDefListReg::Iter lmi = tokenDefList; lmi.lte(); lmi++ ) {
 		/* Watch out for patternless tokens. */
 		if ( lmi->join != 0 ) {
 			/* Create the machine and embed the setting of the longest match id. */

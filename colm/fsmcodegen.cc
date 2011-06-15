@@ -221,7 +221,7 @@ void FsmCodeGen::LM_SWITCH( ostream &ret, InlineItem *item,
 				"; goto st" << redFsm->errState->id << ";\n";
 	}
 
-	for ( TokenDefList::Iter lmi = item->tokenRegion->tokenDefList; lmi.lte(); lmi++ ) {
+	for ( TokenDefListReg::Iter lmi = item->tokenRegion->tokenDefList; lmi.lte(); lmi++ ) {
 		if ( lmi->inLmSelect ) {
 			assert( lmi->token != 0 );
 			ret << "	case " << lmi->longestMatchId << ":\n";

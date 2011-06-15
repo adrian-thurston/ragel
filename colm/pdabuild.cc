@@ -1525,7 +1525,7 @@ void ParseData::makeRuntimeData()
 	/* Captured attributes. Loop over tokens and count first. */
 	long numCapturedAttr = 0;
 	for ( RegionList::Iter reg = regionList; reg.lte(); reg++ ) {
-		for ( TokenDefList::Iter td = reg->tokenDefList; td.lte(); td++ )
+		for ( TokenDefListReg::Iter td = reg->tokenDefList; td.lte(); td++ )
 			numCapturedAttr += td->reCaptureVect.length();
 	}
 	runtimeData->captureAttr = new CaptureAttr[numCapturedAttr];
@@ -1533,7 +1533,7 @@ void ParseData::makeRuntimeData()
 
 	count = 0;
 	for ( RegionList::Iter reg = regionList; reg.lte(); reg++ ) {
-		for ( TokenDefList::Iter td = reg->tokenDefList; td.lte(); td++ ) {
+		for ( TokenDefListReg::Iter td = reg->tokenDefList; td.lte(); td++ ) {
 			runtimeData->lelInfo[td->token->id].captureAttr = count;
 			runtimeData->lelInfo[td->token->id].numCaptureAttr = td->reCaptureVect.length();
 			for ( ReCaptureVect::Iter c = td->reCaptureVect; c.lte(); c++ ) {
