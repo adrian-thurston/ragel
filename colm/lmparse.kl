@@ -1244,11 +1244,11 @@ start_reduce:
 		$$->localFrame = $1->localFrame;
 
 		/* Get the language element. */
-		KlangEl *prodName = getKlangEl( pd, namespaceStack.top(), curDefineId );
+//		KlangEl *prodName = getKlangEl( pd, namespaceStack.top(), curDefineId );
 
 		/* References to the reduce item. */
-		pd->addProdRedObjectVar( pd->curLocalFrame, prodName );
-		pd->addProdRHSVars( pd->curLocalFrame, curProdElList );
+//		pd->addProdRedObjectVar( pd->curLocalFrame, prodName );
+//		pd->addProdRHSVars( pd->curLocalFrame, curProdElList );
 	};
 
 nonterm lang_stmt_list

@@ -408,8 +408,16 @@ void Namespace::declare( ParseData *pd )
 		langEl->contextIn = n->contextIn;
 		langEl->defList.transfer( *n->defList );
 
-		for ( LelDefList::Iter d = langEl->defList; d.lte(); d++ )
+		for ( LelDefList::Iter d = langEl->defList; d.lte(); d++ ) {
 			d->prodName = langEl;
+
+			if ( d->redBlock != 0 ) {
+				pd->addProdRedObjectVar( d->redBlock->localFrame, langEl );
+				pd->addProdRHSVars( d->redBlock->localFrame, d->prodElList );
+			}
+
+		/* References to the reduce item. */
+		}
 	}
 
 	for ( NamespaceVect::Iter c = childNamespaces; c.lte(); c++ ) {
