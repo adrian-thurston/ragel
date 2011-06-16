@@ -345,44 +345,56 @@ pred_token:
 
 cfl_def: cfl_def_head obj_var_list properties_list cfl_prod_list
 	final {
-		/* Get the language element. */
-		KlangEl *langEl = $1->langEl;
-		langEl->objectDef = pd->objectDef;
-		if ( contextStack.length() > 0 )
-			langEl->contextIn = contextStack.top();
-
-		if ( $3->property & PROPERTY_REDUCE_FIRST )
-			langEl->reduceFirst = true;
+//		/* Get the language element. */
+//		KlangEl *langEl = $1->langEl;
+//		langEl->objectDef = pd->objectDef;
+//		if (  )
+//			langEl->reduceFirst = true;
 
 		Namespace *nspace = namespaceStack.top();
-		NtDef *ntDef = new NtDef( $1->langEl->name, nspace );
+		NtDef *ntDef = new NtDef( 
+				curDefineId,
+				nspace, 
+				$4->defList, 
+				pd->objectDef,
+				contextStack.length() > 0 ? contextStack.top() : 0,
+				$3->property & PROPERTY_REDUCE_FIRST );
+
 		nspace->ntDefList.append( ntDef );
 	};
-
-nonterm cfl_def_head
-{
-	KlangEl *langEl;
-};
 
 cfl_def_head: KW_Def TK_Word
 	final {
 		curDefineId = $2->data;
 
-		/* Get the language element. */
-		KlangEl *langEl = getKlangEl( pd, namespaceStack.top(), $2->data );
-
-		/* Check that the element wasn't previously defined as something else. */
-		if ( langEl->type != KlangEl::Unknown ) {
-			error($2->loc) << "'" << curDefineId << 
-				"' has already been defined, maybe you want to use redef?" << endp;
-		}
-
-		langEl->type = KlangEl::NonTerm;
-		$$->langEl = langEl;
+//		/* Get the language element. */
+//		KlangEl *langEl = getKlangEl( pd, namespaceStack.top(), $2->data );
+//
+//		/* Check that the element wasn't previously defined as something else. */
+//		if ( langEl->type != KlangEl::Unknown ) {
+//			error($2->loc) << "'" << curDefineId << 
+//				"' has already been defined, maybe you want to use redef?" << endp;
+//		}
+//
+//		langEl->type = KlangEl::NonTerm;
+//		$$->langEl = langEl;
 	};
 
-cfl_prod_list: cfl_prod_list '|' define_prod;
-cfl_prod_list: define_prod;
+nonterm cfl_prod_list
+{
+	LelDefList *defList;
+};
+
+cfl_prod_list: cfl_prod_list '|' define_prod
+	final {
+		$$->defList = $1->defList;
+		$$->defList->append( $3->definition );
+	};
+cfl_prod_list: define_prod
+	final {
+		$$->defList = new LelDefList;
+		$$->defList->append( $1->definition );
+	};
 
 nonterm property
 {
@@ -422,11 +434,41 @@ opt_prec:
 		$$->predOf = $2->factor->langEl;
 	};
 
+nonterm define_prod
+{
+	Definition *definition;
+};
 
 define_prod: '[' prod_el_list ']' opt_commit opt_reduce_code opt_prec
 	final {
-		addProduction( $1->loc, curDefineId, curProdElList, $4->commit, 
-				$5->codeBlock, $6->predOf ); 
+		const InputLoc &loc = $1->loc;
+		const String &name = curDefineId;
+		ProdElList *prodElList = curProdElList;
+		bool commit = $4->commit;
+		CodeBlock *redBlock = $5->codeBlock;
+		KlangEl *predOf = $6->predOf;
+
+		/* Get the language element. */
+//		KlangEl *prodName = getKlangEl( pd, namespaceStack.top(), name );
+//
+//		assert( prodName->type == KlangEl::NonTerm );
+		Namespace *nspace = namespaceStack.top();
+
+		Definition *newDef = new Definition( loc, 0/*prodName*/, 
+			prodElList, commit, redBlock,
+			pd->prodList.length(), Definition::Production );
+		newDef->predOf = predOf;
+		
+//		prodName->defList.append( newDef );
+		pd->prodList.append( newDef );
+
+//		if ( strcmp( name, nspace->name ) == 0 ) {
+//			/* Insert the name into the top of the region stack after popping the
+//			 * region just created. We need it in the parent. */
+//			nspace->parentNamespace->symbolMap.insert( name, prodName );
+//		}
+
+		$$->definition = newDef;
 	};
 
 obj_var_list: obj_var_list var_def
@@ -2550,33 +2592,6 @@ void Parser::addRegularDef( const InputLoc &loc, Namespace *nspace,
 		// Recover by ignoring the duplicate.
 		error(loc) << "regular definition \"" << name << "\" already exists" << endl;
 	}
-}
-
-void Parser::addProduction( const InputLoc &loc, const String &name, 
-		ProdElList *prodElList, bool commit, CodeBlock *redBlock, KlangEl *predOf )
-{
-	/* Get the language element. */
-	KlangEl *prodName = getKlangEl( pd, namespaceStack.top(), name );
-
-	assert( prodName->type == KlangEl::NonTerm );
-	Namespace *nspace = namespaceStack.top();
-
-	Definition *newDef = new Definition( loc, prodName, 
-		prodElList, commit, redBlock,
-		pd->prodList.length(), Definition::Production );
-	
-	prodName->defList.append( newDef );
-	pd->prodList.append( newDef );
-
-	/* If the token has the same name as the region it is in, then also
-	 * insert it into the symbol map for the parent region. */
-	if ( strcmp( name, nspace->name ) == 0 ) {
-		/* Insert the name into the top of the region stack after popping the
-		 * region just created. We need it in the parent. */
-		nspace->parentNamespace->symbolMap.insert( name, prodName );
-	}
-
-	newDef->predOf = predOf;
 }
 
 ostream &Parser::parse_error( int tokId, Token &token )

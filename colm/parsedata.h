@@ -147,9 +147,16 @@ struct CmpDefById
 typedef BstMap< int, Definition*, CmpOrd<int> > DotItemIndex;
 typedef BstMapEl< int, Definition*> DotItemIndexEl;
 
+struct DefList
+:
+	public DListMel<Definition, DefListEl>
+{};
+
 /* A vector of production vectors. Each non terminal can have many productions. */
-typedef DListMel<Definition, DefListEl> DefList;
-typedef DListMel<Definition, LelDefListEl> LelDefList;
+struct LelDefList
+:
+	public DListMel<Definition, LelDefListEl> 
+{};
 
 /* A set of machines made during a closure round. */
 typedef Vector< PdaGraph* > Machines;

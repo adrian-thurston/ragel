@@ -389,6 +389,29 @@ void Namespace::declare( ParseData *pd )
 		}
 	}
 
+	for ( NtDefList::Iter n = ntDefList; n.lte(); n++ ) {
+		/* Get the language element. */
+		KlangEl *langEl = getKlangEl( pd, this, n->name );
+
+		/* Check that the element wasn't previously defined as something else. */
+		if ( langEl->type != KlangEl::Unknown ) {
+			error(InputLoc()) << "'" << n->name << 
+				"' has already been defined, maybe you want to use redef?" << endp;
+		}
+
+		langEl->type = KlangEl::NonTerm;
+		//$$->langEl = langEl;
+
+		/* Get the language element. */
+		langEl->objectDef = n->objectDef;
+		langEl->reduceFirst = n->reduceFirst;
+		langEl->contextIn = n->contextIn;
+		langEl->defList.transfer( *n->defList );
+
+		for ( LelDefList::Iter d = langEl->defList; d.lte(); d++ )
+			d->prodName = langEl;
+	}
+
 	for ( NamespaceVect::Iter c = childNamespaces; c.lte(); c++ ) {
 		//std::cout << "namespace " << (*c)->name << std::endl;
 		(*c)->declare( pd );

@@ -425,22 +425,37 @@ struct TokenDef
 	Context *contextIn;
 };
 
+struct LelDefList;
+
 struct NtDef
 {
-	NtDef( const String &name, Namespace *nspace )
+	NtDef( const String &name, Namespace *nspace,
+		LelDefList *defList, ObjectDef *objectDef,
+		Context *contextIn, bool reduceFirst )
 	: 
-		name(name), nspace(nspace) {}
+		name(name), 
+		nspace(nspace),
+		defList(defList),
+		objectDef(objectDef),
+		contextIn(contextIn),
+		reduceFirst(reduceFirst)
+	{}
 
 	String name;
 	Namespace *nspace;
+	LelDefList *defList;
+	ObjectDef *objectDef;
+	Context *contextIn;
+	bool reduceFirst;
 
 	NtDef *prev, *next;
 };
 
+struct NtDefList : DList<NtDef> {};
+
 /* Declare a new type so that ptreetypes.h need not include dlist.h. */
 struct TokenDefListReg : DListMel<TokenDef, TokenDefPtr1> {};
 struct TokenDefListNs : DListMel<TokenDef, TokenDefPtr2> {};
-struct NtDefList : DList<NtDef> {};
 
 struct ContextDef
 {
