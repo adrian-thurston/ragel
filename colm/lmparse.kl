@@ -194,49 +194,22 @@ generic_def: KW_Map TK_Word '[' type_ref type_ref ']'
 	final {
 		Namespace *nspace = namespaceStack.top();
 
-//		KlangEl *langEl = getKlangEl( pd, nspace, $2->data );
-
-		/* Check that the element wasn't previously defined as something else. */
-//		if ( langEl->type != KlangEl::Unknown ) {
-//			error($1->loc) << "'" << $2->data << 
-//				"' already defined as something else" << endp;
-//		}
-//		langEl->type = KlangEl::NonTerm;
-
 		GenericType *generic = new GenericType( $2->data, GEN_MAP,
 				pd->nextGenericId++, 0/*langEl*/, $5->typeRef );
 		generic->keyTypeArg = $4->typeRef;
 
-		/* Add one empty production. */
-//		ProdElList *emptyList = new ProdElList;
-//		addProduction( $1->loc, $2->data, emptyList, false, 0, 0 );
-
 		nspace->genericList.append( generic );
-//		langEl->generic = generic;
 	};
 
 generic_def: KW_List TK_Word '[' type_ref ']'
 	final {
 		/* Get the language element. */
 		Namespace *nspace = namespaceStack.top();
-//		KlangEl *langEl = getKlangEl( pd, nspace, $2->data );
-//
-//		/* Check that the element wasn't previously defined as something else. */
-//		if ( langEl->type != KlangEl::Unknown ) {
-//			error($1->loc) << "'" << $2->data << 
-//				"' already defined as something else" << endp;
-//		}
-//		langEl->type = KlangEl::NonTerm;
 
 		GenericType *generic = new GenericType( $2->data, GEN_LIST, 
 				pd->nextGenericId++, 0/*langEl*/, $4->typeRef );
 
-		/* Add one empty production. */
-//		ProdElList *emptyList = new ProdElList;
-//		addProduction( $1->loc, $2->data, emptyList, false, 0, 0 );
-//
 		nspace->genericList.append( generic );
-//		langEl->generic = generic;
 	};
 
 generic_def: KW_Vector TK_Word '[' type_ref ']'
@@ -253,25 +226,11 @@ generic_def: KW_Accum TK_Word '[' type_ref ']'
 	final {
 		/* Get the language element. */
 		Namespace *nspace = namespaceStack.top();
-//		KlangEl *langEl = getKlangEl( pd, nspace, $2->data );
-//
-//		/* Check that the element wasn't previously defined as something else. */
-//		if ( langEl->type != KlangEl::Unknown ) {
-//			error($1->loc) << "'" << $2->data << 
-//				"' already defined as something else" << endp;
-//		}
-//
-//		langEl->type = KlangEl::NonTerm;
 
 		GenericType *generic = new GenericType( $2->data, GEN_PARSER, 
 				pd->nextGenericId++, 0/*langEl*/, $4->typeRef );
 
-		/* Add one empty production. */
-//		ProdElList *emptyList = new ProdElList;
-//		addProduction( $1->loc, $2->data, emptyList, false, 0, 0 );
-
 		nspace->genericList.append( generic );
-//		langEl->generic = generic;
 	};
 
 nonterm global_def uses statement;
@@ -345,12 +304,6 @@ pred_token:
 
 cfl_def: cfl_def_head obj_var_list properties_list cfl_prod_list
 	final {
-//		/* Get the language element. */
-//		KlangEl *langEl = $1->langEl;
-//		langEl->objectDef = pd->objectDef;
-//		if (  )
-//			langEl->reduceFirst = true;
-
 		Namespace *nspace = namespaceStack.top();
 		NtDef *ntDef = new NtDef( 
 				curDefineId,
@@ -366,18 +319,6 @@ cfl_def: cfl_def_head obj_var_list properties_list cfl_prod_list
 cfl_def_head: KW_Def TK_Word
 	final {
 		curDefineId = $2->data;
-
-//		/* Get the language element. */
-//		KlangEl *langEl = getKlangEl( pd, namespaceStack.top(), $2->data );
-//
-//		/* Check that the element wasn't previously defined as something else. */
-//		if ( langEl->type != KlangEl::Unknown ) {
-//			error($2->loc) << "'" << curDefineId << 
-//				"' has already been defined, maybe you want to use redef?" << endp;
-//		}
-//
-//		langEl->type = KlangEl::NonTerm;
-//		$$->langEl = langEl;
 	};
 
 nonterm cfl_prod_list
@@ -448,10 +389,6 @@ define_prod: '[' prod_el_list ']' opt_commit opt_reduce_code opt_prec
 		CodeBlock *redBlock = $5->codeBlock;
 		KlangEl *predOf = $6->predOf;
 
-		/* Get the language element. */
-//		KlangEl *prodName = getKlangEl( pd, namespaceStack.top(), name );
-//
-//		assert( prodName->type == KlangEl::NonTerm );
 		Namespace *nspace = namespaceStack.top();
 
 		Definition *newDef = new Definition( loc, 0/*prodName*/, 
@@ -459,14 +396,7 @@ define_prod: '[' prod_el_list ']' opt_commit opt_reduce_code opt_prec
 			pd->prodList.length(), Definition::Production );
 		newDef->predOf = predOf;
 		
-//		prodName->defList.append( newDef );
 		pd->prodList.append( newDef );
-
-//		if ( strcmp( name, nspace->name ) == 0 ) {
-//			/* Insert the name into the top of the region stack after popping the
-//			 * region just created. We need it in the parent. */
-//			nspace->parentNamespace->symbolMap.insert( name, prodName );
-//		}
 
 		$$->definition = newDef;
 	};
@@ -504,25 +434,11 @@ type_ref: KW_Map '<' type_ref type_ref '>'
 		static int mapId = 0;
 		String name( 36, "__map%d", mapId++ );
 
-//		KlangEl *langEl = getKlangEl( pd, nspace, name );
-//
-//		/* Check that the element wasn't previously defined as something else. */
-//		if ( langEl->type != KlangEl::Unknown ) {
-//			error($1->loc) << "'" << name  << 
-//				"' already defined as something else" << endp;
-//		}
-//		langEl->type = KlangEl::NonTerm;
-
 		GenericType *generic = new GenericType( name, GEN_MAP,
 				pd->nextGenericId++, 0, $4->typeRef );
 		generic->keyTypeArg = $3->typeRef;
 
-		/* Add one empty production. */
-//		ProdElList *emptyList = new ProdElList;
-//		addProduction( $1->loc, String(), emptyList, false, 0, 0 );
-
 		nspace->genericList.append( generic );
-//		langEl->generic = generic;
 
 		NamespaceQual *nspaceQual = new NamespaceQual( namespaceStack.top(), regionStack.top() );
 		$$->typeRef = new TypeRef( InputLoc(), nspaceQual, name );
@@ -986,21 +902,13 @@ literal_item: TK_Literal
 		if ( ldel != 0 )
 			error( $1->loc ) << "literal already defined in this namespace" << endp;
 		else {
-			/* Create a token for the literal. */
-//			KlangEl *newLangEl = getKlangEl( pd, nspace, name );
-//			assert( newLangEl->type == KlangEl::Unknown );
-//			newLangEl->type = KlangEl::Term;
-//			newLangEl->lit = $1->data;
-//			newLangEl->isLiteral = true;
-
 			Join *join = new Join( new Expression( new Term( new FactorWithAug(
 				new FactorWithRep( $1->loc, new FactorWithNeg( $1->loc, new Factor(
 				new Literal( $1->loc, $1->data, 
 					Literal::LitString ) ) ) ) ) ) ) );
 			
 			TokenDef *tokenDef = new TokenDef( name, $1->data, true, false, join, 
-					0, 0 /*newLangEl*/, $1->loc, pd->nextTokenId, nspace, region, 0, 0, 0 );
-//			newLangEl->tokenDef = tokenDef;
+					0, $1->loc, pd->nextTokenId, nspace, region, 0, 0, 0 );
 
 			region->tokenDefList.append( tokenDef );
 			ldel = nspace->literalDict.insert( interp, tokenDef );
@@ -1054,26 +962,16 @@ token_def:
 		if ( name == 0 )
 			name.setAs( 32, "_ignore_%.4x", pd->nextTokenId );
 
-//		/* Create the token. */
-//		KlangEl *tokEl = getKlangEl( pd, namespaceStack.top(), name );
-//		if ( tokEl->type != KlangEl::Unknown )
-//			error($1->loc) << "'" << name << "' already defined" << endp;
-
-//		tokEl->type = KlangEl::Term;
-//		tokEl->ignore = ignore;
-//		tokEl->transBlock = transBlock;
-
 		Namespace *nspace = namespaceStack.top();
 		TokenRegion *region = regionStack.top();
 
 		TokenDef *tokenDef = new TokenDef( name, String(), false, ignore, join, 
-				transBlock, 0 /*tokEl*/, $1->loc, pd->nextTokenId++, nspace, region,
+				transBlock, $1->loc, pd->nextTokenId++, nspace, region,
 				&reCaptureVect, pd->objectDef,
 				contextStack.length() > 0 ? contextStack.top() : 0 );
 
 		region->tokenDefList.append( tokenDef );
 		nspace->tokenDefList.append( tokenDef );
-//		tokEl->tokenDef = tokenDef;
 
 		reCaptureVect.empty();
 
@@ -1089,9 +987,6 @@ token_def:
 			JoinOrLm *joinOrLm = new JoinOrLm( join );
 			addRegularDef( $1->loc, namespaceStack.top(), name, joinOrLm, false );
 		}
-
-//		if ( contextStack.length() > 0 )
-//			tokEl->contextIn = contextStack.top();
 	};
 
 nonterm token_or_ignore
@@ -1242,13 +1137,6 @@ start_reduce:
 	block_open
 	final {
 		$$->localFrame = $1->localFrame;
-
-		/* Get the language element. */
-//		KlangEl *prodName = getKlangEl( pd, namespaceStack.top(), curDefineId );
-
-		/* References to the reduce item. */
-//		pd->addProdRedObjectVar( pd->curLocalFrame, prodName );
-//		pd->addProdRHSVars( pd->curLocalFrame, curProdElList );
 	};
 
 nonterm lang_stmt_list
@@ -1812,25 +1700,11 @@ code_factor: KW_Parse opt_capture type_ref '(' opt_code_expr_list ')'
 
 		/* Get the language element. */
 		Namespace *nspace = namespaceStack.top();
-//		KlangEl *langEl = getKlangEl( pd, nspace, parserName );
-//
-//		/* Check that the element wasn't previously defined as something else. */
-//		if ( langEl->type != KlangEl::Unknown ) {
-//			error($1->loc) << "'" << parserName << 
-//				"' already defined as something else" << endp;
-//		}
-//
-//		langEl->type = KlangEl::NonTerm;
 
 		GenericType *generic = new GenericType( parserName, GEN_PARSER, 
 				pd->nextGenericId++, 0/*langEl*/, $3->typeRef );
 
-//		/* Add one empty production. */
-//		ProdElList *emptyList = new ProdElList;
-//		addProduction( $1->loc, parserName, emptyList, false, 0, 0 );
-
 		nspace->genericList.append( generic );
-//		langEl->generic = generic;
 
 		Replacement *replacement = new Replacement( $1->loc, nspace, pd->rootRegion,
 				new ReplItemList, pd->nextPatReplId++ );
@@ -1863,25 +1737,11 @@ code_factor: KW_ParseStop opt_capture type_ref '(' opt_code_expr_list ')'
 
 		/* Get the language element. */
 		Namespace *nspace = namespaceStack.top();
-//		KlangEl *langEl = getKlangEl( pd, nspace, parserName );
-//
-//		/* Check that the element wasn't previously defined as something else. */
-//		if ( langEl->type != KlangEl::Unknown ) {
-//			error($1->loc) << "'" << parserName << 
-//				"' already defined as something else" << endp;
-//		}
-//
-//		langEl->type = KlangEl::NonTerm;
 
 		GenericType *generic = new GenericType( parserName, GEN_PARSER, 
 				pd->nextGenericId++, 0/*langEl*/, $3->typeRef );
 
-//		/* Add one empty production. */
-//		ProdElList *emptyList = new ProdElList;
-//		addProduction( $1->loc, parserName, emptyList, false, 0, 0 );
-
 		nspace->genericList.append( generic );
-//		langEl->generic = generic;
 
 		Replacement *replacement = new Replacement( $1->loc, nspace, pd->rootRegion,
 				new ReplItemList, pd->nextPatReplId++ );
@@ -2548,19 +2408,13 @@ void Parser::addArgvList()
 {
 	/* Get the language element. */
 	Namespace *nspace = namespaceStack.top();
-//	KlangEl *langEl = getKlangEl( pd, nspace, "argv_list" );
-//	langEl->type = KlangEl::NonTerm;
 
 	NamespaceQual *nspaceQual = new NamespaceQual( namespaceStack.top(), regionStack.top() );
 	TypeRef *typeRef = new TypeRef( InputLoc(), nspaceQual, "str" );
 	GenericType *generic = new GenericType( "argv_list", GEN_LIST, 
 			pd->nextGenericId++, 0/*langEl*/, typeRef );
-	/* Add one empty production. */
-//	ProdElList *emptyList = new ProdElList;
-//	addProduction( InputLoc(), "argv_list", emptyList, false, 0, 0 );
 
 	nspace->genericList.append( generic );
-//	langEl->generic = generic;
 
 	pd->argvList = generic;
 

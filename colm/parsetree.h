@@ -386,12 +386,12 @@ struct TokenDef
 	public TokenDefPtr2
 {
 	TokenDef( const String &name, const String &literal, bool isLiteral, bool ignore,
-		Join *join, CodeBlock *codeBlock, KlangEl *token, InputLoc &semiLoc, 
+		Join *join, CodeBlock *codeBlock, InputLoc &semiLoc, 
 		int longestMatchId, Namespace *nspace, TokenRegion *tokenRegion,
 		ReCaptureVect *pReCaptureVect, ObjectDef *objectDef, Context *contextIn )
 	: 
 		name(name), literal(literal), isLiteral(isLiteral), ignore(ignore), join(join), action(0),
-		codeBlock(codeBlock), token(token), semiLoc(semiLoc), 
+		codeBlock(codeBlock), token(0), semiLoc(semiLoc), 
 		longestMatchId(longestMatchId), inLmSelect(false), 
 		nspace(nspace), tokenRegion(tokenRegion), objectDef(objectDef),
 		contextIn(contextIn)

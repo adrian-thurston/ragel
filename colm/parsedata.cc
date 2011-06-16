@@ -785,6 +785,7 @@ Action *ParseData::newAction( const String &name, InlineList *inlineList )
 	InputLoc loc;
 	loc.line = 1;
 	loc.col = 1;
+	loc.fileName = 0;
 
 	Action *action = new Action( loc, name, inlineList );
 	actionList.append( action );
@@ -1076,7 +1077,7 @@ FsmGraph *ParseData::makeFsmGraph( Join *join )
 
 void ParseData::createDefaultScanner()
 {
-	InputLoc loc;
+	InputLoc loc = { 0, 0, 0 };
 
 	const char *name = "___DEFAULT_SCANNER";
 
@@ -1099,18 +1100,21 @@ void ParseData::createDefaultScanner()
 	newEl->isInstance = true;
 	instanceList.append( newEl );
 
+	Join *join = new Join( new Expression( BT_Any ) );
+		
+	TokenDef *tokenDef = new TokenDef( name, String(), false, false, 
+			join, 0, loc, nextTokenId++, 
+			rootNamespace, defaultRegion, 0, 0, 0 );
+
+	defaultRegion->tokenDefList.append( tokenDef );
+
 	/* Now create the one and only token -> "<chr>" / any /  */
 	name = "___DEFAULT_SCANNER_CHR";
 	defaultCharKlangEl = getKlangEl( this, defaultNamespace, name );
 	assert( defaultCharKlangEl->type == KlangEl::Unknown );
 	defaultCharKlangEl->type = KlangEl::Term;
 
-	Join *join = new Join( new Expression( BT_Any ) );
-		
-	TokenDef *tokenDef = new TokenDef( name, String(), false, false, 
-			join, 0, defaultCharKlangEl, loc, nextTokenId++, 
-			rootNamespace, defaultRegion, 0, 0, 0 );
-	defaultRegion->tokenDefList.append( tokenDef );
+	tokenDef->token = defaultCharKlangEl;
 	defaultCharKlangEl->tokenDef = tokenDef;
 }
 
@@ -1459,18 +1463,22 @@ void ParseData::initEmptyScanners()
 {
 	for ( RegionList::Iter reg = regionList; reg.lte(); reg++ ) {
 		if ( reg->tokenDefList.length() == 0 ) {
-			InputLoc loc;
+			InputLoc loc = { 0, 0, 0 };
 			String name( reg->name.length() + 16, "__%s_DEF_PAT", reg->name.data );
-
-			KlangEl *lel = getKlangEl( this, rootNamespace, name );
-			assert( lel->type == KlangEl::Unknown );
-			lel->type = KlangEl::Term;
 
 			Join *join = new Join( new Expression( BT_Any ) );
 				
 			TokenDef *tokenDef = new TokenDef( name, String(), false, false, join, 
-					0, lel, loc, nextTokenId++, rootNamespace, reg, 0, 0, 0 );
+					0, loc, nextTokenId++, rootNamespace, reg, 0, 0, 0 );
 			reg->tokenDefList.append( tokenDef );
+
+			/* These do not go in the namespace so so they cannot get declared
+			 * in the declare pass. */
+			KlangEl *lel = getKlangEl( this, rootNamespace, name );
+			assert( lel->type == KlangEl::Unknown );
+			lel->type = KlangEl::Term;
+
+			tokenDef->token = lel;
 			lel->tokenDef = tokenDef;
 		}
 	}
@@ -1583,13 +1591,18 @@ void ParseData::semanticAnalysis()
 
 	rootNamespace->declare( this );
 
+	/* Fill any empty scanners with a default token. */
+	initEmptyScanners();
+
+	/* Create the default scanner which will return single characters for us
+	 * when we have no other scanner */
+	createDefaultScanner();
+
 	/* Resolve uses statements. */
 	resolveUses();
 	
-	/* Init the longest match data and create the default scanner which will
-	 * return single characters for us when we have no other scanner */
+	/* Init the longest match data */
 	initLongestMatchData();
-	createDefaultScanner();
 
 	/* Resolve pattern and replacement elements. */
 	resolvePatternEls();
@@ -1601,8 +1614,6 @@ void ParseData::semanticAnalysis()
 	/* This needs to happen before the scanner is built. */
 	resolveProductionEls();
 
-	/* Fill any empty scanners with a default token. */
-	initEmptyScanners();
 
 	FsmGraph *fsmGraph = makeScanner();
 
