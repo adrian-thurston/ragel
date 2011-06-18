@@ -26,6 +26,7 @@
 #include <assert.h>
 
 using std::cout;
+using std::cerr;
 
 void TypeRef::resolve( ParseData *pd ) const
 {
@@ -285,143 +286,182 @@ void ParseData::resolveParseTree()
 	resolveRootBlock( );
 }
 
-void Namespace::declare( ParseData *pd )
+
+void ParseData::resolveUses()
 {
-	for ( GenericList::Iter g = genericList; g.lte(); g++ ) {
-		//std::cout << "generic " << g->name << std::endl;
+	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
+		if ( lel->objectDefUses != 0 ) {
+			/* Look for the production's associated region. */
+			Namespace *nspace = lel->objectDefUsesQual->getQual( this );
 
-		KlangEl *langEl = getKlangEl( pd, this, g->name );
-
-		/* Check that the element wasn't previously defined as something else. */
-		if ( langEl->type != KlangEl::Unknown ) {
-			error() << "'" << g->name << 
-				"' already defined as something else" << endp;
+			if ( nspace == 0 )
+				error() << "do not have namespace for resolving reference" << endp;
+	
+			/* Look up the language element in the region. */
+			KlangEl *langEl = getKlangEl( this, nspace, lel->objectDefUses );
+			lel->objectDef = langEl->objectDef;
 		}
-		langEl->type = KlangEl::NonTerm;
-
-		/* Add one empty production. */
-		ProdElList *emptyList = new ProdElList;
-		//addProduction( g->loc, langEl, emptyList, false, 0, 0 );
-
-		{
-			KlangEl *prodName = langEl;
-			assert( prodName->type == KlangEl::NonTerm );
-
-			Definition *newDef = new Definition( loc, prodName, 
-				emptyList, false, 0,
-				pd->prodList.length(), Definition::Production );
-			
-			prodName->defList.append( newDef );
-			pd->prodList.append( newDef );
-			newDef->predOf = 0;
-		}
-
-		langEl->generic = g;
-		g->langEl = langEl;
-	}
-
-	for ( LiteralDict::Iter l = literalDict; l.lte(); l++  ) {
-		/* Create a token for the literal. */
-		KlangEl *newLangEl = getKlangEl( pd, this, l->value->name );
-		assert( newLangEl->type == KlangEl::Unknown );
-		newLangEl->type = KlangEl::Term;
-		newLangEl->lit = l->value->literal;
-		newLangEl->isLiteral = true;
-		newLangEl->tokenDef = l->value;
-
-		l->value->token = newLangEl;
-	}
-
-	for ( ContextDefList::Iter c = contextDefList; c.lte(); c++ ) {
-		KlangEl *lel = getKlangEl( pd, this, c->name );
-
-		/* Check that the element wasn't previously defined as something else. */
-		if ( lel->type != KlangEl::Unknown ) {
-			error(c->context->loc) << "'" << c->name << 
-				"' has already been defined, maybe you want to use redef?" << endp;
-		}
-		lel->type = KlangEl::NonTerm;
-		ProdElList *emptyList = new ProdElList;
-		//addProduction( c->context->loc, c->name, emptyList, false, 0, 0 );
-
-		{
-			KlangEl *prodName = lel;
-			assert( prodName->type == KlangEl::NonTerm );
-
-			Definition *newDef = new Definition( loc, prodName, 
-				emptyList, false, 0,
-				pd->prodList.length(), Definition::Production );
-			
-			prodName->defList.append( newDef );
-			pd->prodList.append( newDef );
-			newDef->predOf = 0;
-
-			/* If the token has the same name as the region it is in, then also
-			 * insert it into the symbol map for the parent region. */
-			if ( strcmp( c->name, this->name ) == 0 ) {
-				/* Insert the name into the top of the region stack after popping the
-				 * region just created. We need it in the parent. */
-				this->parentNamespace->symbolMap.insert( c->name, prodName );
-			}
-		}
-
-		c->context->lel = lel;
-		lel->contextDef = c->context;
-		lel->objectDef = c->context->contextObjDef;
-	}
-
-	for ( TokenDefListNs::Iter t = tokenDefList; t.lte(); t++ ) {
-		/* Literals already taken care of. */
-		if ( ! t->isLiteral ) {
-			/* Create the token. */
-			KlangEl *tokEl = getKlangEl( pd, this, t->name );
-			if ( tokEl->type != KlangEl::Unknown )
-				error(InputLoc()) << "'" << t->name << "' already defined" << endp;
-
-			tokEl->type = KlangEl::Term;
-			tokEl->ignore = t->ignore;
-			tokEl->transBlock = t->codeBlock;
-			tokEl->objectDef = t->objectDef;
-			tokEl->contextIn = t->contextIn;
-			tokEl->tokenDef = t;
-
-			t->token = tokEl;
-		}
-	}
-
-	for ( NtDefList::Iter n = ntDefList; n.lte(); n++ ) {
-		/* Get the language element. */
-		KlangEl *langEl = getKlangEl( pd, this, n->name );
-
-		/* Check that the element wasn't previously defined as something else. */
-		if ( langEl->type != KlangEl::Unknown ) {
-			error(InputLoc()) << "'" << n->name << 
-				"' has already been defined, maybe you want to use redef?" << endp;
-		}
-
-		langEl->type = KlangEl::NonTerm;
-		//$$->langEl = langEl;
-
-		/* Get the language element. */
-		langEl->objectDef = n->objectDef;
-		langEl->reduceFirst = n->reduceFirst;
-		langEl->contextIn = n->contextIn;
-		langEl->defList.transfer( *n->defList );
-
-		for ( LelDefList::Iter d = langEl->defList; d.lte(); d++ ) {
-			d->prodName = langEl;
-
-			if ( d->redBlock != 0 ) {
-				pd->addProdRedObjectVar( d->redBlock->localFrame, langEl );
-				pd->addProdRHSVars( d->redBlock->localFrame, d->prodElList );
-			}
-
-		/* References to the reduce item. */
-		}
-	}
-
-	for ( NamespaceVect::Iter c = childNamespaces; c.lte(); c++ ) {
-		//std::cout << "namespace " << (*c)->name << std::endl;
-		(*c)->declare( pd );
 	}
 }
+
+void ParseData::resolveLiteralFactor( PdaFactor *fact )
+{
+	/* Interpret escape sequences and remove quotes. */
+	bool unusedCI;
+	String interp;
+	prepareLitString( interp, unusedCI, fact->literal->token.data, 
+			fact->literal->token.loc );
+
+	//cerr << "resolving literal: " << fact->literal->token << endl;
+
+	/* Look for the production's associated region. */
+	Namespace *nspace = fact->nspaceQual->getQual( this );
+
+	if ( nspace == 0 )
+		error(fact->loc) << "do not have region for resolving literal" << endp;
+
+	LiteralDictEl *ldel = nspace->literalDict.find( interp );
+	if ( ldel == 0 )
+		cerr << "could not resolve literal: " << fact->literal->token << endp;
+
+	TokenDef *tokenDef = ldel->value;
+	fact->langEl = tokenDef->token;
+}
+
+void ParseData::resolveReferenceFactor( PdaFactor *fact )
+{
+	/* Look for the production's associated region. */
+	Namespace *nspace = fact->nspaceQual->getQual( this );
+
+	if ( nspace == 0 )
+		error(fact->loc) << "do not have namespace for resolving reference" << endp;
+	
+	fact->nspace = nspace;
+
+	/* Look up the language element in the region. */
+	KlangEl *langEl = getKlangEl( this, nspace, fact->refName );
+
+	if ( fact->repeatType == RepeatRepeat ) {
+		/* If the factor is a repeat, create the repeat element and link the
+		 * factor to it. */
+		String repeatName( 32, "_repeat_%s", fact->refName.data );
+
+    	SymbolMapEl *inDict = nspace->symbolMap.find( repeatName );
+	    if ( inDict != 0 )
+			fact->langEl = inDict->value;
+		else
+			fact->langEl = makeRepeatProd( nspace, repeatName, fact->nspaceQual, fact->refName );
+	}
+	else if ( fact->repeatType == RepeatList ) {
+		/* If the factor is a repeat, create the repeat element and link the
+		 * factor to it. */
+		String listName( 32, "_list_%s", fact->refName.data );
+
+    	SymbolMapEl *inDict = nspace->symbolMap.find( listName );
+	    if ( inDict != 0 )
+			fact->langEl = inDict->value;
+		else
+			fact->langEl = makeListProd( nspace, listName, fact->nspaceQual, fact->refName );
+	}
+	else if ( fact->repeatType == RepeatOpt ) {
+		/* If the factor is an opt, create the opt element and link the factor
+		 * to it. */
+		String optName( 32, "_opt_%s", fact->refName.data );
+
+    	SymbolMapEl *inDict = nspace->symbolMap.find( optName );
+	    if ( inDict != 0 )
+			fact->langEl = inDict->value;
+		else
+			fact->langEl = makeOptProd( nspace, optName, fact->nspaceQual, fact->refName );
+	}
+	else {
+		/* The factor is not a repeat. Link to the language element. */
+		fact->langEl = langEl;
+	}
+}
+
+void ParseData::resolveFactor( PdaFactor *fact )
+{
+	switch ( fact->type ) {
+		case PdaFactor::LiteralType:
+			resolveLiteralFactor( fact );
+			break;
+		case PdaFactor::ReferenceType:
+			resolveReferenceFactor( fact );
+			break;
+	}
+}
+
+void ParseData::resolvePatternEls()
+{
+	for ( PatternList::Iter pat = patternList; pat.lte(); pat++ ) {
+		for ( PatternItemList::Iter item = *pat->list; item.lte(); item++ ) {
+			switch ( item->type ) {
+			case PatternItem::FactorType:
+				/* Use pdaFactor reference resolving. */
+				resolveFactor( item->factor );
+				break;
+			case PatternItem::InputText:
+				/* Nothing to do here. */
+				break;
+			}
+		}
+	}
+}
+
+void ParseData::resolveReplacementEls()
+{
+	for ( ReplList::Iter repl = replList; repl.lte(); repl++ ) {
+		for ( ReplItemList::Iter item = *repl->list; item.lte(); item++ ) {
+			switch ( item->type ) {
+			case ReplItem::FactorType:
+				/* Use pdaFactor reference resolving. */
+				resolveFactor( item->factor );
+				break;
+			case ReplItem::InputText:
+			case ReplItem::ExprType:
+				break;
+			}
+		}
+	}
+}
+
+void ParseData::resolveAccumEls()
+{
+	for ( AccumTextList::Iter accum = accumTextList; accum.lte(); accum++ ) {
+		for ( ReplItemList::Iter item = *accum->list; item.lte(); item++ ) {
+			switch ( item->type ) {
+			case ReplItem::FactorType:
+				resolveFactor( item->factor );
+				break;
+			case ReplItem::InputText:
+			case ReplItem::ExprType:
+				break;
+			}
+		}
+	}
+}
+
+/* Resolves production els and computes the precedence of each prod. */
+void ParseData::resolveProductionEls()
+{
+	for ( DefList::Iter prod = prodList; prod.lte(); prod++ ) {
+		/* First resolve. */
+		for ( ProdElList::Iter fact = *prod->prodElList; fact.lte(); fact++ )
+			resolveFactor( fact );
+
+		/* If there is no explicit precdence ... */
+		if ( prod->predOf == 0 )  {
+			/* Compute the precedence of the productions. */
+			for ( ProdElList::Iter fact = prod->prodElList->last(); fact.gtb(); fact-- ) {
+				/* Production inherits the precedence of the last terminal with
+				 * precedence. */
+				if ( fact->langEl->predType != PredNone ) {
+					prod->predOf = fact->langEl;
+					break;
+				}
+			}
+		}
+	}
+}
+
