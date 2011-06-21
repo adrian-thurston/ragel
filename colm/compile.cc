@@ -1199,7 +1199,7 @@ UniqueType *LangTerm::evaluateConstruct( ParseData *pd, CodeVect &code ) const
 
 	/* Lookup the type of the replacement and store it in the replacement
 	 * object so that replacement parsing has a target. */
-	UniqueType *replUT = typeRef->lookupType( pd );
+	UniqueType *replUT = typeRef->uniqueType;
 	if ( replUT->typeId == TYPE_TREE )
 		replacement->langEl = replUT->langEl;
 	else

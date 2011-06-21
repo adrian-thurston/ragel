@@ -120,17 +120,32 @@ void TypeRef::resolve( ParseData *pd ) const
 
 void LangTerm::resolve( ParseData *pd ) const
 {
-	/* FIXME: implementation missing here. */
 	switch ( type ) {
 		case ConstructType:
 			typeRef->resolve( pd );
+			typeRef->lookupType( pd );
+
+			/* Evaluate the initialization expressions. */
+			if ( fieldInitArgs != 0 ) {
+				for ( FieldInitVect::Iter pi = *fieldInitArgs; pi.lte(); pi++ )
+					(*pi)->expr->resolve( pd );
+			}
 			break;
 		case VarRefType:
+			break;
 		case MethodCallType:
+			if ( args != 0 ) {
+				for ( ExprVect::Iter pe = *args; pe.lte(); pe++ )
+					(*pe)->resolve( pd );
+			}
+			break;
 		case NumberType:
 		case StringType:
 		case MatchType:
+			break;
 		case NewType:
+			expr->resolve( pd );
+			break;
 		case TypeIdType:
 		case SearchType:
 		case NilType:
@@ -223,6 +238,8 @@ void LangStmt::resolve( ParseData *pd ) const
 			break;
 		}
 		case ElseType: {
+			for ( StmtList::Iter stmt = *stmtList; stmt.lte(); stmt++ )
+				stmt->resolve( pd );
 			break;
 		}
 		case RejectType:
@@ -237,6 +254,7 @@ void LangStmt::resolve( ParseData *pd ) const
 		}
 		case AssignType: {
 			/* Evaluate the exrepssion. */
+//			cout << "Assign Type" << endl;
 			expr->resolve( pd );
 			break;
 		}
