@@ -1362,6 +1362,8 @@ struct TypeRef
 		uniqueType(0) {}
 
 	void resolve( ParseData *pd ) const;
+	UniqueType *lookupTypePart( ParseData *pd, NamespaceQual *nspaceQual, 
+			const String &name );
 	UniqueType *lookupType( ParseData *pd );
 
 	InputLoc loc;
@@ -1374,9 +1376,7 @@ struct TypeRef
 	bool isRef;
 	RepeatType repeatType;
 
-private:
-	UniqueType *lookupTypePart( ParseData *pd, NamespaceQual *nspaceQual, 
-			const String &name );
+	/* Resolved. */
 	UniqueType *uniqueType;
 };
 

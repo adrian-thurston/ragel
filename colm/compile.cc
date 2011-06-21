@@ -219,55 +219,6 @@ UniqueType *ParseData::findUniqueType( int typeId, IterDef *iterDef )
 	return uniqueType;
 }
 
-UniqueType *TypeRef::lookupTypePart( ParseData *pd, 
-		NamespaceQual *qual, const String &name )
-{
-	/* Lookup up the qualifiction and then the name. */
-	Namespace *nspace = qual->getQual( pd );
-
-	if ( nspace == 0 )
-		error(loc) << "do not have region for resolving reference" << endp;
-
-	while ( nspace != 0 ) {
-		/* Search for the token in the region by name. */
-		SymbolMapEl *inDict = nspace->symbolMap.find( name );
-		if ( inDict != 0 ) {
-			long typeId = ( isPtr ? TYPE_PTR : ( isRef ? TYPE_REF : TYPE_TREE ) );
-			return pd->findUniqueType( typeId, inDict->value );
-		}
-
-		nspace = nspace->parentNamespace;
-	}
-
-	error(loc) << "unknown type in typeof expression" << endp;
-	return 0;
-}
-
-UniqueType *TypeRef::lookupType( ParseData *pd )
-{
-	if ( uniqueType != 0 )
-		return uniqueType;
-	
-	if ( iterDef != 0 )
-		uniqueType = pd->findUniqueType( TYPE_ITER, iterDef );
-	else if ( factor != 0 )
-		uniqueType = pd->findUniqueType( TYPE_TREE, factor->langEl );
-	else {
-		String name = typeName;
-		if ( repeatType == RepeatOpt )
-			name.setAs( 32, "_opt_%s", name.data );
-		else if ( repeatType == RepeatRepeat )
-			name.setAs( 32, "_repeat_%s", name.data );
-		else if ( repeatType == RepeatList )
-			name.setAs( 32, "_list_%s", name.data );
-
-		/* Not an iterator. May be a reference. */
-		uniqueType = lookupTypePart( pd, nspaceQual, name );
-	}
-
-	return uniqueType;
-}
-
 void ObjectDef::iterPushScope()
 {
 	//cout << "iter push scope ";
@@ -1271,7 +1222,9 @@ UniqueType *LangTerm::evaluateConstruct( ParseData *pd, CodeVect &code ) const
 
 UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) const
 {
-	UniqueType *ut = typeRef->lookupType( pd );
+	UniqueType *ut = typeRef->uniqueType;
+	assert( ut != 0 );
+
 	if ( ut->typeId != TYPE_TREE )
 		error(loc) << "can only parse trees" << endl;
 	
@@ -2886,14 +2839,14 @@ void ParseData::initAccumFields( GenericType *gen )
 		initCtxField( gen );
 }
 
-void ParseData::resolveGenericTypes()
+void ParseData::initGenericTypes()
 {
 	for ( NamespaceList::Iter ns = namespaceList; ns.lte(); ns++ ) {
 		for ( GenericList::Iter gen = ns->genericList; gen.lte(); gen++ ) {
-			gen->utArg = gen->typeArg->lookupType( this );
-
+			gen->utArg = gen->typeArg->uniqueType;
+ 
 			if ( gen->typeId == GEN_MAP )
-				gen->keyUT = gen->keyTypeArg->lookupType( this );
+				gen->keyUT = gen->keyTypeArg->uniqueType; 
 
 			ObjFieldMap *fieldMap = new ObjFieldMap;
 			ObjFieldList *fieldList = new ObjFieldList;
@@ -3272,14 +3225,14 @@ void ParseData::removeNonUnparsableRepls()
 
 void ParseData::compileByteCode()
 {
-	initUniqueTypes();
+//	initUniqueTypes();
 	initIntObject();
 	initStrObject();
 	initStreamObject();
 	initTokenObjects();
 	makeDefaultIterators();
 	initAllLanguageObjects();
-	resolveGenericTypes();
+	initGenericTypes();
 
 	initGlobalFunctions();
 

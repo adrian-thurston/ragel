@@ -27,6 +27,59 @@
 
 using std::cout;
 using std::cerr;
+using std::endl;
+
+UniqueType *TypeRef::lookupTypePart( ParseData *pd, 
+		NamespaceQual *qual, const String &name )
+{
+	/* Lookup up the qualifiction and then the name. */
+	Namespace *nspace = qual->getQual( pd );
+
+	if ( nspace == 0 )
+		error(loc) << "do not have region for resolving reference" << endp;
+
+	while ( nspace != 0 ) {
+		/* Search for the token in the region by name. */
+		SymbolMapEl *inDict = nspace->symbolMap.find( name );
+		if ( inDict != 0 ) {
+			long typeId = ( isPtr ? TYPE_PTR : ( isRef ? TYPE_REF : TYPE_TREE ) );
+			return pd->findUniqueType( typeId, inDict->value );
+		}
+
+		nspace = nspace->parentNamespace;
+	}
+
+	error(loc) << "unknown type in typeof expression" << endp;
+	return 0;
+}
+
+UniqueType *TypeRef::lookupType( ParseData *pd )
+{
+	if ( uniqueType != 0 )
+		return uniqueType;
+
+//	cout << __PRETTY_FUNCTION__ << " " << typeName.data << " " << this << endl;
+	
+	if ( iterDef != 0 )
+		uniqueType = pd->findUniqueType( TYPE_ITER, iterDef );
+	else if ( factor != 0 )
+		uniqueType = pd->findUniqueType( TYPE_TREE, factor->langEl );
+	else {
+		String name = typeName;
+		if ( repeatType == RepeatOpt )
+			name.setAs( 32, "_opt_%s", name.data );
+		else if ( repeatType == RepeatRepeat )
+			name.setAs( 32, "_repeat_%s", name.data );
+		else if ( repeatType == RepeatList )
+			name.setAs( 32, "_list_%s", name.data );
+
+		/* Not an iterator. May be a reference. */
+		uniqueType = lookupTypePart( pd, nspaceQual, name );
+	}
+
+	return uniqueType;
+}
+
 
 void TypeRef::resolve( ParseData *pd ) const
 {
@@ -69,10 +122,9 @@ void LangTerm::resolve( ParseData *pd ) const
 {
 	/* FIXME: implementation missing here. */
 	switch ( type ) {
-		case ConstructType: {
+		case ConstructType:
 			typeRef->resolve( pd );
 			break;
-		}
 		case VarRefType:
 		case MethodCallType:
 		case NumberType:
@@ -84,8 +136,14 @@ void LangTerm::resolve( ParseData *pd ) const
 		case NilType:
 		case TrueType:
 		case FalseType:
+			break;
+
 		case ParseType:
 		case ParseStopType:
+			typeRef->resolve( pd );
+			typeRef->lookupType( pd );
+			break;
+
 		case MakeTreeType:
 		case MakeTokenType:
 		case EmbedStringType:
@@ -461,6 +519,20 @@ void ParseData::resolveProductionEls()
 					break;
 				}
 			}
+		}
+	}
+}
+
+void ParseData::resolveGenericTypes()
+{
+	for ( NamespaceList::Iter ns = namespaceList; ns.lte(); ns++ ) {
+		for ( GenericList::Iter gen = ns->genericList; gen.lte(); gen++ ) {
+//			cout << __PRETTY_FUNCTION__ << " " << gen->name.data << " " << gen->typeArg << endl;
+
+			gen->utArg = gen->typeArg->lookupType( this );
+
+			if ( gen->typeId == GEN_MAP )
+				gen->keyUT = gen->keyTypeArg->lookupType( this );
 		}
 	}
 }

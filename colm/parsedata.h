@@ -660,6 +660,7 @@ struct ParseData
 	void wrapNonTerminals();
 	void makeDefinitionNames();
 	void noUndefindKlangEls();
+	void declareBaseKlangEls();
 	void makeKlangElIds();
 	void makeKlangElNames();
 
@@ -791,6 +792,7 @@ struct ParseData
 	void resolveTranslateBlock( KlangEl *langEl );
 	void resolveReductionCode( Definition *prod );
 	void resolveParseTree();
+	void resolveGenericTypes();
 
 	void compileFunction( Function *func, CodeVect &code );
 	void compileFunction( Function *func );
@@ -801,7 +803,7 @@ struct ParseData
 	void compileTranslateBlock( KlangEl *langEl );
 	void findLocalTrees( CharSet &trees );
 	void compileReductionCode( Definition *prod );
-	void resolveGenericTypes();
+	void initGenericTypes();
 	void removeNonUnparsableRepls();
 	void compileByteCode();
 

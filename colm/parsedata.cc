@@ -1411,7 +1411,6 @@ void ParseData::semanticAnalysis()
 	beginProcessing();
 	initKeyOps();
 
-
 	/*
 	 * Type Declaration.
 	 */
@@ -1440,6 +1439,10 @@ void ParseData::semanticAnalysis()
 
 	/* This needs to happen before the scanner is built. */
 	resolveProductionEls();
+
+	declareBaseKlangEls();
+	initUniqueTypes();
+	resolveGenericTypes();
 
 	/*
 	 * Parsers
