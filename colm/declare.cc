@@ -86,7 +86,10 @@ void ParseData::declareBaseKlangEls()
 	langEls.prepend( anyKlangEl );
 	SymbolMapEl *anyMapEl = rootNamespace->symbolMap.insert( anyKlangEl->name, anyKlangEl );
 	assert( anyMapEl != 0 );
+}
 
+void ParseData::makeTerminalWrappers()
+{
 	/* Make terminal language elements corresponding to each nonterminal in
 	 * the grammar. */
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
@@ -104,7 +107,10 @@ void ParseData::declareBaseKlangEls()
 			termDup->termDup = lel;
 		}
 	}
+}
 
+void ParseData::makeEofElements()
+{
 	/* Make eof language elements for each user terminal. This is a bit excessive and
 	 * need to be reduced to the ones that we need parsers for, but we don't know that yet.
 	 * Another pass before this one is needed. */
@@ -124,7 +130,6 @@ void ParseData::declareBaseKlangEls()
 		}
 	}
 }
-
 
 void Namespace::declare( ParseData *pd )
 {

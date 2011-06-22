@@ -1423,6 +1423,9 @@ void ParseData::semanticAnalysis()
 	 * when we have no other scanner */
 	createDefaultScanner();
 
+	declareBaseKlangEls();
+	initUniqueTypes();
+
 	/*
 	 * Type Resolving.
 	 */
@@ -1440,8 +1443,8 @@ void ParseData::semanticAnalysis()
 	/* This needs to happen before the scanner is built. */
 	resolveProductionEls();
 
-	declareBaseKlangEls();
-	initUniqueTypes();
+	makeTerminalWrappers();
+	makeEofElements();
 	resolveGenericTypes();
 
 	/*

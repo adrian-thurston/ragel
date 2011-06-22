@@ -1479,7 +1479,7 @@ UniqueType *LangTerm::evaluate( ParseData *pd, CodeVect &code ) const
 		}
 		case SearchType: {
 			/* Evaluate the expression. */
-			UniqueType *ut = typeRef->lookupType( pd );
+			UniqueType *ut = typeRef->uniqueType;
 			if ( ut->typeId != TYPE_TREE )
 				error(loc) << "can only search for tree types" << endp;
 
@@ -2177,7 +2177,7 @@ void LangStmt::compile( ParseData *pd, CodeVect &code ) const
 			/* Evaluate the exrepssion. */
 			UniqueType *exprUT = expr->evaluate( pd, code );
 
-			UniqueType *resUT = pd->curFunction->typeRef->lookupType( pd );
+			UniqueType *resUT = pd->curFunction->typeRef->uniqueType;
 			if ( !castAssignment( pd, code, resUT, 0, exprUT ) )
 				error(loc) << "return value wrong type" << endp;
 
@@ -2929,7 +2929,7 @@ void ParseData::makeFuncVisible( Function *func, bool isUserIter )
 
 	/* Insert the function into the global function map. */
 	UniqueType *returnUT = func->typeRef != 0 ? 
-			func->typeRef->lookupType(this) : uniqueTypeInt;
+			func->typeRef->uniqueType : uniqueTypeInt;
 	ObjMethod *objMethod = new ObjMethod( returnUT, func->name, 
 			IN_CALL_WV, IN_CALL_WC, 
 			func->paramList->length(), paramUTs, func->paramList, false );

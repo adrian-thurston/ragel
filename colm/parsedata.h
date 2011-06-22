@@ -663,6 +663,8 @@ struct ParseData
 	void declareBaseKlangEls();
 	void makeKlangElIds();
 	void makeKlangElNames();
+	void makeTerminalWrappers();
+	void makeEofElements();
 
 	/* Parser generation. */
 	void advanceReductions( PdaGraph *pdaGraph );

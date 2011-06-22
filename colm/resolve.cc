@@ -147,7 +147,10 @@ void LangTerm::resolve( ParseData *pd ) const
 			expr->resolve( pd );
 			break;
 		case TypeIdType:
+			break;
 		case SearchType:
+			typeRef->lookupType( pd );
+			break;
 		case NilType:
 		case TrueType:
 		case FalseType:
@@ -338,6 +341,9 @@ void ParseData::resolveParseTree()
 			resolveUserIter( f );
 		else
 			resolveFunction( f );
+		
+		if ( f->typeRef != 0 ) 
+			f->typeRef->lookupType( this );
 	}
 
 	/* Compile the reduction code. */
