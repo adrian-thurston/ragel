@@ -133,12 +133,16 @@ void LangTerm::resolve( ParseData *pd ) const
 			break;
 		case VarRefType:
 			break;
+
+		case MakeTreeType:
+		case MakeTokenType:
 		case MethodCallType:
 			if ( args != 0 ) {
 				for ( ExprVect::Iter pe = *args; pe.lte(); pe++ )
 					(*pe)->resolve( pd );
 			}
 			break;
+
 		case NumberType:
 		case StringType:
 		case MatchType:
@@ -147,6 +151,7 @@ void LangTerm::resolve( ParseData *pd ) const
 			expr->resolve( pd );
 			break;
 		case TypeIdType:
+			typeRef->lookupType( pd );
 			break;
 		case SearchType:
 			typeRef->lookupType( pd );
@@ -162,8 +167,6 @@ void LangTerm::resolve( ParseData *pd ) const
 			typeRef->lookupType( pd );
 			break;
 
-		case MakeTreeType:
-		case MakeTokenType:
 		case EmbedStringType:
 			break;
 	}
@@ -262,6 +265,8 @@ void LangStmt::resolve( ParseData *pd ) const
 			break;
 		}
 		case ForIterType: {
+			typeRef->lookupType( pd );
+
 			/* Evaluate and push the arguments. */
 			langTerm->resolve( pd );
 
@@ -344,6 +349,9 @@ void ParseData::resolveParseTree()
 		
 		if ( f->typeRef != 0 ) 
 			f->typeRef->lookupType( this );
+
+		for ( ParameterList::Iter param = *f->paramList; param.lte(); param++ )
+			param->typeRef->lookupType( this );
 	}
 
 	/* Compile the reduction code. */

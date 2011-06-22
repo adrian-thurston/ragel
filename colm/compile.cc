@@ -1469,7 +1469,7 @@ UniqueType *LangTerm::evaluate( ParseData *pd, CodeVect &code ) const
 			return evaluateNew( pd, code );
 		case TypeIdType: {
 			/* Evaluate the expression. */
-			UniqueType *ut = typeRef->lookupType( pd );
+			UniqueType *ut = typeRef->uniqueType;//lookupType( pd );
 			if ( ut->typeId != TYPE_TREE )
 				error() << "typeid can only be applied to tree types" << endp;
 
@@ -1886,7 +1886,7 @@ void LangStmt::compileForIter( ParseData *pd, CodeVect &code ) const
 		iterCallTerm = chooseDefaultIter( pd, langTerm );
 
 	/* The type we are searching for. */
-	UniqueType *searchUT = typeRef->lookupType( pd );
+	UniqueType *searchUT = typeRef->uniqueType;
 
 	/* 
 	 * Declare the iterator variable.
@@ -2886,7 +2886,7 @@ void ParseData::makeFuncVisible( Function *func, bool isUserIter )
 	long paramPos = 0, paramListSize = 0;
 	UniqueType **paramUTs = new UniqueType*[func->paramList->length()];
 	for ( ParameterList::Iter param = *func->paramList; param.lte(); param++ ) {
-		paramUTs[paramPos] = param->typeRef->lookupType( this );
+		paramUTs[paramPos] = param->typeRef->uniqueType;
 
 		if ( func->localFrame->findField( param->name ) != 0 )
 			error(param->loc) << "parameter " << param->name << " redeclared" << endp;
