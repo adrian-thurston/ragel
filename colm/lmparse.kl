@@ -91,8 +91,7 @@ block_open: '{'
 	final {
 		/* Init the object representing the local frame. */
 		$$->localFrame = new ObjectDef( ObjectDef::FrameType, 
-				"local", new ObjFieldMap(), new ObjFieldList, 
-				new ObjMethodMap(), pd->nextObjectId++ );
+				"local", pd->nextObjectId++ );
 
 		pd->curLocalFrame = $$->localFrame;
 
@@ -412,8 +411,8 @@ obj_var_list: obj_var_list var_def
 
 obj_var_list:
 	final {
-		pd->objectDef = new ObjectDef( ObjectDef::UserType, curDefineId, 
-				new ObjFieldMap, new ObjFieldList, new ObjMethodMap(), pd->nextObjectId++ ); 
+		pd->objectDef = new ObjectDef( ObjectDef::UserType,
+				curDefineId, pd->nextObjectId++ ); 
 	};
 
 
@@ -575,8 +574,8 @@ context_head:
 		ContextDef *contextDef = new ContextDef( $2->data, context, nspace );
 		nspace->contextDefList.append( contextDef );
 
-		context->contextObjDef = new ObjectDef( ObjectDef::UserType, $2->data, 
-				new ObjFieldMap, new ObjFieldList, new ObjMethodMap(), pd->nextObjectId++ ); 
+		context->contextObjDef = new ObjectDef( ObjectDef::UserType,
+				$2->data, pd->nextObjectId++ ); 
 	};
 
 pattern_list: pattern_list pattern;
@@ -2383,8 +2382,8 @@ void Parser::init()
 
 	/* Set up the global object. */
 	String global = "global";
-	pd->globalObjectDef = new ObjectDef( ObjectDef::UserType, global, 
-			new ObjFieldMap, new ObjFieldList, new ObjMethodMap(), pd->nextObjectId++ ); 
+	pd->globalObjectDef = new ObjectDef( ObjectDef::UserType,
+			global, pd->nextObjectId++ ); 
 	
 	/* The eofTokenRegion defaults to the root region. */
 	pd->eofTokenRegion = rootRegion;
@@ -2396,8 +2395,7 @@ void Parser::init()
 	pd->initGraphDict();
 
 	pd->rootLocalFrame = new ObjectDef( ObjectDef::FrameType, 
-				"local", new ObjFieldMap(), new ObjFieldList(), new ObjMethodMap(), 
-				pd->nextObjectId++ );
+				"local", pd->nextObjectId++ );
 	pd->curLocalFrame = pd->rootLocalFrame;
 
 	%% write init;

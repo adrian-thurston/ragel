@@ -2355,11 +2355,7 @@ void ParseData::initLocalRefInstructions( ObjField *el )
 
 void ParseData::initIntObject( )
 {
-	ObjFieldMap *fieldMap = new ObjFieldMap;
-	ObjFieldList *fieldList = new ObjFieldList;
-	ObjMethodMap *methodMap = new ObjMethodMap;
-	intObj = new ObjectDef( ObjectDef::BuiltinType, "int", 
-			fieldMap, fieldList, methodMap, nextObjectId++ );
+	intObj = new ObjectDef( ObjectDef::BuiltinType, "int", nextObjectId++ );
 	intKlangEl->objectDef = intObj;
 
 	initFunction( uniqueTypeStr, intObj, "to_string", IN_INT_TO_STR, IN_INT_TO_STR, true );
@@ -2383,11 +2379,7 @@ void ParseData::addLengthField( ObjectDef *objDef, Code getLength )
 
 void ParseData::initStrObject( )
 {
-	ObjFieldMap *fieldMap = new ObjFieldMap;
-	ObjFieldList *fieldList = new ObjFieldList;
-	ObjMethodMap *methodMap = new ObjMethodMap;
-	strObj = new ObjectDef( ObjectDef::BuiltinType, "str", 
-			fieldMap, fieldList, methodMap, nextObjectId++ );
+	strObj = new ObjectDef( ObjectDef::BuiltinType, "str", nextObjectId++ );
 	strKlangEl->objectDef = strObj;
 
 	initFunction( uniqueTypeInt, strObj, "atoi",   IN_STR_ATOI, IN_STR_ATOI, true );
@@ -2405,11 +2397,8 @@ void ParseData::initStrObject( )
 
 void ParseData::initStreamObject( )
 {
-	ObjFieldMap *fieldMap = new ObjFieldMap;
-	ObjFieldList *fieldList = new ObjFieldList;
-	ObjMethodMap *methodMap = new ObjMethodMap;
-	streamObj = new ObjectDef( ObjectDef::BuiltinType, "stream", 
-			fieldMap, fieldList, methodMap, nextObjectId++ );
+	streamObj = new ObjectDef( ObjectDef::BuiltinType,
+			"stream", nextObjectId++ );
 	streamKlangEl->objectDef = streamObj;
 
 	initFunction( uniqueTypeStr, streamObj, "pull",  IN_STREAM_PULL, IN_STREAM_PULL, uniqueTypeInt, false );
@@ -2456,11 +2445,7 @@ ObjField *ParseData::makePosEl()
 void ParseData::initTokenObjects( )
 {
 	/* Make a default object Definition. */
-	ObjFieldMap *fieldMap = new ObjFieldMap;
-	ObjFieldList *fieldList = new ObjFieldList;
-	ObjMethodMap *methodMap = new ObjMethodMap;
-	tokenObj = new ObjectDef( ObjectDef::BuiltinType, "token", fieldMap, fieldList,
-			methodMap, nextObjectId++ );
+	tokenObj = new ObjectDef( ObjectDef::BuiltinType, "token", nextObjectId++ );
 
 	ObjField *dataEl = makeDataEl();
 	tokenObj->insertField( dataEl->name, dataEl );
@@ -2842,11 +2827,8 @@ void ParseData::initGenericTypes()
 			if ( gen->typeId == GEN_MAP )
 				gen->keyUT = gen->keyTypeArg->uniqueType; 
 
-			ObjFieldMap *fieldMap = new ObjFieldMap;
-			ObjFieldList *fieldList = new ObjFieldList;
-			ObjMethodMap *methodMap = new ObjMethodMap;
 			gen->objDef = new ObjectDef( ObjectDef::BuiltinType, 
-					gen->name, fieldMap, fieldList, methodMap, nextObjectId++ );
+					gen->name, nextObjectId++ );
 
 			switch ( gen->typeId ) {
 				case GEN_MAP: 

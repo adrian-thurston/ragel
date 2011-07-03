@@ -1519,15 +1519,15 @@ struct ObjectDef
 		BuiltinType
 	};
 
-	ObjectDef( Type type, String name, 
-			ObjFieldMap *objFieldMap, ObjFieldList *objFieldList, 
-			ObjMethodMap *objMethodMap, int id )
+	ObjectDef( Type type, String name, int id )
 	:
-		type(type), name(name), objFieldList(objFieldList),
-		objMethodMap(objMethodMap), id(id), nextOffset(0)
+		type(type), name(name), id(id), nextOffset(0)
 	{
 		scope = new ObjNameScope;
-		scope->objFieldMap = objFieldMap;
+		scope->objFieldMap = new ObjFieldMap;
+
+		objFieldList = new ObjFieldList;
+		objMethodMap = new ObjMethodMap();
 	}
 
 	Type type;
