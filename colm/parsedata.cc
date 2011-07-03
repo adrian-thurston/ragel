@@ -1438,10 +1438,10 @@ void ParseData::semanticAnalysis()
 	resolveReplacementEls();
 	resolveAccumEls();
 
-	resolveParseTree();
-
 	/* This needs to happen before the scanner is built. */
 	resolveProductionEls();
+
+	resolveParseTree();
 
 	makeTerminalWrappers();
 	makeEofElements();

@@ -302,7 +302,6 @@ void ObjectDef::resolve( ParseData *pd )
 		ObjField *field = fli->value;
 
 		if ( field->typeRef != 0 ) {
-			cout << "lookup type" << endl;
 			field->typeRef->lookupType( pd );
 		}
 	}
@@ -337,6 +336,8 @@ void ParseData::resolvePreEof( TokenRegion *region )
 
 void ParseData::resolveRootBlock()
 {
+	rootLocalFrame->resolve( this );
+
 	CodeBlock *block = rootCodeBlock;
 	block->resolve( this );
 }
@@ -389,6 +390,23 @@ void ParseData::resolveParseTree()
 
 	/* Compile the init code */
 	resolveRootBlock( );
+
+	/* Init all user object fields (need consistent size). */
+	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
+		ObjectDef *objDef = lel->objectDef;
+		if ( objDef != 0 ) {
+			/* Init all fields of the object. */
+			for ( ObjFieldList::Iter f = *objDef->objFieldList; f.lte(); f++ ) {
+				f->value->typeRef->lookupType( this );
+			}
+		}
+	}
+
+	/* Init all fields of the global object. */
+	for ( ObjFieldList::Iter f = *globalObjectDef->objFieldList; f.lte(); f++ ) {
+		f->value->typeRef->lookupType( this );
+	}
+
 }
 
 
