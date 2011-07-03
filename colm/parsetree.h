@@ -1523,8 +1523,8 @@ struct ObjectDef
 			ObjFieldMap *objFieldMap, ObjFieldList *objFieldList, 
 			ObjMethodMap *objMethodMap, int id )
 	:
-		type(type), name(name), /*objFieldMap(objFieldMap),*/ objFieldList(objFieldList),
-		objMethodMap(objMethodMap), id(id), nextOffset(0), parentScope(0)
+		type(type), name(name), objFieldList(objFieldList),
+		objMethodMap(objMethodMap), id(id), nextOffset(0)
 	{
 		scope = new ObjNameScope;
 		scope->objFieldMap = objFieldMap;
@@ -1532,7 +1532,6 @@ struct ObjectDef
 
 	Type type;
 	String name;
-//	ObjFieldMap *objFieldMap;	
 	ObjFieldList *objFieldList;
 	ObjMethodMap *objMethodMap;	
 
@@ -1556,14 +1555,10 @@ struct ObjectDef
 	ObjField *findFieldInScope( const String &name, ObjNameScope *inScope );
 	ObjField *findField( const String &name );
 	void insertField( const String &name, ObjField *value );
+	void resolve( ParseData *pd );
 
 	long size() { return nextOffset; }
 	long sizeTrees() { return firstNonTree; }
-
-	/* For building a hierarchy of scopes. Scopes point up to their parent. */
-	ObjectDef *parentScope;
-
-	ObjectDef *prev, *next;
 };
 
 typedef Vector<LangExpr*> ExprVect;

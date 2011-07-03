@@ -296,8 +296,23 @@ void LangStmt::resolve( ParseData *pd ) const
 	}
 }
 
+void ObjectDef::resolve( ParseData *pd )
+{
+	for ( ObjFieldList::Iter fli = *objFieldList; fli.lte(); fli++ ) {
+		ObjField *field = fli->value;
+
+		if ( field->typeRef != 0 ) {
+			cout << "lookup type" << endl;
+			field->typeRef->lookupType( pd );
+		}
+	}
+}
+
 void CodeBlock::resolve( ParseData *pd ) const
 {
+	if ( localFrame != 0 )
+		localFrame->resolve( pd );
+
 	for ( StmtList::Iter stmt = *stmtList; stmt.lte(); stmt++ )
 		stmt->resolve( pd );
 }

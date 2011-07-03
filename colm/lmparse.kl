@@ -93,6 +93,7 @@ block_open: '{'
 		$$->localFrame = new ObjectDef( ObjectDef::FrameType, 
 				"local", new ObjFieldMap(), new ObjFieldList, 
 				new ObjMethodMap(), pd->nextObjectId++ );
+
 		pd->curLocalFrame = $$->localFrame;
 
 		/* Add captures to the local frame. We Depend on these becoming the

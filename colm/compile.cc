@@ -280,8 +280,6 @@ ObjField *ObjectDef::checkRedecl( const String &name )
 	ObjFieldMapEl *objDefMapEl = scope->objFieldMap->find( name );
 	if ( objDefMapEl != 0 )
 		return objDefMapEl->value;
-	if ( parentScope != 0 )
-		return parentScope->findField( name );
 	return 0;
 
 }
@@ -292,8 +290,6 @@ ObjField *ObjectDef::findField( const String &name )
 	ObjField *objField = findFieldInScope( name, scope );
 	if ( objField != 0 )
 		return objField;
-	if ( parentScope != 0 )
-		return parentScope->findField( name );
 	return 0;
 }
  
@@ -302,8 +298,6 @@ ObjMethod *ObjectDef::findMethod( const String &name )
 	ObjMethodMapEl *objMethodMapEl = objMethodMap->find( name );
 	if ( objMethodMapEl != 0 )
 		return objMethodMapEl->value;
-	if ( parentScope != 0 )
-		return parentScope->findMethod( name );
 	return 0;
 }
 
