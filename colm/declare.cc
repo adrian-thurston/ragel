@@ -131,6 +131,68 @@ void ParseData::makeEofElements()
 	}
 }
 
+void ParseData::addProdRedObjectVar( ObjectDef *localFrame, KlangEl *nonTerm )
+{
+	UniqueType *prodNameUT = findUniqueType( TYPE_TREE, nonTerm );
+	TypeRef *typeRef = new TypeRef( InputLoc(), prodNameUT );
+	ObjField *el = new ObjField( InputLoc(), typeRef, "lhs" );
+
+	/* Is the only item pushed to the stack just before a reduction action is
+	 * executed. We rely on a zero offset. */
+	el->beenReferenced = true;
+	el->beenInitialized = true;
+	el->isLhsEl = true;
+	el->offset = 0;
+
+	initLocalInstructions( el );
+
+	localFrame->insertField( el->name, el );
+}
+
+void ParseData::addProdRHSVars( ObjectDef *localFrame, ProdElList *prodElList )
+{
+	long position = 1;
+	for ( ProdElList::Iter rhsEl = *prodElList; rhsEl.lte(); rhsEl++, position++ ) {
+		if ( rhsEl->type == PdaFactor::ReferenceType ) {
+			TypeRef *typeRef = new TypeRef( rhsEl->loc, rhsEl->nspaceQual, rhsEl->refName );
+
+			/* Use an offset of zero. For frame objects we compute the offset on
+			 * demand. */
+			String name( 8, "r%d", position );
+			ObjField *el = new ObjField( InputLoc(), typeRef, name );
+			rhsEl->objField = el;
+
+			/* Right hand side elements are constant. */
+			el->isConst = true;
+			el->isRhsEl = true;
+
+			/* Only ever fetch for reading since they are constant. */
+			el->inGetR = IN_GET_LOCAL_R;
+
+			localFrame->insertField( el->name, el );
+		}
+	}
+}
+
+void ParseData::addProdRHSLoads( Definition *prod, CodeVect &code, long &insertPos )
+{
+	CodeVect loads;
+	long elPos = 0;
+	for ( ProdElList::Iter rhsEl = *prod->prodElList; rhsEl.lte(); rhsEl++, elPos++ ) {
+		if ( rhsEl->type == PdaFactor::ReferenceType ) {
+			if ( rhsEl->objField->beenReferenced ) {
+				loads.append ( IN_INIT_RHS_EL );
+				loads.appendHalf( elPos );
+				loads.appendHalf( rhsEl->objField->offset );
+			}
+		}
+	}
+
+	/* Insert and update the insert position. */
+	code.insert( insertPos, loads );
+	insertPos += loads.length();
+}
+
 void Namespace::declare( ParseData *pd )
 {
 	for ( GenericList::Iter g = genericList; g.lte(); g++ ) {
