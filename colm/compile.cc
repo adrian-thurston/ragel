@@ -344,7 +344,7 @@ void ObjectDef::initField( ParseData *pd, ObjField *field )
 {
 	if ( !field->beenInitialized ) {
 		field->beenInitialized = true;
-		UniqueType *fieldUT = field->typeRef->uniqueType;//lookupType( pd );
+		UniqueType *fieldUT = field->typeRef->uniqueType;
 
 		if ( type == FrameType ) {
 			nextOffset += sizeOfField( fieldUT );
@@ -368,7 +368,7 @@ UniqueType *LangVarRef::loadFieldInstr( ParseData *pd, CodeVect &code,
 	/* Ensure that the field is referenced. */
 	inObject->referenceField( pd, el );
 
-	UniqueType *elUT = el->typeRef->uniqueType;//lookupType( pd );
+	UniqueType *elUT = el->typeRef->uniqueType;
 
 	/* If it's a reference then we load it read always. */
 	if ( forWriting ) {
@@ -396,7 +396,7 @@ UniqueType *LangVarRef::loadFieldInstr( ParseData *pd, CodeVect &code,
 
 	/* If we are dealing with an iterator then dereference it. */
 	if ( elUT->typeId == TYPE_ITER )
-		elUT = el->typeRef->searchTypeRef->uniqueType;//lookupType( pd );
+		elUT = el->typeRef->searchUniqueType;
 
 	return elUT;
 }
@@ -446,9 +446,9 @@ long LangVarRef::loadQualificationRefs( ParseData *pd, CodeVect &code ) const
 			code.appendHalf( el->offset );
 		}
 
-		UniqueType *elUT = el->typeRef->uniqueType;//lookupType( pd );
+		UniqueType *elUT = el->typeRef->uniqueType;
 		if ( elUT->typeId == TYPE_ITER )
-			elUT = el->typeRef->searchTypeRef->uniqueType;//lookupType( pd );
+			elUT = el->typeRef->searchUniqueType;
 		
 		assert( qi->type == QualItem::Dot );
 
@@ -667,11 +667,11 @@ VarRefLookup LangVarRef::lookupQualification( ParseData *pd, ObjectDef *rootDef 
 			error(qi->loc) << "cannot resolve qualification " << qi->data << endp;
 
 		/* Lookup the type of the field. */
-		UniqueType *qualUT = el->typeRef->uniqueType;//lookupType( pd );
+		UniqueType *qualUT = el->typeRef->uniqueType;
 
 		/* If we are dealing with an iterator then dereference it. */
 		if ( qualUT->typeId == TYPE_ITER )
-			qualUT = el->typeRef->searchTypeRef->uniqueType;//lookupType( pd );
+			qualUT = el->typeRef->searchUniqueType;
 
 		/* Is it const? */
 		if ( firstConstPart < 0 && el->isConst )
@@ -690,7 +690,7 @@ VarRefLookup LangVarRef::lookupQualification( ParseData *pd, ObjectDef *rootDef 
 		}
 		else if ( qi->type == QualItem::Arrow ) {
 			if ( qualUT->typeId == TYPE_ITER )
-				qualUT = el->typeRef->searchTypeRef->uniqueType;//lookupType( pd );
+				qualUT = el->typeRef->searchUniqueType;
 			else if ( qualUT->typeId == TYPE_PTR )
 				qualUT = pd->findUniqueType( TYPE_TREE, qualUT->langEl );
 		}
@@ -725,10 +725,10 @@ VarRefLookup LangVarRef::lookupField( ParseData *pd ) const
 		error(loc) << "cannot find name " << name << " in object" << endp;
 
 	lookup.objField = field;
-	lookup.uniqueType = field->typeRef->uniqueType;//lookupType( pd );
+	lookup.uniqueType = field->typeRef->uniqueType;
 
-	if ( field->typeRef->searchTypeRef != 0 )
-		lookup.iterSearchUT = field->typeRef->searchTypeRef->uniqueType;//lookupType( pd );
+	if ( field->typeRef->searchUniqueType != 0 )
+		lookup.iterSearchUT = field->typeRef->searchUniqueType;
 
 	return lookup;
 }
@@ -1146,7 +1146,7 @@ void LangTerm::assignFieldArgs( ParseData *pd, CodeVect &code, UniqueType *replU
 
 			/* Lookup the type of the field and compare it to the type of the
 			 * expression. */
-			UniqueType *fieldUT = field->typeRef->uniqueType;//lookupType( pd );
+			UniqueType *fieldUT = field->typeRef->uniqueType;
 			if ( !castAssignment( pd, code, fieldUT, 0, fieldInit->exprUT ) )
 				error(fieldInit->loc) << "type mismatch in initialization" << endp;
 
@@ -1463,7 +1463,7 @@ UniqueType *LangTerm::evaluate( ParseData *pd, CodeVect &code ) const
 			return evaluateNew( pd, code );
 		case TypeIdType: {
 			/* Evaluate the expression. */
-			UniqueType *ut = typeRef->uniqueType;//lookupType( pd );
+			UniqueType *ut = typeRef->uniqueType;
 			if ( ut->typeId != TYPE_TREE )
 				error() << "typeid can only be applied to tree types" << endp;
 
@@ -1705,8 +1705,8 @@ void LangVarRef::assignValue( ParseData *pd, CodeVect &code,
 	lookup.objField->dirtyTree = true;
 
 	/* Check the types of the assignment and possibly cast. */
-	UniqueType *objUT = lookup.objField->typeRef->uniqueType;//lookupType( pd );
-	assert( lookup.uniqueType == lookup.objField->typeRef->uniqueType );//lookupType( pd ) );
+	UniqueType *objUT = lookup.objField->typeRef->uniqueType;
+	assert( lookup.uniqueType == lookup.objField->typeRef->uniqueType );
 	if ( !castAssignment( pd, code, objUT, lookup.iterSearchUT, exprUT ) )
 		error(loc) << "type mismatch in assignment" << endp;
 	
@@ -1893,12 +1893,8 @@ void LangStmt::compileForIter( ParseData *pd, CodeVect &code ) const
 
 	/* Now that we have done the iterator call lookup we can make the type
 	 * reference for the object field. */
-	objField->typeRef = new TypeRef( loc, lookup.objMethod->iterDef, typeRef );
-
-	/* FIXME: this should go to the resolve stage, but the new typref needs to
-	 * be moved too. */
-	objField->typeRef->lookupType( pd );
-	objField->typeRef->searchTypeRef->lookupType( pd );
+	UniqueType *iterUniqueType = pd->findUniqueType( TYPE_ITER, lookup.objMethod->iterDef );
+	objField->typeRef = new TypeRef( loc, lookup.objMethod->iterDef, iterUniqueType, searchUT );
 
 	/* Also force the field to be initialized. */
 	pd->curLocalFrame->initField( pd, objField );
@@ -1907,7 +1903,7 @@ void LangStmt::compileForIter( ParseData *pd, CodeVect &code ) const
 	 * Create the iterator from the local var.
 	 */
 
-	UniqueType *iterUT = objField->typeRef->uniqueType;//lookupType( pd );
+	UniqueType *iterUT = objField->typeRef->uniqueType;
 
 	/* Evaluate and push the arguments. */
 	ObjField **paramRefs = iterCallTerm->varRef->evaluateArgs( 
@@ -2442,7 +2438,7 @@ void ParseData::findLocalTrees( CharSet &trees )
 		/* FIXME: This test needs to be improved. Match_text was getting
 		 * through before useOffset was tested. What will? */
 		if ( el->useOffset && !el->isLhsEl && ( el->beenReferenced || el->isParam ) ) {
-			UniqueType *ut = el->typeRef->uniqueType;//lookupType( this );
+			UniqueType *ut = el->typeRef->uniqueType;
 			if ( ut->typeId == TYPE_TREE || ut->typeId == TYPE_PTR )
 				trees.insert( el->offset );
 		}

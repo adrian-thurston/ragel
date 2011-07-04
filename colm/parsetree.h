@@ -1337,29 +1337,31 @@ struct TypeRef
 	/* Qualification and a type name. These require lookup. */
 	TypeRef( const InputLoc &loc, NamespaceQual *nspaceQual, String typeName ) :
 		loc(loc), nspaceQual(nspaceQual), typeName(typeName), iterDef(0),
-		searchTypeRef(0), factor(0),
+		factor(0),
 		isPtr(false), isRef(false), repeatType(RepeatNone),
-		uniqueType(0) {}
+		uniqueType(0), searchUniqueType(0) {}
 
 	/* Iterator definition. */
-	TypeRef( const InputLoc &loc, IterDef *iterDef, TypeRef *searchTypeRef ) :
-		loc(loc), iterDef(iterDef), searchTypeRef(searchTypeRef), factor(0),
+	TypeRef( const InputLoc &loc, IterDef *iterDef, UniqueType *uniqueType, 
+			UniqueType *searchUniqueType )
+	:
+		loc(loc), iterDef(iterDef), factor(0),
 		isPtr(false), isRef(false), repeatType(RepeatNone),
-		uniqueType(0) {}
+		uniqueType(uniqueType), searchUniqueType(searchUniqueType) {}
 
 	/* Unique type is given directly. */
 	TypeRef( const InputLoc &loc, UniqueType *uniqueType ) :
-		loc(loc), nspaceQual(0), iterDef(0), searchTypeRef(0), factor(0),
+		loc(loc), nspaceQual(0), iterDef(0), factor(0),
 		isPtr(false), isRef(false), repeatType(RepeatNone),
-		uniqueType(uniqueType) {}
+		uniqueType(uniqueType), searchUniqueType(0) {}
 
 	/* A factor in a pattern. In the case of matches we need a type ref at
 	 * parse time, but factors have not been resolved yet, so this allows us
 	 * to do it on demand. */
 	TypeRef( const InputLoc &loc, PdaFactor *factor ) :
-		loc(loc), nspaceQual(0), iterDef(0), searchTypeRef(0), factor(factor),
+		loc(loc), nspaceQual(0), iterDef(0), factor(factor),
 		isPtr(false), isRef(false), repeatType(RepeatNone),
-		uniqueType(0) {}
+		uniqueType(0), searchUniqueType(0) {}
 
 	void resolve( ParseData *pd ) const;
 	UniqueType *lookupTypePart( ParseData *pd, NamespaceQual *nspaceQual, 
@@ -1370,7 +1372,6 @@ struct TypeRef
 	NamespaceQual *nspaceQual;
 	String typeName;
 	IterDef *iterDef;
-	TypeRef *searchTypeRef;
 	PdaFactor *factor;
 	bool isPtr;
 	bool isRef;
@@ -1378,6 +1379,7 @@ struct TypeRef
 
 	/* Resolved. */
 	UniqueType *uniqueType;
+	UniqueType *searchUniqueType;
 };
 
 typedef DList<ObjField> ParameterList; 
