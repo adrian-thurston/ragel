@@ -1345,7 +1345,7 @@ struct TypeRef
 	TypeRef( const InputLoc &loc, IterDef *iterDef, UniqueType *uniqueType, 
 			UniqueType *searchUniqueType )
 	:
-		loc(loc), iterDef(iterDef), factor(0),
+		loc(loc), nspaceQual(0), iterDef(iterDef), factor(0),
 		isPtr(false), isRef(false), repeatType(RepeatNone),
 		uniqueType(uniqueType), searchUniqueType(searchUniqueType) {}
 
@@ -1358,12 +1358,12 @@ struct TypeRef
 	/* A factor in a pattern. In the case of matches we need a type ref at
 	 * parse time, but factors have not been resolved yet, so this allows us
 	 * to do it on demand. */
-	TypeRef( const InputLoc &loc, PdaFactor *factor ) :
-		loc(loc), nspaceQual(0), iterDef(0), factor(factor),
+	TypeRef( const InputLoc &loc, NamespaceQual *nspaceQual, PdaFactor *factor ) :
+		loc(loc), nspaceQual(nspaceQual), iterDef(0), factor(factor),
 		isPtr(false), isRef(false), repeatType(RepeatNone),
 		uniqueType(0), searchUniqueType(0) {}
 
-	void resolve( ParseData *pd ) const;
+	void sugaredDecls( ParseData *pd ) const;
 	UniqueType *lookupTypePart( ParseData *pd, NamespaceQual *nspaceQual, 
 			const String &name );
 	UniqueType *lookupType( ParseData *pd );

@@ -383,13 +383,13 @@ nonterm define_prod
 define_prod: '[' prod_el_list ']' opt_commit opt_reduce_code opt_prec
 	final {
 		const InputLoc &loc = $1->loc;
-		const String &name = curDefineId;
+		//const String &name = curDefineId;
 		ProdElList *prodElList = curProdElList;
 		bool commit = $4->commit;
 		CodeBlock *redBlock = $5->codeBlock;
 		KlangEl *predOf = $6->predOf;
 
-		Namespace *nspace = namespaceStack.top();
+		//Namespace *nspace = namespaceStack.top();
 
 		Definition *newDef = new Definition( loc, 0/*prodName*/, 
 			prodElList, commit, redBlock,
@@ -615,7 +615,8 @@ pattern_el: opt_label pattern_el_type_or_lit
 						" redeclared" << endp;
 			}
 
-			TypeRef *typeRef = new TypeRef( InputLoc(), $2->patternItem->factor );
+			NamespaceQual *qual = new NamespaceQual( namespaceStack.top(), regionStack.top() );
+			TypeRef *typeRef = new TypeRef( InputLoc(), qual, $2->patternItem->factor );
 			ObjField *objField = new ObjField( InputLoc(), typeRef, $1->varRef->name );
 
 			/* Insert it into the field map. */

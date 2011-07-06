@@ -57,6 +57,8 @@ UniqueType *TypeRef::lookupType( ParseData *pd )
 {
 	if ( uniqueType != 0 )
 		return uniqueType;
+	
+	sugaredDecls( pd );
 
 //	cout << __PRETTY_FUNCTION__ << " " << typeName.data << " " << this << endl;
 	
@@ -81,7 +83,7 @@ UniqueType *TypeRef::lookupType( ParseData *pd )
 }
 
 
-void TypeRef::resolve( ParseData *pd ) const
+void TypeRef::sugaredDecls( ParseData *pd ) const
 {
 	/* Look for the production's associated region. */
 	Namespace *nspace = nspaceQual->getQual( pd );
@@ -122,7 +124,6 @@ void LangTerm::resolve( ParseData *pd ) const
 {
 	switch ( type ) {
 		case ConstructType:
-			typeRef->resolve( pd );
 			typeRef->lookupType( pd );
 
 			/* Evaluate the initialization expressions. */
@@ -163,7 +164,6 @@ void LangTerm::resolve( ParseData *pd ) const
 
 		case ParseType:
 		case ParseStopType:
-			typeRef->resolve( pd );
 			typeRef->lookupType( pd );
 			break;
 
