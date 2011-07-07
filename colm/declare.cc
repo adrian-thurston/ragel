@@ -153,7 +153,7 @@ void ParseData::addProdRHSVars( ObjectDef *localFrame, ProdElList *prodElList )
 {
 	long position = 1;
 	for ( ProdElList::Iter rhsEl = *prodElList; rhsEl.lte(); rhsEl++, position++ ) {
-		if ( rhsEl->type == PdaFactor::ReferenceType ) {
+		if ( rhsEl->type == ProdEl::ReferenceType ) {
 			TypeRef *typeRef = new TypeRef( rhsEl->loc, rhsEl->nspaceQual, rhsEl->refName );
 
 			/* Use an offset of zero. For frame objects we compute the offset on
@@ -179,7 +179,7 @@ void ParseData::addProdRHSLoads( Definition *prod, CodeVect &code, long &insertP
 	CodeVect loads;
 	long elPos = 0;
 	for ( ProdElList::Iter rhsEl = *prod->prodElList; rhsEl.lte(); rhsEl++, elPos++ ) {
-		if ( rhsEl->type == PdaFactor::ReferenceType ) {
+		if ( rhsEl->type == ProdEl::ReferenceType ) {
 			if ( rhsEl->objField->beenReferenced ) {
 				loads.append ( IN_INIT_RHS_EL );
 				loads.appendHalf( elPos );

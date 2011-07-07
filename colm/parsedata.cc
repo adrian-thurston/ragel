@@ -1127,9 +1127,9 @@ KlangEl *ParseData::makeRepeatProd( Namespace *nspace, const String &repeatName,
 	ProdElList *prodElList1 = new ProdElList;
 
 	/* Build the first production of the repeat. */
-	PdaFactor *factor1 = new PdaFactor( InputLoc(), false, nspaceQual, 
+	ProdEl *factor1 = new ProdEl( InputLoc(), false, nspaceQual, 
 			name, 0, RepeatNone, false, false );
-	PdaFactor *factor2 = new PdaFactor( InputLoc(), false, nspaceQual, 
+	ProdEl *factor2 = new ProdEl( InputLoc(), false, nspaceQual, 
 			repeatName, 0, RepeatNone, false, false );
 
 	prodElList1->append( factor1 );
@@ -1162,9 +1162,9 @@ KlangEl *ParseData::makeListProd( Namespace *nspace, const String &listName, Nam
 	prodName->isList = true;
 
 	/* Build the first production of the list. */
-	PdaFactor *factor1 = new PdaFactor( InputLoc(), false, nspaceQual, 
+	ProdEl *factor1 = new ProdEl( InputLoc(), false, nspaceQual, 
 			name, 0, RepeatNone, false, false );
-	PdaFactor *factor2 = new PdaFactor( InputLoc(), false, nspaceQual, 
+	ProdEl *factor2 = new ProdEl( InputLoc(), false, nspaceQual, 
 			listName, 0, RepeatNone, false, false );
 
 	ProdElList *prodElList1 = new ProdElList;
@@ -1179,7 +1179,7 @@ KlangEl *ParseData::makeListProd( Namespace *nspace, const String &listName, Nam
 	prodList.append( newDef1 );
 
 	/* Build the second production of the list. */
-	PdaFactor *factor3 = new PdaFactor( InputLoc(), false, nspaceQual, 
+	ProdEl *factor3 = new ProdEl( InputLoc(), false, nspaceQual, 
 			name, 0, RepeatNone, false, false );
 
 	ProdElList *prodElList2 = new ProdElList;
@@ -1204,7 +1204,7 @@ KlangEl *ParseData::makeOptProd( Namespace *nspace, const String &optName, Names
 	ProdElList *prodElList1 = new ProdElList;
 
 	/* Build the first production of the repeat. */
-	PdaFactor *factor1 = new PdaFactor( InputLoc(), false, nspaceQual, 
+	ProdEl *factor1 = new ProdEl( InputLoc(), false, nspaceQual, 
 			name, 0, RepeatNone, false, false );
 	prodElList1->append( factor1 );
 

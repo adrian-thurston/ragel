@@ -53,36 +53,6 @@ UniqueType *TypeRef::lookupTypePart( ParseData *pd,
 	return 0;
 }
 
-UniqueType *TypeRef::lookupType( ParseData *pd )
-{
-	if ( uniqueType != 0 )
-		return uniqueType;
-	
-	sugaredDecls( pd );
-
-//	cout << __PRETTY_FUNCTION__ << " " << typeName.data << " " << this << endl;
-	
-	if ( iterDef != 0 )
-		uniqueType = pd->findUniqueType( TYPE_ITER, iterDef );
-	else if ( factor != 0 )
-		uniqueType = pd->findUniqueType( TYPE_TREE, factor->langEl );
-	else {
-		String name = typeName;
-		if ( repeatType == RepeatOpt )
-			name.setAs( 32, "_opt_%s", name.data );
-		else if ( repeatType == RepeatRepeat )
-			name.setAs( 32, "_repeat_%s", name.data );
-		else if ( repeatType == RepeatList )
-			name.setAs( 32, "_list_%s", name.data );
-
-		/* Not an iterator. May be a reference. */
-		uniqueType = lookupTypePart( pd, nspaceQual, name );
-	}
-
-	return uniqueType;
-}
-
-
 void TypeRef::sugaredDecls( ParseData *pd ) const
 {
 	/* Look for the production's associated region. */
@@ -119,6 +89,37 @@ void TypeRef::sugaredDecls( ParseData *pd ) const
 			pd->makeOptProd( nspace, optName, nspaceQual, typeName );
 	}
 }
+
+
+UniqueType *TypeRef::lookupType( ParseData *pd )
+{
+	if ( uniqueType != 0 )
+		return uniqueType;
+	
+	sugaredDecls( pd );
+
+//	cout << __PRETTY_FUNCTION__ << " " << typeName.data << " " << this << endl;
+//	if ( iterDef != 0 )
+//		uniqueType = pd->findUniqueType( TYPE_ITER, iterDef );
+
+	if ( factor != 0 )
+		uniqueType = pd->findUniqueType( TYPE_TREE, factor->langEl );
+	else {
+		String name = typeName;
+		if ( repeatType == RepeatOpt )
+			name.setAs( 32, "_opt_%s", name.data );
+		else if ( repeatType == RepeatRepeat )
+			name.setAs( 32, "_repeat_%s", name.data );
+		else if ( repeatType == RepeatList )
+			name.setAs( 32, "_list_%s", name.data );
+
+		/* Not an iterator. May be a reference. */
+		uniqueType = lookupTypePart( pd, nspaceQual, name );
+	}
+
+	return uniqueType;
+}
+
 
 void LangTerm::resolve( ParseData *pd ) const
 {
@@ -427,7 +428,7 @@ void ParseData::resolveUses()
 	}
 }
 
-void ParseData::resolveLiteralFactor( PdaFactor *fact )
+void ParseData::resolveLiteralFactor( ProdEl *fact )
 {
 	/* Interpret escape sequences and remove quotes. */
 	bool unusedCI;
@@ -451,7 +452,7 @@ void ParseData::resolveLiteralFactor( PdaFactor *fact )
 	fact->langEl = tokenDef->token;
 }
 
-void ParseData::resolveReferenceFactor( PdaFactor *fact )
+void ParseData::resolveReferenceFactor( ProdEl *fact )
 {
 	/* Look for the production's associated region. */
 	Namespace *nspace = fact->nspaceQual->getQual( this );
@@ -503,13 +504,13 @@ void ParseData::resolveReferenceFactor( PdaFactor *fact )
 	}
 }
 
-void ParseData::resolveFactor( PdaFactor *fact )
+void ParseData::resolveFactor( ProdEl *fact )
 {
 	switch ( fact->type ) {
-		case PdaFactor::LiteralType:
+		case ProdEl::LiteralType:
 			resolveLiteralFactor( fact );
 			break;
-		case PdaFactor::ReferenceType:
+		case ProdEl::ReferenceType:
 			resolveReferenceFactor( fact );
 			break;
 	}

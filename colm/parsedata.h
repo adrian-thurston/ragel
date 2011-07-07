@@ -66,7 +66,7 @@ inline long makeReduceCode( long reduction, bool isShiftReduce )
 		( reduction << 2 );
 }
 
-struct PdaFactor;
+struct ProdEl;
 struct ProdElList;
 struct PdaLiteral;
 struct Definition;
@@ -81,7 +81,7 @@ struct Bindings
 struct DefListEl { Definition *prev, *next; };
 struct LelDefListEl { Definition *prev, *next; };
 typedef Vector< KlangEl* > KlangElVect;
-typedef Vector< PdaFactor* > FactorVect;
+typedef Vector< ProdEl* > FactorVect;
 
 typedef AvlMap<String, long, CmpStr> StringMap;
 typedef AvlMapEl<String, long> StringMapEl;
@@ -237,7 +237,7 @@ struct KlangEl : public DListEl<KlangEl>
 	Context *contextIn;
 };
 
-struct PdaFactor
+struct ProdEl
 {
 	/* Language elements a factor node can be. */
 	enum Type {
@@ -246,25 +246,25 @@ struct PdaFactor
 	}; 
 
 	/* Construct with a literal fsm. */
-	PdaFactor( const InputLoc &loc, bool commit, NamespaceQual *nspaceQual, 
+	ProdEl( const InputLoc &loc, bool commit, NamespaceQual *nspaceQual, 
 			PdaLiteral *literal, int priorVal, RepeatType repeatType, bool opt, bool repeat ) :
 		loc(loc), commit(commit), nspaceQual(nspaceQual), 
 		literal(literal), langEl(0), priorVal(priorVal), repeatType(repeatType),
 		nspace(0), type(LiteralType), objField(0) {}
 
 	/* Construct with a reference to a var def. */
-	PdaFactor( const InputLoc &loc, bool commit, NamespaceQual *nspaceQual, 
+	ProdEl( const InputLoc &loc, bool commit, NamespaceQual *nspaceQual, 
 			const String &refName, int priorVal, RepeatType repeatType, bool opt, bool repeat ) :
 		loc(loc), commit(commit), nspaceQual(nspaceQual), refName(refName),
 		literal(0), langEl(0), priorVal(priorVal), repeatType(repeatType),
 		nspace(0), type(ReferenceType), objField(0) {}
 
-	PdaFactor( const InputLoc &loc, KlangEl *langEl ) :
+	ProdEl( const InputLoc &loc, KlangEl *langEl ) :
 		loc(loc), commit(false), nspaceQual(0), literal(0), langEl(langEl), 
 		priorVal(0), repeatType(RepeatNone), nspace(0),
 		type(ReferenceType), objField(0) {}
 
-	PdaFactor() :
+	ProdEl() :
 		commit(false), nspaceQual(0), 
 		literal(0), langEl(0), priorVal(0), repeatType(RepeatNone),
 		nspace(0), type(LiteralType), objField(0) {}
@@ -280,11 +280,10 @@ struct PdaFactor
 	Namespace *nspace;
 	Type type;
 	ObjField *objField;
-
-	PdaFactor *prev, *next;
+	ProdEl *prev, *next;
 };
 
-struct ProdElList : public DList<PdaFactor>
+struct ProdElList : public DList<ProdEl>
 {
 	PdaGraph *walk( ParseData *pd );
 };
@@ -723,9 +722,9 @@ struct ParseData
 			NamespaceQual *nspaceQual, const String &name );
 	KlangEl *makeOptProd( Namespace *nspace, const String &optName,
 			NamespaceQual *nspaceQual, const String &name );
-	void resolveLiteralFactor( PdaFactor *fact );
-	void resolveReferenceFactor( PdaFactor *fact );
-	void resolveFactor( PdaFactor *fact );
+	void resolveLiteralFactor( ProdEl *fact );
+	void resolveReferenceFactor( ProdEl *fact );
+	void resolveFactor( ProdEl *fact );
 	void resolveProductionEls();
 	void resolvePatternEls();
 	void resolveReplacementEls();

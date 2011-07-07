@@ -147,7 +147,7 @@ KlangEl *getKlangEl( ParseData *pd, Namespace *nspace, const String &data )
 ProdElList *makeProdElList( KlangEl *langEl )
 {
 	ProdElList *prodElList = new ProdElList();
-	prodElList->append( new PdaFactor( InputLoc(), langEl ) );
+	prodElList->append( new ProdEl( InputLoc(), langEl ) );
 	prodElList->tail->langEl = langEl;
 	return prodElList;
 }

@@ -1076,7 +1076,7 @@ struct InlineItem
  * ptreetypes, which should be just typedef forwards. */
 struct InlineList : public DList<InlineItem> { };
 
-struct PdaFactor;
+struct ProdEl;
 struct LangVarRef;
 struct ObjField;
 
@@ -1091,12 +1091,12 @@ struct PatternItem
 			loc(loc), factor(0), data(data), type(type), region(0), 
 			varRef(0), bindId(0) {}
 
-	PatternItem( const InputLoc &loc, PdaFactor *factor, Type type ) : 
+	PatternItem( const InputLoc &loc, ProdEl *factor, Type type ) : 
 			loc(loc), factor(factor), type(type), region(0), 
 			varRef(0), bindId(0) {}
 
 	InputLoc loc;
-	PdaFactor *factor;
+	ProdEl *factor;
 	String data;
 	Type type;
 	TokenRegion *region;
@@ -1123,7 +1123,7 @@ struct ReplItem
 	ReplItem( const InputLoc &loc, Type type, LangExpr *expr ) : 
 		loc(loc), type(type), expr(expr), bindId(0) {}
 
-	ReplItem( const InputLoc &loc, Type type, PdaFactor *factor ) : 
+	ReplItem( const InputLoc &loc, Type type, ProdEl *factor ) : 
 		loc(loc), type(type), expr(expr), factor(factor), bindId(0) {}
 
 	InputLoc loc;
@@ -1131,7 +1131,7 @@ struct ReplItem
 	String data;
 	LangExpr *expr;
 	KlangEl *langEl;
-	PdaFactor *factor;
+	ProdEl *factor;
 	long bindId;
 
 	ReplItem *prev, *next;
@@ -1358,7 +1358,7 @@ struct TypeRef
 	/* A factor in a pattern. In the case of matches we need a type ref at
 	 * parse time, but factors have not been resolved yet, so this allows us
 	 * to do it on demand. */
-	TypeRef( const InputLoc &loc, NamespaceQual *nspaceQual, PdaFactor *factor ) :
+	TypeRef( const InputLoc &loc, NamespaceQual *nspaceQual, ProdEl *factor ) :
 		loc(loc), nspaceQual(nspaceQual), iterDef(0), factor(factor),
 		isPtr(false), isRef(false), repeatType(RepeatNone),
 		uniqueType(0), searchUniqueType(0) {}
@@ -1372,7 +1372,7 @@ struct TypeRef
 	NamespaceQual *nspaceQual;
 	String typeName;
 	IterDef *iterDef;
-	PdaFactor *factor;
+	ProdEl *factor;
 	bool isPtr;
 	bool isRef;
 	RepeatType repeatType;

@@ -282,13 +282,13 @@ pred_token_list: pred_token
 
 nonterm pred_token
 {
-	PdaFactor *factor;
+	ProdEl *factor;
 };
 
 pred_token: 
 	region_qual TK_Word 
 	final {
-		$$->factor = new PdaFactor( $2->loc, false, $1->nspaceQual,
+		$$->factor = new ProdEl( $2->loc, false, $1->nspaceQual,
 				$2->data, 0, RepeatNone, false, false );
 		pd->resolveReferenceFactor( $$->factor );
 	};
@@ -297,7 +297,7 @@ pred_token:
 	region_qual TK_Literal 
 	final {
 		PdaLiteral *literal = new PdaLiteral( $2->loc, *$2 );
-		$$->factor = new PdaFactor( $2->loc, false, $1->nspaceQual,
+		$$->factor = new ProdEl( $2->loc, false, $1->nspaceQual,
 				literal, 0, RepeatNone, false, false );
 		pd->resolveLiteralFactor( $$->factor );
 	};
@@ -638,7 +638,7 @@ nonterm pattern_el_type_or_lit
 
 pattern_el_type_or_lit: region_qual TK_Word opt_repeat
 	final {
-		PdaFactor *factor = new PdaFactor( $2->loc, false, $1->nspaceQual, 
+		ProdEl *factor = new ProdEl( $2->loc, false, $1->nspaceQual, 
 				$2->data, 0, $3->repeatType, $3->opt, $3->repeat );
 		$$->patternItem = new PatternItem( $2->loc, factor, PatternItem::FactorType );
 		patternItemList->append( $$->patternItem );
@@ -647,7 +647,7 @@ pattern_el_type_or_lit: region_qual TK_Word opt_repeat
 pattern_el_type_or_lit: region_qual TK_Literal opt_repeat
 	final {
 		PdaLiteral *literal = new PdaLiteral( $2->loc, *$2 );
-		PdaFactor *factor = new PdaFactor( $2->loc, false, $1->nspaceQual, 
+		ProdEl *factor = new ProdEl( $2->loc, false, $1->nspaceQual, 
 				literal, 0, $3->repeatType, $3->opt, $3->repeat );
 		$$->patternItem = new PatternItem( $2->loc, factor, PatternItem::FactorType );
 		patternItemList->append( $$->patternItem );
@@ -700,7 +700,7 @@ repl_el_list: ;
 repl_el: region_qual TK_Literal
 	final {
 		PdaLiteral *literal = new PdaLiteral( $2->loc, *$2 );
-		PdaFactor *factor = new PdaFactor( $2->loc, false, $1->nspaceQual, 
+		ProdEl *factor = new ProdEl( $2->loc, false, $1->nspaceQual, 
 				literal, 0, RepeatNone, false, false );
 		ReplItem *replItem = new ReplItem( $2->loc, ReplItem::FactorType, factor );
 		replItemList->append( replItem );
@@ -751,7 +751,7 @@ accum_el_list: ;
 #accum_el: region_qual TK_Literal
 #	final {
 #		PdaLiteral *literal = new PdaLiteral( $2->loc, *$2 );
-#		PdaFactor *factor = new PdaFactor( $2->loc, false, $1->nspaceQual, 
+#		ProdEl *factor = new ProdEl( $2->loc, false, $1->nspaceQual, 
 #				literal, 0, RepeatNone, false, false );
 #		ReplItem *replItem = new ReplItem( $2->loc, ReplItem::FactorType, factor );
 #		replItemList->append( replItem );
@@ -797,7 +797,7 @@ string_el_list: ;
 #accum_el: region_qual TK_Literal
 #	final {
 #		PdaLiteral *literal = new PdaLiteral( $2->loc, *$2 );
-#		PdaFactor *factor = new PdaFactor( $2->loc, false, $1->nspaceQual, 
+#		ProdEl *factor = new ProdEl( $2->loc, false, $1->nspaceQual, 
 #				literal, 0, RepeatNone, false, false );
 #		ReplItem *replItem = new ReplItem( $2->loc, ReplItem::FactorType, factor );
 #		replItemList->append( replItem );
@@ -821,13 +821,13 @@ prod_el_list:
 
 nonterm prod_el
 {
-	PdaFactor *factor;
+	ProdEl *factor;
 };
 
 prod_el: 
 	opt_commit region_qual TK_Word opt_repeat
 	final {
-		$$->factor = new PdaFactor( $3->loc, $1->commit, 
+		$$->factor = new ProdEl( $3->loc, $1->commit, 
 				$2->nspaceQual, $3->data, 0, $4->repeatType, $4->opt, $4->repeat );
 	};
 
@@ -836,7 +836,7 @@ prod_el:
 	final {
 		/* Create a new factor node going to a concat literal. */
 		PdaLiteral *literal = new PdaLiteral( $3->loc, *$3 );
-		$$->factor = new PdaFactor( $3->loc, $1->commit, $2->nspaceQual, 
+		$$->factor = new ProdEl( $3->loc, $1->commit, $2->nspaceQual, 
 				literal, 0, $4->repeatType, $4->opt, $4->repeat );
 	};
 
