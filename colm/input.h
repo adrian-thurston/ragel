@@ -48,7 +48,7 @@ extern "C" {
  * take back unprocessed data from the fsmRun.
  */
 
-struct KlangEl;
+struct LangEl;
 struct Pattern;
 struct PatternItem;
 struct Replacement;
@@ -87,7 +87,7 @@ struct InputFuncs
 	int (*getData)( InputStream *is, char *dest, int length );
 	int (*getDataImpl)( InputStream *is, char *dest, int length );
 	struct _Tree *(*getTree)( InputStream *is );
-	struct KlangEl *(*getLangEl)( InputStream *is, long *bindId, char **data, long *length );
+	struct LangEl *(*getLangEl)( InputStream *is, long *bindId, char **data, long *length );
 	void (*pushTree)( InputStream *is, struct _Tree *tree, int ignore );
 	void (*pushText)( InputStream *is, const char *data, long len );
 	struct _Tree *(*undoPush)( InputStream *is, int length );

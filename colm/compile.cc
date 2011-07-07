@@ -197,7 +197,7 @@ UniqueType *ParseData::findUniqueType( int typeId )
 	return uniqueType;
 }
 
-UniqueType *ParseData::findUniqueType( int typeId, KlangEl *langEl )
+UniqueType *ParseData::findUniqueType( int typeId, LangEl *langEl )
 {
 	UniqueType searchKey( typeId, langEl );
 	UniqueType *uniqueType = uniqeTypeMap.find( &searchKey );
@@ -2221,7 +2221,7 @@ void CodeBlock::compile( ParseData *pd, CodeVect &code ) const
 		stmt->compile( pd, code );
 }
 
-void ParseData::addMatchLength( ObjectDef *frame, KlangEl *lel )
+void ParseData::addMatchLength( ObjectDef *frame, LangEl *lel )
 {
 	/* Make the type ref. */
 	TypeRef *typeRef = new TypeRef( InputLoc(), uniqueTypeInt );
@@ -2236,7 +2236,7 @@ void ParseData::addMatchLength( ObjectDef *frame, KlangEl *lel )
 	frame->insertField( el->name, el );
 }
 
-void ParseData::addMatchText( ObjectDef *frame, KlangEl *lel )
+void ParseData::addMatchText( ObjectDef *frame, LangEl *lel )
 {
 	/* Make the type ref. */
 	TypeRef *typeRef = new TypeRef( InputLoc(), uniqueTypeStr );
@@ -2251,7 +2251,7 @@ void ParseData::addMatchText( ObjectDef *frame, KlangEl *lel )
 	frame->insertField( el->name, el );
 }
 
-void ParseData::addInput( ObjectDef *frame, KlangEl *lel )
+void ParseData::addInput( ObjectDef *frame, LangEl *lel )
 {
 	/* Make the type ref. */
 	TypeRef *typeRef = new TypeRef( InputLoc(), uniqueTypeStream );
@@ -2269,7 +2269,7 @@ void ParseData::addInput( ObjectDef *frame, KlangEl *lel )
 	frame->insertField( el->name, el );
 }
 
-void ParseData::addCtx( ObjectDef *frame, KlangEl *lel )
+void ParseData::addCtx( ObjectDef *frame, LangEl *lel )
 {
 	/* Make the type ref. */
 	TypeRef *typeRef = new TypeRef( InputLoc(), uniqueTypeStream );
@@ -2504,7 +2504,7 @@ void ParseData::compileReductionCode( Definition *prod )
 	findLocalTrees( block->trees );
 }
 
-void ParseData::compileTranslateBlock( KlangEl *langEl )
+void ParseData::compileTranslateBlock( LangEl *langEl )
 {
 	CodeBlock *block = langEl->transBlock;
 
@@ -2728,7 +2728,7 @@ void ParseData::initAccumFunctions( GenericType *gen )
 
 void ParseData::initCtxField( GenericType *gen )
 {
-	KlangEl *langEl = gen->utArg->langEl;
+	LangEl *langEl = gen->utArg->langEl;
 	Context *context = langEl->contextIn;
 
 	/* Make the type ref and create the field. */
@@ -2751,7 +2751,7 @@ void ParseData::initCtxField( GenericType *gen )
 
 void ParseData::initAccumFields( GenericType *gen )
 {
-	KlangEl *langEl = gen->utArg->langEl;
+	LangEl *langEl = gen->utArg->langEl;
 	if ( langEl->contextIn != 0 )
 		initCtxField( gen );
 }

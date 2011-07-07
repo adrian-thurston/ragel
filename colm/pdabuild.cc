@@ -55,7 +55,7 @@ int countTransitions( PdaGraph *fsm )
 	return numTrans;
 }
 
-KlangEl::KlangEl( Namespace *nspace, const String &name, Type type )
+LangEl::LangEl( Namespace *nspace, const String &name, Type type )
 :
 	nspace(nspace),
 	name(name),
@@ -130,21 +130,21 @@ PdaGraph *ProdElList::walk( ParseData *pd )
 }
 
 
-KlangEl *getKlangEl( ParseData *pd, Namespace *nspace, const String &data )
+LangEl *getKlangEl( ParseData *pd, Namespace *nspace, const String &data )
 {
     /* If the id is already in the dict, it will be placed in last found. If
      * it is not there then it will be inserted and last found will be set to it. */
     SymbolMapEl *inDict = nspace->symbolMap.find( data );
     if ( inDict == 0 ) {
         /* Language element not there. Make the new lang el and insert.. */
-        KlangEl *langEl = new KlangEl( nspace, data, KlangEl::Unknown );
+        LangEl *langEl = new LangEl( nspace, data, LangEl::Unknown );
         inDict = nspace->symbolMap.insert( langEl->name, langEl );
         pd->langEls.append( langEl );
     }
     return inDict->value;
 }
 
-ProdElList *makeProdElList( KlangEl *langEl )
+ProdElList *makeProdElList( LangEl *langEl )
 {
 	ProdElList *prodElList = new ProdElList();
 	prodElList->append( new ProdEl( InputLoc(), langEl ) );
@@ -169,7 +169,7 @@ void ParseData::makeDefinitionNames()
 void ParseData::noUndefindKlangEls()
 {
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
-		if ( lel->type == KlangEl::Unknown )
+		if ( lel->type == LangEl::Unknown )
 			error() << "'" << lel->name << "' was not defined as anything" << endp;
 	}
 }
@@ -184,7 +184,7 @@ void ParseData::makeKlangElIds()
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
 		/* Must be a term, and not any of the special reserved terminals.
 		 * Remember if the non terminal is a user non terminal. */
-		if ( lel->type == KlangEl::Term && 
+		if ( lel->type == LangEl::Term && 
 				!lel->isEOF && 
 				lel != errorKlangEl &&
 				lel != noTokenKlangEl )
@@ -351,8 +351,8 @@ void ParseData::findFollow( AlphSet &result, PdaState *overTab,
 		assert( overSrc->transMap.length() == 1 );
 		TransMap::Iter pastTrans = overSrc->transMap;
 
-		KlangEl *langEl = langElIndex[pastTrans->key];
-		if ( langEl != 0 && langEl->type == KlangEl::NonTerm ) {
+		LangEl *langEl = langElIndex[pastTrans->key];
+		if ( langEl != 0 && langEl->type == LangEl::NonTerm ) {
 			bool hasEpsilon = false;
 			for ( LelDefList::Iter def = langEl->defList; def.lte(); def++ ) {
 				result.insert( def->firstSet );
@@ -407,7 +407,7 @@ void ParseData::trySetTime( PdaTrans *trans, long code, long &time )
 }
 
 /* Go down a defintiion and then handle the follow actions. */
-void ParseData::pdaOrderFollow( KlangEl *rootEl, PdaState *tabState, 
+void ParseData::pdaOrderFollow( LangEl *rootEl, PdaState *tabState, 
 		PdaTrans *tabTrans, PdaTrans *srcTrans, Definition *parentDef, 
 		Definition *definition, long &time )
 {
@@ -449,8 +449,8 @@ bool regionVectHas( RegionVect &regVect, TokenRegion *region )
 
 void ParseData::addRegion( PdaState *tabState, long pdaKey )
 {
-	KlangEl *klangEl = langElIndex[pdaKey];
-	if ( klangEl != 0 && klangEl->type == KlangEl::Term ) {
+	LangEl *klangEl = langElIndex[pdaKey];
+	if ( klangEl != 0 && klangEl->type == LangEl::Term ) {
 		TokenRegion *region = 0;
 
 		/* If it is not the eof, then use the region associated 
@@ -496,7 +496,7 @@ void ParseData::addRegion( PdaState *tabState, long pdaKey )
     orderState( parseTable.startState, startProduction.startState, 1 )
 #endif
 
-void ParseData::pdaOrderProd( KlangEl *rootEl, PdaState *tabState, 
+void ParseData::pdaOrderProd( LangEl *rootEl, PdaState *tabState, 
 	PdaState *srcState, Definition *parentDef, long &time )
 {
 	assert( srcState->dotSet.length() == 1 );
@@ -513,7 +513,7 @@ void ParseData::pdaOrderProd( KlangEl *rootEl, PdaState *tabState,
 		PdaTrans *tabTrans = tabState->findTrans( srcTrans->key );
 
 		/* Recurse into the transition if it is a non-terminal. */
-		KlangEl *langEl = langElIndex[srcTrans->key];
+		LangEl *langEl = langElIndex[srcTrans->key];
 		if ( langEl != 0 ) {
 			if ( langEl->reduceFirst ) {
 				/* Use a shortest match ordering for the contents of this
@@ -589,7 +589,7 @@ void ParseData::pdaActionOrder( PdaGraph *pdaGraph, KlangElSet &parserEls )
 				/* There are no regions and EOF leaves the state. Add the eof
 				 * token region. */
 				PdaTrans *trans = tel->value;
-				KlangEl *lel = langElIndex[trans->lowKey];
+				LangEl *lel = langElIndex[trans->lowKey];
 				if ( lel != 0 && lel->isEOF )
 					state->regions.append( eofTokenRegion );
 			}
@@ -716,7 +716,7 @@ void ParseData::sortActions( PdaGraph *pdaGraph )
 				cerr << "info: branch point"
 						<< " state: " << state->stateNum
 						<< " trans: ";
-				KlangEl *lel = langElIndex[trans->lowKey];
+				LangEl *lel = langElIndex[trans->lowKey];
 				if ( lel == 0 )
 					cerr << (char)trans->lowKey << endl;
 				else
@@ -792,7 +792,7 @@ void ParseData::reduceActions( PdaGraph *pdaGraph )
 	}
 }
 
-void ParseData::verifyParseStopGrammar( KlangEl *langEl, PdaGraph *pdaGraph )
+void ParseData::verifyParseStopGrammar( LangEl *langEl, PdaGraph *pdaGraph )
 {
 	/* Get the entry into the graph and traverse over the root. The resulting
 	 * state can have eof, nothing else can. */
@@ -815,9 +815,9 @@ void ParseData::verifyParseStopGrammar( KlangEl *langEl, PdaGraph *pdaGraph )
 	}
 }
 
-KlangEl *ParseData::predOf( PdaTrans *trans, long action )
+LangEl *ParseData::predOf( PdaTrans *trans, long action )
 {
-	KlangEl *lel;
+	LangEl *lel;
 	if ( action == SHIFT_CODE )
 		lel = langElIndex[trans->lowKey];
 	else
@@ -826,7 +826,7 @@ KlangEl *ParseData::predOf( PdaTrans *trans, long action )
 }
 
 
-bool ParseData::precedenceSwap( long action1, long action2, KlangEl *l1, KlangEl *l2 )
+bool ParseData::precedenceSwap( long action1, long action2, LangEl *l1, LangEl *l2 )
 {
 	bool swap = false;
 	if ( l2->predValue > l1->predValue )
@@ -840,7 +840,7 @@ bool ParseData::precedenceSwap( long action1, long action2, KlangEl *l1, KlangEl
 	return swap;
 }
 
-bool ParseData::precedenceRemoveBoth( KlangEl *l1, KlangEl *l2 )
+bool ParseData::precedenceRemoveBoth( LangEl *l1, LangEl *l2 )
 {
 	if ( l1->predValue == l2->predValue && l1->predType == PredNonassoc )
 		return true;
@@ -858,12 +858,12 @@ void ParseData::resolvePrecedence( PdaGraph *pdaGraph )
 again:
 			/* Find action with precedence. */
 			for ( int i = 0; i < trans->actions.length(); i++ ) {
-				KlangEl *li = predOf( trans, trans->actions[i] );
+				LangEl *li = predOf( trans, trans->actions[i] );
 					
 				if ( li != 0 && li->predType != PredNone ) {
 					/* Find another action with precedence. */
 					for ( int j = i+1; j < trans->actions.length(); j++ ) {
-						KlangEl *lj = predOf( trans, trans->actions[j] );
+						LangEl *lj = predOf( trans, trans->actions[j] );
 
 						if ( lj != 0 && lj->predType != PredNone ) {
 							/* Conflict to check. */
@@ -942,8 +942,8 @@ void ParseData::analyzeMachine( PdaGraph *pdaGraph, KlangElSet &parserEls )
 	 * which is either a shift or a shift-reduce. */
 	for ( PdaStateList::Iter state = pdaGraph->stateList; state.lte(); state++ ) {
 		for ( TransMap::Iter trans = state->transMap; trans.lte(); trans++ ) {
-			KlangEl *langEl = langElIndex[trans->value->lowKey];
-			if ( langEl != 0 && langEl->type == KlangEl::NonTerm ) {
+			LangEl *langEl = langElIndex[trans->value->lowKey];
+			if ( langEl != 0 && langEl->type == LangEl::NonTerm ) {
 				assert( trans->value->actions.length() == 1 );
 				assert( trans->value->actions[0] == SHIFT_CODE ||
 					(trans->value->actions[0] & 0x3) == SHIFT_REDUCE_CODE );
@@ -963,7 +963,7 @@ void ParseData::analyzeMachine( PdaGraph *pdaGraph, KlangElSet &parserEls )
 
 	/* Verify that any type we parse_stop can actually be parsed that way. */
 	for ( KlangElSet::Iter pe = parserEls; pe.lte(); pe++ ) {
-		KlangEl *lel = *pe;
+		LangEl *lel = *pe;
 		if ( lel->parseStop )
 			verifyParseStopGrammar(lel , pdaGraph);
 	}
@@ -974,7 +974,7 @@ void ParseData::wrapNonTerminals()
 	/* Make a language element that will be used to make the root productions.
 	 * These are used for making parsers rooted at any production (including
 	 * the start symbol). */
-	rootKlangEl = new KlangEl( rootNamespace, "_root", KlangEl::NonTerm );
+	rootKlangEl = new LangEl( rootNamespace, "_root", LangEl::NonTerm );
 	langEls.append( rootKlangEl );
 	SymbolMapEl *rootMapEl = rootNamespace->symbolMap.insert( 
 			rootKlangEl->name, rootKlangEl );
@@ -1001,7 +1001,7 @@ bool ParseData::makeNonTermFirstSetProd( Definition *prod, PdaState *state )
 				modified = true;
 
 			bool hasEpsilon = false;
-			KlangEl *lel = langElIndex[trans->key];
+			LangEl *lel = langElIndex[trans->key];
 			for ( LelDefList::Iter ldef = lel->defList; ldef.lte(); ldef++ ) {
 				for ( ProdIdSet::Iter pid = ldef->nonTermFirstSet; 
 						pid.lte(); pid++ )
@@ -1066,7 +1066,7 @@ void ParseData::printNonTermFirstSets()
 			if ( *pid < 0 )
 				cerr << " <EPSILON>";
 			else {
-				KlangEl *lel = langElIndex[*pid];
+				LangEl *lel = langElIndex[*pid];
 				cerr << " " << lel->name;
 			}
 		}
@@ -1091,7 +1091,7 @@ bool ParseData::makeFirstSetProd( Definition *prod, PdaState *state )
 			if ( inserted != 0 )
 				modified = true;
 
-			KlangEl *klangEl = langElIndex[trans->key];
+			LangEl *klangEl = langElIndex[trans->key];
 			if ( klangEl != 0 && klangEl->termDup != 0 ) {
 				long *inserted2 = prod->firstSet.insert( klangEl->termDup->id );
 				if ( inserted2 != 0 )
@@ -1099,7 +1099,7 @@ bool ParseData::makeFirstSetProd( Definition *prod, PdaState *state )
 			}
 
 			bool hasEpsilon = false;
-			KlangEl *lel = langElIndex[trans->key];
+			LangEl *lel = langElIndex[trans->key];
 			for ( LelDefList::Iter ldef = lel->defList; ldef.lte(); ldef++ ) {
 				for ( ProdIdSet::Iter pid = ldef->firstSet; 
 						pid.lte(); pid++ )
@@ -1159,7 +1159,7 @@ void ParseData::printFirstSets()
 			if ( *pid < 0 )
 				cerr << " <EPSILON>";
 			else {
-				KlangEl *lel = langElIndex[*pid];
+				LangEl *lel = langElIndex[*pid];
 				if ( lel != 0 ) 
 					cerr << endl << "    " << lel->name;
 				else
@@ -1180,9 +1180,9 @@ void ParseData::insertUniqueEmptyProductions()
 		/* Get a language element. */
 		char name[20];
 		sprintf(name, "U%li", prodList.length());
-		KlangEl *prodName = getKlangEl( this, rootNamespace, name );
-		assert( prodName->type == KlangEl::Unknown );
-		prodName->type = KlangEl::NonTerm;
+		LangEl *prodName = getKlangEl( this, rootNamespace, name );
+		assert( prodName->type == LangEl::Unknown );
+		prodName->type = LangEl::NonTerm;
 		Definition *newDef = new Definition( InputLoc(), prodName, 
 				0 /* FIXME new VarDef( name, 0 )*/, 
 				false, 0, prodList.length(), Definition::Production );
@@ -1288,7 +1288,7 @@ void ParseData::makeRuntimeData()
 	runtimeData->numLangEls = count;
 
 	for ( int i = 0; i < nextSymbolId; i++ ) {
-		KlangEl *lel = langElIndex[i];
+		LangEl *lel = langElIndex[i];
 		if ( lel != 0 ) {
 			runtimeData->lelInfo[i].name = lel->fullLit;
 			runtimeData->lelInfo[i].repeat = lel->isRepeat;
@@ -1857,8 +1857,8 @@ void ParseData::prepGrammar()
 	noUndefindKlangEls();
 
 	/* Put the language elements in an index by language element id. */
-	langElIndex = new KlangEl*[nextSymbolId+1];
-	memset( langElIndex, 0, sizeof(KlangEl*)*(nextSymbolId+1) );
+	langElIndex = new LangEl*[nextSymbolId+1];
+	memset( langElIndex, 0, sizeof(LangEl*)*(nextSymbolId+1) );
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ )
 		langElIndex[lel->id] = lel;
 

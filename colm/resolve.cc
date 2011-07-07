@@ -343,7 +343,7 @@ void ParseData::resolveRootBlock()
 	block->resolve( this );
 }
 
-void ParseData::resolveTranslateBlock( KlangEl *langEl )
+void ParseData::resolveTranslateBlock( LangEl *langEl )
 {
 	CodeBlock *block = langEl->transBlock;
 	block->resolve( this );
@@ -422,7 +422,7 @@ void ParseData::resolveUses()
 				error() << "do not have namespace for resolving reference" << endp;
 	
 			/* Look up the language element in the region. */
-			KlangEl *langEl = getKlangEl( this, nspace, lel->objectDefUses );
+			LangEl *langEl = getKlangEl( this, nspace, lel->objectDefUses );
 			lel->objectDef = langEl->objectDef;
 		}
 	}
@@ -463,7 +463,7 @@ void ParseData::resolveReferenceFactor( ProdEl *fact )
 	fact->nspace = nspace;
 
 	/* Look up the language element in the region. */
-	KlangEl *langEl = getKlangEl( this, nspace, fact->refName );
+	LangEl *langEl = getKlangEl( this, nspace, fact->refName );
 
 	if ( fact->repeatType == RepeatRepeat ) {
 		/* If the factor is a repeat, create the repeat element and link the

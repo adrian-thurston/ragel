@@ -89,9 +89,9 @@ int inputStreamPatternShouldFlush( InputStream *is )
 	return is->patItem == 0 || is->patItem->type == PatternItem::FactorType;
 }
 
-KlangEl *inputStreamPatternGetLangEl( InputStream *is, long *bindId, char **data, long *length )
+LangEl *inputStreamPatternGetLangEl( InputStream *is, long *bindId, char **data, long *length )
 { 
-	KlangEl *klangEl = is->patItem->factor->langEl;
+	LangEl *klangEl = is->patItem->factor->langEl;
 	*bindId = is->patItem->bindId;
 	*data = 0;
 	*length = 0;
@@ -217,9 +217,9 @@ int inputStreamReplShouldFlush( InputStream *is )
 			is->replItem->type == ReplItem::FactorType );
 }
 
-KlangEl *inputStreamReplGetLangEl( InputStream *is, long *bindId, char **data, long *length )
+LangEl *inputStreamReplGetLangEl( InputStream *is, long *bindId, char **data, long *length )
 { 
-	KlangEl *klangEl = is->replItem->type == ReplItem::ExprType ? 
+	LangEl *klangEl = is->replItem->type == ReplItem::ExprType ? 
 			is->replItem->langEl : is->replItem->factor->langEl;
 	*bindId = is->replItem->bindId;
 
@@ -343,7 +343,7 @@ void sendNamedLangEl( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *in
 	char *data;
 	long length;
 
-	KlangEl *klangEl = inputStream->funcs->getLangEl( inputStream, &bindId, &data, &length );
+	LangEl *klangEl = inputStream->funcs->getLangEl( inputStream, &bindId, &data, &length );
 	if ( klangEl->termDup != 0 )
 		klangEl = klangEl->termDup;
 	

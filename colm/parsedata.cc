@@ -1111,17 +1111,17 @@ void ParseData::createDefaultScanner()
 	/* Now create the one and only token -> "<chr>" / any /  */
 	name = "___DEFAULT_SCANNER_CHR";
 	defaultCharKlangEl = getKlangEl( this, defaultNamespace, name );
-	assert( defaultCharKlangEl->type == KlangEl::Unknown );
-	defaultCharKlangEl->type = KlangEl::Term;
+	assert( defaultCharKlangEl->type == LangEl::Unknown );
+	defaultCharKlangEl->type = LangEl::Term;
 
 	tokenDef->token = defaultCharKlangEl;
 	defaultCharKlangEl->tokenDef = tokenDef;
 }
 
-KlangEl *ParseData::makeRepeatProd( Namespace *nspace, const String &repeatName, NamespaceQual *nspaceQual, const String &name )
+LangEl *ParseData::makeRepeatProd( Namespace *nspace, const String &repeatName, NamespaceQual *nspaceQual, const String &name )
 {
-	KlangEl *prodName = getKlangEl( this, nspace, repeatName );
-	prodName->type = KlangEl::NonTerm;
+	LangEl *prodName = getKlangEl( this, nspace, repeatName );
+	prodName->type = LangEl::NonTerm;
 	prodName->isRepeat = true;
 
 	ProdElList *prodElList1 = new ProdElList;
@@ -1155,10 +1155,10 @@ KlangEl *ParseData::makeRepeatProd( Namespace *nspace, const String &repeatName,
 	return prodName;
 }
 
-KlangEl *ParseData::makeListProd( Namespace *nspace, const String &listName, NamespaceQual *nspaceQual, const String &name )
+LangEl *ParseData::makeListProd( Namespace *nspace, const String &listName, NamespaceQual *nspaceQual, const String &name )
 {
-	KlangEl *prodName = getKlangEl( this, nspace, listName );
-	prodName->type = KlangEl::NonTerm;
+	LangEl *prodName = getKlangEl( this, nspace, listName );
+	prodName->type = LangEl::NonTerm;
 	prodName->isList = true;
 
 	/* Build the first production of the list. */
@@ -1195,10 +1195,10 @@ KlangEl *ParseData::makeListProd( Namespace *nspace, const String &listName, Nam
 	return prodName;
 }
 
-KlangEl *ParseData::makeOptProd( Namespace *nspace, const String &optName, NamespaceQual *nspaceQual, const String &name )
+LangEl *ParseData::makeOptProd( Namespace *nspace, const String &optName, NamespaceQual *nspaceQual, const String &name )
 {
-	KlangEl *prodName = getKlangEl( this, nspace, optName );
-	prodName->type = KlangEl::NonTerm;
+	LangEl *prodName = getKlangEl( this, nspace, optName );
+	prodName->type = LangEl::NonTerm;
 	prodName->isOpt = true;
 
 	ProdElList *prodElList1 = new ProdElList;
@@ -1313,9 +1313,9 @@ void ParseData::initEmptyScanners()
 
 			/* These do not go in the namespace so so they cannot get declared
 			 * in the declare pass. */
-			KlangEl *lel = getKlangEl( this, rootNamespace, name );
-			assert( lel->type == KlangEl::Unknown );
-			lel->type = KlangEl::Term;
+			LangEl *lel = getKlangEl( this, rootNamespace, name );
+			assert( lel->type == LangEl::Unknown );
+			lel->type = LangEl::Term;
 
 			tokenDef->token = lel;
 			lel->tokenDef = tokenDef;
@@ -1371,13 +1371,13 @@ void ParseData::parsePatterns()
 	fillInPatterns( &prg );
 }
 
-void ParseData::collectParserEls( BstSet<KlangEl*> &parserEls )
+void ParseData::collectParserEls( BstSet<LangEl*> &parserEls )
 {
 	for ( PatternList::Iter pat = patternList; pat.lte(); pat++ ) {
 		/* We assume the reduction action compilation phase was run before
 		 * pattern parsing and it decorated the pattern with the target type. */
 		assert( pat->langEl != 0 );
-		if ( pat->langEl->type != KlangEl::NonTerm )
+		if ( pat->langEl->type != LangEl::NonTerm )
 			error(pat->loc) << "pattern type is not a non-terminal" << endp;
 
 		if ( pat->langEl->parserId < 0 ) {
@@ -1469,7 +1469,7 @@ void ParseData::semanticAnalysis()
 	RedFsmBuild reduce( sectionName, this, fsmGraph );
 	redFsm = reduce.reduceMachine();
 
-	BstSet<KlangEl*> parserEls;
+	BstSet<LangEl*> parserEls;
 	collectParserEls( parserEls );
 
 	makeParser( parserEls );

@@ -72,8 +72,8 @@ void ParseData::lr0BringInItem( PdaGraph *pdaGraph, PdaState *dest, PdaState *pr
 			dest->transMap.insert( srcTrans->lowKey, newTrans, &destTel );
 
 			/* If the item is a non-term, queue it for closure. */
-			KlangEl *langEl = langElIndex[srcTrans->lowKey];
-			if ( langEl != 0 && langEl->type == KlangEl::NonTerm ) {
+			LangEl *langEl = langElIndex[srcTrans->lowKey];
+			if ( langEl != 0 && langEl->type == LangEl::NonTerm ) {
 				pdaGraph->transClosureQueue.append( newTrans );
 				//cerr << "put to trans closure queue" << endl;
 			}
@@ -123,7 +123,7 @@ void ParseData::lr0InvokeClosure( PdaGraph *pdaGraph, PdaState *state )
 		//cerr << "have a transition to derive" << endl;
 
 		/* Get the langEl. */
-		KlangEl *langEl = langElIndex[toClose->lowKey];
+		LangEl *langEl = langElIndex[toClose->lowKey];
 
 		/* Make graphs for all of the productions that the non
 		 * terminal goes to that are not already in the state's dotSet. */
@@ -249,14 +249,14 @@ void ParseData::lalr1AddFollow1( PdaGraph *pdaGraph, PdaState *state )
 	/* Finding non-terminals into the state. */
 	for ( PdaTransInList::Iter in = state->inRange; in.lte(); in++ ) {
 		long key = in->lowKey; 
-		KlangEl *langEl = langElIndex[key];
-		if ( langEl != 0 && langEl->type == KlangEl::NonTerm ) {
+		LangEl *langEl = langElIndex[key];
+		if ( langEl != 0 && langEl->type == LangEl::NonTerm ) {
 			/* Finding the following transitions. */
 			FollowToAdd followKeys;
 			for ( TransMap::Iter fout = state->transMap; fout.lte(); fout++ ) {
 				int fkey = fout->key; 
-				KlangEl *flel = langElIndex[fkey];
-				if ( flel == 0 || flel->type == KlangEl::Term ) {
+				LangEl *flel = langElIndex[fkey];
+				if ( flel == 0 || flel->type == LangEl::Term ) {
 					long prior = fout->value->maxPrior();
 					followKeys.insert( fkey, prior );
 				}
@@ -304,13 +304,13 @@ void ParseData::lalr1AddFollow1( PdaGraph *pdaGraph, PdaTrans *trans )
 {
 	PdaState *state = trans->fromState;
 	int fkey = trans->lowKey; 
-	KlangEl *flel = langElIndex[fkey];
-	if ( flel == 0 || flel->type == KlangEl::Term ) {
+	LangEl *flel = langElIndex[fkey];
+	if ( flel == 0 || flel->type == LangEl::Term ) {
 		/* Finding non-terminals into the state. */
 		for ( PdaTransInList::Iter in = state->inRange; in.lte(); in++ ) {
 			long key = in->lowKey; 
-			KlangEl *langEl = langElIndex[key];
-			if ( langEl != 0 && langEl->type == KlangEl::NonTerm ) {
+			LangEl *langEl = langElIndex[key];
+			if ( langEl != 0 && langEl->type == LangEl::NonTerm ) {
 				//cerr << "FOLLOW PRIOR TRANSFER 2: " << prior << endl;
 				long prior = trans->maxPrior();
 				lalr1AddFollow2( pdaGraph, in, fkey, prior );
@@ -361,14 +361,14 @@ void ParseData::linkExpansions( PdaGraph *pdaGraph )
 		/* Find transitions out on non terminals. */
 		for ( TransMap::Iter trans = state->transMap; trans.lte(); trans++ ) {
 			long key = trans->key;
-			KlangEl *langEl = langElIndex[key];
-			if ( langEl != 0 && langEl->type == KlangEl::NonTerm ) {
+			LangEl *langEl = langElIndex[key];
+			if ( langEl != 0 && langEl->type == LangEl::NonTerm ) {
 				/* For each production that the non terminal expand to ... */
 				for ( LelDefList::Iter prod = langEl->defList; prod.lte(); prod++ ) {
 					/* Follow the production and add to the trans's expand to set. */
 					PdaState *followRes = pdaGraph->followFsm( state, prod->fsm );
 
-					//KlangEl *lel = langElIndex[key];
+					//LangEl *lel = langElIndex[key];
 					//cerr << state->stateNum << ", "; 
 					//if ( lel != 0 )
 					//	cerr << lel->data;
@@ -389,8 +389,8 @@ void ParseData::addDupTerms( PdaGraph *pdaGraph )
 	for ( PdaStateList::Iter state = pdaGraph->stateList; state.lte(); state++ ) {
 		PdaTransList newTranitions;
 		for ( TransMap::Iter trans = state->transMap; trans.lte(); trans++ ) {
-			KlangEl *lel = langElIndex[trans->value->lowKey];
-			if ( lel->type == KlangEl::NonTerm ) {
+			LangEl *lel = langElIndex[trans->value->lowKey];
+			if ( lel->type == LangEl::NonTerm ) {
 				PdaTrans *dupTrans = new PdaTrans;
 				dupTrans->lowKey = lel->termDup->id;
 				dupTrans->isShift = true;
@@ -423,7 +423,7 @@ void ParseData::lalr1GenerateParser( PdaGraph *pdaGraph, KlangElSet &parserEls )
 	/* Make the intial graph. */
 	pdaGraph->langElIndex = langElIndex;
 
-	for ( Vector<KlangEl*>::Iter r = parserEls; r.lte(); r++ ) {
+	for ( Vector<LangEl*>::Iter r = parserEls; r.lte(); r++ ) {
 		/* Create the entry point. */
 		PdaState *rs = pdaGraph->addState();
 		pdaGraph->entryStateSet.insert( rs );

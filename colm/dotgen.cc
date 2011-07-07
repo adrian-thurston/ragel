@@ -35,7 +35,7 @@ void ParseData::writeTransList( PdaState *state )
 		/* Begin the label. */
 		out << " [ label = \""; 
 		long key = trans->key;  
-		KlangEl *lel = langElIndex[key];
+		LangEl *lel = langElIndex[key];
 		if ( lel != 0 )
 			out << lel->name;
 		else

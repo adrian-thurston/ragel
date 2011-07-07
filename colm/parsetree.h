@@ -171,7 +171,7 @@ struct TokenDef;
 struct TokenDefListReg;
 struct TokenDefListNs;
 struct Range;
-struct KlangEl;
+struct LangEl;
 
 /* Type of augmentation. Describes locations in the machine. */
 enum AugType
@@ -356,14 +356,14 @@ typedef Vector<Context*> ContextVect;
 
 struct Context
 {
-	Context( InputLoc &loc, KlangEl *lel )
+	Context( InputLoc &loc, LangEl *lel )
 	:
 		loc(loc),
 		lel(lel)
 	{}
 
 	InputLoc loc;
-	KlangEl *lel;
+	LangEl *lel;
 
 	ObjectDef *contextObjDef;
 };
@@ -409,7 +409,7 @@ struct TokenDef
 	Join *join;
 	Action *action;
 	CodeBlock *codeBlock;
-	KlangEl *token;
+	LangEl *token;
 	InputLoc semiLoc;
 
 	Action *setActId;
@@ -472,8 +472,8 @@ struct ContextDef
 struct ContextDefList : DList<ContextDef> {};
 
 /* Symbol Map. */
-typedef AvlMap< String, KlangEl*, CmpStr > SymbolMap;
-typedef AvlMapEl< String, KlangEl* > SymbolMapEl;
+typedef AvlMap< String, LangEl*, CmpStr > SymbolMap;
+typedef AvlMapEl< String, LangEl* > SymbolMapEl;
 
 typedef Vector<TokenRegion*> RegionVect;
 
@@ -530,7 +530,7 @@ struct GenericType
 	: public DListEl<GenericType>
 {
 	GenericType( const String &name, long typeId, long id, 
-			KlangEl *langEl, TypeRef *typeArg )
+			LangEl *langEl, TypeRef *typeArg )
 	:
 		name(name), typeId(typeId), id(id), langEl(langEl),
 		typeArg(typeArg), keyTypeArg(0), 
@@ -544,7 +544,7 @@ struct GenericType
 	String name;
 	long typeId;
 	long id;
-	KlangEl *langEl;
+	LangEl *langEl;
 	TypeRef *typeArg;
 	TypeRef *keyTypeArg;
 	UniqueType *utArg;
@@ -1130,7 +1130,7 @@ struct ReplItem
 	Type type;
 	String data;
 	LangExpr *expr;
-	KlangEl *langEl;
+	LangEl *langEl;
 	ProdEl *factor;
 	long bindId;
 
@@ -1152,7 +1152,7 @@ struct Pattern
 	TokenRegion *region;
 	PatternItemList *list;
 	long patRepId;
-	KlangEl *langEl;
+	LangEl *langEl;
 	PdaRun *pdaRun;
 	long nextBindId;
 
@@ -1173,7 +1173,7 @@ struct Replacement
 	TokenRegion *region;
 	ReplItemList *list;
 	int patRepId;
-	KlangEl *langEl;
+	LangEl *langEl;
 	PdaRun *pdaRun;
 	long nextBindId;
 	bool parse;
@@ -1194,7 +1194,7 @@ struct AccumText
 	Namespace *nspace;
 	TokenRegion *region;
 	ReplItemList *list;
-	KlangEl *langEl;
+	LangEl *langEl;
 	PdaRun *pdaRun;
 	long nextBindId;
 	bool parse;
@@ -1265,7 +1265,7 @@ struct UniqueType : public AvlTreeEl<UniqueType>
 		langEl(0), 
 		iterDef(0) {}
 
-	UniqueType( int typeId, KlangEl *langEl ) :
+	UniqueType( int typeId, LangEl *langEl ) :
 		typeId(typeId),
 		langEl(langEl),
 		iterDef(0) {}
@@ -1276,7 +1276,7 @@ struct UniqueType : public AvlTreeEl<UniqueType>
 		iterDef(iterDef) {}
 
 	int typeId;
-	KlangEl *langEl;
+	LangEl *langEl;
 	IterDef *iterDef;
 };
 

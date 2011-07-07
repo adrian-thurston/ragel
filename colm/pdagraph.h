@@ -49,7 +49,7 @@ struct PdaState;
 struct PdaGraph;
 struct TokenDef;
 struct Definition;
-struct KlangEl;
+struct LangEl;
 struct TokenRegion;
 
 typedef Vector<TokenRegion*> RegionVect;
@@ -401,7 +401,7 @@ struct PdaGraph
 	TransClosureQueue transClosureQueue;
 	PdaState *stateClosureHead;
 
-	KlangEl **langElIndex;
+	LangEl **langElIndex;
 
 	void setStartState( PdaState *state );
 	void unsetStartState( );

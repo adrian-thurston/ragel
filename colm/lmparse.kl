@@ -361,7 +361,7 @@ property:
 
 nonterm opt_prec
 {
-	KlangEl *predOf;
+	LangEl *predOf;
 };
 
 opt_prec:
@@ -387,7 +387,7 @@ define_prod: '[' prod_el_list ']' opt_commit opt_reduce_code opt_prec
 		ProdElList *prodElList = curProdElList;
 		bool commit = $4->commit;
 		CodeBlock *redBlock = $5->codeBlock;
-		KlangEl *predOf = $6->predOf;
+		LangEl *predOf = $6->predOf;
 
 		//Namespace *nspace = namespaceStack.top();
 

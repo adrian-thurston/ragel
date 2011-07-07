@@ -28,35 +28,35 @@
 void ParseData::declareBaseKlangEls()
 {
 	/* Make the "stream" language element */
-	streamKlangEl = new KlangEl( rootNamespace, strdup("stream"), KlangEl::Term );
+	streamKlangEl = new LangEl( rootNamespace, strdup("stream"), LangEl::Term );
 	langEls.prepend( streamKlangEl );
 	SymbolMapEl *streamMapEl = rootNamespace->symbolMap.insert( 
 			streamKlangEl->name, streamKlangEl );
 	assert( streamMapEl != 0 );
 
 	/* Make the "str" language element */
-	strKlangEl = new KlangEl( rootNamespace, strdup("str"), KlangEl::Term );
+	strKlangEl = new LangEl( rootNamespace, strdup("str"), LangEl::Term );
 	langEls.prepend( strKlangEl );
 	SymbolMapEl *stringMapEl = rootNamespace->symbolMap.insert( 
 			strKlangEl->name, strKlangEl );
 	assert( stringMapEl != 0 );
 
 	/* Make the "int" language element */
-	intKlangEl = new KlangEl( rootNamespace, strdup("int"), KlangEl::Term );
+	intKlangEl = new LangEl( rootNamespace, strdup("int"), LangEl::Term );
 	langEls.prepend( intKlangEl );
 	SymbolMapEl *integerMapEl = rootNamespace->symbolMap.insert( 
 			intKlangEl->name, intKlangEl );
 	assert( integerMapEl != 0 );
 
 	/* Make the "bool" language element */
-	boolKlangEl = new KlangEl( rootNamespace, strdup("bool"), KlangEl::Term );
+	boolKlangEl = new LangEl( rootNamespace, strdup("bool"), LangEl::Term );
 	langEls.prepend( boolKlangEl );
 	SymbolMapEl *boolMapEl = rootNamespace->symbolMap.insert( 
 			boolKlangEl->name, boolKlangEl );
 	assert( boolMapEl != 0 );
 
 	/* Make the "ptr" language element */
-	ptrKlangEl = new KlangEl( rootNamespace, strdup("ptr"), KlangEl::Term );
+	ptrKlangEl = new LangEl( rootNamespace, strdup("ptr"), LangEl::Term );
 	langEls.prepend( ptrKlangEl );
 	SymbolMapEl *ptrMapEl = rootNamespace->symbolMap.insert( 
 			ptrKlangEl->name, ptrKlangEl );
@@ -67,7 +67,7 @@ void ParseData::declareBaseKlangEls()
 	 * that needs to be associated with a language element. This allows us to
 	 * always associate reverse code with the first language element produced
 	 * after a generation action. */
-	noTokenKlangEl = new KlangEl( rootNamespace, strdup("_notoken"), KlangEl::Term );
+	noTokenKlangEl = new LangEl( rootNamespace, strdup("_notoken"), LangEl::Term );
 	noTokenKlangEl->ignore = true;
 	langEls.prepend( noTokenKlangEl );
 	SymbolMapEl *noTokenMapEl = rootNamespace->symbolMap.insert( 
@@ -76,13 +76,13 @@ void ParseData::declareBaseKlangEls()
 
 	/* Make the EOF language element. */
 	eofKlangEl = 0;
-//	eofKlangEl = new KlangEl( rootNamespace, strdup("_eof"), KlangEl::Term );
+//	eofKlangEl = new LangEl( rootNamespace, strdup("_eof"), LangEl::Term );
 //	langEls.prepend( eofKlangEl );
 //	SymbolMapEl *eofMapEl = rootNamespace->symbolMap.insert( eofKlangEl->name, eofKlangEl );
 //	assert( eofMapEl != 0 );
 
 	/* Make the "any" language element */
-	anyKlangEl = new KlangEl( rootNamespace, strdup("any"), KlangEl::NonTerm );
+	anyKlangEl = new LangEl( rootNamespace, strdup("any"), LangEl::NonTerm );
 	langEls.prepend( anyKlangEl );
 	SymbolMapEl *anyMapEl = rootNamespace->symbolMap.insert( anyKlangEl->name, anyKlangEl );
 	assert( anyMapEl != 0 );
@@ -93,9 +93,9 @@ void ParseData::makeTerminalWrappers()
 	/* Make terminal language elements corresponding to each nonterminal in
 	 * the grammar. */
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
-		if ( lel->type == KlangEl::NonTerm ) {
+		if ( lel->type == LangEl::NonTerm ) {
 			String name( lel->name.length() + 5, "_T_%s", lel->name.data );
-			KlangEl *termDup = new KlangEl( lel->nspace, name, KlangEl::Term );
+			LangEl *termDup = new LangEl( lel->nspace, name, LangEl::Term );
 
 			/* Give the dup the attributes of the nonterminal. This ensures
 			 * that the attributes are allocated when patterns and
@@ -121,7 +121,7 @@ void ParseData::makeEofElements()
 				lel != noTokenKlangEl )
 		{
 			String name( lel->name.length() + 5, "_eof_%s", lel->name.data );
-			KlangEl *eofLel = new KlangEl( lel->nspace, name, KlangEl::Term );
+			LangEl *eofLel = new LangEl( lel->nspace, name, LangEl::Term );
 
 			langEls.append( eofLel );
 			lel->eofLel = eofLel;
@@ -131,7 +131,7 @@ void ParseData::makeEofElements()
 	}
 }
 
-void ParseData::addProdRedObjectVar( ObjectDef *localFrame, KlangEl *nonTerm )
+void ParseData::addProdRedObjectVar( ObjectDef *localFrame, LangEl *nonTerm )
 {
 	UniqueType *prodNameUT = findUniqueType( TYPE_TREE, nonTerm );
 	TypeRef *typeRef = new TypeRef( InputLoc(), prodNameUT );
@@ -198,22 +198,22 @@ void Namespace::declare( ParseData *pd )
 	for ( GenericList::Iter g = genericList; g.lte(); g++ ) {
 		//std::cout << "generic " << g->name << std::endl;
 
-		KlangEl *langEl = getKlangEl( pd, this, g->name );
+		LangEl *langEl = getKlangEl( pd, this, g->name );
 
 		/* Check that the element wasn't previously defined as something else. */
-		if ( langEl->type != KlangEl::Unknown ) {
+		if ( langEl->type != LangEl::Unknown ) {
 			error() << "'" << g->name << 
 				"' already defined as something else" << endp;
 		}
-		langEl->type = KlangEl::NonTerm;
+		langEl->type = LangEl::NonTerm;
 
 		/* Add one empty production. */
 		ProdElList *emptyList = new ProdElList;
 		//addProduction( g->loc, langEl, emptyList, false, 0, 0 );
 
 		{
-			KlangEl *prodName = langEl;
-			assert( prodName->type == KlangEl::NonTerm );
+			LangEl *prodName = langEl;
+			assert( prodName->type == LangEl::NonTerm );
 
 			Definition *newDef = new Definition( loc, prodName, 
 				emptyList, false, 0,
@@ -230,9 +230,9 @@ void Namespace::declare( ParseData *pd )
 
 	for ( LiteralDict::Iter l = literalDict; l.lte(); l++  ) {
 		/* Create a token for the literal. */
-		KlangEl *newLangEl = getKlangEl( pd, this, l->value->name );
-		assert( newLangEl->type == KlangEl::Unknown );
-		newLangEl->type = KlangEl::Term;
+		LangEl *newLangEl = getKlangEl( pd, this, l->value->name );
+		assert( newLangEl->type == LangEl::Unknown );
+		newLangEl->type = LangEl::Term;
 		newLangEl->lit = l->value->literal;
 		newLangEl->isLiteral = true;
 		newLangEl->tokenDef = l->value;
@@ -241,20 +241,20 @@ void Namespace::declare( ParseData *pd )
 	}
 
 	for ( ContextDefList::Iter c = contextDefList; c.lte(); c++ ) {
-		KlangEl *lel = getKlangEl( pd, this, c->name );
+		LangEl *lel = getKlangEl( pd, this, c->name );
 
 		/* Check that the element wasn't previously defined as something else. */
-		if ( lel->type != KlangEl::Unknown ) {
+		if ( lel->type != LangEl::Unknown ) {
 			error(c->context->loc) << "'" << c->name << 
 				"' has already been defined, maybe you want to use redef?" << endp;
 		}
-		lel->type = KlangEl::NonTerm;
+		lel->type = LangEl::NonTerm;
 		ProdElList *emptyList = new ProdElList;
 		//addProduction( c->context->loc, c->name, emptyList, false, 0, 0 );
 
 		{
-			KlangEl *prodName = lel;
-			assert( prodName->type == KlangEl::NonTerm );
+			LangEl *prodName = lel;
+			assert( prodName->type == LangEl::NonTerm );
 
 			Definition *newDef = new Definition( loc, prodName, 
 				emptyList, false, 0,
@@ -282,11 +282,11 @@ void Namespace::declare( ParseData *pd )
 		/* Literals already taken care of. */
 		if ( ! t->isLiteral ) {
 			/* Create the token. */
-			KlangEl *tokEl = getKlangEl( pd, this, t->name );
-			if ( tokEl->type != KlangEl::Unknown )
+			LangEl *tokEl = getKlangEl( pd, this, t->name );
+			if ( tokEl->type != LangEl::Unknown )
 				error(InputLoc()) << "'" << t->name << "' already defined" << endp;
 
-			tokEl->type = KlangEl::Term;
+			tokEl->type = LangEl::Term;
 			tokEl->ignore = t->ignore;
 			tokEl->transBlock = t->codeBlock;
 			tokEl->objectDef = t->objectDef;
@@ -299,15 +299,15 @@ void Namespace::declare( ParseData *pd )
 
 	for ( NtDefList::Iter n = ntDefList; n.lte(); n++ ) {
 		/* Get the language element. */
-		KlangEl *langEl = getKlangEl( pd, this, n->name );
+		LangEl *langEl = getKlangEl( pd, this, n->name );
 
 		/* Check that the element wasn't previously defined as something else. */
-		if ( langEl->type != KlangEl::Unknown ) {
+		if ( langEl->type != LangEl::Unknown ) {
 			error(InputLoc()) << "'" << n->name << 
 				"' has already been defined, maybe you want to use redef?" << endp;
 		}
 
-		langEl->type = KlangEl::NonTerm;
+		langEl->type = LangEl::NonTerm;
 		//$$->langEl = langEl;
 
 		/* Get the language element. */

@@ -195,7 +195,7 @@ void FsmCodeGen::SET_TOKSTART( ostream &ret, InlineItem *item )
 	ret << TOKSTART() << " = " << P() << ";";
 }
 
-void FsmCodeGen::EMIT_TOKEN( ostream &ret, KlangEl *token )
+void FsmCodeGen::EMIT_TOKEN( ostream &ret, LangEl *token )
 {
 //	if ( token->transBlock != 0 )
 //		ret << "	execGen( " << token->id << " );\n";

@@ -133,7 +133,7 @@ protected:
 	void LM_ON_NEXT( ostream &ret, InlineItem *item );
 	void LM_ON_LAG_BEHIND( ostream &ret, InlineItem *item );
 	void EXEC_TOKEND( ostream &ret );
-	void EMIT_TOKEN( ostream &ret, KlangEl *token );
+	void EMIT_TOKEN( ostream &ret, LangEl *token );
 
 	string ERROR_STATE();
 	string FIRST_FINAL_STATE();

@@ -51,7 +51,7 @@ void operator<<( std::ostream &out, exit_object & );
 
 /* Forwards. */
 struct RedFsm;
-struct KlangEl;
+struct LangEl;
 struct ParseData;
 struct PdaCodeGen;
 struct FsmCodeGen;
@@ -80,7 +80,7 @@ struct Bindings
 
 struct DefListEl { Definition *prev, *next; };
 struct LelDefListEl { Definition *prev, *next; };
-typedef Vector< KlangEl* > KlangElVect;
+typedef Vector< LangEl* > KlangElVect;
 typedef Vector< ProdEl* > FactorVect;
 
 typedef AvlMap<String, long, CmpStr> StringMap;
@@ -95,7 +95,7 @@ struct Definition
 {
 	enum Type { Production };
 
-	Definition( const InputLoc &loc, KlangEl *prodName, ProdElList *prodElList, 
+	Definition( const InputLoc &loc, LangEl *prodName, ProdElList *prodElList, 
 			bool prodCommit, CodeBlock *redBlock, int prodId, Type type ) : 
 		loc(loc), prodName(prodName), prodElList(prodElList), 
 		prodCommit(prodCommit), redBlock(redBlock), prodId(prodId), 
@@ -103,7 +103,7 @@ struct Definition
 		isLeftRec(false), localFrame(0), lhsField(0), predOf(0) {}
 
 	InputLoc loc;
-	KlangEl *prodName;
+	LangEl *prodName;
 	ProdElList *prodElList;
 	bool prodCommit;
 
@@ -117,7 +117,7 @@ struct Definition
 	String data;
 	LongSet reducesTo;
 
-	KlangEl *uniqueEmptyLeader;
+	LangEl *uniqueEmptyLeader;
 
 	ProdIdSet nonTermFirstSet;
 	AlphSet firstSet;
@@ -126,7 +126,7 @@ struct Definition
 	ObjectDef *localFrame;
 	ObjField *lhsField;
 
-	KlangEl *predOf;
+	LangEl *predOf;
 };
 
 struct CmpDefById
@@ -162,22 +162,22 @@ struct LelDefList
 typedef Vector< PdaGraph* > Machines;
 
 /* List of language elements. */
-typedef DList<KlangEl> LelList;
+typedef DList<LangEl> LelList;
 
 typedef Vector< TokenDef* > TokenDefVect;
 
 struct UniqueType;
 
-typedef Vector<KlangEl*> KlangElVect;
-typedef BstSet<KlangEl*> KlangElSet;
+typedef Vector<LangEl*> KlangElVect;
+typedef BstSet<LangEl*> KlangElSet;
 
 /* A language element class. Can be a nonTerm or a term. */
-struct KlangEl : public DListEl<KlangEl>
+struct LangEl : public DListEl<LangEl>
 {
 	enum Type { Unknown, Term, NonTerm };
 
-	KlangEl( Namespace *nspace, const String &name, Type type );
-	~KlangEl();
+	LangEl( Namespace *nspace, const String &name, Type type );
+	~LangEl();
 
 	/* The region the language element was defined in. */
 	Namespace *nspace;
@@ -209,8 +209,8 @@ struct KlangEl : public DListEl<KlangEl>
 
 	TokenDef *tokenDef;
 	Definition *rootDef;
-	KlangEl *termDup;
-	KlangEl *eofLel;
+	LangEl *termDup;
+	LangEl *eofLel;
 
 	PdaGraph *pdaGraph;
 	PdaTables *pdaTables;
@@ -259,7 +259,7 @@ struct ProdEl
 		literal(0), langEl(0), priorVal(priorVal), repeatType(repeatType),
 		nspace(0), type(ReferenceType), objField(0) {}
 
-	ProdEl( const InputLoc &loc, KlangEl *langEl ) :
+	ProdEl( const InputLoc &loc, LangEl *langEl ) :
 		loc(loc), commit(false), nspaceQual(0), literal(0), langEl(langEl), 
 		priorVal(0), repeatType(RepeatNone), nspace(0),
 		type(ReferenceType), objField(0) {}
@@ -274,7 +274,7 @@ struct ProdEl
 	NamespaceQual *nspaceQual;
 	String refName;
 	PdaLiteral *literal;
-	KlangEl *langEl;
+	LangEl *langEl;
 	int priorVal;
 	RepeatType repeatType;
 	Namespace *nspace;
@@ -544,9 +544,9 @@ struct ParseData
 	void analyzeAction( Action *action, InlineList *inlineList );
 	void analyzeGraph( FsmGraph *graph );
 	void resolvePrecedence( PdaGraph *pdaGraph );
-	KlangEl *predOf( PdaTrans *trans, long action );
-	bool precedenceSwap( long action1, long action2, KlangEl *l1, KlangEl *l2 );
-	bool precedenceRemoveBoth( KlangEl *l1, KlangEl *l2 );
+	LangEl *predOf( PdaTrans *trans, long action );
+	bool precedenceSwap( long action1, long action2, LangEl *l1, LangEl *l2 );
+	bool precedenceRemoveBoth( LangEl *l1, LangEl *l2 );
 
 	void initKeyOps();
 
@@ -704,10 +704,10 @@ struct ParseData
 	void findFollow( AlphSet &result, PdaState *overTab, 
 			PdaState *overSrc, Definition *parentDef );
 	void pdaActionOrder( PdaGraph *pdaGraph, KlangElSet &parserEls );
-	void pdaOrderFollow( KlangEl *rootEl, PdaState *tabState, 
+	void pdaOrderFollow( LangEl *rootEl, PdaState *tabState, 
 			PdaTrans *tabTrans, PdaTrans *srcTrans,
 			Definition *parentDef, Definition *definition, long &time );
-	void pdaOrderProd( KlangEl *rootEl, PdaState *tabState, 
+	void pdaOrderProd( LangEl *rootEl, PdaState *tabState, 
 			PdaState *srcState, Definition *parentDef, long &time );
 	void analyzeMachine( PdaGraph *pdaGraph, KlangElSet &parserEls );
 
@@ -716,11 +716,11 @@ struct ParseData
 	void printNonTermFirstSets();
 	void printFirstSets();
 
-	KlangEl *makeRepeatProd( Namespace *nspace, const String &repeatName, 
+	LangEl *makeRepeatProd( Namespace *nspace, const String &repeatName, 
 			NamespaceQual *nspaceQual, const String &name );
-	KlangEl *makeListProd( Namespace *nspace, const String &listName,
+	LangEl *makeListProd( Namespace *nspace, const String &listName,
 			NamespaceQual *nspaceQual, const String &name );
-	KlangEl *makeOptProd( Namespace *nspace, const String &optName,
+	LangEl *makeOptProd( Namespace *nspace, const String &optName,
 			NamespaceQual *nspaceQual, const String &name );
 	void resolveLiteralFactor( ProdEl *fact );
 	void resolveReferenceFactor( ProdEl *fact );
@@ -730,13 +730,13 @@ struct ParseData
 	void resolveReplacementEls();
 	void resolveAccumEls();
 
-	void addMatchText( ObjectDef *frame, KlangEl *lel );
-	void addMatchLength( ObjectDef *frame, KlangEl *lel );
-	void addInput( ObjectDef *frame, KlangEl *lel );
-	void addCtx( ObjectDef *frame, KlangEl *lel );
-	void addTransTokVar( ObjectDef *frame, KlangEl *lel );
+	void addMatchText( ObjectDef *frame, LangEl *lel );
+	void addMatchLength( ObjectDef *frame, LangEl *lel );
+	void addInput( ObjectDef *frame, LangEl *lel );
+	void addCtx( ObjectDef *frame, LangEl *lel );
+	void addTransTokVar( ObjectDef *frame, LangEl *lel );
 	void addProdRHSVars( ObjectDef *localFrame, ProdElList *prodElList );
-	void addProdRedObjectVar( ObjectDef *localFrame, KlangEl *langEl );
+	void addProdRedObjectVar( ObjectDef *localFrame, LangEl *langEl );
 	void addProdObjects();
 
 	void addSaveLHS( Definition *prod, CodeVect &code, long &insertPos );
@@ -747,7 +747,7 @@ struct ParseData
 
 	void collectParserEls( KlangElSet &parserEls );
 	void makeParser( KlangElSet &parserEls );
-	PdaGraph *makePdaGraph( BstSet<KlangEl*> &parserEls  );
+	PdaGraph *makePdaGraph( BstSet<LangEl*> &parserEls  );
 	PdaTables *makePdaTables( PdaGraph *pdaGraph );
 
 	void fillInPatterns( Program *prg );
@@ -756,7 +756,7 @@ struct ParseData
 	/* Generate and write out the fsm. */
 	void generateGraphviz();
 
-	void verifyParseStopGrammar( KlangEl *langEl, PdaGraph *pdaGraph );
+	void verifyParseStopGrammar( LangEl *langEl, PdaGraph *pdaGraph );
 
 	void initFieldInstructions( ObjField *el );
 	void initLocalInstructions( ObjField *el );
@@ -790,7 +790,7 @@ struct ParseData
 	void resolveUserIter( Function *func );
 	void resolvePreEof( TokenRegion *region );
 	void resolveRootBlock();
-	void resolveTranslateBlock( KlangEl *langEl );
+	void resolveTranslateBlock( LangEl *langEl );
 	void resolveReductionCode( Definition *prod );
 	void resolveParseTree();
 	void resolveGenericTypes();
@@ -801,7 +801,7 @@ struct ParseData
 	void compileUserIter( Function *func );
 	void compilePreEof( TokenRegion *region );
 	void compileRootBlock();
-	void compileTranslateBlock( KlangEl *langEl );
+	void compileTranslateBlock( LangEl *langEl );
 	void findLocalTrees( CharSet &trees );
 	void compileReductionCode( Definition *prod );
 	void initGenericTypes();
@@ -850,17 +850,17 @@ struct ParseData
 	GenericType *anyMap;
 	GenericType *anyVector;
 
-	KlangEl *ptrKlangEl;
-	KlangEl *boolKlangEl;
-	KlangEl *intKlangEl;
-	KlangEl *strKlangEl;
-	KlangEl *streamKlangEl;
-	KlangEl *anyKlangEl;
-	KlangEl *rootKlangEl;
-	KlangEl *noTokenKlangEl;
-	KlangEl *eofKlangEl;
-	KlangEl *errorKlangEl;
-	KlangEl *defaultCharKlangEl;
+	LangEl *ptrKlangEl;
+	LangEl *boolKlangEl;
+	LangEl *intKlangEl;
+	LangEl *strKlangEl;
+	LangEl *streamKlangEl;
+	LangEl *anyKlangEl;
+	LangEl *rootKlangEl;
+	LangEl *noTokenKlangEl;
+	LangEl *eofKlangEl;
+	LangEl *errorKlangEl;
+	LangEl *defaultCharKlangEl;
 
 	TokenRegion *rootRegion;
 	TokenRegion *defaultRegion;
@@ -872,7 +872,7 @@ struct ParseData
 	int nextSymbolId;
 	int firstNonTermId;
 
-	KlangEl **langElIndex;
+	LangEl **langElIndex;
 	PdaState *actionDestState;
 	DefSetSet prodSetSet;
 
@@ -889,7 +889,7 @@ struct ParseData
 	ObjectDef *curLocalFrame;
 
 	UniqueType *findUniqueType( int typeId );
-	UniqueType *findUniqueType( int typeId, KlangEl *langEl );
+	UniqueType *findUniqueType( int typeId, LangEl *langEl );
 	UniqueType *findUniqueType( int typeId, IterDef *iterDef );
 
 	UniqueType *uniqueTypeNil;
@@ -995,6 +995,6 @@ struct Parser;
 typedef AvlMap<String, Parser *, CmpStr> ParserDict;
 typedef AvlMapEl<String, Parser *> ParserDictEl;
 
-KlangEl *getKlangEl( ParseData *pd, Namespace *nspace, const String &data );
+LangEl *getKlangEl( ParseData *pd, Namespace *nspace, const String &data );
 
 #endif /* _PARSEDATA_H */
