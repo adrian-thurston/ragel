@@ -995,6 +995,7 @@ struct Parser;
 typedef AvlMap<String, Parser *, CmpStr> ParserDict;
 typedef AvlMapEl<String, Parser *> ParserDictEl;
 
-LangEl *getKlangEl( ParseData *pd, Namespace *nspace, const String &data );
+LangEl *declareLangEl( ParseData *pd, Namespace *nspace, const String &data );
+LangEl *findLangEl( ParseData *pd, Namespace *nspace, const String &data );
 
 #endif /* _PARSEDATA_H */

@@ -198,13 +198,7 @@ void Namespace::declare( ParseData *pd )
 	for ( GenericList::Iter g = genericList; g.lte(); g++ ) {
 		//std::cout << "generic " << g->name << std::endl;
 
-		LangEl *langEl = getKlangEl( pd, this, g->name );
-
-		/* Check that the element wasn't previously defined as something else. */
-		if ( langEl->type != LangEl::Unknown ) {
-			error() << "'" << g->name << 
-				"' already defined as something else" << endp;
-		}
+		LangEl *langEl = declareLangEl( pd, this, g->name );
 		langEl->type = LangEl::NonTerm;
 
 		/* Add one empty production. */
@@ -230,8 +224,7 @@ void Namespace::declare( ParseData *pd )
 
 	for ( LiteralDict::Iter l = literalDict; l.lte(); l++  ) {
 		/* Create a token for the literal. */
-		LangEl *newLangEl = getKlangEl( pd, this, l->value->name );
-		assert( newLangEl->type == LangEl::Unknown );
+		LangEl *newLangEl = declareLangEl( pd, this, l->value->name );
 		newLangEl->type = LangEl::Term;
 		newLangEl->lit = l->value->literal;
 		newLangEl->isLiteral = true;
@@ -241,13 +234,7 @@ void Namespace::declare( ParseData *pd )
 	}
 
 	for ( ContextDefList::Iter c = contextDefList; c.lte(); c++ ) {
-		LangEl *lel = getKlangEl( pd, this, c->name );
-
-		/* Check that the element wasn't previously defined as something else. */
-		if ( lel->type != LangEl::Unknown ) {
-			error(c->context->loc) << "'" << c->name << 
-				"' has already been defined, maybe you want to use redef?" << endp;
-		}
+		LangEl *lel = declareLangEl( pd, this, c->name );
 		lel->type = LangEl::NonTerm;
 		ProdElList *emptyList = new ProdElList;
 		//addProduction( c->context->loc, c->name, emptyList, false, 0, 0 );
@@ -282,10 +269,7 @@ void Namespace::declare( ParseData *pd )
 		/* Literals already taken care of. */
 		if ( ! t->isLiteral ) {
 			/* Create the token. */
-			LangEl *tokEl = getKlangEl( pd, this, t->name );
-			if ( tokEl->type != LangEl::Unknown )
-				error(InputLoc()) << "'" << t->name << "' already defined" << endp;
-
+			LangEl *tokEl = declareLangEl( pd, this, t->name );
 			tokEl->type = LangEl::Term;
 			tokEl->ignore = t->ignore;
 			tokEl->transBlock = t->codeBlock;
@@ -299,14 +283,7 @@ void Namespace::declare( ParseData *pd )
 
 	for ( NtDefList::Iter n = ntDefList; n.lte(); n++ ) {
 		/* Get the language element. */
-		LangEl *langEl = getKlangEl( pd, this, n->name );
-
-		/* Check that the element wasn't previously defined as something else. */
-		if ( langEl->type != LangEl::Unknown ) {
-			error(InputLoc()) << "'" << n->name << 
-				"' has already been defined, maybe you want to use redef?" << endp;
-		}
-
+		LangEl *langEl = declareLangEl( pd, this, n->name );
 		langEl->type = LangEl::NonTerm;
 		//$$->langEl = langEl;
 

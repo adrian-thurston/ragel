@@ -1110,8 +1110,7 @@ void ParseData::createDefaultScanner()
 
 	/* Now create the one and only token -> "<chr>" / any /  */
 	name = "___DEFAULT_SCANNER_CHR";
-	defaultCharKlangEl = getKlangEl( this, defaultNamespace, name );
-	assert( defaultCharKlangEl->type == LangEl::Unknown );
+	defaultCharKlangEl = declareLangEl( this, defaultNamespace, name );
 	defaultCharKlangEl->type = LangEl::Term;
 
 	tokenDef->token = defaultCharKlangEl;
@@ -1120,7 +1119,7 @@ void ParseData::createDefaultScanner()
 
 LangEl *ParseData::makeRepeatProd( Namespace *nspace, const String &repeatName, NamespaceQual *nspaceQual, const String &name )
 {
-	LangEl *prodName = getKlangEl( this, nspace, repeatName );
+	LangEl *prodName = declareLangEl( this, nspace, repeatName );
 	prodName->type = LangEl::NonTerm;
 	prodName->isRepeat = true;
 
@@ -1157,7 +1156,7 @@ LangEl *ParseData::makeRepeatProd( Namespace *nspace, const String &repeatName, 
 
 LangEl *ParseData::makeListProd( Namespace *nspace, const String &listName, NamespaceQual *nspaceQual, const String &name )
 {
-	LangEl *prodName = getKlangEl( this, nspace, listName );
+	LangEl *prodName = declareLangEl( this, nspace, listName );
 	prodName->type = LangEl::NonTerm;
 	prodName->isList = true;
 
@@ -1197,7 +1196,7 @@ LangEl *ParseData::makeListProd( Namespace *nspace, const String &listName, Name
 
 LangEl *ParseData::makeOptProd( Namespace *nspace, const String &optName, NamespaceQual *nspaceQual, const String &name )
 {
-	LangEl *prodName = getKlangEl( this, nspace, optName );
+	LangEl *prodName = declareLangEl( this, nspace, optName );
 	prodName->type = LangEl::NonTerm;
 	prodName->isOpt = true;
 
@@ -1313,8 +1312,7 @@ void ParseData::initEmptyScanners()
 
 			/* These do not go in the namespace so so they cannot get declared
 			 * in the declare pass. */
-			LangEl *lel = getKlangEl( this, rootNamespace, name );
-			assert( lel->type == LangEl::Unknown );
+			LangEl *lel = declareLangEl( this, rootNamespace, name );
 			lel->type = LangEl::Term;
 
 			tokenDef->token = lel;

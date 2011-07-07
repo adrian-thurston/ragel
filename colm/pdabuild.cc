@@ -130,18 +130,32 @@ PdaGraph *ProdElList::walk( ParseData *pd )
 }
 
 
-LangEl *getKlangEl( ParseData *pd, Namespace *nspace, const String &data )
+LangEl *declareLangEl( ParseData *pd, Namespace *nspace, const String &data )
 {
     /* If the id is already in the dict, it will be placed in last found. If
      * it is not there then it will be inserted and last found will be set to it. */
     SymbolMapEl *inDict = nspace->symbolMap.find( data );
-    if ( inDict == 0 ) {
-        /* Language element not there. Make the new lang el and insert.. */
-        LangEl *langEl = new LangEl( nspace, data, LangEl::Unknown );
-        inDict = nspace->symbolMap.insert( langEl->name, langEl );
-        pd->langEls.append( langEl );
-    }
-    return inDict->value;
+	if ( inDict != 0 )
+		error() << "'" << data << "' already defined as something else" << endp;
+
+	/* Language element not there. Make the new lang el and insert.. */
+	LangEl *langEl = new LangEl( nspace, data, LangEl::Unknown );
+	inDict = nspace->symbolMap.insert( langEl->name, langEl );
+	pd->langEls.append( langEl );
+
+	return inDict->value;
+}
+
+LangEl *findLangEl( ParseData *pd, Namespace *nspace, const String &data )
+{
+	/* If the id is already in the dict, it will be placed in last found. If
+	 * it is not there then it will be inserted and last found will be set to it. */
+	SymbolMapEl *inDict = nspace->symbolMap.find( data );
+
+	if ( inDict == 0 )
+		error() << "'" << data << "' not declared as anything" << endp;
+
+	return inDict->value;
 }
 
 ProdElList *makeProdElList( LangEl *langEl )
@@ -1180,8 +1194,7 @@ void ParseData::insertUniqueEmptyProductions()
 		/* Get a language element. */
 		char name[20];
 		sprintf(name, "U%li", prodList.length());
-		LangEl *prodName = getKlangEl( this, rootNamespace, name );
-		assert( prodName->type == LangEl::Unknown );
+		LangEl *prodName = declareLangEl( this, rootNamespace, name );
 		prodName->type = LangEl::NonTerm;
 		Definition *newDef = new Definition( InputLoc(), prodName, 
 				0 /* FIXME new VarDef( name, 0 )*/, 
