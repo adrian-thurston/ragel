@@ -115,6 +115,21 @@ int CmpUniqueType::compare( const UniqueType &ut1, const UniqueType &ut2 )
 	return 0;
 }
 
+int CmpUniqueRepeat::compare( const UniqueRepeat &ut1, const UniqueRepeat &ut2 )
+{
+	if ( ut1.repeatType < ut2.repeatType )
+		return -1;
+	else if ( ut1.repeatType > ut2.repeatType )
+		return 1;
+	else {
+		if ( ut1.langEl < ut2.langEl )
+			return -1;
+		else if ( ut1.langEl > ut2.langEl )
+			return 1;
+	}
+
+	return 0;
+}
 
 FsmGraph *VarDef::walk( ParseData *pd )
 {

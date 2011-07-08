@@ -158,10 +158,12 @@ LangEl *findLangEl( ParseData *pd, Namespace *nspace, const String &data )
 	return inDict->value;
 }
 
-ProdElList *makeProdElList( LangEl *langEl )
+ProdElList *ParseData::makeProdElList( LangEl *langEl )
 {
 	ProdElList *prodElList = new ProdElList();
-	prodElList->append( new ProdEl( InputLoc(), langEl ) );
+	UniqueType *uniqueType = findUniqueType( TYPE_TREE, langEl );
+	TypeRef *typeRef = new TypeRef( InputLoc(), uniqueType );
+	prodElList->append( new ProdEl( InputLoc(), typeRef ) );
 	prodElList->tail->langEl = langEl;
 	return prodElList;
 }
@@ -1863,7 +1865,9 @@ PdaTables *ParseData::makePdaTables( PdaGraph *pdaGraph )
 
 void ParseData::prepGrammar()
 {
+	/* This will create language elements. */
 	wrapNonTerminals();
+
 	makeKlangElIds();
 	makeKlangElNames();
 	makeDefinitionNames();

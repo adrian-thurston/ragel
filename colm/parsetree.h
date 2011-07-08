@@ -60,6 +60,7 @@ struct UniqueType;
 struct ObjField;
 struct TransBlock;
 struct CodeBlock;
+struct PdaLiteral;
 typedef struct _PdaRun PdaRun;
 
 /* 
@@ -1255,30 +1256,8 @@ typedef AvlSetEl<IterDef> IterDefSetEl;
 
 
 /*
- * Language features.
+ * Unique Types.
  */
-
-struct UniqueType : public AvlTreeEl<UniqueType>
-{
-	UniqueType( int typeId ) :
-		typeId(typeId), 
-		langEl(0), 
-		iterDef(0) {}
-
-	UniqueType( int typeId, LangEl *langEl ) :
-		typeId(typeId),
-		langEl(langEl),
-		iterDef(0) {}
-
-	UniqueType( int typeId, IterDef *iterDef ) :
-		typeId(typeId),
-		langEl(langEl),
-		iterDef(iterDef) {}
-
-	int typeId;
-	LangEl *langEl;
-	IterDef *iterDef;
-};
 
 /*
  *  type_ref -> qualified_name
@@ -1312,72 +1291,122 @@ struct UniqueType : public AvlTreeEl<UniqueType>
  *  type -> iter_user type
  */
 
+struct UniqueType : public AvlTreeEl<UniqueType>
+{
+	UniqueType( int typeId ) :
+		typeId(typeId), 
+		langEl(0), 
+		iterDef(0) {}
+
+	UniqueType( int typeId, LangEl *langEl ) :
+		typeId(typeId),
+		langEl(langEl),
+		iterDef(0) {}
+
+	UniqueType( int typeId, IterDef *iterDef ) :
+		typeId(typeId),
+		langEl(langEl),
+		iterDef(iterDef) {}
+
+	int typeId;
+	LangEl *langEl;
+	IterDef *iterDef;
+};
+
 struct CmpUniqueType
 {
 	static int compare( const UniqueType &ut1, const UniqueType &ut2 );
 };
 
-
 typedef AvlBasic< UniqueType, CmpUniqueType > UniqueTypeMap;
+
+enum RepeatType {
+	RepeatNone = 1,
+	RepeatRepeat,
+	RepeatList,
+	RepeatOpt,
+};
+
+
+/*
+ * Repeat types.
+ */
+
+struct UniqueRepeat
+	: public AvlTreeEl<UniqueRepeat>
+{
+	UniqueRepeat( RepeatType repeatType, LangEl *langEl ) :
+		repeatType(repeatType),
+		langEl(langEl), declLangEl(0) {}
+
+	RepeatType repeatType;
+	LangEl *langEl;
+	LangEl *declLangEl;
+};
+
+struct CmpUniqueRepeat
+{
+	static int compare( const UniqueRepeat &ut1, const UniqueRepeat &ut2 );
+};
+
+typedef AvlBasic< UniqueRepeat, CmpUniqueRepeat > UniqueRepeatMap;
+
+/*
+ *
+ */
 
 typedef AvlMap< StringVect, int, CmpStrVect > VectorTypeIdMap;
 typedef AvlMapEl< StringVect, int > VectorTypeIdMapEl;
 
 typedef Vector<TypeRef*> TypeRefVect;
 
-enum RepeatType {
-	RepeatRepeat,
-	RepeatList,
-	RepeatOpt,
-	RepeatNone
-};
-
 struct TypeRef
 {
 	/* Qualification and a type name. These require lookup. */
 	TypeRef( const InputLoc &loc, NamespaceQual *nspaceQual, String typeName ) :
-		loc(loc), nspaceQual(nspaceQual), typeName(typeName), iterDef(0),
-		factor(0),
+		loc(loc), nspaceQual(nspaceQual), typeName(typeName), pdaLiteral(0), iterDef(0),
 		isPtr(false), isRef(false), repeatType(RepeatNone),
-		uniqueType(0), searchUniqueType(0) {}
+		nspace(0), uniqueType(0), searchUniqueType(0) {}
+
+	/* Qualification and a type name. These require lookup. */
+	TypeRef( const InputLoc &loc, NamespaceQual *nspaceQual, PdaLiteral *pdaLiteral ) :
+		loc(loc), nspaceQual(nspaceQual), pdaLiteral(pdaLiteral), iterDef(0),
+		isPtr(false), isRef(false), repeatType(RepeatNone),
+		nspace(0), uniqueType(0), searchUniqueType(0) {}
 
 	/* Iterator definition. */
 	TypeRef( const InputLoc &loc, IterDef *iterDef, UniqueType *uniqueType, 
-			UniqueType *searchUniqueType )
-	:
-		loc(loc), nspaceQual(0), iterDef(iterDef), factor(0),
+			UniqueType *searchUniqueType ) :
+		loc(loc), nspaceQual(0), pdaLiteral(0), iterDef(iterDef),
 		isPtr(false), isRef(false), repeatType(RepeatNone),
-		uniqueType(uniqueType), searchUniqueType(searchUniqueType) {}
+		nspace(0), uniqueType(uniqueType), searchUniqueType(searchUniqueType) {}
 
 	/* Unique type is given directly. */
 	TypeRef( const InputLoc &loc, UniqueType *uniqueType ) :
-		loc(loc), nspaceQual(0), iterDef(0), factor(0),
+		loc(loc), nspaceQual(0), pdaLiteral(0), iterDef(0),
 		isPtr(false), isRef(false), repeatType(RepeatNone),
-		uniqueType(uniqueType), searchUniqueType(0) {}
+		nspace(0), uniqueType(uniqueType), searchUniqueType(0) {}
 
-	/* A factor in a pattern. In the case of matches we need a type ref at
-	 * parse time, but factors have not been resolved yet, so this allows us
-	 * to do it on demand. */
-	TypeRef( const InputLoc &loc, NamespaceQual *nspaceQual, ProdEl *factor ) :
-		loc(loc), nspaceQual(nspaceQual), iterDef(0), factor(factor),
-		isPtr(false), isRef(false), repeatType(RepeatNone),
-		uniqueType(0), searchUniqueType(0) {}
+	void resolveRepeat( ParseData *pd );
 
-	void sugaredDecls( ParseData *pd ) const;
-	UniqueType *lookupTypePart( ParseData *pd, NamespaceQual *nspaceQual, 
-			const String &name );
+	UniqueType *lookupTypePart( ParseData *pd,
+			NamespaceQual *nspaceQual, const String &name );
+	UniqueType *lookupTypePart( ParseData *pd, 
+			NamespaceQual *qual, PdaLiteral *pdaLiteral );
+
 	UniqueType *lookupType( ParseData *pd );
 
 	InputLoc loc;
 	NamespaceQual *nspaceQual;
 	String typeName;
+	PdaLiteral *pdaLiteral;
 	IterDef *iterDef;
-	ProdEl *factor;
 	bool isPtr;
 	bool isRef;
 	RepeatType repeatType;
 
 	/* Resolved. */
+	Namespace *nspace;
 	UniqueType *uniqueType;
 	UniqueType *searchUniqueType;
 };

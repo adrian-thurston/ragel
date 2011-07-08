@@ -1126,9 +1126,12 @@ LangEl *ParseData::makeRepeatProd( Namespace *nspace, const String &repeatName, 
 	ProdElList *prodElList1 = new ProdElList;
 
 	/* Build the first production of the repeat. */
-	ProdEl *factor1 = new ProdEl( InputLoc(), false, nspaceQual, 
+	TypeRef *typeRef1 = new TypeRef( InputLoc(), nspaceQual, name );
+	ProdEl *factor1 = new ProdEl( InputLoc(), false, typeRef1, nspaceQual, 
 			name, 0, RepeatNone, false, false );
-	ProdEl *factor2 = new ProdEl( InputLoc(), false, nspaceQual, 
+
+	TypeRef *typeRef2 = new TypeRef( InputLoc(), nspaceQual, repeatName );
+	ProdEl *factor2 = new ProdEl( InputLoc(), false, typeRef2, nspaceQual, 
 			repeatName, 0, RepeatNone, false, false );
 
 	prodElList1->append( factor1 );
@@ -1161,9 +1164,12 @@ LangEl *ParseData::makeListProd( Namespace *nspace, const String &listName, Name
 	prodName->isList = true;
 
 	/* Build the first production of the list. */
-	ProdEl *factor1 = new ProdEl( InputLoc(), false, nspaceQual, 
+	TypeRef *typeRef1 = new TypeRef( InputLoc(), nspaceQual, name );
+	ProdEl *factor1 = new ProdEl( InputLoc(), false, typeRef1, nspaceQual, 
 			name, 0, RepeatNone, false, false );
-	ProdEl *factor2 = new ProdEl( InputLoc(), false, nspaceQual, 
+
+	TypeRef *typeRef2 = new TypeRef( InputLoc(), nspaceQual, listName );
+	ProdEl *factor2 = new ProdEl( InputLoc(), false, typeRef2, nspaceQual, 
 			listName, 0, RepeatNone, false, false );
 
 	ProdElList *prodElList1 = new ProdElList;
@@ -1178,7 +1184,8 @@ LangEl *ParseData::makeListProd( Namespace *nspace, const String &listName, Name
 	prodList.append( newDef1 );
 
 	/* Build the second production of the list. */
-	ProdEl *factor3 = new ProdEl( InputLoc(), false, nspaceQual, 
+	TypeRef *typeRef3 = new TypeRef( InputLoc(), nspaceQual, name );
+	ProdEl *factor3 = new ProdEl( InputLoc(), false, typeRef3, nspaceQual, 
 			name, 0, RepeatNone, false, false );
 
 	ProdElList *prodElList2 = new ProdElList;
@@ -1203,7 +1210,8 @@ LangEl *ParseData::makeOptProd( Namespace *nspace, const String &optName, Namesp
 	ProdElList *prodElList1 = new ProdElList;
 
 	/* Build the first production of the repeat. */
-	ProdEl *factor1 = new ProdEl( InputLoc(), false, nspaceQual, 
+	TypeRef *typeRef1 = new TypeRef( InputLoc(), nspaceQual, name );
+	ProdEl *factor1 = new ProdEl( InputLoc(), false, typeRef1, nspaceQual, 
 			name, 0, RepeatNone, false, false );
 	prodElList1->append( factor1 );
 

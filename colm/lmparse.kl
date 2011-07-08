@@ -283,12 +283,13 @@ pred_token_list: pred_token
 nonterm pred_token
 {
 	ProdEl *factor;
+	TypeRef *typeRef;
 };
 
 pred_token: 
 	region_qual TK_Word 
 	final {
-		$$->factor = new ProdEl( $2->loc, false, $1->nspaceQual,
+		$$->factor = new ProdEl( $2->loc, false, 0, $1->nspaceQual,
 				$2->data, 0, RepeatNone, false, false );
 		pd->resolveReferenceFactor( $$->factor );
 	};
@@ -297,7 +298,7 @@ pred_token:
 	region_qual TK_Literal 
 	final {
 		PdaLiteral *literal = new PdaLiteral( $2->loc, *$2 );
-		$$->factor = new ProdEl( $2->loc, false, $1->nspaceQual,
+		$$->factor = new ProdEl( $2->loc, false, 0, $1->nspaceQual,
 				literal, 0, RepeatNone, false, false );
 		pd->resolveLiteralFactor( $$->factor );
 	};
@@ -616,7 +617,7 @@ pattern_el: opt_label pattern_el_type_or_lit
 			}
 
 			NamespaceQual *qual = new NamespaceQual( namespaceStack.top(), regionStack.top() );
-			TypeRef *typeRef = new TypeRef( InputLoc(), qual, $2->patternItem->factor );
+			TypeRef *typeRef = $2->patternItem->factor->typeRef;
 			ObjField *objField = new ObjField( InputLoc(), typeRef, $1->varRef->name );
 
 			/* Insert it into the field map. */
@@ -638,7 +639,9 @@ nonterm pattern_el_type_or_lit
 
 pattern_el_type_or_lit: region_qual TK_Word opt_repeat
 	final {
-		ProdEl *factor = new ProdEl( $2->loc, false, $1->nspaceQual, 
+		TypeRef *typeRef = new TypeRef( $2->loc, $1->nspaceQual, $2->data );
+		typeRef->repeatType = $3->repeatType;
+		ProdEl *factor = new ProdEl( $2->loc, false, typeRef, $1->nspaceQual, 
 				$2->data, 0, $3->repeatType, $3->opt, $3->repeat );
 		$$->patternItem = new PatternItem( $2->loc, factor, PatternItem::FactorType );
 		patternItemList->append( $$->patternItem );
@@ -647,7 +650,10 @@ pattern_el_type_or_lit: region_qual TK_Word opt_repeat
 pattern_el_type_or_lit: region_qual TK_Literal opt_repeat
 	final {
 		PdaLiteral *literal = new PdaLiteral( $2->loc, *$2 );
-		ProdEl *factor = new ProdEl( $2->loc, false, $1->nspaceQual, 
+		TypeRef *typeRef = new TypeRef( $2->loc, $1->nspaceQual, literal );
+		typeRef->repeatType = $3->repeatType;
+
+		ProdEl *factor = new ProdEl( $2->loc, false, typeRef, $1->nspaceQual, 
 				literal, 0, $3->repeatType, $3->opt, $3->repeat );
 		$$->patternItem = new PatternItem( $2->loc, factor, PatternItem::FactorType );
 		patternItemList->append( $$->patternItem );
@@ -700,7 +706,9 @@ repl_el_list: ;
 repl_el: region_qual TK_Literal
 	final {
 		PdaLiteral *literal = new PdaLiteral( $2->loc, *$2 );
-		ProdEl *factor = new ProdEl( $2->loc, false, $1->nspaceQual, 
+		TypeRef *typeRef = new TypeRef( $2->loc, $1->nspaceQual, literal );
+		typeRef->repeatType = RepeatNone;
+		ProdEl *factor = new ProdEl( $2->loc, false, typeRef, $1->nspaceQual, 
 				literal, 0, RepeatNone, false, false );
 		ReplItem *replItem = new ReplItem( $2->loc, ReplItem::FactorType, factor );
 		replItemList->append( replItem );
@@ -827,7 +835,9 @@ nonterm prod_el
 prod_el: 
 	opt_commit region_qual TK_Word opt_repeat
 	final {
-		$$->factor = new ProdEl( $3->loc, $1->commit, 
+		TypeRef *typeRef = new TypeRef( $3->loc, $2->nspaceQual, $3->data );
+		typeRef->repeatType = $4->repeatType;
+		$$->factor = new ProdEl( $3->loc, $1->commit, typeRef,
 				$2->nspaceQual, $3->data, 0, $4->repeatType, $4->opt, $4->repeat );
 	};
 
@@ -836,7 +846,9 @@ prod_el:
 	final {
 		/* Create a new factor node going to a concat literal. */
 		PdaLiteral *literal = new PdaLiteral( $3->loc, *$3 );
-		$$->factor = new ProdEl( $3->loc, $1->commit, $2->nspaceQual, 
+		TypeRef *typeRef = new TypeRef( $3->loc, $2->nspaceQual, literal );
+		typeRef->repeatType = $4->repeatType;
+		$$->factor = new ProdEl( $3->loc, $1->commit, typeRef, $2->nspaceQual, 
 				literal, 0, $4->repeatType, $4->opt, $4->repeat );
 	};
 

@@ -154,12 +154,10 @@ void ParseData::addProdRHSVars( ObjectDef *localFrame, ProdElList *prodElList )
 	long position = 1;
 	for ( ProdElList::Iter rhsEl = *prodElList; rhsEl.lte(); rhsEl++, position++ ) {
 		if ( rhsEl->type == ProdEl::ReferenceType ) {
-			TypeRef *typeRef = new TypeRef( rhsEl->loc, rhsEl->nspaceQual, rhsEl->refName );
-
 			/* Use an offset of zero. For frame objects we compute the offset on
 			 * demand. */
 			String name( 8, "r%d", position );
-			ObjField *el = new ObjField( InputLoc(), typeRef, name );
+			ObjField *el = new ObjField( InputLoc(), rhsEl->typeRef, name );
 			rhsEl->objField = el;
 
 			/* Right hand side elements are constant. */

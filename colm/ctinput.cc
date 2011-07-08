@@ -228,11 +228,11 @@ LangEl *inputStreamReplGetLangEl( InputStream *is, long *bindId, char **data, lo
 	is->line = is->replItem->loc.line;
 
 	if ( is->replItem->type == ReplItem::FactorType ) {
-		if ( is->replItem->factor->literal != 0 ) {
+		if ( is->replItem->factor->typeRef->pdaLiteral != 0 ) {
 			bool unusedCI;
 			prepareLitString( is->replItem->data, unusedCI, 
-					is->replItem->factor->literal->token.data,
-					is->replItem->factor->literal->token.loc );
+					is->replItem->factor->typeRef->pdaLiteral->token.data,
+					is->replItem->factor->typeRef->pdaLiteral->token.loc );
 
 			*data = is->replItem->data;
 			*length = is->replItem->data.length();

@@ -1375,8 +1375,8 @@ UniqueType *LangTerm::evaluateEmbedString( ParseData *pd, CodeVect &code ) const
 			String result;
 			bool unusedCI;
 			prepareLitString( result, unusedCI, 
-					item->factor->literal->token.data,
-					item->factor->literal->token.loc );
+					item->factor->typeRef->pdaLiteral->token.data,
+					item->factor->typeRef->pdaLiteral->token.loc );
 
 			/* Make sure we have this string. */
 			StringMapEl *mapEl = 0;
@@ -1984,8 +1984,8 @@ void LangStmt::evaluateAccumItems( ParseData *pd, CodeVect &code ) const
 			String result;
 			bool unusedCI;
 			prepareLitString( result, unusedCI, 
-					item->factor->literal->token.data,
-					item->factor->literal->token.loc );
+					item->factor->typeRef->pdaLiteral->token.data,
+					item->factor->typeRef->pdaLiteral->token.loc );
 
 			/* Make sure we have this string. */
 			StringMapEl *mapEl = 0;

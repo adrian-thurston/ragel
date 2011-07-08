@@ -246,34 +246,28 @@ struct ProdEl
 	}; 
 
 	/* Construct with a literal fsm. */
-	ProdEl( const InputLoc &loc, bool commit, NamespaceQual *nspaceQual, 
+	ProdEl( const InputLoc &loc, bool commit, TypeRef *typeRef, NamespaceQual *nspaceQual, 
 			PdaLiteral *literal, int priorVal, RepeatType repeatType, bool opt, bool repeat ) :
-		loc(loc), commit(commit), nspaceQual(nspaceQual), 
-		literal(literal), langEl(0), priorVal(priorVal), repeatType(repeatType),
+		commit(commit), typeRef(typeRef),
+		langEl(0), priorVal(priorVal), repeatType(repeatType),
 		nspace(0), type(LiteralType), objField(0) {}
 
 	/* Construct with a reference to a var def. */
-	ProdEl( const InputLoc &loc, bool commit, NamespaceQual *nspaceQual, 
+	ProdEl( const InputLoc &loc, bool commit, TypeRef *typeRef, NamespaceQual *nspaceQual, 
 			const String &refName, int priorVal, RepeatType repeatType, bool opt, bool repeat ) :
-		loc(loc), commit(commit), nspaceQual(nspaceQual), refName(refName),
-		literal(0), langEl(0), priorVal(priorVal), repeatType(repeatType),
+		commit(commit), typeRef(typeRef),
+		langEl(0), priorVal(priorVal), repeatType(repeatType),
 		nspace(0), type(ReferenceType), objField(0) {}
 
-	ProdEl( const InputLoc &loc, LangEl *langEl ) :
-		loc(loc), commit(false), nspaceQual(0), literal(0), langEl(langEl), 
+	ProdEl( const InputLoc &loc, TypeRef *typeRef ) :
+		commit(false), typeRef(typeRef), langEl(0), 
 		priorVal(0), repeatType(RepeatNone), nspace(0),
 		type(ReferenceType), objField(0) {}
 
-	ProdEl() :
-		commit(false), nspaceQual(0), 
-		literal(0), langEl(0), priorVal(0), repeatType(RepeatNone),
-		nspace(0), type(LiteralType), objField(0) {}
-
-	InputLoc loc;
 	bool commit;
-	NamespaceQual *nspaceQual;
-	String refName;
-	PdaLiteral *literal;
+
+	TypeRef *typeRef;
+
 	LangEl *langEl;
 	int priorVal;
 	RepeatType repeatType;
@@ -288,7 +282,7 @@ struct ProdElList : public DList<ProdEl>
 	PdaGraph *walk( ParseData *pd );
 };
 
-/* Some literal machine. Can be a number or literal string. */
+/* This should be renamed. It is a literal string in a type reference. */
 struct PdaLiteral
 {
 	PdaLiteral( const InputLoc &loc, const Token &token )
@@ -298,7 +292,6 @@ struct PdaLiteral
 	Token token;
 	long value;
 };
-
 
 /* Forwards. */
 using std::ostream;
@@ -509,6 +502,7 @@ struct ParseData
 	void fillNameIndex( NameInst **nameIndex, NameInst *from );
 	NameInst **makeNameIndex( NameInst *rootName );
 
+
 	void printNameTree( NameInst *rootName );
 	void printNameIndex( NameInst **nameIndex );
 
@@ -656,6 +650,7 @@ struct ParseData
 	KeyOps thisKeyOps;
 
 	/* CONTEXT FREE */
+	ProdElList *makeProdElList( LangEl *langEl );
 	void wrapNonTerminals();
 	void makeDefinitionNames();
 	void noUndefindKlangEls();
@@ -901,6 +896,7 @@ struct ParseData
 	UniqueType *uniqueTypeAny;
 
 	UniqueTypeMap uniqeTypeMap;
+	UniqueRepeatMap uniqeRepeatMap;
 
 	void initStrObject();
 	void initStreamObject();

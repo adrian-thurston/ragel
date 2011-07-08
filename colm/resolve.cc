@@ -33,7 +33,7 @@ UniqueType *TypeRef::lookupTypePart( ParseData *pd,
 		NamespaceQual *qual, const String &name )
 {
 	/* Lookup up the qualifiction and then the name. */
-	Namespace *nspace = qual->getQual( pd );
+	nspace = qual->getQual( pd );
 
 	if ( nspace == 0 )
 		error(loc) << "do not have region for resolving reference" << endp;
@@ -53,41 +53,82 @@ UniqueType *TypeRef::lookupTypePart( ParseData *pd,
 	return 0;
 }
 
-void TypeRef::sugaredDecls( ParseData *pd ) const
+UniqueType *TypeRef::lookupTypePart( ParseData *pd, 
+		NamespaceQual *qual, PdaLiteral *pdaLiteral )
 {
-	/* Look for the production's associated region. */
-	Namespace *nspace = nspaceQual->getQual( pd );
+	/* Lookup up the qualifiction and then the name. */
+	nspace = qual->getQual( pd );
 
 	if ( nspace == 0 )
-		error(loc) << "do not have namespace for resolving reference" << endp;
+		error(loc) << "do not have region for resolving reference" << endp;
+
+	/* Interpret escape sequences and remove quotes. */
+	bool unusedCI;
+	String interp;
+	prepareLitString( interp, unusedCI, pdaLiteral->token.data, 
+			pdaLiteral->token.loc );
+
+	while ( nspace != 0 ) {
+		LiteralDictEl *ldel = nspace->literalDict.find( interp );
+
+		if ( ldel != 0 ) {
+			long typeId = ( isPtr ? TYPE_PTR : ( isRef ? TYPE_REF : TYPE_TREE ) );
+			return pd->findUniqueType( typeId, ldel->value->token );
+		}
+
+		nspace = nspace->parentNamespace;
+	}
+
+	error(loc) << "unknown type in typeof expression" << endp;
+	return 0;
+}
+
+
+
+void TypeRef::resolveRepeat( ParseData *pd )
+{
+	if ( uniqueType->typeId != TYPE_TREE )
+		error() << "cannot repeat non-tree type" << endp;
+
+	UniqueRepeat searchKey( repeatType, uniqueType->langEl );
+	UniqueRepeat *uniqueRepeat = pd->uniqeRepeatMap.find( &searchKey );
+	if ( uniqueRepeat == 0 ) {
+		uniqueRepeat = new UniqueRepeat( repeatType, uniqueType->langEl );
+		pd->uniqeRepeatMap.insert( uniqueRepeat );
+
+		LangEl *declLangEl = 0;
 	
-	if ( repeatType == RepeatRepeat ) {
-		/* If the factor is a repeat, create the repeat element and link the
-		 * factor to it. */
-		String repeatName( 128, "_repeat_%s", typeName.data );
+		switch ( repeatType ) {
+			case RepeatRepeat: {
+				/* If the factor is a repeat, create the repeat element and link the
+				 * factor to it. */
+				String repeatName( 128, "_repeat_%s", typeName.data );
+				declLangEl = pd->makeRepeatProd( nspace, repeatName, nspaceQual, typeName );
+				break;
+			}
+			case RepeatList: {
+				/* If the factor is a repeat, create the repeat element and link the
+				 * factor to it. */
+				String listName( 128, "_list_%s", typeName.data );
+				declLangEl = pd->makeListProd( nspace, listName, nspaceQual, typeName );
+				break;
+			}
+			case RepeatOpt: {
+				/* If the factor is an opt, create the opt element and link the factor
+				 * to it. */
+				String optName( 128, "_opt_%s", typeName.data );
+				declLangEl = pd->makeOptProd( nspace, optName, nspaceQual, typeName );
+				break;
+			}
 
-	  	SymbolMapEl *inDict = nspace->symbolMap.find( repeatName );
-	    if ( inDict == 0 )
-			pd->makeRepeatProd( nspace, repeatName, nspaceQual, typeName );
-	}
-	else if ( repeatType == RepeatList ) {
-		/* If the factor is a repeat, create the repeat element and link the
-		 * factor to it. */
-		String listName( 128, "_list_%s", typeName.data );
+			case RepeatNone:
+				break;
+		}
 
-		SymbolMapEl *inDict = nspace->symbolMap.find( listName );
-	    if ( inDict == 0 )
-			pd->makeListProd( nspace, listName, nspaceQual, typeName );
+		uniqueRepeat->declLangEl = declLangEl;
 	}
-	else if ( repeatType == RepeatOpt ) {
-		/* If the factor is an opt, create the opt element and link the factor
-		 * to it. */
-		String optName( 128, "_opt_%s", typeName.data );
 
-		SymbolMapEl *inDict = nspace->symbolMap.find( optName );
-	    if ( inDict == 0 )
-			pd->makeOptProd( nspace, optName, nspaceQual, typeName );
-	}
+	uniqueType = pd->findUniqueType( TYPE_TREE, uniqueRepeat->declLangEl );
 }
 
 
@@ -95,30 +136,56 @@ UniqueType *TypeRef::lookupType( ParseData *pd )
 {
 	if ( uniqueType != 0 )
 		return uniqueType;
-	
-	sugaredDecls( pd );
 
 //	cout << __PRETTY_FUNCTION__ << " " << typeName.data << " " << this << endl;
 //	if ( iterDef != 0 )
 //		uniqueType = pd->findUniqueType( TYPE_ITER, iterDef );
 
-	if ( factor != 0 )
-		uniqueType = pd->findUniqueType( TYPE_TREE, factor->langEl );
-	else {
-		String name = typeName;
-		if ( repeatType == RepeatOpt )
-			name.setAs( 32, "_opt_%s", name.data );
-		else if ( repeatType == RepeatRepeat )
-			name.setAs( 32, "_repeat_%s", name.data );
-		else if ( repeatType == RepeatList )
-			name.setAs( 32, "_list_%s", name.data );
+
+//		String name = typeName;
+//		if ( repeatType == RepeatOpt )
+//			name.setAs( 32, "_opt_%s", name.data );
+//		else if ( repeatType == RepeatRepeat )
+//			name.setAs( 32, "_repeat_%s", name.data );
+//		else if ( repeatType == RepeatList )
+//			name.setAs( 32, "_list_%s", name.data );
 
 		/* Not an iterator. May be a reference. */
-		uniqueType = lookupTypePart( pd, nspaceQual, name );
-	}
+		if ( pdaLiteral != 0 )
+			uniqueType = lookupTypePart( pd, nspaceQual, pdaLiteral );
+		else
+			uniqueType = lookupTypePart( pd, nspaceQual, typeName );
+
+		if ( repeatType != RepeatNone )
+			resolveRepeat( pd );
 
 	return uniqueType;
 }
+
+void ParseData::resolveLiteralFactor( ProdEl *fact )
+{
+	fact->typeRef->lookupType( this );
+	fact->langEl = fact->typeRef->uniqueType->langEl;
+}
+
+void ParseData::resolveReferenceFactor( ProdEl *fact )
+{
+	fact->typeRef->lookupType( this );
+	fact->langEl = fact->typeRef->uniqueType->langEl;
+}
+
+void ParseData::resolveFactor( ProdEl *fact )
+{
+	switch ( fact->type ) {
+		case ProdEl::LiteralType:
+			resolveLiteralFactor( fact );
+			break;
+		case ProdEl::ReferenceType:
+			resolveReferenceFactor( fact );
+			break;
+	}
+}
+
 
 
 void LangTerm::resolve( ParseData *pd ) const
@@ -425,94 +492,6 @@ void ParseData::resolveUses()
 			LangEl *langEl = findLangEl( this, nspace, lel->objectDefUses );
 			lel->objectDef = langEl->objectDef;
 		}
-	}
-}
-
-void ParseData::resolveLiteralFactor( ProdEl *fact )
-{
-	/* Interpret escape sequences and remove quotes. */
-	bool unusedCI;
-	String interp;
-	prepareLitString( interp, unusedCI, fact->literal->token.data, 
-			fact->literal->token.loc );
-
-	//cerr << "resolving literal: " << fact->literal->token << endl;
-
-	/* Look for the production's associated region. */
-	Namespace *nspace = fact->nspaceQual->getQual( this );
-
-	if ( nspace == 0 )
-		error(fact->loc) << "do not have region for resolving literal" << endp;
-
-	LiteralDictEl *ldel = nspace->literalDict.find( interp );
-	if ( ldel == 0 )
-		cerr << "could not resolve literal: " << fact->literal->token << endp;
-
-	TokenDef *tokenDef = ldel->value;
-	fact->langEl = tokenDef->token;
-}
-
-void ParseData::resolveReferenceFactor( ProdEl *fact )
-{
-	/* Look for the production's associated region. */
-	Namespace *nspace = fact->nspaceQual->getQual( this );
-
-	if ( nspace == 0 )
-		error(fact->loc) << "do not have namespace for resolving reference" << endp;
-	
-	fact->nspace = nspace;
-
-	/* Look up the language element in the region. */
-	LangEl *langEl = findLangEl( this, nspace, fact->refName );
-
-	if ( fact->repeatType == RepeatRepeat ) {
-		/* If the factor is a repeat, create the repeat element and link the
-		 * factor to it. */
-		String repeatName( 32, "_repeat_%s", fact->refName.data );
-
-    	SymbolMapEl *inDict = nspace->symbolMap.find( repeatName );
-	    if ( inDict != 0 )
-			fact->langEl = inDict->value;
-		else
-			fact->langEl = makeRepeatProd( nspace, repeatName, fact->nspaceQual, fact->refName );
-	}
-	else if ( fact->repeatType == RepeatList ) {
-		/* If the factor is a repeat, create the repeat element and link the
-		 * factor to it. */
-		String listName( 32, "_list_%s", fact->refName.data );
-
-    	SymbolMapEl *inDict = nspace->symbolMap.find( listName );
-	    if ( inDict != 0 )
-			fact->langEl = inDict->value;
-		else
-			fact->langEl = makeListProd( nspace, listName, fact->nspaceQual, fact->refName );
-	}
-	else if ( fact->repeatType == RepeatOpt ) {
-		/* If the factor is an opt, create the opt element and link the factor
-		 * to it. */
-		String optName( 32, "_opt_%s", fact->refName.data );
-
-    	SymbolMapEl *inDict = nspace->symbolMap.find( optName );
-	    if ( inDict != 0 )
-			fact->langEl = inDict->value;
-		else
-			fact->langEl = makeOptProd( nspace, optName, fact->nspaceQual, fact->refName );
-	}
-	else {
-		/* The factor is not a repeat. Link to the language element. */
-		fact->langEl = langEl;
-	}
-}
-
-void ParseData::resolveFactor( ProdEl *fact )
-{
-	switch ( fact->type ) {
-		case ProdEl::LiteralType:
-			resolveLiteralFactor( fact );
-			break;
-		case ProdEl::ReferenceType:
-			resolveReferenceFactor( fact );
-			break;
 	}
 }
 
