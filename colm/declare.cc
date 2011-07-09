@@ -304,3 +304,33 @@ void Namespace::declare( ParseData *pd )
 	}
 }
 
+void ParseData::setPrecedence()
+{
+	for ( PredDeclList::Iter predDecl = predDeclList; predDecl != 0; predDecl++ ) {
+		predDecl->typeRef->lookupType( this );
+
+		LangEl *langEl = predDecl->typeRef->uniqueType->langEl;
+		langEl->predType = predDecl->predType;
+		langEl->predValue = predDecl->predValue;
+	}
+}
+
+void ParseData::typeDeclaration()
+{
+	/*
+	 * Type Declaration.
+	 */
+	rootNamespace->declare( this );
+
+	/* Fill any empty scanners with a default token. */
+	initEmptyScanners();
+
+	/* Create the default scanner which will return single characters for us
+	 * when we have no other scanner */
+	createDefaultScanner();
+
+	declareBaseKlangEls();
+	initUniqueTypes();
+
+	setPrecedence();
+}

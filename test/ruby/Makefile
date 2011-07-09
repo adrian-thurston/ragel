@@ -1,34 +1,31 @@
-#
-#   Copyright 2008 Adrian Thurston <thurston@complang.org>
-#
+SUBDIRS = 
 
-#   This file is part of Colm.
-#
-#   Colm is free software; you can redistribute it and/or modify
-#   it under the terms of the GNU General Public License as published by
-#   the Free Software Foundation; either version 2 of the License, or
-#   (at your option) any later version.
-#
-#   Colm is distributed in the hope that it will be useful,
-#   but WITHOUT ANY WARRANTY; without even the implied warranty of
-#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#   GNU General Public License for more details.
-#
-#   You should have received a copy of the GNU General Public License
-#   along with Colm; if not, write to the Free Software
-#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+TESTS = \
+	ruby.lm
 
+DIFFS = \
+	ruby01.rb.diff
 
-SRC = $(wildcard *.lm)
-BIN = $(SRC:%.lm=%.bin)
-COLM = ../../colm/colm
+all: Makefile $(DIFFS) $(SUBDIRS)
 
-all: $(BIN)
+.PHONY: clean $(SUBDIRS:%=%-clean)
+clean: $(SUBDIRS:%=%-clean)
+	rm -f *.bin
+$(SUBDIRS:%=%-clean):
+	cd $(@:%-clean=%) && $(MAKE) clean
 
-$(BIN): $(COLM)
+.PHONY: $(SUBDIRS)
+$(SUBDIRS):
+	cd $@ && $(MAKE)
 
-$(BIN): %.bin: %.lm
-	$(COLM) $<
+Makefile: ../genmf TESTS
+	../genmf > Makefile
 
-clean:
-	rm -f *.cpp *.bin
+ruby01.rb.diff: ruby01.rb.out ruby01.rb.exp
+	@diff -u ruby01.rb.exp ruby01.rb.out > ruby01.rb.diff || ( cat ruby01.rb.diff; rm ruby01.rb.diff )
+
+ruby01.rb.out: ruby.bin
+	./ruby.bin  < ruby01.rb.in > ruby01.rb.out
+
+ruby.bin: ruby.lm ../../colm/colm
+	../../colm/colm ruby.lm

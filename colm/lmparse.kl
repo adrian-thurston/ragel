@@ -270,15 +270,9 @@ pred_type: KW_Nonassoc final { predType = PredNonassoc; };
 
 pred_token_list: pred_token_list ',' pred_token 
 	final {
-		$3->factor->langEl->predType = predType;
-		$3->factor->langEl->predValue = pd->predValue;
 	};
 
-pred_token_list: pred_token
-	final {
-		$1->factor->langEl->predType = predType;
-		$1->factor->langEl->predValue = pd->predValue;
-	};
+pred_token_list: pred_token;
 
 nonterm pred_token
 {
@@ -289,16 +283,20 @@ nonterm pred_token
 pred_token: 
 	region_qual TK_Word 
 	final {
-		$$->factor = new ProdEl( ProdEl::ReferenceType, $2->loc, false, 0, 0 );
-		pd->resolveFactor( $$->factor );
+		TypeRef *typeRef = new TypeRef( $2->loc, $1->nspaceQual, $2->data );
+
+		PredDecl *predDecl = new PredDecl( typeRef, predType, pd->predValue );
+		pd->predDeclList.append( predDecl );
 	};
 
 pred_token: 
 	region_qual TK_Literal 
 	final {
 		PdaLiteral *literal = new PdaLiteral( $2->loc, *$2 );
-		$$->factor = new ProdEl( ProdEl::LiteralType, $2->loc, false, 0, 0 );
-		pd->resolveFactor( $$->factor );
+		TypeRef *typeRef = new TypeRef( $2->loc, $1->nspaceQual, literal );
+
+		PredDecl *predDecl = new PredDecl( typeRef, predType, pd->predValue );
+		pd->predDeclList.append( predDecl );
 	};
 
 cfl_def: cfl_def_head obj_var_list properties_list cfl_prod_list

@@ -86,7 +86,27 @@ typedef Vector< ProdEl* > FactorVect;
 typedef AvlMap<String, long, CmpStr> StringMap;
 typedef AvlMapEl<String, long> StringMapEl;
 
-enum PredType { PredLeft, PredRight, PredNonassoc, PredNone };
+enum PredType { 
+	PredLeft,
+	PredRight,
+	PredNonassoc,
+	PredNone
+};
+
+struct PredDecl
+{
+	PredDecl( TypeRef *typeRef, PredType predType, long predValue )
+		: typeRef(typeRef), predType(predType), predValue(predValue)
+	{}
+
+	TypeRef *typeRef;
+	PredType predType;
+	long predValue;
+
+	PredDecl *prev, *next;
+};
+
+typedef DList<PredDecl> PredDeclList;
 
 /* Graph dictionary. */
 struct Definition 
@@ -649,6 +669,10 @@ struct ParseData
 	void makeKlangElNames();
 	void makeTerminalWrappers();
 	void makeEofElements();
+	void setPrecedence();
+
+	void typeDeclaration();
+	void typeResolve();
 
 	/* Parser generation. */
 	void advanceReductions( PdaGraph *pdaGraph );
@@ -816,6 +840,8 @@ struct ParseData
 
 	/* Dumping. */
 	DotItemIndex dotItemIndex;
+
+	PredDeclList predDeclList;
 
 	/* The name of the file the fsm is from, and the spec name. */
 	// EXISTS IN RL: char *fileName; 

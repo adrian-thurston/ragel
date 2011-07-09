@@ -1408,41 +1408,11 @@ void ParseData::semanticAnalysis()
 	beginProcessing();
 	initKeyOps();
 
-	/*
-	 * Type Declaration.
-	 */
-	rootNamespace->declare( this );
+	/* Type declaration. */
+	typeDeclaration();
 
-	/* Fill any empty scanners with a default token. */
-	initEmptyScanners();
-
-	/* Create the default scanner which will return single characters for us
-	 * when we have no other scanner */
-	createDefaultScanner();
-
-	declareBaseKlangEls();
-	initUniqueTypes();
-
-	/*
-	 * Type Resolving.
-	 */
-
-	/* Resolve uses statements. */
-	resolveUses();
-
-	/* Resolve pattern and replacement elements. */
-	resolvePatternEls();
-	resolveReplacementEls();
-	resolveAccumEls();
-
-	/* This needs to happen before the scanner is built. */
-	resolveProductionEls();
-
-	resolveParseTree();
-
-	makeTerminalWrappers();
-	makeEofElements();
-	resolveGenericTypes();
+	/* Type resolving. */
+	typeResolve();
 
 	/*
 	 * Parsers

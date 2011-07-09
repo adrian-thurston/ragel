@@ -562,3 +562,26 @@ void ParseData::resolveGenericTypes()
 	}
 }
 
+void ParseData::typeResolve()
+{
+	/*
+	 * Type Resolving.
+	 */
+
+	/* Resolve uses statements. */
+	resolveUses();
+
+	/* Resolve pattern and replacement elements. */
+	resolvePatternEls();
+	resolveReplacementEls();
+	resolveAccumEls();
+
+	/* This needs to happen before the scanner is built. */
+	resolveProductionEls();
+
+	resolveParseTree();
+
+	makeTerminalWrappers();
+	makeEofElements();
+	resolveGenericTypes();
+}

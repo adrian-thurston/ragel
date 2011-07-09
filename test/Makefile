@@ -1,4 +1,4 @@
-SUBDIRS =  python html xml http cxx
+SUBDIRS =  python html xml http cxx ruby
 
 TESTS = \
 	backtrack1.lm \

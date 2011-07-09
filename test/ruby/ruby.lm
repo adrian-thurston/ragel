@@ -565,7 +565,7 @@ def variable
 token ws_no_nl
 	/[ \t]+[^ \t\n]/
 	{
-		send( make_token( typeid ws_no_nl, pull(stdin, match_length-1) ) )
+		input.push( make_token( typeid ws_no_nl input.pull(match_length-1) ) )
 	}
 
 def method_call
@@ -598,7 +598,7 @@ def paren_args
 # Grammar finished
 #
 
-ruby R = parse ruby(stdin)
+parse R: ruby(stdin)
 
 print_xml( R )
 
