@@ -1127,12 +1127,10 @@ LangEl *ParseData::makeRepeatProd( Namespace *nspace, const String &repeatName, 
 
 	/* Build the first production of the repeat. */
 	TypeRef *typeRef1 = new TypeRef( InputLoc(), nspaceQual, name );
-	ProdEl *factor1 = new ProdEl( InputLoc(), false, typeRef1, nspaceQual, 
-			name, 0, RepeatNone, false, false );
+	ProdEl *factor1 = new ProdEl( ProdEl::ReferenceType, InputLoc(), false, typeRef1, 0 );
 
 	TypeRef *typeRef2 = new TypeRef( InputLoc(), nspaceQual, repeatName );
-	ProdEl *factor2 = new ProdEl( InputLoc(), false, typeRef2, nspaceQual, 
-			repeatName, 0, RepeatNone, false, false );
+	ProdEl *factor2 = new ProdEl( ProdEl::ReferenceType, InputLoc(), false, typeRef2, 0 );
 
 	prodElList1->append( factor1 );
 	prodElList1->append( factor2 );
@@ -1165,12 +1163,10 @@ LangEl *ParseData::makeListProd( Namespace *nspace, const String &listName, Name
 
 	/* Build the first production of the list. */
 	TypeRef *typeRef1 = new TypeRef( InputLoc(), nspaceQual, name );
-	ProdEl *factor1 = new ProdEl( InputLoc(), false, typeRef1, nspaceQual, 
-			name, 0, RepeatNone, false, false );
+	ProdEl *factor1 = new ProdEl( ProdEl::ReferenceType, InputLoc(), false, typeRef1, 0 );
 
 	TypeRef *typeRef2 = new TypeRef( InputLoc(), nspaceQual, listName );
-	ProdEl *factor2 = new ProdEl( InputLoc(), false, typeRef2, nspaceQual, 
-			listName, 0, RepeatNone, false, false );
+	ProdEl *factor2 = new ProdEl( ProdEl::ReferenceType, InputLoc(), false, typeRef2, 0 );
 
 	ProdElList *prodElList1 = new ProdElList;
 	prodElList1->append( factor1 );
@@ -1185,8 +1181,7 @@ LangEl *ParseData::makeListProd( Namespace *nspace, const String &listName, Name
 
 	/* Build the second production of the list. */
 	TypeRef *typeRef3 = new TypeRef( InputLoc(), nspaceQual, name );
-	ProdEl *factor3 = new ProdEl( InputLoc(), false, typeRef3, nspaceQual, 
-			name, 0, RepeatNone, false, false );
+	ProdEl *factor3 = new ProdEl( ProdEl::ReferenceType, InputLoc(), false, typeRef3, 0 );
 
 	ProdElList *prodElList2 = new ProdElList;
 	prodElList2->append( factor3 );
@@ -1211,8 +1206,7 @@ LangEl *ParseData::makeOptProd( Namespace *nspace, const String &optName, Namesp
 
 	/* Build the first production of the repeat. */
 	TypeRef *typeRef1 = new TypeRef( InputLoc(), nspaceQual, name );
-	ProdEl *factor1 = new ProdEl( InputLoc(), false, typeRef1, nspaceQual, 
-			name, 0, RepeatNone, false, false );
+	ProdEl *factor1 = new ProdEl( ProdEl::ReferenceType, InputLoc(), false, typeRef1, 0 );
 	prodElList1->append( factor1 );
 
 	Definition *newDef1 = new Definition( InputLoc(),

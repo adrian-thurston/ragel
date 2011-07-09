@@ -289,8 +289,7 @@ nonterm pred_token
 pred_token: 
 	region_qual TK_Word 
 	final {
-		$$->factor = new ProdEl( $2->loc, false, 0, $1->nspaceQual,
-				$2->data, 0, RepeatNone, false, false );
+		$$->factor = new ProdEl( ProdEl::ReferenceType, $2->loc, false, 0, 0 );
 		pd->resolveReferenceFactor( $$->factor );
 	};
 
@@ -298,8 +297,7 @@ pred_token:
 	region_qual TK_Literal 
 	final {
 		PdaLiteral *literal = new PdaLiteral( $2->loc, *$2 );
-		$$->factor = new ProdEl( $2->loc, false, 0, $1->nspaceQual,
-				literal, 0, RepeatNone, false, false );
+		$$->factor = new ProdEl( ProdEl::LiteralType, $2->loc, false, 0, 0 );
 		pd->resolveLiteralFactor( $$->factor );
 	};
 
@@ -641,8 +639,7 @@ pattern_el_type_or_lit: region_qual TK_Word opt_repeat
 	final {
 		TypeRef *typeRef = new TypeRef( $2->loc, $1->nspaceQual, $2->data );
 		typeRef->repeatType = $3->repeatType;
-		ProdEl *factor = new ProdEl( $2->loc, false, typeRef, $1->nspaceQual, 
-				$2->data, 0, $3->repeatType, $3->opt, $3->repeat );
+		ProdEl *factor = new ProdEl( ProdEl::ReferenceType, $2->loc, false, typeRef, 0 );
 		$$->patternItem = new PatternItem( $2->loc, factor, PatternItem::FactorType );
 		patternItemList->append( $$->patternItem );
 	};
@@ -653,8 +650,7 @@ pattern_el_type_or_lit: region_qual TK_Literal opt_repeat
 		TypeRef *typeRef = new TypeRef( $2->loc, $1->nspaceQual, literal );
 		typeRef->repeatType = $3->repeatType;
 
-		ProdEl *factor = new ProdEl( $2->loc, false, typeRef, $1->nspaceQual, 
-				literal, 0, $3->repeatType, $3->opt, $3->repeat );
+		ProdEl *factor = new ProdEl( ProdEl::ReferenceType, $2->loc, false, typeRef, 0 );
 		$$->patternItem = new PatternItem( $2->loc, factor, PatternItem::FactorType );
 		patternItemList->append( $$->patternItem );
 	};
@@ -708,8 +704,7 @@ repl_el: region_qual TK_Literal
 		PdaLiteral *literal = new PdaLiteral( $2->loc, *$2 );
 		TypeRef *typeRef = new TypeRef( $2->loc, $1->nspaceQual, literal );
 		typeRef->repeatType = RepeatNone;
-		ProdEl *factor = new ProdEl( $2->loc, false, typeRef, $1->nspaceQual, 
-				literal, 0, RepeatNone, false, false );
+		ProdEl *factor = new ProdEl( ProdEl::LiteralType, $2->loc, false, typeRef, 0 );
 		ReplItem *replItem = new ReplItem( $2->loc, ReplItem::FactorType, factor );
 		replItemList->append( replItem );
 	};
@@ -760,7 +755,7 @@ accum_el_list: ;
 #	final {
 #		PdaLiteral *literal = new PdaLiteral( $2->loc, *$2 );
 #		ProdEl *factor = new ProdEl( $2->loc, false, $1->nspaceQual, 
-#				literal, 0, RepeatNone, false, false );
+#				literal, 0 );
 #		ReplItem *replItem = new ReplItem( $2->loc, ReplItem::FactorType, factor );
 #		replItemList->append( replItem );
 #	};
@@ -806,7 +801,7 @@ string_el_list: ;
 #	final {
 #		PdaLiteral *literal = new PdaLiteral( $2->loc, *$2 );
 #		ProdEl *factor = new ProdEl( $2->loc, false, $1->nspaceQual, 
-#				literal, 0, RepeatNone, false, false );
+#				literal, 0 );
 #		ReplItem *replItem = new ReplItem( $2->loc, ReplItem::FactorType, factor );
 #		replItemList->append( replItem );
 #	};
@@ -837,8 +832,7 @@ prod_el:
 	final {
 		TypeRef *typeRef = new TypeRef( $3->loc, $2->nspaceQual, $3->data );
 		typeRef->repeatType = $4->repeatType;
-		$$->factor = new ProdEl( $3->loc, $1->commit, typeRef,
-				$2->nspaceQual, $3->data, 0, $4->repeatType, $4->opt, $4->repeat );
+		$$->factor = new ProdEl( ProdEl::ReferenceType, $3->loc, $1->commit, typeRef, 0 );
 	};
 
 prod_el: 
@@ -848,8 +842,7 @@ prod_el:
 		PdaLiteral *literal = new PdaLiteral( $3->loc, *$3 );
 		TypeRef *typeRef = new TypeRef( $3->loc, $2->nspaceQual, literal );
 		typeRef->repeatType = $4->repeatType;
-		$$->factor = new ProdEl( $3->loc, $1->commit, typeRef, $2->nspaceQual, 
-				literal, 0, $4->repeatType, $4->opt, $4->repeat );
+		$$->factor = new ProdEl( ProdEl::LiteralType, $3->loc, $1->commit, typeRef, 0 );
 	};
 
 nonterm opt_repeat

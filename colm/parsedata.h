@@ -245,23 +245,15 @@ struct ProdEl
 		ReferenceType
 	}; 
 
-	/* Construct with a literal fsm. */
-	ProdEl( const InputLoc &loc, bool commit, TypeRef *typeRef, NamespaceQual *nspaceQual, 
-			PdaLiteral *literal, int priorVal, RepeatType repeatType, bool opt, bool repeat ) :
-		commit(commit), typeRef(typeRef),
-		langEl(0), priorVal(priorVal), repeatType(repeatType),
-		nspace(0), type(LiteralType), objField(0) {}
-
 	/* Construct with a reference to a var def. */
-	ProdEl( const InputLoc &loc, bool commit, TypeRef *typeRef, NamespaceQual *nspaceQual, 
-			const String &refName, int priorVal, RepeatType repeatType, bool opt, bool repeat ) :
+	ProdEl( Type type, const InputLoc &loc, bool commit, TypeRef *typeRef, int priorVal ) :
 		commit(commit), typeRef(typeRef),
-		langEl(0), priorVal(priorVal), repeatType(repeatType),
-		nspace(0), type(ReferenceType), objField(0) {}
+		langEl(0), priorVal(priorVal),
+		type(type), objField(0) {}
 
 	ProdEl( const InputLoc &loc, TypeRef *typeRef ) :
 		commit(false), typeRef(typeRef), langEl(0), 
-		priorVal(0), repeatType(RepeatNone), nspace(0),
+		priorVal(0), 
 		type(ReferenceType), objField(0) {}
 
 	bool commit;
@@ -270,8 +262,6 @@ struct ProdEl
 
 	LangEl *langEl;
 	int priorVal;
-	RepeatType repeatType;
-	Namespace *nspace;
 	Type type;
 	ObjField *objField;
 	ProdEl *prev, *next;
