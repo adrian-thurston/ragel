@@ -1110,8 +1110,7 @@ void ParseData::createDefaultScanner()
 
 	/* Now create the one and only token -> "<chr>" / any /  */
 	name = "___DEFAULT_SCANNER_CHR";
-	defaultCharKlangEl = declareLangEl( this, defaultNamespace, name );
-	defaultCharKlangEl->type = LangEl::Term;
+	defaultCharKlangEl = addLangEl( this, defaultNamespace, name, LangEl::Term );
 
 	tokenDef->token = defaultCharKlangEl;
 	defaultCharKlangEl->tokenDef = tokenDef;
@@ -1119,8 +1118,7 @@ void ParseData::createDefaultScanner()
 
 LangEl *ParseData::makeRepeatProd( Namespace *nspace, const String &repeatName, NamespaceQual *nspaceQual, const String &name )
 {
-	LangEl *prodName = declareLangEl( this, nspace, repeatName );
-	prodName->type = LangEl::NonTerm;
+	LangEl *prodName = addLangEl( this, nspace, repeatName, LangEl::NonTerm );
 	prodName->isRepeat = true;
 
 	ProdElList *prodElList1 = new ProdElList;
@@ -1129,7 +1127,8 @@ LangEl *ParseData::makeRepeatProd( Namespace *nspace, const String &repeatName, 
 	TypeRef *typeRef1 = new TypeRef( InputLoc(), nspaceQual, name );
 	ProdEl *factor1 = new ProdEl( ProdEl::ReferenceType, InputLoc(), false, typeRef1, 0 );
 
-	TypeRef *typeRef2 = new TypeRef( InputLoc(), nspaceQual, repeatName );
+	UniqueType *prodNameUT = findUniqueType( TYPE_TREE, prodName );
+	TypeRef *typeRef2 = new TypeRef( InputLoc(), prodNameUT );
 	ProdEl *factor2 = new ProdEl( ProdEl::ReferenceType, InputLoc(), false, typeRef2, 0 );
 
 	prodElList1->append( factor1 );
@@ -1157,15 +1156,15 @@ LangEl *ParseData::makeRepeatProd( Namespace *nspace, const String &repeatName, 
 
 LangEl *ParseData::makeListProd( Namespace *nspace, const String &listName, NamespaceQual *nspaceQual, const String &name )
 {
-	LangEl *prodName = declareLangEl( this, nspace, listName );
-	prodName->type = LangEl::NonTerm;
+	LangEl *prodName = addLangEl( this, nspace, listName, LangEl::NonTerm );
 	prodName->isList = true;
 
 	/* Build the first production of the list. */
 	TypeRef *typeRef1 = new TypeRef( InputLoc(), nspaceQual, name );
 	ProdEl *factor1 = new ProdEl( ProdEl::ReferenceType, InputLoc(), false, typeRef1, 0 );
 
-	TypeRef *typeRef2 = new TypeRef( InputLoc(), nspaceQual, listName );
+	UniqueType *prodNameUT = findUniqueType( TYPE_TREE, prodName );
+	TypeRef *typeRef2 = new TypeRef( InputLoc(), prodNameUT );
 	ProdEl *factor2 = new ProdEl( ProdEl::ReferenceType, InputLoc(), false, typeRef2, 0 );
 
 	ProdElList *prodElList1 = new ProdElList;
@@ -1198,8 +1197,7 @@ LangEl *ParseData::makeListProd( Namespace *nspace, const String &listName, Name
 
 LangEl *ParseData::makeOptProd( Namespace *nspace, const String &optName, NamespaceQual *nspaceQual, const String &name )
 {
-	LangEl *prodName = declareLangEl( this, nspace, optName );
-	prodName->type = LangEl::NonTerm;
+	LangEl *prodName = addLangEl( this, nspace, optName, LangEl::NonTerm );
 	prodName->isOpt = true;
 
 	ProdElList *prodElList1 = new ProdElList;
@@ -1314,8 +1312,7 @@ void ParseData::initEmptyScanners()
 
 			/* These do not go in the namespace so so they cannot get declared
 			 * in the declare pass. */
-			LangEl *lel = declareLangEl( this, rootNamespace, name );
-			lel->type = LangEl::Term;
+			LangEl *lel = addLangEl( this, rootNamespace, name, LangEl::Term );
 
 			tokenDef->token = lel;
 			lel->tokenDef = tokenDef;

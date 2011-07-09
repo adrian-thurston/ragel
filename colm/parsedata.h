@@ -707,8 +707,6 @@ struct ParseData
 			NamespaceQual *nspaceQual, const String &name );
 	LangEl *makeOptProd( Namespace *nspace, const String &optName,
 			NamespaceQual *nspaceQual, const String &name );
-	void resolveLiteralFactor( ProdEl *fact );
-	void resolveReferenceFactor( ProdEl *fact );
 	void resolveFactor( ProdEl *fact );
 	void resolveProductionEls();
 	void resolvePatternEls();
@@ -981,7 +979,8 @@ struct Parser;
 typedef AvlMap<String, Parser *, CmpStr> ParserDict;
 typedef AvlMapEl<String, Parser *> ParserDictEl;
 
-LangEl *declareLangEl( ParseData *pd, Namespace *nspace, const String &data );
+LangEl *declareLangEl( ParseData *pd, Namespace *nspace, const String &data, LangEl::Type type );
+LangEl *addLangEl( ParseData *pd, Namespace *nspace, const String &data, LangEl::Type type );
 LangEl *findLangEl( ParseData *pd, Namespace *nspace, const String &data );
 
 #endif /* _PARSEDATA_H */

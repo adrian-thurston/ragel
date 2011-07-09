@@ -290,7 +290,7 @@ pred_token:
 	region_qual TK_Word 
 	final {
 		$$->factor = new ProdEl( ProdEl::ReferenceType, $2->loc, false, 0, 0 );
-		pd->resolveReferenceFactor( $$->factor );
+		pd->resolveFactor( $$->factor );
 	};
 
 pred_token: 
@@ -298,7 +298,7 @@ pred_token:
 	final {
 		PdaLiteral *literal = new PdaLiteral( $2->loc, *$2 );
 		$$->factor = new ProdEl( ProdEl::LiteralType, $2->loc, false, 0, 0 );
-		pd->resolveLiteralFactor( $$->factor );
+		pd->resolveFactor( $$->factor );
 	};
 
 cfl_def: cfl_def_head obj_var_list properties_list cfl_prod_list

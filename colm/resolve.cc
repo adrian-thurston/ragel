@@ -162,31 +162,11 @@ UniqueType *TypeRef::lookupType( ParseData *pd )
 	return uniqueType;
 }
 
-void ParseData::resolveLiteralFactor( ProdEl *fact )
-{
-	fact->typeRef->lookupType( this );
-	fact->langEl = fact->typeRef->uniqueType->langEl;
-}
-
-void ParseData::resolveReferenceFactor( ProdEl *fact )
-{
-	fact->typeRef->lookupType( this );
-	fact->langEl = fact->typeRef->uniqueType->langEl;
-}
-
 void ParseData::resolveFactor( ProdEl *fact )
 {
-	switch ( fact->type ) {
-		case ProdEl::LiteralType:
-			resolveLiteralFactor( fact );
-			break;
-		case ProdEl::ReferenceType:
-			resolveReferenceFactor( fact );
-			break;
-	}
+	fact->typeRef->lookupType( this );
+	fact->langEl = fact->typeRef->uniqueType->langEl;
 }
-
-
 
 void LangTerm::resolve( ParseData *pd ) const
 {

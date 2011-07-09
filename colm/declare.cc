@@ -196,8 +196,7 @@ void Namespace::declare( ParseData *pd )
 	for ( GenericList::Iter g = genericList; g.lte(); g++ ) {
 		//std::cout << "generic " << g->name << std::endl;
 
-		LangEl *langEl = declareLangEl( pd, this, g->name );
-		langEl->type = LangEl::NonTerm;
+		LangEl *langEl = declareLangEl( pd, this, g->name, LangEl::NonTerm );
 
 		/* Add one empty production. */
 		ProdElList *emptyList = new ProdElList;
@@ -222,8 +221,7 @@ void Namespace::declare( ParseData *pd )
 
 	for ( LiteralDict::Iter l = literalDict; l.lte(); l++  ) {
 		/* Create a token for the literal. */
-		LangEl *newLangEl = declareLangEl( pd, this, l->value->name );
-		newLangEl->type = LangEl::Term;
+		LangEl *newLangEl = declareLangEl( pd, this, l->value->name, LangEl::Term );
 		newLangEl->lit = l->value->literal;
 		newLangEl->isLiteral = true;
 		newLangEl->tokenDef = l->value;
@@ -232,8 +230,7 @@ void Namespace::declare( ParseData *pd )
 	}
 
 	for ( ContextDefList::Iter c = contextDefList; c.lte(); c++ ) {
-		LangEl *lel = declareLangEl( pd, this, c->name );
-		lel->type = LangEl::NonTerm;
+		LangEl *lel = declareLangEl( pd, this, c->name, LangEl::NonTerm );
 		ProdElList *emptyList = new ProdElList;
 		//addProduction( c->context->loc, c->name, emptyList, false, 0, 0 );
 
@@ -267,8 +264,7 @@ void Namespace::declare( ParseData *pd )
 		/* Literals already taken care of. */
 		if ( ! t->isLiteral ) {
 			/* Create the token. */
-			LangEl *tokEl = declareLangEl( pd, this, t->name );
-			tokEl->type = LangEl::Term;
+			LangEl *tokEl = declareLangEl( pd, this, t->name, LangEl::Term );
 			tokEl->ignore = t->ignore;
 			tokEl->transBlock = t->codeBlock;
 			tokEl->objectDef = t->objectDef;
@@ -281,8 +277,7 @@ void Namespace::declare( ParseData *pd )
 
 	for ( NtDefList::Iter n = ntDefList; n.lte(); n++ ) {
 		/* Get the language element. */
-		LangEl *langEl = declareLangEl( pd, this, n->name );
-		langEl->type = LangEl::NonTerm;
+		LangEl *langEl = declareLangEl( pd, this, n->name, LangEl::NonTerm );
 		//$$->langEl = langEl;
 
 		/* Get the language element. */
