@@ -437,9 +437,7 @@ int print_RR_A( s: start )
 	}
 }
 
-map name_map [int name]
-
-int print_name( n: name m: name_map )
+int print_name( n: name m: map<int name> )
 {
 	for P: name_part in n {
 		match P [part_len D:nbytes]
@@ -459,7 +457,7 @@ int print_name( n: name m: name_map )
 int print_all_names( s: start )
 {
 	for M: message in s {
-		construct m: name_map []
+		construct m: map<int name> []
 
 		O: octet = octet in M
 

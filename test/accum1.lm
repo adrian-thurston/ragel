@@ -14,10 +14,7 @@ def start
 
 Input: start = parse start( stdin )
 
-accum output 
-	[start]
-
-Output: output = construct output []
+cons Output: accum<start> []
 
 for Id: id in Input {
 	Output <<

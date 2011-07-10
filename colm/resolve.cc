@@ -115,23 +115,92 @@ UniqueType *TypeRef::lookupTypeMap( ParseData *pd )
 
 UniqueType *TypeRef::lookupTypeList( ParseData *pd )
 {
-//	UniqueType *utValue = typeRef1->lookupType( pd );	
-//	pd->uniqueListMap.find( utValue );
-	return 0;
+	/* Lookup up the qualifiction and then the name. */
+	nspace = nspaceQual->getQual( pd );
+
+	UniqueType *utValue = typeRef1->lookupType( pd );	
+
+	UniqueList searchKey( utValue );
+	UniqueList *inMap = pd->uniqueListMap.find( &searchKey );
+	if ( inMap == 0 ) {
+		inMap = new UniqueList( utValue );
+		pd->uniqueListMap.insert( inMap );
+
+		/* FIXME: Need uniqe name allocator for types. */
+		static int listId = 0;
+		String name( 36, "__list%d", listId++ );
+
+		GenericType *generic = new GenericType( name, GEN_LIST,
+				pd->nextGenericId++, 0/*langEl*/, typeRef1 );
+
+		nspace->genericList.append( generic );
+
+		generic->declare( pd, nspace );
+
+		inMap->generic = generic;
+	}
+
+	return pd->findUniqueType( TYPE_TREE, inMap->generic->langEl );
 }
 
 UniqueType *TypeRef::lookupTypeVector( ParseData *pd )
 {
-//	UniqueType *utValue = typeRef1->lookupType( pd );	
-//	pd->uniqueVectorMap.find( utValue );
-	return 0;
+	/* Lookup up the qualifiction and then the name. */
+	nspace = nspaceQual->getQual( pd );
+
+	UniqueType *utValue = typeRef1->lookupType( pd );	
+
+	UniqueVector searchKey( utValue );
+	UniqueVector *inMap = pd->uniqueVectorMap.find( &searchKey );
+	if ( inMap == 0 ) {
+		inMap = new UniqueVector( utValue );
+		pd->uniqueVectorMap.insert( inMap );
+
+		/* FIXME: Need uniqe name allocator for types. */
+		static int vectorId = 0;
+		String name( 36, "__vector%d", vectorId++ );
+
+		GenericType *generic = new GenericType( name, GEN_VECTOR,
+				pd->nextGenericId++, 0/*langEl*/, typeRef1 );
+
+		nspace->genericList.append( generic );
+
+		generic->declare( pd, nspace );
+
+		inMap->generic = generic;
+	}
+
+	return pd->findUniqueType( TYPE_TREE, inMap->generic->langEl );
 }
 
 UniqueType *TypeRef::lookupTypeAccum( ParseData *pd )
 {
-//	UniqueType *utParse = typeRef1->lookupType( pd );	
-//	pd->uniqueAccumMap.find( utValue );
-	return 0;
+	/* Lookup up the qualifiction and then the name. */
+	nspace = nspaceQual->getQual( pd );
+
+	UniqueType *utParse = typeRef1->lookupType( pd );	
+
+	UniqueAccum searchKey( utParse );
+	UniqueAccum *inMap = pd->uniqueAccumMap.find( &searchKey );
+	if ( inMap == 0 ) {
+		inMap = new UniqueAccum( utParse );
+		pd->uniqueAccumMap.insert( inMap );
+
+		/* FIXME: Need uniqe name allocator for types. */
+		static int accumId = 0;
+		String name( 36, "__accum%d", accumId++ );
+
+		GenericType *generic = new GenericType( name, GEN_PARSER,
+				pd->nextGenericId++, 0/*langEl*/, typeRef1 );
+
+		nspace->genericList.append( generic );
+
+		generic->declare( pd, nspace );
+
+		inMap->generic = generic;
+	}
+
+	return pd->findUniqueType( TYPE_TREE, inMap->generic->langEl );
 }
 
 void TypeRef::resolveRepeat( ParseData *pd )

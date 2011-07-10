@@ -1360,7 +1360,7 @@ struct UniqueMap
 	: public AvlTreeEl<UniqueMap>
 {
 	UniqueMap( UniqueType *key, UniqueType *value ) :
-		key(key), value(value) {}
+		key(key), value(value), generic(0) {}
 
 	UniqueType *key;
 	UniqueType *value;
@@ -1383,9 +1383,10 @@ struct UniqueList
 	: public AvlTreeEl<UniqueList>
 {
 	UniqueList( UniqueType *value ) :
-		value(value) {}
+		value(value), generic(0) {}
 
 	UniqueType *value;
+	GenericType *generic;
 };
 
 struct CmpUniqueList
@@ -1403,9 +1404,10 @@ struct UniqueVector
 	: public AvlTreeEl<UniqueVector>
 {
 	UniqueVector( UniqueType *value ) :
-		value(value) {}
+		value(value), generic(0) {}
 
 	UniqueType *value;
+	GenericType *generic;
 };
 
 struct CmpUniqueVector
@@ -1423,9 +1425,10 @@ struct UniqueAccum
 	: public AvlTreeEl<UniqueAccum>
 {
 	UniqueAccum( UniqueType *parseType ) :
-		parseType(parseType) {}
+		parseType(parseType), generic(0) {}
 
 	UniqueType *parseType;
+	GenericType *generic;
 };
 
 struct CmpUniqueAccum
