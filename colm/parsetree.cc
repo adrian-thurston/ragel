@@ -131,6 +131,52 @@ int CmpUniqueRepeat::compare( const UniqueRepeat &ut1, const UniqueRepeat &ut2 )
 	return 0;
 }
 
+int CmpUniqueMap::compare( const UniqueMap &ut1, const UniqueMap &ut2 )
+{
+	if ( ut1.key < ut2.key )
+		return -1;
+	else if ( ut1.key > ut2.key )
+		return 1;
+	else {
+		if ( ut1.value < ut2.value )
+			return -1;
+		else if ( ut1.value > ut2.value )
+			return 1;
+	}
+
+	return 0;
+}
+
+int CmpUniqueList::compare( const UniqueList &ut1, const UniqueList &ut2 )
+{
+	if ( ut1.value < ut2.value )
+		return -1;
+	else if ( ut1.value > ut2.value )
+		return 1;
+
+	return 0;
+}
+
+int CmpUniqueVector::compare( const UniqueVector &ut1, const UniqueVector &ut2 )
+{
+	if ( ut1.value < ut2.value )
+		return -1;
+	else if ( ut1.value > ut2.value )
+		return 1;
+
+	return 0;
+}
+
+int CmpUniqueAccum::compare( const UniqueAccum &ut1, const UniqueAccum &ut2 )
+{
+	if ( ut1.parseType < ut2.parseType )
+		return -1;
+	else if ( ut1.parseType > ut2.parseType )
+		return 1;
+
+	return 0;
+}
+
 FsmGraph *VarDef::walk( ParseData *pd )
 {
 	/* We enter into a new name scope. */

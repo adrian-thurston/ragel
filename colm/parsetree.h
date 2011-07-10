@@ -542,6 +542,8 @@ struct GenericType
 	const String &getKey() const 
 		{ return name; };
 
+	void declare( ParseData *pd, Namespace *nspace );
+
 	String name;
 	long typeId;
 	long id;
@@ -1327,7 +1329,6 @@ enum RepeatType {
 	RepeatOpt,
 };
 
-
 /*
  * Repeat types.
  */
@@ -1351,6 +1352,89 @@ struct CmpUniqueRepeat
 
 typedef AvlBasic< UniqueRepeat, CmpUniqueRepeat > UniqueRepeatMap;
 
+/* 
+ * Unique Map Types
+ */
+
+struct UniqueMap
+	: public AvlTreeEl<UniqueMap>
+{
+	UniqueMap( UniqueType *key, UniqueType *value ) :
+		key(key), value(value) {}
+
+	UniqueType *key;
+	UniqueType *value;
+
+	GenericType *generic;
+};
+
+struct CmpUniqueMap
+{
+	static int compare( const UniqueMap &ut1, const UniqueMap &ut2 );
+};
+
+typedef AvlBasic< UniqueMap, CmpUniqueMap > UniqueMapMap;
+
+/* 
+ * Unique List Types
+ */
+
+struct UniqueList
+	: public AvlTreeEl<UniqueList>
+{
+	UniqueList( UniqueType *value ) :
+		value(value) {}
+
+	UniqueType *value;
+};
+
+struct CmpUniqueList
+{
+	static int compare( const UniqueList &ut1, const UniqueList &ut2 );
+};
+
+typedef AvlBasic< UniqueList, CmpUniqueList > UniqueListMap;
+
+/* 
+ * Unique Vector Types
+ */
+
+struct UniqueVector
+	: public AvlTreeEl<UniqueVector>
+{
+	UniqueVector( UniqueType *value ) :
+		value(value) {}
+
+	UniqueType *value;
+};
+
+struct CmpUniqueVector
+{
+	static int compare( const UniqueVector &ut1, const UniqueVector &ut2 );
+};
+
+typedef AvlBasic< UniqueVector, CmpUniqueVector > UniqueVectorMap;
+
+/* 
+ * Unique Accum Types
+ */
+
+struct UniqueAccum
+	: public AvlTreeEl<UniqueAccum>
+{
+	UniqueAccum( UniqueType *parseType ) :
+		parseType(parseType) {}
+
+	UniqueType *parseType;
+};
+
+struct CmpUniqueAccum
+{
+	static int compare( const UniqueAccum &ut1, const UniqueAccum &ut2 );
+};
+
+typedef AvlBasic< UniqueAccum, CmpUniqueAccum > UniqueAccumMap;
+
 /*
  *
  */
@@ -1362,45 +1446,75 @@ typedef Vector<TypeRef*> TypeRefVect;
 
 struct TypeRef
 {
+	enum Type
+	{
+		Unspecified,
+		Name,
+		Literal,
+		Iterator,
+		Map,
+		List,
+		Vector,
+		Accum
+	};
+
 	/* Qualification and a type name. These require lookup. */
 	TypeRef( const InputLoc &loc, NamespaceQual *nspaceQual, String typeName ) :
-		loc(loc), nspaceQual(nspaceQual), typeName(typeName), pdaLiteral(0), iterDef(0),
+		type(Name), loc(loc), nspaceQual(nspaceQual), typeName(typeName), pdaLiteral(0), iterDef(0),
+		typeRef1(0), typeRef2(0),
 		isPtr(false), isRef(false), repeatType(RepeatNone),
 		nspace(0), uniqueType(0), searchUniqueType(0) {}
 
 	/* Qualification and a type name. These require lookup. */
 	TypeRef( const InputLoc &loc, NamespaceQual *nspaceQual, PdaLiteral *pdaLiteral ) :
-		loc(loc), nspaceQual(nspaceQual), pdaLiteral(pdaLiteral), iterDef(0),
+		type(Literal), loc(loc), nspaceQual(nspaceQual), pdaLiteral(pdaLiteral), iterDef(0),
+		typeRef1(0), typeRef2(0),
 		isPtr(false), isRef(false), repeatType(RepeatNone),
 		nspace(0), uniqueType(0), searchUniqueType(0) {}
+
+	/* Unique type is given directly. */
+	TypeRef( Type type, const InputLoc &loc, NamespaceQual *nspaceQual, TypeRef *typeRef1, TypeRef *typeRef2 ) :
+		type(type), loc(loc), nspaceQual(nspaceQual), pdaLiteral(0), iterDef(0),
+		typeRef1(typeRef1), typeRef2(typeRef2),
+		isPtr(false), isRef(false), repeatType(RepeatNone),
+		nspace(0), uniqueType(uniqueType), searchUniqueType(0) {}
+
+	/* Resolution not needed. */
 
 	/* Iterator definition. */
 	TypeRef( const InputLoc &loc, IterDef *iterDef, UniqueType *uniqueType, 
 			UniqueType *searchUniqueType ) :
-		loc(loc), nspaceQual(0), pdaLiteral(0), iterDef(iterDef),
+		type(Iterator), loc(loc), nspaceQual(0), pdaLiteral(0), iterDef(iterDef),
+		typeRef1(0), typeRef2(0),
 		isPtr(false), isRef(false), repeatType(RepeatNone),
 		nspace(0), uniqueType(uniqueType), searchUniqueType(searchUniqueType) {}
 
 	/* Unique type is given directly. */
 	TypeRef( const InputLoc &loc, UniqueType *uniqueType ) :
-		loc(loc), nspaceQual(0), pdaLiteral(0), iterDef(0),
+		type(Unspecified), loc(loc), nspaceQual(0), pdaLiteral(0), iterDef(0),
+		typeRef1(0), typeRef2(0),
 		isPtr(false), isRef(false), repeatType(RepeatNone),
 		nspace(0), uniqueType(uniqueType), searchUniqueType(0) {}
 
+
 	void resolveRepeat( ParseData *pd );
 
-	UniqueType *lookupTypePart( ParseData *pd,
-			NamespaceQual *nspaceQual, const String &name );
-	UniqueType *lookupTypePart( ParseData *pd, 
-			NamespaceQual *qual, PdaLiteral *pdaLiteral );
-
+	UniqueType *lookupTypeName( ParseData *pd );
+	UniqueType *lookupTypeLiteral( ParseData *pd );
+	UniqueType *lookupTypeMap( ParseData *pd );
+	UniqueType *lookupTypeList( ParseData *pd );
+	UniqueType *lookupTypeVector( ParseData *pd );
+	UniqueType *lookupTypeAccum( ParseData *pd );
 	UniqueType *lookupType( ParseData *pd );
 
+	Type type;
 	InputLoc loc;
 	NamespaceQual *nspaceQual;
 	String typeName;
 	PdaLiteral *pdaLiteral;
 	IterDef *iterDef;
+	TypeRef *typeRef1;
+	TypeRef *typeRef2;
 	bool isPtr;
 	bool isRef;
 	RepeatType repeatType;

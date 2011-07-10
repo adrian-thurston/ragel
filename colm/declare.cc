@@ -191,33 +191,37 @@ void ParseData::addProdRHSLoads( Definition *prod, CodeVect &code, long &insertP
 	insertPos += loads.length();
 }
 
+void GenericType::declare( ParseData *pd, Namespace *nspace )
+{
+	//std::cout << "generic " << g->name << std::endl;
+
+	LangEl *langEl = declareLangEl( pd, nspace, name, LangEl::NonTerm );
+
+	/* Add one empty production. */
+	ProdElList *emptyList = new ProdElList;
+	//addProduction( g->loc, langEl, emptyList, false, 0, 0 );
+
+	{
+		LangEl *prodName = langEl;
+		assert( prodName->type == LangEl::NonTerm );
+
+		Definition *newDef = new Definition( InputLoc(), prodName, 
+			emptyList, false, 0,
+			pd->prodList.length(), Definition::Production );
+			
+		prodName->defList.append( newDef );
+		pd->prodList.append( newDef );
+		newDef->predOf = 0;
+	}
+
+	langEl->generic = this;
+	this->langEl = langEl;
+}
+
 void Namespace::declare( ParseData *pd )
 {
-	for ( GenericList::Iter g = genericList; g.lte(); g++ ) {
-		//std::cout << "generic " << g->name << std::endl;
-
-		LangEl *langEl = declareLangEl( pd, this, g->name, LangEl::NonTerm );
-
-		/* Add one empty production. */
-		ProdElList *emptyList = new ProdElList;
-		//addProduction( g->loc, langEl, emptyList, false, 0, 0 );
-
-		{
-			LangEl *prodName = langEl;
-			assert( prodName->type == LangEl::NonTerm );
-
-			Definition *newDef = new Definition( loc, prodName, 
-				emptyList, false, 0,
-				pd->prodList.length(), Definition::Production );
-			
-			prodName->defList.append( newDef );
-			pd->prodList.append( newDef );
-			newDef->predOf = 0;
-		}
-
-		langEl->generic = g;
-		g->langEl = langEl;
-	}
+	for ( GenericList::Iter g = genericList; g.lte(); g++ )
+		g->declare( pd, this );
 
 	for ( LiteralDict::Iter l = literalDict; l.lte(); l++  ) {
 		/* Create a token for the literal. */

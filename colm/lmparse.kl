@@ -425,25 +425,30 @@ type_ref: basic_type_ref
 
 type_ref: KW_Map '<' type_ref type_ref '>'
 	final {
-		Namespace *nspace = namespaceStack.top();
-
-		/* FIXME: Need uniqe name allocator for types. */
-		static int mapId = 0;
-		String name( 36, "__map%d", mapId++ );
-
-		GenericType *generic = new GenericType( name, GEN_MAP,
-				pd->nextGenericId++, 0, $4->typeRef );
-		generic->keyTypeArg = $3->typeRef;
-
-		nspace->genericList.append( generic );
-
-		NamespaceQual *nspaceQual = new NamespaceQual( namespaceStack.top(), regionStack.top() );
-		$$->typeRef = new TypeRef( InputLoc(), nspaceQual, name );
+		NamespaceQual *nspaceQual = new NamespaceQual( 
+				namespaceStack.top(), regionStack.top() );
+		$$->typeRef = new TypeRef( TypeRef::Map, InputLoc(), nspaceQual,
+				$3->typeRef, $4->typeRef );
 	};
 
-type_ref: KW_List '<' type_ref '>';
-type_ref: KW_Vector '<' type_ref '>';
-type_ref: KW_Accum '<' type_ref '>';
+type_ref: KW_List '<' type_ref '>'
+	final {
+		NamespaceQual *nspaceQual = new NamespaceQual( 
+				namespaceStack.top(), regionStack.top() );
+		$$->typeRef = new TypeRef( TypeRef::List, InputLoc(), nspaceQual, $3->typeRef, 0 );
+	};
+type_ref: KW_Vector '<' type_ref '>'
+	final {
+		NamespaceQual *nspaceQual = new NamespaceQual( 
+				namespaceStack.top(), regionStack.top() );
+		$$->typeRef = new TypeRef( TypeRef::Vector, InputLoc(), nspaceQual, $3->typeRef, 0 );
+	};
+type_ref: KW_Accum '<' type_ref '>'
+	final {
+		NamespaceQual *nspaceQual = new NamespaceQual( 
+				namespaceStack.top(), regionStack.top() );
+		$$->typeRef = new TypeRef( TypeRef::Accum, InputLoc(), nspaceQual, $3->typeRef, 0 );
+	};
 
 nonterm basic_type_ref uses type_ref;
 
@@ -612,7 +617,6 @@ pattern_el: opt_label pattern_el_type_or_lit
 						" redeclared" << endp;
 			}
 
-			NamespaceQual *qual = new NamespaceQual( namespaceStack.top(), regionStack.top() );
 			TypeRef *typeRef = $2->patternItem->factor->typeRef;
 			ObjField *objField = new ObjField( InputLoc(), typeRef, $1->varRef->name );
 

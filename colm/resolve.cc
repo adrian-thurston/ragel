@@ -29,18 +29,17 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-UniqueType *TypeRef::lookupTypePart( ParseData *pd, 
-		NamespaceQual *qual, const String &name )
+UniqueType *TypeRef::lookupTypeName( ParseData *pd )
 {
 	/* Lookup up the qualifiction and then the name. */
-	nspace = qual->getQual( pd );
+	nspace = nspaceQual->getQual( pd );
 
 	if ( nspace == 0 )
 		error(loc) << "do not have region for resolving reference" << endp;
 
 	while ( nspace != 0 ) {
-		/* Search for the token in the region by name. */
-		SymbolMapEl *inDict = nspace->symbolMap.find( name );
+		/* Search for the token in the region by typeName. */
+		SymbolMapEl *inDict = nspace->symbolMap.find( typeName );
 		if ( inDict != 0 ) {
 			long typeId = ( isPtr ? TYPE_PTR : ( isRef ? TYPE_REF : TYPE_TREE ) );
 			return pd->findUniqueType( typeId, inDict->value );
@@ -53,11 +52,10 @@ UniqueType *TypeRef::lookupTypePart( ParseData *pd,
 	return 0;
 }
 
-UniqueType *TypeRef::lookupTypePart( ParseData *pd, 
-		NamespaceQual *qual, PdaLiteral *pdaLiteral )
+UniqueType *TypeRef::lookupTypeLiteral( ParseData *pd )
 {
 	/* Lookup up the qualifiction and then the name. */
-	nspace = qual->getQual( pd );
+	nspace = nspaceQual->getQual( pd );
 
 	if ( nspace == 0 )
 		error(loc) << "do not have region for resolving reference" << endp;
@@ -83,7 +81,58 @@ UniqueType *TypeRef::lookupTypePart( ParseData *pd,
 	return 0;
 }
 
+UniqueType *TypeRef::lookupTypeMap( ParseData *pd )
+{
+	/* Lookup up the qualifiction and then the name. */
+	nspace = nspaceQual->getQual( pd );
 
+	UniqueType *utKey = typeRef1->lookupType( pd );	
+	UniqueType *utValue = typeRef2->lookupType( pd );	
+
+	UniqueMap searchKey( utKey, utValue );
+	UniqueMap *inMap = pd->uniqueMapMap.find( &searchKey );
+	if ( inMap == 0 ) {
+		inMap = new UniqueMap( utKey, utValue );
+		pd->uniqueMapMap.insert( inMap );
+
+		/* FIXME: Need uniqe name allocator for types. */
+		static int mapId = 0;
+		String name( 36, "__map%d", mapId++ );
+
+		GenericType *generic = new GenericType( name, GEN_MAP,
+				pd->nextGenericId++, 0/*langEl*/, typeRef2 );
+		generic->keyTypeArg = typeRef1;
+
+		nspace->genericList.append( generic );
+
+		generic->declare( pd, nspace );
+
+		inMap->generic = generic;
+	}
+
+	return pd->findUniqueType( TYPE_TREE, inMap->generic->langEl );
+}
+
+UniqueType *TypeRef::lookupTypeList( ParseData *pd )
+{
+//	UniqueType *utValue = typeRef1->lookupType( pd );	
+//	pd->uniqueListMap.find( utValue );
+	return 0;
+}
+
+UniqueType *TypeRef::lookupTypeVector( ParseData *pd )
+{
+//	UniqueType *utValue = typeRef1->lookupType( pd );	
+//	pd->uniqueVectorMap.find( utValue );
+	return 0;
+}
+
+UniqueType *TypeRef::lookupTypeAccum( ParseData *pd )
+{
+//	UniqueType *utParse = typeRef1->lookupType( pd );	
+//	pd->uniqueAccumMap.find( utValue );
+	return 0;
+}
 
 void TypeRef::resolveRepeat( ParseData *pd )
 {
@@ -137,27 +186,34 @@ UniqueType *TypeRef::lookupType( ParseData *pd )
 	if ( uniqueType != 0 )
 		return uniqueType;
 
-//	cout << __PRETTY_FUNCTION__ << " " << typeName.data << " " << this << endl;
-//	if ( iterDef != 0 )
-//		uniqueType = pd->findUniqueType( TYPE_ITER, iterDef );
+	/* Not an iterator. May be a reference. */
+	switch ( type ) {
+		case Name:
+			uniqueType = lookupTypeName( pd );
+			break;
+		case Literal:
+			uniqueType = lookupTypeLiteral( pd );
+			break;
+		case Map:
+			uniqueType = lookupTypeMap( pd );
+			break;
+		case List:
+			uniqueType = lookupTypeList( pd );
+			break;
+		case Vector:
+			uniqueType = lookupTypeVector( pd );
+			break;
+		case Accum:
+			uniqueType = lookupTypeAccum( pd );
+			break;
+		case Iterator:
+		case Unspecified:
+			/* No lookup needed, unique type(s) set when constructed. */
+			break;
+	}
 
-
-//		String name = typeName;
-//		if ( repeatType == RepeatOpt )
-//			name.setAs( 32, "_opt_%s", name.data );
-//		else if ( repeatType == RepeatRepeat )
-//			name.setAs( 32, "_repeat_%s", name.data );
-//		else if ( repeatType == RepeatList )
-//			name.setAs( 32, "_list_%s", name.data );
-
-		/* Not an iterator. May be a reference. */
-		if ( pdaLiteral != 0 )
-			uniqueType = lookupTypePart( pd, nspaceQual, pdaLiteral );
-		else
-			uniqueType = lookupTypePart( pd, nspaceQual, typeName );
-
-		if ( repeatType != RepeatNone )
-			resolveRepeat( pd );
+	if ( repeatType != RepeatNone )
+		resolveRepeat( pd );
 
 	return uniqueType;
 }

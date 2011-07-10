@@ -911,6 +911,10 @@ struct ParseData
 
 	UniqueTypeMap uniqeTypeMap;
 	UniqueRepeatMap uniqeRepeatMap;
+	UniqueMapMap uniqueMapMap;
+	UniqueListMap uniqueListMap;
+	UniqueVectorMap uniqueVectorMap;
+	UniqueAccumMap uniqueAccumMap;
 
 	void initStrObject();
 	void initStreamObject();
