@@ -23,7 +23,7 @@ def args
 
 cons ArgParser: parser<args> []
 
-ArgV: argv_list ArgV = argv
+ArgV: list<str> ArgV = argv
 for A: str in ArgV 
 	ArgParser << [A '\0']
 

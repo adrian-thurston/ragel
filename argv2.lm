@@ -41,7 +41,7 @@ def args
 cons ArgParser: parser<args>[]
 
 # Parse the args and extract the result into Args.
-ArgV: argv_list = argv
+ArgV: list<str> = argv
 for A: str in ArgV
 	ArgParser << [A '\0']
 Args: args = ArgParser.finish()
