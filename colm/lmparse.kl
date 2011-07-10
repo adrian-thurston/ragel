@@ -1709,10 +1709,12 @@ code_factor: KW_Parse opt_capture type_ref '(' opt_code_expr_list ')'
 		/* Get the language element. */
 		Namespace *nspace = namespaceStack.top();
 
-		GenericType *generic = new GenericType( parserName, GEN_PARSER, 
-				pd->nextGenericId++, 0/*langEl*/, $3->typeRef );
+		GenericType *generic = 0;
 
-		nspace->genericList.append( generic );
+		NamespaceQual *nspaceQual = new NamespaceQual( 
+				namespaceStack.top(), regionStack.top() );
+		TypeRef *parserTypeRef = new TypeRef( TypeRef::Accum, 
+				InputLoc(), nspaceQual, $3->typeRef, 0 );
 
 		Replacement *replacement = new Replacement( $1->loc, nspace, pd->rootRegion,
 				new ReplItemList, pd->nextPatReplId++ );
@@ -1723,7 +1725,7 @@ code_factor: KW_Parse opt_capture type_ref '(' opt_code_expr_list ')'
 			varRef = new LangVarRef( $2->objField->loc, new QualItemVect, $2->objField->name );
 
 		$$->expr = new LangExpr( new LangTerm( $1->loc, LangTerm::ParseType,
-				varRef, $2->objField, $3->typeRef, generic, replacement ) );
+				varRef, $2->objField, $3->typeRef, generic, parserTypeRef, replacement ) );
 		$$->expr->term->args = $5->exprVect;
 
 		/* Check for redeclaration. */
@@ -1746,10 +1748,12 @@ code_factor: KW_ParseStop opt_capture type_ref '(' opt_code_expr_list ')'
 		/* Get the language element. */
 		Namespace *nspace = namespaceStack.top();
 
-		GenericType *generic = new GenericType( parserName, GEN_PARSER, 
-				pd->nextGenericId++, 0/*langEl*/, $3->typeRef );
+		GenericType *generic = 0;
 
-		nspace->genericList.append( generic );
+		NamespaceQual *nspaceQual = new NamespaceQual( 
+				namespaceStack.top(), regionStack.top() );
+		TypeRef *parserTypeRef = new TypeRef( TypeRef::Accum, 
+				InputLoc(), nspaceQual, $3->typeRef, 0 );
 
 		Replacement *replacement = new Replacement( $1->loc, nspace, pd->rootRegion,
 				new ReplItemList, pd->nextPatReplId++ );
@@ -1760,7 +1764,7 @@ code_factor: KW_ParseStop opt_capture type_ref '(' opt_code_expr_list ')'
 			varRef = new LangVarRef( $2->objField->loc, new QualItemVect, $2->objField->name );
 
 		$$->expr = new LangExpr( new LangTerm( $1->loc, LangTerm::ParseStopType, 
-				varRef, $2->objField, $3->typeRef, generic, replacement ) );
+				varRef, $2->objField, $3->typeRef, generic, parserTypeRef, replacement ) );
 		$$->expr->term->args = $5->exprVect;
 
 		/* Check for redeclaration. */

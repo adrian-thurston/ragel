@@ -110,6 +110,7 @@ UniqueType *TypeRef::lookupTypeMap( ParseData *pd )
 		inMap->generic = generic;
 	}
 
+	generic = inMap->generic;
 	return pd->findUniqueType( TYPE_TREE, inMap->generic->langEl );
 }
 
@@ -140,6 +141,7 @@ UniqueType *TypeRef::lookupTypeList( ParseData *pd )
 		inMap->generic = generic;
 	}
 
+	generic = inMap->generic;
 	return pd->findUniqueType( TYPE_TREE, inMap->generic->langEl );
 }
 
@@ -170,6 +172,7 @@ UniqueType *TypeRef::lookupTypeVector( ParseData *pd )
 		inMap->generic = generic;
 	}
 
+	generic = inMap->generic;
 	return pd->findUniqueType( TYPE_TREE, inMap->generic->langEl );
 }
 
@@ -200,6 +203,7 @@ UniqueType *TypeRef::lookupTypeAccum( ParseData *pd )
 		inMap->generic = generic;
 	}
 
+	generic = inMap->generic;
 	return pd->findUniqueType( TYPE_TREE, inMap->generic->langEl );
 }
 
@@ -293,7 +297,7 @@ void ParseData::resolveFactor( ProdEl *fact )
 	fact->langEl = fact->typeRef->uniqueType->langEl;
 }
 
-void LangTerm::resolve( ParseData *pd ) const
+void LangTerm::resolve( ParseData *pd )
 {
 	switch ( type ) {
 		case ConstructType:
@@ -338,6 +342,8 @@ void LangTerm::resolve( ParseData *pd ) const
 		case ParseType:
 		case ParseStopType:
 			typeRef->lookupType( pd );
+			parserTypeRef->lookupType( pd );
+			generic = parserTypeRef->generic;
 			break;
 
 		case EmbedStringType:

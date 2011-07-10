@@ -1466,21 +1466,21 @@ struct TypeRef
 		type(Name), loc(loc), nspaceQual(nspaceQual), typeName(typeName), pdaLiteral(0), iterDef(0),
 		typeRef1(0), typeRef2(0),
 		isPtr(false), isRef(false), repeatType(RepeatNone),
-		nspace(0), uniqueType(0), searchUniqueType(0) {}
+		nspace(0), uniqueType(0), searchUniqueType(0), generic(0) {}
 
 	/* Qualification and a type name. These require lookup. */
 	TypeRef( const InputLoc &loc, NamespaceQual *nspaceQual, PdaLiteral *pdaLiteral ) :
 		type(Literal), loc(loc), nspaceQual(nspaceQual), pdaLiteral(pdaLiteral), iterDef(0),
 		typeRef1(0), typeRef2(0),
 		isPtr(false), isRef(false), repeatType(RepeatNone),
-		nspace(0), uniqueType(0), searchUniqueType(0) {}
+		nspace(0), uniqueType(0), searchUniqueType(0), generic(0) {}
 
 	/* Unique type is given directly. */
 	TypeRef( Type type, const InputLoc &loc, NamespaceQual *nspaceQual, TypeRef *typeRef1, TypeRef *typeRef2 ) :
 		type(type), loc(loc), nspaceQual(nspaceQual), pdaLiteral(0), iterDef(0),
 		typeRef1(typeRef1), typeRef2(typeRef2),
 		isPtr(false), isRef(false), repeatType(RepeatNone),
-		nspace(0), uniqueType(uniqueType), searchUniqueType(0) {}
+		nspace(0), uniqueType(uniqueType), searchUniqueType(0), generic(0) {}
 
 	/* Resolution not needed. */
 
@@ -1490,15 +1490,14 @@ struct TypeRef
 		type(Iterator), loc(loc), nspaceQual(0), pdaLiteral(0), iterDef(iterDef),
 		typeRef1(0), typeRef2(0),
 		isPtr(false), isRef(false), repeatType(RepeatNone),
-		nspace(0), uniqueType(uniqueType), searchUniqueType(searchUniqueType) {}
+		nspace(0), uniqueType(uniqueType), searchUniqueType(searchUniqueType), generic(0) {}
 
 	/* Unique type is given directly. */
 	TypeRef( const InputLoc &loc, UniqueType *uniqueType ) :
 		type(Unspecified), loc(loc), nspaceQual(0), pdaLiteral(0), iterDef(0),
 		typeRef1(0), typeRef2(0),
 		isPtr(false), isRef(false), repeatType(RepeatNone),
-		nspace(0), uniqueType(uniqueType), searchUniqueType(0) {}
-
+		nspace(0), uniqueType(uniqueType), searchUniqueType(0), generic(0) {}
 
 	void resolveRepeat( ParseData *pd );
 
@@ -1526,6 +1525,7 @@ struct TypeRef
 	Namespace *nspace;
 	UniqueType *uniqueType;
 	UniqueType *searchUniqueType;
+	GenericType *generic;
 };
 
 typedef DList<ObjField> ParameterList; 
@@ -1888,13 +1888,13 @@ struct LangTerm
 		: type(EmbedStringType), replItemList(replItemList) {}
 
 	LangTerm( const InputLoc &loc, Type type, LangVarRef *varRef,
-			ObjField *objField, TypeRef *typeRef, GenericType *generic,
+			ObjField *objField, TypeRef *typeRef, GenericType *generic, TypeRef *parserTypeRef,
 			Replacement *replacement )
 		: loc(loc), type(type), varRef(varRef), objField(objField),
-			typeRef(typeRef), generic(generic),
+			typeRef(typeRef), generic(generic), parserTypeRef(parserTypeRef),
 			replacement(replacement) {}
 	
-	void resolve( ParseData *pd ) const;
+	void resolve( ParseData *pd );
 
 	UniqueType *evaluateParse( ParseData *pd, CodeVect &code, bool stop ) const;
 	UniqueType *evaluateNew( ParseData *pd, CodeVect &code ) const;
@@ -1917,6 +1917,7 @@ struct LangTerm
 	Pattern *pattern;
 	FieldInitVect *fieldInitArgs;
 	GenericType *generic;
+	TypeRef *parserTypeRef;
 	Replacement *replacement;
 	LangExpr *expr;
 	ReplItemList *replItemList;
