@@ -28,9 +28,7 @@ def item
 def btscan 
 	[item*]
 
-parser btscan_parser [btscan]
-
-Parser: btscan_parser = cons btscan_parser []
+Parser: parser<btscan> = cons parser<btscan> []
 
 Parser << "!ab"
 Parser << "b "

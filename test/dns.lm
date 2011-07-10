@@ -114,8 +114,7 @@ def count
 # end
 #
 
-list count_stack [int]
-global CL: count_stack = construct count_stack []
+global CL: list<int> = construct list<int> []
 
 int start_list( count: int )
 {

@@ -75,7 +75,6 @@ root_item: region_def commit final { $$->stmt = 0; };
 root_item: context_def commit final { $$->stmt = 0; };
 root_item: namespace_def commit final { $$->stmt = 0; };
 root_item: function_def commit final { $$->stmt = 0; };
-root_item: generic_def commit final { $$->stmt = 0; };
 root_item: iter_def commit final { $$->stmt = 0; };
 root_item: global_def commit final { $$->stmt = $1->stmt; };
 root_item: statement commit final { $$->stmt = $1->stmt; };
@@ -188,49 +187,6 @@ reference_type_ref: KW_Ref type_ref
 	final {
 		$$->typeRef = $2->typeRef;
 		$$->typeRef->isRef = true;
-	};
-
-generic_def: KW_Map TK_Word '[' type_ref type_ref ']'
-	final {
-		Namespace *nspace = namespaceStack.top();
-
-		GenericType *generic = new GenericType( $2->data, GEN_MAP,
-				pd->nextGenericId++, 0/*langEl*/, $5->typeRef );
-		generic->keyTypeArg = $4->typeRef;
-
-		nspace->genericList.append( generic );
-	};
-
-generic_def: KW_List TK_Word '[' type_ref ']'
-	final {
-		/* Get the language element. */
-		Namespace *nspace = namespaceStack.top();
-
-		GenericType *generic = new GenericType( $2->data, GEN_LIST, 
-				pd->nextGenericId++, 0/*langEl*/, $4->typeRef );
-
-		nspace->genericList.append( generic );
-	};
-
-generic_def: KW_Vector TK_Word '[' type_ref ']'
-	final {
-		GenericType *generic = new GenericType( $2->data, GEN_VECTOR,
-				pd->nextGenericId++, 0, $4->typeRef );
-
-		Namespace *nspace = namespaceStack.top();
-		nspace->genericList.append( generic );
-	};
-
-
-generic_def: KW_Accum TK_Word '[' type_ref ']'
-	final {
-		/* Get the language element. */
-		Namespace *nspace = namespaceStack.top();
-
-		GenericType *generic = new GenericType( $2->data, GEN_PARSER, 
-				pd->nextGenericId++, 0/*langEl*/, $4->typeRef );
-
-		nspace->genericList.append( generic );
 	};
 
 nonterm global_def uses statement;
@@ -543,7 +499,6 @@ context_item: cfl_def commit;
 context_item: region_def commit;
 context_item: context_def commit;
 context_item: function_def commit;
-context_item: generic_def commit;
 context_item: iter_def commit;
 context_item: pre_eof commit;
 context_item: precedence commit;
@@ -2417,9 +2372,6 @@ void Parser::init()
 
 void Parser::addArgvList()
 {
-	/* Get the language element. */
-	Namespace *nspace = namespaceStack.top();
-
 	NamespaceQual *nspaceQual1 = new NamespaceQual( 
 			namespaceStack.top(), regionStack.top() );
 	TypeRef *typeRef = new TypeRef( InputLoc(), nspaceQual1, "str" );

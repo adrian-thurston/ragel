@@ -12,8 +12,7 @@ def item2
 def start2
 	[item2*]
 
-parser start2_parser [start2]
-global SP: start2_parser = cons start2_parser []
+global SP: parser<start2> = cons parser<start2> []
 
 context ctx
 {

@@ -5,8 +5,7 @@ lex start
 	token id /[a-zA-Z_]+/
 }
 
-parser out_parser [out]
-global Out: out_parser = construct out_parser []
+global Out: parser<out> = construct parser<out> []
 
 def out_item
 	[id]
