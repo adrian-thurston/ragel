@@ -10,8 +10,8 @@ def lang_object
 	# If the object is a typedef, this points to the real object.
 	typedefOf: ptr lang_object
 
-	objectMap: map<str object_list>
-	inherited: object_list
+	objectMap: map<str list<ptr lang_object>>
+	inherited: list<ptr lang_object>
 	lookupParent: ptr lang_object
 	specializationOf: ptr lang_object
 	[]
@@ -33,9 +33,6 @@ def declarator_data
 	lookupObj: ptr lang_object
 	[]
 
-list declaration_data_list [declaration_data]
-list declarator_data_list [declarator_data]
-
 # Constants for language object types.
 global NamespaceType: int = typeid namespace_id
 global ClassType: int = typeid class_id
@@ -45,29 +42,23 @@ global IdType: int = typeid identifier
 global TypedefType: int = typeid typedef_id
 global TemplateIdType: int = typeid template_id
 
-# Object stack definition. Uses references to objects.
-list object_list [ptr lang_object]
-
-# Stack of integers.
-list int_stack [int]
-
 #
 # Global data declarations
 #
 
 # Object stacks.
-global curNamespace: object_list = construct object_list []
-global declNs: object_list = construct object_list []
-global lookupNs: object_list = construct object_list []
-global qualNs: object_list = construct object_list []
-global templateParamNs: object_list = construct object_list []
+global curNamespace: list<ptr lang_object> = construct list<ptr lang_object> []
+global declNs: list<ptr lang_object> = construct list<ptr lang_object> []
+global lookupNs: list<ptr lang_object> = construct list<ptr lang_object> []
+global qualNs: list<ptr lang_object> = construct list<ptr lang_object> []
+global templateParamNs: list<ptr lang_object> = construct list<ptr lang_object> []
 
 # Declaration, declarator data.
-global declarationData: declaration_data_list = construct declaration_data_list []
-global declaratorData: declarator_data_list = construct declarator_data_list []
+global declarationData: list<declaration_data> = construct list<declaration_data> []
+global declaratorData: list<declarator_data> = construct list<declarator_data> []
 
 # Template declarations
-global templDecl: int_stack = construct int_stack []
+global templDecl: list<int> = construct list<int> []
 
 # Root namespace object
 global rootNamespace: ptr lang_object = createLangObject( NamespaceType 
@@ -94,7 +85,7 @@ ptr lang_object lookupInObject( obj: ptr lang_object name: str )
 {
 	# LOG print( '  looking in ', obj->name, '\n' )
 
-	ol: object_list = obj->objectMap.find( name )
+	ol: list<ptr lang_object> = obj->objectMap.find( name )
 	if ol {
 		# LOG print( '  * found an object: ', ol.head, '\n' )
 		return ol.head
@@ -111,7 +102,7 @@ ptr lang_object lookupWithInheritance( obj: ptr lang_object name: str )
 	if found
 		return found
 
-	localObjInherited: object_list = obj->inherited
+	localObjInherited: list<ptr lang_object> = obj->inherited
 	for II: ptr lang_object in localObjInherited {
 		inh: ptr lang_object = II
 
@@ -135,7 +126,7 @@ ptr lang_object unqualifiedLookup( name: str )
 	found: ptr lang_object
 
 	# Start with the objects in the templateParamNs.
-	localTemplateParamNs: object_list = templateParamNs
+	localTemplateParamNs: list<ptr lang_object> = templateParamNs
 	for TemplParaObjIter: ptr lang_object in rev_child(localTemplateParamNs) {
 		found = lookupWithInheritance( TemplParaObjIter name )
 		if found
@@ -267,8 +258,8 @@ ptr lang_object createLangObject( typeId: int name: str lookupParent: ptr lang_o
 	obj: ptr lang_object = new construct lang_object(
 			typeId: typeId 
 			name: name
-			objectMap: construct map<str object_list> []
-			inherited: construct object_list []
+			objectMap: construct map<str list<ptr lang_object>> []
+			inherited: construct list<ptr lang_object> []
 			lookupParent: lookupParent ) []
 	return obj
 }
@@ -276,10 +267,10 @@ ptr lang_object createLangObject( typeId: int name: str lookupParent: ptr lang_o
 # Building the language object tree.
 int insertObject( definedIn: ptr lang_object name: str obj: ptr lang_object )
 {
-	ol: object_list = definedIn->objectMap.find( name )
+	ol: list<ptr lang_object> = definedIn->objectMap.find( name )
 	if !ol {
 		# Element not in the map already
-		ol = construct object_list []
+		ol = construct list<ptr lang_object> []
 	}
 	ol.append( obj )
 	definedIn->objectMap.store( name ol )
@@ -287,7 +278,7 @@ int insertObject( definedIn: ptr lang_object name: str obj: ptr lang_object )
 
 ptr lang_object findClass( inObj: ptr lang_object name: str )
 {
-	ol: object_list = inObj->objectMap.find( name )
+	ol: list<ptr lang_object> = inObj->objectMap.find( name )
 	if ol { 
 		for ObjIter: ptr lang_object in ol {
 			obj: ptr lang_object = ObjIter
@@ -301,7 +292,7 @@ ptr lang_object findClass( inObj: ptr lang_object name: str )
 
 ptr lang_object findTemplateClass( inObj: ptr lang_object name: str )
 {
-	ol: object_list = inObj->objectMap.find( name )
+	ol: list<ptr lang_object> = inObj->objectMap.find( name )
 	if ol { 
 		for ObjIter: ptr lang_object in ol {
 			obj: ptr lang_object = ObjIter
@@ -2138,8 +2129,8 @@ int printObject( indent: str obj: ptr lang_object )
 	if obj->objectMap.length > 0
 		print( ' {\n' )
 	
-	ChildNames: map<str object_list> = obj->objectMap
-	for MapEl: object_list in child( ChildNames ) {
+	ChildNames: map<str list<ptr lang_object>> = obj->objectMap
+	for MapEl: list<ptr lang_object> in child( ChildNames ) {
 		for Obj: ptr lang_object in MapEl
 			printObject( indent + '  ' Obj )
 	}

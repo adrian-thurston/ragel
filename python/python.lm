@@ -2,8 +2,7 @@
 rl ident_char /[a-zA-Z_]/
 
 # List used as a stack of indentations.
-list indent_stack [int]
-global IndentStack: indent_stack = construct indent_stack []
+global IndentStack: list<int> = construct list<int> []
 IndentStack.push( 0 )
 
 # Has a newline been sent for this '\n' .. whitespace match. 
