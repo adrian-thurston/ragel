@@ -2420,17 +2420,15 @@ void Parser::addArgvList()
 	/* Get the language element. */
 	Namespace *nspace = namespaceStack.top();
 
-	NamespaceQual *nspaceQual = new NamespaceQual( namespaceStack.top(), regionStack.top() );
-	TypeRef *typeRef = new TypeRef( InputLoc(), nspaceQual, "str" );
-	GenericType *generic = new GenericType( "argv_list", GEN_LIST, 
-			pd->nextGenericId++, 0/*langEl*/, typeRef );
+	NamespaceQual *nspaceQual1 = new NamespaceQual( 
+			namespaceStack.top(), regionStack.top() );
+	TypeRef *typeRef = new TypeRef( InputLoc(), nspaceQual1, "str" );
 
-	nspace->genericList.append( generic );
+	NamespaceQual *nspaceQual2 = new NamespaceQual( 
+			namespaceStack.top(), regionStack.top() );
 
-	pd->argvList = generic;
-
-	/* Assume this in the VM. */
-	assert( generic->id == 1 );
+	pd->argvTypeRef = new TypeRef( TypeRef::List, InputLoc(), 
+			nspaceQual2, typeRef, 0 );
 }
 
 int Parser::parseLangEl( int type, const Token *token )

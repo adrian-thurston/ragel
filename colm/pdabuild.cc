@@ -1429,6 +1429,8 @@ void ParseData::makeRuntimeData()
 		}
 	}
 
+	runtimeData->argvGenericId = argvTypeRef->generic->id;
+
 	/*
 	 * Literals
 	 */

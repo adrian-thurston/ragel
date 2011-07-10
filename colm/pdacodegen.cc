@@ -425,6 +425,7 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 		"\n"
 		"	" << genericInfo() << ",\n"
 		"	" << runtimeData->numGenerics << ",\n"
+		"	" << runtimeData->argvGenericId << ",\n"
 		"\n"
 		"	" << litdata() << ",\n"
 		"	" << litlen() << ",\n"

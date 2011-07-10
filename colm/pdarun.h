@@ -346,6 +346,8 @@ typedef struct _RuntimeData
 	GenericInfo *genericInfo;
 	long numGenerics;
 
+	long argvGenericId;
+
 	const char **litdata;
 	long *litlen;
 	Head **literals;

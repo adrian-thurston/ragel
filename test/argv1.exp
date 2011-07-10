@@ -1,4 +1,4 @@
-<argv_list>
+<__list0>
   <str>./argv1.bin</str>
   <str>a</str>
   <str>b</str>
@@ -6,4 +6,4 @@
   <str>1</str>
   <str>2</str>
   <str>3</str>
-</argv_list>
+</__list0>

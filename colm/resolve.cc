@@ -693,6 +693,7 @@ void ParseData::resolveGenericTypes()
 	}
 }
 
+
 void ParseData::typeResolve()
 {
 	/*
@@ -715,4 +716,6 @@ void ParseData::typeResolve()
 	makeTerminalWrappers();
 	makeEofElements();
 	resolveGenericTypes();
+
+	argvTypeRef->lookupType( this );
 }

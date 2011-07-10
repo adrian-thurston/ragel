@@ -491,7 +491,7 @@ void userIterDestroy( Tree ***psp, UserIter *uiter )
 
 Tree *constructArgv( Program *prg, int argc, char **argv )
 {
-	Tree *list = createGeneric( prg, 1 );
+	Tree *list = createGeneric( prg, prg->rtd->argvGenericId );
 	treeUpref( list );
 	int i;
 	for ( i = 0; i < argc; i++ ) {

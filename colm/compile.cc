@@ -3080,11 +3080,8 @@ void ParseData::addStderr()
 
 void ParseData::addArgv()
 {
-	/* Make the type ref. */
-	TypeRef *typeRef = new TypeRef( InputLoc(), findUniqueType( TYPE_TREE, argvList->langEl ) );
-
 	/* Create the field and insert it into the map. */
-	ObjField *el = new ObjField( InputLoc(), typeRef, "argv" );
+	ObjField *el = new ObjField( InputLoc(), argvTypeRef, "argv" );
 	el->isArgv = true;
 	el->isConst = true;
 	globalObjectDef->insertField( el->name, el );

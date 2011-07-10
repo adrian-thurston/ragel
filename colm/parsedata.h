@@ -985,7 +985,7 @@ struct ParseData
 	long predValue;
 	long nextMatchEndNum;
 
-	GenericType *argvList;
+	TypeRef *argvTypeRef;
 
 	Context *context;
 };
