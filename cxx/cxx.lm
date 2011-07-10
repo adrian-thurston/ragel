@@ -2,9 +2,6 @@
 # Data types for global data.
 #
 
-# Map definition
-map object_map [str object_list]
-
 # Language objects. 
 def lang_object
 	typeId: int 
@@ -13,7 +10,7 @@ def lang_object
 	# If the object is a typedef, this points to the real object.
 	typedefOf: ptr lang_object
 
-	objectMap: object_map
+	objectMap: map<str object_list>
 	inherited: object_list
 	lookupParent: ptr lang_object
 	specializationOf: ptr lang_object
@@ -270,7 +267,7 @@ ptr lang_object createLangObject( typeId: int name: str lookupParent: ptr lang_o
 	obj: ptr lang_object = new construct lang_object(
 			typeId: typeId 
 			name: name
-			objectMap: construct object_map []
+			objectMap: construct map<str object_list> []
 			inherited: construct object_list []
 			lookupParent: lookupParent ) []
 	return obj
@@ -2141,7 +2138,7 @@ int printObject( indent: str obj: ptr lang_object )
 	if obj->objectMap.length > 0
 		print( ' {\n' )
 	
-	ChildNames: object_map = obj->objectMap
+	ChildNames: map<str object_list> = obj->objectMap
 	for MapEl: object_list in child( ChildNames ) {
 		for Obj: ptr lang_object in MapEl
 			printObject( indent + '  ' Obj )

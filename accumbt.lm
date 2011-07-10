@@ -25,9 +25,7 @@ token EOF /ws+/
 def start 
 	[prefix choice1 choice2 string id id EOF]
 
-accum input [start]
-
-I: input = construct input []
+cons I: parser<start> []
 
 I << " id "
 I << " 77 "

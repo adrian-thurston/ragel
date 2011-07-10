@@ -21,9 +21,7 @@ def item
 def args 
 	[word zero item*]
 
-accum arg_parser [args] 
-
-ArgParser: arg_parser = cons arg_parser []
+cons ArgParser: parser<args> []
 
 ArgV: argv_list ArgV = argv
 for A: str in ArgV 

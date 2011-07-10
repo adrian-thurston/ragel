@@ -26,8 +26,7 @@ context ctx
 }
 
 
-parser start_parser [ctx::start]
-SP: start_parser = cons start_parser[]
+cons SP: parser<ctx::start> []
 SP.ctx = cons ctx []
 SP << stdin
 Input: ctx::start = SP.finish()

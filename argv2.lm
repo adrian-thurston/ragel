@@ -38,9 +38,7 @@ def args
 
 # The argument parser. Using an accumulator so we can send nulls after each
 # arg.
-accum arg_parser [args] 
-ArgParser: arg_parser = 
-	construct arg_parser []
+cons ArgParser: parser<args>[]
 
 # Parse the args and extract the result into Args.
 ArgV: argv_list = argv
