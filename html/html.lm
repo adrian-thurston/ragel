@@ -62,13 +62,13 @@ lex close_id
 	{
 		# If it is in the tag stack then it is a close_id. If not then it's a
 		# stray_close_id.
-		send_id: int = typeid stray_close_id
+		send_id: int = typeid<stray_close_id>
 
 		LocalTagStack: tag_stack = TagStack
 		for Tag: tag_id in LocalTagStack {
 			T: tag_id = Tag
 			if match_text == T.data {
-				send_id = typeid close_id
+				send_id = typeid<close_id>
 				break
 			}
 		}

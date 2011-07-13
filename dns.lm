@@ -29,19 +29,19 @@ token RR_TXT //       # 16 text strings
 token RR_UNKNOWN 
 	/''/
 	{
-		id: int = typeid RR_UNKNOWN
+		id: int = typeid<RR_UNKNOWN>
 		if rr_type_value == 1
-			id = typeid RR_A
+			id = typeid<RR_A>
 		elsif rr_type_value == 2
-			id = typeid RR_NS
+			id = typeid<RR_NS>
 		elsif rr_type_value == 5
-			id = typeid RR_CNAME
+			id = typeid<RR_CNAME>
 		elsif rr_type_value == 12
-			id = typeid RR_PTR
+			id = typeid<RR_PTR>
 		elsif rr_type_value == 15
-			id = typeid RR_MX
+			id = typeid<RR_MX>
 		elsif rr_type_value == 16
-			id = typeid RR_TXT
+			id = typeid<RR_TXT>
 
 		input.push( make_token( id '' ) )
 	}
@@ -198,7 +198,7 @@ token nb_empty /''/
 token nbytes_data
 	/''/
 	{
-		input.push( make_token( typeid nbytes_data input.pull(nbytes) ) )
+		input.push( make_token( typeid<nbytes_data> input.pull(nbytes) ) )
 	}
 
 def nbytes
@@ -269,7 +269,7 @@ def ttl
 token rdata_bytes
 	/''/
 	{
-		input.push( make_token( typeid rdata_bytes input.pull(rdata_length) ) )
+		input.push( make_token( typeid<rdata_bytes> input.pull(rdata_length) ) )
 	}
 
 def rdlength 
