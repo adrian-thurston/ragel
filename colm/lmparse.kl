@@ -1735,10 +1735,10 @@ code_factor: KW_ParseStop opt_capture type_ref '(' opt_code_expr_list ')'
 		}
 
 	};
-code_factor: KW_TypeId type_ref
+code_factor: KW_TypeId '<' type_ref '>'
 	final {
 		$$->expr = new LangExpr( new LangTerm( $1->loc,
-				LangTerm::TypeIdType, $2->typeRef ) );
+				LangTerm::TypeIdType, $3->typeRef ) );
 	};
 code_factor: type_ref KW_In var_ref
 	final {

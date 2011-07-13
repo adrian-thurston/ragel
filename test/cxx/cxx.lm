@@ -34,13 +34,13 @@ def declarator_data
 	[]
 
 # Constants for language object types.
-global NamespaceType: int = typeid namespace_id
-global ClassType: int = typeid class_id
-global TemplateClassType: int = typeid templ_class_id
-global EnumType: int = typeid enum_id
-global IdType: int = typeid identifier
-global TypedefType: int = typeid typedef_id
-global TemplateIdType: int = typeid template_id
+global NamespaceType: int = typeid<namespace_id>
+global ClassType: int = typeid<class_id>
+global TemplateClassType: int = typeid<templ_class_id>
+global EnumType: int = typeid<enum_id>
+global IdType: int = typeid<identifier>
+global TypedefType: int = typeid<typedef_id>
+global TemplateIdType: int = typeid<template_id>
 
 #
 # Global data declarations
@@ -217,11 +217,11 @@ lex start
 			}
 
 			# If no match, return an Unknown ID
-			id: int = typeid unknown_id
+			id: int = typeid<unknown_id>
 			if found
 				id = found->typeId
 
-			LookupId: any = make_token( typeid lookup_id 
+			LookupId: any = make_token( typeid<lookup_id>
 					input.pull(match_length) found qualObj )
 			input.push( make_tree( id LookupId ) )
 
