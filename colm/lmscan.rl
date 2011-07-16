@@ -472,6 +472,7 @@ void Scanner::endSection( )
 		'prec' => { token( KW_Prec ); };
 		'include' => {token( KW_Include ); };
 		'context' => {token( KW_Context ); };
+		'alias' => {token( KW_Alias ); };
 
 		# Identifiers.
 		ident => { token( TK_Word, ts, te ); } ;

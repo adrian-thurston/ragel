@@ -39,10 +39,19 @@ UniqueType *TypeRef::lookupTypeName( ParseData *pd )
 
 	while ( nspace != 0 ) {
 		/* Search for the token in the region by typeName. */
-		SymbolMapEl *inDict = nspace->symbolMap.find( typeName );
+		TypeMapEl *inDict = nspace->typeMap.find( typeName );
+
 		if ( inDict != 0 ) {
-			long typeId = ( isPtr ? TYPE_PTR : ( isRef ? TYPE_REF : TYPE_TREE ) );
-			return pd->findUniqueType( typeId, inDict->value );
+			switch ( inDict->type ) {
+				/* Defer to the typeRef we are an alias of. We need to guard against loops here. */
+				case TypeMapEl::TypeAliasType:
+					return inDict->typeRef->lookupType( pd );
+
+				case TypeMapEl::LangElType: {
+					long typeId = ( isPtr ? TYPE_PTR : ( isRef ? TYPE_REF : TYPE_TREE ) );
+					return pd->findUniqueType( typeId, inDict->value );
+				}
+			}
 		}
 
 		nspace = nspace->parentNamespace;
@@ -600,7 +609,7 @@ void ParseData::resolveUses()
 				error() << "do not have namespace for resolving reference" << endp;
 	
 			/* Look up the language element in the region. */
-			LangEl *langEl = findLangEl( this, nspace, lel->objectDefUses );
+			LangEl *langEl = findType( this, nspace, lel->objectDefUses );
 			lel->objectDef = langEl->objectDef;
 		}
 	}

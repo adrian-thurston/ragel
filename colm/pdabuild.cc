@@ -130,42 +130,6 @@ PdaGraph *ProdElList::walk( ParseData *pd )
 }
 
 
-LangEl *declareLangEl( ParseData *pd, Namespace *nspace, const String &data, LangEl::Type type )
-{
-    /* If the id is already in the dict, it will be placed in last found. If
-     * it is not there then it will be inserted and last found will be set to it. */
-	SymbolMapEl *inDict = nspace->symbolMap.find( data );
-	if ( inDict != 0 )
-		error() << "'" << data << "' already defined as something else" << endp;
-
-	/* Language element not there. Make the new lang el and insert.. */
-	LangEl *langEl = new LangEl( nspace, data, type );
-	nspace->symbolMap.insert( langEl->name, langEl );
-	pd->langEls.append( langEl );
-
-	return langEl;
-}
-
-/* Does not map the new language element. */
-LangEl *addLangEl( ParseData *pd, Namespace *nspace, const String &data, LangEl::Type type )
-{
-	LangEl *langEl = new LangEl( nspace, data, type );
-	pd->langEls.append( langEl );
-	return langEl;
-}
-
-LangEl *findLangEl( ParseData *pd, Namespace *nspace, const String &data )
-{
-	/* If the id is already in the dict, it will be placed in last found. If
-	 * it is not there then it will be inserted and last found will be set to it. */
-	SymbolMapEl *inDict = nspace->symbolMap.find( data );
-
-	if ( inDict == 0 )
-		error() << "'" << data << "' not declared as anything" << endp;
-
-	return inDict->value;
-}
-
 ProdElList *ParseData::makeProdElList( LangEl *langEl )
 {
 	ProdElList *prodElList = new ProdElList();
@@ -998,11 +962,7 @@ void ParseData::wrapNonTerminals()
 	/* Make a language element that will be used to make the root productions.
 	 * These are used for making parsers rooted at any production (including
 	 * the start symbol). */
-	rootKlangEl = new LangEl( rootNamespace, "_root", LangEl::NonTerm );
-	langEls.append( rootKlangEl );
-	SymbolMapEl *rootMapEl = rootNamespace->symbolMap.insert( 
-			rootKlangEl->name, rootKlangEl );
-	assert( rootMapEl != 0 );
+	rootKlangEl = declareLangEl( this, rootNamespace, "_root", LangEl::NonTerm );
 
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
 		/* Make a single production used when the lel is a root. */

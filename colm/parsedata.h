@@ -303,9 +303,6 @@ struct PdaLiteral
 	long value;
 };
 
-/* Forwards. */
-using std::ostream;
-
 /* Nodes in the tree that use this action. */
 typedef Vector<NameInst*> ActionRefs;
 
@@ -1011,6 +1008,7 @@ typedef AvlMapEl<String, Parser *> ParserDictEl;
 
 LangEl *declareLangEl( ParseData *pd, Namespace *nspace, const String &data, LangEl::Type type );
 LangEl *addLangEl( ParseData *pd, Namespace *nspace, const String &data, LangEl::Type type );
-LangEl *findLangEl( ParseData *pd, Namespace *nspace, const String &data );
+void declareTypeAlias( ParseData *pd, Namespace *nspace, const String &data, TypeRef *typeRef );
+LangEl *findType( ParseData *pd, Namespace *nspace, const String &data );
 
 #endif /* _PARSEDATA_H */

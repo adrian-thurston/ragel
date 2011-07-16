@@ -25,67 +25,83 @@
 #include <iostream>
 #include <assert.h>
 
+LangEl *declareLangEl( ParseData *pd, Namespace *nspace, const String &data, LangEl::Type type )
+{
+    /* If the id is already in the dict, it will be placed in last found. If
+     * it is not there then it will be inserted and last found will be set to it. */
+	TypeMapEl *inDict = nspace->typeMap.find( data );
+	if ( inDict != 0 )
+		error() << "'" << data << "' already defined as something else" << endp;
+
+	/* Language element not there. Make the new lang el and insert.. */
+	LangEl *langEl = new LangEl( nspace, data, type );
+	TypeMapEl *typeMapEl = new TypeMapEl( data, langEl );
+	nspace->typeMap.insert( typeMapEl );
+	pd->langEls.append( langEl );
+
+	return langEl;
+}
+
+/* Does not map the new language element. */
+LangEl *addLangEl( ParseData *pd, Namespace *nspace, const String &data, LangEl::Type type )
+{
+	LangEl *langEl = new LangEl( nspace, data, type );
+	pd->langEls.append( langEl );
+	return langEl;
+}
+
+void declareTypeAlias( ParseData *pd, Namespace *nspace, const String &data, TypeRef *typeRef )
+{
+    /* If the id is already in the dict, it will be placed in last found. If
+     * it is not there then it will be inserted and last found will be set to it. */
+	TypeMapEl *inDict = nspace->typeMap.find( data );
+	if ( inDict != 0 )
+		error() << "'" << data << "' already defined as something else" << endp;
+
+	/* Language element not there. Make the new lang el and insert.. */
+	TypeMapEl *typeMapEl = new TypeMapEl( data, typeRef );
+	nspace->typeMap.insert( typeMapEl );
+}
+
+LangEl *findType( ParseData *pd, Namespace *nspace, const String &data )
+{
+	/* If the id is already in the dict, it will be placed in last found. If
+	 * it is not there then it will be inserted and last found will be set to it. */
+	TypeMapEl *inDict = nspace->typeMap.find( data );
+
+	if ( inDict == 0 )
+		error() << "'" << data << "' not declared as anything" << endp;
+
+	return inDict->value;
+}
+
+
 void ParseData::declareBaseKlangEls()
 {
-	/* Make the "stream" language element */
-	streamKlangEl = new LangEl( rootNamespace, strdup("stream"), LangEl::Term );
-	langEls.prepend( streamKlangEl );
-	SymbolMapEl *streamMapEl = rootNamespace->symbolMap.insert( 
-			streamKlangEl->name, streamKlangEl );
-	assert( streamMapEl != 0 );
-
-	/* Make the "str" language element */
-	strKlangEl = new LangEl( rootNamespace, strdup("str"), LangEl::Term );
-	langEls.prepend( strKlangEl );
-	SymbolMapEl *stringMapEl = rootNamespace->symbolMap.insert( 
-			strKlangEl->name, strKlangEl );
-	assert( stringMapEl != 0 );
-
-	/* Make the "int" language element */
-	intKlangEl = new LangEl( rootNamespace, strdup("int"), LangEl::Term );
-	langEls.prepend( intKlangEl );
-	SymbolMapEl *integerMapEl = rootNamespace->symbolMap.insert( 
-			intKlangEl->name, intKlangEl );
-	assert( integerMapEl != 0 );
-
-	/* Make the "bool" language element */
-	boolKlangEl = new LangEl( rootNamespace, strdup("bool"), LangEl::Term );
-	langEls.prepend( boolKlangEl );
-	SymbolMapEl *boolMapEl = rootNamespace->symbolMap.insert( 
-			boolKlangEl->name, boolKlangEl );
-	assert( boolMapEl != 0 );
-
-	/* Make the "ptr" language element */
-	ptrKlangEl = new LangEl( rootNamespace, strdup("ptr"), LangEl::Term );
-	langEls.prepend( ptrKlangEl );
-	SymbolMapEl *ptrMapEl = rootNamespace->symbolMap.insert( 
-			ptrKlangEl->name, ptrKlangEl );
-	assert( ptrMapEl != 0 );
+	/* Order here is important because we make assumptions about the inbuild
+	 * language elements in the runtime. Note tokens are have identifiers set
+	 * in an initial pass. */
 
 	/* Make a "_notoken" language element. This element is used when a
 	 * generation action fails to generate anything, but there is reverse code
 	 * that needs to be associated with a language element. This allows us to
 	 * always associate reverse code with the first language element produced
 	 * after a generation action. */
-	noTokenKlangEl = new LangEl( rootNamespace, strdup("_notoken"), LangEl::Term );
+	noTokenKlangEl = declareLangEl( this, rootNamespace, "_notoken", LangEl::Term );
 	noTokenKlangEl->ignore = true;
-	langEls.prepend( noTokenKlangEl );
-	SymbolMapEl *noTokenMapEl = rootNamespace->symbolMap.insert( 
-			noTokenKlangEl->name, noTokenKlangEl );
-	assert( noTokenMapEl != 0 );
+	
+	/* Make the "stream" language element */
+	ptrKlangEl = declareLangEl( this, rootNamespace, "ptr", LangEl::Term );
+	boolKlangEl = declareLangEl( this, rootNamespace, "bool", LangEl::Term );
+	intKlangEl = declareLangEl( this, rootNamespace, "int", LangEl::Term );
+	strKlangEl = declareLangEl( this, rootNamespace, "str", LangEl::Term );
+	streamKlangEl = declareLangEl( this, rootNamespace, "stream", LangEl::Term );
 
 	/* Make the EOF language element. */
 	eofKlangEl = 0;
-//	eofKlangEl = new LangEl( rootNamespace, strdup("_eof"), LangEl::Term );
-//	langEls.prepend( eofKlangEl );
-//	SymbolMapEl *eofMapEl = rootNamespace->symbolMap.insert( eofKlangEl->name, eofKlangEl );
-//	assert( eofMapEl != 0 );
 
 	/* Make the "any" language element */
-	anyKlangEl = new LangEl( rootNamespace, strdup("any"), LangEl::NonTerm );
-	langEls.prepend( anyKlangEl );
-	SymbolMapEl *anyMapEl = rootNamespace->symbolMap.insert( anyKlangEl->name, anyKlangEl );
-	assert( anyMapEl != 0 );
+	anyKlangEl = declareLangEl( this, rootNamespace, "any", LangEl::NonTerm );
 }
 
 void ParseData::makeTerminalWrappers()
@@ -255,7 +271,8 @@ void Namespace::declare( ParseData *pd )
 			if ( strcmp( c->name, this->name ) == 0 ) {
 				/* Insert the name into the top of the region stack after popping the
 				 * region just created. We need it in the parent. */
-				this->parentNamespace->symbolMap.insert( c->name, prodName );
+				TypeMapEl *typeMapEl = new TypeMapEl( c->name, prodName );
+				this->parentNamespace->typeMap.insert( typeMapEl );
 			}
 		}
 
@@ -298,14 +315,16 @@ void Namespace::declare( ParseData *pd )
 				pd->addProdRHSVars( d->redBlock->localFrame, d->prodElList );
 			}
 
-		/* References to the reduce item. */
+			/* References to the reduce item. */
 		}
 	}
 
-	for ( NamespaceVect::Iter c = childNamespaces; c.lte(); c++ ) {
-		//std::cout << "namespace " << (*c)->name << std::endl;
+	for ( TypeAliasList::Iter ta = typeAliasList; ta.lte(); ta++ )
+		declareTypeAlias( pd, this, ta->name, ta->typeRef );
+
+	/* Go into child aliases. */
+	for ( NamespaceVect::Iter c = childNamespaces; c.lte(); c++ )
 		(*c)->declare( pd );
-	}
 }
 
 void ParseData::setPrecedence()
@@ -319,11 +338,14 @@ void ParseData::setPrecedence()
 	}
 }
 
+/*
+ * Type Declaration Root.
+ */
 void ParseData::typeDeclaration()
 {
-	/*
-	 * Type Declaration.
-	 */
+	/* These must be declared first, since the runtime assumes their identifiers. */
+	declareBaseKlangEls();
+
 	rootNamespace->declare( this );
 
 	/* Fill any empty scanners with a default token. */
@@ -333,7 +355,6 @@ void ParseData::typeDeclaration()
 	 * when we have no other scanner */
 	createDefaultScanner();
 
-	declareBaseKlangEls();
 	initUniqueTypes();
 
 	setPrecedence();

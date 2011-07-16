@@ -80,6 +80,7 @@ root_item: global_def commit final { $$->stmt = $1->stmt; };
 root_item: statement commit final { $$->stmt = $1->stmt; };
 root_item: pre_eof commit final { $$->stmt = 0; };
 root_item: precedence commit final { $$->stmt = 0; };
+root_item: typedef commit final { $$->stmt = 0; };
 
 nonterm block_open
 {
@@ -253,6 +254,15 @@ pred_token:
 
 		PredDecl *predDecl = new PredDecl( typeRef, predType, pd->predValue );
 		pd->predDeclList.append( predDecl );
+	};
+
+typedef:
+	KW_Alias TK_Word type_ref
+	final {
+		Namespace *nspace = namespaceStack.top();
+		TypeAlias *typeAlias = new TypeAlias(
+				$1->loc, nspace, $2->data, $3->typeRef );
+		nspace->typeAliasList.append( typeAlias );
 	};
 
 cfl_def: cfl_def_head obj_var_list properties_list cfl_prod_list

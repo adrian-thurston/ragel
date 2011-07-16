@@ -61,6 +61,7 @@ struct ObjField;
 struct TransBlock;
 struct CodeBlock;
 struct PdaLiteral;
+struct TypeAlias;
 typedef struct _PdaRun PdaRun;
 
 /* 
@@ -472,9 +473,34 @@ struct ContextDef
 
 struct ContextDefList : DList<ContextDef> {};
 
+struct TypeMapEl
+	: public AvlTreeEl<TypeMapEl>
+{
+	enum Type
+	{
+		TypeAliasType = 1,
+		LangElType
+	};
+
+	const String &getKey() { return key; }
+
+	TypeMapEl( const String &key, TypeRef *typeRef )
+		: type(TypeAliasType), key(key), value(0), typeRef(typeRef) {}
+
+	TypeMapEl( const String &key, LangEl *value )
+		: type(LangElType), key(key), value(value), typeRef(0) {}
+
+
+	Type type;
+	String key;
+	LangEl *value;
+	TypeRef *typeRef;
+	
+	TypeMapEl *prev, *next;
+};
+
 /* Symbol Map. */
-typedef AvlMap< String, LangEl*, CmpStr > SymbolMap;
-typedef AvlMapEl< String, LangEl* > SymbolMapEl;
+typedef AvlTree< TypeMapEl, String, CmpStr > TypeMap;
 
 typedef Vector<TokenRegion*> RegionVect;
 
@@ -586,6 +612,27 @@ struct GraphDictEl
 typedef AvlTree<GraphDictEl, String, CmpStr> GraphDict;
 typedef DList<GraphDictEl> GraphList;
 
+struct TypeAlias
+{
+	TypeAlias( const InputLoc &loc, Namespace *nspace, 
+			const String &name, TypeRef *typeRef )
+	:
+		loc(loc),
+		nspace(nspace),
+		name(name),
+		typeRef(typeRef)
+	{}
+
+	InputLoc loc;
+	Namespace *nspace;
+	String name;
+	TypeRef *typeRef;
+
+	TypeAlias *prev, *next;
+};
+
+typedef DList<TypeAlias> TypeAliasList;
+
 struct Namespace
 {
 	/* Construct with a list of joins */
@@ -615,11 +662,13 @@ struct Namespace
 	ContextDefList contextDefList;
 
 	/* Dictionary of symbols within the region. */
-	SymbolMap symbolMap;
+	TypeMap typeMap;
 	GenericList genericList;
 
 	/* Dictionary of graphs. Both instances and non-instances go here. */
 	GraphDict graphDict;
+
+	TypeAliasList typeAliasList;
 
 	Namespace *parentNamespace;
 	NamespaceVect childNamespaces;
