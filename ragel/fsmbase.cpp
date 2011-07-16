@@ -96,6 +96,7 @@ FsmAp::FsmAp( const FsmAp &graph )
 
 			/* Attach The transition to the duplicate. */
 			trans->toState = 0;
+			trans->condTransList.head->toState = 0;
 			attachTrans( state, toState, trans );
 		}
 
@@ -391,7 +392,7 @@ void FsmAp::markReachableFromHereReverse( StateAp *state )
 	state->stateBits |= STB_ISMARKED;
 
 	/* Recurse on all items in transitions. */
-	for ( TransInList::Iter trans = state->inList; trans.lte(); trans++ ) 
+	for ( TransInList<TransAp>::Iter trans = state->inList; trans.lte(); trans++ ) 
 		markReachableFromHereReverse( trans->fromState );
 }
 
@@ -444,7 +445,7 @@ void FsmAp::verifyIntegrity()
 			assert( trans->fromState == state );
 
 		/* Walk the inlist and assert toState is correct. */
-		for ( TransInList::Iter trans = state->inList; trans.lte(); trans++ ) 
+		for ( TransInList<TransAp>::Iter trans = state->inList; trans.lte(); trans++ ) 
 			assert( trans->toState == state );
 	}
 }

@@ -53,6 +53,32 @@ void FsmAp::attachToInList( StateAp *from, StateAp *to,
 	}
 };
 
+void FsmAp::attachToCondInList( StateAp *from, StateAp *to, 
+		CondTransAp *&head, CondTransAp *trans )
+{
+	trans->ilnext = head;
+	trans->ilprev = 0;
+
+	/* If in trans list is not empty, set the head->prev to trans. */
+	if ( head != 0 )
+		head->ilprev = trans;
+
+	/* Now insert ourselves at the front of the list. */
+	head = trans;
+
+	/* Keep track of foreign transitions for from and to. */
+//	if ( from != to ) {
+//		if ( misfitAccounting ) {
+//			/* If the number of foreign in transitions is about to go up to 1 then
+//			 * move it from the misfit list to the main list. */
+//			if ( to->foreignInTrans == 0 )
+//				stateList.append( misfitList.detach( to ) );
+//		}
+//		
+//		to->foreignInTrans += 1;
+//	}
+};
+
 /* Detach a transition from an inlist. The head of the inlist must be supplied. */
 void FsmAp::detachFromInList( StateAp *from, StateAp *to, 
 		TransAp *&head, TransAp *trans )
@@ -79,6 +105,32 @@ void FsmAp::detachFromInList( StateAp *from, StateAp *to,
 	}
 }
 
+/* Detach a transition from an inlist. The head of the inlist must be supplied. */
+void FsmAp::detachFromCondInList( StateAp *from, StateAp *to, 
+		CondTransAp *&head, CondTransAp *trans )
+{
+	/* Detach in the inTransList. */
+	if ( trans->ilprev == 0 ) 
+		head = trans->ilnext; 
+	else
+		trans->ilprev->ilnext = trans->ilnext; 
+
+	if ( trans->ilnext != 0 )
+		trans->ilnext->ilprev = trans->ilprev; 
+	
+//	/* Keep track of foreign transitions for from and to. */
+//	if ( from != to ) {
+//		to->foreignInTrans -= 1;
+//		
+//		if ( misfitAccounting ) {
+//			/* If the number of foreign in transitions goes down to 0 then move it
+//			 * from the main list to the misfit list. */
+//			if ( to->foreignInTrans == 0 )
+//				misfitList.append( stateList.detach( to ) );
+//		}
+//	}
+}
+
 /* Attach states on the default transition, range list or on out/in list key.
  * First makes a new transition. If there is already a transition out from
  * fromState on the default, then will assertion fail. */
@@ -102,6 +154,17 @@ TransAp *FsmAp::attachNewTrans( StateAp *from, StateAp *to, Key lowKey, Key high
 	if ( to != 0 )
 		attachToInList( from, to, to->inList.head, retVal );
 
+	/* Sub-transition for conditions. */
+	CondTransAp *condTransAp = new CondTransAp();
+	retVal->condTransList.append( condTransAp );
+
+	condTransAp->fromState = from;
+	condTransAp->toState = to;
+
+	/* Attach using inList as the head pointer. */
+	if ( to != 0 )
+		attachToCondInList( from, to, to->condInList.head, condTransAp );
+
 	return retVal;
 }
 
@@ -111,12 +174,24 @@ TransAp *FsmAp::attachNewTrans( StateAp *from, StateAp *to, Key lowKey, Key high
 void FsmAp::attachTrans( StateAp *from, StateAp *to, TransAp *trans )
 {
 	assert( trans->fromState == 0 && trans->toState == 0 );
+	assert( trans->condTransList.head->fromState == 0 && 
+			trans->condTransList.head->toState == 0 );
+
 	trans->fromState = from;
 	trans->toState = to;
+	
+	trans->condTransList.head->fromState = from;
+	trans->condTransList.head->toState = to;
 
 	if ( to != 0 ) { 
 		/* Attach using the inList pointer as the head pointer. */
 		attachToInList( from, to, to->inList.head, trans );
+	}
+
+	if ( to != 0 ) {
+		/* For now always attache the one and only condTransList element. */
+		attachToCondInList( from, to, to->condInList.head, 
+				trans->condTransList.head );
 	}
 }
 
@@ -126,11 +201,18 @@ void FsmAp::attachTrans( StateAp *from, StateAp *to, TransAp *trans )
 void FsmAp::redirectErrorTrans( StateAp *from, StateAp *to, TransAp *trans )
 {
 	assert( trans->fromState != 0 && trans->toState == 0 );
+	assert( trans->condTransList.head->fromState != 0 && trans->condTransList.head->toState == 0 );
 	trans->toState = to;
+	trans->condTransList.head->toState = to;
 
-	if ( to != 0 ) { 
+	if ( to != 0 ) {
 		/* Attach using the inList pointer as the head pointer. */
 		attachToInList( from, to, to->inList.head, trans );
+	}
+
+	if ( to != 0 ) {
+		/* Attach using the inList pointer as the head pointer. */
+		attachToCondInList( from, to, to->condInList.head, trans->condTransList.head );
 	}
 }
 
@@ -138,12 +220,22 @@ void FsmAp::redirectErrorTrans( StateAp *from, StateAp *to, TransAp *trans )
 void FsmAp::detachTrans( StateAp *from, StateAp *to, TransAp *trans )
 {
 	assert( trans->fromState == from && trans->toState == to );
+	assert( trans->condTransList.head->fromState == from && 
+			trans->condTransList.head->toState == to );
+
 	trans->fromState = 0;
 	trans->toState = 0;
+
+	trans->condTransList.head->fromState = 0;
+	trans->condTransList.head->toState = 0;
 
 	if ( to != 0 ) {
 		/* Detach using to's inList pointer as the head. */
 		detachFromInList( from, to, to->inList.head, trans );
+	}
+
+	if ( to != 0 ) {
+		detachFromCondInList( from, to, to->condInList.head, trans->condTransList.head );
 	}
 }
 
@@ -197,6 +289,10 @@ TransAp *FsmAp::dupTrans( StateAp *from, TransAp *srcTrans )
 {
 	/* Make a new transition. */
 	TransAp *newTrans = new TransAp();
+
+	/* Sub-transition for conditions. */
+	CondTransAp *condTransAp = new CondTransAp();
+	newTrans->condTransList.append( condTransAp );
 
 	/* We can attach the transition, one does not exist. */
 	attachTrans( from, srcTrans->toState, newTrans );

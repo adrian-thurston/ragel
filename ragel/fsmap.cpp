@@ -154,7 +154,7 @@ void FsmAp::finishFsmPrior( int ordering, PriorDesc *prior )
 	/* Walk all final states. */
 	for ( StateSet::Iter state = finStateSet; state.lte(); state++ ) {
 		/* Walk all in transitions of the final state. */
-		for ( TransInList::Iter trans = (*state)->inList; trans.lte(); trans++ )
+		for ( TransInList<TransAp>::Iter trans = (*state)->inList; trans.lte(); trans++ )
 			trans->priorTable.setPrior( ordering, prior );
 	}
 }
@@ -217,7 +217,7 @@ void FsmAp::finishFsmAction( int ordering, Action *action )
 	/* Walk all final states. */
 	for ( StateSet::Iter state = finStateSet; state.lte(); state++ ) {
 		/* Walk the final state's in list. */
-		for ( TransInList::Iter trans = (*state)->inList; trans.lte(); trans++ )
+		for ( TransInList<TransAp>::Iter trans = (*state)->inList; trans.lte(); trans++ )
 			trans->actionTable.setAction( ordering, action );
 	}
 }
@@ -237,7 +237,7 @@ void FsmAp::longMatchAction( int ordering, LongestMatchPart *lmPart )
 	/* Walk all final states. */
 	for ( StateSet::Iter state = finStateSet; state.lte(); state++ ) {
 		/* Walk the final state's in list. */
-		for ( TransInList::Iter trans = (*state)->inList; trans.lte(); trans++ )
+		for ( TransInList<TransAp>::Iter trans = (*state)->inList; trans.lte(); trans++ )
 			trans->lmActionTable.setAction( ordering, lmPart );
 	}
 }

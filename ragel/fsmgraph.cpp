@@ -925,6 +925,10 @@ void logNewExpansion( Expansion *exp )
 }
 #endif
 
+void FsmAp::expansionTrans( Expansion *expansion, TransAp *src )
+{
+
+}
 
 void FsmAp::findTransExpansions( ExpansionList &expansionList, 
 		StateAp *destState, StateAp *srcState )
@@ -935,9 +939,16 @@ void FsmAp::findTransExpansions( ExpansionList &expansionList,
 		if ( transCond.userState == RangeOverlap ) {
 			Expansion *expansion = new Expansion( transCond.s1Tel.lowKey, 
 					transCond.s1Tel.highKey );
+
+			expansionTrans( expansion, transCond.s1Tel.trans );
+
 			expansion->fromTrans = new TransAp(*transCond.s1Tel.trans);
+			CondTransAp *condTransAp = new CondTransAp( *transCond.s1Tel.trans->condTransList.head );
+			expansion->fromTrans->condTransList.append( condTransAp );
 			expansion->fromTrans->fromState = 0;
+			expansion->fromTrans->condTransList.head->fromState = 0;
 			expansion->fromTrans->toState = transCond.s1Tel.trans->toState;
+			expansion->fromTrans->condTransList.head->toState = transCond.s1Tel.trans->condTransList.head->toState;
 			expansion->fromCondSpace = 0;
 			expansion->fromVals = 0;
 			CondSpace *srcCS = transCond.s2Tel.trans->condSpace;
@@ -946,7 +957,6 @@ void FsmAp::findTransExpansions( ExpansionList &expansionList,
 			long numTargVals = (1 << srcCS->condSet.length());
 			for ( long targVals = 0; targVals < numTargVals; targVals++ )
 				expansion->toValsList.append( targVals );
-
 			#ifdef LOG_CONDS
 			logNewExpansion( expansion );
 			#endif
@@ -978,9 +988,16 @@ void FsmAp::findCondExpInTrans( ExpansionList &expansionList, StateAp *state,
 					keyOps->alphSize() + keyOps->minKey;
 
 			Expansion *expansion = new Expansion( expLowKey, expHighKey );
+
+			expansionTrans( expansion, pairIter.s1Tel.trans );
+
 			expansion->fromTrans = new TransAp(*pairIter.s1Tel.trans);
+			CondTransAp *condTransAp = new CondTransAp( *pairIter.s1Tel.trans->condTransList.head );
+			expansion->fromTrans->condTransList.append( condTransAp );
 			expansion->fromTrans->fromState = 0;
+			expansion->fromTrans->condTransList.head->fromState = 0;
 			expansion->fromTrans->toState = pairIter.s1Tel.trans->toState;
+			expansion->fromTrans->condTransList.head->toState = pairIter.s1Tel.trans->condTransList.head->toState;
 			expansion->fromCondSpace = fromCondSpace;
 			expansion->fromVals = fromVals;
 			expansion->toCondSpace = toCondSpace;
@@ -1311,13 +1328,21 @@ void FsmAp::findEmbedExpansions( ExpansionList &expansionList,
 					/* Create the expansion. */
 					Expansion *expansion = new Expansion( transCond.s1Tel.lowKey,
 							transCond.s1Tel.highKey );
+
+					expansionTrans( expansion, transCond.s1Tel.trans );
+
 					expansion->fromTrans = new TransAp(*transCond.s1Tel.trans);
+					CondTransAp *condTransAp = new CondTransAp( *transCond.s1Tel.trans->condTransList.head );
+					expansion->fromTrans->condTransList.append( condTransAp );
 					expansion->fromTrans->fromState = 0;
+					expansion->fromTrans->condTransList.head->fromState = 0;
 					expansion->fromTrans->toState = transCond.s1Tel.trans->toState;
+					expansion->fromTrans->condTransList.head->toState = transCond.s1Tel.trans->condTransList.head->toState;
 					expansion->fromCondSpace = 0;
 					expansion->fromVals = 0;
 					expansion->toCondSpace = newStateCond->condSpace;
 					expansion->toValsList.append( sense?1:0 );
+
 					#ifdef LOG_CONDS
 					logNewExpansion( expansion );
 					#endif

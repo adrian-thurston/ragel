@@ -372,43 +372,14 @@ typedef Vector<int> TransFuncList;
 /* Comparison for TransFuncList. */
 typedef CmpTable< int, CmpOrd<int> > TransFuncListCompare;
 
-/* Transition class that implements actions and priorities. */
-struct TransAp 
-{
-	TransAp() : fromState(0), toState(0) {}
-	TransAp( const TransAp &other ) :
-		lowKey(other.lowKey),
-		highKey(other.highKey),
-		fromState(0), toState(0),
-		actionTable(other.actionTable),
-		priorTable(other.priorTable),
-		lmActionTable(other.lmActionTable) {}
-
-	Key lowKey, highKey;
-	StateAp *fromState;
-	StateAp *toState;
-
-	/* Pointers for outlist. */
-	TransAp *prev, *next;
-
-	/* Pointers for in-list. */
-	TransAp *ilprev, *ilnext;
-
-	/* The function table and priority for the transition. */
-	ActionTable actionTable;
-	PriorTable priorTable;
-
-	LmActionTable lmActionTable;
-};
-
 /* In transition list. Like DList except only has head pointers, which is all
- * that is required. Insertion and deletion is handled by the graph. This
- * class provides the iterator of a single list. */
-struct TransInList
+ * that is required. Insertion and deletion is handled by the graph. This class
+ * provides the iterator of a single list. */
+template <class Element> struct TransInList
 {
 	TransInList() : head(0) { }
 
-	TransAp *head;
+	Element *head;
 
 	struct Iter
 	{
@@ -437,8 +408,84 @@ struct TransInList
 		inline void operator--(int)   { ptr = ptr->ilprev; }
 
 		/* The iterator is simply a pointer. */
-		TransAp *ptr;
+		Element *ptr;
 	};
+};
+
+
+/* The element for the sub-list within a TransAp. These specify the transitions
+ * and are keyed by the condition expressions. */
+struct CondTransAp
+{
+	CondTransAp() 
+	:
+		fromState(0), toState(0) 
+	{}
+
+	CondTransAp( const CondTransAp &other )
+	:
+		fromState(0), toState(0),
+		actionTable(other.actionTable),
+		priorTable(other.priorTable),
+		lmActionTable(other.lmActionTable)
+	{
+	}
+
+	StateAp *fromState;
+	StateAp *toState;
+
+	/* The function table and priority for the transition. */
+	ActionTable actionTable;
+	PriorTable priorTable;
+
+	LmActionTable lmActionTable;
+
+	/* Pointers for outlist. */
+	CondTransAp *prev, *next;
+
+	/* Pointers for in-list. */
+	CondTransAp *ilprev, *ilnext;
+};
+
+typedef DList<CondTransAp> CondTransList;
+
+/* Transition class that implements actions and priorities. */
+struct TransAp 
+{
+	TransAp() 
+	:
+		fromState(0), toState(0) 
+	{}
+
+	TransAp( const TransAp &other )
+	:
+		condTransList(),
+		lowKey(other.lowKey),
+		highKey(other.highKey),
+		fromState(0), toState(0),
+		actionTable(other.actionTable),
+		priorTable(other.priorTable),
+		lmActionTable(other.lmActionTable)
+	{
+	}
+
+	CondTransList condTransList;
+
+	Key lowKey, highKey;
+	StateAp *fromState;
+	StateAp *toState;
+
+	/* The function table and priority for the transition. */
+	ActionTable actionTable;
+	PriorTable priorTable;
+
+	LmActionTable lmActionTable;
+
+	/* Pointers for outlist. */
+	TransAp *prev, *next;
+
+	/* Pointers for in-list. */
+	TransAp *ilprev, *ilnext;
 };
 
 typedef DList<TransAp> TransList;
@@ -677,7 +724,8 @@ struct StateAp
 	TransList outList;
 
 	/* In transition Lists. */
-	TransInList inList;
+	TransInList<TransAp> inList;
+	TransInList<CondTransAp> condInList;
 
 	/* Set only during scanner construction when actions are added. NFA to DFA
 	 * code can ignore this. */
@@ -1155,6 +1203,7 @@ struct FsmAp
 	/* Set conditions. */
 	CondSpace *addCondSpace( const CondSet &condSet );
 
+	void expansionTrans( Expansion *expansion, TransAp *src );
 	void findEmbedExpansions( ExpansionList &expansionList, 
 		StateAp *destState, Action *condAction, bool sense );
 	void embedCondition( MergeData &md, StateAp *state, Action *condAction, bool sense );
@@ -1240,6 +1289,8 @@ struct FsmAp
 	/* Common to attaching/detaching list and default. */
 	void attachToInList( StateAp *from, StateAp *to, TransAp *&head, TransAp *trans );
 	void detachFromInList( StateAp *from, StateAp *to, TransAp *&head, TransAp *trans );
+	void attachToCondInList( StateAp *from, StateAp *to, CondTransAp *&head, CondTransAp *trans );
+	void detachFromCondInList( StateAp *from, StateAp *to, CondTransAp *&head, CondTransAp *trans );
 
 	/* Attach with a new transition. */
 	TransAp *attachNewTrans( StateAp *from, StateAp *to,
