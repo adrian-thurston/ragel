@@ -75,6 +75,7 @@ StateAp::StateAp()
 	/* No out or in transitions. */
 	outList(),
 	inList(),
+	condInList(),
 
 	/* No EOF target. */
 	eofTarget(0),
@@ -117,6 +118,7 @@ StateAp::StateAp(const StateAp &other)
 	 * individual transitions are duplicated and attached. */
 	outList(),
 	inList(),
+	condInList(),
 
 	/* Set this using the original state's eofTarget. It will get mapped back
 	 * to the new machine in the Fsm copy constructor. */
@@ -157,6 +159,7 @@ StateAp::StateAp(const StateAp &other)
 		 * be corrected once all the states have been created. */
 		TransAp *newTrans = new TransAp(*trans);
 		CondTransAp *newCondTrans = new CondTransAp(*trans->condTransList.head);
+		newCondTrans->transAp = newTrans;
 		newTrans->condTransList.append(newCondTrans);
 
 		assert( trans->lmActionTable.length() == 0 );

@@ -155,7 +155,7 @@ TransAp *FsmAp::attachNewTrans( StateAp *from, StateAp *to, Key lowKey, Key high
 		attachToInList( from, to, to->inList.head, retVal );
 
 	/* Sub-transition for conditions. */
-	CondTransAp *condTransAp = new CondTransAp();
+	CondTransAp *condTransAp = new CondTransAp( retVal );
 	retVal->condTransList.append( condTransAp );
 
 	condTransAp->fromState = from;
@@ -291,7 +291,7 @@ TransAp *FsmAp::dupTrans( StateAp *from, TransAp *srcTrans )
 	TransAp *newTrans = new TransAp();
 
 	/* Sub-transition for conditions. */
-	CondTransAp *condTransAp = new CondTransAp();
+	CondTransAp *condTransAp = new CondTransAp( newTrans );
 	newTrans->condTransList.append( condTransAp );
 
 	/* We can attach the transition, one does not exist. */

@@ -927,7 +927,14 @@ void logNewExpansion( Expansion *exp )
 
 void FsmAp::expansionTrans( Expansion *expansion, TransAp *src )
 {
-
+	expansion->fromTrans = new TransAp(*src);
+	CondTransAp *condTransAp = new CondTransAp( *src->condTransList.head );
+	condTransAp->transAp = expansion->fromTrans;
+	expansion->fromTrans->condTransList.append( condTransAp );
+	expansion->fromTrans->fromState = 0;
+	expansion->fromTrans->condTransList.head->fromState = 0;
+	expansion->fromTrans->toState = src->toState;
+	expansion->fromTrans->condTransList.head->toState = src->condTransList.head->toState;
 }
 
 void FsmAp::findTransExpansions( ExpansionList &expansionList, 
@@ -942,13 +949,6 @@ void FsmAp::findTransExpansions( ExpansionList &expansionList,
 
 			expansionTrans( expansion, transCond.s1Tel.trans );
 
-			expansion->fromTrans = new TransAp(*transCond.s1Tel.trans);
-			CondTransAp *condTransAp = new CondTransAp( *transCond.s1Tel.trans->condTransList.head );
-			expansion->fromTrans->condTransList.append( condTransAp );
-			expansion->fromTrans->fromState = 0;
-			expansion->fromTrans->condTransList.head->fromState = 0;
-			expansion->fromTrans->toState = transCond.s1Tel.trans->toState;
-			expansion->fromTrans->condTransList.head->toState = transCond.s1Tel.trans->condTransList.head->toState;
 			expansion->fromCondSpace = 0;
 			expansion->fromVals = 0;
 			CondSpace *srcCS = transCond.s2Tel.trans->condSpace;
@@ -991,13 +991,6 @@ void FsmAp::findCondExpInTrans( ExpansionList &expansionList, StateAp *state,
 
 			expansionTrans( expansion, pairIter.s1Tel.trans );
 
-			expansion->fromTrans = new TransAp(*pairIter.s1Tel.trans);
-			CondTransAp *condTransAp = new CondTransAp( *pairIter.s1Tel.trans->condTransList.head );
-			expansion->fromTrans->condTransList.append( condTransAp );
-			expansion->fromTrans->fromState = 0;
-			expansion->fromTrans->condTransList.head->fromState = 0;
-			expansion->fromTrans->toState = pairIter.s1Tel.trans->toState;
-			expansion->fromTrans->condTransList.head->toState = pairIter.s1Tel.trans->condTransList.head->toState;
 			expansion->fromCondSpace = fromCondSpace;
 			expansion->fromVals = fromVals;
 			expansion->toCondSpace = toCondSpace;
@@ -1331,13 +1324,6 @@ void FsmAp::findEmbedExpansions( ExpansionList &expansionList,
 
 					expansionTrans( expansion, transCond.s1Tel.trans );
 
-					expansion->fromTrans = new TransAp(*transCond.s1Tel.trans);
-					CondTransAp *condTransAp = new CondTransAp( *transCond.s1Tel.trans->condTransList.head );
-					expansion->fromTrans->condTransList.append( condTransAp );
-					expansion->fromTrans->fromState = 0;
-					expansion->fromTrans->condTransList.head->fromState = 0;
-					expansion->fromTrans->toState = transCond.s1Tel.trans->toState;
-					expansion->fromTrans->condTransList.head->toState = transCond.s1Tel.trans->condTransList.head->toState;
 					expansion->fromCondSpace = 0;
 					expansion->fromVals = 0;
 					expansion->toCondSpace = newStateCond->condSpace;

@@ -417,7 +417,7 @@ template <class Element> struct TransInList
  * and are keyed by the condition expressions. */
 struct CondTransAp
 {
-	CondTransAp() 
+	CondTransAp( TransAp *transAp ) 
 	:
 		fromState(0), toState(0) 
 	{}
@@ -431,6 +431,7 @@ struct CondTransAp
 	{
 	}
 
+	TransAp *transAp;
 	StateAp *fromState;
 	StateAp *toState;
 
