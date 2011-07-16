@@ -392,8 +392,10 @@ void FsmAp::markReachableFromHereReverse( StateAp *state )
 	state->stateBits |= STB_ISMARKED;
 
 	/* Recurse on all items in transitions. */
-	for ( TransInList<TransAp>::Iter trans = state->inList; trans.lte(); trans++ ) 
+	for ( TransInList<CondTransAp>::Iter t = state->inList; t.lte(); t++ ) {
+		TransAp *trans = t->transAp;
 		markReachableFromHereReverse( trans->fromState );
+	}
 }
 
 /* Determine if there are any entry points into a start state other than the
@@ -445,8 +447,10 @@ void FsmAp::verifyIntegrity()
 			assert( trans->fromState == state );
 
 		/* Walk the inlist and assert toState is correct. */
-		for ( TransInList<TransAp>::Iter trans = state->inList; trans.lte(); trans++ ) 
+		for ( TransInList<CondTransAp>::Iter t = state->inList; t.lte(); t++ ) {
+			TransAp *trans = t->transAp;
 			assert( trans->toState == state );
+		}
 	}
 }
 

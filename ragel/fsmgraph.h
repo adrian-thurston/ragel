@@ -399,9 +399,9 @@ template <class Element> struct TransInList
 		bool last() const  { return ptr && ptr->ilnext == 0; }
 
 		/* Cast, dereference, arrow ops. */
-		operator TransAp*() const   { return ptr; }
-		TransAp &operator *() const { return *ptr; }
-		TransAp *operator->() const { return ptr; }
+		operator Element*() const   { return ptr; }
+		Element &operator *() const { return *ptr; }
+		Element *operator->() const { return ptr; }
 
 		/* Increment, decrement. */
 		inline void operator++(int)   { ptr = ptr->ilnext; }
@@ -419,12 +419,12 @@ struct CondTransAp
 {
 	CondTransAp( TransAp *transAp ) 
 	:
-		fromState(0), toState(0) 
+		transAp(transAp), fromState(0), toState(0) 
 	{}
 
 	CondTransAp( const CondTransAp &other )
 	:
-		fromState(0), toState(0),
+		transAp(transAp), fromState(0), toState(0),
 		actionTable(other.actionTable),
 		priorTable(other.priorTable),
 		lmActionTable(other.lmActionTable)
@@ -725,8 +725,7 @@ struct StateAp
 	TransList outList;
 
 	/* In transition Lists. */
-	TransInList<TransAp> inList;
-	TransInList<CondTransAp> condInList;
+	TransInList<CondTransAp> inList;
 
 	/* Set only during scanner construction when actions are added. NFA to DFA
 	 * code can ignore this. */
@@ -1288,10 +1287,8 @@ struct FsmAp
 	 */
 
 	/* Common to attaching/detaching list and default. */
-	void attachToInList( StateAp *from, StateAp *to, TransAp *&head, TransAp *trans );
-	void detachFromInList( StateAp *from, StateAp *to, TransAp *&head, TransAp *trans );
-	void attachToCondInList( StateAp *from, StateAp *to, CondTransAp *&head, CondTransAp *trans );
-	void detachFromCondInList( StateAp *from, StateAp *to, CondTransAp *&head, CondTransAp *trans );
+	void attachToInList( StateAp *from, StateAp *to, CondTransAp *&head, CondTransAp *trans );
+	void detachFromInList( StateAp *from, StateAp *to, CondTransAp *&head, CondTransAp *trans );
 
 	/* Attach with a new transition. */
 	TransAp *attachNewTrans( StateAp *from, StateAp *to,
