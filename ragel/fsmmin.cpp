@@ -715,7 +715,7 @@ void FsmAp::compressTransitions()
 				Key nextLow = next->lowKey;
 				nextLow.decrement();
 				if ( trans->highKey == nextLow && trans->ctList.head->toState == next->ctList.head->toState &&
-					CmpActionTable::compare( trans->actionTable, next->actionTable ) == 0 )
+					CmpActionTable::compare( trans->ctList.head->actionTable, next->ctList.head->actionTable ) == 0 )
 				{
 					trans->highKey = next->highKey;
 					st->outList.detach( next );

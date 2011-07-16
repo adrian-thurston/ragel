@@ -326,7 +326,7 @@ TransAp *FsmAp::crossTransitions( MergeData &md, StateAp *from,
 	TransAp *retTrans;
 
 	/* Compare the priority of the dest and src transitions. */
-	int compareRes = comparePrior( destTrans->priorTable, srcTrans->priorTable );
+	int compareRes = comparePrior( destTrans->ctList.head->priorTable, srcTrans->ctList.head->priorTable );
 	if ( compareRes < 0 ) {
 		/* Src trans has a higher priority than dest, src overwrites dest.
 		 * Detach dest and return a copy of src. */

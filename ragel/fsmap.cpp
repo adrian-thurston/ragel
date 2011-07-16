@@ -120,7 +120,7 @@ void FsmAp::startFsmPrior( int ordering, PriorDesc *prior )
 	/* Walk all transitions out of the start state. */
 	for ( TransList::Iter trans = startState->outList; trans.lte(); trans++ ) {
 		if ( trans->ctList.head->toState != 0 )
-			trans->priorTable.setPrior( ordering, prior );
+			trans->ctList.head->priorTable.setPrior( ordering, prior );
 	}
 
 	/* If the new start state is final then set the out priority. This follows
@@ -139,7 +139,7 @@ void FsmAp::allTransPrior( int ordering, PriorDesc *prior )
 		/* Walk the out list of the state. */
 		for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
 			if ( trans->ctList.head->toState != 0 )
-				trans->priorTable.setPrior( ordering, prior );
+				trans->ctList.head->priorTable.setPrior( ordering, prior );
 		}
 	}
 }
@@ -156,7 +156,7 @@ void FsmAp::finishFsmPrior( int ordering, PriorDesc *prior )
 		/* Walk all in transitions of the final state. */
 		for ( TransInList<CondTransAp>::Iter t = (*state)->inList; t.lte(); t++ ) {
 			TransAp *trans = t->transAp;
-			trans->priorTable.setPrior( ordering, prior );
+			trans->ctList.head->priorTable.setPrior( ordering, prior );
 		}
 	}
 }
@@ -186,7 +186,7 @@ void FsmAp::startFsmAction( int ordering, Action *action )
 	/* Walk the start state's transitions, setting functions. */
 	for ( TransList::Iter trans = startState->outList; trans.lte(); trans++ ) {
 		if ( trans->ctList.head->toState != 0 )
-			trans->actionTable.setAction( ordering, action );
+			trans->ctList.head->actionTable.setAction( ordering, action );
 	}
 
 	/* If start state is final then add the action to the out action table.
@@ -205,7 +205,7 @@ void FsmAp::allTransAction( int ordering, Action *action )
 		/* Walk the out list of the state. */
 		for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
 			if ( trans->ctList.head->toState != 0 )
-				trans->actionTable.setAction( ordering, action );
+				trans->ctList.head->actionTable.setAction( ordering, action );
 		}
 	}
 }
@@ -221,7 +221,7 @@ void FsmAp::finishFsmAction( int ordering, Action *action )
 		/* Walk the final state's in list. */
 		for ( TransInList<CondTransAp>::Iter t = (*state)->inList; t.lte(); t++ ) {
 			TransAp *trans = t->transAp;
-			trans->actionTable.setAction( ordering, action );
+			trans->ctList.head->actionTable.setAction( ordering, action );
 		}
 	}
 }
@@ -243,7 +243,7 @@ void FsmAp::longMatchAction( int ordering, LongestMatchPart *lmPart )
 		/* Walk the final state's in list. */
 		for ( TransInList<CondTransAp>::Iter t = (*state)->inList; t.lte(); t++ ) {
 			TransAp *trans = t->transAp;
-			trans->lmActionTable.setAction( ordering, lmPart );
+			trans->ctList.head->lmActionTable.setAction( ordering, lmPart );
 		}
 	}
 }
@@ -316,7 +316,7 @@ void FsmAp::setErrorActions( StateAp *state, const ActionTable &other )
 	/* Set error transitions in the transitions that go to error. */
 	for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
 		if ( trans->ctList.head->toState == 0 )
-			trans->actionTable.setActions( other );
+			trans->ctList.head->actionTable.setActions( other );
 	}
 }
 
@@ -328,7 +328,7 @@ void FsmAp::setErrorAction( StateAp *state, int ordering, Action *action )
 	/* Set error transitions in the transitions that go to error. */
 	for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
 		if ( trans->ctList.head->toState == 0 )
-			trans->actionTable.setAction( ordering, action );
+			trans->ctList.head->actionTable.setAction( ordering, action );
 	}
 }
 
@@ -345,7 +345,7 @@ void FsmAp::setErrorTarget( StateAp *state, StateAp *target, int *orderings,
 		if ( trans->ctList.head->toState == 0 ) {
 			/* The trans goes to error, redirect it. */
 			redirectErrorTrans( trans->ctList.head->fromState, target, trans );
-			trans->actionTable.setActions( orderings, actions, nActs );
+			trans->ctList.head->actionTable.setActions( orderings, actions, nActs );
 		}
 	}
 }
@@ -596,7 +596,7 @@ int FsmAp::shiftStartActionOrder( int fromOrder )
 		/* Walk the function data for the transition and set the keys to
 		 * increasing values starting at fromOrder. */
 		int curFromOrder = fromOrder;
-		ActionTable::Iter action = trans->actionTable;
+		ActionTable::Iter action = trans->ctList.head->actionTable;
 		for ( ; action.lte(); action++ ) 
 			action->key = curFromOrder++;
 	
@@ -617,7 +617,7 @@ void FsmAp::clearAllPriorities()
 
 		/* Clear transition data from the out transitions. */
 		for ( TransList::Iter trans = state->outList; trans.lte(); trans++ )
-			trans->priorTable.empty();
+			trans->ctList.head->priorTable.empty();
 	}
 }
 
@@ -632,12 +632,12 @@ void FsmAp::nullActionKeys( )
 		/* Walk the transitions for the state. */
 		for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
 			/* Walk the action table for the transition. */
-			for ( ActionTable::Iter action = trans->actionTable;
+			for ( ActionTable::Iter action = trans->ctList.head->actionTable;
 					action.lte(); action++ )
 				action->key = 0;
 
 			/* Walk the action table for the transition. */
-			for ( LmActionTable::Iter action = trans->lmActionTable;
+			for ( LmActionTable::Iter action = trans->ctList.head->lmActionTable;
 					action.lte(); action++ )
 				action->key = 0;
 		}
@@ -727,20 +727,20 @@ int FsmAp::comparePrior( const PriorTable &priorTable1, const PriorTable &priorT
 int FsmAp::compareTransData( TransAp *trans1, TransAp *trans2 )
 {
 	/* Compare the prior table. */
-	int cmpRes = CmpPriorTable::compare( trans1->priorTable, 
-			trans2->priorTable );
+	int cmpRes = CmpPriorTable::compare( trans1->ctList.head->priorTable, 
+			trans2->ctList.head->priorTable );
 	if ( cmpRes != 0 )
 		return cmpRes;
 
 	/* Compare longest match action tables. */
-	cmpRes = CmpLmActionTable::compare(trans1->lmActionTable, 
-			trans2->lmActionTable);
+	cmpRes = CmpLmActionTable::compare(trans1->ctList.head->lmActionTable, 
+			trans2->ctList.head->lmActionTable);
 	if ( cmpRes != 0 )
 		return cmpRes;
 	
 	/* Compare action tables. */
-	return CmpActionTable::compare(trans1->actionTable, 
-			trans2->actionTable);
+	return CmpActionTable::compare(trans1->ctList.head->actionTable, 
+			trans2->ctList.head->actionTable);
 }
 
 /* Callback invoked when another trans (or possibly this) is added into this
@@ -755,14 +755,14 @@ void FsmAp::addInTrans( TransAp *destTrans, TransAp *srcTrans )
 	if ( srcTrans == destTrans ) {
 		/* Adding in ourselves, need to make a copy of the source transitions.
 		 * The priorities are not copied in as that would have no effect. */
-		destTrans->lmActionTable.setActions( LmActionTable(srcTrans->lmActionTable) );
-		destTrans->actionTable.setActions( ActionTable(srcTrans->actionTable) );
+		destTrans->ctList.head->lmActionTable.setActions( LmActionTable(srcTrans->ctList.head->lmActionTable) );
+		destTrans->ctList.head->actionTable.setActions( ActionTable(srcTrans->ctList.head->actionTable) );
 	}
 	else {
 		/* Not a copy of ourself, get the functions and priorities. */
-		destTrans->lmActionTable.setActions( srcTrans->lmActionTable );
-		destTrans->actionTable.setActions( srcTrans->actionTable );
-		destTrans->priorTable.setPriors( srcTrans->priorTable );
+		destTrans->ctList.head->lmActionTable.setActions( srcTrans->ctList.head->lmActionTable );
+		destTrans->ctList.head->actionTable.setActions( srcTrans->ctList.head->actionTable );
+		destTrans->ctList.head->priorTable.setPriors( srcTrans->ctList.head->priorTable );
 	}
 }
 

@@ -44,7 +44,7 @@ GenBase::GenBase( char *fsmName, ParseData *pd, FsmAp *fsm )
 void GenBase::appendTrans( TransListVect &outList, Key lowKey, 
 		Key highKey, TransAp *trans )
 {
-	if ( trans->ctList.head->toState != 0 || trans->actionTable.length() > 0 )
+	if ( trans->ctList.head->toState != 0 || trans->ctList.head->actionTable.length() > 0 )
 		outList.append( TransEl( lowKey, highKey, trans ) );
 }
 
@@ -74,8 +74,8 @@ void GenBase::reduceActionTables()
 
 		/* Loop the transitions and reduce their actions. */
 		for ( TransList::Iter trans = st->outList; trans.lte(); trans++ ) {
-			if ( trans->actionTable.length() > 0 ) {
-				if ( actionTableMap.insert( trans->actionTable, &actionTable ) )
+			if ( trans->ctList.head->actionTable.length() > 0 ) {
+				if ( actionTableMap.insert( trans->ctList.head->actionTable, &actionTable ) )
 					actionTable->id = nextActionTableId++;
 			}
 		}
@@ -144,8 +144,8 @@ void XMLCodeGen::writeTrans( Key lowKey, Key highKey, TransAp *trans )
 {
 	/* First reduce the action. */
 	RedActionTable *actionTable = 0;
-	if ( trans->actionTable.length() > 0 )
-		actionTable = actionTableMap.find( trans->actionTable );
+	if ( trans->ctList.head->actionTable.length() > 0 )
+		actionTable = actionTableMap.find( trans->ctList.head->actionTable );
 
 	/* Write the transition. */
 	out << "        <t>";
@@ -1208,8 +1208,8 @@ void BackendGen::makeTrans( Key lowKey, Key highKey, TransAp *trans )
 {
 	/* First reduce the action. */
 	RedActionTable *actionTable = 0;
-	if ( trans->actionTable.length() > 0 )
-		actionTable = actionTableMap.find( trans->actionTable );
+	if ( trans->ctList.head->actionTable.length() > 0 )
+		actionTable = actionTableMap.find( trans->ctList.head->actionTable );
 
 	long targ = -1;
 	if ( trans->ctList.head->toState != 0 )

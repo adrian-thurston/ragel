@@ -188,10 +188,10 @@ void FsmAp::transferOutData( StateAp *destState, StateAp *srcState )
 	for ( TransList::Iter trans = destState->outList; trans.lte(); trans++ ) {
 		if ( trans->ctList.head->toState != 0 ) {
 			/* Get the actions data from the outActionTable. */
-			trans->actionTable.setActions( srcState->outActionTable );
+			trans->ctList.head->actionTable.setActions( srcState->outActionTable );
 
 			/* Get the priorities from the outPriorTable. */
-			trans->priorTable.setPriors( srcState->outPriorTable );
+			trans->ctList.head->priorTable.setPriors( srcState->outPriorTable );
 		}
 	}
 }
@@ -928,8 +928,7 @@ void logNewExpansion( Expansion *exp )
 void FsmAp::expansionTrans( Expansion *expansion, TransAp *src )
 {
 	expansion->fromTrans = new TransAp(*src);
-	CondTransAp *condTransAp = new CondTransAp( *src->ctList.head );
-	condTransAp->transAp = expansion->fromTrans;
+	CondTransAp *condTransAp = new CondTransAp( expansion->fromTrans, *src->ctList.head );
 	expansion->fromTrans->ctList.append( condTransAp );
 	expansion->fromTrans->ctList.head->fromState = 0;
 	expansion->fromTrans->ctList.head->toState = src->ctList.head->toState;

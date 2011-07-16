@@ -959,7 +959,7 @@ void ParseData::removeActionDups( FsmAp *graph )
 	for ( StateList::Iter state = graph->stateList; state.lte(); state++ ) {
 		/* Loop all transitions. */
 		for ( TransList::Iter trans = state->outList; trans.lte(); trans++ )
-			removeDups( trans->actionTable );
+			removeDups( trans->ctList.head->actionTable );
 		removeDups( state->toStateActionTable );
 		removeDups( state->fromStateActionTable );
 		removeDups( state->eofActionTable );
@@ -1036,7 +1036,7 @@ void ParseData::setLongestMatchData( FsmAp *graph )
 		StateSet states;
 		for ( StateList::Iter state = graph->stateList; state.lte(); state++ ) {
 			for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
-				for ( ActionTable::Iter ati = trans->actionTable; ati.lte(); ati++ ) {
+				for ( ActionTable::Iter ati = trans->ctList.head->actionTable; ati.lte(); ati++ ) {
 					if ( ati->value->anyCall && trans->ctList.head->toState != 0 )
 						states.insert( trans->ctList.head->toState );
 				}
@@ -1288,7 +1288,7 @@ void ParseData::analyzeGraph( FsmAp *graph )
 	for ( StateList::Iter st = graph->stateList; st.lte(); st++ ) {
 		/* The transition list. */
 		for ( TransList::Iter trans = st->outList; trans.lte(); trans++ ) {
-			for ( ActionTable::Iter at = trans->actionTable; at.lte(); at++ )
+			for ( ActionTable::Iter at = trans->ctList.head->actionTable; at.lte(); at++ )
 				at->value->numTransRefs += 1;
 		}
 

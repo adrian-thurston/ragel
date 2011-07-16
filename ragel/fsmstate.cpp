@@ -155,12 +155,12 @@ StateAp::StateAp(const StateAp &other)
 	for ( TransList::Iter trans = other.outList; trans.lte(); trans++ ) {
 		/* Duplicate and store the orginal target in the transition. This will
 		 * be corrected once all the states have been created. */
-		TransAp *newTrans = new TransAp(*trans);
-		CondTransAp *newCondTrans = new CondTransAp(*trans->ctList.head);
+		TransAp *newTrans = new TransAp( *trans );
+		CondTransAp *newCondTrans = new CondTransAp( newTrans, *trans->ctList.head );
 		newCondTrans->transAp = newTrans;
 		newTrans->ctList.append(newCondTrans);
 
-		assert( trans->lmActionTable.length() == 0 );
+		assert( trans->ctList.head->lmActionTable.length() == 0 );
 		newCondTrans->toState = trans->ctList.head->toState;
 		outList.append( newTrans );
 	}

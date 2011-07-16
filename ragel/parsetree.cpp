@@ -312,8 +312,8 @@ void LongestMatch::runLongestMatch( ParseData *pd, FsmAp *graph )
 	 * next pass we have the item set entries from all lmAction tables. */
 	for ( StateList::Iter st = graph->stateList; st.lte(); st++ ) {
 		for ( TransList::Iter trans = st->outList; trans.lte(); trans++ ) {
-			if ( trans->lmActionTable.length() > 0 ) {
-				LmActionTableEl *lmAct = trans->lmActionTable.data;
+			if ( trans->ctList.head->lmActionTable.length() > 0 ) {
+				LmActionTableEl *lmAct = trans->ctList.head->lmActionTable.data;
 				StateAp *toState = trans->ctList.head->toState;
 				assert( toState );
 
@@ -373,8 +373,8 @@ void LongestMatch::runLongestMatch( ParseData *pd, FsmAp *graph )
 	 * id and set the token ending. */
 	for ( StateList::Iter st = graph->stateList; st.lte(); st++ ) {
 		for ( TransList::Iter trans = st->outList; trans.lte(); trans++ ) {
-			if ( trans->lmActionTable.length() > 0 ) {
-				LmActionTableEl *lmAct = trans->lmActionTable.data;
+			if ( trans->ctList.head->lmActionTable.length() > 0 ) {
+				LmActionTableEl *lmAct = trans->ctList.head->lmActionTable.data;
 				StateAp *toState = trans->ctList.head->toState;
 				assert( toState );
 
@@ -390,7 +390,7 @@ void LongestMatch::runLongestMatch( ParseData *pd, FsmAp *graph )
 					 * actions then it will fail because the out action will
 					 * have been transferred to an error transition, which
 					 * makes the outlist non-empty. */
-					trans->actionTable.setAction( lmAct->key, 
+					trans->ctList.head->actionTable.setAction( lmAct->key, 
 							lmAct->value->actOnLast );
 					restartTrans.append( trans );
 				}
@@ -419,13 +419,13 @@ void LongestMatch::runLongestMatch( ParseData *pd, FsmAp *graph )
 					 * because the error action that matches the token will
 					 * require it. */
 					if ( nonFinalNonEmptyItemSet || maxItemSetLength > 1 )
-						trans->actionTable.setAction( pd->setTokEndOrd, pd->setTokEnd );
+						trans->ctList.head->actionTable.setAction( pd->setTokEndOrd, pd->setTokEnd );
 
 					/* Some states may not know which longest match item to
 					 * execute, must set it. */
 					if ( maxItemSetLength > 1 ) {
 						/* There are transitions out, another match may come. */
-						trans->actionTable.setAction( lmAct->key, 
+						trans->ctList.head->actionTable.setAction( lmAct->key, 
 								lmAct->value->setActId );
 					}
 				}
