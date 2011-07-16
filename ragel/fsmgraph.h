@@ -453,6 +453,8 @@ typedef DList<CondTransAp> CondTransList;
 /* Transition class that implements actions and priorities. */
 struct TransAp 
 {
+	TransAp() {}
+
 	TransAp( const TransAp &other )
 	:
 		lowKey(other.lowKey),
