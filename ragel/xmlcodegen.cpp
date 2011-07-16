@@ -44,7 +44,7 @@ GenBase::GenBase( char *fsmName, ParseData *pd, FsmAp *fsm )
 void GenBase::appendTrans( TransListVect &outList, Key lowKey, 
 		Key highKey, TransAp *trans )
 {
-	if ( trans->toState != 0 || trans->actionTable.length() > 0 )
+	if ( trans->ctList.head->toState != 0 || trans->actionTable.length() > 0 )
 		outList.append( TransEl( lowKey, highKey, trans ) );
 }
 
@@ -153,8 +153,8 @@ void XMLCodeGen::writeTrans( Key lowKey, Key highKey, TransAp *trans )
 	out << " ";
 	writeKey( highKey );
 
-	if ( trans->toState != 0 )
-		out << " " << trans->toState->alg.stateNum;
+	if ( trans->ctList.head->toState != 0 )
+		out << " " << trans->ctList.head->toState->alg.stateNum;
 	else
 		out << " x";
 
@@ -1212,8 +1212,8 @@ void BackendGen::makeTrans( Key lowKey, Key highKey, TransAp *trans )
 		actionTable = actionTableMap.find( trans->actionTable );
 
 	long targ = -1;
-	if ( trans->toState != 0 )
-		targ = trans->toState->alg.stateNum;
+	if ( trans->ctList.head->toState != 0 )
+		targ = trans->ctList.head->toState->alg.stateNum;
 
 	long action = -1;
 	if ( actionTable != 0 )

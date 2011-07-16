@@ -1037,8 +1037,8 @@ void ParseData::setLongestMatchData( FsmAp *graph )
 		for ( StateList::Iter state = graph->stateList; state.lte(); state++ ) {
 			for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
 				for ( ActionTable::Iter ati = trans->actionTable; ati.lte(); ati++ ) {
-					if ( ati->value->anyCall && trans->toState != 0 )
-						states.insert( trans->toState );
+					if ( ati->value->anyCall && trans->ctList.head->toState != 0 )
+						states.insert( trans->ctList.head->toState );
 				}
 			}
 		}

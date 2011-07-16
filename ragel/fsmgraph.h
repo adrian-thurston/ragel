@@ -454,27 +454,29 @@ typedef DList<CondTransAp> CondTransList;
 struct TransAp 
 {
 	TransAp() 
-	:
-		fromState(0), toState(0) 
 	{}
 
 	TransAp( const TransAp &other )
 	:
-		condTransList(),
+		ctList(),
 		lowKey(other.lowKey),
 		highKey(other.highKey),
-		fromState(0), toState(0),
 		actionTable(other.actionTable),
 		priorTable(other.priorTable),
 		lmActionTable(other.lmActionTable)
 	{
 	}
 
-	CondTransList condTransList;
+	~TransAp()
+	{
+		delete ctList.head;
+		ctList.abandon();
+	}
+
+	/* Cond trans list. */
+	CondTransList ctList;
 
 	Key lowKey, highKey;
-	StateAp *fromState;
-	StateAp *toState;
 
 	/* The function table and priority for the transition. */
 	ActionTable actionTable;
@@ -484,9 +486,6 @@ struct TransAp
 
 	/* Pointers for outlist. */
 	TransAp *prev, *next;
-
-	/* Pointers for in-list. */
-	TransAp *ilprev, *ilnext;
 };
 
 typedef DList<TransAp> TransList;

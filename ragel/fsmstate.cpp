@@ -156,13 +156,12 @@ StateAp::StateAp(const StateAp &other)
 		/* Duplicate and store the orginal target in the transition. This will
 		 * be corrected once all the states have been created. */
 		TransAp *newTrans = new TransAp(*trans);
-		CondTransAp *newCondTrans = new CondTransAp(*trans->condTransList.head);
+		CondTransAp *newCondTrans = new CondTransAp(*trans->ctList.head);
 		newCondTrans->transAp = newTrans;
-		newTrans->condTransList.append(newCondTrans);
+		newTrans->ctList.append(newCondTrans);
 
 		assert( trans->lmActionTable.length() == 0 );
-		newTrans->toState = trans->toState;
-		newCondTrans->toState = trans->condTransList.head->toState;
+		newCondTrans->toState = trans->ctList.head->toState;
 		outList.append( newTrans );
 	}
 }
@@ -413,14 +412,14 @@ int FsmAp::comparePartPtr( TransAp *trans1, TransAp *trans2 )
 	if ( trans1 != 0 ) {
 		/* If trans1 is set then so should trans2. The initial partitioning
 		 * guarantees this for us. */
-		if ( trans1->toState == 0 && trans2->toState != 0 )
+		if ( trans1->ctList.head->toState == 0 && trans2->ctList.head->toState != 0 )
 			return -1;
-		else if ( trans1->toState != 0 && trans2->toState == 0 )
+		else if ( trans1->ctList.head->toState != 0 && trans2->ctList.head->toState == 0 )
 			return 1;
-		else if ( trans1->toState != 0 ) {
+		else if ( trans1->ctList.head->toState != 0 ) {
 			/* Both of targets are set. */
 			return CmpOrd< MinPartition* >::compare( 
-				trans1->toState->alg.partition, trans2->toState->alg.partition );
+				trans1->ctList.head->toState->alg.partition, trans2->ctList.head->toState->alg.partition );
 		}
 	}
 	return 0;
@@ -458,11 +457,11 @@ int FsmAp::compareFullPtr( TransAp *trans1, TransAp *trans2 )
 	else if ( trans1 != 0 ) {
 		/* Both of the transition pointers are set. Test target state,
 		 * priority and funcs. */
-		if ( trans1->toState < trans2->toState )
+		if ( trans1->ctList.head->toState < trans2->ctList.head->toState )
 			return -1;
-		else if ( trans1->toState > trans2->toState )
+		else if ( trans1->ctList.head->toState > trans2->ctList.head->toState )
 			return 1;
-		else if ( trans1->toState != 0 ) {
+		else if ( trans1->ctList.head->toState != 0 ) {
 			/* Test transition data. */
 			int compareRes = compareTransData( trans1, trans2 );
 			if ( compareRes != 0 )
@@ -484,8 +483,8 @@ bool FsmAp::shouldMarkPtr( MarkIndex &markIndex, TransAp *trans1,
 	else if ( trans1 != 0 ) {
 		/* Both of the transitions are set. If the target pair is marked, then
 		 * the pair we are considering gets marked. */
-		return markIndex.isPairMarked( trans1->toState->alg.stateNum, 
-				trans2->toState->alg.stateNum );
+		return markIndex.isPairMarked( trans1->ctList.head->toState->alg.stateNum, 
+				trans2->ctList.head->toState->alg.stateNum );
 	}
 
 	/* Neither of the transitiosn are set. */

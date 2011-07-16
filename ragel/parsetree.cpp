@@ -291,8 +291,8 @@ void LongestMatch::resolveNameRefs( ParseData *pd )
 
 void LongestMatch::restart( FsmAp *graph, TransAp *trans )
 {
-	StateAp *fromState = trans->fromState;
-	graph->detachTrans( fromState, trans->toState, trans );
+	StateAp *fromState = trans->ctList.head->fromState;
+	graph->detachTrans( fromState, trans->ctList.head->toState, trans );
 	graph->attachTrans( fromState, graph->startState, trans );
 }
 
@@ -314,7 +314,7 @@ void LongestMatch::runLongestMatch( ParseData *pd, FsmAp *graph )
 		for ( TransList::Iter trans = st->outList; trans.lte(); trans++ ) {
 			if ( trans->lmActionTable.length() > 0 ) {
 				LmActionTableEl *lmAct = trans->lmActionTable.data;
-				StateAp *toState = trans->toState;
+				StateAp *toState = trans->ctList.head->toState;
 				assert( toState );
 
 				/* Can only optimize this if there are no transitions out.
@@ -375,7 +375,7 @@ void LongestMatch::runLongestMatch( ParseData *pd, FsmAp *graph )
 		for ( TransList::Iter trans = st->outList; trans.lte(); trans++ ) {
 			if ( trans->lmActionTable.length() > 0 ) {
 				LmActionTableEl *lmAct = trans->lmActionTable.data;
-				StateAp *toState = trans->toState;
+				StateAp *toState = trans->ctList.head->toState;
 				assert( toState );
 
 				/* Can only optimize this if there are no transitions out.

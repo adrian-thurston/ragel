@@ -256,7 +256,7 @@ int FsmAp::splitCandidates( StateAp **statePtrs, MinPartition *parts, int numPar
 				 * that the from state is in onto the splittable list. */
 				for ( TransInList<CondTransAp>::Iter t = state->inList; t.lte(); t++ ) {
 					TransAp *trans = t->transAp;
-					MinPartition *fromPart = trans->fromState->alg.partition;
+					MinPartition *fromPart = trans->ctList.head->fromState->alg.partition;
 					if ( ! fromPart->active ) {
 						fromPart->active = true;
 						partList.detach( fromPart );
@@ -714,12 +714,12 @@ void FsmAp::compressTransitions()
 			for ( TransList::Iter trans = st->outList, next = trans.next(); next.lte();  ) {
 				Key nextLow = next->lowKey;
 				nextLow.decrement();
-				if ( trans->highKey == nextLow && trans->toState == next->toState &&
+				if ( trans->highKey == nextLow && trans->ctList.head->toState == next->ctList.head->toState &&
 					CmpActionTable::compare( trans->actionTable, next->actionTable ) == 0 )
 				{
 					trans->highKey = next->highKey;
 					st->outList.detach( next );
-					detachTrans( next->fromState, next->toState, next );
+					detachTrans( next->ctList.head->fromState, next->ctList.head->toState, next );
 					delete next;
 					next = trans.next();
 				}

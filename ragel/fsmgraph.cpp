@@ -186,7 +186,7 @@ void FsmAp::emptyFsm( )
 void FsmAp::transferOutData( StateAp *destState, StateAp *srcState )
 {
 	for ( TransList::Iter trans = destState->outList; trans.lte(); trans++ ) {
-		if ( trans->toState != 0 ) {
+		if ( trans->ctList.head->toState != 0 ) {
 			/* Get the actions data from the outActionTable. */
 			trans->actionTable.setActions( srcState->outActionTable );
 
@@ -928,13 +928,11 @@ void logNewExpansion( Expansion *exp )
 void FsmAp::expansionTrans( Expansion *expansion, TransAp *src )
 {
 	expansion->fromTrans = new TransAp(*src);
-	CondTransAp *condTransAp = new CondTransAp( *src->condTransList.head );
+	CondTransAp *condTransAp = new CondTransAp( *src->ctList.head );
 	condTransAp->transAp = expansion->fromTrans;
-	expansion->fromTrans->condTransList.append( condTransAp );
-	expansion->fromTrans->fromState = 0;
-	expansion->fromTrans->condTransList.head->fromState = 0;
-	expansion->fromTrans->toState = src->toState;
-	expansion->fromTrans->condTransList.head->toState = src->condTransList.head->toState;
+	expansion->fromTrans->ctList.append( condTransAp );
+	expansion->fromTrans->ctList.head->fromState = 0;
+	expansion->fromTrans->ctList.head->toState = src->ctList.head->toState;
 }
 
 void FsmAp::findTransExpansions( ExpansionList &expansionList, 
@@ -1125,7 +1123,7 @@ void FsmAp::doRemove( MergeData &md, StateAp *destState, ExpansionList &expList1
 				break;
 			case RangeOverlap: {
 				TransAp *trans = pairIter.s1Tel.trans;
-				detachTrans( trans->fromState, trans->toState, trans );
+				detachTrans( trans->ctList.head->fromState, trans->ctList.head->toState, trans );
 				delete trans;
 				break;
 			}

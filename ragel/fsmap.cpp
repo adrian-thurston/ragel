@@ -119,7 +119,7 @@ void FsmAp::startFsmPrior( int ordering, PriorDesc *prior )
 
 	/* Walk all transitions out of the start state. */
 	for ( TransList::Iter trans = startState->outList; trans.lte(); trans++ ) {
-		if ( trans->toState != 0 )
+		if ( trans->ctList.head->toState != 0 )
 			trans->priorTable.setPrior( ordering, prior );
 	}
 
@@ -138,7 +138,7 @@ void FsmAp::allTransPrior( int ordering, PriorDesc *prior )
 	for ( StateList::Iter state = stateList; state.lte(); state++ ) {
 		/* Walk the out list of the state. */
 		for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
-			if ( trans->toState != 0 )
+			if ( trans->ctList.head->toState != 0 )
 				trans->priorTable.setPrior( ordering, prior );
 		}
 	}
@@ -185,7 +185,7 @@ void FsmAp::startFsmAction( int ordering, Action *action )
 
 	/* Walk the start state's transitions, setting functions. */
 	for ( TransList::Iter trans = startState->outList; trans.lte(); trans++ ) {
-		if ( trans->toState != 0 )
+		if ( trans->ctList.head->toState != 0 )
 			trans->actionTable.setAction( ordering, action );
 	}
 
@@ -204,7 +204,7 @@ void FsmAp::allTransAction( int ordering, Action *action )
 	for ( StateList::Iter state = stateList; state.lte(); state++ ) {
 		/* Walk the out list of the state. */
 		for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
-			if ( trans->toState != 0 )
+			if ( trans->ctList.head->toState != 0 )
 				trans->actionTable.setAction( ordering, action );
 		}
 	}
@@ -315,7 +315,7 @@ void FsmAp::setErrorActions( StateAp *state, const ActionTable &other )
 
 	/* Set error transitions in the transitions that go to error. */
 	for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
-		if ( trans->toState == 0 )
+		if ( trans->ctList.head->toState == 0 )
 			trans->actionTable.setActions( other );
 	}
 }
@@ -327,7 +327,7 @@ void FsmAp::setErrorAction( StateAp *state, int ordering, Action *action )
 
 	/* Set error transitions in the transitions that go to error. */
 	for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
-		if ( trans->toState == 0 )
+		if ( trans->ctList.head->toState == 0 )
 			trans->actionTable.setAction( ordering, action );
 	}
 }
@@ -342,9 +342,9 @@ void FsmAp::setErrorTarget( StateAp *state, StateAp *target, int *orderings,
 
 	/* Set error target in the transitions that go to error. */
 	for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
-		if ( trans->toState == 0 ) {
+		if ( trans->ctList.head->toState == 0 ) {
 			/* The trans goes to error, redirect it. */
-			redirectErrorTrans( trans->fromState, target, trans );
+			redirectErrorTrans( trans->ctList.head->fromState, target, trans );
 			trans->actionTable.setActions( orderings, actions, nActs );
 		}
 	}
