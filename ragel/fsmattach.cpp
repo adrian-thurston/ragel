@@ -531,12 +531,88 @@ CondAp *FsmAp::crossCondTransitions( MergeData &md, StateAp *from, TransAp *dest
 	return retTrans;
 }
 
+void FsmAp::expandConds( TransAp *trans, const CondSet &fromCS, const CondSet &mergedCS )
+{
+	CondSpace *mergedCondSpace = addCondSpace( mergedCS );
+
+	CondSet newCS = mergedCS;
+	for ( CondSet::Iter mcsi = fromCS; mcsi.lte(); mcsi++ )
+		newCS.remove( *mcsi );
+
+	if ( newCS.length() > 0 ) {
+		#ifdef LOG_CONDS
+		cerr << "there are " << newCS.length() << " item(s) that are "
+					"only in the srcCS" << endl;
+		#endif
+
+		long fromLen = fromCS.length();
+	
+		/* Loop all values in the dest space. */
+		for ( long fromVals = 0; fromVals < (1 << fromLen); fromVals++ ) {
+	//		long basicVals = 0;
+	//		for ( CondSet::Iter csi = destCS; csi.lte(); csi++ ) {
+	//			if ( destVals & (1 << csi.pos()) ) {
+	//				Action **cim = mergedCS.find( *csi );
+	//				long bitPos = (cim - mergedCS.data);
+	//				basicVals |= 1 << bitPos;
+	//			}
+	//		}
+	//
+	//		/* Loop all new values. */
+	//		LongVect expandToVals;
+	//		for ( long soVals = 0; soVals < (1 << srcOnlyLen); soVals++ ) {
+	//			long targVals = basicVals;
+	//			for ( CondSet::Iter csi = srcOnlyCS; csi.lte(); csi++ ) {
+	//				if ( soVals & (1 << csi.pos()) ) {
+	//					Action **cim = mergedCS.find( *csi );
+	//					long bitPos = (cim - mergedCS.data);
+	//					targVals |= 1 << bitPos;
+	//				}
+	//			}
+	//			expandToVals.append( targVals );
+	//		}
+	//
+	//		findCondExpInTrans( expansionList, destState, 
+	//				condCond.s1Tel.lowKey, condCond.s1Tel.highKey, 
+	//				fromCondSpace, toCondSpace, destVals, expandToVals );
+		}
+	}
+}
+
+void FsmAp::expandCondTransitions( TransAp *destTrans, TransAp *srcTrans )
+{
+	CondSet destCS, srcCS;
+	CondSet mergedCS;
+
+	if ( destTrans->condSpace != 0 )
+		destCS.insert( destTrans->condSpace->condSet );
+
+	if ( srcTrans->condSpace != 0 )
+		srcCS.insert( srcTrans->condSpace->condSet );
+	
+	mergedCS.insert( destCS );
+	mergedCS.insert( srcCS );
+
+
+	expandConds( destTrans, destCS, mergedCS );
+}
+
 /* Find the trans with the higher priority. If src is lower priority then dest then
  * src is ignored. If src is higher priority than dest, then src overwrites dest. If
  * the priorities are equal, then they are merged. */
 TransAp *FsmAp::crossTransitions( MergeData &md, StateAp *from,
 		TransAp *destTrans, TransAp *srcTrans )
 {
+//	findTransExpansions( expList1, destState, srcState );
+//	findCondExpansions( expList1, destState, srcState );
+//	findTransExpansions( expList2, srcState, destState );
+//	findCondExpansions( expList2, srcState, destState );
+//
+//	mergeStateConds( destState, srcState );
+
+	if ( destTrans->condSpace != srcTrans->condSpace )
+		expandCondTransitions( destTrans, srcTrans );
+
 	/* The destination list. */
 	CondTransList destList;
 

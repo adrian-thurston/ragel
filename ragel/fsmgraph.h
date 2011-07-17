@@ -58,6 +58,7 @@ struct FsmAp;
 struct Action;
 struct LongestMatchPart;
 struct LengthDef;
+struct CondSpace;
 
 /* State list element for unambiguous access to list element. */
 struct FsmListEl 
@@ -463,12 +464,14 @@ typedef DList<CondAp> CondTransList;
 /* Transition class that implements actions and priorities. */
 struct TransAp 
 {
-	TransAp() {}
+	TransAp() 
+		: condSpace(0) {}
 
 	TransAp( const TransAp &other )
 	:
 		lowKey(other.lowKey),
 		highKey(other.highKey),
+		condSpace(0),
 		ctList()
 	{
 	}
@@ -480,6 +483,9 @@ struct TransAp
 	}
 
 	Key lowKey, highKey;
+
+	/* Which conditions are tested on this range. */
+	CondSpace *condSpace;
 
 	/* Cond trans list. */
 	CondTransList ctList;
@@ -1318,6 +1324,9 @@ struct FsmAp
 	/* In crossing, two transitions both go to real states. */
 	CondAp *fsmAttachStates( MergeData &md, StateAp *from,
 			CondAp *destTrans, CondAp *srcTrans );
+
+	void expandConds( TransAp *trans, const CondSet &origSet, const CondSet &mergedCS );
+	void expandCondTransitions( TransAp *destTrans, TransAp *srcTrans );
 
 	/* Two transitions are to be crossed, handle the possibility of either
 	 * going to the error state. */
