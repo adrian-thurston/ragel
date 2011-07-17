@@ -156,7 +156,7 @@ StateAp::StateAp(const StateAp &other)
 		/* Duplicate and store the orginal target in the transition. This will
 		 * be corrected once all the states have been created. */
 		TransAp *newTrans = new TransAp( *trans );
-		CondTransAp *newCondTrans = new CondTransAp( newTrans, *trans->ctList.head );
+		CondAp *newCondTrans = new CondAp( *trans->ctList.head, newTrans );
 		newCondTrans->transAp = newTrans;
 		newTrans->ctList.append(newCondTrans);
 

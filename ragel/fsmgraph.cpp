@@ -928,7 +928,7 @@ void logNewExpansion( Expansion *exp )
 void FsmAp::expansionTrans( Expansion *expansion, TransAp *src )
 {
 	expansion->fromTrans = new TransAp(*src);
-	CondTransAp *condTransAp = new CondTransAp( expansion->fromTrans, *src->ctList.head );
+	CondAp *condTransAp = new CondAp( *src->ctList.head, expansion->fromTrans );
 	expansion->fromTrans->ctList.append( condTransAp );
 	expansion->fromTrans->ctList.head->fromState = 0;
 	expansion->fromTrans->ctList.head->toState = src->ctList.head->toState;

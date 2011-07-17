@@ -154,7 +154,7 @@ void FsmAp::finishFsmPrior( int ordering, PriorDesc *prior )
 	/* Walk all final states. */
 	for ( StateSet::Iter state = finStateSet; state.lte(); state++ ) {
 		/* Walk all in transitions of the final state. */
-		for ( TransInList<CondTransAp>::Iter t = (*state)->inList; t.lte(); t++ ) {
+		for ( TransInList<CondAp>::Iter t = (*state)->inList; t.lte(); t++ ) {
 			TransAp *trans = t->transAp;
 			trans->ctList.head->priorTable.setPrior( ordering, prior );
 		}
@@ -219,7 +219,7 @@ void FsmAp::finishFsmAction( int ordering, Action *action )
 	/* Walk all final states. */
 	for ( StateSet::Iter state = finStateSet; state.lte(); state++ ) {
 		/* Walk the final state's in list. */
-		for ( TransInList<CondTransAp>::Iter t = (*state)->inList; t.lte(); t++ ) {
+		for ( TransInList<CondAp>::Iter t = (*state)->inList; t.lte(); t++ ) {
 			TransAp *trans = t->transAp;
 			trans->ctList.head->actionTable.setAction( ordering, action );
 		}
@@ -241,7 +241,7 @@ void FsmAp::longMatchAction( int ordering, LongestMatchPart *lmPart )
 	/* Walk all final states. */
 	for ( StateSet::Iter state = finStateSet; state.lte(); state++ ) {
 		/* Walk the final state's in list. */
-		for ( TransInList<CondTransAp>::Iter t = (*state)->inList; t.lte(); t++ ) {
+		for ( TransInList<CondAp>::Iter t = (*state)->inList; t.lte(); t++ ) {
 			TransAp *trans = t->transAp;
 			trans->ctList.head->lmActionTable.setAction( ordering, lmPart );
 		}
@@ -763,6 +763,29 @@ void FsmAp::addInTrans( TransAp *destTrans, TransAp *srcTrans )
 		destTrans->ctList.head->lmActionTable.setActions( srcTrans->ctList.head->lmActionTable );
 		destTrans->ctList.head->actionTable.setActions( srcTrans->ctList.head->actionTable );
 		destTrans->ctList.head->priorTable.setPriors( srcTrans->ctList.head->priorTable );
+	}
+}
+
+/* Callback invoked when another trans (or possibly this) is added into this
+ * transition during the merging process.  Draw in any properties of srcTrans
+ * into this transition. AddInTrans is called when a new transitions is made
+ * that will be a duplicate of another transition or a combination of several
+ * other transitions. AddInTrans will be called for each transition that the
+ * new transition is to represent. */
+void FsmAp::addInTrans( CondAp *destTrans, CondAp *srcTrans )
+{
+	/* Protect against adding in from ourselves. */
+	if ( srcTrans == destTrans ) {
+		/* Adding in ourselves, need to make a copy of the source transitions.
+		 * The priorities are not copied in as that would have no effect. */
+		destTrans->lmActionTable.setActions( LmActionTable(srcTrans->lmActionTable) );
+		destTrans->actionTable.setActions( ActionTable(srcTrans->actionTable) );
+	}
+	else {
+		/* Not a copy of ourself, get the functions and priorities. */
+		destTrans->lmActionTable.setActions( srcTrans->lmActionTable );
+		destTrans->actionTable.setActions( srcTrans->actionTable );
+		destTrans->priorTable.setPriors( srcTrans->priorTable );
 	}
 }
 

@@ -415,23 +415,33 @@ template <class Element> struct TransInList
 
 /* The element for the sub-list within a TransAp. These specify the transitions
  * and are keyed by the condition expressions. */
-struct CondTransAp
+struct CondAp
 {
-	CondTransAp( TransAp *transAp ) 
+	CondAp( TransAp *transAp ) 
 	:
-		transAp(transAp), fromState(0), toState(0) 
+		transAp(transAp), 
+		lowKey(0), highKey(0),
+		fromState(0), toState(0) 
 	{}
 
-	CondTransAp( TransAp *transAp, const CondTransAp &other )
+	CondAp( const CondAp &other, TransAp *transAp )
 	:
-		transAp(transAp), fromState(0), toState(0),
+		transAp(transAp),
+		lowKey(0), highKey(0),
+//		lowKey(other.lowKey),
+//		highKey(other.highKey),
+		fromState(0), toState(0),
 		actionTable(other.actionTable),
 		priorTable(other.priorTable),
 		lmActionTable(other.lmActionTable)
 	{
 	}
 
+	/* Owning transition. */
 	TransAp *transAp;
+
+	Key lowKey, highKey;
+
 	StateAp *fromState;
 	StateAp *toState;
 
@@ -442,13 +452,13 @@ struct CondTransAp
 	LmActionTable lmActionTable;
 
 	/* Pointers for outlist. */
-	CondTransAp *prev, *next;
+	CondAp *prev, *next;
 
 	/* Pointers for in-list. */
-	CondTransAp *ilprev, *ilnext;
+	CondAp *ilprev, *ilnext;
 };
 
-typedef DList<CondTransAp> CondTransList;
+typedef DList<CondAp> CondTransList;
 
 /* Transition class that implements actions and priorities. */
 struct TransAp 
@@ -714,7 +724,7 @@ struct StateAp
 	TransList outList;
 
 	/* In transition Lists. */
-	TransInList<CondTransAp> inList;
+	TransInList<CondAp> inList;
 
 	/* Set only during scanner construction when actions are added. NFA to DFA
 	 * code can ignore this. */
@@ -1276,8 +1286,8 @@ struct FsmAp
 	 */
 
 	/* Common to attaching/detaching list and default. */
-	void attachToInList( StateAp *from, StateAp *to, CondTransAp *&head, CondTransAp *trans );
-	void detachFromInList( StateAp *from, StateAp *to, CondTransAp *&head, CondTransAp *trans );
+	void attachToInList( StateAp *from, StateAp *to, CondAp *&head, CondAp *trans );
+	void detachFromInList( StateAp *from, StateAp *to, CondAp *&head, CondAp *trans );
 
 	/* Attach with a new transition. */
 	TransAp *attachNewTrans( StateAp *from, StateAp *to,
@@ -1285,12 +1295,14 @@ struct FsmAp
 
 	/* Attach with an existing transition that already in an out list. */
 	void attachTrans( StateAp *from, StateAp *to, TransAp *trans );
+	void attachTrans( StateAp *from, StateAp *to, CondAp *trans );
 	
 	/* Redirect a transition away from error and towards some state. */
 	void redirectErrorTrans( StateAp *from, StateAp *to, TransAp *trans );
 
 	/* Detach a transition from a target state. */
 	void detachTrans( StateAp *from, StateAp *to, TransAp *trans );
+	void detachTrans( StateAp *from, StateAp *to, CondAp *trans );
 
 	/* Detach a state from the graph. */
 	void detachState( StateAp *state );
@@ -1301,15 +1313,16 @@ struct FsmAp
 
 	/* Duplicate a transition that will dropin to a free spot. */
 	TransAp *dupTrans( StateAp *from, TransAp *srcTrans );
+	CondAp *dupCondTrans( StateAp *from, TransAp *destParent, CondAp *srcTrans );
 
 	/* In crossing, two transitions both go to real states. */
-	TransAp *fsmAttachStates( MergeData &md, StateAp *from,
-			TransAp *destTrans, TransAp *srcTrans );
+	CondAp *fsmAttachStates( MergeData &md, StateAp *from,
+			CondAp *destTrans, CondAp *srcTrans );
 
 	/* Two transitions are to be crossed, handle the possibility of either
 	 * going to the error state. */
-	TransAp *mergeTrans( MergeData &md, StateAp *from,
-			TransAp *destTrans, TransAp *srcTrans );
+	CondAp *mergeTrans( MergeData &md, StateAp *from,
+			CondAp *destTrans, CondAp *srcTrans );
 
 	/* Compare deterimne relative priorities of two transition tables. */
 	int comparePrior( const PriorTable &priorTable1, const PriorTable &priorTable2 );
@@ -1317,6 +1330,8 @@ struct FsmAp
 	/* Cross a src transition with one that is already occupying a spot. */
 	TransAp *crossTransitions( MergeData &md, StateAp *from,
 			TransAp *destTrans, TransAp *srcTrans );
+	CondAp *crossCondTransitions( MergeData &md, StateAp *from,
+			TransAp *destParent, CondAp *destTrans, CondAp *srcTrans );
 
 	void outTransCopy( MergeData &md, StateAp *dest, TransAp *srcList );
 
@@ -1368,6 +1383,7 @@ struct FsmAp
 
 	/* Add in the properties of srcTrans into this. */
 	void addInTrans( TransAp *destTrans, TransAp *srcTrans );
+	void addInTrans( CondAp *destTrans, CondAp *srcTrans );
 
 	/* Compare states on data stored in the states. */
 	static int compareStateData( const StateAp *state1, const StateAp *state2 );
