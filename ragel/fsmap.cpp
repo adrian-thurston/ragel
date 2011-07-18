@@ -890,19 +890,19 @@ CondSpace *FsmAp::addCondSpace( const CondSet &condSet )
 
 void FsmAp::startFsmCondition( Action *condAction, bool sense )
 {
-//	/* Make sure the start state has no other entry points. */
-//	isolateStartState();
-//	embedCondition( startState, condAction, sense );
+	/* Make sure the start state has no other entry points. */
+	isolateStartState();
+	embedCondition( startState, condAction, sense );
 }
 
 void FsmAp::allTransCondition( Action *condAction, bool sense )
 {
-//	for ( StateList::Iter state = stateList; state.lte(); state++ )
-//		embedCondition( state, condAction, sense );
+	for ( StateList::Iter state = stateList; state.lte(); state++ )
+		embedCondition( state, condAction, sense );
 }
 
 void FsmAp::leaveFsmCondition( Action *condAction, bool sense )
 {
-//	for ( StateSet::Iter state = finStateSet; state.lte(); state++ )
-//		(*state)->outCondSet.insert( OutCond( condAction, sense ) );
+	for ( StateSet::Iter state = finStateSet; state.lte(); state++ )
+		(*state)->outCondSet.insert( OutCond( condAction, sense ) );
 }

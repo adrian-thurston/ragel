@@ -1406,12 +1406,23 @@ void FsmAp::embedCondition( StateAp *state, Action *condAction, bool sense )
 
 void FsmAp::embedCondition( MergeData &md, StateAp *state, Action *condAction, bool sense )
 {
+#if 0
 	ExpansionList expList;
 
 	findEmbedExpansions( expList, state, condAction, sense );
 	doExpand( md, state, expList );
 	doRemove( md, state, expList );
 	expList.empty();
+#endif
+
+	CondSet condSet;
+	condSet.insert( condAction );
+	CondSpace *condSpace = addCondSpace( condSet );
+
+	for ( TransList::Iter tr = state->outList; tr.lte(); tr++ ) {
+		tr->condSpace = condSpace;
+		tr->ctList.head->lowKey = tr->ctList.head->highKey = 1;
+	}
 }
 
 /* Check if a machine defines a single character. This is useful in validating

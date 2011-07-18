@@ -40,7 +40,7 @@
 #include "avlmap.h"
 #include "ragel.h"
 
-//#define LOG_CONDS
+#define LOG_CONDS 1
 
 /* Flags that control merging. */
 #define STB_GRAPH1     0x01
@@ -428,9 +428,8 @@ struct CondAp
 	CondAp( const CondAp &other, TransAp *transAp )
 	:
 		transAp(transAp),
-		lowKey(0), highKey(0),
-//		lowKey(other.lowKey),
-//		highKey(other.highKey),
+		lowKey(other.lowKey),
+		highKey(other.highKey),
 		fromState(0), toState(0),
 		actionTable(other.actionTable),
 		priorTable(other.priorTable),
@@ -471,7 +470,7 @@ struct TransAp
 	:
 		lowKey(other.lowKey),
 		highKey(other.highKey),
-		condSpace(0),
+		condSpace(other.condSpace),
 		ctList()
 	{
 	}
@@ -1308,7 +1307,7 @@ struct FsmAp
 
 	/* Detach a transition from a target state. */
 	void detachTrans( StateAp *from, StateAp *to, TransAp *trans );
-	void detachTrans( StateAp *from, StateAp *to, CondAp *trans );
+	void detachCondTrans( StateAp *from, StateAp *to, CondAp *trans );
 
 	/* Detach a state from the graph. */
 	void detachState( StateAp *state );

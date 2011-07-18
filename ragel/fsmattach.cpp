@@ -170,7 +170,7 @@ void FsmAp::detachTrans( StateAp *from, StateAp *to, TransAp *trans )
 }
 
 /* Detach for out/in lists or for default transition. */
-void FsmAp::detachTrans( StateAp *from, StateAp *to, CondAp *trans )
+void FsmAp::detachCondTrans( StateAp *from, StateAp *to, CondAp *trans )
 {
 	assert( trans->fromState == from && trans->toState == to );
 
@@ -191,15 +191,22 @@ void FsmAp::detachState( StateAp *state )
 	/* Detach the in transitions from the inList list of transitions. */
 	while ( state->inList.head != 0 ) {
 		/* Get pointers to the trans and the state. */
-		TransAp *trans = state->inList.head->transAp;
-		StateAp *fromState = trans->ctList.head->fromState;
+		CondAp *condAp = state->inList.head;
+		TransAp *trans = condAp->transAp;
+
+		StateAp *fromState = condAp->fromState;
 
 		/* Detach the transitions from the source state. */
-		detachTrans( fromState, state, trans );
+		detachCondTrans( fromState, state, condAp );
 
-		/* Ok to delete the transition. */
-		fromState->outList.detach( trans );
-		delete trans;
+		trans->ctList.detach( condAp );
+		delete condAp;
+
+		if ( trans->ctList.length() == 0 ) {
+			/* Ok to delete the transition. */
+			fromState->outList.detach( trans );
+			delete trans;
+		}
 	}
 
 	/* Remove the entry points in on the machine. */
@@ -232,10 +239,13 @@ TransAp *FsmAp::dupTrans( StateAp *from, TransAp *srcTrans )
 {
 	/* Make a new transition. */
 	TransAp *newTrans = new TransAp();
+	newTrans->condSpace = srcTrans->condSpace;
 
 	for ( CondTransList::Iter sc = srcTrans->ctList; sc.lte(); sc++ ) {
 		/* Sub-transition for conditions. */
 		CondAp *newCond = new CondAp( newTrans );
+		newCond->lowKey = sc->lowKey;
+		newCond->highKey = sc->highKey;
 		newTrans->ctList.append( newCond );
 
 		/* We can attach the transition, one does not exist. */
@@ -393,7 +403,7 @@ CondAp *FsmAp::fsmAttachStates( MergeData &md, StateAp *from,
 		StateAp *targ = lastFound->targState;
 
 		/* Detach the state from existing state. */
-		detachTrans( from, existingState, destTrans );
+		detachCondTrans( from, existingState, destTrans );
 
 		/* Re-attach to the new target. */
 		attachTrans( from, targ, destTrans );
@@ -453,7 +463,7 @@ CondAp *FsmAp::mergeTrans( MergeData &md, StateAp *from,
 	}
 	else if ( destTrans->toState == 0 && srcTrans->toState != 0 ) {
 		/* Non error added into error we need to detach and reattach, */
-		detachTrans( from, destTrans->toState, destTrans );
+		detachCondTrans( from, destTrans->toState, destTrans );
 		attachTrans( from, srcTrans->toState, destTrans );
 		addInTrans( destTrans, srcTrans );
 		retTrans = destTrans;
@@ -515,7 +525,7 @@ CondAp *FsmAp::crossCondTransitions( MergeData &md, StateAp *from, TransAp *dest
 	if ( compareRes < 0 ) {
 		/* Src trans has a higher priority than dest, src overwrites dest.
 		 * Detach dest and return a copy of src. */
-		detachTrans( from, destTrans->toState, destTrans );
+		detachCondTrans( from, destTrans->toState, destTrans );
 		retTrans = dupCondTrans( from, destParent, srcTrans );
 	}
 	else if ( compareRes > 0 ) {
@@ -533,50 +543,92 @@ CondAp *FsmAp::crossCondTransitions( MergeData &md, StateAp *from, TransAp *dest
 
 void FsmAp::expandConds( TransAp *trans, const CondSet &fromCS, const CondSet &mergedCS )
 {
-	CondSpace *mergedCondSpace = addCondSpace( mergedCS );
+	/*CondSpace *mergedCondSpace = */addCondSpace( mergedCS );
 
 	CondSet newCS = mergedCS;
 	for ( CondSet::Iter mcsi = fromCS; mcsi.lte(); mcsi++ )
 		newCS.remove( *mcsi );
+	/*long newLen = */newCS.length();
+
+#if 0
+
+	/* Need to transform condition element to the merged set. */
+	for ( CondTransList::Iter cti = trans->ctList; cti.lte(); cti++ ) {
+		long origVal = cti->lowKey.getVal();
+		long newVal = 0;
+
+		/* Iterate the bit positions in the from set. */
+		for ( CondSet::Iter csi = fromCS; csi.lte(); csi++ ) {
+			/* If set, find it in the merged set and flip the bit to 1. */
+			if ( origVal & (1 << csi.pos()) ) {
+				/* The condition is set. Find the bit position in the merged
+				 * set. */
+				Action **cim = mergedCS.find( *csi );
+				long bitPos = (cim - mergedCS.data);
+				newVal |= 1 << bitPos;
+			}
+		}
+
+		cout << "orig: " << origVal << " new: " << newVal << endl;
+		cti->lowKey = cti->highKey = newVal;
+	}
+
+	/* Need to double up the whole transition list for each condition test in
+	 * merged that is not in from. The one we add has the bit in question set.
+	 * */
+	for ( CondSet::Iter csi = mergedCS; csi.lte(); csi++ ) {
+		Action **cim = fromCS.find( *csi );
+		if ( cim == 0 ) {
+			cout << "doubling up on condition" << endl;
+		}
+	}
+#endif
+
+#if 0
+	cout << "newCS.length() = " << newCS.length() << endl;
 
 	if ( newCS.length() > 0 ) {
 		#ifdef LOG_CONDS
 		cerr << "there are " << newCS.length() << " item(s) that are "
-					"only in the srcCS" << endl;
+					"only in the mergedCS" << endl;
 		#endif
 
 		long fromLen = fromCS.length();
 	
 		/* Loop all values in the dest space. */
-		for ( long fromVals = 0; fromVals < (1 << fromLen); fromVals++ ) {
-	//		long basicVals = 0;
-	//		for ( CondSet::Iter csi = destCS; csi.lte(); csi++ ) {
-	//			if ( destVals & (1 << csi.pos()) ) {
-	//				Action **cim = mergedCS.find( *csi );
-	//				long bitPos = (cim - mergedCS.data);
-	//				basicVals |= 1 << bitPos;
-	//			}
-	//		}
-	//
-	//		/* Loop all new values. */
-	//		LongVect expandToVals;
-	//		for ( long soVals = 0; soVals < (1 << srcOnlyLen); soVals++ ) {
-	//			long targVals = basicVals;
-	//			for ( CondSet::Iter csi = srcOnlyCS; csi.lte(); csi++ ) {
-	//				if ( soVals & (1 << csi.pos()) ) {
-	//					Action **cim = mergedCS.find( *csi );
-	//					long bitPos = (cim - mergedCS.data);
-	//					targVals |= 1 << bitPos;
-	//				}
-	//			}
-	//			expandToVals.append( targVals );
-	//		}
-	//
-	//		findCondExpInTrans( expansionList, destState, 
-	//				condCond.s1Tel.lowKey, condCond.s1Tel.highKey, 
-	//				fromCondSpace, toCondSpace, destVals, expandToVals );
+		for ( long fromBits = 0; fromBits < (1 << fromLen); fromBits++ ) {
+			long basicVals = 0;
+			for ( CondSet::Iter csi = fromCS; csi.lte(); csi++ ) {
+				if ( fromBits & (1 << csi.pos()) ) {
+					Action **cim = mergedCS.find( *csi );
+					long bitPos = (cim - mergedCS.data);
+					basicVals |= 1 << bitPos;
+				}
+			}
+
+			cerr << "basicVals: " << basicVals << endl;
+	
+			/* Loop all new values. */
+			LongVect expandToVals;
+			for ( long newVals = 0; newVals < (1 << newLen); newVals++ ) {
+				long targVals = basicVals;
+				for ( CondSet::Iter csi = newCS; csi.lte(); csi++ ) {
+					if ( newVals & (1 << csi.pos()) ) {
+						Action **cim = mergedCS.find( *csi );
+						long bitPos = (cim - mergedCS.data);
+						targVals |= 1 << bitPos;
+					}
+				}
+				cerr << "targVals: " << targVals << endl;
+				expandToVals.append( targVals );
+			}
+	
+//			findCondExpInTrans( expansionList, destState, 
+//					condCond.s1Tel.lowKey, condCond.s1Tel.highKey, 
+//					fromCondSpace, toCondSpace, destVals, expandToVals );
 		}
 	}
+#endif
 }
 
 void FsmAp::expandCondTransitions( TransAp *destTrans, TransAp *srcTrans )
@@ -593,8 +645,8 @@ void FsmAp::expandCondTransitions( TransAp *destTrans, TransAp *srcTrans )
 	mergedCS.insert( destCS );
 	mergedCS.insert( srcCS );
 
-
 	expandConds( destTrans, destCS, mergedCS );
+	expandConds( srcTrans, srcCS, mergedCS );
 }
 
 /* Find the trans with the higher priority. If src is lower priority then dest then
@@ -620,11 +672,10 @@ TransAp *FsmAp::crossTransitions( MergeData &md, StateAp *from,
 	PairIter<CondAp> outPair( destTrans->ctList.head, srcTrans->ctList.head );
 	for ( ; !outPair.end(); outPair++ ) {
 		switch ( outPair.userState ) {
-#if 0
 		case RangeInS1: {
 			/* The pair iter is the authority on the keys. It may have needed
 			 * to break the dest range. */
-			TransAp *destTrans = outPair.s1Tel.trans;
+			CondAp *destTrans = outPair.s1Tel.trans;
 			destTrans->lowKey = outPair.s1Tel.lowKey;
 			destTrans->highKey = outPair.s1Tel.highKey;
 			destList.append( destTrans );
@@ -632,7 +683,7 @@ TransAp *FsmAp::crossTransitions( MergeData &md, StateAp *from,
 		}
 		case RangeInS2: {
 			/* Src range may get crossed with dest's default transition. */
-			TransAp *newTrans = dupTrans( dest, outPair.s2Tel.trans );
+			CondAp *newTrans = dupCondTrans( from, destTrans, outPair.s2Tel.trans );
 
 			/* Set up the transition's keys and append to the dest list. */
 			newTrans->lowKey = outPair.s2Tel.lowKey;
@@ -640,7 +691,6 @@ TransAp *FsmAp::crossTransitions( MergeData &md, StateAp *from,
 			destList.append( newTrans );
 			break;
 		}
-#endif
 		case RangeOverlap: {
 			/* Exact overlap, cross them. */
 			CondAp *newTrans = crossCondTransitions( md, from, destTrans,
@@ -652,17 +702,16 @@ TransAp *FsmAp::crossTransitions( MergeData &md, StateAp *from,
 			destList.append( newTrans );
 			break;
 		}
-#if 0
 		case BreakS1: {
-			/* Since we are always writing to the dest trans, the dest needs
-			 * to be copied when it is broken. The copy goes into the first
-			 * half of the break to "break it off". */
-			outPair.s1Tel.trans = dupTrans( dest, outPair.s1Tel.trans );
+//			/* Since we are always writing to the dest trans, the dest needs
+//			 * to be copied when it is broken. The copy goes into the first
+//			 * half of the break to "break it off". */
+//			outPair.s1Tel.trans = dupTrans( dest, outPair.s1Tel.trans );
+			assert( false );
 			break;
 		}
 		case BreakS2:
 			break;
-#endif
 		}
 	}
 
