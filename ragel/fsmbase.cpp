@@ -347,8 +347,6 @@ void FsmAp::epsilonTrans( int id )
  * for removing states that have no path into them. */
 void FsmAp::markReachableFromHere( StateAp *state )
 {
-	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
-
 	/* Base case: return; */
 	if ( state->stateBits & STB_ISMARKED )
 		return;
@@ -359,8 +357,10 @@ void FsmAp::markReachableFromHere( StateAp *state )
 
 	/* Recurse on all out transitions. */
 	for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
-		if ( trans->ctList.head->toState != 0 )
-			markReachableFromHere( trans->ctList.head->toState );
+		for ( CondTransList::Iter cond = trans->ctList; cond.lte(); cond++ ) {
+			if ( cond->toState != 0 )
+				markReachableFromHere( cond->toState );
+		}
 	}
 }
 
@@ -494,8 +494,6 @@ void FsmAp::verifyNoDeadEndStates()
 
 void FsmAp::depthFirstOrdering( StateAp *state )
 {
-	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
-
 	/* Nothing to do if the state is already on the list. */
 	if ( state->stateBits & STB_ONLIST )
 		return;
@@ -506,8 +504,10 @@ void FsmAp::depthFirstOrdering( StateAp *state )
 	
 	/* Recurse on everything ranges. */
 	for ( TransList::Iter tel = state->outList; tel.lte(); tel++ ) {
-		if ( tel->ctList.head->toState != 0 )
-			depthFirstOrdering( tel->ctList.head->toState );
+		for ( CondTransList::Iter cond = tel->ctList; cond.lte(); cond++ ) {
+			if ( cond->toState != 0 )
+				depthFirstOrdering( cond->toState );
+		}
 	}
 }
 
