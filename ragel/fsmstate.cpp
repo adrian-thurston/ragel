@@ -151,6 +151,8 @@ StateAp::StateAp(const StateAp &other)
 	errActionTable(other.errActionTable),
 	eofActionTable(other.eofActionTable)
 {
+	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
+
 	/* Duplicate all the transitions. */
 	for ( TransList::Iter trans = other.outList; trans.lte(); trans++ ) {
 		/* Duplicate and store the orginal target in the transition. This will
@@ -416,6 +418,8 @@ bool MarkCompare::shouldMark( MarkIndex &markIndex, const StateAp *state1,
 /* Compare target partitions. Either pointer may be null. */
 int FsmAp::comparePartPtr( TransAp *trans1, TransAp *trans2 )
 {
+	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
+
 	if ( trans1 != 0 ) {
 		/* If trans1 is set then so should trans2. The initial partitioning
 		 * guarantees this for us. */
@@ -454,6 +458,8 @@ int FsmAp::compareDataPtr( TransAp *trans1, TransAp *trans2 )
  * Does not consider from state. Either of the pointers may be null. */
 int FsmAp::compareFullPtr( TransAp *trans1, TransAp *trans2 )
 {
+	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
+
 	if ( (trans1 != 0) ^ (trans2 != 0) ) {
 		/* Exactly one of the transitions is set. */
 		if ( trans1 != 0 )
@@ -482,6 +488,8 @@ int FsmAp::compareFullPtr( TransAp *trans1, TransAp *trans2 )
 bool FsmAp::shouldMarkPtr( MarkIndex &markIndex, TransAp *trans1, 
 				TransAp *trans2 )
 {
+	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
+
 	if ( (trans1 != 0) ^ (trans2 != 0) ) {
 		/* Exactly one of the transitions is set. The initial mark round
 		 * should rule out this case. */

@@ -477,8 +477,8 @@ struct TransAp
 
 	~TransAp()
 	{
-		delete ctList.head;
-		ctList.abandon();
+	//	delete ctList.head;
+	//	ctList.abandon();
 	}
 
 	Key lowKey, highKey;
@@ -1324,8 +1324,8 @@ struct FsmAp
 	CondAp *fsmAttachStates( MergeData &md, StateAp *from,
 			CondAp *destTrans, CondAp *srcTrans );
 
-	void expandConds( TransAp *trans, const CondSet &origSet, const CondSet &mergedCS );
-	void expandCondTransitions( TransAp *destTrans, TransAp *srcTrans );
+	void expandConds( StateAp *fromState, TransAp *trans, const CondSet &origSet, const CondSet &mergedCS );
+	void expandCondTransitions( StateAp *fromState, TransAp *destTrans, TransAp *srcTrans );
 
 	/* Two transitions are to be crossed, handle the possibility of either
 	 * going to the error state. */

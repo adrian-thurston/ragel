@@ -112,6 +112,8 @@ TransAp *FsmAp::attachNewTrans( StateAp *from, StateAp *to, Key lowKey, Key high
  * target state.  Does not handle adding the transition into the out list. */
 void FsmAp::attachTrans( StateAp *from, StateAp *to, TransAp *trans )
 {
+	cout << "FIXME: " << __PRETTY_FUNCTION__ << endl;
+
 	assert( trans->ctList.head->fromState == 0 && 
 			trans->ctList.head->toState == 0 );
 
@@ -146,6 +148,8 @@ void FsmAp::attachTrans( StateAp *from, StateAp *to, CondAp *trans )
  * it. */
 void FsmAp::redirectErrorTrans( StateAp *from, StateAp *to, TransAp *trans )
 {
+	cout << "FIXME: " << __PRETTY_FUNCTION__ << endl;
+
 	assert( trans->ctList.head->fromState != 0 && trans->ctList.head->toState == 0 );
 	trans->ctList.head->toState = to;
 
@@ -158,6 +162,8 @@ void FsmAp::redirectErrorTrans( StateAp *from, StateAp *to, TransAp *trans )
 /* Detach for out/in lists or for default transition. */
 void FsmAp::detachTrans( StateAp *from, StateAp *to, TransAp *trans )
 {
+	cout << "FIXME: " << __PRETTY_FUNCTION__ << endl;
+
 	assert( trans->ctList.head->fromState == from && 
 			trans->ctList.head->toState == to );
 
@@ -216,7 +222,12 @@ void FsmAp::detachState( StateAp *state )
 	/* Detach out range transitions. */
 	for ( TransList::Iter trans = state->outList; trans.lte(); ) {
 		TransList::Iter next = trans.next();
-		detachTrans( state, trans->ctList.head->toState, trans );
+		for ( CondTransList::Iter cond = trans->ctList; cond.lte(); ) {
+			CondTransList::Iter next = cond.next();
+			detachCondTrans( state, cond->toState, cond );
+			delete cond;
+			cond = next;
+		}
 		delete trans;
 		trans = next;
 	}
@@ -541,7 +552,7 @@ CondAp *FsmAp::crossCondTransitions( MergeData &md, StateAp *from, TransAp *dest
 	return retTrans;
 }
 
-void FsmAp::expandConds( TransAp *trans, const CondSet &fromCS, const CondSet &mergedCS )
+void FsmAp::expandConds( StateAp *fromState, TransAp *trans, const CondSet &fromCS, const CondSet &mergedCS )
 {
 	/*CondSpace *mergedCondSpace = */addCondSpace( mergedCS );
 
@@ -550,7 +561,6 @@ void FsmAp::expandConds( TransAp *trans, const CondSet &fromCS, const CondSet &m
 		newCS.remove( *mcsi );
 	/*long newLen = */newCS.length();
 
-#if 0
 
 	/* Need to transform condition element to the merged set. */
 	for ( CondTransList::Iter cti = trans->ctList; cti.lte(); cti++ ) {
@@ -569,8 +579,10 @@ void FsmAp::expandConds( TransAp *trans, const CondSet &fromCS, const CondSet &m
 			}
 		}
 
-		cout << "orig: " << origVal << " new: " << newVal << endl;
-		cti->lowKey = cti->highKey = newVal;
+		if ( origVal != newVal ) {
+			cout << "orig: " << origVal << " new: " << newVal << endl;
+			cti->lowKey = cti->highKey = newVal;
+		}
 	}
 
 	/* Need to double up the whole transition list for each condition test in
@@ -579,9 +591,18 @@ void FsmAp::expandConds( TransAp *trans, const CondSet &fromCS, const CondSet &m
 	for ( CondSet::Iter csi = mergedCS; csi.lte(); csi++ ) {
 		Action **cim = fromCS.find( *csi );
 		if ( cim == 0 ) {
+			CondTransList newItems;
 			cout << "doubling up on condition" << endl;
+			for ( CondTransList::Iter cti = trans->ctList; cti.lte(); cti++ ) {
+				CondAp *cond = dupCondTrans( fromState, trans, cti  );
+
+				cond->lowKey = cond->highKey = cti->lowKey.getVal() | (1 << csi.pos());
+			}
+
+			trans->ctList.transfer( newItems );
 		}
 	}
+#if 0
 #endif
 
 #if 0
@@ -631,7 +652,7 @@ void FsmAp::expandConds( TransAp *trans, const CondSet &fromCS, const CondSet &m
 #endif
 }
 
-void FsmAp::expandCondTransitions( TransAp *destTrans, TransAp *srcTrans )
+void FsmAp::expandCondTransitions( StateAp *fromState, TransAp *destTrans, TransAp *srcTrans )
 {
 	CondSet destCS, srcCS;
 	CondSet mergedCS;
@@ -645,8 +666,8 @@ void FsmAp::expandCondTransitions( TransAp *destTrans, TransAp *srcTrans )
 	mergedCS.insert( destCS );
 	mergedCS.insert( srcCS );
 
-	expandConds( destTrans, destCS, mergedCS );
-	expandConds( srcTrans, srcCS, mergedCS );
+	expandConds( fromState, destTrans, destCS, mergedCS );
+	expandConds( fromState, srcTrans, srcCS, mergedCS );
 }
 
 /* Find the trans with the higher priority. If src is lower priority then dest then
@@ -655,15 +676,8 @@ void FsmAp::expandCondTransitions( TransAp *destTrans, TransAp *srcTrans )
 TransAp *FsmAp::crossTransitions( MergeData &md, StateAp *from,
 		TransAp *destTrans, TransAp *srcTrans )
 {
-//	findTransExpansions( expList1, destState, srcState );
-//	findCondExpansions( expList1, destState, srcState );
-//	findTransExpansions( expList2, srcState, destState );
-//	findCondExpansions( expList2, srcState, destState );
-//
-//	mergeStateConds( destState, srcState );
-
 	if ( destTrans->condSpace != srcTrans->condSpace )
-		expandCondTransitions( destTrans, srcTrans );
+		expandCondTransitions( from, destTrans, srcTrans );
 
 	/* The destination list. */
 	CondTransList destList;
@@ -782,6 +796,8 @@ void FsmAp::outTransCopy( MergeData &md, StateAp *dest, TransAp *srcList )
 /* Move all the transitions that go into src so that they go into dest.  */
 void FsmAp::inTransMove( StateAp *dest, StateAp *src )
 {
+	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
+
 	/* Do not try to move in trans to and from the same state. */
 	assert( dest != src );
 

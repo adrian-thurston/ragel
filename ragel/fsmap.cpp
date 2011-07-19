@@ -114,6 +114,8 @@ void PriorTable::setPriors( const PriorTable &other )
  * null word. */
 void FsmAp::startFsmPrior( int ordering, PriorDesc *prior )
 {
+	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
+
 	/* Make sure the start state has no other entry points. */
 	isolateStartState();
 
@@ -134,6 +136,8 @@ void FsmAp::startFsmPrior( int ordering, PriorDesc *prior )
  * and all def transitions. */
 void FsmAp::allTransPrior( int ordering, PriorDesc *prior )
 {
+	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
+
 	/* Walk the list of all states. */
 	for ( StateList::Iter state = stateList; state.lte(); state++ ) {
 		/* Walk the out list of the state. */
@@ -151,6 +155,8 @@ void FsmAp::allTransPrior( int ordering, PriorDesc *prior )
  * supported. */
 void FsmAp::finishFsmPrior( int ordering, PriorDesc *prior )
 {
+	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
+
 	/* Walk all final states. */
 	for ( StateSet::Iter state = finStateSet; state.lte(); state++ ) {
 		/* Walk all in transitions of the final state. */
@@ -180,6 +186,8 @@ void FsmAp::leaveFsmPrior( int ordering, PriorDesc *prior )
  * state. */
 void FsmAp::startFsmAction( int ordering, Action *action )
 {
+	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
+
 	/* Make sure the start state has no other entry points. */
 	isolateStartState();
 
@@ -200,6 +208,8 @@ void FsmAp::startFsmAction( int ordering, Action *action )
  * states. */
 void FsmAp::allTransAction( int ordering, Action *action )
 {
+	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
+
 	/* Walk all states. */
 	for ( StateList::Iter state = stateList; state.lte(); state++ ) {
 		/* Walk the out list of the state. */
@@ -216,6 +226,8 @@ void FsmAp::allTransAction( int ordering, Action *action )
  * final state from within the same fsm. */
 void FsmAp::finishFsmAction( int ordering, Action *action )
 {
+	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
+
 	/* Walk all final states. */
 	for ( StateSet::Iter state = finStateSet; state.lte(); state++ ) {
 		/* Walk the final state's in list. */
@@ -238,6 +250,8 @@ void FsmAp::leaveFsmAction( int ordering, Action *action )
 /* Add functions to the longest match action table for constructing scanners. */
 void FsmAp::longMatchAction( int ordering, LongestMatchPart *lmPart )
 {
+	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
+
 	/* Walk all final states. */
 	for ( StateSet::Iter state = finStateSet; state.lte(); state++ ) {
 		/* Walk the final state's in list. */
@@ -310,6 +324,8 @@ void FsmAp::fillGaps( StateAp *state )
 
 void FsmAp::setErrorActions( StateAp *state, const ActionTable &other )
 {
+	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
+
 	/* Fill any gaps in the out list with an error transition. */
 	fillGaps( state );
 
@@ -322,6 +338,8 @@ void FsmAp::setErrorActions( StateAp *state, const ActionTable &other )
 
 void FsmAp::setErrorAction( StateAp *state, int ordering, Action *action )
 {
+	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
+
 	/* Fill any gaps in the out list with an error transition. */
 	fillGaps( state );
 
@@ -337,6 +355,8 @@ void FsmAp::setErrorAction( StateAp *state, int ordering, Action *action )
 void FsmAp::setErrorTarget( StateAp *state, StateAp *target, int *orderings, 
 			Action **actions, int nActs )
 {
+	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
+
 	/* Fill any gaps in the out list with an error transition. */
 	fillGaps( state );
 
@@ -589,6 +609,8 @@ void FsmAp::middleFromStateAction( int ordering, Action *action )
  * Returns the maximum number of order numbers used. */
 int FsmAp::shiftStartActionOrder( int fromOrder )
 {
+	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
+
 	int maxUsed = 0;
 
 	/* Walk the start state's transitions, shifting function ordering. */
@@ -726,6 +748,8 @@ int FsmAp::comparePrior( const PriorTable &priorTable1, const PriorTable &priorT
  * the base transition has no data, the default is to return equal. */
 int FsmAp::compareTransData( TransAp *trans1, TransAp *trans2 )
 {
+	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
+
 	/* Compare the prior table. */
 	int cmpRes = CmpPriorTable::compare( trans1->ctList.head->priorTable, 
 			trans2->ctList.head->priorTable );
@@ -751,6 +775,8 @@ int FsmAp::compareTransData( TransAp *trans1, TransAp *trans2 )
  * new transition is to represent. */
 void FsmAp::addInTrans( TransAp *destTrans, TransAp *srcTrans )
 {
+	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
+
 	/* Protect against adding in from ourselves. */
 	if ( srcTrans == destTrans ) {
 		/* Adding in ourselves, need to make a copy of the source transitions.

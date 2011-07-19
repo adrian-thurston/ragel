@@ -185,6 +185,8 @@ void FsmAp::emptyFsm( )
 
 void FsmAp::transferOutData( StateAp *destState, StateAp *srcState )
 {
+	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
+
 	for ( TransList::Iter trans = destState->outList; trans.lte(); trans++ ) {
 		if ( trans->ctList.head->toState != 0 ) {
 			/* Get the actions data from the outActionTable. */

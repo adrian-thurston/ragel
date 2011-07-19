@@ -86,6 +86,8 @@ FsmAp::FsmAp( const FsmAp &graph )
 		/* Set the mapsTo item of the old state. */
 		origState->alg.stateMap = newState;
 	}
+
+	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
 	
 	/* Derefernce all the state maps. */
 	for ( StateList::Iter state = stateList; state.lte(); state++ ) {
@@ -345,6 +347,8 @@ void FsmAp::epsilonTrans( int id )
  * for removing states that have no path into them. */
 void FsmAp::markReachableFromHere( StateAp *state )
 {
+	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
+
 	/* Base case: return; */
 	if ( state->stateBits & STB_ISMARKED )
 		return;
@@ -440,6 +444,8 @@ void FsmAp::setFinBits( int finStateBits )
 /* Tests the integrity of the transition lists and the fromStates. */
 void FsmAp::verifyIntegrity()
 {
+	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
+
 	for ( StateList::Iter state = stateList; state.lte(); state++ ) {
 		/* Walk the out transitions and assert fromState is correct. */
 		for ( TransList::Iter trans = state->outList; trans.lte(); trans++ )
@@ -488,6 +494,8 @@ void FsmAp::verifyNoDeadEndStates()
 
 void FsmAp::depthFirstOrdering( StateAp *state )
 {
+	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
+
 	/* Nothing to do if the state is already on the list. */
 	if ( state->stateBits & STB_ONLIST )
 		return;
@@ -555,6 +563,8 @@ void FsmAp::setStateNumbers( int base )
 
 bool FsmAp::checkErrTrans( StateAp *state, TransAp *trans )
 {
+	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
+
 	/* Might go directly to error state. */
 	if ( trans->ctList.head->toState == 0 )
 		return true;
