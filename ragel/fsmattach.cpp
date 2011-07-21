@@ -672,6 +672,34 @@ void FsmAp::expandCondTransitions( StateAp *fromState, TransAp *destTrans, Trans
 	expandConds( fromState, srcTrans, srcCS, mergedCS );
 }
 
+TransAp *FsmAp::copyTransForExpanision( StateAp *fromState, TransAp *srcTrans )
+{
+	/* This is the dup without the attach. */
+	TransAp *newTrans = new TransAp();
+	newTrans->condSpace = srcTrans->condSpace;
+
+	for ( CondTransList::Iter sc = srcTrans->ctList; sc.lte(); sc++ ) {
+		/* Sub-transition for conditions. */
+		CondAp *newCond = new CondAp( newTrans );
+		newCond->lowKey = sc->lowKey;
+		newCond->highKey = sc->highKey;
+
+		newCond->fromState = sc->fromState;
+		newCond->toState = sc->toState;
+			
+		/* Call the user callback to add in the original source transition. */
+		addInTrans( newCond, sc );
+
+		newTrans->ctList.append( newCond );
+	}
+
+	/* Set up the transition's keys and append to the dest list. */
+	newTrans->lowKey = srcTrans->lowKey;
+	newTrans->highKey = srcTrans->highKey;
+
+	return newTrans;
+}
+
 /* Find the trans with the higher priority. If src is lower priority then dest then
  * src is ignored. If src is higher priority than dest, then src overwrites dest. If
  * the priorities are equal, then they are merged. */
@@ -681,15 +709,7 @@ TransAp *FsmAp::crossTransitions( MergeData &md, StateAp *from,
 	TransAp *effectiveSrcTrans = srcTrans;
 
 	if ( destTrans->condSpace != srcTrans->condSpace ) {
-		/* Src range may get crossed with dest's default transition. */
-		TransAp *newTrans = dupTrans( from, srcTrans );
-
-		/* Set up the transition's keys and append to the dest list. */
-		newTrans->lowKey = srcTrans->lowKey;
-		newTrans->highKey = srcTrans->highKey;
-
-		effectiveSrcTrans = newTrans;
-
+		effectiveSrcTrans = copyTransForExpanision( from, srcTrans );
 		expandCondTransitions( from, destTrans, effectiveSrcTrans );
 	}
 
@@ -746,10 +766,10 @@ TransAp *FsmAp::crossTransitions( MergeData &md, StateAp *from,
 	/* Abandon the old outList and transfer destList into it. */
 	destTrans->ctList.transfer( destList );
 
-	if ( effectiveSrcTrans != srcTrans ) {
-		/* Detach the copy of the src Trans. */
-//		detachTrans( from, effectiveSrcTrans->ctList.head->toState, effectiveSrcTrans );
+	if ( srcTrans != effectiveSrcTrans ) {
+		/* FIXME: Delete the duplicate. Don't detach anything. */
 	}
+
 	return destTrans;
 }
 

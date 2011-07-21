@@ -1326,6 +1326,7 @@ struct FsmAp
 
 	void expandConds( StateAp *fromState, TransAp *trans, const CondSet &origSet, const CondSet &mergedCS );
 	void expandCondTransitions( StateAp *fromState, TransAp *destTrans, TransAp *srcTrans );
+	TransAp *copyTransForExpanision( StateAp *fromState, TransAp *srcTrans );
 
 	/* Two transitions are to be crossed, handle the possibility of either
 	 * going to the error state. */
