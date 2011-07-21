@@ -185,15 +185,15 @@ void FsmAp::emptyFsm( )
 
 void FsmAp::transferOutData( StateAp *destState, StateAp *srcState )
 {
-	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
-
 	for ( TransList::Iter trans = destState->outList; trans.lte(); trans++ ) {
-		if ( trans->ctList.head->toState != 0 ) {
-			/* Get the actions data from the outActionTable. */
-			trans->ctList.head->actionTable.setActions( srcState->outActionTable );
+		for ( CondTransList::Iter cond = trans->ctList; cond.lte(); cond++ ) {
+			if ( cond->toState != 0 ) {
+				/* Get the actions data from the outActionTable. */
+				cond->actionTable.setActions( srcState->outActionTable );
 
-			/* Get the priorities from the outPriorTable. */
-			trans->ctList.head->priorTable.setPriors( srcState->outPriorTable );
+				/* Get the priorities from the outPriorTable. */
+				cond->priorTable.setPriors( srcState->outPriorTable );
+			}
 		}
 	}
 }

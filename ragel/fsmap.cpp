@@ -114,15 +114,15 @@ void PriorTable::setPriors( const PriorTable &other )
  * null word. */
 void FsmAp::startFsmPrior( int ordering, PriorDesc *prior )
 {
-	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
-
 	/* Make sure the start state has no other entry points. */
 	isolateStartState();
 
 	/* Walk all transitions out of the start state. */
 	for ( TransList::Iter trans = startState->outList; trans.lte(); trans++ ) {
-		if ( trans->ctList.head->toState != 0 )
-			trans->ctList.head->priorTable.setPrior( ordering, prior );
+		for ( CondTransList::Iter cond = trans->ctList; cond.lte(); cond++ ) {
+			if ( cond->toState != 0 )
+				cond->priorTable.setPrior( ordering, prior );
+		}
 	}
 
 	/* If the new start state is final then set the out priority. This follows
@@ -136,14 +136,14 @@ void FsmAp::startFsmPrior( int ordering, PriorDesc *prior )
  * and all def transitions. */
 void FsmAp::allTransPrior( int ordering, PriorDesc *prior )
 {
-	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
-
 	/* Walk the list of all states. */
 	for ( StateList::Iter state = stateList; state.lte(); state++ ) {
 		/* Walk the out list of the state. */
 		for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
-			if ( trans->ctList.head->toState != 0 )
-				trans->ctList.head->priorTable.setPrior( ordering, prior );
+			for ( CondTransList::Iter cond = trans->ctList; cond.lte(); cond++ ) {
+				if ( cond->toState != 0 )
+					cond->priorTable.setPrior( ordering, prior );
+			}
 		}
 	}
 }
@@ -155,15 +155,11 @@ void FsmAp::allTransPrior( int ordering, PriorDesc *prior )
  * supported. */
 void FsmAp::finishFsmPrior( int ordering, PriorDesc *prior )
 {
-	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
-
 	/* Walk all final states. */
 	for ( StateSet::Iter state = finStateSet; state.lte(); state++ ) {
 		/* Walk all in transitions of the final state. */
-		for ( TransInList<CondAp>::Iter t = (*state)->inList; t.lte(); t++ ) {
-			TransAp *trans = t->transAp;
-			trans->ctList.head->priorTable.setPrior( ordering, prior );
-		}
+		for ( TransInList<CondAp>::Iter t = (*state)->inList; t.lte(); t++ )
+			t->priorTable.setPrior( ordering, prior );
 	}
 }
 
@@ -186,15 +182,15 @@ void FsmAp::leaveFsmPrior( int ordering, PriorDesc *prior )
  * state. */
 void FsmAp::startFsmAction( int ordering, Action *action )
 {
-	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
-
 	/* Make sure the start state has no other entry points. */
 	isolateStartState();
 
 	/* Walk the start state's transitions, setting functions. */
 	for ( TransList::Iter trans = startState->outList; trans.lte(); trans++ ) {
-		if ( trans->ctList.head->toState != 0 )
-			trans->ctList.head->actionTable.setAction( ordering, action );
+		for ( CondTransList::Iter cond = trans->ctList; cond.lte(); cond++ ) {
+			if ( cond->toState != 0 )
+				cond->actionTable.setAction( ordering, action );
+		}
 	}
 
 	/* If start state is final then add the action to the out action table.
@@ -208,14 +204,14 @@ void FsmAp::startFsmAction( int ordering, Action *action )
  * states. */
 void FsmAp::allTransAction( int ordering, Action *action )
 {
-	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
-
 	/* Walk all states. */
 	for ( StateList::Iter state = stateList; state.lte(); state++ ) {
 		/* Walk the out list of the state. */
 		for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
-			if ( trans->ctList.head->toState != 0 )
-				trans->ctList.head->actionTable.setAction( ordering, action );
+			for ( CondTransList::Iter cond = trans->ctList; cond.lte(); cond++ ) {
+				if ( cond->toState != 0 )
+					cond->actionTable.setAction( ordering, action );
+			}
 		}
 	}
 }
@@ -226,15 +222,11 @@ void FsmAp::allTransAction( int ordering, Action *action )
  * final state from within the same fsm. */
 void FsmAp::finishFsmAction( int ordering, Action *action )
 {
-	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
-
 	/* Walk all final states. */
 	for ( StateSet::Iter state = finStateSet; state.lte(); state++ ) {
 		/* Walk the final state's in list. */
-		for ( TransInList<CondAp>::Iter t = (*state)->inList; t.lte(); t++ ) {
-			TransAp *trans = t->transAp;
-			trans->ctList.head->actionTable.setAction( ordering, action );
-		}
+		for ( TransInList<CondAp>::Iter t = (*state)->inList; t.lte(); t++ )
+			t->actionTable.setAction( ordering, action );
 	}
 }
 
@@ -250,15 +242,11 @@ void FsmAp::leaveFsmAction( int ordering, Action *action )
 /* Add functions to the longest match action table for constructing scanners. */
 void FsmAp::longMatchAction( int ordering, LongestMatchPart *lmPart )
 {
-	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
-
 	/* Walk all final states. */
 	for ( StateSet::Iter state = finStateSet; state.lte(); state++ ) {
 		/* Walk the final state's in list. */
-		for ( TransInList<CondAp>::Iter t = (*state)->inList; t.lte(); t++ ) {
-			TransAp *trans = t->transAp;
-			trans->ctList.head->lmActionTable.setAction( ordering, lmPart );
-		}
+		for ( TransInList<CondAp>::Iter t = (*state)->inList; t.lte(); t++ )
+			t->lmActionTable.setAction( ordering, lmPart );
 	}
 }
 
@@ -324,29 +312,29 @@ void FsmAp::fillGaps( StateAp *state )
 
 void FsmAp::setErrorActions( StateAp *state, const ActionTable &other )
 {
-	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
-
 	/* Fill any gaps in the out list with an error transition. */
 	fillGaps( state );
 
 	/* Set error transitions in the transitions that go to error. */
 	for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
-		if ( trans->ctList.head->toState == 0 )
-			trans->ctList.head->actionTable.setActions( other );
+		for ( CondTransList::Iter cond = trans->ctList; cond.lte(); cond++ ) {
+			if ( cond->toState == 0 )
+				cond->actionTable.setActions( other );
+		}
 	}
 }
 
 void FsmAp::setErrorAction( StateAp *state, int ordering, Action *action )
 {
-	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
-
 	/* Fill any gaps in the out list with an error transition. */
 	fillGaps( state );
 
 	/* Set error transitions in the transitions that go to error. */
 	for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
-		if ( trans->ctList.head->toState == 0 )
-			trans->ctList.head->actionTable.setAction( ordering, action );
+		for ( CondTransList::Iter cond = trans->ctList; cond.lte(); cond++ ) {
+			if ( cond->toState == 0 )
+				cond->actionTable.setAction( ordering, action );
+		}
 	}
 }
 
@@ -355,17 +343,17 @@ void FsmAp::setErrorAction( StateAp *state, int ordering, Action *action )
 void FsmAp::setErrorTarget( StateAp *state, StateAp *target, int *orderings, 
 			Action **actions, int nActs )
 {
-	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
-
 	/* Fill any gaps in the out list with an error transition. */
 	fillGaps( state );
 
 	/* Set error target in the transitions that go to error. */
 	for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
-		if ( trans->ctList.head->toState == 0 ) {
-			/* The trans goes to error, redirect it. */
-			redirectErrorTrans( trans->ctList.head->fromState, target, trans );
-			trans->ctList.head->actionTable.setActions( orderings, actions, nActs );
+		for ( CondTransList::Iter cond = trans->ctList; cond.lte(); cond++ ) {
+			if ( cond->toState == 0 ) {
+				/* The trans goes to error, redirect it. */
+				redirectErrorTrans( cond->fromState, target, trans );
+				cond->actionTable.setActions( orderings, actions, nActs );
+			}
 		}
 	}
 }
@@ -609,22 +597,22 @@ void FsmAp::middleFromStateAction( int ordering, Action *action )
  * Returns the maximum number of order numbers used. */
 int FsmAp::shiftStartActionOrder( int fromOrder )
 {
-	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
-
 	int maxUsed = 0;
 
 	/* Walk the start state's transitions, shifting function ordering. */
 	for ( TransList::Iter trans = startState->outList; trans.lte(); trans++ ) {
-		/* Walk the function data for the transition and set the keys to
-		 * increasing values starting at fromOrder. */
-		int curFromOrder = fromOrder;
-		ActionTable::Iter action = trans->ctList.head->actionTable;
-		for ( ; action.lte(); action++ ) 
-			action->key = curFromOrder++;
-	
-		/* Keep track of the max number of orders used. */
-		if ( curFromOrder - fromOrder > maxUsed )
-			maxUsed = curFromOrder - fromOrder;
+		for ( CondTransList::Iter cond = trans->ctList; cond.lte(); cond++ ) {
+			/* Walk the function data for the transition and set the keys to
+			 * increasing values starting at fromOrder. */
+			int curFromOrder = fromOrder;
+			ActionTable::Iter action = cond->actionTable;
+			for ( ; action.lte(); action++ ) 
+				action->key = curFromOrder++;
+		
+			/* Keep track of the max number of orders used. */
+			if ( curFromOrder - fromOrder > maxUsed )
+				maxUsed = curFromOrder - fromOrder;
+		}
 	}
 	
 	return maxUsed;

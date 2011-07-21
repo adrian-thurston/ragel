@@ -597,9 +597,11 @@ void FsmAp::expandConds( StateAp *fromState, TransAp *trans, const CondSet &from
 				CondAp *cond = dupCondTrans( fromState, trans, cti  );
 
 				cond->lowKey = cond->highKey = cti->lowKey.getVal() | (1 << csi.pos());
+
+				newItems.append( cond );
 			}
 
-			trans->ctList.transfer( newItems );
+			trans->ctList.append( newItems );
 		}
 	}
 #if 0
@@ -676,14 +678,26 @@ void FsmAp::expandCondTransitions( StateAp *fromState, TransAp *destTrans, Trans
 TransAp *FsmAp::crossTransitions( MergeData &md, StateAp *from,
 		TransAp *destTrans, TransAp *srcTrans )
 {
-	if ( destTrans->condSpace != srcTrans->condSpace )
-		expandCondTransitions( from, destTrans, srcTrans );
+	TransAp *effectiveSrcTrans = srcTrans;
+
+	if ( destTrans->condSpace != srcTrans->condSpace ) {
+		/* Src range may get crossed with dest's default transition. */
+		TransAp *newTrans = dupTrans( from, srcTrans );
+
+		/* Set up the transition's keys and append to the dest list. */
+		newTrans->lowKey = srcTrans->lowKey;
+		newTrans->highKey = srcTrans->highKey;
+
+		effectiveSrcTrans = newTrans;
+
+		expandCondTransitions( from, destTrans, effectiveSrcTrans );
+	}
 
 	/* The destination list. */
 	CondTransList destList;
 
 	/* Set up an iterator to stop at breaks. */
-	PairIter<CondAp> outPair( destTrans->ctList.head, srcTrans->ctList.head );
+	PairIter<CondAp> outPair( destTrans->ctList.head, effectiveSrcTrans->ctList.head );
 	for ( ; !outPair.end(); outPair++ ) {
 		switch ( outPair.userState ) {
 		case RangeInS1: {
@@ -731,6 +745,11 @@ TransAp *FsmAp::crossTransitions( MergeData &md, StateAp *from,
 
 	/* Abandon the old outList and transfer destList into it. */
 	destTrans->ctList.transfer( destList );
+
+	if ( effectiveSrcTrans != srcTrans ) {
+		/* Detach the copy of the src Trans. */
+//		detachTrans( from, effectiveSrcTrans->ctList.head->toState, effectiveSrcTrans );
+	}
 	return destTrans;
 }
 
