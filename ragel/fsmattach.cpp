@@ -700,6 +700,16 @@ TransAp *FsmAp::copyTransForExpanision( StateAp *fromState, TransAp *srcTrans )
 	return newTrans;
 }
 
+void FsmAp::freeEffectiveTrans( TransAp *trans )
+{
+	for ( CondTransList::Iter sc = trans->ctList; sc.lte(); ) {
+		CondTransList::Iter next = sc.next();
+		delete sc;
+		sc = next;
+	}
+	delete trans;
+}
+
 /* Find the trans with the higher priority. If src is lower priority then dest then
  * src is ignored. If src is higher priority than dest, then src overwrites dest. If
  * the priorities are equal, then they are merged. */
@@ -766,9 +776,9 @@ TransAp *FsmAp::crossTransitions( MergeData &md, StateAp *from,
 	/* Abandon the old outList and transfer destList into it. */
 	destTrans->ctList.transfer( destList );
 
-	if ( srcTrans != effectiveSrcTrans ) {
-		/* FIXME: Delete the duplicate. Don't detach anything. */
-	}
+	/* Delete the duplicate. Don't detach anything. */
+	if ( srcTrans != effectiveSrcTrans )
+		freeEffectiveTrans( effectiveSrcTrans );
 
 	return destTrans;
 }
