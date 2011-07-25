@@ -736,6 +736,11 @@ int FsmAp::comparePrior( const PriorTable &priorTable1, const PriorTable &priorT
  * the base transition has no data, the default is to return equal. */
 int FsmAp::compareTransData( TransAp *trans1, TransAp *trans2 )
 {
+	if ( trans1->condSpace < trans2->condSpace )
+		return -1;
+	else if ( trans2->condSpace < trans1->condSpace )
+		return 1;
+
 	PairIter<CondAp> outPair( trans1->ctList.head, trans2->ctList.head );
 	for ( ; !outPair.end(); outPair++ ) {
 		switch ( outPair.userState ) {

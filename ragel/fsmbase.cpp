@@ -87,18 +87,18 @@ FsmAp::FsmAp( const FsmAp &graph )
 		origState->alg.stateMap = newState;
 	}
 
-	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
-	
 	/* Derefernce all the state maps. */
 	for ( StateList::Iter state = stateList; state.lte(); state++ ) {
 		for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
-			/* The points to the original in the src machine. The taget's duplicate
-			 * is in the statemap. */
-			StateAp *toState = trans->ctList.head->toState != 0 ? trans->ctList.head->toState->alg.stateMap : 0;
+			for ( CondTransList::Iter cti = trans->ctList; cti.lte(); cti++ ) {
+				/* The points to the original in the src machine. The taget's duplicate
+				 * is in the statemap. */
+				StateAp *toState = cti->toState != 0 ? cti->toState->alg.stateMap : 0;
 
-			/* Attach The transition to the duplicate. */
-			trans->ctList.head->toState = 0;
-			attachTrans( state, toState, trans );
+				/* Attach The transition to the duplicate. */
+				cti->toState = 0;
+				attachTrans( state, toState, cti );
+			}
 		}
 
 		/* Fix the eofTarg, if set. */

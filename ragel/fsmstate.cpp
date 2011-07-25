@@ -151,8 +151,6 @@ StateAp::StateAp(const StateAp &other)
 	errActionTable(other.errActionTable),
 	eofActionTable(other.eofActionTable)
 {
-	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
-
 	/* Duplicate all the transitions. */
 	for ( TransList::Iter trans = other.outList; trans.lte(); trans++ ) {
 		/* Duplicate and store the orginal target in the transition. This will
@@ -168,7 +166,7 @@ StateAp::StateAp(const StateAp &other)
 
 			assert( cti->lmActionTable.length() == 0 );
 
-			newCondTrans->toState = trans->ctList.head->toState;
+			newCondTrans->toState = cti->toState;
 		}
 
 		outList.append( newTrans );

@@ -704,11 +704,11 @@ void FsmAp::fusePartitions( MinPartition *parts, int numParts )
 	}
 }
 
-
-/* Merge neighboring transitions go to the same state and have the same
+/* Merge neighboring transitions that go to the same state and have the same
  * transitions data. */
 void FsmAp::compressTransitions()
 {
+	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
 	for ( StateList::Iter st = stateList; st.lte(); st++ ) {
 		if ( st->outList.length() > 1 ) {
 			for ( TransList::Iter trans = st->outList, next = trans.next(); next.lte();  ) {
