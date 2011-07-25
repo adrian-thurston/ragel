@@ -708,15 +708,23 @@ void FsmAp::fusePartitions( MinPartition *parts, int numParts )
  * transitions data. */
 void FsmAp::compressTransitions()
 {
-	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
 	for ( StateList::Iter st = stateList; st.lte(); st++ ) {
 		if ( st->outList.length() > 1 ) {
 			for ( TransList::Iter trans = st->outList, next = trans.next(); next.lte();  ) {
 				Key nextLow = next->lowKey;
 				nextLow.decrement();
-				if ( trans->highKey == nextLow && trans->ctList.head->toState == next->ctList.head->toState &&
-					CmpActionTable::compare( trans->ctList.head->actionTable, next->ctList.head->actionTable ) == 0 )
-				{
+
+				/* Require there be no conditions in either of the merge
+				 * candidates. */
+				bool merge = 
+					trans->condSpace == 0 && 
+					next->condSpace == 0 && 
+					trans->highKey == nextLow && 
+					trans->ctList.length() == 1 && next->ctList.length() == 1 &&
+					trans->ctList.head->toState == next->ctList.head->toState &&
+					CmpActionTable::compare( trans->ctList.head->actionTable, next->ctList.head->actionTable ) == 0;
+
+				if ( merge ) {
 					trans->highKey = next->highKey;
 					st->outList.detach( next );
 					detachTrans( next->ctList.head->fromState, next->ctList.head->toState, next );
