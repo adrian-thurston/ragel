@@ -736,23 +736,59 @@ int FsmAp::comparePrior( const PriorTable &priorTable1, const PriorTable &priorT
  * the base transition has no data, the default is to return equal. */
 int FsmAp::compareTransData( TransAp *trans1, TransAp *trans2 )
 {
-	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
+	PairIter<CondAp> outPair( trans1->ctList.head, trans2->ctList.head );
+	for ( ; !outPair.end(); outPair++ ) {
+		switch ( outPair.userState ) {
+		case RangeInS1: {
+			int compareRes = FsmAp::compareCondDataPtr( outPair.s1Tel.trans, 0 );
+			if ( compareRes != 0 )
+				return compareRes;
+			break;
+		}
+		case RangeInS2: {
+			int compareRes = FsmAp::compareCondDataPtr( 0, outPair.s2Tel.trans );
+			if ( compareRes != 0 )
+				return compareRes;
+			break;
+		}
+		case RangeOverlap: {
+			int compareRes = FsmAp::compareCondDataPtr( 
+					outPair.s1Tel.trans, outPair.s2Tel.trans );
+			if ( compareRes != 0 )
+				return compareRes;
+			break;
+		}
+		case BreakS1:
+		case BreakS2:
+			assert(false);
+			break;
+		}
+	}
+	return 0;
+}
 
+/* Compares two transitions according to priority and functions. Pointers
+ * should not be null. Does not consider to state or from state.  Compare two
+ * transitions according to the data contained in the transitions.  Data means
+ * any properties added to user transitions that may differentiate them. Since
+ * the base transition has no data, the default is to return equal. */
+int FsmAp::compareCondData( CondAp *trans1, CondAp *trans2 )
+{
 	/* Compare the prior table. */
-	int cmpRes = CmpPriorTable::compare( trans1->ctList.head->priorTable, 
-			trans2->ctList.head->priorTable );
+	int cmpRes = CmpPriorTable::compare( trans1->priorTable, 
+			trans2->priorTable );
 	if ( cmpRes != 0 )
 		return cmpRes;
 
 	/* Compare longest match action tables. */
-	cmpRes = CmpLmActionTable::compare(trans1->ctList.head->lmActionTable, 
-			trans2->ctList.head->lmActionTable);
+	cmpRes = CmpLmActionTable::compare(trans1->lmActionTable, 
+			trans2->lmActionTable);
 	if ( cmpRes != 0 )
 		return cmpRes;
 	
 	/* Compare action tables. */
-	return CmpActionTable::compare(trans1->ctList.head->actionTable, 
-			trans2->ctList.head->actionTable);
+	return CmpActionTable::compare(trans1->actionTable, 
+			trans2->actionTable);
 }
 
 /* Callback invoked when another trans (or possibly this) is added into this

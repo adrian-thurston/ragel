@@ -845,8 +845,6 @@ void FsmAp::outTransCopy( MergeData &md, StateAp *dest, TransAp *srcList )
 /* Move all the transitions that go into src so that they go into dest.  */
 void FsmAp::inTransMove( StateAp *dest, StateAp *src )
 {
-	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
-
 	/* Do not try to move in trans to and from the same state. */
 	assert( dest != src );
 
@@ -864,11 +862,11 @@ void FsmAp::inTransMove( StateAp *dest, StateAp *src )
 	/* Move the transitions in inList. */
 	while ( src->inList.head != 0 ) {
 		/* Get trans and from state. */
-		TransAp *trans = src->inList.head->transAp;
-		StateAp *fromState = trans->ctList.head->fromState;
+		CondAp *trans = src->inList.head;
+		StateAp *fromState = trans->fromState;
 
 		/* Detach from src, reattach to dest. */
-		detachTrans( fromState, src, trans );
+		detachCondTrans( fromState, src, trans );
 		attachTrans( fromState, dest, trans );
 	}
 }

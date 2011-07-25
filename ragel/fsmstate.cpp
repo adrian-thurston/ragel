@@ -299,19 +299,19 @@ int InitPartitionCompare::compare( const StateAp *state1 , const StateAp *state2
 		switch ( outPair.userState ) {
 
 		case RangeInS1:
-			compareRes = FsmAp::compareDataPtr( outPair.s1Tel.trans, 0 );
+			compareRes = FsmAp::compareTransDataPtr( outPair.s1Tel.trans, 0 );
 			if ( compareRes != 0 )
 				return compareRes;
 			break;
 
 		case RangeInS2:
-			compareRes = FsmAp::compareDataPtr( 0, outPair.s2Tel.trans );
+			compareRes = FsmAp::compareTransDataPtr( 0, outPair.s2Tel.trans );
 			if ( compareRes != 0 )
 				return compareRes;
 			break;
 
 		case RangeOverlap:
-			compareRes = FsmAp::compareDataPtr( 
+			compareRes = FsmAp::compareTransDataPtr( 
 					outPair.s1Tel.trans, outPair.s2Tel.trans );
 			if ( compareRes != 0 )
 				return compareRes;
@@ -337,19 +337,19 @@ int PartitionCompare::compare( const StateAp *state1, const StateAp *state2 )
 		switch ( outPair.userState ) {
 
 		case RangeInS1:
-			compareRes = FsmAp::comparePartPtr( outPair.s1Tel.trans, 0 );
+			compareRes = FsmAp::compareTransPartPtr( outPair.s1Tel.trans, 0 );
 			if ( compareRes != 0 )
 				return compareRes;
 			break;
 
 		case RangeInS2:
-			compareRes = FsmAp::comparePartPtr( 0, outPair.s2Tel.trans );
+			compareRes = FsmAp::compareTransPartPtr( 0, outPair.s2Tel.trans );
 			if ( compareRes != 0 )
 				return compareRes;
 			break;
 
 		case RangeOverlap:
-			compareRes = FsmAp::comparePartPtr( 
+			compareRes = FsmAp::compareTransPartPtr( 
 					outPair.s1Tel.trans, outPair.s2Tel.trans );
 			if ( compareRes != 0 )
 				return compareRes;
@@ -415,22 +415,69 @@ bool MarkCompare::shouldMark( MarkIndex &markIndex, const StateAp *state1,
  * Transition Comparison.
  */
 
-/* Compare target partitions. Either pointer may be null. */
-int FsmAp::comparePartPtr( TransAp *trans1, TransAp *trans2 )
+int FsmAp::comparePart( TransAp *trans1, TransAp *trans2 )
 {
-	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
+	/* Use a pair iterator to get the transition pairs. */
+	PairIter<CondAp> outPair( trans1->ctList.head, trans2->ctList.head );
+	for ( ; !outPair.end(); outPair++ ) {
+		switch ( outPair.userState ) {
 
+		case RangeInS1: {
+			int compareRes = FsmAp::compareCondPartPtr( outPair.s1Tel.trans, 0 );
+			if ( compareRes != 0 )
+				return compareRes;
+			break;
+		}
+
+		case RangeInS2: {
+			int compareRes = FsmAp::compareCondPartPtr( 0, outPair.s2Tel.trans );
+			if ( compareRes != 0 )
+				return compareRes;
+			break;
+		}
+
+		case RangeOverlap: {
+			int compareRes = FsmAp::compareCondPartPtr( 
+					outPair.s1Tel.trans, outPair.s2Tel.trans );
+			if ( compareRes != 0 )
+				return compareRes;
+			break;
+		}
+
+		case BreakS1:
+		case BreakS2:
+			break;
+		}
+	}
+
+	return 0;
+}
+
+/* Compare target partitions. Either pointer may be null. */
+int FsmAp::compareTransPartPtr( TransAp *trans1, TransAp *trans2 )
+{
 	if ( trans1 != 0 ) {
 		/* If trans1 is set then so should trans2. The initial partitioning
 		 * guarantees this for us. */
-		if ( trans1->ctList.head->toState == 0 && trans2->ctList.head->toState != 0 )
+		return comparePart( trans1, trans2 );
+	}
+
+	return 0;
+}
+
+int FsmAp::compareCondPartPtr( CondAp *trans1, CondAp *trans2 )
+{
+	if ( trans1 != 0 ) {
+		/* If trans1 is set then so should trans2. The initial partitioning
+		 * guarantees this for us. */
+		if ( trans1->toState == 0 && trans2->toState != 0 )
 			return -1;
-		else if ( trans1->ctList.head->toState != 0 && trans2->ctList.head->toState == 0 )
+		else if ( trans1->toState != 0 && trans2->toState == 0 )
 			return 1;
-		else if ( trans1->ctList.head->toState != 0 ) {
+		else if ( trans1->toState != 0 ) {
 			/* Both of targets are set. */
 			return CmpOrd< MinPartition* >::compare( 
-				trans1->ctList.head->toState->alg.partition, trans2->ctList.head->toState->alg.partition );
+				trans1->toState->alg.partition, trans2->toState->alg.partition );
 		}
 	}
 	return 0;
@@ -439,7 +486,7 @@ int FsmAp::comparePartPtr( TransAp *trans1, TransAp *trans2 )
 
 /* Compares two transition pointers according to priority and functions.
  * Either pointer may be null. Does not consider to state or from state. */
-int FsmAp::compareDataPtr( TransAp *trans1, TransAp *trans2 )
+int FsmAp::compareTransDataPtr( TransAp *trans1, TransAp *trans2 )
 {
 	if ( trans1 == 0 && trans2 != 0 )
 		return -1;
@@ -448,6 +495,23 @@ int FsmAp::compareDataPtr( TransAp *trans1, TransAp *trans2 )
 	else if ( trans1 != 0 ) {
 		/* Both of the transition pointers are set. */
 		int compareRes = compareTransData( trans1, trans2 );
+		if ( compareRes != 0 )
+			return compareRes;
+	}
+	return 0;
+}
+
+/* Compares two transition pointers according to priority and functions.
+ * Either pointer may be null. Does not consider to state or from state. */
+int FsmAp::compareCondDataPtr( CondAp *trans1, CondAp *trans2 )
+{
+	if ( trans1 == 0 && trans2 != 0 )
+		return -1;
+	else if ( trans1 != 0 && trans2 == 0 )
+		return 1;
+	else if ( trans1 != 0 ) {
+		/* Both of the transition pointers are set. */
+		int compareRes = compareCondData( trans1, trans2 );
 		if ( compareRes != 0 )
 			return compareRes;
 	}

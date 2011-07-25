@@ -1371,25 +1371,30 @@ struct FsmAp
 	 * Transition Comparison.
 	 */
 
+	/* Compare priority and function table of transitions. */
+	static int compareTransData( TransAp *trans1, TransAp *trans2 );
+	static int compareCondData( CondAp *trans1, CondAp *trans2 );
+
 	/* Compare transition data. Either of the pointers may be null. */
-	static inline int compareDataPtr( TransAp *trans1, TransAp *trans2 );
+	static int compareTransDataPtr( TransAp *trans1, TransAp *trans2 );
+	static int compareCondDataPtr( CondAp *trans1, CondAp *trans2 );
 
 	/* Compare target state and transition data. Either pointer may be null. */
-	static inline int compareFullPtr( TransAp *trans1, TransAp *trans2 );
+	static int compareFullPtr( TransAp *trans1, TransAp *trans2 );
 
 	/* Compare target partitions. Either pointer may be null. */
-	static inline int comparePartPtr( TransAp *trans1, TransAp *trans2 );
+	static int compareTransPartPtr( TransAp *trans1, TransAp *trans2 );
+	static int compareCondPartPtr( CondAp *trans1, CondAp *trans2 );
+
+	static int comparePart( TransAp *trans1, TransAp *trans2 );
 
 	/* Check marked status of target states. Either pointer may be null. */
-	static inline bool shouldMarkPtr( MarkIndex &markIndex, 
+	static bool shouldMarkPtr( MarkIndex &markIndex, 
 			TransAp *trans1, TransAp *trans2 );
 
 	/*
 	 * Callbacks.
 	 */
-
-	/* Compare priority and function table of transitions. */
-	static int compareTransData( TransAp *trans1, TransAp *trans2 );
 
 	/* Add in the properties of srcTrans into this. */
 	void addInTrans( TransAp *destTrans, TransAp *srcTrans );
