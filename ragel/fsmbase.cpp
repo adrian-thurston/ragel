@@ -560,11 +560,34 @@ void FsmAp::setStateNumbers( int base )
 		state->alg.stateNum = base++;
 }
 
-
-bool FsmAp::checkErrTrans( StateAp *state, TransAp *trans )
+bool FsmAp::checkErrTrans( StateAp *state, CondAp *trans )
 {
 	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
 
+	/* Might go directly to error state. */
+	if ( trans->toState == 0 )
+		return true;
+
+//	FIXME: look for gaps.
+//	if ( trans->prev == 0 ) {
+//		/* If this is the first transition. */
+//		if ( keyOps->minKey < trans->lowKey )
+//			return true;
+//	}
+//	else {
+//		/* Not the first transition. Compare against the prev. */
+//		TransAp *prev = trans->prev;
+//		Key nextKey = prev->highKey;
+//		nextKey.increment();
+//		if ( nextKey < trans->lowKey )
+//			return true; 
+//	}
+
+	return false;
+}
+
+bool FsmAp::checkErrTrans( StateAp *state, TransAp *trans )
+{
 	/* Might go directly to error state. */
 	if ( trans->ctList.head->toState == 0 )
 		return true;
@@ -582,6 +605,28 @@ bool FsmAp::checkErrTrans( StateAp *state, TransAp *trans )
 		if ( nextKey < trans->lowKey )
 			return true; 
 	}
+
+	if ( trans->condSpace == 0 ) {
+		/* If there is no cond space then we are just dealing with a single
+		 * transtion. (optionally) */
+		if ( trans->ctList.length() == 0 )
+			return true;
+		else { 
+			CondAp *cond = trans->ctList.head;
+			if ( cond->toState == 0 )
+				return true;
+		}
+	}
+	else {
+		/* Need to check destination, as well as for gaps. Use the condSpace to
+		 * determine where to end. */
+		for ( CondTransList::Iter cti = trans->ctList; cti.lte(); cti++ ) {
+			bool res = checkErrTrans( state, cti );
+			if ( res )
+				return true;
+		}
+	}
+
 	return false;
 }
 

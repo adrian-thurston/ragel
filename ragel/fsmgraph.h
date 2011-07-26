@@ -1589,6 +1589,7 @@ struct FsmAp
 	/* Returns true if there is a transtion (either explicit or by a gap) to
 	 * the error state. */
 	bool checkErrTrans( StateAp *state, TransAp *trans );
+	bool checkErrTrans( StateAp *state, CondAp *trans );
 	bool checkErrTransFinish( StateAp *state );
 	bool hasErrorTrans();
 
