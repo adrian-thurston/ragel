@@ -727,7 +727,7 @@ void FsmAp::compressTransitions()
 				if ( merge ) {
 					trans->highKey = next->highKey;
 					st->outList.detach( next );
-					detachTrans( next->ctList.head->fromState, next->ctList.head->toState, next );
+					detachCondTrans( next->ctList.head->fromState, next->ctList.head->toState, next->ctList.head );
 					delete next;
 					next = trans.next();
 				}

@@ -146,16 +146,14 @@ void FsmAp::attachTrans( StateAp *from, StateAp *to, CondAp *trans )
 /* Redirect a transition away from error and towards some state. This is just
  * like attachTrans except it requires fromState to be set and does not touch
  * it. */
-void FsmAp::redirectErrorTrans( StateAp *from, StateAp *to, TransAp *trans )
+void FsmAp::redirectErrorTrans( StateAp *from, StateAp *to, CondAp *trans )
 {
-	cout << "FIXME: " << __PRETTY_FUNCTION__ << endl;
-
-	assert( trans->ctList.head->fromState != 0 && trans->ctList.head->toState == 0 );
-	trans->ctList.head->toState = to;
+	assert( trans->fromState != 0 && trans->toState == 0 );
+	trans->toState = to;
 
 	if ( to != 0 ) {
 		/* Attach using the inList pointer as the head pointer. */
-		attachToInList( from, to, to->inList.head, trans->ctList.head );
+		attachToInList( from, to, to->inList.head, trans );
 	}
 }
 

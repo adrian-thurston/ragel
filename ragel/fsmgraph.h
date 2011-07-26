@@ -1303,7 +1303,7 @@ struct FsmAp
 	void attachTrans( StateAp *from, StateAp *to, CondAp *trans );
 	
 	/* Redirect a transition away from error and towards some state. */
-	void redirectErrorTrans( StateAp *from, StateAp *to, TransAp *trans );
+	void redirectErrorTrans( StateAp *from, StateAp *to, CondAp *trans );
 
 	/* Detach a transition from a target state. */
 	void detachTrans( StateAp *from, StateAp *to, TransAp *trans );

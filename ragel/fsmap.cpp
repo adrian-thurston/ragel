@@ -351,7 +351,7 @@ void FsmAp::setErrorTarget( StateAp *state, StateAp *target, int *orderings,
 		for ( CondTransList::Iter cond = trans->ctList; cond.lte(); cond++ ) {
 			if ( cond->toState == 0 ) {
 				/* The trans goes to error, redirect it. */
-				redirectErrorTrans( cond->fromState, target, trans );
+				redirectErrorTrans( cond->fromState, target, cond );
 				cond->actionTable.setActions( orderings, actions, nActs );
 			}
 		}

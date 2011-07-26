@@ -291,9 +291,11 @@ void LongestMatch::resolveNameRefs( ParseData *pd )
 
 void LongestMatch::restart( FsmAp *graph, TransAp *trans )
 {
-	StateAp *fromState = trans->ctList.head->fromState;
-	graph->detachTrans( fromState, trans->ctList.head->toState, trans );
-	graph->attachTrans( fromState, graph->startState, trans );
+	for ( CondTransList::Iter cti = trans->ctList; cti.lte(); cti++ ) {
+		StateAp *fromState = cti->fromState;
+		graph->detachCondTrans( fromState, cti->toState, cti );
+		graph->attachTrans( fromState, graph->startState, cti );
+	}
 }
 
 void LongestMatch::runLongestMatch( ParseData *pd, FsmAp *graph )
