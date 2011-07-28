@@ -972,6 +972,10 @@ void ParseData::wrapNonTerminals()
 				prodList.length(), Definition::Production );
 		prodList.append( lel->rootDef );
 		rootKlangEl->defList.append( lel->rootDef );
+
+		/* First resolve. */
+		for ( ProdElList::Iter fact = *prodElList; fact.lte(); fact++ )
+			resolveFactor( fact );
 	}
 }
 
@@ -1650,6 +1654,21 @@ struct CmpSpan
 	}
 };
 
+PdaGraph *ParseData::makePdaGraph( KlangElSet &parserEls )
+{
+	//for ( DefList::Iter prod = prodList; prod.lte(); prod++ )
+	//	cerr << prod->prodId << " " << prod->data << endl;
+
+	PdaGraph *pdaGraph = new PdaGraph();
+	lalr1GenerateParser( pdaGraph, parserEls );
+	pdaGraph->setStateNumbers();
+	analyzeMachine( pdaGraph, parserEls );
+
+	//cerr << "NUMBER OF STATES: " << pdaGraph->stateList.length() << endl;
+
+	return pdaGraph;
+}
+
 PdaTables *ParseData::makePdaTables( PdaGraph *pdaGraph )
 {
 	int count, pos;
@@ -1832,47 +1851,9 @@ PdaTables *ParseData::makePdaTables( PdaGraph *pdaGraph )
 	return pdaTables;
 }
 
-void ParseData::prepGrammar()
-{
-	/* This will create language elements. */
-	wrapNonTerminals();
-
-	makeKlangElIds();
-	makeKlangElNames();
-	makeDefinitionNames();
-	noUndefindKlangEls();
-
-	/* Put the language elements in an index by language element id. */
-	langElIndex = new LangEl*[nextSymbolId+1];
-	memset( langElIndex, 0, sizeof(LangEl*)*(nextSymbolId+1) );
-	for ( LelList::Iter lel = langEls; lel.lte(); lel++ )
-		langElIndex[lel->id] = lel;
-
-	makeProdFsms();
-
-	/* Allocate the Runtime data now. Every PdaTable that we make 
-	 * will reference it, but it will be filled in after all the tables are
-	 * built. */
-	runtimeData = new RuntimeData;
-}
-
-PdaGraph *ParseData::makePdaGraph( KlangElSet &parserEls )
-{
-	//for ( DefList::Iter prod = prodList; prod.lte(); prod++ )
-	//	cerr << prod->prodId << " " << prod->data << endl;
-
-	PdaGraph *pdaGraph = new PdaGraph();
-	lalr1GenerateParser( pdaGraph, parserEls );
-	pdaGraph->setStateNumbers();
-	analyzeMachine( pdaGraph, parserEls );
-
-	//cerr << "NUMBER OF STATES: " << pdaGraph->stateList.length() << endl;
-
-	return pdaGraph;
-}
-
 void ParseData::makeParser( KlangElSet &parserEls )
 {
 	pdaGraph = makePdaGraph( parserEls );
 	pdaTables = makePdaTables( pdaGraph );
 }
+

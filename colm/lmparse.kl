@@ -186,8 +186,7 @@ nonterm reference_type_ref uses type_ref;
 
 reference_type_ref: KW_Ref type_ref
 	final {
-		$$->typeRef = $2->typeRef;
-		$$->typeRef->isRef = true;
+		$$->typeRef = new TypeRef( TypeRef::Ref, $1->loc, $2->typeRef );
 	};
 
 nonterm global_def uses statement;
@@ -428,7 +427,7 @@ basic_type_ref: KW_Ptr region_qual TK_Word opt_repeat
 	final {
 		$$->typeRef = new TypeRef( $1->loc, $2->nspaceQual, $3->data );
 		$$->typeRef->repeatType = $4->repeatType;
-		$$->typeRef->isPtr = true;
+		$$->typeRef = new TypeRef( TypeRef::Ptr, $1->loc, $$->typeRef );
 	};
 
 

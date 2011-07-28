@@ -104,48 +104,6 @@ void ParseData::declareBaseKlangEls()
 	anyKlangEl = declareLangEl( this, rootNamespace, "any", LangEl::NonTerm );
 }
 
-void ParseData::makeTerminalWrappers()
-{
-	/* Make terminal language elements corresponding to each nonterminal in
-	 * the grammar. */
-	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
-		if ( lel->type == LangEl::NonTerm ) {
-			String name( lel->name.length() + 5, "_T_%s", lel->name.data );
-			LangEl *termDup = new LangEl( lel->nspace, name, LangEl::Term );
-
-			/* Give the dup the attributes of the nonterminal. This ensures
-			 * that the attributes are allocated when patterns and
-			 * constructors are parsed. */
-			termDup->objectDef = lel->objectDef;
-
-			langEls.append( termDup );
-			lel->termDup = termDup;
-			termDup->termDup = lel;
-		}
-	}
-}
-
-void ParseData::makeEofElements()
-{
-	/* Make eof language elements for each user terminal. This is a bit excessive and
-	 * need to be reduced to the ones that we need parsers for, but we don't know that yet.
-	 * Another pass before this one is needed. */
-	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
-		if ( lel->eofLel == 0 &&
-				lel != eofKlangEl &&
-				lel != errorKlangEl &&
-				lel != noTokenKlangEl )
-		{
-			String name( lel->name.length() + 5, "_eof_%s", lel->name.data );
-			LangEl *eofLel = new LangEl( lel->nspace, name, LangEl::Term );
-
-			langEls.append( eofLel );
-			lel->eofLel = eofLel;
-			eofLel->eofLel = lel;
-			eofLel->isEOF = true;
-		}
-	}
-}
 
 void ParseData::addProdRedObjectVar( ObjectDef *localFrame, LangEl *nonTerm )
 {

@@ -47,10 +47,8 @@ UniqueType *TypeRef::lookupTypeName( ParseData *pd )
 				case TypeMapEl::TypeAliasType:
 					return inDict->typeRef->lookupType( pd );
 
-				case TypeMapEl::LangElType: {
-					long typeId = ( isPtr ? TYPE_PTR : ( isRef ? TYPE_REF : TYPE_TREE ) );
-					return pd->findUniqueType( typeId, inDict->value );
-				}
+				case TypeMapEl::LangElType:
+					return pd->findUniqueType( TYPE_TREE, inDict->value );
 			}
 		}
 
@@ -78,10 +76,8 @@ UniqueType *TypeRef::lookupTypeLiteral( ParseData *pd )
 	while ( nspace != 0 ) {
 		LiteralDictEl *ldel = nspace->literalDict.find( interp );
 
-		if ( ldel != 0 ) {
-			long typeId = ( isPtr ? TYPE_PTR : ( isRef ? TYPE_REF : TYPE_TREE ) );
-			return pd->findUniqueType( typeId, ldel->value->token );
-		}
+		if ( ldel != 0 )
+			return pd->findUniqueType( TYPE_TREE, ldel->value->token );
 
 		nspace = nspace->parentNamespace;
 	}
@@ -216,10 +212,22 @@ UniqueType *TypeRef::lookupTypeAccum( ParseData *pd )
 	return pd->findUniqueType( TYPE_TREE, inMap->generic->langEl );
 }
 
+UniqueType *TypeRef::lookupTypePtr( ParseData *pd )
+{
+	typeRef1->lookupType( pd );
+	return pd->findUniqueType( TYPE_PTR, typeRef1->uniqueType->langEl );
+}
+
+UniqueType *TypeRef::lookupTypeRef( ParseData *pd )
+{
+	typeRef1->lookupType( pd );
+	return pd->findUniqueType( TYPE_REF, typeRef1->uniqueType->langEl );
+}
+
 void TypeRef::resolveRepeat( ParseData *pd )
 {
 	if ( uniqueType->typeId != TYPE_TREE )
-		error() << "cannot repeat non-tree type" << endp;
+		error(loc) << "cannot repeat non-tree type" << endp;
 
 	UniqueRepeat searchKey( repeatType, uniqueType->langEl );
 	UniqueRepeat *uniqueRepeat = pd->uniqeRepeatMap.find( &searchKey );
@@ -287,6 +295,12 @@ UniqueType *TypeRef::lookupType( ParseData *pd )
 			break;
 		case Accum:
 			uniqueType = lookupTypeAccum( pd );
+			break;
+		case Ptr:
+			uniqueType = lookupTypePtr( pd );
+			break;
+		case Ref:
+			uniqueType = lookupTypeRef( pd );
 			break;
 		case Iterator:
 		case Unspecified:
@@ -668,6 +682,7 @@ void ParseData::resolveAccumEls()
 /* Resolves production els and computes the precedence of each prod. */
 void ParseData::resolveProductionEls()
 {
+	/* NOTE: as we process this list it may be growing! */
 	for ( DefList::Iter prod = prodList; prod.lte(); prod++ ) {
 		/* First resolve. */
 		for ( ProdElList::Iter fact = *prod->prodElList; fact.lte(); fact++ )
@@ -702,6 +717,48 @@ void ParseData::resolveGenericTypes()
 	}
 }
 
+void ParseData::makeTerminalWrappers()
+{
+	/* Make terminal language elements corresponding to each nonterminal in
+	 * the grammar. */
+	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
+		if ( lel->type == LangEl::NonTerm ) {
+			String name( lel->name.length() + 5, "_T_%s", lel->name.data );
+			LangEl *termDup = new LangEl( lel->nspace, name, LangEl::Term );
+
+			/* Give the dup the attributes of the nonterminal. This ensures
+			 * that the attributes are allocated when patterns and
+			 * constructors are parsed. */
+			termDup->objectDef = lel->objectDef;
+
+			langEls.append( termDup );
+			lel->termDup = termDup;
+			termDup->termDup = lel;
+		}
+	}
+}
+
+void ParseData::makeEofElements()
+{
+	/* Make eof language elements for each user terminal. This is a bit excessive and
+	 * need to be reduced to the ones that we need parsers for, but we don't know that yet.
+	 * Another pass before this one is needed. */
+	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
+		if ( lel->eofLel == 0 &&
+				lel != eofKlangEl &&
+				lel != errorKlangEl &&
+				lel != noTokenKlangEl )
+		{
+			String name( lel->name.length() + 5, "_eof_%s", lel->name.data );
+			LangEl *eofLel = new LangEl( lel->nspace, name, LangEl::Term );
+
+			langEls.append( eofLel );
+			lel->eofLel = eofLel;
+			eofLel->eofLel = lel;
+			eofLel->isEOF = true;
+		}
+	}
+}
 
 void ParseData::typeResolve()
 {
@@ -717,14 +774,16 @@ void ParseData::typeResolve()
 	resolveReplacementEls();
 	resolveAccumEls();
 
-	/* This needs to happen before the scanner is built. */
-	resolveProductionEls();
-
 	resolveParseTree();
 
-	makeTerminalWrappers();
-	makeEofElements();
 	resolveGenericTypes();
 
 	argvTypeRef->lookupType( this );
+
+	/* We must do this as the last step in the type resolution process because
+	 * all type resolves can cause new language elments with associated
+	 * productions. They get tacked onto the end of the list of productions.
+	 * Doing it at the end results processing a growing list. */
+	resolveProductionEls();
+
 }

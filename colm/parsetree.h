@@ -1507,29 +1507,38 @@ struct TypeRef
 		Map,
 		List,
 		Vector,
-		Accum
+		Accum,
+		Ref,
+		Ptr,
 	};
 
 	/* Qualification and a type name. These require lookup. */
 	TypeRef( const InputLoc &loc, NamespaceQual *nspaceQual, String typeName ) :
 		type(Name), loc(loc), nspaceQual(nspaceQual), typeName(typeName), pdaLiteral(0), iterDef(0),
 		typeRef1(0), typeRef2(0),
-		isPtr(false), isRef(false), repeatType(RepeatNone),
+		repeatType(RepeatNone),
 		nspace(0), uniqueType(0), searchUniqueType(0), generic(0) {}
 
 	/* Qualification and a type name. These require lookup. */
 	TypeRef( const InputLoc &loc, NamespaceQual *nspaceQual, PdaLiteral *pdaLiteral ) :
 		type(Literal), loc(loc), nspaceQual(nspaceQual), pdaLiteral(pdaLiteral), iterDef(0),
 		typeRef1(0), typeRef2(0),
-		isPtr(false), isRef(false), repeatType(RepeatNone),
+		repeatType(RepeatNone),
 		nspace(0), uniqueType(0), searchUniqueType(0), generic(0) {}
 
-	/* Unique type is given directly. */
+	/* Generics. */
 	TypeRef( Type type, const InputLoc &loc, NamespaceQual *nspaceQual, TypeRef *typeRef1, TypeRef *typeRef2 ) :
 		type(type), loc(loc), nspaceQual(nspaceQual), pdaLiteral(0), iterDef(0),
 		typeRef1(typeRef1), typeRef2(typeRef2),
-		isPtr(false), isRef(false), repeatType(RepeatNone),
-		nspace(0), uniqueType(uniqueType), searchUniqueType(0), generic(0) {}
+		repeatType(RepeatNone),
+		nspace(0), uniqueType(0), searchUniqueType(0), generic(0) {}
+	
+	/* Pointers and Refs. */
+	TypeRef( Type type, const InputLoc &loc, TypeRef *typeRef1 ) :
+		type(type), loc(loc), nspaceQual(0), pdaLiteral(0), iterDef(0),
+		typeRef1(typeRef1), typeRef2(0),
+		repeatType(RepeatNone),
+		nspace(0), uniqueType(0), searchUniqueType(0), generic(0) {}
 
 	/* Resolution not needed. */
 
@@ -1538,14 +1547,14 @@ struct TypeRef
 			UniqueType *searchUniqueType ) :
 		type(Iterator), loc(loc), nspaceQual(0), pdaLiteral(0), iterDef(iterDef),
 		typeRef1(0), typeRef2(0),
-		isPtr(false), isRef(false), repeatType(RepeatNone),
+		repeatType(RepeatNone),
 		nspace(0), uniqueType(uniqueType), searchUniqueType(searchUniqueType), generic(0) {}
 
 	/* Unique type is given directly. */
 	TypeRef( const InputLoc &loc, UniqueType *uniqueType ) :
 		type(Unspecified), loc(loc), nspaceQual(0), pdaLiteral(0), iterDef(0),
 		typeRef1(0), typeRef2(0),
-		isPtr(false), isRef(false), repeatType(RepeatNone),
+		repeatType(RepeatNone),
 		nspace(0), uniqueType(uniqueType), searchUniqueType(0), generic(0) {}
 
 	void resolveRepeat( ParseData *pd );
@@ -1557,6 +1566,8 @@ struct TypeRef
 	UniqueType *lookupTypeVector( ParseData *pd );
 	UniqueType *lookupTypeAccum( ParseData *pd );
 	UniqueType *lookupType( ParseData *pd );
+	UniqueType *lookupTypePtr( ParseData *pd );
+	UniqueType *lookupTypeRef( ParseData *pd );
 
 	Type type;
 	InputLoc loc;
@@ -1566,8 +1577,6 @@ struct TypeRef
 	IterDef *iterDef;
 	TypeRef *typeRef1;
 	TypeRef *typeRef2;
-	bool isPtr;
-	bool isRef;
 	RepeatType repeatType;
 
 	/* Resolved. */

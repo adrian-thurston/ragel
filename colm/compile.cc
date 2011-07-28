@@ -437,7 +437,7 @@ long LangVarRef::loadQualificationRefs( ParseData *pd, CodeVect &code ) const
 			code.append( el->typeRef->iterDef->inRefFromCur );
 			code.appendHalf( el->offset );
 		}
-		else if ( el->typeRef->isRef ) {
+		else if ( el->typeRef->type == TypeRef::Ref ) {
 			code.append( IN_REF_FROM_REF );
 			code.appendHalf( el->offset );
 		}
@@ -898,7 +898,7 @@ ObjField *LangVarRef::evaluateRef( ParseData *pd, CodeVect &code, long pushCount
 		code.append( lookup.objField->typeRef->iterDef->inRefFromCur );
 		code.appendHalf( lookup.objField->offset );
 	}
-	else if ( lookup.objField->typeRef->isRef ) {
+	else if ( lookup.objField->typeRef->type == TypeRef::Ref ) {
 		code.append( IN_REF_FROM_REF );
 		code.appendHalf( lookup.objField->offset );
 	}

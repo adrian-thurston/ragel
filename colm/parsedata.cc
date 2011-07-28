@@ -1403,57 +1403,6 @@ void ParseData::collectParserEls( BstSet<LangEl*> &parserEls )
 	}
 }
 
-void ParseData::semanticAnalysis()
-{
-	beginProcessing();
-	initKeyOps();
-
-	/* Type declaration. */
-	typeDeclaration();
-
-	/* Type resolving. */
-	typeResolve();
-
-	/*
-	 * Parsers
-	 */
-
-	/* Init the longest match data */
-	initLongestMatchData();
-	FsmGraph *fsmGraph = makeScanner();
-
-	if ( colm_log_compile ) {
-		printNameTree( fsmGraph->rootName );
-		printNameIndex( fsmGraph->nameIndex );
-	}
-
-	prepGrammar();
-
-	/* Compile bytecode. */
-	compileByteCode();
-
-	/* Make the reduced fsm. */
-	RedFsmBuild reduce( sectionName, this, fsmGraph );
-	redFsm = reduce.reduceMachine();
-
-	BstSet<LangEl*> parserEls;
-	collectParserEls( parserEls );
-
-	makeParser( parserEls );
-
-	/* Make the scanner tables. */
-	fsmTables = redFsm->makeFsmTables();
-
-	/* Now that all parsers are built, make the global runtimeData. */
-	makeRuntimeData();
-
-	/* 
-	 * All compilation is now complete.
-	 */
-	
-	/* Parse patterns and replacements. */
-	parsePatterns();
-}
 
 void ParseData::generateOutput()
 {
