@@ -1,31 +1,10 @@
-SUBDIRS = 
-
-TESTS = \
+TEST_CASES = \
 	html.lm
 
-DIFFS = \
-	html01.diff
+INPUT = \
+	html01.in
 
-all: Makefile $(DIFFS) $(SUBDIRS)
+EXPECTED_OUTPUT = \
+	html01.exp
 
-.PHONY: clean $(SUBDIRS:%=%-clean)
-clean: $(SUBDIRS:%=%-clean)
-	rm -f *.bin
-$(SUBDIRS:%=%-clean):
-	cd $(@:%-clean=%) && $(MAKE) clean
-
-.PHONY: $(SUBDIRS)
-$(SUBDIRS):
-	cd $@ && $(MAKE)
-
-Makefile: ../genmf TESTS
-	../genmf > Makefile
-
-html01.diff: html01.out html01.exp
-	@diff -u html01.exp html01.out > html01.diff || ( cat html01.diff; rm html01.diff )
-
-html01.out: html.bin
-	./html.bin  < html01.in > html01.out
-
-html.bin: html.lm ../../colm/colm
-	../../colm/colm html.lm
+EXTRA_DIST = TESTS runtests.mk $(TEST_CASES) $(INPUT) $(EXPECTED_OUTPUT)

@@ -1,31 +1,10 @@
-SUBDIRS = 
-
-TESTS = \
+TEST_CASES = \
 	xml.lm
 
-DIFFS = \
-	xml.diff
+INPUT = \
+	xml.in
 
-all: Makefile $(DIFFS) $(SUBDIRS)
+EXPECTED_OUTPUT = \
+	xml.exp
 
-.PHONY: clean $(SUBDIRS:%=%-clean)
-clean: $(SUBDIRS:%=%-clean)
-	rm -f *.bin
-$(SUBDIRS:%=%-clean):
-	cd $(@:%-clean=%) && $(MAKE) clean
-
-.PHONY: $(SUBDIRS)
-$(SUBDIRS):
-	cd $@ && $(MAKE)
-
-Makefile: ../genmf TESTS
-	../genmf > Makefile
-
-xml.diff: xml.out xml.exp
-	@diff -u xml.exp xml.out > xml.diff || ( cat xml.diff; rm xml.diff )
-
-xml.out: xml.bin
-	./xml.bin  < xml.in > xml.out
-
-xml.bin: xml.lm ../../colm/colm
-	../../colm/colm xml.lm
+EXTRA_DIST = TESTS runtests.mk $(TEST_CASES) $(INPUT) $(EXPECTED_OUTPUT)
