@@ -152,10 +152,10 @@ void usage()
 "usage: colm [options] file\n"
 "general:\n"
 "   -h, -H, -?, --help   print this usage and exit\n"
-"   --version            print version information and exit\n"
+"   -v --version         print version information and exit\n"
 "   -o <file>            write output to <file>\n"
 "   -i                   show conflict information\n"
-"   -v                   make colm verbose\n"
+"   -d                   make colm verbose\n"
 "   -l                   compile logging into the output executable\n"
 	;	
 }
@@ -366,6 +366,10 @@ void process_args( int argc, const char **argv )
 				includePaths.append( pc.parameterArg );
 				break;
 			case 'v':
+				version();
+				exit(0);
+				break;
+			case 'd':
 				verbose = true;
 				break;
 			case 'l':
