@@ -75,7 +75,7 @@
 # ADT 
 
 SUBDIRS = colm
-DIST_SUBDIRS = $(SUBDIRS) aapl 
+DIST_SUBDIRS = $(SUBDIRS) aapl test
 
 dist_doc_DATA =  colm.vim
 EXTRA_DIST = colm.vim
