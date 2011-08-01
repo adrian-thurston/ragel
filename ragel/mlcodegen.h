@@ -135,6 +135,7 @@ protected:
 	string ET() { return "_" + DATA_PREFIX() + "eof_trans"; }
 	string SP() { return "_" + DATA_PREFIX() + "key_spans"; }
 	string CSP() { return "_" + DATA_PREFIX() + "cond_key_spans"; }
+	string TYPE_STATE() { return "_" + DATA_PREFIX() + "state"; }
 	string START() { return DATA_PREFIX() + "start"; }
 	string ERROR() { return DATA_PREFIX() + "error"; }
 	string FIRST_FINAL() { return DATA_PREFIX() + "first_final"; }

@@ -289,7 +289,7 @@ void OCamlFTabCodeGen::writeData()
 
 	STATE_IDS();
 
-  out << "type state = { mutable keys : int; mutable trans : int; }"
+  out << "type " << TYPE_STATE() << " = { mutable keys : int; mutable trans : int; }"
     << TOP_SEP();
 
   out << "exception Goto_match" << TOP_SEP();

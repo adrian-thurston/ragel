@@ -634,7 +634,7 @@ void OCamlFlatCodeGen::writeData()
 
 	STATE_IDS();
 
-  out << "type state = { mutable trans : int; mutable acts : int; mutable nacts : int; }"
+  out << "type " << TYPE_STATE() << " = { mutable trans : int; mutable acts : int; mutable nacts : int; }"
     << TOP_SEP();
 
   out << "exception Goto_match" << TOP_SEP();
