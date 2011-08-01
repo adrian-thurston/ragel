@@ -504,14 +504,20 @@ void inputStreamAccumAppendData( InputStream *_is, const char *data, long len )
 {
 	InputStream *is = (InputStream*)_is;
 
-	RunBuf *ad = newRunBuf();
-	inputStreamAppend( is, ad );
+	while ( len > 0 ) {
+		RunBuf *ad = newRunBuf();
+		inputStreamAppend( is, ad );
 
-	/* FIXME: need to deal with this. */
-	assert( len < (int)sizeof(ad->data) );
+		long consume = 
+			len <= (long)sizeof(ad->data) ? 
+			len : (long)sizeof(ad->data);
 
-	memcpy( ad->data, data, len );
-	ad->length = len;
+		memcpy( ad->data, data, consume );
+		ad->length = consume;
+
+		len -= consume;
+		data += consume;
+	}
 }
 
 void inputStreamAccumAppendTree( InputStream *_is, Tree *tree )
