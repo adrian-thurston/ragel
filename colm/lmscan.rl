@@ -491,7 +491,7 @@ void Scanner::endSection( )
 			token( '"' );
 		};
 
-		s_literal => {
+		"'" ([^'\\\n] | '\\' (any | NL))* ( "'" | NL ) => {
 			token( TK_Literal, ts, te );
 		};
 

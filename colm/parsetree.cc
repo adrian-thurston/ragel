@@ -50,7 +50,7 @@ void prepareLitString( String &result, bool &caseInsensitive,
 	char *src = srcString.data + 1;
 	char *end = srcString.data + srcString.length() - 1;
 
-	while ( *end != '\'' && *end != '\"' ) {
+	while ( *end != '\'' && *end != '\"' && *end != '\n' ) {
 		if ( *end == 'i' )
 			caseInsensitive = true;
 		else {
@@ -59,6 +59,9 @@ void prepareLitString( String &result, bool &caseInsensitive,
 		}
 		end -= 1;
 	}
+
+	if ( *end == '\n' )
+		end++;
 
 	char *dest = result.data;
 	int len = 0;
