@@ -376,6 +376,7 @@ void Scanner::endSection( )
 	*|;
 
 	literal_pattern := |*
+		'\\' '0' { litBuf.append( '\0' ); };
 		'\\' 'a' { litBuf.append( '\a' ); };
 		'\\' 'b' { litBuf.append( '\b' ); };
 		'\\' 't' { litBuf.append( '\t' ); };
