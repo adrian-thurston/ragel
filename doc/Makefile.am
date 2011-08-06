@@ -46,11 +46,11 @@ version.tex: Makefile
 	echo '|def|version{$(PACKAGE_VERSION)}' | tr '|' '\\' > version.tex
 	echo '|def|pubdate{$(PUBDATE)}' | tr '|' '\\' >> version.tex
 
-ragel-guide.tex: guide.bin ragel-guide.txt
-	./guide.bin < ragel-guide.txt > ragel-guide.tex
+ragel-guide.tex: generate.bin ragel-guide.txt
+	./generate.bin < ragel-guide.txt > ragel-guide.tex
 	
-guide.bin: guide.lm
-	colm guide.lm
+generate.bin: generate.lm
+	colm generate.lm
 
 ragel-guide.pdf: version.tex
 
