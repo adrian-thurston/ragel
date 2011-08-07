@@ -773,7 +773,7 @@ void RedFsm::analyzeAction( GenAction *act, InlineList *inlineList )
 	for ( InlineList::Iter item = *inlineList; item.lte(); item++ ) {
 		/* Check for various things in regular actions. */
 		if ( act->numTransRefs > 0 || act->numToStateRefs > 0 || 
-				act->numFromStateRefs > 0 )
+				act->numFromStateRefs > 0 || act->numEofRefs > 0 )
 		{
 			if ( item->type == InlineItem::LmSwitch && 
 					item->tokenRegion->lmSwitchHandlesError )
