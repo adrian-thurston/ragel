@@ -911,38 +911,6 @@ bool FsmAp::hasOutData( StateAp *state )
  * Setting Conditions.
  */
 
-void logNewExpansion( Expansion *exp );
-void logCondSpace( CondSpace *condSpace );
-
-CondSpace *FsmAp::addCondSpace( const CondSet &condSet )
-{
-	CondSpace *condSpace = condData->condSpaceMap.find( condSet );
-	if ( condSpace == 0 ) {
-		/* Do we have enough keyspace left? */
-		Size availableSpace = condData->lastCondKey.availableSpace();
-		Size neededSpace = (1 << condSet.length() ) * keyOps->alphSize();
-		if ( neededSpace > availableSpace )
-			throw FsmConstructFail( FsmConstructFail::CondNoKeySpace );
-
-		Key baseKey = condData->lastCondKey;
-		baseKey.increment();
-		condData->lastCondKey += (1 << condSet.length() ) * keyOps->alphSize();
-
-		condSpace = new CondSpace( condSet );
-		condSpace->baseKey = baseKey;
-		condData->condSpaceMap.insert( condSpace );
-
-		#ifdef LOG_CONDS
-		cerr << "adding new condition space" << endl;
-		cerr << "  condition set: ";
-		logCondSpace( condSpace );
-		cerr << endl;
-		cerr << "  baseKey: " << baseKey.getVal() << endl;
-		#endif
-	}
-	return condSpace;
-}
-
 void FsmAp::startFsmCondition( Action *condAction, bool sense )
 {
 	/* Make sure the start state has no other entry points. */

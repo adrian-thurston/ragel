@@ -15,7 +15,7 @@ ragel_SOURCES = \
 	csgoto.h gendata.h ragel.h rubyfflat.h goipgoto.h \
 	mlcodegen.h mltable.h mlftable.h mlflat.h mlfflat.h mlgoto.h \
 	main.cpp parsetree.cpp parsedata.cpp fsmstate.cpp fsmbase.cpp \
-	fsmattach.cpp fsmmin.cpp fsmgraph.cpp fsmap.cpp rlscan.cpp rlparse.cpp \
+	fsmattach.cpp fsmmin.cpp fsmgraph.cpp fsmap.cpp fsmcond.cpp rlscan.cpp rlparse.cpp \
 	inputdata.cpp common.cpp redfsm.cpp gendata.cpp cdcodegen.cpp \
 	cdtable.cpp cdftable.cpp cdflat.cpp cdfflat.cpp cdgoto.cpp cdfgoto.cpp \
 	cdipgoto.cpp cdsplit.cpp javacodegen.cpp rubycodegen.cpp rubytable.cpp \
