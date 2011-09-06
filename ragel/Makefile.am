@@ -14,18 +14,18 @@ ragel_SOURCES = \
 	csftable.h fsmgraph.h pcheck.h rubycodegen.h xmlcodegen.h cdftable.h \
 	csgoto.h gendata.h ragel.h rubyfflat.h goipgoto.h \
 	mlcodegen.h mltable.h mlftable.h mlflat.h mlfflat.h mlgoto.h \
-	main.cpp parsetree.cpp parsedata.cpp fsmstate.cpp fsmbase.cpp \
-	fsmattach.cpp fsmmin.cpp fsmgraph.cpp fsmap.cpp fsmcond.cpp rlscan.cpp rlparse.cpp \
-	inputdata.cpp common.cpp redfsm.cpp gendata.cpp cdcodegen.cpp \
-	cdtable.cpp cdftable.cpp cdflat.cpp cdfflat.cpp cdgoto.cpp cdfgoto.cpp \
-	cdipgoto.cpp cdsplit.cpp javacodegen.cpp rubycodegen.cpp rubytable.cpp \
-	rubyftable.cpp rubyflat.cpp rubyfflat.cpp rbxgoto.cpp cscodegen.cpp \
-	cstable.cpp csftable.cpp csflat.cpp csfflat.cpp csgoto.cpp csfgoto.cpp \
-	csipgoto.cpp cssplit.cpp dotcodegen.cpp xmlcodegen.cpp goipgoto.cpp \
-	mlcodegen.cpp mltable.cpp mlftable.cpp mlflat.cpp mlfflat.cpp mlgoto.cpp
+	main.cc parsetree.cc parsedata.cc fsmstate.cc fsmbase.cc \
+	fsmattach.cc fsmmin.cc fsmgraph.cc fsmap.cc fsmcond.cc rlscan.cc rlparse.cc \
+	inputdata.cc common.cc redfsm.cc gendata.cc cdcodegen.cc \
+	cdtable.cc cdftable.cc cdflat.cc cdfflat.cc cdgoto.cc cdfgoto.cc \
+	cdipgoto.cc cdsplit.cc javacodegen.cc rubycodegen.cc rubytable.cc \
+	rubyftable.cc rubyflat.cc rubyfflat.cc rbxgoto.cc cscodegen.cc \
+	cstable.cc csftable.cc csflat.cc csfflat.cc csgoto.cc csfgoto.cc \
+	csipgoto.cc cssplit.cc dotcodegen.cc xmlcodegen.cc goipgoto.cc \
+	mlcodegen.cc mltable.cc mlftable.cc mlflat.cc mlfflat.cc mlgoto.cc
 
 BUILT_SOURCES = \
-	rlscan.cpp rlparse.h rlparse.cpp version.h
+	rlscan.cc rlparse.h rlparse.cc version.h
 
 version.h: Makefile
 	echo '#define VERSION "$(PACKAGE_VERSION)"' > version.h
@@ -36,19 +36,19 @@ EXTRA_DIST = rlscan.rl rlparse.kh rlparse.kl
 if BUILD_PARSERS
 
 CLEANFILES = \
-	rlscan.cpp rlparse.h rlparse.cpp
+	rlscan.cc rlparse.h rlparse.cc
 
 rlparse.h: rlparse.kh
 	kelbt -o $@ $<
 
-rlparse.cpp: rlparse.kl rlparse.kh
+rlparse.cc: rlparse.kl rlparse.kh
 	kelbt -o $@ $<
 
 # This dependency comes from the import of the parser defines
 # into the scanner.
-rlscan.cpp: rlparse.h
+rlscan.cc: rlparse.h
 
-rlscan.cpp: rlscan.rl
+rlscan.cc: rlscan.rl
 	ragel -G2 -I$(builddir) -o $@ $<
 
 endif
