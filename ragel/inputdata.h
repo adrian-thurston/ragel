@@ -86,10 +86,13 @@ struct InputData
 	void verifyWritesHaveData();
 
 	void writeOutput();
+	void makeDefaultFileName();
 	void makeOutputStream();
 	void openOutput();
 	void generateReduced();
-	void prepareMachineGen();
+	void prepareSingleMachine();
+	void prepareAllMachines();
+
 	void terminateAllParsers();
 
 	void cdDefaultFileName( const char *inputFile );
@@ -101,6 +104,12 @@ struct InputData
 
 	void writeLanguage( std::ostream &out );
 	void writeXML( std::ostream &out );
+	void writeDot( std::ostream &out );
+
+	void parseArgs( int argc, const char **argv );
+	void checkArgs();
+
+	void process();
 };
 
 #endif

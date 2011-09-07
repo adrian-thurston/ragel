@@ -24,9 +24,13 @@
 #include "inputdata.h"
 #include "parsedata.h"
 #include "rlparse.h"
-#include <iostream>
+#include "rlscan.h"
 #include "dotcodegen.h"
+#include <iostream>
 
+using std::istream;
+using std::ifstream;
+using std::ostream;
 using std::cout;
 using std::cerr;
 using std::endl;
@@ -104,33 +108,34 @@ void InputData::ocamlDefaultFileName( const char *inputFile )
 		outputFileName = fileNameFromStem( inputFile, ".ml" );
 }
 
+void InputData::makeDefaultFileName()
+{
+	switch ( hostLang->lang ) {
+		case HostLang::C:
+		case HostLang::D:
+		case HostLang::D2:
+			cdDefaultFileName( inputFileName );
+			break;
+		case HostLang::Java:
+			javaDefaultFileName( inputFileName );
+			break;
+		case HostLang::Go:
+			goDefaultFileName( inputFileName );
+			break;
+		case HostLang::Ruby:
+			rubyDefaultFileName( inputFileName );
+			break;
+		case HostLang::CSharp:
+			csharpDefaultFileName( inputFileName );
+			break;
+		case HostLang::OCaml:
+			ocamlDefaultFileName( inputFileName );
+			break;
+	}
+}
+
 void InputData::makeOutputStream()
 {
-	if ( ! generateDot && ! generateXML ) {
-		switch ( hostLang->lang ) {
-			case HostLang::C:
-			case HostLang::D:
-			case HostLang::D2:
-				cdDefaultFileName( inputFileName );
-				break;
-			case HostLang::Java:
-				javaDefaultFileName( inputFileName );
-				break;
-			case HostLang::Go:
-				goDefaultFileName( inputFileName );
-				break;
-			case HostLang::Ruby:
-				rubyDefaultFileName( inputFileName );
-				break;
-			case HostLang::CSharp:
-				csharpDefaultFileName( inputFileName );
-				break;
-			case HostLang::OCaml:
-				ocamlDefaultFileName( inputFileName );
-				break;
-		}
-	}
-
 	/* Make sure we are not writing to the same file as the input file. */
 	if ( outputFileName != 0 ) {
 		if ( strcmp( inputFileName, outputFileName  ) == 0 ) {
@@ -161,62 +166,59 @@ void InputData::openOutput()
 	}
 }
 
-void InputData::prepareMachineGen()
+void InputData::prepareSingleMachine()
 {
-	if ( generateDot ) {
-		/* Locate a machine spec to generate dot output for. We can only emit.
-		 * Dot takes one graph at a time. */
-		if ( machineSpec != 0 ) {
-			/* Machine specified. */
-			ParserDictEl *pdEl = parserDict.find( machineSpec );
-			if ( pdEl == 0 )
-				error() << "could not locate machine specified with -S and/or -M" << endp;
-			dotGenParser = pdEl->value;
-		}
-		else { 
-			/* No machine spec given, just use the first one. */
-			if ( parserList.length() == 0 )
-				error() << "no machine specification to generate graphviz output" << endp;
+	/* Locate a machine spec to generate dot output for. We can only emit.
+	 * Dot takes one graph at a time. */
+	if ( machineSpec != 0 ) {
+		/* Machine specified. */
+		ParserDictEl *pdEl = parserDict.find( machineSpec );
+		if ( pdEl == 0 )
+			error() << "could not locate machine specified with -S and/or -M" << endp;
+		dotGenParser = pdEl->value;
+	}
+	else { 
+		/* No machine spec given, generate the first one. */
+		if ( parserList.length() == 0 )
+			error() << "no machine specification to generate graphviz output" << endp;
 
-			dotGenParser = parserList.head;
-		}
+		dotGenParser = parserList.head;
+	}
 
-		GraphDictEl *gdEl = 0;
+	GraphDictEl *gdEl = 0;
 
-		if ( machineName != 0 ) {
-			gdEl = dotGenParser->pd->graphDict.find( machineName );
-			if ( gdEl == 0 )
-				error() << "machine definition/instantiation not found" << endp;
-		}
-		else {
-			/* We are using the whole machine spec. Need to make sure there
-			 * are instances in the spec. */
-			if ( dotGenParser->pd->instanceList.length() == 0 )
-				error() << "no machine instantiations to generate graphviz output" << endp;
-		}
-
-		dotGenParser->pd->prepareMachineGen( gdEl );
+	if ( machineName != 0 ) {
+		gdEl = dotGenParser->pd->graphDict.find( machineName );
+		if ( gdEl == 0 )
+			error() << "machine definition/instantiation not found" << endp;
 	}
 	else {
-		/* No machine spec or machine name given. Generate everything. */
-		for ( ParserDict::Iter parser = parserDict; parser.lte(); parser++ ) {
-			ParseData *pd = parser->value->pd;
-			if ( pd->instanceList.length() > 0 )
-				pd->prepareMachineGen( 0 );
-		}
+		/* We are using the whole machine spec. Need to make sure there
+		 * are instances in the spec. */
+		if ( dotGenParser->pd->instanceList.length() == 0 )
+			error() << "no machine instantiations to generate graphviz output" << endp;
+	}
+
+	dotGenParser->pd->prepareMachineGen( gdEl );
+}
+
+void InputData::prepareAllMachines()
+{
+	/* No machine spec or machine name given. Generate everything. */
+	for ( ParserDict::Iter parser = parserDict; parser.lte(); parser++ ) {
+		ParseData *pd = parser->value->pd;
+		if ( pd->instanceList.length() > 0 )
+			pd->prepareMachineGen( 0 );
 	}
 }
 
+
 void InputData::generateReduced()
 {
-	if ( generateDot )
-		dotGenParser->pd->generateReduced( *this );
-	else {
-		for ( ParserDict::Iter parser = parserDict; parser.lte(); parser++ ) {
-			ParseData *pd = parser->value->pd;
-			if ( pd->instanceList.length() > 0 )
-				pd->generateReduced( *this );
-		}
+	for ( ParserDict::Iter parser = parserDict; parser.lte(); parser++ ) {
+		ParseData *pd = parser->value->pd;
+		if ( pd->instanceList.length() > 0 )
+			pd->generateReduced( *this );
 	}
 }
 
@@ -235,36 +237,118 @@ void InputData::terminateAllParsers( )
 
 void InputData::verifyWritesHaveData()
 {
-	if ( !generateXML && !generateDot ) {
-		for ( InputItemList::Iter ii = inputItems; ii.lte(); ii++ ) {
-			if ( ii->type == InputItem::Write ) {
-				if ( ii->pd->cgd == 0 )
-					error( ii->loc ) << "no machine instantiations to write" << endl;
-			}
+	for ( InputItemList::Iter ii = inputItems; ii.lte(); ii++ ) {
+		if ( ii->type == InputItem::Write ) {
+			if ( ii->pd->cgd == 0 )
+				error( ii->loc ) << "no machine instantiations to write" << endl;
 		}
 	}
 }
 
 void InputData::writeOutput()
 {
+	for ( InputItemList::Iter ii = inputItems; ii.lte(); ii++ ) {
+		if ( ii->type == InputItem::Write ) {
+			CodeGenData *cgd = ii->pd->cgd;
+			::keyOps = &cgd->thisKeyOps;
+
+			cgd->writeStatement( ii->loc, ii->writeArgs.length()-1, ii->writeArgs.data );
+		}
+		else {
+			*outStream << '\n';
+			lineDirective( *outStream, inputFileName, ii->loc.line );
+			*outStream << ii->data.str();
+		}
+	}
+}
+
+void InputData::process()
+{
+	/* Open the input file for reading. */
+	assert( inputFileName != 0 );
+	ifstream *inFile = new ifstream( inputFileName );
+	if ( ! inFile->is_open() )
+		error() << "could not open " << inputFileName << " for reading" << endp;
+
+	/* Used for just a few things. */
+	std::ostringstream hostData;
+
+	/* Make the first input item. */
+	InputItem *firstInputItem = new InputItem;
+	firstInputItem->type = InputItem::HostData;
+	firstInputItem->loc.fileName = inputFileName;
+	firstInputItem->loc.line = 1;
+	firstInputItem->loc.col = 1;
+	inputItems.append( firstInputItem );
+
+	Scanner scanner( *this, inputFileName, *inFile, 0, 0, 0, false );
+	scanner.do_scan();
+
+	/* Finished, final check for errors.. */
+	if ( gblErrorCount > 0 )
+		exit(1);
+
+	/* Now send EOF to all parsers. */
+	terminateAllParsers();
+
+	/* Bail on above error. */
+	if ( gblErrorCount > 0 )
+		exit(1);
+
+	/* Locate the backend program */
+	/* Compiles machines. */
+	if ( generateDot )
+		prepareSingleMachine();
+	else
+		prepareAllMachines();
+
+	if ( gblErrorCount > 0 )
+		exit(1);
+
+	if ( ! generateDot && ! generateXML )
+		makeDefaultFileName();
+	makeOutputStream();
+
+	/* Generates the reduced machine, which we use to write output. */
+	if ( ! generateXML ) {
+		if ( generateDot )
+			dotGenParser->pd->generateReduced( *this );
+		else
+			generateReduced();
+
+		if ( gblErrorCount > 0 )
+			exit(1);
+	}
+
+	if ( !generateXML && !generateDot )
+		verifyWritesHaveData();
+
+	if ( gblErrorCount > 0 )
+		exit(1);
+
+	/*
+	 * From this point on we should not be reporting any errors.
+	 */
+
+	openOutput();
+
 	if ( generateXML )
 		writeXML( *outStream );
 	else if ( generateDot )
-		static_cast<GraphvizDotGen*>(dotGenParser->pd->cgd)->writeDotFile();
-	else {
-		for ( InputItemList::Iter ii = inputItems; ii.lte(); ii++ ) {
-			if ( ii->type == InputItem::Write ) {
-				CodeGenData *cgd = ii->pd->cgd;
-				::keyOps = &cgd->thisKeyOps;
+		writeDot( *outStream );
+	else 
+		writeOutput();
 
-				cgd->writeStatement( ii->loc, ii->writeArgs.length()-1, ii->writeArgs.data );
-			}
-			else {
-				*outStream << '\n';
-				lineDirective( *outStream, inputFileName, ii->loc.line );
-				*outStream << ii->data.str();
-			}
-		}
+	/* Close the input and the intermediate file. */
+	delete inFile;
+
+	/* If writing to a file, delete the ostream, causing it to flush.
+	 * Standard out is flushed automatically. */
+	if ( outputFileName != 0 ) {
+		delete outStream;
+		delete outFilter;
 	}
+
+	assert( gblErrorCount == 0 );
 }
 

@@ -22,6 +22,9 @@
 #include "ragel.h"
 #include "dotcodegen.h"
 #include "gendata.h"
+#include "inputdata.h"
+#include "rlparse.h"
+#include "rlscan.h"
 
 using std::istream;
 using std::ifstream;
@@ -316,4 +319,9 @@ void GraphvizDotGen::finishRagelDef()
 {
 	/* For dot file generation we want to pick default transitions. */
 	redFsm->chooseDefaultSpan();
+}
+
+void InputData::writeDot( ostream &out )
+{
+	static_cast<GraphvizDotGen*>(dotGenParser->pd->cgd)->writeDotFile();
 }

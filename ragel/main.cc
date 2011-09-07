@@ -76,9 +76,9 @@ const char *machineSpec = 0, *machineName = 0;
 bool machineSpecFound = false;
 bool wantDupsRemoved = true;
 
-bool printStatistics = false;
 bool generateXML = false;
 bool generateDot = false;
+bool printStatistics = false;
 
 /* Target language and output style. */
 CodeStyle codeStyle = GenTables;
@@ -217,7 +217,7 @@ void escapeLineDirectivePath( std::ostream &out, char *path )
 	}
 }
 
-void processArgs( int argc, const char **argv, InputData &id )
+void InputData::parseArgs( int argc, const char **argv )
 {
 	ParamCheck pc("xo:dnmleabjkS:M:I:CDEJZRAOvHh?-:sT:F:G:P:LpV", argc, argv);
 
@@ -239,11 +239,11 @@ void processArgs( int argc, const char **argv, InputData &id )
 			case 'o':
 				if ( *pc.paramArg == 0 )
 					error() << "a zero length output file name was given" << endl;
-				else if ( id.outputFileName != 0 )
+				else if ( outputFileName != 0 )
 					error() << "more than one output file name was given" << endl;
 				else {
 					/* Ok, remember the output file name. */
-					id.outputFileName = pc.paramArg;
+					outputFileName = pc.paramArg;
 				}
 				break;
 
@@ -306,7 +306,7 @@ void processArgs( int argc, const char **argv, InputData &id )
 				if ( *pc.paramArg == 0 )
 					error() << "please specify an argument to -I" << endl;
 				else {
-					id.includePaths.append( pc.paramArg );
+					includePaths.append( pc.paramArg );
 				}
 				break;
 
@@ -436,119 +436,22 @@ void processArgs( int argc, const char **argv, InputData &id )
 			/* It is interpreted as an input file. */
 			if ( *pc.curArg == 0 )
 				error() << "a zero length input file name was given" << endl;
-			else if ( id.inputFileName != 0 )
+			else if ( inputFileName != 0 )
 				error() << "more than one input file name was given" << endl;
 			else {
 				/* OK, Remember the filename. */
-				id.inputFileName = pc.curArg;
+				inputFileName = pc.curArg;
 			}
 			break;
 		}
 	}
 }
 
-void process( InputData &id )
+void InputData::checkArgs()
 {
-	/* Open the input file for reading. */
-	assert( id.inputFileName != 0 );
-	ifstream *inFile = new ifstream( id.inputFileName );
-	if ( ! inFile->is_open() )
-		error() << "could not open " << id.inputFileName << " for reading" << endp;
-
-	/* Used for just a few things. */
-	std::ostringstream hostData;
-
-	/* Make the first input item. */
-	InputItem *firstInputItem = new InputItem;
-	firstInputItem->type = InputItem::HostData;
-	firstInputItem->loc.fileName = id.inputFileName;
-	firstInputItem->loc.line = 1;
-	firstInputItem->loc.col = 1;
-	id.inputItems.append( firstInputItem );
-
-	Scanner scanner( id, id.inputFileName, *inFile, 0, 0, 0, false );
-	scanner.do_scan();
-
-	/* Finished, final check for errors.. */
-	if ( gblErrorCount > 0 )
-		exit(1);
-
-	/* Now send EOF to all parsers. */
-	id.terminateAllParsers();
-
-	/* Bail on above error. */
-	if ( gblErrorCount > 0 )
-		exit(1);
-
-	/* Locate the backend program */
-	/* Compiles machines. */
-	id.prepareMachineGen();
-
-	if ( gblErrorCount > 0 )
-		exit(1);
-
-	id.makeOutputStream();
-
-	/* Generates the reduced machine, which we use to write output. */
-	if ( !generateXML ) {
-		id.generateReduced();
-
-		if ( gblErrorCount > 0 )
-			exit(1);
-	}
-
-	id.verifyWritesHaveData();
-	if ( gblErrorCount > 0 )
-		exit(1);
-
-	/*
-	 * From this point on we should not be reporting any errors.
-	 */
-
-	id.openOutput();
-	id.writeOutput();
-
-	/* Close the input and the intermediate file. */
-	delete inFile;
-
-	/* If writing to a file, delete the ostream, causing it to flush.
-	 * Standard out is flushed automatically. */
-	if ( id.outputFileName != 0 ) {
-		delete id.outStream;
-		delete id.outFilter;
-	}
-
-	assert( gblErrorCount == 0 );
-}
-
-char *makeIntermedTemplate( const char *baseFileName )
-{
-	char *result = 0;
-	const char *templ = "ragel-XXXXXX.xml";
-	const char *lastSlash = strrchr( baseFileName, '/' );
-	if ( lastSlash == 0 ) {
-		result = new char[strlen(templ)+1];
-		strcpy( result, templ );
-	}
-	else {
-		int baseLen = lastSlash - baseFileName + 1;
-		result = new char[baseLen + strlen(templ) + 1];
-		memcpy( result, baseFileName, baseLen );
-		strcpy( result+baseLen, templ );
-	}
-	return result;
-};
-
-/* Main, process args and call yyparse to start scanning input. */
-int main( int argc, const char **argv )
-{
-	InputData id;
-
-	processArgs( argc, argv, id );
-
 	/* Require an input file. If we use standard in then we won't have a file
 	 * name on which to base the output. */
-	if ( id.inputFileName == 0 )
+	if ( inputFileName == 0 )
 		error() << "no input file given" << endl;
 
 	/* Bail on argument processing errors. */
@@ -556,14 +459,23 @@ int main( int argc, const char **argv )
 		exit(1);
 
 	/* Make sure we are not writing to the same file as the input file. */
-	if ( id.inputFileName != 0 && id.outputFileName != 0 && 
-			strcmp( id.inputFileName, id.outputFileName  ) == 0 )
+	if ( inputFileName != 0 && outputFileName != 0 && 
+			strcmp( inputFileName, outputFileName  ) == 0 )
 	{
-		error() << "output file \"" << id.outputFileName  << 
+		error() << "output file \"" << outputFileName  << 
 				"\" is the same as the input file" << endp;
 	}
+}
 
-	process( id );
+
+/* Main, process args and call yyparse to start scanning input. */
+int main( int argc, const char **argv )
+{
+	InputData id;
+
+	id.parseArgs( argc, argv );
+	id.checkArgs();
+	id.process();
 
 	return 0;
 }
