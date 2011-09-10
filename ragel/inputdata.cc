@@ -310,11 +310,12 @@ void InputData::process()
 	makeOutputStream();
 
 	/* Generates the reduced machine, which we use to write output. */
-	if ( ! generateXML ) {
-		if ( generateDot )
-			dotGenParser->pd->generateReduced( *this );
-		else
-			generateReduced();
+	if ( ! generateXML && !generateDot ) {
+//		if ( generateDot )
+//			dotGenParser->pd->generateReduced( *this );
+//		else
+
+		generateReduced();
 
 		if ( gblErrorCount > 0 )
 			exit(1);

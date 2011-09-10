@@ -372,41 +372,12 @@ std::ostream &InputData::KEY( ostream &out, Key key )
 
 std::ostream &InputData::ONCHAR( ostream &out, Key lowKey, Key highKey, CondSpace *condSpace, long condVals )
 {
-#if 0
-	GenCondSpace *condSpace;
-	if ( lowKey > keyOps->maxKey && (condSpace=findCondSpace(lowKey, highKey) ) ) {
-		Key values = ( lowKey - condSpace->baseKey ) / keyOps->alphSize();
-
-		lowKey = keyOps->minKey + 
-			(lowKey - condSpace->baseKey - keyOps->alphSize() * values.getVal());
-		highKey = keyOps->minKey + 
-			(highKey - condSpace->baseKey - keyOps->alphSize() * values.getVal());
-		KEY( lowKey );
-		if ( lowKey != highKey ) {
-			out << "..";
-			KEY( highKey );
-		}
-		out << "(";
-
-		for ( GenCondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
-			bool set = values & (1 << csi.pos());
-			if ( !set )
-				out << "!";
-			out << (*csi)->nameOrLoc();
-			if ( !csi.last() )
-				out << ", ";
-		}
-		out << ")";
+	/* Output the key. Possibly a range. */
+	KEY( out, lowKey );
+	if ( highKey != lowKey ) {
+		out << "..";
+		KEY( out, highKey );
 	}
-	else {
-#endif
-		/* Output the key. Possibly a range. */
-		KEY( out, lowKey );
-		if ( highKey != lowKey ) {
-			out << "..";
-			KEY( out, highKey );
-		}
-//	}
 
 	if ( condSpace != 0 ) {
 		out << "(";
@@ -425,16 +396,51 @@ std::ostream &InputData::ONCHAR( ostream &out, Key lowKey, Key highKey, CondSpac
 }
 
 
+std::ostream &InputData::TRANS_ACTION( ostream &out, StateAp *fromState, CondAp *trans )
+{
+	int n = 0;
+	ActionTable *actionTables[3] = { 0, 0, 0 };
+
+	if ( fromState->fromStateActionTable.length() != 0 )
+		actionTables[n++] = &fromState->fromStateActionTable;
+	if ( trans->actionTable.length() != 0 )
+		actionTables[n++] = &trans->actionTable;
+	if ( trans->toState != 0 && trans->toState->toStateActionTable.length() != 0 )
+		actionTables[n++] = &trans->toState->toStateActionTable;
+
+	if ( n > 0 )
+		out << " / ";
+	
+	/* Loop the existing actions and write out what's there. */
+	for ( int a = 0; a < n; a++ ) {
+		for ( ActionTable::Iter actIt = actionTables[a]->first(); actIt.lte(); actIt++ ) {
+			Action *action = actIt->value;
+			action->actionName( out );
+			if ( a < n-1 || !actIt.last() )
+				out << ", ";
+		}
+	}
+	return out;
+}
+
+std::ostream &InputData::ACTION( ostream &out, ActionTable *actionTable )
+{
+	/* The action. */
+	out << " / ";
+	for ( ActionTable::Iter actIt = actionTable->first(); actIt.lte(); actIt++ ) {
+		Action *action = actIt->value;
+		action->actionName( out );
+		if ( !actIt.last() )
+			out << ", ";
+	}
+	return out;
+}
+
 void InputData::writeTransList( ostream &out, StateAp *state )
 {
 	/* Build the set of unique transitions out of this state. */
 	RedTransSet stTransSet;
 	for ( TransList::Iter tel = state->outList; tel.lte(); tel++ ) {
-
-//		/* If we haven't seen the transitions before, the move forward
-//		 * emitting all the transitions on the same character. */
-//		if ( stTransSet.insert( tel->value ) ) {
-
 		for ( CondTransList::Iter ctel = tel->ctList; ctel.lte(); ctel++ ) {
 			/* Write out the from and to states. */
 			out << "\t" << state->alg.stateNum << " -> ";
@@ -448,46 +454,32 @@ void InputData::writeTransList( ostream &out, StateAp *state )
 			out << " [ label = \""; 
 			ONCHAR( out, tel->lowKey, tel->highKey, tel->condSpace, ctel->lowKey.getVal() );
 
-#if 0
-			/* Walk the transition list, finding the same. */
-			for ( RedTransList::Iter mtel = tel.next(); mtel.lte(); mtel++ ) {
-				if ( mtel->value == tel->value ) {
-					out << ", ";
-					ONCHAR( mtel->lowKey, mtel->highKey );
-				}
-			}
-
 			/* Write the action and close the transition. */
-			TRANS_ACTION( state, tel->value );
-#endif
+			TRANS_ACTION( out, state, ctel );
 			out << "\" ];\n";
 		}
 	}
-#if 0
+}
 
-	/* Write the default transition. */
-	if ( state->defTrans != 0 ) {
-		/* Write out the from and to states. */
-		out << "\t" << state->id << " -> ";
-
-		if ( state->defTrans->targ == 0 )
-			out << "err_" << state->id;
-		else
-			out << state->defTrans->targ->id;
-
-		/* Begin the label. */
-		out << " [ label = \"DEF"; 
-
-		/* Write the action and close the transition. */
-		TRANS_ACTION( state, state->defTrans );
-		out << "\" ];\n";
+bool InputData::makeNameInst( std::string &res, NameInst *nameInst )
+{
+	bool written = false;
+	if ( nameInst->parent != 0 )
+		written = makeNameInst( res, nameInst->parent );
+	
+	if ( nameInst->name != 0 ) {
+		if ( written )
+			res += '_';
+		res += nameInst->name;
+		written = true;
 	}
-#endif
+
+	return written;
 }
 
 void InputData::writeDot( ostream &out )
 {
-	static_cast<GraphvizDotGen*>(dotGenParser->pd->cgd)->writeDotFile();
+//	static_cast<GraphvizDotGen*>(dotGenParser->pd->cgd)->writeDotFile();
 
 	ParseData *pd = dotGenParser->pd;
 	FsmAp *graph = pd->sectionGraph;
@@ -522,19 +514,17 @@ void InputData::writeDot( ostream &out )
 	/* Psuedo states for states whose default actions go to error. */
 	for ( StateList::Iter st = graph->stateList; st.lte(); st++ ) {
 		bool needsErr = false;
-//		if ( st->defTrans != 0 && st->defTrans->targ == 0 )
-//			needsErr = true;
-//		else {
-//			for ( RedTransList::Iter tel = st->outRange; tel.lte(); tel++ ) {
-//				if ( tel->value->targ == 0 ) {
-//					needsErr = true;
-//					break;
-//				}
-//			}
-//		}
-//
-//		if ( needsErr )
-//			out << "	err_" << st->id << " [ label=\"\"];\n";
+		for ( TransList::Iter tel = st->outList; tel.lte(); tel++ ) {
+			for ( CondTransList::Iter ctel = tel->ctList; ctel.lte(); ctel++ ) {
+				if ( ctel->toState == 0 ) {
+					needsErr = true;
+					break;
+				}
+			}
+		}
+
+		if ( needsErr )
+			out << "	err_" << st->alg.stateNum << " [ label=\"\"];\n";
 	}
 
 	/* Attributes common to all nodes, plus double circle for final states. */
@@ -550,37 +540,31 @@ void InputData::writeDot( ostream &out )
 	out << "	node [ shape = circle ];\n";
 
 	/* Walk the states. */
-	for ( StateList::Iter st = graph->stateList; st.lte(); st++ ) {
-		if ( st != 0 ) {
+	for ( StateList::Iter st = graph->stateList; st.lte(); st++ )
 		writeTransList( out, st );
-		}
+
+	/* Transitions into the start state. */
+	if ( graph->startState != 0 ) 
+		out << "	ENTRY -> " << graph->startState->alg.stateNum << " [ label = \"IN\" ];\n";
+
+	for ( EntryMap::Iter en = graph->entryPoints; en.lte(); en++ ) {
+		NameInst *nameInst = pd->nameIndex[en->key];
+		std::string name;
+		makeNameInst( name, nameInst );
+		StateAp *state = en->value;
+		out << "	en_" << state->alg.stateNum << 
+				" -> " << state->alg.stateNum <<
+				" [ label = \"" << name << "\" ];\n";
 	}
 
-//	/* Transitions into the start state. */
-//	if ( redFsm->startState != 0 ) 
-//		out << "	ENTRY -> " << redFsm->startState->id << " [ label = \"IN\" ];\n";
-//
-//	/* Transitions into the entry points. */
-//	for ( EntryIdVect::Iter en = entryPointIds; en.lte(); en++ ) {
-//		RedStateAp *state = allStates + *en;
-//		char *name = entryPointNames[en.pos()];
-//		out << "	en_" << state->id << " -> " << state->id <<
-//				" [ label = \"" << name << "\" ];\n";
-//	}
-//
-//	/* Out action transitions. */
-//	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-//		if ( st->eofTrans != 0 && st->eofTrans->action != 0 ) {
-//			out << "	" << st->id << " -> eof_" << 
-//					st->id << " [ label = \"EOF"; 
-//			ACTION( st->eofTrans->action ) << "\" ];\n";
-//		}
-//		if ( st->eofAction != 0 ) {
-//			out << "	" << st->id << " -> eof_" << 
-//					st->id << " [ label = \"EOF"; 
-//			ACTION( st->eofAction ) << "\" ];\n";
-//		}
-//	}
+	/* Out action transitions. */
+	for ( StateList::Iter st = graph->stateList; st.lte(); st++ ) {
+		if ( st->eofActionTable.length() != 0 ) {
+			out << "	" << st->alg.stateNum << " -> eof_" << 
+					st->alg.stateNum << " [ label = \"EOF"; 
+			ACTION( out, &st->eofActionTable ) << "\" ];\n";
+		}
+	}
 
 	out <<
 		"}\n";

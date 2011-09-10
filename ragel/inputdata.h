@@ -29,6 +29,8 @@
 struct Parser;
 struct ParseData;
 struct CondSpace;
+struct CondAp;
+struct ActionTable;
 
 struct InputItem
 {
@@ -106,6 +108,9 @@ struct InputData
 	void writeLanguage( std::ostream &out );
 	void writeXML( std::ostream &out );
 
+	bool makeNameInst( std::string &res, NameInst *nameInst );
+	std::ostream &ACTION( ostream &out, ActionTable *actionTable );
+	std::ostream &TRANS_ACTION( ostream &out, StateAp *fromState, CondAp *trans );
 	std::ostream &KEY( ostream &out, Key key );
 	std::ostream &ONCHAR( ostream &out, Key lowKey, Key highKey, CondSpace *condSpace, long condVals );
 	void writeTransList( ostream &out, StateAp *state );
