@@ -321,7 +321,156 @@ void GraphvizDotGen::finishRagelDef()
 	redFsm->chooseDefaultSpan();
 }
 
+void InputData::writeTransList( StateAp *state )
+{
+#if 0
+	/* Build the set of unique transitions out of this state. */
+	RedTransSet stTransSet;
+	for ( RedTransList::Iter tel = state->outRange; tel.lte(); tel++ ) {
+		/* If we haven't seen the transitions before, the move forward
+		 * emitting all the transitions on the same character. */
+		if ( stTransSet.insert( tel->value ) ) {
+			/* Write out the from and to states. */
+			out << "\t" << state->id << " -> ";
+
+			if ( tel->value->targ == 0 )
+				out << "err_" << state->id;
+			else
+				out << tel->value->targ->id;
+
+			/* Begin the label. */
+			out << " [ label = \""; 
+			ONCHAR( tel->lowKey, tel->highKey );
+
+			/* Walk the transition list, finding the same. */
+			for ( RedTransList::Iter mtel = tel.next(); mtel.lte(); mtel++ ) {
+				if ( mtel->value == tel->value ) {
+					out << ", ";
+					ONCHAR( mtel->lowKey, mtel->highKey );
+				}
+			}
+
+			/* Write the action and close the transition. */
+			TRANS_ACTION( state, tel->value );
+			out << "\" ];\n";
+		}
+	}
+
+	/* Write the default transition. */
+	if ( state->defTrans != 0 ) {
+		/* Write out the from and to states. */
+		out << "\t" << state->id << " -> ";
+
+		if ( state->defTrans->targ == 0 )
+			out << "err_" << state->id;
+		else
+			out << state->defTrans->targ->id;
+
+		/* Begin the label. */
+		out << " [ label = \"DEF"; 
+
+		/* Write the action and close the transition. */
+		TRANS_ACTION( state, state->defTrans );
+		out << "\" ];\n";
+	}
+#endif
+}
+
 void InputData::writeDot( ostream &out )
 {
 	static_cast<GraphvizDotGen*>(dotGenParser->pd->cgd)->writeDotFile();
+	return;
+
+	ParseData *pd = dotGenParser->pd;
+	FsmAp *graph = pd->sectionGraph;
+
+	out << 
+		"digraph " << pd->sectionName << " {\n"
+		"	rankdir=LR;\n";
+	
+	/* Define the psuedo states. Transitions will be done after the states
+	 * have been defined as either final or not final. */
+	out << "	node [ shape = point ];\n";
+
+	if ( graph->startState != 0 )
+		out << "	ENTRY;\n";
+
+	/* Psuedo states for entry points in the entry map. */
+	for ( EntryMap::Iter en = graph->entryPoints; en.lte(); en++ ) {
+		StateAp *state = en->value;
+		out << "	en_" << state->alg.stateNum << ";\n";
+	}
+
+	/* Psuedo states for final states with eof actions. */
+	for ( StateList::Iter st = graph->stateList; st.lte(); st++ ) {
+		//if ( st->eofTrans != 0 && st->eofTrans->action != 0 )
+		//	out << "	eof_" << st->id << ";\n";
+		if ( st->eofActionTable.length() > 0 )
+			out << "	eof_" << st->alg.stateNum << ";\n";
+	}
+
+	out << "	node [ shape = circle, height = 0.2 ];\n";
+
+	/* Psuedo states for states whose default actions go to error. */
+	for ( StateList::Iter st = graph->stateList; st.lte(); st++ ) {
+		bool needsErr = false;
+//		if ( st->defTrans != 0 && st->defTrans->targ == 0 )
+//			needsErr = true;
+//		else {
+//			for ( RedTransList::Iter tel = st->outRange; tel.lte(); tel++ ) {
+//				if ( tel->value->targ == 0 ) {
+//					needsErr = true;
+//					break;
+//				}
+//			}
+//		}
+//
+//		if ( needsErr )
+//			out << "	err_" << st->id << " [ label=\"\"];\n";
+	}
+
+	/* Attributes common to all nodes, plus double circle for final states. */
+	out << "	node [ fixedsize = true, height = 0.65, shape = doublecircle ];\n";
+
+	/* List Final states. */
+	for ( StateList::Iter st = graph->stateList; st.lte(); st++ ) {
+		if ( st->isFinState() )
+			out << "	" << st->alg.stateNum << ";\n";
+	}
+
+	/* List transitions. */
+	out << "	node [ shape = circle ];\n";
+
+	/* Walk the states. */
+	for ( StateList::Iter st = graph->stateList; st.lte(); st++ )
+		writeTransList( st );
+
+//	/* Transitions into the start state. */
+//	if ( redFsm->startState != 0 ) 
+//		out << "	ENTRY -> " << redFsm->startState->id << " [ label = \"IN\" ];\n";
+//
+//	/* Transitions into the entry points. */
+//	for ( EntryIdVect::Iter en = entryPointIds; en.lte(); en++ ) {
+//		RedStateAp *state = allStates + *en;
+//		char *name = entryPointNames[en.pos()];
+//		out << "	en_" << state->id << " -> " << state->id <<
+//				" [ label = \"" << name << "\" ];\n";
+//	}
+//
+//	/* Out action transitions. */
+//	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+//		if ( st->eofTrans != 0 && st->eofTrans->action != 0 ) {
+//			out << "	" << st->id << " -> eof_" << 
+//					st->id << " [ label = \"EOF"; 
+//			ACTION( st->eofTrans->action ) << "\" ];\n";
+//		}
+//		if ( st->eofAction != 0 ) {
+//			out << "	" << st->id << " -> eof_" << 
+//					st->id << " [ label = \"EOF"; 
+//			ACTION( st->eofAction ) << "\" ];\n";
+//		}
+//	}
+
+	out <<
+		"}\n";
 }

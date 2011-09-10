@@ -1292,7 +1292,7 @@ void BackendGen::makeMachine()
 	cgd->closeMachine();
 }
 
-void BackendGen::close_ragel_def()
+void BackendGen::finishGen()
 {
 	/* Do this before distributing transitions out to singles and defaults
 	 * makes life easier. */
@@ -1394,7 +1394,7 @@ void BackendGen::makeBackend()
 	makeExports();
 	makeMachine();
 
-	close_ragel_def();
+	finishGen();
 }
 
 void InputData::writeLanguage( std::ostream &out )

@@ -175,7 +175,7 @@ private:
 	void makeTransList( StateAp *state );
 	void makeTrans( Key lowKey, Key highKey, TransAp *trans );
 
-	void close_ragel_def();
+	void finishGen();
 
 	CodeGenData *cgd;
 
