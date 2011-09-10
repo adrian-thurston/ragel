@@ -159,6 +159,9 @@ void FsmAp::expandCondTransitions( StateAp *fromState, TransAp *destTrans, Trans
 
 	expandConds( fromState, destTrans, destCS, mergedCS );
 	expandConds( fromState, srcTrans, srcCS, mergedCS );
+
+	CondSpace *mergedCondSpace = addCondSpace( mergedCS );
+	destTrans->condSpace = mergedCondSpace;
 }
 
 void FsmAp::expansionTrans( Expansion *expansion, TransAp *src )

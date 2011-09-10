@@ -28,6 +28,7 @@
 
 struct Parser;
 struct ParseData;
+struct CondSpace;
 
 struct InputItem
 {
@@ -105,7 +106,9 @@ struct InputData
 	void writeLanguage( std::ostream &out );
 	void writeXML( std::ostream &out );
 
-	void writeTransList( StateAp *state );
+	std::ostream &KEY( ostream &out, Key key );
+	std::ostream &ONCHAR( ostream &out, Key lowKey, Key highKey, CondSpace *condSpace, long condVals );
+	void writeTransList( ostream &out, StateAp *state );
 	void writeDot( std::ostream &out );
 
 	void parseArgs( int argc, const char **argv );

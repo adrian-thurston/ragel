@@ -321,27 +321,134 @@ void GraphvizDotGen::finishRagelDef()
 	redFsm->chooseDefaultSpan();
 }
 
-void InputData::writeTransList( StateAp *state )
+std::ostream &InputData::KEY( ostream &out, Key key )
+{
+	if ( displayPrintables && key.isPrintable() ) {
+		// Output values as characters, ensuring we escape the quote (") character
+		char cVal = (char) key.getVal();
+		switch ( cVal ) {
+			case '"': case '\\':
+				out << "'\\" << cVal << "'";
+				break;
+			case '\a':
+				out << "'\\\\a'";
+				break;
+			case '\b':
+				out << "'\\\\b'";
+				break;
+			case '\t':
+				out << "'\\\\t'";
+				break;
+			case '\n':
+				out << "'\\\\n'";
+				break;
+			case '\v':
+				out << "'\\\\v'";
+				break;
+			case '\f':
+				out << "'\\\\f'";
+				break;
+			case '\r':
+				out << "'\\\\r'";
+				break;
+			case ' ':
+				out << "SP";
+				break;
+			default:	
+				out << "'" << cVal << "'";
+				break;
+		}
+	}
+	else {
+		if ( keyOps->isSigned )
+			out << key.getVal();
+		else
+			out << (unsigned long) key.getVal();
+	}
+
+	return out;
+}
+
+
+std::ostream &InputData::ONCHAR( ostream &out, Key lowKey, Key highKey, CondSpace *condSpace, long condVals )
 {
 #if 0
+	GenCondSpace *condSpace;
+	if ( lowKey > keyOps->maxKey && (condSpace=findCondSpace(lowKey, highKey) ) ) {
+		Key values = ( lowKey - condSpace->baseKey ) / keyOps->alphSize();
+
+		lowKey = keyOps->minKey + 
+			(lowKey - condSpace->baseKey - keyOps->alphSize() * values.getVal());
+		highKey = keyOps->minKey + 
+			(highKey - condSpace->baseKey - keyOps->alphSize() * values.getVal());
+		KEY( lowKey );
+		if ( lowKey != highKey ) {
+			out << "..";
+			KEY( highKey );
+		}
+		out << "(";
+
+		for ( GenCondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
+			bool set = values & (1 << csi.pos());
+			if ( !set )
+				out << "!";
+			out << (*csi)->nameOrLoc();
+			if ( !csi.last() )
+				out << ", ";
+		}
+		out << ")";
+	}
+	else {
+#endif
+		/* Output the key. Possibly a range. */
+		KEY( out, lowKey );
+		if ( highKey != lowKey ) {
+			out << "..";
+			KEY( out, highKey );
+		}
+//	}
+
+	if ( condSpace != 0 ) {
+		out << "(";
+		for ( CondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
+			bool set = condVals & (1 << csi.pos());
+			if ( !set )
+				out << "!";
+			(*csi)->actionName( out );
+			if ( !csi.last() )
+				out << ", ";
+		}
+		out << ")";
+	}
+
+	return out;
+}
+
+
+void InputData::writeTransList( ostream &out, StateAp *state )
+{
 	/* Build the set of unique transitions out of this state. */
 	RedTransSet stTransSet;
-	for ( RedTransList::Iter tel = state->outRange; tel.lte(); tel++ ) {
-		/* If we haven't seen the transitions before, the move forward
-		 * emitting all the transitions on the same character. */
-		if ( stTransSet.insert( tel->value ) ) {
-			/* Write out the from and to states. */
-			out << "\t" << state->id << " -> ";
+	for ( TransList::Iter tel = state->outList; tel.lte(); tel++ ) {
 
-			if ( tel->value->targ == 0 )
-				out << "err_" << state->id;
+//		/* If we haven't seen the transitions before, the move forward
+//		 * emitting all the transitions on the same character. */
+//		if ( stTransSet.insert( tel->value ) ) {
+
+		for ( CondTransList::Iter ctel = tel->ctList; ctel.lte(); ctel++ ) {
+			/* Write out the from and to states. */
+			out << "\t" << state->alg.stateNum << " -> ";
+
+			if ( ctel->toState == 0 )
+				out << "err_" << state->alg.stateNum;
 			else
-				out << tel->value->targ->id;
+				out << ctel->toState->alg.stateNum;
 
 			/* Begin the label. */
 			out << " [ label = \""; 
-			ONCHAR( tel->lowKey, tel->highKey );
+			ONCHAR( out, tel->lowKey, tel->highKey, tel->condSpace, ctel->lowKey.getVal() );
 
+#if 0
 			/* Walk the transition list, finding the same. */
 			for ( RedTransList::Iter mtel = tel.next(); mtel.lte(); mtel++ ) {
 				if ( mtel->value == tel->value ) {
@@ -352,9 +459,11 @@ void InputData::writeTransList( StateAp *state )
 
 			/* Write the action and close the transition. */
 			TRANS_ACTION( state, tel->value );
+#endif
 			out << "\" ];\n";
 		}
 	}
+#if 0
 
 	/* Write the default transition. */
 	if ( state->defTrans != 0 ) {
@@ -379,7 +488,6 @@ void InputData::writeTransList( StateAp *state )
 void InputData::writeDot( ostream &out )
 {
 	static_cast<GraphvizDotGen*>(dotGenParser->pd->cgd)->writeDotFile();
-	return;
 
 	ParseData *pd = dotGenParser->pd;
 	FsmAp *graph = pd->sectionGraph;
@@ -442,8 +550,11 @@ void InputData::writeDot( ostream &out )
 	out << "	node [ shape = circle ];\n";
 
 	/* Walk the states. */
-	for ( StateList::Iter st = graph->stateList; st.lte(); st++ )
-		writeTransList( st );
+	for ( StateList::Iter st = graph->stateList; st.lte(); st++ ) {
+		if ( st != 0 ) {
+		writeTransList( out, st );
+		}
+	}
 
 //	/* Transitions into the start state. */
 //	if ( redFsm->startState != 0 ) 
