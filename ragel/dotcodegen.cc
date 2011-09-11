@@ -1,5 +1,5 @@
 /*
- *  Copyright 2001-2007 Adrian Thurston <thurston@complang.org>
+ *  Copyright 2001-2011 Adrian Thurston <thurston@complang.org>
  */
 
 /*  This file is part of Ragel.
@@ -35,7 +35,7 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-std::ostream &InputData::KEY( ostream &out, Key key )
+void GraphvizDotGen::key( Key key )
 {
 	if ( displayPrintables && key.isPrintable() ) {
 		// Output values as characters, ensuring we escape the quote (") character
@@ -79,18 +79,16 @@ std::ostream &InputData::KEY( ostream &out, Key key )
 		else
 			out << (unsigned long) key.getVal();
 	}
-
-	return out;
 }
 
 
-std::ostream &InputData::ONCHAR( ostream &out, Key lowKey, Key highKey, CondSpace *condSpace, long condVals )
+void GraphvizDotGen::onChar( Key lowKey, Key highKey, CondSpace *condSpace, long condVals )
 {
 	/* Output the key. Possibly a range. */
-	KEY( out, lowKey );
+	key( lowKey );
 	if ( highKey != lowKey ) {
 		out << "..";
-		KEY( out, highKey );
+		key( highKey );
 	}
 
 	if ( condSpace != 0 ) {
@@ -105,12 +103,10 @@ std::ostream &InputData::ONCHAR( ostream &out, Key lowKey, Key highKey, CondSpac
 		}
 		out << ")";
 	}
-
-	return out;
 }
 
 
-std::ostream &InputData::TRANS_ACTION( ostream &out, StateAp *fromState, CondAp *trans )
+void GraphvizDotGen::transAction( StateAp *fromState, CondAp *trans )
 {
 	int n = 0;
 	ActionTable *actionTables[3] = { 0, 0, 0 };
@@ -134,10 +130,9 @@ std::ostream &InputData::TRANS_ACTION( ostream &out, StateAp *fromState, CondAp 
 				out << ", ";
 		}
 	}
-	return out;
 }
 
-std::ostream &InputData::ACTION( ostream &out, ActionTable *actionTable )
+void GraphvizDotGen::action( ActionTable *actionTable )
 {
 	/* The action. */
 	out << " / ";
@@ -147,10 +142,9 @@ std::ostream &InputData::ACTION( ostream &out, ActionTable *actionTable )
 		if ( !actIt.last() )
 			out << ", ";
 	}
-	return out;
 }
 
-void InputData::writeTransList( ostream &out, StateAp *state )
+void GraphvizDotGen::transList( StateAp *state )
 {
 	/* Build the set of unique transitions out of this state. */
 	RedTransSet stTransSet;
@@ -166,16 +160,16 @@ void InputData::writeTransList( ostream &out, StateAp *state )
 
 			/* Begin the label. */
 			out << " [ label = \""; 
-			ONCHAR( out, tel->lowKey, tel->highKey, tel->condSpace, ctel->lowKey.getVal() );
+			onChar( tel->lowKey, tel->highKey, tel->condSpace, ctel->lowKey.getVal() );
 
 			/* Write the action and close the transition. */
-			TRANS_ACTION( out, state, ctel );
+			transAction( state, ctel );
 			out << "\" ];\n";
 		}
 	}
 }
 
-bool InputData::makeNameInst( std::string &res, NameInst *nameInst )
+bool GraphvizDotGen::makeNameInst( std::string &res, NameInst *nameInst )
 {
 	bool written = false;
 	if ( nameInst->parent != 0 )
@@ -191,13 +185,8 @@ bool InputData::makeNameInst( std::string &res, NameInst *nameInst )
 	return written;
 }
 
-void InputData::writeDot( ostream &out )
+void GraphvizDotGen::write( )
 {
-//	static_cast<GraphvizDotGen*>(dotGenParser->pd->cgd)->writeDotFile();
-
-	ParseData *pd = dotGenParser->pd;
-	FsmAp *graph = pd->sectionGraph;
-
 	out << 
 		"digraph " << pd->sectionName << " {\n"
 		"	rankdir=LR;\n";
@@ -206,17 +195,17 @@ void InputData::writeDot( ostream &out )
 	 * have been defined as either final or not final. */
 	out << "	node [ shape = point ];\n";
 
-	if ( graph->startState != 0 )
+	if ( fsm->startState != 0 )
 		out << "	ENTRY;\n";
 
 	/* Psuedo states for entry points in the entry map. */
-	for ( EntryMap::Iter en = graph->entryPoints; en.lte(); en++ ) {
+	for ( EntryMap::Iter en = fsm->entryPoints; en.lte(); en++ ) {
 		StateAp *state = en->value;
 		out << "	en_" << state->alg.stateNum << ";\n";
 	}
 
 	/* Psuedo states for final states with eof actions. */
-	for ( StateList::Iter st = graph->stateList; st.lte(); st++ ) {
+	for ( StateList::Iter st = fsm->stateList; st.lte(); st++ ) {
 		//if ( st->eofTrans != 0 && st->eofTrans->action != 0 )
 		//	out << "	eof_" << st->id << ";\n";
 		if ( st->eofActionTable.length() > 0 )
@@ -226,7 +215,7 @@ void InputData::writeDot( ostream &out )
 	out << "	node [ shape = circle, height = 0.2 ];\n";
 
 	/* Psuedo states for states whose default actions go to error. */
-	for ( StateList::Iter st = graph->stateList; st.lte(); st++ ) {
+	for ( StateList::Iter st = fsm->stateList; st.lte(); st++ ) {
 		bool needsErr = false;
 		for ( TransList::Iter tel = st->outList; tel.lte(); tel++ ) {
 			for ( CondTransList::Iter ctel = tel->ctList; ctel.lte(); ctel++ ) {
@@ -245,7 +234,7 @@ void InputData::writeDot( ostream &out )
 	out << "	node [ fixedsize = true, height = 0.65, shape = doublecircle ];\n";
 
 	/* List Final states. */
-	for ( StateList::Iter st = graph->stateList; st.lte(); st++ ) {
+	for ( StateList::Iter st = fsm->stateList; st.lte(); st++ ) {
 		if ( st->isFinState() )
 			out << "	" << st->alg.stateNum << ";\n";
 	}
@@ -254,14 +243,14 @@ void InputData::writeDot( ostream &out )
 	out << "	node [ shape = circle ];\n";
 
 	/* Walk the states. */
-	for ( StateList::Iter st = graph->stateList; st.lte(); st++ )
-		writeTransList( out, st );
+	for ( StateList::Iter st = fsm->stateList; st.lte(); st++ )
+		transList( st );
 
 	/* Transitions into the start state. */
-	if ( graph->startState != 0 ) 
-		out << "	ENTRY -> " << graph->startState->alg.stateNum << " [ label = \"IN\" ];\n";
+	if ( fsm->startState != 0 ) 
+		out << "	ENTRY -> " << fsm->startState->alg.stateNum << " [ label = \"IN\" ];\n";
 
-	for ( EntryMap::Iter en = graph->entryPoints; en.lte(); en++ ) {
+	for ( EntryMap::Iter en = fsm->entryPoints; en.lte(); en++ ) {
 		NameInst *nameInst = pd->nameIndex[en->key];
 		std::string name;
 		makeNameInst( name, nameInst );
@@ -272,14 +261,28 @@ void InputData::writeDot( ostream &out )
 	}
 
 	/* Out action transitions. */
-	for ( StateList::Iter st = graph->stateList; st.lte(); st++ ) {
+	for ( StateList::Iter st = fsm->stateList; st.lte(); st++ ) {
 		if ( st->eofActionTable.length() != 0 ) {
 			out << "	" << st->alg.stateNum << " -> eof_" << 
 					st->alg.stateNum << " [ label = \"EOF"; 
-			ACTION( out, &st->eofActionTable ) << "\" ];\n";
+			action( &st->eofActionTable );
+			out << "\" ];\n";
 		}
 	}
 
 	out <<
 		"}\n";
 }
+
+void InputData::writeDot( ostream &out )
+{
+	ParseData *pd = dotGenParser->pd;
+	FsmAp *graph = pd->sectionGraph;
+
+	CodeGenArgs args( *this, inputFileName, pd->sectionName, pd, graph, out );
+
+	GraphvizDotGen dotGen( args );
+
+	dotGen.write();
+}
+

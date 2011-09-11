@@ -112,12 +112,6 @@ struct InputData
 	void processDot();
 	void processCode();
 
-	bool makeNameInst( std::string &res, NameInst *nameInst );
-	std::ostream &ACTION( ostream &out, ActionTable *actionTable );
-	std::ostream &TRANS_ACTION( ostream &out, StateAp *fromState, CondAp *trans );
-	std::ostream &KEY( ostream &out, Key key );
-	std::ostream &ONCHAR( ostream &out, Key lowKey, Key highKey, CondSpace *condSpace, long condVals );
-	void writeTransList( ostream &out, StateAp *state );
 	void writeDot( std::ostream &out );
 
 	void parseArgs( int argc, const char **argv );

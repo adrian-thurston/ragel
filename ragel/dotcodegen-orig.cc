@@ -36,11 +36,11 @@ using std::cerr;
 using std::endl;
 
 /* Override this so that write statement processing is ignored */
-void GraphvizDotGen::writeStatement( InputLoc &, int, char ** )
+void GraphvizDotGenOrig::writeStatement( InputLoc &, int, char ** )
 {
 }
 
-std::ostream &GraphvizDotGen::KEY( Key key )
+std::ostream &GraphvizDotGenOrig::KEY( Key key )
 {
 	if ( displayPrintables && key.isPrintable() ) {
 		// Output values as characters, ensuring we escape the quote (") character
@@ -88,7 +88,7 @@ std::ostream &GraphvizDotGen::KEY( Key key )
 	return out;
 }
 
-std::ostream &GraphvizDotGen::TRANS_ACTION( RedStateAp *fromState, RedTransAp *trans )
+std::ostream &GraphvizDotGenOrig::TRANS_ACTION( RedStateAp *fromState, RedTransAp *trans )
 {
 	int n = 0;
 	RedAction *actions[3];
@@ -115,7 +115,7 @@ std::ostream &GraphvizDotGen::TRANS_ACTION( RedStateAp *fromState, RedTransAp *t
 	return out;
 }
 
-std::ostream &GraphvizDotGen::ACTION( RedAction *action )
+std::ostream &GraphvizDotGenOrig::ACTION( RedAction *action )
 {
 	/* The action. */
 	out << " / ";
@@ -131,7 +131,7 @@ std::ostream &GraphvizDotGen::ACTION( RedAction *action )
 	return out;
 }
 
-std::ostream &GraphvizDotGen::ONCHAR( Key lowKey, Key highKey )
+std::ostream &GraphvizDotGenOrig::ONCHAR( Key lowKey, Key highKey )
 {
 	GenCondSpace *condSpace;
 	if ( lowKey > keyOps->maxKey && (condSpace=findCondSpace(lowKey, highKey) ) ) {
@@ -169,7 +169,7 @@ std::ostream &GraphvizDotGen::ONCHAR( Key lowKey, Key highKey )
 	return out;
 }
 
-void GraphvizDotGen::writeTransList( RedStateAp *state )
+void GraphvizDotGenOrig::writeTransList( RedStateAp *state )
 {
 	/* Build the set of unique transitions out of this state. */
 	RedTransSet stTransSet;
@@ -222,7 +222,7 @@ void GraphvizDotGen::writeTransList( RedStateAp *state )
 	}
 }
 
-void GraphvizDotGen::writeDotFile( )
+void GraphvizDotGenOrig::writeDotFile( )
 {
 	out << 
 		"digraph " << fsmName << " {\n"
@@ -315,7 +315,7 @@ void GraphvizDotGen::writeDotFile( )
 		"}\n";
 }
 
-void GraphvizDotGen::finishRagelDef()
+void GraphvizDotGenOrig::finishRagelDef()
 {
 	/* For dot file generation we want to pick default transitions. */
 	redFsm->chooseDefaultSpan();

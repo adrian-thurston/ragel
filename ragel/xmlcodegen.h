@@ -27,72 +27,7 @@
 #include "fsmgraph.h"
 #include "parsedata.h"
 #include "redfsm.h"
-
-/* Forwards. */
-struct TransAp;
-struct FsmAp;
-struct ParseData;
-struct GenInlineList;
-struct CodeGenData;
-
-struct RedActionTable
-:
-	public AvlTreeEl<RedActionTable>
-{
-	RedActionTable( const ActionTable &key )
-	:	
-		key(key), 
-		id(0)
-	{ }
-
-	const ActionTable &getKey() 
-		{ return key; }
-
-	ActionTable key;
-	int id;
-};
-
-typedef AvlTree<RedActionTable, ActionTable, CmpActionTable> ActionTableMap;
-
-struct NextRedTrans
-{
-	Key lowKey, highKey;
-	TransAp *trans;
-	TransAp *next;
-
-	void load() {
-		if ( trans != 0 ) {
-			next = trans->next;
-			lowKey = trans->lowKey;
-			highKey = trans->highKey;
-		}
-	}
-
-	NextRedTrans( TransAp *t ) {
-		trans = t;
-		load();
-	}
-
-	void increment() {
-		trans = next;
-		load();
-	}
-};
-
-struct GenBase
-{
-	GenBase( char *fsmName, ParseData *pd, FsmAp *fsm );
-
-	void appendTrans( TransListVect &outList, Key lowKey, Key highKey, TransAp *trans );
-	void reduceActionTables();
-
-	char *fsmName;
-	ParseData *pd;
-	FsmAp *fsm;
-
-	ActionTableMap actionTableMap;
-	int nextActionTableId;
-};
+#include "gendata.h"
 
 class XMLCodeGen : protected GenBase
 {
@@ -136,61 +71,6 @@ private:
 	void writeActionExec( InlineItem *item );
 
 	std::ostream &out;
-};
-
-CodeGenData *makeCodeGen( InputData &inputData, char *fsmName, ParseData *pd, FsmAp *fsm );
-struct CodeGenArgs;
-
-class ReducedGen : protected GenBase
-{
-public:
-	ReducedGen( const CodeGenArgs &args );
-	CodeGenData *make();
-
-private:
-	void makeGenInlineList( GenInlineList *outList, InlineList *inList );
-	void makeKey( GenInlineList *outList, Key key );
-	void makeText( GenInlineList *outList, InlineItem *item );
-	void makeLmOnLast( GenInlineList *outList, InlineItem *item );
-	void makeLmOnNext( GenInlineList *outList, InlineItem *item );
-	void makeLmOnLagBehind( GenInlineList *outList, InlineItem *item );
-	void makeActionExec( GenInlineList *outList, InlineItem *item );
-	void makeLmSwitch( GenInlineList *outList, InlineItem *item );
-	void makeSetTokend( GenInlineList *outList, long offset );
-	void makeSetAct( GenInlineList *outList, long lmId );
-	void makeSubList( GenInlineList *outList, InlineList *inlineList, 
-			GenInlineItem::Type type );
-	void makeTargetItem( GenInlineList *outList, NameInst *nameTarg, GenInlineItem::Type type );
-	void makeExecGetTokend( GenInlineList *outList );
-	void makeExports();
-	void makeMachine();
-	void makeActionList();
-	void makeAction( Action *action );
-	void makeActionTableList();
-	void makeConditions();
-	void makeEntryPoints();
-	bool makeNameInst( std::string &out, NameInst *nameInst );
-	void makeStateList();
-
-	void makeStateActions( StateAp *state );
-	void makeEofTrans( StateAp *state );
-	void makeStateConditions( StateAp *state );
-	void makeTransList( StateAp *state );
-	void makeTrans( Key lowKey, Key highKey, TransAp *trans );
-
-	void finishGen();
-
-
-	/* Collected during parsing. */
-	int curAction;
-	int curActionTable;
-	int curTrans;
-	int curState;
-	int curCondSpace;
-	int curStateCond;
-
-protected:
-	CodeGenData *cgd;
 };
 
 #endif
