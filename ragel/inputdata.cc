@@ -262,6 +262,78 @@ void InputData::writeOutput()
 	}
 }
 
+void InputData::processXML()
+{
+	/* Compiles machines. */
+	prepareAllMachines();
+
+	if ( gblErrorCount > 0 )
+		exit(1);
+
+	makeOutputStream();
+
+	if ( gblErrorCount > 0 )
+		exit(1);
+
+	/*
+	 * From this point on we should not be reporting any errors.
+	 */
+
+	openOutput();
+	writeXML( *outStream );
+}
+
+void InputData::processDot()
+{
+	/* Compiles the DOT machines. */
+	prepareSingleMachine();
+
+	if ( gblErrorCount > 0 )
+		exit(1);
+
+	makeOutputStream();
+
+	if ( gblErrorCount > 0 )
+		exit(1);
+
+	/*
+	 * From this point on we should not be reporting any errors.
+	 */
+
+	openOutput();
+	writeDot( *outStream );
+}
+
+void InputData::processCode()
+{
+	/* Compiles machines. */
+	prepareAllMachines();
+
+	if ( gblErrorCount > 0 )
+		exit(1);
+
+	makeDefaultFileName();
+	makeOutputStream();
+
+	/* Generates the reduced machine, which we use to write output. */
+	generateReduced();
+
+	if ( gblErrorCount > 0 )
+		exit(1);
+
+	verifyWritesHaveData();
+
+	if ( gblErrorCount > 0 )
+		exit(1);
+
+	/*
+	 * From this point on we should not be reporting any errors.
+	 */
+
+	openOutput();
+	writeOutput();
+}
+
 void InputData::process()
 {
 	/* Open the input file for reading. */
@@ -295,50 +367,12 @@ void InputData::process()
 	if ( gblErrorCount > 0 )
 		exit(1);
 
-	/* Locate the backend program */
-	/* Compiles machines. */
-	if ( generateDot )
-		prepareSingleMachine();
-	else
-		prepareAllMachines();
-
-	if ( gblErrorCount > 0 )
-		exit(1);
-
-	if ( ! generateDot && ! generateXML )
-		makeDefaultFileName();
-	makeOutputStream();
-
-	/* Generates the reduced machine, which we use to write output. */
-	if ( ! generateXML && !generateDot ) {
-//		if ( generateDot )
-//			dotGenParser->pd->generateReduced( *this );
-//		else
-
-		generateReduced();
-
-		if ( gblErrorCount > 0 )
-			exit(1);
-	}
-
-	if ( !generateXML && !generateDot )
-		verifyWritesHaveData();
-
-	if ( gblErrorCount > 0 )
-		exit(1);
-
-	/*
-	 * From this point on we should not be reporting any errors.
-	 */
-
-	openOutput();
-
 	if ( generateXML )
-		writeXML( *outStream );
+		processXML();
 	else if ( generateDot )
-		writeDot( *outStream );
+		processDot();
 	else 
-		writeOutput();
+		processCode();
 
 	/* Close the input and the intermediate file. */
 	delete inFile;

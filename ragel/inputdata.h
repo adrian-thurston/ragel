@@ -108,6 +108,10 @@ struct InputData
 	void writeLanguage( std::ostream &out );
 	void writeXML( std::ostream &out );
 
+	void processXML();
+	void processDot();
+	void processCode();
+
 	bool makeNameInst( std::string &res, NameInst *nameInst );
 	std::ostream &ACTION( ostream &out, ActionTable *actionTable );
 	std::ostream &TRANS_ACTION( ostream &out, StateAp *fromState, CondAp *trans );

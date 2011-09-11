@@ -21,7 +21,7 @@ ragel_SOURCES = \
 	cdipgoto.cc cdsplit.cc javacodegen.cc rubycodegen.cc rubytable.cc \
 	rubyftable.cc rubyflat.cc rubyfflat.cc rbxgoto.cc cscodegen.cc \
 	cstable.cc csftable.cc csflat.cc csfflat.cc csgoto.cc csfgoto.cc \
-	csipgoto.cc cssplit.cc dotcodegen.cc xmlcodegen.cc goipgoto.cc \
+	csipgoto.cc cssplit.cc dotcodegen.cc dotcodegen-orig.cc xmlcodegen.cc goipgoto.cc \
 	mlcodegen.cc mltable.cc mlftable.cc mlflat.cc mlfflat.cc mlgoto.cc
 
 BUILT_SOURCES = \
