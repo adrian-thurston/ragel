@@ -74,289 +74,6 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-/* Invoked by the parser when a ragel definition is opened. */
-CodeGenData *dotMakeCodeGen( const char *sourceFileName, const char *fsmName, ostream &out )
-{
-	CodeGenData *codeGen = new GraphvizDotGen(out);
-
-	codeGen->sourceFileName = sourceFileName;
-	codeGen->fsmName = fsmName;
-
-	/* For normal code generation we want a transition on every character so we never
-	 * end up in an undefined state. For graphviz this just clutters the
-	 * drawing so we turn it off. */
-	codeGen->wantComplete = false;
-
-	return codeGen;
-}
-
-/* Invoked by the parser when a ragel definition is opened. */
-CodeGenData *cdMakeCodeGen( const char *sourceFileName, const char *fsmName, ostream &out )
-{
-	CodeGenData *codeGen = 0;
-	switch ( hostLang->lang ) {
-	case HostLang::C:
-		switch ( codeStyle ) {
-		case GenTables:
-			codeGen = new CTabCodeGen(out);
-			break;
-		case GenFTables:
-			codeGen = new CFTabCodeGen(out);
-			break;
-		case GenFlat:
-			codeGen = new CFlatCodeGen(out);
-			break;
-		case GenFFlat:
-			codeGen = new CFFlatCodeGen(out);
-			break;
-		case GenGoto:
-			codeGen = new CGotoCodeGen(out);
-			break;
-		case GenFGoto:
-			codeGen = new CFGotoCodeGen(out);
-			break;
-		case GenIpGoto:
-			codeGen = new CIpGotoCodeGen(out);
-			break;
-		case GenSplit:
-			codeGen = new CSplitCodeGen(out);
-			break;
-		}
-		break;
-
-	case HostLang::D:
-		switch ( codeStyle ) {
-		case GenTables:
-			codeGen = new DTabCodeGen(out);
-			break;
-		case GenFTables:
-			codeGen = new DFTabCodeGen(out);
-			break;
-		case GenFlat:
-			codeGen = new DFlatCodeGen(out);
-			break;
-		case GenFFlat:
-			codeGen = new DFFlatCodeGen(out);
-			break;
-		case GenGoto:
-			codeGen = new DGotoCodeGen(out);
-			break;
-		case GenFGoto:
-			codeGen = new DFGotoCodeGen(out);
-			break;
-		case GenIpGoto:
-			codeGen = new DIpGotoCodeGen(out);
-			break;
-		case GenSplit:
-			codeGen = new DSplitCodeGen(out);
-			break;
-		}
-		break;
-
-	case HostLang::D2:
-		switch ( codeStyle ) {
-		case GenTables:
-			codeGen = new D2TabCodeGen(out);
-			break;
-		case GenFTables:
-			codeGen = new D2FTabCodeGen(out);
-			break;
-		case GenFlat:
-			codeGen = new D2FlatCodeGen(out);
-			break;
-		case GenFFlat:
-			codeGen = new D2FFlatCodeGen(out);
-			break;
-		case GenGoto:
-			codeGen = new D2GotoCodeGen(out);
-			break;
-		case GenFGoto:
-			codeGen = new D2FGotoCodeGen(out);
-			break;
-		case GenIpGoto:
-			codeGen = new D2IpGotoCodeGen(out);
-			break;
-		case GenSplit:
-			codeGen = new D2SplitCodeGen(out);
-			break;
-		}
-		break;
-
-	default: break;
-	}
-
-	codeGen->sourceFileName = sourceFileName;
-	codeGen->fsmName = fsmName;
-
-	return codeGen;
-}
-
-/* Invoked by the parser when a ragel definition is opened. */
-CodeGenData *javaMakeCodeGen( const char *sourceFileName, const char *fsmName, ostream &out )
-{
-	CodeGenData *codeGen = new JavaTabCodeGen(out);
-
-	codeGen->sourceFileName = sourceFileName;
-	codeGen->fsmName = fsmName;
-
-	return codeGen;
-}
-
-/* Invoked by the parser when a ragel definition is opened. */
-CodeGenData *goMakeCodeGen( const char *sourceFileName, const char *fsmName, ostream &out )
-{
-	CodeGenData *codeGen;
-
-	switch ( codeStyle ) {
-	case GenIpGoto:
-		codeGen = new GoIpGotoCodeGen(out);
-		break;
-	default:
-		cerr << "I only support the -G2 output style for Go.  Please "
-			"rerun ragel including this flag.\n";
-		exit(1);
-	}
-
-	codeGen->sourceFileName = sourceFileName;
-	codeGen->fsmName = fsmName;
-
-	return codeGen;
-}
-
-/* Invoked by the parser when a ragel definition is opened. */
-CodeGenData *rubyMakeCodeGen( const char *sourceFileName, const char *fsmName, ostream &out )
-{
-	CodeGenData *codeGen = 0;
-	switch ( codeStyle ) {
-		case GenTables: 
-			codeGen = new RubyTabCodeGen(out);
-			break;
-		case GenFTables:
-			codeGen = new RubyFTabCodeGen(out);
-			break;
-		case GenFlat:
-			codeGen = new RubyFlatCodeGen(out);
-			break;
-		case GenFFlat:
-			codeGen = new RubyFFlatCodeGen(out);
-			break;
-		case GenGoto:
-			if ( rubyImpl == Rubinius ) {
-				codeGen = new RbxGotoCodeGen(out);
-			} else {
-				cerr << "Goto style is still _very_ experimental " 
-					"and only supported using Rubinius.\n"
-					"You may want to enable the --rbx flag "
-					" to give it a try.\n";
-				exit(1);
-			}
-			break;
-		default:
-			cout << "Invalid code style\n";
-			exit(1);
-			break;
-	}
-	codeGen->sourceFileName = sourceFileName;
-	codeGen->fsmName = fsmName;
-
-	return codeGen;
-}
-
-/* Invoked by the parser when a ragel definition is opened. */
-CodeGenData *csharpMakeCodeGen( const char *sourceFileName, const char *fsmName, ostream &out )
-{
-	CodeGenData *codeGen = 0;
-
-	switch ( codeStyle ) {
-	case GenTables:
-		codeGen = new CSharpTabCodeGen(out);
-		break;
-	case GenFTables:
-		codeGen = new CSharpFTabCodeGen(out);
-		break;
-	case GenFlat:
-		codeGen = new CSharpFlatCodeGen(out);
-		break;
-	case GenFFlat:
-		codeGen = new CSharpFFlatCodeGen(out);
-		break;
-	case GenGoto:
-		codeGen = new CSharpGotoCodeGen(out);
-		break;
-	case GenFGoto:
-		codeGen = new CSharpFGotoCodeGen(out);
-		break;
-	case GenIpGoto:
-		codeGen = new CSharpIpGotoCodeGen(out);
-		break;
-	case GenSplit:
-		codeGen = new CSharpSplitCodeGen(out);
-		break;
-	}
-
-	codeGen->sourceFileName = sourceFileName;
-	codeGen->fsmName = fsmName;
-
-	return codeGen;
-}
-
-/* Invoked by the parser when a ragel definition is opened. */
-CodeGenData *ocamlMakeCodeGen( const char *sourceFileName, const char *fsmName, ostream &out )
-{
-	CodeGenData *codeGen = 0;
-
-	switch ( codeStyle ) {
-	case GenTables:
-		codeGen = new OCamlTabCodeGen(out);
-		break;
-	case GenFTables:
-		codeGen = new OCamlFTabCodeGen(out);
-		break;
-	case GenFlat:
-		codeGen = new OCamlFlatCodeGen(out);
-		break;
-	case GenFFlat:
-		codeGen = new OCamlFFlatCodeGen(out);
-		break;
-	case GenGoto:
-		codeGen = new OCamlGotoCodeGen(out);
-		break;
-	default:
-		cerr << "I only support the -T0 -T1 -F0 -F1 and -G0 output styles for OCaml.\n";
-		exit(1);
-	}
-
-	codeGen->sourceFileName = sourceFileName;
-	codeGen->fsmName = fsmName;
-
-	return codeGen;
-}
-
-
-CodeGenData *makeCodeGen( const char *sourceFileName, const char *fsmName, ostream &out )
-{
-	CodeGenData *cgd = 0;
-	if ( generateDot )
-		cgd = dotMakeCodeGen( sourceFileName, fsmName, out );
-	else if ( hostLang == &hostLangC )
-		cgd = cdMakeCodeGen( sourceFileName, fsmName, out );
-	else if ( hostLang == &hostLangD )
-		cgd = cdMakeCodeGen( sourceFileName, fsmName, out );
-	else if ( hostLang == &hostLangD2 )
-		cgd = cdMakeCodeGen( sourceFileName, fsmName, out );
-	else if ( hostLang == &hostLangGo )
-		cgd = goMakeCodeGen( sourceFileName, fsmName, out );
-	else if ( hostLang == &hostLangJava )
-		cgd = javaMakeCodeGen( sourceFileName, fsmName, out );
-	else if ( hostLang == &hostLangRuby )
-		cgd = rubyMakeCodeGen( sourceFileName, fsmName, out );
-	else if ( hostLang == &hostLangCSharp )
-		cgd = csharpMakeCodeGen( sourceFileName, fsmName, out );
-	else if ( hostLang == &hostLangOCaml )
-		cgd = ocamlMakeCodeGen( sourceFileName, fsmName, out );
-	return cgd;
-}
-
 void lineDirective( ostream &out, const char *fileName, int line )
 {
 	if ( !generateDot ) {
@@ -418,7 +135,6 @@ CodeGenData::CodeGenData( ostream &out )
 	tokstartExpr(0),
 	tokendExpr(0),
 	dataExpr(0),
-	wantComplete(true),
 	hasLongestMatch(false),
 	noEnd(false),
 	noPrefix(false),
@@ -507,41 +223,38 @@ void CodeGenData::newTrans( int snum, int tnum, Key lowKey,
 		return;
 
 	/* Make the new transitions. */
-	RedStateAp *targState = targ >= 0 ? (allStates + targ) : 
-			wantComplete ? redFsm->getErrorState() : 0;
+	RedStateAp *targState = targ >= 0 ? (allStates + targ) : redFsm->getErrorState();
 	RedAction *actionTable = action >= 0 ? (allActionTables + action) : 0;
 	RedTransAp *trans = redFsm->allocateTrans( targState, actionTable );
 	RedTransEl transEl( lowKey, highKey, trans );
 
-	if ( wantComplete ) {
-		/* If the machine is to be complete then we need to fill any gaps with
-		 * the error transitions. */
-		if ( destRange.length() == 0 ) {
-			/* Range is currently empty. */
-			if ( keyOps->minKey < lowKey ) {
-				/* The first range doesn't start at the low end. */
-				Key fillHighKey = lowKey;
-				fillHighKey.decrement();
+	/* Reduced machines are complete. We need to fill any gaps with the error
+	 * transitions. */
+	if ( destRange.length() == 0 ) {
+		/* Range is currently empty. */
+		if ( keyOps->minKey < lowKey ) {
+			/* The first range doesn't start at the low end. */
+			Key fillHighKey = lowKey;
+			fillHighKey.decrement();
 
-				/* Create the filler with the state's error transition. */
-				RedTransEl newTel( keyOps->minKey, fillHighKey, redFsm->getErrorTrans() );
-				destRange.append( newTel );
-			}
+			/* Create the filler with the state's error transition. */
+			RedTransEl newTel( keyOps->minKey, fillHighKey, redFsm->getErrorTrans() );
+			destRange.append( newTel );
 		}
-		else {
-			/* The range list is not empty, get the the last range. */
-			RedTransEl *last = &destRange[destRange.length()-1];
-			Key nextKey = last->highKey;
-			nextKey.increment();
-			if ( nextKey < lowKey ) {
-				/* There is a gap to fill. Make the high key. */
-				Key fillHighKey = lowKey;
-				fillHighKey.decrement();
+	}
+	else {
+		/* The range list is not empty, get the the last range. */
+		RedTransEl *last = &destRange[destRange.length()-1];
+		Key nextKey = last->highKey;
+		nextKey.increment();
+		if ( nextKey < lowKey ) {
+			/* There is a gap to fill. Make the high key. */
+			Key fillHighKey = lowKey;
+			fillHighKey.decrement();
 
-				/* Create the filler with the state's error transtion. */
-				RedTransEl newTel( nextKey, fillHighKey, redFsm->getErrorTrans() );
-				destRange.append( newTel );
-			}
+			/* Create the filler with the state's error transtion. */
+			RedTransEl newTel( nextKey, fillHighKey, redFsm->getErrorTrans() );
+			destRange.append( newTel );
 		}
 	}
 
@@ -558,27 +271,25 @@ void CodeGenData::finishTransList( int snum )
 	if ( curState == redFsm->errState )
 		return;
 
-	/* If building a complete machine we may need filler on the end. */
-	if ( wantComplete ) {
-		/* Check if there are any ranges already. */
-		if ( destRange.length() == 0 ) {
-			/* Fill with the whole alphabet. */
-			/* Add the range on the lower and upper bound. */
-			RedTransEl newTel( keyOps->minKey, keyOps->maxKey, redFsm->getErrorTrans() );
-			destRange.append( newTel );
-		}
-		else {
-			/* Get the last and check for a gap on the end. */
-			RedTransEl *last = &destRange[destRange.length()-1];
-			if ( last->highKey < keyOps->maxKey ) {
-				/* Make the high key. */
-				Key fillLowKey = last->highKey;
-				fillLowKey.increment();
+	/* We may need filler on the end. */
+	/* Check if there are any ranges already. */
+	if ( destRange.length() == 0 ) {
+		/* Fill with the whole alphabet. */
+		/* Add the range on the lower and upper bound. */
+		RedTransEl newTel( keyOps->minKey, keyOps->maxKey, redFsm->getErrorTrans() );
+		destRange.append( newTel );
+	}
+	else {
+		/* Get the last and check for a gap on the end. */
+		RedTransEl *last = &destRange[destRange.length()-1];
+		if ( last->highKey < keyOps->maxKey ) {
+			/* Make the high key. */
+			Key fillLowKey = last->highKey;
+			fillLowKey.increment();
 
-				/* Create the new range with the error trans and append it. */
-				RedTransEl newTel( fillLowKey, keyOps->maxKey, redFsm->getErrorTrans() );
-				destRange.append( newTel );
-			}
+			/* Create the new range with the error trans and append it. */
+			RedTransEl newTel( fillLowKey, keyOps->maxKey, redFsm->getErrorTrans() );
+			destRange.append( newTel );
 		}
 	}
 }

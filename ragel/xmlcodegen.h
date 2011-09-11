@@ -138,13 +138,22 @@ private:
 	std::ostream &out;
 };
 
-class BackendGen : protected GenBase
+class ReducedGen : protected GenBase
 {
 public:
-	BackendGen( char *fsmName, ParseData *pd, FsmAp *fsm, CodeGenData *cgd );
-	void makeBackend( );
+	ReducedGen( InputData &inputData, char *fsmName, ParseData *pd, FsmAp *fsm );
+	CodeGenData *make();
 
 private:
+	/* Invoked by the parser when a ragel definition is opened. */
+	CodeGenData *cdMakeCodeGen( const char *sourceFileName, const char *fsmName, ostream &out );
+	CodeGenData *javaMakeCodeGen( const char *sourceFileName, const char *fsmName, ostream &out );
+	CodeGenData *goMakeCodeGen( const char *sourceFileName, const char *fsmName, ostream &out );
+	CodeGenData *rubyMakeCodeGen( const char *sourceFileName, const char *fsmName, ostream &out );
+	CodeGenData *csharpMakeCodeGen( const char *sourceFileName, const char *fsmName, ostream &out );
+	CodeGenData *ocamlMakeCodeGen( const char *sourceFileName, const char *fsmName, ostream &out );
+	CodeGenData *makeCodeGen( const char *sourceFileName, const char *fsmName, ostream &out );
+
 	void makeGenInlineList( GenInlineList *outList, InlineList *inList );
 	void makeKey( GenInlineList *outList, Key key );
 	void makeText( GenInlineList *outList, InlineItem *item );
@@ -190,3 +199,4 @@ private:
 };
 
 #endif
+

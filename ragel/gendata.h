@@ -118,7 +118,6 @@ struct CodeGenData
 	GenInlineList *dataExpr;
 
 	KeyOps thisKeyOps;
-	bool wantComplete;
 	EntryIdVect entryPointIds;
 	EntryNameVect entryPointNames;
 	bool hasLongestMatch;
@@ -181,8 +180,5 @@ struct CodeGenData
 	ostream &source_error( const InputLoc &loc );
 	void write_option_error( InputLoc &loc, char *arg );
 };
-
-CodeGenData *makeCodeGen( const char *sourceFileName, 
-		const char *fsmName, ostream &out );
 
 #endif

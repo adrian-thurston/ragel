@@ -1432,13 +1432,11 @@ void ParseData::generateReduced( InputData &inputData )
 {
 	beginProcessing();
 
-	cgd = makeCodeGen( inputData.inputFileName, sectionName, *inputData.outStream );
-
 	/* Make the generator. */
-	BackendGen backendGen( sectionName, this, sectionGraph, cgd );
+	ReducedGen reducedGen( inputData, sectionName, this, sectionGraph );
 
 	/* Write out with it. */
-	backendGen.makeBackend();
+	cgd = reducedGen.make();
 
 	if ( printStatistics ) {
 		cerr << "fsm name  : " << sectionName << endl;
