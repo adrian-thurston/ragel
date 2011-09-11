@@ -109,6 +109,7 @@ void genLineDirective( ostream &out )
 
 CodeGenData::CodeGenData( const CodeGenArgs &args )
 :
+	ReducedGen(args),
 	sourceFileName(args.sourceFileName),
 	fsmName(args.fsmName), 
 	out(args.out),
@@ -141,7 +142,9 @@ CodeGenData::CodeGenData( const CodeGenArgs &args )
 	noFinal(false),
 	noError(false),
 	noCS(false)
-{}
+{
+	ReducedGen::cgd = this;
+}
 
 void CodeGenData::createMachine()
 {

@@ -1428,17 +1428,18 @@ void ParseData::prepareMachineGenTBWrapped( GraphDictEl *graphDictEl )
 	sectionGraph->setStateNumbers( 0 );
 }
 
+CodeGenData *makeCodeGen2( const CodeGenArgs &args );
+
 void ParseData::generateReduced( InputData &inputData )
 {
 	beginProcessing();
 
 	CodeGenArgs args( inputData, inputData.inputFileName, sectionName, this, sectionGraph, *inputData.outStream );
 
-	/* Make the generator. */
-	ReducedGen reducedGen( args );
-
 	/* Write out with it. */
-	cgd = reducedGen.make();
+	cgd = makeCodeGen2( args );
+
+	cgd->make();
 
 	if ( printStatistics ) {
 		cerr << "fsm name  : " << sectionName << endl;

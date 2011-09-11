@@ -124,13 +124,16 @@ void GenBase::reduceActionTables()
 }
 
 CodeGenData *makeCodeGen( const CodeGenArgs &args );
+CodeGenData *makeCodeGen2( const CodeGenArgs &args )
+{
+	return makeCodeGen( args );
+}
 
 ReducedGen::ReducedGen( const CodeGenArgs &args )
 :
 	GenBase(args.fsmName, args.pd, args.fsm),
 	cgd(0)
 {
-	cgd = makeCodeGen( args );
 }
 
 /* Invoked by the parser when a ragel definition is opened. */

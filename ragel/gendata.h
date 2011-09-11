@@ -26,6 +26,7 @@
 #include "config.h"
 #include "redfsm.h"
 #include "common.h"
+#include "xmlcodegen.h"
 
 using std::ostream;
 
@@ -80,7 +81,7 @@ struct CodeGenArgs
 	std::ostream &out;
 };
 
-struct CodeGenData
+struct CodeGenData : public ReducedGen
 {
 	/*
 	 * The interface to the code generator.

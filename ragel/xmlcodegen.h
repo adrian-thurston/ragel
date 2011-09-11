@@ -180,7 +180,6 @@ private:
 
 	void finishGen();
 
-	CodeGenData *cgd;
 
 	/* Collected during parsing. */
 	int curAction;
@@ -190,6 +189,8 @@ private:
 	int curCondSpace;
 	int curStateCond;
 
+protected:
+	CodeGenData *cgd;
 };
 
 #endif
