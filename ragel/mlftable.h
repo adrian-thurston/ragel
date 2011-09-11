@@ -37,7 +37,7 @@
 class OCamlFTabCodeGen : public OCamlTabCodeGen
 {
 public:
-	OCamlFTabCodeGen( ostream &out ) : OCamlTabCodeGen(out) {}
+	OCamlFTabCodeGen( const CodeGenArgs &args ) : OCamlTabCodeGen(args) {}
 private:
 	std::ostream &TO_STATE_ACTION_SWITCH();
 	std::ostream &FROM_STATE_ACTION_SWITCH();

@@ -29,8 +29,8 @@
 class RubyFFlatCodeGen : public RubyFlatCodeGen 
 {
 public:
-	RubyFFlatCodeGen( ostream &out ) : 
-		RubyFlatCodeGen(out) {}
+	RubyFFlatCodeGen( const CodeGenArgs &args ) : 
+		RubyFlatCodeGen(args) {}
 protected:
 	
 	std::ostream &TO_STATE_ACTION_SWITCH();

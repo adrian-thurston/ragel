@@ -36,7 +36,8 @@ struct CodeGenData;
 class FFlatCodeGen : public FlatCodeGen
 {
 protected:
-	FFlatCodeGen( ostream &out ) : FsmCodeGen(out), FlatCodeGen(out) {}
+	FFlatCodeGen( const CodeGenArgs &args ) 
+		: FsmCodeGen(args), FlatCodeGen(args) {}
 
 	std::ostream &TO_STATE_ACTION_SWITCH();
 	std::ostream &FROM_STATE_ACTION_SWITCH();
@@ -58,8 +59,8 @@ protected:
 struct CFFlatCodeGen
 	: public FFlatCodeGen, public CCodeGen
 {
-	CFFlatCodeGen( ostream &out ) : 
-		FsmCodeGen(out), FFlatCodeGen(out), CCodeGen(out) {}
+	CFFlatCodeGen( const CodeGenArgs &args ) : 
+		FsmCodeGen(args), FFlatCodeGen(args), CCodeGen(args) {}
 };
 
 /*
@@ -68,8 +69,8 @@ struct CFFlatCodeGen
 struct DFFlatCodeGen
 	: public FFlatCodeGen, public DCodeGen
 {
-	DFFlatCodeGen( ostream &out ) : 
-		FsmCodeGen(out), FFlatCodeGen(out), DCodeGen(out) {}
+	DFFlatCodeGen( const CodeGenArgs &args ) : 
+		FsmCodeGen(args), FFlatCodeGen(args), DCodeGen(args) {}
 };
 
 /*
@@ -78,8 +79,8 @@ struct DFFlatCodeGen
 struct D2FFlatCodeGen
 	: public FFlatCodeGen, public D2CodeGen
 {
-	D2FFlatCodeGen( ostream &out ) : 
-		FsmCodeGen(out), FFlatCodeGen(out), D2CodeGen(out) {}
+	D2FFlatCodeGen( const CodeGenArgs &args ) : 
+		FsmCodeGen(args), FFlatCodeGen(args), D2CodeGen(args) {}
 };
 
 #endif

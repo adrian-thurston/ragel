@@ -36,7 +36,7 @@
 class OCamlFFlatCodeGen : public OCamlFlatCodeGen
 {
 public:
-	OCamlFFlatCodeGen( ostream &out ) : OCamlFlatCodeGen(out) {}
+	OCamlFFlatCodeGen( const CodeGenArgs &args ) : OCamlFlatCodeGen(args) {}
 private:
 	std::ostream &TO_STATE_ACTION_SWITCH();
 	std::ostream &FROM_STATE_ACTION_SWITCH();

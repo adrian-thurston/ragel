@@ -37,8 +37,8 @@ using std::ostream;
  */
 struct JavaTabCodeGen : public CodeGenData
 {
-	JavaTabCodeGen( ostream &out ) : 
-		CodeGenData(out) {}
+	JavaTabCodeGen( const CodeGenArgs &args ) :
+		CodeGenData(args) {}
 
 	std::ostream &TO_STATE_ACTION_SWITCH();
 	std::ostream &FROM_STATE_ACTION_SWITCH();

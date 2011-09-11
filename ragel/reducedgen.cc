@@ -123,44 +123,46 @@ void GenBase::reduceActionTables()
 	}
 }
 
-ReducedGen::ReducedGen( InputData &inputData, char *fsmName, ParseData *pd, FsmAp *fsm )
+CodeGenData *makeCodeGen( const CodeGenArgs &args );
+
+ReducedGen::ReducedGen( const CodeGenArgs &args )
 :
-	GenBase(fsmName, pd, fsm),
+	GenBase(args.fsmName, args.pd, args.fsm),
 	cgd(0)
 {
-	cgd = makeCodeGen( inputData.inputFileName, fsmName, *inputData.outStream );
+	cgd = makeCodeGen( args );
 }
 
 /* Invoked by the parser when a ragel definition is opened. */
-CodeGenData *ReducedGen::cdMakeCodeGen( const char *sourceFileName, const char *fsmName, ostream &out )
+CodeGenData *cdMakeCodeGen( const CodeGenArgs &args )
 {
 	CodeGenData *codeGen = 0;
 	switch ( hostLang->lang ) {
 	case HostLang::C:
 		switch ( codeStyle ) {
 		case GenTables:
-			codeGen = new CTabCodeGen(out);
+			codeGen = new CTabCodeGen(args);
 			break;
 		case GenFTables:
-			codeGen = new CFTabCodeGen(out);
+			codeGen = new CFTabCodeGen(args);
 			break;
 		case GenFlat:
-			codeGen = new CFlatCodeGen(out);
+			codeGen = new CFlatCodeGen(args);
 			break;
 		case GenFFlat:
-			codeGen = new CFFlatCodeGen(out);
+			codeGen = new CFFlatCodeGen(args);
 			break;
 		case GenGoto:
-			codeGen = new CGotoCodeGen(out);
+			codeGen = new CGotoCodeGen(args);
 			break;
 		case GenFGoto:
-			codeGen = new CFGotoCodeGen(out);
+			codeGen = new CFGotoCodeGen(args);
 			break;
 		case GenIpGoto:
-			codeGen = new CIpGotoCodeGen(out);
+			codeGen = new CIpGotoCodeGen(args);
 			break;
 		case GenSplit:
-			codeGen = new CSplitCodeGen(out);
+			codeGen = new CSplitCodeGen(args);
 			break;
 		}
 		break;
@@ -168,28 +170,28 @@ CodeGenData *ReducedGen::cdMakeCodeGen( const char *sourceFileName, const char *
 	case HostLang::D:
 		switch ( codeStyle ) {
 		case GenTables:
-			codeGen = new DTabCodeGen(out);
+			codeGen = new DTabCodeGen(args);
 			break;
 		case GenFTables:
-			codeGen = new DFTabCodeGen(out);
+			codeGen = new DFTabCodeGen(args);
 			break;
 		case GenFlat:
-			codeGen = new DFlatCodeGen(out);
+			codeGen = new DFlatCodeGen(args);
 			break;
 		case GenFFlat:
-			codeGen = new DFFlatCodeGen(out);
+			codeGen = new DFFlatCodeGen(args);
 			break;
 		case GenGoto:
-			codeGen = new DGotoCodeGen(out);
+			codeGen = new DGotoCodeGen(args);
 			break;
 		case GenFGoto:
-			codeGen = new DFGotoCodeGen(out);
+			codeGen = new DFGotoCodeGen(args);
 			break;
 		case GenIpGoto:
-			codeGen = new DIpGotoCodeGen(out);
+			codeGen = new DIpGotoCodeGen(args);
 			break;
 		case GenSplit:
-			codeGen = new DSplitCodeGen(out);
+			codeGen = new DSplitCodeGen(args);
 			break;
 		}
 		break;
@@ -197,28 +199,28 @@ CodeGenData *ReducedGen::cdMakeCodeGen( const char *sourceFileName, const char *
 	case HostLang::D2:
 		switch ( codeStyle ) {
 		case GenTables:
-			codeGen = new D2TabCodeGen(out);
+			codeGen = new D2TabCodeGen(args);
 			break;
 		case GenFTables:
-			codeGen = new D2FTabCodeGen(out);
+			codeGen = new D2FTabCodeGen(args);
 			break;
 		case GenFlat:
-			codeGen = new D2FlatCodeGen(out);
+			codeGen = new D2FlatCodeGen(args);
 			break;
 		case GenFFlat:
-			codeGen = new D2FFlatCodeGen(out);
+			codeGen = new D2FFlatCodeGen(args);
 			break;
 		case GenGoto:
-			codeGen = new D2GotoCodeGen(out);
+			codeGen = new D2GotoCodeGen(args);
 			break;
 		case GenFGoto:
-			codeGen = new D2FGotoCodeGen(out);
+			codeGen = new D2FGotoCodeGen(args);
 			break;
 		case GenIpGoto:
-			codeGen = new D2IpGotoCodeGen(out);
+			codeGen = new D2IpGotoCodeGen(args);
 			break;
 		case GenSplit:
-			codeGen = new D2SplitCodeGen(out);
+			codeGen = new D2SplitCodeGen(args);
 			break;
 		}
 		break;
@@ -226,31 +228,25 @@ CodeGenData *ReducedGen::cdMakeCodeGen( const char *sourceFileName, const char *
 	default: break;
 	}
 
-	codeGen->sourceFileName = sourceFileName;
-	codeGen->fsmName = fsmName;
-
 	return codeGen;
 }
 
 /* Invoked by the parser when a ragel definition is opened. */
-CodeGenData *ReducedGen::javaMakeCodeGen( const char *sourceFileName, const char *fsmName, ostream &out )
+CodeGenData *javaMakeCodeGen( const CodeGenArgs &args )
 {
-	CodeGenData *codeGen = new JavaTabCodeGen(out);
-
-	codeGen->sourceFileName = sourceFileName;
-	codeGen->fsmName = fsmName;
+	CodeGenData *codeGen = new JavaTabCodeGen(args);
 
 	return codeGen;
 }
 
 /* Invoked by the parser when a ragel definition is opened. */
-CodeGenData *ReducedGen::goMakeCodeGen( const char *sourceFileName, const char *fsmName, ostream &out )
+CodeGenData *goMakeCodeGen( const CodeGenArgs &args )
 {
 	CodeGenData *codeGen;
 
 	switch ( codeStyle ) {
 	case GenIpGoto:
-		codeGen = new GoIpGotoCodeGen(out);
+		codeGen = new GoIpGotoCodeGen(args);
 		break;
 	default:
 		cerr << "I only support the -G2 output style for Go.  Please "
@@ -258,32 +254,29 @@ CodeGenData *ReducedGen::goMakeCodeGen( const char *sourceFileName, const char *
 		exit(1);
 	}
 
-	codeGen->sourceFileName = sourceFileName;
-	codeGen->fsmName = fsmName;
-
 	return codeGen;
 }
 
 /* Invoked by the parser when a ragel definition is opened. */
-CodeGenData *ReducedGen::rubyMakeCodeGen( const char *sourceFileName, const char *fsmName, ostream &out )
+CodeGenData *rubyMakeCodeGen( const CodeGenArgs &args )
 {
 	CodeGenData *codeGen = 0;
 	switch ( codeStyle ) {
 		case GenTables: 
-			codeGen = new RubyTabCodeGen(out);
+			codeGen = new RubyTabCodeGen(args);
 			break;
 		case GenFTables:
-			codeGen = new RubyFTabCodeGen(out);
+			codeGen = new RubyFTabCodeGen(args);
 			break;
 		case GenFlat:
-			codeGen = new RubyFlatCodeGen(out);
+			codeGen = new RubyFlatCodeGen(args);
 			break;
 		case GenFFlat:
-			codeGen = new RubyFFlatCodeGen(out);
+			codeGen = new RubyFFlatCodeGen(args);
 			break;
 		case GenGoto:
 			if ( rubyImpl == Rubinius ) {
-				codeGen = new RbxGotoCodeGen(out);
+				codeGen = new RbxGotoCodeGen(args);
 			} else {
 				cerr << "Goto style is still _very_ experimental " 
 					"and only supported using Rubinius.\n"
@@ -297,102 +290,94 @@ CodeGenData *ReducedGen::rubyMakeCodeGen( const char *sourceFileName, const char
 			exit(1);
 			break;
 	}
-	codeGen->sourceFileName = sourceFileName;
-	codeGen->fsmName = fsmName;
 
 	return codeGen;
 }
 
 /* Invoked by the parser when a ragel definition is opened. */
-CodeGenData *ReducedGen::csharpMakeCodeGen( const char *sourceFileName, const char *fsmName, ostream &out )
+CodeGenData *csharpMakeCodeGen( const CodeGenArgs &args )
 {
 	CodeGenData *codeGen = 0;
 
 	switch ( codeStyle ) {
 	case GenTables:
-		codeGen = new CSharpTabCodeGen(out);
+		codeGen = new CSharpTabCodeGen(args);
 		break;
 	case GenFTables:
-		codeGen = new CSharpFTabCodeGen(out);
+		codeGen = new CSharpFTabCodeGen(args);
 		break;
 	case GenFlat:
-		codeGen = new CSharpFlatCodeGen(out);
+		codeGen = new CSharpFlatCodeGen(args);
 		break;
 	case GenFFlat:
-		codeGen = new CSharpFFlatCodeGen(out);
+		codeGen = new CSharpFFlatCodeGen(args);
 		break;
 	case GenGoto:
-		codeGen = new CSharpGotoCodeGen(out);
+		codeGen = new CSharpGotoCodeGen(args);
 		break;
 	case GenFGoto:
-		codeGen = new CSharpFGotoCodeGen(out);
+		codeGen = new CSharpFGotoCodeGen(args);
 		break;
 	case GenIpGoto:
-		codeGen = new CSharpIpGotoCodeGen(out);
+		codeGen = new CSharpIpGotoCodeGen(args);
 		break;
 	case GenSplit:
-		codeGen = new CSharpSplitCodeGen(out);
+		codeGen = new CSharpSplitCodeGen(args);
 		break;
 	}
 
-	codeGen->sourceFileName = sourceFileName;
-	codeGen->fsmName = fsmName;
-
 	return codeGen;
 }
 
 /* Invoked by the parser when a ragel definition is opened. */
-CodeGenData *ReducedGen::ocamlMakeCodeGen( const char *sourceFileName, const char *fsmName, ostream &out )
+CodeGenData *ocamlMakeCodeGen( const CodeGenArgs &args )
 {
 	CodeGenData *codeGen = 0;
 
 	switch ( codeStyle ) {
 	case GenTables:
-		codeGen = new OCamlTabCodeGen(out);
+		codeGen = new OCamlTabCodeGen(args);
 		break;
 	case GenFTables:
-		codeGen = new OCamlFTabCodeGen(out);
+		codeGen = new OCamlFTabCodeGen(args);
 		break;
 	case GenFlat:
-		codeGen = new OCamlFlatCodeGen(out);
+		codeGen = new OCamlFlatCodeGen(args);
 		break;
 	case GenFFlat:
-		codeGen = new OCamlFFlatCodeGen(out);
+		codeGen = new OCamlFFlatCodeGen(args);
 		break;
 	case GenGoto:
-		codeGen = new OCamlGotoCodeGen(out);
+		codeGen = new OCamlGotoCodeGen(args);
 		break;
 	default:
 		cerr << "I only support the -T0 -T1 -F0 -F1 and -G0 output styles for OCaml.\n";
 		exit(1);
 	}
 
-	codeGen->sourceFileName = sourceFileName;
-	codeGen->fsmName = fsmName;
-
 	return codeGen;
 }
 
 
-CodeGenData *ReducedGen::makeCodeGen( const char *sourceFileName, const char *fsmName, ostream &out )
+CodeGenData *makeCodeGen( const CodeGenArgs &args )
 {
 	CodeGenData *cgd = 0;
 	if ( hostLang == &hostLangC )
-		cgd = cdMakeCodeGen( sourceFileName, fsmName, out );
+		cgd = cdMakeCodeGen( args );
 	else if ( hostLang == &hostLangD )
-		cgd = cdMakeCodeGen( sourceFileName, fsmName, out );
+		cgd = cdMakeCodeGen( args );
 	else if ( hostLang == &hostLangD2 )
-		cgd = cdMakeCodeGen( sourceFileName, fsmName, out );
+		cgd = cdMakeCodeGen( args );
 	else if ( hostLang == &hostLangGo )
-		cgd = goMakeCodeGen( sourceFileName, fsmName, out );
+		cgd = goMakeCodeGen( args );
 	else if ( hostLang == &hostLangJava )
-		cgd = javaMakeCodeGen( sourceFileName, fsmName, out );
+		cgd = javaMakeCodeGen( args );
 	else if ( hostLang == &hostLangRuby )
-		cgd = rubyMakeCodeGen( sourceFileName, fsmName, out );
+		cgd = rubyMakeCodeGen( args );
 	else if ( hostLang == &hostLangCSharp )
-		cgd = csharpMakeCodeGen( sourceFileName, fsmName, out );
+		cgd = csharpMakeCodeGen( args );
 	else if ( hostLang == &hostLangOCaml )
-		cgd = ocamlMakeCodeGen( sourceFileName, fsmName, out );
+		cgd = ocamlMakeCodeGen( args );
 	return cgd;
 }
 

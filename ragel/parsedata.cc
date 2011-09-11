@@ -1432,8 +1432,10 @@ void ParseData::generateReduced( InputData &inputData )
 {
 	beginProcessing();
 
+	CodeGenArgs args( inputData, inputData.inputFileName, sectionName, this, sectionGraph, *inputData.outStream );
+
 	/* Make the generator. */
-	ReducedGen reducedGen( inputData, sectionName, this, sectionGraph );
+	ReducedGen reducedGen( args );
 
 	/* Write out with it. */
 	cgd = reducedGen.make();

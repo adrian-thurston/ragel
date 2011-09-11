@@ -39,7 +39,7 @@ struct RedStateAp;
 class FlatCodeGen : virtual public FsmCodeGen
 {
 public:
-	FlatCodeGen( ostream &out ) : FsmCodeGen(out) {}
+	FlatCodeGen( const CodeGenArgs &args ) : FsmCodeGen(args) {}
 	virtual ~FlatCodeGen() { }
 
 protected:
@@ -91,8 +91,8 @@ protected:
 struct CFlatCodeGen
 	: public FlatCodeGen, public CCodeGen
 {
-	CFlatCodeGen( ostream &out ) : 
-		FsmCodeGen(out), FlatCodeGen(out), CCodeGen(out) {}
+	CFlatCodeGen( const CodeGenArgs &args ) : 
+		FsmCodeGen(args), FlatCodeGen(args), CCodeGen(args) {}
 };
 
 /*
@@ -101,8 +101,8 @@ struct CFlatCodeGen
 struct DFlatCodeGen
 	: public FlatCodeGen, public DCodeGen
 {
-	DFlatCodeGen( ostream &out ) : 
-		FsmCodeGen(out), FlatCodeGen(out), DCodeGen(out) {}
+	DFlatCodeGen( const CodeGenArgs &args ) : 
+		FsmCodeGen(args), FlatCodeGen(args), DCodeGen(args) {}
 };
 
 /*
@@ -111,8 +111,8 @@ struct DFlatCodeGen
 struct D2FlatCodeGen
 	: public FlatCodeGen, public D2CodeGen
 {
-	D2FlatCodeGen( ostream &out ) : 
-		FsmCodeGen(out), FlatCodeGen(out), D2CodeGen(out) {}
+	D2FlatCodeGen( const CodeGenArgs &args ) : 
+		FsmCodeGen(args), FlatCodeGen(args), D2CodeGen(args) {}
 };
 
 #endif

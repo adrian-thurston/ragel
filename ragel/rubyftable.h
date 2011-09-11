@@ -28,7 +28,9 @@
 class RubyFTabCodeGen : public RubyTabCodeGen
 {
 public:
-	RubyFTabCodeGen( ostream &out ): RubyTabCodeGen(out) {}
+	RubyFTabCodeGen( const CodeGenArgs &args )
+		: RubyTabCodeGen(args) {}
+
 protected:
 	std::ostream &TO_STATE_ACTION_SWITCH();
 	std::ostream &FROM_STATE_ACTION_SWITCH();

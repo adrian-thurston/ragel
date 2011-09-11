@@ -76,11 +76,10 @@ void FsmCodeGen::genLineDirective( ostream &out )
 	cdLineDirective( out, filter->fileName, filter->line + 1 );
 }
 
-
 /* Init code gen with in parameters. */
-FsmCodeGen::FsmCodeGen( ostream &out )
+FsmCodeGen::FsmCodeGen( const CodeGenArgs &args )
 :
-	CodeGenData(out)
+	CodeGenData(args)
 {
 }
 

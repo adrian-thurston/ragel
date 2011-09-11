@@ -56,7 +56,7 @@ string itoa( int i );
 class CSharpFsmCodeGen : public CodeGenData
 {
 public:
-	CSharpFsmCodeGen( ostream &out );
+	CSharpFsmCodeGen( const CodeGenArgs &args );
 	virtual ~CSharpFsmCodeGen() {}
 
 	virtual void finishRagelDef();
@@ -182,7 +182,8 @@ public:
 class CSharpCodeGen : virtual public CSharpFsmCodeGen
 {
 public:
-	CSharpCodeGen( ostream &out ) : CSharpFsmCodeGen(out) {}
+	CSharpCodeGen( const CodeGenArgs &args ) 
+			: CSharpFsmCodeGen(args) {}
 
 	virtual string GET_KEY();
 	virtual string NULL_ITEM();

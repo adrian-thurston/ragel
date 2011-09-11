@@ -75,9 +75,9 @@ void CSharpFsmCodeGen::genLineDirective( ostream &out )
 
 
 /* Init code gen with in parameters. */
-CSharpFsmCodeGen::CSharpFsmCodeGen( ostream &out )
+CSharpFsmCodeGen::CSharpFsmCodeGen( const CodeGenArgs &args )
 :
-	CodeGenData(out)
+	CodeGenData(args)
 {
 }
 

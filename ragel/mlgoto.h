@@ -40,7 +40,7 @@
 class OCamlGotoCodeGen : virtual public OCamlCodeGen
 {
 public:
-	OCamlGotoCodeGen( ostream &out ) : OCamlCodeGen(out) {}
+	OCamlGotoCodeGen( const CodeGenArgs &args ) : OCamlCodeGen(args) {}
 	std::ostream &TO_STATE_ACTION_SWITCH();
 	std::ostream &FROM_STATE_ACTION_SWITCH();
 	std::ostream &EOF_ACTION_SWITCH();

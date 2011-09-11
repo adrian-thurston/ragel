@@ -37,7 +37,9 @@ struct CodeGenData;
 class CSharpFTabCodeGen : public CSharpTabCodeGen
 {
 public:
-	CSharpFTabCodeGen( ostream &out ) : CSharpFsmCodeGen(out), CSharpTabCodeGen(out) {}
+	CSharpFTabCodeGen( const CodeGenArgs &args ) 
+		: CSharpFsmCodeGen(args), CSharpTabCodeGen(args) {}
+
 private:
 	std::ostream &TO_STATE_ACTION_SWITCH();
 	std::ostream &FROM_STATE_ACTION_SWITCH();

@@ -39,6 +39,9 @@ typedef unsigned long ulong;
 extern int gblErrorCount;
 
 struct CodeGenData;
+struct InputData;
+struct ParseData;
+struct FsmAp;
 
 typedef AvlMap<char *, CodeGenData*, CmpStr> CodeGenMap;
 typedef AvlMapEl<char *, CodeGenData*> CodeGenMapEl;
@@ -55,6 +58,27 @@ void lineDirective( ostream &out, const char *fileName, int line );
 string itoa( int i );
 
 /*********************************/
+
+struct CodeGenArgs
+{
+	CodeGenArgs( InputData &inputData, const char *sourceFileName, 
+			char *fsmName, ParseData *pd, FsmAp *fsm, std::ostream &out )
+	:
+		inputData(inputData),
+		sourceFileName(sourceFileName),
+		fsmName(fsmName),
+		pd(pd),
+		fsm(fsm),
+		out(out)
+	{}
+
+	InputData &inputData;
+	const char *sourceFileName;
+	char *fsmName;
+	ParseData *pd;
+	FsmAp *fsm;
+	std::ostream &out;
+};
 
 struct CodeGenData
 {
@@ -78,7 +102,8 @@ struct CodeGenData
 
 	/********************/
 
-	CodeGenData( ostream &out );
+	CodeGenData( const CodeGenArgs &args );
+
 	virtual ~CodeGenData() {}
 
 	/* 

@@ -58,7 +58,7 @@ struct LongestMatchPart;
 class OCamlCodeGen : public CodeGenData
 {
 public:
-	OCamlCodeGen( ostream &out );
+	OCamlCodeGen( const CodeGenArgs &args );
 	virtual ~OCamlCodeGen() {}
 
 	virtual void finishRagelDef();

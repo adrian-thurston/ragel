@@ -69,9 +69,9 @@ void OCamlCodeGen::genLineDirective( ostream &out )
 
 
 /* Init code gen with in parameters. */
-OCamlCodeGen::OCamlCodeGen( ostream &out )
+OCamlCodeGen::OCamlCodeGen( const CodeGenArgs &args )
 :
-	CodeGenData(out)
+	CodeGenData(args)
 {
 }
 

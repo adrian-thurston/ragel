@@ -32,8 +32,10 @@ using std::string;
 class RbxGotoCodeGen : public RubyCodeGen
 {
 public:
-        RbxGotoCodeGen( ostream &out ) : RubyCodeGen(out) {}
-        virtual ~RbxGotoCodeGen() {}
+	RbxGotoCodeGen( const CodeGenArgs &args ) 
+		: RubyCodeGen(args) {}
+
+	virtual ~RbxGotoCodeGen() {}
 
 	std::ostream &TO_STATE_ACTION_SWITCH();
 	std::ostream &FROM_STATE_ACTION_SWITCH();

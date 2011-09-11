@@ -39,7 +39,7 @@
 class OCamlFlatCodeGen : public OCamlCodeGen
 {
 public:
-	OCamlFlatCodeGen( ostream &out ) : OCamlCodeGen(out) {}
+	OCamlFlatCodeGen( const CodeGenArgs &args ) : OCamlCodeGen(args) {}
 	virtual ~OCamlFlatCodeGen() { }
 
 protected:

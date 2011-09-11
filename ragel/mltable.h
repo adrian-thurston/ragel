@@ -41,7 +41,7 @@ struct RedStateAp;
 class OCamlTabCodeGen : public OCamlCodeGen
 {
 public:
-	OCamlTabCodeGen( ostream &out ) : OCamlCodeGen(out) {}
+	OCamlTabCodeGen( const CodeGenArgs &args ) : OCamlCodeGen(args) {}
 	virtual ~OCamlTabCodeGen() { }
 	virtual void writeData();
 	virtual void writeExec();

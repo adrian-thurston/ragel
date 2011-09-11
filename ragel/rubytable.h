@@ -40,9 +40,10 @@ using std::ostream;
 class RubyTabCodeGen : public RubyCodeGen
 {
 public:
-	RubyTabCodeGen( ostream &out ) : 
-          RubyCodeGen(out) {}
-        virtual ~RubyTabCodeGen() {}
+	RubyTabCodeGen( const CodeGenArgs &args )
+		: RubyCodeGen(args) {}
+
+	virtual ~RubyTabCodeGen() {}
 
 public:
 	void BREAK( ostream &ret, int targState );

@@ -27,7 +27,8 @@
 class CSharpSplitCodeGen : public CSharpIpGotoCodeGen
 {
 public:
-	CSharpSplitCodeGen( ostream &out ) : CSharpFsmCodeGen(out), CSharpIpGotoCodeGen(out) {}
+	CSharpSplitCodeGen( const CodeGenArgs &args )
+		: CSharpFsmCodeGen(args), CSharpIpGotoCodeGen(args) {}
 
 	bool ptOutLabelUsed;
 

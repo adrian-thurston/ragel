@@ -39,7 +39,8 @@ struct RedStateAp;
 class CSharpFlatCodeGen : virtual public CSharpFsmCodeGen, public CSharpCodeGen
 {
 public:
-	CSharpFlatCodeGen( ostream &out ) : CSharpFsmCodeGen(out), CSharpCodeGen(out) {}
+	CSharpFlatCodeGen( const CodeGenArgs &args ) 
+		: CSharpFsmCodeGen(args), CSharpCodeGen(args) {}
 	virtual ~CSharpFlatCodeGen() { }
 
 protected:

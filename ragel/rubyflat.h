@@ -36,8 +36,9 @@ using std::ostream;
 class RubyFlatCodeGen : public RubyCodeGen
 {
 public:
-	RubyFlatCodeGen( ostream &out ) :
-		RubyCodeGen(out) {};
+	RubyFlatCodeGen( const CodeGenArgs &args )
+		: RubyCodeGen(args) {};
+
 	virtual ~RubyFlatCodeGen() {}
 protected:
 	

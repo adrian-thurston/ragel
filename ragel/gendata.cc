@@ -107,11 +107,11 @@ void genLineDirective( ostream &out )
 /* Total error count. */
 /* int gblErrorCount = 0; */
 
-CodeGenData::CodeGenData( ostream &out )
+CodeGenData::CodeGenData( const CodeGenArgs &args )
 :
-	sourceFileName(0),
-	fsmName(0), 
-	out(out),
+	sourceFileName(args.sourceFileName),
+	fsmName(args.fsmName), 
+	out(args.out),
 	redFsm(0), 
 	allActions(0),
 	allActionTables(0),
@@ -142,7 +142,6 @@ CodeGenData::CodeGenData( ostream &out )
 	noError(false),
 	noCS(false)
 {}
-
 
 void CodeGenData::createMachine()
 {

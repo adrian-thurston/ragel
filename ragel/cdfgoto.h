@@ -37,7 +37,8 @@ struct CodeGenData;
 class FGotoCodeGen : public GotoCodeGen
 {
 public:
-	FGotoCodeGen( ostream &out ) : FsmCodeGen(out), GotoCodeGen(out) {}
+	FGotoCodeGen( const CodeGenArgs &args )
+			: FsmCodeGen(args), GotoCodeGen(args) {}
 
 	std::ostream &EXEC_ACTIONS();
 	std::ostream &TO_STATE_ACTION_SWITCH();
@@ -58,8 +59,8 @@ public:
 struct CFGotoCodeGen
 	: public FGotoCodeGen, public CCodeGen
 {
-	CFGotoCodeGen( ostream &out ) : 
-		FsmCodeGen(out), FGotoCodeGen(out), CCodeGen(out) {}
+	CFGotoCodeGen( const CodeGenArgs &args ) : 
+		FsmCodeGen(args), FGotoCodeGen(args), CCodeGen(args) {}
 };
 
 /*
@@ -68,8 +69,8 @@ struct CFGotoCodeGen
 struct DFGotoCodeGen
 	: public FGotoCodeGen, public DCodeGen
 {
-	DFGotoCodeGen( ostream &out ) : 
-		FsmCodeGen(out), FGotoCodeGen(out), DCodeGen(out) {}
+	DFGotoCodeGen( const CodeGenArgs &args ) : 
+		FsmCodeGen(args), FGotoCodeGen(args), DCodeGen(args) {}
 };
 
 /*
@@ -78,8 +79,8 @@ struct DFGotoCodeGen
 struct D2FGotoCodeGen
 	: public FGotoCodeGen, public D2CodeGen
 {
-	D2FGotoCodeGen( ostream &out ) : 
-		FsmCodeGen(out), FGotoCodeGen(out), D2CodeGen(out) {}
+	D2FGotoCodeGen( const CodeGenArgs &args ) : 
+		FsmCodeGen(args), FGotoCodeGen(args), D2CodeGen(args) {}
 };
 
 #endif

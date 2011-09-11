@@ -33,7 +33,7 @@
 class RubyCodeGen : public CodeGenData
 {
 public:
-   RubyCodeGen( ostream &out ) : CodeGenData(out) { }
+   RubyCodeGen( const CodeGenArgs &args ) : CodeGenData(args) { }
    virtual ~RubyCodeGen() {}
 protected:
 	ostream &START_ARRAY_LINE();

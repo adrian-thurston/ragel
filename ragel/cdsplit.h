@@ -27,7 +27,8 @@
 class SplitCodeGen : public IpGotoCodeGen
 {
 public:
-	SplitCodeGen( ostream &out ) : FsmCodeGen(out), IpGotoCodeGen(out) {}
+	SplitCodeGen( const CodeGenArgs &args ) 
+		: FsmCodeGen(args), IpGotoCodeGen(args) {}
 
 	bool ptOutLabelUsed;
 
@@ -53,8 +54,8 @@ public:
 struct CSplitCodeGen
 	: public SplitCodeGen, public CCodeGen
 {
-	CSplitCodeGen( ostream &out ) : 
-		FsmCodeGen(out), SplitCodeGen(out), CCodeGen(out) {}
+	CSplitCodeGen( const CodeGenArgs &args ) : 
+		FsmCodeGen(args), SplitCodeGen(args), CCodeGen(args) {}
 };
 
 /*
@@ -63,8 +64,8 @@ struct CSplitCodeGen
 struct DSplitCodeGen
 	: public SplitCodeGen, public DCodeGen
 {
-	DSplitCodeGen( ostream &out ) : 
-		FsmCodeGen(out), SplitCodeGen(out), DCodeGen(out) {}
+	DSplitCodeGen( const CodeGenArgs &args ) : 
+		FsmCodeGen(args), SplitCodeGen(args), DCodeGen(args) {}
 };
 
 /*
@@ -73,8 +74,8 @@ struct DSplitCodeGen
 struct D2SplitCodeGen
 	: public SplitCodeGen, public D2CodeGen
 {
-	D2SplitCodeGen( ostream &out ) : 
-		FsmCodeGen(out), SplitCodeGen(out), D2CodeGen(out) {}
+	D2SplitCodeGen( const CodeGenArgs &args ) : 
+		FsmCodeGen(args), SplitCodeGen(args), D2CodeGen(args) {}
 };
 
 #endif

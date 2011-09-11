@@ -39,7 +39,9 @@ struct RedStateAp;
 class CSharpTabCodeGen : virtual public CSharpFsmCodeGen, public CSharpCodeGen
 {
 public:
-	CSharpTabCodeGen( ostream &out ) : CSharpFsmCodeGen(out), CSharpCodeGen(out) {}
+	CSharpTabCodeGen( const CodeGenArgs &args ) 
+		: CSharpFsmCodeGen(args), CSharpCodeGen(args) {}
+
 	virtual ~CSharpTabCodeGen() { }
 	virtual void writeData();
 	virtual void writeExec();

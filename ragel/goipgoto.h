@@ -36,8 +36,8 @@ struct GoIpGotoCodeGen
 	: public IpGotoCodeGen, public CCodeGen
 {
 public:
-	GoIpGotoCodeGen( ostream &out ) :
-		FsmCodeGen(out), IpGotoCodeGen(out), CCodeGen(out) {}
+	GoIpGotoCodeGen( const CodeGenArgs &args ) :
+		FsmCodeGen(args), IpGotoCodeGen(args), CCodeGen(args) {}
 
 	void writeExec();
 	void writeData();
@@ -56,7 +56,7 @@ public:
 	ostream &STATE_GOTOS();
 	ostream &STATIC_VAR( string type, string name );
 	ostream &TRANS_GOTO( RedTransAp *trans, int level );
-	void genLineDirective( ostream &out );
+	void genLineDirective( ostream &args );
 	bool IN_TRANS_ACTIONS( RedStateAp *state );
 	void ACTION( ostream &ret, GenAction *action, int targState, 
 		     bool inFinish, bool csForced );

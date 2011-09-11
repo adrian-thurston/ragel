@@ -37,7 +37,8 @@ struct CodeGenData;
 class FTabCodeGen : public TabCodeGen
 {
 protected:
-	FTabCodeGen( ostream &out ) : FsmCodeGen(out), TabCodeGen(out) {}
+	FTabCodeGen( const CodeGenArgs &args ) 
+			: FsmCodeGen(args), TabCodeGen(args) {}
 
 	std::ostream &TO_STATE_ACTION_SWITCH();
 	std::ostream &FROM_STATE_ACTION_SWITCH();
@@ -60,8 +61,8 @@ protected:
 struct CFTabCodeGen
 	: public FTabCodeGen, public CCodeGen
 {
-	CFTabCodeGen( ostream &out ) : 
-		FsmCodeGen(out), FTabCodeGen(out), CCodeGen(out) {}
+	CFTabCodeGen( const CodeGenArgs &args ) : 
+		FsmCodeGen(args), FTabCodeGen(args), CCodeGen(args) {}
 };
 
 /*
@@ -70,8 +71,8 @@ struct CFTabCodeGen
 struct DFTabCodeGen
 	: public FTabCodeGen, public DCodeGen
 {
-	DFTabCodeGen( ostream &out ) : 
-		FsmCodeGen(out), FTabCodeGen(out), DCodeGen(out) {}
+	DFTabCodeGen( const CodeGenArgs &args ) : 
+		FsmCodeGen(args), FTabCodeGen(args), DCodeGen(args) {}
 };
 
 /*
@@ -80,8 +81,8 @@ struct DFTabCodeGen
 struct D2FTabCodeGen
 	: public FTabCodeGen, public D2CodeGen
 {
-	D2FTabCodeGen( ostream &out ) : 
-		FsmCodeGen(out), FTabCodeGen(out), D2CodeGen(out) {}
+	D2FTabCodeGen( const CodeGenArgs &args ) : 
+		FsmCodeGen(args), FTabCodeGen(args), D2CodeGen(args) {}
 };
 
 #endif

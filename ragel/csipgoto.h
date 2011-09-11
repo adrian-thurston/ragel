@@ -36,8 +36,8 @@ struct CodeGenData;
 class CSharpIpGotoCodeGen : public CSharpGotoCodeGen
 {
 public:
-	CSharpIpGotoCodeGen( ostream &out ) : CSharpFsmCodeGen(out),
-		CSharpGotoCodeGen(out) {}
+	CSharpIpGotoCodeGen( const CodeGenArgs &args ) 
+			: CSharpFsmCodeGen(args), CSharpGotoCodeGen(args) {}
 
 	std::ostream &EXIT_STATES();
 	std::ostream &TRANS_GOTO( RedTransAp *trans, int level );

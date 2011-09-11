@@ -40,7 +40,9 @@ struct GenStateCond;
 class CSharpGotoCodeGen : virtual public CSharpFsmCodeGen, public CSharpCodeGen
 {
 public:
-	CSharpGotoCodeGen( ostream &out ) : CSharpFsmCodeGen(out), CSharpCodeGen(out) {}
+	CSharpGotoCodeGen( const CodeGenArgs &args ) 
+			: CSharpFsmCodeGen(args), CSharpCodeGen(args) {}
+
 	std::ostream &TO_STATE_ACTION_SWITCH();
 	std::ostream &FROM_STATE_ACTION_SWITCH();
 	std::ostream &EOF_ACTION_SWITCH();

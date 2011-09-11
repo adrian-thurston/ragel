@@ -28,7 +28,8 @@
 class GraphvizDotGen : public CodeGenData
 {
 public:
-	GraphvizDotGen( ostream &out ) : CodeGenData(out) { }
+	GraphvizDotGen( const CodeGenArgs &args ) 
+			: CodeGenData(args) { }
 
 	/* Print an fsm to out stream. */
 	void writeTransList( RedStateAp *state );

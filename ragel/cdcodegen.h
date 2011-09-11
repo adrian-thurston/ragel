@@ -56,7 +56,8 @@ string itoa( int i );
 class FsmCodeGen : public CodeGenData
 {
 public:
-	FsmCodeGen( ostream &out );
+	FsmCodeGen( const CodeGenArgs &args );
+
 	virtual ~FsmCodeGen() {}
 
 	virtual void finishRagelDef();
@@ -188,7 +189,7 @@ public:
 class CCodeGen : virtual public FsmCodeGen
 {
 public:
-	CCodeGen( ostream &out ) : FsmCodeGen(out) {}
+	CCodeGen( const CodeGenArgs &args ) : FsmCodeGen(args) {}
 
 	virtual string NULL_ITEM();
 	virtual string POINTER();
@@ -209,7 +210,7 @@ public:
 class DCodeGen : virtual public FsmCodeGen
 {
 public:
-	DCodeGen( ostream &out ) : FsmCodeGen(out) {}
+	DCodeGen( const CodeGenArgs &args ) : FsmCodeGen(args) {}
 
 	virtual string NULL_ITEM();
 	virtual string POINTER();
@@ -230,7 +231,7 @@ public:
 class D2CodeGen : virtual public FsmCodeGen
 {
 public:
-	D2CodeGen( ostream &out ) : FsmCodeGen(out) {}
+	D2CodeGen( const CodeGenArgs &args ) : FsmCodeGen(args) {}
 
 	virtual string NULL_ITEM();
 	virtual string POINTER();
