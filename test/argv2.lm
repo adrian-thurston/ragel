@@ -43,8 +43,8 @@ cons ArgParser: parser<args>[]
 # Parse the args and extract the result into Args.
 ArgV: list<str> = argv
 for A: str in ArgV
-	ArgParser << [A '\0']
-Args: args = ArgParser.finish()
+	send ArgParser [A '\0']
+Args: args = ArgParser()
 
 # Process the args.
 for Item: item in Args {

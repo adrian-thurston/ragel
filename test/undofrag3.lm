@@ -17,13 +17,13 @@ def out
 def item 
 	[id]
 	{
-		Out << r1
+		send Out r1
 	}
 |	['(' item* ')']
 	{
-		Out << '('
-		Out << r2
-		Out << ')'
+		send Out '('
+		send Out r2
+		send Out ')'
 	}
 
 def A1 []
@@ -32,7 +32,7 @@ def A2 []
 def F
 	[]
 	{
-		print_xml( Out.finish() )
+		print_xml( Out() )
 	}
 
 

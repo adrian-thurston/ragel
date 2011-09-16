@@ -28,11 +28,11 @@ def item
 def btscan 
 	[item*]
 
-Parser: parser<btscan> = cons parser<btscan> []
+cons Parser: parser<btscan> []
 
-Parser << "!ab"
-Parser << "b "
-Parser << "!ab"
-Parser << "ba !aab\n"
+send Parser "!ab"
+send Parser "b "
+send Parser "!ab"
+send Parser "ba !aab\n"
 
-print_xml(Parser.finish())
+print_xml( Parser() )

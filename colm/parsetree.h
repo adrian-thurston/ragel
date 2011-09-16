@@ -1831,7 +1831,7 @@ struct LangVarRef
 	void setFieldInstr( ParseData *pd, CodeVect &code, ObjectDef *inObject, 
 			ObjField *el, UniqueType *exprUT, bool revert ) const;
 
-	VarRefLookup lookupMethod( ParseData *pd ) const;
+	VarRefLookup lookupMethod( ParseData *pd ) ;
 	VarRefLookup lookupField( ParseData *pd ) const;
 
 	VarRefLookup lookupQualification( ParseData *pd, ObjectDef *rootDef ) const;
@@ -1863,7 +1863,7 @@ struct LangVarRef
 	ObjField **evaluateArgs( ParseData *pd, CodeVect &code, 
 			VarRefLookup &lookup, ExprVect *args ) const;
 	void callOperation( ParseData *pd, CodeVect &code, VarRefLookup &lookup ) const;
-	UniqueType *evaluateCall( ParseData *pd, CodeVect &code, ExprVect *args ) const;
+	UniqueType *evaluateCall( ParseData *pd, CodeVect &code, ExprVect *args );
 	UniqueType *evaluate( ParseData *pd, CodeVect &code, bool forWriting = false ) const;
 	ObjField *evaluateRef( ParseData *pd, CodeVect &code, long pushCount ) const;
 	ObjField *preEvaluateRef( ParseData *pd, CodeVect &code ) const;

@@ -1276,6 +1276,15 @@ statement: var_ref TK_LtLt accumulate
 
 		$$->stmt = new LangStmt( LangStmt::AccumType, $1->varRef, accumText );
 	};
+statement: KW_Send var_ref accumulate
+	final {
+		Namespace *nspace = namespaceStack.top();
+		TokenRegion *region = regionStack.top();
+		AccumText *accumText = new AccumText( $1->loc, nspace, region, replItemList );
+		pd->accumTextList.append( accumText );
+
+		$$->stmt = new LangStmt( LangStmt::AccumType, $2->varRef, accumText );
+	};
 
 nonterm opt_require_stmt uses statement;
 

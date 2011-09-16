@@ -733,7 +733,8 @@ VarRefLookup LangVarRef::lookupField( ParseData *pd ) const
 	return lookup;
 }
 
-VarRefLookup LangVarRef::lookupMethod( ParseData *pd ) const
+
+VarRefLookup LangVarRef::lookupMethod( ParseData *pd ) 
 {
 	/* Lookup the object that the field is in. */
 	VarRefLookup lookup = lookupObj( pd );
@@ -741,8 +742,21 @@ VarRefLookup LangVarRef::lookupMethod( ParseData *pd ) const
 	/* Find the method. */
 	assert( lookup.inObject->objMethodMap != 0 );
 	ObjMethod *method = lookup.inObject->findMethod( name );
-	if ( method == 0 )
-		error(loc) << "cannot find " << name << "(...) in object" << endp;
+	if ( method == 0 ) {
+		/* Not found as a method, try it as an object on which we will call a
+		 * default function. */
+		qual->append( QualItem( InputLoc(), name, QualItem::Dot ) );
+		name = "finish";
+
+		/* Lookup the object that the field is in. */
+		VarRefLookup lookup = lookupObj( pd );
+
+		/* Find the method. */
+		assert( lookup.inObject->objMethodMap != 0 );
+		method = lookup.inObject->findMethod( name );
+		if ( method == 0 )
+			error(loc) << "cannot find " << name << "(...) in object" << endp;
+	}
 	
 	lookup.objMethod = method;
 	lookup.uniqueType = method->returnUT;
@@ -1062,7 +1076,7 @@ void LangVarRef::popRefQuals( ParseData *pd, CodeVect &code,
 	}
 }
 
-UniqueType *LangVarRef::evaluateCall( ParseData *pd, CodeVect &code, ExprVect *args ) const
+UniqueType *LangVarRef::evaluateCall( ParseData *pd, CodeVect &code, ExprVect *args ) 
 {
 	/* Evaluate the object. */
 	VarRefLookup lookup = lookupMethod( pd );

@@ -27,14 +27,14 @@ def start
 
 cons I: parser<start> []
 
-I << " id "
-I << " 77 "
-I << " 88 "
-I << " \"hello\" "
-I << " dude "
-I << " dude\n"
+send I " id "
+send I " 77 "
+send I " 88 "
+send I " \"hello\" "
+send I " dude "
+send I " dude\n"
 
-S: start = I.finish()
+S: start = I()
 S = match S 
 	~id 77 88 "hello" dude dude
 print_xml( S )

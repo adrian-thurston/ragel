@@ -474,6 +474,7 @@ void Scanner::endSection( )
 		'include' => {token( KW_Include ); };
 		'context' => {token( KW_Context ); };
 		'alias' => {token( KW_Alias ); };
+		'send' => {token( KW_Send ); };
 
 		# Identifiers.
 		ident => { token( TK_Word, ts, te ); } ;
