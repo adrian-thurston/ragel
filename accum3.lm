@@ -25,9 +25,9 @@ cons ArgParser: parser<args> []
 
 ArgV: list<str> ArgV = argv
 for A: str in ArgV 
-	ArgParser << [A '\0']
+	send ArgParser [A '\0']
 
-Args: args = ArgParser.finish() 
+Args: args = ArgParser() 
 
 print_xml( Args )
 

@@ -17,10 +17,10 @@ Input: start = parse start( stdin )
 cons Output: accum<start> []
 
 for Id: id in Input {
-	Output <<
+	send Output
 		"( [Id] )
 }
 
-S: start = Output.finish()
+S: start = Output()
 
 print( S '\n' )

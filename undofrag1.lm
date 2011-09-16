@@ -12,7 +12,8 @@ def item2
 def start2
 	[item2*]
 
-global SP: parser<start2> = cons parser<start2> []
+global SP: parser<start2> = 
+	cons parser<start2> []
 
 context ctx
 {
@@ -30,26 +31,25 @@ context ctx
 
 	def A [] {
 		print( 'A\n' )
-		SP << "{ A{d} }"
+		send SP "{ A{d} }"
 	}
 
 	def B [] {
 		print( 'B\n' )
-		SP << "{ B{d} }"
+		send SP "{ B{d} }"
 	}
-	
 
 	def start 
 		[A item* '!']
 	|	[B item* ';\n']
 }
 
-SP << "a b{c}"
+send SP "a b{c}"
 
 CTX: ctx = cons ctx []
 Input: ctx::start = parse ctx::start( CTX stdin )
 
-SP << "{e}f g"
+send SP "{e}f g"
 
 print( Input )
-print( SP.finish() '\n' )
+print( SP() '\n' )
