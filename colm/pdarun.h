@@ -97,6 +97,14 @@ typedef struct _Tree
 	Head *tokdata;
 } Tree;
 
+typedef struct _IgnoreList
+{
+	struct _Kid *first;
+	struct _Kid *next;
+
+	long generation;
+} IgnoreList;
+
 typedef struct _ParseTree
 {
 	/* Entire structure must overlay Tree. */
@@ -436,6 +444,7 @@ typedef struct _Program
 	PoolAlloc mapElPool;
 	PoolAlloc headPool;
 	PoolAlloc locationPool;
+	PoolAlloc ignoreListPool;
 
 	Tree *trueVal;
 	Tree *falseVal;

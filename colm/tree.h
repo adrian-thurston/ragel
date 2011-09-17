@@ -96,7 +96,6 @@ void printXmlTree( Tree **sp, Program *prg, Tree *tree, int commAttr );
  * never down resizes. */
 typedef struct _StrCollect
 {
-
 	char *data;
 	int allocated;
 	int length;

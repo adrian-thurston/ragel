@@ -286,3 +286,27 @@ long locationNumLost( Program *prg )
 	return poolAllocNumLost( &prg->locationPool );
 }
 
+/* 
+ * IgnoreList
+ */
+
+Location *ignoreListAllocate( Program *prg )
+{
+	return (Location*) poolAllocAllocate( &prg->ignoreListPool );
+}
+
+void ignoreListFree( Program *prg, IgnoreList *el )
+{
+	poolAllocFree( &prg->ignoreListPool, el );
+}
+
+void ignoreListClear( Program *prg )
+{
+	poolAllocClear( &prg->ignoreListPool );
+}
+
+long ignoreListNumLost( Program *prg )
+{
+	return poolAllocNumLost( &prg->ignoreListPool );
+}
+

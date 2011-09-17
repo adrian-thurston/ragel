@@ -528,6 +528,7 @@ void initProgram( Program *prg, int argc, char **argv, int ctxDepParsing,
 	initPoolAlloc( &prg->mapElPool, sizeof(MapEl) );
 	initPoolAlloc( &prg->headPool, sizeof(Head) );
 	initPoolAlloc( &prg->locationPool, sizeof(Location) );
+	initPoolAlloc( &prg->ignoreListPool, sizeof(IgnoreList) );
 
 	Int *trueInt = (Int*) treeAllocate( prg );
 	trueInt->id = LEL_ID_BOOL;
@@ -613,6 +614,10 @@ void clearProgram( Program *prg, Tree **vm_stack, Tree **sp )
 	long locationLost = locationNumLost( prg );
 	if ( locationLost )
 		message( "warning: lost locations: %ld\n", locationLost );
+
+	long ignoreListList = ignoreListNumLost( prg );
+	if ( ignoreListNumLost )
+		message( "warning: lost ignore lists: %ld\n", ignoreListNumLost );
 
 	kidClear( prg );
 	treeClear( prg );

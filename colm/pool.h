@@ -70,6 +70,11 @@ void locationFree( Program *prg, Location *el );
 void locationClear( Program *prg );
 long locationNumLost( Program *prg );
 
+Location *ignoreListAllocate( Program *prg );
+void ignoreListFree( Program *prg, IgnoreList *el );
+void ignoreListClear( Program *prg );
+long ignoreListNumLost( Program *prg );
+
 /* Wrong place. */
 TreePair mapRemove( Program *prg, Map *map, Tree *key );
 
