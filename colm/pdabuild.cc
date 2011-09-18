@@ -1475,10 +1475,13 @@ void mapNodes( Program *prg, int &count, Kid *kid )
 	if ( kid != 0 ) {
 		pt(kid->tree)->state = count++;
 
-		Kid *ignore = treeIgnore( prg, kid->tree );
-		while ( ignore != 0 ) {
-			count += 1;
-			ignore = ignore->next;
+		IgnoreList *ignoreList = treeIgnore( prg, kid->tree );
+		if ( ignoreList != 0 ) {
+			Kid *ignore = ignoreList->child;
+			while ( ignore != 0 ) {
+				count += 1;
+				ignore = ignore->next;
+			}
 		}
 		
 		count += prg->rtd->lelInfo[kid->tree->id].numCaptureAttr;
@@ -1505,7 +1508,8 @@ void fillNodes( Program *prg, Bindings *bindings, long &bindId,
 		node.data = stringData( kid->tree->tokdata );
 
 		/* Ignore items. */
-		Kid *ignore = treeIgnore( prg, kid->tree );
+		IgnoreList *ignoreList = treeIgnore( prg, kid->tree );
+		Kid *ignore = ignoreList == 0 ? 0 : ignoreList->child;
 		node.ignore = ignore == 0 ? -1 : ind;
 
 		while ( ignore != 0 ) {
@@ -1601,7 +1605,6 @@ void ParseData::fillInPatterns( Program *prg )
 				runtimeData->patReplNodes, repl->pdaRun->stackTop );
 	}
 }
-
 
 
 int ParseData::findIndexOff( PdaTables *pdaTables, PdaGraph *pdaGraph, PdaState *state, int &curLen )

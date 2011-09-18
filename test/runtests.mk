@@ -25,10 +25,6 @@ TESTS = \
 	context1.lm \
 	context2.lm \
 	context3.lm \
-	undofrag1.lm \
-	undofrag2.lm \
-	undofrag3.lm \
-	nestedcomm.lm \
 	reparse.lm \
 	btscan1.lm \
 	btscan2.lm \
@@ -83,10 +79,6 @@ DIFFS = \
 	context1.diff \
 	context2.diff \
 	context3.diff \
-	undofrag1.diff \
-	undofrag2.diff \
-	undofrag3.diff \
-	nestedcomm.diff \
 	reparse.diff \
 	btscan1.diff \
 	btscan2.diff \

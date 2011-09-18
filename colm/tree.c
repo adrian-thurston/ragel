@@ -269,11 +269,16 @@ Tree *constructReplacementTree( Tree **bindings, Program *prg, long pat )
 
 			tree = splitTree( prg, tree );
 
+			IgnoreList *ignoreList = ignoreListAllocate( prg );
+			ignoreList->id = LEL_ID_IGNORE_LIST;
+			ignoreList->refs = 1;
+			ignoreList->child = ignore;
+			
 			Kid *ignoreHead = kidAllocate( prg );
+			ignoreHead->tree = (Tree*)ignoreList;
 			ignoreHead->next = tree->child;
 			tree->child = ignoreHead;
 
-			ignoreHead->tree = (Tree*) ignore;
 			tree->flags |= AF_LEFT_IGNORE;
 		}
 	}
@@ -294,11 +299,16 @@ Tree *constructReplacementTree( Tree **bindings, Program *prg, long pat )
 
 		tree->child = kidListConcat( attrs, child );
 		if ( ignore != 0 ) {
+			IgnoreList *ignoreList = ignoreListAllocate( prg );
+			ignoreList->id = LEL_ID_IGNORE_LIST;
+			ignoreList->refs = 1;
+			ignoreList->child = ignore;
+
 			Kid *ignoreHead = kidAllocate( prg );
+			ignoreHead->tree = (Tree*) ignoreList;
 			ignoreHead->next = tree->child;
 			tree->child = ignoreHead;
 
-			ignoreHead->tree = (Tree*) ignore;
 			tree->flags |= AF_LEFT_IGNORE;
 		}
 
@@ -434,7 +444,8 @@ void printStr2( FILE *out, Head *str )
  * deal since the recursion it is only caused by nonterminals that are ignored. */
 void printIgnoreList2( FILE *out, Tree **sp, Program *prg, Tree *tree )
 {
-	Kid *ignore = treeIgnore( prg, tree );
+	IgnoreList *ignoreList = treeIgnore( prg, tree );
+	Kid *ignore = ignoreList->child;
 
 	/* Record the root of the stack and push everything. */
 	Tree **root = vm_ptop();
@@ -600,25 +611,25 @@ Tree *copyRealTree( Program *prg, Tree *tree, Kid *oldNextDown,
 	/* Left ignores. */
 	if ( tree->flags & AF_LEFT_IGNORE ) {
 		newTree->flags |= AF_LEFT_IGNORE;
-		Kid *newHeader = copyIgnoreList( prg, child );
-
-		/* Always the head. */
-		newTree->child = newHeader;
-
-		child = child->next;
-		last = newHeader;
+//		Kid *newHeader = copyIgnoreList( prg, child );
+//
+//		/* Always the head. */
+//		newTree->child = newHeader;
+//
+//		child = child->next;
+//		last = newHeader;
 	}
 
 	/* Right ignores. */
 	if ( tree->flags & AF_RIGHT_IGNORE ) {
 		newTree->flags |= AF_RIGHT_IGNORE;
-		Kid *newHeader = copyIgnoreList( prg, child );
-		if ( last == 0 )
-			newTree->child = newHeader;
-		else
-			last->next = newHeader;
-		child = child->next;
-		last = newHeader;
+//		Kid *newHeader = copyIgnoreList( prg, child );
+//		if ( last == 0 )
+//			newTree->child = newHeader;
+//		else
+//			last->next = newHeader;
+//		child = child->next;
+//		last = newHeader;
 	}
 
 	/* Attributes and children. */
@@ -886,36 +897,6 @@ free_tree:
 			stringFree( prg, tree->tokdata );
 			Kid *child = tree->child;
 
-			/* Left ignore trees. */
-			if ( tree->flags & AF_LEFT_IGNORE ) {
-				Kid *ic = (Kid*)child->tree;
-				while ( ic != 0 ) {
-					Kid *next = ic->next;
-					vm_push( ic->tree );
-					kidFree( prg, ic );
-					ic = next;
-				}
-			
-				Kid *next = child->next;
-				kidFree( prg, child );
-				child = next;
-			}
-
-			/* Right ignore trees. */
-			if ( tree->flags & AF_RIGHT_IGNORE ) {
-				Kid *ic = (Kid*)child->tree;
-				while ( ic != 0 ) {
-					Kid *next = ic->next;
-					vm_push( ic->tree );
-					kidFree( prg, ic );
-					ic = next;
-				}
-
-				Kid *next = child->next;
-				kidFree( prg, child );
-				child = next;
-			}
-
 			/* Attributes and grammar-based children. */
 			while ( child != 0 ) {
 				Kid *next = child->next;
@@ -926,6 +907,8 @@ free_tree:
 
 			if ( tree->flags & AF_PARSE_TREE )
 				parseTreeFree( prg, (ParseTree*)tree );
+			else if ( tree->id == LEL_ID_IGNORE_LIST )
+				ignoreListFree( prg, (IgnoreList*)tree );
 			else
 				treeFree( prg, tree );
 		}
@@ -1007,10 +990,10 @@ Kid *treeExtractChild( Program *prg, Tree *tree )
 }
 
 
-Kid *treeIgnore( Program *prg, Tree *tree )
+IgnoreList *treeIgnore( Program *prg, Tree *tree )
 {
 	if ( tree->flags & AF_LEFT_IGNORE )
-		return (Kid*)tree->child->tree;
+		return (IgnoreList*)tree->child->tree;
 	return 0;
 }
 
@@ -1782,7 +1765,8 @@ void printXmlKid( FILE *out, Tree **sp, Program *prg, Kid *kid, int commAttr, in
  * ignored. */
 void printXmlIgnoreList( FILE *out, Tree **sp, Program *prg, Tree *tree, long depth )
 {
-	Kid *ignore = treeIgnore( prg, tree );
+	IgnoreList *ignoreList = treeIgnore( prg, tree );
+	Kid *ignore = ignoreList->child;
 	while ( ignore != 0 ) {
 		printXmlKid( out, sp, prg, ignore, true, depth );
 		ignore = ignore->next;
@@ -1957,7 +1941,8 @@ void printStr( StrCollect *collect, Head *str )
  * deal since the recursion it is only caused by nonterminals that are ignored. */
 void printIgnoreList( StrCollect *collect, Tree **sp, Program *prg, Tree *tree )
 {
-	Kid *ignore = treeIgnore( prg, tree );
+	IgnoreList *ignoreList = treeIgnore( prg, tree );
+	Kid *ignore = ignoreList->child;
 
 	/* Record the root of the stack and push everything. */
 	Tree **root = vm_ptop();

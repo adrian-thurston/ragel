@@ -353,9 +353,9 @@ void sendBack( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStre
 		streamPushTree( inputStream, input->tree, false );
 
 		/* FIXME: need to undo the merge of ignore tokens. */
-		Kid *leftIgnore = 0;
+		IgnoreList *leftIgnore = 0;
 		if ( input->tree->flags & AF_LEFT_IGNORE ) {
-			leftIgnore = (Kid*)input->tree->child->tree;
+			leftIgnore = (IgnoreList*)input->tree->child->tree;
 			//input->tree->flags &= ~AF_LEFT_IGNORE;
 			//input->tree->child = input->tree->child->next;
 		}
@@ -364,7 +364,8 @@ void sendBack( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStre
 		//	cerr << "need to pull out ignore" << endl;
 		//}
 
-		sendBackIgnore( sp, pdaRun, fsmRun, inputStream, leftIgnore );
+		if ( leftIgnore != 0 )
+			sendBackIgnore( sp, pdaRun, fsmRun, inputStream, leftIgnore->child );
 
 		///* Always push back the ignore text. */
 		//sendBackIgnore( sp, pdaRun, fsmRun, inputStream, treeIgnore( fsmRun->prg, input->tree ) );
@@ -386,7 +387,9 @@ void sendBack( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStre
 		}
 
 		/* Always push back the ignore text. */
-		sendBackIgnore( sp, pdaRun, fsmRun, inputStream, treeIgnore( fsmRun->prg, input->tree ) );
+		IgnoreList *ignoreList = treeIgnore( fsmRun->prg, input->tree );
+		if ( ignoreList != 0 )
+			sendBackIgnore( sp, pdaRun, fsmRun, inputStream, ignoreList->child );
 
 		/* If eof was just sent back remember that it needs to be sent again. */
 		if ( input->tree->id == pdaRun->tables->rtd->eofLelIds[pdaRun->parserId] )
@@ -618,8 +621,12 @@ void sendWithIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inp
 		if ( input->tree->flags & AF_LEFT_IGNORE ) {
 			/* FIXME: Leak here. */
 			Kid *ignoreHead = input->tree->child;
-			clearIgnoreList( pdaRun->prg, sp, (Kid*) ignoreHead->tree );
-			ignoreHead->tree = (Tree*) ignore;
+			clearIgnoreList( pdaRun->prg, sp, ignoreHead->tree->child );
+
+			ignoreHead->tree = (Tree*) ignoreListAllocate( pdaRun->prg );
+			ignoreHead->tree->id = LEL_ID_IGNORE_LIST;
+			ignoreHead->tree->refs = 1;
+			ignoreHead->tree->child = ignore;
 		}
 		else {
 			/* Insert an ignore head in the child list. */
@@ -627,7 +634,10 @@ void sendWithIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inp
 			ignoreHead->next = input->tree->child;
 			input->tree->child = ignoreHead;
 
-			ignoreHead->tree = (Tree*) ignore;
+			ignoreHead->tree = (Tree*) ignoreListAllocate( pdaRun->prg );
+			ignoreHead->tree->id = LEL_ID_IGNORE_LIST;
+			ignoreHead->tree->refs = 1;
+			ignoreHead->tree->child = ignore;
 			input->tree->flags |= AF_LEFT_IGNORE;
 		}
 	}
@@ -636,7 +646,7 @@ void sendWithIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inp
 		if ( input->tree->flags & AF_LEFT_IGNORE ) {
 			/* FIXME: leak here. */
 			Kid *ignoreHead = input->tree->child;
-			clearIgnoreList( pdaRun->prg, sp, (Kid*)ignoreHead->tree );
+			clearIgnoreList( pdaRun->prg, sp, ignoreHead->tree->child );
 			kidFree( pdaRun->prg, ignoreHead );
 
 			input->tree->child = input->tree->child->next;
