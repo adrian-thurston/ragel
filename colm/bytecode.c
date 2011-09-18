@@ -615,9 +615,9 @@ void clearProgram( Program *prg, Tree **vm_stack, Tree **sp )
 	if ( locationLost )
 		message( "warning: lost locations: %ld\n", locationLost );
 
-	long ignoreListList = ignoreListNumLost( prg );
-	if ( ignoreListNumLost )
-		message( "warning: lost ignore lists: %ld\n", ignoreListNumLost );
+	long ignoreListLost = ignoreListNumLost( prg );
+	if ( ignoreListLost )
+		message( "warning: lost ignore lists: %ld\n", ignoreListLost );
 
 	kidClear( prg );
 	treeClear( prg );

@@ -450,6 +450,26 @@ void printIgnoreList2( FILE *out, Tree **sp, Program *prg, Tree *tree )
 	}
 }
 
+void printIgnoreList3( FILE *out, Tree **sp, Program *prg, Kid *ignore )
+{
+//	fprintf( out, "<" );
+
+	/* Record the root of the stack and push everything. */
+	Tree **root = vm_ptop();
+	while ( ignore != 0 ) {
+		vm_push( (SW)ignore );
+		ignore = ignore->next;
+	}
+
+	/* Pop them off and print. */
+	while ( vm_ptop() != root ) {
+		ignore = (Kid*) vm_pop();
+		printTree2( out, sp, prg, ignore->tree );
+	}
+
+//	fprintf( out, ">" );
+}
+
 
 void printKid2( FILE *out, Tree **sp, Program *prg, Kid *kid, int printIgnore )
 {
@@ -465,7 +485,12 @@ rec_call:
 		printIgnore = false;
 	}
 
-	if ( kid->tree->id < prg->rtd->firstNonTermId ) {
+	if ( kid->tree->id == LEL_ID_IGNORE_LIST )
+	{
+		IgnoreList *ignoreList = (IgnoreList*)kid->tree;
+		printIgnoreList3( out, sp, prg, ignoreList->child );
+	}
+	else if ( kid->tree->id < prg->rtd->firstNonTermId ) {
 		/* Always turn on ignore printing when we get to a token. */
 		printIgnore = true;
 

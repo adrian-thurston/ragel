@@ -39,6 +39,7 @@ void ParseData::initUniqueTypes( )
 	uniqueTypeInt = new UniqueType( TYPE_TREE, intKlangEl );
 	uniqueTypeStr = new UniqueType( TYPE_TREE, strKlangEl );
 	uniqueTypeStream = new UniqueType( TYPE_TREE, streamKlangEl );
+	uniqueTypeIgnoreList = new UniqueType( TYPE_TREE, ignoreListKlangEl );
 	uniqueTypeAny = new UniqueType( TYPE_TREE, anyKlangEl );
 
 	uniqeTypeMap.insert( uniqueTypeNil );
@@ -47,6 +48,7 @@ void ParseData::initUniqueTypes( )
 	uniqeTypeMap.insert( uniqueTypeInt );
 	uniqeTypeMap.insert( uniqueTypeStr );
 	uniqeTypeMap.insert( uniqueTypeStream );
+	uniqeTypeMap.insert( uniqueTypeIgnoreList );
 	uniqeTypeMap.insert( uniqueTypeAny );
 }
 

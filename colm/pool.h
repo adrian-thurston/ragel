@@ -70,7 +70,7 @@ void locationFree( Program *prg, Location *el );
 void locationClear( Program *prg );
 long locationNumLost( Program *prg );
 
-Location *ignoreListAllocate( Program *prg );
+IgnoreList *ignoreListAllocate( Program *prg );
 void ignoreListFree( Program *prg, IgnoreList *el );
 void ignoreListClear( Program *prg );
 long ignoreListNumLost( Program *prg );

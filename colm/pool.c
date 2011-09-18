@@ -290,9 +290,9 @@ long locationNumLost( Program *prg )
  * IgnoreList
  */
 
-Location *ignoreListAllocate( Program *prg )
+IgnoreList *ignoreListAllocate( Program *prg )
 {
-	return (Location*) poolAllocAllocate( &prg->ignoreListPool );
+	return (IgnoreList*) poolAllocAllocate( &prg->ignoreListPool );
 }
 
 void ignoreListFree( Program *prg, IgnoreList *el )

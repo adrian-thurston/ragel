@@ -867,6 +867,7 @@ struct ParseData
 	LangEl *eofKlangEl;
 	LangEl *errorKlangEl;
 	LangEl *defaultCharKlangEl;
+	LangEl *ignoreListKlangEl;
 
 	TokenRegion *rootRegion;
 	TokenRegion *defaultRegion;
@@ -904,6 +905,7 @@ struct ParseData
 	UniqueType *uniqueTypeInt;
 	UniqueType *uniqueTypeStr;
 	UniqueType *uniqueTypeStream;
+	UniqueType *uniqueTypeIgnoreList;
 	UniqueType *uniqueTypeAny;
 
 	UniqueTypeMap uniqeTypeMap;

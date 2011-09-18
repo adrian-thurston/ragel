@@ -212,6 +212,7 @@ void ParseData::makeKlangElIds()
 	assert( intKlangEl->id == LEL_ID_INT );
 	assert( strKlangEl->id == LEL_ID_STR );
 	assert( streamKlangEl->id == LEL_ID_STREAM );
+	assert( ignoreListKlangEl->id == LEL_ID_IGNORE_LIST );
 }
 
 void ParseData::makeKlangElNames()

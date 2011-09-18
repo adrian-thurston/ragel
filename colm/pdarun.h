@@ -99,10 +99,14 @@ typedef struct _Tree
 
 typedef struct _IgnoreList
 {
-	struct _Kid *first;
-	struct _Kid *next;
+	/* First four will be overlaid in other structures. */
+	short id;
+	unsigned short flags;
+	long refs;
+	Kid *child;
 
 	long generation;
+
 } IgnoreList;
 
 typedef struct _ParseTree
@@ -630,7 +634,7 @@ void clearIgnoreList( Program *prg, Tree **sp, Kid *kid );
 void sendWithIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
 Head *extractMatch( Program *prg, FsmRun *fsmRun, InputStream *inputStream );
 void execGen( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long id );
-void sendIgnore( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long id );
+void sendIgnore( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long id );
 Head *extractMatch( Program *prg, FsmRun *fsmRun, InputStream *inputStream );
 void sendToken( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long id );
 void sendEof( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun );

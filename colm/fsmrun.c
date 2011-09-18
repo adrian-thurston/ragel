@@ -696,7 +696,7 @@ void execGen( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRu
 	generationAction( sp, inputStream, fsmRun, pdaRun, id, tokdata, false, 0 );
 }
 
-void sendIgnore( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long id )
+void sendIgnore( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long id )
 {
 	debug( REALM_PARSE, "ignoring: %s\n", pdaRun->tables->rtd->lelInfo[id].name );
 
@@ -713,6 +713,10 @@ void sendIgnore( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long 
 
 	/* Send it to the pdaRun. */
 	ignoreTree( pdaRun, tree );
+
+//	Kid *kid = kidAllocate( fsmRun->prg );
+//	kid->tree = tree;
+//	parseToken( sp, pdaRun, fsmRun, inputStream, kid );
 }
 
 Head *extractMatch( Program *prg, FsmRun *fsmRun, InputStream *inputStream )
@@ -1097,7 +1101,7 @@ void parseLoop( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStr
 			if ( ctxDepParsing && lelInfo[tokenId].frameId >= 0 )
 				execGen( sp, inputStream, fsmRun, pdaRun, tokenId );
 			else if ( lelInfo[tokenId].ignore )
-				sendIgnore( inputStream, fsmRun, pdaRun, tokenId );
+				sendIgnore( sp, inputStream, fsmRun, pdaRun, tokenId );
 			else
 				sendToken( sp, inputStream, fsmRun, pdaRun, tokenId );
 		}

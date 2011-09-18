@@ -276,13 +276,15 @@ head:
 	}
 
 	/* Reset retries. */
-	if ( pt(tree)->retry_lower > 0 ) {
-		parser->numRetry -= 1;
-		pt(tree)->retry_lower = 0;
-	}
-	if ( pt(tree)->retry_upper > 0 ) {
-		parser->numRetry -= 1;
-		pt(tree)->retry_upper = 0;
+	if ( tree->flags & AF_PARSED ) {
+		if ( pt(tree)->retry_lower > 0 ) {
+			parser->numRetry -= 1;
+			pt(tree)->retry_lower = 0;
+		}
+		if ( pt(tree)->retry_upper > 0 ) {
+			parser->numRetry -= 1;
+			pt(tree)->retry_upper = 0;
+		}
 	}
 	tree->flags |= AF_COMMITTED;
 
@@ -366,8 +368,10 @@ void parseToken( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputSt
 	if ( input == 0 )
 		goto parseError;
 
-	/* The tree we are given must be parse tree size. It also must have a single reference. */
-	assert( input->tree->flags & AF_PARSE_TREE );
+	/* The tree we are given must either be an ignore token, or it must be be
+	 * parse tree size. It also must have at least one reference. */
+	LangElInfo *lelInfo = pdaRun->tables->rtd->lelInfo;
+	assert( lelInfo[input->tree->id].ignore || input->tree->flags & AF_PARSE_TREE );
 	assert( input->tree->refs > 0 );
 
 	/* This will cause input to be lost. This 
@@ -385,6 +389,32 @@ again:
 		goto _out;
 
 	lel = input;
+
+	if ( lelInfo[lel->tree->id].ignore ) {
+		/* Consume. */
+		input = input->next;
+
+		Tree *stTree = pdaRun->stackTop->tree;
+		if ( stTree->id == LEL_ID_IGNORE_LIST ) {
+			lel->next = stTree->child;
+			stTree->child = lel;
+		}
+		else {
+			Kid *kid = kidAllocate( pdaRun->prg );
+			kid->tree = (Tree*) ignoreListAllocate( pdaRun->prg );
+			kid->tree->id = LEL_ID_IGNORE_LIST;
+			kid->tree->refs = 1;
+			kid->tree->child = lel;
+			lel->next = 0;
+
+			kid->next = pdaRun->stackTop;
+			pdaRun->stackTop = kid;
+		}
+
+		/* Note: no state change. */
+		goto again;
+	}
+
 	if ( lel->tree->id < pdaRun->tables->keys[pdaRun->cs<<1] ||
 			lel->tree->id > pdaRun->tables->keys[(pdaRun->cs<<1)+1] )
 		goto parseError;
@@ -412,7 +442,9 @@ again:
 //			cerr << "shifted: " << pdaRun->tables->rtd->lelInfo[pt(lel->tree)->id].name;
 //		}
 //		#endif
+		/* Consume. */
 		input = input->next;
+
 		pt(lel->tree)->state = pdaRun->cs;
 		lel->next = pdaRun->stackTop;
 		pdaRun->stackTop = lel;
@@ -477,13 +509,25 @@ again:
 		attrs = allocAttrs( pdaRun->prg, objectLength );
 
 		/* Build the list of children. */
+		Kid *realChild = 0;
 		rhsLen = pdaRun->tables->rtd->prodInfo[reduction].length;
 		child = last = 0;
-		for ( r = 0; r < rhsLen; r++ ) {
+		for ( r = 0;; ) {
+			if ( r == rhsLen && pdaRun->stackTop->tree->id != LEL_ID_IGNORE_LIST )
+				break;
+
 			child = pdaRun->stackTop;
 			pdaRun->stackTop = pdaRun->stackTop->next;
 			child->next = last;
 			last = child;
+			
+			if ( child->tree->id != LEL_ID_IGNORE_LIST ) {
+				/* Count it only if it is not an ignore token. */
+				r++;
+			}
+
+			if ( child->tree->id != LEL_ID_IGNORE_LIST )
+				realChild = child;
 		}
 
 		redLel->tree->child = kidListConcat( attrs, child );
@@ -516,7 +560,7 @@ again:
 
 		/* When the production is of zero length we stay in the same state.
 		 * Otherwise we use the state stored in the first child. */
-		targState = rhsLen == 0 ? pdaRun->cs : pt(child->tree)->state;
+		targState = rhsLen == 0 ? pdaRun->cs : pt(realChild->tree)->state;
 
 		assert( redLel->tree->refs == 1 );
 

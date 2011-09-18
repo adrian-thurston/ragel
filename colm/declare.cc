@@ -96,6 +96,7 @@ void ParseData::declareBaseKlangEls()
 	intKlangEl = declareLangEl( this, rootNamespace, "int", LangEl::Term );
 	strKlangEl = declareLangEl( this, rootNamespace, "str", LangEl::Term );
 	streamKlangEl = declareLangEl( this, rootNamespace, "stream", LangEl::Term );
+	ignoreListKlangEl = declareLangEl( this, rootNamespace, "il", LangEl::Term );
 
 	/* Make the EOF language element. */
 	eofKlangEl = 0;

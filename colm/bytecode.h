@@ -284,11 +284,12 @@ typedef unsigned char uchar;
 
 
 /* Types */
-#define TYPE_NIL      0x01
-#define TYPE_TREE     0x02
-#define TYPE_REF      0x03
-#define TYPE_PTR      0x04
-#define TYPE_ITER     0x05
+#define TYPE_NIL          0x01
+#define TYPE_TREE         0x02
+#define TYPE_REF          0x03
+#define TYPE_PTR          0x04
+#define TYPE_ITER         0x05
+#define TYPE_IGNORE_LIST  0x06
 
 /* Types of Generics. */
 #define GEN_LIST      0x10
@@ -301,11 +302,12 @@ typedef unsigned char uchar;
 #define VM_STACK_SIZE (SIZEOF_WORD*1024ll*1024ll) 
 
 /* Known language element ids. */
-#define LEL_ID_PTR    1
-#define LEL_ID_BOOL   2
-#define LEL_ID_INT    3
-#define LEL_ID_STR    4
-#define LEL_ID_STREAM 5
+#define LEL_ID_PTR          1
+#define LEL_ID_BOOL         2
+#define LEL_ID_INT          3
+#define LEL_ID_STR          4
+#define LEL_ID_STREAM       5
+#define LEL_ID_IGNORE_LIST  6
 
 /*
  * Flags
