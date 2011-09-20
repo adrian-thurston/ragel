@@ -101,12 +101,22 @@ typedef struct _StrCollect
 	int length;
 } StrCollect;
 
+typedef struct _PrintArgs
+{
+	void *arg;
+	void (*out)( void *arg, const char *data, int length );
+} PrintArgs;
+
 void initStrCollect( StrCollect *collect );
 void strCollectDestroy( StrCollect *collect );
 void strCollectAppend( StrCollect *collect, const char *data, long len );
 void strCollectClear( StrCollect *collect );
 
 void printTree( StrCollect *collect, Tree **sp, Program *prg, Tree *tree );
+
+void printTreeArgs( PrintArgs *printArgs, Tree **sp, Program *prg, Tree *tree );
+void printTreeCollect( StrCollect *collect, Tree **sp, Program *prg, Tree *tree );
+void printTreeFile( FILE *out, Tree **sp, Program *prg, Tree *tree );
 
 #if defined(__cplusplus)
 }

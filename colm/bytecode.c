@@ -204,7 +204,7 @@ Head *treeToStr( Tree **sp, Program *prg, Tree *tree )
 	StrCollect collect;
 	initStrCollect( &collect );
 
-	printTree( &collect, sp, prg, tree );
+	printTreeCollect( &collect, sp, prg, tree );
 
 	/* Set up the input stream. */
 	Head *ret = stringAllocFull( prg, collect.data, collect.length );
@@ -252,7 +252,7 @@ Word streamAppend( Tree **sp, Program *prg, Tree *input, Stream *stream )
 		/* Collect the tree data. */
 		StrCollect collect;
 		initStrCollect( &collect );
-		printTree( &collect, sp, prg, input );
+		printTreeCollect( &collect, sp, prg, input );
 
 		/* Load it into the input. */
 		stream->in->funcs->appendData( stream->in, collect.data, collect.length );
@@ -286,7 +286,7 @@ void parseFrag( Tree **sp, Program *prg, Tree *input, Accum *accum, long stopId 
 		/* Collect the tree data. */
 		StrCollect collect;
 		initStrCollect( &collect );
-		printTree( &collect, sp, prg, input );
+		printTreeCollect( &collect, sp, prg, input );
 
 		/* Load it into the input. */
 		stream->in->funcs->appendData( stream->in, collect.data, collect.length );
@@ -386,7 +386,7 @@ Word streamPush( Program *prg, Tree **sp, Stream *stream, Tree *tree, int ignore
 		/* Collect the tree data. */
 		StrCollect collect;
 		initStrCollect( &collect );
-		printTree( &collect, sp, prg, tree );
+		printTreeCollect( &collect, sp, prg, tree );
 
 		streamPushText( stream->in, collect.data, collect.length );
 		long length = collect.length;
@@ -1197,7 +1197,7 @@ again:
 
 			while ( n-- > 0 ) {
 				Tree *tree = pop();
-				printTree2( stdout, sp, prg, tree );
+				printTreeFile( stdout, sp, prg, tree );
 				treeDownref( prg, sp, tree );
 			}
 			break;
@@ -1246,7 +1246,7 @@ again:
 			Stream *stream = (Stream*)pop();
 			while ( n-- > 0 ) {
 				Tree *tree = pop();
-				printTree2( stream->file, sp, prg, tree );
+				printTreeFile( stream->file, sp, prg, tree );
 				treeDownref( prg, sp, tree );
 			}
 			treeDownref( prg, sp, (Tree*)stream );
