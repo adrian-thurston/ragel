@@ -1822,21 +1822,6 @@ void printStr( PrintArgs *printArgs, Head *str )
 
 /* Note that this function causes recursion, thought it is not a big
  * deal since the recursion it is only caused by nonterminals that are ignored. */
-void printIgnoreList( PrintArgs *printArgs, Tree **sp, Program *prg, Kid *ignore )
-{
-	/* Record the root of the stack and push everything. */
-	Tree **root = vm_ptop();
-	while ( ignore != 0 ) {
-		vm_push( (SW)ignore );
-		ignore = ignore->next;
-	}
-
-	/* Pop them off and print. */
-	while ( vm_ptop() != root ) {
-		ignore = (Kid*) vm_pop();
-		printTreeArgs( printArgs, sp, prg, ignore->tree );
-	}
-}
 
 void printKid( PrintArgs *printArgs, Tree **sp, Program *prg, Kid *kid, int printIgnore )
 {
@@ -1847,15 +1832,15 @@ rec_call:
 	/* If not currently skipping ignore data, then print it. Ignore data can
 	 * be associated with terminals and nonterminals. */
 	if ( printIgnore && treeIgnore( prg, kid->tree ) != 0 ) {
-		IgnoreList *ignoreList = treeIgnore( prg, kid->tree );
-		Kid *ignore = ignoreList->child;
-
-		/* Ignorelists are reversed. */
-		printIgnoreList( printArgs, sp, prg, ignore );
+		vm_push( (SW)kid );
+		kid = kid->tree->child;
+		goto rec_call;
+		rec_return_ign:
+		kid = (Kid*)vm_pop();
 		printIgnore = false;
 	}
 
-	if ( kid->tree->id < prg->rtd->firstNonTermId ) {
+	if ( kid->tree->id != LEL_ID_IGNORE_LIST && kid->tree->id < prg->rtd->firstNonTermId ) {
 		/* Always turn on ignore printing when we get to a token. */
 		printIgnore = true;
 
@@ -1907,8 +1892,13 @@ rec_call:
 		}
 	}
 
-	if ( vm_ptop() != root )
-		goto rec_return;
+	if ( vm_ptop() != root ) {
+		Kid *parent = (Kid*)vm_top();
+		if ( kid->tree == (Tree*)treeIgnore( prg, parent->tree ) )
+			goto rec_return_ign;
+		else
+			goto rec_return;
+	}
 }
 
 void appendCollect( void *arg, const char *data, int length )

@@ -293,7 +293,23 @@ void sendBackText( FsmRun *fsmRun, InputStream *inputStream, const char *data, l
 
 void sendBackIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *ignore )
 {
-	/* Ignore tokens are queued in reverse order. */
+	/* Ignore tokens are queued in reverse order. Reverse the list fist. */
+
+	if ( ignore != 0 ) {
+		Kid *last = 0;
+		while ( true ) {
+			Kid *next = ignore->next;
+			ignore->next = last;
+
+			if ( next == 0 )
+				break;
+
+			last = ignore;
+			ignore = next;
+		}
+	}
+
+
 	while ( ignore != 0 ) {
 		#ifdef COLM_LOG
 		LangElInfo *lelInfo = pdaRun->tables->rtd->lelInfo;
@@ -624,7 +640,21 @@ void sendWithIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inp
 
 	/* Pull the ignore tokens out and store in the token. */
 	Kid *ignoreKid = extractIgnore( pdaRun );
+	
 	if ( ignoreKid != 0 ) {
+		/* Reverse the list. */
+		Kid *last = 0;
+		while ( true ) {
+			Kid *next = ignoreKid->next;
+			ignoreKid->next = last;
+
+			if ( next == 0 )
+				break;
+
+			last = ignoreKid;
+			ignoreKid = next;
+		}
+
 		if ( input->tree->flags & AF_LEFT_IGNORE ) {
 			/* Merge by putting the ignore list at the head of the existing
 			 * list. We can later revert by popping it to restore the token
