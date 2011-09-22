@@ -340,6 +340,7 @@ typedef unsigned char uchar;
 #define AF_RIGHT_IGNORE  0x200
 
 #define AF_IL_ATTACHED   0x400
+#define AF_IGNORE        0x800
 
 /*
  * Call stack.

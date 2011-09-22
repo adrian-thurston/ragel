@@ -1475,7 +1475,7 @@ void mapNodes( Program *prg, int &count, Kid *kid )
 	if ( kid != 0 ) {
 		pt(kid->tree)->state = count++;
 
-		IgnoreList *ignoreList = treeIgnore( prg, kid->tree );
+		Tree *ignoreList = treeLeftIgnore( prg, kid->tree );
 		if ( ignoreList != 0 ) {
 			Kid *ignore = ignoreList->child;
 			while ( ignore != 0 ) {
@@ -1508,7 +1508,7 @@ void fillNodes( Program *prg, Bindings *bindings, long &bindId,
 		node.data = stringData( kid->tree->tokdata );
 
 		/* Ignore items. */
-		IgnoreList *ignoreList = treeIgnore( prg, kid->tree );
+		Tree *ignoreList = treeLeftIgnore( prg, kid->tree );
 		Kid *ignore = ignoreList == 0 ? 0 : ignoreList->child;
 		node.ignore = ignore == 0 ? -1 : ind;
 

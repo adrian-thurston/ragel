@@ -369,7 +369,7 @@ void sendBack( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStre
 
 		Kid *ignore = 0;
 		if ( input->tree->flags & AF_IL_ATTACHED ) {
-			IgnoreList *ignoreList = treeIgnore( pdaRun->prg, input->tree );
+			Tree *ignoreList = treeLeftIgnore( pdaRun->prg, input->tree );
 
 			if ( ignoreList->child->tree->id != LEL_ID_IGNORE_LIST ) {
 				ignore = ignoreList->child;
@@ -380,6 +380,32 @@ void sendBack( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStre
 			else {
 				ignore = ignoreList->child->next;
 				ignoreList->child = ignoreList->child->tree->child;
+			}
+		}
+//		else if ( input->tree->flags & AF_IL_ATTACHED ) {
+//			Tree *ignoreList = treeLeftIgnore( pdaRun->prg, input->tree );
+//
+//			if ( ignoreList->child->tree->id != LEL_ID_IGNORE_LIST ) {
+//				ignore = ignoreList->child;
+//				input->tree->child = input->tree->child->next;
+//				input->tree->flags &= ~AF_IL_ATTACHED;
+//				input->tree->flags &= ~AF_LEFT_IGNORE;
+//			}
+//			else {
+//				ignore = ignoreList->child->next;
+//				ignoreList->child = ignoreList->child->tree->child;
+//			}
+//		}
+
+		if ( pdaRun->tokenList != 0 ) {
+			Tree *ignoreList = treeRightIgnore( pdaRun->prg, pdaRun->tokenList->tree );
+			if ( ignoreList != 0 ) {
+				assert( false );
+	//			if ( pdaRun->tokenList->tree->flags & AF_LEFT_IGNORE )
+	//				pdaRun->tokenList->tree->child->next = pdaRun->tokenList->tree->child->next->next;
+	//			else
+	//				pdaRun->tokenList->tree->child = pdaRun->tokenList->tree->child->next;
+	//			pdaRun->tokenList->tree->flags &= ~AF_RIGHT_IGNORE;
 			}
 		}
 
@@ -405,9 +431,20 @@ void sendBack( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStre
 		}
 
 		/* Always push back the ignore text. */
-		IgnoreList *ignoreList = treeIgnore( fsmRun->prg, input->tree );
+		Tree *ignoreList = treeLeftIgnore( fsmRun->prg, input->tree );
 		if ( ignoreList != 0 )
 			sendBackIgnore( sp, pdaRun, fsmRun, inputStream, ignoreList->child );
+
+		if ( pdaRun->tokenList != 0 ) {
+			ignoreList = treeRightIgnore( pdaRun->prg, pdaRun->tokenList->tree );
+			if ( ignoreList != 0 ) {
+				if ( pdaRun->tokenList->tree->flags & AF_LEFT_IGNORE )
+					pdaRun->tokenList->tree->child->next = pdaRun->tokenList->tree->child->next->next;
+				else
+					pdaRun->tokenList->tree->child = pdaRun->tokenList->tree->child->next;
+				pdaRun->tokenList->tree->flags &= ~AF_RIGHT_IGNORE;
+			}
+		}
 
 		/* If eof was just sent back remember that it needs to be sent again. */
 		if ( input->tree->id == pdaRun->tables->rtd->eofLelIds[pdaRun->parserId] )
@@ -629,7 +666,6 @@ void clearIgnoreList( Program *prg, Tree **sp, Kid *kid )
 }
 
 
-
 void sendWithIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input )
 {
 	/* Need to preserve the layout under a tree:
@@ -655,52 +691,70 @@ void sendWithIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inp
 			ignoreKid = next;
 		}
 
+		Tree *ignoreList = treeAllocate( pdaRun->prg );
+		ignoreList->id = LEL_ID_IGNORE_LIST;
+		ignoreList->child = ignoreKid;
+
 		if ( input->tree->flags & AF_LEFT_IGNORE ) {
 			/* Merge by putting the ignore list at the head of the existing
 			 * list. We can later revert by popping it to restore the token
 			 * sent in. */
 
-			IgnoreList *curIgnoreList = treeIgnore( pdaRun->prg, input->tree );
+			Tree *curIgnoreList = treeLeftIgnore( pdaRun->prg, input->tree );
 
 			Kid *kid = kidAllocate( pdaRun->prg );
-			kid->next = ignoreKid;
-			kid->tree = (Tree*) curIgnoreList;
-
-			IgnoreList *ignoreList = ignoreListAllocate( pdaRun->prg );
-
-			ignoreList->id = LEL_ID_IGNORE_LIST;
-			ignoreList->refs = 1;
-			ignoreList->child = kid;
-
-			input->tree->child->tree = (Tree*) ignoreList;
+			kid->tree = ignoreList;
+			kid->next = curIgnoreList->child;
+			treeUpref( ignoreList );
+			curIgnoreList->child = kid;
 
 			input->tree->flags |= AF_IL_ATTACHED;
+			assert(false);
 		}
 		else {
 			/* Insert an ignore head in the child list. */
-			Kid *ignoreListKid = kidAllocate( pdaRun->prg );
-			ignoreListKid->next = input->tree->child;
-			input->tree->child = ignoreListKid;
-
-			ignoreListKid->tree = (Tree*) ignoreListAllocate( pdaRun->prg );
-			ignoreListKid->tree->id = LEL_ID_IGNORE_LIST;
-			ignoreListKid->tree->refs = 1;
-			ignoreListKid->tree->child = ignoreKid;
+			Kid *kid = kidAllocate( pdaRun->prg );
+			kid->tree = ignoreList;
+			kid->next = input->tree->child;
+			treeUpref( ignoreList );
+			input->tree->child = kid;
 			input->tree->flags |= AF_LEFT_IGNORE;
-			input->tree->flags |= AF_IL_ATTACHED;
+		}
+
+		if ( pdaRun->tokenList != 0 ) {
+			if ( pdaRun->tokenList->tree->flags & AF_RIGHT_IGNORE ) {
+				assert(false);
+			}
+			else {
+				/* Insert an ignore head in the child list. */
+				Kid *kid = kidAllocate( pdaRun->prg );
+				kid->tree = ignoreList;
+				treeUpref( ignoreList );
+
+				if ( pdaRun->tokenList->tree->flags & AF_LEFT_IGNORE ) {
+					kid->next = pdaRun->tokenList->tree->child->next;
+					pdaRun->tokenList->tree->child->next = kid;
+				}
+				else {
+					kid->next = pdaRun->tokenList->tree->child;
+					pdaRun->tokenList->tree->child = kid;
+				}
+
+				pdaRun->tokenList->tree->flags |= AF_RIGHT_IGNORE;
+			}
 		}
 	}
 	else {
 //		/* Need to add an empty list if there is already an ignore list in this
 //		 * item, otherwise we will could be sending it back by mistake. */
 //		if ( input->tree->flags & AF_LEFT_IGNORE ) {
-//			IgnoreList *curIgnoreList = treeIgnore( pdaRun->prg, input->tree );
+//			Tree *curIgnoreList = treeLeftIgnore( pdaRun->prg, input->tree );
 //
 //			Kid *kid = kidAllocate( pdaRun->prg );
 //			kid->next = 0;
-//			kid->tree = (Tree*) curIgnoreList;
+//			kid->tree = curIgnoreList;
 //
-//			IgnoreList *ignoreList = ignoreListAllocate( pdaRun->prg );
+//			Tree *ignoreList = treeAllocate( pdaRun->prg );
 //
 //			ignoreList->id = LEL_ID_IGNORE_LIST;
 //			ignoreList->refs = 1;
@@ -740,6 +794,8 @@ void ignoreTree( PdaRun *pdaRun, Tree *tree )
 	/* Add the ignore string to the head of the ignore list. */
 	Kid *ignore = kidAllocate( pdaRun->prg );
 	ignore->tree = tree;
+
+	tree->flags |= AF_IGNORE;
 
 	/* Prepend it to the list of ignore tokens. */
 	ignore->next = pdaRun->accumIgnore;

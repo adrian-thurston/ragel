@@ -104,6 +104,7 @@ void cleanParser( Tree **sp, PdaRun *pdaRun )
 		kid = next;
 	}
 	pdaRun->stackTop = 0;
+	pdaRun->tokenList = 0;
 //	pdaRun->clearContext( sp );
 }
 
@@ -401,7 +402,7 @@ again:
 		}
 		else {
 			Kid *kid = kidAllocate( pdaRun->prg );
-			kid->tree = (Tree*) ignoreListAllocate( pdaRun->prg );
+			kid->tree = treeAllocate( pdaRun->prg );
 			kid->tree->id = LEL_ID_IGNORE_LIST;
 			kid->tree->refs = 1;
 			kid->tree->child = lel;
@@ -449,6 +450,15 @@ again:
 		lel->next = pdaRun->stackTop;
 		pdaRun->stackTop = lel;
 
+		/* Record the last shifted token. Need this for attaching ignores. */
+		if ( lel->tree->id < pdaRun->tables->rtd->firstNonTermId ) {
+			Kid *kid = kidAllocate( pdaRun->prg );
+			kid->tree = lel->tree;
+			treeUpref( lel->tree );
+			kid->next = pdaRun->tokenList;
+			pdaRun->tokenList = kid;
+		}
+
 		/* If shifting a termDup then change it to the nonterm. */
 		if ( lel->tree->id < pdaRun->tables->rtd->firstNonTermId &&
 				pdaRun->tables->rtd->lelInfo[lel->tree->id].termDupId > 0 )
@@ -469,6 +479,8 @@ again:
 //			}
 //			#endif
 		}
+
+			
 //		#ifdef COLM_LOG_PARSE
 //		if ( colm_log_parse ) {
 //			cerr << endl;
@@ -732,6 +744,12 @@ parseError:
 			/* Queue it as next input item. */
 			undoLel->next = input;
 			input = undoLel;
+
+			/* Record the last shifted token. Need this for attaching ignores. */
+			Kid *kid = pdaRun->tokenList;
+			pdaRun->tokenList = kid->next;
+			treeDownref( pdaRun->prg, sp, kid->tree );
+			kidFree( pdaRun->prg, kid );
 		}
 		else {
 //			#ifdef COLM_LOG_PARSE

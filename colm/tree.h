@@ -36,7 +36,10 @@ typedef struct _TreePair
 void treeUpref( Tree *tree );
 void treeDownref( Program *prg, Tree **sp, Tree *tree );
 long cmpTree( Program *prg, const Tree *tree1, const Tree *tree2 );
-IgnoreList *treeIgnore( Program *prg, Tree *tree );
+Tree *treeLeftIgnore( Program *prg, Tree *tree );
+Tree *treeRightIgnore( Program *prg, Tree *tree );
+Kid *treeLeftIgnoreKid( Program *prg, Tree *tree );
+Kid *treeRightIgnoreKid( Program *prg, Tree *tree );
 Kid *treeChild( Program *prg, const Tree *tree );
 Kid *kidListConcat( Kid *list1, Kid *list2 );
 Kid *treeExtractChild( Program *prg, Tree *tree );

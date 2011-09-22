@@ -269,13 +269,13 @@ Tree *constructReplacementTree( Tree **bindings, Program *prg, long pat )
 
 			tree = splitTree( prg, tree );
 
-			IgnoreList *ignoreList = ignoreListAllocate( prg );
+			Tree *ignoreList = treeAllocate( prg );
 			ignoreList->id = LEL_ID_IGNORE_LIST;
 			ignoreList->refs = 1;
 			ignoreList->child = ignore;
 			
 			Kid *ignoreHead = kidAllocate( prg );
-			ignoreHead->tree = (Tree*)ignoreList;
+			ignoreHead->tree = ignoreList;
 			ignoreHead->next = tree->child;
 			tree->child = ignoreHead;
 
@@ -299,13 +299,13 @@ Tree *constructReplacementTree( Tree **bindings, Program *prg, long pat )
 
 		tree->child = kidListConcat( attrs, child );
 		if ( ignore != 0 ) {
-			IgnoreList *ignoreList = ignoreListAllocate( prg );
+			Tree *ignoreList = treeAllocate( prg );
 			ignoreList->id = LEL_ID_IGNORE_LIST;
 			ignoreList->refs = 1;
 			ignoreList->child = ignore;
 
 			Kid *ignoreHead = kidAllocate( prg );
-			ignoreHead->tree = (Tree*) ignoreList;
+			ignoreHead->tree = ignoreList;
 			ignoreHead->next = tree->child;
 			tree->child = ignoreHead;
 
@@ -790,8 +790,6 @@ free_tree:
 
 			if ( tree->flags & AF_PARSE_TREE )
 				parseTreeFree( prg, (ParseTree*)tree );
-			else if ( tree->id == LEL_ID_IGNORE_LIST )
-				ignoreListFree( prg, (IgnoreList*)tree );
 			else
 				treeFree( prg, tree );
 		}
@@ -873,12 +871,42 @@ Kid *treeExtractChild( Program *prg, Tree *tree )
 }
 
 
-IgnoreList *treeIgnore( Program *prg, Tree *tree )
+Tree *treeLeftIgnore( Program *prg, Tree *tree )
 {
 	if ( tree->flags & AF_LEFT_IGNORE )
-		return (IgnoreList*)tree->child->tree;
+		return tree->child->tree;
 	return 0;
 }
+
+Tree *treeRightIgnore( Program *prg, Tree *tree )
+{
+	if ( tree->flags & AF_RIGHT_IGNORE ) {
+		if ( tree->flags & AF_LEFT_IGNORE )
+			return tree->child->next->tree;
+		else
+			return tree->child->tree;
+	}
+	return 0;
+}
+
+Kid *treeLeftIgnoreKid( Program *prg, Tree *tree )
+{
+	if ( tree->flags & AF_LEFT_IGNORE )
+		return tree->child;
+	return 0;
+}
+
+Kid *treeRightIgnoreKid( Program *prg, Tree *tree )
+{
+	if ( tree->flags & AF_RIGHT_IGNORE ) {
+		if ( tree->flags & AF_LEFT_IGNORE )
+			return tree->child->next;
+		else
+			return tree->child;
+	}
+	return 0;
+}
+
 
 Tree *treeIterDerefCur( TreeIter *iter )
 {
@@ -1648,7 +1676,7 @@ void printXmlKid( FILE *out, Tree **sp, Program *prg, Kid *kid, int commAttr, in
  * ignored. */
 void printXmlIgnoreList( FILE *out, Tree **sp, Program *prg, Tree *tree, long depth )
 {
-	IgnoreList *ignoreList = treeIgnore( prg, tree );
+	Tree *ignoreList = treeLeftIgnore( prg, tree );
 	Kid *ignore = ignoreList->child;
 	while ( ignore != 0 ) {
 		printXmlKid( out, sp, prg, ignore, true, depth );
@@ -1820,29 +1848,8 @@ void printStr( PrintArgs *printArgs, Head *str )
 	printArgs->out( printArgs->arg, (char*)(str->data), str->length );
 }
 
-/* Note that this function causes recursion, thought it is not a big
- * deal since the recursion it is only caused by nonterminals that are ignored. */
-
-void printKid( PrintArgs *printArgs, Tree **sp, Program *prg, Kid *kid, int printIgnore )
+void printTerm( PrintArgs *printArgs, Tree **sp, Program *prg, Kid *kid )
 {
-	Tree **root = vm_ptop();
-	Kid *child;
-
-rec_call:
-	/* If not currently skipping ignore data, then print it. Ignore data can
-	 * be associated with terminals and nonterminals. */
-	if ( printIgnore && treeIgnore( prg, kid->tree ) != 0 ) {
-		vm_push( (SW)kid );
-		kid = kid->tree->child;
-		goto rec_call;
-		rec_return_ign:
-		kid = (Kid*)vm_pop();
-		printIgnore = false;
-	}
-
-	if ( kid->tree->id != LEL_ID_IGNORE_LIST && kid->tree->id < prg->rtd->firstNonTermId ) {
-		/* Always turn on ignore printing when we get to a token. */
-		printIgnore = true;
 
 		if ( kid->tree->id == LEL_ID_INT ) {
 			char buf[INT_SZ];
@@ -1876,6 +1883,60 @@ rec_call:
 			printArgs->out( printArgs->arg, stringData( kid->tree->tokdata ), 
 					stringLength( kid->tree->tokdata ) );
 		}
+}
+
+/* Note that this function causes recursion, thought it is not a big
+ * deal since the recursion it is only caused by nonterminals that are ignored. */
+
+void printKid( PrintArgs *printArgs, Tree **sp, Program *prg, Kid *kid )
+{
+	Tree **root = vm_ptop();
+	Kid *child;
+	Kid *leadingIgnore = 0;
+
+rec_call:
+	/* If not currently skipping ignore data, then print it. Ignore data can
+	 * be associated with terminals and nonterminals. */
+	if ( kid->tree->flags & AF_LEFT_IGNORE ) {
+		vm_push( (SW)kid );
+		kid = treeLeftIgnoreKid( prg, kid->tree );
+		goto rec_call;
+		rec_return_ign_left:
+		kid = (Kid*)vm_pop();
+	}
+
+	if ( kid->tree->flags & AF_IGNORE ) {
+		Kid *newIgnore = kidAllocate( prg );
+		newIgnore->next = leadingIgnore;
+		leadingIgnore = newIgnore;
+		leadingIgnore->tree = kid->tree;
+	}
+	else if ( kid->tree->id != LEL_ID_IGNORE_LIST && kid->tree->id < prg->rtd->firstNonTermId ) {
+		/* Reverse the leading ignore list. */
+		if ( leadingIgnore != 0 ) {
+			Kid *last = 0;
+			while ( true ) {
+				Kid *next = leadingIgnore->next;
+				leadingIgnore->next = last;
+
+				if ( next == 0 )
+					break;
+
+				last = leadingIgnore;
+				leadingIgnore = next;
+			}
+		}
+
+		/* Print the leading ignore list, free the kids in the process. */
+		while ( leadingIgnore != 0 ) {
+			Kid *print = leadingIgnore;
+			leadingIgnore = leadingIgnore->next;
+
+			printTerm( printArgs, sp, prg, print );
+			kidFree( prg, print );
+		}
+
+		printTerm( printArgs, sp, prg, kid );
 	}
 	else {
 		/* Non-terminal. */
@@ -1886,18 +1947,57 @@ rec_call:
 			while ( kid != 0 ) {
 				goto rec_call;
 				rec_return:
+
+
 				kid = kid->next;
 			}
 			kid = (Kid*)vm_pop();
 		}
 	}
 
+	/* If not currently skipping ignore data, then print it. Ignore data can
+	 * be associated with terminals and nonterminals. */
+	if ( kid->tree->flags & AF_RIGHT_IGNORE ) {
+		vm_push( (SW)kid );
+		kid = treeRightIgnoreKid( prg, kid->tree );
+		goto rec_call;
+		rec_return_ign_right:
+		kid = (Kid*)vm_pop();
+	}
+
 	if ( vm_ptop() != root ) {
 		Kid *parent = (Kid*)vm_top();
-		if ( kid->tree == (Tree*)treeIgnore( prg, parent->tree ) )
-			goto rec_return_ign;
+		if ( kid->tree == treeLeftIgnore( prg, parent->tree ) )
+			goto rec_return_ign_left;
+		else if ( kid->tree == treeRightIgnore( prg, parent->tree ) )
+			goto rec_return_ign_right;
 		else
 			goto rec_return;
+	}
+
+	/* Done. Maybe more ignore? */
+	/* Reverse the leading ignore list. */
+	if ( leadingIgnore != 0 ) {
+		Kid *last = 0;
+		while ( true ) {
+			Kid *next = leadingIgnore->next;
+			leadingIgnore->next = last;
+
+			if ( next == 0 )
+				break;
+
+			last = leadingIgnore;
+			leadingIgnore = next;
+		}
+	}
+
+	/* Print the leading ignore list, free the kids in the process. */
+	while ( leadingIgnore != 0 ) {
+		Kid *print = leadingIgnore;
+		leadingIgnore = leadingIgnore->next;
+
+		printTerm( printArgs, sp, prg, print );
+		kidFree( prg, print );
 	}
 }
 
@@ -1919,7 +2019,7 @@ void printTreeArgs( PrintArgs *printArgs, Tree **sp, Program *prg, Tree *tree )
 		Kid kid;
 		kid.tree = tree;
 		kid.next = 0;
-		printKid( printArgs, sp, prg, &kid, false );
+		printKid( printArgs, sp, prg, &kid );
 	}
 }
 
