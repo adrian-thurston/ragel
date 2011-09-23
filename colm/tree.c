@@ -1894,10 +1894,13 @@ void printKid( PrintArgs *printArgs, Tree **sp, Program *prg, Kid *kid )
 	Kid *child;
 	Kid *leadingIgnore = 0;
 
+	int emittedRightIgnore = false;
+
 rec_call:
 	/* If not currently skipping ignore data, then print it. Ignore data can
 	 * be associated with terminals and nonterminals. */
-	if ( kid->tree->flags & AF_LEFT_IGNORE ) {
+	if ( !emittedRightIgnore && kid->tree->flags & AF_LEFT_IGNORE ) {
+		emittedRightIgnore = true;
 		vm_push( (SW)kid );
 		kid = treeLeftIgnoreKid( prg, kid->tree );
 		goto rec_call;
@@ -1937,6 +1940,7 @@ rec_call:
 		}
 
 		printTerm( printArgs, sp, prg, kid );
+		emittedRightIgnore = false;
 	}
 	else {
 		/* Non-terminal. */
@@ -1947,8 +1951,6 @@ rec_call:
 			while ( kid != 0 ) {
 				goto rec_call;
 				rec_return:
-
-
 				kid = kid->next;
 			}
 			kid = (Kid*)vm_pop();
@@ -1957,7 +1959,8 @@ rec_call:
 
 	/* If not currently skipping ignore data, then print it. Ignore data can
 	 * be associated with terminals and nonterminals. */
-	if ( kid->tree->flags & AF_RIGHT_IGNORE ) {
+	if ( !emittedRightIgnore && kid->tree->flags & AF_RIGHT_IGNORE ) {
+		emittedRightIgnore = true;
 		vm_push( (SW)kid );
 		kid = treeRightIgnoreKid( prg, kid->tree );
 		goto rec_call;
