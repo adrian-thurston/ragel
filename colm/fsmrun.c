@@ -373,9 +373,9 @@ void sendBack( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStre
 			rightIgnore = riKid->tree;
 			treeUpref( rightIgnore );
 			removeRightIgnore( pdaRun->prg, sp, pdaRun->tokenList->tree );
+			pdaRun->tokenList->tree->flags &= ~AF_RIGHT_IL_ATTACHED;
 		}
 
-		pdaRun->tokenList->tree->flags &= ~AF_RIGHT_IL_ATTACHED;
 	}
 
 	/* Detach left. */
@@ -397,9 +397,9 @@ void sendBack( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStre
 			leftIgnore = liKid->tree;
 			treeUpref( leftIgnore );
 			removeLeftIgnore( pdaRun->prg, sp, input->tree );
+			input->tree->flags &= ~AF_LEFT_IL_ATTACHED;
 		}
 
-		input->tree->flags &= ~AF_LEFT_IL_ATTACHED;
 	}
 
 	/* Artifical were not parsed, instead sent in as items. */
