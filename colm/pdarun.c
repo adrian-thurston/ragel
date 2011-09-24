@@ -104,8 +104,18 @@ void cleanParser( Tree **sp, PdaRun *pdaRun )
 		kid = next;
 	}
 	pdaRun->stackTop = 0;
+
+	/* Traverse the stack, downreffing. */
+	kid = pdaRun->tokenList;
+	while ( kid != 0 ) {
+		Kid *next = kid->next;
+		treeDownref( pdaRun->prg, sp, kid->tree );
+		kidFree( pdaRun->prg, kid );
+		kid = next;
+	}
 	pdaRun->tokenList = 0;
-//	pdaRun->clearContext( sp );
+
+	//pdaRun->clearContext( sp );
 }
 
 int isParserStopFinished( PdaRun *pdaRun )

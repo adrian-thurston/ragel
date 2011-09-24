@@ -294,21 +294,7 @@ void sendBackText( FsmRun *fsmRun, InputStream *inputStream, const char *data, l
 void sendBackIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *ignore )
 {
 	/* Ignore tokens are queued in reverse order. Reverse the list fist. */
-
-	if ( ignore != 0 ) {
-		Kid *last = 0;
-		while ( true ) {
-			Kid *next = ignore->next;
-			ignore->next = last;
-
-			if ( next == 0 )
-				break;
-
-			last = ignore;
-			ignore = next;
-		}
-	}
-
+	ignore = reverseKidList( ignore );
 
 	while ( ignore != 0 ) {
 		#ifdef COLM_LOG
@@ -364,51 +350,66 @@ void sendBack( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStre
 
 	decrementConsumed( pdaRun );
 
-	/* Detach ignores. */
-	Kid *leftIgnore = 0;
-	Kid *rightIgnore = 0;
+	/*
+	 * Detach ignores.
+	 */
 
-	if ( input->tree->flags & AF_LEFT_IL_ATTACHED ) {
-		leftIgnore = treeLeftIgnoreKid( pdaRun->prg, input->tree );
-
-		/* If the left ignore has a right ignore, then that was the original
-		 * left ignore. */
-		Kid *ri = treeRightIgnoreKid( pdaRun->prg, leftIgnore->tree );
-		if ( ri != 0 ) {
-			removeRightIgnore( pdaRun->prg, leftIgnore->tree );
-			leftIgnore->tree = ri->tree;
-		}
-		else {
-			removeLeftIgnore( pdaRun->prg, input->tree );
-		}
-
-		input->tree->flags &= ~AF_LEFT_IL_ATTACHED;
-	}
-
+	/* Detach right. */
+	Tree *rightIgnore = 0;
 	if ( pdaRun->tokenList != 0 && pdaRun->tokenList->tree->flags & AF_RIGHT_IL_ATTACHED ) {
-		rightIgnore = treeRightIgnoreKid( pdaRun->prg, pdaRun->tokenList->tree );
+		Kid *riKid = treeRightIgnoreKid( pdaRun->prg, pdaRun->tokenList->tree );
 
 		/* If the right ignore has a left ignore, then that was the original
 		 * right ignore. */
-		Kid *li = treeLeftIgnoreKid( pdaRun->prg, rightIgnore->tree );
+		Kid *li = treeLeftIgnoreKid( pdaRun->prg, riKid->tree );
 		if ( li != 0 ) {
-			removeLeftIgnore( pdaRun->prg, rightIgnore->tree );
-			rightIgnore->tree = li->tree;
+			treeUpref( li->tree );
+			removeLeftIgnore( pdaRun->prg, sp, riKid->tree );
+			rightIgnore = riKid->tree;
+			treeUpref( rightIgnore );
+			riKid->tree = li->tree;
 		}
 		else  {
-			removeRightIgnore( pdaRun->prg, pdaRun->tokenList->tree );
+			rightIgnore = riKid->tree;
+			treeUpref( rightIgnore );
+			removeRightIgnore( pdaRun->prg, sp, pdaRun->tokenList->tree );
 		}
 
 		pdaRun->tokenList->tree->flags &= ~AF_RIGHT_IL_ATTACHED;
 	}
 
+	/* Detach left. */
+	Tree *leftIgnore = 0;
+	if ( input->tree->flags & AF_LEFT_IL_ATTACHED ) {
+		Kid *liKid = treeLeftIgnoreKid( pdaRun->prg, input->tree );
+
+		/* If the left ignore has a right ignore, then that was the original
+		 * left ignore. */
+		Kid *ri = treeRightIgnoreKid( pdaRun->prg, liKid->tree );
+		if ( ri != 0 ) {
+			treeUpref( ri->tree );
+			removeRightIgnore( pdaRun->prg, sp, liKid->tree );
+			leftIgnore = liKid->tree;
+			treeUpref( leftIgnore );
+			liKid->tree = ri->tree;
+		}
+		else {
+			leftIgnore = liKid->tree;
+			treeUpref( leftIgnore );
+			removeLeftIgnore( pdaRun->prg, sp, input->tree );
+		}
+
+		input->tree->flags &= ~AF_LEFT_IL_ATTACHED;
+	}
+
+	/* Artifical were not parsed, instead sent in as items. */
 	if ( input->tree->flags & AF_ARTIFICIAL ) {
 		treeUpref( input->tree );
 
 		streamPushTree( inputStream, input->tree, false );
 
 		if ( leftIgnore != 0 )
-			sendBackIgnore( sp, pdaRun, fsmRun, inputStream, leftIgnore->tree->child );
+			sendBackIgnore( sp, pdaRun, fsmRun, inputStream, leftIgnore->child );
 	}
 	else {
 		/* Push back the token data. */
@@ -428,7 +429,7 @@ void sendBack( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStre
 
 		/* Always push back the ignore text. */
 		if ( leftIgnore != 0 )
-			sendBackIgnore( sp, pdaRun, fsmRun, inputStream, leftIgnore->tree->child );
+			sendBackIgnore( sp, pdaRun, fsmRun, inputStream, leftIgnore->child );
 
 		/* If eof was just sent back remember that it needs to be sent again. */
 		if ( input->tree->id == pdaRun->tables->rtd->eofLelIds[pdaRun->parserId] )
@@ -445,6 +446,8 @@ void sendBack( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStre
 
 	/* Downref the tree that was sent back and free the kid. */
 	treeDownref( fsmRun->prg, sp, input->tree );
+	treeDownref( fsmRun->prg, sp, rightIgnore );
+	treeDownref( fsmRun->prg, sp, leftIgnore );
 	kidFree( fsmRun->prg, input );
 }
 
@@ -663,18 +666,7 @@ void sendWithIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inp
 	Kid *ignoreKid = extractIgnore( pdaRun );
 	
 	if ( ignoreKid != 0 ) {
-		/* Reverse the list. */
-		Kid *last = 0;
-		while ( true ) {
-			Kid *next = ignoreKid->next;
-			ignoreKid->next = last;
-
-			if ( next == 0 )
-				break;
-
-			last = ignoreKid;
-			ignoreKid = next;
-		}
+		ignoreKid = reverseKidList( ignoreKid );
 
 		/* Make the ignore list for the left-ignore. */
 		Tree *leftIgnore = treeAllocate( pdaRun->prg );
@@ -696,7 +688,11 @@ void sendWithIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inp
 			 * right ignore of the new list. */
 			Kid *curIgnore = treeLeftIgnoreKid( pdaRun->prg, input->tree );
 			attachRightIgnore( pdaRun->prg, leftIgnore, curIgnore->tree );
+
+			/* Replace the current ignore. */
+			treeDownref( pdaRun->prg, sp, curIgnore->tree );
 			curIgnore->tree = leftIgnore;
+			treeUpref( leftIgnore );
 		}
 		else {
 			/* Attach the ignore list. */
@@ -710,7 +706,11 @@ void sendWithIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inp
 				 * attaching it as a left ignore of the new list. */
 				Kid *curIgnore = treeRightIgnoreKid( pdaRun->prg, pdaRun->tokenList->tree );
 				attachLeftIgnore( pdaRun->prg, rightIgnore, curIgnore->tree );
+
+				/* Replace the current ignore. */
+				treeDownref( pdaRun->prg, sp, curIgnore->tree );
 				curIgnore->tree = rightIgnore;
+				treeUpref( rightIgnore );
 			}
 			else {
 				/* Attach The ignore list. */

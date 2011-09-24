@@ -38,8 +38,8 @@ void treeDownref( Program *prg, Tree **sp, Tree *tree );
 long cmpTree( Program *prg, const Tree *tree1, const Tree *tree2 );
 void attachLeftIgnore( Program *prg, Tree *tree, Tree *ignoreList );
 void attachRightIgnore( Program *prg, Tree *tree, Tree *ignoreList );
-void removeLeftIgnore( Program *prg, Tree *tree );
-void removeRightIgnore( Program *prg, Tree *tree );
+void removeLeftIgnore( Program *prg, Tree **sp, Tree *tree );
+void removeRightIgnore( Program *prg, Tree **sp, Tree *tree );
 Tree *treeLeftIgnore( Program *prg, Tree *tree );
 Tree *treeRightIgnore( Program *prg, Tree *tree );
 Kid *treeLeftIgnoreKid( Program *prg, Tree *tree );
@@ -47,6 +47,7 @@ Kid *treeRightIgnoreKid( Program *prg, Tree *tree );
 Kid *treeChild( Program *prg, const Tree *tree );
 Kid *kidListConcat( Kid *list1, Kid *list2 );
 Kid *treeExtractChild( Program *prg, Tree *tree );
+Kid *reverseKidList( Kid *kid );
 
 Tree *constructInteger( Program *prg, long i );
 Tree *constructPointer( Program *prg, Tree *tree );
