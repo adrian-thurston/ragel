@@ -36,6 +36,10 @@ typedef struct _TreePair
 void treeUpref( Tree *tree );
 void treeDownref( Program *prg, Tree **sp, Tree *tree );
 long cmpTree( Program *prg, const Tree *tree1, const Tree *tree2 );
+void attachLeftIgnore( Program *prg, Tree *tree, Tree *ignoreList );
+void attachRightIgnore( Program *prg, Tree *tree, Tree *ignoreList );
+void removeLeftIgnore( Program *prg, Tree *tree );
+void removeRightIgnore( Program *prg, Tree *tree );
 Tree *treeLeftIgnore( Program *prg, Tree *tree );
 Tree *treeRightIgnore( Program *prg, Tree *tree );
 Kid *treeLeftIgnoreKid( Program *prg, Tree *tree );
@@ -56,6 +60,7 @@ Tree *makeTree( Tree **root, Program *prg, long nargs );
 Stream *openFile( Program *prg, Tree *name, Tree *mode );
 Stream *openStreamFd( Program *prg, long fd );
 Kid *copyIgnoreList( Program *prg, Kid *ignoreHeader );
+Kid *copyKidList( Program *prg, Kid *kidList );
 void streamFree( Program *prg, Stream *s );
 Tree *copyTree( Program *prg, Tree *tree, Kid *oldNextDown, Kid **newNextDown );
 

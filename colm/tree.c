@@ -470,6 +470,28 @@ Kid *copyIgnoreList( Program *prg, Kid *ignoreHeader )
 	return newHeader;
 }
 
+Kid *copyKidList( Program *prg, Kid *kidList )
+{
+	Kid *newList = 0, *last = 0, *ic = kidList;
+
+	while ( ic != 0 ) {
+		Kid *newIc = kidAllocate( prg );
+
+		newIc->tree = ic->tree;
+		newIc->tree->refs += 1;
+
+		/* List pointers. */
+		if ( last == 0 )
+			newList = newIc;
+		else
+			last->next = newIc;
+
+		ic = ic->next;
+		last = newIc;
+	}
+	return newList;
+}
+
 /* New tree has zero ref. */
 Tree *copyRealTree( Program *prg, Tree *tree, Kid *oldNextDown, 
 		Kid **newNextDown, int parseTree )
@@ -870,6 +892,65 @@ Kid *treeExtractChild( Program *prg, Tree *tree )
 	return kid;
 }
 
+void attachLeftIgnore( Program *prg, Tree *tree, Tree *ignoreList )
+{
+	assert( ! (tree->flags & AF_LEFT_IGNORE) );
+
+	/* Allocate. */
+	Kid *kid = kidAllocate( prg );
+	kid->tree = ignoreList;
+	treeUpref( ignoreList );
+
+	/* Attach it. */
+	kid->next = tree->child;
+	tree->child = kid;
+
+	tree->flags |= AF_LEFT_IGNORE;
+}
+
+void attachRightIgnore( Program *prg, Tree *tree, Tree *ignoreList )
+{
+	assert( ! (tree->flags & AF_RIGHT_IGNORE) );
+
+	/* Insert an ignore head in the child list. */
+	Kid *kid = kidAllocate( prg );
+	kid->tree = ignoreList;
+	treeUpref( ignoreList );
+
+	/* Attach it. */
+	if ( tree->flags & AF_LEFT_IGNORE ) {
+		kid->next = tree->child->next;
+		tree->child->next = kid;
+	}
+	else {
+		kid->next = tree->child;
+		tree->child = kid;
+	}
+
+	tree->flags |= AF_RIGHT_IGNORE;
+
+}
+
+void removeLeftIgnore( Program *prg, Tree *tree )
+{
+	assert( tree->flags & AF_LEFT_IGNORE );
+
+	tree->child = tree->child->next;
+
+	tree->flags &= ~AF_LEFT_IGNORE;
+}
+
+void removeRightIgnore( Program *prg, Tree *tree )
+{
+	assert( tree->flags & AF_RIGHT_IGNORE );
+
+	if ( tree->flags & AF_LEFT_IGNORE )
+		tree->child->next = tree->child->next->next;
+	else
+		tree->child = tree->child->next;
+
+	tree->flags &= ~AF_RIGHT_IGNORE;
+}
 
 Tree *treeLeftIgnore( Program *prg, Tree *tree )
 {
