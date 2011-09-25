@@ -43,6 +43,8 @@ void message( const char *fmt, ... );
 #define REALM_PARSE       0x00000002
 #define REALM_MATCH       0x00000004
 #define REALM_COMPILE     0x00000008
+#define REALM_POOL        0x00000010
+#define REALM_PRINT       0x00000020
 
 #ifdef __cplusplus
 }

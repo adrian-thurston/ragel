@@ -24,6 +24,7 @@
 
 #include "pdarun.h"
 #include "pool.h"
+#include "debug.h"
 
 void initPoolAlloc( PoolAlloc *poolAlloc, int sizeofT )
 {
@@ -35,9 +36,12 @@ void initPoolAlloc( PoolAlloc *poolAlloc, int sizeofT )
 
 void *poolAllocAllocate( PoolAlloc *poolAlloc )
 {
+	debug( REALM_POOL, "pool allocation\n" );
+
 	//#ifdef COLM_LOG_BYTECODE
 	//cerr << "allocating in: " << __PRETTY_FUNCTION__ << endl;
 	//#endif
+
 	void *newEl = 0;
 	if ( poolAlloc->pool == 0 ) {
 		if ( poolAlloc->nextel == FRESH_BLOCK ) {
