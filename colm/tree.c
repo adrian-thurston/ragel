@@ -2002,7 +2002,6 @@ enum ReturnType
 	CollectIgnoreLeft,
 	CollectIgnoreRight,
 	IgnoreList,
-	TrailingIgnoreList,
 	ChildPrint
 };
 
@@ -2015,7 +2014,17 @@ void printKid( PrintArgs *printArgs, Tree **sp, Program *prg, Kid *kid )
 	enum ReturnType rt;
 	Kid *child;
 	Kid *leadingIgnore = 0;
-	vm_push( (SW) Done );
+
+	/* Iterate the kids passed in. We are expecting a next, which will allow us
+	 * to print the trailing ignore list. */
+	while ( kid != 0 ) {
+		vm_push( (SW) Done );
+		goto rec_call;
+		rec_return_top:
+		kid = kid->next;
+	}
+
+	return;
 
 rec_call:
 	/* If not currently skipping ignore data, then print it. Ignore data can
@@ -2043,14 +2052,19 @@ rec_call:
 
 		/* Reverse the leading ignore list. */
 		if ( leadingIgnore != 0 ) {
+			long rightPrinted  = 0;
 			debug( REALM_PRINT, "printing ignore %p\n", leadingIgnore->tree );
 			leadingIgnore = reverseKidList( leadingIgnore );
 
 			/* Print the leading ignore list, free the kids in the process. */
 			while ( leadingIgnore != 0 ) {
+				if ( leadingIgnore->tree->flags & AF_IS_LEFT_IGNORE && rightPrinted > 0 )
+					break;
+					
 				/* Non-terminal. */
 				Kid *child = treeChild( prg, leadingIgnore->tree );
 				if ( child != 0 ) {
+					vm_push( (SW)rightPrinted );
 					vm_push( (SW)leadingIgnore );
 					vm_push( (SW)kid );
 					leadingIgnore = 0;
@@ -2064,22 +2078,28 @@ rec_call:
 					}
 					kid = (Kid*)vm_pop();
 					leadingIgnore = (Kid*)vm_pop();
+					rightPrinted = (long)vm_pop();
 				}
+
+				if ( leadingIgnore->tree->flags & AF_IS_RIGHT_IGNORE )
+					rightPrinted += 1;
 
 				Kid *next = leadingIgnore->next;
 				kidFree( prg, leadingIgnore );
 				leadingIgnore = next;
+			}
 
-				while ( leadingIgnore != 0 ) {
-					Kid *next = leadingIgnore->next;
-					kidFree( prg, leadingIgnore );
-					leadingIgnore = next;
-				}
+			/* Consume anything left over after stopping. */
+			while ( leadingIgnore != 0 ) {
+				Kid *next = leadingIgnore->next;
+				kidFree( prg, leadingIgnore );
+				leadingIgnore = next;
 			}
 		}
 
-		debug( DBG_PRINT, "printing term %p\n", kid->tree );
-		printTerm( printArgs, sp, prg, kid );
+		debug( DBG_PRINT, "printing terminal %p\n", kid->tree );
+		if ( kid->tree->id != 0 )
+			printTerm( printArgs, sp, prg, kid );
 	}
 	else {
 		/* Non-terminal. */
@@ -2112,7 +2132,8 @@ rec_call:
 	rt = (enum ReturnType)vm_pop();
 	switch ( rt ) {
 		case Done:
-			debug( RELAM_PRINT,  "return: done\n" );
+			debug( RELAM_PRINT, "return: done\n" );
+			goto rec_return_top;
 			break;
 		case CollectIgnoreLeft:
 			debug( REALM_PRINT, "return: ignore left\n" );
@@ -2123,52 +2144,9 @@ rec_call:
 		case IgnoreList:
 			debug( REALM_PRINT, "return: ignore list\n" );
 			goto rec_return_il;
-		case TrailingIgnoreList:
-			debug( REALM_PRINT, "return: trailing list\n" );
-			goto rec_return_til;
 		case ChildPrint:
 			debug( REALM_PRINT, "return: child print\n" );
 			goto rec_return;
-	}
-
-
-	/* Done maybe trailing ignore. */
-	if ( leadingIgnore != 0 ) {
-		leadingIgnore = reverseKidList( leadingIgnore );
-
-		debug( REALM_PRINT, "printing ignore %p\n", leadingIgnore->tree );
-		leadingIgnore = reverseKidList( leadingIgnore );
-
-		/* Print the leading ignore list, free the kids in the process. */
-		while ( leadingIgnore != 0 ) {
-			/* Non-terminal. */
-			Kid *child = treeChild( prg, leadingIgnore->tree );
-			if ( child != 0 ) {
-				vm_push( (SW)leadingIgnore );
-				vm_push( (SW)kid );
-				leadingIgnore = 0;
-				kid = child;
-				while ( kid != 0 ) {
-					debug( REALM_PRINT, "rec call on %p\n", kid->tree );
-					vm_push( (SW) TrailingIgnoreList );
-					goto rec_call;
-					rec_return_til:
-					kid = kid->next;
-				}
-				kid = (Kid*)vm_pop();
-				leadingIgnore = (Kid*)vm_pop();
-			}
-
-			Kid *next = leadingIgnore->next;
-			kidFree( prg, leadingIgnore );
-			leadingIgnore = next;
-
-			while ( leadingIgnore != 0 ) {
-				Kid *next = leadingIgnore->next;
-				kidFree( prg, leadingIgnore );
-				leadingIgnore = next;
-			}
-		}
 	}
 }
 
@@ -2187,9 +2165,16 @@ void printTreeArgs( PrintArgs *printArgs, Tree **sp, Program *prg, Tree *tree )
 	if ( tree == 0 )
 		printArgs->out( printArgs->arg, "NIL", 3 );
 	else {
-		Kid kid;
+		Tree termTree;
+		memset( &termTree, 0, sizeof(termTree) );
+
+		Kid kid, term;
+		term.tree = &termTree;
+		term.next = 0;
+
 		kid.tree = tree;
-		kid.next = 0;
+		kid.next = &term;
+
 		printKid( printArgs, sp, prg, &kid );
 	}
 }

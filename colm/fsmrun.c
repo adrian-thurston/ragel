@@ -674,6 +674,7 @@ void sendWithIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inp
 		Tree *leftIgnore = treeAllocate( pdaRun->prg );
 		leftIgnore->id = LEL_ID_IGNORE_LIST;
 		leftIgnore->child = ignoreKid;
+		leftIgnore->flags |= AF_IS_LEFT_IGNORE;
 
 		/* Copy the ignore list first if we need to attach it as a right
 		 * ignore. */
@@ -682,6 +683,7 @@ void sendWithIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inp
 			rightIgnore = treeAllocate( pdaRun->prg );
 			rightIgnore->id = LEL_ID_IGNORE_LIST;
 			rightIgnore->child = copyKidList( pdaRun->prg, ignoreKid );
+			rightIgnore->flags |= AF_IS_RIGHT_IGNORE;
 		}
 
 		/* Attach as left ignore to the token we are sending. */
@@ -752,8 +754,6 @@ void ignoreTree( PdaRun *pdaRun, Tree *tree )
 	/* Add the ignore string to the head of the ignore list. */
 	Kid *ignore = kidAllocate( pdaRun->prg );
 	ignore->tree = tree;
-
-	tree->flags |= AF_IGNORE;
 
 	/* Prepend it to the list of ignore tokens. */
 	ignore->next = pdaRun->accumIgnore;
