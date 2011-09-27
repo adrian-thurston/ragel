@@ -2005,6 +2005,9 @@ enum ReturnType
 	ChildPrint
 };
 
+#define IPF_RIGHT_PRINTED     0x0001
+#define IPF_LEFT_PRESENT      0x0001
+
 /* Note that this function causes recursion, thought it is not a big
  * deal since the recursion it is only caused by nonterminals that are ignored. */
 
@@ -2052,44 +2055,65 @@ rec_call:
 
 		/* Reverse the leading ignore list. */
 		if ( leadingIgnore != 0 ) {
-			long rightPrinted  = 0;
+			long printFlags = 0;
+			Kid *ignore = 0, *last = 0;
+
 			debug( REALM_PRINT, "printing ignore %p\n", leadingIgnore->tree );
+
 			leadingIgnore = reverseKidList( leadingIgnore );
 
-			/* Print the leading ignore list, free the kids in the process. */
-			while ( leadingIgnore != 0 ) {
-				if ( leadingIgnore->tree->flags & AF_IS_LEFT_IGNORE && rightPrinted > 0 )
-					break;
-					
-				/* Non-terminal. */
-				Kid *child = treeChild( prg, leadingIgnore->tree );
-				if ( child != 0 ) {
-					vm_push( (SW)rightPrinted );
-					vm_push( (SW)leadingIgnore );
-					vm_push( (SW)kid );
-					leadingIgnore = 0;
-					kid = child;
-					while ( kid != 0 ) {
-						debug( REALM_PRINT, "rec call on %p\n", kid->tree );
-						vm_push( (SW) IgnoreList );
-						goto rec_call;
-						rec_return_il:
-						kid = kid->next;
-					}
-					kid = (Kid*)vm_pop();
-					leadingIgnore = (Kid*)vm_pop();
-					rightPrinted = (long)vm_pop();
-				}
-
-				if ( leadingIgnore->tree->flags & AF_IS_RIGHT_IGNORE )
-					rightPrinted += 1;
-
+			/* Reverse the list. */
+			while ( true ) {
 				Kid *next = leadingIgnore->next;
-				kidFree( prg, leadingIgnore );
+				leadingIgnore->next = last;
+
+				if ( leadingIgnore->tree->flags & AF_IS_LEFT_IGNORE )
+					printFlags |= IPF_LEFT_PRESENT;
+
+				if ( next == 0 )
+					break;
+
+				last = leadingIgnore;
 				leadingIgnore = next;
 			}
 
-			/* Consume anything left over after stopping. */
+			/* Print the leading ignore list, free the kids in the process. */
+			ignore = leadingIgnore;
+			while ( ignore != 0 ) {
+				if ( (ignore->tree->flags & AF_IS_RIGHT_IGNORE) && (printFlags & IPF_LEFT_PRESENT) )
+				{
+					debug( RELAM_PRINT, "skipping right ignore because left is present\n" );
+					/* Skip. */
+				}
+				else {
+					
+					/* Non-terminal. */
+					Kid *child = treeChild( prg, ignore->tree );
+					if ( child != 0 ) {
+						vm_push( (SW)leadingIgnore );
+						vm_push( (SW)printFlags );
+						vm_push( (SW)ignore );
+						vm_push( (SW)kid );
+						leadingIgnore = 0;
+						kid = child;
+						while ( kid != 0 ) {
+							debug( REALM_PRINT, "rec call on %p\n", kid->tree );
+							vm_push( (SW) IgnoreList );
+							goto rec_call;
+							rec_return_il:
+							kid = kid->next;
+						}
+						kid = (Kid*)vm_pop();
+						ignore = (Kid*)vm_pop();
+						printFlags = (long)vm_pop();
+						leadingIgnore = (Kid*)vm_pop();
+					}
+				}
+
+				ignore = ignore->next;
+			}
+
+			/* Free the leading ignore list. */
 			while ( leadingIgnore != 0 ) {
 				Kid *next = leadingIgnore->next;
 				kidFree( prg, leadingIgnore );
