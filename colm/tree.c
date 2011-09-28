@@ -2006,7 +2006,8 @@ enum ReturnType
 };
 
 #define IPF_RIGHT_PRINTED     0x0001
-#define IPF_LEFT_PRESENT      0x0001
+#define IPF_LEFT_PRESENT      0x0002
+#define IPF_TERM_PRINTED      0x0004
 
 /* Note that this function causes recursion, thought it is not a big
  * deal since the recursion it is only caused by nonterminals that are ignored. */
@@ -2016,6 +2017,7 @@ void printKid( PrintArgs *printArgs, Tree **sp, Program *prg, Kid *kid )
 	Tree **root = vm_ptop();
 	enum ReturnType rt;
 	Kid *child;
+	int flags = 0;
 	Kid *leadingIgnore = 0;
 
 	/* Iterate the kids passed in. We are expecting a next, which will allow us
@@ -2055,7 +2057,7 @@ rec_call:
 
 		/* Reverse the leading ignore list. */
 		if ( leadingIgnore != 0 ) {
-			long printFlags = 0;
+			long leadingPrintFlags = 0;
 			Kid *ignore = 0, *last = 0;
 
 			debug( REALM_PRINT, "printing ignore %p\n", leadingIgnore->tree );
@@ -2068,7 +2070,7 @@ rec_call:
 				leadingIgnore->next = last;
 
 				if ( leadingIgnore->tree->flags & AF_IS_LEFT_IGNORE )
-					printFlags |= IPF_LEFT_PRESENT;
+					leadingPrintFlags |= IPF_LEFT_PRESENT;
 
 				if ( next == 0 )
 					break;
@@ -2080,18 +2082,15 @@ rec_call:
 			/* Print the leading ignore list, free the kids in the process. */
 			ignore = leadingIgnore;
 			while ( ignore != 0 ) {
-				if ( (ignore->tree->flags & AF_IS_RIGHT_IGNORE) && (printFlags & IPF_LEFT_PRESENT) )
-				{
-					debug( RELAM_PRINT, "skipping right ignore because left is present\n" );
-					/* Skip. */
-				}
-				else {
-					
+				if ( (flags & IPF_TERM_PRINTED) && 
+						! (ignore->tree->flags & AF_IS_RIGHT_IGNORE) &&
+						! (leadingPrintFlags & IPF_TERM_PRINTED) )
+				{	
 					/* Non-terminal. */
 					Kid *child = treeChild( prg, ignore->tree );
 					if ( child != 0 ) {
 						vm_push( (SW)leadingIgnore );
-						vm_push( (SW)printFlags );
+						vm_push( (SW)leadingPrintFlags );
 						vm_push( (SW)ignore );
 						vm_push( (SW)kid );
 						leadingIgnore = 0;
@@ -2105,9 +2104,11 @@ rec_call:
 						}
 						kid = (Kid*)vm_pop();
 						ignore = (Kid*)vm_pop();
-						printFlags = (long)vm_pop();
+						leadingPrintFlags = (long)vm_pop();
 						leadingIgnore = (Kid*)vm_pop();
 					}
+
+					leadingPrintFlags |= IPF_TERM_PRINTED;
 				}
 
 				ignore = ignore->next;
@@ -2122,8 +2123,10 @@ rec_call:
 		}
 
 		debug( DBG_PRINT, "printing terminal %p\n", kid->tree );
-		if ( kid->tree->id != 0 )
+		if ( kid->tree->id != 0 ) {
+			flags |= IPF_TERM_PRINTED;
 			printTerm( printArgs, sp, prg, kid );
+		}
 	}
 	else {
 		/* Non-terminal. */
