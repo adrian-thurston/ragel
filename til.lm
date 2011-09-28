@@ -155,11 +155,11 @@ for S: statement* in P
 		{
             # Replace the labelled statement through to the goto 
 			# with a do ... while.
-            S = construct statement*
-                ['do'
-                    First
-                    Rest
-                'while' Expr ';'
+            S = construct statement* [
+				"do
+                "	[First]
+                "	[Rest]
+                "while [Expr];
                 Following]
 		}
     }
