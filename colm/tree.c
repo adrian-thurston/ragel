@@ -269,13 +269,13 @@ Tree *constructReplacementTree( Tree **bindings, Program *prg, long pat )
 
 			tree = splitTree( prg, tree );
 
-			Tree *ignoreList = treeAllocate( prg );
+			IgnoreList *ignoreList = ilAllocate( prg );
 			ignoreList->id = LEL_ID_IGNORE_LIST;
 			ignoreList->refs = 1;
 			ignoreList->child = ignore;
 			
 			Kid *ignoreHead = kidAllocate( prg );
-			ignoreHead->tree = ignoreList;
+			ignoreHead->tree = (Tree*)ignoreList;
 			ignoreHead->next = tree->child;
 			tree->child = ignoreHead;
 
@@ -299,13 +299,13 @@ Tree *constructReplacementTree( Tree **bindings, Program *prg, long pat )
 
 		tree->child = kidListConcat( attrs, child );
 		if ( ignore != 0 ) {
-			Tree *ignoreList = treeAllocate( prg );
+			IgnoreList *ignoreList = ilAllocate( prg );
 			ignoreList->id = LEL_ID_IGNORE_LIST;
 			ignoreList->refs = 1;
 			ignoreList->child = ignore;
 
 			Kid *ignoreHead = kidAllocate( prg );
-			ignoreHead->tree = ignoreList;
+			ignoreHead->tree = (Tree*)ignoreList;
 			ignoreHead->next = tree->child;
 			tree->child = ignoreHead;
 
@@ -810,7 +810,9 @@ free_tree:
 				child = next;
 			}
 
-			if ( tree->flags & AF_PARSE_TREE )
+			if ( tree->id == LEL_ID_IGNORE_LIST )
+				ilFree( prg, (IgnoreList*) tree );
+			else if ( tree->flags & AF_PARSE_TREE )
 				parseTreeFree( prg, (ParseTree*)tree );
 			else
 				treeFree( prg, tree );
@@ -911,14 +913,14 @@ Kid *reverseKidList( Kid *kid )
 	return kid;
 }
 
-void attachLeftIgnore( Program *prg, Tree *tree, Tree *ignoreList )
+void attachLeftIgnore( Program *prg, Tree *tree, IgnoreList *ignoreList )
 {
 	assert( ! (tree->flags & AF_LEFT_IGNORE) );
 
 	/* Allocate. */
 	Kid *kid = kidAllocate( prg );
-	kid->tree = ignoreList;
-	treeUpref( ignoreList );
+	kid->tree = (Tree*)ignoreList;
+	treeUpref( (Tree*)ignoreList );
 
 	/* Attach it. */
 	kid->next = tree->child;
@@ -927,14 +929,14 @@ void attachLeftIgnore( Program *prg, Tree *tree, Tree *ignoreList )
 	tree->flags |= AF_LEFT_IGNORE;
 }
 
-void attachRightIgnore( Program *prg, Tree *tree, Tree *ignoreList )
+void attachRightIgnore( Program *prg, Tree *tree, IgnoreList *ignoreList )
 {
 	assert( ! (tree->flags & AF_RIGHT_IGNORE) );
 
 	/* Insert an ignore head in the child list. */
 	Kid *kid = kidAllocate( prg );
-	kid->tree = ignoreList;
-	treeUpref( ignoreList );
+	kid->tree = (Tree*)ignoreList;
+	treeUpref( (Tree*)ignoreList );
 
 	/* Attach it. */
 	if ( tree->flags & AF_LEFT_IGNORE ) {
@@ -981,20 +983,20 @@ void removeRightIgnore( Program *prg, Tree **sp, Tree *tree )
 	tree->flags &= ~AF_RIGHT_IGNORE;
 }
 
-Tree *treeLeftIgnore( Program *prg, Tree *tree )
+IgnoreList *treeLeftIgnore( Program *prg, Tree *tree )
 {
 	if ( tree->flags & AF_LEFT_IGNORE )
-		return tree->child->tree;
+		return (IgnoreList*)tree->child->tree;
 	return 0;
 }
 
-Tree *treeRightIgnore( Program *prg, Tree *tree )
+IgnoreList *treeRightIgnore( Program *prg, Tree *tree )
 {
 	if ( tree->flags & AF_RIGHT_IGNORE ) {
 		if ( tree->flags & AF_LEFT_IGNORE )
-			return tree->child->next->tree;
+			return (IgnoreList*)tree->child->next->tree;
 		else
-			return tree->child->tree;
+			return (IgnoreList*)tree->child->tree;
 	}
 	return 0;
 }
@@ -1786,7 +1788,7 @@ void printXmlKid( FILE *out, Tree **sp, Program *prg, Kid *kid, int commAttr, in
  * ignored. */
 void printXmlIgnoreList( FILE *out, Tree **sp, Program *prg, Tree *tree, long depth )
 {
-	Tree *ignoreList = treeLeftIgnore( prg, tree );
+	IgnoreList *ignoreList = treeLeftIgnore( prg, tree );
 	Kid *ignore = ignoreList->child;
 	while ( ignore != 0 ) {
 		printXmlKid( out, sp, prg, ignore, true, depth );
@@ -2001,7 +2003,7 @@ enum ReturnType
 	Done = 1,
 	CollectIgnoreLeft,
 	CollectIgnoreRight,
-	IgnoreList,
+	RecIgnoreList,
 	ChildPrint
 };
 
@@ -2097,7 +2099,7 @@ rec_call:
 						kid = child;
 						while ( kid != 0 ) {
 							debug( REALM_PRINT, "rec call on %p\n", kid->tree );
-							vm_push( (SW) IgnoreList );
+							vm_push( (SW) RecIgnoreList );
 							goto rec_call;
 							rec_return_il:
 							kid = kid->next;
@@ -2168,7 +2170,7 @@ rec_call:
 		case CollectIgnoreRight:
 			debug( REALM_PRINT, "return: ignore right\n" );
 			goto rec_return_ign_right;
-		case IgnoreList:
+		case RecIgnoreList:
 			debug( REALM_PRINT, "return: ignore list\n" );
 			goto rec_return_il;
 		case ChildPrint:

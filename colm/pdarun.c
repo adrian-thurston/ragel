@@ -412,7 +412,7 @@ again:
 		}
 		else {
 			Kid *kid = kidAllocate( pdaRun->prg );
-			kid->tree = treeAllocate( pdaRun->prg );
+			kid->tree = (Tree*)ilAllocate( pdaRun->prg );
 			kid->tree->id = LEL_ID_IGNORE_LIST;
 			kid->tree->refs = 1;
 			kid->tree->child = lel;

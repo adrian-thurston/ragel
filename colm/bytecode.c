@@ -520,6 +520,7 @@ void initProgram( Program *prg, int argc, char **argv, int ctxDepParsing,
 	prg->stdinVal = 0;
 	prg->stdoutVal = 0;
 	prg->stderrVal = 0;
+	prg->nextIlGen = 0;
 
 	initPoolAlloc( &prg->kidPool, sizeof(Kid) );
 	initPoolAlloc( &prg->treePool, sizeof(Tree) );
@@ -528,6 +529,7 @@ void initProgram( Program *prg, int argc, char **argv, int ctxDepParsing,
 	initPoolAlloc( &prg->mapElPool, sizeof(MapEl) );
 	initPoolAlloc( &prg->headPool, sizeof(Head) );
 	initPoolAlloc( &prg->locationPool, sizeof(Location) );
+	initPoolAlloc( &prg->ilPool, sizeof(IgnoreList) );
 
 	Int *trueInt = (Int*) treeAllocate( prg );
 	trueInt->id = LEL_ID_BOOL;
@@ -614,12 +616,17 @@ void clearProgram( Program *prg, Tree **vm_stack, Tree **sp )
 	if ( locationLost )
 		message( "warning: lost locations: %ld\n", locationLost );
 
+	long ilLost = ilNumLost( prg );
+	if ( ilLost )
+		message( "warning: lost ignore lists: %ld\n", ilLost );
+
 	kidClear( prg );
 	treeClear( prg );
 	parseTreeClear( prg );
 	listElClear( prg );
 	mapElClear( prg );
 	locationClear( prg );
+	ilClear( prg );
 
 	//exec->reverseCode->empty();
 	//memset( vm_stack, 0, sizeof(Tree*) * VM_STACK_SIZE);

@@ -654,7 +654,6 @@ void clearIgnoreList( Program *prg, Tree **sp, Kid *kid )
 	}
 }
 
-
 void sendWithIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input )
 {
 	/* Need to preserve the layout under a tree:
@@ -671,16 +670,16 @@ void sendWithIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inp
 		ignoreKid = reverseKidList( ignoreKid );
 
 		/* Make the ignore list for the left-ignore. */
-		Tree *leftIgnore = treeAllocate( pdaRun->prg );
+		IgnoreList *leftIgnore = ilAllocate( pdaRun->prg );
 		leftIgnore->id = LEL_ID_IGNORE_LIST;
 		leftIgnore->child = ignoreKid;
 		leftIgnore->flags |= AF_IS_LEFT_IGNORE;
 
 		/* Copy the ignore list first if we need to attach it as a right
 		 * ignore. */
-		Tree *rightIgnore = 0;
+		IgnoreList *rightIgnore = 0;
 		if ( pdaRun->tokenList != 0 ) {
-			rightIgnore = treeAllocate( pdaRun->prg );
+			rightIgnore = ilAllocate( pdaRun->prg );
 			rightIgnore->id = LEL_ID_IGNORE_LIST;
 			rightIgnore->child = copyKidList( pdaRun->prg, ignoreKid );
 			rightIgnore->flags |= AF_IS_RIGHT_IGNORE;
@@ -691,12 +690,12 @@ void sendWithIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inp
 			/* The token already has a left-ignore. Merge by attaching it as a
 			 * right ignore of the new list. */
 			Kid *curIgnore = treeLeftIgnoreKid( pdaRun->prg, input->tree );
-			attachRightIgnore( pdaRun->prg, leftIgnore, curIgnore->tree );
+			attachRightIgnore( pdaRun->prg, (Tree*)leftIgnore, (IgnoreList*)curIgnore->tree );
 
 			/* Replace the current ignore. */
 			treeDownref( pdaRun->prg, sp, curIgnore->tree );
-			curIgnore->tree = leftIgnore;
-			treeUpref( leftIgnore );
+			curIgnore->tree = (Tree*)leftIgnore;
+			treeUpref( (Tree*)leftIgnore );
 		}
 		else {
 			/* Attach the ignore list. */
@@ -709,12 +708,12 @@ void sendWithIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inp
 				/* The previous token already has a right ignore. Merge by
 				 * attaching it as a left ignore of the new list. */
 				Kid *curIgnore = treeRightIgnoreKid( pdaRun->prg, pdaRun->tokenList->tree );
-				attachLeftIgnore( pdaRun->prg, rightIgnore, curIgnore->tree );
+				attachLeftIgnore( pdaRun->prg, (Tree*)rightIgnore, (IgnoreList*)curIgnore->tree );
 
 				/* Replace the current ignore. */
 				treeDownref( pdaRun->prg, sp, curIgnore->tree );
-				curIgnore->tree = rightIgnore;
-				treeUpref( rightIgnore );
+				curIgnore->tree = (Tree*)rightIgnore;
+				treeUpref( (Tree*)rightIgnore );
 			}
 			else {
 				/* Attach The ignore list. */
