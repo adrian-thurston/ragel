@@ -72,7 +72,8 @@ Tree *getFieldSplit( Program *prg, Tree *tree, Word field );
 Tree *getRhsEl( Program *prg, Tree *lhs, long position );
 void setField( Program *prg, Tree *tree, long field, Tree *value );
 
-void setTriterCur( TreeIter *iter, Tree *tree );
+void setTriterCur( Program *prg, TreeIter *iter, Tree *tree );
+void setUiterCur( Program *prg, UserIter *uiter, Tree *tree );
 void refSetValue( Ref *ref, Tree *v );
 Tree *treeSearch( Program *prg, Kid *kid, long id );
 Tree *treeSearch2( Program *prg, Tree *tree, long id );

@@ -97,6 +97,9 @@ typedef struct _Tree
 	Head *tokdata;
 } Tree;
 
+#define IL_CMD_GO_LEFT  1
+#define IL_CMD_GO_RIGHT 2
+
 typedef struct _IgnoreList
 {
 	/* First four will be overlaid in other structures. */
@@ -106,6 +109,7 @@ typedef struct _IgnoreList
 	Kid *child;
 
 	long generation;
+	long cmd;
 } IgnoreList;
 
 typedef struct _ParseTree

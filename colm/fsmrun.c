@@ -687,7 +687,6 @@ void sendWithIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inp
 		leftIgnore->flags |= AF_IS_LEFT_IGNORE;
 		leftIgnore->generation = pdaRun->prg->nextIlGen++;
 
-
 		/* Attach as left ignore to the token we are sending. */
 		if ( input->tree->flags & AF_LEFT_IGNORE ) {
 			/* The token already has a left-ignore. Merge by attaching it as a

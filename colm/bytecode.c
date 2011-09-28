@@ -1568,7 +1568,7 @@ again:
 			UserIter *uiter = (UserIter*) local(field);
 			splitRef( &sp, prg, &uiter->ref );
 			Tree *old = uiter->ref.kid->tree;
-			uiter->ref.kid->tree = t;
+			setUiterCur( prg, uiter, t );
 			treeDownref( prg, sp, old );
 			break;
 		}
@@ -2530,7 +2530,7 @@ again:
 			TreeIter *iter = (TreeIter*) plocal(field);
 			splitIterCur( &sp, prg, iter );
 			Tree *old = treeIterDerefCur( iter );
-			setTriterCur( iter, tree );
+			setTriterCur( prg, iter, tree );
 			treeDownref( prg, sp, old );
 			break;
 		}
