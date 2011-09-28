@@ -412,7 +412,10 @@ again:
 		}
 		else {
 			Kid *kid = kidAllocate( pdaRun->prg );
-			kid->tree = (Tree*)ilAllocate( pdaRun->prg );
+			IgnoreList *ignoreList = ilAllocate( pdaRun->prg );
+			ignoreList->generation = pdaRun->prg->nextIlGen++;
+
+			kid->tree = (Tree*)ignoreList;
 			kid->tree->id = LEL_ID_IGNORE_LIST;
 			kid->tree->refs = 1;
 			kid->tree->child = lel;

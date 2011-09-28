@@ -273,6 +273,7 @@ Tree *constructReplacementTree( Tree **bindings, Program *prg, long pat )
 			ignoreList->id = LEL_ID_IGNORE_LIST;
 			ignoreList->refs = 1;
 			ignoreList->child = ignore;
+			ignoreList->generation = prg->nextIlGen++;
 			
 			Kid *ignoreHead = kidAllocate( prg );
 			ignoreHead->tree = (Tree*)ignoreList;
@@ -303,6 +304,7 @@ Tree *constructReplacementTree( Tree **bindings, Program *prg, long pat )
 			ignoreList->id = LEL_ID_IGNORE_LIST;
 			ignoreList->refs = 1;
 			ignoreList->child = ignore;
+			ignoreList->generation = prg->nextIlGen++;
 
 			Kid *ignoreHead = kidAllocate( prg );
 			ignoreHead->tree = (Tree*)ignoreList;
@@ -799,10 +801,11 @@ free_tree:
 		else if ( tree->id == LEL_ID_STREAM )
 			streamFree( prg, (Stream*) tree );
 		else { 
-			stringFree( prg, tree->tokdata );
-			Kid *child = tree->child;
+			if ( tree->id != LEL_ID_IGNORE_LIST )
+				stringFree( prg, tree->tokdata );
 
 			/* Attributes and grammar-based children. */
+			Kid *child = tree->child;
 			while ( child != 0 ) {
 				Kid *next = child->next;
 				vm_push( child->tree );
@@ -2061,6 +2064,7 @@ rec_call:
 		if ( leadingIgnore != 0 ) {
 			long leadingPrintFlags = 0;
 			Kid *ignore = 0, *last = 0;
+			long youngest = -1;
 
 			debug( REALM_PRINT, "printing ignore %p\n", leadingIgnore->tree );
 
@@ -2073,6 +2077,9 @@ rec_call:
 
 				if ( leadingIgnore->tree->flags & AF_IS_LEFT_IGNORE )
 					leadingPrintFlags |= IPF_LEFT_PRESENT;
+
+				if ( ((IgnoreList*)leadingIgnore->tree)->generation > youngest )
+					youngest = ((IgnoreList*)leadingIgnore->tree)->generation;
 
 				if ( next == 0 )
 					break;
