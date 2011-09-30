@@ -1845,7 +1845,7 @@ void iterFindRevRepeat( Program *prg, Tree ***psp, TreeIter *iter, int tryFirst 
 			 * because the chain may have been split, setting it null (to
 			 * prevent repeated walks up). */
 			Ref *ref = (Ref*)vm_ptop();
-			iter->ref.kid = ref->kid->tree->child;
+			iter->ref.kid = treeChild( prg, ref->kid->tree );
 		}
 		else {
 			iter->ref.kid = (Kid*)vm_pop();
