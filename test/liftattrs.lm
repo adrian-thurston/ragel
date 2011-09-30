@@ -69,6 +69,6 @@ for AttrListIter:attr_list in RootItemList {
 
 # Reconstruct the left hand side with the 
 IL = construct item_list 
-	["<wrapper" CollectedAttrs ">" RootItemList "</wrapper>"]
+	["<wrapper " CollectedAttrs ">" RootItemList "</wrapper>"]
 
 print( IL '\n' )
