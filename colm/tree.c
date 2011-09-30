@@ -272,7 +272,6 @@ Tree *constructReplacementTree( Tree **bindings, Program *prg, long pat )
 
 			leftIgnore = ilAllocate( prg );
 			leftIgnore->id = LEL_ID_IGNORE_LIST;
-			leftIgnore->refs = 1;
 			leftIgnore->child = ignore;
 			leftIgnore->generation = prg->nextIlGen++;
 			
@@ -291,7 +290,6 @@ Tree *constructReplacementTree( Tree **bindings, Program *prg, long pat )
 
 			leftIgnore = ilAllocate( prg );
 			leftIgnore->id = LEL_ID_IGNORE_LIST;
-			leftIgnore->refs = 1;
 			leftIgnore->child = 0;
 			leftIgnore->generation = prg->nextIlGen++;
 			leftIgnore->cmd = IL_CMD_GO_LEFT;
@@ -316,7 +314,6 @@ Tree *constructReplacementTree( Tree **bindings, Program *prg, long pat )
 
 		IgnoreList *rightIgnore = ilAllocate( prg );
 		rightIgnore->id = LEL_ID_IGNORE_LIST;
-		rightIgnore->refs = 1;
 		rightIgnore->child = 0;
 		rightIgnore->generation = prg->nextIlGen++;
 		rightIgnore->cmd = IL_CMD_GO_RIGHT;
@@ -1133,7 +1130,6 @@ void setUiterCur( Program *prg, UserIter *uiter, Tree *tree )
 
 	IgnoreList *leftIgnore = ilAllocate( prg );
 	leftIgnore->id = LEL_ID_IGNORE_LIST;
-	leftIgnore->refs = 1;
 	leftIgnore->child = 0;
 	leftIgnore->generation = prg->nextIlGen++;
 	leftIgnore->cmd = IL_CMD_GO_LEFT;
@@ -1156,7 +1152,6 @@ void setUiterCur( Program *prg, UserIter *uiter, Tree *tree )
 
 	IgnoreList *rightIgnore = ilAllocate( prg );
 	rightIgnore->id = LEL_ID_IGNORE_LIST;
-	rightIgnore->refs = 1;
 	rightIgnore->child = 0;
 	rightIgnore->generation = prg->nextIlGen++;
 	rightIgnore->cmd = IL_CMD_GO_RIGHT;
@@ -1186,7 +1181,6 @@ void setTriterCur( Program *prg, TreeIter *iter, Tree *tree )
 
 	IgnoreList *leftIgnore = ilAllocate( prg );
 	leftIgnore->id = LEL_ID_IGNORE_LIST;
-	leftIgnore->refs = 1;
 	leftIgnore->child = 0;
 	leftIgnore->generation = prg->nextIlGen++;
 	leftIgnore->cmd = IL_CMD_GO_LEFT;
@@ -1209,7 +1203,6 @@ void setTriterCur( Program *prg, TreeIter *iter, Tree *tree )
 
 	IgnoreList *rightIgnore = ilAllocate( prg );
 	rightIgnore->id = LEL_ID_IGNORE_LIST;
-	rightIgnore->refs = 1;
 	rightIgnore->child = 0;
 	rightIgnore->generation = prg->nextIlGen++;
 	rightIgnore->cmd = IL_CMD_GO_RIGHT;

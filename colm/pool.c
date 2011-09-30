@@ -38,6 +38,11 @@ void *poolAllocAllocate( PoolAlloc *poolAlloc )
 {
 	debug( REALM_POOL, "pool allocation\n" );
 
+#ifdef POOL_MALLOC
+	void *res = malloc( poolAlloc->sizeofT );
+	memset( res, 0, poolAlloc->sizeofT );
+	return res;
+#else
 	//#ifdef COLM_LOG_BYTECODE
 	//cerr << "allocating in: " << __PRETTY_FUNCTION__ << endl;
 	//#endif
@@ -65,6 +70,7 @@ void *poolAllocAllocate( PoolAlloc *poolAlloc )
 	}
 	memset( newEl, 0, poolAlloc->sizeofT );
 	return newEl;
+#endif
 }
 
 void poolAllocFree( PoolAlloc *poolAlloc, void *el )
@@ -78,9 +84,13 @@ void poolAllocFree( PoolAlloc *poolAlloc, void *el )
 	memset( el, 0xcc, sizeof(T) );
 	#endif
 
+#ifdef POOL_MALLOC
+	free( el );
+#else
 	PoolItem *pi = (PoolItem*) el;
 	pi->next = poolAlloc->pool;
 	poolAlloc->pool = pi;
+#endif
 }
 
 void poolAllocClear( PoolAlloc *poolAlloc )

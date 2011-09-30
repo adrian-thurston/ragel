@@ -61,6 +61,9 @@ AC_LANG_CPLUSPLUS
 dnl Check for definition of MAKE.
 AC_PROG_MAKE_SET
 
+AC_ARG_ENABLE(pool-malloc, "allocate pool objects with malloc", 
+		AC_DEFINE([POOL_MALLOC], [1], [allocate pool objects with malloc]))
+
 # Logging features
 # AC_ARG_ENABLE(log, "turn on logging", AC_DEFINE(COLM_LOG))
 # AC_ARG_ENABLE(log-bytecode, "turns on bytecode logging", AC_DEFINE(COLM_LOG_BYTECODE))
