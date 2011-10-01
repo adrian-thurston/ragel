@@ -6,6 +6,8 @@ source TESTS
 GENMF="$0"
 COLM="`dirname $GENMF`/../colm/colm"
 
+echo "#!/usr/bin/make -f "
+echo
 echo "SUBDIRS = " $SUBDIRS
 echo
 
@@ -36,20 +38,20 @@ done
 echo 
 echo
 
-echo 'all: Makefile $(DIFFS) $(SUBDIRS)'
+echo 'all: runtests.mk $(DIFFS) $(SUBDIRS)'
 echo
 echo '.PHONY: clean $(SUBDIRS:%=%-clean)'
 echo 'clean: $(SUBDIRS:%=%-clean)'
 echo '	rm -f *.bin'
 echo '$(SUBDIRS:%=%-clean):'
-echo '	cd $(@:%-clean=%) && $(MAKE) clean'
+echo '	cd $(@:%-clean=%) && $(MAKE) -f runtests.mk clean'
 echo
 echo '.PHONY: $(SUBDIRS)'
 echo '$(SUBDIRS):'
-echo '	cd $@ && $(MAKE)'
+echo '	cd $@ && $(MAKE) -f runtests.mk'
 echo
-echo "Makefile: $GENMF TESTS"
-echo "	$GENMF > Makefile"
+echo "runtests.mk: $GENMF TESTS"
+echo "	$GENMF > runtests.mk"
 echo
 
 
