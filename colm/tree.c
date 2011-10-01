@@ -253,7 +253,7 @@ Kid *constructIgnoreList( Program *prg, long pat )
 
 /* Returns an uprefed tree. Saves us having to downref and bindings to zero to
  * return a zero-ref tree. */
-Tree *constructReplacementTree( Tree **bindings, Program *prg, long pat )
+Tree *constructReplacementTree( Kid *kid, Tree **bindings, Program *prg, long pat )
 {
 	PatReplNode *nodes = prg->rtd->patReplNodes;
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
@@ -274,65 +274,30 @@ Tree *constructReplacementTree( Tree **bindings, Program *prg, long pat )
 			leftIgnore->id = LEL_ID_IGNORE_LIST;
 			leftIgnore->child = ignore;
 			leftIgnore->generation = prg->nextIlGen++;
-			
-//			Kid *ignoreHead = kidAllocate( prg );
-//			ignoreHead->tree = (Tree*)ignoreList;
-//			ignoreHead->next = tree->child;
-//			tree->child = ignoreHead;
 
-//			assert( !(tree->flags & AF_LEFT_IGNORE) );
-//			tree->flags |= AF_LEFT_IGNORE;
+			if ( tree->flags & AF_LEFT_IGNORE ) {
+				/* The token already has a left-ignore. Merge by attaching it as a
+				 * right ignore of the new list. */
+				Kid *curIgnore = treeLeftIgnoreKid( prg, tree );
+				attachRightIgnore( prg, (Tree*)leftIgnore, (IgnoreList*)curIgnore->tree );
 
-			//input->tree->flags |= AF_LEFT_IL_ATTACHED;
+				/* Replace the current ignore. */
+				curIgnore->tree->refs -= 1;
+				curIgnore->tree = (Tree*)leftIgnore;
+				treeUpref( (Tree*)leftIgnore );
+			}
+			else {
+				/* Attach the ignore list. */
+				attachLeftIgnore( prg, tree, leftIgnore );
+			}
 		}
 		else {
-			tree = splitTree( prg, tree );
-
-			leftIgnore = ilAllocate( prg );
-			leftIgnore->id = LEL_ID_IGNORE_LIST;
-			leftIgnore->child = 0;
-			leftIgnore->generation = prg->nextIlGen++;
-			leftIgnore->cmd = IL_CMD_GO_LEFT;
+			if ( kid != 0 )
+				kid->flags |= KF_SUPPRESS_RIGHT;
 		}
 
-		if ( tree->flags & AF_LEFT_IGNORE ) {
-			/* The token already has a left-ignore. Merge by attaching it as a
-			 * right ignore of the new list. */
-			Kid *curIgnore = treeLeftIgnoreKid( prg, tree );
-			attachRightIgnore( prg, (Tree*)leftIgnore, (IgnoreList*)curIgnore->tree );
-
-			/* Replace the current ignore. */
-			curIgnore->tree->refs -= 1;
-			curIgnore->tree = (Tree*)leftIgnore;
-			treeUpref( (Tree*)leftIgnore );
-		}
-		else {
-			/* Attach the ignore list. */
-			attachLeftIgnore( prg, tree, leftIgnore );
-		}
-
-
-		IgnoreList *rightIgnore = ilAllocate( prg );
-		rightIgnore->id = LEL_ID_IGNORE_LIST;
-		rightIgnore->child = 0;
-		rightIgnore->generation = prg->nextIlGen++;
-		rightIgnore->cmd = IL_CMD_GO_RIGHT;
-
-		if ( tree->flags & AF_RIGHT_IGNORE ) {
-			/* The previous token already has a right ignore. Merge by
-			 * attaching it as a left ignore of the new list. */
-			Kid *curIgnore = treeRightIgnoreKid( prg, tree );
-			attachLeftIgnore( prg, (Tree*)rightIgnore, (IgnoreList*)curIgnore->tree );
-
-			/* Replace the current ignore. */
-			curIgnore->tree->refs -= 1;
-			curIgnore->tree = (Tree*)rightIgnore;
-			treeUpref( (Tree*)rightIgnore );
-		}
-		else {
-			/* Attach The ignore list. */
-			attachRightIgnore( prg, tree, rightIgnore );
-		}
+		if ( kid != 0 )
+			kid->flags |= KF_SUPPRESS_LEFT;
 	}
 	else {
 		tree = treeAllocate( prg );
@@ -390,7 +355,7 @@ Kid *constructReplacementKid( Tree **bindings, Program *prg, Kid *prev, long pat
 
 	if ( pat != -1 ) {
 		kid = kidAllocate( prg );
-		kid->tree = constructReplacementTree( bindings, prg, pat );
+		kid->tree = constructReplacementTree( kid, bindings, prg, pat );
 
 		/* Recurse down next. */
 		Kid *next = constructReplacementKid( bindings, prg, 
@@ -1126,104 +1091,16 @@ Tree *getFieldSplit( Program *prg, Tree *tree, Word field )
 
 void setUiterCur( Program *prg, UserIter *uiter, Tree *tree )
 {
-	tree = splitTree( prg, tree );
-
-	IgnoreList *leftIgnore = ilAllocate( prg );
-	leftIgnore->id = LEL_ID_IGNORE_LIST;
-	leftIgnore->child = 0;
-	leftIgnore->generation = prg->nextIlGen++;
-	leftIgnore->cmd = IL_CMD_GO_LEFT;
-
-	if ( tree->flags & AF_LEFT_IGNORE ) {
-		/* The token already has a left-ignore. Merge by attaching it as a
-		 * right ignore of the new list. */
-		Kid *curIgnore = treeLeftIgnoreKid( prg, tree );
-		attachRightIgnore( prg, (Tree*)leftIgnore, (IgnoreList*)curIgnore->tree );
-
-		/* Replace the current ignore. */
-		curIgnore->tree->refs -= 1;
-		curIgnore->tree = (Tree*)leftIgnore;
-		treeUpref( (Tree*)leftIgnore );
-	}
-	else {
-		/* Attach the ignore list. */
-		attachLeftIgnore( prg, tree, leftIgnore );
-	}
-
-	IgnoreList *rightIgnore = ilAllocate( prg );
-	rightIgnore->id = LEL_ID_IGNORE_LIST;
-	rightIgnore->child = 0;
-	rightIgnore->generation = prg->nextIlGen++;
-	rightIgnore->cmd = IL_CMD_GO_RIGHT;
-
-	if ( tree->flags & AF_RIGHT_IGNORE ) {
-		/* The previous token already has a right ignore. Merge by
-		 * attaching it as a left ignore of the new list. */
-		Kid *curIgnore = treeRightIgnoreKid( prg, tree );
-		attachLeftIgnore( prg, (Tree*)rightIgnore, (IgnoreList*)curIgnore->tree );
-
-		/* Replace the current ignore. */
-		curIgnore->tree->refs -= 1;
-		curIgnore->tree = (Tree*)rightIgnore;
-		treeUpref( (Tree*)rightIgnore );
-	}
-	else {
-		/* Attach The ignore list. */
-		attachRightIgnore( prg, tree, rightIgnore );
-	}
-
 	uiter->ref.kid->tree = tree;
+	uiter->ref.kid->flags |= KF_SUPPRESS_RIGHT;
+	uiter->ref.kid->flags |= KF_SUPPRESS_LEFT;
 }
 
 void setTriterCur( Program *prg, TreeIter *iter, Tree *tree )
 {
-	tree = splitTree( prg, tree );
-
-	IgnoreList *leftIgnore = ilAllocate( prg );
-	leftIgnore->id = LEL_ID_IGNORE_LIST;
-	leftIgnore->child = 0;
-	leftIgnore->generation = prg->nextIlGen++;
-	leftIgnore->cmd = IL_CMD_GO_LEFT;
-
-	if ( tree->flags & AF_LEFT_IGNORE ) {
-		/* The token already has a left-ignore. Merge by attaching it as a
-		 * right ignore of the new list. */
-		Kid *curIgnore = treeLeftIgnoreKid( prg, tree );
-		attachRightIgnore( prg, (Tree*)leftIgnore, (IgnoreList*)curIgnore->tree );
-
-		/* Replace the current ignore. */
-		curIgnore->tree->refs -= 1;
-		curIgnore->tree = (Tree*)leftIgnore;
-		treeUpref( (Tree*)leftIgnore );
-	}
-	else {
-		/* Attach the ignore list. */
-		attachLeftIgnore( prg, tree, leftIgnore );
-	}
-
-	IgnoreList *rightIgnore = ilAllocate( prg );
-	rightIgnore->id = LEL_ID_IGNORE_LIST;
-	rightIgnore->child = 0;
-	rightIgnore->generation = prg->nextIlGen++;
-	rightIgnore->cmd = IL_CMD_GO_RIGHT;
-
-	if ( tree->flags & AF_RIGHT_IGNORE ) {
-		/* The previous token already has a right ignore. Merge by
-		 * attaching it as a left ignore of the new list. */
-		Kid *curIgnore = treeRightIgnoreKid( prg, tree );
-		attachLeftIgnore( prg, (Tree*)rightIgnore, (IgnoreList*)curIgnore->tree );
-
-		/* Replace the current ignore. */
-		curIgnore->tree->refs -= 1;
-		curIgnore->tree = (Tree*)rightIgnore;
-		treeUpref( (Tree*)rightIgnore );
-	}
-	else {
-		/* Attach The ignore list. */
-		attachRightIgnore( prg, tree, rightIgnore );
-	}
-
 	iter->ref.kid->tree = tree;
+	iter->ref.kid->flags |= KF_SUPPRESS_RIGHT;
+	iter->ref.kid->flags |= KF_SUPPRESS_LEFT;
 }
 
 Tree *getPtrVal( Pointer *ptr )
@@ -2074,6 +1951,7 @@ void printXmlTree( Tree **sp, Program *prg, Tree *tree, int commAttr )
 	Kid kid;
 	kid.tree = tree;
 	kid.next = 0;
+	kid.flags = 0;
 	printXmlKid( stdout, sp, prg, &kid, commAttr, 0 );
 }
 
@@ -2162,6 +2040,7 @@ enum ReturnType
 #define IPF_RIGHT_PRINTED     0x0001
 #define IPF_LEFT_PRESENT      0x0002
 #define IPF_TERM_PRINTED      0x0004
+#define IPF_SUPPRESS          0x0008
 
 /* Note that this function causes recursion, thought it is not a big
  * deal since the recursion it is only caused by nonterminals that are ignored. */
@@ -2171,8 +2050,9 @@ void printKid( PrintArgs *printArgs, Tree **sp, Program *prg, Kid *kid )
 	Tree **root = vm_ptop();
 	enum ReturnType rt;
 	Kid *child;
-	int flags = 0;
+	int printFlags = 0;
 	Kid *leadingIgnore = 0;
+	Kid *suppressLeftStop = 0;
 
 	/* Iterate the kids passed in. We are expecting a next, which will allow us
 	 * to print the trailing ignore list. */
@@ -2186,6 +2066,21 @@ void printKid( PrintArgs *printArgs, Tree **sp, Program *prg, Kid *kid )
 	return;
 
 rec_call:
+	if ( kid->flags & KF_SUPPRESS_RIGHT )
+		printFlags |= IPF_SUPPRESS;
+
+	if ( kid->flags & KF_SUPPRESS_LEFT )
+		suppressLeftStop = leadingIgnore;
+	
+	if ( kid->flags & KF_SUPPRESS_OLEFT ) {
+		/* Free the leading ignore list. */
+		while ( leadingIgnore != 0 ) {
+			Kid *next = leadingIgnore->next;
+			kidFree( prg, leadingIgnore );
+			leadingIgnore = next;
+		}
+	}
+
 	/* If not currently skipping ignore data, then print it. Ignore data can
 	 * be associated with terminals and nonterminals. */
 	if ( kid->tree->flags & AF_LEFT_IGNORE ) {
@@ -2198,35 +2093,32 @@ rec_call:
 	}
 
 	if ( kid->tree->id == LEL_ID_IGNORE_LIST ) {
-		debug( REALM_PRINT, "putting %p on ignore list\n", kid->tree );
-		Kid *newIgnore = kidAllocate( prg );
-		newIgnore->next = leadingIgnore;
-		leadingIgnore = newIgnore;
-		leadingIgnore->tree = kid->tree;
+		if ( ! (printFlags & IPF_SUPPRESS ) ) {
+			debug( REALM_PRINT, "putting %p on ignore list\n", kid->tree );
+			Kid *newIgnore = kidAllocate( prg );
+			newIgnore->next = leadingIgnore;
+			leadingIgnore = newIgnore;
+			leadingIgnore->tree = kid->tree;
+		}
 	}
 	else if ( kid->tree->id < prg->rtd->firstNonTermId ) {
 		/* 
 		 * First print any leading ignore.
 		 */
+		suppressLeftStop = 0;
 
 		/* Reverse the leading ignore list. */
 		if ( leadingIgnore != 0 ) {
-			long leadingPrintFlags = 0;
 			Kid *ignore = 0, *last = 0;
 			long youngest = -1;
 			Kid *youngestKid = 0;
 
 			debug( REALM_PRINT, "printing ignore %p\n", leadingIgnore->tree );
 
-//			leadingIgnore = reverseKidList( leadingIgnore );
-
 			/* Reverse the list. */
 			while ( true ) {
 				Kid *next = leadingIgnore->next;
 				leadingIgnore->next = last;
-
-				if ( leadingIgnore->tree->flags & AF_IS_LEFT_IGNORE )
-					leadingPrintFlags |= IPF_LEFT_PRESENT;
 
 				if ( ((IgnoreList*)leadingIgnore->tree)->generation > youngest ) {
 					youngest = ((IgnoreList*)leadingIgnore->tree)->generation;
@@ -2243,81 +2135,30 @@ rec_call:
 			Kid *start = leadingIgnore;
 			Kid *stop = 0;
 
-			while ( youngestKid != 0 && ( (IgnoreList*)youngestKid->tree )->cmd != 0 ) {
-
-				if ( youngestKid != 0 && ( (IgnoreList*)youngestKid->tree )->cmd == IL_CMD_GO_LEFT ) {
-					stop = youngestKid;
-
-					youngest = -1;
-					youngestKid = 0;
-
-					Kid *k = start;
-					while ( k != stop ) {
-
-						if ( ((IgnoreList*)k->tree)->generation > youngest ) {
-							youngest = ((IgnoreList*)k->tree)->generation;
-							youngestKid = k;
-						}
-
-						k = k->next;
-					}
-				}
-
-				if ( youngestKid != 0 && ( (IgnoreList*)youngestKid->tree )->cmd == IL_CMD_GO_RIGHT ) {
-					start = youngestKid->next;
-
-					youngest = -1;
-					youngestKid = 0;
-
-					Kid *k = start;
-					while ( k != stop ) {
-
-						if ( ((IgnoreList*)k->tree)->generation > youngest ) {
-							youngest = ((IgnoreList*)k->tree)->generation;
-							youngestKid = k;
-						}
-
-						k = k->next;
-					}
-				}
-			}
-
 			/* Print the leading ignore list, free the kids in the process. */
-			ignore = leadingIgnore;
-			while ( ignore != 0 ) {
-				if ( 
-					kid->tree->id != 0 &&
-					(flags & IPF_TERM_PRINTED) && 
-					! (leadingPrintFlags & IPF_TERM_PRINTED) &&
-					ignore == youngestKid
-				)
-				{	
-					/* Non-terminal. */
-					Kid *child = treeChild( prg, ignore->tree );
-					if ( child != 0 ) {
-						vm_push( (SW)leadingIgnore );
-						vm_push( (SW)leadingPrintFlags );
-						vm_push( (SW)ignore );
-						vm_push( (SW)kid );
-						leadingIgnore = 0;
-						kid = child;
-						while ( kid != 0 ) {
-							debug( REALM_PRINT, "rec call on %p\n", kid->tree );
-							vm_push( (SW) RecIgnoreList );
-							goto rec_call;
-							rec_return_il:
-							kid = kid->next;
-						}
-						kid = (Kid*)vm_pop();
-						ignore = (Kid*)vm_pop();
-						leadingPrintFlags = (long)vm_pop();
-						leadingIgnore = (Kid*)vm_pop();
+			ignore = youngestKid;
+			if ( ignore != 0 && kid->tree->id != 0 &&
+				(printFlags & IPF_TERM_PRINTED) )
+			{	
+				/* Non-terminal. */
+				Kid *child = treeChild( prg, ignore->tree );
+				if ( child != 0 ) {
+					vm_push( (SW)leadingIgnore );
+					vm_push( (SW)ignore );
+					vm_push( (SW)kid );
+					leadingIgnore = 0;
+					kid = child;
+					while ( kid != 0 ) {
+						debug( REALM_PRINT, "rec call on %p\n", kid->tree );
+						vm_push( (SW) RecIgnoreList );
+						goto rec_call;
+						rec_return_il:
+						kid = kid->next;
 					}
-
-					leadingPrintFlags |= IPF_TERM_PRINTED;
+					kid = (Kid*)vm_pop();
+					ignore = (Kid*)vm_pop();
+					leadingIgnore = (Kid*)vm_pop();
 				}
-
-				ignore = ignore->next;
 			}
 
 			/* Free the leading ignore list. */
@@ -2330,9 +2171,11 @@ rec_call:
 
 		debug( DBG_PRINT, "printing terminal %p\n", kid->tree );
 		if ( kid->tree->id != 0 ) {
-			flags |= IPF_TERM_PRINTED;
+			printFlags |= IPF_TERM_PRINTED;
 			printTerm( printArgs, sp, prg, kid );
 		}
+
+		printFlags &= ~IPF_SUPPRESS;
 	}
 	else {
 		/* Non-terminal. */
@@ -2353,14 +2196,28 @@ rec_call:
 	/* If not currently skipping ignore data, then print it. Ignore data can
 	 * be associated with terminals and nonterminals. */
 	if ( kid->tree->flags & AF_RIGHT_IGNORE ) {
-		//emittedRightIgnore = true;
-		vm_push( (SW)kid );
-		kid = treeRightIgnoreKid( prg, kid->tree );
-		vm_push( (SW) CollectIgnoreRight );
-		goto rec_call;
-		rec_return_ign_right:
-		kid = (Kid*)vm_pop();
+		if ( ! (printFlags & IPF_SUPPRESS ) ) {
+			//emittedRightIgnore = true;
+			vm_push( (SW)kid );
+			kid = treeRightIgnoreKid( prg, kid->tree );
+			vm_push( (SW) CollectIgnoreRight );
+			goto rec_call;
+			rec_return_ign_right:
+			kid = (Kid*)vm_pop();
+		}
 	}
+
+	if ( kid->flags & KF_SUPPRESS_LEFT ) {
+		/* Free the leading ignore list. */
+		while ( leadingIgnore != 0 && leadingIgnore != suppressLeftStop ) {
+			Kid *next = leadingIgnore->next;
+			kidFree( prg, leadingIgnore );
+			leadingIgnore = next;
+		}
+	}
+
+	if ( kid->flags & KF_SUPPRESS_ORIGHT )
+		printFlags |= IPF_SUPPRESS;
 
 	rt = (enum ReturnType)vm_pop();
 	switch ( rt ) {
@@ -2404,9 +2261,11 @@ void printTreeArgs( PrintArgs *printArgs, Tree **sp, Program *prg, Tree *tree )
 		Kid kid, term;
 		term.tree = &termTree;
 		term.next = 0;
+		term.flags = 0;
 
 		kid.tree = tree;
 		kid.next = &term;
+		kid.flags = 0;
 
 		printKid( printArgs, sp, prg, &kid );
 	}

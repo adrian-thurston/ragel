@@ -78,11 +78,12 @@ typedef struct _Kid
 	 * a Kid*. */
 	struct _Tree *tree;
 	struct _Kid *next;
+	unsigned char flags;
 } Kid;
 
 typedef struct _Ref
 {
-	Kid *kid;
+	struct _Kid *kid;
 	struct _Ref *next;
 } Ref;
 
@@ -97,9 +98,6 @@ typedef struct _Tree
 	Head *tokdata;
 } Tree;
 
-#define IL_CMD_GO_LEFT  1
-#define IL_CMD_GO_RIGHT 2
-
 typedef struct _IgnoreList
 {
 	/* First four will be overlaid in other structures. */
@@ -109,7 +107,6 @@ typedef struct _IgnoreList
 	Kid *child;
 
 	long generation;
-	long cmd;
 } IgnoreList;
 
 typedef struct _ParseTree
@@ -492,7 +489,7 @@ typedef struct _PdaRun
 {
 	int numRetry;
 	Kid *stackTop;
-	Kid *tokenList;
+	Ref *tokenList;
 	int errCount;
 	int cs;
 	int nextRegionInd;
@@ -597,7 +594,6 @@ void initPdaRun( PdaRun *pdaRun, Program *prg, PdaTables *tables,
 void clearContext( PdaRun *pdaRun, Tree **sp );
 Kid *extractIgnore( PdaRun *pdaRun );
 long stackTopTarget( PdaRun *pdaRun );
-void commitKid( PdaRun *pdaRun, Tree **root, Kid *lel );
 void runCommit( PdaRun *pdaRun );
 int isParserStopFinished( PdaRun *pdaRun );
 void pdaRunMatch(  PdaRun *pdaRun, Kid *tree, Kid *pattern );
@@ -650,7 +646,6 @@ void fsmExecute( FsmRun *fsmRun, InputStream *inputStream );
 void sendNamedLangEl( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
 void parseLoop( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
 void initBindings( PdaRun *pdaRun );
-void commitKid2( PdaRun *parser, Tree **root, Kid *lel, Code **rcode, long *causeReduce );
 Tree *getParsedRoot( PdaRun *pdaRun, int stop );
 
 #ifdef __cplusplus

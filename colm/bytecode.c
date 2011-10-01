@@ -2986,7 +2986,7 @@ again:
 				treeUpref( replTree );
 			}
 			else {
-				replTree = constructReplacementTree( bindings, 
+				replTree = constructReplacementTree( 0, bindings, 
 						prg, rootNode );
 			}
 

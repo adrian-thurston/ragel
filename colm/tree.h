@@ -52,7 +52,7 @@ Kid *reverseKidList( Kid *kid );
 Tree *constructInteger( Program *prg, long i );
 Tree *constructPointer( Program *prg, Tree *tree );
 Tree *constructTerm( Program *prg, Word id, Head *tokdata );
-Tree *constructReplacementTree( Tree **bindings, Program *prg, long pat );
+Tree *constructReplacementTree( Kid *kid, Tree **bindings, Program *prg, long pat );
 Tree *createGeneric( Program *prg, long genericId );
 
 Tree *makeToken2( Tree **root, Program *prg, long nargs );

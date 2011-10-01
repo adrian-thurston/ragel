@@ -106,12 +106,12 @@ void cleanParser( Tree **sp, PdaRun *pdaRun )
 	pdaRun->stackTop = 0;
 
 	/* Traverse the stack, downreffing. */
-	kid = pdaRun->tokenList;
-	while ( kid != 0 ) {
-		Kid *next = kid->next;
-		treeDownref( pdaRun->prg, sp, kid->tree );
-		kidFree( pdaRun->prg, kid );
-		kid = next;
+	Ref *ref = pdaRun->tokenList;
+	while ( ref != 0 ) {
+		Ref *next = ref->next;
+		//treeDownref( pdaRun->prg, sp, ref->kid->tree );
+		kidFree( pdaRun->prg, (Kid*)ref );
+		ref = next;
 	}
 	pdaRun->tokenList = 0;
 
@@ -217,7 +217,7 @@ Code *backupOverRcode( Code *rcode )
 
 /* The top level of the stack is linked right-to-left. Trees underneath are
  * linked left-to-right. */
-void commitKid2( PdaRun *parser, Tree **root, Kid *lel, Code **rcode, long *causeReduce )
+void commitKid( PdaRun *parser, Tree **root, Kid *lel, Code **rcode, long *causeReduce )
 {
 	Tree *tree = 0;
 	Tree **sp = root;
@@ -348,7 +348,7 @@ void commitFull( Tree **sp, PdaRun *parser, long causeReduce )
 	/* The top level of the stack is linked right to left. This is the
 	 * traversal order we need for committing. */
 	while ( kid != 0 && !beenCommitted( kid ) ) {
-		commitKid2( parser, sp, kid, &rcode, &causeReduce );
+		commitKid( parser, sp, kid, &rcode, &causeReduce );
 		kid = kid->next;
 	}
 
@@ -465,11 +465,11 @@ again:
 
 		/* Record the last shifted token. Need this for attaching ignores. */
 		if ( lel->tree->id < pdaRun->tables->rtd->firstNonTermId ) {
-			Kid *kid = kidAllocate( pdaRun->prg );
-			kid->tree = lel->tree;
-			treeUpref( lel->tree );
-			kid->next = pdaRun->tokenList;
-			pdaRun->tokenList = kid;
+			Ref *ref = (Ref*)kidAllocate( pdaRun->prg );
+			ref->kid = lel;
+			//treeUpref( lel->tree );
+			ref->next = pdaRun->tokenList;
+			pdaRun->tokenList = ref;
 		}
 
 		/* If shifting a termDup then change it to the nonterm. */
@@ -759,10 +759,10 @@ parseError:
 			input = undoLel;
 
 			/* Record the last shifted token. Need this for attaching ignores. */
-			Kid *kid = pdaRun->tokenList;
-			pdaRun->tokenList = kid->next;
-			treeDownref( pdaRun->prg, sp, kid->tree );
-			kidFree( pdaRun->prg, kid );
+			Ref *ref = pdaRun->tokenList;
+			pdaRun->tokenList = ref->next;
+			//treeDownref( pdaRun->prg, sp, kid->tree );
+			kidFree( pdaRun->prg, (Kid*)ref );
 		}
 		else {
 //			#ifdef COLM_LOG_PARSE
