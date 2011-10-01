@@ -792,10 +792,9 @@ free_tree:
 			free( accum->fsmRun );
 			cleanParser( sp, accum->pdaRun );
 			clearContext( accum->pdaRun, sp );
-			rcodeDownrefAll( prg, sp, accum->pdaRun->allReverseCode );
-			rtCodeVectEmpty( accum->pdaRun->allReverseCode );
+			rcodeDownrefAll( prg, sp, &accum->pdaRun->reverseCode );
 			rtCodeVectEmpty( &accum->pdaRun->reverseCode );
-			free( accum->pdaRun->allReverseCode );
+			rtCodeVectEmpty( &accum->pdaRun->rcodeCollect );
 			free( accum->pdaRun );
 			treeDownref( prg, sp, (Tree*)accum->stream );
 			mapElFree( prg, (MapEl*)accum );

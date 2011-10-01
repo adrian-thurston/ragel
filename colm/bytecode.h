@@ -418,7 +418,7 @@ typedef struct _Execution
 	int reject;
 
 	/* Reverse code. */
-	RtCodeVect *reverseCode;
+	RtCodeVect *rcodeCollect;
 	long rcodeUnitLen;
 	char **captures;
 

@@ -159,10 +159,8 @@ void initPdaRun( PdaRun *pdaRun, Program *prg, PdaTables *tables,
 
 	initBindings( pdaRun );
 
-	pdaRun->allReverseCode = malloc( sizeof(RtCodeVect) );
-	initRtCodeVect( pdaRun->allReverseCode );
-
 	initRtCodeVect( &pdaRun->reverseCode );
+	initRtCodeVect( &pdaRun->rcodeCollect );
 
 	pdaRun->context = splitTree( pdaRun->prg, context );
 }
@@ -343,7 +341,7 @@ void commitFull( Tree **sp, PdaRun *parser, long causeReduce )
 //	#endif
 	
 	Kid *kid = parser->stackTop;
-	Code *rcode = parser->allReverseCode->data + parser->allReverseCode->tabLen;
+	Code *rcode = parser->reverseCode.data + parser->reverseCode.tabLen;
 
 	/* The top level of the stack is linked right to left. This is the
 	 * traversal order we need for committing. */
@@ -355,7 +353,7 @@ void commitFull( Tree **sp, PdaRun *parser, long causeReduce )
 	/* We cannot always clear all the rcode here. We may need to backup over
 	 * the parse statement. We depend on the context flag. */
 	if ( !parser->revertOn )
-		rcodeDownrefAll( parser->prg, sp, parser->allReverseCode );
+		rcodeDownrefAll( parser->prg, sp, &parser->reverseCode );
 }
 
 
@@ -595,7 +593,7 @@ again:
 
 			/* Execution environment for the reduction code. */
 			Execution exec;
-			initExecution( &exec, pdaRun->prg, &pdaRun->reverseCode, 
+			initExecution( &exec, pdaRun->prg, &pdaRun->rcodeCollect, 
 					pdaRun, fsmRun, fi->codeWV, redLel->tree, 0, 0, fsmRun->mark );
 
 			/* Execute it. */
@@ -616,13 +614,13 @@ again:
 				treeUpref( redLel->tree );
 				treeDownref( pdaRun->prg, sp, exec.lhs );
 
-				append( &pdaRun->reverseCode, IN_RESTORE_LHS );
-				appendWord( &pdaRun->reverseCode, (Word)exec.parsed );
-				append( &pdaRun->reverseCode, SIZEOF_CODE + SIZEOF_WORD );
+				append( &pdaRun->rcodeCollect, IN_RESTORE_LHS );
+				appendWord( &pdaRun->rcodeCollect, (Word)exec.parsed );
+				append( &pdaRun->rcodeCollect, SIZEOF_CODE + SIZEOF_WORD );
 			}
 
 			/* Pull out the reverse code, if any. */
-			int hasrcode = makeReverseCode( pdaRun->allReverseCode, &pdaRun->reverseCode );
+			int hasrcode = makeReverseCode( &pdaRun->reverseCode, &pdaRun->rcodeCollect );
 			if ( hasrcode )
 				redLel->tree->flags |= AF_HAS_RCODE;
 
@@ -775,11 +773,11 @@ parseError:
 			/* Check for an execution environment. */
 			if ( undoLel->tree->flags & AF_HAS_RCODE ) {
 				Execution exec;
-				initExecution( &exec, pdaRun->prg, &pdaRun->reverseCode, 
+				initExecution( &exec, pdaRun->prg, &pdaRun->rcodeCollect, 
 						pdaRun, fsmRun, 0, 0, 0, 0, fsmRun->mark );
 
 				/* Do the reverse exeuction. */
-				rexecute( &exec, sp, pdaRun->allReverseCode );
+				rexecute( &exec, sp, &pdaRun->reverseCode );
 				undoLel->tree->flags &= ~AF_HAS_RCODE;
 
 				if ( exec.lhs != 0 ) {

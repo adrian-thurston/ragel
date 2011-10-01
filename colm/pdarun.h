@@ -500,8 +500,8 @@ typedef struct _PdaRun
 	int parserId;
 
 	/* Reused. */
+	RtCodeVect rcodeCollect;
 	RtCodeVect reverseCode;
-	RtCodeVect *allReverseCode;
 
 	int stopParsing;
 	long stopTarget;

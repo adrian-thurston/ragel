@@ -628,7 +628,6 @@ void clearProgram( Program *prg, Tree **vm_stack, Tree **sp )
 	locationClear( prg );
 	ilClear( prg );
 
-	//exec->reverseCode->empty();
 	//memset( vm_stack, 0, sizeof(Tree*) * VM_STACK_SIZE);
 }
 
@@ -674,10 +673,10 @@ void runProgram( Program *prg )
 	 */
 
 	if ( prg->rtd->rootCodeLen > 0 ) {
-		RtCodeVect reverseCode;
+		RtCodeVect rcodeCollect;
 		Execution execution;
-		initRtCodeVect( &reverseCode );
-		initExecution( &execution, prg, &reverseCode, 0, 0, prg->rtd->rootCode, 0, 0, 0, 0 );
+		initRtCodeVect( &rcodeCollect );
+		initExecution( &execution, prg, &rcodeCollect, 0, 0, prg->rtd->rootCode, 0, 0, 0, 0 );
 		execute( &execution, root );
 
 		/* Pull out the reverse code and free it. */
@@ -687,16 +686,16 @@ void runProgram( Program *prg )
 		}
 		#endif
 
-		/* The root code should all be commit code and reverseCode
+		/* The root code should all be commit code and reverse code
 		 * should be empty. */
-		assert( reverseCode.tabLen == 0 );
+		assert( rcodeCollect.tabLen == 0 );
 	}
 
 	/* Clear */
 	clearProgram( prg, vm_stack, root );
 }
 
-void initExecution( Execution *exec, Program *prg, RtCodeVect *reverseCode,
+void initExecution( Execution *exec, Program *prg, RtCodeVect *rcodeCollect,
 		PdaRun *pdaRun, FsmRun *fsmRun, Code *code, Tree *lhs,
 		long genId, Head *matchText, char **captures )
 {
@@ -711,7 +710,7 @@ void initExecution( Execution *exec, Program *prg, RtCodeVect *reverseCode,
 	exec->genId = genId;
 	exec->matchText = matchText;
 	exec->reject = false;
-	exec->reverseCode = reverseCode;
+	exec->rcodeCollect = rcodeCollect;
 	exec->rcodeUnitLen = 0;
 	exec->captures = captures;
 
@@ -1276,7 +1275,7 @@ again:
 			push( exec->pdaRun->context );
 
 			/* Set up the reverse instruction. */
-			append( exec->reverseCode, IN_LOAD_CONTEXT_BKT );
+			append( exec->rcodeCollect, IN_LOAD_CONTEXT_BKT );
 			exec->rcodeUnitLen = SIZEOF_CODE;
 			break;
 		}
@@ -1326,7 +1325,7 @@ again:
 			push( prg->global );
 
 			/* Set up the reverse instruction. */
-			append( exec->reverseCode, IN_LOAD_GLOBAL_BKT );
+			append( exec->rcodeCollect, IN_LOAD_GLOBAL_BKT );
 			exec->rcodeUnitLen = SIZEOF_CODE;
 			break;
 		}
@@ -1376,7 +1375,7 @@ again:
 			push( exec->fsmRun->curStream );
 
 			/* Set up the reverse instruction. */
-			append( exec->reverseCode, IN_LOAD_INPUT_BKT );
+			append( exec->rcodeCollect, IN_LOAD_INPUT_BKT );
 			exec->rcodeUnitLen = SIZEOF_CODE;
 			break;
 		}
@@ -1426,7 +1425,7 @@ again:
 			push( exec->pdaRun->context );
 
 			/* Set up the reverse instruction. */
-			append( exec->reverseCode, IN_LOAD_INPUT_BKT );
+			append( exec->rcodeCollect, IN_LOAD_INPUT_BKT );
 			exec->rcodeUnitLen = SIZEOF_CODE;
 			break;
 		}
@@ -1731,8 +1730,8 @@ again:
 			push( split );
 
 			/* Set up the reverse instruction. */
-			append( exec->reverseCode, IN_GET_FIELD_BKT );
-			appendHalf( exec->reverseCode, field );
+			append( exec->rcodeCollect, IN_GET_FIELD_BKT );
+			appendHalf( exec->rcodeCollect, field );
 			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_HALF;
 			break;
 		}
@@ -1794,11 +1793,11 @@ again:
 			setField( prg, obj, field, val );
 
 			/* Set up the reverse instruction. */
-			append( exec->reverseCode, IN_SET_FIELD_BKT );
-			appendHalf( exec->reverseCode, field );
-			appendWord( exec->reverseCode, (Word)prev );
+			append( exec->rcodeCollect, IN_SET_FIELD_BKT );
+			appendHalf( exec->rcodeCollect, field );
+			appendWord( exec->rcodeCollect, (Word)prev );
 			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_HALF + SIZEOF_WORD;
-			append( exec->reverseCode, exec->rcodeUnitLen );
+			append( exec->rcodeCollect, exec->rcodeUnitLen );
 			/* FLUSH */
 			break;
 		}
@@ -2652,7 +2651,7 @@ again:
 			push( input );
 			treeDownref( prg, sp, accum );
 //
-//			append( exec->reverseCode, IN_EXTRACT_INPUT_BKT );
+//			append( exec->rcodeCollect, IN_EXTRACT_INPUT_BKT );
 //			exec->rcodeUnitLen += SIZEOF_CODE;
 			break;
 		}
@@ -2709,11 +2708,11 @@ again:
 			treeUpref( stream );
 			push( stream );
 
-			append( exec->reverseCode, IN_STREAM_APPEND_BKT );
-			appendWord( exec->reverseCode, (Word) stream );
-			appendWord( exec->reverseCode, (Word) input );
-			appendWord( exec->reverseCode, (Word) len );
-			append( exec->reverseCode, SIZEOF_CODE + 3 * SIZEOF_WORD );
+			append( exec->rcodeCollect, IN_STREAM_APPEND_BKT );
+			appendWord( exec->rcodeCollect, (Word) stream );
+			appendWord( exec->rcodeCollect, (Word) input );
+			appendWord( exec->rcodeCollect, (Word) len );
+			append( exec->rcodeCollect, SIZEOF_CODE + 3 * SIZEOF_WORD );
 			break;
 		}
 		case IN_STREAM_APPEND_BKT: {
@@ -2774,11 +2773,11 @@ again:
 			//treeDownref( prg, sp, stream );
 			//treeDownref( prg, sp, accum );
 
-			append( exec->reverseCode, IN_PARSE_FRAG_BKT );
-			appendWord( exec->reverseCode, (Word) accum );
-			appendWord( exec->reverseCode, (Word) stream );
-			appendWord( exec->reverseCode, consumed );
-			append( exec->reverseCode, SIZEOF_CODE + 3 * SIZEOF_WORD );
+			append( exec->rcodeCollect, IN_PARSE_FRAG_BKT );
+			appendWord( exec->rcodeCollect, (Word) accum );
+			appendWord( exec->rcodeCollect, (Word) stream );
+			appendWord( exec->rcodeCollect, consumed );
+			append( exec->rcodeCollect, SIZEOF_CODE + 3 * SIZEOF_WORD );
 			break;
 		}
 
@@ -2828,11 +2827,11 @@ again:
 			push( result );
 
 			treeUpref( result );
-			append( exec->reverseCode, IN_PARSE_FINISH_BKT );
-			appendWord( exec->reverseCode, (Word) accum );
-			appendWord( exec->reverseCode, (Word) result );
-			appendWord( exec->reverseCode, (Word) consumed );
-			append( exec->reverseCode, SIZEOF_CODE + 3*SIZEOF_WORD );
+			append( exec->rcodeCollect, IN_PARSE_FINISH_BKT );
+			appendWord( exec->rcodeCollect, (Word) accum );
+			appendWord( exec->rcodeCollect, (Word) result );
+			appendWord( exec->rcodeCollect, (Word) consumed );
+			append( exec->rcodeCollect, SIZEOF_CODE + 3*SIZEOF_WORD );
 			break;
 		}
 		case IN_PARSE_FINISH_BKT: {
@@ -2871,10 +2870,10 @@ again:
 
 			/* Single unit. */
 			treeUpref( string );
-			append( exec->reverseCode, IN_STREAM_PULL_BKT );
-			appendWord( exec->reverseCode, (Word) string );
+			append( exec->rcodeCollect, IN_STREAM_PULL_BKT );
+			appendWord( exec->rcodeCollect, (Word) string );
 			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
-			append( exec->reverseCode, exec->rcodeUnitLen );
+			append( exec->rcodeCollect, exec->rcodeUnitLen );
 
 			treeDownref( prg, sp, stream );
 			treeDownref( prg, sp, len );
@@ -2909,10 +2908,10 @@ again:
 			push( 0 );
 
 			/* Single unit. */
-			append( exec->reverseCode, IN_STREAM_PUSH_BKT );
-			appendWord( exec->reverseCode, len );
+			append( exec->rcodeCollect, IN_STREAM_PUSH_BKT );
+			appendWord( exec->rcodeCollect, len );
 			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
-			append( exec->reverseCode, exec->rcodeUnitLen );
+			append( exec->rcodeCollect, exec->rcodeUnitLen );
 
 			treeDownref( prg, sp, stream );
 			treeDownref( prg, sp, tree );
@@ -2930,10 +2929,10 @@ again:
 			push( 0 );
 
 			/* Single unit. */
-			append( exec->reverseCode, IN_STREAM_PUSH_BKT );
-			appendWord( exec->reverseCode, len );
+			append( exec->rcodeCollect, IN_STREAM_PUSH_BKT );
+			appendWord( exec->rcodeCollect, len );
 			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
-			append( exec->reverseCode, exec->rcodeUnitLen );
+			append( exec->rcodeCollect, exec->rcodeUnitLen );
 
 			treeDownref( prg, sp, stream );
 			treeDownref( prg, sp, tree );
@@ -3107,8 +3106,8 @@ again:
 			push( dval );
 
 			/* This is an initial global load. Need to reverse execute it. */
-			append( exec->reverseCode, IN_PTR_DEREF_BKT );
-			appendWord( exec->reverseCode, (Word) ptr );
+			append( exec->rcodeCollect, IN_PTR_DEREF_BKT );
+			appendWord( exec->rcodeCollect, (Word) ptr );
 			exec->rcodeUnitLen = SIZEOF_CODE + SIZEOF_WORD;
 			break;
 		}
@@ -3262,10 +3261,10 @@ again:
 			tree->tokdata = head;
 
 			/* Set up reverse code. Needs no args. */
-			append( exec->reverseCode, IN_SET_TOKEN_DATA_BKT );
-			appendWord( exec->reverseCode, (Word)oldval );
+			append( exec->rcodeCollect, IN_SET_TOKEN_DATA_BKT );
+			appendWord( exec->rcodeCollect, (Word)oldval );
 			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
-			append( exec->reverseCode, exec->rcodeUnitLen );
+			append( exec->rcodeCollect, exec->rcodeUnitLen );
 
 			treeDownref( prg, sp, tree );
 			treeDownref( prg, sp, val );
@@ -3359,9 +3358,9 @@ again:
 			push( prg->trueVal );
 
 			/* Set up reverse code. Needs no args. */
-			append( exec->reverseCode, IN_LIST_APPEND_BKT );
+			append( exec->rcodeCollect, IN_LIST_APPEND_BKT );
 			exec->rcodeUnitLen += SIZEOF_CODE;
-			append( exec->reverseCode, exec->rcodeUnitLen );
+			append( exec->rcodeCollect, exec->rcodeUnitLen );
 			/* FLUSH */
 			break;
 		}
@@ -3426,10 +3425,10 @@ again:
 			/* Set up reverse. The result comes off the list downrefed.
 			 * Need it up referenced for the reverse code too. */
 			treeUpref( end );
-			append( exec->reverseCode, IN_LIST_REMOVE_END_BKT );
-			appendWord( exec->reverseCode, (Word)end );
+			append( exec->rcodeCollect, IN_LIST_REMOVE_END_BKT );
+			appendWord( exec->rcodeCollect, (Word)end );
 			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
-			append( exec->reverseCode, exec->rcodeUnitLen );
+			append( exec->rcodeCollect, exec->rcodeUnitLen );
 			/* FLUSH */
 			break;
 		}
@@ -3503,8 +3502,8 @@ again:
 			push( val );
 
 			/* Set up the reverse instruction. */
-			append( exec->reverseCode, IN_GET_LIST_MEM_BKT );
-			appendHalf( exec->reverseCode, field );
+			append( exec->rcodeCollect, IN_GET_LIST_MEM_BKT );
+			appendHalf( exec->rcodeCollect, field );
 			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_HALF;
 			break;
 		}
@@ -3561,11 +3560,11 @@ again:
 			Tree *existing = setListMem( (List*)obj, field, val );
 
 			/* Set up the reverse instruction. */
-			append( exec->reverseCode, IN_SET_LIST_MEM_BKT );
-			appendHalf( exec->reverseCode, field );
-			appendWord( exec->reverseCode, (Word)existing );
+			append( exec->rcodeCollect, IN_SET_LIST_MEM_BKT );
+			appendHalf( exec->rcodeCollect, field );
+			appendWord( exec->rcodeCollect, (Word)existing );
 			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_HALF + SIZEOF_WORD;
-			append( exec->reverseCode, exec->rcodeUnitLen );
+			append( exec->rcodeCollect, exec->rcodeUnitLen );
 			/* FLUSH */
 			break;
 		}
@@ -3612,11 +3611,11 @@ again:
 
 			/* Need to upref key for storage in reverse code. */
 			treeUpref( key );
-			append( exec->reverseCode, IN_MAP_INSERT_BKT );
-			append( exec->reverseCode, inserted );
-			appendWord( exec->reverseCode, (Word)key );
+			append( exec->rcodeCollect, IN_MAP_INSERT_BKT );
+			append( exec->rcodeCollect, inserted );
+			appendWord( exec->rcodeCollect, (Word)key );
 			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_CODE + SIZEOF_WORD;
-			append( exec->reverseCode, exec->rcodeUnitLen );
+			append( exec->rcodeCollect, exec->rcodeUnitLen );
 
 			if ( ! inserted ) {
 				treeDownref( prg, sp, key );
@@ -3713,11 +3712,11 @@ again:
 			/* Set up the reverse instruction. */
 			treeUpref( key );
 			treeUpref( existing );
-			append( exec->reverseCode, IN_MAP_STORE_BKT );
-			appendWord( exec->reverseCode, (Word)key );
-			appendWord( exec->reverseCode, (Word)existing );
+			append( exec->rcodeCollect, IN_MAP_STORE_BKT );
+			appendWord( exec->rcodeCollect, (Word)key );
+			appendWord( exec->rcodeCollect, (Word)existing );
 			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD + SIZEOF_WORD;
-			append( exec->reverseCode, exec->rcodeUnitLen );
+			append( exec->rcodeCollect, exec->rcodeUnitLen );
 			/* FLUSH */
 
 			treeDownref( prg, sp, obj );
@@ -3782,11 +3781,11 @@ again:
 			push( pair.val );
 
 			/* Reverse instruction. */
-			append( exec->reverseCode, IN_MAP_REMOVE_BKT );
-			appendWord( exec->reverseCode, (Word)pair.key );
-			appendWord( exec->reverseCode, (Word)pair.val );
+			append( exec->rcodeCollect, IN_MAP_REMOVE_BKT );
+			appendWord( exec->rcodeCollect, (Word)pair.key );
+			appendWord( exec->rcodeCollect, (Word)pair.val );
 			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD + SIZEOF_WORD;
-			append( exec->reverseCode, exec->rcodeUnitLen );
+			append( exec->rcodeCollect, exec->rcodeUnitLen );
 
 			treeDownref( prg, sp, obj );
 			treeDownref( prg, sp, key );

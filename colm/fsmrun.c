@@ -315,11 +315,11 @@ void sendBackIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inp
 		/* Check for reverse code. */
 		if ( ignore->tree->flags & AF_HAS_RCODE ) {
 			Execution exec;
-			initExecution( &exec, pdaRun->prg, &pdaRun->reverseCode, 
+			initExecution( &exec, pdaRun->prg, &pdaRun->rcodeCollect, 
 					pdaRun, fsmRun, 0, 0, 0, 0, 0 );
 
 			/* Do the reverse exeuction. */
-			rexecute( &exec, sp, pdaRun->allReverseCode );
+			rexecute( &exec, sp, &pdaRun->reverseCode );
 			ignore->tree->flags &= ~AF_HAS_RCODE;
 		}
 
@@ -421,11 +421,11 @@ void sendBack( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStre
 		/* Check for reverse code. */
 		if ( input->tree->flags & AF_HAS_RCODE ) {
 			Execution exec;
-			initExecution( &exec, pdaRun->prg, &pdaRun->reverseCode, 
+			initExecution( &exec, pdaRun->prg, &pdaRun->rcodeCollect, 
 					pdaRun, fsmRun, 0, 0, 0, 0, 0 );
 
 			/* Do the reverse exeuction. */
-			rexecute( &exec, sp, pdaRun->allReverseCode );
+			rexecute( &exec, sp, &pdaRun->reverseCode );
 			input->tree->flags &= ~AF_HAS_RCODE;
 		}
 
@@ -488,7 +488,7 @@ void queueBackTree( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inpu
 void addNoToken( Program *prg, PdaRun *parser )
 {
 	/* Check if there was anything generated. */
-	if ( parser->queue == 0 && parser->reverseCode.tabLen > 0 ) {
+	if ( parser->queue == 0 && parser->rcodeCollect.tabLen > 0 ) {
 		debug( REALM_PARSE, "found reverse code but no token, sending _notoken\n" );
 
 		Tree *tree = (Tree*)parseTreeAllocate( prg );
@@ -580,7 +580,7 @@ void executeGenerationAction( Tree **sp, Program *prg, FsmRun *fsmRun, PdaRun *p
 {
 	/* Execute the translation. */
 	Execution exec;
-	initExecution( &exec, prg, &pdaRun->reverseCode, pdaRun, fsmRun, code, 0, id, tokdata, fsmRun->mark );
+	initExecution( &exec, prg, &pdaRun->rcodeCollect, pdaRun, fsmRun, code, 0, id, tokdata, fsmRun->mark );
 	execute( &exec, sp );
 
 	/* If there is revese code but nothing generated we need a noToken. */
@@ -590,7 +590,7 @@ void executeGenerationAction( Tree **sp, Program *prg, FsmRun *fsmRun, PdaRun *p
 	 * queue is not empty. Pull the reverse code out and store in the
 	 * token. */
 	Tree *tree = pdaRun->queue->tree;
-	int hasrcode = makeReverseCode( pdaRun->allReverseCode, &pdaRun->reverseCode );
+	int hasrcode = makeReverseCode( &pdaRun->reverseCode, &pdaRun->rcodeCollect );
 	if ( hasrcode )
 		tree->flags |= AF_HAS_RCODE;
 }
