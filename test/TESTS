@@ -7,6 +7,7 @@ SUBDIRS="
 	xml
 	http
 	cxx
+	ruby
 "
 
 TESTS="

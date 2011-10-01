@@ -453,11 +453,6 @@ int testFalse( Program *prg, Tree *tree )
 	return flse;
 }
 
-void printStr2( FILE *out, Head *str )
-{
-	fwrite( (char*)(str->data), str->length, 1, out );
-}
-
 void streamFree( Program *prg, Stream *s )
 {
 	free( s->in );
@@ -1845,8 +1840,8 @@ rec_call:
 	}
 	else {
 		/* First print the ignore tokens. */
-		if ( commAttr )
-			printXmlIgnoreList( out, sp, prg, kid->tree, depth );
+// FIXME if ( commAttr )
+//			printXmlIgnoreList( out, sp, prg, kid->tree, depth );
 
 		for ( i = 0; i < depth; i++ )
 			fprintf( out, "  " );
@@ -1871,10 +1866,6 @@ rec_call:
 
 			kidNum = 0;
 			kid = child;
-
-			/* Skip over attributes if not printing comments and attributes. */
-			if ( ! commAttr )
-				kid = child;
 
 			while ( kid != 0 ) {
 				/* FIXME: I don't think we need this check for ignore any more. */
