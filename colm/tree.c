@@ -794,7 +794,7 @@ free_tree:
 			clearContext( accum->pdaRun, sp );
 			rcodeDownrefAll( prg, sp, accum->pdaRun->allReverseCode );
 			rtCodeVectEmpty( accum->pdaRun->allReverseCode );
-			rtCodeVectEmpty( &accum->pdaRun->rcodeCollect );
+			rtCodeVectEmpty( &accum->pdaRun->reverseCode );
 			free( accum->pdaRun->allReverseCode );
 			free( accum->pdaRun );
 			treeDownref( prg, sp, (Tree*)accum->stream );
