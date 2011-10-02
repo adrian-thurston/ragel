@@ -86,6 +86,7 @@ typedef struct _FsmRun
 } FsmRun;
 
 void initFsmRun( FsmRun *fsmRun, struct _Program *prg );
+void cleanFsmRun( struct _Program *prg, FsmRun *fsmRun );
 void updatePosition( InputStream *inputStream, const char *data, long length );
 void undoPosition( InputStream *inputStream, const char *data, long length );
 void takeBackBuffered( InputStream *inputStream );

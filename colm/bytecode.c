@@ -543,6 +543,8 @@ void initProgram( Program *prg, int argc, char **argv, int ctxDepParsing,
 
 	prg->trueVal = (Tree*)trueInt;
 	prg->falseVal = (Tree*)falseInt;
+
+	prg->allocRunBuf = 0;
 }
 
 void clearGlobal( Program *prg, Tree **sp )
@@ -629,6 +631,13 @@ void clearProgram( Program *prg, Tree **vm_stack, Tree **sp )
 	ilClear( prg );
 
 	//memset( vm_stack, 0, sizeof(Tree*) * VM_STACK_SIZE);
+
+	RunBuf *rb = prg->allocRunBuf;
+	while ( rb != 0 ) {
+		RunBuf *next = rb->next;
+		free( rb );
+		rb = next;
+	}
 }
 
 void allocGlobal( Program *prg )

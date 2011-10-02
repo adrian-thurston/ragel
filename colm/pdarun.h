@@ -459,6 +459,8 @@ typedef struct _Program
 	Stream *stdinVal;
 	Stream *stdoutVal;
 	Stream *stderrVal;
+
+	RunBuf *allocRunBuf;
 } Program;
 
 typedef struct _TreeIter

@@ -61,6 +61,19 @@ void initFsmRun( FsmRun *fsmRun, Program *prg )
 	fsmRun->peof = 0;
 }
 
+void cleanFsmRun( Program *prg, FsmRun *fsmRun )
+{
+	if ( fsmRun->runBuf != 0 ) {
+		/* Transfer the run buf list to the program */
+		RunBuf *head = fsmRun->runBuf;
+		RunBuf *tail = head;
+		while ( tail->next != 0 )
+			tail = tail->next;
+
+		tail->next = prg->allocRunBuf;
+		prg->allocRunBuf = head;
+	}
+}
 
 /* Keep the position up to date after consuming text. */
 void updatePosition( InputStream *inputStream, const char *data, long length )
@@ -295,11 +308,6 @@ void sendBackIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inp
 {
 	Kid *ignore = ignoreKidList;
 	while ( ignore != 0 ) {
-		if ( ignore->tree->id == pdaRun->prg->rtd->noTokenId )
-			message( "no token id sent back in ignore list %d\n", ignore->tree->refs );
-		else
-			message( "sent back in ignore list %d\n", ignore->tree->refs );
-
 		#ifdef COLM_LOG
 		LangElInfo *lelInfo = pdaRun->tables->rtd->lelInfo;
 		debug( REALM_PARSE, "sending back: %s%s\n",
