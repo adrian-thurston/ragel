@@ -456,6 +456,7 @@ void sendBack( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStre
 /* This is the entry point for the perser to send back tokens. */
 void queueBackTree( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input )
 {
+#if 0
 	/* If there are queued items send them back starting at the tail
 	 * (newest). */
 	if ( pdaRun->queue != 0 ) {
@@ -477,61 +478,10 @@ void queueBackTree( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inpu
 
 		pdaRun->queue = 0;
 	}
+#endif
 
 	/* Now that the queue is flushed, can send back the original item. */
 	sendBack( sp, pdaRun, fsmRun, inputStream, input );
-}
-
-
-/* If no token was generated but there is reverse code then we must generate
- * a fake token so we can attach the reverse code to it. */
-void addNoToken( Program *prg, PdaRun *parser )
-{
-	/* Check if there was anything generated. */
-	if ( parser->queue == 0 && parser->rcodeCollect.tabLen > 0 ) {
-		debug( REALM_PARSE, "found reverse code but no token, sending _notoken\n" );
-
-		Tree *tree = (Tree*)parseTreeAllocate( prg );
-		tree->flags |= AF_PARSE_TREE;
-		tree->refs = 1;
-		tree->id = prg->rtd->noTokenId;
-		tree->tokdata = 0;
-
-		parser->queue = kidAllocate( prg );
-		parser->queue->tree = tree;
-		parser->queue->next = 0;
-	}
-}
-
-void sendQueuedTokens( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
-{
-	LangElInfo *lelInfo = fsmRun->prg->rtd->lelInfo;
-
-	while ( pdaRun->queue != 0 ) {
-		/* Pull an item to send off the queue. */
-		Kid *send = pdaRun->queue;
-		pdaRun->queue = pdaRun->queue->next;
-
-		/* Must clear next, since the parsing algorithm uses it. */
-		send->next = 0;
-		if ( lelInfo[send->tree->id].ignore ) {
-			debug( REALM_PARSE, "ignoring queued item: %s\n",
-					pdaRun->tables->rtd->lelInfo[send->tree->id].name );
-
-			incrementConsumed( pdaRun );
-
-			ignoreTree( pdaRun, send->tree );
-			kidFree( fsmRun->prg, send );
-		}
-		else {
-			debug( REALM_PARSE, "sending queue item: %s\n",
-					pdaRun->tables->rtd->lelInfo[send->tree->id].name );
-
-			incrementConsumed( pdaRun );
-
-			sendHandleError( sp, pdaRun, fsmRun, inputStream, send );
-		}
-	}
 }
 
 Kid *makeToken( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, int id,
@@ -576,23 +526,43 @@ Kid *makeToken( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, int id
 }
 
 void executeGenerationAction( Tree **sp, Program *prg, FsmRun *fsmRun, PdaRun *pdaRun, 
-		Code *code, long id, Head *tokdata )
+		InputStream *inputStream, Code *code, long id, Head *tokdata )
 {
 	/* Execute the translation. */
 	Execution exec;
 	initExecution( &exec, prg, &pdaRun->rcodeCollect, pdaRun, fsmRun, code, 0, id, tokdata, fsmRun->mark );
 	execute( &exec, sp );
 
-	/* If there is revese code but nothing generated we need a noToken. */
-	addNoToken( prg, pdaRun );
+	/* 
+	 * Need a no-token.
+	 */
 
-	/* If there is reverse code then addNoToken will guarantee that the
-	 * queue is not empty. Pull the reverse code out and store in the
-	 * token. */
-	Tree *tree = pdaRun->queue->tree;
-	int hasrcode = makeReverseCode( &pdaRun->reverseCode, &pdaRun->rcodeCollect );
-	if ( hasrcode )
-		tree->flags |= AF_HAS_RCODE;
+	/* Check if there was anything generated. */
+	if ( pdaRun->rcodeCollect.tabLen > 0 ) {
+		debug( REALM_PARSE, "found reverse code but no token, sending _notoken\n" );
+
+		Tree *tree = (Tree*)parseTreeAllocate( prg );
+		tree->flags |= AF_PARSE_TREE;
+		tree->refs = 1;
+		tree->id = prg->rtd->noTokenId;
+		tree->tokdata = 0;
+
+		Kid *send = kidAllocate( prg );
+		send->tree = tree;
+		send->next = 0;
+
+		/* If there is reverse code then addNoToken will guarantee that the
+		 * queue is not empty. Pull the reverse code out and store in the
+		 * token. */
+		int hasrcode = makeReverseCode( &pdaRun->reverseCode, &pdaRun->rcodeCollect );
+		if ( hasrcode )
+			tree->flags |= AF_HAS_RCODE;
+
+		incrementConsumed( pdaRun );
+
+		ignoreTree( pdaRun, send->tree );
+		kidFree( fsmRun->prg, send );
+	}
 }
 
 /* 
@@ -615,13 +585,10 @@ void generationAction( Tree **sp, InputStream *inputStream, FsmRun *fsmRun,
 			pdaRun->tables->rtd->lelInfo[id].frameId].codeWV;
 
 	/* Execute the action and process the queue. */
-	executeGenerationAction( sp, fsmRun->prg, fsmRun, pdaRun, code, id, tokdata );
+	executeGenerationAction( sp, fsmRun->prg, fsmRun, pdaRun, inputStream, code, id, tokdata );
 
 	/* Finished with the match text. */
 	stringFree( fsmRun->prg, tokdata );
-
-	/* Send the queued tokens. */
-	sendQueuedTokens( sp, pdaRun, fsmRun, inputStream );
 }
 
 Kid *extractIgnore( PdaRun *pdaRun )
@@ -863,10 +830,8 @@ void sendEof( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRu
 		Code *code = pdaRun->tables->rtd->frameInfo[frameId].codeWV;
 
 		/* Execute the action and process the queue. */
-		executeGenerationAction( sp, fsmRun->prg, fsmRun, pdaRun, code, input->tree->id, 0 );
-
-		/* Send the generated tokens. */
-		sendQueuedTokens( sp, pdaRun, fsmRun, inputStream );
+		executeGenerationAction( sp, fsmRun->prg, fsmRun, pdaRun,
+				inputStream, code, input->tree->id, 0 );
 	}
 
 	sendWithIgnore( sp, pdaRun, fsmRun, inputStream, input );

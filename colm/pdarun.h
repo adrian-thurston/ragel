@@ -507,7 +507,6 @@ typedef struct _PdaRun
 	long stopTarget;
 
 	Kid *accumIgnore;
-	Kid *queue, *queueLast;
 
 	struct Bindings *bindings;
 
@@ -626,9 +625,7 @@ Kid *makeToken( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, int id
 		Head *tokdata, int namedLangEl, int bindId );
 void makeTokenPushBinding( PdaRun *pdaRun, int bindId, Tree *tree );
 void executeGenerationAction( Tree **sp, Program *prg, FsmRun *fsmRun, PdaRun *pdaRun, 
-		Code *code, long id, Head *tokdata );
-void generationAction( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, 
-		PdaRun *pdaRun, int id, Head *tokdata, int namedLangEl, int bindId );
+		InputStream *inputStream, Code *code, long id, Head *tokdata );
 Kid *extractIgnore( PdaRun *pdaRun );
 void sendBackQueuedIgnore( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun );
 void clearIgnoreList( Program *prg, Tree **sp, Kid *kid );
