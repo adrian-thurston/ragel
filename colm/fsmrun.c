@@ -291,12 +291,15 @@ void sendBackText( FsmRun *fsmRun, InputStream *inputStream, const char *data, l
 	undoPosition( inputStream, data, length );
 }
 
-void sendBackIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *ignore )
+void sendBackIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *ignoreKidList )
 {
-	/* Ignore tokens are queued in reverse order. Reverse the list fist. */
-	ignore = reverseKidList( ignore );
-
+	Kid *ignore = ignoreKidList;
 	while ( ignore != 0 ) {
+		if ( ignore->tree->id == pdaRun->prg->rtd->noTokenId )
+			message( "no token id sent back in ignore list %d\n", ignore->tree->refs );
+		else
+			message( "sent back in ignore list %d\n", ignore->tree->refs );
+
 		#ifdef COLM_LOG
 		LangElInfo *lelInfo = pdaRun->tables->rtd->lelInfo;
 		debug( REALM_PARSE, "sending back: %s%s\n",
@@ -324,6 +327,14 @@ void sendBackIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inp
 		}
 
 		ignore = ignore->next;
+	}
+
+	ignore = ignoreKidList;
+	while ( ignore != 0 ) {
+		Kid *next = ignore->next;
+		treeDownref( pdaRun->prg, sp, ignore->tree );
+		kidFree( pdaRun->prg, ignore );
+		ignore = next;
 	}
 }
 
@@ -402,16 +413,11 @@ void sendBack( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStre
 
 	}
 
-	/* Send back. */
-
 	/* Artifical were not parsed, instead sent in as items. */
 	if ( input->tree->flags & AF_ARTIFICIAL ) {
 		treeUpref( input->tree );
 
 		streamPushTree( inputStream, input->tree, false );
-
-		if ( leftIgnore != 0 )
-			sendBackIgnore( sp, pdaRun, fsmRun, inputStream, leftIgnore->child );
 	}
 	else {
 		/* Push back the token data. */
@@ -429,16 +435,18 @@ void sendBack( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStre
 			input->tree->flags &= ~AF_HAS_RCODE;
 		}
 
-		/* Always push back the ignore text. */
-		if ( leftIgnore != 0 )
-			sendBackIgnore( sp, pdaRun, fsmRun, inputStream, leftIgnore->child );
-
 		/* If eof was just sent back remember that it needs to be sent again. */
 		if ( input->tree->id == pdaRun->tables->rtd->eofLelIds[pdaRun->parserId] )
 			inputStream->eofSent = false;
 
 		/* If the item is bound then store remove it from the bindings array. */
 		unbind( fsmRun->prg, sp, pdaRun, input->tree );
+	}
+
+	if ( leftIgnore != 0 ) {
+		Kid *ignore = reverseKidList( leftIgnore->child );
+		leftIgnore->child = 0;
+		sendBackIgnore( sp, pdaRun, fsmRun, inputStream, ignore );
 	}
 
 	if ( pdaRun->consumed == pdaRun->targetConsumed ) {
@@ -456,30 +464,6 @@ void sendBack( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStre
 /* This is the entry point for the perser to send back tokens. */
 void queueBackTree( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input )
 {
-#if 0
-	/* If there are queued items send them back starting at the tail
-	 * (newest). */
-	if ( pdaRun->queue != 0 ) {
-		/* Reverse the list. */
-		Kid *kid = pdaRun->queue, *last = 0;
-		while ( kid != 0 ) {
-			Kid *next = kid->next;
-			kid->next = last;
-			last = kid;
-			kid = next;
-		}
-
-		/* Send them back. */
-		while ( last != 0 ) {
-			Kid *next = last->next;
-			sendBack( sp, pdaRun, fsmRun, inputStream, last );
-			last = next;
-		}
-
-		pdaRun->queue = 0;
-	}
-#endif
-
 	/* Now that the queue is flushed, can send back the original item. */
 	sendBack( sp, pdaRun, fsmRun, inputStream, input );
 }
@@ -603,12 +587,6 @@ void sendBackQueuedIgnore( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, 
 {
 	Kid *ignore = extractIgnore( pdaRun );
 	sendBackIgnore( sp, pdaRun, fsmRun, inputStream, ignore );
-	while ( ignore != 0 ) {
-		Kid *next = ignore->next;
-		treeDownref( pdaRun->prg, sp, ignore->tree );
-		kidFree( pdaRun->prg, ignore );
-		ignore = next;
-	}
 }
 
 void clearIgnoreList( Program *prg, Tree **sp, Kid *kid )
