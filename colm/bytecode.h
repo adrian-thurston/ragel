@@ -448,15 +448,14 @@ void initExecution( Execution *exec, Program *prg, RtCodeVect *reverseCode,
 		PdaRun *pdaRun, FsmRun *fsmRun, Code *code, Tree *lhs,
 		long genId, Head *matchText, char **captures );
 
-void rexecute( Execution *exec, Tree **sp, RtCodeVect *allRev );
+void forwardExecution( Execution *exec, Tree **sp );
+void reverseExecution( Execution *exec, Tree **sp, RtCodeVect *allRev );
 
 Kid *allocAttrs( Program *prg, long length );
 void freeAttrs( Program *prg, Kid *attrs );
 void setAttr( Tree *tree, long pos, Tree *val );
 Tree *getAttr( Tree *tree, long pos );
 Kid *getAttrKid( Tree *tree, long pos );
-
-void execute( Execution *exec, Tree **sp );
 
 Tree *splitTree( Program *prg, Tree *t );
 void rcodeDownrefAll( Program *prg, Tree **sp, RtCodeVect *cv );

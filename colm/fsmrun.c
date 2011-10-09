@@ -330,7 +330,7 @@ void sendBackIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inp
 					pdaRun, fsmRun, 0, 0, 0, 0, 0 );
 
 			/* Do the reverse exeuction. */
-			rexecute( &exec, sp, &pdaRun->reverseCode );
+			reverseExecution( &exec, sp, &pdaRun->reverseCode );
 			ignore->tree->flags &= ~AF_HAS_RCODE;
 		}
 
@@ -439,7 +439,7 @@ void sendBack( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStre
 					pdaRun, fsmRun, 0, 0, 0, 0, 0 );
 
 			/* Do the reverse exeuction. */
-			rexecute( &exec, sp, &pdaRun->reverseCode );
+			reverseExecution( &exec, sp, &pdaRun->reverseCode );
 			input->tree->flags &= ~AF_HAS_RCODE;
 		}
 
@@ -523,7 +523,7 @@ void executeGenerationAction( Tree **sp, Program *prg, FsmRun *fsmRun, PdaRun *p
 	/* Execute the translation. */
 	Execution exec;
 	initExecution( &exec, prg, &pdaRun->rcodeCollect, pdaRun, fsmRun, code, 0, id, tokdata, fsmRun->mark );
-	execute( &exec, sp );
+	forwardExecution( &exec, sp );
 
 	/* 
 	 * Need a no-token.
@@ -1157,6 +1157,11 @@ void parseLoop( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStr
 
 		if ( pdaRun->stop ) {
 			debug( REALM_PARSE, "parsing has been stopped by consumedCount\n" );
+			break;
+		}
+
+		if ( pdaRun->prg->induceExit ) {
+			debug( REALM_PARSE, "parsing has been stopped by a call to exit\n" );
 			break;
 		}
 	}

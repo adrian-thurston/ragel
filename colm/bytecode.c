@@ -276,49 +276,6 @@ Word streamAppend( Tree **sp, Program *prg, Tree *input, Stream *stream )
 	}
 }
 
-void parseFrag( Tree **sp, Program *prg, Tree *input, Accum *accum, long stopId )
-{
-	accum->pdaRun->stopTarget = stopId;
-	Stream *stream = (Stream*) extractInput( prg, accum );
-
-	if ( input->id == LEL_ID_STR ) {
-		//assert(false);
-		/* Collect the tree data. */
-		StrCollect collect;
-		initStrCollect( &collect );
-		printTreeCollect( &collect, sp, prg, input );
-
-		/* Load it into the input. */
-		stream->in->funcs->appendData( stream->in, collect.data, collect.length );
-
-		/* Parse. */
-		parseLoop( sp, accum->pdaRun, accum->fsmRun, stream->in );
-
-		strCollectDestroy( &collect );
-	}
-	else {
-		//assert(false);
-		/* Cause a flush */
-
-		input = prepParseTree( prg, sp, input );
-
-		if ( input->id >= prg->rtd->firstNonTermId )
-			input->id = prg->rtd->lelInfo[input->id].termDupId;
-
-		input->flags |= AF_ARTIFICIAL;
-
-		treeUpref( input );
-		stream->in->funcs->appendTree( stream->in, input );
-
-		parseLoop( sp, accum->pdaRun, accum->fsmRun, stream->in );
-
-//		stream->in->flush = true;
-//		parseLoop( sp, accum->pdaRun, accum->fsmRun, stream->in );
-
-//		sendTreeFrag( prg, sp, accum->pdaRun, accum->fsmRun, stream->in, input, false );
-	}
-}
-
 void undoParseStream( Tree **sp, Program *prg, Stream *input, Accum *accum, long consumed )
 {
 	if ( consumed < accum->pdaRun->consumed ) {
@@ -521,6 +478,8 @@ void initProgram( Program *prg, int argc, char **argv, int ctxDepParsing,
 	prg->stdoutVal = 0;
 	prg->stderrVal = 0;
 	prg->nextIlGen = 0;
+	prg->induceExit = 0;
+	prg->exitStatus = 0;
 
 	initPoolAlloc( &prg->kidPool, sizeof(Kid) );
 	initPoolAlloc( &prg->treePool, sizeof(Tree) );
@@ -686,14 +645,9 @@ void runProgram( Program *prg )
 		Execution execution;
 		initRtCodeVect( &rcodeCollect );
 		initExecution( &execution, prg, &rcodeCollect, 0, 0, prg->rtd->rootCode, 0, 0, 0, 0 );
-		execute( &execution, root );
+		forwardExecution( &execution, root );
 
-		/* Pull out the reverse code and free it. */
-		#ifdef COLM_LOG_BYTECODE
-		if ( colm_log_bytecode ) {
-			cerr << "freeing the root reverse code" << endl;
-		}
-		#endif
+		debug( REALM_BYTECODE, "freeing the root reverse code" );
 
 		/* The root code should all be commit code and reverse code
 		 * should be empty. */
@@ -1028,7 +982,7 @@ again:
 	goto again;
 }
 
-void execute( Execution *exec, Tree **sp )
+void forwardExecution( Execution *exec, Tree **sp )
 {
 	/* If we have a lhs push it to the stack. */
 	int haveLhs = exec->lhs != 0;
@@ -1074,7 +1028,7 @@ int makeReverseCode( RtCodeVect *all, RtCodeVect *reverseCode )
 	return true;
 }
 
-void rexecute( Execution *exec, Tree **root, RtCodeVect *allRev )
+void reverseExecution( Execution *exec, Tree **root, RtCodeVect *allRev )
 {
 	/* Read the length */
 	Code *prcode = allRev->data + allRev->tabLen - SIZEOF_WORD;
@@ -2760,6 +2714,8 @@ again:
 
 			treeDownref( prg, sp, stream );
 			treeDownref( prg, sp, accum );
+			if ( prg->induceExit )
+				goto out;
 			break;
 		}
 
@@ -2787,6 +2743,8 @@ again:
 			appendWord( exec->rcodeCollect, (Word) stream );
 			appendWord( exec->rcodeCollect, consumed );
 			append( exec->rcodeCollect, SIZEOF_CODE + 3 * SIZEOF_WORD );
+			if ( prg->induceExit )
+				goto out;
 			break;
 		}
 
@@ -2798,10 +2756,7 @@ again:
 			read_tree( input );
 			read_word( consumed );
 
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode )
-				cerr << "IN_PARSE_FRAG_BKT " << consumed << endl;
-			#endif
+			debug( REALM_BYTECODE, "IN_PARSE_FRAG_BKT " << consumed );
 
 			undoParseStream( sp, prg, (Stream*)input, (Accum*)accum, consumed );
 
@@ -2811,16 +2766,14 @@ again:
 		}
 
 		case IN_PARSE_FINISH_WC: {
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode ) {
-				cerr << "IN_PARSE_FINISH_WC " << endl;
-			}
-			#endif
+			debug( REALM_BYTECODE, "IN_PARSE_FINISH_WC " );
 
 			Tree *accum = pop();
 			Tree *result = parseFinish( sp, prg, (Accum*)accum, false );
 			push( result );
 			treeDownref( prg, sp, accum );
+			if ( prg->induceExit )
+				goto out;
 			break;
 		}
 		case IN_PARSE_FINISH_WV: {
@@ -2841,6 +2794,8 @@ again:
 			appendWord( exec->rcodeCollect, (Word) result );
 			appendWord( exec->rcodeCollect, (Word) consumed );
 			append( exec->rcodeCollect, SIZEOF_CODE + 3*SIZEOF_WORD );
+			if ( prg->induceExit )
+				goto out;
 			break;
 		}
 		case IN_PARSE_FINISH_BKT: {
@@ -4092,8 +4047,9 @@ again:
 			#endif
 
 			Int *status = (Int*)pop();
-			exit( status->value );
-			break;
+			prg->exitStatus = status->value;
+			prg->induceExit = 1;
+			goto out;
 		}
 		case IN_OPEN_FILE: {
 			#ifdef COLM_LOG_BYTECODE
@@ -4173,7 +4129,9 @@ again:
 	goto again;
 
 out:
-	assert( sp == root );
+	if ( ! prg->induceExit ) {
+		assert( sp == root );
+	}
 }
 
 void parseError( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, int tokId, Tree *tree )

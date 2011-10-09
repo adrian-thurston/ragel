@@ -441,6 +441,8 @@ typedef struct _Program
 	RuntimeData *rtd;
 	Tree *global;
 	long nextIlGen;
+	int induceExit;
+	int exitStatus;
 
 	PoolAlloc kidPool;
 	PoolAlloc treePool;

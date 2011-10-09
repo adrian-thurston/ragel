@@ -596,8 +596,10 @@ again:
 			initExecution( &exec, pdaRun->prg, &pdaRun->rcodeCollect, 
 					pdaRun, fsmRun, fi->codeWV, redLel->tree, 0, 0, fsmRun->mark );
 
-			/* Execute it. */
-			execute( &exec, sp );
+			forwardExecution( &exec, sp );
+
+			if ( exec.prg->induceExit )
+				goto fail;
 
 			/* If the lhs was saved and it changed then we need to restore the
 			 * original upon backtracking, otherwise downref since we took a
@@ -777,7 +779,7 @@ parseError:
 						pdaRun, fsmRun, 0, 0, 0, 0, fsmRun->mark );
 
 				/* Do the reverse exeuction. */
-				rexecute( &exec, sp, &pdaRun->reverseCode );
+				reverseExecution( &exec, sp, &pdaRun->reverseCode );
 				undoLel->tree->flags &= ~AF_HAS_RCODE;
 
 				if ( exec.lhs != 0 ) {
