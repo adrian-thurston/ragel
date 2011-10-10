@@ -901,8 +901,7 @@ Kid *treeExtractChild( Program *prg, Tree *tree )
 		kid = kid->next;
 
 	/* Skip over attributes. */
-	long objectLength = lelInfo[tree->id].objectLength;
-	long a;
+	long a, objectLength = lelInfo[tree->id].objectLength;
 	for ( a = 0; a < objectLength; a++ ) {
 		last = kid;
 		kid = kid->next;
@@ -912,6 +911,20 @@ Kid *treeExtractChild( Program *prg, Tree *tree )
 		tree->child = 0;
 	else
 		last->next = 0;
+
+	return kid;
+}
+
+/* Find the first child of a tree. */
+Kid *treeAttr( Program *prg, const Tree *tree )
+{
+	LangElInfo *lelInfo = prg->rtd->lelInfo;
+	Kid *kid = tree->child;
+
+	if ( tree->flags & AF_LEFT_IGNORE )
+		kid = kid->next;
+	if ( tree->flags & AF_RIGHT_IGNORE )
+		kid = kid->next;
 
 	return kid;
 }
@@ -1945,15 +1958,6 @@ rec_call:
 		goto rec_return;
 }
 
-void printXmlTree( Tree **sp, Program *prg, Tree *tree, int commAttr )
-{
-	Kid kid;
-	kid.tree = tree;
-	kid.next = 0;
-	kid.flags = 0;
-	printXmlKid( stdout, sp, prg, &kid, commAttr, 0 );
-}
-
 void initStrCollect( StrCollect *collect )
 {
 	collect->data = (char*) malloc( BUFFER_INITIAL_SIZE );
@@ -1986,45 +1990,7 @@ void strCollectClear( StrCollect *collect )
 
 void printStr( PrintArgs *printArgs, Head *str )
 {
-	printArgs->out( printArgs->arg, (char*)(str->data), str->length );
-}
-
-void printTerm( PrintArgs *printArgs, Tree **sp, Program *prg, Kid *kid )
-{
-	debug( REALM_PRINT, "printing term %p\n", kid->tree );
-
-	if ( kid->tree->id == LEL_ID_INT ) {
-		char buf[INT_SZ];
-		sprintf( buf, "%ld", ((Int*)kid->tree)->value );
-		printArgs->out( printArgs->arg, buf, strlen(buf) );
-	}
-	else if ( kid->tree->id == LEL_ID_BOOL ) {
-		if ( ((Int*)kid->tree)->value )
-			printArgs->out( printArgs->arg, "true", 4 );
-		else
-			printArgs->out( printArgs->arg, "false", 5 );
-	}
-	else if ( kid->tree->id == LEL_ID_PTR ) {
-		char buf[INT_SZ];
-		printArgs->out( printArgs->arg, "#", 1 );
-		sprintf( buf, "%p", (void*) ((Pointer*)kid->tree)->value );
-		printArgs->out( printArgs->arg, buf, strlen(buf) );
-	}
-	else if ( kid->tree->id == LEL_ID_STR ) {
-		printStr( printArgs, ((Str*)kid->tree)->value );
-	}
-	else if ( kid->tree->id == LEL_ID_STREAM ) {
-		char buf[INT_SZ];
-		printArgs->out( printArgs->arg, "#", 1 );
-		sprintf( buf, "%p", (void*) ((Stream*)kid->tree)->file );
-		printArgs->out( printArgs->arg, buf, strlen(buf) );
-	}
-	else if ( kid->tree->tokdata != 0 && 
-			stringLength( kid->tree->tokdata ) > 0 )
-	{
-		printArgs->out( printArgs->arg, stringData( kid->tree->tokdata ), 
-				stringLength( kid->tree->tokdata ) );
-	}
+	printArgs->out( printArgs, (char*)(str->data), str->length );
 }
 
 enum ReturnType
@@ -2046,6 +2012,7 @@ enum ReturnType
 
 void printKid( PrintArgs *printArgs, Tree **sp, Program *prg, Kid *kid )
 {
+	LangElInfo *lelInfo = prg->rtd->lelInfo;
 	Tree **root = vm_ptop();
 	enum ReturnType rt;
 	Kid *child;
@@ -2100,96 +2067,115 @@ rec_call:
 			leadingIgnore->tree = kid->tree;
 		}
 	}
-	else if ( kid->tree->id < prg->rtd->firstNonTermId ) {
-		/* 
-		 * First print any leading ignore.
-		 */
-		suppressLeftStop = 0;
-
-		/* Reverse the leading ignore list. */
-		if ( leadingIgnore != 0 ) {
-			Kid *ignore = 0, *last = 0;
-			long youngest = -1;
-			Kid *youngestKid = 0;
-
-			debug( REALM_PRINT, "printing ignore %p\n", leadingIgnore->tree );
-
-			/* Reverse the list. */
-			while ( true ) {
-				Kid *next = leadingIgnore->next;
-				leadingIgnore->next = last;
-
-				if ( ((IgnoreList*)leadingIgnore->tree)->generation > youngest ) {
-					youngest = ((IgnoreList*)leadingIgnore->tree)->generation;
-					youngestKid = leadingIgnore;
-				}
-
-				if ( next == 0 )
-					break;
-
-				last = leadingIgnore;
-				leadingIgnore = next;
-			}
-			
-			Kid *start = leadingIgnore;
-			Kid *stop = 0;
-
-			/* Print the leading ignore list, free the kids in the process. */
-			ignore = youngestKid;
-			if ( ignore != 0 && kid->tree->id != 0 &&
-				(printFlags & IPF_TERM_PRINTED) )
-			{	
-				/* Non-terminal. */
-				Kid *child = treeChild( prg, ignore->tree );
-				if ( child != 0 ) {
-					vm_push( (SW)leadingIgnore );
-					vm_push( (SW)ignore );
-					vm_push( (SW)kid );
-					leadingIgnore = 0;
-					kid = child;
-					while ( kid != 0 ) {
-						debug( REALM_PRINT, "rec call on %p\n", kid->tree );
-						vm_push( (SW) RecIgnoreList );
-						goto rec_call;
-						rec_return_il:
-						kid = kid->next;
-					}
-					kid = (Kid*)vm_pop();
-					ignore = (Kid*)vm_pop();
-					leadingIgnore = (Kid*)vm_pop();
-				}
-			}
-
-			/* Free the leading ignore list. */
-			while ( leadingIgnore != 0 ) {
-				Kid *next = leadingIgnore->next;
-				kidFree( prg, leadingIgnore );
-				leadingIgnore = next;
-			}
-		}
-
-		debug( DBG_PRINT, "printing terminal %p\n", kid->tree );
-		if ( kid->tree->id != 0 ) {
-			printFlags |= IPF_TERM_PRINTED;
-			printTerm( printArgs, sp, prg, kid );
-		}
-
-		printFlags &= ~IPF_SUPPRESS;
-	}
 	else {
-		/* Non-terminal. */
-		Kid *child = treeChild( prg, kid->tree );
+		Kid *child = printArgs->attr ? 
+			treeAttr( prg, kid->tree ) : 
+			treeChild( prg, kid->tree );
+
+		printArgs->openTree( printArgs, sp, prg, kid );
+
+		if ( kid->tree->id < prg->rtd->firstNonTermId ) {
+			/* 
+			 * First print any leading ignore.
+			 */
+			suppressLeftStop = 0;
+
+			/* Reverse the leading ignore list. */
+			if ( leadingIgnore != 0 ) {
+				Kid *ignore = 0, *last = 0;
+				long youngest = -1;
+				Kid *youngestKid = 0;
+
+				debug( REALM_PRINT, "printing ignore %p\n", leadingIgnore->tree );
+
+				/* Reverse the list. */
+				while ( true ) {
+					Kid *next = leadingIgnore->next;
+					leadingIgnore->next = last;
+
+					if ( ((IgnoreList*)leadingIgnore->tree)->generation > youngest ) {
+						youngest = ((IgnoreList*)leadingIgnore->tree)->generation;
+						youngestKid = leadingIgnore;
+					}
+
+					if ( next == 0 )
+						break;
+
+					last = leadingIgnore;
+					leadingIgnore = next;
+				}
+			
+				Kid *start = leadingIgnore;
+				Kid *stop = 0;
+
+				/* Print the leading ignore list, free the kids in the process. */
+				ignore = youngestKid;
+				if ( printArgs->comm && ignore != 0 && kid->tree->id != 0 &&
+					(printFlags & IPF_TERM_PRINTED) )
+				{	
+					/* Non-terminal. */
+					Kid *child = treeChild( prg, ignore->tree );
+					if ( child != 0 ) {
+						vm_push( (SW)leadingIgnore );
+						vm_push( (SW)ignore );
+						vm_push( (SW)kid );
+						leadingIgnore = 0;
+						kid = child;
+						while ( kid != 0 ) {
+							debug( REALM_PRINT, "rec call on %p\n", kid->tree );
+							vm_push( (SW) RecIgnoreList );
+							goto rec_call;
+							rec_return_il:
+							kid = kid->next;
+						}
+						kid = (Kid*)vm_pop();
+						ignore = (Kid*)vm_pop();
+						leadingIgnore = (Kid*)vm_pop();
+					}
+				}
+
+				/* Free the leading ignore list. */
+				while ( leadingIgnore != 0 ) {
+					Kid *next = leadingIgnore->next;
+					kidFree( prg, leadingIgnore );
+					leadingIgnore = next;
+				}
+			}
+
+			debug( DBG_PRINT, "printing terminal %p\n", kid->tree );
+			if ( kid->tree->id != 0 ) {
+				printFlags |= IPF_TERM_PRINTED;
+				printArgs->printTerm( printArgs, sp, prg, kid );
+			}
+
+			printFlags &= ~IPF_SUPPRESS;
+		}
+
 		if ( child != 0 ) {
 			vm_push( (SW)kid );
 			kid = child;
 			while ( kid != 0 ) {
 				vm_push( (SW) ChildPrint );
 				goto rec_call;
+
 				rec_return:
+
 				kid = kid->next;
+
+				/* If the parent kid is a repeat then skip this node and go
+				 * right to the first child (repeated item). */
+				if ( lelInfo[((Kid*)vm_top())->tree->id].repeat )
+					kid = treeChild( prg, kid->tree );
+
+				/* If we have a kid and the parent is a list (recursive prod of
+				 * list) then go right to the first child. */
+				if ( kid != 0 && lelInfo[((Kid*)vm_top())->tree->id].list )
+					kid = treeChild( prg, kid->tree );
 			}
 			kid = (Kid*)vm_pop();
 		}
+
+		printArgs->closeTree( printArgs, sp, prg, kid );
 	}
 
 	/* If not currently skipping ignore data, then print it. Ignore data can
@@ -2239,20 +2225,20 @@ rec_call:
 	}
 }
 
-void appendCollect( void *arg, const char *data, int length )
+void appendCollect( PrintArgs *args, const char *data, int length )
 {
-	strCollectAppend( (StrCollect*) arg, data, length );
+	strCollectAppend( (StrCollect*) args->arg, data, length );
 }
 
-void appendFile( void *arg, const char *data, int length )
+void appendFile( PrintArgs *args, const char *data, int length )
 {
-	fwrite( data, length, 1, (FILE*)arg );
+	fwrite( data, length, 1, (FILE*)args->arg );
 }
 
 void printTreeArgs( PrintArgs *printArgs, Tree **sp, Program *prg, Tree *tree )
 {
 	if ( tree == 0 )
-		printArgs->out( printArgs->arg, "NIL", 3 );
+		printArgs->out( printArgs, "NIL", 3 );
 	else {
 		Tree termTree;
 		memset( &termTree, 0, sizeof(termTree) );
@@ -2270,14 +2256,159 @@ void printTreeArgs( PrintArgs *printArgs, Tree **sp, Program *prg, Tree *tree )
 	}
 }
 
+void printTermTree( PrintArgs *printArgs, Tree **sp, Program *prg, Kid *kid )
+{
+	debug( REALM_PRINT, "printing term %p\n", kid->tree );
+
+	if ( kid->tree->id == LEL_ID_INT ) {
+		char buf[INT_SZ];
+		sprintf( buf, "%ld", ((Int*)kid->tree)->value );
+		printArgs->out( printArgs, buf, strlen(buf) );
+	}
+	else if ( kid->tree->id == LEL_ID_BOOL ) {
+		if ( ((Int*)kid->tree)->value )
+			printArgs->out( printArgs, "true", 4 );
+		else
+			printArgs->out( printArgs, "false", 5 );
+	}
+	else if ( kid->tree->id == LEL_ID_PTR ) {
+		char buf[INT_SZ];
+		printArgs->out( printArgs, "#", 1 );
+		sprintf( buf, "%p", (void*) ((Pointer*)kid->tree)->value );
+		printArgs->out( printArgs, buf, strlen(buf) );
+	}
+	else if ( kid->tree->id == LEL_ID_STR ) {
+		printStr( printArgs, ((Str*)kid->tree)->value );
+	}
+	else if ( kid->tree->id == LEL_ID_STREAM ) {
+		char buf[INT_SZ];
+		printArgs->out( printArgs, "#", 1 );
+		sprintf( buf, "%p", (void*) ((Stream*)kid->tree)->file );
+		printArgs->out( printArgs, buf, strlen(buf) );
+	}
+	else if ( kid->tree->tokdata != 0 && 
+			stringLength( kid->tree->tokdata ) > 0 )
+	{
+		printArgs->out( printArgs, stringData( kid->tree->tokdata ), 
+				stringLength( kid->tree->tokdata ) );
+	}
+}
+
+
+void printNull( struct _PrintArgs *args, Tree **sp, Program *prg, Kid *kid )
+{
+}
+
+void openTreeXml( struct _PrintArgs *args, Tree **sp, Program *prg, Kid *kid )
+{
+	LangElInfo *lelInfo = prg->rtd->lelInfo;
+	const char *name = lelInfo[kid->tree->id].name;
+	int i, objectLength;
+
+	args->out( args, "<", 1 );
+	if ( lelInfo[kid->tree->id].literal ) {
+		args->out( args, "lit", 3 );
+	}
+	else {
+		args->out( args, name, strlen( name ) );
+	}
+	args->out( args, ">", 1 );
+
+	objectLength = lelInfo[kid->tree->id].objectLength;
+
+	Kid *attr = treeAttr( prg, kid->tree );
+
+	for ( i = 0; i < objectLength; i++ ) {
+		kid = kid->next;
+	}
+}
+
+void printTermXml( PrintArgs *printArgs, Tree **sp, Program *prg, Kid *kid )
+{
+	int i, depth = 1, objectLength;
+	FILE *out = (FILE*)printArgs->arg;
+	LangElInfo *lelInfo = prg->rtd->lelInfo;
+	long kidNum = 0;;
+	Kid *child;
+	int commAttr = 0;
+
+//	for ( i = 0; i < depth; i++ )
+//		fprintf( out, "  " );
+
+	/* Open the tag. Afterwards we will either print data underneath it or
+	 * we will close it off immediately. */
+//	fprintf( out, "<%s", lelInfo[kid->tree->id].name );
+
+	objectLength = lelInfo[kid->tree->id].objectLength;
+	child = treeChild( prg, kid->tree );
+	if ( kid->tree->id == LEL_ID_PTR ) {
+		fprintf( out, "%p\n", (void*)((Pointer*)kid->tree)->value,
+				lelInfo[kid->tree->id].name );
+	}
+	else if ( kid->tree->id == LEL_ID_BOOL ) {
+		if ( ((Int*)kid->tree)->value )
+			fprintf( out, "true" );
+		else
+			fprintf( out, "false" );
+		//#fprintf( out, "%s>\n", lelInfo[kid->tree->id].name );
+	}
+	else if ( kid->tree->id == LEL_ID_INT ) {
+		fprintf( out, "%ld", ((Int*)kid->tree)->value,
+				lelInfo[kid->tree->id].name );
+	}
+	else if ( kid->tree->id == LEL_ID_STR ) {
+		Head *head = (Head*) ((Str*)kid->tree)->value;
+
+		//fprintf( out, ">" );
+		xmlEscapeData( out, (char*)(head->data), head->length );
+		//fprintf( out, "</%s>\n", lelInfo[kid->tree->id].name );
+	}
+	else if ( 0 < kid->tree->id && kid->tree->id < prg->rtd->firstNonTermId &&
+			kid->tree->id != LEL_ID_IGNORE_LIST &&
+			kid->tree->tokdata != 0 && 
+			stringLength( kid->tree->tokdata ) > 0 && 
+			!lelInfo[kid->tree->id].literal )
+	{
+		//fprintf( out, ">" );
+		xmlEscapeData( out, stringData( kid->tree->tokdata ), 
+				stringLength( kid->tree->tokdata ) );
+		//fprintf( out, "</%s>\n", lelInfo[kid->tree->id].name );
+	}
+}
+
+
+void closeTreeXml( struct _PrintArgs *args, Tree **sp, Program *prg, Kid *kid )
+{
+	LangElInfo *lelInfo = prg->rtd->lelInfo;
+	const char *name = lelInfo[kid->tree->id].name;
+	args->out( args, "</", 2 );
+	if ( lelInfo[kid->tree->id].literal ) {
+		args->out( args, "lit", 3 );
+	}
+	else {
+		args->out( args, name, strlen( name ) );
+	}
+	args->out( args, ">", 1 );
+}
+
 void printTreeCollect( StrCollect *collect, Tree **sp, Program *prg, Tree *tree )
 {
-	PrintArgs printArgs = { collect, &appendCollect };
+	PrintArgs printArgs = { collect, 1, 0, &appendCollect, 
+			&printNull, &printTermTree, &printNull };
 	printTreeArgs( &printArgs, sp, prg, tree );
 }
 
 void printTreeFile( FILE *out, Tree **sp, Program *prg, Tree *tree )
 {
-	PrintArgs printArgs = { out, &appendFile };
+	PrintArgs printArgs = { out, 1, 0, &appendFile, 
+			&printNull, &printTermTree, &printNull };
 	printTreeArgs( &printArgs, sp, prg, tree );
 }
+
+void printXmlStdout( Tree **sp, Program *prg, Tree *tree, int commAttr )
+{
+	PrintArgs printArgs = { stdout, commAttr, commAttr, &appendFile, 
+			&openTreeXml, &printTermXml, &closeTreeXml };
+	printTreeArgs( &printArgs, sp, prg, tree );
+}
+

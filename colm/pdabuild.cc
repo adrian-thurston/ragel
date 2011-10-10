@@ -1278,6 +1278,7 @@ void ParseData::makeRuntimeData()
 		LangEl *lel = langElIndex[i];
 		if ( lel != 0 ) {
 			runtimeData->lelInfo[i].name = lel->fullLit;
+			//runtimeData->lelInfo[i].literal = lel->fullLit;
 			runtimeData->lelInfo[i].repeat = lel->isRepeat;
 			runtimeData->lelInfo[i].list = lel->isList;
 			runtimeData->lelInfo[i].literal = lel->isLiteral;

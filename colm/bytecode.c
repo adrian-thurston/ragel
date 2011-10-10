@@ -1177,7 +1177,7 @@ again:
 
 			while ( n-- > 0 ) {
 				Tree *tree = pop();
-				printXmlTree( sp, prg, tree, true );
+				printXmlStdout( sp, prg, tree, true );
 				treeDownref( prg, sp, tree );
 			}
 			break;
@@ -1193,7 +1193,7 @@ again:
 
 			while ( n-- > 0 ) {
 				Tree *tree = pop();
-				printXmlTree( sp, prg, tree, false );
+				printXmlStdout( sp, prg, tree, false );
 				treeDownref( prg, sp, tree );
 			}
 			break;

@@ -45,6 +45,7 @@ IgnoreList *treeRightIgnore( Program *prg, Tree *tree );
 Kid *treeLeftIgnoreKid( Program *prg, Tree *tree );
 Kid *treeRightIgnoreKid( Program *prg, Tree *tree );
 Kid *treeChild( Program *prg, const Tree *tree );
+Kid *treeAttr( Program *prg, const Tree *tree );
 Kid *kidListConcat( Kid *list1, Kid *list2 );
 Kid *treeExtractChild( Program *prg, Tree *tree );
 Kid *reverseKidList( Kid *kid );
@@ -99,7 +100,7 @@ Tree *treeRevIterPrevChild( Program *prg, Tree ***psp, RevTreeIter *iter );
 Tree *treeIterNextRepeat( Program *prg, Tree ***psp, TreeIter *iter );
 Tree *treeIterPrevRepeat( Program *prg, Tree ***psp, TreeIter *iter );
 
-void printXmlTree( Tree **sp, Program *prg, Tree *tree, int commAttr );
+void printXmlStdout( Tree **sp, Program *prg, Tree *tree, int commAttr );
 
 
 /* An automatically grown buffer for collecting tokens. Always reuses space;
@@ -114,7 +115,12 @@ typedef struct _StrCollect
 typedef struct _PrintArgs
 {
 	void *arg;
-	void (*out)( void *arg, const char *data, int length );
+	int comm;
+	int attr;
+	void (*out)( struct _PrintArgs *args, const char *data, int length );
+	void (*openTree)( struct _PrintArgs *args, Tree **sp, Program *prg, Kid *kid );
+	void (*printTerm)( struct _PrintArgs *args, Tree **sp, Program *prg, Kid *kid );
+	void (*closeTree)( struct _PrintArgs *args, Tree **sp, Program *prg, Kid *kid );
 } PrintArgs;
 
 void initStrCollect( StrCollect *collect );
