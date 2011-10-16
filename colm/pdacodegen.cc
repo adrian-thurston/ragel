@@ -171,14 +171,20 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 	 */
 	out << "LangElInfo " << lelInfo() << "[] = {\n";
 	for ( int i = 0; i < runtimeData->numLangEls; i++ ) {
-		out << "\t{ \"";
+		out << "\t{";
+		
+		/* Name. */
+		out << " \"";
+		escapeLiteralString( out, runtimeData->lelInfo[i].name );
+		out << "\", ";
 
 		/* Name. */
-		escapeLiteralString( out, runtimeData->lelInfo[i].name );
-		out << "\"";
+		out << " \"";
+		escapeLiteralString( out, runtimeData->lelInfo[i].nameNonLit );
+		out << "\", ";
 		
 		/* Repeat, literal, ignore flags. */
-		out << ", " << (int)runtimeData->lelInfo[i].repeat << ", " << 
+		out << (int)runtimeData->lelInfo[i].repeat << ", " << 
 				(int)runtimeData->lelInfo[i].list << ", " <<
 				(int)runtimeData->lelInfo[i].literal << ", " <<
 				(int)runtimeData->lelInfo[i].ignore << ", ";

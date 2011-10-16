@@ -1993,6 +1993,17 @@ void printStr( PrintArgs *printArgs, Head *str )
 	printArgs->out( printArgs, (char*)(str->data), str->length );
 }
 
+void appendCollect( PrintArgs *args, const char *data, int length )
+{
+	strCollectAppend( (StrCollect*) args->arg, data, length );
+}
+
+void appendFile( PrintArgs *args, const char *data, int length )
+{
+	fwrite( data, length, 1, (FILE*)args->arg );
+}
+
+
 enum ReturnType
 {
 	Done = 1,
@@ -2047,6 +2058,10 @@ rec_call:
 		}
 	}
 
+	if ( kid->tree == 0 )
+		goto skip_null;
+
+
 	/* If not currently skipping ignore data, then print it. Ignore data can
 	 * be associated with terminals and nonterminals. */
 	if ( kid->tree->flags & AF_LEFT_IGNORE ) {
@@ -2068,11 +2083,6 @@ rec_call:
 		}
 	}
 	else {
-		Kid *child = printArgs->attr ? 
-			treeAttr( prg, kid->tree ) : 
-			treeChild( prg, kid->tree );
-
-		printArgs->openTree( printArgs, sp, prg, kid );
 
 		if ( kid->tree->id < prg->rtd->firstNonTermId ) {
 			/* 
@@ -2142,6 +2152,9 @@ rec_call:
 				}
 			}
 
+			if ( kid->tree->id != 0 )
+				printArgs->openTree( printArgs, sp, prg, kid );
+
 			debug( DBG_PRINT, "printing terminal %p\n", kid->tree );
 			if ( kid->tree->id != 0 ) {
 				printFlags |= IPF_TERM_PRINTED;
@@ -2150,6 +2163,14 @@ rec_call:
 
 			printFlags &= ~IPF_SUPPRESS;
 		}
+		else {
+			if ( kid->tree->id != 0 )
+				printArgs->openTree( printArgs, sp, prg, kid );
+		}
+
+		Kid *child = printArgs->attr ? 
+			treeAttr( prg, kid->tree ) : 
+			treeChild( prg, kid->tree );
 
 		if ( child != 0 ) {
 			vm_push( (SW)kid );
@@ -2175,7 +2196,8 @@ rec_call:
 			kid = (Kid*)vm_pop();
 		}
 
-		printArgs->closeTree( printArgs, sp, prg, kid );
+		if ( kid->tree->id != 0 )
+			printArgs->closeTree( printArgs, sp, prg, kid );
 	}
 
 	/* If not currently skipping ignore data, then print it. Ignore data can
@@ -2191,6 +2213,9 @@ rec_call:
 			kid = (Kid*)vm_pop();
 		}
 	}
+
+/* For skiping over content on null. */
+skip_null:
 
 	if ( kid->flags & KF_SUPPRESS_LEFT ) {
 		/* Free the leading ignore list. */
@@ -2223,16 +2248,6 @@ rec_call:
 			debug( REALM_PRINT, "return: child print\n" );
 			goto rec_return;
 	}
-}
-
-void appendCollect( PrintArgs *args, const char *data, int length )
-{
-	strCollectAppend( (StrCollect*) args->arg, data, length );
-}
-
-void appendFile( PrintArgs *args, const char *data, int length )
-{
-	fwrite( data, length, 1, (FILE*)args->arg );
 }
 
 void printTreeArgs( PrintArgs *printArgs, Tree **sp, Program *prg, Tree *tree )
@@ -2307,7 +2322,8 @@ void openTreeXml( struct _PrintArgs *args, Tree **sp, Program *prg, Kid *kid )
 
 	args->out( args, "<", 1 );
 	if ( lelInfo[kid->tree->id].literal ) {
-		args->out( args, "lit", 3 );
+		name = lelInfo[kid->tree->id].nameNonLit;
+		args->out( args, name, strlen( name ) );
 	}
 	else {
 		args->out( args, name, strlen( name ) );
@@ -2315,12 +2331,6 @@ void openTreeXml( struct _PrintArgs *args, Tree **sp, Program *prg, Kid *kid )
 	args->out( args, ">", 1 );
 
 	objectLength = lelInfo[kid->tree->id].objectLength;
-
-	Kid *attr = treeAttr( prg, kid->tree );
-
-	for ( i = 0; i < objectLength; i++ ) {
-		kid = kid->next;
-	}
 }
 
 void printTermXml( PrintArgs *printArgs, Tree **sp, Program *prg, Kid *kid )
@@ -2366,8 +2376,7 @@ void printTermXml( PrintArgs *printArgs, Tree **sp, Program *prg, Kid *kid )
 	else if ( 0 < kid->tree->id && kid->tree->id < prg->rtd->firstNonTermId &&
 			kid->tree->id != LEL_ID_IGNORE_LIST &&
 			kid->tree->tokdata != 0 && 
-			stringLength( kid->tree->tokdata ) > 0 && 
-			!lelInfo[kid->tree->id].literal )
+			stringLength( kid->tree->tokdata ) > 0 )
 	{
 		//fprintf( out, ">" );
 		xmlEscapeData( out, stringData( kid->tree->tokdata ), 
@@ -2383,7 +2392,8 @@ void closeTreeXml( struct _PrintArgs *args, Tree **sp, Program *prg, Kid *kid )
 	const char *name = lelInfo[kid->tree->id].name;
 	args->out( args, "</", 2 );
 	if ( lelInfo[kid->tree->id].literal ) {
-		args->out( args, "lit", 3 );
+		name = lelInfo[kid->tree->id].nameNonLit;
+		args->out( args, name, strlen( name ) );
 	}
 	else {
 		args->out( args, name, strlen( name ) );

@@ -1278,7 +1278,7 @@ void ParseData::makeRuntimeData()
 		LangEl *lel = langElIndex[i];
 		if ( lel != 0 ) {
 			runtimeData->lelInfo[i].name = lel->fullLit;
-			//runtimeData->lelInfo[i].literal = lel->fullLit;
+			runtimeData->lelInfo[i].nameNonLit = lel->fullName;
 			runtimeData->lelInfo[i].repeat = lel->isRepeat;
 			runtimeData->lelInfo[i].list = lel->isList;
 			runtimeData->lelInfo[i].literal = lel->isLiteral;
@@ -1326,6 +1326,7 @@ void ParseData::makeRuntimeData()
 		else {
 			memset(&runtimeData->lelInfo[i], 0, sizeof(LangElInfo) );
 			runtimeData->lelInfo[i].name = "__UNUSED";
+			runtimeData->lelInfo[i].nameNonLit = "__UNUSED";
 			runtimeData->lelInfo[i].frameId = -1;
 		}
 	}
