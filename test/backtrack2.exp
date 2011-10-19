@@ -1,11 +1,1 @@
-<start>
-  <prods>
-    <two>
-      <bang2>!</bang2>
-      <id>aa</id>
-      <id>bb</id>
-      <id>cc</id>
-      <id>dd</id>
-    </two>
-  </prods>
-</start>
+<start><prods><two><bang2>!</bang2><id>aa</id><id>bb</id><id>cc</id><id>dd</id></two></prods></start>

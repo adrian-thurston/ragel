@@ -1,13 +1,1 @@
-<start>
-  <E>
-    <E>
-      <F>
-        <number>9</number>
-      </F>
-    </E>
-    <'+'/>
-    <F>
-      <number>9</number>
-    </F>
-  </E>
-</start>
+<start><E><E><F><number>9</number></F></E><_literal_0001>+</_literal_0001><F><number>9</number></F></E></start>

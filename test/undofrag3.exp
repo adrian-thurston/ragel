@@ -1,15 +1,1 @@
-<out>
-  <_repeat_out_item>
-    <out_item>
-      <id>a</id>
-    </out_item>
-  </_repeat_out_item>
-</out>
-<out>
-  <_repeat_out_item>
-    <out_item>
-      <id>a</id>
-    </out_item>
-  </_repeat_out_item>
-</out>
-a . ;
+<out><_repeat_out_item><out_item><id>a</id></out_item></_repeat_out_item></out><out><_repeat_out_item><out_item><id>a</id></out_item></_repeat_out_item></out>a . ;
