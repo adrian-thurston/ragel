@@ -1,15 +1,2 @@
-<start>
-  <prefix>
-    <id>id</id>
-  </prefix>
-  <choice1>
-    <number>77</number>
-  </choice1>
-  <choice2>
-    <number>88</number>
-  </choice2>
-  <string>"hello"</string>
-  <id>dude</id>
-  <id>dude</id>
-  <EOL>&#10;</EOL>
-</start>
+<start><prefix><id>id</id></prefix><choice1><number>77</number></choice1><choice2><number>88</number></choice2><string>"hello"</string><id>dude</id><id>dude</id><EOL>
+</EOL></start>

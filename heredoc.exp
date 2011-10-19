@@ -1,39 +1,4 @@
-<heredoc>
-  <here_name>
-    <id>hello</id>
-  </here_name>
-  <here_data>
-    <_repeat_here_data_item>
-      <here_data_item>
-        <nl>&#10;</nl>
-      </here_data_item>
-      <here_data_item>
-        <id>random</id>
-      </here_data_item>
-      <here_data_item>
-        <other> 9392</other>
-      </here_data_item>
-      <here_data_item>
-        <id>af</id>
-      </here_data_item>
-      <here_data_item>
-        <other> </other>
-      </here_data_item>
-      <here_data_item>
-        <id>j</id>
-      </here_data_item>
-      <here_data_item>
-        <other>9 </other>
-      </here_data_item>
-      <here_data_item>
-        <id>stuff</id>
-      </here_data_item>
-      <here_data_item>
-        <nl>&#10;</nl>
-      </here_data_item>
-    </_repeat_here_data_item>
-  </here_data>
-  <here_close>hell</here_close>
-  <id>o</id>
-  <nl>&#10;</nl>
-</heredoc>
+<heredoc><here_name><id>hello</id></here_name><here_data><_repeat_here_data_item><here_data_item><nl>
+</nl></here_data_item><here_data_item><id>random</id></here_data_item><here_data_item><other> 9392</other></here_data_item><here_data_item><id>af</id></here_data_item><here_data_item><other> </other></here_data_item><here_data_item><id>j</id></here_data_item><here_data_item><other>9 </other></here_data_item><here_data_item><id>stuff</id></here_data_item><here_data_item><nl>
+</nl></here_data_item></_repeat_here_data_item></here_data><here_close>hell</here_close><id>o</id><nl>
+</nl></heredoc>
