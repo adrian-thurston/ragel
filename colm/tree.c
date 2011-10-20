@@ -1895,7 +1895,7 @@ void printKid( PrintArgs *printArgs, Tree **sp, Program *prg, Kid *kid )
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
 	Tree **root = vm_ptop();
 	enum ReturnType rt;
-	Kid *child;
+	Kid *parent = 0;
 	int printFlags = 0;
 	Kid *leadingIgnore = 0;
 	Kid *suppressLeftStop = 0;
@@ -1930,7 +1930,6 @@ rec_call:
 	if ( kid->tree == 0 )
 		goto skip_null;
 
-
 	/* If not currently skipping ignore data, then print it. Ignore data can
 	 * be associated with terminals and nonterminals. */
 	if ( kid->tree->flags & AF_LEFT_IGNORE ) {
@@ -1953,10 +1952,9 @@ rec_call:
 	}
 	else {
 
+		/* Terminals trigger leading ignore printing. */
 		if ( kid->tree->id < prg->rtd->firstNonTermId ) {
-			/* 
-			 * First print any leading ignore.
-			 */
+			/* Reset suppress left stop. */
 			suppressLeftStop = 0;
 
 			/* Reverse the leading ignore list. */
@@ -2020,10 +2018,13 @@ rec_call:
 					leadingIgnore = next;
 				}
 			}
+		}
 
-			if ( kid->tree->id != 0 )
-				printArgs->openTree( printArgs, sp, prg, kid );
+		/* Open the tree. */
+		printArgs->openTree( printArgs, sp, prg, parent, kid );
 
+		/* Print contents. */
+		if ( kid->tree->id < prg->rtd->firstNonTermId ) {
 			debug( DBG_PRINT, "printing terminal %p\n", kid->tree );
 			if ( kid->tree->id != 0 ) {
 				printFlags |= IPF_TERM_PRINTED;
@@ -2032,41 +2033,29 @@ rec_call:
 
 			printFlags &= ~IPF_SUPPRESS;
 		}
-		else {
-			if ( kid->tree->id != 0 )
-				printArgs->openTree( printArgs, sp, prg, kid );
-		}
 
+		/* Print children. */
 		Kid *child = printArgs->attr ? 
 			treeAttr( prg, kid->tree ) : 
 			treeChild( prg, kid->tree );
 
 		if ( child != 0 ) {
+			vm_push( (SW)parent );
 			vm_push( (SW)kid );
+			parent = kid;
 			kid = child;
 			while ( kid != 0 ) {
 				vm_push( (SW) ChildPrint );
 				goto rec_call;
-
 				rec_return:
-
 				kid = kid->next;
-
-				/* If the parent kid is a repeat then skip this node and go
-				 * right to the first child (repeated item). */
-				if ( lelInfo[((Kid*)vm_top())->tree->id].repeat )
-					kid = treeChild( prg, kid->tree );
-
-				/* If we have a kid and the parent is a list (recursive prod of
-				 * list) then go right to the first child. */
-				if ( kid != 0 && lelInfo[((Kid*)vm_top())->tree->id].list )
-					kid = treeChild( prg, kid->tree );
 			}
 			kid = (Kid*)vm_pop();
+			parent = (Kid*)vm_pop();
 		}
 
-		if ( kid->tree->id != 0 )
-			printArgs->closeTree( printArgs, sp, prg, kid );
+		/* close the tree. */
+		printArgs->closeTree( printArgs, sp, prg, parent, kid );
 	}
 
 	/* If not currently skipping ignore data, then print it. Ignore data can
@@ -2179,13 +2168,26 @@ void printTermTree( PrintArgs *printArgs, Tree **sp, Program *prg, Kid *kid )
 }
 
 
-void printNull( struct _PrintArgs *args, Tree **sp, Program *prg, Kid *kid )
+void printNull( struct _PrintArgs *args, Tree **sp, Program *prg, Kid *parent, Kid *kid )
 {
 }
 
-void openTreeXml( struct _PrintArgs *args, Tree **sp, Program *prg, Kid *kid )
+void openTreeXml( struct _PrintArgs *args, Tree **sp, Program *prg, Kid *parent, Kid *kid )
 {
+	/* Skip the terminal that is for forcing trailing ignores out. */
+	if ( kid->tree->id == 0 )
+		return;
+
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
+
+	/* Skip the repeats and lists that are a continuation of the list. This is
+	 * the list flattening. */
+	if ( parent != 0 && parent->tree->id == kid->tree->id && kid->next == 0 &&
+			( lelInfo[parent->tree->id].repeat || lelInfo[parent->tree->id].list ) )
+	{
+		return;
+	}
+
 	const char *name = lelInfo[kid->tree->id].name;
 	int i, objectLength;
 
@@ -2244,9 +2246,22 @@ void printTermXml( PrintArgs *printArgs, Tree **sp, Program *prg, Kid *kid )
 }
 
 
-void closeTreeXml( struct _PrintArgs *args, Tree **sp, Program *prg, Kid *kid )
+void closeTreeXml( struct _PrintArgs *args, Tree **sp, Program *prg, Kid *parent, Kid *kid )
 {
+	/* Skip the terminal that is for forcing trailing ignores out. */
+	if ( kid->tree->id == 0 )
+		return;
+
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
+
+	/* Skip the repeats and lists that are a continuation of the list. This is
+	 * the list flattening. */
+	if ( parent != 0 && parent->tree->id == kid->tree->id && kid->next == 0 &&
+			( lelInfo[parent->tree->id].repeat || lelInfo[parent->tree->id].list ) )
+	{
+		return;
+	}
+
 	const char *name = lelInfo[kid->tree->id].name;
 	args->out( args, "</", 2 );
 	if ( lelInfo[kid->tree->id].literal ) {

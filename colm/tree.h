@@ -118,9 +118,9 @@ typedef struct _PrintArgs
 	int comm;
 	int attr;
 	void (*out)( struct _PrintArgs *args, const char *data, int length );
-	void (*openTree)( struct _PrintArgs *args, Tree **sp, Program *prg, Kid *kid );
+	void (*openTree)( struct _PrintArgs *args, Tree **sp, Program *prg, Kid *parent, Kid *kid );
 	void (*printTerm)( struct _PrintArgs *args, Tree **sp, Program *prg, Kid *kid );
-	void (*closeTree)( struct _PrintArgs *args, Tree **sp, Program *prg, Kid *kid );
+	void (*closeTree)( struct _PrintArgs *args, Tree **sp, Program *prg, Kid *parent, Kid *kid );
 } PrintArgs;
 
 void initStrCollect( StrCollect *collect );
