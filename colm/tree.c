@@ -1941,7 +1941,10 @@ rec_call:
 		kid = (Kid*)vm_pop();
 	}
 
+	/* If it is an ignore list, queue it and skip past the content. */
 	if ( kid->tree->id == LEL_ID_IGNORE_LIST ) {
+		/* Ignore suppression can be triggered by a suppress right or suppress
+		 * outside left for example. */
 		if ( ! (printFlags & IPF_SUPPRESS ) ) {
 			debug( REALM_PRINT, "putting %p on ignore list\n", kid->tree );
 			Kid *newIgnore = kidAllocate( prg );
@@ -1949,115 +1952,115 @@ rec_call:
 			leadingIgnore = newIgnore;
 			leadingIgnore->tree = kid->tree;
 		}
-	}
-	else {
-
-		/* Terminals trigger leading ignore printing. */
-		if ( kid->tree->id < prg->rtd->firstNonTermId ) {
-			/* Reset suppress left stop. */
-			suppressLeftStop = 0;
-
-			/* Reverse the leading ignore list. */
-			if ( leadingIgnore != 0 ) {
-				Kid *ignore = 0, *last = 0;
-				long youngest = -1;
-				Kid *youngestKid = 0;
-
-				debug( REALM_PRINT, "printing ignore %p\n", leadingIgnore->tree );
-
-				/* Reverse the list. */
-				while ( true ) {
-					Kid *next = leadingIgnore->next;
-					leadingIgnore->next = last;
-
-					if ( ((IgnoreList*)leadingIgnore->tree)->generation > youngest ) {
-						youngest = ((IgnoreList*)leadingIgnore->tree)->generation;
-						youngestKid = leadingIgnore;
-					}
-
-					if ( next == 0 )
-						break;
-
-					last = leadingIgnore;
-					leadingIgnore = next;
-				}
-			
-				Kid *start = leadingIgnore;
-				Kid *stop = 0;
-
-				/* Print the leading ignore list, free the kids in the process. */
-				ignore = youngestKid;
-				if ( printArgs->comm && ignore != 0 && kid->tree->id != 0 &&
-					(printFlags & IPF_TERM_PRINTED) )
-				{	
-					/* Non-terminal. */
-					Kid *child = treeChild( prg, ignore->tree );
-					if ( child != 0 ) {
-						vm_push( (SW)leadingIgnore );
-						vm_push( (SW)ignore );
-						vm_push( (SW)kid );
-						leadingIgnore = 0;
-						kid = child;
-						while ( kid != 0 ) {
-							debug( REALM_PRINT, "rec call on %p\n", kid->tree );
-							vm_push( (SW) RecIgnoreList );
-							goto rec_call;
-							rec_return_il:
-							kid = kid->next;
-						}
-						kid = (Kid*)vm_pop();
-						ignore = (Kid*)vm_pop();
-						leadingIgnore = (Kid*)vm_pop();
-					}
-				}
-
-				/* Free the leading ignore list. */
-				while ( leadingIgnore != 0 ) {
-					Kid *next = leadingIgnore->next;
-					kidFree( prg, leadingIgnore );
-					leadingIgnore = next;
-				}
-			}
-		}
-
-		/* Open the tree. */
-		printArgs->openTree( printArgs, sp, prg, parent, kid );
-
-		/* Print contents. */
-		if ( kid->tree->id < prg->rtd->firstNonTermId ) {
-			debug( DBG_PRINT, "printing terminal %p\n", kid->tree );
-			if ( kid->tree->id != 0 ) {
-				printFlags |= IPF_TERM_PRINTED;
-				printArgs->printTerm( printArgs, sp, prg, kid );
-			}
-
-			printFlags &= ~IPF_SUPPRESS;
-		}
-
-		/* Print children. */
-		Kid *child = printArgs->attr ? 
-			treeAttr( prg, kid->tree ) : 
-			treeChild( prg, kid->tree );
-
-		if ( child != 0 ) {
-			vm_push( (SW)parent );
-			vm_push( (SW)kid );
-			parent = kid;
-			kid = child;
-			while ( kid != 0 ) {
-				vm_push( (SW) ChildPrint );
-				goto rec_call;
-				rec_return:
-				kid = kid->next;
-			}
-			kid = (Kid*)vm_pop();
-			parent = (Kid*)vm_pop();
-		}
-
-		/* close the tree. */
-		printArgs->closeTree( printArgs, sp, prg, parent, kid );
+		goto skip_node;
 	}
 
+	/* Terminals trigger leading ignore printing. */
+	if ( kid->tree->id < prg->rtd->firstNonTermId ) {
+		/* Reset suppress left stop. */
+		suppressLeftStop = 0;
+
+		/* Reverse the leading ignore list. */
+		if ( leadingIgnore != 0 ) {
+			Kid *ignore = 0, *last = 0;
+			long youngest = -1;
+			Kid *youngestKid = 0;
+
+			debug( REALM_PRINT, "printing ignore %p\n", leadingIgnore->tree );
+
+			/* Reverse the list. */
+			while ( true ) {
+				Kid *next = leadingIgnore->next;
+				leadingIgnore->next = last;
+
+				if ( ((IgnoreList*)leadingIgnore->tree)->generation > youngest ) {
+					youngest = ((IgnoreList*)leadingIgnore->tree)->generation;
+					youngestKid = leadingIgnore;
+				}
+
+				if ( next == 0 )
+					break;
+
+				last = leadingIgnore;
+				leadingIgnore = next;
+			}
+		
+			Kid *start = leadingIgnore;
+			Kid *stop = 0;
+
+			/* Print the leading ignore list, free the kids in the process. */
+			ignore = youngestKid;
+			if ( printArgs->comm && ignore != 0 && kid->tree->id != 0 &&
+				(printFlags & IPF_TERM_PRINTED) )
+			{	
+				/* Non-terminal. */
+				Kid *child = treeChild( prg, ignore->tree );
+				if ( child != 0 ) {
+					vm_push( (SW)leadingIgnore );
+					vm_push( (SW)ignore );
+					vm_push( (SW)kid );
+					leadingIgnore = 0;
+					kid = child;
+					while ( kid != 0 ) {
+						debug( REALM_PRINT, "rec call on %p\n", kid->tree );
+						vm_push( (SW) RecIgnoreList );
+						goto rec_call;
+						rec_return_il:
+						kid = kid->next;
+					}
+					kid = (Kid*)vm_pop();
+					ignore = (Kid*)vm_pop();
+					leadingIgnore = (Kid*)vm_pop();
+				}
+			}
+
+			/* Free the leading ignore list. */
+			while ( leadingIgnore != 0 ) {
+				Kid *next = leadingIgnore->next;
+				kidFree( prg, leadingIgnore );
+				leadingIgnore = next;
+			}
+		}
+	}
+
+	/* Open the tree. */
+	printArgs->openTree( printArgs, sp, prg, parent, kid );
+
+	/* Print contents. */
+	if ( kid->tree->id < prg->rtd->firstNonTermId ) {
+		debug( DBG_PRINT, "printing terminal %p\n", kid->tree );
+		if ( kid->tree->id != 0 ) {
+			printFlags |= IPF_TERM_PRINTED;
+			printArgs->printTerm( printArgs, sp, prg, kid );
+		}
+
+		printFlags &= ~IPF_SUPPRESS;
+	}
+
+	/* Print children. */
+	Kid *child = printArgs->attr ? 
+		treeAttr( prg, kid->tree ) : 
+		treeChild( prg, kid->tree );
+
+	if ( child != 0 ) {
+		vm_push( (SW)parent );
+		vm_push( (SW)kid );
+		parent = kid;
+		kid = child;
+		while ( kid != 0 ) {
+			vm_push( (SW) ChildPrint );
+			goto rec_call;
+			rec_return:
+			kid = kid->next;
+		}
+		kid = (Kid*)vm_pop();
+		parent = (Kid*)vm_pop();
+	}
+
+	/* close the tree. */
+	printArgs->closeTree( printArgs, sp, prg, parent, kid );
+
+skip_node:
 	/* If not currently skipping ignore data, then print it. Ignore data can
 	 * be associated with terminals and nonterminals. */
 	if ( kid->tree->flags & AF_RIGHT_IGNORE ) {
@@ -2180,8 +2183,8 @@ void openTreeXml( struct _PrintArgs *args, Tree **sp, Program *prg, Kid *parent,
 
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
 
-	/* Skip the repeats and lists that are a continuation of the list. This is
-	 * the list flattening. */
+	/* List flattening: skip the repeats and lists that are a continuation of
+	 * the list. */
 	if ( parent != 0 && parent->tree->id == kid->tree->id && kid->next == 0 &&
 			( lelInfo[parent->tree->id].repeat || lelInfo[parent->tree->id].list ) )
 	{
@@ -2254,8 +2257,8 @@ void closeTreeXml( struct _PrintArgs *args, Tree **sp, Program *prg, Kid *parent
 
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
 
-	/* Skip the repeats and lists that are a continuation of the list. This is
-	 * the list flattening. */
+	/* List flattening: skip the repeats and lists that are a continuation of
+	 * the list. */
 	if ( parent != 0 && parent->tree->id == kid->tree->id && kid->next == 0 &&
 			( lelInfo[parent->tree->id].repeat || lelInfo[parent->tree->id].list ) )
 	{
