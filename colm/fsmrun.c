@@ -78,8 +78,8 @@ void cleanFsmRun( Program *prg, FsmRun *fsmRun )
 /* Keep the position up to date after consuming text. */
 void updatePosition( InputStream *inputStream, const char *data, long length )
 {
-	int i;
 	if ( !inputStream->handlesLine ) {
+		int i;
 		for ( i = 0; i < length; i++ ) {
 			if ( data[i] != '\n' )
 				inputStream->column += 1;
@@ -831,8 +831,8 @@ void sendEof( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRu
 void initInputStream( InputStream *inputStream )
 {
 	/* FIXME: correct values here. */
-	inputStream->line = 0;
-	inputStream->column = 0;
+	inputStream->line = 1;
+	inputStream->column = 1;
 	inputStream->byte = 0;
 }
 

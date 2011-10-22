@@ -811,12 +811,8 @@ free_tree:
 		}
 		else if ( tree->id == LEL_ID_BOOL || tree->id == LEL_ID_INT )
 			treeFree( prg, tree );
-		else if ( tree->id == LEL_ID_PTR ) {
-			//Pointer *ptr = (Pointer*)tree;
-			//vm_push( ptr->value->tree );
-			//kidFree( prg, ptr->value );
+		else if ( tree->id == LEL_ID_PTR )
 			treeFree( prg, tree );
-		}
 		else if ( tree->id == LEL_ID_STREAM )
 			streamFree( prg, (Stream*) tree );
 		else { 

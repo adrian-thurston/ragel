@@ -383,10 +383,18 @@ typedef unsigned char uchar;
 #define IFR_RIF 1    /* return iframe pointer */
 #define IFR_RFR 0    /* return frame pointer */
 
-#define vm_push(i) (*(--sp) = (i))
+/* Exported to modules other than bytecode.c */
+#define vm_push(i) if ( sp == prg->se ) vm_grow( prg ); (*(--sp) = (i))
 #define vm_pop() (*sp++)
 #define vm_top() (*sp)
 #define vm_ptop() (sp)
+
+//#define  push(i) (*(--sp) = (i))
+//#define  pop() (*sp++)
+//#define  top() (*sp)
+//#define  ptop() (sp)
+
+void vm_grow( Program * );
 
 typedef Tree *SW;
 typedef Tree **StackPtr;

@@ -459,6 +459,8 @@ typedef struct _Program
 
 	Kid *heap;
 
+	Tree **se;
+
 	Stream *stdinVal;
 	Stream *stdoutVal;
 	Stream *stderrVal;
@@ -512,6 +514,8 @@ typedef struct _PdaRun
 	long stopTarget;
 
 	Kid *accumIgnore;
+
+	Kid *btPoint;
 
 	struct Bindings *bindings;
 

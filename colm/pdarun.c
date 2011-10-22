@@ -105,17 +105,24 @@ void cleanParser( Tree **sp, PdaRun *pdaRun )
 	}
 	pdaRun->stackTop = 0;
 
-	/* Traverse the stack, downreffing. */
+	/* Traverse the token list, downreffing. */
 	Ref *ref = pdaRun->tokenList;
 	while ( ref != 0 ) {
 		Ref *next = ref->next;
-		//treeDownref( pdaRun->prg, sp, ref->kid->tree );
 		kidFree( pdaRun->prg, (Kid*)ref );
 		ref = next;
 	}
 	pdaRun->tokenList = 0;
 
-	//pdaRun->clearContext( sp );
+	/* Traverse the btPoint list. */
+	Kid *btp = pdaRun->btPoint;
+	while ( btp != 0 ) {
+		Kid *next = btp->next;
+		treeDownref( pdaRun->prg, sp, btp->tree );
+		kidFree( pdaRun->prg, (Kid*)btp );
+		btp = next;
+	}
+	pdaRun->btPoint = 0;
 }
 
 int isParserStopFinished( PdaRun *pdaRun )
@@ -156,6 +163,7 @@ void initPdaRun( PdaRun *pdaRun, Program *prg, PdaTables *tables,
 	pdaRun->nextRegionInd = pdaRun->tables->tokenRegionInds[pdaRun->cs];
 	pdaRun->stopParsing = false;
 	pdaRun->accumIgnore = 0;
+	pdaRun->btPoint = 0;
 
 	initBindings( pdaRun );
 
@@ -220,6 +228,7 @@ void commitKid( PdaRun *parser, Tree **root, Kid *lel, Code **rcode, long *cause
 	Tree *tree = 0;
 	Tree **sp = root;
 	Tree *restore = 0;
+	Program *prg = parser->prg;
 
 head:
 	/* Commit */
@@ -356,6 +365,14 @@ void commitFull( Tree **sp, PdaRun *parser, long causeReduce )
 		rcodeDownrefAll( parser->prg, sp, &parser->reverseCode );
 }
 
+void pushBtPoint( PdaRun *pdaRun, Tree *tree )
+{
+	Kid *kid = kidAllocate( pdaRun->prg );
+	kid->tree = tree;
+	treeUpref( tree );
+	kid->next = pdaRun->btPoint;
+	pdaRun->btPoint = kid;
+}
 
 /*
  * shift:         retry goes into lower of shifted node.
@@ -374,8 +391,11 @@ void parseToken( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputSt
 	int indPos;
 
 	/* The scanner will send a null token if it can't find a token. */
-	if ( input == 0 )
-		goto parseError;
+	if ( input == 0 ) {
+		/* Grab the most recently accepted item. */
+		pushBtPoint( pdaRun, pdaRun->tokenList->kid->tree );
+		goto parse_error;
+	}
 
 	/* The tree we are given must either be an ignore token, or it must be be
 	 * parse tree size. It also must have at least one reference. */
@@ -428,19 +448,25 @@ again:
 	}
 
 	if ( lel->tree->id < pdaRun->tables->keys[pdaRun->cs<<1] ||
-			lel->tree->id > pdaRun->tables->keys[(pdaRun->cs<<1)+1] )
-		goto parseError;
+			lel->tree->id > pdaRun->tables->keys[(pdaRun->cs<<1)+1] ) {
+		pushBtPoint( pdaRun, lel->tree );
+		goto parse_error;
+	}
 
 	indPos = pdaRun->tables->offsets[pdaRun->cs] + 
 		(lel->tree->id - pdaRun->tables->keys[pdaRun->cs<<1]);
 
 	owner = pdaRun->tables->owners[indPos];
-	if ( owner != pdaRun->cs )
-		goto parseError;
+	if ( owner != pdaRun->cs ) {
+		pushBtPoint( pdaRun, lel->tree );
+		goto parse_error;
+	}
 
 	pos = pdaRun->tables->indicies[indPos];
-	if ( pos < 0 )
-		goto parseError;
+	if ( pos < 0 ) {
+		pushBtPoint( pdaRun, lel->tree );
+		goto parse_error;
+	}
 
 	induceReject = false;
 	targState = pdaRun->tables->targs[pos];
@@ -647,7 +673,8 @@ again:
 			redLel->next = pdaRun->stackTop;
 			pdaRun->stackTop = redLel;
 			pdaRun->cs = targState;
-			goto parseError;
+			pushBtPoint( pdaRun, lel->tree );
+			goto parse_error;
 		}
 		else {
 			redLel->next = input;
@@ -659,7 +686,7 @@ again:
 	pdaRun->cs = targState;
 	goto again;
 
-parseError:
+parse_error:
 //	#ifdef COLM_LOG_PARSE
 //	if ( colm_log_parse ) {
 //		cerr << "hit error, backtracking" << endl;
