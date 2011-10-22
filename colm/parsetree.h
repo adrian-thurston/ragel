@@ -24,7 +24,7 @@
 
 #include <iostream>
 #include <string.h>
-#include "colm.h"
+#include "global.h"
 #include "avlmap.h"
 #include "bstmap.h"
 #include "bstset.h"

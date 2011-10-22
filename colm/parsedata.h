@@ -25,7 +25,7 @@
 #include <iostream>
 #include <limits.h>
 #include "bstset.h"
-#include "colm.h"
+#include "global.h"
 #include "avlmap.h"
 #include "avlset.h"
 #include "bstmap.h"

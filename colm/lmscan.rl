@@ -23,7 +23,7 @@
 #include <fstream>
 #include <string.h>
 
-#include "colm.h"
+#include "global.h"
 #include "lmscan.h"
 #include "lmparse.h"
 #include "parsedata.h"

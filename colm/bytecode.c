@@ -467,6 +467,19 @@ Tree *constructArgv( Program *prg, int argc, char **argv )
  * Execution environment
  */
 
+void initColm( long debugRealm )
+{
+	/* Always on because because logging is controlled with ifdefs in\n" the
+	 * runtime lib. */
+	colm_log_bytecode = 1;
+	colm_log_parse = 1;
+	colm_log_match = 1;
+	colm_log_compile = 1;
+	colm_log_conds = 1;
+	colmActiveRealm = 0xffffffff;
+	initInputFuncs();
+}
+
 void initProgram( Program *prg, int argc, char **argv, int ctxDepParsing, 
 		RuntimeData *rtd )
 {
@@ -523,8 +536,67 @@ void clearGlobal( Program *prg, Tree **sp )
 	treeFree( prg, prg->global );
 }
 
-void clearProgram( Program *prg, Tree **vm_stack, Tree **sp )
+void allocGlobal( Program *prg )
 {
+	/* Alloc the global. */
+	Tree *tree = treeAllocate( prg );
+	tree->child = allocAttrs( prg, prg->rtd->globalSize );
+	tree->refs = 1;
+	prg->global = tree;
+}
+
+Tree **stackAlloc()
+{
+	//return new Tree*[VM_STACK_SIZE];
+
+	return (Tree**)mmap( 0, sizeof(Tree*)*VM_STACK_SIZE,
+		PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0 );
+}
+
+void runProgram( Program *prg )
+{
+	assert( sizeof(Int)      <= sizeof(Tree) );
+	assert( sizeof(Str)      <= sizeof(Tree) );
+	assert( sizeof(Pointer)  <= sizeof(Tree) );
+	assert( sizeof(Map)      <= sizeof(MapEl) );
+	assert( sizeof(List)     <= sizeof(MapEl) );
+	assert( sizeof(Stream)   <= sizeof(MapEl) );
+	assert( sizeof(Accum)    <= sizeof(MapEl) );
+
+	/* Allocate the global variable. */
+	allocGlobal( prg );
+
+	/* 
+	 * Allocate the VM stack.
+	 */
+
+	prg->vm_stack = stackAlloc();
+	prg->vm_root = &prg->vm_stack[VM_STACK_SIZE];
+
+	/*
+	 * Execute
+	 */
+
+	if ( prg->rtd->rootCodeLen > 0 ) {
+		RtCodeVect rcodeCollect;
+		Execution execution;
+		initRtCodeVect( &rcodeCollect );
+		initExecution( &execution, prg, &rcodeCollect, 0, 0, prg->rtd->rootCode, 0, 0, 0, 0 );
+		forwardExecution( &execution, prg->vm_root );
+
+		debug( REALM_BYTECODE, "freeing the root reverse code" );
+
+		/* The root code should all be commit code and reverse code
+		 * should be empty. */
+		assert( rcodeCollect.tabLen == 0 );
+	}
+}
+
+void clearProgram( Program *prg )
+{
+	Tree **vm_stack = prg->vm_stack;
+	Tree **sp = prg->vm_root;
+
 	#ifdef COLM_LOG_BYTECODE
 	if ( colm_log_bytecode ) {
 		cerr << "clearing the prg" << endl;
@@ -601,64 +673,6 @@ void clearProgram( Program *prg, Tree **vm_stack, Tree **sp )
 	}
 }
 
-void allocGlobal( Program *prg )
-{
-	/* Alloc the global. */
-	Tree *tree = treeAllocate( prg );
-	tree->child = allocAttrs( prg, prg->rtd->globalSize );
-	tree->refs = 1;
-	prg->global = tree;
-}
-
-Tree **stackAlloc()
-{
-	//return new Tree*[VM_STACK_SIZE];
-
-	return (Tree**)mmap( 0, sizeof(Tree*)*VM_STACK_SIZE,
-		PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0 );
-}
-
-void runProgram( Program *prg )
-{
-	assert( sizeof(Int)      <= sizeof(Tree) );
-	assert( sizeof(Str)      <= sizeof(Tree) );
-	assert( sizeof(Pointer)  <= sizeof(Tree) );
-	assert( sizeof(Map)      <= sizeof(MapEl) );
-	assert( sizeof(List)     <= sizeof(MapEl) );
-	assert( sizeof(Stream)   <= sizeof(MapEl) );
-	assert( sizeof(Accum)    <= sizeof(MapEl) );
-
-	/* Allocate the global variable. */
-	allocGlobal( prg );
-
-	/* 
-	 * Allocate the VM stack.
-	 */
-
-	Tree **vm_stack = stackAlloc();
-	Tree **root = &vm_stack[VM_STACK_SIZE];
-
-	/*
-	 * Execute
-	 */
-
-	if ( prg->rtd->rootCodeLen > 0 ) {
-		RtCodeVect rcodeCollect;
-		Execution execution;
-		initRtCodeVect( &rcodeCollect );
-		initExecution( &execution, prg, &rcodeCollect, 0, 0, prg->rtd->rootCode, 0, 0, 0, 0 );
-		forwardExecution( &execution, root );
-
-		debug( REALM_BYTECODE, "freeing the root reverse code" );
-
-		/* The root code should all be commit code and reverse code
-		 * should be empty. */
-		assert( rcodeCollect.tabLen == 0 );
-	}
-
-	/* Clear */
-	clearProgram( prg, vm_stack, root );
-}
 
 void initExecution( Execution *exec, Program *prg, RtCodeVect *rcodeCollect,
 		PdaRun *pdaRun, FsmRun *fsmRun, Code *code, Tree *lhs,

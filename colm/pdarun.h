@@ -466,6 +466,9 @@ typedef struct _Program
 	Stream *stderrVal;
 
 	RunBuf *allocRunBuf;
+
+	Tree **vm_stack;
+	Tree **vm_root; 
 } Program;
 
 typedef struct _TreeIter

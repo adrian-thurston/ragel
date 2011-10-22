@@ -23,7 +23,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <limits.h>
-#include "colm.h"
+#include "global.h"
 #include "parsedata.h"
 #include "avlmap.h"
 #include "avlbasic.h"

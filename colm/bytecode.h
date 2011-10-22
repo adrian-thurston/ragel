@@ -19,8 +19,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _BYTECODE2_H
-#define _BYTECODE2_H
+#ifndef _BYTECODE_H
+#define _BYTECODE_H
 
 #include "pdarun.h"
 #include "tree.h"
@@ -472,15 +472,16 @@ Tree *getParsedRoot( PdaRun *pdaRun, int stop );
 Tree *prepParseTree( Program *prg, Tree **sp, Tree *tree );
 void splitRef( Tree ***sp, Program *prg, Ref *fromRef );
 
-void initProgram( Program *program, int argc, char **argv,
-		int ctxDepParsing, RuntimeData *rtd );
-void clearProgram( Program *prg, Tree **vm_stack, Tree **sp );
-void runProgram( Program *prg );
 void allocGlobal( Program *prg );
-
 void executeCode( Execution *exec, Tree **sp, Code *instr );
 void rcodeDownref( Program *prg, Tree **sp, Code *instr );
 Tree **stackAlloc();
+
+void initColm( long debugRealm );
+void initProgram( Program *program, int argc, char **argv,
+		int ctxDepParsing, RuntimeData *rtd );
+void runProgram( Program *prg );
+void clearProgram( Program *prg );
 
 #ifdef __cplusplus
 }

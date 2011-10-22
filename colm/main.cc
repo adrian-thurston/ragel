@@ -30,7 +30,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "colm.h"
+#include "program.h"
 #include "debug.h"
 #include "lmscan.h"
 #include "pcheck.h"

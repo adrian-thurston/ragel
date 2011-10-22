@@ -1072,23 +1072,18 @@ void FsmCodeGen::writeCode()
 		"void initStaticFuncs() {}\n"
 		"void initPatternFuncs() {}\n"
 		"void initReplFuncs() {}\n"
-		"void initInputFuncs();\n";
+		"void initInputFuncs();\n"
+		"\n"
+		"\n";
 
 	out << 
 		"int main( int argc, char **argv )\n"
 		"{\n"
-		"	/* Always on because because logging is controlled with ifdefs in\n"
-		"	 * the runtime lib. */\n"
-		"	colm_log_bytecode = 1;\n"
-		"	colm_log_parse = 1;\n"
-		"	colm_log_match = 1;\n"
-		"	colm_log_compile = 1;\n"
-		"	colm_log_conds = 1;\n"
-		"	colmActiveRealm = 0xffffffff;\n"
-		"	initInputFuncs();\n"
+		"	initColm( 0 );\n"
 		"	Program program;\n"
-		"	initProgram( &program, argc, argv, true, &main_runtimeData );\n"
+		"	initProgram( &program, argc, argv, 1, &main_runtimeData );\n"
 		"	runProgram( &program );\n"
+		"	clearProgram( &program );\n"
 		"	return 0;\n"
 		"}\n"
 		"\n";

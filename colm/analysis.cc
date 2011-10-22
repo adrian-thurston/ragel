@@ -26,7 +26,7 @@
 #include <limits.h>
 #include <sstream>
 
-#include "colm.h"
+#include "program.h"
 #include "lmparse.h"
 #include "parsedata.h"
 #include "parsetree.h"

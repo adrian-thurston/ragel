@@ -25,7 +25,7 @@
 #include <stdlib.h>
 
 /* Parsing. */
-#include "colm.h"
+#include "global.h"
 #include "parsedata.h"
 #include "pdacodegen.h"
 #include "pdarun.h"

@@ -38,8 +38,7 @@
 #include "sbstmap.h"
 #include "sbstset.h"
 #include "sbsttable.h"
-#include "colm.h"
-#include "fsmrun.h"
+#include "global.h"
 #include "fsmrun.h"
 
 #define TRANS_ERR_TRANS   0

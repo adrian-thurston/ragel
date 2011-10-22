@@ -29,7 +29,7 @@
 #include "parsedata.h"
 #include "parsetree.h"
 #include "pdarun.h"
-#include "colm.h"
+#include "global.h"
 
 void execAction( FsmRun *fsmRun, GenAction *genAction )
 {

@@ -26,7 +26,7 @@
 #include <fstream>
 #include <string.h>
 
-#include "colm.h"
+#include "global.h"
 #include "lmparse.h"
 #include "parsedata.h"
 #include "avltree.h"

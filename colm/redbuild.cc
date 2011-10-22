@@ -20,7 +20,7 @@
  */
 
 
-#include "colm.h"
+#include "global.h"
 #include "redbuild.h"
 #include "fsmgraph.h"
 #include "redfsm.h"

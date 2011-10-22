@@ -23,7 +23,7 @@
 #include <iostream>
 #include <string.h>
 #include <assert.h>
-#include "colm.h"
+#include "global.h"
 #include "pdagraph.h"
 #include "mergesort.h"
 

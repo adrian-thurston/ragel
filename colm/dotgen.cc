@@ -20,7 +20,7 @@
  */
 
 
-#include "colm.h"
+#include "global.h"
 #include "parsedata.h"
 
 using namespace std;
