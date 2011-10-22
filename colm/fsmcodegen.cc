@@ -1075,20 +1075,6 @@ void FsmCodeGen::writeCode()
 		"void initInputFuncs();\n"
 		"\n"
 		"\n";
-
-	out << 
-		"int main( int argc, char **argv )\n"
-		"{\n"
-		"	initColm( 0 );\n"
-		"	Program program;\n"
-		"	initProgram( &program, argc, argv, 1, &main_runtimeData );\n"
-		"	runProgram( &program );\n"
-		"	clearProgram( &program );\n"
-		"	return 0;\n"
-		"}\n"
-		"\n";
-
-	out.flush();
 }
 
 ostream &FsmCodeGen::source_warning( const InputLoc &loc )

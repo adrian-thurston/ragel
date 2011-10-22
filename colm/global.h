@@ -63,6 +63,7 @@ extern bool printStatistics;
 
 extern int gblErrorCount;
 extern char machineMain[];
+extern bool gblLibrary;
 
 /* Location in an input file. */
 struct InputLoc

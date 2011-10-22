@@ -1420,5 +1420,7 @@ void ParseData::generateOutput()
 	/* Write the runtime data. */
 	pdaGen->writeRuntimeData( runtimeData, pdaTables );
 
+	if ( !gblLibrary ) 
+		fsmGen->writeMain();
 	outStream->flush();
 }

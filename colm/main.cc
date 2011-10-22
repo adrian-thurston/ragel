@@ -75,6 +75,7 @@ bool verbose = false;
 bool logging = false;
 bool branchPointInfo = false;
 bool addUniqueEmptyProductions = false;
+bool gblLibrary = false;
 
 ArgsVector includePaths;
 
@@ -356,7 +357,7 @@ bool inSourceTree( const char *argv0 )
 
 void process_args( int argc, const char **argv )
 {
-	ParamCheck pc( "I:vdlio:S:M:vHh?-:sV", argc, argv );
+	ParamCheck pc( "LI:vdlio:S:M:vHh?-:sV", argc, argv );
 
 	while ( pc.check() ) {
 		switch ( pc.state ) {
@@ -412,6 +413,10 @@ void process_args( int argc, const char **argv )
 					error() << "--" << pc.parameterArg << 
 							" is an invalid argument" << endl;
 				}
+				break;
+			case 'L':
+				gblLibrary = true;
+				break;
 			}
 			break;
 
@@ -505,10 +510,12 @@ int main(int argc, const char **argv)
 		if ( outStream != 0 )
 			delete outStream;
 
-		if ( inSourceTree( argv[0] ) )
-			compileOutputInSource( argv[0] );
-		else
-			compileOutputInstalled( argv[0] );
+		if ( !gblLibrary ) {
+			if ( inSourceTree( argv[0] ) )
+				compileOutputInSource( argv[0] );
+			else
+				compileOutputInstalled( argv[0] );
+		}
 	}
 
 	return 0;

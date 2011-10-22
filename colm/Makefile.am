@@ -18,6 +18,72 @@
 #   along with Colm; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
 
+INCLUDES = -I$(top_srcdir)/aapl
+
+bin_PROGRAMS = colm
+
+RUNTIME_SRC = \
+	map.c fsmrun.c pdarun.c list.c input.c debug.c \
+	codevect.c pool.c string.c tree.c bytecode.c
+
+RUNTIME_HDR = \
+	bytecode.h config.h defs.h debug.h pool.h input.h \
+	fsmrun.h pdarun.h map.h tree.h colm.h
+
+lib_LIBRARIES = libcolmp.a libcolmd.a
+
+libcolmp_a_SOURCES = $(RUNTIME_SRC)
+
+libcolmd_a_SOURCES = $(RUNTIME_SRC)
+libcolmd_a_CXXFLAGS = -DCOLM_LOG
+
+colm_CXXFLAGS = \
+	-Wall \
+	-DCOLM_LOG \
+	-DPREFIX='"$(prefix)"'
+
+colm_LDADD = libcolmp.a
+
+# ADT DEFS_COLM += -DCOLM_LOG -DPREFIX='"$(prefix)"'
+
+if BUILD_PARSERS
+ 
+lmparse.h: lmparse.kh
+	kelbt -o $@ $<
+
+lmparse.cc: lmparse.kl lmparse.kh
+	kelbt -o $@ $<
+
+lmscan.cc: lmparse.h
+
+lmscan.cc: lmscan.rl
+	ragel -G2 -o $@ $<
+ 
+endif
+
+colm_SOURCES = \
+	buffer.h bytecode.h colm.h debug.h dotgen.h fsmcodegen.h fsmgraph.h \
+	fsmrun.h input.h keyops.h lmparse.h lmscan.h map.h parsedata.h \
+	parsetree.h pcheck.h pdacodegen.h pdagraph.h pdarun.h pool.h redbuild.h \
+	redfsm.h rtvector.h tree.h version.h colm.h \
+	\
+	resolve.cc compile.cc lmparse.cc lmscan.cc parsetree.cc \
+	parsedata.cc fsmstate.cc fsmbase.cc fsmattach.cc fsmmin.cc \
+	fsmgraph.cc pdagraph.cc pdabuild.cc pdacodegen.cc fsmcodegen.cc \
+	redfsm.cc fsmexec.cc main.cc redbuild.cc closure.cc fsmap.cc \
+	dotgen.cc pcheck.cc ctinput.cc declare.cc analysis.cc codegen.cc
+
+colmincdir = $(includedir)/colm
+
+colminc_HEADERS = $(RUNTIME_HDR)
+
+BUILT_SOURCES = \
+	version.h lmscan.cc lmparse.h lmparse.cc 
+
+version.h: Makefile
+	echo '#define VERSION "$(PACKAGE_VERSION)"' > version.h
+	echo '#define PUBDATE "$(PUBDATE)"' >> version.h
+
 # ADT 
 # ADT # Logging:
 # ADT # colm: rt on/off
@@ -111,70 +177,4 @@
 # ADT 	install $(RUNTIME_HDR) $(prefix)/include/colm
 # ADT 
 # ADT -include $(DEPS)
-
-INCLUDES = -I$(top_srcdir)/aapl
-
-bin_PROGRAMS = colm
-
-RUNTIME_SRC = \
-	map.c fsmrun.c pdarun.c list.c input.c debug.c \
-	codevect.c pool.c string.c tree.c bytecode.c
-
-RUNTIME_HDR = \
-	bytecode.h config.h defs.h debug.h pool.h input.h \
-	fsmrun.h pdarun.h map.h tree.h
-
-lib_LIBRARIES = libcolmp.a libcolmd.a
-
-libcolmp_a_SOURCES = $(RUNTIME_SRC)
-
-libcolmd_a_SOURCES = $(RUNTIME_SRC)
-libcolmd_a_CXXFLAGS = -DCOLM_LOG
-
-colm_CXXFLAGS = \
-	-Wall \
-	-DCOLM_LOG \
-	-DPREFIX='"$(prefix)"'
-
-colm_LDADD = libcolmp.a
-
-# ADT DEFS_COLM += -DCOLM_LOG -DPREFIX='"$(prefix)"'
-
-if BUILD_PARSERS
- 
-lmparse.h: lmparse.kh
-	kelbt -o $@ $<
-
-lmparse.cc: lmparse.kl lmparse.kh
-	kelbt -o $@ $<
-
-lmscan.cc: lmparse.h
-
-lmscan.cc: lmscan.rl
-	ragel -G2 -o $@ $<
- 
-endif
-
-colm_SOURCES = \
-	buffer.h bytecode.h colm.h debug.h dotgen.h fsmcodegen.h fsmgraph.h \
-	fsmrun.h input.h keyops.h lmparse.h lmscan.h map.h parsedata.h \
-	parsetree.h pcheck.h pdacodegen.h pdagraph.h pdarun.h pool.h redbuild.h \
-	redfsm.h rtvector.h tree.h version.h \
-	\
-	resolve.cc compile.cc lmparse.cc lmscan.cc parsetree.cc \
-	parsedata.cc fsmstate.cc fsmbase.cc fsmattach.cc fsmmin.cc \
-	fsmgraph.cc pdagraph.cc pdabuild.cc pdacodegen.cc fsmcodegen.cc \
-	redfsm.cc fsmexec.cc main.cc redbuild.cc closure.cc fsmap.cc \
-	dotgen.cc pcheck.cc ctinput.cc declare.cc analysis.cc
-
-colmincdir = $(includedir)/colm
-
-colminc_HEADERS = $(RUNTIME_HDR)
-
-BUILT_SOURCES = \
-	version.h lmscan.cc lmparse.h lmparse.cc 
-
-version.h: Makefile
-	echo '#define VERSION "$(PACKAGE_VERSION)"' > version.h
-	echo '#define PUBDATE "$(PUBDATE)"' >> version.h
 

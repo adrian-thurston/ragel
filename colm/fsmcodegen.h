@@ -193,6 +193,7 @@ public:
 	void writeInit();
 	void writeExec();
 	void writeCode();
+	void writeMain();
 
 protected:
 	bool useAgainLabel();
