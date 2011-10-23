@@ -73,6 +73,10 @@ void ParseData::generateExports()
 
 			out << "	" <<
 				"int end() { return repeatEnd( (Tree*)this ); }\n";
+
+			out << "	" << lel->repeatOf->fullName << " *value"
+				"() { return (" << lel->repeatOf->fullName << 
+				"*)getRepeatVal( (Tree*)this ); }\n";
 		}
 		out << "};\n";
 	}

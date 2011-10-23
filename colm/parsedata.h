@@ -224,6 +224,8 @@ struct LangEl : public DListEl<LangEl>
 	bool parseStop;
 	bool isEOF;
 
+	LangEl *repeatOf;
+
 	/* Productions from the language element if it is a non-terminal. */
 	LelDefList defList;
 

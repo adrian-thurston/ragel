@@ -111,6 +111,18 @@ Tree *getRepeatNext( Tree *tree )
 	return kid->next->tree;
 }
 
+Tree *getRepeatVal( Tree *tree )
+{
+	Kid *kid = tree->child;
+
+	if ( tree->flags & AF_LEFT_IGNORE )
+		kid = kid->next;
+	if ( tree->flags & AF_RIGHT_IGNORE )
+		kid = kid->next;
+	
+	return kid->tree;
+}
+
 int repeatEnd( Tree *tree )
 {
 	Kid *kid = tree->child;

@@ -466,6 +466,7 @@ Tree *getAttr( Tree *tree, long pos );
 Kid *getAttrKid( Tree *tree, long pos );
 Tree *getRepeatNext( Tree *tree );
 int repeatEnd( Tree *tree );
+Tree *getRepeatVal( Tree *tree );
 
 Tree *splitTree( Program *prg, Tree *t );
 void rcodeDownrefAll( Program *prg, Tree **sp, RtCodeVect *cv );

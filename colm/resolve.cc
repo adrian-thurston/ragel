@@ -265,6 +265,7 @@ void TypeRef::resolveRepeat( ParseData *pd )
 		}
 
 		uniqueRepeat->declLangEl = declLangEl;
+		declLangEl->repeatOf = uniqueRepeat->langEl;
 	}
 
 	uniqueType = pd->findUniqueType( TYPE_TREE, uniqueRepeat->declLangEl );

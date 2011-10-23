@@ -75,6 +75,7 @@ LangEl::LangEl( Namespace *nspace, const String &name, Type type )
 	isOpt(false),
 	parseStop(false),
 	isEOF(false),
+	repeatOf(0),
 	tokenDef(0),
 	rootDef(0),
 	termDup(0),
