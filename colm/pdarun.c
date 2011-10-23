@@ -622,7 +622,7 @@ again:
 			initExecution( &exec, pdaRun->prg, &pdaRun->rcodeCollect, 
 					pdaRun, fsmRun, fi->codeWV, redLel->tree, 0, 0, fsmRun->mark );
 
-			forwardExecution( &exec, sp );
+			generationExecution( &exec, sp );
 
 			if ( exec.prg->induceExit )
 				goto fail;

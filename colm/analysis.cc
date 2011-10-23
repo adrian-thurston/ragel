@@ -45,10 +45,10 @@ void ParseData::prepGrammar()
 	/* This will create language elements. */
 	wrapNonTerminals();
 
-	makeKlangElIds();
-	makeKlangElNames();
+	makeLangElIds();
+	makeLangElNames();
 	makeDefinitionNames();
-	noUndefindKlangEls();
+	noUndefindLangEls();
 
 	/* Put the language elements in an index by language element id. */
 	langElIndex = new LangEl*[nextSymbolId+1];

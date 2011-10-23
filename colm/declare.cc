@@ -76,7 +76,7 @@ LangEl *findType( ParseData *pd, Namespace *nspace, const String &data )
 }
 
 
-void ParseData::declareBaseKlangEls()
+void ParseData::declareBaseLangEls()
 {
 	/* Order here is important because we make assumptions about the inbuild
 	 * language elements in the runtime. Note tokens are have identifiers set
@@ -87,22 +87,22 @@ void ParseData::declareBaseKlangEls()
 	 * that needs to be associated with a language element. This allows us to
 	 * always associate reverse code with the first language element produced
 	 * after a generation action. */
-	noTokenKlangEl = declareLangEl( this, rootNamespace, "_notoken", LangEl::Term );
-	noTokenKlangEl->ignore = true;
+	noTokenLangEl = declareLangEl( this, rootNamespace, "_notoken", LangEl::Term );
+	noTokenLangEl->ignore = true;
 	
 	/* Make the "stream" language element */
-	ptrKlangEl = declareLangEl( this, rootNamespace, "ptr", LangEl::Term );
-	boolKlangEl = declareLangEl( this, rootNamespace, "bool", LangEl::Term );
-	intKlangEl = declareLangEl( this, rootNamespace, "int", LangEl::Term );
-	strKlangEl = declareLangEl( this, rootNamespace, "str", LangEl::Term );
-	streamKlangEl = declareLangEl( this, rootNamespace, "stream", LangEl::Term );
-	ignoreListKlangEl = declareLangEl( this, rootNamespace, "il", LangEl::Term );
+	ptrLangEl = declareLangEl( this, rootNamespace, "ptr", LangEl::Term );
+	boolLangEl = declareLangEl( this, rootNamespace, "bool", LangEl::Term );
+	intLangEl = declareLangEl( this, rootNamespace, "int", LangEl::Term );
+	strLangEl = declareLangEl( this, rootNamespace, "str", LangEl::Term );
+	streamLangEl = declareLangEl( this, rootNamespace, "stream", LangEl::Term );
+	ignoreListLangEl = declareLangEl( this, rootNamespace, "il", LangEl::Term );
 
 	/* Make the EOF language element. */
-	eofKlangEl = 0;
+	eofLangEl = 0;
 
 	/* Make the "any" language element */
-	anyKlangEl = declareLangEl( this, rootNamespace, "any", LangEl::NonTerm );
+	anyLangEl = declareLangEl( this, rootNamespace, "any", LangEl::NonTerm );
 }
 
 
@@ -303,7 +303,7 @@ void ParseData::setPrecedence()
 void ParseData::typeDeclaration()
 {
 	/* These must be declared first, since the runtime assumes their identifiers. */
-	declareBaseKlangEls();
+	declareBaseLangEls();
 
 	rootNamespace->declare( this );
 

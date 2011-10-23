@@ -523,7 +523,7 @@ void executeGenerationAction( Tree **sp, Program *prg, FsmRun *fsmRun, PdaRun *p
 	/* Execute the translation. */
 	Execution exec;
 	initExecution( &exec, prg, &pdaRun->rcodeCollect, pdaRun, fsmRun, code, 0, id, tokdata, fsmRun->mark );
-	forwardExecution( &exec, sp );
+	generationExecution( &exec, sp );
 
 	/* 
 	 * Need a no-token.

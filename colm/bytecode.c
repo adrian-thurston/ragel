@@ -555,7 +555,7 @@ Tree **stackAlloc()
 		PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0 );
 }
 
-Tree *runProgram( Program *prg )
+void runProgram( Program *prg )
 {
 	assert( sizeof(Int)      <= sizeof(Tree) );
 	assert( sizeof(Str)      <= sizeof(Tree) );
@@ -583,28 +583,14 @@ Tree *runProgram( Program *prg )
 	if ( prg->rtd->rootCodeLen > 0 ) {
 		RtCodeVect rcodeCollect;
 		Execution execution;
+
 		initRtCodeVect( &rcodeCollect );
-
 		initExecution( &execution, prg, &rcodeCollect, 0, 0, prg->rtd->rootCode, 0, 0, 0, 0 );
-
-		Tree **sp = prg->vm_root;
-		vm_push( 0 ); 
-		vm_push( 0 );
-		vm_push( 0 );
-		executeCode( &execution, sp, execution.code );
-		vm_pop();
-		vm_pop();
-		retVal = vm_pop();
-
-		/* The root code should all be commit code and reverse code
-		 * should be empty. */
-		assert( rcodeCollect.tabLen == 0 );
+		mainExecution( &execution );
 	}
-
-	return retVal;
 }
 
-void clearProgram( Program *prg, Tree *tree )
+void clearProgram( Program *prg )
 {
 	Tree **vm_stack = prg->vm_stack;
 	Tree **sp = prg->vm_root;
@@ -615,7 +601,7 @@ void clearProgram( Program *prg, Tree *tree )
 	}
 	#endif
 
-	treeDownref( prg, sp, tree );
+	treeDownref( prg, sp, prg->returnVal );
 	clearGlobal( prg, sp );
 
 	/* Clear the heap. */
@@ -1011,7 +997,13 @@ again:
 	goto again;
 }
 
-void forwardExecution( Execution *exec, Tree **sp )
+void generationExecution( Execution *exec, Tree **sp )
+{
+	/* Execution loop. */
+	executeCode( exec, sp, exec->code );
+}
+
+void reductionExecution( Execution *exec, Tree **sp )
 {
 	Program *prg = exec->prg;
 
@@ -1026,6 +1018,28 @@ void forwardExecution( Execution *exec, Tree **sp )
 	/* Take the lhs off the stack. */
 	if ( haveLhs )
 		exec->lhs = (Tree*) vm_pop();
+}
+
+void mainExecution( Execution *exec )
+{
+	Program *prg = exec->prg;
+	Tree **sp = prg->vm_root;
+
+	/* Set up the stack as if we have called. We allow a return value. */
+	vm_push( 0 ); 
+	vm_push( 0 );
+	vm_push( 0 );
+
+	/* Execution loop. */
+	executeCode( exec, sp, exec->code );
+
+	vm_pop();
+	vm_pop();
+	prg->returnVal = vm_pop();
+
+	/* The root code should all be commit code and reverse code
+	 * should be empty. */
+	assert( exec->rcodeCollect->tabLen == 0 );
 }
 
 int makeReverseCode( RtCodeVect *all, RtCodeVect *reverseCode )

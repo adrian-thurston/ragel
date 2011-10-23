@@ -470,6 +470,9 @@ typedef struct _Program
 
 	Tree **vm_stack;
 	Tree **vm_root; 
+
+	/* Returned from the main line. */
+	Tree *returnVal;
 } Program;
 
 typedef struct _TreeIter

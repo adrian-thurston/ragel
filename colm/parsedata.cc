@@ -419,10 +419,10 @@ ParseData::ParseData( const String &fileName, const String &sectionName,
 	out(out),
 	access(0),
 	tokenStruct(0),
-	rootKlangEl(0),
-	eofKlangEl(0),
-	errorKlangEl(0),
-	defaultCharKlangEl(0),
+	rootLangEl(0),
+	eofLangEl(0),
+	errorLangEl(0),
+	defaultCharLangEl(0),
 	rootRegion(0),
 	defaultRegion(0),
 	firstNonTermId(0),
@@ -1110,10 +1110,10 @@ void ParseData::createDefaultScanner()
 
 	/* Now create the one and only token -> "<chr>" / any /  */
 	name = "___DEFAULT_SCANNER_CHR";
-	defaultCharKlangEl = addLangEl( this, defaultNamespace, name, LangEl::Term );
+	defaultCharLangEl = addLangEl( this, defaultNamespace, name, LangEl::Term );
 
-	tokenDef->token = defaultCharKlangEl;
-	defaultCharKlangEl->tokenDef = tokenDef;
+	tokenDef->token = defaultCharLangEl;
+	defaultCharLangEl->tokenDef = tokenDef;
 }
 
 LangEl *ParseData::makeRepeatProd( Namespace *nspace, const String &repeatName, NamespaceQual *nspaceQual, const String &name )

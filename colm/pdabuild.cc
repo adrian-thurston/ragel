@@ -155,7 +155,7 @@ void ParseData::makeDefinitionNames()
 /* Make sure there there are no language elements whose type is unkonwn. This
  * can happen when an id is used on the rhs of a definition but is not defined
  * as anything. */
-void ParseData::noUndefindKlangEls()
+void ParseData::noUndefindLangEls()
 {
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
 		if ( lel->type == LangEl::Unknown )
@@ -163,7 +163,7 @@ void ParseData::noUndefindKlangEls()
 	}
 }
 
-void ParseData::makeKlangElIds()
+void ParseData::makeLangElIds()
 {
 	/* The first id 0 is reserved for the stack sentinal. A negative id means
 	 * error to the parsing function, inducing backtracking. */
@@ -175,15 +175,15 @@ void ParseData::makeKlangElIds()
 		 * Remember if the non terminal is a user non terminal. */
 		if ( lel->type == LangEl::Term && 
 				!lel->isEOF && 
-				lel != errorKlangEl &&
-				lel != noTokenKlangEl )
+				lel != errorLangEl &&
+				lel != noTokenLangEl )
 		{
 			lel->isUserTerm = true;
 			lel->id = nextSymbolId++;
 		}
 	}
 
-	//eofKlangEl->id = nextSymbolId++;
+	//eofLangEl->id = nextSymbolId++;
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
 		/* Must be a term, and not any of the special reserved terminals.
 		 * Remember if the non terminal is a user non terminal. */
@@ -192,11 +192,11 @@ void ParseData::makeKlangElIds()
 	}
 
 	/* Next assign to the eof notoken, which we always create. */
-	noTokenKlangEl->id = nextSymbolId++;
+	noTokenLangEl->id = nextSymbolId++;
 
 	/* Possibly assign to the error language element. */
-	if ( errorKlangEl != 0 )
-		errorKlangEl->id = nextSymbolId++;
+	if ( errorLangEl != 0 )
+		errorLangEl->id = nextSymbolId++;
 
 	/* Save this for the code generation. */
 	firstNonTermId = nextSymbolId;
@@ -208,15 +208,15 @@ void ParseData::makeKlangElIds()
 			lel->id = nextSymbolId++;
 	}
 
-	assert( ptrKlangEl->id == LEL_ID_PTR );
-	assert( boolKlangEl->id == LEL_ID_BOOL );
-	assert( intKlangEl->id == LEL_ID_INT );
-	assert( strKlangEl->id == LEL_ID_STR );
-	assert( streamKlangEl->id == LEL_ID_STREAM );
-	assert( ignoreListKlangEl->id == LEL_ID_IGNORE_LIST );
+	assert( ptrLangEl->id == LEL_ID_PTR );
+	assert( boolLangEl->id == LEL_ID_BOOL );
+	assert( intLangEl->id == LEL_ID_INT );
+	assert( strLangEl->id == LEL_ID_STR );
+	assert( streamLangEl->id == LEL_ID_STREAM );
+	assert( ignoreListLangEl->id == LEL_ID_IGNORE_LIST );
 }
 
-void ParseData::makeKlangElNames()
+void ParseData::makeLangElNames()
 {
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
 		if ( lel->id == LEL_ID_INT ) {
@@ -556,7 +556,7 @@ void ParseData::pdaOrderProd( LangEl *rootEl, PdaState *tabState,
 	}
 }
 
-void ParseData::pdaActionOrder( PdaGraph *pdaGraph, KlangElSet &parserEls )
+void ParseData::pdaActionOrder( PdaGraph *pdaGraph, LangElSet &parserEls )
 {
 	for ( PdaStateList::Iter state = pdaGraph->stateList; state.lte(); state++ ) {
 		assert( (state->stateBits & SB_ISMARKED) == 0 );
@@ -572,7 +572,7 @@ void ParseData::pdaActionOrder( PdaGraph *pdaGraph, KlangElSet &parserEls )
 
 	/* Compute the action orderings, record the max value. */
 	long time = 1;
-	for ( KlangElSet::Iter pe = parserEls; pe.lte(); pe++ ) {
+	for ( LangElSet::Iter pe = parserEls; pe.lte(); pe++ ) {
 		PdaState *startState = (*pe)->rootDef->fsm->startState;
 		pdaOrderProd( *pe, (*pe)->startState, startState, (*pe)->rootDef, time );
 
@@ -896,7 +896,7 @@ again:
 	}
 }
 
-void ParseData::analyzeMachine( PdaGraph *pdaGraph, KlangElSet &parserEls )
+void ParseData::analyzeMachine( PdaGraph *pdaGraph, LangElSet &parserEls )
 {
 	pdaGraph->maxState = pdaGraph->stateList.length() - 1;
 	pdaGraph->maxLelId = nextSymbolId - 1;
@@ -962,7 +962,7 @@ void ParseData::analyzeMachine( PdaGraph *pdaGraph, KlangElSet &parserEls )
 	}
 
 	/* Verify that any type we parse_stop can actually be parsed that way. */
-	for ( KlangElSet::Iter pe = parserEls; pe.lte(); pe++ ) {
+	for ( LangElSet::Iter pe = parserEls; pe.lte(); pe++ ) {
 		LangEl *lel = *pe;
 		if ( lel->parseStop )
 			verifyParseStopGrammar(lel , pdaGraph);
@@ -974,16 +974,16 @@ void ParseData::wrapNonTerminals()
 	/* Make a language element that will be used to make the root productions.
 	 * These are used for making parsers rooted at any production (including
 	 * the start symbol). */
-	rootKlangEl = declareLangEl( this, rootNamespace, "_root", LangEl::NonTerm );
+	rootLangEl = declareLangEl( this, rootNamespace, "_root", LangEl::NonTerm );
 
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
 		/* Make a single production used when the lel is a root. */
 		ProdElList *prodElList = makeProdElList( lel );
-		lel->rootDef = new Definition( InputLoc(), rootKlangEl, 
+		lel->rootDef = new Definition( InputLoc(), rootLangEl, 
 				prodElList, false, 0,
 				prodList.length(), Definition::Production );
 		prodList.append( lel->rootDef );
-		rootKlangEl->defList.append( lel->rootDef );
+		rootLangEl->defList.append( lel->rootDef );
 
 		/* First resolve. */
 		for ( ProdElList::Iter fact = *prodElList; fact.lte(); fact++ )
@@ -1475,11 +1475,11 @@ void ParseData::makeRuntimeData()
 	runtimeData->firstNonTermId = firstNonTermId;
 
 	/* Special trees. */
-	runtimeData->integerId = intKlangEl->id;
-	runtimeData->stringId = strKlangEl->id;
-	runtimeData->anyId = anyKlangEl->id;
-	runtimeData->eofId = 0; //eofKlangEl->id;
-	runtimeData->noTokenId = noTokenKlangEl->id;
+	runtimeData->integerId = intLangEl->id;
+	runtimeData->stringId = strLangEl->id;
+	runtimeData->anyId = anyLangEl->id;
+	runtimeData->eofId = 0; //eofLangEl->id;
+	runtimeData->noTokenId = noTokenLangEl->id;
 }
 
 /* Borrow alg->state for mapsTo. */
@@ -1671,7 +1671,7 @@ struct CmpSpan
 	}
 };
 
-PdaGraph *ParseData::makePdaGraph( KlangElSet &parserEls )
+PdaGraph *ParseData::makePdaGraph( LangElSet &parserEls )
 {
 	//for ( DefList::Iter prod = prodList; prod.lte(); prod++ )
 	//	cerr << prod->prodId << " " << prod->data << endl;
@@ -1868,7 +1868,7 @@ PdaTables *ParseData::makePdaTables( PdaGraph *pdaGraph )
 	return pdaTables;
 }
 
-void ParseData::makeParser( KlangElSet &parserEls )
+void ParseData::makeParser( LangElSet &parserEls )
 {
 	pdaGraph = makePdaGraph( parserEls );
 	pdaTables = makePdaTables( pdaGraph );

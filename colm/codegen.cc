@@ -88,12 +88,11 @@ void FsmCodeGen::writeMain()
 	out << 
 		"int main( int argc, char **argv )\n"
 		"{\n"
-		"	Tree *tree;\n"
 		"	Program program;\n"
 		"	initColm( 0 );\n"
 		"	initProgram( &program, argc, argv, 1, &main_runtimeData );\n"
-		"	tree = runProgram( &program );\n"
-		"	clearProgram( &program, tree );\n"
+		"	runProgram( &program );\n"
+		"	clearProgram( &program );\n"
 		"	return 0;\n"
 		"}\n"
 		"\n";

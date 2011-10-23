@@ -456,7 +456,9 @@ void initExecution( Execution *exec, Program *prg, RtCodeVect *reverseCode,
 		PdaRun *pdaRun, FsmRun *fsmRun, Code *code, Tree *lhs,
 		long genId, Head *matchText, char **captures );
 
-void forwardExecution( Execution *exec, Tree **sp );
+void mainExecution( Execution *exec );
+void reductionExecution( Execution *exec, Tree **sp );
+void generationExecution( Execution *exec, Tree **sp );
 void reverseExecution( Execution *exec, Tree **sp, RtCodeVect *allRev );
 
 Kid *allocAttrs( Program *prg, long length );
@@ -483,8 +485,8 @@ Tree **stackAlloc();
 void initColm( long debugRealm );
 void initProgram( Program *program, int argc, char **argv,
 		int ctxDepParsing, RuntimeData *rtd );
-Tree *runProgram( Program *prg );
-void clearProgram( Program *prg, Tree *tree );
+void runProgram( Program *prg );
+void clearProgram( Program *prg );
 
 #ifdef __cplusplus
 }

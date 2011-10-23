@@ -34,13 +34,13 @@ using std::endl;
 void ParseData::initUniqueTypes( )
 {
 	uniqueTypeNil = new UniqueType( TYPE_NIL );
-	uniqueTypePtr = new UniqueType( TYPE_TREE, ptrKlangEl );
-	uniqueTypeBool = new UniqueType( TYPE_TREE, boolKlangEl );
-	uniqueTypeInt = new UniqueType( TYPE_TREE, intKlangEl );
-	uniqueTypeStr = new UniqueType( TYPE_TREE, strKlangEl );
-	uniqueTypeStream = new UniqueType( TYPE_TREE, streamKlangEl );
-	uniqueTypeIgnoreList = new UniqueType( TYPE_TREE, ignoreListKlangEl );
-	uniqueTypeAny = new UniqueType( TYPE_TREE, anyKlangEl );
+	uniqueTypePtr = new UniqueType( TYPE_TREE, ptrLangEl );
+	uniqueTypeBool = new UniqueType( TYPE_TREE, boolLangEl );
+	uniqueTypeInt = new UniqueType( TYPE_TREE, intLangEl );
+	uniqueTypeStr = new UniqueType( TYPE_TREE, strLangEl );
+	uniqueTypeStream = new UniqueType( TYPE_TREE, streamLangEl );
+	uniqueTypeIgnoreList = new UniqueType( TYPE_TREE, ignoreListLangEl );
+	uniqueTypeAny = new UniqueType( TYPE_TREE, anyLangEl );
 
 	uniqeTypeMap.insert( uniqueTypeNil );
 	uniqeTypeMap.insert( uniqueTypePtr );
@@ -789,7 +789,7 @@ bool castAssignment( ParseData *pd, CodeVect &code, UniqueType *destUT,
 		return true;
 
 	/* Casting trees to any. */
-	if ( destUT->typeId == TYPE_TREE && destUT->langEl == pd->anyKlangEl &&
+	if ( destUT->typeId == TYPE_TREE && destUT->langEl == pd->anyLangEl &&
 			srcUT->typeId == TYPE_TREE )
 		return true;
 	
@@ -2331,7 +2331,7 @@ void ParseData::initLocalRefInstructions( ObjField *el )
 void ParseData::initIntObject( )
 {
 	intObj = new ObjectDef( ObjectDef::BuiltinType, "int", nextObjectId++ );
-	intKlangEl->objectDef = intObj;
+	intLangEl->objectDef = intObj;
 
 	initFunction( uniqueTypeStr, intObj, "to_string", IN_INT_TO_STR, IN_INT_TO_STR, true );
 }
@@ -2355,7 +2355,7 @@ void ParseData::addLengthField( ObjectDef *objDef, Code getLength )
 void ParseData::initStrObject( )
 {
 	strObj = new ObjectDef( ObjectDef::BuiltinType, "str", nextObjectId++ );
-	strKlangEl->objectDef = strObj;
+	strLangEl->objectDef = strObj;
 
 	initFunction( uniqueTypeInt, strObj, "atoi",   IN_STR_ATOI, IN_STR_ATOI, true );
 	initFunction( uniqueTypeInt, strObj, "uord8",  IN_STR_UORD8,  IN_STR_UORD8, true );
@@ -2374,7 +2374,7 @@ void ParseData::initStreamObject( )
 {
 	streamObj = new ObjectDef( ObjectDef::BuiltinType,
 			"stream", nextObjectId++ );
-	streamKlangEl->objectDef = streamObj;
+	streamLangEl->objectDef = streamObj;
 
 	initFunction( uniqueTypeStr, streamObj, "pull",  IN_STREAM_PULL, IN_STREAM_PULL, uniqueTypeInt, false );
 	initFunction( uniqueTypeStr, streamObj, "push",  IN_STREAM_PUSH_WV, IN_STREAM_PUSH_WV, uniqueTypeAny, false );
@@ -3002,7 +3002,7 @@ void ParseData::makeDefaultIterators()
 {
 	/* Tree iterator. */
 	{
-		UniqueType *anyRefUT = findUniqueType( TYPE_REF, anyKlangEl );
+		UniqueType *anyRefUT = findUniqueType( TYPE_REF, anyLangEl );
 		ObjMethod *objMethod = initFunction( uniqueTypeAny, globalObjectDef, 
 				"triter", IN_HALT, IN_HALT, anyRefUT, true );
 
@@ -3012,7 +3012,7 @@ void ParseData::makeDefaultIterators()
 
 	/* Child iterator. */
 	{
-		UniqueType *anyRefUT = findUniqueType( TYPE_REF, anyKlangEl );
+		UniqueType *anyRefUT = findUniqueType( TYPE_REF, anyLangEl );
 		ObjMethod *objMethod = initFunction( uniqueTypeAny, globalObjectDef, 
 				"child", IN_HALT, IN_HALT, anyRefUT, true );
 
@@ -3022,7 +3022,7 @@ void ParseData::makeDefaultIterators()
 
 	/* Reverse iterator. */
 	{
-		UniqueType *anyRefUT = findUniqueType( TYPE_REF, anyKlangEl );
+		UniqueType *anyRefUT = findUniqueType( TYPE_REF, anyLangEl );
 		ObjMethod *objMethod = initFunction( uniqueTypeAny, globalObjectDef, 
 				"rev_child", IN_HALT, IN_HALT, anyRefUT, true );
 
@@ -3032,7 +3032,7 @@ void ParseData::makeDefaultIterators()
 
 	/* Repeat iterator. */
 	{
-		UniqueType *anyRefUT = findUniqueType( TYPE_REF, anyKlangEl );
+		UniqueType *anyRefUT = findUniqueType( TYPE_REF, anyLangEl );
 		ObjMethod *objMethod = initFunction( uniqueTypeAny, globalObjectDef, 
 				"repeat", IN_HALT, IN_HALT, anyRefUT, true );
 
@@ -3042,7 +3042,7 @@ void ParseData::makeDefaultIterators()
 
 	/* Reverse repeat iterator. */
 	{
-		UniqueType *anyRefUT = findUniqueType( TYPE_REF, anyKlangEl );
+		UniqueType *anyRefUT = findUniqueType( TYPE_REF, anyLangEl );
 		ObjMethod *objMethod = initFunction( uniqueTypeAny, globalObjectDef, 
 				"rev_repeat", IN_HALT, IN_HALT, anyRefUT, true );
 

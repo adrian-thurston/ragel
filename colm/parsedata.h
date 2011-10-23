@@ -80,7 +80,7 @@ struct Bindings
 
 struct DefListEl { Definition *prev, *next; };
 struct LelDefListEl { Definition *prev, *next; };
-typedef Vector< LangEl* > KlangElVect;
+typedef Vector< LangEl* > LangElVect;
 typedef Vector< ProdEl* > FactorVect;
 
 typedef AvlMap<String, long, CmpStr> StringMap;
@@ -188,8 +188,8 @@ typedef Vector< TokenDef* > TokenDefVect;
 
 struct UniqueType;
 
-typedef Vector<LangEl*> KlangElVect;
-typedef BstSet<LangEl*> KlangElSet;
+typedef Vector<LangEl*> LangElVect;
+typedef BstSet<LangEl*> LangElSet;
 
 /* A language element class. Can be a nonTerm or a term. */
 struct LangEl : public DListEl<LangEl>
@@ -662,10 +662,10 @@ struct ParseData
 	ProdElList *makeProdElList( LangEl *langEl );
 	void wrapNonTerminals();
 	void makeDefinitionNames();
-	void noUndefindKlangEls();
-	void declareBaseKlangEls();
-	void makeKlangElIds();
-	void makeKlangElNames();
+	void noUndefindLangEls();
+	void declareBaseLangEls();
+	void makeLangElIds();
+	void makeLangElNames();
 	void makeTerminalWrappers();
 	void makeEofElements();
 	void setPrecedence();
@@ -688,14 +688,14 @@ struct ParseData
 	void lalr1AddFollow2( PdaGraph *pdaGraph, PdaTrans *trans, long followKey, long prior );
 	void lalr1AddFollow1( PdaGraph *pdaGraph, PdaTrans *trans );
 
-	void lalr1AddFollowSets( PdaGraph *pdaGraph, KlangElSet &parserEls );
+	void lalr1AddFollowSets( PdaGraph *pdaGraph, LangElSet &parserEls );
 
 	void lr0BringInItem( PdaGraph *pdaGraph, PdaState *dest, PdaState *prodState, 
 			PdaTrans *expandFrom, Definition *prod );
 	void lr0InvokeClosure( PdaGraph *pdaGraph, PdaState *state );
 	void lr0CloseAllStates( PdaGraph *pdaGraph );
 
-	void lalr1GenerateParser( PdaGraph *pdaGraph, KlangElSet &parserEls );
+	void lalr1GenerateParser( PdaGraph *pdaGraph, LangElSet &parserEls );
 
 	void reduceActions( PdaGraph *pdaGraph );
 
@@ -711,13 +711,13 @@ struct ParseData
 	PdaState *followProd( PdaState *tabState, PdaState *prodState );
 	void findFollow( AlphSet &result, PdaState *overTab, 
 			PdaState *overSrc, Definition *parentDef );
-	void pdaActionOrder( PdaGraph *pdaGraph, KlangElSet &parserEls );
+	void pdaActionOrder( PdaGraph *pdaGraph, LangElSet &parserEls );
 	void pdaOrderFollow( LangEl *rootEl, PdaState *tabState, 
 			PdaTrans *tabTrans, PdaTrans *srcTrans,
 			Definition *parentDef, Definition *definition, long &time );
 	void pdaOrderProd( LangEl *rootEl, PdaState *tabState, 
 			PdaState *srcState, Definition *parentDef, long &time );
-	void analyzeMachine( PdaGraph *pdaGraph, KlangElSet &parserEls );
+	void analyzeMachine( PdaGraph *pdaGraph, LangElSet &parserEls );
 
 	void makeProdFsms();
 	void insertUniqueEmptyProductions();
@@ -751,8 +751,8 @@ struct ParseData
 	void prepGrammar();
 	void parsePatterns();
 
-	void collectParserEls( KlangElSet &parserEls );
-	void makeParser( KlangElSet &parserEls );
+	void collectParserEls( LangElSet &parserEls );
+	void makeParser( LangElSet &parserEls );
 	PdaGraph *makePdaGraph( BstSet<LangEl*> &parserEls  );
 	PdaTables *makePdaTables( PdaGraph *pdaGraph );
 
@@ -857,18 +857,18 @@ struct ParseData
 	GenericType *anyMap;
 	GenericType *anyVector;
 
-	LangEl *ptrKlangEl;
-	LangEl *boolKlangEl;
-	LangEl *intKlangEl;
-	LangEl *strKlangEl;
-	LangEl *streamKlangEl;
-	LangEl *anyKlangEl;
-	LangEl *rootKlangEl;
-	LangEl *noTokenKlangEl;
-	LangEl *eofKlangEl;
-	LangEl *errorKlangEl;
-	LangEl *defaultCharKlangEl;
-	LangEl *ignoreListKlangEl;
+	LangEl *ptrLangEl;
+	LangEl *boolLangEl;
+	LangEl *intLangEl;
+	LangEl *strLangEl;
+	LangEl *streamLangEl;
+	LangEl *anyLangEl;
+	LangEl *rootLangEl;
+	LangEl *noTokenLangEl;
+	LangEl *eofLangEl;
+	LangEl *errorLangEl;
+	LangEl *defaultCharLangEl;
+	LangEl *ignoreListLangEl;
 
 	TokenRegion *rootRegion;
 	TokenRegion *defaultRegion;

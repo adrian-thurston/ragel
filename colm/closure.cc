@@ -320,7 +320,7 @@ void ParseData::lalr1AddFollow1( PdaGraph *pdaGraph, PdaTrans *trans )
 }
 
 /* Add follow sets to an LR(0) graph to make it LALR(1). */
-void ParseData::lalr1AddFollowSets( PdaGraph *pdaGraph, KlangElSet &parserEls )
+void ParseData::lalr1AddFollowSets( PdaGraph *pdaGraph, LangElSet &parserEls )
 {
 	/* Make the state that all reduction actions go to. Since a reduction pops
 	 * states of the stack and sets the new target state, this state is
@@ -328,7 +328,7 @@ void ParseData::lalr1AddFollowSets( PdaGraph *pdaGraph, KlangElSet &parserEls )
 	actionDestState = pdaGraph->addState();
 	pdaGraph->setFinState( actionDestState );
 
-	for ( KlangElSet::Iter pe = parserEls; pe.lte(); pe++ ) {
+	for ( LangElSet::Iter pe = parserEls; pe.lte(); pe++ ) {
 		/* Get the entry into the graph and traverse over start. */
 		PdaState *overStart = pdaGraph->followFsm( (*pe)->startState, (*pe)->rootDef->fsm );
 
@@ -418,7 +418,7 @@ void ParseData::addDupTerms( PdaGraph *pdaGraph )
 }
 
 /* Generate a LALR(1) graph. */
-void ParseData::lalr1GenerateParser( PdaGraph *pdaGraph, KlangElSet &parserEls )
+void ParseData::lalr1GenerateParser( PdaGraph *pdaGraph, LangElSet &parserEls )
 {
 	/* Make the intial graph. */
 	pdaGraph->langElIndex = langElIndex;
@@ -453,6 +453,6 @@ void ParseData::lalr1GenerateParser( PdaGraph *pdaGraph, KlangElSet &parserEls )
 
 //	/* Set the commit on the final eof shift. */
 //	PdaTrans *overStart = pdaGraph->startState->findTrans( rootEl->id );
-//	PdaTrans *eofTrans = overStart->toState->findTrans( eofKlangEl->id );
+//	PdaTrans *eofTrans = overStart->toState->findTrans( eofLangEl->id );
 //	eofTrans->afterShiftCommits.insert( 2 );
 }

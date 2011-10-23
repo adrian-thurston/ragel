@@ -95,7 +95,7 @@ struct Parser
 	NameRef nameRef;
 	NameRefList nameRefList;
 
-	KlangElVect langElVect;
+	LangElVect langElVect;
 
 	PatternItemList *patternItemList;
 	ReplItemList *replItemList;

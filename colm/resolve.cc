@@ -746,9 +746,9 @@ void ParseData::makeEofElements()
 	 * Another pass before this one is needed. */
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
 		if ( lel->eofLel == 0 &&
-				lel != eofKlangEl &&
-				lel != errorKlangEl &&
-				lel != noTokenKlangEl )
+				lel != eofLangEl &&
+				lel != errorLangEl &&
+				lel != noTokenLangEl )
 		{
 			String name( lel->name.length() + 5, "_eof_%s", lel->name.data );
 			LangEl *eofLel = new LangEl( lel->nspace, name, LangEl::Term );
