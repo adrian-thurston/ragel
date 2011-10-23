@@ -2478,6 +2478,16 @@ void ParseData::addSaveLHS( Definition *prod, CodeVect &code, long &insertPos )
 		code.insert( insertPos, IN_SAVE_LHS );
 }
 
+void ParseData::makeProdCopies( Definition *prod )
+{
+	int pos = 0;
+	for ( ProdElList::Iter pel = *prod->prodElList; pel.lte(); pel++, pos++) {
+		if ( pel->captureField != 0 ) {
+			prod->copy.append( pel->captureField->offset );
+			prod->copy.append( pos );
+		}
+	}
+}
 
 void ParseData::compileReductionCode( Definition *prod )
 {
@@ -3184,6 +3194,7 @@ void ParseData::compileByteCode()
 
 	/* Compile the reduction code. */
 	for ( DefList::Iter prod = prodList; prod.lte(); prod++ ) {
+		makeProdCopies( prod );
 		if ( prod->redBlock != 0 ) {
 			if ( prod->redBlock->context != 0 )
 				context = prod->redBlock->context;

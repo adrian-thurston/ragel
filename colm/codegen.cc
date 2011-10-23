@@ -37,9 +37,32 @@ using std::endl;
 void ParseData::generateExports()
 {
 	ostream &out = *outStream;
-	out << "#ifndef _EXPORTS_H\n";
-	out << "#define _EXPORTS_H\n";
-	out << "#include <colm/colm.h>\n";
+
+	out << 
+		"#ifndef _EXPORTS_H\n"
+		"#define _EXPORTS_H\n"
+		"#include <colm/colm.h>\n"
+		"#include <string>\n"
+		"\n";
+
+	out << 
+		"inline void appendString( PrintArgs *args, const char *data, int length )\n"
+		"{\n"
+		"	std::string *str = (std::string*)args->arg;\n"
+		"	*str += std::string( data, length );\n"
+		"}\n"
+		"\n";
+
+	out << 
+		"inline std::string printTreeStr( Program *prg, Tree *tree )\n"
+		"{\n"
+		"	std::string str;\n"
+		"	PrintArgs printArgs = { &str, 1, 0, &appendString, \n"
+		"			&printNull, &printTermTree, &printNull };\n"
+		"	printTreeArgs( &printArgs, prg->vm_root, prg, tree );\n"
+		"	return str;\n"
+		"}\n"
+		"\n";
 
 	/* Declare. */
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ )
@@ -49,6 +72,7 @@ void ParseData::generateExports()
 		out << "struct " << lel->fullName << "\n";
 		out << "{\n";
 		out << "	Head *data() { return ((Tree*)this)->tokdata; }\n";
+		out << "	std::string text( Program *prg ) { return printTreeStr( prg, (Tree*)this ); }\n";
 
 		if ( lel->objectDef != 0 && lel->objectDef->objFieldList != 0 ) {
 			ObjFieldList *objFieldList = lel->objectDef->objFieldList;

@@ -147,6 +147,8 @@ struct Definition
 	ObjField *lhsField;
 
 	LangEl *predOf;
+
+	UnsignedCharVect copy;
 };
 
 struct CmpDefById
@@ -268,16 +270,26 @@ struct ProdEl
 	}; 
 
 	/* Construct with a reference to a var def. */
-	ProdEl( Type type, const InputLoc &loc, bool commit, TypeRef *typeRef, int priorVal ) :
-		commit(commit), typeRef(typeRef),
-		langEl(0), priorVal(priorVal),
-		type(type), objField(0) {}
+	ProdEl( Type type, const InputLoc &loc, ObjField *captureField, bool commit, TypeRef *typeRef, int priorVal )
+	:
+		captureField(captureField),
+		commit(commit),
+		typeRef(typeRef),
+		langEl(0),
+		priorVal(priorVal),
+		type(type), 
+		objField(0) {}
 
-	ProdEl( const InputLoc &loc, TypeRef *typeRef ) :
-		commit(false), typeRef(typeRef), langEl(0), 
+	ProdEl( const InputLoc &loc, TypeRef *typeRef )
+	:
+		captureField(0), 
+		commit(false), 
+		typeRef(typeRef), 
+		langEl(0), 
 		priorVal(0), 
 		type(ReferenceType), objField(0) {}
 
+	ObjField *captureField;
 	bool commit;
 
 	TypeRef *typeRef;
@@ -809,6 +821,7 @@ struct ParseData
 	void compileRootBlock();
 	void compileTranslateBlock( LangEl *langEl );
 	void findLocalTrees( CharSet &trees );
+	void makeProdCopies( Definition *prod );
 	void compileReductionCode( Definition *prod );
 	void initGenericTypes();
 	void removeNonUnparsableRepls();

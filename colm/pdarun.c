@@ -613,6 +613,21 @@ again:
 
 		assert( redLel->tree->refs == 1 );
 
+		/* Copy RHS elements in the production. */
+		{
+			unsigned char *copy = pdaRun->tables->rtd->prodInfo[reduction].copy;
+			if ( copy != 0 ) {
+				int i, copyLen = pdaRun->tables->rtd->prodInfo[reduction].copyLen;
+				for ( i = 0; i < copyLen; i++ ) {
+					unsigned char field = copy[i*2];
+					unsigned char fromPos = copy[i*2+1];
+					Tree *val = getRhsEl( pdaRun->prg, redLel->tree, fromPos );
+					treeUpref( val );
+					setField( pdaRun->prg, redLel->tree, field, val );
+				}
+			}
+		}
+
 		if ( pdaRun->prg->ctxDepParsing && pdaRun->tables->rtd->prodInfo[reduction].frameId >= 0 ) {
 			/* Frame info for reduction. */
 			FrameInfo *fi = &pdaRun->tables->rtd->frameInfo[pdaRun->tables->rtd->prodInfo[reduction].frameId];
@@ -622,7 +637,7 @@ again:
 			initExecution( &exec, pdaRun->prg, &pdaRun->rcodeCollect, 
 					pdaRun, fsmRun, fi->codeWV, redLel->tree, 0, 0, fsmRun->mark );
 
-			generationExecution( &exec, sp );
+			reductionExecution( &exec, sp );
 
 			if ( exec.prg->induceExit )
 				goto fail;

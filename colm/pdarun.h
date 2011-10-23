@@ -305,6 +305,8 @@ typedef struct _ProdInfo
 	const char *name;
 	long frameId;
 	unsigned char lhsUpref;
+	unsigned char *copy;
+	long copyLen;
 } ProdInfo;
 
 typedef struct _FrameInfo

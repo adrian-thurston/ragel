@@ -605,7 +605,7 @@ pattern_el_type_or_lit: region_qual TK_Word opt_repeat
 	final {
 		TypeRef *typeRef = new TypeRef( $2->loc, $1->nspaceQual, $2->data );
 		typeRef->repeatType = $3->repeatType;
-		ProdEl *factor = new ProdEl( ProdEl::ReferenceType, $2->loc, false, typeRef, 0 );
+		ProdEl *factor = new ProdEl( ProdEl::ReferenceType, $2->loc, 0, false, typeRef, 0 );
 		$$->patternItem = new PatternItem( $2->loc, factor, PatternItem::FactorType );
 		patternItemList->append( $$->patternItem );
 	};
@@ -616,7 +616,7 @@ pattern_el_type_or_lit: region_qual TK_Literal opt_repeat
 		TypeRef *typeRef = new TypeRef( $2->loc, $1->nspaceQual, literal );
 		typeRef->repeatType = $3->repeatType;
 
-		ProdEl *factor = new ProdEl( ProdEl::ReferenceType, $2->loc, false, typeRef, 0 );
+		ProdEl *factor = new ProdEl( ProdEl::ReferenceType, $2->loc, 0, false, typeRef, 0 );
 		$$->patternItem = new PatternItem( $2->loc, factor, PatternItem::FactorType );
 		patternItemList->append( $$->patternItem );
 	};
@@ -670,7 +670,7 @@ repl_el: region_qual TK_Literal
 		PdaLiteral *literal = new PdaLiteral( $2->loc, *$2 );
 		TypeRef *typeRef = new TypeRef( $2->loc, $1->nspaceQual, literal );
 		typeRef->repeatType = RepeatNone;
-		ProdEl *factor = new ProdEl( ProdEl::LiteralType, $2->loc, false, typeRef, 0 );
+		ProdEl *factor = new ProdEl( ProdEl::LiteralType, $2->loc, 0, false, typeRef, 0 );
 		ReplItem *replItem = new ReplItem( $2->loc, ReplItem::FactorType, factor );
 		replItemList->append( replItem );
 	};
@@ -794,21 +794,39 @@ nonterm prod_el
 };
 
 prod_el: 
-	opt_commit region_qual TK_Word opt_repeat
+	opt_capture opt_commit region_qual TK_Word opt_repeat
 	final {
-		TypeRef *typeRef = new TypeRef( $3->loc, $2->nspaceQual, $3->data );
-		typeRef->repeatType = $4->repeatType;
-		$$->factor = new ProdEl( ProdEl::ReferenceType, $3->loc, $1->commit, typeRef, 0 );
+		TypeRef *typeRef = new TypeRef( $4->loc, $3->nspaceQual, $4->data );
+		typeRef->repeatType = $5->repeatType;
+		$$->factor = new ProdEl( ProdEl::ReferenceType, $4->loc, $1->objField, $2->commit, typeRef, 0 );
+
+		/* If there is a capture, create the field. */
+		if ( $1->objField != 0 ) {
+			$1->objField->typeRef = typeRef;
+			if ( pd->objectDef->checkRedecl( $1->objField->name ) != 0 )
+				error() << "object field renamed" << endp;
+
+			pd->objectDef->insertField( $1->objField->name, $1->objField );
+		}
 	};
 
 prod_el: 
-	opt_commit region_qual TK_Literal opt_repeat
+	opt_capture opt_commit region_qual TK_Literal opt_repeat
 	final {
 		/* Create a new factor node going to a concat literal. */
-		PdaLiteral *literal = new PdaLiteral( $3->loc, *$3 );
-		TypeRef *typeRef = new TypeRef( $3->loc, $2->nspaceQual, literal );
-		typeRef->repeatType = $4->repeatType;
-		$$->factor = new ProdEl( ProdEl::LiteralType, $3->loc, $1->commit, typeRef, 0 );
+		PdaLiteral *literal = new PdaLiteral( $4->loc, *$4 );
+		TypeRef *typeRef = new TypeRef( $4->loc, $3->nspaceQual, literal );
+		typeRef->repeatType = $5->repeatType;
+		$$->factor = new ProdEl( ProdEl::LiteralType, $4->loc, $1->objField, $2->commit, typeRef, 0 );
+
+		/* If there is a capture, create the field. */
+		if ( $1->objField != 0 ) {
+			$1->objField->typeRef = typeRef;
+			if ( pd->objectDef->checkRedecl( $1->objField->name ) != 0 )
+				error() << "object field renamed" << endp;
+
+			pd->objectDef->insertField( $1->objField->name, $1->objField );
+		}
 	};
 
 nonterm opt_repeat

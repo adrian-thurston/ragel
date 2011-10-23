@@ -1249,6 +1249,8 @@ void ParseData::makeRuntimeData()
 		}
 
 		runtimeData->prodInfo[count].lhsUpref = true;
+		runtimeData->prodInfo[count].copy = prod->copy.data;
+		runtimeData->prodInfo[count].copyLen = prod->copy.length() / 2;
 		count += 1;
 	}
 

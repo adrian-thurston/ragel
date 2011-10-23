@@ -130,6 +130,9 @@ void strCollectClear( StrCollect *collect );
 
 void printTree( StrCollect *collect, Tree **sp, Program *prg, Tree *tree );
 
+void printTermTree( PrintArgs *printArgs, Tree **sp, Program *prg, Kid *kid );
+void printNull( struct _PrintArgs *args, Tree **sp, Program *prg, Kid *parent, Kid *kid );
+
 void printTreeArgs( PrintArgs *printArgs, Tree **sp, Program *prg, Tree *tree );
 void printTreeCollect( StrCollect *collect, Tree **sp, Program *prg, Tree *tree );
 void printTreeFile( FILE *out, Tree **sp, Program *prg, Tree *tree );

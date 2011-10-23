@@ -150,6 +150,27 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 		}
 	}
 
+	/*
+	 * Blocks in production info.
+	 */
+	for ( int i = 0; i < runtimeData->numProds; i++ ) {
+		if ( runtimeData->prodInfo[i].copyLen > 0 ) {
+			out << "unsigned char copy_" << i << "[] = {\n\t";
+
+			unsigned char *block = runtimeData->prodInfo[i].copy;
+			for ( int j = 0; j < runtimeData->prodInfo[i].copyLen; j++ ) {
+				out << (long) block[j*2] << ", " << (long) block[j*2+1];
+
+				if ( j < runtimeData->prodInfo[i].copyLen-1 ) {
+					out << ", ";
+					if ( (j+1) % 8 == 0 )
+						out << "\n\t";
+				}
+			}
+			out << "\n};\n\n";
+		}
+	}
+
 	/* 
 	 * Init code.
 	 */
@@ -257,11 +278,18 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 	for ( int i = 0; i < runtimeData->numProds; i++ ) {
 		out << "\t{ ";
 
-		out << runtimeData->prodInfo[i].length << ", ";
-		out << runtimeData->prodInfo[i].lhsId << ", ";
-		out << '"' << runtimeData->prodInfo[i].name << "\", ";
-		out << runtimeData->prodInfo[i].frameId << ", ";
-		out << (int)runtimeData->prodInfo[i].lhsUpref;
+		out << 
+			runtimeData->prodInfo[i].length << ", " << 
+			runtimeData->prodInfo[i].lhsId << ", " << 
+			'"' << runtimeData->prodInfo[i].name << "\", " << 
+			runtimeData->prodInfo[i].frameId << ", " << 
+			(int)runtimeData->prodInfo[i].lhsUpref << ", ";
+
+		if ( runtimeData->prodInfo[i].copyLen > 0 )
+			out << "copy_" << i << ", ";
+		else
+			out << "0, ";
+		out << runtimeData->prodInfo[i].copyLen << ", ";
 
 		out << " }";
 

@@ -148,6 +148,7 @@ enum BuiltinMachine
 };
 
 typedef BstSet<char> CharSet;
+typedef Vector<unsigned char> UnsignedCharVect;
 
 
 struct ParseData;

@@ -384,7 +384,7 @@ typedef unsigned char uchar;
 #define IFR_RFR 0    /* return frame pointer */
 
 /* Exported to modules other than bytecode.c */
-#define vm_push(i) if ( sp == prg->se ) vm_grow( prg ); (*(--sp) = (i))
+#define vm_push(i) /*if ( sp == prg->se ) vm_grow( prg ); */(*(--sp) = (i))
 #define vm_pop() (*sp++)
 #define vm_top() (*sp)
 #define vm_ptop() (sp)
