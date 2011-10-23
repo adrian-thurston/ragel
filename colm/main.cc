@@ -69,6 +69,7 @@ istream *inStream = 0;
 ostream *outStream = 0;
 const char *inputFileName = 0;
 const char *outputFileName = 0;
+const char *gblExportTo = 0;
 
 bool generateGraphviz = false;
 bool verbose = false;
@@ -264,6 +265,31 @@ void openOutput( )
 	}
 }
 
+void openExports( )
+{
+	/* Make sure we are not writing to the same file as the input file. */
+	if ( gblExportTo != 0 && strcmp( inputFileName, gblExportTo  ) == 0 ) {
+		error() << "output file \"" << gblExportTo  << 
+				"\" is the same as the input file" << endl;
+	}
+
+	if ( gblExportTo != 0 ) {
+		/* Open the output stream, attaching it to the filter. */
+		ofstream *outFStream = new ofstream( gblExportTo );
+
+		if ( !outFStream->is_open() ) {
+			error() << "error opening " << outputFileName << " for writing" << endl;
+			exit(1);
+		}
+
+		outStream = outFStream;
+	}
+	else {
+		/* Writing out ot std out. */
+		outStream = &cout;
+	}
+}
+
 void compileOutputCommand( const char *command )
 {
 	if ( colm_log_compile )
@@ -357,7 +383,7 @@ bool inSourceTree( const char *argv0 )
 
 void process_args( int argc, const char **argv )
 {
-	ParamCheck pc( "LI:vdlio:S:M:vHh?-:sV", argc, argv );
+	ParamCheck pc( "e:LI:vdlio:S:M:vHh?-:sV", argc, argv );
 
 	while ( pc.check() ) {
 		switch ( pc.state ) {
@@ -416,6 +442,9 @@ void process_args( int argc, const char **argv )
 				break;
 			case 'L':
 				gblLibrary = true;
+				break;
+			case 'e':
+				gblExportTo = pc.parameterArg;
 				break;
 			}
 			break;
@@ -515,6 +544,12 @@ int main(int argc, const char **argv)
 				compileOutputInSource( argv[0] );
 			else
 				compileOutputInstalled( argv[0] );
+		}
+
+		if ( gblExportTo != 0 )  {
+			openExports();
+			scanner.parser->pd->generateExports();
+			delete outStream;
 		}
 	}
 

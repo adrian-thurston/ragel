@@ -218,8 +218,18 @@ void ParseData::makeKlangElIds()
 void ParseData::makeKlangElNames()
 {
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
-		lel->fullName = lel->name;
-		lel->fullLit = lel->lit;
+		if ( lel->id == LEL_ID_INT ) {
+			lel->fullName = "_int";
+			lel->fullLit = "_int";
+		}
+		else if ( lel->id == LEL_ID_BOOL ) {
+			lel->fullName = "_bool";
+			lel->fullLit = "_bool";
+		}
+		else {
+			lel->fullName = lel->name;
+			lel->fullLit = lel->lit;
+		}
 
 		Namespace *nspace = lel->nspace;
 		while ( nspace != 0 ) {

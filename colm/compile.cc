@@ -2187,9 +2187,11 @@ void LangStmt::compile( ParseData *pd, CodeVect &code ) const
 			/* Evaluate the exrepssion. */
 			UniqueType *exprUT = expr->evaluate( pd, code );
 
-			UniqueType *resUT = pd->curFunction->typeRef->uniqueType;
-			if ( !castAssignment( pd, code, resUT, 0, exprUT ) )
-				error(loc) << "return value wrong type" << endp;
+			if ( pd->curFunction != 0 ) {
+				UniqueType *resUT = pd->curFunction->typeRef->uniqueType;
+				if ( !castAssignment( pd, code, resUT, 0, exprUT ) )
+					error(loc) << "return value wrong type" << endp;
+			}
 
 			code.append( IN_SAVE_RET );
 

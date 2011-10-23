@@ -464,6 +464,8 @@ void freeAttrs( Program *prg, Kid *attrs );
 void setAttr( Tree *tree, long pos, Tree *val );
 Tree *getAttr( Tree *tree, long pos );
 Kid *getAttrKid( Tree *tree, long pos );
+Tree *getRepeatNext( Tree *tree );
+int repeatEnd( Tree *tree );
 
 Tree *splitTree( Program *prg, Tree *t );
 void rcodeDownrefAll( Program *prg, Tree **sp, RtCodeVect *cv );
@@ -480,8 +482,8 @@ Tree **stackAlloc();
 void initColm( long debugRealm );
 void initProgram( Program *program, int argc, char **argv,
 		int ctxDepParsing, RuntimeData *rtd );
-void runProgram( Program *prg );
-void clearProgram( Program *prg );
+Tree *runProgram( Program *prg );
+void clearProgram( Program *prg, Tree *tree );
 
 #ifdef __cplusplus
 }

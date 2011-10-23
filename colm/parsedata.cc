@@ -1424,3 +1424,4 @@ void ParseData::generateOutput()
 		fsmGen->writeMain();
 	outStream->flush();
 }
+

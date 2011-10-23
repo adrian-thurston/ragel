@@ -19,6 +19,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
+//#define COLM_LOG
+
 #include <alloca.h>
 #include <sys/mman.h>
 #include <string.h>
@@ -553,7 +555,7 @@ Tree **stackAlloc()
 		PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0 );
 }
 
-void runProgram( Program *prg )
+Tree *runProgram( Program *prg )
 {
 	assert( sizeof(Int)      <= sizeof(Tree) );
 	assert( sizeof(Str)      <= sizeof(Tree) );
@@ -576,23 +578,33 @@ void runProgram( Program *prg )
 	/*
 	 * Execute
 	 */
+	Tree *retVal = 0;
 
 	if ( prg->rtd->rootCodeLen > 0 ) {
 		RtCodeVect rcodeCollect;
 		Execution execution;
 		initRtCodeVect( &rcodeCollect );
-		initExecution( &execution, prg, &rcodeCollect, 0, 0, prg->rtd->rootCode, 0, 0, 0, 0 );
-		forwardExecution( &execution, prg->vm_root );
 
-		debug( REALM_BYTECODE, "freeing the root reverse code" );
+		initExecution( &execution, prg, &rcodeCollect, 0, 0, prg->rtd->rootCode, 0, 0, 0, 0 );
+
+		Tree **sp = prg->vm_root;
+		vm_push( 0 ); 
+		vm_push( 0 );
+		vm_push( 0 );
+		executeCode( &execution, sp, execution.code );
+		vm_pop();
+		vm_pop();
+		retVal = vm_pop();
 
 		/* The root code should all be commit code and reverse code
 		 * should be empty. */
 		assert( rcodeCollect.tabLen == 0 );
 	}
+
+	return retVal;
 }
 
-void clearProgram( Program *prg )
+void clearProgram( Program *prg, Tree *tree )
 {
 	Tree **vm_stack = prg->vm_stack;
 	Tree **sp = prg->vm_root;
@@ -603,6 +615,7 @@ void clearProgram( Program *prg )
 	}
 	#endif
 
+	treeDownref( prg, sp, tree );
 	clearGlobal( prg, sp );
 
 	/* Clear the heap. */
@@ -1598,11 +1611,7 @@ again:
 			break;
 		}
 		case IN_SAVE_RET: {
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode ) {
-				cerr << "IN_SAVE_RET " << endl;
-			}
-			#endif
+			debug( REALM_BYTECODE, "IN_SAVE_RET\n" );
 
 			Tree *val = vm_pop();
 			vm_local(FR_RV) = val;
@@ -2774,7 +2783,7 @@ again:
 			read_tree( input );
 			read_word( consumed );
 
-			debug( REALM_BYTECODE, "IN_PARSE_FRAG_BKT " << consumed );
+			debug( REALM_BYTECODE, "IN_PARSE_FRAG_BKT %ld", consumed );
 
 			undoParseStream( sp, prg, (Stream*)input, (Accum*)accum, consumed );
 
@@ -2784,7 +2793,7 @@ again:
 		}
 
 		case IN_PARSE_FINISH_WC: {
-			debug( REALM_BYTECODE, "IN_PARSE_FINISH_WC " );
+			debug( REALM_BYTECODE, "IN_PARSE_FINISH_WC\n" );
 
 			Tree *accum = vm_pop();
 			Tree *result = parseFinish( sp, prg, (Accum*)accum, false );
@@ -3864,11 +3873,7 @@ again:
 
 			FunctionInfo *fi = &prg->rtd->functionInfo[funcId];
 
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode ) {
-				cerr << "IN_CALL_WV " << fi->name << endl;
-			}
-			#endif
+			debug( REALM_BYTECODE, "IN_CALL_WV %ld\n", fi->name );
 
 			vm_push( 0 ); /* Return value. */
 			vm_push( (SW)instr );
@@ -3884,11 +3889,7 @@ again:
 
 			FunctionInfo *fi = &prg->rtd->functionInfo[funcId];
 
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode ) {
-				cerr << "IN_CALL_WC " << fi->name << endl;
-			}
-			#endif
+			debug( REALM_BYTECODE, "IN_CALL_WC %ld\n", fi->name );
 
 			vm_push( 0 ); /* Return value. */
 			vm_push( (SW)instr );
@@ -4012,11 +4013,7 @@ again:
 
 			FunctionInfo *fui = &prg->rtd->functionInfo[funcId];
 
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode ) {
-				cerr << "IN_RET " << fui->name << endl;
-			}
-			#endif
+			debug( REALM_BYTECODE, "IN_RET %ld\n", fui->name );
 
 			FrameInfo *fi = &prg->rtd->frameInfo[fui->frameId];
 			downrefLocalTrees( prg, sp, exec->frame, fi->trees, fi->treesLen );

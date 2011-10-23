@@ -99,6 +99,30 @@ Tree *getAttr( Tree *tree, long pos )
 	return kid->tree;
 }
 
+Tree *getRepeatNext( Tree *tree )
+{
+	Kid *kid = tree->child;
+
+	if ( tree->flags & AF_LEFT_IGNORE )
+		kid = kid->next;
+	if ( tree->flags & AF_RIGHT_IGNORE )
+		kid = kid->next;
+
+	return kid->next->tree;
+}
+
+int repeatEnd( Tree *tree )
+{
+	Kid *kid = tree->child;
+
+	if ( tree->flags & AF_LEFT_IGNORE )
+		kid = kid->next;
+	if ( tree->flags & AF_RIGHT_IGNORE )
+		kid = kid->next;
+
+	return kid == 0;
+}
+
 Kid *getAttrKid( Tree *tree, long pos )
 {
 	long i;

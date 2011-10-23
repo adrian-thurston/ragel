@@ -34,16 +34,62 @@ using std::string;
 using std::cerr;
 using std::endl;
 
+void ParseData::generateExports()
+{
+	ostream &out = *outStream;
+	out << "#ifndef _EXPORTS_H\n";
+	out << "#define _EXPORTS_H\n";
+	out << "#include <colm/colm.h>\n";
+
+	/* Declare. */
+	for ( LelList::Iter lel = langEls; lel.lte(); lel++ )
+		out << "struct " << lel->fullName << ";\n";
+
+	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
+		out << "struct " << lel->fullName << "\n";
+		out << "{\n";
+		out << "	Head *data() { return ((Tree*)this)->tokdata; }\n";
+
+		if ( lel->objectDef != 0 && lel->objectDef->objFieldList != 0 ) {
+			ObjFieldList *objFieldList = lel->objectDef->objFieldList;
+			for ( ObjFieldList::Iter ofi = *objFieldList; ofi.lte(); ofi++ ) {
+				ObjField *field = ofi->value;
+				if ( field->useOffset && field->typeRef != 0 ) {
+					UniqueType *ut = field->typeRef->lookupType( this );
+
+					if ( ut != 0 && ut->typeId == TYPE_TREE  ) {
+						out << "	" << ut->langEl->fullName << " *" << field->name << 
+							"() { return (" << ut->langEl->fullName << 
+							"*)getAttr( (Tree*)this, " << field->offset << "); }\n";
+					}
+				}
+			}
+		}
+
+		if ( lel->isRepeat ) {
+			out << "	" << lel->fullName << " *next"
+				"() { return (" << lel->fullName << 
+				"*)getRepeatNext( (Tree*)this ); }\n";
+
+			out << "	" <<
+				"int end() { return repeatEnd( (Tree*)this ); }\n";
+		}
+		out << "};\n";
+	}
+	out << "#endif\n";
+}
+
 void FsmCodeGen::writeMain()
 {
 	out << 
 		"int main( int argc, char **argv )\n"
 		"{\n"
-		"	initColm( 0 );\n"
+		"	Tree *tree;\n"
 		"	Program program;\n"
+		"	initColm( 0 );\n"
 		"	initProgram( &program, argc, argv, 1, &main_runtimeData );\n"
-		"	runProgram( &program );\n"
-		"	clearProgram( &program );\n"
+		"	tree = runProgram( &program );\n"
+		"	clearProgram( &program, tree );\n"
 		"	return 0;\n"
 		"}\n"
 		"\n";

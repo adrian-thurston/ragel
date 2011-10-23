@@ -67,7 +67,8 @@ typedef struct _Location
 /* Header located just before string data. */
 typedef struct _Head
 {
-	const char *data; long length;
+	const char *data; 
+	long length;
 	Location *location;
 } Head;
 

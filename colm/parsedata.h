@@ -817,6 +817,8 @@ struct ParseData
 	void semanticAnalysis();
 	void generateOutput();
 
+	void generateExports();
+
 	/* 
 	 * Graphviz Generation
 	 */
@@ -829,10 +831,7 @@ struct ParseData
 	 * Data collected during the parse.
 	 */
 
-	/* Dictionary of graphs. Both instances and non-instances go here. */
 	LelList langEls;
-
-	/* The list of instances. */
 	DefList prodList;
 
 	/* Dumping. */
