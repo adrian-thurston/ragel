@@ -98,9 +98,9 @@ Tree *getParsedRoot( PdaRun *pdaRun, int stop )
 		return pdaRun->stackTop->next->tree;
 }
 
-void cleanParser( Tree **sp, PdaRun *pdaRun )
+void clearPdaRun( Tree **sp, PdaRun *pdaRun )
 {
-	/* Traverse the stack, downreffing. */
+	/* Traverse the stack downreffing. */
 	Kid *kid = pdaRun->stackTop;
 	while ( kid != 0 ) {
 		Kid *next = kid->next;
@@ -110,7 +110,7 @@ void cleanParser( Tree **sp, PdaRun *pdaRun )
 	}
 	pdaRun->stackTop = 0;
 
-	/* Traverse the token list, downreffing. */
+	/* Traverse the token list downreffing. */
 	Ref *ref = pdaRun->tokenList;
 	while ( ref != 0 ) {
 		Ref *next = ref->next;
@@ -119,7 +119,7 @@ void cleanParser( Tree **sp, PdaRun *pdaRun )
 	}
 	pdaRun->tokenList = 0;
 
-	/* Traverse the btPoint list. */
+	/* Traverse the btPoint list downreffing */
 	Kid *btp = pdaRun->btPoint;
 	while ( btp != 0 ) {
 		Kid *next = btp->next;
@@ -128,6 +128,13 @@ void cleanParser( Tree **sp, PdaRun *pdaRun )
 		btp = next;
 	}
 	pdaRun->btPoint = 0;
+
+	if ( pdaRun->context != 0 )
+		treeDownref( pdaRun->prg, sp, pdaRun->context );
+
+	rcodeDownrefAll( pdaRun->prg, sp, &pdaRun->reverseCode );
+	rtCodeVectEmpty( &pdaRun->reverseCode );
+	rtCodeVectEmpty( &pdaRun->rcodeCollect );
 }
 
 int isParserStopFinished( PdaRun *pdaRun )
@@ -177,13 +184,6 @@ void initPdaRun( PdaRun *pdaRun, Program *prg, PdaTables *tables,
 	pdaRun->context = splitTree( pdaRun->prg, context );
 	pdaRun->parseError = 0;
 }
-
-void clearContext( PdaRun *pdaRun, Tree **sp )
-{
-	if ( pdaRun->context != 0 )
-		treeDownref( pdaRun->prg, sp, pdaRun->context );
-}
-
 
 long stackTopTarget( PdaRun *pdaRun )
 {

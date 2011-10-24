@@ -97,11 +97,6 @@ static void downResize( RtCodeVect *vect, long len)
 void rtCodeVectEmpty( RtCodeVect *vect )
 {
 	if ( vect->data != 0 ) {
-		/* Call All destructors. */
-		//Code *pos = vect->data;
-		//for ( long i = 0; i < vect->tabLen; pos++, i++ )
-		//	pos->~Code();
-
 		/* Free the data space. */
 		free( vect->data );
 		vect->data = 0;

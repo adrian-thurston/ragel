@@ -110,7 +110,7 @@ void ParseData::generateExports()
 void FsmCodeGen::writeMain()
 {
 	out << 
-		"int main( int argc, char **argv )\n"
+		"int main( int argc, const char **argv )\n"
 		"{\n"
 		"	Program program;\n"
 		"	initColm( 0 );\n"

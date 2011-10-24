@@ -606,6 +606,7 @@ int makeReverseCode( RtCodeVect *all, RtCodeVect *reverseCode );
 
 void initPdaRun( PdaRun *pdaRun, Program *prg, PdaTables *tables,
 		FsmRun *fsmRun, int parserId, long stopTarget, int revertOn, Tree *context );
+void clearPdaRun( Tree **root, PdaRun *pdaRun );
 
 void clearContext( PdaRun *pdaRun, Tree **sp );
 Kid *extractIgnore( PdaRun *pdaRun );
@@ -617,7 +618,6 @@ void pdaRunMatch(  PdaRun *pdaRun, Kid *tree, Kid *pattern );
 /* Offset can be used to look at the next nextRegionInd. */
 int pdaRunGetNextRegion( PdaRun *pdaRun, int offset );
 
-void cleanParser( Tree **root, PdaRun *pdaRun );
 void ignoreTree( PdaRun *pdaRun, Tree *tree );
 void parseToken( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
 long undoParse( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Tree *tree );

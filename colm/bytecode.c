@@ -314,9 +314,6 @@ Tree *parseFinish( Tree **sp, Program *prg, Accum *accum, int revertOn )
 	Tree *tree = getParsedRoot( accum->pdaRun, accum->pdaRun->stopTarget > 0 );
 	treeUpref( tree );
 
-	if ( !revertOn )
-		cleanParser( sp, accum->pdaRun );
-
 	/* Indicate that this tree came out of a parser. */
 	if ( tree != 0 )
 		tree->flags |= AF_PARSED;

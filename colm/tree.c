@@ -820,24 +820,16 @@ free_tree:
 		}
 		else if ( generic->type == GEN_PARSER ) {
 			Accum *accum = (Accum*)tree;
-			cleanFsmRun( prg, accum->fsmRun );
-			cleanParser( sp, accum->pdaRun );
-			clearContext( accum->pdaRun, sp );
-			rcodeDownrefAll( prg, sp, &accum->pdaRun->reverseCode );
-			rtCodeVectEmpty( &accum->pdaRun->reverseCode );
-			rtCodeVectEmpty( &accum->pdaRun->rcodeCollect );
-			if ( accum->fsmRun->haveDataOf != 0 ) {
-				accum->fsmRun->haveDataOf->hasData = 0;
-				accum->fsmRun->haveDataOf = 0;
-			}
-				
+			clearFsmRun( prg, accum->fsmRun );
+			clearPdaRun( sp, accum->pdaRun );
 			free( accum->pdaRun );
 			free( accum->fsmRun );
 			treeDownref( prg, sp, (Tree*)accum->stream );
 			mapElFree( prg, (MapEl*)accum );
 		}
-		else
+		else {
 			assert(false);
+		}
 	}
 	else {
 		if ( tree->id == LEL_ID_STR ) {

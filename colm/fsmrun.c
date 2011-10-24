@@ -61,7 +61,7 @@ void initFsmRun( FsmRun *fsmRun, Program *prg )
 	fsmRun->peof = 0;
 }
 
-void cleanFsmRun( Program *prg, FsmRun *fsmRun )
+void clearFsmRun( Program *prg, FsmRun *fsmRun )
 {
 	if ( fsmRun->runBuf != 0 ) {
 		/* Transfer the run buf list to the program */
@@ -72,6 +72,11 @@ void cleanFsmRun( Program *prg, FsmRun *fsmRun )
 
 		tail->next = prg->allocRunBuf;
 		prg->allocRunBuf = head;
+	}
+
+	if ( fsmRun->haveDataOf != 0 ) {
+		fsmRun->haveDataOf->hasData = 0;
+		fsmRun->haveDataOf = 0;
 	}
 }
 
