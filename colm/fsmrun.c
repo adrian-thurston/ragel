@@ -294,10 +294,10 @@ void sendBackText( FsmRun *fsmRun, InputStream *inputStream, const char *data, l
 	/* slide data back. */
 	fsmRun->p -= length;
 
-	#if COLM_LOG
-	if ( memcmp( data, fsmRun->p, length ) != 0 )
-		debug( REALM_PARSE, "mismatch of pushed back text\n" );
-	#endif
+//	#if COLM_LOG
+//	if ( memcmp( data, fsmRun->p, length ) != 0 )
+//		debug( REALM_PARSE, "mismatch of pushed back text\n" );
+//	#endif
 
 	assert( memcmp( data, fsmRun->p, length ) == 0 );
 		
@@ -697,9 +697,9 @@ void sendHandleError( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *in
 	sendWithIgnore( sp, pdaRun, fsmRun, inputStream, input );
 		
 	/* Check the result. */
-	if ( pdaRun->errCount > 0 ) {
+	if ( pdaRun->parseError ) {
 		/* Error occured in the top-level parser. */
-		parseError( inputStream, fsmRun, pdaRun, id, input->tree );
+		reportParseError( pdaRun );
 	}
 	else {
 		if ( isParserStopFinished( pdaRun ) ) {
@@ -821,9 +821,8 @@ void sendEof( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRu
 
 	sendWithIgnore( sp, pdaRun, fsmRun, inputStream, input );
 
-	if ( pdaRun->errCount > 0 ) {
-		parseError( inputStream, fsmRun, pdaRun, input->tree->id, input->tree );
-	}
+	if ( pdaRun->parseError )
+		reportParseError( pdaRun );
 }
 
 void initInputStream( InputStream *inputStream )
@@ -1023,14 +1022,11 @@ long scanToken( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 	return SCAN_ERROR;
 }
 
+
 void scannerError( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
 {
 	if ( pdaRunGetNextRegion( pdaRun, 1 ) != 0 ) {
-//		#ifdef COLM_LOG_PARSE
-//		if ( colm_log_parse ) {
-//			cerr << "scanner failed, trying next region" << endl;
-//		}
-//		#endif
+		debug( REALM_PARSE, "scanner failed, trying next region\n" );
 
 		/* May have accumulated ignore tokens from a previous region.
 		 * need to rescan them since we won't be sending tokens from
@@ -1039,28 +1035,24 @@ void scannerError( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *
 		pdaRun->nextRegionInd += 1;
 	}
 	else if ( pdaRun->numRetry > 0 ) {
-//		/* Invoke the parser's error handling. */
-//		#ifdef COLM_LOG_PARSE
-//		if ( colm_log_parse ) {
-//			cerr << "invoking parse error from the scanner" << endl;
-//		}
-//		#endif
+		debug( REALM_PARSE, "invoking parse error from the scanner\n" );
 
 		sendBackQueuedIgnore( sp, inputStream, fsmRun, pdaRun );
 		parseToken( sp, pdaRun, fsmRun, inputStream, 0 );
 
-//		if ( pdaRun->parseError > 0 ) {
-//			/* Error occured in the top-level parser. */
-//			fatal( "PARSE ERROR\n" );
-//		}
+		if ( pdaRun->parseError ) {
+			/* Error occured in the top-level parser. */
+			reportParseError( pdaRun );
+		}
 	}
 	else {
-//		/* There are no alternative scanning regions to try, nor are there any
-//		 * alternatives stored in the current parse tree. No choice but to
-//		 * kill the parse. */
-//		fatal( "error:%d: scanner error", inputStream->line );
-		/* FIXME: Need to report this. */
-		pdaRun->parseError = true;
+		/* There are no alternative scanning regions to try, nor are there any
+		 * alternatives stored in the current parse tree. No choice but to end
+		 * the parse. */
+		if ( pdaRun->tokenList != 0 ) 
+			pushBtPoint( pdaRun, pdaRun->tokenList->kid->tree );
+		reportParseError( pdaRun );
+		pdaRun->parseError = 1;
 	}
 }
 

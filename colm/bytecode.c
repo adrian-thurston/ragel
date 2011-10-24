@@ -242,11 +242,12 @@ void setInput( Program *prg, Tree **sp, Accum *accum, Stream *stream )
 
 void parseStream( Tree **sp, Program *prg, Tree *input, Accum *accum, long stopId )
 {
-	accum->pdaRun->stopTarget = stopId;
-
-	Stream *stream = (Stream*)input;
-	accum->fsmRun->curStream = input;
-	parseLoop( sp, accum->pdaRun, accum->fsmRun, stream->in );
+	if ( ! accum->pdaRun->parseError ) {
+		accum->pdaRun->stopTarget = stopId;
+		Stream *stream = (Stream*)input;
+		accum->fsmRun->curStream = input;
+		parseLoop( sp, accum->pdaRun, accum->fsmRun, stream->in );
+	}
 }
 
 Word streamAppend( Tree **sp, Program *prg, Tree *input, Stream *stream )
@@ -298,7 +299,7 @@ Tree *parseFinish( Tree **sp, Program *prg, Accum *accum, int revertOn )
 {
 	Stream *stream = (Stream*)extractInput( prg, accum );
 
-	if ( accum->pdaRun->stopTarget > 0 ) {
+	if ( accum->pdaRun->stopTarget > 0 || accum->pdaRun->parseError ) {
 
 	}
 	else {
@@ -451,7 +452,7 @@ void userIterDestroy( Tree ***psp, UserIter *uiter )
 	*psp = sp;
 }
 
-Tree *constructArgv( Program *prg, int argc, char **argv )
+Tree *constructArgv( Program *prg, int argc, const char **argv )
 {
 	Tree *list = createGeneric( prg, prg->rtd->argvGenericId );
 	treeUpref( list );
@@ -483,7 +484,7 @@ void initColm( long debugRealm )
 	initInputFuncs();
 }
 
-void initProgram( Program *prg, int argc, char **argv, int ctxDepParsing, 
+void initProgram( Program *prg, int argc, const char **argv, int ctxDepParsing, 
 		RuntimeData *rtd )
 {
 	prg->argc = argc;
@@ -4164,18 +4165,3 @@ out:
 	}
 }
 
-void parseError( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, int tokId, Tree *tree )
-{
-	Kid *kid = pdaRun->btPoint;
-	Location *deepest = 0;
-	while ( kid != 0 ) {
-		Head *head = kid->tree->tokdata;
-		Location *location = head != 0 ? head->location : 0;
-		if ( location && ( deepest == 0 || location->byte > deepest->byte ) )
-			deepest = location;
-		kid = kid->next;
-	}
-
-	if ( deepest != 0 ) 
-		fprintf( stderr, "%ld:%ld:parse error\n", deepest->line, deepest->column );
-}

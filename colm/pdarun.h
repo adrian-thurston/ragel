@@ -439,7 +439,7 @@ typedef struct _PoolAlloc
 typedef struct _Program
 {
 	int argc;
-	char **argv;
+	const char **argv;
 
 	unsigned char ctxDepParsing;
 	RuntimeData *rtd;
@@ -506,7 +506,6 @@ typedef struct _PdaRun
 	int numRetry;
 	Kid *stackTop;
 	Ref *tokenList;
-	int errCount;
 	int cs;
 	int nextRegionInd;
 
@@ -602,9 +601,8 @@ inline static void appendWord( RtCodeVect *vect, Word word )
 void incrementConsumed( PdaRun *pdaRun );
 void decrementConsumed( PdaRun *pdaRun );
 
-void parseError( InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, int tokId, Tree *tree );
+void reportParseError( PdaRun *pdaRun );
 int makeReverseCode( RtCodeVect *all, RtCodeVect *reverseCode );
-
 
 void initPdaRun( PdaRun *pdaRun, Program *prg, PdaTables *tables,
 		FsmRun *fsmRun, int parserId, long stopTarget, int revertOn, Tree *context );

@@ -483,7 +483,7 @@ void rcodeDownref( Program *prg, Tree **sp, Code *instr );
 Tree **stackAlloc();
 
 void initColm( long debugRealm );
-void initProgram( Program *program, int argc, char **argv,
+void initProgram( Program *program, int argc, const char **argv,
 		int ctxDepParsing, RuntimeData *rtd );
 void runProgram( Program *prg );
 void clearProgram( Program *prg );

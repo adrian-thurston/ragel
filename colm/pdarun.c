@@ -164,7 +164,6 @@ void initPdaRun( PdaRun *pdaRun, Program *prg, PdaTables *tables,
 	pt(pdaRun->stackTop->tree)->state = -1;
 	pdaRun->stackTop->tree->refs = 1;
 	pdaRun->numRetry = 0;
-	pdaRun->errCount = 0;
 	pdaRun->nextRegionInd = pdaRun->tables->tokenRegionInds[pdaRun->cs];
 	pdaRun->stopParsing = false;
 	pdaRun->accumIgnore = 0;
@@ -481,11 +480,8 @@ again:
 		action += pt(lel->tree)->retry_lower;
 
 	if ( *action & act_sb ) {
-//		#ifdef COLM_LOG_PARSE
-//		if ( colm_log_parse ) {
-//			cerr << "shifted: " << pdaRun->tables->rtd->lelInfo[pt(lel->tree)->id].name;
-//		}
-//		#endif
+		debug( REALM_PARSE, "shifted: %s\n", 
+				pdaRun->tables->rtd->lelInfo[pt(lel->tree)->id].name );
 		/* Consume. */
 		input = input->next;
 
@@ -513,22 +509,12 @@ again:
 		if ( action[1] == 0 )
 			pt(lel->tree)->retry_lower = 0;
 		else {
+			debug( "retry: %p\n", pdaRun->stackTop );
 			pt(lel->tree)->retry_lower += 1;
 			assert( pt(lel->tree)->retry_upper == 0 );
-			pdaRun->numRetry += 1; /* FIXME: Has the retry already been counted? */
-//			#ifdef COLM_LOG_PARSE
-//			if ( colm_log_parse ) {
-//				cerr << " retry: " << pdaRun->stackTop;
-//			}
-//			#endif
+			/* FIXME: Has the retry already been counted? */
+			pdaRun->numRetry += 1; 
 		}
-
-			
-//		#ifdef COLM_LOG_PARSE
-//		if ( colm_log_parse ) {
-//			cerr << endl;
-//		}
-//		#endif
 	}
 
 	if ( pdaRun->tables->commitLen[pos] != 0 ) {
@@ -587,31 +573,16 @@ again:
 
 		redLel->tree->child = kidListConcat( attrs, child );
 
-//		#ifdef COLM_LOG_PARSE
-//		if ( colm_log_parse ) {
-//			cerr << "reduced: "
-//					<< pdaRun->tables->rtd->prodInfo[reduction].name
-//					<< " rhsLen: " << rhsLen;
-//		}
-//		#endif
+		debug( REALM_PARSE, "reduced: %s rhsLen %d\n",
+				pdaRun->tables->rtd->prodInfo[reduction].name, rhsLen );
 		if ( action[1] == 0 )
 			pt(redLel->tree)->retry_upper = 0;
 		else {
 			pt(redLel->tree)->retry_upper += 1;
 			assert( pt(lel->tree)->retry_lower == 0 );
 			pdaRun->numRetry += 1;
-//			#ifdef COLM_LOG_PARSE
-//			if ( colm_log_parse ) {
-//				cerr << " retry: " << redLel;
-//			}
-//			#endif
+			debug( REALM_PARSE, "retry: %p\n", redLel );
 		}
-
-//		#ifdef COLM_LOG_PARSE
-//		if ( colm_log_parse ) {
-//			cerr << endl;
-//		}
-//		#endif
 
 		/* When the production is of zero length we stay in the same state.
 		 * Otherwise we use the state stored in the first child. */
@@ -652,11 +623,7 @@ again:
 			 * original upon backtracking, otherwise downref since we took a
 			 * copy above. */
 			if ( exec.parsed != 0 && exec.parsed != redLel->tree ) {
-//				#ifdef COLM_LOG_PARSE
-//				if ( colm_log_parse ) {
-//					cerr << "lhs tree was modified, adding a restore instruction" << endl;
-//				}
-//				#endif
+				debug( REALM_PARSE "lhs tree was modified, adding a restore instruction\n" );
 
 				/* Transfer the lhs from the environment to redLel. */
 				redLel->tree = prepParseTree( pdaRun->prg, sp, exec.lhs );
@@ -684,12 +651,8 @@ again:
 		 * when going backwards and when doing a commit. */
 
 		if ( induceReject ) {
-//			#ifdef COLM_LOG_PARSE
-//			if ( colm_log_parse ) {
-//				cerr << "error induced during reduction of " <<
-//						pdaRun->tables->rtd->lelInfo[redLel->tree->id].name << endl;
-//			}
-//			#endif
+			debug( REALM_PARSE, "error induced during reduction of %s\n",
+					pdaRun->tables->rtd->lelInfo[redLel->tree->id].name );
 			pt(redLel->tree)->state = pdaRun->cs;
 			redLel->next = pdaRun->stackTop;
 			pdaRun->stackTop = redLel;
@@ -708,12 +671,8 @@ again:
 	goto again;
 
 parse_error:
-//	#ifdef COLM_LOG_PARSE
-//	if ( colm_log_parse ) {
-//		cerr << "hit error, backtracking" << endl;
-//	}
-//	#endif
-//
+	debug( REALM_PARSE, "hit error, backtracking\n" );
+
 	if ( pdaRun->numRetry == 0 )
 		goto fail;
 
@@ -722,18 +681,9 @@ parse_error:
 			assert( pt(input->tree)->retry_upper == 0 );
 
 			if ( pt(input->tree)->retry_lower != 0 ) {
-//				#ifdef COLM_LOG_PARSE
-//				if ( colm_log_parse ) {
-//					cerr << "found retry targ: " << input << endl;
-//				}
-//				#endif
-				pdaRun->numRetry -= 1;
-//				#ifdef COLM_LOG_PARSE
-//				if ( colm_log_parse ) {
-//					cerr << "found retry: " << input << endl;
-//				}
-//				#endif
+				debug( REALM_PARSE, "found retry targ: %p\n", input );
 
+				pdaRun->numRetry -= 1;
 				pdaRun->cs = pt(input->tree)->state;
 				goto again;
 			}
@@ -746,11 +696,7 @@ parse_error:
 				queueBackTree( sp, pdaRun, fsmRun, inputStream, input );
 				input = 0;
 				if ( pdaRun->tables->tokenRegions[next] != 0 ) {
-//					#ifdef COLM_LOG_PARSE
-//					if ( colm_log_parse ) {
-//						cerr << "found a new region" << endl;
-//					}
-//					#endif
+					debug( REALM_PARSE, "found a new region\n" );
 					pdaRun->numRetry -= 1;
 					pdaRun->cs = stackTopTarget( pdaRun );
 					pdaRun->nextRegionInd = next;
@@ -758,11 +704,7 @@ parse_error:
 				}
 
 				if ( pdaRun->stop ) {
-//					#ifdef COLM_LOG_PARSE
-//					if ( colm_log_parse ) {
-//						cerr << "stopping the backtracking, consumed is " << pdaRun->consumed << endl;
-//					}
-//					#endif
+					debug( REALM_PARSE, "stopping the backtracking, consumed is %d", pdaRun->consumed );
 
 					pdaRun->cs = stackTopTarget( pdaRun );
 					goto _out;
@@ -786,12 +728,8 @@ parse_error:
 		if ( pdaRun->stackTop->tree->id < pdaRun->tables->rtd->firstNonTermId || 
 				(pdaRun->stackTop->tree->flags & AF_TERM_DUP) )
 		{
-//			#ifdef COLM_LOG_PARSE
-//			if ( colm_log_parse ) {
-//				cerr << "backing up over effective terminal: " <<
-//						pdaRun->tables->rtd->lelInfo[pdaRun->stackTop->tree->id].name << endl;
-//			}
-//			#endif
+			debug( REALM_PARSE, "backing up over effective terminal: %s\n",
+						pdaRun->tables->rtd->lelInfo[pdaRun->stackTop->tree->id].name );
 
 			/* Pop the item from the stack. */
 			pdaRun->stackTop = pdaRun->stackTop->next;
@@ -813,12 +751,8 @@ parse_error:
 			kidFree( pdaRun->prg, (Kid*)ref );
 		}
 		else {
-//			#ifdef COLM_LOG_PARSE
-//			if ( colm_log_parse ) {
-//				cerr << "backing up over non-terminal: " <<
-//						pdaRun->tables->rtd->lelInfo[pdaRun->stackTop->tree->id].name << endl;
-//			}
-//			#endif
+			debug( REALM_PARSE, "backing up over non-terminal: %s\n",
+					pdaRun->tables->rtd->lelInfo[pdaRun->stackTop->tree->id].name );
 
 			/* Check for an execution environment. */
 			if ( undoLel->tree->flags & AF_HAS_RCODE ) {
@@ -889,9 +823,27 @@ parse_error:
 
 fail:
 	pdaRun->cs = -1;
-	pdaRun->errCount += 1;
 	pdaRun->parseError = 1;
 _out:
 	pdaRun->nextRegionInd = pdaRun->tables->tokenRegionInds[pdaRun->cs];
 }
 
+void reportParseError( PdaRun *pdaRun )
+{
+	Kid *kid = pdaRun->btPoint;
+	Location *deepest = 0;
+	while ( kid != 0 ) {
+		Head *head = kid->tree->tokdata;
+		Location *location = head != 0 ? head->location : 0;
+		if ( location && ( deepest == 0 || location->byte > deepest->byte ) )
+			deepest = location;
+		kid = kid->next;
+	}
+
+	/* If there are no error points on record assume the error occurred at the beginning of the stream. */
+	if ( deepest == 0 ) 
+		fprintf( stderr, "PARSE ERROR at 1:1\n" );
+	else
+		fprintf( stderr, "PARSE ERROR at %ld:%ld\n", deepest->line, deepest->column );
+	
+}
