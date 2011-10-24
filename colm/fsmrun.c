@@ -700,7 +700,6 @@ void sendHandleError( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *in
 	if ( pdaRun->errCount > 0 ) {
 		/* Error occured in the top-level parser. */
 		parseError( inputStream, fsmRun, pdaRun, id, input->tree );
-		fatal( "parse error\n" );
 	}
 	else {
 		if ( isParserStopFinished( pdaRun ) ) {
@@ -824,7 +823,6 @@ void sendEof( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRu
 
 	if ( pdaRun->errCount > 0 ) {
 		parseError( inputStream, fsmRun, pdaRun, input->tree->id, input->tree );
-		fatal( "parse error\n" );
 	}
 }
 
@@ -1051,16 +1049,18 @@ void scannerError( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *
 		sendBackQueuedIgnore( sp, inputStream, fsmRun, pdaRun );
 		parseToken( sp, pdaRun, fsmRun, inputStream, 0 );
 
-		if ( pdaRun->errCount > 0 ) {
-			/* Error occured in the top-level parser. */
-			fatal( "PARSE ERROR\n" );
-		}
+//		if ( pdaRun->parseError > 0 ) {
+//			/* Error occured in the top-level parser. */
+//			fatal( "PARSE ERROR\n" );
+//		}
 	}
 	else {
-		/* There are no alternative scanning regions to try, nor are there any
-		 * alternatives stored in the current parse tree. No choice but to
-		 * kill the parse. */
-		fatal( "error:%d: scanner error", inputStream->line );
+//		/* There are no alternative scanning regions to try, nor are there any
+//		 * alternatives stored in the current parse tree. No choice but to
+//		 * kill the parse. */
+//		fatal( "error:%d: scanner error", inputStream->line );
+		/* FIXME: Need to report this. */
+		pdaRun->parseError = true;
 	}
 }
 
@@ -1113,6 +1113,8 @@ void parseLoop( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStr
 
 			newToken( pdaRun, fsmRun );
 
+			if ( pdaRun->parseError )
+				break;
 			if ( inputStream->eofSent )
 				break;
 			continue;
@@ -1162,6 +1164,11 @@ void parseLoop( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStr
 
 		if ( pdaRun->prg->induceExit ) {
 			debug( REALM_PARSE, "parsing has been stopped by a call to exit\n" );
+			break;
+		}
+
+		if ( pdaRun->parseError ) {
+			debug( REALM_PARSE, "parsing stopped by a parse error\n" );
 			break;
 		}
 	}

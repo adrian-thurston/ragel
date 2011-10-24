@@ -90,7 +90,12 @@ int pdaRunGetNextRegion( PdaRun *pdaRun, int offset )
 
 Tree *getParsedRoot( PdaRun *pdaRun, int stop )
 {
-	return stop ? pdaRun->stackTop->tree : pdaRun->stackTop->next->tree;
+	if ( pdaRun->parseError )
+		return 0;
+	else if ( stop )
+		return pdaRun->stackTop->tree;
+	else
+		return pdaRun->stackTop->next->tree;
 }
 
 void cleanParser( Tree **sp, PdaRun *pdaRun )
@@ -171,6 +176,7 @@ void initPdaRun( PdaRun *pdaRun, Program *prg, PdaTables *tables,
 	initRtCodeVect( &pdaRun->rcodeCollect );
 
 	pdaRun->context = splitTree( pdaRun->prg, context );
+	pdaRun->parseError = 0;
 }
 
 void clearContext( PdaRun *pdaRun, Tree **sp )
@@ -884,6 +890,7 @@ parse_error:
 fail:
 	pdaRun->cs = -1;
 	pdaRun->errCount += 1;
+	pdaRun->parseError = 1;
 _out:
 	pdaRun->nextRegionInd = pdaRun->tables->tokenRegionInds[pdaRun->cs];
 }

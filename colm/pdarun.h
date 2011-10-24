@@ -534,6 +534,7 @@ typedef struct _PdaRun
 
 	//bool fragStop;
 	int stop;
+	int parseError;
 
 	long consumed;
 	long targetConsumed;

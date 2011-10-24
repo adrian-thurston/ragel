@@ -1344,6 +1344,8 @@ void ParseData::parsePatterns()
 		initFsmRun( fsmRun, &prg );
 		newToken( repl->pdaRun, fsmRun );
 		parseLoop( root, repl->pdaRun, fsmRun, in );
+		if ( repl->pdaRun->parseError )
+			cout << "parse error" << endp;
 		free(in);
 	}
 
@@ -1362,6 +1364,8 @@ void ParseData::parsePatterns()
 		initFsmRun( fsmRun, &prg );
 		newToken( pat->pdaRun, fsmRun );
 		parseLoop( root, pat->pdaRun, fsmRun, in );
+		if ( pat->pdaRun->parseError )
+			cout << "parse error" << endp;
 		free( in );
 	}
 

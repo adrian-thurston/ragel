@@ -317,7 +317,8 @@ Tree *parseFinish( Tree **sp, Program *prg, Accum *accum, int revertOn )
 		cleanParser( sp, accum->pdaRun );
 
 	/* Indicate that this tree came out of a parser. */
-	tree->flags |= AF_PARSED;
+	if ( tree != 0 )
+		tree->flags |= AF_PARSED;
 
 	return tree;
 }
