@@ -491,6 +491,7 @@ Kid *makeToken( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, int id
 	Kid *input = 0;
 	input = kidAllocate( fsmRun->prg );
 	input->tree = (Tree*)parseTreeAllocate( fsmRun->prg );
+	debug( REALM_PARSE, "made token %p\n", input->tree );
 	input->tree->flags |= AF_PARSE_TREE;
 
 	if ( namedLangEl )
@@ -783,7 +784,7 @@ void sendToken( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pda
 
 	debug( REALM_PARSE, "token: %s  text: %.*s\n",
 		pdaRun->tables->rtd->lelInfo[id].name,
-		stringData( tokdata ), stringLength( tokdata ) );
+		stringLength(tokdata), stringData(tokdata) );
 
 	updatePosition( inputStream, fsmRun->tokstart, tokdata->length );
 

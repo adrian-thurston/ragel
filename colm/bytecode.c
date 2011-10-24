@@ -299,8 +299,12 @@ Tree *parseFinish( Tree **sp, Program *prg, Accum *accum, int revertOn )
 {
 	Stream *stream = (Stream*)extractInput( prg, accum );
 
-	if ( accum->pdaRun->stopTarget > 0 || accum->pdaRun->parseError ) {
+	if ( accum->pdaRun->stopTarget > 0 ) {
 
+	}
+	else if ( accum->pdaRun->parseError ) {
+		stream->in->eof = true;
+		stream->in->later = false;
 	}
 	else {
 		stream->in->eof = true;
@@ -577,8 +581,6 @@ void runProgram( Program *prg )
 	/*
 	 * Execute
 	 */
-	Tree *retVal = 0;
-
 	if ( prg->rtd->rootCodeLen > 0 ) {
 		RtCodeVect rcodeCollect;
 		Execution execution;
@@ -655,6 +657,7 @@ void clearProgram( Program *prg )
 
 	kidClear( prg );
 	treeClear( prg );
+	headClear( prg );
 	parseTreeClear( prg );
 	listElClear( prg );
 	mapElClear( prg );
@@ -4117,11 +4120,7 @@ again:
 		case IN_LOAD_ARGV: {
 			Half field;
 			read_half( field );
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode ) {
-				cerr << "IN_LOAD_ARGV " << field << endl;
-			}
-			#endif
+			debug( "IN_LOAD_ARGV %lu", field );
 
 			/* Tree comes back upreffed. */
 			Tree *tree = constructArgv( prg, prg->argc, prg->argv );

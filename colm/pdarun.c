@@ -129,6 +129,15 @@ void clearPdaRun( Tree **sp, PdaRun *pdaRun )
 	}
 	pdaRun->btPoint = 0;
 
+	/* Clear out any remaining ignores. */
+	Kid *ignore = pdaRun->accumIgnore;
+	while ( ignore != 0 ) {
+		Kid *next = ignore->next;
+		treeDownref( pdaRun->prg, sp, ignore->tree );
+		kidFree( pdaRun->prg, (Kid*)ignore );
+		ignore = next;
+	}
+
 	if ( pdaRun->context != 0 )
 		treeDownref( pdaRun->prg, sp, pdaRun->context );
 
@@ -424,6 +433,7 @@ again:
 
 	lel = input;
 
+	/* This can disappear. An old experiment. */
 	if ( lelInfo[lel->tree->id].ignore ) {
 		/* Consume. */
 		input = input->next;
@@ -509,7 +519,7 @@ again:
 		if ( action[1] == 0 )
 			pt(lel->tree)->retry_lower = 0;
 		else {
-			debug( "retry: %p\n", pdaRun->stackTop );
+			debug( REALM_PARSE, "retry: %p\n", pdaRun->stackTop );
 			pt(lel->tree)->retry_lower += 1;
 			assert( pt(lel->tree)->retry_upper == 0 );
 			/* FIXME: Has the retry already been counted? */
@@ -623,7 +633,7 @@ again:
 			 * original upon backtracking, otherwise downref since we took a
 			 * copy above. */
 			if ( exec.parsed != 0 && exec.parsed != redLel->tree ) {
-				debug( REALM_PARSE "lhs tree was modified, adding a restore instruction\n" );
+				debug( REALM_PARSE, "lhs tree was modified, adding a restore instruction\n" );
 
 				/* Transfer the lhs from the environment to redLel. */
 				redLel->tree = prepParseTree( pdaRun->prg, sp, exec.lhs );
@@ -824,6 +834,17 @@ parse_error:
 fail:
 	pdaRun->cs = -1;
 	pdaRun->parseError = 1;
+
+	/* If we failed parsing on tree we must free it. The caller expected us to
+	 * either consume it or send it back to the input. */
+	if ( input != 0 ) {
+		treeDownref( pdaRun->prg, sp, input->tree );
+		kidFree( pdaRun->prg, input );
+	}
+
+	/* FIXME: do we still need to fall through here? A fail is permanent now,
+	 * no longer called into again. */
+
 _out:
 	pdaRun->nextRegionInd = pdaRun->tables->tokenRegionInds[pdaRun->cs];
 }
