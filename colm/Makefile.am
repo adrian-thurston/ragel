@@ -33,39 +33,26 @@ RUNTIME_HDR = \
 lib_LIBRARIES = libcolmp.a libcolmd.a
 
 libcolmp_a_SOURCES = $(RUNTIME_SRC)
+libcolmp_a_CFLAGS = -I..
 
 libcolmd_a_SOURCES = $(RUNTIME_SRC)
-libcolmd_a_CXXFLAGS = -DCOLM_LOG
+libcolmd_a_CFLAGS = -I..
 
 colm_CXXFLAGS = \
 	-Wall \
 	-DCOLM_LOG \
-	-DPREFIX='"$(prefix)"'
+	-DPREFIX='"$(prefix)"' \
+	-I..
 
 colm_LDADD = libcolmp.a
 
 # ADT DEFS_COLM += -DCOLM_LOG -DPREFIX='"$(prefix)"'
 
-if BUILD_PARSERS
- 
-lmparse.h: lmparse.kh
-	kelbt -o $@ $<
-
-lmparse.cc: lmparse.kl lmparse.kh
-	kelbt -o $@ $<
-
-lmscan.cc: lmparse.h
-
-lmscan.cc: lmscan.rl
-	ragel -G2 -o $@ $<
- 
-endif
-
 colm_SOURCES = \
 	buffer.h bytecode.h colm.h debug.h dotgen.h fsmcodegen.h fsmgraph.h \
 	fsmrun.h input.h keyops.h lmparse.h lmscan.h map.h parsedata.h \
 	parsetree.h pcheck.h pdacodegen.h pdagraph.h pdarun.h pool.h redbuild.h \
-	redfsm.h rtvector.h tree.h version.h colm.h \
+	redfsm.h rtvector.h tree.h version.h global.h colm.h \
 	\
 	resolve.cc compile.cc lmparse.cc lmscan.cc parsetree.cc \
 	parsedata.cc fsmstate.cc fsmbase.cc fsmattach.cc fsmmin.cc \
@@ -83,6 +70,21 @@ BUILT_SOURCES = \
 version.h: Makefile
 	echo '#define VERSION "$(PACKAGE_VERSION)"' > version.h
 	echo '#define PUBDATE "$(PUBDATE)"' >> version.h
+
+if BUILD_PARSERS
+ 
+lmparse.h: lmparse.kh
+	kelbt -o $@ $<
+
+lmparse.cc: lmparse.kl lmparse.kh
+	kelbt -o $@ $<
+
+lmscan.cc: lmparse.h
+
+lmscan.cc: lmscan.rl
+	ragel -G2 -o $@ $<
+ 
+endif
 
 # ADT 
 # ADT # Logging:

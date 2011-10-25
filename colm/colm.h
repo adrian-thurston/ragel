@@ -3,9 +3,7 @@
 
 #include <colm/pdarun.h>
 #include <colm/fsmrun.h>
-#include <colm/debug.h>
 #include <colm/bytecode.h>
-#include <colm/config.h>
 #include <colm/defs.h>
 #include <colm/input.h>
 #include <colm/tree.h>

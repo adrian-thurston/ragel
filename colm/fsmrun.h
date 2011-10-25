@@ -22,7 +22,7 @@
 #ifndef _FSMRUN2_H
 #define _FSMRUN2_H
 
-#include "input.h"
+#include <colm/input.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -90,7 +90,7 @@ void clearFsmRun( struct _Program *prg, FsmRun *fsmRun );
 void updatePosition( InputStream *inputStream, const char *data, long length );
 void undoPosition( InputStream *inputStream, const char *data, long length );
 void takeBackBuffered( InputStream *inputStream );
-void connect( FsmRun *fsmRun, InputStream *inputStream );
+void connectStream( FsmRun *fsmRun, InputStream *inputStream );
 void sendBackRunBufHead( FsmRun *fsmRun, InputStream *inputStream );
 void undoStreamPull( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length );
 

@@ -19,9 +19,9 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#include "input.h"
-#include "fsmrun.h"
-#include "pdarun.h"
+#include <colm/input.h>
+#include <colm/fsmrun.h>
+#include <colm/pdarun.h>
 
 #include <stdio.h>
 #include <stdlib.h>

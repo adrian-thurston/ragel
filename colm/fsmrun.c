@@ -19,13 +19,13 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#include "fsmrun.h"
-#include "pdarun.h"
-#include "input.h"
-#include "debug.h"
-#include "tree.h"
-#include "bytecode.h"
-#include "pool.h"
+#include <colm/fsmrun.h>
+#include <colm/pdarun.h>
+#include <colm/input.h>
+#include <colm/debug.h>
+#include <colm/tree.h>
+#include <colm/bytecode.h>
+#include <colm/pool.h>
 
 #include <string.h>
 #include <assert.h>
@@ -153,7 +153,7 @@ void takeBackBuffered( InputStream *inputStream )
 	}
 }
 
-void connect( FsmRun *fsmRun, InputStream *inputStream )
+void connectStream( FsmRun *fsmRun, InputStream *inputStream )
 {
 	if ( inputStream->hasData != 0 && inputStream->hasData != fsmRun ) {
 		takeBackBuffered( inputStream );
@@ -185,7 +185,7 @@ Head *streamPull( Program *prg, FsmRun *fsmRun, InputStream *inputStream, long l
 		if ( space == 0 )
 			fatal( "OUT OF BUFFER SPACE\n" );
 
-		connect( fsmRun, inputStream );
+		connectStream( fsmRun, inputStream );
 			
 		long len = inputStream->funcs->getData( inputStream, fsmRun->p, space );
 		fsmRun->pe = fsmRun->p + len;
@@ -228,7 +228,7 @@ void undoStreamPull( FsmRun *fsmRun, InputStream *inputStream, const char *data,
 {
 	debug( REALM_PARSE, "undoing stream pull\n" );
 
-	connect( fsmRun, inputStream );
+	connectStream( fsmRun, inputStream );
 
 	if ( fsmRun->p == fsmRun->pe && fsmRun->p == fsmRun->runBuf->data )
 		sendBackRunBufHead( fsmRun, inputStream );
@@ -282,7 +282,7 @@ void undoStreamAppend( Program *prg, Tree **sp, InputStream *inputStream, long l
  * a previous buffer and slide back data. */
 void sendBackText( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length )
 {
-	connect( fsmRun, inputStream );
+	connectStream( fsmRun, inputStream );
 
 	debug( REALM_PARSE, "push back of %ld characters\n", length );
 
@@ -1017,7 +1017,7 @@ long scanToken( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 		space = fsmRun->runBuf->data + FSM_BUFSIZE - fsmRun->pe;
 		assert( space > 0 );
 			
-		connect( fsmRun, inputStream );
+		connectStream( fsmRun, inputStream );
 
 		/* Get more data. */
 		int len = inputStream->funcs->getData( inputStream, fsmRun->p, space );

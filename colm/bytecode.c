@@ -21,19 +21,20 @@
 
 //#define COLM_LOG
 
+
+#include <colm/pdarun.h>
+#include <colm/fsmrun.h>
+#include <colm/tree.h>
+#include <colm/bytecode.h>
+#include <colm/pool.h>
+#include <colm/debug.h>
+#include <colm/config.h>
+
 #include <alloca.h>
 #include <sys/mman.h>
 #include <string.h>
 #include <assert.h>
 #include <stdlib.h>
-
-#include "pdarun.h"
-#include "fsmrun.h"
-#include "tree.h"
-#include "bytecode.h"
-#include "pool.h"
-#include "debug.h"
-#include "config.h"
 
 #if SIZEOF_LONG != 4 && SIZEOF_LONG != 8 
 	#error "SIZEOF_LONG contained an unexpected value"
