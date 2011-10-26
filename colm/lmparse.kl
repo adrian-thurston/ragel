@@ -281,6 +281,7 @@ cfl_def: cfl_def_head obj_var_list properties_list cfl_prod_list
 cfl_def_head: KW_Def TK_Word
 	final {
 		curDefineId = $2->data;
+		curDefList = new LelDefList;
 	};
 
 nonterm cfl_prod_list
@@ -291,11 +292,13 @@ nonterm cfl_prod_list
 cfl_prod_list: cfl_prod_list '|' define_prod
 	final {
 		$$->defList = $1->defList;
+		$3->definition->prodNum = $$->defList->length();
 		$$->defList->append( $3->definition );
 	};
 cfl_prod_list: define_prod
 	final {
-		$$->defList = new LelDefList;
+		$$->defList = curDefList;
+		$1->definition->prodNum = $$->defList->length();
 		$$->defList->append( $1->definition );
 	};
 
@@ -355,7 +358,7 @@ define_prod: '[' prod_el_list ']' opt_commit opt_reduce_code opt_prec
 
 		Definition *newDef = new Definition( loc, 0/*prodName*/, 
 			prodElList, commit, redBlock,
-			pd->prodList.length(), Definition::Production );
+			pd->prodList.length(), 0, Definition::Production );
 		newDef->predOf = predOf;
 		
 		pd->prodList.append( newDef );
@@ -802,11 +805,23 @@ prod_el:
 
 		/* If there is a capture, create the field. */
 		if ( $1->objField != 0 ) {
-			$1->objField->typeRef = typeRef;
-			if ( pd->objectDef->checkRedecl( $1->objField->name ) != 0 )
-				error() << "object field renamed" << endp;
+			/* Might already exist. */
+			ObjField *objField = pd->objectDef->checkRedecl( $1->objField->name );
+			if ( objField == 0 ) {
+				objField = $1->objField;
+				objField->typeRef = typeRef;
+				pd->objectDef->insertField( objField->name, objField );
+			}
+			else {
+				/* FIXME: check the types are the same. */
+				//error() << "object field renamed" << endp;
+			}
 
-			pd->objectDef->insertField( $1->objField->name, $1->objField );
+			objField->isRhsGet = true;
+			RhsVal rhsVal( curDefList->length(), curProdElList->length() );
+			cout << "rhs val: " << objField << " " << objField->name << " " << 
+					rhsVal.prodNum << " " << rhsVal.childNum << endl;
+			objField->rhsVal.append( RhsVal( curDefList->length(), curProdElList->length() ) );
 		}
 	};
 

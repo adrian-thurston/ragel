@@ -1136,7 +1136,8 @@ LangEl *ParseData::makeRepeatProd( Namespace *nspace, const String &repeatName, 
 
 	Definition *newDef1 = new Definition( InputLoc(),
 			prodName, prodElList1, false, 0,
-			prodList.length(), Definition::Production );
+			prodList.length(), prodName->defList.length(),
+			Definition::Production );
 
 	prodName->defList.append( newDef1 );
 	prodList.append( newDef1 );
@@ -1146,7 +1147,8 @@ LangEl *ParseData::makeRepeatProd( Namespace *nspace, const String &repeatName, 
 
 	Definition *newDef2 = new Definition( InputLoc(),
 			prodName, prodElList2, false, 0,
-			prodList.length(), Definition::Production );
+			prodList.length(), prodName->defList.length(),
+			Definition::Production );
 
 	prodName->defList.append( newDef2 );
 	prodList.append( newDef2 );
@@ -1173,7 +1175,8 @@ LangEl *ParseData::makeListProd( Namespace *nspace, const String &listName, Name
 
 	Definition *newDef1 = new Definition( InputLoc(),
 			prodName, prodElList1, false, 0,
-			prodList.length(), Definition::Production );
+			prodList.length(), prodName->defList.length(),
+			Definition::Production );
 
 	prodName->defList.append( newDef1 );
 	prodList.append( newDef1 );
@@ -1187,7 +1190,8 @@ LangEl *ParseData::makeListProd( Namespace *nspace, const String &listName, Name
 
 	Definition *newDef2 = new Definition( InputLoc(),
 			prodName, prodElList2, false, 0,
-			prodList.length(), Definition::Production );
+			prodList.length(), prodName->defList.length(),
+			Definition::Production );
 
 	prodName->defList.append( newDef2 );
 	prodList.append( newDef2 );
@@ -1209,7 +1213,8 @@ LangEl *ParseData::makeOptProd( Namespace *nspace, const String &optName, Namesp
 
 	Definition *newDef1 = new Definition( InputLoc(),
 			prodName, prodElList1, false, 0,
-			prodList.length(), Definition::Production );
+			prodList.length(), prodName->defList.length(),
+			Definition::Production );
 
 	prodName->defList.append( newDef1 );
 	prodList.append( newDef1 );
@@ -1219,7 +1224,8 @@ LangEl *ParseData::makeOptProd( Namespace *nspace, const String &optName, Namesp
 
 	Definition *newDef2 = new Definition( InputLoc(),
 			prodName, prodElList2, false, 0,
-			prodList.length(), Definition::Production );
+			prodList.length(), prodName->defList.length(),
+			Definition::Production );
 
 	prodName->defList.append( newDef2 );
 	prodList.append( newDef2 );

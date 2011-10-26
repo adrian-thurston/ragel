@@ -278,9 +278,11 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 	for ( int i = 0; i < runtimeData->numProds; i++ ) {
 		out << "\t{ ";
 
-		out << 
-			runtimeData->prodInfo[i].length << ", " << 
-			runtimeData->prodInfo[i].lhsId << ", " << 
+		out << runtimeData->prodInfo[i].lhsId << ", ";
+		out << runtimeData->prodInfo[i].prodNum << ", ";
+		out << runtimeData->prodInfo[i].length << ", ";
+
+		out <<
 			'"' << runtimeData->prodInfo[i].name << "\", " << 
 			runtimeData->prodInfo[i].frameId << ", " << 
 			(int)runtimeData->prodInfo[i].lhsUpref << ", ";
@@ -289,7 +291,9 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 			out << "copy_" << i << ", ";
 		else
 			out << "0, ";
+
 		out << runtimeData->prodInfo[i].copyLen << ", ";
+
 
 		out << " }";
 
@@ -314,7 +318,8 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 	out << "PatReplNode " << patReplNodes() << "[] = {\n";
 	for ( int i = 0; i < runtimeData->numPatternNodes; i++ ) {
 		PatReplNode &node = runtimeData->patReplNodes[i];
-		out << "	{ " << node.id << ", " << node.next << ", " << 
+		out << "	{ " << node.id << ", " << 
+				node.prodNum << ", " << node.next << ", " << 
 				node.child << ", " << node.bindId << ", ";
 		if ( node.data == 0 )
 			out << "0";

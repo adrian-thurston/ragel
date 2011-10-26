@@ -96,6 +96,9 @@ typedef struct _Tree
 	Kid *child;
 
 	Head *tokdata;
+
+	/* FIXME: this needs to go somewhere else. Will do for now. */
+	unsigned short prodNum;
 } Tree;
 
 typedef struct _IgnoreList
@@ -118,6 +121,8 @@ typedef struct _ParseTree
 	Kid *child;
 
 	Head *tokdata;
+
+	unsigned short prodNum;
 
 	/* Parsing algorithm. */
 	long state;
@@ -254,6 +259,7 @@ typedef struct _PatReplInfo
 typedef struct _PatReplNode
 {
 	long id;
+	long prodNum;
 	long next;
 	long child;
 	long bindId;
@@ -299,8 +305,9 @@ typedef struct _ObjFieldInfo
 
 typedef struct _ProdInfo
 {
-	long length;
 	unsigned long lhsId;
+	short prodNum;
+	long length;
 	const char *name;
 	long frameId;
 	unsigned char lhsUpref;

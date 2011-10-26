@@ -354,6 +354,14 @@ void ObjectDef::initField( ParseData *pd, ObjField *field )
 
 			pd->initLocalInstructions( field );
 		}
+		else if ( field->isRhsGet ) {
+			field->useOffset = false;
+			field->inGetR =   IN_GET_RHS_VAL_R;
+			field->inGetWC =  IN_GET_RHS_VAL_WC;
+			field->inGetWV =  IN_GET_RHS_VAL_WV;
+			field->inSetWC =  IN_SET_RHS_VAL_WC;
+			field->inSetWV =  IN_SET_RHS_VAL_WC;
+		}
 		else {
 			field->offset = nextOffset;
 			nextOffset += sizeOfField( fieldUT );
@@ -394,6 +402,14 @@ UniqueType *LangVarRef::loadFieldInstr( ParseData *pd, CodeVect &code,
 		/* Gets of locals and fields require offsets. Fake vars like token
 		 * data and lhs don't require it. */
 		code.appendHalf( el->offset );
+	}
+	else if ( el->isRhsGet ) {
+		/* Need to place the array computing the val. */
+		code.append( el->rhsVal.length() );
+		for ( Vector<RhsVal>::Iter rg = el->rhsVal; rg.lte(); rg++ ) {
+			code.append( rg->prodNum );
+			code.append( rg->childNum );
+		}
 	}
 
 	/* If we are dealing with an iterator then dereference it. */

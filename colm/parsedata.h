@@ -116,9 +116,9 @@ struct Definition
 	enum Type { Production };
 
 	Definition( const InputLoc &loc, LangEl *prodName, ProdElList *prodElList, 
-			bool prodCommit, CodeBlock *redBlock, int prodId, Type type ) : 
+			bool prodCommit, CodeBlock *redBlock, int prodId, int prodNum, Type type ) : 
 		loc(loc), prodName(prodName), prodElList(prodElList), 
-		prodCommit(prodCommit), redBlock(redBlock), prodId(prodId), 
+		prodCommit(prodCommit), redBlock(redBlock), prodId(prodId), prodNum(prodNum),
 		type(type), fsm(0), fsmLength(0), uniqueEmptyLeader(0), 
 		isLeftRec(false), localFrame(0), lhsField(0), predOf(0) {}
 
@@ -130,6 +130,7 @@ struct Definition
 	CodeBlock *redBlock;
 
 	int prodId;
+	int prodNum;
 	Type type;
 
 	PdaGraph *fsm;

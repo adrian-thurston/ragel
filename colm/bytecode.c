@@ -1856,6 +1856,28 @@ again:
 			vm_push( obj );
 			break;
 		}
+		case IN_GET_RHS_VAL_R: {
+			int i, done = 0;
+			uchar len;
+			Tree *val, *res = 0;
+
+			val = vm_pop();
+
+			read_byte( len );
+			for ( i = 0; i < len; i++ ) {
+				uchar prodNum, childNum;
+				read_byte( prodNum );
+				read_byte( childNum );
+				if ( !done && val->prodNum == prodNum ) {
+					res = getRhsEl( prg, val, childNum );
+					done = 1;
+				}
+			}
+
+			treeUpref( res );
+			vm_push( res );
+			break;
+		}
 		case IN_POP: {
 			#ifdef COLM_LOG_BYTECODE
 			if ( colm_log_bytecode ) {

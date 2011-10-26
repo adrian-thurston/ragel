@@ -182,7 +182,8 @@ void GenericType::declare( ParseData *pd, Namespace *nspace )
 
 		Definition *newDef = new Definition( InputLoc(), prodName, 
 			emptyList, false, 0,
-			pd->prodList.length(), Definition::Production );
+			pd->prodList.length(), prodName->defList.length(),
+			Definition::Production );
 			
 		prodName->defList.append( newDef );
 		pd->prodList.append( newDef );
@@ -219,7 +220,8 @@ void Namespace::declare( ParseData *pd )
 
 			Definition *newDef = new Definition( loc, prodName, 
 				emptyList, false, 0,
-				pd->prodList.length(), Definition::Production );
+				pd->prodList.length(), prodName->defList.length(),
+				Definition::Production );
 			
 			prodName->defList.append( newDef );
 			pd->prodList.append( newDef );

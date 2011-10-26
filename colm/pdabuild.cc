@@ -981,7 +981,8 @@ void ParseData::wrapNonTerminals()
 		ProdElList *prodElList = makeProdElList( lel );
 		lel->rootDef = new Definition( InputLoc(), rootLangEl, 
 				prodElList, false, 0,
-				prodList.length(), Definition::Production );
+				prodList.length(), rootLangEl->defList.length(),
+				Definition::Production );
 		prodList.append( lel->rootDef );
 		rootLangEl->defList.append( lel->rootDef );
 
@@ -1183,7 +1184,8 @@ void ParseData::insertUniqueEmptyProductions()
 		LangEl *prodName = addLangEl( this, rootNamespace, name, LangEl::NonTerm );
 		Definition *newDef = new Definition( InputLoc(), prodName, 
 				0 /* FIXME new VarDef( name, 0 )*/, 
-				false, 0, prodList.length(), Definition::Production );
+				false, 0, prodList.length(), prodName->defList.length(),
+				Definition::Production );
 		prodName->defList.append( newDef );
 		prodList.append( newDef );
 
@@ -1233,8 +1235,9 @@ void ParseData::makeRuntimeData()
 
 	count = 0;
 	for ( DefList::Iter prod = prodList; prod.lte(); prod++ ) {
-		runtimeData->prodInfo[count].length = prod->fsmLength;
 		runtimeData->prodInfo[count].lhsId = prod->prodName->id;
+		runtimeData->prodInfo[count].prodNum = prod->prodNum;
+		runtimeData->prodInfo[count].length = prod->fsmLength;
 		runtimeData->prodInfo[count].name = prod->data;
 		runtimeData->prodInfo[count].frameId = -1;
 
@@ -1517,6 +1520,7 @@ void fillNodes( Program *prg, Bindings *bindings, long &bindId,
 
 		/* Set up the fields. */
 		node.id = kid->tree->id;
+		node.prodNum = kid->tree->prodNum;
 		node.child = child == 0 ? -1 : pt(child->tree)->state;
 		node.next = kid->next == 0 ? -1 : pt(kid->next->tree)->state;
 		node.length = stringLength( kid->tree->tokdata );
@@ -1532,6 +1536,7 @@ void fillNodes( Program *prg, Bindings *bindings, long &bindId,
 
 			memset( &node, 0, sizeof(PatReplNode) );
 			node.id = ignore->tree->id;
+			node.prodNum = ignore->tree->prodNum;
 			node.next = ignore->next == 0 ? -1 : ind;
 			
 			node.length = stringLength( ignore->tree->tokdata );
@@ -1551,6 +1556,7 @@ void fillNodes( Program *prg, Bindings *bindings, long &bindId,
 			memset( &node, 0, sizeof(PatReplNode) );
 
 			node.id = attr->id;
+			node.prodNum = attr->prodNum;
 			node.length = stringLength( attr->tokdata );
 			node.data = stringData( attr->tokdata );
 		}

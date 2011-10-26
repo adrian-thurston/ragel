@@ -282,6 +282,13 @@ typedef unsigned char uchar;
 
 #define IN_SPRINTF               0xcf
 
+#define IN_GET_RHS_VAL_R         0xd1
+#define IN_GET_RHS_VAL_WC        0xd2
+#define IN_GET_RHS_VAL_WV        0xd3
+#define IN_GET_RHS_VAL_BKT       0xd4
+#define IN_SET_RHS_VAL_WC        0xd5
+#define IN_SET_RHS_VAL_WV        0xd6
+#define IN_SET_RHS_VAL_BKT       0xd7
 
 /* Types */
 #define TYPE_NIL          0x01

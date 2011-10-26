@@ -296,11 +296,7 @@ head:
 		*causeReduce -= 1;
 
 		if ( *causeReduce == 0 ) {
-//			#ifdef COLM_LOG_PARSE
-//			if ( colm_log_parse ) {
-//				cerr << "commit: causeReduce dropped to zero, backing up over rcode" << endl;
-//			}
-//			#endif
+			debug( REALM_PARSE, "commit: causeReduce dropped to zero, backing up over rcode\n" );
 
 			/* Cause reduce just dropped down to zero. */
 			*rcode = backupOverRcode( *rcode );
@@ -548,6 +544,7 @@ again:
 		redLel->tree->flags |= AF_PARSE_TREE;
 		redLel->tree->refs = 1;
 		redLel->tree->id = pdaRun->tables->rtd->prodInfo[reduction].lhsId;
+		redLel->tree->prodNum = pdaRun->tables->rtd->prodInfo[reduction].prodNum;
 
 		redLel->next = 0;
 		pt(redLel->tree)->causeReduce = 0;
@@ -602,17 +599,17 @@ again:
 
 		/* Copy RHS elements in the production. */
 		{
-			unsigned char *copy = pdaRun->tables->rtd->prodInfo[reduction].copy;
-			if ( copy != 0 ) {
-				int i, copyLen = pdaRun->tables->rtd->prodInfo[reduction].copyLen;
-				for ( i = 0; i < copyLen; i++ ) {
-					unsigned char field = copy[i*2];
-					unsigned char fromPos = copy[i*2+1];
-					Tree *val = getRhsEl( pdaRun->prg, redLel->tree, fromPos );
-					treeUpref( val );
-					setField( pdaRun->prg, redLel->tree, field, val );
-				}
-			}
+//			unsigned char *copy = pdaRun->tables->rtd->prodInfo[reduction].copy;
+//			if ( copy != 0 ) {
+//				int i, copyLen = pdaRun->tables->rtd->prodInfo[reduction].copyLen;
+//				for ( i = 0; i < copyLen; i++ ) {
+//					unsigned char field = copy[i*2];
+//					unsigned char fromPos = copy[i*2+1];
+//					Tree *val = getRhsEl( pdaRun->prg, redLel->tree, fromPos );
+//					treeUpref( val );
+//					setField( pdaRun->prg, redLel->tree, field, val );
+//				}
+//			}
 		}
 
 		if ( pdaRun->prg->ctxDepParsing && pdaRun->tables->rtd->prodInfo[reduction].frameId >= 0 ) {
