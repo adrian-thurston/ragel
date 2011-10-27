@@ -671,6 +671,8 @@ struct ParseData
 	CondData thisCondData;
 	KeyOps thisKeyOps;
 
+	UniqueType *mainReturnUT;
+
 	/* CONTEXT FREE */
 	ProdElList *makeProdElList( LangEl *langEl );
 	void wrapNonTerminals();

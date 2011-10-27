@@ -72,8 +72,16 @@ void ParseData::generateExports()
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
 		out << "struct " << lel->fullName << "\n";
 		out << "{\n";
-		out << "	Head *data() { return ((Tree*)this)->tokdata; }\n";
-		out << "	std::string text( Program *prg ) { return printTreeStr( prg, (Tree*)this ); }\n";
+		out << "	Head *data() { return tree->tokdata; }\n";
+		out << "	std::string text() { return printTreeStr( prg, tree ); }\n";
+		out << "	operator Tree *() { return tree; }\n";
+		out << "	Program *prg;\n";
+		out << "	Tree *tree;\n";
+
+		if ( mainReturnUT != 0 && mainReturnUT->langEl == lel ) {
+			out << "	" << lel->fullName << "( Program *prg ) : prg(prg), tree(prg->returnVal) {}\n";
+		}
+		out << "	" << lel->fullName << "( Program *prg, Tree *tree ) : prg(prg), tree(tree) {}\n";
 
 		if ( lel->objectDef != 0 && lel->objectDef->objFieldList != 0 ) {
 			ObjFieldList *objFieldList = lel->objectDef->objFieldList;
@@ -83,9 +91,7 @@ void ParseData::generateExports()
 					UniqueType *ut = field->typeRef->lookupType( this );
 
 					if ( ut != 0 && ut->typeId == TYPE_TREE  ) {
-						out << "	" << ut->langEl->fullName << " *" << field->name << 
-							"() { return (" << ut->langEl->fullName << 
-							"*)getAttr( (Tree*)this, " << field->offset << "); }\n";
+						out << "	" << ut->langEl->fullName << " " << field->name << "();\n";
 					}
 				}
 
@@ -93,8 +99,47 @@ void ParseData::generateExports()
 					UniqueType *ut = field->typeRef->lookupType( this );
 
 					if ( ut != 0 && ut->typeId == TYPE_TREE  ) {
-						out << "	" << ut->langEl->fullName << " *" << field->name << 
-							"(Program *prg) { static int a[] = {"; 
+						out << "	" << ut->langEl->fullName << " " << field->name << "();\n";
+					}
+				}
+			}
+		}
+
+		if ( lel->isRepeat ) {
+			out << "	" << "int end() { return repeatEnd( tree ); }\n";
+			out << "	" << lel->fullName << " next();\n";
+			out << "	" << lel->repeatOf->fullName << " value();\n";
+		}
+
+		if ( lel->isList ) {
+			out << "	" << "int last() { return listLast( tree ); }\n";
+			out << "	" << lel->fullName << " next();\n";
+			out << "	" << lel->repeatOf->fullName << " value();\n";
+		}
+		out << "};\n";
+	}
+
+	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
+		if ( lel->objectDef != 0 && lel->objectDef->objFieldList != 0 ) {
+			ObjFieldList *objFieldList = lel->objectDef->objFieldList;
+			for ( ObjFieldList::Iter ofi = *objFieldList; ofi.lte(); ofi++ ) {
+				ObjField *field = ofi->value;
+				if ( field->useOffset && field->typeRef != 0  ) {
+					UniqueType *ut = field->typeRef->lookupType( this );
+
+					if ( ut != 0 && ut->typeId == TYPE_TREE  ) {
+						out << ut->langEl->fullName << " " << lel->fullName << "::" << field->name << 
+							"() { return " << ut->langEl->fullName << 
+							"( prg, getAttr( tree, " << field->offset << ") ); }\n";
+					}
+				}
+
+				if ( field->isRhsGet ) {
+					UniqueType *ut = field->typeRef->lookupType( this );
+
+					if ( ut != 0 && ut->typeId == TYPE_TREE  ) {
+						out << ut->langEl->fullName << " " << lel->fullName << "::" << field->name << 
+							"() { static int a[] = {"; 
 
 						/* Need to place the array computing the val. */
 						out << field->rhsVal.length();
@@ -103,39 +148,33 @@ void ParseData::generateExports()
 							out << ", " << rg->childNum;
 						}
 
-						out << "}; return (" << ut->langEl->fullName << 
-							"*)getRhsVal( prg, (Tree*)this, a ); }\n";
+						out << "}; return " << ut->langEl->fullName << 
+							"( prg, getRhsVal( prg, tree, a ) ); }\n";
 					}
 				}
 			}
 		}
 
 		if ( lel->isRepeat ) {
-			out << "	" << lel->fullName << " *next"
-				"() { return (" << lel->fullName << 
-				"*)getRepeatNext( (Tree*)this ); }\n";
+			out << lel->fullName << " " << lel->fullName << "::" << " next"
+				"() { return " << lel->fullName << 
+				"( prg, getRepeatNext( tree ) ); }\n";
 
-			out << "	" <<
-				"int end() { return repeatEnd( (Tree*)this ); }\n";
+			out << lel->repeatOf->fullName << " " << lel->fullName << "::" << " value"
+				"() { return " << lel->repeatOf->fullName << 
+				"( prg, getRepeatVal( tree ) ); }\n";
 
-			out << "	" << lel->repeatOf->fullName << " *value"
-				"() { return (" << lel->repeatOf->fullName << 
-				"*)getRepeatVal( (Tree*)this ); }\n";
 		}
 
 		if ( lel->isList ) {
-			out << "	" << lel->fullName << " *next"
-				"() { return (" << lel->fullName << 
-				"*)getRepeatNext( (Tree*)this ); }\n";
+			out << lel->fullName << " " << lel->fullName << "::" << " next"
+				"() { return " << lel->fullName << 
+				"( prg, getRepeatNext( tree ) ); }\n";
 
-			out << "	" <<
-				"int last() { return listLast( (Tree*)this ); }\n";
-
-			out << "	" << lel->repeatOf->fullName << " *value"
-				"() { return (" << lel->repeatOf->fullName << 
-				"*)getRepeatVal( (Tree*)this ); }\n";
+			out << lel->repeatOf->fullName << " " << lel->fullName << "::" << " value"
+				"() { return " << lel->repeatOf->fullName << 
+				"( prg, getRepeatVal( tree ) ); }\n";
 		}
-		out << "};\n";
 	}
 	out << "#endif\n";
 }
