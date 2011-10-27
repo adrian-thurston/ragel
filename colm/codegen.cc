@@ -41,10 +41,11 @@ void ParseData::generateExports()
 	out << 
 		"#ifndef _EXPORTS_H\n"
 		"#define _EXPORTS_H\n"
+		"\n"
 		"#include <colm/colm.h>\n"
 		"#include <string>\n"
 		"\n";
-
+	
 	out << 
 		"inline void appendString( PrintArgs *args, const char *data, int length )\n"
 		"{\n"
@@ -78,13 +79,32 @@ void ParseData::generateExports()
 			ObjFieldList *objFieldList = lel->objectDef->objFieldList;
 			for ( ObjFieldList::Iter ofi = *objFieldList; ofi.lte(); ofi++ ) {
 				ObjField *field = ofi->value;
-				if ( field->useOffset && field->typeRef != 0 ) {
+				if ( field->useOffset && field->typeRef != 0  ) {
 					UniqueType *ut = field->typeRef->lookupType( this );
 
 					if ( ut != 0 && ut->typeId == TYPE_TREE  ) {
 						out << "	" << ut->langEl->fullName << " *" << field->name << 
 							"() { return (" << ut->langEl->fullName << 
 							"*)getAttr( (Tree*)this, " << field->offset << "); }\n";
+					}
+				}
+
+				if ( field->isRhsGet ) {
+					UniqueType *ut = field->typeRef->lookupType( this );
+
+					if ( ut != 0 && ut->typeId == TYPE_TREE  ) {
+						out << "	" << ut->langEl->fullName << " *" << field->name << 
+							"(Program *prg) { static int a[] = {"; 
+
+						/* Need to place the array computing the val. */
+						out << field->rhsVal.length();
+						for ( Vector<RhsVal>::Iter rg = field->rhsVal; rg.lte(); rg++ ) {
+							out << ", " << rg->prodNum;
+							out << ", " << rg->childNum;
+						}
+
+						out << "}; return (" << ut->langEl->fullName << 
+							"*)getRhsVal( prg, (Tree*)this, a ); }\n";
 					}
 				}
 			}
@@ -97,6 +117,19 @@ void ParseData::generateExports()
 
 			out << "	" <<
 				"int end() { return repeatEnd( (Tree*)this ); }\n";
+
+			out << "	" << lel->repeatOf->fullName << " *value"
+				"() { return (" << lel->repeatOf->fullName << 
+				"*)getRepeatVal( (Tree*)this ); }\n";
+		}
+
+		if ( lel->isList ) {
+			out << "	" << lel->fullName << " *next"
+				"() { return (" << lel->fullName << 
+				"*)getRepeatNext( (Tree*)this ); }\n";
+
+			out << "	" <<
+				"int last() { return listLast( (Tree*)this ); }\n";
 
 			out << "	" << lel->repeatOf->fullName << " *value"
 				"() { return (" << lel->repeatOf->fullName << 

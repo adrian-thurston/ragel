@@ -99,6 +99,19 @@ Tree *getAttr( Tree *tree, long pos )
 	return kid->tree;
 }
 
+Tree *getRhsVal( Program *prg, Tree *tree, int *a )
+{
+	int i, len = a[0];
+	for ( i = 0; i < len; i++ ) {
+		int prodNum = a[1 + i * 2];
+		int childNum = a[1 + i * 2 + 1];
+		if ( tree->prodNum == prodNum )
+			return getRhsEl( prg, tree, childNum );
+	}
+	return 0;
+}
+
+
 Tree *getRepeatNext( Tree *tree )
 {
 	Kid *kid = tree->child;
@@ -133,6 +146,18 @@ int repeatEnd( Tree *tree )
 		kid = kid->next;
 
 	return kid == 0;
+}
+
+int listLast( Tree *tree )
+{
+	Kid *kid = tree->child;
+
+	if ( tree->flags & AF_LEFT_IGNORE )
+		kid = kid->next;
+	if ( tree->flags & AF_RIGHT_IGNORE )
+		kid = kid->next;
+
+	return kid->next == 0;
 }
 
 Kid *getAttrKid( Tree *tree, long pos )

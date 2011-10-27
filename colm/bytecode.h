@@ -473,8 +473,10 @@ void freeAttrs( Program *prg, Kid *attrs );
 void setAttr( Tree *tree, long pos, Tree *val );
 Tree *getAttr( Tree *tree, long pos );
 Kid *getAttrKid( Tree *tree, long pos );
+Tree *getRhsVal( Program *prg, Tree *tree, int *a );
 Tree *getRepeatNext( Tree *tree );
 int repeatEnd( Tree *tree );
+int listLast( Tree *tree );
 Tree *getRepeatVal( Tree *tree );
 
 Tree *splitTree( Program *prg, Tree *t );
