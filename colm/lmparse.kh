@@ -104,6 +104,7 @@ struct Parser
 	ContextVect contextStack;
 
 	String curDefineId;
+	LelDefList *curDefList;
 	ProdElList *curProdElList;
 
 	PredType predType;

@@ -1056,6 +1056,7 @@ void FsmCodeGen::writeCode()
 		"#include <colm/defs.h>\n"
 		"#include <colm/input.h>\n"
 		"#include <colm/tree.h>\n"
+		"#include <colm/colm.h>\n"
 		"\n"
 		"\n";
 

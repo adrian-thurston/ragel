@@ -47,7 +47,7 @@ void ParseData::generateExports()
 		"\n";
 	
 	out << 
-		"inline void appendString( PrintArgs *args, const char *data, int length )\n"
+		"inline void appendString( ColmPrintArgs *args, const char *data, int length )\n"
 		"{\n"
 		"	std::string *str = (std::string*)args->arg;\n"
 		"	*str += std::string( data, length );\n"
@@ -55,12 +55,12 @@ void ParseData::generateExports()
 		"\n";
 
 	out << 
-		"inline std::string printTreeStr( Program *prg, Tree *tree )\n"
+		"inline std::string printTreeStr( ColmProgram *prg, ColmTree *tree )\n"
 		"{\n"
 		"	std::string str;\n"
-		"	PrintArgs printArgs = { &str, 1, 0, &appendString, \n"
+		"	ColmPrintArgs printArgs = { &str, 1, 0, &appendString, \n"
 		"			&printNull, &printTermTree, &printNull };\n"
-		"	printTreeArgs( &printArgs, prg->vm_root, prg, tree );\n"
+		"	printTreeArgs( &printArgs, vm_root(prg), prg, tree );\n"
 		"	return str;\n"
 		"}\n"
 		"\n";
@@ -72,16 +72,15 @@ void ParseData::generateExports()
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
 		out << "struct " << lel->fullName << "\n";
 		out << "{\n";
-		out << "	Head *data() { return tree->tokdata; }\n";
 		out << "	std::string text() { return printTreeStr( prg, tree ); }\n";
-		out << "	operator Tree *() { return tree; }\n";
-		out << "	Program *prg;\n";
-		out << "	Tree *tree;\n";
+		out << "	operator ColmTree *() { return tree; }\n";
+		out << "	ColmProgram *prg;\n";
+		out << "	ColmTree *tree;\n";
 
 		if ( mainReturnUT != 0 && mainReturnUT->langEl == lel ) {
-			out << "	" << lel->fullName << "( Program *prg ) : prg(prg), tree(prg->returnVal) {}\n";
+			out << "	" << lel->fullName << "( ColmProgram *prg ) : prg(prg), tree(returnVal(prg)) {}\n";
 		}
-		out << "	" << lel->fullName << "( Program *prg, Tree *tree ) : prg(prg), tree(tree) {}\n";
+		out << "	" << lel->fullName << "( ColmProgram *prg, ColmTree *tree ) : prg(prg), tree(tree) {}\n";
 
 		if ( lel->objectDef != 0 && lel->objectDef->objFieldList != 0 ) {
 			ObjFieldList *objFieldList = lel->objectDef->objFieldList;
@@ -184,11 +183,11 @@ void FsmCodeGen::writeMain()
 	out << 
 		"int main( int argc, const char **argv )\n"
 		"{\n"
-		"	Program program;\n"
-		"	initColm( 0 );\n"
-		"	initProgram( &program, argc, argv, 1, &main_runtimeData );\n"
-		"	runProgram( &program );\n"
-		"	clearProgram( &program );\n"
+		"	struct ColmProgram *prg;\n"
+		"	colmInit( 0 );\n"
+		"	prg = colmNewProgram( &main_runtimeData, argc, argv );\n"
+		"	colmRunProgram( prg );\n"
+		"	colmDeleteProgram( prg );\n"
 		"	return 0;\n"
 		"}\n"
 		"\n";

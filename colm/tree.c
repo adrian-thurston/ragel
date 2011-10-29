@@ -1856,7 +1856,7 @@ Tree *treeSearch2( Program *prg, Tree *tree, long id )
 	return res;
 }
 
-void xmlEscapeData( PrintArgs *printArgs, const char *data, long len )
+void xmlEscapeData( struct ColmPrintArgs *printArgs, const char *data, long len )
 {
 	int i;
 	for ( i = 0; i < len; i++ ) {
@@ -1906,17 +1906,17 @@ void strCollectClear( StrCollect *collect )
 
 #define INT_SZ 32
 
-void printStr( PrintArgs *printArgs, Head *str )
+void printStr( struct ColmPrintArgs *printArgs, Head *str )
 {
 	printArgs->out( printArgs, (char*)(str->data), str->length );
 }
 
-void appendCollect( PrintArgs *args, const char *data, int length )
+void appendCollect( struct ColmPrintArgs *args, const char *data, int length )
 {
 	strCollectAppend( (StrCollect*) args->arg, data, length );
 }
 
-void appendFile( PrintArgs *args, const char *data, int length )
+void appendFile( struct ColmPrintArgs *args, const char *data, int length )
 {
 	fwrite( data, length, 1, (FILE*)args->arg );
 }
@@ -1939,7 +1939,7 @@ enum ReturnType
 /* Note that this function causes recursion, thought it is not a big
  * deal since the recursion it is only caused by nonterminals that are ignored. */
 
-void printKid( PrintArgs *printArgs, Tree **sp, Program *prg, Kid *kid )
+void printKid( struct ColmPrintArgs *printArgs, Tree **sp, Program *prg, Kid *kid )
 {
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
 	Tree **root = vm_ptop();
@@ -2160,7 +2160,7 @@ skip_null:
 	}
 }
 
-void printTreeArgs( PrintArgs *printArgs, Tree **sp, Program *prg, Tree *tree )
+void printTreeArgs( struct ColmPrintArgs *printArgs, Tree **sp, Program *prg, Tree *tree )
 {
 	if ( tree == 0 )
 		printArgs->out( printArgs, "NIL", 3 );
@@ -2181,7 +2181,7 @@ void printTreeArgs( PrintArgs *printArgs, Tree **sp, Program *prg, Tree *tree )
 	}
 }
 
-void printTermTree( PrintArgs *printArgs, Tree **sp, Program *prg, Kid *kid )
+void printTermTree( struct ColmPrintArgs *printArgs, Tree **sp, Program *prg, Kid *kid )
 {
 	debug( REALM_PRINT, "printing term %p\n", kid->tree );
 
@@ -2220,11 +2220,11 @@ void printTermTree( PrintArgs *printArgs, Tree **sp, Program *prg, Kid *kid )
 }
 
 
-void printNull( struct _PrintArgs *args, Tree **sp, Program *prg, Kid *parent, Kid *kid )
+void printNull( struct ColmPrintArgs *args, Tree **sp, Program *prg, Kid *parent, Kid *kid )
 {
 }
 
-void openTreeXml( struct _PrintArgs *args, Tree **sp, Program *prg, Kid *parent, Kid *kid )
+void openTreeXml( struct ColmPrintArgs *args, Tree **sp, Program *prg, Kid *parent, Kid *kid )
 {
 	/* Skip the terminal that is for forcing trailing ignores out. */
 	if ( kid->tree->id == 0 )
@@ -2256,7 +2256,7 @@ void openTreeXml( struct _PrintArgs *args, Tree **sp, Program *prg, Kid *parent,
 	objectLength = lelInfo[kid->tree->id].objectLength;
 }
 
-void printTermXml( PrintArgs *printArgs, Tree **sp, Program *prg, Kid *kid )
+void printTermXml( struct ColmPrintArgs *printArgs, Tree **sp, Program *prg, Kid *kid )
 {
 	int i, depth = 1, objectLength;
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
@@ -2298,7 +2298,7 @@ void printTermXml( PrintArgs *printArgs, Tree **sp, Program *prg, Kid *kid )
 }
 
 
-void closeTreeXml( struct _PrintArgs *args, Tree **sp, Program *prg, Kid *parent, Kid *kid )
+void closeTreeXml( struct ColmPrintArgs *args, Tree **sp, Program *prg, Kid *parent, Kid *kid )
 {
 	/* Skip the terminal that is for forcing trailing ignores out. */
 	if ( kid->tree->id == 0 )
@@ -2328,21 +2328,21 @@ void closeTreeXml( struct _PrintArgs *args, Tree **sp, Program *prg, Kid *parent
 
 void printTreeCollect( StrCollect *collect, Tree **sp, Program *prg, Tree *tree )
 {
-	PrintArgs printArgs = { collect, 1, 0, &appendCollect, 
+	struct ColmPrintArgs printArgs = { collect, 1, 0, &appendCollect, 
 			&printNull, &printTermTree, &printNull };
 	printTreeArgs( &printArgs, sp, prg, tree );
 }
 
 void printTreeFile( FILE *out, Tree **sp, Program *prg, Tree *tree )
 {
-	PrintArgs printArgs = { out, 1, 0, &appendFile, 
+	struct ColmPrintArgs printArgs = { out, 1, 0, &appendFile, 
 			&printNull, &printTermTree, &printNull };
 	printTreeArgs( &printArgs, sp, prg, tree );
 }
 
 void printXmlStdout( Tree **sp, Program *prg, Tree *tree, int commAttr )
 {
-	PrintArgs printArgs = { stdout, commAttr, commAttr, &appendFile, 
+	struct ColmPrintArgs printArgs = { stdout, commAttr, commAttr, &appendFile, 
 			&openTreeXml, &printTermXml, &closeTreeXml };
 	printTreeArgs( &printArgs, sp, prg, tree );
 }

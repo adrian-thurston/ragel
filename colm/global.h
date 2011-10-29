@@ -19,8 +19,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _COLM_H
-#define _COLM_H
+#ifndef __COLM_GLOBAL_H
+#define __COLM_GLOBAL_H
 
 #include <stdio.h>
 #include <iostream>
@@ -87,5 +87,4 @@ void xmlEscapeHost( std::ostream &out, char *data, int len );
 void openOutput();
 void escapeLiteralString( std::ostream &out, const char *data );
 
-
-#endif /* _COLM_H */
+#endif

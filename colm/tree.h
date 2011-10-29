@@ -19,12 +19,14 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _TREE_H
-#define _TREE_H
+#ifndef __COLM_TREE_H
+#define __COLM_TREE_H
 
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+#include <colm/colm.h>
 
 typedef struct _TreePair
 {
@@ -112,17 +114,6 @@ typedef struct _StrCollect
 	int length;
 } StrCollect;
 
-typedef struct _PrintArgs
-{
-	void *arg;
-	int comm;
-	int attr;
-	void (*out)( struct _PrintArgs *args, const char *data, int length );
-	void (*openTree)( struct _PrintArgs *args, Tree **sp, Program *prg, Kid *parent, Kid *kid );
-	void (*printTerm)( struct _PrintArgs *args, Tree **sp, Program *prg, Kid *kid );
-	void (*closeTree)( struct _PrintArgs *args, Tree **sp, Program *prg, Kid *parent, Kid *kid );
-} PrintArgs;
-
 void initStrCollect( StrCollect *collect );
 void strCollectDestroy( StrCollect *collect );
 void strCollectAppend( StrCollect *collect, const char *data, long len );
@@ -130,10 +121,8 @@ void strCollectClear( StrCollect *collect );
 
 void printTree( StrCollect *collect, Tree **sp, Program *prg, Tree *tree );
 
-void printTermTree( PrintArgs *printArgs, Tree **sp, Program *prg, Kid *kid );
-void printNull( struct _PrintArgs *args, Tree **sp, Program *prg, Kid *parent, Kid *kid );
+void printTermTree( struct ColmPrintArgs *printArgs, Tree **sp, Program *prg, Kid *kid );
 
-void printTreeArgs( PrintArgs *printArgs, Tree **sp, Program *prg, Tree *tree );
 void printTreeCollect( StrCollect *collect, Tree **sp, Program *prg, Tree *tree );
 void printTreeFile( FILE *out, Tree **sp, Program *prg, Tree *tree );
 

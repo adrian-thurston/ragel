@@ -54,7 +54,7 @@ struct PatternItem;
 struct Replacement;
 struct ReplItem;
 struct _FsmRun;
-struct _Tree;
+struct ColmTree;
 
 enum RunBufType {
 	RunBufDataType = 0,
@@ -67,7 +67,7 @@ typedef struct _RunBuf
 	enum RunBufType type;
 	char data[FSM_BUFSIZE];
 	long length;
-	struct _Tree *tree;
+	struct ColmTree *tree;
 	long offset;
 	struct _RunBuf *next, *prev;
 } RunBuf;
@@ -86,14 +86,14 @@ struct InputFuncs
 	int (*tryAgainLater)( InputStream *is );
 	int (*getData)( InputStream *is, char *dest, int length );
 	int (*getDataImpl)( InputStream *is, char *dest, int length );
-	struct _Tree *(*getTree)( InputStream *is );
+	struct ColmTree *(*getTree)( InputStream *is );
 	struct LangEl *(*getLangEl)( InputStream *is, long *bindId, char **data, long *length );
-	void (*pushTree)( InputStream *is, struct _Tree *tree, int ignore );
+	void (*pushTree)( InputStream *is, struct ColmTree *tree, int ignore );
 	void (*pushText)( InputStream *is, const char *data, long len );
-	struct _Tree *(*undoPush)( InputStream *is, int length );
+	struct ColmTree *(*undoPush)( InputStream *is, int length );
 	void (*appendData)( InputStream *is, const char *data, long len );
-	void (*appendTree)( InputStream *is, struct _Tree *tree );
-	struct _Tree *(*undoAppend)( InputStream *is, int length );
+	void (*appendTree)( InputStream *is, struct ColmTree *tree );
+	struct ColmTree *(*undoAppend)( InputStream *is, int length );
 	void (*pushBackNamed)( InputStream *is );
 	void (*pushBackBuf)( InputStream *is, RunBuf *runBuf );
 };

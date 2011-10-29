@@ -36,6 +36,7 @@
 #include "fsmcodegen.h"
 #include "fsmrun.h"
 #include "pdarun.h"
+#include "colm.h"
 
 using namespace std;
 using std::ostringstream;
@@ -1330,8 +1331,10 @@ void ParseData::initEmptyScanners()
 
 void ParseData::parsePatterns()
 {
-	Program prg;
-	initProgram( &prg, 0, 0, false, runtimeData );
+	Program *prg = colmNewProgram( runtimeData, 0, 0 );
+
+	/* Turn off context-dependent parsing. */
+	prg->ctxDepParsing = 0;
 
 	Tree **vm_stack = stackAlloc();
 	Tree **root = &vm_stack[VM_STACK_SIZE];
@@ -1347,8 +1350,8 @@ void ParseData::parsePatterns()
 
 		FsmRun *fsmRun = new FsmRun;
 		repl->pdaRun = new PdaRun;
-		initPdaRun( repl->pdaRun, &prg, pdaTables, fsmRun, repl->langEl->parserId, 0, false, 0 );
-		initFsmRun( fsmRun, &prg );
+		initPdaRun( repl->pdaRun, prg, pdaTables, fsmRun, repl->langEl->parserId, 0, false, 0 );
+		initFsmRun( fsmRun, prg );
 		newToken( repl->pdaRun, fsmRun );
 		parseLoop( root, repl->pdaRun, fsmRun, in );
 		if ( repl->pdaRun->parseError )
@@ -1367,8 +1370,8 @@ void ParseData::parsePatterns()
 
 		FsmRun *fsmRun = new FsmRun;
 		pat->pdaRun = new PdaRun;
-		initPdaRun( pat->pdaRun, &prg, pdaTables, fsmRun, pat->langEl->parserId, 0, false, 0 );
-		initFsmRun( fsmRun, &prg );
+		initPdaRun( pat->pdaRun, prg, pdaTables, fsmRun, pat->langEl->parserId, 0, false, 0 );
+		initFsmRun( fsmRun, prg );
 		newToken( pat->pdaRun, fsmRun );
 		parseLoop( root, pat->pdaRun, fsmRun, in );
 		if ( pat->pdaRun->parseError )
@@ -1376,7 +1379,7 @@ void ParseData::parsePatterns()
 		free( in );
 	}
 
-	fillInPatterns( &prg );
+	fillInPatterns( prg );
 }
 
 void ParseData::collectParserEls( BstSet<LangEl*> &parserEls )

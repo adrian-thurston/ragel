@@ -819,8 +819,6 @@ prod_el:
 
 			objField->isRhsGet = true;
 			RhsVal rhsVal( curDefList->length(), curProdElList->length() );
-			cout << "rhs val: " << objField << " " << objField->name << " " << 
-					rhsVal.prodNum << " " << rhsVal.childNum << endl;
 			objField->rhsVal.append( RhsVal( curDefList->length(), curProdElList->length() ) );
 		}
 	};

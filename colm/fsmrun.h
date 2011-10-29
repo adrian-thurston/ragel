@@ -28,6 +28,8 @@
 extern "C" {
 #endif
 
+struct ColmProgram;
+
 #define MARK_SLOTS 32
 
 typedef struct _FsmTables
@@ -64,11 +66,9 @@ typedef struct _FsmTables
 	long numActionSwitch;
 } FsmTables;
 
-struct _Program;
-
 typedef struct _FsmRun
 {
-	struct _Program *prg;
+	struct ColmProgram *prg;
 	FsmTables *tables;
 
 	RunBuf *runBuf;
@@ -82,11 +82,11 @@ typedef struct _FsmRun
 	long matchedToken;
 
 	InputStream *haveDataOf;
-	struct _Tree *curStream;
+	struct ColmTree *curStream;
 } FsmRun;
 
-void initFsmRun( FsmRun *fsmRun, struct _Program *prg );
-void clearFsmRun( struct _Program *prg, FsmRun *fsmRun );
+void initFsmRun( FsmRun *fsmRun, struct ColmProgram *prg );
+void clearFsmRun( struct ColmProgram *prg, FsmRun *fsmRun );
 void updatePosition( InputStream *inputStream, const char *data, long length );
 void undoPosition( InputStream *inputStream, const char *data, long length );
 void takeBackBuffered( InputStream *inputStream );

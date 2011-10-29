@@ -71,23 +71,23 @@ typedef struct _Head
 	Location *location;
 } Head;
 
-typedef struct _Kid
+typedef struct ColmKid
 {
 	/* The tree needs to be first since pointers to kids are used to reference
 	 * trees on the stack. A pointer to the word that is a Tree* is cast to
 	 * a Kid*. */
-	struct _Tree *tree;
-	struct _Kid *next;
+	struct ColmTree *tree;
+	struct ColmKid *next;
 	unsigned char flags;
 } Kid;
 
 typedef struct _Ref
 {
-	struct _Kid *kid;
+	struct ColmKid *kid;
 	struct _Ref *next;
 } Ref;
 
-typedef struct _Tree
+typedef struct ColmTree
 {
 	/* First four will be overlaid in other structures. */
 	short id;
@@ -339,7 +339,7 @@ typedef struct _CaptureAttr
 	long offset;
 } CaptureAttr;
 
-typedef struct _RuntimeData
+typedef struct ColmRuntimeData
 {
 	LangElInfo *lelInfo;
 	long numLangEls;
@@ -442,7 +442,7 @@ typedef struct _PoolAlloc
 	int sizeofT;
 } PoolAlloc;
 
-typedef struct _Program
+typedef struct ColmProgram
 {
 	int argc;
 	const char **argv;

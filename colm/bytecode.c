@@ -473,7 +473,7 @@ Tree *constructArgv( Program *prg, int argc, const char **argv )
  * Execution environment
  */
 
-void initColm( long debugRealm )
+void colmInit( long debugRealm )
 {
 	/* Always on because because logging is controlled with ifdefs in\n" the
 	 * runtime lib. */
@@ -486,13 +486,14 @@ void initColm( long debugRealm )
 	initInputFuncs();
 }
 
-void initProgram( Program *prg, int argc, const char **argv, int ctxDepParsing, 
-		RuntimeData *rtd )
+Program *colmNewProgram( RuntimeData *rtd, int argc, const char **argv )
 {
+	Program *prg = malloc(sizeof(Program));
+	memset( prg, 0, sizeof(Program) );
 	prg->argc = argc;
 	prg->argv = argv;
-	prg->ctxDepParsing = ctxDepParsing;
 	prg->rtd = rtd;
+	prg->ctxDepParsing = 1;
 	prg->global = 0;
 	prg->heap = 0;
 	prg->stdinVal = 0;
@@ -525,6 +526,7 @@ void initProgram( Program *prg, int argc, const char **argv, int ctxDepParsing,
 	prg->falseVal = (Tree*)falseInt;
 
 	prg->allocRunBuf = 0;
+	return prg;
 }
 
 void clearGlobal( Program *prg, Tree **sp )
@@ -559,7 +561,17 @@ Tree **stackAlloc()
 		PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0 );
 }
 
-void runProgram( Program *prg )
+Tree **vm_root( struct ColmProgram *prg )
+{
+	return prg->vm_root;
+}
+
+Tree *returnVal( struct ColmProgram *prg )
+{
+	return prg->returnVal;
+}
+
+void colmRunProgram( Program *prg )
 {
 	assert( sizeof(Int)      <= sizeof(Tree) );
 	assert( sizeof(Str)      <= sizeof(Tree) );
@@ -592,7 +604,7 @@ void runProgram( Program *prg )
 	}
 }
 
-void clearProgram( Program *prg )
+void colmDeleteProgram( Program *prg )
 {
 	Tree **vm_stack = prg->vm_stack;
 	Tree **sp = prg->vm_root;
@@ -673,6 +685,8 @@ void clearProgram( Program *prg )
 		free( rb );
 		rb = next;
 	}
+
+	free( prg );
 }
 
 

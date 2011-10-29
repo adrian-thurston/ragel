@@ -471,13 +471,7 @@ void reverseExecution( Execution *exec, Tree **sp, RtCodeVect *allRev );
 Kid *allocAttrs( Program *prg, long length );
 void freeAttrs( Program *prg, Kid *attrs );
 void setAttr( Tree *tree, long pos, Tree *val );
-Tree *getAttr( Tree *tree, long pos );
 Kid *getAttrKid( Tree *tree, long pos );
-Tree *getRhsVal( Program *prg, Tree *tree, int *a );
-Tree *getRepeatNext( Tree *tree );
-int repeatEnd( Tree *tree );
-int listLast( Tree *tree );
-Tree *getRepeatVal( Tree *tree );
 
 Tree *splitTree( Program *prg, Tree *t );
 void rcodeDownrefAll( Program *prg, Tree **sp, RtCodeVect *cv );
@@ -490,12 +484,6 @@ void allocGlobal( Program *prg );
 void executeCode( Execution *exec, Tree **sp, Code *instr );
 void rcodeDownref( Program *prg, Tree **sp, Code *instr );
 Tree **stackAlloc();
-
-void initColm( long debugRealm );
-void initProgram( Program *program, int argc, const char **argv,
-		int ctxDepParsing, RuntimeData *rtd );
-void runProgram( Program *prg );
-void clearProgram( Program *prg );
 
 #ifdef __cplusplus
 }
