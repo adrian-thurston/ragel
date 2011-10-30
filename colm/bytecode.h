@@ -476,7 +476,7 @@ Kid *getAttrKid( Tree *tree, long pos );
 
 Tree *splitTree( struct ColmProgram *prg, Tree *t );
 void rcodeDownrefAll( struct ColmProgram *prg, Tree **sp, RtCodeVect *cv );
-void commitFull( Tree **sp, PdaRun *parser, long commitReduce );
+void commitFull( Tree **sp, PdaRun *pdaRun, long commitReduce );
 Tree *getParsedRoot( PdaRun *pdaRun, int stop );
 Tree *prepParseTree( struct ColmProgram *prg, Tree **sp, Tree *tree );
 void splitRef( Tree ***sp, struct ColmProgram *prg, Ref *fromRef );

@@ -236,7 +236,7 @@ Code *backupOverRcode( Code *rcode )
 
 /* The top level of the stack is linked right-to-left. Trees underneath are
  * linked left-to-right. */
-void commitKid( PdaRun *parser, Tree **root, Kid *lel, Code **rcode, long *causeReduce )
+void commitKid( PdaRun *pdaRun, Tree **root, Kid *lel, Code **rcode, long *causeReduce )
 {
 	Tree *tree = 0;
 	Tree **sp = root;
@@ -245,7 +245,7 @@ void commitKid( PdaRun *parser, Tree **root, Kid *lel, Code **rcode, long *cause
 head:
 	/* Commit */
 	debug( REALM_PARSE, "commit: visiting %s\n",
-			parser->prg->rtd->lelInfo[lel->tree->id].name );
+			pdaRun->prg->rtd->lelInfo[lel->tree->id].name );
 
 	/* Load up the parsed tree. */
 	tree = lel->tree;
@@ -288,7 +288,7 @@ head:
 	/* Check causeReduce, might be time to backup over the reverse code
 	 * belonging to a nonterminal that caused previous reductions. */
 	if ( *causeReduce > 0 && 
-			tree->id >= parser->prg->rtd->firstNonTermId &&
+			tree->id >= pdaRun->prg->rtd->firstNonTermId &&
 			!(tree->flags & AF_TERM_DUP) )
 	{
 		*causeReduce -= 1;
@@ -304,20 +304,20 @@ head:
 	/* Reset retries. */
 	if ( tree->flags & AF_PARSED ) {
 		if ( pt(tree)->retry_lower > 0 ) {
-			parser->numRetry -= 1;
+			pdaRun->numRetry -= 1;
 			pt(tree)->retry_lower = 0;
 		}
 		if ( pt(tree)->retry_upper > 0 ) {
-			parser->numRetry -= 1;
+			pdaRun->numRetry -= 1;
 			pt(tree)->retry_upper = 0;
 		}
 	}
 	tree->flags |= AF_COMMITTED;
 
 	/* Do not recures on trees that are terminal dups. */
-	if ( !(tree->flags & AF_TERM_DUP) && treeChild( parser->prg, tree ) != 0 ) {
+	if ( !(tree->flags & AF_TERM_DUP) && treeChild( pdaRun->prg, tree ) != 0 ) {
 		vm_push( (Tree*)lel );
-		lel = treeChild( parser->prg, tree );
+		lel = treeChild( pdaRun->prg, tree );
 
 		if ( lel != 0 ) {
 			while ( lel != 0 ) {
@@ -345,11 +345,11 @@ backup:
 		goto backup;
 	}
 
-	parser->numRetry = 0;
+	pdaRun->numRetry = 0;
 	assert( sp == root );
 }
 
-void commitFull( Tree **sp, PdaRun *parser, long causeReduce )
+void commitFull( Tree **sp, PdaRun *pdaRun, long causeReduce )
 {
 //	#ifdef COLM_LOG_PARSE
 //	if ( colm_log_parse ) {
@@ -357,20 +357,20 @@ void commitFull( Tree **sp, PdaRun *parser, long causeReduce )
 //	}
 //	#endif
 	
-	Kid *kid = parser->stackTop;
-	Code *rcode = parser->reverseCode.data + parser->reverseCode.tabLen;
+	Kid *kid = pdaRun->stackTop;
+	Code *rcode = pdaRun->reverseCode.data + pdaRun->reverseCode.tabLen;
 
 	/* The top level of the stack is linked right to left. This is the
 	 * traversal order we need for committing. */
 	while ( kid != 0 && !beenCommitted( kid ) ) {
-		commitKid( parser, sp, kid, &rcode, &causeReduce );
+		commitKid( pdaRun, sp, kid, &rcode, &causeReduce );
 		kid = kid->next;
 	}
 
 	/* We cannot always clear all the rcode here. We may need to backup over
 	 * the parse statement. We depend on the context flag. */
-	if ( !parser->revertOn )
-		rcodeDownrefAll( parser->prg, sp, &parser->reverseCode );
+	if ( !pdaRun->revertOn )
+		rcodeDownrefAll( pdaRun->prg, sp, &pdaRun->reverseCode );
 }
 
 void pushBtPoint( PdaRun *pdaRun, Tree *tree )

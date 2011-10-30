@@ -149,55 +149,6 @@ Tree *prepParseTree( Program *prg, Tree **sp, Tree *tree )
 	return tree;
 }
 
-void sendTreeFrag( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, 
-		InputStream *inputStream,
-		Tree *tree, int ignore )
-{
-	tree = prepParseTree( prg, sp, tree );
-
-	if ( tree->id >= prg->rtd->firstNonTermId )
-		tree->id = prg->rtd->lelInfo[tree->id].termDupId;
-
-	tree->flags |= AF_ARTIFICIAL;
-
-	treeUpref( tree );
-		
-	/* FIXME: Do we need to remove the ignore tokens 
-	 * at this point? Will it cause a leak? */
-
-	Kid *send = kidAllocate( prg );
-	send->tree = tree;
-
-	LangElInfo *lelInfo = pdaRun->prg->rtd->lelInfo;
-
-	/* Must clear next, since the parsing algorithm uses it. */
-	if ( lelInfo[send->tree->id].ignore ) {
-		#ifdef COLM_LOG_PARSE
-		if ( colm_log_parse ) {
-			cerr << "ignoring queued item: " << 
-					pdaRun->tables->rtd->lelInfo[send->tree->id].name << endl;
-		}
-		#endif
-
-		incrementConsumed( pdaRun );
-
-		ignoreTree( pdaRun, send->tree );
-		kidFree( pdaRun->prg, send );
-	}
-	else {
-		#ifdef COLM_LOG_PARSE
-		if ( colm_log_parse ) {
-			cerr << "sending queue item: " << 
-					pdaRun->tables->rtd->lelInfo[send->tree->id].name << endl;
-		}
-		#endif
-
-		incrementConsumed( pdaRun );
-
-		sendHandleError( sp, pdaRun, fsmRun, inputStream, send );
-	}
-}
-
 void parserSetContext( Tree **sp, Program *prg, Accum *accum, Tree *val )
 {
 	accum->pdaRun->context = splitTree( prg, val );
@@ -2876,11 +2827,11 @@ again:
 			break;
 		}
 		case IN_PARSE_FINISH_BKT: {
-			Tree *parser;
+			Tree *accum;
 			Tree *tree;
 			Word consumed;
 
-			read_tree( parser );
+			read_tree( accum );
 			read_tree( tree );
 			read_word( consumed );
 
@@ -2889,11 +2840,11 @@ again:
 				cerr << "IN_PARSE_FINISH_BKT " << consumed << endl;
 			#endif
 
-			undoParseStream( sp, prg, ((Accum*)parser)->stream, (Accum*)parser, consumed );
-			((Accum*)parser)->stream->in->eof = false;
+			undoParseStream( sp, prg, ((Accum*)accum)->stream, (Accum*)accum, consumed );
+			((Accum*)accum)->stream->in->eof = false;
 
 			/* This needs an implementation. */
-			treeDownref( prg, sp, parser );
+			treeDownref( prg, sp, accum );
 			treeDownref( prg, sp, tree );
 			break;
 		}
