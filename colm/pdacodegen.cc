@@ -75,22 +75,10 @@ void PdaCodeGen::writeTokenIds()
 	out << "*/\n\n";
 }
 
-
-void PdaCodeGen::writeFirst()
+void PdaCodeGen::defineRuntime()
 {
 	out << 
-		"/*\n"
-		" * This code is generated\n"
-		"*/\n"
-		"\n"
-		"#include <colm/pdarun.h>\n"
-		"#include <colm/fsmrun.h>\n"
-		"#include <colm/debug.h>\n"
-		"#include <colm/bytecode.h>\n"
-		"\n"
-		"extern RuntimeData main_runtimeData;\n";
-
-	out <<
+		"extern RuntimeData main_runtimeData;\n"
 		"\n";
 }
 
@@ -636,10 +624,7 @@ void PdaCodeGen::writeParserData( long id, PdaTables *tables )
 		"	" << tables->numActInds << ",\n"
 		"	" << tables->numActions << ",\n"
 		"	" << tables->numCommitLen << ",\n"
-		"	" << tables->numRegionItems << ",\n"
-		"\n"
-		"\n"
-		"	&main_runtimeData\n"
+		"	" << tables->numRegionItems << "\n"
 		"};\n"
 		"\n";
 }

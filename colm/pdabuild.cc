@@ -1870,9 +1870,6 @@ PdaTables *ParseData::makePdaTables( PdaGraph *pdaGraph )
 		pdaTables->tokenRegions[count++] = 0;
 	}
 
-	/* Get a pointer to the (yet unfilled) global runtime data. */
-	pdaTables->rtd = runtimeData;
-
 	return pdaTables;
 }
 

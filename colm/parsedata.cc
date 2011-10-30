@@ -1425,7 +1425,8 @@ void ParseData::generateOutput()
 
 	PdaCodeGen *pdaGen = new PdaCodeGen( outputFileName, "parser", this, *outStream );
 
-	pdaGen->writeFirst();
+	fsmGen->writeIncludes();
+	pdaGen->defineRuntime();
 	fsmGen->writeCode();
 
 	/* Make parsers that we need. */
@@ -1436,6 +1437,7 @@ void ParseData::generateOutput()
 
 	if ( !gblLibrary ) 
 		fsmGen->writeMain();
+
 	outStream->flush();
 }
 

@@ -26,6 +26,8 @@
 extern "C" {
 #endif
 
+#include <colm/program.h>
+
 typedef struct _MapEl
 {
 	/* Must overlay Kid. */

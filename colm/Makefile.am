@@ -28,7 +28,7 @@ RUNTIME_SRC = \
 
 RUNTIME_HDR = \
 	bytecode.h config.h defs.h debug.h pool.h input.h \
-	fsmrun.h pdarun.h map.h tree.h colm.h
+	fsmrun.h pdarun.h map.h tree.h program.h colm.h
 
 lib_LIBRARIES = libcolmp.a libcolmd.a
 

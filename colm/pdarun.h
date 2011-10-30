@@ -19,12 +19,13 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _PDARUN_H
-#define _PDARUN_H
+#ifndef __COLM_PDARUN_H
+#define __COLM_PDARUN_H
 
 #include <colm/input.h>
 #include <colm/fsmrun.h>
 #include <colm/defs.h>
+#include <colm/tree.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -34,10 +35,6 @@ extern "C" {
 	#error "SIZEOF_LONG contained an unexpected value"
 #endif
 
-typedef unsigned char Code;
-typedef unsigned long Word;
-typedef unsigned long Half;
-struct Bindings;
 
 typedef struct _RtCodeVect
 {
@@ -47,159 +44,6 @@ typedef struct _RtCodeVect
 
 	/* FIXME: leak when freed. */
 } RtCodeVect;
-
-
-typedef struct _File
-{
-	struct _File *prev;
-	struct _File *next;
-} File;
-
-typedef struct _Location
-{
-	File *file;
-	long line;
-	long column;
-	long byte;
-} Location;
-
-/* Header located just before string data. */
-typedef struct _Head
-{
-	const char *data; 
-	long length;
-	Location *location;
-} Head;
-
-typedef struct ColmKid
-{
-	/* The tree needs to be first since pointers to kids are used to reference
-	 * trees on the stack. A pointer to the word that is a Tree* is cast to
-	 * a Kid*. */
-	struct ColmTree *tree;
-	struct ColmKid *next;
-	unsigned char flags;
-} Kid;
-
-typedef struct _Ref
-{
-	struct ColmKid *kid;
-	struct _Ref *next;
-} Ref;
-
-typedef struct ColmTree
-{
-	/* First four will be overlaid in other structures. */
-	short id;
-	unsigned short flags;
-	long refs;
-	Kid *child;
-
-	Head *tokdata;
-
-	/* FIXME: this needs to go somewhere else. Will do for now. */
-	unsigned short prodNum;
-} Tree;
-
-typedef struct _IgnoreList
-{
-	/* First four will be overlaid in other structures. */
-	short id;
-	unsigned short flags;
-	long refs;
-	Kid *child;
-
-	long generation;
-} IgnoreList;
-
-typedef struct _ParseTree
-{
-	/* Entire structure must overlay Tree. */
-	short id;
-	unsigned short flags;
-	long refs;
-	Kid *child;
-
-	Head *tokdata;
-
-	unsigned short prodNum;
-
-	/* Parsing algorithm. */
-	long state;
-	long region;
-	char causeReduce;
-	char retry_lower;
-	char retry_upper;
-} ParseTree;
-
-typedef struct _Int
-{
-	/* Must overlay Tree. */
-	short id;
-	unsigned short flags;
-	long refs;
-	Kid *child;
-
-	long value;
-} Int;
-
-typedef struct _Pointer
-{
-	/* Must overlay Tree. */
-	short id;
-	unsigned short flags;
-	long refs;
-	Kid *child;
-
-	Kid *value;
-} Pointer;
-
-typedef struct _Str
-{
-	/* Must overlay Tree. */
-	short id;
-	unsigned short flags;
-	long refs;
-	Kid *child;
-
-	Head *value;
-} Str;
-
-typedef struct _ListEl
-{
-	/* Must overlay kid. */
-	Tree *value;
-	struct _ListEl *next;
-	struct _ListEl *prev;
-} ListEl;
-
-/*
- * Maps
- */
-typedef struct _GenericInfo
-{
-	long type;
-	long typeArg;
-	long keyOffset;
-	long keyType;
-	long langElId;
-	long parserId;
-} GenericInfo;
-
-typedef struct _List
-{
-	/* Must overlay Tree. */
-	short id;
-	unsigned short flags;
-	long refs;
-	ListEl *head;
-
-	ListEl *tail;
-	long listLen;
-	GenericInfo *genericInfo;
-
-} List;
-
 
 void listAddAfter( List *list, ListEl *prev_el, ListEl *new_el );
 void listAddBefore( List *list, ListEl *next_el, ListEl *new_el );
@@ -213,18 +57,6 @@ ListEl *listDetachLast(List *list );
 
 long listLength(List *list);
 
-typedef struct _Stream
-{
-	/* Must overlay Tree. */
-	short id;
-	unsigned short flags;
-	long refs;
-	Kid *child;
-
-	FILE *file;
-	InputStream *in;
-} Stream;
-
 typedef struct _FunctionInfo
 {
 	const char *name;
@@ -233,18 +65,6 @@ typedef struct _FunctionInfo
 	long ntrees;
 	long frameSize;
 } FunctionInfo;
-
-typedef struct _UserIter
-{
-	/* The current item. */
-	Ref ref;
-	Tree **stackRoot;
-	long argSize;
-	long stackSize;
-	Code *resume;
-	Tree **frame;
-	long searchId;
-} UserIter;
 
 /*
  * Program Data.
@@ -339,63 +159,6 @@ typedef struct _CaptureAttr
 	long offset;
 } CaptureAttr;
 
-typedef struct ColmRuntimeData
-{
-	LangElInfo *lelInfo;
-	long numLangEls;
-
-	ProdInfo *prodInfo;
-	long numProds;
-
-	RegionInfo *regionInfo;
-	long numRegions;
-
-	Code *rootCode;
-	long rootCodeLen;
-
-	FrameInfo *frameInfo;
-	long numFrames;
-
-	FunctionInfo *functionInfo;
-	long numFunctions;
-
-	PatReplInfo *patReplInfo;
-	long numPatterns;
-
-	PatReplNode *patReplNodes;
-	long numPatternNodes;
-
-	GenericInfo *genericInfo;
-	long numGenerics;
-
-	long argvGenericId;
-
-	const char **litdata;
-	long *litlen;
-	Head **literals;
-	long numLiterals;
-
-	CaptureAttr *captureAttr;
-	long numCapturedAttr;
-
-	FsmTables *fsmTables;
-	struct _PdaTables *pdaTables;
-	int *startStates;
-	int *eofLelIds;
-	int *parserLelIds;
-	long numParsers;
-
-	long globalSize;
-
-	long firstNonTermId;
-
-	long integerId;
-	long stringId;
-	long anyId;
-	long eofId;
-	long noTokenId;
-} RuntimeData;
-
 typedef struct _PdaTables
 {
 	/* Parser table data. */
@@ -418,10 +181,7 @@ typedef struct _PdaTables
 	int numActions;
 	int numCommitLen;
 	int numRegionItems;
-
-	RuntimeData *rtd;
 } PdaTables;
-
 
 typedef struct _PoolBlock
 {
@@ -442,71 +202,6 @@ typedef struct _PoolAlloc
 	int sizeofT;
 } PoolAlloc;
 
-typedef struct ColmProgram
-{
-	int argc;
-	const char **argv;
-
-	unsigned char ctxDepParsing;
-	RuntimeData *rtd;
-	Tree *global;
-	long nextIlGen;
-	int induceExit;
-	int exitStatus;
-
-	PoolAlloc kidPool;
-	PoolAlloc treePool;
-	PoolAlloc parseTreePool;
-	PoolAlloc listElPool;
-	PoolAlloc mapElPool;
-	PoolAlloc headPool;
-	PoolAlloc locationPool;
-	PoolAlloc ilPool;
-
-	Tree *trueVal;
-	Tree *falseVal;
-
-	Kid *heap;
-
-	Tree **se;
-
-	Stream *stdinVal;
-	Stream *stdoutVal;
-	Stream *stderrVal;
-
-	RunBuf *allocRunBuf;
-
-	Tree **vm_stack;
-	Tree **vm_root; 
-
-	/* Returned from the main line. */
-	Tree *returnVal;
-} Program;
-
-typedef struct _TreeIter
-{
-	Ref rootRef;
-	Ref ref;
-	long searchId;
-	Tree **stackRoot;
-	long stackSize;
-} TreeIter;
-
-/* This must overlay tree iter because some of the same bytecodes are used. */
-typedef struct _RevTreeIter
-{
-	Ref rootRef;
-	Ref ref;
-	long searchId;
-	Tree **stackRoot;
-	long stackSize;
-
-	/* For detecting a split at the leaf. */
-	Kid *kidAtYield;
-	long children;
-	Kid **cur;
-} RevTreeIter;
-
 typedef struct _PdaRun
 {
 	int numRetry;
@@ -515,9 +210,8 @@ typedef struct _PdaRun
 	int cs;
 	int nextRegionInd;
 
-	Program *prg;
+	struct ColmProgram *prg;
 	PdaTables *tables;
-	FsmRun *fsmRun;
 	int parserId;
 
 	/* Reused. */
@@ -544,21 +238,6 @@ typedef struct _PdaRun
 	long consumed;
 	long targetConsumed;
 } PdaRun;
-
-typedef struct AccumStruct
-{
-	/* Must overlay Tree. */
-	short id;
-	unsigned short flags;
-	long refs;
-	Kid *child;
-
-	GenericInfo *genericInfo;
-
-	PdaRun *pdaRun;
-	FsmRun *fsmRun;
-	Stream *stream;
-} Accum;
 
 void rtCodeVectReplace( RtCodeVect *vect, long pos, const Code *val, long len );
 void rtCodeVectEmpty( RtCodeVect *vect );
@@ -610,7 +289,7 @@ void decrementConsumed( PdaRun *pdaRun );
 void reportParseError( PdaRun *pdaRun );
 int makeReverseCode( RtCodeVect *all, RtCodeVect *reverseCode );
 
-void initPdaRun( PdaRun *pdaRun, Program *prg, PdaTables *tables,
+void initPdaRun( PdaRun *pdaRun, struct ColmProgram *prg, PdaTables *tables,
 		FsmRun *fsmRun, int parserId, long stopTarget, int revertOn, Tree *context );
 void clearPdaRun( Tree **root, PdaRun *pdaRun );
 
@@ -627,36 +306,35 @@ int pdaRunGetNextRegion( PdaRun *pdaRun, int offset );
 void ignoreTree( PdaRun *pdaRun, Tree *tree );
 void parseToken( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
 long undoParse( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Tree *tree );
-void xml_print_list( RuntimeData *runtimeData, Kid *lel, int depth );
 
-Head *streamPull( Program *prg, FsmRun *fsmRun, InputStream *inputStream, long length );
-Head *stringAllocPointer( Program *prg, const char *data, long length );
+Head *streamPull( struct ColmProgram *prg, FsmRun *fsmRun, InputStream *inputStream, long length );
+Head *stringAllocPointer( struct ColmProgram *prg, const char *data, long length );
 
 void streamPushText( InputStream *inputStream, const char *data, long length );
 void streamPushTree( InputStream *inputStream, Tree *tree, int ignore );
-void undoStreamPush( Program *prg, Tree **sp, InputStream *inputStream, long length );
-void undoStreamAppend( Program *prg, Tree **sp, InputStream *inputStream, long length );
+void undoStreamPush( struct ColmProgram *prg, Tree **sp, InputStream *inputStream, long length );
+void undoStreamAppend( struct ColmProgram *prg, Tree **sp, InputStream *inputStream, long length );
 void sendBackText( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length );
 void sendBackIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *ignore );
 void sendBack( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
-void unbind( Program *prg, Tree **sp, PdaRun *pdaRun, Tree *tree );
+void unbind( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, Tree *tree );
 void queueBackTree( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
-void addNoToken( Program *prg, PdaRun *parser );
+void addNoToken( struct ColmProgram *prg, PdaRun *parser );
 void sendQueuedTokens( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
 void sendHandleError( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
 Kid *makeToken( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, int id,
 		Head *tokdata, int namedLangEl, int bindId );
 void makeTokenPushBinding( PdaRun *pdaRun, int bindId, Tree *tree );
-void executeGenerationAction( Tree **sp, Program *prg, FsmRun *fsmRun, PdaRun *pdaRun, 
+void executeGenerationAction( Tree **sp, struct ColmProgram *prg, FsmRun *fsmRun, PdaRun *pdaRun, 
 		InputStream *inputStream, Code *code, long id, Head *tokdata );
 Kid *extractIgnore( PdaRun *pdaRun );
 void sendBackQueuedIgnore( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun );
-void clearIgnoreList( Program *prg, Tree **sp, Kid *kid );
+void clearIgnoreList( struct ColmProgram *prg, Tree **sp, Kid *kid );
 void sendWithIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
-Head *extractMatch( Program *prg, FsmRun *fsmRun, InputStream *inputStream );
+Head *extractMatch( struct ColmProgram *prg, FsmRun *fsmRun, InputStream *inputStream );
 void execGen( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long id );
 void sendIgnore( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long id );
-Head *extractMatch( Program *prg, FsmRun *fsmRun, InputStream *inputStream );
+Head *extractMatch( struct ColmProgram *prg, FsmRun *fsmRun, InputStream *inputStream );
 void sendToken( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long id );
 void sendEof( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun );
 void initInputStream( InputStream *in );
@@ -667,6 +345,7 @@ void sendNamedLangEl( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *in
 void parseLoop( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
 void initBindings( PdaRun *pdaRun );
 Tree *getParsedRoot( PdaRun *pdaRun, int stop );
+void pushBtPoint( PdaRun *pdaRun, Tree *tree );
 
 #ifdef __cplusplus
 }

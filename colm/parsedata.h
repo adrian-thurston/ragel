@@ -42,6 +42,7 @@
 #include "compare.h"
 #include "pdarun.h"
 #include "bytecode.h"
+#include "program.h"
 
 using std::ostream;
 

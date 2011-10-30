@@ -349,14 +349,14 @@ void sendNamedLangEl( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *in
 	
 	#ifdef COLM_LOG_PARSE
 	if ( colm_log_parse ) {
-		cerr << "named langEl: " << pdaRun->tables->rtd->lelInfo[klangEl->id].name << endl;
+		cerr << "named langEl: " << pdaRun->prg->rtd->lelInfo[klangEl->id].name << endl;
 	}
 	#endif
 
 	/* Copy the token data. */
 	Head *tokdata = 0;
 	if ( data != 0 )
-		tokdata = stringAllocFull( fsmRun->prg, data, length );
+		tokdata = stringAllocFull( pdaRun->prg, data, length );
 
 	Kid *input = makeToken( pdaRun, fsmRun, inputStream, klangEl->id, tokdata, true, bindId );
 

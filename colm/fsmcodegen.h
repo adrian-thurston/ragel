@@ -189,6 +189,7 @@ public:
 	std::ostream &TRANS_GOTO( RedTrans *trans, int level );
 	std::ostream &FINISH_CASES();
 
+	void writeIncludes();
 	void writeData();
 	void writeInit();
 	void writeExec();

@@ -68,7 +68,6 @@ typedef struct _FsmTables
 
 typedef struct _FsmRun
 {
-	struct ColmProgram *prg;
 	FsmTables *tables;
 
 	RunBuf *runBuf;

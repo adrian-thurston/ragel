@@ -161,7 +161,6 @@ void initPdaRun( PdaRun *pdaRun, Program *prg, PdaTables *tables,
 	memset( pdaRun, 0, sizeof(PdaRun) );
 	pdaRun->prg = prg;
 	pdaRun->tables = tables;
-	pdaRun->fsmRun = fsmRun;
 	pdaRun->parserId = parserId;
 	pdaRun->stopTarget = stopTarget;
 	pdaRun->revertOn = revertOn;
@@ -242,7 +241,6 @@ void commitKid( PdaRun *parser, Tree **root, Kid *lel, Code **rcode, long *cause
 	Tree *tree = 0;
 	Tree **sp = root;
 	Tree *restore = 0;
-	Program *prg = parser->prg;
 
 head:
 	/* Commit */
@@ -290,7 +288,7 @@ head:
 	/* Check causeReduce, might be time to backup over the reverse code
 	 * belonging to a nonterminal that caused previous reductions. */
 	if ( *causeReduce > 0 && 
-			tree->id >= parser->tables->rtd->firstNonTermId &&
+			tree->id >= parser->prg->rtd->firstNonTermId &&
 			!(tree->flags & AF_TERM_DUP) )
 	{
 		*causeReduce -= 1;
@@ -400,6 +398,8 @@ void parseToken( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputSt
 	int induceReject;
 	int indPos;
 
+	LangElInfo *lelInfo = pdaRun->prg->rtd->lelInfo;
+
 	/* The scanner will send a null token if it can't find a token. */
 	if ( input == 0 ) {
 		/* Grab the most recently accepted item. */
@@ -409,7 +409,6 @@ void parseToken( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputSt
 
 	/* The tree we are given must either be an ignore token, or it must be be
 	 * parse tree size. It also must have at least one reference. */
-	LangElInfo *lelInfo = pdaRun->tables->rtd->lelInfo;
 	assert( lelInfo[input->tree->id].ignore || input->tree->flags & AF_PARSE_TREE );
 	assert( input->tree->refs > 0 );
 
@@ -487,7 +486,7 @@ again:
 
 	if ( *action & act_sb ) {
 		debug( REALM_PARSE, "shifted: %s\n", 
-				pdaRun->tables->rtd->lelInfo[pt(lel->tree)->id].name );
+				pdaRun->prg->rtd->lelInfo[pt(lel->tree)->id].name );
 		/* Consume. */
 		input = input->next;
 
@@ -496,7 +495,7 @@ again:
 		pdaRun->stackTop = lel;
 
 		/* Record the last shifted token. Need this for attaching ignores. */
-		if ( lel->tree->id < pdaRun->tables->rtd->firstNonTermId ) {
+		if ( lel->tree->id < pdaRun->prg->rtd->firstNonTermId ) {
 			Ref *ref = (Ref*)kidAllocate( pdaRun->prg );
 			ref->kid = lel;
 			//treeUpref( lel->tree );
@@ -505,10 +504,10 @@ again:
 		}
 
 		/* If shifting a termDup then change it to the nonterm. */
-		if ( lel->tree->id < pdaRun->tables->rtd->firstNonTermId &&
-				pdaRun->tables->rtd->lelInfo[lel->tree->id].termDupId > 0 )
+		if ( lel->tree->id < pdaRun->prg->rtd->firstNonTermId &&
+				pdaRun->prg->rtd->lelInfo[lel->tree->id].termDupId > 0 )
 		{
-			lel->tree->id = pdaRun->tables->rtd->lelInfo[lel->tree->id].termDupId;
+			lel->tree->id = pdaRun->prg->rtd->lelInfo[lel->tree->id].termDupId;
 			lel->tree->flags |= AF_TERM_DUP;
 		}
 
@@ -543,8 +542,8 @@ again:
 		redLel->tree = (Tree*)parseTreeAllocate( pdaRun->prg );
 		redLel->tree->flags |= AF_PARSE_TREE;
 		redLel->tree->refs = 1;
-		redLel->tree->id = pdaRun->tables->rtd->prodInfo[reduction].lhsId;
-		redLel->tree->prodNum = pdaRun->tables->rtd->prodInfo[reduction].prodNum;
+		redLel->tree->id = pdaRun->prg->rtd->prodInfo[reduction].lhsId;
+		redLel->tree->prodNum = pdaRun->prg->rtd->prodInfo[reduction].prodNum;
 
 		redLel->next = 0;
 		pt(redLel->tree)->causeReduce = 0;
@@ -553,12 +552,12 @@ again:
 		pt(lel->tree)->retry_lower = 0;
 
 		/* Allocate the attributes. */
-		objectLength = pdaRun->tables->rtd->lelInfo[redLel->tree->id].objectLength;
+		objectLength = pdaRun->prg->rtd->lelInfo[redLel->tree->id].objectLength;
 		attrs = allocAttrs( pdaRun->prg, objectLength );
 
 		/* Build the list of children. */
 		Kid *realChild = 0;
-		rhsLen = pdaRun->tables->rtd->prodInfo[reduction].length;
+		rhsLen = pdaRun->prg->rtd->prodInfo[reduction].length;
 		child = last = 0;
 		for ( r = 0;; ) {
 			if ( r == rhsLen && pdaRun->stackTop->tree->id != LEL_ID_IGNORE_LIST )
@@ -581,7 +580,7 @@ again:
 		redLel->tree->child = kidListConcat( attrs, child );
 
 		debug( REALM_PARSE, "reduced: %s rhsLen %d\n",
-				pdaRun->tables->rtd->prodInfo[reduction].name, rhsLen );
+				pdaRun->prg->rtd->prodInfo[reduction].name, rhsLen );
 		if ( action[1] == 0 )
 			pt(redLel->tree)->retry_upper = 0;
 		else {
@@ -599,9 +598,9 @@ again:
 
 		/* Copy RHS elements in the production. */
 		{
-//			unsigned char *copy = pdaRun->tables->rtd->prodInfo[reduction].copy;
+//			unsigned char *copy = pdaRun->prg->rtd->prodInfo[reduction].copy;
 //			if ( copy != 0 ) {
-//				int i, copyLen = pdaRun->tables->rtd->prodInfo[reduction].copyLen;
+//				int i, copyLen = pdaRun->prg->rtd->prodInfo[reduction].copyLen;
 //				for ( i = 0; i < copyLen; i++ ) {
 //					unsigned char field = copy[i*2];
 //					unsigned char fromPos = copy[i*2+1];
@@ -612,9 +611,9 @@ again:
 //			}
 		}
 
-		if ( pdaRun->prg->ctxDepParsing && pdaRun->tables->rtd->prodInfo[reduction].frameId >= 0 ) {
+		if ( pdaRun->prg->ctxDepParsing && pdaRun->prg->rtd->prodInfo[reduction].frameId >= 0 ) {
 			/* Frame info for reduction. */
-			FrameInfo *fi = &pdaRun->tables->rtd->frameInfo[pdaRun->tables->rtd->prodInfo[reduction].frameId];
+			FrameInfo *fi = &pdaRun->prg->rtd->frameInfo[pdaRun->prg->rtd->prodInfo[reduction].frameId];
 
 			/* Execution environment for the reduction code. */
 			Execution exec;
@@ -659,7 +658,7 @@ again:
 
 		if ( induceReject ) {
 			debug( REALM_PARSE, "error induced during reduction of %s\n",
-					pdaRun->tables->rtd->lelInfo[redLel->tree->id].name );
+					pdaRun->prg->rtd->lelInfo[redLel->tree->id].name );
 			pt(redLel->tree)->state = pdaRun->cs;
 			redLel->next = pdaRun->stackTop;
 			pdaRun->stackTop = redLel;
@@ -732,18 +731,18 @@ parse_error:
 
 		/* Either we are dealing with a terminal that was
 		 * shifted or a nonterminal that was reduced. */
-		if ( pdaRun->stackTop->tree->id < pdaRun->tables->rtd->firstNonTermId || 
+		if ( pdaRun->stackTop->tree->id < pdaRun->prg->rtd->firstNonTermId || 
 				(pdaRun->stackTop->tree->flags & AF_TERM_DUP) )
 		{
 			debug( REALM_PARSE, "backing up over effective terminal: %s\n",
-						pdaRun->tables->rtd->lelInfo[pdaRun->stackTop->tree->id].name );
+						pdaRun->prg->rtd->lelInfo[pdaRun->stackTop->tree->id].name );
 
 			/* Pop the item from the stack. */
 			pdaRun->stackTop = pdaRun->stackTop->next;
 
 			/* Undo the translation from termDup. */
 			if ( undoLel->tree->flags & AF_TERM_DUP ) {
-				undoLel->tree->id = pdaRun->tables->rtd->lelInfo[undoLel->tree->id].termDupId;
+				undoLel->tree->id = pdaRun->prg->rtd->lelInfo[undoLel->tree->id].termDupId;
 				undoLel->tree->flags &= ~AF_TERM_DUP;
 			}
 
@@ -759,7 +758,7 @@ parse_error:
 		}
 		else {
 			debug( REALM_PARSE, "backing up over non-terminal: %s\n",
-					pdaRun->tables->rtd->lelInfo[pdaRun->stackTop->tree->id].name );
+					pdaRun->prg->rtd->lelInfo[pdaRun->stackTop->tree->id].name );
 
 			/* Check for an execution environment. */
 			if ( undoLel->tree->flags & AF_HAS_RCODE ) {

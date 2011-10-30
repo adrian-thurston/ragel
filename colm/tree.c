@@ -967,7 +967,6 @@ Kid *treeExtractChild( Program *prg, Tree *tree )
 /* Find the first child of a tree. */
 Kid *treeAttr( Program *prg, const Tree *tree )
 {
-	LangElInfo *lelInfo = prg->rtd->lelInfo;
 	Kid *kid = tree->child;
 
 	if ( tree->flags & AF_LEFT_IGNORE )
@@ -1866,7 +1865,7 @@ void xmlEscapeData( struct ColmPrintArgs *printArgs, const char *data, long len 
 			printArgs->out( printArgs, "&gt;", 4 );
 		else if ( data[i] == '&' )
 			printArgs->out( printArgs, "&amp;", 5 );
-		else if ( 32 <= data[i] && data[i] <= 126 || data[i] == '\t' || data[i] == '\n' || data[i] == '\r' )
+		else if ( (32 <= data[i] && data[i] <= 126) || data[i] == '\t' || data[i] == '\n' || data[i] == '\r' )
 			printArgs->out( printArgs, &data[i], 1 );
 		else {
 			char out[64];
@@ -1941,8 +1940,6 @@ enum ReturnType
 
 void printKid( struct ColmPrintArgs *printArgs, Tree **sp, Program *prg, Kid *kid )
 {
-	LangElInfo *lelInfo = prg->rtd->lelInfo;
-	Tree **root = vm_ptop();
 	enum ReturnType rt;
 	Kid *parent = 0;
 	int printFlags = 0;
@@ -2034,9 +2031,6 @@ rec_call:
 				leadingIgnore = next;
 			}
 		
-			Kid *start = leadingIgnore;
-			Kid *stop = 0;
-
 			/* Print the leading ignore list, free the kids in the process. */
 			ignore = youngestKid;
 			if ( printArgs->comm && ignore != 0 && kid->tree->id != 0 &&
@@ -2241,8 +2235,6 @@ void openTreeXml( struct ColmPrintArgs *args, Tree **sp, Program *prg, Kid *pare
 	}
 
 	const char *name = lelInfo[kid->tree->id].name;
-	int i, objectLength;
-
 	args->out( args, "<", 1 );
 	if ( lelInfo[kid->tree->id].literal ) {
 		name = lelInfo[kid->tree->id].nameNonLit;
@@ -2252,19 +2244,12 @@ void openTreeXml( struct ColmPrintArgs *args, Tree **sp, Program *prg, Kid *pare
 		args->out( args, name, strlen( name ) );
 	}
 	args->out( args, ">", 1 );
-
-	objectLength = lelInfo[kid->tree->id].objectLength;
 }
 
 void printTermXml( struct ColmPrintArgs *printArgs, Tree **sp, Program *prg, Kid *kid )
 {
-	int i, depth = 1, objectLength;
-	LangElInfo *lelInfo = prg->rtd->lelInfo;
-	long kidNum = 0;;
 	Kid *child;
-	int commAttr = 0;
 
-	objectLength = lelInfo[kid->tree->id].objectLength;
 	child = treeChild( prg, kid->tree );
 	if ( kid->tree->id == LEL_ID_PTR ) {
 		char ptr[32];

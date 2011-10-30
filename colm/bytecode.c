@@ -606,7 +606,6 @@ void colmRunProgram( Program *prg )
 
 void colmDeleteProgram( Program *prg )
 {
-	Tree **vm_stack = prg->vm_stack;
 	Tree **sp = prg->vm_root;
 
 	#ifdef COLM_LOG_BYTECODE
@@ -1022,8 +1021,6 @@ void generationExecution( Execution *exec, Tree **sp )
 
 void reductionExecution( Execution *exec, Tree **sp )
 {
-	Program *prg = exec->prg;
-
 	/* If we have a lhs push it to the stack. */
 	int haveLhs = exec->lhs != 0;
 	if ( haveLhs )
@@ -1050,8 +1047,8 @@ void mainExecution( Execution *exec )
 	/* Execution loop. */
 	executeCode( exec, sp, exec->code );
 
-	vm_pop();
-	vm_pop();
+	vm_pop_ignore();
+	vm_pop_ignore();
 	prg->returnVal = vm_pop();
 
 	/* The root code should all be commit code and reverse code

@@ -50,7 +50,7 @@ struct PdaCodeGen
 	void writeFirstLocate( Definition *prod );
 	void writeRhsLocate( Definition *prod );
 
-	void writeFirst();
+	void defineRuntime();
 	void writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTables );
 	void writeParserData( long id, PdaTables *tables );
 
