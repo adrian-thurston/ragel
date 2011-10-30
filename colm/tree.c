@@ -428,7 +428,7 @@ Kid *constructReplacementKid( Tree **bindings, Program *prg, Kid *prev, long pat
 	return kid;
 }
 
-Tree *makeToken2( Tree **root, Program *prg, long nargs )
+Tree *makeToken2( Program *prg, Tree **root, long nargs )
 {
 	Tree **const sp = root;
 	Tree **base = vm_ptop() + nargs;
@@ -469,7 +469,7 @@ Tree *makeToken2( Tree **root, Program *prg, long nargs )
 	return tree;
 }
 
-Tree *makeTree( Tree **root, Program *prg, long nargs )
+Tree *makeTree( Program *prg, Tree **root, long nargs )
 {
 	Tree **const sp = root;
 	Tree **base = vm_ptop() + nargs;
@@ -846,7 +846,7 @@ free_tree:
 		else if ( generic->type == GEN_PARSER ) {
 			Accum *accum = (Accum*)tree;
 			clearFsmRun( prg, accum->fsmRun );
-			clearPdaRun( sp, accum->pdaRun );
+			clearPdaRun( prg, sp, accum->pdaRun );
 			free( accum->pdaRun );
 			free( accum->fsmRun );
 			treeDownref( prg, sp, (Tree*)accum->stream );
@@ -1315,7 +1315,7 @@ long cmpTree( Program *prg, const Tree *tree1, const Tree *tree2 )
 }
 
 
-void splitRef( Tree ***psp, Program *prg, Ref *fromRef )
+void splitRef( Program *prg, Tree ***psp, Ref *fromRef )
 {
 	/* Go up the chain of kids, turing the pointers down. */
 	Ref *last = 0, *ref = fromRef, *next = 0;
@@ -1375,12 +1375,12 @@ void splitRef( Tree ***psp, Program *prg, Ref *fromRef )
 	}
 }
 
-void splitIterCur( Tree ***psp, Program *prg, TreeIter *iter )
+void splitIterCur( Program *prg, Tree ***psp, TreeIter *iter )
 {
 	if ( iter->ref.kid == 0 )
 		return;
 	
-	splitRef( psp, prg, &iter->ref );
+	splitRef( prg, psp, &iter->ref );
 }
 
 Tree *setListMem( List *list, Half field, Tree *value )
@@ -1938,7 +1938,7 @@ enum ReturnType
 /* Note that this function causes recursion, thought it is not a big
  * deal since the recursion it is only caused by nonterminals that are ignored. */
 
-void printKid( struct ColmPrintArgs *printArgs, Tree **sp, Program *prg, Kid *kid )
+void printKid( Program *prg, Tree **sp, struct ColmPrintArgs *printArgs, Kid *kid )
 {
 	enum ReturnType rt;
 	Kid *parent = 0;
@@ -2067,14 +2067,14 @@ rec_call:
 	}
 
 	/* Open the tree. */
-	printArgs->openTree( printArgs, sp, prg, parent, kid );
+	printArgs->openTree( prg, sp, printArgs, parent, kid );
 
 	/* Print contents. */
 	if ( kid->tree->id < prg->rtd->firstNonTermId ) {
 		debug( DBG_PRINT, "printing terminal %p\n", kid->tree );
 		if ( kid->tree->id != 0 ) {
 			printFlags |= IPF_TERM_PRINTED;
-			printArgs->printTerm( printArgs, sp, prg, kid );
+			printArgs->printTerm( prg, sp, printArgs, kid );
 		}
 
 		printFlags &= ~IPF_SUPPRESS;
@@ -2101,7 +2101,7 @@ rec_call:
 	}
 
 	/* close the tree. */
-	printArgs->closeTree( printArgs, sp, prg, parent, kid );
+	printArgs->closeTree( prg, sp, printArgs, parent, kid );
 
 skip_node:
 	/* If not currently skipping ignore data, then print it. Ignore data can
@@ -2154,7 +2154,7 @@ skip_null:
 	}
 }
 
-void printTreeArgs( struct ColmPrintArgs *printArgs, Tree **sp, Program *prg, Tree *tree )
+void printTreeArgs( Program *prg, Tree **sp, struct ColmPrintArgs *printArgs, Tree *tree )
 {
 	if ( tree == 0 )
 		printArgs->out( printArgs, "NIL", 3 );
@@ -2171,11 +2171,11 @@ void printTreeArgs( struct ColmPrintArgs *printArgs, Tree **sp, Program *prg, Tr
 		kid.next = &term;
 		kid.flags = 0;
 
-		printKid( printArgs, sp, prg, &kid );
+		printKid( prg, sp, printArgs, &kid );
 	}
 }
 
-void printTermTree( struct ColmPrintArgs *printArgs, Tree **sp, Program *prg, Kid *kid )
+void printTermTree( Program *prg, Tree **sp, struct ColmPrintArgs *printArgs, Kid *kid )
 {
 	debug( REALM_PRINT, "printing term %p\n", kid->tree );
 
@@ -2214,11 +2214,11 @@ void printTermTree( struct ColmPrintArgs *printArgs, Tree **sp, Program *prg, Ki
 }
 
 
-void printNull( struct ColmPrintArgs *args, Tree **sp, Program *prg, Kid *parent, Kid *kid )
+void printNull( Program *prg, Tree **sp, struct ColmPrintArgs *args, Kid *parent, Kid *kid )
 {
 }
 
-void openTreeXml( struct ColmPrintArgs *args, Tree **sp, Program *prg, Kid *parent, Kid *kid )
+void openTreeXml( Program *prg, Tree **sp, struct ColmPrintArgs *args, Kid *parent, Kid *kid )
 {
 	/* Skip the terminal that is for forcing trailing ignores out. */
 	if ( kid->tree->id == 0 )
@@ -2246,7 +2246,7 @@ void openTreeXml( struct ColmPrintArgs *args, Tree **sp, Program *prg, Kid *pare
 	args->out( args, ">", 1 );
 }
 
-void printTermXml( struct ColmPrintArgs *printArgs, Tree **sp, Program *prg, Kid *kid )
+void printTermXml( Program *prg, Tree **sp, struct ColmPrintArgs *printArgs, Kid *kid )
 {
 	Kid *child;
 
@@ -2283,7 +2283,7 @@ void printTermXml( struct ColmPrintArgs *printArgs, Tree **sp, Program *prg, Kid
 }
 
 
-void closeTreeXml( struct ColmPrintArgs *args, Tree **sp, Program *prg, Kid *parent, Kid *kid )
+void closeTreeXml( Program *prg, Tree **sp, struct ColmPrintArgs *args, Kid *parent, Kid *kid )
 {
 	/* Skip the terminal that is for forcing trailing ignores out. */
 	if ( kid->tree->id == 0 )
@@ -2311,24 +2311,24 @@ void closeTreeXml( struct ColmPrintArgs *args, Tree **sp, Program *prg, Kid *par
 	args->out( args, ">", 1 );
 }
 
-void printTreeCollect( StrCollect *collect, Tree **sp, Program *prg, Tree *tree )
+void printTreeCollect( Program *prg, Tree **sp, StrCollect *collect, Tree *tree )
 {
 	struct ColmPrintArgs printArgs = { collect, 1, 0, &appendCollect, 
 			&printNull, &printTermTree, &printNull };
-	printTreeArgs( &printArgs, sp, prg, tree );
+	printTreeArgs( prg, sp, &printArgs, tree );
 }
 
-void printTreeFile( FILE *out, Tree **sp, Program *prg, Tree *tree )
+void printTreeFile( Program *prg, Tree **sp, FILE *out, Tree *tree )
 {
 	struct ColmPrintArgs printArgs = { out, 1, 0, &appendFile, 
 			&printNull, &printTermTree, &printNull };
-	printTreeArgs( &printArgs, sp, prg, tree );
+	printTreeArgs( prg, sp, &printArgs, tree );
 }
 
-void printXmlStdout( Tree **sp, Program *prg, Tree *tree, int commAttr )
+void printXmlStdout( Program *prg, Tree **sp, Tree *tree, int commAttr )
 {
 	struct ColmPrintArgs printArgs = { stdout, commAttr, commAttr, &appendFile, 
 			&openTreeXml, &printTermXml, &closeTreeXml };
-	printTreeArgs( &printArgs, sp, prg, tree );
+	printTreeArgs( prg, sp, &printArgs, tree );
 }
 

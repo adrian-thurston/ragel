@@ -210,7 +210,6 @@ typedef struct _PdaRun
 	int cs;
 	int nextRegionInd;
 
-	struct ColmProgram *prg;
 	PdaTables *tables;
 	int parserId;
 
@@ -291,11 +290,11 @@ int makeReverseCode( RtCodeVect *all, RtCodeVect *reverseCode );
 
 void initPdaRun( PdaRun *pdaRun, struct ColmProgram *prg, PdaTables *tables,
 		FsmRun *fsmRun, int parserId, long stopTarget, int revertOn, Tree *context );
-void clearPdaRun( Tree **root, PdaRun *pdaRun );
+void clearPdaRun( struct ColmProgram *prg, Tree **root, PdaRun *pdaRun );
 
 void clearContext( PdaRun *pdaRun, Tree **sp );
 Kid *extractIgnore( PdaRun *pdaRun );
-long stackTopTarget( PdaRun *pdaRun );
+long stackTopTarget( struct ColmProgram *prg, PdaRun *pdaRun );
 void runCommit( PdaRun *pdaRun );
 int isParserStopFinished( PdaRun *pdaRun );
 void pdaRunMatch(  PdaRun *pdaRun, Kid *tree, Kid *pattern );
@@ -303,8 +302,8 @@ void pdaRunMatch(  PdaRun *pdaRun, Kid *tree, Kid *pattern );
 /* Offset can be used to look at the next nextRegionInd. */
 int pdaRunGetNextRegion( PdaRun *pdaRun, int offset );
 
-void ignoreTree( PdaRun *pdaRun, Tree *tree );
-void parseToken( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
+void ignoreTree( struct ColmProgram *prg, PdaRun *pdaRun, Tree *tree );
+void parseToken( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
 long undoParse( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Tree *tree );
 
 Head *streamPull( struct ColmProgram *prg, FsmRun *fsmRun, InputStream *inputStream, long length );
@@ -315,37 +314,37 @@ void streamPushTree( InputStream *inputStream, Tree *tree, int ignore );
 void undoStreamPush( struct ColmProgram *prg, Tree **sp, InputStream *inputStream, long length );
 void undoStreamAppend( struct ColmProgram *prg, Tree **sp, InputStream *inputStream, long length );
 void sendBackText( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length );
-void sendBackIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *ignore );
-void sendBack( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
+void sendBackIgnore( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *ignore );
+void sendBack( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
 void unbind( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, Tree *tree );
-void queueBackTree( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
+void queueBackTree( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
 void addNoToken( struct ColmProgram *prg, PdaRun *parser );
 void sendQueuedTokens( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
-void sendHandleError( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
-Kid *makeToken( PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, int id,
+void sendHandleError( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
+Kid *makeToken( struct ColmProgram *prg, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, int id,
 		Head *tokdata, int namedLangEl, int bindId );
 void makeTokenPushBinding( PdaRun *pdaRun, int bindId, Tree *tree );
-void executeGenerationAction( Tree **sp, struct ColmProgram *prg, FsmRun *fsmRun, PdaRun *pdaRun, 
+void executeGenerationAction( struct ColmProgram *prg, Tree **sp, FsmRun *fsmRun, PdaRun *pdaRun, 
 		InputStream *inputStream, Code *code, long id, Head *tokdata );
 Kid *extractIgnore( PdaRun *pdaRun );
-void sendBackQueuedIgnore( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun );
+void sendBackQueuedIgnore( struct ColmProgram *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun );
 void clearIgnoreList( struct ColmProgram *prg, Tree **sp, Kid *kid );
-void sendWithIgnore( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
+void sendWithIgnore( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
 Head *extractMatch( struct ColmProgram *prg, FsmRun *fsmRun, InputStream *inputStream );
-void execGen( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long id );
-void sendIgnore( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long id );
+void execGen( struct ColmProgram *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long id );
+void sendIgnore( struct ColmProgram *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long id );
 Head *extractMatch( struct ColmProgram *prg, FsmRun *fsmRun, InputStream *inputStream );
-void sendToken( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long id );
-void sendEof( Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun );
+void sendToken( struct ColmProgram *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long id );
+void sendEof( struct ColmProgram *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun );
 void initInputStream( InputStream *in );
 void newToken( PdaRun *pdaRun, FsmRun *fsmRun );
 void breakRunBuf( FsmRun *fsmRun );
 void fsmExecute( FsmRun *fsmRun, InputStream *inputStream );
-void sendNamedLangEl( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
-void parseLoop( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
+void sendNamedLangEl( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
+void parseLoop( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
 void initBindings( PdaRun *pdaRun );
 Tree *getParsedRoot( PdaRun *pdaRun, int stop );
-void pushBtPoint( PdaRun *pdaRun, Tree *tree );
+void pushBtPoint( struct ColmProgram *prg, PdaRun *pdaRun, Tree *tree );
 
 #ifdef __cplusplus
 }

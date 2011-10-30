@@ -21,23 +21,23 @@ struct ColmPrintArgs
 	int comm;
 	int attr;
 	void (*out)( struct ColmPrintArgs *args, const char *data, int length );
-	void (*openTree)( struct ColmPrintArgs *args, struct ColmTree **sp, 
-			struct ColmProgram *prg, struct ColmKid *parent, struct ColmKid *kid );
-	void (*printTerm)( struct ColmPrintArgs *args, struct ColmTree **sp, 
-			struct ColmProgram *prg, struct ColmKid *kid );
-	void (*closeTree)( struct ColmPrintArgs *args, struct ColmTree **sp, 
-			struct ColmProgram *prg, struct ColmKid *parent, struct ColmKid *kid );
+	void (*openTree)( struct ColmProgram *prg, struct ColmTree **sp, 
+		struct ColmPrintArgs *args, struct ColmKid *parent, struct ColmKid *kid );
+	void (*printTerm)( struct ColmProgram *prg, struct ColmTree **sp, 
+		struct ColmPrintArgs *args, struct ColmKid *kid );
+	void (*closeTree)( struct ColmProgram *prg, struct ColmTree **sp, 
+		struct ColmPrintArgs *args, struct ColmKid *parent, struct ColmKid *kid );
 };
 
-void printNull( struct ColmPrintArgs *args, struct ColmTree **sp,
-		struct ColmProgram *prg, struct ColmKid *parent, struct ColmKid *kid );
-void printTermTree( struct ColmPrintArgs *printArgs, struct ColmTree **sp,
-		struct ColmProgram *prg, struct ColmKid *kid );
+void printNull( struct ColmProgram *prg, struct ColmTree **sp,
+		struct ColmPrintArgs *args, struct ColmKid *parent, struct ColmKid *kid );
+void printTermTree( struct ColmProgram *prg, struct ColmTree **sp,
+		struct ColmPrintArgs *printArgs, struct ColmKid *kid );
 
 struct ColmTree **vm_root( struct ColmProgram *prg );
 struct ColmTree *returnVal( struct ColmProgram *prg );
-void printTreeArgs( struct ColmPrintArgs *printArgs, struct ColmTree **sp,
-		struct ColmProgram *prg, struct ColmTree *tree );
+void printTreeArgs( struct ColmProgram *prg, struct ColmTree **sp,
+		struct ColmPrintArgs *printArgs, struct ColmTree *tree );
 
 int repeatEnd( struct ColmTree *tree );
 int listLast( struct ColmTree *tree );

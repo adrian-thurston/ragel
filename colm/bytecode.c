@@ -149,18 +149,18 @@ Tree *prepParseTree( Program *prg, Tree **sp, Tree *tree )
 	return tree;
 }
 
-void parserSetContext( Tree **sp, Program *prg, Accum *accum, Tree *val )
+void parserSetContext( Program *prg, Tree **sp, Accum *accum, Tree *val )
 {
 	accum->pdaRun->context = splitTree( prg, val );
 }
 
-Head *treeToStr( Tree **sp, Program *prg, Tree *tree )
+Head *treeToStr( Program *prg, Tree **sp, Tree *tree )
 {
 	/* Collect the tree data. */
 	StrCollect collect;
 	initStrCollect( &collect );
 
-	printTreeCollect( &collect, sp, prg, tree );
+	printTreeCollect( prg, sp, &collect, tree );
 
 	/* Set up the input stream. */
 	Head *ret = stringAllocFull( prg, collect.data, collect.length );
@@ -192,24 +192,24 @@ void setInput( Program *prg, Tree **sp, Accum *accum, Stream *stream )
 	treeUpref( (Tree*)accum->stream );
 }
 
-void parseStream( Tree **sp, Program *prg, Tree *input, Accum *accum, long stopId )
+void parseStream( Program *prg, Tree **sp, Tree *input, Accum *accum, long stopId )
 {
 	if ( ! accum->pdaRun->parseError ) {
 		accum->pdaRun->stopTarget = stopId;
 		Stream *stream = (Stream*)input;
 		accum->fsmRun->curStream = input;
-		parseLoop( sp, accum->pdaRun, accum->fsmRun, stream->in );
+		parseLoop( prg, sp, accum->pdaRun, accum->fsmRun, stream->in );
 	}
 }
 
-Word streamAppend( Tree **sp, Program *prg, Tree *input, Stream *stream )
+Word streamAppend( Program *prg, Tree **sp, Tree *input, Stream *stream )
 {
 	if ( input->id == LEL_ID_STR ) {
 		//assert(false);
 		/* Collect the tree data. */
 		StrCollect collect;
 		initStrCollect( &collect );
-		printTreeCollect( &collect, sp, prg, input );
+		printTreeCollect( prg, sp, &collect, input );
 
 		/* Load it into the input. */
 		stream->in->funcs->appendData( stream->in, collect.data, collect.length );
@@ -233,12 +233,12 @@ Word streamAppend( Tree **sp, Program *prg, Tree *input, Stream *stream )
 	}
 }
 
-void undoParseStream( Tree **sp, Program *prg, Stream *input, Accum *accum, long consumed )
+void undoParseStream( Program *prg, Tree **sp, Stream *input, Accum *accum, long consumed )
 {
 	if ( consumed < accum->pdaRun->consumed ) {
 		accum->pdaRun->numRetry += 1;
 		accum->pdaRun->targetConsumed = consumed;
-		parseToken( sp, accum->pdaRun, accum->fsmRun, input->in, 0 );
+		parseToken( prg, sp, accum->pdaRun, accum->fsmRun, input->in, 0 );
 		accum->pdaRun->targetConsumed = -1;
 		accum->pdaRun->numRetry -= 1;
 
@@ -247,7 +247,7 @@ void undoParseStream( Tree **sp, Program *prg, Stream *input, Accum *accum, long
 	}
 }
 
-Tree *parseFinish( Tree **sp, Program *prg, Accum *accum, int revertOn )
+Tree *parseFinish( Program *prg, Tree **sp, Accum *accum, int revertOn )
 {
 	Stream *stream = (Stream*)extractInput( prg, accum );
 
@@ -261,11 +261,11 @@ Tree *parseFinish( Tree **sp, Program *prg, Accum *accum, int revertOn )
 	else {
 		stream->in->eof = true;
 		stream->in->later = false;
-		parseLoop( sp, accum->pdaRun, accum->fsmRun, stream->in );
+		parseLoop( prg, sp, accum->pdaRun, accum->fsmRun, stream->in );
 	}
 
 	if ( !revertOn )
-		commitFull( sp, accum->pdaRun, 0 );
+		commitFull( prg, sp, accum->pdaRun, 0 );
 	
 	Tree *tree = getParsedRoot( accum->pdaRun, accum->pdaRun->stopTarget > 0 );
 	treeUpref( tree );
@@ -302,7 +302,7 @@ Word streamPush( Program *prg, Tree **sp, Stream *stream, Tree *tree, int ignore
 		/* Collect the tree data. */
 		StrCollect collect;
 		initStrCollect( &collect );
-		printTreeCollect( &collect, sp, prg, tree );
+		printTreeCollect( prg, sp, &collect, tree );
 
 		streamPushText( stream->in, collect.data, collect.length );
 		long length = collect.length;
@@ -352,7 +352,7 @@ void downrefLocalTrees( Program *prg, Tree **sp, Tree **frame, char *trees, long
 	}
 }
 
-UserIter *uiterCreate( Tree ***psp, Program *prg, FunctionInfo *fi, long searchId )
+UserIter *uiterCreate( Program *prg, Tree ***psp, FunctionInfo *fi, long searchId )
 {
 	Tree **sp = *psp;
 	vm_pushn( sizeof(UserIter) / sizeof(Word) );
@@ -1171,7 +1171,7 @@ again:
 
 			while ( n-- > 0 ) {
 				Tree *tree = vm_pop();
-				printTreeFile( stdout, sp, prg, tree );
+				printTreeFile( prg, sp, stdout, tree );
 				treeDownref( prg, sp, tree );
 			}
 			break;
@@ -1187,7 +1187,7 @@ again:
 
 			while ( n-- > 0 ) {
 				Tree *tree = vm_pop();
-				printXmlStdout( sp, prg, tree, true );
+				printXmlStdout( prg, sp, tree, true );
 				treeDownref( prg, sp, tree );
 			}
 			break;
@@ -1203,7 +1203,7 @@ again:
 
 			while ( n-- > 0 ) {
 				Tree *tree = vm_pop();
-				printXmlStdout( sp, prg, tree, false );
+				printXmlStdout( prg, sp, tree, false );
 				treeDownref( prg, sp, tree );
 			}
 			break;
@@ -1220,7 +1220,7 @@ again:
 			Stream *stream = (Stream*)vm_pop();
 			while ( n-- > 0 ) {
 				Tree *tree = vm_pop();
-				printTreeFile( stream->file, sp, prg, tree );
+				printTreeFile( prg, sp, stream->file, tree );
 				treeDownref( prg, sp, tree );
 			}
 			treeDownref( prg, sp, (Tree*)stream );
@@ -1520,7 +1520,7 @@ again:
 			#endif
 
 			UserIter *uiter = (UserIter*) vm_local(field);
-			splitRef( &sp, prg, &uiter->ref );
+			splitRef( prg, &sp, &uiter->ref );
 			Tree *split = uiter->ref.kid->tree;
 			treeUpref( split );
 			vm_push( split );
@@ -1538,7 +1538,7 @@ again:
 
 			Tree *t = vm_pop();
 			UserIter *uiter = (UserIter*) vm_local(field);
-			splitRef( &sp, prg, &uiter->ref );
+			splitRef( prg, &sp, &uiter->ref );
 			Tree *old = uiter->ref.kid->tree;
 			setUiterCur( prg, uiter, t );
 			treeDownref( prg, sp, old );
@@ -1623,7 +1623,7 @@ again:
 			#endif
 
 			Ref *ref = (Ref*) vm_plocal(field);
-			splitRef( &sp, prg, ref );
+			splitRef( prg, &sp, ref );
 			Tree *val = ref->kid->tree;
 			treeUpref( val );
 			vm_push( val );
@@ -1641,7 +1641,7 @@ again:
 
 			Tree *val = vm_pop();
 			Ref *ref = (Ref*) vm_plocal(field);
-			splitRef( &sp, prg, ref );
+			splitRef( prg, &sp, ref );
 			refSetValue( ref, val );
 			break;
 		}
@@ -1921,7 +1921,7 @@ again:
 			#endif
 
 			Tree *tree = vm_pop();
-			Head *res = treeToStr( sp, prg, tree );
+			Head *res = treeToStr( prg, sp, tree );
 			Tree *str = constructString( prg, res );
 			treeUpref( str );
 			vm_push( str );
@@ -2500,7 +2500,7 @@ again:
 			#endif
 			
 			TreeIter *iter = (TreeIter*) vm_plocal(field);
-			splitIterCur( &sp, prg, iter );
+			splitIterCur( prg, &sp, iter );
 			Tree *tree = treeIterDerefCur( iter );
 			treeUpref( tree );
 			vm_push( tree );
@@ -2518,7 +2518,7 @@ again:
 
 			Tree *tree = vm_pop();
 			TreeIter *iter = (TreeIter*) vm_plocal(field);
-			splitIterCur( &sp, prg, iter );
+			splitIterCur( prg, &sp, iter );
 			Tree *old = treeIterDerefCur( iter );
 			setTriterCur( prg, iter, tree );
 			treeDownref( prg, sp, old );
@@ -2602,7 +2602,7 @@ again:
 
 			Tree *obj = vm_pop();
 			Tree *val = vm_pop();
-			parserSetContext( sp, prg, (Accum*)obj, val );
+			parserSetContext( prg, sp, (Accum*)obj, val );
 			treeDownref( prg, sp, obj );
 			//treeDownref( prg, sp, val );
 			break;
@@ -2679,7 +2679,7 @@ again:
 
 			Tree *stream = vm_pop();
 			Tree *input = vm_pop();
-			streamAppend( sp, prg, input, (Stream*)stream );
+			streamAppend( prg, sp, input, (Stream*)stream );
 
 			treeDownref( prg, sp, input );
 			vm_push( stream );
@@ -2694,7 +2694,7 @@ again:
 
 			Tree *stream = vm_pop();
 			Tree *input = vm_pop();
-			Word len = streamAppend( sp, prg, input, (Stream*)stream );
+			Word len = streamAppend( prg, sp, input, (Stream*)stream );
 
 			treeUpref( stream );
 			vm_push( stream );
@@ -2738,7 +2738,7 @@ again:
 			Tree *accum = vm_pop();
 			Tree *stream = vm_pop();
 
-			parseStream( sp, prg, stream, (Accum*)accum, stopId );
+			parseStream( prg, sp, stream, (Accum*)accum, stopId );
 
 			treeDownref( prg, sp, stream );
 			treeDownref( prg, sp, accum );
@@ -2761,7 +2761,7 @@ again:
 			Tree *stream = vm_pop();
 
 			long consumed = ((Accum*)accum)->pdaRun->consumed;
-			parseStream( sp, prg, stream, (Accum*)accum, stopId );
+			parseStream( prg, sp, stream, (Accum*)accum, stopId );
 
 			//treeDownref( prg, sp, stream );
 			//treeDownref( prg, sp, accum );
@@ -2786,7 +2786,7 @@ again:
 
 			debug( REALM_BYTECODE, "IN_PARSE_FRAG_BKT %ld", consumed );
 
-			undoParseStream( sp, prg, (Stream*)input, (Accum*)accum, consumed );
+			undoParseStream( prg, sp, (Stream*)input, (Accum*)accum, consumed );
 
 			treeDownref( prg, sp, accum );
 			treeDownref( prg, sp, input );
@@ -2797,7 +2797,7 @@ again:
 			debug( REALM_BYTECODE, "IN_PARSE_FINISH_WC\n" );
 
 			Tree *accum = vm_pop();
-			Tree *result = parseFinish( sp, prg, (Accum*)accum, false );
+			Tree *result = parseFinish( prg, sp, (Accum*)accum, false );
 			vm_push( result );
 			treeDownref( prg, sp, accum );
 			if ( prg->induceExit )
@@ -2813,7 +2813,7 @@ again:
 
 			Tree *accum = vm_pop();
 			long consumed = ((Accum*)accum)->pdaRun->consumed;
-			Tree *result = parseFinish( sp, prg, (Accum*)accum, true );
+			Tree *result = parseFinish( prg, sp, (Accum*)accum, true );
 			vm_push( result );
 
 			treeUpref( result );
@@ -2840,7 +2840,7 @@ again:
 				cerr << "IN_PARSE_FINISH_BKT " << consumed << endl;
 			#endif
 
-			undoParseStream( sp, prg, ((Accum*)accum)->stream, (Accum*)accum, consumed );
+			undoParseStream( prg, sp, ((Accum*)accum)->stream, (Accum*)accum, consumed );
 			((Accum*)accum)->stream->in->eof = false;
 
 			/* This needs an implementation. */
@@ -3011,7 +3011,7 @@ again:
 			}
 			#endif
 
-			Tree *result = makeToken2( sp, prg, nargs );
+			Tree *result = makeToken2( prg, sp, nargs );
 			long i;
 			for ( i = 0; i < nargs; i++ ) {
 				Tree *arg = vm_pop();
@@ -3030,7 +3030,7 @@ again:
 			}
 			#endif
 
-			Tree *result = makeTree( sp, prg, nargs );
+			Tree *result = makeTree( prg, sp, nargs );
 			long i;
 			for ( i = 0; i < nargs; i++ ) {
 				Tree *arg = vm_pop();
@@ -3949,7 +3949,7 @@ again:
 			#endif
 
 			FunctionInfo *fi = prg->rtd->functionInfo + funcId;
-			UserIter *uiter = uiterCreate( &sp, prg, fi, searchId );
+			UserIter *uiter = uiterCreate( prg, &sp, fi, searchId );
 			vm_local(field) = (SW) uiter;
 
 			/* This is a setup similar to as a call, only the frame structure
@@ -3979,7 +3979,7 @@ again:
 			#endif
 
 			FunctionInfo *fi = prg->rtd->functionInfo + funcId;
-			UserIter *uiter = uiterCreate( &sp, prg, fi, searchId );
+			UserIter *uiter = uiterCreate( prg, &sp, fi, searchId );
 			vm_local(field) = (SW) uiter;
 
 			/* This is a setup similar to as a call, only the frame structure

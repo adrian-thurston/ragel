@@ -60,7 +60,7 @@ void ParseData::generateExports()
 		"	std::string str;\n"
 		"	ColmPrintArgs printArgs = { &str, 1, 0, &appendString, \n"
 		"			&printNull, &printTermTree, &printNull };\n"
-		"	printTreeArgs( &printArgs, vm_root(prg), prg, tree );\n"
+		"	printTreeArgs( prg, vm_root(prg), &printArgs, tree );\n"
 		"	return str;\n"
 		"}\n"
 		"\n";

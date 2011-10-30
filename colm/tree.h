@@ -279,9 +279,9 @@ Tree *constructTerm( struct ColmProgram *prg, Word id, Head *tokdata );
 Tree *constructReplacementTree( Kid *kid, Tree **bindings, struct ColmProgram *prg, long pat );
 Tree *createGeneric( struct ColmProgram *prg, long genericId );
 
-Tree *makeToken2( Tree **root, struct ColmProgram *prg, long nargs );
+Tree *makeToken2( struct ColmProgram *prg, Tree **root, long nargs );
 int testFalse( struct ColmProgram *prg, Tree *tree );
-Tree *makeTree( Tree **root, struct ColmProgram *prg, long nargs );
+Tree *makeTree( struct ColmProgram *prg, Tree **root, long nargs );
 Stream *openFile( struct ColmProgram *prg, Tree *name, Tree *mode );
 Stream *openStreamFd( struct ColmProgram *prg, long fd );
 Kid *copyIgnoreList( struct ColmProgram *prg, Kid *ignoreHeader );
@@ -309,7 +309,7 @@ Tree *treeIterDerefCur( TreeIter *iter );
 Kid *getFieldKid( Tree *tree, Word field );
 
 Tree *copyRealTree( struct ColmProgram *prg, Tree *tree, Kid *oldNextDown, Kid **newNextDown, int parsed );
-void splitIterCur( Tree ***psp, struct ColmProgram *prg, TreeIter *iter );
+void splitIterCur( struct ColmProgram *prg, Tree ***psp, TreeIter *iter );
 Tree *setListMem( List *list, Half field, Tree *value );
 
 void listAppend2( struct ColmProgram *prg, List *list, Tree *val );
@@ -323,7 +323,7 @@ Tree *treeRevIterPrevChild( struct ColmProgram *prg, Tree ***psp, RevTreeIter *i
 Tree *treeIterNextRepeat( struct ColmProgram *prg, Tree ***psp, TreeIter *iter );
 Tree *treeIterPrevRepeat( struct ColmProgram *prg, Tree ***psp, TreeIter *iter );
 
-void printXmlStdout( Tree **sp, struct ColmProgram *prg, Tree *tree, int commAttr );
+void printXmlStdout( struct ColmProgram *prg, Tree **sp, Tree *tree, int commAttr );
 
 
 /* An automatically grown buffer for collecting tokens. Always reuses space;
@@ -340,12 +340,10 @@ void strCollectDestroy( StrCollect *collect );
 void strCollectAppend( StrCollect *collect, const char *data, long len );
 void strCollectClear( StrCollect *collect );
 
-void printTree( StrCollect *collect, Tree **sp, struct ColmProgram *prg, Tree *tree );
-
-void printTermTree( struct ColmPrintArgs *printArgs, Tree **sp, struct ColmProgram *prg, Kid *kid );
-
-void printTreeCollect( StrCollect *collect, Tree **sp, struct ColmProgram *prg, Tree *tree );
-void printTreeFile( FILE *out, Tree **sp, struct ColmProgram *prg, Tree *tree );
+void printTree( struct ColmProgram *prg, Tree **sp, StrCollect *collect, Tree *tree );
+void printTermTree( struct ColmProgram *prg, Tree **sp, struct ColmPrintArgs *printArgs, Kid *kid );
+void printTreeCollect( struct ColmProgram *prg, Tree **sp, StrCollect *collect, Tree *tree );
+void printTreeFile( struct ColmProgram *prg, Tree **sp, FILE *out, Tree *tree );
 
 #if defined(__cplusplus)
 }

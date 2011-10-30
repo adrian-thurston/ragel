@@ -1075,7 +1075,7 @@ void FsmCodeGen::writeCode()
 	/* Referenced in the runtime lib, but used only in the compiler. Probably
 	 * should use the preprocessor to make these go away. */
 	out <<
-		"void sendNamedLangEl( Tree **tree, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream ) {}\n"
+		"void sendNamedLangEl( Program *prg, Tree **tree, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream ) {}\n"
 		"void initBindings( PdaRun *pdaRun ) {}\n"
 		"void makeTokenPushBinding( PdaRun *pdaRun, int bindId, Tree *tree ) {}\n"
 		"void unbind( Program *prg, Tree **sp, PdaRun *pdaRun, Tree *tree ) {}\n"

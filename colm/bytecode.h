@@ -476,10 +476,10 @@ Kid *getAttrKid( Tree *tree, long pos );
 
 Tree *splitTree( struct ColmProgram *prg, Tree *t );
 void rcodeDownrefAll( struct ColmProgram *prg, Tree **sp, RtCodeVect *cv );
-void commitFull( Tree **sp, PdaRun *pdaRun, long commitReduce );
+void commitFull( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, long commitReduce );
 Tree *getParsedRoot( PdaRun *pdaRun, int stop );
 Tree *prepParseTree( struct ColmProgram *prg, Tree **sp, Tree *tree );
-void splitRef( Tree ***sp, struct ColmProgram *prg, Ref *fromRef );
+void splitRef( struct ColmProgram *prg, Tree ***sp, Ref *fromRef );
 
 void allocGlobal( struct ColmProgram *prg );
 void executeCode( Execution *exec, Tree **sp, Code *instr );

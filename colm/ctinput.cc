@@ -336,7 +336,7 @@ extern "C" void initReplFuncs()
 	replFuncs.pushBackNamed = &inputStreamReplPushBackNamed;
 }
 
-void sendNamedLangEl( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
+void sendNamedLangEl( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 {
 	/* All three set by getLangEl. */
 	long bindId;
@@ -349,20 +349,20 @@ void sendNamedLangEl( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *in
 	
 	#ifdef COLM_LOG_PARSE
 	if ( colm_log_parse ) {
-		cerr << "named langEl: " << pdaRun->prg->rtd->lelInfo[klangEl->id].name << endl;
+		cerr << "named langEl: " << prg->rtd->lelInfo[klangEl->id].name << endl;
 	}
 	#endif
 
 	/* Copy the token data. */
 	Head *tokdata = 0;
 	if ( data != 0 )
-		tokdata = stringAllocFull( pdaRun->prg, data, length );
+		tokdata = stringAllocFull( prg, data, length );
 
-	Kid *input = makeToken( pdaRun, fsmRun, inputStream, klangEl->id, tokdata, true, bindId );
+	Kid *input = makeToken( prg, pdaRun, fsmRun, inputStream, klangEl->id, tokdata, true, bindId );
 
 	pdaRun->consumed += 1;
 
-	sendHandleError( sp, pdaRun, fsmRun, inputStream, input );
+	sendHandleError( prg, sp, pdaRun, fsmRun, inputStream, input );
 }
 
 void initBindings( PdaRun *pdaRun )
