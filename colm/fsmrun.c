@@ -703,7 +703,7 @@ void sendHandleError( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, I
 	/* Check the result. */
 	if ( pdaRun->parseError ) {
 		/* Error occured in the top-level parser. */
-		reportParseError( pdaRun );
+		reportParseError( prg, pdaRun );
 	}
 	else {
 		if ( isParserStopFinished( pdaRun ) ) {
@@ -799,12 +799,19 @@ void sendEof( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun,
 
 	incrementConsumed( pdaRun );
 
+	Head *head = headAllocate( prg );
+	head->location = locationAllocate( prg );
+	head->location->line = inputStream->line;
+	head->location->column = inputStream->column;
+	head->location->byte = inputStream->byte;
+
 	Kid *input = kidAllocate( prg );
 	input->tree = (Tree*)parseTreeAllocate( prg );
 	input->tree->flags |= AF_PARSE_TREE;
 
 	input->tree->refs = 1;
 	input->tree->id = prg->rtd->eofLelIds[pdaRun->parserId];
+	input->tree->tokdata = head;
 
 	/* Set the state using the state of the parser. */
 	fsmRun->region = pdaRunGetNextRegion( pdaRun, 0 );
@@ -826,7 +833,7 @@ void sendEof( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun,
 	sendWithIgnore( prg, sp, pdaRun, fsmRun, inputStream, input );
 
 	if ( pdaRun->parseError )
-		reportParseError( pdaRun );
+		reportParseError( prg, pdaRun );
 }
 
 void initInputStream( InputStream *inputStream )
@@ -1046,7 +1053,7 @@ void scannerError( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fs
 
 		if ( pdaRun->parseError ) {
 			/* Error occured in the top-level parser. */
-			reportParseError( pdaRun );
+			reportParseError( prg, pdaRun );
 		}
 	}
 	else {
@@ -1055,7 +1062,7 @@ void scannerError( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fs
 		 * the parse. */
 		if ( pdaRun->tokenList != 0 ) 
 			pushBtPoint( prg, pdaRun, pdaRun->tokenList->kid->tree );
-		reportParseError( pdaRun );
+		reportParseError( prg, pdaRun );
 		pdaRun->parseError = 1;
 	}
 }

@@ -34,6 +34,30 @@
 
 #define BUFFER_INITIAL_SIZE 4096
 
+void initTreeIter( TreeIter *treeIter, const Ref *rootRef, int searchId, Tree **stackRoot )
+{
+	treeIter->rootRef = *rootRef;
+	treeIter->searchId = searchId;
+	treeIter->stackRoot = stackRoot;
+	treeIter->stackSize = 0;
+	treeIter->ref.kid = 0;
+	treeIter->ref.next = 0;
+}
+
+void initRevTreeIter( RevTreeIter *revTriter, const Ref *rootRef, 
+		int searchId, Tree **stackRoot, int children )
+{
+	revTriter->rootRef = *rootRef;
+	revTriter->searchId = searchId;
+	revTriter->stackRoot = stackRoot;
+	revTriter->stackSize = children;
+	revTriter->kidAtYield = 0;
+	revTriter->children = children;
+	revTriter->ref.kid = 0;
+	revTriter->ref.next = 0;
+}
+
+
 void initUserIter( UserIter *userIter, Tree **stackRoot, long argSize, long searchId )
 {
 	userIter->stackRoot = stackRoot;

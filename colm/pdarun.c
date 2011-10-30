@@ -59,29 +59,6 @@
 	i = (Tree*)w; \
 } while(0)
 
-void initTreeIter( TreeIter *treeIter, const Ref *rootRef, int searchId, Tree **stackRoot )
-{
-	treeIter->rootRef = *rootRef;
-	treeIter->searchId = searchId;
-	treeIter->stackRoot = stackRoot;
-	treeIter->stackSize = 0;
-	treeIter->ref.kid = 0;
-	treeIter->ref.next = 0;
-}
-
-void initRevTreeIter( RevTreeIter *revTriter, const Ref *rootRef, 
-		int searchId, Tree **stackRoot, int children )
-{
-	revTriter->rootRef = *rootRef;
-	revTriter->searchId = searchId;
-	revTriter->stackRoot = stackRoot;
-	revTriter->stackSize = children;
-	revTriter->kidAtYield = 0;
-	revTriter->children = children;
-	revTriter->ref.kid = 0;
-	revTriter->ref.next = 0;
-}
-
 /* Offset can be used to look at the next nextRegionInd. */
 int pdaRunGetNextRegion( PdaRun *pdaRun, int offset )
 {
@@ -412,7 +389,7 @@ void parseToken( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputS
 	assert( input->tree->refs > 0 );
 
 	/* This will cause input to be lost. This 
-	 * path should be Should be traced. */
+	 * path should be traced. */
 	if ( pdaRun->cs < 0 )
 		return;
 
@@ -844,7 +821,7 @@ _out:
 	pdaRun->nextRegionInd = pdaRun->tables->tokenRegionInds[pdaRun->cs];
 }
 
-void reportParseError( PdaRun *pdaRun )
+void reportParseError( Program *prg, PdaRun *pdaRun )
 {
 	Kid *kid = pdaRun->btPoint;
 	Location *deepest = 0;
