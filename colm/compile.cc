@@ -3167,6 +3167,9 @@ void ParseData::initGlobalFunctions()
 	method = initFunction( uniqueTypeInt, globalObjectDef, "exit",
 		IN_EXIT, IN_EXIT, uniqueTypeInt, true );
 
+	method = initFunction( uniqueTypeStr, globalObjectDef, "error",
+		IN_ERROR, IN_ERROR, true );
+
 	addStdin();
 	addStdout();
 	addStderr();

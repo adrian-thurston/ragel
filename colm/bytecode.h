@@ -255,6 +255,7 @@ typedef unsigned char uchar;
 #define IN_TO_UPPER              0xa3
 #define IN_TO_LOWER              0xa4
 #define IN_EXIT                  0xa5
+#define IN_ERROR                 0xa6
 
 #define IN_STREAM_PUSH_WV        0x96
 #define IN_STREAM_PUSH_BKT       0x97

@@ -24,7 +24,7 @@ bin_PROGRAMS = colm
 
 RUNTIME_SRC = \
 	map.c fsmrun.c pdarun.c list.c input.c debug.c \
-	codevect.c pool.c string.c tree.c bytecode.c
+	codevect.c pool.c string.c tree.c bytecode.c program.c
 
 RUNTIME_HDR = \
 	bytecode.h config.h defs.h debug.h pool.h input.h \

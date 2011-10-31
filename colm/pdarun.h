@@ -285,7 +285,6 @@ inline static void appendWord( RtCodeVect *vect, Word word )
 void incrementConsumed( PdaRun *pdaRun );
 void decrementConsumed( PdaRun *pdaRun );
 
-void reportParseError( struct ColmProgram *prg, PdaRun *pdaRun );
 int makeReverseCode( RtCodeVect *all, RtCodeVect *reverseCode );
 
 void initPdaRun( PdaRun *pdaRun, struct ColmProgram *prg, PdaTables *tables,

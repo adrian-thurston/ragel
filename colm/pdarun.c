@@ -820,23 +820,3 @@ fail:
 _out:
 	pdaRun->nextRegionInd = pdaRun->tables->tokenRegionInds[pdaRun->cs];
 }
-
-void reportParseError( Program *prg, PdaRun *pdaRun )
-{
-	Kid *kid = pdaRun->btPoint;
-	Location *deepest = 0;
-	while ( kid != 0 ) {
-		Head *head = kid->tree->tokdata;
-		Location *location = head != 0 ? head->location : 0;
-		if ( location && ( deepest == 0 || location->byte > deepest->byte ) )
-			deepest = location;
-		kid = kid->next;
-	}
-
-	/* If there are no error points on record assume the error occurred at the beginning of the stream. */
-	if ( deepest == 0 ) 
-		fprintf( stderr, "PARSE ERROR at 1:1\n" );
-	else
-		fprintf( stderr, "PARSE ERROR at %ld:%ld\n", deepest->line, deepest->column );
-	
-}

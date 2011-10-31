@@ -424,222 +424,6 @@ Tree *constructArgv( Program *prg, int argc, const char **argv )
  * Execution environment
  */
 
-void colmInit( long debugRealm )
-{
-	/* Always on because because logging is controlled with ifdefs in\n" the
-	 * runtime lib. */
-	colm_log_bytecode = 1;
-	colm_log_parse = 1;
-	colm_log_match = 1;
-	colm_log_compile = 1;
-	colm_log_conds = 1;
-	colmActiveRealm = 0xffffffff;
-	initInputFuncs();
-}
-
-Program *colmNewProgram( RuntimeData *rtd, int argc, const char **argv )
-{
-	Program *prg = malloc(sizeof(Program));
-	memset( prg, 0, sizeof(Program) );
-	prg->argc = argc;
-	prg->argv = argv;
-	prg->rtd = rtd;
-	prg->ctxDepParsing = 1;
-	prg->global = 0;
-	prg->heap = 0;
-	prg->stdinVal = 0;
-	prg->stdoutVal = 0;
-	prg->stderrVal = 0;
-	prg->nextIlGen = 0;
-	prg->induceExit = 0;
-	prg->exitStatus = 0;
-
-	initPoolAlloc( &prg->kidPool, sizeof(Kid) );
-	initPoolAlloc( &prg->treePool, sizeof(Tree) );
-	initPoolAlloc( &prg->parseTreePool, sizeof(ParseTree) );
-	initPoolAlloc( &prg->listElPool, sizeof(ListEl) );
-	initPoolAlloc( &prg->mapElPool, sizeof(MapEl) );
-	initPoolAlloc( &prg->headPool, sizeof(Head) );
-	initPoolAlloc( &prg->locationPool, sizeof(Location) );
-	initPoolAlloc( &prg->ilPool, sizeof(IgnoreList) );
-
-	Int *trueInt = (Int*) treeAllocate( prg );
-	trueInt->id = LEL_ID_BOOL;
-	trueInt->refs = 1;
-	trueInt->value = 1;
-
-	Int *falseInt = (Int*) treeAllocate( prg );
-	falseInt->id = LEL_ID_BOOL;
-	falseInt->refs = 1;
-	falseInt->value = 0;
-
-	prg->trueVal = (Tree*)trueInt;
-	prg->falseVal = (Tree*)falseInt;
-
-	prg->allocRunBuf = 0;
-	return prg;
-}
-
-void clearGlobal( Program *prg, Tree **sp )
-{
-	/* Downref all the fields in the global object. */
-	int g;
-	for ( g = 0; g < prg->rtd->globalSize; g++ ) {
-		//assert( getAttr( global, g )->refs == 1 );
-		treeDownref( prg, sp, getAttr( prg->global, g ) );
-	}
-
-	/* Free the global object. */
-	if ( prg->rtd->globalSize > 0 )
-		freeAttrs( prg, prg->global->child );
-	treeFree( prg, prg->global );
-}
-
-void allocGlobal( Program *prg )
-{
-	/* Alloc the global. */
-	Tree *tree = treeAllocate( prg );
-	tree->child = allocAttrs( prg, prg->rtd->globalSize );
-	tree->refs = 1;
-	prg->global = tree;
-}
-
-Tree **stackAlloc()
-{
-	//return new Tree*[VM_STACK_SIZE];
-
-	return (Tree**)mmap( 0, sizeof(Tree*)*VM_STACK_SIZE,
-		PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0 );
-}
-
-Tree **vm_root( struct ColmProgram *prg )
-{
-	return prg->vm_root;
-}
-
-Tree *returnVal( struct ColmProgram *prg )
-{
-	return prg->returnVal;
-}
-
-void colmRunProgram( Program *prg )
-{
-	assert( sizeof(Int)      <= sizeof(Tree) );
-	assert( sizeof(Str)      <= sizeof(Tree) );
-	assert( sizeof(Pointer)  <= sizeof(Tree) );
-	assert( sizeof(Map)      <= sizeof(MapEl) );
-	assert( sizeof(List)     <= sizeof(MapEl) );
-	assert( sizeof(Stream)   <= sizeof(MapEl) );
-	assert( sizeof(Accum)    <= sizeof(MapEl) );
-
-	/* Allocate the global variable. */
-	allocGlobal( prg );
-
-	/* 
-	 * Allocate the VM stack.
-	 */
-
-	prg->vm_stack = stackAlloc();
-	prg->vm_root = &prg->vm_stack[VM_STACK_SIZE];
-
-	/*
-	 * Execute
-	 */
-	if ( prg->rtd->rootCodeLen > 0 ) {
-		RtCodeVect rcodeCollect;
-		Execution execution;
-
-		initRtCodeVect( &rcodeCollect );
-		initExecution( &execution, prg, &rcodeCollect, 0, 0, prg->rtd->rootCode, 0, 0, 0, 0 );
-		mainExecution( &execution );
-	}
-}
-
-void colmDeleteProgram( Program *prg )
-{
-	Tree **sp = prg->vm_root;
-
-	#ifdef COLM_LOG_BYTECODE
-	if ( colm_log_bytecode ) {
-		cerr << "clearing the prg" << endl;
-	}
-	#endif
-
-	treeDownref( prg, sp, prg->returnVal );
-	clearGlobal( prg, sp );
-
-	/* Clear the heap. */
-	Kid *a = prg->heap;
-	while ( a != 0 ) {
-		Kid *next = a->next;
-		treeDownref( prg, sp, a->tree );
-		kidFree( prg, a );
-		a = next;
-	}
-
-	//assert( trueVal->refs == 1 );
-	//assert( falseVal->refs == 1 );
-	treeDownref( prg, sp, prg->trueVal );
-	treeDownref( prg, sp, prg->falseVal );
-
-	treeDownref( prg, sp, (Tree*)prg->stdinVal );
-	treeDownref( prg, sp, (Tree*)prg->stdoutVal );
-	treeDownref( prg, sp, (Tree*)prg->stderrVal );
-
-	long kidLost = kidNumLost( prg );
-	if ( kidLost )
-		message( "warning: lost kids: %ld\n", kidLost );
-
-	long treeLost = treeNumLost( prg );
-	if ( treeLost )
-		message( "warning: lost trees: %ld\n", treeLost );
-
-	long parseTreeLost = parseTreeNumLost( prg );
-	if ( parseTreeLost )
-		message( "warning: lost parse trees: %ld\n", parseTreeLost );
-
-	long listLost = listElNumLost( prg );
-	if ( listLost )
-		message( "warning: lost listEls: %ld\n", listLost );
-
-	long mapLost = mapElNumLost( prg );
-	if ( mapLost )
-		message( "warning: lost mapEls: %ld\n", mapLost );
-
-	long headLost = headNumLost( prg );
-	if ( headLost )
-		message( "warning: lost heads: %ld\n", headLost );
-
-	long locationLost = locationNumLost( prg );
-	if ( locationLost )
-		message( "warning: lost locations: %ld\n", locationLost );
-
-	long ilLost = ilNumLost( prg );
-	if ( ilLost )
-		message( "warning: lost ignore lists: %ld\n", ilLost );
-
-	kidClear( prg );
-	treeClear( prg );
-	headClear( prg );
-	parseTreeClear( prg );
-	listElClear( prg );
-	mapElClear( prg );
-	locationClear( prg );
-	ilClear( prg );
-
-	//memset( vm_stack, 0, sizeof(Tree*) * VM_STACK_SIZE);
-
-	RunBuf *rb = prg->allocRunBuf;
-	while ( rb != 0 ) {
-		RunBuf *next = rb->next;
-		free( rb );
-		rb = next;
-	}
-
-	free( prg );
-}
-
-
 void initExecution( Execution *exec, Program *prg, RtCodeVect *rcodeCollect,
 		PdaRun *pdaRun, FsmRun *fsmRun, Code *code, Tree *lhs,
 		long genId, Head *matchText, char **captures )
@@ -811,11 +595,7 @@ again:
 			short field;
 			read_half( field );
 
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode ) {
-				cerr << "IN_GET_FIELD_BKT " << field << endl;
-			}
-			#endif
+			debug( REALM_BYTECODE, "IN_GET_FIELD_BKT %d\n", field );
 			break;
 		}
 		case IN_SET_FIELD_BKT: {
@@ -824,11 +604,7 @@ again:
 			read_half( field );
 			read_tree( val );
 
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode ) {
-				cerr << "IN_SET_FIELD_BKT " << field << endl;
-			}
-			#endif
+			debug( REALM_BYTECODE, "IN_SET_FIELD_BKT %d\n", field );
 
 			treeDownref( prg, sp, val );
 			break;
@@ -837,11 +613,7 @@ again:
 			Tree *ptr;
 			read_tree( ptr );
 
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode ) {
-				cerr << "IN_PTR_DEREF_BKT" << endl;
-			}
-			#endif
+			debug( REALM_BYTECODE, "IN_PTR_DEREF_BKT\n" );
 
 			treeDownref( prg, sp, ptr );
 			break;
@@ -1064,9 +836,13 @@ void executeCode( Execution *exec, Tree **sp, Code *instr )
 	 * space. */
 	Tree **root = sp;
 	Program *prg = exec->prg;
+	Code c;
 
 again:
-	switch ( *instr++ ) {
+	c = *instr++;
+	//debug( REALM_BYTECODE, "--in 0x%x\n", c );
+
+	switch ( c ) {
 		case IN_SAVE_LHS: {
 			#ifdef COLM_LOG_BYTECODE
 			if ( colm_log_bytecode ) {
@@ -1098,33 +874,18 @@ again:
 			break;
 		}
 		case IN_LOAD_NIL: {
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode ) {
-				cerr << "IN_LOAD_NIL" << endl;
-			}
-			#endif
-
+			debug( REALM_BYTECODE, "IN_LOAD_NIL\n" );
 			vm_push( 0 );
 			break;
 		}
 		case IN_LOAD_TRUE: {
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode ) {
-				cerr << "IN_LOAD_TRUE" << endl;
-			}
-			#endif
-
+			debug( REALM_BYTECODE, "IN_LOAD_TRUE\n" );
 			treeUpref( prg->trueVal );
 			vm_push( prg->trueVal );
 			break;
 		}
 		case IN_LOAD_FALSE: {
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode ) {
-				cerr << "IN_LOAD_FALSE" << endl;
-			}
-			#endif
-
+			debug( REALM_BYTECODE, "IN_LOAD_FALSE\n" );
 			treeUpref( prg->falseVal );
 			vm_push( prg->falseVal );
 			break;
@@ -1133,11 +894,7 @@ again:
 			Word i;
 			read_word( i );
 
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode ) {
-				cerr << "IN_LOAD_INT " << i << endl;
-			}
-			#endif
+			debug( REALM_BYTECODE, "IN_LOAD_INT %d\n", i );
 
 			Tree *tree = constructInteger( prg, i );
 			treeUpref( tree );
@@ -1148,11 +905,7 @@ again:
 			Word offset;
 			read_word( offset );
 
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode ) {
-				cerr << "IN_LOAD_STR " << offset << endl;
-			}
-			#endif
+			debug( REALM_BYTECODE, "IN_LOAD_STR %d\n", offset );
 
 			Head *lit = makeLiteral( prg, offset );
 			Tree *tree = constructString( prg, lit );
@@ -1163,11 +916,7 @@ again:
 		case IN_PRINT: {
 			int n;
 			read_byte( n );
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode ) {
-				cerr << "IN_PRINT " << n << endl;
-			}
-			#endif
+			debug( REALM_BYTECODE, "IN_PRINT %d\n", n );
 
 			while ( n-- > 0 ) {
 				Tree *tree = vm_pop();
@@ -1179,11 +928,8 @@ again:
 		case IN_PRINT_XML_AC: {
 			int n;
 			read_byte( n );
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode ) {
-				cerr << "IN_PRINT_XML_AC" << n << endl;
-			}
-			#endif
+
+			debug( REALM_BYTECODE, "IN_PRINT_XML_AC %d\n", n );
 
 			while ( n-- > 0 ) {
 				Tree *tree = vm_pop();
@@ -1195,11 +941,7 @@ again:
 		case IN_PRINT_XML: {
 			int n;
 			read_byte( n );
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode ) {
-				cerr << "IN_PRINT_XML" << n << endl;
-			}
-			#endif
+			debug( REALM_BYTECODE, "IN_PRINT_XML %d", n );
 
 			while ( n-- > 0 ) {
 				Tree *tree = vm_pop();
@@ -1277,11 +1019,7 @@ again:
 			break;
 		}
 		case IN_LOAD_GLOBAL_R: {
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode ) {
-				cerr << "IN_LOAD_GLOBAL_R" << endl;
-			}
-			#endif
+			debug( REALM_BYTECODE, "IN_LOAD_GLOBAL_R\n" );
 
 			treeUpref( prg->global );
 			vm_push( prg->global );
@@ -1578,11 +1316,7 @@ again:
 			short field;
 			read_half( field );
 
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode ) {
-				cerr << "IN_SET_LOCAL_WC " << field << endl;
-			}
-			#endif
+			debug( REALM_BYTECODE, "IN_SET_LOCAL_WC %d\n", field );
 
 			Tree *val = vm_pop();
 			treeDownref( prg, sp, vm_local(field) );
@@ -1649,11 +1383,7 @@ again:
 			short field;
 			read_half( field );
 
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode ) {
-				cerr << "IN_GET_FIELD_R " << field << endl;
-			}
-			#endif
+			debug( REALM_BYTECODE, "IN_GET_FIELD_R %d\n", field );
 
 			Tree *obj = vm_pop();
 			treeDownref( prg, sp, obj );
@@ -1667,11 +1397,7 @@ again:
 			short field;
 			read_half( field );
 
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode ) {
-				cerr << "IN_GET_FIELD_WC " << field << endl;
-			}
-			#endif
+			debug( REALM_BYTECODE, "IN_GET_FIELD_WC %d\n", field );
 
 			Tree *obj = vm_pop();
 			treeDownref( prg, sp, obj );
@@ -1726,11 +1452,7 @@ again:
 			short field;
 			read_half( field );
 
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode ) {
-				cerr << "IN_SET_FIELD_WC " << field << endl;
-			}
-			#endif
+			debug( REALM_BYTECODE, "IN_SET_FIELD_WC %d\n", field );
 
 			Tree *obj = vm_pop();
 			Tree *val = vm_pop();
@@ -1747,11 +1469,7 @@ again:
 			short field;
 			read_half( field );
 
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode ) {
-				cerr << "IN_SET_FIELD_WV " << field << endl;
-			}
-			#endif
+			debug( REALM_BYTECODE, "IN_SET_FIELD_WV %d\n", field );
 
 			Tree *obj = vm_pop();
 			Tree *val = vm_pop();
@@ -1995,11 +1713,7 @@ again:
 			short dist;
 			read_half( dist );
 
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode ) {
-				cerr << "IN_JMP_FALSE " << dist << endl;
-			}
-			#endif
+			debug( REALM_BYTECODE, "IN_JMP_FALSE %d\n", dist );
 
 			Tree *tree = vm_pop();
 			if ( testFalse( prg, tree ) )
@@ -2011,11 +1725,7 @@ again:
 			short dist;
 			read_half( dist );
 
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode ) {
-				cerr << "IN_JMP_TRUE " << dist << endl;
-			}
-			#endif
+			debug( REALM_BYTECODE, "IN_JMP_TRUE %d\n", dist );
 
 			Tree *tree = vm_pop();
 			if ( !testFalse( prg, tree ) )
@@ -2050,11 +1760,7 @@ again:
 		 * Binary comparison operators.
 		 */
 		case IN_TST_EQL: {
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode ) {
-				cerr << "IN_TST_EQL" << endl;
-			}
-			#endif
+			debug( REALM_BYTECODE, "IN_TST_EQL\n" );
 
 			Tree *o2 = vm_pop();
 			Tree *o1 = vm_pop();
@@ -2067,11 +1773,7 @@ again:
 			break;
 		}
 		case IN_TST_NOT_EQL: {
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode ) {
-				cerr << "IN_TST_NOT_EQL" << endl;
-			}
-			#endif
+			debug( REALM_BYTECODE, "IN_TST_NOT_EQL\n" );
 
 			Tree *o2 = vm_pop();
 			Tree *o1 = vm_pop();
@@ -2084,11 +1786,7 @@ again:
 			break;
 		}
 		case IN_TST_LESS: {
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode ) {
-				cerr << "IN_TST_LESS" << endl;
-			}
-			#endif
+			debug( REALM_BYTECODE, "IN_TST_LESS\n" );
 
 			Tree *o2 = vm_pop();
 			Tree *o1 = vm_pop();
@@ -2101,11 +1799,7 @@ again:
 			break;
 		}
 		case IN_TST_LESS_EQL: {
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode ) {
-				cerr << "IN_TST_LESS_EQL" << endl;
-			}
-			#endif
+			debug( REALM_BYTECODE, "IN_TST_LESS_EQL\n" );
 
 			Tree *o2 = vm_pop();
 			Tree *o1 = vm_pop();
@@ -2117,11 +1811,7 @@ again:
 			treeDownref( prg, sp, o2 );
 		}
 		case IN_TST_GRTR: {
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode ) {
-				cerr << "IN_TST_GRTR" << endl;
-			}
-			#endif
+			debug( REALM_BYTECODE, "IN_TST_GRTR\n" );
 
 			Tree *o2 = vm_pop();
 			Tree *o1 = vm_pop();
@@ -2134,11 +1824,7 @@ again:
 			break;
 		}
 		case IN_TST_GRTR_EQL: {
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode ) {
-				cerr << "IN_TST_GRTR_EQL" << endl;
-			}
-			#endif
+			debug( REALM_BYTECODE, "IN_TST_GRTR_EQL\n" );
 
 			Tree *o2 = (Tree*)vm_pop();
 			Tree *o1 = (Tree*)vm_pop();
@@ -2151,11 +1837,7 @@ again:
 			break;
 		}
 		case IN_TST_LOGICAL_AND: {
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode ) {
-				cerr << "IN_TST_LOGICAL_AND" << endl;
-			}
-			#endif
+			debug( REALM_BYTECODE, "IN_TST_LOGICAL_AND\n" );
 
 			Tree *o2 = vm_pop();
 			Tree *o1 = vm_pop();
@@ -2170,11 +1852,7 @@ again:
 			break;
 		}
 		case IN_TST_LOGICAL_OR: {
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode ) {
-				cerr << "IN_TST_LOGICAL_OR" << endl;
-			}
-			#endif
+			debug( REALM_BYTECODE, "IN_TST_LOGICAL_OR\n" );
 
 			Tree *o2 = vm_pop();
 			Tree *o1 = vm_pop();
@@ -2189,11 +1867,7 @@ again:
 			break;
 		}
 		case IN_NOT: {
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode ) {
-				cerr << "IN_NOT" << endl;
-			}
-			#endif
+			debug( REALM_BYTECODE, "IN_NOT\n" );
 
 			Tree *tree = (Tree*)vm_pop();
 			long r = testFalse( prg, tree );
@@ -2714,11 +2388,7 @@ again:
 			read_tree( input );
 			read_word( len );
 
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode ) {
-				cerr << "IN_STREAM_APPEND_BKT" << endl;
-			}
-			#endif
+			debug( REALM_BYTECODE, "IN_STREAM_APPEND_BKT\n" );
 
 			undoStreamAppend( prg, sp, ((Stream*)stream)->in, len );
 			treeDownref( prg, sp, stream );
@@ -2730,10 +2400,7 @@ again:
 			Half stopId;
 			read_half( stopId );
 
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode )
-				cerr << "IN_PARSE_FRAG_WC " << endl;
-			#endif
+			debug( REALM_BYTECODE, "IN_PARSE_FRAG_WC %d\n", stopId );
 
 			Tree *accum = vm_pop();
 			Tree *stream = vm_pop();
@@ -4067,12 +3734,17 @@ again:
 			prg->induceExit = 1;
 			goto out;
 		}
+		case IN_ERROR: {
+			debug( REALM_BYTECODE, "IN_ERROR\n" );
+
+			/* Pop the global. */
+			vm_pop_ignore();
+			treeUpref( prg->lastParseError );
+			vm_push( prg->lastParseError );
+			break;
+		}
 		case IN_OPEN_FILE: {
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode ) {
-				cerr << "IN_OPEN_FILE" << endl;
-			}
-			#endif
+			debug( REALM_BYTECODE, "IN_OPEN_FILE\n" );
 
 			Tree *mode = vm_pop();
 			Tree *name = vm_pop();
@@ -4084,11 +3756,7 @@ again:
 			break;
 		}
 		case IN_GET_STDIN: {
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode ) {
-				cerr << "IN_GET_STDIN" << endl;
-			}
-			#endif
+			debug( REALM_BYTECODE, "IN_GET_STDIN\n" );
 
 			/* Pop the root object. */
 			Tree *obj = vm_pop();
@@ -4105,7 +3773,7 @@ again:
 		case IN_LOAD_ARGV: {
 			Half field;
 			read_half( field );
-			debug( "IN_LOAD_ARGV %lu", field );
+			debug( REALM_BYTECODE, "IN_LOAD_ARGV %lu\n", field );
 
 			/* Tree comes back upreffed. */
 			Tree *tree = constructArgv( prg, prg->argc, prg->argv );
@@ -4113,12 +3781,7 @@ again:
 			break;
 		}
 		case IN_STOP: {
-			#ifdef COLM_LOG_BYTECODE
-			if ( colm_log_bytecode ) {
-				cerr << "IN_STOP" << endl;
-			}
-			#endif
-
+			debug( REALM_BYTECODE, "IN_STOP\n" );
 			fflush( stdout );
 			goto out;
 		}

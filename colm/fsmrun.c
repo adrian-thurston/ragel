@@ -613,6 +613,35 @@ void clearIgnoreList( Program *prg, Tree **sp, Kid *kid )
 	}
 }
 
+static void reportParseError( Program *prg, Tree **sp, PdaRun *pdaRun )
+{
+	Kid *kid = pdaRun->btPoint;
+	Location *deepest = 0;
+	while ( kid != 0 ) {
+		Head *head = kid->tree->tokdata;
+		Location *location = head != 0 ? head->location : 0;
+		if ( location && ( deepest == 0 || location->byte > deepest->byte ) )
+			deepest = location;
+		kid = kid->next;
+	}
+
+	Head *head = 0;
+
+	/* If there are no error points on record assume the error occurred at the beginning of the stream. */
+	if ( deepest == 0 ) 
+		head = stringAllocFull( prg, "PARSE ERROR at 1:1", 18 );
+	else {
+		char formatted[128];
+		sprintf( formatted, "PARSE ERROR at %ld:%ld\n", deepest->line, deepest->column );
+		head = stringAllocFull( prg, formatted, strlen(formatted) );
+	}
+
+	Tree *tree = constructString( prg, head );
+	treeDownref( prg, sp, prg->lastParseError );
+	prg->lastParseError = tree;
+	treeUpref( prg->lastParseError );
+}
+
 void sendWithIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input )
 {
 	/* Need to preserve the layout under a tree:
@@ -703,7 +732,7 @@ void sendHandleError( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, I
 	/* Check the result. */
 	if ( pdaRun->parseError ) {
 		/* Error occured in the top-level parser. */
-		reportParseError( prg, pdaRun );
+		reportParseError( prg, sp, pdaRun );
 	}
 	else {
 		if ( isParserStopFinished( pdaRun ) ) {
@@ -833,7 +862,7 @@ void sendEof( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun,
 	sendWithIgnore( prg, sp, pdaRun, fsmRun, inputStream, input );
 
 	if ( pdaRun->parseError )
-		reportParseError( prg, pdaRun );
+		reportParseError( prg, sp, pdaRun );
 }
 
 void initInputStream( InputStream *inputStream )
@@ -1053,7 +1082,7 @@ void scannerError( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fs
 
 		if ( pdaRun->parseError ) {
 			/* Error occured in the top-level parser. */
-			reportParseError( prg, pdaRun );
+			reportParseError( prg, sp, pdaRun );
 		}
 	}
 	else {
@@ -1062,7 +1091,7 @@ void scannerError( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fs
 		 * the parse. */
 		if ( pdaRun->tokenList != 0 ) 
 			pushBtPoint( prg, pdaRun, pdaRun->tokenList->kid->tree );
-		reportParseError( prg, pdaRun );
+		reportParseError( prg, sp, pdaRun );
 		pdaRun->parseError = 1;
 	}
 }
