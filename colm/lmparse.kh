@@ -49,7 +49,7 @@ struct Parser
 
 	# Defining things.
 	token KW_Rl, KW_Def, KW_Lex, KW_Context, KW_Ignore, KW_Token, KW_Commit, KW_Namespace,
-		KW_Literal, KW_ReduceFirst, KW_Map, KW_List, KW_Vector, KW_Accum, KW_Global,
+		KW_Literal, KW_ReduceFirst, KW_Map, KW_List, KW_Vector, KW_Accum, KW_Global, KW_Export,
 		KW_Iter, KW_Reject, KW_Ptr, KW_Ref, KW_Deref;
 
 	# Language.

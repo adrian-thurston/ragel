@@ -632,7 +632,7 @@ static void reportParseError( Program *prg, Tree **sp, PdaRun *pdaRun )
 		head = stringAllocFull( prg, "PARSE ERROR at 1:1", 18 );
 	else {
 		char formatted[128];
-		sprintf( formatted, "PARSE ERROR at %ld:%ld\n", deepest->line, deepest->column );
+		sprintf( formatted, "PARSE ERROR at %ld:%ld", deepest->line, deepest->column );
 		head = stringAllocFull( prg, formatted, strlen(formatted) );
 	}
 

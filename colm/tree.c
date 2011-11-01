@@ -57,7 +57,6 @@ void initRevTreeIter( RevTreeIter *revTriter, const Ref *rootRef,
 	revTriter->ref.next = 0;
 }
 
-
 void initUserIter( UserIter *userIter, Tree **stackRoot, long argSize, long searchId )
 {
 	userIter->stackRoot = stackRoot;
@@ -107,6 +106,9 @@ void setAttr( Tree *tree, long pos, Tree *val )
 		kid = kid->next;
 	kid->tree = val;
 }
+
+Tree *getGlobal( Program *prg, long pos )
+	{ return getAttr( prg->global, pos ); }
 
 Tree *getAttr( Tree *tree, long pos )
 {

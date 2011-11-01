@@ -175,6 +175,22 @@ void ParseData::generateExports()
 				"( prg, getRepeatVal( tree ) ); }\n";
 		}
 	}
+
+	out << "\n";
+
+	for ( ObjFieldList::Iter of = *globalObjectDef->objFieldList; of.lte(); of++ ) {
+		ObjField *field = of->value;
+		if ( field->isExport ) {
+			UniqueType *ut = field->typeRef->lookupType(this);
+			if ( ut != 0 && ut->typeId == TYPE_TREE  ) {
+				out << 
+					ut->langEl->fullName << " " << field->name << "(ColmProgram *prg)\n"
+					"{ return " << ut->langEl->fullName << "( prg, getGlobal( prg, " << 
+					field->offset << ") ); }\n";
+			}
+		}
+	}
+	
 	out << "#endif\n";
 }
 

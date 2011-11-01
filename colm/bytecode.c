@@ -3738,7 +3738,8 @@ again:
 			debug( REALM_BYTECODE, "IN_ERROR\n" );
 
 			/* Pop the global. */
-			vm_pop_ignore();
+			Tree *global = vm_pop();
+			treeDownref( prg, sp, global );
 			treeUpref( prg->lastParseError );
 			vm_push( prg->lastParseError );
 			break;

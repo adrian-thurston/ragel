@@ -191,6 +191,32 @@ reference_type_ref: KW_Ref type_ref
 
 nonterm global_def uses statement;
 
+global_def: KW_Export var_def opt_def_init
+	final {
+		$$->stmt = 0;
+
+		ObjectDef *object;
+		if ( contextStack.length() == 0 )
+			object = pd->globalObjectDef;
+		else {
+			error($2->objField->loc) << "cannot export a parser context variables" << endl;
+		}
+
+		if ( object->checkRedecl( $2->objField->name ) != 0 )
+			error($2->objField->loc) << "object field renamed" << endp;
+
+		object->insertField( $2->objField->name, $2->objField );
+		$2->objField->isExport = true;
+
+		if ( $3->expr != 0 ) {
+			LangVarRef *varRef = new LangVarRef( $2->objField->loc, 
+					new QualItemVect, $2->objField->name );
+
+			$$->stmt = new LangStmt( $2->objField->loc, 
+					$3->assignType, varRef, $3->expr );
+		}
+	};
+
 global_def: KW_Global var_def opt_def_init
 	final {
 		$$->stmt = 0;

@@ -43,6 +43,7 @@ int repeatEnd( struct ColmTree *tree );
 int listLast( struct ColmTree *tree );
 struct ColmTree *getRhsVal( struct ColmProgram *prg, struct ColmTree *tree, int *a );
 struct ColmTree *getAttr( struct ColmTree *tree, long pos );
+struct ColmTree *getGlobal( struct ColmProgram *prg, long pos );
 struct ColmTree *getRepeatNext( struct ColmTree *tree );
 struct ColmTree *getRepeatVal( struct ColmTree *tree );
 

@@ -1652,6 +1652,7 @@ struct ObjField
 		isCustom(false),
 		isParam(false),
 		isRhsGet(false),
+		isExport(false),
 		dirtyTree(false),
 		inGetR( IN_HALT ),
 		inGetWC( IN_HALT ),
@@ -1677,6 +1678,7 @@ struct ObjField
 	bool isCustom;
 	bool isParam;
 	bool isRhsGet;
+	bool isExport;
 	
 	/* True if some aspect of the tree has possibly been written to. This does
 	 * not include attributes. This is here so we can optimize the storage of
