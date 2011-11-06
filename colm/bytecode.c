@@ -21,7 +21,6 @@
 
 //#define COLM_LOG
 
-
 #include <colm/pdarun.h>
 #include <colm/fsmrun.h>
 #include <colm/tree.h>
@@ -3111,6 +3110,7 @@ again:
 		case IN_EXIT: {
 			debug( REALM_BYTECODE, "IN_EXIT\n" );
 
+			Tree *global = vm_pop();
 			Int *status = (Int*)vm_pop();
 			prg->exitStatus = status->value;
 			prg->induceExit = 1;

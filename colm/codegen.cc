@@ -204,7 +204,7 @@ void FsmCodeGen::writeMain()
 		"	prg = colmNewProgram( &main_runtimeData, argc, argv );\n"
 		"	colmRunProgram( prg );\n"
 		"	colmDeleteProgram( prg );\n"
-		"	return 0;\n"
+		"	return prg->exitStatus;\n"
 		"}\n"
 		"\n";
 
