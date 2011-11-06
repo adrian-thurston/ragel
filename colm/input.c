@@ -56,6 +56,14 @@ struct InputFuncs stringFuncs;
 struct InputFuncs fileFuncs;
 struct InputFuncs fdFuncs;
 
+void initInputStream( InputStream *inputStream )
+{
+	/* FIXME: correct values here. */
+	inputStream->line = 1;
+	inputStream->column = 1;
+	inputStream->byte = 0;
+}
+
 InputStream *newInputStreamFile( FILE *file )
 {
 	InputStream *is = (InputStream*)malloc(sizeof(InputStream));

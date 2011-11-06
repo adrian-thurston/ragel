@@ -365,34 +365,36 @@ void pushBtPoint( Program *prg, PdaRun *pdaRun, Tree *tree )
  * shift-reduce:  cannot be a retry
  */
 
-void parseToken( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
+enum ParseTokenResult parseToken( Program *prg, Tree **sp, PdaRun *pdaRun,
+		FsmRun *fsmRun, InputStream *inputStream, enum ParseTokenEntry entry )
 {
-	int pos, targState;
+	int pos, curState;
 	unsigned int *action;
 	int rhsLen;
 	Kid *lel;
 	int owner;
 	int induceReject;
 	int indPos;
-
-	LangElInfo *lelInfo = prg->rtd->lelInfo;
+	LangElInfo *lelInfo;
 
 	/* The scanner will send a null token if it can't find a token. */
-	if ( pdaRun->input == 0 ) {
+	if ( entry == PteError ) {
 		/* Grab the most recently accepted item. */
+		assert( pdaRun->input == 0 );
 		pushBtPoint( prg, pdaRun, pdaRun->tokenList->kid->tree );
 		goto parse_error;
 	}
 
-	/* The tree we are given must either be an ignore token, or it must be be
-	 * parse tree size. It also must have at least one reference. */
-	assert( lelInfo[pdaRun->input->tree->id].ignore || pdaRun->input->tree->flags & AF_PARSE_TREE );
+	/* The tree we are given must be * parse tree size. It also must have at
+	 * least one reference. */
+	lelInfo = prg->rtd->lelInfo;
+	assert( pdaRun->input->tree->flags & AF_PARSE_TREE );
 	assert( pdaRun->input->tree->refs > 0 );
 
 	/* This will cause input to be lost. This 
 	 * path should be traced. */
 	if ( pdaRun->cs < 0 )
-		return;
+		return PtrDone;
 
 	pt(pdaRun->input->tree)->region = pdaRun->nextRegionInd;
 	pt(pdaRun->input->tree)->state = pdaRun->cs;
@@ -404,6 +406,7 @@ again:
 		goto _out;
 
 	lel = pdaRun->input;
+	curState = pdaRun->cs;
 
 	/* This can disappear. An old experiment. */
 	if ( lelInfo[lel->tree->id].ignore ) {
@@ -434,17 +437,17 @@ again:
 		goto again;
 	}
 
-	if ( lel->tree->id < pdaRun->tables->keys[pdaRun->cs<<1] ||
-			lel->tree->id > pdaRun->tables->keys[(pdaRun->cs<<1)+1] ) {
+	if ( lel->tree->id < pdaRun->tables->keys[curState<<1] ||
+			lel->tree->id > pdaRun->tables->keys[(curState<<1)+1] ) {
 		pushBtPoint( prg, pdaRun, lel->tree );
 		goto parse_error;
 	}
 
-	indPos = pdaRun->tables->offsets[pdaRun->cs] + 
-		(lel->tree->id - pdaRun->tables->keys[pdaRun->cs<<1]);
+	indPos = pdaRun->tables->offsets[curState] + 
+		(lel->tree->id - pdaRun->tables->keys[curState<<1]);
 
 	owner = pdaRun->tables->owners[indPos];
-	if ( owner != pdaRun->cs ) {
+	if ( owner != curState ) {
 		pushBtPoint( prg, pdaRun, lel->tree );
 		goto parse_error;
 	}
@@ -455,8 +458,10 @@ again:
 		goto parse_error;
 	}
 
+	/* Checking complete. */
+
 	induceReject = false;
-	targState = pdaRun->tables->targs[pos];
+	pdaRun->cs = pdaRun->tables->targs[pos];
 	action = pdaRun->tables->actions + pdaRun->tables->actInds[pos];
 	if ( pt(lel->tree)->retry_lower )
 		action += pt(lel->tree)->retry_lower;
@@ -467,7 +472,7 @@ again:
 		/* Consume. */
 		pdaRun->input = pdaRun->input->next;
 
-		pt(lel->tree)->state = pdaRun->cs;
+		pt(lel->tree)->state = curState;
 		lel->next = pdaRun->stackTop;
 		pdaRun->stackTop = lel;
 
@@ -569,24 +574,9 @@ again:
 
 		/* When the production is of zero length we stay in the same state.
 		 * Otherwise we use the state stored in the first child. */
-		targState = rhsLen == 0 ? pdaRun->cs : pt(realChild->tree)->state;
+		pdaRun->cs = rhsLen == 0 ? curState : pt(realChild->tree)->state;
 
 		assert( redLel->tree->refs == 1 );
-
-		/* Copy RHS elements in the production. */
-//		{
-//			unsigned char *copy = prg->rtd->prodInfo[reduction].copy;
-//			if ( copy != 0 ) {
-//				int i, copyLen = prg->rtd->prodInfo[reduction].copyLen;
-//				for ( i = 0; i < copyLen; i++ ) {
-//					unsigned char field = copy[i*2];
-//					unsigned char fromPos = copy[i*2+1];
-//					Tree *val = getRhsEl( prg, redLel->tree, fromPos );
-//					treeUpref( val );
-//					setField( prg, redLel->tree, field, val );
-//				}
-//			}
-//		}
 
 		if ( prg->ctxDepParsing && prg->rtd->prodInfo[reduction].frameId >= 0 ) {
 			/* Frame info for reduction. */
@@ -637,21 +627,17 @@ again:
 		if ( induceReject ) {
 			debug( REALM_PARSE, "error induced during reduction of %s\n",
 					prg->rtd->lelInfo[redLel->tree->id].name );
-			pt(redLel->tree)->state = pdaRun->cs;
+			pt(redLel->tree)->state = curState;
 			redLel->next = pdaRun->stackTop;
 			pdaRun->stackTop = redLel;
-			pdaRun->cs = targState;
 			pushBtPoint( prg, pdaRun, lel->tree );
 			goto parse_error;
 		}
-		else {
-			redLel->next = pdaRun->input;
-			pdaRun->input = redLel;
-		}
+
+		redLel->next = pdaRun->input;
+		pdaRun->input = redLel;
 	}
 
-
-	pdaRun->cs = targState;
 	goto again;
 
 parse_error:
@@ -684,7 +670,7 @@ parse_error:
 					pdaRun->numRetry -= 1;
 					pdaRun->cs = stackTopTarget( prg, pdaRun );
 					pdaRun->nextRegionInd = next;
-					return;
+					return PtrDone;
 				}
 
 				if ( pdaRun->stop ) {
@@ -822,4 +808,5 @@ fail:
 
 _out:
 	pdaRun->nextRegionInd = pdaRun->tables->tokenRegionInds[pdaRun->cs];
+	return PtrDone;
 }

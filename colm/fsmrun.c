@@ -261,6 +261,23 @@ void streamPushTree( InputStream *inputStream, Tree *tree, int ignore )
 	inputStream->funcs->pushTree( inputStream, tree, ignore );
 }
 
+void undoParseStream( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long consumed )
+{
+	if ( consumed < pdaRun->consumed ) {
+		pdaRun->numRetry += 1;
+		pdaRun->targetConsumed = consumed;
+
+		assert( pdaRun->input == 0 );
+		parseToken( prg, sp, pdaRun, fsmRun, inputStream, PteError );
+
+		pdaRun->targetConsumed = -1;
+		pdaRun->numRetry -= 1;
+
+		fsmRun->region = pdaRunGetNextRegion( pdaRun, 0 );
+		fsmRun->cs = fsmRun->tables->entryByRegion[fsmRun->region];
+	}
+}
+
 void undoStreamPush( Program *prg, Tree **sp, InputStream *inputStream, long length )
 {
 	takeBackBuffered( inputStream );
@@ -481,6 +498,17 @@ void queueBackTree( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, Inp
 	sendBack( prg, sp, pdaRun, fsmRun, inputStream, input );
 }
 
+void ignoreTree( Program *prg, PdaRun *pdaRun, Tree *tree )
+{
+	/* Add the ignore string to the head of the ignore list. */
+	Kid *ignore = kidAllocate( prg );
+	ignore->tree = tree;
+
+	/* Prepend it to the list of ignore tokens. */
+	ignore->next = pdaRun->accumIgnore;
+	pdaRun->accumIgnore = ignore;
+}
+
 Kid *makeToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, int id,
 		Head *tokdata, int namedLangEl, int bindId )
 {
@@ -644,12 +672,12 @@ static void reportParseError( Program *prg, Tree **sp, PdaRun *pdaRun )
 	treeUpref( prg->lastParseError );
 }
 
-void sendWithIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input )
+void attachIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, Kid *input )
 {
 	/* Need to preserve the layout under a tree:
 	 *    attributes, ignore tokens, grammar children. */
 
-	/* Rest. */
+	/* Reset. */
 	input->tree->flags &= ~AF_LEFT_IL_ATTACHED;
 	input->tree->flags &= ~AF_RIGHT_IL_ATTACHED;
 
@@ -722,16 +750,16 @@ void sendWithIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, In
 			pdaRun->tokenList->kid->flags |= KF_SUPPRESS_LEFT;
 		}
 	}
-
-	assert( pdaRun->input == 0 );
-	pdaRun->input = input;
-	parseToken( prg, sp, pdaRun, fsmRun, inputStream );
 }
 
 void sendHandleError( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input )
 {
 	/* Send the token to the parser. */
-	sendWithIgnore( prg, sp, pdaRun, fsmRun, inputStream, input );
+	attachIgnore( prg, sp, pdaRun, input );
+
+	assert( pdaRun->input == 0 );
+	pdaRun->input = input;
+	parseToken( prg, sp, pdaRun, fsmRun, inputStream, PteToken );
 		
 	/* Check the result. */
 	if ( pdaRun->parseError ) {
@@ -744,17 +772,6 @@ void sendHandleError( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, I
 			pdaRun->stopParsing = true;
 		}
 	}
-}
-
-void ignoreTree( Program *prg, PdaRun *pdaRun, Tree *tree )
-{
-	/* Add the ignore string to the head of the ignore list. */
-	Kid *ignore = kidAllocate( prg );
-	ignore->tree = tree;
-
-	/* Prepend it to the list of ignore tokens. */
-	ignore->next = pdaRun->accumIgnore;
-	pdaRun->accumIgnore = ignore;
 }
 
 void execGen( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long id )
@@ -791,10 +808,6 @@ void sendIgnore( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmR
 
 	/* Send it to the pdaRun. */
 	ignoreTree( prg, pdaRun, tree );
-
-//	Kid *kid = kidAllocate( prg );
-//	kid->tree = tree;
-//	parseToken( sp, pdaRun, fsmRun, inputStream, kid );
 }
 
 Head *extractMatch( Program *prg, FsmRun *fsmRun, InputStream *inputStream )
@@ -820,6 +833,16 @@ void sendToken( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRu
 	updatePosition( inputStream, fsmRun->tokstart, tokdata->length );
 
 	Kid *input = makeToken( prg, pdaRun, fsmRun, inputStream, id, tokdata, false, 0 );
+
+	incrementConsumed( pdaRun );
+
+	sendHandleError( prg, sp, pdaRun, fsmRun, inputStream, input );
+}
+
+void sendTree( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
+{
+	Kid *input = kidAllocate( prg );
+	input->tree = inputStream->funcs->getTree( inputStream );
 
 	incrementConsumed( pdaRun );
 
@@ -863,18 +886,7 @@ void sendEof( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun,
 				inputStream, frameId, code, input->tree->id, 0 );
 	}
 
-	sendWithIgnore( prg, sp, pdaRun, fsmRun, inputStream, input );
-
-	if ( pdaRun->parseError )
-		reportParseError( prg, sp, pdaRun );
-}
-
-void initInputStream( InputStream *inputStream )
-{
-	/* FIXME: correct values here. */
-	inputStream->line = 1;
-	inputStream->column = 1;
-	inputStream->byte = 0;
+	sendHandleError( prg, sp, pdaRun, fsmRun, inputStream, input );
 }
 
 void newToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun )
@@ -1084,7 +1096,7 @@ void scannerError( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fs
 		sendBackQueuedIgnore( prg, sp, inputStream, fsmRun, pdaRun );
 
 		assert( pdaRun->input == 0 );
-		parseToken( prg, sp, pdaRun, fsmRun, inputStream );
+		parseToken( prg, sp, pdaRun, fsmRun, inputStream, PteError );
 
 		if ( pdaRun->parseError ) {
 			/* Error occured in the top-level parser. */
@@ -1100,22 +1112,6 @@ void scannerError( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fs
 		reportParseError( prg, sp, pdaRun );
 		pdaRun->parseError = 1;
 	}
-}
-
-void sendTree( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
-{
-//	RunBuf *runBuf = inputStream->queue;
-//	inputStream->queue = inputStream->queue->next;
-//
-//	/* FIXME: using runbufs here for this is a poor use of memory. */
-//	input->tree = runBuf->tree;
-//	delete runBuf;
-	Kid *input = kidAllocate( prg );
-	input->tree = inputStream->funcs->getTree( inputStream );
-
-	incrementConsumed( pdaRun );
-
-	sendHandleError( prg, sp, pdaRun, fsmRun, inputStream, input );
 }
 
 void sendTreeIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )

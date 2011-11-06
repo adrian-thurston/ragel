@@ -303,8 +303,21 @@ void pdaRunMatch(  PdaRun *pdaRun, Kid *tree, Kid *pattern );
 /* Offset can be used to look at the next nextRegionInd. */
 int pdaRunGetNextRegion( PdaRun *pdaRun, int offset );
 
-void ignoreTree( struct ColmProgram *prg, PdaRun *pdaRun, Tree *tree );
-void parseToken( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
+enum ParseTokenEntry
+{
+	PteToken,
+	PteError
+};
+
+enum ParseTokenResult
+{
+	PtrDone,
+	PteReduction
+};
+
+enum ParseTokenResult parseToken( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, 
+		FsmRun *fsmRun, InputStream *inputStream, enum ParseTokenEntry entry );
+
 long undoParse( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Tree *tree );
 
 Head *streamPull( struct ColmProgram *prg, FsmRun *fsmRun, InputStream *inputStream, long length );
@@ -320,8 +333,6 @@ void sendBack( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRu
 void unbind( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, Tree *tree );
 void queueBackTree( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
 void addNoToken( struct ColmProgram *prg, PdaRun *parser );
-void sendQueuedTokens( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
-void sendHandleError( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
 Kid *makeToken( struct ColmProgram *prg, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, int id,
 		Head *tokdata, int namedLangEl, int bindId );
 void makeTokenPushBinding( PdaRun *pdaRun, int bindId, Tree *tree );
@@ -330,13 +341,8 @@ void executeGenerationAction( struct ColmProgram *prg, Tree **sp, FsmRun *fsmRun
 Kid *extractIgnore( PdaRun *pdaRun );
 void sendBackQueuedIgnore( struct ColmProgram *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun );
 void clearIgnoreList( struct ColmProgram *prg, Tree **sp, Kid *kid );
-void sendWithIgnore( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
 Head *extractMatch( struct ColmProgram *prg, FsmRun *fsmRun, InputStream *inputStream );
-void execGen( struct ColmProgram *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long id );
-void sendIgnore( struct ColmProgram *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long id );
 Head *extractMatch( struct ColmProgram *prg, FsmRun *fsmRun, InputStream *inputStream );
-void sendToken( struct ColmProgram *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long id );
-void sendEof( struct ColmProgram *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun );
 void initInputStream( InputStream *in );
 void newToken( struct ColmProgram *prg, PdaRun *pdaRun, FsmRun *fsmRun );
 void breakRunBuf( FsmRun *fsmRun );
@@ -346,6 +352,10 @@ void parseLoop( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmR
 void initBindings( PdaRun *pdaRun );
 Tree *getParsedRoot( PdaRun *pdaRun, int stop );
 void pushBtPoint( struct ColmProgram *prg, PdaRun *pdaRun, Tree *tree );
+void sendHandleError( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
+		InputStream *inputStream, Kid *input );
+void undoParseStream( struct ColmProgram *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun, 
+		PdaRun *pdaRun, long consumed );
 
 #ifdef __cplusplus
 }

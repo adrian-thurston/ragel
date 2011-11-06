@@ -223,19 +223,9 @@ Word streamAppend( Program *prg, Tree **sp, Tree *input, Stream *stream )
 	}
 }
 
-void undoParseStream( Program *prg, Tree **sp, Stream *input, Accum *accum, long consumed )
+void undoParseStreamBc( Program *prg, Tree **sp, Stream *input, Accum *accum, long consumed )
 {
-	if ( consumed < accum->pdaRun->consumed ) {
-		accum->pdaRun->numRetry += 1;
-		accum->pdaRun->targetConsumed = consumed;
-		assert( accum->pdaRun->input == 0 );
-		parseToken( prg, sp, accum->pdaRun, accum->fsmRun, input->in );
-		accum->pdaRun->targetConsumed = -1;
-		accum->pdaRun->numRetry -= 1;
-
-		accum->fsmRun->region = pdaRunGetNextRegion( accum->pdaRun, 0 );
-		accum->fsmRun->cs = accum->fsmRun->tables->entryByRegion[accum->fsmRun->region];
-	}
+	undoParseStream( prg, sp, input->in, accum->fsmRun, accum->pdaRun, consumed );
 }
 
 Tree *parseFinish( Program *prg, Tree **sp, Accum *accum, int revertOn )
@@ -2142,7 +2132,7 @@ again:
 
 			debug( REALM_BYTECODE, "IN_PARSE_FRAG_BKT %ld", consumed );
 
-			undoParseStream( prg, sp, (Stream*)input, (Accum*)accum, consumed );
+			undoParseStreamBc( prg, sp, (Stream*)input, (Accum*)accum, consumed );
 
 			treeDownref( prg, sp, accum );
 			treeDownref( prg, sp, input );
@@ -2189,7 +2179,7 @@ again:
 
 			debug( REALM_BYTECODE, "IN_PARSE_FINISH_BKT\n" );
 
-			undoParseStream( prg, sp, ((Accum*)accum)->stream, (Accum*)accum, consumed );
+			undoParseStreamBc( prg, sp, ((Accum*)accum)->stream, (Accum*)accum, consumed );
 			((Accum*)accum)->stream->in->eof = false;
 
 			/* This needs an implementation. */
