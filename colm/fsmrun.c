@@ -268,7 +268,14 @@ void undoParseStream( Program *prg, Tree **sp, InputStream *inputStream, FsmRun 
 		pdaRun->targetConsumed = consumed;
 
 		assert( pdaRun->input == 0 );
-		parseToken( prg, sp, pdaRun, fsmRun, inputStream, PteError );
+
+		enum ParseTokenResult ptr = parseToken( prg, sp, pdaRun, fsmRun,
+				inputStream, PteError );
+
+		while ( ptr == PtrReduction )
+			ptr = parseToken( prg, sp, pdaRun, fsmRun, inputStream, PteReduction );
+
+		assert( ptr == PtrDone );
 
 		pdaRun->targetConsumed = -1;
 		pdaRun->numRetry -= 1;
@@ -759,7 +766,14 @@ void sendHandleError( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, I
 
 	assert( pdaRun->input == 0 );
 	pdaRun->input = input;
-	parseToken( prg, sp, pdaRun, fsmRun, inputStream, PteToken );
+
+	enum ParseTokenResult ptr = parseToken( prg, sp, pdaRun, fsmRun,
+			inputStream, PteToken );
+	
+	while ( ptr == PtrReduction )
+		ptr = parseToken( prg, sp, pdaRun, fsmRun, inputStream, PteReduction );
+
+	assert( ptr == PtrDone );
 		
 	/* Check the result. */
 	if ( pdaRun->parseError ) {
@@ -1096,7 +1110,14 @@ void scannerError( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fs
 		sendBackQueuedIgnore( prg, sp, inputStream, fsmRun, pdaRun );
 
 		assert( pdaRun->input == 0 );
-		parseToken( prg, sp, pdaRun, fsmRun, inputStream, PteError );
+
+		enum ParseTokenResult ptr = parseToken( prg, sp, pdaRun, fsmRun,
+				inputStream, PteError );
+
+		while ( ptr == PtrReduction )
+			ptr = parseToken( prg, sp, pdaRun, fsmRun, inputStream, PteReduction );
+
+		assert( ptr == PtrDone );
 
 		if ( pdaRun->parseError ) {
 			/* Error occured in the top-level parser. */

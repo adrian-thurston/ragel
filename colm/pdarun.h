@@ -237,7 +237,13 @@ typedef struct _PdaRun
 	long consumed;
 	long targetConsumed;
 
+	/* Data we added when factoring out the reduction action execution. */
 	Kid *input;
+	FrameInfo *fi;
+	int reduction;
+	Kid *redLel;
+	int curState;
+	Kid *lel;
 } PdaRun;
 
 void rtCodeVectReplace( RtCodeVect *vect, long pos, const Code *val, long len );
@@ -306,13 +312,14 @@ int pdaRunGetNextRegion( PdaRun *pdaRun, int offset );
 enum ParseTokenEntry
 {
 	PteToken,
-	PteError
+	PteError,
+	PteReduction
 };
 
 enum ParseTokenResult
 {
 	PtrDone,
-	PteReduction
+	PtrReduction
 };
 
 enum ParseTokenResult parseToken( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, 
