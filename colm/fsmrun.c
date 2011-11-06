@@ -873,7 +873,7 @@ void initInputStream( InputStream *inputStream )
 	inputStream->byte = 0;
 }
 
-void newToken( PdaRun *pdaRun, FsmRun *fsmRun )
+void newToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun )
 {
 	/* Init the scanner vars. */
 	fsmRun->act = 0;
@@ -1143,7 +1143,7 @@ void parseLoop( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputSt
 			inputStream->eofSent = true;
 			sendEof( prg, sp, inputStream, fsmRun, pdaRun );
 
-			newToken( pdaRun, fsmRun );
+			newToken( prg, pdaRun, fsmRun );
 
 			if ( pdaRun->parseError )
 				break;
@@ -1180,7 +1180,7 @@ void parseLoop( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputSt
 				sendToken( prg, sp, inputStream, fsmRun, pdaRun, tokenId );
 		}
 
-		newToken( pdaRun, fsmRun );
+		newToken( prg, pdaRun, fsmRun );
 
 		/* Fall through here either when the input buffer has been exhausted
 		 * or the scanner is in an error state. Otherwise we must continue. */

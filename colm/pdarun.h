@@ -336,7 +336,7 @@ Head *extractMatch( struct ColmProgram *prg, FsmRun *fsmRun, InputStream *inputS
 void sendToken( struct ColmProgram *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long id );
 void sendEof( struct ColmProgram *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun );
 void initInputStream( InputStream *in );
-void newToken( PdaRun *pdaRun, FsmRun *fsmRun );
+void newToken( struct ColmProgram *prg, PdaRun *pdaRun, FsmRun *fsmRun );
 void breakRunBuf( FsmRun *fsmRun );
 void fsmExecute( FsmRun *fsmRun, InputStream *inputStream );
 void sendNamedLangEl( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );

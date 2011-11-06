@@ -819,7 +819,7 @@ Tree *createGeneric( Program *prg, long genericId )
 			initPdaRun( accum->pdaRun, prg, prg->rtd->pdaTables, 
 					accum->fsmRun, genericInfo->parserId, false, false, 0 );
 			initFsmRun( accum->fsmRun, prg );
-			newToken( accum->pdaRun, accum->fsmRun );
+			newToken( prg, accum->pdaRun, accum->fsmRun );
 
 			newGeneric = (Tree*) accum;
 			break;
@@ -2097,7 +2097,7 @@ rec_call:
 
 	/* Print contents. */
 	if ( kid->tree->id < prg->rtd->firstNonTermId ) {
-		debug( DBG_PRINT, "printing terminal %p\n", kid->tree );
+		debug( REALM_PRINT, "printing terminal %p\n", kid->tree );
 		if ( kid->tree->id != 0 ) {
 			printFlags |= IPF_TERM_PRINTED;
 			printArgs->printTerm( prg, sp, printArgs, kid );
@@ -2162,7 +2162,7 @@ skip_null:
 	rt = (enum ReturnType)vm_pop();
 	switch ( rt ) {
 		case Done:
-			debug( RELAM_PRINT, "return: done\n" );
+			debug( REALM_PRINT, "return: done\n" );
 			goto rec_return_top;
 			break;
 		case CollectIgnoreLeft:

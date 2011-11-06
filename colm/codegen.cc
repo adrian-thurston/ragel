@@ -24,6 +24,7 @@
 #include "redfsm.h"
 #include "bstmap.h"
 #include "fsmrun.h"
+#include "debug.h"
 #include <sstream>
 #include <string>
 #include <assert.h>
@@ -200,7 +201,7 @@ void FsmCodeGen::writeMain()
 		"int main( int argc, const char **argv )\n"
 		"{\n"
 		"	struct ColmProgram *prg;\n"
-		"	colmInit( 0 );\n"
+		"	colmInit( " << colmActiveRealm << " );\n"
 		"	prg = colmNewProgram( &main_runtimeData, argc, argv );\n"
 		"	colmRunProgram( prg );\n"
 		"	colmDeleteProgram( prg );\n"

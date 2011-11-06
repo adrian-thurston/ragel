@@ -381,9 +381,9 @@ bool inSourceTree( const char *argv0 )
 	return false;
 }
 
-void process_args( int argc, const char **argv )
+void processArgs( int argc, const char **argv )
 {
-	ParamCheck pc( "e:LI:vdlio:S:M:vHh?-:sV", argc, argv );
+	ParamCheck pc( "D:e:LI:vdlio:S:M:vHh?-:sV", argc, argv );
 
 	while ( pc.check() ) {
 		switch ( pc.state ) {
@@ -446,6 +446,26 @@ void process_args( int argc, const char **argv )
 			case 'e':
 				gblExportTo = pc.parameterArg;
 				break;
+			case 'D':
+#if DEBUG
+				if ( strcmp( pc.parameterArg, "BYTECODE" ) == 0 )
+					colmActiveRealm |= REALM_BYTECODE;
+				else if ( strcmp( pc.parameterArg, "PARSE" ) == 0 )
+					colmActiveRealm |= REALM_PARSE;
+				else if ( strcmp( pc.parameterArg, "MATCH" ) == 0 )
+					colmActiveRealm |= REALM_MATCH;
+				else if ( strcmp( pc.parameterArg, "COMPILE" ) == 0 )
+					colmActiveRealm |= REALM_COMPILE;
+				else if ( strcmp( pc.parameterArg, "POOL" ) == 0 )
+					colmActiveRealm |= REALM_POOL;
+				else if ( strcmp( pc.parameterArg, "PRINT" ) == 0 )
+					colmActiveRealm |= REALM_PRINT;
+				else
+					fatal( "unknown argument to -D %s\n", pc.parameterArg );
+#else
+				fatal("-D option specified but debugging messsages not compiled in");
+#endif
+				
 			}
 			break;
 
@@ -471,7 +491,7 @@ void process_args( int argc, const char **argv )
 /* Main, process args and call yyparse to start scanning input. */
 int main(int argc, const char **argv)
 {
-	process_args( argc, argv );
+	processArgs( argc, argv );
 
 	if ( verbose ) {
 		colm_log_bytecode = 1;

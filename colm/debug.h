@@ -23,9 +23,11 @@
 extern "C" {
 #endif
 
+#include "config.h"
+
 void fatal( const char *fmt, ... );
 
-#ifdef COLM_LOG
+#ifdef DEBUG
 #define debug( realm, ... ) _debug( realm, __VA_ARGS__ )
 #define check_realm( realm ) _check_realm( realm )
 #else
