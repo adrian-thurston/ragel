@@ -39,12 +39,6 @@
 	#error "SIZEOF_LONG contained an unexpected value"
 #endif
 
-#undef COLM_LOG
-#undef COLM_LOG_BYTECODE
-#undef COLM_LOG_PARSE
-#undef COLM_LOG_MATCH
-#undef COLM_LOG_COMPILE
-
 #define true 1
 #define false 0
 
@@ -52,10 +46,10 @@
 #define vm_top_off(n) (sp[n])
 #define vm_popn(n) (sp += (n))
 #define vm_pushn(n) (sp -= (n))
-#define vm_local(o) (exec->frame[o])
-#define vm_plocal(o) (&exec->frame[o])
-#define vm_local_iframe(o) (exec->iframe[o])
-#define vm_plocal_iframe(o) (&exec->iframe[o])
+#define vm_local(o) (exec->framePtr[o])
+#define vm_plocal(o) (&exec->framePtr[o])
+#define vm_local_iframe(o) (exec->iframePtr[o])
+#define vm_plocal_iframe(o) (&exec->iframePtr[o])
 
 #define read_byte( i ) do { \
 	i = ((uchar) *instr++); \
@@ -416,16 +410,86 @@ Tree *constructArgv( Program *prg, int argc, const char **argv )
  * Execution environment
  */
 
-void initExecution( Execution *exec, Program *prg, RtCodeVect *rcodeCollect,
-		PdaRun *pdaRun, FsmRun *fsmRun, Code *code, Tree *lhs,
+void initProgramExecution( Execution *exec, Program *prg, RtCodeVect *rcodeCollect,
+		PdaRun *pdaRun, FsmRun *fsmRun, int frameId, Code *code, Tree *lhs,
 		long genId, Head *matchText, char **captures )
 {
 	exec->prg = prg;
 	exec->pdaRun = pdaRun;
 	exec->fsmRun = fsmRun;
 	exec->code = code;
-	exec->frame = 0;
-	exec->iframe = 0;
+	exec->framePtr = 0;
+	exec->iframePtr = 0;
+	exec->frameId = frameId;
+	exec->lhs = lhs;
+	exec->parsed = 0;
+	exec->genId = genId;
+	exec->matchText = matchText;
+	exec->reject = false;
+	exec->rcodeCollect = rcodeCollect;
+	exec->rcodeUnitLen = 0;
+	exec->captures = captures;
+
+	assert( lhs == 0 || lhs->refs == 1 );
+}
+
+void initGenerationExecution( Execution *exec, Program *prg, RtCodeVect *rcodeCollect,
+		PdaRun *pdaRun, FsmRun *fsmRun, int frameId, Code *code, Tree *lhs,
+		long genId, Head *matchText, char **captures )
+{
+	exec->prg = prg;
+	exec->pdaRun = pdaRun;
+	exec->fsmRun = fsmRun;
+	exec->code = code;
+	exec->framePtr = 0;
+	exec->iframePtr = 0;
+	exec->frameId = frameId;
+	exec->lhs = lhs;
+	exec->parsed = 0;
+	exec->genId = genId;
+	exec->matchText = matchText;
+	exec->reject = false;
+	exec->rcodeCollect = rcodeCollect;
+	exec->rcodeUnitLen = 0;
+	exec->captures = captures;
+
+	assert( lhs == 0 || lhs->refs == 1 );
+}
+
+void initReductionExecution( Execution *exec, Program *prg, RtCodeVect *rcodeCollect,
+		PdaRun *pdaRun, FsmRun *fsmRun, int frameId, Code *code, Tree *lhs,
+		long genId, Head *matchText, char **captures )
+{
+	exec->prg = prg;
+	exec->pdaRun = pdaRun;
+	exec->fsmRun = fsmRun;
+	exec->code = code;
+	exec->framePtr = 0;
+	exec->iframePtr = 0;
+	exec->frameId = frameId;
+	exec->lhs = lhs;
+	exec->parsed = 0;
+	exec->genId = genId;
+	exec->matchText = matchText;
+	exec->reject = false;
+	exec->rcodeCollect = rcodeCollect;
+	exec->rcodeUnitLen = 0;
+	exec->captures = captures;
+
+	assert( lhs == 0 || lhs->refs == 1 );
+}
+
+void initReverseExecution( Execution *exec, Program *prg, RtCodeVect *rcodeCollect,
+		PdaRun *pdaRun, FsmRun *fsmRun, int frameId, Code *code, Tree *lhs,
+		long genId, Head *matchText, char **captures )
+{
+	exec->prg = prg;
+	exec->pdaRun = pdaRun;
+	exec->fsmRun = fsmRun;
+	exec->code = code;
+	exec->framePtr = 0;
+	exec->iframePtr = 0;
+	exec->frameId = frameId;
 	exec->lhs = lhs;
 	exec->parsed = 0;
 	exec->genId = genId;
@@ -686,6 +750,7 @@ void mainExecution( Execution *exec )
 
 	/* Set up the stack as if we have called. We allow a return value. */
 	vm_push( 0 ); 
+	vm_push( 0 );
 	vm_push( 0 );
 	vm_push( 0 );
 
@@ -1032,7 +1097,7 @@ again:
 						mark[ca->mark_enter], mark[ca->mark_leave] - mark[ca->mark_enter] );
 				Tree *string = constructString( prg, data );
 				treeUpref( string );
-				setLocal( exec->frame, -1 - i, string );
+				setLocal( exec->framePtr, -1 - i, string );
 			}
 			break;
 		}
@@ -1065,8 +1130,8 @@ again:
 			uiter->stackRoot[-IFR_AA + IFR_RIN] = (SW)instr;
 
 			instr = uiter->resume;
-			exec->frame = uiter->frame;
-			exec->iframe = &uiter->stackRoot[-IFR_AA];
+			exec->framePtr = uiter->frame;
+			exec->iframePtr = &uiter->stackRoot[-IFR_AA];
 			break;
 		}
 		case IN_UITER_GET_CUR_R: {
@@ -1125,7 +1190,7 @@ again:
 
 			debug( REALM_BYTECODE, "IN_GET_LOCAL_WC\n" );
 
-			Tree *split = getLocalSplit( prg, exec->frame, field );
+			Tree *split = getLocalSplit( prg, exec->framePtr, field );
 			treeUpref( split );
 			vm_push( split );
 			break;
@@ -1138,7 +1203,7 @@ again:
 
 			Tree *val = vm_pop();
 			treeDownref( prg, sp, vm_local(field) );
-			setLocal( exec->frame, field, val );
+			setLocal( exec->framePtr, field, val );
 			break;
 		}
 		case IN_SAVE_RET: {
@@ -2400,7 +2465,8 @@ again:
 
 			/* Push the next pointer first, then the kid. */
 			TreeIter *iter = (TreeIter*) vm_plocal(field);
-			vm_push( (SW)&iter->ref );
+			Ref *ref = &iter->ref;
+			vm_push( (SW)ref );
 			vm_push( (SW)iter->ref.kid );
 			break;
 		}
@@ -2927,7 +2993,7 @@ again:
 
 			debug( REALM_BYTECODE, "IN_INIT_LOCALS\n" );
 
-			exec->frame = vm_ptop();
+			exec->framePtr = vm_ptop();
 			vm_pushn( size );
 			memset( vm_ptop(), 0, sizeof(Word) * size );
 			break;
@@ -2940,7 +3006,7 @@ again:
 			debug( REALM_BYTECODE, "IN_POP_LOCALS\n" );
 
 			FrameInfo *fi = &prg->rtd->frameInfo[frameId];
-			downrefLocalTrees( prg, sp, exec->frame, fi->trees, fi->treesLen );
+			downrefLocalTrees( prg, sp, exec->framePtr, fi->trees, fi->treesLen );
 			vm_popn( size );
 			break;
 		}
@@ -2954,10 +3020,11 @@ again:
 
 			vm_push( 0 ); /* Return value. */
 			vm_push( (SW)instr );
-			vm_push( (SW)exec->frame );
+			vm_push( (SW)exec->framePtr );
+			vm_push( (SW)exec->frameId );
 
 			instr = prg->rtd->frameInfo[fi->frameId].codeWV;
-			exec->frame = vm_ptop();
+			exec->framePtr = vm_ptop();
 			break;
 		}
 		case IN_CALL_WC: {
@@ -2970,10 +3037,11 @@ again:
 
 			vm_push( 0 ); /* Return value. */
 			vm_push( (SW)instr );
-			vm_push( (SW)exec->frame );
+			vm_push( (SW)exec->framePtr );
+			vm_push( (SW)exec->frameId );
 
 			instr = prg->rtd->frameInfo[fi->frameId].codeWC;
-			exec->frame = vm_ptop();
+			exec->framePtr = vm_ptop();
 			break;
 		}
 		case IN_YIELD: {
@@ -2992,12 +3060,12 @@ again:
 				uiter->ref.next = next;
 				uiter->stackSize = uiter->stackRoot - vm_ptop();
 				uiter->resume = instr;
-				uiter->frame = exec->frame;
+				uiter->frame = exec->framePtr;
 
 				/* Restore the instruction and frame pointer. */
 				instr = (Code*) vm_local_iframe(IFR_RIN);
-				exec->frame = (Tree**) vm_local_iframe(IFR_RFR);
-				exec->iframe = (Tree**) vm_local_iframe(IFR_RIF);
+				exec->framePtr = (Tree**) vm_local_iframe(IFR_RFR);
+				exec->iframePtr = (Tree**) vm_local_iframe(IFR_RIF);
 
 				/* Return the yield result on the top of the stack. */
 				Tree *result = uiter->ref.kid != 0 ? prg->trueVal : prg->falseVal;
@@ -3025,8 +3093,8 @@ again:
 			 * uiter advance will set it. The frame we need to do because it
 			 * is set once for the lifetime of the iterator. */
 			vm_push( 0 );            /* Return instruction pointer,  */
-			vm_push( (SW)exec->iframe ); /* Return iframe. */
-			vm_push( (SW)exec->frame );  /* Return frame. */
+			vm_push( (SW)exec->iframePtr ); /* Return iframe. */
+			vm_push( (SW)exec->framePtr );  /* Return frame. */
 
 			uiterInit( prg, sp, uiter, fi, true );
 			break;
@@ -3050,8 +3118,8 @@ again:
 			 * uiter advance will set it. The frame we need to do because it
 			 * is set once for the lifetime of the iterator. */
 			vm_push( 0 );            /* Return instruction pointer,  */
-			vm_push( (SW)exec->iframe ); /* Return iframe. */
-			vm_push( (SW)exec->frame );  /* Return frame. */
+			vm_push( (SW)exec->iframePtr ); /* Return iframe. */
+			vm_push( (SW)exec->framePtr );  /* Return frame. */
 
 			uiterInit( prg, sp, uiter, fi, false );
 			break;
@@ -3075,10 +3143,11 @@ again:
 			debug( REALM_BYTECODE, "IN_RET %ld\n", fui->name );
 
 			FrameInfo *fi = &prg->rtd->frameInfo[fui->frameId];
-			downrefLocalTrees( prg, sp, exec->frame, fi->trees, fi->treesLen );
+			downrefLocalTrees( prg, sp, exec->framePtr, fi->trees, fi->treesLen );
 
 			vm_popn( fui->frameSize );
-			exec->frame = (Tree**) vm_pop();
+			exec->frameId = (long) vm_pop();
+			exec->framePtr = (Tree**) vm_pop();
 			instr = (Code*) vm_pop();
 			Tree *retVal = vm_pop();
 			vm_popn( fui->argSize );
@@ -3114,6 +3183,7 @@ again:
 			Int *status = (Int*)vm_pop();
 			prg->exitStatus = status->value;
 			prg->induceExit = 1;
+			treeDownref( prg, sp, global );
 			goto out;
 		}
 		case IN_ERROR: {
@@ -3124,6 +3194,7 @@ again:
 			treeDownref( prg, sp, global );
 			treeUpref( prg->lastParseError );
 			vm_push( prg->lastParseError );
+			treeDownref( prg, sp, global );
 			break;
 		}
 		case IN_OPEN_FILE: {

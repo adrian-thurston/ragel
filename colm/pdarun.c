@@ -573,7 +573,7 @@ again:
 		assert( redLel->tree->refs == 1 );
 
 		/* Copy RHS elements in the production. */
-		{
+//		{
 //			unsigned char *copy = prg->rtd->prodInfo[reduction].copy;
 //			if ( copy != 0 ) {
 //				int i, copyLen = prg->rtd->prodInfo[reduction].copyLen;
@@ -585,7 +585,7 @@ again:
 //					setField( prg, redLel->tree, field, val );
 //				}
 //			}
-		}
+//		}
 
 		if ( prg->ctxDepParsing && prg->rtd->prodInfo[reduction].frameId >= 0 ) {
 			/* Frame info for reduction. */
@@ -593,8 +593,9 @@ again:
 
 			/* Execution environment for the reduction code. */
 			Execution exec;
-			initExecution( &exec, prg, &pdaRun->rcodeCollect, 
-					pdaRun, fsmRun, fi->codeWV, redLel->tree, 0, 0, fsmRun->mark );
+			initReductionExecution( &exec, prg, &pdaRun->rcodeCollect, 
+					pdaRun, fsmRun, prg->rtd->prodInfo[reduction].frameId, 
+					fi->codeWV, redLel->tree, 0, 0, fsmRun->mark );
 
 			reductionExecution( &exec, sp );
 
@@ -739,8 +740,8 @@ parse_error:
 			/* Check for an execution environment. */
 			if ( undoLel->tree->flags & AF_HAS_RCODE ) {
 				Execution exec;
-				initExecution( &exec, prg, &pdaRun->rcodeCollect, 
-						pdaRun, fsmRun, 0, 0, 0, 0, fsmRun->mark );
+				initReverseExecution( &exec, prg, &pdaRun->rcodeCollect, 
+						pdaRun, fsmRun, -1, 0, 0, 0, 0, fsmRun->mark );
 
 				/* Do the reverse exeuction. */
 				reverseExecution( &exec, sp, &pdaRun->reverseCode );

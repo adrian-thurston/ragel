@@ -14,7 +14,8 @@ TESTS = \
 	mutualrec.lm \
 	argv1.lm \
 	argv2.lm \
-	exit.lm \
+	exit1.lm \
+	exit2.lm \
 	rubyhere.lm \
 	translate1.lm \
 	translate2.lm \
@@ -72,7 +73,8 @@ DIFFS = \
 	mutualrec.diff \
 	argv1.diff \
 	argv2.diff \
-	exit.diff \
+	exit1.diff \
+	exit2.diff \
 	rubyhere.diff \
 	translate1.diff \
 	translate2.diff \
@@ -221,14 +223,21 @@ argv2.out: argv2.bin
 
 argv2.bin: argv2.lm ./../colm/colm
 	./../colm/colm argv2.lm
-exit.diff: exit.out exit.exp
-	@diff -u exit.exp exit.out > exit.diff || ( cat exit.diff; rm exit.diff )
+exit1.diff: exit1.out exit1.exp
+	@diff -u exit1.exp exit1.out > exit1.diff || ( cat exit1.diff; rm exit1.diff )
+exit2.diff: exit2.out exit2.exp
+	@diff -u exit2.exp exit2.out > exit2.diff || ( cat exit2.diff; rm exit2.diff )
 
-exit.out: exit.bin
-	./exit.bin  > exit.out
+exit1.out: exit1.bin
+	./exit1.bin  > exit1.out
 
-exit.bin: exit.lm ./../colm/colm
-	./../colm/colm exit.lm
+exit2.out: exit2.bin
+	./exit2.bin  > exit2.out
+
+exit1.bin: exit1.lm ./../colm/colm
+	./../colm/colm exit1.lm
+exit2.bin: exit2.lm ./../colm/colm
+	./../colm/colm exit2.lm
 rubyhere.diff: rubyhere.out rubyhere.exp
 	@diff -u rubyhere.exp rubyhere.out > rubyhere.diff || ( cat rubyhere.diff; rm rubyhere.diff )
 

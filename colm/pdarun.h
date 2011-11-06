@@ -324,7 +324,7 @@ Kid *makeToken( struct ColmProgram *prg, PdaRun *pdaRun, FsmRun *fsmRun, InputSt
 		Head *tokdata, int namedLangEl, int bindId );
 void makeTokenPushBinding( PdaRun *pdaRun, int bindId, Tree *tree );
 void executeGenerationAction( struct ColmProgram *prg, Tree **sp, FsmRun *fsmRun, PdaRun *pdaRun, 
-		InputStream *inputStream, Code *code, long id, Head *tokdata );
+		InputStream *inputStream, int frameId, Code *code, long id, Head *tokdata );
 Kid *extractIgnore( PdaRun *pdaRun );
 void sendBackQueuedIgnore( struct ColmProgram *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun );
 void clearIgnoreList( struct ColmProgram *prg, Tree **sp, Kid *kid );

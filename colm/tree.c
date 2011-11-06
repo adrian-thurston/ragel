@@ -1435,7 +1435,7 @@ Tree *setListMem( List *list, Half field, Tree *value )
 TreePair mapRemove( Program *prg, Map *map, Tree *key )
 {
 	MapEl *mapEl = mapImplFind( prg, map, key );
-	TreePair result;
+	TreePair result = { 0, 0 };
 	if ( mapEl != 0 ) {
 		mapDetach( prg, map, mapEl );
 		result.key = mapEl->key;

@@ -1,4 +1,4 @@
 
 print( 'before\n' )
-exit( 1 )
+exit( 0 )
 print( 'after\n' )

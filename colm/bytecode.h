@@ -360,12 +360,13 @@ typedef unsigned char uchar;
  */
 
 /* Number of spots in the frame, after the args. */
-#define FR_AA 3
+#define FR_AA 4
 
 /* Positions relative to the frame pointer. */
-#define FR_RV 2    /* return value */
-#define FR_RI 1    /* return instruction */
-#define FR_RF 0    /* return frame pointer */
+#define FR_RV  3    /* return value */
+#define FR_RI  2    /* return instruction */
+#define FR_RFP 1    /* return frame pointer */
+#define FR_RFD 0    /* return frame id. */
 
 /*
  * Calling Convention:
@@ -373,9 +374,10 @@ typedef unsigned char uchar;
  *   a2
  *   a3
  *   ...
- *   return value FR_RV
- *   return instr FR_RI
- *   return frame FR_RF
+ *   return value      FR_RV
+ *   return instr      FR_RI
+ *   return frame ptr  FR_RFP
+ *   return frame id   FR_RFD
  */
 
 /*
@@ -392,16 +394,11 @@ typedef unsigned char uchar;
 #define IFR_RFR 0    /* return frame pointer */
 
 /* Exported to modules other than bytecode.c */
-#define vm_push(i) /*if ( sp == prg->se ) vm_grow( prg ); */(*(--sp) = (i))
+#define vm_push(i) /*if ( sp == prg->se ) vm_grow( prg ); */ (*(--sp) = (i))
 #define vm_pop() (*sp++)
 #define vm_top() (*sp)
 #define vm_ptop() (sp)
 #define vm_pop_ignore() (sp++)
-
-//#define  push(i) (*(--sp) = (i))
-//#define  pop() (*sp++)
-//#define  top() (*sp)
-//#define  ptop() (sp)
 
 void vm_grow( struct ColmProgram * );
 
@@ -422,8 +419,9 @@ typedef struct _Execution
 	PdaRun *pdaRun;
 	FsmRun *fsmRun;
 	Code *code;
-	Tree **frame;
-	Tree **iframe;
+	Tree **framePtr;
+	Tree **iframePtr;
+	int frameId;
 
 	/* The left hand side passed in and the saved left hand side in case we
 	 * need to preserve it for backtracking before we write to it. */
@@ -461,8 +459,20 @@ Head *intToStr( struct ColmProgram *prg, Word i );
 
 Tree *constructString( struct ColmProgram *prg, Head *s );
 
-void initExecution( Execution *exec, struct ColmProgram *prg, RtCodeVect *reverseCode,
-		PdaRun *pdaRun, FsmRun *fsmRun, Code *code, Tree *lhs,
+void initProgramExecution( Execution *exec, struct ColmProgram *prg, RtCodeVect *reverseCode,
+		PdaRun *pdaRun, FsmRun *fsmRun, int frameId, Code *code, Tree *lhs,
+		long genId, Head *matchText, char **captures );
+
+void initReductionExecution( Execution *exec, struct ColmProgram *prg, RtCodeVect *reverseCode,
+		PdaRun *pdaRun, FsmRun *fsmRun, int frameId, Code *code, Tree *lhs,
+		long genId, Head *matchText, char **captures );
+
+void initGenerationExecution( Execution *exec, struct ColmProgram *prg, RtCodeVect *reverseCode,
+		PdaRun *pdaRun, FsmRun *fsmRun, int frameId, Code *code, Tree *lhs,
+		long genId, Head *matchText, char **captures );
+
+void initReverseExecution( Execution *exec, struct ColmProgram *prg, RtCodeVect *reverseCode,
+		PdaRun *pdaRun, FsmRun *fsmRun, int frameId, Code *code, Tree *lhs,
 		long genId, Head *matchText, char **captures );
 
 void mainExecution( Execution *exec );

@@ -14,7 +14,8 @@ TEST_CASES = \
 	mutualrec.lm \
 	argv1.lm \
 	argv2.lm \
-	exit.lm \
+	exit1.lm \
+	exit2.lm \
 	rubyhere.lm \
 	translate1.lm \
 	translate2.lm \
@@ -132,7 +133,8 @@ EXPECTED_OUTPUT = \
 	counting4.exp \
 	div.exp \
 	dns.exp \
-	exit.exp \
+	exit1.exp \
+	exit2.exp \
 	func.exp \
 	heredoc.exp \
 	island.exp \

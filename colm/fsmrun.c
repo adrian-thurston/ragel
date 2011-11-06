@@ -331,8 +331,8 @@ void sendBackIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, In
 		/* Check for reverse code. */
 		if ( ignore->tree->flags & AF_HAS_RCODE ) {
 			Execution exec;
-			initExecution( &exec, prg, &pdaRun->rcodeCollect, 
-					pdaRun, fsmRun, 0, 0, 0, 0, 0 );
+			initReverseExecution( &exec, prg, &pdaRun->rcodeCollect, 
+					pdaRun, fsmRun, -1, 0, 0, 0, 0, 0 );
 
 			/* Do the reverse exeuction. */
 			reverseExecution( &exec, sp, &pdaRun->reverseCode );
@@ -440,8 +440,8 @@ void sendBack( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStr
 		/* Check for reverse code. */
 		if ( input->tree->flags & AF_HAS_RCODE ) {
 			Execution exec;
-			initExecution( &exec, prg, &pdaRun->rcodeCollect, 
-					pdaRun, fsmRun, 0, 0, 0, 0, 0 );
+			initReverseExecution( &exec, prg, &pdaRun->rcodeCollect, 
+					pdaRun, fsmRun, -1, 0, 0, 0, 0, 0 );
 
 			/* Do the reverse exeuction. */
 			reverseExecution( &exec, sp, &pdaRun->reverseCode );
@@ -524,11 +524,12 @@ Kid *makeToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *input
 }
 
 void executeGenerationAction( Program *prg, Tree **sp, FsmRun *fsmRun, PdaRun *pdaRun, 
-		InputStream *inputStream, Code *code, long id, Head *tokdata )
+		InputStream *inputStream, int frameId, Code *code, long id, Head *tokdata )
 {
 	/* Execute the translation. */
 	Execution exec;
-	initExecution( &exec, prg, &pdaRun->rcodeCollect, pdaRun, fsmRun, code, 0, id, tokdata, fsmRun->mark );
+	initGenerationExecution( &exec, prg, &pdaRun->rcodeCollect, pdaRun, fsmRun, 
+			frameId, code, 0, id, tokdata, fsmRun->mark );
 	generationExecution( &exec, sp );
 
 	/* 
@@ -583,7 +584,8 @@ void generationAction( Program *prg, Tree **sp, InputStream *inputStream, FsmRun
 			prg->rtd->lelInfo[id].frameId].codeWV;
 
 	/* Execute the action and process the queue. */
-	executeGenerationAction( prg, sp, fsmRun, pdaRun, inputStream, code, id, tokdata );
+	executeGenerationAction( prg, sp, fsmRun, pdaRun, inputStream, 
+			prg->rtd->lelInfo[id].frameId, code, id, tokdata );
 
 	/* Finished with the match text. */
 	stringFree( prg, tokdata );
@@ -856,7 +858,7 @@ void sendEof( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun,
 
 		/* Execute the action and process the queue. */
 		executeGenerationAction( prg, sp, fsmRun, pdaRun,
-				inputStream, code, input->tree->id, 0 );
+				inputStream, frameId, code, input->tree->id, 0 );
 	}
 
 	sendWithIgnore( prg, sp, pdaRun, fsmRun, inputStream, input );
