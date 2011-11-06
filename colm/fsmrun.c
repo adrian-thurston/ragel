@@ -272,8 +272,19 @@ void undoParseStream( Program *prg, Tree **sp, InputStream *inputStream, FsmRun 
 		enum ParseTokenResult ptr = parseToken( prg, sp, pdaRun, fsmRun,
 				inputStream, PteError );
 
-		while ( ptr == PtrReduction )
+		while ( ptr == PtrReduction ) {
+			Execution exec;
+			pdaRun->exec = &exec;
+
+			/* Execution environment for the reduction code. */
+			initReductionExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, 
+					pdaRun, fsmRun, prg->rtd->prodInfo[pdaRun->reduction].frameId, 
+					pdaRun->fi->codeWV, pdaRun->redLel->tree, 0, 0, fsmRun->mark );
+
+			reductionExecution( pdaRun->exec, sp );
+
 			ptr = parseToken( prg, sp, pdaRun, fsmRun, inputStream, PteReduction );
+		}
 
 		assert( ptr == PtrDone );
 
@@ -770,8 +781,19 @@ void sendHandleError( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, I
 	enum ParseTokenResult ptr = parseToken( prg, sp, pdaRun, fsmRun,
 			inputStream, PteToken );
 	
-	while ( ptr == PtrReduction )
+	while ( ptr == PtrReduction ) {
+		Execution exec;
+		pdaRun->exec = &exec;
+
+		/* Execution environment for the reduction code. */
+		initReductionExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, 
+				pdaRun, fsmRun, prg->rtd->prodInfo[pdaRun->reduction].frameId, 
+				pdaRun->fi->codeWV, pdaRun->redLel->tree, 0, 0, fsmRun->mark );
+
+		reductionExecution( pdaRun->exec, sp );
+
 		ptr = parseToken( prg, sp, pdaRun, fsmRun, inputStream, PteReduction );
+	}
 
 	assert( ptr == PtrDone );
 		
@@ -1114,8 +1136,19 @@ void scannerError( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fs
 		enum ParseTokenResult ptr = parseToken( prg, sp, pdaRun, fsmRun,
 				inputStream, PteError );
 
-		while ( ptr == PtrReduction )
+		while ( ptr == PtrReduction ) {
+			Execution exec;
+			pdaRun->exec = &exec;
+
+			/* Execution environment for the reduction code. */
+			initReductionExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, 
+					pdaRun, fsmRun, prg->rtd->prodInfo[pdaRun->reduction].frameId, 
+					pdaRun->fi->codeWV, pdaRun->redLel->tree, 0, 0, fsmRun->mark );
+
+			reductionExecution( pdaRun->exec, sp );
+
 			ptr = parseToken( prg, sp, pdaRun, fsmRun, inputStream, PteReduction );
+		}
 
 		assert( ptr == PtrDone );
 

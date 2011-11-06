@@ -35,6 +35,7 @@ extern "C" {
 	#error "SIZEOF_LONG contained an unexpected value"
 #endif
 
+struct _Execution;
 
 typedef struct _RtCodeVect
 {
@@ -244,6 +245,7 @@ typedef struct _PdaRun
 	Kid *redLel;
 	int curState;
 	Kid *lel;
+	struct _Execution *exec;
 } PdaRun;
 
 void rtCodeVectReplace( RtCodeVect *vect, long pos, const Code *val, long len );

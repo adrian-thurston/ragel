@@ -375,7 +375,6 @@ enum ParseTokenResult parseToken( Program *prg, Tree **sp, PdaRun *pdaRun,
 	int induceReject;
 	int indPos;
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
-	Execution exec;
 
 	/* The scanner will send a null token if it can't find a token. */
 	switch ( entry ) {
@@ -593,29 +592,22 @@ again:
 			return PtrReduction;
 			pteReduction:
 
-			/* Execution environment for the reduction code. */
-			initReductionExecution( &exec, prg, &pdaRun->rcodeCollect, 
-					pdaRun, fsmRun, prg->rtd->prodInfo[pdaRun->reduction].frameId, 
-					pdaRun->fi->codeWV, pdaRun->redLel->tree, 0, 0, fsmRun->mark );
-
-			reductionExecution( &exec, sp );
-
 			if ( prg->induceExit )
 				goto fail;
 
 			/* If the lhs was saved and it changed then we need to restore the
 			 * original upon backtracking, otherwise downref since we took a
 			 * copy above. */
-			if ( exec.parsed != 0 && exec.parsed != pdaRun->redLel->tree ) {
+			if ( pdaRun->exec->parsed != 0 && pdaRun->exec->parsed != pdaRun->redLel->tree ) {
 				debug( REALM_PARSE, "lhs tree was modified, adding a restore instruction\n" );
 
 				/* Transfer the lhs from the environment to redLel. */
-				pdaRun->redLel->tree = prepParseTree( prg, sp, exec.lhs );
+				pdaRun->redLel->tree = prepParseTree( prg, sp, pdaRun->exec->lhs );
 				treeUpref( pdaRun->redLel->tree );
-				treeDownref( prg, sp, exec.lhs );
+				treeDownref( prg, sp, pdaRun->exec->lhs );
 
 				append( &pdaRun->rcodeCollect, IN_RESTORE_LHS );
-				appendWord( &pdaRun->rcodeCollect, (Word)exec.parsed );
+				appendWord( &pdaRun->rcodeCollect, (Word)pdaRun->exec->parsed );
 				append( &pdaRun->rcodeCollect, SIZEOF_CODE + SIZEOF_WORD );
 			}
 
@@ -626,7 +618,7 @@ again:
 
 			/* Perhaps the execution environment is telling us we need to
 			 * reject the reduction. */
-			induceReject = exec.reject;
+			induceReject = pdaRun->exec->reject;
 		}
 
 		/* If the left hand side was replaced then the only parse algorithm
