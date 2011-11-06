@@ -236,6 +236,8 @@ typedef struct _PdaRun
 
 	long consumed;
 	long targetConsumed;
+
+	Kid *input;
 } PdaRun;
 
 void rtCodeVectReplace( RtCodeVect *vect, long pos, const Code *val, long len );
@@ -302,7 +304,7 @@ void pdaRunMatch(  PdaRun *pdaRun, Kid *tree, Kid *pattern );
 int pdaRunGetNextRegion( PdaRun *pdaRun, int offset );
 
 void ignoreTree( struct ColmProgram *prg, PdaRun *pdaRun, Tree *tree );
-void parseToken( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
+void parseToken( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
 long undoParse( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Tree *tree );
 
 Head *streamPull( struct ColmProgram *prg, FsmRun *fsmRun, InputStream *inputStream, long length );

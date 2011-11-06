@@ -421,7 +421,7 @@ typedef struct _Execution
 	Code *code;
 	Tree **framePtr;
 	Tree **iframePtr;
-	int frameId;
+	long frameId;
 
 	/* The left hand side passed in and the saved left hand side in case we
 	 * need to preserve it for backtracking before we write to it. */

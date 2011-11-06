@@ -723,7 +723,9 @@ void sendWithIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, In
 		}
 	}
 
-	parseToken( prg, sp, pdaRun, fsmRun, inputStream, input );
+	assert( pdaRun->input == 0 );
+	pdaRun->input = input;
+	parseToken( prg, sp, pdaRun, fsmRun, inputStream );
 }
 
 void sendHandleError( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input )
@@ -1080,7 +1082,9 @@ void scannerError( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fs
 		debug( REALM_PARSE, "invoking parse error from the scanner\n" );
 
 		sendBackQueuedIgnore( prg, sp, inputStream, fsmRun, pdaRun );
-		parseToken( prg, sp, pdaRun, fsmRun, inputStream, 0 );
+
+		assert( pdaRun->input == 0 );
+		parseToken( prg, sp, pdaRun, fsmRun, inputStream );
 
 		if ( pdaRun->parseError ) {
 			/* Error occured in the top-level parser. */

@@ -228,7 +228,8 @@ void undoParseStream( Program *prg, Tree **sp, Stream *input, Accum *accum, long
 	if ( consumed < accum->pdaRun->consumed ) {
 		accum->pdaRun->numRetry += 1;
 		accum->pdaRun->targetConsumed = consumed;
-		parseToken( prg, sp, accum->pdaRun, accum->fsmRun, input->in, 0 );
+		assert( accum->pdaRun->input == 0 );
+		parseToken( prg, sp, accum->pdaRun, accum->fsmRun, input->in );
 		accum->pdaRun->targetConsumed = -1;
 		accum->pdaRun->numRetry -= 1;
 

@@ -167,6 +167,7 @@ void initPdaRun( PdaRun *pdaRun, Program *prg, PdaTables *tables,
 
 	pdaRun->context = splitTree( prg, context );
 	pdaRun->parseError = 0;
+	pdaRun->input = 0;
 }
 
 long stackTopTarget( Program *prg, PdaRun *pdaRun )
@@ -364,7 +365,7 @@ void pushBtPoint( Program *prg, PdaRun *pdaRun, Tree *tree )
  * shift-reduce:  cannot be a retry
  */
 
-void parseToken( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input )
+void parseToken( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 {
 	int pos, targState;
 	unsigned int *action;
@@ -377,7 +378,7 @@ void parseToken( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputS
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
 
 	/* The scanner will send a null token if it can't find a token. */
-	if ( input == 0 ) {
+	if ( pdaRun->input == 0 ) {
 		/* Grab the most recently accepted item. */
 		pushBtPoint( prg, pdaRun, pdaRun->tokenList->kid->tree );
 		goto parse_error;
@@ -385,29 +386,29 @@ void parseToken( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputS
 
 	/* The tree we are given must either be an ignore token, or it must be be
 	 * parse tree size. It also must have at least one reference. */
-	assert( lelInfo[input->tree->id].ignore || input->tree->flags & AF_PARSE_TREE );
-	assert( input->tree->refs > 0 );
+	assert( lelInfo[pdaRun->input->tree->id].ignore || pdaRun->input->tree->flags & AF_PARSE_TREE );
+	assert( pdaRun->input->tree->refs > 0 );
 
 	/* This will cause input to be lost. This 
 	 * path should be traced. */
 	if ( pdaRun->cs < 0 )
 		return;
 
-	pt(input->tree)->region = pdaRun->nextRegionInd;
-	pt(input->tree)->state = pdaRun->cs;
-	if ( pdaRun->tables->tokenRegions[pt(input->tree)->region+1] != 0 )
+	pt(pdaRun->input->tree)->region = pdaRun->nextRegionInd;
+	pt(pdaRun->input->tree)->state = pdaRun->cs;
+	if ( pdaRun->tables->tokenRegions[pt(pdaRun->input->tree)->region+1] != 0 )
 		pdaRun->numRetry += 1;
 
 again:
-	if ( input == 0 )
+	if ( pdaRun->input == 0 )
 		goto _out;
 
-	lel = input;
+	lel = pdaRun->input;
 
 	/* This can disappear. An old experiment. */
 	if ( lelInfo[lel->tree->id].ignore ) {
 		/* Consume. */
-		input = input->next;
+		pdaRun->input = pdaRun->input->next;
 
 		Tree *stTree = pdaRun->stackTop->tree;
 		if ( stTree->id == LEL_ID_IGNORE_LIST ) {
@@ -464,7 +465,7 @@ again:
 		debug( REALM_PARSE, "shifted: %s\n", 
 				prg->rtd->lelInfo[pt(lel->tree)->id].name );
 		/* Consume. */
-		input = input->next;
+		pdaRun->input = pdaRun->input->next;
 
 		pt(lel->tree)->state = pdaRun->cs;
 		lel->next = pdaRun->stackTop;
@@ -500,9 +501,9 @@ again:
 
 	if ( pdaRun->tables->commitLen[pos] != 0 ) {
 		long causeReduce = 0;
-		if ( input != 0 ) { 
-			if ( input->tree->flags & AF_HAS_RCODE )
-				causeReduce = pt(input->tree)->causeReduce;
+		if ( pdaRun->input != 0 ) { 
+			if ( pdaRun->input->tree->flags & AF_HAS_RCODE )
+				causeReduce = pt(pdaRun->input->tree)->causeReduce;
 		}
 		commitFull( prg, sp, pdaRun, causeReduce );
 	}
@@ -511,8 +512,8 @@ again:
 		int r, objectLength, reduction = *action >> 2;
 		Kid *last, *redLel, *child, *attrs;
 
-		if ( input != 0 )
-			pt(input->tree)->causeReduce += 1;
+		if ( pdaRun->input != 0 )
+			pt(pdaRun->input->tree)->causeReduce += 1;
 
 		redLel = kidAllocate( prg );
 		redLel->tree = (Tree*)parseTreeAllocate( prg );
@@ -644,8 +645,8 @@ again:
 			goto parse_error;
 		}
 		else {
-			redLel->next = input;
-			input = redLel;
+			redLel->next = pdaRun->input;
+			pdaRun->input = redLel;
 		}
 	}
 
@@ -660,24 +661,24 @@ parse_error:
 		goto fail;
 
 	while ( 1 ) {
-		if ( input != 0 ) {
-			assert( pt(input->tree)->retry_upper == 0 );
+		if ( pdaRun->input != 0 ) {
+			assert( pt(pdaRun->input->tree)->retry_upper == 0 );
 
-			if ( pt(input->tree)->retry_lower != 0 ) {
-				debug( REALM_PARSE, "found retry targ: %p\n", input );
+			if ( pt(pdaRun->input->tree)->retry_lower != 0 ) {
+				debug( REALM_PARSE, "found retry targ: %p\n", pdaRun->input );
 
 				pdaRun->numRetry -= 1;
-				pdaRun->cs = pt(input->tree)->state;
+				pdaRun->cs = pt(pdaRun->input->tree)->state;
 				goto again;
 			}
 
 			/* If there is no retry and there are no reductions caused by the
 			 * current input token then we are finished with it. Send it back. */
-			if ( pt(input->tree)->causeReduce == 0 ) {
-				int next = pt(input->tree)->region + 1;
+			if ( pt(pdaRun->input->tree)->causeReduce == 0 ) {
+				int next = pt(pdaRun->input->tree)->region + 1;
 
-				queueBackTree( prg, sp, pdaRun, fsmRun, inputStream, input );
-				input = 0;
+				queueBackTree( prg, sp, pdaRun, fsmRun, inputStream, pdaRun->input );
+				pdaRun->input = 0;
 				if ( pdaRun->tables->tokenRegions[next] != 0 ) {
 					debug( REALM_PARSE, "found a new region\n" );
 					pdaRun->numRetry -= 1;
@@ -724,8 +725,8 @@ parse_error:
 			}
 
 			/* Queue it as next input item. */
-			undoLel->next = input;
-			input = undoLel;
+			undoLel->next = pdaRun->input;
+			pdaRun->input = undoLel;
 
 			/* Record the last shifted token. Need this for attaching ignores. */
 			Ref *ref = pdaRun->tokenList;
@@ -781,21 +782,21 @@ parse_error:
 
 			/* If there is an input queued, this is one less reduction it has
 			 * caused. */
-			if ( input != 0 )
-				pt(input->tree)->causeReduce -= 1;
+			if ( pdaRun->input != 0 )
+				pt(pdaRun->input->tree)->causeReduce -= 1;
 
 			if ( pt(undoLel->tree)->retry_upper != 0 ) {
 				/* There is always an input item here because reduce
 				 * conflicts only happen on a lookahead character. */
-				assert( input != undoLel );
-				assert( input != 0 );
+				assert( pdaRun->input != undoLel );
+				assert( pdaRun->input != 0 );
 				assert( pt(undoLel->tree)->retry_lower == 0 );
-				assert( pt(input->tree)->retry_upper == 0 );
+				assert( pt(pdaRun->input->tree)->retry_upper == 0 );
 
 				/* Transfer the retry from undoLel to input. */
-				pt(input->tree)->retry_lower = pt(undoLel->tree)->retry_upper;
-				pt(input->tree)->retry_upper = 0;
-				pt(input->tree)->state = stackTopTarget( prg, pdaRun );
+				pt(pdaRun->input->tree)->retry_lower = pt(undoLel->tree)->retry_upper;
+				pt(pdaRun->input->tree)->retry_upper = 0;
+				pt(pdaRun->input->tree)->state = stackTopTarget( prg, pdaRun );
 			}
 
 			/* Free the reduced item. */
@@ -810,9 +811,10 @@ fail:
 
 	/* If we failed parsing on tree we must free it. The caller expected us to
 	 * either consume it or send it back to the input. */
-	if ( input != 0 ) {
-		treeDownref( prg, sp, input->tree );
-		kidFree( prg, input );
+	if ( pdaRun->input != 0 ) {
+		treeDownref( prg, sp, pdaRun->input->tree );
+		kidFree( prg, pdaRun->input );
+		pdaRun->input = 0;
 	}
 
 	/* FIXME: do we still need to fall through here? A fail is permanent now,
