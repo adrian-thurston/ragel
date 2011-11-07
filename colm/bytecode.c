@@ -258,7 +258,7 @@ void undoParseStreamBc( Program *prg, Tree **sp, Stream *input, Accum *accum, lo
 	undoParseStream( prg, sp, input->in, accum->fsmRun, accum->pdaRun, consumed );
 }
 
-Tree *streamPull2( Program *prg, FsmRun *fsmRun, Stream *stream, Tree *length )
+Tree *streamPullBc( Program *prg, FsmRun *fsmRun, Stream *stream, Tree *length )
 {
 	long len = ((Int*)length)->value;
 	Head *tokdata = streamPull( prg, fsmRun, stream->in, len );
@@ -2192,7 +2192,7 @@ again:
 
 			Tree *stream = vm_pop();
 			Tree *len = vm_pop();
-			Tree *string = streamPull2( prg, exec->fsmRun, (Stream*)stream, len );
+			Tree *string = streamPullBc( prg, exec->fsmRun, (Stream*)stream, len );
 			treeUpref( string );
 			vm_push( string );
 

@@ -264,35 +264,19 @@ void streamPushTree( InputStream *inputStream, Tree *tree, int ignore )
 void undoParseStream( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long consumed )
 {
 	if ( consumed < pdaRun->consumed ) {
+		/* Setup environment for going backwards until we reduced consumed to
+		 * what we want. */
 		pdaRun->numRetry += 1;
 		pdaRun->targetConsumed = consumed;
+		pdaRun->triggerUndo = 1;
 
-		assert( pdaRun->input == 0 );
+		/* The parse loop will recognise the situation. */
+		parseLoop( prg, sp, pdaRun, fsmRun, inputStream );
 
-		enum ParseTokenResult ptr = parseToken( prg, sp, pdaRun, fsmRun,
-				inputStream, PteError );
-
-		while ( ptr == PtrReduction ) {
-			Execution exec;
-			pdaRun->exec = &exec;
-
-			/* Execution environment for the reduction code. */
-			initReductionExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, 
-					pdaRun, fsmRun, prg->rtd->prodInfo[pdaRun->reduction].frameId, 
-					pdaRun->fi->codeWV, pdaRun->redLel->tree, 0, 0, fsmRun->mark );
-
-			reductionExecution( pdaRun->exec, sp );
-
-			ptr = parseToken( prg, sp, pdaRun, fsmRun, inputStream, PteReduction );
-		}
-
-		assert( ptr == PtrDone );
-
+		/* Reset environment. */
+		pdaRun->triggerUndo = 0;
 		pdaRun->targetConsumed = -1;
 		pdaRun->numRetry -= 1;
-
-		fsmRun->region = pdaRunGetNextRegion( pdaRun, 0 );
-		fsmRun->cs = fsmRun->tables->entryByRegion[fsmRun->region];
 	}
 }
 
@@ -968,6 +952,7 @@ void breakRunBuf( FsmRun *fsmRun )
 	}
 }
 
+#define SCAN_UNDO              -7
 #define SCAN_IGNORE            -6
 #define SCAN_TREE              -5
 #define SCAN_TRY_AGAIN_LATER   -4
@@ -977,6 +962,9 @@ void breakRunBuf( FsmRun *fsmRun )
 
 long scanToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 {
+	if ( pdaRun->triggerUndo )
+		return SCAN_UNDO;
+
 	while ( true ) {
 		if ( inputStream->funcs->needFlush( inputStream ) )
 			fsmRun->peof = fsmRun->pe;
@@ -1151,6 +1139,9 @@ void parseLoop( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputSt
 			inputStream->eofSent = true;
 			input = sendEof( prg, sp, inputStream, fsmRun, pdaRun );
 		}
+		else if ( tokenId == SCAN_UNDO ) {
+			/* Fall through with input = 0. FIXME: Do we need to send back ignore? */
+		}
 		else if ( tokenId == SCAN_ERROR ) {
 			/* Scanner error, maybe retry. */
 			if ( pdaRunGetNextRegion( pdaRun, 1 ) != 0 ) {
@@ -1218,8 +1209,19 @@ void parseLoop( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputSt
 skipSend:
 		newToken( prg, pdaRun, fsmRun );
 
-		/* Fall through here either when the input buffer has been exhausted
-		 * or the scanner is in an error state. Otherwise we must continue. */
+		/* Various stop conditions. This should all be coverned by one test
+		 * eventually. */
+
+		if ( pdaRun->triggerUndo ) {
+			debug( REALM_PARSE, "parsing stopped by triggerUndo\n" );
+			break;
+		}
+
+		if ( inputStream->eofSent ) {
+			debug( REALM_PARSE, "parsing stopped by EOF\n" );
+			break;
+		}
+
 		if ( pdaRun->stopParsing ) {
 			debug( REALM_PARSE, "scanner has been stopped\n" );
 			break;
@@ -1239,11 +1241,5 @@ skipSend:
 			debug( REALM_PARSE, "parsing stopped by a parse error\n" );
 			break;
 		}
-			
-		if ( inputStream->eofSent ) {
-			debug( REALM_PARSE, "parsing stopped by EOF\n" );
-			break;
-		}
 	}
 }
-

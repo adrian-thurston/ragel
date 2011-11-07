@@ -168,6 +168,7 @@ void initPdaRun( PdaRun *pdaRun, Program *prg, PdaTables *tables,
 	pdaRun->context = splitTree( prg, context );
 	pdaRun->parseError = 0;
 	pdaRun->input = 0;
+	pdaRun->triggerUndo = 0;
 }
 
 long stackTopTarget( Program *prg, PdaRun *pdaRun )

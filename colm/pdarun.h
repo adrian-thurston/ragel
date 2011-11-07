@@ -246,6 +246,7 @@ typedef struct _PdaRun
 	int curState;
 	Kid *lel;
 	struct _Execution *exec;
+	int triggerUndo;
 } PdaRun;
 
 void rtCodeVectReplace( RtCodeVect *vect, long pos, const Code *val, long len );
