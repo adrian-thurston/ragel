@@ -197,13 +197,6 @@ void FsmCodeGen::SET_TOKSTART( ostream &ret, InlineItem *item )
 
 void FsmCodeGen::EMIT_TOKEN( ostream &ret, LangEl *token )
 {
-//	if ( token->transBlock != 0 )
-//		ret << "	execGen( " << token->id << " );\n";
-//	else if ( token->ignore )
-//		ret << "	sendIgnore( " << token->id << " );\n";
-//	else 
-//		ret << "	sendToken( " << token->id << " );\n";
-
 	ret << "	" << MATCHED_TOKEN() << " = " << token->id << ";\n";
 }
 
@@ -1075,7 +1068,8 @@ void FsmCodeGen::writeCode()
 	/* Referenced in the runtime lib, but used only in the compiler. Probably
 	 * should use the preprocessor to make these go away. */
 	out <<
-		"void sendNamedLangEl( Program *prg, Tree **tree, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream ) {}\n"
+		"Kid *sendNamedLangEl( Program *prg, Tree **tree, PdaRun *pdaRun,\n"
+		"		FsmRun *fsmRun, InputStream *inputStream ) { return 0; }\n"
 		"void initBindings( PdaRun *pdaRun ) {}\n"
 		"void makeTokenPushBinding( PdaRun *pdaRun, int bindId, Tree *tree ) {}\n"
 		"void unbind( Program *prg, Tree **sp, PdaRun *pdaRun, Tree *tree ) {}\n"

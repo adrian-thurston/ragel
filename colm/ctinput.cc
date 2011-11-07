@@ -336,7 +336,7 @@ extern "C" void initReplFuncs()
 	replFuncs.pushBackNamed = &inputStreamReplPushBackNamed;
 }
 
-void sendNamedLangEl( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
+Kid *sendNamedLangEl( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 {
 	/* All three set by getLangEl. */
 	long bindId;
@@ -362,7 +362,7 @@ void sendNamedLangEl( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, I
 
 	pdaRun->consumed += 1;
 
-	sendHandleError( prg, sp, pdaRun, fsmRun, inputStream, input );
+	return input;
 }
 
 void initBindings( PdaRun *pdaRun )

@@ -618,12 +618,7 @@ void executeGenerationAction( Program *prg, Tree **sp, FsmRun *fsmRun, PdaRun *p
 void generationAction( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun, 
 		PdaRun *pdaRun, int id, Head *tokdata, int namedLangEl, int bindId )
 {
-//	#ifdef COLM_LOG_PARSE
-//	if ( colm_log_parse ) {
-//		cerr << "generation action: " << 
-//				prg->rtd->lelInfo[id].name << endl;
-//	}
-//	#endif
+	debug( REALM_PARSE, "generation action: %s\n", prg->rtd->lelInfo[id].name );
 
 	/* Find the code. */
 	Code *code = prg->rtd->frameInfo[
@@ -770,16 +765,33 @@ void attachIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, Kid *input )
 	}
 }
 
+void handleError( Program *prg, Tree **sp, PdaRun *pdaRun )
+{
+	/* Check the result. */
+	if ( pdaRun->parseError ) {
+		/* Error occured in the top-level parser. */
+		reportParseError( prg, sp, pdaRun );
+	}
+	else {
+		if ( isParserStopFinished( pdaRun ) ) {
+			debug( REALM_PARSE, "stopping the parse\n" );
+			pdaRun->stopParsing = true;
+		}
+	}
+}
+
 void sendHandleError( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input )
 {
-	/* Send the token to the parser. */
-	attachIgnore( prg, sp, pdaRun, input );
+	if ( input != 0 ) {
+		/* Send the token to the parser. */
+		attachIgnore( prg, sp, pdaRun, input );
+	}
 
 	assert( pdaRun->input == 0 );
 	pdaRun->input = input;
 
 	enum ParseTokenResult ptr = parseToken( prg, sp, pdaRun, fsmRun,
-			inputStream, PteToken );
+			inputStream, input != 0 ? PteToken : PteError );
 	
 	while ( ptr == PtrReduction ) {
 		Execution exec;
@@ -796,18 +808,6 @@ void sendHandleError( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, I
 	}
 
 	assert( ptr == PtrDone );
-		
-	/* Check the result. */
-	if ( pdaRun->parseError ) {
-		/* Error occured in the top-level parser. */
-		reportParseError( prg, sp, pdaRun );
-	}
-	else {
-		if ( isParserStopFinished( pdaRun ) ) {
-			debug( REALM_PARSE, "stopping the parse\n" );
-			pdaRun->stopParsing = true;
-		}
-	}
 }
 
 void execGen( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long id )
@@ -857,7 +857,7 @@ Head *extractMatch( Program *prg, FsmRun *fsmRun, InputStream *inputStream )
 	return head;
 }
 
-void sendToken( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long id )
+Kid *sendToken( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long id )
 {
 	/* Make the token data. */
 	Head *tokdata = extractMatch( prg, fsmRun, inputStream );
@@ -872,20 +872,21 @@ void sendToken( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRu
 
 	incrementConsumed( pdaRun );
 
-	sendHandleError( prg, sp, pdaRun, fsmRun, inputStream, input );
+	return input;
 }
 
-void sendTree( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
+Kid *sendTree( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 {
 	Kid *input = kidAllocate( prg );
 	input->tree = inputStream->funcs->getTree( inputStream );
 
 	incrementConsumed( pdaRun );
 
-	sendHandleError( prg, sp, pdaRun, fsmRun, inputStream, input );
+	return input;
+
 }
 
-void sendEof( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
+Kid *sendEof( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
 {
 	debug( REALM_PARSE, "token: _EOF\n" );
 
@@ -922,7 +923,7 @@ void sendEof( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun,
 				inputStream, frameId, code, input->tree->id, 0 );
 	}
 
-	sendHandleError( prg, sp, pdaRun, fsmRun, inputStream, input );
+	return input;
 }
 
 void newToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun )
@@ -1115,59 +1116,6 @@ long scanToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *input
 }
 
 
-void scannerError( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
-{
-	if ( pdaRunGetNextRegion( pdaRun, 1 ) != 0 ) {
-		debug( REALM_PARSE, "scanner failed, trying next region\n" );
-
-		/* May have accumulated ignore tokens from a previous region.
-		 * need to rescan them since we won't be sending tokens from
-		 * this region. */
-		sendBackQueuedIgnore( prg, sp, inputStream, fsmRun, pdaRun );
-		pdaRun->nextRegionInd += 1;
-	}
-	else if ( pdaRun->numRetry > 0 ) {
-		debug( REALM_PARSE, "invoking parse error from the scanner\n" );
-
-		sendBackQueuedIgnore( prg, sp, inputStream, fsmRun, pdaRun );
-
-		assert( pdaRun->input == 0 );
-
-		enum ParseTokenResult ptr = parseToken( prg, sp, pdaRun, fsmRun,
-				inputStream, PteError );
-
-		while ( ptr == PtrReduction ) {
-			Execution exec;
-			pdaRun->exec = &exec;
-
-			/* Execution environment for the reduction code. */
-			initReductionExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, 
-					pdaRun, fsmRun, prg->rtd->prodInfo[pdaRun->reduction].frameId, 
-					pdaRun->fi->codeWV, pdaRun->redLel->tree, 0, 0, fsmRun->mark );
-
-			reductionExecution( pdaRun->exec, sp );
-
-			ptr = parseToken( prg, sp, pdaRun, fsmRun, inputStream, PteReduction );
-		}
-
-		assert( ptr == PtrDone );
-
-		if ( pdaRun->parseError ) {
-			/* Error occured in the top-level parser. */
-			reportParseError( prg, sp, pdaRun );
-		}
-	}
-	else {
-		/* There are no alternative scanning regions to try, nor are there any
-		 * alternatives stored in the current parse tree. No choice but to end
-		 * the parse. */
-		if ( pdaRun->tokenList != 0 ) 
-			pushBtPoint( prg, pdaRun, pdaRun->tokenList->kid->tree );
-		reportParseError( prg, sp, pdaRun );
-		pdaRun->parseError = 1;
-	}
-}
-
 void sendTreeIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 {
 	RunBuf *runBuf = inputStreamPopHead( inputStream );
@@ -1183,6 +1131,8 @@ void sendTreeIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, In
 
 void parseLoop( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 {
+	LangElInfo *lelInfo = prg->rtd->lelInfo;
+
 	pdaRun->stop = false;
 
 	while ( true ) {
@@ -1197,7 +1147,9 @@ void parseLoop( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputSt
 		/* Check for EOF. */
 		if ( tokenId == SCAN_EOF ) {
 			inputStream->eofSent = true;
-			sendEof( prg, sp, inputStream, fsmRun, pdaRun );
+			Kid *input = sendEof( prg, sp, inputStream, fsmRun, pdaRun );
+			sendHandleError( prg, sp, pdaRun, fsmRun, inputStream, input );
+			handleError( prg, sp, pdaRun );
 
 			newToken( prg, pdaRun, fsmRun );
 
@@ -1210,30 +1162,66 @@ void parseLoop( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputSt
 
 		if ( tokenId == SCAN_ERROR ) {
 			/* Error. */
-			scannerError( prg, sp, inputStream, fsmRun, pdaRun );
+//			scannerError( prg, sp, inputStream, fsmRun, pdaRun );
+
+			if ( pdaRunGetNextRegion( pdaRun, 1 ) != 0 ) {
+				debug( REALM_PARSE, "scanner failed, trying next region\n" );
+
+				/* May have accumulated ignore tokens from a previous region.
+				 * need to rescan them since we won't be sending tokens from
+				 * this region. */
+				sendBackQueuedIgnore( prg, sp, inputStream, fsmRun, pdaRun );
+				pdaRun->nextRegionInd += 1;
+			}
+			else if ( pdaRun->numRetry > 0 ) {
+				debug( REALM_PARSE, "invoking parse error from the scanner\n" );
+
+				/* Send back any accumulated ignore tokens, then trigger error
+				 * in the the parser. */
+				sendBackQueuedIgnore( prg, sp, inputStream, fsmRun, pdaRun );
+				sendHandleError( prg, sp, pdaRun, fsmRun, inputStream, 0 );
+				handleError( prg, sp, pdaRun );
+			}
+			else {
+				/* There are no alternative scanning regions to try, nor are
+				 * there any alternatives stored in the current parse tree. No
+				 * choice but to end the parse. */
+				if ( pdaRun->tokenList != 0 ) 
+					pushBtPoint( prg, pdaRun, pdaRun->tokenList->kid->tree );
+
+				reportParseError( prg, sp, pdaRun );
+				pdaRun->parseError = 1;
+			}
 		}
 		else if ( tokenId == SCAN_LANG_EL ) {
 			/* A named language element (parsing colm program). */
-			sendNamedLangEl( prg, sp, pdaRun, fsmRun, inputStream );
+			Kid *input = sendNamedLangEl( prg, sp, pdaRun, fsmRun, inputStream );
+			sendHandleError( prg, sp, pdaRun, fsmRun, inputStream, input );
+			handleError( prg, sp, pdaRun );
 		}
 		else if ( tokenId == SCAN_TREE ) {
 			/* A tree already built. */
-			sendTree( prg, sp, pdaRun, fsmRun, inputStream );
+			Kid *input = sendTree( prg, sp, pdaRun, fsmRun, inputStream );
+			sendHandleError( prg, sp, pdaRun, fsmRun, inputStream, input );
+			handleError( prg, sp, pdaRun );
 		}
 		else if ( tokenId == SCAN_IGNORE ) {
 			/* A tree to ignore. */
 			sendTreeIgnore( prg, sp, pdaRun, fsmRun, inputStream );
 		}
+		else if ( prg->ctxDepParsing && lelInfo[tokenId].frameId >= 0 ) {
+			/* Has a generation action. */
+			execGen( prg, sp, inputStream, fsmRun, pdaRun, tokenId );
+		}
+		else if ( lelInfo[tokenId].ignore ) {
+			/* Is an ignore token. */
+			sendIgnore( prg, sp, inputStream, fsmRun, pdaRun, tokenId );
+		}
 		else {
-			/* Plain token. */
-			int ctxDepParsing = prg->ctxDepParsing;
-			LangElInfo *lelInfo = prg->rtd->lelInfo;
-			if ( ctxDepParsing && lelInfo[tokenId].frameId >= 0 )
-				execGen( prg, sp, inputStream, fsmRun, pdaRun, tokenId );
-			else if ( lelInfo[tokenId].ignore )
-				sendIgnore( prg, sp, inputStream, fsmRun, pdaRun, tokenId );
-			else
-				sendToken( prg, sp, inputStream, fsmRun, pdaRun, tokenId );
+			/* Is a plain token. */
+			Kid *input = sendToken( prg, sp, inputStream, fsmRun, pdaRun, tokenId );
+			sendHandleError( prg, sp, pdaRun, fsmRun, inputStream, input );
+			handleError( prg, sp, pdaRun );
 		}
 
 		newToken( prg, pdaRun, fsmRun );
