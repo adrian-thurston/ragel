@@ -182,16 +182,6 @@ void setInput( Program *prg, Tree **sp, Accum *accum, Stream *stream )
 	treeUpref( (Tree*)accum->stream );
 }
 
-void parseStream( Program *prg, Tree **sp, Tree *input, Accum *accum, long stopId )
-{
-	if ( ! accum->pdaRun->parseError ) {
-		accum->pdaRun->stopTarget = stopId;
-		Stream *stream = (Stream*)input;
-		accum->fsmRun->curStream = input;
-		parseLoop( prg, sp, accum->pdaRun, accum->fsmRun, stream->in );
-	}
-}
-
 Word streamAppend( Program *prg, Tree **sp, Tree *input, Stream *stream )
 {
 	if ( input->id == LEL_ID_STR ) {
@@ -223,9 +213,14 @@ Word streamAppend( Program *prg, Tree **sp, Tree *input, Stream *stream )
 	}
 }
 
-void undoParseStreamBc( Program *prg, Tree **sp, Stream *input, Accum *accum, long consumed )
+void parseStream( Program *prg, Tree **sp, Tree *input, Accum *accum, long stopId )
 {
-	undoParseStream( prg, sp, input->in, accum->fsmRun, accum->pdaRun, consumed );
+	if ( ! accum->pdaRun->parseError ) {
+		accum->pdaRun->stopTarget = stopId;
+		Stream *stream = (Stream*)input;
+		accum->fsmRun->curStream = input;
+		parseLoop( prg, sp, accum->pdaRun, accum->fsmRun, stream->in );
+	}
 }
 
 Tree *parseFinish( Program *prg, Tree **sp, Accum *accum, int revertOn )
@@ -256,6 +251,11 @@ Tree *parseFinish( Program *prg, Tree **sp, Accum *accum, int revertOn )
 		tree->flags |= AF_PARSED;
 
 	return tree;
+}
+
+void undoParseStreamBc( Program *prg, Tree **sp, Stream *input, Accum *accum, long consumed )
+{
+	undoParseStream( prg, sp, input->in, accum->fsmRun, accum->pdaRun, consumed );
 }
 
 Tree *streamPull2( Program *prg, FsmRun *fsmRun, Stream *stream, Tree *length )

@@ -780,7 +780,7 @@ void handleError( Program *prg, Tree **sp, PdaRun *pdaRun )
 	}
 }
 
-void sendHandleError( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input )
+void sendInput( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input )
 {
 	if ( input != 0 ) {
 		/* Send the token to the parser. */
@@ -1144,26 +1144,15 @@ void parseLoop( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputSt
 		if ( tokenId == SCAN_TRY_AGAIN_LATER )
 			break;
 
+		Kid *input = 0;
+
 		/* Check for EOF. */
 		if ( tokenId == SCAN_EOF ) {
 			inputStream->eofSent = true;
-			Kid *input = sendEof( prg, sp, inputStream, fsmRun, pdaRun );
-			sendHandleError( prg, sp, pdaRun, fsmRun, inputStream, input );
-			handleError( prg, sp, pdaRun );
-
-			newToken( prg, pdaRun, fsmRun );
-
-			if ( pdaRun->parseError )
-				break;
-			if ( inputStream->eofSent )
-				break;
-			continue;
+			input = sendEof( prg, sp, inputStream, fsmRun, pdaRun );
 		}
-
-		if ( tokenId == SCAN_ERROR ) {
-			/* Error. */
-//			scannerError( prg, sp, inputStream, fsmRun, pdaRun );
-
+		else if ( tokenId == SCAN_ERROR ) {
+			/* Scanner error, maybe retry. */
 			if ( pdaRunGetNextRegion( pdaRun, 1 ) != 0 ) {
 				debug( REALM_PARSE, "scanner failed, trying next region\n" );
 
@@ -1172,6 +1161,7 @@ void parseLoop( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputSt
 				 * this region. */
 				sendBackQueuedIgnore( prg, sp, inputStream, fsmRun, pdaRun );
 				pdaRun->nextRegionInd += 1;
+				goto skipSend;
 			}
 			else if ( pdaRun->numRetry > 0 ) {
 				debug( REALM_PARSE, "invoking parse error from the scanner\n" );
@@ -1179,8 +1169,8 @@ void parseLoop( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputSt
 				/* Send back any accumulated ignore tokens, then trigger error
 				 * in the the parser. */
 				sendBackQueuedIgnore( prg, sp, inputStream, fsmRun, pdaRun );
-				sendHandleError( prg, sp, pdaRun, fsmRun, inputStream, 0 );
-				handleError( prg, sp, pdaRun );
+
+				/* Fall through to send null (error). */
 			}
 			else {
 				/* There are no alternative scanning regions to try, nor are
@@ -1191,39 +1181,41 @@ void parseLoop( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputSt
 
 				reportParseError( prg, sp, pdaRun );
 				pdaRun->parseError = 1;
+				goto skipSend;
 			}
 		}
 		else if ( tokenId == SCAN_LANG_EL ) {
 			/* A named language element (parsing colm program). */
-			Kid *input = sendNamedLangEl( prg, sp, pdaRun, fsmRun, inputStream );
-			sendHandleError( prg, sp, pdaRun, fsmRun, inputStream, input );
-			handleError( prg, sp, pdaRun );
+			input = sendNamedLangEl( prg, sp, pdaRun, fsmRun, inputStream );
 		}
 		else if ( tokenId == SCAN_TREE ) {
 			/* A tree already built. */
-			Kid *input = sendTree( prg, sp, pdaRun, fsmRun, inputStream );
-			sendHandleError( prg, sp, pdaRun, fsmRun, inputStream, input );
-			handleError( prg, sp, pdaRun );
+			input = sendTree( prg, sp, pdaRun, fsmRun, inputStream );
 		}
 		else if ( tokenId == SCAN_IGNORE ) {
 			/* A tree to ignore. */
 			sendTreeIgnore( prg, sp, pdaRun, fsmRun, inputStream );
+			goto skipSend;
 		}
 		else if ( prg->ctxDepParsing && lelInfo[tokenId].frameId >= 0 ) {
 			/* Has a generation action. */
 			execGen( prg, sp, inputStream, fsmRun, pdaRun, tokenId );
+			goto skipSend;
 		}
 		else if ( lelInfo[tokenId].ignore ) {
 			/* Is an ignore token. */
 			sendIgnore( prg, sp, inputStream, fsmRun, pdaRun, tokenId );
+			goto skipSend;
 		}
 		else {
 			/* Is a plain token. */
-			Kid *input = sendToken( prg, sp, inputStream, fsmRun, pdaRun, tokenId );
-			sendHandleError( prg, sp, pdaRun, fsmRun, inputStream, input );
-			handleError( prg, sp, pdaRun );
+			input = sendToken( prg, sp, inputStream, fsmRun, pdaRun, tokenId );
 		}
 
+		sendInput( prg, sp, pdaRun, fsmRun, inputStream, input );
+		handleError( prg, sp, pdaRun );
+
+skipSend:
 		newToken( prg, pdaRun, fsmRun );
 
 		/* Fall through here either when the input buffer has been exhausted
@@ -1245,6 +1237,11 @@ void parseLoop( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputSt
 
 		if ( pdaRun->parseError ) {
 			debug( REALM_PARSE, "parsing stopped by a parse error\n" );
+			break;
+		}
+			
+		if ( inputStream->eofSent ) {
+			debug( REALM_PARSE, "parsing stopped by EOF\n" );
 			break;
 		}
 	}
