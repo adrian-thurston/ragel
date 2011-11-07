@@ -358,12 +358,11 @@ void newToken( struct ColmProgram *prg, PdaRun *pdaRun, FsmRun *fsmRun );
 void breakRunBuf( FsmRun *fsmRun );
 void fsmExecute( FsmRun *fsmRun, InputStream *inputStream );
 Kid *sendNamedLangEl( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
-void parseLoop( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
+enum ParseTokenResult parseLoop( struct ColmProgram *prg, Tree **sp, 
+		PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, enum ParseTokenEntry entry );
 void initBindings( PdaRun *pdaRun );
 Tree *getParsedRoot( PdaRun *pdaRun, int stop );
 void pushBtPoint( struct ColmProgram *prg, PdaRun *pdaRun, Tree *tree );
-void undoParseStream( struct ColmProgram *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun, 
-		PdaRun *pdaRun, long consumed );
 
 #ifdef __cplusplus
 }
