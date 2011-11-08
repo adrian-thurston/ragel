@@ -534,19 +534,9 @@ Kid *makeToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *input
 	return input;
 }
 
-void executeGenerationAction( Program *prg, Tree **sp, FsmRun *fsmRun, PdaRun *pdaRun, 
+void addNoToken( Program *prg, Tree **sp, FsmRun *fsmRun, PdaRun *pdaRun, 
 		InputStream *inputStream, int frameId, Code *code, long id, Head *tokdata )
 {
-	/* Execute the translation. */
-	Execution exec;
-	initGenerationExecution( &exec, prg, &pdaRun->rcodeCollect, pdaRun, fsmRun, 
-			frameId, code, 0, id, tokdata, fsmRun->mark );
-	generationExecution( &exec, sp );
-
-	/* 
-	 * Need a no-token.
-	 */
-
 	/* Check if there was anything generated. */
 	if ( pdaRun->rcodeCollect.tabLen > 0 ) {
 		debug( REALM_PARSE, "found reverse code but no token, sending _notoken\n" );
@@ -575,27 +565,27 @@ void executeGenerationAction( Program *prg, Tree **sp, FsmRun *fsmRun, PdaRun *p
 	}
 }
 
+void executeGenerationAction( Program *prg, Tree **sp, FsmRun *fsmRun, PdaRun *pdaRun, 
+		InputStream *inputStream, int frameId, Code *code, long id, Head *tokdata )
+{
+	/* Execute the translation. */
+	Execution exec;
+	initGenerationExecution( &exec, prg, &pdaRun->rcodeCollect, pdaRun, fsmRun, 
+			frameId, code, 0, id, tokdata, fsmRun->mark );
+	generationExecution( &exec, sp );
+
+	/* 
+	 * Need a no-token.
+	 */
+	addNoToken( prg, sp, fsmRun, pdaRun, inputStream, frameId, code, id, tokdata );
+}
+
+
 /* 
  * Not supported:
  *  -invoke failure (the backtracker)
  */
 
-void generationAction( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun, 
-		PdaRun *pdaRun, int id, Head *tokdata, int namedLangEl, int bindId )
-{
-	debug( REALM_PARSE, "generation action: %s\n", prg->rtd->lelInfo[id].name );
-
-	/* Find the code. */
-	Code *code = prg->rtd->frameInfo[
-			prg->rtd->lelInfo[id].frameId].codeWV;
-
-	/* Execute the action and process the queue. */
-	executeGenerationAction( prg, sp, fsmRun, pdaRun, inputStream, 
-			prg->rtd->lelInfo[id].frameId, code, id, tokdata );
-
-	/* Finished with the match text. */
-	stringFree( prg, tokdata );
-}
 
 Kid *extractIgnore( PdaRun *pdaRun )
 {
@@ -743,27 +733,6 @@ void handleError( Program *prg, Tree **sp, PdaRun *pdaRun )
 			pdaRun->stopParsing = true;
 		}
 	}
-}
-
-void sendInput( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input )
-{
-}
-
-void execGen( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long id )
-{
-	debug( REALM_PARSE, "token gen action: %s\n", 
-			prg->rtd->lelInfo[id].name );
-
-	/* Make the token data. */
-	Head *tokdata = extractMatch( prg, fsmRun, inputStream );
-
-	/* Note that we don't update the position now. It is done when the token
-	 * data is pulled from the inputStream. */
-
-	fsmRun->p = fsmRun->tokstart;
-	fsmRun->tokstart = 0;
-
-	generationAction( prg, sp, inputStream, fsmRun, pdaRun, id, tokdata, false, 0 );
 }
 
 void sendIgnore( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long id )
@@ -1148,7 +1117,37 @@ enum ParseCr parseLoop( Program *prg, Tree **sp, PdaRun *pdaRun,
 		}
 		else if ( prg->ctxDepParsing && lelInfo[tokenId].frameId >= 0 ) {
 			/* Has a generation action. */
-			execGen( prg, sp, inputStream, fsmRun, pdaRun, tokenId );
+			debug( REALM_PARSE, "token gen action: %s\n", 
+					prg->rtd->lelInfo[tokenId].name );
+
+			/* Make the token data. */
+			Head *tokdata = extractMatch( prg, fsmRun, inputStream );
+
+			/* Note that we don't update the position now. It is done when the token
+			 * data is pulled from the inputStream. */
+
+			fsmRun->p = fsmRun->tokstart;
+			fsmRun->tokstart = 0;
+
+			/* Find the code. */
+			Code *code = prg->rtd->frameInfo[
+					prg->rtd->lelInfo[tokenId].frameId].codeWV;
+
+			/* Execute the translation. */
+			Execution exec;
+			initGenerationExecution( &exec, prg, &pdaRun->rcodeCollect, pdaRun, fsmRun, 
+					prg->rtd->lelInfo[tokenId].frameId, code, 0, tokenId, tokdata, fsmRun->mark );
+			generationExecution( &exec, sp );
+
+			/* 
+			 * Need a no-token.
+			 */
+			addNoToken( prg, sp, fsmRun, pdaRun, inputStream, 
+					prg->rtd->lelInfo[tokenId].frameId, code, tokenId, tokdata );
+
+			/* Finished with the match text. */
+			stringFree( prg, tokdata );
+
 			goto skipSend;
 		}
 		else if ( lelInfo[tokenId].ignore ) {

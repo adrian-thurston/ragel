@@ -336,7 +336,6 @@ void sendBackIgnore( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, FsmRun 
 void sendBack( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
 void unbind( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, Tree *tree );
 void queueBackTree( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
-void addNoToken( struct ColmProgram *prg, PdaRun *parser );
 Kid *makeToken( struct ColmProgram *prg, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, int id,
 		Head *tokdata, int namedLangEl, int bindId );
 void makeTokenPushBinding( PdaRun *pdaRun, int bindId, Tree *tree );
