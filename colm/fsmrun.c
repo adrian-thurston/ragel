@@ -745,6 +745,10 @@ void handleError( Program *prg, Tree **sp, PdaRun *pdaRun )
 	}
 }
 
+void sendInput( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input )
+{
+}
+
 void execGen( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long id )
 {
 	debug( REALM_PARSE, "token gen action: %s\n", 
@@ -1068,15 +1072,14 @@ void sendTreeIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, In
 	ignoreTree( prg, pdaRun, tree );
 }
 
-enum ParseTokenResult parseLoop( Program *prg, Tree **sp, PdaRun *pdaRun,
+enum ParseTokenResult parseLoop( Program *prg, Tree **sp, PdaRun *pdaRun, 
 		FsmRun *fsmRun, InputStream *inputStream, enum ParseTokenEntry entry )
 {
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
+	if ( entry == PteReduction )
+		goto ptrReduction;
 
 	pdaRun->stop = false;
-
-	if ( entry == PteReduction )
-		goto pteReduction;
 
 	while ( true ) {
 		/* Pull the current scanner from the parser. This can change during
@@ -1169,17 +1172,13 @@ enum ParseTokenResult parseLoop( Program *prg, Tree **sp, PdaRun *pdaRun,
 		enum ParseTokenResult ptr = parseToken( prg, sp, pdaRun, fsmRun,
 				inputStream, input != 0 ? PteToken : PteError );
 		
-
 		while ( ptr == PtrReduction ) {
-
 			return PtrReduction;
-			pteReduction:
-
+			ptrReduction:
 			ptr = parseToken( prg, sp, pdaRun, fsmRun, inputStream, PteReduction );
 		}
 
 		assert( ptr == PtrDone );
-
 
 		handleError( prg, sp, pdaRun );
 
@@ -1219,6 +1218,5 @@ skipSend:
 			break;
 		}
 	}
-
 	return PtrDone;
 }
