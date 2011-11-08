@@ -771,6 +771,11 @@ again:
 	goto again;
 }
 
+/* 
+ * Not supported:
+ *  -invoke failure (the backtracker)
+ */
+
 void generationExecution( Execution *exec, Tree **sp )
 {
 	/* Execution loop. */

@@ -565,27 +565,6 @@ void addNoToken( Program *prg, Tree **sp, FsmRun *fsmRun, PdaRun *pdaRun,
 	}
 }
 
-void executeGenerationAction( Program *prg, Tree **sp, FsmRun *fsmRun, PdaRun *pdaRun, 
-		InputStream *inputStream, int frameId, Code *code, long id, Head *tokdata )
-{
-	/* Execute the translation. */
-	Execution exec;
-	initGenerationExecution( &exec, prg, &pdaRun->rcodeCollect, pdaRun, fsmRun, 
-			frameId, code, 0, id, tokdata, fsmRun->mark );
-	generationExecution( &exec, sp );
-
-	/* 
-	 * Need a no-token.
-	 */
-	addNoToken( prg, sp, fsmRun, pdaRun, inputStream, frameId, code, id, tokdata );
-}
-
-
-/* 
- * Not supported:
- *  -invoke failure (the backtracker)
- */
-
 
 Kid *extractIgnore( PdaRun *pdaRun )
 {
@@ -818,20 +797,11 @@ Kid *sendEof( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun,
 	fsmRun->region = pdaRunGetNextRegion( pdaRun, 0 );
 	fsmRun->cs = fsmRun->tables->entryByRegion[fsmRun->region];
 
-	int ctxDepParsing = prg->ctxDepParsing;
-	long frameId = prg->rtd->regionInfo[fsmRun->region].eofFrameId;
-	if ( ctxDepParsing && frameId >= 0 ) {
-		debug( REALM_PARSE, "HAVE PRE_EOF BLOCK\n" );
-
-		/* Get the code for the pre-eof block. */
-		Code *code = prg->rtd->frameInfo[frameId].codeWV;
-
-		/* Execute the action and process the queue. */
-		executeGenerationAction( prg, sp, fsmRun, pdaRun,
-				inputStream, frameId, code, input->tree->id, 0 );
-	}
-
 	return input;
+}
+
+void preEofBlock( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, int tokenId )
+{
 }
 
 void newToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun )
@@ -1065,6 +1035,26 @@ enum ParseCr parseLoop( Program *prg, Tree **sp, PdaRun *pdaRun,
 		if ( tokenId == SCAN_EOF ) {
 			inputStream->eofSent = true;
 			input = sendEof( prg, sp, inputStream, fsmRun, pdaRun );
+
+			int ctxDepParsing = prg->ctxDepParsing;
+			long frameId = prg->rtd->regionInfo[fsmRun->region].eofFrameId;
+			if ( ctxDepParsing && frameId >= 0 ) {
+				debug( REALM_PARSE, "HAVE PRE_EOF BLOCK\n" );
+
+				/* Get the code for the pre-eof block. */
+				Code *code = prg->rtd->frameInfo[frameId].codeWV;
+
+				/* Execute the translation. */
+				Execution exec;
+				initGenerationExecution( &exec, prg, &pdaRun->rcodeCollect, pdaRun, fsmRun, 
+						frameId, code, 0, tokenId, 0, fsmRun->mark );
+				generationExecution( &exec, sp );
+
+				/* 
+				 * Need a no-token.
+				 */
+				addNoToken( prg, sp, fsmRun, pdaRun, inputStream, frameId, code, tokenId, 0 );
+			}
 		}
 		else if ( tokenId == SCAN_UNDO ) {
 			/* Fall through with input = 0. FIXME: Do we need to send back ignore? */
