@@ -213,12 +213,12 @@ Word streamAppend( Program *prg, Tree **sp, Tree *input, Stream *stream )
 	}
 }
 
-enum ParseTokenResult parseStream( Program *prg, Tree **sp, Tree *input,
-		Accum *accum, long stopId, enum ParseTokenEntry entry )
+enum ParseCr parseStream( Program *prg, Tree **sp, Tree *input,
+		Accum *accum, long stopId, enum ParseCr entry )
 {
 	Stream *stream = (Stream*)input;
 
-	if ( entry == PteReduction )
+	if ( entry == PcrReduction )
 		goto pteReduction;
 
 	if ( ! accum->pdaRun->parseError ) {
@@ -228,21 +228,21 @@ enum ParseTokenResult parseStream( Program *prg, Tree **sp, Tree *input,
 		PdaRun *pdaRun = accum->pdaRun;
 		FsmRun *fsmRun = accum->fsmRun;
 
-		enum ParseTokenResult ptr = parseLoop( prg, sp, accum->pdaRun, accum->fsmRun, stream->in, PteToken );
-		while ( ptr == PtrReduction ) {
-			return PtrReduction;
+		enum ParseCr ptr = parseLoop( prg, sp, accum->pdaRun, accum->fsmRun, stream->in, PcrToken );
+		while ( ptr == PcrReduction ) {
+			return PcrReduction;
 			pteReduction:
 
-			ptr = parseLoop( prg, sp, accum->pdaRun, accum->fsmRun, stream->in, PteReduction );
+			ptr = parseLoop( prg, sp, accum->pdaRun, accum->fsmRun, stream->in, PcrReduction );
 		}
 	}
-	return PtrDone;
+	return PcrDone;
 }
 
-enum ParseTokenResult parseFinish( Tree **result, Program *prg, Tree **sp,
-		Accum *accum, Stream *stream, int revertOn, enum ParseTokenEntry entry )
+enum ParseCr parseFinish( Tree **result, Program *prg, Tree **sp,
+		Accum *accum, Stream *stream, int revertOn, enum ParseCr entry )
 {
-	if ( entry == PteReduction )
+	if ( entry == PcrReduction )
 		goto pteReduction;
 
 	if ( accum->pdaRun->stopTarget > 0 ) {
@@ -259,12 +259,12 @@ enum ParseTokenResult parseFinish( Tree **result, Program *prg, Tree **sp,
 		PdaRun *pdaRun = accum->pdaRun;
 		FsmRun *fsmRun = accum->fsmRun;
 
-		enum ParseTokenResult ptr = parseLoop( prg, sp, accum->pdaRun, accum->fsmRun, stream->in, PteToken );
-		while ( ptr == PtrReduction ) {
-			return PtrReduction;
+		enum ParseCr ptr = parseLoop( prg, sp, accum->pdaRun, accum->fsmRun, stream->in, PcrToken );
+		while ( ptr == PcrReduction ) {
+			return PcrReduction;
 			pteReduction:
 
-			ptr = parseLoop( prg, sp, accum->pdaRun, accum->fsmRun, stream->in, PteReduction );
+			ptr = parseLoop( prg, sp, accum->pdaRun, accum->fsmRun, stream->in, PcrReduction );
 		}
 	}
 
@@ -279,17 +279,17 @@ enum ParseTokenResult parseFinish( Tree **result, Program *prg, Tree **sp,
 		tree->flags |= AF_PARSED;
 
 	*result = tree;
-	return PtrDone;
+	return PcrDone;
 }
 
-enum ParseTokenResult undoParseStreamBc( Program *prg, Tree **sp, Stream *input,
-		Accum *accum, long consumed, enum ParseTokenEntry entry )
+enum ParseCr undoParseStreamBc( Program *prg, Tree **sp, Stream *input,
+		Accum *accum, long consumed, enum ParseCr entry )
 {
 	InputStream *inputStream = input->in;
 	FsmRun *fsmRun = accum->fsmRun;
 	PdaRun *pdaRun = accum->pdaRun;
 
-	if ( entry == PteReduction )
+	if ( entry == PcrReduction )
 		goto pteReduction;
 
 	if ( consumed < pdaRun->consumed ) {
@@ -300,12 +300,12 @@ enum ParseTokenResult undoParseStreamBc( Program *prg, Tree **sp, Stream *input,
 		pdaRun->triggerUndo = 1;
 
 		/* The parse loop will recognise the situation. */
-		enum ParseTokenResult ptr = parseLoop( prg, sp, pdaRun, fsmRun, inputStream, PteToken );
-		while ( ptr == PtrReduction ) {
-			return PtrReduction;
+		enum ParseCr ptr = parseLoop( prg, sp, pdaRun, fsmRun, inputStream, PcrToken );
+		while ( ptr == PcrReduction ) {
+			return PcrReduction;
 			pteReduction:
 
-			ptr = parseLoop( prg, sp, pdaRun, fsmRun, inputStream, PteReduction );
+			ptr = parseLoop( prg, sp, pdaRun, fsmRun, inputStream, PcrReduction );
 		}
 
 		/* Reset environment. */
@@ -313,6 +313,7 @@ enum ParseTokenResult undoParseStreamBc( Program *prg, Tree **sp, Stream *input,
 		pdaRun->targetConsumed = -1;
 		pdaRun->numRetry -= 1;
 	}
+	return PcrDone;
 }
 
 Tree *streamPullBc( Program *prg, FsmRun *fsmRun, Stream *stream, Tree *length )
@@ -2148,8 +2149,8 @@ again:
 			PdaRun *pdaRun = ((Accum*)accum)->pdaRun;
 			FsmRun *fsmRun = ((Accum*)accum)->fsmRun;
 
-			enum ParseTokenResult ptr = parseStream( prg, sp, stream, (Accum*)accum, stopId, PteToken );
-			while ( ptr == PtrReduction ) {
+			enum ParseCr ptr = parseStream( prg, sp, stream, (Accum*)accum, stopId, PcrToken );
+			while ( ptr == PcrReduction ) {
 				Execution exec;
 				pdaRun->exec = &exec;
 
@@ -2160,7 +2161,7 @@ again:
 
 				reductionExecution( pdaRun->exec, sp );
 				
-				ptr = parseStream( prg, sp, stream, (Accum*)accum, stopId, PteReduction );
+				ptr = parseStream( prg, sp, stream, (Accum*)accum, stopId, PcrReduction );
 			}
 
 			treeDownref( prg, sp, stream );
@@ -2183,8 +2184,8 @@ again:
 			FsmRun *fsmRun = ((Accum*)accum)->fsmRun;
 
 			long consumed = ((Accum*)accum)->pdaRun->consumed;
-			enum ParseTokenResult ptr = parseStream( prg, sp, stream, (Accum*)accum, stopId, PteToken );
-			while ( ptr == PtrReduction ) {
+			enum ParseCr ptr = parseStream( prg, sp, stream, (Accum*)accum, stopId, PcrToken );
+			while ( ptr == PcrReduction ) {
 				Execution exec;
 				pdaRun->exec = &exec;
 
@@ -2195,7 +2196,7 @@ again:
 
 				reductionExecution( pdaRun->exec, sp );
 
-				ptr = parseStream( prg, sp, stream, (Accum*)accum, stopId, PteReduction );
+				ptr = parseStream( prg, sp, stream, (Accum*)accum, stopId, PcrReduction );
 			}
 
 			//treeDownref( prg, sp, stream );
@@ -2224,8 +2225,8 @@ again:
 			FsmRun *fsmRun = ((Accum*)accum)->fsmRun;
 			PdaRun *pdaRun = ((Accum*)accum)->pdaRun;
 
-			enum ParseTokenResult ptr = undoParseStreamBc( prg, sp, (Stream*)input, (Accum*)accum, consumed, PteToken );
-			while ( ptr == PtrReduction ) {
+			enum ParseCr ptr = undoParseStreamBc( prg, sp, (Stream*)input, (Accum*)accum, consumed, PcrToken );
+			while ( ptr == PcrReduction ) {
 				Execution exec;
 				pdaRun->exec = &exec;
 
@@ -2236,7 +2237,7 @@ again:
 
 				reductionExecution( pdaRun->exec, sp );
 
-				ptr = undoParseStreamBc( prg, sp, (Stream*)input, (Accum*)accum, consumed, PteReduction );
+				ptr = undoParseStreamBc( prg, sp, (Stream*)input, (Accum*)accum, consumed, PcrReduction );
 			}
 
 			treeDownref( prg, sp, accum );
@@ -2254,8 +2255,8 @@ again:
 			PdaRun *pdaRun = ((Accum*)accum)->pdaRun;
 			FsmRun *fsmRun = ((Accum*)accum)->fsmRun;
 
-			enum ParseTokenResult ptr = parseFinish( &result, prg, sp, (Accum*)accum, stream, false, PteToken );
-			while ( ptr == PtrReduction ) {
+			enum ParseCr ptr = parseFinish( &result, prg, sp, (Accum*)accum, stream, false, PcrToken );
+			while ( ptr == PcrReduction ) {
 				Execution exec;
 				pdaRun->exec = &exec;
 				debug( REALM_BYTECODE, "reduction in finish\n" );
@@ -2267,7 +2268,7 @@ again:
 
 				reductionExecution( pdaRun->exec, sp );
 
-				ptr = parseFinish( &result, prg, sp, (Accum*)accum, stream, false, PteReduction );
+				ptr = parseFinish( &result, prg, sp, (Accum*)accum, stream, false, PcrReduction );
 			}
 			vm_push( result );
 			treeDownref( prg, sp, accum );
@@ -2286,8 +2287,8 @@ again:
 			PdaRun *pdaRun = ((Accum*)accum)->pdaRun;
 			FsmRun *fsmRun = ((Accum*)accum)->fsmRun;
 
-			enum ParseTokenResult ptr = parseFinish( &result, prg, sp, (Accum*)accum, stream, true, PteToken );
-			while ( ptr == PtrReduction ) {
+			enum ParseCr ptr = parseFinish( &result, prg, sp, (Accum*)accum, stream, true, PcrToken );
+			while ( ptr == PcrReduction ) {
 				Execution exec;
 				pdaRun->exec = &exec;
 				debug( REALM_BYTECODE, "reduction in finish\n" );
@@ -2299,7 +2300,7 @@ again:
 
 				reductionExecution( pdaRun->exec, sp );
 
-				ptr = parseFinish( &result, prg, sp, (Accum*)accum, stream, true, PteReduction );
+				ptr = parseFinish( &result, prg, sp, (Accum*)accum, stream, true, PcrReduction );
 			}
 
 			vm_push( result );
@@ -2328,9 +2329,9 @@ again:
 			FsmRun *fsmRun = ((Accum*)accum)->fsmRun;
 			PdaRun *pdaRun = ((Accum*)accum)->pdaRun;
 
-			enum ParseTokenResult ptr = undoParseStreamBc( prg, sp, ((Accum*)accum)->stream, (Accum*)accum, consumed, PteToken );
+			enum ParseCr ptr = undoParseStreamBc( prg, sp, ((Accum*)accum)->stream, (Accum*)accum, consumed, PcrToken );
 
-			while ( ptr == PtrReduction ) {
+			while ( ptr == PcrReduction ) {
 				Execution exec;
 				pdaRun->exec = &exec;
 
@@ -2341,7 +2342,7 @@ again:
 
 				reductionExecution( pdaRun->exec, sp );
 
-				ptr = undoParseStreamBc( prg, sp, ((Accum*)accum)->stream, (Accum*)accum, consumed, PteReduction );
+				ptr = undoParseStreamBc( prg, sp, ((Accum*)accum)->stream, (Accum*)accum, consumed, PcrReduction );
 			}
 
 			((Accum*)accum)->stream->in->eof = false;

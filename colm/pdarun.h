@@ -312,21 +312,15 @@ void pdaRunMatch(  PdaRun *pdaRun, Kid *tree, Kid *pattern );
 /* Offset can be used to look at the next nextRegionInd. */
 int pdaRunGetNextRegion( PdaRun *pdaRun, int offset );
 
-enum ParseTokenEntry
+enum ParseCr
 {
-	PteToken,
-	PteError,
-	PteReduction
+	PcrToken,
+	PcrReduction,
+	PcrDone
 };
 
-enum ParseTokenResult
-{
-	PtrDone,
-	PtrReduction
-};
-
-enum ParseTokenResult parseToken( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, 
-		FsmRun *fsmRun, InputStream *inputStream, enum ParseTokenEntry entry );
+enum ParseCr parseToken( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, 
+		FsmRun *fsmRun, InputStream *inputStream, enum ParseCr entry );
 
 long undoParse( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Tree *tree );
 
@@ -358,8 +352,8 @@ void newToken( struct ColmProgram *prg, PdaRun *pdaRun, FsmRun *fsmRun );
 void breakRunBuf( FsmRun *fsmRun );
 void fsmExecute( FsmRun *fsmRun, InputStream *inputStream );
 Kid *sendNamedLangEl( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
-enum ParseTokenResult parseLoop( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, 
-		FsmRun *fsmRun, InputStream *inputStream, enum ParseTokenEntry entry );
+enum ParseCr parseLoop( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, 
+		FsmRun *fsmRun, InputStream *inputStream, enum ParseCr entry );
 void initBindings( PdaRun *pdaRun );
 Tree *getParsedRoot( PdaRun *pdaRun, int stop );
 void pushBtPoint( struct ColmProgram *prg, PdaRun *pdaRun, Tree *tree );

@@ -1072,11 +1072,11 @@ void sendTreeIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, In
 	ignoreTree( prg, pdaRun, tree );
 }
 
-enum ParseTokenResult parseLoop( Program *prg, Tree **sp, PdaRun *pdaRun, 
-		FsmRun *fsmRun, InputStream *inputStream, enum ParseTokenEntry entry )
+enum ParseCr parseLoop( Program *prg, Tree **sp, PdaRun *pdaRun, 
+		FsmRun *fsmRun, InputStream *inputStream, enum ParseCr entry )
 {
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
-	if ( entry == PteReduction )
+	if ( entry == PcrReduction )
 		goto ptrReduction;
 
 	pdaRun->stop = false;
@@ -1169,16 +1169,16 @@ enum ParseTokenResult parseLoop( Program *prg, Tree **sp, PdaRun *pdaRun,
 		assert( pdaRun->input == 0 );
 		pdaRun->input = input;
 
-		enum ParseTokenResult ptr = parseToken( prg, sp, pdaRun, fsmRun,
-				inputStream, input != 0 ? PteToken : PteError );
+		enum ParseCr ptr = parseToken( prg, sp, pdaRun, fsmRun,
+				inputStream, PcrToken );
 		
-		while ( ptr == PtrReduction ) {
-			return PtrReduction;
+		while ( ptr == PcrReduction ) {
+			return PcrReduction;
 			ptrReduction:
-			ptr = parseToken( prg, sp, pdaRun, fsmRun, inputStream, PteReduction );
+			ptr = parseToken( prg, sp, pdaRun, fsmRun, inputStream, PcrReduction );
 		}
 
-		assert( ptr == PtrDone );
+		assert( ptr == PcrDone );
 
 		handleError( prg, sp, pdaRun );
 
@@ -1218,5 +1218,5 @@ skipSend:
 			break;
 		}
 	}
-	return PtrDone;
+	return PcrDone;
 }

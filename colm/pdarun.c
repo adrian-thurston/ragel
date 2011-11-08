@@ -366,8 +366,8 @@ void pushBtPoint( Program *prg, PdaRun *pdaRun, Tree *tree )
  * shift-reduce:  cannot be a retry
  */
 
-enum ParseTokenResult parseToken( Program *prg, Tree **sp, PdaRun *pdaRun,
-		FsmRun *fsmRun, InputStream *inputStream, enum ParseTokenEntry entry )
+enum ParseCr parseToken( Program *prg, Tree **sp, PdaRun *pdaRun,
+		FsmRun *fsmRun, InputStream *inputStream, enum ParseCr entry )
 {
 	int pos;
 	unsigned int *action;
@@ -378,18 +378,13 @@ enum ParseTokenResult parseToken( Program *prg, Tree **sp, PdaRun *pdaRun,
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
 
 	/* The scanner will send a null token if it can't find a token. */
-	switch ( entry ) {
-		case PteError: {
-			/* Grab the most recently accepted item. */
-			assert( pdaRun->input == 0 );
-			pushBtPoint( prg, pdaRun, pdaRun->tokenList->kid->tree );
-			goto parse_error;
-		}
-		case PteReduction:
-			goto pteReduction;
-		case PteToken:
-			/* Fall through */
-			break;
+	if ( entry == PcrReduction )
+		goto pteReduction;
+
+	if ( pdaRun->input == 0 ) {
+		/* Grab the most recently accepted item. */
+		pushBtPoint( prg, pdaRun, pdaRun->tokenList->kid->tree );
+		goto parse_error;
 	}
 
 	/* The tree we are given must be * parse tree size. It also must have at
@@ -400,7 +395,7 @@ enum ParseTokenResult parseToken( Program *prg, Tree **sp, PdaRun *pdaRun,
 	/* This will cause input to be lost. This 
 	 * path should be traced. */
 	if ( pdaRun->cs < 0 )
-		return PtrDone;
+		return PcrDone;
 
 	pt(pdaRun->input->tree)->region = pdaRun->nextRegionInd;
 	pt(pdaRun->input->tree)->state = pdaRun->cs;
@@ -590,7 +585,7 @@ again:
 			/* Frame info for reduction. */
 			pdaRun->fi = &prg->rtd->frameInfo[prg->rtd->prodInfo[pdaRun->reduction].frameId];
 
-			return PtrReduction;
+			return PcrReduction;
 			pteReduction:
 
 			if ( prg->induceExit )
@@ -673,7 +668,7 @@ parse_error:
 					pdaRun->numRetry -= 1;
 					pdaRun->cs = stackTopTarget( prg, pdaRun );
 					pdaRun->nextRegionInd = next;
-					return PtrDone;
+					return PcrDone;
 				}
 
 				if ( pdaRun->stop ) {
@@ -811,5 +806,5 @@ fail:
 
 _out:
 	pdaRun->nextRegionInd = pdaRun->tables->tokenRegionInds[pdaRun->cs];
-	return PtrDone;
+	return PcrDone;
 }
