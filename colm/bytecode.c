@@ -2155,7 +2155,30 @@ again:
 			FsmRun *fsmRun = ((Accum*)accum)->fsmRun;
 
 			enum ParseCr ptr = parseStream( prg, sp, stream, (Accum*)accum, stopId, PcrToken );
-			while ( ptr == PcrReduction ) {
+
+			vm_push( (SW)pdaRun );
+			vm_push( (SW)fsmRun );
+			vm_push( (SW)ptr );
+
+			vm_push( stream );
+			vm_push( accum );
+			break;
+		}
+
+		case IN_PARSE_FRAG_WC2: {
+			Half stopId;
+			read_half( stopId );
+
+			debug( REALM_BYTECODE, "IN_PARSE_FRAG_WC2 %d\n", stopId );
+
+			Tree *accum = vm_pop();
+			Tree *stream = vm_pop();
+
+			enum ParseCr ptr = (enum ParseCr)vm_pop();
+			FsmRun *fsmRun = (FsmRun*)vm_pop();
+			PdaRun *pdaRun = (PdaRun*)vm_pop();
+
+			if ( ptr == PcrReduction ) {
 				Execution exec;
 				pdaRun->exec = &exec;
 
@@ -2167,12 +2190,22 @@ again:
 				reductionExecution( pdaRun->exec, sp );
 				
 				ptr = parseStream( prg, sp, stream, (Accum*)accum, stopId, PcrReduction );
-			}
 
-			treeDownref( prg, sp, stream );
-			treeDownref( prg, sp, accum );
-			if ( prg->induceExit )
-				goto out;
+				vm_push( (SW)pdaRun );
+				vm_push( (SW)fsmRun );
+				vm_push( (SW)ptr );
+
+				vm_push( stream );
+				vm_push( accum );
+
+				instr -= SIZEOF_CODE + SIZEOF_HALF;
+			}
+			else {
+				treeDownref( prg, sp, stream );
+				treeDownref( prg, sp, accum );
+				if ( prg->induceExit )
+					goto out;
+			}
 			break;
 		}
 

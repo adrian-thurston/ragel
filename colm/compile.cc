@@ -1335,10 +1335,32 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 
 		/* Parse instruction, dependent on whether or not we are
 		 * producing revert or commit code. */
-		if ( pd->revertOn )
+		if ( pd->revertOn ) {
 			code.append( IN_PARSE_FRAG_WV );
-		else
+
+			/* The stop id. */
+			if ( stop )
+				code.appendHalf( ut->langEl->id );
+			else 
+				code.appendHalf( 0 );
+		}
+		else {
 			code.append( IN_PARSE_FRAG_WC );
+
+			/* The stop id. */
+			if ( stop )
+				code.appendHalf( ut->langEl->id );
+			else 
+				code.appendHalf( 0 );
+
+			code.append( IN_PARSE_FRAG_WC2 );
+
+			/* The stop id. */
+			if ( stop )
+				code.appendHalf( ut->langEl->id );
+			else 
+				code.appendHalf( 0 );
+		}
 	}
 	else {
 		/* Get a copy of the parser. */
@@ -1360,17 +1382,33 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 		code.append( IN_DUP_TOP_OFF );
 		code.appendHalf( 1 );
 
-		if ( pd->revertOn )
+		if ( pd->revertOn ) {
 			code.append( IN_PARSE_FRAG_WV );
-		else
-			code.append( IN_PARSE_FRAG_WC );
-	}
 
-	/* The stop id. */
-	if ( stop )
-		code.appendHalf( ut->langEl->id );
-	else 
-		code.appendHalf( 0 );
+			/* The stop id. */
+			if ( stop )
+				code.appendHalf( ut->langEl->id );
+			else 
+				code.appendHalf( 0 );
+		}
+		else {
+			code.append( IN_PARSE_FRAG_WC );
+
+			/* The stop id. */
+			if ( stop )
+				code.appendHalf( ut->langEl->id );
+			else 
+				code.appendHalf( 0 );
+
+			code.append( IN_PARSE_FRAG_WC2 );
+
+			/* The stop id. */
+			if ( stop )
+				code.appendHalf( ut->langEl->id );
+			else 
+				code.appendHalf( 0 );
+		}
+	}
 
 	/*
 	 * Finish the parser.
@@ -2051,10 +2089,17 @@ void LangStmt::evaluateAccumItems( ParseData *pd, CodeVect &code ) const
 
 			/* Parse instruction, dependent on whether or not we are producing
 			 * revert or commit code. */
-			if ( pd->revertOn )
+			if ( pd->revertOn ) {
 				code.append( IN_PARSE_FRAG_WV );
-			else
+				code.appendHalf( 0 );
+			}
+			else {
 				code.append( IN_PARSE_FRAG_WC );
+				code.appendHalf( 0 );
+
+				code.append( IN_PARSE_FRAG_WC2 );
+				code.appendHalf( 0 );
+			}
 		}
 		else {
 			code.append( IN_DUP_TOP_OFF );
@@ -2074,13 +2119,18 @@ void LangStmt::evaluateAccumItems( ParseData *pd, CodeVect &code ) const
 			code.append( IN_DUP_TOP_OFF );
 			code.appendHalf( 1 );
 
-			if ( pd->revertOn )
+			if ( pd->revertOn ) {
 				code.append( IN_PARSE_FRAG_WV );
-			else
+				code.appendHalf( 0 );
+			}
+			else {
 				code.append( IN_PARSE_FRAG_WC );
-		}
+				code.appendHalf( 0 );
 
-		code.appendHalf( 0 );
+				code.append( IN_PARSE_FRAG_WC2 );
+				code.appendHalf( 0 );
+			}
+		}
 	}
 	code.append( IN_POP );
 }
