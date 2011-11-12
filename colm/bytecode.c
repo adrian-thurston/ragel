@@ -2194,25 +2194,17 @@ again:
 						pdaRun, fsmRun, prg->rtd->prodInfo[pdaRun->reduction].frameId, 
 						pdaRun->fi->codeWV, pdaRun->redLel->tree, 0, 0, fsmRun->mark );
 
-				{
-					/* If we have a lhs push it to the stack. */
-					int haveLhs = exec->lhs != 0;
-					if ( haveLhs )
-						vm_push( exec->lhs );
+				/* If we have a lhs push it to the stack. */
+				int haveLhs = exec->lhs != 0;
+				if ( haveLhs )
+					vm_push( exec->lhs );
 
-					/* Execution loop. */
-					executeCode( exec, sp, exec->code );
+				/* Execution loop. */
+				executeCode( exec, sp, exec->code );
 
-					/* Take the lhs off the stack. */
-					if ( haveLhs )
-						exec->lhs = (Tree*) vm_pop();
-				}
-				
-				pcr = parseFrag( prg, sp, (Accum*)accum, (Stream*)stream, stopId, PcrReduction );
-
-				/* Pop the saved execution. */
-				memcpy( exec, pushedExec, sizeof(Execution) );
-				vm_popn( SIZEOF_WORD * 20 );
+				/* Take the lhs off the stack. */
+				if ( haveLhs )
+					exec->lhs = (Tree*) vm_pop();
 
 				vm_push( (SW)pdaRun );
 				vm_push( (SW)fsmRun );
@@ -2220,15 +2212,48 @@ again:
 
 				vm_push( stream );
 				vm_push( accum );
-
-				instr -= SIZEOF_CODE + SIZEOF_HALF;
 			}
 			else {
 				treeDownref( prg, sp, stream );
 				treeDownref( prg, sp, accum );
+
+				instr += SIZEOF_CODE + SIZEOF_HALF;
 				if ( prg->induceExit )
 					goto out;
 			}
+			break;
+		}
+
+		case IN_PARSE_FRAG_WC3: {
+			Half stopId;
+			read_half( stopId );
+
+			debug( REALM_BYTECODE, "IN_PARSE_FRAG_WC3 %d\n", stopId );
+
+			Tree *accum = vm_pop();
+			Tree *stream = vm_pop();
+
+			long pcr = (long)vm_pop();
+			FsmRun *fsmRun = (FsmRun*)vm_pop();
+			PdaRun *pdaRun = (PdaRun*)vm_pop();
+
+			pcr = parseFrag( prg, sp, (Accum*)accum, (Stream*)stream, stopId, PcrReduction );
+
+			/* Pop the saved execution. */
+			Execution *pushedExec = (Execution*)vm_ptop();
+			memcpy( exec, pushedExec, sizeof(Execution) );
+			vm_popn( SIZEOF_WORD * 20 );
+
+			vm_push( (SW)pdaRun );
+			vm_push( (SW)fsmRun );
+			vm_push( (SW)pcr );
+
+			vm_push( stream );
+			vm_push( accum );
+
+			/* Back up to the frag 2. */
+			instr -= SIZEOF_CODE + SIZEOF_HALF;
+			instr -= SIZEOF_CODE + SIZEOF_HALF;
 			break;
 		}
 
