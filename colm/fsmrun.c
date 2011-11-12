@@ -1011,8 +1011,8 @@ void sendTreeIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, In
 	ignoreTree( prg, pdaRun, tree );
 }
 
-enum ParseCr parseLoop( Program *prg, Tree **sp, PdaRun *pdaRun, 
-		FsmRun *fsmRun, InputStream *inputStream, enum ParseCr entry )
+long parseLoop( Program *prg, Tree **sp, PdaRun *pdaRun, 
+		FsmRun *fsmRun, InputStream *inputStream, long entry )
 {
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
 	if ( entry == PcrReduction )
@@ -1158,7 +1158,7 @@ enum ParseCr parseLoop( Program *prg, Tree **sp, PdaRun *pdaRun,
 		assert( pdaRun->input == 0 );
 		pdaRun->input = input;
 
-		enum ParseCr ptr = parseToken( prg, sp, pdaRun, fsmRun,
+		long ptr = parseToken( prg, sp, pdaRun, fsmRun,
 				inputStream, PcrToken );
 		
 		while ( ptr == PcrReduction ) {

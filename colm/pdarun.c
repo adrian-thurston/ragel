@@ -366,8 +366,8 @@ void pushBtPoint( Program *prg, PdaRun *pdaRun, Tree *tree )
  * shift-reduce:  cannot be a retry
  */
 
-enum ParseCr parseToken( Program *prg, Tree **sp, PdaRun *pdaRun,
-		FsmRun *fsmRun, InputStream *inputStream, enum ParseCr entry )
+long parseToken( Program *prg, Tree **sp, PdaRun *pdaRun,
+		FsmRun *fsmRun, InputStream *inputStream, long entry )
 {
 	int pos;
 	unsigned int *action;
