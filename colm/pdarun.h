@@ -312,7 +312,7 @@ void pdaRunMatch(  PdaRun *pdaRun, Kid *tree, Kid *pattern );
 /* Offset can be used to look at the next nextRegionInd. */
 int pdaRunGetNextRegion( PdaRun *pdaRun, int offset );
 
-#define PcrToken        1
+#define PcrStart        1
 #define PcrReduction    2
 #define PcrDone         3
 

@@ -213,13 +213,12 @@ Word streamAppend( Program *prg, Tree **sp, Tree *input, Stream *stream )
 	}
 }
 
-long parseStream( Program *prg, Tree **sp, Tree *input,
-		Accum *accum, long stopId, long entry )
+long parseFrag( Program *prg, Tree **sp, Tree *input, Accum *accum, long stopId, long entry )
 {
 	Stream *stream = (Stream*)input;
 
-	if ( entry == PcrReduction )
-		goto pteReduction;
+switch ( entry ) {
+case PcrStart:
 
 	if ( ! accum->pdaRun->parseError ) {
 		accum->pdaRun->stopTarget = stopId;
@@ -228,43 +227,43 @@ long parseStream( Program *prg, Tree **sp, Tree *input,
 		PdaRun *pdaRun = accum->pdaRun;
 		FsmRun *fsmRun = accum->fsmRun;
 
-		long pcr = parseLoop( prg, sp, accum->pdaRun, accum->fsmRun, stream->in, PcrToken );
+		long pcr = parseLoop( prg, sp, accum->pdaRun, accum->fsmRun, stream->in, PcrStart );
+
 		while ( pcr == PcrReduction ) {
-			return PcrReduction;
-			pteReduction:
+
+return PcrReduction;
+case PcrReduction:
 
 			pcr = parseLoop( prg, sp, accum->pdaRun, accum->fsmRun, stream->in, PcrReduction );
 		}
 	}
+
+case PcrDone:
+break; }
+
 	return PcrDone;
 }
 
 long parseFinish( Tree **result, Program *prg, Tree **sp,
 		Accum *accum, Stream *stream, int revertOn, long entry )
 {
-	if ( entry == PcrReduction )
-		goto pteReduction;
+switch ( entry ) {
+case PcrStart:
 
-	if ( accum->pdaRun->stopTarget > 0 ) {
-
-	}
-	else if ( accum->pdaRun->parseError ) {
-		stream->in->eof = true;
-		stream->in->later = false;
-	}
-	else {
+	if ( accum->pdaRun->stopTarget <= 0 ) {
 		stream->in->eof = true;
 		stream->in->later = false;
 
-		PdaRun *pdaRun = accum->pdaRun;
-		FsmRun *fsmRun = accum->fsmRun;
+		if ( ! accum->pdaRun->parseError ) {
+			long pcr = parseLoop( prg, sp, accum->pdaRun, accum->fsmRun, stream->in, PcrStart );
 
-		long pcr = parseLoop( prg, sp, accum->pdaRun, accum->fsmRun, stream->in, PcrToken );
-		while ( pcr == PcrReduction ) {
-			return PcrReduction;
-			pteReduction:
+			while ( pcr == PcrReduction ) {
 
-			pcr = parseLoop( prg, sp, accum->pdaRun, accum->fsmRun, stream->in, PcrReduction );
+return PcrReduction;
+case PcrReduction:
+
+				pcr = parseLoop( prg, sp, accum->pdaRun, accum->fsmRun, stream->in, PcrReduction );
+			}
 		}
 	}
 
@@ -279,18 +278,22 @@ long parseFinish( Tree **result, Program *prg, Tree **sp,
 		tree->flags |= AF_PARSED;
 
 	*result = tree;
+
+case PcrDone:
+break; }
+
 	return PcrDone;
 }
 
-long undoParseStreamBc( Program *prg, Tree **sp, Stream *input,
+long undoParseFrag( Program *prg, Tree **sp, Stream *input,
 		Accum *accum, long consumed, long entry )
 {
 	InputStream *inputStream = input->in;
 	FsmRun *fsmRun = accum->fsmRun;
 	PdaRun *pdaRun = accum->pdaRun;
 
-	if ( entry == PcrReduction )
-		goto pteReduction;
+switch ( entry ) {
+case PcrStart:
 
 	if ( consumed < pdaRun->consumed ) {
 		/* Setup environment for going backwards until we reduced consumed to
@@ -300,10 +303,11 @@ long undoParseStreamBc( Program *prg, Tree **sp, Stream *input,
 		pdaRun->triggerUndo = 1;
 
 		/* The parse loop will recognise the situation. */
-		long pcr = parseLoop( prg, sp, pdaRun, fsmRun, inputStream, PcrToken );
+		long pcr = parseLoop( prg, sp, pdaRun, fsmRun, inputStream, PcrStart );
 		while ( pcr == PcrReduction ) {
-			return PcrReduction;
-			pteReduction:
+
+return PcrReduction;
+case PcrReduction:
 
 			pcr = parseLoop( prg, sp, pdaRun, fsmRun, inputStream, PcrReduction );
 		}
@@ -313,6 +317,10 @@ long undoParseStreamBc( Program *prg, Tree **sp, Stream *input,
 		pdaRun->targetConsumed = -1;
 		pdaRun->numRetry -= 1;
 	}
+
+case PcrDone:
+break; }
+
 	return PcrDone;
 }
 
@@ -2154,7 +2162,7 @@ again:
 			PdaRun *pdaRun = ((Accum*)accum)->pdaRun;
 			FsmRun *fsmRun = ((Accum*)accum)->fsmRun;
 
-			long pcr = parseStream( prg, sp, stream, (Accum*)accum, stopId, PcrToken );
+			long pcr = parseFrag( prg, sp, stream, (Accum*)accum, stopId, PcrStart );
 
 			vm_push( (SW)pdaRun );
 			vm_push( (SW)fsmRun );
@@ -2189,7 +2197,7 @@ again:
 
 				reductionExecution( pdaRun->exec, sp );
 				
-				pcr = parseStream( prg, sp, stream, (Accum*)accum, stopId, PcrReduction );
+				pcr = parseFrag( prg, sp, stream, (Accum*)accum, stopId, PcrReduction );
 
 				vm_push( (SW)pdaRun );
 				vm_push( (SW)fsmRun );
@@ -2222,7 +2230,7 @@ again:
 			FsmRun *fsmRun = ((Accum*)accum)->fsmRun;
 
 			long consumed = ((Accum*)accum)->pdaRun->consumed;
-			long pcr = parseStream( prg, sp, stream, (Accum*)accum, stopId, PcrToken );
+			long pcr = parseFrag( prg, sp, stream, (Accum*)accum, stopId, PcrStart );
 			while ( pcr == PcrReduction ) {
 				Execution exec;
 				pdaRun->exec = &exec;
@@ -2234,7 +2242,7 @@ again:
 
 				reductionExecution( pdaRun->exec, sp );
 
-				pcr = parseStream( prg, sp, stream, (Accum*)accum, stopId, PcrReduction );
+				pcr = parseFrag( prg, sp, stream, (Accum*)accum, stopId, PcrReduction );
 			}
 
 			//treeDownref( prg, sp, stream );
@@ -2263,7 +2271,7 @@ again:
 			FsmRun *fsmRun = ((Accum*)accum)->fsmRun;
 			PdaRun *pdaRun = ((Accum*)accum)->pdaRun;
 
-			long pcr = undoParseStreamBc( prg, sp, (Stream*)input, (Accum*)accum, consumed, PcrToken );
+			long pcr = undoParseFrag( prg, sp, (Stream*)input, (Accum*)accum, consumed, PcrStart );
 			while ( pcr == PcrReduction ) {
 				Execution exec;
 				pdaRun->exec = &exec;
@@ -2275,7 +2283,7 @@ again:
 
 				reductionExecution( pdaRun->exec, sp );
 
-				pcr = undoParseStreamBc( prg, sp, (Stream*)input, (Accum*)accum, consumed, PcrReduction );
+				pcr = undoParseFrag( prg, sp, (Stream*)input, (Accum*)accum, consumed, PcrReduction );
 			}
 
 			treeDownref( prg, sp, accum );
@@ -2293,7 +2301,7 @@ again:
 			PdaRun *pdaRun = ((Accum*)accum)->pdaRun;
 			FsmRun *fsmRun = ((Accum*)accum)->fsmRun;
 
-			long pcr = parseFinish( &result, prg, sp, (Accum*)accum, stream, false, PcrToken );
+			long pcr = parseFinish( &result, prg, sp, (Accum*)accum, stream, false, PcrStart );
 			while ( pcr == PcrReduction ) {
 				Execution exec;
 				pdaRun->exec = &exec;
@@ -2325,7 +2333,7 @@ again:
 			PdaRun *pdaRun = ((Accum*)accum)->pdaRun;
 			FsmRun *fsmRun = ((Accum*)accum)->fsmRun;
 
-			long pcr = parseFinish( &result, prg, sp, (Accum*)accum, stream, true, PcrToken );
+			long pcr = parseFinish( &result, prg, sp, (Accum*)accum, stream, true, PcrStart );
 			while ( pcr == PcrReduction ) {
 				Execution exec;
 				pdaRun->exec = &exec;
@@ -2367,7 +2375,7 @@ again:
 			FsmRun *fsmRun = ((Accum*)accum)->fsmRun;
 			PdaRun *pdaRun = ((Accum*)accum)->pdaRun;
 
-			long pcr = undoParseStreamBc( prg, sp, ((Accum*)accum)->stream, (Accum*)accum, consumed, PcrToken );
+			long pcr = undoParseFrag( prg, sp, ((Accum*)accum)->stream, (Accum*)accum, consumed, PcrStart );
 
 			while ( pcr == PcrReduction ) {
 				Execution exec;
@@ -2380,7 +2388,7 @@ again:
 
 				reductionExecution( pdaRun->exec, sp );
 
-				pcr = undoParseStreamBc( prg, sp, ((Accum*)accum)->stream, (Accum*)accum, consumed, PcrReduction );
+				pcr = undoParseFrag( prg, sp, ((Accum*)accum)->stream, (Accum*)accum, consumed, PcrReduction );
 			}
 
 			((Accum*)accum)->stream->in->eof = false;

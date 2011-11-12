@@ -1353,7 +1353,7 @@ void ParseData::parsePatterns()
 		initPdaRun( repl->pdaRun, prg, pdaTables, fsmRun, repl->langEl->parserId, 0, false, 0 );
 		initFsmRun( fsmRun, prg );
 		newToken( prg, repl->pdaRun, fsmRun );
-		long pcr = parseLoop( prg, root, repl->pdaRun, fsmRun, in, PcrToken );
+		long pcr = parseLoop( prg, root, repl->pdaRun, fsmRun, in, PcrStart );
 		assert( pcr == PcrDone );
 		if ( repl->pdaRun->parseError )
 			cout << "parse error" << endp;
@@ -1374,7 +1374,7 @@ void ParseData::parsePatterns()
 		initPdaRun( pat->pdaRun, prg, pdaTables, fsmRun, pat->langEl->parserId, 0, false, 0 );
 		initFsmRun( fsmRun, prg );
 		newToken( prg, pat->pdaRun, fsmRun );
-		long pcr = parseLoop( prg, root, pat->pdaRun, fsmRun, in, PcrToken );
+		long pcr = parseLoop( prg, root, pat->pdaRun, fsmRun, in, PcrStart );
 		assert( pcr == PcrDone );
 		if ( pat->pdaRun->parseError )
 			cout << "parse error" << endp;

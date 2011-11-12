@@ -1158,8 +1158,7 @@ long parseLoop( Program *prg, Tree **sp, PdaRun *pdaRun,
 		assert( pdaRun->input == 0 );
 		pdaRun->input = input;
 
-		long ptr = parseToken( prg, sp, pdaRun, fsmRun,
-				inputStream, PcrToken );
+		long ptr = parseToken( prg, sp, pdaRun, fsmRun, inputStream, PcrStart );
 		
 		while ( ptr == PcrReduction ) {
 			return PcrReduction;
