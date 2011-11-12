@@ -786,21 +786,6 @@ void generationExecution( Execution *exec, Tree **sp )
 	executeCode( exec, sp, exec->code );
 }
 
-void reductionExecution( Execution *exec, Tree **sp )
-{
-	/* If we have a lhs push it to the stack. */
-	int haveLhs = exec->lhs != 0;
-	if ( haveLhs )
-		vm_push( exec->lhs );
-
-	/* Execution loop. */
-	executeCode( exec, sp, exec->code );
-
-	/* Take the lhs off the stack. */
-	if ( haveLhs )
-		exec->lhs = (Tree*) vm_pop();
-}
-
 void mainExecution( Execution *exec )
 {
 	Program *prg = exec->prg;
@@ -2183,7 +2168,7 @@ again:
 			PdaRun *pdaRun = (PdaRun*)vm_pop();
 
 			if ( pcr == PcrReduction ) {
-				/* Push the executio. */
+				/* Push the execution. */
 				vm_pushn( SIZEOF_WORD * 20 );
 				Execution *pushedExec = (Execution*)vm_ptop();
 				memcpy( pushedExec, exec, sizeof(Execution) );
@@ -2194,17 +2179,19 @@ again:
 						pdaRun, fsmRun, prg->rtd->prodInfo[pdaRun->reduction].frameId, 
 						pdaRun->fi->codeWV, pdaRun->redLel->tree, 0, 0, fsmRun->mark );
 
-				/* If we have a lhs push it to the stack. */
-				int haveLhs = exec->lhs != 0;
-				if ( haveLhs )
-					vm_push( exec->lhs );
+				/* Push the instruction. */
+				vm_push( (SW)instr );
+
+				/* Push the LHS onto the stack. */
+				vm_push( exec->lhs );
 
 				/* Execution loop. */
 				executeCode( exec, sp, exec->code );
 
 				/* Take the lhs off the stack. */
-				if ( haveLhs )
-					exec->lhs = (Tree*) vm_pop();
+				exec->lhs = (Tree*) vm_pop();
+
+				/*instr = (Code*) */ vm_pop();
 
 				vm_push( (SW)pdaRun );
 				vm_push( (SW)fsmRun );
@@ -2257,6 +2244,14 @@ again:
 			break;
 		}
 
+		case IN_RED_RET: {
+			debug( REALM_BYTECODE, "IN_RED_RET\n" );
+			//instr = (Code*) vm_pop();
+			fflush( stdout );
+			goto out;
+			break;
+		}
+
 		case IN_PARSE_FRAG_WV: {
 			Half stopId;
 			read_half( stopId );
@@ -2272,15 +2267,29 @@ again:
 			long consumed = ((Accum*)accum)->pdaRun->consumed;
 			long pcr = parseFrag( prg, sp, (Accum*)accum, (Stream*)stream, stopId, PcrStart );
 			while ( pcr == PcrReduction ) {
-				Execution exec;
-				pdaRun->exec = &exec;
+				Execution exec2;
+				Execution *exec = &exec2;
+				pdaRun->exec = exec;
 
 				/* Execution environment for the reduction code. */
 				initReductionExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, 
 						pdaRun, fsmRun, prg->rtd->prodInfo[pdaRun->reduction].frameId, 
 						pdaRun->fi->codeWV, pdaRun->redLel->tree, 0, 0, fsmRun->mark );
 
-				reductionExecution( pdaRun->exec, sp );
+				/* Push the instruction. */
+				vm_push( (SW)instr );
+
+				/* Push the LHS onto the stack. */
+				vm_push( exec->lhs );
+
+				/* Execution loop. */
+				executeCode( exec, sp, exec->code );
+
+				/* Take the lhs off the stack. */
+				exec->lhs = (Tree*) vm_pop();
+
+				/*instr = (Code*) */ vm_pop();
+
 
 				pcr = parseFrag( prg, sp, (Accum*)accum, (Stream*)stream, stopId, PcrReduction );
 			}
@@ -2313,15 +2322,28 @@ again:
 
 			long pcr = undoParseFrag( prg, sp, (Stream*)input, (Accum*)accum, consumed, PcrStart );
 			while ( pcr == PcrReduction ) {
-				Execution exec;
-				pdaRun->exec = &exec;
+				Execution exec2;
+				Execution *exec = &exec2;
+				pdaRun->exec = exec;
 
 				/* Execution environment for the reduction code. */
 				initReductionExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, 
 						pdaRun, fsmRun, prg->rtd->prodInfo[pdaRun->reduction].frameId, 
 						pdaRun->fi->codeWV, pdaRun->redLel->tree, 0, 0, fsmRun->mark );
 
-				reductionExecution( pdaRun->exec, sp );
+				/* Push the instruction. */
+				vm_push( (SW)instr );
+
+				/* Push the LHS onto the stack. */
+				vm_push( exec->lhs );
+
+				/* Execution loop. */
+				executeCode( exec, sp, exec->code );
+
+				/* Take the lhs off the stack. */
+				exec->lhs = (Tree*) vm_pop();
+
+				/*instr = (Code*) */ vm_pop();
 
 				pcr = undoParseFrag( prg, sp, (Stream*)input, (Accum*)accum, consumed, PcrReduction );
 			}
@@ -2343,8 +2365,9 @@ again:
 
 			long pcr = parseFinish( &result, prg, sp, (Accum*)accum, stream, false, PcrStart );
 			while ( pcr == PcrReduction ) {
-				Execution exec;
-				pdaRun->exec = &exec;
+				Execution exec2;
+				Execution *exec = &exec2;
+				pdaRun->exec = exec;
 				debug( REALM_BYTECODE, "reduction in finish\n" );
 
 				/* Execution environment for the reduction code. */
@@ -2352,7 +2375,19 @@ again:
 						pdaRun, fsmRun, prg->rtd->prodInfo[pdaRun->reduction].frameId, 
 						pdaRun->fi->codeWV, pdaRun->redLel->tree, 0, 0, fsmRun->mark );
 
-				reductionExecution( pdaRun->exec, sp );
+				/* Push the instruction. */
+				vm_push( (SW)instr );
+
+				/* Push the LHS onto the stack. */
+				vm_push( exec->lhs );
+
+				/* Execution loop. */
+				executeCode( exec, sp, exec->code );
+
+				/* Take the lhs off the stack. */
+				exec->lhs = (Tree*) vm_pop();
+
+				/*instr = (Code*) */ vm_pop();
 
 				pcr = parseFinish( &result, prg, sp, (Accum*)accum, stream, false, PcrReduction );
 			}
@@ -2375,8 +2410,9 @@ again:
 
 			long pcr = parseFinish( &result, prg, sp, (Accum*)accum, stream, true, PcrStart );
 			while ( pcr == PcrReduction ) {
-				Execution exec;
-				pdaRun->exec = &exec;
+				Execution exec2;
+				Execution *exec = &exec2;
+				pdaRun->exec = exec;
 				debug( REALM_BYTECODE, "reduction in finish\n" );
 
 				/* Execution environment for the reduction code. */
@@ -2384,7 +2420,19 @@ again:
 						pdaRun, fsmRun, prg->rtd->prodInfo[pdaRun->reduction].frameId, 
 						pdaRun->fi->codeWV, pdaRun->redLel->tree, 0, 0, fsmRun->mark );
 
-				reductionExecution( pdaRun->exec, sp );
+				/* Push the instruction. */
+				vm_push( (SW)instr );
+
+				/* Push the LHS onto the stack. */
+				vm_push( exec->lhs );
+
+				/* Execution loop. */
+				executeCode( exec, sp, exec->code );
+
+				/* Take the lhs off the stack. */
+				exec->lhs = (Tree*) vm_pop();
+
+				/*instr = (Code*) */ vm_pop();
 
 				pcr = parseFinish( &result, prg, sp, (Accum*)accum, stream, true, PcrReduction );
 			}
@@ -2418,15 +2466,28 @@ again:
 			long pcr = undoParseFrag( prg, sp, ((Accum*)accum)->stream, (Accum*)accum, consumed, PcrStart );
 
 			while ( pcr == PcrReduction ) {
-				Execution exec;
-				pdaRun->exec = &exec;
+				Execution exec2;
+				Execution *exec = &exec2;
+				pdaRun->exec = exec;
 
 				/* Execution environment for the reduction code. */
 				initReductionExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, 
 						pdaRun, fsmRun, prg->rtd->prodInfo[pdaRun->reduction].frameId, 
 						pdaRun->fi->codeWV, pdaRun->redLel->tree, 0, 0, fsmRun->mark );
 
-				reductionExecution( pdaRun->exec, sp );
+				/* Push the instruction. */
+				vm_push( (SW)instr );
+
+				/* Push the LHS onto the stack. */
+				vm_push( exec->lhs );
+
+				/* Execution loop. */
+				executeCode( exec, sp, exec->code );
+
+				/* Take the lhs off the stack. */
+				exec->lhs = (Tree*) vm_pop();
+
+				/*instr = (Code*) */ vm_pop();
 
 				pcr = undoParseFrag( prg, sp, ((Accum*)accum)->stream, (Accum*)accum, consumed, PcrReduction );
 			}
@@ -3476,6 +3537,7 @@ again:
 			setField( prg, prg->global, field, tree );
 			break;
 		}
+
 		case IN_STOP: {
 			debug( REALM_BYTECODE, "IN_STOP\n" );
 			fflush( stdout );
