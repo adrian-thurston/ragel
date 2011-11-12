@@ -1343,6 +1343,22 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 				code.appendHalf( ut->langEl->id );
 			else 
 				code.appendHalf( 0 );
+
+			code.append( IN_PARSE_FRAG_WV2 );
+
+			/* The stop id. */
+			if ( stop )
+				code.appendHalf( ut->langEl->id );
+			else 
+				code.appendHalf( 0 );
+
+			code.append( IN_PARSE_FRAG_WV3 );
+
+			/* The stop id. */
+			if ( stop )
+				code.appendHalf( ut->langEl->id );
+			else 
+				code.appendHalf( 0 );
 		}
 		else {
 			code.append( IN_PARSE_FRAG_WC );
@@ -1392,6 +1408,22 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 
 		if ( pd->revertOn ) {
 			code.append( IN_PARSE_FRAG_WV );
+
+			/* The stop id. */
+			if ( stop )
+				code.appendHalf( ut->langEl->id );
+			else 
+				code.appendHalf( 0 );
+
+			code.append( IN_PARSE_FRAG_WV2 );
+
+			/* The stop id. */
+			if ( stop )
+				code.appendHalf( ut->langEl->id );
+			else 
+				code.appendHalf( 0 );
+
+			code.append( IN_PARSE_FRAG_WV3 );
 
 			/* The stop id. */
 			if ( stop )
@@ -2108,6 +2140,10 @@ void LangStmt::evaluateAccumItems( ParseData *pd, CodeVect &code ) const
 			if ( pd->revertOn ) {
 				code.append( IN_PARSE_FRAG_WV );
 				code.appendHalf( 0 );
+				code.append( IN_PARSE_FRAG_WV2 );
+				code.appendHalf( 0 );
+				code.append( IN_PARSE_FRAG_WV3 );
+				code.appendHalf( 0 );
 			}
 			else {
 				code.append( IN_PARSE_FRAG_WC );
@@ -2140,6 +2176,12 @@ void LangStmt::evaluateAccumItems( ParseData *pd, CodeVect &code ) const
 
 			if ( pd->revertOn ) {
 				code.append( IN_PARSE_FRAG_WV );
+				code.appendHalf( 0 );
+
+				code.append( IN_PARSE_FRAG_WV2 );
+				code.appendHalf( 0 );
+
+				code.append( IN_PARSE_FRAG_WV3 );
 				code.appendHalf( 0 );
 			}
 			else {

@@ -232,6 +232,8 @@ typedef unsigned char uchar;
 #define IN_PARSE_FRAG_WC3        0xe1
 #define IN_RED_RET               0xe3
 #define IN_PARSE_FRAG_WV         0xc1
+#define IN_PARSE_FRAG_WV2        0xe2
+#define IN_PARSE_FRAG_WV3        0xe4
 #define IN_PARSE_FRAG_BKT        0xc2
 
 #define IN_EXTRACT_INPUT_WC      0xc3
