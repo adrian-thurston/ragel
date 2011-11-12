@@ -213,19 +213,15 @@ Word streamAppend( Program *prg, Tree **sp, Tree *input, Stream *stream )
 	}
 }
 
-long parseFrag( Program *prg, Tree **sp, Tree *input, Accum *accum, long stopId, long entry )
+long parseFrag( Program *prg, Tree **sp, Accum *accum, Stream *stream, long stopId, long entry )
 {
-	Stream *stream = (Stream*)input;
 
 switch ( entry ) {
 case PcrStart:
 
 	if ( ! accum->pdaRun->parseError ) {
 		accum->pdaRun->stopTarget = stopId;
-		accum->fsmRun->curStream = input;
-
-		PdaRun *pdaRun = accum->pdaRun;
-		FsmRun *fsmRun = accum->fsmRun;
+		accum->fsmRun->curStream = (Tree*)stream;
 
 		long pcr = parseLoop( prg, sp, accum->pdaRun, accum->fsmRun, stream->in, PcrStart );
 
@@ -2162,7 +2158,7 @@ again:
 			PdaRun *pdaRun = ((Accum*)accum)->pdaRun;
 			FsmRun *fsmRun = ((Accum*)accum)->fsmRun;
 
-			long pcr = parseFrag( prg, sp, stream, (Accum*)accum, stopId, PcrStart );
+			long pcr = parseFrag( prg, sp, (Accum*)accum, (Stream*)stream, stopId, PcrStart );
 
 			vm_push( (SW)pdaRun );
 			vm_push( (SW)fsmRun );
@@ -2187,17 +2183,36 @@ again:
 			PdaRun *pdaRun = (PdaRun*)vm_pop();
 
 			if ( pcr == PcrReduction ) {
-				Execution exec;
-				pdaRun->exec = &exec;
+				/* Push the executio. */
+				vm_pushn( SIZEOF_WORD * 20 );
+				Execution *pushedExec = (Execution*)vm_ptop();
+				memcpy( pushedExec, exec, sizeof(Execution) );
+				pdaRun->exec = exec;
 
 				/* Execution environment for the reduction code. */
-				initReductionExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, 
+				initReductionExecution( exec, prg, &pdaRun->rcodeCollect, 
 						pdaRun, fsmRun, prg->rtd->prodInfo[pdaRun->reduction].frameId, 
 						pdaRun->fi->codeWV, pdaRun->redLel->tree, 0, 0, fsmRun->mark );
 
-				reductionExecution( pdaRun->exec, sp );
+				{
+					/* If we have a lhs push it to the stack. */
+					int haveLhs = exec->lhs != 0;
+					if ( haveLhs )
+						vm_push( exec->lhs );
+
+					/* Execution loop. */
+					executeCode( exec, sp, exec->code );
+
+					/* Take the lhs off the stack. */
+					if ( haveLhs )
+						exec->lhs = (Tree*) vm_pop();
+				}
 				
-				pcr = parseFrag( prg, sp, stream, (Accum*)accum, stopId, PcrReduction );
+				pcr = parseFrag( prg, sp, (Accum*)accum, (Stream*)stream, stopId, PcrReduction );
+
+				/* Pop the saved execution. */
+				memcpy( exec, pushedExec, sizeof(Execution) );
+				vm_popn( SIZEOF_WORD * 20 );
 
 				vm_push( (SW)pdaRun );
 				vm_push( (SW)fsmRun );
@@ -2230,7 +2245,7 @@ again:
 			FsmRun *fsmRun = ((Accum*)accum)->fsmRun;
 
 			long consumed = ((Accum*)accum)->pdaRun->consumed;
-			long pcr = parseFrag( prg, sp, stream, (Accum*)accum, stopId, PcrStart );
+			long pcr = parseFrag( prg, sp, (Accum*)accum, (Stream*)stream, stopId, PcrStart );
 			while ( pcr == PcrReduction ) {
 				Execution exec;
 				pdaRun->exec = &exec;
@@ -2242,7 +2257,7 @@ again:
 
 				reductionExecution( pdaRun->exec, sp );
 
-				pcr = parseFrag( prg, sp, stream, (Accum*)accum, stopId, PcrReduction );
+				pcr = parseFrag( prg, sp, (Accum*)accum, (Stream*)stream, stopId, PcrReduction );
 			}
 
 			//treeDownref( prg, sp, stream );
