@@ -2192,8 +2192,8 @@ again:
 				/* Push the LHS onto the stack. */
 				vm_push( exec->lhs );
 
-				/* Execution loop. */
-				sp = executeCode( exec, sp, exec->code );
+				/* Call execution. */
+				instr = exec->code;
 			}
 			else {
 				treeDownref( prg, sp, stream );
@@ -2245,8 +2245,10 @@ again:
 			exec->lhs = (Tree*) vm_pop();
 			instr = (Code*) vm_pop();
 
-			fflush( stdout );
-			goto out;
+			if ( instr == 0 ) {
+				fflush( stdout );
+				goto out;
+			}
 			break;
 		}
 
@@ -2275,7 +2277,7 @@ again:
 						pdaRun->fi->codeWV, pdaRun->redLel->tree, 0, 0, fsmRun->mark );
 
 				/* Push the instruction. */
-				vm_push( (SW)instr );
+				vm_push( 0 ) ;//(SW)instr );
 
 				/* Push the LHS onto the stack. */
 				vm_push( exec->lhs );
@@ -2324,7 +2326,7 @@ again:
 						pdaRun->fi->codeWV, pdaRun->redLel->tree, 0, 0, fsmRun->mark );
 
 				/* Push the instruction. */
-				vm_push( (SW)instr );
+				vm_push( 0 ) ;//(SW)instr );
 
 				/* Push the LHS onto the stack. */
 				vm_push( exec->lhs );
@@ -2363,7 +2365,7 @@ again:
 						pdaRun->fi->codeWV, pdaRun->redLel->tree, 0, 0, fsmRun->mark );
 
 				/* Push the instruction. */
-				vm_push( (SW)instr );
+				vm_push( 0 ) ;//(SW)instr );
 
 				/* Push the LHS onto the stack. */
 				vm_push( exec->lhs );
@@ -2403,7 +2405,7 @@ again:
 						pdaRun->fi->codeWV, pdaRun->redLel->tree, 0, 0, fsmRun->mark );
 
 				/* Push the instruction. */
-				vm_push( (SW)instr );
+				vm_push( 0 ) ;//(SW)instr );
 
 				/* Push the LHS onto the stack. */
 				vm_push( exec->lhs );
@@ -2453,7 +2455,7 @@ again:
 						pdaRun->fi->codeWV, pdaRun->redLel->tree, 0, 0, fsmRun->mark );
 
 				/* Push the instruction. */
-				vm_push( (SW)instr );
+				vm_push( 0 ) ;//(SW)instr );
 
 				/* Push the LHS onto the stack. */
 				vm_push( exec->lhs );
