@@ -230,7 +230,7 @@ typedef unsigned char uchar;
 #define IN_PARSE_FRAG_WC         0xc0
 #define IN_PARSE_FRAG_WC2        0xe0
 #define IN_PARSE_FRAG_WC3        0xe1
-#define IN_RED_RET               0xe2
+#define IN_RED_RET               0xe3
 #define IN_PARSE_FRAG_WV         0xc1
 #define IN_PARSE_FRAG_BKT        0xc2
 
@@ -496,7 +496,7 @@ Tree *prepParseTree( struct ColmProgram *prg, Tree **sp, Tree *tree );
 void splitRef( struct ColmProgram *prg, Tree ***sp, Ref *fromRef );
 
 void allocGlobal( struct ColmProgram *prg );
-void executeCode( Execution *exec, Tree **sp, Code *instr );
+Tree **executeCode( Execution *exec, Tree **sp, Code *instr );
 void rcodeDownref( struct ColmProgram *prg, Tree **sp, Code *instr );
 Tree **stackAlloc();
 

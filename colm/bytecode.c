@@ -860,7 +860,7 @@ void reverseExecution( Execution *exec, Tree **root, RtCodeVect *allRev )
 	allRev->tabLen -= len + SIZEOF_WORD;
 }
 
-void executeCode( Execution *exec, Tree **sp, Code *instr )
+Tree **executeCode( Execution *exec, Tree **sp, Code *instr )
 {
 	/* When we exit we are going to verify that we did not eat up any stack
 	 * space. */
@@ -891,7 +891,7 @@ again:
 			read_tree( restore );
 
 			debug( REALM_BYTECODE, "IN_RESTORE_LHS\n" );
-			assert( exec->lhs == 0 );
+			//assert( exec->lhs == 0 );
 			exec->lhs = restore;
 			break;
 		}
@@ -2179,6 +2179,13 @@ again:
 						pdaRun, fsmRun, prg->rtd->prodInfo[pdaRun->reduction].frameId, 
 						pdaRun->fi->codeWV, pdaRun->redLel->tree, 0, 0, fsmRun->mark );
 
+				vm_push( (SW)pdaRun );
+				vm_push( (SW)fsmRun );
+				vm_push( (SW)pcr );
+
+				vm_push( stream );
+				vm_push( accum );
+
 				/* Push the instruction. */
 				vm_push( (SW)instr );
 
@@ -2186,19 +2193,7 @@ again:
 				vm_push( exec->lhs );
 
 				/* Execution loop. */
-				executeCode( exec, sp, exec->code );
-
-				/* Take the lhs off the stack. */
-				exec->lhs = (Tree*) vm_pop();
-
-				/*instr = (Code*) */ vm_pop();
-
-				vm_push( (SW)pdaRun );
-				vm_push( (SW)fsmRun );
-				vm_push( (SW)pcr );
-
-				vm_push( stream );
-				vm_push( accum );
+				sp = executeCode( exec, sp, exec->code );
 			}
 			else {
 				treeDownref( prg, sp, stream );
@@ -2246,7 +2241,10 @@ again:
 
 		case IN_RED_RET: {
 			debug( REALM_BYTECODE, "IN_RED_RET\n" );
-			//instr = (Code*) vm_pop();
+
+			exec->lhs = (Tree*) vm_pop();
+			instr = (Code*) vm_pop();
+
 			fflush( stdout );
 			goto out;
 			break;
@@ -2283,13 +2281,7 @@ again:
 				vm_push( exec->lhs );
 
 				/* Execution loop. */
-				executeCode( exec, sp, exec->code );
-
-				/* Take the lhs off the stack. */
-				exec->lhs = (Tree*) vm_pop();
-
-				/*instr = (Code*) */ vm_pop();
-
+				sp = executeCode( exec, sp, exec->code );
 
 				pcr = parseFrag( prg, sp, (Accum*)accum, (Stream*)stream, stopId, PcrReduction );
 			}
@@ -2338,12 +2330,7 @@ again:
 				vm_push( exec->lhs );
 
 				/* Execution loop. */
-				executeCode( exec, sp, exec->code );
-
-				/* Take the lhs off the stack. */
-				exec->lhs = (Tree*) vm_pop();
-
-				/*instr = (Code*) */ vm_pop();
+				sp = executeCode( exec, sp, exec->code );
 
 				pcr = undoParseFrag( prg, sp, (Stream*)input, (Accum*)accum, consumed, PcrReduction );
 			}
@@ -2382,12 +2369,7 @@ again:
 				vm_push( exec->lhs );
 
 				/* Execution loop. */
-				executeCode( exec, sp, exec->code );
-
-				/* Take the lhs off the stack. */
-				exec->lhs = (Tree*) vm_pop();
-
-				/*instr = (Code*) */ vm_pop();
+				sp = executeCode( exec, sp, exec->code );
 
 				pcr = parseFinish( &result, prg, sp, (Accum*)accum, stream, false, PcrReduction );
 			}
@@ -2427,12 +2409,7 @@ again:
 				vm_push( exec->lhs );
 
 				/* Execution loop. */
-				executeCode( exec, sp, exec->code );
-
-				/* Take the lhs off the stack. */
-				exec->lhs = (Tree*) vm_pop();
-
-				/*instr = (Code*) */ vm_pop();
+				sp = executeCode( exec, sp, exec->code );
 
 				pcr = parseFinish( &result, prg, sp, (Accum*)accum, stream, true, PcrReduction );
 			}
@@ -2482,12 +2459,7 @@ again:
 				vm_push( exec->lhs );
 
 				/* Execution loop. */
-				executeCode( exec, sp, exec->code );
-
-				/* Take the lhs off the stack. */
-				exec->lhs = (Tree*) vm_pop();
-
-				/*instr = (Code*) */ vm_pop();
+				sp = executeCode( exec, sp, exec->code );
 
 				pcr = undoParseFrag( prg, sp, ((Accum*)accum)->stream, (Accum*)accum, consumed, PcrReduction );
 			}
@@ -3554,7 +3526,7 @@ again:
 			break;
 		}
 		default: {
-			fatal( "UNKNOWN INSTRUCTION: -- something is wrong\n" );
+			fatal( "UNKNOWN INSTRUCTION: %d -- something is wrong\n", *(instr-1) );
 			assert(false);
 			break;
 		}
@@ -3563,7 +3535,8 @@ again:
 
 out:
 	if ( ! prg->induceExit ) {
-		assert( sp == root );
+//		assert( sp == root );
 	}
+	return sp;
 }
 
