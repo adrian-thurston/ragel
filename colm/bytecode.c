@@ -215,7 +215,6 @@ Word streamAppend( Program *prg, Tree **sp, Tree *input, Stream *stream )
 
 long parseFrag( Program *prg, Tree **sp, Accum *accum, Stream *stream, long stopId, long entry )
 {
-
 switch ( entry ) {
 case PcrStart:
 
@@ -223,14 +222,15 @@ case PcrStart:
 		accum->pdaRun->stopTarget = stopId;
 		accum->fsmRun->curStream = (Tree*)stream;
 
-		long pcr = parseLoop( prg, sp, accum->pdaRun, accum->fsmRun, stream->in, PcrStart );
+		long pcr = parseLoop( prg, sp, accum->pdaRun, accum->fsmRun, stream->in, entry );
 
-		while ( pcr == PcrReduction ) {
+		while ( pcr != PcrDone ) {
 
-return PcrReduction;
+return pcr;
+case PcrGeneration:
 case PcrReduction:
 
-			pcr = parseLoop( prg, sp, accum->pdaRun, accum->fsmRun, stream->in, PcrReduction );
+			pcr = parseLoop( prg, sp, accum->pdaRun, accum->fsmRun, stream->in, entry );
 		}
 	}
 
@@ -251,14 +251,15 @@ case PcrStart:
 		stream->in->later = false;
 
 		if ( ! accum->pdaRun->parseError ) {
-			long pcr = parseLoop( prg, sp, accum->pdaRun, accum->fsmRun, stream->in, PcrStart );
+			long pcr = parseLoop( prg, sp, accum->pdaRun, accum->fsmRun, stream->in, entry );
 
-			while ( pcr == PcrReduction ) {
+			while ( pcr != PcrDone ) {
 
-return PcrReduction;
+return pcr;
+case PcrGeneration:
 case PcrReduction:
 
-				pcr = parseLoop( prg, sp, accum->pdaRun, accum->fsmRun, stream->in, PcrReduction );
+				pcr = parseLoop( prg, sp, accum->pdaRun, accum->fsmRun, stream->in, entry );
 			}
 		}
 	}
@@ -299,13 +300,14 @@ case PcrStart:
 		pdaRun->triggerUndo = 1;
 
 		/* The parse loop will recognise the situation. */
-		long pcr = parseLoop( prg, sp, pdaRun, fsmRun, inputStream, PcrStart );
-		while ( pcr == PcrReduction ) {
+		long pcr = parseLoop( prg, sp, pdaRun, fsmRun, inputStream, entry );
+		while ( pcr != PcrDone ) {
 
-return PcrReduction;
+return pcr;
+case PcrGeneration:
 case PcrReduction:
 
-			pcr = parseLoop( prg, sp, pdaRun, fsmRun, inputStream, PcrReduction );
+			pcr = parseLoop( prg, sp, pdaRun, fsmRun, inputStream, entry );
 		}
 
 		/* Reset environment. */
@@ -880,7 +882,7 @@ Tree **executeCode( Execution *exec, Tree **sp, Code *instr )
 {
 	/* When we exit we are going to verify that we did not eat up any stack
 	 * space. */
-	Tree **root = sp;
+	//Tree **root = sp;
 	Program *prg = exec->prg;
 	Code c;
 
@@ -2183,7 +2185,7 @@ again:
 			FsmRun *fsmRun = (FsmRun*)vm_pop();
 			PdaRun *pdaRun = (PdaRun*)vm_pop();
 
-			if ( pcr == PcrReduction ) {
+			if ( pcr != PcrDone ) {
 				/* Push the execution. */
 				vm_pushn( SIZEOF_WORD * 20 );
 				Execution *pushedExec = (Execution*)vm_ptop();
@@ -2235,7 +2237,7 @@ again:
 			FsmRun *fsmRun = (FsmRun*)vm_pop();
 			PdaRun *pdaRun = (PdaRun*)vm_pop();
 
-			pcr = parseFrag( prg, sp, (Accum*)accum, (Stream*)stream, stopId, PcrReduction );
+			pcr = parseFrag( prg, sp, (Accum*)accum, (Stream*)stream, stopId, pcr );
 
 			/* Pop the saved execution. */
 			Execution *pushedExec = (Execution*)vm_ptop();
@@ -2294,7 +2296,7 @@ again:
 			FsmRun *fsmRun = (FsmRun*)vm_pop();
 			PdaRun *pdaRun = (PdaRun*)vm_pop();
 
-			if ( pcr == PcrReduction ) {
+			if ( pcr != PcrDone ) {
 				vm_pushn( SIZEOF_WORD * 20 );
 				Execution *pushedExec = (Execution*)vm_ptop();
 				memcpy( pushedExec, exec, sizeof(Execution) );
@@ -2352,7 +2354,7 @@ again:
 			FsmRun *fsmRun = (FsmRun*)vm_pop();
 			PdaRun *pdaRun = (PdaRun*)vm_pop();
 
-			pcr = parseFrag( prg, sp, (Accum*)accum, (Stream*)stream, stopId, PcrReduction );
+			pcr = parseFrag( prg, sp, (Accum*)accum, (Stream*)stream, stopId, pcr );
 
 			/* Pop the saved execution. */
 			Execution *pushedExec = (Execution*)vm_ptop();
@@ -2409,7 +2411,7 @@ again:
 
 			debug( REALM_BYTECODE, "IN_PARSE_FRAG_BKT2 %ld", consumed );
 
-			if ( pcr == PcrReduction ) {
+			if ( pcr != PcrDone ) {
 				vm_pushn( SIZEOF_WORD * 20 );
 				Execution *pushedExec = (Execution*)vm_ptop();
 				memcpy( pushedExec, exec, sizeof(Execution) );
@@ -2457,7 +2459,7 @@ again:
 
 			debug( REALM_BYTECODE, "IN_PARSE_FRAG_BKT3 %ld", consumed );
 
-			pcr = undoParseFrag( prg, sp, (Stream*)input, (Accum*)accum, consumed, PcrReduction );
+			pcr = undoParseFrag( prg, sp, (Stream*)input, (Accum*)accum, consumed, pcr );
 
 			/* Pop the saved execution. */
 			Execution *pushedExec = (Execution*)vm_ptop();
@@ -2524,7 +2526,7 @@ again:
 			FsmRun *fsmRun = (FsmRun*)vm_pop();
 			PdaRun *pdaRun = (PdaRun*)vm_pop();
 
-			if ( pcr == PcrReduction ) {
+			if ( pcr != PcrDone ) {
 				/* Push the execution. */
 				vm_pushn( SIZEOF_WORD * 20 );
 				Execution *pushedExec = (Execution*)vm_ptop();
@@ -2575,7 +2577,7 @@ again:
 			FsmRun *fsmRun = (FsmRun*)vm_pop();
 			PdaRun *pdaRun = (PdaRun*)vm_pop();
 
-			pcr = parseFinish( &result, prg, sp, (Accum*)accum, stream, false, PcrReduction );
+			pcr = parseFinish( &result, prg, sp, (Accum*)accum, stream, false, pcr );
 
 			/* Pop the saved execution. */
 			Execution *pushedExec = (Execution*)vm_ptop();
@@ -2632,7 +2634,7 @@ again:
 			FsmRun *fsmRun = (FsmRun*)vm_pop();
 			PdaRun *pdaRun = (PdaRun*)vm_pop();
 
-			if ( pcr == PcrReduction ) {
+			if ( pcr != PcrDone ) {
 				/* Push the execution. */
 				vm_pushn( SIZEOF_WORD * 20 );
 				Execution *pushedExec = (Execution*)vm_ptop();
@@ -2693,7 +2695,7 @@ again:
 			FsmRun *fsmRun = (FsmRun*)vm_pop();
 			PdaRun *pdaRun = (PdaRun*)vm_pop();
 
-			pcr = parseFinish( &result, prg, sp, (Accum*)accum, stream, true, PcrReduction );
+			pcr = parseFinish( &result, prg, sp, (Accum*)accum, stream, true, pcr );
 
 			/* Pop the saved execution. */
 			Execution *pushedExec = (Execution*)vm_ptop();
@@ -2751,7 +2753,7 @@ again:
 
 			debug( REALM_BYTECODE, "IN_PARSE_FINISH_BKT2\n" );
 
-			if ( pcr == PcrReduction ) {
+			if ( pcr != PcrDone ) {
 				vm_pushn( SIZEOF_WORD * 20 );
 				Execution *pushedExec = (Execution*)vm_ptop();
 				memcpy( pushedExec, exec, sizeof(Execution) );
@@ -2802,7 +2804,7 @@ again:
 
 			debug( REALM_BYTECODE, "IN_PARSE_FINISH_BKT3\n" );
 
-			pcr = undoParseFrag( prg, sp, ((Accum*)accum)->stream, (Accum*)accum, consumed, PcrReduction );
+			pcr = undoParseFrag( prg, sp, ((Accum*)accum)->stream, (Accum*)accum, consumed, pcr );
 
 			/* Pop the saved execution. */
 			Execution *pushedExec = (Execution*)vm_ptop();
@@ -3887,7 +3889,8 @@ again:
 
 out:
 	if ( ! prg->induceExit ) {
-//		assert( sp == root );
+		// FIXME: bring this back.
+		//assert( sp == root );
 	}
 	return sp;
 }

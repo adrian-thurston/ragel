@@ -1015,8 +1015,9 @@ long parseLoop( Program *prg, Tree **sp, PdaRun *pdaRun,
 		FsmRun *fsmRun, InputStream *inputStream, long entry )
 {
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
-	if ( entry == PcrReduction )
-		goto ptrReduction;
+
+switch ( entry ) {
+case PcrStart:
 
 	pdaRun->stop = false;
 
@@ -1106,6 +1107,14 @@ long parseLoop( Program *prg, Tree **sp, PdaRun *pdaRun,
 			goto skipSend;
 		}
 		else if ( prg->ctxDepParsing && lelInfo[tokenId].frameId >= 0 ) {
+			pdaRun->tokenId = tokenId;
+
+//return PcrGeneration;
+//case PcrGeneration:
+
+			input = 0;
+			tokenId = pdaRun->tokenId;
+
 			/* Has a generation action. */
 			debug( REALM_PARSE, "token gen action: %s\n", 
 					prg->rtd->lelInfo[tokenId].name );
@@ -1161,8 +1170,10 @@ long parseLoop( Program *prg, Tree **sp, PdaRun *pdaRun,
 		long ptr = parseToken( prg, sp, pdaRun, fsmRun, inputStream, PcrStart );
 		
 		while ( ptr == PcrReduction ) {
-			return PcrReduction;
-			ptrReduction:
+
+return PcrReduction;
+case PcrReduction:
+
 			ptr = parseToken( prg, sp, pdaRun, fsmRun, inputStream, PcrReduction );
 		}
 
@@ -1206,5 +1217,9 @@ skipSend:
 			break;
 		}
 	}
+
+case PcrDone:
+break; }
+
 	return PcrDone;
 }

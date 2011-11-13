@@ -169,6 +169,8 @@ void initPdaRun( PdaRun *pdaRun, Program *prg, PdaTables *tables,
 	pdaRun->parseError = 0;
 	pdaRun->input = 0;
 	pdaRun->triggerUndo = 0;
+
+	pdaRun->tokenId = 0;
 }
 
 long stackTopTarget( Program *prg, PdaRun *pdaRun )
@@ -377,10 +379,10 @@ long parseToken( Program *prg, Tree **sp, PdaRun *pdaRun,
 	int indPos;
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
 
-	/* The scanner will send a null token if it can't find a token. */
-	if ( entry == PcrReduction )
-		goto pteReduction;
+switch ( entry ) {
+case PcrStart:
 
+	/* The scanner will send a null token if it can't find a token. */
 	if ( pdaRun->input == 0 ) {
 		/* Grab the most recently accepted item. */
 		pushBtPoint( prg, pdaRun, pdaRun->tokenList->kid->tree );
@@ -585,8 +587,8 @@ again:
 			/* Frame info for reduction. */
 			pdaRun->fi = &prg->rtd->frameInfo[prg->rtd->prodInfo[pdaRun->reduction].frameId];
 
-			return PcrReduction;
-			pteReduction:
+return PcrReduction;
+case PcrReduction:
 
 			if ( prg->induceExit )
 				goto fail;
@@ -806,5 +808,9 @@ fail:
 
 _out:
 	pdaRun->nextRegionInd = pdaRun->tables->tokenRegionInds[pdaRun->cs];
+
+case PcrDone:
+break; }
+
 	return PcrDone;
 }
