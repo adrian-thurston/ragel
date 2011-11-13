@@ -1109,8 +1109,8 @@ case PcrStart:
 		else if ( prg->ctxDepParsing && lelInfo[tokenId].frameId >= 0 ) {
 			pdaRun->tokenId = tokenId;
 
-//return PcrGeneration;
-//case PcrGeneration:
+return PcrGeneration;
+case PcrGeneration:
 
 			input = 0;
 			tokenId = pdaRun->tokenId;
