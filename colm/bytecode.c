@@ -642,6 +642,14 @@ again:
 			treeDownref( prg, sp, tree );
 			break;
 		}
+		case IN_PARSE_FINISH_BKT2: {
+			debug( REALM_BYTECODE, "IN_PARSE_FINISH_BKT2\n" );
+			break;
+		}
+		case IN_PARSE_FINISH_BKT3: {
+			debug( REALM_BYTECODE, "IN_PARSE_FINISH_BKT3\n" );
+			break;
+		}
 		case IN_STREAM_PULL_BKT: {
 			Tree *string;
 			read_tree( string );
@@ -2664,7 +2672,9 @@ again:
 				appendWord( exec->rcodeCollect, (Word) accum );
 				appendWord( exec->rcodeCollect, (Word) result );
 				appendWord( exec->rcodeCollect, (Word) consumed );
-				append( exec->rcodeCollect, SIZEOF_CODE + 3*SIZEOF_WORD );
+				append( exec->rcodeCollect, IN_PARSE_FINISH_BKT2 );
+				append( exec->rcodeCollect, IN_PARSE_FINISH_BKT3 );
+				append( exec->rcodeCollect, 3*SIZEOF_CODE + 3*SIZEOF_WORD );
 				if ( prg->induceExit )
 					goto out;
 			}
@@ -2703,6 +2713,7 @@ again:
 			instr -= SIZEOF_CODE;
 			break;
 		}
+
 		case IN_PARSE_FINISH_BKT: {
 			Tree *accum;
 			Tree *tree;
@@ -2719,9 +2730,31 @@ again:
 
 			long pcr = undoParseFrag( prg, sp, ((Accum*)accum)->stream, (Accum*)accum, consumed, PcrStart );
 
-			while ( pcr == PcrReduction ) {
-				Execution exec2;
-				Execution *exec = &exec2;
+			vm_push( (SW)pdaRun );
+			vm_push( (SW)fsmRun );
+			vm_push( (SW)pcr );
+			vm_push( (SW)consumed );
+
+			vm_push( tree );
+			vm_push( accum );
+			break;
+		}
+
+		case IN_PARSE_FINISH_BKT2: {
+			Tree *accum = vm_pop();
+			Tree *tree = vm_pop();
+
+			long consumed = (long)vm_pop();
+			long pcr = (long)vm_pop();
+			FsmRun *fsmRun = (FsmRun*)vm_pop();
+			PdaRun *pdaRun = (PdaRun*)vm_pop();
+
+			debug( REALM_BYTECODE, "IN_PARSE_FINISH_BKT2\n" );
+
+			if ( pcr == PcrReduction ) {
+				vm_pushn( SIZEOF_WORD * 20 );
+				Execution *pushedExec = (Execution*)vm_ptop();
+				memcpy( pushedExec, exec, sizeof(Execution) );
 				pdaRun->exec = exec;
 
 				/* Execution environment for the reduction code. */
@@ -2729,25 +2762,67 @@ again:
 						pdaRun, fsmRun, prg->rtd->prodInfo[pdaRun->reduction].frameId, 
 						pdaRun->fi->codeWV, pdaRun->redLel->tree, 0, 0, fsmRun->mark );
 
+				vm_push( (SW)pdaRun );
+				vm_push( (SW)fsmRun );
+				vm_push( (SW)pcr );
+				vm_push( (SW)consumed );
+
+				vm_push( tree );
+				vm_push( accum );
+
 				/* Push the instruction. */
-				vm_push( 0 ) ;//(SW)instr );
+				vm_push( (SW)instr );
 
 				/* Push the LHS onto the stack. */
 				vm_push( exec->lhs );
 
-				/* Execution loop. */
-				sp = executeCode( exec, sp, exec->code );
-
-				pcr = undoParseFrag( prg, sp, ((Accum*)accum)->stream, (Accum*)accum, consumed, PcrReduction );
+				/* Call execution. */
+				instr = exec->code;
 			}
+			else {
+				instr += SIZEOF_CODE;
 
-			((Accum*)accum)->stream->in->eof = false;
+				((Accum*)accum)->stream->in->eof = false;
 
-			/* This needs an implementation. */
-			treeDownref( prg, sp, accum );
-			treeDownref( prg, sp, tree );
+				/* This needs an implementation. */
+				treeDownref( prg, sp, accum );
+				treeDownref( prg, sp, tree );
+			}
 			break;
 		}
+
+		case IN_PARSE_FINISH_BKT3: {
+			Tree *accum = vm_pop();
+			Tree *tree = vm_pop();
+
+			long consumed = (long)vm_pop();
+			long pcr = (long)vm_pop();
+			FsmRun *fsmRun = (FsmRun*)vm_pop();
+			PdaRun *pdaRun = (PdaRun*)vm_pop();
+
+			debug( REALM_BYTECODE, "IN_PARSE_FINISH_BKT3\n" );
+
+			pcr = undoParseFrag( prg, sp, ((Accum*)accum)->stream, (Accum*)accum, consumed, PcrReduction );
+
+			/* Pop the saved execution. */
+			Execution *pushedExec = (Execution*)vm_ptop();
+			memcpy( exec, pushedExec, sizeof(Execution) );
+			vm_popn( SIZEOF_WORD * 20 );
+
+			vm_push( (SW)pdaRun );
+			vm_push( (SW)fsmRun );
+			vm_push( (SW)pcr );
+			vm_push( (SW)consumed );
+
+			vm_push( tree );
+			vm_push( accum );
+
+			/* Back up to the frag 2. */
+			instr -= SIZEOF_CODE;
+			instr -= SIZEOF_CODE;
+			break;
+		}
+
 		case IN_STREAM_PULL: {
 			debug( REALM_BYTECODE, "IN_STREAM_PULL\n" );
 
