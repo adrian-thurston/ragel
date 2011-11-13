@@ -619,6 +619,14 @@ again:
 			treeDownref( prg, sp, input );
 			break;
 		}
+		case IN_PARSE_FRAG_BKT2: {
+			debug( REALM_BYTECODE, "IN_PARSE_FRAG_BKT2\n" );
+			break;
+		}
+		case IN_PARSE_FRAG_BKT3: {
+			debug( REALM_BYTECODE, "IN_PARSE_FRAG_BKT3\n" );
+			break;
+		}
 		case IN_PARSE_FINISH_BKT: {
 			Tree *accumTree;
 			Tree *tree;
@@ -767,7 +775,7 @@ again:
 			return;
 		}
 		default: {
-			fatal( "UNKNOWN INSTRUCTION: -- reverse code downref\n" );
+			fatal( "UNKNOWN INSTRUCTION 0x%2x: -- reverse code downref\n", *(instr-1));
 			assert(false);
 			break;
 		}
@@ -2313,7 +2321,9 @@ again:
 				appendWord( exec->rcodeCollect, (Word) accum );
 				appendWord( exec->rcodeCollect, (Word) stream );
 				appendWord( exec->rcodeCollect, consumed );
-				append( exec->rcodeCollect, SIZEOF_CODE + 3 * SIZEOF_WORD );
+				append( exec->rcodeCollect, IN_PARSE_FRAG_BKT2 );
+				append( exec->rcodeCollect, IN_PARSE_FRAG_BKT3 );
+				append( exec->rcodeCollect, 3*SIZEOF_CODE + 3 * SIZEOF_WORD );
 				if ( prg->induceExit )
 					goto out;
 			}
@@ -2355,18 +2365,6 @@ again:
 			break;
 		}
 
-		case IN_RED_RET: {
-			debug( REALM_BYTECODE, "IN_RED_RET\n" );
-
-			exec->lhs = (Tree*) vm_pop();
-			instr = (Code*) vm_pop();
-
-			if ( instr == 0 ) {
-				fflush( stdout );
-				goto out;
-			}
-			break;
-		}
 
 		case IN_PARSE_FRAG_BKT: {
 			Tree *accum;
@@ -2382,9 +2380,32 @@ again:
 			PdaRun *pdaRun = ((Accum*)accum)->pdaRun;
 
 			long pcr = undoParseFrag( prg, sp, (Stream*)input, (Accum*)accum, consumed, PcrStart );
-			while ( pcr == PcrReduction ) {
-				Execution exec2;
-				Execution *exec = &exec2;
+
+			vm_push( (SW)pdaRun );
+			vm_push( (SW)fsmRun );
+			vm_push( (SW)pcr );
+			vm_push( (SW)consumed );
+
+			vm_push( input );
+			vm_push( accum );
+			break;
+		}
+
+		case IN_PARSE_FRAG_BKT2: {
+			Tree *accum = vm_pop();
+			Tree *input = vm_pop();
+
+			long consumed = (long)vm_pop();
+			long pcr = (long)vm_pop();
+			FsmRun *fsmRun = (FsmRun*)vm_pop();
+			PdaRun *pdaRun = (PdaRun*)vm_pop();
+
+			debug( REALM_BYTECODE, "IN_PARSE_FRAG_BKT2 %ld", consumed );
+
+			if ( pcr == PcrReduction ) {
+				vm_pushn( SIZEOF_WORD * 20 );
+				Execution *pushedExec = (Execution*)vm_ptop();
+				memcpy( pushedExec, exec, sizeof(Execution) );
 				pdaRun->exec = exec;
 
 				/* Execution environment for the reduction code. */
@@ -2392,20 +2413,74 @@ again:
 						pdaRun, fsmRun, prg->rtd->prodInfo[pdaRun->reduction].frameId, 
 						pdaRun->fi->codeWV, pdaRun->redLel->tree, 0, 0, fsmRun->mark );
 
+				vm_push( (SW)pdaRun );
+				vm_push( (SW)fsmRun );
+				vm_push( (SW)pcr );
+				vm_push( (SW)consumed );
+
+				vm_push( input );
+				vm_push( accum );
+
 				/* Push the instruction. */
-				vm_push( 0 ) ;//(SW)instr );
+				vm_push( (SW)instr );
 
 				/* Push the LHS onto the stack. */
 				vm_push( exec->lhs );
 
-				/* Execution loop. */
-				sp = executeCode( exec, sp, exec->code );
-
-				pcr = undoParseFrag( prg, sp, (Stream*)input, (Accum*)accum, consumed, PcrReduction );
+				/* Call execution. */
+				instr = exec->code;
 			}
+			else {
+				instr += SIZEOF_CODE;
 
-			treeDownref( prg, sp, accum );
-			treeDownref( prg, sp, input );
+				treeDownref( prg, sp, accum );
+				treeDownref( prg, sp, input );
+			}
+			break;
+		}
+
+		case IN_PARSE_FRAG_BKT3: {
+			Tree *accum = vm_pop();
+			Tree *input = vm_pop();
+
+			long consumed = (long)vm_pop();
+			long pcr = (long)vm_pop();
+			FsmRun *fsmRun = (FsmRun*)vm_pop();
+			PdaRun *pdaRun = (PdaRun*)vm_pop();
+
+			debug( REALM_BYTECODE, "IN_PARSE_FRAG_BKT3 %ld", consumed );
+
+			pcr = undoParseFrag( prg, sp, (Stream*)input, (Accum*)accum, consumed, PcrReduction );
+
+			/* Pop the saved execution. */
+			Execution *pushedExec = (Execution*)vm_ptop();
+			memcpy( exec, pushedExec, sizeof(Execution) );
+			vm_popn( SIZEOF_WORD * 20 );
+
+			vm_push( (SW)pdaRun );
+			vm_push( (SW)fsmRun );
+			vm_push( (SW)pcr );
+			vm_push( (SW)consumed );
+
+			vm_push( input );
+			vm_push( accum );
+
+			/* Back up to the frag 2. */
+			instr -= SIZEOF_CODE;
+			instr -= SIZEOF_CODE;
+			break;
+		}
+
+		case IN_RED_RET: {
+			debug( REALM_BYTECODE, "IN_RED_RET\n" );
+
+			exec->lhs = (Tree*) vm_pop();
+			instr = (Code*) vm_pop();
+
+			if ( instr == 0 ) {
+				fflush( stdout );
+				goto out;
+			}
 			break;
 		}
 
@@ -3595,7 +3670,7 @@ again:
 			break;
 		}
 		default: {
-			fatal( "UNKNOWN INSTRUCTION: %d -- something is wrong\n", *(instr-1) );
+			fatal( "UNKNOWN INSTRUCTION: 0x%2x -- something is wrong\n", *(instr-1) );
 			assert(false);
 			break;
 		}
