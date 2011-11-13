@@ -741,22 +741,16 @@ case PcrRevIgnore3:
 
 			/* Check for an execution environment. */
 			if ( pdaRun->undoLel->tree->flags & AF_HAS_RCODE ) {
-				Execution exec;
 
 return PcrRevReduction;
 case PcrRevReduction:
 
-				initReverseExecution( &exec, prg, &pdaRun->rcodeCollect, 
-						pdaRun, fsmRun, -1, 0, 0, 0, 0, fsmRun->mark );
-
-				/* Do the reverse exeuction. */
-				reverseExecution( &exec, sp, &pdaRun->reverseCode );
 				pdaRun->undoLel->tree->flags &= ~AF_HAS_RCODE;
 
-				if ( exec.lhs != 0 ) {
+				if ( pdaRun->exec->lhs != 0 ) {
 					/* Get the lhs, it may have been reverted. */
 					treeDownref( prg, sp, pdaRun->undoLel->tree );
-					pdaRun->undoLel->tree = exec.lhs;
+					pdaRun->undoLel->tree = pdaRun->exec->lhs;
 				}
 			}
 

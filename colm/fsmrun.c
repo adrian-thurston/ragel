@@ -338,16 +338,10 @@ case PcrStart:
 
 		/* Check for reverse code. */
 		if ( pdaRun->ignore4->tree->flags & AF_HAS_RCODE ) {
-			Execution exec;
 
 return PcrRevIgnore;
 case PcrRevIgnore:
 
-			initReverseExecution( &exec, prg, &pdaRun->rcodeCollect, 
-					pdaRun, fsmRun, -1, 0, 0, 0, 0, 0 );
-
-			/* Do the reverse exeuction. */
-			reverseExecution( &exec, sp, &pdaRun->reverseCode );
 			pdaRun->ignore4->tree->flags &= ~AF_HAS_RCODE;
 		}
 
@@ -464,16 +458,10 @@ case PcrStart:
 
 		/* Check for reverse code. */
 		if ( input->tree->flags & AF_HAS_RCODE ) {
-			Execution exec;
 
 return PcrRevToken;
 case PcrRevToken:
 
-			initReverseExecution( &exec, prg, &pdaRun->rcodeCollect, 
-					pdaRun, fsmRun, -1, 0, 0, 0, 0, 0 );
-
-			/* Do the reverse exeuction. */
-			reverseExecution( &exec, sp, &pdaRun->reverseCode );
 			input->tree->flags &= ~AF_HAS_RCODE;
 		}
 

@@ -891,68 +891,91 @@ void callParseBlock( Code **pinstr, Tree ***psp, long pcr, Program *prg,
 {
 	Tree **sp = *psp;
 
-	if ( pcr == PcrReduction ) {
-		/* Execution environment for the reduction code. */
-		initReductionExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, 
-				pdaRun, fsmRun, prg->rtd->prodInfo[pdaRun->reduction].frameId, 
-				pdaRun->fi->codeWV, pdaRun->redLel->tree, 0, 0, fsmRun->mark );
+	switch ( pcr ) {
+		case PcrReduction: {
+			/* Execution environment for the reduction code. */
+			initReductionExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, 
+					pdaRun, fsmRun, prg->rtd->prodInfo[pdaRun->reduction].frameId, 
+					pdaRun->fi->codeWV, pdaRun->redLel->tree, 0, 0, fsmRun->mark );
 
-		/* Push the instruction. */
-		vm_push( (SW)*pinstr );
+			/* Push the instruction. */
+			vm_push( (SW)*pinstr );
 
-		/* Push the LHS onto the stack. */
-		vm_push( exec->lhs );
+			/* Push the LHS onto the stack. */
+			vm_push( exec->lhs );
 
-		/* Call execution. */
-		*pinstr = exec->code;
-	}
-	else if ( pcr == PcrGeneration ) {
-		/* 
-		 * Not supported:
-		 *  -invoke failure (the backtracker)
-		 */
-		initGenerationExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, 
-				pdaRun, fsmRun, prg->rtd->lelInfo[pdaRun->tokenId].frameId, 
-				pdaRun->fi->codeWV, 0, pdaRun->tokenId, pdaRun->tokdata, fsmRun->mark );
+			/* Call execution. */
+			*pinstr = exec->code;
+			break;
+		}
+		case PcrGeneration: {
+			/* 
+			 * Not supported:
+			 *  -invoke failure (the backtracker)
+			 */
+			initGenerationExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, 
+					pdaRun, fsmRun, prg->rtd->lelInfo[pdaRun->tokenId].frameId, 
+					pdaRun->fi->codeWV, 0, pdaRun->tokenId, pdaRun->tokdata, fsmRun->mark );
 
-		/* Push the instruction. */
-		vm_push( (SW)*pinstr );
+			/* Push the instruction. */
+			vm_push( (SW)*pinstr );
 
-		/* Push the LHS onto the stack. */
-		vm_push( 0 );
+			/* Push the LHS onto the stack. */
+			vm_push( 0 );
 
-		/* Call execution. */
-		*pinstr = exec->code;
-	}
-	else if ( pcr == PcrPreEof ) {
-		/* Execute the translation. */
-		initGenerationExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, pdaRun, fsmRun, 
-				pdaRun->frameId, prg->rtd->frameInfo[pdaRun->frameId].codeWV,
-				0, pdaRun->tokenId, 0, fsmRun->mark );
+			/* Call execution. */
+			*pinstr = exec->code;
+			break;
+		}
+		case PcrPreEof: {
+			/* Execute the translation. */
+			initGenerationExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, pdaRun, fsmRun, 
+					pdaRun->frameId, prg->rtd->frameInfo[pdaRun->frameId].codeWV,
+					0, pdaRun->tokenId, 0, fsmRun->mark );
 
-		/* Push the instruction. */
-		vm_push( (SW)*pinstr );
+			/* Push the instruction. */
+			vm_push( (SW)*pinstr );
 
-		/* Push the LHS onto the stack. */
-		vm_push( 0 );
+			/* Push the LHS onto the stack. */
+			vm_push( 0 );
 
-		/* Call execution. */
-		*pinstr = exec->code;
-	}
-	else if ( pcr == PcrRevIgnore1 ) {
-		message("PcrRevIgnore1\n");
-	}
-	else if ( pcr == PcrRevIgnore2 ) {
-		message("PcrRevIgnore2\n");
-	}
-	else if ( pcr == PcrRevIgnore3 ) {
-		message("PcrRevIgnore3\n");
-	}
-	else if ( pcr == PcrRevReduction ) {
-		message("PcrRevReduction\n");
-	}
-	else if ( pcr == PcrRevToken ) {
-		message("PcrRevToken\n");
+			/* Call execution. */
+			*pinstr = exec->code;
+			break;
+		}
+		case PcrRevIgnore1:
+		case PcrRevIgnore2:
+		case PcrRevIgnore3: {
+			Execution exec;
+			initReverseExecution( &exec, prg, &pdaRun->rcodeCollect, 
+					pdaRun, fsmRun, -1, 0, 0, 0, 0, 0 );
+
+			/* Do the reverse exeuction. */
+			reverseExecution( &exec, sp, &pdaRun->reverseCode );
+
+			break;
+		}
+		case PcrRevReduction: {
+			Execution exec;
+			initReverseExecution( &exec, prg, &pdaRun->rcodeCollect, 
+					pdaRun, fsmRun, -1, 0, 0, 0, 0, fsmRun->mark );
+
+			/* Do the reverse exeuction. */
+			reverseExecution( &exec, sp, &pdaRun->reverseCode );
+			break;
+		}
+		case PcrRevToken: {
+			Execution exec;
+			initReverseExecution( &exec, prg, &pdaRun->rcodeCollect, 
+					pdaRun, fsmRun, -1, 0, 0, 0, 0, 0 );
+
+			/* Do the reverse exeuction. */
+			reverseExecution( &exec, sp, &pdaRun->reverseCode );
+			break;
+		}
+		default: {
+			fatal( "unknown parsing co-routine stop point -- something is wrong\n" );
+		}
 	}
 
 	*psp = sp;
