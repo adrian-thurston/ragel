@@ -1,11 +1,12 @@
 def open_item
-	str type
-	int num
+	type: str
+	num: int
 	[]
 
-list open_stack [open_item]
-global open_stack OpenStack = construct open_stack []
-open_item Sentinal = construct open_item( type: '** SENTINAL **', num: 1 ) []
+alias open_stack list<open_item> 
+
+global OpenStack: open_stack = construct open_stack []
+Sentinal: open_item = construct open_item( type: '** SENTINAL **' num: 1 ) []
 OpenStack.push( Sentinal )
 
 lex start
@@ -14,11 +15,11 @@ lex start
 
 	token ocurly /'{'+/
 	{
-		open_item OI = construct open_item( type: '{', num: match_length ) []
+		OI: open_item = construct open_item( type: '{' num: match_length ) []
 		OpenStack.push( OI )
-		int i = 0
+		i: int = 0
 		while ( i < match_length ) {
-			send( make_token( typeid ocurly, pull(stdin, 1 ) ) )
+			input.push( make_token( typeid<ocurly> input.pull(1 ) ) )
 			i = i + 1
 		}
 	}
@@ -31,20 +32,20 @@ lex start
 	token tmp1 /'}'+/
 	{
 		if OpenStack.length > 0 && OpenStack.tail.type == '{' {
-			int length = 3
+			length: int = 3
 			if ( length > match_length )
 				length = match_length
 
-			open_item Tail = OpenStack.pop()
+			Tail: open_item = OpenStack.pop()
 			if ( length > Tail.num )
 				length = Tail.num
 
 			if ( length == 1 )
-				send( make_token( typeid ccurly1, pull( stdin, 1 ) ) )
+				input.push( make_token( typeid<ccurly1> input.pull( 1 ) ) )
 			else if ( length == 2 )
-				send( make_token( typeid ccurly2, pull( stdin, 2 ) ) )
+				input.push( make_token( typeid<ccurly2> input.pull( 2 ) ) )
 			else if ( length == 3 )
-				send( make_token( typeid ccurly3, pull( stdin, 3 ) ) )
+				input.push( make_token( typeid<ccurly3> input.pull( 3 ) ) )
 
 			Tail.num = Tail.num - length
 
@@ -52,17 +53,17 @@ lex start
 				OpenStack.push( Tail )
 		}
 		else {
-			send( make_token( typeid stray_close, pull( stdin, match_length ) ) )
+			input.push( make_token( typeid<stray_close> input.pull( match_length ) ) )
 		}
 	}
 	
 	token osquare /'['+/
 	{
-		open_item OI = construct open_item( type: '[', num: match_length ) []
+		OI: open_item = construct open_item( type: '[' num: match_length ) []
 		OpenStack.push( OI )
-		int i = 0
+		i: int = 0
 		while ( i < match_length ) {
-			send( make_token( typeid osquare, pull(stdin, 1 ) ) )
+			input.push( make_token( typeid<osquare> input.pull(1 ) ) )
 			i = i + 1
 		}
 	}
@@ -74,18 +75,18 @@ lex start
 	token tmp2 /']'+/
 	{
 		if OpenStack.length > 0 && OpenStack.tail.type == '[' {
-			int length = 2
+			length: int = 2
 			if ( length > match_length )
 				length = match_length
 
-			open_item Tail = OpenStack.pop()
+			Tail: open_item = OpenStack.pop()
 			if ( length > Tail.num )
 				length = Tail.num
 
 			if ( length == 1 )
-				send( make_token( typeid csquare1, pull( stdin, 1 ) ) )
+				input.push( make_token( typeid<csquare1> input.pull( 1 ) ) )
 			else if ( length == 2 )
-				send( make_token( typeid csquare2, pull( stdin, 2 ) ) )
+				input.push( make_token( typeid<csquare2> input.pull( 2 ) ) )
 
 			Tail.num = Tail.num - length
 
@@ -93,7 +94,7 @@ lex start
 				OpenStack.push( Tail )
 		}
 		else {
-			send( make_token( typeid stray_close, pull( stdin, match_length ) ) )
+			input.push( make_token( typeid<stray_close> input.pull( match_length ) ) )
 		}
 	}
 	
@@ -102,19 +103,19 @@ lex start
 
 	preeof {
 		while ( OpenStack.length > 0 ) {
-			open_item Tail = OpenStack.pop()
-			int i
+			Tail: open_item = OpenStack.pop()
+			i: int
 			if ( Tail.type == '{' ) {
 				i = 0
 				while ( i < Tail.num ) {
-					send( make_token( typeid missing_curly, '}' ) )
+					input.push( make_token( typeid<missing_curly> '}' ) )
 					i = i + 1
 				}
 			}
 			else if ( Tail.type == '[' ) {
 				i = 0
 				while ( i < Tail.num ) {
-					send( make_token( typeid missing_square, ']' ) )
+					input.push( make_token( typeid<missing_square> ']' ) )
 					i = i + 1
 				}
 			}
@@ -189,8 +190,8 @@ def item
 def start 
 	[item*]
 
-start S = parse start(stdin)
+S: start = parse start(stdin)
 for I: internal_link in S
-	print( I, '\n' )
+	print( I  '\n' )
 print_xml( S )
 #print_xml( OpenStack )
