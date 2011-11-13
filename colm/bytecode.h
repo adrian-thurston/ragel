@@ -230,10 +230,11 @@ typedef unsigned char uchar;
 #define IN_PARSE_FRAG_WC         0xc0
 #define IN_PARSE_FRAG_WC2        0xe0
 #define IN_PARSE_FRAG_WC3        0xe1
-#define IN_RED_RET               0xe3
+
 #define IN_PARSE_FRAG_WV         0xc1
 #define IN_PARSE_FRAG_WV2        0xe2
 #define IN_PARSE_FRAG_WV3        0xe4
+
 #define IN_PARSE_FRAG_BKT        0xc2
 #define IN_PARSE_FRAG_BKT2       0xe5
 #define IN_PARSE_FRAG_BKT3       0xe6
@@ -249,8 +250,18 @@ typedef unsigned char uchar;
 #define IN_STREAM_APPEND_BKT     0xc8
 
 #define IN_PARSE_FINISH_WC       0x9d
+#define IN_PARSE_FINISH_WC2      0xe7
+#define IN_PARSE_FINISH_WC3      0xea
+
 #define IN_PARSE_FINISH_WV       0xbd
+#define IN_PARSE_FINISH_WV2      0xe8
+#define IN_PARSE_FINISH_WV3      0xeb
+
 #define IN_PARSE_FINISH_BKT      0xbf
+#define IN_PARSE_FINISH_BKT2     0xe9
+#define IN_PARSE_FINISH_BKT3     0xec
+
+#define IN_RED_RET               0xe3
 
 #define IN_PARSE_EXTRACT_INPUT 
 

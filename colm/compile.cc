@@ -1059,10 +1059,16 @@ void LangVarRef::callOperation( ParseData *pd, CodeVect &code, VarRefLookup &loo
 	bool revert = lookup.lastPtrInQual >= 0 || !isLocalRef(pd);
 	
 	/* The call instruction. */
-	if ( pd->revertOn && revert ) 
+	if ( pd->revertOn && revert )  {
 		code.append( lookup.objMethod->opcodeWV );
-	else
+	}
+	else {
 		code.append( lookup.objMethod->opcodeWC );
+		if ( lookup.objMethod->opcodeWC == IN_PARSE_FINISH_WC ) {
+			code.append( IN_PARSE_FINISH_WC2 );
+			code.append( IN_PARSE_FINISH_WC3 );
+		}
+	}
 	
 	if ( lookup.objMethod->useFuncId )
 		code.appendHalf( lookup.objMethod->funcId );
@@ -1466,6 +1472,19 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 		code.append( IN_PARSE_FINISH_WV );
 	else
 		code.append( IN_PARSE_FINISH_WC );
+
+	if ( pd->revertOn )
+		{//code.append( IN_PARSE_FINISH_WV2 );
+		}
+	else
+		code.append( IN_PARSE_FINISH_WC2 );
+
+	if ( pd->revertOn )
+		{//code.append( IN_PARSE_FINISH_WV3 );
+		}
+	else
+		code.append( IN_PARSE_FINISH_WC3 );
+
 
 	/* Lookup the type of the replacement and store it in the replacement
 	 * object so that replacement parsing has a target. */
