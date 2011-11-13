@@ -261,7 +261,7 @@ typedef unsigned char uchar;
 #define IN_PARSE_FINISH_BKT2     0xe9
 #define IN_PARSE_FINISH_BKT3     0xec
 
-#define IN_RED_RET               0xe3
+#define IN_PCR_RET               0xe3
 
 #define IN_PARSE_EXTRACT_INPUT 
 

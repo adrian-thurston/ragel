@@ -2680,7 +2680,7 @@ void ParseData::compileReductionCode( Definition *prod )
 	code.appendHalf( block->frameId );
 	code.appendHalf( frameSize );
 
-	code.append( IN_RED_RET );
+	code.append( IN_PCR_RET );
 
 	/* Now that compilation is done variables are referenced. Make the local
 	 * trees descriptor. */
@@ -2730,7 +2730,7 @@ void ParseData::compileTranslateBlock( LangEl *langEl )
 	code.appendHalf( block->frameId );
 	code.appendHalf( frameSize );
 
-	code.append( IN_RED_RET );
+	code.append( IN_PCR_RET );
 
 	/* Now that compilation is done variables are referenced. Make the local
 	 * trees descriptor. */

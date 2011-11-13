@@ -670,6 +670,10 @@ again:
 			debug( REALM_BYTECODE, "IN_PARSE_FINISH_BKT3\n" );
 			break;
 		}
+		case IN_PCR_RET: {
+			debug( REALM_BYTECODE, "IN_PCR_RET\n" );
+			return;
+		}
 		case IN_STREAM_PULL_BKT: {
 			Tree *string;
 			read_tree( string );
@@ -856,7 +860,7 @@ int makeReverseCode( RtCodeVect *all, RtCodeVect *reverseCode )
 	}
 
 	/* Stop, then place a total length in the global stack. */
-	append( all, IN_STOP );
+	append( all, IN_PCR_RET );
 	long length = all->tabLen - prevAllLength;
 	appendWord( all, length );
 
@@ -866,7 +870,7 @@ int makeReverseCode( RtCodeVect *all, RtCodeVect *reverseCode )
 	return true;
 }
 
-void reverseExecution( Execution *exec, Tree **root, RtCodeVect *allRev )
+Code *popReverseCode( RtCodeVect *allRev )
 {
 	/* Read the length */
 	Code *prcode = allRev->data + allRev->tabLen - SIZEOF_WORD;
@@ -877,13 +881,10 @@ void reverseExecution( Execution *exec, Tree **root, RtCodeVect *allRev )
 	long start = allRev->tabLen - len - SIZEOF_WORD;
 	prcode = allRev->data + start;
 
-	/* Execute it. */
-	Tree **sp = root;
-	executeCode( exec, sp, prcode );
-	assert( sp == root );
-
 	/* Backup over it. */
 	allRev->tabLen -= len + SIZEOF_WORD;
+
+	return prcode;
 }
 
 void callParseBlock( Code **pinstr, Tree ***psp, long pcr, Program *prg,
@@ -943,36 +944,54 @@ void callParseBlock( Code **pinstr, Tree ***psp, long pcr, Program *prg,
 			*pinstr = exec->code;
 			break;
 		}
+
 		case PcrRevIgnore1:
 		case PcrRevIgnore2:
 		case PcrRevIgnore3: {
-			Execution exec;
-			initReverseExecution( &exec, prg, &pdaRun->rcodeCollect, 
+
+			initReverseExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, 
 					pdaRun, fsmRun, -1, 0, 0, 0, 0, 0 );
 
-			/* Do the reverse exeuction. */
-			reverseExecution( &exec, sp, &pdaRun->reverseCode );
+			/* Push the instruction. */
+			vm_push( (SW)*pinstr );
 
+			/* Push the LHS onto the stack. */
+			vm_push( 0 );
+
+			*pinstr = popReverseCode( &pdaRun->reverseCode );
 			break;
 		}
+
 		case PcrRevReduction: {
-			Execution exec;
-			initReverseExecution( &exec, prg, &pdaRun->rcodeCollect, 
+
+			initReverseExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, 
 					pdaRun, fsmRun, -1, 0, 0, 0, 0, fsmRun->mark );
 
-			/* Do the reverse exeuction. */
-			reverseExecution( &exec, sp, &pdaRun->reverseCode );
+			/* Push the instruction. */
+			vm_push( (SW)*pinstr );
+
+			/* Push the LHS onto the stack. */
+			vm_push( 0 );
+
+			*pinstr = popReverseCode( &pdaRun->reverseCode );
 			break;
 		}
+
 		case PcrRevToken: {
-			Execution exec;
-			initReverseExecution( &exec, prg, &pdaRun->rcodeCollect, 
+
+			initReverseExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, 
 					pdaRun, fsmRun, -1, 0, 0, 0, 0, 0 );
 
-			/* Do the reverse exeuction. */
-			reverseExecution( &exec, sp, &pdaRun->reverseCode );
+			/* Push the instruction. */
+			vm_push( (SW)*pinstr );
+
+			/* Push the LHS onto the stack. */
+			vm_push( 0 );
+
+			*pinstr = popReverseCode( &pdaRun->reverseCode );
 			break;
 		}
+
 		default: {
 			fatal( "unknown parsing co-routine stop point -- something is wrong\n" );
 		}
@@ -2549,8 +2568,8 @@ again:
 			break;
 		}
 
-		case IN_RED_RET: {
-			debug( REALM_BYTECODE, "IN_RED_RET\n" );
+		case IN_PCR_RET: {
+			debug( REALM_BYTECODE, "IN_PCR_RET\n" );
 
 			exec->lhs = (Tree*) vm_pop();
 			instr = (Code*) vm_pop();
