@@ -535,7 +535,7 @@ Kid *makeToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *input
 }
 
 void addNoToken( Program *prg, Tree **sp, FsmRun *fsmRun, PdaRun *pdaRun, 
-		InputStream *inputStream, int frameId, Code *code, long id, Head *tokdata )
+		InputStream *inputStream, int frameId, long id, Head *tokdata )
 {
 	/* Check if there was anything generated. */
 	if ( pdaRun->rcodeCollect.tabLen > 0 ) {
@@ -1025,15 +1025,15 @@ case PcrStart:
 		/* Pull the current scanner from the parser. This can change during
 		 * parsing due to inputStream pushes, usually for the purpose of includes.
 		 * */
-		int tokenId = scanToken( prg, pdaRun, fsmRun, inputStream );
+		pdaRun->tokenId = scanToken( prg, pdaRun, fsmRun, inputStream );
 
-		if ( tokenId == SCAN_TRY_AGAIN_LATER )
+		if ( pdaRun->tokenId == SCAN_TRY_AGAIN_LATER )
 			break;
 
 		Kid *input = 0;
 
 		/* Check for EOF. */
-		if ( tokenId == SCAN_EOF ) {
+		if ( pdaRun->tokenId == SCAN_EOF ) {
 			inputStream->eofSent = true;
 			input = sendEof( prg, sp, inputStream, fsmRun, pdaRun );
 
@@ -1048,19 +1048,19 @@ case PcrStart:
 				/* Execute the translation. */
 				Execution exec;
 				initGenerationExecution( &exec, prg, &pdaRun->rcodeCollect, pdaRun, fsmRun, 
-						frameId, code, 0, tokenId, 0, fsmRun->mark );
+						frameId, code, 0, pdaRun->tokenId, 0, fsmRun->mark );
 				generationExecution( &exec, sp );
 
 				/* 
 				 * Need a no-token.
 				 */
-				addNoToken( prg, sp, fsmRun, pdaRun, inputStream, frameId, code, tokenId, 0 );
+				addNoToken( prg, sp, fsmRun, pdaRun, inputStream, frameId, pdaRun->tokenId, 0 );
 			}
 		}
-		else if ( tokenId == SCAN_UNDO ) {
+		else if ( pdaRun->tokenId == SCAN_UNDO ) {
 			/* Fall through with input = 0. FIXME: Do we need to send back ignore? */
 		}
-		else if ( tokenId == SCAN_ERROR ) {
+		else if ( pdaRun->tokenId == SCAN_ERROR ) {
 			/* Scanner error, maybe retry. */
 			if ( pdaRunGetNextRegion( pdaRun, 1 ) != 0 ) {
 				debug( REALM_PARSE, "scanner failed, trying next region\n" );
@@ -1093,34 +1093,26 @@ case PcrStart:
 				goto skipSend;
 			}
 		}
-		else if ( tokenId == SCAN_LANG_EL ) {
+		else if ( pdaRun->tokenId == SCAN_LANG_EL ) {
 			/* A named language element (parsing colm program). */
 			input = sendNamedLangEl( prg, sp, pdaRun, fsmRun, inputStream );
 		}
-		else if ( tokenId == SCAN_TREE ) {
+		else if ( pdaRun->tokenId == SCAN_TREE ) {
 			/* A tree already built. */
 			input = sendTree( prg, sp, pdaRun, fsmRun, inputStream );
 		}
-		else if ( tokenId == SCAN_IGNORE ) {
+		else if ( pdaRun->tokenId == SCAN_IGNORE ) {
 			/* A tree to ignore. */
 			sendTreeIgnore( prg, sp, pdaRun, fsmRun, inputStream );
 			goto skipSend;
 		}
-		else if ( prg->ctxDepParsing && lelInfo[tokenId].frameId >= 0 ) {
-			pdaRun->tokenId = tokenId;
-
-return PcrGeneration;
-case PcrGeneration:
-
-			input = 0;
-			tokenId = pdaRun->tokenId;
-
+		else if ( prg->ctxDepParsing && lelInfo[pdaRun->tokenId].frameId >= 0 ) {
 			/* Has a generation action. */
 			debug( REALM_PARSE, "token gen action: %s\n", 
-					prg->rtd->lelInfo[tokenId].name );
+					prg->rtd->lelInfo[pdaRun->tokenId].name );
 
 			/* Make the token data. */
-			Head *tokdata = extractMatch( prg, fsmRun, inputStream );
+			pdaRun->tokdata = extractMatch( prg, fsmRun, inputStream );
 
 			/* Note that we don't update the position now. It is done when the token
 			 * data is pulled from the inputStream. */
@@ -1128,35 +1120,30 @@ case PcrGeneration:
 			fsmRun->p = fsmRun->tokstart;
 			fsmRun->tokstart = 0;
 
-			/* Find the code. */
-			Code *code = prg->rtd->frameInfo[
-					prg->rtd->lelInfo[tokenId].frameId].codeWV;
-
-			/* Execute the translation. */
-			Execution exec;
-			initGenerationExecution( &exec, prg, &pdaRun->rcodeCollect, pdaRun, fsmRun, 
-					prg->rtd->lelInfo[tokenId].frameId, code, 0, tokenId, tokdata, fsmRun->mark );
-			generationExecution( &exec, sp );
+			pdaRun->fi = &prg->rtd->frameInfo[prg->rtd->lelInfo[pdaRun->tokenId].frameId];
+			
+return PcrGeneration;
+case PcrGeneration:
 
 			/* 
 			 * Need a no-token.
 			 */
 			addNoToken( prg, sp, fsmRun, pdaRun, inputStream, 
-					prg->rtd->lelInfo[tokenId].frameId, code, tokenId, tokdata );
+					prg->rtd->lelInfo[pdaRun->tokenId].frameId, pdaRun->tokenId, pdaRun->tokdata );
 
 			/* Finished with the match text. */
-			stringFree( prg, tokdata );
+			stringFree( prg, pdaRun->tokdata );
 
 			goto skipSend;
 		}
-		else if ( lelInfo[tokenId].ignore ) {
+		else if ( lelInfo[pdaRun->tokenId].ignore ) {
 			/* Is an ignore token. */
-			sendIgnore( prg, sp, inputStream, fsmRun, pdaRun, tokenId );
+			sendIgnore( prg, sp, inputStream, fsmRun, pdaRun, pdaRun->tokenId );
 			goto skipSend;
 		}
 		else {
 			/* Is a plain token. */
-			input = sendToken( prg, sp, inputStream, fsmRun, pdaRun, tokenId );
+			input = sendToken( prg, sp, inputStream, fsmRun, pdaRun, pdaRun->tokenId );
 		}
 
 		if ( input != 0 ) {

@@ -897,6 +897,20 @@ void callParseBlock( Code **pinstr, Tree ***psp, long pcr, Program *prg,
 		/* Call execution. */
 		*pinstr = exec->code;
 	}
+	else if ( pcr == PcrGeneration ) {
+		initGenerationExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, 
+				pdaRun, fsmRun, prg->rtd->lelInfo[pdaRun->tokenId].frameId, 
+				pdaRun->fi->codeWV, 0, pdaRun->tokenId, pdaRun->tokdata, fsmRun->mark );
+
+		/* Push the instruction. */
+		vm_push( (SW)*pinstr );
+
+		/* Push the LHS onto the stack. */
+		vm_push( 0 );
+
+		/* Call execution. */
+		*pinstr = exec->code;
+	}
 	*psp = sp;
 }
 

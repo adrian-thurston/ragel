@@ -250,6 +250,7 @@ typedef struct _PdaRun
 
 	/* Data we added when factoring out the token generation action. */
 	int tokenId;
+	Head *tokdata;
 } PdaRun;
 
 void rtCodeVectReplace( RtCodeVect *vect, long pos, const Code *val, long len );
