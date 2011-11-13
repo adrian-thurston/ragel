@@ -1030,35 +1030,28 @@ case PcrStart:
 		if ( pdaRun->tokenId == SCAN_TRY_AGAIN_LATER )
 			break;
 
-		Kid *input = 0;
+		pdaRun->parseInput = 0;
 
 		/* Check for EOF. */
 		if ( pdaRun->tokenId == SCAN_EOF ) {
 			inputStream->eofSent = true;
-			input = sendEof( prg, sp, inputStream, fsmRun, pdaRun );
+			pdaRun->parseInput = sendEof( prg, sp, inputStream, fsmRun, pdaRun );
 
-			int ctxDepParsing = prg->ctxDepParsing;
-			long frameId = prg->rtd->regionInfo[fsmRun->region].eofFrameId;
-			if ( ctxDepParsing && frameId >= 0 ) {
+			pdaRun->frameId = prg->rtd->regionInfo[fsmRun->region].eofFrameId;
+			if ( prg->ctxDepParsing && pdaRun->frameId >= 0 ) {
 				debug( REALM_PARSE, "HAVE PRE_EOF BLOCK\n" );
 
-				/* Get the code for the pre-eof block. */
-				Code *code = prg->rtd->frameInfo[frameId].codeWV;
-
-				/* Execute the translation. */
-				Execution exec;
-				initGenerationExecution( &exec, prg, &pdaRun->rcodeCollect, pdaRun, fsmRun, 
-						frameId, code, 0, pdaRun->tokenId, 0, fsmRun->mark );
-				generationExecution( &exec, sp );
+return PcrPreEof;
+case PcrPreEof:
 
 				/* 
 				 * Need a no-token.
 				 */
-				addNoToken( prg, sp, fsmRun, pdaRun, inputStream, frameId, pdaRun->tokenId, 0 );
+				addNoToken( prg, sp, fsmRun, pdaRun, inputStream, pdaRun->frameId, pdaRun->tokenId, 0 );
 			}
 		}
 		else if ( pdaRun->tokenId == SCAN_UNDO ) {
-			/* Fall through with input = 0. FIXME: Do we need to send back ignore? */
+			/* Fall through with parseInput = 0. FIXME: Do we need to send back ignore? */
 		}
 		else if ( pdaRun->tokenId == SCAN_ERROR ) {
 			/* Scanner error, maybe retry. */
@@ -1095,11 +1088,11 @@ case PcrStart:
 		}
 		else if ( pdaRun->tokenId == SCAN_LANG_EL ) {
 			/* A named language element (parsing colm program). */
-			input = sendNamedLangEl( prg, sp, pdaRun, fsmRun, inputStream );
+			pdaRun->parseInput = sendNamedLangEl( prg, sp, pdaRun, fsmRun, inputStream );
 		}
 		else if ( pdaRun->tokenId == SCAN_TREE ) {
 			/* A tree already built. */
-			input = sendTree( prg, sp, pdaRun, fsmRun, inputStream );
+			pdaRun->parseInput = sendTree( prg, sp, pdaRun, fsmRun, inputStream );
 		}
 		else if ( pdaRun->tokenId == SCAN_IGNORE ) {
 			/* A tree to ignore. */
@@ -1143,16 +1136,16 @@ case PcrGeneration:
 		}
 		else {
 			/* Is a plain token. */
-			input = sendToken( prg, sp, inputStream, fsmRun, pdaRun, pdaRun->tokenId );
+			pdaRun->parseInput = sendToken( prg, sp, inputStream, fsmRun, pdaRun, pdaRun->tokenId );
 		}
 
-		if ( input != 0 ) {
+		if ( pdaRun->parseInput != 0 ) {
 			/* Send the token to the parser. */
-			attachIgnore( prg, sp, pdaRun, input );
+			attachIgnore( prg, sp, pdaRun, pdaRun->parseInput );
 		}
 
 		assert( pdaRun->input == 0 );
-		pdaRun->input = input;
+		pdaRun->input = pdaRun->parseInput;
 
 		long ptr = parseToken( prg, sp, pdaRun, fsmRun, inputStream, PcrStart );
 		

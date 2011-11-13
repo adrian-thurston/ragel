@@ -251,6 +251,8 @@ typedef struct _PdaRun
 	/* Data we added when factoring out the token generation action. */
 	int tokenId;
 	Head *tokdata;
+	int frameId;
+	Kid *parseInput;
 } PdaRun;
 
 void rtCodeVectReplace( RtCodeVect *vect, long pos, const Code *val, long len );
@@ -319,7 +321,8 @@ int pdaRunGetNextRegion( PdaRun *pdaRun, int offset );
 #define PcrStart        1
 #define PcrReduction    2
 #define PcrGeneration   3
-#define PcrDone         4
+#define PcrPreEof       4
+#define PcrDone         5
 
 long parseToken( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, 
 		FsmRun *fsmRun, InputStream *inputStream, long entry );
