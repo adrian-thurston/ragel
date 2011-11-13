@@ -878,6 +878,28 @@ void reverseExecution( Execution *exec, Tree **root, RtCodeVect *allRev )
 	allRev->tabLen -= len + SIZEOF_WORD;
 }
 
+void callParseBlock( Code **pinstr, Tree ***psp, long pcr, Program *prg,
+		Execution *exec, PdaRun *pdaRun, FsmRun *fsmRun )
+{
+	Tree **sp = *psp;
+	if ( pcr == PcrReduction ) {
+		/* Execution environment for the reduction code. */
+		initReductionExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, 
+				pdaRun, fsmRun, prg->rtd->prodInfo[pdaRun->reduction].frameId, 
+				pdaRun->fi->codeWV, pdaRun->redLel->tree, 0, 0, fsmRun->mark );
+
+		/* Push the instruction. */
+		vm_push( (SW)*pinstr );
+
+		/* Push the LHS onto the stack. */
+		vm_push( exec->lhs );
+
+		/* Call execution. */
+		*pinstr = exec->code;
+	}
+	*psp = sp;
+}
+
 Tree **executeCode( Execution *exec, Tree **sp, Code *instr )
 {
 	/* When we exit we are going to verify that we did not eat up any stack
@@ -2199,21 +2221,7 @@ again:
 				vm_push( stream );
 				vm_push( accum );
 
-				if ( pcr == PcrReduction ) {
-					/* Execution environment for the reduction code. */
-					initReductionExecution( exec, prg, &pdaRun->rcodeCollect, 
-							pdaRun, fsmRun, prg->rtd->prodInfo[pdaRun->reduction].frameId, 
-							pdaRun->fi->codeWV, pdaRun->redLel->tree, 0, 0, fsmRun->mark );
-
-					/* Push the instruction. */
-					vm_push( (SW)instr );
-
-					/* Push the LHS onto the stack. */
-					vm_push( exec->lhs );
-
-					/* Call execution. */
-					instr = exec->code;
-				}
+				callParseBlock( &instr, &sp, pcr, prg, exec, pdaRun, fsmRun );
 			}
 			else {
 				treeDownref( prg, sp, stream );
@@ -2313,21 +2321,7 @@ again:
 				vm_push( stream );
 				vm_push( accum );
 
-				if ( pcr == PcrReduction ) {
-					/* Execution environment for the reduction code. */
-					initReductionExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, 
-							pdaRun, fsmRun, prg->rtd->prodInfo[pdaRun->reduction].frameId, 
-							pdaRun->fi->codeWV, pdaRun->redLel->tree, 0, 0, fsmRun->mark );
-
-					/* Push the instruction. */
-					vm_push( (SW)instr );
-
-					/* Push the LHS onto the stack. */
-					vm_push( exec->lhs );
-
-					/* Call execution. */
-					instr = exec->code;
-				}
+				callParseBlock( &instr, &sp, pcr, prg, exec, pdaRun, fsmRun );
 			}
 			else {
 				instr += SIZEOF_CODE + SIZEOF_HALF;
@@ -2431,21 +2425,7 @@ again:
 				vm_push( input );
 				vm_push( accum );
 
-				if ( pcr == PcrReduction ) {
-					/* Execution environment for the reduction code. */
-					initReductionExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, 
-							pdaRun, fsmRun, prg->rtd->prodInfo[pdaRun->reduction].frameId, 
-							pdaRun->fi->codeWV, pdaRun->redLel->tree, 0, 0, fsmRun->mark );
-
-					/* Push the instruction. */
-					vm_push( (SW)instr );
-
-					/* Push the LHS onto the stack. */
-					vm_push( exec->lhs );
-
-					/* Call execution. */
-					instr = exec->code;
-				}
+				callParseBlock( &instr, &sp, pcr, prg, exec, pdaRun, fsmRun );
 			}
 			else {
 				instr += SIZEOF_CODE;
@@ -2549,21 +2529,7 @@ again:
 				vm_push( stream );
 				vm_push( accum );
 
-				if ( pcr == PcrReduction ) {
-					/* Execution environment for the reduction code. */
-					initReductionExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, 
-							pdaRun, fsmRun, prg->rtd->prodInfo[pdaRun->reduction].frameId, 
-							pdaRun->fi->codeWV, pdaRun->redLel->tree, 0, 0, fsmRun->mark );
-
-					/* Push the instruction. */
-					vm_push( (SW)instr );
-
-					/* Push the LHS onto the stack. */
-					vm_push( exec->lhs );
-
-					/* Call execution. */
-					instr = exec->code;
-				}
+				callParseBlock( &instr, &sp, pcr, prg, exec, pdaRun, fsmRun );
 			}
 			else {
 				instr += SIZEOF_CODE;
@@ -2660,21 +2626,7 @@ again:
 				vm_push( stream );
 				vm_push( accum );
 
-				if ( pcr == PcrReduction ) {
-					/* Execution environment for the reduction code. */
-					initReductionExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, 
-							pdaRun, fsmRun, prg->rtd->prodInfo[pdaRun->reduction].frameId, 
-							pdaRun->fi->codeWV, pdaRun->redLel->tree, 0, 0, fsmRun->mark );
-
-					/* Push the instruction. */
-					vm_push( (SW)instr );
-
-					/* Push the LHS onto the stack. */
-					vm_push( exec->lhs );
-
-					/* Call execution. */
-					instr = exec->code;
-				}
+				callParseBlock( &instr, &sp, pcr, prg, exec, pdaRun, fsmRun );
 			}
 			else {
 				instr += SIZEOF_CODE;
@@ -2780,21 +2732,7 @@ again:
 				vm_push( tree );
 				vm_push( accum );
 
-				if ( pcr == PcrReduction ) {
-					/* Execution environment for the reduction code. */
-					initReductionExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, 
-							pdaRun, fsmRun, prg->rtd->prodInfo[pdaRun->reduction].frameId, 
-							pdaRun->fi->codeWV, pdaRun->redLel->tree, 0, 0, fsmRun->mark );
-
-					/* Push the instruction. */
-					vm_push( (SW)instr );
-
-					/* Push the LHS onto the stack. */
-					vm_push( exec->lhs );
-
-					/* Call execution. */
-					instr = exec->code;
-				}
+				callParseBlock( &instr, &sp, pcr, prg, exec, pdaRun, fsmRun );
 			}
 			else {
 				instr += SIZEOF_CODE;
