@@ -1061,6 +1061,10 @@ void LangVarRef::callOperation( ParseData *pd, CodeVect &code, VarRefLookup &loo
 	/* The call instruction. */
 	if ( pd->revertOn && revert )  {
 		code.append( lookup.objMethod->opcodeWV );
+		if ( lookup.objMethod->opcodeWV == IN_PARSE_FINISH_WV ) {
+			code.append( IN_PARSE_FINISH_WV2 );
+			code.append( IN_PARSE_FINISH_WV3 );
+		}
 	}
 	else {
 		code.append( lookup.objMethod->opcodeWC );
@@ -1474,14 +1478,12 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 		code.append( IN_PARSE_FINISH_WC );
 
 	if ( pd->revertOn )
-		{//code.append( IN_PARSE_FINISH_WV2 );
-		}
+		code.append( IN_PARSE_FINISH_WV2 );
 	else
 		code.append( IN_PARSE_FINISH_WC2 );
 
 	if ( pd->revertOn )
-		{//code.append( IN_PARSE_FINISH_WV3 );
-		}
+		code.append( IN_PARSE_FINISH_WV3 );
 	else
 		code.append( IN_PARSE_FINISH_WC3 );
 
