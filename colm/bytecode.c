@@ -227,8 +227,14 @@ case PcrStart:
 		while ( pcr != PcrDone ) {
 
 return pcr;
-case PcrGeneration:
 case PcrReduction:
+case PcrGeneration:
+case PcrPreEof:
+case PcrRevIgnore1:
+case PcrRevIgnore2:
+case PcrRevIgnore3:
+case PcrRevToken:
+case PcrRevReduction:
 
 			pcr = parseLoop( prg, sp, accum->pdaRun, accum->fsmRun, stream->in, entry );
 		}
@@ -256,8 +262,14 @@ case PcrStart:
 			while ( pcr != PcrDone ) {
 
 return pcr;
-case PcrGeneration:
 case PcrReduction:
+case PcrGeneration:
+case PcrPreEof:
+case PcrRevIgnore1:
+case PcrRevIgnore2:
+case PcrRevIgnore3:
+case PcrRevToken:
+case PcrRevReduction:
 
 				pcr = parseLoop( prg, sp, accum->pdaRun, accum->fsmRun, stream->in, entry );
 			}
@@ -282,8 +294,8 @@ break; }
 	return PcrDone;
 }
 
-long undoParseFrag( Program *prg, Tree **sp, Stream *input,
-		Accum *accum, long consumed, long entry )
+long undoParseFrag( Program *prg, Tree **sp, Accum *accum,
+		Stream *input, long consumed, long entry )
 {
 	InputStream *inputStream = input->in;
 	FsmRun *fsmRun = accum->fsmRun;
@@ -304,8 +316,14 @@ case PcrStart:
 		while ( pcr != PcrDone ) {
 
 return pcr;
-case PcrGeneration:
 case PcrReduction:
+case PcrGeneration:
+case PcrPreEof:
+case PcrRevIgnore1:
+case PcrRevIgnore2:
+case PcrRevIgnore3:
+case PcrRevToken:
+case PcrRevReduction:
 
 			pcr = parseLoop( prg, sp, pdaRun, fsmRun, inputStream, entry );
 		}
@@ -793,16 +811,6 @@ again:
 	goto again;
 }
 
-/* 
- * Not supported:
- *  -invoke failure (the backtracker)
- */
-
-void generationExecution( Execution *exec, Tree **sp )
-{
-	/* Execution loop. */
-	executeCode( exec, sp, exec->code );
-}
 
 void mainExecution( Execution *exec )
 {
@@ -882,6 +890,7 @@ void callParseBlock( Code **pinstr, Tree ***psp, long pcr, Program *prg,
 		Execution *exec, PdaRun *pdaRun, FsmRun *fsmRun )
 {
 	Tree **sp = *psp;
+
 	if ( pcr == PcrReduction ) {
 		/* Execution environment for the reduction code. */
 		initReductionExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, 
@@ -898,6 +907,10 @@ void callParseBlock( Code **pinstr, Tree ***psp, long pcr, Program *prg,
 		*pinstr = exec->code;
 	}
 	else if ( pcr == PcrGeneration ) {
+		/* 
+		 * Not supported:
+		 *  -invoke failure (the backtracker)
+		 */
 		initGenerationExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, 
 				pdaRun, fsmRun, prg->rtd->lelInfo[pdaRun->tokenId].frameId, 
 				pdaRun->fi->codeWV, 0, pdaRun->tokenId, pdaRun->tokdata, fsmRun->mark );
@@ -913,7 +926,7 @@ void callParseBlock( Code **pinstr, Tree ***psp, long pcr, Program *prg,
 	}
 	else if ( pcr == PcrPreEof ) {
 		/* Execute the translation. */
-		initGenerationExecution( &pdaRun->exec, prg, &pdaRun->rcodeCollect, pdaRun, fsmRun, 
+		initGenerationExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, pdaRun, fsmRun, 
 				pdaRun->frameId, prg->rtd->frameInfo[pdaRun->frameId].codeWV,
 				0, pdaRun->tokenId, 0, fsmRun->mark );
 
@@ -925,6 +938,21 @@ void callParseBlock( Code **pinstr, Tree ***psp, long pcr, Program *prg,
 
 		/* Call execution. */
 		*pinstr = exec->code;
+	}
+	else if ( pcr == PcrRevIgnore1 ) {
+		message("PcrRevIgnore1\n");
+	}
+	else if ( pcr == PcrRevIgnore2 ) {
+		message("PcrRevIgnore2\n");
+	}
+	else if ( pcr == PcrRevIgnore3 ) {
+		message("PcrRevIgnore3\n");
+	}
+	else if ( pcr == PcrRevReduction ) {
+		message("PcrRevReduction\n");
+	}
+	else if ( pcr == PcrRevToken ) {
+		message("PcrRevToken\n");
 	}
 
 	*psp = sp;
@@ -2417,7 +2445,7 @@ again:
 			FsmRun *fsmRun = ((Accum*)accum)->fsmRun;
 			PdaRun *pdaRun = ((Accum*)accum)->pdaRun;
 
-			long pcr = undoParseFrag( prg, sp, (Stream*)input, (Accum*)accum, consumed, PcrStart );
+			long pcr = undoParseFrag( prg, sp, (Accum*)accum, (Stream*)input, consumed, PcrStart );
 
 			vm_push( (SW)pdaRun );
 			vm_push( (SW)fsmRun );
@@ -2477,7 +2505,7 @@ again:
 
 			debug( REALM_BYTECODE, "IN_PARSE_FRAG_BKT3 %ld", consumed );
 
-			pcr = undoParseFrag( prg, sp, (Stream*)input, (Accum*)accum, consumed, pcr );
+			pcr = undoParseFrag( prg, sp, (Accum*)accum, (Stream*)input, consumed, pcr );
 
 			/* Pop the saved execution. */
 			Execution *pushedExec = (Execution*)vm_ptop();
@@ -2583,7 +2611,7 @@ again:
 			FsmRun *fsmRun = (FsmRun*)vm_pop();
 			PdaRun *pdaRun = (PdaRun*)vm_pop();
 
-			pcr = parseFinish( &result, prg, sp, (Accum*)accum, stream, false, pcr );
+			pcr = parseFinish( &result, prg, sp, (Accum*)accum, (Stream*)stream, false, pcr );
 
 			/* Pop the saved execution. */
 			Execution *pushedExec = (Execution*)vm_ptop();
@@ -2689,7 +2717,7 @@ again:
 			FsmRun *fsmRun = (FsmRun*)vm_pop();
 			PdaRun *pdaRun = (PdaRun*)vm_pop();
 
-			pcr = parseFinish( &result, prg, sp, (Accum*)accum, stream, true, pcr );
+			pcr = parseFinish( &result, prg, sp, (Accum*)accum, (Stream*)stream, true, pcr );
 
 			/* Pop the saved execution. */
 			Execution *pushedExec = (Execution*)vm_ptop();
@@ -2724,7 +2752,7 @@ again:
 			FsmRun *fsmRun = ((Accum*)accum)->fsmRun;
 			PdaRun *pdaRun = ((Accum*)accum)->pdaRun;
 
-			long pcr = undoParseFrag( prg, sp, ((Accum*)accum)->stream, (Accum*)accum, consumed, PcrStart );
+			long pcr = undoParseFrag( prg, sp, (Accum*)accum, ((Accum*)accum)->stream, consumed, PcrStart );
 
 			vm_push( (SW)pdaRun );
 			vm_push( (SW)fsmRun );
@@ -2787,7 +2815,7 @@ again:
 
 			debug( REALM_BYTECODE, "IN_PARSE_FINISH_BKT3\n" );
 
-			pcr = undoParseFrag( prg, sp, ((Accum*)accum)->stream, (Accum*)accum, consumed, pcr );
+			pcr = undoParseFrag( prg, sp, (Accum*)accum, ((Accum*)accum)->stream, consumed, pcr );
 
 			/* Pop the saved execution. */
 			Execution *pushedExec = (Execution*)vm_ptop();

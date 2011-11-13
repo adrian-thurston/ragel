@@ -252,7 +252,15 @@ typedef struct _PdaRun
 	int tokenId;
 	Head *tokdata;
 	int frameId;
-	Kid *parseInput;
+	Kid *input2;
+	Tree *rightIgnore;
+	Tree *leftIgnore;
+	Kid *ignore2;
+	Kid *ignore3;
+	int next;
+	Kid *undoLel;
+	Kid *ignore4;
+	Kid *ignore5;
 } PdaRun;
 
 void rtCodeVectReplace( RtCodeVect *vect, long pos, const Code *val, long len );
@@ -319,10 +327,16 @@ void pdaRunMatch(  PdaRun *pdaRun, Kid *tree, Kid *pattern );
 int pdaRunGetNextRegion( PdaRun *pdaRun, int offset );
 
 #define PcrStart        1
-#define PcrReduction    2
-#define PcrGeneration   3
-#define PcrPreEof       4
-#define PcrDone         5
+#define PcrDone         2
+#define PcrReduction    3
+#define PcrGeneration   4
+#define PcrPreEof       5
+#define PcrRevIgnore    6
+#define PcrRevIgnore1   7
+#define PcrRevIgnore2   8
+#define PcrRevIgnore3   9
+#define PcrRevToken     10
+#define PcrRevReduction 11
 
 long parseToken( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, 
 		FsmRun *fsmRun, InputStream *inputStream, long entry );
@@ -337,8 +351,10 @@ void streamPushTree( InputStream *inputStream, Tree *tree, int ignore );
 void undoStreamPush( struct ColmProgram *prg, Tree **sp, InputStream *inputStream, long length );
 void undoStreamAppend( struct ColmProgram *prg, Tree **sp, InputStream *inputStream, long length );
 void sendBackText( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length );
-void sendBackIgnore( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *ignore );
-void sendBack( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
+long sendBackIgnore( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
+		InputStream *inputStream, Kid *ignoreKidList, long entry );
+long sendBack( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
+		InputStream *inputStream, Kid *input, long entry );
 void unbind( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, Tree *tree );
 void queueBackTree( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
 Kid *makeToken( struct ColmProgram *prg, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, int id,
@@ -347,7 +363,8 @@ void makeTokenPushBinding( PdaRun *pdaRun, int bindId, Tree *tree );
 void executeGenerationAction( struct ColmProgram *prg, Tree **sp, FsmRun *fsmRun, PdaRun *pdaRun, 
 		InputStream *inputStream, int frameId, Code *code, long id, Head *tokdata );
 Kid *extractIgnore( PdaRun *pdaRun );
-void sendBackQueuedIgnore( struct ColmProgram *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun );
+long sendBackQueuedIgnore( struct ColmProgram *prg, Tree **sp, InputStream *inputStream,
+		FsmRun *fsmRun, PdaRun *pdaRun, long entry );
 void clearIgnoreList( struct ColmProgram *prg, Tree **sp, Kid *kid );
 Head *extractMatch( struct ColmProgram *prg, FsmRun *fsmRun, InputStream *inputStream );
 Head *extractMatch( struct ColmProgram *prg, FsmRun *fsmRun, InputStream *inputStream );

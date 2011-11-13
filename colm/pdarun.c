@@ -368,6 +368,12 @@ void pushBtPoint( Program *prg, PdaRun *pdaRun, Tree *tree )
  * shift-reduce:  cannot be a retry
  */
 
+/* Stops on:
+ *   PcrReduction
+ *   PcrRevToken
+ *   PcrRevIgnore3
+ *   PcrRevReduction
+ */
 long parseToken( Program *prg, Tree **sp, PdaRun *pdaRun,
 		FsmRun *fsmRun, InputStream *inputStream, long entry )
 {
@@ -386,7 +392,7 @@ case PcrStart:
 	if ( pdaRun->input == 0 ) {
 		/* Grab the most recently accepted item. */
 		pushBtPoint( prg, pdaRun, pdaRun->tokenList->kid->tree );
-		goto parse_error;
+		goto parseError;
 	}
 
 	/* The tree we are given must be * parse tree size. It also must have at
@@ -443,7 +449,7 @@ again:
 	if ( pdaRun->lel->tree->id < pdaRun->tables->keys[pdaRun->curState<<1] ||
 			pdaRun->lel->tree->id > pdaRun->tables->keys[(pdaRun->curState<<1)+1] ) {
 		pushBtPoint( prg, pdaRun, pdaRun->lel->tree );
-		goto parse_error;
+		goto parseError;
 	}
 
 	indPos = pdaRun->tables->offsets[pdaRun->curState] + 
@@ -452,13 +458,13 @@ again:
 	owner = pdaRun->tables->owners[indPos];
 	if ( owner != pdaRun->curState ) {
 		pushBtPoint( prg, pdaRun, pdaRun->lel->tree );
-		goto parse_error;
+		goto parseError;
 	}
 
 	pos = pdaRun->tables->indicies[indPos];
 	if ( pos < 0 ) {
 		pushBtPoint( prg, pdaRun, pdaRun->lel->tree );
-		goto parse_error;
+		goto parseError;
 	}
 
 	/* Checking complete. */
@@ -631,7 +637,7 @@ case PcrReduction:
 			pdaRun->redLel->next = pdaRun->stackTop;
 			pdaRun->stackTop = pdaRun->redLel;
 			pushBtPoint( prg, pdaRun, pdaRun->lel->tree );
-			goto parse_error;
+			goto parseError;
 		}
 
 		pdaRun->redLel->next = pdaRun->input;
@@ -640,7 +646,7 @@ case PcrReduction:
 
 	goto again;
 
-parse_error:
+parseError:
 	debug( REALM_PARSE, "hit error, backtracking\n" );
 
 	if ( pdaRun->numRetry == 0 )
@@ -661,15 +667,24 @@ parse_error:
 			/* If there is no retry and there are no reductions caused by the
 			 * current input token then we are finished with it. Send it back. */
 			if ( pt(pdaRun->input->tree)->causeReduce == 0 ) {
-				int next = pt(pdaRun->input->tree)->region + 1;
+				pdaRun->next = pt(pdaRun->input->tree)->region + 1;
 
-				queueBackTree( prg, sp, pdaRun, fsmRun, inputStream, pdaRun->input );
+				long pcr = sendBack( prg, sp, pdaRun, fsmRun, inputStream, pdaRun->input, PcrStart );
+				while ( pcr != PcrDone ) {
+
+return pcr;
+case PcrRevToken:
+case PcrRevIgnore3:
+					pcr = sendBack( prg, sp, pdaRun, fsmRun, inputStream, pdaRun->input, entry );
+				}
+
+
 				pdaRun->input = 0;
-				if ( pdaRun->tables->tokenRegions[next] != 0 ) {
+				if ( pdaRun->tables->tokenRegions[pdaRun->next] != 0 ) {
 					debug( REALM_PARSE, "found a new region\n" );
 					pdaRun->numRetry -= 1;
 					pdaRun->cs = stackTopTarget( prg, pdaRun );
-					pdaRun->nextRegionInd = next;
+					pdaRun->nextRegionInd = pdaRun->next;
 					return PcrDone;
 				}
 
@@ -684,13 +699,13 @@ parse_error:
 
 		/* Now it is time to undo something. Pick an element from the top of
 		 * the stack. */
-		Kid *undoLel = pdaRun->stackTop;
+		pdaRun->undoLel = pdaRun->stackTop;
 
 		/* Check if we've arrived at the stack sentinal. This guard is
 		 * here to allow us to initially set numRetry to one to cause the
 		 * parser to backup all the way to the beginning when an error
 		 * occurs. */
-		if ( undoLel->next == 0 )
+		if ( pdaRun->undoLel->next == 0 )
 			break;
 
 		/* Either we are dealing with a terminal that was
@@ -705,14 +720,14 @@ parse_error:
 			pdaRun->stackTop = pdaRun->stackTop->next;
 
 			/* Undo the translation from termDup. */
-			if ( undoLel->tree->flags & AF_TERM_DUP ) {
-				undoLel->tree->id = prg->rtd->lelInfo[undoLel->tree->id].termDupId;
-				undoLel->tree->flags &= ~AF_TERM_DUP;
+			if ( pdaRun->undoLel->tree->flags & AF_TERM_DUP ) {
+				pdaRun->undoLel->tree->id = prg->rtd->lelInfo[pdaRun->undoLel->tree->id].termDupId;
+				pdaRun->undoLel->tree->flags &= ~AF_TERM_DUP;
 			}
 
 			/* Queue it as next input item. */
-			undoLel->next = pdaRun->input;
-			pdaRun->input = undoLel;
+			pdaRun->undoLel->next = pdaRun->input;
+			pdaRun->input = pdaRun->undoLel;
 
 			/* Record the last shifted token. Need this for attaching ignores. */
 			Ref *ref = pdaRun->tokenList;
@@ -725,19 +740,23 @@ parse_error:
 					prg->rtd->lelInfo[pdaRun->stackTop->tree->id].name );
 
 			/* Check for an execution environment. */
-			if ( undoLel->tree->flags & AF_HAS_RCODE ) {
+			if ( pdaRun->undoLel->tree->flags & AF_HAS_RCODE ) {
 				Execution exec;
+
+return PcrRevReduction;
+case PcrRevReduction:
+
 				initReverseExecution( &exec, prg, &pdaRun->rcodeCollect, 
 						pdaRun, fsmRun, -1, 0, 0, 0, 0, fsmRun->mark );
 
 				/* Do the reverse exeuction. */
 				reverseExecution( &exec, sp, &pdaRun->reverseCode );
-				undoLel->tree->flags &= ~AF_HAS_RCODE;
+				pdaRun->undoLel->tree->flags &= ~AF_HAS_RCODE;
 
 				if ( exec.lhs != 0 ) {
 					/* Get the lhs, it may have been reverted. */
-					treeDownref( prg, sp, undoLel->tree );
-					undoLel->tree = exec.lhs;
+					treeDownref( prg, sp, pdaRun->undoLel->tree );
+					pdaRun->undoLel->tree = exec.lhs;
 				}
 			}
 
@@ -745,13 +764,13 @@ parse_error:
 			 * the the original. We read it after restoring. */
 
 			/* Warm fuzzies ... */
-			assert( undoLel == pdaRun->stackTop );
+			assert( pdaRun->undoLel == pdaRun->stackTop );
 
 			/* Take the nonterm off the stack. */
 			pdaRun->stackTop = pdaRun->stackTop->next;
 
 			/* Extract the real children from the child list. */
-			Kid *first = treeExtractChild( prg, undoLel->tree );
+			Kid *first = treeExtractChild( prg, pdaRun->undoLel->tree );
 
 			/* Walk the child list and and push the items onto the parsing
 			 * stack one at a time. */
@@ -771,23 +790,23 @@ parse_error:
 			if ( pdaRun->input != 0 )
 				pt(pdaRun->input->tree)->causeReduce -= 1;
 
-			if ( pt(undoLel->tree)->retry_upper != 0 ) {
+			if ( pt(pdaRun->undoLel->tree)->retry_upper != 0 ) {
 				/* There is always an input item here because reduce
 				 * conflicts only happen on a lookahead character. */
-				assert( pdaRun->input != undoLel );
+				assert( pdaRun->input != pdaRun->undoLel );
 				assert( pdaRun->input != 0 );
-				assert( pt(undoLel->tree)->retry_lower == 0 );
+				assert( pt(pdaRun->undoLel->tree)->retry_lower == 0 );
 				assert( pt(pdaRun->input->tree)->retry_upper == 0 );
 
 				/* Transfer the retry from undoLel to input. */
-				pt(pdaRun->input->tree)->retry_lower = pt(undoLel->tree)->retry_upper;
+				pt(pdaRun->input->tree)->retry_lower = pt(pdaRun->undoLel->tree)->retry_upper;
 				pt(pdaRun->input->tree)->retry_upper = 0;
 				pt(pdaRun->input->tree)->state = stackTopTarget( prg, pdaRun );
 			}
 
 			/* Free the reduced item. */
-			treeDownref( prg, sp, undoLel->tree );
-			kidFree( prg, undoLel );
+			treeDownref( prg, sp, pdaRun->undoLel->tree );
+			kidFree( prg, pdaRun->undoLel );
 		}
 	}
 

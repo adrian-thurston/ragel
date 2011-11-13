@@ -195,12 +195,10 @@ global_def: KW_Export var_def opt_def_init
 	final {
 		$$->stmt = 0;
 
-		ObjectDef *object;
-		if ( contextStack.length() == 0 )
-			object = pd->globalObjectDef;
-		else {
-			error($2->objField->loc) << "cannot export a parser context variables" << endl;
-		}
+		if ( contextStack.length() != 0 )
+			error($2->objField->loc) << "cannot export parser context variables" << endp;
+
+		ObjectDef *object = pd->globalObjectDef;
 
 		if ( object->checkRedecl( $2->objField->name ) != 0 )
 			error($2->objField->loc) << "object field renamed" << endp;
