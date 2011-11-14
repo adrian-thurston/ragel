@@ -754,8 +754,8 @@ struct ParseData
 
 	void addMatchText( ObjectDef *frame, LangEl *lel );
 	void addMatchLength( ObjectDef *frame, LangEl *lel );
-	void addInput( ObjectDef *frame, LangEl *lel );
-	void addCtx( ObjectDef *frame, LangEl *lel );
+	void addInput( ObjectDef *frame );
+	void addCtx( ObjectDef *frame );
 	void addTransTokVar( ObjectDef *frame, LangEl *lel );
 	void addProdRHSVars( ObjectDef *localFrame, ProdElList *prodElList );
 	void addProdRedObjectVar( ObjectDef *localFrame, LangEl *langEl );

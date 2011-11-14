@@ -2424,7 +2424,7 @@ void ParseData::addMatchText( ObjectDef *frame, LangEl *lel )
 	frame->insertField( el->name, el );
 }
 
-void ParseData::addInput( ObjectDef *frame, LangEl *lel )
+void ParseData::addInput( ObjectDef *frame )
 {
 	/* Make the type ref. */
 	TypeRef *typeRef = new TypeRef( InputLoc(), uniqueTypeStream );
@@ -2442,7 +2442,7 @@ void ParseData::addInput( ObjectDef *frame, LangEl *lel )
 	frame->insertField( el->name, el );
 }
 
-void ParseData::addCtx( ObjectDef *frame, LangEl *lel )
+void ParseData::addCtx( ObjectDef *frame )
 {
 	/* Make the type ref. */
 	TypeRef *typeRef = new TypeRef( InputLoc(), uniqueTypeStream );
@@ -2700,8 +2700,8 @@ void ParseData::compileTranslateBlock( LangEl *langEl )
 	/* References to the reduce item. */
 	addMatchLength( curLocalFrame, langEl );
 	addMatchText( curLocalFrame, langEl );
-	addInput( curLocalFrame, langEl );
-	addCtx( curLocalFrame, langEl );
+	addInput( curLocalFrame );
+	addCtx( curLocalFrame );
 
 	CodeVect &code = block->codeWV;
 
@@ -2747,11 +2747,8 @@ void ParseData::compilePreEof( TokenRegion *region )
 	revertOn = true;
 	block->frameId = nextFrameId++;
 
-	/* References to the reduce item. */
-//	addMatchLength( curLocalFrame, langEl );
-//	addMatchText( curLocalFrame, langEl );
-//	initFunction( uniqueTypeStr, curLocalFrame, "pull",
-//			IN_STREAM_PULL, IN_STREAM_PULL, uniqueTypeStream, uniqueTypeInt, true );
+	addInput( curLocalFrame );
+	addCtx( curLocalFrame );
 
 	CodeVect &code = block->codeWV;
 
