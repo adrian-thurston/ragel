@@ -1336,156 +1336,59 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 	
 		code.append( IN_SET_INPUT_WC );
 	}
-
-
-	if ( argUT == pd->uniqueTypeStream ) {
-		/* Get a copy of the parser. */
-		code.append( IN_DUP_TOP_OFF );
-		code.appendHalf( 1 );
-
-		/* Parse instruction, dependent on whether or not we are
-		 * producing revert or commit code. */
-		if ( pd->revertOn ) {
-			code.append( IN_PARSE_FRAG_WV );
-
-			/* The stop id. */
-			if ( stop )
-				code.appendHalf( ut->langEl->id );
-			else 
-				code.appendHalf( 0 );
-
-			code.append( IN_PARSE_FRAG_WV2 );
-
-			/* The stop id. */
-			if ( stop )
-				code.appendHalf( ut->langEl->id );
-			else 
-				code.appendHalf( 0 );
-
-			code.append( IN_PARSE_FRAG_WV3 );
-
-			/* The stop id. */
-			if ( stop )
-				code.appendHalf( ut->langEl->id );
-			else 
-				code.appendHalf( 0 );
-		}
-		else {
-			code.append( IN_PARSE_FRAG_WC );
-
-			/* The stop id. */
-			if ( stop )
-				code.appendHalf( ut->langEl->id );
-			else 
-				code.appendHalf( 0 );
-
-			code.append( IN_PARSE_FRAG_WC2 );
-
-			/* The stop id. */
-			if ( stop )
-				code.appendHalf( ut->langEl->id );
-			else 
-				code.appendHalf( 0 );
-
-			code.append( IN_PARSE_FRAG_WC3 );
-
-			/* The stop id. */
-			if ( stop )
-				code.appendHalf( ut->langEl->id );
-			else 
-				code.appendHalf( 0 );
-		}
-	}
 	else {
+		/* Not a stream, append the item to the stream. */
+
 		/* Get a copy of the parser. */
 		code.append( IN_DUP_TOP_OFF );
 		code.appendHalf( 1 );
 
 		/* Not a stream. Get the input first. */
-		if ( pd->revertOn )
-			code.append( IN_EXTRACT_INPUT_WV );
-		else
-			code.append( IN_EXTRACT_INPUT_WC );
-
-		if ( pd->revertOn )
-			code.append( IN_STREAM_APPEND_WV );
-		else
-			code.append( IN_STREAM_APPEND_WC );
-
-		/* Get a copy of the parser. */
-		code.append( IN_DUP_TOP_OFF );
-		code.appendHalf( 1 );
-
 		if ( pd->revertOn ) {
-			code.append( IN_PARSE_FRAG_WV );
-
-			/* The stop id. */
-			if ( stop )
-				code.appendHalf( ut->langEl->id );
-			else 
-				code.appendHalf( 0 );
-
-			code.append( IN_PARSE_FRAG_WV2 );
-
-			/* The stop id. */
-			if ( stop )
-				code.appendHalf( ut->langEl->id );
-			else 
-				code.appendHalf( 0 );
-
-			code.append( IN_PARSE_FRAG_WV3 );
-
-			/* The stop id. */
-			if ( stop )
-				code.appendHalf( ut->langEl->id );
-			else 
-				code.appendHalf( 0 );
+			code.append( IN_EXTRACT_INPUT_WV );
+			code.append( IN_STREAM_APPEND_WV );
 		}
 		else {
-			code.append( IN_PARSE_FRAG_WC );
-
-			/* The stop id. */
-			if ( stop )
-				code.appendHalf( ut->langEl->id );
-			else 
-				code.appendHalf( 0 );
-
-			code.append( IN_PARSE_FRAG_WC2 );
-
-			/* The stop id. */
-			if ( stop )
-				code.appendHalf( ut->langEl->id );
-			else 
-				code.appendHalf( 0 );
-
-			code.append( IN_PARSE_FRAG_WC3 );
-
-			/* The stop id. */
-			if ( stop )
-				code.appendHalf( ut->langEl->id );
-			else 
-				code.appendHalf( 0 );
+			code.append( IN_EXTRACT_INPUT_WC );
+			code.append( IN_STREAM_APPEND_WC );
 		}
 	}
 
-	/*
-	 * Finish the parser.
-	 */
 
-	if ( pd->revertOn )
+	/* Get a copy of the parser. */
+	code.append( IN_DUP_TOP_OFF );
+	code.appendHalf( 1 );
+
+	int stopId = stop ? ut->langEl->id : 0;
+
+	/* Parse instruction, dependent on whether or not we are producing revert
+	 * or commit code. */
+	if ( pd->revertOn ) {
+		code.append( IN_PARSE_FRAG_WV );
+		code.appendHalf( stopId );
+		code.append( IN_PARSE_FRAG_WV2 );
+		code.appendHalf( stopId );
+		code.append( IN_PARSE_FRAG_WV3 );
+		code.appendHalf( stopId );
+
+		/* Finish immediately. */
 		code.append( IN_PARSE_FINISH_WV );
-	else
-		code.append( IN_PARSE_FINISH_WC );
-
-	if ( pd->revertOn )
 		code.append( IN_PARSE_FINISH_WV2 );
-	else
-		code.append( IN_PARSE_FINISH_WC2 );
-
-	if ( pd->revertOn )
 		code.append( IN_PARSE_FINISH_WV3 );
-	else
+	}
+	else {
+		code.append( IN_PARSE_FRAG_WC );
+		code.appendHalf( stopId );
+		code.append( IN_PARSE_FRAG_WC2 );
+		code.appendHalf( stopId );
+		code.append( IN_PARSE_FRAG_WC3 );
+		code.appendHalf( stopId );
+
+		/* Finish immediately. */
+		code.append( IN_PARSE_FINISH_WC );
+		code.append( IN_PARSE_FINISH_WC2 );
 		code.append( IN_PARSE_FINISH_WC3 );
+	}
 
 
 	/* Lookup the type of the replacement and store it in the replacement
@@ -2150,6 +2053,16 @@ void LangStmt::evaluateAccumItems( ParseData *pd, CodeVect &code ) const
 		case ReplItem::ExprType:
 			exprUT = item->expr->evaluate( pd, code );
 			break;
+		}
+
+		if ( exprUT == pd->uniqueTypeStream ) {
+			code.append( IN_DUP_TOP );
+
+			/* Get a copy of the parser. */
+			code.append( IN_DUP_TOP_OFF );
+			code.appendHalf( 2 );
+		
+			code.append( IN_SET_INPUT_WC );
 		}
 
 		if ( exprUT == pd->uniqueTypeStream ) {

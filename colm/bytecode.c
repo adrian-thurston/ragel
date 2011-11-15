@@ -2283,7 +2283,7 @@ again:
 			PdaRun *pdaRun = ((Accum*)accum)->pdaRun;
 			FsmRun *fsmRun = ((Accum*)accum)->fsmRun;
 
-			long pcr = parseFrag( prg, sp, (Accum*)accum, (Stream*)stream, stopId, PcrStart );
+			long pcr = parseFrag( prg, sp, (Accum*)accum, ((Accum*)accum)->stream, stopId, PcrStart );
 
 			vm_push( (SW)pdaRun );
 			vm_push( (SW)fsmRun );
@@ -2347,7 +2347,7 @@ again:
 			FsmRun *fsmRun = (FsmRun*)vm_pop();
 			PdaRun *pdaRun = (PdaRun*)vm_pop();
 
-			pcr = parseFrag( prg, sp, (Accum*)accum, (Stream*)stream, stopId, pcr );
+			pcr = parseFrag( prg, sp, (Accum*)accum, ((Accum*)accum)->stream, stopId, pcr );
 
 			/* Pop the saved execution. */
 			Execution *pushedExec = (Execution*)vm_ptop();
@@ -2380,7 +2380,7 @@ again:
 			FsmRun *fsmRun = ((Accum*)accum)->fsmRun;
 
 			long consumed = ((Accum*)accum)->pdaRun->consumed;
-			long pcr = parseFrag( prg, sp, (Accum*)accum, (Stream*)stream, stopId, PcrStart );
+			long pcr = parseFrag( prg, sp, (Accum*)accum, ((Accum*)accum)->stream, stopId, PcrStart );
 
 			vm_push( (SW)pdaRun );
 			vm_push( (SW)fsmRun );
@@ -2453,7 +2453,7 @@ again:
 			FsmRun *fsmRun = (FsmRun*)vm_pop();
 			PdaRun *pdaRun = (PdaRun*)vm_pop();
 
-			pcr = parseFrag( prg, sp, (Accum*)accum, (Stream*)stream, stopId, pcr );
+			pcr = parseFrag( prg, sp, (Accum*)accum, ((Accum*)accum)->stream, stopId, pcr );
 
 			/* Pop the saved execution. */
 			Execution *pushedExec = (Execution*)vm_ptop();
@@ -2487,7 +2487,7 @@ again:
 			FsmRun *fsmRun = ((Accum*)accum)->fsmRun;
 			PdaRun *pdaRun = ((Accum*)accum)->pdaRun;
 
-			long pcr = undoParseFrag( prg, sp, (Accum*)accum, (Stream*)input, consumed, PcrStart );
+			long pcr = undoParseFrag( prg, sp, (Accum*)accum, ((Accum*)accum)->stream, consumed, PcrStart );
 
 			vm_push( (SW)pdaRun );
 			vm_push( (SW)fsmRun );
@@ -2547,7 +2547,7 @@ again:
 
 			debug( REALM_BYTECODE, "IN_PARSE_FRAG_BKT3 %ld", consumed );
 
-			pcr = undoParseFrag( prg, sp, (Accum*)accum, (Stream*)input, consumed, pcr );
+			pcr = undoParseFrag( prg, sp, (Accum*)accum, ((Accum*)accum)->stream, consumed, pcr );
 
 			/* Pop the saved execution. */
 			Execution *pushedExec = (Execution*)vm_ptop();
@@ -2591,7 +2591,7 @@ again:
 			PdaRun *pdaRun = ((Accum*)accum)->pdaRun;
 			FsmRun *fsmRun = ((Accum*)accum)->fsmRun;
 
-			long pcr = parseFinish( &result, prg, sp, (Accum*)accum, stream, false, PcrStart );
+			long pcr = parseFinish( &result, prg, sp, (Accum*)accum, ((Accum*)accum)->stream, false, PcrStart );
 
 			vm_push( (SW)pdaRun );
 			vm_push( (SW)fsmRun );
@@ -2653,7 +2653,7 @@ again:
 			FsmRun *fsmRun = (FsmRun*)vm_pop();
 			PdaRun *pdaRun = (PdaRun*)vm_pop();
 
-			pcr = parseFinish( &result, prg, sp, (Accum*)accum, (Stream*)stream, false, pcr );
+			pcr = parseFinish( &result, prg, sp, (Accum*)accum, ((Accum*)accum)->stream, false, pcr );
 
 			/* Pop the saved execution. */
 			Execution *pushedExec = (Execution*)vm_ptop();
@@ -2685,7 +2685,7 @@ again:
 			PdaRun *pdaRun = ((Accum*)accum)->pdaRun;
 			FsmRun *fsmRun = ((Accum*)accum)->fsmRun;
 
-			long pcr = parseFinish( &result, prg, sp, (Accum*)accum, stream, true, PcrStart );
+			long pcr = parseFinish( &result, prg, sp, (Accum*)accum, ((Accum*)accum)->stream, true, PcrStart );
 
 			vm_push( (SW)pdaRun );
 			vm_push( (SW)fsmRun );
@@ -2759,7 +2759,7 @@ again:
 			FsmRun *fsmRun = (FsmRun*)vm_pop();
 			PdaRun *pdaRun = (PdaRun*)vm_pop();
 
-			pcr = parseFinish( &result, prg, sp, (Accum*)accum, (Stream*)stream, true, pcr );
+			pcr = parseFinish( &result, prg, sp, (Accum*)accum, ((Accum*)accum)->stream, true, pcr );
 
 			/* Pop the saved execution. */
 			Execution *pushedExec = (Execution*)vm_ptop();
