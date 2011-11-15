@@ -1328,11 +1328,11 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 
 	/* If the arg is a stream then install it in the parser. */
 	if ( argUT == pd->uniqueTypeStream ) {
-		code.append( IN_DUP_TOP );
+//		code.append( IN_DUP_TOP );
 
 		/* Get a copy of the parser. */
 		code.append( IN_DUP_TOP_OFF );
-		code.appendHalf( 2 );
+		code.appendHalf( 1 );
 	
 		code.append( IN_SET_INPUT_WC );
 	}
@@ -1356,8 +1356,8 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 
 
 	/* Get a copy of the parser. */
-	code.append( IN_DUP_TOP_OFF );
-	code.appendHalf( 1 );
+	code.append( IN_DUP_TOP );
+//	code.appendHalf( 1 );
 
 	int stopId = stop ? ut->langEl->id : 0;
 
@@ -2056,78 +2056,49 @@ void LangStmt::evaluateAccumItems( ParseData *pd, CodeVect &code ) const
 		}
 
 		if ( exprUT == pd->uniqueTypeStream ) {
-			code.append( IN_DUP_TOP );
+//			code.append( IN_DUP_TOP );
 
 			/* Get a copy of the parser. */
 			code.append( IN_DUP_TOP_OFF );
-			code.appendHalf( 2 );
+			code.appendHalf( 1 );
 		
 			code.append( IN_SET_INPUT_WC );
-		}
-
-		if ( exprUT == pd->uniqueTypeStream ) {
-			code.append( IN_DUP_TOP_OFF );
-			code.appendHalf( 1 );
-
-			/* Parse instruction, dependent on whether or not we are producing
-			 * revert or commit code. */
-			if ( pd->revertOn ) {
-				code.append( IN_PARSE_FRAG_WV );
-				code.appendHalf( 0 );
-				code.append( IN_PARSE_FRAG_WV2 );
-				code.appendHalf( 0 );
-				code.append( IN_PARSE_FRAG_WV3 );
-				code.appendHalf( 0 );
-			}
-			else {
-				code.append( IN_PARSE_FRAG_WC );
-				code.appendHalf( 0 );
-
-				code.append( IN_PARSE_FRAG_WC2 );
-				code.appendHalf( 0 );
-
-				code.append( IN_PARSE_FRAG_WC3 );
-				code.appendHalf( 0 );
-			}
 		}
 		else {
 			code.append( IN_DUP_TOP_OFF );
 			code.appendHalf( 1 );
 
 			/* Not a stream. Get the input first. */
-			if ( pd->revertOn )
-				code.append( IN_EXTRACT_INPUT_WV );
-			else
-				code.append( IN_EXTRACT_INPUT_WC );
-
-			if ( pd->revertOn )
-				code.append( IN_STREAM_APPEND_WV );
-			else
-				code.append( IN_STREAM_APPEND_WC );
-
-			code.append( IN_DUP_TOP_OFF );
-			code.appendHalf( 1 );
-
 			if ( pd->revertOn ) {
-				code.append( IN_PARSE_FRAG_WV );
-				code.appendHalf( 0 );
-
-				code.append( IN_PARSE_FRAG_WV2 );
-				code.appendHalf( 0 );
-
-				code.append( IN_PARSE_FRAG_WV3 );
-				code.appendHalf( 0 );
+				code.append( IN_EXTRACT_INPUT_WV );
+				code.append( IN_STREAM_APPEND_WV );
 			}
 			else {
-				code.append( IN_PARSE_FRAG_WC );
-				code.appendHalf( 0 );
-
-				code.append( IN_PARSE_FRAG_WC2 );
-				code.appendHalf( 0 );
-
-				code.append( IN_PARSE_FRAG_WC3 );
-				code.appendHalf( 0 );
+				code.append( IN_EXTRACT_INPUT_WC );
+				code.append( IN_STREAM_APPEND_WC );
 			}
+		}
+
+		code.append( IN_DUP_TOP );
+//		code.appendHalf( 1 );
+
+		/* Parse instruction, dependent on whether or not we are producing
+		 * revert or commit code. */
+		if ( pd->revertOn ) {
+			code.append( IN_PARSE_FRAG_WV );
+			code.appendHalf( 0 );
+			code.append( IN_PARSE_FRAG_WV2 );
+			code.appendHalf( 0 );
+			code.append( IN_PARSE_FRAG_WV3 );
+			code.appendHalf( 0 );
+		}
+		else {
+			code.append( IN_PARSE_FRAG_WC );
+			code.appendHalf( 0 );
+			code.append( IN_PARSE_FRAG_WC2 );
+			code.appendHalf( 0 );
+			code.append( IN_PARSE_FRAG_WC3 );
+			code.appendHalf( 0 );
 		}
 	}
 	code.append( IN_POP );

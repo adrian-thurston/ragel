@@ -653,16 +653,13 @@ again:
 		}
 		case IN_PARSE_FRAG_BKT: {
 			Tree *accum;
-			Tree *input;
 			long consumed;
 			read_tree( accum );
-			read_tree( input );
 			read_word( consumed );
 
 			debug( REALM_BYTECODE, "IN_PARSE_FRAG_BKT %ld\n", consumed );
 			
 			treeDownref( prg, sp, accum );
-			treeDownref( prg, sp, input );
 			break;
 		}
 		case IN_PARSE_FRAG_BKT2: {
@@ -675,17 +672,14 @@ again:
 		}
 		case IN_PARSE_FINISH_BKT: {
 			Tree *accumTree;
-			Tree *tree;
 			long consumed;
 
 			read_tree( accumTree );
-			read_tree( tree );
 			read_word( consumed );
 
 			debug( REALM_BYTECODE, "IN_PARSE_FINISH_BKT %ld\n", consumed );
 
 			treeDownref( prg, sp, accumTree );
-			treeDownref( prg, sp, tree );
 			break;
 		}
 		case IN_PARSE_FINISH_BKT2: {
@@ -2261,7 +2255,7 @@ again:
 			streamAppend( prg, sp, input, (Stream*)stream );
 
 			treeDownref( prg, sp, input );
-			vm_push( stream );
+			treeDownref( prg, sp, stream );
 			break;
 		}
 		case IN_STREAM_APPEND_WV: {
@@ -2270,9 +2264,6 @@ again:
 			Tree *stream = vm_pop();
 			Tree *input = vm_pop();
 			Word len = streamAppend( prg, sp, input, (Stream*)stream );
-
-			treeUpref( stream );
-			vm_push( stream );
 
 			append( exec->rcodeCollect, IN_STREAM_APPEND_BKT );
 			appendWord( exec->rcodeCollect, (Word) stream );
@@ -2304,12 +2295,10 @@ again:
 			debug( REALM_BYTECODE, "IN_PARSE_FRAG_WC %d\n", stopId );
 
 			Accum *accum = (Accum*)vm_pop();
-			Tree *stream = vm_pop();
 
 			long pcr = parseFrag( prg, sp, accum, stopId, PcrStart );
 
 			vm_push( (SW)pcr );
-			vm_push( stream );
 			vm_push( (Tree*)accum );
 			break;
 		}
@@ -2321,7 +2310,6 @@ again:
 			debug( REALM_BYTECODE, "IN_PARSE_FRAG_WC2 %d\n", stopId );
 
 			Accum *accum = (Accum*)vm_pop();
-			Tree *stream = vm_pop();
 			long pcr = (long)vm_pop();
 
 			PdaRun *pdaRun = accum->pdaRun;
@@ -2335,13 +2323,11 @@ again:
 				pdaRun->exec = exec;
 
 				vm_push( (SW)pcr );
-				vm_push( stream );
 				vm_push( (SW)accum );
 
 				callParseBlock( &instr, &sp, pcr, prg, exec, pdaRun, fsmRun );
 			}
 			else {
-				treeDownref( prg, sp, stream );
 				treeDownref( prg, sp, (Tree*)accum );
 
 				instr += SIZEOF_CODE + SIZEOF_HALF;
@@ -2358,7 +2344,6 @@ again:
 			debug( REALM_BYTECODE, "IN_PARSE_FRAG_WC3 %d\n", stopId );
 
 			Accum *accum = (Accum*)vm_pop();
-			Tree *stream = vm_pop();
 			long pcr = (long)vm_pop();
 
 			pcr = parseFrag( prg, sp, accum, stopId, pcr );
@@ -2369,7 +2354,6 @@ again:
 			vm_popn( SIZEOF_WORD * 20 );
 
 			vm_push( (SW)pcr );
-			vm_push( stream );
 			vm_push( (Tree*)accum );
 
 			/* Back up to the frag 2. */
@@ -2385,14 +2369,12 @@ again:
 			debug( REALM_BYTECODE, "IN_PARSE_FRAG_WV \n" );
 
 			Accum *accum = (Accum*)vm_pop();
-			Tree *stream = vm_pop();
 
 			long consumed = accum->pdaRun->consumed;
 			long pcr = parseFrag( prg, sp, accum, stopId, PcrStart );
 
 			vm_push( (SW)pcr );
 			vm_push( (SW)consumed );
-			vm_push( stream );
 			vm_push( (Tree*)accum );
 			break;
 		}
@@ -2404,7 +2386,6 @@ again:
 			debug( REALM_BYTECODE, "IN_PARSE_FRAG_WV2\n" );
 
 			Accum *accum = (Accum*)vm_pop();
-			Tree *stream = vm_pop();
 			long consumed = (long)vm_pop();
 			long pcr = (long)vm_pop();
 
@@ -2420,7 +2401,6 @@ again:
 
 				vm_push( (SW)pcr );
 				vm_push( (SW)consumed );
-				vm_push( stream );
 				vm_push( (SW)accum );
 
 				callParseBlock( &instr, &sp, pcr, prg, exec, pdaRun, fsmRun );
@@ -2430,11 +2410,10 @@ again:
 
 				append( exec->rcodeCollect, IN_PARSE_FRAG_BKT );
 				appendWord( exec->rcodeCollect, (Word) accum );
-				appendWord( exec->rcodeCollect, (Word) stream );
 				appendWord( exec->rcodeCollect, consumed );
 				append( exec->rcodeCollect, IN_PARSE_FRAG_BKT2 );
 				append( exec->rcodeCollect, IN_PARSE_FRAG_BKT3 );
-				append( exec->rcodeCollect, 3*SIZEOF_CODE + 3 * SIZEOF_WORD );
+				append( exec->rcodeCollect, 3 * SIZEOF_CODE + 2 * SIZEOF_WORD );
 				if ( prg->induceExit )
 					goto out;
 			}
@@ -2448,7 +2427,6 @@ again:
 			debug( REALM_BYTECODE, "IN_PARSE_FRAG_WV3 \n" );
 
 			Accum *accum = (Accum*)vm_pop();
-			Tree *stream = vm_pop();
 			long consumed = (long)vm_pop();
 			long pcr = (long)vm_pop();
 
@@ -2461,7 +2439,6 @@ again:
 
 			vm_push( (SW)pcr );
 			vm_push( (SW)consumed );
-			vm_push( stream );
 			vm_push( (SW)accum );
 
 			/* Back up to the frag 2. */
@@ -2472,10 +2449,8 @@ again:
 
 		case IN_PARSE_FRAG_BKT: {
 			Accum *accum;
-			Tree *input;
 			long consumed;
 			read_word_type( Accum*, accum );
-			read_tree( input );
 			read_word( consumed );
 
 			debug( REALM_BYTECODE, "IN_PARSE_FRAG_BKT %ld", consumed );
@@ -2484,14 +2459,12 @@ again:
 
 			vm_push( (SW)pcr );
 			vm_push( (SW)consumed );
-			vm_push( input );
 			vm_push( (SW)accum );
 			break;
 		}
 
 		case IN_PARSE_FRAG_BKT2: {
 			Accum *accum = (Accum*)vm_pop();
-			Tree *input = vm_pop();
 			long consumed = (long)vm_pop();
 			long pcr = (long)vm_pop();
 
@@ -2509,7 +2482,6 @@ again:
 
 				vm_push( (SW)pcr );
 				vm_push( (SW)consumed );
-				vm_push( input );
 				vm_push( (SW)accum );
 
 				callParseBlock( &instr, &sp, pcr, prg, exec, pdaRun, fsmRun );
@@ -2518,14 +2490,12 @@ again:
 				instr += SIZEOF_CODE;
 
 				treeDownref( prg, sp, (Tree*)accum );
-				treeDownref( prg, sp, input );
 			}
 			break;
 		}
 
 		case IN_PARSE_FRAG_BKT3: {
 			Accum *accum = (Accum*)vm_pop();
-			Tree *input = vm_pop();
 			long consumed = (long)vm_pop();
 			long pcr = (long)vm_pop();
 
@@ -2540,7 +2510,6 @@ again:
 
 			vm_push( (SW)pcr );
 			vm_push( (SW)consumed );
-			vm_push( input );
 			vm_push( (SW)accum );
 
 			/* Back up to the frag 2. */
@@ -2553,14 +2522,14 @@ again:
 			debug( REALM_BYTECODE, "IN_PARSE_FINISH_WC\n" );
 
 			Accum *accum = (Accum*)vm_pop();
-			Stream *stream = (Stream*)extractInput( prg, (Accum*)accum );
-			Tree *result = 0;
 
+			extractInput( prg, accum );
+
+			Tree *result = 0;
 			long pcr = parseFinish( &result, prg, sp, accum, false, PcrStart );
 
 			vm_push( (SW)pcr );
 			vm_push( result );
-			vm_push( (SW)stream );
 			vm_push( (SW)accum );
 			break;
 		}
@@ -2569,8 +2538,6 @@ again:
 			debug( REALM_BYTECODE, "IN_PARSE_FINISH_WC2\n" );
 
 			Accum *accum = (Accum*)vm_pop();
-			Tree *stream = vm_pop();
-
 			Tree *result = vm_pop();
 			long pcr = (long)vm_pop();
 
@@ -2586,7 +2553,6 @@ again:
 
 				vm_push( (SW)pcr );
 				vm_push( result );
-				vm_push( stream );
 				vm_push( (SW)accum );
 
 				callParseBlock( &instr, &sp, pcr, prg, exec, pdaRun, fsmRun );
@@ -2606,7 +2572,6 @@ again:
 			debug( REALM_BYTECODE, "IN_PARSE_FINISH_WC3\n" );
 
 			Accum *accum = (Accum*)vm_pop();
-			Tree *stream = vm_pop();
 			Tree *result = vm_pop();
 			long pcr = (long)vm_pop();
 
@@ -2619,7 +2584,6 @@ again:
 
 			vm_push( (SW)pcr );
 			vm_push( result );
-			vm_push( stream );
 			vm_push( (SW)accum );
 
 			instr -= SIZEOF_CODE;
@@ -2632,16 +2596,15 @@ again:
 			debug( REALM_BYTECODE, "IN_PARSE_FINISH_WV\n" );
 
 			Accum *accum = (Accum*)vm_pop();
-			long consumed = ((Accum*)accum)->pdaRun->consumed;
-			Stream *stream = (Stream*)extractInput( prg, (Accum*)accum );
-			Tree *result = 0;
 
+			long consumed = accum->pdaRun->consumed;
+			extractInput( prg, accum );
+			Tree *result = 0;
 			long pcr = parseFinish( &result, prg, sp, accum, true, PcrStart );
 
 			vm_push( (SW)pcr );
 			vm_push( (SW)consumed );
 			vm_push( result );
-			vm_push( (Tree*)stream );
 			vm_push( (SW)accum );
 			break;
 		}
@@ -2650,7 +2613,6 @@ again:
 			debug( REALM_BYTECODE, "IN_PARSE_FINISH_WV2\n" );
 
 			Accum *accum = (Accum*)vm_pop();
-			Tree *stream = vm_pop();
 			Tree *result = vm_pop();
 			long consumed = (long)vm_pop();
 			long pcr = (long)vm_pop();
@@ -2668,7 +2630,6 @@ again:
 				vm_push( (SW)pcr );
 				vm_push( (SW)consumed );
 				vm_push( result );
-				vm_push( stream );
 				vm_push( (SW)accum );
 
 				callParseBlock( &instr, &sp, pcr, prg, exec, pdaRun, fsmRun );
@@ -2678,14 +2639,12 @@ again:
 
 				vm_push( result );
 
-				treeUpref( result );
 				append( exec->rcodeCollect, IN_PARSE_FINISH_BKT );
 				appendWord( exec->rcodeCollect, (Word) accum );
-				appendWord( exec->rcodeCollect, (Word) result );
 				appendWord( exec->rcodeCollect, (Word) consumed );
 				append( exec->rcodeCollect, IN_PARSE_FINISH_BKT2 );
 				append( exec->rcodeCollect, IN_PARSE_FINISH_BKT3 );
-				append( exec->rcodeCollect, 3*SIZEOF_CODE + 3*SIZEOF_WORD );
+				append( exec->rcodeCollect, 3 * SIZEOF_CODE + 2 * SIZEOF_WORD );
 				if ( prg->induceExit )
 					goto out;
 			}
@@ -2696,7 +2655,6 @@ again:
 			debug( REALM_BYTECODE, "IN_PARSE_FINISH_WV3\n" );
 
 			Accum *accum = (Accum*)vm_pop();
-			Tree *stream = vm_pop();
 			Tree *result = vm_pop();
 			long consumed = (long)vm_pop();
 			long pcr = (long)vm_pop();
@@ -2711,7 +2669,6 @@ again:
 			vm_push( (SW)pcr );
 			vm_push( (SW)consumed );
 			vm_push( result );
-			vm_push( stream );
 			vm_push( (SW)accum );
 
 			instr -= SIZEOF_CODE;
@@ -2721,11 +2678,9 @@ again:
 
 		case IN_PARSE_FINISH_BKT: {
 			Accum *accum;
-			Tree *tree;
 			Word consumed;
 
 			read_word_type( Accum*, accum );
-			read_tree( tree );
 			read_word( consumed );
 
 			debug( REALM_BYTECODE, "IN_PARSE_FINISH_BKT\n" );
@@ -2734,15 +2689,12 @@ again:
 
 			vm_push( (SW)pcr );
 			vm_push( (SW)consumed );
-			vm_push( tree );
 			vm_push( (SW)accum );
 			break;
 		}
 
 		case IN_PARSE_FINISH_BKT2: {
 			Accum *accum = (Accum*)vm_pop();
-			Tree *tree = vm_pop();
-
 			long consumed = (long)vm_pop();
 			long pcr = (long)vm_pop();
 
@@ -2760,7 +2712,6 @@ again:
 
 				vm_push( (SW)pcr );
 				vm_push( (SW)consumed );
-				vm_push( tree );
 				vm_push( (SW)accum );
 
 				callParseBlock( &instr, &sp, pcr, prg, exec, pdaRun, fsmRun );
@@ -2772,14 +2723,12 @@ again:
 
 				/* This needs an implementation. */
 				treeDownref( prg, sp, (Tree*)accum );
-				treeDownref( prg, sp, tree );
 			}
 			break;
 		}
 
 		case IN_PARSE_FINISH_BKT3: {
 			Accum *accum = (Accum*)vm_pop();
-			Tree *tree = vm_pop();
 			long consumed = (long)vm_pop();
 			long pcr = (long)vm_pop();
 
@@ -2794,7 +2743,6 @@ again:
 
 			vm_push( (SW)pcr );
 			vm_push( (SW)consumed );
-			vm_push( tree );
 			vm_push( (SW)accum );
 
 			/* Back up to the frag 2. */
