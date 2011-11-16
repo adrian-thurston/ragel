@@ -231,15 +231,17 @@ typedef struct _PdaRun
 
 	Tree *context;
 
-	//bool fragStop;
 	int stop;
 	int parseError;
 
 	long consumed;
 	long targetConsumed;
 
-	/* Data we added when factoring out the reduction action execution. */
-	Kid *input;
+	/*
+	 * Data we added when refactoring the parsing engine into a coroutine.
+	 */
+
+	Kid *input1;
 	FrameInfo *fi;
 	int reduction;
 	Kid *redLel;
@@ -248,7 +250,6 @@ typedef struct _PdaRun
 	struct _Execution *exec;
 	int triggerUndo;
 
-	/* Data we added when factoring out the token generation action. */
 	int tokenId;
 	Head *tokdata;
 	int frameId;

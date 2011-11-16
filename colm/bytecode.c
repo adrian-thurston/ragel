@@ -908,9 +908,11 @@ Code *popReverseCode( RtCodeVect *allRev )
 }
 
 void callParseBlock( Code **pinstr, Tree ***psp, long pcr, Program *prg,
-		Execution *exec, PdaRun *pdaRun, FsmRun *fsmRun )
+		Execution *exec, Accum *accum )
 {
 	Tree **sp = *psp;
+	PdaRun *pdaRun = accum->pdaRun;
+	FsmRun *fsmRun = accum->fsmRun;
 
 	switch ( pcr ) {
 		case PcrReduction: {
@@ -2312,20 +2314,17 @@ again:
 			Accum *accum = (Accum*)vm_pop();
 			long pcr = (long)vm_pop();
 
-			PdaRun *pdaRun = accum->pdaRun;
-			FsmRun *fsmRun = accum->fsmRun;
-
 			if ( pcr != PcrDone ) {
 				/* Push the execution. */
 				vm_pushn( SIZEOF_WORD * 20 );
 				Execution *pushedExec = (Execution*)vm_ptop();
 				memcpy( pushedExec, exec, sizeof(Execution) );
-				pdaRun->exec = exec;
+				accum->pdaRun->exec = exec;
 
 				vm_push( (SW)pcr );
 				vm_push( (SW)accum );
 
-				callParseBlock( &instr, &sp, pcr, prg, exec, pdaRun, fsmRun );
+				callParseBlock( &instr, &sp, pcr, prg, exec, accum );
 			}
 			else {
 				treeDownref( prg, sp, (Tree*)accum );
@@ -2366,7 +2365,7 @@ again:
 			Half stopId;
 			read_half( stopId );
 
-			debug( REALM_BYTECODE, "IN_PARSE_FRAG_WV \n" );
+			debug( REALM_BYTECODE, "IN_PARSE_FRAG_WV\n" );
 
 			Accum *accum = (Accum*)vm_pop();
 
@@ -2389,21 +2388,18 @@ again:
 			long consumed = (long)vm_pop();
 			long pcr = (long)vm_pop();
 
-			PdaRun *pdaRun = accum->pdaRun;
-			FsmRun *fsmRun = accum->fsmRun;
-
 			if ( pcr != PcrDone ) {
 				/* Push the execution. */
 				vm_pushn( SIZEOF_WORD * 20 );
 				Execution *pushedExec = (Execution*)vm_ptop();
 				memcpy( pushedExec, exec, sizeof(Execution) );
-				pdaRun->exec = exec;
+				accum->pdaRun->exec = exec;
 
 				vm_push( (SW)pcr );
 				vm_push( (SW)consumed );
 				vm_push( (SW)accum );
 
-				callParseBlock( &instr, &sp, pcr, prg, exec, pdaRun, fsmRun );
+				callParseBlock( &instr, &sp, pcr, prg, exec, accum );
 			}
 			else {
 				instr += SIZEOF_CODE + SIZEOF_HALF;
@@ -2468,9 +2464,6 @@ again:
 			long consumed = (long)vm_pop();
 			long pcr = (long)vm_pop();
 
-			PdaRun *pdaRun = accum->pdaRun;
-			FsmRun *fsmRun = accum->fsmRun;
-
 			debug( REALM_BYTECODE, "IN_PARSE_FRAG_BKT2 %ld", consumed );
 
 			if ( pcr != PcrDone ) {
@@ -2478,13 +2471,13 @@ again:
 				vm_pushn( SIZEOF_WORD * 20 );
 				Execution *pushedExec = (Execution*)vm_ptop();
 				memcpy( pushedExec, exec, sizeof(Execution) );
-				pdaRun->exec = exec;
+				accum->pdaRun->exec = exec;
 
 				vm_push( (SW)pcr );
 				vm_push( (SW)consumed );
 				vm_push( (SW)accum );
 
-				callParseBlock( &instr, &sp, pcr, prg, exec, pdaRun, fsmRun );
+				callParseBlock( &instr, &sp, pcr, prg, exec, accum );
 			}
 			else {
 				instr += SIZEOF_CODE;
@@ -2541,21 +2534,18 @@ again:
 			Tree *result = vm_pop();
 			long pcr = (long)vm_pop();
 
-			PdaRun *pdaRun = accum->pdaRun;
-			FsmRun *fsmRun = accum->fsmRun;
-
 			if ( pcr != PcrDone ) {
 				/* Push the execution. */
 				vm_pushn( SIZEOF_WORD * 20 );
 				Execution *pushedExec = (Execution*)vm_ptop();
 				memcpy( pushedExec, exec, sizeof(Execution) );
-				pdaRun->exec = exec;
+				accum->pdaRun->exec = exec;
 
 				vm_push( (SW)pcr );
 				vm_push( result );
 				vm_push( (SW)accum );
 
-				callParseBlock( &instr, &sp, pcr, prg, exec, pdaRun, fsmRun );
+				callParseBlock( &instr, &sp, pcr, prg, exec, accum );
 			}
 			else {
 				instr += SIZEOF_CODE;
@@ -2617,22 +2607,19 @@ again:
 			long consumed = (long)vm_pop();
 			long pcr = (long)vm_pop();
 
-			PdaRun *pdaRun = accum->pdaRun;
-			FsmRun *fsmRun = accum->fsmRun;
-
 			if ( pcr != PcrDone ) {
 				/* Push the execution. */
 				vm_pushn( SIZEOF_WORD * 20 );
 				Execution *pushedExec = (Execution*)vm_ptop();
 				memcpy( pushedExec, exec, sizeof(Execution) );
-				pdaRun->exec = exec;
+				accum->pdaRun->exec = exec;
 
 				vm_push( (SW)pcr );
 				vm_push( (SW)consumed );
 				vm_push( result );
 				vm_push( (SW)accum );
 
-				callParseBlock( &instr, &sp, pcr, prg, exec, pdaRun, fsmRun );
+				callParseBlock( &instr, &sp, pcr, prg, exec, accum );
 			}
 			else {
 				instr += SIZEOF_CODE;
@@ -2698,9 +2685,6 @@ again:
 			long consumed = (long)vm_pop();
 			long pcr = (long)vm_pop();
 
-			PdaRun *pdaRun = accum->pdaRun;
-			FsmRun *fsmRun = accum->fsmRun;
-
 			debug( REALM_BYTECODE, "IN_PARSE_FINISH_BKT2\n" );
 
 			if ( pcr != PcrDone ) {
@@ -2708,13 +2692,13 @@ again:
 				vm_pushn( SIZEOF_WORD * 20 );
 				Execution *pushedExec = (Execution*)vm_ptop();
 				memcpy( pushedExec, exec, sizeof(Execution) );
-				pdaRun->exec = exec;
+				accum->pdaRun->exec = exec;
 
 				vm_push( (SW)pcr );
 				vm_push( (SW)consumed );
 				vm_push( (SW)accum );
 
-				callParseBlock( &instr, &sp, pcr, prg, exec, pdaRun, fsmRun );
+				callParseBlock( &instr, &sp, pcr, prg, exec, accum );
 			}
 			else {
 				instr += SIZEOF_CODE;

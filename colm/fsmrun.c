@@ -1189,8 +1189,8 @@ case PcrGeneration:
 			attachIgnore( prg, sp, pdaRun, pdaRun->input2 );
 		}
 
-		assert( pdaRun->input == 0 );
-		pdaRun->input = pdaRun->input2;
+		assert( pdaRun->input1 == 0 );
+		pdaRun->input1 = pdaRun->input2;
 		pdaRun->input2 = 0;
 
 		long pcr = parseToken( prg, sp, pdaRun, fsmRun, inputStream, PcrStart );
