@@ -1026,7 +1026,7 @@ Tree **executeCode( Execution *exec, Tree **sp, Code *instr )
 {
 	/* When we exit we are going to verify that we did not eat up any stack
 	 * space. */
-	//Tree **root = sp;
+	Tree **root = sp;
 	Program *prg = exec->prg;
 	Code c;
 
@@ -3746,7 +3746,6 @@ again:
 			treeDownref( prg, sp, global );
 			treeUpref( prg->lastParseError );
 			vm_push( prg->lastParseError );
-			treeDownref( prg, sp, global );
 			break;
 		}
 		case IN_OPEN_FILE: {
@@ -3811,10 +3810,8 @@ again:
 	goto again;
 
 out:
-	if ( ! prg->induceExit ) {
-		// FIXME: bring this back.
-		//assert( sp == root );
-	}
+	if ( ! prg->induceExit )
+		assert( sp == root );
 	return sp;
 }
 

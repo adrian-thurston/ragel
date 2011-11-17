@@ -353,13 +353,27 @@ void commitFull( Program *prg, Tree **sp, PdaRun *pdaRun, long causeReduce )
 		rcodeDownrefAll( prg, sp, &pdaRun->reverseCode );
 }
 
+/* Tree null means compute from what we find in the parser. */
 void pushBtPoint( Program *prg, PdaRun *pdaRun, Tree *tree )
 {
-	Kid *kid = kidAllocate( prg );
-	kid->tree = tree;
-	treeUpref( tree );
-	kid->next = pdaRun->btPoint;
-	pdaRun->btPoint = kid;
+	if ( tree == 0 ) {
+		if ( pdaRun->accumIgnore != 0 ) 
+			tree = pdaRun->accumIgnore->tree;
+		else if ( pdaRun->tokenList != 0 )
+			tree = pdaRun->tokenList->kid->tree;
+	}
+
+	if ( tree != 0 ) {
+		debug( REALM_PARSE, "pushing bt point with location byte %d\n", 
+				( tree != 0 && tree->tokdata != 0 && tree->tokdata->location != 0 ) ? 
+				tree->tokdata->location->byte : 0 );
+
+		Kid *kid = kidAllocate( prg );
+		kid->tree = tree;
+		treeUpref( tree );
+		kid->next = pdaRun->btPoint;
+		pdaRun->btPoint = kid;
+	}
 }
 
 /*
@@ -389,11 +403,8 @@ switch ( entry ) {
 case PcrStart:
 
 	/* The scanner will send a null token if it can't find a token. */
-	if ( pdaRun->input1 == 0 ) {
-		/* Grab the most recently accepted item. */
-		pushBtPoint( prg, pdaRun, pdaRun->tokenList->kid->tree );
+	if ( pdaRun->input1 == 0 )
 		goto parseError;
-	}
 
 	/* The tree we are given must be * parse tree size. It also must have at
 	 * least one reference. */

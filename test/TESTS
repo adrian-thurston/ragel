@@ -22,7 +22,8 @@ TESTS="
 	mutualrec.lm
 	argv1.lm
 	argv2.lm
-	exit.lm
+	exit1.lm
+	exit2.lm
 	rubyhere.lm
 	translate1.lm
 	translate2.lm
@@ -67,4 +68,5 @@ TESTS="
 	sprintf.lm
 	div.lm
 	scope1.lm
+	export1.lm
 "

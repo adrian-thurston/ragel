@@ -609,27 +609,42 @@ void clearIgnoreList( Program *prg, Tree **sp, Kid *kid )
 static void reportParseError( Program *prg, Tree **sp, PdaRun *pdaRun )
 {
 	Kid *kid = pdaRun->btPoint;
-	Location *deepest = 0;
+	Head *deepest = 0;
 	while ( kid != 0 ) {
 		Head *head = kid->tree->tokdata;
-		Location *location = head != 0 ? head->location : 0;
-		if ( location && ( deepest == 0 || location->byte > deepest->byte ) )
-			deepest = location;
+		if ( head != 0 && head->location != 0 ) {
+			if ( deepest == 0 || head->location->byte > deepest->location->byte ) 
+				deepest = head;
+		}
 		kid = kid->next;
 	}
 
-	Head *head = 0;
+	Head *errorHead = 0;
 
 	/* If there are no error points on record assume the error occurred at the beginning of the stream. */
 	if ( deepest == 0 ) 
-		head = stringAllocFull( prg, "PARSE ERROR at 1:1", 18 );
+		errorHead = stringAllocFull( prg, "PARSE ERROR at 1:1", 18 );
 	else {
+		debug( REALM_PARSE, "deepest location byte: %d\n", deepest->location->byte );
+
+		long line = deepest->location->line;
+		long i, column = deepest->location->column;
+
+		for ( i = 0; i < deepest->length; i++ ) {
+			if ( deepest->data[i] != '\n' )
+				column += 1;
+			else {
+				line += 1;
+				column = 1;
+			}
+		}
+
 		char formatted[128];
-		sprintf( formatted, "PARSE ERROR at %ld:%ld", deepest->line, deepest->column );
-		head = stringAllocFull( prg, formatted, strlen(formatted) );
+		sprintf( formatted, "PARSE ERROR at %ld:%ld", line, column );
+		errorHead = stringAllocFull( prg, formatted, strlen(formatted) );
 	}
 
-	Tree *tree = constructString( prg, head );
+	Tree *tree = constructString( prg, errorHead );
 	treeDownref( prg, sp, prg->lastParseError );
 	prg->lastParseError = tree;
 	treeUpref( prg->lastParseError );
@@ -757,6 +772,8 @@ Head *extractMatch( Program *prg, FsmRun *fsmRun, InputStream *inputStream )
 	head->location->line = inputStream->line;
 	head->location->column = inputStream->column;
 	head->location->byte = inputStream->byte;
+
+	debug( REALM_PARSE, "location byte: %d\n", inputStream->byte );
 	return head;
 }
 
@@ -1080,6 +1097,7 @@ case PcrPreEof:
 		}
 		else if ( pdaRun->tokenId == SCAN_UNDO ) {
 			/* Fall through with input2 = 0. FIXME: Do we need to send back ignore? */
+			debug( REALM_PARSE, "invoking undo from the scanner\n" );
 		}
 		else if ( pdaRun->tokenId == SCAN_ERROR ) {
 			/* Scanner error, maybe retry. */
@@ -1105,6 +1123,9 @@ case PcrRevIgnore1:
 			else if ( pdaRun->numRetry > 0 ) {
 				debug( REALM_PARSE, "invoking parse error from the scanner\n" );
 
+				/* Fall through to send null (error). */
+				pushBtPoint( prg, pdaRun, 0 );
+
 				/* Send back any accumulated ignore tokens, then trigger error
 				 * in the the parser. */
 				pdaRun->ignore3 = extractIgnore( pdaRun );
@@ -1116,15 +1137,13 @@ case PcrRevIgnore2:
 
 					pcr = sendBackIgnore( prg, sp, pdaRun, fsmRun, inputStream, pdaRun->ignore3, PcrRevIgnore );
 				}
-
-				/* Fall through to send null (error). */
 			}
 			else {
+				debug( REALM_PARSE, "no alternate scanning regions\n" );
 				/* There are no alternative scanning regions to try, nor are
 				 * there any alternatives stored in the current parse tree. No
 				 * choice but to end the parse. */
-				if ( pdaRun->tokenList != 0 ) 
-					pushBtPoint( prg, pdaRun, pdaRun->tokenList->kid->tree );
+				pushBtPoint( prg, pdaRun, 0 );
 
 				reportParseError( prg, sp, pdaRun );
 				pdaRun->parseError = 1;
@@ -1132,14 +1151,20 @@ case PcrRevIgnore2:
 			}
 		}
 		else if ( pdaRun->tokenId == SCAN_LANG_EL ) {
+			debug( REALM_PARSE, "sending an named lang el\n" );
+
 			/* A named language element (parsing colm program). */
 			pdaRun->input2 = sendNamedLangEl( prg, sp, pdaRun, fsmRun, inputStream );
 		}
 		else if ( pdaRun->tokenId == SCAN_TREE ) {
+			debug( REALM_PARSE, "sending an tree\n" );
+
 			/* A tree already built. */
 			pdaRun->input2 = sendTree( prg, sp, pdaRun, fsmRun, inputStream );
 		}
 		else if ( pdaRun->tokenId == SCAN_IGNORE ) {
+			debug( REALM_PARSE, "sending an ignore token\n" );
+
 			/* A tree to ignore. */
 			sendTreeIgnore( prg, sp, pdaRun, fsmRun, inputStream );
 			goto skipSend;
@@ -1175,11 +1200,17 @@ case PcrGeneration:
 			goto skipSend;
 		}
 		else if ( lelInfo[pdaRun->tokenId].ignore ) {
+			debug( REALM_PARSE, "sending an ignore token: %s\n", 
+					prg->rtd->lelInfo[pdaRun->tokenId].name );
+
 			/* Is an ignore token. */
 			sendIgnore( prg, sp, inputStream, fsmRun, pdaRun, pdaRun->tokenId );
 			goto skipSend;
 		}
 		else {
+			debug( REALM_PARSE, "sending an a plain old token: %s\n", 
+					prg->rtd->lelInfo[pdaRun->tokenId].name );
+
 			/* Is a plain token. */
 			pdaRun->input2 = sendToken( prg, sp, inputStream, fsmRun, pdaRun, pdaRun->tokenId );
 		}
