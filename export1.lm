@@ -1,0 +1,16 @@
+lex start
+{
+	token id /[a-z]+/
+	ignore /[ \t]+/
+}
+
+def start
+	[id*]
+
+export Start: start
+export Error: str
+
+Start = parse start( stdin )
+
+Error = error()
+

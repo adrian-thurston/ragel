@@ -59,7 +59,8 @@ TESTS = \
 	commitbt.lm \
 	sprintf.lm \
 	div.lm \
-	scope1.lm
+	scope1.lm \
+	export1.lm
 
 DIFFS = \
 	backtrack1.diff \
@@ -118,7 +119,8 @@ DIFFS = \
 	commitbt.diff \
 	sprintf.diff \
 	div.diff \
-	scope1.diff
+	scope1.diff \
+	export1.diff
 
 all: runtests.mk $(DIFFS) $(SUBDIRS)
 
@@ -225,17 +227,18 @@ argv2.bin: argv2.lm ./../colm/colm
 	./../colm/colm argv2.lm
 exit1.diff: exit1.out exit1.exp
 	@diff -u exit1.exp exit1.out > exit1.diff || ( cat exit1.diff; rm exit1.diff )
-exit2.diff: exit2.out exit2.exp
-	@diff -u exit2.exp exit2.out > exit2.diff || ( cat exit2.diff; rm exit2.diff )
 
 exit1.out: exit1.bin
 	./exit1.bin  > exit1.out
 
+exit1.bin: exit1.lm ./../colm/colm
+	./../colm/colm exit1.lm
+exit2.diff: exit2.out exit2.exp
+	@diff -u exit2.exp exit2.out > exit2.diff || ( cat exit2.diff; rm exit2.diff )
+
 exit2.out: exit2.bin
 	./exit2.bin  > exit2.out
 
-exit1.bin: exit1.lm ./../colm/colm
-	./../colm/colm exit1.lm
 exit2.bin: exit2.lm ./../colm/colm
 	./../colm/colm exit2.lm
 rubyhere.diff: rubyhere.out rubyhere.exp
@@ -590,3 +593,11 @@ scope1.out: scope1.bin
 
 scope1.bin: scope1.lm ./../colm/colm
 	./../colm/colm scope1.lm
+export1.diff: export1.out export1.exp
+	@diff -u export1.exp export1.out > export1.diff || ( cat export1.diff; rm export1.diff )
+
+export1.out: export1.bin
+	./export1.bin  < export1.in > export1.out
+
+export1.bin: export1.lm ./../colm/colm
+	./../colm/colm export1.lm
