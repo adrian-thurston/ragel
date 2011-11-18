@@ -262,6 +262,7 @@ typedef struct _PdaRun
 	Kid *undoLel;
 	Kid *ignore4;
 	Kid *ignore5;
+	Kid *ignore6;
 } PdaRun;
 
 void rtCodeVectReplace( RtCodeVect *vect, long pos, const Code *val, long len );
@@ -336,8 +337,9 @@ int pdaRunGetNextRegion( PdaRun *pdaRun, int offset );
 #define PcrRevIgnore1   7
 #define PcrRevIgnore2   8
 #define PcrRevIgnore3   9
-#define PcrRevToken     10
-#define PcrRevReduction 11
+#define PcrRevIgnore4   10
+#define PcrRevToken     11
+#define PcrRevReduction 12
 
 long parseToken( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, 
 		FsmRun *fsmRun, InputStream *inputStream, long entry );

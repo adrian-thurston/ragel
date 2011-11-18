@@ -386,6 +386,7 @@ void pushBtPoint( Program *prg, PdaRun *pdaRun, Tree *tree )
  *   PcrReduction
  *   PcrRevToken
  *   PcrRevIgnore3
+ *   PcrRevIgnore4
  *   PcrRevReduction
  */
 long parseToken( Program *prg, Tree **sp, PdaRun *pdaRun,
@@ -693,7 +694,6 @@ case PcrRevIgnore3:
 					pcr = sendBack( prg, sp, pdaRun, fsmRun, inputStream, pdaRun->input1, entry );
 				}
 
-
 				pdaRun->input1 = 0;
 				if ( pdaRun->tables->tokenRegions[pdaRun->next] != 0 ) {
 					debug( REALM_PARSE, "found a new region\n" );
@@ -709,6 +709,20 @@ case PcrRevIgnore3:
 					pdaRun->cs = stackTopTarget( prg, pdaRun );
 					goto _out;
 				}
+			}
+		}
+
+		if ( pdaRun->accumIgnore != 0 ) {
+			/* Send back any accumulated ignore tokens, then trigger error
+			 * in the the parser. */
+			pdaRun->ignore6 = extractIgnore( pdaRun );
+			long pcr = sendBackIgnore( prg, sp, pdaRun, fsmRun, inputStream, pdaRun->ignore6, PcrStart );
+			while ( pcr != PcrDone ) {
+
+return PcrRevIgnore4;
+case PcrRevIgnore4:
+
+				pcr = sendBackIgnore( prg, sp, pdaRun, fsmRun, inputStream, pdaRun->ignore6, PcrRevIgnore );
 			}
 		}
 

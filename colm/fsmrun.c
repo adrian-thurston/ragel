@@ -362,40 +362,9 @@ break; }
 	return PcrDone;
 }
 
-/* Stops on:
- *   PcrRevIgnore3
- *   PcrRevToken
- */
-
-long sendBack( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input, long entry )
+void detachIgnores( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input )
 {
-	#ifdef COLM_LOG
-	LangElInfo *lelInfo = prg->rtd->lelInfo;
-	debug( REALM_PARSE, "sending back: %s  text: %.*s%s\n", 
-			lelInfo[input->tree->id].name, 
-			stringLength( input->tree->tokdata ), 
-			stringData( input->tree->tokdata ), 
-			input->tree->flags & AF_ARTIFICIAL ? " (artificial)" : "" );
-	#endif
-
-switch ( entry ) {
-case PcrStart:
-
-	if ( input->tree->flags & AF_NAMED ) {
-		/* Send back anything in the buffer that has not been parsed. */
-		if ( fsmRun->p == fsmRun->runBuf->data )
-			sendBackRunBufHead( fsmRun, inputStream );
-
-		/* Send the named lang el back first, then send back any leading
-		 * whitespace. */
-		inputStream->funcs->pushBackNamed( inputStream );
-	}
-
-	decrementConsumed( pdaRun );
-
-	/*
-	 * Detach ignores.
-	 */
+	assert( pdaRun->accumIgnore == 0 );
 
 	/* Detach right. */
 	pdaRun->rightIgnore = 0;
@@ -444,6 +413,43 @@ case PcrStart:
 		}
 
 	}
+}
+
+/* Stops on:
+ *   PcrRevIgnore3
+ *   PcrRevToken
+ */
+
+long sendBack( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input, long entry )
+{
+	#ifdef COLM_LOG
+	LangElInfo *lelInfo = prg->rtd->lelInfo;
+	debug( REALM_PARSE, "sending back: %s  text: %.*s%s\n", 
+			lelInfo[input->tree->id].name, 
+			stringLength( input->tree->tokdata ), 
+			stringData( input->tree->tokdata ), 
+			input->tree->flags & AF_ARTIFICIAL ? " (artificial)" : "" );
+	#endif
+
+switch ( entry ) {
+case PcrStart:
+
+	if ( input->tree->flags & AF_NAMED ) {
+		/* Send back anything in the buffer that has not been parsed. */
+		if ( fsmRun->p == fsmRun->runBuf->data )
+			sendBackRunBufHead( fsmRun, inputStream );
+
+		/* Send the named lang el back first, then send back any leading
+		 * whitespace. */
+		inputStream->funcs->pushBackNamed( inputStream );
+	}
+
+	decrementConsumed( pdaRun );
+
+	/*
+	 * Detach ignores.
+	 */
+	detachIgnores( prg, sp, pdaRun, fsmRun, inputStream, input );
 
 	/* Artifical were not parsed, instead sent in as items. */
 	if ( input->tree->flags & AF_ARTIFICIAL ) {
@@ -1227,10 +1233,12 @@ case PcrGeneration:
 		long pcr = parseToken( prg, sp, pdaRun, fsmRun, inputStream, PcrStart );
 		
 		while ( pcr != PcrDone ) {
+
 return pcr;
 case PcrReduction:
 case PcrRevReduction:
 case PcrRevIgnore3:
+case PcrRevIgnore4:
 case PcrRevToken:
 
 			pcr = parseToken( prg, sp, pdaRun, fsmRun, inputStream, entry );
