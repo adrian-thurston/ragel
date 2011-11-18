@@ -459,7 +459,8 @@ again:
 
 	if ( pdaRun->lel->tree->id < pdaRun->tables->keys[pdaRun->curState<<1] ||
 			pdaRun->lel->tree->id > pdaRun->tables->keys[(pdaRun->curState<<1)+1] ) {
-		pushBtPoint( prg, pdaRun, pdaRun->lel->tree );
+		debug( REALM_PARSE, "parse error, no transition 1\n" );
+		pushBtPoint( prg, pdaRun, 0 );
 		goto parseError;
 	}
 
@@ -468,13 +469,15 @@ again:
 
 	owner = pdaRun->tables->owners[indPos];
 	if ( owner != pdaRun->curState ) {
-		pushBtPoint( prg, pdaRun, pdaRun->lel->tree );
+		debug( REALM_PARSE, "parse error, no transition 2\n" );
+		pushBtPoint( prg, pdaRun, 0 );
 		goto parseError;
 	}
 
 	pos = pdaRun->tables->indicies[indPos];
 	if ( pos < 0 ) {
-		pushBtPoint( prg, pdaRun, pdaRun->lel->tree );
+		debug( REALM_PARSE, "parse error, no transition 3\n" );
+		pushBtPoint( prg, pdaRun, 0 );
 		goto parseError;
 	}
 
@@ -647,6 +650,7 @@ case PcrReduction:
 			pt(pdaRun->redLel->tree)->state = pdaRun->curState;
 			pdaRun->redLel->next = pdaRun->stackTop;
 			pdaRun->stackTop = pdaRun->redLel;
+			/* FIXME: What is the right argument here? */
 			pushBtPoint( prg, pdaRun, pdaRun->lel->tree );
 			goto parseError;
 		}
