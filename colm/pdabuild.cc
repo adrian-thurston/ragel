@@ -1842,9 +1842,10 @@ PdaTables *ParseData::makePdaTables( PdaGraph *pdaGraph )
 		pdaTables->commitLen[count++] = asi->key.commitLen;
 	
 	/*
-	 * tokenRegionInds
+	 * tokenRegionInds. Start at one so region index 0 is null (unset).
 	 */
-	count = pos = 0;
+	count = 0;
+	pos = 1;
 	pdaTables->tokenRegionInds = new int[pdaTables->numStates];
 	for ( PdaStateList::Iter state = pdaGraph->stateList; state.lte(); state++ ) {
 		pdaTables->tokenRegionInds[count++] = pos;
@@ -1852,10 +1853,10 @@ PdaTables *ParseData::makePdaTables( PdaGraph *pdaGraph )
 	}
 
 	/*
-	 * tokenRegions
+	 * tokenRegions. Build in a null at the beginning.
 	 */
 
-	count = 0;
+	count = 1;
 	for ( PdaStateList::Iter state = pdaGraph->stateList; state.lte(); state++ )
 		count += state->regions.length() + 1;
 
@@ -1863,6 +1864,7 @@ PdaTables *ParseData::makePdaTables( PdaGraph *pdaGraph )
 	pdaTables->tokenRegions = new int[pdaTables->numRegionItems];
 
 	count = 0;
+	pdaTables->tokenRegions[count++] = 0;
 	for ( PdaStateList::Iter state = pdaGraph->stateList; state.lte(); state++ ) {
 		for ( RegionVect::Iter reg = state->regions; reg.lte(); reg++ )
 			pdaTables->tokenRegions[count++] = (*reg)->id + 1;

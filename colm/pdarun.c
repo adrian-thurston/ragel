@@ -353,14 +353,13 @@ void commitFull( Program *prg, Tree **sp, PdaRun *pdaRun, long causeReduce )
 }
 
 /* Tree null means compute from what we find in the parser. */
-void pushBtPoint( Program *prg, PdaRun *pdaRun, Tree *tree )
+void pushBtPoint( Program *prg, PdaRun *pdaRun )
 {
-	if ( tree == 0 ) {
-		if ( pdaRun->accumIgnore != 0 ) 
-			tree = pdaRun->accumIgnore->tree;
-		else if ( pdaRun->tokenList != 0 )
-			tree = pdaRun->tokenList->kid->tree;
-	}
+	Tree *tree = 0;
+	if ( pdaRun->accumIgnore != 0 ) 
+		tree = pdaRun->accumIgnore->tree;
+	else if ( pdaRun->tokenList != 0 )
+		tree = pdaRun->tokenList->kid->tree;
 
 	if ( tree != 0 ) {
 		debug( REALM_PARSE, "pushing bt point with location byte %d\n", 
@@ -457,7 +456,7 @@ again:
 	if ( pdaRun->lel->tree->id < pdaRun->tables->keys[pdaRun->curState<<1] ||
 			pdaRun->lel->tree->id > pdaRun->tables->keys[(pdaRun->curState<<1)+1] ) {
 		debug( REALM_PARSE, "parse error, no transition 1\n" );
-		pushBtPoint( prg, pdaRun, 0 );
+		pushBtPoint( prg, pdaRun );
 		goto parseError;
 	}
 
@@ -467,14 +466,14 @@ again:
 	owner = pdaRun->tables->owners[indPos];
 	if ( owner != pdaRun->curState ) {
 		debug( REALM_PARSE, "parse error, no transition 2\n" );
-		pushBtPoint( prg, pdaRun, 0 );
+		pushBtPoint( prg, pdaRun );
 		goto parseError;
 	}
 
 	pos = pdaRun->tables->indicies[indPos];
 	if ( pos < 0 ) {
 		debug( REALM_PARSE, "parse error, no transition 3\n" );
-		pushBtPoint( prg, pdaRun, 0 );
+		pushBtPoint( prg, pdaRun );
 		goto parseError;
 	}
 
@@ -663,7 +662,7 @@ case PcrReduction:
 			pdaRun->redLel->next = pdaRun->stackTop;
 			pdaRun->stackTop = pdaRun->redLel;
 			/* FIXME: What is the right argument here? */
-			pushBtPoint( prg, pdaRun, pdaRun->lel->tree );
+			pushBtPoint( prg, pdaRun );
 			goto parseError;
 		}
 
@@ -697,7 +696,7 @@ parseError:
 			 * current input1 token then we are finished with it. Send it back. */
 			if ( pt(pdaRun->input1->tree)->causeReduce == 0 ) {
 				long region = pt(pdaRun->input1->tree)->region;
-				pdaRun->next = region >= 0 ? region + 1 : -1;
+				pdaRun->next = region > 0 ? region + 1 : 0;
 
 				long pcr = sendBack( prg, sp, pdaRun, fsmRun, inputStream, pdaRun->input1, PcrStart );
 				while ( pcr != PcrDone ) {
@@ -708,7 +707,7 @@ case PcrRevToken:
 
 				pdaRun->input1 = 0;
 
-				if ( pdaRun->next >= 0 && pdaRun->tables->tokenRegions[pdaRun->next] != 0 ) {
+				if ( pdaRun->next > 0 && pdaRun->tables->tokenRegions[pdaRun->next] != 0 ) {
 					debug( REALM_PARSE, "found a new region\n" );
 					pdaRun->numRetry -= 1;
 					pdaRun->cs = stackTopTarget( prg, pdaRun );
@@ -735,7 +734,7 @@ case PcrRevToken:
 			pdaRun->ignore6->next = 0;
 			
 			long region = pt(pdaRun->ignore6->tree)->region;
-			pdaRun->next = region >= 0 ? region + 1 : -1;
+			pdaRun->next = region > 0 ? region + 1 : 0;
 			
 			long pcr = sendBackIgnore( prg, sp, pdaRun, fsmRun, inputStream, pdaRun->ignore6, PcrStart );
 			while ( pcr != PcrDone ) {
@@ -746,7 +745,7 @@ case PcrRevIgnore:
 				pcr = sendBackIgnore( prg, sp, pdaRun, fsmRun, inputStream, pdaRun->ignore6, entry );
 			}
 
-			if ( pdaRun->next >= 0 && pdaRun->tables->tokenRegions[pdaRun->next] != 0 ) {
+			if ( pdaRun->next > 0 && pdaRun->tables->tokenRegions[pdaRun->next] != 0 ) {
 				debug( REALM_PARSE, "found a new region\n" );
 				pdaRun->numRetry -= 1;
 				pdaRun->cs = stackTopTarget( prg, pdaRun );

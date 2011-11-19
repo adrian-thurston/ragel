@@ -497,9 +497,6 @@ void ignoreTree( Program *prg, PdaRun *pdaRun, Tree *tree )
 		if ( pdaRun->tables->tokenRegions[pt(tree)->region+1] != 0 )
 			pdaRun->numRetry += 1;
 	}
-	else {
-		pt(tree)->region = -1;
-	}
 
 	/* Add the ignore string to the head of the ignore list. */
 	Kid *ignore = kidAllocate( prg );
@@ -758,8 +755,6 @@ void sendIgnore( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmR
 	tree->refs = 1;
 	tree->id = id;
 	tree->tokdata = ignoreStr;
-
-	pt(tree)->region = pdaRun->nextRegionInd;
 
 	incrementConsumed( pdaRun );
 
@@ -1116,7 +1111,7 @@ case PcrPreEof:
 				debug( REALM_PARSE, "invoking parse error from the scanner\n" );
 
 				/* Fall through to send null (error). */
-				pushBtPoint( prg, pdaRun, 0 );
+				pushBtPoint( prg, pdaRun );
 			}
 			else {
 				debug( REALM_PARSE, "no alternate scanning regions\n" );
@@ -1124,7 +1119,7 @@ case PcrPreEof:
 				/* There are no alternative scanning regions to try, nor are
 				 * there any alternatives stored in the current parse tree. No
 				 * choice but to end the parse. */
-				pushBtPoint( prg, pdaRun, 0 );
+				pushBtPoint( prg, pdaRun );
 
 				reportParseError( prg, sp, pdaRun );
 				pdaRun->parseError = 1;
@@ -1203,9 +1198,6 @@ case PcrGeneration:
 				if ( pdaRun->tables->tokenRegions[pt(pdaRun->input2->tree)->region+1] != 0 )
 					pdaRun->numRetry += 1;
 			}
-			else
-				pt(pdaRun->input2->tree)->region = -1;
-
 		}
 
 		assert( pdaRun->input1 == 0 );
