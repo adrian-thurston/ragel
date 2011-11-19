@@ -34,6 +34,7 @@
 
 #define false 0
 #define true 1
+#define pt(var) ((ParseTree*)(var))
 
 void listPrepend( List *list, ListEl *new_el) { listAddBefore(list, list->head, new_el); }
 void listAppend( List *list, ListEl *new_el)  { listAddAfter(list, list->tail, new_el); }
@@ -320,41 +321,32 @@ switch ( entry ) {
 case PcrStart:
 	pdaRun->ignore4 = ignoreKidList;
 
-	while ( pdaRun->ignore4 != 0 ) {
-		#ifdef COLM_LOG
-		LangElInfo *lelInfo = prg->rtd->lelInfo;
-		debug( REALM_PARSE, "sending back: %s%s\n",
-			lelInfo[pdaRun->ignore4->tree->id].name, 
-			pdaRun->ignore4->tree->flags & AF_ARTIFICIAL ? " (artificial)" : "" );
-		#endif
+	#ifdef COLM_LOG
+	LangElInfo *lelInfo = prg->rtd->lelInfo;
+	debug( REALM_PARSE, "sending back: %s%s\n",
+		lelInfo[pdaRun->ignore4->tree->id].name, 
+		pdaRun->ignore4->tree->flags & AF_ARTIFICIAL ? " (artificial)" : "" );
+	#endif
 
-		Head *head = pdaRun->ignore4->tree->tokdata;
-		int artificial = pdaRun->ignore4->tree->flags & AF_ARTIFICIAL;
+	Head *head = pdaRun->ignore4->tree->tokdata;
+	int artificial = pdaRun->ignore4->tree->flags & AF_ARTIFICIAL;
 
-		if ( head != 0 && !artificial )
-			sendBackText( fsmRun, inputStream, stringData( head ), head->length );
+	if ( head != 0 && !artificial )
+		sendBackText( fsmRun, inputStream, stringData( head ), head->length );
 
-		decrementConsumed( pdaRun );
+	decrementConsumed( pdaRun );
 
-		/* Check for reverse code. */
-		if ( pdaRun->ignore4->tree->flags & AF_HAS_RCODE ) {
+	/* Check for reverse code. */
+	if ( pdaRun->ignore4->tree->flags & AF_HAS_RCODE ) {
 
 return PcrRevIgnore;
 case PcrRevIgnore:
 
-			pdaRun->ignore4->tree->flags &= ~AF_HAS_RCODE;
-		}
-
-		pdaRun->ignore4 = pdaRun->ignore4->next;
+		pdaRun->ignore4->tree->flags &= ~AF_HAS_RCODE;
 	}
 
-	Kid *ignore = ignoreKidList;
-	while ( ignore != 0 ) {
-		Kid *next = ignore->next;
-		treeDownref( prg, sp, ignore->tree );
-		kidFree( prg, ignore );
-		ignore = next;
-	}
+	treeDownref( prg, sp, pdaRun->ignore4->tree );
+	kidFree( prg, pdaRun->ignore4 );
 
 case PcrDone:
 break; }
@@ -362,12 +354,13 @@ break; }
 	return PcrDone;
 }
 
-void detachIgnores( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input )
+void detachIgnores( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, Kid *input )
 {
 	assert( pdaRun->accumIgnore == 0 );
 
-	/* Detach right. */
-	pdaRun->rightIgnore = 0;
+	/* Right ignore are immediately discarded since they are copies of
+	 * left-ignores. */
+	Tree *rightIgnore = 0;
 	if ( pdaRun->tokenList != 0 && pdaRun->tokenList->kid->tree->flags & AF_RIGHT_IL_ATTACHED ) {
 		Kid *riKid = treeRightIgnoreKid( prg, pdaRun->tokenList->kid->tree );
 
@@ -377,21 +370,23 @@ void detachIgnores( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, Inp
 		if ( li != 0 ) {
 			treeUpref( li->tree );
 			removeLeftIgnore( prg, sp, riKid->tree );
-			pdaRun->rightIgnore = riKid->tree;
-			treeUpref( pdaRun->rightIgnore );
+			rightIgnore = riKid->tree;
+			treeUpref( rightIgnore );
 			riKid->tree = li->tree;
 		}
 		else  {
-			pdaRun->rightIgnore = riKid->tree;
-			treeUpref( pdaRun->rightIgnore );
+			rightIgnore = riKid->tree;
+			treeUpref( rightIgnore );
 			removeRightIgnore( prg, sp, pdaRun->tokenList->kid->tree );
 			pdaRun->tokenList->kid->tree->flags &= ~AF_RIGHT_IL_ATTACHED;
 		}
 
 	}
 
+	treeDownref( prg, sp, rightIgnore );
+
 	/* Detach left. */
-	pdaRun->leftIgnore = 0;
+	Tree *leftIgnore = 0;
 	if ( input->tree->flags & AF_LEFT_IL_ATTACHED ) {
 		Kid *liKid = treeLeftIgnoreKid( prg, input->tree );
 
@@ -401,22 +396,27 @@ void detachIgnores( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, Inp
 		if ( ri != 0 ) {
 			treeUpref( ri->tree );
 			removeRightIgnore( prg, sp, liKid->tree );
-			pdaRun->leftIgnore = liKid->tree;
-			treeUpref( pdaRun->leftIgnore );
+			leftIgnore = liKid->tree;
+			treeUpref( leftIgnore );
 			liKid->tree = ri->tree;
 		}
 		else {
-			pdaRun->leftIgnore = liKid->tree;
-			treeUpref( pdaRun->leftIgnore );
+			leftIgnore = liKid->tree;
+			treeUpref( leftIgnore );
 			removeLeftIgnore( prg, sp, input->tree );
 			input->tree->flags &= ~AF_LEFT_IL_ATTACHED;
 		}
-
 	}
+
+	if ( leftIgnore != 0 ) {
+		pdaRun->accumIgnore = reverseKidList( leftIgnore->child );
+		leftIgnore->child = 0;
+	}
+
+	treeDownref( prg, sp, leftIgnore );
 }
 
 /* Stops on:
- *   PcrRevIgnore3
  *   PcrRevToken
  */
 
@@ -446,11 +446,6 @@ case PcrStart:
 
 	decrementConsumed( pdaRun );
 
-	/*
-	 * Detach ignores.
-	 */
-	detachIgnores( prg, sp, pdaRun, fsmRun, inputStream, input );
-
 	/* Artifical were not parsed, instead sent in as items. */
 	if ( input->tree->flags & AF_ARTIFICIAL ) {
 		treeUpref( input->tree );
@@ -479,20 +474,6 @@ case PcrRevToken:
 		unbind( prg, sp, pdaRun, input->tree );
 	}
 
-	if ( pdaRun->leftIgnore != 0 ) {
-		pdaRun->ignore5 = reverseKidList( pdaRun->leftIgnore->child );
-		pdaRun->leftIgnore->child = 0;
-
-		long pcr = sendBackIgnore( prg, sp, pdaRun, fsmRun, inputStream, pdaRun->ignore5, PcrStart );
-		while ( pcr != PcrDone ) {
-
-return PcrRevIgnore3;
-case PcrRevIgnore3:
-
-			pcr = sendBackIgnore( prg, sp, pdaRun, fsmRun, inputStream, pdaRun->ignore5, PcrRevIgnore );
-		}
-	}
-
 	if ( pdaRun->consumed == pdaRun->targetConsumed ) {
 		debug( REALM_PARSE, "trigger parse stop, consumed = target = %d", pdaRun->targetConsumed );
 		pdaRun->stop = true;
@@ -500,8 +481,6 @@ case PcrRevIgnore3:
 
 	/* Downref the tree that was sent back and free the kid. */
 	treeDownref( prg, sp, input->tree );
-	treeDownref( prg, sp, pdaRun->rightIgnore );
-	treeDownref( prg, sp, pdaRun->leftIgnore );
 	kidFree( prg, input );
 
 case PcrDone:
@@ -512,6 +491,16 @@ break; }
 
 void ignoreTree( Program *prg, PdaRun *pdaRun, Tree *tree )
 {
+	if ( pdaRun->accumIgnore == 0 ) {
+		/* Recording the next region. */
+		pt(tree)->region = pdaRun->nextRegionInd;
+		if ( pdaRun->tables->tokenRegions[pt(tree)->region+1] != 0 )
+			pdaRun->numRetry += 1;
+	}
+	else {
+		pt(tree)->region = -1;
+	}
+
 	/* Add the ignore string to the head of the ignore list. */
 	Kid *ignore = kidAllocate( prg );
 	ignore->tree = tree;
@@ -658,6 +647,7 @@ static void reportParseError( Program *prg, Tree **sp, PdaRun *pdaRun )
 
 void attachIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, Kid *input )
 {
+
 	/* Need to preserve the layout under a tree:
 	 *    attributes, ignore tokens, grammar children. */
 
@@ -669,6 +659,8 @@ void attachIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, Kid *input )
 	Kid *ignoreKid = extractIgnore( pdaRun );
 	
 	if ( ignoreKid != 0 ) {
+		debug( REALM_PARSE, "attaching ignore\n" );
+
 		ignoreKid = reverseKidList( ignoreKid );
 
 		/* Copy the ignore list first if we need to attach it as a right
@@ -759,10 +751,15 @@ void sendIgnore( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmR
 	Head *ignoreStr = extractMatch( prg, fsmRun, inputStream );
 	updatePosition( inputStream, fsmRun->tokstart, ignoreStr->length );
 	
-	Tree *tree = treeAllocate( prg );
+	debug( REALM_PARSE, "ignoring: %.*s\n", ignoreStr->length, ignoreStr->data );
+
+	Tree *tree = (Tree*)parseTreeAllocate( prg );
+	tree->flags |= AF_PARSE_TREE;
 	tree->refs = 1;
 	tree->id = id;
 	tree->tokdata = ignoreStr;
+
+	pt(tree)->region = pdaRun->nextRegionInd;
 
 	incrementConsumed( pdaRun );
 
@@ -1053,12 +1050,10 @@ void sendTreeIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, In
 /*
  * Stops on:
  *   PcrPreEof
- *   PcrRevIgnore1
- *   PcrREvIgnore2
  *   PcrGeneration
  *   PcrReduction
  *   PcrRevReduction
- *   PcrRevIgnore3
+ *   PcrRevIgnore
  *   PcrRevToken
  */
 
@@ -1073,13 +1068,17 @@ case PcrStart:
 	pdaRun->stop = false;
 
 	while ( true ) {
+		debug( REALM_PARSE, "parse loop start\n" );
+
 		/* Pull the current scanner from the parser. This can change during
 		 * parsing due to inputStream pushes, usually for the purpose of includes.
 		 * */
 		pdaRun->tokenId = scanToken( prg, pdaRun, fsmRun, inputStream );
 
-		if ( pdaRun->tokenId == SCAN_TRY_AGAIN_LATER )
+		if ( pdaRun->tokenId == SCAN_TRY_AGAIN_LATER ) {
+			debug( REALM_PARSE, "scanner says try again later\n" );
 			break;
+		}
 
 		pdaRun->input2 = 0;
 
@@ -1107,21 +1106,8 @@ case PcrPreEof:
 		}
 		else if ( pdaRun->tokenId == SCAN_ERROR ) {
 			/* Scanner error, maybe retry. */
-			if ( pdaRunGetNextRegion( pdaRun, 1 ) != 0 ) {
+			if ( pdaRun->accumIgnore == 0 && pdaRunGetNextRegion( pdaRun, 1 ) != 0 ) {
 				debug( REALM_PARSE, "scanner failed, trying next region\n" );
-
-				/* May have accumulated ignore tokens from a previous region.
-				 * need to rescan them since we won't be sending tokens from
-				 * this region. */
-				pdaRun->ignore2 = extractIgnore( pdaRun );
-				long pcr = sendBackIgnore( prg, sp, pdaRun, fsmRun, inputStream, pdaRun->ignore2, PcrStart );
-				while ( pcr != PcrDone ) {
-
-return PcrRevIgnore1;
-case PcrRevIgnore1:
-
-					pcr = sendBackIgnore( prg, sp, pdaRun, fsmRun, inputStream, pdaRun->ignore2, PcrRevIgnore );
-				}
 
 				pdaRun->nextRegionInd += 1;
 				goto skipSend;
@@ -1131,21 +1117,10 @@ case PcrRevIgnore1:
 
 				/* Fall through to send null (error). */
 				pushBtPoint( prg, pdaRun, 0 );
-
-				/* Send back any accumulated ignore tokens, then trigger error
-				 * in the the parser. */
-				pdaRun->ignore3 = extractIgnore( pdaRun );
-				long pcr = sendBackIgnore( prg, sp, pdaRun, fsmRun, inputStream, pdaRun->ignore3, PcrStart );
-				while ( pcr != PcrDone ) {
-
-return PcrRevIgnore2;
-case PcrRevIgnore2:
-
-					pcr = sendBackIgnore( prg, sp, pdaRun, fsmRun, inputStream, pdaRun->ignore3, PcrRevIgnore );
-				}
 			}
 			else {
 				debug( REALM_PARSE, "no alternate scanning regions\n" );
+
 				/* There are no alternative scanning regions to try, nor are
 				 * there any alternatives stored in the current parse tree. No
 				 * choice but to end the parse. */
@@ -1163,7 +1138,7 @@ case PcrRevIgnore2:
 			pdaRun->input2 = sendNamedLangEl( prg, sp, pdaRun, fsmRun, inputStream );
 		}
 		else if ( pdaRun->tokenId == SCAN_TREE ) {
-			debug( REALM_PARSE, "sending an tree\n" );
+			debug( REALM_PARSE, "sending a tree\n" );
 
 			/* A tree already built. */
 			pdaRun->input2 = sendTree( prg, sp, pdaRun, fsmRun, inputStream );
@@ -1221,9 +1196,16 @@ case PcrGeneration:
 			pdaRun->input2 = sendToken( prg, sp, inputStream, fsmRun, pdaRun, pdaRun->tokenId );
 		}
 
-		if ( pdaRun->input2 != 0 ) {
-			/* Send the token to the parser. */
-			attachIgnore( prg, sp, pdaRun, pdaRun->input2 );
+		if ( pdaRun->input2 != 0 && pdaRun->cs >= 0 ) {
+			if ( pdaRun->accumIgnore == 0 ) {
+				/* Recording the next region. */
+				pt(pdaRun->input2->tree)->region = pdaRun->nextRegionInd;
+				if ( pdaRun->tables->tokenRegions[pt(pdaRun->input2->tree)->region+1] != 0 )
+					pdaRun->numRetry += 1;
+			}
+			else
+				pt(pdaRun->input2->tree)->region = -1;
+
 		}
 
 		assert( pdaRun->input1 == 0 );
@@ -1237,8 +1219,7 @@ case PcrGeneration:
 return pcr;
 case PcrReduction:
 case PcrRevReduction:
-case PcrRevIgnore3:
-case PcrRevIgnore4:
+case PcrRevIgnore:
 case PcrRevToken:
 
 			pcr = parseToken( prg, sp, pdaRun, fsmRun, inputStream, entry );

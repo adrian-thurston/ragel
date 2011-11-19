@@ -254,8 +254,6 @@ typedef struct _PdaRun
 	Head *tokdata;
 	int frameId;
 	Kid *input2;
-	Tree *rightIgnore;
-	Tree *leftIgnore;
 	Kid *ignore2;
 	Kid *ignore3;
 	int next;
@@ -334,10 +332,6 @@ int pdaRunGetNextRegion( PdaRun *pdaRun, int offset );
 #define PcrGeneration   4
 #define PcrPreEof       5
 #define PcrRevIgnore    6
-#define PcrRevIgnore1   7
-#define PcrRevIgnore2   8
-#define PcrRevIgnore3   9
-#define PcrRevIgnore4   10
 #define PcrRevToken     11
 #define PcrRevReduction 12
 
@@ -383,6 +377,8 @@ Tree *getParsedRoot( PdaRun *pdaRun, int stop );
 void pushBtPoint( struct ColmProgram *prg, PdaRun *pdaRun, Tree *tree );
 void undoParseStream( struct ColmProgram *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun, 
 		PdaRun *pdaRun, long consumed );
+void attachIgnore( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, Kid *input );
+void detachIgnores( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, Kid *input );
 
 #ifdef __cplusplus
 }

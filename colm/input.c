@@ -22,6 +22,7 @@
 #include <colm/input.h>
 #include <colm/fsmrun.h>
 #include <colm/pdarun.h>
+#include <colm/debug.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -384,6 +385,7 @@ int inputStreamStringGetDataImpl( InputStream *is, char *dest, int length )
 
 	if ( is->offset == is->dlen ) {
 		//eof = true;
+		debug( REALM_PARSE, "setting later = true\n" );
 		is->later = true;
 	}
 
@@ -475,8 +477,10 @@ void initFdFuncs()
 
 int inputStreamAccumTryAgainLater( InputStream *is )
 {
-	if ( is->later || ( !is->flush && is->queue == 0 ))
+	if ( is->later || ( !is->flush && is->queue == 0 )) {
+		debug( REALM_PARSE, "try again later %d %d %d\n", is->later, is->flush, is->queue );
 		return true;
+	}
 
 	return false;
 }

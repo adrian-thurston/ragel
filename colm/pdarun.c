@@ -40,7 +40,6 @@
 #define act_rb 0x2
 #define lower 0x0000ffff
 #define upper 0xffff0000
-#define reject() induceReject = 1
 #define pt(var) ((ParseTree*)(var))
 
 #define read_word_p( i, p ) do { \
@@ -385,7 +384,6 @@ void pushBtPoint( Program *prg, PdaRun *pdaRun, Tree *tree )
 /* Stops on:
  *   PcrReduction
  *   PcrRevToken
- *   PcrRevIgnore3
  *   PcrRevIgnore4
  *   PcrRevReduction
  */
@@ -417,10 +415,8 @@ case PcrStart:
 	if ( pdaRun->cs < 0 )
 		return PcrDone;
 
-	pt(pdaRun->input1->tree)->region = pdaRun->nextRegionInd;
+	/* Record the state in the parse tree. */
 	pt(pdaRun->input1->tree)->state = pdaRun->cs;
-	if ( pdaRun->tables->tokenRegions[pt(pdaRun->input1->tree)->region+1] != 0 )
-		pdaRun->numRetry += 1;
 
 again:
 	if ( pdaRun->input1 == 0 )
@@ -490,6 +486,10 @@ again:
 	if ( pt(pdaRun->lel->tree)->retry_lower )
 		action += pt(pdaRun->lel->tree)->retry_lower;
 
+	/*
+	 * Shift
+	 */
+
 	if ( *action & act_sb ) {
 		debug( REALM_PARSE, "shifted: %s\n", 
 				prg->rtd->lelInfo[pt(pdaRun->lel->tree)->id].name );
@@ -500,8 +500,11 @@ again:
 		pdaRun->lel->next = pdaRun->stackTop;
 		pdaRun->stackTop = pdaRun->lel;
 
-		/* Record the last shifted token. Need this for attaching ignores. */
+		/* If its a token then attach ignores and record it in the token list
+		 * of the next ignore attachment to use. */
 		if ( pdaRun->lel->tree->id < prg->rtd->firstNonTermId ) {
+			attachIgnore( prg, sp, pdaRun, pdaRun->lel );
+
 			Ref *ref = (Ref*)kidAllocate( prg );
 			ref->kid = pdaRun->lel;
 			//treeUpref( pdaRun->lel->tree );
@@ -528,6 +531,10 @@ again:
 		}
 	}
 
+	/* 
+	 * Commit
+	 */
+
 	if ( pdaRun->tables->commitLen[pos] != 0 ) {
 		long causeReduce = 0;
 		if ( pdaRun->input1 != 0 ) { 
@@ -536,6 +543,10 @@ again:
 		}
 		commitFull( prg, sp, pdaRun, causeReduce );
 	}
+
+	/*
+	 * Reduce
+	 */
 
 	if ( *action & act_rb ) {
 		int r, objectLength;
@@ -665,8 +676,10 @@ case PcrReduction:
 parseError:
 	debug( REALM_PARSE, "hit error, backtracking\n" );
 
-	if ( pdaRun->numRetry == 0 )
+	if ( pdaRun->numRetry == 0 ) {
+		debug( REALM_PARSE, "out of retries failing parse\n" );
 		goto fail;
+	}
 
 	while ( 1 ) {
 		if ( pdaRun->input1 != 0 ) {
@@ -683,19 +696,19 @@ parseError:
 			/* If there is no retry and there are no reductions caused by the
 			 * current input1 token then we are finished with it. Send it back. */
 			if ( pt(pdaRun->input1->tree)->causeReduce == 0 ) {
-				pdaRun->next = pt(pdaRun->input1->tree)->region + 1;
+				long region = pt(pdaRun->input1->tree)->region;
+				pdaRun->next = region >= 0 ? region + 1 : -1;
 
 				long pcr = sendBack( prg, sp, pdaRun, fsmRun, inputStream, pdaRun->input1, PcrStart );
 				while ( pcr != PcrDone ) {
-
 return pcr;
 case PcrRevToken:
-case PcrRevIgnore3:
 					pcr = sendBack( prg, sp, pdaRun, fsmRun, inputStream, pdaRun->input1, entry );
 				}
 
 				pdaRun->input1 = 0;
-				if ( pdaRun->tables->tokenRegions[pdaRun->next] != 0 ) {
+
+				if ( pdaRun->next >= 0 && pdaRun->tables->tokenRegions[pdaRun->next] != 0 ) {
 					debug( REALM_PARSE, "found a new region\n" );
 					pdaRun->numRetry -= 1;
 					pdaRun->cs = stackTopTarget( prg, pdaRun );
@@ -712,17 +725,33 @@ case PcrRevIgnore3:
 			}
 		}
 
-		if ( pdaRun->accumIgnore != 0 ) {
+		while ( pdaRun->input1 == 0 && pdaRun->accumIgnore != 0 ) {
+			debug( REALM_PARSE, "have accumulated ignore to undo\n" );
+
 			/* Send back any accumulated ignore tokens, then trigger error
 			 * in the the parser. */
-			pdaRun->ignore6 = extractIgnore( pdaRun );
+			pdaRun->ignore6 = pdaRun->accumIgnore;
+			pdaRun->accumIgnore = pdaRun->accumIgnore->next;
+			pdaRun->ignore6->next = 0;
+			
+			long region = pt(pdaRun->ignore6->tree)->region;
+			pdaRun->next = region >= 0 ? region + 1 : -1;
+			
 			long pcr = sendBackIgnore( prg, sp, pdaRun, fsmRun, inputStream, pdaRun->ignore6, PcrStart );
 			while ( pcr != PcrDone ) {
 
-return PcrRevIgnore4;
-case PcrRevIgnore4:
+return pcr;
+case PcrRevIgnore:
 
-				pcr = sendBackIgnore( prg, sp, pdaRun, fsmRun, inputStream, pdaRun->ignore6, PcrRevIgnore );
+				pcr = sendBackIgnore( prg, sp, pdaRun, fsmRun, inputStream, pdaRun->ignore6, entry );
+			}
+
+			if ( pdaRun->next >= 0 && pdaRun->tables->tokenRegions[pdaRun->next] != 0 ) {
+				debug( REALM_PARSE, "found a new region\n" );
+				pdaRun->numRetry -= 1;
+				pdaRun->cs = stackTopTarget( prg, pdaRun );
+				pdaRun->nextRegionInd = pdaRun->next;
+				return PcrDone;
 			}
 		}
 
@@ -758,11 +787,12 @@ case PcrRevIgnore4:
 			pdaRun->undoLel->next = pdaRun->input1;
 			pdaRun->input1 = pdaRun->undoLel;
 
-			/* Record the last shifted token. Need this for attaching ignores. */
+			/* Pop from the token list. */
 			Ref *ref = pdaRun->tokenList;
 			pdaRun->tokenList = ref->next;
-			//treeDownref( prg, sp, kid->tree );
 			kidFree( prg, (Kid*)ref );
+
+			detachIgnores( prg, sp, pdaRun, fsmRun, pdaRun->input1 );
 		}
 		else {
 			debug( REALM_PARSE, "backing up over non-terminal: %s\n",

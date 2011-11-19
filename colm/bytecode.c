@@ -254,9 +254,7 @@ return pcr;
 case PcrReduction:
 case PcrGeneration:
 case PcrPreEof:
-case PcrRevIgnore1:
-case PcrRevIgnore2:
-case PcrRevIgnore3:
+case PcrRevIgnore:
 case PcrRevToken:
 case PcrRevReduction:
 
@@ -291,9 +289,7 @@ return pcr;
 case PcrReduction:
 case PcrGeneration:
 case PcrPreEof:
-case PcrRevIgnore1:
-case PcrRevIgnore2:
-case PcrRevIgnore3:
+case PcrRevIgnore:
 case PcrRevToken:
 case PcrRevReduction:
 
@@ -345,9 +341,7 @@ return pcr;
 case PcrReduction:
 case PcrGeneration:
 case PcrPreEof:
-case PcrRevIgnore1:
-case PcrRevIgnore2:
-case PcrRevIgnore3:
+case PcrRevIgnore:
 case PcrRevToken:
 case PcrRevReduction:
 
@@ -967,9 +961,7 @@ void callParseBlock( Code **pinstr, Tree ***psp, long pcr, Program *prg,
 			break;
 		}
 
-		case PcrRevIgnore1:
-		case PcrRevIgnore2:
-		case PcrRevIgnore3: {
+		case PcrRevIgnore: {
 
 			initReverseExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, 
 					pdaRun, fsmRun, -1, 0, 0, 0, 0, 0 );
