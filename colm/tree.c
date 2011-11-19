@@ -454,7 +454,7 @@ Kid *constructReplacementKid( Tree **bindings, Program *prg, Kid *prev, long pat
 	return kid;
 }
 
-Tree *makeToken2( Program *prg, Tree **root, long nargs )
+Tree *constructToken( Program *prg, Tree **root, long nargs )
 {
 	Tree **const sp = root;
 	Tree **base = vm_ptop() + nargs;

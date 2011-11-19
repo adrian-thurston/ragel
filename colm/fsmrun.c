@@ -507,7 +507,7 @@ void ignoreTree( Program *prg, PdaRun *pdaRun, Tree *tree )
 	pdaRun->accumIgnore = ignore;
 }
 
-Kid *makeToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, int id,
+Kid *makeTokenWithData( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, int id,
 		Head *tokdata, int namedLangEl, int bindId )
 {
 	/* Make the token object. */
@@ -786,7 +786,7 @@ Kid *sendToken( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRu
 
 	updatePosition( inputStream, fsmRun->tokstart, tokdata->length );
 
-	Kid *input = makeToken( prg, pdaRun, fsmRun, inputStream, id, tokdata, false, 0 );
+	Kid *input = makeTokenWithData( prg, pdaRun, fsmRun, inputStream, id, tokdata, false, 0 );
 
 	incrementConsumed( pdaRun );
 
@@ -1075,12 +1075,13 @@ case PcrStart:
 			break;
 		}
 
-		pdaRun->input2 = 0;
+		assert( pdaRun->input1 == 0 );
+		pdaRun->input1 = 0;
 
 		/* Check for EOF. */
 		if ( pdaRun->tokenId == SCAN_EOF ) {
 			inputStream->eofSent = true;
-			pdaRun->input2 = sendEof( prg, sp, inputStream, fsmRun, pdaRun );
+			pdaRun->input1 = sendEof( prg, sp, inputStream, fsmRun, pdaRun );
 
 			pdaRun->frameId = prg->rtd->regionInfo[fsmRun->region].eofFrameId;
 			if ( prg->ctxDepParsing && pdaRun->frameId >= 0 ) {
@@ -1096,7 +1097,7 @@ case PcrPreEof:
 			}
 		}
 		else if ( pdaRun->tokenId == SCAN_UNDO ) {
-			/* Fall through with input2 = 0. FIXME: Do we need to send back ignore? */
+			/* Fall through with input1 = 0. FIXME: Do we need to send back ignore? */
 			debug( REALM_PARSE, "invoking undo from the scanner\n" );
 		}
 		else if ( pdaRun->tokenId == SCAN_ERROR ) {
@@ -1130,13 +1131,13 @@ case PcrPreEof:
 			debug( REALM_PARSE, "sending an named lang el\n" );
 
 			/* A named language element (parsing colm program). */
-			pdaRun->input2 = sendNamedLangEl( prg, sp, pdaRun, fsmRun, inputStream );
+			pdaRun->input1 = sendNamedLangEl( prg, sp, pdaRun, fsmRun, inputStream );
 		}
 		else if ( pdaRun->tokenId == SCAN_TREE ) {
 			debug( REALM_PARSE, "sending a tree\n" );
 
 			/* A tree already built. */
-			pdaRun->input2 = sendTree( prg, sp, pdaRun, fsmRun, inputStream );
+			pdaRun->input1 = sendTree( prg, sp, pdaRun, fsmRun, inputStream );
 		}
 		else if ( pdaRun->tokenId == SCAN_IGNORE ) {
 			debug( REALM_PARSE, "sending an ignore token\n" );
@@ -1188,21 +1189,17 @@ case PcrGeneration:
 					prg->rtd->lelInfo[pdaRun->tokenId].name );
 
 			/* Is a plain token. */
-			pdaRun->input2 = sendToken( prg, sp, inputStream, fsmRun, pdaRun, pdaRun->tokenId );
+			pdaRun->input1 = sendToken( prg, sp, inputStream, fsmRun, pdaRun, pdaRun->tokenId );
 		}
 
-		if ( pdaRun->input2 != 0 && pdaRun->cs >= 0 ) {
+		if ( pdaRun->input1 != 0 && pdaRun->cs >= 0 ) {
 			if ( pdaRun->accumIgnore == 0 ) {
 				/* Recording the next region. */
-				pt(pdaRun->input2->tree)->region = pdaRun->nextRegionInd;
-				if ( pdaRun->tables->tokenRegions[pt(pdaRun->input2->tree)->region+1] != 0 )
+				pt(pdaRun->input1->tree)->region = pdaRun->nextRegionInd;
+				if ( pdaRun->tables->tokenRegions[pt(pdaRun->input1->tree)->region+1] != 0 )
 					pdaRun->numRetry += 1;
 			}
 		}
-
-		assert( pdaRun->input1 == 0 );
-		pdaRun->input1 = pdaRun->input2;
-		pdaRun->input2 = 0;
 
 		long pcr = parseToken( prg, sp, pdaRun, fsmRun, inputStream, PcrStart );
 		

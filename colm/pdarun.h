@@ -253,7 +253,6 @@ typedef struct _PdaRun
 	int tokenId;
 	Head *tokdata;
 	int frameId;
-	Kid *input2;
 	Kid *ignore2;
 	Kid *ignore3;
 	int next;
@@ -354,8 +353,8 @@ long sendBack( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRu
 		InputStream *inputStream, Kid *input, long entry );
 void unbind( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, Tree *tree );
 void queueBackTree( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input );
-Kid *makeToken( struct ColmProgram *prg, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, int id,
-		Head *tokdata, int namedLangEl, int bindId );
+Kid *makeTokenWithData( struct ColmProgram *prg, PdaRun *pdaRun, FsmRun *fsmRun, 
+		InputStream *inputStream, int id, Head *tokdata, int namedLangEl, int bindId );
 void makeTokenPushBinding( PdaRun *pdaRun, int bindId, Tree *tree );
 void executeGenerationAction( struct ColmProgram *prg, Tree **sp, FsmRun *fsmRun, PdaRun *pdaRun, 
 		InputStream *inputStream, int frameId, Code *code, long id, Head *tokdata );

@@ -278,8 +278,8 @@ Tree *constructPointer( struct ColmProgram *prg, Tree *tree );
 Tree *constructTerm( struct ColmProgram *prg, Word id, Head *tokdata );
 Tree *constructReplacementTree( Kid *kid, Tree **bindings, struct ColmProgram *prg, long pat );
 Tree *createGeneric( struct ColmProgram *prg, long genericId );
+Tree *constructToken( struct ColmProgram *prg, Tree **root, long nargs );
 
-Tree *makeToken2( struct ColmProgram *prg, Tree **root, long nargs );
 int testFalse( struct ColmProgram *prg, Tree *tree );
 Tree *makeTree( struct ColmProgram *prg, Tree **root, long nargs );
 Stream *openFile( struct ColmProgram *prg, Tree *name, Tree *mode );

@@ -2874,7 +2874,7 @@ again:
 
 			debug( REALM_BYTECODE, "IN_MAKE_TOKEN\n" );
 
-			Tree *result = makeToken2( prg, sp, nargs );
+			Tree *result = constructToken( prg, sp, nargs );
 			long i;
 			for ( i = 0; i < nargs; i++ ) {
 				Tree *arg = vm_pop();
