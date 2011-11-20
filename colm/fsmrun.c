@@ -489,7 +489,7 @@ break; }
 	return PcrDone;
 }
 
-void ignoreTree( Program *prg, PdaRun *pdaRun, Tree *tree )
+void setRegion( PdaRun *pdaRun, Tree *tree )
 {
 	if ( pdaRun->accumIgnore == 0 ) {
 		/* Recording the next region. */
@@ -497,6 +497,11 @@ void ignoreTree( Program *prg, PdaRun *pdaRun, Tree *tree )
 		if ( pdaRun->tables->tokenRegions[pt(tree)->region+1] != 0 )
 			pdaRun->numRetry += 1;
 	}
+}
+
+void ignoreTree( Program *prg, PdaRun *pdaRun, Tree *tree )
+{
+	setRegion( pdaRun, tree );
 
 	/* Add the ignore string to the head of the ignore list. */
 	Kid *ignore = kidAllocate( prg );
@@ -789,6 +794,10 @@ Kid *sendToken( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRu
 	Kid *input = makeTokenWithData( prg, pdaRun, fsmRun, inputStream, id, tokdata, false, 0 );
 
 	incrementConsumed( pdaRun );
+
+	/* Store any alternate scanning region. */
+	if ( input != 0 && pdaRun->cs >= 0 )
+		setRegion( pdaRun, input->tree );
 
 	return input;
 }
@@ -1166,7 +1175,7 @@ return PcrGeneration;
 case PcrGeneration:
 
 			/* 
-			 * Need a no-token.
+			 * May need a no-token.
 			 */
 			addNoToken( prg, sp, fsmRun, pdaRun, inputStream, 
 					prg->rtd->lelInfo[pdaRun->tokenId].frameId, pdaRun->tokenId, pdaRun->tokdata );
@@ -1190,16 +1199,9 @@ case PcrGeneration:
 
 			/* Is a plain token. */
 			pdaRun->input1 = sendToken( prg, sp, inputStream, fsmRun, pdaRun, pdaRun->tokenId );
+
 		}
 
-		if ( pdaRun->input1 != 0 && pdaRun->cs >= 0 ) {
-			if ( pdaRun->accumIgnore == 0 ) {
-				/* Recording the next region. */
-				pt(pdaRun->input1->tree)->region = pdaRun->nextRegionInd;
-				if ( pdaRun->tables->tokenRegions[pt(pdaRun->input1->tree)->region+1] != 0 )
-					pdaRun->numRetry += 1;
-			}
-		}
 
 		long pcr = parseToken( prg, sp, pdaRun, fsmRun, inputStream, PcrStart );
 		
