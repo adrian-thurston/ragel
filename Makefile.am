@@ -59,7 +59,8 @@ TEST_CASES = \
 	commitbt.lm \
 	sprintf.lm \
 	div.lm \
-	scope1.lm
+	scope1.lm \
+	export1.lm
 
 INPUT = \
 	accum1.in \
@@ -105,7 +106,8 @@ INPUT = \
 	treecmp1.in \
 	undofrag1.in \
 	undofrag2.in \
-	undofrag3.in
+	undofrag3.in \
+	export1.in
 
 EXPECTED_OUTPUT = \
 	accum1.exp \
@@ -164,6 +166,7 @@ EXPECTED_OUTPUT = \
 	treecmp1.exp \
 	undofrag1.exp \
 	undofrag2.exp \
-	undofrag3.exp
+	undofrag3.exp \
+	export1.exp
 
 EXTRA_DIST = genmf TESTS runtests.mk $(TEST_CASES) $(INPUT) $(EXPECTED_OUTPUT)
