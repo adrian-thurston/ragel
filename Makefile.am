@@ -1,4 +1,4 @@
-DIST_SUBDIRS =  python html xml http cxx ruby
+DIST_SUBDIRS =  python http cxx ruby
 
 TESTS = runtests.mk
 

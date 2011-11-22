@@ -1,6 +1,0 @@
-#!/bin/bash
-#
-
-TESTS="
-	html.lm
-"
