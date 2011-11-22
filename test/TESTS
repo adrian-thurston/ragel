@@ -3,8 +3,6 @@
 
 SUBDIRS="
 	python
-	html
-	xml
 	http
 	cxx
 	ruby
@@ -62,7 +60,9 @@ TESTS="
 	matchex.lm
 	maxlen.lm
 	superid.lm
-	tags.lm
+	tags1.lm
+	tags2.lm
+	tags3.lm
 	heredoc.lm
 	commitbt.lm
 	sprintf.lm

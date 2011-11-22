@@ -1,6 +1,0 @@
-#!/bin/bash
-#
-
-TESTS="
-	xml.lm
-"

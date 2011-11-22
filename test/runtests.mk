@@ -1,6 +1,6 @@
 #!/usr/bin/make -f 
 
-SUBDIRS =  python html xml http cxx ruby
+SUBDIRS =  python http cxx ruby
 
 TESTS = \
 	backtrack1.lm \
@@ -54,7 +54,9 @@ TESTS = \
 	matchex.lm \
 	maxlen.lm \
 	superid.lm \
-	tags.lm \
+	tags1.lm \
+	tags2.lm \
+	tags3.lm \
 	heredoc.lm \
 	commitbt.lm \
 	sprintf.lm \
@@ -114,7 +116,9 @@ DIFFS = \
 	matchex.diff \
 	maxlen.diff \
 	superid.diff \
-	tags.diff \
+	tags1.diff \
+	tags2.diff \
+	tags3.diff \
 	heredoc.diff \
 	commitbt.diff \
 	sprintf.diff \
@@ -545,14 +549,30 @@ superid.out: superid.bin
 
 superid.bin: superid.lm ./../colm/colm
 	./../colm/colm superid.lm
-tags.diff: tags.out tags.exp
-	@diff -u tags.exp tags.out > tags.diff || ( cat tags.diff; rm tags.diff )
+tags1.diff: tags1.out tags1.exp
+	@diff -u tags1.exp tags1.out > tags1.diff || ( cat tags1.diff; rm tags1.diff )
 
-tags.out: tags.bin
-	./tags.bin  < tags.in > tags.out
+tags1.out: tags1.bin
+	./tags1.bin  < tags1.in > tags1.out
 
-tags.bin: tags.lm ./../colm/colm
-	./../colm/colm tags.lm
+tags1.bin: tags1.lm ./../colm/colm
+	./../colm/colm tags1.lm
+tags2.diff: tags2.out tags2.exp
+	@diff -u tags2.exp tags2.out > tags2.diff || ( cat tags2.diff; rm tags2.diff )
+
+tags2.out: tags2.bin
+	./tags2.bin  < tags2.in > tags2.out
+
+tags2.bin: tags2.lm ./../colm/colm
+	./../colm/colm tags2.lm
+tags3.diff: tags3.out tags3.exp
+	@diff -u tags3.exp tags3.out > tags3.diff || ( cat tags3.diff; rm tags3.diff )
+
+tags3.out: tags3.bin
+	./tags3.bin  < tags3.in > tags3.out
+
+tags3.bin: tags3.lm ./../colm/colm
+	./../colm/colm tags3.lm
 heredoc.diff: heredoc.out heredoc.exp
 	@diff -u heredoc.exp heredoc.out > heredoc.diff || ( cat heredoc.diff; rm heredoc.diff )
 
