@@ -2147,8 +2147,11 @@ int printNamespace()
 }
 
 S: start = parse start( stdin )
-print( '***** SUCCESS *****\n' )
-print_xml( S )
+if ! S {
+	print( error() )
+	exit( 1 )
+}
+
 print( '***** NAMSPACES *****\n' )
 printNamespace()
 print( '***** UNKNOWN DECLARATORS *****\n' )

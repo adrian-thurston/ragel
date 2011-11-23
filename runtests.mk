@@ -1,8 +1,9 @@
 #!/usr/bin/make -f 
 
-SUBDIRS =  python cxx ruby
+SUBDIRS = 
 
 TESTS = \
+	ambig1.lm \
 	backtrack1.lm \
 	backtrack2.lm \
 	backtrack3.lm \
@@ -22,6 +23,8 @@ TESTS = \
 	construct1.lm \
 	construct2.lm \
 	construct3.lm \
+	generate1.lm \
+	lookup1.lm \
 	treecmp1.lm \
 	context1.lm \
 	context2.lm \
@@ -67,6 +70,7 @@ TESTS = \
 	export1.lm
 
 DIFFS = \
+	ambig1.diff \
 	backtrack1.diff \
 	backtrack2.diff \
 	backtrack3.diff \
@@ -86,6 +90,8 @@ DIFFS = \
 	construct1.diff \
 	construct2.diff \
 	construct3.diff \
+	generate1.diff \
+	lookup1.diff \
 	treecmp1.diff \
 	context1.diff \
 	context2.diff \
@@ -145,6 +151,14 @@ $(SUBDIRS):
 runtests.mk: ./genmf TESTS
 	./genmf > runtests.mk
 
+ambig1.diff: ambig1.out ambig1.exp
+	@diff -u ambig1.exp ambig1.out > ambig1.diff || ( cat ambig1.diff; rm ambig1.diff )
+
+ambig1.out: ambig1.bin
+	./ambig1.bin  < ambig1.in > ambig1.out
+
+ambig1.bin: ambig1.lm ./../colm/colm
+	./../colm/colm ambig1.lm
 backtrack1.diff: backtrack1.out backtrack1.exp
 	@diff -u backtrack1.exp backtrack1.out > backtrack1.diff || ( cat backtrack1.diff; rm backtrack1.diff )
 
@@ -297,6 +311,22 @@ construct3.out: construct3.bin
 
 construct3.bin: construct3.lm ./../colm/colm
 	./../colm/colm construct3.lm
+generate1.diff: generate1.out generate1.exp
+	@diff -u generate1.exp generate1.out > generate1.diff || ( cat generate1.diff; rm generate1.diff )
+
+generate1.out: generate1.bin
+	./generate1.bin  < generate1.in > generate1.out
+
+generate1.bin: generate1.lm ./../colm/colm
+	./../colm/colm generate1.lm
+lookup1.diff: lookup1.out lookup1.exp
+	@diff -u lookup1.exp lookup1.out > lookup1.diff || ( cat lookup1.diff; rm lookup1.diff )
+
+lookup1.out: lookup1.bin
+	./lookup1.bin  < lookup1.in > lookup1.out
+
+lookup1.bin: lookup1.lm ./../colm/colm
+	./../colm/colm lookup1.lm
 treecmp1.diff: treecmp1.out treecmp1.exp
 	@diff -u treecmp1.exp treecmp1.out > treecmp1.diff || ( cat treecmp1.diff; rm treecmp1.diff )
 

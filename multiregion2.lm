@@ -69,7 +69,6 @@ def header
 def request
 	[request_line header* CRLF]
 
-
 parse R: request*( stdin )
 
 if !R {
@@ -77,8 +76,7 @@ if !R {
 	exit( 1 )
 }
 
-for FV: fv in R 
-{
+for FV: fv in R {
 	if match FV [fv_ext]
 		FV = cons fv " "
 }

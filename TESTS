@@ -1,13 +1,10 @@
 #!/bin/bash
 #
 
-SUBDIRS="
-	python
-	cxx
-	ruby
-"
+SUBDIRS=""
 
 TESTS="
+	ambig1.lm
 	backtrack1.lm
 	backtrack2.lm
 	backtrack3.lm
@@ -27,6 +24,8 @@ TESTS="
 	construct1.lm
 	construct2.lm
 	construct3.lm
+	generate1.lm
+	lookup1.lm
 	treecmp1.lm
 	context1.lm
 	context2.lm
