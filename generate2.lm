@@ -191,7 +191,10 @@ def start
 	[item*]
 
 S: start = parse start(stdin)
-for I: internal_link in S
-	print( I  '\n' )
-print_xml( S )
-#print_xml( OpenStack )
+if S {
+	for I: external_link in S
+		print( 'EXTERNAL LINK: ' I  '\n' )
+
+	for I: internal_link in S
+		print( 'INTERNAL LINK: ' I  '\n' )
+}

@@ -25,6 +25,7 @@ TESTS="
 	construct2.lm
 	construct3.lm
 	generate1.lm
+	generate2.lm
 	lookup1.lm
 	treecmp1.lm
 	context1.lm

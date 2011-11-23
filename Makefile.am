@@ -22,6 +22,7 @@ TEST_CASES = \
 	construct2.lm \
 	construct3.lm \
 	generate1.lm \
+	generate2.lm \
 	lookup1.lm \
 	treecmp1.lm \
 	context1.lm \
@@ -86,6 +87,7 @@ INPUT = \
 	counting3.in \
 	counting4.in \
 	generate1.in \
+	generate2.in \
 	lookup1.in \
 	binary1.in \
 	func.in \
@@ -149,6 +151,7 @@ EXPECTED_OUTPUT = \
 	counting3.exp \
 	counting4.exp \
 	generate1.exp \
+	generate2.exp \
 	lookup1.exp \
 	div.exp \
 	binary1.exp \
