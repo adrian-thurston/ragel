@@ -24,6 +24,7 @@ TESTS = \
 	construct2.lm \
 	construct3.lm \
 	generate1.lm \
+	generate2.lm \
 	lookup1.lm \
 	treecmp1.lm \
 	context1.lm \
@@ -91,6 +92,7 @@ DIFFS = \
 	construct2.diff \
 	construct3.diff \
 	generate1.diff \
+	generate2.diff \
 	lookup1.diff \
 	treecmp1.diff \
 	context1.diff \
@@ -319,6 +321,14 @@ generate1.out: generate1.bin
 
 generate1.bin: generate1.lm ./../colm/colm
 	./../colm/colm generate1.lm
+generate2.diff: generate2.out generate2.exp
+	@diff -u generate2.exp generate2.out > generate2.diff || ( cat generate2.diff; rm generate2.diff )
+
+generate2.out: generate2.bin
+	./generate2.bin  < generate2.in > generate2.out
+
+generate2.bin: generate2.lm ./../colm/colm
+	./../colm/colm generate2.lm
 lookup1.diff: lookup1.out lookup1.exp
 	@diff -u lookup1.exp lookup1.out > lookup1.diff || ( cat lookup1.diff; rm lookup1.diff )
 
