@@ -3,7 +3,6 @@
 
 SUBDIRS="
 	python
-	http
 	cxx
 	ruby
 "
@@ -12,7 +11,7 @@ TESTS="
 	backtrack1.lm
 	backtrack2.lm
 	backtrack3.lm
-	dns.lm
+	binary1.lm
 	accum1.lm
 	accum2.lm
 	accum3.lm
@@ -59,6 +58,8 @@ TESTS="
 	til.lm
 	matchex.lm
 	maxlen.lm
+	multiregion1.lm
+	multiregion2.lm
 	superid.lm
 	tags1.lm
 	tags2.lm

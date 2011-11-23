@@ -1,12 +1,12 @@
 #!/usr/bin/make -f 
 
-SUBDIRS =  python http cxx ruby
+SUBDIRS =  python cxx ruby
 
 TESTS = \
 	backtrack1.lm \
 	backtrack2.lm \
 	backtrack3.lm \
-	dns.lm \
+	binary1.lm \
 	accum1.lm \
 	accum2.lm \
 	accum3.lm \
@@ -53,6 +53,8 @@ TESTS = \
 	til.lm \
 	matchex.lm \
 	maxlen.lm \
+	multiregion1.lm \
+	multiregion2.lm \
 	superid.lm \
 	tags1.lm \
 	tags2.lm \
@@ -68,7 +70,7 @@ DIFFS = \
 	backtrack1.diff \
 	backtrack2.diff \
 	backtrack3.diff \
-	dns.diff \
+	binary1.diff \
 	accum1.diff \
 	accum2.diff \
 	accum3.diff \
@@ -115,6 +117,8 @@ DIFFS = \
 	til.diff \
 	matchex.diff \
 	maxlen.diff \
+	multiregion1.diff \
+	multiregion2.diff \
 	superid.diff \
 	tags1.diff \
 	tags2.diff \
@@ -165,14 +169,14 @@ backtrack3.out: backtrack3.bin
 
 backtrack3.bin: backtrack3.lm ./../colm/colm
 	./../colm/colm backtrack3.lm
-dns.diff: dns.out dns.exp
-	@diff -u dns.exp dns.out > dns.diff || ( cat dns.diff; rm dns.diff )
+binary1.diff: binary1.out binary1.exp
+	@diff -u binary1.exp binary1.out > binary1.diff || ( cat binary1.diff; rm binary1.diff )
 
-dns.out: dns.bin
-	./dns.bin  < dns.in > dns.out
+binary1.out: binary1.bin
+	./binary1.bin  < binary1.in > binary1.out
 
-dns.bin: dns.lm ./../colm/colm
-	./../colm/colm dns.lm
+binary1.bin: binary1.lm ./../colm/colm
+	./../colm/colm binary1.lm
 accum1.diff: accum1.out accum1.exp
 	@diff -u accum1.exp accum1.out > accum1.diff || ( cat accum1.diff; rm accum1.diff )
 
@@ -541,6 +545,22 @@ maxlen.out: maxlen.bin
 
 maxlen.bin: maxlen.lm ./../colm/colm
 	./../colm/colm maxlen.lm
+multiregion1.diff: multiregion1.out multiregion1.exp
+	@diff -u multiregion1.exp multiregion1.out > multiregion1.diff || ( cat multiregion1.diff; rm multiregion1.diff )
+
+multiregion1.out: multiregion1.bin
+	./multiregion1.bin  < multiregion1.in > multiregion1.out
+
+multiregion1.bin: multiregion1.lm ./../colm/colm
+	./../colm/colm multiregion1.lm
+multiregion2.diff: multiregion2.out multiregion2.exp
+	@diff -u multiregion2.exp multiregion2.out > multiregion2.diff || ( cat multiregion2.diff; rm multiregion2.diff )
+
+multiregion2.out: multiregion2.bin
+	./multiregion2.bin  < multiregion2.in > multiregion2.out
+
+multiregion2.bin: multiregion2.lm ./../colm/colm
+	./../colm/colm multiregion2.lm
 superid.diff: superid.out superid.exp
 	@diff -u superid.exp superid.out > superid.diff || ( cat superid.diff; rm superid.diff )
 

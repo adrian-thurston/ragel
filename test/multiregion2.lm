@@ -45,8 +45,19 @@ def request_line
 
 token field_name /token_char+/
 
-token field_value 
-	/(^(CR|LF) | CR LF (SP|HT))* CR LF/
+lex field_value
+{
+	token fv_plain /(^(CR|LF))*/
+	token fv_ext /CR LF (SP|HT)/
+	token fv_term /CR LF/
+}
+
+def fv 
+	[fv_plain]
+|	[fv_ext]
+
+def field_value 
+	[fv* fv_term]
 
 def header 
 	[field_name ':' field_value]
@@ -58,11 +69,19 @@ def header
 def request
 	[request_line header* CRLF]
 
-R: request = parse_stop request( stdin )
 
-print( 'HTTP/1.0 200 OK\r\n' )
-print( 'Date: Fri, 31 Dec 1999 23:59:59 GMT\r\n' )
-print( 'Content-Type: text/plain\r\n' )
-print( '\r\n' )
-print_xml( R )
+parse R: request*( stdin )
+
+if !R {
+	print( error() )
+	exit( 1 )
+}
+
+for FV: fv in R 
+{
+	if match FV [fv_ext]
+		FV = cons fv " "
+}
+
+print( R )
 

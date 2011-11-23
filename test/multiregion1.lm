@@ -48,11 +48,9 @@ def file_diff
 def start 
 	[file_diff*]
 
+parse S: start( stdin )
 
-start S = parse start( stdin )
-
-for OF:old_file in S {
-	print( 'old file: ', OF )
+for OF: old_file in S {
 	# Get the first word and check if it is 
 	# the file we are interested in.
 	if match OF [
@@ -62,23 +60,9 @@ for OF:old_file in S {
 		]
 	{
 		OF = construct old_file
-			["--- newfilename.cpp" Rest "\n"]
-		print_xml( OF )
+			["--- newfilename.cpp " Rest "\n"]
 	}
 }
 
 print( S )
-
-#		for Header: file_header in lhs {
-#			old_file OF = old_file in Header
-#			if match OF 
-#				[old_file_start "lmparse.kl" word_list newline]
-#			{
-#				Header = construct file_header
-#					~Index: rewritten
-#					~===================================================================
-#					~--- this is the file (asldkfj)
-#					~+++ this is the file (ewir)
-#			}
-#		}
 

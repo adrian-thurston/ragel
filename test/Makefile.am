@@ -1,4 +1,4 @@
-DIST_SUBDIRS =  python http cxx ruby
+DIST_SUBDIRS =  python cxx ruby
 
 TESTS = runtests.mk
 
@@ -6,7 +6,7 @@ TEST_CASES = \
 	backtrack1.lm \
 	backtrack2.lm \
 	backtrack3.lm \
-	dns.lm \
+	binary1.lm \
 	accum1.lm \
 	accum2.lm \
 	accum3.lm \
@@ -60,7 +60,9 @@ TEST_CASES = \
 	sprintf.lm \
 	div.lm \
 	scope1.lm \
-	export1.lm
+	export1.lm \
+	multiregion1.lm \
+	multiregion2.lm
 
 INPUT = \
 	accum1.in \
@@ -78,7 +80,7 @@ INPUT = \
 	counting2.in \
 	counting3.in \
 	counting4.in \
-	dns.in \
+	binary1.in \
 	func.in \
 	heredoc.in \
 	island.in \
@@ -107,7 +109,9 @@ INPUT = \
 	undofrag1.in \
 	undofrag2.in \
 	undofrag3.in \
-	export1.in
+	export1.in \
+	multiregion1.in \
+	multiregion2.in
 
 EXPECTED_OUTPUT = \
 	accum1.exp \
@@ -134,7 +138,7 @@ EXPECTED_OUTPUT = \
 	counting3.exp \
 	counting4.exp \
 	div.exp \
-	dns.exp \
+	binary1.exp \
 	exit1.exp \
 	exit2.exp \
 	func.exp \
@@ -167,6 +171,8 @@ EXPECTED_OUTPUT = \
 	undofrag1.exp \
 	undofrag2.exp \
 	undofrag3.exp \
-	export1.exp
+	export1.exp \
+	multiregion1.exp \
+	multiregion2.exp
 
 EXTRA_DIST = genmf TESTS runtests.mk $(TEST_CASES) $(INPUT) $(EXPECTED_OUTPUT)
