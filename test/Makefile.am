@@ -1,8 +1,7 @@
-DIST_SUBDIRS =  python cxx ruby
-
 TESTS = runtests.mk
 
 TEST_CASES = \
+	ambig1.lm \
 	backtrack1.lm \
 	backtrack2.lm \
 	backtrack3.lm \
@@ -22,6 +21,8 @@ TEST_CASES = \
 	construct1.lm \
 	construct2.lm \
 	construct3.lm \
+	generate1.lm \
+	lookup1.lm \
 	treecmp1.lm \
 	context1.lm \
 	context2.lm \
@@ -51,7 +52,10 @@ TEST_CASES = \
 	counting3.lm \
 	counting4.lm \
 	til.lm \
-	tags.lm \
+	tags1.lm \
+	tags2.lm \
+	tags3.lm \
+	tags4.lm \
 	matchex.lm \
 	maxlen.lm \
 	superid.lm \
@@ -65,6 +69,7 @@ TEST_CASES = \
 	multiregion2.lm
 
 INPUT = \
+	ambig1.in \
 	accum1.in \
 	accum2.in \
 	backtrack1.in \
@@ -80,6 +85,8 @@ INPUT = \
 	counting2.in \
 	counting3.in \
 	counting4.in \
+	generate1.in \
+	lookup1.in \
 	binary1.in \
 	func.in \
 	heredoc.in \
@@ -99,7 +106,10 @@ INPUT = \
 	rubyhere.in \
 	string.in \
 	superid.in \
-	tags.in \
+	tags1.in \
+	tags2.in \
+	tags3.in \
+	tags4.in \
 	til.in \
 	translate1.in \
 	translate2.in \
@@ -114,6 +124,7 @@ INPUT = \
 	multiregion2.in
 
 EXPECTED_OUTPUT = \
+	ambig1.exp \
 	accum1.exp \
 	accum2.exp \
 	accum3.exp \
@@ -137,6 +148,8 @@ EXPECTED_OUTPUT = \
 	counting2.exp \
 	counting3.exp \
 	counting4.exp \
+	generate1.exp \
+	lookup1.exp \
 	div.exp \
 	binary1.exp \
 	exit1.exp \
@@ -162,7 +175,10 @@ EXPECTED_OUTPUT = \
 	sprintf.exp \
 	string.exp \
 	superid.exp \
-	tags.exp \
+	tags1.exp \
+	tags2.exp \
+	tags3.exp \
+	tags4.exp \
 	til.exp \
 	translate1.exp \
 	translate2.exp \

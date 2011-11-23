@@ -725,8 +725,9 @@ int print_stmts( S: start )
 }
 
 S: start = parse start( stdin )
-print_xml( S )
+print( '*** SUCCESS ***\n' )
 print( S '\n' )
+print( '***\n' )
 print_stmts( S )
 print_target_subscriptions_and_slicings( S )
 print_primary_subscriptions_and_slicings( S )

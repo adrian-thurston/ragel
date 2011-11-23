@@ -100,8 +100,6 @@ fi
 fi # build_parsers
 
 dnl write output files
-AC_OUTPUT(Makefile colm/Makefile aapl/Makefile test/Makefile
-	test/python/Makefile test/html/Makefile test/xml/Makefile test/http/Makefile
-	test/cxx/Makefile test/ruby/Makefile)
+AC_OUTPUT(Makefile colm/Makefile aapl/Makefile test/Makefile)
 
 echo "configuration of colm complete"
