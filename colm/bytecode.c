@@ -925,6 +925,7 @@ void callParseBlock( Code **pinstr, Tree ***psp, long pcr, Program *prg,
 			*pinstr = exec->code;
 			break;
 		}
+
 		case PcrGeneration: {
 			/* 
 			 * Not supported:
@@ -944,6 +945,7 @@ void callParseBlock( Code **pinstr, Tree ***psp, long pcr, Program *prg,
 			*pinstr = exec->code;
 			break;
 		}
+
 		case PcrPreEof: {
 			/* Execute the translation. */
 			initGenerationExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, pdaRun, fsmRun, 

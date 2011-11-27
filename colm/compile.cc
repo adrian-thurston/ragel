@@ -2652,7 +2652,7 @@ void ParseData::compilePreEof( TokenRegion *region )
 	code.appendHalf( block->frameId );
 	code.appendHalf( frameSize );
 
-	code.append( IN_STOP );
+	code.append( IN_PCR_RET );
 
 	/* Now that compilation is done variables are referenced. Make the local
 	 * trees descriptor. */
