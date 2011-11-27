@@ -15,11 +15,13 @@ lex start
 
 	token ocurly /'{'+/
 	{
-		OI: open_item = construct open_item( type: '{' num: match_length ) []
+		input.pull( match_length )
+
+		cons OI: open_item( type: '{' num: match_length ) []
 		OpenStack.push( OI )
 		i: int = 0
 		while ( i < match_length ) {
-			input.push( make_token( typeid<ocurly> input.pull(1 ) ) )
+			input.push( make_token( typeid<ocurly> '{' ) )
 			i = i + 1
 		}
 	}
@@ -59,11 +61,12 @@ lex start
 	
 	token osquare /'['+/
 	{
+		input.pull( match_length )
 		OI: open_item = construct open_item( type: '[' num: match_length ) []
 		OpenStack.push( OI )
 		i: int = 0
 		while ( i < match_length ) {
-			input.push( make_token( typeid<osquare> input.pull(1 ) ) )
+			input.push( make_token( typeid<osquare> '[' ) )
 			i = i + 1
 		}
 	}
