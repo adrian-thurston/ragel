@@ -1899,9 +1899,9 @@ nonterm field_init
 	FieldInit *fieldInit;
 };
 
-field_init: TK_Word ':' code_expr
+field_init: code_expr
 	final {
-		$$->fieldInit = new FieldInit( $1->loc, $1->data, $3->expr );
+		$$->fieldInit = new FieldInit( InputLoc(), "_name", $1->expr );
 	};
 
 #

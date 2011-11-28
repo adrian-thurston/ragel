@@ -286,6 +286,18 @@ ObjField *ObjectDef::checkRedecl( const String &name )
 
 }
 
+/* 0-based. */
+ObjField *ObjectDef::findFieldNum( long offset )
+{
+	int fn = 0;
+	ObjFieldList::Iter field = *objFieldList; 
+	while ( fn < offset ) {
+		fn++;
+		field++;
+	}
+	return field->value;
+}
+
 ObjField *ObjectDef::findField( const String &name )
 {
 	//cout << "looking for " << name << endl;
@@ -1180,10 +1192,10 @@ void LangTerm::assignFieldArgs( ParseData *pd, CodeVect &code, UniqueType *replU
 		/* Note the reverse traversal. */
 		for ( FieldInitVect::Iter pi = fieldInitArgs->last(); pi.gtb(); pi-- ) {
 			FieldInit *fieldInit = *pi;
-			ObjField *field = objDef->findField( fieldInit->name );
+			ObjField *field = objDef->findFieldNum( pi.pos() );
 			if ( field == 0 ) {
-				error(fieldInit->loc) << "failed to find init name " << 
-					fieldInit->name << " in object" << endp;
+				error(fieldInit->loc) << "failed to find init pos " << 
+					pi.pos() << " in object" << endp;
 			}
 
 			/* Lookup the type of the field and compare it to the type of the

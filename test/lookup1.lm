@@ -73,8 +73,7 @@ lookupNs.push( rootNamespace )
 qualNs.push( nil )
 
 templDecl.push( 0 )
-declarationData.push( construct declaration_data( 
-		isTypedef: 0 isFriend: 0 isTemplate: 0 ) [] )
+declarationData.push( construct declaration_data( 0 0 0 ) [] )
 
 #
 # Identifier lookup.
@@ -253,14 +252,26 @@ lex start
 # Support functions
 #
 
+	typeId: int 
+	name: str
+
+	# If the object is a typedef, this points to the real object.
+	typedefOf: ptr lang_object
+
+	objectMap: map<str list<ptr lang_object>>
+	inherited: list<ptr lang_object>
+	lookupParent: ptr lang_object
+	specializationOf: ptr lang_object
+
 ptr lang_object createLangObject( typeId: int name: str lookupParent: ptr lang_object )
 {
 	obj: ptr lang_object = new construct lang_object(
-			typeId: typeId 
-			name: name
-			objectMap: construct map<str list<ptr lang_object>> []
-			inherited: construct list<ptr lang_object> []
-			lookupParent: lookupParent ) []
+			typeId 
+			name
+			nil
+			construct map<str list<ptr lang_object>> []
+			construct list<ptr lang_object> []
+			lookupParent ) []
 	return obj
 }
 
@@ -483,8 +494,7 @@ def declaration_start
 	[]
 	{
 		# LOG print( 'opening new declaration_data with templDecl: ', templDecl.top, '\n' )
-		declarationData.push( construct declaration_data (
-				isTypedef: 0 isFriend: 0 isTemplate: 0 ) [] )
+		declarationData.push( construct declaration_data ( 0 0 0 ) [] )
 
 		# Transfer the template flag and reset it.
 		declarationData.top.isTemplate = templDecl.top
@@ -1257,7 +1267,7 @@ def declarator_id
 		}
 
 		declaratorData.push( construct declarator_data (
-				qualObj: qualObj lookupObj: lookupNs.top ) [] )
+				qualObj nil lookupNs.top ) [] )
 
 		# If the declarator is qualified, push the qualification to the lookup
 		# stack. Also save it in the declarator data so it can be passed to a

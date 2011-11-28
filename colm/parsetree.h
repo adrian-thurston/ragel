@@ -1771,6 +1771,7 @@ struct ObjectDef
 	ObjField *findField( const String &name );
 	void insertField( const String &name, ObjField *value );
 	void resolve( ParseData *pd );
+	ObjField *findFieldNum( long offset );
 
 	long size() { return nextOffset; }
 	long sizeTrees() { return firstNonTree; }
