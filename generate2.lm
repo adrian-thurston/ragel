@@ -6,7 +6,7 @@ def open_item
 alias open_stack list<open_item> 
 
 global OpenStack: open_stack = construct open_stack []
-Sentinal: open_item = construct open_item( type: '** SENTINAL **' num: 1 ) []
+Sentinal: open_item = construct open_item( '** SENTINAL **' 1 ) []
 OpenStack.push( Sentinal )
 
 lex start
@@ -17,7 +17,7 @@ lex start
 	{
 		input.pull( match_length )
 
-		cons OI: open_item( type: '{' num: match_length ) []
+		cons OI: open_item( '{' match_length ) []
 		OpenStack.push( OI )
 		i: int = 0
 		while ( i < match_length ) {
@@ -62,7 +62,7 @@ lex start
 	token osquare /'['+/
 	{
 		input.pull( match_length )
-		OI: open_item = construct open_item( type: '[' num: match_length ) []
+		OI: open_item = construct open_item( '[' match_length ) []
 		OpenStack.push( OI )
 		i: int = 0
 		while ( i < match_length ) {
