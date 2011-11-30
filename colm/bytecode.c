@@ -853,33 +853,36 @@ void mainExecution( Execution *exec )
 	assert( exec->rcodeCollect->tabLen == 0 );
 }
 
-int makeReverseCode( RtCodeVect *all, RtCodeVect *reverseCode )
+int makeReverseCode( PdaRun *pdaRun )
 {
+	RtCodeVect *reverseCode = &pdaRun->reverseCode;
+	RtCodeVect *rcodeCollect = &pdaRun->rcodeCollect;
+
 	/* Do we need to revert the left hand side? */
 
 	/* Check if there was anything generated. */
-	if ( reverseCode->tabLen == 0 )
+	if ( rcodeCollect->tabLen == 0 )
 		return false;
 
-	long prevAllLength = all->tabLen;
+	long prevAllLength = reverseCode->tabLen;
 
 	/* Go backwards, group by group, through the reverse code. Push each group
 	 * to the global reverse code stack. */
-	Code *p = reverseCode->data + reverseCode->tabLen;
-	while ( p != reverseCode->data ) {
+	Code *p = rcodeCollect->data + rcodeCollect->tabLen;
+	while ( p != rcodeCollect->data ) {
 		p--;
 		long len = *p;
 		p = p - len;
-		append2( all, p, len );
+		append2( reverseCode, p, len );
 	}
 
 	/* Stop, then place a total length in the global stack. */
-	append( all, IN_PCR_RET );
-	long length = all->tabLen - prevAllLength;
-	appendWord( all, length );
+	append( reverseCode, IN_PCR_RET );
+	long length = reverseCode->tabLen - prevAllLength;
+	appendWord( reverseCode, length );
 
 	/* Clear the revere code buffer. */
-	reverseCode->tabLen = 0;
+	rcodeCollect->tabLen = 0;
 
 	return true;
 }

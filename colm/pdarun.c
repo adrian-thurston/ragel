@@ -641,7 +641,7 @@ case PcrReduction:
 			}
 
 			/* Pull out the reverse code, if any. */
-			int hasrcode = makeReverseCode( &pdaRun->reverseCode, &pdaRun->rcodeCollect );
+			int hasrcode = makeReverseCode( pdaRun );
 			if ( hasrcode )
 				pdaRun->redLel->tree->flags |= AF_HAS_RCODE;
 

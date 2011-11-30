@@ -574,7 +574,7 @@ void addNoToken( Program *prg, Tree **sp, FsmRun *fsmRun, PdaRun *pdaRun,
 		/* If there is reverse code then addNoToken will guarantee that the
 		 * queue is not empty. Pull the reverse code out and store in the
 		 * token. */
-		int hasrcode = makeReverseCode( &pdaRun->reverseCode, &pdaRun->rcodeCollect );
+		int hasrcode = makeReverseCode( pdaRun );
 		if ( hasrcode )
 			tree->flags |= AF_HAS_RCODE;
 
@@ -584,7 +584,6 @@ void addNoToken( Program *prg, Tree **sp, FsmRun *fsmRun, PdaRun *pdaRun,
 		kidFree( prg, send );
 	}
 }
-
 
 Kid *extractIgnore( PdaRun *pdaRun )
 {

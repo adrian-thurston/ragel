@@ -309,7 +309,7 @@ inline static void appendWord( RtCodeVect *vect, Word word )
 void incrementConsumed( PdaRun *pdaRun );
 void decrementConsumed( PdaRun *pdaRun );
 
-int makeReverseCode( RtCodeVect *all, RtCodeVect *reverseCode );
+int makeReverseCode( PdaRun *pdaRun );
 
 void initPdaRun( PdaRun *pdaRun, struct ColmProgram *prg, PdaTables *tables,
 		FsmRun *fsmRun, int parserId, long stopTarget, int revertOn, Tree *context );
