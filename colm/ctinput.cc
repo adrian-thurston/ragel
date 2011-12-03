@@ -360,7 +360,7 @@ Kid *sendNamedLangEl( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, I
 
 	Kid *input = makeTokenWithData( prg, pdaRun, fsmRun, inputStream, klangEl->id, tokdata, true, bindId );
 
-	pdaRun->consumed += 1;
+	incrementSteps( pdaRun );
 
 	return input;
 }

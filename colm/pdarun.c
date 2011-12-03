@@ -139,7 +139,7 @@ void initPdaRun( PdaRun *pdaRun, Program *prg, PdaTables *tables,
 	pdaRun->parserId = parserId;
 	pdaRun->stopTarget = stopTarget;
 	pdaRun->revertOn = revertOn;
-	pdaRun->targetConsumed = -1;
+	pdaRun->targetSteps = -1;
 
 	debug( REALM_PARSE, "initializing PdaRun\n" );
 
@@ -716,7 +716,7 @@ case PcrRevToken:
 				}
 
 				if ( pdaRun->stop ) {
-					debug( REALM_PARSE, "stopping the backtracking, consumed is %d", pdaRun->consumed );
+					debug( REALM_PARSE, "stopping the backtracking, steps is %d", pdaRun->steps );
 
 					pdaRun->cs = stackTopTarget( prg, pdaRun );
 					goto _out;

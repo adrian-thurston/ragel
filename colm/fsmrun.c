@@ -115,16 +115,16 @@ void undoPosition( InputStream *inputStream, const char *data, long length )
 	inputStream->byte -= length;
 }
 
-void incrementConsumed( PdaRun *pdaRun )
+void incrementSteps( PdaRun *pdaRun )
 {
-	pdaRun->consumed += 1;
-	debug( REALM_PARSE, "consumed up to %ld\n", pdaRun->consumed );
+	pdaRun->steps += 1;
+	debug( REALM_PARSE, "steps up to %ld\n", pdaRun->steps );
 }
 
-void decrementConsumed( PdaRun *pdaRun )
+void decrementSteps( PdaRun *pdaRun )
 {
-	pdaRun->consumed -= 1;
-	debug( REALM_PARSE, "consumed down to %ld\n", pdaRun->consumed );
+	pdaRun->steps -= 1;
+	debug( REALM_PARSE, "steps down to %ld\n", pdaRun->steps );
 }
 
 void takeBackBuffered( InputStream *inputStream )
@@ -334,7 +334,7 @@ case PcrStart:
 	if ( head != 0 && !artificial )
 		sendBackText( fsmRun, inputStream, stringData( head ), head->length );
 
-	decrementConsumed( pdaRun );
+	decrementSteps( pdaRun );
 
 	/* Check for reverse code. */
 	if ( pdaRun->ignore4->tree->flags & AF_HAS_RCODE ) {
@@ -444,7 +444,7 @@ case PcrStart:
 		inputStream->funcs->pushBackNamed( inputStream );
 	}
 
-	decrementConsumed( pdaRun );
+	decrementSteps( pdaRun );
 
 	/* Artifical were not parsed, instead sent in as items. */
 	if ( input->tree->flags & AF_ARTIFICIAL ) {
@@ -474,8 +474,8 @@ case PcrRevToken:
 		unbind( prg, sp, pdaRun, input->tree );
 	}
 
-	if ( pdaRun->consumed == pdaRun->targetConsumed ) {
-		debug( REALM_PARSE, "trigger parse stop, consumed = target = %d", pdaRun->targetConsumed );
+	if ( pdaRun->steps == pdaRun->targetSteps ) {
+		debug( REALM_PARSE, "trigger parse stop, steps = target = %d", pdaRun->targetSteps );
 		pdaRun->stop = true;
 	}
 
@@ -578,7 +578,7 @@ void addNoToken( Program *prg, Tree **sp, FsmRun *fsmRun, PdaRun *pdaRun,
 		if ( hasrcode )
 			tree->flags |= AF_HAS_RCODE;
 
-		incrementConsumed( pdaRun );
+		incrementSteps( pdaRun );
 
 		ignoreTree( prg, pdaRun, send->tree );
 		kidFree( prg, send );
@@ -760,7 +760,7 @@ void sendIgnore( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmR
 	tree->id = id;
 	tree->tokdata = ignoreStr;
 
-	incrementConsumed( pdaRun );
+	incrementSteps( pdaRun );
 
 	/* Send it to the pdaRun. */
 	ignoreTree( prg, pdaRun, tree );
@@ -792,7 +792,7 @@ Kid *sendToken( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRu
 
 	Kid *input = makeTokenWithData( prg, pdaRun, fsmRun, inputStream, id, tokdata, false, 0 );
 
-	incrementConsumed( pdaRun );
+	incrementSteps( pdaRun );
 
 	/* Store any alternate scanning region. */
 	if ( input != 0 && pdaRun->cs >= 0 )
@@ -806,7 +806,7 @@ Kid *sendTree( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStr
 	Kid *input = kidAllocate( prg );
 	input->tree = inputStream->funcs->getTree( inputStream );
 
-	incrementConsumed( pdaRun );
+	incrementSteps( pdaRun );
 
 	return input;
 
@@ -816,7 +816,7 @@ Kid *sendEof( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun,
 {
 	debug( REALM_PARSE, "token: _EOF\n" );
 
-	incrementConsumed( pdaRun );
+	incrementSteps( pdaRun );
 
 	Head *head = headAllocate( prg );
 	head->location = locationAllocate( prg );
@@ -1045,7 +1045,7 @@ void sendTreeIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, In
 	Tree *tree = runBuf->tree;
 	free( runBuf );
 
-	incrementConsumed( pdaRun );
+	incrementSteps( pdaRun );
 
 	ignoreTree( prg, pdaRun, tree );
 }
@@ -1198,7 +1198,6 @@ case PcrGeneration:
 
 			/* Is a plain token. */
 			pdaRun->input1 = sendToken( prg, sp, inputStream, fsmRun, pdaRun, pdaRun->tokenId );
-
 		}
 
 

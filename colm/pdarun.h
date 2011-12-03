@@ -234,8 +234,8 @@ typedef struct _PdaRun
 	int stop;
 	int parseError;
 
-	long consumed;
-	long targetConsumed;
+	long steps;
+	long targetSteps;
 
 	/*
 	 * Data we added when refactoring the parsing engine into a coroutine.
@@ -306,8 +306,8 @@ inline static void appendWord( RtCodeVect *vect, Word word )
 	#endif
 }
 
-void incrementConsumed( PdaRun *pdaRun );
-void decrementConsumed( PdaRun *pdaRun );
+void incrementSteps( PdaRun *pdaRun );
+void decrementSteps( PdaRun *pdaRun );
 
 int makeReverseCode( PdaRun *pdaRun );
 
@@ -375,7 +375,7 @@ void initBindings( PdaRun *pdaRun );
 Tree *getParsedRoot( PdaRun *pdaRun, int stop );
 void pushBtPoint( struct ColmProgram *prg, PdaRun *pdaRun );
 void undoParseStream( struct ColmProgram *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun, 
-		PdaRun *pdaRun, long consumed );
+		PdaRun *pdaRun, long steps );
 void attachIgnore( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, Kid *input );
 void detachIgnores( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, Kid *input );
 
