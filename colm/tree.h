@@ -118,9 +118,11 @@ typedef struct _ParseTree
 	/* Parsing algorithm. */
 	long state;
 	long region;
-	char causeReduce;
-	char retry_lower;
-	char retry_upper;
+	short causeReduce;
+
+	/* FIXME: unify probably. */
+	char retryLower;
+	char retryUpper;
 } ParseTree;
 
 typedef struct _Int

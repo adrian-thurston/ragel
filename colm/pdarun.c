@@ -282,13 +282,13 @@ head:
 
 	/* Reset retries. */
 	if ( tree->flags & AF_PARSED ) {
-		if ( pt(tree)->retry_lower > 0 ) {
+		if ( pt(tree)->retryLower > 0 ) {
 			pdaRun->numRetry -= 1;
-			pt(tree)->retry_lower = 0;
+			pt(tree)->retryLower = 0;
 		}
-		if ( pt(tree)->retry_upper > 0 ) {
+		if ( pt(tree)->retryUpper > 0 ) {
 			pdaRun->numRetry -= 1;
-			pt(tree)->retry_upper = 0;
+			pt(tree)->retryUpper = 0;
 		}
 	}
 	tree->flags |= AF_COMMITTED;
@@ -482,8 +482,8 @@ again:
 	induceReject = false;
 	pdaRun->cs = pdaRun->tables->targs[pos];
 	action = pdaRun->tables->actions + pdaRun->tables->actInds[pos];
-	if ( pt(pdaRun->lel->tree)->retry_lower )
-		action += pt(pdaRun->lel->tree)->retry_lower;
+	if ( pt(pdaRun->lel->tree)->retryLower )
+		action += pt(pdaRun->lel->tree)->retryLower;
 
 	/*
 	 * Shift
@@ -520,11 +520,11 @@ again:
 		}
 
 		if ( action[1] == 0 )
-			pt(pdaRun->lel->tree)->retry_lower = 0;
+			pt(pdaRun->lel->tree)->retryLower = 0;
 		else {
 			debug( REALM_PARSE, "retry: %p\n", pdaRun->stackTop );
-			pt(pdaRun->lel->tree)->retry_lower += 1;
-			assert( pt(pdaRun->lel->tree)->retry_upper == 0 );
+			pt(pdaRun->lel->tree)->retryLower += 1;
+			assert( pt(pdaRun->lel->tree)->retryUpper == 0 );
 			/* FIXME: Has the retry already been counted? */
 			pdaRun->numRetry += 1; 
 		}
@@ -565,9 +565,9 @@ again:
 
 		pdaRun->redLel->next = 0;
 		pt(pdaRun->redLel->tree)->causeReduce = 0;
-		pt(pdaRun->redLel->tree)->retry_lower = 0;
-		pt(pdaRun->redLel->tree)->retry_upper = pt(pdaRun->lel->tree)->retry_lower;
-		pt(pdaRun->lel->tree)->retry_lower = 0;
+		pt(pdaRun->redLel->tree)->retryLower = 0;
+		pt(pdaRun->redLel->tree)->retryUpper = pt(pdaRun->lel->tree)->retryLower;
+		pt(pdaRun->lel->tree)->retryLower = 0;
 
 		/* Allocate the attributes. */
 		objectLength = prg->rtd->lelInfo[pdaRun->redLel->tree->id].objectLength;
@@ -600,10 +600,10 @@ again:
 		debug( REALM_PARSE, "reduced: %s rhsLen %d\n",
 				prg->rtd->prodInfo[pdaRun->reduction].name, rhsLen );
 		if ( action[1] == 0 )
-			pt(pdaRun->redLel->tree)->retry_upper = 0;
+			pt(pdaRun->redLel->tree)->retryUpper = 0;
 		else {
-			pt(pdaRun->redLel->tree)->retry_upper += 1;
-			assert( pt(pdaRun->lel->tree)->retry_lower == 0 );
+			pt(pdaRun->redLel->tree)->retryUpper += 1;
+			assert( pt(pdaRun->lel->tree)->retryLower == 0 );
 			pdaRun->numRetry += 1;
 			debug( REALM_PARSE, "retry: %p\n", pdaRun->redLel );
 		}
@@ -682,9 +682,9 @@ parseError:
 
 	while ( 1 ) {
 		if ( pdaRun->input1 != 0 ) {
-			assert( pt(pdaRun->input1->tree)->retry_upper == 0 );
+			assert( pt(pdaRun->input1->tree)->retryUpper == 0 );
 
-			if ( pt(pdaRun->input1->tree)->retry_lower != 0 ) {
+			if ( pt(pdaRun->input1->tree)->retryLower != 0 ) {
 				debug( REALM_PARSE, "found retry targ: %p\n", pdaRun->input1 );
 
 				pdaRun->numRetry -= 1;
@@ -842,17 +842,17 @@ case PcrRevReduction:
 			if ( pdaRun->input1 != 0 )
 				pt(pdaRun->input1->tree)->causeReduce -= 1;
 
-			if ( pt(pdaRun->undoLel->tree)->retry_upper != 0 ) {
+			if ( pt(pdaRun->undoLel->tree)->retryUpper != 0 ) {
 				/* There is always an input1 item here because reduce
 				 * conflicts only happen on a lookahead character. */
 				assert( pdaRun->input1 != pdaRun->undoLel );
 				assert( pdaRun->input1 != 0 );
-				assert( pt(pdaRun->undoLel->tree)->retry_lower == 0 );
-				assert( pt(pdaRun->input1->tree)->retry_upper == 0 );
+				assert( pt(pdaRun->undoLel->tree)->retryLower == 0 );
+				assert( pt(pdaRun->input1->tree)->retryUpper == 0 );
 
 				/* Transfer the retry from undoLel to input1. */
-				pt(pdaRun->input1->tree)->retry_lower = pt(pdaRun->undoLel->tree)->retry_upper;
-				pt(pdaRun->input1->tree)->retry_upper = 0;
+				pt(pdaRun->input1->tree)->retryLower = pt(pdaRun->undoLel->tree)->retryUpper;
+				pt(pdaRun->input1->tree)->retryUpper = 0;
 				pt(pdaRun->input1->tree)->state = stackTopTarget( prg, pdaRun );
 			}
 
