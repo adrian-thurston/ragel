@@ -339,6 +339,8 @@ case PcrStart:
 	/* Check for reverse code. */
 	if ( pdaRun->ignore4->tree->flags & AF_HAS_RCODE ) {
 
+		pdaRun->onDeck = true;
+
 return PcrRevIgnore;
 case PcrRevIgnore:
 
@@ -459,6 +461,8 @@ case PcrStart:
 
 		/* Check for reverse code. */
 		if ( input->tree->flags & AF_HAS_RCODE ) {
+
+			pdaRun->onDeck = true;
 
 return PcrRevToken;
 case PcrRevToken:

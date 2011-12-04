@@ -170,6 +170,8 @@ void initPdaRun( PdaRun *pdaRun, Program *prg, PdaTables *tables,
 	pdaRun->triggerUndo = 0;
 
 	pdaRun->tokenId = 0;
+
+	pdaRun->onDeck = false;
 }
 
 long stackTopTarget( Program *prg, PdaRun *pdaRun )
@@ -799,6 +801,8 @@ case PcrRevIgnore:
 
 			/* Check for an execution environment. */
 			if ( pdaRun->undoLel->tree->flags & AF_HAS_RCODE ) {
+
+				pdaRun->onDeck = true;
 
 return PcrRevReduction;
 case PcrRevReduction:

@@ -688,6 +688,10 @@ again:
 			debug( REALM_BYTECODE, "IN_PCR_RET\n" );
 			return;
 		}
+		case IN_PCR_END_DECK: {
+			debug( REALM_BYTECODE, "IN_PCR_END_DECK\n" );
+			return;
+		}
 		case IN_STREAM_PULL_BKT: {
 			Tree *string;
 			read_tree( string );
@@ -864,7 +868,11 @@ int makeReverseCode( PdaRun *pdaRun )
 	if ( rcodeCollect->tabLen == 0 )
 		return false;
 
-	long prevAllLength = reverseCode->tabLen;
+	/* One reverse code run for the DECK terminator. */
+	append( reverseCode, IN_PCR_END_DECK );
+	appendWord( reverseCode, 1 );
+
+	long startLength = reverseCode->tabLen;
 
 	/* Go backwards, group by group, through the reverse code. Push each group
 	 * to the global reverse code stack. */
@@ -878,7 +886,7 @@ int makeReverseCode( PdaRun *pdaRun )
 
 	/* Stop, then place a total length in the global stack. */
 	append( reverseCode, IN_PCR_RET );
-	long length = reverseCode->tabLen - prevAllLength;
+	long length = reverseCode->tabLen - startLength;
 	appendWord( reverseCode, length );
 
 	/* Clear the revere code buffer. */
@@ -899,6 +907,13 @@ Code *popReverseCode( RtCodeVect *allRev )
 	prcode = allRev->data + start;
 
 	/* Backup over it. */
+	allRev->tabLen -= len + SIZEOF_WORD;
+
+	/* Do it again for the terminator. */
+	Code *prcode2 = allRev->data + allRev->tabLen - SIZEOF_WORD;
+	read_word_p( len, prcode2 );
+	start = allRev->tabLen - len - SIZEOF_WORD;
+	prcode2 = allRev->data + start;
 	allRev->tabLen -= len + SIZEOF_WORD;
 
 	return prcode;
@@ -2742,6 +2757,22 @@ again:
 				fflush( stdout );
 				goto out;
 			}
+			break;
+		}
+
+		case IN_PCR_END_DECK: {
+			debug( REALM_BYTECODE, "IN_PCR_END_DECK\n" );
+			assert( false );
+			exec->pdaRun->onDeck = false;
+
+//			exec->lhs = (Tree*) vm_pop();
+//			instr = (Code*) vm_pop();
+//
+//			if ( instr == 0 ) {
+//				fflush( stdout );
+//				goto out;
+//			}
+
 			break;
 		}
 

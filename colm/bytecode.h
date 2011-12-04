@@ -262,6 +262,7 @@ typedef unsigned char uchar;
 #define IN_PARSE_FINISH_BKT3     0xec
 
 #define IN_PCR_RET               0xe3
+#define IN_PCR_END_DECK          0xed
 
 #define IN_PARSE_EXTRACT_INPUT 
 

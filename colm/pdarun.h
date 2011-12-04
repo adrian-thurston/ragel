@@ -237,6 +237,8 @@ typedef struct _PdaRun
 	long steps;
 	long targetSteps;
 
+	int onDeck;
+
 	/*
 	 * Data we added when refactoring the parsing engine into a coroutine.
 	 */
