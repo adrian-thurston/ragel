@@ -2030,6 +2030,36 @@ case PcrRevIgnore2:
 			debug( REALM_PARSE, "backing up over non-terminal: %s\n",
 					prg->rtd->lelInfo[pdaRun->stackTop->tree->id].name );
 
+			/* Pop the item from the stack. */
+			pdaRun->stackTop = pdaRun->stackTop->next;
+
+//			/* Undo the translation from termDup. */
+//			if ( pdaRun->undoLel->tree->flags & AF_TERM_DUP ) {
+//				pdaRun->undoLel->tree->id = prg->rtd->lelInfo[pdaRun->undoLel->tree->id].termDupId;
+//				pdaRun->undoLel->tree->flags &= ~AF_TERM_DUP;
+//			}
+//
+			/* Queue it as next input1 item. */
+			pdaRun->undoLel->next = pdaRun->input1;
+			pdaRun->input1 = pdaRun->undoLel;
+
+//			/* Pop from the token list. */
+//			Ref *ref = pdaRun->tokenList;
+//			pdaRun->tokenList = ref->next;
+//			kidFree( prg, (Kid*)ref );
+//
+//			detachIgnores( prg, sp, pdaRun, fsmRun, pdaRun->input1 );
+
+//			/* Warm fuzzies ... */
+//			assert( pdaRun->undoLel == pdaRun->stackTop );
+//
+//			/* Take the nonterm off the stack. */
+//			pdaRun->stackTop = pdaRun->stackTop->next;
+
+			/* Remove it from the input queue. */
+			pdaRun->undoLel = pdaRun->input1;
+			pdaRun->input1 = pdaRun->input1->next;
+
 			/* Check for an execution environment. */
 			if ( pdaRun->undoLel->tree->flags & AF_HAS_RCODE ) {
 
@@ -2052,12 +2082,6 @@ case PcrRevReduction2:
 
 			/* Only the RCODE flag was in the replaced lhs. All the rest is in
 			 * the the original. We read it after restoring. */
-
-			/* Warm fuzzies ... */
-			assert( pdaRun->undoLel == pdaRun->stackTop );
-
-			/* Take the nonterm off the stack. */
-			pdaRun->stackTop = pdaRun->stackTop->next;
 
 			/* Extract the real children from the child list. */
 			Kid *first = treeExtractChild( prg, pdaRun->undoLel->tree );
