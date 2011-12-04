@@ -255,8 +255,11 @@ case PcrReduction:
 case PcrGeneration:
 case PcrPreEof:
 case PcrRevIgnore:
+case PcrRevIgnore2:
 case PcrRevToken:
+case PcrRevToken2:
 case PcrRevReduction:
+case PcrRevReduction2:
 
 			pcr = parseLoop( prg, sp, accum->pdaRun, accum->fsmRun, stream->in, entry );
 		}
@@ -290,8 +293,11 @@ case PcrReduction:
 case PcrGeneration:
 case PcrPreEof:
 case PcrRevIgnore:
+case PcrRevIgnore2:
 case PcrRevToken:
+case PcrRevToken2:
 case PcrRevReduction:
+case PcrRevReduction2:
 
 				pcr = parseLoop( prg, sp, accum->pdaRun, accum->fsmRun, stream->in, entry );
 			}
@@ -342,8 +348,11 @@ case PcrReduction:
 case PcrGeneration:
 case PcrPreEof:
 case PcrRevIgnore:
+case PcrRevIgnore2:
 case PcrRevToken:
+case PcrRevToken2:
 case PcrRevReduction:
+case PcrRevReduction2:
 
 			pcr = parseLoop( prg, sp, pdaRun, fsmRun, inputStream, entry );
 		}
@@ -909,12 +918,12 @@ Code *popReverseCode( RtCodeVect *allRev )
 	/* Backup over it. */
 	allRev->tabLen -= len + SIZEOF_WORD;
 
-	/* Do it again for the terminator. */
-	Code *prcode2 = allRev->data + allRev->tabLen - SIZEOF_WORD;
-	read_word_p( len, prcode2 );
-	start = allRev->tabLen - len - SIZEOF_WORD;
-	prcode2 = allRev->data + start;
-	allRev->tabLen -= len + SIZEOF_WORD;
+//	/* Do it again for the terminator. */
+//	Code *prcode2 = allRev->data + allRev->tabLen - SIZEOF_WORD;
+//	read_word_p( len, prcode2 );
+//	start = allRev->tabLen - len - SIZEOF_WORD;
+//	prcode2 = allRev->data + start;
+//	allRev->tabLen -= len + SIZEOF_WORD;
 
 	return prcode;
 }
@@ -981,8 +990,9 @@ void callParseBlock( Code **pinstr, Tree ***psp, long pcr, Program *prg,
 			break;
 		}
 
-		case PcrRevIgnore: {
-
+		case PcrRevIgnore:
+		case PcrRevIgnore2:
+		{
 			initReverseExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, 
 					pdaRun, fsmRun, -1, 0, 0, 0, 0, 0 );
 
@@ -996,8 +1006,9 @@ void callParseBlock( Code **pinstr, Tree ***psp, long pcr, Program *prg,
 			break;
 		}
 
-		case PcrRevReduction: {
-
+		case PcrRevReduction:
+		case PcrRevReduction2:
+		{
 			initReverseExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, 
 					pdaRun, fsmRun, -1, 0, 0, 0, 0, fsmRun->mark );
 
@@ -1011,8 +1022,9 @@ void callParseBlock( Code **pinstr, Tree ***psp, long pcr, Program *prg,
 			break;
 		}
 
-		case PcrRevToken: {
-
+		case PcrRevToken:
+		case PcrRevToken2:
+		{
 			initReverseExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, 
 					pdaRun, fsmRun, -1, 0, 0, 0, 0, 0 );
 
@@ -2762,16 +2774,15 @@ again:
 
 		case IN_PCR_END_DECK: {
 			debug( REALM_BYTECODE, "IN_PCR_END_DECK\n" );
-			assert( false );
 			exec->pdaRun->onDeck = false;
 
-//			exec->lhs = (Tree*) vm_pop();
-//			instr = (Code*) vm_pop();
-//
-//			if ( instr == 0 ) {
-//				fflush( stdout );
-//				goto out;
-//			}
+			exec->lhs = (Tree*) vm_pop();
+			instr = (Code*) vm_pop();
+
+			if ( instr == 0 ) {
+				fflush( stdout );
+				goto out;
+			}
 
 			break;
 		}

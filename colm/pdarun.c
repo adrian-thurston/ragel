@@ -293,7 +293,7 @@ void undoStreamAppend( Program *prg, Tree **sp, InputStream *inputStream, long l
 /* Should only be sending back whole tokens/ignores, therefore the send back
  * should never cross a buffer boundary. Either we slide back data, or we move to
  * a previous buffer and slide back data. */
-void sendBackText( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length )
+static void sendBackText( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length )
 {
 	connectStream( fsmRun, inputStream );
 
@@ -326,7 +326,7 @@ void sendBackText( FsmRun *fsmRun, InputStream *inputStream, const char *data, l
  * Stops on:
  *   PcrRevIgnore
  */
-long sendBackIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
+static long sendBackIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
 		InputStream *inputStream, Kid *ignoreKidList, long entry )
 {
 switch ( entry ) {
@@ -355,6 +355,9 @@ case PcrStart:
 
 return PcrRevIgnore;
 case PcrRevIgnore:
+
+return PcrRevIgnore2;
+case PcrRevIgnore2:
 
 		pdaRun->ignore4->tree->flags &= ~AF_HAS_RCODE;
 	}
@@ -434,7 +437,8 @@ void detachIgnores( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, Kid
  *   PcrRevToken
  */
 
-long sendBack( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Kid *input, long entry )
+static long sendBack( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, 
+		InputStream *inputStream, Kid *input, long entry )
 {
 	#ifdef COLM_LOG
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
@@ -478,6 +482,9 @@ case PcrStart:
 
 return PcrRevToken;
 case PcrRevToken:
+
+return PcrRevToken2;
+case PcrRevToken2:
 
 			input->tree->flags &= ~AF_HAS_RCODE;
 		}
@@ -879,7 +886,7 @@ void newToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun )
 	memset( fsmRun->mark, 0, sizeof(fsmRun->mark) );
 }
 
-void breakRunBuf( FsmRun *fsmRun )
+static void breakRunBuf( FsmRun *fsmRun )
 {
 	/* We break the runbuf on named language elements and trees. This makes
 	 * backtracking simpler because it allows us to always push back whole
@@ -900,6 +907,29 @@ void breakRunBuf( FsmRun *fsmRun )
 		fsmRun->runBuf = newBuf;
 	}
 }
+
+/* Tree null means compute from what we find in the parser. */
+static void pushBtPoint( Program *prg, PdaRun *pdaRun )
+{
+	Tree *tree = 0;
+	if ( pdaRun->accumIgnore != 0 ) 
+		tree = pdaRun->accumIgnore->tree;
+	else if ( pdaRun->tokenList != 0 )
+		tree = pdaRun->tokenList->kid->tree;
+
+	if ( tree != 0 ) {
+		debug( REALM_PARSE, "pushing bt point with location byte %d\n", 
+				( tree != 0 && tree->tokdata != 0 && tree->tokdata->location != 0 ) ? 
+				tree->tokdata->location->byte : 0 );
+
+		Kid *kid = kidAllocate( prg );
+		kid->tree = tree;
+		treeUpref( tree );
+		kid->next = pdaRun->btPoint;
+		pdaRun->btPoint = kid;
+	}
+}
+
 
 #define SCAN_UNDO              -7
 #define SCAN_IGNORE            -6
@@ -1224,8 +1254,11 @@ case PcrGeneration:
 return pcr;
 case PcrReduction:
 case PcrRevReduction:
+case PcrRevReduction2:
 case PcrRevIgnore:
+case PcrRevIgnore2:
 case PcrRevToken:
+case PcrRevToken2:
 
 			pcr = parseToken( prg, sp, pdaRun, fsmRun, inputStream, entry );
 		}
@@ -1573,28 +1606,6 @@ void commitFull( Program *prg, Tree **sp, PdaRun *pdaRun, long causeReduce )
 		rcodeDownrefAll( prg, sp, &pdaRun->reverseCode );
 }
 
-/* Tree null means compute from what we find in the parser. */
-void pushBtPoint( Program *prg, PdaRun *pdaRun )
-{
-	Tree *tree = 0;
-	if ( pdaRun->accumIgnore != 0 ) 
-		tree = pdaRun->accumIgnore->tree;
-	else if ( pdaRun->tokenList != 0 )
-		tree = pdaRun->tokenList->kid->tree;
-
-	if ( tree != 0 ) {
-		debug( REALM_PARSE, "pushing bt point with location byte %d\n", 
-				( tree != 0 && tree->tokdata != 0 && tree->tokdata->location != 0 ) ? 
-				tree->tokdata->location->byte : 0 );
-
-		Kid *kid = kidAllocate( prg );
-		kid->tree = tree;
-		treeUpref( tree );
-		kid->next = pdaRun->btPoint;
-		pdaRun->btPoint = kid;
-	}
-}
-
 /*
  * shift:         retry goes into lower of shifted node.
  * reduce:        retry goes into upper of reduced node.
@@ -1604,7 +1615,6 @@ void pushBtPoint( Program *prg, PdaRun *pdaRun )
 /* Stops on:
  *   PcrReduction
  *   PcrRevToken
- *   PcrRevIgnore4
  *   PcrRevReduction
  */
 long parseToken( Program *prg, Tree **sp, PdaRun *pdaRun,
@@ -1923,6 +1933,7 @@ parseError:
 				while ( pcr != PcrDone ) {
 return pcr;
 case PcrRevToken:
+case PcrRevToken2:
 					pcr = sendBack( prg, sp, pdaRun, fsmRun, inputStream, pdaRun->input1, entry );
 				}
 
@@ -1962,6 +1973,7 @@ case PcrRevToken:
 
 return pcr;
 case PcrRevIgnore:
+case PcrRevIgnore2:
 
 				pcr = sendBackIgnore( prg, sp, pdaRun, fsmRun, inputStream, pdaRun->ignore6, entry );
 			}
@@ -2025,6 +2037,9 @@ case PcrRevIgnore:
 
 return PcrRevReduction;
 case PcrRevReduction:
+
+return PcrRevReduction2;
+case PcrRevReduction2:
 
 				pdaRun->undoLel->tree->flags &= ~AF_HAS_RCODE;
 
