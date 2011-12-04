@@ -34,6 +34,16 @@
 
 #define BUFFER_INITIAL_SIZE 4096
 
+void listPrepend( List *list, ListEl *new_el) { listAddBefore(list, list->head, new_el); }
+void listAppend( List *list, ListEl *new_el)  { listAddAfter(list, list->tail, new_el); }
+
+ListEl *listDetach( List *list, ListEl *el );
+ListEl *listDetachFirst(List *list )        { return listDetach(list, list->head); }
+ListEl *listDetachLast(List *list )         { return listDetach(list, list->tail); }
+
+long listLength(List *list)
+	{ return list->listLen; }
+
 void initTreeIter( TreeIter *treeIter, const Ref *rootRef, int searchId, Tree **stackRoot )
 {
 	treeIter->rootRef = *rootRef;
