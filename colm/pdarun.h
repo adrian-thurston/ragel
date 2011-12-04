@@ -31,6 +31,72 @@
 extern "C" {
 #endif
 
+struct ColmProgram;
+
+#define MARK_SLOTS 32
+
+typedef struct _FsmTables
+{
+	long *actions;
+	long *keyOffsets;
+	char *transKeys;
+	long *singleLengths;
+	long *rangeLengths;
+	long *indexOffsets;
+	long *transTargsWI;
+	long *transActionsWI;
+	long *toStateActions;
+	long *fromStateActions;
+	long *eofActions;
+	long *eofTargs;
+	long *entryByRegion;
+
+	long numStates;
+	long numActions;
+	long numTransKeys;
+	long numSingleLengths;
+	long numRangeLengths;
+	long numIndexOffsets;
+	long numTransTargsWI;
+	long numTransActionsWI;
+	long numRegions;
+
+	long startState;
+	long firstFinal;
+	long errorState;
+
+	struct GenAction **actionSwitch;
+	long numActionSwitch;
+} FsmTables;
+
+typedef struct _FsmRun
+{
+	FsmTables *tables;
+
+	RunBuf *runBuf;
+
+	/* FsmRun State. */
+	long region, cs, act;
+	char *tokstart, *tokend;
+	char *p, *pe, *peof;
+	int returnResult;
+	char *mark[MARK_SLOTS];
+	long matchedToken;
+
+	InputStream *haveDataOf;
+	struct ColmTree *curStream;
+} FsmRun;
+
+void initFsmRun( FsmRun *fsmRun, struct ColmProgram *prg );
+void clearFsmRun( struct ColmProgram *prg, FsmRun *fsmRun );
+void updatePosition( InputStream *inputStream, const char *data, long length );
+void undoPosition( InputStream *inputStream, const char *data, long length );
+void takeBackBuffered( InputStream *inputStream );
+void connectStream( FsmRun *fsmRun, InputStream *inputStream );
+void sendBackRunBufHead( FsmRun *fsmRun, InputStream *inputStream );
+void undoStreamPull( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length );
+
+
 #if SIZEOF_LONG != 4 && SIZEOF_LONG != 8 
 	#error "SIZEOF_LONG contained an unexpected value"
 #endif
