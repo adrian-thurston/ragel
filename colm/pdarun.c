@@ -1912,47 +1912,122 @@ parseError:
 	}
 
 	while ( 1 ) {
+restart:
 		if ( pdaRun->input1 != 0 ) {
-			assert( pt(pdaRun->input1->tree)->retryUpper == 0 );
+			/* Either we are dealing with a terminal that was
+			 * shifted or a nonterminal that was reduced. */
+			if ( pdaRun->input1->tree->id < prg->rtd->firstNonTermId || 
+					(pdaRun->input1->tree->flags & AF_TERM_DUP) )
+			{
+				assert( pt(pdaRun->input1->tree)->retryUpper == 0 );
 
-			if ( pt(pdaRun->input1->tree)->retryLower != 0 ) {
-				debug( REALM_PARSE, "found retry targ: %p\n", pdaRun->input1 );
+				if ( pt(pdaRun->input1->tree)->retryLower != 0 ) {
+					debug( REALM_PARSE, "found retry targ: %p\n", pdaRun->input1 );
 
-				pdaRun->numRetry -= 1;
-				pdaRun->cs = pt(pdaRun->input1->tree)->state;
-				goto again;
-			}
+					pdaRun->numRetry -= 1;
+					pdaRun->cs = pt(pdaRun->input1->tree)->state;
+					goto again;
+				}
 
-			/* If there is no retry and there are no reductions caused by the
-			 * current input1 token then we are finished with it. Send it back. */
-			if ( pt(pdaRun->input1->tree)->causeReduce == 0 ) {
-				long region = pt(pdaRun->input1->tree)->region;
-				pdaRun->next = region > 0 ? region + 1 : 0;
+				/* If there is no retry and there are no reductions caused by the
+				 * current input1 token then we are finished with it. Send it back. */
+				if ( pt(pdaRun->input1->tree)->causeReduce == 0 ) {
+					long region = pt(pdaRun->input1->tree)->region;
+					pdaRun->next = region > 0 ? region + 1 : 0;
 
-				long pcr = sendBack( prg, sp, pdaRun, fsmRun, inputStream, pdaRun->input1, PcrStart );
-				while ( pcr != PcrDone ) {
+					long pcr = sendBack( prg, sp, pdaRun, fsmRun, inputStream, pdaRun->input1, PcrStart );
+					while ( pcr != PcrDone ) {
 return pcr;
 case PcrRevToken:
 case PcrRevToken2:
-					pcr = sendBack( prg, sp, pdaRun, fsmRun, inputStream, pdaRun->input1, entry );
+						pcr = sendBack( prg, sp, pdaRun, fsmRun, inputStream, pdaRun->input1, entry );
+					}
+
+					pdaRun->input1 = 0;
+
+					if ( pdaRun->next > 0 && pdaRun->tables->tokenRegions[pdaRun->next] != 0 ) {
+						debug( REALM_PARSE, "found a new region\n" );
+						pdaRun->numRetry -= 1;
+						pdaRun->cs = stackTopTarget( prg, pdaRun );
+						pdaRun->nextRegionInd = pdaRun->next;
+						return PcrDone;
+					}
+
+					if ( pdaRun->stop ) {
+						debug( REALM_PARSE, "stopping the backtracking, steps is %d", pdaRun->steps );
+
+						pdaRun->cs = stackTopTarget( prg, pdaRun );
+						goto _out;
+					}
+				}
+			}
+			else {
+				/* Remove it from the input queue. */
+				pdaRun->undoLel = pdaRun->input1;
+				pdaRun->input1 = pdaRun->input1->next;
+
+				/* Check for an execution environment. */
+				if ( pdaRun->undoLel->tree->flags & AF_HAS_RCODE ) {
+
+					pdaRun->onDeck = true;
+
+return PcrRevReduction;
+case PcrRevReduction:
+
+return PcrRevReduction2;
+case PcrRevReduction2:
+
+					pdaRun->undoLel->tree->flags &= ~AF_HAS_RCODE;
+
+					if ( pdaRun->exec->lhs != 0 ) {
+						/* Get the lhs, it may have been reverted. */
+						treeDownref( prg, sp, pdaRun->undoLel->tree );
+						pdaRun->undoLel->tree = pdaRun->exec->lhs;
+					}
 				}
 
-				pdaRun->input1 = 0;
+				/* Only the RCODE flag was in the replaced lhs. All the rest is in
+				 * the the original. We read it after restoring. */
 
-				if ( pdaRun->next > 0 && pdaRun->tables->tokenRegions[pdaRun->next] != 0 ) {
-					debug( REALM_PARSE, "found a new region\n" );
-					pdaRun->numRetry -= 1;
-					pdaRun->cs = stackTopTarget( prg, pdaRun );
-					pdaRun->nextRegionInd = pdaRun->next;
-					return PcrDone;
+				/* Extract the real children from the child list. */
+				Kid *first = treeExtractChild( prg, pdaRun->undoLel->tree );
+
+				/* Walk the child list and and push the items onto the parsing
+				 * stack one at a time. */
+				while ( first != 0 ) {
+					/* Get the next item ahead of time. */
+					Kid *next = first->next;
+
+					/* Push onto the stack. */
+					first->next = pdaRun->stackTop;
+					pdaRun->stackTop = first;
+
+					first = next;
 				}
 
-				if ( pdaRun->stop ) {
-					debug( REALM_PARSE, "stopping the backtracking, steps is %d", pdaRun->steps );
+				/* If there is an input1 queued, this is one less reduction it has
+				 * caused. */
+				if ( pdaRun->input1 != 0 )
+					pt(pdaRun->input1->tree)->causeReduce -= 1;
 
-					pdaRun->cs = stackTopTarget( prg, pdaRun );
-					goto _out;
+				if ( pt(pdaRun->undoLel->tree)->retryUpper != 0 ) {
+					/* There is always an input1 item here because reduce
+					 * conflicts only happen on a lookahead character. */
+					assert( pdaRun->input1 != pdaRun->undoLel );
+					assert( pdaRun->input1 != 0 );
+					assert( pt(pdaRun->undoLel->tree)->retryLower == 0 );
+					assert( pt(pdaRun->input1->tree)->retryUpper == 0 );
+
+					/* Transfer the retry from undoLel to input1. */
+					pt(pdaRun->input1->tree)->retryLower = pt(pdaRun->undoLel->tree)->retryUpper;
+					pt(pdaRun->input1->tree)->retryUpper = 0;
+					pt(pdaRun->input1->tree)->state = stackTopTarget( prg, pdaRun );
 				}
+
+				/* Free the reduced item. */
+				treeDownref( prg, sp, pdaRun->undoLel->tree );
+				kidFree( prg, pdaRun->undoLel );
+				goto restart;
 			}
 		}
 
@@ -2056,71 +2131,6 @@ case PcrRevIgnore2:
 //			/* Take the nonterm off the stack. */
 //			pdaRun->stackTop = pdaRun->stackTop->next;
 
-			/* Remove it from the input queue. */
-			pdaRun->undoLel = pdaRun->input1;
-			pdaRun->input1 = pdaRun->input1->next;
-
-			/* Check for an execution environment. */
-			if ( pdaRun->undoLel->tree->flags & AF_HAS_RCODE ) {
-
-				pdaRun->onDeck = true;
-
-return PcrRevReduction;
-case PcrRevReduction:
-
-return PcrRevReduction2;
-case PcrRevReduction2:
-
-				pdaRun->undoLel->tree->flags &= ~AF_HAS_RCODE;
-
-				if ( pdaRun->exec->lhs != 0 ) {
-					/* Get the lhs, it may have been reverted. */
-					treeDownref( prg, sp, pdaRun->undoLel->tree );
-					pdaRun->undoLel->tree = pdaRun->exec->lhs;
-				}
-			}
-
-			/* Only the RCODE flag was in the replaced lhs. All the rest is in
-			 * the the original. We read it after restoring. */
-
-			/* Extract the real children from the child list. */
-			Kid *first = treeExtractChild( prg, pdaRun->undoLel->tree );
-
-			/* Walk the child list and and push the items onto the parsing
-			 * stack one at a time. */
-			while ( first != 0 ) {
-				/* Get the next item ahead of time. */
-				Kid *next = first->next;
-
-				/* Push onto the stack. */
-				first->next = pdaRun->stackTop;
-				pdaRun->stackTop = first;
-
-				first = next;
-			}
-
-			/* If there is an input1 queued, this is one less reduction it has
-			 * caused. */
-			if ( pdaRun->input1 != 0 )
-				pt(pdaRun->input1->tree)->causeReduce -= 1;
-
-			if ( pt(pdaRun->undoLel->tree)->retryUpper != 0 ) {
-				/* There is always an input1 item here because reduce
-				 * conflicts only happen on a lookahead character. */
-				assert( pdaRun->input1 != pdaRun->undoLel );
-				assert( pdaRun->input1 != 0 );
-				assert( pt(pdaRun->undoLel->tree)->retryLower == 0 );
-				assert( pt(pdaRun->input1->tree)->retryUpper == 0 );
-
-				/* Transfer the retry from undoLel to input1. */
-				pt(pdaRun->input1->tree)->retryLower = pt(pdaRun->undoLel->tree)->retryUpper;
-				pt(pdaRun->input1->tree)->retryUpper = 0;
-				pt(pdaRun->input1->tree)->state = stackTopTarget( prg, pdaRun );
-			}
-
-			/* Free the reduced item. */
-			treeDownref( prg, sp, pdaRun->undoLel->tree );
-			kidFree( prg, pdaRun->undoLel );
 		}
 	}
 
