@@ -1960,6 +1960,10 @@ case PcrRevToken2:
 						goto _out;
 					}
 				}
+				else {
+					/* Need to undo a reduction. */
+					goto undo_someting;
+				}
 			}
 			else {
 				/* Remove it from the input queue. */
@@ -2027,8 +2031,9 @@ case PcrRevReduction2:
 				/* Free the reduced item. */
 				treeDownref( prg, sp, pdaRun->undoLel->tree );
 				kidFree( prg, pdaRun->undoLel );
-				goto restart;
 			}
+
+			goto restart;
 		}
 
 		while ( pdaRun->input1 == 0 && pdaRun->accumIgnore != 0 ) {
@@ -2062,6 +2067,7 @@ case PcrRevIgnore2:
 			}
 		}
 
+undo_someting:
 		/* Now it is time to undo something. Pick an element from the top of
 		 * the stack. */
 		pdaRun->undoLel = pdaRun->stackTop;
