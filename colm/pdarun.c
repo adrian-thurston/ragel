@@ -1912,7 +1912,6 @@ parseError:
 	}
 
 	while ( 1 ) {
-restart:
 		if ( pdaRun->input1 != 0 ) {
 			/* Either we are dealing with a terminal that was
 			 * shifted or a nonterminal that was reduced. */
@@ -1929,9 +1928,32 @@ restart:
 					goto again;
 				}
 
-				/* If there is no retry and there are no reductions caused by the
-				 * current input1 token then we are finished with it. Send it back. */
-				if ( pt(pdaRun->input1->tree)->causeReduce == 0 ) {
+				if ( pt(pdaRun->input1->tree)->causeReduce != 0 ) {
+					pdaRun->undoLel = pdaRun->stackTop;
+
+					/* Check if we've arrived at the stack sentinal. This guard
+					 * is here to allow us to initially set numRetry to one to
+					 * cause the parser to backup all the way to the beginning
+					 * when an error occurs. */
+					if ( pdaRun->undoLel->next == 0 )
+						break;
+
+					/* Either we are dealing with a terminal that was
+					 * shifted or a nonterminal that was reduced. */
+					assert( !(pdaRun->stackTop->tree->id < prg->rtd->firstNonTermId || 
+							(pdaRun->stackTop->tree->flags & AF_TERM_DUP) ) );
+
+					debug( REALM_PARSE, "backing up over non-terminal: %s\n",
+							prg->rtd->lelInfo[pdaRun->stackTop->tree->id].name );
+
+					/* Pop the item from the stack. */
+					pdaRun->stackTop = pdaRun->stackTop->next;
+
+					/* Queue it as next input1 item. */
+					pdaRun->undoLel->next = pdaRun->input1;
+					pdaRun->input1 = pdaRun->undoLel;
+				}
+				else {
 					long region = pt(pdaRun->input1->tree)->region;
 					pdaRun->next = region > 0 ? region + 1 : 0;
 
@@ -1959,10 +1981,6 @@ case PcrRevToken2:
 						pdaRun->cs = stackTopTarget( prg, pdaRun );
 						goto _out;
 					}
-				}
-				else {
-					/* Need to undo a reduction. */
-					goto undo_someting;
 				}
 			}
 			else {
@@ -2032,11 +2050,8 @@ case PcrRevReduction2:
 				treeDownref( prg, sp, pdaRun->undoLel->tree );
 				kidFree( prg, pdaRun->undoLel );
 			}
-
-			goto restart;
 		}
-
-		while ( pdaRun->input1 == 0 && pdaRun->accumIgnore != 0 ) {
+		else if ( pdaRun->accumIgnore != 0 ) {
 			debug( REALM_PARSE, "have accumulated ignore to undo\n" );
 
 			/* Send back any accumulated ignore tokens, then trigger error
@@ -2066,77 +2081,58 @@ case PcrRevIgnore2:
 				return PcrDone;
 			}
 		}
+		else {
 
-undo_someting:
-		/* Now it is time to undo something. Pick an element from the top of
-		 * the stack. */
-		pdaRun->undoLel = pdaRun->stackTop;
+			/* Now it is time to undo something. Pick an element from the top of
+			 * the stack. */
+			pdaRun->undoLel = pdaRun->stackTop;
 
-		/* Check if we've arrived at the stack sentinal. This guard is
-		 * here to allow us to initially set numRetry to one to cause the
-		 * parser to backup all the way to the beginning when an error
-		 * occurs. */
-		if ( pdaRun->undoLel->next == 0 )
-			break;
+			/* Check if we've arrived at the stack sentinal. This guard is
+			 * here to allow us to initially set numRetry to one to cause the
+			 * parser to backup all the way to the beginning when an error
+			 * occurs. */
+			if ( pdaRun->undoLel->next == 0 )
+				break;
 
-		/* Either we are dealing with a terminal that was
-		 * shifted or a nonterminal that was reduced. */
-		if ( pdaRun->stackTop->tree->id < prg->rtd->firstNonTermId || 
-				(pdaRun->stackTop->tree->flags & AF_TERM_DUP) )
-		{
-			debug( REALM_PARSE, "backing up over effective terminal: %s\n",
+			/* Either we are dealing with a terminal that was
+			 * shifted or a nonterminal that was reduced. */
+			if ( pdaRun->stackTop->tree->id < prg->rtd->firstNonTermId || 
+					(pdaRun->stackTop->tree->flags & AF_TERM_DUP) )
+			{
+				debug( REALM_PARSE, "backing up over effective terminal: %s\n",
+							prg->rtd->lelInfo[pdaRun->stackTop->tree->id].name );
+
+				/* Pop the item from the stack. */
+				pdaRun->stackTop = pdaRun->stackTop->next;
+
+				/* Undo the translation from termDup. */
+				if ( pdaRun->undoLel->tree->flags & AF_TERM_DUP ) {
+					pdaRun->undoLel->tree->id = prg->rtd->lelInfo[pdaRun->undoLel->tree->id].termDupId;
+					pdaRun->undoLel->tree->flags &= ~AF_TERM_DUP;
+				}
+
+				/* Queue it as next input1 item. */
+				pdaRun->undoLel->next = pdaRun->input1;
+				pdaRun->input1 = pdaRun->undoLel;
+
+				/* Pop from the token list. */
+				Ref *ref = pdaRun->tokenList;
+				pdaRun->tokenList = ref->next;
+				kidFree( prg, (Kid*)ref );
+
+				detachIgnores( prg, sp, pdaRun, fsmRun, pdaRun->input1 );
+			}
+			else {
+				debug( REALM_PARSE, "backing up over non-terminal: %s\n",
 						prg->rtd->lelInfo[pdaRun->stackTop->tree->id].name );
 
-			/* Pop the item from the stack. */
-			pdaRun->stackTop = pdaRun->stackTop->next;
+				/* Pop the item from the stack. */
+				pdaRun->stackTop = pdaRun->stackTop->next;
 
-			/* Undo the translation from termDup. */
-			if ( pdaRun->undoLel->tree->flags & AF_TERM_DUP ) {
-				pdaRun->undoLel->tree->id = prg->rtd->lelInfo[pdaRun->undoLel->tree->id].termDupId;
-				pdaRun->undoLel->tree->flags &= ~AF_TERM_DUP;
+				/* Queue it as next input1 item. */
+				pdaRun->undoLel->next = pdaRun->input1;
+				pdaRun->input1 = pdaRun->undoLel;
 			}
-
-			/* Queue it as next input1 item. */
-			pdaRun->undoLel->next = pdaRun->input1;
-			pdaRun->input1 = pdaRun->undoLel;
-
-			/* Pop from the token list. */
-			Ref *ref = pdaRun->tokenList;
-			pdaRun->tokenList = ref->next;
-			kidFree( prg, (Kid*)ref );
-
-			detachIgnores( prg, sp, pdaRun, fsmRun, pdaRun->input1 );
-		}
-		else {
-			debug( REALM_PARSE, "backing up over non-terminal: %s\n",
-					prg->rtd->lelInfo[pdaRun->stackTop->tree->id].name );
-
-			/* Pop the item from the stack. */
-			pdaRun->stackTop = pdaRun->stackTop->next;
-
-//			/* Undo the translation from termDup. */
-//			if ( pdaRun->undoLel->tree->flags & AF_TERM_DUP ) {
-//				pdaRun->undoLel->tree->id = prg->rtd->lelInfo[pdaRun->undoLel->tree->id].termDupId;
-//				pdaRun->undoLel->tree->flags &= ~AF_TERM_DUP;
-//			}
-//
-			/* Queue it as next input1 item. */
-			pdaRun->undoLel->next = pdaRun->input1;
-			pdaRun->input1 = pdaRun->undoLel;
-
-//			/* Pop from the token list. */
-//			Ref *ref = pdaRun->tokenList;
-//			pdaRun->tokenList = ref->next;
-//			kidFree( prg, (Kid*)ref );
-//
-//			detachIgnores( prg, sp, pdaRun, fsmRun, pdaRun->input1 );
-
-//			/* Warm fuzzies ... */
-//			assert( pdaRun->undoLel == pdaRun->stackTop );
-//
-//			/* Take the nonterm off the stack. */
-//			pdaRun->stackTop = pdaRun->stackTop->next;
-
 		}
 	}
 
