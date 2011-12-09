@@ -442,6 +442,11 @@ typedef struct _Execution
 	Tree **iframePtr;
 	long frameId;
 
+	/* The left hand side passed in and the saved left hand side in case we
+	 * need to preserve it for backtracking before we write to it. */
+	Tree *lhs;
+	Tree *parsed;
+
 	long genId;
 	Head *matchText;
 	int reject;
@@ -473,6 +478,22 @@ Head *intToStr( struct ColmProgram *prg, Word i );
 
 Tree *constructString( struct ColmProgram *prg, Head *s );
 
+void initProgramExecution( Execution *exec, struct ColmProgram *prg, RtCodeVect *reverseCode,
+		PdaRun *pdaRun, FsmRun *fsmRun, int frameId, Code *code, Tree *lhs,
+		long genId, Head *matchText, char **captures );
+
+void initReductionExecution( Execution *exec, struct ColmProgram *prg, RtCodeVect *reverseCode,
+		PdaRun *pdaRun, FsmRun *fsmRun, int frameId, Code *code, Tree *lhs,
+		long genId, Head *matchText, char **captures );
+
+void initGenerationExecution( Execution *exec, struct ColmProgram *prg, RtCodeVect *reverseCode,
+		PdaRun *pdaRun, FsmRun *fsmRun, int frameId, Code *code, Tree *lhs,
+		long genId, Head *matchText, char **captures );
+
+void initReverseExecution( Execution *exec, struct ColmProgram *prg, RtCodeVect *reverseCode,
+		PdaRun *pdaRun, FsmRun *fsmRun, int frameId, Code *code, Tree *lhs,
+		long genId, Head *matchText, char **captures );
+
 void mainExecution( Execution *exec );
 void reductionExecution( Execution *exec, Tree **sp );
 void generationExecution( Execution *exec, Tree **sp );
@@ -494,10 +515,6 @@ void allocGlobal( struct ColmProgram *prg );
 Tree **executeCode( Execution *exec, Tree **sp, Code *instr );
 void rcodeDownref( struct ColmProgram *prg, Tree **sp, Code *instr );
 Tree **stackAlloc();
-
-void initProgramExecution( Execution *exec, struct ColmProgram *prg, RtCodeVect *reverseCode,
-		PdaRun *pdaRun, FsmRun *fsmRun, int frameId, Code *code,
-		long genId, Head *matchText, char **captures );
 
 #ifdef __cplusplus
 }

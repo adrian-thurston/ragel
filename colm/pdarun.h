@@ -331,11 +331,6 @@ typedef struct _PdaRun
 
 	int checkNext;
 	int checkStop;
-
-	/* The left hand side passed in and the saved left hand side in case we
-	 * need to preserve it for backtracking before we write to it. */
-	Tree *lhs;
-	Tree *parsed;
 } PdaRun;
 
 void rtCodeVectReplace( RtCodeVect *vect, long pos, const Code *val, long len );
