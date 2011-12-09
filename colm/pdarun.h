@@ -328,6 +328,9 @@ typedef struct _PdaRun
 	Kid *ignore4;
 	Kid *ignore5;
 	Kid *ignore6;
+
+	int checkNext;
+	int checkStop;
 } PdaRun;
 
 void rtCodeVectReplace( RtCodeVect *vect, long pos, const Code *val, long len );

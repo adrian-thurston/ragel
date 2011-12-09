@@ -1410,6 +1410,8 @@ void initPdaRun( PdaRun *pdaRun, Program *prg, PdaTables *tables,
 	pdaRun->stopParsing = false;
 	pdaRun->accumIgnore = 0;
 	pdaRun->btPoint = 0;
+	pdaRun->checkNext = false;
+	pdaRun->checkStop = false;
 
 	initBindings( pdaRun );
 
@@ -1912,7 +1914,28 @@ parseError:
 	}
 
 	while ( 1 ) {
-		if ( pdaRun->input1 != 0 ) {
+		if ( pdaRun->checkNext ) {
+			pdaRun->checkNext = false;
+
+			if ( pdaRun->next > 0 && pdaRun->tables->tokenRegions[pdaRun->next] != 0 ) {
+				debug( REALM_PARSE, "found a new region\n" );
+				pdaRun->numRetry -= 1;
+				pdaRun->cs = stackTopTarget( prg, pdaRun );
+				pdaRun->nextRegionInd = pdaRun->next;
+				return PcrDone;
+			}
+		}
+		else if ( pdaRun->checkStop ) {
+			pdaRun->checkStop = false;
+
+			if ( pdaRun->stop ) {
+				debug( REALM_PARSE, "stopping the backtracking, steps is %d", pdaRun->steps );
+
+				pdaRun->cs = stackTopTarget( prg, pdaRun );
+				goto _out;
+			}
+		}
+		else if ( pdaRun->input1 != 0 ) {
 			/* Either we are dealing with a terminal that was
 			 * shifted or a nonterminal that was reduced. */
 			if ( pdaRun->input1->tree->id < prg->rtd->firstNonTermId || 
@@ -1956,6 +1979,8 @@ parseError:
 				else {
 					long region = pt(pdaRun->input1->tree)->region;
 					pdaRun->next = region > 0 ? region + 1 : 0;
+					pdaRun->checkNext = true;
+					pdaRun->checkStop = true;
 
 					long pcr = sendBack( prg, sp, pdaRun, fsmRun, inputStream, pdaRun->input1, PcrStart );
 					while ( pcr != PcrDone ) {
@@ -1967,31 +1992,11 @@ case PcrRevToken2:
 
 					pdaRun->input1 = 0;
 
-					if ( pdaRun->next > 0 && pdaRun->tables->tokenRegions[pdaRun->next] != 0 ) {
-						debug( REALM_PARSE, "found a new region\n" );
-						pdaRun->numRetry -= 1;
-						pdaRun->cs = stackTopTarget( prg, pdaRun );
-						pdaRun->nextRegionInd = pdaRun->next;
-						return PcrDone;
-					}
-
-					if ( pdaRun->stop ) {
-						debug( REALM_PARSE, "stopping the backtracking, steps is %d", pdaRun->steps );
-
-						pdaRun->cs = stackTopTarget( prg, pdaRun );
-						goto _out;
-					}
 				}
 			}
-			else {
-				/* Remove it from the input queue. */
-				pdaRun->undoLel = pdaRun->input1;
-				pdaRun->input1 = pdaRun->input1->next;
+			else if ( pdaRun->input1->tree->flags & AF_HAS_RCODE ) {
 
-				/* Check for an execution environment. */
-				if ( pdaRun->undoLel->tree->flags & AF_HAS_RCODE ) {
-
-					pdaRun->onDeck = true;
+				pdaRun->onDeck = true;
 
 return PcrRevReduction;
 case PcrRevReduction:
@@ -1999,17 +2004,22 @@ case PcrRevReduction:
 return PcrRevReduction2;
 case PcrRevReduction2:
 
-					pdaRun->undoLel->tree->flags &= ~AF_HAS_RCODE;
-
-					if ( pdaRun->exec->lhs != 0 ) {
-						/* Get the lhs, it may have been reverted. */
-						treeDownref( prg, sp, pdaRun->undoLel->tree );
-						pdaRun->undoLel->tree = pdaRun->exec->lhs;
-					}
-				}
-
 				/* Only the RCODE flag was in the replaced lhs. All the rest is in
 				 * the the original. We read it after restoring. */
+
+				pdaRun->input1->tree->flags &= ~AF_HAS_RCODE;
+
+				if ( pdaRun->exec->lhs != 0 ) {
+					/* Get the lhs, it may have been reverted. */
+					treeDownref( prg, sp, pdaRun->input1->tree );
+					pdaRun->input1->tree = pdaRun->exec->lhs;
+				}
+			}
+			else {
+				/* Remove it from the input queue. */
+				pdaRun->undoLel = pdaRun->input1;
+				pdaRun->input1 = pdaRun->input1->next;
+
 
 				/* Extract the real children from the child list. */
 				Kid *first = treeExtractChild( prg, pdaRun->undoLel->tree );
@@ -2062,6 +2072,7 @@ case PcrRevReduction2:
 			
 			long region = pt(pdaRun->ignore6->tree)->region;
 			pdaRun->next = region > 0 ? region + 1 : 0;
+			pdaRun->checkNext = true;
 			
 			long pcr = sendBackIgnore( prg, sp, pdaRun, fsmRun, inputStream, pdaRun->ignore6, PcrStart );
 			while ( pcr != PcrDone ) {
@@ -2071,14 +2082,6 @@ case PcrRevIgnore:
 case PcrRevIgnore2:
 
 				pcr = sendBackIgnore( prg, sp, pdaRun, fsmRun, inputStream, pdaRun->ignore6, entry );
-			}
-
-			if ( pdaRun->next > 0 && pdaRun->tables->tokenRegions[pdaRun->next] != 0 ) {
-				debug( REALM_PARSE, "found a new region\n" );
-				pdaRun->numRetry -= 1;
-				pdaRun->cs = stackTopTarget( prg, pdaRun );
-				pdaRun->nextRegionInd = pdaRun->next;
-				return PcrDone;
 			}
 		}
 		else {
