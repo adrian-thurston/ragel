@@ -763,6 +763,8 @@ struct ParseData
 
 	void addSaveLHS( Definition *prod, CodeVect &code, long &insertPos );
 	void addProdRHSLoads( Definition *prod, CodeVect &code, long &insertPos );
+	void addProdLHSLoad( Definition *prod, CodeVect &code, long &insertPos );
+	void addPushBackLHS( Definition *prod, CodeVect &code, long &insertPos );
 
 	void prepGrammar();
 	void parsePatterns();

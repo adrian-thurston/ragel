@@ -111,7 +111,9 @@ typedef unsigned char uchar;
 #define IN_GET_TOKEN_POS_R       0x37
 
 #define IN_INIT_RHS_EL           0x38
+#define IN_INIT_LHS_EL           0xef
 #define IN_INIT_CAPTURES         0x39
+#define IN_STORE_LHS_EL          0xf0
 
 #define IN_TRITER_FROM_REF       0x3a
 #define IN_TRITER_ADVANCE        0x3b

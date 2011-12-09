@@ -112,16 +112,60 @@ void ParseData::addProdRedObjectVar( ObjectDef *localFrame, LangEl *nonTerm )
 	TypeRef *typeRef = new TypeRef( InputLoc(), prodNameUT );
 	ObjField *el = new ObjField( InputLoc(), typeRef, "lhs" );
 
-	/* Is the only item pushed to the stack just before a reduction action is
-	 * executed. We rely on a zero offset. */
-	el->beenReferenced = true;
-	el->beenInitialized = true;
 	el->isLhsEl = true;
-	el->offset = 0;
 
 	initLocalInstructions( el );
 
 	localFrame->insertField( el->name, el );
+}
+
+void ParseData::addProdLHSLoad( Definition *prod, CodeVect &code, long &insertPos )
+{
+	ObjField *lhsField = prod->redBlock->localFrame->findField("lhs");
+	assert( lhsField != 0 );
+
+	CodeVect loads;
+	if ( lhsField->beenReferenced ) {
+		loads.append ( IN_INIT_LHS_EL );
+		loads.appendHalf( lhsField->offset );
+	}
+
+	code.insert( insertPos, loads );
+	insertPos += loads.length();
+}
+
+void ParseData::addSaveLHS( Definition *prod, CodeVect &code, long &insertPos )
+{
+	CodeBlock *block = prod->redBlock;
+
+	/* If the lhs tree is dirty then we will need to save off the old lhs
+	* before it gets modified. We want to avoid this for attribute
+	* modifications. The computation of dirtyTree should deal with this for
+	* us. */
+	ObjField *lhsField = block->localFrame->findField("lhs");
+	assert( lhsField != 0 );
+
+	if ( lhsField->dirtyTree ) {
+		code.insert( insertPos, IN_SAVE_LHS );
+		insertPos += 1;
+	}
+}
+
+void ParseData::addPushBackLHS( Definition *prod, CodeVect &code, long &insertPos )
+{
+	CodeBlock *block = prod->redBlock;
+
+	/* If the lhs tree is dirty then we will need to save off the old lhs
+	 * before it gets modified. We want to avoid this for attribute
+	 * modifications. The computation of dirtyTree should deal with this for
+	 * us. */
+	ObjField *lhsField = block->localFrame->findField("lhs");
+	assert( lhsField != 0 );
+
+	if ( lhsField->beenReferenced ) {
+		code.append( IN_STORE_LHS_EL );
+		code.appendHalf( lhsField->offset );
+	}
 }
 
 void ParseData::addProdRHSVars( ObjectDef *localFrame, ProdElList *prodElList )

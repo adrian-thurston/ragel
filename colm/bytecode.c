@@ -945,9 +945,6 @@ void callParseBlock( Code **pinstr, Tree ***psp, long pcr, Program *prg,
 			/* Push the instruction. */
 			vm_push( (SW)*pinstr );
 
-			/* Push the LHS onto the stack. */
-			vm_push( exec->lhs );
-
 			/* Call execution. */
 			*pinstr = exec->code;
 			break;
@@ -965,9 +962,6 @@ void callParseBlock( Code **pinstr, Tree ***psp, long pcr, Program *prg,
 			/* Push the instruction. */
 			vm_push( (SW)*pinstr );
 
-			/* Push the LHS onto the stack. */
-			vm_push( 0 );
-
 			/* Call execution. */
 			*pinstr = exec->code;
 			break;
@@ -981,9 +975,6 @@ void callParseBlock( Code **pinstr, Tree ***psp, long pcr, Program *prg,
 
 			/* Push the instruction. */
 			vm_push( (SW)*pinstr );
-
-			/* Push the LHS onto the stack. */
-			vm_push( 0 );
 
 			/* Call execution. */
 			*pinstr = exec->code;
@@ -999,9 +990,6 @@ void callParseBlock( Code **pinstr, Tree ***psp, long pcr, Program *prg,
 			/* Push the instruction. */
 			vm_push( (SW)*pinstr );
 
-			/* Push the LHS onto the stack. */
-			vm_push( 0 );
-
 			*pinstr = popReverseCode( &pdaRun->reverseCode );
 			break;
 		}
@@ -1015,9 +1003,6 @@ void callParseBlock( Code **pinstr, Tree ***psp, long pcr, Program *prg,
 			/* Push the instruction. */
 			vm_push( (SW)*pinstr );
 
-			/* Push the LHS onto the stack. */
-			vm_push( 0 );
-
 			*pinstr = popReverseCode( &pdaRun->reverseCode );
 			break;
 		}
@@ -1030,9 +1015,6 @@ void callParseBlock( Code **pinstr, Tree ***psp, long pcr, Program *prg,
 
 			/* Push the instruction. */
 			vm_push( (SW)*pinstr );
-
-			/* Push the LHS onto the stack. */
-			vm_push( 0 );
 
 			*pinstr = popReverseCode( &pdaRun->reverseCode );
 			break;
@@ -1062,7 +1044,7 @@ again:
 		case IN_SAVE_LHS: {
 			debug( REALM_BYTECODE, "IN_SAVE_LHS\n" );
 
-			assert( exec->lhs != 0 );
+			//assert( exec->lhs != 0 );
 
 			/* Save and upref before writing. We don't generate a restore
 			 * here. Instead, in the parser we will check if it actually
@@ -1336,11 +1318,34 @@ again:
 			read_half( position );
 			read_half( field );
 
-			debug( REALM_BYTECODE, "IN_INIT_RHS_EL\n" );
+			debug( REALM_BYTECODE, "IN_INIT_RHS_EL %hd\n", field );
 
 			Tree *val = getRhsEl( prg, exec->lhs, position );
 			treeUpref( val );
 			vm_local(field) = val;
+			break;
+		}
+		case IN_INIT_LHS_EL: {
+			short field;
+			read_half( field );
+
+			debug( REALM_BYTECODE, "IN_INIT_LHS_EL %hd\n", field );
+
+			Tree *val = exec->lhs;
+			exec->lhs = 0;
+			//treeUpref( val );
+			vm_local(field) = val;
+			break;
+		}
+		case IN_STORE_LHS_EL: {
+			short field;
+			read_half( field );
+
+			debug( REALM_BYTECODE, "IN_STORE_LHS_EL %hd\n", field );
+
+			Tree *val = vm_local(field);
+			vm_local(field) = 0;
+			exec->lhs = val;
 			break;
 		}
 		case IN_UITER_ADVANCE: {
@@ -2762,7 +2767,6 @@ again:
 		case IN_PCR_RET: {
 			debug( REALM_BYTECODE, "IN_PCR_RET\n" );
 
-			exec->lhs = (Tree*) vm_pop();
 			instr = (Code*) vm_pop();
 
 			if ( instr == 0 ) {
@@ -2776,7 +2780,6 @@ again:
 			debug( REALM_BYTECODE, "IN_PCR_END_DECK\n" );
 			exec->pdaRun->onDeck = false;
 
-			exec->lhs = (Tree*) vm_pop();
 			instr = (Code*) vm_pop();
 
 			if ( instr == 0 ) {

@@ -2514,21 +2514,6 @@ void ParseData::findLocalTrees( CharSet &trees )
 	}
 }
 
-void ParseData::addSaveLHS( Definition *prod, CodeVect &code, long &insertPos )
-{
-	CodeBlock *block = prod->redBlock;
-
-	/* If the lhs tree is dirty then we will need to save off the old lhs
-	 * before it gets modified. We want to avoid this for attribute
-	 * modifications. The computation of dirtyTree should deal with this for
-	 * us. */
-	ObjField *lhsField = block->localFrame->findField("lhs");
-	assert( lhsField != 0 );
-
-	if ( lhsField->dirtyTree )
-		code.insert( insertPos, IN_SAVE_LHS );
-}
-
 void ParseData::makeProdCopies( Definition *prod )
 {
 	int pos = 0;
@@ -2571,6 +2556,9 @@ void ParseData::compileReductionCode( Definition *prod )
 
 	/* Might need to load right hand side values. */
 	addProdRHSLoads( prod, code, afterInit );
+	addProdLHSLoad( prod, code, afterInit );
+
+	addPushBackLHS( prod, code, afterInit );
 
 	code.append( IN_POP_LOCALS );
 	code.appendHalf( block->frameId );
