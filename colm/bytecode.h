@@ -466,7 +466,7 @@ Head *intToStr( struct ColmProgram *prg, Word i );
 
 Tree *constructString( struct ColmProgram *prg, Head *s );
 
-void initProgramExecution( Execution *exec, struct ColmProgram *prg, RtCodeVect *reverseCode,
+void initExecution( Execution *exec, struct ColmProgram *prg, RtCodeVect *reverseCode,
 		PdaRun *pdaRun, FsmRun *fsmRun, int frameId );
 
 void mainExecution( Execution *exec, Code *code );

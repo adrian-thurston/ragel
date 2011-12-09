@@ -512,46 +512,7 @@ Tree *constructArgv( Program *prg, int argc, const char **argv )
  * Execution environment
  */
 
-void initProgramExecution( Execution *exec, Program *prg, RtCodeVect *rcodeCollect,
-		PdaRun *pdaRun, FsmRun *fsmRun, int frameId )
-{
-	exec->prg = prg;
-	exec->pdaRun = pdaRun;
-	exec->fsmRun = fsmRun;
-	exec->framePtr = 0;
-	exec->iframePtr = 0;
-	exec->frameId = frameId;
-	exec->rcodeCollect = rcodeCollect;
-	exec->rcodeUnitLen = 0;
-}
-
-void initGenerationExecution( Execution *exec, Program *prg, RtCodeVect *rcodeCollect,
-		PdaRun *pdaRun, FsmRun *fsmRun, int frameId )
-{
-	exec->prg = prg;
-	exec->pdaRun = pdaRun;
-	exec->fsmRun = fsmRun;
-	exec->framePtr = 0;
-	exec->iframePtr = 0;
-	exec->frameId = frameId;
-	exec->rcodeCollect = rcodeCollect;
-	exec->rcodeUnitLen = 0;
-}
-
-void initReductionExecution( Execution *exec, Program *prg, RtCodeVect *rcodeCollect,
-		PdaRun *pdaRun, FsmRun *fsmRun, int frameId )
-{
-	exec->prg = prg;
-	exec->pdaRun = pdaRun;
-	exec->fsmRun = fsmRun;
-	exec->framePtr = 0;
-	exec->iframePtr = 0;
-	exec->frameId = frameId;
-	exec->rcodeCollect = rcodeCollect;
-	exec->rcodeUnitLen = 0;
-}
-
-void initReverseExecution( Execution *exec, Program *prg, RtCodeVect *rcodeCollect,
+void initExecution( Execution *exec, Program *prg, RtCodeVect *rcodeCollect,
 		PdaRun *pdaRun, FsmRun *fsmRun, int frameId )
 {
 	exec->prg = prg;
@@ -898,11 +859,7 @@ void callParseBlock( Code **pinstr, Tree ***psp, long pcr, Program *prg,
 	switch ( pcr ) {
 		case PcrReduction: {
 			/* Execution environment for the reduction code. */
-			initReductionExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, 
-					pdaRun, fsmRun, pdaRun->frameId );
-
-			/* Push the instruction. */
-			vm_push( (SW)*pinstr );
+			initExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, pdaRun, fsmRun, pdaRun->frameId );
 
 			/* Call execution. */
 			*pinstr = pdaRun->fi->codeWV;
@@ -914,11 +871,7 @@ void callParseBlock( Code **pinstr, Tree ***psp, long pcr, Program *prg,
 			 * Not supported:
 			 *  -invoke failure (the backtracker)
 			 */
-			initGenerationExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, 
-					pdaRun, fsmRun, pdaRun->frameId );
-
-			/* Push the instruction. */
-			vm_push( (SW)*pinstr );
+			initExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, pdaRun, fsmRun, pdaRun->frameId );
 
 			/* Call execution. */
 			*pinstr = pdaRun->fi->codeWV;
@@ -927,11 +880,7 @@ void callParseBlock( Code **pinstr, Tree ***psp, long pcr, Program *prg,
 
 		case PcrPreEof: {
 			/* Execute the translation. */
-			initGenerationExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, 
-					pdaRun, fsmRun, pdaRun->frameId );
-
-			/* Push the instruction. */
-			vm_push( (SW)*pinstr );
+			initExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, pdaRun, fsmRun, pdaRun->frameId );
 
 			/* Call execution. */
 			*pinstr = pdaRun->fi->codeWV;
@@ -941,11 +890,7 @@ void callParseBlock( Code **pinstr, Tree ***psp, long pcr, Program *prg,
 		case PcrRevIgnore:
 		case PcrRevIgnore2:
 		{
-			initReverseExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, 
-					pdaRun, fsmRun, -1 );
-
-			/* Push the instruction. */
-			vm_push( (SW)*pinstr );
+			initExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, pdaRun, fsmRun, -1 );
 
 			*pinstr = popReverseCode( &pdaRun->reverseCode );
 			break;
@@ -954,11 +899,7 @@ void callParseBlock( Code **pinstr, Tree ***psp, long pcr, Program *prg,
 		case PcrRevReduction:
 		case PcrRevReduction2:
 		{
-			initReverseExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, 
-					pdaRun, fsmRun, -1 );
-
-			/* Push the instruction. */
-			vm_push( (SW)*pinstr );
+			initExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, pdaRun, fsmRun, -1 );
 
 			*pinstr = popReverseCode( &pdaRun->reverseCode );
 			break;
@@ -967,11 +908,7 @@ void callParseBlock( Code **pinstr, Tree ***psp, long pcr, Program *prg,
 		case PcrRevToken:
 		case PcrRevToken2:
 		{
-			initReverseExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, 
-					pdaRun, fsmRun, -1 );
-
-			/* Push the instruction. */
-			vm_push( (SW)*pinstr );
+			initExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, pdaRun, fsmRun, -1 );
 
 			*pinstr = popReverseCode( &pdaRun->reverseCode );
 			break;
@@ -2299,6 +2236,7 @@ again:
 
 				vm_push( (SW)pcr );
 				vm_push( (SW)accum );
+				vm_push( (SW)instr );
 
 				callParseBlock( &instr, &sp, pcr, prg, exec, accum );
 			}
@@ -2374,6 +2312,7 @@ again:
 				vm_push( (SW)pcr );
 				vm_push( (SW)steps );
 				vm_push( (SW)accum );
+				vm_push( (SW)instr );
 
 				callParseBlock( &instr, &sp, pcr, prg, exec, accum );
 			}
@@ -2452,6 +2391,7 @@ again:
 				vm_push( (SW)pcr );
 				vm_push( (SW)steps );
 				vm_push( (SW)accum );
+				vm_push( (SW)instr );
 
 				callParseBlock( &instr, &sp, pcr, prg, exec, accum );
 			}
@@ -2520,6 +2460,7 @@ again:
 				vm_push( (SW)pcr );
 				vm_push( result );
 				vm_push( (SW)accum );
+				vm_push( (SW)instr );
 
 				callParseBlock( &instr, &sp, pcr, prg, exec, accum );
 			}
@@ -2594,6 +2535,7 @@ again:
 				vm_push( (SW)steps );
 				vm_push( result );
 				vm_push( (SW)accum );
+				vm_push( (SW)instr );
 
 				callParseBlock( &instr, &sp, pcr, prg, exec, accum );
 			}
@@ -2673,6 +2615,7 @@ again:
 				vm_push( (SW)pcr );
 				vm_push( (SW)steps );
 				vm_push( (SW)accum );
+				vm_push( (SW)instr );
 
 				callParseBlock( &instr, &sp, pcr, prg, exec, accum );
 			}
