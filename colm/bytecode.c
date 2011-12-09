@@ -526,10 +526,10 @@ void initProgramExecution( Execution *exec, Program *prg, RtCodeVect *rcodeColle
 	if ( exec->pdaRun != 0 ) {
 		exec->pdaRun->lhs = lhs;
 		exec->pdaRun->parsed = 0;
+		exec->pdaRun->reject = false;
 	}
 	exec->genId = genId;
 	exec->matchText = matchText;
-	exec->reject = false;
 	exec->rcodeCollect = rcodeCollect;
 	exec->rcodeUnitLen = 0;
 	exec->captures = captures;
@@ -551,10 +551,10 @@ void initGenerationExecution( Execution *exec, Program *prg, RtCodeVect *rcodeCo
 	if ( exec->pdaRun != 0 ) {
 		exec->pdaRun->lhs = lhs;
 		exec->pdaRun->parsed = 0;
+		exec->pdaRun->reject = false;
 	}
 	exec->genId = genId;
 	exec->matchText = matchText;
-	exec->reject = false;
 	exec->rcodeCollect = rcodeCollect;
 	exec->rcodeUnitLen = 0;
 	exec->captures = captures;
@@ -576,10 +576,10 @@ void initReductionExecution( Execution *exec, Program *prg, RtCodeVect *rcodeCol
 	if ( exec->pdaRun != 0 ) {
 		exec->pdaRun->lhs = lhs;
 		exec->pdaRun->parsed = 0;
+		exec->pdaRun->reject = false;
 	}
 	exec->genId = genId;
 	exec->matchText = matchText;
-	exec->reject = false;
 	exec->rcodeCollect = rcodeCollect;
 	exec->rcodeUnitLen = 0;
 	exec->captures = captures;
@@ -601,10 +601,10 @@ void initReverseExecution( Execution *exec, Program *prg, RtCodeVect *rcodeColle
 	if ( exec->pdaRun != 0 ) {
 		exec->pdaRun->lhs = lhs;
 		exec->pdaRun->parsed = 0;
+		exec->pdaRun->reject = false;
 	}
 	exec->genId = genId;
 	exec->matchText = matchText;
-	exec->reject = false;
 	exec->rcodeCollect = rcodeCollect;
 	exec->rcodeUnitLen = 0;
 	exec->captures = captures;
@@ -1791,7 +1791,7 @@ again:
 		}
 		case IN_REJECT: {
 			debug( REALM_BYTECODE, "IN_REJECT\n" );
-			exec->reject = true;
+			exec->pdaRun->reject = true;
 			break;
 		}
 

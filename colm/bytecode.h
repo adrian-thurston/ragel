@@ -444,7 +444,6 @@ typedef struct _Execution
 
 	long genId;
 	Head *matchText;
-	int reject;
 
 	/* Reverse code. */
 	RtCodeVect *rcodeCollect;

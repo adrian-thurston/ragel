@@ -1426,6 +1426,9 @@ void initPdaRun( PdaRun *pdaRun, Program *prg, PdaTables *tables,
 	pdaRun->tokenId = 0;
 
 	pdaRun->onDeck = false;
+	pdaRun->lhs = 0;
+	pdaRun->parsed = 0;
+	pdaRun->reject = false;
 }
 
 long stackTopTarget( Program *prg, PdaRun *pdaRun )
@@ -1880,7 +1883,7 @@ case PcrReduction:
 
 			/* Perhaps the execution environment is telling us we need to
 			 * reject the reduction. */
-			induceReject = pdaRun->exec->reject;
+			induceReject = pdaRun->reject;
 		}
 
 		/* If the left hand side was replaced then the only parse algorithm

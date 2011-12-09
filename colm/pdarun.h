@@ -315,8 +315,8 @@ typedef struct _PdaRun
 	Kid *redLel;
 	int curState;
 	Kid *lel;
-	struct _Execution *exec;
 	int triggerUndo;
+	struct _Execution *exec;
 
 	int tokenId;
 	Head *tokdata;
@@ -337,6 +337,7 @@ typedef struct _PdaRun
 	Tree *lhs;
 	Tree *parsed;
 
+	int reject;
 } PdaRun;
 
 void rtCodeVectReplace( RtCodeVect *vect, long pos, const Code *val, long len );
