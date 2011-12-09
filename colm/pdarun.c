@@ -1858,18 +1858,17 @@ case PcrReduction:
 				goto fail;
 
 			/* If the lhs was saved and it changed then we need to restore the
-			 * original upon backtracking, otherwise downref since we took a
-			 * copy above. */
-			if ( pdaRun->exec->parsed != 0 && pdaRun->exec->parsed != pdaRun->redLel->tree ) {
+			 * original upon backtracking. */
+			if ( pdaRun->parsed != 0 && pdaRun->parsed != pdaRun->redLel->tree ) {
 				debug( REALM_PARSE, "lhs tree was modified, adding a restore instruction\n" );
 
 				/* Transfer the lhs from the environment to redLel. */
-				pdaRun->redLel->tree = prepParseTree( prg, sp, pdaRun->exec->lhs );
+				pdaRun->redLel->tree = prepParseTree( prg, sp, pdaRun->parsed );
 				treeUpref( pdaRun->redLel->tree );
-				treeDownref( prg, sp, pdaRun->exec->lhs );
+				treeDownref( prg, sp, pdaRun->lhs );
 
 				append( &pdaRun->rcodeCollect, IN_RESTORE_LHS );
-				appendWord( &pdaRun->rcodeCollect, (Word)pdaRun->exec->parsed );
+				appendWord( &pdaRun->rcodeCollect, (Word)pdaRun->parsed );
 				append( &pdaRun->rcodeCollect, SIZEOF_CODE + SIZEOF_WORD );
 			}
 
@@ -2009,10 +2008,10 @@ case PcrRevReduction2:
 
 				pdaRun->input1->tree->flags &= ~AF_HAS_RCODE;
 
-				if ( pdaRun->exec->lhs != 0 ) {
+				if ( pdaRun->lhs != 0 ) {
 					/* Get the lhs, it may have been reverted. */
 					treeDownref( prg, sp, pdaRun->input1->tree );
-					pdaRun->input1->tree = pdaRun->exec->lhs;
+					pdaRun->input1->tree = pdaRun->lhs;
 				}
 			}
 			else {

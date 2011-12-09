@@ -513,7 +513,7 @@ Tree *constructArgv( Program *prg, int argc, const char **argv )
  */
 
 void initProgramExecution( Execution *exec, Program *prg, RtCodeVect *rcodeCollect,
-		PdaRun *pdaRun, FsmRun *fsmRun, int frameId, Code *code, Tree *lhs,
+		PdaRun *pdaRun, FsmRun *fsmRun, int frameId, Code *code,
 		long genId, Head *matchText, char **captures )
 {
 	exec->prg = prg;
@@ -523,20 +523,20 @@ void initProgramExecution( Execution *exec, Program *prg, RtCodeVect *rcodeColle
 	exec->framePtr = 0;
 	exec->iframePtr = 0;
 	exec->frameId = frameId;
-	exec->lhs = lhs;
-	exec->parsed = 0;
+	if ( exec->pdaRun != 0 ) {
+		exec->pdaRun->lhs = 0;
+		exec->pdaRun->parsed = 0;
+	}
 	exec->genId = genId;
 	exec->matchText = matchText;
 	exec->reject = false;
 	exec->rcodeCollect = rcodeCollect;
 	exec->rcodeUnitLen = 0;
 	exec->captures = captures;
-
-	assert( lhs == 0 || lhs->refs == 1 );
 }
 
-void initGenerationExecution( Execution *exec, Program *prg, RtCodeVect *rcodeCollect,
-		PdaRun *pdaRun, FsmRun *fsmRun, int frameId, Code *code, Tree *lhs,
+static void initGenerationExecution( Execution *exec, Program *prg, RtCodeVect *rcodeCollect,
+		PdaRun *pdaRun, FsmRun *fsmRun, int frameId, Code *code,
 		long genId, Head *matchText, char **captures )
 {
 	exec->prg = prg;
@@ -546,19 +546,19 @@ void initGenerationExecution( Execution *exec, Program *prg, RtCodeVect *rcodeCo
 	exec->framePtr = 0;
 	exec->iframePtr = 0;
 	exec->frameId = frameId;
-	exec->lhs = lhs;
-	exec->parsed = 0;
+	if ( exec->pdaRun != 0 ) {
+		exec->pdaRun->lhs = 0;
+		exec->pdaRun->parsed = 0;
+	}
 	exec->genId = genId;
 	exec->matchText = matchText;
 	exec->reject = false;
 	exec->rcodeCollect = rcodeCollect;
 	exec->rcodeUnitLen = 0;
 	exec->captures = captures;
-
-	assert( lhs == 0 || lhs->refs == 1 );
 }
 
-void initReductionExecution( Execution *exec, Program *prg, RtCodeVect *rcodeCollect,
+static void initReductionExecution( Execution *exec, Program *prg, RtCodeVect *rcodeCollect,
 		PdaRun *pdaRun, FsmRun *fsmRun, int frameId, Code *code, Tree *lhs,
 		long genId, Head *matchText, char **captures )
 {
@@ -569,8 +569,10 @@ void initReductionExecution( Execution *exec, Program *prg, RtCodeVect *rcodeCol
 	exec->framePtr = 0;
 	exec->iframePtr = 0;
 	exec->frameId = frameId;
-	exec->lhs = lhs;
-	exec->parsed = 0;
+	if ( exec->pdaRun != 0 ) {
+		exec->pdaRun->lhs = lhs;
+		exec->pdaRun->parsed = 0;
+	}
 	exec->genId = genId;
 	exec->matchText = matchText;
 	exec->reject = false;
@@ -582,7 +584,7 @@ void initReductionExecution( Execution *exec, Program *prg, RtCodeVect *rcodeCol
 }
 
 void initReverseExecution( Execution *exec, Program *prg, RtCodeVect *rcodeCollect,
-		PdaRun *pdaRun, FsmRun *fsmRun, int frameId, Code *code, Tree *lhs,
+		PdaRun *pdaRun, FsmRun *fsmRun, int frameId, Code *code,
 		long genId, Head *matchText, char **captures )
 {
 	exec->prg = prg;
@@ -592,16 +594,16 @@ void initReverseExecution( Execution *exec, Program *prg, RtCodeVect *rcodeColle
 	exec->framePtr = 0;
 	exec->iframePtr = 0;
 	exec->frameId = frameId;
-	exec->lhs = lhs;
-	exec->parsed = 0;
+	if ( exec->pdaRun != 0 ) {
+		exec->pdaRun->lhs = 0;
+		exec->pdaRun->parsed = 0;
+	}
 	exec->genId = genId;
 	exec->matchText = matchText;
 	exec->reject = false;
 	exec->rcodeCollect = rcodeCollect;
 	exec->rcodeUnitLen = 0;
 	exec->captures = captures;
-
-	assert( lhs == 0 || lhs->refs == 1 );
 }
 
 void rcodeDownrefAll( Program *prg, Tree **sp, RtCodeVect *rev )
@@ -946,7 +948,7 @@ void callParseBlock( Code **pinstr, Tree ***psp, long pcr, Program *prg,
 			vm_push( (SW)*pinstr );
 
 			/* Push the LHS onto the stack. */
-			vm_push( exec->lhs );
+			vm_push( exec->pdaRun->lhs );
 
 			/* Call execution. */
 			*pinstr = exec->code;
@@ -960,7 +962,7 @@ void callParseBlock( Code **pinstr, Tree ***psp, long pcr, Program *prg,
 			 */
 			initGenerationExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, 
 					pdaRun, fsmRun, prg->rtd->lelInfo[pdaRun->tokenId].frameId, 
-					pdaRun->fi->codeWV, 0, pdaRun->tokenId, pdaRun->tokdata, fsmRun->mark );
+					pdaRun->fi->codeWV, pdaRun->tokenId, pdaRun->tokdata, fsmRun->mark );
 
 			/* Push the instruction. */
 			vm_push( (SW)*pinstr );
@@ -977,7 +979,7 @@ void callParseBlock( Code **pinstr, Tree ***psp, long pcr, Program *prg,
 			/* Execute the translation. */
 			initGenerationExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, pdaRun, fsmRun, 
 					pdaRun->frameId, prg->rtd->frameInfo[pdaRun->frameId].codeWV,
-					0, pdaRun->tokenId, 0, fsmRun->mark );
+					pdaRun->tokenId, 0, fsmRun->mark );
 
 			/* Push the instruction. */
 			vm_push( (SW)*pinstr );
@@ -994,7 +996,7 @@ void callParseBlock( Code **pinstr, Tree ***psp, long pcr, Program *prg,
 		case PcrRevIgnore2:
 		{
 			initReverseExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, 
-					pdaRun, fsmRun, -1, 0, 0, 0, 0, 0 );
+					pdaRun, fsmRun, -1, 0, 0, 0, 0 );
 
 			/* Push the instruction. */
 			vm_push( (SW)*pinstr );
@@ -1010,7 +1012,7 @@ void callParseBlock( Code **pinstr, Tree ***psp, long pcr, Program *prg,
 		case PcrRevReduction2:
 		{
 			initReverseExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, 
-					pdaRun, fsmRun, -1, 0, 0, 0, 0, fsmRun->mark );
+					pdaRun, fsmRun, -1, 0, 0, 0, fsmRun->mark );
 
 			/* Push the instruction. */
 			vm_push( (SW)*pinstr );
@@ -1026,7 +1028,7 @@ void callParseBlock( Code **pinstr, Tree ***psp, long pcr, Program *prg,
 		case PcrRevToken2:
 		{
 			initReverseExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, 
-					pdaRun, fsmRun, -1, 0, 0, 0, 0, 0 );
+					pdaRun, fsmRun, -1, 0, 0, 0, 0 );
 
 			/* Push the instruction. */
 			vm_push( (SW)*pinstr );
@@ -1062,13 +1064,13 @@ again:
 		case IN_SAVE_LHS: {
 			debug( REALM_BYTECODE, "IN_SAVE_LHS\n" );
 
-			assert( exec->lhs != 0 );
+			assert( exec->pdaRun->lhs != 0 );
 
 			/* Save and upref before writing. We don't generate a restore
 			 * here. Instead, in the parser we will check if it actually
 			 * changed and insert the instruction then. The presence of this
 			 * instruction here is just a conservative approximation.  */
-			exec->parsed = exec->lhs;
+			exec->pdaRun->parsed = exec->pdaRun->lhs;
 			//treeUpref( parsed );
 			break;
 		}
@@ -1077,8 +1079,8 @@ again:
 			read_tree( restore );
 
 			debug( REALM_BYTECODE, "IN_RESTORE_LHS\n" );
-			//assert( exec->lhs == 0 );
-			exec->lhs = restore;
+			//assert( exec->pdaRun->lhs == 0 );
+			exec->pdaRun->lhs = restore;
 			break;
 		}
 		case IN_LOAD_NIL: {
@@ -1338,7 +1340,7 @@ again:
 
 			debug( REALM_BYTECODE, "IN_INIT_RHS_EL\n" );
 
-			Tree *val = getRhsEl( prg, exec->lhs, position );
+			Tree *val = getRhsEl( prg, exec->pdaRun->lhs, position );
 			treeUpref( val );
 			vm_local(field) = val;
 			break;
@@ -2762,7 +2764,7 @@ again:
 		case IN_PCR_RET: {
 			debug( REALM_BYTECODE, "IN_PCR_RET\n" );
 
-			exec->lhs = (Tree*) vm_pop();
+			exec->pdaRun->lhs = (Tree*) vm_pop();
 			instr = (Code*) vm_pop();
 
 			if ( instr == 0 ) {
@@ -2776,7 +2778,7 @@ again:
 			debug( REALM_BYTECODE, "IN_PCR_END_DECK\n" );
 			exec->pdaRun->onDeck = false;
 
-			exec->lhs = (Tree*) vm_pop();
+			exec->pdaRun->lhs = (Tree*) vm_pop();
 			instr = (Code*) vm_pop();
 
 			if ( instr == 0 ) {
