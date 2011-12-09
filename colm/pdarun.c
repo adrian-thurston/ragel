@@ -1138,6 +1138,8 @@ case PcrStart:
 			pdaRun->input1 = sendEof( prg, sp, inputStream, fsmRun, pdaRun );
 
 			pdaRun->frameId = prg->rtd->regionInfo[fsmRun->region].eofFrameId;
+			pdaRun->fi = &prg->rtd->frameInfo[pdaRun->frameId];
+
 			if ( prg->ctxDepParsing && pdaRun->frameId >= 0 ) {
 				debug( REALM_PARSE, "HAVE PRE_EOF BLOCK\n" );
 
@@ -1215,6 +1217,7 @@ case PcrPreEof:
 			fsmRun->tokstart = 0;
 
 			pdaRun->fi = &prg->rtd->frameInfo[prg->rtd->lelInfo[pdaRun->tokenId].frameId];
+			pdaRun->frameId = prg->rtd->lelInfo[pdaRun->tokenId].frameId;
 			
 return PcrGeneration;
 case PcrGeneration:
@@ -1853,6 +1856,10 @@ again:
 		if ( prg->ctxDepParsing && prg->rtd->prodInfo[pdaRun->reduction].frameId >= 0 ) {
 			/* Frame info for reduction. */
 			pdaRun->fi = &prg->rtd->frameInfo[prg->rtd->prodInfo[pdaRun->reduction].frameId];
+			pdaRun->frameId = prg->rtd->prodInfo[pdaRun->reduction].frameId;
+			pdaRun->reject = false;
+			pdaRun->lhs = pdaRun->redLel->tree;
+			pdaRun->parsed = 0;
 
 return PcrReduction;
 case PcrReduction:
@@ -2000,6 +2007,8 @@ case PcrRevToken2:
 			else if ( pdaRun->input1->tree->flags & AF_HAS_RCODE ) {
 
 				pdaRun->onDeck = true;
+				pdaRun->lhs = 0;
+				pdaRun->parsed = 0;
 
 return PcrRevReduction;
 case PcrRevReduction:

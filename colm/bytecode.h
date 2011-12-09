@@ -437,19 +437,13 @@ typedef struct _Execution
 	PdaTables *pdaTables;
 	PdaRun *pdaRun;
 	FsmRun *fsmRun;
-	Code *code;
 	Tree **framePtr;
 	Tree **iframePtr;
 	long frameId;
 
-	long genId;
-	Head *matchText;
-
-	/* Reverse code. */
+	/* Reverse code collection. */
 	RtCodeVect *rcodeCollect;
 	long rcodeUnitLen;
-	char **captures;
-
 } Execution;
 
 long stringLength( Head *str );
@@ -473,22 +467,9 @@ Head *intToStr( struct ColmProgram *prg, Word i );
 Tree *constructString( struct ColmProgram *prg, Head *s );
 
 void initProgramExecution( Execution *exec, struct ColmProgram *prg, RtCodeVect *reverseCode,
-		PdaRun *pdaRun, FsmRun *fsmRun, int frameId, Code *code, Tree *lhs,
-		long genId, Head *matchText, char **captures );
+		PdaRun *pdaRun, FsmRun *fsmRun, int frameId );
 
-void initReductionExecution( Execution *exec, struct ColmProgram *prg, RtCodeVect *reverseCode,
-		PdaRun *pdaRun, FsmRun *fsmRun, int frameId, Code *code, Tree *lhs,
-		long genId, Head *matchText, char **captures );
-
-void initGenerationExecution( Execution *exec, struct ColmProgram *prg, RtCodeVect *reverseCode,
-		PdaRun *pdaRun, FsmRun *fsmRun, int frameId, Code *code, Tree *lhs,
-		long genId, Head *matchText, char **captures );
-
-void initReverseExecution( Execution *exec, struct ColmProgram *prg, RtCodeVect *reverseCode,
-		PdaRun *pdaRun, FsmRun *fsmRun, int frameId, Code *code, Tree *lhs,
-		long genId, Head *matchText, char **captures );
-
-void mainExecution( Execution *exec );
+void mainExecution( Execution *exec, Code *code );
 void reductionExecution( Execution *exec, Tree **sp );
 void generationExecution( Execution *exec, Tree **sp );
 void reverseExecution( Execution *exec, Tree **sp, RtCodeVect *allRev );

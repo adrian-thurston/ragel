@@ -74,8 +74,8 @@ void colmRunProgram( Program *prg )
 		Execution execution;
 
 		initRtCodeVect( &rcodeCollect );
-		initProgramExecution( &execution, prg, &rcodeCollect, 0, 0, -1, prg->rtd->rootCode, 0, 0, 0, 0 );
-		mainExecution( &execution );
+		initProgramExecution( &execution, prg, &rcodeCollect, 0, 0, -1 );
+		mainExecution( &execution, prg->rtd->rootCode );
 	}
 }
 

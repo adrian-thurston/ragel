@@ -513,103 +513,55 @@ Tree *constructArgv( Program *prg, int argc, const char **argv )
  */
 
 void initProgramExecution( Execution *exec, Program *prg, RtCodeVect *rcodeCollect,
-		PdaRun *pdaRun, FsmRun *fsmRun, int frameId, Code *code, Tree *lhs,
-		long genId, Head *matchText, char **captures )
+		PdaRun *pdaRun, FsmRun *fsmRun, int frameId )
 {
 	exec->prg = prg;
 	exec->pdaRun = pdaRun;
 	exec->fsmRun = fsmRun;
-	exec->code = code;
 	exec->framePtr = 0;
 	exec->iframePtr = 0;
 	exec->frameId = frameId;
-	if ( exec->pdaRun != 0 ) {
-		exec->pdaRun->lhs = lhs;
-		exec->pdaRun->parsed = 0;
-		exec->pdaRun->reject = false;
-	}
-	exec->genId = genId;
-	exec->matchText = matchText;
 	exec->rcodeCollect = rcodeCollect;
 	exec->rcodeUnitLen = 0;
-	exec->captures = captures;
-
-	assert( lhs == 0 || lhs->refs == 1 );
 }
 
 void initGenerationExecution( Execution *exec, Program *prg, RtCodeVect *rcodeCollect,
-		PdaRun *pdaRun, FsmRun *fsmRun, int frameId, Code *code, Tree *lhs,
-		long genId, Head *matchText, char **captures )
+		PdaRun *pdaRun, FsmRun *fsmRun, int frameId )
 {
 	exec->prg = prg;
 	exec->pdaRun = pdaRun;
 	exec->fsmRun = fsmRun;
-	exec->code = code;
 	exec->framePtr = 0;
 	exec->iframePtr = 0;
 	exec->frameId = frameId;
-	if ( exec->pdaRun != 0 ) {
-		exec->pdaRun->lhs = lhs;
-		exec->pdaRun->parsed = 0;
-		exec->pdaRun->reject = false;
-	}
-	exec->genId = genId;
-	exec->matchText = matchText;
 	exec->rcodeCollect = rcodeCollect;
 	exec->rcodeUnitLen = 0;
-	exec->captures = captures;
-
-	assert( lhs == 0 || lhs->refs == 1 );
 }
 
 void initReductionExecution( Execution *exec, Program *prg, RtCodeVect *rcodeCollect,
-		PdaRun *pdaRun, FsmRun *fsmRun, int frameId, Code *code, Tree *lhs,
-		long genId, Head *matchText, char **captures )
+		PdaRun *pdaRun, FsmRun *fsmRun, int frameId )
 {
 	exec->prg = prg;
 	exec->pdaRun = pdaRun;
 	exec->fsmRun = fsmRun;
-	exec->code = code;
 	exec->framePtr = 0;
 	exec->iframePtr = 0;
 	exec->frameId = frameId;
-	if ( exec->pdaRun != 0 ) {
-		exec->pdaRun->lhs = lhs;
-		exec->pdaRun->parsed = 0;
-		exec->pdaRun->reject = false;
-	}
-	exec->genId = genId;
-	exec->matchText = matchText;
 	exec->rcodeCollect = rcodeCollect;
 	exec->rcodeUnitLen = 0;
-	exec->captures = captures;
-
-	assert( lhs == 0 || lhs->refs == 1 );
 }
 
 void initReverseExecution( Execution *exec, Program *prg, RtCodeVect *rcodeCollect,
-		PdaRun *pdaRun, FsmRun *fsmRun, int frameId, Code *code, Tree *lhs,
-		long genId, Head *matchText, char **captures )
+		PdaRun *pdaRun, FsmRun *fsmRun, int frameId )
 {
 	exec->prg = prg;
 	exec->pdaRun = pdaRun;
 	exec->fsmRun = fsmRun;
-	exec->code = code;
 	exec->framePtr = 0;
 	exec->iframePtr = 0;
 	exec->frameId = frameId;
-	if ( exec->pdaRun != 0 ) {
-		exec->pdaRun->lhs = lhs;
-		exec->pdaRun->parsed = 0;
-		exec->pdaRun->reject = false;
-	}
-	exec->genId = genId;
-	exec->matchText = matchText;
 	exec->rcodeCollect = rcodeCollect;
 	exec->rcodeUnitLen = 0;
-	exec->captures = captures;
-
-	assert( lhs == 0 || lhs->refs == 1 );
 }
 
 void rcodeDownrefAll( Program *prg, Tree **sp, RtCodeVect *rev )
@@ -851,7 +803,7 @@ again:
 }
 
 
-void mainExecution( Execution *exec )
+void mainExecution( Execution *exec, Code *code )
 {
 	Program *prg = exec->prg;
 	Tree **sp = prg->vm_root;
@@ -863,7 +815,7 @@ void mainExecution( Execution *exec )
 	vm_push( 0 );
 
 	/* Execution loop. */
-	executeCode( exec, sp, exec->code );
+	executeCode( exec, sp, code );
 
 	vm_pop_ignore();
 	vm_pop_ignore();
@@ -947,14 +899,13 @@ void callParseBlock( Code **pinstr, Tree ***psp, long pcr, Program *prg,
 		case PcrReduction: {
 			/* Execution environment for the reduction code. */
 			initReductionExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, 
-					pdaRun, fsmRun, prg->rtd->prodInfo[pdaRun->reduction].frameId, 
-					pdaRun->fi->codeWV, pdaRun->redLel->tree, 0, 0, fsmRun->mark );
+					pdaRun, fsmRun, pdaRun->frameId );
 
 			/* Push the instruction. */
 			vm_push( (SW)*pinstr );
 
 			/* Call execution. */
-			*pinstr = exec->code;
+			*pinstr = pdaRun->fi->codeWV;
 			break;
 		}
 
@@ -964,28 +915,26 @@ void callParseBlock( Code **pinstr, Tree ***psp, long pcr, Program *prg,
 			 *  -invoke failure (the backtracker)
 			 */
 			initGenerationExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, 
-					pdaRun, fsmRun, prg->rtd->lelInfo[pdaRun->tokenId].frameId, 
-					pdaRun->fi->codeWV, 0, pdaRun->tokenId, pdaRun->tokdata, fsmRun->mark );
+					pdaRun, fsmRun, pdaRun->frameId );
 
 			/* Push the instruction. */
 			vm_push( (SW)*pinstr );
 
 			/* Call execution. */
-			*pinstr = exec->code;
+			*pinstr = pdaRun->fi->codeWV;
 			break;
 		}
 
 		case PcrPreEof: {
 			/* Execute the translation. */
-			initGenerationExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, pdaRun, fsmRun, 
-					pdaRun->frameId, prg->rtd->frameInfo[pdaRun->frameId].codeWV,
-					0, pdaRun->tokenId, 0, fsmRun->mark );
+			initGenerationExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, 
+					pdaRun, fsmRun, pdaRun->frameId );
 
 			/* Push the instruction. */
 			vm_push( (SW)*pinstr );
 
 			/* Call execution. */
-			*pinstr = exec->code;
+			*pinstr = pdaRun->fi->codeWV;
 			break;
 		}
 
@@ -993,7 +942,7 @@ void callParseBlock( Code **pinstr, Tree ***psp, long pcr, Program *prg,
 		case PcrRevIgnore2:
 		{
 			initReverseExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, 
-					pdaRun, fsmRun, -1, 0, 0, 0, 0, 0 );
+					pdaRun, fsmRun, -1 );
 
 			/* Push the instruction. */
 			vm_push( (SW)*pinstr );
@@ -1006,7 +955,7 @@ void callParseBlock( Code **pinstr, Tree ***psp, long pcr, Program *prg,
 		case PcrRevReduction2:
 		{
 			initReverseExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, 
-					pdaRun, fsmRun, -1, 0, 0, 0, 0, fsmRun->mark );
+					pdaRun, fsmRun, -1 );
 
 			/* Push the instruction. */
 			vm_push( (SW)*pinstr );
@@ -1019,7 +968,7 @@ void callParseBlock( Code **pinstr, Tree ***psp, long pcr, Program *prg,
 		case PcrRevToken2:
 		{
 			initReverseExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, 
-					pdaRun, fsmRun, -1, 0, 0, 0, 0, 0 );
+					pdaRun, fsmRun, -1 );
 
 			/* Push the instruction. */
 			vm_push( (SW)*pinstr );
@@ -1294,11 +1243,11 @@ again:
 			/* If there are captures (this is a translate block) then copy them into
 			 * the local frame now. */
 			LangElInfo *lelInfo = prg->rtd->lelInfo;
-			char **mark = exec->captures;
+			char **mark = exec->fsmRun->mark;
 
 			int i;
-			for ( i = 0; i < lelInfo[exec->genId].numCaptureAttr; i++ ) {
-				CaptureAttr *ca = &prg->rtd->captureAttr[lelInfo[exec->genId].captureAttr + i];
+			for ( i = 0; i < lelInfo[exec->pdaRun->tokenId].numCaptureAttr; i++ ) {
+				CaptureAttr *ca = &prg->rtd->captureAttr[lelInfo[exec->pdaRun->tokenId].captureAttr + i];
 				Head *data = stringAllocFull( prg, 
 						mark[ca->mark_enter], mark[ca->mark_leave] - mark[ca->mark_enter] );
 				Tree *string = constructString( prg, data );
@@ -3147,7 +3096,7 @@ again:
 		case IN_GET_MATCH_LENGTH_R: {
 			debug( REALM_BYTECODE, "IN_GET_MATCH_LENGTH_R\n" );
 
-			Tree *integer = constructInteger( prg, stringLength(exec->matchText) );
+			Tree *integer = constructInteger( prg, stringLength(exec->pdaRun->tokdata) );
 			treeUpref( integer );
 			vm_push( integer );
 			break;
@@ -3155,7 +3104,7 @@ again:
 		case IN_GET_MATCH_TEXT_R: {
 			debug( REALM_BYTECODE, "IN_GET_MATCH_TEXT_R\n" );
 
-			Head *s = stringCopy( prg, exec->matchText );
+			Head *s = stringCopy( prg, exec->pdaRun->tokdata );
 			Tree *tree = constructString( prg, s );
 			treeUpref( tree );
 			vm_push( tree );
