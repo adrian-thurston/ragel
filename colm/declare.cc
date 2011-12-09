@@ -126,8 +126,9 @@ void ParseData::addProdLHSLoad( Definition *prod, CodeVect &code, long &insertPo
 
 	CodeVect loads;
 	if ( lhsField->beenReferenced ) {
-		loads.append ( IN_INIT_LHS_EL );
+		loads.append( IN_INIT_LHS_EL );
 		loads.appendHalf( lhsField->offset );
+		loads.append( lhsField->dirtyTree );
 	}
 
 	code.insert( insertPos, loads );

@@ -36,9 +36,6 @@ extern "C" {
 typedef unsigned long ulong;
 typedef unsigned char uchar;
 
-#define IN_SAVE_LHS              0xbe
-#define IN_RESTORE_LHS           0x01
-
 #define IN_LOAD_INT              0x02
 #define IN_LOAD_STR              0x03
 #define IN_LOAD_NIL              0x04
@@ -114,6 +111,7 @@ typedef unsigned char uchar;
 #define IN_INIT_LHS_EL           0xef
 #define IN_INIT_CAPTURES         0x39
 #define IN_STORE_LHS_EL          0xf0
+#define IN_RESTORE_LHS           0x01
 
 #define IN_TRITER_FROM_REF       0x3a
 #define IN_TRITER_ADVANCE        0x3b

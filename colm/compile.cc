@@ -2550,10 +2550,6 @@ void ParseData::compileReductionCode( Definition *prod )
 	long frameSize = curLocalFrame->size();
 	code.setHalf( 1, frameSize );
 
-	/* Might need to preserve the LHS for backtracking. The afterInit 
-	 * var may be updated by this call. */
-	addSaveLHS( prod, code, afterInit );
-
 	/* Might need to load right hand side values. */
 	addProdRHSLoads( prod, code, afterInit );
 	addProdLHSLoad( prod, code, afterInit );

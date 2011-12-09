@@ -761,7 +761,6 @@ struct ParseData
 	void addProdRedObjectVar( ObjectDef *localFrame, LangEl *langEl );
 	void addProdObjects();
 
-	void addSaveLHS( Definition *prod, CodeVect &code, long &insertPos );
 	void addProdRHSLoads( Definition *prod, CodeVect &code, long &insertPos );
 	void addProdLHSLoad( Definition *prod, CodeVect &code, long &insertPos );
 	void addPushBackLHS( Definition *prod, CodeVect &code, long &insertPos );

@@ -1041,19 +1041,6 @@ again:
 	//debug( REALM_BYTECODE, "--in 0x%x\n", c );
 
 	switch ( c ) {
-		case IN_SAVE_LHS: {
-			debug( REALM_BYTECODE, "IN_SAVE_LHS\n" );
-
-			//assert( exec->lhs != 0 );
-
-			/* Save and upref before writing. We don't generate a restore
-			 * here. Instead, in the parser we will check if it actually
-			 * changed and insert the instruction then. The presence of this
-			 * instruction here is just a conservative approximation.  */
-			exec->parsed = exec->lhs;
-			//treeUpref( parsed );
-			break;
-		}
 		case IN_RESTORE_LHS: {
 			Tree *restore;
 			read_tree( restore );
@@ -1327,13 +1314,16 @@ again:
 		}
 		case IN_INIT_LHS_EL: {
 			short field;
+			uchar save;
 			read_half( field );
+			read_byte( save );
 
-			debug( REALM_BYTECODE, "IN_INIT_LHS_EL %hd\n", field );
+			debug( REALM_BYTECODE, "IN_INIT_LHS_EL %hd %hhu\n", field, save );
 
 			Tree *val = exec->lhs;
+			if ( save )
+				exec->parsed = exec->lhs;
 			exec->lhs = 0;
-			//treeUpref( val );
 			vm_local(field) = val;
 			break;
 		}
