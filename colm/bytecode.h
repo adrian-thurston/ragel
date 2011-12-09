@@ -442,11 +442,6 @@ typedef struct _Execution
 	Tree **iframePtr;
 	long frameId;
 
-	/* The left hand side passed in and the saved left hand side in case we
-	 * need to preserve it for backtracking before we write to it. */
-	Tree *lhs;
-	Tree *parsed;
-
 	long genId;
 	Head *matchText;
 	int reject;

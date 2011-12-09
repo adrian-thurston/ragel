@@ -523,8 +523,10 @@ void initProgramExecution( Execution *exec, Program *prg, RtCodeVect *rcodeColle
 	exec->framePtr = 0;
 	exec->iframePtr = 0;
 	exec->frameId = frameId;
-	exec->lhs = lhs;
-	exec->parsed = 0;
+	if ( exec->pdaRun != 0 ) {
+		exec->pdaRun->lhs = lhs;
+		exec->pdaRun->parsed = 0;
+	}
 	exec->genId = genId;
 	exec->matchText = matchText;
 	exec->reject = false;
@@ -546,8 +548,10 @@ void initGenerationExecution( Execution *exec, Program *prg, RtCodeVect *rcodeCo
 	exec->framePtr = 0;
 	exec->iframePtr = 0;
 	exec->frameId = frameId;
-	exec->lhs = lhs;
-	exec->parsed = 0;
+	if ( exec->pdaRun != 0 ) {
+		exec->pdaRun->lhs = lhs;
+		exec->pdaRun->parsed = 0;
+	}
 	exec->genId = genId;
 	exec->matchText = matchText;
 	exec->reject = false;
@@ -569,8 +573,10 @@ void initReductionExecution( Execution *exec, Program *prg, RtCodeVect *rcodeCol
 	exec->framePtr = 0;
 	exec->iframePtr = 0;
 	exec->frameId = frameId;
-	exec->lhs = lhs;
-	exec->parsed = 0;
+	if ( exec->pdaRun != 0 ) {
+		exec->pdaRun->lhs = lhs;
+		exec->pdaRun->parsed = 0;
+	}
 	exec->genId = genId;
 	exec->matchText = matchText;
 	exec->reject = false;
@@ -592,8 +598,10 @@ void initReverseExecution( Execution *exec, Program *prg, RtCodeVect *rcodeColle
 	exec->framePtr = 0;
 	exec->iframePtr = 0;
 	exec->frameId = frameId;
-	exec->lhs = lhs;
-	exec->parsed = 0;
+	if ( exec->pdaRun != 0 ) {
+		exec->pdaRun->lhs = lhs;
+		exec->pdaRun->parsed = 0;
+	}
 	exec->genId = genId;
 	exec->matchText = matchText;
 	exec->reject = false;
@@ -1047,7 +1055,7 @@ again:
 
 			debug( REALM_BYTECODE, "IN_RESTORE_LHS\n" );
 			//assert( exec->lhs == 0 );
-			exec->lhs = restore;
+			exec->pdaRun->lhs = restore;
 			break;
 		}
 		case IN_LOAD_NIL: {
@@ -1307,7 +1315,7 @@ again:
 
 			debug( REALM_BYTECODE, "IN_INIT_RHS_EL %hd\n", field );
 
-			Tree *val = getRhsEl( prg, exec->lhs, position );
+			Tree *val = getRhsEl( prg, exec->pdaRun->lhs, position );
 			treeUpref( val );
 			vm_local(field) = val;
 			break;
@@ -1320,10 +1328,10 @@ again:
 
 			debug( REALM_BYTECODE, "IN_INIT_LHS_EL %hd %hhu\n", field, save );
 
-			Tree *val = exec->lhs;
+			Tree *val = exec->pdaRun->lhs;
 			if ( save )
-				exec->parsed = exec->lhs;
-			exec->lhs = 0;
+				exec->pdaRun->parsed = exec->pdaRun->lhs;
+			exec->pdaRun->lhs = 0;
 			vm_local(field) = val;
 			break;
 		}
@@ -1335,7 +1343,7 @@ again:
 
 			Tree *val = vm_local(field);
 			vm_local(field) = 0;
-			exec->lhs = val;
+			exec->pdaRun->lhs = val;
 			break;
 		}
 		case IN_UITER_ADVANCE: {

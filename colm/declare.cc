@@ -135,23 +135,6 @@ void ParseData::addProdLHSLoad( Definition *prod, CodeVect &code, long &insertPo
 	insertPos += loads.length();
 }
 
-void ParseData::addSaveLHS( Definition *prod, CodeVect &code, long &insertPos )
-{
-	CodeBlock *block = prod->redBlock;
-
-	/* If the lhs tree is dirty then we will need to save off the old lhs
-	* before it gets modified. We want to avoid this for attribute
-	* modifications. The computation of dirtyTree should deal with this for
-	* us. */
-	ObjField *lhsField = block->localFrame->findField("lhs");
-	assert( lhsField != 0 );
-
-	if ( lhsField->dirtyTree ) {
-		code.insert( insertPos, IN_SAVE_LHS );
-		insertPos += 1;
-	}
-}
-
 void ParseData::addPushBackLHS( Definition *prod, CodeVect &code, long &insertPos )
 {
 	CodeBlock *block = prod->redBlock;
