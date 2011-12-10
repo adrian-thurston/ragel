@@ -433,7 +433,6 @@ typedef Tree **StackPtr;
 
 typedef struct _Execution
 {
-	struct ColmProgram *prg;
 	PdaRun *pdaRun;
 	FsmRun *fsmRun;
 	Tree **framePtr;
@@ -462,10 +461,9 @@ Head *intToStr( struct ColmProgram *prg, Word i );
 
 Tree *constructString( struct ColmProgram *prg, Head *s );
 
-void initExecution( Execution *exec, struct ColmProgram *prg,
-		PdaRun *pdaRun, FsmRun *fsmRun, int frameId );
+void initExecution( Execution *exec, PdaRun *pdaRun, FsmRun *fsmRun, int frameId );
 
-void mainExecution( Execution *exec, Code *code );
+void mainExecution( struct ColmProgram *prg, Execution *exec, Code *code );
 void reductionExecution( Execution *exec, Tree **sp );
 void generationExecution( Execution *exec, Tree **sp );
 void reverseExecution( Execution *exec, Tree **sp, RtCodeVect *allRev );
@@ -483,7 +481,7 @@ Tree *prepParseTree( struct ColmProgram *prg, Tree **sp, Tree *tree );
 void splitRef( struct ColmProgram *prg, Tree ***sp, Ref *fromRef );
 
 void allocGlobal( struct ColmProgram *prg );
-Tree **executeCode( Execution *exec, Tree **sp, Code *instr );
+Tree **executeCode( struct ColmProgram *prg, Execution *exec, Tree **sp, Code *instr );
 void rcodeDownref( struct ColmProgram *prg, Tree **sp, Code *instr );
 Tree **stackAlloc();
 Code *popReverseCode( RtCodeVect *allRev );

@@ -512,10 +512,8 @@ Tree *constructArgv( Program *prg, int argc, const char **argv )
  * Execution environment
  */
 
-void initExecution( Execution *exec, Program *prg, 
-		PdaRun *pdaRun, FsmRun *fsmRun, int frameId )
+void initExecution( Execution *exec, PdaRun *pdaRun, FsmRun *fsmRun, int frameId )
 {
-	exec->prg = prg;
 	exec->pdaRun = pdaRun;
 	exec->fsmRun = fsmRun;
 	exec->framePtr = 0;
@@ -763,9 +761,8 @@ again:
 }
 
 
-void mainExecution( Execution *exec, Code *code )
+void mainExecution( Program *prg, Execution *exec, Code *code )
 {
-	Program *prg = exec->prg;
 	Tree **sp = prg->vm_root;
 
 	/* Set up the stack as if we have called. We allow a return value. */
@@ -775,7 +772,7 @@ void mainExecution( Execution *exec, Code *code )
 	vm_push( 0 );
 
 	/* Execution loop. */
-	executeCode( exec, sp, code );
+	executeCode( prg, exec, sp, code );
 
 	vm_pop_ignore();
 	vm_pop_ignore();
@@ -844,12 +841,11 @@ Code *popReverseCode( RtCodeVect *allRev )
 	return prcode;
 }
 
-Tree **executeCode( Execution *exec, Tree **sp, Code *instr )
+Tree **executeCode( Program *prg, Execution *exec, Tree **sp, Code *instr )
 {
 	/* When we exit we are going to verify that we did not eat up any stack
 	 * space. */
 	Tree **root = sp;
-	Program *prg = exec->prg;
 	Code c;
 
 again:
@@ -2151,7 +2147,6 @@ again:
 
 			if ( pcr != PcrDone ) {
 				/* Push the execution. */
-				vm_push( (SW)exec->prg );
 				vm_push( (SW)exec->pdaRun );
 				vm_push( (SW)exec->fsmRun );
 				vm_push( (SW)exec->framePtr );
@@ -2165,7 +2160,7 @@ again:
 
 				PdaRun *pdaRun = accum->pdaRun;
 				FsmRun *fsmRun = accum->fsmRun;
-				initExecution( exec, prg, pdaRun, fsmRun, pdaRun->frameId );
+				initExecution( exec, pdaRun, fsmRun, pdaRun->frameId );
 				instr = pdaRun->code;
 			}
 			else {
@@ -2196,7 +2191,6 @@ again:
 			exec->framePtr = ( Tree ** ) vm_pop();
 			exec->fsmRun = ( FsmRun * ) vm_pop();
 			exec->pdaRun = ( PdaRun * ) vm_pop();
-			exec->prg = ( struct ColmProgram * ) vm_pop();
 
 			vm_push( (SW)pcr );
 			vm_push( (Tree*)accum );
@@ -2236,7 +2230,6 @@ again:
 
 			if ( pcr != PcrDone ) {
 				/* Push the execution. */
-				vm_push( (SW)exec->prg );
 				vm_push( (SW)exec->pdaRun );
 				vm_push( (SW)exec->fsmRun );
 				vm_push( (SW)exec->framePtr );
@@ -2251,7 +2244,7 @@ again:
 
 				PdaRun *pdaRun = accum->pdaRun;
 				FsmRun *fsmRun = accum->fsmRun;
-				initExecution( exec, prg, pdaRun, fsmRun, pdaRun->frameId );
+				initExecution( exec, pdaRun, fsmRun, pdaRun->frameId );
 				instr = pdaRun->code;
 			}
 			else {
@@ -2288,7 +2281,6 @@ again:
 			exec->framePtr = ( Tree ** ) vm_pop();
 			exec->fsmRun = ( FsmRun * ) vm_pop();
 			exec->pdaRun = ( PdaRun * ) vm_pop();
-			exec->prg = ( struct ColmProgram * ) vm_pop();
 
 			vm_push( (SW)pcr );
 			vm_push( (SW)steps );
@@ -2325,7 +2317,6 @@ again:
 
 			if ( pcr != PcrDone ) {
 				/* Push the execution. */
-				vm_push( (SW)exec->prg );
 				vm_push( (SW)exec->pdaRun );
 				vm_push( (SW)exec->fsmRun );
 				vm_push( (SW)exec->framePtr );
@@ -2340,7 +2331,7 @@ again:
 
 				PdaRun *pdaRun = accum->pdaRun;
 				FsmRun *fsmRun = accum->fsmRun;
-				initExecution( exec, prg, pdaRun, fsmRun, pdaRun->frameId );
+				initExecution( exec, pdaRun, fsmRun, pdaRun->frameId );
 				instr = pdaRun->code;
 			}
 			else {
@@ -2367,7 +2358,6 @@ again:
 			exec->framePtr = ( Tree ** ) vm_pop();
 			exec->fsmRun = ( FsmRun * ) vm_pop();
 			exec->pdaRun = ( PdaRun * ) vm_pop();
-			exec->prg = ( struct ColmProgram * ) vm_pop();
 
 			vm_push( (SW)pcr );
 			vm_push( (SW)steps );
@@ -2404,7 +2394,6 @@ again:
 
 			if ( pcr != PcrDone ) {
 				/* Push the execution. */
-				vm_push( (SW)exec->prg );
 				vm_push( (SW)exec->pdaRun );
 				vm_push( (SW)exec->fsmRun );
 				vm_push( (SW)exec->framePtr );
@@ -2419,7 +2408,7 @@ again:
 
 				PdaRun *pdaRun = accum->pdaRun;
 				FsmRun *fsmRun = accum->fsmRun;
-				initExecution( exec, prg, pdaRun, fsmRun, pdaRun->frameId );
+				initExecution( exec, pdaRun, fsmRun, pdaRun->frameId );
 				instr = pdaRun->code;
 			}
 			else {
@@ -2449,7 +2438,6 @@ again:
 			exec->framePtr = ( Tree ** ) vm_pop();
 			exec->fsmRun = ( FsmRun * ) vm_pop();
 			exec->pdaRun = ( PdaRun * ) vm_pop();
-			exec->prg = ( struct ColmProgram * ) vm_pop();
 
 			vm_push( (SW)pcr );
 			vm_push( result );
@@ -2488,7 +2476,6 @@ again:
 
 			if ( pcr != PcrDone ) {
 				/* Push the execution. */
-				vm_push( (SW)exec->prg );
 				vm_push( (SW)exec->pdaRun );
 				vm_push( (SW)exec->fsmRun );
 				vm_push( (SW)exec->framePtr );
@@ -2504,7 +2491,7 @@ again:
 
 				PdaRun *pdaRun = accum->pdaRun;
 				FsmRun *fsmRun = accum->fsmRun;
-				initExecution( exec, prg, pdaRun, fsmRun, pdaRun->frameId );
+				initExecution( exec, pdaRun, fsmRun, pdaRun->frameId );
 				instr = pdaRun->code;
 			}
 			else {
@@ -2541,7 +2528,6 @@ again:
 			exec->framePtr = ( Tree ** ) vm_pop();
 			exec->fsmRun = ( FsmRun * ) vm_pop();
 			exec->pdaRun = ( PdaRun * ) vm_pop();
-			exec->prg = ( struct ColmProgram * ) vm_pop();
 
 			vm_push( (SW)pcr );
 			vm_push( (SW)steps );
@@ -2579,7 +2565,6 @@ again:
 
 			if ( pcr != PcrDone ) {
 				/* Push the execution. */
-				vm_push( (SW)exec->prg );
 				vm_push( (SW)exec->pdaRun );
 				vm_push( (SW)exec->fsmRun );
 				vm_push( (SW)exec->framePtr );
@@ -2594,7 +2579,7 @@ again:
 
 				PdaRun *pdaRun = accum->pdaRun;
 				FsmRun *fsmRun = accum->fsmRun;
-				initExecution( exec, prg, pdaRun, fsmRun, pdaRun->frameId );
+				initExecution( exec, pdaRun, fsmRun, pdaRun->frameId );
 				instr = pdaRun->code;
 			}
 			else {
@@ -2624,7 +2609,6 @@ again:
 			exec->framePtr = ( Tree ** ) vm_pop();
 			exec->fsmRun = ( FsmRun * ) vm_pop();
 			exec->pdaRun = ( PdaRun * ) vm_pop();
-			exec->prg = ( struct ColmProgram * ) vm_pop();
 
 			vm_push( (SW)pcr );
 			vm_push( (SW)steps );
