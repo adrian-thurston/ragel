@@ -2229,9 +2229,15 @@ again:
 
 			if ( pcr != PcrDone ) {
 				/* Push the execution. */
-				vm_pushn( SIZEOF_WORD * 20 );
-				Execution *pushedExec = (Execution*)vm_ptop();
-				memcpy( pushedExec, exec, sizeof(Execution) );
+				vm_push( (SW)exec->prg );
+				vm_push( (SW)exec->pdaRun );
+				vm_push( (SW)exec->fsmRun );
+				vm_push( (SW)exec->framePtr );
+				vm_push( (SW)exec->iframePtr );
+				vm_push( (SW)exec->frameId );
+				vm_push( (SW)exec->rcodeCollect );
+				vm_push( (SW)exec->rcodeUnitLen );
+
 				accum->pdaRun->exec = exec;
 
 				vm_push( (SW)pcr );
@@ -2262,9 +2268,14 @@ again:
 			pcr = parseFrag( prg, sp, accum, stopId, pcr );
 
 			/* Pop the saved execution. */
-			Execution *pushedExec = (Execution*)vm_ptop();
-			memcpy( exec, pushedExec, sizeof(Execution) );
-			vm_popn( SIZEOF_WORD * 20 );
+			exec->rcodeUnitLen = ( long ) vm_pop();
+			exec->rcodeCollect = ( RtCodeVect * ) vm_pop();
+			exec->frameId = ( long ) vm_pop();
+			exec->iframePtr = ( Tree ** ) vm_pop();
+			exec->framePtr = ( Tree ** ) vm_pop();
+			exec->fsmRun = ( FsmRun * ) vm_pop();
+			exec->pdaRun = ( PdaRun * ) vm_pop();
+			exec->prg = ( struct ColmProgram * ) vm_pop();
 
 			vm_push( (SW)pcr );
 			vm_push( (Tree*)accum );
@@ -2304,9 +2315,15 @@ again:
 
 			if ( pcr != PcrDone ) {
 				/* Push the execution. */
-				vm_pushn( SIZEOF_WORD * 20 );
-				Execution *pushedExec = (Execution*)vm_ptop();
-				memcpy( pushedExec, exec, sizeof(Execution) );
+				vm_push( (SW)exec->prg );
+				vm_push( (SW)exec->pdaRun );
+				vm_push( (SW)exec->fsmRun );
+				vm_push( (SW)exec->framePtr );
+				vm_push( (SW)exec->iframePtr );
+				vm_push( (SW)exec->frameId );
+				vm_push( (SW)exec->rcodeCollect );
+				vm_push( (SW)exec->rcodeUnitLen );
+
 				accum->pdaRun->exec = exec;
 
 				vm_push( (SW)pcr );
@@ -2344,9 +2361,14 @@ again:
 			pcr = parseFrag( prg, sp, accum, stopId, pcr );
 
 			/* Pop the saved execution. */
-			Execution *pushedExec = (Execution*)vm_ptop();
-			memcpy( exec, pushedExec, sizeof(Execution) );
-			vm_popn( SIZEOF_WORD * 20 );
+			exec->rcodeUnitLen = ( long ) vm_pop();
+			exec->rcodeCollect = ( RtCodeVect * ) vm_pop();
+			exec->frameId = ( long ) vm_pop();
+			exec->iframePtr = ( Tree ** ) vm_pop();
+			exec->framePtr = ( Tree ** ) vm_pop();
+			exec->fsmRun = ( FsmRun * ) vm_pop();
+			exec->pdaRun = ( PdaRun * ) vm_pop();
+			exec->prg = ( struct ColmProgram * ) vm_pop();
 
 			vm_push( (SW)pcr );
 			vm_push( (SW)steps );
@@ -2383,9 +2405,15 @@ again:
 
 			if ( pcr != PcrDone ) {
 				/* Push the execution. */
-				vm_pushn( SIZEOF_WORD * 20 );
-				Execution *pushedExec = (Execution*)vm_ptop();
-				memcpy( pushedExec, exec, sizeof(Execution) );
+				vm_push( (SW)exec->prg );
+				vm_push( (SW)exec->pdaRun );
+				vm_push( (SW)exec->fsmRun );
+				vm_push( (SW)exec->framePtr );
+				vm_push( (SW)exec->iframePtr );
+				vm_push( (SW)exec->frameId );
+				vm_push( (SW)exec->rcodeCollect );
+				vm_push( (SW)exec->rcodeUnitLen );
+
 				accum->pdaRun->exec = exec;
 
 				vm_push( (SW)pcr );
@@ -2413,9 +2441,14 @@ again:
 			pcr = undoParseFrag( prg, sp, accum, steps, pcr );
 
 			/* Pop the saved execution. */
-			Execution *pushedExec = (Execution*)vm_ptop();
-			memcpy( exec, pushedExec, sizeof(Execution) );
-			vm_popn( SIZEOF_WORD * 20 );
+			exec->rcodeUnitLen = ( long ) vm_pop();
+			exec->rcodeCollect = ( RtCodeVect * ) vm_pop();
+			exec->frameId = ( long ) vm_pop();
+			exec->iframePtr = ( Tree ** ) vm_pop();
+			exec->framePtr = ( Tree ** ) vm_pop();
+			exec->fsmRun = ( FsmRun * ) vm_pop();
+			exec->pdaRun = ( PdaRun * ) vm_pop();
+			exec->prg = ( struct ColmProgram * ) vm_pop();
 
 			vm_push( (SW)pcr );
 			vm_push( (SW)steps );
@@ -2452,9 +2485,15 @@ again:
 
 			if ( pcr != PcrDone ) {
 				/* Push the execution. */
-				vm_pushn( SIZEOF_WORD * 20 );
-				Execution *pushedExec = (Execution*)vm_ptop();
-				memcpy( pushedExec, exec, sizeof(Execution) );
+				vm_push( (SW)exec->prg );
+				vm_push( (SW)exec->pdaRun );
+				vm_push( (SW)exec->fsmRun );
+				vm_push( (SW)exec->framePtr );
+				vm_push( (SW)exec->iframePtr );
+				vm_push( (SW)exec->frameId );
+				vm_push( (SW)exec->rcodeCollect );
+				vm_push( (SW)exec->rcodeUnitLen );
+
 				accum->pdaRun->exec = exec;
 
 				vm_push( (SW)pcr );
@@ -2485,9 +2524,14 @@ again:
 			pcr = parseFinish( &result, prg, sp, accum, false, pcr );
 
 			/* Pop the saved execution. */
-			Execution *pushedExec = (Execution*)vm_ptop();
-			memcpy( exec, pushedExec, sizeof(Execution) );
-			vm_popn( SIZEOF_WORD * 20 );
+			exec->rcodeUnitLen = ( long ) vm_pop();
+			exec->rcodeCollect = ( RtCodeVect * ) vm_pop();
+			exec->frameId = ( long ) vm_pop();
+			exec->iframePtr = ( Tree ** ) vm_pop();
+			exec->framePtr = ( Tree ** ) vm_pop();
+			exec->fsmRun = ( FsmRun * ) vm_pop();
+			exec->pdaRun = ( PdaRun * ) vm_pop();
+			exec->prg = ( struct ColmProgram * ) vm_pop();
 
 			vm_push( (SW)pcr );
 			vm_push( result );
@@ -2526,9 +2570,15 @@ again:
 
 			if ( pcr != PcrDone ) {
 				/* Push the execution. */
-				vm_pushn( SIZEOF_WORD * 20 );
-				Execution *pushedExec = (Execution*)vm_ptop();
-				memcpy( pushedExec, exec, sizeof(Execution) );
+				vm_push( (SW)exec->prg );
+				vm_push( (SW)exec->pdaRun );
+				vm_push( (SW)exec->fsmRun );
+				vm_push( (SW)exec->framePtr );
+				vm_push( (SW)exec->iframePtr );
+				vm_push( (SW)exec->frameId );
+				vm_push( (SW)exec->rcodeCollect );
+				vm_push( (SW)exec->rcodeUnitLen );
+
 				accum->pdaRun->exec = exec;
 
 				vm_push( (SW)pcr );
@@ -2567,9 +2617,14 @@ again:
 			pcr = parseFinish( &result, prg, sp, accum, true, pcr );
 
 			/* Pop the saved execution. */
-			Execution *pushedExec = (Execution*)vm_ptop();
-			memcpy( exec, pushedExec, sizeof(Execution) );
-			vm_popn( SIZEOF_WORD * 20 );
+			exec->rcodeUnitLen = ( long ) vm_pop();
+			exec->rcodeCollect = ( RtCodeVect * ) vm_pop();
+			exec->frameId = ( long ) vm_pop();
+			exec->iframePtr = ( Tree ** ) vm_pop();
+			exec->framePtr = ( Tree ** ) vm_pop();
+			exec->fsmRun = ( FsmRun * ) vm_pop();
+			exec->pdaRun = ( PdaRun * ) vm_pop();
+			exec->prg = ( struct ColmProgram * ) vm_pop();
 
 			vm_push( (SW)pcr );
 			vm_push( (SW)steps );
@@ -2607,9 +2662,15 @@ again:
 
 			if ( pcr != PcrDone ) {
 				/* Push the execution. */
-				vm_pushn( SIZEOF_WORD * 20 );
-				Execution *pushedExec = (Execution*)vm_ptop();
-				memcpy( pushedExec, exec, sizeof(Execution) );
+				vm_push( (SW)exec->prg );
+				vm_push( (SW)exec->pdaRun );
+				vm_push( (SW)exec->fsmRun );
+				vm_push( (SW)exec->framePtr );
+				vm_push( (SW)exec->iframePtr );
+				vm_push( (SW)exec->frameId );
+				vm_push( (SW)exec->rcodeCollect );
+				vm_push( (SW)exec->rcodeUnitLen );
+
 				accum->pdaRun->exec = exec;
 
 				vm_push( (SW)pcr );
@@ -2640,9 +2701,14 @@ again:
 			pcr = undoParseFrag( prg, sp, accum, steps, pcr );
 
 			/* Pop the saved execution. */
-			Execution *pushedExec = (Execution*)vm_ptop();
-			memcpy( exec, pushedExec, sizeof(Execution) );
-			vm_popn( SIZEOF_WORD * 20 );
+			exec->rcodeUnitLen = ( long ) vm_pop();
+			exec->rcodeCollect = ( RtCodeVect * ) vm_pop();
+			exec->frameId = ( long ) vm_pop();
+			exec->iframePtr = ( Tree ** ) vm_pop();
+			exec->framePtr = ( Tree ** ) vm_pop();
+			exec->fsmRun = ( FsmRun * ) vm_pop();
+			exec->pdaRun = ( PdaRun * ) vm_pop();
+			exec->prg = ( struct ColmProgram * ) vm_pop();
 
 			vm_push( (SW)pcr );
 			vm_push( (SW)steps );

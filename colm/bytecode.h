@@ -434,7 +434,6 @@ typedef Tree **StackPtr;
 typedef struct _Execution
 {
 	struct ColmProgram *prg;
-	PdaTables *pdaTables;
 	PdaRun *pdaRun;
 	FsmRun *fsmRun;
 	Tree **framePtr;
