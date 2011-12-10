@@ -439,9 +439,6 @@ typedef struct _Execution
 	Tree **framePtr;
 	Tree **iframePtr;
 	long frameId;
-
-	/* Reverse code collection. */
-	RtCodeVect *rcodeCollect;
 	long rcodeUnitLen;
 } Execution;
 
@@ -465,7 +462,7 @@ Head *intToStr( struct ColmProgram *prg, Word i );
 
 Tree *constructString( struct ColmProgram *prg, Head *s );
 
-void initExecution( Execution *exec, struct ColmProgram *prg, RtCodeVect *reverseCode,
+void initExecution( Execution *exec, struct ColmProgram *prg,
 		PdaRun *pdaRun, FsmRun *fsmRun, int frameId );
 
 void mainExecution( Execution *exec, Code *code );

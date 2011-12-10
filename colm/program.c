@@ -70,11 +70,10 @@ void colmRunProgram( Program *prg )
 	 * Execute
 	 */
 	if ( prg->rtd->rootCodeLen > 0 ) {
-		RtCodeVect rcodeCollect;
+		//RtCodeVect rcodeCollect;
 		Execution execution;
 
-		initRtCodeVect( &rcodeCollect );
-		initExecution( &execution, prg, &rcodeCollect, 0, 0, -1 );
+		initExecution( &execution, prg, 0, 0, -1 );
 		mainExecution( &execution, prg->rtd->rootCode );
 	}
 }

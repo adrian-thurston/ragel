@@ -512,7 +512,7 @@ Tree *constructArgv( Program *prg, int argc, const char **argv )
  * Execution environment
  */
 
-void initExecution( Execution *exec, Program *prg, RtCodeVect *rcodeCollect,
+void initExecution( Execution *exec, Program *prg, 
 		PdaRun *pdaRun, FsmRun *fsmRun, int frameId )
 {
 	exec->prg = prg;
@@ -521,7 +521,6 @@ void initExecution( Execution *exec, Program *prg, RtCodeVect *rcodeCollect,
 	exec->framePtr = 0;
 	exec->iframePtr = 0;
 	exec->frameId = frameId;
-	exec->rcodeCollect = rcodeCollect;
 	exec->rcodeUnitLen = 0;
 }
 
@@ -781,10 +780,6 @@ void mainExecution( Execution *exec, Code *code )
 	vm_pop_ignore();
 	vm_pop_ignore();
 	prg->returnVal = vm_pop();
-
-	/* The root code should all be commit code and reverse code
-	 * should be empty. */
-	assert( exec->rcodeCollect->tabLen == 0 );
 }
 
 int makeReverseCode( PdaRun *pdaRun )
@@ -976,7 +971,7 @@ again:
 			vm_push( exec->pdaRun->context );
 
 			/* Set up the reverse instruction. */
-			append( exec->rcodeCollect, IN_LOAD_CONTEXT_BKT );
+			append( &exec->pdaRun->rcodeCollect, IN_LOAD_CONTEXT_BKT );
 			exec->rcodeUnitLen = SIZEOF_CODE;
 			break;
 		}
@@ -1010,7 +1005,7 @@ again:
 			vm_push( prg->global );
 
 			/* Set up the reverse instruction. */
-			append( exec->rcodeCollect, IN_LOAD_GLOBAL_BKT );
+			append( &exec->pdaRun->rcodeCollect, IN_LOAD_GLOBAL_BKT );
 			exec->rcodeUnitLen = SIZEOF_CODE;
 			break;
 		}
@@ -1044,7 +1039,7 @@ again:
 			vm_push( exec->fsmRun->curStream );
 
 			/* Set up the reverse instruction. */
-			append( exec->rcodeCollect, IN_LOAD_INPUT_BKT );
+			append( &exec->pdaRun->rcodeCollect, IN_LOAD_INPUT_BKT );
 			exec->rcodeUnitLen = SIZEOF_CODE;
 			break;
 		}
@@ -1078,7 +1073,7 @@ again:
 			vm_push( exec->pdaRun->context );
 
 			/* Set up the reverse instruction. */
-			append( exec->rcodeCollect, IN_LOAD_INPUT_BKT );
+			append( &exec->pdaRun->rcodeCollect, IN_LOAD_INPUT_BKT );
 			exec->rcodeUnitLen = SIZEOF_CODE;
 			break;
 		}
@@ -1337,8 +1332,8 @@ again:
 			vm_push( split );
 
 			/* Set up the reverse instruction. */
-			append( exec->rcodeCollect, IN_GET_FIELD_BKT );
-			appendHalf( exec->rcodeCollect, field );
+			append( &exec->pdaRun->rcodeCollect, IN_GET_FIELD_BKT );
+			appendHalf( &exec->pdaRun->rcodeCollect, field );
 			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_HALF;
 			break;
 		}
@@ -1388,11 +1383,11 @@ again:
 			setField( prg, obj, field, val );
 
 			/* Set up the reverse instruction. */
-			append( exec->rcodeCollect, IN_SET_FIELD_BKT );
-			appendHalf( exec->rcodeCollect, field );
-			appendWord( exec->rcodeCollect, (Word)prev );
+			append( &exec->pdaRun->rcodeCollect, IN_SET_FIELD_BKT );
+			appendHalf( &exec->pdaRun->rcodeCollect, field );
+			appendWord( &exec->pdaRun->rcodeCollect, (Word)prev );
 			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_HALF + SIZEOF_WORD;
-			append( exec->rcodeCollect, exec->rcodeUnitLen );
+			append( &exec->pdaRun->rcodeCollect, exec->rcodeUnitLen );
 			/* FLUSH */
 			break;
 		}
@@ -2068,7 +2063,7 @@ again:
 			vm_push( input );
 			treeDownref( prg, sp, accum );
 //
-//			append( exec->rcodeCollect, IN_EXTRACT_INPUT_BKT );
+//			append( &exec->pdaRun->rcodeCollect, IN_EXTRACT_INPUT_BKT );
 //			exec->rcodeUnitLen += SIZEOF_CODE;
 			break;
 		}
@@ -2107,11 +2102,11 @@ again:
 			Tree *input = vm_pop();
 			Word len = streamAppend( prg, sp, input, (Stream*)stream );
 
-			append( exec->rcodeCollect, IN_STREAM_APPEND_BKT );
-			appendWord( exec->rcodeCollect, (Word) stream );
-			appendWord( exec->rcodeCollect, (Word) input );
-			appendWord( exec->rcodeCollect, (Word) len );
-			append( exec->rcodeCollect, SIZEOF_CODE + 3 * SIZEOF_WORD );
+			append( &exec->pdaRun->rcodeCollect, IN_STREAM_APPEND_BKT );
+			appendWord( &exec->pdaRun->rcodeCollect, (Word) stream );
+			appendWord( &exec->pdaRun->rcodeCollect, (Word) input );
+			appendWord( &exec->pdaRun->rcodeCollect, (Word) len );
+			append( &exec->pdaRun->rcodeCollect, SIZEOF_CODE + 3 * SIZEOF_WORD );
 			break;
 		}
 		case IN_STREAM_APPEND_BKT: {
@@ -2162,7 +2157,6 @@ again:
 				vm_push( (SW)exec->framePtr );
 				vm_push( (SW)exec->iframePtr );
 				vm_push( (SW)exec->frameId );
-				vm_push( (SW)exec->rcodeCollect );
 				vm_push( (SW)exec->rcodeUnitLen );
 
 				vm_push( (SW)pcr );
@@ -2171,7 +2165,7 @@ again:
 
 				PdaRun *pdaRun = accum->pdaRun;
 				FsmRun *fsmRun = accum->fsmRun;
-				initExecution( exec, prg, &pdaRun->rcodeCollect, pdaRun, fsmRun, pdaRun->frameId );
+				initExecution( exec, prg, pdaRun, fsmRun, pdaRun->frameId );
 				instr = pdaRun->code;
 			}
 			else {
@@ -2197,7 +2191,6 @@ again:
 
 			/* Pop the saved execution. */
 			exec->rcodeUnitLen = ( long ) vm_pop();
-			exec->rcodeCollect = ( RtCodeVect * ) vm_pop();
 			exec->frameId = ( long ) vm_pop();
 			exec->iframePtr = ( Tree ** ) vm_pop();
 			exec->framePtr = ( Tree ** ) vm_pop();
@@ -2249,7 +2242,6 @@ again:
 				vm_push( (SW)exec->framePtr );
 				vm_push( (SW)exec->iframePtr );
 				vm_push( (SW)exec->frameId );
-				vm_push( (SW)exec->rcodeCollect );
 				vm_push( (SW)exec->rcodeUnitLen );
 
 				vm_push( (SW)pcr );
@@ -2259,18 +2251,18 @@ again:
 
 				PdaRun *pdaRun = accum->pdaRun;
 				FsmRun *fsmRun = accum->fsmRun;
-				initExecution( exec, prg, &pdaRun->rcodeCollect, pdaRun, fsmRun, pdaRun->frameId );
+				initExecution( exec, prg, pdaRun, fsmRun, pdaRun->frameId );
 				instr = pdaRun->code;
 			}
 			else {
 				instr += SIZEOF_CODE + SIZEOF_HALF;
 
-				append( exec->rcodeCollect, IN_PARSE_FRAG_BKT );
-				appendWord( exec->rcodeCollect, (Word) accum );
-				appendWord( exec->rcodeCollect, steps );
-				append( exec->rcodeCollect, IN_PARSE_FRAG_BKT2 );
-				append( exec->rcodeCollect, IN_PARSE_FRAG_BKT3 );
-				append( exec->rcodeCollect, 3 * SIZEOF_CODE + 2 * SIZEOF_WORD );
+				append( &exec->pdaRun->rcodeCollect, IN_PARSE_FRAG_BKT );
+				appendWord( &exec->pdaRun->rcodeCollect, (Word) accum );
+				appendWord( &exec->pdaRun->rcodeCollect, steps );
+				append( &exec->pdaRun->rcodeCollect, IN_PARSE_FRAG_BKT2 );
+				append( &exec->pdaRun->rcodeCollect, IN_PARSE_FRAG_BKT3 );
+				append( &exec->pdaRun->rcodeCollect, 3 * SIZEOF_CODE + 2 * SIZEOF_WORD );
 				if ( prg->induceExit )
 					goto out;
 			}
@@ -2291,7 +2283,6 @@ again:
 
 			/* Pop the saved execution. */
 			exec->rcodeUnitLen = ( long ) vm_pop();
-			exec->rcodeCollect = ( RtCodeVect * ) vm_pop();
 			exec->frameId = ( long ) vm_pop();
 			exec->iframePtr = ( Tree ** ) vm_pop();
 			exec->framePtr = ( Tree ** ) vm_pop();
@@ -2340,7 +2331,6 @@ again:
 				vm_push( (SW)exec->framePtr );
 				vm_push( (SW)exec->iframePtr );
 				vm_push( (SW)exec->frameId );
-				vm_push( (SW)exec->rcodeCollect );
 				vm_push( (SW)exec->rcodeUnitLen );
 
 				vm_push( (SW)pcr );
@@ -2350,7 +2340,7 @@ again:
 
 				PdaRun *pdaRun = accum->pdaRun;
 				FsmRun *fsmRun = accum->fsmRun;
-				initExecution( exec, prg, &pdaRun->rcodeCollect, pdaRun, fsmRun, pdaRun->frameId );
+				initExecution( exec, prg, pdaRun, fsmRun, pdaRun->frameId );
 				instr = pdaRun->code;
 			}
 			else {
@@ -2372,7 +2362,6 @@ again:
 
 			/* Pop the saved execution. */
 			exec->rcodeUnitLen = ( long ) vm_pop();
-			exec->rcodeCollect = ( RtCodeVect * ) vm_pop();
 			exec->frameId = ( long ) vm_pop();
 			exec->iframePtr = ( Tree ** ) vm_pop();
 			exec->framePtr = ( Tree ** ) vm_pop();
@@ -2421,7 +2410,6 @@ again:
 				vm_push( (SW)exec->framePtr );
 				vm_push( (SW)exec->iframePtr );
 				vm_push( (SW)exec->frameId );
-				vm_push( (SW)exec->rcodeCollect );
 				vm_push( (SW)exec->rcodeUnitLen );
 
 				vm_push( (SW)pcr );
@@ -2431,7 +2419,7 @@ again:
 
 				PdaRun *pdaRun = accum->pdaRun;
 				FsmRun *fsmRun = accum->fsmRun;
-				initExecution( exec, prg, &pdaRun->rcodeCollect, pdaRun, fsmRun, pdaRun->frameId );
+				initExecution( exec, prg, pdaRun, fsmRun, pdaRun->frameId );
 				instr = pdaRun->code;
 			}
 			else {
@@ -2456,7 +2444,6 @@ again:
 
 			/* Pop the saved execution. */
 			exec->rcodeUnitLen = ( long ) vm_pop();
-			exec->rcodeCollect = ( RtCodeVect * ) vm_pop();
 			exec->frameId = ( long ) vm_pop();
 			exec->iframePtr = ( Tree ** ) vm_pop();
 			exec->framePtr = ( Tree ** ) vm_pop();
@@ -2507,7 +2494,6 @@ again:
 				vm_push( (SW)exec->framePtr );
 				vm_push( (SW)exec->iframePtr );
 				vm_push( (SW)exec->frameId );
-				vm_push( (SW)exec->rcodeCollect );
 				vm_push( (SW)exec->rcodeUnitLen );
 
 				vm_push( (SW)pcr );
@@ -2518,7 +2504,7 @@ again:
 
 				PdaRun *pdaRun = accum->pdaRun;
 				FsmRun *fsmRun = accum->fsmRun;
-				initExecution( exec, prg, &pdaRun->rcodeCollect, pdaRun, fsmRun, pdaRun->frameId );
+				initExecution( exec, prg, pdaRun, fsmRun, pdaRun->frameId );
 				instr = pdaRun->code;
 			}
 			else {
@@ -2526,12 +2512,12 @@ again:
 
 				vm_push( result );
 
-				append( exec->rcodeCollect, IN_PARSE_FINISH_BKT );
-				appendWord( exec->rcodeCollect, (Word) accum );
-				appendWord( exec->rcodeCollect, (Word) steps );
-				append( exec->rcodeCollect, IN_PARSE_FINISH_BKT2 );
-				append( exec->rcodeCollect, IN_PARSE_FINISH_BKT3 );
-				append( exec->rcodeCollect, 3 * SIZEOF_CODE + 2 * SIZEOF_WORD );
+				append( &exec->pdaRun->rcodeCollect, IN_PARSE_FINISH_BKT );
+				appendWord( &exec->pdaRun->rcodeCollect, (Word) accum );
+				appendWord( &exec->pdaRun->rcodeCollect, (Word) steps );
+				append( &exec->pdaRun->rcodeCollect, IN_PARSE_FINISH_BKT2 );
+				append( &exec->pdaRun->rcodeCollect, IN_PARSE_FINISH_BKT3 );
+				append( &exec->pdaRun->rcodeCollect, 3 * SIZEOF_CODE + 2 * SIZEOF_WORD );
 				if ( prg->induceExit )
 					goto out;
 			}
@@ -2550,7 +2536,6 @@ again:
 
 			/* Pop the saved execution. */
 			exec->rcodeUnitLen = ( long ) vm_pop();
-			exec->rcodeCollect = ( RtCodeVect * ) vm_pop();
 			exec->frameId = ( long ) vm_pop();
 			exec->iframePtr = ( Tree ** ) vm_pop();
 			exec->framePtr = ( Tree ** ) vm_pop();
@@ -2600,7 +2585,6 @@ again:
 				vm_push( (SW)exec->framePtr );
 				vm_push( (SW)exec->iframePtr );
 				vm_push( (SW)exec->frameId );
-				vm_push( (SW)exec->rcodeCollect );
 				vm_push( (SW)exec->rcodeUnitLen );
 
 				vm_push( (SW)pcr );
@@ -2610,7 +2594,7 @@ again:
 
 				PdaRun *pdaRun = accum->pdaRun;
 				FsmRun *fsmRun = accum->fsmRun;
-				initExecution( exec, prg, &pdaRun->rcodeCollect, pdaRun, fsmRun, pdaRun->frameId );
+				initExecution( exec, prg, pdaRun, fsmRun, pdaRun->frameId );
 				instr = pdaRun->code;
 			}
 			else {
@@ -2635,7 +2619,6 @@ again:
 
 			/* Pop the saved execution. */
 			exec->rcodeUnitLen = ( long ) vm_pop();
-			exec->rcodeCollect = ( RtCodeVect * ) vm_pop();
 			exec->frameId = ( long ) vm_pop();
 			exec->iframePtr = ( Tree ** ) vm_pop();
 			exec->framePtr = ( Tree ** ) vm_pop();
@@ -2690,10 +2673,10 @@ again:
 
 			/* Single unit. */
 			treeUpref( string );
-			append( exec->rcodeCollect, IN_STREAM_PULL_BKT );
-			appendWord( exec->rcodeCollect, (Word) string );
+			append( &exec->pdaRun->rcodeCollect, IN_STREAM_PULL_BKT );
+			appendWord( &exec->pdaRun->rcodeCollect, (Word) string );
 			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
-			append( exec->rcodeCollect, exec->rcodeUnitLen );
+			append( &exec->pdaRun->rcodeCollect, exec->rcodeUnitLen );
 
 			treeDownref( prg, sp, stream );
 			treeDownref( prg, sp, len );
@@ -2721,10 +2704,10 @@ again:
 			vm_push( 0 );
 
 			/* Single unit. */
-			append( exec->rcodeCollect, IN_STREAM_PUSH_BKT );
-			appendWord( exec->rcodeCollect, len );
+			append( &exec->pdaRun->rcodeCollect, IN_STREAM_PUSH_BKT );
+			appendWord( &exec->pdaRun->rcodeCollect, len );
 			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
-			append( exec->rcodeCollect, exec->rcodeUnitLen );
+			append( &exec->pdaRun->rcodeCollect, exec->rcodeUnitLen );
 
 			treeDownref( prg, sp, stream );
 			treeDownref( prg, sp, tree );
@@ -2739,10 +2722,10 @@ again:
 			vm_push( 0 );
 
 			/* Single unit. */
-			append( exec->rcodeCollect, IN_STREAM_PUSH_BKT );
-			appendWord( exec->rcodeCollect, len );
+			append( &exec->pdaRun->rcodeCollect, IN_STREAM_PUSH_BKT );
+			appendWord( &exec->pdaRun->rcodeCollect, len );
 			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
-			append( exec->rcodeCollect, exec->rcodeUnitLen );
+			append( &exec->pdaRun->rcodeCollect, exec->rcodeUnitLen );
 
 			treeDownref( prg, sp, stream );
 			treeDownref( prg, sp, tree );
@@ -2880,8 +2863,8 @@ again:
 			vm_push( dval );
 
 			/* This is an initial global load. Need to reverse execute it. */
-			append( exec->rcodeCollect, IN_PTR_DEREF_BKT );
-			appendWord( exec->rcodeCollect, (Word) ptr );
+			append( &exec->pdaRun->rcodeCollect, IN_PTR_DEREF_BKT );
+			appendWord( &exec->pdaRun->rcodeCollect, (Word) ptr );
 			exec->rcodeUnitLen = SIZEOF_CODE + SIZEOF_WORD;
 			break;
 		}
@@ -3000,10 +2983,10 @@ again:
 			tree->tokdata = head;
 
 			/* Set up reverse code. Needs no args. */
-			append( exec->rcodeCollect, IN_SET_TOKEN_DATA_BKT );
-			appendWord( exec->rcodeCollect, (Word)oldval );
+			append( &exec->pdaRun->rcodeCollect, IN_SET_TOKEN_DATA_BKT );
+			appendWord( &exec->pdaRun->rcodeCollect, (Word)oldval );
 			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
-			append( exec->rcodeCollect, exec->rcodeUnitLen );
+			append( &exec->pdaRun->rcodeCollect, exec->rcodeUnitLen );
 
 			treeDownref( prg, sp, tree );
 			treeDownref( prg, sp, val );
@@ -3075,9 +3058,9 @@ again:
 			vm_push( prg->trueVal );
 
 			/* Set up reverse code. Needs no args. */
-			append( exec->rcodeCollect, IN_LIST_APPEND_BKT );
+			append( &exec->pdaRun->rcodeCollect, IN_LIST_APPEND_BKT );
 			exec->rcodeUnitLen += SIZEOF_CODE;
-			append( exec->rcodeCollect, exec->rcodeUnitLen );
+			append( &exec->pdaRun->rcodeCollect, exec->rcodeUnitLen );
 			/* FLUSH */
 			break;
 		}
@@ -3126,10 +3109,10 @@ again:
 			/* Set up reverse. The result comes off the list downrefed.
 			 * Need it up referenced for the reverse code too. */
 			treeUpref( end );
-			append( exec->rcodeCollect, IN_LIST_REMOVE_END_BKT );
-			appendWord( exec->rcodeCollect, (Word)end );
+			append( &exec->pdaRun->rcodeCollect, IN_LIST_REMOVE_END_BKT );
+			appendWord( &exec->pdaRun->rcodeCollect, (Word)end );
 			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
-			append( exec->rcodeCollect, exec->rcodeUnitLen );
+			append( &exec->pdaRun->rcodeCollect, exec->rcodeUnitLen );
 			/* FLUSH */
 			break;
 		}
@@ -3187,8 +3170,8 @@ again:
 			vm_push( val );
 
 			/* Set up the reverse instruction. */
-			append( exec->rcodeCollect, IN_GET_LIST_MEM_BKT );
-			appendHalf( exec->rcodeCollect, field );
+			append( &exec->pdaRun->rcodeCollect, IN_GET_LIST_MEM_BKT );
+			appendHalf( &exec->pdaRun->rcodeCollect, field );
 			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_HALF;
 			break;
 		}
@@ -3233,11 +3216,11 @@ again:
 			Tree *existing = setListMem( (List*)obj, field, val );
 
 			/* Set up the reverse instruction. */
-			append( exec->rcodeCollect, IN_SET_LIST_MEM_BKT );
-			appendHalf( exec->rcodeCollect, field );
-			appendWord( exec->rcodeCollect, (Word)existing );
+			append( &exec->pdaRun->rcodeCollect, IN_SET_LIST_MEM_BKT );
+			appendHalf( &exec->pdaRun->rcodeCollect, field );
+			appendWord( &exec->pdaRun->rcodeCollect, (Word)existing );
 			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_HALF + SIZEOF_WORD;
-			append( exec->rcodeCollect, exec->rcodeUnitLen );
+			append( &exec->pdaRun->rcodeCollect, exec->rcodeUnitLen );
 			/* FLUSH */
 			break;
 		}
@@ -3276,11 +3259,11 @@ again:
 
 			/* Need to upref key for storage in reverse code. */
 			treeUpref( key );
-			append( exec->rcodeCollect, IN_MAP_INSERT_BKT );
-			append( exec->rcodeCollect, inserted );
-			appendWord( exec->rcodeCollect, (Word)key );
+			append( &exec->pdaRun->rcodeCollect, IN_MAP_INSERT_BKT );
+			append( &exec->pdaRun->rcodeCollect, inserted );
+			appendWord( &exec->pdaRun->rcodeCollect, (Word)key );
 			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_CODE + SIZEOF_WORD;
-			append( exec->rcodeCollect, exec->rcodeUnitLen );
+			append( &exec->pdaRun->rcodeCollect, exec->rcodeUnitLen );
 
 			if ( ! inserted ) {
 				treeDownref( prg, sp, key );
@@ -3361,11 +3344,11 @@ again:
 			/* Set up the reverse instruction. */
 			treeUpref( key );
 			treeUpref( existing );
-			append( exec->rcodeCollect, IN_MAP_STORE_BKT );
-			appendWord( exec->rcodeCollect, (Word)key );
-			appendWord( exec->rcodeCollect, (Word)existing );
+			append( &exec->pdaRun->rcodeCollect, IN_MAP_STORE_BKT );
+			appendWord( &exec->pdaRun->rcodeCollect, (Word)key );
+			appendWord( &exec->pdaRun->rcodeCollect, (Word)existing );
 			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD + SIZEOF_WORD;
-			append( exec->rcodeCollect, exec->rcodeUnitLen );
+			append( &exec->pdaRun->rcodeCollect, exec->rcodeUnitLen );
 			/* FLUSH */
 
 			treeDownref( prg, sp, obj );
@@ -3418,11 +3401,11 @@ again:
 			vm_push( pair.val );
 
 			/* Reverse instruction. */
-			append( exec->rcodeCollect, IN_MAP_REMOVE_BKT );
-			appendWord( exec->rcodeCollect, (Word)pair.key );
-			appendWord( exec->rcodeCollect, (Word)pair.val );
+			append( &exec->pdaRun->rcodeCollect, IN_MAP_REMOVE_BKT );
+			appendWord( &exec->pdaRun->rcodeCollect, (Word)pair.key );
+			appendWord( &exec->pdaRun->rcodeCollect, (Word)pair.val );
 			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD + SIZEOF_WORD;
-			append( exec->rcodeCollect, exec->rcodeUnitLen );
+			append( &exec->pdaRun->rcodeCollect, exec->rcodeUnitLen );
 
 			treeDownref( prg, sp, obj );
 			treeDownref( prg, sp, key );
