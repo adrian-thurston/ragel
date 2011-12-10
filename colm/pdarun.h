@@ -316,7 +316,6 @@ typedef struct _PdaRun
 	int curState;
 	Kid *lel;
 	int triggerUndo;
-	struct _Execution *exec;
 
 	int tokenId;
 	Head *tokdata;

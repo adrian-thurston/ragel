@@ -849,19 +849,6 @@ Code *popReverseCode( RtCodeVect *allRev )
 	return prcode;
 }
 
-void callParseBlock( Code **pinstr, Tree ***psp, long pcr, Program *prg,
-		Execution *exec, Accum *accum )
-{
-	Tree **sp = *psp;
-	PdaRun *pdaRun = accum->pdaRun;
-	FsmRun *fsmRun = accum->fsmRun;
-
-	initExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, pdaRun, fsmRun, pdaRun->frameId );
-	*pinstr = pdaRun->code;
-
-	*psp = sp;
-}
-
 Tree **executeCode( Execution *exec, Tree **sp, Code *instr )
 {
 	/* When we exit we are going to verify that we did not eat up any stack
@@ -2178,13 +2165,14 @@ again:
 				vm_push( (SW)exec->rcodeCollect );
 				vm_push( (SW)exec->rcodeUnitLen );
 
-				accum->pdaRun->exec = exec;
-
 				vm_push( (SW)pcr );
 				vm_push( (SW)accum );
 				vm_push( (SW)instr );
 
-				callParseBlock( &instr, &sp, pcr, prg, exec, accum );
+				PdaRun *pdaRun = accum->pdaRun;
+				FsmRun *fsmRun = accum->fsmRun;
+				initExecution( exec, prg, &pdaRun->rcodeCollect, pdaRun, fsmRun, pdaRun->frameId );
+				instr = pdaRun->code;
 			}
 			else {
 				treeDownref( prg, sp, (Tree*)accum );
@@ -2264,14 +2252,15 @@ again:
 				vm_push( (SW)exec->rcodeCollect );
 				vm_push( (SW)exec->rcodeUnitLen );
 
-				accum->pdaRun->exec = exec;
-
 				vm_push( (SW)pcr );
 				vm_push( (SW)steps );
 				vm_push( (SW)accum );
 				vm_push( (SW)instr );
 
-				callParseBlock( &instr, &sp, pcr, prg, exec, accum );
+				PdaRun *pdaRun = accum->pdaRun;
+				FsmRun *fsmRun = accum->fsmRun;
+				initExecution( exec, prg, &pdaRun->rcodeCollect, pdaRun, fsmRun, pdaRun->frameId );
+				instr = pdaRun->code;
 			}
 			else {
 				instr += SIZEOF_CODE + SIZEOF_HALF;
@@ -2354,14 +2343,15 @@ again:
 				vm_push( (SW)exec->rcodeCollect );
 				vm_push( (SW)exec->rcodeUnitLen );
 
-				accum->pdaRun->exec = exec;
-
 				vm_push( (SW)pcr );
 				vm_push( (SW)steps );
 				vm_push( (SW)accum );
 				vm_push( (SW)instr );
 
-				callParseBlock( &instr, &sp, pcr, prg, exec, accum );
+				PdaRun *pdaRun = accum->pdaRun;
+				FsmRun *fsmRun = accum->fsmRun;
+				initExecution( exec, prg, &pdaRun->rcodeCollect, pdaRun, fsmRun, pdaRun->frameId );
+				instr = pdaRun->code;
 			}
 			else {
 				instr += SIZEOF_CODE;
@@ -2434,14 +2424,15 @@ again:
 				vm_push( (SW)exec->rcodeCollect );
 				vm_push( (SW)exec->rcodeUnitLen );
 
-				accum->pdaRun->exec = exec;
-
 				vm_push( (SW)pcr );
 				vm_push( result );
 				vm_push( (SW)accum );
 				vm_push( (SW)instr );
 
-				callParseBlock( &instr, &sp, pcr, prg, exec, accum );
+				PdaRun *pdaRun = accum->pdaRun;
+				FsmRun *fsmRun = accum->fsmRun;
+				initExecution( exec, prg, &pdaRun->rcodeCollect, pdaRun, fsmRun, pdaRun->frameId );
+				instr = pdaRun->code;
 			}
 			else {
 				instr += SIZEOF_CODE;
@@ -2519,15 +2510,16 @@ again:
 				vm_push( (SW)exec->rcodeCollect );
 				vm_push( (SW)exec->rcodeUnitLen );
 
-				accum->pdaRun->exec = exec;
-
 				vm_push( (SW)pcr );
 				vm_push( (SW)steps );
 				vm_push( result );
 				vm_push( (SW)accum );
 				vm_push( (SW)instr );
 
-				callParseBlock( &instr, &sp, pcr, prg, exec, accum );
+				PdaRun *pdaRun = accum->pdaRun;
+				FsmRun *fsmRun = accum->fsmRun;
+				initExecution( exec, prg, &pdaRun->rcodeCollect, pdaRun, fsmRun, pdaRun->frameId );
+				instr = pdaRun->code;
 			}
 			else {
 				instr += SIZEOF_CODE;
@@ -2611,14 +2603,15 @@ again:
 				vm_push( (SW)exec->rcodeCollect );
 				vm_push( (SW)exec->rcodeUnitLen );
 
-				accum->pdaRun->exec = exec;
-
 				vm_push( (SW)pcr );
 				vm_push( (SW)steps );
 				vm_push( (SW)accum );
 				vm_push( (SW)instr );
 
-				callParseBlock( &instr, &sp, pcr, prg, exec, accum );
+				PdaRun *pdaRun = accum->pdaRun;
+				FsmRun *fsmRun = accum->fsmRun;
+				initExecution( exec, prg, &pdaRun->rcodeCollect, pdaRun, fsmRun, pdaRun->frameId );
+				instr = pdaRun->code;
 			}
 			else {
 				instr += SIZEOF_CODE;
