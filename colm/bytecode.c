@@ -2158,7 +2158,7 @@ again:
 				vm_push( (SW)accum );
 				vm_push( (SW)instr );
 
-				initExecution( exec, accum->pdaRun, fsmRun, pdaRun->frameId );
+				initExecution( exec, accum->pdaRun, accum->fsmRun, accum->pdaRun->frameId );
 				instr = accum->pdaRun->code;
 			}
 			else {
@@ -2240,7 +2240,7 @@ again:
 				vm_push( (SW)accum );
 				vm_push( (SW)instr );
 
-				initExecution( exec, accum->pdaRun, accum->fsmRun, pdaRun->frameId );
+				initExecution( exec, accum->pdaRun, accum->fsmRun, accum->pdaRun->frameId );
 				instr = accum->pdaRun->code;
 			}
 			else {
@@ -2325,7 +2325,7 @@ again:
 				vm_push( (SW)accum );
 				vm_push( (SW)instr );
 
-				initExecution( exec, accum->pdaRun, accum->fsmRun, pdaRun->frameId );
+				initExecution( exec, accum->pdaRun, accum->fsmRun, accum->pdaRun->frameId );
 				instr = accum->pdaRun->code;
 			}
 			else {
@@ -2400,7 +2400,7 @@ again:
 				vm_push( (SW)accum );
 				vm_push( (SW)instr );
 
-				initExecution( exec, accum->pdaRun, accum->fsmRun, pdaRun->frameId );
+				initExecution( exec, accum->pdaRun, accum->fsmRun, accum->pdaRun->frameId );
 				instr = accum->pdaRun->code;
 			}
 			else {
@@ -2481,7 +2481,7 @@ again:
 				vm_push( (SW)accum );
 				vm_push( (SW)instr );
 
-				initExecution( exec, accum->pdaRun, fsmRun, pdaRun->frameId );
+				initExecution( exec, accum->pdaRun, accum->fsmRun, accum->pdaRun->frameId );
 				instr = accum->pdaRun->code;
 			}
 			else {
@@ -2567,7 +2567,7 @@ again:
 				vm_push( (SW)accum );
 				vm_push( (SW)instr );
 
-				initExecution( exec, accum->pdaRun, accum->fsmRun, pdaRun->frameId );
+				initExecution( exec, accum->pdaRun, accum->fsmRun, accum->pdaRun->frameId );
 				instr = accum->pdaRun->code;
 			}
 			else {
