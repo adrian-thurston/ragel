@@ -338,6 +338,9 @@ typedef struct _PdaRun
 	Tree *parsed;
 
 	int reject;
+
+	/* Instruction pointer to use when we stop parsing and execute code. */
+	Code *code;
 } PdaRun;
 
 void rtCodeVectReplace( RtCodeVect *vect, long pos, const Code *val, long len );

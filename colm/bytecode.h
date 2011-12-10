@@ -489,6 +489,7 @@ void allocGlobal( struct ColmProgram *prg );
 Tree **executeCode( Execution *exec, Tree **sp, Code *instr );
 void rcodeDownref( struct ColmProgram *prg, Tree **sp, Code *instr );
 Tree **stackAlloc();
+Code *popReverseCode( RtCodeVect *allRev );
 
 #ifdef __cplusplus
 }

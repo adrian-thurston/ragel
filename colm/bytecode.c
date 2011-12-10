@@ -856,68 +856,8 @@ void callParseBlock( Code **pinstr, Tree ***psp, long pcr, Program *prg,
 	PdaRun *pdaRun = accum->pdaRun;
 	FsmRun *fsmRun = accum->fsmRun;
 
-	switch ( pcr ) {
-		case PcrReduction: {
-			/* Execution environment for the reduction code. */
-			initExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, pdaRun, fsmRun, pdaRun->frameId );
-
-			/* Call execution. */
-			*pinstr = pdaRun->fi->codeWV;
-			break;
-		}
-
-		case PcrGeneration: {
-			/* 
-			 * Not supported:
-			 *  -invoke failure (the backtracker)
-			 */
-			initExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, pdaRun, fsmRun, pdaRun->frameId );
-
-			/* Call execution. */
-			*pinstr = pdaRun->fi->codeWV;
-			break;
-		}
-
-		case PcrPreEof: {
-			/* Execute the translation. */
-			initExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, pdaRun, fsmRun, pdaRun->frameId );
-
-			/* Call execution. */
-			*pinstr = pdaRun->fi->codeWV;
-			break;
-		}
-
-		case PcrRevIgnore:
-		case PcrRevIgnore2:
-		{
-			initExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, pdaRun, fsmRun, -1 );
-
-			*pinstr = popReverseCode( &pdaRun->reverseCode );
-			break;
-		}
-
-		case PcrRevReduction:
-		case PcrRevReduction2:
-		{
-			initExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, pdaRun, fsmRun, -1 );
-
-			*pinstr = popReverseCode( &pdaRun->reverseCode );
-			break;
-		}
-
-		case PcrRevToken:
-		case PcrRevToken2:
-		{
-			initExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, pdaRun, fsmRun, -1 );
-
-			*pinstr = popReverseCode( &pdaRun->reverseCode );
-			break;
-		}
-
-		default: {
-			fatal( "unknown parsing co-routine stop point -- something is wrong\n" );
-		}
-	}
+	initExecution( pdaRun->exec, prg, &pdaRun->rcodeCollect, pdaRun, fsmRun, pdaRun->frameId );
+	*pinstr = pdaRun->code;
 
 	*psp = sp;
 }

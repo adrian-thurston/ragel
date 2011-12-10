@@ -352,9 +352,13 @@ case PcrStart:
 	if ( pdaRun->ignore4->tree->flags & AF_HAS_RCODE ) {
 
 		pdaRun->onDeck = true;
+		pdaRun->frameId = -1;
+		pdaRun->code = popReverseCode( &pdaRun->reverseCode );
 
 return PcrRevIgnore;
 case PcrRevIgnore:
+
+		pdaRun->code = popReverseCode( &pdaRun->reverseCode );
 
 return PcrRevIgnore2;
 case PcrRevIgnore2:
@@ -479,9 +483,13 @@ case PcrStart:
 		if ( input->tree->flags & AF_HAS_RCODE ) {
 
 			pdaRun->onDeck = true;
+			pdaRun->frameId = -1;
+			pdaRun->code = popReverseCode( &pdaRun->reverseCode );
 
 return PcrRevToken;
 case PcrRevToken:
+
+			pdaRun->code = popReverseCode( &pdaRun->reverseCode );
 
 return PcrRevToken2;
 case PcrRevToken2:
@@ -1138,10 +1146,12 @@ case PcrStart:
 			pdaRun->input1 = sendEof( prg, sp, inputStream, fsmRun, pdaRun );
 
 			pdaRun->frameId = prg->rtd->regionInfo[fsmRun->region].eofFrameId;
-			pdaRun->fi = &prg->rtd->frameInfo[pdaRun->frameId];
 
 			if ( prg->ctxDepParsing && pdaRun->frameId >= 0 ) {
 				debug( REALM_PARSE, "HAVE PRE_EOF BLOCK\n" );
+
+				pdaRun->fi = &prg->rtd->frameInfo[pdaRun->frameId];
+				pdaRun->code = pdaRun->fi->codeWV;
 
 return PcrPreEof;
 case PcrPreEof:
@@ -1218,6 +1228,7 @@ case PcrPreEof:
 
 			pdaRun->fi = &prg->rtd->frameInfo[prg->rtd->lelInfo[pdaRun->tokenId].frameId];
 			pdaRun->frameId = prg->rtd->lelInfo[pdaRun->tokenId].frameId;
+			pdaRun->code = pdaRun->fi->codeWV;
 			
 return PcrGeneration;
 case PcrGeneration:
@@ -1860,6 +1871,7 @@ again:
 			pdaRun->reject = false;
 			pdaRun->lhs = pdaRun->redLel->tree;
 			pdaRun->parsed = 0;
+			pdaRun->code = pdaRun->fi->codeWV;
 
 return PcrReduction;
 case PcrReduction:
@@ -2009,9 +2021,13 @@ case PcrRevToken2:
 				pdaRun->onDeck = true;
 				pdaRun->lhs = 0;
 				pdaRun->parsed = 0;
+				pdaRun->frameId = -1;
+				pdaRun->code = popReverseCode( &pdaRun->reverseCode );
 
 return PcrRevReduction;
 case PcrRevReduction:
+
+				pdaRun->code = popReverseCode( &pdaRun->reverseCode );
 
 return PcrRevReduction2;
 case PcrRevReduction2:
