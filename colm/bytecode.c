@@ -2158,10 +2158,8 @@ again:
 				vm_push( (SW)accum );
 				vm_push( (SW)instr );
 
-				PdaRun *pdaRun = accum->pdaRun;
-				FsmRun *fsmRun = accum->fsmRun;
-				initExecution( exec, pdaRun, fsmRun, pdaRun->frameId );
-				instr = pdaRun->code;
+				initExecution( exec, accum->pdaRun, fsmRun, pdaRun->frameId );
+				instr = accum->pdaRun->code;
 			}
 			else {
 				treeDownref( prg, sp, (Tree*)accum );
@@ -2242,10 +2240,8 @@ again:
 				vm_push( (SW)accum );
 				vm_push( (SW)instr );
 
-				PdaRun *pdaRun = accum->pdaRun;
-				FsmRun *fsmRun = accum->fsmRun;
-				initExecution( exec, pdaRun, fsmRun, pdaRun->frameId );
-				instr = pdaRun->code;
+				initExecution( exec, accum->pdaRun, accum->fsmRun, pdaRun->frameId );
+				instr = accum->pdaRun->code;
 			}
 			else {
 				instr += SIZEOF_CODE + SIZEOF_HALF;
@@ -2329,10 +2325,8 @@ again:
 				vm_push( (SW)accum );
 				vm_push( (SW)instr );
 
-				PdaRun *pdaRun = accum->pdaRun;
-				FsmRun *fsmRun = accum->fsmRun;
-				initExecution( exec, pdaRun, fsmRun, pdaRun->frameId );
-				instr = pdaRun->code;
+				initExecution( exec, accum->pdaRun, accum->fsmRun, pdaRun->frameId );
+				instr = accum->pdaRun->code;
 			}
 			else {
 				instr += SIZEOF_CODE;
@@ -2402,14 +2396,12 @@ again:
 				vm_push( (SW)exec->rcodeUnitLen );
 
 				vm_push( (SW)pcr );
-				vm_push( result );
+				vm_push( (SW)result );
 				vm_push( (SW)accum );
 				vm_push( (SW)instr );
 
-				PdaRun *pdaRun = accum->pdaRun;
-				FsmRun *fsmRun = accum->fsmRun;
-				initExecution( exec, pdaRun, fsmRun, pdaRun->frameId );
-				instr = pdaRun->code;
+				initExecution( exec, accum->pdaRun, accum->fsmRun, pdaRun->frameId );
+				instr = accum->pdaRun->code;
 			}
 			else {
 				instr += SIZEOF_CODE;
@@ -2440,7 +2432,7 @@ again:
 			exec->pdaRun = ( PdaRun * ) vm_pop();
 
 			vm_push( (SW)pcr );
-			vm_push( result );
+			vm_push( (SW)result );
 			vm_push( (SW)accum );
 
 			instr -= SIZEOF_CODE;
@@ -2485,14 +2477,12 @@ again:
 
 				vm_push( (SW)pcr );
 				vm_push( (SW)steps );
-				vm_push( result );
+				vm_push( (SW)result );
 				vm_push( (SW)accum );
 				vm_push( (SW)instr );
 
-				PdaRun *pdaRun = accum->pdaRun;
-				FsmRun *fsmRun = accum->fsmRun;
-				initExecution( exec, pdaRun, fsmRun, pdaRun->frameId );
-				instr = pdaRun->code;
+				initExecution( exec, accum->pdaRun, fsmRun, pdaRun->frameId );
+				instr = accum->pdaRun->code;
 			}
 			else {
 				instr += SIZEOF_CODE;
@@ -2531,7 +2521,7 @@ again:
 
 			vm_push( (SW)pcr );
 			vm_push( (SW)steps );
-			vm_push( result );
+			vm_push( (SW)result );
 			vm_push( (SW)accum );
 
 			instr -= SIZEOF_CODE;
@@ -2577,10 +2567,8 @@ again:
 				vm_push( (SW)accum );
 				vm_push( (SW)instr );
 
-				PdaRun *pdaRun = accum->pdaRun;
-				FsmRun *fsmRun = accum->fsmRun;
-				initExecution( exec, pdaRun, fsmRun, pdaRun->frameId );
-				instr = pdaRun->code;
+				initExecution( exec, accum->pdaRun, accum->fsmRun, pdaRun->frameId );
+				instr = accum->pdaRun->code;
 			}
 			else {
 				instr += SIZEOF_CODE;
