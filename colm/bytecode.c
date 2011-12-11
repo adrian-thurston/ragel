@@ -2146,16 +2146,15 @@ again:
 			long pcr = (long)vm_pop();
 
 			if ( pcr != PcrDone ) {
-				/* Push the execution. */
+				vm_push( (SW)pcr );
+				vm_push( (SW)accum );
+
 				vm_push( (SW)exec->pdaRun );
 				vm_push( (SW)exec->fsmRun );
 				vm_push( (SW)exec->framePtr );
 				vm_push( (SW)exec->iframePtr );
 				vm_push( (SW)exec->frameId );
 				vm_push( (SW)exec->rcodeUnitLen );
-
-				vm_push( (SW)pcr );
-				vm_push( (SW)accum );
 				vm_push( (SW)instr );
 
 				initExecution( exec, accum->pdaRun, accum->fsmRun, accum->pdaRun->frameId );
@@ -2181,14 +2180,6 @@ again:
 			long pcr = (long)vm_pop();
 
 			pcr = parseFrag( prg, sp, accum, stopId, pcr );
-
-			/* Pop the saved execution. */
-			exec->rcodeUnitLen = ( long ) vm_pop();
-			exec->frameId = ( long ) vm_pop();
-			exec->iframePtr = ( Tree ** ) vm_pop();
-			exec->framePtr = ( Tree ** ) vm_pop();
-			exec->fsmRun = ( FsmRun * ) vm_pop();
-			exec->pdaRun = ( PdaRun * ) vm_pop();
 
 			vm_push( (SW)pcr );
 			vm_push( (Tree*)accum );
@@ -2227,17 +2218,16 @@ again:
 			long pcr = (long)vm_pop();
 
 			if ( pcr != PcrDone ) {
-				/* Push the execution. */
+				vm_push( (SW)pcr );
+				vm_push( (SW)steps );
+				vm_push( (SW)accum );
+
 				vm_push( (SW)exec->pdaRun );
 				vm_push( (SW)exec->fsmRun );
 				vm_push( (SW)exec->framePtr );
 				vm_push( (SW)exec->iframePtr );
 				vm_push( (SW)exec->frameId );
 				vm_push( (SW)exec->rcodeUnitLen );
-
-				vm_push( (SW)pcr );
-				vm_push( (SW)steps );
-				vm_push( (SW)accum );
 				vm_push( (SW)instr );
 
 				initExecution( exec, accum->pdaRun, accum->fsmRun, accum->pdaRun->frameId );
@@ -2269,14 +2259,6 @@ again:
 			long pcr = (long)vm_pop();
 
 			pcr = parseFrag( prg, sp, accum, stopId, pcr );
-
-			/* Pop the saved execution. */
-			exec->rcodeUnitLen = ( long ) vm_pop();
-			exec->frameId = ( long ) vm_pop();
-			exec->iframePtr = ( Tree ** ) vm_pop();
-			exec->framePtr = ( Tree ** ) vm_pop();
-			exec->fsmRun = ( FsmRun * ) vm_pop();
-			exec->pdaRun = ( PdaRun * ) vm_pop();
 
 			vm_push( (SW)pcr );
 			vm_push( (SW)steps );
@@ -2312,17 +2294,16 @@ again:
 			debug( REALM_BYTECODE, "IN_PARSE_FRAG_BKT2 %ld", steps );
 
 			if ( pcr != PcrDone ) {
-				/* Push the execution. */
+				vm_push( (SW)pcr );
+				vm_push( (SW)steps );
+				vm_push( (SW)accum );
+
 				vm_push( (SW)exec->pdaRun );
 				vm_push( (SW)exec->fsmRun );
 				vm_push( (SW)exec->framePtr );
 				vm_push( (SW)exec->iframePtr );
 				vm_push( (SW)exec->frameId );
 				vm_push( (SW)exec->rcodeUnitLen );
-
-				vm_push( (SW)pcr );
-				vm_push( (SW)steps );
-				vm_push( (SW)accum );
 				vm_push( (SW)instr );
 
 				initExecution( exec, accum->pdaRun, accum->fsmRun, accum->pdaRun->frameId );
@@ -2344,14 +2325,6 @@ again:
 			debug( REALM_BYTECODE, "IN_PARSE_FRAG_BKT3 %ld", steps );
 
 			pcr = undoParseFrag( prg, sp, accum, steps, pcr );
-
-			/* Pop the saved execution. */
-			exec->rcodeUnitLen = ( long ) vm_pop();
-			exec->frameId = ( long ) vm_pop();
-			exec->iframePtr = ( Tree ** ) vm_pop();
-			exec->framePtr = ( Tree ** ) vm_pop();
-			exec->fsmRun = ( FsmRun * ) vm_pop();
-			exec->pdaRun = ( PdaRun * ) vm_pop();
 
 			vm_push( (SW)pcr );
 			vm_push( (SW)steps );
@@ -2387,17 +2360,16 @@ again:
 			long pcr = (long)vm_pop();
 
 			if ( pcr != PcrDone ) {
-				/* Push the execution. */
+				vm_push( (SW)pcr );
+				vm_push( (SW)result );
+				vm_push( (SW)accum );
+
 				vm_push( (SW)exec->pdaRun );
 				vm_push( (SW)exec->fsmRun );
 				vm_push( (SW)exec->framePtr );
 				vm_push( (SW)exec->iframePtr );
 				vm_push( (SW)exec->frameId );
 				vm_push( (SW)exec->rcodeUnitLen );
-
-				vm_push( (SW)pcr );
-				vm_push( (SW)result );
-				vm_push( (SW)accum );
 				vm_push( (SW)instr );
 
 				initExecution( exec, accum->pdaRun, accum->fsmRun, accum->pdaRun->frameId );
@@ -2422,14 +2394,6 @@ again:
 			long pcr = (long)vm_pop();
 
 			pcr = parseFinish( &result, prg, sp, accum, false, pcr );
-
-			/* Pop the saved execution. */
-			exec->rcodeUnitLen = ( long ) vm_pop();
-			exec->frameId = ( long ) vm_pop();
-			exec->iframePtr = ( Tree ** ) vm_pop();
-			exec->framePtr = ( Tree ** ) vm_pop();
-			exec->fsmRun = ( FsmRun * ) vm_pop();
-			exec->pdaRun = ( PdaRun * ) vm_pop();
 
 			vm_push( (SW)pcr );
 			vm_push( (SW)result );
@@ -2467,18 +2431,17 @@ again:
 			long pcr = (long)vm_pop();
 
 			if ( pcr != PcrDone ) {
-				/* Push the execution. */
+				vm_push( (SW)pcr );
+				vm_push( (SW)steps );
+				vm_push( (SW)result );
+				vm_push( (SW)accum );
+
 				vm_push( (SW)exec->pdaRun );
 				vm_push( (SW)exec->fsmRun );
 				vm_push( (SW)exec->framePtr );
 				vm_push( (SW)exec->iframePtr );
 				vm_push( (SW)exec->frameId );
 				vm_push( (SW)exec->rcodeUnitLen );
-
-				vm_push( (SW)pcr );
-				vm_push( (SW)steps );
-				vm_push( (SW)result );
-				vm_push( (SW)accum );
 				vm_push( (SW)instr );
 
 				initExecution( exec, accum->pdaRun, accum->fsmRun, accum->pdaRun->frameId );
@@ -2510,14 +2473,6 @@ again:
 			long pcr = (long)vm_pop();
 
 			pcr = parseFinish( &result, prg, sp, accum, true, pcr );
-
-			/* Pop the saved execution. */
-			exec->rcodeUnitLen = ( long ) vm_pop();
-			exec->frameId = ( long ) vm_pop();
-			exec->iframePtr = ( Tree ** ) vm_pop();
-			exec->framePtr = ( Tree ** ) vm_pop();
-			exec->fsmRun = ( FsmRun * ) vm_pop();
-			exec->pdaRun = ( PdaRun * ) vm_pop();
 
 			vm_push( (SW)pcr );
 			vm_push( (SW)steps );
@@ -2554,17 +2509,16 @@ again:
 			debug( REALM_BYTECODE, "IN_PARSE_FINISH_BKT2\n" );
 
 			if ( pcr != PcrDone ) {
-				/* Push the execution. */
+				vm_push( (SW)pcr );
+				vm_push( (SW)steps );
+				vm_push( (SW)accum );
+
 				vm_push( (SW)exec->pdaRun );
 				vm_push( (SW)exec->fsmRun );
 				vm_push( (SW)exec->framePtr );
 				vm_push( (SW)exec->iframePtr );
 				vm_push( (SW)exec->frameId );
 				vm_push( (SW)exec->rcodeUnitLen );
-
-				vm_push( (SW)pcr );
-				vm_push( (SW)steps );
-				vm_push( (SW)accum );
 				vm_push( (SW)instr );
 
 				initExecution( exec, accum->pdaRun, accum->fsmRun, accum->pdaRun->frameId );
@@ -2590,14 +2544,6 @@ again:
 
 			pcr = undoParseFrag( prg, sp, accum, steps, pcr );
 
-			/* Pop the saved execution. */
-			exec->rcodeUnitLen = ( long ) vm_pop();
-			exec->frameId = ( long ) vm_pop();
-			exec->iframePtr = ( Tree ** ) vm_pop();
-			exec->framePtr = ( Tree ** ) vm_pop();
-			exec->fsmRun = ( FsmRun * ) vm_pop();
-			exec->pdaRun = ( PdaRun * ) vm_pop();
-
 			vm_push( (SW)pcr );
 			vm_push( (SW)steps );
 			vm_push( (SW)accum );
@@ -2612,6 +2558,12 @@ again:
 			debug( REALM_BYTECODE, "IN_PCR_RET\n" );
 
 			instr = (Code*) vm_pop();
+			exec->rcodeUnitLen = ( long ) vm_pop();
+			exec->frameId = ( long ) vm_pop();
+			exec->iframePtr = ( Tree ** ) vm_pop();
+			exec->framePtr = ( Tree ** ) vm_pop();
+			exec->fsmRun = ( FsmRun * ) vm_pop();
+			exec->pdaRun = ( PdaRun * ) vm_pop();
 
 			if ( instr == 0 ) {
 				fflush( stdout );
@@ -2625,6 +2577,12 @@ again:
 			exec->pdaRun->onDeck = false;
 
 			instr = (Code*) vm_pop();
+			exec->rcodeUnitLen = ( long ) vm_pop();
+			exec->frameId = ( long ) vm_pop();
+			exec->iframePtr = ( Tree ** ) vm_pop();
+			exec->framePtr = ( Tree ** ) vm_pop();
+			exec->fsmRun = ( FsmRun * ) vm_pop();
+			exec->pdaRun = ( PdaRun * ) vm_pop();
 
 			if ( instr == 0 ) {
 				fflush( stdout );
