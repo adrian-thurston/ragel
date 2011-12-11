@@ -228,6 +228,7 @@ typedef unsigned char uchar;
 //#define IN_PARSE_TREE_WV         0x9b
 
 #define IN_PARSE_LOAD_START      0xf2
+#define IN_PARSE_SAVE_STEPS      0xf3
 #define IN_PARSE_FRAG_WC         0xc0
 #define IN_PARSE_FRAG_WC2        0xe0
 #define IN_PARSE_FRAG_WC3        0xe1

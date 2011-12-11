@@ -1376,12 +1376,12 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 	/* Parse instruction, dependent on whether or not we are producing revert
 	 * or commit code. */
 	if ( pd->revertOn ) {
+		code.append( IN_PARSE_SAVE_STEPS );
+		code.append( IN_PARSE_LOAD_START );
 		code.append( IN_PARSE_FRAG_WV );
 		code.appendHalf( stopId );
 		code.append( IN_PARSE_FRAG_WV2 );
-		code.appendHalf( stopId );
 		code.append( IN_PARSE_FRAG_WV3 );
-		code.appendHalf( stopId );
 
 		/* Finish immediately. */
 		code.append( IN_PARSE_FINISH_WV );
@@ -2096,12 +2096,12 @@ void LangStmt::evaluateAccumItems( ParseData *pd, CodeVect &code ) const
 		/* Parse instruction, dependent on whether or not we are producing
 		 * revert or commit code. */
 		if ( pd->revertOn ) {
+			code.append( IN_PARSE_SAVE_STEPS );
+			code.append( IN_PARSE_LOAD_START );
 			code.append( IN_PARSE_FRAG_WV );
 			code.appendHalf( 0 );
 			code.append( IN_PARSE_FRAG_WV2 );
-			code.appendHalf( 0 );
 			code.append( IN_PARSE_FRAG_WV3 );
-			code.appendHalf( 0 );
 		}
 		else {
 			code.append( IN_PARSE_LOAD_START );
