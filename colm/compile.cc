@@ -1389,12 +1389,11 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 		code.append( IN_PARSE_FINISH_WV3 );
 	}
 	else {
+		code.append( IN_PARSE_LOAD_START );
 		code.append( IN_PARSE_FRAG_WC );
 		code.appendHalf( stopId );
 		code.append( IN_PARSE_FRAG_WC2 );
-		code.appendHalf( stopId );
 		code.append( IN_PARSE_FRAG_WC3 );
-		code.appendHalf( stopId );
 
 		/* Finish immediately. */
 		code.append( IN_PARSE_FINISH_WC );
@@ -2105,12 +2104,11 @@ void LangStmt::evaluateAccumItems( ParseData *pd, CodeVect &code ) const
 			code.appendHalf( 0 );
 		}
 		else {
+			code.append( IN_PARSE_LOAD_START );
 			code.append( IN_PARSE_FRAG_WC );
 			code.appendHalf( 0 );
 			code.append( IN_PARSE_FRAG_WC2 );
-			code.appendHalf( 0 );
 			code.append( IN_PARSE_FRAG_WC3 );
-			code.appendHalf( 0 );
 		}
 	}
 	code.append( IN_POP );

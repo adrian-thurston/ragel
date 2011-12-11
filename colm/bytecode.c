@@ -2121,72 +2121,68 @@ again:
 			break;
 		}
 
+		case IN_PARSE_LOAD_START: {
+			debug( REALM_BYTECODE, "IN_PARSE_LOAD_START\n" );
+			vm_push( (SW) PcrStart );
+			break;
+		}
+
 		case IN_PARSE_FRAG_WC: {
+			debug( REALM_BYTECODE, "IN_PARSE_FRAG_WC\n" );
+
 			Half stopId;
 			read_half( stopId );
 
-			debug( REALM_BYTECODE, "IN_PARSE_FRAG_WC %d\n", stopId );
-
+			long pcr = (long)vm_pop();
 			Accum *accum = (Accum*)vm_pop();
 
-			long pcr = parseFrag( prg, sp, accum, stopId, PcrStart );
+			pcr = parseFrag( prg, sp, accum, stopId, pcr );
 
+			vm_push( (SW)accum );
 			vm_push( (SW)pcr );
-			vm_push( (Tree*)accum );
+
+			/* If done, jump to the terminating instruction, otherwise fall
+			 * through to call some code, then jump back here. */
+			if ( pcr == PcrDone )
+				instr += SIZEOF_CODE;
 			break;
 		}
 
 		case IN_PARSE_FRAG_WC2: {
-			Half stopId;
-			read_half( stopId );
+			debug( REALM_BYTECODE, "IN_PARSE_FRAG_WC2\n" );
 
-			debug( REALM_BYTECODE, "IN_PARSE_FRAG_WC2 %d\n", stopId );
-
-			Accum *accum = (Accum*)vm_pop();
 			long pcr = (long)vm_pop();
+			Accum *accum = (Accum*)vm_pop();
 
-			if ( pcr != PcrDone ) {
-				vm_push( (SW)pcr );
-				vm_push( (SW)accum );
+			vm_push( (SW)accum );
+			vm_push( (SW)pcr );
 
-				vm_push( (SW)exec->pdaRun );
-				vm_push( (SW)exec->fsmRun );
-				vm_push( (SW)exec->framePtr );
-				vm_push( (SW)exec->iframePtr );
-				vm_push( (SW)exec->frameId );
-				vm_push( (SW)exec->rcodeUnitLen );
-				vm_push( (SW)instr );
+			vm_push( (SW)exec->pdaRun );
+			vm_push( (SW)exec->fsmRun );
+			vm_push( (SW)exec->framePtr );
+			vm_push( (SW)exec->iframePtr );
+			vm_push( (SW)exec->frameId );
+			vm_push( (SW)exec->rcodeUnitLen );
 
-				initExecution( exec, accum->pdaRun, accum->fsmRun, accum->pdaRun->frameId );
-				instr = accum->pdaRun->code;
-			}
-			else {
-				treeDownref( prg, sp, (Tree*)accum );
+			Code *returnTo = instr - ( SIZEOF_CODE + SIZEOF_CODE + SIZEOF_HALF );
+			vm_push( (SW)returnTo );
 
-				instr += SIZEOF_CODE + SIZEOF_HALF;
-				if ( prg->induceExit )
-					goto out;
-			}
+			initExecution( exec, accum->pdaRun, accum->fsmRun, accum->pdaRun->frameId );
+			instr = accum->pdaRun->code;
 			break;
 		}
 
 		case IN_PARSE_FRAG_WC3: {
-			Half stopId;
-			read_half( stopId );
+			debug( REALM_BYTECODE, "IN_PARSE_FRAG_WC3\n" );
 
-			debug( REALM_BYTECODE, "IN_PARSE_FRAG_WC3 %d\n", stopId );
-
-			Accum *accum = (Accum*)vm_pop();
 			long pcr = (long)vm_pop();
+			Accum *accum = (Accum*)vm_pop();
 
-			pcr = parseFrag( prg, sp, accum, stopId, pcr );
+			treeDownref( prg, sp, (Tree*)accum );
 
-			vm_push( (SW)pcr );
-			vm_push( (Tree*)accum );
+			if ( prg->induceExit )
+				goto out;
 
-			/* Back up to the frag 2. */
-			instr -= SIZEOF_CODE + SIZEOF_HALF;
-			instr -= SIZEOF_CODE + SIZEOF_HALF;
 			break;
 		}
 
