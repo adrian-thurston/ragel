@@ -2338,68 +2338,58 @@ again:
 		case IN_PARSE_FINISH_WC: {
 			debug( REALM_BYTECODE, "IN_PARSE_FINISH_WC\n" );
 
+			int pcr = (long)vm_pop();
 			Accum *accum = (Accum*)vm_pop();
 
 			extractInput( prg, accum );
 
-			Tree *result = 0;
-			long pcr = parseFinish( &result, prg, sp, accum, false, PcrStart );
+			accum->result = 0;
+			pcr = parseFinish( &accum->result, prg, sp, accum, false, pcr );
 
-			vm_push( (SW)pcr );
-			vm_push( result );
 			vm_push( (SW)accum );
+			vm_push( (SW)pcr );
+
+			/* If done, jump to the terminating instruction, otherwise fall
+			 * through to call some code, then jump back here. */
+			if ( pcr == PcrDone )
+				instr += SIZEOF_CODE;
 			break;
 		}
 
 		case IN_PARSE_FINISH_WC2: {
 			debug( REALM_BYTECODE, "IN_PARSE_FINISH_WC2\n" );
 
-			Accum *accum = (Accum*)vm_pop();
-			Tree *result = vm_pop();
 			long pcr = (long)vm_pop();
+			Accum *accum = (Accum*)vm_pop();
 
-			if ( pcr != PcrDone ) {
-				vm_push( (SW)pcr );
-				vm_push( (SW)result );
-				vm_push( (SW)accum );
+			vm_push( (SW)accum );
+			vm_push( (SW)pcr );
 
-				vm_push( (SW)exec->pdaRun );
-				vm_push( (SW)exec->fsmRun );
-				vm_push( (SW)exec->framePtr );
-				vm_push( (SW)exec->iframePtr );
-				vm_push( (SW)exec->frameId );
-				vm_push( (SW)exec->rcodeUnitLen );
-				vm_push( (SW)instr );
+			vm_push( (SW)exec->pdaRun );
+			vm_push( (SW)exec->fsmRun );
+			vm_push( (SW)exec->framePtr );
+			vm_push( (SW)exec->iframePtr );
+			vm_push( (SW)exec->frameId );
+			vm_push( (SW)exec->rcodeUnitLen );
 
-				initExecution( exec, accum->pdaRun, accum->fsmRun, accum->pdaRun->frameId );
-				instr = accum->pdaRun->code;
-			}
-			else {
-				instr += SIZEOF_CODE;
+			Code *returnTo = instr - (SIZEOF_CODE + SIZEOF_CODE);
+			vm_push( (SW)returnTo );
 
-				vm_push( result );
-				treeDownref( prg, sp, (Tree*)accum );
-				if ( prg->induceExit )
-					goto out;
-			}
+			initExecution( exec, accum->pdaRun, accum->fsmRun, accum->pdaRun->frameId );
+			instr = accum->pdaRun->code;
 			break;
 		}
 
 		case IN_PARSE_FINISH_WC3: {
 			debug( REALM_BYTECODE, "IN_PARSE_FINISH_WC3\n" );
 
-			Accum *accum = (Accum*)vm_pop();
-			Tree *result = vm_pop();
 			long pcr = (long)vm_pop();
+			Accum *accum = (Accum*)vm_pop();
 
-			pcr = parseFinish( &result, prg, sp, accum, false, pcr );
-
-			vm_push( (SW)pcr );
-			vm_push( (SW)result );
-			vm_push( (SW)accum );
-
-			instr -= SIZEOF_CODE;
-			instr -= SIZEOF_CODE;
+			vm_push( accum->result );
+			treeDownref( prg, sp, (Tree*)accum );
+			if ( prg->induceExit )
+				goto out;
 
 			break;
 		}
@@ -2407,79 +2397,68 @@ again:
 		case IN_PARSE_FINISH_WV: {
 			debug( REALM_BYTECODE, "IN_PARSE_FINISH_WV\n" );
 
+			long pcr = (long)vm_pop();
 			Accum *accum = (Accum*)vm_pop();
+			long steps = (long)vm_pop();
 
-			long steps = accum->pdaRun->steps;
 			extractInput( prg, accum );
-			Tree *result = 0;
-			long pcr = parseFinish( &result, prg, sp, accum, true, PcrStart );
+			accum->result = 0;
+			pcr = parseFinish( &accum->result, prg, sp, accum, true, pcr );
 
-			vm_push( (SW)pcr );
 			vm_push( (SW)steps );
-			vm_push( result );
 			vm_push( (SW)accum );
+			vm_push( (SW)pcr );
+
+			if ( pcr == PcrDone )
+				instr += SIZEOF_CODE;
 			break;
 		}
 
 		case IN_PARSE_FINISH_WV2: {
 			debug( REALM_BYTECODE, "IN_PARSE_FINISH_WV2\n" );
 
-			Accum *accum = (Accum*)vm_pop();
-			Tree *result = vm_pop();
-			long steps = (long)vm_pop();
 			long pcr = (long)vm_pop();
+			Accum *accum = (Accum*)vm_pop();
+			long steps = (long)vm_pop();
 
-			if ( pcr != PcrDone ) {
-				vm_push( (SW)pcr );
-				vm_push( (SW)steps );
-				vm_push( (SW)result );
-				vm_push( (SW)accum );
+			vm_push( (SW)steps );
+			vm_push( (SW)accum );
+			vm_push( (SW)pcr );
 
-				vm_push( (SW)exec->pdaRun );
-				vm_push( (SW)exec->fsmRun );
-				vm_push( (SW)exec->framePtr );
-				vm_push( (SW)exec->iframePtr );
-				vm_push( (SW)exec->frameId );
-				vm_push( (SW)exec->rcodeUnitLen );
-				vm_push( (SW)instr );
+			vm_push( (SW)exec->pdaRun );
+			vm_push( (SW)exec->fsmRun );
+			vm_push( (SW)exec->framePtr );
+			vm_push( (SW)exec->iframePtr );
+			vm_push( (SW)exec->frameId );
+			vm_push( (SW)exec->rcodeUnitLen );
 
-				initExecution( exec, accum->pdaRun, accum->fsmRun, accum->pdaRun->frameId );
-				instr = accum->pdaRun->code;
-			}
-			else {
-				instr += SIZEOF_CODE;
+			Code *returnTo = instr - (SIZEOF_CODE + SIZEOF_CODE);
+			vm_push( (SW)returnTo );
 
-				vm_push( result );
+			initExecution( exec, accum->pdaRun, accum->fsmRun, accum->pdaRun->frameId );
+			instr = accum->pdaRun->code;
 
-				append( &exec->pdaRun->rcodeCollect, IN_PARSE_FINISH_BKT );
-				appendWord( &exec->pdaRun->rcodeCollect, (Word) accum );
-				appendWord( &exec->pdaRun->rcodeCollect, (Word) steps );
-				append( &exec->pdaRun->rcodeCollect, IN_PARSE_FINISH_BKT2 );
-				append( &exec->pdaRun->rcodeCollect, IN_PARSE_FINISH_BKT3 );
-				append( &exec->pdaRun->rcodeCollect, 3 * SIZEOF_CODE + 2 * SIZEOF_WORD );
-				if ( prg->induceExit )
-					goto out;
-			}
 			break;
 		}
 
 		case IN_PARSE_FINISH_WV3: {
 			debug( REALM_BYTECODE, "IN_PARSE_FINISH_WV3\n" );
 
-			Accum *accum = (Accum*)vm_pop();
-			Tree *result = vm_pop();
-			long steps = (long)vm_pop();
 			long pcr = (long)vm_pop();
+			Accum *accum = (Accum*)vm_pop();
+			long steps = (long)vm_pop();
 
-			pcr = parseFinish( &result, prg, sp, accum, true, pcr );
+			vm_push( accum->result );
 
-			vm_push( (SW)pcr );
-			vm_push( (SW)steps );
-			vm_push( (SW)result );
-			vm_push( (SW)accum );
+			append( &exec->pdaRun->rcodeCollect, IN_PARSE_FINISH_BKT );
+			appendWord( &exec->pdaRun->rcodeCollect, (Word) accum );
+			appendWord( &exec->pdaRun->rcodeCollect, (Word) steps );
+			append( &exec->pdaRun->rcodeCollect, IN_PARSE_FINISH_BKT2 );
+			append( &exec->pdaRun->rcodeCollect, IN_PARSE_FINISH_BKT3 );
+			append( &exec->pdaRun->rcodeCollect, 3 * SIZEOF_CODE + 2 * SIZEOF_WORD );
+			if ( prg->induceExit )
+				goto out;
 
-			instr -= SIZEOF_CODE;
-			instr -= SIZEOF_CODE;
 			break;
 		}
 
