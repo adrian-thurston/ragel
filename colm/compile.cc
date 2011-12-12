@@ -1076,6 +1076,7 @@ void LangVarRef::callOperation( ParseData *pd, CodeVect &code, VarRefLookup &loo
 			code.append( IN_PARSE_SAVE_STEPS );
 			code.append( IN_PARSE_LOAD_START );
 			code.append( IN_PARSE_FINISH_WV );
+			code.appendHalf( 0 );
 			code.append( IN_PARSE_FINISH_WV2 );
 			code.append( IN_PARSE_FINISH_WV3 );
 		}
@@ -1088,6 +1089,7 @@ void LangVarRef::callOperation( ParseData *pd, CodeVect &code, VarRefLookup &loo
 			code.append( IN_PARSE_SAVE_STEPS );
 			code.append( IN_PARSE_LOAD_START );
 			code.append( IN_PARSE_FINISH_WC );
+			code.appendHalf( 0 );
 			code.append( IN_PARSE_FINISH_WC2 );
 			code.append( IN_PARSE_FINISH_WC3 );
 		}
@@ -1397,6 +1399,7 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 		code.append( IN_PARSE_SAVE_STEPS );
 		code.append( IN_PARSE_LOAD_START );
 		code.append( IN_PARSE_FINISH_WV );
+		code.appendHalf( stopId );
 		code.append( IN_PARSE_FINISH_WV2 );
 		code.append( IN_PARSE_FINISH_WV3 );
 	}
@@ -1412,6 +1415,7 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 		code.append( IN_PARSE_SAVE_STEPS );
 		code.append( IN_PARSE_LOAD_START );
 		code.append( IN_PARSE_FINISH_WC );
+		code.appendHalf( stopId );
 		code.append( IN_PARSE_FINISH_WC2 );
 		code.append( IN_PARSE_FINISH_WC3 );
 	}

@@ -594,6 +594,8 @@ again:
 			break;
 		}
 		case IN_PARSE_FRAG_BKT: {
+			Half stopId;
+			read_half( stopId );
 			debug( REALM_BYTECODE, "IN_PARSE_FRAG_BKT\n" );
 			break;
 		}
@@ -606,6 +608,8 @@ again:
 			break;
 		}
 		case IN_PARSE_FINISH_BKT: {
+			Half stopId;
+			read_half( stopId );
 			debug( REALM_BYTECODE, "IN_PARSE_FINISH_BKT\n" );
 			break;
 		}
@@ -2289,9 +2293,10 @@ again:
 			appendWord( &exec->pdaRun->rcodeCollect, (Word)accum );
 			append( &exec->pdaRun->rcodeCollect, IN_PARSE_LOAD_START );
 			append( &exec->pdaRun->rcodeCollect, IN_PARSE_FRAG_BKT );
+			appendHalf( &exec->pdaRun->rcodeCollect, 0 );
 			append( &exec->pdaRun->rcodeCollect, IN_PARSE_FRAG_BKT2 );
 			append( &exec->pdaRun->rcodeCollect, IN_PARSE_FRAG_BKT3 );
-			append( &exec->pdaRun->rcodeCollect, 6 * SIZEOF_CODE + 2 * SIZEOF_WORD );
+			append( &exec->pdaRun->rcodeCollect, 6 * SIZEOF_CODE + 2 * SIZEOF_WORD + SIZEOF_HALF );
 
 			if ( prg->induceExit )
 				goto out;
@@ -2299,6 +2304,9 @@ again:
 		}
 
 		case IN_PARSE_FRAG_BKT: {
+			Half stopId;
+			read_half( stopId );
+
 			debug( REALM_BYTECODE, "IN_PARSE_FRAG_BKT\n" );
 
 			long pcr = (long)vm_pop();
@@ -2334,7 +2342,7 @@ again:
 			vm_push( (SW)exec->frameId );
 			vm_push( (SW)exec->rcodeUnitLen );
 
-			Code *returnTo = instr - ( SIZEOF_CODE + SIZEOF_CODE );
+			Code *returnTo = instr - ( SIZEOF_CODE + SIZEOF_CODE + SIZEOF_HALF );
 			vm_push( (SW)returnTo );
 
 			initExecution( exec, accum->pdaRun, accum->fsmRun, accum->pdaRun->frameId );
@@ -2355,6 +2363,9 @@ again:
 		}
 
 		case IN_PARSE_FINISH_WC: {
+			Half stopId;
+			read_half( stopId );
+
 			debug( REALM_BYTECODE, "IN_PARSE_FINISH_WC\n" );
 
 			int pcr = (long)vm_pop();
@@ -2395,7 +2406,7 @@ again:
 			vm_push( (SW)exec->frameId );
 			vm_push( (SW)exec->rcodeUnitLen );
 
-			Code *returnTo = instr - (SIZEOF_CODE + SIZEOF_CODE);
+			Code *returnTo = instr - ( SIZEOF_CODE + SIZEOF_CODE + SIZEOF_HALF );
 			vm_push( (SW)returnTo );
 
 			initExecution( exec, accum->pdaRun, accum->fsmRun, accum->pdaRun->frameId );
@@ -2419,6 +2430,9 @@ again:
 		}
 
 		case IN_PARSE_FINISH_WV: {
+			Half stopId;
+			read_half( stopId );
+
 			debug( REALM_BYTECODE, "IN_PARSE_FINISH_WV\n" );
 
 			long pcr = (long)vm_pop();
@@ -2456,7 +2470,7 @@ again:
 			vm_push( (SW)exec->frameId );
 			vm_push( (SW)exec->rcodeUnitLen );
 
-			Code *returnTo = instr - (SIZEOF_CODE + SIZEOF_CODE);
+			Code *returnTo = instr - ( SIZEOF_CODE + SIZEOF_CODE + SIZEOF_HALF );
 			vm_push( (SW)returnTo );
 
 			initExecution( exec, accum->pdaRun, accum->fsmRun, accum->pdaRun->frameId );
@@ -2480,9 +2494,10 @@ again:
 			appendWord( &exec->pdaRun->rcodeCollect, (Word)accum );
 			append( &exec->pdaRun->rcodeCollect, IN_PARSE_LOAD_START );
 			append( &exec->pdaRun->rcodeCollect, IN_PARSE_FINISH_BKT );
+			appendHalf( &exec->pdaRun->rcodeCollect, 0 );
 			append( &exec->pdaRun->rcodeCollect, IN_PARSE_FINISH_BKT2 );
 			append( &exec->pdaRun->rcodeCollect, IN_PARSE_FINISH_BKT3 );
-			append( &exec->pdaRun->rcodeCollect, 6 * SIZEOF_CODE + 2 * SIZEOF_WORD );
+			append( &exec->pdaRun->rcodeCollect, 6 * SIZEOF_CODE + 2 * SIZEOF_WORD + SIZEOF_HALF );
 
 			if ( prg->induceExit )
 				goto out;
@@ -2491,6 +2506,9 @@ again:
 		}
 
 		case IN_PARSE_FINISH_BKT: {
+			Half stopId;
+			read_half( stopId );
+
 			debug( REALM_BYTECODE, "IN_PARSE_FINISH_BKT\n" );
 
 			long pcr = (long)vm_pop();
@@ -2526,7 +2544,7 @@ again:
 			vm_push( (SW)exec->frameId );
 			vm_push( (SW)exec->rcodeUnitLen );
 
-			Code *returnTo = instr - (SIZEOF_CODE + SIZEOF_CODE);
+			Code *returnTo = instr - ( SIZEOF_CODE + SIZEOF_CODE + SIZEOF_HALF );
 			vm_push( (SW)returnTo );
 
 			initExecution( exec, accum->pdaRun, accum->fsmRun, accum->pdaRun->frameId );
