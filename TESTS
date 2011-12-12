@@ -70,4 +70,5 @@ TESTS="
 	div.lm
 	scope1.lm
 	export1.lm
+	lhs1.lm
 "
