@@ -2168,9 +2168,11 @@ again:
 
 			long pcr = (long)vm_pop();
 			Accum *accum = (Accum*)vm_pop();
+			long steps = (long)vm_pop();
 
 			pcr = parseFrag( prg, sp, accum, stopId, pcr );
 
+			vm_push( (SW)steps );
 			vm_push( (SW)accum );
 			vm_push( (SW)pcr );
 
@@ -2186,7 +2188,9 @@ again:
 
 			long pcr = (long)vm_pop();
 			Accum *accum = (Accum*)vm_pop();
+			long steps = (long)vm_pop();
 
+			vm_push( (SW)steps );
 			vm_push( (SW)accum );
 			vm_push( (SW)pcr );
 
@@ -2210,6 +2214,7 @@ again:
 
 			long pcr = (long)vm_pop();
 			Accum *accum = (Accum*)vm_pop();
+			long steps = (long)vm_pop();
 
 			treeDownref( prg, sp, (Tree*)accum );
 
@@ -2312,11 +2317,11 @@ again:
 		}
 
 		case IN_PARSE_FRAG_BKT2: {
+			debug( REALM_BYTECODE, "IN_PARSE_FRAG_BKT2" );
+
 			long pcr = (long)vm_pop();
 			Accum *accum = (Accum*)vm_pop();
 			long steps = (long)vm_pop();
-
-			debug( REALM_BYTECODE, "IN_PARSE_FRAG_BKT2 %ld", steps );
 
 			vm_push( (SW)steps );
 			vm_push( (SW)accum );
@@ -2354,12 +2359,14 @@ again:
 
 			int pcr = (long)vm_pop();
 			Accum *accum = (Accum*)vm_pop();
+			long steps = (long)vm_pop();
 
 			extractInput( prg, accum );
 
 			accum->result = 0;
 			pcr = parseFinish( &accum->result, prg, sp, accum, false, pcr );
 
+			vm_push( (SW)steps );
 			vm_push( (SW)accum );
 			vm_push( (SW)pcr );
 
@@ -2375,7 +2382,9 @@ again:
 
 			long pcr = (long)vm_pop();
 			Accum *accum = (Accum*)vm_pop();
+			long steps = (long)vm_pop();
 
+			vm_push( (SW)steps );
 			vm_push( (SW)accum );
 			vm_push( (SW)pcr );
 
@@ -2399,6 +2408,7 @@ again:
 
 			long pcr = (long)vm_pop();
 			Accum *accum = (Accum*)vm_pop();
+			long steps = (long)vm_pop();
 
 			vm_push( accum->result );
 			treeDownref( prg, sp, (Tree*)accum );
