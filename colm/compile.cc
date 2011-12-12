@@ -1077,7 +1077,7 @@ void LangVarRef::callOperation( ParseData *pd, CodeVect &code, VarRefLookup &loo
 			code.append( IN_PARSE_LOAD_START );
 			code.append( IN_PARSE_FINISH_WV );
 			code.appendHalf( 0 );
-			code.append( IN_PARSE_FINISH_WV2 );
+			code.append( IN_PCR_CALL );
 			code.append( IN_PARSE_FINISH_WV3 );
 		}
 		else {
@@ -1090,7 +1090,7 @@ void LangVarRef::callOperation( ParseData *pd, CodeVect &code, VarRefLookup &loo
 			code.append( IN_PARSE_LOAD_START );
 			code.append( IN_PARSE_FINISH_WC );
 			code.appendHalf( 0 );
-			code.append( IN_PARSE_FINISH_WC2 );
+			code.append( IN_PCR_CALL );
 			code.append( IN_PARSE_FINISH_WC3 );
 		}
 		else {
@@ -1392,7 +1392,7 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 		code.append( IN_PARSE_LOAD_START );
 		code.append( IN_PARSE_FRAG_WV );
 		code.appendHalf( stopId );
-		code.append( IN_PARSE_FRAG_WV2 );
+		code.append( IN_PCR_CALL );
 		code.append( IN_PARSE_FRAG_WV3 );
 
 		/* Finish immediately. */
@@ -1400,7 +1400,7 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 		code.append( IN_PARSE_LOAD_START );
 		code.append( IN_PARSE_FINISH_WV );
 		code.appendHalf( stopId );
-		code.append( IN_PARSE_FINISH_WV2 );
+		code.append( IN_PCR_CALL );
 		code.append( IN_PARSE_FINISH_WV3 );
 	}
 	else {
@@ -1408,7 +1408,7 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 		code.append( IN_PARSE_LOAD_START );
 		code.append( IN_PARSE_FRAG_WC );
 		code.appendHalf( stopId );
-		code.append( IN_PARSE_FRAG_WC2 );
+		code.append( IN_PCR_CALL );
 		code.append( IN_PARSE_FRAG_WC3 );
 
 		/* Finish immediately. */
@@ -1416,7 +1416,7 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 		code.append( IN_PARSE_LOAD_START );
 		code.append( IN_PARSE_FINISH_WC );
 		code.appendHalf( stopId );
-		code.append( IN_PARSE_FINISH_WC2 );
+		code.append( IN_PCR_CALL );
 		code.append( IN_PARSE_FINISH_WC3 );
 	}
 
@@ -2119,7 +2119,7 @@ void LangStmt::evaluateAccumItems( ParseData *pd, CodeVect &code ) const
 			code.append( IN_PARSE_LOAD_START );
 			code.append( IN_PARSE_FRAG_WV );
 			code.appendHalf( 0 );
-			code.append( IN_PARSE_FRAG_WV2 );
+			code.append( IN_PCR_CALL );
 			code.append( IN_PARSE_FRAG_WV3 );
 		}
 		else {
@@ -2127,7 +2127,7 @@ void LangStmt::evaluateAccumItems( ParseData *pd, CodeVect &code ) const
 			code.append( IN_PARSE_LOAD_START );
 			code.append( IN_PARSE_FRAG_WC );
 			code.appendHalf( 0 );
-			code.append( IN_PARSE_FRAG_WC2 );
+			code.append( IN_PCR_CALL );
 			code.append( IN_PARSE_FRAG_WC3 );
 		}
 	}
