@@ -172,9 +172,10 @@ void connectStream( FsmRun *fsmRun, InputStream *inputStream )
 		takeBackBuffered( inputStream );
 	}
 	
-#ifdef COLM_LOG
-	if ( inputStream->hasData != fsmRun )
+#ifdef DEBUG
+	if ( inputStream->hasData != fsmRun ) {
 		debug( REALM_PARSE, "connecting fsmRun: %p and input stream %p\n", fsmRun, inputStream );
+	}
 #endif
 
 	inputStream->hasData = fsmRun;
@@ -295,9 +296,9 @@ void undoStreamAppend( Program *prg, Tree **sp, InputStream *inputStream, long l
  * a previous buffer and slide back data. */
 static void sendBackText( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length )
 {
-	connectStream( fsmRun, inputStream );
-
 	debug( REALM_PARSE, "push back of %ld characters\n", length );
+
+//	connectStream( fsmRun, inputStream );
 
 	if ( length == 0 )
 		return;
@@ -364,6 +365,11 @@ return PcrRevIgnore2;
 case PcrRevIgnore2:
 
 		pdaRun->ignore4->tree->flags &= ~AF_HAS_RCODE;
+	}
+
+	if ( pdaRun->steps == pdaRun->targetSteps ) {
+		debug( REALM_PARSE, "trigger parse stop, steps = target = %d\n", pdaRun->targetSteps );
+		pdaRun->stop = true;
 	}
 
 	treeDownref( prg, sp, pdaRun->ignore4->tree );
@@ -506,7 +512,7 @@ case PcrRevToken2:
 	}
 
 	if ( pdaRun->steps == pdaRun->targetSteps ) {
-		debug( REALM_PARSE, "trigger parse stop, steps = target = %d", pdaRun->targetSteps );
+		debug( REALM_PARSE, "trigger parse stop, steps = target = %d\n", pdaRun->targetSteps );
 		pdaRun->stop = true;
 	}
 
@@ -1951,7 +1957,7 @@ parseError:
 			pdaRun->checkStop = false;
 
 			if ( pdaRun->stop ) {
-				debug( REALM_PARSE, "stopping the backtracking, steps is %d", pdaRun->steps );
+				debug( REALM_PARSE, "stopping the backtracking, steps is %d\n", pdaRun->steps );
 
 				pdaRun->cs = stackTopTarget( prg, pdaRun );
 				goto _out;
@@ -2094,6 +2100,7 @@ case PcrRevReduction2:
 			long region = pt(pdaRun->ignore6->tree)->region;
 			pdaRun->next = region > 0 ? region + 1 : 0;
 			pdaRun->checkNext = true;
+			pdaRun->checkStop = true;
 			
 			long pcr = sendBackIgnore( prg, sp, pdaRun, fsmRun, inputStream, pdaRun->ignore6, PcrStart );
 			while ( pcr != PcrDone ) {

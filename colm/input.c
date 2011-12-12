@@ -230,14 +230,14 @@ int inputStreamDynamicGetDataRev( InputStream *is, char *dest, int length )
 	if ( is->queueTail != 0 ) {
 		long avail = is->queueTail->length - is->queueTail->offset;
 		if ( length >= avail ) {
-			memcpy( dest, &is->queue->data[is->queue->offset], avail );
+			memcpy( dest, &is->queueTail->data[is->queue->offset], avail );
 			RunBuf *del = inputStreamPopTail(is);
 			free(del);
 			return avail;
 		}
 		else {
-			memcpy( dest, &is->queue->data[is->queue->offset], length );
-			is->queue->offset += length;
+			memcpy( dest, &is->queueTail->data[is->queueTail->offset], length );
+			is->queueTail->length -= length;
 			return length;
 		}
 	}

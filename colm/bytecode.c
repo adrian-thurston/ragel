@@ -329,6 +329,17 @@ long undoParseFrag( Program *prg, Tree **sp, Accum *accum, long steps, long entr
 	FsmRun *fsmRun = accum->fsmRun;
 	PdaRun *pdaRun = accum->pdaRun;
 
+	debug( REALM_PARSE, "undo parse frag, target steps: %ld, pdarun steps: %ld\n", steps, pdaRun->steps );
+
+	/* If there is a token started, but never finished for a lack of data, we
+	 * must first backup over it. */
+	if ( fsmRun->tokstart != 0 ) {
+		fsmRun->p = fsmRun->tokstart;
+		fsmRun->tokstart = 0;
+	}
+
+	//takeBackBuffered( inputStream );
+
 switch ( entry ) {
 case PcrStart:
 
@@ -2339,7 +2350,7 @@ again:
 			Accum *accum = (Accum*)vm_pop();
 			long steps = (long)vm_pop();
 
-			debug( REALM_BYTECODE, "IN_PARSE_FRAG_BKT3 %ld", steps );
+			debug( REALM_BYTECODE, "IN_PARSE_FRAG_BKT3 %ld\n", steps );
 
 			treeDownref( prg, sp, (Tree*)accum );
 			break;
