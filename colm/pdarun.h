@@ -333,7 +333,7 @@ typedef struct _PdaRun
 
 	/* The left hand side passed in and the saved left hand side in case we
 	 * need to preserve it for backtracking before we write to it. */
-	Tree *lhs;
+//	Tree *lhs;
 	Tree *parsed;
 
 	int reject;

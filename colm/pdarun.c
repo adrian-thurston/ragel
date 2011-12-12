@@ -1440,7 +1440,6 @@ void initPdaRun( PdaRun *pdaRun, Program *prg, PdaTables *tables,
 	pdaRun->tokenId = 0;
 
 	pdaRun->onDeck = false;
-	pdaRun->lhs = 0;
 	pdaRun->parsed = 0;
 	pdaRun->reject = false;
 }
@@ -1521,17 +1520,18 @@ head:
 		else {
 			*rcode = backupOverRcode( *rcode );
 
-			if ( **rcode == IN_RESTORE_LHS ) {
+//			if ( **rcode == IN_RESTORE_LHS ) {
 //				#if COLM_LOG_PARSE
 //				cerr << "commit: has restore_lhs" << endl;
 //				#endif
-				read_tree_p( restore, (*rcode+1) );
-			}
+//				read_tree_p( restore, (*rcode+1) );
+//			}
 		}
 	}
 
-	if ( restore != 0 )
-		tree = restore;
+//	FIXME: what was this about?
+//	if ( restore != 0 )
+//		tree = restore;
 
 	/* All the parse algorithm data except for the RCODE flag is in the
 	 * original. That is why we restore first, then we can clear the retry
@@ -1869,7 +1869,6 @@ again:
 			pdaRun->fi = &prg->rtd->frameInfo[prg->rtd->prodInfo[pdaRun->reduction].frameId];
 			pdaRun->frameId = prg->rtd->prodInfo[pdaRun->reduction].frameId;
 			pdaRun->reject = false;
-			pdaRun->lhs = pdaRun->redLel->tree;
 			pdaRun->parsed = 0;
 			pdaRun->code = pdaRun->fi->codeWV;
 
@@ -1879,20 +1878,21 @@ case PcrReduction:
 			if ( prg->induceExit )
 				goto fail;
 
-			/* If the lhs was saved and it changed then we need to restore the
+			/* If the lhs was stored and it changed then we need to restore the
 			 * original upon backtracking, otherwise downref since we took a
 			 * copy above. */
-			if ( pdaRun->parsed != 0 && pdaRun->parsed != pdaRun->redLel->tree ) {
-				debug( REALM_PARSE, "lhs tree was modified, adding a restore instruction\n" );
+			if ( pdaRun->parsed != 0 ) {
+				if ( pdaRun->parsed != pdaRun->redLel->tree ) {
+					debug( REALM_PARSE, "lhs tree was modified, adding a restore instruction\n" );
 
-				/* Transfer the lhs from the environment to redLel. */
-				pdaRun->redLel->tree = prepParseTree( prg, sp, pdaRun->lhs );
-				treeUpref( pdaRun->redLel->tree );
-				treeDownref( prg, sp, pdaRun->lhs );
+					/* Transfer the lhs from the environment to redLel. */
+					pdaRun->redLel->tree = prepParseTree( prg, sp, pdaRun->redLel->tree );
+					treeUpref( pdaRun->redLel->tree );
 
-				append( &pdaRun->rcodeCollect, IN_RESTORE_LHS );
-				appendWord( &pdaRun->rcodeCollect, (Word)pdaRun->parsed );
-				append( &pdaRun->rcodeCollect, SIZEOF_CODE + SIZEOF_WORD );
+					append( &pdaRun->rcodeCollect, IN_RESTORE_LHS );
+					appendWord( &pdaRun->rcodeCollect, (Word)pdaRun->parsed );
+					append( &pdaRun->rcodeCollect, SIZEOF_CODE + SIZEOF_WORD );
+				}
 			}
 
 			/* Pull out the reverse code, if any. */
@@ -2019,7 +2019,6 @@ case PcrRevToken2:
 			else if ( pdaRun->input1->tree->flags & AF_HAS_RCODE ) {
 
 				pdaRun->onDeck = true;
-				pdaRun->lhs = 0;
 				pdaRun->parsed = 0;
 				pdaRun->frameId = -1;
 				pdaRun->code = popReverseCode( &pdaRun->reverseCode );
@@ -2036,12 +2035,6 @@ case PcrRevReduction2:
 				 * the the original. We read it after restoring. */
 
 				pdaRun->input1->tree->flags &= ~AF_HAS_RCODE;
-
-				if ( pdaRun->lhs != 0 ) {
-					/* Get the lhs, it may have been reverted. */
-					treeDownref( prg, sp, pdaRun->input1->tree );
-					pdaRun->input1->tree = pdaRun->lhs;
-				}
 			}
 			else {
 				/* Remove it from the input queue. */

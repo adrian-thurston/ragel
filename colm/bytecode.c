@@ -568,10 +568,10 @@ again:
 			break;
 		}
 		case IN_RESTORE_LHS: {
-			Tree *lhs;
-			read_tree( lhs );
+			Tree *restore;
+			read_tree( restore );
 			debug( REALM_BYTECODE, "IN_RESTORE_LHS\n" );
-			treeDownref( prg, sp, lhs );
+			treeDownref( prg, sp, restore );
 			break;
 		}
 
@@ -864,8 +864,7 @@ again:
 			read_tree( restore );
 
 			debug( REALM_BYTECODE, "IN_RESTORE_LHS\n" );
-			//assert( exec->lhs == 0 );
-			exec->pdaRun->lhs = restore;
+			exec->pdaRun->input1->tree = restore;
 			break;
 		}
 		case IN_LOAD_NIL: {
@@ -1140,7 +1139,7 @@ again:
 
 			debug( REALM_BYTECODE, "IN_INIT_RHS_EL %hd\n", field );
 
-			Tree *val = getRhsEl( prg, exec->pdaRun->lhs, position );
+			Tree *val = getRhsEl( prg, exec->pdaRun->redLel->tree, position );
 			treeUpref( val );
 			vm_local(field) = val;
 			break;
@@ -1153,10 +1152,13 @@ again:
 
 			debug( REALM_BYTECODE, "IN_INIT_LHS_EL %hd %hhu\n", field, save );
 
-			Tree *val = exec->pdaRun->lhs;
-			if ( save )
-				exec->pdaRun->parsed = exec->pdaRun->lhs;
-			exec->pdaRun->lhs = 0;
+			/* We transfer it to to the local field. Possibly take a copy. */
+			Tree *val = exec->pdaRun->redLel->tree;
+			if ( save ) {
+				treeUpref( val );
+				exec->pdaRun->parsed = val;
+			}
+			exec->pdaRun->redLel->tree = 0;
 			vm_local(field) = val;
 			break;
 		}
@@ -1168,7 +1170,7 @@ again:
 
 			Tree *val = vm_local(field);
 			vm_local(field) = 0;
-			exec->pdaRun->lhs = val;
+			exec->pdaRun->redLel->tree = val;
 			break;
 		}
 		case IN_UITER_ADVANCE: {
