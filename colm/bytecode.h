@@ -41,6 +41,8 @@ typedef unsigned char uchar;
 #define IN_LOAD_NIL              0x04
 #define IN_LOAD_TRUE             0x05
 #define IN_LOAD_FALSE            0x06
+#define IN_LOAD_TREE             0xf4
+#define IN_LOAD_WORD             0xf5
 
 #define IN_ADD_INT               0x07
 #define IN_SUB_INT               0x08
