@@ -556,3 +556,308 @@ void initAccumFuncs()
 	accumFuncs.pushBackBuf = &inputStreamAccumPushBackBuf;
 }
 
+/*
+ * Input struct, this wraps the list of input streams.
+ */
+
+void inputStreamPrepend2( Input *is, RunBuf *runBuf )
+{
+	if ( is->queue == 0 ) {
+		runBuf->prev = runBuf->next = 0;
+		is->queue = is->queueTail = runBuf;
+	}
+	else {
+		is->queue->prev = runBuf;
+		runBuf->prev = 0;
+		runBuf->next = is->queue;
+		is->queue = runBuf;
+	}
+}
+
+RunBuf *inputStreamPopHead2( Input *is )
+{
+	RunBuf *ret = is->queue;
+	is->queue = is->queue->next;
+	if ( is->queue == 0 )
+		is->queueTail = 0;
+	else
+		is->queue->prev = 0;
+	return ret;
+}
+
+void inputStreamAppend2( Input *is, RunBuf *runBuf )
+{
+	if ( is->queue == 0 ) {
+		runBuf->prev = runBuf->next = 0;
+		is->queue = is->queueTail = runBuf;
+	}
+	else {
+		is->queueTail->next = runBuf;
+		runBuf->prev = is->queueTail;
+		runBuf->next = 0;
+		is->queueTail = runBuf;
+	}
+}
+
+int inputStreamDynamicGetDataRev2( Input *is, char *dest, int length )
+{
+	/* If there is any data in the rubuf queue then read that first. */
+	if ( is->queueTail != 0 ) {
+		long avail = is->queueTail->length - is->queueTail->offset;
+		if ( length >= avail ) {
+			memcpy( dest, &is->queueTail->data[is->queue->offset], avail );
+			RunBuf *del = inputStreamPopTail2(is);
+			free(del);
+			return avail;
+		}
+		else {
+			memcpy( dest, &is->queueTail->data[is->queueTail->offset], length );
+			is->queueTail->length -= length;
+			return length;
+		}
+	}
+	return 0;
+}
+
+RunBuf *inputStreamPopTail2( Input *is )
+{
+	RunBuf *ret = is->queueTail;
+	is->queueTail = is->queue->prev;
+	if ( is->queueTail == 0 )
+		is->queue = 0;
+	else
+		is->queueTail->next = 0;
+	return ret;
+}
+
+//dynamicFuncs.isTree = &inputStreamDynamicIsTree;
+int isTree( Input *is )
+{
+	if ( is->queue != 0 && is->queue->type == RunBufTokenType )
+		return true;
+	return false;
+}
+
+//dynamicFuncs.isIgnore = &inputStreamDynamicIsIgnore;
+int isIgnore( Input *is )
+{
+	if ( is->queue != 0 && is->queue->type == RunBufIgnoreType )
+		return true;
+	return false;
+}
+
+//dynamicFuncs.isLangEl = &inputStreamDynamicIsLangEl;
+int isLangEl( Input *is )
+{
+	return false;
+}
+
+//dynamicFuncs.isEof = &inputStreamDynamicIsEof;
+int isEof( Input *is )
+{
+	return is->queue == 0 && is->eof;
+}
+
+//accumFuncs.needFlush = &inputStreamAccumNeedFlush;
+int needFlush( Input *is )
+{
+	if ( is->flush ) {
+		is->flush = false;
+		return true;
+	}
+
+	if ( is->queue != 0 && is->queue->type != RunBufDataType )
+		return true;
+
+	if ( is->eof )
+		return true;
+		
+	return false;
+}
+
+//accumFuncs.tryAgainLater = &inputStreamAccumTryAgainLater;
+int tryAgainLater( Input *is )
+{
+	if ( is->later || ( !is->flush && is->queue == 0 )) {
+		debug( REALM_PARSE, "try again later %d %d %d\n", is->later, is->flush, is->queue );
+		return true;
+	}
+
+	return false;
+}
+
+//dynamicFuncs.getData = &inputStreamDynamicGetData;
+int getData( Input *is, char *dest, int length )
+{
+	/* If there is any data in the rubuf queue then read that first. */
+	if ( is->queue != 0 ) {
+		long avail = is->queue->length - is->queue->offset;
+		if ( length >= avail ) {
+			memcpy( dest, &is->queue->data[is->queue->offset], avail );
+			RunBuf *del = inputStreamPopHead2( is );
+			free(del);
+			return avail;
+		}
+		else {
+			memcpy( dest, &is->queue->data[is->queue->offset], length );
+			is->queue->offset += length;
+			return length;
+		}
+	}
+	else {
+		/* No stored data, call the impl version. */
+		return getDataImpl( is, dest, length );
+	}
+}
+
+//accumFuncs.getDataImpl = &inputStreamAccumGetDataImpl;
+int getDataImpl( Input *is, char *dest, int length )
+{
+	/* No source of data, it is all done with RunBuf list appends. */
+	return 0;
+}
+
+//dynamicFuncs.getTree = &inputStreamDynamicGetTree;
+Tree *getTree( Input *is )
+{
+	if ( is->queue != 0 && is->queue->type == RunBufTokenType ) {
+		RunBuf *runBuf = inputStreamPopHead2( is );
+
+		/* FIXME: using runbufs here for this is a poor use of memory. */
+		Tree *tree = runBuf->tree;
+		free(runBuf);
+		return tree;
+	}
+
+	return 0;
+}
+
+
+//dynamicFuncs.pushTree = &inputStreamDynamicPushTree;
+void pushTree( Input *is, Tree *tree, int ignore )
+{
+//	#ifdef COLM_LOG_PARSE
+//	if ( colm_log_parse ) {
+//		cerr << "readying fake push" << endl;
+//	}
+//	#endif
+
+//	takeBackBuffered( inputStream );
+
+	/* Create a new buffer for the data. This is the easy implementation.
+	 * Something better is needed here. It puts a max on the amount of
+	 * data that can be pushed back to the inputStream. */
+	RunBuf *newBuf = newRunBuf();
+	newBuf->type = ignore ? RunBufIgnoreType : RunBufTokenType;
+	newBuf->tree = tree;
+
+	inputStreamPrepend2( is, newBuf );
+}
+
+//dynamicFuncs.pushText = &inputStreamDynamicPushText;
+void pushText( Input *is, const char *data, long length )
+{
+//	#ifdef COLM_LOG_PARSE
+//	if ( colm_log_parse ) {
+//		cerr << "readying fake push" << endl;
+//	}
+//	#endif
+
+//	takeBackBuffered( inputStream );
+
+	/* Create a new buffer for the data. This is the easy implementation.
+	 * Something better is needed here. It puts a max on the amount of
+	 * data that can be pushed back to the inputStream. */
+	assert( length < FSM_BUFSIZE );
+
+	RunBuf *newBuf = newRunBuf();
+	newBuf->length = length;
+	memcpy( newBuf->data, data, length );
+
+	pushBackBuf( is, newBuf );
+}
+
+//dynamicFuncs.undoPush = &inputStreamDynamicUndoPush;
+Tree *undoPush( Input *is, int length )
+{
+	if ( is->queue->type == RunBufDataType ) {
+		char tmp[length];
+		int have = 0;
+		while ( have < length ) {
+			int res = getData( is, tmp, length-have );
+			have += res;
+		}
+		return 0;
+	}
+	else {
+		/* FIXME: leak here. */
+		RunBuf *rb = inputStreamPopHead2( is );
+		Tree *tree = rb->tree;
+		free(rb);
+		return tree;
+	}
+}
+
+//accumFuncs.appendData = &inputStreamAccumAppendData;
+void appendData( Input *_is, const char *data, long len )
+{
+	Input *is = (Input*)_is;
+
+	while ( len > 0 ) {
+		RunBuf *ad = newRunBuf();
+		inputStreamAppend2( is, ad );
+
+		long consume = 
+			len <= (long)sizeof(ad->data) ? 
+			len : (long)sizeof(ad->data);
+
+		memcpy( ad->data, data, consume );
+		ad->length = consume;
+
+		len -= consume;
+		data += consume;
+	}
+}
+
+//accumFuncs.appendTree = &inputStreamAccumAppendTree;
+void appendTree( Input *_is, Tree *tree )
+{
+	Input *is = (Input*)_is;
+
+	RunBuf *ad = newRunBuf();
+
+	inputStreamAppend2( is, ad );
+
+	ad->type = RunBufTokenType;
+	ad->tree = tree;
+	ad->length = 0;
+}
+
+//dynamicFuncs.undoAppend = &inputStreamDynamicUndoAppend;
+Tree *undoAppend( Input *is, int length )
+{
+	if ( is->queueTail->type == RunBufDataType ) {
+		char tmp[length];
+		int have = 0;
+		while ( have < length ) {
+			int res = inputStreamDynamicGetDataRev2( is, tmp, length-have );
+			have += res;
+		}
+		return 0;
+	}
+	else {
+		/* FIXME: leak here. */
+		RunBuf *rb = inputStreamPopTail2( is );
+		Tree *tree = rb->tree;
+		free(rb);
+		return tree;
+	}
+}
+
+//accumFuncs.pushBackBuf = &inputStreamAccumPushBackBuf;
+void pushBackBuf( Input *is, RunBuf *runBuf )
+{
+	inputStreamPrepend2( is, runBuf );
+}
+
+

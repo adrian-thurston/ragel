@@ -160,6 +160,63 @@ void initStaticFuncs();
 void initPatternFuncs();
 void initReplFuncs();
 
+/* List of input streams. Enables streams to be pushed/popped. */
+typedef struct _Input
+{
+	InputStream *is;
+
+	struct InputFuncs *funcs;
+
+	struct _FsmRun *hasData;
+
+	char eofSent;
+	char flush;
+	char eof;
+
+	long line;
+	long column;
+	long byte;
+
+	/* This is set true for input streams that do their own line counting.
+	 * Causes FsmRun to ignore NLs. */
+	int handlesLine;
+	int later;
+
+	RunBuf *queue;
+	RunBuf *queueTail;
+
+	const char *data;
+	long dlen;
+	int offset;
+
+	FILE *file;
+	long fd;
+
+	struct Pattern *pattern;
+	struct PatternItem *patItem;
+	struct Replacement *replacement;
+	struct ReplItem *replItem;
+} Input;
+
+int isTree( Input *in );
+int isIgnore( Input *in );
+int isLangEl( Input *in );
+int isEof( Input *in );
+int needFlush( Input *in );
+int tryAgainLater( Input *in );
+int getData( Input *in, char *dest, int length );
+int getDataImpl( Input *in, char *dest, int length );
+struct ColmTree *getTree( Input *in );
+struct LangEl *getLangEl( Input *in, long *bindId, char **data, long *length );
+void pushTree( Input *in, struct ColmTree *tree, int ignore );
+void pushText( Input *in, const char *data, long len );
+struct ColmTree *undoPush( Input *in, int length );
+void appendData( Input *in, const char *data, long len );
+void appendTree( Input *in, struct ColmTree *tree );
+struct ColmTree *undoAppend( Input *in, int length );
+void pushBackNamed( Input *in );
+void pushBackBuf( Input *in, RunBuf *runBuf );
+
 #ifdef __cplusplus
 }
 #endif
