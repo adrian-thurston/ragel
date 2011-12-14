@@ -2263,9 +2263,9 @@ again:
 		case IN_PARSE_FRAG_WC3: {
 			debug( REALM_BYTECODE, "IN_PARSE_FRAG_WC3\n" );
 
-			long pcr = (long)vm_pop();
+			vm_pop_ignore();
 			Accum *accum = (Accum*)vm_pop();
-			long steps = (long)vm_pop();
+			vm_pop_ignore();
 
 			treeDownref( prg, sp, (Tree*)accum );
 
@@ -2346,11 +2346,11 @@ again:
 		}
 
 		case IN_PARSE_FRAG_BKT3: {
-			long pcr = (long)vm_pop();
-			Accum *accum = (Accum*)vm_pop();
-			long steps = (long)vm_pop();
+			debug( REALM_BYTECODE, "IN_PARSE_FRAG_BKT3\n" );
 
-			debug( REALM_BYTECODE, "IN_PARSE_FRAG_BKT3 %ld\n", steps );
+			vm_pop_ignore();
+			Accum *accum = (Accum*)vm_pop();
+			vm_pop_ignore();
 
 			treeDownref( prg, sp, (Tree*)accum );
 			break;
@@ -2362,7 +2362,7 @@ again:
 
 			debug( REALM_BYTECODE, "IN_PARSE_FINISH_WC\n" );
 
-			int pcr = (long)vm_pop();
+			long pcr = (long)vm_pop();
 			Accum *accum = (Accum*)vm_pop();
 			long steps = (long)vm_pop();
 
@@ -2385,9 +2385,9 @@ again:
 		case IN_PARSE_FINISH_WC3: {
 			debug( REALM_BYTECODE, "IN_PARSE_FINISH_WC3\n" );
 
-			long pcr = (long)vm_pop();
+			vm_pop_ignore();
 			Accum *accum = (Accum*)vm_pop();
-			long steps = (long)vm_pop();
+			vm_pop_ignore();
 
 			vm_push( accum->result );
 			treeDownref( prg, sp, (Tree*)accum );
@@ -2423,7 +2423,7 @@ again:
 		case IN_PARSE_FINISH_WV3: {
 			debug( REALM_BYTECODE, "IN_PARSE_FINISH_WV3\n" );
 
-			long pcr = (long)vm_pop();
+			vm_pop_ignore();
 			Accum *accum = (Accum*)vm_pop();
 			long steps = (long)vm_pop();
 
@@ -2470,9 +2470,9 @@ again:
 		case IN_PARSE_FINISH_BKT3: {
 			debug( REALM_BYTECODE, "IN_PARSE_FINISH_BKT3\n" );
 
-			long pcr = (long)vm_pop();
+			vm_pop_ignore();
 			Accum *accum = (Accum*)vm_pop();
-			long steps = (long)vm_pop();
+			vm_pop_ignore();
 
 			accum->stream->in->eof = false;
 			treeDownref( prg, sp, (Tree*)accum );

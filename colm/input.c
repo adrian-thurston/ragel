@@ -560,7 +560,7 @@ void initAccumFuncs()
  * Input struct, this wraps the list of input streams.
  */
 
-void inputStreamPrepend2( Input *is, RunBuf *runBuf )
+static void inputStreamPrepend2( Input *is, RunBuf *runBuf )
 {
 	if ( is->queue == 0 ) {
 		runBuf->prev = runBuf->next = 0;
@@ -574,7 +574,7 @@ void inputStreamPrepend2( Input *is, RunBuf *runBuf )
 	}
 }
 
-RunBuf *inputStreamPopHead2( Input *is )
+static RunBuf *inputStreamPopHead2( Input *is )
 {
 	RunBuf *ret = is->queue;
 	is->queue = is->queue->next;
@@ -585,7 +585,7 @@ RunBuf *inputStreamPopHead2( Input *is )
 	return ret;
 }
 
-void inputStreamAppend2( Input *is, RunBuf *runBuf )
+static void inputStreamAppend2( Input *is, RunBuf *runBuf )
 {
 	if ( is->queue == 0 ) {
 		runBuf->prev = runBuf->next = 0;
@@ -599,7 +599,18 @@ void inputStreamAppend2( Input *is, RunBuf *runBuf )
 	}
 }
 
-int inputStreamDynamicGetDataRev2( Input *is, char *dest, int length )
+static RunBuf *inputStreamPopTail2( Input *is )
+{
+	RunBuf *ret = is->queueTail;
+	is->queueTail = is->queue->prev;
+	if ( is->queueTail == 0 )
+		is->queue = 0;
+	else
+		is->queueTail->next = 0;
+	return ret;
+}
+
+static int inputStreamDynamicGetDataRev2( Input *is, char *dest, int length )
 {
 	/* If there is any data in the rubuf queue then read that first. */
 	if ( is->queueTail != 0 ) {
@@ -619,16 +630,6 @@ int inputStreamDynamicGetDataRev2( Input *is, char *dest, int length )
 	return 0;
 }
 
-RunBuf *inputStreamPopTail2( Input *is )
-{
-	RunBuf *ret = is->queueTail;
-	is->queueTail = is->queue->prev;
-	if ( is->queueTail == 0 )
-		is->queue = 0;
-	else
-		is->queueTail->next = 0;
-	return ret;
-}
 
 //dynamicFuncs.isTree = &inputStreamDynamicIsTree;
 int isTree( Input *is )
