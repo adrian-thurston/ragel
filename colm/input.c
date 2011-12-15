@@ -630,92 +630,147 @@ static int inputStreamDynamicGetDataRev2( InputStream2 *is, char *dest, int leng
 	return 0;
 }
 
+static int isSourceStream( InputStream2 *is )
+{
+	if ( is->queue != 0 && is->queue->type == RunBufSourceType )
+		return true;
+	return false;
+}
+
 
 //dynamicFuncs.isTree = &inputStreamDynamicIsTree;
 int isTree( InputStream2 *is )
 {
-	if ( is->queue != 0 && is->queue->type == RunBufTokenType )
-		return true;
-	return false;
+	if ( isSourceStream( is ) ) {
+		Stream *stream = (Stream*)is->queue->tree;
+		return stream->in->funcs->isTree( stream->in );
+	}
+	else {
+		if ( is->queue != 0 && is->queue->type == RunBufTokenType )
+			return true;
+		return false;
+	}
 }
 
 //dynamicFuncs.isIgnore = &inputStreamDynamicIsIgnore;
 int isIgnore( InputStream2 *is )
 {
-	if ( is->queue != 0 && is->queue->type == RunBufIgnoreType )
-		return true;
-	return false;
+	if ( isSourceStream( is ) ) {
+		Stream *stream = (Stream*)is->queue->tree;
+		return stream->in->funcs->isIgnore( stream->in );
+	}
+	else {
+		if ( is->queue != 0 && is->queue->type == RunBufIgnoreType )
+			return true;
+		return false;
+	}
 }
 
 //dynamicFuncs.isLangEl = &inputStreamDynamicIsLangEl;
 int isLangEl( InputStream2 *is )
 {
-	return false;
+	if ( isSourceStream( is ) ) {
+		Stream *stream = (Stream*)is->queue->tree;
+		return stream->in->funcs->isLangEl( stream->in );
+	}
+	else {
+		return false;
+	}
 }
 
 //dynamicFuncs.isEof = &inputStreamDynamicIsEof;
 int isEof( InputStream2 *is )
 {
-	return is->queue == 0 && is->eof;
+	if ( isSourceStream( is ) ) {
+		Stream *stream = (Stream*)is->queue->tree;
+		return stream->in->funcs->isEof( stream->in );
+	}
+	else {
+		return is->queue == 0 && is->eof;
+	}
 }
 
 //accumFuncs.needFlush = &inputStreamAccumNeedFlush;
 int needFlush( InputStream2 *is )
 {
-	if ( is->flush ) {
-		is->flush = false;
-		return true;
+	if ( isSourceStream( is ) ) {
+		Stream *stream = (Stream*)is->queue->tree;
+		return stream->in->funcs->needFlush( stream->in );
 	}
+	else {
+		if ( is->flush ) {
+			is->flush = false;
+			return true;
+		}
 
-	if ( is->queue != 0 && is->queue->type != RunBufDataType )
-		return true;
+		if ( is->queue != 0 && is->queue->type != RunBufDataType )
+			return true;
 
-	if ( is->eof )
-		return true;
-		
-	return false;
+		if ( is->eof )
+			return true;
+			
+		return false;
+	}
 }
 
 //accumFuncs.tryAgainLater = &inputStreamAccumTryAgainLater;
 int tryAgainLater( InputStream2 *is )
 {
-	if ( is->later || ( !is->flush && is->queue == 0 )) {
-		debug( REALM_PARSE, "try again later %d %d %d\n", is->later, is->flush, is->queue );
-		return true;
+	if ( isSourceStream( is ) ) {
+		Stream *stream = (Stream*)is->queue->tree;
+		return stream->in->funcs->tryAgainLater( stream->in );
 	}
+	else {
+		if ( is->later || ( !is->flush && is->queue == 0 )) {
+			debug( REALM_PARSE, "try again later %d %d %d\n", is->later, is->flush, is->queue );
+			return true;
+		}
 
-	return false;
+		return false;
+	}
 }
 
 //dynamicFuncs.getData = &inputStreamDynamicGetData;
 int getData( InputStream2 *is, char *dest, int length )
 {
-	/* If there is any data in the rubuf queue then read that first. */
-	if ( is->queue != 0 ) {
-		long avail = is->queue->length - is->queue->offset;
-		if ( length >= avail ) {
-			memcpy( dest, &is->queue->data[is->queue->offset], avail );
-			RunBuf *del = inputStreamPopHead2( is );
-			free(del);
-			return avail;
-		}
-		else {
-			memcpy( dest, &is->queue->data[is->queue->offset], length );
-			is->queue->offset += length;
-			return length;
-		}
+	if ( isSourceStream( is ) ) {
+		Stream *stream = (Stream*)is->queue->tree;
+		return stream->in->funcs->getData( stream->in, dest, length );
 	}
 	else {
-		/* No stored data, call the impl version. */
-		return getDataImpl( is, dest, length );
+		/* If there is any data in the rubuf queue then read that first. */
+		if ( is->queue != 0 ) {
+			long avail = is->queue->length - is->queue->offset;
+			if ( length >= avail ) {
+				memcpy( dest, &is->queue->data[is->queue->offset], avail );
+				RunBuf *del = inputStreamPopHead2( is );
+				free(del);
+				return avail;
+			}
+			else {
+				memcpy( dest, &is->queue->data[is->queue->offset], length );
+				is->queue->offset += length;
+				return length;
+			}
+		}
+		else {
+			/* No stored data, call the impl version. */
+			return getDataImpl( is, dest, length );
+		}
 	}
 }
 
 //accumFuncs.getDataImpl = &inputStreamAccumGetDataImpl;
 int getDataImpl( InputStream2 *is, char *dest, int length )
 {
-	/* No source of data, it is all done with RunBuf list appends. */
-	return 0;
+	if ( isSourceStream( is ) ) {
+		Stream *stream = (Stream*)is->queue->tree;
+		return stream->in->funcs->getDataImpl( stream->in, dest, length );
+	}
+	else {
+		/* No source of data, it is all done with RunBuf list appends. */
+		return 0;
+	}
 }
 
 //dynamicFuncs.getTree = &inputStreamDynamicGetTree;
