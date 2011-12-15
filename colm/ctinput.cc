@@ -28,26 +28,25 @@
 using std::cerr;
 using std::endl;
 
-InputFuncs staticFuncs;
-InputFuncs patternFuncs;
-InputFuncs replFuncs;
+SourceFuncs staticFuncs;
+SourceFuncs patternFuncs;
+SourceFuncs replFuncs;
 
 /* 
  * Implementation
  */
 
-int inputStreamStaticIsTree( InputStream *is )
+int inputStreamStaticIsTree( SourceStream *is )
 {
 	return false;
 }
 
-int inputStreamStaticIsIgnore( InputStream *is )
+int inputStreamStaticIsIgnore( SourceStream *is )
 {
 	return false;
 }
 
-
-int inputStreamStaticTryAgainLater( InputStream *is )
+int inputStreamStaticTryAgainLater( SourceStream *is )
 {
 	if ( is->later )
 		return true;
@@ -57,7 +56,7 @@ int inputStreamStaticTryAgainLater( InputStream *is )
 
 extern "C" void initStaticFuncs()
 {
-	memcpy( &staticFuncs, &baseFuncs, sizeof(InputFuncs) );
+	memcpy( &staticFuncs, &baseFuncs, sizeof(SourceFuncs) );
 	staticFuncs.isTree = &inputStreamStaticIsTree;
 	staticFuncs.isIgnore = &inputStreamStaticIsIgnore;
 	staticFuncs.tryAgainLater = &inputStreamStaticTryAgainLater;
@@ -68,10 +67,10 @@ extern "C" void initStaticFuncs()
  * Pattern
  */
 
-InputStream *newInputStreamPattern( Pattern *pattern )
+SourceStream *newInputStreamPattern( Pattern *pattern )
 {
-	InputStream *is = (InputStream*)malloc(sizeof(InputStream));
-	memset( is, 0, sizeof(InputStream) );
+	SourceStream *is = (SourceStream*)malloc(sizeof(SourceStream));
+	memset( is, 0, sizeof(SourceStream) );
 	is->handlesLine = true;
 	is->pattern = pattern;
 	is->patItem = pattern->list->head;
@@ -79,17 +78,17 @@ InputStream *newInputStreamPattern( Pattern *pattern )
 	return is;
 }
 
-int inputStreamPatternIsLangEl( InputStream *is )
+int inputStreamPatternIsLangEl( SourceStream *is )
 { 
 	return is->patItem != 0 && is->patItem->type == PatternItem::FactorType;
 }
 
-int inputStreamPatternShouldFlush( InputStream *is )
+int inputStreamPatternShouldFlush( SourceStream *is )
 { 
 	return is->patItem == 0 || is->patItem->type == PatternItem::FactorType;
 }
 
-LangEl *inputStreamPatternGetLangEl( InputStream *is, long *bindId, char **data, long *length )
+LangEl *inputStreamPatternGetLangEl( SourceStream *is, long *bindId, char **data, long *length )
 { 
 	LangEl *klangEl = is->patItem->factor->langEl;
 	*bindId = is->patItem->bindId;
@@ -103,7 +102,7 @@ LangEl *inputStreamPatternGetLangEl( InputStream *is, long *bindId, char **data,
 	return klangEl;
 }
 
-int inputStreamPatternGetData( InputStream *is, char *dest, int length )
+int inputStreamPatternGetData( SourceStream *is, char *dest, int length )
 { 
 	if ( is->offset == 0 )
 		is->line = is->patItem->loc.line;
@@ -131,17 +130,17 @@ int inputStreamPatternGetData( InputStream *is, char *dest, int length )
 	return length;
 }
 
-int inputStreamPatternIsEof( InputStream *is )
+int inputStreamPatternIsEof( SourceStream *is )
 {
 	return is->patItem == 0;
 }
 
-int inputStreamPatternNeedFlush( InputStream *is )
+int inputStreamPatternNeedFlush( SourceStream *is )
 {
 	return is->flush;
 }
 
-void inputStreamPatternBackup( InputStream *is )
+void inputStreamPatternBackup( SourceStream *is )
 {
 	if ( is->patItem == 0 )
 		is->patItem = is->pattern->list->tail;
@@ -149,7 +148,7 @@ void inputStreamPatternBackup( InputStream *is )
 		is->patItem = is->patItem->prev;
 }
 
-void inputStreamPatternPushBackBuf( InputStream *is, RunBuf *runBuf )
+void inputStreamPatternPushBackBuf( SourceStream *is, RunBuf *runBuf )
 {
 	char *data = runBuf->data + runBuf->offset;
 	long length = runBuf->length;
@@ -170,7 +169,7 @@ void inputStreamPatternPushBackBuf( InputStream *is, RunBuf *runBuf )
 	assert( memcmp( &is->patItem->data[is->offset], data, length ) == 0 );
 }
 
-void inputStreamPatternPushBackNamed( InputStream *is )
+void inputStreamPatternPushBackNamed( SourceStream *is )
 {
 	inputStreamPatternBackup( is );
 	is->offset = is->patItem->data.length();
@@ -179,7 +178,7 @@ void inputStreamPatternPushBackNamed( InputStream *is )
 
 extern "C" void initPatternFuncs()
 {
-	memcpy( &patternFuncs, &staticFuncs, sizeof(InputFuncs) );
+	memcpy( &patternFuncs, &staticFuncs, sizeof(SourceFuncs) );
 	patternFuncs.getData = &inputStreamPatternGetData;
 	patternFuncs.isLangEl = &inputStreamPatternIsLangEl;
 	patternFuncs.isEof = &inputStreamPatternIsEof;
@@ -194,10 +193,10 @@ extern "C" void initPatternFuncs()
  * Replacement
  */
 
-InputStream *newInputStreamRepl( Replacement *replacement )
+SourceStream *newInputStreamRepl( Replacement *replacement )
 {
-	InputStream *is = (InputStream*)malloc(sizeof(InputStream));
-	memset( is, 0, sizeof(InputStream) );
+	SourceStream *is = (SourceStream*)malloc(sizeof(SourceStream));
+	memset( is, 0, sizeof(SourceStream) );
 	is->handlesLine = true;
 	is->replacement = replacement;
 	is->replItem = replacement->list->head;
@@ -205,19 +204,19 @@ InputStream *newInputStreamRepl( Replacement *replacement )
 	return is;
 }
 
-int inputStreamReplIsLangEl( InputStream *is )
+int inputStreamReplIsLangEl( SourceStream *is )
 { 
 	return is->replItem != 0 && ( is->replItem->type == ReplItem::ExprType || 
 			is->replItem->type == ReplItem::FactorType );
 }
 
-int inputStreamReplShouldFlush( InputStream *is )
+int inputStreamReplShouldFlush( SourceStream *is )
 { 
 	return is->replItem == 0 || ( is->replItem->type == ReplItem::ExprType ||
 			is->replItem->type == ReplItem::FactorType );
 }
 
-LangEl *inputStreamReplGetLangEl( InputStream *is, long *bindId, char **data, long *length )
+LangEl *inputStreamReplGetLangEl( SourceStream *is, long *bindId, char **data, long *length )
 { 
 	LangEl *klangEl = is->replItem->type == ReplItem::ExprType ? 
 			is->replItem->langEl : is->replItem->factor->langEl;
@@ -245,7 +244,7 @@ LangEl *inputStreamReplGetLangEl( InputStream *is, long *bindId, char **data, lo
 	return klangEl;
 }
 
-int inputStreamReplGetData( InputStream *is, char *dest, int length )
+int inputStreamReplGetData( SourceStream *is, char *dest, int length )
 { 
 	if ( is->offset == 0 )
 		is->line = is->replItem->loc.line;
@@ -273,17 +272,17 @@ int inputStreamReplGetData( InputStream *is, char *dest, int length )
 	return length;
 }
 
-int inputStreamReplIsEof( InputStream *is )
+int inputStreamReplIsEof( SourceStream *is )
 {
 	return is->replItem == 0;
 }
 
-int inputStreamReplNeedFlush( InputStream *is )
+int inputStreamReplNeedFlush( SourceStream *is )
 {
 	return is->flush;
 }
 
-void inputStreamReplBackup( InputStream *is )
+void inputStreamReplBackup( SourceStream *is )
 {
 	if ( is->replItem == 0 )
 		is->replItem = is->replacement->list->tail;
@@ -291,7 +290,7 @@ void inputStreamReplBackup( InputStream *is )
 		is->replItem = is->replItem->prev;
 }
 
-void inputStreamReplPushBackBuf( InputStream *is, RunBuf *runBuf )
+void inputStreamReplPushBackBuf( SourceStream *is, RunBuf *runBuf )
 {
 	char *data = runBuf->data + runBuf->offset;
 	long length = runBuf->length;
@@ -318,7 +317,7 @@ void inputStreamReplPushBackBuf( InputStream *is, RunBuf *runBuf )
 	assert( memcmp( &is->replItem->data[is->offset], data, length ) == 0 );
 }
 
-void inputStreamReplPushBackNamed( InputStream *is )
+void inputStreamReplPushBackNamed( SourceStream *is )
 {
 	inputStreamReplBackup( is );
 	is->offset = is->replItem->data.length();
@@ -326,7 +325,7 @@ void inputStreamReplPushBackNamed( InputStream *is )
 
 extern "C" void initReplFuncs()
 {
-	memcpy( &replFuncs, &staticFuncs, sizeof(InputFuncs) );
+	memcpy( &replFuncs, &staticFuncs, sizeof(SourceFuncs) );
 	replFuncs.getData = &inputStreamReplGetData;
 	replFuncs.isLangEl = &inputStreamReplIsLangEl;
 	replFuncs.isEof = &inputStreamReplIsEof;
@@ -336,7 +335,7 @@ extern "C" void initReplFuncs()
 	replFuncs.pushBackNamed = &inputStreamReplPushBackNamed;
 }
 
-Kid *sendNamedLangEl( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
+Kid *sendNamedLangEl( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, SourceStream *inputStream )
 {
 	/* All three set by getLangEl. */
 	long bindId;

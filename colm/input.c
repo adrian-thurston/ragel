@@ -50,14 +50,14 @@ void initStaticFuncs();
 void initPatternFuncs();
 void initReplFuncs();
 
-struct InputFuncs baseFuncs;
-struct InputFuncs accumFuncs;
-struct InputFuncs dynamicFuncs;
-struct InputFuncs stringFuncs;
-struct InputFuncs fileFuncs;
-struct InputFuncs fdFuncs;
+struct SourceFuncs baseFuncs;
+struct SourceFuncs accumFuncs;
+struct SourceFuncs dynamicFuncs;
+struct SourceFuncs stringFuncs;
+struct SourceFuncs fileFuncs;
+struct SourceFuncs fdFuncs;
 
-void initInputStream( InputStream *inputStream )
+void initInputStream( SourceStream *inputStream )
 {
 	/* FIXME: correct values here. */
 	inputStream->line = 1;
@@ -65,10 +65,10 @@ void initInputStream( InputStream *inputStream )
 	inputStream->byte = 0;
 }
 
-InputStream *newInputStreamFile( FILE *file )
+SourceStream *newInputStreamFile( FILE *file )
 {
-	InputStream *is = (InputStream*)malloc(sizeof(InputStream));
-	memset( is, 0, sizeof(InputStream) );
+	SourceStream *is = (SourceStream*)malloc(sizeof(SourceStream));
+	memset( is, 0, sizeof(SourceStream) );
 	is->line = 1;
 	is->column = 1;
 	is->file = file;
@@ -76,10 +76,10 @@ InputStream *newInputStreamFile( FILE *file )
 	return is;
 }
 
-InputStream *newInputStreamFd( long fd )
+SourceStream *newInputStreamFd( long fd )
 {
-	InputStream *is = (InputStream*)malloc(sizeof(InputStream));
-	memset( is, 0, sizeof(InputStream) );
+	SourceStream *is = (SourceStream*)malloc(sizeof(SourceStream));
+	memset( is, 0, sizeof(SourceStream) );
 	is->line = 1;
 	is->column = 1;
 	is->fd = fd;
@@ -87,10 +87,10 @@ InputStream *newInputStreamFd( long fd )
 	return is;
 }
 
-InputStream *newInputStreamAccum()
+SourceStream *newInputStreamAccum()
 {
-	InputStream *is = (InputStream*)malloc(sizeof(InputStream));
-	memset( is, 0, sizeof(InputStream) );
+	SourceStream *is = (SourceStream*)malloc(sizeof(SourceStream));
+	memset( is, 0, sizeof(SourceStream) );
 	is->line = 1;
 	is->column = 1;
 	is->funcs = &accumFuncs;
@@ -98,17 +98,17 @@ InputStream *newInputStreamAccum()
 }
 
 
-RunBuf *inputStreamHead( InputStream *is )
+RunBuf *inputStreamHead( SourceStream *is )
 { 
 	return is->queue;
 }
 
-RunBuf *inputStreamTail( InputStream *is )
+RunBuf *inputStreamTail( SourceStream *is )
 {
 	return is->queueTail;
 }
 
-RunBuf *inputStreamPopHead( InputStream *is )
+RunBuf *inputStreamPopHead( SourceStream *is )
 {
 	RunBuf *ret = is->queue;
 	is->queue = is->queue->next;
@@ -119,7 +119,7 @@ RunBuf *inputStreamPopHead( InputStream *is )
 	return ret;
 }
 
-RunBuf *inputStreamPopTail( InputStream *is )
+RunBuf *inputStreamPopTail( SourceStream *is )
 {
 	RunBuf *ret = is->queueTail;
 	is->queueTail = is->queue->prev;
@@ -130,7 +130,7 @@ RunBuf *inputStreamPopTail( InputStream *is )
 	return ret;
 }
 
-void inputStreamAppend( InputStream *is, RunBuf *runBuf )
+void inputStreamAppend( SourceStream *is, RunBuf *runBuf )
 {
 	if ( is->queue == 0 ) {
 		runBuf->prev = runBuf->next = 0;
@@ -144,7 +144,7 @@ void inputStreamAppend( InputStream *is, RunBuf *runBuf )
 	}
 }
 
-void inputStreamPrepend( InputStream *is, RunBuf *runBuf )
+void inputStreamPrepend( SourceStream *is, RunBuf *runBuf )
 {
 	if ( is->queue == 0 ) {
 		runBuf->prev = runBuf->next = 0;
@@ -161,7 +161,7 @@ void inputStreamPrepend( InputStream *is, RunBuf *runBuf )
 
 void initInputFuncs()
 {
-	memset( &baseFuncs, 0, sizeof(struct InputFuncs) );
+	memset( &baseFuncs, 0, sizeof(struct SourceFuncs) );
 
 	initDynamicFuncs();
 	initStringFuncs();
@@ -177,31 +177,31 @@ void initInputFuncs()
  * Base run-time input streams.
  */
 
-int inputStreamDynamicIsTree( InputStream *is )
+int inputStreamDynamicIsTree( SourceStream *is )
 {
 	if ( is->queue != 0 && is->queue->type == RunBufTokenType )
 		return true;
 	return false;
 }
 
-int inputStreamDynamicIsIgnore( InputStream *is )
+int inputStreamDynamicIsIgnore( SourceStream *is )
 {
 	if ( is->queue != 0 && is->queue->type == RunBufIgnoreType )
 		return true;
 	return false;
 }
 
-int inputStreamDynamicIsLangEl( InputStream *is )
+int inputStreamDynamicIsLangEl( SourceStream *is )
 {
 	return false;
 }
 
-int inputStreamDynamicIsEof( InputStream *is )
+int inputStreamDynamicIsEof( SourceStream *is )
 {
 	return is->queue == 0 && is->eof;
 }
 
-int inputStreamDynamicGetData( InputStream *is, char *dest, int length )
+int inputStreamDynamicGetData( SourceStream *is, char *dest, int length )
 {
 	/* If there is any data in the rubuf queue then read that first. */
 	if ( is->queue != 0 ) {
@@ -224,7 +224,7 @@ int inputStreamDynamicGetData( InputStream *is, char *dest, int length )
 	}
 }
 
-int inputStreamDynamicGetDataRev( InputStream *is, char *dest, int length )
+int inputStreamDynamicGetDataRev( SourceStream *is, char *dest, int length )
 {
 	/* If there is any data in the rubuf queue then read that first. */
 	if ( is->queueTail != 0 ) {
@@ -244,7 +244,7 @@ int inputStreamDynamicGetDataRev( InputStream *is, char *dest, int length )
 	return 0;
 }
 
-int inputStreamDynamicTryAgainLater( InputStream *is )
+int inputStreamDynamicTryAgainLater( SourceStream *is )
 {
 	if ( is->later )
 		return true;
@@ -252,7 +252,7 @@ int inputStreamDynamicTryAgainLater( InputStream *is )
 	return false;
 }
 
-Tree *inputStreamDynamicGetTree( InputStream *is )
+Tree *inputStreamDynamicGetTree( SourceStream *is )
 {
 	if ( is->queue != 0 && is->queue->type == RunBufTokenType ) {
 		RunBuf *runBuf = inputStreamPopHead( is );
@@ -266,7 +266,7 @@ Tree *inputStreamDynamicGetTree( InputStream *is )
 	return 0;
 }
 
-void inputStreamDynamicPushText( InputStream *is, const char *data, long length )
+void inputStreamDynamicPushText( SourceStream *is, const char *data, long length )
 {
 //	#ifdef COLM_LOG_PARSE
 //	if ( colm_log_parse ) {
@@ -288,7 +288,7 @@ void inputStreamDynamicPushText( InputStream *is, const char *data, long length 
 	is->funcs->pushBackBuf( is, newBuf );
 }
 
-void inputStreamDynamicPushTree( InputStream *is, Tree *tree, int ignore )
+void inputStreamDynamicPushTree( SourceStream *is, Tree *tree, int ignore )
 {
 //	#ifdef COLM_LOG_PARSE
 //	if ( colm_log_parse ) {
@@ -308,7 +308,7 @@ void inputStreamDynamicPushTree( InputStream *is, Tree *tree, int ignore )
 	inputStreamPrepend( is, newBuf );
 }
 
-Tree *inputStreamDynamicUndoPush( InputStream *is, int length )
+Tree *inputStreamDynamicUndoPush( SourceStream *is, int length )
 {
 	if ( is->queue->type == RunBufDataType ) {
 		char tmp[length];
@@ -328,7 +328,7 @@ Tree *inputStreamDynamicUndoPush( InputStream *is, int length )
 	}
 }
 
-Tree *inputStreamDynamicUndoAppend( InputStream *is, int length )
+Tree *inputStreamDynamicUndoAppend( SourceStream *is, int length )
 {
 	if ( is->queueTail->type == RunBufDataType ) {
 		char tmp[length];
@@ -350,7 +350,7 @@ Tree *inputStreamDynamicUndoAppend( InputStream *is, int length )
 
 void initDynamicFuncs()
 {
-	memcpy( &dynamicFuncs, &baseFuncs, sizeof(struct InputFuncs) );
+	memcpy( &dynamicFuncs, &baseFuncs, sizeof(struct SourceFuncs) );
 	dynamicFuncs.isTree = &inputStreamDynamicIsTree;
 	dynamicFuncs.isIgnore = &inputStreamDynamicIsIgnore;
 	dynamicFuncs.isLangEl = &inputStreamDynamicIsLangEl;
@@ -368,12 +368,12 @@ void initDynamicFuncs()
  * String
  */
 
-int inputStreamStringNeedFlush( InputStream *is )
+int inputStreamStringNeedFlush( SourceStream *is )
 {
 	return is->eof;
 }
 
-int inputStreamStringGetDataImpl( InputStream *is, char *dest, int length )
+int inputStreamStringGetDataImpl( SourceStream *is, char *dest, int length )
 { 
 	int available = is->dlen - is->offset;
 
@@ -392,7 +392,7 @@ int inputStreamStringGetDataImpl( InputStream *is, char *dest, int length )
 	return length;
 }
 
-void inputStreamStringPushBackBuf( InputStream *is, RunBuf *runBuf )
+void inputStreamStringPushBackBuf( SourceStream *is, RunBuf *runBuf )
 {
 	//char *data = runBuf->buf + runBuf->offset;
 	long length = runBuf->length;
@@ -403,7 +403,7 @@ void inputStreamStringPushBackBuf( InputStream *is, RunBuf *runBuf )
 
 void initStringFuncs()
 {
-	memcpy( &stringFuncs, &dynamicFuncs, sizeof(struct InputFuncs) );
+	memcpy( &stringFuncs, &dynamicFuncs, sizeof(struct SourceFuncs) );
 	stringFuncs.needFlush = &inputStreamStringNeedFlush;
 	stringFuncs.getDataImpl = &inputStreamStringGetDataImpl;
 	stringFuncs.pushBackBuf = &inputStreamStringPushBackBuf;
@@ -414,12 +414,12 @@ void initStringFuncs()
  * File
  */
 
-int inputStreamFileNeedFlush( InputStream *is )
+int inputStreamFileNeedFlush( SourceStream *is )
 {
 	return is->queue == 0 && feof( is->file );
 }
 
-int inputStreamFileGetDataImpl( InputStream *is, char *dest, int length )
+int inputStreamFileGetDataImpl( SourceStream *is, char *dest, int length )
 {
 	size_t res = fread( dest, 1, length, is->file );
 	if ( res < (size_t) length )
@@ -427,14 +427,14 @@ int inputStreamFileGetDataImpl( InputStream *is, char *dest, int length )
 	return res;
 }
 
-void inputStreamFilePushBackBuf( InputStream *is, RunBuf *runBuf )
+void inputStreamFilePushBackBuf( SourceStream *is, RunBuf *runBuf )
 {
 	inputStreamPrepend( is, runBuf );
 }
 
 void initFileFuncs()
 {
-	memcpy( &fileFuncs, &dynamicFuncs, sizeof(struct InputFuncs) );
+	memcpy( &fileFuncs, &dynamicFuncs, sizeof(struct SourceFuncs) );
 	fileFuncs.needFlush = &inputStreamFileNeedFlush;
 	fileFuncs.getDataImpl = &inputStreamFileGetDataImpl;
 	fileFuncs.pushBackBuf = &inputStreamFilePushBackBuf;
@@ -444,17 +444,17 @@ void initFileFuncs()
  * FD
  */
 
-int inputStreamFdNeedFlush( InputStream *is )
+int inputStreamFdNeedFlush( SourceStream *is )
 {
 	return is->queue == 0 && is->eof;
 }
 
-void inputStreamFdPushBackBuf( InputStream *is, RunBuf *runBuf )
+void inputStreamFdPushBackBuf( SourceStream *is, RunBuf *runBuf )
 {
 	inputStreamPrepend( is, runBuf );
 }
 
-int inputStreamFdGetDataImpl( InputStream *is, char *dest, int length )
+int inputStreamFdGetDataImpl( SourceStream *is, char *dest, int length )
 {
 	long got = read( is->fd, dest, length );
 	if ( got == 0 )
@@ -464,7 +464,7 @@ int inputStreamFdGetDataImpl( InputStream *is, char *dest, int length )
 
 void initFdFuncs()
 {
-	memcpy( &fdFuncs, &dynamicFuncs, sizeof(struct InputFuncs) );
+	memcpy( &fdFuncs, &dynamicFuncs, sizeof(struct SourceFuncs) );
 	fdFuncs.needFlush = &inputStreamFdNeedFlush;
 	fdFuncs.getDataImpl = &inputStreamFdGetDataImpl;
 	fdFuncs.pushBackBuf = &inputStreamFdPushBackBuf;
@@ -475,7 +475,7 @@ void initFdFuncs()
  * Accum
  */
 
-int inputStreamAccumTryAgainLater( InputStream *is )
+int inputStreamAccumTryAgainLater( SourceStream *is )
 {
 	if ( is->later || ( !is->flush && is->queue == 0 )) {
 		debug( REALM_PARSE, "try again later %d %d %d\n", is->later, is->flush, is->queue );
@@ -485,7 +485,7 @@ int inputStreamAccumTryAgainLater( InputStream *is )
 	return false;
 }
 
-int inputStreamAccumNeedFlush( InputStream *is )
+int inputStreamAccumNeedFlush( SourceStream *is )
 {
 	if ( is->flush ) {
 		is->flush = false;
@@ -501,20 +501,20 @@ int inputStreamAccumNeedFlush( InputStream *is )
 	return false;
 }
 
-int inputStreamAccumGetDataImpl( InputStream *is, char *dest, int length )
+int inputStreamAccumGetDataImpl( SourceStream *is, char *dest, int length )
 {
 	/* No source of data, it is all done with RunBuf list appends. */
 	return 0;
 }
 
-void inputStreamAccumPushBackBuf( InputStream *is, RunBuf *runBuf )
+void inputStreamAccumPushBackBuf( SourceStream *is, RunBuf *runBuf )
 {
 	inputStreamPrepend( is, runBuf );
 }
 
-void inputStreamAccumAppendData( InputStream *_is, const char *data, long len )
+void inputStreamAccumAppendData( SourceStream *_is, const char *data, long len )
 {
-	InputStream *is = (InputStream*)_is;
+	SourceStream *is = (SourceStream*)_is;
 
 	while ( len > 0 ) {
 		RunBuf *ad = newRunBuf();
@@ -532,9 +532,9 @@ void inputStreamAccumAppendData( InputStream *_is, const char *data, long len )
 	}
 }
 
-void inputStreamAccumAppendTree( InputStream *_is, Tree *tree )
+void inputStreamAccumAppendTree( SourceStream *_is, Tree *tree )
 {
-	InputStream *is = (InputStream*)_is;
+	SourceStream *is = (SourceStream*)_is;
 
 	RunBuf *ad = newRunBuf();
 
@@ -547,7 +547,7 @@ void inputStreamAccumAppendTree( InputStream *_is, Tree *tree )
 
 void initAccumFuncs()
 {
-	memcpy( &accumFuncs, &dynamicFuncs, sizeof(struct InputFuncs) );
+	memcpy( &accumFuncs, &dynamicFuncs, sizeof(struct SourceFuncs) );
 	accumFuncs.needFlush = &inputStreamAccumNeedFlush;
 	accumFuncs.tryAgainLater = &inputStreamAccumTryAgainLater;
 	accumFuncs.getDataImpl = &inputStreamAccumGetDataImpl;
@@ -557,10 +557,10 @@ void initAccumFuncs()
 }
 
 /*
- * Input struct, this wraps the list of input streams.
+ * InputStream2 struct, this wraps the list of input streams.
  */
 
-static void inputStreamPrepend2( Input *is, RunBuf *runBuf )
+static void inputStreamPrepend2( InputStream2 *is, RunBuf *runBuf )
 {
 	if ( is->queue == 0 ) {
 		runBuf->prev = runBuf->next = 0;
@@ -574,7 +574,7 @@ static void inputStreamPrepend2( Input *is, RunBuf *runBuf )
 	}
 }
 
-static RunBuf *inputStreamPopHead2( Input *is )
+static RunBuf *inputStreamPopHead2( InputStream2 *is )
 {
 	RunBuf *ret = is->queue;
 	is->queue = is->queue->next;
@@ -585,7 +585,7 @@ static RunBuf *inputStreamPopHead2( Input *is )
 	return ret;
 }
 
-static void inputStreamAppend2( Input *is, RunBuf *runBuf )
+static void inputStreamAppend2( InputStream2 *is, RunBuf *runBuf )
 {
 	if ( is->queue == 0 ) {
 		runBuf->prev = runBuf->next = 0;
@@ -599,7 +599,7 @@ static void inputStreamAppend2( Input *is, RunBuf *runBuf )
 	}
 }
 
-static RunBuf *inputStreamPopTail2( Input *is )
+static RunBuf *inputStreamPopTail2( InputStream2 *is )
 {
 	RunBuf *ret = is->queueTail;
 	is->queueTail = is->queue->prev;
@@ -610,7 +610,7 @@ static RunBuf *inputStreamPopTail2( Input *is )
 	return ret;
 }
 
-static int inputStreamDynamicGetDataRev2( Input *is, char *dest, int length )
+static int inputStreamDynamicGetDataRev2( InputStream2 *is, char *dest, int length )
 {
 	/* If there is any data in the rubuf queue then read that first. */
 	if ( is->queueTail != 0 ) {
@@ -632,7 +632,7 @@ static int inputStreamDynamicGetDataRev2( Input *is, char *dest, int length )
 
 
 //dynamicFuncs.isTree = &inputStreamDynamicIsTree;
-int isTree( Input *is )
+int isTree( InputStream2 *is )
 {
 	if ( is->queue != 0 && is->queue->type == RunBufTokenType )
 		return true;
@@ -640,7 +640,7 @@ int isTree( Input *is )
 }
 
 //dynamicFuncs.isIgnore = &inputStreamDynamicIsIgnore;
-int isIgnore( Input *is )
+int isIgnore( InputStream2 *is )
 {
 	if ( is->queue != 0 && is->queue->type == RunBufIgnoreType )
 		return true;
@@ -648,19 +648,19 @@ int isIgnore( Input *is )
 }
 
 //dynamicFuncs.isLangEl = &inputStreamDynamicIsLangEl;
-int isLangEl( Input *is )
+int isLangEl( InputStream2 *is )
 {
 	return false;
 }
 
 //dynamicFuncs.isEof = &inputStreamDynamicIsEof;
-int isEof( Input *is )
+int isEof( InputStream2 *is )
 {
 	return is->queue == 0 && is->eof;
 }
 
 //accumFuncs.needFlush = &inputStreamAccumNeedFlush;
-int needFlush( Input *is )
+int needFlush( InputStream2 *is )
 {
 	if ( is->flush ) {
 		is->flush = false;
@@ -677,7 +677,7 @@ int needFlush( Input *is )
 }
 
 //accumFuncs.tryAgainLater = &inputStreamAccumTryAgainLater;
-int tryAgainLater( Input *is )
+int tryAgainLater( InputStream2 *is )
 {
 	if ( is->later || ( !is->flush && is->queue == 0 )) {
 		debug( REALM_PARSE, "try again later %d %d %d\n", is->later, is->flush, is->queue );
@@ -688,7 +688,7 @@ int tryAgainLater( Input *is )
 }
 
 //dynamicFuncs.getData = &inputStreamDynamicGetData;
-int getData( Input *is, char *dest, int length )
+int getData( InputStream2 *is, char *dest, int length )
 {
 	/* If there is any data in the rubuf queue then read that first. */
 	if ( is->queue != 0 ) {
@@ -712,14 +712,14 @@ int getData( Input *is, char *dest, int length )
 }
 
 //accumFuncs.getDataImpl = &inputStreamAccumGetDataImpl;
-int getDataImpl( Input *is, char *dest, int length )
+int getDataImpl( InputStream2 *is, char *dest, int length )
 {
 	/* No source of data, it is all done with RunBuf list appends. */
 	return 0;
 }
 
 //dynamicFuncs.getTree = &inputStreamDynamicGetTree;
-Tree *getTree( Input *is )
+Tree *getTree( InputStream2 *is )
 {
 	if ( is->queue != 0 && is->queue->type == RunBufTokenType ) {
 		RunBuf *runBuf = inputStreamPopHead2( is );
@@ -735,7 +735,7 @@ Tree *getTree( Input *is )
 
 
 //dynamicFuncs.pushTree = &inputStreamDynamicPushTree;
-void pushTree( Input *is, Tree *tree, int ignore )
+void pushTree( InputStream2 *is, Tree *tree, int ignore )
 {
 //	#ifdef COLM_LOG_PARSE
 //	if ( colm_log_parse ) {
@@ -756,7 +756,7 @@ void pushTree( Input *is, Tree *tree, int ignore )
 }
 
 //dynamicFuncs.pushText = &inputStreamDynamicPushText;
-void pushText( Input *is, const char *data, long length )
+void pushText( InputStream2 *is, const char *data, long length )
 {
 //	#ifdef COLM_LOG_PARSE
 //	if ( colm_log_parse ) {
@@ -779,7 +779,7 @@ void pushText( Input *is, const char *data, long length )
 }
 
 //dynamicFuncs.undoPush = &inputStreamDynamicUndoPush;
-Tree *undoPush( Input *is, int length )
+Tree *undoPush( InputStream2 *is, int length )
 {
 	if ( is->queue->type == RunBufDataType ) {
 		char tmp[length];
@@ -800,9 +800,9 @@ Tree *undoPush( Input *is, int length )
 }
 
 //accumFuncs.appendData = &inputStreamAccumAppendData;
-void appendData( Input *_is, const char *data, long len )
+void appendData( InputStream2 *_is, const char *data, long len )
 {
-	Input *is = (Input*)_is;
+	InputStream2 *is = (InputStream2*)_is;
 
 	while ( len > 0 ) {
 		RunBuf *ad = newRunBuf();
@@ -821,9 +821,9 @@ void appendData( Input *_is, const char *data, long len )
 }
 
 //accumFuncs.appendTree = &inputStreamAccumAppendTree;
-void appendTree( Input *_is, Tree *tree )
+void appendTree( InputStream2 *_is, Tree *tree )
 {
-	Input *is = (Input*)_is;
+	InputStream2 *is = (InputStream2*)_is;
 
 	RunBuf *ad = newRunBuf();
 
@@ -835,7 +835,7 @@ void appendTree( Input *_is, Tree *tree )
 }
 
 //dynamicFuncs.undoAppend = &inputStreamDynamicUndoAppend;
-Tree *undoAppend( Input *is, int length )
+Tree *undoAppend( InputStream2 *is, int length )
 {
 	if ( is->queueTail->type == RunBufDataType ) {
 		char tmp[length];
@@ -856,7 +856,7 @@ Tree *undoAppend( Input *is, int length )
 }
 
 //accumFuncs.pushBackBuf = &inputStreamAccumPushBackBuf;
-void pushBackBuf( Input *is, RunBuf *runBuf )
+void pushBackBuf( InputStream2 *is, RunBuf *runBuf )
 {
 	inputStreamPrepend2( is, runBuf );
 }

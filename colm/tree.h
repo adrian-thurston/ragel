@@ -202,7 +202,7 @@ typedef struct _Stream
 	Kid *child;
 
 	FILE *file;
-	InputStream *in;
+	SourceStream *in;
 } Stream;
 
 typedef struct AccumStruct
