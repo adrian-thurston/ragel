@@ -75,7 +75,6 @@ typedef struct _RunBuf
 
 RunBuf *newRunBuf();
 
-typedef struct _SourceStream InputStream;
 typedef struct _SourceStream SourceStream;
 
 struct SourceFuncs
@@ -163,10 +162,8 @@ void initPatternFuncs();
 void initReplFuncs();
 
 /* List of input streams. Enables streams to be pushed/popped. */
-typedef struct _InputStream
+struct _InputStream
 {
-	struct _FsmRun *hasData;
-
 	char eofSent;
 	char flush;
 	char eof;
@@ -194,26 +191,34 @@ typedef struct _InputStream
 	struct PatternItem *patItem;
 	struct Replacement *replacement;
 	struct ReplItem *replItem;
-} InputStream2;
+};
 
-int isTree( InputStream2 *in );
-int isIgnore( InputStream2 *in );
-int isLangEl( InputStream2 *in );
-int isEof( InputStream2 *in );
-int needFlush( InputStream2 *in );
-int tryAgainLater( InputStream2 *in );
-int getData( InputStream2 *in, char *dest, int length );
-int getDataImpl( InputStream2 *in, char *dest, int length );
-struct ColmTree *getTree( InputStream2 *in );
-struct LangEl *getLangEl( InputStream2 *in, long *bindId, char **data, long *length );
-void pushTree( InputStream2 *in, struct ColmTree *tree, int ignore );
-void pushText( InputStream2 *in, const char *data, long len );
-struct ColmTree *undoPush( InputStream2 *in, int length );
-void appendData( InputStream2 *in, const char *data, long len );
-void appendTree( InputStream2 *in, struct ColmTree *tree );
-struct ColmTree *undoAppend( InputStream2 *in, int length );
-void pushBackNamed( InputStream2 *in );
-void pushBackBuf( InputStream2 *in, RunBuf *runBuf );
+typedef struct _InputStream InputStream;
+
+int isTree( InputStream *in );
+int isIgnore( InputStream *in );
+int isLangEl( InputStream *in );
+int isEof( InputStream *in );
+int needFlush( InputStream *in );
+int tryAgainLater( InputStream *in );
+void setEof( InputStream *is );
+void unsetEof( InputStream *is );
+void unsetLater( InputStream *is );
+int getData( InputStream *in, char *dest, int length );
+int getDataImpl( InputStream *in, char *dest, int length );
+struct ColmTree *getTree( InputStream *in );
+struct LangEl *getLangEl( InputStream *in, long *bindId, char **data, long *length );
+void pushTree( InputStream *in, struct ColmTree *tree, int ignore );
+void pushText( InputStream *in, const char *data, long len );
+struct ColmTree *undoPush( InputStream *in, int length );
+void appendData( InputStream *in, const char *data, long len );
+void appendTree( InputStream *in, struct ColmTree *tree );
+void appendStream( InputStream *in, struct ColmTree *tree );
+struct ColmTree *undoAppend( InputStream *in, int length );
+void pushBackNamed( InputStream *in );
+void pushBackBuf( InputStream *in, RunBuf *runBuf );
+
+RunBuf *inputStreamPopHead2( InputStream *is );
 
 #ifdef __cplusplus
 }

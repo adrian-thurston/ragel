@@ -232,7 +232,7 @@ Stream *openStreamFile( Program *prg, FILE *file )
 	res->id = LEL_ID_STREAM;
 	res->file = file;
 	res->in = newInputStreamFile( file );
-	initInputStream( res->in );
+	initSourceStream( res->in );
 	return res;
 }
 
@@ -241,7 +241,7 @@ Stream *openStreamFd( Program *prg, long fd )
 	Stream *res = (Stream*)mapElAllocate( prg );
 	res->id = LEL_ID_STREAM;
 	res->in = newInputStreamFd( fd );
-	initInputStream( res->in );
+	initSourceStream( res->in );
 	return res;
 }
 
@@ -824,11 +824,13 @@ Tree *createGeneric( Program *prg, long genericId )
 			accum->genericInfo = genericInfo;
 			accum->fsmRun = malloc( sizeof(FsmRun) );
 			accum->pdaRun = malloc( sizeof(PdaRun) );
+			accum->in = malloc( sizeof(InputStream) );
 
 			/* Start off the parsing process. */
 			initPdaRun( accum->pdaRun, prg, prg->rtd->pdaTables, 
 					accum->fsmRun, genericInfo->parserId, false, false, 0 );
 			initFsmRun( accum->fsmRun, prg );
+			initInputStream( accum->in );
 			newToken( prg, accum->pdaRun, accum->fsmRun );
 
 			newGeneric = (Tree*) accum;
@@ -885,7 +887,7 @@ free_tree:
 			clearPdaRun( prg, sp, accum->pdaRun );
 			free( accum->pdaRun );
 			free( accum->fsmRun );
-			treeDownref( prg, sp, (Tree*)accum->stream );
+			free( accum->in );
 			mapElFree( prg, (MapEl*)accum );
 		}
 		else {

@@ -82,17 +82,13 @@ typedef struct _FsmRun
 	int returnResult;
 	char *mark[MARK_SLOTS];
 	long matchedToken;
-
-	InputStream *haveDataOf;
-	struct ColmTree *curStream;
 } FsmRun;
 
 void initFsmRun( FsmRun *fsmRun, struct ColmProgram *prg );
 void clearFsmRun( struct ColmProgram *prg, FsmRun *fsmRun );
 void updatePosition( InputStream *inputStream, const char *data, long length );
 void undoPosition( InputStream *inputStream, const char *data, long length );
-void takeBackBuffered( InputStream *inputStream );
-void connectStream( FsmRun *fsmRun, InputStream *inputStream );
+void takeBackBuffered( FsmRun *fsmRun, InputStream *inputStream );
 void sendBackRunBufHead( FsmRun *fsmRun, InputStream *inputStream );
 void undoStreamPull( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length );
 
@@ -331,9 +327,8 @@ typedef struct _PdaRun
 	int checkNext;
 	int checkStop;
 
-	/* The left hand side passed in and the saved left hand side in case we
-	 * need to preserve it for backtracking before we write to it. */
-//	Tree *lhs;
+	/* The lhs is sometimes saved before reduction actions in case it is
+	 * replaced and we need to restore it on backtracking */
 	Tree *parsed;
 
 	int reject;
@@ -441,6 +436,7 @@ long sendBackQueuedIgnore( struct ColmProgram *prg, Tree **sp, InputStream *inpu
 void clearIgnoreList( struct ColmProgram *prg, Tree **sp, Kid *kid );
 Head *extractMatch( struct ColmProgram *prg, FsmRun *fsmRun, InputStream *inputStream );
 Head *extractMatch( struct ColmProgram *prg, FsmRun *fsmRun, InputStream *inputStream );
+void initSourceStream( SourceStream *in );
 void initInputStream( InputStream *in );
 void newToken( struct ColmProgram *prg, PdaRun *pdaRun, FsmRun *fsmRun );
 void fsmExecute( FsmRun *fsmRun, InputStream *inputStream );

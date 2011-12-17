@@ -335,14 +335,14 @@ extern "C" void initReplFuncs()
 	replFuncs.pushBackNamed = &inputStreamReplPushBackNamed;
 }
 
-Kid *sendNamedLangEl( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, SourceStream *inputStream )
+Kid *sendNamedLangEl( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 {
 	/* All three set by getLangEl. */
 	long bindId;
 	char *data;
 	long length;
 
-	LangEl *klangEl = inputStream->funcs->getLangEl( inputStream, &bindId, &data, &length );
+	LangEl *klangEl = getLangEl( inputStream, &bindId, &data, &length );
 	if ( klangEl->termDup != 0 )
 		klangEl = klangEl->termDup;
 	

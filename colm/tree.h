@@ -217,7 +217,7 @@ typedef struct AccumStruct
 
 	struct _PdaRun *pdaRun;
 	struct _FsmRun *fsmRun;
-	Stream *stream;
+	struct _InputStream *in;
 	Tree *result;
 } Accum;
 

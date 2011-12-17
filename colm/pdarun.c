@@ -62,8 +62,6 @@ void initFsmRun( FsmRun *fsmRun, Program *prg )
 {
 	fsmRun->tables = prg->rtd->fsmTables;
 	fsmRun->runBuf = 0;
-	fsmRun->haveDataOf = 0;
-	fsmRun->curStream = 0;
 
 	/* Run buffers need to stick around because 
 	 * token strings point into them. */
@@ -85,11 +83,6 @@ void clearFsmRun( Program *prg, FsmRun *fsmRun )
 
 		tail->next = prg->allocRunBuf;
 		prg->allocRunBuf = head;
-	}
-
-	if ( fsmRun->haveDataOf != 0 ) {
-		fsmRun->haveDataOf->hasData = 0;
-		fsmRun->haveDataOf = 0;
 	}
 }
 
@@ -139,47 +132,24 @@ void decrementSteps( PdaRun *pdaRun )
 	debug( REALM_PARSE, "steps down to %ld\n", pdaRun->steps );
 }
 
-void takeBackBuffered( InputStream *inputStream )
+void takeBackBuffered( FsmRun *fsmRun, InputStream *inputStream )
 {
-	if ( inputStream->hasData != 0 ) {
-		FsmRun *fsmRun = inputStream->hasData;
+	if ( fsmRun->runBuf != 0 ) {
+		if ( fsmRun->pe - fsmRun->p > 0 ) {
+			debug( REALM_PARSE, "taking back buffered fsmRun: %p input stream: %p\n", fsmRun, inputStream );
 
-		if ( fsmRun->runBuf != 0 ) {
-			if ( fsmRun->pe - fsmRun->p > 0 ) {
-				debug( REALM_PARSE, "taking back buffered fsmRun: %p input stream: %p\n", fsmRun, inputStream );
+			RunBuf *split = newRunBuf();
+			memcpy( split->data, fsmRun->p, fsmRun->pe - fsmRun->p );
 
-				RunBuf *split = newRunBuf();
-				memcpy( split->data, fsmRun->p, fsmRun->pe - fsmRun->p );
+			split->length = fsmRun->pe - fsmRun->p;
+			split->offset = 0;
+			split->next = 0;
 
-				split->length = fsmRun->pe - fsmRun->p;
-				split->offset = 0;
-				split->next = 0;
+			fsmRun->pe = fsmRun->p;
 
-				fsmRun->pe = fsmRun->p;
-
-				inputStream->funcs->pushBackBuf( inputStream, split );
-			}
+			pushBackBuf( inputStream, split );
 		}
-
-		inputStream->hasData = 0;
-		fsmRun->haveDataOf = 0;
 	}
-}
-
-void connectStream( FsmRun *fsmRun, InputStream *inputStream )
-{
-	if ( inputStream->hasData != 0 && inputStream->hasData != fsmRun ) {
-		takeBackBuffered( inputStream );
-	}
-	
-#ifdef DEBUG
-	if ( inputStream->hasData != fsmRun ) {
-		debug( REALM_PARSE, "connecting fsmRun: %p and input stream %p\n", fsmRun, inputStream );
-	}
-#endif
-
-	inputStream->hasData = fsmRun;
-	fsmRun->haveDataOf = inputStream;
 }
 
 /* Load up a token, starting from tokstart if it is set. If not set then
@@ -199,9 +169,7 @@ Head *streamPull( Program *prg, FsmRun *fsmRun, InputStream *inputStream, long l
 		if ( space == 0 )
 			fatal( "OUT OF BUFFER SPACE\n" );
 
-		connectStream( fsmRun, inputStream );
-			
-		long len = inputStream->funcs->getData( inputStream, fsmRun->p, space );
+		long len = getData( inputStream, fsmRun->p, space );
 		fsmRun->pe = fsmRun->p + len;
 	}
 
@@ -226,7 +194,7 @@ void sendBackRunBufHead( FsmRun *fsmRun, InputStream *inputStream )
 	/* Flush out the input buffer. */
 	back->length = fsmRun->pe - fsmRun->p;
 	back->offset = 0;
-	inputStream->funcs->pushBackBuf( inputStream, back );
+	pushBackBuf( inputStream, back );
 
 	/* Set data and de. */
 	if ( fsmRun->runBuf == 0 ) {
@@ -241,8 +209,6 @@ void sendBackRunBufHead( FsmRun *fsmRun, InputStream *inputStream )
 void undoStreamPull( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length )
 {
 	debug( REALM_PARSE, "undoing stream pull\n" );
-
-	connectStream( fsmRun, inputStream );
 
 	if ( fsmRun->p == fsmRun->pe && fsmRun->p == fsmRun->runBuf->data )
 		sendBackRunBufHead( fsmRun, inputStream );
@@ -259,8 +225,8 @@ void streamPushText( InputStream *inputStream, const char *data, long length )
 //	}
 //	#endif
 
-	takeBackBuffered( inputStream );
-	inputStream->funcs->pushText( inputStream, data, length );
+	takeBackBuffered( 0, inputStream );
+	pushText( inputStream, data, length );
 }
 
 void streamPushTree( InputStream *inputStream, Tree *tree, int ignore )
@@ -271,22 +237,22 @@ void streamPushTree( InputStream *inputStream, Tree *tree, int ignore )
 //	}
 //	#endif
 
-	takeBackBuffered( inputStream );
-	inputStream->funcs->pushTree( inputStream, tree, ignore );
+	takeBackBuffered( 0, inputStream );
+	pushTree( inputStream, tree, ignore );
 }
 
 void undoStreamPush( Program *prg, Tree **sp, InputStream *inputStream, long length )
 {
-	takeBackBuffered( inputStream );
-	Tree *tree = inputStream->funcs->undoPush( inputStream, length );
+	takeBackBuffered( 0, inputStream );
+	Tree *tree = undoPush( inputStream, length );
 	if ( tree != 0 )
 		treeDownref( prg, sp, tree );
 }
 
 void undoStreamAppend( Program *prg, Tree **sp, InputStream *inputStream, long length )
 {
-	takeBackBuffered( inputStream );
-	Tree *tree = inputStream->funcs->undoAppend( inputStream, length );
+	takeBackBuffered( 0, inputStream );
+	Tree *tree = undoAppend( inputStream, length );
 	if ( tree != 0 )
 		treeDownref( prg, sp, tree );
 }
@@ -297,8 +263,6 @@ void undoStreamAppend( Program *prg, Tree **sp, InputStream *inputStream, long l
 static void sendBackText( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length )
 {
 	debug( REALM_PARSE, "push back of %ld characters\n", length );
-
-//	connectStream( fsmRun, inputStream );
 
 	if ( length == 0 )
 		return;
@@ -469,7 +433,7 @@ case PcrStart:
 
 		/* Send the named lang el back first, then send back any leading
 		 * whitespace. */
-		inputStream->funcs->pushBackNamed( inputStream );
+		pushBackNamed( inputStream );
 	}
 
 	decrementSteps( pdaRun );
@@ -841,12 +805,11 @@ Kid *sendToken( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRu
 Kid *sendTree( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 {
 	Kid *input = kidAllocate( prg );
-	input->tree = inputStream->funcs->getTree( inputStream );
+	input->tree = getTree( inputStream );
 
 	incrementSteps( pdaRun );
 
 	return input;
-
 }
 
 Kid *sendEof( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
@@ -959,7 +922,7 @@ long scanToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *input
 		return SCAN_UNDO;
 
 	while ( true ) {
-		if ( inputStream->funcs->needFlush( inputStream ) )
+		if ( needFlush( inputStream ) )
 			fsmRun->peof = fsmRun->pe;
 
 		fsmExecute( fsmRun, inputStream );
@@ -1000,21 +963,21 @@ long scanToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *input
 		/* Check for a named language element or constructed trees. Note that
 		 * we can do this only when data == de otherwise we get ahead of what's
 		 * already in the buffer. */
-		if ( inputStream->funcs->isLangEl( inputStream ) ) {
+		if ( isLangEl( inputStream ) ) {
 			breakRunBuf( fsmRun );
 			return SCAN_LANG_EL;
 		}
-		else if ( inputStream->funcs->isTree( inputStream ) ) {
+		else if ( isTree( inputStream ) ) {
 			breakRunBuf( fsmRun );
 			return SCAN_TREE;
 		}
-		else if ( inputStream->funcs->isIgnore( inputStream ) ) {
+		else if ( isIgnore( inputStream ) ) {
 			breakRunBuf( fsmRun );
 			return SCAN_IGNORE;
 		}
 
 		/* Maybe need eof. */
- 		if ( inputStream->funcs->isEof( inputStream ) ) {
+ 		if ( isEof( inputStream ) ) {
 			if ( fsmRun->tokstart != 0 ) {
 				/* If a token has been started, but not finshed 
 				 * this is an error. */
@@ -1028,7 +991,7 @@ long scanToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *input
 
 		/* Maybe need to pause parsing until more data is inserted into the
 		 * input inputStream. */
-		if ( inputStream->funcs->tryAgainLater( inputStream ) )
+		if ( tryAgainLater( inputStream ) )
 			return SCAN_TRY_AGAIN_LATER;
 
 		/* There may be space left in the current buffer. If not then we need
@@ -1085,10 +1048,8 @@ long scanToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *input
 		space = fsmRun->runBuf->data + FSM_BUFSIZE - fsmRun->pe;
 		assert( space > 0 );
 			
-		connectStream( fsmRun, inputStream );
-
 		/* Get more data. */
-		int len = inputStream->funcs->getData( inputStream, fsmRun->p, space );
+		int len = getData( inputStream, fsmRun->p, space );
 		fsmRun->pe = fsmRun->p + len;
 	}
 
@@ -1096,10 +1057,9 @@ long scanToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *input
 	return SCAN_ERROR;
 }
 
-
 void sendTreeIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 {
-	RunBuf *runBuf = inputStreamPopHead( inputStream );
+	RunBuf *runBuf = inputStreamPopHead2( inputStream );
 
 	/* FIXME: using runbufs here for this is a poor use of memory. */
 	Tree *tree = runBuf->tree;

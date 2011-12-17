@@ -240,12 +240,6 @@ typedef unsigned char uchar;
 #define IN_PARSE_FRAG_BKT        0xc2
 #define IN_PARSE_FRAG_BKT3       0xe6
 
-#define IN_EXTRACT_INPUT_WC      0xc3
-#define IN_EXTRACT_INPUT_WV      0xc4
-#define IN_EXTRACT_INPUT_BKT     0xc5
-
-#define IN_SET_INPUT_WC          0xc9
-
 #define IN_STREAM_APPEND_WC      0xc6
 #define IN_STREAM_APPEND_WV      0xc7
 #define IN_STREAM_APPEND_BKT     0xc8
@@ -432,8 +426,10 @@ typedef Tree **StackPtr;
 
 typedef struct _Execution
 {
+	Accum *accum;
 	PdaRun *pdaRun;
 	FsmRun *fsmRun;
+	InputStream *inputStream;
 	Tree **framePtr;
 	Tree **iframePtr;
 	long frameId;
@@ -460,7 +456,7 @@ Head *intToStr( struct ColmProgram *prg, Word i );
 
 Tree *constructString( struct ColmProgram *prg, Head *s );
 
-void initExecution( Execution *exec, PdaRun *pdaRun, FsmRun *fsmRun, int frameId );
+void initExecution( Execution *exec, Accum *accum, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, int frameId );
 
 void mainExecution( struct ColmProgram *prg, Execution *exec, Code *code );
 void reductionExecution( Execution *exec, Tree **sp );

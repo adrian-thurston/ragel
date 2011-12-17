@@ -1351,32 +1351,14 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 		ut->langEl->parseStop = true;
 
 	/* If the arg is a stream then install it in the parser. */
-	if ( argUT == pd->uniqueTypeStream ) {
-//		code.append( IN_DUP_TOP );
+	/* Get a copy of the parser. */
+	code.append( IN_DUP_TOP_OFF );
+	code.appendHalf( 1 );
 
-		/* Get a copy of the parser. */
-		code.append( IN_DUP_TOP_OFF );
-		code.appendHalf( 1 );
-	
-		code.append( IN_SET_INPUT_WC );
-	}
-	else {
-		/* Not a stream, append the item to the stream. */
-
-		/* Get a copy of the parser. */
-		code.append( IN_DUP_TOP_OFF );
-		code.appendHalf( 1 );
-
-		/* Not a stream. Get the input first. */
-		if ( pd->revertOn ) {
-			code.append( IN_EXTRACT_INPUT_WV );
-			code.append( IN_STREAM_APPEND_WV );
-		}
-		else {
-			code.append( IN_EXTRACT_INPUT_WC );
-			code.append( IN_STREAM_APPEND_WC );
-		}
-	}
+	if ( pd->revertOn )
+		code.append( IN_STREAM_APPEND_WV );
+	else
+		code.append( IN_STREAM_APPEND_WC );
 
 
 	/* Get a copy of the parser. */
@@ -2085,32 +2067,16 @@ void LangStmt::evaluateAccumItems( ParseData *pd, CodeVect &code ) const
 			break;
 		}
 
-		if ( exprUT == pd->uniqueTypeStream ) {
-//			code.append( IN_DUP_TOP );
+		code.append( IN_DUP_TOP_OFF );
+		code.appendHalf( 1 );
 
-			/* Get a copy of the parser. */
-			code.append( IN_DUP_TOP_OFF );
-			code.appendHalf( 1 );
-		
-			code.append( IN_SET_INPUT_WC );
-		}
-		else {
-			code.append( IN_DUP_TOP_OFF );
-			code.appendHalf( 1 );
-
-			/* Not a stream. Get the input first. */
-			if ( pd->revertOn ) {
-				code.append( IN_EXTRACT_INPUT_WV );
-				code.append( IN_STREAM_APPEND_WV );
-			}
-			else {
-				code.append( IN_EXTRACT_INPUT_WC );
-				code.append( IN_STREAM_APPEND_WC );
-			}
-		}
+		/* Not a stream. Get the input first. */
+		if ( pd->revertOn )
+			code.append( IN_STREAM_APPEND_WV );
+		else
+			code.append( IN_STREAM_APPEND_WC );
 
 		code.append( IN_DUP_TOP );
-//		code.appendHalf( 1 );
 
 		/* Parse instruction, dependent on whether or not we are producing
 		 * revert or commit code. */

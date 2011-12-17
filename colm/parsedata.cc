@@ -37,6 +37,7 @@
 #include "fsmrun.h"
 #include "pdarun.h"
 #include "colm.h"
+#include "pool.h"
 
 using namespace std;
 using std::ostringstream;
@@ -1345,19 +1346,24 @@ void ParseData::parsePatterns()
 					repl->loc.line << ' ' << repl->loc.col << endl;
 		}
 
-		InputStream *in = newInputStreamRepl( repl );
-		initInputStream( in );
-
+		InputStream *in = new InputStream;
 		FsmRun *fsmRun = new FsmRun;
 		repl->pdaRun = new PdaRun;
+
+		initInputStream( in );
 		initPdaRun( repl->pdaRun, prg, pdaTables, fsmRun, repl->langEl->parserId, 0, false, 0 );
 		initFsmRun( fsmRun, prg );
+
+		Stream *res = (Stream*)mapElAllocate( prg );
+		res->id = LEL_ID_STREAM;
+		res->in = newInputStreamRepl( repl );
+		appendStream( in, (Tree*)res );
+
 		newToken( prg, repl->pdaRun, fsmRun );
 		long pcr = parseLoop( prg, root, repl->pdaRun, fsmRun, in, PcrStart );
 		assert( pcr == PcrDone );
 		if ( repl->pdaRun->parseError )
 			cout << "parse error" << endp;
-		free(in);
 	}
 
 	for ( PatternList::Iter pat = patternList; pat.lte(); pat++ ) {
@@ -1366,19 +1372,24 @@ void ParseData::parsePatterns()
 					pat->loc.line << ' ' << pat->loc.col << endl;
 		}
 
-		InputStream *in = newInputStreamPattern( pat );
-		initInputStream( in );
-
+		InputStream *in = new InputStream;
 		FsmRun *fsmRun = new FsmRun;
 		pat->pdaRun = new PdaRun;
+
+		initInputStream( in );
 		initPdaRun( pat->pdaRun, prg, pdaTables, fsmRun, pat->langEl->parserId, 0, false, 0 );
 		initFsmRun( fsmRun, prg );
+
+		Stream *res = (Stream*)mapElAllocate( prg );
+		res->id = LEL_ID_STREAM;
+		res->in = newInputStreamPattern( pat );
+		appendStream( in, (Tree*)res );
+
 		newToken( prg, pat->pdaRun, fsmRun );
 		long pcr = parseLoop( prg, root, pat->pdaRun, fsmRun, in, PcrStart );
 		assert( pcr == PcrDone );
 		if ( pat->pdaRun->parseError )
 			cout << "parse error" << endp;
-		free( in );
 	}
 
 	fillInPatterns( prg );
