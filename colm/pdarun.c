@@ -132,23 +132,21 @@ void decrementSteps( PdaRun *pdaRun )
 	debug( REALM_PARSE, "steps down to %ld\n", pdaRun->steps );
 }
 
-void takeBackBuffered( FsmRun *fsmRun, InputStream *inputStream )
+void sendBackBuffered( FsmRun *fsmRun, InputStream *inputStream )
 {
-	if ( fsmRun->runBuf != 0 ) {
-		if ( fsmRun->pe - fsmRun->p > 0 ) {
-			debug( REALM_PARSE, "taking back buffered fsmRun: %p input stream: %p\n", fsmRun, inputStream );
+	if ( fsmRun->runBuf != 0 && fsmRun->pe - fsmRun->p > 0 ) {
+		debug( REALM_PARSE, "taking back buffered fsmRun: %p input stream: %p\n", fsmRun, inputStream );
 
-			RunBuf *split = newRunBuf();
-			memcpy( split->data, fsmRun->p, fsmRun->pe - fsmRun->p );
+		RunBuf *split = newRunBuf();
+		memcpy( split->data, fsmRun->p, fsmRun->pe - fsmRun->p );
 
-			split->length = fsmRun->pe - fsmRun->p;
-			split->offset = 0;
-			split->next = 0;
+		split->length = fsmRun->pe - fsmRun->p;
+		split->offset = 0;
+		split->next = 0;
 
-			fsmRun->pe = fsmRun->p;
+		fsmRun->pe = fsmRun->p;
 
-			pushBackBuf( inputStream, split );
-		}
+		pushBackBuf( inputStream, split );
 	}
 }
 
@@ -159,22 +157,13 @@ Head *streamPull( Program *prg, FsmRun *fsmRun, InputStream *inputStream, long l
 	/* We should not be in the midst of getting a token. */
 	assert( fsmRun->tokstart == 0 );
 
-	/* The generated token length has been stuffed into tokdata. */
-	if ( fsmRun->p + length > fsmRun->pe ) {
-		fsmRun->p = fsmRun->pe = fsmRun->runBuf->data;
-		fsmRun->peof = 0;
+	RunBuf *runBuf = newRunBuf();
+	runBuf->next = fsmRun->runBuf;
+	fsmRun->runBuf = runBuf;
 
-		long space = fsmRun->runBuf->data + FSM_BUFSIZE - fsmRun->pe;
-			
-		if ( space == 0 )
-			fatal( "OUT OF BUFFER SPACE\n" );
-
-		long len = getData( inputStream, fsmRun->p, space );
-		fsmRun->pe = fsmRun->p + len;
-	}
-
-	if ( fsmRun->p + length > fsmRun->pe )
-		fatal( "NOT ENOUGH DATA TO FETCH TOKEN\n" );
+	fsmRun->p = runBuf->data;
+	long len = getData( inputStream, fsmRun->p, length );
+	fsmRun->pe = fsmRun->p + length;
 
 	Head *tokdata = stringAllocPointer( prg, fsmRun->p, length );
 	updatePosition( inputStream, fsmRun->p, length );
@@ -213,11 +202,11 @@ void undoStreamPull( FsmRun *fsmRun, InputStream *inputStream, const char *data,
 	if ( fsmRun->p == fsmRun->pe && fsmRun->p == fsmRun->runBuf->data )
 		sendBackRunBufHead( fsmRun, inputStream );
 
-	assert( fsmRun->p - length >= fsmRun->runBuf->data );
+	//assert( fsmRun->p - length >= fsmRun->runBuf->data );
 	fsmRun->p -= length;
 }
 
-void streamPushText( InputStream *inputStream, const char *data, long length )
+void streamPushText( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length )
 {
 //	#ifdef COLM_LOG_PARSE
 //	if ( colm_log_parse ) {
@@ -225,11 +214,11 @@ void streamPushText( InputStream *inputStream, const char *data, long length )
 //	}
 //	#endif
 
-	takeBackBuffered( 0, inputStream );
+//	sendBackBuffered( fsmRun, inputStream );
 	pushText( inputStream, data, length );
 }
 
-void streamPushTree( InputStream *inputStream, Tree *tree, int ignore )
+void streamPushTree( FsmRun *fsmRun, InputStream *inputStream, Tree *tree, int ignore )
 {
 //	#ifdef COLM_LOG_PARSE
 //	if ( colm_log_parse ) {
@@ -237,21 +226,21 @@ void streamPushTree( InputStream *inputStream, Tree *tree, int ignore )
 //	}
 //	#endif
 
-	takeBackBuffered( 0, inputStream );
+//	sendBackBuffered( fsmRun, inputStream );
 	pushTree( inputStream, tree, ignore );
 }
 
-void undoStreamPush( Program *prg, Tree **sp, InputStream *inputStream, long length )
+void undoStreamPush( Program *prg, Tree **sp, FsmRun *fsmRun, InputStream *inputStream, long length )
 {
-	takeBackBuffered( 0, inputStream );
+//	sendBackBuffered( fsmRun, inputStream );
 	Tree *tree = undoPush( inputStream, length );
 	if ( tree != 0 )
 		treeDownref( prg, sp, tree );
 }
 
-void undoStreamAppend( Program *prg, Tree **sp, InputStream *inputStream, long length )
+void undoStreamAppend( Program *prg, Tree **sp, FsmRun *fsmRun, InputStream *inputStream, long length )
 {
-	takeBackBuffered( 0, inputStream );
+//	sendBackBuffered( fsmRun, inputStream );
 	Tree *tree = undoAppend( inputStream, length );
 	if ( tree != 0 )
 		treeDownref( prg, sp, tree );
@@ -442,7 +431,7 @@ case PcrStart:
 	if ( input->tree->flags & AF_ARTIFICIAL ) {
 		treeUpref( input->tree );
 
-		streamPushTree( inputStream, input->tree, false );
+		streamPushTree( fsmRun, inputStream, input->tree, false );
 	}
 	else {
 		/* Push back the token data. */

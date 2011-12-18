@@ -819,16 +819,22 @@ int getDataImpl( InputStream *is, char *dest, int length )
 //dynamicFuncs.getTree = &inputStreamDynamicGetTree;
 Tree *getTree( InputStream *is )
 {
-	if ( is->queue != 0 && is->queue->type == RunBufTokenType ) {
-		RunBuf *runBuf = inputStreamPopHead2( is );
-
-		/* FIXME: using runbufs here for this is a poor use of memory. */
-		Tree *tree = runBuf->tree;
-		free(runBuf);
-		return tree;
+	if ( isSourceStream( is ) ) {
+		Stream *stream = (Stream*)is->queue->tree;
+		return stream->in->funcs->getTree( stream->in );
 	}
+	else {
+		if ( is->queue != 0 && is->queue->type == RunBufTokenType ) {
+			RunBuf *runBuf = inputStreamPopHead2( is );
 
-	return 0;
+			/* FIXME: using runbufs here for this is a poor use of memory. */
+			Tree *tree = runBuf->tree;
+			free(runBuf);
+			return tree;
+		}
+
+		return 0;
+	}
 }
 
 struct LangEl *getLangEl( InputStream *is, long *bindId, char **data, long *length )
@@ -853,101 +859,127 @@ void pushBackNamed( InputStream *is )
 //dynamicFuncs.pushTree = &inputStreamDynamicPushTree;
 void pushTree( InputStream *is, Tree *tree, int ignore )
 {
-//	#ifdef COLM_LOG_PARSE
-//	if ( colm_log_parse ) {
-//		cerr << "readying fake push" << endl;
-//	}
-//	#endif
+	if ( isSourceStream( is ) ) {
+		Stream *stream = (Stream*)is->queue->tree;
+		return stream->in->funcs->pushTree( stream->in, tree, ignore );
+	}
+	else {
+	//	#ifdef COLM_LOG_PARSE
+	//	if ( colm_log_parse ) {
+	//		cerr << "readying fake push" << endl;
+	//	}
+	//	#endif
 
-//	takeBackBuffered( inputStream );
+	//	takeBackBuffered( inputStream );
 
-	/* Create a new buffer for the data. This is the easy implementation.
-	 * Something better is needed here. It puts a max on the amount of
-	 * data that can be pushed back to the inputStream. */
-	RunBuf *newBuf = newRunBuf();
-	newBuf->type = ignore ? RunBufIgnoreType : RunBufTokenType;
-	newBuf->tree = tree;
+		/* Create a new buffer for the data. This is the easy implementation.
+		 * Something better is needed here. It puts a max on the amount of
+		 * data that can be pushed back to the inputStream. */
+		RunBuf *newBuf = newRunBuf();
+		newBuf->type = ignore ? RunBufIgnoreType : RunBufTokenType;
+		newBuf->tree = tree;
 
-	inputStreamPrepend2( is, newBuf );
+		inputStreamPrepend2( is, newBuf );
+	}
 }
 
 //dynamicFuncs.pushText = &inputStreamDynamicPushText;
 void pushText( InputStream *is, const char *data, long length )
 {
-//	#ifdef COLM_LOG_PARSE
-//	if ( colm_log_parse ) {
-//		cerr << "readying fake push" << endl;
-//	}
-//	#endif
+	if ( isSourceStream( is ) ) {
+		Stream *stream = (Stream*)is->queue->tree;
+		return stream->in->funcs->pushText( stream->in, data, length );
+	}
+	else {
+	//	#ifdef COLM_LOG_PARSE
+	//	if ( colm_log_parse ) {
+	//		cerr << "readying fake push" << endl;
+	//	}
+	//	#endif
 
-//	takeBackBuffered( inputStream );
+	//	takeBackBuffered( inputStream );
 
-	/* Create a new buffer for the data. This is the easy implementation.
-	 * Something better is needed here. It puts a max on the amount of
-	 * data that can be pushed back to the inputStream. */
-	assert( length < FSM_BUFSIZE );
+		/* Create a new buffer for the data. This is the easy implementation.
+		 * Something better is needed here. It puts a max on the amount of
+		 * data that can be pushed back to the inputStream. */
+		assert( length < FSM_BUFSIZE );
 
-	RunBuf *newBuf = newRunBuf();
-	newBuf->length = length;
-	memcpy( newBuf->data, data, length );
+		RunBuf *newBuf = newRunBuf();
+		newBuf->length = length;
+		memcpy( newBuf->data, data, length );
 
-	pushBackBuf( is, newBuf );
+		pushBackBuf( is, newBuf );
+	}
 }
 
 //dynamicFuncs.undoPush = &inputStreamDynamicUndoPush;
 Tree *undoPush( InputStream *is, int length )
 {
-	if ( is->queue->type == RunBufDataType ) {
-		char tmp[length];
-		int have = 0;
-		while ( have < length ) {
-			int res = getData( is, tmp, length-have );
-			have += res;
-		}
-		return 0;
+	if ( isSourceStream( is ) ) {
+		Stream *stream = (Stream*)is->queue->tree;
+		return stream->in->funcs->undoPush( stream->in, length );
 	}
 	else {
-		/* FIXME: leak here. */
-		RunBuf *rb = inputStreamPopHead2( is );
-		Tree *tree = rb->tree;
-		free(rb);
-		return tree;
+		if ( is->queue->type == RunBufDataType ) {
+			char tmp[length];
+			int have = 0;
+			while ( have < length ) {
+				int res = getData( is, tmp, length-have );
+				have += res;
+			}
+			return 0;
+		}
+		else {
+			/* FIXME: leak here. */
+			RunBuf *rb = inputStreamPopHead2( is );
+			Tree *tree = rb->tree;
+			free(rb);
+			return tree;
+		}
 	}
 }
 
 //accumFuncs.appendData = &inputStreamAccumAppendData;
-void appendData( InputStream *_is, const char *data, long len )
+void appendData( InputStream *is, const char *data, long len )
 {
-	InputStream *is = (InputStream*)_is;
+	if ( isSourceStream( is ) ) {
+		Stream *stream = (Stream*)is->queue->tree;
+		return stream->in->funcs->appendData( stream->in, data, len );
+	}
+	else {
+		while ( len > 0 ) {
+			RunBuf *ad = newRunBuf();
+			inputStreamAppend2( is, ad );
 
-	while ( len > 0 ) {
-		RunBuf *ad = newRunBuf();
-		inputStreamAppend2( is, ad );
+			long consume = 
+				len <= (long)sizeof(ad->data) ? 
+				len : (long)sizeof(ad->data);
 
-		long consume = 
-			len <= (long)sizeof(ad->data) ? 
-			len : (long)sizeof(ad->data);
+			memcpy( ad->data, data, consume );
+			ad->length = consume;
 
-		memcpy( ad->data, data, consume );
-		ad->length = consume;
-
-		len -= consume;
-		data += consume;
+			len -= consume;
+			data += consume;
+		}
 	}
 }
 
 //accumFuncs.appendTree = &inputStreamAccumAppendTree;
-void appendTree( InputStream *_is, Tree *tree )
+void appendTree( InputStream *is, Tree *tree )
 {
-	InputStream *is = (InputStream*)_is;
+	if ( isSourceStream( is ) ) {
+		Stream *stream = (Stream*)is->queue->tree;
+		return stream->in->funcs->appendTree( stream->in, tree );
+	}
+	else {
+		RunBuf *ad = newRunBuf();
 
-	RunBuf *ad = newRunBuf();
+		inputStreamAppend2( is, ad );
 
-	inputStreamAppend2( is, ad );
-
-	ad->type = RunBufTokenType;
-	ad->tree = tree;
-	ad->length = 0;
+		ad->type = RunBufTokenType;
+		ad->tree = tree;
+		ad->length = 0;
+	}
 }
 
 void appendStream( InputStream *in, struct ColmTree *tree )
@@ -964,21 +996,27 @@ void appendStream( InputStream *in, struct ColmTree *tree )
 //dynamicFuncs.undoAppend = &inputStreamDynamicUndoAppend;
 Tree *undoAppend( InputStream *is, int length )
 {
-	if ( is->queueTail->type == RunBufDataType ) {
-		char tmp[length];
-		int have = 0;
-		while ( have < length ) {
-			int res = inputStreamDynamicGetDataRev2( is, tmp, length-have );
-			have += res;
-		}
-		return 0;
+	if ( isSourceStream( is ) ) {
+		Stream *stream = (Stream*)is->queue->tree;
+		return stream->in->funcs->undoAppend( stream->in, length );
 	}
 	else {
-		/* FIXME: leak here. */
-		RunBuf *rb = inputStreamPopTail2( is );
-		Tree *tree = rb->tree;
-		free(rb);
-		return tree;
+		if ( is->queueTail->type == RunBufDataType ) {
+			char tmp[length];
+			int have = 0;
+			while ( have < length ) {
+				int res = inputStreamDynamicGetDataRev2( is, tmp, length-have );
+				have += res;
+			}
+			return 0;
+		}
+		else {
+			/* FIXME: leak here. */
+			RunBuf *rb = inputStreamPopTail2( is );
+			Tree *tree = rb->tree;
+			free(rb);
+			return tree;
+		}
 	}
 }
 
@@ -987,7 +1025,7 @@ void pushBackBuf( InputStream *is, RunBuf *runBuf )
 {
 	if ( isSourceStream( is ) ) {
 		Stream *stream = (Stream*)is->queue->tree;
-		inputStreamPrepend( stream->in, runBuf );
+		stream->in->funcs->pushBackBuf( stream->in, runBuf );
 	}
 	else {
 		inputStreamPrepend2( is, runBuf );

@@ -1363,7 +1363,6 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 
 	/* Get a copy of the parser. */
 	code.append( IN_DUP_TOP );
-//	code.appendHalf( 1 );
 
 	int stopId = stop ? ut->langEl->id : 0;
 

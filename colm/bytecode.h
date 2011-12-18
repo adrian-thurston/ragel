@@ -480,6 +480,7 @@ Tree **executeCode( struct ColmProgram *prg, Execution *exec, Tree **sp, Code *i
 void rcodeDownref( struct ColmProgram *prg, Tree **sp, Code *instr );
 Tree **stackAlloc();
 Code *popReverseCode( RtCodeVect *allRev );
+void sendBackBuffered( FsmRun *fsmRun, InputStream *inputStream );
 
 #ifdef __cplusplus
 }

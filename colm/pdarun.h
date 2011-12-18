@@ -88,7 +88,6 @@ void initFsmRun( FsmRun *fsmRun, struct ColmProgram *prg );
 void clearFsmRun( struct ColmProgram *prg, FsmRun *fsmRun );
 void updatePosition( InputStream *inputStream, const char *data, long length );
 void undoPosition( InputStream *inputStream, const char *data, long length );
-void takeBackBuffered( FsmRun *fsmRun, InputStream *inputStream );
 void sendBackRunBufHead( FsmRun *fsmRun, InputStream *inputStream );
 void undoStreamPull( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length );
 
@@ -420,10 +419,10 @@ long undoParse( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStr
 Head *streamPull( struct ColmProgram *prg, FsmRun *fsmRun, InputStream *inputStream, long length );
 Head *stringAllocPointer( struct ColmProgram *prg, const char *data, long length );
 
-void streamPushText( InputStream *inputStream, const char *data, long length );
-void streamPushTree( InputStream *inputStream, Tree *tree, int ignore );
-void undoStreamPush( struct ColmProgram *prg, Tree **sp, InputStream *inputStream, long length );
-void undoStreamAppend( struct ColmProgram *prg, Tree **sp, InputStream *inputStream, long length );
+void streamPushText( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length );
+void streamPushTree( FsmRun *fsmRun, InputStream *inputStream, Tree *tree, int ignore );
+void undoStreamPush( struct ColmProgram *prg, Tree **sp, FsmRun *fsmRun, InputStream *inputStream, long length );
+void undoStreamAppend( struct ColmProgram *prg, Tree **sp, FsmRun *fsmRun, InputStream *inputStream, long length );
 void unbind( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, Tree *tree );
 Kid *makeTokenWithData( struct ColmProgram *prg, PdaRun *pdaRun, FsmRun *fsmRun, 
 		InputStream *inputStream, int id, Head *tokdata, int namedLangEl, int bindId );

@@ -228,6 +228,7 @@ case PcrStart:
 		long pcr = parseLoop( prg, sp, accum->pdaRun, accum->fsmRun, accum->in, entry );
 
 		while ( pcr != PcrDone ) {
+			sendBackBuffered( accum->fsmRun, accum->in );
 
 return pcr;
 case PcrReduction:
@@ -247,6 +248,8 @@ case PcrRevReduction2:
 case PcrDone:
 break; }
 
+	sendBackBuffered( accum->fsmRun, accum->in );
+
 	return PcrDone;
 }
 
@@ -263,7 +266,9 @@ case PcrStart:
 		if ( ! accum->pdaRun->parseError ) {
 			long pcr = parseLoop( prg, sp, accum->pdaRun, accum->fsmRun, accum->in, entry );
 
-			while ( pcr != PcrDone ) {
+		 	while ( pcr != PcrDone ) {
+
+				sendBackBuffered( accum->fsmRun, accum->in );
 
 return pcr;
 case PcrReduction:
@@ -296,6 +301,8 @@ case PcrRevReduction2:
 case PcrDone:
 break; }
 
+	sendBackBuffered( accum->fsmRun, accum->in );
+
 	return PcrDone;
 }
 
@@ -314,7 +321,7 @@ long undoParseFrag( Program *prg, Tree **sp, Accum *accum, long steps, long entr
 		fsmRun->tokstart = 0;
 	}
 
-	//takeBackBuffered( inputStream );
+	//sendBackBuffered( inputStream );
 
 switch ( entry ) {
 case PcrStart:
@@ -329,6 +336,8 @@ case PcrStart:
 		/* The parse loop will recognise the situation. */
 		long pcr = parseLoop( prg, sp, pdaRun, fsmRun, inputStream, entry );
 		while ( pcr != PcrDone ) {
+
+			sendBackBuffered( accum->fsmRun, accum->in );
 
 return pcr;
 case PcrReduction:
@@ -353,6 +362,8 @@ case PcrRevReduction2:
 case PcrDone:
 break; }
 
+	sendBackBuffered( accum->fsmRun, accum->in );
+
 	return PcrDone;
 }
 
@@ -371,7 +382,7 @@ void undoPull( Program *prg, FsmRun *fsmRun, InputStream *in, Tree *str )
 	undoStreamPull( fsmRun, in, data, length );
 }
 
-Word streamPush( Program *prg, Tree **sp, InputStream *in, Tree *tree, int ignore )
+Word streamPush( Program *prg, Tree **sp, FsmRun *fsmRun, InputStream *in, Tree *tree, int ignore )
 {
 	if ( tree->id == LEL_ID_STR ) {
 		/* This should become a compile error. If it's text, it's up to the
@@ -383,7 +394,7 @@ Word streamPush( Program *prg, Tree **sp, InputStream *in, Tree *tree, int ignor
 		initStrCollect( &collect );
 		printTreeCollect( prg, sp, &collect, tree );
 
-		streamPushText( in, collect.data, collect.length );
+		streamPushText( fsmRun, in, collect.data, collect.length );
 		long length = collect.length;
 		strCollectDestroy( &collect );
 
@@ -397,7 +408,7 @@ Word streamPush( Program *prg, Tree **sp, InputStream *in, Tree *tree, int ignor
 
 		tree->flags |= AF_ARTIFICIAL;
 		treeUpref( tree );
-		streamPushTree( in, tree, ignore );
+		streamPushTree( fsmRun, in, tree, ignore );
 		return 0;
 	}
 }
@@ -2082,7 +2093,7 @@ again:
 
 			debug( REALM_BYTECODE, "IN_STREAM_APPEND_BKT\n" );
 
-			undoStreamAppend( prg, sp, ((Accum*)accum)->in, len );
+			undoStreamAppend( prg, sp, ((Accum*)accum)->fsmRun, ((Accum*)accum)->in, len );
 			treeDownref( prg, sp, accum );
 			treeDownref( prg, sp, input );
 			break;
@@ -2437,21 +2448,21 @@ again:
 			Tree *string;
 			read_tree( string );
 
-			Tree *stream = vm_pop();
+			Tree *accum = vm_pop();
 
 			debug( REALM_BYTECODE, "IN_STREAM_PULL_BKT\n" );
 
-			//undoPull( prg, exec->fsmRun, (Stream*)stream, string );
-			treeDownref( prg, sp, stream );
+			undoPull( prg, ((Accum*)accum)->fsmRun, ((Accum*)accum)->in, string );
+			treeDownref( prg, sp, accum );
 			treeDownref( prg, sp, string );
 			break;
 		}
 		case IN_STREAM_PUSH_WV: {
 			debug( REALM_BYTECODE, "IN_STREAM_PUSH_WV\n" );
 
-			Tree *stream = vm_pop();
+			Tree *accum = vm_pop();
 			Tree *tree = vm_pop();
-			Word len = 0;//streamPush( prg, sp, ((Stream*)stream), tree, false );
+			Word len = streamPush( prg, sp, ((Accum*)accum)->fsmRun, ((Accum*)accum)->in, tree, false );
 			vm_push( 0 );
 
 			/* Single unit. */
@@ -2460,16 +2471,16 @@ again:
 			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
 			append( &exec->pdaRun->rcodeCollect, exec->rcodeUnitLen );
 
-			treeDownref( prg, sp, stream );
+			treeDownref( prg, sp, accum );
 			treeDownref( prg, sp, tree );
 			break;
 		}
 		case IN_STREAM_PUSH_IGNORE_WV: {
 			debug( REALM_BYTECODE, "IN_STREAM_PUSH_IGNORE_WV\n" );
 
-			Tree *stream = vm_pop();
+			Tree *accum = vm_pop();
 			Tree *tree = vm_pop();
-			Word len = 0;//streamPush( prg, sp, ((Stream*)stream), tree, true );
+			Word len = streamPush( prg, sp, ((Accum*)accum)->fsmRun, ((Accum*)accum)->in, tree, true );
 			vm_push( 0 );
 
 			/* Single unit. */
@@ -2478,7 +2489,7 @@ again:
 			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
 			append( &exec->pdaRun->rcodeCollect, exec->rcodeUnitLen );
 
-			treeDownref( prg, sp, stream );
+			treeDownref( prg, sp, accum );
 			treeDownref( prg, sp, tree );
 			break;
 		}
@@ -2486,12 +2497,12 @@ again:
 			Word len;
 			read_word( len );
 
-			Tree *stream = vm_pop();
+			Tree *accum = vm_pop();
 
 			debug( REALM_BYTECODE, "IN_STREAM_PUSH_BKT\n" );
 
-//			undoStreamPush( prg, sp, ((Stream*)stream)->in, len );
-			treeDownref( prg, sp, stream );
+			undoStreamPush( prg, sp, ((Accum*)accum)->fsmRun, ((Accum*)accum)->in, len );
+			treeDownref( prg, sp, accum );
 			break;
 		}
 		case IN_CONSTRUCT: {
