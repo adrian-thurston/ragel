@@ -264,7 +264,7 @@ int inputStreamDynamicTryAgainLater( SourceStream *is )
 
 Tree *inputStreamDynamicGetTree( SourceStream *is )
 {
-	if ( is->queue != 0 && is->queue->type == RunBufTokenType ) {
+	if ( is->queue != 0 && (is->queue->type == RunBufTokenType || is->queue->type == RunBufIgnoreType) ) {
 		RunBuf *runBuf = inputStreamPopHead( is );
 
 		/* FIXME: using runbufs here for this is a poor use of memory. */
@@ -824,7 +824,7 @@ Tree *getTree( InputStream *is )
 		return stream->in->funcs->getTree( stream->in );
 	}
 	else {
-		if ( is->queue != 0 && is->queue->type == RunBufTokenType ) {
+		if ( is->queue != 0 && (is->queue->type == RunBufTokenType || is->queue->type == RunBufIgnoreType) ) {
 			RunBuf *runBuf = inputStreamPopHead2( is );
 
 			/* FIXME: using runbufs here for this is a poor use of memory. */

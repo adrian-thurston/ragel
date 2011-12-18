@@ -143,13 +143,6 @@ struct _SourceStream
 	struct ReplItem *replItem;
 };
 
-RunBuf *inputStreamHead( SourceStream *is );
-RunBuf *inputStreamTail( SourceStream *is );
-RunBuf *inputStreamPopHead( SourceStream *is );
-RunBuf *inputStreamPopTail( SourceStream *is );
-void inputStreamAppend( SourceStream *is, RunBuf *runBuf );
-void inputStreamPrepend( SourceStream *is, RunBuf *runBuf );
-
 SourceStream *newInputStreamPattern( struct Pattern *pattern );
 SourceStream *newInputStreamRepl( struct Replacement *replacement );
 SourceStream *newInputStreamFile( FILE *file );

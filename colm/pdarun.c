@@ -791,7 +791,7 @@ Kid *sendToken( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRu
 	return input;
 }
 
-Kid *sendTree( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
+static Kid *sendTree( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 {
 	Kid *input = kidAllocate( prg );
 	input->tree = getTree( inputStream );
@@ -800,6 +800,16 @@ Kid *sendTree( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStr
 
 	return input;
 }
+
+static void sendIgnoreTree( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
+{
+	Tree *tree = getTree( inputStream );
+
+	incrementSteps( pdaRun );
+
+	ignoreTree( prg, pdaRun, tree );
+}
+
 
 Kid *sendEof( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
 {
@@ -1046,19 +1056,6 @@ long scanToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *input
 	return SCAN_ERROR;
 }
 
-void sendTreeIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
-{
-	RunBuf *runBuf = inputStreamPopHead2( inputStream );
-
-	/* FIXME: using runbufs here for this is a poor use of memory. */
-	Tree *tree = runBuf->tree;
-	free( runBuf );
-
-	incrementSteps( pdaRun );
-
-	ignoreTree( prg, pdaRun, tree );
-}
-
 /*
  * Stops on:
  *   PcrPreEof
@@ -1164,7 +1161,7 @@ case PcrPreEof:
 			debug( REALM_PARSE, "sending an ignore token\n" );
 
 			/* A tree to ignore. */
-			sendTreeIgnore( prg, sp, pdaRun, fsmRun, inputStream );
+			sendIgnoreTree( prg, sp, pdaRun, fsmRun, inputStream );
 			goto skipSend;
 		}
 		else if ( prg->ctxDepParsing && lelInfo[pdaRun->tokenId].frameId >= 0 ) {
