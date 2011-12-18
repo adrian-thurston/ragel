@@ -272,10 +272,10 @@ typedef unsigned char uchar;
 #define IN_STREAM_PUSH_WV        0x96
 #define IN_STREAM_PUSH_BKT       0x97
 #define IN_STREAM_PUSH_IGNORE_WV 0xbb
-#define IN_LOAD_INPUT_R          0xa8
-#define IN_LOAD_INPUT_WV         0xa9
-#define IN_LOAD_INPUT_WC         0xaa
-#define IN_LOAD_INPUT_BKT        0xab
+#define IN_LOAD_ACCUM_R          0xa8
+#define IN_LOAD_ACCUM_WV         0xa9
+#define IN_LOAD_ACCUM_WC         0xaa
+#define IN_LOAD_ACCUM_BKT        0xab
 
 #define IN_LOAD_CONTEXT_R        0xac
 #define IN_LOAD_CONTEXT_WV       0xad

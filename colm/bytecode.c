@@ -645,8 +645,10 @@ again:
 			debug( REALM_BYTECODE, "IN_LOAD_CONTEXT_BKT\n" );
 			break;
 		}
-		case IN_LOAD_INPUT_BKT: {
-			debug( REALM_BYTECODE, "IN_LOAD_INPUT_BKT\n" );
+		case IN_LOAD_ACCUM_BKT: {
+			Tree *accum;
+			read_tree( accum );
+			debug( REALM_BYTECODE, "IN_LOAD_ACCUM_BKT\n" );
 			break;
 		}
 		case IN_GET_FIELD_BKT: {
@@ -1037,38 +1039,46 @@ again:
 			vm_push( prg->global );
 			break;
 		}
-		case IN_LOAD_INPUT_R: {
-			debug( REALM_BYTECODE, "IN_LOAD_INPUT_R\n" );
+		case IN_LOAD_ACCUM_R: {
+			debug( REALM_BYTECODE, "IN_LOAD_ACCUM_R\n" );
 
 			treeUpref( (Tree*)exec->accum );
 			vm_push( (Tree*)exec->accum );
+			assert( exec->accum != 0 );
 			break;
 		}
-		case IN_LOAD_INPUT_WV: {
-			debug( REALM_BYTECODE, "IN_LOAD_INPUT_WV\n" );
+		case IN_LOAD_ACCUM_WV: {
+			debug( REALM_BYTECODE, "IN_LOAD_ACCUM_WV\n" );
 
 			treeUpref( (Tree*)exec->accum );
 			vm_push( (Tree*)exec->accum );
+			assert( exec->accum != 0 );
 
 			/* Set up the reverse instruction. */
-			append( &exec->pdaRun->rcodeCollect, IN_LOAD_INPUT_BKT );
-			exec->rcodeUnitLen = SIZEOF_CODE;
+			append( &exec->pdaRun->rcodeCollect, IN_LOAD_ACCUM_BKT );
+			appendWord( &exec->pdaRun->rcodeCollect, (Word)exec->accum );
+			exec->rcodeUnitLen = SIZEOF_CODE + SIZEOF_WORD;
 			break;
 		}
-		case IN_LOAD_INPUT_WC: {
-			debug( REALM_BYTECODE, "IN_LOAD_INPUT_WC\n" );
+		case IN_LOAD_ACCUM_WC: {
+			debug( REALM_BYTECODE, "IN_LOAD_ACCUM_WC\n" );
 
 			/* This is identical to the _R version, but using it for writing
 			 * would be confusing. */
 			treeUpref( (Tree*)exec->accum );
 			vm_push( (Tree*)exec->accum );
+			assert( exec->accum != 0 );
 			break;
 		}
-		case IN_LOAD_INPUT_BKT: {
-			debug( REALM_BYTECODE, "IN_LOAD_INPUT_BKT\n" );
+		case IN_LOAD_ACCUM_BKT: {
+			Tree *accum;
+			read_tree( accum );
 
-			treeUpref( (Tree*)exec->accum );
-			vm_push( (Tree*)exec->accum );
+			debug( REALM_BYTECODE, "IN_LOAD_ACCUM_BKT\n" );
+
+			treeUpref( accum );
+			vm_push( accum );
+			assert( exec->accum != 0 );
 			break;
 		}
 		case IN_LOAD_CTX_R: {
@@ -1085,8 +1095,9 @@ again:
 			vm_push( exec->pdaRun->context );
 
 			/* Set up the reverse instruction. */
-			append( &exec->pdaRun->rcodeCollect, IN_LOAD_INPUT_BKT );
-			exec->rcodeUnitLen = SIZEOF_CODE;
+			append( &exec->pdaRun->rcodeCollect, IN_LOAD_ACCUM_BKT );
+			appendWord( &exec->pdaRun->rcodeCollect, (Word)exec->accum );
+			exec->rcodeUnitLen = SIZEOF_CODE + SIZEOF_WORD;
 			break;
 		}
 		case IN_LOAD_CTX_WC: {
@@ -2174,8 +2185,10 @@ again:
 			exec->frameId = ( long ) vm_pop();
 			exec->iframePtr = ( Tree ** ) vm_pop();
 			exec->framePtr = ( Tree ** ) vm_pop();
+			exec->inputStream = ( InputStream * ) vm_pop();
 			exec->fsmRun = ( FsmRun * ) vm_pop();
 			exec->pdaRun = ( PdaRun * ) vm_pop();
+			exec->accum = ( Accum * ) vm_pop();
 
 			if ( instr == 0 ) {
 				fflush( stdout );
@@ -2452,7 +2465,7 @@ again:
 
 			debug( REALM_BYTECODE, "IN_STREAM_PULL_BKT\n" );
 
-			undoPull( prg, ((Accum*)accum)->fsmRun, ((Accum*)accum)->in, string );
+			//undoPull( prg, ((Accum*)accum)->fsmRun, ((Accum*)accum)->in, string );
 			treeDownref( prg, sp, accum );
 			treeDownref( prg, sp, string );
 			break;

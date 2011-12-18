@@ -2315,9 +2315,9 @@ void ParseData::addInput( ObjectDef *frame )
 	el->isConst   = false;
 	el->useOffset = false;
 	el->isCustom  = true;
-	el->inGetR    = IN_LOAD_INPUT_R;
-	el->inGetWV   = IN_LOAD_INPUT_WV;
-	el->inGetWC   = IN_LOAD_INPUT_WC;
+	el->inGetR    = IN_LOAD_ACCUM_R;
+	el->inGetWV   = IN_LOAD_ACCUM_WV;
+	el->inGetWC   = IN_LOAD_ACCUM_WC;
 	frame->insertField( el->name, el );
 }
 
