@@ -993,6 +993,15 @@ void appendStream( InputStream *in, struct ColmTree *tree )
 	ad->length = 0;
 }
 
+Tree *undoAppendStream( InputStream *in )
+{
+	/* FIXME: leak here. */
+	RunBuf *rb = inputStreamPopTail2( in );
+	Tree *tree = rb->tree;
+	free(rb);
+	return tree;
+}
+
 //dynamicFuncs.undoAppend = &inputStreamDynamicUndoAppend;
 Tree *undoAppend( InputStream *is, int length )
 {

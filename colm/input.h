@@ -208,6 +208,7 @@ void appendData( InputStream *in, const char *data, long len );
 void appendTree( InputStream *in, struct ColmTree *tree );
 void appendStream( InputStream *in, struct ColmTree *tree );
 struct ColmTree *undoAppend( InputStream *in, int length );
+struct ColmTree *undoAppendStream( InputStream *in );
 void pushBackNamed( InputStream *in );
 void pushBackBuf( InputStream *in, RunBuf *runBuf );
 

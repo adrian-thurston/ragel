@@ -2104,7 +2104,7 @@ again:
 
 			debug( REALM_BYTECODE, "IN_STREAM_APPEND_BKT\n" );
 
-			undoStreamAppend( prg, sp, ((Accum*)accum)->fsmRun, ((Accum*)accum)->in, len );
+			undoStreamAppend( prg, sp, ((Accum*)accum)->fsmRun, ((Accum*)accum)->in, input, len );
 			treeDownref( prg, sp, accum );
 			treeDownref( prg, sp, input );
 			break;
