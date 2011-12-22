@@ -219,15 +219,11 @@ typedef unsigned char uchar;
 #define IN_MAKE_TREE             0x8f
 #define IN_CONSTRUCT_TERM        0x90
 
-
 #define IN_STREAM_PULL           0x94
 #define IN_STREAM_PULL_BKT       0x95
 
-//#define IN_PARSE_WV              0x91
-//#define IN_PARSE_WC              0x92
-//#define IN_PARSE_BKT             0x93
-//#define IN_PARSE_TREE_WC         0x9a
-//#define IN_PARSE_TREE_WV         0x9b
+#define IN_ACCUM_STREAM_PULL     0xf7
+#define IN_ACCUM_STREAM_PULL_BKT 0xf8
 
 #define IN_PARSE_LOAD_START      0xf2
 #define IN_PARSE_SAVE_STEPS      0xf3
@@ -243,6 +239,10 @@ typedef unsigned char uchar;
 #define IN_STREAM_APPEND_WC      0xc6
 #define IN_STREAM_APPEND_WV      0xc7
 #define IN_STREAM_APPEND_BKT     0xc8
+
+#define IN_ACCUM_STREAM_APPEND_WC      0x91
+#define IN_ACCUM_STREAM_APPEND_WV      0x92
+#define IN_ACCUM_STREAM_APPEND_BKT     0x93
 
 #define IN_PARSE_FINISH_WC       0x9d
 #define IN_PARSE_FINISH_WC3      0xea
@@ -272,10 +272,20 @@ typedef unsigned char uchar;
 #define IN_STREAM_PUSH_WV        0x96
 #define IN_STREAM_PUSH_BKT       0x97
 #define IN_STREAM_PUSH_IGNORE_WV 0xbb
+
 #define IN_LOAD_ACCUM_R          0xa8
 #define IN_LOAD_ACCUM_WV         0xa9
 #define IN_LOAD_ACCUM_WC         0xaa
 #define IN_LOAD_ACCUM_BKT        0xab
+
+#define IN_LOAD_ACCUM_STREAM_R   0x98
+#define IN_LOAD_ACCUM_STREAM_WV  0x99
+#define IN_LOAD_ACCUM_STREAM_WC  0x9a
+#define IN_LOAD_ACCUM_STREAM_BKT 0x9b
+
+#define IN_ACCUM_STREAM_PUSH_WV  0xf9
+#define IN_ACCUM_STREAM_PUSH_BKT 0xfa
+#define IN_ACCUM_STREAM_PUSH_IGNORE_WV 0xfb
 
 #define IN_LOAD_CONTEXT_R        0xac
 #define IN_LOAD_CONTEXT_WV       0xad
@@ -303,6 +313,10 @@ typedef unsigned char uchar;
 #define IN_SET_RHS_VAL_WV        0xd6
 #define IN_SET_RHS_VAL_BKT       0xd7
 
+#define IN_CONS_ACCUM_STREAM     0x9c
+#define IN_SET_ACCUM_STREAM      0xa7
+#define IN_GET_ACCUM_STREAM      0xb9
+
 /* Types */
 #define TYPE_NIL          0x01
 #define TYPE_TREE         0x02
@@ -327,7 +341,8 @@ typedef unsigned char uchar;
 #define LEL_ID_INT          3
 #define LEL_ID_STR          4
 #define LEL_ID_STREAM       5
-#define LEL_ID_IGNORE_LIST  6
+#define LEL_ID_ACCUM_STREAM 6
+#define LEL_ID_IGNORE_LIST  7
 
 /*
  * Flags

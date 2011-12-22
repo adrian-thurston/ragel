@@ -39,6 +39,7 @@ void ParseData::initUniqueTypes( )
 	uniqueTypeInt = new UniqueType( TYPE_TREE, intLangEl );
 	uniqueTypeStr = new UniqueType( TYPE_TREE, strLangEl );
 	uniqueTypeStream = new UniqueType( TYPE_TREE, streamLangEl );
+	uniqueTypeAccumStream = new UniqueType( TYPE_TREE, accumStreamLangEl );
 	uniqueTypeIgnoreList = new UniqueType( TYPE_TREE, ignoreListLangEl );
 	uniqueTypeAny = new UniqueType( TYPE_TREE, anyLangEl );
 
@@ -1312,6 +1313,12 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 	code.append( IN_CONSTRUCT );
 	code.appendHalf( replacement->patRepId );
 
+	/* Dup once for the context load, again for the argument load, again for
+	 * the parse frag, leaving the original there for the finish. */
+	code.append( IN_DUP_TOP );
+//	code.append( IN_DUP_TOP );
+//	code.append( IN_DUP_TOP );
+
 	/* 
 	 * First load the context into the parser.
 	 */
@@ -1324,11 +1331,9 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 			error(loc) << "context argument must be a stream or a tree" << endp;
 	}
 
-	/* Load the parser. */
+	/* FIXME: need to select right one here. */
 	code.append( IN_DUP_TOP_OFF );
 	code.appendHalf( 1 );
-
-	/* FIXME: need to select right one here. */
 	code.append( IN_SET_ACCUM_CTX_WC );
 
 	/*
@@ -1350,19 +1355,17 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 	if ( stop )
 		ut->langEl->parseStop = true;
 
-	/* If the arg is a stream then install it in the parser. */
-	/* Get a copy of the parser. */
+	if ( argUT != pd->uniqueTypeAccumStream ) {
+		code.append( IN_CONS_ACCUM_STREAM );
+		if ( pd->revertOn )
+			code.append( IN_ACCUM_STREAM_APPEND_WV );
+		else
+			code.append( IN_ACCUM_STREAM_APPEND_WC );
+	}
+
 	code.append( IN_DUP_TOP_OFF );
 	code.appendHalf( 1 );
-
-	if ( pd->revertOn )
-		code.append( IN_STREAM_APPEND_WV );
-	else
-		code.append( IN_STREAM_APPEND_WC );
-
-
-	/* Get a copy of the parser. */
-	code.append( IN_DUP_TOP );
+	code.append( IN_SET_ACCUM_STREAM );
 
 	int stopId = stop ? ut->langEl->id : 0;
 
@@ -1400,7 +1403,6 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 		code.append( IN_PCR_CALL );
 		code.append( IN_PARSE_FINISH_WC3 );
 	}
-
 
 	/* Lookup the type of the replacement and store it in the replacement
 	 * object so that replacement parsing has a target. */
@@ -2306,7 +2308,7 @@ void ParseData::addMatchText( ObjectDef *frame, LangEl *lel )
 void ParseData::addInput( ObjectDef *frame )
 {
 	/* Make the type ref. */
-	TypeRef *typeRef = new TypeRef( InputLoc(), uniqueTypeStream );
+	TypeRef *typeRef = new TypeRef( InputLoc(), uniqueTypeAccumStream );
 
 	/* Create the field and insert it into the map. */
 	ObjField *el = new ObjField( InputLoc(), typeRef, "input" );
@@ -2315,9 +2317,9 @@ void ParseData::addInput( ObjectDef *frame )
 	el->isConst   = false;
 	el->useOffset = false;
 	el->isCustom  = true;
-	el->inGetR    = IN_LOAD_ACCUM_R;
-	el->inGetWV   = IN_LOAD_ACCUM_WV;
-	el->inGetWC   = IN_LOAD_ACCUM_WC;
+	el->inGetR    = IN_LOAD_ACCUM_STREAM_R;
+	el->inGetWV   = IN_LOAD_ACCUM_STREAM_WV;
+	el->inGetWC   = IN_LOAD_ACCUM_STREAM_WC;
 	frame->insertField( el->name, el );
 }
 
@@ -2410,10 +2412,26 @@ void ParseData::initStreamObject( )
 			"stream", nextObjectId++ );
 	streamLangEl->objectDef = streamObj;
 
-	initFunction( uniqueTypeStr, streamObj, "pull",  IN_STREAM_PULL, IN_STREAM_PULL, uniqueTypeInt, false );
-	initFunction( uniqueTypeStr, streamObj, "push",  IN_STREAM_PUSH_WV, IN_STREAM_PUSH_WV, uniqueTypeAny, false );
+	initFunction( uniqueTypeStr, streamObj, "pull",  
+			IN_STREAM_PULL, IN_STREAM_PULL, uniqueTypeInt, false );
+	initFunction( uniqueTypeStr, streamObj, "push",  
+			IN_STREAM_PUSH_WV, IN_STREAM_PUSH_WV, uniqueTypeAny, false );
 	initFunction( uniqueTypeStr, streamObj, "push_ignore",  
 			IN_STREAM_PUSH_IGNORE_WV, IN_STREAM_PUSH_IGNORE_WV, uniqueTypeAny, false );
+}
+
+void ParseData::initAccumStreamObject( )
+{
+	accumStreamObj = new ObjectDef( ObjectDef::BuiltinType,
+			"accum_stream", nextObjectId++ );
+	accumStreamLangEl->objectDef = accumStreamObj;
+
+	initFunction( uniqueTypeStr, accumStreamObj, "pull",  
+			IN_ACCUM_STREAM_PULL, IN_ACCUM_STREAM_PULL, uniqueTypeInt, false );
+	initFunction( uniqueTypeStr, accumStreamObj, "push",  
+			IN_ACCUM_STREAM_PUSH_WV, IN_ACCUM_STREAM_PUSH_WV, uniqueTypeAny, false );
+	initFunction( uniqueTypeStr, accumStreamObj, "push_ignore",  
+			IN_ACCUM_STREAM_PUSH_IGNORE_WV, IN_ACCUM_STREAM_PUSH_IGNORE_WV, uniqueTypeAny, false );
 }
 
 ObjField *ParseData::makeDataEl()
@@ -3186,6 +3204,7 @@ void ParseData::compileByteCode()
 	initIntObject();
 	initStrObject();
 	initStreamObject();
+	initAccumStreamObject();
 	initTokenObjects();
 	makeDefaultIterators();
 	initAllLanguageObjects();

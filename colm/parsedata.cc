@@ -1354,7 +1354,7 @@ void ParseData::parsePatterns()
 		initPdaRun( repl->pdaRun, prg, pdaTables, fsmRun, repl->langEl->parserId, 0, false, 0 );
 		initFsmRun( fsmRun, prg );
 
-		Stream *res = (Stream*)mapElAllocate( prg );
+		Stream *res = streamAllocate( prg );
 		res->id = LEL_ID_STREAM;
 		res->in = newInputStreamRepl( repl );
 		appendStream( in, (Tree*)res );
@@ -1380,7 +1380,7 @@ void ParseData::parsePatterns()
 		initPdaRun( pat->pdaRun, prg, pdaTables, fsmRun, pat->langEl->parserId, 0, false, 0 );
 		initFsmRun( fsmRun, prg );
 
-		Stream *res = (Stream*)mapElAllocate( prg );
+		Stream *res = streamAllocate( prg );
 		res->id = LEL_ID_STREAM;
 		res->in = newInputStreamPattern( pat );
 		appendStream( in, (Tree*)res );

@@ -323,3 +323,32 @@ long ilNumLost( Program *prg )
 {
 	return poolAllocNumLost( &prg->ilPool );
 }
+
+/*
+ * Stream
+ */
+
+Stream *streamAllocate( Program *prg )
+{
+	return (Stream*)mapElAllocate( prg );
+}
+
+void streamFree( Program *prg, Stream *stream )
+{
+	mapElFree( prg, (MapEl*)stream );
+}
+
+
+/*
+ * AccumStream
+ */
+
+AccumStream *accumStreamAllocate( Program *prg )
+{
+	return (AccumStream*)mapElAllocate( prg );
+}
+
+void accumStreamFree( Program *prg, AccumStream *accumStream )
+{
+	mapElFree( prg, (MapEl*)accumStream );
+}

@@ -550,14 +550,6 @@ int testFalse( Program *prg, Tree *tree )
 	return flse;
 }
 
-void streamFree( Program *prg, Stream *s )
-{
-	free( s->in );
-	if ( s->file != 0 )
-		fclose( s->file );
-	mapElFree( prg, (MapEl*)s );
-}
-
 Kid *copyIgnoreList( Program *prg, Kid *ignoreHeader )
 {
 	Kid *newHeader = kidAllocate( prg );
@@ -824,13 +816,15 @@ Tree *createGeneric( Program *prg, long genericId )
 			accum->genericInfo = genericInfo;
 			accum->fsmRun = malloc( sizeof(FsmRun) );
 			accum->pdaRun = malloc( sizeof(PdaRun) );
-			accum->in = malloc( sizeof(InputStream) );
+			accum->accumStream = accumStreamAllocate( prg );
+			accum->accumStream->in = malloc( sizeof(InputStream) );
+			accum->accumStream->refs = 1;
 
 			/* Start off the parsing process. */
 			initPdaRun( accum->pdaRun, prg, prg->rtd->pdaTables, 
 					accum->fsmRun, genericInfo->parserId, false, false, 0 );
 			initFsmRun( accum->fsmRun, prg );
-			initInputStream( accum->in );
+			initInputStream( accum->accumStream->in );
 			newToken( prg, accum->pdaRun, accum->fsmRun );
 
 			newGeneric = (Tree*) accum;
@@ -887,7 +881,7 @@ free_tree:
 			clearPdaRun( prg, sp, accum->pdaRun );
 			free( accum->pdaRun );
 			free( accum->fsmRun );
-			free( accum->in );
+			free( accum->accumStream->in );
 			mapElFree( prg, (MapEl*)accum );
 		}
 		else {
@@ -904,8 +898,13 @@ free_tree:
 			treeFree( prg, tree );
 		else if ( tree->id == LEL_ID_PTR )
 			treeFree( prg, tree );
-		else if ( tree->id == LEL_ID_STREAM )
-			streamFree( prg, (Stream*) tree );
+		else if ( tree->id == LEL_ID_STREAM ) {
+			Stream *s = (Stream*)tree;
+			free( s->in );
+			if ( s->file != 0 )
+				fclose( s->file );
+			streamFree( prg, s );
+		}
 		else { 
 			if ( tree->id != LEL_ID_IGNORE_LIST )
 				stringFree( prg, tree->tokdata );

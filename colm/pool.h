@@ -75,6 +75,12 @@ void ilFree( Program *prg, IgnoreList *el );
 void ilClear( Program *prg );
 long ilNumLost( Program *prg );
 
+Stream *streamAllocate( Program *prg );
+void streamFree( Program *prg, Stream *stream );
+
+AccumStream *accumStreamAllocate( Program *prg );
+void accumStreamFree( Program *prg, AccumStream *stream );
+
 /* Wrong place. */
 TreePair mapRemove( Program *prg, Map *map, Tree *key );
 

@@ -880,6 +880,7 @@ struct ParseData
 	LangEl *intLangEl;
 	LangEl *strLangEl;
 	LangEl *streamLangEl;
+	LangEl *accumStreamLangEl;
 	LangEl *anyLangEl;
 	LangEl *rootLangEl;
 	LangEl *noTokenLangEl;
@@ -924,6 +925,7 @@ struct ParseData
 	UniqueType *uniqueTypeInt;
 	UniqueType *uniqueTypeStr;
 	UniqueType *uniqueTypeStream;
+	UniqueType *uniqueTypeAccumStream;
 	UniqueType *uniqueTypeIgnoreList;
 	UniqueType *uniqueTypeAny;
 
@@ -936,12 +938,14 @@ struct ParseData
 
 	void initStrObject();
 	void initStreamObject();
+	void initAccumStreamObject();
 	void initIntObject();
 	void initTokenObjects();
 
 	ObjectDef *intObj;
 	ObjectDef *strObj;
 	ObjectDef *streamObj;
+	ObjectDef *accumStreamObj;
 	ObjectDef *tokenObj;
 
 	FsmTables *fsmTables;
