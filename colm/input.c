@@ -223,6 +223,7 @@ int inputStreamDynamicGetData( SourceStream *is, int skip, char *dest, int lengt
 				ret = INPUT_EOD;
 				break;
 			}
+			runBuf->length = received;
 
 			int slen = received < length ? received : length;
 			memcpy( dest, runBuf->data, slen );
@@ -261,24 +262,27 @@ int inputStreamDynamicGetData( SourceStream *is, int skip, char *dest, int lengt
 		buf = buf->next;
 	}
 
-#if DEBUG
-	switch ( ret ) {
-		case INPUT_DATA:
-			debug( REALM_INPUT, "get data: DATA copied: %d\n", *copied );
-			break;
-		case INPUT_EOD:
-			debug( REALM_INPUT, "get data: EOD\n" );
-			break;
-	}
-#endif
-
 	return ret;
 }
 
 int inputStreamDynamicConsumeData( SourceStream *is, int length )
 {
 	debug( REALM_INPUT, "consuming %ld bytes\n", length );
+
+	while ( is->queue->offset == is->queue->length ) {
+		RunBuf *runBuf = inputStreamPopHead( is );
+		free( runBuf );
+	}
+
 	is->queue->offset += length;
+
+	return length;
+}
+
+int inputStreamDynamicUndoConsumeData( SourceStream *is, const char *data, int length )
+{
+	debug( REALM_INPUT, "undoing consume of %ld bytes\n", length );
+	is->queue->offset -= length;
 	return length;
 }
 
@@ -408,6 +412,7 @@ void initDynamicFuncs()
 	dynamicFuncs.isEof = &inputStreamDynamicIsEof;
 	dynamicFuncs.getData = &inputStreamDynamicGetData;
 	dynamicFuncs.consumeData = &inputStreamDynamicConsumeData;
+	dynamicFuncs.undoConsumeData = &inputStreamDynamicUndoConsumeData;
 	dynamicFuncs.getTree = &inputStreamDynamicGetTree;
 	dynamicFuncs.pushTree = &inputStreamDynamicPushTree;
 	dynamicFuncs.undoPush = &inputStreamDynamicUndoPush;
@@ -773,6 +778,27 @@ int consumeData( InputStream *is, int length )
 	}
 }
 
+int undoConsumeData( InputStream *is, const char *data, int length )
+{
+	if ( isSourceStream( is ) ) {
+		Stream *stream = (Stream*)is->queue->tree;
+		return stream->in->funcs->undoConsumeData( stream->in, data, length );
+	}
+	else {
+		assert( false );
+
+//		debug( REALM_INPUT, "consuming %ld bytes\n", length );
+//
+//		is->queue->offset += length;
+//		if ( is->queue->offset == is->queue->length ) {
+//			RunBuf *runBuf = inputStreamPopHead2( is );
+//			free( runBuf );
+//		}
+//
+		return length;
+	}
+}
+
 int getDataImpl( InputStream *is, char *dest, int length )
 {
 	if ( isSourceStream( is ) ) {
@@ -803,7 +829,7 @@ Tree *getTree( InputStream *is )
 		return tree;
 	}
 
-//		return 0;
+	return 0;
 //	}
 }
 

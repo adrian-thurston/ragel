@@ -46,6 +46,7 @@ void message( const char *fmt, ... );
 #define REALM_POOL        0x00000010
 #define REALM_PRINT       0x00000020
 #define REALM_INPUT       0x00000040
+#define REALM_SCAN        0x00000080
 
 #define REALMS            32
 

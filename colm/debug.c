@@ -34,6 +34,7 @@ const char *colmRealmNames[REALMS] =
 		"POOL",
 		"PRINT",
 		"INPUT",
+		"SCAN",
 	};
 
 int _debug( long realm, const char *fmt, ... )

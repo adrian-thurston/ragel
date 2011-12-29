@@ -86,13 +86,15 @@ typedef struct _SourceStream SourceStream;
 
 struct SourceFuncs
 {
+	int (*getData)( SourceStream *is, int offset, char *dest, int length, int *copied );
+	int (*consumeData)( SourceStream *is, int length );
+	int (*undoConsumeData)( SourceStream *is, const char *data, int length );
+
 	int (*isTree)( SourceStream *is );
 	int (*isIgnore)( SourceStream *is );
 	int (*isLangEl)( SourceStream *is );
 	int (*isEof)( SourceStream *is, int offset );
-	int (*getData)( SourceStream *is, int offset, char *dest, int length, int *copied );
 	int (*getDataImpl)( SourceStream *is, char *dest, int length );
-	int (*consumeData)( SourceStream *is, int length );
 	struct ColmTree *(*getTree)( SourceStream *is );
 	struct LangEl *(*getLangEl)( SourceStream *is, long *bindId, char **data, long *length );
 	void (*pushTree)( SourceStream *is, struct ColmTree *tree, int ignore );
@@ -191,6 +193,10 @@ struct _InputStream
 
 typedef struct _InputStream InputStream;
 
+int getData( InputStream *in, int offset, char *dest, int length, int *copied );
+int consumeData( InputStream *in, int length );
+int undoConsumeData( InputStream *is, const char *data, int length );
+
 int isTree( InputStream *in );
 int isIgnore( InputStream *in );
 int isLangEl( InputStream *in );
@@ -199,8 +205,6 @@ int tryAgainLater( InputStream *in, int offset );
 void setEof( InputStream *is );
 void unsetEof( InputStream *is );
 void unsetLater( InputStream *is );
-int getData( InputStream *in, int offset, char *dest, int length, int *copied );
-int consumeData( InputStream *in, int length );
 int getDataImpl( InputStream *in, char *dest, int length );
 struct ColmTree *getTree( InputStream *in );
 struct LangEl *getLangEl( InputStream *in, long *bindId, char **data, long *length );

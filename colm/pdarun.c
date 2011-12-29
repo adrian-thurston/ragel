@@ -173,6 +173,7 @@ Head *streamPull( Program *prg, FsmRun *fsmRun, InputStream *inputStream, long l
 	return tokdata;
 }
 
+#if 0
 void sendBackRunBufHead( FsmRun *fsmRun, InputStream *inputStream )
 {
 	debug( REALM_PARSE, "pushing back runbuf\n" );
@@ -195,13 +196,14 @@ void sendBackRunBufHead( FsmRun *fsmRun, InputStream *inputStream )
 
 	fsmRun->p = fsmRun->pe = fsmRun->runBuf->data + fsmRun->runBuf->length;
 }
+#endif
 
 void undoStreamPull( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length )
 {
 	debug( REALM_PARSE, "undoing stream pull\n" );
 
-	if ( fsmRun->p == fsmRun->pe && fsmRun->p == fsmRun->runBuf->data )
-		sendBackRunBufHead( fsmRun, inputStream );
+//	if ( fsmRun->p == fsmRun->pe && fsmRun->p == fsmRun->runBuf->data )
+//		sendBackRunBufHead( fsmRun, inputStream );
 
 	//assert( fsmRun->p - length >= fsmRun->runBuf->data );
 	fsmRun->p -= length;
@@ -262,22 +264,26 @@ static void sendBackText( FsmRun *fsmRun, InputStream *inputStream, const char *
 	if ( length == 0 )
 		return;
 
-	if ( fsmRun->p == fsmRun->runBuf->data )
-		sendBackRunBufHead( fsmRun, inputStream );
+//	if ( fsmRun->p == fsmRun->runBuf->data )
+//		sendBackRunBufHead( fsmRun, inputStream );
 
 	/* If there is data in the current buffer then send the whole send back
 	 * should be in this buffer. */
-	assert( (fsmRun->p - fsmRun->runBuf->data) >= length );
+	if ( fsmRun->tokstart != 0 ) 
+		fsmRun->p = fsmRun->pe = fsmRun->tokstart;
+	else
+		fsmRun->pe = fsmRun->p;
 
 	/* slide data back. */
-	fsmRun->p -= length;
+//	fsmRun->p = fsmRun->pe = fsmRun->runBuf->data;
+	undoConsumeData( inputStream, data, length );
 
 //	#if COLM_LOG
 //	if ( memcmp( data, fsmRun->p, length ) != 0 )
 //		debug( REALM_PARSE, "mismatch of pushed back text\n" );
 //	#endif
 
-	assert( memcmp( data, fsmRun->p, length ) == 0 );
+//	assert( memcmp( data, fsmRun->p, length ) == 0 );
 		
 	undoPosition( inputStream, data, length );
 }
@@ -423,8 +429,8 @@ case PcrStart:
 
 	if ( input->tree->flags & AF_NAMED ) {
 		/* Send back anything in the buffer that has not been parsed. */
-		if ( fsmRun->p == fsmRun->runBuf->data )
-			sendBackRunBufHead( fsmRun, inputStream );
+//		if ( fsmRun->p == fsmRun->runBuf->data )
+//			sendBackRunBufHead( fsmRun, inputStream );
 
 		/* Send the named lang el back first, then send back any leading
 		 * whitespace. */
@@ -1034,6 +1040,7 @@ long scanToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *input
 		/* Get more data. */
 		int have = fsmRun->tokstart != 0 ? fsmRun->p - fsmRun->tokstart : 0;
 		int len = 0;
+		debug( REALM_SCAN, "fetching data: have: %d  space: %d\n", have, space );
 		int type = getData( inputStream, have, fsmRun->p, space, &len );
 
 		switch ( type ) {

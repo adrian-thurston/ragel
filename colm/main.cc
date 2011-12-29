@@ -462,6 +462,8 @@ void processArgs( int argc, const char **argv )
 					colmActiveRealm |= REALM_PRINT;
 				else if ( strcmp( pc.parameterArg, "INPUT" ) == 0 )
 					colmActiveRealm |= REALM_INPUT;
+				else if ( strcmp( pc.parameterArg, "SCAN" ) == 0 )
+					colmActiveRealm |= REALM_SCAN;
 				else
 					fatal( "unknown argument to -D %s\n", pc.parameterArg );
 #else

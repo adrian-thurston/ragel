@@ -228,7 +228,7 @@ case PcrStart:
 		long pcr = parseLoop( prg, sp, accum->pdaRun, accum->fsmRun, accum->accumStream->in, entry );
 
 		while ( pcr != PcrDone ) {
-			sendBackBuffered( accum->fsmRun, accum->accumStream->in );
+//			sendBackBuffered( accum->fsmRun, accum->accumStream->in );
 
 return pcr;
 case PcrReduction:
@@ -248,7 +248,7 @@ case PcrRevReduction2:
 case PcrDone:
 break; }
 
-	sendBackBuffered( accum->fsmRun, accum->accumStream->in );
+//	sendBackBuffered( accum->fsmRun, accum->accumStream->in );
 
 	return PcrDone;
 }
@@ -268,7 +268,7 @@ case PcrStart:
 
 		 	while ( pcr != PcrDone ) {
 
-				sendBackBuffered( accum->fsmRun, accum->accumStream->in );
+//				sendBackBuffered( accum->fsmRun, accum->accumStream->in );
 
 return pcr;
 case PcrReduction:
@@ -301,7 +301,7 @@ case PcrRevReduction2:
 case PcrDone:
 break; }
 
-	sendBackBuffered( accum->fsmRun, accum->accumStream->in );
+//	sendBackBuffered( accum->fsmRun, accum->accumStream->in );
 
 	return PcrDone;
 }
@@ -321,7 +321,7 @@ long undoParseFrag( Program *prg, Tree **sp, Accum *accum, long steps, long entr
 		fsmRun->tokstart = 0;
 	}
 
-	//sendBackBuffered( inputStream );
+//	sendBackBuffered( inputStream );
 
 switch ( entry ) {
 case PcrStart:
@@ -337,7 +337,7 @@ case PcrStart:
 		long pcr = parseLoop( prg, sp, pdaRun, fsmRun, inputStream, entry );
 		while ( pcr != PcrDone ) {
 
-			sendBackBuffered( accum->fsmRun, accum->accumStream->in );
+//			sendBackBuffered( accum->fsmRun, accum->accumStream->in );
 
 return pcr;
 case PcrReduction:
@@ -362,7 +362,7 @@ case PcrRevReduction2:
 case PcrDone:
 break; }
 
-	sendBackBuffered( accum->fsmRun, accum->accumStream->in );
+//	sendBackBuffered( accum->fsmRun, accum->accumStream->in );
 
 	return PcrDone;
 }

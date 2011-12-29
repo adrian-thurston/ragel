@@ -23,6 +23,7 @@
 #include "parsetree.h"
 #include "input.h"
 #include "fsmrun.h"
+#include "debug.h"
 
 #include <iostream>
 using std::cerr;
@@ -92,7 +93,7 @@ LangEl *inputStreamPatternGetLangEl( SourceStream *is, long *bindId, char **data
 	return klangEl;
 }
 
-int inputStreamPatternGetData( SourceStream *is, int offset, char *dest, int length, int *copied )
+int inputStreamPatternGetData( SourceStream *is, int skip, char *dest, int length, int *copied )
 { 
 	if ( is->patItem == 0 )
 		return INPUT_EOD;
@@ -104,25 +105,28 @@ int inputStreamPatternGetData( SourceStream *is, int offset, char *dest, int len
 		is->line = is->patItem->loc.line;
 	
 	assert ( is->patItem->type == PatternItem::InputText );
-	int available = is->patItem->data.length() - is->offset;
+	int available = is->patItem->data.length() - ( is->offset + skip );
+
+	if ( available == 0 && is->patItem->next == 0 )
+		return INPUT_EOD;
 
 	if ( available < length )
 		length = available;
 
 	memcpy( dest, is->patItem->data.data + is->offset, length );
-	is->offset += length;
+//	is->offset += length;
 
-	if ( is->offset == is->patItem->data.length() ) {
-		/* Read up to the end of the data. Advance the
-		 * pattern item. */
-		is->patItem = is->patItem->next;
-		is->offset = 0;
-		is->flush = inputStreamPatternShouldFlush( is );
-	}
-	else {
-		/* There is more data in this buffer. Don't flush. */
-		is->flush = false;
-	}
+//	if ( is->offset == is->patItem->data.length() ) {
+//		/* Read up to the end of the data. Advance the
+//		 * pattern item. */
+//		is->patItem = is->patItem->next;
+//		is->offset = 0;
+//		is->flush = inputStreamPatternShouldFlush( is );
+//	}
+//	else {
+//		/* There is more data in this buffer. Don't flush. */
+//		is->flush = false;
+//	}
 
 	*copied = length;
 	return INPUT_DATA;
@@ -168,16 +172,47 @@ void inputStreamPatternPushBackNamed( SourceStream *is )
 	is->offset = is->patItem->data.length();
 }
 
+int inputStreamPatternConsumeData( SourceStream *is, int length )
+{
+	debug( REALM_INPUT, "consuming %ld bytes\n", length );
+
+	is->offset += length;
+	if ( is->offset == is->patItem->data.length() ) {
+		/* Read up to the end of the data. Advance the
+		 * pattern item. */
+		is->patItem = is->patItem->next;
+		is->offset = 0;
+		is->flush = inputStreamPatternShouldFlush( is );
+	}
+	else {
+		/* There is more data in this buffer. Don't flush. */
+		is->flush = false;
+	}
+
+	return length;
+}
+
+int inputStreamPatternUndoConsumeData( SourceStream *is, const char *data, int length )
+{
+	is->offset -= length;
+	return length;
+}
+
 extern "C" void initPatternFuncs()
 {
 	memcpy( &patternFuncs, &staticFuncs, sizeof(SourceFuncs) );
+
 	patternFuncs.getData = &inputStreamPatternGetData;
+	patternFuncs.consumeData = &inputStreamPatternConsumeData;
+	patternFuncs.undoConsumeData = &inputStreamPatternUndoConsumeData;
+
 	patternFuncs.isLangEl = &inputStreamPatternIsLangEl;
 	patternFuncs.isEof = &inputStreamPatternIsEof;
 	patternFuncs.getLangEl = &inputStreamPatternGetLangEl;
 	patternFuncs.pushBackBuf = &inputStreamPatternPushBackBuf;
 	patternFuncs.pushBackNamed = &inputStreamPatternPushBackNamed;
 }
+
 
 /*
  * Replacement
@@ -316,6 +351,13 @@ void inputStreamReplPushBackNamed( SourceStream *is )
 	is->offset = is->replItem->data.length();
 }
 
+int inputStreamReplConsumeData( SourceStream *is, int length )
+{
+	debug( REALM_INPUT, "consuming %ld bytes\n", length );
+	is->queue->offset += length;
+	return length;
+}
+
 extern "C" void initReplFuncs()
 {
 	memcpy( &replFuncs, &staticFuncs, sizeof(SourceFuncs) );
@@ -325,6 +367,7 @@ extern "C" void initReplFuncs()
 	replFuncs.getLangEl = &inputStreamReplGetLangEl;
 	replFuncs.pushBackBuf = &inputStreamReplPushBackBuf;
 	replFuncs.pushBackNamed = &inputStreamReplPushBackNamed;
+	replFuncs.consumeData = &inputStreamReplConsumeData;
 }
 
 Kid *sendNamedLangEl( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
