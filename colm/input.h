@@ -31,6 +31,11 @@ extern "C" {
 #define FSM_BUFSIZE 8192
 //#define FSM_BUFSIZE 8
 
+#define INPUT_DATA     1
+#define INPUT_EOD      2
+#define INPUT_EOF      3
+#define INPUT_LANG_EL  4
+
 /*
  * pdaRun <- fsmRun <- stream 
  *
@@ -82,11 +87,12 @@ struct SourceFuncs
 	int (*isTree)( SourceStream *is );
 	int (*isIgnore)( SourceStream *is );
 	int (*isLangEl)( SourceStream *is );
-	int (*isEof)( SourceStream *is );
+	int (*isEof)( SourceStream *is, int offset );
 	int (*needFlush)( SourceStream *is );
-	int (*tryAgainLater)( SourceStream *is );
-	int (*getData)( SourceStream *is, char *dest, int length );
+	int (*tryAgainLater)( SourceStream *is, int offset );
+	int (*getData)( SourceStream *is, int offset, char *dest, int length, int *copied );
 	int (*getDataImpl)( SourceStream *is, char *dest, int length );
+	int (*consumeData)( SourceStream *is, int length );
 	struct ColmTree *(*getTree)( SourceStream *is );
 	struct LangEl *(*getLangEl)( SourceStream *is, long *bindId, char **data, long *length );
 	void (*pushTree)( SourceStream *is, struct ColmTree *tree, int ignore );
@@ -191,13 +197,14 @@ typedef struct _InputStream InputStream;
 int isTree( InputStream *in );
 int isIgnore( InputStream *in );
 int isLangEl( InputStream *in );
-int isEof( InputStream *in );
+int isEof( InputStream *in, int offset );
 int needFlush( InputStream *in );
-int tryAgainLater( InputStream *in );
+int tryAgainLater( InputStream *in, int offset );
 void setEof( InputStream *is );
 void unsetEof( InputStream *is );
 void unsetLater( InputStream *is );
-int getData( InputStream *in, char *dest, int length );
+int getData( InputStream *in, int offset, char *dest, int length, int *copied );
+int consumeData( InputStream *in, int length );
 int getDataImpl( InputStream *in, char *dest, int length );
 struct ColmTree *getTree( InputStream *in );
 struct LangEl *getLangEl( InputStream *in, long *bindId, char **data, long *length );

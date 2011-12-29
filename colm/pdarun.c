@@ -162,7 +162,8 @@ Head *streamPull( Program *prg, FsmRun *fsmRun, InputStream *inputStream, long l
 	fsmRun->runBuf = runBuf;
 
 	fsmRun->p = runBuf->data;
-	long len = getData( inputStream, fsmRun->p, length );
+	int len = 0;
+	/*long len = */ getData( inputStream, 0, fsmRun->p, length, &len );
 	fsmRun->pe = fsmRun->p + length;
 
 	Head *tokdata = stringAllocPointer( prg, fsmRun->p, length );
@@ -771,6 +772,9 @@ Head *extractMatch( Program *prg, FsmRun *fsmRun, InputStream *inputStream )
 	head->location->byte = inputStream->byte;
 
 	debug( REALM_PARSE, "location byte: %d\n", inputStream->byte );
+
+	consumeData( inputStream, length );
+
 	return head;
 }
 
@@ -971,7 +975,7 @@ long scanToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *input
 			breakRunBuf( fsmRun );
 			return SCAN_LANG_EL;
 		}
-		else if ( isTree( inputStream ) ) {
+		if ( isTree( inputStream ) ) {
 			breakRunBuf( fsmRun );
 			return SCAN_TREE;
 		}
@@ -981,22 +985,24 @@ long scanToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *input
 		}
 
 		/* Maybe need eof. */
- 		if ( isEof( inputStream ) ) {
-			if ( fsmRun->tokstart != 0 ) {
-				/* If a token has been started, but not finshed 
-				 * this is an error. */
-				fsmRun->cs = fsmRun->tables->errorState;
-				return SCAN_ERROR;
-			}
-			else {
-				return SCAN_EOF;
-			}
-		}
+		int offset = fsmRun->tokstart != 0 ? fsmRun->p - fsmRun->tokstart : 0 ;
+			
+//		if ( isEof( inputStream, offset ) ) {
+//			if ( fsmRun->tokstart != 0 ) {
+//				/* If a token has been started, but not finshed 
+//				 * this is an error. */
+//				fsmRun->cs = fsmRun->tables->errorState;
+//				return SCAN_ERROR;
+//			}
+//			else {
+//				return SCAN_EOF;
+//			}
+//		}
 
-		/* Maybe need to pause parsing until more data is inserted into the
-		 * input inputStream. */
-		if ( tryAgainLater( inputStream ) )
-			return SCAN_TRY_AGAIN_LATER;
+//		/* Maybe need to pause parsing until more data is inserted into the
+//		 * input inputStream. */
+//		if ( tryAgainLater( inputStream, offset ) )
+//			return SCAN_TRY_AGAIN_LATER;
 
 		/* There may be space left in the current buffer. If not then we need
 		 * to make some. */
@@ -1053,8 +1059,29 @@ long scanToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *input
 		assert( space > 0 );
 			
 		/* Get more data. */
-		int len = getData( inputStream, fsmRun->p, space );
-		fsmRun->pe = fsmRun->p + len;
+		int have = fsmRun->tokstart != 0 ? fsmRun->p - fsmRun->tokstart : 0;
+		int len = 0;
+		int type = getData( inputStream, have, fsmRun->p, space, &len );
+
+		switch ( type ) {
+			case INPUT_DATA:
+				fsmRun->pe = fsmRun->p + len;
+				break;
+			case INPUT_EOF:
+				if ( fsmRun->tokstart != 0 )
+					fsmRun->peof = fsmRun->pe;
+				else 
+					return SCAN_EOF;
+				break;
+			case INPUT_EOD:
+				return SCAN_TRY_AGAIN_LATER;
+			case INPUT_LANG_EL:
+				if ( fsmRun->tokstart != 0 )
+					fsmRun->peof = fsmRun->pe;
+				else 
+					return SCAN_LANG_EL;
+				break;
+		}
 	}
 
 	/* Should not be reached. */

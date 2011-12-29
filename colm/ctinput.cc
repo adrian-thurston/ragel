@@ -46,7 +46,7 @@ int inputStreamStaticIsIgnore( SourceStream *is )
 	return false;
 }
 
-int inputStreamStaticTryAgainLater( SourceStream *is )
+int inputStreamStaticTryAgainLater( SourceStream *is, int offset )
 {
 	if ( is->later )
 		return true;
@@ -102,11 +102,17 @@ LangEl *inputStreamPatternGetLangEl( SourceStream *is, long *bindId, char **data
 	return klangEl;
 }
 
-int inputStreamPatternGetData( SourceStream *is, char *dest, int length )
+int inputStreamPatternGetData( SourceStream *is, int offset, char *dest, int length, int *copied )
 { 
+	if ( is->patItem == 0 )
+		return INPUT_EOD;
+
+	if ( is->patItem->type == PatternItem::FactorType )
+		return INPUT_LANG_EL;
+
 	if ( is->offset == 0 )
 		is->line = is->patItem->loc.line;
-
+	
 	assert ( is->patItem->type == PatternItem::InputText );
 	int available = is->patItem->data.length() - is->offset;
 
@@ -127,10 +133,12 @@ int inputStreamPatternGetData( SourceStream *is, char *dest, int length )
 		/* There is more data in this buffer. Don't flush. */
 		is->flush = false;
 	}
-	return length;
+
+	*copied = length;
+	return INPUT_DATA;
 }
 
-int inputStreamPatternIsEof( SourceStream *is )
+int inputStreamPatternIsEof( SourceStream *is, int offset )
 {
 	return is->patItem == 0;
 }
@@ -244,8 +252,14 @@ LangEl *inputStreamReplGetLangEl( SourceStream *is, long *bindId, char **data, l
 	return klangEl;
 }
 
-int inputStreamReplGetData( SourceStream *is, char *dest, int length )
+int inputStreamReplGetData( SourceStream *is, int offset, char *dest, int length, int *copied )
 { 
+	if ( is->replItem == 0 )
+		return INPUT_EOD;
+
+	if ( is->replItem->type == ReplItem::ExprType || is->replItem->type == ReplItem::FactorType )
+		return INPUT_LANG_EL;
+
 	if ( is->offset == 0 )
 		is->line = is->replItem->loc.line;
 
@@ -269,10 +283,12 @@ int inputStreamReplGetData( SourceStream *is, char *dest, int length )
 		/* There is more data in this buffer. Don't flush. */
 		is->flush = false;
 	}
-	return length;
+
+	*copied = length;
+	return INPUT_DATA;
 }
 
-int inputStreamReplIsEof( SourceStream *is )
+int inputStreamReplIsEof( SourceStream *is, int offset )
 {
 	return is->replItem == 0;
 }

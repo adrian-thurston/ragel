@@ -1358,6 +1358,7 @@ void ParseData::parsePatterns()
 		res->id = LEL_ID_STREAM;
 		res->in = newInputStreamRepl( repl );
 		appendStream( in, (Tree*)res );
+		setEof( in );
 
 		newToken( prg, repl->pdaRun, fsmRun );
 		long pcr = parseLoop( prg, root, repl->pdaRun, fsmRun, in, PcrStart );
@@ -1384,6 +1385,7 @@ void ParseData::parsePatterns()
 		res->id = LEL_ID_STREAM;
 		res->in = newInputStreamPattern( pat );
 		appendStream( in, (Tree*)res );
+		setEof( in );
 
 		newToken( prg, pat->pdaRun, fsmRun );
 		long pcr = parseLoop( prg, root, pat->pdaRun, fsmRun, in, PcrStart );

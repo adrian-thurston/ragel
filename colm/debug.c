@@ -25,16 +25,29 @@
 #include <stdlib.h>
 
 long colmActiveRealm = 0;
-
-int _check_realm( long realm )
-{
-	return ( colmActiveRealm & realm );
-}
+const char *colmRealmNames[REALMS] =
+	{
+		"BYTECODE",
+		"PARSE",
+		"MATCH",
+		"COMPILE",
+		"POOL",
+		"PRINT",
+		"INPUT",
+	};
 
 int _debug( long realm, const char *fmt, ... )
 {
 	int result = 0;
 	if ( colmActiveRealm & realm ) {
+		/* Compute the index by shifting. */
+		int ind = 0;
+		while ( (realm & 0x1) != 0x1 ) {
+			realm >>= 1;
+			ind += 1;
+		}
+
+		fprintf( stderr, "%s: ", colmRealmNames[ind] );
 		va_list args;
 		va_start( args, fmt );
 		result = vfprintf( stderr, fmt, args );
@@ -47,6 +60,7 @@ int _debug( long realm, const char *fmt, ... )
 void fatal( const char *fmt, ... )
 {
 	va_list args;
+	fprintf( stderr, "fatal: " );
 	va_start( args, fmt );
 	vfprintf( stderr, fmt, args );
 	va_end( args );
@@ -56,6 +70,7 @@ void fatal( const char *fmt, ... )
 void message( const char *fmt, ... )
 {
 	va_list args;
+	fprintf( stderr, "message: " );
 	va_start( args, fmt );
 	vfprintf( stderr, fmt, args );
 	va_end( args );

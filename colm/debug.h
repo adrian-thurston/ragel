@@ -36,8 +36,6 @@ void fatal( const char *fmt, ... );
 #endif
 
 int _debug( long realm, const char *fmt, ... );
-int _check_realm( long realm );
-extern long colmActiveRealm;
 
 void message( const char *fmt, ... );
 
@@ -47,6 +45,12 @@ void message( const char *fmt, ... );
 #define REALM_COMPILE     0x00000008
 #define REALM_POOL        0x00000010
 #define REALM_PRINT       0x00000020
+#define REALM_INPUT       0x00000040
+
+#define REALMS            32
+
+extern long colmActiveRealm;
+extern const char *colmRealmNames[REALMS];
 
 #ifdef __cplusplus
 }

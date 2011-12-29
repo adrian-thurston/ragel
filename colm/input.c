@@ -206,32 +206,94 @@ int inputStreamDynamicIsLangEl( SourceStream *is )
 	return false;
 }
 
-int inputStreamDynamicIsEof( SourceStream *is )
+int inputStreamDynamicIsEof( SourceStream *is, int offset )
 {
-	return is->queue == 0 && is->eof;
+	int isEof = false;
+	if ( is->eof ) {
+		if ( is->queue == 0 )
+			isEof = true;
+		else if ( is->queue != 0 && is->queue->offset + offset >= is->queue->length )
+			isEof = true;
+	}
+
+	debug( REALM_INPUT, "is eof: %d\n", (int)isEof );
+	return isEof;
 }
 
-int inputStreamDynamicGetData( SourceStream *is, char *dest, int length )
+int inputStreamDynamicGetData( SourceStream *is, int skip, char *dest, int length, int *copied )
 {
-	/* If there is any data in the rubuf queue then read that first. */
-	if ( is->queue != 0 ) {
-		long avail = is->queue->length - is->queue->offset;
-		if ( length >= avail ) {
-			memcpy( dest, &is->queue->data[is->queue->offset], avail );
-			RunBuf *del = inputStreamPopHead( is );
-			free(del);
-			return avail;
+	int ret = 0;
+	*copied = 0;
+
+	/* Move over skip bytes. */
+	RunBuf *buf = is->queue;
+	while ( true ) {
+		if ( buf == 0 ) {
+			/* Got through the in-mem buffers without copying anything. */
+			RunBuf *runBuf = newRunBuf();
+			inputStreamPrepend( is, runBuf );
+			int received = is->funcs->getDataImpl( is, runBuf->data, FSM_BUFSIZE );
+			if ( received == 0 ) {
+				ret = INPUT_EOD;
+				break;
+			}
+
+			int slen = received < length ? received : length;
+			memcpy( dest, runBuf->data, slen );
+			*copied = slen;
+			ret = INPUT_DATA;
+			break;
 		}
-		else {
-			memcpy( dest, &is->queue->data[is->queue->offset], length );
-			is->queue->offset += length;
-			return length;
+
+		int avail = buf->length - buf->offset;
+
+		/* Anything available in the current buffer. */
+		if ( avail > 0 ) {
+			/* The source data from the current buffer. */
+			char *src = &buf->data[buf->offset];
+			int slen = avail <= length ? avail : length;
+
+			/* Need to skip? */
+			if ( skip > 0 && slen <= skip ) {
+				/* Skipping the the whole source. */
+				skip -= slen;
+			}
+			else {
+				/* Either skip is zero, or less than slen. Skip goes to zero.
+				 * Some data left over, copy it. */
+				src += skip;
+				slen -= skip;
+				skip = 0;
+
+				memcpy( dest, src, slen ) ;
+				*copied += slen;
+				ret = INPUT_DATA;
+				break;
+			}
 		}
+
+		buf = buf->next;
 	}
-	else {
-		/* No stored data, call the impl version. */
-		return is->funcs->getDataImpl( is, dest, length );
+
+#if DEBUG
+	switch ( ret ) {
+		case INPUT_DATA:
+			debug( REALM_INPUT, "get data: copied %d bytes\n", copied );
+			break;
+		case INPUT_EOD:
+			debug( REALM_INPUT, "get data: EOD\n" );
+			break;
 	}
+#endif
+
+	return ret;
+}
+
+int inputStreamDynamicConsumeData( SourceStream *is, int length )
+{
+	debug( REALM_INPUT, "consuming %ld bytes\n", length );
+	is->queue->offset += length;
+	return length;
 }
 
 int inputStreamDynamicGetDataRev( SourceStream *is, char *dest, int length )
@@ -254,12 +316,15 @@ int inputStreamDynamicGetDataRev( SourceStream *is, char *dest, int length )
 	return 0;
 }
 
-int inputStreamDynamicTryAgainLater( SourceStream *is )
+int inputStreamDynamicTryAgainLater( SourceStream *is, int offset )
 {
-	if ( is->later )
-		return true;
+	int later = false;
 
-	return false;
+	if ( is->later )
+		later = true;
+
+	debug( REALM_INPUT, "try again later: %d\n", later );
+	return later;
 }
 
 Tree *inputStreamDynamicGetTree( SourceStream *is )
@@ -324,7 +389,8 @@ Tree *inputStreamDynamicUndoPush( SourceStream *is, int length )
 		char tmp[length];
 		int have = 0;
 		while ( have < length ) {
-			int res = is->funcs->getData( is, tmp, length-have );
+			int res = 0;
+			is->funcs->getData( is, 0, tmp, length-have, &res );
 			have += res;
 		}
 		return 0;
@@ -367,6 +433,7 @@ void initDynamicFuncs()
 	dynamicFuncs.isEof = &inputStreamDynamicIsEof;
 	dynamicFuncs.tryAgainLater = &inputStreamDynamicTryAgainLater;
 	dynamicFuncs.getData = &inputStreamDynamicGetData;
+	dynamicFuncs.consumeData = &inputStreamDynamicConsumeData;
 	dynamicFuncs.getTree = &inputStreamDynamicGetTree;
 	dynamicFuncs.pushTree = &inputStreamDynamicPushTree;
 	dynamicFuncs.undoPush = &inputStreamDynamicUndoPush;
@@ -431,9 +498,12 @@ int inputStreamFileNeedFlush( SourceStream *is )
 
 int inputStreamFileGetDataImpl( SourceStream *is, char *dest, int length )
 {
+	debug( REALM_INPUT, "inputStreamFileGetDataImpl length = %ld\n", length );
 	size_t res = fread( dest, 1, length, is->file );
-	if ( res < (size_t) length )
+	if ( res < (size_t) length ) {
+		debug( REALM_INPUT, "setting later = true\n" );
 		is->later = true;
+	}
 	return res;
 }
 
@@ -485,14 +555,14 @@ void initFdFuncs()
  * Accum
  */
 
-int inputStreamAccumTryAgainLater( SourceStream *is )
+int inputStreamAccumTryAgainLater( SourceStream *is, int offset )
 {
-	if ( is->later || ( !is->flush && is->queue == 0 )) {
-		debug( REALM_PARSE, "try again later %d %d %d\n", is->later, is->flush, is->queue );
-		return true;
-	}
+	int later = false;
+	if ( is->later || ( !is->flush && is->queue == 0 ) )
+		later = true;
 
-	return false;
+	debug( REALM_INPUT, "try again later: %d\n", later );
+	return later;
 }
 
 int inputStreamAccumNeedFlush( SourceStream *is )
@@ -689,26 +759,28 @@ int isLangEl( InputStream *is )
 }
 
 //dynamicFuncs.isEof = &inputStreamDynamicIsEof;
-int isEof( InputStream *is )
+int isEof( InputStream *is, int offset )
 {
 	if ( isSourceStream( is ) ) {
 		Stream *stream = (Stream*)is->queue->tree;
-		return stream->in->funcs->isEof( stream->in );
+		return stream->in->funcs->isEof( stream->in, offset );
 	}
 	else {
+		debug( REALM_INPUT, "checking input stream eof\n" );
 		return is->queue == 0 && is->eof;
 	}
 }
 
 void setEof( InputStream *is )
 {
-	if ( isSourceStream( is ) ) {
-		Stream *stream = (Stream*)is->queue->tree;
-		stream->in->eof = true;
-	}
-	else {
+//	if ( isSourceStream( is ) ) {
+//		Stream *stream = (Stream*)is->queue->tree;
+//		stream->in->eof = true;
+//	}
+//	else {
+		debug( REALM_INPUT, "setting EOF in input stream\n" );
 		is->eof = true;
-	}
+//	}
 }
 
 void unsetEof( InputStream *is )
@@ -757,28 +829,33 @@ int needFlush( InputStream *is )
 }
 
 //accumFuncs.tryAgainLater = &inputStreamAccumTryAgainLater;
-int tryAgainLater( InputStream *is )
+int tryAgainLater( InputStream *is, int offset )
 {
 	if ( isSourceStream( is ) ) {
 		Stream *stream = (Stream*)is->queue->tree;
-		return stream->in->funcs->tryAgainLater( stream->in );
+		return stream->in->funcs->tryAgainLater( stream->in, offset );
 	}
 	else {
-		if ( is->later || ( !is->flush && is->queue == 0 )) {
-			debug( REALM_PARSE, "try again later %d %d %d\n", is->later, is->flush, is->queue );
-			return true;
-		}
+		int later = false;
+		if ( is->later || ( !is->flush && is->queue == 0 ) )
+			later = true;
 
-		return false;
+		debug( REALM_INPUT, "try again later: %d\n", later );
+		return later;
 	}
 }
 
 //dynamicFuncs.getData = &inputStreamDynamicGetData;
-int getData( InputStream *is, char *dest, int length )
+int getData( InputStream *is, int offset, char *dest, int length, int *copied )
 {
 	if ( isSourceStream( is ) ) {
 		Stream *stream = (Stream*)is->queue->tree;
-		return stream->in->funcs->getData( stream->in, dest, length );
+		int type = stream->in->funcs->getData( stream->in, offset, dest, length, copied );
+
+		if ( type == INPUT_EOD && is->eof )
+			return INPUT_EOF;
+
+		return type;
 	}
 	else {
 		/* If there is any data in the rubuf queue then read that first. */
@@ -800,6 +877,17 @@ int getData( InputStream *is, char *dest, int length )
 			/* No stored data, call the impl version. */
 			return getDataImpl( is, dest, length );
 		}
+	}
+}
+
+int consumeData( InputStream *is, int length )
+{
+	if ( isSourceStream( is ) ) {
+		Stream *stream = (Stream*)is->queue->tree;
+		return stream->in->funcs->consumeData( stream->in, length );
+	}
+	else {
+		assert( false );
 	}
 }
 
@@ -924,7 +1012,8 @@ Tree *undoPush( InputStream *is, int length )
 			char tmp[length];
 			int have = 0;
 			while ( have < length ) {
-				int res = getData( is, tmp, length-have );
+				int res = 0;
+				getData( is, 0, tmp, length-have, &res );
 				have += res;
 			}
 			return 0;

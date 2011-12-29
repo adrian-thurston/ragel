@@ -374,7 +374,6 @@ Tree *streamPullBc( Program *prg, FsmRun *fsmRun, InputStream *in, Tree *length 
 	return constructString( prg, tokdata );
 }
 
-
 void undoPull( Program *prg, FsmRun *fsmRun, InputStream *in, Tree *str )
 {
 	const char *data = stringData( ( (Str*)str )->value );
