@@ -2147,12 +2147,12 @@ again:
 		case IN_STREAM_APPEND_WC: {
 			debug( REALM_BYTECODE, "IN_STREAM_APPEND_WC \n" );
 
-			Tree *accum = vm_pop();
+			Accum *accum = (Accum*)vm_pop();
 			Tree *input = vm_pop();
-			streamAppend( prg, sp, input, ((Accum*)accum)->accumStream->in );
+			streamAppend( prg, sp, input, accum->accumStream->in );
 
 			treeDownref( prg, sp, input );
-			treeDownref( prg, sp, accum );
+			treeDownref( prg, sp, (Tree*)accum );
 			break;
 		}
 		case IN_STREAM_APPEND_WV: {

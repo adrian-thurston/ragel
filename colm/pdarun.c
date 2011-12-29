@@ -871,28 +871,6 @@ void newToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun )
 	memset( fsmRun->mark, 0, sizeof(fsmRun->mark) );
 }
 
-static void breakRunBuf( FsmRun *fsmRun )
-{
-	/* We break the runbuf on named language elements and trees. This makes
-	 * backtracking simpler because it allows us to always push back whole
-	 * runBufs only. If we did not do this we could get half a runBuf, a named
-	 * langEl, then the second half full. During backtracking we would need to
-	 * push the halves back separately. */
-	if ( fsmRun->p > fsmRun->runBuf->data ) {
-		debug( REALM_PARSE, "have a langEl, making a new runBuf\n" );
-
-		/* Compute the length of the current before before we move
-		 * past it. */
-		fsmRun->runBuf->length = fsmRun->p - fsmRun->runBuf->data;;
-
-		/* Make the new one. */
-		RunBuf *newBuf = newRunBuf();
-		fsmRun->p = fsmRun->pe = newBuf->data;
-		newBuf->next = fsmRun->runBuf;
-		fsmRun->runBuf = newBuf;
-	}
-}
-
 /* Tree null means compute from what we find in the parser. */
 static void pushBtPoint( Program *prg, PdaRun *pdaRun )
 {
@@ -930,9 +908,6 @@ long scanToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *input
 		return SCAN_UNDO;
 
 	while ( true ) {
-		if ( needFlush( inputStream ) )
-			fsmRun->peof = fsmRun->pe;
-
 		fsmExecute( fsmRun, inputStream );
 
 		/* First check if scanning stopped because we have a token. */
@@ -968,25 +943,24 @@ long scanToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *input
 		 * data. */
 		assert( fsmRun->p == fsmRun->pe );
 
-		/* Check for a named language element or constructed trees. Note that
-		 * we can do this only when data == de otherwise we get ahead of what's
-		 * already in the buffer. */
-		if ( isLangEl( inputStream ) ) {
-			breakRunBuf( fsmRun );
-			return SCAN_LANG_EL;
-		}
-		if ( isTree( inputStream ) ) {
-			breakRunBuf( fsmRun );
-			return SCAN_TREE;
-		}
-		else if ( isIgnore( inputStream ) ) {
-			breakRunBuf( fsmRun );
-			return SCAN_IGNORE;
-		}
-
-		/* Maybe need eof. */
-		int offset = fsmRun->tokstart != 0 ? fsmRun->p - fsmRun->tokstart : 0 ;
-			
+//		/* Check for a named language element or constructed trees. Note that
+//		 * we can do this only when data == de otherwise we get ahead of what's
+//		 * already in the buffer. */
+//		if ( isLangEl( inputStream ) ) {
+//			breakRunBuf( fsmRun );
+//			return SCAN_LANG_EL;
+//		}
+//		if ( isTree( inputStream ) ) {
+//			breakRunBuf( fsmRun );
+//			return SCAN_TREE;
+//		}
+//		else if ( isIgnore( inputStream ) ) {
+//			breakRunBuf( fsmRun );
+//			return SCAN_IGNORE;
+//		}
+//
+//		/* Maybe need eof. */
+//		int offset = fsmRun->tokstart != 0 ? fsmRun->p - fsmRun->tokstart : 0 ;
 //		if ( isEof( inputStream, offset ) ) {
 //			if ( fsmRun->tokstart != 0 ) {
 //				/* If a token has been started, but not finshed 
@@ -998,7 +972,6 @@ long scanToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *input
 //				return SCAN_EOF;
 //			}
 //		}
-
 //		/* Maybe need to pause parsing until more data is inserted into the
 //		 * input inputStream. */
 //		if ( tryAgainLater( inputStream, offset ) )
@@ -1067,19 +1040,29 @@ long scanToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *input
 			case INPUT_DATA:
 				fsmRun->pe = fsmRun->p + len;
 				break;
+
 			case INPUT_EOF:
 				if ( fsmRun->tokstart != 0 )
 					fsmRun->peof = fsmRun->pe;
 				else 
 					return SCAN_EOF;
 				break;
+
 			case INPUT_EOD:
 				return SCAN_TRY_AGAIN_LATER;
+
 			case INPUT_LANG_EL:
 				if ( fsmRun->tokstart != 0 )
 					fsmRun->peof = fsmRun->pe;
 				else 
 					return SCAN_LANG_EL;
+				break;
+
+			case INPUT_TREE:
+				if ( fsmRun->tokstart != 0 )
+					fsmRun->peof = fsmRun->pe;
+				else 
+					return SCAN_TREE;
 				break;
 		}
 	}

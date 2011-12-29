@@ -46,22 +46,12 @@ int inputStreamStaticIsIgnore( SourceStream *is )
 	return false;
 }
 
-int inputStreamStaticTryAgainLater( SourceStream *is, int offset )
-{
-	if ( is->later )
-		return true;
-
-	return false;
-}
-
 extern "C" void initStaticFuncs()
 {
 	memcpy( &staticFuncs, &baseFuncs, sizeof(SourceFuncs) );
 	staticFuncs.isTree = &inputStreamStaticIsTree;
 	staticFuncs.isIgnore = &inputStreamStaticIsIgnore;
-	staticFuncs.tryAgainLater = &inputStreamStaticTryAgainLater;
 }
-
 
 /*
  * Pattern
@@ -143,11 +133,6 @@ int inputStreamPatternIsEof( SourceStream *is, int offset )
 	return is->patItem == 0;
 }
 
-int inputStreamPatternNeedFlush( SourceStream *is )
-{
-	return is->flush;
-}
-
 void inputStreamPatternBackup( SourceStream *is )
 {
 	if ( is->patItem == 0 )
@@ -183,19 +168,16 @@ void inputStreamPatternPushBackNamed( SourceStream *is )
 	is->offset = is->patItem->data.length();
 }
 
-
 extern "C" void initPatternFuncs()
 {
 	memcpy( &patternFuncs, &staticFuncs, sizeof(SourceFuncs) );
 	patternFuncs.getData = &inputStreamPatternGetData;
 	patternFuncs.isLangEl = &inputStreamPatternIsLangEl;
 	patternFuncs.isEof = &inputStreamPatternIsEof;
-	patternFuncs.needFlush = &inputStreamPatternNeedFlush;
 	patternFuncs.getLangEl = &inputStreamPatternGetLangEl;
 	patternFuncs.pushBackBuf = &inputStreamPatternPushBackBuf;
 	patternFuncs.pushBackNamed = &inputStreamPatternPushBackNamed;
 }
-
 
 /*
  * Replacement
@@ -293,11 +275,6 @@ int inputStreamReplIsEof( SourceStream *is, int offset )
 	return is->replItem == 0;
 }
 
-int inputStreamReplNeedFlush( SourceStream *is )
-{
-	return is->flush;
-}
-
 void inputStreamReplBackup( SourceStream *is )
 {
 	if ( is->replItem == 0 )
@@ -345,7 +322,6 @@ extern "C" void initReplFuncs()
 	replFuncs.getData = &inputStreamReplGetData;
 	replFuncs.isLangEl = &inputStreamReplIsLangEl;
 	replFuncs.isEof = &inputStreamReplIsEof;
-	replFuncs.needFlush = &inputStreamReplNeedFlush;
 	replFuncs.getLangEl = &inputStreamReplGetLangEl;
 	replFuncs.pushBackBuf = &inputStreamReplPushBackBuf;
 	replFuncs.pushBackNamed = &inputStreamReplPushBackNamed;

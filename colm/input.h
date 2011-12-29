@@ -32,9 +32,11 @@ extern "C" {
 //#define FSM_BUFSIZE 8
 
 #define INPUT_DATA     1
+/* This is for data sources to return, not for the wrapper. */
 #define INPUT_EOD      2
 #define INPUT_EOF      3
 #define INPUT_LANG_EL  4
+#define INPUT_TREE     5
 
 /*
  * pdaRun <- fsmRun <- stream 
@@ -88,8 +90,6 @@ struct SourceFuncs
 	int (*isIgnore)( SourceStream *is );
 	int (*isLangEl)( SourceStream *is );
 	int (*isEof)( SourceStream *is, int offset );
-	int (*needFlush)( SourceStream *is );
-	int (*tryAgainLater)( SourceStream *is, int offset );
 	int (*getData)( SourceStream *is, int offset, char *dest, int length, int *copied );
 	int (*getDataImpl)( SourceStream *is, char *dest, int length );
 	int (*consumeData)( SourceStream *is, int length );
@@ -98,8 +98,6 @@ struct SourceFuncs
 	void (*pushTree)( SourceStream *is, struct ColmTree *tree, int ignore );
 	void (*pushText)( SourceStream *is, const char *data, long len );
 	struct ColmTree *(*undoPush)( SourceStream *is, int length );
-	void (*appendData)( SourceStream *is, const char *data, long len );
-	void (*appendTree)( SourceStream *is, struct ColmTree *tree );
 	struct ColmTree *(*undoAppend)( SourceStream *is, int length );
 	void (*pushBackNamed)( SourceStream *is );
 	void (*pushBackBuf)( SourceStream *is, RunBuf *runBuf );
@@ -153,7 +151,6 @@ SourceStream *newInputStreamPattern( struct Pattern *pattern );
 SourceStream *newInputStreamRepl( struct Replacement *replacement );
 SourceStream *newInputStreamFile( FILE *file );
 SourceStream *newInputStreamFd( long fd );
-SourceStream *newInputStreamAccum();
 
 void initInputFuncs();
 void initStaticFuncs();
@@ -198,7 +195,6 @@ int isTree( InputStream *in );
 int isIgnore( InputStream *in );
 int isLangEl( InputStream *in );
 int isEof( InputStream *in, int offset );
-int needFlush( InputStream *in );
 int tryAgainLater( InputStream *in, int offset );
 void setEof( InputStream *is );
 void unsetEof( InputStream *is );
