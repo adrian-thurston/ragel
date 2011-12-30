@@ -230,10 +230,7 @@ void undoStreamAppend( Program *prg, Tree **sp, FsmRun *fsmRun, InputStream *inp
 		undoAppendStream( inputStream );
 	}
 	else {
-	//	sendBackBuffered( fsmRun, inputStream );
-		Tree *tree = undoAppendData( inputStream, length );
-		if ( tree != 0 )
-			treeDownref( prg, sp, tree );
+		undoAppendData( inputStream, length );
 	}
 }
 

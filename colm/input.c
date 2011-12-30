@@ -228,12 +228,38 @@ int inputStreamDynamicConsumeData( SourceStream *is, int length )
 {
 	debug( REALM_INPUT, "source consuming %ld bytes\n", length );
 
-	while ( is->queue->offset == is->queue->length ) {
-		RunBuf *runBuf = inputStreamPopHead( is );
-		free( runBuf );
+	int consumed = 0;
+
+	/* Move over skip bytes. */
+	while ( true ) {
+		RunBuf *buf = is->queue;
+
+		if ( buf == 0 )
+			break;
+
+		if ( buf->type == RunBufTokenType )
+			break;
+		else if ( buf->type == RunBufIgnoreType )
+			break;
+		else {
+			/* Anything available in the current buffer. */
+			int avail = buf->length - buf->offset;
+			if ( avail > 0 ) {
+				/* The source data from the current buffer. */
+				int slen = avail <= length ? avail : length;
+				consumed += slen;
+				length -= slen;
+				buf->offset += slen;
+			}
+		}
+
+		if ( length == 0 )
+			break;
+
+		free( inputStreamPopHead( is ) );
 	}
 
-	is->queue->offset += length;
+	return consumed;
 
 	return length;
 }
@@ -474,26 +500,6 @@ static RunBuf *inputStreamPopTail2( InputStream *is )
 	else
 		is->queueTail->next = 0;
 	return ret;
-}
-
-static int inputStreamDynamicGetDataRev2( InputStream *is, char *dest, int length )
-{
-	/* If there is any data in the rubuf queue then read that first. */
-	if ( is->queueTail != 0 ) {
-		long avail = is->queueTail->length - is->queueTail->offset;
-		if ( length >= avail ) {
-			memcpy( dest, &is->queueTail->data[is->queue->offset], avail );
-			RunBuf *del = inputStreamPopTail2(is);
-			free(del);
-			return avail;
-		}
-		else {
-			memcpy( dest, &is->queueTail->data[is->queueTail->offset], length );
-			is->queueTail->length -= length;
-			return length;
-		}
-	}
-	return 0;
 }
 
 static int isSourceStream( InputStream *is )
@@ -804,22 +810,38 @@ void appendData( InputStream *is, const char *data, long len )
 
 Tree *undoAppendData( InputStream *is, int length )
 {
-	if ( is->queueTail->type == RunBufDataType ) {
-		char tmp[length];
-		int have = 0;
-		while ( have < length ) {
-			int res = inputStreamDynamicGetDataRev2( is, tmp, length-have );
-			have += res;
+	int consumed = 0;
+
+	/* Move over skip bytes. */
+	while ( true ) {
+		RunBuf *buf = is->queueTail;
+
+		if ( buf == 0 )
+			break;
+
+		if ( buf->type == RunBufTokenType )
+			break;
+		else if ( buf->type == RunBufIgnoreType )
+			break;
+		else {
+			/* Anything available in the current buffer. */
+			int avail = buf->length - buf->offset;
+			if ( avail > 0 ) {
+				/* The source data from the current buffer. */
+				int slen = avail <= length ? avail : length;
+				consumed += slen;
+				length -= slen;
+				buf->length -= slen;
+			}
 		}
-		return 0;
+
+		if ( length == 0 )
+			break;
+
+		free( inputStreamPopTail2( is ) );
 	}
-	else {
-		/* FIXME: leak here. */
-		RunBuf *rb = inputStreamPopTail2( is );
-		Tree *tree = rb->tree;
-		free(rb);
-		return tree;
-	}
+
+	return 0;
 }
 
 void appendTree( InputStream *is, Tree *tree )
