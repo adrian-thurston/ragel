@@ -7,7 +7,6 @@ TESTS = \
 	backtrack1.lm \
 	backtrack2.lm \
 	backtrack3.lm \
-	binary1.lm \
 	accum1.lm \
 	accum2.lm \
 	accum3.lm \
@@ -76,7 +75,6 @@ DIFFS = \
 	backtrack1.diff \
 	backtrack2.diff \
 	backtrack3.diff \
-	binary1.diff \
 	accum1.diff \
 	accum2.diff \
 	accum3.diff \
