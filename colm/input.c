@@ -666,13 +666,13 @@ int consumeData( InputStream *is, int length )
 
 int undoConsumeData( InputStream *is, const char *data, int length )
 {
+	debug( REALM_INPUT, "undoing consume of %ld bytes\n", length );
+
 	if ( isSourceStream( is ) ) {
 		Stream *stream = (Stream*)is->queue->tree;
 		return stream->in->funcs->undoConsumeData( stream->in, data, length );
 	}
 	else {
-		debug( REALM_INPUT, "undoing consume of %ld bytes\n", length );
-
 		RunBuf *newBuf = newRunBuf();
 		newBuf->length = length;
 		memcpy( newBuf->data, data, length );

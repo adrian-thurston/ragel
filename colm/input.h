@@ -126,7 +126,6 @@ struct _SourceStream
 	struct _FsmRun *hasData;
 
 	char eofSent;
-	char flush;
 	char eof;
 
 	long line;
@@ -168,7 +167,6 @@ void initReplFuncs();
 struct _InputStream
 {
 	char eofSent;
-	char flush;
 	char eof;
 
 	long line;

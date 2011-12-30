@@ -47,11 +47,6 @@ SourceStream *newInputStreamPattern( Pattern *pattern )
 	return is;
 }
 
-int inputStreamPatternShouldFlush( SourceStream *is )
-{ 
-	return is->patItem == 0 || is->patItem->type == PatternItem::FactorType;
-}
-
 LangEl *inputStreamPatternGetLangEl( SourceStream *is, long *bindId, char **data, long *length )
 { 
 	LangEl *klangEl = is->patItem->factor->langEl;
@@ -62,7 +57,6 @@ LangEl *inputStreamPatternGetLangEl( SourceStream *is, long *bindId, char **data
 
 	is->patItem = is->patItem->next;
 	is->offset = 0;
-	is->flush = false;
 	return klangEl;
 }
 
@@ -87,18 +81,14 @@ int inputStreamPatternGetData( SourceStream *is, int skip, char *dest, int lengt
 		length = available;
 
 	memcpy( dest, is->patItem->data.data + is->offset, length );
-//	is->offset += length;
 
+//	is->offset += length;
+//
 //	if ( is->offset == is->patItem->data.length() ) {
 //		/* Read up to the end of the data. Advance the
 //		 * pattern item. */
 //		is->patItem = is->patItem->next;
 //		is->offset = 0;
-//		is->flush = inputStreamPatternShouldFlush( is );
-//	}
-//	else {
-//		/* There is more data in this buffer. Don't flush. */
-//		is->flush = false;
 //	}
 
 	*copied = length;
@@ -134,7 +124,7 @@ void inputStreamPatternPushBackBuf( SourceStream *is, RunBuf *runBuf )
 	assert( memcmp( &is->patItem->data[is->offset], data, length ) == 0 );
 }
 
-void inputStreamPatternPushBackNamed( SourceStream *is )
+void inputStreamPatternUndoConsumeLangEl( SourceStream *is )
 {
 	inputStreamPatternBackup( is );
 	is->offset = is->patItem->data.length();
@@ -150,11 +140,6 @@ int inputStreamPatternConsumeData( SourceStream *is, int length )
 		 * pattern item. */
 		is->patItem = is->patItem->next;
 		is->offset = 0;
-		is->flush = inputStreamPatternShouldFlush( is );
-	}
-	else {
-		/* There is more data in this buffer. Don't flush. */
-		is->flush = false;
 	}
 
 	return length;
@@ -175,7 +160,7 @@ extern "C" void initPatternFuncs()
 	patternFuncs.undoConsumeData = &inputStreamPatternUndoConsumeData;
 
 	patternFuncs.consumeLangEl = &inputStreamPatternGetLangEl;
-	patternFuncs.undoConsumeLangEl = &inputStreamPatternPushBackNamed;
+	patternFuncs.undoConsumeLangEl = &inputStreamPatternUndoConsumeLangEl;
 }
 
 
@@ -192,12 +177,6 @@ SourceStream *newInputStreamRepl( Replacement *replacement )
 	is->replItem = replacement->list->head;
 	is->funcs = &replFuncs;
 	return is;
-}
-
-int inputStreamReplShouldFlush( SourceStream *is )
-{ 
-	return is->replItem == 0 || ( is->replItem->type == ReplItem::ExprType ||
-			is->replItem->type == ReplItem::FactorType );
 }
 
 LangEl *inputStreamReplGetLangEl( SourceStream *is, long *bindId, char **data, long *length )
@@ -224,7 +203,6 @@ LangEl *inputStreamReplGetLangEl( SourceStream *is, long *bindId, char **data, l
 
 	is->replItem = is->replItem->next;
 	is->offset = 0;
-	is->flush = false;
 	return klangEl;
 }
 
@@ -240,25 +218,24 @@ int inputStreamReplGetData( SourceStream *is, int offset, char *dest, int length
 		is->line = is->replItem->loc.line;
 
 	assert ( is->replItem->type == ReplItem::InputText );
-	int available = is->replItem->data.length() - is->offset;
+	int available = is->replItem->data.length() - is->offset - offset;
+
+	if ( available == 0 && is->replItem->next == 0 )
+		return INPUT_EOD;
 
 	if ( available < length )
 		length = available;
 
 	memcpy( dest, is->replItem->data.data+is->offset, length );
-	is->offset += length;
 
-	if ( is->offset == is->replItem->data.length() ) {
-		/* Read up to the end of the data. Advance the
-		 * replacement item. */
-		is->replItem = is->replItem->next;
-		is->offset = 0;
-		is->flush = inputStreamReplShouldFlush( is );
-	}
-	else {
-		/* There is more data in this buffer. Don't flush. */
-		is->flush = false;
-	}
+//	is->offset += length;
+//
+//	if ( is->offset == is->replItem->data.length() ) {
+//		/* Read up to the end of the data. Advance the
+//		 * replacement item. */
+//		is->replItem = is->replItem->next;
+//		is->offset = 0;
+//	}
 
 	*copied = length;
 	return INPUT_DATA;
@@ -299,7 +276,7 @@ void inputStreamReplPushBackBuf( SourceStream *is, RunBuf *runBuf )
 	assert( memcmp( &is->replItem->data[is->offset], data, length ) == 0 );
 }
 
-void inputStreamReplPushBackNamed( SourceStream *is )
+void inputStreamReplUndoConsumeLangEl( SourceStream *is )
 {
 	inputStreamReplBackup( is );
 	is->offset = is->replItem->data.length();
@@ -307,8 +284,15 @@ void inputStreamReplPushBackNamed( SourceStream *is )
 
 int inputStreamReplConsumeData( SourceStream *is, int length )
 {
-	debug( REALM_INPUT, "consuming %ld bytes\n", length );
 	is->offset += length;
+
+	if ( is->offset == is->replItem->data.length() ) {
+		/* Read up to the end of the data. Advance the
+		 * pattern item. */
+		is->replItem = is->replItem->next;
+		is->offset = 0;
+	}
+
 	return length;
 }
 
@@ -327,7 +311,7 @@ extern "C" void initReplFuncs()
 	replFuncs.undoConsumeData = &inputStreamReplUndoConsumeData;
 
 	replFuncs.consumeLangEl = &inputStreamReplGetLangEl;
-	replFuncs.undoConsumeLangEl = &inputStreamReplPushBackNamed;
+	replFuncs.undoConsumeLangEl = &inputStreamReplUndoConsumeLangEl;
 }
 
 Kid *sendNamedLangEl( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
