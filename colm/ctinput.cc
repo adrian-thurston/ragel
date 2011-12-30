@@ -184,8 +184,8 @@ extern "C" void initPatternFuncs()
 	patternFuncs.consumeData = &inputStreamPatternConsumeData;
 	patternFuncs.undoConsumeData = &inputStreamPatternUndoConsumeData;
 
-	patternFuncs.getLangEl = &inputStreamPatternGetLangEl;
-	patternFuncs.pushBackNamed = &inputStreamPatternPushBackNamed;
+	patternFuncs.consumeLangEl = &inputStreamPatternGetLangEl;
+	patternFuncs.undoConsumeLangEl = &inputStreamPatternPushBackNamed;
 }
 
 
@@ -326,19 +326,19 @@ extern "C" void initReplFuncs()
 {
 	memcpy( &replFuncs, &staticFuncs, sizeof(SourceFuncs) );
 	replFuncs.getData = &inputStreamReplGetData;
-	replFuncs.getLangEl = &inputStreamReplGetLangEl;
-	replFuncs.pushBackNamed = &inputStreamReplPushBackNamed;
+	replFuncs.consumeLangEl = &inputStreamReplGetLangEl;
+	replFuncs.undoConsumeLangEl = &inputStreamReplPushBackNamed;
 	replFuncs.consumeData = &inputStreamReplConsumeData;
 }
 
 Kid *sendNamedLangEl( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 {
-	/* All three set by getLangEl. */
+	/* All three set by consumeLangEl. */
 	long bindId;
 	char *data;
 	long length;
 
-	LangEl *klangEl = getLangEl( inputStream, &bindId, &data, &length );
+	LangEl *klangEl = consumeLangEl( inputStream, &bindId, &data, &length );
 	if ( klangEl->termDup != 0 )
 		klangEl = klangEl->termDup;
 	

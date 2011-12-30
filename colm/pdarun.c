@@ -416,7 +416,7 @@ case PcrStart:
 
 		/* Send the named lang el back first, then send back any leading
 		 * whitespace. */
-		pushBackNamed( inputStream );
+		undoConsumeLangEl( inputStream );
 	}
 
 	decrementSteps( pdaRun );
@@ -791,7 +791,7 @@ Kid *sendToken( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRu
 static Kid *sendTree( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 {
 	Kid *input = kidAllocate( prg );
-	input->tree = getTree( inputStream );
+	input->tree = consumeTree( inputStream );
 
 	incrementSteps( pdaRun );
 
@@ -800,7 +800,7 @@ static Kid *sendTree( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, I
 
 static void sendIgnoreTree( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 {
-	Tree *tree = getTree( inputStream );
+	Tree *tree = consumeTree( inputStream );
 
 	incrementSteps( pdaRun );
 

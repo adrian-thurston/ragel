@@ -270,7 +270,7 @@ int inputStreamDynamicGetDataRev( SourceStream *is, char *dest, int length )
 	return 0;
 }
 
-Tree *inputStreamDynamicGetTree( SourceStream *is )
+Tree *inputStreamDynamicConsumeTree( SourceStream *is )
 {
 	if ( is->queue != 0 && (is->queue->type == RunBufTokenType || is->queue->type == RunBufIgnoreType) ) {
 		RunBuf *runBuf = inputStreamPopHead( is );
@@ -373,7 +373,7 @@ void initDynamicFuncs()
 	dynamicFuncs.getData = &inputStreamDynamicGetData;
 	dynamicFuncs.consumeData = &inputStreamDynamicConsumeData;
 	dynamicFuncs.undoConsumeData = &inputStreamDynamicUndoConsumeData;
-	dynamicFuncs.getTree = &inputStreamDynamicGetTree;
+	dynamicFuncs.consumeTree = &inputStreamDynamicConsumeTree;
 	dynamicFuncs.pushTree = &inputStreamDynamicPushTree;
 	dynamicFuncs.undoPush = &inputStreamDynamicUndoPush;
 	dynamicFuncs.undoAppend = &inputStreamDynamicUndoAppend;
@@ -661,12 +661,11 @@ int undoConsumeData( InputStream *is, const char *data, int length )
 	}
 }
 
-//dynamicFuncs.getTree = &inputStreamDynamicGetTree;
-Tree *getTree( InputStream *is )
+Tree *consumeTree( InputStream *is )
 {
 //	if ( isSourceStream( is ) ) {
 //		Stream *stream = (Stream*)is->queue->tree;
-//		return stream->in->funcs->getTree( stream->in );
+//		return stream->in->funcs->consumeTree( stream->in );
 //	}
 //	else {
 
@@ -683,26 +682,25 @@ Tree *getTree( InputStream *is )
 //	}
 }
 
-struct LangEl *getLangEl( InputStream *is, long *bindId, char **data, long *length )
+struct LangEl *consumeLangEl( InputStream *is, long *bindId, char **data, long *length )
 {
 	if ( isSourceStream( is ) ) {
 		Stream *stream = (Stream*)is->queue->tree;
-		return stream->in->funcs->getLangEl( stream->in, bindId, data, length );
+		return stream->in->funcs->consumeLangEl( stream->in, bindId, data, length );
 	}
 	else {
 		return 0;
 	}
 }
 
-void pushBackNamed( InputStream *is )
+void undoConsumeLangEl( InputStream *is )
 {
 	if ( isSourceStream( is ) ) {
 		Stream *stream = (Stream*)is->queue->tree;
-		return stream->in->funcs->pushBackNamed( stream->in );
+		return stream->in->funcs->undoConsumeLangEl( stream->in );
 	}
 }
 
-//dynamicFuncs.pushTree = &inputStreamDynamicPushTree;
 void pushTree( InputStream *is, Tree *tree, int ignore )
 {
 	if ( isSourceStream( is ) ) {
@@ -729,7 +727,6 @@ void pushTree( InputStream *is, Tree *tree, int ignore )
 	}
 }
 
-//dynamicFuncs.pushText = &inputStreamDynamicPushText;
 void pushText( InputStream *is, const char *data, long length )
 {
 	if ( isSourceStream( is ) ) {
@@ -758,7 +755,6 @@ void pushText( InputStream *is, const char *data, long length )
 	}
 }
 
-//dynamicFuncs.undoPush = &inputStreamDynamicUndoPush;
 Tree *undoPush( InputStream *is, int length )
 {
 	if ( isSourceStream( is ) ) {
@@ -835,7 +831,6 @@ Tree *undoAppendStream( InputStream *in )
 	return tree;
 }
 
-//dynamicFuncs.undoAppend = &inputStreamDynamicUndoAppend;
 Tree *undoAppend( InputStream *is, int length )
 {
 	if ( isSourceStream( is ) ) {

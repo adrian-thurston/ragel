@@ -92,13 +92,15 @@ struct SourceFuncs
 	int (*undoConsumeData)( SourceStream *is, const char *data, int length );
 
 	int (*getDataImpl)( SourceStream *is, char *dest, int length );
-	struct ColmTree *(*getTree)( SourceStream *is );
-	struct LangEl *(*getLangEl)( SourceStream *is, long *bindId, char **data, long *length );
+
+	struct ColmTree *(*consumeTree)( SourceStream *is );
+	struct LangEl *(*consumeLangEl)( SourceStream *is, long *bindId, char **data, long *length );
+
 	void (*pushTree)( SourceStream *is, struct ColmTree *tree, int ignore );
 	void (*pushText)( SourceStream *is, const char *data, long len );
 	struct ColmTree *(*undoPush)( SourceStream *is, int length );
 	struct ColmTree *(*undoAppend)( SourceStream *is, int length );
-	void (*pushBackNamed)( SourceStream *is );
+	void (*undoConsumeLangEl)( SourceStream *is );
 };
 
 extern struct SourceFuncs baseFuncs;
@@ -193,12 +195,14 @@ int getData( InputStream *in, int offset, char *dest, int length, int *copied );
 int consumeData( InputStream *in, int length );
 int undoConsumeData( InputStream *is, const char *data, int length );
 
-int tryAgainLater( InputStream *in, int offset );
+struct LangEl *consumeLangEl( InputStream *in, long *bindId, char **data, long *length );
+void undoConsumeLangEl( InputStream *in );
+
+struct ColmTree *consumeTree( InputStream *in );
+
 void setEof( InputStream *is );
 void unsetEof( InputStream *is );
 void unsetLater( InputStream *is );
-struct ColmTree *getTree( InputStream *in );
-struct LangEl *getLangEl( InputStream *in, long *bindId, char **data, long *length );
 void pushTree( InputStream *in, struct ColmTree *tree, int ignore );
 void pushText( InputStream *in, const char *data, long len );
 struct ColmTree *undoPush( InputStream *in, int length );
@@ -207,7 +211,6 @@ void appendTree( InputStream *in, struct ColmTree *tree );
 void appendStream( InputStream *in, struct ColmTree *tree );
 struct ColmTree *undoAppend( InputStream *in, int length );
 struct ColmTree *undoAppendStream( InputStream *in );
-void pushBackNamed( InputStream *in );
 
 RunBuf *inputStreamPopHead2( InputStream *is );
 
