@@ -336,7 +336,7 @@ void inputStreamDynamicPushText( SourceStream *is, const char *data, long length
 	newBuf->length = length;
 	memcpy( newBuf->data, data, length );
 
-	is->funcs->pushBackBuf( is, newBuf );
+	inputStreamPrepend( is, newBuf );
 }
 
 void inputStreamDynamicPushTree( SourceStream *is, Tree *tree, int ignore )
@@ -432,26 +432,15 @@ int inputStreamFileGetDataImpl( SourceStream *is, char *dest, int length )
 	return res;
 }
 
-void inputStreamFilePushBackBuf( SourceStream *is, RunBuf *runBuf )
-{
-	inputStreamPrepend( is, runBuf );
-}
-
 void initFileFuncs()
 {
 	memcpy( &fileFuncs, &dynamicFuncs, sizeof(struct SourceFuncs) );
 	fileFuncs.getDataImpl = &inputStreamFileGetDataImpl;
-	fileFuncs.pushBackBuf = &inputStreamFilePushBackBuf;
 }
 
 /*
  * FD
  */
-
-void inputStreamFdPushBackBuf( SourceStream *is, RunBuf *runBuf )
-{
-	inputStreamPrepend( is, runBuf );
-}
 
 int inputStreamFdGetDataImpl( SourceStream *is, char *dest, int length )
 {
@@ -465,7 +454,6 @@ void initFdFuncs()
 {
 	memcpy( &fdFuncs, &dynamicFuncs, sizeof(struct SourceFuncs) );
 	fdFuncs.getDataImpl = &inputStreamFdGetDataImpl;
-	fdFuncs.pushBackBuf = &inputStreamFdPushBackBuf;
 }
 
 /*
@@ -861,7 +849,7 @@ void pushText( InputStream *is, const char *data, long length )
 		newBuf->length = length;
 		memcpy( newBuf->data, data, length );
 
-		pushBackBuf( is, newBuf );
+		inputStreamPrepend2( is, newBuf );
 	}
 }
 
@@ -966,16 +954,5 @@ Tree *undoAppend( InputStream *is, int length )
 			free(rb);
 			return tree;
 		}
-	}
-}
-
-void pushBackBuf( InputStream *is, RunBuf *runBuf )
-{
-	if ( isSourceStream( is ) ) {
-		Stream *stream = (Stream*)is->queue->tree;
-		stream->in->funcs->pushBackBuf( stream->in, runBuf );
-	}
-	else {
-		inputStreamPrepend2( is, runBuf );
 	}
 }

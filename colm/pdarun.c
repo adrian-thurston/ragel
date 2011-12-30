@@ -132,24 +132,6 @@ void decrementSteps( PdaRun *pdaRun )
 	debug( REALM_PARSE, "steps down to %ld\n", pdaRun->steps );
 }
 
-void sendBackBuffered( FsmRun *fsmRun, InputStream *inputStream )
-{
-	if ( fsmRun->runBuf != 0 && fsmRun->pe - fsmRun->p > 0 ) {
-		debug( REALM_PARSE, "taking back buffered fsmRun: %p input stream: %p\n", fsmRun, inputStream );
-
-		RunBuf *split = newRunBuf();
-		memcpy( split->data, fsmRun->p, fsmRun->pe - fsmRun->p );
-
-		split->length = fsmRun->pe - fsmRun->p;
-		split->offset = 0;
-		split->next = 0;
-
-		fsmRun->pe = fsmRun->p;
-
-		pushBackBuf( inputStream, split );
-	}
-}
-
 /* Load up a token, starting from tokstart if it is set. If not set then
  * start it at data. */
 Head *streamPull( Program *prg, FsmRun *fsmRun, InputStream *inputStream, long length )

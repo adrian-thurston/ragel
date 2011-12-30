@@ -102,7 +102,6 @@ struct SourceFuncs
 	struct ColmTree *(*undoPush)( SourceStream *is, int length );
 	struct ColmTree *(*undoAppend)( SourceStream *is, int length );
 	void (*pushBackNamed)( SourceStream *is );
-	void (*pushBackBuf)( SourceStream *is, RunBuf *runBuf );
 };
 
 extern struct SourceFuncs baseFuncs;
@@ -217,7 +216,6 @@ void appendStream( InputStream *in, struct ColmTree *tree );
 struct ColmTree *undoAppend( InputStream *in, int length );
 struct ColmTree *undoAppendStream( InputStream *in );
 void pushBackNamed( InputStream *in );
-void pushBackBuf( InputStream *in, RunBuf *runBuf );
 
 RunBuf *inputStreamPopHead2( InputStream *is );
 

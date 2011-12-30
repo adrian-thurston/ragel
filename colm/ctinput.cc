@@ -209,7 +209,6 @@ extern "C" void initPatternFuncs()
 	patternFuncs.isLangEl = &inputStreamPatternIsLangEl;
 	patternFuncs.isEof = &inputStreamPatternIsEof;
 	patternFuncs.getLangEl = &inputStreamPatternGetLangEl;
-	patternFuncs.pushBackBuf = &inputStreamPatternPushBackBuf;
 	patternFuncs.pushBackNamed = &inputStreamPatternPushBackNamed;
 }
 
@@ -365,7 +364,6 @@ extern "C" void initReplFuncs()
 	replFuncs.isLangEl = &inputStreamReplIsLangEl;
 	replFuncs.isEof = &inputStreamReplIsEof;
 	replFuncs.getLangEl = &inputStreamReplGetLangEl;
-	replFuncs.pushBackBuf = &inputStreamReplPushBackBuf;
 	replFuncs.pushBackNamed = &inputStreamReplPushBackNamed;
 	replFuncs.consumeData = &inputStreamReplConsumeData;
 }
