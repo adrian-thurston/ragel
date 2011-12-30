@@ -170,39 +170,6 @@ void initInputFuncs()
  * Base run-time input streams.
  */
 
-int inputStreamDynamicIsTree( SourceStream *is )
-{
-	if ( is->queue != 0 && is->queue->type == RunBufTokenType )
-		return true;
-	return false;
-}
-
-int inputStreamDynamicIsIgnore( SourceStream *is )
-{
-	if ( is->queue != 0 && is->queue->type == RunBufIgnoreType )
-		return true;
-	return false;
-}
-
-int inputStreamDynamicIsLangEl( SourceStream *is )
-{
-	return false;
-}
-
-int inputStreamDynamicIsEof( SourceStream *is, int offset )
-{
-	int isEof = false;
-	if ( is->eof ) {
-		if ( is->queue == 0 )
-			isEof = true;
-		else if ( is->queue != 0 && is->queue->offset + offset >= is->queue->length )
-			isEof = true;
-	}
-
-	debug( REALM_INPUT, "is eof: %d\n", (int)isEof );
-	return isEof;
-}
-
 int inputStreamDynamicGetData( SourceStream *is, int skip, char *dest, int length, int *copied )
 {
 	int ret = 0;
@@ -403,10 +370,6 @@ Tree *inputStreamDynamicUndoAppend( SourceStream *is, int length )
 void initDynamicFuncs()
 {
 	memcpy( &dynamicFuncs, &baseFuncs, sizeof(struct SourceFuncs) );
-	dynamicFuncs.isTree = &inputStreamDynamicIsTree;
-	dynamicFuncs.isIgnore = &inputStreamDynamicIsIgnore;
-	dynamicFuncs.isLangEl = &inputStreamDynamicIsLangEl;
-	dynamicFuncs.isEof = &inputStreamDynamicIsEof;
 	dynamicFuncs.getData = &inputStreamDynamicGetData;
 	dynamicFuncs.consumeData = &inputStreamDynamicConsumeData;
 	dynamicFuncs.undoConsumeData = &inputStreamDynamicUndoConsumeData;
@@ -537,60 +500,6 @@ static int isSourceStream( InputStream *is )
 	return false;
 }
 
-
-//dynamicFuncs.isTree = &inputStreamDynamicIsTree;
-int isTree( InputStream *is )
-{
-	if ( isSourceStream( is ) ) {
-		Stream *stream = (Stream*)is->queue->tree;
-		return stream->in->funcs->isTree( stream->in );
-	}
-	else {
-		if ( is->queue != 0 && is->queue->type == RunBufTokenType )
-			return true;
-		return false;
-	}
-}
-
-//dynamicFuncs.isIgnore = &inputStreamDynamicIsIgnore;
-int isIgnore( InputStream *is )
-{
-	if ( isSourceStream( is ) ) {
-		Stream *stream = (Stream*)is->queue->tree;
-		return stream->in->funcs->isIgnore( stream->in );
-	}
-	else {
-		if ( is->queue != 0 && is->queue->type == RunBufIgnoreType )
-			return true;
-		return false;
-	}
-}
-
-//dynamicFuncs.isLangEl = &inputStreamDynamicIsLangEl;
-int isLangEl( InputStream *is )
-{
-	if ( isSourceStream( is ) ) {
-		Stream *stream = (Stream*)is->queue->tree;
-		return stream->in->funcs->isLangEl( stream->in );
-	}
-	else {
-		return false;
-	}
-}
-
-//dynamicFuncs.isEof = &inputStreamDynamicIsEof;
-int isEof( InputStream *is, int offset )
-{
-	if ( isSourceStream( is ) ) {
-		Stream *stream = (Stream*)is->queue->tree;
-		return stream->in->funcs->isEof( stream->in, offset );
-	}
-	else {
-		debug( REALM_INPUT, "checking input stream eof\n" );
-		return is->queue == 0 && is->eof;
-	}
-}
-
 void setEof( InputStream *is )
 {
 	debug( REALM_INPUT, "setting EOF in input stream\n" );
@@ -651,6 +560,11 @@ int getData( InputStream *is, int skip, char *dest, int length, int *copied )
 			break;
 		}
 
+		if ( buf->type == RunBufIgnoreType ) {
+			ret = INPUT_IGNORE;
+			break;
+		}
+
 		int avail = buf->length - buf->offset;
 
 		/* Anything available in the current buffer. */
@@ -694,6 +608,9 @@ int getData( InputStream *is, int skip, char *dest, int length, int *copied )
 			break;
 		case INPUT_TREE:
 			debug( REALM_INPUT, "get data: TREE\n" );
+			break;
+		case INPUT_IGNORE:
+			debug( REALM_INPUT, "get data: IGNORE\n" );
 			break;
 		case INPUT_LANG_EL:
 			debug( REALM_INPUT, "get data: LANG_EL\n" );
@@ -741,18 +658,6 @@ int undoConsumeData( InputStream *is, const char *data, int length )
 //		}
 //
 		return length;
-	}
-}
-
-int getDataImpl( InputStream *is, char *dest, int length )
-{
-	if ( isSourceStream( is ) ) {
-		Stream *stream = (Stream*)is->queue->tree;
-		return stream->in->funcs->getDataImpl( stream->in, dest, length );
-	}
-	else {
-		/* No source of data, it is all done with RunBuf list appends. */
-		return 0;
 	}
 }
 

@@ -934,37 +934,11 @@ long scanToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *input
 //		/* Check for a named language element or constructed trees. Note that
 //		 * we can do this only when data == de otherwise we get ahead of what's
 //		 * already in the buffer. */
-//		if ( isLangEl( inputStream ) ) {
-//			breakRunBuf( fsmRun );
-//			return SCAN_LANG_EL;
-//		}
-//		if ( isTree( inputStream ) ) {
-//			breakRunBuf( fsmRun );
-//			return SCAN_TREE;
-//		}
 //		else if ( isIgnore( inputStream ) ) {
 //			breakRunBuf( fsmRun );
 //			return SCAN_IGNORE;
 //		}
 //
-//		/* Maybe need eof. */
-//		int offset = fsmRun->tokstart != 0 ? fsmRun->p - fsmRun->tokstart : 0 ;
-//		if ( isEof( inputStream, offset ) ) {
-//			if ( fsmRun->tokstart != 0 ) {
-//				/* If a token has been started, but not finshed 
-//				 * this is an error. */
-//				fsmRun->cs = fsmRun->tables->errorState;
-//				return SCAN_ERROR;
-//			}
-//			else {
-//				return SCAN_EOF;
-//			}
-//		}
-//		/* Maybe need to pause parsing until more data is inserted into the
-//		 * input inputStream. */
-//		if ( tryAgainLater( inputStream, offset ) )
-//			return SCAN_TRY_AGAIN_LATER;
-
 		/* There may be space left in the current buffer. If not then we need
 		 * to make some. */
 		long space = fsmRun->runBuf->data + FSM_BUFSIZE - fsmRun->pe;

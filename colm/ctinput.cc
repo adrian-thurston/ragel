@@ -37,21 +37,9 @@ SourceFuncs replFuncs;
  * Implementation
  */
 
-int inputStreamStaticIsTree( SourceStream *is )
-{
-	return false;
-}
-
-int inputStreamStaticIsIgnore( SourceStream *is )
-{
-	return false;
-}
-
 extern "C" void initStaticFuncs()
 {
 	memcpy( &staticFuncs, &baseFuncs, sizeof(SourceFuncs) );
-	staticFuncs.isTree = &inputStreamStaticIsTree;
-	staticFuncs.isIgnore = &inputStreamStaticIsIgnore;
 }
 
 /*
@@ -67,11 +55,6 @@ SourceStream *newInputStreamPattern( Pattern *pattern )
 	is->patItem = pattern->list->head;
 	is->funcs = &patternFuncs;
 	return is;
-}
-
-int inputStreamPatternIsLangEl( SourceStream *is )
-{ 
-	return is->patItem != 0 && is->patItem->type == PatternItem::FactorType;
 }
 
 int inputStreamPatternShouldFlush( SourceStream *is )
@@ -130,11 +113,6 @@ int inputStreamPatternGetData( SourceStream *is, int skip, char *dest, int lengt
 
 	*copied = length;
 	return INPUT_DATA;
-}
-
-int inputStreamPatternIsEof( SourceStream *is, int offset )
-{
-	return is->patItem == 0;
 }
 
 void inputStreamPatternBackup( SourceStream *is )
@@ -206,8 +184,6 @@ extern "C" void initPatternFuncs()
 	patternFuncs.consumeData = &inputStreamPatternConsumeData;
 	patternFuncs.undoConsumeData = &inputStreamPatternUndoConsumeData;
 
-	patternFuncs.isLangEl = &inputStreamPatternIsLangEl;
-	patternFuncs.isEof = &inputStreamPatternIsEof;
 	patternFuncs.getLangEl = &inputStreamPatternGetLangEl;
 	patternFuncs.pushBackNamed = &inputStreamPatternPushBackNamed;
 }
@@ -226,12 +202,6 @@ SourceStream *newInputStreamRepl( Replacement *replacement )
 	is->replItem = replacement->list->head;
 	is->funcs = &replFuncs;
 	return is;
-}
-
-int inputStreamReplIsLangEl( SourceStream *is )
-{ 
-	return is->replItem != 0 && ( is->replItem->type == ReplItem::ExprType || 
-			is->replItem->type == ReplItem::FactorType );
 }
 
 int inputStreamReplShouldFlush( SourceStream *is )
@@ -304,11 +274,6 @@ int inputStreamReplGetData( SourceStream *is, int offset, char *dest, int length
 	return INPUT_DATA;
 }
 
-int inputStreamReplIsEof( SourceStream *is, int offset )
-{
-	return is->replItem == 0;
-}
-
 void inputStreamReplBackup( SourceStream *is )
 {
 	if ( is->replItem == 0 )
@@ -361,8 +326,6 @@ extern "C" void initReplFuncs()
 {
 	memcpy( &replFuncs, &staticFuncs, sizeof(SourceFuncs) );
 	replFuncs.getData = &inputStreamReplGetData;
-	replFuncs.isLangEl = &inputStreamReplIsLangEl;
-	replFuncs.isEof = &inputStreamReplIsEof;
 	replFuncs.getLangEl = &inputStreamReplGetLangEl;
 	replFuncs.pushBackNamed = &inputStreamReplPushBackNamed;
 	replFuncs.consumeData = &inputStreamReplConsumeData;
