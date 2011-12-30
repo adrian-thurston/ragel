@@ -41,7 +41,6 @@ RunBuf *newRunBuf()
 #define false 0
 
 void initDynamicFuncs();
-void initStringFuncs();
 void initFileFuncs();
 void initFdFuncs();
 
@@ -51,7 +50,6 @@ void initReplFuncs();
 
 struct SourceFuncs baseFuncs;
 struct SourceFuncs dynamicFuncs;
-struct SourceFuncs stringFuncs;
 struct SourceFuncs fileFuncs;
 struct SourceFuncs fdFuncs;
 
@@ -161,7 +159,6 @@ void initInputFuncs()
 	memset( &baseFuncs, 0, sizeof(struct SourceFuncs) );
 
 	initDynamicFuncs();
-	initStringFuncs();
 	initFileFuncs();
 	initFdFuncs();
 	initStaticFuncs();
@@ -419,46 +416,6 @@ void initDynamicFuncs()
 	dynamicFuncs.undoAppend = &inputStreamDynamicUndoAppend;
 	dynamicFuncs.pushText = &inputStreamDynamicPushText;
 }
-
-/*
- * String
- */
-
-int inputStreamStringGetDataImpl( SourceStream *is, char *dest, int length )
-{ 
-	int available = is->dlen - is->offset;
-
-	if ( available < length )
-		length = available;
-
-	memcpy( dest, is->data+is->offset, length );
-	is->offset += length;
-
-	if ( is->offset == is->dlen ) {
-		//eof = true;
-		debug( REALM_PARSE, "setting later = true\n" );
-		is->later = true;
-	}
-
-	return length;
-}
-
-void inputStreamStringPushBackBuf( SourceStream *is, RunBuf *runBuf )
-{
-	//char *data = runBuf->buf + runBuf->offset;
-	long length = runBuf->length;
-
-	assert( length <= is->offset );
-	is->offset -= length;
-}
-
-void initStringFuncs()
-{
-	memcpy( &stringFuncs, &dynamicFuncs, sizeof(struct SourceFuncs) );
-	stringFuncs.getDataImpl = &inputStreamStringGetDataImpl;
-	stringFuncs.pushBackBuf = &inputStreamStringPushBackBuf;
-}
-
 
 /*
  * File
