@@ -102,9 +102,9 @@ struct SourceFuncs
 
 	/* Altering streams. 
 	 * FIXME: These should disappear. */
-	void (*pushText)( SourceStream *is, const char *data, long len );
-	struct ColmTree *(*undoPush)( SourceStream *is, int length );
-	struct ColmTree *(*undoAppend)( SourceStream *is, int length );
+	void (*prependData)( SourceStream *is, const char *data, long len );
+	struct ColmTree *(*undoPrependData)( SourceStream *is, int length );
+	struct ColmTree *(*undoAppendData)( SourceStream *is, int length );
 
 	/* Private implmentation for some shared get data functions. */
 	int (*getDataImpl)( SourceStream *is, char *dest, int length );
@@ -198,28 +198,29 @@ struct _InputStream
 
 typedef struct _InputStream InputStream;
 
+/* The input stream interface. */
+
 int getData( InputStream *in, int offset, char *dest, int length, int *copied );
 int consumeData( InputStream *in, int length );
 int undoConsumeData( InputStream *is, const char *data, int length );
 
+struct ColmTree *consumeTree( InputStream *in );
+void undoConsumeTree( InputStream *in, struct ColmTree *tree, int ignore );
+
 struct LangEl *consumeLangEl( InputStream *in, long *bindId, char **data, long *length );
 void undoConsumeLangEl( InputStream *in );
 
-struct ColmTree *consumeTree( InputStream *in );
-
 void setEof( InputStream *is );
 void unsetEof( InputStream *is );
-void unsetLater( InputStream *is );
-void undoConsumeTree( InputStream *in, struct ColmTree *tree, int ignore );
-void pushText( InputStream *in, const char *data, long len );
-struct ColmTree *undoPush( InputStream *in, int length );
+
+void prependData( InputStream *in, const char *data, long len );
+struct ColmTree *undoPrependData( InputStream *in, int length );
+
 void appendData( InputStream *in, const char *data, long len );
 void appendTree( InputStream *in, struct ColmTree *tree );
 void appendStream( InputStream *in, struct ColmTree *tree );
-struct ColmTree *undoAppend( InputStream *in, int length );
+struct ColmTree *undoAppendData( InputStream *in, int length );
 struct ColmTree *undoAppendStream( InputStream *in );
-
-RunBuf *inputStreamPopHead2( InputStream *is );
 
 #ifdef __cplusplus
 }

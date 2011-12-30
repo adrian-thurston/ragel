@@ -261,7 +261,6 @@ case PcrStart:
 
 	if ( accum->pdaRun->stopTarget <= 0 ) {
 		setEof( accum->accumStream->in );
-		unsetLater( accum->accumStream->in );
 
 		if ( ! accum->pdaRun->parseError ) {
 			long pcr = parseLoop( prg, sp, accum->pdaRun, accum->fsmRun, accum->accumStream->in, entry );
@@ -651,8 +650,10 @@ again:
 			break;
 		}
 		case IN_ACCUM_STREAM_PULL_BKT: {
+			Word f;
 			Tree *string;
 			read_tree( string );
+			read_word( f );
 
 			debug( REALM_BYTECODE, "IN_ACCUM_STREAM_PULL_BKT\n" );
 

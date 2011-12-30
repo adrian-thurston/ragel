@@ -226,7 +226,7 @@ int inputStreamDynamicGetData( SourceStream *is, int skip, char *dest, int lengt
 
 int inputStreamDynamicConsumeData( SourceStream *is, int length )
 {
-	debug( REALM_INPUT, "consuming %ld bytes\n", length );
+	debug( REALM_INPUT, "source consuming %ld bytes\n", length );
 
 	while ( is->queue->offset == is->queue->length ) {
 		RunBuf *runBuf = inputStreamPopHead( is );
@@ -241,7 +241,12 @@ int inputStreamDynamicConsumeData( SourceStream *is, int length )
 int inputStreamDynamicUndoConsumeData( SourceStream *is, const char *data, int length )
 {
 	debug( REALM_INPUT, "undoing consume of %ld bytes\n", length );
-	is->queue->offset -= length;
+
+	RunBuf *newBuf = newRunBuf();
+	newBuf->length = length;
+	memcpy( newBuf->data, data, length );
+	inputStreamPrepend( is, newBuf );
+
 	return length;
 }
 
@@ -301,7 +306,7 @@ void inputStreamDynamicPushText( SourceStream *is, const char *data, long length
 	inputStreamPrepend( is, newBuf );
 }
 
-void inputStreamDynamicPushTree( SourceStream *is, Tree *tree, int ignore )
+void inputStreamDynamicUndoConsumeTree( SourceStream *is, Tree *tree, int ignore )
 {
 //	#ifdef COLM_LOG_PARSE
 //	if ( colm_log_parse ) {
@@ -321,7 +326,7 @@ void inputStreamDynamicPushTree( SourceStream *is, Tree *tree, int ignore )
 	inputStreamPrepend( is, newBuf );
 }
 
-Tree *inputStreamDynamicUndoPush( SourceStream *is, int length )
+Tree *inputStreamDynamicUndoPrependData( SourceStream *is, int length )
 {
 	if ( is->queue->type == RunBufDataType ) {
 		char tmp[length];
@@ -365,14 +370,17 @@ Tree *inputStreamDynamicUndoAppend( SourceStream *is, int length )
 void initDynamicFuncs()
 {
 	memset( &dynamicFuncs, 0, sizeof(struct SourceFuncs) );
+
 	dynamicFuncs.getData = &inputStreamDynamicGetData;
 	dynamicFuncs.consumeData = &inputStreamDynamicConsumeData;
 	dynamicFuncs.undoConsumeData = &inputStreamDynamicUndoConsumeData;
+
 	dynamicFuncs.consumeTree = &inputStreamDynamicConsumeTree;
-	dynamicFuncs.undoConsumeTree = &inputStreamDynamicPushTree;
-	dynamicFuncs.undoPush = &inputStreamDynamicUndoPush;
-	dynamicFuncs.undoAppend = &inputStreamDynamicUndoAppend;
-	dynamicFuncs.pushText = &inputStreamDynamicPushText;
+	dynamicFuncs.undoConsumeTree = &inputStreamDynamicUndoConsumeTree;
+
+	dynamicFuncs.undoPrependData = &inputStreamDynamicUndoPrependData;
+	dynamicFuncs.undoAppendData = &inputStreamDynamicUndoAppend;
+	dynamicFuncs.prependData = &inputStreamDynamicPushText;
 }
 
 /*
@@ -512,17 +520,6 @@ void unsetEof( InputStream *is )
 	}
 }
 
-void unsetLater( InputStream *is )
-{
-	if ( isSourceStream( is ) ) {
-		Stream *stream = (Stream*)is->queue->tree;
-		stream->in->later = false;
-	}
-	else {
-		is->later = false;
-	}
-}
-
 int getData( InputStream *is, int skip, char *dest, int length, int *copied )
 {
 	int ret = 0;
@@ -618,21 +615,47 @@ int getData( InputStream *is, int skip, char *dest, int length, int *copied )
 
 int consumeData( InputStream *is, int length )
 {
-	if ( isSourceStream( is ) ) {
-		Stream *stream = (Stream*)is->queue->tree;
-		return stream->in->funcs->consumeData( stream->in, length );
-	}
-	else {
-		debug( REALM_INPUT, "consuming %ld bytes\n", length );
+	debug( REALM_INPUT, "consuming %d bytes\n", length );
 
-		is->queue->offset += length;
-		if ( is->queue->offset == is->queue->length ) {
-			RunBuf *runBuf = inputStreamPopHead2( is );
-			free( runBuf );
+	int consumed = 0;
+
+	/* Move over skip bytes. */
+	while ( true ) {
+		RunBuf *buf = is->queue;
+
+		if ( buf == 0 )
+			break;
+
+		if ( buf->type == RunBufSourceType ) {
+			Stream *stream = (Stream*)buf->tree;
+			int slen = stream->in->funcs->consumeData( stream->in, length );
+
+			consumed += slen;
+			length -= slen;
+		}
+		else if ( buf->type == RunBufTokenType )
+			break;
+		else if ( buf->type == RunBufIgnoreType )
+			break;
+		else {
+			/* Anything available in the current buffer. */
+			int avail = buf->length - buf->offset;
+			if ( avail > 0 ) {
+				/* The source data from the current buffer. */
+				int slen = avail <= length ? avail : length;
+				consumed += slen;
+				length -= slen;
+				buf->offset += slen;
+			}
 		}
 
-		return length;
+		if ( length == 0 )
+			break;
+
+		free( inputStreamPopHead2( is ) );
 	}
+
+	return consumed;
 }
 
 int undoConsumeData( InputStream *is, const char *data, int length )
@@ -642,27 +665,23 @@ int undoConsumeData( InputStream *is, const char *data, int length )
 		return stream->in->funcs->undoConsumeData( stream->in, data, length );
 	}
 	else {
-		assert( false );
+		debug( REALM_INPUT, "undoing consume of %ld bytes\n", length );
 
-//		debug( REALM_INPUT, "consuming %ld bytes\n", length );
-//
-//		is->queue->offset += length;
-//		if ( is->queue->offset == is->queue->length ) {
-//			RunBuf *runBuf = inputStreamPopHead2( is );
-//			free( runBuf );
-//		}
-//
+		RunBuf *newBuf = newRunBuf();
+		newBuf->length = length;
+		memcpy( newBuf->data, data, length );
+		inputStreamPrepend2( is, newBuf );
+
 		return length;
 	}
 }
 
 Tree *consumeTree( InputStream *is )
 {
-//	if ( isSourceStream( is ) ) {
-//		Stream *stream = (Stream*)is->queue->tree;
-//		return stream->in->funcs->consumeTree( stream->in );
-//	}
-//	else {
+	while ( is->queue != 0 && is->queue->type == RunBufDataType && is->queue->offset == is->queue->length ) {
+		RunBuf *runBuf = inputStreamPopHead2( is );
+		free( runBuf );
+	}
 
 	if ( is->queue != 0 && (is->queue->type == RunBufTokenType || is->queue->type == RunBufIgnoreType) ) {
 		RunBuf *runBuf = inputStreamPopHead2( is );
@@ -674,7 +693,17 @@ Tree *consumeTree( InputStream *is )
 	}
 
 	return 0;
-//	}
+}
+
+void undoConsumeTree( InputStream *is, Tree *tree, int ignore )
+{
+	/* Create a new buffer for the data. This is the easy implementation.
+	 * Something better is needed here. It puts a max on the amount of
+	 * data that can be pushed back to the inputStream. */
+	RunBuf *newBuf = newRunBuf();
+	newBuf->type = ignore ? RunBufIgnoreType : RunBufTokenType;
+	newBuf->tree = tree;
+	inputStreamPrepend2( is, newBuf );
 }
 
 struct LangEl *consumeLangEl( InputStream *is, long *bindId, char **data, long *length )
@@ -694,39 +723,17 @@ void undoConsumeLangEl( InputStream *is )
 		Stream *stream = (Stream*)is->queue->tree;
 		return stream->in->funcs->undoConsumeLangEl( stream->in );
 	}
-}
-
-void undoConsumeTree( InputStream *is, Tree *tree, int ignore )
-{
-	if ( isSourceStream( is ) ) {
-		Stream *stream = (Stream*)is->queue->tree;
-		return stream->in->funcs->undoConsumeTree( stream->in, tree, ignore );
-	}
 	else {
-	//	#ifdef COLM_LOG_PARSE
-	//	if ( colm_log_parse ) {
-	//		cerr << "readying fake push" << endl;
-	//	}
-	//	#endif
-
-	//	takeBackBuffered( inputStream );
-
-		/* Create a new buffer for the data. This is the easy implementation.
-		 * Something better is needed here. It puts a max on the amount of
-		 * data that can be pushed back to the inputStream. */
-		RunBuf *newBuf = newRunBuf();
-		newBuf->type = ignore ? RunBufIgnoreType : RunBufTokenType;
-		newBuf->tree = tree;
-
-		inputStreamPrepend2( is, newBuf );
+		assert(false);
 	}
 }
 
-void pushText( InputStream *is, const char *data, long length )
+
+void prependData( InputStream *is, const char *data, long length )
 {
 	if ( isSourceStream( is ) ) {
 		Stream *stream = (Stream*)is->queue->tree;
-		return stream->in->funcs->pushText( stream->in, data, length );
+		return stream->in->funcs->prependData( stream->in, data, length );
 	}
 	else {
 	//	#ifdef COLM_LOG_PARSE
@@ -750,11 +757,11 @@ void pushText( InputStream *is, const char *data, long length )
 	}
 }
 
-Tree *undoPush( InputStream *is, int length )
+Tree *undoPrependData( InputStream *is, int length )
 {
 	if ( isSourceStream( is ) ) {
 		Stream *stream = (Stream*)is->queue->tree;
-		return stream->in->funcs->undoPush( stream->in, length );
+		return stream->in->funcs->undoPrependData( stream->in, length );
 	}
 	else {
 		if ( is->queue->type == RunBufDataType ) {
@@ -795,6 +802,26 @@ void appendData( InputStream *is, const char *data, long len )
 	}
 }
 
+Tree *undoAppendData( InputStream *is, int length )
+{
+	if ( is->queueTail->type == RunBufDataType ) {
+		char tmp[length];
+		int have = 0;
+		while ( have < length ) {
+			int res = inputStreamDynamicGetDataRev2( is, tmp, length-have );
+			have += res;
+		}
+		return 0;
+	}
+	else {
+		/* FIXME: leak here. */
+		RunBuf *rb = inputStreamPopTail2( is );
+		Tree *tree = rb->tree;
+		free(rb);
+		return tree;
+	}
+}
+
 void appendTree( InputStream *is, Tree *tree )
 {
 	RunBuf *ad = newRunBuf();
@@ -819,35 +846,8 @@ void appendStream( InputStream *in, struct ColmTree *tree )
 
 Tree *undoAppendStream( InputStream *in )
 {
-	/* FIXME: leak here. */
-	RunBuf *rb = inputStreamPopTail2( in );
-	Tree *tree = rb->tree;
-	free(rb);
+	RunBuf *runBuf = inputStreamPopTail2( in );
+	Tree *tree = runBuf->tree;
+	free( runBuf );
 	return tree;
-}
-
-Tree *undoAppend( InputStream *is, int length )
-{
-	if ( isSourceStream( is ) ) {
-		Stream *stream = (Stream*)is->queue->tree;
-		return stream->in->funcs->undoAppend( stream->in, length );
-	}
-	else {
-		if ( is->queueTail->type == RunBufDataType ) {
-			char tmp[length];
-			int have = 0;
-			while ( have < length ) {
-				int res = inputStreamDynamicGetDataRev2( is, tmp, length-have );
-				have += res;
-			}
-			return 0;
-		}
-		else {
-			/* FIXME: leak here. */
-			RunBuf *rb = inputStreamPopTail2( is );
-			Tree *tree = rb->tree;
-			free(rb);
-			return tree;
-		}
-	}
 }

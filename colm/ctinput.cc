@@ -308,7 +308,7 @@ void inputStreamReplPushBackNamed( SourceStream *is )
 int inputStreamReplConsumeData( SourceStream *is, int length )
 {
 	debug( REALM_INPUT, "consuming %ld bytes\n", length );
-	is->queue->offset += length;
+	is->offset += length;
 	return length;
 }
 

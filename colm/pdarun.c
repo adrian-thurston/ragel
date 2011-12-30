@@ -143,14 +143,15 @@ Head *streamPull( Program *prg, FsmRun *fsmRun, InputStream *inputStream, long l
 	runBuf->next = fsmRun->runBuf;
 	fsmRun->runBuf = runBuf;
 
-	fsmRun->p = runBuf->data;
 	int len = 0;
-	/*long len = */ getData( inputStream, 0, fsmRun->p, length, &len );
-	fsmRun->pe = fsmRun->p + length;
+	getData( inputStream, 0, runBuf->data, length, &len );
+	consumeData( inputStream, length );
+	fsmRun->p = fsmRun->pe = runBuf->data + length;
 
-	Head *tokdata = stringAllocPointer( prg, fsmRun->p, length );
-	updatePosition( inputStream, fsmRun->p, length );
-	fsmRun->p += length;
+	Head *tokdata = stringAllocPointer( prg, runBuf->data, length );
+	updatePosition( inputStream, runBuf->data, length );
+
+
 
 	return tokdata;
 }
@@ -200,7 +201,7 @@ void streamPushText( FsmRun *fsmRun, InputStream *inputStream, const char *data,
 //	#endif
 
 //	sendBackBuffered( fsmRun, inputStream );
-	pushText( inputStream, data, length );
+	prependData( inputStream, data, length );
 }
 
 void streamPushTree( FsmRun *fsmRun, InputStream *inputStream, Tree *tree, int ignore )
@@ -218,7 +219,7 @@ void streamPushTree( FsmRun *fsmRun, InputStream *inputStream, Tree *tree, int i
 void undoStreamPush( Program *prg, Tree **sp, FsmRun *fsmRun, InputStream *inputStream, long length )
 {
 //	sendBackBuffered( fsmRun, inputStream );
-	Tree *tree = undoPush( inputStream, length );
+	Tree *tree = undoPrependData( inputStream, length );
 	if ( tree != 0 )
 		treeDownref( prg, sp, tree );
 }
@@ -230,7 +231,7 @@ void undoStreamAppend( Program *prg, Tree **sp, FsmRun *fsmRun, InputStream *inp
 	}
 	else {
 	//	sendBackBuffered( fsmRun, inputStream );
-		Tree *tree = undoAppend( inputStream, length );
+		Tree *tree = undoAppendData( inputStream, length );
 		if ( tree != 0 )
 			treeDownref( prg, sp, tree );
 	}
@@ -750,6 +751,23 @@ void sendIgnore( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmR
 	ignoreTree( prg, pdaRun, tree );
 }
 
+
+/* Doesn't consume. */
+Head *peekMatch( Program *prg, FsmRun *fsmRun, InputStream *inputStream )
+{
+	long length = fsmRun->p - fsmRun->tokstart;
+	Head *head = stringAllocPointer( prg, fsmRun->tokstart, length );
+	head->location = locationAllocate( prg );
+	head->location->line = inputStream->line;
+	head->location->column = inputStream->column;
+	head->location->byte = inputStream->byte;
+
+	debug( REALM_PARSE, "location byte: %d\n", inputStream->byte );
+
+	return head;
+}
+
+/* Consumes. */
 Head *extractMatch( Program *prg, FsmRun *fsmRun, InputStream *inputStream )
 {
 	long length = fsmRun->p - fsmRun->tokstart;
@@ -1148,7 +1166,7 @@ case PcrPreEof:
 					prg->rtd->lelInfo[pdaRun->tokenId].name );
 
 			/* Make the token data. */
-			pdaRun->tokdata = extractMatch( prg, fsmRun, inputStream );
+			pdaRun->tokdata = peekMatch( prg, fsmRun, inputStream );
 
 			/* Note that we don't update the position now. It is done when the token
 			 * data is pulled from the inputStream. */
