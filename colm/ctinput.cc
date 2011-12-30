@@ -29,18 +29,8 @@
 using std::cerr;
 using std::endl;
 
-SourceFuncs staticFuncs;
 SourceFuncs patternFuncs;
 SourceFuncs replFuncs;
-
-/* 
- * Implementation
- */
-
-extern "C" void initStaticFuncs()
-{
-	memcpy( &staticFuncs, &baseFuncs, sizeof(SourceFuncs) );
-}
 
 /*
  * Pattern
@@ -178,7 +168,7 @@ int inputStreamPatternUndoConsumeData( SourceStream *is, const char *data, int l
 
 extern "C" void initPatternFuncs()
 {
-	memcpy( &patternFuncs, &staticFuncs, sizeof(SourceFuncs) );
+	memset( &patternFuncs, 0, sizeof(SourceFuncs) );
 
 	patternFuncs.getData = &inputStreamPatternGetData;
 	patternFuncs.consumeData = &inputStreamPatternConsumeData;
@@ -322,13 +312,22 @@ int inputStreamReplConsumeData( SourceStream *is, int length )
 	return length;
 }
 
+int inputStreamReplUndoConsumeData( SourceStream *is, const char *data, int length )
+{
+	is->offset -= length;
+	return length;
+}
+
 extern "C" void initReplFuncs()
 {
-	memcpy( &replFuncs, &staticFuncs, sizeof(SourceFuncs) );
+	memset( &replFuncs, 0, sizeof(SourceFuncs) );
+
 	replFuncs.getData = &inputStreamReplGetData;
+	replFuncs.consumeData = &inputStreamReplConsumeData;
+	replFuncs.undoConsumeData = &inputStreamReplUndoConsumeData;
+
 	replFuncs.consumeLangEl = &inputStreamReplGetLangEl;
 	replFuncs.undoConsumeLangEl = &inputStreamReplPushBackNamed;
-	replFuncs.consumeData = &inputStreamReplConsumeData;
 }
 
 Kid *sendNamedLangEl( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )

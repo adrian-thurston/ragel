@@ -87,20 +87,27 @@ typedef struct _SourceStream SourceStream;
 
 struct SourceFuncs
 {
+	/* Data. */
 	int (*getData)( SourceStream *is, int offset, char *dest, int length, int *copied );
 	int (*consumeData)( SourceStream *is, int length );
 	int (*undoConsumeData)( SourceStream *is, const char *data, int length );
 
-	int (*getDataImpl)( SourceStream *is, char *dest, int length );
-
+	/* Trees. */
 	struct ColmTree *(*consumeTree)( SourceStream *is );
-	struct LangEl *(*consumeLangEl)( SourceStream *is, long *bindId, char **data, long *length );
+	void (*undoConsumeTree)( SourceStream *is, struct ColmTree *tree, int ignore );
 
-	void (*pushTree)( SourceStream *is, struct ColmTree *tree, int ignore );
+	/* Language elments (compile-time). */
+	struct LangEl *(*consumeLangEl)( SourceStream *is, long *bindId, char **data, long *length );
+	void (*undoConsumeLangEl)( SourceStream *is );
+
+	/* Altering streams. 
+	 * FIXME: These should disappear. */
 	void (*pushText)( SourceStream *is, const char *data, long len );
 	struct ColmTree *(*undoPush)( SourceStream *is, int length );
 	struct ColmTree *(*undoAppend)( SourceStream *is, int length );
-	void (*undoConsumeLangEl)( SourceStream *is );
+
+	/* Private implmentation for some shared get data functions. */
+	int (*getDataImpl)( SourceStream *is, char *dest, int length );
 };
 
 extern struct SourceFuncs baseFuncs;
@@ -203,7 +210,7 @@ struct ColmTree *consumeTree( InputStream *in );
 void setEof( InputStream *is );
 void unsetEof( InputStream *is );
 void unsetLater( InputStream *is );
-void pushTree( InputStream *in, struct ColmTree *tree, int ignore );
+void undoConsumeTree( InputStream *in, struct ColmTree *tree, int ignore );
 void pushText( InputStream *in, const char *data, long len );
 struct ColmTree *undoPush( InputStream *in, int length );
 void appendData( InputStream *in, const char *data, long len );

@@ -44,11 +44,9 @@ void initDynamicFuncs();
 void initFileFuncs();
 void initFdFuncs();
 
-void initStaticFuncs();
 void initPatternFuncs();
 void initReplFuncs();
 
-struct SourceFuncs baseFuncs;
 struct SourceFuncs dynamicFuncs;
 struct SourceFuncs fileFuncs;
 struct SourceFuncs fdFuncs;
@@ -156,12 +154,9 @@ void inputStreamPrepend( SourceStream *is, RunBuf *runBuf )
 
 void initInputFuncs()
 {
-	memset( &baseFuncs, 0, sizeof(struct SourceFuncs) );
-
 	initDynamicFuncs();
 	initFileFuncs();
 	initFdFuncs();
-	initStaticFuncs();
 	initPatternFuncs();
 	initReplFuncs();
 }
@@ -369,12 +364,12 @@ Tree *inputStreamDynamicUndoAppend( SourceStream *is, int length )
 
 void initDynamicFuncs()
 {
-	memcpy( &dynamicFuncs, &baseFuncs, sizeof(struct SourceFuncs) );
+	memset( &dynamicFuncs, 0, sizeof(struct SourceFuncs) );
 	dynamicFuncs.getData = &inputStreamDynamicGetData;
 	dynamicFuncs.consumeData = &inputStreamDynamicConsumeData;
 	dynamicFuncs.undoConsumeData = &inputStreamDynamicUndoConsumeData;
 	dynamicFuncs.consumeTree = &inputStreamDynamicConsumeTree;
-	dynamicFuncs.pushTree = &inputStreamDynamicPushTree;
+	dynamicFuncs.undoConsumeTree = &inputStreamDynamicPushTree;
 	dynamicFuncs.undoPush = &inputStreamDynamicUndoPush;
 	dynamicFuncs.undoAppend = &inputStreamDynamicUndoAppend;
 	dynamicFuncs.pushText = &inputStreamDynamicPushText;
@@ -701,11 +696,11 @@ void undoConsumeLangEl( InputStream *is )
 	}
 }
 
-void pushTree( InputStream *is, Tree *tree, int ignore )
+void undoConsumeTree( InputStream *is, Tree *tree, int ignore )
 {
 	if ( isSourceStream( is ) ) {
 		Stream *stream = (Stream*)is->queue->tree;
-		return stream->in->funcs->pushTree( stream->in, tree, ignore );
+		return stream->in->funcs->undoConsumeTree( stream->in, tree, ignore );
 	}
 	else {
 	//	#ifdef COLM_LOG_PARSE

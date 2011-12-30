@@ -212,7 +212,7 @@ void streamPushTree( FsmRun *fsmRun, InputStream *inputStream, Tree *tree, int i
 //	#endif
 
 //	sendBackBuffered( fsmRun, inputStream );
-	pushTree( inputStream, tree, ignore );
+	undoConsumeTree( inputStream, tree, ignore );
 }
 
 void undoStreamPush( Program *prg, Tree **sp, FsmRun *fsmRun, InputStream *inputStream, long length )
