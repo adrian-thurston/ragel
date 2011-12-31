@@ -78,18 +78,29 @@ int inputStreamPatternGetData( SourceStream *is, int skip, char *dest, int lengt
 			is->line = buf->loc.line;
 
 		assert ( buf->type == PatternItem::InputText );
-		int available = buf->data.length() - ( offset + skip );
+		int avail = buf->data.length() - offset;
 
-		if ( available == 0 && buf->next == 0 )
-			return INPUT_EOD;
+		if ( avail > 0 ) {
+			/* The source data from the current buffer. */
+			char *src = &buf->data[offset];
+			int slen = avail <= length ? avail : length;
 
-		if ( available > 0 ) {
-			if ( available < length )
-				length = available;
+			/* Need to skip? */
+			if ( skip > 0 && slen <= skip ) {
+				/* Skipping the the whole source. */
+				skip -= slen;
+			}
+			else {
+				/* Either skip is zero, or less than slen. Skip goes to zero.
+				 * Some data left over, copy it. */
+				src += skip;
+				slen -= skip;
+				skip = 0;
 
-			memcpy( dest, buf->data.data + offset, length );
-			*copied += length;
-			break;
+				memcpy( dest, src, slen ) ;
+				*copied += slen;
+				break;
+			}
 		}
 
 		buf = buf->next;
@@ -154,6 +165,9 @@ int inputStreamPatternConsumeData( SourceStream *is, int length )
 
 			length -= avail;
 			consumed += avail;
+
+			if ( length == 0 )
+				break;
 		}
 		else {
 			is->offset += length;
@@ -244,18 +258,29 @@ int inputStreamReplGetData( SourceStream *is, int skip, char *dest, int length, 
 			is->line = buf->loc.line;
 
 		assert ( buf->type == ReplItem::InputText );
-		int available = buf->data.length() - ( offset + skip ) ;
+		int avail = buf->data.length() - offset;
 
-		if ( available == 0 && buf->next == 0 )
-			return INPUT_EOD;
+		if ( avail > 0 ) {
+			/* The source data from the current buffer. */
+			char *src = &buf->data[offset];
+			int slen = avail <= length ? avail : length;
 
-		if ( available > 0 ) {
-			if ( available < length )
-				length = available;
+			/* Need to skip? */
+			if ( skip > 0 && slen <= skip ) {
+				/* Skipping the the whole source. */
+				skip -= slen;
+			}
+			else {
+				/* Either skip is zero, or less than slen. Skip goes to zero.
+				 * Some data left over, copy it. */
+				src += skip;
+				slen -= skip;
+				skip = 0;
 
-			memcpy( dest, buf->data.data + offset, length );
-			*copied += length;
-			break;
+				memcpy( dest, src, slen ) ;
+				*copied += slen;
+				break;
+			}
 		}
 
 		buf = buf->next;
@@ -324,6 +349,9 @@ int inputStreamReplConsumeData( SourceStream *is, int length )
 
 			length -= avail;
 			consumed += avail;
+
+			if ( length == 0 )
+				break;
 		}
 		else {
 			is->offset += length;
