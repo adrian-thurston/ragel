@@ -963,6 +963,10 @@ long scanToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *input
 			}
 			else {
 				int i;
+
+				debug( REALM_SCAN, "copying data over to new buffer\n" );
+				assert( fsmRun->runBuf->offset == 0 );
+
 				if ( fsmRun->tokstart == fsmRun->runBuf->data ) {
 					/* A token is started and it is already at the beginning
 					 * of the current buffer. This means buffer is full and it

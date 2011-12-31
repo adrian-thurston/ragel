@@ -176,7 +176,7 @@ int inputStreamDynamicGetData( SourceStream *is, int skip, char *dest, int lengt
 		if ( buf == 0 ) {
 			/* Got through the in-mem buffers without copying anything. */
 			RunBuf *runBuf = newRunBuf();
-			inputStreamPrepend( is, runBuf );
+			inputStreamAppend( is, runBuf );
 			int received = is->funcs->getDataImpl( is, runBuf->data, FSM_BUFSIZE );
 			if ( received == 0 ) {
 				ret = INPUT_EOD;
@@ -247,6 +247,7 @@ int inputStreamDynamicConsumeData( SourceStream *is, int length )
 			if ( avail > 0 ) {
 				/* The source data from the current buffer. */
 				int slen = avail <= length ? avail : length;
+				debug( REALM_INPUT, "consumed: %.*s\n", slen, buf->data + buf->offset );
 				consumed += slen;
 				length -= slen;
 				buf->offset += slen;
@@ -260,8 +261,6 @@ int inputStreamDynamicConsumeData( SourceStream *is, int length )
 	}
 
 	return consumed;
-
-	return length;
 }
 
 int inputStreamDynamicUndoConsumeData( SourceStream *is, const char *data, int length )
@@ -596,7 +595,7 @@ int getData( InputStream *is, int skip, char *dest, int length, int *copied )
 #if DEBUG
 	switch ( ret ) {
 		case INPUT_DATA:
-			debug( REALM_INPUT, "get data: DATA copied: %d\n", *copied );
+			debug( REALM_INPUT, "get data: DATA copied: %d: %.*s\n", *copied, (int)*copied, dest );
 			break;
 		case INPUT_EOD:
 			debug( REALM_INPUT, "get data: EOD\n" );
