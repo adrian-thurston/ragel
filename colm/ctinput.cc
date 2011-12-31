@@ -138,15 +138,31 @@ int inputStreamPatternConsumeData( SourceStream *is, int length )
 {
 	debug( REALM_INPUT, "consuming %ld bytes\n", length );
 
-	is->offset += length;
-	if ( is->offset == is->patItem->data.length() ) {
-		/* Read up to the end of the data. Advance the
-		 * pattern item. */
-		is->patItem = is->patItem->next;
-		is->offset = 0;
+	int consumed = 0;
+
+	while ( true ) {
+		if ( is->patItem == 0 )
+			break;
+
+		int avail = is->patItem->data.length() - is->offset;
+
+		if ( length >= avail ) {
+			/* Read up to the end of the data. Advance the
+			 * pattern item. */
+			is->patItem = is->patItem->next;
+			is->offset = 0;
+
+			length -= avail;
+			consumed += avail;
+		}
+		else {
+			is->offset += length;
+			consumed += length;
+			break;
+		}
 	}
 
-	return length;
+	return consumed;
 }
 
 int inputStreamPatternUndoConsumeData( SourceStream *is, const char *data, int length )
@@ -292,16 +308,31 @@ void inputStreamReplUndoConsumeLangEl( SourceStream *is )
 
 int inputStreamReplConsumeData( SourceStream *is, int length )
 {
-	is->offset += length;
+	int consumed = 0;
 
-	if ( is->offset == is->replItem->data.length() ) {
-		/* Read up to the end of the data. Advance the
-		 * pattern item. */
-		is->replItem = is->replItem->next;
-		is->offset = 0;
+	while ( true ) {
+		if ( is->replItem == 0 )
+			break;
+
+		int avail = is->replItem->data.length() - is->offset;
+
+		if ( length >= avail ) {
+			/* Read up to the end of the data. Advance the
+			 * pattern item. */
+			is->replItem = is->replItem->next;
+			is->offset = 0;
+
+			length -= avail;
+			consumed += avail;
+		}
+		else {
+			is->offset += length;
+			consumed += length;
+			break;
+		}
 	}
 
-	return length;
+	return consumed;
 }
 
 int inputStreamReplUndoConsumeData( SourceStream *is, const char *data, int length )

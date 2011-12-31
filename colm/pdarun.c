@@ -389,9 +389,20 @@ void detachIgnores( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, Kid
 	treeDownref( prg, sp, leftIgnore );
 }
 
+void clearBuffered( FsmRun *fsmRun )
+{
+	/* If there is data in the current buffer then send the whole send back
+	 * should be in this buffer. */
+	if ( fsmRun->tokstart != 0 ) 
+		fsmRun->p = fsmRun->pe = fsmRun->tokstart;
+	else
+		fsmRun->pe = fsmRun->p;
+}
+
 /* Stops on:
  *   PcrRevToken
  */
+
 
 static long sendBack( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, 
 		InputStream *inputStream, Kid *input, long entry )

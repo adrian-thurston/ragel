@@ -449,6 +449,8 @@ void undoParseStream( struct ColmProgram *prg, Tree **sp, InputStream *inputStre
 void attachIgnore( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, Kid *input );
 void detachIgnores( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, Kid *input );
 
+void clearBuffered( FsmRun *fsmRun );
+
 #ifdef __cplusplus
 }
 #endif
