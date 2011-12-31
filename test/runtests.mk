@@ -68,7 +68,8 @@ TESTS = \
 	div.lm \
 	scope1.lm \
 	export1.lm \
-	lhs1.lm
+	lhs1.lm \
+	binary1.lm
 
 DIFFS = \
 	ambig1.diff \
@@ -136,7 +137,8 @@ DIFFS = \
 	div.diff \
 	scope1.diff \
 	export1.diff \
-	lhs1.diff
+	lhs1.diff \
+	binary1.diff
 
 all: runtests.mk $(DIFFS) $(SUBDIRS)
 

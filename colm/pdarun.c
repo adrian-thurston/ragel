@@ -250,10 +250,7 @@ static void sendBackText( FsmRun *fsmRun, InputStream *inputStream, const char *
 
 	/* If there is data in the current buffer then send the whole send back
 	 * should be in this buffer. */
-	if ( fsmRun->tokstart != 0 ) 
-		fsmRun->p = fsmRun->pe = fsmRun->tokstart;
-	else
-		fsmRun->pe = fsmRun->p;
+	clearBuffered( fsmRun );
 
 	/* slide data back. */
 //	fsmRun->p = fsmRun->pe = fsmRun->runBuf->data;
@@ -393,10 +390,13 @@ void clearBuffered( FsmRun *fsmRun )
 {
 	/* If there is data in the current buffer then send the whole send back
 	 * should be in this buffer. */
-	if ( fsmRun->tokstart != 0 ) 
+	if ( fsmRun->tokstart != 0 ) {
 		fsmRun->p = fsmRun->pe = fsmRun->tokstart;
-	else
+		fsmRun->tokstart = 0;
+	}
+	else {
 		fsmRun->pe = fsmRun->p;
+	}
 }
 
 /* Stops on:
@@ -1218,7 +1218,6 @@ case PcrGeneration:
 			/* Is a plain token. */
 			pdaRun->input1 = sendToken( prg, sp, inputStream, fsmRun, pdaRun, pdaRun->tokenId );
 		}
-
 
 		long pcr = parseToken( prg, sp, pdaRun, fsmRun, inputStream, PcrStart );
 		
