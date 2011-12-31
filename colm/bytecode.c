@@ -362,7 +362,7 @@ void undoPull( Program *prg, FsmRun *fsmRun, InputStream *in, Tree *str )
 	undoStreamPull( fsmRun, in, data, length );
 }
 
-Word streamPush( Program *prg, Tree **sp, FsmRun *fsmRun, InputStream *in, Tree *tree, int ignore )
+long streamPush( Program *prg, Tree **sp, FsmRun *fsmRun, InputStream *in, Tree *tree, int ignore )
 {
 	if ( tree->id == LEL_ID_STR ) {
 		/* This should become a compile error. If it's text, it's up to the
@@ -389,7 +389,7 @@ Word streamPush( Program *prg, Tree **sp, FsmRun *fsmRun, InputStream *in, Tree 
 		tree->flags |= AF_ARTIFICIAL;
 		treeUpref( tree );
 		streamPushTree( fsmRun, in, tree, ignore );
-		return 0;
+		return -1;
 	}
 }
 
@@ -484,7 +484,6 @@ Tree *constructArgv( Program *prg, int argc, const char **argv )
 	}
 	return list;
 }
-
 
 /*
  * Execution environment
@@ -2580,7 +2579,7 @@ again:
 
 			Tree *accum = vm_pop();
 			Tree *tree = vm_pop();
-			Word len = streamPush( prg, sp, ((Accum*)accum)->fsmRun, ((Accum*)accum)->accumStream->in, tree, false );
+			int len = streamPush( prg, sp, ((Accum*)accum)->fsmRun, ((Accum*)accum)->accumStream->in, tree, false );
 			vm_push( 0 );
 
 			/* Single unit. */
@@ -2598,7 +2597,7 @@ again:
 
 			Tree *accum = vm_pop();
 			Tree *tree = vm_pop();
-			Word len = streamPush( prg, sp, ((Accum*)accum)->fsmRun, ((Accum*)accum)->accumStream->in, tree, true );
+			long len = streamPush( prg, sp, ((Accum*)accum)->fsmRun, ((Accum*)accum)->accumStream->in, tree, true );
 			vm_push( 0 );
 
 			/* Single unit. */
@@ -2665,7 +2664,7 @@ again:
 
 			AccumStream *accumStream = (AccumStream*)vm_pop();
 			Tree *tree = vm_pop();
-			Word len = streamPush( prg, sp, 0, accumStream->in, tree, false );
+			long len = streamPush( prg, sp, 0, accumStream->in, tree, false );
 			vm_push( 0 );
 
 			/* Single unit. */
@@ -2683,7 +2682,7 @@ again:
 
 			AccumStream *accumStream = (AccumStream*)vm_pop();
 			Tree *tree = vm_pop();
-			Word len = streamPush( prg, sp, 0, accumStream->in, tree, true );
+			long len = streamPush( prg, sp, 0, accumStream->in, tree, true );
 			vm_push( 0 );
 
 			/* Single unit. */

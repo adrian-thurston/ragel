@@ -776,19 +776,13 @@ void prependData( InputStream *is, const char *data, long length )
 
 Tree *undoPrependData( InputStream *is, int length )
 {
-	if ( isSourceStream( is ) ) {
-		Stream *stream = (Stream*)is->queue->tree;
-		return stream->in->funcs->undoPrependData( stream->in, length );
-	}
-	else {
+//	if ( isSourceStream( is ) ) {
+//		Stream *stream = (Stream*)is->queue->tree;
+//		return stream->in->funcs->undoPrependData( stream->in, length );
+//	}
+//	else {
 		if ( is->queue->type == RunBufDataType ) {
-			char tmp[length];
-			int have = 0;
-			while ( have < length ) {
-				int res = 0;
-				getData( 0, is, 0, tmp, length-have, &res );
-				have += res;
-			}
+			consumeData( is, length );
 			return 0;
 		}
 		else {
@@ -798,7 +792,7 @@ Tree *undoPrependData( InputStream *is, int length )
 			free(rb);
 			return tree;
 		}
-	}
+//	}
 }
 
 void appendData( InputStream *is, const char *data, long len )

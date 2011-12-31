@@ -222,20 +222,18 @@ void streamPushTree( FsmRun *fsmRun, InputStream *inputStream, Tree *tree, int i
 
 void undoStreamPush( Program *prg, Tree **sp, FsmRun *fsmRun, InputStream *inputStream, long length )
 {
-//	sendBackBuffered( fsmRun, inputStream );
-	Tree *tree = undoPrependData( inputStream, length );
-	if ( tree != 0 )
-		treeDownref( prg, sp, tree );
+	if ( length < 0 ) 
+		consumeTree( inputStream );
+	else
+		consumeData( inputStream, length );
 }
 
 void undoStreamAppend( Program *prg, Tree **sp, FsmRun *fsmRun, InputStream *inputStream, Tree *input, long length )
 {
-	if ( input->id == LEL_ID_STREAM ) {
+	if ( input->id == LEL_ID_STREAM )
 		undoAppendStream( inputStream );
-	}
-	else {
+	else
 		undoAppendData( inputStream, length );
-	}
 }
 
 /* Should only be sending back whole tokens/ignores, therefore the send back
