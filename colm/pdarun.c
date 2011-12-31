@@ -198,25 +198,11 @@ void undoStreamPull( FsmRun *fsmRun, InputStream *inputStream, const char *data,
 
 void streamPushText( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length )
 {
-//	#ifdef COLM_LOG_PARSE
-//	if ( colm_log_parse ) {
-//		cerr << "readying fake push" << endl;
-//	}
-//	#endif
-
-//	sendBackBuffered( fsmRun, inputStream );
 	prependData( inputStream, data, length );
 }
 
 void streamPushTree( FsmRun *fsmRun, InputStream *inputStream, Tree *tree, int ignore )
 {
-//	#ifdef COLM_LOG_PARSE
-//	if ( colm_log_parse ) {
-//		cerr << "readying fake push" << endl;
-//	}
-//	#endif
-
-//	sendBackBuffered( fsmRun, inputStream );
 	undoConsumeTree( inputStream, tree, ignore );
 }
 

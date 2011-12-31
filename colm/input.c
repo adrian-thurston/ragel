@@ -714,6 +714,9 @@ Tree *consumeTree( InputStream *is )
 
 void undoConsumeTree( InputStream *is, Tree *tree, int ignore )
 {
+	if ( is->attached1 != 0 )
+		detachInput1( is->attached1, is );
+
 	/* Create a new buffer for the data. This is the easy implementation.
 	 * Something better is needed here. It puts a max on the amount of
 	 * data that can be pushed back to the inputStream. */
@@ -748,11 +751,11 @@ void undoConsumeLangEl( InputStream *is )
 
 void prependData( InputStream *is, const char *data, long length )
 {
-	if ( isSourceStream( is ) ) {
-		Stream *stream = (Stream*)is->queue->tree;
-		return stream->in->funcs->prependData( stream->in, data, length );
-	}
-	else {
+///	if ( isSourceStream( is ) ) {
+///		Stream *stream = (Stream*)is->queue->tree;
+///		return stream->in->funcs->prependData( stream->in, data, length );
+///	}
+///	else {
 	//	#ifdef COLM_LOG_PARSE
 	//	if ( colm_log_parse ) {
 	//		cerr << "readying fake push" << endl;
@@ -771,7 +774,7 @@ void prependData( InputStream *is, const char *data, long length )
 		memcpy( newBuf->data, data, length );
 
 		inputStreamPrepend2( is, newBuf );
-	}
+//	}
 }
 
 Tree *undoPrependData( InputStream *is, int length )
