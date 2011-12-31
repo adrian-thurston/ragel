@@ -62,36 +62,40 @@ LangEl *inputStreamPatternGetLangEl( SourceStream *is, long *bindId, char **data
 
 int inputStreamPatternGetData( SourceStream *is, int skip, char *dest, int length, int *copied )
 { 
-	if ( is->patItem == 0 )
-		return INPUT_EOD;
+	*copied = 0;
 
-	if ( is->patItem->type == PatternItem::FactorType )
-		return INPUT_LANG_EL;
+	PatternItem *buf = is->patItem;
+	int offset = is->offset;
 
-	if ( is->offset == 0 )
-		is->line = is->patItem->loc.line;
-	
-	assert ( is->patItem->type == PatternItem::InputText );
-	int available = is->patItem->data.length() - ( is->offset + skip );
+	while ( true ) {
+		if ( buf == 0 )
+			return INPUT_EOD;
 
-	if ( available == 0 && is->patItem->next == 0 )
-		return INPUT_EOD;
+		if ( buf->type == PatternItem::FactorType )
+			return INPUT_LANG_EL;
 
-	if ( available < length )
-		length = available;
+		if ( offset == 0 )
+			is->line = buf->loc.line;
 
-	memcpy( dest, is->patItem->data.data + is->offset, length );
+		assert ( buf->type == PatternItem::InputText );
+		int available = buf->data.length() - ( offset + skip );
 
-//	is->offset += length;
-//
-//	if ( is->offset == is->patItem->data.length() ) {
-//		/* Read up to the end of the data. Advance the
-//		 * pattern item. */
-//		is->patItem = is->patItem->next;
-//		is->offset = 0;
-//	}
+		if ( available == 0 && buf->next == 0 )
+			return INPUT_EOD;
 
-	*copied = length;
+		if ( available > 0 ) {
+			if ( available < length )
+				length = available;
+
+			memcpy( dest, buf->data.data + offset, length );
+			*copied += length;
+			break;
+		}
+
+		buf = buf->next;
+		offset = 0;
+	}
+
 	return INPUT_DATA;
 }
 
@@ -206,38 +210,42 @@ LangEl *inputStreamReplGetLangEl( SourceStream *is, long *bindId, char **data, l
 	return klangEl;
 }
 
-int inputStreamReplGetData( SourceStream *is, int offset, char *dest, int length, int *copied )
+int inputStreamReplGetData( SourceStream *is, int skip, char *dest, int length, int *copied )
 { 
-	if ( is->replItem == 0 )
-		return INPUT_EOD;
+	*copied = 0;
 
-	if ( is->replItem->type == ReplItem::ExprType || is->replItem->type == ReplItem::FactorType )
-		return INPUT_LANG_EL;
+	ReplItem *buf = is->replItem;
+	int offset = is->offset;
 
-	if ( is->offset == 0 )
-		is->line = is->replItem->loc.line;
+	while ( true ) {
+		if ( buf == 0 )
+			return INPUT_EOD;
 
-	assert ( is->replItem->type == ReplItem::InputText );
-	int available = is->replItem->data.length() - is->offset - offset;
+		if ( buf->type == ReplItem::ExprType || buf->type == ReplItem::FactorType )
+			return INPUT_LANG_EL;
 
-	if ( available == 0 && is->replItem->next == 0 )
-		return INPUT_EOD;
+		if ( offset == 0 )
+			is->line = buf->loc.line;
 
-	if ( available < length )
-		length = available;
+		assert ( buf->type == ReplItem::InputText );
+		int available = buf->data.length() - ( offset + skip ) ;
 
-	memcpy( dest, is->replItem->data.data+is->offset, length );
+		if ( available == 0 && buf->next == 0 )
+			return INPUT_EOD;
 
-//	is->offset += length;
-//
-//	if ( is->offset == is->replItem->data.length() ) {
-//		/* Read up to the end of the data. Advance the
-//		 * replacement item. */
-//		is->replItem = is->replItem->next;
-//		is->offset = 0;
-//	}
+		if ( available > 0 ) {
+			if ( available < length )
+				length = available;
 
-	*copied = length;
+			memcpy( dest, buf->data.data + offset, length );
+			*copied += length;
+			break;
+		}
+
+		buf = buf->next;
+		offset = 0;
+	}
+
 	return INPUT_DATA;
 }
 
