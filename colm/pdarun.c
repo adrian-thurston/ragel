@@ -151,8 +151,6 @@ Head *streamPull( Program *prg, FsmRun *fsmRun, InputStream *inputStream, long l
 	Head *tokdata = stringAllocPointer( prg, runBuf->data, length );
 	updatePosition( inputStream, runBuf->data, length );
 
-
-
 	return tokdata;
 }
 
@@ -187,9 +185,12 @@ void undoStreamPull( FsmRun *fsmRun, InputStream *inputStream, const char *data,
 
 //	if ( fsmRun->p == fsmRun->pe && fsmRun->p == fsmRun->runBuf->data )
 //		sendBackRunBufHead( fsmRun, inputStream );
+//
+//	//assert( fsmRun->p - length >= fsmRun->runBuf->data );
+//	fsmRun->p -= length;
 
-	//assert( fsmRun->p - length >= fsmRun->runBuf->data );
-	fsmRun->p -= length;
+	prependData( inputStream, data, length );
+
 }
 
 void streamPushText( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length )
@@ -946,14 +947,6 @@ long scanToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *input
 		 * data. */
 		assert( fsmRun->p == fsmRun->pe );
 
-//		/* Check for a named language element or constructed trees. Note that
-//		 * we can do this only when data == de otherwise we get ahead of what's
-//		 * already in the buffer. */
-//		else if ( isIgnore( inputStream ) ) {
-//			breakRunBuf( fsmRun );
-//			return SCAN_IGNORE;
-//		}
-//
 		/* There may be space left in the current buffer. If not then we need
 		 * to make some. */
 		long space = fsmRun->runBuf->data + FSM_BUFSIZE - fsmRun->pe;
@@ -1041,6 +1034,12 @@ long scanToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *input
 					fsmRun->peof = fsmRun->pe;
 				else 
 					return SCAN_TREE;
+				break;
+			case INPUT_IGNORE:
+				if ( fsmRun->tokstart != 0 )
+					fsmRun->peof = fsmRun->pe;
+				else
+					return SCAN_IGNORE;
 				break;
 		}
 	}
