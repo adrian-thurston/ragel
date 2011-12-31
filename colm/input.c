@@ -525,7 +525,7 @@ void unsetEof( InputStream *is )
 	}
 }
 
-int getData( InputStream *is, int skip, char *dest, int length, int *copied )
+int getData( FsmRun *fsmRun, InputStream *is, int skip, char *dest, int length, int *copied )
 {
 	int ret = 0;
 	*copied = 0;
@@ -542,6 +542,8 @@ int getData( InputStream *is, int skip, char *dest, int length, int *copied )
 		if ( buf->type == RunBufSourceType ) {
 			Stream *stream = (Stream*)buf->tree;
 			int type = stream->in->funcs->getData( stream->in, skip, dest, length, copied );
+
+			attachInput2( fsmRun, stream->in );
 
 			if ( type == INPUT_EOD && is->eof ) {
 				ret = INPUT_EOF;
@@ -591,6 +593,8 @@ int getData( InputStream *is, int skip, char *dest, int length, int *copied )
 
 		buf = buf->next;
 	}
+
+	attachInput1( fsmRun, is );
 
 #if DEBUG
 	switch ( ret ) {
@@ -663,19 +667,27 @@ int consumeData( InputStream *is, int length )
 	return consumed;
 }
 
-int undoConsumeData( InputStream *is, const char *data, int length )
+int undoConsumeData( FsmRun *fsmRun, InputStream *is, const char *data, int length )
 {
 	debug( REALM_INPUT, "undoing consume of %ld bytes\n", length );
 
 	if ( isSourceStream( is ) ) {
 		Stream *stream = (Stream*)is->queue->tree;
-		return stream->in->funcs->undoConsumeData( stream->in, data, length );
+		int len = stream->in->funcs->undoConsumeData( stream->in, data, length );
+
+		if ( stream->in->attached2 != 0 )
+			detachInput2( stream->in->attached2, stream->in );
+
+		return len;
 	}
 	else {
 		RunBuf *newBuf = newRunBuf();
 		newBuf->length = length;
 		memcpy( newBuf->data, data, length );
 		inputStreamPrepend2( is, newBuf );
+
+		if ( is->attached1 != 0 )
+			detachInput1( is->attached1, is );
 
 		return length;
 	}
@@ -718,7 +730,7 @@ struct LangEl *consumeLangEl( InputStream *is, long *bindId, char **data, long *
 		return stream->in->funcs->consumeLangEl( stream->in, bindId, data, length );
 	}
 	else {
-		return 0;
+		assert( false );
 	}
 }
 
@@ -729,7 +741,7 @@ void undoConsumeLangEl( InputStream *is )
 		return stream->in->funcs->undoConsumeLangEl( stream->in );
 	}
 	else {
-		assert(false);
+		assert( false );
 	}
 }
 
@@ -774,7 +786,7 @@ Tree *undoPrependData( InputStream *is, int length )
 			int have = 0;
 			while ( have < length ) {
 				int res = 0;
-				getData( is, 0, tmp, length-have, &res );
+				getData( 0, is, 0, tmp, length-have, &res );
 				have += res;
 			}
 			return 0;

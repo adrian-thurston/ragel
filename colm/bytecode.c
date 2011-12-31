@@ -228,7 +228,6 @@ case PcrStart:
 		long pcr = parseLoop( prg, sp, accum->pdaRun, accum->fsmRun, accum->accumStream->in, entry );
 
 		while ( pcr != PcrDone ) {
-			clearBuffered( accum->fsmRun );
 
 return pcr;
 case PcrReduction:
@@ -248,8 +247,6 @@ case PcrRevReduction2:
 case PcrDone:
 break; }
 
-	clearBuffered( accum->fsmRun );
-
 	return PcrDone;
 }
 
@@ -266,8 +263,6 @@ case PcrStart:
 			long pcr = parseLoop( prg, sp, accum->pdaRun, accum->fsmRun, accum->accumStream->in, entry );
 
 		 	while ( pcr != PcrDone ) {
-
-				clearBuffered( accum->fsmRun );
 
 return pcr;
 case PcrReduction:
@@ -300,8 +295,6 @@ case PcrRevReduction2:
 case PcrDone:
 break; }
 
-	clearBuffered( accum->fsmRun );
-
 	return PcrDone;
 }
 
@@ -313,14 +306,7 @@ long undoParseFrag( Program *prg, Tree **sp, Accum *accum, long steps, long entr
 
 	debug( REALM_PARSE, "undo parse frag, target steps: %ld, pdarun steps: %ld\n", steps, pdaRun->steps );
 
-	/* If there is a token started, but never finished for a lack of data, we
-	 * must first backup over it. */
-	if ( fsmRun->tokstart != 0 ) {
-		fsmRun->p = fsmRun->tokstart;
-		fsmRun->tokstart = 0;
-	}
-
-//	sendBackBuffered( inputStream );
+	resetToken( fsmRun );
 
 switch ( entry ) {
 case PcrStart:
@@ -335,8 +321,6 @@ case PcrStart:
 		/* The parse loop will recognise the situation. */
 		long pcr = parseLoop( prg, sp, pdaRun, fsmRun, inputStream, entry );
 		while ( pcr != PcrDone ) {
-
-//			sendBackBuffered( accum->fsmRun, accum->accumStream->in );
 
 return pcr;
 case PcrReduction:
@@ -360,8 +344,6 @@ case PcrRevReduction2:
 
 case PcrDone:
 break; }
-
-//	sendBackBuffered( accum->fsmRun, accum->accumStream->in );
 
 	return PcrDone;
 }

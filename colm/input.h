@@ -151,6 +151,8 @@ struct _SourceStream
 	struct PatternItem *patItem;
 	struct Replacement *replacement;
 	struct ReplItem *replItem;
+
+	struct _FsmRun *attached2;
 };
 
 SourceStream *newInputStreamPattern( struct Pattern *pattern );
@@ -192,15 +194,17 @@ struct _InputStream
 	struct PatternItem *patItem;
 	struct Replacement *replacement;
 	struct ReplItem *replItem;
+
+	struct _FsmRun *attached1;
 };
 
 typedef struct _InputStream InputStream;
 
 /* The input stream interface. */
 
-int getData( InputStream *in, int offset, char *dest, int length, int *copied );
+int getData( struct _FsmRun *fsmRun, InputStream *in, int offset, char *dest, int length, int *copied );
 int consumeData( InputStream *in, int length );
-int undoConsumeData( InputStream *is, const char *data, int length );
+int undoConsumeData( struct _FsmRun *fsmRun, InputStream *is, const char *data, int length );
 
 struct ColmTree *consumeTree( InputStream *in );
 void undoConsumeTree( InputStream *in, struct ColmTree *tree, int ignore );

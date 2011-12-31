@@ -70,6 +70,9 @@ void initFsmRun( FsmRun *fsmRun, Program *prg )
 
 	fsmRun->p = fsmRun->pe = fsmRun->runBuf->data;
 	fsmRun->peof = 0;
+
+	fsmRun->attached1 = 0;
+	fsmRun->attached2 = 0;
 }
 
 void clearFsmRun( Program *prg, FsmRun *fsmRun )
@@ -144,7 +147,7 @@ Head *streamPull( Program *prg, FsmRun *fsmRun, InputStream *inputStream, long l
 	fsmRun->runBuf = runBuf;
 
 	int len = 0;
-	getData( inputStream, 0, runBuf->data, length, &len );
+	getData( fsmRun, inputStream, 0, runBuf->data, length, &len );
 	consumeData( inputStream, length );
 	fsmRun->p = fsmRun->pe = runBuf->data + length;
 
@@ -250,11 +253,11 @@ static void sendBackText( FsmRun *fsmRun, InputStream *inputStream, const char *
 
 	/* If there is data in the current buffer then send the whole send back
 	 * should be in this buffer. */
-	clearBuffered( fsmRun );
+	//clearBuffered( fsmRun );
 
 	/* slide data back. */
 //	fsmRun->p = fsmRun->pe = fsmRun->runBuf->data;
-	undoConsumeData( inputStream, data, length );
+	undoConsumeData( fsmRun, inputStream, data, length );
 
 //	#if COLM_LOG
 //	if ( memcmp( data, fsmRun->p, length ) != 0 )
@@ -386,6 +389,57 @@ void detachIgnores( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, Kid
 	treeDownref( prg, sp, leftIgnore );
 }
 
+void attachInput1( FsmRun *fsmRun, InputStream *is )
+{
+	if ( is->attached1 != 0 && is->attached1 != fsmRun )
+		detachInput1( is->attached1, is );
+
+	debug( REALM_INPUT, "attaching fsm run to input stream:  %p %p\n", fsmRun, is );
+	fsmRun->attached1 = is;
+	is->attached1 = fsmRun;
+}
+
+void attachInput2( FsmRun *fsmRun, SourceStream *is )
+{
+	if ( is->attached2 != 0 && is->attached2 != fsmRun )
+		detachInput2( is->attached2, is );
+
+	debug( REALM_INPUT, "attaching fsm run to source stream: %p %p\n", fsmRun, is );
+	fsmRun->attached2 = is;
+	is->attached2 = fsmRun;
+}
+
+void detachInput1( FsmRun *fsmRun, InputStream *is )
+{
+	debug( REALM_INPUT, "detaching fsm run from input stream:  %p %p\n", fsmRun, is );
+
+	fsmRun->attached1 = 0;
+	is->attached1 = 0;
+
+	clearBuffered( fsmRun );
+
+	if ( fsmRun->attached2 != 0 ) {
+		fsmRun->attached2->attached2 = 0;
+		fsmRun->attached2 = 0;
+	}
+}
+
+void detachInput2( FsmRun *fsmRun, SourceStream *is )
+{
+	debug( REALM_INPUT, "detaching fsm run from source stream: %p %p\n", fsmRun, is );
+
+	fsmRun->attached2 = 0;
+	is->attached2 = 0;
+
+	clearBuffered( fsmRun );
+
+	if ( fsmRun->attached1 != 0 ) {
+		fsmRun->attached1->attached1 = 0;
+		fsmRun->attached1 = 0;
+	}
+}
+
+
 void clearBuffered( FsmRun *fsmRun )
 {
 	/* If there is data in the current buffer then send the whole send back
@@ -396,6 +450,16 @@ void clearBuffered( FsmRun *fsmRun )
 	}
 	else {
 		fsmRun->pe = fsmRun->p;
+	}
+}
+
+void resetToken( FsmRun *fsmRun )
+{
+	/* If there is a token started, but never finished for a lack of data, we
+	 * must first backup over it. */
+	if ( fsmRun->tokstart != 0 ) {
+		fsmRun->p = fsmRun->tokstart;
+		fsmRun->tokstart = 0;
 	}
 }
 
@@ -873,7 +937,6 @@ void newToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun )
 	fsmRun->tokstart = 0;
 	fsmRun->tokend = 0;
 	fsmRun->matchedToken = 0;
-	fsmRun->tokstart = 0;
 
 	/* Set the state using the state of the parser. */
 	fsmRun->region = pdaRunGetNextRegion( pdaRun, 0 );
@@ -1020,7 +1083,7 @@ long scanToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *input
 		int have = fsmRun->tokstart != 0 ? fsmRun->p - fsmRun->tokstart : 0;
 		int len = 0;
 		debug( REALM_SCAN, "fetching data: have: %d  space: %d\n", have, space );
-		int type = getData( inputStream, have, fsmRun->p, space, &len );
+		int type = getData( fsmRun, inputStream, have, fsmRun->p, space, &len );
 
 		switch ( type ) {
 			case INPUT_DATA:
