@@ -809,15 +809,11 @@ Tree *createGeneric( Program *prg, long genericId )
 			accum->genericInfo = genericInfo;
 			accum->fsmRun = malloc( sizeof(FsmRun) );
 			accum->pdaRun = malloc( sizeof(PdaRun) );
-			accum->accumStream = accumStreamAllocate( prg );
-			accum->accumStream->in = malloc( sizeof(InputStream) );
-			accum->accumStream->refs = 1;
 
 			/* Start off the parsing process. */
 			initPdaRun( accum->pdaRun, prg, prg->rtd->pdaTables, 
 					accum->fsmRun, genericInfo->parserId, false, false, 0 );
 			initFsmRun( accum->fsmRun, prg );
-			initInputStream( accum->accumStream->in );
 			newToken( prg, accum->pdaRun, accum->fsmRun );
 
 			newGeneric = (Tree*) accum;
