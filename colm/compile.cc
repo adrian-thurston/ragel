@@ -2078,10 +2078,12 @@ void LangStmt::evaluateAccumItems( ParseData *pd, CodeVect &code ) const
 		code.appendHalf( 1 );
 
 		/* Not a stream. Get the input first. */
+		code.append( IN_GET_ACCUM_STREAM );
 		if ( pd->revertOn )
-			code.append( IN_STREAM_APPEND_WV );
+			code.append( IN_ACCUM_STREAM_APPEND_WV );
 		else
-			code.append( IN_STREAM_APPEND_WC );
+			code.append( IN_ACCUM_STREAM_APPEND_WC );
+		code.append( IN_POP );
 
 		code.append( IN_DUP_TOP );
 

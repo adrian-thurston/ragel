@@ -602,20 +602,6 @@ again:
 			debug( REALM_BYTECODE, "IN_STREAM_PUSH_BKT\n" );
 			break;
 		}
-		case IN_STREAM_APPEND_BKT: {
-			Tree *accum;
-			Tree *input;
-			Word len;
-			read_tree( accum );
-			read_tree( input );
-			read_word( len );
-
-			debug( REALM_BYTECODE, "IN_STREAM_APPEND_BKT\n" ); 
-
-			treeDownref( prg, sp, accum );
-			treeDownref( prg, sp, input );
-			break;
-		}
 		case IN_ACCUM_STREAM_APPEND_BKT: {
 			Tree *accum;
 			Tree *input;
@@ -2124,47 +2110,6 @@ again:
 //		case IN_SET_ACCUM_CTX_WC:
 //		case IN_SET_ACCUM_CTX_WV:
 //			break;
-
-		case IN_STREAM_APPEND_WC: {
-			debug( REALM_BYTECODE, "IN_STREAM_APPEND_WC \n" );
-
-			Accum *accum = (Accum*)vm_pop();
-			Tree *input = vm_pop();
-			streamAppend( prg, sp, input, accum->accumStream->in );
-
-			treeDownref( prg, sp, input );
-			treeDownref( prg, sp, (Tree*)accum );
-			break;
-		}
-		case IN_STREAM_APPEND_WV: {
-			debug( REALM_BYTECODE, "IN_STREAM_APPEND_WV \n" );
-
-			Accum *accum = (Accum*)vm_pop();
-			Tree *input = vm_pop();
-			Word len = streamAppend( prg, sp, input, accum->accumStream->in );
-
-			append( &exec->pdaRun->rcodeCollect, IN_STREAM_APPEND_BKT );
-			appendWord( &exec->pdaRun->rcodeCollect, (Word) accum );
-			appendWord( &exec->pdaRun->rcodeCollect, (Word) input );
-			appendWord( &exec->pdaRun->rcodeCollect, (Word) len );
-			append( &exec->pdaRun->rcodeCollect, SIZEOF_CODE + 3 * SIZEOF_WORD );
-			break;
-		}
-		case IN_STREAM_APPEND_BKT: {
-			Tree *accum;
-			Tree *input;
-			Word len;
-			read_tree( accum );
-			read_tree( input );
-			read_word( len );
-
-			debug( REALM_BYTECODE, "IN_STREAM_APPEND_BKT\n" );
-
-			undoStreamAppend( prg, sp, ((Accum*)accum)->fsmRun, ((Accum*)accum)->accumStream->in, input, len );
-			treeDownref( prg, sp, accum );
-			treeDownref( prg, sp, input );
-			break;
-		}
 
 		case IN_ACCUM_STREAM_APPEND_WC: {
 			debug( REALM_BYTECODE, "IN_ACCUM_STREAM_APPEND_WC \n" );
