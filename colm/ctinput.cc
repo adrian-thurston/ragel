@@ -36,7 +36,7 @@ SourceFuncs replFuncs;
  * Pattern
  */
 
-SourceStream *newInputStreamPattern( Pattern *pattern )
+SourceStream *newSourceStreamPattern( Pattern *pattern )
 {
 	SourceStream *is = (SourceStream*)malloc(sizeof(SourceStream));
 	memset( is, 0, sizeof(SourceStream) );
@@ -202,7 +202,7 @@ extern "C" void initPatternFuncs()
  * Replacement
  */
 
-SourceStream *newInputStreamRepl( Replacement *replacement )
+SourceStream *newSourceStreamRepl( Replacement *replacement )
 {
 	SourceStream *is = (SourceStream*)malloc(sizeof(SourceStream));
 	memset( is, 0, sizeof(SourceStream) );

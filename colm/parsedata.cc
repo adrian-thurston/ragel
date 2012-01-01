@@ -1356,7 +1356,7 @@ void ParseData::parsePatterns()
 
 		Stream *res = streamAllocate( prg );
 		res->id = LEL_ID_STREAM;
-		res->in = newInputStreamRepl( repl );
+		res->in = newSourceStreamRepl( repl );
 		appendStream( in, (Tree*)res );
 		setEof( in );
 
@@ -1383,7 +1383,7 @@ void ParseData::parsePatterns()
 
 		Stream *res = streamAllocate( prg );
 		res->id = LEL_ID_STREAM;
-		res->in = newInputStreamPattern( pat );
+		res->in = newSourceStreamPattern( pat );
 		appendStream( in, (Tree*)res );
 		setEof( in );
 

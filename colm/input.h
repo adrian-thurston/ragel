@@ -100,15 +100,6 @@ struct SourceFuncs
 	int (*getDataImpl)( SourceStream *is, char *dest, int length );
 };
 
-extern struct SourceFuncs baseFuncs;
-extern struct SourceFuncs stringFuncs;
-extern struct SourceFuncs fileFuncs;
-extern struct SourceFuncs fdFuncs;
-extern struct SourceFuncs accumFuncs;
-extern struct SourceFuncs staticFuncs;
-extern struct SourceFuncs patternFuncs;
-extern struct SourceFuncs replFuncs;
-
 struct _SourceStream
 {
 	struct SourceFuncs *funcs;
@@ -144,10 +135,10 @@ struct _SourceStream
 	struct _FsmRun *attached2;
 };
 
-SourceStream *newInputStreamPattern( struct Pattern *pattern );
-SourceStream *newInputStreamRepl( struct Replacement *replacement );
-SourceStream *newInputStreamFile( FILE *file );
-SourceStream *newInputStreamFd( long fd );
+SourceStream *newSourceStreamPattern( struct Pattern *pattern );
+SourceStream *newSourceStreamRepl( struct Replacement *replacement );
+SourceStream *newSourceStreamFile( FILE *file );
+SourceStream *newSourceStreamFd( long fd );
 
 void initInputFuncs();
 void initStaticFuncs();
