@@ -213,6 +213,7 @@ void ParseData::makeLangElIds()
 	assert( intLangEl->id == LEL_ID_INT );
 	assert( strLangEl->id == LEL_ID_STR );
 	assert( streamLangEl->id == LEL_ID_STREAM );
+	assert( accumStreamLangEl->id == LEL_ID_ACCUM_STREAM );
 	assert( ignoreListLangEl->id == LEL_ID_IGNORE_LIST );
 }
 
