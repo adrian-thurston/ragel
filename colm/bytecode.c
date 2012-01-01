@@ -2742,9 +2742,10 @@ again:
 			debug( REALM_BYTECODE, "IN_CONS_ACCUM_STREAM\n" );
 
 			AccumStream *accumStream = accumStreamAllocate( prg );
+			accumStream->refs = 1;
+			accumStream->id = LEL_ID_ACCUM_STREAM;
 			accumStream->in = malloc( sizeof(InputStream) );
 			initInputStream( accumStream->in );
-			accumStream->refs = 1;
 
 			vm_push( (Tree*) accumStream );
 			break;

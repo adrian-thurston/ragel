@@ -868,10 +868,9 @@ free_tree:
 			Accum *accum = (Accum*)tree;
 			clearFsmRun( prg, accum->fsmRun );
 			clearPdaRun( prg, sp, accum->pdaRun );
-			//treeDownref( prg, accum->accumStream );
 			free( accum->pdaRun );
 			free( accum->fsmRun );
-			//free( accum->accumStream->in );
+			treeDownref( prg, sp, (Tree*)accum->accumStream );
 			mapElFree( prg, (MapEl*)accum );
 		}
 		else {
@@ -894,6 +893,11 @@ free_tree:
 			if ( s->file != 0 )
 				fclose( s->file );
 			streamFree( prg, s );
+		}
+		else if ( tree->id == LEL_ID_ACCUM_STREAM ) {
+			AccumStream *s = (AccumStream*)tree;
+			free( s->in );
+			accumStreamFree( prg, s );
 		}
 		else { 
 			if ( tree->id != LEL_ID_IGNORE_LIST )
