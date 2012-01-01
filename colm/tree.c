@@ -768,13 +768,6 @@ Tree *splitTree( Program *prg, Tree *tree )
 		assert( tree->refs >= 1 );
 
 		if ( tree->refs > 1 ) {
-//			#ifdef COLM_LOG_BYTECODE
-//			if ( colm_log_bytecode ) {
-//				cerr << "splitting tree: " << tree << " refs: " << 
-//						tree->refs << endl;
-//			}
-//			#endif
-
 			Kid *oldNextDown = 0, *newNextDown = 0;
 			Tree *newTree = copyTree( prg, tree, oldNextDown, &newNextDown );
 			treeUpref( newTree );
@@ -879,9 +872,10 @@ free_tree:
 			Accum *accum = (Accum*)tree;
 			clearFsmRun( prg, accum->fsmRun );
 			clearPdaRun( prg, sp, accum->pdaRun );
+			//treeDownref( prg, accum->accumStream );
 			free( accum->pdaRun );
 			free( accum->fsmRun );
-			free( accum->accumStream->in );
+			//free( accum->accumStream->in );
 			mapElFree( prg, (MapEl*)accum );
 		}
 		else {

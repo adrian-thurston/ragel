@@ -157,43 +157,11 @@ Head *streamPull( Program *prg, FsmRun *fsmRun, InputStream *inputStream, long l
 	return tokdata;
 }
 
-#if 0
-void sendBackRunBufHead( FsmRun *fsmRun, InputStream *inputStream )
-{
-	debug( REALM_PARSE, "pushing back runbuf\n" );
-
-	/* Move to the next run buffer. */
-	RunBuf *back = fsmRun->runBuf;
-	fsmRun->runBuf = fsmRun->runBuf->next;
-		
-	/* Flush out the input buffer. */
-	back->length = fsmRun->pe - fsmRun->p;
-	back->offset = 0;
-	pushBackBuf( inputStream, back );
-
-	/* Set data and de. */
-	if ( fsmRun->runBuf == 0 ) {
-		fsmRun->runBuf = newRunBuf();
-		fsmRun->runBuf->next = 0;
-		fsmRun->p = fsmRun->pe = fsmRun->runBuf->data;
-	}
-
-	fsmRun->p = fsmRun->pe = fsmRun->runBuf->data + fsmRun->runBuf->length;
-}
-#endif
-
 void undoStreamPull( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length )
 {
 	debug( REALM_PARSE, "undoing stream pull\n" );
 
-//	if ( fsmRun->p == fsmRun->pe && fsmRun->p == fsmRun->runBuf->data )
-//		sendBackRunBufHead( fsmRun, inputStream );
-//
-//	//assert( fsmRun->p - length >= fsmRun->runBuf->data );
-//	fsmRun->p -= length;
-
 	prependData( inputStream, data, length );
-
 }
 
 void streamPushText( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length )

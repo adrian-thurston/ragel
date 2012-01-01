@@ -2116,7 +2116,6 @@ again:
 			Tree *val = vm_pop();
 			parserSetContext( prg, sp, (Accum*)obj, val );
 			treeDownref( prg, sp, obj );
-			//treeDownref( prg, sp, val );
 			break;
 		}
 
@@ -2174,11 +2173,8 @@ again:
 			Tree *input = vm_pop();
 			streamAppend( prg, sp, input, accumStream->in );
 
-			treeUpref( (Tree*)accumStream );
 			vm_push( (Tree*)accumStream );
-
 			treeDownref( prg, sp, input );
-			treeDownref( prg, sp, (Tree*)accumStream );
 			break;
 		}
 		case IN_ACCUM_STREAM_APPEND_WV: {
@@ -2198,6 +2194,7 @@ again:
 			append( &exec->pdaRun->rcodeCollect, SIZEOF_CODE + 3 * SIZEOF_WORD );
 			break;
 		}
+
 		case IN_ACCUM_STREAM_APPEND_BKT: {
 			Tree *accumStream;
 			Tree *input;
@@ -2228,7 +2225,6 @@ again:
 
 			vm_push( (SW)steps );
 			vm_push( (SW)accum );
-
 			break;
 		}
 
@@ -2453,6 +2449,7 @@ again:
 			vm_pop_ignore();
 
 			vm_push( accum->result );
+			debug( REALM_BYTECODE, "accum refs: %d\n", accum->refs );
 			treeDownref( prg, sp, (Tree*)accum );
 			if ( prg->induceExit )
 				goto out;
@@ -2752,16 +2749,23 @@ again:
 			break;
 		}
 		case IN_GET_ACCUM_STREAM: {
+			debug( REALM_BYTECODE, "IN_GET_ACCUM_STREAM\n" );
+
 			Accum *accum = (Accum*)vm_pop();
 			treeUpref( (Tree*)accum->accumStream );
 			vm_push( (Tree*)accum->accumStream );
+			treeDownref( prg, sp, (Tree*)accum );
 			break;
 		}
 		case IN_SET_ACCUM_STREAM: {
+			debug( REALM_BYTECODE, "IN_SET_ACCUM_STREAM\n" );
+
 			Accum *accum = (Accum*)vm_pop();
 			AccumStream *accumStream = (AccumStream*)vm_pop();
 			accum->accumStream = accumStream;
 			treeUpref( (Tree*)accumStream );
+			treeDownref( prg, sp, (Tree*)accum );
+			treeDownref( prg, sp, (Tree*)accumStream );
 			break;
 		}
 		case IN_CONSTRUCT_TERM: {
