@@ -2745,6 +2745,7 @@ again:
 			accumStream->in = malloc( sizeof(InputStream) );
 			initInputStream( accumStream->in );
 			accumStream->refs = 1;
+
 			vm_push( (Tree*) accumStream );
 			break;
 		}

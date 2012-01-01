@@ -1261,11 +1261,17 @@ UniqueType *LangTerm::evaluateConstruct( ParseData *pd, CodeVect &code ) const
 	/* Lookup the type of the replacement and store it in the replacement
 	 * object so that replacement parsing has a target. */
 	UniqueType *replUT = typeRef->uniqueType;
-	if ( replUT->typeId == TYPE_TREE )
-		replacement->langEl = replUT->langEl;
-	else
+	if ( replUT->typeId != TYPE_TREE )
 		error(loc) << "don't know how to construct this type" << endp;
-
+	
+	if ( typeRef->type == TypeRef::Accum ) {
+		code.append( IN_CONS_ACCUM_STREAM );
+		code.append( IN_DUP_TOP_OFF );
+		code.appendHalf( 1 );
+		code.append( IN_SET_ACCUM_STREAM );
+	}
+	
+	replacement->langEl = replUT->langEl;
 	assignFieldArgs( pd, code, replUT );
 
 	if ( varRef != 0 ) {
