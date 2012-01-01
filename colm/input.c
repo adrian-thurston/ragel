@@ -295,103 +295,6 @@ int inputStreamDynamicGetDataRev( SourceStream *is, char *dest, int length )
 	return 0;
 }
 
-Tree *inputStreamDynamicConsumeTree( SourceStream *is )
-{
-	if ( is->queue != 0 && (is->queue->type == RunBufTokenType || is->queue->type == RunBufIgnoreType) ) {
-		RunBuf *runBuf = inputStreamPopHead( is );
-
-		/* FIXME: using runbufs here for this is a poor use of memory. */
-		Tree *tree = runBuf->tree;
-		free(runBuf);
-		return tree;
-	}
-
-	return 0;
-}
-
-void inputStreamDynamicPushText( SourceStream *is, const char *data, long length )
-{
-//	#ifdef COLM_LOG_PARSE
-//	if ( colm_log_parse ) {
-//		cerr << "readying fake push" << endl;
-//	}
-//	#endif
-
-//	takeBackBuffered( inputStream );
-
-	/* Create a new buffer for the data. This is the easy implementation.
-	 * Something better is needed here. It puts a max on the amount of
-	 * data that can be pushed back to the inputStream. */
-	assert( length < FSM_BUFSIZE );
-
-	RunBuf *newBuf = newRunBuf();
-	newBuf->length = length;
-	memcpy( newBuf->data, data, length );
-
-	inputStreamPrepend( is, newBuf );
-}
-
-void inputStreamDynamicUndoConsumeTree( SourceStream *is, Tree *tree, int ignore )
-{
-//	#ifdef COLM_LOG_PARSE
-//	if ( colm_log_parse ) {
-//		cerr << "readying fake push" << endl;
-//	}
-//	#endif
-
-//	takeBackBuffered( inputStream );
-
-	/* Create a new buffer for the data. This is the easy implementation.
-	 * Something better is needed here. It puts a max on the amount of
-	 * data that can be pushed back to the inputStream. */
-	RunBuf *newBuf = newRunBuf();
-	newBuf->type = ignore ? RunBufIgnoreType : RunBufTokenType;
-	newBuf->tree = tree;
-
-	inputStreamPrepend( is, newBuf );
-}
-
-Tree *inputStreamDynamicUndoPrependData( SourceStream *is, int length )
-{
-	if ( is->queue->type == RunBufDataType ) {
-		char tmp[length];
-		int have = 0;
-		while ( have < length ) {
-			int res = 0;
-			is->funcs->getData( is, 0, tmp, length-have, &res );
-			have += res;
-		}
-		return 0;
-	}
-	else {
-		/* FIXME: leak here. */
-		RunBuf *rb = inputStreamPopHead( is );
-		Tree *tree = rb->tree;
-		free(rb);
-		return tree;
-	}
-}
-
-Tree *inputStreamDynamicUndoAppend( SourceStream *is, int length )
-{
-	if ( is->queueTail->type == RunBufDataType ) {
-		char tmp[length];
-		int have = 0;
-		while ( have < length ) {
-			int res = inputStreamDynamicGetDataRev( is, tmp, length-have );
-			have += res;
-		}
-		return 0;
-	}
-	else {
-		/* FIXME: leak here. */
-		RunBuf *rb = inputStreamPopTail( is );
-		Tree *tree = rb->tree;
-		free(rb);
-		return tree;
-	}
-}
-
 void initDynamicFuncs()
 {
 	memset( &dynamicFuncs, 0, sizeof(struct SourceFuncs) );
@@ -399,13 +302,6 @@ void initDynamicFuncs()
 	dynamicFuncs.getData = &inputStreamDynamicGetData;
 	dynamicFuncs.consumeData = &inputStreamDynamicConsumeData;
 	dynamicFuncs.undoConsumeData = &inputStreamDynamicUndoConsumeData;
-
-	dynamicFuncs.consumeTree = &inputStreamDynamicConsumeTree;
-	dynamicFuncs.undoConsumeTree = &inputStreamDynamicUndoConsumeTree;
-
-	dynamicFuncs.undoPrependData = &inputStreamDynamicUndoPrependData;
-	dynamicFuncs.undoAppendData = &inputStreamDynamicUndoAppend;
-	dynamicFuncs.prependData = &inputStreamDynamicPushText;
 }
 
 /*
@@ -416,10 +312,6 @@ int inputStreamFileGetDataImpl( SourceStream *is, char *dest, int length )
 {
 	debug( REALM_INPUT, "inputStreamFileGetDataImpl length = %ld\n", length );
 	size_t res = fread( dest, 1, length, is->file );
-	if ( res < (size_t) length ) {
-		debug( REALM_INPUT, "setting later = true\n" );
-		is->later = true;
-	}
 	return res;
 }
 
@@ -436,8 +328,6 @@ void initFileFuncs()
 int inputStreamFdGetDataImpl( SourceStream *is, char *dest, int length )
 {
 	long got = read( is->fd, dest, length );
-	if ( got == 0 )
-		is->later = true;
 	return got;
 }
 

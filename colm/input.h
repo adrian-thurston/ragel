@@ -92,19 +92,9 @@ struct SourceFuncs
 	int (*consumeData)( SourceStream *is, int length );
 	int (*undoConsumeData)( SourceStream *is, const char *data, int length );
 
-	/* Trees. */
-	struct ColmTree *(*consumeTree)( SourceStream *is );
-	void (*undoConsumeTree)( SourceStream *is, struct ColmTree *tree, int ignore );
-
 	/* Language elments (compile-time). */
 	struct LangEl *(*consumeLangEl)( SourceStream *is, long *bindId, char **data, long *length );
 	void (*undoConsumeLangEl)( SourceStream *is );
-
-	/* Altering streams. 
-	 * FIXME: These should disappear. */
-	void (*prependData)( SourceStream *is, const char *data, long len );
-	struct ColmTree *(*undoPrependData)( SourceStream *is, int length );
-	struct ColmTree *(*undoAppendData)( SourceStream *is, int length );
 
 	/* Private implmentation for some shared get data functions. */
 	int (*getDataImpl)( SourceStream *is, char *dest, int length );
@@ -135,7 +125,6 @@ struct _SourceStream
 	/* This is set true for input streams that do their own line counting.
 	 * Causes FsmRun to ignore NLs. */
 	int handlesLine;
-	int later;
 
 	RunBuf *queue;
 	RunBuf *queueTail;
@@ -178,7 +167,6 @@ struct _InputStream
 	/* This is set true for input streams that do their own line counting.
 	 * Causes FsmRun to ignore NLs. */
 	int handlesLine;
-	int later;
 
 	RunBuf *queue;
 	RunBuf *queueTail;
