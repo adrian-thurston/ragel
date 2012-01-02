@@ -2683,16 +2683,12 @@ again:
 			vm_push( replTree );
 			break;
 		}
-		case IN_CONS_INPUT: {
-			debug( REALM_BYTECODE, "IN_CONS_INPUT\n" );
+		case IN_CONSTRUCT_INPUT: {
+			debug( REALM_BYTECODE, "IN_CONSTRUCT_INPUT\n" );
 
-			Input *accumStream = accumStreamAllocate( prg );
-			accumStream->refs = 1;
-			accumStream->id = LEL_ID_INPUT;
-			accumStream->in = malloc( sizeof(InputStream) );
-			initInputStream( accumStream->in );
-
-			vm_push( (Tree*) accumStream );
+			Tree *input = constructInput( prg );
+			treeUpref( input );
+			vm_push( input );
 			break;
 		}
 		case IN_GET_INPUT: {

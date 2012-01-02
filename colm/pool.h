@@ -78,8 +78,8 @@ long ilNumLost( Program *prg );
 Stream *streamAllocate( Program *prg );
 void streamFree( Program *prg, Stream *stream );
 
-Input *accumStreamAllocate( Program *prg );
-void accumStreamFree( Program *prg, Input *stream );
+Input *inputAllocate( Program *prg );
+void inputFree( Program *prg, Input *stream );
 
 /* Wrong place. */
 TreePair mapRemove( Program *prg, Map *map, Tree *key );

@@ -293,6 +293,8 @@ Tree *constructTerm( struct ColmProgram *prg, Word id, Head *tokdata );
 Tree *constructReplacementTree( Kid *kid, Tree **bindings, struct ColmProgram *prg, long pat );
 Tree *createGeneric( struct ColmProgram *prg, long genericId );
 Tree *constructToken( struct ColmProgram *prg, Tree **root, long nargs );
+Tree *constructInput( struct ColmProgram *prg );
+
 
 int testFalse( struct ColmProgram *prg, Tree *tree );
 Tree *makeTree( struct ColmProgram *prg, Tree **root, long nargs );

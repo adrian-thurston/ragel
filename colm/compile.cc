@@ -1266,7 +1266,7 @@ UniqueType *LangTerm::evaluateConstruct( ParseData *pd, CodeVect &code ) const
 		error(loc) << "don't know how to construct this type" << endp;
 	
 	if ( typeRef->type == TypeRef::Parser ) {
-		code.append( IN_CONS_INPUT );
+		code.append( IN_CONSTRUCT_INPUT );
 		code.append( IN_DUP_TOP_OFF );
 		code.appendHalf( 1 );
 		code.append( IN_SET_INPUT );
@@ -1363,7 +1363,7 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 		ut->langEl->parseStop = true;
 
 	if ( argUT != pd->uniqueTypeInput ) {
-		code.append( IN_CONS_INPUT );
+		code.append( IN_CONSTRUCT_INPUT );
 		if ( pd->revertOn )
 			code.append( IN_INPUT_APPEND_WV );
 		else

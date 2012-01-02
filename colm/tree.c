@@ -316,6 +316,16 @@ Tree *constructTerm( Program *prg, Word id, Head *tokdata )
 	return tree;
 }
 
+Tree *constructInput( Program *prg )
+{
+	Input *input = inputAllocate( prg );
+	input->refs = 0;
+	input->id = LEL_ID_INPUT;
+	input->in = malloc( sizeof(InputStream) );
+	initInputStream( input->in );
+	return input;
+}
+
 Kid *constructReplacementKid( Tree **bindings, Program *prg, Kid *prev, long pat );
 
 Kid *constructIgnoreList( Program *prg, long pat )
@@ -888,16 +898,17 @@ free_tree:
 		else if ( tree->id == LEL_ID_PTR )
 			treeFree( prg, tree );
 		else if ( tree->id == LEL_ID_STREAM ) {
-			Stream *s = (Stream*)tree;
-			free( s->in );
-			if ( s->file != 0 )
-				fclose( s->file );
-			streamFree( prg, s );
+			Stream *stream = (Stream*)tree;
+			free( stream->in );
+			if ( stream->file != 0 )
+				fclose( stream->file );
+			streamFree( prg, stream );
 		}
 		else if ( tree->id == LEL_ID_INPUT ) {
-			Input *s = (Input*)tree;
-			free( s->in );
-			accumStreamFree( prg, s );
+			Input *input = (Input*)tree;
+			clearInputStream( prg, sp, input->in );
+			free( input->in );
+			inputFree( prg, input );
 		}
 		else { 
 			if ( tree->id != LEL_ID_IGNORE )

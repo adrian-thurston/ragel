@@ -315,6 +315,25 @@ void initInputStream( InputStream *inputStream )
 	inputStream->byte = 0;
 }
 
+void clearInputStream( struct ColmProgram *prg, Tree **sp, InputStream *inputStream )
+{
+	RunBuf *buf = inputStream->queue;
+	while ( buf != 0 ) {
+		switch ( buf->type ) {
+			case RunBufDataType:
+				break;
+
+			case RunBufTokenType:
+			case RunBufIgnoreType:
+			case RunBufSourceType:
+				treeDownref( prg, sp, buf->tree );
+				break;
+		}
+
+		buf = buf->next;
+	}
+}
+
 static void inputStreamPrepend( InputStream *is, RunBuf *runBuf )
 {
 	if ( is->queue == 0 ) {

@@ -309,9 +309,9 @@ typedef unsigned char uchar;
 #define IN_SET_RHS_VAL_WV        0xd6
 #define IN_SET_RHS_VAL_BKT       0xd7
 
-#define IN_CONS_INPUT     0x9c
-#define IN_SET_INPUT      0xa7
-#define IN_GET_INPUT      0xb9
+#define IN_CONSTRUCT_INPUT       0x9c
+#define IN_SET_INPUT             0xa7
+#define IN_GET_INPUT             0xb9
 
 /* Types */
 #define TYPE_NIL          0x01

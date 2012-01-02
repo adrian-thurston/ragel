@@ -391,6 +391,9 @@ int makeReverseCode( PdaRun *pdaRun );
 void initPdaRun( PdaRun *pdaRun, struct ColmProgram *prg, PdaTables *tables,
 		FsmRun *fsmRun, int parserId, long stopTarget, int revertOn, Tree *context );
 void clearPdaRun( struct ColmProgram *prg, Tree **root, PdaRun *pdaRun );
+void initInputStream( InputStream *inputStream );
+
+void clearInputStream( struct ColmProgram *prg, Tree **sp, InputStream *inputStream );
 
 void clearContext( PdaRun *pdaRun, Tree **sp );
 Kid *extractIgnore( PdaRun *pdaRun );
@@ -439,7 +442,6 @@ void clearIgnoreList( struct ColmProgram *prg, Tree **sp, Kid *kid );
 Head *extractMatch( struct ColmProgram *prg, FsmRun *fsmRun, InputStream *inputStream );
 Head *extractMatch( struct ColmProgram *prg, FsmRun *fsmRun, InputStream *inputStream );
 void initSourceStream( SourceStream *in );
-void initInputStream( InputStream *in );
 void newToken( struct ColmProgram *prg, PdaRun *pdaRun, FsmRun *fsmRun );
 void fsmExecute( FsmRun *fsmRun, InputStream *inputStream );
 Kid *sendNamedLangEl( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
