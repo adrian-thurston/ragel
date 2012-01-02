@@ -368,7 +368,7 @@ Tree *constructReplacementTree( Kid *kid, Tree **bindings, Program *prg, long pa
 			tree = splitTree( prg, tree );
 
 			leftIgnore = ilAllocate( prg );
-			leftIgnore->id = LEL_ID_IGNORE_LIST;
+			leftIgnore->id = LEL_ID_IGNORE;
 			leftIgnore->child = ignore;
 			leftIgnore->generation = prg->nextIlGen++;
 
@@ -414,7 +414,7 @@ Tree *constructReplacementTree( Kid *kid, Tree **bindings, Program *prg, long pa
 		tree->child = kidListConcat( attrs, child );
 		if ( ignore != 0 ) {
 			IgnoreList *ignoreList = ilAllocate( prg );
-			ignoreList->id = LEL_ID_IGNORE_LIST;
+			ignoreList->id = LEL_ID_IGNORE;
 			ignoreList->refs = 1;
 			ignoreList->child = ignore;
 			ignoreList->generation = prg->nextIlGen++;
@@ -804,19 +804,19 @@ Tree *createGeneric( Program *prg, long genericId )
 			break;
 		}
 		case GEN_PARSER: {
-			Accum *accum = (Accum*)mapElAllocate( prg );
-			accum->id = genericInfo->langElId;
-			accum->genericInfo = genericInfo;
-			accum->fsmRun = malloc( sizeof(FsmRun) );
-			accum->pdaRun = malloc( sizeof(PdaRun) );
+			Parser *parser = (Parser*)mapElAllocate( prg );
+			parser->id = genericInfo->langElId;
+			parser->genericInfo = genericInfo;
+			parser->fsmRun = malloc( sizeof(FsmRun) );
+			parser->pdaRun = malloc( sizeof(PdaRun) );
 
 			/* Start off the parsing process. */
-			initPdaRun( accum->pdaRun, prg, prg->rtd->pdaTables, 
-					accum->fsmRun, genericInfo->parserId, false, false, 0 );
-			initFsmRun( accum->fsmRun, prg );
-			newToken( prg, accum->pdaRun, accum->fsmRun );
+			initPdaRun( parser->pdaRun, prg, prg->rtd->pdaTables, 
+					parser->fsmRun, genericInfo->parserId, false, false, 0 );
+			initFsmRun( parser->fsmRun, prg );
+			newToken( prg, parser->pdaRun, parser->fsmRun );
 
-			newGeneric = (Tree*) accum;
+			newGeneric = (Tree*) parser;
 			break;
 		}
 		default:
@@ -865,13 +865,13 @@ free_tree:
 			mapElFree( prg, (MapEl*)map );
 		}
 		else if ( generic->type == GEN_PARSER ) {
-			Accum *accum = (Accum*)tree;
-			clearFsmRun( prg, accum->fsmRun );
-			clearPdaRun( prg, sp, accum->pdaRun );
-			free( accum->pdaRun );
-			free( accum->fsmRun );
-			treeDownref( prg, sp, (Tree*)accum->accumStream );
-			mapElFree( prg, (MapEl*)accum );
+			Parser *parser = (Parser*)tree;
+			clearFsmRun( prg, parser->fsmRun );
+			clearPdaRun( prg, sp, parser->pdaRun );
+			free( parser->pdaRun );
+			free( parser->fsmRun );
+			treeDownref( prg, sp, (Tree*)parser->input );
+			mapElFree( prg, (MapEl*)parser );
 		}
 		else {
 			assert(false);
@@ -894,13 +894,13 @@ free_tree:
 				fclose( s->file );
 			streamFree( prg, s );
 		}
-		else if ( tree->id == LEL_ID_ACCUM_STREAM ) {
-			AccumStream *s = (AccumStream*)tree;
+		else if ( tree->id == LEL_ID_INPUT ) {
+			Input *s = (Input*)tree;
 			free( s->in );
 			accumStreamFree( prg, s );
 		}
 		else { 
-			if ( tree->id != LEL_ID_IGNORE_LIST )
+			if ( tree->id != LEL_ID_IGNORE )
 				stringFree( prg, tree->tokdata );
 
 			/* Attributes and grammar-based children. */
@@ -912,7 +912,7 @@ free_tree:
 				child = next;
 			}
 
-			if ( tree->id == LEL_ID_IGNORE_LIST )
+			if ( tree->id == LEL_ID_IGNORE )
 				ilFree( prg, (IgnoreList*) tree );
 			else if ( tree->flags & AF_PARSE_TREE )
 				parseTreeFree( prg, (ParseTree*)tree );
@@ -2019,7 +2019,7 @@ rec_call:
 	}
 
 	/* If it is an ignore list, queue it and skip past the content. */
-	if ( kid->tree->id == LEL_ID_IGNORE_LIST ) {
+	if ( kid->tree->id == LEL_ID_IGNORE ) {
 		/* Ignore suppression can be triggered by a suppress right or suppress
 		 * outside left for example. */
 		if ( ! (printFlags & IPF_SUPPRESS ) ) {
@@ -2304,7 +2304,7 @@ void printTermXml( Program *prg, Tree **sp, struct ColmPrintArgs *printArgs, Kid
 		xmlEscapeData( printArgs, (char*)(head->data), head->length );
 	}
 	else if ( 0 < kid->tree->id && kid->tree->id < prg->rtd->firstNonTermId &&
-			kid->tree->id != LEL_ID_IGNORE_LIST &&
+			kid->tree->id != LEL_ID_IGNORE &&
 			kid->tree->tokdata != 0 && 
 			stringLength( kid->tree->tokdata ) > 0 )
 	{

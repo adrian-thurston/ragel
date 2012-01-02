@@ -181,18 +181,18 @@ UniqueType *TypeRef::lookupTypeVector( ParseData *pd )
 	return pd->findUniqueType( TYPE_TREE, inMap->generic->langEl );
 }
 
-UniqueType *TypeRef::lookupTypeAccum( ParseData *pd )
+UniqueType *TypeRef::lookupTypeParser( ParseData *pd )
 {
 	/* Lookup up the qualifiction and then the name. */
 	nspace = nspaceQual->getQual( pd );
 
 	UniqueType *utParse = typeRef1->lookupType( pd );	
 
-	UniqueAccum searchKey( utParse );
-	UniqueAccum *inMap = pd->uniqueAccumMap.find( &searchKey );
+	UniqueParser searchKey( utParse );
+	UniqueParser *inMap = pd->uniqueParserMap.find( &searchKey );
 	if ( inMap == 0 ) {
-		inMap = new UniqueAccum( utParse );
-		pd->uniqueAccumMap.insert( inMap );
+		inMap = new UniqueParser( utParse );
+		pd->uniqueParserMap.insert( inMap );
 
 		/* FIXME: Need uniqe name allocator for types. */
 		static int accumId = 0;
@@ -294,8 +294,8 @@ UniqueType *TypeRef::lookupType( ParseData *pd )
 		case Vector:
 			uniqueType = lookupTypeVector( pd );
 			break;
-		case Accum:
-			uniqueType = lookupTypeAccum( pd );
+		case Parser:
+			uniqueType = lookupTypeParser( pd );
 			break;
 		case Ptr:
 			uniqueType = lookupTypePtr( pd );
@@ -399,10 +399,10 @@ void LangExpr::resolve( ParseData *pd ) const
 	}
 }
 
-void LangStmt::resolveAccumItems( ParseData *pd ) const
+void LangStmt::resolveParserItems( ParseData *pd ) const
 {
 	/* Assign bind ids to the variables in the replacement. */
-	for ( ReplItemList::Iter item = *accumText->list; item.lte(); item++ ) {
+	for ( ReplItemList::Iter item = *parserText->list; item.lte(); item++ ) {
 		varRef->resolve( pd );
 
 		switch ( item->type ) {
@@ -492,7 +492,7 @@ void LangStmt::resolve( ParseData *pd ) const
 			varRef->resolve( pd );
 			break;
 		}
-		case AccumType: {
+		case ParserType: {
 			//for ( )
 			break;
 		}
@@ -664,9 +664,9 @@ void ParseData::resolveReplacementEls()
 	}
 }
 
-void ParseData::resolveAccumEls()
+void ParseData::resolveParserEls()
 {
-	for ( AccumTextList::Iter accum = accumTextList; accum.lte(); accum++ ) {
+	for ( ParserTextList::Iter accum = parserTextList; accum.lte(); accum++ ) {
 		for ( ReplItemList::Iter item = *accum->list; item.lte(); item++ ) {
 			switch ( item->type ) {
 			case ReplItem::FactorType:
@@ -773,7 +773,7 @@ void ParseData::typeResolve()
 	/* Resolve pattern and replacement elements. */
 	resolvePatternEls();
 	resolveReplacementEls();
-	resolveAccumEls();
+	resolveParserEls();
 
 	resolveParseTree();
 

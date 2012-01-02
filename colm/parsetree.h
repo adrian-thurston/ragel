@@ -1236,9 +1236,9 @@ struct Replacement
 
 typedef DList<Replacement> ReplList;
 
-struct AccumText
+struct ParserText
 {
-	AccumText( const InputLoc &loc, Namespace *nspace, 
+	ParserText( const InputLoc &loc, Namespace *nspace, 
 			TokenRegion *region, ReplItemList *list ) :
 		loc(loc), nspace(nspace), region(region), list(list), 
 		langEl(0), pdaRun(0), nextBindId(1), parse(true) {}
@@ -1252,10 +1252,10 @@ struct AccumText
 	long nextBindId;
 	bool parse;
 
-	AccumText *prev, *next;
+	ParserText *prev, *next;
 };
 
-typedef DList<AccumText> AccumTextList;
+typedef DList<ParserText> ParserTextList;
 
 struct Function;
 
@@ -1468,25 +1468,25 @@ struct CmpUniqueVector
 typedef AvlBasic< UniqueVector, CmpUniqueVector > UniqueVectorMap;
 
 /* 
- * Unique Accum Types
+ * Unique Parser Types
  */
 
-struct UniqueAccum
-	: public AvlTreeEl<UniqueAccum>
+struct UniqueParser
+	: public AvlTreeEl<UniqueParser>
 {
-	UniqueAccum( UniqueType *parseType ) :
+	UniqueParser( UniqueType *parseType ) :
 		parseType(parseType), generic(0) {}
 
 	UniqueType *parseType;
 	GenericType *generic;
 };
 
-struct CmpUniqueAccum
+struct CmpUniqueParser
 {
-	static int compare( const UniqueAccum &ut1, const UniqueAccum &ut2 );
+	static int compare( const UniqueParser &ut1, const UniqueParser &ut2 );
 };
 
-typedef AvlBasic< UniqueAccum, CmpUniqueAccum > UniqueAccumMap;
+typedef AvlBasic< UniqueParser, CmpUniqueParser > UniqueParserMap;
 
 /*
  *
@@ -1508,7 +1508,7 @@ struct TypeRef
 		Map,
 		List,
 		Vector,
-		Accum,
+		Parser,
 		Ref,
 		Ptr,
 	};
@@ -1565,7 +1565,7 @@ struct TypeRef
 	UniqueType *lookupTypeMap( ParseData *pd );
 	UniqueType *lookupTypeList( ParseData *pd );
 	UniqueType *lookupTypeVector( ParseData *pd );
-	UniqueType *lookupTypeAccum( ParseData *pd );
+	UniqueType *lookupTypeParser( ParseData *pd );
 	UniqueType *lookupType( ParseData *pd );
 	UniqueType *lookupTypePtr( ParseData *pd );
 	UniqueType *lookupTypeRef( ParseData *pd );
@@ -2040,7 +2040,7 @@ struct LangStmt
 		YieldType,
 		ForIterType,
 		BreakType,
-		AccumType
+		ParserType
 	};
 
 	LangStmt( const InputLoc &loc, Type type, FieldInitVect *fieldInitVect ) : 
@@ -2078,8 +2078,8 @@ struct LangStmt
 		type(type), varRef(varRef), expr(0), replacement(replacement), 
 		exprPtrVect(0), next(0) {}
 
-	LangStmt( Type type, LangVarRef *varRef, AccumText *accumText ) : 
-		type(type), varRef(varRef), expr(0), accumText(accumText), 
+	LangStmt( Type type, LangVarRef *varRef, ParserText *parserText ) : 
+		type(type), varRef(varRef), expr(0), parserText(parserText), 
 		exprPtrVect(0), next(0) {}
 
 	/* ForIterType */
@@ -2092,9 +2092,9 @@ struct LangStmt
 		type(type), next(0) {}
 
 	void resolve( ParseData *pd ) const;
-	void resolveAccumItems( ParseData *pd ) const;
+	void resolveParserItems( ParseData *pd ) const;
 
-	void evaluateAccumItems( ParseData *pd, CodeVect &code ) const;
+	void evaluateParserItems( ParseData *pd, CodeVect &code ) const;
 	LangTerm *chooseDefaultIter( ParseData *pd, LangTerm *fromVarRef ) const;
 	void compileWhile( ParseData *pd, CodeVect &code ) const;
 	void compileForIterBody( ParseData *pd, CodeVect &code, UniqueType *iterUT ) const;
@@ -2109,7 +2109,7 @@ struct LangStmt
 	TypeRef *typeRef;
 	LangExpr *expr;
 	Replacement *replacement;
-	AccumText *accumText;
+	ParserText *parserText;
 	ExprVect *exprPtrVect;
 	FieldInitVect *fieldInitVect;
 	StmtList *stmtList;

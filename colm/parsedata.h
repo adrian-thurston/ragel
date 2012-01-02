@@ -750,7 +750,7 @@ struct ParseData
 	void resolveProductionEls();
 	void resolvePatternEls();
 	void resolveReplacementEls();
-	void resolveAccumEls();
+	void resolveParserEls();
 
 	void addMatchText( ObjectDef *frame, LangEl *lel );
 	void addMatchLength( ObjectDef *frame, LangEl *lel );
@@ -790,8 +790,8 @@ struct ParseData
 	void initListFields( GenericType *gen );
 	void initListFunctions( GenericType *gen );
 	void initVectorFunctions( GenericType *gen );
-	void initAccumFunctions( GenericType *gen );
-	void initAccumFields( GenericType *gen );
+	void initParserFunctions( GenericType *gen );
+	void initParserFields( GenericType *gen );
 	void initCtxField( GenericType *gen );
 
 	void addStdin();
@@ -880,14 +880,14 @@ struct ParseData
 	LangEl *intLangEl;
 	LangEl *strLangEl;
 	LangEl *streamLangEl;
-	LangEl *accumStreamLangEl;
+	LangEl *inputLangEl;
 	LangEl *anyLangEl;
 	LangEl *rootLangEl;
 	LangEl *noTokenLangEl;
 	LangEl *eofLangEl;
 	LangEl *errorLangEl;
 	LangEl *defaultCharLangEl;
-	LangEl *ignoreListLangEl;
+	LangEl *ignoreLangEl;
 
 	TokenRegion *rootRegion;
 	TokenRegion *defaultRegion;
@@ -908,7 +908,7 @@ struct ParseData
 
 	PatternList patternList;
 	ReplList replList;
-	AccumTextList accumTextList;
+	ParserTextList parserTextList;
 
 	ObjectDef *globalObjectDef;
 
@@ -925,8 +925,8 @@ struct ParseData
 	UniqueType *uniqueTypeInt;
 	UniqueType *uniqueTypeStr;
 	UniqueType *uniqueTypeStream;
-	UniqueType *uniqueTypeAccumStream;
-	UniqueType *uniqueTypeIgnoreList;
+	UniqueType *uniqueTypeInput;
+	UniqueType *uniqueTypeIgnore;
 	UniqueType *uniqueTypeAny;
 
 	UniqueTypeMap uniqeTypeMap;
@@ -934,18 +934,18 @@ struct ParseData
 	UniqueMapMap uniqueMapMap;
 	UniqueListMap uniqueListMap;
 	UniqueVectorMap uniqueVectorMap;
-	UniqueAccumMap uniqueAccumMap;
+	UniqueParserMap uniqueParserMap;
 
 	void initStrObject();
 	void initStreamObject();
-	void initAccumStreamObject();
+	void initInputObject();
 	void initIntObject();
 	void initTokenObjects();
 
 	ObjectDef *intObj;
 	ObjectDef *strObj;
 	ObjectDef *streamObj;
-	ObjectDef *accumStreamObj;
+	ObjectDef *inputObj;
 	ObjectDef *tokenObj;
 
 	FsmTables *fsmTables;
@@ -1026,10 +1026,10 @@ FsmGraph *dotStarFsm( ParseData *pd );
 
 void errorStateLabels( const NameSet &locations );
 
-struct Parser;
+struct ColmParser;
 
-typedef AvlMap<String, Parser *, CmpStr> ParserDict;
-typedef AvlMapEl<String, Parser *> ParserDictEl;
+typedef AvlMap<String, ColmParser *, CmpStr> ParserDict;
+typedef AvlMapEl<String, ColmParser *> ParserDictEl;
 
 LangEl *declareLangEl( ParseData *pd, Namespace *nspace, const String &data, LangEl::Type type );
 LangEl *addLangEl( ParseData *pd, Namespace *nspace, const String &data, LangEl::Type type );

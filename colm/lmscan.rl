@@ -628,5 +628,5 @@ void Scanner::eof()
 	loc.fileName = "<EOF>";
 	loc.line = line;
 	loc.col = 1;
-	parser->token( loc, Parser_tk_eof, 0, 0 );
+	parser->token( loc, ColmParser_tk_eof, 0, 0 );
 }

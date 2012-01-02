@@ -161,9 +161,9 @@ Tree *prepParseTree( Program *prg, Tree **sp, Tree *tree )
 	return tree;
 }
 
-void parserSetContext( Program *prg, Tree **sp, Accum *accum, Tree *val )
+void parserSetContext( Program *prg, Tree **sp, Parser *parser, Tree *val )
 {
-	accum->pdaRun->context = splitTree( prg, val );
+	parser->pdaRun->context = splitTree( prg, val );
 }
 
 Head *treeToStr( Program *prg, Tree **sp, Tree *tree )
@@ -217,15 +217,15 @@ Word streamAppend( Program *prg, Tree **sp, Tree *input, InputStream *inputStrea
 	return length;
 }
 
-long parseFrag( Program *prg, Tree **sp, Accum *accum, long stopId, long entry )
+long parseFrag( Program *prg, Tree **sp, Parser *parser, long stopId, long entry )
 {
 switch ( entry ) {
 case PcrStart:
 
-	if ( ! accum->pdaRun->parseError ) {
-		accum->pdaRun->stopTarget = stopId;
+	if ( ! parser->pdaRun->parseError ) {
+		parser->pdaRun->stopTarget = stopId;
 
-		long pcr = parseLoop( prg, sp, accum->pdaRun, accum->fsmRun, accum->accumStream->in, entry );
+		long pcr = parseLoop( prg, sp, parser->pdaRun, parser->fsmRun, parser->input->in, entry );
 
 		while ( pcr != PcrDone ) {
 
@@ -240,7 +240,7 @@ case PcrRevToken2:
 case PcrRevReduction:
 case PcrRevReduction2:
 
-			pcr = parseLoop( prg, sp, accum->pdaRun, accum->fsmRun, accum->accumStream->in, entry );
+			pcr = parseLoop( prg, sp, parser->pdaRun, parser->fsmRun, parser->input->in, entry );
 		}
 	}
 
@@ -251,16 +251,16 @@ break; }
 }
 
 long parseFinish( Tree **result, Program *prg, Tree **sp,
-		Accum *accum, int revertOn, long entry )
+		Parser *parser, int revertOn, long entry )
 {
 switch ( entry ) {
 case PcrStart:
 
-	if ( accum->pdaRun->stopTarget <= 0 ) {
-		setEof( accum->accumStream->in );
+	if ( parser->pdaRun->stopTarget <= 0 ) {
+		setEof( parser->input->in );
 
-		if ( ! accum->pdaRun->parseError ) {
-			long pcr = parseLoop( prg, sp, accum->pdaRun, accum->fsmRun, accum->accumStream->in, entry );
+		if ( ! parser->pdaRun->parseError ) {
+			long pcr = parseLoop( prg, sp, parser->pdaRun, parser->fsmRun, parser->input->in, entry );
 
 		 	while ( pcr != PcrDone ) {
 
@@ -275,15 +275,15 @@ case PcrRevToken2:
 case PcrRevReduction:
 case PcrRevReduction2:
 
-				pcr = parseLoop( prg, sp, accum->pdaRun, accum->fsmRun, accum->accumStream->in, entry );
+				pcr = parseLoop( prg, sp, parser->pdaRun, parser->fsmRun, parser->input->in, entry );
 			}
 		}
 	}
 
 	if ( !revertOn )
-		commitFull( prg, sp, accum->pdaRun, 0 );
+		commitFull( prg, sp, parser->pdaRun, 0 );
 	
-	Tree *tree = getParsedRoot( accum->pdaRun, accum->pdaRun->stopTarget > 0 );
+	Tree *tree = getParsedRoot( parser->pdaRun, parser->pdaRun->stopTarget > 0 );
 	treeUpref( tree );
 
 	/* Indicate that this tree came out of a parser. */
@@ -298,11 +298,11 @@ break; }
 	return PcrDone;
 }
 
-long undoParseFrag( Program *prg, Tree **sp, Accum *accum, long steps, long entry )
+long undoParseFrag( Program *prg, Tree **sp, Parser *parser, long steps, long entry )
 {
-	InputStream *inputStream = accum->accumStream->in;
-	FsmRun *fsmRun = accum->fsmRun;
-	PdaRun *pdaRun = accum->pdaRun;
+	InputStream *inputStream = parser->input->in;
+	FsmRun *fsmRun = parser->fsmRun;
+	PdaRun *pdaRun = parser->pdaRun;
 
 	debug( REALM_PARSE, "undo parse frag, target steps: %ld, pdarun steps: %ld\n", steps, pdaRun->steps );
 
@@ -489,9 +489,9 @@ Tree *constructArgv( Program *prg, int argc, const char **argv )
  * Execution environment
  */
 
-void initExecution( Execution *exec, Accum *accum, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, int frameId )
+void initExecution( Execution *exec, Parser *parser, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, int frameId )
 {
-	exec->accum = accum;
+	exec->parser = parser;
 	exec->pdaRun = pdaRun;
 	exec->fsmRun = fsmRun;
 	exec->inputStream = inputStream;
@@ -602,36 +602,36 @@ again:
 			debug( REALM_BYTECODE, "IN_STREAM_PUSH_BKT\n" );
 			break;
 		}
-		case IN_ACCUM_STREAM_APPEND_BKT: {
-			Tree *accum;
+		case IN_INPUT_APPEND_BKT: {
+			Tree *parser;
 			Tree *input;
 			Word len;
-			read_tree( accum );
+			read_tree( parser );
 			read_tree( input );
 			read_word( len );
 
-			debug( REALM_BYTECODE, "IN_ACCUM_STREAM_APPEND_BKT\n" ); 
+			debug( REALM_BYTECODE, "IN_INPUT_APPEND_BKT\n" ); 
 
-			treeDownref( prg, sp, accum );
+			treeDownref( prg, sp, parser );
 			treeDownref( prg, sp, input );
 			break;
 		}
-		case IN_ACCUM_STREAM_PULL_BKT: {
+		case IN_INPUT_PULL_BKT: {
 			Word f;
 			Tree *string;
 			read_tree( string );
 			read_word( f );
 
-			debug( REALM_BYTECODE, "IN_ACCUM_STREAM_PULL_BKT\n" );
+			debug( REALM_BYTECODE, "IN_INPUT_PULL_BKT\n" );
 
 			treeDownref( prg, sp, string );
 			break;
 		}
-		case IN_ACCUM_STREAM_PUSH_BKT: {
+		case IN_INPUT_PUSH_BKT: {
 			Word len;
 			read_word( len );
 
-			debug( REALM_BYTECODE, "IN_ACCUM_STREAM_PUSH_BKT\n" );
+			debug( REALM_BYTECODE, "IN_INPUT_PUSH_BKT\n" );
 			break;
 		}
 		case IN_LOAD_GLOBAL_BKT: {
@@ -643,15 +643,15 @@ again:
 			break;
 		}
 		case IN_LOAD_ACCUM_BKT: {
-			Tree *accum;
-			read_tree( accum );
+			Tree *parser;
+			read_tree( parser );
 			debug( REALM_BYTECODE, "IN_LOAD_ACCUM_BKT\n" );
 			break;
 		}
-		case IN_LOAD_ACCUM_STREAM_BKT: {
-			Tree *accumStream;
-			read_tree( accumStream );
-			debug( REALM_BYTECODE, "IN_LOAD_ACCUM_STREAM_BKT\n" );
+		case IN_LOAD_INPUT_BKT: {
+			Tree *input;
+			read_tree( input );
+			debug( REALM_BYTECODE, "IN_LOAD_INPUT_BKT\n" );
 			break;
 		}
 		case IN_GET_FIELD_BKT: {
@@ -1045,21 +1045,21 @@ again:
 		case IN_LOAD_ACCUM_R: {
 			debug( REALM_BYTECODE, "IN_LOAD_ACCUM_R\n" );
 
-			treeUpref( (Tree*)exec->accum );
-			vm_push( (Tree*)exec->accum );
-			assert( exec->accum != 0 );
+			treeUpref( (Tree*)exec->parser );
+			vm_push( (Tree*)exec->parser );
+			assert( exec->parser != 0 );
 			break;
 		}
 		case IN_LOAD_ACCUM_WV: {
 			debug( REALM_BYTECODE, "IN_LOAD_ACCUM_WV\n" );
 
-			treeUpref( (Tree*)exec->accum );
-			vm_push( (Tree*)exec->accum );
-			assert( exec->accum != 0 );
+			treeUpref( (Tree*)exec->parser );
+			vm_push( (Tree*)exec->parser );
+			assert( exec->parser != 0 );
 
 			/* Set up the reverse instruction. */
 			append( &exec->pdaRun->rcodeCollect, IN_LOAD_ACCUM_BKT );
-			appendWord( &exec->pdaRun->rcodeCollect, (Word)exec->accum );
+			appendWord( &exec->pdaRun->rcodeCollect, (Word)exec->parser );
 			exec->rcodeUnitLen = SIZEOF_CODE + SIZEOF_WORD;
 			break;
 		}
@@ -1068,57 +1068,57 @@ again:
 
 			/* This is identical to the _R version, but using it for writing
 			 * would be confusing. */
-			treeUpref( (Tree*)exec->accum );
-			vm_push( (Tree*)exec->accum );
-			assert( exec->accum != 0 );
+			treeUpref( (Tree*)exec->parser );
+			vm_push( (Tree*)exec->parser );
+			assert( exec->parser != 0 );
 			break;
 		}
 		case IN_LOAD_ACCUM_BKT: {
-			Tree *accum;
-			read_tree( accum );
+			Tree *parser;
+			read_tree( parser );
 
 			debug( REALM_BYTECODE, "IN_LOAD_ACCUM_BKT\n" );
 
-			treeUpref( accum );
-			vm_push( accum );
+			treeUpref( parser );
+			vm_push( parser );
 			break;
 		}
-		case IN_LOAD_ACCUM_STREAM_R: {
-			debug( REALM_BYTECODE, "IN_LOAD_ACCUM_STREAM_R\n" );
+		case IN_LOAD_INPUT_R: {
+			debug( REALM_BYTECODE, "IN_LOAD_INPUT_R\n" );
 
-			assert( exec->accum != 0 );
-			treeUpref( (Tree*)exec->accum->accumStream );
-			vm_push( (Tree*)exec->accum->accumStream );
+			assert( exec->parser != 0 );
+			treeUpref( (Tree*)exec->parser->input );
+			vm_push( (Tree*)exec->parser->input );
 			break;
 		}
-		case IN_LOAD_ACCUM_STREAM_WV: {
-			debug( REALM_BYTECODE, "IN_LOAD_ACCUM_STREAM_WV\n" );
+		case IN_LOAD_INPUT_WV: {
+			debug( REALM_BYTECODE, "IN_LOAD_INPUT_WV\n" );
 
-			assert( exec->accum != 0 );
-			treeUpref( (Tree*)exec->accum->accumStream );
-			vm_push( (Tree*)exec->accum->accumStream );
+			assert( exec->parser != 0 );
+			treeUpref( (Tree*)exec->parser->input );
+			vm_push( (Tree*)exec->parser->input );
 
 			/* Set up the reverse instruction. */
-			append( &exec->pdaRun->rcodeCollect, IN_LOAD_ACCUM_STREAM_BKT );
-			appendWord( &exec->pdaRun->rcodeCollect, (Word)exec->accum->accumStream );
+			append( &exec->pdaRun->rcodeCollect, IN_LOAD_INPUT_BKT );
+			appendWord( &exec->pdaRun->rcodeCollect, (Word)exec->parser->input );
 			exec->rcodeUnitLen = SIZEOF_CODE + SIZEOF_WORD;
 			break;
 		}
-		case IN_LOAD_ACCUM_STREAM_WC: {
-			debug( REALM_BYTECODE, "IN_LOAD_ACCUM_STREAM_WC\n" );
+		case IN_LOAD_INPUT_WC: {
+			debug( REALM_BYTECODE, "IN_LOAD_INPUT_WC\n" );
 
 			/* This is identical to the _R version, but using it for writing
 			 * would be confusing. */
-			assert( exec->accum != 0 );
-			treeUpref( (Tree*)exec->accum->accumStream );
-			vm_push( (Tree*)exec->accum->accumStream );
+			assert( exec->parser != 0 );
+			treeUpref( (Tree*)exec->parser->input );
+			vm_push( (Tree*)exec->parser->input );
 			break;
 		}
-		case IN_LOAD_ACCUM_STREAM_BKT: {
+		case IN_LOAD_INPUT_BKT: {
 			Tree *accumStream;
 			read_tree( accumStream );
 
-			debug( REALM_BYTECODE, "IN_LOAD_ACCUM_STREAM_BKT\n" );
+			debug( REALM_BYTECODE, "IN_LOAD_INPUT_BKT\n" );
 
 			treeUpref( accumStream );
 			vm_push( accumStream );
@@ -1139,7 +1139,7 @@ again:
 
 			/* Set up the reverse instruction. */
 			append( &exec->pdaRun->rcodeCollect, IN_LOAD_ACCUM_BKT );
-			appendWord( &exec->pdaRun->rcodeCollect, (Word)exec->accum );
+			appendWord( &exec->pdaRun->rcodeCollect, (Word)exec->parser );
 			exec->rcodeUnitLen = SIZEOF_CODE + SIZEOF_WORD;
 			break;
 		}
@@ -2088,7 +2088,7 @@ again:
 			debug( REALM_BYTECODE, "IN_GET_ACCUM_CTX_R\n" );
 
 			Tree *obj = vm_pop();
-			Tree *ctx = ((Accum*)obj)->pdaRun->context;
+			Tree *ctx = ((Parser*)obj)->pdaRun->context;
 			treeUpref( ctx );
 			vm_push( ctx );
 			treeDownref( prg, sp, obj );
@@ -2100,7 +2100,7 @@ again:
 
 			Tree *obj = vm_pop();
 			Tree *val = vm_pop();
-			parserSetContext( prg, sp, (Accum*)obj, val );
+			parserSetContext( prg, sp, (Parser*)obj, val );
 			treeDownref( prg, sp, obj );
 			break;
 		}
@@ -2111,10 +2111,10 @@ again:
 //		case IN_SET_ACCUM_CTX_WV:
 //			break;
 
-		case IN_ACCUM_STREAM_APPEND_WC: {
-			debug( REALM_BYTECODE, "IN_ACCUM_STREAM_APPEND_WC \n" );
+		case IN_INPUT_APPEND_WC: {
+			debug( REALM_BYTECODE, "IN_INPUT_APPEND_WC \n" );
 
-			AccumStream *accumStream = (AccumStream*)vm_pop();
+			Input *accumStream = (Input*)vm_pop();
 			Tree *input = vm_pop();
 			streamAppend( prg, sp, input, accumStream->in );
 
@@ -2122,17 +2122,17 @@ again:
 			treeDownref( prg, sp, input );
 			break;
 		}
-		case IN_ACCUM_STREAM_APPEND_WV: {
-			debug( REALM_BYTECODE, "IN_ACCUM_STREAM_APPEND_WV \n" );
+		case IN_INPUT_APPEND_WV: {
+			debug( REALM_BYTECODE, "IN_INPUT_APPEND_WV \n" );
 
-			AccumStream *accumStream = (AccumStream*)vm_pop();
+			Input *accumStream = (Input*)vm_pop();
 			Tree *input = vm_pop();
 			Word len = streamAppend( prg, sp, input, accumStream->in );
 
 			treeUpref( (Tree*)accumStream );
 			vm_push( (Tree*)accumStream );
 
-			append( &exec->pdaRun->rcodeCollect, IN_ACCUM_STREAM_APPEND_BKT );
+			append( &exec->pdaRun->rcodeCollect, IN_INPUT_APPEND_BKT );
 			appendWord( &exec->pdaRun->rcodeCollect, (Word) accumStream );
 			appendWord( &exec->pdaRun->rcodeCollect, (Word) input );
 			appendWord( &exec->pdaRun->rcodeCollect, (Word) len );
@@ -2140,7 +2140,7 @@ again:
 			break;
 		}
 
-		case IN_ACCUM_STREAM_APPEND_BKT: {
+		case IN_INPUT_APPEND_BKT: {
 			Tree *accumStream;
 			Tree *input;
 			Word len;
@@ -2148,9 +2148,9 @@ again:
 			read_tree( input );
 			read_word( len );
 
-			debug( REALM_BYTECODE, "IN_ACCUM_STREAM_APPEND_BKT\n" );
+			debug( REALM_BYTECODE, "IN_INPUT_APPEND_BKT\n" );
 
-			undoStreamAppend( prg, sp, 0, ((AccumStream*)accumStream)->in, input, len );
+			undoStreamAppend( prg, sp, 0, ((Input*)accumStream)->in, input, len );
 			treeDownref( prg, sp, accumStream );
 			treeDownref( prg, sp, input );
 			break;
@@ -2165,11 +2165,11 @@ again:
 		case IN_PARSE_SAVE_STEPS: {
 			debug( REALM_BYTECODE, "IN_PARSE_SAVE_STEPS\n" );
 
-			Accum *accum = (Accum*)vm_pop();
-			long steps = accum->pdaRun->steps;
+			Parser *parser = (Parser*)vm_pop();
+			long steps = parser->pdaRun->steps;
 
 			vm_push( (SW)steps );
-			vm_push( (SW)accum );
+			vm_push( (SW)parser );
 			break;
 		}
 
@@ -2177,14 +2177,14 @@ again:
 			debug( REALM_BYTECODE, "IN_PCR_CALL\n" );
 
 			long pcr = (long)vm_pop();
-			Accum *accum = (Accum*)vm_pop();
+			Parser *parser = (Parser*)vm_pop();
 			long steps = (long)vm_pop();
 
 			vm_push( (SW)steps );
-			vm_push( (SW)accum );
+			vm_push( (SW)parser );
 			vm_push( (SW)pcr );
 
-			vm_push( (SW)exec->accum );
+			vm_push( (SW)exec->parser );
 			vm_push( (SW)exec->pdaRun );
 			vm_push( (SW)exec->fsmRun );
 			vm_push( (SW)exec->inputStream );
@@ -2196,8 +2196,8 @@ again:
 			Code *returnTo = instr - ( SIZEOF_CODE + SIZEOF_CODE + SIZEOF_HALF );
 			vm_push( (SW)returnTo );
 
-			initExecution( exec, accum, accum->pdaRun, accum->fsmRun, accum->accumStream->in, accum->pdaRun->frameId );
-			instr = accum->pdaRun->code;
+			initExecution( exec, parser, parser->pdaRun, parser->fsmRun, parser->input->in, parser->pdaRun->frameId );
+			instr = parser->pdaRun->code;
 			break;
 		}
 
@@ -2212,7 +2212,7 @@ again:
 			exec->inputStream = ( InputStream * ) vm_pop();
 			exec->fsmRun = ( FsmRun * ) vm_pop();
 			exec->pdaRun = ( PdaRun * ) vm_pop();
-			exec->accum = ( Accum * ) vm_pop();
+			exec->parser = ( Parser * ) vm_pop();
 
 			if ( instr == 0 ) {
 				fflush( stdout );
@@ -2233,7 +2233,7 @@ again:
 			exec->inputStream = ( InputStream * ) vm_pop();
 			exec->fsmRun = ( FsmRun * ) vm_pop();
 			exec->pdaRun = ( PdaRun * ) vm_pop();
-			exec->accum = ( Accum * ) vm_pop();
+			exec->parser = ( Parser * ) vm_pop();
 
 			if ( instr == 0 ) {
 				fflush( stdout );
@@ -2250,13 +2250,13 @@ again:
 			read_half( stopId );
 
 			long pcr = (long)vm_pop();
-			Accum *accum = (Accum*)vm_pop();
+			Parser *parser = (Parser*)vm_pop();
 			long steps = (long)vm_pop();
 
-			pcr = parseFrag( prg, sp, accum, stopId, pcr );
+			pcr = parseFrag( prg, sp, parser, stopId, pcr );
 
 			vm_push( (SW)steps );
-			vm_push( (SW)accum );
+			vm_push( (SW)parser );
 			vm_push( (SW)pcr );
 
 			/* If done, jump to the terminating instruction, otherwise fall
@@ -2270,10 +2270,10 @@ again:
 			debug( REALM_BYTECODE, "IN_PARSE_FRAG_WC3\n" );
 
 			vm_pop_ignore();
-			Accum *accum = (Accum*)vm_pop();
+			Parser *parser = (Parser*)vm_pop();
 			vm_pop_ignore();
 
-			treeDownref( prg, sp, (Tree*)accum );
+			treeDownref( prg, sp, (Tree*)parser );
 
 			if ( prg->induceExit )
 				goto out;
@@ -2288,13 +2288,13 @@ again:
 			debug( REALM_BYTECODE, "IN_PARSE_FRAG_WV\n" );
 
 			long pcr = (long)vm_pop();
-			Accum *accum = (Accum*)vm_pop();
+			Parser *parser = (Parser*)vm_pop();
 			long steps = (long)vm_pop();
 
-			pcr = parseFrag( prg, sp, accum, stopId, pcr );
+			pcr = parseFrag( prg, sp, parser, stopId, pcr );
 
 			vm_push( (SW)steps );
-			vm_push( (SW)accum );
+			vm_push( (SW)parser );
 			vm_push( (SW)pcr );
 
 			/* If done, jump to the terminating instruction, otherwise fall
@@ -2308,7 +2308,7 @@ again:
 			debug( REALM_BYTECODE, "IN_PARSE_FRAG_WV3 \n" );
 
 			long pcr = (long)vm_pop();
-			Accum *accum = (Accum*)vm_pop();
+			Parser *parser = (Parser*)vm_pop();
 			long steps = (long)vm_pop();
 
 			debug( REALM_BYTECODE, "pcr: %ld\n", pcr );
@@ -2317,7 +2317,7 @@ again:
 			append( &exec->pdaRun->rcodeCollect, IN_LOAD_WORD );
 			appendWord( &exec->pdaRun->rcodeCollect, steps );
 			append( &exec->pdaRun->rcodeCollect, IN_LOAD_TREE );
-			appendWord( &exec->pdaRun->rcodeCollect, (Word)accum );
+			appendWord( &exec->pdaRun->rcodeCollect, (Word)parser );
 			append( &exec->pdaRun->rcodeCollect, IN_PARSE_LOAD_START );
 			append( &exec->pdaRun->rcodeCollect, IN_PARSE_FRAG_BKT );
 			appendHalf( &exec->pdaRun->rcodeCollect, 0 );
@@ -2337,13 +2337,13 @@ again:
 			debug( REALM_BYTECODE, "IN_PARSE_FRAG_BKT\n" );
 
 			long pcr = (long)vm_pop();
-			Accum *accum = (Accum*)vm_pop();
+			Parser *parser = (Parser*)vm_pop();
 			long steps = (long)vm_pop();
 
-			pcr = undoParseFrag( prg, sp, accum, steps, pcr );
+			pcr = undoParseFrag( prg, sp, parser, steps, pcr );
 
 			vm_push( (SW)steps );
-			vm_push( (SW)accum );
+			vm_push( (SW)parser );
 			vm_push( (SW)pcr );
 
 			if ( pcr == PcrDone )
@@ -2355,10 +2355,10 @@ again:
 			debug( REALM_BYTECODE, "IN_PARSE_FRAG_BKT3\n" );
 
 			vm_pop_ignore();
-			Accum *accum = (Accum*)vm_pop();
+			Parser *parser = (Parser*)vm_pop();
 			vm_pop_ignore();
 
-			treeDownref( prg, sp, (Tree*)accum );
+			treeDownref( prg, sp, (Tree*)parser );
 			break;
 		}
 
@@ -2369,14 +2369,14 @@ again:
 			debug( REALM_BYTECODE, "IN_PARSE_FINISH_WC\n" );
 
 			long pcr = (long)vm_pop();
-			Accum *accum = (Accum*)vm_pop();
+			Parser *parser = (Parser*)vm_pop();
 			long steps = (long)vm_pop();
 
-			accum->result = 0;
-			pcr = parseFinish( &accum->result, prg, sp, accum, false, pcr );
+			parser->result = 0;
+			pcr = parseFinish( &parser->result, prg, sp, parser, false, pcr );
 
 			vm_push( (SW)steps );
-			vm_push( (SW)accum );
+			vm_push( (SW)parser );
 			vm_push( (SW)pcr );
 
 			/* If done, jump to the terminating instruction, otherwise fall
@@ -2390,12 +2390,12 @@ again:
 			debug( REALM_BYTECODE, "IN_PARSE_FINISH_WC3\n" );
 
 			vm_pop_ignore();
-			Accum *accum = (Accum*)vm_pop();
+			Parser *parser = (Parser*)vm_pop();
 			vm_pop_ignore();
 
-			vm_push( accum->result );
-			debug( REALM_BYTECODE, "accum refs: %d\n", accum->refs );
-			treeDownref( prg, sp, (Tree*)accum );
+			vm_push( parser->result );
+			debug( REALM_BYTECODE, "parser refs: %d\n", parser->refs );
+			treeDownref( prg, sp, (Tree*)parser );
 			if ( prg->induceExit )
 				goto out;
 
@@ -2409,14 +2409,14 @@ again:
 			debug( REALM_BYTECODE, "IN_PARSE_FINISH_WV\n" );
 
 			long pcr = (long)vm_pop();
-			Accum *accum = (Accum*)vm_pop();
+			Parser *parser = (Parser*)vm_pop();
 			long steps = (long)vm_pop();
 
-			accum->result = 0;
-			pcr = parseFinish( &accum->result, prg, sp, accum, true, pcr );
+			parser->result = 0;
+			pcr = parseFinish( &parser->result, prg, sp, parser, true, pcr );
 
 			vm_push( (SW)steps );
-			vm_push( (SW)accum );
+			vm_push( (SW)parser );
 			vm_push( (SW)pcr );
 
 			if ( pcr == PcrDone )
@@ -2428,15 +2428,15 @@ again:
 			debug( REALM_BYTECODE, "IN_PARSE_FINISH_WV3\n" );
 
 			vm_pop_ignore();
-			Accum *accum = (Accum*)vm_pop();
+			Parser *parser = (Parser*)vm_pop();
 			long steps = (long)vm_pop();
 
-			vm_push( accum->result );
+			vm_push( parser->result );
 
 			append( &exec->pdaRun->rcodeCollect, IN_LOAD_WORD );
 			appendWord( &exec->pdaRun->rcodeCollect, steps );
 			append( &exec->pdaRun->rcodeCollect, IN_LOAD_TREE );
-			appendWord( &exec->pdaRun->rcodeCollect, (Word)accum );
+			appendWord( &exec->pdaRun->rcodeCollect, (Word)parser );
 			append( &exec->pdaRun->rcodeCollect, IN_PARSE_LOAD_START );
 			append( &exec->pdaRun->rcodeCollect, IN_PARSE_FINISH_BKT );
 			appendHalf( &exec->pdaRun->rcodeCollect, 0 );
@@ -2457,13 +2457,13 @@ again:
 			debug( REALM_BYTECODE, "IN_PARSE_FINISH_BKT\n" );
 
 			long pcr = (long)vm_pop();
-			Accum *accum = (Accum*)vm_pop();
+			Parser *parser = (Parser*)vm_pop();
 			long steps = (long)vm_pop();
 
-			pcr = undoParseFrag( prg, sp, accum, steps, pcr );
+			pcr = undoParseFrag( prg, sp, parser, steps, pcr );
 
 			vm_push( (SW)steps );
-			vm_push( (SW)accum );
+			vm_push( (SW)parser );
 			vm_push( (SW)pcr );
 
 			if ( pcr == PcrDone )
@@ -2475,20 +2475,20 @@ again:
 			debug( REALM_BYTECODE, "IN_PARSE_FINISH_BKT3\n" );
 
 			vm_pop_ignore();
-			Accum *accum = (Accum*)vm_pop();
+			Parser *parser = (Parser*)vm_pop();
 			vm_pop_ignore();
 
-			unsetEof( accum->accumStream->in );
-			treeDownref( prg, sp, (Tree*)accum );
+			unsetEof( parser->input->in );
+			treeDownref( prg, sp, (Tree*)parser );
 			break;
 		}
 
 		case IN_STREAM_PULL: {
 			debug( REALM_BYTECODE, "IN_STREAM_PULL\n" );
 
-			Tree *accum = vm_pop();
+			Tree *parser = vm_pop();
 			Tree *len = vm_pop();
-			Tree *string = streamPullBc( prg, exec->fsmRun, ((Accum*)accum)->accumStream->in, len );
+			Tree *string = streamPullBc( prg, exec->fsmRun, ((Parser*)parser)->input->in, len );
 			treeUpref( string );
 			vm_push( string );
 
@@ -2499,7 +2499,7 @@ again:
 			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
 			append( &exec->pdaRun->rcodeCollect, exec->rcodeUnitLen );
 
-			treeDownref( prg, sp, accum );
+			treeDownref( prg, sp, parser );
 			treeDownref( prg, sp, len );
 			break;
 		}
@@ -2507,21 +2507,21 @@ again:
 			Tree *string;
 			read_tree( string );
 
-			Tree *accum = vm_pop();
+			Tree *parser = vm_pop();
 
 			debug( REALM_BYTECODE, "IN_STREAM_PULL_BKT\n" );
 
-			//undoPull( prg, ((Accum*)accum)->fsmRun, ((Accum*)accum)->in, string );
-			treeDownref( prg, sp, accum );
+			//undoPull( prg, ((Parser*)parser)->fsmRun, ((Parser*)parser)->in, string );
+			treeDownref( prg, sp, parser );
 			treeDownref( prg, sp, string );
 			break;
 		}
 		case IN_STREAM_PUSH_WV: {
 			debug( REALM_BYTECODE, "IN_STREAM_PUSH_WV\n" );
 
-			Tree *accum = vm_pop();
+			Tree *parser = vm_pop();
 			Tree *tree = vm_pop();
-			int len = streamPush( prg, sp, ((Accum*)accum)->fsmRun, ((Accum*)accum)->accumStream->in, tree, false );
+			int len = streamPush( prg, sp, ((Parser*)parser)->fsmRun, ((Parser*)parser)->input->in, tree, false );
 			vm_push( 0 );
 
 			/* Single unit. */
@@ -2530,16 +2530,16 @@ again:
 			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
 			append( &exec->pdaRun->rcodeCollect, exec->rcodeUnitLen );
 
-			treeDownref( prg, sp, accum );
+			treeDownref( prg, sp, parser );
 			treeDownref( prg, sp, tree );
 			break;
 		}
 		case IN_STREAM_PUSH_IGNORE_WV: {
 			debug( REALM_BYTECODE, "IN_STREAM_PUSH_IGNORE_WV\n" );
 
-			Tree *accum = vm_pop();
+			Tree *parser = vm_pop();
 			Tree *tree = vm_pop();
-			long len = streamPush( prg, sp, ((Accum*)accum)->fsmRun, ((Accum*)accum)->accumStream->in, tree, true );
+			long len = streamPush( prg, sp, ((Parser*)parser)->fsmRun, ((Parser*)parser)->input->in, tree, true );
 			vm_push( 0 );
 
 			/* Single unit. */
@@ -2548,7 +2548,7 @@ again:
 			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
 			append( &exec->pdaRun->rcodeCollect, exec->rcodeUnitLen );
 
-			treeDownref( prg, sp, accum );
+			treeDownref( prg, sp, parser );
 			treeDownref( prg, sp, tree );
 			break;
 		}
@@ -2556,18 +2556,18 @@ again:
 			Word len;
 			read_word( len );
 
-			Tree *accum = vm_pop();
+			Tree *parser = vm_pop();
 
 			debug( REALM_BYTECODE, "IN_STREAM_PUSH_BKT\n" );
 
-			undoStreamPush( prg, sp, ((Accum*)accum)->fsmRun, ((Accum*)accum)->accumStream->in, len );
-			treeDownref( prg, sp, accum );
+			undoStreamPush( prg, sp, ((Parser*)parser)->fsmRun, ((Parser*)parser)->input->in, len );
+			treeDownref( prg, sp, parser );
 			break;
 		}
-		case IN_ACCUM_STREAM_PULL: {
-			debug( REALM_BYTECODE, "IN_ACCUM_STREAM_PULL\n" );
+		case IN_INPUT_PULL: {
+			debug( REALM_BYTECODE, "IN_INPUT_PULL\n" );
 
-			AccumStream *accumStream = (AccumStream*)vm_pop();
+			Input *accumStream = (Input*)vm_pop();
 			Tree *len = vm_pop();
 			Tree *string = streamPullBc( prg, exec->fsmRun, accumStream->in, len );
 			treeUpref( string );
@@ -2575,7 +2575,7 @@ again:
 
 			/* Single unit. */
 			treeUpref( string );
-			append( &exec->pdaRun->rcodeCollect, IN_ACCUM_STREAM_PULL_BKT );
+			append( &exec->pdaRun->rcodeCollect, IN_INPUT_PULL_BKT );
 			appendWord( &exec->pdaRun->rcodeCollect, (Word) string );
 			appendWord( &exec->pdaRun->rcodeCollect, (Word) exec->fsmRun );
 			exec->rcodeUnitLen += SIZEOF_CODE + 2 *SIZEOF_WORD;
@@ -2585,7 +2585,7 @@ again:
 			treeDownref( prg, sp, len );
 			break;
 		}
-		case IN_ACCUM_STREAM_PULL_BKT: {
+		case IN_INPUT_PULL_BKT: {
 			Word f;
 			Tree *string;
 			read_tree( string );
@@ -2594,23 +2594,23 @@ again:
 
 			Tree *accumStream = vm_pop();
 
-			debug( REALM_BYTECODE, "IN_ACCUM_STREAM_PULL_BKT\n" );
+			debug( REALM_BYTECODE, "IN_INPUT_PULL_BKT\n" );
 
-			undoPull( prg, fsmRun, ((AccumStream*)accumStream)->in, string );
+			undoPull( prg, fsmRun, ((Input*)accumStream)->in, string );
 			treeDownref( prg, sp, accumStream );
 			treeDownref( prg, sp, string );
 			break;
 		}
-		case IN_ACCUM_STREAM_PUSH_WV: {
-			debug( REALM_BYTECODE, "IN_ACCUM_STREAM_PUSH_WV\n" );
+		case IN_INPUT_PUSH_WV: {
+			debug( REALM_BYTECODE, "IN_INPUT_PUSH_WV\n" );
 
-			AccumStream *accumStream = (AccumStream*)vm_pop();
+			Input *accumStream = (Input*)vm_pop();
 			Tree *tree = vm_pop();
 			long len = streamPush( prg, sp, 0, accumStream->in, tree, false );
 			vm_push( 0 );
 
 			/* Single unit. */
-			append( &exec->pdaRun->rcodeCollect, IN_ACCUM_STREAM_PUSH_BKT );
+			append( &exec->pdaRun->rcodeCollect, IN_INPUT_PUSH_BKT );
 			appendWord( &exec->pdaRun->rcodeCollect, len );
 			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
 			append( &exec->pdaRun->rcodeCollect, exec->rcodeUnitLen );
@@ -2619,16 +2619,16 @@ again:
 			treeDownref( prg, sp, tree );
 			break;
 		}
-		case IN_ACCUM_STREAM_PUSH_IGNORE_WV: {
-			debug( REALM_BYTECODE, "IN_ACCUM_STREAM_PUSH_IGNORE_WV\n" );
+		case IN_INPUT_PUSH_IGNORE_WV: {
+			debug( REALM_BYTECODE, "IN_INPUT_PUSH_IGNORE_WV\n" );
 
-			AccumStream *accumStream = (AccumStream*)vm_pop();
+			Input *accumStream = (Input*)vm_pop();
 			Tree *tree = vm_pop();
 			long len = streamPush( prg, sp, 0, accumStream->in, tree, true );
 			vm_push( 0 );
 
 			/* Single unit. */
-			append( &exec->pdaRun->rcodeCollect, IN_ACCUM_STREAM_PUSH_BKT );
+			append( &exec->pdaRun->rcodeCollect, IN_INPUT_PUSH_BKT );
 			appendWord( &exec->pdaRun->rcodeCollect, len );
 			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
 			append( &exec->pdaRun->rcodeCollect, exec->rcodeUnitLen );
@@ -2637,13 +2637,13 @@ again:
 			treeDownref( prg, sp, tree );
 			break;
 		}
-		case IN_ACCUM_STREAM_PUSH_BKT: {
+		case IN_INPUT_PUSH_BKT: {
 			Word len;
 			read_word( len );
 
-			AccumStream *accumStream = (AccumStream*)vm_pop();
+			Input *accumStream = (Input*)vm_pop();
 
-			debug( REALM_BYTECODE, "IN_ACCUM_STREAM_PUSH_BKT\n" );
+			debug( REALM_BYTECODE, "IN_INPUT_PUSH_BKT\n" );
 
 			undoStreamPush( prg, sp, 0, accumStream->in, len );
 			treeDownref( prg, sp, (Tree*)accumStream );
@@ -2683,35 +2683,35 @@ again:
 			vm_push( replTree );
 			break;
 		}
-		case IN_CONS_ACCUM_STREAM: {
-			debug( REALM_BYTECODE, "IN_CONS_ACCUM_STREAM\n" );
+		case IN_CONS_INPUT: {
+			debug( REALM_BYTECODE, "IN_CONS_INPUT\n" );
 
-			AccumStream *accumStream = accumStreamAllocate( prg );
+			Input *accumStream = accumStreamAllocate( prg );
 			accumStream->refs = 1;
-			accumStream->id = LEL_ID_ACCUM_STREAM;
+			accumStream->id = LEL_ID_INPUT;
 			accumStream->in = malloc( sizeof(InputStream) );
 			initInputStream( accumStream->in );
 
 			vm_push( (Tree*) accumStream );
 			break;
 		}
-		case IN_GET_ACCUM_STREAM: {
-			debug( REALM_BYTECODE, "IN_GET_ACCUM_STREAM\n" );
+		case IN_GET_INPUT: {
+			debug( REALM_BYTECODE, "IN_GET_INPUT\n" );
 
-			Accum *accum = (Accum*)vm_pop();
-			treeUpref( (Tree*)accum->accumStream );
-			vm_push( (Tree*)accum->accumStream );
-			treeDownref( prg, sp, (Tree*)accum );
+			Parser *parser = (Parser*)vm_pop();
+			treeUpref( (Tree*)parser->input );
+			vm_push( (Tree*)parser->input );
+			treeDownref( prg, sp, (Tree*)parser );
 			break;
 		}
-		case IN_SET_ACCUM_STREAM: {
-			debug( REALM_BYTECODE, "IN_SET_ACCUM_STREAM\n" );
+		case IN_SET_INPUT: {
+			debug( REALM_BYTECODE, "IN_SET_INPUT\n" );
 
-			Accum *accum = (Accum*)vm_pop();
-			AccumStream *accumStream = (AccumStream*)vm_pop();
-			accum->accumStream = accumStream;
+			Parser *parser = (Parser*)vm_pop();
+			Input *accumStream = (Input*)vm_pop();
+			parser->input = accumStream;
 			treeUpref( (Tree*)accumStream );
-			treeDownref( prg, sp, (Tree*)accum );
+			treeDownref( prg, sp, (Tree*)parser );
 			treeDownref( prg, sp, (Tree*)accumStream );
 			break;
 		}

@@ -28,10 +28,10 @@
 
 #define PROPERTY_REDUCE_FIRST 0x1
 
-struct Parser
+struct ColmParser
 {
 	%%{
-	parser Parser;
+	parser ColmParser;
 
 	# Use a class for tokens.
 	token uses class Token;
@@ -71,7 +71,7 @@ struct Parser
 	void init();
 	int parseLangEl( int type, const Token *token );
 
-	Parser( const char *fileName, const char *sectionName, const InputLoc &sectionLoc )
+	ColmParser( const char *fileName, const char *sectionName, const InputLoc &sectionLoc )
 		: sectionName(sectionName), enterRl(false)
 	{
 		pd = new ParseData( fileName, sectionName, sectionLoc, std::cout );

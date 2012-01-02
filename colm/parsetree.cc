@@ -170,7 +170,7 @@ int CmpUniqueVector::compare( const UniqueVector &ut1, const UniqueVector &ut2 )
 	return 0;
 }
 
-int CmpUniqueAccum::compare( const UniqueAccum &ut1, const UniqueAccum &ut2 )
+int CmpUniqueParser::compare( const UniqueParser &ut1, const UniqueParser &ut2 )
 {
 	if ( ut1.parseType < ut2.parseType )
 		return -1;

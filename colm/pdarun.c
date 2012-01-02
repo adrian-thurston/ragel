@@ -679,14 +679,14 @@ void attachIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, Kid *input )
 		IgnoreList *rightIgnore = 0;
 		if ( pdaRun->tokenList != 0 ) {
 			rightIgnore = ilAllocate( prg );
-			rightIgnore->id = LEL_ID_IGNORE_LIST;
+			rightIgnore->id = LEL_ID_IGNORE;
 			rightIgnore->child = copyKidList( prg, ignoreKid );
 			rightIgnore->generation = prg->nextIlGen++;
 		}
 
 		/* Make the ignore list for the left-ignore. */
 		IgnoreList *leftIgnore = ilAllocate( prg );
-		leftIgnore->id = LEL_ID_IGNORE_LIST;
+		leftIgnore->id = LEL_ID_IGNORE;
 		leftIgnore->child = ignoreKid;
 		leftIgnore->generation = prg->nextIlGen++;
 
@@ -1653,7 +1653,7 @@ again:
 		pdaRun->input1 = pdaRun->input1->next;
 
 		Tree *stTree = pdaRun->stackTop->tree;
-		if ( stTree->id == LEL_ID_IGNORE_LIST ) {
+		if ( stTree->id == LEL_ID_IGNORE ) {
 			pdaRun->lel->next = stTree->child;
 			stTree->child = pdaRun->lel;
 		}
@@ -1663,7 +1663,7 @@ again:
 			ignoreList->generation = prg->nextIlGen++;
 
 			kid->tree = (Tree*)ignoreList;
-			kid->tree->id = LEL_ID_IGNORE_LIST;
+			kid->tree->id = LEL_ID_IGNORE;
 			kid->tree->refs = 1;
 			kid->tree->child = pdaRun->lel;
 			pdaRun->lel->next = 0;
@@ -1801,7 +1801,7 @@ again:
 		rhsLen = prg->rtd->prodInfo[pdaRun->reduction].length;
 		child = last = 0;
 		for ( r = 0;; ) {
-			if ( r == rhsLen && pdaRun->stackTop->tree->id != LEL_ID_IGNORE_LIST )
+			if ( r == rhsLen && pdaRun->stackTop->tree->id != LEL_ID_IGNORE )
 				break;
 
 			child = pdaRun->stackTop;
@@ -1809,12 +1809,12 @@ again:
 			child->next = last;
 			last = child;
 			
-			if ( child->tree->id != LEL_ID_IGNORE_LIST ) {
+			if ( child->tree->id != LEL_ID_IGNORE ) {
 				/* Count it only if it is not an ignore token. */
 				r++;
 			}
 
-			if ( child->tree->id != LEL_ID_IGNORE_LIST )
+			if ( child->tree->id != LEL_ID_IGNORE )
 				realChild = child;
 		}
 

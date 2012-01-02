@@ -205,7 +205,7 @@ typedef struct _Stream
 	SourceStream *in;
 } Stream;
 
-typedef struct _AccumStream
+typedef struct _Input
 {
 	/* Must overlay Tree. */
 	short id;
@@ -214,9 +214,9 @@ typedef struct _AccumStream
 	Kid *child;
 
 	InputStream *in;
-} AccumStream;
+} Input;
 
-typedef struct AccumStruct
+typedef struct _Parser
 {
 	/* Must overlay Tree. */
 	short id;
@@ -228,9 +228,9 @@ typedef struct AccumStruct
 
 	struct _PdaRun *pdaRun;
 	struct _FsmRun *fsmRun;
-	struct _AccumStream *accumStream;
+	struct _Input *input;
 	Tree *result;
-} Accum;
+} Parser;
 
 typedef struct _TreeIter
 {

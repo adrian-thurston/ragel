@@ -39,8 +39,8 @@ void ParseData::initUniqueTypes( )
 	uniqueTypeInt = new UniqueType( TYPE_TREE, intLangEl );
 	uniqueTypeStr = new UniqueType( TYPE_TREE, strLangEl );
 	uniqueTypeStream = new UniqueType( TYPE_TREE, streamLangEl );
-	uniqueTypeAccumStream = new UniqueType( TYPE_TREE, accumStreamLangEl );
-	uniqueTypeIgnoreList = new UniqueType( TYPE_TREE, ignoreListLangEl );
+	uniqueTypeInput = new UniqueType( TYPE_TREE, inputLangEl );
+	uniqueTypeIgnore = new UniqueType( TYPE_TREE, ignoreLangEl );
 	uniqueTypeAny = new UniqueType( TYPE_TREE, anyLangEl );
 
 	uniqeTypeMap.insert( uniqueTypeNil );
@@ -49,7 +49,8 @@ void ParseData::initUniqueTypes( )
 	uniqeTypeMap.insert( uniqueTypeInt );
 	uniqeTypeMap.insert( uniqueTypeStr );
 	uniqeTypeMap.insert( uniqueTypeStream );
-	uniqeTypeMap.insert( uniqueTypeIgnoreList );
+	uniqeTypeMap.insert( uniqueTypeInput );
+	uniqeTypeMap.insert( uniqueTypeIgnore );
 	uniqeTypeMap.insert( uniqueTypeAny );
 }
 
@@ -1264,11 +1265,11 @@ UniqueType *LangTerm::evaluateConstruct( ParseData *pd, CodeVect &code ) const
 	if ( replUT->typeId != TYPE_TREE )
 		error(loc) << "don't know how to construct this type" << endp;
 	
-	if ( typeRef->type == TypeRef::Accum ) {
-		code.append( IN_CONS_ACCUM_STREAM );
+	if ( typeRef->type == TypeRef::Parser ) {
+		code.append( IN_CONS_INPUT );
 		code.append( IN_DUP_TOP_OFF );
 		code.appendHalf( 1 );
-		code.append( IN_SET_ACCUM_STREAM );
+		code.append( IN_SET_INPUT );
 	}
 	
 	replacement->langEl = replUT->langEl;
@@ -1361,17 +1362,17 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 	if ( stop )
 		ut->langEl->parseStop = true;
 
-	if ( argUT != pd->uniqueTypeAccumStream ) {
-		code.append( IN_CONS_ACCUM_STREAM );
+	if ( argUT != pd->uniqueTypeInput ) {
+		code.append( IN_CONS_INPUT );
 		if ( pd->revertOn )
-			code.append( IN_ACCUM_STREAM_APPEND_WV );
+			code.append( IN_INPUT_APPEND_WV );
 		else
-			code.append( IN_ACCUM_STREAM_APPEND_WC );
+			code.append( IN_INPUT_APPEND_WC );
 	}
 
 	code.append( IN_DUP_TOP_OFF );
 	code.appendHalf( 1 );
-	code.append( IN_SET_ACCUM_STREAM );
+	code.append( IN_SET_INPUT );
 
 	int stopId = stop ? ut->langEl->id : 0;
 
@@ -2033,12 +2034,12 @@ void LangStmt::compileWhile( ParseData *pd, CodeVect &code ) const
 	pd->curLocalFrame->iterPopScope();
 }
 
-void LangStmt::evaluateAccumItems( ParseData *pd, CodeVect &code ) const
+void LangStmt::evaluateParserItems( ParseData *pd, CodeVect &code ) const
 {
 	varRef->evaluate( pd, code );
 
 	/* Assign bind ids to the variables in the replacement. */
-	for ( ReplItemList::Iter item = *accumText->list; item.lte(); item++ ) {
+	for ( ReplItemList::Iter item = *parserText->list; item.lte(); item++ ) {
 		UniqueType *exprUT = 0;
 		switch ( item->type ) {
 		case ReplItem::FactorType: {
@@ -2078,11 +2079,11 @@ void LangStmt::evaluateAccumItems( ParseData *pd, CodeVect &code ) const
 		code.appendHalf( 1 );
 
 		/* Not a stream. Get the input first. */
-		code.append( IN_GET_ACCUM_STREAM );
+		code.append( IN_GET_INPUT );
 		if ( pd->revertOn )
-			code.append( IN_ACCUM_STREAM_APPEND_WV );
+			code.append( IN_INPUT_APPEND_WV );
 		else
-			code.append( IN_ACCUM_STREAM_APPEND_WC );
+			code.append( IN_INPUT_APPEND_WC );
 		code.append( IN_POP );
 
 		code.append( IN_DUP_TOP );
@@ -2270,8 +2271,8 @@ void LangStmt::compile( ParseData *pd, CodeVect &code ) const
 			objField->refActive = false;
 			break;
 		}
-		case AccumType: {
-			evaluateAccumItems( pd, code );
+		case ParserType: {
+			evaluateParserItems( pd, code );
 			break;
 		}
 	}
@@ -2316,7 +2317,7 @@ void ParseData::addMatchText( ObjectDef *frame, LangEl *lel )
 void ParseData::addInput( ObjectDef *frame )
 {
 	/* Make the type ref. */
-	TypeRef *typeRef = new TypeRef( InputLoc(), uniqueTypeAccumStream );
+	TypeRef *typeRef = new TypeRef( InputLoc(), uniqueTypeInput );
 
 	/* Create the field and insert it into the map. */
 	ObjField *el = new ObjField( InputLoc(), typeRef, "input" );
@@ -2325,9 +2326,9 @@ void ParseData::addInput( ObjectDef *frame )
 	el->isConst   = false;
 	el->useOffset = false;
 	el->isCustom  = true;
-	el->inGetR    = IN_LOAD_ACCUM_STREAM_R;
-	el->inGetWV   = IN_LOAD_ACCUM_STREAM_WV;
-	el->inGetWC   = IN_LOAD_ACCUM_STREAM_WC;
+	el->inGetR    = IN_LOAD_INPUT_R;
+	el->inGetWV   = IN_LOAD_INPUT_WV;
+	el->inGetWC   = IN_LOAD_INPUT_WC;
 	frame->insertField( el->name, el );
 }
 
@@ -2428,18 +2429,18 @@ void ParseData::initStreamObject( )
 			IN_STREAM_PUSH_IGNORE_WV, IN_STREAM_PUSH_IGNORE_WV, uniqueTypeAny, false );
 }
 
-void ParseData::initAccumStreamObject( )
+void ParseData::initInputObject( )
 {
-	accumStreamObj = new ObjectDef( ObjectDef::BuiltinType,
+	inputObj = new ObjectDef( ObjectDef::BuiltinType,
 			"accum_stream", nextObjectId++ );
-	accumStreamLangEl->objectDef = accumStreamObj;
+	inputLangEl->objectDef = inputObj;
 
-	initFunction( uniqueTypeStr, accumStreamObj, "pull",  
-			IN_ACCUM_STREAM_PULL, IN_ACCUM_STREAM_PULL, uniqueTypeInt, false );
-	initFunction( uniqueTypeStr, accumStreamObj, "push",  
-			IN_ACCUM_STREAM_PUSH_WV, IN_ACCUM_STREAM_PUSH_WV, uniqueTypeAny, false );
-	initFunction( uniqueTypeStr, accumStreamObj, "push_ignore",  
-			IN_ACCUM_STREAM_PUSH_IGNORE_WV, IN_ACCUM_STREAM_PUSH_IGNORE_WV, uniqueTypeAny, false );
+	initFunction( uniqueTypeStr, inputObj, "pull",  
+			IN_INPUT_PULL, IN_INPUT_PULL, uniqueTypeInt, false );
+	initFunction( uniqueTypeStr, inputObj, "push",  
+			IN_INPUT_PUSH_WV, IN_INPUT_PUSH_WV, uniqueTypeAny, false );
+	initFunction( uniqueTypeStr, inputObj, "push_ignore",  
+			IN_INPUT_PUSH_IGNORE_WV, IN_INPUT_PUSH_IGNORE_WV, uniqueTypeAny, false );
 }
 
 ObjField *ParseData::makeDataEl()
@@ -2789,7 +2790,7 @@ void ParseData::initVectorFunctions( GenericType *gen )
 			IN_VECTOR_INSERT_WV, IN_VECTOR_INSERT_WC, uniqueTypeInt, gen->utArg, false );
 }
 
-void ParseData::initAccumFunctions( GenericType *gen )
+void ParseData::initParserFunctions( GenericType *gen )
 {
 	initFunction( gen->utArg, gen->objDef, "finish", 
 			IN_PARSE_FINISH_WV, IN_PARSE_FINISH_WC, true );
@@ -2818,7 +2819,7 @@ void ParseData::initCtxField( GenericType *gen )
 	el->beenInitialized = true;
 }
 
-void ParseData::initAccumFields( GenericType *gen )
+void ParseData::initParserFields( GenericType *gen )
 {
 	LangEl *langEl = gen->utArg->langEl;
 	if ( langEl->contextIn != 0 )
@@ -2851,8 +2852,8 @@ void ParseData::initGenericTypes()
 				case GEN_PARSER:
 					/* Need to generate a parser for the type. */
 					gen->utArg->langEl->parserId = nextParserId++;
-					initAccumFunctions( gen );
-					initAccumFields( gen );
+					initParserFunctions( gen );
+					initParserFields( gen );
 					break;
 			}
 
@@ -3212,7 +3213,7 @@ void ParseData::compileByteCode()
 	initIntObject();
 	initStrObject();
 	initStreamObject();
-	initAccumStreamObject();
+	initInputObject();
 	initTokenObjects();
 	makeDefaultIterators();
 	initAllLanguageObjects();

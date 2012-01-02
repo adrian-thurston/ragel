@@ -96,8 +96,8 @@ void ParseData::declareBaseLangEls()
 	intLangEl = declareLangEl( this, rootNamespace, "int", LangEl::Term );
 	strLangEl = declareLangEl( this, rootNamespace, "str", LangEl::Term );
 	streamLangEl = declareLangEl( this, rootNamespace, "stream", LangEl::Term );
-	accumStreamLangEl = declareLangEl( this, rootNamespace, "accum_stream", LangEl::Term );
-	ignoreListLangEl = declareLangEl( this, rootNamespace, "il", LangEl::Term );
+	inputLangEl = declareLangEl( this, rootNamespace, "accum_stream", LangEl::Term );
+	ignoreLangEl = declareLangEl( this, rootNamespace, "il", LangEl::Term );
 
 	/* Make the EOF language element. */
 	eofLangEl = 0;

@@ -60,7 +60,7 @@ extern ArgsVector includePaths;
 struct Scanner
 {
 	Scanner( const char *fileName, istream &input, 
-			ostream &output, Parser *includeToParser, int includeDepth )
+			ostream &output, ColmParser *includeToParser, int includeDepth )
 	: 
 		fileName(fileName), input(input), output(output),
 		includeDepth(includeDepth),
@@ -71,7 +71,7 @@ struct Scanner
 		if ( includeToParser != 0 )
 			parser = includeToParser;
 		else {
-			parser = new Parser( fileName, "machine", InputLoc() );
+			parser = new ColmParser( fileName, "machine", InputLoc() );
 			parser->init();
 		}
 	}
@@ -106,7 +106,7 @@ struct Scanner
 
 	/* Set by machine statements, these persist from section to section
 	 * allowing for unnamed sections. */
-	Parser *parser;
+	ColmParser *parser;
 	IncludeStack includeStack;
 
 	/* This is set if ragel has already emitted an error stating that

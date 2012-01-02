@@ -36,7 +36,7 @@ ParserDict parserDict;
 
 %%{
 
-parser Parser;
+parser ColmParser;
 
 include "lmparse.kh";
 
@@ -439,7 +439,7 @@ type_ref: KW_Accum '<' type_ref '>'
 	final {
 		NamespaceQual *nspaceQual = new NamespaceQual( 
 				namespaceStack.top(), regionStack.top() );
-		$$->typeRef = new TypeRef( TypeRef::Accum, InputLoc(), nspaceQual, $3->typeRef, 0 );
+		$$->typeRef = new TypeRef( TypeRef::Parser, InputLoc(), nspaceQual, $3->typeRef, 0 );
 	};
 
 nonterm basic_type_ref uses type_ref;
@@ -1326,19 +1326,19 @@ statement: var_ref TK_LtLt accumulate
 	final {
 		Namespace *nspace = namespaceStack.top();
 		TokenRegion *region = regionStack.top();
-		AccumText *accumText = new AccumText( $2->loc, nspace, region, replItemList );
-		pd->accumTextList.append( accumText );
+		ParserText *parserText = new ParserText( $2->loc, nspace, region, replItemList );
+		pd->parserTextList.append( parserText );
 
-		$$->stmt = new LangStmt( LangStmt::AccumType, $1->varRef, accumText );
+		$$->stmt = new LangStmt( LangStmt::ParserType, $1->varRef, parserText );
 	};
 statement: KW_Send var_ref accumulate
 	final {
 		Namespace *nspace = namespaceStack.top();
 		TokenRegion *region = regionStack.top();
-		AccumText *accumText = new AccumText( $1->loc, nspace, region, replItemList );
-		pd->accumTextList.append( accumText );
+		ParserText *parserText = new ParserText( $1->loc, nspace, region, replItemList );
+		pd->parserTextList.append( parserText );
 
-		$$->stmt = new LangStmt( LangStmt::AccumType, $2->varRef, accumText );
+		$$->stmt = new LangStmt( LangStmt::ParserType, $2->varRef, parserText );
 	};
 
 nonterm opt_require_stmt uses statement;
@@ -1741,7 +1741,7 @@ code_factor: KW_Parse opt_capture type_ref '(' opt_code_expr_list ')'
 
 		NamespaceQual *nspaceQual = new NamespaceQual( 
 				namespaceStack.top(), regionStack.top() );
-		TypeRef *parserTypeRef = new TypeRef( TypeRef::Accum, 
+		TypeRef *parserTypeRef = new TypeRef( TypeRef::Parser, 
 				InputLoc(), nspaceQual, $3->typeRef, 0 );
 
 		Replacement *replacement = new Replacement( $1->loc, nspace, pd->rootRegion,
@@ -1780,7 +1780,7 @@ code_factor: KW_ParseStop opt_capture type_ref '(' opt_code_expr_list ')'
 
 		NamespaceQual *nspaceQual = new NamespaceQual( 
 				namespaceStack.top(), regionStack.top() );
-		TypeRef *parserTypeRef = new TypeRef( TypeRef::Accum, 
+		TypeRef *parserTypeRef = new TypeRef( TypeRef::Parser, 
 				InputLoc(), nspaceQual, $3->typeRef, 0 );
 
 		Replacement *replacement = new Replacement( $1->loc, nspace, pd->rootRegion,
@@ -2400,7 +2400,7 @@ opt_commit: KW_Commit final { $$->commit = true; };
 	write data;
 }%%
 
-void Parser::init()
+void ColmParser::init()
 {
 	/* Set up the root namespace. */
 	const char *rootNamespaceName = "___ROOT_NAMESPACE";
@@ -2443,7 +2443,7 @@ void Parser::init()
 	addArgvList();
 }
 
-void Parser::addArgvList()
+void ColmParser::addArgvList()
 {
 	NamespaceQual *nspaceQual1 = new NamespaceQual( 
 			namespaceStack.top(), regionStack.top() );
@@ -2456,13 +2456,13 @@ void Parser::addArgvList()
 			nspaceQual2, typeRef, 0 );
 }
 
-int Parser::parseLangEl( int type, const Token *token )
+int ColmParser::parseLangEl( int type, const Token *token )
 {
 	%% write exec;
 	return errCount == 0 ? 0 : -1;
 }
 
-void Parser::addRegularDef( const InputLoc &loc, Namespace *nspace,
+void ColmParser::addRegularDef( const InputLoc &loc, Namespace *nspace,
 		const String &name, JoinOrLm *joinOrLm, bool isInstance )
 {
 	GraphDictEl *newEl = nspace->graphDict.insert( name );
@@ -2482,7 +2482,7 @@ void Parser::addRegularDef( const InputLoc &loc, Namespace *nspace,
 	}
 }
 
-ostream &Parser::parse_error( int tokId, Token &token )
+ostream &ColmParser::parse_error( int tokId, Token &token )
 {
 	/* Maintain the error count. */
 	gblErrorCount += 1;
@@ -2490,9 +2490,9 @@ ostream &Parser::parse_error( int tokId, Token &token )
 	cerr << token.loc.fileName << ":" << token.loc.line << ":" << token.loc.col << ": ";
 	cerr << "at token ";
 	if ( tokId < 128 )
-		cerr << "\"" << Parser_lelNames[tokId] << "\"";
+		cerr << "\"" << ColmParser_lelNames[tokId] << "\"";
 	else 
-		cerr << Parser_lelNames[tokId];
+		cerr << ColmParser_lelNames[tokId];
 	if ( token.data != 0 )
 		cerr << " with data \"" << token.data << "\"";
 	cerr << ": ";
@@ -2500,7 +2500,7 @@ ostream &Parser::parse_error( int tokId, Token &token )
 	return cerr;
 }
 
-int Parser::token( InputLoc &loc, int tokId, char *tokstart, int toklen )
+int ColmParser::token( InputLoc &loc, int tokId, char *tokstart, int toklen )
 {
 	Token token;
 

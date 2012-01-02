@@ -340,15 +340,15 @@ void streamFree( Program *prg, Stream *stream )
 
 
 /*
- * AccumStream
+ * Input
  */
 
-AccumStream *accumStreamAllocate( Program *prg )
+Input *accumStreamAllocate( Program *prg )
 {
-	return (AccumStream*)mapElAllocate( prg );
+	return (Input*)mapElAllocate( prg );
 }
 
-void accumStreamFree( Program *prg, AccumStream *accumStream )
+void accumStreamFree( Program *prg, Input *accumStream )
 {
 	mapElFree( prg, (MapEl*)accumStream );
 }

@@ -54,7 +54,7 @@ void colmRunProgram( Program *prg )
 	assert( sizeof(Map)      <= sizeof(MapEl) );
 	assert( sizeof(List)     <= sizeof(MapEl) );
 	assert( sizeof(Stream)   <= sizeof(MapEl) );
-	assert( sizeof(Accum)    <= sizeof(MapEl) );
+	assert( sizeof(Parser)   <= sizeof(MapEl) );
 
 	/* Allocate the global variable. */
 	allocGlobal( prg );
