@@ -2098,10 +2098,10 @@ again:
 		case IN_SET_ACCUM_CTX_WC: {
 			debug( REALM_BYTECODE, "IN_SET_ACCUM_CTX_WC\n" );
 
-			Tree *obj = vm_pop();
+			Tree *parser = vm_pop();
 			Tree *val = vm_pop();
-			parserSetContext( prg, sp, (Parser*)obj, val );
-			treeDownref( prg, sp, obj );
+			parserSetContext( prg, sp, (Parser*)parser, val );
+			treeDownref( prg, sp, parser );
 			break;
 		}
 

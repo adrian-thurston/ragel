@@ -634,6 +634,9 @@ void undoConsumeLangEl( InputStream *is )
 
 void prependData( InputStream *is, const char *data, long length )
 {
+	if ( is->attached1 != 0 )
+		detachInput1( is->attached1, is );
+
 	/* Create a new buffer for the data. This is the easy implementation.
 	 * Something better is needed here. It puts a max on the amount of
 	 * data that can be pushed back to the inputStream. */
@@ -648,6 +651,9 @@ void prependData( InputStream *is, const char *data, long length )
 
 int undoPrependData( InputStream *is, int length )
 {
+	if ( is->attached1 != 0 )
+		detachInput1( is->attached1, is );
+
 	debug( REALM_INPUT, "consuming %d bytes\n", length );
 
 	int consumed = 0;
@@ -708,6 +714,9 @@ void prependTree( InputStream *is, Tree *tree, int ignore )
 
 Tree *undoPrependTree( InputStream *is )
 {
+	if ( is->attached1 != 0 )
+		detachInput1( is->attached1, is );
+
 	while ( is->queue != 0 && is->queue->type == RunBufDataType && is->queue->offset == is->queue->length ) {
 		RunBuf *runBuf = inputStreamPopHead( is );
 		free( runBuf );
@@ -745,6 +754,9 @@ void appendData( InputStream *is, const char *data, long len )
 
 Tree *undoAppendData( InputStream *is, int length )
 {
+	if ( is->attached1 != 0 )
+		detachInput1( is->attached1, is );
+
 	int consumed = 0;
 
 	/* Move over skip bytes. */
@@ -802,17 +814,23 @@ void appendStream( InputStream *in, struct ColmTree *tree )
 	ad->length = 0;
 }
 
-Tree *undoAppendStream( InputStream *in )
+Tree *undoAppendStream( InputStream *is )
 {
-	RunBuf *runBuf = inputStreamPopTail( in );
+	if ( is->attached1 != 0 )
+		detachInput1( is->attached1, is );
+
+	RunBuf *runBuf = inputStreamPopTail( is );
 	Tree *tree = runBuf->tree;
 	free( runBuf );
 	return tree;
 }
 
-Tree *undoAppendTree( InputStream *in )
+Tree *undoAppendTree( InputStream *is )
 {
-	RunBuf *runBuf = inputStreamPopTail( in );
+	if ( is->attached1 != 0 )
+		detachInput1( is->attached1, is );
+
+	RunBuf *runBuf = inputStreamPopTail( is );
 	Tree *tree = runBuf->tree;
 	free( runBuf );
 	return tree;
