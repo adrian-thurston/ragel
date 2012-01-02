@@ -195,13 +195,17 @@ void setEof( InputStream *is );
 void unsetEof( InputStream *is );
 
 void prependData( InputStream *in, const char *data, long len );
-struct ColmTree *undoPrependData( InputStream *in, int length );
+int undoPrependData( InputStream *is, int length );
+
+void prependTree( InputStream *is, struct ColmTree *tree, int ignore );
+struct ColmTree *undoPrependTree( InputStream *is );
 
 void appendData( InputStream *in, const char *data, long len );
 void appendTree( InputStream *in, struct ColmTree *tree );
 void appendStream( InputStream *in, struct ColmTree *tree );
 struct ColmTree *undoAppendData( InputStream *in, int length );
 struct ColmTree *undoAppendStream( InputStream *in );
+struct ColmTree *undoAppendTree( InputStream *in );
 
 #ifdef __cplusplus
 }

@@ -171,23 +171,25 @@ void streamPushText( FsmRun *fsmRun, InputStream *inputStream, const char *data,
 
 void streamPushTree( FsmRun *fsmRun, InputStream *inputStream, Tree *tree, int ignore )
 {
-	undoConsumeTree( inputStream, tree, ignore );
+	prependTree( inputStream, tree, ignore );
 }
 
 void undoStreamPush( Program *prg, Tree **sp, FsmRun *fsmRun, InputStream *inputStream, long length )
 {
 	if ( length < 0 ) 
-		consumeTree( inputStream );
+		undoPrependTree( inputStream );
 	else
-		consumeData( inputStream, length );
+		undoPrependData( inputStream, length );
 }
 
 void undoStreamAppend( Program *prg, Tree **sp, FsmRun *fsmRun, InputStream *inputStream, Tree *input, long length )
 {
-	if ( input->id == LEL_ID_STREAM )
+	if ( input->id == LEL_ID_STR )
+		undoAppendData( inputStream, length );
+	else if ( input->id == LEL_ID_STREAM )
 		undoAppendStream( inputStream );
 	else
-		undoAppendData( inputStream, length );
+		undoAppendTree( inputStream );
 }
 
 /* Should only be sending back whole tokens/ignores, therefore the send back
@@ -200,24 +202,7 @@ static void sendBackText( FsmRun *fsmRun, InputStream *inputStream, const char *
 	if ( length == 0 )
 		return;
 
-//	if ( fsmRun->p == fsmRun->runBuf->data )
-//		sendBackRunBufHead( fsmRun, inputStream );
-
-	/* If there is data in the current buffer then send the whole send back
-	 * should be in this buffer. */
-	//clearBuffered( fsmRun );
-
-	/* slide data back. */
-//	fsmRun->p = fsmRun->pe = fsmRun->runBuf->data;
 	undoConsumeData( fsmRun, inputStream, data, length );
-
-//	#if COLM_LOG
-//	if ( memcmp( data, fsmRun->p, length ) != 0 )
-//		debug( REALM_PARSE, "mismatch of pushed back text\n" );
-//	#endif
-
-//	assert( memcmp( data, fsmRun->p, length ) == 0 );
-		
 	undoPosition( inputStream, data, length );
 }
 

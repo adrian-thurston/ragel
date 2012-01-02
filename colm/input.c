@@ -632,54 +632,97 @@ void undoConsumeLangEl( InputStream *is )
 	}
 }
 
-
 void prependData( InputStream *is, const char *data, long length )
 {
-///	if ( isSourceStream( is ) ) {
-///		Stream *stream = (Stream*)is->queue->tree;
-///		return stream->in->funcs->prependData( stream->in, data, length );
-///	}
-///	else {
-	//	#ifdef COLM_LOG_PARSE
-	//	if ( colm_log_parse ) {
-	//		cerr << "readying fake push" << endl;
-	//	}
-	//	#endif
+	/* Create a new buffer for the data. This is the easy implementation.
+	 * Something better is needed here. It puts a max on the amount of
+	 * data that can be pushed back to the inputStream. */
+	assert( length < FSM_BUFSIZE );
 
-	//	takeBackBuffered( inputStream );
+	RunBuf *newBuf = newRunBuf();
+	newBuf->length = length;
+	memcpy( newBuf->data, data, length );
 
-		/* Create a new buffer for the data. This is the easy implementation.
-		 * Something better is needed here. It puts a max on the amount of
-		 * data that can be pushed back to the inputStream. */
-		assert( length < FSM_BUFSIZE );
-
-		RunBuf *newBuf = newRunBuf();
-		newBuf->length = length;
-		memcpy( newBuf->data, data, length );
-
-		inputStreamPrepend( is, newBuf );
-//	}
+	inputStreamPrepend( is, newBuf );
 }
 
-Tree *undoPrependData( InputStream *is, int length )
+int undoPrependData( InputStream *is, int length )
 {
-//	if ( isSourceStream( is ) ) {
-//		Stream *stream = (Stream*)is->queue->tree;
-//		return stream->in->funcs->undoPrependData( stream->in, length );
-//	}
-//	else {
-		if ( is->queue->type == RunBufDataType ) {
-			consumeData( is, length );
-			return 0;
+	debug( REALM_INPUT, "consuming %d bytes\n", length );
+
+	int consumed = 0;
+
+	/* Move over skip bytes. */
+	while ( true ) {
+		RunBuf *buf = is->queue;
+
+		if ( buf == 0 )
+			break;
+
+		if ( buf->type == RunBufSourceType ) {
+			Stream *stream = (Stream*)buf->tree;
+			int slen = stream->in->funcs->consumeData( stream->in, length );
+
+			consumed += slen;
+			length -= slen;
 		}
+		else if ( buf->type == RunBufTokenType )
+			break;
+		else if ( buf->type == RunBufIgnoreType )
+			break;
 		else {
-			/* FIXME: leak here. */
-			RunBuf *rb = inputStreamPopHead( is );
-			Tree *tree = rb->tree;
-			free(rb);
-			return tree;
+			/* Anything available in the current buffer. */
+			int avail = buf->length - buf->offset;
+			if ( avail > 0 ) {
+				/* The source data from the current buffer. */
+				int slen = avail <= length ? avail : length;
+				consumed += slen;
+				length -= slen;
+				buf->offset += slen;
+			}
 		}
-//	}
+
+		if ( length == 0 )
+			break;
+
+		RunBuf *runBuf = inputStreamPopHead( is );
+		free( runBuf );
+	}
+
+	return consumed;
+}
+
+void prependTree( InputStream *is, Tree *tree, int ignore )
+{
+	if ( is->attached1 != 0 )
+		detachInput1( is->attached1, is );
+
+	/* Create a new buffer for the data. This is the easy implementation.
+	 * Something better is needed here. It puts a max on the amount of
+	 * data that can be pushed back to the inputStream. */
+	RunBuf *newBuf = newRunBuf();
+	newBuf->type = ignore ? RunBufIgnoreType : RunBufTokenType;
+	newBuf->tree = tree;
+	inputStreamPrepend( is, newBuf );
+}
+
+Tree *undoPrependTree( InputStream *is )
+{
+	while ( is->queue != 0 && is->queue->type == RunBufDataType && is->queue->offset == is->queue->length ) {
+		RunBuf *runBuf = inputStreamPopHead( is );
+		free( runBuf );
+	}
+
+	if ( is->queue != 0 && (is->queue->type == RunBufTokenType || is->queue->type == RunBufIgnoreType) ) {
+		RunBuf *runBuf = inputStreamPopHead( is );
+
+		/* FIXME: using runbufs here for this is a poor use of memory. */
+		Tree *tree = runBuf->tree;
+		free(runBuf);
+		return tree;
+	}
+
+	return 0;
 }
 
 void appendData( InputStream *is, const char *data, long len )
@@ -760,6 +803,14 @@ void appendStream( InputStream *in, struct ColmTree *tree )
 }
 
 Tree *undoAppendStream( InputStream *in )
+{
+	RunBuf *runBuf = inputStreamPopTail( in );
+	Tree *tree = runBuf->tree;
+	free( runBuf );
+	return tree;
+}
+
+Tree *undoAppendTree( InputStream *in )
 {
 	RunBuf *runBuf = inputStreamPopTail( in );
 	Tree *tree = runBuf->tree;
