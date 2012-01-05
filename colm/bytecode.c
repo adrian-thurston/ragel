@@ -799,7 +799,8 @@ int makeReverseCode( PdaRun *pdaRun )
 
 	/* One reverse code run for the DECK terminator. */
 	append( reverseCode, IN_PCR_END_DECK );
-	appendWord( reverseCode, 1 );
+	append( reverseCode, IN_PCR_RET );
+	appendWord( reverseCode, 2 );
 
 	long startLength = reverseCode->tabLen;
 
@@ -2224,22 +2225,6 @@ again:
 		case IN_PCR_END_DECK: {
 			debug( REALM_BYTECODE, "IN_PCR_END_DECK\n" );
 			exec->pdaRun->onDeck = false;
-
-			instr = (Code*) vm_pop();
-			exec->rcodeUnitLen = ( long ) vm_pop();
-			exec->frameId = ( long ) vm_pop();
-			exec->iframePtr = ( Tree ** ) vm_pop();
-			exec->framePtr = ( Tree ** ) vm_pop();
-			exec->inputStream = ( InputStream * ) vm_pop();
-			exec->fsmRun = ( FsmRun * ) vm_pop();
-			exec->pdaRun = ( PdaRun * ) vm_pop();
-			exec->parser = ( Parser * ) vm_pop();
-
-			if ( instr == 0 ) {
-				fflush( stdout );
-				goto out;
-			}
-
 			break;
 		}
 
