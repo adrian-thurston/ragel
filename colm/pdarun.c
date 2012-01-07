@@ -210,11 +210,9 @@ static void sendBackText( FsmRun *fsmRun, InputStream *inputStream, const char *
  * Stops on:
  *   PcrRevIgnore
  */
-static long sendBackIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
-		InputStream *inputStream, Kid *ignoreKidList, long entry )
+static void sendBackIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
+		InputStream *inputStream, Kid *ignoreKidList )
 {
-switch ( entry ) {
-case PcrStart:
 	pdaRun->ignore4 = ignoreKidList;
 
 	#ifdef COLM_LOG
@@ -234,19 +232,7 @@ case PcrStart:
 
 	/* Check for reverse code. */
 	if ( pdaRun->ignore4->tree->flags & AF_HAS_RCODE ) {
-
 		pdaRun->onDeck = true;
-		pdaRun->frameId = -1;
-		pdaRun->code = popReverseCode( &pdaRun->reverseCode );
-
-return PcrRevIgnore;
-case PcrRevIgnore:
-
-		pdaRun->code = popReverseCode( &pdaRun->reverseCode );
-
-return PcrRevIgnore2;
-case PcrRevIgnore2:
-
 		pdaRun->ignore4->tree->flags &= ~AF_HAS_RCODE;
 	}
 
@@ -257,11 +243,6 @@ case PcrRevIgnore2:
 
 	treeDownref( prg, sp, pdaRun->ignore4->tree );
 	kidFree( prg, pdaRun->ignore4 );
-
-case PcrDone:
-break; }
-
-	return PcrDone;
 }
 
 void detachIgnores( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, Kid *input )
@@ -405,8 +386,8 @@ void resetToken( FsmRun *fsmRun )
  */
 
 
-static long sendBack( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, 
-		InputStream *inputStream, Kid *input, long entry )
+static void sendBack( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, 
+		InputStream *inputStream, Kid *input )
 {
 	#ifdef COLM_LOG
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
@@ -416,9 +397,6 @@ static long sendBack( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
 			stringData( input->tree->tokdata ), 
 			input->tree->flags & AF_ARTIFICIAL ? " (artificial)" : "" );
 	#endif
-
-switch ( entry ) {
-case PcrStart:
 
 	if ( input->tree->flags & AF_NAMED ) {
 		/* Send back anything in the buffer that has not been parsed. */
@@ -445,19 +423,7 @@ case PcrStart:
 
 		/* Check for reverse code. */
 		if ( input->tree->flags & AF_HAS_RCODE ) {
-
 			pdaRun->onDeck = true;
-			pdaRun->frameId = -1;
-			pdaRun->code = popReverseCode( &pdaRun->reverseCode );
-
-return PcrRevToken;
-case PcrRevToken:
-
-			pdaRun->code = popReverseCode( &pdaRun->reverseCode );
-
-return PcrRevToken2;
-case PcrRevToken2:
-
 			input->tree->flags &= ~AF_HAS_RCODE;
 		}
 
@@ -477,11 +443,6 @@ case PcrRevToken2:
 	/* Downref the tree that was sent back and free the kid. */
 	treeDownref( prg, sp, input->tree );
 	kidFree( prg, input );
-
-case PcrDone:
-break; }
-
-	return PcrDone;
 }
 
 void setRegion( PdaRun *pdaRun, Tree *tree )
@@ -1225,12 +1186,7 @@ case PcrGeneration:
 
 return pcr;
 case PcrReduction:
-case PcrRevReduction:
-case PcrRevReduction2:
-case PcrRevIgnore:
-case PcrRevIgnore2:
-case PcrRevToken:
-case PcrRevToken2:
+case PcrReverse:
 
 			pcr = parseToken( prg, sp, pdaRun, fsmRun, inputStream, entry );
 		}
@@ -1894,7 +1850,19 @@ parseError:
 	}
 
 	while ( 1 ) {
-		if ( pdaRun->checkNext ) {
+		if ( pdaRun->onDeck ) {
+			debug( REALM_BYTECODE, "dropping out for reverse code call\n" );
+
+			pdaRun->frameId = -1;
+			pdaRun->code = popReverseCode( &pdaRun->reverseCode );
+
+return PcrReverse;
+case PcrReverse: 
+
+			{}
+
+		}
+		else if ( pdaRun->checkNext ) {
 			pdaRun->checkNext = false;
 
 			if ( pdaRun->next > 0 && pdaRun->tables->tokenRegions[pdaRun->next] != 0 ) {
@@ -1962,32 +1930,15 @@ parseError:
 					pdaRun->checkNext = true;
 					pdaRun->checkStop = true;
 
-					long pcr = sendBack( prg, sp, pdaRun, fsmRun, inputStream, pdaRun->input1, PcrStart );
-					while ( pcr != PcrDone ) {
-return pcr;
-case PcrRevToken:
-case PcrRevToken2:
-						pcr = sendBack( prg, sp, pdaRun, fsmRun, inputStream, pdaRun->input1, entry );
-					}
+					sendBack( prg, sp, pdaRun, fsmRun, inputStream, pdaRun->input1 );
 
 					pdaRun->input1 = 0;
 
 				}
 			}
 			else if ( pdaRun->input1->tree->flags & AF_HAS_RCODE ) {
-
 				pdaRun->onDeck = true;
 				pdaRun->parsed = 0;
-				pdaRun->frameId = -1;
-				pdaRun->code = popReverseCode( &pdaRun->reverseCode );
-
-return PcrRevReduction;
-case PcrRevReduction:
-
-				pdaRun->code = popReverseCode( &pdaRun->reverseCode );
-
-return PcrRevReduction2;
-case PcrRevReduction2:
 
 				/* Only the RCODE flag was in the replaced lhs. All the rest is in
 				 * the the original. We read it after restoring. */
@@ -2054,15 +2005,7 @@ case PcrRevReduction2:
 			pdaRun->checkNext = true;
 			pdaRun->checkStop = true;
 			
-			long pcr = sendBackIgnore( prg, sp, pdaRun, fsmRun, inputStream, pdaRun->ignore6, PcrStart );
-			while ( pcr != PcrDone ) {
-
-return pcr;
-case PcrRevIgnore:
-case PcrRevIgnore2:
-
-				pcr = sendBackIgnore( prg, sp, pdaRun, fsmRun, inputStream, pdaRun->ignore6, entry );
-			}
+			sendBackIgnore( prg, sp, pdaRun, fsmRun, inputStream, pdaRun->ignore6 );
 		}
 		else {
 

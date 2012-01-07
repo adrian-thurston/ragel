@@ -233,12 +233,7 @@ return pcr;
 case PcrReduction:
 case PcrGeneration:
 case PcrPreEof:
-case PcrRevIgnore:
-case PcrRevIgnore2:
-case PcrRevToken:
-case PcrRevToken2:
-case PcrRevReduction:
-case PcrRevReduction2:
+case PcrReverse:
 
 			pcr = parseLoop( prg, sp, parser->pdaRun, parser->fsmRun, parser->input->in, entry );
 		}
@@ -268,12 +263,7 @@ return pcr;
 case PcrReduction:
 case PcrGeneration:
 case PcrPreEof:
-case PcrRevIgnore:
-case PcrRevIgnore2:
-case PcrRevToken:
-case PcrRevToken2:
-case PcrRevReduction:
-case PcrRevReduction2:
+case PcrReverse:
 
 				pcr = parseLoop( prg, sp, parser->pdaRun, parser->fsmRun, parser->input->in, entry );
 			}
@@ -326,12 +316,7 @@ return pcr;
 case PcrReduction:
 case PcrGeneration:
 case PcrPreEof:
-case PcrRevIgnore:
-case PcrRevIgnore2:
-case PcrRevToken:
-case PcrRevToken2:
-case PcrRevReduction:
-case PcrRevReduction2:
+case PcrReverse:
 
 			pcr = parseLoop( prg, sp, pdaRun, fsmRun, inputStream, entry );
 		}

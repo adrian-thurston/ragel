@@ -410,12 +410,7 @@ int pdaRunGetNextRegion( PdaRun *pdaRun, int offset );
 #define PcrReduction     3
 #define PcrGeneration    4
 #define PcrPreEof        5
-#define PcrRevIgnore     6
-#define PcrRevIgnore2    7
-#define PcrRevToken      8
-#define PcrRevToken2     9
-#define PcrRevReduction  10
-#define PcrRevReduction2 11
+#define PcrReverse       6
 
 long parseToken( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, 
 		FsmRun *fsmRun, InputStream *inputStream, long entry );
