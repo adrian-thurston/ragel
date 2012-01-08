@@ -176,10 +176,13 @@ void streamPushTree( FsmRun *fsmRun, InputStream *inputStream, Tree *tree, int i
 
 void undoStreamPush( Program *prg, Tree **sp, FsmRun *fsmRun, InputStream *inputStream, long length )
 {
-	if ( length < 0 ) 
-		undoPrependTree( inputStream );
-	else
+	if ( length < 0 ) {
+		Tree *tree = undoPrependTree( inputStream );
+		treeDownref( prg, sp, tree );
+	}
+	else {
 		undoPrependData( inputStream, length );
+	}
 }
 
 void undoStreamAppend( Program *prg, Tree **sp, FsmRun *fsmRun, InputStream *inputStream, Tree *input, long length )
@@ -204,6 +207,11 @@ static void sendBackText( FsmRun *fsmRun, InputStream *inputStream, const char *
 
 	undoConsumeData( fsmRun, inputStream, data, length );
 	undoPosition( inputStream, data, length );
+}
+
+void sendBackTree( InputStream *inputStream, Tree *tree )
+{
+	undoConsumeTree( inputStream, tree, false );
 }
 
 /*
@@ -421,7 +429,7 @@ static void sendBack( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
 
 		treeUpref( input->tree );
 
-		streamPushTree( fsmRun, inputStream, input->tree, false );
+		sendBackTree( inputStream, input->tree );
 	}
 	else {
 		/* Check for reverse code. */
@@ -434,7 +442,6 @@ static void sendBack( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
 		/* Push back the token data. */
 		sendBackText( fsmRun, inputStream, stringData( input->tree->tokdata ), 
 				stringLength( input->tree->tokdata ) );
-
 
 		/* If eof was just sent back remember that it needs to be sent again. */
 		if ( input->tree->id == prg->rtd->eofLelIds[pdaRun->parserId] )

@@ -874,10 +874,9 @@ again:
 		}
 		case IN_LOAD_TREE: {
 			debug( REALM_BYTECODE, "IN_LOAD_TREE\n" );
-			Word w;
-			read_word( w );
-			treeUpref( (Tree*)w );
-			vm_push( (SW)w );
+			Tree *tree;
+			read_tree( tree );
+			vm_push( tree );
 			break;
 		}
 		case IN_LOAD_WORD: {
@@ -2584,9 +2583,9 @@ again:
 		case IN_INPUT_PUSH_WV: {
 			debug( REALM_BYTECODE, "IN_INPUT_PUSH_WV\n" );
 
-			Input *accumStream = (Input*)vm_pop();
+			Input *input = (Input*)vm_pop();
 			Tree *tree = vm_pop();
-			long len = streamPush( prg, sp, 0, accumStream->in, tree, false );
+			long len = streamPush( prg, sp, 0, input->in, tree, false );
 			vm_push( 0 );
 
 			/* Single unit. */
@@ -2595,16 +2594,16 @@ again:
 			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
 			append( &exec->pdaRun->rcodeCollect, exec->rcodeUnitLen );
 
-			treeDownref( prg, sp, (Tree*)accumStream );
+			treeDownref( prg, sp, (Tree*)input );
 			treeDownref( prg, sp, tree );
 			break;
 		}
 		case IN_INPUT_PUSH_IGNORE_WV: {
 			debug( REALM_BYTECODE, "IN_INPUT_PUSH_IGNORE_WV\n" );
 
-			Input *accumStream = (Input*)vm_pop();
+			Input *input = (Input*)vm_pop();
 			Tree *tree = vm_pop();
-			long len = streamPush( prg, sp, 0, accumStream->in, tree, true );
+			long len = streamPush( prg, sp, 0, input->in, tree, true );
 			vm_push( 0 );
 
 			/* Single unit. */
@@ -2613,7 +2612,7 @@ again:
 			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
 			append( &exec->pdaRun->rcodeCollect, exec->rcodeUnitLen );
 
-			treeDownref( prg, sp, (Tree*)accumStream );
+			treeDownref( prg, sp, (Tree*)input );
 			treeDownref( prg, sp, tree );
 			break;
 		}
@@ -2621,12 +2620,12 @@ again:
 			Word len;
 			read_word( len );
 
-			Input *accumStream = (Input*)vm_pop();
+			Input *input = (Input*)vm_pop();
 
 			debug( REALM_BYTECODE, "IN_INPUT_PUSH_BKT\n" );
 
-			undoStreamPush( prg, sp, 0, accumStream->in, len );
-			treeDownref( prg, sp, (Tree*)accumStream );
+			undoStreamPush( prg, sp, 0, input->in, len );
+			treeDownref( prg, sp, (Tree*)input );
 			break;
 		}
 		case IN_CONSTRUCT: {
