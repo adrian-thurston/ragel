@@ -201,11 +201,12 @@ void FsmCodeGen::writeMain()
 		"int main( int argc, const char **argv )\n"
 		"{\n"
 		"	struct ColmProgram *prg;\n"
+		"	int exitStatus;\n"
 		"	colmInit( " << colmActiveRealm << " );\n"
 		"	prg = colmNewProgram( &main_runtimeData, argc, argv );\n"
 		"	colmRunProgram( prg );\n"
-		"	colmDeleteProgram( prg );\n"
-		"	return prg->exitStatus;\n"
+		"	exitStatus = colmDeleteProgram( prg );\n"
+		"	return exitStatus;\n"
 		"}\n"
 		"\n";
 

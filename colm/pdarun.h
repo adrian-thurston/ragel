@@ -337,6 +337,8 @@ typedef struct _PdaRun
 
 	/* Instruction pointer to use when we stop parsing and execute code. */
 	Code *code;
+
+	int rcBlockCount;
 } PdaRun;
 
 void rtCodeVectReplace( RtCodeVect *vect, long pos, const Code *val, long len );
@@ -387,6 +389,7 @@ void incrementSteps( PdaRun *pdaRun );
 void decrementSteps( PdaRun *pdaRun );
 
 int makeReverseCode( PdaRun *pdaRun );
+void transferReverseCode( PdaRun *pdaRun, Tree *tree );
 
 void initPdaRun( PdaRun *pdaRun, struct ColmProgram *prg, PdaTables *tables,
 		FsmRun *fsmRun, int parserId, long stopTarget, int revertOn, Tree *context );

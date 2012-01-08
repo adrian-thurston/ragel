@@ -270,6 +270,11 @@ case PcrReverse:
 		}
 	}
 
+	/* FIXME: need something here to check that we aren' stopped waiting for
+	 * more data when we are actually expected to finish. This check doesn't
+	 * work (at time of writing). */
+	//assert( (parser->pdaRun->stopTarget > 0 && parser->pdaRun->stopParsing) || parser->input->in->eofSent );
+
 	if ( !revertOn )
 		commitFull( prg, sp, parser->pdaRun, 0 );
 	
@@ -782,10 +787,14 @@ int makeReverseCode( PdaRun *pdaRun )
 	if ( rcodeCollect->tabLen == 0 )
 		return false;
 
-	/* One reverse code run for the DECK terminator. */
-	append( reverseCode, IN_PCR_END_DECK );
-	append( reverseCode, IN_PCR_RET );
-	appendWord( reverseCode, 2 );
+	if ( pdaRun->rcBlockCount == 0 ) {
+		/* One reverse code run for the DECK terminator. */
+		append( reverseCode, IN_PCR_END_DECK );
+		append( reverseCode, IN_PCR_RET );
+		appendWord( reverseCode, 2 );
+		pdaRun->rcBlockCount += 1;
+		incrementSteps( pdaRun );
+	}
 
 	long startLength = reverseCode->tabLen;
 
@@ -807,7 +816,19 @@ int makeReverseCode( PdaRun *pdaRun )
 	/* Clear the revere code buffer. */
 	rcodeCollect->tabLen = 0;
 
+	pdaRun->rcBlockCount += 1;
+	incrementSteps( pdaRun );
+
 	return true;
+}
+
+void transferReverseCode( PdaRun *pdaRun, Tree *tree )
+{
+	if ( pdaRun->rcBlockCount > 0 ) {
+		debug( REALM_PARSE, "attaching reverse code to token\n" );
+		tree->flags |= AF_HAS_RCODE;
+		pdaRun->rcBlockCount = 0;
+	}
 }
 
 Code *popReverseCode( RtCodeVect *allRev )
@@ -823,14 +844,6 @@ Code *popReverseCode( RtCodeVect *allRev )
 
 	/* Backup over it. */
 	allRev->tabLen -= len + SIZEOF_WORD;
-
-//	/* Do it again for the terminator. */
-//	Code *prcode2 = allRev->data + allRev->tabLen - SIZEOF_WORD;
-//	read_word_p( len, prcode2 );
-//	start = allRev->tabLen - len - SIZEOF_WORD;
-//	prcode2 = allRev->data + start;
-//	allRev->tabLen -= len + SIZEOF_WORD;
-
 	return prcode;
 }
 
@@ -2277,12 +2290,9 @@ again:
 		case IN_PARSE_FRAG_WV3: {
 			debug( REALM_BYTECODE, "IN_PARSE_FRAG_WV3 \n" );
 
-			long pcr = (long)vm_pop();
+			vm_pop_ignore();
 			Parser *parser = (Parser*)vm_pop();
 			long steps = (long)vm_pop();
-
-			debug( REALM_BYTECODE, "pcr: %ld\n", pcr );
-			debug( REALM_BYTECODE, "steps: %ld\n", steps );
 
 			append( &exec->pdaRun->rcodeCollect, IN_LOAD_WORD );
 			appendWord( &exec->pdaRun->rcodeCollect, steps );

@@ -412,20 +412,29 @@ static void sendBack( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
 
 	/* Artifical were not parsed, instead sent in as items. */
 	if ( input->tree->flags & AF_ARTIFICIAL ) {
+		/* Check for reverse code. */
+		if ( input->tree->flags & AF_HAS_RCODE ) {
+			debug( REALM_PARSE, "tree has rcode, setting on deck\n" );
+			pdaRun->onDeck = true;
+			input->tree->flags &= ~AF_HAS_RCODE;
+		}
+
 		treeUpref( input->tree );
 
 		streamPushTree( fsmRun, inputStream, input->tree, false );
 	}
 	else {
+		/* Check for reverse code. */
+		if ( input->tree->flags & AF_HAS_RCODE ) {
+			debug( REALM_PARSE, "tree has rcode, setting on deck\n" );
+			pdaRun->onDeck = true;
+			input->tree->flags &= ~AF_HAS_RCODE;
+		}
+
 		/* Push back the token data. */
 		sendBackText( fsmRun, inputStream, stringData( input->tree->tokdata ), 
 				stringLength( input->tree->tokdata ) );
 
-		/* Check for reverse code. */
-		if ( input->tree->flags & AF_HAS_RCODE ) {
-			pdaRun->onDeck = true;
-			input->tree->flags &= ~AF_HAS_RCODE;
-		}
 
 		/* If eof was just sent back remember that it needs to be sent again. */
 		if ( input->tree->id == prg->rtd->eofLelIds[pdaRun->parserId] )
@@ -457,6 +466,10 @@ void setRegion( PdaRun *pdaRun, Tree *tree )
 
 void ignoreTree( Program *prg, PdaRun *pdaRun, Tree *tree )
 {
+	transferReverseCode( pdaRun, tree );
+
+	incrementSteps( pdaRun );
+
 	setRegion( pdaRun, tree );
 
 	/* Add the ignore string to the head of the ignore list. */
@@ -508,37 +521,6 @@ Kid *makeTokenWithData( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, InputStrea
 	makeTokenPushBinding( pdaRun, bindId, input->tree );
 
 	return input;
-}
-
-void addNoToken( Program *prg, Tree **sp, FsmRun *fsmRun, PdaRun *pdaRun, 
-		InputStream *inputStream, int frameId, long id, Head *tokdata )
-{
-	/* Check if there was anything generated. */
-	if ( pdaRun->rcodeCollect.tabLen > 0 ) {
-		debug( REALM_PARSE, "found reverse code but no token, sending _notoken\n" );
-
-		Tree *tree = (Tree*)parseTreeAllocate( prg );
-		tree->flags |= AF_PARSE_TREE;
-		tree->refs = 1;
-		tree->id = prg->rtd->noTokenId;
-		tree->tokdata = 0;
-
-		Kid *send = kidAllocate( prg );
-		send->tree = tree;
-		send->next = 0;
-
-		/* If there is reverse code then addNoToken will guarantee that the
-		 * queue is not empty. Pull the reverse code out and store in the
-		 * token. */
-		int hasrcode = makeReverseCode( pdaRun );
-		if ( hasrcode )
-			tree->flags |= AF_HAS_RCODE;
-
-		incrementSteps( pdaRun );
-
-		ignoreTree( prg, pdaRun, send->tree );
-		kidFree( prg, send );
-	}
 }
 
 Kid *extractIgnore( PdaRun *pdaRun )
@@ -700,6 +682,7 @@ void handleError( Program *prg, Tree **sp, PdaRun *pdaRun )
 	}
 }
 
+
 void sendIgnore( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long id )
 {
 	debug( REALM_PARSE, "ignoring: %s\n", prg->rtd->lelInfo[id].name );
@@ -715,8 +698,6 @@ void sendIgnore( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmR
 	tree->refs = 1;
 	tree->id = id;
 	tree->tokdata = ignoreStr;
-
-	incrementSteps( pdaRun );
 
 	/* Send it to the pdaRun. */
 	ignoreTree( prg, pdaRun, tree );
@@ -790,9 +771,6 @@ static Kid *sendTree( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, I
 static void sendIgnoreTree( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 {
 	Tree *tree = consumeTree( inputStream );
-
-	incrementSteps( pdaRun );
-
 	ignoreTree( prg, pdaRun, tree );
 }
 
@@ -1075,11 +1053,12 @@ case PcrStart:
 
 return PcrPreEof;
 case PcrPreEof:
+				{}
 
 				/* 
 				 * Need a no-token.
 				 */
-				addNoToken( prg, sp, fsmRun, pdaRun, inputStream, pdaRun->frameId, pdaRun->tokenId, 0 );
+				//addNoToken( prg, sp, fsmRun, pdaRun, inputStream, pdaRun->frameId, pdaRun->tokenId, 0 );
 			}
 		}
 		else if ( pdaRun->tokenId == SCAN_UNDO ) {
@@ -1156,8 +1135,10 @@ case PcrGeneration:
 			/* 
 			 * May need a no-token.
 			 */
-			addNoToken( prg, sp, fsmRun, pdaRun, inputStream, 
-					prg->rtd->lelInfo[pdaRun->tokenId].frameId, pdaRun->tokenId, pdaRun->tokdata );
+			//addNoToken( prg, sp, fsmRun, pdaRun, inputStream, 
+			//		prg->rtd->lelInfo[pdaRun->tokenId].frameId, pdaRun->tokenId, pdaRun->tokdata );
+
+			makeReverseCode( pdaRun );
 
 			/* Finished with the match text. */
 			stringFree( prg, pdaRun->tokdata );
@@ -1179,6 +1160,9 @@ case PcrGeneration:
 			/* Is a plain token. */
 			pdaRun->input1 = sendToken( prg, sp, inputStream, fsmRun, pdaRun, pdaRun->tokenId );
 		}
+
+		if ( pdaRun->input1 != 0 )
+			transferReverseCode( pdaRun, pdaRun->input1->tree );
 
 		long pcr = parseToken( prg, sp, pdaRun, fsmRun, inputStream, PcrStart );
 		
@@ -1356,6 +1340,8 @@ void initPdaRun( PdaRun *pdaRun, Program *prg, PdaTables *tables,
 	pdaRun->onDeck = false;
 	pdaRun->parsed = 0;
 	pdaRun->reject = false;
+
+	pdaRun->rcBlockCount = 0;
 }
 
 long stackTopTarget( Program *prg, PdaRun *pdaRun )
@@ -1810,9 +1796,8 @@ case PcrReduction:
 			}
 
 			/* Pull out the reverse code, if any. */
-			int hasrcode = makeReverseCode( pdaRun );
-			if ( hasrcode )
-				pdaRun->redLel->tree->flags |= AF_HAS_RCODE;
+			makeReverseCode( pdaRun );
+			transferReverseCode( pdaRun, pdaRun->redLel->tree );
 
 			/* Perhaps the execution environment is telling us we need to
 			 * reject the reduction. */
@@ -1859,6 +1844,7 @@ parseError:
 return PcrReverse;
 case PcrReverse: 
 
+			decrementSteps( pdaRun );
 			{}
 
 		}
@@ -1937,6 +1923,7 @@ case PcrReverse:
 				}
 			}
 			else if ( pdaRun->input1->tree->flags & AF_HAS_RCODE ) {
+				debug( REALM_PARSE, "tree has rcode, setting on deck\n" );
 				pdaRun->onDeck = true;
 				pdaRun->parsed = 0;
 
@@ -1949,7 +1936,6 @@ case PcrReverse:
 				/* Remove it from the input queue. */
 				pdaRun->undoLel = pdaRun->input1;
 				pdaRun->input1 = pdaRun->input1->next;
-
 
 				/* Extract the real children from the child list. */
 				Kid *first = treeExtractChild( prg, pdaRun->undoLel->tree );

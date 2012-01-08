@@ -323,7 +323,7 @@ Tree *constructInput( Program *prg )
 	input->id = LEL_ID_INPUT;
 	input->in = malloc( sizeof(InputStream) );
 	initInputStream( input->in );
-	return input;
+	return (Tree*)input;
 }
 
 Kid *constructReplacementKid( Tree **bindings, Program *prg, Kid *prev, long pat );

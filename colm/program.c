@@ -167,9 +167,10 @@ Program *colmNewProgram( RuntimeData *rtd, int argc, const char **argv )
 	return prg;
 }
 
-void colmDeleteProgram( Program *prg )
+int colmDeleteProgram( Program *prg )
 {
 	Tree **sp = prg->vm_root;
+	int exitStatus = prg->exitStatus;
 
 	#ifdef COLM_LOG_BYTECODE
 	if ( colm_log_bytecode ) {
@@ -250,6 +251,8 @@ void colmDeleteProgram( Program *prg )
 	}
 
 	free( prg );
+
+	return exitStatus;
 }
 
 

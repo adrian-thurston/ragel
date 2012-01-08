@@ -7,10 +7,13 @@ TESTS = \
 	backtrack1.lm \
 	backtrack2.lm \
 	backtrack3.lm \
+	binary1.lm \
 	accum1.lm \
 	accum2.lm \
 	accum3.lm \
-	accumbt.lm \
+	accumbt1.lm \
+	accumbt2.lm \
+	accumbt3.lm \
 	mutualrec.lm \
 	argv1.lm \
 	argv2.lm \
@@ -68,18 +71,20 @@ TESTS = \
 	div.lm \
 	scope1.lm \
 	export1.lm \
-	lhs1.lm \
-	binary1.lm
+	lhs1.lm
 
 DIFFS = \
 	ambig1.diff \
 	backtrack1.diff \
 	backtrack2.diff \
 	backtrack3.diff \
+	binary1.diff \
 	accum1.diff \
 	accum2.diff \
 	accum3.diff \
-	accumbt.diff \
+	accumbt1.diff \
+	accumbt2.diff \
+	accumbt3.diff \
 	mutualrec.diff \
 	argv1.diff \
 	argv2.diff \
@@ -137,8 +142,7 @@ DIFFS = \
 	div.diff \
 	scope1.diff \
 	export1.diff \
-	lhs1.diff \
-	binary1.diff
+	lhs1.diff
 
 all: runtests.mk $(DIFFS) $(SUBDIRS)
 
@@ -219,14 +223,30 @@ accum3.out: accum3.bin
 
 accum3.bin: accum3.lm ./../colm/colm
 	./../colm/colm accum3.lm
-accumbt.diff: accumbt.out accumbt.exp
-	@diff -u accumbt.exp accumbt.out > accumbt.diff || ( cat accumbt.diff; rm accumbt.diff )
+accumbt1.diff: accumbt1.out accumbt1.exp
+	@diff -u accumbt1.exp accumbt1.out > accumbt1.diff || ( cat accumbt1.diff; rm accumbt1.diff )
 
-accumbt.out: accumbt.bin
-	./accumbt.bin  > accumbt.out
+accumbt1.out: accumbt1.bin
+	./accumbt1.bin  > accumbt1.out
 
-accumbt.bin: accumbt.lm ./../colm/colm
-	./../colm/colm accumbt.lm
+accumbt1.bin: accumbt1.lm ./../colm/colm
+	./../colm/colm accumbt1.lm
+accumbt2.diff: accumbt2.out accumbt2.exp
+	@diff -u accumbt2.exp accumbt2.out > accumbt2.diff || ( cat accumbt2.diff; rm accumbt2.diff )
+
+accumbt2.out: accumbt2.bin
+	./accumbt2.bin  < accumbt2.in > accumbt2.out
+
+accumbt2.bin: accumbt2.lm ./../colm/colm
+	./../colm/colm accumbt2.lm
+accumbt3.diff: accumbt3.out accumbt3.exp
+	@diff -u accumbt3.exp accumbt3.out > accumbt3.diff || ( cat accumbt3.diff; rm accumbt3.diff )
+
+accumbt3.out: accumbt3.bin
+	./accumbt3.bin  < accumbt3.in > accumbt3.out
+
+accumbt3.bin: accumbt3.lm ./../colm/colm
+	./../colm/colm accumbt3.lm
 mutualrec.diff: mutualrec.out mutualrec.exp
 	@diff -u mutualrec.exp mutualrec.out > mutualrec.diff || ( cat mutualrec.diff; rm mutualrec.diff )
 
