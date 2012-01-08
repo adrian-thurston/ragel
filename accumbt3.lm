@@ -1,0 +1,85 @@
+#
+# Tokens
+#
+
+# Any single character can be a literal
+lex start
+{
+	# Ignore whitespace.
+	ignore /[ \t\n\r\v]+/
+
+	# Open and close id
+	token id /[a-zA-Z_][a-zA-Z0-9_]*/
+
+	token open_paren /'('/ 
+	{
+		parse_stop NC: nested_comment( input )
+		print( 'discarding: ' NC '\n' )
+	}
+}
+
+#
+# Token translation
+#
+
+lex nc_scan
+{
+	literal '(', ')'
+	token nc_data /[^()]+/
+}
+
+def nc_item 
+	[nc_data]
+|	[nested_comment]
+
+def nested_comment 
+	['(' nc_item* ')']
+
+def nested [id*]
+
+global NestedParser: accum<nested> = 
+	cons accum<nested>[]
+
+lex two
+{
+	ignore /[ \t]+/
+	token word /[a-zA-Z0-9/*+_\-]+/
+	token stuff /[a-zA-Z0-9()/*+_\- ]+/
+	literal '!', ';', '\n'
+
+	def A1 []
+		{ print( "A1\n" ) }
+
+	def A2 []
+		{ print( "A2\n" ) }
+
+	def item
+		[word]
+		{
+			send NestedParser [' ']
+			send NestedParser [$r1]
+			send NestedParser [' ']
+		}
+	|
+		[stuff]
+		{
+			send NestedParser [' ']
+			send NestedParser [$r1]
+			send NestedParser [' ']
+		}
+
+	def two 
+	[A1 item* '!' '\n']
+	|
+	[A2 item* ';' '\n']
+}
+
+Two: two = 
+	parse two( stdin )
+
+Nested: nested = NestedParser.finish()
+
+print( '\n------------\n' )
+print( Nested '\n' )
+print( Two '\n' )
+

@@ -12,7 +12,9 @@ TESTS="
 	accum1.lm
 	accum2.lm
 	accum3.lm
-	accumbt.lm
+	accumbt1.lm
+	accumbt2.lm
+	accumbt3.lm
 	mutualrec.lm
 	argv1.lm
 	argv2.lm
