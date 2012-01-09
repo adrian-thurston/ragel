@@ -1800,6 +1800,10 @@ case PcrReduction:
 					appendWord( &pdaRun->rcodeCollect, (Word)pdaRun->parsed );
 					append( &pdaRun->rcodeCollect, SIZEOF_CODE + SIZEOF_WORD );
 				}
+				else {
+					treeDownref( prg, sp, pdaRun->parsed );
+				}
+				pdaRun->parsed = 0;
 			}
 
 			/* Pull out the reverse code, if any. */

@@ -2954,6 +2954,7 @@ again:
 			List *list = (List*) vm_pop();
 			long len = listLength( list );
 			Tree *res = constructInteger( prg, len );
+			treeDownref( prg, sp, (Tree*)list );
 			treeUpref( res );
 			vm_push( res );
 			break;
