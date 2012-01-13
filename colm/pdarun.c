@@ -809,10 +809,6 @@ Kid *sendEof( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun,
 	return input;
 }
 
-void preEofBlock( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, int tokenId )
-{
-}
-
 void newToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun )
 {
 	/* Init the scanner vars. */
@@ -1060,12 +1056,7 @@ case PcrStart:
 
 return PcrPreEof;
 case PcrPreEof:
-				{}
-
-				/* 
-				 * Need a no-token.
-				 */
-				//addNoToken( prg, sp, fsmRun, pdaRun, inputStream, pdaRun->frameId, pdaRun->tokenId, 0 );
+				makeReverseCode( pdaRun );
 			}
 		}
 		else if ( pdaRun->tokenId == SCAN_UNDO ) {
@@ -1138,12 +1129,6 @@ case PcrPreEof:
 			
 return PcrGeneration;
 case PcrGeneration:
-
-			/* 
-			 * May need a no-token.
-			 */
-			//addNoToken( prg, sp, fsmRun, pdaRun, inputStream, 
-			//		prg->rtd->lelInfo[pdaRun->tokenId].frameId, pdaRun->tokenId, pdaRun->tokdata );
 
 			makeReverseCode( pdaRun );
 
