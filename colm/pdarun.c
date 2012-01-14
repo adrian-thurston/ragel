@@ -191,8 +191,10 @@ void undoStreamAppend( Program *prg, Tree **sp, FsmRun *fsmRun, InputStream *inp
 		undoAppendData( inputStream, length );
 	else if ( input->id == LEL_ID_STREAM )
 		undoAppendStream( inputStream );
-	else
-		undoAppendTree( inputStream );
+	else {
+		Tree *tree = undoAppendTree( inputStream );
+		treeDownref( prg, sp, tree );
+	}
 }
 
 /* Should only be sending back whole tokens/ignores, therefore the send back
@@ -1383,7 +1385,7 @@ void commitKid( Program *prg, PdaRun *pdaRun, Tree **root, Kid *lel, Code **rcod
 {
 	Tree *tree = 0;
 	Tree **sp = root;
-	Tree *restore = 0;
+	//Tree *restore = 0;
 
 head:
 	/* Commit */
@@ -1394,7 +1396,7 @@ head:
 	tree = lel->tree;
 
 	/* Check for reverse code. */
-	restore = 0;
+	//restore = 0;
 	if ( tree->flags & AF_HAS_RCODE ) {
 		/* If tree caused some reductions, now is not the right time to backup
 		 * over the reverse code. We need to backup over the reductions first. Store
