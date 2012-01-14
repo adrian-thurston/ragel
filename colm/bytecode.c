@@ -864,6 +864,7 @@ again:
 			read_tree( restore );
 
 			debug( REALM_BYTECODE, "IN_RESTORE_LHS\n" );
+			treeDownref( prg, sp, exec->pdaRun->input1->tree );
 			exec->pdaRun->input1->tree = restore;
 			break;
 		}
@@ -1192,20 +1193,20 @@ again:
 			vm_local(field) = val;
 			break;
 		}
+
 		case IN_INIT_LHS_EL: {
 			short field;
-			uchar save;
 			read_half( field );
-			read_byte( save );
 
-			debug( REALM_BYTECODE, "IN_INIT_LHS_EL %hd %hhu\n", field, save );
+			debug( REALM_BYTECODE, "IN_INIT_LHS_EL %hd\n", field );
 
 			/* We transfer it to to the local field. Possibly take a copy. */
 			Tree *val = exec->pdaRun->redLel->tree;
-			if ( save ) {
-				treeUpref( val );
-				exec->pdaRun->parsed = val;
-			}
+
+			/* Save it. */
+			treeUpref( val );
+			exec->pdaRun->parsed = val;
+
 			exec->pdaRun->redLel->tree = 0;
 			vm_local(field) = val;
 			break;

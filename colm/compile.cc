@@ -2562,8 +2562,8 @@ void ParseData::compileReductionCode( Definition *prod )
 
 	/* Might need to load right hand side values. */
 	addProdRHSLoads( prod, code, afterInit );
-	addProdLHSLoad( prod, code, afterInit );
 
+	addProdLHSLoad( prod, code, afterInit );
 	addPushBackLHS( prod, code, afterInit );
 
 	code.append( IN_POP_LOCALS );

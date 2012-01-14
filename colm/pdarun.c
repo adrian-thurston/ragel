@@ -1779,15 +1779,21 @@ case PcrReduction:
 				if ( pdaRun->parsed != pdaRun->redLel->tree ) {
 					debug( REALM_PARSE, "lhs tree was modified, adding a restore instruction\n" );
 
-					/* Transfer the lhs from the environment to redLel. */
-					pdaRun->redLel->tree = prepParseTree( prg, sp, pdaRun->redLel->tree );
+					/* Make it into a parse tree. */
+					Tree *newPt = prepParseTree( prg, sp, pdaRun->redLel->tree );
+					treeDownref( prg, sp, pdaRun->redLel->tree );
+
+					/* Copy it in. */
+					pdaRun->redLel->tree = newPt;
 					treeUpref( pdaRun->redLel->tree );
 
+					/* Add the restore instruct. */
 					append( &pdaRun->rcodeCollect, IN_RESTORE_LHS );
 					appendWord( &pdaRun->rcodeCollect, (Word)pdaRun->parsed );
 					append( &pdaRun->rcodeCollect, SIZEOF_CODE + SIZEOF_WORD );
 				}
 				else {
+					/* Not changed. Done with parsed. */
 					treeDownref( prg, sp, pdaRun->parsed );
 				}
 				pdaRun->parsed = 0;
