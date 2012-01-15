@@ -3602,6 +3602,7 @@ again:
 			prg->exitStatus = status->value;
 			prg->induceExit = 1;
 			treeDownref( prg, sp, global );
+			treeDownref( prg, sp, (Tree*)status );
 
 			while ( true ) {
 				FrameInfo *fi = &prg->rtd->frameInfo[exec->frameId];
