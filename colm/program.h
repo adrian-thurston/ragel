@@ -37,6 +37,7 @@ typedef struct ColmRuntimeData
 
 	Code *rootCode;
 	long rootCodeLen;
+	long rootFrameId;
 
 	FrameInfo *frameInfo;
 	long numFrames;

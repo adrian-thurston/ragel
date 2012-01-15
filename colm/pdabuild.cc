@@ -1216,10 +1216,12 @@ void ParseData::makeRuntimeData()
 	if ( rootCodeBlock == 0 ) {
 		runtimeData->rootCode = 0;
 		runtimeData->rootCodeLen = 0;
+		runtimeData->rootFrameId = 0;
 	}
 	else {
 		runtimeData->rootCode = rootCodeBlock->codeWC.data;
 		runtimeData->rootCodeLen = rootCodeBlock->codeWC.length();
+		runtimeData->rootFrameId = rootCodeBlock->frameId;
 	}
 
 	runtimeData->frameInfo[rootCodeBlock->frameId].codeWV = 0;

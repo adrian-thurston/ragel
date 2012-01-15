@@ -73,7 +73,7 @@ void colmRunProgram( Program *prg )
 		//RtCodeVect rcodeCollect;
 		Execution execution;
 
-		initExecution( &execution, 0, 0, 0, 0, -1 );
+		initExecution( &execution, 0, 0, 0, 0, prg->rtd->rootFrameId );
 		mainExecution( prg, &execution, prg->rtd->rootCode );
 	}
 }

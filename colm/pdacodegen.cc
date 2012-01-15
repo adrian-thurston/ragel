@@ -437,6 +437,7 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 		"\n"
 		"	" << rootCode() << ",\n"
 		"	" << runtimeData->rootCodeLen << ",\n"
+		"	" << runtimeData->rootFrameId << ",\n"
 		"\n"
 		"	" << frameInfo() << ",\n"
 		"	" << runtimeData->numFrames << ",\n"
