@@ -3020,7 +3020,7 @@ void ParseData::compileFunction( Function *func, CodeVect &code )
 	/* Return cleans up the stack (including the args) and leaves the return
 	 * value on the top. */
 	code.append( IN_RET );
-	code.appendHalf( func->funcId );
+	code.appendHalf( block->frameId );
 }
 
 void ParseData::compileFunction( Function *func )
