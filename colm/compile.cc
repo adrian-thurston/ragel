@@ -1265,7 +1265,7 @@ UniqueType *LangTerm::evaluateConstruct( ParseData *pd, CodeVect &code ) const
 	if ( replUT->typeId != TYPE_TREE )
 		error(loc) << "don't know how to construct this type" << endp;
 	
-	if ( typeRef->type == TypeRef::Parser ) {
+	if ( replUT->langEl->generic != 0 && replUT->langEl->generic->typeId == GEN_PARSER ) {
 		code.append( IN_CONSTRUCT_INPUT );
 		code.append( IN_DUP_TOP_OFF );
 		code.appendHalf( 1 );
