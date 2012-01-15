@@ -249,7 +249,11 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 			out << "trees_" << i << ", ";
 		else
 			out << "0, ";
-		out << runtimeData->frameInfo[i].treesLen << ", ";
+
+		out << 
+			runtimeData->frameInfo[i].treesLen << ", " <<
+			runtimeData->frameInfo[i].argSize << ", " <<
+			runtimeData->frameInfo[i].frameSize;
 
 		out << " }";
 
@@ -333,7 +337,6 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 				"\"" << runtimeData->functionInfo[i].name << "\", " <<
 				runtimeData->functionInfo[i].frameId << ", " <<
 				runtimeData->functionInfo[i].argSize << ", " <<
-				runtimeData->functionInfo[i].ntrees << ", " <<
 				runtimeData->functionInfo[i].frameSize;
 		out << " }";
 

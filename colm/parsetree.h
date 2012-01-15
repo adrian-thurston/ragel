@@ -1736,7 +1736,8 @@ struct ObjectDef
 
 	ObjectDef( Type type, String name, int id )
 	:
-		type(type), name(name), id(id), nextOffset(0)
+		type(type), name(name), id(id), 
+		nextOffset(0), firstNonTree(0)
 	{
 		scope = new ObjNameScope;
 		scope->objFieldMap = new ObjFieldMap;

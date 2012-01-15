@@ -3526,6 +3526,9 @@ again:
 			FrameInfo *fi = &prg->rtd->frameInfo[fui->frameId];
 			downrefLocalTrees( prg, sp, exec->framePtr, fi->trees, fi->treesLen );
 
+			assert( fui->argSize == fi->argSize );
+			assert( fui->frameSize == fi->frameSize );
+
 			vm_popn( fui->frameSize );
 			exec->frameId = (long) vm_pop();
 			exec->framePtr = (Tree**) vm_pop();

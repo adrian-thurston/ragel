@@ -127,7 +127,6 @@ typedef struct _FunctionInfo
 	const char *name;
 	long frameId;
 	long argSize;
-	long ntrees;
 	long frameSize;
 } FunctionInfo;
 
@@ -208,6 +207,8 @@ typedef struct _FrameInfo
 	long codeLenWC;
 	char *trees;
 	long treesLen;
+	long argSize;
+	long frameSize;
 } FrameInfo;
 
 typedef struct _RegionInfo

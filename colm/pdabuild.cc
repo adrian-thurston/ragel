@@ -1228,6 +1228,8 @@ void ParseData::makeRuntimeData()
 	runtimeData->frameInfo[rootCodeBlock->frameId].codeLenWV = 0;
 	runtimeData->frameInfo[rootCodeBlock->frameId].trees = rootCodeBlock->trees.data;
 	runtimeData->frameInfo[rootCodeBlock->frameId].treesLen = rootCodeBlock->trees.length();
+	runtimeData->frameInfo[rootCodeBlock->frameId].frameSize = rootLocalFrame->size();
+	runtimeData->frameInfo[rootCodeBlock->frameId].argSize = 0;
 
 	/*
 	 * prodInfo
@@ -1252,6 +1254,9 @@ void ParseData::makeRuntimeData()
 
 			runtimeData->frameInfo[block->frameId].trees = block->trees.data;
 			runtimeData->frameInfo[block->frameId].treesLen = block->trees.length();
+
+			runtimeData->frameInfo[block->frameId].frameSize = block->localFrame->size();
+			runtimeData->frameInfo[block->frameId].argSize = 0;
 		}
 
 		runtimeData->prodInfo[count].lhsUpref = true;
@@ -1265,6 +1270,8 @@ void ParseData::makeRuntimeData()
 	 */
 	runtimeData->numRegions = regionList.length()+1;
 	runtimeData->regionInfo = new RegionInfo[runtimeData->numRegions];
+	memset( runtimeData->regionInfo, 0, sizeof(RegionInfo) * runtimeData->numRegions );
+
 	runtimeData->regionInfo[0].name = "___EMPTY";
 	runtimeData->regionInfo[0].defaultToken = -1;
 	for ( RegionList::Iter reg = regionList; reg.lte(); reg++ ) {
@@ -1282,6 +1289,9 @@ void ParseData::makeRuntimeData()
 
 			runtimeData->frameInfo[block->frameId].trees = block->trees.data;
 			runtimeData->frameInfo[block->frameId].treesLen = block->trees.length();
+
+			runtimeData->frameInfo[block->frameId].frameSize = block->localFrame->size();
+			runtimeData->frameInfo[block->frameId].argSize = 0;
 		}
 	}
 
@@ -1292,6 +1302,7 @@ void ParseData::makeRuntimeData()
 	count = nextSymbolId;
 	runtimeData->lelInfo = new LangElInfo[count];
 	runtimeData->numLangEls = count;
+	memset( runtimeData->lelInfo, 0, sizeof(LangElInfo)*count );
 
 	for ( int i = 0; i < nextSymbolId; i++ ) {
 		LangEl *lel = langElIndex[i];
@@ -1312,6 +1323,9 @@ void ParseData::makeRuntimeData()
 
 				runtimeData->frameInfo[block->frameId].trees = block->trees.data;
 				runtimeData->frameInfo[block->frameId].treesLen = block->trees.length();
+
+				runtimeData->frameInfo[block->frameId].frameSize = block->localFrame->size();
+				runtimeData->frameInfo[block->frameId].argSize = 0;
 			}
 
 			
@@ -1357,6 +1371,7 @@ void ParseData::makeRuntimeData()
 
 	runtimeData->functionInfo = new FunctionInfo[count];
 	runtimeData->numFunctions = count;
+	memset( runtimeData->functionInfo, 0, sizeof(FunctionInfo)*count );
 	for ( FunctionList::Iter func = functionList; func.lte(); func++ ) {
 		runtimeData->functionInfo[func->funcId].name = func->name;
 		runtimeData->functionInfo[func->funcId].frameId = -1;
@@ -1373,11 +1388,13 @@ void ParseData::makeRuntimeData()
 
 			runtimeData->frameInfo[block->frameId].trees = block->trees.data;
 			runtimeData->frameInfo[block->frameId].treesLen = block->trees.length();
+
+			runtimeData->frameInfo[block->frameId].frameSize = func->localFrame->size();
+			runtimeData->frameInfo[block->frameId].argSize = func->paramListSize;
 		}
 
-		runtimeData->functionInfo[func->funcId].argSize = func->paramListSize;
-		runtimeData->functionInfo[func->funcId].ntrees = func->localFrame->sizeTrees();
 		runtimeData->functionInfo[func->funcId].frameSize = func->localFrame->size();
+		runtimeData->functionInfo[func->funcId].argSize = func->paramListSize;
 	}
 
 	/*
@@ -1443,6 +1460,7 @@ void ParseData::makeRuntimeData()
 	}
 	runtimeData->captureAttr = new CaptureAttr[numCapturedAttr];
 	runtimeData->numCapturedAttr = numCapturedAttr;
+	memset( runtimeData->captureAttr, 0, sizeof( CaptureAttr ) * numCapturedAttr );
 
 	count = 0;
 	for ( RegionList::Iter reg = regionList; reg.lte(); reg++ ) {
