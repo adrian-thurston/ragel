@@ -2566,10 +2566,6 @@ void ParseData::compileReductionCode( Definition *prod )
 	addProdLHSLoad( prod, code, afterInit );
 	addPushBackLHS( prod, code, afterInit );
 
-	code.append( IN_POP_LOCALS );
-	code.appendHalf( block->frameId );
-	code.appendHalf( frameSize );
-
 	code.append( IN_PCR_RET );
 
 	/* Now that compilation is done variables are referenced. Make the local
@@ -2616,10 +2612,6 @@ void ParseData::compileTranslateBlock( LangEl *langEl )
 	long frameSize = curLocalFrame->size();
 	code.setHalf( 1, frameSize );
 
-	code.append( IN_POP_LOCALS );
-	code.appendHalf( block->frameId );
-	code.appendHalf( frameSize );
-
 	code.append( IN_PCR_RET );
 
 	/* Now that compilation is done variables are referenced. Make the local
@@ -2653,10 +2645,6 @@ void ParseData::compilePreEof( TokenRegion *region )
 	/* We have the frame size now. Set in the alloc frame instruction. */
 	long frameSize = curLocalFrame->size();
 	code.setHalf( 1, frameSize );
-
-	code.append( IN_POP_LOCALS );
-	code.appendHalf( block->frameId );
-	code.appendHalf( frameSize );
 
 	code.append( IN_PCR_RET );
 
@@ -2696,10 +2684,6 @@ void ParseData::compileRootBlock( )
 	/* We have the frame size now. Store it in frame init. */
 	long frameSize = curLocalFrame->size();
 	code.setHalf( 1, frameSize );
-
-	code.append( IN_POP_LOCALS );
-	code.appendHalf( block->frameId );
-	code.appendHalf( frameSize );
 
 	code.append( IN_STOP );
 
@@ -3020,7 +3004,7 @@ void ParseData::compileFunction( Function *func, CodeVect &code )
 	/* Return cleans up the stack (including the args) and leaves the return
 	 * value on the top. */
 	code.append( IN_RET );
-	code.appendHalf( block->frameId );
+//	code.appendHalf( block->frameId );
 }
 
 void ParseData::compileFunction( Function *func )

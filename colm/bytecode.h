@@ -69,7 +69,6 @@ typedef unsigned char uchar;
 #define IN_CONCAT_STR            0x18
 
 #define IN_INIT_LOCALS           0x19
-#define IN_POP_LOCALS            0x1a
 #define IN_POP                   0x1b
 #define IN_POP_N_WORDS           0x1c
 #define IN_DUP_TOP               0x1d

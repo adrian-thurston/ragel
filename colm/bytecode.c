@@ -2203,6 +2203,10 @@ again:
 		case IN_PCR_RET: {
 			debug( REALM_BYTECODE, "IN_PCR_RET\n" );
 
+			FrameInfo *fi = &prg->rtd->frameInfo[exec->frameId];
+			downrefLocalTrees( prg, sp, exec->framePtr, fi->trees, fi->treesLen );
+			vm_popn( fi->frameSize );
+
 			instr = (Code*) vm_pop();
 			exec->rcodeUnitLen = ( long ) vm_pop();
 			exec->frameId = ( long ) vm_pop();
@@ -3379,21 +3383,6 @@ again:
 			memset( vm_ptop(), 0, sizeof(Word) * size );
 			break;
 		}
-		case IN_POP_LOCALS: {
-			Half frameId, size;
-			read_half( frameId );
-			read_half( size );
-
-			debug( REALM_BYTECODE, "IN_POP_LOCALS\n" );
-
-			assert( frameId == exec->frameId );
-			assert( size == exec->frameSize );
-
-			FrameInfo *fi = &prg->rtd->frameInfo[frameId];
-			downrefLocalTrees( prg, sp, exec->framePtr, fi->trees, fi->treesLen );
-			vm_popn( size );
-			break;
-		}
 		case IN_CALL_WV: {
 			Half funcId;
 			read_half( funcId );
@@ -3521,17 +3510,12 @@ again:
 			break;
 		}
 		case IN_RET: {
-			Half frameId;
-			read_half( frameId );
-
 			debug( REALM_BYTECODE, "IN_RET\n" );
 
-			assert( frameId == exec->frameId );
-
-			FrameInfo *fi = &prg->rtd->frameInfo[frameId];
+			FrameInfo *fi = &prg->rtd->frameInfo[exec->frameId];
 			downrefLocalTrees( prg, sp, exec->framePtr, fi->trees, fi->treesLen );
-
 			vm_popn( fi->frameSize );
+
 			exec->frameId = (long) vm_pop();
 			exec->framePtr = (Tree**) vm_pop();
 			instr = (Code*) vm_pop();
@@ -3622,6 +3606,11 @@ again:
 
 		case IN_STOP: {
 			debug( REALM_BYTECODE, "IN_STOP\n" );
+
+			FrameInfo *fi = &prg->rtd->frameInfo[exec->frameId];
+			downrefLocalTrees( prg, sp, exec->framePtr, fi->trees, fi->treesLen );
+			vm_popn( fi->frameSize );
+
 			fflush( stdout );
 			goto out;
 		}
