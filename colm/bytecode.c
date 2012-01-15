@@ -3546,16 +3546,6 @@ again:
 			treeDownref( prg, sp, in );
 			break;
 		}
-		case IN_EXIT: {
-			debug( REALM_BYTECODE, "IN_EXIT\n" );
-
-			Tree *global = vm_pop();
-			Int *status = (Int*)vm_pop();
-			prg->exitStatus = status->value;
-			prg->induceExit = 1;
-			treeDownref( prg, sp, global );
-			goto out;
-		}
 		case IN_ERROR: {
 			debug( REALM_BYTECODE, "IN_ERROR\n" );
 
@@ -3602,6 +3592,38 @@ again:
 			Tree *tree = constructArgv( prg, prg->argc, prg->argv );
 			setField( prg, prg->global, field, tree );
 			break;
+		}
+
+		case IN_EXIT: {
+			debug( REALM_BYTECODE, "IN_EXIT\n" );
+
+			Tree *global = vm_pop();
+			Int *status = (Int*)vm_pop();
+			prg->exitStatus = status->value;
+			prg->induceExit = 1;
+			treeDownref( prg, sp, global );
+
+			while ( true ) {
+				FrameInfo *fi = &prg->rtd->frameInfo[exec->frameId];
+				downrefLocalTrees( prg, sp, exec->framePtr, fi->trees, fi->treesLen );
+				vm_popn( fi->frameSize );
+
+				/* Call layout. */
+				exec->frameId = (long) vm_pop();
+				exec->framePtr = (Tree**) vm_pop();
+				instr = (Code*) vm_pop();
+				Tree *retVal = vm_pop();
+				vm_popn( fi->argSize );
+
+				treeDownref( prg, sp, retVal );
+
+				/* We stop on the root, which doesn't have the full function
+				 * stack layout. */
+				if ( exec->frameId == prg->rtd->rootFrameId )
+					break;
+			}
+
+			goto out;
 		}
 
 		case IN_STOP: {
