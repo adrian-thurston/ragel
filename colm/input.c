@@ -426,7 +426,7 @@ int getData( FsmRun *fsmRun, InputStream *is, int skip, char *dest, int length, 
 			Stream *stream = (Stream*)buf->tree;
 			int type = stream->in->funcs->getData( stream->in, skip, dest, length, copied );
 
-			attachInput2( fsmRun, stream->in );
+			attachSource( fsmRun, stream->in );
 
 			if ( type == INPUT_EOD && is->eof ) {
 				ret = INPUT_EOF;
@@ -477,7 +477,7 @@ int getData( FsmRun *fsmRun, InputStream *is, int skip, char *dest, int length, 
 		buf = buf->next;
 	}
 
-	attachInput1( fsmRun, is );
+	attachInput( fsmRun, is );
 
 #if DEBUG
 	switch ( ret ) {
@@ -559,8 +559,8 @@ int undoConsumeData( FsmRun *fsmRun, InputStream *is, const char *data, int leng
 		Stream *stream = (Stream*)is->queue->tree;
 		int len = stream->in->funcs->undoConsumeData( stream->in, data, length );
 
-		if ( stream->in->attached2 != 0 )
-			detachInput2( stream->in->attached2, stream->in );
+		if ( stream->in->attached != 0 )
+			detachSource( stream->in->attached, stream->in );
 
 		return len;
 	}
@@ -570,8 +570,8 @@ int undoConsumeData( FsmRun *fsmRun, InputStream *is, const char *data, int leng
 		memcpy( newBuf->data, data, length );
 		inputStreamPrepend( is, newBuf );
 
-		if ( is->attached1 != 0 )
-			detachInput1( is->attached1, is );
+		if ( is->attached != 0 )
+			detachInput( is->attached, is );
 
 		return length;
 	}
@@ -598,8 +598,8 @@ Tree *consumeTree( InputStream *is )
 
 void undoConsumeTree( InputStream *is, Tree *tree, int ignore )
 {
-	if ( is->attached1 != 0 )
-		detachInput1( is->attached1, is );
+	if ( is->attached != 0 )
+		detachInput( is->attached, is );
 
 	/* Create a new buffer for the data. This is the easy implementation.
 	 * Something better is needed here. It puts a max on the amount of
@@ -634,8 +634,8 @@ void undoConsumeLangEl( InputStream *is )
 
 void prependData( InputStream *is, const char *data, long length )
 {
-	if ( is->attached1 != 0 )
-		detachInput1( is->attached1, is );
+	if ( is->attached != 0 )
+		detachInput( is->attached, is );
 
 	/* Create a new buffer for the data. This is the easy implementation.
 	 * Something better is needed here. It puts a max on the amount of
@@ -651,8 +651,8 @@ void prependData( InputStream *is, const char *data, long length )
 
 int undoPrependData( InputStream *is, int length )
 {
-	if ( is->attached1 != 0 )
-		detachInput1( is->attached1, is );
+	if ( is->attached != 0 )
+		detachInput( is->attached, is );
 
 	debug( REALM_INPUT, "consuming %d bytes\n", length );
 
@@ -700,8 +700,8 @@ int undoPrependData( InputStream *is, int length )
 
 void prependTree( InputStream *is, Tree *tree, int ignore )
 {
-	if ( is->attached1 != 0 )
-		detachInput1( is->attached1, is );
+	if ( is->attached != 0 )
+		detachInput( is->attached, is );
 
 	/* Create a new buffer for the data. This is the easy implementation.
 	 * Something better is needed here. It puts a max on the amount of
@@ -714,8 +714,8 @@ void prependTree( InputStream *is, Tree *tree, int ignore )
 
 Tree *undoPrependTree( InputStream *is )
 {
-	if ( is->attached1 != 0 )
-		detachInput1( is->attached1, is );
+	if ( is->attached != 0 )
+		detachInput( is->attached, is );
 
 	while ( is->queue != 0 && is->queue->type == RunBufDataType && is->queue->offset == is->queue->length ) {
 		RunBuf *runBuf = inputStreamPopHead( is );
@@ -754,8 +754,8 @@ void appendData( InputStream *is, const char *data, long len )
 
 Tree *undoAppendData( InputStream *is, int length )
 {
-	if ( is->attached1 != 0 )
-		detachInput1( is->attached1, is );
+	if ( is->attached != 0 )
+		detachInput( is->attached, is );
 
 	int consumed = 0;
 
@@ -816,8 +816,8 @@ void appendStream( InputStream *in, struct ColmTree *tree )
 
 Tree *undoAppendStream( InputStream *is )
 {
-	if ( is->attached1 != 0 )
-		detachInput1( is->attached1, is );
+	if ( is->attached != 0 )
+		detachInput( is->attached, is );
 
 	RunBuf *runBuf = inputStreamPopTail( is );
 	Tree *tree = runBuf->tree;
@@ -827,8 +827,8 @@ Tree *undoAppendStream( InputStream *is )
 
 Tree *undoAppendTree( InputStream *is )
 {
-	if ( is->attached1 != 0 )
-		detachInput1( is->attached1, is );
+	if ( is->attached != 0 )
+		detachInput( is->attached, is );
 
 	RunBuf *runBuf = inputStreamPopTail( is );
 	Tree *tree = runBuf->tree;

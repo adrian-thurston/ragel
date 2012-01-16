@@ -132,7 +132,7 @@ struct _SourceStream
 	struct Replacement *replacement;
 	struct ReplItem *replItem;
 
-	struct _FsmRun *attached2;
+	struct _FsmRun *attached;
 };
 
 SourceStream *newSourceStreamPattern( struct Pattern *pattern );
@@ -174,7 +174,7 @@ struct _InputStream
 	struct Replacement *replacement;
 	struct ReplItem *replItem;
 
-	struct _FsmRun *attached1;
+	struct _FsmRun *attached;
 };
 
 typedef struct _InputStream InputStream;

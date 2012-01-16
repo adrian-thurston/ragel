@@ -71,8 +71,8 @@ void initFsmRun( FsmRun *fsmRun, Program *prg )
 	fsmRun->p = fsmRun->pe = fsmRun->runBuf->data;
 	fsmRun->peof = 0;
 
-	fsmRun->attached1 = 0;
-	fsmRun->attached2 = 0;
+	fsmRun->attachedInput = 0;
+	fsmRun->attachedSource = 0;
 }
 
 void clearFsmRun( Program *prg, FsmRun *fsmRun )
@@ -317,56 +317,59 @@ void detachIgnores( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, Kid
 	treeDownref( prg, sp, leftIgnore );
 }
 
-void attachInput1( FsmRun *fsmRun, InputStream *is )
+void attachInput( FsmRun *fsmRun, InputStream *is )
 {
-	if ( is->attached1 != 0 && is->attached1 != fsmRun )
-		detachInput1( is->attached1, is );
+	if ( is->attached != 0 && is->attached != fsmRun )
+		detachInput( is->attached, is );
 
-	debug( REALM_INPUT, "attaching fsm run to input stream:  %p %p\n", fsmRun, is );
-	fsmRun->attached1 = is;
-	is->attached1 = fsmRun;
+	if ( is->attached != fsmRun ) {
+		debug( REALM_INPUT, "attaching fsm run to input stream:  %p %p\n", fsmRun, is );
+		fsmRun->attachedInput = is;
+		is->attached = fsmRun;
+	}
 }
 
-void attachInput2( FsmRun *fsmRun, SourceStream *is )
+void attachSource( FsmRun *fsmRun, SourceStream *ss )
 {
-	if ( is->attached2 != 0 && is->attached2 != fsmRun )
-		detachInput2( is->attached2, is );
+	if ( ss->attached != 0 && ss->attached != fsmRun )
+		detachSource( ss->attached, ss );
 
-	debug( REALM_INPUT, "attaching fsm run to source stream: %p %p\n", fsmRun, is );
-	fsmRun->attached2 = is;
-	is->attached2 = fsmRun;
+	if ( ss->attached != fsmRun ) {
+		debug( REALM_INPUT, "attaching fsm run to source stream: %p %p\n", fsmRun, ss );
+		fsmRun->attachedSource = ss;
+		ss->attached = fsmRun;
+	}
 }
 
-void detachInput1( FsmRun *fsmRun, InputStream *is )
+void detachInput( FsmRun *fsmRun, InputStream *is )
 {
 	debug( REALM_INPUT, "detaching fsm run from input stream:  %p %p\n", fsmRun, is );
 
-	fsmRun->attached1 = 0;
-	is->attached1 = 0;
+	fsmRun->attachedInput = 0;
+	is->attached = 0;
 
 	clearBuffered( fsmRun );
 
-	if ( fsmRun->attached2 != 0 ) {
-		fsmRun->attached2->attached2 = 0;
-		fsmRun->attached2 = 0;
+	if ( fsmRun->attachedSource != 0 ) {
+		fsmRun->attachedSource->attached = 0;
+		fsmRun->attachedSource = 0;
 	}
 }
 
-void detachInput2( FsmRun *fsmRun, SourceStream *is )
+void detachSource( FsmRun *fsmRun, SourceStream *is )
 {
 	debug( REALM_INPUT, "detaching fsm run from source stream: %p %p\n", fsmRun, is );
 
-	fsmRun->attached2 = 0;
-	is->attached2 = 0;
+	fsmRun->attachedSource = 0;
+	is->attached = 0;
 
 	clearBuffered( fsmRun );
 
-	if ( fsmRun->attached1 != 0 ) {
-		fsmRun->attached1->attached1 = 0;
-		fsmRun->attached1 = 0;
+	if ( fsmRun->attachedInput != 0 ) {
+		fsmRun->attachedInput->attached = 0;
+		fsmRun->attachedInput = 0;
 	}
 }
-
 
 void clearBuffered( FsmRun *fsmRun )
 {
@@ -1028,7 +1031,7 @@ case PcrStart:
 	pdaRun->stop = false;
 
 	while ( true ) {
-		debug( REALM_PARSE, "parse loop start\n" );
+		debug( REALM_PARSE, "parse loop start %d:%d\n", inputStream->line, inputStream->column );
 
 		/* Pull the current scanner from the parser. This can change during
 		 * parsing due to inputStream pushes, usually for the purpose of includes.

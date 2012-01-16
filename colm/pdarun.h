@@ -83,8 +83,8 @@ typedef struct _FsmRun
 	char *mark[MARK_SLOTS];
 	long matchedToken;
 
-	InputStream *attached1;
-	SourceStream *attached2;
+	InputStream *attachedInput;
+	SourceStream *attachedSource;
 } FsmRun;
 
 void initFsmRun( FsmRun *fsmRun, struct ColmProgram *prg );
@@ -456,10 +456,10 @@ void detachIgnores( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, FsmRun *
 void clearBuffered( FsmRun *fsmRun );
 void resetToken( FsmRun *fsmRun );
 
-void detachInput1( FsmRun *fsmRun, InputStream *is );
-void attachInput1( FsmRun *fsmRun, InputStream *is );
-void detachInput2( FsmRun *fsmRun, SourceStream *is );
-void attachInput2( FsmRun *fsmRun, SourceStream *is );
+void detachInput( FsmRun *fsmRun, InputStream *is );
+void attachInput( FsmRun *fsmRun, InputStream *is );
+void detachSource( FsmRun *fsmRun, SourceStream *ss );
+void attachSource( FsmRun *fsmRun, SourceStream *ss );
 
 #ifdef __cplusplus
 }
