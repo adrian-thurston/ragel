@@ -156,6 +156,10 @@ int fdGetData( SourceStream *is, int skip, char *dest, int length, int *copied )
 	int ret = 0;
 	*copied = 0;
 
+	if ( skip == 9 && length == 6 ) {
+		debug( REALM_INPUT, "foo\n" );
+	}
+
 	/* Move over skip bytes. */
 	RunBuf *buf = is->queue;
 	while ( true ) {
@@ -183,20 +187,20 @@ int fdGetData( SourceStream *is, int skip, char *dest, int length, int *copied )
 		if ( avail > 0 ) {
 			/* The source data from the current buffer. */
 			char *src = &buf->data[buf->offset];
-			int slen = avail <= length ? avail : length;
 
 			/* Need to skip? */
-			if ( skip > 0 && slen <= skip ) {
+			if ( skip > 0 && skip >= avail ) {
 				/* Skipping the the whole source. */
-				skip -= slen;
+				skip -= avail;
 			}
 			else {
 				/* Either skip is zero, or less than slen. Skip goes to zero.
 				 * Some data left over, copy it. */
 				src += skip;
-				slen -= skip;
+				avail -= skip;
 				skip = 0;
 
+				int slen = avail < length ? avail : length;
 				memcpy( dest, src, slen ) ;
 				*copied += slen;
 				ret = INPUT_DATA;
@@ -453,20 +457,20 @@ int getData( FsmRun *fsmRun, InputStream *is, int skip, char *dest, int length, 
 		if ( avail > 0 ) {
 			/* The source data from the current buffer. */
 			char *src = &buf->data[buf->offset];
-			int slen = avail <= length ? avail : length;
 
 			/* Need to skip? */
-			if ( skip > 0 && slen <= skip ) {
+			if ( skip > 0 && skip >= avail ) {
 				/* Skipping the the whole source. */
-				skip -= slen;
+				skip -= avail;
 			}
 			else {
 				/* Either skip is zero, or less than slen. Skip goes to zero.
 				 * Some data left over, copy it. */
 				src += skip;
-				slen -= skip;
+				avail -= skip;
 				skip = 0;
 
+				int slen = avail <= length ? avail : length;
 				memcpy( dest, src, slen ) ;
 				*copied += slen;
 				ret = INPUT_DATA;

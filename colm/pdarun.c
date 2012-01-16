@@ -207,6 +207,9 @@ static void sendBackText( FsmRun *fsmRun, InputStream *inputStream, const char *
 	if ( length == 0 )
 		return;
 
+	debug( REALM_PARSE, "sending back text: %.*s\n", 
+			(int)length, data );
+
 	undoConsumeData( fsmRun, inputStream, data, length );
 	undoPosition( inputStream, data, length );
 }
