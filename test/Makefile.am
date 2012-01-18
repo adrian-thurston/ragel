@@ -9,7 +9,9 @@ TEST_CASES = \
 	accum1.lm \
 	accum2.lm \
 	accum3.lm \
-	accumbt.lm \
+	accumbt1.lm \
+	accumbt2.lm \
+	accumbt3.lm \
 	mutualrec.lm \
 	argv1.lm \
 	argv2.lm \
@@ -74,6 +76,8 @@ INPUT = \
 	ambig1.in \
 	accum1.in \
 	accum2.in \
+	accumbt2.in \
+	accumbt3.in \
 	backtrack1.in \
 	backtrack2.in \
 	backtrack3.in \
@@ -132,7 +136,9 @@ EXPECTED_OUTPUT = \
 	accum1.exp \
 	accum2.exp \
 	accum3.exp \
-	accumbt.exp \
+	accumbt1.exp \
+	accumbt2.exp \
+	accumbt3.exp \
 	argv1.exp \
 	argv2.exp \
 	backtrack1.exp \
