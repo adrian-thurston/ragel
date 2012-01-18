@@ -30,15 +30,15 @@
 #include <assert.h>
 #include <unistd.h>
 
+#define true 1
+#define false 0
+
 RunBuf *newRunBuf()
 {
 	RunBuf *rb = (RunBuf*)malloc(sizeof(RunBuf));
 	memset( rb, 0, sizeof(RunBuf) );
 	return rb;
 }
-
-#define true 1
-#define false 0
 
 void initFdFuncs();
 void initFileFuncs();
@@ -55,6 +55,29 @@ void initSourceStream( SourceStream *inputStream )
 	inputStream->line = 1;
 	inputStream->column = 1;
 	inputStream->byte = 0;
+}
+
+void clearSourceStream( struct ColmProgram *prg, Tree **sp, SourceStream *sourceStream )
+{
+	RunBuf *buf = sourceStream->queue;
+	while ( buf != 0 ) {
+		switch ( buf->type ) {
+			case RunBufDataType:
+				break;
+
+			case RunBufTokenType:
+			case RunBufIgnoreType:
+			case RunBufSourceType:
+				treeDownref( prg, sp, buf->tree );
+				break;
+		}
+
+		RunBuf *next = buf->next;
+		free( buf );
+		buf = next;
+	}
+
+	sourceStream->queue = 0;
 }
 
 SourceStream *newSourceStreamFile( FILE *file )
@@ -79,17 +102,7 @@ SourceStream *newSourceStreamFd( long fd )
 	return is;
 }
 
-RunBuf *sourceStreamHead( SourceStream *is )
-{ 
-	return is->queue;
-}
-
-RunBuf *sourceStreamTail( SourceStream *is )
-{
-	return is->queueTail;
-}
-
-RunBuf *sourceStreamPopHead( SourceStream *is )
+static RunBuf *sourceStreamPopHead( SourceStream *is )
 {
 	RunBuf *ret = is->queue;
 	is->queue = is->queue->next;
@@ -100,18 +113,7 @@ RunBuf *sourceStreamPopHead( SourceStream *is )
 	return ret;
 }
 
-RunBuf *sourceStreamPopTail( SourceStream *is )
-{
-	RunBuf *ret = is->queueTail;
-	is->queueTail = is->queue->prev;
-	if ( is->queueTail == 0 )
-		is->queue = 0;
-	else
-		is->queueTail->next = 0;
-	return ret;
-}
-
-void sourceStreamAppend( SourceStream *is, RunBuf *runBuf )
+static void sourceStreamAppend( SourceStream *is, RunBuf *runBuf )
 {
 	if ( is->queue == 0 ) {
 		runBuf->prev = runBuf->next = 0;
@@ -125,7 +127,7 @@ void sourceStreamAppend( SourceStream *is, RunBuf *runBuf )
 	}
 }
 
-void sourceStreamPrepend( SourceStream *is, RunBuf *runBuf )
+static void sourceStreamPrepend( SourceStream *is, RunBuf *runBuf )
 {
 	if ( is->queue == 0 ) {
 		runBuf->prev = runBuf->next = 0;
@@ -334,8 +336,12 @@ void clearInputStream( struct ColmProgram *prg, Tree **sp, InputStream *inputStr
 				break;
 		}
 
-		buf = buf->next;
+		RunBuf *next = buf->next;
+		free( buf );
+		buf = next;
 	}
+
+	inputStream->queue = 0;
 }
 
 static void inputStreamPrepend( InputStream *is, RunBuf *runBuf )
@@ -352,7 +358,7 @@ static void inputStreamPrepend( InputStream *is, RunBuf *runBuf )
 	}
 }
 
-RunBuf *inputStreamPopHead( InputStream *is )
+static RunBuf *inputStreamPopHead( InputStream *is )
 {
 	RunBuf *ret = is->queue;
 	is->queue = is->queue->next;
@@ -380,7 +386,7 @@ static void inputStreamAppend( InputStream *is, RunBuf *runBuf )
 static RunBuf *inputStreamPopTail( InputStream *is )
 {
 	RunBuf *ret = is->queueTail;
-	is->queueTail = is->queue->prev;
+	is->queueTail = is->queueTail->prev;
 	if ( is->queueTail == 0 )
 		is->queue = 0;
 	else

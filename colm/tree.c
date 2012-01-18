@@ -899,6 +899,7 @@ free_tree:
 			treeFree( prg, tree );
 		else if ( tree->id == LEL_ID_STREAM ) {
 			Stream *stream = (Stream*)tree;
+			clearSourceStream( prg, sp, stream->in );
 			free( stream->in );
 			if ( stream->file != 0 )
 				fclose( stream->file );

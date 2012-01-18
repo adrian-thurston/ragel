@@ -395,9 +395,12 @@ void transferReverseCode( PdaRun *pdaRun, Tree *tree );
 void initPdaRun( PdaRun *pdaRun, struct ColmProgram *prg, PdaTables *tables,
 		FsmRun *fsmRun, int parserId, long stopTarget, int revertOn, Tree *context );
 void clearPdaRun( struct ColmProgram *prg, Tree **root, PdaRun *pdaRun );
-void initInputStream( InputStream *inputStream );
 
+void initInputStream( InputStream *inputStream );
 void clearInputStream( struct ColmProgram *prg, Tree **sp, InputStream *inputStream );
+void initSourceStream( SourceStream *in );
+void clearSourceStream( struct ColmProgram *prg, Tree **sp, SourceStream *sourceStream );
+
 
 void clearContext( PdaRun *pdaRun, Tree **sp );
 Kid *extractIgnore( PdaRun *pdaRun );
@@ -440,7 +443,6 @@ long sendBackQueuedIgnore( struct ColmProgram *prg, Tree **sp, InputStream *inpu
 void clearIgnoreList( struct ColmProgram *prg, Tree **sp, Kid *kid );
 Head *extractMatch( struct ColmProgram *prg, FsmRun *fsmRun, InputStream *inputStream );
 Head *extractMatch( struct ColmProgram *prg, FsmRun *fsmRun, InputStream *inputStream );
-void initSourceStream( SourceStream *in );
 void newToken( struct ColmProgram *prg, PdaRun *pdaRun, FsmRun *fsmRun );
 void fsmExecute( FsmRun *fsmRun, InputStream *inputStream );
 Kid *sendNamedLangEl( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
