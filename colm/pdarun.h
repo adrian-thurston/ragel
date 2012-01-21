@@ -308,7 +308,7 @@ typedef struct _PdaRun
 	 * Data we added when refactoring the parsing engine into a coroutine.
 	 */
 
-	Kid *input1;
+	Kid *parseInput;
 	FrameInfo *fi;
 	int reduction;
 	Kid *redLel;
@@ -319,13 +319,8 @@ typedef struct _PdaRun
 	int tokenId;
 	Head *tokdata;
 	int frameId;
-	Kid *ignore2;
-	Kid *ignore3;
 	int next;
 	Kid *undoLel;
-	Kid *ignore4;
-	Kid *ignore5;
-	Kid *ignore6;
 
 	int checkNext;
 	int checkStop;

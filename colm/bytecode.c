@@ -848,8 +848,8 @@ again:
 			read_tree( restore );
 
 			debug( REALM_BYTECODE, "IN_RESTORE_LHS\n" );
-			treeDownref( prg, sp, exec->pdaRun->input1->tree );
-			exec->pdaRun->input1->tree = restore;
+			treeDownref( prg, sp, exec->pdaRun->parseInput->tree );
+			exec->pdaRun->parseInput->tree = restore;
 			break;
 		}
 		case IN_LOAD_NIL: {
