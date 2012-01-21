@@ -218,11 +218,8 @@ typedef unsigned char uchar;
 #define IN_MAKE_TREE             0x8f
 #define IN_CONSTRUCT_TERM        0x90
 
-#define IN_STREAM_PULL           0x94
-#define IN_STREAM_PULL_BKT       0x95
-
-#define IN_INPUT_PULL     0xf7
-#define IN_INPUT_PULL_BKT 0xf8
+#define IN_INPUT_PULL_WV         0xf7
+#define IN_INPUT_PULL_BKT        0xf8
 
 #define IN_PARSE_LOAD_START      0xf2
 #define IN_PARSE_SAVE_STEPS      0xf3
@@ -235,9 +232,9 @@ typedef unsigned char uchar;
 #define IN_PARSE_FRAG_BKT        0xc2
 #define IN_PARSE_FRAG_BKT3       0xe6
 
-#define IN_INPUT_APPEND_WC      0x91
-#define IN_INPUT_APPEND_WV      0x92
-#define IN_INPUT_APPEND_BKT     0x93
+#define IN_INPUT_APPEND_WC       0x91
+#define IN_INPUT_APPEND_WV       0x92
+#define IN_INPUT_APPEND_BKT      0x93
 
 #define IN_PARSE_FINISH_WC       0x9d
 #define IN_PARSE_FINISH_WC3      0xea
@@ -264,23 +261,19 @@ typedef unsigned char uchar;
 #define IN_EXIT                  0xa5
 #define IN_ERROR                 0xa6
 
-#define IN_STREAM_PUSH_WV        0x96
-#define IN_STREAM_PUSH_BKT       0x97
-#define IN_STREAM_PUSH_IGNORE_WV 0xbb
-
 #define IN_LOAD_ACCUM_R          0xa8
 #define IN_LOAD_ACCUM_WV         0xa9
 #define IN_LOAD_ACCUM_WC         0xaa
 #define IN_LOAD_ACCUM_BKT        0xab
 
-#define IN_LOAD_INPUT_R   0x98
-#define IN_LOAD_INPUT_WV  0x99
-#define IN_LOAD_INPUT_WC  0x9a
-#define IN_LOAD_INPUT_BKT 0x9b
+#define IN_LOAD_INPUT_R          0x98
+#define IN_LOAD_INPUT_WV         0x99
+#define IN_LOAD_INPUT_WC         0x9a
+#define IN_LOAD_INPUT_BKT        0x9b
 
-#define IN_INPUT_PUSH_WV  0xf9
-#define IN_INPUT_PUSH_BKT 0xfa
-#define IN_INPUT_PUSH_IGNORE_WV 0xfb
+#define IN_INPUT_PUSH_WV         0xf9
+#define IN_INPUT_PUSH_BKT        0xfa
+#define IN_INPUT_PUSH_IGNORE_WV  0xfb
 
 #define IN_LOAD_CONTEXT_R        0xac
 #define IN_LOAD_CONTEXT_WV       0xad

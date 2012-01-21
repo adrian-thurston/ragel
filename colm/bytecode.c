@@ -576,22 +576,6 @@ again:
 			debug( REALM_BYTECODE, "IN_PCR_END_DECK\n" );
 			return;
 		}
-		case IN_STREAM_PULL_BKT: {
-			Tree *string;
-			read_tree( string );
-
-			debug( REALM_BYTECODE, "IN_STREAM_PULL_BKT\n" );
-
-			treeDownref( prg, sp, string );
-			break;
-		}
-		case IN_STREAM_PUSH_BKT: {
-			Word len;
-			read_word( len );
-
-			debug( REALM_BYTECODE, "IN_STREAM_PUSH_BKT\n" );
-			break;
-		}
 		case IN_INPUT_APPEND_BKT: {
 			Tree *parser;
 			Tree *input;
@@ -2467,89 +2451,8 @@ again:
 			break;
 		}
 
-		case IN_STREAM_PULL: {
-			debug( REALM_BYTECODE, "IN_STREAM_PULL\n" );
-
-			Tree *parser = vm_pop();
-			Tree *len = vm_pop();
-			Tree *string = streamPullBc( prg, exec->fsmRun, ((Parser*)parser)->input->in, len );
-			treeUpref( string );
-			vm_push( string );
-
-			/* Single unit. */
-			treeUpref( string );
-			append( &exec->pdaRun->rcodeCollect, IN_STREAM_PULL_BKT );
-			appendWord( &exec->pdaRun->rcodeCollect, (Word) string );
-			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
-			append( &exec->pdaRun->rcodeCollect, exec->rcodeUnitLen );
-
-			treeDownref( prg, sp, parser );
-			treeDownref( prg, sp, len );
-			break;
-		}
-		case IN_STREAM_PULL_BKT: {
-			Tree *string;
-			read_tree( string );
-
-			Tree *parser = vm_pop();
-
-			debug( REALM_BYTECODE, "IN_STREAM_PULL_BKT\n" );
-
-			//undoPull( prg, ((Parser*)parser)->fsmRun, ((Parser*)parser)->in, string );
-			treeDownref( prg, sp, parser );
-			treeDownref( prg, sp, string );
-			break;
-		}
-		case IN_STREAM_PUSH_WV: {
-			debug( REALM_BYTECODE, "IN_STREAM_PUSH_WV\n" );
-
-			Tree *parser = vm_pop();
-			Tree *tree = vm_pop();
-			int len = streamPush( prg, sp, ((Parser*)parser)->fsmRun, ((Parser*)parser)->input->in, tree, false );
-			vm_push( 0 );
-
-			/* Single unit. */
-			append( &exec->pdaRun->rcodeCollect, IN_STREAM_PUSH_BKT );
-			appendWord( &exec->pdaRun->rcodeCollect, len );
-			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
-			append( &exec->pdaRun->rcodeCollect, exec->rcodeUnitLen );
-
-			treeDownref( prg, sp, parser );
-			treeDownref( prg, sp, tree );
-			break;
-		}
-		case IN_STREAM_PUSH_IGNORE_WV: {
-			debug( REALM_BYTECODE, "IN_STREAM_PUSH_IGNORE_WV\n" );
-
-			Tree *parser = vm_pop();
-			Tree *tree = vm_pop();
-			long len = streamPush( prg, sp, ((Parser*)parser)->fsmRun, ((Parser*)parser)->input->in, tree, true );
-			vm_push( 0 );
-
-			/* Single unit. */
-			append( &exec->pdaRun->rcodeCollect, IN_STREAM_PUSH_BKT );
-			appendWord( &exec->pdaRun->rcodeCollect, len );
-			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
-			append( &exec->pdaRun->rcodeCollect, exec->rcodeUnitLen );
-
-			treeDownref( prg, sp, parser );
-			treeDownref( prg, sp, tree );
-			break;
-		}
-		case IN_STREAM_PUSH_BKT: {
-			Word len;
-			read_word( len );
-
-			Tree *parser = vm_pop();
-
-			debug( REALM_BYTECODE, "IN_STREAM_PUSH_BKT\n" );
-
-			undoStreamPush( prg, sp, ((Parser*)parser)->fsmRun, ((Parser*)parser)->input->in, len );
-			treeDownref( prg, sp, parser );
-			break;
-		}
-		case IN_INPUT_PULL: {
-			debug( REALM_BYTECODE, "IN_INPUT_PULL\n" );
+		case IN_INPUT_PULL_WV: {
+			debug( REALM_BYTECODE, "IN_INPUT_PULL_WV\n" );
 
 			Input *accumStream = (Input*)vm_pop();
 			Tree *len = vm_pop();

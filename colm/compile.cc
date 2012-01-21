@@ -2420,13 +2420,6 @@ void ParseData::initStreamObject( )
 	streamObj = new ObjectDef( ObjectDef::BuiltinType,
 			"stream", nextObjectId++ );
 	streamLangEl->objectDef = streamObj;
-
-	initFunction( uniqueTypeStr, streamObj, "pull",  
-			IN_STREAM_PULL, IN_STREAM_PULL, uniqueTypeInt, false );
-	initFunction( uniqueTypeStr, streamObj, "push",  
-			IN_STREAM_PUSH_WV, IN_STREAM_PUSH_WV, uniqueTypeAny, false );
-	initFunction( uniqueTypeStr, streamObj, "push_ignore",  
-			IN_STREAM_PUSH_IGNORE_WV, IN_STREAM_PUSH_IGNORE_WV, uniqueTypeAny, false );
 }
 
 void ParseData::initInputObject( )
@@ -2436,7 +2429,7 @@ void ParseData::initInputObject( )
 	inputLangEl->objectDef = inputObj;
 
 	initFunction( uniqueTypeStr, inputObj, "pull",  
-			IN_INPUT_PULL, IN_INPUT_PULL, uniqueTypeInt, false );
+			IN_INPUT_PULL_WV, IN_INPUT_PULL_WV, uniqueTypeInt, false );
 	initFunction( uniqueTypeStr, inputObj, "push",  
 			IN_INPUT_PUSH_WV, IN_INPUT_PUSH_WV, uniqueTypeAny, false );
 	initFunction( uniqueTypeStr, inputObj, "push_ignore",  
