@@ -1,67 +1,6 @@
+.chapter Introduction
 
-% TODO: Need a section on the different strategies for handline recursion.
-
-
-%
-% Title page
-%
-\thispagestyle{empty}
-\begin{center}
-\vspace*{3in}
-{\huge Ragel State Machine Compiler}\\
-\vspace*{12pt}
-{\Large User Guide}\\
-\vspace{1in}
-by\\
-\vspace{12pt}
-{\large Adrian Thurston}\\
-\end{center}
-\clearpage
-
-\pagenumbering{roman}
-
-%
-% License page
-%
-\chapter*{License}
-Ragel version \version, \pubdate\\
-Copyright \copyright\ 2003-2007 Adrian Thurston
-\vspace{6mm}
-
-{\bf\it\noindent This document is part of Ragel, and as such, this document is
-released under the terms of the GNU General Public License as published by the
-Free Software Foundation; either version 2 of the License, or (at your option)
-any later version.}
-
-\vspace{5pt}
-
-{\bf\it\noindent Ragel is distributed in the hope that it will be useful, but
-WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
-details.}
-
-\vspace{5pt}
-
-{\bf\it\noindent You should have received a copy of the GNU General Public
-License along with Ragel; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place, Suite 330, Boston, MA  02111-1307  USA}
-
-%
-% Table of contents
-%
-\clearpage
-\tableofcontents
-\clearpage
-
-%
-% Chapter 1
-%
-
-\pagenumbering{arabic}
-
-\chapter{Introduction}
-
-\section{Abstract}
+.section Abstract
 
 Regular expressions are used heavily in practice for the purpose of specifying
 parsers. They are normally used as black boxes linked together with program
@@ -88,7 +27,7 @@ that themselves have embedded actions. Ragel can produce code that is small and
 runs very fast. Ragel can handle integer-sized alphabets and can compile very
 large state machines.
 
-\section{Motivation}
+.section Motivation
 
 When a programmer is faced with the task of producing a parser for a
 context-free language there are many tools to choose from. It is quite common
@@ -134,7 +73,7 @@ and concise statement of our language. From the state machine we obtain a very
 fast and robust executable that lends itself to many kinds of analysis and
 visualization.
 
-\section{Overview}
+.section Overview
 
 Ragel is a language for specifying state machines. The Ragel program is a
 compiler that assembles a state machine definition to executable code.  Ragel
@@ -246,7 +185,7 @@ much faster than the table-driven. On the other hand, the table-driven machine
 is more compact and less demanding on the host language compiler. It is better
 suited to compiling large state machines.
 
-\section{Related Work}
+.section Related Work
 
 Lex is perhaps the best-known tool for constructing parsers from regular
 expressions. In the Lex processing model, generated code attempts to match one
@@ -378,7 +317,7 @@ run time simply moves from state to state as it consumes input. An equivalent
 parser expressed in Ragel would attempt both of the alternatives concurrently,
 printing \verb|a1 a2 b1 b2|.
 
-\section{Development Status}
+.section Development Status
 
 Ragel is a relatively new tool and is under continuous development. As a rough
 release guide, minor revision number changes are for implementation
@@ -390,9 +329,9 @@ documentation lags behind the development in the interest of documenting only
 the lasting features. The latest changes are always documented in the ChangeLog
 file. 
 
-\chapter{Constructing State Machines}
+.chapter Constructing State Machines
 
-\section{Ragel State Machine Specifications}
+.section Ragel State Machine Specifications
 
 A Ragel input file consists of a program in the host language that contains embedded machine
 specifications.  Ragel normally passes input straight to output.  When it sees
@@ -552,7 +491,7 @@ Ragel searches for imported files from the location of the current file.
 Additional directories can be added to the search path using the \verb|-I|
 option.
 
-\section{Lexical Analysis of a Ragel Block}
+.section Lexical Analysis of a Ragel Block
 \label{lexing}
 
 Within a machine specification the following lexical rules apply to the input.
@@ -613,7 +552,7 @@ format.
 %statement does require a trailing semicolon.
 
 
-\section{Basic Machines}
+.section Basic Machines
 \label{basic}
 
 The basic machines are the base operands of regular language expressions. They
@@ -825,7 +764,7 @@ alphabets.
 \end{itemize}
 \end{itemize}
 
-\section{Operator Precedence}
+.section Operator Precedence
 The following table shows operator precedence from lowest to highest. Operators
 in the same precedence group are evaluated from left to right.
 
@@ -862,7 +801,7 @@ in the same precedence group are evaluated from left to right.
 \hline
 \end{tabular}
 
-\section{Regular Language Operators}
+.section Regular Language Operators
 \label{machconst}
 
 When using Ragel it is helpful to have a sense of how it constructs machines.
@@ -1294,7 +1233,7 @@ not matched by the given machine. Character-Level Negation is equivalent to
 \verb|(any - expr)|. It must be applied only to machines that match strings of
 length one.
 
-\section{State Machine Minimization}
+.section State Machine Minimization
 
 State machine minimization is the process of finding the minimal equivalent FSM accepting
 the language. Minimization reduces the number of states in machines
@@ -1310,7 +1249,7 @@ listed in memory. Though exact analysis is very difficult, Ragel minimization
 runs close to $O(n \times log(n))$ and requires $O(n)$ temporary storage where
 $n$ is the number of states.
 
-\section{Visualization}
+.section Visualization
 \label{visualization}
 
 %In many cases, practical
@@ -1340,7 +1279,7 @@ nondeterminism.
 Ragel has another option to help debugging. The \verb|-x| option causes Ragel
 to emit the compiled machine in an XML format.
 
-\chapter{User Actions}
+.chapter User Actions
 
 Ragel permits the user to embed actions into the transitions of a regular
 expression's corresponding state machine. These actions are executed when the
@@ -1360,7 +1299,7 @@ into all transitions leaving it. The {\em finishing transition} operator
 an expression. The {\em leaving transition} operator \verb|%| provides access
 to the yet-unmade transitions moving out of the machine via the final states. 
 
-\section{Embedding Actions}
+.section Embedding Actions
 
 \begin{verbatim}
 action ActionName {
@@ -1583,7 +1522,7 @@ main := ( lower* >A $B %C ) . '\n' @N;
 \graphspace
 
 
-\section{State Action Embedding Operators}
+.section State Action Embedding Operators
 
 The state embedding operators allow one to embed actions into states. Like the
 transition embedding operators, there are several different classes of states
@@ -1803,7 +1742,7 @@ main := (
 
 
 
-\section{Action Ordering and Duplicates}
+.section Action Ordering and Duplicates
 
 When combining expressions that have embedded actions it is often the case that
 a number of actions must be executed on a single input character. For example,
@@ -1846,7 +1785,7 @@ block's unique location in the program.
 
 The removal of duplicates can be turned off using the \verb|-d| option.
 
-\section{Values and Statements Available in Code Blocks}
+.section Values and Statements Available in Code Blocks
 \label{vals}
 
 \noindent The following values are available in code blocks:
@@ -1950,7 +1889,7 @@ machine construction operators are not aware of are introduced.  These
 commands should therefore be used with caution.
 
 
-\chapter{Controlling Nondeterminism}
+.chapter Controlling Nondeterminism
 \label{controlling-nondeterminism}
 
 Along with the flexibility of arbitrary action embeddings comes a need to
@@ -2140,7 +2079,7 @@ transitions that represent an extension of a token to take precedence over the
 transitions that represent the beginning of a new token. For this problem
 there is no simple solution that uses standard regular expression operators.
 
-\section{Priorities}
+.section Priorities
 
 A priority mechanism was devised and built into the determinization
 process, specifically for the purpose of allowing the user to control
@@ -2191,7 +2130,7 @@ to which the priority is assigned.
 \item \verb|expr % (name, int)| -- Leaving transitions.
 \end{itemize}
 
-\section{Guarded Operators that Encapsulate Priorities}
+.section Guarded Operators that Encapsulate Priorities
 
 Priority embeddings are a very expressive mechanism. At the same time they
 can be very confusing for the user. They force the user to imagine
@@ -2437,7 +2376,7 @@ because there is never any backtracking. To build a scanner with backtracking
 use the Longest-Match machine construction described in Section
 \ref{generating-scanners}.
 
-\chapter{Interface to Host Program}
+.chapter Interface to Host Program
 
 The Ragel code generator is very flexible. The generated code has no
 dependencies and can be inserted in any function, perhaps inside a loop if
@@ -2501,7 +2440,7 @@ int main( int argc, char **argv )
 \label{basic-example}
 \end{figure}
 
-\section{Variables Used by Ragel}
+.section Variables Used by Ragel
 
 There are a number of variables that Ragel expects the user to declare. At a
 very minimum the \verb|cs|, \verb|p| and \verb|pe| variables must be declared.
@@ -2557,7 +2496,7 @@ more information.
 
 \end{itemize}
 
-\section{Alphtype Statement}
+.section Alphtype Statement
 
 \begin{verbatim}
 alphtype unsigned int;
@@ -2616,7 +2555,7 @@ D:
 
 \end{multicols}
 
-\section{Getkey Statement}
+.section Getkey Statement
 
 \begin{verbatim}
 getkey fpc->id;
@@ -2632,7 +2571,7 @@ defaults to \verb|(*p)|. In goto-driven machines the getkey expression may be
 evaluated more than once per element processed, therefore it should not incur a
 large cost nor preclude optimization.
 
-\section{Access Statement}
+.section Access Statement
 
 \begin{verbatim}
 access fsm->;
@@ -2647,7 +2586,7 @@ The access statement is useful if a machine is to be encapsulated inside a
 structure in C code. It can be used to give the name of
 a pointer to the structure.
 
-\section{Variable Statement}
+.section Variable Statement
 
 \begin{verbatim}
 variable p fsm->p;
@@ -2660,7 +2599,7 @@ used by Ragel can be changed. This includes \verb|p|, \verb|pe|, \verb|eof|, \ve
 \verb|top|, \verb|stack|, \verb|ts|, \verb|te| and \verb|act|.
 In Go, Ruby and Java code generation the \verb|data| variable can also be changed.
 
-\section{Pre-Push Statement}
+.section Pre-Push Statement
 \label{prepush}
 
 \begin{verbatim}
@@ -2675,7 +2614,7 @@ written out during the generation of fcall, immediately before the current
 state is pushed to the stack. This statement can be used to test the number of
 available spaces and dynamically grow the stack if necessary.
 
-\section{Post-Pop Statement}
+.section Post-Pop Statement
 \label{postpop}
 
 \begin{verbatim}
@@ -2690,7 +2629,7 @@ written out during the generation of fret, immediately after the next state is
 popped from the stack. This statement can be used to dynamically shrink the
 stack.
 
-\section{Write Statement}
+.section Write Statement
 \label{write-statement}
 
 \begin{verbatim}
@@ -2876,7 +2815,7 @@ written out in the generated code. Defines are used for C and constant integers
 are used for D, Java and Ruby. See Section \ref{import} for a description of the
 import statement.
 
-\section{Maintaining Pointers to Input Data}
+.section Maintaining Pointers to Input Data
 
 In the creation of any parser it is not uncommon to require the collection of
 the data being parsed.  It is always possible to collect data into a growable
@@ -2953,7 +2892,7 @@ first found newline. On the next input read, the new data is placed after the
 partially read line and processing continues from the beginning of the line.
 An example of line-oriented processing is given in Figure \ref{line-oriented}.
 
-\section{Specifying the Host Language}
+.section Specifying the Host Language
 
 The \verb|ragel| program has a number of options for specifying the host
 language. The host-language options are:
@@ -2967,7 +2906,7 @@ language. The host-language options are:
 \item \verb|-A  | for C\# code.
 \end{itemize}
 
-\section{Choosing a Generated Code Style}
+.section Choosing a Generated Code Style
 \label{genout}
 
 There are three styles of code output to choose from. Code style affects the
@@ -3045,9 +2984,9 @@ preferred output format.
 \end{tabular}
 \end{center}
 
-\chapter{Beyond the Basic Model}
+.chapter Beyond the Basic Model
 
-\section{Parser Modularization}
+.section Parser Modularization
 \label{modularization}
 
 It is possible to use Ragel's machine construction and action embedding
@@ -3126,7 +3065,7 @@ will point to the next available space in \verb|stack|. Sections \ref{prepush}
 and \ref{postpop} describe the Pre-Push and Post-Pop statements which can be
 used to implement a dynamically resizable array.
 
-\section{Referencing Names}
+.section Referencing Names
 \label{labels}
 
 This section describes how to reference names in epsilon transitions (Section
@@ -3167,7 +3106,7 @@ name tree. However, it can always be renamed.
 % banned.
 
 
-\section{Scanners}
+.section Scanners
 \label{generating-scanners}
 
 Scanners are very much intertwined with regular-languages and their
@@ -3365,7 +3304,7 @@ An example scanner processing loop is given in Figure \ref{scanner-loop}.
 \label{scanner-loop}
 \end{figure}
 
-\section{State Charts}
+.section State Charts
 \label{state-charts}
 
 In addition to supporting the construction of state machines using regular
@@ -3513,7 +3452,7 @@ two: (
 \end{center}
 
 
-\section{Semantic Conditions}
+.section Semantic Conditions
 \label{semantic}
 
 Many communication protocols contain variable-length fields, where the length
@@ -3617,7 +3556,7 @@ from the alphabet space. Ragel uses these allocated characters to express
 uses longs to store characters there is no room left in the alphabet space
 unless an alphabet type smaller than long is used.
 
-\section{Implementing Lookahead}
+.section Implementing Lookahead
 
 There are a few strategies for implementing lookahead in Ragel programs.
 Leaving actions, which are described in Section \ref{out-actions}, can be
@@ -3631,7 +3570,7 @@ cautious of combining the resulting machine with another in such a way that the
 transition on which the current position is adjusted is not combined with a
 transition from the other machine.
 
-\section{Parsing Recursive Language Structures}
+.section Parsing Recursive Language Structures
 
 In general Ragel cannot handle recursive structures because the grammar is
 interpreted as a regular language. However, depending on what needs to be
