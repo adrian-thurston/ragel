@@ -125,19 +125,33 @@ Footer: str =
 
 lex all 
 {
-	token line /[^.\n] [^\n]* '\n' | '\n'/
+	token plain_line /[^.\n] [^\n]* '\n' | '\n'/
 
 	rl hws /[ \t]+/
 
 	token cmd_chapter /'.' hws? 'chapter' hws/
 	token cmd_section /'.' hws? 'section' hws/
+	token cmd_comment /'.' hws? 'comment' hws? '\n'/
 }
 
-lex foo
+lex dirdata
 {
 	token dirdata /[^\n]+/
 	token nl /'\n'/
 }
+
+lex comment
+{
+	token comment_end /'.' hws? 'end' hws 'comment' hws?'\n'/
+	token comment_line /[^\n]* '\n'/
+}
+
+def comment
+	[cmd_comment line* comment_end]
+
+def line
+	[plain_line]
+|	[comment]
 
 def section
 	[cmd_section dirdata nl line*]
@@ -156,19 +170,27 @@ if ( ! Start ) {
 
 print( Header )
 
+int printLines( Lines: line* )
+{
+	for L: line in repeat(Lines) {
+		if match L [plain_line]
+			print( L )
+	}
+}
+
 for Chapter: chapter in Start {
 	match Chapter
 		[cmd_chapter DirData: dirdata nl Lines: line* SectionList: section*]
 
 	print( '\\chapter{' DirData '}\n' )
-	print( Lines )
+	printLines( Lines )
 
 	for Section: section in SectionList {
 		match Section
 			[cmd_section DirData: dirdata nl Lines: line*]
 
 		print( '\\section{' DirData '}\n' )
-		print( Lines )
+		printLines( Lines )
 	}
 }
 

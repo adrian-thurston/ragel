@@ -224,55 +224,57 @@ an action with newlines. This forces the definition of a new start condition.
 Alternatively the user can reprocess the text of the matched string literal to
 count newlines. 
 
-\begin{comment}
+.comment
+
 How ragel is different from Lex.
 
-%Like Re2c, Ragel provides a simple execution model that does not make any
-%assumptions as to how the input is collected.  Also, Ragel does not do any
-%buffering in the generated code. Consequently there are no dependencies on
-%external functions such as \verb|malloc|. 
+Like Re2c, Ragel provides a simple execution model that does not make any
+assumptions as to how the input is collected.  Also, Ragel does not do any
+buffering in the generated code. Consequently there are no dependencies on
+external functions such as \verb|malloc|. 
 
-%If buffering is required it can be manually implemented by embedding actions
-%that copy the current character to a buffer, or data can be passed to the
-%parser using known block boundaries. If the longest-match operator is used,
-%Ragel requires the user to ensure that the ending portion of the input buffer
-%is preserved when the buffer is exhaused before a token is fully matched. The
-%user should move the token prefix to a new memory location, such as back to the
-%beginning of the input buffer, then place the subsequently read input
-%immediately after the prefix.
+If buffering is required it can be manually implemented by embedding actions
+that copy the current character to a buffer, or data can be passed to the
+parser using known block boundaries. If the longest-match operator is used,
+Ragel requires the user to ensure that the ending portion of the input buffer
+is preserved when the buffer is exhaused before a token is fully matched. The
+user should move the token prefix to a new memory location, such as back to the
+beginning of the input buffer, then place the subsequently read input
+immediately after the prefix.
 
-%These properties of Ragel make it more work to write a program that requires
-%the longest-match operator or buffering of input, however they make Ragel a
-%more flexible tool that can produce very simple and fast-running programs under
-%a variety of input acquisition arrangements.
+These properties of Ragel make it more work to write a program that requires
+the longest-match operator or buffering of input, however they make Ragel a
+more flexible tool that can produce very simple and fast-running programs under
+a variety of input acquisition arrangements.
 
-%In Ragel, it is not necessary
-%to introduce start conditions to concatenate tokens and retain action
-%execution. Ragel allows one to structure a parser as a series of tokens, but
-%does not require it.
+In Ragel, it is not necessary
+to introduce start conditions to concatenate tokens and retain action
+execution. Ragel allows one to structure a parser as a series of tokens, but
+does not require it.
 
-%Like Lex and Re2C, Ragel is able to process input using a longest-match
-%execution model, however the core of the Ragel language specifies parsers at a
-%much lower level. This core is built around a pure state machine model. When
-%building basic machines there is no implied algorithm for processing input
-%other than to move from state to state on the transitions of the machine. This
-%core of pure state machine operations makes Ragel well suited to handling
-%parsing problems not based on token scanning. Should one need to use a
-%longest-match model, the functionality is available and the lower level state
-%machine construction facilities can be used to specify the patterns of a
-%longest-match machine.
+Like Lex and Re2C, Ragel is able to process input using a longest-match
+execution model, however the core of the Ragel language specifies parsers at a
+much lower level. This core is built around a pure state machine model. When
+building basic machines there is no implied algorithm for processing input
+other than to move from state to state on the transitions of the machine. This
+core of pure state machine operations makes Ragel well suited to handling
+parsing problems not based on token scanning. Should one need to use a
+longest-match model, the functionality is available and the lower level state
+machine construction facilities can be used to specify the patterns of a
+longest-match machine.
 
-%This is not possible in Ragel. One can only program
-%a longest-match instantiation with a fixed set of rules. One can jump to
-%another longest-match machine that employs the same machine definitions in the
-%construction of its rules, however no states will be shared.
+This is not possible in Ragel. One can only program
+a longest-match instantiation with a fixed set of rules. One can jump to
+another longest-match machine that employs the same machine definitions in the
+construction of its rules, however no states will be shared.
 
-%In Ragel, input may be re-parsed using a
-%different machine, but since the action to be executed is associated with
-%transitions of the compiled state machine, the longest-match construction does
-%not permit a single rule to be excluded from the active set. It cannot be done
-%ahead of time nor in the excluded rule's action.
-\end{comment}
+In Ragel, input may be re-parsed using a
+different machine, but since the action to be executed is associated with
+transitions of the compiled state machine, the longest-match construction does
+not permit a single rule to be excluded from the active set. It cannot be done
+ahead of time nor in the excluded rule's action.
+
+.end comment
 
 The Re2C program defines an input processing model similar to that of Lex.
 Re2C focuses on making generated state machines run very fast and
