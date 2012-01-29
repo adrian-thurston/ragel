@@ -131,13 +131,28 @@ lex all
 
 	token cmd_chapter /'.' hws? 'chapter' hws/
 	token cmd_section /'.' hws? 'section' hws/
+	token cmd_graphic /'.' hws? 'graphic' hws/
 	token cmd_comment /'.' hws? 'comment' hws? '\n'/
+	token cmd_verbatim /'.' hws? 'verbatim' hws? '\n'/
 }
 
 lex dirdata
 {
 	token dirdata /[^\n]+/
-	token nl /'\n'/
+	token dd_nl /'\n'/
+}
+
+lex word
+{
+	ignore /[ \t]+/
+	token word /[^ \t\n]+/
+	token dw_nl /'\n'/
+}
+
+lex verbatim
+{
+	token verbatim_end /'.' hws? 'end' hws 'verbatim' hws?'\n'/
+	token verbatim_line /[^\n]* '\n'/
 }
 
 lex comment
@@ -149,15 +164,24 @@ lex comment
 def comment
 	[cmd_comment line* comment_end]
 
+def verbatim
+	[cmd_verbatim line* verbatim_end]
+
 def line
 	[plain_line]
 |	[comment]
+|	[verbatim]
+|	[graphic]
 
 def section
-	[cmd_section dirdata nl line*]
+	[cmd_section dirdata dd_nl line*]
 
 def chapter
-	[cmd_chapter dirdata nl line* section*]
+	[cmd_chapter dirdata dd_nl line* section*]
+
+# Name scale (optional)
+def graphic
+	[cmd_graphic word word? dw_nl]
 
 def start 
 	[chapter*]
@@ -173,21 +197,37 @@ print( Header )
 int printLines( Lines: line* )
 {
 	for L: line in repeat(Lines) {
-		if match L [plain_line]
+		if match L [plain_line] {
 			print( L )
+		}
+		if match L [cmd_verbatim Lines: line* verbatim_end] {
+			print( '\\begin{verbatim}\n' )
+			printLines( Lines )
+			print( '\\end{verbatim}\n' )
+		}
+		if match L [cmd_graphic Name: word Scale: word? dw_nl] {
+			print( '\\begin{center}\n' )
+			print( '\\includegraphics' )
+			if match Scale [word]
+				print( '[scale=' Scale ']' )
+			else 
+				print( '[scale=0.55]' )
+			print( '{' Name '}\n' )
+			print( '\\end{center}\n' )
+		}
 	}
 }
 
 for Chapter: chapter in Start {
 	match Chapter
-		[cmd_chapter DirData: dirdata nl Lines: line* SectionList: section*]
+		[cmd_chapter DirData: dirdata dd_nl Lines: line* SectionList: section*]
 
 	print( '\\chapter{' DirData '}\n' )
 	printLines( Lines )
 
 	for Section: section in SectionList {
 		match Section
-			[cmd_section DirData: dirdata nl Lines: line*]
+			[cmd_section DirData: dirdata dd_nl Lines: line*]
 
 		print( '\\section{' DirData '}\n' )
 		printLines( Lines )
