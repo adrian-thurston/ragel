@@ -634,17 +634,6 @@ the sequence of characters in the quoted string. If there are 5 characters
 there will be 6 states chained together with the characters in the string. See
 Section \ref{lexing} for information on valid escape sequences. 
 
-% GENERATE: bmconcat
-% OPT: -p
-% %%{
-% machine bmconcat;
-\begin{comment}
-\begin{verbatim}
-main := 'hello';
-\end{verbatim}
-\end{comment}
-% }%%
-% END GENERATE
 
 \begin{center}
 \includegraphics[scale=0.55]{bmconcat}
@@ -665,17 +654,6 @@ using an initial \verb|^| character as in standard regular expressions.
 See Section \ref{lexing} for information on valid escape sequences
 in \verb|or| expressions.
 
-% GENERATE: bmor
-% OPT: -p
-% %%{
-% machine bmor;
-\begin{comment}
-\begin{verbatim}
-main := [hello];
-\end{verbatim}
-\end{comment}
-% }%%
-% END GENERATE
 
 \begin{center}
 \includegraphics[scale=0.55]{bmor}
@@ -685,17 +663,6 @@ main := [hello];
 that matches the zero length string. Zero length machines have one state that is both
 a start state and a final state.
 
-% GENERATE: bmnull
-% OPT: -p
-% %%{
-% machine bmnull;
-\begin{comment}
-\begin{verbatim}
-main := '';
-\end{verbatim}
-\end{comment}
-% }%%
-% END GENERATE
 
 \begin{center}
 \includegraphics[scale=0.55]{bmnull}
@@ -709,16 +676,6 @@ maximum values permitted are defined by the host machine that Ragel is compiled
 on. For example, numbers in a \verb|short| alphabet on an i386 machine should
 be in the range \verb|-32768| to \verb|32767|.
 
-% GENERATE: bmnum
-% %%{
-% machine bmnum;
-\begin{comment}
-\begin{verbatim}
-main := 42;
-\end{verbatim}
-\end{comment}
-% }%%
-% END GENERATE
 
 \begin{center}
 \includegraphics[scale=0.55]{bmnum}
@@ -745,18 +702,6 @@ result of compiling \verb|/ab*[c-z].*[123]/|. \verb|DEF| represents the default
 transition, which is taken if no other transition can be taken. 
 
 
-% GENERATE: bmregex
-% OPT: -p
-% %%{
-% machine bmregex;
-\begin{comment}
-\begin{verbatim}
-main := /ab*[c-z].*[123]/;
-\end{verbatim}
-\end{comment}
-% }%%
-% END GENERATE
-
 \begin{center}
 \includegraphics[scale=0.55]{bmregex}
 \end{center}
@@ -767,17 +712,6 @@ range are concatenation literals of length one and numerical literals.  For
 example, \verb|0x10..0x20|, \verb|0..63|, and \verb|'a'..'z'| are valid ranges.
 The bounds should be in the range allowed by the alphabet type.
 
-% GENERATE: bmrange
-% OPT: -p
-% %%{
-% machine bmrange;
-\begin{comment}
-\begin{verbatim}
-main := 'a' .. 'z';
-\end{verbatim}
-\end{comment}
-% }%%
-% END GENERATE
 
 \begin{center}
 \includegraphics[scale=0.55]{bmrange}
