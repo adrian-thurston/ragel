@@ -304,13 +304,13 @@ attempts to match the first alternative, printing \verb|a1 b1|.  When this
 possibility fails it backtracks and tries the second possibility, printing
 \verb|a2 b2|, at which point it succeeds.
 
-\begin{inline_code}
+.code
 .verbatim
 print "YES\n" if ( <STDIN> =~
         /( a (?{ print "a1 "; }) b (?{ print "b1 "; }) cX ) |
          ( a (?{ print "a2 "; }) b (?{ print "b2 "; }) cd )/x )
 .end verbatim
-\end{inline_code}
+.end code
 \verbspace
 
 In Ragel there is no regular expression interpretor. Aside from the scanner
@@ -704,7 +704,6 @@ main := 'a' .. 'z';
 
 .graphic bmrange
 
-
 \item \verb|variable_name| -- Lookup the machine definition assigned to the
 variable name given and use an instance of it. See Section \ref{definition} for
 an important note on what it means to reference a variable name.
@@ -851,9 +850,7 @@ strings, or prefixes of strings that are matched by both machines then the new
 machine will follow both parts of the alternation at once. The union operation is
 shown below.
 
-\graphspace
 .graphic opor 1.0
-\graphspace
 
 The following example demonstrates the union of three machines representing
 common tokens.
@@ -862,16 +859,15 @@ common tokens.
 % OPT: -p
 % %%{
 % machine exor;
-\begin{inline_code}
+.code
 .verbatim
 # Hex digits, decimal digits, or identifiers
 main := '0x' xdigit+ | digit+ | alpha alnum*;
 .end verbatim
-\end{inline_code}
+.end code
 % }%%
 % END GENERATE
 
-\graphspace
 .graphic exor
 
 \subsection{Intersection}
@@ -893,7 +889,7 @@ independent patterns be simultaneously satisfied as in the following example.
 % OPT: -p
 % %%{
 % machine exinter;
-\begin{inline_code}
+.code
 .verbatim
 # Match lines four characters wide that contain 
 # words separated by whitespace.
@@ -901,11 +897,10 @@ main :=
     /[^\n][^\n][^\n][^\n]\n/* &
     (/[a-z][a-z]*/ | [ \n])**;
 .end verbatim
-\end{inline_code}
+.end code
 % }%%
 % END GENERATE
 
-\graphspace
 .graphic exinter
 
 \subsection{Difference}
@@ -928,19 +923,16 @@ use of subtraction to exclude specific cases from a set.
 % OPT: -p
 % %%{
 % machine exsubtr;
-\begin{inline_code}
+.code
 .verbatim
 # Subtract keywords from identifiers.
 main := /[a-z][a-z]*/ - ( 'for' | 'int' );
 .end verbatim
-\end{inline_code}
+.end code
 % }%%
 % END GENERATE
 
-\graphspace
 .graphic exsubtr
-\graphspace
-
 
 \subsection{Strong Difference}
 \label{strong_difference}
@@ -959,18 +951,16 @@ taken.
 % OPT: -p
 % %%{
 % machine exstrongsubtr;
-\begin{inline_code}
+.code
 .verbatim
 crlf = '\r\n';
 main := [a-z]+ ':' ( any* -- crlf ) crlf;
 .end verbatim
-\end{inline_code}
+.end code
 % }%%
 % END GENERATE
 
-\graphspace
 .graphic exstrongsubtr
-\graphspace
 
 This operator is equivalent to the following.
 
@@ -992,9 +982,7 @@ start state of the second machine is final as well.
 Concatenation is the default operator. Two machines next to each other with no
 operator between them results in concatenation.
 
-\graphspace
 .graphic opconcat 1.0
-\graphspace
 
 The opportunity for nondeterministic behaviour results from the possibility of
 the final states of the first machine accepting a string that is also accepted
@@ -1016,18 +1004,16 @@ however because we wish to permit EOF strings before the end of the input.
 % OPT: -p
 % %%{
 % machine exconcat;
-\begin{inline_code}
+.code
 .verbatim
 # Require an eof marker on the last line.
 main := /[^\n]*\n/* . 'EOF\n';
 .end verbatim
-\end{inline_code}
+.end code
 % }%%
 % END GENERATE
 
-\graphspace
 .graphic exconcat
-\graphspace
 
 \noindent {\bf Note:} There is a language
 ambiguity involving concatenation and subtraction. Because concatenation is the 
@@ -1058,9 +1044,7 @@ between the final states of the machine and the new start state.  After the
 machine is made deterministic the effect is of the final states getting all the
 transitions of the start state. 
 
-\graphspace
 .graphic opstar 1.0
-\graphspace
 
 The possibility for nondeterministic behaviour arises if the final states have
 transitions on any of the same characters as the start state.  This is common
@@ -1083,18 +1067,16 @@ new Ragel users and must be guarded against.
 % OPT: -p
 % %%{
 % machine exstar;
-\begin{inline_code}
+.code
 .verbatim
 # Match any number of lines with only lowercase letters.
 main := /[a-z]*\n/*;
 .end verbatim
-\end{inline_code}
+.end code
 % }%%
 % END GENERATE
 
-\graphspace
 .graphic exstar
-\graphspace
 
 \subsection{One Or More Repetition}
 
@@ -1109,18 +1091,16 @@ operator is equivalent to \verb|(expr . expr*)|.
 % OPT: -p
 % %%{
 % machine explus;
-\begin{inline_code}
+.code
 .verbatim
 # Match alpha-numeric words.
 main := alnum+;
 .end verbatim
-\end{inline_code}
+.end code
 % }%%
 % END GENERATE
 
-\graphspace
 .graphic explus
-\graphspace
 
 \subsection{Optional}
 
@@ -1136,19 +1116,16 @@ possibly extend a token.
 % OPT: -p
 % %%{
 % machine exoption;
-\begin{inline_code}
+.code
 .verbatim
 # Match integers or floats.
 main := digit+ ('.' digit+)?;
 .end verbatim
-\end{inline_code}
+.end code
 % }%%
 % END GENERATE
 
-\graphspace
 .graphic exoption
-\graphspace
-
 
 \subsection{Repetition}
 
@@ -1174,19 +1151,16 @@ machine. Negation is equivalent to \verb|(any* - expr)|.
 % OPT: -p
 % %%{
 % machine exnegate;
-\begin{inline_code}
+.code
 .verbatim
 # Accept anything but a string beginning with a digit.
 main := ! ( digit any* );
 .end verbatim
-\end{inline_code}
+.end code
 % }%%
 % END GENERATE
 
-\graphspace
 .graphic exnegate
-\graphspace
-
 
 \subsection{Character-Level Negation}
 
@@ -1308,19 +1282,17 @@ machine ensuring that the entering actions are exected once only.
 % OPT: -p
 % %%{
 % machine exstact;
-\begin{inline_code}
+.code
 .verbatim
 # Execute A at the beginning of a string of alpha.
 action A {}
 main := ( lower* >A ) . ' ';
 .end verbatim
-\end{inline_code}
+.end code
 % }%%
 % END GENERATE
 
-\graphspace
 .graphic exstact
-\graphspace
 
 \subsection{Finishing Action}
 
@@ -1339,19 +1311,16 @@ and the finishing action is executed only once.
 % %%{
 % machine exdoneact;
 % action A {}
-\begin{inline_code}
+.code
 .verbatim
 # Execute A when the trailing space is seen.
 main := ( lower* ' ' ) @A;
 .end verbatim
-\end{inline_code}
+.end code
 % }%%
 % END GENERATE
 
-\graphspace
 .graphic exdoneact
-\graphspace
-
 
 \subsection{All Transition Action}
 
@@ -1367,19 +1336,16 @@ following example, A is executed on every character matched.
 % %%{
 % machine exallact;
 % action A {}
-\begin{inline_code}
+.code
 .verbatim
 # Execute A on any characters of the machine.
 main := ( 'm1' | 'm2' ) $A;
 .end verbatim
-\end{inline_code}
+.end code
 % }%%
 % END GENERATE
 
-\graphspace
 .graphic exallact
-\graphspace
-
 
 \subsection{Leaving Actions}
 \label{out-actions}
@@ -1407,19 +1373,17 @@ machine on the newline character.
 % %%{
 % machine exoutact1;
 % action A {}
-\begin{inline_code}
+.code
 .verbatim
 # Match a word followed by a newline. Execute A when 
 # finishing the word.
 main := ( lower+ %A ) . '\n';
 .end verbatim
-\end{inline_code}
+.end code
 % }%%
 % END GENERATE
 
-\graphspace
 .graphic exoutact1
-\graphspace
 
 In the following example, the \verb|term_word| action could be used to register
 the appearance of a word and to clear the buffer that the \verb|lower| action used
@@ -1433,18 +1397,16 @@ to store the text of it.
 % action space {}
 % action term_word {}
 % action newline {}
-\begin{inline_code}
+.code
 .verbatim
 word = ( [a-z] @lower )+ %term_word;
 main := word ( ' ' @space word )* '\n' @newline;
 .end verbatim
-\end{inline_code}
+.end code
 % }%%
 % END GENERATE
 
-\graphspace
 .graphic exoutact2
-\graphspace
 
 In this final example of the action embedding operators, A is executed upon entering
 the alpha machine, B is executed on all transitions of the
@@ -1460,19 +1422,17 @@ state.
 % action B {}
 % action C {}
 % action N {}
-\begin{inline_code}
+.code
 .verbatim
 # Execute A on starting the alpha machine, B on every transition 
 # moving through it and C upon finishing. Execute N on the newline.
 main := ( lower* >A $B %C ) . '\n' @N;
 .end verbatim
-\end{inline_code}
+.end code
 % }%%
 % END GENERATE
 
-\graphspace
 .graphic exaction
-\graphspace
 
 
 .section State Action Embedding Operators
@@ -1657,7 +1617,7 @@ consuming the line, the error recovery machine returns to the main loop.
 %   ws = ' ';
 %   address = 'foo@bar.com';
 %   date = 'Monday May 12';
-\begin{inline_code}
+.code
 .verbatim
 action cmd_err { 
     printf( "command error\n" ); 
@@ -1683,7 +1643,7 @@ main := (
     ) 
 )*;
 .end verbatim
-\end{inline_code}
+.end code
 % }%%
 % %% write data;
 % void f()
@@ -1874,19 +1834,18 @@ the following example.
 % action first {}
 % action tail {}
 % word = [a-z]+;
-\begin{inline_code}
+.code
 .verbatim
 ws = [\n\t ];
 line = word $first ( ws word $tail )* '\n';
 lines = line*;
 .end verbatim
-\end{inline_code}
+.end code
 % main := lines;
 % }%%
 % END GENERATE
 
 .graphic lines1 0.53
-\graphspace
 
 Since the \verb|ws| expression includes the newline character, we will
 not finish the \verb|line| expression when a newline character is seen. We will
@@ -1903,19 +1862,18 @@ the newline character from the \verb|ws| expression.
 % action first {}
 % action tail {}
 % word = [a-z]+;
-\begin{inline_code}
+.code
 .verbatim
 ws = [\t ];
 line = word $first ( ws word $tail )* '\n';
 lines = line*;
 .end verbatim
-\end{inline_code}
+.end code
 % main := lines;
 % }%%
 % END GENERATE
 
 .graphic lines2
-\graphspace
 
 Solving this kind of problem is straightforward when the ambiguity is created
 by strings that are a single character long.  When the ambiguity is created by
@@ -1928,17 +1886,16 @@ language comments.
 % %%{
 % machine comments1;
 % action comm {}
-\begin{inline_code}
+.code
 .verbatim
 comment = '/*' ( any @comm )* '*/';
 main := comment ' ';
 .end verbatim
-\end{inline_code}
+.end code
 % }%%
 % END GENERATE
 
 .graphic comments1
-\graphspace
 
 Using standard concatenation, we will never leave the \verb|any*| expression.
 We will forever entertain the possibility that a \verb|'*/'| string that we see
@@ -1957,18 +1914,16 @@ by the following regular expression.
 % %%{
 % machine comments2;
 % action comm {}
-\begin{inline_code}
+.code
 .verbatim
 comment = '/*' ( ( any @comm )* - ( any* '*/' any* ) ) '*/';
 .end verbatim
-\end{inline_code}
+.end code
 % main := comment;
 % }%%
 % END GENERATE
 
-\graphspace
 .graphic comments2
-\graphspace
 
 Note that Ragel's strong subtraction operator \verb|--| can also be used here.
 In doing this subtraction we have phrased the problem of controlling non-determinism in
@@ -1996,20 +1951,19 @@ unintended nondeterminism.
 % action start_str {}
 % action on_char {}
 % action finish_str {}
-\begin{inline_code}
+.code
 .verbatim
 header_contents = ( 
     lower+ >start_str $on_char %finish_str | 
     ' '
 )*;
 .end verbatim
-\end{inline_code}
+.end code
 % main := header_contents;
 % }%%
 % END GENERATE
 
 .graphic smallscanner
-\graphspace
 
 In this case, the problem with using a standard kleene star operation is that
 there is an ambiguity between extending a token and wrapping around the machine
@@ -2099,15 +2053,13 @@ transitions of the second machine that enter into a final state. The following
 example yields a machine identical to the example in Section 
 \ref{controlling-nondeterminism}.
 
-\begin{inline_code}
+.code
 .verbatim
 comment = '/*' ( any @comm )* :>> '*/';
 .end verbatim
-\end{inline_code}
+.end code
 
-\graphspace
 .graphic comments2
-\graphspace
 
 Another guarded operator is {\em left-guarded concatenation}, given by the
 \verb|<:| compound symbol. This operator places a higher priority on all
@@ -2152,17 +2104,16 @@ end-of-input marker.
 % OPT: -p
 % %%{
 % machine entryguard;
-\begin{inline_code}
+.code
 .verbatim
 # Leave the catch-all machine on the first character of FIN.
 main := any* :> 'FIN';
 .end verbatim
-\end{inline_code}
+.end code
 % }%%
 % END GENERATE
 
 .graphic entryguard
-\graphspace
 
 Entry-guarded concatenation is equivalent to the following:
 
@@ -2189,17 +2140,16 @@ delayed until the full end-of-input marker has been matched.
 % OPT: -p
 % %%{
 % machine finguard;
-\begin{inline_code}
+.code
 .verbatim
 # Leave the catch-all machine on the last character of FIN.
 main := any* :>> 'FIN';
 .end verbatim
-\end{inline_code}
+.end code
 % }%%
 % END GENERATE
 
 .graphic finguard
-\graphspace
 
 Finish-guarded concatenation is equivalent to the following, with one
 exception. If the right machine's start state is final, the higher priority is
@@ -2230,17 +2180,15 @@ whitespace-separated words as in:
 % action ws {}
 % action start {}
 % action fin {}
-\begin{inline_code}
+.code
 .verbatim
 main := ( ' '* >start %fin ) <: ( ' ' $ws | [a-z] $alpha )*;
 .end verbatim
-\end{inline_code}
+.end code
 % }%%
 % END GENERATE
 
-\graphspace
 .graphic leftguard
-\graphspace
 
 Left-guarded concatenation is equivalent to the following:
 
@@ -2270,7 +2218,7 @@ following.
 % machine exfinpri;
 % action A {}
 % action B {}
-\begin{inline_code}
+.code
 .verbatim
 # Repeat tokens, but make sure to get the longest match.
 main := (
@@ -2279,12 +2227,11 @@ main := (
     ' '
 )**;
 .end verbatim
-\end{inline_code}
+.end code
 % }%%
 % END GENERATE
 
 .graphic lmkleene
-\graphspace
 
 If a regular kleene star were used the machine above would not be able to
 distinguish between extending a word and beginning a new one.  This operator is
@@ -2948,7 +2895,7 @@ state machines are used to handle the parsing of two types of headers.
 % GENERATE: call
 % %%{
 %   machine call;
-\begin{inline_code}
+.code
 .verbatim
 action return { fret; }
 action call_date { fcall date; }
@@ -2969,7 +2916,7 @@ headers =
 
 main := headers*;
 .end verbatim
-\end{inline_code}
+.end code
 % }%%
 % %% write data;
 % void f()
@@ -3070,7 +3017,7 @@ Scanners can be used to process sub-languages, as well as for tokenizing
 programming languages. In the following example a scanner is used to tokenize
 the contents of a header field.
 
-\begin{inline_code}
+.code
 .verbatim
 word = [a-z]+;
 head_name = 'Header';
@@ -3083,7 +3030,7 @@ header := |*
 
 main := ( head_name ':' @{ fcall header; } )*;
 .end verbatim
-\end{inline_code}
+.end code
 \verbspace
 
 The scanner construction has a purpose similar to the longest-match kleene star
@@ -3353,7 +3300,7 @@ operators, and so an ability to drop down to the state chart method is useful.
 % OPT: -p
 % %%{
 % machine dropdown;
-\begin{inline_code}
+.code
 .verbatim
 action bchar { buff( fpc ); }    # Buffer the current character.
 action bbrack1 { buff( "]" ); }
@@ -3374,12 +3321,11 @@ two: (
      [^>\]] @bbrack2 @bchar ->start
 );
 .end verbatim
-\end{inline_code}
+.end code
 % main := CDATA_body;
 % }%%
 % END GENERATE
 
-\graphspace
 .graphic dropdown
 
 
@@ -3404,7 +3350,7 @@ field, then proceed to match $n$ data values.
 % %%{
 % machine conds1;
 % number = digit+;
-\begin{inline_code}
+.code
 .verbatim
 action rec_num { i = 0; n = getnumber(); }
 action test_len { i++ < n }
@@ -3415,13 +3361,12 @@ data_fields = (
     ( [a-z] when test_len )*
 )**;
 .end verbatim
-\end{inline_code}
+.end code
 % main := data_fields;
 % }%%
 % END GENERATE
 
 .graphic conds1
-\graphspace
 
 The Ragel implementation of semantic conditions does not force us to give up the
 compositional property of Ragel definitions. For example, a machine that tests
@@ -3449,7 +3394,7 @@ pattern.
 % %%{
 % machine conds2;
 % number = digit+;
-\begin{inline_code}
+.code
 .verbatim
 action test_len { i++ < n }
 action one { /* accept pattern one */ }
@@ -3459,12 +3404,11 @@ patterns =
     [a-z][a-z0-9]* %two;
 main := patterns '\n';
 .end verbatim
-\end{inline_code}
+.end code
 % }%%
 % END GENERATE
 
 .graphic conds2
-\graphspace
 
 There are many more potential uses for semantic conditions. The user is free to
 use arbitrary code and may therefore perform actions such as looking up names

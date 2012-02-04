@@ -134,6 +134,7 @@ lex all
 	token cmd_graphic /'.' hws? 'graphic' hws/
 	token cmd_comment /'.' hws? 'comment' hws? '\n'/
 	token cmd_verbatim /'.' hws? 'verbatim' hws? '\n'/
+	token cmd_code /'.' hws? 'code' hws? '\n'/
 }
 
 lex dirdata
@@ -155,6 +156,12 @@ lex verbatim
 	token verbatim_line /[^\n]* '\n'/
 }
 
+lex code
+{
+	token code_end /'.' hws? 'end' hws 'code' hws?'\n'/
+	token code_line /[^\n]* '\n'/
+}
+
 lex comment
 {
 	token comment_end /'.' hws? 'end' hws 'comment' hws?'\n'/
@@ -167,10 +174,14 @@ def comment
 def verbatim
 	[cmd_verbatim line* verbatim_end]
 
+def code
+	[cmd_code line* code_end]
+
 def line
 	[plain_line]
 |	[comment]
 |	[verbatim]
+|	[code]
 |	[graphic]
 
 def section
@@ -205,7 +216,13 @@ int printLines( Lines: line* )
 			printLines( Lines )
 			print( '\\end{verbatim}\n' )
 		}
+		if match L [cmd_code Lines: line* code_end] {
+			print( '\\begin{inline_code}\n' )
+			printLines( Lines )
+			print( '\\end{inline_code}\n' )
+		}
 		if match L [cmd_graphic Name: word Scale: word? dw_nl] {
+			print( '\\graphspace\n' )
 			print( '\\begin{center}\n' )
 			print( '\\includegraphics' )
 			if match Scale [word]
@@ -214,6 +231,7 @@ int printLines( Lines: line* )
 				print( '[scale=0.55]' )
 			print( '{' Name '}\n' )
 			print( '\\end{center}\n' )
+			print( '\\graphspace\n' )
 		}
 	}
 }
