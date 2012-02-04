@@ -125,16 +125,20 @@ Footer: str =
 
 lex all 
 {
-	token plain_line /[^.\n] [^\n]* '\n' | '\n'/
-
 	rl hws /[ \t]+/
+	token plain_line /hws? [^. \t\n] [^\n]* '\n' | '\n' | hws '\n' /
 
-	token cmd_chapter /'.' hws? 'chapter' hws/
-	token cmd_section /'.' hws? 'section' hws/
-	token cmd_graphic /'.' hws? 'graphic' hws/
-	token cmd_comment /'.' hws? 'comment' hws? '\n'/
-	token cmd_verbatim /'.' hws? 'verbatim' hws? '\n'/
-	token cmd_code /'.' hws? 'code' hws? '\n'/
+	token cmd_chapter /hws? '.' hws? 'chapter' hws/
+	token cmd_section /hws? '.' hws? 'section' hws/
+	token cmd_sub_section /hws? '.' hws? 'subsection' hws/
+	token cmd_sub_sub_section /hws? '.' hws? 'subsubsection' hws/
+	token cmd_graphic /hws? '.' hws? 'graphic' hws/
+	token cmd_comment /hws? '.' hws? 'comment' hws? '\n'/
+	token cmd_verbatim /hws? '.' hws? 'verbatim' hws? '\n'/
+	token cmd_code /hws? '.' hws? 'code' hws? '\n'/
+	token cmd_itemize /hws? '.' hws? 'itemize' hws? '\n'/
+	token end_itemize /hws? '.' hws? 'end' hws 'itemize' hws?'\n'/
+	token cmd_item /hws? '.' hws? 'item' hws/
 }
 
 lex dirdata
@@ -152,30 +156,30 @@ lex word
 
 lex verbatim
 {
-	token verbatim_end /'.' hws? 'end' hws 'verbatim' hws?'\n'/
+	token end_verbatim /hws? '.' hws? 'end' hws 'verbatim' hws?'\n'/
 	token verbatim_line /[^\n]* '\n'/
 }
 
 lex code
 {
-	token code_end /'.' hws? 'end' hws 'code' hws?'\n'/
+	token end_code /hws? '.' hws? 'end' hws 'code' hws?'\n'/
 	token code_line /[^\n]* '\n'/
 }
 
 lex comment
 {
-	token comment_end /'.' hws? 'end' hws 'comment' hws?'\n'/
+	token end_comment /hws? '.' hws? 'end' hws 'comment' hws?'\n'/
 	token comment_line /[^\n]* '\n'/
 }
 
 def comment
-	[cmd_comment line* comment_end]
+	[cmd_comment comment_line* end_comment]
 
 def verbatim
-	[cmd_verbatim line* verbatim_end]
+	[cmd_verbatim verbatim_line* end_verbatim]
 
 def code
-	[cmd_code line* code_end]
+	[cmd_code line* end_code]
 
 def line
 	[plain_line]
@@ -183,9 +187,16 @@ def line
 |	[verbatim]
 |	[code]
 |	[graphic]
+|	[itemize]
+
+def sub_sub_section
+	[cmd_sub_sub_section dirdata dd_nl line*]
+
+def sub_section
+	[cmd_sub_section dirdata dd_nl line* sub_sub_section*]
 
 def section
-	[cmd_section dirdata dd_nl line*]
+	[cmd_section dirdata dd_nl line* sub_section*]
 
 def chapter
 	[cmd_chapter dirdata dd_nl line* section*]
@@ -193,6 +204,12 @@ def chapter
 # Name scale (optional)
 def graphic
 	[cmd_graphic word word? dw_nl]
+
+def itemize
+	[cmd_itemize line* item* end_itemize]
+
+def item
+	[cmd_item line*]
 
 def start 
 	[chapter*]
@@ -211,12 +228,12 @@ int printLines( Lines: line* )
 		if match L [plain_line] {
 			print( L )
 		}
-		if match L [cmd_verbatim Lines: line* verbatim_end] {
+		if match L [cmd_verbatim Lines: verbatim_line* end_verbatim] {
 			print( '\\begin{verbatim}\n' )
-			printLines( Lines )
+			print( Lines )
 			print( '\\end{verbatim}\n' )
 		}
-		if match L [cmd_code Lines: line* code_end] {
+		if match L [cmd_code Lines: line* end_code] {
 			print( '\\begin{inline_code}\n' )
 			printLines( Lines )
 			print( '\\end{inline_code}\n' )
@@ -233,6 +250,16 @@ int printLines( Lines: line* )
 			print( '\\end{center}\n' )
 			print( '\\graphspace\n' )
 		}
+		if match L [cmd_itemize Lines: line* Items: item* end_itemize] {
+			print( '\\begin{itemize}\n' )
+			printLines( Lines )
+			for Item: item in repeat(Items) {
+				match Item [cmd_item Lines: line*]
+				print( '\\item ' )
+				printLines( Lines )
+			}
+			print( '\\end{itemize}\n' )
+		}
 	}
 }
 
@@ -243,12 +270,27 @@ for Chapter: chapter in Start {
 	print( '\\chapter{' DirData '}\n' )
 	printLines( Lines )
 
-	for Section: section in SectionList {
+	for Section: section in repeat(SectionList) {
 		match Section
-			[cmd_section DirData: dirdata dd_nl Lines: line*]
+			[cmd_section DirData: dirdata dd_nl Lines: line* SubSectionList: sub_section*]
 
 		print( '\\section{' DirData '}\n' )
 		printLines( Lines )
+		for SubSection: sub_section in repeat(SubSectionList) {
+			match SubSection
+				[cmd_sub_section DirData: dirdata dd_nl Lines: line* SubSubSectionList: sub_sub_section*]
+
+			print( '\\subsection{' DirData '}\n' )
+			printLines( Lines )
+
+			for SubSubSection: sub_sub_section in repeat(SubSubSectionList) {
+				match SubSubSection
+					[cmd_sub_sub_section DirData: dirdata dd_nl Lines: line*]
+
+				print( '\\subsubsection{' DirData '}\n' )
+				printLines( Lines )
+			}
+		}
 	}
 }
 
