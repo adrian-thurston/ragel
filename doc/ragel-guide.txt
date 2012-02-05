@@ -354,7 +354,7 @@ possible to use an @@verb|#if 0| directive to comment out a machine as is
 commonly done in C code. As an alternative, a machine can be prevented from
 causing any generated output by commenting out write statements.
 
-In Figure \ref{cmd-line-parsing}, a multi-line specification is used to define the
+In Figure @@ref{cmd-line-parsing}, a multi-line specification is used to define the
 machine and single line specifications are used to trigger the writing of the machine
 data and execution code.
 
@@ -391,7 +391,7 @@ int main( int argc, char **argv )
 .end verbatim
 \end{multicols}
 \caption{Parsing a command line argument.}
-\label{cmd-line-parsing}
+@@label{cmd-line-parsing}
 \end{figure}
 
 .subsection Naming Ragel Blocks
@@ -411,7 +411,7 @@ several files or draw in statements that are common to multiple machines using
 the @@verb|include| statement.
 
 .subsection Machine Definition
-\label{definition}
+@@label{definition}
 
 .verbatim
 <name> = <expression>;
@@ -426,7 +426,7 @@ instantiated, which happens when a definition is referenced in an instantiated
 expression. 
 
 .subsection Machine Instantiation
-\label{instantiation}
+@@label{instantiation}
 
 .verbatim
 <name> := <expression>;
@@ -467,7 +467,7 @@ Additional directories can be added to the search path using the @@verb|-I|
 option.
 
 .subsection Importing Definitions
-\label{import}
+@@label{import}
 
 .verbatim
 import "inputfile.h";
@@ -486,7 +486,7 @@ the following forms. Ragel treats these forms as state machine definitions.
 .end itemize
 
 If the input file is a Ragel program then tokens inside any Ragel
-specifications are ignored. See Section \ref{export} for a description of
+specifications are ignored. See Section @@ref{export} for a description of
 exporting machine definitions.
 
 Ragel searches for imported files from the location of the current file.
@@ -494,7 +494,7 @@ Additional directories can be added to the search path using the @@verb|-I|
 option.
 
 .section Lexical Analysis of a Ragel Block
-\label{lexing}
+@@label{lexing}
 
 Within a machine specification the following lexical rules apply to the input.
 
@@ -513,7 +513,7 @@ backslash preceding any other character removes special meaning. This applies
 to terminating characters and to special characters in regular expression
 literals. As an exception, regular expression literals do not support escape
 sequences as the operands of a range within a list. See the bullet on regular
-expressions in Section \ref{basic}.
+expressions in Section @@ref{basic}.
 
 .item The symbols @@verb|{}| delimit a block of host language code that will be
 embedded into the machine as an action.  Within the block of host language
@@ -557,7 +557,7 @@ format.
 
 
 .section Basic Machines
-\label{basic}
+@@label{basic}
 
 The basic machines are the base operands of regular language expressions. They
 are the smallest unit to which machine construction and manipulation operators
@@ -568,7 +568,7 @@ can be applied.
 .item @@verb|'hello'| -- Concatenation Literal. Produces a machine that matches
 the sequence of characters in the quoted string. If there are 5 characters
 there will be 6 states chained together with the characters in the string. See
-Section \ref{lexing} for information on valid escape sequences. 
+Section @@ref{lexing} for information on valid escape sequences. 
 
 .comment
 % GENERATE: bmconcat
@@ -596,7 +596,7 @@ The @@verb|[]| delimiters behave like the quotes of a literal string. For exampl
 @@verb|[ \t]| means tab or space. The @@verb|or| expression supports character ranges
 with the @@verb|-| symbol as a separator. The meaning of the union can be negated
 using an initial @@verb|^| character as in standard regular expressions. 
-See Section \ref{lexing} for information on valid escape sequences
+See Section @@ref{lexing} for information on valid escape sequences
 in @@verb|or| expressions.
 
 .comment
@@ -662,13 +662,13 @@ list. Within a union, a range of characters can be given by separating the first
 and last characters of the range with the @@verb|-| symbol. Each
 concatenated machine may have repetition specified by following it with the
 @@verb|*| symbol. The standard escape sequences described in Section
-\ref{lexing} are supported everywhere in regular expressions except as the
+@@ref{lexing} are supported everywhere in regular expressions except as the
 operands of a range within in a list. This notation also supports the @@verb|i|
 trailing option. Use it to produce case-insensitive machines, as in @@verb|/GET/i|.
 
 Ragel does not support very complex regular expressions because the desired
 results can always be achieved using the more general machine construction
-operators listed in Section \ref{machconst}. The following diagram shows the
+operators listed in Section @@ref{machconst}. The following diagram shows the
 result of compiling @@verb|/ab*[c-z].*[123]/|. @@verb|DEF| represents the default
 transition, which is taken if no other transition can be taken. 
 
@@ -707,7 +707,7 @@ main := 'a' .. 'z';
 .graphic bmrange
 
 .item @@verb|variable_name| -- Lookup the machine definition assigned to the
-variable name given and use an instance of it. See Section \ref{definition} for
+variable name given and use an instance of it. See Section @@ref{definition} for
 an important note on what it means to reference a variable name.
 
 .item @@verb|builtin_machine| -- There are several built-in machines available
@@ -792,7 +792,7 @@ in the same precedence group are evaluated from left to right.
 \end{tabular}
 
 .section Regular Language Operators
-\label{machconst}
+@@label{machconst}
 
 When using Ragel it is helpful to have a sense of how it constructs machines.
 The determinization process can produce results that seem unusual to someone
@@ -829,12 +829,12 @@ This problem forces one to think hard about the language that needs to be
 matched. To guard against this kind of problem one must ensure that the machine
 specification is divided up using boundaries that do not allow ambiguities from
 one portion of the machine to the next. See Chapter
-\ref{controlling-nondeterminism} for more on this problem and how to solve it.
+@@ref{controlling-nondeterminism} for more on this problem and how to solve it.
 
 The Graphviz tool is an immense help when debugging improperly compiled
 machines or otherwise learning how to use Ragel. Graphviz Dot files can be
 generated from Ragel programs using the @@verb|-V| option. See Section
-\ref{visualization} for more information.
+@@ref{visualization} for more information.
 
 
 .subsection Union
@@ -937,7 +937,7 @@ main := /[a-z][a-z]*/ - ( 'for' | 'int' );
 .graphic exsubtr
 
 .subsection Strong Difference
-\label{strong_difference}
+@@label{strong_difference}
 
 @@verb|expr -- expr|
 \verbspace
@@ -992,7 +992,7 @@ by the start state of the second machine.
 The most common scenario in which this happens is the
 concatenation of a machine that repeats some pattern with a machine that gives
 a terminating string, but the repetition machine does not exclude the
-terminating string. The example in Section \ref{strong_difference}
+terminating string. The example in Section @@ref{strong_difference}
 guards against this. Another example is the expression @@verb|("'" any* "'")|.
 When executed the thread of control will
 never leave the @@verb|any*| machine.  This is a problem especially if actions
@@ -1052,9 +1052,9 @@ The possibility for nondeterministic behaviour arises if the final states have
 transitions on any of the same characters as the start state.  This is common
 when applying kleene star to an alternation of tokens. Like the other problems
 arising from nondeterministic behavior, this is discussed in more detail in Chapter
-\ref{controlling-nondeterminism}. This particular problem can also be solved
+@@ref{controlling-nondeterminism}. This particular problem can also be solved
 by using the longest-match construction discussed in Section 
-\ref{generating-scanners} on scanners.
+@@ref{generating-scanners} on scanners.
 
 In this 
 example, there is no nondeterminism introduced by the exterior kleene star due to
@@ -1191,7 +1191,7 @@ runs close to $O(n \times log(n))$ and requires $O(n)$ temporary storage where
 $n$ is the number of states.
 
 .section Visualization
-\label{visualization}
+@@label{visualization}
 
 %In many cases, practical
 %parsing programs will be too large to completely visualize with Graphviz.  The
@@ -1259,7 +1259,7 @@ degree to which the machine can be minimized.
 
 Within an action some Ragel expressions and statements are parsed and
 translated. These allow the user to interact with the machine from action code.
-See Section \ref{vals} for a complete list of statements and values available
+See Section @@ref{vals} for a complete list of statements and values available
 in code blocks. 
 
 .subsection Entering Action
@@ -1350,7 +1350,7 @@ main := ( 'm1' | 'm2' ) $A;
 .graphic exallact
 
 .subsection Leaving Actions
-\label{out-actions}
+@@label{out-actions}
 
 @@verb|expr % action|
 \verbspace
@@ -1701,7 +1701,7 @@ block's unique location in the program.
 The removal of duplicates can be turned off using the @@verb|-d| option.
 
 .section Values and Statements Available in Code Blocks
-\label{vals}
+@@label{vals}
 
 \noindent The following values are available in code blocks:
 
@@ -1772,7 +1772,7 @@ of the transition on which the call was made. Use of @@verb|fcall| requires
 the declaration of a call stack. An array of integers named @@verb|stack| and a
 single integer named @@verb|top| must be declared. With the @@verb|fcall|
 construct, control is immediately transferred to the destination state.
-See section \ref{modularization} for more information.
+See section @@ref{modularization} for more information.
 
 .item @@verb|fcall *<expr>;| -- Push the current state and jump to the entry
 point given by @@verb|<expr>|. The expression must evaluate to an integer value
@@ -1805,7 +1805,7 @@ commands should therefore be used with caution.
 
 
 .chapter Controlling Nondeterminism
-\label{controlling-nondeterminism}
+@@label{controlling-nondeterminism}
 
 Along with the flexibility of arbitrary action embeddings comes a need to
 control nondeterminism in regular expressions. If a regular expression is
@@ -2053,7 +2053,7 @@ unique name and uses it to embed a low priority into all
 transitions of the first machine. A higher priority is then embedded into the
 transitions of the second machine that enter into a final state. The following
 example yields a machine identical to the example in Section 
-\ref{controlling-nondeterminism}.
+@@ref{controlling-nondeterminism}.
 
 .code
 .verbatim
@@ -2201,7 +2201,7 @@ expr $(unique_name,1) . expr >(unique_name,0)
 \verbspace
 
 .subsection Longest-Match Kleene Star
-\label{longest_match_kleene_star}
+@@label{longest_match_kleene_star}
 
 @@verb|expr**| 
 \verbspace
@@ -2256,7 +2256,7 @@ that wraps around is dropped.
 Note that this operator does not build a scanner in the traditional sense
 because there is never any backtracking. To build a scanner with backtracking
 use the Longest-Match machine construction described in Section
-\ref{generating-scanners}.
+@@ref{generating-scanners}.
 
 .chapter Interface to Host Program
 
@@ -2288,7 +2288,7 @@ parsing, care must be taken to not use a pointer that has been invalidated by
 movement to a subsequent block.  If the current input data pointer is moved
 backwards it must not be moved past the beginning of the current block.
 
-Figure \ref{basic-example} shows a simple Ragel program that does not have any
+Figure @@ref{basic-example} shows a simple Ragel program that does not have any
 actions. The example tests the first argument of the program against a number
 pattern and then prints the machine's acceptance status.
 
@@ -2319,7 +2319,7 @@ int main( int argc, char **argv )
 }
 .end verbatim
 \caption{A basic Ragel example without any actions.}
-\label{basic-example}
+@@label{basic-example}
 \end{figure}
 
 .section Variables Used by Ragel
@@ -2362,7 +2362,7 @@ must be an array containting the data to process.
 .item @@verb|stack| - This must be an array of integers. It is used to store
 integer values representing states. If the stack must resize dynamically the
 Pre-push and Post-Pop statements can be used to do this (Sections
-\ref{prepush} and \ref{postpop}).
+@@ref{prepush} and @@ref{postpop}).
 
 .item @@verb|top| - This must be an integer value and will be used as an offset
 to @@verb|stack|, giving the next available spot on the top of the stack.
@@ -2371,7 +2371,7 @@ to @@verb|stack|, giving the next available spot on the top of the stack.
 used by scanner code to keep track of the most recent successful pattern match.
 
 .item @@verb|ts| - This must be a pointer to character data. In Go, Java and
-Ruby code this must be an integer. See Section \ref{generating-scanners} for
+Ruby code this must be an integer. See Section @@ref{generating-scanners} for
 more information.
 
 .item @@verb|te| - Also a pointer to character data.
@@ -2482,7 +2482,7 @@ used by Ragel can be changed. This includes @@verb|p|, @@verb|pe|, @@verb|eof|, 
 In Go, Ruby and Java code generation the @@verb|data| variable can also be changed.
 
 .section Pre-Push Statement
-\label{prepush}
+@@label{prepush}
 
 .verbatim
 prepush { 
@@ -2497,7 +2497,7 @@ state is pushed to the stack. This statement can be used to test the number of
 available spaces and dynamically grow the stack if necessary.
 
 .section Post-Pop Statement
-\label{postpop}
+@@label{postpop}
 
 .verbatim
 postpop { 
@@ -2512,7 +2512,7 @@ popped from the stack. This statement can be used to dynamically shrink the
 stack.
 
 .section Write Statement
-\label{write-statement}
+@@label{write-statement}
 
 .verbatim
 write <component> [options];
@@ -2525,7 +2525,7 @@ components that can be generated by a write statement. These components make up 
 state machine's data, initialization code, execution code, and export definitions.
 A write statement may appear before a machine is fully defined.
 This allows one to write out the data first then later define the machine where
-it is used. An example of this is shown in Figure \ref{fbreak-example}.
+it is used. An example of this is shown in Figure @@ref{fbreak-example}.
 
 .subsection Write Data
 .verbatim
@@ -2534,7 +2534,7 @@ write data [options];
 \verbspace
 
 The write data statement causes Ragel to emit the constant static data needed
-by the machine. In table-driven output styles (see Section \ref{genout}) this
+by the machine. In table-driven output styles (see Section @@ref{genout}) this
 is a collection of arrays that represent the states and transitions of the
 machine.  In goto-driven machines much less data is emitted. At the very
 minimum a start state @@verb|name_start| is generated.  All variables written
@@ -2596,7 +2596,7 @@ int main( int argc, char **argv )
 .end verbatim
 \caption{Use of {\tt noend} write option and the {\tt fbreak} statement for
 processing a string.}
-\label{fbreak-example}
+@@label{fbreak-example}
 \end{figure}
 
 .subsection Write Start, First Final and Error
@@ -2672,11 +2672,11 @@ case the user must explicitly break out of the processing loop using
 it moves into the error state. This option is useful if one wishes to process a
 null terminated string. Rather than traverse the string to discover then length
 before processing the input, the user can break out when the null character is
-seen.  The example in Figure \ref{fbreak-example} shows the use of the
+seen.  The example in Figure @@ref{fbreak-example} shows the use of the
 @@verb|noend| write option and the @@verb|fbreak| statement for processing a string.
 
 .subsection Write Exports
-\label{export}
+@@label{export}
 
 .verbatim
 write exports;
@@ -2694,7 +2694,7 @@ export machine_to_export = 0x44;
 
 When the write exports statement is used these machines are 
 written out in the generated code. Defines are used for C and constant integers
-are used for D, Java and Ruby. See Section \ref{import} for a description of the
+are used for D, Java and Ruby. See Section @@ref{import} for a description of the
 import statement.
 
 .section Maintaining Pointers to Input Data
@@ -2710,7 +2710,7 @@ must be used while parsing a following buffer block, some extra consideration
 to correctness must be made.
 
 The scanner constructions exhibit this problem, requiring the maintenance
-code described in Section \ref{generating-scanners}. If a longest-match
+code described in Section @@ref{generating-scanners}. If a longest-match
 construction has been used somewhere in the machine then it is possible to
 take advantage of the required prefix maintenance code in the driver program to
 ensure pointers to the input are always valid. If laying down a pointer one can
@@ -2754,7 +2754,7 @@ to maintain pointers to the input that will always be consistent.
     }
 .end verbatim
 \caption{An example of line-oriented processing.}
-\label{line-oriented}
+@@label{line-oriented}
 \end{figure}
 
 In general, there are two approaches for guaranteeing the consistency of
@@ -2772,7 +2772,7 @@ program must perform line-oriented processing, the user can scan backwards from
 the end of an input block that has just been read in and process only up to the
 first found newline. On the next input read, the new data is placed after the
 partially read line and processing continues from the beginning of the line.
-An example of line-oriented processing is given in Figure \ref{line-oriented}.
+An example of line-oriented processing is given in Figure @@ref{line-oriented}.
 
 .section Specifying the Host Language
 
@@ -2789,7 +2789,7 @@ language. The host-language options are:
 .end itemize
 
 .section Choosing a Generated Code Style
-\label{genout}
+@@label{genout}
 
 There are three styles of code output to choose from. Code style affects the
 size and speed of the compiled binary. Changing code style does not require any
@@ -2869,7 +2869,7 @@ preferred output format.
 .chapter Beyond the Basic Model
 
 .section Parser Modularization
-\label{modularization}
+@@label{modularization}
 
 It is possible to use Ragel's machine construction and action embedding
 operators to specify an entire parser using a single regular expression. In
@@ -2939,19 +2939,19 @@ together sub-parsers of a language into a parser for the full language,
 especially for the purpose of modularizing code and reducing the number of
 states when the machine contains frequently recurring patterns.
 
-Section \ref{vals} describes the jump and call statements that are used to
+Section @@ref{vals} describes the jump and call statements that are used to
 transfer control. These statements make use of two variables that must be
 declared by the user, @@verb|stack| and @@verb|top|. The @@verb|stack| variable
 must be an array of integers and @@verb|top| must be a single integer, which
-will point to the next available space in @@verb|stack|. Sections \ref{prepush}
-and \ref{postpop} describe the Pre-Push and Post-Pop statements which can be
+will point to the next available space in @@verb|stack|. Sections @@ref{prepush}
+and @@ref{postpop} describe the Pre-Push and Post-Pop statements which can be
 used to implement a dynamically resizable array.
 
 .section Referencing Names
-\label{labels}
+@@label{labels}
 
 This section describes how to reference names in epsilon transitions (Section
-\ref{state-charts}) and
+@@ref{state-charts}) and
 action-based control-flow statements such as @@verb|fgoto|. There is a hierarchy
 of names implied in a Ragel specification.  At the top level are the machine
 instantiations. Beneath the instantiations are labels and references to machine
@@ -2989,7 +2989,7 @@ name tree. However, it can always be renamed.
 
 
 .section Scanners
-\label{generating-scanners}
+@@label{generating-scanners}
 
 Scanners are very much intertwined with regular-languages and their
 corresponding processors. For this reason Ragel supports the definition of
@@ -3100,7 +3100,7 @@ preserved data.
 .item Run the scanner on the new data.
 .end itemize
 
-Figure \ref{preserve_example} shows the required handling of an input stream in
+Figure @@ref{preserve_example} shows the required handling of an input stream in
 which a token is broken by the input block boundaries. After processing up to
 and including the ``t'' of ``characters'', the prefix of the string token must be
 retained and processing should resume at the ``e'' on the next iteration of
@@ -3125,7 +3125,7 @@ data will ever need to be shifted.
 \caption{Following an invocation of the execute code there may be a partially
 matched token (a). The data of the partially matched token 
 must be preserved ahead of the new data on the next invocation (b).}
-\label{preserve_example}
+@@label{preserve_example}
 \end{figure}
 
 Since scanners attempt to make the longest possible match of input, patterns
@@ -3133,7 +3133,7 @@ such as identifiers require one character of lookahead in order to trigger a
 match. In the case of the last token in the input stream the user must ensure
 that the @@verb|eof| variable is set so that the final token is flushed out.
 
-An example scanner processing loop is given in Figure \ref{scanner-loop}.
+An example scanner processing loop is given in Figure @@ref{scanner-loop}.
 
 \begin{figure}
 \small
@@ -3183,11 +3183,11 @@ An example scanner processing loop is given in Figure \ref{scanner-loop}.
     }
 .end verbatim
 \caption{A processing loop for a scanner.}
-\label{scanner-loop}
+@@label{scanner-loop}
 \end{figure}
 
 .section State Charts
-\label{state-charts}
+@@label{state-charts}
 
 In addition to supporting the construction of state machines using regular
 languages, Ragel provides a way to manually specify state machines using
@@ -3235,7 +3235,7 @@ Draws an epsilon transition to the state defined
 by @@verb|label|.  Epsilon transitions are made deterministic when join
 operators are evaluated. Epsilon transitions that are not in a join operation
 are made deterministic when the machine definition that contains the epsilon is
-complete. See Section \ref{labels} for information on referencing labels.
+complete. See Section @@ref{labels} for information on referencing labels.
 
 .subsection Simplifying State Charts
 
@@ -3278,7 +3278,7 @@ access to the states and transitions. We can still execute code on the
 transitions that we have encapsulated.
 
 .subsection Dropping Down One Level of Abstraction
-\label{down}
+@@label{down}
 
 The second benefit of incorporating state charts into Ragel is that it permits
 us to bypass the regular language abstraction if we need to. Ragel's action
@@ -3332,7 +3332,7 @@ two: (
 
 
 .section Semantic Conditions
-\label{semantic}
+@@label{semantic}
 
 Many communication protocols contain variable-length fields, where the length
 of the field is given ahead of the field as a value. This
@@ -3432,7 +3432,7 @@ unless an alphabet type smaller than long is used.
 .section Implementing Lookahead
 
 There are a few strategies for implementing lookahead in Ragel programs.
-Leaving actions, which are described in Section \ref{out-actions}, can be
+Leaving actions, which are described in Section @@ref{out-actions}, can be
 used as a form of lookahead.  Ragel also provides the @@verb|fhold| directive
 which can be used in actions to prevent the machine from advancing over the
 current character. It is also possible to manually adjust the current character

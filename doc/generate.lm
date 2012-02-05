@@ -159,6 +159,8 @@ lex ilc
 {
 	token cmd_verb1 /'verb|'/
 	token cmd_verb2 /'verb/'/
+	token cmd_label /'label{'/
+	token cmd_ref /'ref{'/
 }
 
 lex verb1
@@ -173,10 +175,18 @@ lex verb2
 	token vde2 /'/'/
 }
 
+lex ilcd
+{
+	token ilcdd /[^}]*/
+	token ilcde /'}'/
+}
+
 def pl_data
 	['@']
 |	['@@' cmd_verb1 vdd1 vde1]
 |	['@@' cmd_verb2 vdd2 vde2]
+|	['@@' cmd_label ilcdd ilcde]
+|	['@@' cmd_ref ilcdd ilcde]
 |	[d]
 
 def plain_line
@@ -282,6 +292,16 @@ int printLines( Lines: line* )
 					print( '\\verb/' )
 					print( V )
 					print( '/' )
+				}
+				else if match Pld ['@@' cmd_label L: ilcdd ilcde] {
+					print( '\\label{' )
+					print( L )
+					print( '}' )
+				}
+				else if match Pld ['@@' cmd_ref L: ilcdd ilcde] {
+					print( '\\ref{' )
+					print( L )
+					print( '}' )
 				}
 				else {
 					print( Pld )
