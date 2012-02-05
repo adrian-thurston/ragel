@@ -231,7 +231,7 @@ How ragel is different from Lex.
 Like Re2c, Ragel provides a simple execution model that does not make any
 assumptions as to how the input is collected.  Also, Ragel does not do any
 buffering in the generated code. Consequently there are no dependencies on
-external functions such as \verb|malloc|. 
+external functions such as @@verb|malloc|. 
 
 If buffering is required it can be manually implemented by embedding actions
 that copy the current character to a buffer, or data can be passed to the
@@ -299,10 +299,10 @@ regular expressions. Perl embeddings do not translate into the embedding of
 code into deterministic state machines. Perl regular expressions are in fact
 not fully compiled to deterministic machines when embedded code is involved.
 They are instead interpreted and involve backtracking. This is shown by the
-following Perl program. When it is fed the input \verb|abcd| the interpretor
-attempts to match the first alternative, printing \verb|a1 b1|.  When this
+following Perl program. When it is fed the input @@verb|abcd| the interpretor
+attempts to match the first alternative, printing @@verb|a1 b1|.  When this
 possibility fails it backtracks and tries the second possibility, printing
-\verb|a2 b2|, at which point it succeeds.
+@@verb|a2 b2|, at which point it succeeds.
 
 .code
 .verbatim
@@ -317,7 +317,7 @@ In Ragel there is no regular expression interpretor. Aside from the scanner
 operator, all Ragel expressions are made into deterministic machines and the
 run time simply moves from state to state as it consumes input. An equivalent
 parser expressed in Ragel would attempt both of the alternatives concurrently,
-printing \verb|a1 a2 b1 b2|.
+printing @@verb|a1 a2 b1 b2|.
 
 .section Development Status
 
@@ -341,16 +341,16 @@ a machine specification it stops to read the Ragel statements and possibly gener
 code in place of the specification.
 Afterwards it continues to pass input through.  There
 can be any number of FSM specifications in an input file. A multi-line FSM spec
-starts with \verb|%%{| and ends with \verb|}%%|. A single-line FSM spec starts
-with \verb|%%| and ends at the first newline.  
+starts with @@verb|%%{| and ends with @@verb|}%%|. A single-line FSM spec starts
+with @@verb|%%| and ends at the first newline.  
 
 While Ragel is looking for FSM specifications it does basic lexical analysis on
 the surrounding input. It interprets literal strings and comments so a
-\verb|%%| sequence in either of those will not trigger the parsing of an FSM
+@@verb|%%| sequence in either of those will not trigger the parsing of an FSM
 specification. Ragel does not pass the input through any preprocessor nor does it
 interpret preprocessor directives itself so includes, defines and ifdef logic
 cannot be used to alter the parse of a Ragel input file. It is therefore not
-possible to use an \verb|#if 0| directive to comment out a machine as is
+possible to use an @@verb|#if 0| directive to comment out a machine as is
 commonly done in C code. As an alternative, a machine can be prevented from
 causing any generated output by commenting out write statements.
 
@@ -401,14 +401,14 @@ machine fsm_name;
 .end verbatim
 \verbspace
 
-The \verb|machine| statement gives the name of the FSM. If present in a
+The @@verb|machine| statement gives the name of the FSM. If present in a
 specification, this statement must appear first. If a machine specification
 does not have a name then Ragel uses the previous specification name.  If no
 previous specification name exists then this is an error. Because FSM
 specifications persist in memory, a machine's statements can be spread across
 multiple machine specifications.  This allows one to break up a machine across
 several files or draw in statements that are common to multiple machines using
-the \verb|include| statement.
+the @@verb|include| statement.
 
 .subsection Machine Definition
 \label{definition}
@@ -437,16 +437,16 @@ The machine instantiation statement generates a set of states representing an
 expression. Each instantiation generates a distinct set of states.  The starting
 state of the instantiation is written in the data section of the generated code
 using the instantiation name.  If a machine named
-\verb|main| is instantiated, its start state is used as the
-specification's start state and is assigned to the \verb|cs| variable by the
-\verb|write init| command. If no \verb|main| machine is given, the start state
+@@verb|main| is instantiated, its start state is used as the
+specification's start state and is assigned to the @@verb|cs| variable by the
+@@verb|write init| command. If no @@verb|main| machine is given, the start state
 of the last machine instantiation to appear is used as the specification's
 start state.
 
 From outside the execution loop, control may be passed to any machine by
-assigning the entry point to the \verb|cs| variable.  From inside the execution
-loop, control may be passed to any machine instantiation using \verb|fcall|,
-\verb|fgoto| or \verb|fnext| statements.
+assigning the entry point to the @@verb|cs| variable.  From inside the execution
+loop, control may be passed to any machine instantiation using @@verb|fcall|,
+@@verb|fgoto| or @@verb|fnext| statements.
 
 .subsection Including Ragel Code
 
@@ -455,7 +455,7 @@ include FsmName "inputfile.rl";
 .end verbatim
 \verbspace
 
-The \verb|include| statement can be used to draw in the statements of another FSM
+The @@verb|include| statement can be used to draw in the statements of another FSM
 specification. Both the name and input file are optional, however at least one
 must be given. Without an FSM name, the given input file is searched for an FSM
 of the same name as the current specification. Without an input file the
@@ -463,7 +463,7 @@ current file is searched for a machine of the given name. If both are present,
 the given input file is searched for a machine of the given name.
 
 Ragel searches for included files from the location of the current file.
-Additional directories can be added to the search path using the \verb|-I|
+Additional directories can be added to the search path using the @@verb|-I|
 option.
 
 .subsection Importing Definitions
@@ -474,15 +474,15 @@ import "inputfile.h";
 .end verbatim
 \verbspace
 
-The \verb|import| statement scrapes a file for sequences of tokens that match
+The @@verb|import| statement scrapes a file for sequences of tokens that match
 the following forms. Ragel treats these forms as state machine definitions.
 
 .itemize
     \setlength{\itemsep}{-2mm}
-    .item \verb|name '=' number|
-    .item \verb|name '=' lit_string|
-    .item \verb|'define' name number|
-    .item \verb|'define' name lit_string|
+    .item @@verb|name '=' number|
+    .item @@verb|name '=' lit_string|
+    .item @@verb|'define' name number|
+    .item @@verb|'define' name lit_string|
 .end itemize
 
 If the input file is a Ragel program then tokens inside any Ragel
@@ -490,7 +490,7 @@ specifications are ignored. See Section \ref{export} for a description of
 exporting machine definitions.
 
 Ragel searches for imported files from the location of the current file.
-Additional directories can be added to the search path using the \verb|-I|
+Additional directories can be added to the search path using the @@verb|-I|
 option.
 
 .section Lexical Analysis of a Ragel Block
@@ -500,13 +500,13 @@ Within a machine specification the following lexical rules apply to the input.
 
 .itemize
 
-.item The \verb|#| symbol begins a comment that terminates at the next newline.
+.item The @@verb|#| symbol begins a comment that terminates at the next newline.
 
-.item The symbols \verb|""|, \verb|''|, \verb|//|, \verb|[]| behave as the
+.item The symbols @@verb|""|, @@verb|''|, @@verb|//|, @@verb|[]| behave as the
 delimiters of literal strings. Within them, the following escape sequences 
 are interpreted: 
 
-\verb|    \0 \a \b \t \n \v \f \r|
+@@verb|    \0 \a \b \t \n \v \f \r|
 
 A backslash at the end of a line joins the following line onto the current. A
 backslash preceding any other character removes special meaning. This applies
@@ -515,32 +515,32 @@ literals. As an exception, regular expression literals do not support escape
 sequences as the operands of a range within a list. See the bullet on regular
 expressions in Section \ref{basic}.
 
-.item The symbols \verb|{}| delimit a block of host language code that will be
+.item The symbols @@verb|{}| delimit a block of host language code that will be
 embedded into the machine as an action.  Within the block of host language
 code, basic lexical analysis of comments and strings is done in order to
 correctly find the closing brace of the block. With the exception of FSM
 commands embedded in code blocks, the entire block is preserved as is for
 identical reproduction in the output code.
 
-.item The pattern \verb|[+-]?[0-9]+| denotes an integer in decimal format.
+.item The pattern @@verb|[+-]?[0-9]+| denotes an integer in decimal format.
 Integers used for specifying machines may be negative only if the alphabet type
 is signed. Integers used for specifying priorities may be positive or negative.
 
-.item The pattern \verb|0x[0-9A-Fa-f]+| denotes an integer in hexadecimal
+.item The pattern @@verb|0x[0-9A-Fa-f]+| denotes an integer in hexadecimal
 format.
 
-.item The keywords are \verb|access|, \verb|action|, \verb|alphtype|,
-\verb|getkey|, \verb|write|, \verb|machine| and \verb|include|.
+.item The keywords are @@verb|access|, @@verb|action|, @@verb|alphtype|,
+@@verb|getkey|, @@verb|write|, @@verb|machine| and @@verb|include|.
 
-.item The pattern \verb|[a-zA-Z_][a-zA-Z_0-9]*| denotes an identifier.
+.item The pattern @@verb|[a-zA-Z_][a-zA-Z_0-9]*| denotes an identifier.
 
 .comment
 .item The allowable symbols are:
 
-\verb/    ( ) ! ^ * ? + : -> - | & . , := = ; > @ $ % /\\
-\verb|    >/  $/  %/  </  @/  <>/ >!  $!  %!  <!  @!  <>!|\\
-\verb|    >^  $^  %^  <^  @^  <>^ >~  $~  %~  <~  @~  <>~|\\
-\verb|    >*  $*  %*  <*  @*  <>*|
+@@verb/    ( ) ! ^ * ? + : -> - | & . , := = ; > @ $ % /\\
+@@verb|    >/  $/  %/  </  @/  <>/ >!  $!  %!  <!  @!  <>!|\\
+@@verb|    >^  $^  %^  <^  @^  <>^ >~  $~  %~  <~  @~  <>~|\\
+@@verb|    >*  $*  %*  <*  @*  <>*|
 .end comment
 
 .item Any amount of whitespace may separate tokens.
@@ -565,7 +565,7 @@ can be applied.
 
 .itemize
 
-.item \verb|'hello'| -- Concatenation Literal. Produces a machine that matches
+.item @@verb|'hello'| -- Concatenation Literal. Produces a machine that matches
 the sequence of characters in the quoted string. If there are 5 characters
 there will be 6 states chained together with the characters in the string. See
 Section \ref{lexing} for information on valid escape sequences. 
@@ -585,19 +585,19 @@ main := 'hello';
 .graphic bmconcat
 
 It is possible
-to make a concatenation literal case-insensitive by appending an \verb|i| to
-the string, for example \verb|'cmd'i|.
+to make a concatenation literal case-insensitive by appending an @@verb|i| to
+the string, for example @@verb|'cmd'i|.
 
-.item \verb|"hello"| -- Identical to the single quoted version.
+.item @@verb|"hello"| -- Identical to the single quoted version.
 
-.item \verb|[hello]| -- Or Expression. Produces a union of characters.  There
+.item @@verb|[hello]| -- Or Expression. Produces a union of characters.  There
 will be two states with a transition for each unique character between the two states.
-The \verb|[]| delimiters behave like the quotes of a literal string. For example, 
-\verb|[ \t]| means tab or space. The \verb|or| expression supports character ranges
-with the \verb|-| symbol as a separator. The meaning of the union can be negated
-using an initial \verb|^| character as in standard regular expressions. 
+The @@verb|[]| delimiters behave like the quotes of a literal string. For example, 
+@@verb|[ \t]| means tab or space. The @@verb|or| expression supports character ranges
+with the @@verb|-| symbol as a separator. The meaning of the union can be negated
+using an initial @@verb|^| character as in standard regular expressions. 
 See Section \ref{lexing} for information on valid escape sequences
-in \verb|or| expressions.
+in @@verb|or| expressions.
 
 .comment
 % GENERATE: bmor
@@ -613,7 +613,7 @@ main := [hello];
 
 .graphic bmor
 
-.item \verb|''|, \verb|""|, and \verb|[]| -- Zero Length Machine.  Produces a machine
+.item @@verb|''|, @@verb|""|, and @@verb|[]| -- Zero Length Machine.  Produces a machine
 that matches the zero length string. Zero length machines have one state that is both
 a start state and a final state.
 
@@ -632,12 +632,12 @@ main := '';
 .graphic bmnull
 
 % FIXME: More on the range of values here.
-.item \verb|42| -- Numerical Literal. Produces a two state machine with one
+.item @@verb|42| -- Numerical Literal. Produces a two state machine with one
 transition on the given number. The number may be in decimal or hexadecimal
 format and should be in the range allowed by the alphabet type. The minimum and
 maximum values permitted are defined by the host machine that Ragel is compiled
-on. For example, numbers in a \verb|short| alphabet on an i386 machine should
-be in the range \verb|-32768| to \verb|32767|.
+on. For example, numbers in a @@verb|short| alphabet on an i386 machine should
+be in the range @@verb|-32768| to @@verb|32767|.
 
 .comment
 % GENERATE: bmnum
@@ -652,24 +652,24 @@ main := 42;
 
 .graphic bmnum
 
-.item \verb|/simple_regex/| -- Regular Expression. Regular expressions are
+.item @@verb|/simple_regex/| -- Regular Expression. Regular expressions are
 parsed as a series of expressions that are concatenated together. Each
 concatenated expression
-may be a literal character, the ``any'' character specified by the \verb|.|
-symbol, or a union of characters specified by the \verb|[]| delimiters. If the
-first character of a union is \verb|^| then it matches any character not in the
+may be a literal character, the ``any'' character specified by the @@verb|.|
+symbol, or a union of characters specified by the @@verb|[]| delimiters. If the
+first character of a union is @@verb|^| then it matches any character not in the
 list. Within a union, a range of characters can be given by separating the first
-and last characters of the range with the \verb|-| symbol. Each
+and last characters of the range with the @@verb|-| symbol. Each
 concatenated machine may have repetition specified by following it with the
-\verb|*| symbol. The standard escape sequences described in Section
+@@verb|*| symbol. The standard escape sequences described in Section
 \ref{lexing} are supported everywhere in regular expressions except as the
-operands of a range within in a list. This notation also supports the \verb|i|
-trailing option. Use it to produce case-insensitive machines, as in \verb|/GET/i|.
+operands of a range within in a list. This notation also supports the @@verb|i|
+trailing option. Use it to produce case-insensitive machines, as in @@verb|/GET/i|.
 
 Ragel does not support very complex regular expressions because the desired
 results can always be achieved using the more general machine construction
 operators listed in Section \ref{machconst}. The following diagram shows the
-result of compiling \verb|/ab*[c-z].*[123]/|. \verb|DEF| represents the default
+result of compiling @@verb|/ab*[c-z].*[123]/|. @@verb|DEF| represents the default
 transition, which is taken if no other transition can be taken. 
 
 .comment
@@ -686,10 +686,10 @@ main := /ab*[c-z].*[123]/;
 
 .graphic bmregex
 
-.item \verb|'a' .. 'z'| -- Range. Produces a machine that matches any
+.item @@verb|'a' .. 'z'| -- Range. Produces a machine that matches any
 characters in the specified range.  Allowable upper and lower bounds of the
 range are concatenation literals of length one and numerical literals.  For
-example, \verb|0x10..0x20|, \verb|0..63|, and \verb|'a'..'z'| are valid ranges.
+example, @@verb|0x10..0x20|, @@verb|0..63|, and @@verb|'a'..'z'| are valid ranges.
 The bounds should be in the range allowed by the alphabet type.
 
 .comment
@@ -706,50 +706,50 @@ main := 'a' .. 'z';
 
 .graphic bmrange
 
-.item \verb|variable_name| -- Lookup the machine definition assigned to the
+.item @@verb|variable_name| -- Lookup the machine definition assigned to the
 variable name given and use an instance of it. See Section \ref{definition} for
 an important note on what it means to reference a variable name.
 
-.item \verb|builtin_machine| -- There are several built-in machines available
+.item @@verb|builtin_machine| -- There are several built-in machines available
 for use. They are all two state machines for the purpose of matching common
 classes of characters. They are:
 
 .itemize
 
-.item \verb|any   | -- Any character in the alphabet.
+.item @@verb|any   | -- Any character in the alphabet.
 
-.item \verb|ascii | -- Ascii characters. \verb|0..127|
+.item @@verb|ascii | -- Ascii characters. @@verb|0..127|
 
-.item \verb|extend| -- Ascii extended characters. This is the range
-\verb|-128..127| for signed alphabets and the range \verb|0..255| for unsigned
+.item @@verb|extend| -- Ascii extended characters. This is the range
+@@verb|-128..127| for signed alphabets and the range @@verb|0..255| for unsigned
 alphabets.
 
-.item \verb|alpha | -- Alphabetic characters. \verb|[A-Za-z]|
+.item @@verb|alpha | -- Alphabetic characters. @@verb|[A-Za-z]|
 
-.item \verb|digit | -- Digits. \verb|[0-9]|
+.item @@verb|digit | -- Digits. @@verb|[0-9]|
 
-.item \verb|alnum | -- Alpha numerics. \verb|[0-9A-Za-z]|
+.item @@verb|alnum | -- Alpha numerics. @@verb|[0-9A-Za-z]|
 
-.item \verb|lower | -- Lowercase characters. \verb|[a-z]|
+.item @@verb|lower | -- Lowercase characters. @@verb|[a-z]|
 
-.item \verb|upper | -- Uppercase characters. \verb|[A-Z]|
+.item @@verb|upper | -- Uppercase characters. @@verb|[A-Z]|
 
-.item \verb|xdigit| -- Hexadecimal digits. \verb|[0-9A-Fa-f]|
+.item @@verb|xdigit| -- Hexadecimal digits. @@verb|[0-9A-Fa-f]|
 
-.item \verb|cntrl | -- Control characters. \verb|0..31|
+.item @@verb|cntrl | -- Control characters. @@verb|0..31|
 
-.item \verb|graph | -- Graphical characters. \verb|[!-~]|
+.item @@verb|graph | -- Graphical characters. @@verb|[!-~]|
 
-.item \verb|print | -- Printable characters. \verb|[ -~]|
+.item @@verb|print | -- Printable characters. @@verb|[ -~]|
 
-.item \verb|punct | -- Punctuation. Graphical characters that are not alphanumerics.
-\verb|[!-/:-@[-`{-~]|
+.item @@verb|punct | -- Punctuation. Graphical characters that are not alphanumerics.
+@@verb|[!-/:-@[-`{-~]|
 
-.item \verb|space | -- Whitespace. \verb|[\t\v\f\n\r ]|
+.item @@verb|space | -- Whitespace. @@verb|[\t\v\f\n\r ]|
 
-.item \verb|zlen  | -- Zero length string. \verb|""|
+.item @@verb|zlen  | -- Zero length string. @@verb|""|
 
-.item \verb|empty | -- Empty set. Matches nothing. \verb|^any|
+.item @@verb|empty | -- Empty set. Matches nothing. @@verb|^any|
 
 .end itemize
 .end itemize
@@ -761,33 +761,33 @@ in the same precedence group are evaluated from left to right.
 \verbspace
 \begin{tabular}{|c|c|c|}
 \hline
-1&\verb| , |&Join\\
+1&@@verb| , |&Join\\
 \hline
-2&\verb/ | & - --/&Union, Intersection and Subtraction\\
+2&@@verb/ | & - --/&Union, Intersection and Subtraction\\
 \hline
-3&\verb| . <: :> :>> |&Concatenation\\
+3&@@verb| . <: :> :>> |&Concatenation\\
 \hline
-4&\verb| : |&Label\\
+4&@@verb| : |&Label\\
 \hline
-5&\verb| -> |&Epsilon Transition\\
+5&@@verb| -> |&Epsilon Transition\\
 \hline
-&\verb| >  @  $  % |&Transitions Actions and Priorities\\
+&@@verb| >  @  $  % |&Transitions Actions and Priorities\\
 \cline{2-3}
-&\verb| >/  $/  %/  </  @/  <>/ |&EOF Actions\\
+&@@verb| >/  $/  %/  </  @/  <>/ |&EOF Actions\\
 \cline{2-3}
-6&\verb| >!  $!  %!  <!  @!  <>! |&Global Error Actions\\
+6&@@verb| >!  $!  %!  <!  @!  <>! |&Global Error Actions\\
 \cline{2-3}
-&\verb| >^  $^  %^  <^  @^  <>^ |&Local Error Actions\\
+&@@verb| >^  $^  %^  <^  @^  <>^ |&Local Error Actions\\
 \cline{2-3}
-&\verb| >~  $~  %~  <~  @~  <>~ |&To-State Actions\\
+&@@verb| >~  $~  %~  <~  @~  <>~ |&To-State Actions\\
 \cline{2-3}
-&\verb| >*  $*  %*  <*  @*  <>* |&From-State Action\\
+&@@verb| >*  $*  %*  <*  @*  <>* |&From-State Action\\
 \hline
-7&\verb| * ** ? + {n} {,n} {n,} {n,m} |&Repetition\\
+7&@@verb| * ** ? + {n} {,n} {n,} {n,m} |&Repetition\\
 \hline
-8&\verb| ! ^ |&Negation and Character-Level Negation\\
+8&@@verb| ! ^ |&Negation and Character-Level Negation\\
 \hline
-9&\verb| ( <expr> ) |&Grouping\\
+9&@@verb| ( <expr> ) |&Grouping\\
 \hline
 \end{tabular}
 
@@ -804,10 +804,10 @@ immediately removed by the determinization process which is executed at every
 operation. Ragel does not make use of any nondeterministic intermediate state
 machines. 
 
-To create an epsilon transition between two states \verb|x| and \verb|y| is to
-copy all of the properties of \verb|y| into \verb|x|. This involves drawing in
-all of \verb|y|'s to-state actions, EOF actions, etc., in addition to its
-transitions. If \verb|x| and \verb|y| both have a transition out on the same
+To create an epsilon transition between two states @@verb|x| and @@verb|y| is to
+copy all of the properties of @@verb|y| into @@verb|x|. This involves drawing in
+all of @@verb|y|'s to-state actions, EOF actions, etc., in addition to its
+transitions. If @@verb|x| and @@verb|y| both have a transition out on the same
 character, then the transitions must be combined.  During transition
 combination a new transition is made that goes to a new state that is the
 combination of both target states. The new combination state is created using
@@ -833,13 +833,13 @@ one portion of the machine to the next. See Chapter
 
 The Graphviz tool is an immense help when debugging improperly compiled
 machines or otherwise learning how to use Ragel. Graphviz Dot files can be
-generated from Ragel programs using the \verb|-V| option. See Section
+generated from Ragel programs using the @@verb|-V| option. See Section
 \ref{visualization} for more information.
 
 
 .subsection Union
 
-\verb/expr | expr/
+@@verb/expr | expr/
 \verbspace
 
 The union operation produces a machine that matches any string in machine one
@@ -874,7 +874,7 @@ main := '0x' xdigit+ | digit+ | alpha alnum*;
 
 .subsection Intersection
 
-\verb|expr & expr|
+@@verb|expr & expr|
 \verbspace
 
 Intersection produces a machine that matches any
@@ -907,7 +907,7 @@ main :=
 
 .subsection Difference
 
-\verb|expr - expr|
+@@verb|expr - expr|
 \verbspace
 
 The difference operation produces a machine that matches
@@ -939,13 +939,13 @@ main := /[a-z][a-z]*/ - ( 'for' | 'int' );
 .subsection Strong Difference
 \label{strong_difference}
 
-\verb|expr -- expr|
+@@verb|expr -- expr|
 \verbspace
 
 Strong difference produces a machine that matches any string of the first
 machine that does not have any string of the second machine as a substring. In
-the following example, strong subtraction is used to excluded \verb|CRLF| from
-a sequence. In the corresponding visualization, the label \verb|DEF| is short
+the following example, strong subtraction is used to excluded @@verb|CRLF| from
+a sequence. In the corresponding visualization, the label @@verb|DEF| is short
 for default. The default transition is taken if no other transition can be
 taken.
 
@@ -973,7 +973,7 @@ expr - ( any* expr any* )
 
 .subsection Concatenation
 
-\verb|expr . expr|
+@@verb|expr . expr|
 \verbspace
 
 Concatenation produces a machine that matches all the strings in machine one followed by all
@@ -993,10 +993,10 @@ The most common scenario in which this happens is the
 concatenation of a machine that repeats some pattern with a machine that gives
 a terminating string, but the repetition machine does not exclude the
 terminating string. The example in Section \ref{strong_difference}
-guards against this. Another example is the expression \verb|("'" any* "'")|.
+guards against this. Another example is the expression @@verb|("'" any* "'")|.
 When executed the thread of control will
-never leave the \verb|any*| machine.  This is a problem especially if actions
-are embedded to process the characters of the \verb|any*| component.
+never leave the @@verb|any*| machine.  This is a problem especially if actions
+are embedded to process the characters of the @@verb|any*| component.
 
 In the following example, the first machine is always active due to the
 nondeterministic nature of concatenation. This particular nondeterminism is intended
@@ -1022,19 +1022,19 @@ ambiguity involving concatenation and subtraction. Because concatenation is the
 default operator for two
 adjacent machines there is an ambiguity between subtraction of
 a positive numerical literal and concatenation of a negative numerical literal.
-For example, \verb|(x-7)| could be interpreted as \verb|(x . -7)| or 
-\verb|(x - 7)|. In the Ragel language, the subtraction operator always takes precedence
+For example, @@verb|(x-7)| could be interpreted as @@verb|(x . -7)| or 
+@@verb|(x - 7)|. In the Ragel language, the subtraction operator always takes precedence
 over concatenation of a negative literal. We adhere to the rule that the default
 concatenation operator takes effect only when there are no other operators between
-two machines. Beware of writing machines such as \verb|(any -1)| when what is
-desired is a concatenation of \verb|any| and \verb|-1|. Instead write 
-\verb|(any . -1)| or \verb|(any (-1))|. If in doubt of the meaning of your program do not
-rely on the default concatenation operator; always use the \verb|.| symbol.
+two machines. Beware of writing machines such as @@verb|(any -1)| when what is
+desired is a concatenation of @@verb|any| and @@verb|-1|. Instead write 
+@@verb|(any . -1)| or @@verb|(any (-1))|. If in doubt of the meaning of your program do not
+rely on the default concatenation operator; always use the @@verb|.| symbol.
 
 
 .subsection Kleene Star
 
-\verb|expr*|
+@@verb|expr*|
 \verbspace
 
 The machine resulting from the Kleene Star operator will match zero or more
@@ -1082,12 +1082,12 @@ main := /[a-z]*\n/*;
 
 .subsection One Or More Repetition
 
-\verb|expr+|
+@@verb|expr+|
 \verbspace
 
 This operator produces the concatenation of the machine with the kleene star of
 itself. The result will match one or more repetitions of the machine. The plus
-operator is equivalent to \verb|(expr . expr*)|.  
+operator is equivalent to @@verb|(expr . expr*)|.  
 
 % GENERATE: explus
 % OPT: -p
@@ -1106,12 +1106,12 @@ main := alnum+;
 
 .subsection Optional
 
-\verb|expr?|
+@@verb|expr?|
 \verbspace
 
 The {\em optional} operator produces a machine that accepts the machine
 given or the zero length string. The optional operator is equivalent to
-\verb/(expr | '' )/. In the following example the optional operator is used to
+@@verb/(expr | '' )/. In the following example the optional operator is used to
 possibly extend a token.
 
 % GENERATE: exoption
@@ -1132,22 +1132,22 @@ main := digit+ ('.' digit+)?;
 .subsection Repetition
 
 \begin{tabbing}
-\noindent \verb|expr {n}| \hspace{16pt}\=-- Exactly N copies of expr.\\
+\noindent @@verb|expr {n}| \hspace{16pt}\=-- Exactly N copies of expr.\\
 
-\noindent \verb|expr {,n}| \>-- Zero to N copies of expr.\\
+\noindent @@verb|expr {,n}| \>-- Zero to N copies of expr.\\
 
-\noindent \verb|expr {n,}| \>-- N or more copies of expr.\\
+\noindent @@verb|expr {n,}| \>-- N or more copies of expr.\\
 
-\noindent \verb|expr {n,m}| \>-- N to M copies of expr.
+\noindent @@verb|expr {n,m}| \>-- N to M copies of expr.
 \end{tabbing}
 
 .subsection Negation
 
-\verb|!expr|
+@@verb|!expr|
 \verbspace
 
 Negation produces a machine that matches any string not matched by the given
-machine. Negation is equivalent to \verb|(any* - expr)|.
+machine. Negation is equivalent to @@verb|(any* - expr)|.
 
 % GENERATE: exnegate
 % OPT: -p
@@ -1166,12 +1166,12 @@ main := ! ( digit any* );
 
 .subsection Character-Level Negation
 
-\verb|^expr|
+@@verb|^expr|
 \verbspace
 
 Character-level negation produces a machine that matches any single character
 not matched by the given machine. Character-Level Negation is equivalent to
-\verb|(any - expr)|. It must be applied only to machines that match strings of
+@@verb|(any - expr)|. It must be applied only to machines that match strings of
 length one.
 
 .section State Machine Minimization
@@ -1181,7 +1181,7 @@ the language. Minimization reduces the number of states in machines
 by merging equivalent states. It does not change the behaviour of the machine
 in any way. It will cause some states to be merged into one because they are
 functionally equivalent. State minimization is on by default. It can be turned
-off with the \verb|-n| option.
+off with the @@verb|-n| option.
 
 The algorithm implemented is similar to Hopcroft's state minimization
 algorithm. Hopcroft's algorithm assumes a finite alphabet that can be listed in
@@ -1197,27 +1197,27 @@ $n$ is the number of states.
 %parsing programs will be too large to completely visualize with Graphviz.  The
 %proper approach is to reduce the language to the smallest subset possible that
 %still exhibits the characteristics that one wishes to learn about or to fix.
-%This can be done without modifying the source code using the \verb|-M| and
-%\verb|-S| options. If a machine cannot be easily reduced,
+%This can be done without modifying the source code using the @@verb|-M| and
+%@@verb|-S| options. If a machine cannot be easily reduced,
 %embeddings of unique actions can be very useful for tracing a
 %particular component of a larger machine specification, since action names are
 %written out on transition labels.
 
 Ragel is able to emit compiled state machines in Graphviz's Dot file format.
-This is done using the \verb|-V| option.
+This is done using the @@verb|-V| option.
 Graphviz support allows users to perform
 incremental visualization of their parsers. User actions are displayed on
 transition labels of the graph. 
 
 If the final graph is too large to be
 meaningful, or even drawn, the user is able to inspect portions of the parser
-by naming particular regular expression definitions with the \verb|-S| and
-\verb|-M| options to the \verb|ragel| program. Use of Graphviz greatly
+by naming particular regular expression definitions with the @@verb|-S| and
+@@verb|-M| options to the @@verb|ragel| program. Use of Graphviz greatly
 improves the Ragel programming experience. It allows users to learn Ragel by
 experimentation and also to track down bugs caused by unintended
 nondeterminism.
 
-Ragel has another option to help debugging. The \verb|-x| option causes Ragel
+Ragel has another option to help debugging. The @@verb|-x| option causes Ragel
 to emit the compiled machine in an XML format.
 
 .chapter User Actions
@@ -1233,11 +1233,11 @@ placement of actions.
 
 A machine's transitions are categorized into four classes. The action embedding
 operators access the transitions defined by these classes.  The {\em entering
-transition} operator \verb|>| isolates the start state, then embeds an action
+transition} operator @@verb|>| isolates the start state, then embeds an action
 into all transitions leaving it. The {\em finishing transition} operator
-\verb|@| embeds an action into all transitions going into a final state.  The
-{\em all transition} operator \verb|$| embeds an action into all transitions of
-an expression. The {\em leaving transition} operator \verb|%| provides access
+@@verb|@| embeds an action into all transitions going into a final state.  The
+{\em all transition} operator @@verb|$| embeds an action into all transitions of
+an expression. The {\em leaving transition} operator @@verb|%| provides access
 to the yet-unmade transitions moving out of the machine via the final states. 
 
 .section Embedding Actions
@@ -1264,7 +1264,7 @@ in code blocks.
 
 .subsection Entering Action
 
-\verb|expr > action| 
+@@verb|expr > action| 
 \verbspace
 
 The entering action operator embeds an action into all transitions
@@ -1298,7 +1298,7 @@ main := ( lower* >A ) . ' ';
 
 .subsection Finishing Action
 
-\verb|expr @ action|
+@@verb|expr @ action|
 \verbspace
 
 The finishing action operator embeds an action into any transitions that move
@@ -1326,7 +1326,7 @@ main := ( lower* ' ' ) @A;
 
 .subsection All Transition Action
 
-\verb|expr $ action|
+@@verb|expr $ action|
 \verbspace
 
 The all transition operator embeds an action into all transitions of a machine.
@@ -1352,7 +1352,7 @@ main := ( 'm1' | 'm2' ) $A;
 .subsection Leaving Actions
 \label{out-actions}
 
-\verb|expr % action|
+@@verb|expr % action|
 \verbspace
 
 The leaving action operator queues an action for embedding into the transitions
@@ -1387,8 +1387,8 @@ main := ( lower+ %A ) . '\n';
 
 .graphic exoutact1
 
-In the following example, the \verb|term_word| action could be used to register
-the appearance of a word and to clear the buffer that the \verb|lower| action used
+In the following example, the @@verb|term_word| action could be used to register
+the appearance of a word and to clear the buffer that the @@verb|lower| action used
 to store the text of it.
 
 % GENERATE: exoutact2
@@ -1462,21 +1462,21 @@ second component also have equivalent kewords.
 \begin{multicols}{2}
 \raggedcolumns
 \noindent The different classes of states are:\\
-\fakeitem \verb|> | -- the start state\\
-\fakeitem \verb|< | -- any state except the start state\\
-\fakeitem \verb|$ | -- all states\\
-\fakeitem \verb|% | -- final states\\
-\fakeitem \verb|@ | -- any state except final states\\
-\fakeitem \verb|<>| -- any except start and final (middle)
+\fakeitem @@verb|> | -- the start state\\
+\fakeitem @@verb|< | -- any state except the start state\\
+\fakeitem @@verb|$ | -- all states\\
+\fakeitem @@verb|% | -- final states\\
+\fakeitem @@verb|@ | -- any state except final states\\
+\fakeitem @@verb|<>| -- any except start and final (middle)
 
 \columnbreak
 
 \noindent The different kinds of embeddings are:\\
-\fakeitem \verb|~| -- to-state actions (\verb|to|)\\
-\fakeitem \verb|*| -- from-state actions (\verb|from|)\\
-\fakeitem \verb|/| -- EOF actions (\verb|eof|)\\
-\fakeitem \verb|!| -- error actions (\verb|err|)\\
-\fakeitem \verb|^| -- local error actions (\verb|lerr|)\\
+\fakeitem @@verb|~| -- to-state actions (@@verb|to|)\\
+\fakeitem @@verb|*| -- from-state actions (@@verb|from|)\\
+\fakeitem @@verb|/| -- EOF actions (@@verb|eof|)\\
+\fakeitem @@verb|!| -- error actions (@@verb|err|)\\
+\fakeitem @@verb|^| -- local error actions (@@verb|lerr|)\\
 \end{multicols}
 \end{minipage}
 
@@ -1486,24 +1486,24 @@ second component also have equivalent kewords.
 
 \def\sasp{\hspace*{40pt}}
 
-\sasp\verb|>~action      >to(name)      >to{...} | -- the start state\\
-\sasp\verb|<~action      <to(name)      <to{...} | -- any state except the start state\\
-\sasp\verb|$~action      $to(name)      $to{...} | -- all states\\
-\sasp\verb|%~action      %to(name)      %to{...} | -- final states\\
-\sasp\verb|@~action      @to(name)      @to{...} | -- any state except final states\\
-\sasp\verb|<>~action     <>to(name)     <>to{...}| -- any except start and final (middle)
+\sasp@@verb|>~action      >to(name)      >to{...} | -- the start state\\
+\sasp@@verb|<~action      <to(name)      <to{...} | -- any state except the start state\\
+\sasp@@verb|$~action      $to(name)      $to{...} | -- all states\\
+\sasp@@verb|%~action      %to(name)      %to{...} | -- final states\\
+\sasp@@verb|@~action      @to(name)      @to{...} | -- any state except final states\\
+\sasp@@verb|<>~action     <>to(name)     <>to{...}| -- any except start and final (middle)
 \vspace{12pt}
 
 
 To-state actions are executed whenever the state machine moves into the
 specified state, either by a natural movement over a transition or by an
-action-based transfer of control such as \verb|fgoto|. They are executed after the
+action-based transfer of control such as @@verb|fgoto|. They are executed after the
 in-transition's actions but before the current character is advanced and
 tested against the end of the input block. To-state embeddings stay with the
 state. They are irrespective of the state's current set of transitions and any
 future transitions that may be added in or out of the state.
 
-Note that the setting of the current state variable \verb|cs| outside of the
+Note that the setting of the current state variable @@verb|cs| outside of the
 execute code is not considered by Ragel as moving into a state and consequently
 the to-state actions of the new current state are not executed. This includes
 the initialization of the current state when the machine begins.  This is
@@ -1512,12 +1512,12 @@ of to-state actions.
 
 .subsubsection From-State Actions
 
-\sasp\verb|>*action     >from(name)     >from{...} | -- the start state\\
-\sasp\verb|<*action     <from(name)     <from{...} | -- any state except the start state\\
-\sasp\verb|$*action     $from(name)     $from{...} | -- all states\\
-\sasp\verb|%*action     %from(name)     %from{...} | -- final states\\
-\sasp\verb|@*action     @from(name)     @from{...} | -- any state except final states\\
-\sasp\verb|<>*action    <>from(name)    <>from{...}| -- any except start and final (middle)
+\sasp@@verb|>*action     >from(name)     >from{...} | -- the start state\\
+\sasp@@verb|<*action     <from(name)     <from{...} | -- any state except the start state\\
+\sasp@@verb|$*action     $from(name)     $from{...} | -- all states\\
+\sasp@@verb|%*action     %from(name)     %from{...} | -- final states\\
+\sasp@@verb|@*action     @from(name)     @from{...} | -- any state except final states\\
+\sasp@@verb|<>*action    <>from(name)    <>from{...}| -- any except start and final (middle)
 \vspace{12pt}
 
 From-state actions are executed whenever the state machine takes a transition from a
@@ -1530,18 +1530,18 @@ embeddings, from-state embeddings stay with the state.
 
 .subsection EOF Actions
 
-\sasp\verb|>/action     >eof(name)     >eof{...} | -- the start state\\
-\sasp\verb|</action     <eof(name)     <eof{...} | -- any state except the start state\\
-\sasp\verb|$/action     $eof(name)     $eof{...} | -- all states\\
-\sasp\verb|%/action     %eof(name)     %eof{...} | -- final states\\
-\sasp\verb|@/action     @eof(name)     @eof{...} | -- any state except final states\\
-\sasp\verb|<>/action    <>eof(name)    <>eof{...}| -- any except start and final (middle)
+\sasp@@verb|>/action     >eof(name)     >eof{...} | -- the start state\\
+\sasp@@verb|</action     <eof(name)     <eof{...} | -- any state except the start state\\
+\sasp@@verb|$/action     $eof(name)     $eof{...} | -- all states\\
+\sasp@@verb|%/action     %eof(name)     %eof{...} | -- final states\\
+\sasp@@verb|@/action     @eof(name)     @eof{...} | -- any state except final states\\
+\sasp@@verb|<>/action    <>eof(name)    <>eof{...}| -- any except start and final (middle)
 \vspace{12pt}
 
 The EOF action embedding operators enable the user to embed actions that are
 executed at the end of the input stream. EOF actions are stored in states and
-generated in the \verb|write exec| block. They are run when \verb|p == pe == eof|
-as the execute block is finishing. EOF actions are free to adjust \verb|p| and
+generated in the @@verb|write exec| block. They are run when @@verb|p == pe == eof|
+as the execute block is finishing. EOF actions are free to adjust @@verb|p| and
 jump to another part of the machine to restart execution.
 
 .subsection Handling Errors
@@ -1557,12 +1557,12 @@ instantiation that consumes input, can attempt to recover from errors.
 
 .subsubsection Global Error Actions
 
-\sasp\verb|>!action     >err(name)     >err{...} | -- the start state\\
-\sasp\verb|<!action     <err(name)     <err{...} | -- any state except the start state\\
-\sasp\verb|$!action     $err(name)     $err{...} | -- all states\\
-\sasp\verb|%!action     %err(name)     %err{...} | -- final states\\
-\sasp\verb|@!action     @err(name)     @err{...} | -- any state except final states\\
-\sasp\verb|<>!action    <>err(name)    <>err{...}| -- any except start and final (middle)
+\sasp@@verb|>!action     >err(name)     >err{...} | -- the start state\\
+\sasp@@verb|<!action     <err(name)     <err{...} | -- any state except the start state\\
+\sasp@@verb|$!action     $err(name)     $err{...} | -- all states\\
+\sasp@@verb|%!action     %err(name)     %err{...} | -- final states\\
+\sasp@@verb|@!action     @err(name)     @err{...} | -- any state except final states\\
+\sasp@@verb|<>!action    <>err(name)    <>err{...}| -- any except start and final (middle)
 \vspace{12pt}
 
 Global error actions are stored in the states they are embedded into until
@@ -1573,16 +1573,16 @@ action is not final when compilation is complete, then the action is also
 embedded as an EOF action.
 
 Error actions can be used to recover from errors by jumping back into the
-machine with \verb|fgoto| and optionally altering \verb|p|.
+machine with @@verb|fgoto| and optionally altering @@verb|p|.
 
 .subsubsection Local Error Actions
 
-\sasp\verb|>^action     >lerr(name)     >lerr{...} | -- the start state\\
-\sasp\verb|<^action     <lerr(name)     <lerr{...} | -- any state except the start state\\
-\sasp\verb|$^action     $lerr(name)     $lerr{...} | -- all states\\
-\sasp\verb|%^action     %lerr(name)     %lerr{...} | -- final states\\
-\sasp\verb|@^action     @lerr(name)     @lerr{...} | -- any state except final states\\
-\sasp\verb|<>^action    <>lerr(name)    <>lerr{...}| -- any except start and final (middle)
+\sasp@@verb|>^action     >lerr(name)     >lerr{...} | -- the start state\\
+\sasp@@verb|<^action     <lerr(name)     <lerr{...} | -- any state except the start state\\
+\sasp@@verb|$^action     $lerr(name)     $lerr{...} | -- all states\\
+\sasp@@verb|%^action     %lerr(name)     %lerr{...} | -- final states\\
+\sasp@@verb|@^action     @lerr(name)     @lerr{...} | -- any state except final states\\
+\sasp@@verb|<>^action    <>lerr(name)    <>lerr{...}| -- any except start and final (middle)
 \vspace{12pt}
 
 Like global error actions, local error actions are also stored in the states
@@ -1605,7 +1605,7 @@ error action in a sub-definition that is used to construct the machine
 definition that the local error action is associated with. To embed local 
 error actions and
 explicitly state the machine definition on which the transfer is to happen use
-\verb|(name, action)| as the action.
+@@verb|(name, action)| as the action.
 
 .subsubsection Example
 
@@ -1698,7 +1698,7 @@ Note that Ragel does not compare action bodies to determine if they have
 identical program text. It simply checks for duplicates using each action
 block's unique location in the program.
 
-The removal of duplicates can be turned off using the \verb|-d| option.
+The removal of duplicates can be turned off using the @@verb|-d| option.
 
 .section Values and Statements Available in Code Blocks
 \label{vals}
@@ -1706,26 +1706,26 @@ The removal of duplicates can be turned off using the \verb|-d| option.
 \noindent The following values are available in code blocks:
 
 .itemize
-.item \verb|fpc| -- A pointer to the current character. This is equivalent to
-accessing the \verb|p| variable.
+.item @@verb|fpc| -- A pointer to the current character. This is equivalent to
+accessing the @@verb|p| variable.
 
-.item \verb|fc| -- The current character. This is equivalent to the expression \verb|(*p)|.
+.item @@verb|fc| -- The current character. This is equivalent to the expression @@verb|(*p)|.
 
-.item \verb|fcurs| -- An integer value representing the current state. This
+.item @@verb|fcurs| -- An integer value representing the current state. This
 value should only be read from. To move to a different place in the machine
-from action code use the \verb|fgoto|, \verb|fnext| or \verb|fcall| statements.
-Outside of the machine execution code the \verb|cs| variable may be modified.
+from action code use the @@verb|fgoto|, @@verb|fnext| or @@verb|fcall| statements.
+Outside of the machine execution code the @@verb|cs| variable may be modified.
 
-.item \verb|ftargs| -- An integer value representing the target state. This
-value should only be read from. Again, \verb|fgoto|, \verb|fnext| and
-\verb|fcall| can be used to move to a specific entry point.
+.item @@verb|ftargs| -- An integer value representing the target state. This
+value should only be read from. Again, @@verb|fgoto|, @@verb|fnext| and
+@@verb|fcall| can be used to move to a specific entry point.
 
-.item \verb|fentry(<label>)| -- Retrieve an integer value representing the
-entry point \verb|label|. The integer value returned will be a compile time
+.item @@verb|fentry(<label>)| -- Retrieve an integer value representing the
+entry point @@verb|label|. The integer value returned will be a compile time
 constant. This number is suitable for later use in control flow transfer
 statements that take an expression. This value should not be compared against
 the current state because any given label can have multiple states representing
-it. The value returned by \verb|fentry| can be any one of the multiple states that
+it. The value returned by @@verb|fentry| can be any one of the multiple states that
 it represents.
 .end itemize
 
@@ -1733,62 +1733,62 @@ it represents.
 
 .itemize
 
-.item \verb|fhold;| -- Do not advance over the current character. If processing
-data in multiple buffer blocks, the \verb|fhold| statement should only be used
+.item @@verb|fhold;| -- Do not advance over the current character. If processing
+data in multiple buffer blocks, the @@verb|fhold| statement should only be used
 once in the set of actions executed on a character.  Multiple calls may result
-in backing up over the beginning of the buffer block. The \verb|fhold|
+in backing up over the beginning of the buffer block. The @@verb|fhold|
 statement does not imply any transfer of control. It is equivalent to the
-\verb|p--;| statement. 
+@@verb|p--;| statement. 
 
-.item \verb|fexec <expr>;| -- Set the next character to process. This can be
+.item @@verb|fexec <expr>;| -- Set the next character to process. This can be
 used to backtrack to previous input or advance ahead.
-Unlike \verb|fhold|, which can be used
-anywhere, \verb|fexec| requires the user to ensure that the target of the
+Unlike @@verb|fhold|, which can be used
+anywhere, @@verb|fexec| requires the user to ensure that the target of the
 backtrack is in the current buffer block or is known to be somewhere ahead of
-it. The machine will continue iterating forward until \verb|pe| is arrived at,
-\verb|fbreak| is called or the machine moves into the error state. In actions
-embedded into transitions, the \verb|fexec| statement is equivalent to setting
-\verb|p| to one position ahead of the next character to process.  If the user
-also modifies \verb|pe|, it is possible to change the buffer block entirely.
+it. The machine will continue iterating forward until @@verb|pe| is arrived at,
+@@verb|fbreak| is called or the machine moves into the error state. In actions
+embedded into transitions, the @@verb|fexec| statement is equivalent to setting
+@@verb|p| to one position ahead of the next character to process.  If the user
+also modifies @@verb|pe|, it is possible to change the buffer block entirely.
 
-.item \verb|fgoto <label>;| -- Jump to an entry point defined by
-\verb|<label>|.  The \verb|fgoto| statement immediately transfers control to
+.item @@verb|fgoto <label>;| -- Jump to an entry point defined by
+@@verb|<label>|.  The @@verb|fgoto| statement immediately transfers control to
 the destination state.
 
-.item \verb|fgoto *<expr>;| -- Jump to an entry point given by \verb|<expr>|.
+.item @@verb|fgoto *<expr>;| -- Jump to an entry point given by @@verb|<expr>|.
 The expression must evaluate to an integer value representing a state.
 
-.item \verb|fnext <label>;| -- Set the next state to be the entry point defined
-by \verb|label|.  The \verb|fnext| statement does not immediately jump to the
+.item @@verb|fnext <label>;| -- Set the next state to be the entry point defined
+by @@verb|label|.  The @@verb|fnext| statement does not immediately jump to the
 specified state. Any action code following the statement is executed.
 
-.item \verb|fnext *<expr>;| -- Set the next state to be the entry point given
-by \verb|<expr>|. The expression must evaluate to an integer value representing
+.item @@verb|fnext *<expr>;| -- Set the next state to be the entry point given
+by @@verb|<expr>|. The expression must evaluate to an integer value representing
 a state.
 
-.item \verb|fcall <label>;| -- Push the target state and jump to the entry
-point defined by \verb|<label>|.  The next \verb|fret| will jump to the target
-of the transition on which the call was made. Use of \verb|fcall| requires
-the declaration of a call stack. An array of integers named \verb|stack| and a
-single integer named \verb|top| must be declared. With the \verb|fcall|
+.item @@verb|fcall <label>;| -- Push the target state and jump to the entry
+point defined by @@verb|<label>|.  The next @@verb|fret| will jump to the target
+of the transition on which the call was made. Use of @@verb|fcall| requires
+the declaration of a call stack. An array of integers named @@verb|stack| and a
+single integer named @@verb|top| must be declared. With the @@verb|fcall|
 construct, control is immediately transferred to the destination state.
 See section \ref{modularization} for more information.
 
-.item \verb|fcall *<expr>;| -- Push the current state and jump to the entry
-point given by \verb|<expr>|. The expression must evaluate to an integer value
+.item @@verb|fcall *<expr>;| -- Push the current state and jump to the entry
+point given by @@verb|<expr>|. The expression must evaluate to an integer value
 representing a state.
 
-.item \verb|fret;| -- Return to the target state of the transition on which the
-last \verb|fcall| was made.  Use of \verb|fret| requires the declaration of a
+.item @@verb|fret;| -- Return to the target state of the transition on which the
+last @@verb|fcall| was made.  Use of @@verb|fret| requires the declaration of a
 call stack. Control is immediately transferred to the destination state.
 
-.item \verb|fbreak;| -- Advance \verb|p|, save the target state to \verb|cs|
+.item @@verb|fbreak;| -- Advance @@verb|p|, save the target state to @@verb|cs|
 and immediately break out of the execute loop. This statement is useful
-in conjunction with the \verb|noend| write option. Rather than process input
-until \verb|pe| is arrived at, the fbreak statement
-can be used to stop processing from an action.  After an \verb|fbreak|
-statement the \verb|p| variable will point to the next character in the input. The
-current state will be the target of the current transition. Note that \verb|fbreak|
+in conjunction with the @@verb|noend| write option. Rather than process input
+until @@verb|pe| is arrived at, the fbreak statement
+can be used to stop processing from an action.  After an @@verb|fbreak|
+statement the @@verb|p| variable will point to the next character in the input. The
+current state will be the target of the current transition. Note that @@verb|fbreak|
 causes the target state's to-state actions to be skipped.
 
 .end itemize
@@ -1849,13 +1849,13 @@ lines = line*;
 
 .graphic lines1 0.53
 
-Since the \verb|ws| expression includes the newline character, we will
-not finish the \verb|line| expression when a newline character is seen. We will
+Since the @@verb|ws| expression includes the newline character, we will
+not finish the @@verb|line| expression when a newline character is seen. We will
 simultaneously pursue the possibility of matching further words on the same
 line and the possibility of matching a second line. Evidence of this fact is 
-in the state tables. On several transitions both the \verb|first| and
-\verb|tail| actions are executed.  The solution here is simple: exclude
-the newline character from the \verb|ws| expression. 
+in the state tables. On several transitions both the @@verb|first| and
+@@verb|tail| actions are executed.  The solution here is simple: exclude
+the newline character from the @@verb|ws| expression. 
 
 % GENERATE: lines2
 % OPT: -p
@@ -1899,14 +1899,14 @@ main := comment ' ';
 
 .graphic comments1
 
-Using standard concatenation, we will never leave the \verb|any*| expression.
-We will forever entertain the possibility that a \verb|'*/'| string that we see
+Using standard concatenation, we will never leave the @@verb|any*| expression.
+We will forever entertain the possibility that a @@verb|'*/'| string that we see
 is contained in a longer comment and that, simultaneously, the comment has
-ended.  The concatenation of the \verb|comment| machine with \verb|SP| is done
+ended.  The concatenation of the @@verb|comment| machine with @@verb|SP| is done
 to show this. When we match space, we are also still matching the comment body.
 
 One way to approach the problem is to exclude the terminating string
-from the \verb|any*| expression using set difference. We must be careful to
+from the @@verb|any*| expression using set difference. We must be careful to
 exclude not just the terminating string, but any string that contains it as a
 substring. A verbose, but proper specification of a C comment parser is given
 by the following regular expression. 
@@ -1927,16 +1927,16 @@ comment = '/*' ( ( any @comm )* - ( any* '*/' any* ) ) '*/';
 
 .graphic comments2
 
-Note that Ragel's strong subtraction operator \verb|--| can also be used here.
+Note that Ragel's strong subtraction operator @@verb|--| can also be used here.
 In doing this subtraction we have phrased the problem of controlling non-determinism in
 terms of excluding strings common to two expressions that interact when
 combined.
 We can also phrase the problem in terms of the transitions of the state
 machines that implement these expressions. During the concatenation of
-\verb|any*| and \verb|'*/'| we will be making transitions that are composed of
+@@verb|any*| and @@verb|'*/'| we will be making transitions that are composed of
 both the loop of the first expression and the final character of the second.
-At this time we want the transition on the \verb|'/'| character to take precedence
-over and disallow the transition that originated in the \verb|any*| loop.
+At this time we want the transition on the @@verb|'/'| character to take precedence
+over and disallow the transition that originated in the @@verb|any*| loop.
 
 In another parsing problem, we wish to implement a lightweight tokenizer that we can
 utilize in the composition of a larger machine. For example, some HTTP headers
@@ -2009,10 +2009,10 @@ boundaries.
 
 .itemize
 \setlength{\parskip}{0in}
-.item \verb|expr > int| -- Sets starting transitions to have priority int.
-.item \verb|expr @ int| -- Sets transitions that go into a final state to have priority int. 
-.item \verb|expr $ int| -- Sets all transitions to have priority int.
-.item \verb|expr % int| -- Sets leaving transitions to
+.item @@verb|expr > int| -- Sets starting transitions to have priority int.
+.item @@verb|expr @ int| -- Sets transitions that go into a final state to have priority int. 
+.item @@verb|expr $ int| -- Sets all transitions to have priority int.
+.item @@verb|expr % int| -- Sets leaving transitions to
 have priority int. When a transition is made going out of the machine (either
 by concatenation or kleene star) its priority is immediately set to the 
 leaving priority.  
@@ -2023,10 +2023,10 @@ to which the priority is assigned.
 
 .itemize
 \setlength{\parskip}{0in}
-.item \verb|expr > (name, int)| -- Starting transitions.
-.item \verb|expr @ (name, int)| -- Finishing transitions (into a final state).
-.item \verb|expr $ (name, int)| -- All transitions.
-.item \verb|expr % (name, int)| -- Leaving transitions.
+.item @@verb|expr > (name, int)| -- Starting transitions.
+.item @@verb|expr @ (name, int)| -- Finishing transitions (into a final state).
+.item @@verb|expr $ (name, int)| -- All transitions.
+.item @@verb|expr % (name, int)| -- Leaving transitions.
 .end itemize
 
 .section Guarded Operators that Encapsulate Priorities
@@ -2064,13 +2064,13 @@ comment = '/*' ( any @comm )* :>> '*/';
 .graphic comments2
 
 Another guarded operator is {\em left-guarded concatenation}, given by the
-\verb|<:| compound symbol. This operator places a higher priority on all
+@@verb|<:| compound symbol. This operator places a higher priority on all
 transitions of the first machine. This is useful if one must forcibly separate
 two lists that contain common elements. For example, one may need to tokenize a
 stream, but first consume leading whitespace.
 
 Ragel also includes a {\em longest-match kleene star} operator, given by the
-\verb|**| compound symbol. This 
+@@verb|**| compound symbol. This 
 guarded operator embeds a high
 priority into all transitions of the machine. 
 A lower priority is then embedded into the leaving transitions.  When the
@@ -2088,7 +2088,7 @@ using state charts.
 
 .subsection Entry-Guarded Concatenation
 
-\verb|expr :> expr| 
+@@verb|expr :> expr| 
 \verbspace
 
 This operator concatenates two machines, but first assigns a low
@@ -2126,7 +2126,7 @@ expr $(unique_name,0) . expr >(unique_name,1)
 
 .subsection Finish-Guarded Concatenation
 
-\verb|expr :>> expr|
+@@verb|expr :>> expr|
 \verbspace
 
 This operator is
@@ -2165,7 +2165,7 @@ expr $(unique_name,0) . expr @(unique_name,1)
 
 .subsection Left-Guarded Concatenation
 
-\verb|expr <: expr| 
+@@verb|expr <: expr| 
 \verbspace
 
 This operator places
@@ -2203,7 +2203,7 @@ expr $(unique_name,1) . expr >(unique_name,0)
 .subsection Longest-Match Kleene Star
 \label{longest_match_kleene_star}
 
-\verb|expr**| 
+@@verb|expr**| 
 \verbspace
 
 This version of kleene star puts a higher priority on staying in the
@@ -2325,56 +2325,56 @@ int main( int argc, char **argv )
 .section Variables Used by Ragel
 
 There are a number of variables that Ragel expects the user to declare. At a
-very minimum the \verb|cs|, \verb|p| and \verb|pe| variables must be declared.
-In Go, Java and Ruby code the \verb|data| variable must also be declared. If
-EOF actions are used then the \verb|eof| variable is required. If
+very minimum the @@verb|cs|, @@verb|p| and @@verb|pe| variables must be declared.
+In Go, Java and Ruby code the @@verb|data| variable must also be declared. If
+EOF actions are used then the @@verb|eof| variable is required. If
 stack-based state machine control flow statements are used then the
-\verb|stack| and \verb|top| variables are required. If a scanner is declared
-then the \verb|act|, \verb|ts| and \verb|te| variables must be
+@@verb|stack| and @@verb|top| variables are required. If a scanner is declared
+then the @@verb|act|, @@verb|ts| and @@verb|te| variables must be
 declared.
 
 .itemize
 
-.item \verb|cs| - Current state. This must be an integer and it should persist
+.item @@verb|cs| - Current state. This must be an integer and it should persist
 across invocations of the machine when the data is broken into blocks that are
 processed independently. This variable may be modified from outside the
 execution loop, but not from within.
 
-.item \verb|p| - Data pointer. In C/D code this variable is expected to be a
+.item @@verb|p| - Data pointer. In C/D code this variable is expected to be a
 pointer to the character data to process. It should be initialized to the
 beginning of the data block on every run of the machine. In Go, Java and Ruby it is
-used as an offset to \verb|data| and must be an integer. In this case it should
+used as an offset to @@verb|data| and must be an integer. In this case it should
 be initialized to zero on every run of the machine.
 
-.item \verb|pe| - Data end pointer. This should be initialized to \verb|p| plus
+.item @@verb|pe| - Data end pointer. This should be initialized to @@verb|p| plus
 the data length on every run of the machine. In Go, Java and Ruby code this should
 be initialized to the data length.
 
-.item \verb|eof| - End of file pointer. This should be set to \verb|pe| when
+.item @@verb|eof| - End of file pointer. This should be set to @@verb|pe| when
 the buffer block being processed is the last one, otherwise it should be set to
-null. In Go, Java and Ruby code \verb|-1| must be used instead of null. If the EOF
+null. In Go, Java and Ruby code @@verb|-1| must be used instead of null. If the EOF
 event can be known only after the final buffer block has been processed, then
-it is possible to set \verb|p = pe = eof| and run the execute block.
+it is possible to set @@verb|p = pe = eof| and run the execute block.
 
-.item \verb|data| - This variable is only required in Go, Java and Ruby code. It
+.item @@verb|data| - This variable is only required in Go, Java and Ruby code. It
 must be an array containting the data to process.
 
-.item \verb|stack| - This must be an array of integers. It is used to store
+.item @@verb|stack| - This must be an array of integers. It is used to store
 integer values representing states. If the stack must resize dynamically the
 Pre-push and Post-Pop statements can be used to do this (Sections
 \ref{prepush} and \ref{postpop}).
 
-.item \verb|top| - This must be an integer value and will be used as an offset
-to \verb|stack|, giving the next available spot on the top of the stack.
+.item @@verb|top| - This must be an integer value and will be used as an offset
+to @@verb|stack|, giving the next available spot on the top of the stack.
 
-.item \verb|act| - This must be an integer value. It is a variable sometimes
+.item @@verb|act| - This must be an integer value. It is a variable sometimes
 used by scanner code to keep track of the most recent successful pattern match.
 
-.item \verb|ts| - This must be a pointer to character data. In Go, Java and
+.item @@verb|ts| - This must be a pointer to character data. In Go, Java and
 Ruby code this must be an integer. See Section \ref{generating-scanners} for
 more information.
 
-.item \verb|te| - Also a pointer to character data.
+.item @@verb|te| - Also a pointer to character data.
 
 .end itemize
 
@@ -2388,7 +2388,7 @@ alphtype unsigned int;
 The alphtype statement specifies the alphabet data type that the machine
 operates on. During the compilation of the machine, integer literals are
 expected to be in the range of possible values of the alphtype. The default
-is \verb|char| for all languages except Go where the default is \verb|byte|.
+is @@verb|char| for all languages except Go where the default is @@verb|byte|.
 
 \begin{multicols}{2}
 \setlength{\columnseprule}{1pt} 
@@ -2445,11 +2445,11 @@ getkey fpc->id;
 \verbspace
 
 This statement specifies to Ragel how to retrieve the current character from 
-from the pointer to the current element (\verb|p|). Any expression that returns
+from the pointer to the current element (@@verb|p|). Any expression that returns
 a value of the alphabet type
 may be used. The getkey statement may be used for looking into element
 structures or for translating the character to process. The getkey expression
-defaults to \verb|(*p)|. In goto-driven machines the getkey expression may be
+defaults to @@verb|(*p)|. In goto-driven machines the getkey expression may be
 evaluated more than once per element processed, therefore it should not incur a
 large cost nor preclude optimization.
 
@@ -2462,8 +2462,8 @@ access fsm->;
 
 The access statement specifies how the generated code should
 access the machine data that is persistent across processing buffer blocks.
-This applies to all variables except \verb|p|, \verb|pe| and \verb|eof|. This includes
-\verb|cs|, \verb|top|, \verb|stack|, \verb|ts|, \verb|te| and \verb|act|.
+This applies to all variables except @@verb|p|, @@verb|pe| and @@verb|eof|. This includes
+@@verb|cs|, @@verb|top|, @@verb|stack|, @@verb|ts|, @@verb|te| and @@verb|act|.
 The access statement is useful if a machine is to be encapsulated inside a
 structure in C code. It can be used to give the name of
 a pointer to the structure.
@@ -2477,9 +2477,9 @@ variable p fsm->p;
 
 The variable statement specifies how to access a specific
 variable. All of the variables that are declared by the user and
-used by Ragel can be changed. This includes \verb|p|, \verb|pe|, \verb|eof|, \verb|cs|,
-\verb|top|, \verb|stack|, \verb|ts|, \verb|te| and \verb|act|.
-In Go, Ruby and Java code generation the \verb|data| variable can also be changed.
+used by Ragel can be changed. This includes @@verb|p|, @@verb|pe|, @@verb|eof|, @@verb|cs|,
+@@verb|top|, @@verb|stack|, @@verb|ts|, @@verb|te| and @@verb|act|.
+In Go, Ruby and Java code generation the @@verb|data| variable can also be changed.
 
 .section Pre-Push Statement
 \label{prepush}
@@ -2537,14 +2537,14 @@ The write data statement causes Ragel to emit the constant static data needed
 by the machine. In table-driven output styles (see Section \ref{genout}) this
 is a collection of arrays that represent the states and transitions of the
 machine.  In goto-driven machines much less data is emitted. At the very
-minimum a start state \verb|name_start| is generated.  All variables written
-out in machine data have both the \verb|static| and \verb|const| properties and
+minimum a start state @@verb|name_start| is generated.  All variables written
+out in machine data have both the @@verb|static| and @@verb|const| properties and
 are prefixed with the name of the machine and an
 underscore. The data can be placed inside a class, inside a function, or it can
 be defined as global data.
 
 Two variables are written that may be used to test the state of the machine
-after a buffer block has been processed. The \verb|name_error| variable gives
+after a buffer block has been processed. The @@verb|name_error| variable gives
 the id of the state that the machine moves into when it cannot find a valid
 transition to take. The machine immediately breaks out of the processing loop when
 it finds itself in the error state. The error variable can be compared to the
@@ -2553,7 +2553,7 @@ machine is complete, that is from every state there is a transition to a proper
 state on every possible character of the alphabet, then no error state is required
 and this variable will be set to -1.
 
-The \verb|name_first_final| variable stores the id of the first final state. All of the
+The @@verb|name_first_final| variable stores the id of the first final state. All of the
 machine's states are sorted by their final state status before having their ids
 assigned. Checking if the machine has accepted its input can then be done by
 checking if the current state is greater-than or equal to the first final
@@ -2563,11 +2563,11 @@ Data generation has several options:
 
 .itemize
 \setlength{\itemsep}{-2mm}
-.item \verb|noerror  | - Do not generate the integer variable that gives the
+.item @@verb|noerror  | - Do not generate the integer variable that gives the
 id of the error state.
-.item \verb|nofinal  | - Do not generate the integer variable that gives the
+.item @@verb|nofinal  | - Do not generate the integer variable that gives the
 id of the first final state.
-.item \verb|noprefix | - Do not prefix the variable names with the name of the
+.item @@verb|noprefix | - Do not prefix the variable names with the name of the
 machine.
 .end itemize
 
@@ -2609,7 +2609,7 @@ write error;
 \verbspace
 
 These three write statements provide an alternative means of accessing the
-\verb|start|, \verb|first_final| and \verb|error| states. If there are many
+@@verb|start|, @@verb|first_final| and @@verb|error| states. If there are many
 different machine specifications in one file it is easy to get the prefix for
 these wrong. This is especially true if the state machine boilerplate is
 frequently made by a copy-paste-edit process. These write statements allow the
@@ -2641,7 +2641,7 @@ current state to the start state. If other variables are needed by the
 generated code, such as call stack variables or scanner management
 variables, they are also initialized here.
 
-The \verb|nocs| option to the write init statement will cause ragel to skip
+The @@verb|nocs| option to the write init statement will cause ragel to skip
 intialization of the cs variable. This is useful if the user wishes to use
 custom logic to decide which state the specification should start in.
 
@@ -2653,27 +2653,27 @@ write exec [options];
 
 The write exec statement causes Ragel to emit the state machine's execution code.
 Ragel expects several variables to be available to this code. At a very minimum, the
-generated code needs access to the current character position \verb|p|, the ending
-position \verb|pe| and the current state \verb|cs| (though \verb|pe|
-can be omitted using the \verb|noend| write option).
-The \verb|p| variable is the cursor that the execute code will
-used to traverse the input. The \verb|pe| variable should be set up to point to one
+generated code needs access to the current character position @@verb|p|, the ending
+position @@verb|pe| and the current state @@verb|cs| (though @@verb|pe|
+can be omitted using the @@verb|noend| write option).
+The @@verb|p| variable is the cursor that the execute code will
+used to traverse the input. The @@verb|pe| variable should be set up to point to one
 position past the last valid character in the buffer.
 
 Other variables are needed when certain features are used. For example using
-the \verb|fcall| or \verb|fret| statements requires \verb|stack| and
-\verb|top| variables to be defined. If a longest-match construction is used,
+the @@verb|fcall| or @@verb|fret| statements requires @@verb|stack| and
+@@verb|top| variables to be defined. If a longest-match construction is used,
 variables for managing backtracking are required.
 
-The write exec statement has one option. The \verb|noend| option tells Ragel
-to generate code that ignores the end position \verb|pe|. In this
+The write exec statement has one option. The @@verb|noend| option tells Ragel
+to generate code that ignores the end position @@verb|pe|. In this
 case the user must explicitly break out of the processing loop using
-\verb|fbreak|, otherwise the machine will continue to process characters until
+@@verb|fbreak|, otherwise the machine will continue to process characters until
 it moves into the error state. This option is useful if one wishes to process a
 null terminated string. Rather than traverse the string to discover then length
 before processing the input, the user can break out when the null character is
 seen.  The example in Figure \ref{fbreak-example} shows the use of the
-\verb|noend| write option and the \verb|fbreak| statement for processing a string.
+@@verb|noend| write option and the @@verb|fbreak| statement for processing a string.
 
 .subsection Write Exports
 \label{export}
@@ -2684,7 +2684,7 @@ write exports;
 \verbspace
 
 The export feature can be used to export simple machine definitions. Machine definitions
-are marked for export using the \verb|export| keyword.
+are marked for export using the @@verb|export| keyword.
 
 \verbspace
 .verbatim
@@ -2714,7 +2714,7 @@ code described in Section \ref{generating-scanners}. If a longest-match
 construction has been used somewhere in the machine then it is possible to
 take advantage of the required prefix maintenance code in the driver program to
 ensure pointers to the input are always valid. If laying down a pointer one can
-set \verb|ts| at the same spot or ahead of it. When data is shifted in
+set @@verb|ts| at the same spot or ahead of it. When data is shifted in
 between loops the user must also shift the pointer.  In this way it is possible
 to maintain pointers to the input that will always be consistent.
 
@@ -2776,16 +2776,16 @@ An example of line-oriented processing is given in Figure \ref{line-oriented}.
 
 .section Specifying the Host Language
 
-The \verb|ragel| program has a number of options for specifying the host
+The @@verb|ragel| program has a number of options for specifying the host
 language. The host-language options are:
 
 .itemize
-.item \verb|-C  | for C/C++/Objective-C code (default)
-.item \verb|-D  | for D code.
-.item \verb|-Z  | for Go code.
-.item \verb|-J  | for Java code.
-.item \verb|-R  | for Ruby code.
-.item \verb|-A  | for C\# code.
+.item @@verb|-C  | for C/C++/Objective-C code (default)
+.item @@verb|-D  | for D code.
+.item @@verb|-Z  | for Go code.
+.item @@verb|-J  | for Java code.
+.item @@verb|-R  | for Ruby code.
+.item @@verb|-A  | for C\# code.
 .end itemize
 
 .section Choosing a Generated Code Style
@@ -2797,11 +2797,11 @@ change to the Ragel program. There are two table-driven formats and a goto
 driven format.
 
 In addition to choosing a style to emit, there are various levels of action
-code reuse to choose from.  The maximum reuse levels (\verb|-T0|, \verb|-F0|
-and \verb|-G0|) ensure that no FSM action code is ever duplicated by encoding
+code reuse to choose from.  The maximum reuse levels (@@verb|-T0|, @@verb|-F0|
+and @@verb|-G0|) ensure that no FSM action code is ever duplicated by encoding
 each transition's action list as static data and iterating
 through the lists on every transition. This will normally result in a smaller
-binary. The less action reuse options (\verb|-T1|, \verb|-F1| and \verb|-G1|)
+binary. The less action reuse options (@@verb|-T1|, @@verb|-F1| and @@verb|-G1|)
 will usually produce faster running code by expanding each transition's action
 list into a single block of code, eliminating the need to iterate through the
 lists. This duplicates action code instead of generating the logic necessary
@@ -2834,13 +2834,13 @@ computed using switch statements and directly executable binary searches.  In
 general, the goto FSM produces faster code but results in a larger binary and a
 more expensive host language compile.
 
-The goto-driven format has an additional action reuse level (\verb|-G2|) that
+The goto-driven format has an additional action reuse level (@@verb|-G2|) that
 writes actions directly into the state transitioning logic rather than putting
 all the actions together into a single switch. Generally this produces faster
 running code because it allows the machine to encode the current state using
 the processor's instruction pointer. Again, sparse machines may actually
-compile to smaller binaries when \verb|-G2| is used due to less state and
-action management overhead. For many parsing applications \verb|-G2| is the
+compile to smaller binaries when @@verb|-G2| is used due to less state and
+action management overhead. For many parsing applications @@verb|-G2| is the
 preferred output format.
 
 \verbspace
@@ -2849,19 +2849,19 @@ preferred output format.
 \hline
 \multicolumn{3}{|c|}{\bf Code Output Style Options} \\
 \hline
-\verb|-T0|&binary search table-driven&C/D/Java/Ruby/C\#\\
+@@verb|-T0|&binary search table-driven&C/D/Java/Ruby/C\#\\
 \hline
-\verb|-T1|&binary search, expanded actions&C/D/Ruby/C\#\\
+@@verb|-T1|&binary search, expanded actions&C/D/Ruby/C\#\\
 \hline
-\verb|-F0|&flat table-driven&C/D/Ruby/C\#\\
+@@verb|-F0|&flat table-driven&C/D/Ruby/C\#\\
 \hline
-\verb|-F1|&flat table, expanded actions&C/D/Ruby/C\#\\
+@@verb|-F1|&flat table, expanded actions&C/D/Ruby/C\#\\
 \hline
-\verb|-G0|&goto-driven&C/D/C\#\\
+@@verb|-G0|&goto-driven&C/D/C\#\\
 \hline
-\verb|-G1|&goto, expanded actions&C/D/C\#\\
+@@verb|-G1|&goto, expanded actions&C/D/C\#\\
 \hline
-\verb|-G2|&goto, in-place actions&C/D/Go\\
+@@verb|-G2|&goto, in-place actions&C/D/Go\\
 \hline
 \end{tabular}
 \end{center}
@@ -2941,9 +2941,9 @@ states when the machine contains frequently recurring patterns.
 
 Section \ref{vals} describes the jump and call statements that are used to
 transfer control. These statements make use of two variables that must be
-declared by the user, \verb|stack| and \verb|top|. The \verb|stack| variable
-must be an array of integers and \verb|top| must be a single integer, which
-will point to the next available space in \verb|stack|. Sections \ref{prepush}
+declared by the user, @@verb|stack| and @@verb|top|. The @@verb|stack| variable
+must be an array of integers and @@verb|top| must be a single integer, which
+will point to the next available space in @@verb|stack|. Sections \ref{prepush}
 and \ref{postpop} describe the Pre-Push and Post-Pop statements which can be
 used to implement a dynamically resizable array.
 
@@ -2952,13 +2952,13 @@ used to implement a dynamically resizable array.
 
 This section describes how to reference names in epsilon transitions (Section
 \ref{state-charts}) and
-action-based control-flow statements such as \verb|fgoto|. There is a hierarchy
+action-based control-flow statements such as @@verb|fgoto|. There is a hierarchy
 of names implied in a Ragel specification.  At the top level are the machine
 instantiations. Beneath the instantiations are labels and references to machine
 definitions. Beneath those are more labels and references to definitions, and
 so on.
 
-Any name reference may contain multiple components separated with the \verb|::|
+Any name reference may contain multiple components separated with the @@verb|::|
 compound symbol.  The search for the first component of a name reference is
 rooted at the join expression that the epsilon transition or action embedding
 is contained in. If the name reference is not contained in a join,
@@ -2972,7 +2972,7 @@ once, the local search is performed for each embedding and the result is the
 union of all the searches. If no result is found for action-based references then
 the search is repeated at the root of the name tree.  Any action-based name
 search may be forced into a strictly global search by prefixing the name
-reference with \verb|::|.
+reference with @@verb|::|.
 
 The final component of the name reference must resolve to a unique entry point.
 If a name is unique in the entire name tree it can be referenced as is. If it
@@ -3036,7 +3036,7 @@ main := ( head_name ':' @{ fcall header; } )*;
 \verbspace
 
 The scanner construction has a purpose similar to the longest-match kleene star
-operator \verb|**|. The key
+operator @@verb|**|. The key
 difference is that a scanner is able to backtrack to match a previously matched
 shorter string when the pursuit of a longer string fails.  For this reason the
 scanner construction operator is not a pure state machine construction
@@ -3045,35 +3045,35 @@ pointers to the matched input text available to the user.  For this reason
 scanners must be immediately instantiated. They cannot be defined inline or
 referenced by another expression. Scanners must be jumped to or called.
 
-Scanners rely on the \verb|ts|, \verb|te| and \verb|act|
+Scanners rely on the @@verb|ts|, @@verb|te| and @@verb|act|
 variables to be present so that they can backtrack and make pointers to the
 matched text available to the user. If input is processed using multiple calls
 to the execute code then the user must ensure that when a token is only
 partially matched that the prefix is preserved on the subsequent invocation of
 the execute code.
 
-The \verb|ts| variable must be defined as a pointer to the input data.
+The @@verb|ts| variable must be defined as a pointer to the input data.
 It is used for recording where the current token match begins. This variable
 may be used in action code for retrieving the text of the current match.  Ragel
 ensures that in between tokens and outside of the longest-match machines that
 this pointer is set to null. In between calls to the execute code the user must
-check if \verb|ts| is set and if so, ensure that the data it points to is
+check if @@verb|ts| is set and if so, ensure that the data it points to is
 preserved ahead of the next buffer block. This is described in more detail
 below.
 
-The \verb|te| variable must also be defined as a pointer to the input data.
+The @@verb|te| variable must also be defined as a pointer to the input data.
 It is used for recording where a match ends and where scanning of the next
 token should begin. This can also be used in action code for retrieving the
 text of the current match.
 
-The \verb|act| variable must be defined as an integer type. It is used for
+The @@verb|act| variable must be defined as an integer type. It is used for
 recording the identity of the last pattern matched when the scanner must go
 past a matched pattern in an attempt to make a longer match. If the longer
-match fails it may need to consult the \verb|act| variable. In some cases, use 
-of the \verb|act|
+match fails it may need to consult the @@verb|act| variable. In some cases, use 
+of the @@verb|act|
 variable can be avoided because the value of the current state is enough
 information to determine which token to accept, however in other cases this is
-not enough and so the \verb|act| variable is used. 
+not enough and so the @@verb|act| variable is used. 
 
 When the longest-match operator is in use, the user's driver code must take on
 some buffer management functions. The following algorithm gives an overview of
@@ -3083,15 +3083,15 @@ the steps that should be taken to properly use the longest-match operator.
 \setlength{\parskip}{0pt}
 .item Read a block of input data.
 .item Run the execute code.
-.item If \verb|ts| is set, the execute code will expect the incomplete
+.item If @@verb|ts| is set, the execute code will expect the incomplete
 token to be preserved ahead of the buffer on the next invocation of the execute
 code.  
 .itemize
-.item Shift the data beginning at \verb|ts| and ending at \verb|pe| to the
+.item Shift the data beginning at @@verb|ts| and ending at @@verb|pe| to the
 beginning of the input buffer.
-.item Reset \verb|ts| to the beginning of the buffer. 
-.item Shift \verb|te| by the distance from the old value of \verb|ts|
-to the new value. The \verb|te| variable may or may not be valid.  There is
+.item Reset @@verb|ts| to the beginning of the buffer. 
+.item Shift @@verb|te| by the distance from the old value of @@verb|ts|
+to the new value. The @@verb|te| variable may or may not be valid.  There is
 no way to know if it holds a meaningful value because it is not kept at null
 when it is not in use. It can be shifted regardless.
 .end itemize
@@ -3131,7 +3131,7 @@ must be preserved ahead of the new data on the next invocation (b).}
 Since scanners attempt to make the longest possible match of input, patterns
 such as identifiers require one character of lookahead in order to trigger a
 match. In the case of the last token in the input stream the user must ensure
-that the \verb|eof| variable is set so that the final token is flushed out.
+that the @@verb|eof| variable is set so that the final token is flushed out.
 
 An example scanner processing loop is given in Figure \ref{scanner-loop}.
 
@@ -3193,7 +3193,7 @@ In addition to supporting the construction of state machines using regular
 languages, Ragel provides a way to manually specify state machines using
 state charts.  The comma operator combines machines together without any
 implied transitions. The user can then manually link machines by specifying
-epsilon transitions with the \verb|->| operator.  Epsilon transitions are drawn
+epsilon transitions with the @@verb|->| operator.  Epsilon transitions are drawn
 between the final states of a machine and entry points defined by labels.  This
 makes it possible to build machines using the explicit state-chart method while
 making minimal changes to the Ragel language. 
@@ -3205,7 +3205,7 @@ used in the definition of a state chart transition.
 
 .subsection Join
 
-\verb|expr , expr , ...|
+@@verb|expr , expr , ...|
 \verbspace
 
 Join a list of machines together without
@@ -3218,21 +3218,21 @@ operation allows one to build machines using a state chart model.
 
 .subsection Label
 
-\verb|label: expr| 
+@@verb|label: expr| 
 \verbspace
 
 Attaches a label to an expression. Labels can be
 used as the target of epsilon transitions and explicit control transfer
-statements such as \verb|fgoto| and \verb|fnext| in action
+statements such as @@verb|fgoto| and @@verb|fnext| in action
 code.
 
 .subsection Epsilon
 
-\verb|expr -> label| 
+@@verb|expr -> label| 
 \verbspace
 
 Draws an epsilon transition to the state defined
-by \verb|label|.  Epsilon transitions are made deterministic when join
+by @@verb|label|.  Epsilon transitions are made deterministic when join
 operators are evaluated. Epsilon transitions that are not in a join operation
 are made deterministic when the machine definition that contains the epsilon is
 complete. See Section \ref{labels} for information on referencing labels.
@@ -3288,11 +3288,11 @@ to assembly language programming using embedded assembler, it is sometimes
 useful for the Ragel programmer to drop down to programming with state charts.
 
 In the following example, we wish to buffer the characters of an XML CDATA
-sequence. The sequence is terminated by the string \verb|]]>|. The challenge
+sequence. The sequence is terminated by the string @@verb|]]>|. The challenge
 in our application is that we do not wish the terminating characters to be
-buffered. An expression of the form \verb|any* @buffer :>> ']]>'| will not work
-because the buffer will always contain the characters \verb|]]| on the end.
-Instead, what we need is to delay the buffering of \hspace{0.25mm} \verb|]|
+buffered. An expression of the form @@verb|any* @buffer :>> ']]>'| will not work
+because the buffer will always contain the characters @@verb|]]| on the end.
+Instead, what we need is to delay the buffering of \hspace{0.25mm} @@verb|]|
 characters until a time when we
 abandon the terminating sequence and go back into the main loop. There is no
 easy way to express this using Ragel's regular expression and action embedding
@@ -3422,7 +3422,7 @@ engineering problems.
 \vspace{10pt}
 
 \noindent {\large\bf Note:} The semantic condition feature works only with
-alphabet types that are smaller in width than the \verb|long| type. To
+alphabet types that are smaller in width than the @@verb|long| type. To
 implement semantic conditions Ragel needs to be able to allocate characters
 from the alphabet space. Ragel uses these allocated characters to express
 "character C with condition P true" or "C with P false." Since internally Ragel
@@ -3433,12 +3433,12 @@ unless an alphabet type smaller than long is used.
 
 There are a few strategies for implementing lookahead in Ragel programs.
 Leaving actions, which are described in Section \ref{out-actions}, can be
-used as a form of lookahead.  Ragel also provides the \verb|fhold| directive
+used as a form of lookahead.  Ragel also provides the @@verb|fhold| directive
 which can be used in actions to prevent the machine from advancing over the
 current character. It is also possible to manually adjust the current character
-position by shifting it backwards using \verb|fexec|, however when this is
+position by shifting it backwards using @@verb|fexec|, however when this is
 done, care must be taken not to overstep the beginning of the current buffer
-block. In both the use of \verb|fhold| and \verb|fexec| the user must be
+block. In both the use of @@verb|fhold| and @@verb|fexec| the user must be
 cautious of combining the resulting machine with another in such a way that the
 transition on which the current position is adjusted is not combined with a
 transition from the other machine.
@@ -3454,7 +3454,7 @@ simple and easy to recognize, such as in the balancing of parentheses
 One approach to parsing recursive structures is to use actions that increment
 and decrement counters or otherwise recognize the entry to and exit from
 recursive structures and then jump to the appropriate machine defnition using
-\verb|fcall| and \verb|fret|. Alternatively, semantic conditions can be used to
+@@verb|fcall| and @@verb|fret|. Alternatively, semantic conditions can be used to
 test counter variables.
 
 A more traditional approach is to call a separate parsing function (expressed

@@ -126,7 +126,14 @@ Footer: str =
 lex all 
 {
 	rl hws /[ \t]+/
-	token plain_line /hws? [^. \t\n] [^\n]* '\n' | '\n' | hws '\n' /
+
+	token PLAIN //
+
+	token _ /hws? [^. \t\n]/ {
+		input.push( make_token( typeid<PLAIN> '' ) )
+	}
+	
+	token empty_line /hws? '\n'/
 
 	token cmd_chapter /hws? '.' hws? 'chapter' hws/
 	token cmd_section /hws? '.' hws? 'section' hws/
@@ -137,9 +144,43 @@ lex all
 	token cmd_verbatim /hws? '.' hws? 'verbatim' hws? '\n'/
 	token cmd_code /hws? '.' hws? 'code' hws? '\n'/
 	token cmd_itemize /hws? '.' hws? 'itemize' hws? '\n'/
-	token end_itemize /hws? '.' hws? 'end' hws 'itemize' hws?'\n'/
+	token end_itemize /hws? '.' hws? 'end' hws 'itemize' hws? '\n'/
 	token cmd_item /hws? '.' hws? 'item' hws/
 }
+
+lex line
+{
+	token d /[^@\n]+/
+	literal '@@', '@'
+	token nl /'\n'/
+}
+
+lex ilc
+{
+	token cmd_verb1 /'verb|'/
+	token cmd_verb2 /'verb/'/
+}
+
+lex verb1
+{
+	token vdd1 /[^|]*/
+	token vde1 /'|'/
+}
+
+lex verb2
+{
+	token vdd2 /[^/]*/
+	token vde2 /'/'/
+}
+
+def pl_data
+	['@']
+|	['@@' cmd_verb1 vdd1 vde1]
+|	['@@' cmd_verb2 vdd2 vde2]
+|	[d]
+
+def plain_line
+	[PLAIN pl_data* nl]
 
 lex dirdata
 {
@@ -156,19 +197,19 @@ lex word
 
 lex verbatim
 {
-	token end_verbatim /hws? '.' hws? 'end' hws 'verbatim' hws?'\n'/
+	token end_verbatim /hws? '.' hws? 'end' hws 'verbatim' hws? '\n'/
 	token verbatim_line /[^\n]* '\n'/
 }
 
 lex code
 {
-	token end_code /hws? '.' hws? 'end' hws 'code' hws?'\n'/
+	token end_code /hws? '.' hws? 'end' hws 'code' hws? '\n'/
 	token code_line /[^\n]* '\n'/
 }
 
 lex comment
 {
-	token end_comment /hws? '.' hws? 'end' hws 'comment' hws?'\n'/
+	token end_comment /hws? '.' hws? 'end' hws 'comment' hws? '\n'/
 	token comment_line /[^\n]* '\n'/
 }
 
@@ -182,7 +223,8 @@ def code
 	[cmd_code line* end_code]
 
 def line
-	[plain_line]
+	[empty_line]
+|	[plain_line]
 |	[comment]
 |	[verbatim]
 |	[code]
@@ -225,8 +267,27 @@ print( Header )
 int printLines( Lines: line* )
 {
 	for L: line in repeat(Lines) {
-		if match L [plain_line] {
+		if match L [empty_line] {
 			print( L )
+		}
+		if match L [PLAIN D: pl_data* Nl: nl] {
+			# FIXME: pretty ugly, but works for transitioning.
+			for Pld: pl_data in D {
+				if match Pld ['@@' cmd_verb1 V: vdd1 vde1] {
+					print( '\\verb|' )
+					print( V )
+					print( '|' )
+				}
+				else if match Pld ['@@' cmd_verb2 V: vdd2 vde2] {
+					print( '\\verb/' )
+					print( V )
+					print( '/' )
+				}
+				else {
+					print( Pld )
+				}
+			}
+			print( Nl )
 		}
 		if match L [cmd_verbatim Lines: verbatim_line* end_verbatim] {
 			print( '\\begin{verbatim}\n' )
