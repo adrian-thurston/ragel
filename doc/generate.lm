@@ -230,7 +230,7 @@ def verbatim
 	[cmd_verbatim verbatim_line* end_verbatim]
 
 def code
-	[cmd_code line* end_code]
+	[cmd_code code_line* end_code]
 
 def line
 	[empty_line]
@@ -314,9 +314,11 @@ int printLines( Lines: line* )
 			print( Lines )
 			print( '\\end{verbatim}\n' )
 		}
-		if match L [cmd_code Lines: line* end_code] {
+		if match L [cmd_code Lines: code_line* end_code] {
 			print( '\\begin{inline_code}\n' )
-			printLines( Lines )
+			print( '\\begin{verbatim}\n' )
+			print( Lines )
+			print( '\\end{verbatim}\n' )
 			print( '\\end{inline_code}\n' )
 		}
 		if match L [cmd_graphic Name: word Scale: word? dw_nl] {

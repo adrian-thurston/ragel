@@ -305,11 +305,9 @@ possibility fails it backtracks and tries the second possibility, printing
 @@verb|a2 b2|, at which point it succeeds.
 
 .code
-.verbatim
 print "YES\n" if ( <STDIN> =~
         /( a (?{ print "a1 "; }) b (?{ print "b1 "; }) cX ) |
          ( a (?{ print "a2 "; }) b (?{ print "b2 "; }) cd )/x )
-.end verbatim
 .end code
 \verbspace
 
@@ -862,10 +860,8 @@ common tokens.
 % %%{
 % machine exor;
 .code
-.verbatim
 # Hex digits, decimal digits, or identifiers
 main := '0x' xdigit+ | digit+ | alpha alnum*;
-.end verbatim
 .end code
 % }%%
 % END GENERATE
@@ -892,13 +888,11 @@ independent patterns be simultaneously satisfied as in the following example.
 % %%{
 % machine exinter;
 .code
-.verbatim
 # Match lines four characters wide that contain 
 # words separated by whitespace.
 main :=
     /[^\n][^\n][^\n][^\n]\n/* &
     (/[a-z][a-z]*/ | [ \n])**;
-.end verbatim
 .end code
 % }%%
 % END GENERATE
@@ -926,10 +920,8 @@ use of subtraction to exclude specific cases from a set.
 % %%{
 % machine exsubtr;
 .code
-.verbatim
 # Subtract keywords from identifiers.
 main := /[a-z][a-z]*/ - ( 'for' | 'int' );
-.end verbatim
 .end code
 % }%%
 % END GENERATE
@@ -954,10 +946,8 @@ taken.
 % %%{
 % machine exstrongsubtr;
 .code
-.verbatim
 crlf = '\r\n';
 main := [a-z]+ ':' ( any* -- crlf ) crlf;
-.end verbatim
 .end code
 % }%%
 % END GENERATE
@@ -1007,10 +997,8 @@ however because we wish to permit EOF strings before the end of the input.
 % %%{
 % machine exconcat;
 .code
-.verbatim
 # Require an eof marker on the last line.
 main := /[^\n]*\n/* . 'EOF\n';
-.end verbatim
 .end code
 % }%%
 % END GENERATE
@@ -1070,10 +1058,8 @@ new Ragel users and must be guarded against.
 % %%{
 % machine exstar;
 .code
-.verbatim
 # Match any number of lines with only lowercase letters.
 main := /[a-z]*\n/*;
-.end verbatim
 .end code
 % }%%
 % END GENERATE
@@ -1094,10 +1080,8 @@ operator is equivalent to @@verb|(expr . expr*)|.
 % %%{
 % machine explus;
 .code
-.verbatim
 # Match alpha-numeric words.
 main := alnum+;
-.end verbatim
 .end code
 % }%%
 % END GENERATE
@@ -1119,10 +1103,8 @@ possibly extend a token.
 % %%{
 % machine exoption;
 .code
-.verbatim
 # Match integers or floats.
 main := digit+ ('.' digit+)?;
-.end verbatim
 .end code
 % }%%
 % END GENERATE
@@ -1154,10 +1136,8 @@ machine. Negation is equivalent to @@verb|(any* - expr)|.
 % %%{
 % machine exnegate;
 .code
-.verbatim
 # Accept anything but a string beginning with a digit.
 main := ! ( digit any* );
-.end verbatim
 .end code
 % }%%
 % END GENERATE
@@ -1285,11 +1265,9 @@ machine ensuring that the entering actions are exected once only.
 % %%{
 % machine exstact;
 .code
-.verbatim
 # Execute A at the beginning of a string of alpha.
 action A {}
 main := ( lower* >A ) . ' ';
-.end verbatim
 .end code
 % }%%
 % END GENERATE
@@ -1314,10 +1292,8 @@ and the finishing action is executed only once.
 % machine exdoneact;
 % action A {}
 .code
-.verbatim
 # Execute A when the trailing space is seen.
 main := ( lower* ' ' ) @A;
-.end verbatim
 .end code
 % }%%
 % END GENERATE
@@ -1339,10 +1315,8 @@ following example, A is executed on every character matched.
 % machine exallact;
 % action A {}
 .code
-.verbatim
 # Execute A on any characters of the machine.
 main := ( 'm1' | 'm2' ) $A;
-.end verbatim
 .end code
 % }%%
 % END GENERATE
@@ -1376,11 +1350,9 @@ machine on the newline character.
 % machine exoutact1;
 % action A {}
 .code
-.verbatim
 # Match a word followed by a newline. Execute A when 
 # finishing the word.
 main := ( lower+ %A ) . '\n';
-.end verbatim
 .end code
 % }%%
 % END GENERATE
@@ -1400,10 +1372,8 @@ to store the text of it.
 % action term_word {}
 % action newline {}
 .code
-.verbatim
 word = ( [a-z] @lower )+ %term_word;
 main := word ( ' ' @space word )* '\n' @newline;
-.end verbatim
 .end code
 % }%%
 % END GENERATE
@@ -1425,11 +1395,9 @@ state.
 % action C {}
 % action N {}
 .code
-.verbatim
 # Execute A on starting the alpha machine, B on every transition 
 # moving through it and C upon finishing. Execute N on the newline.
 main := ( lower* >A $B %C ) . '\n' @N;
-.end verbatim
 .end code
 % }%%
 % END GENERATE
@@ -1620,7 +1588,6 @@ consuming the line, the error recovery machine returns to the main loop.
 %   address = 'foo@bar.com';
 %   date = 'Monday May 12';
 .code
-.verbatim
 action cmd_err { 
     printf( "command error\n" ); 
     fhold; fgoto line;
@@ -1644,7 +1611,6 @@ main := (
             ( ws+ address '\n' ) $err(to_err)
     ) 
 )*;
-.end verbatim
 .end code
 % }%%
 % %% write data;
@@ -1837,11 +1803,9 @@ the following example.
 % action tail {}
 % word = [a-z]+;
 .code
-.verbatim
 ws = [\n\t ];
 line = word $first ( ws word $tail )* '\n';
 lines = line*;
-.end verbatim
 .end code
 % main := lines;
 % }%%
@@ -1865,11 +1829,9 @@ the newline character from the @@verb|ws| expression.
 % action tail {}
 % word = [a-z]+;
 .code
-.verbatim
 ws = [\t ];
 line = word $first ( ws word $tail )* '\n';
 lines = line*;
-.end verbatim
 .end code
 % main := lines;
 % }%%
@@ -1889,10 +1851,8 @@ language comments.
 % machine comments1;
 % action comm {}
 .code
-.verbatim
 comment = '/*' ( any @comm )* '*/';
 main := comment ' ';
-.end verbatim
 .end code
 % }%%
 % END GENERATE
@@ -1917,9 +1877,7 @@ by the following regular expression.
 % machine comments2;
 % action comm {}
 .code
-.verbatim
 comment = '/*' ( ( any @comm )* - ( any* '*/' any* ) ) '*/';
-.end verbatim
 .end code
 % main := comment;
 % }%%
@@ -1954,12 +1912,10 @@ unintended nondeterminism.
 % action on_char {}
 % action finish_str {}
 .code
-.verbatim
 header_contents = ( 
     lower+ >start_str $on_char %finish_str | 
     ' '
 )*;
-.end verbatim
 .end code
 % main := header_contents;
 % }%%
@@ -2056,9 +2012,7 @@ example yields a machine identical to the example in Section
 @@ref{controlling-nondeterminism}.
 
 .code
-.verbatim
 comment = '/*' ( any @comm )* :>> '*/';
-.end verbatim
 .end code
 
 .graphic comments2
@@ -2107,10 +2061,8 @@ end-of-input marker.
 % %%{
 % machine entryguard;
 .code
-.verbatim
 # Leave the catch-all machine on the first character of FIN.
 main := any* :> 'FIN';
-.end verbatim
 .end code
 % }%%
 % END GENERATE
@@ -2143,10 +2095,8 @@ delayed until the full end-of-input marker has been matched.
 % %%{
 % machine finguard;
 .code
-.verbatim
 # Leave the catch-all machine on the last character of FIN.
 main := any* :>> 'FIN';
-.end verbatim
 .end code
 % }%%
 % END GENERATE
@@ -2183,9 +2133,7 @@ whitespace-separated words as in:
 % action start {}
 % action fin {}
 .code
-.verbatim
 main := ( ' '* >start %fin ) <: ( ' ' $ws | [a-z] $alpha )*;
-.end verbatim
 .end code
 % }%%
 % END GENERATE
@@ -2221,14 +2169,12 @@ following.
 % action A {}
 % action B {}
 .code
-.verbatim
 # Repeat tokens, but make sure to get the longest match.
 main := (
     lower ( lower | digit )* %A | 
     digit+ %B | 
     ' '
 )**;
-.end verbatim
 .end code
 % }%%
 % END GENERATE
@@ -2898,7 +2844,6 @@ state machines are used to handle the parsing of two types of headers.
 % %%{
 %   machine call;
 .code
-.verbatim
 action return { fret; }
 action call_date { fcall date; }
 action call_name { fcall name; }
@@ -2917,7 +2862,6 @@ headers =
     ( 'departed' | 'arrived' ) ':' @call_date;
 
 main := headers*;
-.end verbatim
 .end code
 % }%%
 % %% write data;
@@ -3020,7 +2964,6 @@ programming languages. In the following example a scanner is used to tokenize
 the contents of a header field.
 
 .code
-.verbatim
 word = [a-z]+;
 head_name = 'Header';
 
@@ -3031,7 +2974,6 @@ header := |*
 *|;
 
 main := ( head_name ':' @{ fcall header; } )*;
-.end verbatim
 .end code
 \verbspace
 
@@ -3303,7 +3245,6 @@ operators, and so an ability to drop down to the state chart method is useful.
 % %%{
 % machine dropdown;
 .code
-.verbatim
 action bchar { buff( fpc ); }    # Buffer the current character.
 action bbrack1 { buff( "]" ); }
 action bbrack2 { buff( "]]" ); }
@@ -3322,7 +3263,6 @@ two: (
      ']' @bbrack1 -> two |
      [^>\]] @bbrack2 @bchar ->start
 );
-.end verbatim
 .end code
 % main := CDATA_body;
 % }%%
@@ -3353,7 +3293,6 @@ field, then proceed to match $n$ data values.
 % machine conds1;
 % number = digit+;
 .code
-.verbatim
 action rec_num { i = 0; n = getnumber(); }
 action test_len { i++ < n }
 data_fields = (
@@ -3362,7 +3301,6 @@ data_fields = (
     ':'
     ( [a-z] when test_len )*
 )**;
-.end verbatim
 .end code
 % main := data_fields;
 % }%%
@@ -3397,7 +3335,6 @@ pattern.
 % machine conds2;
 % number = digit+;
 .code
-.verbatim
 action test_len { i++ < n }
 action one { /* accept pattern one */ }
 action two { /* accept pattern two */ }
@@ -3405,7 +3342,6 @@ patterns =
     ( [a-z] when test_len )+ %one |
     [a-z][a-z0-9]* %two;
 main := patterns '\n';
-.end verbatim
 .end code
 % }%%
 % END GENERATE
