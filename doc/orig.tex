@@ -456,7 +456,8 @@ int main( int argc, char **argv )
 }
 \end{verbatim}
 \end{multicols}
-\caption{Parsing a command line argument.}
+\caption{Parsing a command line argument.
+}
 \label{cmd-line-parsing}
 \end{figure}
 
@@ -1545,27 +1546,27 @@ second component also have equivalent kewords.
 
 \vspace{10pt}
 
-\def\fakeitem{\hspace*{12pt}$\bullet$\hspace*{10pt}}
+\def\sasp{\hspace*{26pt}}
 
 \begin{minipage}{\textwidth}
 \begin{multicols}{2}
 \raggedcolumns
 \noindent The different classes of states are:\\
-\fakeitem \verb|> | -- the start state\\
-\fakeitem \verb|< | -- any state except the start state\\
-\fakeitem \verb|$ | -- all states\\
-\fakeitem \verb|% | -- final states\\
-\fakeitem \verb|@ | -- any state except final states\\
-\fakeitem \verb|<>| -- any except start and final (middle)
+\sasp\verb|> | -- the start state\\
+\sasp\verb|< | -- any state except the start state\\
+\sasp\verb|$ | -- all states\\
+\sasp\verb|% | -- final states\\
+\sasp\verb|@ | -- any state except final states\\
+\sasp\verb|<>| -- any except start and final (middle)
 
 \columnbreak
 
 \noindent The different kinds of embeddings are:\\
-\fakeitem \verb|~| -- to-state actions (\verb|to|)\\
-\fakeitem \verb|*| -- from-state actions (\verb|from|)\\
-\fakeitem \verb|/| -- EOF actions (\verb|eof|)\\
-\fakeitem \verb|!| -- error actions (\verb|err|)\\
-\fakeitem \verb|^| -- local error actions (\verb|lerr|)\\
+\sasp\verb|~| -- to-state actions (\verb|to|)\\
+\sasp\verb|*| -- from-state actions (\verb|from|)\\
+\sasp\verb|/| -- EOF actions (\verb|eof|)\\
+\sasp\verb|!| -- error actions (\verb|err|)\\
+\sasp\verb|^| -- local error actions (\verb|lerr|)\\
 \end{multicols}
 \end{minipage}
 
@@ -1573,7 +1574,6 @@ second component also have equivalent kewords.
 
 \subsubsection{To-State Actions}
 
-\def\sasp{\hspace*{40pt}}
 
 \sasp\verb|>~action      >to(name)      >to{...} | -- the start state\\
 \sasp\verb|<~action      <to(name)      <to{...} | -- any state except the start state\\
@@ -2447,7 +2447,8 @@ int main( int argc, char **argv )
     return 0;
 }
 \end{verbatim}
-\caption{A basic Ragel example without any actions.}
+\caption{A basic Ragel example without any actions.
+}
 \label{basic-example}
 \end{figure}
 
@@ -2724,7 +2725,8 @@ int main( int argc, char **argv )
 }
 \end{verbatim}
 \caption{Use of {\tt noend} write option and the {\tt fbreak} statement for
-processing a string.}
+processing a string.
+}
 \label{fbreak-example}
 \end{figure}
 
@@ -2882,7 +2884,8 @@ to maintain pointers to the input that will always be consistent.
             break;
     }
 \end{verbatim}
-\caption{An example of line-oriented processing.}
+\caption{An example of line-oriented processing.
+}
 \label{line-oriented}
 \end{figure}
 
@@ -3254,7 +3257,8 @@ data will ever need to be shifted.
 \end{verbatim}
 \caption{Following an invocation of the execute code there may be a partially
 matched token (a). The data of the partially matched token 
-must be preserved ahead of the new data on the next invocation (b).}
+must be preserved ahead of the new data on the next invocation (b).
+}
 \label{preserve_example}
 \end{figure}
 
@@ -3312,7 +3316,8 @@ An example scanner processing loop is given in Figure \ref{scanner-loop}.
         }
     }
 \end{verbatim}
-\caption{A processing loop for a scanner.}
+\caption{A processing loop for a scanner.
+}
 \label{scanner-loop}
 \end{figure}
 

@@ -150,6 +150,10 @@ lex all
 	token cmd_figure /hws? '.' hws? 'figure' hws?/
 	token cmd_caption /hws? '.' hws? 'caption' hws/
 	token end_figure /hws? '.' hws? 'end' hws 'figure' hws? '\n'/
+
+	token cmd_list /hws? '.' hws? 'list' hws? '\n'/
+	token end_list /hws? '.' hws? 'end' hws 'list' hws? '\n'/
+	token cmd_saspi /hws? '.' hws? 'li' hws/
 }
 
 lex line
@@ -239,6 +243,12 @@ def code
 def figure
 	[cmd_figure dirdata dd_nl line* caption? end_figure]
 
+def li
+	[cmd_saspi line*]
+
+def _list
+	[cmd_list li* end_list]
+
 def line
 	[empty_line]
 |	[plain_line]
@@ -248,6 +258,7 @@ def line
 |	[graphic]
 |	[itemize]
 |	[figure]
+|	[_list]
 
 def sub_sub_section
 	[cmd_sub_sub_section dirdata dd_nl line*]
@@ -285,6 +296,35 @@ if ( ! Start ) {
 
 print( Header )
 
+int printPlData( D: pl_data* )
+{
+	for Pld: pl_data in D {
+		if match Pld ['@@' cmd_verb1 V: vdd1 vde1] {
+			print( '\\verb|' )
+			print( V )
+			print( '|' )
+		}
+		else if match Pld ['@@' cmd_verb2 V: vdd2 vde2] {
+			print( '\\verb/' )
+			print( V )
+			print( '/' )
+		}
+		else if match Pld ['@@' cmd_label L: ilcdd ilcde] {
+			print( '\\label{' )
+			print( L )
+			print( '}' )
+		}
+		else if match Pld ['@@' cmd_ref L: ilcdd ilcde] {
+			print( '\\ref{' )
+			print( L )
+			print( '}' )
+		}
+		else {
+			print( Pld )
+		}
+	}
+}
+
 int printLines( Lines: line* )
 {
 	for L: line in repeat(Lines) {
@@ -292,32 +332,7 @@ int printLines( Lines: line* )
 			print( L )
 		}
 		if match L [PLAIN D: pl_data* Nl: nl] {
-			# FIXME: pretty ugly, but works for transitioning.
-			for Pld: pl_data in D {
-				if match Pld ['@@' cmd_verb1 V: vdd1 vde1] {
-					print( '\\verb|' )
-					print( V )
-					print( '|' )
-				}
-				else if match Pld ['@@' cmd_verb2 V: vdd2 vde2] {
-					print( '\\verb/' )
-					print( V )
-					print( '/' )
-				}
-				else if match Pld ['@@' cmd_label L: ilcdd ilcde] {
-					print( '\\label{' )
-					print( L )
-					print( '}' )
-				}
-				else if match Pld ['@@' cmd_ref L: ilcdd ilcde] {
-					print( '\\ref{' )
-					print( L )
-					print( '}' )
-				}
-				else {
-					print( Pld )
-				}
-			}
+			printPlData( D )
 			print( Nl )
 		}
 		if match L [cmd_verbatim Lines: verbatim_line* end_verbatim] {
@@ -365,6 +380,18 @@ int printLines( Lines: line* )
 			}
 			print( '\\label{' DirData '}\n' )
 			print( '\\end{figure}\n' )
+		}
+		if match L [cmd_list Saspi: li* end_list] {
+			for S: li* in Saspi {
+				if match S [cmd_saspi PLAIN D: pl_data* nl Rest: li*] {
+					print( '\\\hspace*{24pt}' )
+					printPlData( D )
+					if match Rest [ li li* ]
+						print( '\\\\' )
+					print( '\n' )
+				}
+			}
+			print( '\\vspace{12pt}\n' )
 		}
 	}
 }
