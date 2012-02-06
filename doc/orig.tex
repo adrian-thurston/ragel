@@ -1546,41 +1546,39 @@ second component also have equivalent kewords.
 
 \vspace{10pt}
 
-\def\sasp{\hspace*{26pt}}
-
-\begin{minipage}{\textwidth}
 \begin{multicols}{2}
 \raggedcolumns
 \noindent The different classes of states are:\\
-\sasp\verb|> | -- the start state\\
-\sasp\verb|< | -- any state except the start state\\
-\sasp\verb|$ | -- all states\\
-\sasp\verb|% | -- final states\\
-\sasp\verb|@ | -- any state except final states\\
-\sasp\verb|<>| -- any except start and final (middle)
+\hspace*{24pt}\verb|> | -- the start state\\
+\hspace*{24pt}\verb|< | -- any state except the start state\\
+\hspace*{24pt}\verb|$ | -- all states\\
+\hspace*{24pt}\verb|% | -- final states\\
+\hspace*{24pt}\verb|@ | -- any state except final states\\
+\hspace*{24pt}\verb|<>| -- any except start and final (middle)
+\vspace{12pt}
 
 \columnbreak
 
 \noindent The different kinds of embeddings are:\\
-\sasp\verb|~| -- to-state actions (\verb|to|)\\
-\sasp\verb|*| -- from-state actions (\verb|from|)\\
-\sasp\verb|/| -- EOF actions (\verb|eof|)\\
-\sasp\verb|!| -- error actions (\verb|err|)\\
-\sasp\verb|^| -- local error actions (\verb|lerr|)\\
+\hspace*{24pt}\verb|~| -- to-state actions (\verb|to|)\\
+\hspace*{24pt}\verb|*| -- from-state actions (\verb|from|)\\
+\hspace*{24pt}\verb|/| -- EOF actions (\verb|eof|)\\
+\hspace*{24pt}\verb|!| -- error actions (\verb|err|)\\
+\hspace*{24pt}\verb|^| -- local error actions (\verb|lerr|)
+\vspace{12pt}
+
 \end{multicols}
-\end{minipage}
 
 \subsection{To-State and From-State Actions}
 
 \subsubsection{To-State Actions}
 
-
-\sasp\verb|>~action      >to(name)      >to{...} | -- the start state\\
-\sasp\verb|<~action      <to(name)      <to{...} | -- any state except the start state\\
-\sasp\verb|$~action      $to(name)      $to{...} | -- all states\\
-\sasp\verb|%~action      %to(name)      %to{...} | -- final states\\
-\sasp\verb|@~action      @to(name)      @to{...} | -- any state except final states\\
-\sasp\verb|<>~action     <>to(name)     <>to{...}| -- any except start and final (middle)
+\hspace*{24pt}\verb|>~action      >to(name)      >to{...} | -- the start state\\
+\hspace*{24pt}\verb|<~action      <to(name)      <to{...} | -- any state except the start state\\
+\hspace*{24pt}\verb|$~action      $to(name)      $to{...} | -- all states\\
+\hspace*{24pt}\verb|%~action      %to(name)      %to{...} | -- final states\\
+\hspace*{24pt}\verb|@~action      @to(name)      @to{...} | -- any state except final states\\
+\hspace*{24pt}\verb|<>~action     <>to(name)     <>to{...}| -- any except start and final (middle)
 \vspace{12pt}
 
 
@@ -1601,12 +1599,12 @@ of to-state actions.
 
 \subsubsection{From-State Actions}
 
-\sasp\verb|>*action     >from(name)     >from{...} | -- the start state\\
-\sasp\verb|<*action     <from(name)     <from{...} | -- any state except the start state\\
-\sasp\verb|$*action     $from(name)     $from{...} | -- all states\\
-\sasp\verb|%*action     %from(name)     %from{...} | -- final states\\
-\sasp\verb|@*action     @from(name)     @from{...} | -- any state except final states\\
-\sasp\verb|<>*action    <>from(name)    <>from{...}| -- any except start and final (middle)
+\hspace*{24pt}\verb|>*action     >from(name)     >from{...} | -- the start state\\
+\hspace*{24pt}\verb|<*action     <from(name)     <from{...} | -- any state except the start state\\
+\hspace*{24pt}\verb|$*action     $from(name)     $from{...} | -- all states\\
+\hspace*{24pt}\verb|%*action     %from(name)     %from{...} | -- final states\\
+\hspace*{24pt}\verb|@*action     @from(name)     @from{...} | -- any state except final states\\
+\hspace*{24pt}\verb|<>*action    <>from(name)    <>from{...}| -- any except start and final (middle)
 \vspace{12pt}
 
 From-state actions are executed whenever the state machine takes a transition from a
@@ -1619,12 +1617,12 @@ embeddings, from-state embeddings stay with the state.
 
 \subsection{EOF Actions}
 
-\sasp\verb|>/action     >eof(name)     >eof{...} | -- the start state\\
-\sasp\verb|</action     <eof(name)     <eof{...} | -- any state except the start state\\
-\sasp\verb|$/action     $eof(name)     $eof{...} | -- all states\\
-\sasp\verb|%/action     %eof(name)     %eof{...} | -- final states\\
-\sasp\verb|@/action     @eof(name)     @eof{...} | -- any state except final states\\
-\sasp\verb|<>/action    <>eof(name)    <>eof{...}| -- any except start and final (middle)
+\hspace*{24pt}\verb|>/action     >eof(name)     >eof{...} | -- the start state\\
+\hspace*{24pt}\verb|</action     <eof(name)     <eof{...} | -- any state except the start state\\
+\hspace*{24pt}\verb|$/action     $eof(name)     $eof{...} | -- all states\\
+\hspace*{24pt}\verb|%/action     %eof(name)     %eof{...} | -- final states\\
+\hspace*{24pt}\verb|@/action     @eof(name)     @eof{...} | -- any state except final states\\
+\hspace*{24pt}\verb|<>/action    <>eof(name)    <>eof{...}| -- any except start and final (middle)
 \vspace{12pt}
 
 The EOF action embedding operators enable the user to embed actions that are
@@ -1646,12 +1644,12 @@ instantiation that consumes input, can attempt to recover from errors.
 
 \subsubsection{Global Error Actions}
 
-\sasp\verb|>!action     >err(name)     >err{...} | -- the start state\\
-\sasp\verb|<!action     <err(name)     <err{...} | -- any state except the start state\\
-\sasp\verb|$!action     $err(name)     $err{...} | -- all states\\
-\sasp\verb|%!action     %err(name)     %err{...} | -- final states\\
-\sasp\verb|@!action     @err(name)     @err{...} | -- any state except final states\\
-\sasp\verb|<>!action    <>err(name)    <>err{...}| -- any except start and final (middle)
+\hspace*{24pt}\verb|>!action     >err(name)     >err{...} | -- the start state\\
+\hspace*{24pt}\verb|<!action     <err(name)     <err{...} | -- any state except the start state\\
+\hspace*{24pt}\verb|$!action     $err(name)     $err{...} | -- all states\\
+\hspace*{24pt}\verb|%!action     %err(name)     %err{...} | -- final states\\
+\hspace*{24pt}\verb|@!action     @err(name)     @err{...} | -- any state except final states\\
+\hspace*{24pt}\verb|<>!action    <>err(name)    <>err{...}| -- any except start and final (middle)
 \vspace{12pt}
 
 Global error actions are stored in the states they are embedded into until
@@ -1666,12 +1664,12 @@ machine with \verb|fgoto| and optionally altering \verb|p|.
 
 \subsubsection{Local Error Actions}
 
-\sasp\verb|>^action     >lerr(name)     >lerr{...} | -- the start state\\
-\sasp\verb|<^action     <lerr(name)     <lerr{...} | -- any state except the start state\\
-\sasp\verb|$^action     $lerr(name)     $lerr{...} | -- all states\\
-\sasp\verb|%^action     %lerr(name)     %lerr{...} | -- final states\\
-\sasp\verb|@^action     @lerr(name)     @lerr{...} | -- any state except final states\\
-\sasp\verb|<>^action    <>lerr(name)    <>lerr{...}| -- any except start and final (middle)
+\hspace*{24pt}\verb|>^action     >lerr(name)     >lerr{...} | -- the start state\\
+\hspace*{24pt}\verb|<^action     <lerr(name)     <lerr{...} | -- any state except the start state\\
+\hspace*{24pt}\verb|$^action     $lerr(name)     $lerr{...} | -- all states\\
+\hspace*{24pt}\verb|%^action     %lerr(name)     %lerr{...} | -- final states\\
+\hspace*{24pt}\verb|@^action     @lerr(name)     @lerr{...} | -- any state except final states\\
+\hspace*{24pt}\verb|<>^action    <>lerr(name)    <>lerr{...}| -- any except start and final (middle)
 \vspace{12pt}
 
 Like global error actions, local error actions are also stored in the states
