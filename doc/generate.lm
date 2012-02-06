@@ -147,7 +147,8 @@ lex all
 	token end_itemize /hws? '.' hws? 'end' hws 'itemize' hws? '\n'/
 	token cmd_item /hws? '.' hws? 'item' hws/
 
-	token cmd_figure /hws? '.' hws? 'figure' hws? '\n'/
+	token cmd_figure /hws? '.' hws? 'figure' hws?/
+	token cmd_caption /hws? '.' hws? 'caption' hws/
 	token end_figure /hws? '.' hws? 'end' hws 'figure' hws? '\n'/
 }
 
@@ -236,7 +237,7 @@ def code
 	[cmd_code code_line* end_code]
 
 def figure
-	[cmd_figure line* end_figure]
+	[cmd_figure dirdata dd_nl line* caption? end_figure]
 
 def line
 	[empty_line]
@@ -269,6 +270,9 @@ def itemize
 
 def item
 	[cmd_item line*]
+
+def caption
+	[cmd_caption line*]
 
 def start 
 	[chapter*]
@@ -350,10 +354,16 @@ int printLines( Lines: line* )
 			}
 			print( '\\end{itemize}\n' )
 		}
-		if match L [cmd_figure Lines: line* end_figure] {
+		if match L [cmd_figure DirData: dirdata dd_nl Lines: line* Caption: caption? end_figure] {
 			print( '\\begin{figure}\n' )
 			print( '\\small\n' )
 			printLines( Lines )
+			if match Caption [cmd_caption CL: line*] {
+				print( '\\caption{' )
+				printLines( CL )
+				print( '}\n' )
+			}
+			print( '\\label{' DirData '}\n' )
 			print( '\\end{figure}\n' )
 		}
 	}
