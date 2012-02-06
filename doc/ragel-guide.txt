@@ -356,9 +356,8 @@ In Figure @@ref{cmd-line-parsing}, a multi-line specification is used to define 
 machine and single line specifications are used to trigger the writing of the machine
 data and execution code.
 
-\begin{figure}
+.figure
 \begin{multicols}{2}
-\small
 .verbatim
 #include <string.h>
 #include <stdio.h>
@@ -390,7 +389,7 @@ int main( int argc, char **argv )
 \end{multicols}
 \caption{Parsing a command line argument.}
 @@label{cmd-line-parsing}
-\end{figure}
+.end figure
 
 .subsection Naming Ragel Blocks
 
@@ -2238,8 +2237,7 @@ Figure @@ref{basic-example} shows a simple Ragel program that does not have any
 actions. The example tests the first argument of the program against a number
 pattern and then prints the machine's acceptance status.
 
-\begin{figure}
-\small
+.figure
 .verbatim
 #include <stdio.h>
 #include <string.h>
@@ -2266,7 +2264,7 @@ int main( int argc, char **argv )
 .end verbatim
 \caption{A basic Ragel example without any actions.}
 @@label{basic-example}
-\end{figure}
+.end figure
 
 .section Variables Used by Ragel
 
@@ -2517,8 +2515,7 @@ id of the first final state.
 machine.
 .end itemize
 
-\begin{figure}
-\small
+.figure
 .verbatim
 #include <stdio.h>
 %% machine foo;
@@ -2543,7 +2540,7 @@ int main( int argc, char **argv )
 \caption{Use of {\tt noend} write option and the {\tt fbreak} statement for
 processing a string.}
 @@label{fbreak-example}
-\end{figure}
+.end figure
 
 .subsection Write Start, First Final and Error
 
@@ -2664,8 +2661,7 @@ set @@verb|ts| at the same spot or ahead of it. When data is shifted in
 between loops the user must also shift the pointer.  In this way it is possible
 to maintain pointers to the input that will always be consistent.
 
-\begin{figure}
-\small
+.figure
 .verbatim
     int have = 0;
     while ( 1 ) {
@@ -2701,7 +2697,7 @@ to maintain pointers to the input that will always be consistent.
 .end verbatim
 \caption{An example of line-oriented processing.}
 @@label{line-oriented}
-\end{figure}
+.end figure
 
 In general, there are two approaches for guaranteeing the consistency of
 pointers to input data. The first approach is the one just described;
@@ -3054,7 +3050,7 @@ define tokens that are allowed to be very long and instead processes these
 items using pure state machines or sub-scanners, then only a small amount of
 data will ever need to be shifted.
 
-\begin{figure}
+.figure
 .verbatim
       a)           A stream "of characters" to be scanned.
                    |        |          |
@@ -3068,7 +3064,7 @@ data will ever need to be shifted.
 matched token (a). The data of the partially matched token 
 must be preserved ahead of the new data on the next invocation (b).}
 @@label{preserve_example}
-\end{figure}
+.end figure
 
 Since scanners attempt to make the longest possible match of input, patterns
 such as identifiers require one character of lookahead in order to trigger a
@@ -3077,8 +3073,7 @@ that the @@verb|eof| variable is set so that the final token is flushed out.
 
 An example scanner processing loop is given in Figure @@ref{scanner-loop}.
 
-\begin{figure}
-\small
+.figure
 .verbatim
     int have = 0;
     bool done = false;
@@ -3126,7 +3121,7 @@ An example scanner processing loop is given in Figure @@ref{scanner-loop}.
 .end verbatim
 \caption{A processing loop for a scanner.}
 @@label{scanner-loop}
-\end{figure}
+.end figure
 
 .section State Charts
 @@label{state-charts}

@@ -146,6 +146,9 @@ lex all
 	token cmd_itemize /hws? '.' hws? 'itemize' hws? '\n'/
 	token end_itemize /hws? '.' hws? 'end' hws 'itemize' hws? '\n'/
 	token cmd_item /hws? '.' hws? 'item' hws/
+
+	token cmd_figure /hws? '.' hws? 'figure' hws? '\n'/
+	token end_figure /hws? '.' hws? 'end' hws 'figure' hws? '\n'/
 }
 
 lex line
@@ -232,6 +235,9 @@ def verbatim
 def code
 	[cmd_code code_line* end_code]
 
+def figure
+	[cmd_figure line* end_figure]
+
 def line
 	[empty_line]
 |	[plain_line]
@@ -240,6 +246,7 @@ def line
 |	[code]
 |	[graphic]
 |	[itemize]
+|	[figure]
 
 def sub_sub_section
 	[cmd_sub_sub_section dirdata dd_nl line*]
@@ -342,6 +349,12 @@ int printLines( Lines: line* )
 				printLines( Lines )
 			}
 			print( '\\end{itemize}\n' )
+		}
+		if match L [cmd_figure Lines: line* end_figure] {
+			print( '\\begin{figure}\n' )
+			print( '\\small\n' )
+			printLines( Lines )
+			print( '\\end{figure}\n' )
 		}
 	}
 }
