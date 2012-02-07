@@ -309,7 +309,6 @@ print "YES\n" if ( <STDIN> =~
         /( a (?{ print "a1 "; }) b (?{ print "b1 "; }) cX ) |
          ( a (?{ print "a2 "; }) b (?{ print "b2 "; }) cd )/x )
 .end code
-\verbspace
 
 In Ragel there is no regular expression interpretor. Aside from the scanner
 operator, all Ragel expressions are made into deterministic machines and the
@@ -395,7 +394,6 @@ int main( int argc, char **argv )
 .verbatim
 machine fsm_name;
 .end verbatim
-\verbspace
 
 The @@verb|machine| statement gives the name of the FSM. If present in a
 specification, this statement must appear first. If a machine specification
@@ -412,7 +410,6 @@ the @@verb|include| statement.
 .verbatim
 <name> = <expression>;
 .end verbatim 
-\verbspace
 
 The machine definition statement associates an FSM expression with a name. Machine
 expressions assigned to names can later be referenced in other expressions. A
@@ -427,7 +424,6 @@ expression.
 .verbatim
 <name> := <expression>;
 .end verbatim
-\verbspace
 
 The machine instantiation statement generates a set of states representing an
 expression. Each instantiation generates a distinct set of states.  The starting
@@ -449,7 +445,6 @@ loop, control may be passed to any machine instantiation using @@verb|fcall|,
 .verbatim
 include FsmName "inputfile.rl";
 .end verbatim
-\verbspace
 
 The @@verb|include| statement can be used to draw in the statements of another FSM
 specification. Both the name and input file are optional, however at least one
@@ -468,7 +463,6 @@ option.
 .verbatim
 import "inputfile.h";
 .end verbatim
-\verbspace
 
 The @@verb|import| statement scrapes a file for sequences of tokens that match
 the following forms. Ragel treats these forms as state machine definitions.
@@ -754,9 +748,7 @@ alphabets.
 The following table shows operator precedence from lowest to highest. Operators
 in the same precedence group are evaluated from left to right.
 
-\verbspace
-\begin{tabular}{|c|c|c|}
-\hline
+.tabular
 1&@@verb| , |&Join\\
 \hline
 2&@@verb/ | & - --/&Union, Intersection and Subtraction\\
@@ -784,8 +776,7 @@ in the same precedence group are evaluated from left to right.
 8&@@verb| ! ^ |&Negation and Character-Level Negation\\
 \hline
 9&@@verb| ( <expr> ) |&Grouping\\
-\hline
-\end{tabular}
+.end tabular
 
 .section Regular Language Operators
 @@label{machconst}
@@ -836,7 +827,6 @@ generated from Ragel programs using the @@verb|-V| option. See Section
 .subsection Union
 
 @@verb/expr | expr/
-\verbspace
 
 The union operation produces a machine that matches any string in machine one
 or machine two. The operation first creates a new start state. Epsilon
@@ -869,7 +859,6 @@ main := '0x' xdigit+ | digit+ | alpha alnum*;
 .subsection Intersection
 
 @@verb|expr & expr|
-\verbspace
 
 Intersection produces a machine that matches any
 string that is in both machine one and machine two. To achieve intersection, a
@@ -900,7 +889,6 @@ main :=
 .subsection Difference
 
 @@verb|expr - expr|
-\verbspace
 
 The difference operation produces a machine that matches
 strings that are in machine one but are not in machine two. To achieve subtraction,
@@ -910,8 +898,6 @@ of states involving a final state from machine two has its final state status
 revoked. As with intersection, the operation is completed by pruning any path
 that does not lead to a final state.  The following example demonstrates the
 use of subtraction to exclude specific cases from a set.
-
-\verbspace
 
 % GENERATE: exsubtr
 % OPT: -p
@@ -930,7 +916,6 @@ main := /[a-z][a-z]*/ - ( 'for' | 'int' );
 @@label{strong_difference}
 
 @@verb|expr -- expr|
-\verbspace
 
 Strong difference produces a machine that matches any string of the first
 machine that does not have any string of the second machine as a substring. In
@@ -954,7 +939,6 @@ main := [a-z]+ ':' ( any* -- crlf ) crlf;
 
 This operator is equivalent to the following.
 
-\verbspace
 .verbatim
 expr - ( any* expr any* )
 .end verbatim
@@ -962,7 +946,6 @@ expr - ( any* expr any* )
 .subsection Concatenation
 
 @@verb|expr . expr|
-\verbspace
 
 Concatenation produces a machine that matches all the strings in machine one followed by all
 the strings in machine two.  Concatenation draws epsilon transitions from the
@@ -1021,7 +1004,6 @@ rely on the default concatenation operator; always use the @@verb|.| symbol.
 .subsection Kleene Star
 
 @@verb|expr*|
-\verbspace
 
 The machine resulting from the Kleene Star operator will match zero or more
 repetitions of the machine it is applied to.
@@ -1067,7 +1049,6 @@ main := /[a-z]*\n/*;
 .subsection One Or More Repetition
 
 @@verb|expr+|
-\verbspace
 
 This operator produces the concatenation of the machine with the kleene star of
 itself. The result will match one or more repetitions of the machine. The plus
@@ -1089,7 +1070,6 @@ main := alnum+;
 .subsection Optional
 
 @@verb|expr?|
-\verbspace
 
 The {\em optional} operator produces a machine that accepts the machine
 given or the zero length string. The optional operator is equivalent to
@@ -1124,7 +1104,6 @@ main := digit+ ('.' digit+)?;
 .subsection Negation
 
 @@verb|!expr|
-\verbspace
 
 Negation produces a machine that matches any string not matched by the given
 machine. Negation is equivalent to @@verb|(any* - expr)|.
@@ -1145,7 +1124,6 @@ main := ! ( digit any* );
 .subsection Character-Level Negation
 
 @@verb|^expr|
-\verbspace
 
 Character-level negation produces a machine that matches any single character
 not matched by the given machine. Character-Level Negation is equivalent to
@@ -1226,7 +1204,6 @@ action ActionName {
     count += 1;
 }
 .end verbatim
-\verbspace
 
 The action statement defines a block of code that can be embedded into an FSM.
 Action names can be referenced by the action embedding operators in
@@ -1243,7 +1220,6 @@ in code blocks.
 .subsection Entering Action
 
 @@verb|expr > action| 
-\verbspace
 
 The entering action operator embeds an action into all transitions
 that enter into the machine from the start state. If the start state is final,
@@ -1255,8 +1231,6 @@ that this can happen on both a following character and on the EOF event.
 In some machines the start state has transtions coming in from within the
 machine. In these cases the start state is first isolated from the rest of the
 machine ensuring that the entering actions are exected once only.
-
-\verbspace
 
 % GENERATE: exstact
 % OPT: -p
@@ -1275,7 +1249,6 @@ main := ( lower* >A ) . ' ';
 .subsection Finishing Action
 
 @@verb|expr @ action|
-\verbspace
 
 The finishing action operator embeds an action into any transitions that move
 the machine into a final state. Further input may move the machine out of the
@@ -1301,7 +1274,6 @@ main := ( lower* ' ' ) @A;
 .subsection All Transition Action
 
 @@verb|expr $ action|
-\verbspace
 
 The all transition operator embeds an action into all transitions of a machine.
 The action is executed whenever a transition of the machine is taken. In the
@@ -1325,7 +1297,6 @@ main := ( 'm1' | 'm2' ) $A;
 @@label{out-actions}
 
 @@verb|expr % action|
-\verbspace
 
 The leaving action operator queues an action for embedding into the transitions
 that go out of a machine via a final state. The action is first stored in
@@ -1655,12 +1626,10 @@ prevents leaving actions from being transferred multiple times. This can
 happen when a machine is repeated, then followed with another machine that
 begins with a common character. For example:
 
-\verbspace
 .verbatim
 word = [a-z]+ %act;
 main := word ( '\n' word )* '\n\n';
 .end verbatim
-\verbspace
 
 Note that Ragel does not compare action bodies to determine if they have
 identical program text. It simply checks for duplicates using each action
@@ -2045,7 +2014,6 @@ using state charts.
 .subsection Entry-Guarded Concatenation
 
 @@verb|expr :> expr| 
-\verbspace
 
 This operator concatenates two machines, but first assigns a low
 priority to all transitions
@@ -2073,7 +2041,6 @@ main := any* :> 'FIN';
 
 Entry-guarded concatenation is equivalent to the following:
 
-\verbspace
 .verbatim
 expr $(unique_name,0) . expr >(unique_name,1)
 .end verbatim
@@ -2081,7 +2048,6 @@ expr $(unique_name,0) . expr >(unique_name,1)
 .subsection Finish-Guarded Concatenation
 
 @@verb|expr :>> expr|
-\verbspace
 
 This operator is
 like the previous operator, except the higher priority is placed on the final
@@ -2110,7 +2076,6 @@ exception. If the right machine's start state is final, the higher priority is
 also embedded into it as a leaving priority. This prevents the left machine
 from persisting via the zero-length string.
 
-\verbspace
 .verbatim
 expr $(unique_name,0) . expr @(unique_name,1)
 .end verbatim
@@ -2118,7 +2083,6 @@ expr $(unique_name,0) . expr @(unique_name,1)
 .subsection Left-Guarded Concatenation
 
 @@verb|expr <: expr| 
-\verbspace
 
 This operator places
 a higher priority on the left expression. It is useful if you want to prefix a
@@ -2144,25 +2108,20 @@ main := ( ' '* >start %fin ) <: ( ' ' $ws | [a-z] $alpha )*;
 
 Left-guarded concatenation is equivalent to the following:
 
-\verbspace
 .verbatim
 expr $(unique_name,1) . expr >(unique_name,0)
 .end verbatim
-\verbspace
 
 .subsection Longest-Match Kleene Star
 @@label{longest_match_kleene_star}
 
 @@verb|expr**| 
-\verbspace
 
 This version of kleene star puts a higher priority on staying in the
 machine versus wrapping around and starting over. The LM kleene star is useful
 when writing simple tokenizers.  These machines are built by applying the
 longest-match kleene star to an alternation of token patterns, as in the
 following.
-
-\verbspace
 
 % GENERATE: lmkleene
 % OPT: -p
@@ -2187,11 +2146,9 @@ If a regular kleene star were used the machine above would not be able to
 distinguish between extending a word and beginning a new one.  This operator is
 equivalent to:
 
-\verbspace
 .verbatim
 ( expr $(unique_name,1) %(unique_name,0) )*
 .end verbatim
-\verbspace
 
 When the kleene star is applied, transitions that go out of the machine and
 back into it are made. These are assigned a priority of zero by the leaving 
@@ -2329,7 +2286,6 @@ more information.
 .verbatim
 alphtype unsigned int;
 .end verbatim
-\verbspace
 
 The alphtype statement specifies the alphabet data type that the machine
 operates on. During the compilation of the machine, integer literals are
@@ -2388,7 +2344,6 @@ D:
 .verbatim
 getkey fpc->id;
 .end verbatim
-\verbspace
 
 This statement specifies to Ragel how to retrieve the current character from 
 from the pointer to the current element (@@verb|p|). Any expression that returns
@@ -2404,7 +2359,6 @@ large cost nor preclude optimization.
 .verbatim
 access fsm->;
 .end verbatim
-\verbspace
 
 The access statement specifies how the generated code should
 access the machine data that is persistent across processing buffer blocks.
@@ -2419,7 +2373,6 @@ a pointer to the structure.
 .verbatim
 variable p fsm->p;
 .end verbatim
-\verbspace
 
 The variable statement specifies how to access a specific
 variable. All of the variables that are declared by the user and
@@ -2435,7 +2388,6 @@ prepush {
     /* stack growing code */
 }
 .end verbatim
-\verbspace
 
 The prepush statement allows the user to supply stack management code that is
 written out during the generation of fcall, immediately before the current
@@ -2450,7 +2402,6 @@ postpop {
     /* stack shrinking code */
 }
 .end verbatim
-\verbspace
 
 The postpop statement allows the user to supply stack management code that is
 written out during the generation of fret, immediately after the next state is
@@ -2463,7 +2414,6 @@ stack.
 .verbatim
 write <component> [options];
 .end verbatim
-\verbspace
 
 The write statement is used to generate parts of the machine. 
 There are seven
@@ -2477,7 +2427,6 @@ it is used. An example of this is shown in Figure @@ref{fbreak-example}.
 .verbatim
 write data [options];
 .end verbatim
-\verbspace
 
 The write data statement causes Ragel to emit the constant static data needed
 by the machine. In table-driven output styles (see Section @@ref{genout}) this
@@ -2550,7 +2499,6 @@ write start;
 write first_final;
 write error;
 .end verbatim
-\verbspace
 
 These three write statements provide an alternative means of accessing the
 @@verb|start|, @@verb|first_final| and @@verb|error| states. If there are many
@@ -2558,8 +2506,6 @@ different machine specifications in one file it is easy to get the prefix for
 these wrong. This is especially true if the state machine boilerplate is
 frequently made by a copy-paste-edit process. These write statements allow the
 problem to be avoided. They can be used as follows:
-
-\verbspace
 
 {
 \small
@@ -2577,7 +2523,6 @@ if ( cs < %%{ write first_final; }%% ) {
 .verbatim
 write init [options];
 .end verbatim
-\verbspace
 
 The write init statement causes Ragel to emit initialization code. This should
 be executed once before the machine is started. At a very minimum this sets the
@@ -2593,7 +2538,6 @@ custom logic to decide which state the specification should start in.
 .verbatim
 write exec [options];
 .end verbatim
-\verbspace
 
 The write exec statement causes Ragel to emit the state machine's execution code.
 Ragel expects several variables to be available to this code. At a very minimum, the
@@ -2625,16 +2569,13 @@ seen.  The example in Figure @@ref{fbreak-example} shows the use of the
 .verbatim
 write exports;
 .end verbatim
-\verbspace
 
 The export feature can be used to export simple machine definitions. Machine definitions
 are marked for export using the @@verb|export| keyword.
 
-\verbspace
 .verbatim
 export machine_to_export = 0x44;
 .end verbatim
-\verbspace
 
 When the write exports statement is used these machines are 
 written out in the generated code. Defines are used for C and constant integers
@@ -2785,10 +2726,8 @@ compile to smaller binaries when @@verb|-G2| is used due to less state and
 action management overhead. For many parsing applications @@verb|-G2| is the
 preferred output format.
 
-\verbspace
-\begin{center}
-\begin{tabular}{|c|c|c|}
-\hline
+.center
+.tabular
 \multicolumn{3}{|c|}{\bf Code Output Style Options} \\
 \hline
 @@verb|-T0|&binary search table-driven&C/D/Java/Ruby/C\#\\
@@ -2804,9 +2743,8 @@ preferred output format.
 @@verb|-G1|&goto, expanded actions&C/D/C\#\\
 \hline
 @@verb|-G2|&goto, in-place actions&C/D/Go\\
-\hline
-\end{tabular}
-\end{center}
+.end tabular
+.end center
 
 .chapter Beyond the Basic Model
 
@@ -2939,7 +2877,6 @@ equal-length matches, the generated code will favour patterns that appear ahead
 of others. When a scanner makes a match it executes the user code associated
 with the match, consumes the input then resumes scanning.
 
-\verbspace
 .verbatim
 <machine_name> := |* 
         pattern1 => action1;
@@ -2947,7 +2884,6 @@ with the match, consumes the input then resumes scanning.
         ...
     *|;
 .end verbatim
-\verbspace
 
 On the surface, Ragel scanners are similar to those defined by Lex. Though
 there is a key distinguishing feature: patterns may be arbitrary Ragel
@@ -2971,7 +2907,6 @@ header := |*
 
 main := ( head_name ':' @{ fcall header; } )*;
 .end code
-\verbspace
 
 The scanner construction has a purpose similar to the longest-match kleene star
 operator @@verb|**|. The key
@@ -3141,7 +3076,6 @@ used in the definition of a state chart transition.
 .subsection Join
 
 @@verb|expr , expr , ...|
-\verbspace
 
 Join a list of machines together without
 drawing any transitions, without setting up a start state, and without
@@ -3154,7 +3088,6 @@ operation allows one to build machines using a state chart model.
 .subsection Label
 
 @@verb|label: expr| 
-\verbspace
 
 Attaches a label to an expression. Labels can be
 used as the target of epsilon transitions and explicit control transfer
@@ -3164,7 +3097,6 @@ code.
 .subsection Epsilon
 
 @@verb|expr -> label| 
-\verbspace
 
 Draws an epsilon transition to the state defined
 by @@verb|label|.  Epsilon transitions are made deterministic when join

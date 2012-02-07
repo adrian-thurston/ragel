@@ -440,6 +440,7 @@ data and execution code.
 
 %% write data;
 \end{verbatim}
+\verbspace
 \columnbreak
 \begin{verbatim}
 int main( int argc, char **argv )
@@ -455,6 +456,7 @@ int main( int argc, char **argv )
     return 0;
 }
 \end{verbatim}
+\verbspace
 \end{multicols}
 \caption{Parsing a command line argument.
 }
@@ -776,7 +778,6 @@ alphabets.
 The following table shows operator precedence from lowest to highest. Operators
 in the same precedence group are evaluated from left to right.
 
-\verbspace
 \begin{tabular}{|c|c|c|}
 \hline
 1&\verb| , |&Join\\
@@ -858,7 +859,6 @@ generated from Ragel programs using the \verb|-V| option. See Section
 \subsection{Union}
 
 \verb/expr | expr/
-\verbspace
 
 The union operation produces a machine that matches any string in machine one
 or machine two. The operation first creates a new start state. Epsilon
@@ -889,6 +889,7 @@ common tokens.
 main := '0x' xdigit+ | digit+ | alpha alnum*;
 \end{verbatim}
 \end{inline_code}
+\verbspace
 % }%%
 % END GENERATE
 
@@ -901,7 +902,6 @@ main := '0x' xdigit+ | digit+ | alpha alnum*;
 \subsection{Intersection}
 
 \verb|expr & expr|
-\verbspace
 
 Intersection produces a machine that matches any
 string that is in both machine one and machine two. To achieve intersection, a
@@ -926,6 +926,7 @@ main :=
     (/[a-z][a-z]*/ | [ \n])**;
 \end{verbatim}
 \end{inline_code}
+\verbspace
 % }%%
 % END GENERATE
 
@@ -938,7 +939,6 @@ main :=
 \subsection{Difference}
 
 \verb|expr - expr|
-\verbspace
 
 The difference operation produces a machine that matches
 strings that are in machine one but are not in machine two. To achieve subtraction,
@@ -948,8 +948,6 @@ of states involving a final state from machine two has its final state status
 revoked. As with intersection, the operation is completed by pruning any path
 that does not lead to a final state.  The following example demonstrates the
 use of subtraction to exclude specific cases from a set.
-
-\verbspace
 
 % GENERATE: exsubtr
 % OPT: -p
@@ -961,6 +959,7 @@ use of subtraction to exclude specific cases from a set.
 main := /[a-z][a-z]*/ - ( 'for' | 'int' );
 \end{verbatim}
 \end{inline_code}
+\verbspace
 % }%%
 % END GENERATE
 
@@ -974,7 +973,6 @@ main := /[a-z][a-z]*/ - ( 'for' | 'int' );
 \label{strong_difference}
 
 \verb|expr -- expr|
-\verbspace
 
 Strong difference produces a machine that matches any string of the first
 machine that does not have any string of the second machine as a substring. In
@@ -993,6 +991,7 @@ crlf = '\r\n';
 main := [a-z]+ ':' ( any* -- crlf ) crlf;
 \end{verbatim}
 \end{inline_code}
+\verbspace
 % }%%
 % END GENERATE
 
@@ -1004,15 +1003,14 @@ main := [a-z]+ ':' ( any* -- crlf ) crlf;
 
 This operator is equivalent to the following.
 
-\verbspace
 \begin{verbatim}
 expr - ( any* expr any* )
 \end{verbatim}
+\verbspace
 
 \subsection{Concatenation}
 
 \verb|expr . expr|
-\verbspace
 
 Concatenation produces a machine that matches all the strings in machine one followed by all
 the strings in machine two.  Concatenation draws epsilon transitions from the
@@ -1054,6 +1052,7 @@ however because we wish to permit EOF strings before the end of the input.
 main := /[^\n]*\n/* . 'EOF\n';
 \end{verbatim}
 \end{inline_code}
+\verbspace
 % }%%
 % END GENERATE
 
@@ -1081,7 +1080,6 @@ rely on the default concatenation operator; always use the \verb|.| symbol.
 \subsection{Kleene Star}
 
 \verb|expr*|
-\verbspace
 
 The machine resulting from the Kleene Star operator will match zero or more
 repetitions of the machine it is applied to.
@@ -1125,6 +1123,7 @@ new Ragel users and must be guarded against.
 main := /[a-z]*\n/*;
 \end{verbatim}
 \end{inline_code}
+\verbspace
 % }%%
 % END GENERATE
 
@@ -1137,7 +1136,6 @@ main := /[a-z]*\n/*;
 \subsection{One Or More Repetition}
 
 \verb|expr+|
-\verbspace
 
 This operator produces the concatenation of the machine with the kleene star of
 itself. The result will match one or more repetitions of the machine. The plus
@@ -1153,6 +1151,7 @@ operator is equivalent to \verb|(expr . expr*)|.
 main := alnum+;
 \end{verbatim}
 \end{inline_code}
+\verbspace
 % }%%
 % END GENERATE
 
@@ -1165,7 +1164,6 @@ main := alnum+;
 \subsection{Optional}
 
 \verb|expr?|
-\verbspace
 
 The {\em optional} operator produces a machine that accepts the machine
 given or the zero length string. The optional operator is equivalent to
@@ -1182,6 +1180,7 @@ possibly extend a token.
 main := digit+ ('.' digit+)?;
 \end{verbatim}
 \end{inline_code}
+\verbspace
 % }%%
 % END GENERATE
 
@@ -1206,7 +1205,6 @@ main := digit+ ('.' digit+)?;
 \subsection{Negation}
 
 \verb|!expr|
-\verbspace
 
 Negation produces a machine that matches any string not matched by the given
 machine. Negation is equivalent to \verb|(any* - expr)|.
@@ -1221,6 +1219,7 @@ machine. Negation is equivalent to \verb|(any* - expr)|.
 main := ! ( digit any* );
 \end{verbatim}
 \end{inline_code}
+\verbspace
 % }%%
 % END GENERATE
 
@@ -1233,7 +1232,6 @@ main := ! ( digit any* );
 \subsection{Character-Level Negation}
 
 \verb|^expr|
-\verbspace
 
 Character-level negation produces a machine that matches any single character
 not matched by the given machine. Character-Level Negation is equivalent to
@@ -1331,7 +1329,6 @@ in code blocks.
 \subsection{Entering Action}
 
 \verb|expr > action| 
-\verbspace
 
 The entering action operator embeds an action into all transitions
 that enter into the machine from the start state. If the start state is final,
@@ -1344,8 +1341,6 @@ In some machines the start state has transtions coming in from within the
 machine. In these cases the start state is first isolated from the rest of the
 machine ensuring that the entering actions are exected once only.
 
-\verbspace
-
 % GENERATE: exstact
 % OPT: -p
 % %%{
@@ -1357,6 +1352,7 @@ action A {}
 main := ( lower* >A ) . ' ';
 \end{verbatim}
 \end{inline_code}
+\verbspace
 % }%%
 % END GENERATE
 
@@ -1369,7 +1365,6 @@ main := ( lower* >A ) . ' ';
 \subsection{Finishing Action}
 
 \verb|expr @ action|
-\verbspace
 
 The finishing action operator embeds an action into any transitions that move
 the machine into a final state. Further input may move the machine out of the
@@ -1389,6 +1384,7 @@ and the finishing action is executed only once.
 main := ( lower* ' ' ) @A;
 \end{verbatim}
 \end{inline_code}
+\verbspace
 % }%%
 % END GENERATE
 
@@ -1401,7 +1397,6 @@ main := ( lower* ' ' ) @A;
 \subsection{All Transition Action}
 
 \verb|expr $ action|
-\verbspace
 
 The all transition operator embeds an action into all transitions of a machine.
 The action is executed whenever a transition of the machine is taken. In the
@@ -1418,6 +1413,7 @@ following example, A is executed on every character matched.
 main := ( 'm1' | 'm2' ) $A;
 \end{verbatim}
 \end{inline_code}
+\verbspace
 % }%%
 % END GENERATE
 
@@ -1431,7 +1427,6 @@ main := ( 'm1' | 'm2' ) $A;
 \label{out-actions}
 
 \verb|expr % action|
-\verbspace
 
 The leaving action operator queues an action for embedding into the transitions
 that go out of a machine via a final state. The action is first stored in
@@ -1460,6 +1455,7 @@ machine on the newline character.
 main := ( lower+ %A ) . '\n';
 \end{verbatim}
 \end{inline_code}
+\verbspace
 % }%%
 % END GENERATE
 
@@ -1487,6 +1483,7 @@ word = ( [a-z] @lower )+ %term_word;
 main := word ( ' ' @space word )* '\n' @newline;
 \end{verbatim}
 \end{inline_code}
+\verbspace
 % }%%
 % END GENERATE
 
@@ -1517,6 +1514,7 @@ state.
 main := ( lower* >A $B %C ) . '\n' @N;
 \end{verbatim}
 \end{inline_code}
+\verbspace
 % }%%
 % END GENERATE
 
@@ -1733,6 +1731,7 @@ main := (
 )*;
 \end{verbatim}
 \end{inline_code}
+\verbspace
 % }%%
 % %% write data;
 % void f()
@@ -1774,7 +1773,6 @@ prevents leaving actions from being transferred multiple times. This can
 happen when a machine is repeated, then followed with another machine that
 begins with a common character. For example:
 
-\verbspace
 \begin{verbatim}
 word = [a-z]+ %act;
 main := word ( '\n' word )* '\n\n';
@@ -1930,6 +1928,7 @@ line = word $first ( ws word $tail )* '\n';
 lines = line*;
 \end{verbatim}
 \end{inline_code}
+\verbspace
 % main := lines;
 % }%%
 % END GENERATE
@@ -1962,6 +1961,7 @@ line = word $first ( ws word $tail )* '\n';
 lines = line*;
 \end{verbatim}
 \end{inline_code}
+\verbspace
 % main := lines;
 % }%%
 % END GENERATE
@@ -1989,6 +1989,7 @@ comment = '/*' ( any @comm )* '*/';
 main := comment ' ';
 \end{verbatim}
 \end{inline_code}
+\verbspace
 % }%%
 % END GENERATE
 
@@ -2020,6 +2021,7 @@ by the following regular expression.
 comment = '/*' ( ( any @comm )* - ( any* '*/' any* ) ) '*/';
 \end{verbatim}
 \end{inline_code}
+\verbspace
 % main := comment;
 % }%%
 % END GENERATE
@@ -2064,6 +2066,7 @@ header_contents = (
 )*;
 \end{verbatim}
 \end{inline_code}
+\verbspace
 % main := header_contents;
 % }%%
 % END GENERATE
@@ -2167,6 +2170,7 @@ example yields a machine identical to the example in Section
 comment = '/*' ( any @comm )* :>> '*/';
 \end{verbatim}
 \end{inline_code}
+\verbspace
 
 \graphspace
 \begin{center}
@@ -2200,7 +2204,6 @@ using state charts.
 \subsection{Entry-Guarded Concatenation}
 
 \verb|expr :> expr| 
-\verbspace
 
 This operator concatenates two machines, but first assigns a low
 priority to all transitions
@@ -2223,6 +2226,7 @@ end-of-input marker.
 main := any* :> 'FIN';
 \end{verbatim}
 \end{inline_code}
+\verbspace
 % }%%
 % END GENERATE
 
@@ -2234,15 +2238,14 @@ main := any* :> 'FIN';
 
 Entry-guarded concatenation is equivalent to the following:
 
-\verbspace
 \begin{verbatim}
 expr $(unique_name,0) . expr >(unique_name,1)
 \end{verbatim}
+\verbspace
 
 \subsection{Finish-Guarded Concatenation}
 
 \verb|expr :>> expr|
-\verbspace
 
 This operator is
 like the previous operator, except the higher priority is placed on the final
@@ -2263,6 +2266,7 @@ delayed until the full end-of-input marker has been matched.
 main := any* :>> 'FIN';
 \end{verbatim}
 \end{inline_code}
+\verbspace
 % }%%
 % END GENERATE
 
@@ -2277,15 +2281,14 @@ exception. If the right machine's start state is final, the higher priority is
 also embedded into it as a leaving priority. This prevents the left machine
 from persisting via the zero-length string.
 
-\verbspace
 \begin{verbatim}
 expr $(unique_name,0) . expr @(unique_name,1)
 \end{verbatim}
+\verbspace
 
 \subsection{Left-Guarded Concatenation}
 
 \verb|expr <: expr| 
-\verbspace
 
 This operator places
 a higher priority on the left expression. It is useful if you want to prefix a
@@ -2306,6 +2309,7 @@ whitespace-separated words as in:
 main := ( ' '* >start %fin ) <: ( ' ' $ws | [a-z] $alpha )*;
 \end{verbatim}
 \end{inline_code}
+\verbspace
 % }%%
 % END GENERATE
 
@@ -2317,7 +2321,6 @@ main := ( ' '* >start %fin ) <: ( ' ' $ws | [a-z] $alpha )*;
 
 Left-guarded concatenation is equivalent to the following:
 
-\verbspace
 \begin{verbatim}
 expr $(unique_name,1) . expr >(unique_name,0)
 \end{verbatim}
@@ -2327,15 +2330,12 @@ expr $(unique_name,1) . expr >(unique_name,0)
 \label{longest_match_kleene_star}
 
 \verb|expr**| 
-\verbspace
 
 This version of kleene star puts a higher priority on staying in the
 machine versus wrapping around and starting over. The LM kleene star is useful
 when writing simple tokenizers.  These machines are built by applying the
 longest-match kleene star to an alternation of token patterns, as in the
 following.
-
-\verbspace
 
 % GENERATE: lmkleene
 % OPT: -p
@@ -2353,6 +2353,7 @@ main := (
 )**;
 \end{verbatim}
 \end{inline_code}
+\verbspace
 % }%%
 % END GENERATE
 
@@ -2366,7 +2367,6 @@ If a regular kleene star were used the machine above would not be able to
 distinguish between extending a word and beginning a new one.  This operator is
 equivalent to:
 
-\verbspace
 \begin{verbatim}
 ( expr $(unique_name,1) %(unique_name,0) )*
 \end{verbatim}
@@ -2445,6 +2445,7 @@ int main( int argc, char **argv )
     return 0;
 }
 \end{verbatim}
+\verbspace
 \caption{A basic Ragel example without any actions.
 }
 \label{basic-example}
@@ -2527,6 +2528,7 @@ C/C++/Objective-C:
           int       unsigned int
           long      unsigned long
 \end{verbatim}
+\verbspace
 
 Go:
 \begin{verbatim}
@@ -2536,12 +2538,14 @@ Go:
           int32     uint32
           int
 \end{verbatim}
+\verbspace
 
 Ruby: 
 \begin{verbatim}
           char 
           int
 \end{verbatim}
+\verbspace
 
 \columnbreak
 
@@ -2552,6 +2556,7 @@ Java:
           short 
           int
 \end{verbatim}
+\verbspace
 
 D:
 \begin{verbatim}
@@ -2562,6 +2567,7 @@ D:
           int       uint 
           dchar
 \end{verbatim}
+\verbspace
 
 \end{multicols}
 
@@ -2722,6 +2728,7 @@ int main( int argc, char **argv )
     return 0;
 }
 \end{verbatim}
+\verbspace
 \caption{Use of {\tt noend} write option and the {\tt fbreak} statement for
 processing a string.
 }
@@ -2744,8 +2751,6 @@ these wrong. This is especially true if the state machine boilerplate is
 frequently made by a copy-paste-edit process. These write statements allow the
 problem to be avoided. They can be used as follows:
 
-\verbspace
-
 {
 \small
 \begin{verbatim}
@@ -2755,6 +2760,7 @@ if ( cs < %%{ write first_final; }%% ) {
     goto fail;
 }
 \end{verbatim}
+\verbspace
 }
   
 
@@ -2815,7 +2821,6 @@ write exports;
 The export feature can be used to export simple machine definitions. Machine definitions
 are marked for export using the \verb|export| keyword.
 
-\verbspace
 \begin{verbatim}
 export machine_to_export = 0x44;
 \end{verbatim}
@@ -2882,6 +2887,7 @@ to maintain pointers to the input that will always be consistent.
             break;
     }
 \end{verbatim}
+\verbspace
 \caption{An example of line-oriented processing.
 }
 \label{line-oriented}
@@ -2973,7 +2979,6 @@ compile to smaller binaries when \verb|-G2| is used due to less state and
 action management overhead. For many parsing applications \verb|-G2| is the
 preferred output format.
 
-\verbspace
 \begin{center}
 \begin{tabular}{|c|c|c|}
 \hline
@@ -3049,6 +3054,7 @@ headers =
 main := headers*;
 \end{verbatim}
 \end{inline_code}
+\verbspace
 % }%%
 % %% write data;
 % void f()
@@ -3129,7 +3135,6 @@ equal-length matches, the generated code will favour patterns that appear ahead
 of others. When a scanner makes a match it executes the user code associated
 with the match, consumes the input then resumes scanning.
 
-\verbspace
 \begin{verbatim}
 <machine_name> := |* 
         pattern1 => action1;
@@ -3253,6 +3258,7 @@ data will ever need to be shifted.
                    |          |        |
                    ts         p        pe
 \end{verbatim}
+\verbspace
 \caption{Following an invocation of the execute code there may be a partially
 matched token (a). The data of the partially matched token 
 must be preserved ahead of the new data on the next invocation (b).
@@ -3314,6 +3320,7 @@ An example scanner processing loop is given in Figure \ref{scanner-loop}.
         }
     }
 \end{verbatim}
+\verbspace
 \caption{A processing loop for a scanner.
 }
 \label{scanner-loop}
@@ -3339,7 +3346,6 @@ used in the definition of a state chart transition.
 \subsection{Join}
 
 \verb|expr , expr , ...|
-\verbspace
 
 Join a list of machines together without
 drawing any transitions, without setting up a start state, and without
@@ -3352,7 +3358,6 @@ operation allows one to build machines using a state chart model.
 \subsection{Label}
 
 \verb|label: expr| 
-\verbspace
 
 Attaches a label to an expression. Labels can be
 used as the target of epsilon transitions and explicit control transfer
@@ -3362,7 +3367,6 @@ code.
 \subsection{Epsilon}
 
 \verb|expr -> label| 
-\verbspace
 
 Draws an epsilon transition to the state defined
 by \verb|label|.  Epsilon transitions are made deterministic when join
@@ -3457,6 +3461,7 @@ two: (
 );
 \end{verbatim}
 \end{inline_code}
+\verbspace
 % main := CDATA_body;
 % }%%
 % END GENERATE
@@ -3501,6 +3506,7 @@ data_fields = (
 )**;
 \end{verbatim}
 \end{inline_code}
+\verbspace
 % main := data_fields;
 % }%%
 % END GENERATE
@@ -3548,6 +3554,7 @@ patterns =
 main := patterns '\n';
 \end{verbatim}
 \end{inline_code}
+\verbspace
 % }%%
 % END GENERATE
 

@@ -139,13 +139,21 @@ lex all
 	token cmd_section /hws? '.' hws? 'section' hws/
 	token cmd_sub_section /hws? '.' hws? 'subsection' hws/
 	token cmd_sub_sub_section /hws? '.' hws? 'subsubsection' hws/
+
 	token cmd_graphic /hws? '.' hws? 'graphic' hws/
 	token cmd_comment /hws? '.' hws? 'comment' hws? '\n'/
 	token cmd_verbatim /hws? '.' hws? 'verbatim' hws? '\n'/
 	token cmd_code /hws? '.' hws? 'code' hws? '\n'/
+
 	token cmd_itemize /hws? '.' hws? 'itemize' hws? '\n'/
 	token end_itemize /hws? '.' hws? 'end' hws 'itemize' hws? '\n'/
 	token cmd_item /hws? '.' hws? 'item' hws/
+
+	token cmd_center /hws? '.' hws? 'center' hws? '\n'/
+	token end_center /hws? '.' hws? 'end' hws 'center' hws? '\n'/
+
+	token cmd_tabular /hws? '.' hws? 'tabular' hws? '\n'/
+	token end_tabular /hws? '.' hws? 'end' hws 'tabular' hws? '\n'/
 
 	token cmd_figure /hws? '.' hws? 'figure' hws?/
 	token cmd_caption /hws? '.' hws? 'caption' hws/
@@ -153,7 +161,7 @@ lex all
 
 	token cmd_list /hws? '.' hws? 'list' hws? '\n'/
 	token end_list /hws? '.' hws? 'end' hws 'list' hws? '\n'/
-	token cmd_saspi /hws? '.' hws? 'li' hws/
+	token cmd_li /hws? '.' hws? 'li' hws/
 }
 
 lex line
@@ -244,7 +252,7 @@ def figure
 	[cmd_figure dirdata dd_nl line* caption? end_figure]
 
 def li
-	[cmd_saspi line*]
+	[cmd_li line*]
 
 def _list
 	[cmd_list li* end_list]
@@ -257,6 +265,8 @@ def line
 |	[code]
 |	[graphic]
 |	[itemize]
+|	[center]
+|	[tabular]
 |	[figure]
 |	[_list]
 
@@ -278,6 +288,12 @@ def graphic
 
 def itemize
 	[cmd_itemize line* item* end_itemize]
+
+def center
+	[cmd_center line* end_center]
+
+def tabular
+	[cmd_tabular line* end_tabular]
 
 def item
 	[cmd_item line*]
@@ -339,6 +355,7 @@ int printLines( Lines: line* )
 			print( '\\begin{verbatim}\n' )
 			print( Lines )
 			print( '\\end{verbatim}\n' )
+			print( '\\verbspace\n' )
 		}
 		if match L [cmd_code Lines: code_line* end_code] {
 			print( '\\begin{inline_code}\n' )
@@ -346,6 +363,7 @@ int printLines( Lines: line* )
 			print( Lines )
 			print( '\\end{verbatim}\n' )
 			print( '\\end{inline_code}\n' )
+			print( '\\verbspace\n' )
 		}
 		if match L [cmd_graphic Name: word Scale: word? dw_nl] {
 			print( '\\graphspace\n' )
@@ -381,9 +399,9 @@ int printLines( Lines: line* )
 			print( '\\label{' DirData '}\n' )
 			print( '\\end{figure}\n' )
 		}
-		if match L [cmd_list Saspi: li* end_list] {
-			for S: li* in Saspi {
-				if match S [cmd_saspi PLAIN D: pl_data* nl Rest: li*] {
+		if match L [cmd_list LiList: li* end_list] {
+			for Li: li* in LiList {
+				if match Li [cmd_li PLAIN D: pl_data* nl Rest: li*] {
 					print( '\\\hspace*{24pt}' )
 					printPlData( D )
 					if match Rest [ li li* ]
@@ -392,6 +410,18 @@ int printLines( Lines: line* )
 				}
 			}
 			print( '\\vspace{12pt}\n' )
+		}
+		if match L [cmd_center Lines: line* end_center] {
+			print( '\\begin{center}\n' )
+			printLines( Lines )
+			print( '\\end{center}\n' )
+		}
+		if match L [cmd_tabular Lines: line* end_tabular] {
+			print( '\\begin{tabular}{|c|c|c|}\n' )
+			print( '\\hline\n' )
+			printLines( Lines )
+			print( '\\hline\n' )
+			print( '\\end{tabular}\n' )
 		}
 	}
 }
