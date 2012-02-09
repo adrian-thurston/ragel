@@ -546,13 +546,11 @@ import "inputfile.h";
 The \verb|import| statement scrapes a file for sequences of tokens that match
 the following forms. Ragel treats these forms as state machine definitions.
 
-\begin{itemize}
-    \setlength{\itemsep}{-2mm}
-\item \verb|name '=' number|
-\item \verb|name '=' lit_string|
-\item \verb|'define' name number|
-\item \verb|'define' name lit_string|
-\end{itemize}
+\noindent\hspace*{24pt}\verb|name '=' number|\\
+\noindent\hspace*{24pt}\verb|name '=' lit_string|\\
+\noindent\hspace*{24pt}\verb|'define' name number|\\
+\noindent\hspace*{24pt}\verb|'define' name lit_string|
+\vspace{12pt}
 
 If the input file is a Ragel program then tokens inside any Ragel
 specifications are ignored. See Section \ref{export} for a description of
@@ -607,14 +605,6 @@ format.
 \item Any amount of whitespace may separate tokens.
 
 \end{itemize}
-
-%\section{Parse of an FSM Specification}
-
-%The following statements are possible within an FSM specification. The
-%requirements for trailing semicolons loosely follow that of C. 
-%A block
-%specifying code does not require a trailing semicolon. An expression
-%statement does require a trailing semicolon.
 
 
 \section{Basic Machines}
@@ -790,17 +780,17 @@ in the same precedence group are evaluated from left to right.
 \hline
 5&\verb| -> |&Epsilon Transition\\
 \hline
-&\verb| >  @  $  % |&Transitions Actions and Priorities\\
-\cline{2-3}
-&\verb| >/  $/  %/  </  @/  <>/ |&EOF Actions\\
-\cline{2-3}
+6&\verb| >  @  $  % |&Transitions Actions and Priorities\\
+\hline
+6&\verb| >/  $/  %/  </  @/  <>/ |&EOF Actions\\
+\hline
 6&\verb| >!  $!  %!  <!  @!  <>! |&Global Error Actions\\
-\cline{2-3}
-&\verb| >^  $^  %^  <^  @^  <>^ |&Local Error Actions\\
-\cline{2-3}
-&\verb| >~  $~  %~  <~  @~  <>~ |&To-State Actions\\
-\cline{2-3}
-&\verb| >*  $*  %*  <*  @*  <>* |&From-State Action\\
+\hline
+6&\verb| >^  $^  %^  <^  @^  <>^ |&Local Error Actions\\
+\hline
+6&\verb| >~  $~  %~  <~  @~  <>~ |&To-State Actions\\
+\hline
+6&\verb| >*  $*  %*  <*  @*  <>* |&From-State Action\\
 \hline
 7&\verb| * ** ? + {n} {,n} {n,} {n,m} |&Repetition\\
 \hline
@@ -1062,7 +1052,7 @@ main := /[^\n]*\n/* . 'EOF\n';
 \end{center}
 \graphspace
 
-\noindent {\bf Note:} There is a language
+There is a language
 ambiguity involving concatenation and subtraction. Because concatenation is the 
 default operator for two
 adjacent machines there is an ambiguity between subtraction of
@@ -1192,15 +1182,11 @@ main := digit+ ('.' digit+)?;
 
 \subsection{Repetition}
 
-\begin{tabbing}
-\noindent \verb|expr {n}| \hspace{16pt}\=-- Exactly N copies of expr.\\
-
-\noindent \verb|expr {,n}| \>-- Zero to N copies of expr.\\
-
-\noindent \verb|expr {n,}| \>-- N or more copies of expr.\\
-
-\noindent \verb|expr {n,m}| \>-- N to M copies of expr.
-\end{tabbing}
+\noindent\hspace*{24pt}\verb|expr {n}| -- Exactly N copies of expr.\\
+\noindent\hspace*{24pt}\verb|expr {,n}| -- Zero to N copies of expr.\\
+\noindent\hspace*{24pt}\verb|expr {n,}| -- N or more copies of expr.\\
+\noindent\hspace*{24pt}\verb|expr {n,m}| -- N to M copies of expr.
+\vspace{12pt}
 
 \subsection{Negation}
 
@@ -1251,7 +1237,7 @@ The algorithm implemented is similar to Hopcroft's state minimization
 algorithm. Hopcroft's algorithm assumes a finite alphabet that can be listed in
 memory, whereas Ragel supports arbitrary integer alphabets that cannot be
 listed in memory. Though exact analysis is very difficult, Ragel minimization
-runs close to $O(n \times log(n))$ and requires $O(n)$ temporary storage where
+runs close to O(n * log(n)) and requires O(n) temporary storage where
 $n$ is the number of states.
 
 \section{Visualization}
@@ -1542,27 +1528,26 @@ class of states that the action will be embedded into. The second component
 specifies the type of event the action will be executed on. The symbols of the
 second component also have equivalent kewords. 
 
-\vspace{10pt}
-
 \begin{multicols}{2}
-\raggedcolumns
-\noindent The different classes of states are:\\
-\hspace*{24pt}\verb|> | -- the start state\\
-\hspace*{24pt}\verb|< | -- any state except the start state\\
-\hspace*{24pt}\verb|$ | -- all states\\
-\hspace*{24pt}\verb|% | -- final states\\
-\hspace*{24pt}\verb|@ | -- any state except final states\\
-\hspace*{24pt}\verb|<>| -- any except start and final (middle)
+The different classes of states are:
+
+\noindent\hspace*{24pt}\verb|> | -- the start state\\
+\noindent\hspace*{24pt}\verb|< | -- any state except the start state\\
+\noindent\hspace*{24pt}\verb|$ | -- all states\\
+\noindent\hspace*{24pt}\verb|% | -- final states\\
+\noindent\hspace*{24pt}\verb|@ | -- any state except final states\\
+\noindent\hspace*{24pt}\verb|<>| -- any except start and final (middle)
 \vspace{12pt}
 
 \columnbreak
 
-\noindent The different kinds of embeddings are:\\
-\hspace*{24pt}\verb|~| -- to-state actions (\verb|to|)\\
-\hspace*{24pt}\verb|*| -- from-state actions (\verb|from|)\\
-\hspace*{24pt}\verb|/| -- EOF actions (\verb|eof|)\\
-\hspace*{24pt}\verb|!| -- error actions (\verb|err|)\\
-\hspace*{24pt}\verb|^| -- local error actions (\verb|lerr|)
+The different kinds of embeddings are:
+
+\noindent\hspace*{24pt}\verb|~| -- to-state actions (\verb|to|)\\
+\noindent\hspace*{24pt}\verb|*| -- from-state actions (\verb|from|)\\
+\noindent\hspace*{24pt}\verb|/| -- EOF actions (\verb|eof|)\\
+\noindent\hspace*{24pt}\verb|!| -- error actions (\verb|err|)\\
+\noindent\hspace*{24pt}\verb|^| -- local error actions (\verb|lerr|)
 \vspace{12pt}
 
 \end{multicols}
@@ -1571,12 +1556,12 @@ second component also have equivalent kewords.
 
 \subsubsection{To-State Actions}
 
-\hspace*{24pt}\verb|>~action      >to(name)      >to{...} | -- the start state\\
-\hspace*{24pt}\verb|<~action      <to(name)      <to{...} | -- any state except the start state\\
-\hspace*{24pt}\verb|$~action      $to(name)      $to{...} | -- all states\\
-\hspace*{24pt}\verb|%~action      %to(name)      %to{...} | -- final states\\
-\hspace*{24pt}\verb|@~action      @to(name)      @to{...} | -- any state except final states\\
-\hspace*{24pt}\verb|<>~action     <>to(name)     <>to{...}| -- any except start and final (middle)
+\noindent\hspace*{24pt}\verb|>~action      >to(name)      >to{...} | -- the start state\\
+\noindent\hspace*{24pt}\verb|<~action      <to(name)      <to{...} | -- any state except the start state\\
+\noindent\hspace*{24pt}\verb|$~action      $to(name)      $to{...} | -- all states\\
+\noindent\hspace*{24pt}\verb|%~action      %to(name)      %to{...} | -- final states\\
+\noindent\hspace*{24pt}\verb|@~action      @to(name)      @to{...} | -- any state except final states\\
+\noindent\hspace*{24pt}\verb|<>~action     <>to(name)     <>to{...}| -- any except start and final (middle)
 \vspace{12pt}
 
 
@@ -1597,12 +1582,12 @@ of to-state actions.
 
 \subsubsection{From-State Actions}
 
-\hspace*{24pt}\verb|>*action     >from(name)     >from{...} | -- the start state\\
-\hspace*{24pt}\verb|<*action     <from(name)     <from{...} | -- any state except the start state\\
-\hspace*{24pt}\verb|$*action     $from(name)     $from{...} | -- all states\\
-\hspace*{24pt}\verb|%*action     %from(name)     %from{...} | -- final states\\
-\hspace*{24pt}\verb|@*action     @from(name)     @from{...} | -- any state except final states\\
-\hspace*{24pt}\verb|<>*action    <>from(name)    <>from{...}| -- any except start and final (middle)
+\noindent\hspace*{24pt}\verb|>*action     >from(name)     >from{...} | -- the start state\\
+\noindent\hspace*{24pt}\verb|<*action     <from(name)     <from{...} | -- any state except the start state\\
+\noindent\hspace*{24pt}\verb|$*action     $from(name)     $from{...} | -- all states\\
+\noindent\hspace*{24pt}\verb|%*action     %from(name)     %from{...} | -- final states\\
+\noindent\hspace*{24pt}\verb|@*action     @from(name)     @from{...} | -- any state except final states\\
+\noindent\hspace*{24pt}\verb|<>*action    <>from(name)    <>from{...}| -- any except start and final (middle)
 \vspace{12pt}
 
 From-state actions are executed whenever the state machine takes a transition from a
@@ -1615,12 +1600,12 @@ embeddings, from-state embeddings stay with the state.
 
 \subsection{EOF Actions}
 
-\hspace*{24pt}\verb|>/action     >eof(name)     >eof{...} | -- the start state\\
-\hspace*{24pt}\verb|</action     <eof(name)     <eof{...} | -- any state except the start state\\
-\hspace*{24pt}\verb|$/action     $eof(name)     $eof{...} | -- all states\\
-\hspace*{24pt}\verb|%/action     %eof(name)     %eof{...} | -- final states\\
-\hspace*{24pt}\verb|@/action     @eof(name)     @eof{...} | -- any state except final states\\
-\hspace*{24pt}\verb|<>/action    <>eof(name)    <>eof{...}| -- any except start and final (middle)
+\noindent\hspace*{24pt}\verb|>/action     >eof(name)     >eof{...} | -- the start state\\
+\noindent\hspace*{24pt}\verb|</action     <eof(name)     <eof{...} | -- any state except the start state\\
+\noindent\hspace*{24pt}\verb|$/action     $eof(name)     $eof{...} | -- all states\\
+\noindent\hspace*{24pt}\verb|%/action     %eof(name)     %eof{...} | -- final states\\
+\noindent\hspace*{24pt}\verb|@/action     @eof(name)     @eof{...} | -- any state except final states\\
+\noindent\hspace*{24pt}\verb|<>/action    <>eof(name)    <>eof{...}| -- any except start and final (middle)
 \vspace{12pt}
 
 The EOF action embedding operators enable the user to embed actions that are
@@ -1642,12 +1627,12 @@ instantiation that consumes input, can attempt to recover from errors.
 
 \subsubsection{Global Error Actions}
 
-\hspace*{24pt}\verb|>!action     >err(name)     >err{...} | -- the start state\\
-\hspace*{24pt}\verb|<!action     <err(name)     <err{...} | -- any state except the start state\\
-\hspace*{24pt}\verb|$!action     $err(name)     $err{...} | -- all states\\
-\hspace*{24pt}\verb|%!action     %err(name)     %err{...} | -- final states\\
-\hspace*{24pt}\verb|@!action     @err(name)     @err{...} | -- any state except final states\\
-\hspace*{24pt}\verb|<>!action    <>err(name)    <>err{...}| -- any except start and final (middle)
+\noindent\hspace*{24pt}\verb|>!action     >err(name)     >err{...} | -- the start state\\
+\noindent\hspace*{24pt}\verb|<!action     <err(name)     <err{...} | -- any state except the start state\\
+\noindent\hspace*{24pt}\verb|$!action     $err(name)     $err{...} | -- all states\\
+\noindent\hspace*{24pt}\verb|%!action     %err(name)     %err{...} | -- final states\\
+\noindent\hspace*{24pt}\verb|@!action     @err(name)     @err{...} | -- any state except final states\\
+\noindent\hspace*{24pt}\verb|<>!action    <>err(name)    <>err{...}| -- any except start and final (middle)
 \vspace{12pt}
 
 Global error actions are stored in the states they are embedded into until
@@ -1662,12 +1647,12 @@ machine with \verb|fgoto| and optionally altering \verb|p|.
 
 \subsubsection{Local Error Actions}
 
-\hspace*{24pt}\verb|>^action     >lerr(name)     >lerr{...} | -- the start state\\
-\hspace*{24pt}\verb|<^action     <lerr(name)     <lerr{...} | -- any state except the start state\\
-\hspace*{24pt}\verb|$^action     $lerr(name)     $lerr{...} | -- all states\\
-\hspace*{24pt}\verb|%^action     %lerr(name)     %lerr{...} | -- final states\\
-\hspace*{24pt}\verb|@^action     @lerr(name)     @lerr{...} | -- any state except final states\\
-\hspace*{24pt}\verb|<>^action    <>lerr(name)    <>lerr{...}| -- any except start and final (middle)
+\noindent\hspace*{24pt}\verb|>^action     >lerr(name)     >lerr{...} | -- the start state\\
+\noindent\hspace*{24pt}\verb|<^action     <lerr(name)     <lerr{...} | -- any state except the start state\\
+\noindent\hspace*{24pt}\verb|$^action     $lerr(name)     $lerr{...} | -- all states\\
+\noindent\hspace*{24pt}\verb|%^action     %lerr(name)     %lerr{...} | -- final states\\
+\noindent\hspace*{24pt}\verb|@^action     @lerr(name)     @lerr{...} | -- any state except final states\\
+\noindent\hspace*{24pt}\verb|<>^action    <>lerr(name)    <>lerr{...}| -- any except start and final (middle)
 \vspace{12pt}
 
 Like global error actions, local error actions are also stored in the states
@@ -1788,7 +1773,7 @@ The removal of duplicates can be turned off using the \verb|-d| option.
 \section{Values and Statements Available in Code Blocks}
 \label{vals}
 
-\noindent The following values are available in code blocks:
+The following values are available in code blocks:
 
 \begin{itemize}
 \item \verb|fpc| -- A pointer to the current character. This is equivalent to
@@ -1814,7 +1799,7 @@ it. The value returned by \verb|fentry| can be any one of the multiple states th
 it represents.
 \end{itemize}
 
-\noindent The following statements are available in code blocks:
+The following statements are available in code blocks:
 
 \begin{itemize}
 
@@ -1878,7 +1863,7 @@ causes the target state's to-state actions to be skipped.
 
 \end{itemize}
 
-\noindent {\bf Note:} Once actions with control-flow commands are embedded into a
+Once actions with control-flow commands are embedded into a
 machine, the user must exercise caution when using the machine as the operand
 to other machine construction operators. If an action jumps to another state
 then unioning any transition that executes that action with another transition
@@ -2049,8 +2034,6 @@ have a token stream as a sub-language. The following example is an attempt
 at a regular expression-based tokenizer that does not function correctly due to
 unintended nondeterminism.
 
-\newpage
-
 % GENERATE: smallscanner
 % OPT: -p
 % %%{
@@ -2118,7 +2101,6 @@ name can be specified, allowing priority interaction across machine definition
 boundaries.
 
 \begin{itemize}
-\setlength{\parskip}{0in}
 \item \verb|expr > int| -- Sets starting transitions to have priority int.
 \item \verb|expr @ int| -- Sets transitions that go into a final state to have priority int. 
 \item \verb|expr $ int| -- Sets all transitions to have priority int.
@@ -2132,7 +2114,6 @@ The second form of priority assignment allows the programmer to specify the name
 to which the priority is assigned.
 
 \begin{itemize}
-\setlength{\parskip}{0in}
 \item \verb|expr > (name, int)| -- Starting transitions.
 \item \verb|expr @ (name, int)| -- Finishing transitions (into a final state).
 \item \verb|expr $ (name, int)| -- All transitions.
@@ -2520,7 +2501,6 @@ expected to be in the range of possible values of the alphtype. The default
 is \verb|char| for all languages except Go where the default is \verb|byte|.
 
 \begin{multicols}{2}
-\setlength{\columnseprule}{1pt} 
 C/C++/Objective-C:
 \begin{verbatim}
           char      unsigned char      
@@ -2687,23 +2667,18 @@ machine is complete, that is from every state there is a transition to a proper
 state on every possible character of the alphabet, then no error state is required
 and this variable will be set to -1.
 
-The \verb|name_first_final| variable stores the id of the first final state. All of the
-machine's states are sorted by their final state status before having their ids
-assigned. Checking if the machine has accepted its input can then be done by
-checking if the current state is greater-than or equal to the first final
-state.
+The \verb|name_first_final| variable stores the id of the first final state.
+All of the machine's states are sorted by their final state status before
+having their ids assigned. Checking if the machine has accepted its input can
+then be done by checking if the current state is greater-than or equal to the
+first final state.
 
 Data generation has several options:
 
-\begin{itemize}
-\setlength{\itemsep}{-2mm}
-\item \verb|noerror  | - Do not generate the integer variable that gives the
-id of the error state.
-\item \verb|nofinal  | - Do not generate the integer variable that gives the
-id of the first final state.
-\item \verb|noprefix | - Do not prefix the variable names with the name of the
-machine.
-\end{itemize}
+\noindent\hspace*{24pt}\verb|noerror  | - Do not generate the integer variable that gives the id of the error state.\\
+\noindent\hspace*{24pt}\verb|nofinal  | - Do not generate the integer variable that gives the id of the first final state.\\
+\noindent\hspace*{24pt}\verb|noprefix | - Do not prefix the variable names with the name of the machine.
+\vspace{12pt}
 
 \begin{figure}
 \small
@@ -2751,8 +2726,6 @@ these wrong. This is especially true if the state machine boilerplate is
 frequently made by a copy-paste-edit process. These write statements allow the
 problem to be avoided. They can be used as follows:
 
-{
-\small
 \begin{verbatim}
 /* Did parsing succeed? */
 if ( cs < %%{ write first_final; }%% ) {
@@ -2761,8 +2734,6 @@ if ( cs < %%{ write first_final; }%% ) {
 }
 \end{verbatim}
 \verbspace
-}
-  
 
 \subsection{Write Init}
 \begin{verbatim}
@@ -2980,9 +2951,10 @@ action management overhead. For many parsing applications \verb|-G2| is the
 preferred output format.
 
 \begin{center}
+
+Code Output Style Options
+
 \begin{tabular}{|c|c|c|}
-\hline
-\multicolumn{3}{|c|}{\bf Code Output Style Options} \\
 \hline
 \verb|-T0|&binary search table-driven&C/D/Java/Ruby/C\#\\
 \hline
@@ -3215,7 +3187,6 @@ some buffer management functions. The following algorithm gives an overview of
 the steps that should be taken to properly use the longest-match operator.
 
 \begin{itemize}
-\setlength{\parskip}{0pt}
 \item Read a block of input data.
 \item Run the execute code.
 \item If \verb|ts| is set, the execute code will expect the incomplete
@@ -3429,7 +3400,7 @@ sequence. The sequence is terminated by the string \verb|]]>|. The challenge
 in our application is that we do not wish the terminating characters to be
 buffered. An expression of the form \verb|any* @buffer :>> ']]>'| will not work
 because the buffer will always contain the characters \verb|]]| on the end.
-Instead, what we need is to delay the buffering of \hspace{0.25mm} \verb|]|
+Instead, what we need is to delay the buffering of \verb|]|
 characters until a time when we
 abandon the terminating sequence and go back into the main loop. There is no
 easy way to express this using Ragel's regular expression and action embedding
@@ -3567,19 +3538,17 @@ main := patterns '\n';
 There are many more potential uses for semantic conditions. The user is free to
 use arbitrary code and may therefore perform actions such as looking up names
 in dictionaries, validating input using external parsing mechanisms or
-performing checks on the semantic structure of input seen so far. In the
-next section we describe how Ragel accommodates several common parser
-engineering problems.
+performing checks on the semantic structure of input seen so far. In the next
+section we describe how Ragel accommodates several common parser engineering
+problems.
 
-\vspace{10pt}
-
-\noindent {\large\bf Note:} The semantic condition feature works only with
-alphabet types that are smaller in width than the \verb|long| type. To
-implement semantic conditions Ragel needs to be able to allocate characters
-from the alphabet space. Ragel uses these allocated characters to express
-"character C with condition P true" or "C with P false." Since internally Ragel
-uses longs to store characters there is no room left in the alphabet space
-unless an alphabet type smaller than long is used.
+The semantic condition feature works only with alphabet types that are smaller
+in width than the \verb|long| type. To implement semantic conditions Ragel
+needs to be able to allocate characters from the alphabet space. Ragel uses
+these allocated characters to express "character C with condition P true" or "C
+with P false." Since internally Ragel uses longs to store characters there is
+no room left in the alphabet space unless an alphabet type smaller than long is
+used.
 
 \section{Implementing Lookahead}
 

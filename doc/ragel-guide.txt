@@ -356,7 +356,7 @@ machine and single line specifications are used to trigger the writing of the ma
 data and execution code.
 
 .figure cmd-line-parsing
-\begin{multicols}{2}
+.multicols
 .verbatim
 #include <string.h>
 #include <stdio.h>
@@ -370,7 +370,7 @@ data and execution code.
 
 %% write data;
 .end verbatim
-\columnbreak
+.columnbreak
 .verbatim
 int main( int argc, char **argv )
 {
@@ -385,7 +385,7 @@ int main( int argc, char **argv )
     return 0;
 }
 .end verbatim
-\end{multicols}
+.end multicols
 .caption Parsing a command line argument.
 .end figure
 
@@ -467,13 +467,12 @@ import "inputfile.h";
 The @@verb|import| statement scrapes a file for sequences of tokens that match
 the following forms. Ragel treats these forms as state machine definitions.
 
-.itemize
-    \setlength{\itemsep}{-2mm}
-    .item @@verb|name '=' number|
-    .item @@verb|name '=' lit_string|
-    .item @@verb|'define' name number|
-    .item @@verb|'define' name lit_string|
-.end itemize
+.list
+    .li @@verb|name '=' number|
+    .li @@verb|name '=' lit_string|
+    .li @@verb|'define' name number|
+    .li @@verb|'define' name lit_string|
+.end list
 
 If the input file is a Ragel program then tokens inside any Ragel
 specifications are ignored. See Section @@ref{export} for a description of
@@ -537,14 +536,15 @@ format.
 
 .end itemize
 
-%\section{Parse of an FSM Specification}
+.comment
+.section Parse of an FSM Specification
 
-%The following statements are possible within an FSM specification. The
-%requirements for trailing semicolons loosely follow that of C. 
-%A block
-%specifying code does not require a trailing semicolon. An expression
-%statement does require a trailing semicolon.
-
+The following statements are possible within an FSM specification. The
+requirements for trailing semicolons loosely follow that of C. 
+A block
+specifying code does not require a trailing semicolon. An expression
+statement does require a trailing semicolon.
+.end comment
 
 .section Basic Machines
 @@label{basic}
@@ -749,33 +749,20 @@ The following table shows operator precedence from lowest to highest. Operators
 in the same precedence group are evaluated from left to right.
 
 .tabular
-1&@@verb| , |&Join\\
-\hline
-2&@@verb/ | & - --/&Union, Intersection and Subtraction\\
-\hline
-3&@@verb| . <: :> :>> |&Concatenation\\
-\hline
-4&@@verb| : |&Label\\
-\hline
-5&@@verb| -> |&Epsilon Transition\\
-\hline
-&@@verb| >  @  $  % |&Transitions Actions and Priorities\\
-\cline{2-3}
-&@@verb| >/  $/  %/  </  @/  <>/ |&EOF Actions\\
-\cline{2-3}
-6&@@verb| >!  $!  %!  <!  @!  <>! |&Global Error Actions\\
-\cline{2-3}
-&@@verb| >^  $^  %^  <^  @^  <>^ |&Local Error Actions\\
-\cline{2-3}
-&@@verb| >~  $~  %~  <~  @~  <>~ |&To-State Actions\\
-\cline{2-3}
-&@@verb| >*  $*  %*  <*  @*  <>* |&From-State Action\\
-\hline
-7&@@verb| * ** ? + {n} {,n} {n,} {n,m} |&Repetition\\
-\hline
-8&@@verb| ! ^ |&Negation and Character-Level Negation\\
-\hline
-9&@@verb| ( <expr> ) |&Grouping\\
+.row 1&@@verb| , |&Join
+.row 2&@@verb/ | & - --/&Union, Intersection and Subtraction
+.row 3&@@verb| . <: :> :>> |&Concatenation
+.row 4&@@verb| : |&Label
+.row 5&@@verb| -> |&Epsilon Transition
+.row 6&@@verb| >  @  $  % |&Transitions Actions and Priorities
+.row 6&@@verb| >/  $/  %/  </  @/  <>/ |&EOF Actions
+.row 6&@@verb| >!  $!  %!  <!  @!  <>! |&Global Error Actions
+.row 6&@@verb| >^  $^  %^  <^  @^  <>^ |&Local Error Actions
+.row 6&@@verb| >~  $~  %~  <~  @~  <>~ |&To-State Actions
+.row 6&@@verb| >*  $*  %*  <*  @*  <>* |&From-State Action
+.row 7&@@verb| * ** ? + {n} {,n} {n,} {n,m} |&Repetition
+.row 8&@@verb| ! ^ |&Negation and Character-Level Negation
+.row 9&@@verb| ( <expr> ) |&Grouping
 .end tabular
 
 .section Regular Language Operators
@@ -986,7 +973,7 @@ main := /[^\n]*\n/* . 'EOF\n';
 
 .graphic exconcat
 
-\noindent {\bf Note:} There is a language
+There is a language
 ambiguity involving concatenation and subtraction. Because concatenation is the 
 default operator for two
 adjacent machines there is an ambiguity between subtraction of
@@ -1071,7 +1058,7 @@ main := alnum+;
 
 @@verb|expr?|
 
-The {\em optional} operator produces a machine that accepts the machine
+The @@em{optional} operator produces a machine that accepts the machine
 given or the zero length string. The optional operator is equivalent to
 @@verb/(expr | '' )/. In the following example the optional operator is used to
 possibly extend a token.
@@ -1091,15 +1078,12 @@ main := digit+ ('.' digit+)?;
 
 .subsection Repetition
 
-\begin{tabbing}
-\noindent @@verb|expr {n}| \hspace{16pt}\=-- Exactly N copies of expr.\\
-
-\noindent @@verb|expr {,n}| \>-- Zero to N copies of expr.\\
-
-\noindent @@verb|expr {n,}| \>-- N or more copies of expr.\\
-
-\noindent @@verb|expr {n,m}| \>-- N to M copies of expr.
-\end{tabbing}
+.list 
+.li @@verb|expr {n}| -- Exactly N copies of expr.
+.li @@verb|expr {,n}| -- Zero to N copies of expr.
+.li @@verb|expr {n,}| -- N or more copies of expr.
+.li @@verb|expr {n,m}| -- N to M copies of expr.
+.end list
 
 .subsection Negation
 
@@ -1143,7 +1127,7 @@ The algorithm implemented is similar to Hopcroft's state minimization
 algorithm. Hopcroft's algorithm assumes a finite alphabet that can be listed in
 memory, whereas Ragel supports arbitrary integer alphabets that cannot be
 listed in memory. Though exact analysis is very difficult, Ragel minimization
-runs close to $O(n \times log(n))$ and requires $O(n)$ temporary storage where
+runs close to O(n * log(n)) and requires O(n) temporary storage where
 $n$ is the number of states.
 
 .section Visualization
@@ -1188,12 +1172,12 @@ compositional nature of embeddings, the user has complete freedom in the
 placement of actions.
 
 A machine's transitions are categorized into four classes. The action embedding
-operators access the transitions defined by these classes.  The {\em entering
+operators access the transitions defined by these classes.  The @@em{entering
 transition} operator @@verb|>| isolates the start state, then embeds an action
-into all transitions leaving it. The {\em finishing transition} operator
+into all transitions leaving it. The @@em{finishing transition} operator
 @@verb|@| embeds an action into all transitions going into a final state.  The
-{\em all transition} operator @@verb|$| embeds an action into all transitions of
-an expression. The {\em leaving transition} operator @@verb|%| provides access
+@@em{all transition} operator @@verb|$| embeds an action into all transitions of
+an expression. The @@em{leaving transition} operator @@verb|%| provides access
 to the yet-unmade transitions moving out of the machine via the final states. 
 
 .section Embedding Actions
@@ -1391,11 +1375,9 @@ class of states that the action will be embedded into. The second component
 specifies the type of event the action will be executed on. The symbols of the
 second component also have equivalent kewords. 
 
-\vspace{10pt}
+.multicols
+The different classes of states are:
 
-\begin{multicols}{2}
-\raggedcolumns
-\noindent The different classes of states are:\\
 .list
 .li @@verb|> | -- the start state
 .li @@verb|< | -- any state except the start state
@@ -1405,9 +1387,10 @@ second component also have equivalent kewords.
 .li @@verb|<>| -- any except start and final (middle)
 .end list
 
-\columnbreak
+.columnbreak
 
-\noindent The different kinds of embeddings are:\\
+The different kinds of embeddings are:
+
 .list
 .li @@verb|~| -- to-state actions (@@verb|to|)
 .li @@verb|*| -- from-state actions (@@verb|from|)
@@ -1416,7 +1399,7 @@ second component also have equivalent kewords.
 .li @@verb|^| -- local error actions (@@verb|lerr|)
 .end list
 
-\end{multicols}
+.end multicols
 
 .subsection To-State and From-State Actions
 
@@ -1610,9 +1593,9 @@ used to order actions that appear together on a single transition in the final
 state machine. To accomplish this we recursively traverse the parse tree of
 regular expressions and assign timestamps to action embeddings. References to
 machine definitions are followed in the traversal. When we visit a
-parse tree node we assign timestamps to all {\em entering} action embeddings,
-recurse on the parse tree, then assign timestamps to the remaining {\em all},
-{\em finishing}, and {\em leaving} embeddings in the order in which they
+parse tree node we assign timestamps to all @@em{entering} action embeddings,
+recurse on the parse tree, then assign timestamps to the remaining @@em{all},
+@@em{finishing}, and @@em{leaving} embeddings in the order in which they
 appear.
 
 By default Ragel does not permit a single action to appear multiple times in an action
@@ -1640,7 +1623,7 @@ The removal of duplicates can be turned off using the @@verb|-d| option.
 .section Values and Statements Available in Code Blocks
 @@label{vals}
 
-\noindent The following values are available in code blocks:
+The following values are available in code blocks:
 
 .itemize
 .item @@verb|fpc| -- A pointer to the current character. This is equivalent to
@@ -1666,7 +1649,7 @@ it. The value returned by @@verb|fentry| can be any one of the multiple states t
 it represents.
 .end itemize
 
-\noindent The following statements are available in code blocks:
+The following statements are available in code blocks:
 
 .itemize
 
@@ -1730,7 +1713,7 @@ causes the target state's to-state actions to be skipped.
 
 .end itemize
 
-\noindent {\bf Note:} Once actions with control-flow commands are embedded into a
+Once actions with control-flow commands are embedded into a
 machine, the user must exercise caution when using the machine as the operand
 to other machine construction operators. If an action jumps to another state
 then unioning any transition that executes that action with another transition
@@ -1873,8 +1856,6 @@ have a token stream as a sub-language. The following example is an attempt
 at a regular expression-based tokenizer that does not function correctly due to
 unintended nondeterminism.
 
-\newpage
-
 % GENERATE: smallscanner
 % OPT: -p
 % %%{
@@ -1935,7 +1916,6 @@ name can be specified, allowing priority interaction across machine definition
 boundaries.
 
 .itemize
-\setlength{\parskip}{0in}
 .item @@verb|expr > int| -- Sets starting transitions to have priority int.
 .item @@verb|expr @ int| -- Sets transitions that go into a final state to have priority int. 
 .item @@verb|expr $ int| -- Sets all transitions to have priority int.
@@ -1949,7 +1929,6 @@ The second form of priority assignment allows the programmer to specify the name
 to which the priority is assigned.
 
 .itemize
-\setlength{\parskip}{0in}
 .item @@verb|expr > (name, int)| -- Starting transitions.
 .item @@verb|expr @ (name, int)| -- Finishing transitions (into a final state).
 .item @@verb|expr $ (name, int)| -- All transitions.
@@ -1973,7 +1952,7 @@ advantageous from a language design point of view because it greatly simplifies
 the design.  
 
 Going back to the C comment example, we can now properly specify
-it using a guarded concatenation operator which we call {\em finish-guarded
+it using a guarded concatenation operator which we call @@em{finish-guarded
 concatenation}. From the user's point of view, this operator terminates the
 first machine when the second machine moves into a final state.  It chooses a
 unique name and uses it to embed a low priority into all
@@ -1988,13 +1967,13 @@ comment = '/*' ( any @comm )* :>> '*/';
 
 .graphic comments2
 
-Another guarded operator is {\em left-guarded concatenation}, given by the
+Another guarded operator is @@em{left-guarded concatenation}, given by the
 @@verb|<:| compound symbol. This operator places a higher priority on all
 transitions of the first machine. This is useful if one must forcibly separate
 two lists that contain common elements. For example, one may need to tokenize a
 stream, but first consume leading whitespace.
 
-Ragel also includes a {\em longest-match kleene star} operator, given by the
+Ragel also includes a @@em{longest-match kleene star} operator, given by the
 @@verb|**| compound symbol. This 
 guarded operator embeds a high
 priority into all transitions of the machine. 
@@ -2292,8 +2271,7 @@ operates on. During the compilation of the machine, integer literals are
 expected to be in the range of possible values of the alphtype. The default
 is @@verb|char| for all languages except Go where the default is @@verb|byte|.
 
-\begin{multicols}{2}
-\setlength{\columnseprule}{1pt} 
+.multicols
 C/C++/Objective-C:
 .verbatim
           char      unsigned char      
@@ -2317,7 +2295,7 @@ Ruby:
           int
 .end verbatim
 
-\columnbreak
+.columnbreak
 
 Java:
 .verbatim
@@ -2337,7 +2315,7 @@ D:
           dchar
 .end verbatim
 
-\end{multicols}
+.end multicols
 
 .section Getkey Statement
 
@@ -2448,23 +2426,19 @@ machine is complete, that is from every state there is a transition to a proper
 state on every possible character of the alphabet, then no error state is required
 and this variable will be set to -1.
 
-The @@verb|name_first_final| variable stores the id of the first final state. All of the
-machine's states are sorted by their final state status before having their ids
-assigned. Checking if the machine has accepted its input can then be done by
-checking if the current state is greater-than or equal to the first final
-state.
+The @@verb|name_first_final| variable stores the id of the first final state.
+All of the machine's states are sorted by their final state status before
+having their ids assigned. Checking if the machine has accepted its input can
+then be done by checking if the current state is greater-than or equal to the
+first final state.
 
 Data generation has several options:
 
-.itemize
-\setlength{\itemsep}{-2mm}
-.item @@verb|noerror  | - Do not generate the integer variable that gives the
-id of the error state.
-.item @@verb|nofinal  | - Do not generate the integer variable that gives the
-id of the first final state.
-.item @@verb|noprefix | - Do not prefix the variable names with the name of the
-machine.
-.end itemize
+.list
+.li @@verb|noerror  | - Do not generate the integer variable that gives the id of the error state.
+.li @@verb|nofinal  | - Do not generate the integer variable that gives the id of the first final state.
+.li @@verb|noprefix | - Do not prefix the variable names with the name of the machine.
+.end list
 
 .figure fbreak-example
 .verbatim
@@ -2488,7 +2462,7 @@ int main( int argc, char **argv )
     return 0;
 }
 .end verbatim
-.caption Use of {\tt noend} write option and the {\tt fbreak} statement for
+.caption Use of @@tt{noend} write option and the @@tt{fbreak} statement for
 processing a string.
 .end figure
 
@@ -2507,8 +2481,6 @@ these wrong. This is especially true if the state machine boilerplate is
 frequently made by a copy-paste-edit process. These write statements allow the
 problem to be avoided. They can be used as follows:
 
-{
-\small
 .verbatim
 /* Did parsing succeed? */
 if ( cs < %%{ write first_final; }%% ) {
@@ -2516,8 +2488,6 @@ if ( cs < %%{ write first_final; }%% ) {
     goto fail;
 }
 .end verbatim
-}
-  
 
 .subsection Write Init
 .verbatim
@@ -2727,22 +2697,17 @@ action management overhead. For many parsing applications @@verb|-G2| is the
 preferred output format.
 
 .center
+
+Code Output Style Options
+
 .tabular
-\multicolumn{3}{|c|}{\bf Code Output Style Options} \\
-\hline
-@@verb|-T0|&binary search table-driven&C/D/Java/Ruby/C\#\\
-\hline
-@@verb|-T1|&binary search, expanded actions&C/D/Ruby/C\#\\
-\hline
-@@verb|-F0|&flat table-driven&C/D/Ruby/C\#\\
-\hline
-@@verb|-F1|&flat table, expanded actions&C/D/Ruby/C\#\\
-\hline
-@@verb|-G0|&goto-driven&C/D/C\#\\
-\hline
-@@verb|-G1|&goto, expanded actions&C/D/C\#\\
-\hline
-@@verb|-G2|&goto, in-place actions&C/D/Go\\
+.row @@verb|-T0|&binary search table-driven&C/D/Java/Ruby/C\#
+.row @@verb|-T1|&binary search, expanded actions&C/D/Ruby/C\#
+.row @@verb|-F0|&flat table-driven&C/D/Ruby/C\#
+.row @@verb|-F1|&flat table, expanded actions&C/D/Ruby/C\#
+.row @@verb|-G0|&goto-driven&C/D/C\#
+.row @@verb|-G1|&goto, expanded actions&C/D/C\#
+.row @@verb|-G2|&goto, in-place actions&C/D/Go
 .end tabular
 .end center
 
@@ -2953,7 +2918,6 @@ some buffer management functions. The following algorithm gives an overview of
 the steps that should be taken to properly use the longest-match operator.
 
 .itemize
-\setlength{\parskip}{0pt}
 .item Read a block of input data.
 .item Run the execute code.
 .item If @@verb|ts| is set, the execute code will expect the incomplete
@@ -3159,7 +3123,7 @@ sequence. The sequence is terminated by the string @@verb|]]>|. The challenge
 in our application is that we do not wish the terminating characters to be
 buffered. An expression of the form @@verb|any* @buffer :>> ']]>'| will not work
 because the buffer will always contain the characters @@verb|]]| on the end.
-Instead, what we need is to delay the buffering of \hspace{0.25mm} @@verb|]|
+Instead, what we need is to delay the buffering of @@verb|]|
 characters until a time when we
 abandon the terminating sequence and go back into the main loop. There is no
 easy way to express this using Ragel's regular expression and action embedding
@@ -3276,19 +3240,17 @@ main := patterns '\n';
 There are many more potential uses for semantic conditions. The user is free to
 use arbitrary code and may therefore perform actions such as looking up names
 in dictionaries, validating input using external parsing mechanisms or
-performing checks on the semantic structure of input seen so far. In the
-next section we describe how Ragel accommodates several common parser
-engineering problems.
+performing checks on the semantic structure of input seen so far. In the next
+section we describe how Ragel accommodates several common parser engineering
+problems.
 
-\vspace{10pt}
-
-\noindent {\large\bf Note:} The semantic condition feature works only with
-alphabet types that are smaller in width than the @@verb|long| type. To
-implement semantic conditions Ragel needs to be able to allocate characters
-from the alphabet space. Ragel uses these allocated characters to express
-"character C with condition P true" or "C with P false." Since internally Ragel
-uses longs to store characters there is no room left in the alphabet space
-unless an alphabet type smaller than long is used.
+The semantic condition feature works only with alphabet types that are smaller
+in width than the @@verb|long| type. To implement semantic conditions Ragel
+needs to be able to allocate characters from the alphabet space. Ragel uses
+these allocated characters to express "character C with condition P true" or "C
+with P false." Since internally Ragel uses longs to store characters there is
+no room left in the alphabet space unless an alphabet type smaller than long is
+used.
 
 .section Implementing Lookahead
 

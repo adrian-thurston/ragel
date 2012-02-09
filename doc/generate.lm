@@ -153,7 +153,12 @@ lex all
 	token end_center /hws? '.' hws? 'end' hws 'center' hws? '\n'/
 
 	token cmd_tabular /hws? '.' hws? 'tabular' hws? '\n'/
+	token cmd_row /hws? '.' hws? 'row' hws/
 	token end_tabular /hws? '.' hws? 'end' hws 'tabular' hws? '\n'/
+
+	token cmd_multicols /hws? '.' hws? 'multicols' hws? '\n'/
+	token cmd_columnbreak /hws? '.' hws? 'columnbreak' hws? '\n'/
+	token end_multicols /hws? '.' hws? 'end' hws 'multicols' hws? '\n'/
 
 	token cmd_figure /hws? '.' hws? 'figure' hws?/
 	token cmd_caption /hws? '.' hws? 'caption' hws/
@@ -177,6 +182,8 @@ lex ilc
 	token cmd_verb2 /'verb/'/
 	token cmd_label /'label{'/
 	token cmd_ref /'ref{'/
+	token cmd_em /'em{'/
+	token cmd_tt /'tt{'/
 }
 
 lex verb1
@@ -203,6 +210,8 @@ def pl_data
 |	['@@' cmd_verb2 vdd2 vde2]
 |	['@@' cmd_label ilcdd ilcde]
 |	['@@' cmd_ref ilcdd ilcde]
+|	['@@' cmd_em ilcdd ilcde]
+|	['@@' cmd_tt ilcdd ilcde]
 |	[d]
 
 def plain_line
@@ -267,6 +276,8 @@ def line
 |	[itemize]
 |	[center]
 |	[tabular]
+|	[multicols]
+|	[cmd_columnbreak]
 |	[figure]
 |	[_list]
 
@@ -292,8 +303,14 @@ def itemize
 def center
 	[cmd_center line* end_center]
 
+def row
+	[cmd_row line]
+
 def tabular
-	[cmd_tabular line* end_tabular]
+	[cmd_tabular row* end_tabular]
+
+def multicols
+	[cmd_multicols line* end_multicols]
 
 def item
 	[cmd_item line*]
@@ -332,6 +349,16 @@ int printPlData( D: pl_data* )
 		}
 		else if match Pld ['@@' cmd_ref L: ilcdd ilcde] {
 			print( '\\ref{' )
+			print( L )
+			print( '}' )
+		}
+		else if match Pld ['@@' cmd_em L: ilcdd ilcde] {
+			print( '{\\em ' )
+			print( L )
+			print( '}' )
+		}
+		else if match Pld ['@@' cmd_tt L: ilcdd ilcde] {
+			print( '{\\tt ' )
 			print( L )
 			print( '}' )
 		}
@@ -402,7 +429,7 @@ int printLines( Lines: line* )
 		if match L [cmd_list LiList: li* end_list] {
 			for Li: li* in LiList {
 				if match Li [cmd_li PLAIN D: pl_data* nl Rest: li*] {
-					print( '\\\hspace*{24pt}' )
+					print( '\\noindent\\\hspace*{24pt}' )
 					printPlData( D )
 					if match Rest [ li li* ]
 						print( '\\\\' )
@@ -416,12 +443,26 @@ int printLines( Lines: line* )
 			printLines( Lines )
 			print( '\\end{center}\n' )
 		}
-		if match L [cmd_tabular Lines: line* end_tabular] {
+		if match L [cmd_tabular Rows: row* end_tabular] {
 			print( '\\begin{tabular}{|c|c|c|}\n' )
 			print( '\\hline\n' )
-			printLines( Lines )
-			print( '\\hline\n' )
+			for Row: row in repeat(Rows) {
+				if match Row [cmd_row PLAIN D: pl_data* nl] 
+				{
+					printPlData( D )
+					print( '\\\\' '\n' )
+					print( '\\hline\n' )
+				}
+			}
 			print( '\\end{tabular}\n' )
+		}
+		if match L [cmd_multicols Lines: line* end_multicols] {
+			print( '\\begin{multicols}{2}\n' )
+			printLines( Lines )
+			print( '\\end{multicols}\n' )
+		}
+		if match L [cmd_columnbreak] {
+			print( '\\columnbreak\n' )
 		}
 	}
 }
