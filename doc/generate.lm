@@ -127,13 +127,10 @@ lex top
 {
 	rl hws /[ \t]+/
 
-	token PLAIN //
+	literal '@'
 
-	token _ /hws? [^. \t\n]/ {
-		input.push( make_token( typeid<PLAIN> '' ) )
-	}
-	
-	token empty_line /hws? '\n'/
+	token pd /( [^.@\n]+  | '.' )/
+	token nl / '\n'/
 
 	token cmd_chapter /'.' 'chapter' hws/
 	token cmd_section /'.' 'section' hws/
@@ -167,13 +164,6 @@ lex top
 	token cmd_list /'.' 'list' hws? '\n'/
 	token end_list /'.' 'end' hws 'list' hws? '\n'/
 	token cmd_li /'.' 'li' hws/
-}
-
-lex line
-{
-	token line_data /[^@\n]+/
-	literal '@'
-	token nl /'\n'/
 }
 
 lex inline_cmd
@@ -211,10 +201,6 @@ def pl_data
 |	['@' cmd_ref curly_data end_curly]
 |	['@' cmd_em curly_data end_curly]
 |	['@' cmd_tt curly_data end_curly]
-|	[line_data]
-
-def plain_line
-	[PLAIN pl_data* nl]
 
 lex dirdata
 {
@@ -260,7 +246,7 @@ def figure
 	[cmd_figure dirdata dd_nl line* caption? end_figure]
 
 def li
-	[cmd_li line*]
+	[cmd_li line2* nl]
 
 def _list
 	[cmd_list li* end_list]
@@ -274,8 +260,12 @@ def itemize
 def center
 	[cmd_center line* end_center]
 
+def line2
+	[pd]
+|	[pl_data]
+
 def row
-	[cmd_row line]
+	[cmd_row line2* nl]
 
 def tabular
 	[cmd_tabular row* end_tabular]
@@ -294,8 +284,9 @@ def caption
 	[cmd_caption line*]
 
 def line
-	[empty_line]
-|	[plain_line]
+	[pd]
+|	[nl]
+|	[pl_data]
 |	[comment]
 |	[verbatim]
 |	[code]
@@ -331,41 +322,51 @@ if ( ! Start ) {
 
 print( Header )
 
-int printPlData( D: pl_data* )
+int printPlData( Pld: pl_data )
 {
-	for Pld: pl_data in D {
-		if match Pld ['@' cmd_verb1 V: bar_data end_bar] {
-			print( '\\verb|' )
-			print( V )
-			print( '|' )
+	if match Pld ['@' cmd_verb1 V: bar_data end_bar] {
+		print( '\\verb|' )
+		print( V )
+		print( '|' )
+	}
+	else if match Pld ['@' cmd_verb2 V: slash_data end_slash] {
+		print( '\\verb/' )
+		print( V )
+		print( '/' )
+	}
+	else if match Pld ['@' cmd_label L: curly_data end_curly] {
+		print( '\\label{' )
+		print( L )
+		print( '}' )
+	}
+	else if match Pld ['@' cmd_ref L: curly_data end_curly] {
+		print( '\\ref{' )
+		print( L )
+		print( '}' )
+	}
+	else if match Pld ['@' cmd_em L: curly_data end_curly] {
+		print( '{\\em ' )
+		print( L )
+		print( '}' )
+	}
+	else if match Pld ['@' cmd_tt L: curly_data end_curly] {
+		print( '{\\tt ' )
+		print( L )
+		print( '}' )
+	}
+	else {
+		print( Pld )
+	}
+}
+
+int printLines2( Lines: line2* )
+{
+	for L: line2 in repeat(Lines) {
+		if match L [Pd: pd] {
+			print( Pd )
 		}
-		else if match Pld ['@' cmd_verb2 V: slash_data end_slash] {
-			print( '\\verb/' )
-			print( V )
-			print( '/' )
-		}
-		else if match Pld ['@' cmd_label L: curly_data end_curly] {
-			print( '\\label{' )
-			print( L )
-			print( '}' )
-		}
-		else if match Pld ['@' cmd_ref L: curly_data end_curly] {
-			print( '\\ref{' )
-			print( L )
-			print( '}' )
-		}
-		else if match Pld ['@' cmd_em L: curly_data end_curly] {
-			print( '{\\em ' )
-			print( L )
-			print( '}' )
-		}
-		else if match Pld ['@' cmd_tt L: curly_data end_curly] {
-			print( '{\\tt ' )
-			print( L )
-			print( '}' )
-		}
-		else {
-			print( Pld )
+		if match L [PlData: pl_data] {
+			printPlData( PlData )
 		}
 	}
 }
@@ -373,12 +374,14 @@ int printPlData( D: pl_data* )
 int printLines( Lines: line* )
 {
 	for L: line in repeat(Lines) {
-		if match L [empty_line] {
-			print( L )
+		if match L [Pd: pd] {
+			print( Pd )
 		}
-		if match L [PLAIN D: pl_data* Nl: nl] {
-			printPlData( D )
+		if match L [Nl: nl] {
 			print( Nl )
+		}
+		if match L [PlData: pl_data] {
+			printPlData( PlData )
 		}
 		if match L [cmd_verbatim Lines: verbatim_line* end_verbatim] {
 			print( '\\begin{verbatim}\n' )
@@ -430,9 +433,9 @@ int printLines( Lines: line* )
 		}
 		if match L [cmd_list LiList: li* end_list] {
 			for Li: li* in LiList {
-				if match Li [cmd_li PLAIN D: pl_data* nl Rest: li*] {
+				if match Li [cmd_li Lines: line2* nl Rest: li*] {
 					print( '\\noindent\\\hspace*{24pt}' )
-					printPlData( D )
+					printLines2( Lines )
 					if match Rest [ li li* ]
 						print( '\\\\' )
 					print( '\n' )
@@ -449,9 +452,8 @@ int printLines( Lines: line* )
 			print( '\\begin{tabular}{|c|c|c|}\n' )
 			print( '\\hline\n' )
 			for Row: row in repeat(Rows) {
-				if match Row [cmd_row PLAIN D: pl_data* nl] 
-				{
-					printPlData( D )
+				if match Row [cmd_row Lines: line2* nl ] {
+					printLines2( Lines )
 					print( '\\\\' '\n' )
 					print( '\\hline\n' )
 				}

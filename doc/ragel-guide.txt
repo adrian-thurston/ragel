@@ -1541,7 +1541,7 @@ consuming the line, the error recovery machine returns to the main loop.
 % %%{
 %   machine erract;
 %   ws = ' ';
-%   address = 'foo AT bar.com';
+%   address = 'foo AT bar..com';
 %   date = 'Monday May 12';
 .code
 action cmd_err { 
