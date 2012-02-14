@@ -127,53 +127,52 @@ lex top
 {
 	rl hws /[ \t]+/
 
-	literal '@'
-
-	token pd /( [^.@\n]+  | '.' )/
+	token pd /( [^.\n]+  | '.' )/
 	token nl / '\n'/
 
-	token cmd_chapter /'.' 'chapter' hws/
-	token cmd_section /'.' 'section' hws/
-	token cmd_sub_section /'.' 'subsection' hws/
-	token cmd_sub_sub_section /'.' 'subsubsection' hws/
+	token cmd_verb1 /'.verb|'/
+	token cmd_verb2 /'.verb/'/
+	token cmd_label /'.label{'/
+	token cmd_ref /'.ref{'/
+	token cmd_em /'.em{'/
+	token cmd_tt /'.tt{'/
 
-	token cmd_graphic /'.' 'graphic' hws/
-	token cmd_comment /'.' 'comment' hws? '\n'/
-	token cmd_verbatim /'.' 'verbatim' hws? '\n'/
-	token cmd_code /'.' 'code' hws? '\n'/
+	token cmd_chapter /'.chapter' hws/
+	token cmd_section /'.section' hws/
+	token cmd_sub_section /'.subsection' hws/
+	token cmd_sub_sub_section /'.subsubsection' hws/
 
-	token cmd_itemize /'.' 'itemize' hws? '\n'/
-	token end_itemize /'.' 'end' hws 'itemize' hws? '\n'/
-	token cmd_item /'.' 'item' hws/
+	token cmd_graphic /'.graphic' hws/
+	token cmd_comment /'.comment' hws? '\n'/
+	token cmd_verbatim /'.verbatim' hws? '\n'/
+	token cmd_code /'.code' hws? '\n'/
 
-	token cmd_center /'.' 'center' hws? '\n'/
-	token end_center /'.' 'end' hws 'center' hws? '\n'/
+	token cmd_itemize /'.itemize' hws? '\n'/
+	token end_itemize /'.end' hws 'itemize' hws? '\n'/
+	token cmd_item /'.item' hws/
 
-	token cmd_tabular /'.' 'tabular' hws? '\n'/
-	token cmd_row /'.' 'row' hws/
-	token end_tabular /'.' 'end' hws 'tabular' hws? '\n'/
+	token cmd_center /'.center' hws? '\n'/
+	token end_center /'.end' hws 'center' hws? '\n'/
 
-	token cmd_multicols /'.' 'multicols' hws? '\n'/
-	token cmd_columnbreak /'.' 'columnbreak' hws? '\n'/
-	token end_multicols /'.' 'end' hws 'multicols' hws? '\n'/
+	token cmd_tabular /'.tabular' hws? '\n'/
+	token cmd_row /'.row' hws/
+	token end_tabular /'.end' hws 'tabular' hws? '\n'/
 
-	token cmd_figure / '.' 'figure' hws?/
-	token cmd_caption / '.' 'caption' hws/
-	token end_figure / '.' 'end' hws 'figure' hws? '\n'/
+	token cmd_multicols /'.multicols' hws? '\n'/
+	token cmd_columnbreak /'.columnbreak' hws? '\n'/
+	token end_multicols /'.end' hws 'multicols' hws? '\n'/
 
-	token cmd_list /'.' 'list' hws? '\n'/
-	token end_list /'.' 'end' hws 'list' hws? '\n'/
-	token cmd_li /'.' 'li' hws/
+	token cmd_figure / '.figure' hws?/
+	token cmd_caption / '.caption' hws/
+	token end_figure / '.end' hws 'figure' hws? '\n'/
+
+	token cmd_list /'.list' hws? '\n'/
+	token end_list /'.end' hws 'list' hws? '\n'/
+	token cmd_li /'.li' hws/
 }
 
 lex inline_cmd
 {
-	token cmd_verb1 /'verb|'/
-	token cmd_verb2 /'verb/'/
-	token cmd_label /'label{'/
-	token cmd_ref /'ref{'/
-	token cmd_em /'em{'/
-	token cmd_tt /'tt{'/
 }
 
 lex cmd_bar
@@ -195,12 +194,12 @@ lex cmd_curly
 }
 
 def pl_data
-	['@' cmd_verb1 bar_data end_bar]
-|	['@' cmd_verb2 slash_data end_slash]
-|	['@' cmd_label curly_data end_curly]
-|	['@' cmd_ref curly_data end_curly]
-|	['@' cmd_em curly_data end_curly]
-|	['@' cmd_tt curly_data end_curly]
+	[cmd_verb1 bar_data end_bar]
+|	[cmd_verb2 slash_data end_slash]
+|	[cmd_label curly_data end_curly]
+|	[cmd_ref curly_data end_curly]
+|	[cmd_em curly_data end_curly]
+|	[cmd_tt curly_data end_curly]
 
 lex dirdata
 {
@@ -324,32 +323,32 @@ print( Header )
 
 int printPlData( Pld: pl_data )
 {
-	if match Pld ['@' cmd_verb1 V: bar_data end_bar] {
+	if match Pld [ cmd_verb1 V: bar_data end_bar] {
 		print( '\\verb|' )
 		print( V )
 		print( '|' )
 	}
-	else if match Pld ['@' cmd_verb2 V: slash_data end_slash] {
+	else if match Pld [cmd_verb2 V: slash_data end_slash] {
 		print( '\\verb/' )
 		print( V )
 		print( '/' )
 	}
-	else if match Pld ['@' cmd_label L: curly_data end_curly] {
+	else if match Pld [cmd_label L: curly_data end_curly] {
 		print( '\\label{' )
 		print( L )
 		print( '}' )
 	}
-	else if match Pld ['@' cmd_ref L: curly_data end_curly] {
+	else if match Pld [cmd_ref L: curly_data end_curly] {
 		print( '\\ref{' )
 		print( L )
 		print( '}' )
 	}
-	else if match Pld ['@' cmd_em L: curly_data end_curly] {
+	else if match Pld [cmd_em L: curly_data end_curly] {
 		print( '{\\em ' )
 		print( L )
 		print( '}' )
 	}
-	else if match Pld ['@' cmd_tt L: curly_data end_curly] {
+	else if match Pld [cmd_tt L: curly_data end_curly] {
 		print( '{\\tt ' )
 		print( L )
 		print( '}' )
