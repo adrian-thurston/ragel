@@ -123,7 +123,7 @@ Footer: str =
 	~
 	~\end{document}
 
-lex all 
+lex top 
 {
 	rl hws /[ \t]+/
 
@@ -135,48 +135,48 @@ lex all
 	
 	token empty_line /hws? '\n'/
 
-	token cmd_chapter /hws? '.' hws? 'chapter' hws/
-	token cmd_section /hws? '.' hws? 'section' hws/
-	token cmd_sub_section /hws? '.' hws? 'subsection' hws/
-	token cmd_sub_sub_section /hws? '.' hws? 'subsubsection' hws/
+	token cmd_chapter /'.' 'chapter' hws/
+	token cmd_section /'.' 'section' hws/
+	token cmd_sub_section /'.' 'subsection' hws/
+	token cmd_sub_sub_section /'.' 'subsubsection' hws/
 
-	token cmd_graphic /hws? '.' hws? 'graphic' hws/
-	token cmd_comment /hws? '.' hws? 'comment' hws? '\n'/
-	token cmd_verbatim /hws? '.' hws? 'verbatim' hws? '\n'/
-	token cmd_code /hws? '.' hws? 'code' hws? '\n'/
+	token cmd_graphic /'.' 'graphic' hws/
+	token cmd_comment /'.' 'comment' hws? '\n'/
+	token cmd_verbatim /'.' 'verbatim' hws? '\n'/
+	token cmd_code /'.' 'code' hws? '\n'/
 
-	token cmd_itemize /hws? '.' hws? 'itemize' hws? '\n'/
-	token end_itemize /hws? '.' hws? 'end' hws 'itemize' hws? '\n'/
-	token cmd_item /hws? '.' hws? 'item' hws/
+	token cmd_itemize /'.' 'itemize' hws? '\n'/
+	token end_itemize /'.' 'end' hws 'itemize' hws? '\n'/
+	token cmd_item /'.' 'item' hws/
 
-	token cmd_center /hws? '.' hws? 'center' hws? '\n'/
-	token end_center /hws? '.' hws? 'end' hws 'center' hws? '\n'/
+	token cmd_center /'.' 'center' hws? '\n'/
+	token end_center /'.' 'end' hws 'center' hws? '\n'/
 
-	token cmd_tabular /hws? '.' hws? 'tabular' hws? '\n'/
-	token cmd_row /hws? '.' hws? 'row' hws/
-	token end_tabular /hws? '.' hws? 'end' hws 'tabular' hws? '\n'/
+	token cmd_tabular /'.' 'tabular' hws? '\n'/
+	token cmd_row /'.' 'row' hws/
+	token end_tabular /'.' 'end' hws 'tabular' hws? '\n'/
 
-	token cmd_multicols /hws? '.' hws? 'multicols' hws? '\n'/
-	token cmd_columnbreak /hws? '.' hws? 'columnbreak' hws? '\n'/
-	token end_multicols /hws? '.' hws? 'end' hws 'multicols' hws? '\n'/
+	token cmd_multicols /'.' 'multicols' hws? '\n'/
+	token cmd_columnbreak /'.' 'columnbreak' hws? '\n'/
+	token end_multicols /'.' 'end' hws 'multicols' hws? '\n'/
 
-	token cmd_figure /hws? '.' hws? 'figure' hws?/
-	token cmd_caption /hws? '.' hws? 'caption' hws/
-	token end_figure /hws? '.' hws? 'end' hws 'figure' hws? '\n'/
+	token cmd_figure / '.' 'figure' hws?/
+	token cmd_caption / '.' 'caption' hws/
+	token end_figure / '.' 'end' hws 'figure' hws? '\n'/
 
-	token cmd_list /hws? '.' hws? 'list' hws? '\n'/
-	token end_list /hws? '.' hws? 'end' hws 'list' hws? '\n'/
-	token cmd_li /hws? '.' hws? 'li' hws/
+	token cmd_list /'.' 'list' hws? '\n'/
+	token end_list /'.' 'end' hws 'list' hws? '\n'/
+	token cmd_li /'.' 'li' hws/
 }
 
 lex line
 {
-	token d /[^@\n]+/
-	literal '@@', '@'
+	token line_data /[^@\n]+/
+	literal '@'
 	token nl /'\n'/
 }
 
-lex ilc
+lex inline_cmd
 {
 	token cmd_verb1 /'verb|'/
 	token cmd_verb2 /'verb/'/
@@ -186,33 +186,32 @@ lex ilc
 	token cmd_tt /'tt{'/
 }
 
-lex verb1
+lex cmd_bar
 {
-	token vdd1 /[^|]*/
-	token vde1 /'|'/
+	token bar_data /[^|]*/
+	token end_bar /'|'/
 }
 
-lex verb2
+lex cmd_slash
 {
-	token vdd2 /[^/]*/
-	token vde2 /'/'/
+	token slash_data /[^/]*/
+	token end_slash /'/'/
 }
 
-lex ilcd
+lex cmd_curly
 {
-	token ilcdd /[^}]*/
-	token ilcde /'}'/
+	token curly_data /[^}]*/
+	token end_curly /'}'/
 }
 
 def pl_data
-	['@']
-|	['@@' cmd_verb1 vdd1 vde1]
-|	['@@' cmd_verb2 vdd2 vde2]
-|	['@@' cmd_label ilcdd ilcde]
-|	['@@' cmd_ref ilcdd ilcde]
-|	['@@' cmd_em ilcdd ilcde]
-|	['@@' cmd_tt ilcdd ilcde]
-|	[d]
+	['@' cmd_verb1 bar_data end_bar]
+|	['@' cmd_verb2 slash_data end_slash]
+|	['@' cmd_label curly_data end_curly]
+|	['@' cmd_ref curly_data end_curly]
+|	['@' cmd_em curly_data end_curly]
+|	['@' cmd_tt curly_data end_curly]
+|	[line_data]
 
 def plain_line
 	[PLAIN pl_data* nl]
@@ -236,11 +235,17 @@ lex verbatim
 	token verbatim_line /[^\n]* '\n'/
 }
 
+def verbatim
+	[cmd_verbatim verbatim_line* end_verbatim]
+
 lex code
 {
 	token end_code /hws? '.' hws? 'end' hws 'code' hws? '\n'/
 	token code_line /[^\n]* '\n'/
 }
+
+def code
+	[cmd_code code_line* end_code]
 
 lex comment
 {
@@ -251,12 +256,6 @@ lex comment
 def comment
 	[cmd_comment comment_line* end_comment]
 
-def verbatim
-	[cmd_verbatim verbatim_line* end_verbatim]
-
-def code
-	[cmd_code code_line* end_code]
-
 def figure
 	[cmd_figure dirdata dd_nl line* caption? end_figure]
 
@@ -266,34 +265,6 @@ def li
 def _list
 	[cmd_list li* end_list]
 
-def line
-	[empty_line]
-|	[plain_line]
-|	[comment]
-|	[verbatim]
-|	[code]
-|	[graphic]
-|	[itemize]
-|	[center]
-|	[tabular]
-|	[multicols]
-|	[cmd_columnbreak]
-|	[figure]
-|	[_list]
-
-def sub_sub_section
-	[cmd_sub_sub_section dirdata dd_nl line*]
-
-def sub_section
-	[cmd_sub_section dirdata dd_nl line* sub_sub_section*]
-
-def section
-	[cmd_section dirdata dd_nl line* sub_section*]
-
-def chapter
-	[cmd_chapter dirdata dd_nl line* section*]
-
-# Name scale (optional)
 def graphic
 	[cmd_graphic word word? dw_nl]
 
@@ -309,8 +280,12 @@ def row
 def tabular
 	[cmd_tabular row* end_tabular]
 
+def multicols_line
+	[cmd_columnbreak]
+|	[line]
+
 def multicols
-	[cmd_multicols line* end_multicols]
+	[cmd_multicols multicols_line* end_multicols]
 
 def item
 	[cmd_item line*]
@@ -318,8 +293,35 @@ def item
 def caption
 	[cmd_caption line*]
 
+def line
+	[empty_line]
+|	[plain_line]
+|	[comment]
+|	[verbatim]
+|	[code]
+|	[graphic]
+|	[itemize]
+|	[center]
+|	[tabular]
+|	[multicols]
+|	[figure]
+|	[_list]
+
+def sub_sub_section
+	[cmd_sub_sub_section dirdata dd_nl line*]
+
+def sub_section
+	[cmd_sub_section dirdata dd_nl line* sub_sub_section*]
+
+def section
+	[cmd_section dirdata dd_nl line* sub_section*]
+
+def chapter
+	[cmd_chapter dirdata dd_nl line* section*]
+
 def start 
 	[chapter*]
+
 
 parse Start: start( stdin )
 if ( ! Start ) {
@@ -332,32 +334,32 @@ print( Header )
 int printPlData( D: pl_data* )
 {
 	for Pld: pl_data in D {
-		if match Pld ['@@' cmd_verb1 V: vdd1 vde1] {
+		if match Pld ['@' cmd_verb1 V: bar_data end_bar] {
 			print( '\\verb|' )
 			print( V )
 			print( '|' )
 		}
-		else if match Pld ['@@' cmd_verb2 V: vdd2 vde2] {
+		else if match Pld ['@' cmd_verb2 V: slash_data end_slash] {
 			print( '\\verb/' )
 			print( V )
 			print( '/' )
 		}
-		else if match Pld ['@@' cmd_label L: ilcdd ilcde] {
+		else if match Pld ['@' cmd_label L: curly_data end_curly] {
 			print( '\\label{' )
 			print( L )
 			print( '}' )
 		}
-		else if match Pld ['@@' cmd_ref L: ilcdd ilcde] {
+		else if match Pld ['@' cmd_ref L: curly_data end_curly] {
 			print( '\\ref{' )
 			print( L )
 			print( '}' )
 		}
-		else if match Pld ['@@' cmd_em L: ilcdd ilcde] {
+		else if match Pld ['@' cmd_em L: curly_data end_curly] {
 			print( '{\\em ' )
 			print( L )
 			print( '}' )
 		}
-		else if match Pld ['@@' cmd_tt L: ilcdd ilcde] {
+		else if match Pld ['@' cmd_tt L: curly_data end_curly] {
 			print( '{\\tt ' )
 			print( L )
 			print( '}' )
@@ -456,13 +458,16 @@ int printLines( Lines: line* )
 			}
 			print( '\\end{tabular}\n' )
 		}
-		if match L [cmd_multicols Lines: line* end_multicols] {
+		if match L [cmd_multicols Lines: multicols_line* end_multicols] {
 			print( '\\begin{multicols}{2}\n' )
-			printLines( Lines )
+			for McLine: multicols_line in repeat( Lines ) {
+				if match McLine [Line: line]
+					printLines( cons line* [Line] )
+				else if match McLine [cmd_columnbreak] {
+					print( '\\columnbreak\n' )
+				}
+			}
 			print( '\\end{multicols}\n' )
-		}
-		if match L [cmd_columnbreak] {
-			print( '\\columnbreak\n' )
 		}
 	}
 }
