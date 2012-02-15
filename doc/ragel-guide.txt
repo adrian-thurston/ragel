@@ -1,3 +1,6 @@
+.title Ragel State Machine Compiler
+.subtitle User Guide
+.author Adrian Thurston
 .chapter Introduction
 
 .section Abstract

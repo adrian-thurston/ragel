@@ -137,6 +137,10 @@ lex top
 	token cmd_em /'.em{'/
 	token cmd_tt /'.tt{'/
 
+	token cmd_title /'.title' hws/
+	token cmd_sub_title /'.subtitle' hws/
+	token cmd_author /'.author' hws/
+
 	token cmd_chapter /'.chapter' hws/
 	token cmd_section /'.section' hws/
 	token cmd_sub_section /'.subsection' hws/
@@ -309,9 +313,26 @@ def section
 def chapter
 	[cmd_chapter dirdata dd_nl line* section*]
 
-def start 
-	[chapter*]
+def title
+	[cmd_title dirdata dd_nl]
 
+def subtitle
+	[cmd_sub_title dirdata dd_nl]
+
+def author
+	[cmd_author dirdata dd_nl]
+
+def preamble_item
+	[title]
+|	[subtitle]
+|	[author]
+|	[pd]
+
+def preamble
+	[preamble_item*]
+
+def start 
+	[preamble chapter*]
 
 parse Start: start( stdin )
 if ( ! Start ) {
