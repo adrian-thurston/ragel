@@ -69,6 +69,8 @@ lex top
 	token cmd_list /'.list' hws? '\n'/
 	token end_list /'.end' hws 'list' hws? '\n'/
 	token cmd_li /'.li' hws/
+
+	token cmd_license /'.license' hws? '\n'/
 }
 
 lex inline_cmd
@@ -218,6 +220,9 @@ def subtitle
 def author
 	[cmd_author dirdata dd_nl]
 
+def license
+	[cmd_license line*]
+
 def preamble_item
 	[title]
 |	[subtitle]
@@ -225,7 +230,7 @@ def preamble_item
 |	[pd]
 
 def preamble
-	[preamble_item*]
+	[preamble_item* license]
 
 def start 
 	[preamble chapter*]
@@ -400,6 +405,9 @@ match SubTitle [cmd_sub_title SubTitleData: dirdata dd_nl]
 Author: author = author in Preamble
 match Author [cmd_author AuthorData: dirdata dd_nl]
 
+License: license = license in Preamble
+match License [cmd_license line*]
+
 
 print( 
 	~\documentclass[letterpaper,11pt,oneside]{book}
@@ -466,10 +474,16 @@ print(
 	~\pagenumbering{roman}
 	~
 	~\chapter*{License}
+)
+
+print(
 	~Ragel version \version, \pubdate\\
 	~Copyright \copyright\ 2003-2012 Adrian D. Thurston
 	~\vspace{6mm}
 	~
+)
+
+print( 
 	~{\bf\it\noindent This document is part of Ragel, and as such, this document is
 	~released under the terms of the GNU General Public License as published by the
 	~Free Software Foundation; either version 2 of the License, or (at your option)
@@ -487,6 +501,9 @@ print(
 	~{\bf\it\noindent You should have received a copy of the GNU General Public
 	~License along with Ragel; if not, write to the Free Software Foundation, Inc.,
 	~59 Temple Place, Suite 330, Boston, MA  02111-1307  USA}
+)
+
+print(
 	~
 	~\clearpage
 	~\tableofcontents
