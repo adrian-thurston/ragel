@@ -1,127 +1,23 @@
+#
+#   Copyright 2012 Adrian Thurston <thurston@complang.org>
+#
 
+#   This file is part of Ragel.
+#
+#   Ragel is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   Ragel is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with Ragel; if not, write to the Free Software
+#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
 
-Header: str =
-	~%
-	~%   Copyright 2001-2009 Adrian Thurston <thurston@complang.org>
-	~%
-	~
-	~%   This file is part of Ragel.
-	~%
-	~%   Ragel is free software; you can redistribute it and/or modify
-	~%   it under the terms of the GNU General Public License as published by
-	~%   the Free Software Foundation; either version 2 of the License, or
-	~%   (at your option) any later version.
-	~%
-	~%   Ragel is distributed in the hope that it will be useful,
-	~%   but WITHOUT ANY WARRANTY; without even the implied warranty of
-	~%   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	~%   GNU General Public License for more details.
-	~%
-	~%   You should have received a copy of the GNU General Public License
-	~%   along with Ragel; if not, write to the Free Software
-	~%   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
-	~
-	~% TODO: Need a section on the different strategies for handline recursion.
-	~
-	~\documentclass[letterpaper,11pt,oneside]{book}
-	~\usepackage{graphicx}
-	~\usepackage{comment}
-	~\usepackage{multicol}
-	~\usepackage[
-	~	colorlinks=true,
-	~	linkcolor=black,
-	~	citecolor=green,
-	~	filecolor=black,
-	~	urlcolor=black]{hyperref}
-	~
-	~\topmargin -0.20in
-	~\oddsidemargin 0in
-	~\textwidth 6.5in
-	~\textheight 9in
-	~
-	~\setlength{\parskip}{0pt}
-	~\setlength{\topsep}{0pt}
-	~\setlength{\partopsep}{0pt}
-	~\setlength{\itemsep}{0pt}
-	~
-	~\input{version}
-	~
-	~\newcommand{\verbspace}{\vspace{10pt}}
-	~\newcommand{\graphspace}{\vspace{10pt}}
-	~
-	~\renewcommand\floatpagefraction{.99}
-	~\renewcommand\topfraction{.99}
-	~\renewcommand\bottomfraction{.99}
-	~\renewcommand\textfraction{.01}   
-	~\setcounter{totalnumber}{50}
-	~\setcounter{topnumber}{50}
-	~\setcounter{bottomnumber}{50}
-	~
-	~\newenvironment{inline_code}{\def\baselinestretch{1}\vspace{12pt}\small}{}
-	~
-	~\begin{document}
-	~
-	~%
-	~% Title page
-	~%
-	~\thispagestyle{empty}
-	~\begin{center}
-	~\vspace*{3in}
-	~{\huge Ragel State Machine Compiler}\\
-	~\vspace*{12pt}
-	~{\Large User Guide}\\
-	~\vspace{1in}
-	~by\\
-	~\vspace{12pt}
-	~{\large Adrian Thurston}\\
-	~\end{center}
-	~\clearpage
-	~
-	~\pagenumbering{roman}
-	~
-	~%
-	~% License page
-	~%
-	~\chapter*{License}
-	~Ragel version \version, \pubdate\\
-	~Copyright \copyright\ 2003-2007 Adrian Thurston
-	~\vspace{6mm}
-	~
-	~{\bf\it\noindent This document is part of Ragel, and as such, this document is
-	~released under the terms of the GNU General Public License as published by the
-	~Free Software Foundation; either version 2 of the License, or (at your option)
-	~any later version.}
-	~
-	~\vspace{5pt}
-	~
-	~{\bf\it\noindent Ragel is distributed in the hope that it will be useful, but
-	~WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-	~FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
-	~details.}
-	~
-	~\vspace{5pt}
-	~
-	~{\bf\it\noindent You should have received a copy of the GNU General Public
-	~License along with Ragel; if not, write to the Free Software Foundation, Inc.,
-	~59 Temple Place, Suite 330, Boston, MA  02111-1307  USA}
-	~
-	~%
-	~% Table of contents
-	~%
-	~\clearpage
-	~\tableofcontents
-	~\clearpage
-	~
-	~%
-	~% Chapter 1
-	~%
-	~
-	~\pagenumbering{arabic}
-	~
-
-Footer: str =
-	~
-	~\end{document}
 
 lex top 
 {
@@ -340,8 +236,6 @@ if ( ! Start ) {
 	exit( 1 )
 }
 
-print( Header )
-
 int printPlData( Pld: pl_data )
 {
 	if match Pld [ cmd_verb1 V: bar_data end_bar] {
@@ -494,7 +388,115 @@ int printLines( Lines: line* )
 	}
 }
 
-for Chapter: chapter in Start {
+match Start 
+	[Preamble: preamble Chapters: chapter*]
+
+Title: title = title in Preamble
+match Title [cmd_title TitleData: dirdata dd_nl]
+
+SubTitle: subtitle = subtitle in Preamble
+match SubTitle [cmd_sub_title SubTitleData: dirdata dd_nl]
+
+Author: author = author in Preamble
+match Author [cmd_author AuthorData: dirdata dd_nl]
+
+
+print( 
+	~\documentclass[letterpaper,11pt,oneside]{book}
+	~\usepackage{graphicx}
+	~\usepackage{comment}
+	~\usepackage{multicol}
+	~\usepackage[
+	~	colorlinks=true,
+	~	linkcolor=black,
+	~	citecolor=green,
+	~	filecolor=black,
+	~	urlcolor=black]{hyperref}
+	~
+	~\topmargin -0.20in
+	~\oddsidemargin 0in
+	~\textwidth 6.5in
+	~\textheight 9in
+	~
+	~\setlength{\parskip}{0pt}
+	~\setlength{\topsep}{0pt}
+	~\setlength{\partopsep}{0pt}
+	~\setlength{\itemsep}{0pt}
+	~
+	~\input{version}
+	~
+	~\newcommand{\verbspace}{\vspace{10pt}}
+	~\newcommand{\graphspace}{\vspace{10pt}}
+	~
+	~\renewcommand\floatpagefraction{.99}
+	~\renewcommand\topfraction{.99}
+	~\renewcommand\bottomfraction{.99}
+	~\renewcommand\textfraction{.01}   
+	~\setcounter{totalnumber}{50}
+	~\setcounter{topnumber}{50}
+	~\setcounter{bottomnumber}{50}
+	~
+	~\newenvironment{inline_code}{\def\baselinestretch{1}\vspace{12pt}\small}{}
+	~
+	~\begin{document}
+	~
+	~\thispagestyle{empty}
+	~\begin{center}
+	~\vspace*{3in}
+)
+
+print( '{\\huge ' TitleData '}\\\\\n' )
+
+print( '\\vspace*{12pt}\n' )
+
+print( '{\\Large ' SubTitleData '}\\\\\n' )
+
+print(
+	~\vspace{1in}
+	~by\\
+	~\vspace{12pt}
+)
+
+print( '{\\large ' AuthorData '}\\\\\n' )
+
+print(
+	~\end{center}
+	~\clearpage
+	~
+	~\pagenumbering{roman}
+	~
+	~\chapter*{License}
+	~Ragel version \version, \pubdate\\
+	~Copyright \copyright\ 2003-2012 Adrian D. Thurston
+	~\vspace{6mm}
+	~
+	~{\bf\it\noindent This document is part of Ragel, and as such, this document is
+	~released under the terms of the GNU General Public License as published by the
+	~Free Software Foundation; either version 2 of the License, or (at your option)
+	~any later version.}
+	~
+	~\vspace{5pt}
+	~
+	~{\bf\it\noindent Ragel is distributed in the hope that it will be useful, but
+	~WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+	~FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+	~details.}
+	~
+	~\vspace{5pt}
+	~
+	~{\bf\it\noindent You should have received a copy of the GNU General Public
+	~License along with Ragel; if not, write to the Free Software Foundation, Inc.,
+	~59 Temple Place, Suite 330, Boston, MA  02111-1307  USA}
+	~
+	~\clearpage
+	~\tableofcontents
+	~\clearpage
+	~
+	~\pagenumbering{arabic}
+)
+
+
+for Chapter: chapter in repeat(Chapters) {
 	match Chapter
 		[cmd_chapter DirData: dirdata dd_nl Lines: line* SectionList: section*]
 
@@ -509,7 +511,8 @@ for Chapter: chapter in Start {
 		printLines( Lines )
 		for SubSection: sub_section in repeat(SubSectionList) {
 			match SubSection
-				[cmd_sub_section DirData: dirdata dd_nl Lines: line* SubSubSectionList: sub_sub_section*]
+				[cmd_sub_section DirData: dirdata dd_nl Lines: line* 
+						SubSubSectionList: sub_sub_section*]
 
 			print( '\\subsection{' DirData '}\n' )
 			printLines( Lines )
@@ -525,4 +528,7 @@ for Chapter: chapter in Start {
 	}
 }
 
-print( Footer )
+print( 
+	~
+	~\end{document}
+)
