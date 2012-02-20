@@ -23,7 +23,7 @@ lex top
 {
 	rl hws /[ \t]+/
 
-	token pd  /( [^. \t\n]+  | '.' )/
+	token word  /( [^. \t\n]+  | '.' )/
 	token lws /[ \t]+/
 	token nl  / '\n'/
 
@@ -74,10 +74,6 @@ lex top
 	token cmd_license /'.license' hws? '\n'/
 }
 
-lex inline_cmd
-{
-}
-
 lex cmd_bar
 {
 	token bar_data /[^|]*/
@@ -96,13 +92,21 @@ lex cmd_curly
 	token end_curly /'}'/
 }
 
-def pl_data
+def cmd_il
 	[cmd_verb1 bar_data end_bar]
 |	[cmd_verb2 slash_data end_slash]
 |	[cmd_label curly_data end_curly]
 |	[cmd_ref curly_data end_curly]
 |	[cmd_em curly_data end_curly]
 |	[cmd_tt curly_data end_curly]
+
+def pdlws
+	[word]
+|	[lws]
+
+def text
+	[pdlws]
+|	[cmd_il]
 
 lex verbatim
 {
@@ -132,19 +136,19 @@ def comment
 	[cmd_comment comment_line* end_comment]
 
 def figure
-	[cmd_figure pdlws nl line* caption? end_figure]
+	[cmd_figure text nl line* caption? end_figure]
 
 def li
-	[cmd_li line2* nl]
+	[cmd_li text* nl]
 
 def _list
 	[cmd_list li* end_list]
 
 def scale
-	[lws pd pd*]
+	[lws word word*]
 
 def graphic
-	[cmd_graphic pd scale? nl]
+	[cmd_graphic word scale? nl]
 
 def itemize
 	[cmd_itemize line* item* end_itemize]
@@ -152,12 +156,8 @@ def itemize
 def center
 	[cmd_center line* end_center]
 
-def line2
-	[pdlws]
-|	[pl_data]
-
 def row
-	[cmd_row line2* nl]
+	[cmd_row text* nl]
 
 def tabular
 	[cmd_tabular row* end_tabular]
@@ -175,13 +175,10 @@ def item
 def caption
 	[cmd_caption line*]
 
-def pdlws
-	[pd] | [lws]
-
 def line
 	[pdlws]
 |	[nl]
-|	[pl_data]
+|	[cmd_il]
 |	[comment]
 |	[verbatim]
 |	[code]
@@ -194,25 +191,25 @@ def line
 |	[_list]
 
 def sub_sub_section
-	[cmd_sub_sub_section line2* nl line*]
+	[cmd_sub_sub_section text* nl line*]
 
 def sub_section
-	[cmd_sub_section line2* nl line* sub_sub_section*]
+	[cmd_sub_section text* nl line* sub_sub_section*]
 
 def section
-	[cmd_section line2* nl line* sub_section*]
+	[cmd_section text* nl line* sub_section*]
 
 def chapter
-	[cmd_chapter line2* nl line* section*]
+	[cmd_chapter text* nl line* section*]
 
 def title
-	[cmd_title line2* nl]
+	[cmd_title text* nl]
 
 def subtitle
-	[cmd_sub_title line2* nl]
+	[cmd_sub_title text* nl]
 
 def author
-	[cmd_author line2* nl]
+	[cmd_author text* nl]
 
 def license
 	[cmd_license line*]
@@ -235,7 +232,7 @@ if ( ! Start ) {
 	exit( 1 )
 }
 
-int printPlData( Pld: pl_data )
+int printPlData( Pld: cmd_il )
 {
 	if match Pld [ cmd_verb1 V: bar_data end_bar] {
 		print( '\\verb|' )
@@ -272,13 +269,13 @@ int printPlData( Pld: pl_data )
 	}
 }
 
-int printLines2( Lines: line2* )
+int printLines2( Lines: text* )
 {
-	for L: line2 in repeat(Lines) {
+	for L: text in repeat(Lines) {
 		if match L [Pd: pdlws] {
 			print( Pd )
 		}
-		if match L [PlData: pl_data] {
+		if match L [PlData: cmd_il] {
 			printPlData( PlData )
 		}
 	}
@@ -293,7 +290,7 @@ int printLines( Lines: line* )
 		if match L [Nl: nl] {
 			print( Nl )
 		}
-		if match L [PlData: pl_data] {
+		if match L [PlData: cmd_il] {
 			printPlData( PlData )
 		}
 		if match L [cmd_verbatim Lines: verbatim_line* end_verbatim] {
@@ -310,11 +307,11 @@ int printLines( Lines: line* )
 			print( '\\end{inline_code}\n' )
 			print( '\\verbspace\n' )
 		}
-		if match L [cmd_graphic Name: pd Scale: scale? nl] {
+		if match L [cmd_graphic Name: word Scale: scale? nl] {
 			print( '\\graphspace\n' )
 			print( '\\begin{center}\n' )
 			print( '\\includegraphics' )
-			if match Scale [lws Spd: pd Spd2: pd*]
+			if match Scale [lws Spd: word Spd2: word*]
 				print( '[scale=' Spd Spd2 ']' )
 			else 
 				print( '[scale=0.55]' )
@@ -332,7 +329,7 @@ int printLines( Lines: line* )
 			}
 			print( '\\end{itemize}\n' )
 		}
-		if match L [cmd_figure DirData: pdlws nl Lines: line* Caption: caption? end_figure] {
+		if match L [cmd_figure DirData: text nl Lines: line* Caption: caption? end_figure] {
 			print( '\\begin{figure}\n' )
 			print( '\\small\n' )
 			printLines( Lines )
@@ -346,7 +343,7 @@ int printLines( Lines: line* )
 		}
 		if match L [cmd_list LiList: li* end_list] {
 			for Li: li* in LiList {
-				if match Li [cmd_li Lines: line2* nl Rest: li*] {
+				if match Li [cmd_li Lines: text* nl Rest: li*] {
 					print( '\\noindent\\\hspace*{24pt}' )
 					printLines2( Lines )
 					if match Rest [ li li* ]
@@ -365,7 +362,7 @@ int printLines( Lines: line* )
 			print( '\\begin{tabular}{|c|c|c|}\n' )
 			print( '\\hline\n' )
 			for Row: row in repeat(Rows) {
-				if match Row [cmd_row Lines: line2* nl ] {
+				if match Row [cmd_row Lines: text* nl ] {
 					printLines2( Lines )
 					print( '\\\\' '\n' )
 					print( '\\hline\n' )
@@ -391,13 +388,13 @@ match Start
 	[Preamble: preamble Chapters: chapter*]
 
 Title: title = title in Preamble
-match Title [cmd_title TitleData: line2* nl]
+match Title [cmd_title TitleData: text* nl]
 
 SubTitle: subtitle = subtitle in Preamble
-match SubTitle [cmd_sub_title SubTitleData: line2* nl]
+match SubTitle [cmd_sub_title SubTitleData: text* nl]
 
 Author: author = author in Preamble
-match Author [cmd_author AuthorData: line2* nl]
+match Author [cmd_author AuthorData: text* nl]
 
 License: license = license in Preamble
 match License [cmd_license line*]
@@ -509,20 +506,20 @@ print(
 
 for Chapter: chapter in repeat(Chapters) {
 	match Chapter
-		[cmd_chapter DirData: line2* nl Lines: line* SectionList: section*]
+		[cmd_chapter DirData: text* nl Lines: line* SectionList: section*]
 
 	print( '\\chapter{' DirData '}\n' )
 	printLines( Lines )
 
 	for Section: section in repeat(SectionList) {
 		match Section
-			[cmd_section DirData: line2* nl Lines: line* SubSectionList: sub_section*]
+			[cmd_section DirData: text* nl Lines: line* SubSectionList: sub_section*]
 
 		print( '\\section{' DirData '}\n' )
 		printLines( Lines )
 		for SubSection: sub_section in repeat(SubSectionList) {
 			match SubSection
-				[cmd_sub_section DirData: line2* nl Lines: line* 
+				[cmd_sub_section DirData: text* nl Lines: line* 
 						SubSubSectionList: sub_sub_section*]
 
 			print( '\\subsection{' DirData '}\n' )
@@ -530,7 +527,7 @@ for Chapter: chapter in repeat(Chapters) {
 
 			for SubSubSection: sub_sub_section in repeat(SubSubSectionList) {
 				match SubSubSection
-					[cmd_sub_sub_section DirData: line2* nl Lines: line*]
+					[cmd_sub_sub_section DirData: text* nl Lines: line*]
 
 				print( '\\subsubsection{' DirData '}\n' )
 				printLines( Lines )
