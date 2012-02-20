@@ -103,12 +103,6 @@ def pl_data
 |	[cmd_em curly_data end_curly]
 |	[cmd_tt curly_data end_curly]
 
-lex dirdata
-{
-	token dirdata /[^\n]+/
-	token dd_nl /'\n'/
-}
-
 lex word
 {
 	ignore /[ \t]+/
@@ -144,7 +138,7 @@ def comment
 	[cmd_comment comment_line* end_comment]
 
 def figure
-	[cmd_figure dirdata dd_nl line* caption? end_figure]
+	[cmd_figure pd nl line* caption? end_figure]
 
 def li
 	[cmd_li line2* nl]
@@ -200,25 +194,25 @@ def line
 |	[_list]
 
 def sub_sub_section
-	[cmd_sub_sub_section dirdata dd_nl line*]
+	[cmd_sub_sub_section pd nl line*]
 
 def sub_section
-	[cmd_sub_section dirdata dd_nl line* sub_sub_section*]
+	[cmd_sub_section pd nl line* sub_sub_section*]
 
 def section
-	[cmd_section dirdata dd_nl line* sub_section*]
+	[cmd_section pd nl line* sub_section*]
 
 def chapter
-	[cmd_chapter dirdata dd_nl line* section*]
+	[cmd_chapter pd nl line* section*]
 
 def title
-	[cmd_title dirdata dd_nl]
+	[cmd_title pd nl]
 
 def subtitle
-	[cmd_sub_title dirdata dd_nl]
+	[cmd_sub_title pd nl]
 
 def author
-	[cmd_author dirdata dd_nl]
+	[cmd_author pd nl]
 
 def license
 	[cmd_license line*]
@@ -338,7 +332,7 @@ int printLines( Lines: line* )
 			}
 			print( '\\end{itemize}\n' )
 		}
-		if match L [cmd_figure DirData: dirdata dd_nl Lines: line* Caption: caption? end_figure] {
+		if match L [cmd_figure DirData: pd nl Lines: line* Caption: caption? end_figure] {
 			print( '\\begin{figure}\n' )
 			print( '\\small\n' )
 			printLines( Lines )
@@ -397,13 +391,13 @@ match Start
 	[Preamble: preamble Chapters: chapter*]
 
 Title: title = title in Preamble
-match Title [cmd_title TitleData: dirdata dd_nl]
+match Title [cmd_title TitleData: pd nl]
 
 SubTitle: subtitle = subtitle in Preamble
-match SubTitle [cmd_sub_title SubTitleData: dirdata dd_nl]
+match SubTitle [cmd_sub_title SubTitleData: pd nl]
 
 Author: author = author in Preamble
-match Author [cmd_author AuthorData: dirdata dd_nl]
+match Author [cmd_author AuthorData: pd nl]
 
 License: license = license in Preamble
 match License [cmd_license line*]
@@ -515,20 +509,20 @@ print(
 
 for Chapter: chapter in repeat(Chapters) {
 	match Chapter
-		[cmd_chapter DirData: dirdata dd_nl Lines: line* SectionList: section*]
+		[cmd_chapter DirData: pd nl Lines: line* SectionList: section*]
 
 	print( '\\chapter{' DirData '}\n' )
 	printLines( Lines )
 
 	for Section: section in repeat(SectionList) {
 		match Section
-			[cmd_section DirData: dirdata dd_nl Lines: line* SubSectionList: sub_section*]
+			[cmd_section DirData: pd nl Lines: line* SubSectionList: sub_section*]
 
 		print( '\\section{' DirData '}\n' )
 		printLines( Lines )
 		for SubSection: sub_section in repeat(SubSectionList) {
 			match SubSection
-				[cmd_sub_section DirData: dirdata dd_nl Lines: line* 
+				[cmd_sub_section DirData: pd nl Lines: line* 
 						SubSubSectionList: sub_sub_section*]
 
 			print( '\\subsection{' DirData '}\n' )
@@ -536,7 +530,7 @@ for Chapter: chapter in repeat(Chapters) {
 
 			for SubSubSection: sub_sub_section in repeat(SubSubSectionList) {
 				match SubSubSection
-					[cmd_sub_sub_section DirData: dirdata dd_nl Lines: line*]
+					[cmd_sub_sub_section DirData: pd nl Lines: line*]
 
 				print( '\\subsubsection{' DirData '}\n' )
 				printLines( Lines )
