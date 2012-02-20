@@ -176,9 +176,8 @@ def caption
 	[cmd_caption line*]
 
 def line
-	[pdlws]
+	[text]
 |	[nl]
-|	[cmd_il]
 |	[comment]
 |	[verbatim]
 |	[code]
@@ -215,10 +214,11 @@ def license
 	[cmd_license line*]
 
 def preamble_item
-	[title]
+	[text]
+|	[nl]
+|	[title]
 |	[subtitle]
 |	[author]
-|	[pdlws]
 
 def preamble
 	[preamble_item* license]
@@ -269,14 +269,14 @@ int printPlData( Pld: cmd_il )
 	}
 }
 
-int printLines2( Lines: text* )
+int printText( Lines: text* )
 {
 	for L: text in repeat(Lines) {
-		if match L [Pd: pdlws] {
-			print( Pd )
-		}
 		if match L [PlData: cmd_il] {
 			printPlData( PlData )
+		}
+		else {
+			print( L )
 		}
 	}
 }
@@ -284,11 +284,14 @@ int printLines2( Lines: text* )
 int printLines( Lines: line* )
 {
 	for L: line in repeat(Lines) {
-		if match L [Pd: pdlws] {
-			print( Pd )
+		if match L [word] {
+			print( L )
 		}
-		if match L [Nl: nl] {
-			print( Nl )
+		if match L [lws] {
+			print( L )
+		}
+		if match L [nl] {
+			print( L )
 		}
 		if match L [PlData: cmd_il] {
 			printPlData( PlData )
@@ -345,7 +348,7 @@ int printLines( Lines: line* )
 			for Li: li* in LiList {
 				if match Li [cmd_li Lines: text* nl Rest: li*] {
 					print( '\\noindent\\\hspace*{24pt}' )
-					printLines2( Lines )
+					printText( Lines )
 					if match Rest [ li li* ]
 						print( '\\\\' )
 					print( '\n' )
@@ -363,7 +366,7 @@ int printLines( Lines: line* )
 			print( '\\hline\n' )
 			for Row: row in repeat(Rows) {
 				if match Row [cmd_row Lines: text* nl ] {
-					printLines2( Lines )
+					printText( Lines )
 					print( '\\\\' '\n' )
 					print( '\\hline\n' )
 				}

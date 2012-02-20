@@ -1,6 +1,9 @@
 .title Ragel State Machine Compiler
+
 .subtitle User Guide
+
 .author Adrian Thurston
+
 .license
 
 Ragel version \version, \pubdate\\
