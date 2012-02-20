@@ -21,8 +21,6 @@
 
 lex top 
 {
-	rl hws /[ \t]+/
-
 	token word  /( [^. \t\n]+  | '.' )/
 	token lws /[ \t]+/
 	token nl  / '\n'/
@@ -34,44 +32,44 @@ lex top
 	token cmd_em /'.em{'/
 	token cmd_tt /'.tt{'/
 
-	token cmd_title /'.title' hws/
-	token cmd_sub_title /'.subtitle' hws/
-	token cmd_author /'.author' hws/
+	token cmd_title /'.title' lws/
+	token cmd_sub_title /'.subtitle' lws/
+	token cmd_author /'.author' lws/
 
-	token cmd_chapter /'.chapter' hws/
-	token cmd_section /'.section' hws/
-	token cmd_sub_section /'.subsection' hws/
-	token cmd_sub_sub_section /'.subsubsection' hws/
+	token cmd_chapter /'.chapter' lws/
+	token cmd_section /'.section' lws/
+	token cmd_sub_section /'.subsection' lws/
+	token cmd_sub_sub_section /'.subsubsection' lws/
 
-	token cmd_graphic /'.graphic' hws/
-	token cmd_comment /'.comment' hws? '\n'/
-	token cmd_verbatim /'.verbatim' hws? '\n'/
-	token cmd_code /'.code' hws? '\n'/
+	token cmd_graphic /'.graphic' lws/
+	token cmd_comment /'.comment' lws? '\n'/
+	token cmd_verbatim /'.verbatim' lws? '\n'/
+	token cmd_code /'.code' lws? '\n'/
 
-	token cmd_itemize /'.itemize' hws? '\n'/
-	token end_itemize /'.end' hws 'itemize' hws? '\n'/
-	token cmd_item /'.item' hws/
+	token cmd_itemize /'.itemize' lws? '\n'/
+	token end_itemize /'.end' lws 'itemize' lws? '\n'/
+	token cmd_item /'.item' lws/
 
-	token cmd_center /'.center' hws? '\n'/
-	token end_center /'.end' hws 'center' hws? '\n'/
+	token cmd_center /'.center' lws? '\n'/
+	token end_center /'.end' lws 'center' lws? '\n'/
 
-	token cmd_tabular /'.tabular' hws? '\n'/
-	token cmd_row /'.row' hws/
-	token end_tabular /'.end' hws 'tabular' hws? '\n'/
+	token cmd_tabular /'.tabular' lws? '\n'/
+	token cmd_row /'.row' lws/
+	token end_tabular /'.end' lws 'tabular' lws? '\n'/
 
-	token cmd_multicols /'.multicols' hws? '\n'/
-	token cmd_columnbreak /'.columnbreak' hws? '\n'/
-	token end_multicols /'.end' hws 'multicols' hws? '\n'/
+	token cmd_multicols /'.multicols' lws? '\n'/
+	token cmd_columnbreak /'.columnbreak' lws? '\n'/
+	token end_multicols /'.end' lws 'multicols' lws? '\n'/
 
-	token cmd_figure / '.figure' hws?/
-	token cmd_caption / '.caption' hws/
-	token end_figure / '.end' hws 'figure' hws? '\n'/
+	token cmd_figure / '.figure' lws?/
+	token cmd_caption / '.caption' lws/
+	token end_figure / '.end' lws 'figure' lws? '\n'/
 
-	token cmd_list /'.list' hws? '\n'/
-	token end_list /'.end' hws 'list' hws? '\n'/
-	token cmd_li /'.li' hws/
+	token cmd_list /'.list' lws? '\n'/
+	token end_list /'.end' lws 'list' lws? '\n'/
+	token cmd_li /'.li' lws/
 
-	token cmd_license /'.license' hws? '\n'/
+	token cmd_license /'.license' lws? '\n'/
 }
 
 lex cmd_bar
@@ -100,17 +98,14 @@ def cmd_il
 |	[cmd_em curly_data end_curly]
 |	[cmd_tt curly_data end_curly]
 
-def pdlws
+def text
 	[word]
 |	[lws]
-
-def text
-	[pdlws]
 |	[cmd_il]
 
 lex verbatim
 {
-	token end_verbatim /hws? '.' hws? 'end' hws 'verbatim' hws? '\n'/
+	token end_verbatim /lws? '.' lws? 'end' lws 'verbatim' lws? '\n'/
 	token verbatim_line /[^\n]* '\n'/
 }
 
@@ -119,7 +114,7 @@ def verbatim
 
 lex code
 {
-	token end_code /hws? '.' hws? 'end' hws 'code' hws? '\n'/
+	token end_code /lws? '.' lws? 'end' lws 'code' lws? '\n'/
 	token code_line /[^\n]* '\n'/
 }
 
@@ -128,7 +123,7 @@ def code
 
 lex comment
 {
-	token end_comment /hws? '.' hws? 'end' hws 'comment' hws? '\n'/
+	token end_comment /lws? '.' lws? 'end' lws 'comment' lws? '\n'/
 	token comment_line /[^\n]* '\n'/
 }
 
@@ -210,8 +205,28 @@ def subtitle
 def author
 	[cmd_author text* nl]
 
+#
+# Paragraphs.
+#
+
+def pline
+	[text text* nl]
+
+def paragraph
+	[pline pline*]
+
+def pextra
+	[nl paragraph]
+
+def block
+	[paragraph pextra*]
+
 def license
-	[cmd_license line*]
+	[cmd_license nl* block nl*]
+
+#
+# Preamble.
+#
 
 def preamble_item
 	[text]
@@ -400,8 +415,6 @@ Author: author = author in Preamble
 match Author [cmd_author AuthorData: text* nl]
 
 License: license = license in Preamble
-match License [cmd_license line*]
-
 
 print( 
 	~\documentclass[letterpaper,11pt,oneside]{book}
@@ -476,6 +489,13 @@ print(
 	~\vspace{6mm}
 	~
 )
+
+#for P: paragraph in License {
+#	print( "{\\bf\\it\\noindent " )
+#	print( P )
+#	print( "}\n" )
+#}
+
 
 print( 
 	~{\bf\it\noindent This document is part of Ragel, and as such, this document is
