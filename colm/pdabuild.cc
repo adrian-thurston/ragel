@@ -217,37 +217,53 @@ void ParseData::makeLangElIds()
 	assert( ignoreLangEl->id == LEL_ID_IGNORE );
 }
 
+void ParseData::refNameSpace( LangEl *lel, Namespace *nspace )
+{
+	if ( nspace == defaultNamespace || nspace == rootNamespace ) {
+		lel->refName = "::" + lel->refName;
+		return;
+	}
+	
+	lel->refName = nspace->name + "::" + lel->refName;
+	lel->declName = nspace->name + "::" + lel->declName;
+	refNameSpace( lel, nspace->parentNamespace );
+}
+
 void ParseData::makeLangElNames()
 {
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
 		if ( lel->id == LEL_ID_INT ) {
 			lel->fullName = "_int";
 			lel->fullLit = "_int";
+			lel->refName = "_int";
+			lel->declName = "_int";
 		}
 		else if ( lel->id == LEL_ID_BOOL ) {
 			lel->fullName = "_bool";
 			lel->fullLit = "_bool";
+			lel->refName = "_bool";
+			lel->declName = "_bool";
 		}
 		else {
 			lel->fullName = lel->name;
 			lel->fullLit = lel->lit;
+			lel->refName = lel->lit;
+			lel->declName = lel->lit;
 		}
 
-		Namespace *nspace = lel->nspace;
-		while ( nspace != 0 ) {
-			if ( nspace == defaultNamespace || nspace == rootNamespace )
-				break;
-			lel->fullName = nspace->name + "_" + lel->fullName;
-			nspace = nspace->parentNamespace;
+		/* If there is also a namespace next to the type, we add a prefix to
+		 * the type. It's not convenient to name C++ classes the same as a
+		 * namespace in the same scope. We don't want to restrict colm, so we
+		 * add a workaround for the least-common case. The type gets t_ prefix.
+		 * */
+		Namespace *nspace = lel->nspace->findNamespace( lel->name );
+		if ( nspace != 0 ) {
+			lel->refName = "t_" + lel->refName;
+			lel->fullName = "t_" + lel->fullName;
+			lel->declName = "t_" + lel->declName;
 		}
 
-		nspace = lel->nspace;
-		while ( nspace != 0 ) {
-			if ( nspace == defaultNamespace || nspace == rootNamespace )
-				break;
-			lel->fullLit = nspace->name + "::" + lel->fullLit;
-			nspace = nspace->parentNamespace;
-		}
+		refNameSpace( lel, lel->nspace );
 	}
 }
 

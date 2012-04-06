@@ -212,6 +212,12 @@ struct LangEl : public DListEl<LangEl>
 	String fullName;
 	String fullLit;
 
+	/* For referencing the type. */
+	String refName;
+
+	/* For declaring things inside the type. */
+	String declName;
+
 	Type type;
 	long id;
 	bool isUserTerm;
@@ -837,7 +843,11 @@ struct ParseData
 	void semanticAnalysis();
 	void generateOutput();
 
+	void openNameSpace( ostream &out, Namespace *nspace );
+	void closeNameSpace( ostream &out, Namespace *nspace );
+	void refNameSpace( LangEl *lel, Namespace *nspace );
 	void generateExports();
+	void generateExportsImpl();
 
 	/* 
 	 * Graphviz Generation

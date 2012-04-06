@@ -35,6 +35,24 @@ using std::string;
 using std::cerr;
 using std::endl;
 
+void ParseData::openNameSpace( ostream &out, Namespace *nspace )
+{
+	if ( nspace == defaultNamespace || nspace == rootNamespace )
+		return;
+	
+	openNameSpace( out, nspace->parentNamespace );
+	out << "namespace " << nspace->name << " { ";
+}
+
+void ParseData::closeNameSpace( ostream &out, Namespace *nspace )
+{
+	if ( nspace == defaultNamespace || nspace == rootNamespace )
+		return;
+	
+	openNameSpace( out, nspace->parentNamespace );
+	out << " }";
+}
+
 void ParseData::generateExports()
 {
 	ostream &out = *outStream;
@@ -67,10 +85,16 @@ void ParseData::generateExports()
 		"\n";
 
 	/* Declare. */
-	for ( LelList::Iter lel = langEls; lel.lte(); lel++ )
-		out << "struct " << lel->fullName << ";\n";
-
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
+		openNameSpace( out, lel->nspace );
+		out << "struct " << lel->fullName << ";";
+		closeNameSpace( out, lel->nspace );
+		out << "\n";
+	}
+
+	/* Class definitions. */
+	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
+		openNameSpace( out, lel->nspace );
 		out << "struct " << lel->fullName << "\n";
 		out << "{\n";
 		out << "	std::string text() { return printTreeStr( prg, tree ); }\n";
@@ -91,7 +115,7 @@ void ParseData::generateExports()
 					UniqueType *ut = field->typeRef->lookupType( this );
 
 					if ( ut != 0 && ut->typeId == TYPE_TREE  ) {
-						out << "	" << ut->langEl->fullName << " " << field->name << "();\n";
+						out << "	" << ut->langEl->refName << " " << field->name << "();\n";
 					}
 				}
 
@@ -99,7 +123,7 @@ void ParseData::generateExports()
 					UniqueType *ut = field->typeRef->lookupType( this );
 
 					if ( ut != 0 && ut->typeId == TYPE_TREE  ) {
-						out << "	" << ut->langEl->fullName << " " << field->name << "();\n";
+						out << "	" << ut->langEl->refName << " " << field->name << "();\n";
 					}
 				}
 			}
@@ -107,18 +131,42 @@ void ParseData::generateExports()
 
 		if ( lel->isRepeat ) {
 			out << "	" << "int end() { return repeatEnd( tree ); }\n";
-			out << "	" << lel->fullName << " next();\n";
-			out << "	" << lel->repeatOf->fullName << " value();\n";
+			out << "	" << lel->refName << " next();\n";
+			out << "	" << lel->repeatOf->refName << " value();\n";
 		}
 
 		if ( lel->isList ) {
 			out << "	" << "int last() { return listLast( tree ); }\n";
-			out << "	" << lel->fullName << " next();\n";
-			out << "	" << lel->repeatOf->fullName << " value();\n";
+			out << "	" << lel->refName << " next();\n";
+			out << "	" << lel->repeatOf->refName << " value();\n";
 		}
-		out << "};\n";
+		out << "};";
+		closeNameSpace( out, lel->nspace );
+		out << "\n";
 	}
 
+	for ( ObjFieldList::Iter of = *globalObjectDef->objFieldList; of.lte(); of++ ) {
+		ObjField *field = of->value;
+		if ( field->isExport ) {
+			UniqueType *ut = field->typeRef->lookupType(this);
+			if ( ut != 0 && ut->typeId == TYPE_TREE  ) {
+				out << ut->langEl->refName << " " << field->name << "( ColmProgram *prg );\n";
+			}
+		}
+	}
+	
+	out << "#endif\n";
+}
+
+void ParseData::generateExportsImpl()
+{
+	ostream &out = *outStream;
+
+	if ( gblExportTo != 0 )  {
+		out << "#include \"" << gblExportTo << "\"\n";
+	}
+
+	/* Function implementations. */
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
 		if ( lel->objectDef != 0 && lel->objectDef->objFieldList != 0 ) {
 			ObjFieldList *objFieldList = lel->objectDef->objFieldList;
@@ -128,8 +176,8 @@ void ParseData::generateExports()
 					UniqueType *ut = field->typeRef->lookupType( this );
 
 					if ( ut != 0 && ut->typeId == TYPE_TREE  ) {
-						out << ut->langEl->fullName << " " << lel->fullName << "::" << field->name << 
-							"() { return " << ut->langEl->fullName << 
+						out << ut->langEl->refName << " " << lel->declName << "::" << field->name << 
+							"() { return " << ut->langEl->refName << 
 							"( prg, getAttr( tree, " << field->offset << ") ); }\n";
 					}
 				}
@@ -138,7 +186,7 @@ void ParseData::generateExports()
 					UniqueType *ut = field->typeRef->lookupType( this );
 
 					if ( ut != 0 && ut->typeId == TYPE_TREE  ) {
-						out << ut->langEl->fullName << " " << lel->fullName << "::" << field->name << 
+						out << ut->langEl->refName << " " << lel->declName << "::" << field->name << 
 							"() { static int a[] = {"; 
 
 						/* Need to place the array computing the val. */
@@ -148,7 +196,7 @@ void ParseData::generateExports()
 							out << ", " << rg->childNum;
 						}
 
-						out << "}; return " << ut->langEl->fullName << 
+						out << "}; return " << ut->langEl->refName << 
 							"( prg, getRhsVal( prg, tree, a ) ); }\n";
 					}
 				}
@@ -156,23 +204,23 @@ void ParseData::generateExports()
 		}
 
 		if ( lel->isRepeat ) {
-			out << lel->fullName << " " << lel->fullName << "::" << " next"
-				"() { return " << lel->fullName << 
+			out << lel->refName << " " << lel->declName << "::" << " next"
+				"() { return " << lel->refName << 
 				"( prg, getRepeatNext( tree ) ); }\n";
 
-			out << lel->repeatOf->fullName << " " << lel->fullName << "::" << " value"
-				"() { return " << lel->repeatOf->fullName << 
+			out << lel->repeatOf->refName << " " << lel->declName << "::" << " value"
+				"() { return " << lel->repeatOf->refName << 
 				"( prg, getRepeatVal( tree ) ); }\n";
 
 		}
 
 		if ( lel->isList ) {
-			out << lel->fullName << " " << lel->fullName << "::" << " next"
-				"() { return " << lel->fullName << 
+			out << lel->refName << " " << lel->declName << "::" << " next"
+				"() { return " << lel->refName << 
 				"( prg, getRepeatNext( tree ) ); }\n";
 
-			out << lel->repeatOf->fullName << " " << lel->fullName << "::" << " value"
-				"() { return " << lel->repeatOf->fullName << 
+			out << lel->repeatOf->refName << " " << lel->declName << "::" << " value"
+				"() { return " << lel->repeatOf->refName << 
 				"( prg, getRepeatVal( tree ) ); }\n";
 		}
 	}
@@ -185,14 +233,12 @@ void ParseData::generateExports()
 			UniqueType *ut = field->typeRef->lookupType(this);
 			if ( ut != 0 && ut->typeId == TYPE_TREE  ) {
 				out << 
-					ut->langEl->fullName << " " << field->name << "(ColmProgram *prg)\n"
-					"{ return " << ut->langEl->fullName << "( prg, getGlobal( prg, " << 
+					ut->langEl->refName << " " << field->name << "(ColmProgram *prg)\n"
+					"{ return " << ut->langEl->refName << "( prg, getGlobal( prg, " << 
 					field->offset << ") ); }\n";
 			}
 		}
 	}
-	
-	out << "#endif\n";
 }
 
 void FsmCodeGen::writeMain()
