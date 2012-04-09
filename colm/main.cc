@@ -168,7 +168,7 @@ void usage()
 void version()
 {
 	cout << "Colm version " VERSION << " " PUBDATE << endl <<
-			"Copyright (c) 2007, 2008 by Adrian Thurston" << endl;
+			"Copyright (c) 2007-2012 by Adrian D. Thurston" << endl;
 }
 
 /* Scans a string looking for the file extension. If there is a file
