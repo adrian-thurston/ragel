@@ -1,0 +1,522 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues type="array">
+  <issue>
+    <id>342</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Feature" id="2"/>
+    <status name="Completed" id="7"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <fixed_version name="0.4" id="31"/>
+    <subject>eliminate series of test functions from the input stream interface</subject>
+    <description>rather than calling a series of tests for exceptional situations, us one main get data function and return the exceptional circumstances from that. This is helpful in the split between wrapper and implementation streams.</description>
+    <start_date>2011-12-29</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Thu Dec 29 10:37:42 -0800 2011</created_on>
+    <updated_on>Sat Jan 21 14:04:38 -0800 2012</updated_on>
+  </issue>
+  <issue>
+    <id>341</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Feature" id="2"/>
+    <status name="Completed" id="7"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <fixed_version name="0.4" id="31"/>
+    <subject>split input stream into two: wrapper and implementation streams</subject>
+    <description>The wrapper act as a stream of streams. The implementation stream (source stream) will provide data. Both need a refcounted tree struct so they can be stored in multiple accumulators, which will happen mostly due to sub-parsers.</description>
+    <start_date>2011-12-29</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Thu Dec 29 10:35:27 -0800 2011</created_on>
+    <updated_on>Sat Jan 21 14:04:30 -0800 2012</updated_on>
+  </issue>
+  <issue>
+    <id>340</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Feature" id="2"/>
+    <status name="Completed" id="7"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <fixed_version name="0.4" id="31"/>
+    <subject>eliminate sharing of buffer space between FSM run and input stream</subject>
+    <description>Copy data into the FSM run. Consume it in the input stream when tokens are produced. This implementation will be more robust.</description>
+    <start_date>2011-12-27</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Tue Dec 27 12:33:55 -0800 2011</created_on>
+    <updated_on>Sat Jan 21 14:04:25 -0800 2012</updated_on>
+  </issue>
+  <issue>
+    <id>337</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Bug" id="1"/>
+    <status name="Fixed" id="8"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <fixed_version name="0.4" id="31"/>
+    <subject>need a reverse execution 'deck'</subject>
+    <description>This concept will allow us to disassociate reverse execution from tokens, which is currently binding us somewhat.</description>
+    <start_date>2011-12-04</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sun Dec 04 12:59:11 -0800 2011</created_on>
+    <updated_on>Sat Jan 21 14:04:18 -0800 2012</updated_on>
+  </issue>
+  <issue>
+    <id>336</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Bug" id="1"/>
+    <status name="Fixed" id="8"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <fixed_version name="0.4" id="31"/>
+    <subject>eliminate notoken</subject>
+    <description>Wasteful. Can probably be removed with more careful computation of steps (formally consumed).</description>
+    <start_date>2011-12-02</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Fri Dec 02 19:49:10 -0800 2011</created_on>
+    <updated_on>Sat Jan 21 14:04:13 -0800 2012</updated_on>
+  </issue>
+  <issue>
+    <id>335</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Bug" id="1"/>
+    <status name="Fixed" id="8"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <fixed_version name="0.4" id="31"/>
+    <subject>naming attributes in cons is inconsistent with the use of colon for capture</subject>
+    <description>Eliminate this. Just go with positions.</description>
+    <start_date>2011-11-27</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sun Nov 27 17:52:37 -0800 2011</created_on>
+    <updated_on>Sat Jan 21 14:04:06 -0800 2012</updated_on>
+  </issue>
+  <issue>
+    <id>333</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Bug" id="1"/>
+    <status name="Fixed" id="8"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <fixed_version name="0.3" id="30"/>
+    <subject>don't attach ignores until the token is shifted</subject>
+    <description></description>
+    <start_date>2011-11-17</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Thu Nov 17 22:08:47 -0800 2011</created_on>
+    <updated_on>Sun Nov 20 14:29:13 -0800 2011</updated_on>
+  </issue>
+  <issue>
+    <id>332</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Bug" id="1"/>
+    <status name="Fixed" id="8"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <fixed_version name="0.3" id="30"/>
+    <subject>eliminate possibility of recursive calls to bytecode execution</subject>
+    <description>requires factoring out the reduction and token generation actions.</description>
+    <start_date>2011-11-06</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sun Nov 06 20:16:04 -0800 2011</created_on>
+    <updated_on>Tue Nov 15 17:40:48 -0800 2011</updated_on>
+  </issue>
+  <issue>
+    <id>331</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Bug" id="1"/>
+    <status name="Fixed" id="8"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <fixed_version name="0.3" id="30"/>
+    <subject>parse errors should not cause errors to be printed to stderr/stdout</subject>
+    <description>Cannot assume it is okay to use output. Store the error for access.</description>
+    <start_date>2011-10-31</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Mon Oct 31 00:01:32 -0700 2011</created_on>
+    <updated_on>Tue Nov 15 17:41:53 -0800 2011</updated_on>
+  </issue>
+  <issue>
+    <id>330</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Bug" id="1"/>
+    <status name="Fixed" id="8"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <fixed_version name="0.3" id="30"/>
+    <subject>parse errors cannot be printed</subject>
+    <description>Store them instead. They can be printed in the program if needed, or exported to the program that the colm program is embedded in.</description>
+    <start_date>2011-10-30</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sun Oct 30 16:28:52 -0700 2011</created_on>
+    <updated_on>Sun Nov 20 15:13:44 -0800 2011</updated_on>
+  </issue>
+  <issue>
+    <id>329</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Feature" id="2"/>
+    <status name="Completed" id="7"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <fixed_version name="0.3" id="30"/>
+    <subject>automatic access to RHS elements</subject>
+    <description>Allow access to RHS elements. Useful for extraction of data.</description>
+    <start_date>2011-10-26</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Wed Oct 26 09:09:08 -0700 2011</created_on>
+    <updated_on>Sun Nov 20 14:35:51 -0800 2011</updated_on>
+  </issue>
+  <issue>
+    <id>328</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Feature" id="2"/>
+    <status name="Completed" id="7"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <fixed_version name="0.3" id="30"/>
+    <subject>embeddable in other programs</subject>
+    <description>Should be possible to link a colm program into another C/C++ program.</description>
+    <start_date>2011-10-22</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sat Oct 22 10:45:07 -0700 2011</created_on>
+    <updated_on>Sun Nov 20 14:36:00 -0800 2011</updated_on>
+  </issue>
+  <issue>
+    <id>327</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Bug" id="1"/>
+    <status name="Fixed" id="8"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <fixed_version name="0.3" id="30"/>
+    <subject>parse error cannot cause fatal error</subject>
+    <description>generally there can be none, but parsing is critical</description>
+    <start_date>2011-10-21</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Fri Oct 21 20:29:08 -0700 2011</created_on>
+    <updated_on>Tue Nov 15 17:41:23 -0800 2011</updated_on>
+  </issue>
+  <issue>
+    <id>326</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Feature" id="2"/>
+    <status name="Completed" id="7"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <fixed_version name="0.3" id="30"/>
+    <subject>print the deepest error, it is more accurate</subject>
+    <description>May also consider printing a list of errors sorted by depth</description>
+    <start_date>2011-10-21</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Fri Oct 21 20:01:00 -0700 2011</created_on>
+    <updated_on>Sun Nov 20 14:36:05 -0800 2011</updated_on>
+  </issue>
+  <issue>
+    <id>325</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Feature" id="2"/>
+    <status name="Completed" id="7"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <fixed_version name="0.3" id="30"/>
+    <subject>XML printing off of main print function</subject>
+    <description>Need to have only one print loop as the complexity increases.</description>
+    <start_date>2011-10-09</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sun Oct 09 10:29:08 -0700 2011</created_on>
+    <updated_on>Sat Nov 05 14:54:59 -0700 2011</updated_on>
+  </issue>
+  <issue>
+    <id>324</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Bug" id="1"/>
+    <status name="Fixed" id="8"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <fixed_version name="0.3" id="30"/>
+    <subject>exit cannot call c exit function</subject>
+    <description>must break out of the execution loop, then any loops higher up.</description>
+    <start_date>2011-10-08</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sat Oct 08 22:21:02 -0700 2011</created_on>
+    <updated_on>Tue Nov 15 17:41:02 -0800 2011</updated_on>
+  </issue>
+  <issue>
+    <id>323</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Research" id="4"/>
+    <status name="Closed" id="5"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <fixed_version name="0.3" id="30"/>
+    <subject>ignore tokens with generations, on both sides of tokens, and stored in child lists</subject>
+    <description>Try out a new method of storing ignore tokens. Generations for replacement without seraching and modifying.
+
+Put them on both sides of tokens.
+
+Put them in child lists.</description>
+    <start_date>2011-09-17</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sat Sep 17 13:58:35 -0700 2011</created_on>
+    <updated_on>Tue Nov 15 17:44:58 -0800 2011</updated_on>
+  </issue>
+  <issue>
+    <id>322</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Feature" id="2"/>
+    <status name="Completed" id="7"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <fixed_version name="0.3" id="30"/>
+    <subject>better syntax for &lt;&lt; and .finish(): send Parser [stuff] and Parser()</subject>
+    <description>The &lt;&lt; operator and the .finish() call have both always stood out. Try out a replacement.
+
+send Parser "stuff
+Start: start = Parser()</description>
+    <start_date>2011-09-16</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Fri Sep 16 09:13:43 -0700 2011</created_on>
+    <updated_on>Tue Nov 15 17:44:22 -0800 2011</updated_on>
+  </issue>
+  <issue>
+    <id>318</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Feature" id="2"/>
+    <status name="New" id="1"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <subject>function for stripping ignore tokens</subject>
+    <description></description>
+    <start_date>2011-08-07</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sun Aug 07 22:34:44 -0700 2011</created_on>
+    <updated_on>Tue Nov 15 17:44:03 -0800 2011</updated_on>
+  </issue>
+  <issue>
+    <id>317</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Bug" id="1"/>
+    <status name="New" id="1"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <subject>single literal strings cannot be concatenated</subject>
+    <description>Single literal strings cannot be concatenated because they are not LitPat tokens. They are Literals, and parsed differently in productions and patterns. But they are available in code. This inconsistency is somewhat confusing.</description>
+    <start_date>2011-08-07</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sun Aug 07 10:41:07 -0700 2011</created_on>
+    <updated_on>Tue Nov 15 17:43:08 -0800 2011</updated_on>
+  </issue>
+  <issue>
+    <id>316</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Bug" id="1"/>
+    <status name="Fixed" id="8"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <fixed_version name="0.3" id="30"/>
+    <subject>compilation error in fsm code generation</subject>
+    <description>&lt;pre&gt;
+lex all
+{       
+    ignore /'#' any* '\n'/
+            
+    token word /[^#\n]+/
+    token NL /'\n'/
+}       
+&lt;/pre&gt;</description>
+    <start_date>2011-08-07</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sun Aug 07 10:11:29 -0700 2011</created_on>
+    <updated_on>Sun Aug 07 10:14:37 -0700 2011</updated_on>
+  </issue>
+  <issue>
+    <id>313</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Feature" id="2"/>
+    <status name="Completed" id="7"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <fixed_version name="0.3" id="30"/>
+    <subject>allow the ending ' of single literal strings to be omitted, ending at newline</subject>
+    <description>This will make single literal strings consistent with ~ and " strings.</description>
+    <start_date>2011-08-01</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Mon Aug 01 22:49:26 -0700 2011</created_on>
+    <updated_on>Mon Aug 01 22:53:23 -0700 2011</updated_on>
+  </issue>
+  <issue>
+    <id>312</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Bug" id="1"/>
+    <status name="Fixed" id="8"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <fixed_version name="0.3" id="30"/>
+    <subject>sending long strings to a parser</subject>
+    <description>Assertion failure in inputStreamAccumAppendData prevents sending long strings to a parser.</description>
+    <start_date>2011-08-01</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Mon Aug 01 09:15:12 -0700 2011</created_on>
+    <updated_on>Mon Aug 01 22:53:48 -0700 2011</updated_on>
+  </issue>
+  <issue>
+    <id>310</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Bug" id="1"/>
+    <status name="Fixed" id="8"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <fixed_version name="0.3" id="30"/>
+    <subject>compilation error: single token in region, where token accepts everything</subject>
+    <description>&lt;pre&gt;
+
+token all /any*/
+
+def start 
+    [all]
+
+parse Start: start( stdin )
+
+print( Start )
+
+&lt;/pre&gt;</description>
+    <start_date>2011-07-31</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sun Jul 31 10:12:51 -0700 2011</created_on>
+    <updated_on>Sun Aug 07 10:14:49 -0700 2011</updated_on>
+  </issue>
+  <issue>
+    <id>309</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Bug" id="1"/>
+    <status name="Fixed" id="8"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <fixed_version name="0.2" id="26"/>
+    <subject>the -v option should print the version</subject>
+    <description></description>
+    <start_date>2011-07-31</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sun Jul 31 10:08:31 -0700 2011</created_on>
+    <updated_on>Sun Jul 31 10:13:09 -0700 2011</updated_on>
+  </issue>
+</issues>
