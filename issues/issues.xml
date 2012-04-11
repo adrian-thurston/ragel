@@ -1,0 +1,551 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues type="array">
+  <issue>
+    <id>339</id>
+    <project name="Ragel" id="1"/>
+    <tracker name="Bug" id="1"/>
+    <status name="New" id="1"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <subject>CXXFLAGS in configure</subject>
+    <description>http://www.complang.org/pipermail/ragel-users/2011-December/002754.html</description>
+    <start_date>2011-12-13</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Tue Dec 13 18:42:34 -0800 2011</created_on>
+    <updated_on>Tue Dec 13 18:42:34 -0800 2011</updated_on>
+  </issue>
+  <issue>
+    <id>338</id>
+    <project name="Ragel" id="1"/>
+    <tracker name="Feature" id="2"/>
+    <status name="New" id="1"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <subject>merge crack language support</subject>
+    <description>http://www.complang.org/pipermail/ragel-users/2011-December/002755.html</description>
+    <start_date>2011-12-12</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Mon Dec 12 14:15:12 -0800 2011</created_on>
+    <updated_on>Mon Dec 12 14:15:12 -0800 2011</updated_on>
+  </issue>
+  <issue>
+    <id>334</id>
+    <project name="Ragel" id="1"/>
+    <tracker name="Bug" id="1"/>
+    <status name="New" id="1"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <subject>again label for C ipgoto not created if an EOF action has an fret</subject>
+    <description>Reported by &#1052;&#1072;&#1088;&#1082; &#1050;&#1086;&#1088;&#1077;&#1085;&#1073;&#1077;&#1088;&#1075;.
+
+http://www.complang.org/pipermail/ragel-users/2011-October/002740.html</description>
+    <start_date>2011-11-20</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sun Nov 20 21:04:26 -0800 2011</created_on>
+    <updated_on>Sun Nov 20 21:06:25 -0800 2011</updated_on>
+  </issue>
+  <issue>
+    <id>321</id>
+    <project name="Ragel" id="1"/>
+    <tracker name="Feature" id="2"/>
+    <status name="New" id="1"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <fixed_version name="7.0" id="29"/>
+    <subject>unify the ReducedGen class and the CodeGenData class</subject>
+    <description>This separation was present because of the intermediate XML file. With the XML file gone it doesn't make much sense to separate into producer and consumer.</description>
+    <start_date>2011-09-10</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sat Sep 10 23:09:13 -0700 2011</created_on>
+    <updated_on>Sat Sep 10 23:09:13 -0700 2011</updated_on>
+  </issue>
+  <issue>
+    <id>320</id>
+    <project name="Ragel" id="1"/>
+    <tracker name="Bug" id="1"/>
+    <status name="New" id="1"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <subject>no passthrough of UTF-8 magic</subject>
+    <description>I found some problem with generated files on Windows platform.
+if *.rl file is utf-8 file with signature (first 2 bytes EF BB).
+
+Example:
+&lt;pre&gt;
+input file lexer.rl
+----- START ---------------
+//=== this is first line (comment)
+... // other lines
+----- END ---------------
+
+output file lexer.cs
+----- START ---------------
+/* #line 1 "lexer.rl" */
+?//=== this is first line (comment)
+... // other lines
+----- END ---------------
+&lt;/pre&gt;
+
+ragel puts /* #line 1 "lexer.rl" */ comment before utf-8 signature at
+the begining of file and this is wrong utf-8 file.
+
+And second - if we disable #line generation with option -L, you remove
+generation /* #line */ - not just comment this lines.
+
+Best regards,
+Denis Naumov.
+
+</description>
+    <start_date>2011-09-08</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Thu Sep 08 14:26:07 -0700 2011</created_on>
+    <updated_on>Thu Sep 08 14:26:07 -0700 2011</updated_on>
+  </issue>
+  <issue>
+    <id>319</id>
+    <project name="Ragel" id="1"/>
+    <tracker name="Feature" id="2"/>
+    <status name="New" id="1"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <fixed_version name="7.0" id="29"/>
+    <subject>generate graphviz off of the FSM graph</subject>
+    <description>Graphviz code generation was implemented off of the reduced machine because of the split between frontend and backend. Now that split is gone, and graphviz code generation forces us to consider making machines that are not complete, which complicates the reduced machine. We should just generate graphviz based off the FSM graph. Doing this naively will mean that the default transition will go away. This may turn out to be better ... not sure yet.</description>
+    <start_date>2011-09-05</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Mon Sep 05 20:21:17 -0700 2011</created_on>
+    <updated_on>Mon Sep 05 20:21:17 -0700 2011</updated_on>
+  </issue>
+  <issue>
+    <id>311</id>
+    <project name="Ragel" id="1"/>
+    <tracker name="Feature" id="2"/>
+    <status name="New" id="1"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <fixed_version name="7.0" id="29"/>
+    <subject>Documentation in HTML in addition to PDF.</subject>
+    <description></description>
+    <start_date>2011-07-31</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sun Jul 31 10:52:34 -0700 2011</created_on>
+    <updated_on>Sun Jul 31 10:52:34 -0700 2011</updated_on>
+  </issue>
+  <issue>
+    <id>307</id>
+    <project name="Ragel" id="1"/>
+    <tracker name="Bug" id="1"/>
+    <status name="New" id="1"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <fixed_version name="7.0" id="29"/>
+    <subject>go code generator is now broken</subject>
+    <description>From Miek Gieben:
+
+With new Go versions Ragel breaks, as the
+newest weekly release(s) restricts the use of 'goto'. 
+
+See this message from Andrew Gerrand:
+http://groups.google.com/group/golang-nuts/browse_thread/thread/a27ca841a496956b/6768a0f0326a6569?lnk=gst&amp;q=goto#6768a0f0326a6569
+
+This will soon show up in a 'stable' release thereby breaking
+Ragel's ability to generate Go code.
+</description>
+    <start_date>2011-07-17</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sun Jul 17 19:40:11 -0700 2011</created_on>
+    <updated_on>Sun Dec 25 10:51:08 -0800 2011</updated_on>
+  </issue>
+  <issue>
+    <id>306</id>
+    <project name="Ragel" id="1"/>
+    <tracker name="Feature" id="2"/>
+    <status name="New" id="1"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <fixed_version name="7.0" id="29"/>
+    <subject>condition transitions should be a list inside transitions on a character range</subject>
+    <description>As it stands, conditions are implemented by expanding to values in the alphabet. This causes the alphabet to grow and makes it impossible to use conditions with long-sized alphabets (no space left). It is also a confusing implementation.
+
+We should instead be representing transition on character as a the usual list, instead of a single transtion in the TransAp struct we should have a list of transitions for each active condition expression. Most of this time will be on the no-condition set.</description>
+    <start_date>2011-07-15</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Fri Jul 15 23:41:51 -0700 2011</created_on>
+    <updated_on>Fri Jul 15 23:43:11 -0700 2011</updated_on>
+  </issue>
+  <issue>
+    <id>302</id>
+    <project name="Ragel" id="1"/>
+    <tracker name="Bug" id="1"/>
+    <status name="New" id="1"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <fixed_version name="7.0" id="29"/>
+    <subject>keywords to, from, eof missing from 2.2 of the manual</subject>
+    <description></description>
+    <start_date>2011-06-29</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Wed Jun 29 18:43:15 -0700 2011</created_on>
+    <updated_on>Sun Jul 17 19:41:02 -0700 2011</updated_on>
+  </issue>
+  <issue>
+    <id>301</id>
+    <project name="Ragel" id="1"/>
+    <tracker name="Feature" id="2"/>
+    <status name="New" id="1"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <subject>the define/var importer should accept values in hex</subject>
+    <description></description>
+    <start_date>2011-06-25</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sat Jun 25 10:53:08 -0700 2011</created_on>
+    <updated_on>Sat Jun 25 10:53:26 -0700 2011</updated_on>
+  </issue>
+  <issue>
+    <id>293</id>
+    <project name="Ragel" id="1"/>
+    <tracker name="Feature" id="2"/>
+    <status name="New" id="1"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <subject>add D2 to the test suite</subject>
+    <description></description>
+    <start_date>2011-05-20</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Fri May 20 15:39:57 -0700 2011</created_on>
+    <updated_on>Fri May 20 15:39:57 -0700 2011</updated_on>
+  </issue>
+  <issue>
+    <id>292</id>
+    <project name="Ragel" id="1"/>
+    <tracker name="Feature" id="2"/>
+    <status name="New" id="1"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <subject>add go language to the test suite</subject>
+    <description></description>
+    <start_date>2011-05-20</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Fri May 20 15:37:28 -0700 2011</created_on>
+    <updated_on>Fri May 20 15:40:10 -0700 2011</updated_on>
+  </issue>
+  <issue>
+    <id>291</id>
+    <project name="Ragel" id="1"/>
+    <tracker name="Feature" id="2"/>
+    <status name="New" id="1"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <subject>add ocaml to the test suite</subject>
+    <description></description>
+    <start_date>2011-05-20</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Fri May 20 15:37:18 -0700 2011</created_on>
+    <updated_on>Fri May 20 15:37:18 -0700 2011</updated_on>
+  </issue>
+  <issue>
+    <id>268</id>
+    <project name="Ragel" id="1"/>
+    <tracker name="Bug" id="1"/>
+    <status name="Fixed" id="8"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <fixed_version name="6.7" id="11"/>
+    <subject>Apply syntax highlighting patch from Ismael Luceno</subject>
+    <description>http://www.complang.org/pipermail/ragel-users/2010-November/002479.html</description>
+    <start_date>2011-04-12</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Tue Apr 12 17:15:49 -0700 2011</created_on>
+    <updated_on>Tue Apr 12 17:16:52 -0700 2011</updated_on>
+  </issue>
+  <issue>
+    <id>267</id>
+    <project name="Ragel" id="1"/>
+    <tracker name="Feature" id="2"/>
+    <status name="Completed" id="7"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <fixed_version name="6.7" id="11"/>
+    <subject>Apply GO patch</subject>
+    <description></description>
+    <start_date>2011-04-12</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Tue Apr 12 17:10:49 -0700 2011</created_on>
+    <updated_on>Tue Apr 12 17:11:36 -0700 2011</updated_on>
+  </issue>
+  <issue>
+    <id>266</id>
+    <project name="Ragel" id="1"/>
+    <tracker name="Bug" id="1"/>
+    <status name="Fixed" id="8"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <fixed_version name="6.7" id="11"/>
+    <subject>arithmetic overflow in generated C# code</subject>
+    <description>http://www.complang.org/pipermail/ragel-users/2010-January/002374.html</description>
+    <start_date>2011-04-12</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Tue Apr 12 17:09:13 -0700 2011</created_on>
+    <updated_on>Tue Apr 12 17:10:06 -0700 2011</updated_on>
+  </issue>
+  <issue>
+    <id>265</id>
+    <project name="Ragel" id="1"/>
+    <tracker name="Bug" id="1"/>
+    <status name="Fixed" id="8"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <fixed_version name="6.7" id="11"/>
+    <subject>have to get the signedness of the wide key right</subject>
+    <description>This bug came to light at work.</description>
+    <start_date>2011-04-12</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Tue Apr 12 16:48:44 -0700 2011</created_on>
+    <updated_on>Tue Apr 12 16:49:13 -0700 2011</updated_on>
+  </issue>
+  <issue>
+    <id>264</id>
+    <project name="Ragel" id="1"/>
+    <tracker name="Feature" id="2"/>
+    <status name="Completed" id="7"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <fixed_version name="6.7" id="11"/>
+    <subject>Add a configure option for specifying if the manual should be built</subject>
+    <description>Useful for building in places where the required programs are not installed and the manual isn't needed.</description>
+    <start_date>2011-04-12</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Tue Apr 12 16:44:45 -0700 2011</created_on>
+    <updated_on>Tue Apr 12 16:45:32 -0700 2011</updated_on>
+  </issue>
+  <issue>
+    <id>263</id>
+    <project name="Ragel" id="1"/>
+    <tracker name="Feature" id="2"/>
+    <status name="Completed" id="7"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <fixed_version name="6.7" id="11"/>
+    <subject>apply new ragel.m4</subject>
+    <description>Apply new ragel.m4 autoconf definitions from Diego.
+
+http://www.complang.org/pipermail/ragel-users/2009-December/002357.html</description>
+    <start_date>2011-04-12</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Tue Apr 12 16:40:54 -0700 2011</created_on>
+    <updated_on>Tue Apr 12 16:41:45 -0700 2011</updated_on>
+  </issue>
+  <issue>
+    <id>259</id>
+    <project name="Ragel" id="1"/>
+    <tracker name="Feature" id="2"/>
+    <status name="Completed" id="7"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <fixed_version name="6.7" id="11"/>
+    <subject>merge ocaml patch</subject>
+    <description>contributed by ygrek
+http://ygrek.org.ua/
+
+Attached patch adds ragel ocaml code generation.
+ Implemented code styles are : -T0 -T1 -F0 -F1 and -G0 (partial).
+ The only input data type is string (elements are bytes).
+ Several simple tests are included in examples/ocaml/.
+ Here are speed benchmark results for different codegen styles
+ (examples/go/url.rl converted to ocaml host language) :
+
+ocaml -T0 : 4.02 sec
+ocaml -T1 : 3.85 sec
+ocaml -F0 : 1.72 sec
+ocaml -F1 : 1.52 sec
+ocaml -G0 : 1.70 sec
+go -G2    : 2.18 sec
+
+rounds : 100_000
+go : 8g version release.2011-02-01.1 7463
+ocaml : 3.11.2
+</description>
+    <start_date>2011-04-09</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sat Apr 09 09:46:01 -0700 2011</created_on>
+    <updated_on>Fri May 20 15:37:52 -0700 2011</updated_on>
+  </issue>
+  <issue>
+    <id>256</id>
+    <project name="Ragel" id="1"/>
+    <tracker name="Feature" id="2"/>
+    <status name="New" id="1"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <subject>add write "entry" &lt;machine_or_label&gt;</subject>
+    <description>This would be useful for setting the state outside of the machine. Still needed :)</description>
+    <start_date>2011-04-07</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Thu Apr 07 14:19:56 -0700 2011</created_on>
+    <updated_on>Thu Apr 07 14:19:56 -0700 2011</updated_on>
+  </issue>
+  <issue>
+    <id>255</id>
+    <project name="Ragel" id="1"/>
+    <tracker name="Bug" id="1"/>
+    <status name="New" id="1"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <subject>state chart documentation is lacking</subject>
+    <description></description>
+    <start_date>2011-04-07</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Thu Apr 07 13:24:20 -0700 2011</created_on>
+    <updated_on>Thu Apr 07 13:24:20 -0700 2011</updated_on>
+  </issue>
+  <issue>
+    <id>254</id>
+    <project name="Ragel" id="1"/>
+    <tracker name="Bug" id="1"/>
+    <status name="New" id="1"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <fixed_version name="7.0" id="29"/>
+    <subject>support win32-style paths in includes and include directories</subject>
+    <description>The usual string parsing causes backslash to escape, rather than path-separate.</description>
+    <start_date>2011-04-07</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Thu Apr 07 13:13:05 -0700 2011</created_on>
+    <updated_on>Sun Jul 17 19:40:38 -0700 2011</updated_on>
+  </issue>
+  <issue>
+    <id>252</id>
+    <project name="Ragel" id="1"/>
+    <tracker name="Feature" id="2"/>
+    <status name="New" id="1"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <subject>support for command line options in ragel files</subject>
+    <description>This has been requested in the past. Requested again by Denis Naumov.
+
+%%option name = value;
+
+There are some sticky issues involved ... how to parse the host language to discover what language we are to parse?</description>
+    <start_date>2011-04-06</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Wed Apr 06 15:31:44 -0700 2011</created_on>
+    <updated_on>Wed Apr 06 15:36:44 -0700 2011</updated_on>
+  </issue>
+</issues>
