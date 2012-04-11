@@ -520,3 +520,1099 @@ print( Start )
     <updated_on>Sun Jul 31 10:13:09 -0700 2011</updated_on>
   </issue>
 </issues>
+<issues type="array">
+  <issue>
+    <id>308</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Bug" id="1"/>
+    <status name="Fixed" id="8"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <fixed_version name="0.2" id="26"/>
+    <subject>fix "ref tree*"</subject>
+    <description>Parsed as "(ref tree)*" when it should be parsed as "ref (tree*)".
+
+</description>
+    <start_date>2011-07-26</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Tue Jul 26 21:35:37 -0700 2011</created_on>
+    <updated_on>Wed Jul 27 19:51:17 -0700 2011</updated_on>
+  </issue>
+  <issue>
+    <id>305</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Feature" id="2"/>
+    <status name="Fixed" id="8"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <fixed_version name="0.2" id="26"/>
+    <subject>add alias statement, which can be used to alias a type</subject>
+    <description>This is important now that we reference maps and lists using inline typerefs, rather than declaring them. Complicated maps get tedius to write out over and over again.</description>
+    <start_date>2011-07-15</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Fri Jul 15 23:33:35 -0700 2011</created_on>
+    <updated_on>Wed Jul 27 19:51:03 -0700 2011</updated_on>
+  </issue>
+  <issue>
+    <id>304</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Feature" id="2"/>
+    <status name="Completed" id="7"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <fixed_version name="0.2" id="26"/>
+    <subject>typeid arg should be wrapped in &lt;&gt; (to match map, list, etc)</subject>
+    <description></description>
+    <start_date>2011-07-12</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Tue Jul 12 19:53:55 -0700 2011</created_on>
+    <updated_on>Tue Jul 12 19:59:34 -0700 2011</updated_on>
+  </issue>
+  <issue>
+    <id>298</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Feature" id="2"/>
+    <status name="Completed" id="7"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <fixed_version name="0.2" id="26"/>
+    <subject>independent declare and resolve passes</subject>
+    <description>The declare/resolve pass(es) need to be made independent of the parser and compile pass. Need to lookup types after parsing because we support use before declaration, and we need to do lookups before compilation because some lookups cause new tree types to be declared (generics).</description>
+    <start_date>2011-06-19</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sun Jun 19 15:44:44 -0700 2011</created_on>
+    <updated_on>Sun Jul 10 11:26:32 -0700 2011</updated_on>
+  </issue>
+  <issue>
+    <id>297</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Bug" id="1"/>
+    <status name="Fixed" id="8"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <fixed_version name="0.2" id="26"/>
+    <subject>the check for installed vs source based running doesn't cover a common case.</subject>
+    <description>Doesn't work when we specify the full path to the binary.</description>
+    <start_date>2011-06-03</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Fri Jun 03 00:29:57 -0700 2011</created_on>
+    <updated_on>Wed Jul 27 19:57:36 -0700 2011</updated_on>
+  </issue>
+  <issue>
+    <id>296</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Bug" id="1"/>
+    <status name="Fixed" id="8"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <fixed_version name="0.2" id="26"/>
+    <subject>config.h.in is checked in, but also generated, stop generation</subject>
+    <description>fails the build</description>
+    <start_date>2011-05-28</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sat May 28 18:39:26 -0700 2011</created_on>
+    <updated_on>Wed Jul 27 19:56:53 -0700 2011</updated_on>
+  </issue>
+  <issue>
+    <id>295</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Feature" id="2"/>
+    <status name="Completed" id="7"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <fixed_version name="0.2" id="26"/>
+    <subject>unnamed generics using &lt;type_args&gt; as the syntax</subject>
+    <description>Form 'map&lt;foo bar&gt;'
+
+This will require a proper type grammar and improvements to type references.
+
+Currently the generic types are declared like productions. This is very confusing since they are more like C++ templates. They are a predefined type that has arguments. Adopting the &lt;args&gt; syntax for type args.</description>
+    <start_date>2011-05-25</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Wed May 25 22:04:01 -0700 2011</created_on>
+    <updated_on>Tue Jul 12 20:01:05 -0700 2011</updated_on>
+  </issue>
+  <issue>
+    <id>294</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Feature" id="2"/>
+    <status name="Completed" id="7"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <fixed_version name="0.2" id="26"/>
+    <subject>add tests to the dist</subject>
+    <description>Tests are not currently bundled with the dist, they should be.</description>
+    <start_date>2011-05-23</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Mon May 23 21:56:58 -0700 2011</created_on>
+    <updated_on>Sun Jul 31 10:09:03 -0700 2011</updated_on>
+  </issue>
+  <issue>
+    <id>290</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Feature" id="2"/>
+    <status name="Completed" id="7"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <fixed_version name="0.2" id="26"/>
+    <subject>declare variables that capture produced tree in construct and parse statements</subject>
+    <description>This is a natural extension to the variable declaration/capture syntax that is found all over the language.</description>
+    <start_date>2011-05-20</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Fri May 20 14:19:34 -0700 2011</created_on>
+    <updated_on>Wed Jul 27 19:57:48 -0700 2011</updated_on>
+  </issue>
+  <issue>
+    <id>284</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Feature" id="2"/>
+    <status name="Completed" id="7"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <fixed_version name="0.1" id="1"/>
+    <subject>convert to automake</subject>
+    <description></description>
+    <start_date>2011-05-11</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Wed May 11 11:47:05 -0700 2011</created_on>
+    <updated_on>Tue May 17 20:09:05 -0700 2011</updated_on>
+  </issue>
+  <issue>
+    <id>246</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Feature" id="2"/>
+    <status name="Completed" id="7"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <fixed_version name="0.1" id="1"/>
+    <subject>Remove commas from parameter lists, expression lists</subject>
+    <description>Why: consistency, copy-paste patterns, constructors, grammars to-from parameter and argument lists.</description>
+    <start_date>2011-03-30</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Wed Mar 30 12:02:16 -0700 2011</created_on>
+    <updated_on>Tue May 17 20:11:57 -0700 2011</updated_on>
+  </issue>
+  <issue>
+    <id>243</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Feature" id="2"/>
+    <status name="Completed" id="7"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <fixed_version name="0.1" id="1"/>
+    <subject>add 'dist' target to the makefile</subject>
+    <description>Need this for initial release.</description>
+    <start_date>2011-03-23</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Wed Mar 23 17:07:37 -0700 2011</created_on>
+    <updated_on>Tue May 17 20:12:32 -0700 2011</updated_on>
+  </issue>
+  <issue>
+    <id>242</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Bug" id="1"/>
+    <status name="Fixed" id="8"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <fixed_version name="0.1" id="1"/>
+    <subject>test suite failes on 64bit</subject>
+    <description></description>
+    <start_date>2011-03-23</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Wed Mar 23 17:06:17 -0700 2011</created_on>
+    <updated_on>Tue May 17 20:08:07 -0700 2011</updated_on>
+  </issue>
+  <issue>
+    <id>241</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Feature" id="2"/>
+    <status name="Completed" id="7"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <fixed_version name="0.1" id="1"/>
+    <subject>all variable declarations to be in pattern style "Name: type"</subject>
+    <description>It can be difficult to move from looking at variable declarations in patterns then to local variables and function arguments because the name and type change order. Make them all pattern-style in the name of consistency.</description>
+    <start_date>2011-03-23</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Wed Mar 23 17:04:36 -0700 2011</created_on>
+    <updated_on>Tue May 17 20:12:08 -0700 2011</updated_on>
+  </issue>
+  <issue>
+    <id>96</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Bug" id="1"/>
+    <status name="New" id="1"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <subject>need to fix construct with ignore lists</subject>
+    <description>broken with new ignore storage format </description>
+    <start_date>2010-05-09</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sun May 09 11:28:08 -0700 2010</created_on>
+    <updated_on>Thu Dec 30 21:20:31 -0800 2010</updated_on>
+  </issue>
+  <issue>
+    <id>54</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Feature" id="2"/>
+    <status name="New" id="1"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <subject>need a syntax for constructing tokens with a str</subject>
+    <description>Currently using parse, which is just way too much overhead for just a token.</description>
+    <start_date>2010-03-27</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sat Mar 27 11:17:52 -0700 2010</created_on>
+    <updated_on>Sat Mar 27 11:17:52 -0700 2010</updated_on>
+  </issue>
+  <issue>
+    <id>53</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Bug" id="1"/>
+    <status name="New" id="1"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <subject>print_xml_ac fails when used at end of commitbt.lm</subject>
+    <description></description>
+    <start_date>2010-03-27</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sat Mar 27 01:03:53 -0700 2010</created_on>
+    <updated_on>Sat Mar 27 01:03:53 -0700 2010</updated_on>
+  </issue>
+  <issue>
+    <id>52</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Bug" id="1"/>
+    <status name="New" id="1"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <subject>translate block with no send causes crash</subject>
+    <description></description>
+    <start_date>2010-03-26</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Fri Mar 26 23:58:56 -0700 2010</created_on>
+    <updated_on>Fri Mar 26 23:58:56 -0700 2010</updated_on>
+  </issue>
+  <issue>
+    <id>51</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Bug" id="1"/>
+    <status name="New" id="1"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <subject>using stdin.pull in a token transformation results in IN_HALT</subject>
+    <description>can be shown with the commitbt.lm test case. Change input.pull to stdin.pull.</description>
+    <start_date>2010-03-25</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Thu Mar 25 17:58:09 -0700 2010</created_on>
+    <updated_on>Thu Mar 25 17:58:09 -0700 2010</updated_on>
+  </issue>
+  <issue>
+    <id>50</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Bug" id="1"/>
+    <status name="Closed" id="5"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <subject>sending back artificicial tokens with ignore</subject>
+    <description>Where does the ignore come from? The artificial token or from the the stream? Need to record this info and use it during backtracking
+
+&lt;pre&gt;
+lex start
+{
+    ignore /[ \t]+/
+    literal '*', '(', ')', '^', ';', '\n', '.'
+    token id /[a-zA-Z_]+/
+}
+
+parser out_parser [out]
+global out_parser Out = construct out_parser []
+
+def out_item
+    [id]
+|   ['(' item* ')']
+
+def out 
+    [out_item*]
+
+def item 
+    [id]
+    {
+        Out &lt;&lt; r1
+    }
+|   ['(' item* ')']
+    {
+#       Out &lt;&lt; '('
+#       Out &lt;&lt; r2
+#       Out &lt;&lt; ')'
+    }
+
+def A1 []
+def A2 []
+
+def F
+    []
+    {
+        #Out.finish()
+    }
+
+def start 
+    [A1 item* F '.' '^']
+|   [A2 item* F '.' ';' '\n']
+
+start Input = parse start( stdin )
+print( Input )
+&lt;/pre&gt;</description>
+    <start_date>2010-03-20</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sat Mar 20 18:31:54 -0700 2010</created_on>
+    <updated_on>Sat Mar 20 21:57:25 -0700 2010</updated_on>
+  </issue>
+  <issue>
+    <id>49</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Feature" id="2"/>
+    <status name="Closed" id="5"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <subject>PARSE_FINISH_BKT not implemented</subject>
+    <description></description>
+    <start_date>2010-03-20</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sat Mar 20 13:19:33 -0700 2010</created_on>
+    <updated_on>Thu Mar 25 17:59:35 -0700 2010</updated_on>
+  </issue>
+  <issue>
+    <id>42</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Feature" id="2"/>
+    <status name="New" id="1"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <subject>rudimentary pattern matching during parsing</subject>
+    <description>Needed so we can require that IDs have certain values instead of forcing a keyword.</description>
+    <start_date>2010-03-20</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sat Mar 20 10:53:49 -0700 2010</created_on>
+    <updated_on>Sat Mar 20 10:53:49 -0700 2010</updated_on>
+  </issue>
+  <issue>
+    <id>41</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Bug" id="1"/>
+    <status name="New" id="1"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <subject>some colm parse errors take a really long time to be known</subject>
+    <description></description>
+    <start_date>2010-03-20</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sat Mar 20 10:53:24 -0700 2010</created_on>
+    <updated_on>Sat Mar 20 10:53:24 -0700 2010</updated_on>
+  </issue>
+  <issue>
+    <id>40</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Bug" id="1"/>
+    <status name="New" id="1"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <subject>ref output in function call introduces leaks</subject>
+    <description>working on a new code generator and as soon as ref output in a function call is introduces there are leaks</description>
+    <start_date>2010-03-20</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sat Mar 20 10:53:10 -0700 2010</created_on>
+    <updated_on>Sat Mar 20 10:53:10 -0700 2010</updated_on>
+  </issue>
+  <issue>
+    <id>39</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Bug" id="1"/>
+    <status name="New" id="1"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <subject>parse accumulator crashes if required to backtrack</subject>
+    <description></description>
+    <start_date>2010-03-20</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sat Mar 20 10:52:52 -0700 2010</created_on>
+    <updated_on>Sat Mar 20 10:52:52 -0700 2010</updated_on>
+  </issue>
+</issues>
+<issues type="array">
+  <issue>
+    <id>38</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Feature" id="2"/>
+    <status name="New" id="1"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <subject>Really need ?expr in pattern matches.</subject>
+    <description>Pain doing it after the pattern.</description>
+    <start_date>2010-03-20</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sat Mar 20 10:52:33 -0700 2010</created_on>
+    <updated_on>Sat Mar 20 10:52:33 -0700 2010</updated_on>
+  </issue>
+  <issue>
+    <id>37</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Bug" id="1"/>
+    <status name="New" id="1"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <subject>need a list concatenation operator</subject>
+    <description>List1 . List2 should put List2 on end of List1 (requires same type, or list1 == list2*).</description>
+    <start_date>2010-03-20</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sat Mar 20 10:52:14 -0700 2010</created_on>
+    <updated_on>Sat Mar 20 10:52:14 -0700 2010</updated_on>
+  </issue>
+  <issue>
+    <id>36</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Bug" id="1"/>
+    <status name="New" id="1"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <subject>syntax highlighting deficiency</subject>
+    <description>The parse keyword isn't highlighted properly.
+
+&lt;pre&gt;
+Output &lt;&lt;
+        "#ifndef _[f( parse something(Tree) )]
+&lt;/pre&gt;</description>
+    <start_date>2010-03-20</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sat Mar 20 10:51:54 -0700 2010</created_on>
+    <updated_on>Sat Mar 20 10:51:54 -0700 2010</updated_on>
+  </issue>
+  <issue>
+    <id>35</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Bug" id="1"/>
+    <status name="New" id="1"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <subject>can't match against a terminal</subject>
+    <description>need this</description>
+    <start_date>2010-03-20</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sat Mar 20 10:51:24 -0700 2010</created_on>
+    <updated_on>Sat Mar 20 10:51:24 -0700 2010</updated_on>
+  </issue>
+  <issue>
+    <id>34</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Bug" id="1"/>
+    <status name="Fixed" id="8"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <fixed_version name="0.3" id="30"/>
+    <subject>error location in included files is wrong</subject>
+    <description>report file that included the file that the error was in</description>
+    <start_date>2010-03-20</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sat Mar 20 10:51:02 -0700 2010</created_on>
+    <updated_on>Sun Nov 20 14:36:12 -0800 2011</updated_on>
+  </issue>
+  <issue>
+    <id>33</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Feature" id="2"/>
+    <status name="Closed" id="5"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <subject>exit function</subject>
+    <description>an exit function is necessary.</description>
+    <start_date>2010-03-20</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sat Mar 20 10:50:44 -0700 2010</created_on>
+    <updated_on>Sat Mar 20 10:50:44 -0700 2010</updated_on>
+  </issue>
+  <issue>
+    <id>32</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Bug" id="1"/>
+    <status name="Closed" id="5"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <subject>assertion failure on unparsable input</subject>
+    <description>run with args: ./tmp.bin -qv -h -o output -ieth0 file
+
+Fails due to '0' in -i arg. Instead of parse error, an assertion fails.
+&lt;pre&gt;
+lex args
+{   
+    literal '-'
+    token file /^('-'|0)(^0)*/
+}
+
+token word /(^0)+/
+token zero /0/ 
+
+lex opts
+{
+    token single /[qvh]/
+    token with_opt /[oi]/
+}
+
+def item
+    [file zero]
+|   ['-' single* zero]
+|   ['-' with_opt zero? zero]
+
+def args 
+    [word zero item*]
+
+accum arg_parser [args] 
+arg_parser ArgParser =
+    construct arg_parser []
+    
+argv_list ArgV = argv
+for A: str in ArgV 
+    ArgParser &lt;&lt; [A '\0']
+        
+args Args = ArgParser.finish() 
+
+print_xml( Args )
+
+&lt;/pre&gt;
+</description>
+    <start_date>2010-03-20</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sat Mar 20 10:50:26 -0700 2010</created_on>
+    <updated_on>Sat Mar 20 11:24:30 -0700 2010</updated_on>
+  </issue>
+  <issue>
+    <id>31</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Bug" id="1"/>
+    <status name="New" id="1"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <subject>parse accumulator forces token boundaries on each call</subject>
+    <description>Not possible for a token to span calls to the fragment parser. This imposes a restriction.
+
+Might be done.</description>
+    <start_date>2010-03-20</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sat Mar 20 10:49:51 -0700 2010</created_on>
+    <updated_on>Sat Mar 20 10:49:51 -0700 2010</updated_on>
+  </issue>
+  <issue>
+    <id>30</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Bug" id="1"/>
+    <status name="Fixed" id="8"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <fixed_version name="0.3" id="30"/>
+    <subject>\0 does not work as expected in "" strings</subject>
+    <description>works in '' strings, but does not in "" strings.</description>
+    <start_date>2010-03-20</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sat Mar 20 10:48:58 -0700 2010</created_on>
+    <updated_on>Mon Aug 01 22:53:10 -0700 2011</updated_on>
+  </issue>
+  <issue>
+    <id>29</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Feature" id="2"/>
+    <status name="Closed" id="5"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <subject>Need to support all arguments, not just argv1.</subject>
+    <description></description>
+    <start_date>2010-03-20</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sat Mar 20 10:48:36 -0700 2010</created_on>
+    <updated_on>Sat Mar 20 10:48:36 -0700 2010</updated_on>
+  </issue>
+  <issue>
+    <id>28</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Feature" id="2"/>
+    <status name="Closed" id="5"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <subject>need -I option</subject>
+    <description></description>
+    <start_date>2010-03-20</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sat Mar 20 10:48:23 -0700 2010</created_on>
+    <updated_on>Sat Mar 20 10:48:23 -0700 2010</updated_on>
+  </issue>
+  <issue>
+    <id>27</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Feature" id="2"/>
+    <status name="New" id="1"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <subject>optimize longest match operator</subject>
+    <description>forget what this means</description>
+    <start_date>2010-03-20</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sat Mar 20 10:48:12 -0700 2010</created_on>
+    <updated_on>Sat Mar 20 11:02:42 -0700 2010</updated_on>
+  </issue>
+  <issue>
+    <id>26</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Research" id="4"/>
+    <status name="New" id="1"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <subject>regex subexpression capture</subject>
+    <description>This may be finished. Need to investigate.</description>
+    <start_date>2010-03-20</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sat Mar 20 10:47:55 -0700 2010</created_on>
+    <updated_on>Sat Mar 20 10:47:55 -0700 2010</updated_on>
+  </issue>
+  <issue>
+    <id>25</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Research" id="4"/>
+    <status name="New" id="1"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <subject>optimization of reference chains</subject>
+    <description>I think this is done already. Need to verify.</description>
+    <start_date>2010-03-20</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sat Mar 20 10:47:40 -0700 2010</created_on>
+    <updated_on>Sat Mar 20 10:47:40 -0700 2010</updated_on>
+  </issue>
+  <issue>
+    <id>24</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Feature" id="2"/>
+    <status name="New" id="1"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <subject>string manipulation library needs expansion</subject>
+    <description></description>
+    <start_date>2010-03-20</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sat Mar 20 10:46:56 -0700 2010</created_on>
+    <updated_on>Sat Mar 20 10:46:56 -0700 2010</updated_on>
+  </issue>
+  <issue>
+    <id>23</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Feature" id="2"/>
+    <status name="New" id="1"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <subject>integer expressings not complete</subject>
+    <description></description>
+    <start_date>2010-03-20</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sat Mar 20 10:46:40 -0700 2010</created_on>
+    <updated_on>Sat Mar 20 10:46:40 -0700 2010</updated_on>
+  </issue>
+  <issue>
+    <id>22</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Feature" id="2"/>
+    <status name="New" id="1"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <subject>garbage collector needs work</subject>
+    <description></description>
+    <start_date>2010-03-20</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sat Mar 20 10:46:29 -0700 2010</created_on>
+    <updated_on>Sat Mar 20 10:46:29 -0700 2010</updated_on>
+  </issue>
+  <issue>
+    <id>21</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Bug" id="1"/>
+    <status name="New" id="1"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <subject>eradicate the use of replItemList</subject>
+    <description>The replacement, accumulator, and string concat sections of the grammar all use this global (to Parser). This is problematic in the face of recursion. It should be replaced with code that passes the list up through the productions.</description>
+    <start_date>2010-03-20</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sat Mar 20 10:46:12 -0700 2010</created_on>
+    <updated_on>Sat Mar 20 10:46:12 -0700 2010</updated_on>
+  </issue>
+  <issue>
+    <id>20</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Bug" id="1"/>
+    <status name="Closed" id="5"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <subject>the constructex.lm test case is broken, does not compile.</subject>
+    <description>This needs to be fixed.</description>
+    <start_date>2010-03-20</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sat Mar 20 10:45:42 -0700 2010</created_on>
+    <updated_on>Sat Mar 20 10:45:42 -0700 2010</updated_on>
+  </issue>
+  <issue>
+    <id>19</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Feature" id="2"/>
+    <status name="New" id="1"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <subject>embedding a colm program into a host C/C++ program</subject>
+    <description>This is a desirable feature. Requires returning a tree providing some means of walking the returned tree.</description>
+    <start_date>2010-03-20</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sat Mar 20 10:45:20 -0700 2010</created_on>
+    <updated_on>Sat Mar 20 10:45:20 -0700 2010</updated_on>
+  </issue>
+  <issue>
+    <id>18</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Feature" id="2"/>
+    <status name="New" id="1"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <subject>printing to named streams is necessary</subject>
+    <description>Need to be able to write to stderr and to arbitrary files.</description>
+    <start_date>2010-03-20</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sat Mar 20 10:44:54 -0700 2010</created_on>
+    <updated_on>Sat Mar 20 10:44:54 -0700 2010</updated_on>
+  </issue>
+  <issue>
+    <id>17</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Feature" id="2"/>
+    <status name="Closed" id="5"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <subject>need to support full argument list</subject>
+    <description>Currently only supporting argv1. Instead all args need to go into a list of strings.</description>
+    <start_date>2010-03-20</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sat Mar 20 10:44:30 -0700 2010</created_on>
+    <updated_on>Sat Mar 20 10:44:30 -0700 2010</updated_on>
+  </issue>
+  <issue>
+    <id>16</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Research" id="4"/>
+    <status name="New" id="1"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <subject>sub patterns and sub constructs</subject>
+    <description>maybe use ( ) for these
+
+type( construct ) for sub-construct
+Name: type ( pattern ) for sub-pattern
+
+</description>
+    <start_date>2010-03-20</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sat Mar 20 10:44:00 -0700 2010</created_on>
+    <updated_on>Sat Mar 20 10:44:00 -0700 2010</updated_on>
+  </issue>
+  <issue>
+    <id>15</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Bug" id="1"/>
+    <status name="New" id="1"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <subject>mutually recursive functions are not possible</subject>
+    <description>This needs to be fixed.</description>
+    <start_date>2010-03-20</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sat Mar 20 10:43:17 -0700 2010</created_on>
+    <updated_on>Sat Mar 20 10:43:17 -0700 2010</updated_on>
+  </issue>
+  <issue>
+    <id>14</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Bug" id="1"/>
+    <status name="Closed" id="5"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <subject>include needs to honour the path of the source file</subject>
+    <description>Include needs to honour the path of the source file as a prefix when searching for the file to include. This allows colm to be called with a CWD that is not the one the source is in.</description>
+    <start_date>2010-03-20</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sat Mar 20 10:42:54 -0700 2010</created_on>
+    <updated_on>Sat Mar 20 10:42:54 -0700 2010</updated_on>
+  </issue>
+</issues>
+<issues type="array">
+  <issue>
+    <id>13</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Research" id="4"/>
+    <status name="New" id="1"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <subject>put position information in the Head struct</subject>
+    <description>This may be a good place for it, rather than in all trees. Heads represent strings, which are the entities that have the position information.</description>
+    <start_date>2010-03-20</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sat Mar 20 10:42:24 -0700 2010</created_on>
+    <updated_on>Sat Mar 20 10:42:24 -0700 2010</updated_on>
+  </issue>
+</issues>
