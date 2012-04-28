@@ -1,0 +1,12 @@
+/config.log
+/config.h
+/config.cache
+/config.status
+/Makefile
+/Makefile.in
+/configure
+/depcomp
+/missing
+/install-sh
+/aclocal.m4
+/autom4te.cache
