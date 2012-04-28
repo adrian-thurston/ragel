@@ -1,0 +1,13 @@
+/tags
+/Makefile
+/Makefile.in
+/rlscan.cc
+/rlparse.cc
+/rlparse.h
+/version.h
+/config.h
+/config.h.in
+/ragel
+/ragel.exe
+/.deps
+/stamp-h1
