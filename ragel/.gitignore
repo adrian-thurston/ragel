@@ -1,0 +1,10 @@
+/tags
+/Makefile
+/rlscan.cpp
+/rlparse.cpp
+/rlparse.h
+/version.h
+/config.h
+/ragel
+/ragel.exe
+/.*.d
