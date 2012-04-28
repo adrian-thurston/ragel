@@ -1,0 +1,6 @@
+/config.h
+/version.h
+/common.a
+/.*.d
+/*.o
+/Makefile
