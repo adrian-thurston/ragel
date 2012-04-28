@@ -1,0 +1,17 @@
+/Makefile
+/*.c
+/*.cpp
+/*.cs
+/*.m
+/*.d
+/*.rb
+/*.bin
+/*.exp
+/*.out
+/*.java
+/*.class
+/*_c.rl
+/*_d.rl
+/*_java.rl
+/*_ruby.rl
+/*_csharp.rl
