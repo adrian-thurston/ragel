@@ -1,0 +1,8 @@
+/.*.d
+/tags
+/redfsm.a
+/xmltags.cpp
+/xmlparse.cpp
+/Makefile
+/xmlparse.h
+/xmlscan.cpp
