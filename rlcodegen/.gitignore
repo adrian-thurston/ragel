@@ -1,0 +1,8 @@
+/tags
+/Makefile
+/xmlscan.cpp
+/xmlparse.cpp
+/xmlparse.h
+/xmltags.cpp
+/rlcodegen
+/.*.d
