@@ -52,13 +52,13 @@ HostType hostTypesC[] =
 #define S31BIT_MIN -1073741824l
 #define S31BIT_MAX 1073741823l
 
-#define S32BIT_MIN –2147483648l
+#define S32BIT_MIN -2147483648l
 #define S32BIT_MAX 2147483647l
 
 #define U32BIT_MIN 0
 #define U32BIT_MAX 4294967295l
 
-#define S64BIT_MIN –9223372036854775808ll
+#define S64BIT_MIN -9223372036854775808ll
 #define S64BIT_MAX 9223372036854775807ll
 
 #define U64BIT_MIN 0
@@ -87,6 +87,15 @@ HostType hostTypesGo[] =
 	{ "int32",   0,  "int",    true,   true,  false,  INT_MIN,   INT_MAX,     4 },
 	{ "uint32",  0,  "uint",   false,  true,  false,  0,         UINT_MAX,    4 },
 	{ "int",     0,  "long",   true,   true,  false,  LONG_MIN,  LONG_MAX,    sizeof(long) },
+};
+
+HostType hostTypesCrack[] = 
+{
+  { "byte",    0,  "byte",     false,  true,  true,   0,            UCHAR_MAX,    1 },
+  { "int32",   0,  "uint32",   false,  true,  false,  S32BIT_MIN,   S32BIT_MAX,   4 },
+  { "uint32",  0,  "uint32",   false,  true,  false,  U32BIT_MIN,   U32BIT_MAX,   4 },
+  { "int",     0,  "int",      true,   true,  false,  INT_MIN,      INT_MAX,      sizeof(int) },
+  { "uint",    0,  "uint",     true,   true,  false,  0,            UINT_MAX,     sizeof(int) },  
 };
 
 HostType hostTypesJava[] = 
@@ -131,7 +140,7 @@ HostLang hostLangJava =   { HostLang::Java,   hostTypesJava,   4,  hostTypesJava
 HostLang hostLangRuby =   { HostLang::Ruby,   hostTypesRuby,   2,  hostTypesRuby+0,    false };
 HostLang hostLangCSharp = { HostLang::CSharp, hostTypesCSharp, 9,  hostTypesCSharp+4,  true };
 HostLang hostLangOCaml =  { HostLang::OCaml,  hostTypesOCaml,  1,  hostTypesOCaml+0,   false };
-
+HostLang hostLangCrack =  { HostLang::Crack,  hostTypesCrack,  5,  hostTypesCrack+0,   true };
 HostLang *hostLang = &hostLangC;
 
 HostType *findAlphType( const char *s1 )

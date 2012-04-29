@@ -104,6 +104,7 @@ struct InputData
 	void rubyDefaultFileName( const char *inputFile );
 	void csharpDefaultFileName( const char *inputFile );
 	void ocamlDefaultFileName( const char *inputFile );
+	void crackDefaultFileName( const char *inputFile );
 
 	void writeLanguage( std::ostream &out );
 	void writeXML( std::ostream &out );

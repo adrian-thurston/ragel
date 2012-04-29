@@ -126,6 +126,7 @@ void usage()
 "   -R                   The host language is Ruby\n"
 "   -A                   The host language is C#\n"
 "   -O                   The host language is OCaml\n"
+"   -K                   The host language is Crack\n"
 "line directives: (C/D/Ruby/C#)\n"
 "   -L                   Inhibit writing of #line directives\n"
 "code style: (C/D/Java/Ruby/C#)\n"
@@ -219,7 +220,7 @@ void escapeLineDirectivePath( std::ostream &out, char *path )
 
 void InputData::parseArgs( int argc, const char **argv )
 {
-	ParamCheck pc("xo:dnmleabjkS:M:I:CDEJZRAOvHh?-:sT:F:G:P:LpV", argc, argv);
+	ParamCheck pc("xo:dnmleabjkS:M:I:CDEJZRAOKvHh?-:sT:F:G:P:LpV", argc, argv);
 
 	/* FIXME: Need to check code styles VS langauge. */
 
@@ -334,6 +335,9 @@ void InputData::parseArgs( int argc, const char **argv )
 				break;
 			case 'O':
 				hostLang = &hostLangOCaml;
+				break;
+			case 'K':
+				hostLang = &hostLangCrack;
 				break;
 
 			/* Version and help. */

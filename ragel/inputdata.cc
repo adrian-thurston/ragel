@@ -108,6 +108,16 @@ void InputData::ocamlDefaultFileName( const char *inputFile )
 		outputFileName = fileNameFromStem( inputFile, ".ml" );
 }
 
+/* Invoked by the parser when the root element is opened. */
+void InputData::crackDefaultFileName( const char *inputFile )
+{
+	/* If the output format is code and no output file name is given, then
+	 * make a default. */
+	if ( outputFileName == 0 )
+		outputFileName = fileNameFromStem( inputFile, ".crk" );
+}
+
+
 void InputData::makeDefaultFileName()
 {
 	switch ( hostLang->lang ) {
@@ -131,6 +141,10 @@ void InputData::makeDefaultFileName()
 		case HostLang::OCaml:
 			ocamlDefaultFileName( inputFileName );
 			break;
+		case HostLang::Crack:
+			crackDefaultFileName( inputFileName );
+			break;
+
 	}
 }
 

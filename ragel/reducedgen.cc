@@ -70,6 +70,8 @@
 #include "rubyfflat.h"
 #include "rbxgoto.h"
 
+#include "crackflat.h"
+
 using std::cerr;
 using std::endl;
 
@@ -261,6 +263,25 @@ CodeGenData *goMakeCodeGen( const CodeGenArgs &args )
 }
 
 /* Invoked by the parser when a ragel definition is opened. */
+CodeGenData *crackMakeCodeGen( const CodeGenArgs &args )
+{
+	CodeGenData *codeGen;
+
+	switch ( codeStyle ) {
+	case GenFlat:
+		codeGen = new CrackFlatCodeGen(args);
+		break;
+	default:
+		cerr << "Invalid output style, only -F0 is supported. Please "
+			"rerun ragel including this flag.\n";
+		exit(1);
+	}
+
+	return codeGen;
+}
+
+
+/* Invoked by the parser when a ragel definition is opened. */
 CodeGenData *rubyMakeCodeGen( const CodeGenArgs &args )
 {
 	CodeGenData *codeGen = 0;
@@ -381,6 +402,8 @@ CodeGenData *makeCodeGen( const CodeGenArgs &args )
 		cgd = csharpMakeCodeGen( args );
 	else if ( hostLang == &hostLangOCaml )
 		cgd = ocamlMakeCodeGen( args );
+	else if ( hostLang == &hostLangCrack )
+		cgd = crackMakeCodeGen( args );
 	return cgd;
 }
 

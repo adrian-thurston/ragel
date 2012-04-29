@@ -63,6 +63,8 @@
 #include "rubyfflat.h"
 #include "rbxgoto.h"
 
+#include "crackflat.h"
+
 string itoa( int i )
 {
 	char buf[16];
@@ -93,6 +95,9 @@ void lineDirective( ostream &out, const char *fileName, int line )
 			csharpLineDirective( out, fileName, line );
 		else if ( hostLang == &hostLangOCaml )
 			ocamlLineDirective( out, fileName, line );
+		else if ( hostLang == &hostLangCrack )
+			rubyLineDirective( out, fileName, line );
+
 	}
 }
 
