@@ -123,6 +123,8 @@ typedef struct _ParseTree
 	/* FIXME: unify probably. */
 	char retryLower;
 	char retryUpper;
+
+	Kid *shadow;
 } ParseTree;
 
 typedef struct _Int

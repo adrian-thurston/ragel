@@ -1164,6 +1164,14 @@ case PcrGeneration:
 		if ( pdaRun->parseInput != 0 )
 			transferReverseCode( pdaRun, pdaRun->parseInput->tree );
 
+		if ( pdaRun->parseInput != 0 ) {
+			Kid *oldNextDown = 0, *newNextDown = 0;
+			Tree *newTree = copyTree( prg, pdaRun->parseInput->tree, oldNextDown, &newNextDown );
+			treeUpref( newTree );
+			pt(pdaRun->parseInput->tree)->shadow = treeAllocate( prg );
+			pt(pdaRun->parseInput->tree)->shadow->tree = newTree;
+		}
+
 		long pcr = parseToken( prg, sp, pdaRun, fsmRun, inputStream, PcrStart );
 		
 		while ( pcr != PcrDone ) {
@@ -1232,10 +1240,15 @@ Tree *getParsedRoot( PdaRun *pdaRun, int stop )
 {
 	if ( pdaRun->parseError )
 		return 0;
-	else if ( stop )
-		return pdaRun->stackTop->tree;
-	else
-		return pdaRun->stackTop->next->tree;
+	else if ( stop ) {
+		if ( pt(pdaRun->stackTop->tree)->shadow != 0 )
+			return pt(pdaRun->stackTop->tree)->shadow->tree;
+	}
+	else {
+		if ( pt(pdaRun->stackTop->next->tree)->shadow != 0 )
+			return pt(pdaRun->stackTop->next->tree)->shadow->tree;
+	}
+	return 0;
 }
 
 void clearPdaRun( Program *prg, Tree **sp, PdaRun *pdaRun )
@@ -1646,8 +1659,13 @@ again:
 		pdaRun->parseInput = pdaRun->parseInput->next;
 
 		pt(pdaRun->lel->tree)->state = pdaRun->curState;
+
+		if ( pt(pdaRun->lel->tree)->shadow != 0 && pt(pdaRun->stackTop->tree)->shadow != 0 )
+			pt(pdaRun->lel->tree)->shadow->next = pt(pdaRun->stackTop->tree)->shadow;
+
 		pdaRun->lel->next = pdaRun->stackTop;
 		pdaRun->stackTop = pdaRun->lel;
+
 
 		/* If its a token then attach ignores and record it in the token list
 		 * of the next ignore attachment to use. */
@@ -1719,6 +1737,13 @@ again:
 		pt(pdaRun->redLel->tree)->retryUpper = pt(pdaRun->lel->tree)->retryLower;
 		pt(pdaRun->lel->tree)->retryLower = 0;
 
+		pt(pdaRun->redLel->tree)->shadow = kidAllocate( prg );
+		pt(pdaRun->redLel->tree)->shadow->tree = (Tree*)parseTreeAllocate( prg );
+		pt(pdaRun->redLel->tree)->shadow->tree->flags |= AF_PARSE_TREE;
+		pt(pdaRun->redLel->tree)->shadow->tree->refs = 1;
+		pt(pdaRun->redLel->tree)->shadow->tree->id = prg->rtd->prodInfo[pdaRun->reduction].lhsId;
+		pt(pdaRun->redLel->tree)->shadow->tree->prodNum = prg->rtd->prodInfo[pdaRun->reduction].prodNum;
+
 		/* Allocate the attributes. */
 		objectLength = prg->rtd->lelInfo[pdaRun->redLel->tree->id].objectLength;
 		attrs = allocAttrs( prg, objectLength );
@@ -1746,6 +1771,21 @@ again:
 		}
 
 		pdaRun->redLel->tree->child = kidListConcat( attrs, child );
+
+		/* SHADOW */
+		Kid *l = 0;
+		Kid *c = pdaRun->redLel->tree->child;
+		if ( c != 0 ) {
+			pt(pdaRun->redLel->tree)->shadow->tree->child = pt(c->tree)->shadow;
+			l = c;
+			c = c->next;
+			while ( c != 0 ) {
+				pt(l->tree)->shadow->next = pt(c->tree)->shadow;
+				l = c;
+				c = c->next;
+			}
+			pt(l->tree)->shadow->next = 0;
+		}
 
 		debug( REALM_PARSE, "reduced: %s rhsLen %d\n",
 				prg->rtd->prodInfo[pdaRun->reduction].name, rhsLen );
