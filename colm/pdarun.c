@@ -1175,6 +1175,17 @@ case PcrGeneration:
 			treeUpref( newTree );
 			pt(pdaRun->parseInput->tree)->shadow = kidAllocate( prg );
 			pt(pdaRun->parseInput->tree)->shadow->tree = newTree;
+			if ( newTree->tokdata != 0 ) {
+				newTree->tokdata->location = pdaRun->parseInput->tree->tokdata->location;
+				pdaRun->parseInput->tree->tokdata->location = 0;
+			}
+
+//			ParseTree *parseTree = parseTreeAllocate( prg );
+//			parseTree->shadow = kidAllocate( prg );
+//			parseTree->shadow->tree = pdaRun->parseInput;
+//			parseTree->refs = 1;
+//			parseTree->flags |= AF_PARSE_TREE;
+//			pdaRun->parseInput = parseTree;
 		}
 
 		long pcr = parseToken( prg, sp, pdaRun, fsmRun, inputStream, PcrStart );
