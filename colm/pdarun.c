@@ -601,9 +601,11 @@ static void reportParseError( Program *prg, Tree **sp, PdaRun *pdaRun )
 
 void attachIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, Kid *input )
 {
-
 	/* Need to preserve the layout under a tree:
 	 *    attributes, ignore tokens, grammar children. */
+	
+	if ( pt(input->tree)->shadow )
+		input = pt(input->tree)->shadow;
 
 	/* Reset. */
 	input->tree->flags &= ~AF_LEFT_IL_ATTACHED;
@@ -1168,7 +1170,7 @@ case PcrGeneration:
 			Kid *oldNextDown = 0, *newNextDown = 0;
 			Tree *newTree = copyTree( prg, pdaRun->parseInput->tree, oldNextDown, &newNextDown );
 			treeUpref( newTree );
-			pt(pdaRun->parseInput->tree)->shadow = treeAllocate( prg );
+			pt(pdaRun->parseInput->tree)->shadow = kidAllocate( prg );
 			pt(pdaRun->parseInput->tree)->shadow->tree = newTree;
 		}
 
