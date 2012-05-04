@@ -1701,6 +1701,11 @@ again:
 		{
 			pdaRun->lel->tree->id = prg->rtd->lelInfo[pdaRun->lel->tree->id].termDupId;
 			pdaRun->lel->tree->flags |= AF_TERM_DUP;
+			if ( pt(pdaRun->lel->tree)->shadow != 0 ) {
+				pt(pdaRun->lel->tree)->shadow->tree->id = 
+						prg->rtd->lelInfo[pt(pdaRun->lel->tree)->shadow->tree->id].termDupId;
+				pt(pdaRun->lel->tree)->shadow->tree->flags |= AF_TERM_DUP;
+			}
 		}
 
 		if ( action[1] == 0 )
@@ -2096,6 +2101,11 @@ case PcrReverse:
 				if ( pdaRun->undoLel->tree->flags & AF_TERM_DUP ) {
 					pdaRun->undoLel->tree->id = prg->rtd->lelInfo[pdaRun->undoLel->tree->id].termDupId;
 					pdaRun->undoLel->tree->flags &= ~AF_TERM_DUP;
+
+					pt(pdaRun->undoLel->tree)->shadow->tree->id = 
+							prg->rtd->lelInfo[pt(pdaRun->undoLel->tree)->shadow->tree->id].termDupId;
+					pt(pdaRun->undoLel->tree)->shadow->tree->flags &= ~AF_TERM_DUP;
+
 				}
 
 				/* Queue it as next parseInput item. */
