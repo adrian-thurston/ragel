@@ -262,6 +262,9 @@ void detachIgnores( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, Kid
 {
 	assert( pdaRun->accumIgnore == 0 );
 
+	if ( pt(input->tree)->shadow )
+		input = pt(input->tree)->shadow;
+
 	/* Right ignore are immediately discarded since they are copies of
 	 * left-ignores. */
 	Tree *rightIgnore = 0;
@@ -1719,7 +1722,7 @@ again:
 
 	if ( *action & act_rb ) {
 		int r, objectLength;
-		Kid *last, *child, *attrs;
+		Kid *last, *child, *attrs, *attrs2;
 
 		pdaRun->reduction = *action >> 2;
 
@@ -1749,6 +1752,7 @@ again:
 		/* Allocate the attributes. */
 		objectLength = prg->rtd->lelInfo[pdaRun->redLel->tree->id].objectLength;
 		attrs = allocAttrs( prg, objectLength );
+		attrs2 = allocAttrs( prg, objectLength );
 
 		/* Build the list of children. */
 		Kid *realChild = 0;
@@ -1772,13 +1776,14 @@ again:
 				realChild = child;
 		}
 
-		pdaRun->redLel->tree->child = kidListConcat( attrs, child );
+		pdaRun->redLel->tree->child = child;
 
 		/* SHADOW */
 		Kid *l = 0;
-		Kid *c = pdaRun->redLel->tree->child;
+		Kid *c = treeChild(prg, pdaRun->redLel->tree);
+		Kid *rc = 0;
 		if ( c != 0 ) {
-			pt(pdaRun->redLel->tree)->shadow->tree->child = pt(c->tree)->shadow;
+			rc = pt(c->tree)->shadow;
 			l = c;
 			c = c->next;
 			while ( c != 0 ) {
@@ -1788,6 +1793,8 @@ again:
 			}
 			pt(l->tree)->shadow->next = 0;
 		}
+
+		pt(pdaRun->redLel->tree)->shadow->tree->child = kidListConcat( attrs2, rc );
 
 		debug( REALM_PARSE, "reduced: %s rhsLen %d\n",
 				prg->rtd->prodInfo[pdaRun->reduction].name, rhsLen );
@@ -1998,9 +2005,14 @@ case PcrReverse:
 					/* Get the next item ahead of time. */
 					Kid *next = first->next;
 
+					/*****/
+					if ( pt(first->tree)->shadow != 0 && pt(pdaRun->stackTop->tree)->shadow != 0 )
+						pt(first->tree)->shadow->next = pt(pdaRun->stackTop->tree)->shadow;
+
 					/* Push onto the stack. */
 					first->next = pdaRun->stackTop;
 					pdaRun->stackTop = first;
+
 
 					first = next;
 				}

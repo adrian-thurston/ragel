@@ -1162,6 +1162,7 @@ void refSetValue( Ref *ref, Tree *v )
 
 Tree *getRhsEl( Program *prg, Tree *lhs, long position )
 {
+	lhs = ((ParseTree*)lhs)->shadow->tree;
 	Kid *pos = treeChild( prg, lhs );
 	while ( position > 0 ) {
 		pos = pos->next;
