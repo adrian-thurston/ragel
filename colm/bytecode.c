@@ -1185,13 +1185,13 @@ again:
 			debug( REALM_BYTECODE, "IN_INIT_LHS_EL %hd\n", field );
 
 			/* We transfer it to to the local field. Possibly take a copy. */
-			Tree *val = exec->pdaRun->redLel->tree;
+			Tree *val = ((ParseTree*)exec->pdaRun->redLel->tree)->shadow->tree;
 
 			/* Save it. */
 			treeUpref( val );
-			exec->pdaRun->parsed = val;
+			//exec->pdaRun->parsed = val;
 
-			exec->pdaRun->redLel->tree = 0;
+			//exec->pdaRun->redLel->tree = 0;
 			vm_local(field) = val;
 			break;
 		}
@@ -1203,7 +1203,7 @@ again:
 
 			Tree *val = vm_local(field);
 			vm_local(field) = 0;
-			exec->pdaRun->redLel->tree = val;
+			((ParseTree*)exec->pdaRun->redLel->tree)->shadow->tree = val;
 			break;
 		}
 		case IN_UITER_ADVANCE: {

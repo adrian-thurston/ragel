@@ -1776,7 +1776,7 @@ again:
 				realChild = child;
 		}
 
-		pdaRun->redLel->tree->child = child;
+		pdaRun->redLel->tree->child = kidListConcat( attrs, child );
 
 		/* SHADOW */
 		Kid *l = 0;
@@ -1830,29 +1830,29 @@ case PcrReduction:
 			/* If the lhs was stored and it changed then we need to restore the
 			 * original upon backtracking, otherwise downref since we took a
 			 * copy above. */
-			if ( pdaRun->parsed != 0 ) {
-				if ( pdaRun->parsed != pdaRun->redLel->tree ) {
-					debug( REALM_PARSE, "lhs tree was modified, adding a restore instruction\n" );
-
-					/* Make it into a parse tree. */
-					Tree *newPt = prepParseTree( prg, sp, pdaRun->redLel->tree );
-					treeDownref( prg, sp, pdaRun->redLel->tree );
-
-					/* Copy it in. */
-					pdaRun->redLel->tree = newPt;
-					treeUpref( pdaRun->redLel->tree );
-
-					/* Add the restore instruct. */
-					append( &pdaRun->rcodeCollect, IN_RESTORE_LHS );
-					appendWord( &pdaRun->rcodeCollect, (Word)pdaRun->parsed );
-					append( &pdaRun->rcodeCollect, SIZEOF_CODE + SIZEOF_WORD );
-				}
-				else {
-					/* Not changed. Done with parsed. */
-					treeDownref( prg, sp, pdaRun->parsed );
-				}
-				pdaRun->parsed = 0;
-			}
+//			if ( pdaRun->parsed != 0 ) {
+//				if ( pdaRun->parsed != pdaRun->redLel->tree ) {
+//					debug( REALM_PARSE, "lhs tree was modified, adding a restore instruction\n" );
+//
+//					/* Make it into a parse tree. */
+//					Tree *newPt = prepParseTree( prg, sp, pdaRun->redLel->tree );
+//					treeDownref( prg, sp, pdaRun->redLel->tree );
+//
+//					/* Copy it in. */
+//					pdaRun->redLel->tree = newPt;
+//					treeUpref( pdaRun->redLel->tree );
+//
+//					/* Add the restore instruct. */
+//					append( &pdaRun->rcodeCollect, IN_RESTORE_LHS );
+//					appendWord( &pdaRun->rcodeCollect, (Word)pdaRun->parsed );
+//					append( &pdaRun->rcodeCollect, SIZEOF_CODE + SIZEOF_WORD );
+//				}
+//				else {
+//					/* Not changed. Done with parsed. */
+//					treeDownref( prg, sp, pdaRun->parsed );
+//				}
+//				pdaRun->parsed = 0;
+//			}
 
 			/* Pull out the reverse code, if any. */
 			makeReverseCode( pdaRun );
