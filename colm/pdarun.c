@@ -417,7 +417,7 @@ static void sendBack( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
 			input->tree->flags & AF_ARTIFICIAL ? " (artificial)" : "" );
 	#endif
 
-	if ( input->tree->flags & AF_NAMED ) {
+	if ( pt(input->tree)->shadow->tree->flags & AF_NAMED ) {
 		/* Send back anything in the buffer that has not been parsed. */
 //		if ( fsmRun->p == fsmRun->runBuf->data )
 //			sendBackRunBufHead( fsmRun, inputStream );
@@ -430,36 +430,36 @@ static void sendBack( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
 	decrementSteps( pdaRun );
 
 	/* Artifical were not parsed, instead sent in as items. */
-	if ( input->tree->flags & AF_ARTIFICIAL ) {
+	if ( pt(input->tree)->shadow->tree->flags & AF_ARTIFICIAL ) {
 		/* Check for reverse code. */
-		if ( input->tree->flags & AF_HAS_RCODE ) {
+		if ( pt(input->tree)->shadow->tree->flags & AF_HAS_RCODE ) {
 			debug( REALM_PARSE, "tree has rcode, setting on deck\n" );
 			pdaRun->onDeck = true;
-			input->tree->flags &= ~AF_HAS_RCODE;
+			pt(input->tree)->shadow->tree->flags &= ~AF_HAS_RCODE;
 		}
 
-		treeUpref( input->tree );
+		treeUpref( pt(input->tree)->shadow->tree );
 
-		sendBackTree( inputStream, input->tree );
+		sendBackTree( inputStream, pt(input->tree)->shadow->tree );
 	}
 	else {
 		/* Check for reverse code. */
-		if ( input->tree->flags & AF_HAS_RCODE ) {
+		if ( pt(input->tree)->shadow->tree->flags & AF_HAS_RCODE ) {
 			debug( REALM_PARSE, "tree has rcode, setting on deck\n" );
 			pdaRun->onDeck = true;
-			input->tree->flags &= ~AF_HAS_RCODE;
+			pt(input->tree)->shadow->tree->flags &= ~AF_HAS_RCODE;
 		}
 
 		/* Push back the token data. */
-		sendBackText( fsmRun, inputStream, stringData( input->tree->tokdata ), 
-				stringLength( input->tree->tokdata ) );
+		sendBackText( fsmRun, inputStream, stringData( pt(input->tree)->shadow->tree->tokdata ), 
+				stringLength( pt(input->tree)->shadow->tree->tokdata ) );
 
 		/* If eof was just sent back remember that it needs to be sent again. */
 		if ( input->tree->id == prg->rtd->eofLelIds[pdaRun->parserId] )
 			inputStream->eofSent = false;
 
 		/* If the item is bound then store remove it from the bindings array. */
-		unbind( prg, sp, pdaRun, input->tree );
+		unbind( prg, sp, pdaRun, pt(input->tree)->shadow->tree );
 	}
 
 	if ( pdaRun->steps == pdaRun->targetSteps ) {
@@ -468,8 +468,8 @@ static void sendBack( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
 	}
 
 	/* Downref the tree that was sent back and free the kid. */
-	treeDownref( prg, sp, input->tree );
-	kidFree( prg, input );
+	treeDownref( prg, sp, pt(input->tree)->shadow->tree );
+	//FIXME: leak kidFree( prg, input );
 }
 
 void setRegion( PdaRun *pdaRun, Tree *tree )
@@ -1448,7 +1448,7 @@ head:
 
 	/* Check for reverse code. */
 	//restore = 0;
-	if ( tree->flags & AF_HAS_RCODE ) {
+	if ( pt(tree)->shadow->tree->flags & AF_HAS_RCODE ) {
 		/* If tree caused some reductions, now is not the right time to backup
 		 * over the reverse code. We need to backup over the reductions first. Store
 		 * the count of the reductions and do it when the count drops to zero. */
@@ -1512,7 +1512,7 @@ head:
 	tree->flags |= AF_COMMITTED;
 
 	/* Do not recures on trees that are terminal dups. */
-	if ( !(tree->flags & AF_TERM_DUP) && treeChild( prg, tree ) != 0 ) {
+	if ( !(pt(tree)->shadow->tree->flags & AF_TERM_DUP) && treeChild( prg, tree ) != 0 ) {
 		vm_push( (Tree*)lel );
 		lel = treeChild( prg, tree );
 
@@ -2009,7 +2009,7 @@ case PcrReverse:
 					pdaRun->checkNext = true;
 					pdaRun->checkStop = true;
 
-					sendBack( prg, sp, pdaRun, fsmRun, inputStream, pt(pdaRun->parseInput->tree)->shadow );
+					sendBack( prg, sp, pdaRun, fsmRun, inputStream, pdaRun->parseInput );
 
 					pdaRun->parseInput = 0;
 				}
