@@ -1535,12 +1535,14 @@ void mapNodes( Program *prg, int &count, Kid *kid )
 	if ( kid != 0 ) {
 		pt(kid->tree)->state = count++;
 
-		IgnoreList *ignoreList = treeLeftIgnore( prg, kid->tree );
-		if ( ignoreList != 0 ) {
-			Kid *ignore = ignoreList->child;
-			while ( ignore != 0 ) {
-				count += 1;
-				ignore = ignore->next;
+		if ( pt(kid->tree)->shadow != 0 ) {
+			IgnoreList *ignoreList = treeLeftIgnore( prg, pt(kid->tree)->shadow->tree );
+			if ( ignoreList != 0 ) {
+				Kid *ignore = ignoreList->child;
+				while ( ignore != 0 ) {
+					count += 1;
+					ignore = ignore->next;
+				}
 			}
 		}
 		
@@ -1568,23 +1570,25 @@ void fillNodes( Program *prg, Bindings *bindings, long &bindId,
 		node.length = stringLength( kid->tree->tokdata );
 		node.data = stringData( kid->tree->tokdata );
 
-		/* Ignore items. */
-		IgnoreList *ignoreList = treeLeftIgnore( prg, kid->tree );
-		Kid *ignore = ignoreList == 0 ? 0 : ignoreList->child;
-		node.ignore = ignore == 0 ? -1 : ind;
+		if ( pt(kid->tree)->shadow != 0 ) {
+			/* Ignore items. */
+			IgnoreList *ignoreList = treeLeftIgnore( prg, pt(kid->tree)->shadow->tree );
+			Kid *ignore = ignoreList == 0 ? 0 : ignoreList->child;
+			node.ignore = ignore == 0 ? -1 : ind;
 
-		while ( ignore != 0 ) {
-			PatReplNode &node = nodes[ind++];
+			while ( ignore != 0 ) {
+				PatReplNode &node = nodes[ind++];
 
-			memset( &node, 0, sizeof(PatReplNode) );
-			node.id = ignore->tree->id;
-			node.prodNum = ignore->tree->prodNum;
-			node.next = ignore->next == 0 ? -1 : ind;
-			
-			node.length = stringLength( ignore->tree->tokdata );
-			node.data = stringData( ignore->tree->tokdata );
+				memset( &node, 0, sizeof(PatReplNode) );
+				node.id = ignore->tree->id;
+				node.prodNum = ignore->tree->prodNum;
+				node.next = ignore->next == 0 ? -1 : ind;
+				
+				node.length = stringLength( ignore->tree->tokdata );
+				node.data = stringData( ignore->tree->tokdata );
 
-			ignore = ignore->next;
+				ignore = ignore->next;
+			}
 		}
 
 		/* The captured attributes. */
