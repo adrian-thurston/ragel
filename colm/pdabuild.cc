@@ -1567,8 +1567,8 @@ void fillNodes( Program *prg, Bindings *bindings, long &bindId,
 		node.prodNum = kid->tree->prodNum;
 		node.child = child == 0 ? -1 : pt(child->tree)->state;
 		node.next = kid->next == 0 ? -1 : pt(kid->next->tree)->state;
-		node.length = stringLength( kid->tree->tokdata );
-		node.data = stringData( kid->tree->tokdata );
+		node.length = pt(kid->tree)->shadow != 0 ? stringLength( pt(kid->tree)->shadow->tree->tokdata ) : 0;
+		node.data = pt(kid->tree)->shadow != 0 ? stringData( pt(kid->tree)->shadow->tree->tokdata ) : 0;
 
 		if ( pt(kid->tree)->shadow != 0 ) {
 			/* Ignore items. */
