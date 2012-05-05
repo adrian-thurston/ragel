@@ -268,8 +268,8 @@ void detachIgnores( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, Kid
 	/* Right ignore are immediately discarded since they are copies of
 	 * left-ignores. */
 	Tree *rightIgnore = 0;
-	if ( pdaRun->tokenList != 0 && pdaRun->tokenList->kid->tree->flags & AF_RIGHT_IL_ATTACHED ) {
-		Kid *riKid = treeRightIgnoreKid( prg, pdaRun->tokenList->kid->tree );
+	if ( pdaRun->tokenList != 0 && pt(pdaRun->tokenList->kid->tree)->shadow->tree->flags & AF_RIGHT_IL_ATTACHED ) {
+		Kid *riKid = treeRightIgnoreKid( prg, pt(pdaRun->tokenList->kid->tree)->shadow->tree );
 
 		/* If the right ignore has a left ignore, then that was the original
 		 * right ignore. */
@@ -284,8 +284,8 @@ void detachIgnores( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, Kid
 		else  {
 			rightIgnore = riKid->tree;
 			treeUpref( rightIgnore );
-			removeRightIgnore( prg, sp, pdaRun->tokenList->kid->tree );
-			pdaRun->tokenList->kid->tree->flags &= ~AF_RIGHT_IL_ATTACHED;
+			removeRightIgnore( prg, sp, pt(pdaRun->tokenList->kid->tree)->shadow->tree );
+			pt(pdaRun->tokenList->kid->tree)->shadow->tree->flags &= ~AF_RIGHT_IL_ATTACHED;
 		}
 
 	}
@@ -657,10 +657,10 @@ void attachIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, Kid *input )
 		input->tree->flags |= AF_LEFT_IL_ATTACHED;
 
 		if ( pdaRun->tokenList != 0 ) {
-			if ( pdaRun->tokenList->kid->tree->flags & AF_RIGHT_IGNORE ) {
+			if ( pt(pdaRun->tokenList->kid->tree)->shadow->tree->flags & AF_RIGHT_IGNORE ) {
 				/* The previous token already has a right ignore. Merge by
 				 * attaching it as a left ignore of the new list. */
-				Kid *curIgnore = treeRightIgnoreKid( prg, pdaRun->tokenList->kid->tree );
+				Kid *curIgnore = treeRightIgnoreKid( prg, pt(pdaRun->tokenList->kid->tree)->shadow->tree );
 				attachLeftIgnore( prg, (Tree*)rightIgnore, (IgnoreList*)curIgnore->tree );
 
 				/* Replace the current ignore. */
@@ -670,10 +670,10 @@ void attachIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, Kid *input )
 			}
 			else {
 				/* Attach The ignore list. */
-				attachRightIgnore( prg, pdaRun->tokenList->kid->tree, rightIgnore );
+				attachRightIgnore( prg, pt(pdaRun->tokenList->kid->tree)->shadow->tree, rightIgnore );
 			}
 
-			pdaRun->tokenList->kid->tree->flags |= AF_RIGHT_IL_ATTACHED;
+			pt(pdaRun->tokenList->kid->tree)->shadow->tree->flags |= AF_RIGHT_IL_ATTACHED;
 		}
 	}
 	else {
