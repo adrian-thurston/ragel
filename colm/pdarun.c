@@ -1170,22 +1170,32 @@ case PcrGeneration:
 			transferReverseCode( pdaRun, pdaRun->parseInput->tree );
 
 		if ( pdaRun->parseInput != 0 ) {
-			Kid *oldNextDown = 0, *newNextDown = 0;
-			Tree *newTree = copyTree( prg, pdaRun->parseInput->tree, oldNextDown, &newNextDown );
-			treeUpref( newTree );
-			pt(pdaRun->parseInput->tree)->shadow = kidAllocate( prg );
-			pt(pdaRun->parseInput->tree)->shadow->tree = newTree;
-			if ( newTree->tokdata != 0 ) {
-				newTree->tokdata->location = pdaRun->parseInput->tree->tokdata->location;
-				pdaRun->parseInput->tree->tokdata->location = 0;
-			}
+//			Kid *oldNextDown = 0, *newNextDown = 0;
+//			Tree *newTree = copyTree( prg, pdaRun->parseInput->tree, oldNextDown, &newNextDown );
+//			treeUpref( newTree );
+//			pt(pdaRun->parseInput->tree)->shadow = kidAllocate( prg );
+//			pt(pdaRun->parseInput->tree)->shadow->tree = newTree;
+//			if ( newTree->tokdata != 0 ) {
+//				newTree->tokdata->location = pdaRun->parseInput->tree->tokdata->location;
+//				pdaRun->parseInput->tree->tokdata->location = 0;
+//			}
+//			pdaRun->parseInput->tree->tokdata = 0;
 
-//			ParseTree *parseTree = parseTreeAllocate( prg );
-//			parseTree->shadow = kidAllocate( prg );
-//			parseTree->shadow->tree = pdaRun->parseInput;
-//			parseTree->refs = 1;
-//			parseTree->flags |= AF_PARSE_TREE;
-//			pdaRun->parseInput = parseTree;
+			ParseTree *parseTree = parseTreeAllocate( prg );
+			parseTree->id = pdaRun->parseInput->tree->id;
+			parseTree->flags = pdaRun->parseInput->tree->flags;
+			parseTree->refs = 1;
+			parseTree->prodNum = pdaRun->parseInput->tree->prodNum;
+			parseTree->state = pt(pdaRun->parseInput->tree)->state;
+			parseTree->region = pt(pdaRun->parseInput->tree)->region;
+			parseTree->causeReduce = pt(pdaRun->parseInput->tree)->causeReduce;
+			parseTree->retryLower = pt(pdaRun->parseInput->tree)->retryLower;
+			parseTree->retryUpper = pt(pdaRun->parseInput->tree)->retryUpper;
+
+			parseTree->shadow = pdaRun->parseInput;
+			
+			pdaRun->parseInput = kidAllocate( prg );
+			pdaRun->parseInput->tree = (Tree*)parseTree;
 		}
 
 		long pcr = parseToken( prg, sp, pdaRun, fsmRun, inputStream, PcrStart );
@@ -1532,6 +1542,8 @@ backup:
 
 void commitFull( Program *prg, Tree **sp, PdaRun *pdaRun, long causeReduce )
 {
+//	return;
+
 //	#ifdef COLM_LOG_PARSE
 //	if ( colm_log_parse ) {
 //		cerr << "running full commit" << endl;
@@ -1991,10 +2003,9 @@ case PcrReverse:
 					pdaRun->checkNext = true;
 					pdaRun->checkStop = true;
 
-					sendBack( prg, sp, pdaRun, fsmRun, inputStream, pdaRun->parseInput );
+					sendBack( prg, sp, pdaRun, fsmRun, inputStream, pt(pdaRun->parseInput->tree)->shadow );
 
 					pdaRun->parseInput = 0;
-
 				}
 			}
 			else if ( pdaRun->parseInput->tree->flags & AF_HAS_RCODE ) {
