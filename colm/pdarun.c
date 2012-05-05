@@ -1353,9 +1353,15 @@ void initPdaRun( PdaRun *pdaRun, Program *prg, PdaTables *tables,
 	pdaRun->stackTop = kidAllocate( prg );
 	pdaRun->stackTop->tree = (Tree*)parseTreeAllocate( prg );
 	pdaRun->stackTop->tree->flags |= AF_PARSE_TREE;
-
 	pt(pdaRun->stackTop->tree)->state = -1;
 	pdaRun->stackTop->tree->refs = 1;
+
+	pt(pdaRun->stackTop->tree)->shadow = kidAllocate( prg );
+	pt(pdaRun->stackTop->tree)->shadow->tree = (Tree*)parseTreeAllocate( prg );
+	pt(pdaRun->stackTop->tree)->shadow->tree->flags |= AF_PARSE_TREE;
+	pt(pt(pdaRun->stackTop->tree)->shadow->tree)->state = -1;
+	pt(pdaRun->stackTop->tree)->shadow->tree->refs = 1;
+
 	pdaRun->numRetry = 0;
 	pdaRun->nextRegionInd = pdaRun->tables->tokenRegionInds[pdaRun->cs];
 	pdaRun->stopParsing = false;
