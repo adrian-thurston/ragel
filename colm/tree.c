@@ -2277,15 +2277,9 @@ void openTreeXml( Program *prg, Tree **sp, struct ColmPrintArgs *args, Kid *pare
 		return;
 	}
 
-	const char *name = lelInfo[kid->tree->id].name;
+	const char *name = lelInfo[kid->tree->id].xmlTag;
 	args->out( args, "<", 1 );
-	if ( lelInfo[kid->tree->id].literal ) {
-		name = lelInfo[kid->tree->id].nameNonLit;
-		args->out( args, name, strlen( name ) );
-	}
-	else {
-		args->out( args, name, strlen( name ) );
-	}
+	args->out( args, name, strlen( name ) );
 	args->out( args, ">", 1 );
 }
 
@@ -2342,15 +2336,9 @@ void closeTreeXml( Program *prg, Tree **sp, struct ColmPrintArgs *args, Kid *par
 		return;
 	}
 
-	const char *name = lelInfo[kid->tree->id].name;
+	const char *name = lelInfo[kid->tree->id].xmlTag;
 	args->out( args, "</", 2 );
-	if ( lelInfo[kid->tree->id].literal ) {
-		name = lelInfo[kid->tree->id].nameNonLit;
-		args->out( args, name, strlen( name ) );
-	}
-	else {
-		args->out( args, name, strlen( name ) );
-	}
+	args->out( args, name, strlen( name ) );
 	args->out( args, ">", 1 );
 }
 

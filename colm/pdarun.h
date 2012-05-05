@@ -160,7 +160,7 @@ typedef struct _PatReplNode
 typedef struct _LangElInfo
 {
 	const char *name;
-	const char *nameNonLit;
+	const char *xmlTag;
 	unsigned char repeat;
 	unsigned char list;
 	unsigned char literal;

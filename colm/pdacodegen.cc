@@ -189,7 +189,7 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 
 		/* Name. */
 		out << " \"";
-		escapeLiteralString( out, runtimeData->lelInfo[i].nameNonLit );
+		escapeLiteralString( out, runtimeData->lelInfo[i].xmlTag );
 		out << "\", ";
 		
 		/* Repeat, literal, ignore flags. */

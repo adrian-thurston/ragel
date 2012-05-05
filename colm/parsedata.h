@@ -218,6 +218,8 @@ struct LangEl : public DListEl<LangEl>
 	/* For declaring things inside the type. */
 	String declName;
 
+	String xmlTag;
+
 	Type type;
 	long id;
 	bool isUserTerm;

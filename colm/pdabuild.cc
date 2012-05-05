@@ -226,6 +226,7 @@ void ParseData::refNameSpace( LangEl *lel, Namespace *nspace )
 	
 	lel->refName = nspace->name + "::" + lel->refName;
 	lel->declName = nspace->name + "::" + lel->declName;
+	lel->xmlTag = nspace->name + "::" + lel->xmlTag;
 	refNameSpace( lel, nspace->parentNamespace );
 }
 
@@ -237,18 +238,21 @@ void ParseData::makeLangElNames()
 			lel->fullLit = "_int";
 			lel->refName = "_int";
 			lel->declName = "_int";
+			lel->xmlTag = "int";
 		}
 		else if ( lel->id == LEL_ID_BOOL ) {
 			lel->fullName = "_bool";
 			lel->fullLit = "_bool";
 			lel->refName = "_bool";
 			lel->declName = "_bool";
+			lel->xmlTag = "bool";
 		}
 		else {
 			lel->fullName = lel->name;
 			lel->fullLit = lel->lit;
 			lel->refName = lel->lit;
 			lel->declName = lel->lit;
+			lel->xmlTag = lel->name;
 		}
 
 		/* If there is also a namespace next to the type, we add a prefix to
@@ -261,6 +265,7 @@ void ParseData::makeLangElNames()
 			lel->refName = "t_" + lel->refName;
 			lel->fullName = "t_" + lel->fullName;
 			lel->declName = "t_" + lel->declName;
+			lel->xmlTag = "t_" + lel->xmlTag;
 		}
 
 		refNameSpace( lel, lel->nspace );
@@ -1324,7 +1329,7 @@ void ParseData::makeRuntimeData()
 		LangEl *lel = langElIndex[i];
 		if ( lel != 0 ) {
 			runtimeData->lelInfo[i].name = lel->fullLit;
-			runtimeData->lelInfo[i].nameNonLit = lel->fullName;
+			runtimeData->lelInfo[i].xmlTag = lel->xmlTag;
 			runtimeData->lelInfo[i].repeat = lel->isRepeat;
 			runtimeData->lelInfo[i].list = lel->isList;
 			runtimeData->lelInfo[i].literal = lel->isLiteral;
@@ -1375,7 +1380,7 @@ void ParseData::makeRuntimeData()
 		else {
 			memset(&runtimeData->lelInfo[i], 0, sizeof(LangElInfo) );
 			runtimeData->lelInfo[i].name = "__UNUSED";
-			runtimeData->lelInfo[i].nameNonLit = "__UNUSED";
+			runtimeData->lelInfo[i].xmlTag = "__UNUSED";
 			runtimeData->lelInfo[i].frameId = -1;
 		}
 	}
