@@ -1548,7 +1548,8 @@ void mapNodes( Program *prg, int &count, Kid *kid )
 		
 		count += prg->rtd->lelInfo[kid->tree->id].numCaptureAttr;
 
-		mapNodes( prg, count, treeChild( prg, kid->tree ) );
+		if ( !( pt(kid->tree)->shadow->tree->flags & AF_NAMED ) )
+			mapNodes( prg, count, treeChild( prg, kid->tree ) );
 		mapNodes( prg, count, kid->next );
 	}
 }
@@ -1560,7 +1561,9 @@ void fillNodes( Program *prg, Bindings *bindings, long &bindId,
 		long ind = pt(kid->tree)->state;
 		PatReplNode &node = nodes[ind++];
 
-		Kid *child = treeChild( prg, kid->tree );
+		Kid *child = 
+			!( pt(kid->tree)->shadow->tree->flags & AF_NAMED ) ?
+			treeChild( prg, kid->tree ) : 0;
 
 		/* Set up the fields. */
 		node.id = kid->tree->id;
