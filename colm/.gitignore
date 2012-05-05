@@ -1,3 +1,11 @@
+# Common testing files.
+/tmp.lm
+/tmp.c
+/tmp.bin
+/input
+/out
+
+/*.o
 /Makefile.in
 /Makefile
 /.*.d
