@@ -1515,7 +1515,11 @@ head:
 	tree->flags |= AF_COMMITTED;
 
 	/* Do not recures on trees that are terminal dups. */
-	if ( !(pt(tree)->shadow->tree->flags & AF_TERM_DUP) && treeChild( prg, tree ) != 0 ) {
+	if ( !(pt(tree)->shadow->tree->flags & AF_TERM_DUP) && 
+			!(pt(tree)->shadow->tree->flags & AF_NAMED) && 
+			!(pt(tree)->shadow->tree->flags & AF_ARTIFICIAL) && 
+			treeChild( prg, tree ) != 0 )
+	{
 		vm_push( (Tree*)lel );
 		lel = treeChild( prg, tree );
 
