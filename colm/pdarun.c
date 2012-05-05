@@ -1184,6 +1184,9 @@ case PcrGeneration:
 			ParseTree *parseTree = parseTreeAllocate( prg );
 			parseTree->id = pdaRun->parseInput->tree->id;
 			parseTree->flags = pdaRun->parseInput->tree->flags;
+			parseTree->flags &= ~(
+				AF_LEFT_IGNORE | AF_LEFT_IL_ATTACHED | AF_RIGHT_IGNORE | AF_RIGHT_IL_ATTACHED
+			);
 			parseTree->refs = 1;
 			parseTree->prodNum = pdaRun->parseInput->tree->prodNum;
 			parseTree->state = pt(pdaRun->parseInput->tree)->state;
