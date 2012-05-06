@@ -135,18 +135,6 @@ Tree *getAttr( Tree *tree, long pos )
 	return kid->tree;
 }
 
-Tree *getRhsVal( Program *prg, Tree *tree, int *a )
-{
-	int i, len = a[0];
-	for ( i = 0; i < len; i++ ) {
-		int prodNum = a[1 + i * 2];
-		int childNum = a[1 + i * 2 + 1];
-		if ( tree->prodNum == prodNum )
-			return getRhsEl( prg, tree, childNum );
-	}
-	return 0;
-}
-
 
 Tree *getRepeatNext( Tree *tree )
 {
@@ -1136,7 +1124,6 @@ void refSetValue( Ref *ref, Tree *v )
 
 Tree *getRhsEl( Program *prg, Tree *lhs, long position )
 {
-	lhs = ((ParseTree*)lhs)->shadow->tree;
 	Kid *pos = treeChild( prg, lhs );
 	while ( position > 0 ) {
 		pos = pos->next;

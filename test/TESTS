@@ -73,4 +73,5 @@ TESTS="
 	scope1.lm
 	export1.lm
 	lhs1.lm
+	rhsref1.lm
 "

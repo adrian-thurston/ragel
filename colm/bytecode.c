@@ -1172,7 +1172,7 @@ again:
 
 			debug( REALM_BYTECODE, "IN_INIT_RHS_EL %hd\n", field );
 
-			Tree *val = getRhsEl( prg, exec->pdaRun->redLel->tree, position );
+			Tree *val = getRhsEl( prg, ((ParseTree*)exec->pdaRun->redLel->tree)->shadow->tree, position );
 			treeUpref( val );
 			vm_local(field) = val;
 			break;
