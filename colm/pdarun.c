@@ -756,6 +756,32 @@ Head *extractMatch( Program *prg, FsmRun *fsmRun, InputStream *inputStream )
 	return head;
 }
 
+void parseTreeWrap( Program *prg, PdaRun *pdaRun )
+{
+	if ( pdaRun->parseInput != 0 ) {
+		ParseTree *parseTree = parseTreeAllocate( prg );
+		parseTree->id = pdaRun->parseInput->tree->id;
+		parseTree->flags = pdaRun->parseInput->tree->flags;
+		parseTree->flags &= ~(
+			AF_LEFT_IGNORE | AF_LEFT_IL_ATTACHED | AF_RIGHT_IGNORE | AF_RIGHT_IL_ATTACHED
+		);
+		parseTree->flags |= AF_PARSE_TREE;
+		parseTree->refs = 1;
+		parseTree->prodNum = pdaRun->parseInput->tree->prodNum;
+		parseTree->state = pt(pdaRun->parseInput->tree)->state;
+		parseTree->region = pt(pdaRun->parseInput->tree)->region;
+		parseTree->causeReduce = pt(pdaRun->parseInput->tree)->causeReduce;
+		parseTree->retryLower = pt(pdaRun->parseInput->tree)->retryLower;
+		parseTree->retryUpper = pt(pdaRun->parseInput->tree)->retryUpper;
+
+		parseTree->shadow = pdaRun->parseInput;
+		
+		pdaRun->parseInput = kidAllocate( prg );
+		pdaRun->parseInput->tree = (Tree*)parseTree;
+	}
+}
+
+
 Kid *sendToken( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long id )
 {
 	/* Make the token data. */
@@ -1070,6 +1096,8 @@ return PcrPreEof;
 case PcrPreEof:
 				makeReverseCode( pdaRun );
 			}
+
+			parseTreeWrap( prg, pdaRun );
 		}
 		else if ( pdaRun->tokenId == SCAN_UNDO ) {
 			/* Fall through with parseInput = 0. FIXME: Do we need to send back ignore? */
@@ -1107,12 +1135,16 @@ case PcrPreEof:
 
 			/* A named language element (parsing colm program). */
 			pdaRun->parseInput = sendNamedLangEl( prg, sp, pdaRun, fsmRun, inputStream );
+
+			parseTreeWrap( prg, pdaRun );
 		}
 		else if ( pdaRun->tokenId == SCAN_TREE ) {
 			debug( REALM_PARSE, "sending a tree\n" );
 
 			/* A tree already built. */
 			pdaRun->parseInput = sendTree( prg, sp, pdaRun, fsmRun, inputStream );
+
+			parseTreeWrap( prg, pdaRun );
 		}
 		else if ( pdaRun->tokenId == SCAN_IGNORE ) {
 			debug( REALM_PARSE, "sending an ignore token\n" );
@@ -1163,28 +1195,8 @@ case PcrGeneration:
 
 			/* Is a plain token. */
 			pdaRun->parseInput = sendToken( prg, sp, inputStream, fsmRun, pdaRun, pdaRun->tokenId );
-		}
 
-		if ( pdaRun->parseInput != 0 ) {
-			ParseTree *parseTree = parseTreeAllocate( prg );
-			parseTree->id = pdaRun->parseInput->tree->id;
-			parseTree->flags = pdaRun->parseInput->tree->flags;
-			parseTree->flags &= ~(
-				AF_LEFT_IGNORE | AF_LEFT_IL_ATTACHED | AF_RIGHT_IGNORE | AF_RIGHT_IL_ATTACHED
-			);
-			parseTree->flags |= AF_PARSE_TREE;
-			parseTree->refs = 1;
-			parseTree->prodNum = pdaRun->parseInput->tree->prodNum;
-			parseTree->state = pt(pdaRun->parseInput->tree)->state;
-			parseTree->region = pt(pdaRun->parseInput->tree)->region;
-			parseTree->causeReduce = pt(pdaRun->parseInput->tree)->causeReduce;
-			parseTree->retryLower = pt(pdaRun->parseInput->tree)->retryLower;
-			parseTree->retryUpper = pt(pdaRun->parseInput->tree)->retryUpper;
-
-			parseTree->shadow = pdaRun->parseInput;
-			
-			pdaRun->parseInput = kidAllocate( prg );
-			pdaRun->parseInput->tree = (Tree*)parseTree;
+			parseTreeWrap( prg, pdaRun );
 		}
 
 		if ( pdaRun->parseInput != 0 )

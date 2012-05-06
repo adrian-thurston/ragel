@@ -459,6 +459,8 @@ void attachInput( FsmRun *fsmRun, InputStream *is );
 void detachSource( FsmRun *fsmRun, SourceStream *ss );
 void attachSource( FsmRun *fsmRun, SourceStream *ss );
 
+void parseTreeWrap( struct ColmProgram *prg, PdaRun *pdaRun );
+
 #ifdef __cplusplus
 }
 #endif
