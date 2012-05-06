@@ -441,7 +441,7 @@ Head *extractMatch( struct ColmProgram *prg, FsmRun *fsmRun, InputStream *inputS
 Head *extractMatch( struct ColmProgram *prg, FsmRun *fsmRun, InputStream *inputStream );
 void newToken( struct ColmProgram *prg, PdaRun *pdaRun, FsmRun *fsmRun );
 void fsmExecute( FsmRun *fsmRun, InputStream *inputStream );
-Kid *sendNamedLangEl( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
+void sendNamedLangEl( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
 long parseLoop( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, 
 		FsmRun *fsmRun, InputStream *inputStream, long entry );
 void initBindings( PdaRun *pdaRun );

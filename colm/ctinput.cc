@@ -381,7 +381,7 @@ extern "C" void initReplFuncs()
 	replFuncs.undoConsumeLangEl = &inputStreamReplUndoConsumeLangEl;
 }
 
-Kid *sendNamedLangEl( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
+void sendNamedLangEl( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 {
 	/* All three set by consumeLangEl. */
 	long bindId;
@@ -407,7 +407,9 @@ Kid *sendNamedLangEl( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, I
 
 	incrementSteps( pdaRun );
 
-	return input;
+	pdaRun->parseInput = input;
+
+	parseTreeWrap( prg, pdaRun );
 }
 
 void initBindings( PdaRun *pdaRun )
