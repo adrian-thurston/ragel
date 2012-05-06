@@ -982,32 +982,6 @@ Kid *treeChild( Program *prg, const Tree *tree )
 }
 
 /* Find the first child of a tree. */
-Kid *treeExtractChild( Program *prg, Tree *tree )
-{
-	LangElInfo *lelInfo = prg->rtd->lelInfo;
-	Kid *kid = tree->child, *last = 0;
-
-	if ( tree->flags & AF_LEFT_IGNORE )
-		kid = kid->next;
-	if ( tree->flags & AF_RIGHT_IGNORE )
-		kid = kid->next;
-
-	/* Skip over attributes. */
-	long a, objectLength = lelInfo[tree->id].objectLength;
-	for ( a = 0; a < objectLength; a++ ) {
-		last = kid;
-		kid = kid->next;
-	}
-
-	if ( last == 0 )
-		tree->child = 0;
-	else
-		last->next = 0;
-
-	return kid;
-}
-
-/* Find the first child of a tree. */
 Kid *treeAttr( Program *prg, const Tree *tree )
 {
 	Kid *kid = tree->child;

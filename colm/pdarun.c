@@ -2035,7 +2035,8 @@ case PcrReverse:
 				pdaRun->parseInput = pdaRun->parseInput->next;
 
 				/* Extract the real children from the child list. */
-				Kid *first = treeExtractChild( prg, pdaRun->undoLel->tree );
+				Kid *first = pdaRun->undoLel->tree->child;
+				pdaRun->undoLel->tree->child = 0;
 
 				/* Walk the child list and and push the items onto the parsing
 				 * stack one at a time. */
