@@ -71,7 +71,8 @@ TESTS = \
 	div.lm \
 	scope1.lm \
 	export1.lm \
-	lhs1.lm
+	lhs1.lm \
+	rhsref1.lm
 
 DIFFS = \
 	ambig1.diff \
@@ -142,7 +143,8 @@ DIFFS = \
 	div.diff \
 	scope1.diff \
 	export1.diff \
-	lhs1.diff
+	lhs1.diff \
+	rhsref1.diff
 
 all: runtests.mk $(DIFFS) $(SUBDIRS)
 
@@ -711,3 +713,11 @@ lhs1.out: lhs1.bin
 
 lhs1.bin: lhs1.lm ./../colm/colm
 	./../colm/colm lhs1.lm
+rhsref1.diff: rhsref1.out rhsref1.exp
+	@diff -u rhsref1.exp rhsref1.out > rhsref1.diff || ( cat rhsref1.diff; rm rhsref1.diff )
+
+rhsref1.out: rhsref1.bin
+	./rhsref1.bin  < rhsref1.in > rhsref1.out
+
+rhsref1.bin: rhsref1.lm ./../colm/colm
+	./../colm/colm rhsref1.lm
