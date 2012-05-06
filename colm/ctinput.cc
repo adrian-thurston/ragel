@@ -24,8 +24,11 @@
 #include "input.h"
 #include "fsmrun.h"
 #include "debug.h"
+#include "pool.h"
 
 #include <iostream>
+#define pt(var) ((ParseTree*)(var))
+
 using std::cerr;
 using std::endl;
 
@@ -407,9 +410,26 @@ void sendNamedLangEl( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, I
 
 	incrementSteps( pdaRun );
 
-	pdaRun->parseInput = input;
+	ParseTree *parseTree = parseTreeAllocate( prg );
+	parseTree->id = input->tree->id;
+	parseTree->flags = input->tree->flags;
+	parseTree->flags &= ~(
+		AF_LEFT_IGNORE | AF_LEFT_IL_ATTACHED | 
+		AF_RIGHT_IGNORE | AF_RIGHT_IL_ATTACHED
+	);
+	parseTree->flags |= AF_PARSE_TREE;
+	parseTree->refs = 1;
+	parseTree->prodNum = input->tree->prodNum;
+	parseTree->state = pt(input->tree)->state;
+	parseTree->region = pt(input->tree)->region;
+	parseTree->causeReduce = pt(input->tree)->causeReduce;
+	parseTree->retryLower = pt(input->tree)->retryLower;
+	parseTree->retryUpper = pt(input->tree)->retryUpper;
 
-	parseTreeWrap( prg, pdaRun );
+	parseTree->shadow = input;
+	
+	pdaRun->parseInput = kidAllocate( prg );
+	pdaRun->parseInput->tree = (Tree*)parseTree;
 }
 
 void initBindings( PdaRun *pdaRun )

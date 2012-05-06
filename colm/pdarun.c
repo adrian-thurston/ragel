@@ -756,31 +756,6 @@ Head *extractMatch( Program *prg, FsmRun *fsmRun, InputStream *inputStream )
 	return head;
 }
 
-void parseTreeWrap( Program *prg, PdaRun *pdaRun )
-{
-	if ( pdaRun->parseInput != 0 ) {
-		ParseTree *parseTree = parseTreeAllocate( prg );
-		parseTree->id = pdaRun->parseInput->tree->id;
-		parseTree->flags = pdaRun->parseInput->tree->flags;
-		parseTree->flags &= ~(
-			AF_LEFT_IGNORE | AF_LEFT_IL_ATTACHED | AF_RIGHT_IGNORE | AF_RIGHT_IL_ATTACHED
-		);
-		parseTree->flags |= AF_PARSE_TREE;
-		parseTree->refs = 1;
-		parseTree->prodNum = pdaRun->parseInput->tree->prodNum;
-		parseTree->state = pt(pdaRun->parseInput->tree)->state;
-		parseTree->region = pt(pdaRun->parseInput->tree)->region;
-		parseTree->causeReduce = pt(pdaRun->parseInput->tree)->causeReduce;
-		parseTree->retryLower = pt(pdaRun->parseInput->tree)->retryLower;
-		parseTree->retryUpper = pt(pdaRun->parseInput->tree)->retryUpper;
-
-		parseTree->shadow = pdaRun->parseInput;
-		
-		pdaRun->parseInput = kidAllocate( prg );
-		pdaRun->parseInput->tree = (Tree*)parseTree;
-	}
-}
-
 static void sendToken( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long id )
 {
 	/* Make the token data. */
@@ -800,9 +775,26 @@ static void sendToken( Program *prg, Tree **sp, InputStream *inputStream, FsmRun
 	if ( input != 0 && pdaRun->cs >= 0 )
 		setRegion( pdaRun, input->tree );
 
-	pdaRun->parseInput = input;
+	ParseTree *parseTree = parseTreeAllocate( prg );
+	parseTree->id = input->tree->id;
+	parseTree->flags = input->tree->flags;
+	parseTree->flags &= ~(
+		AF_LEFT_IGNORE | AF_LEFT_IL_ATTACHED | 
+		AF_RIGHT_IGNORE | AF_RIGHT_IL_ATTACHED
+	);
+	parseTree->flags |= AF_PARSE_TREE;
+	parseTree->refs = 1;
+	parseTree->prodNum = input->tree->prodNum;
+	parseTree->state = pt(input->tree)->state;
+	parseTree->region = pt(input->tree)->region;
+	parseTree->causeReduce = pt(input->tree)->causeReduce;
+	parseTree->retryLower = pt(input->tree)->retryLower;
+	parseTree->retryUpper = pt(input->tree)->retryUpper;
 
-	parseTreeWrap( prg, pdaRun );
+	parseTree->shadow = input;
+		
+	pdaRun->parseInput = kidAllocate( prg );
+	pdaRun->parseInput->tree = (Tree*)parseTree;
 }
 
 static void sendTree( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
@@ -812,9 +804,25 @@ static void sendTree( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, I
 
 	incrementSteps( pdaRun );
 
-	pdaRun->parseInput = input;
+	ParseTree *parseTree = parseTreeAllocate( prg );
+	parseTree->id = input->tree->id;
+	parseTree->flags = input->tree->flags;
+	parseTree->flags &= ~(
+		AF_LEFT_IGNORE | AF_LEFT_IL_ATTACHED | AF_RIGHT_IGNORE | AF_RIGHT_IL_ATTACHED
+	);
+	parseTree->flags |= AF_PARSE_TREE;
+	parseTree->refs = 1;
+	parseTree->prodNum = input->tree->prodNum;
+	parseTree->state = pt(input->tree)->state;
+	parseTree->region = pt(input->tree)->region;
+	parseTree->causeReduce = pt(input->tree)->causeReduce;
+	parseTree->retryLower = pt(input->tree)->retryLower;
+	parseTree->retryUpper = pt(input->tree)->retryUpper;
 
-	parseTreeWrap( prg, pdaRun );
+	parseTree->shadow = input;
+	
+	pdaRun->parseInput = kidAllocate( prg );
+	pdaRun->parseInput->tree = (Tree*)parseTree;
 }
 
 static void sendIgnoreTree( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
@@ -824,7 +832,7 @@ static void sendIgnoreTree( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsm
 }
 
 
-static sendEof( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
+static void sendEof( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
 {
 	debug( REALM_PARSE, "token: _EOF\n" );
 
@@ -848,9 +856,21 @@ static sendEof( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRu
 	fsmRun->region = pdaRunGetNextRegion( pdaRun, 0 );
 	fsmRun->cs = fsmRun->tables->entryByRegion[fsmRun->region];
 
-	pdaRun->parseInput = input;
+	ParseTree *parseTree = parseTreeAllocate( prg );
+	parseTree->id = input->tree->id;
+	parseTree->flags = input->tree->flags;
+	parseTree->flags &= ~(
+		AF_LEFT_IGNORE | AF_LEFT_IL_ATTACHED | 
+		AF_RIGHT_IGNORE | AF_RIGHT_IL_ATTACHED
+	);
+	parseTree->flags |= AF_PARSE_TREE;
+	parseTree->refs = 1;
+	parseTree->prodNum = input->tree->prodNum;
 
-	parseTreeWrap( prg, pdaRun );
+	parseTree->shadow = input;
+	
+	pdaRun->parseInput = kidAllocate( prg );
+	pdaRun->parseInput->tree = (Tree*)parseTree;
 }
 
 void newToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun )
