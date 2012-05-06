@@ -420,12 +420,6 @@ void sendNamedLangEl( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, I
 	parseTree->flags |= AF_PARSE_TREE;
 	parseTree->refs = 1;
 	parseTree->prodNum = input->tree->prodNum;
-	parseTree->state = pt(input->tree)->state;
-	parseTree->region = pt(input->tree)->region;
-	parseTree->causeReduce = pt(input->tree)->causeReduce;
-	parseTree->retryLower = pt(input->tree)->retryLower;
-	parseTree->retryUpper = pt(input->tree)->retryUpper;
-
 	parseTree->shadow = input;
 	
 	pdaRun->parseInput = kidAllocate( prg );
