@@ -815,6 +815,16 @@ void transferReverseCode( PdaRun *pdaRun, Tree *tree )
 	}
 }
 
+void transferReverseCode2( PdaRun *pdaRun, Tree *tree )
+{
+	if ( pdaRun->rcBlockCount > 0 ) {
+		debug( REALM_PARSE, "attaching reverse code to token\n" );
+		tree->flags |= AF_HAS_RCODE;
+		((ParseTree*)tree)->shadow->tree->flags |= AF_HAS_RCODE;
+		pdaRun->rcBlockCount = 0;
+	}
+}
+
 Code *popReverseCode( RtCodeVect *allRev )
 {
 	/* Read the length */

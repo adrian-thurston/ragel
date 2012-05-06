@@ -386,6 +386,7 @@ void decrementSteps( PdaRun *pdaRun );
 
 int makeReverseCode( PdaRun *pdaRun );
 void transferReverseCode( PdaRun *pdaRun, Tree *tree );
+void transferReverseCode2( PdaRun *pdaRun, Tree *tree );
 
 void initPdaRun( PdaRun *pdaRun, struct ColmProgram *prg, PdaTables *tables,
 		FsmRun *fsmRun, int parserId, long stopTarget, int revertOn, Tree *context );

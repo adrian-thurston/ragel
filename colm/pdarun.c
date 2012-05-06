@@ -1165,27 +1165,14 @@ case PcrGeneration:
 			pdaRun->parseInput = sendToken( prg, sp, inputStream, fsmRun, pdaRun, pdaRun->tokenId );
 		}
 
-		if ( pdaRun->parseInput != 0 )
-			transferReverseCode( pdaRun, pdaRun->parseInput->tree );
-
 		if ( pdaRun->parseInput != 0 ) {
-//			Kid *oldNextDown = 0, *newNextDown = 0;
-//			Tree *newTree = copyTree( prg, pdaRun->parseInput->tree, oldNextDown, &newNextDown );
-//			treeUpref( newTree );
-//			pt(pdaRun->parseInput->tree)->shadow = kidAllocate( prg );
-//			pt(pdaRun->parseInput->tree)->shadow->tree = newTree;
-//			if ( newTree->tokdata != 0 ) {
-//				newTree->tokdata->location = pdaRun->parseInput->tree->tokdata->location;
-//				pdaRun->parseInput->tree->tokdata->location = 0;
-//			}
-//			pdaRun->parseInput->tree->tokdata = 0;
-
 			ParseTree *parseTree = parseTreeAllocate( prg );
 			parseTree->id = pdaRun->parseInput->tree->id;
 			parseTree->flags = pdaRun->parseInput->tree->flags;
 			parseTree->flags &= ~(
 				AF_LEFT_IGNORE | AF_LEFT_IL_ATTACHED | AF_RIGHT_IGNORE | AF_RIGHT_IL_ATTACHED
 			);
+			parseTree->flags |= AF_PARSE_TREE;
 			parseTree->refs = 1;
 			parseTree->prodNum = pdaRun->parseInput->tree->prodNum;
 			parseTree->state = pt(pdaRun->parseInput->tree)->state;
@@ -1199,6 +1186,9 @@ case PcrGeneration:
 			pdaRun->parseInput = kidAllocate( prg );
 			pdaRun->parseInput->tree = (Tree*)parseTree;
 		}
+
+		if ( pdaRun->parseInput != 0 )
+			transferReverseCode2( pdaRun, pdaRun->parseInput->tree );
 
 		long pcr = parseToken( prg, sp, pdaRun, fsmRun, inputStream, PcrStart );
 		
