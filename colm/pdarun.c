@@ -262,8 +262,8 @@ void detachIgnores( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, Kid
 {
 	assert( pdaRun->accumIgnore == 0 );
 
-	if ( pt(input->tree)->shadow )
-		input = pt(input->tree)->shadow;
+	assert( pt(input->tree)->shadow );
+	input = pt(input->tree)->shadow;
 
 	/* Right ignore are immediately discarded since they are copies of
 	 * left-ignores. */
@@ -607,8 +607,8 @@ void attachIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, Kid *input )
 	/* Need to preserve the layout under a tree:
 	 *    attributes, ignore tokens, grammar children. */
 	
-	if ( pt(input->tree)->shadow )
-		input = pt(input->tree)->shadow;
+	assert( ( pt(input->tree)->shadow ) != 0 );
+	input = pt(input->tree)->shadow;
 
 	/* Reset. */
 	input->tree->flags &= ~AF_LEFT_IL_ATTACHED;
@@ -841,7 +841,6 @@ void newToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun )
 	memset( fsmRun->mark, 0, sizeof(fsmRun->mark) );
 }
 
-/* Tree null means compute from what we find in the parser. */
 static void pushBtPoint( Program *prg, PdaRun *pdaRun )
 {
 	Tree *tree = 0;
@@ -1518,10 +1517,10 @@ head:
 	if ( !(pt(tree)->shadow->tree->flags & AF_TERM_DUP) && 
 			!(pt(tree)->shadow->tree->flags & AF_NAMED) && 
 			!(pt(tree)->shadow->tree->flags & AF_ARTIFICIAL) && 
-			treeChild( prg, tree ) != 0 )
+			tree->child != 0 )
 	{
 		vm_push( (Tree*)lel );
-		lel = treeChild( prg, tree );
+		lel = tree->child;
 
 		if ( lel != 0 ) {
 			while ( lel != 0 ) {
@@ -1763,7 +1762,7 @@ again:
 
 	if ( *action & act_rb ) {
 		int r, objectLength;
-		Kid *last, *child, *attrs, *attrs2;
+		Kid *last, *child, *attrs;
 
 		pdaRun->reduction = *action >> 2;
 
@@ -1793,7 +1792,6 @@ again:
 		/* Allocate the attributes. */
 		objectLength = prg->rtd->lelInfo[pdaRun->redLel->tree->id].objectLength;
 		attrs = allocAttrs( prg, objectLength );
-		attrs2 = allocAttrs( prg, objectLength );
 
 		/* Build the list of children. */
 		Kid *realChild = 0;
@@ -1817,11 +1815,11 @@ again:
 				realChild = child;
 		}
 
-		pdaRun->redLel->tree->child = kidListConcat( attrs, child );
+		pdaRun->redLel->tree->child = child;
 
 		/* SHADOW */
 		Kid *l = 0;
-		Kid *c = treeChild(prg, pdaRun->redLel->tree);
+		Kid *c = pdaRun->redLel->tree->child;
 		Kid *rc = 0;
 		if ( c != 0 ) {
 			rc = pt(c->tree)->shadow;
@@ -1835,7 +1833,7 @@ again:
 			pt(l->tree)->shadow->next = 0;
 		}
 
-		pt(pdaRun->redLel->tree)->shadow->tree->child = kidListConcat( attrs2, rc );
+		pt(pdaRun->redLel->tree)->shadow->tree->child = kidListConcat( attrs, rc );
 
 		debug( REALM_PARSE, "reduced: %s rhsLen %d\n",
 				prg->rtd->prodInfo[pdaRun->reduction].name, rhsLen );
