@@ -324,7 +324,7 @@ void detachIgnores( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, Kid
 	treeDownref( prg, sp, leftIgnore );
 
 	if ( ptree->ignore != 0 ) {
-		pdaRun->ptAccumIgnore = ptree->ignore;
+		pdaRun->_accumIgnore = ptree->ignore;
 		ptree->ignore = 0;
 	}
 }
@@ -497,8 +497,8 @@ void ignoreTree( Program *prg, PdaRun *pdaRun, Tree *tree )
 	/* Parse tree ignore tokens. */
 	Kid *pignore = kidAllocate( prg );
 	pignore->tree = (Tree*)parseTreeAllocate( prg );
-	pignore->next = pdaRun->ptAccumIgnore;
-	pdaRun->ptAccumIgnore = pignore;
+	pignore->next = pdaRun->_accumIgnore;
+	pdaRun->_accumIgnore = pignore;
 
 	setRegion( pdaRun, pt(pignore->tree) );
 
@@ -562,8 +562,8 @@ Kid *extractIgnore( PdaRun *pdaRun )
 
 Kid *extractIgnore2( PdaRun *pdaRun )
 {
-	Kid *ignore = pdaRun->ptAccumIgnore;
-	pdaRun->ptAccumIgnore = 0;
+	Kid *ignore = pdaRun->_accumIgnore;
+	pdaRun->_accumIgnore = 0;
 	return ignore;
 }
 
@@ -2120,8 +2120,8 @@ case PcrReverse:
 			ignore->next = 0;
 
 			/* Parse tree ignore. */
-			Kid *pignore = pdaRun->ptAccumIgnore;
-			pdaRun->ptAccumIgnore = pdaRun->ptAccumIgnore->next;
+			Kid *pignore = pdaRun->_accumIgnore;
+			pdaRun->_accumIgnore = pdaRun->_accumIgnore->next;
 			pignore->next = 0;
 			
 			long region = pt(pignore->tree)->region;
