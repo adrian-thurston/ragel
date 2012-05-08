@@ -478,9 +478,9 @@ static void sendBack( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
 	//FIXME: leak kidFree( prg, input );
 }
 
-void setRegion( PdaRun *pdaRun, ParseTree *tree )
+void setRegion( PdaRun *pdaRun, int emptyIgnore, ParseTree *tree )
 {
-	if ( pdaRun->accumIgnore == 0 ) {
+	if ( emptyIgnore ) {
 		/* Recording the next region. */
 		tree->region = pdaRun->nextRegionInd;
 		if ( pdaRun->tables->tokenRegions[tree->region+1] != 0 )
@@ -490,6 +490,8 @@ void setRegion( PdaRun *pdaRun, ParseTree *tree )
 
 void ignoreTree( Program *prg, PdaRun *pdaRun, Tree *tree )
 {
+	int emptyIgnore = pdaRun->_accumIgnore == 0;
+
 	transferReverseCode( pdaRun, tree );
 
 	incrementSteps( pdaRun );
@@ -500,8 +502,6 @@ void ignoreTree( Program *prg, PdaRun *pdaRun, Tree *tree )
 	pignore->next = pdaRun->_accumIgnore;
 	pdaRun->_accumIgnore = pignore;
 
-	setRegion( pdaRun, pt(pignore->tree) );
-
 	/* Add the ignore string to the head of the ignore list. */
 	Kid *ignore = kidAllocate( prg );
 	ignore->tree = tree;
@@ -509,6 +509,8 @@ void ignoreTree( Program *prg, PdaRun *pdaRun, Tree *tree )
 	/* Push it to the list of ignore tokens. */
 	ignore->next = pdaRun->accumIgnore;
 	pdaRun->accumIgnore = ignore;
+
+	setRegion( pdaRun, emptyIgnore, pt(pdaRun->_accumIgnore->tree) );
 }
 
 Kid *makeTokenWithData( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, int id,
@@ -782,6 +784,8 @@ Head *extractMatch( Program *prg, FsmRun *fsmRun, InputStream *inputStream )
 
 static void sendToken( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long id )
 {
+	int emptyIgnore = pdaRun->_accumIgnore == 0;
+
 	/* Make the token data. */
 	Head *tokdata = extractMatch( prg, fsmRun, inputStream );
 
@@ -806,13 +810,13 @@ static void sendToken( Program *prg, Tree **sp, InputStream *inputStream, FsmRun
 	parseTree->refs = 1;
 	parseTree->prodNum = input->tree->prodNum;
 	parseTree->shadow = input;
-
-	/* Store any alternate scanning region. */
-	if ( input != 0 && pdaRun->cs >= 0 )
-		setRegion( pdaRun, parseTree );
 		
 	pdaRun->parseInput = kidAllocate( prg );
 	pdaRun->parseInput->tree = (Tree*)parseTree;
+
+	/* Store any alternate scanning region. */
+	if ( input != 0 && pdaRun->cs >= 0 )
+		setRegion( pdaRun, emptyIgnore, parseTree );
 }
 
 static void sendTree( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
