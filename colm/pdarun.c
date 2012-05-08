@@ -562,8 +562,8 @@ Kid *extractIgnore( PdaRun *pdaRun )
 
 Kid *extractIgnore2( PdaRun *pdaRun )
 {
-	Kid *ignore = pdaRun->accumIgnore;
-	pdaRun->accumIgnore = 0;
+	Kid *ignore = pdaRun->ptAccumIgnore;
+	pdaRun->ptAccumIgnore = 0;
 	return ignore;
 }
 
