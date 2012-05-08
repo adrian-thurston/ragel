@@ -125,6 +125,7 @@ typedef struct _ParseTree
 	char retryUpper;
 
 	Kid *shadow;
+	Kid *ignore;
 } ParseTree;
 
 typedef struct _Int

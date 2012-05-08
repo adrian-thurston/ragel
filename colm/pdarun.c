@@ -262,6 +262,7 @@ void detachIgnores( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, Kid
 {
 	assert( pdaRun->accumIgnore == 0 );
 
+	ParseTree *ptree = pt(input->tree);
 	assert( pt(input->tree)->shadow );
 	input = pt(input->tree)->shadow;
 
@@ -321,6 +322,11 @@ void detachIgnores( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, Kid
 	}
 
 	treeDownref( prg, sp, leftIgnore );
+
+	if ( ptree->ignore != 0 ) {
+		pdaRun->ptAccumIgnore = ptree->ignore;
+		ptree->ignore = 0;
+	}
 }
 
 void attachInput( FsmRun *fsmRun, InputStream *is )
@@ -494,9 +500,15 @@ void ignoreTree( Program *prg, PdaRun *pdaRun, Tree *tree )
 	Kid *ignore = kidAllocate( prg );
 	ignore->tree = tree;
 
-	/* Prepend it to the list of ignore tokens. */
+	/* Push it to the list of ignore tokens. */
 	ignore->next = pdaRun->accumIgnore;
 	pdaRun->accumIgnore = ignore;
+
+	/* Parse tree ignore tokens. */
+	Kid *pignore = kidAllocate( prg );
+	pignore->tree = (Tree*)parseTreeAllocate( prg );
+	pignore->next = pdaRun->ptAccumIgnore;
+	pdaRun->ptAccumIgnore = pignore;
 }
 
 Kid *makeTokenWithData( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, int id,
@@ -542,6 +554,13 @@ Kid *makeTokenWithData( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, InputStrea
 }
 
 Kid *extractIgnore( PdaRun *pdaRun )
+{
+	Kid *ignore = pdaRun->accumIgnore;
+	pdaRun->accumIgnore = 0;
+	return ignore;
+}
+
+Kid *extractIgnore2( PdaRun *pdaRun )
 {
 	Kid *ignore = pdaRun->accumIgnore;
 	pdaRun->accumIgnore = 0;
@@ -607,6 +626,7 @@ void attachIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, Kid *input )
 	/* Need to preserve the layout under a tree:
 	 *    attributes, ignore tokens, grammar children. */
 	
+	ParseTree *ptree = pt(input->tree);
 	assert( ( pt(input->tree)->shadow ) != 0 );
 	input = pt(input->tree)->shadow;
 
@@ -685,6 +705,10 @@ void attachIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, Kid *input )
 			pdaRun->tokenList->kid->flags |= KF_SUPPRESS_LEFT;
 		}
 	}
+
+	Kid *pignore = extractIgnore2( pdaRun );
+	if ( pignore != 0 )
+		ptree->ignore = pignore;
 }
 
 void handleError( Program *prg, Tree **sp, PdaRun *pdaRun )
@@ -2095,6 +2119,11 @@ case PcrReverse:
 			Kid *ignore = pdaRun->accumIgnore;
 			pdaRun->accumIgnore = pdaRun->accumIgnore->next;
 			ignore->next = 0;
+
+			/* Parse tree ignore. */
+			Kid *pignore = pdaRun->ptAccumIgnore;
+			pdaRun->ptAccumIgnore = pdaRun->ptAccumIgnore->next;
+			pignore->next = 0;
 			
 			long region = pt(ignore->tree)->region;
 			pdaRun->next = region > 0 ? region + 1 : 0;
