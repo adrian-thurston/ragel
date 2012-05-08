@@ -263,6 +263,12 @@ void detachIgnores( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, Kid
 	assert( pdaRun->accumIgnore == 0 );
 
 	ParseTree *ptree = pt(input->tree);
+
+	if ( ptree->ignore != 0 ) {
+		pdaRun->accumIgnore = ptree->ignore;
+		ptree->ignore = 0;
+	}
+
 	assert( pt(input->tree)->shadow );
 	input = pt(input->tree)->shadow;
 
@@ -317,16 +323,20 @@ void detachIgnores( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, Kid
 	}
 
 	if ( leftIgnore != 0 ) {
-		pdaRun->accumIgnore = reverseKidList( leftIgnore->child );
+		Kid *cignore = reverseKidList( leftIgnore->child );
 		leftIgnore->child = 0;
+
+		Kid *ignore = pdaRun->accumIgnore;
+		while ( ignore != 0 ) {
+			pt(ignore->tree)->shadow = cignore;
+
+			ignore = ignore->next;
+			cignore = cignore->next;
+		}
 	}
 
 	treeDownref( prg, sp, leftIgnore );
 
-	if ( ptree->ignore != 0 ) {
-		pdaRun->_accumIgnore = ptree->ignore;
-		ptree->ignore = 0;
-	}
 }
 
 void attachInput( FsmRun *fsmRun, InputStream *is )
@@ -490,7 +500,7 @@ void setRegion( PdaRun *pdaRun, int emptyIgnore, ParseTree *tree )
 
 void ignoreTree( Program *prg, PdaRun *pdaRun, Tree *tree )
 {
-	int emptyIgnore = pdaRun->_accumIgnore == 0;
+	int emptyIgnore = pdaRun->accumIgnore == 0;
 
 	transferReverseCode( pdaRun, tree );
 
@@ -501,13 +511,12 @@ void ignoreTree( Program *prg, PdaRun *pdaRun, Tree *tree )
 	pt(ignore->tree)->shadow = kidAllocate( prg );
 	pt(ignore->tree)->shadow->tree = tree;
 
-	if ( pdaRun->_accumIgnore != 0 )
-		pt(ignore->tree)->shadow->next = pt(pdaRun->_accumIgnore->tree)->shadow;
-	ignore->next = pdaRun->_accumIgnore;
-	pdaRun->_accumIgnore = ignore;
-	pdaRun->accumIgnore = pt(ignore->tree)->shadow;
+	if ( pdaRun->accumIgnore != 0 )
+		pt(ignore->tree)->shadow->next = pt(pdaRun->accumIgnore->tree)->shadow;
+	ignore->next = pdaRun->accumIgnore;
+	pdaRun->accumIgnore = ignore;
 
-	setRegion( pdaRun, emptyIgnore, pt(pdaRun->_accumIgnore->tree) );
+	setRegion( pdaRun, emptyIgnore, pt(pdaRun->accumIgnore->tree) );
 }
 
 Kid *makeTokenWithData( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, int id,
@@ -550,20 +559,6 @@ Kid *makeTokenWithData( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, InputStrea
 	makeTokenPushBinding( pdaRun, bindId, input->tree );
 
 	return input;
-}
-
-Kid *extractIgnore( PdaRun *pdaRun )
-{
-	Kid *ignore = pdaRun->accumIgnore;
-	pdaRun->accumIgnore = 0;
-	return ignore;
-}
-
-Kid *extractIgnore2( PdaRun *pdaRun )
-{
-	Kid *ignore = pdaRun->_accumIgnore;
-	pdaRun->_accumIgnore = 0;
-	return ignore;
 }
 
 void clearIgnoreList( Program *prg, Tree **sp, Kid *kid )
@@ -633,10 +628,14 @@ void attachIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, Kid *input )
 	input->tree->flags &= ~AF_LEFT_IL_ATTACHED;
 	input->tree->flags &= ~AF_RIGHT_IL_ATTACHED;
 
-	/* Pull the ignore tokens out and store in the token. */
-	Kid *ignoreKid = extractIgnore( pdaRun );
-	
-	if ( ignoreKid != 0 ) {
+	Kid *pignore = pdaRun->accumIgnore;
+	pdaRun->accumIgnore = 0;
+
+	if ( pignore != 0 ) {
+		ptree->ignore = pignore;
+
+		Kid *ignoreKid = pt(pignore->tree)->shadow;
+
 		debug( REALM_PARSE, "attaching ignore\n" );
 
 		ignoreKid = reverseKidList( ignoreKid );
@@ -705,9 +704,6 @@ void attachIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, Kid *input )
 		}
 	}
 
-	Kid *pignore = extractIgnore2( pdaRun );
-	if ( pignore != 0 )
-		ptree->ignore = pignore;
 }
 
 void handleError( Program *prg, Tree **sp, PdaRun *pdaRun )
@@ -781,7 +777,7 @@ Head *extractMatch( Program *prg, FsmRun *fsmRun, InputStream *inputStream )
 
 static void sendToken( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long id )
 {
-	int emptyIgnore = pdaRun->_accumIgnore == 0;
+	int emptyIgnore = pdaRun->accumIgnore == 0;
 
 	/* Make the token data. */
 	Head *tokdata = extractMatch( prg, fsmRun, inputStream );
@@ -908,7 +904,7 @@ static void pushBtPoint( Program *prg, PdaRun *pdaRun )
 {
 	Tree *tree = 0;
 	if ( pdaRun->accumIgnore != 0 ) 
-		tree = pdaRun->accumIgnore->tree;
+		tree = pt(pdaRun->accumIgnore->tree)->shadow->tree;
 	else if ( pdaRun->tokenList != 0 )
 		tree = pdaRun->tokenList->kid->tree;
 
@@ -1342,13 +1338,13 @@ void clearPdaRun( Program *prg, Tree **sp, PdaRun *pdaRun )
 	pdaRun->btPoint = 0;
 
 	/* Clear out any remaining ignores. */
-	Kid *ignore = pdaRun->accumIgnore;
-	while ( ignore != 0 ) {
-		Kid *next = ignore->next;
-		treeDownref( prg, sp, ignore->tree );
-		kidFree( prg, (Kid*)ignore );
-		ignore = next;
-	}
+//	Kid *ignore = pdaRun->accumIgnore;
+//	while ( ignore != 0 ) {
+//		Kid *next = ignore->next;
+//		treeDownref( prg, sp, ignore->tree );
+//		kidFree( prg, (Kid*)ignore );
+//		ignore = next;
+//	}
 
 	if ( pdaRun->context != 0 )
 		treeDownref( prg, sp, pdaRun->context );
@@ -2111,13 +2107,12 @@ case PcrReverse:
 				kidFree( prg, pdaRun->undoLel );
 			}
 		}
-		else if ( pdaRun->_accumIgnore != 0 ) {
+		else if ( pdaRun->accumIgnore != 0 ) {
 			debug( REALM_PARSE, "have accumulated ignore to undo\n" );
 
 			/* Send back any accumulated ignore tokens, then trigger error
 			 * in the the parser. */
-			Kid *ignore = pdaRun->_accumIgnore;
-			pdaRun->_accumIgnore = pdaRun->_accumIgnore->next;
+			Kid *ignore = pdaRun->accumIgnore;
 			pdaRun->accumIgnore = pdaRun->accumIgnore->next;
 			pt(ignore->tree)->shadow->next = 0;
 			ignore->next = 0;
