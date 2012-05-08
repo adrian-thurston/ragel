@@ -496,19 +496,16 @@ void ignoreTree( Program *prg, PdaRun *pdaRun, Tree *tree )
 
 	incrementSteps( pdaRun );
 
-	/* Parse tree ignore tokens. */
-	Kid *pignore = kidAllocate( prg );
-	pignore->tree = (Tree*)parseTreeAllocate( prg );
-	pignore->next = pdaRun->_accumIgnore;
-	pdaRun->_accumIgnore = pignore;
-
-	/* Add the ignore string to the head of the ignore list. */
 	Kid *ignore = kidAllocate( prg );
-	ignore->tree = tree;
+	ignore->tree = (Tree*)parseTreeAllocate( prg );
+	pt(ignore->tree)->shadow = kidAllocate( prg );
+	pt(ignore->tree)->shadow->tree = tree;
 
-	/* Push it to the list of ignore tokens. */
-	ignore->next = pdaRun->accumIgnore;
-	pdaRun->accumIgnore = ignore;
+	if ( pdaRun->_accumIgnore != 0 )
+		pt(ignore->tree)->shadow->next = pt(pdaRun->_accumIgnore->tree)->shadow;
+	ignore->next = pdaRun->_accumIgnore;
+	pdaRun->_accumIgnore = ignore;
+	pdaRun->accumIgnore = pt(ignore->tree)->shadow;
 
 	setRegion( pdaRun, emptyIgnore, pt(pdaRun->_accumIgnore->tree) );
 }
@@ -2114,26 +2111,23 @@ case PcrReverse:
 				kidFree( prg, pdaRun->undoLel );
 			}
 		}
-		else if ( pdaRun->accumIgnore != 0 ) {
+		else if ( pdaRun->_accumIgnore != 0 ) {
 			debug( REALM_PARSE, "have accumulated ignore to undo\n" );
 
 			/* Send back any accumulated ignore tokens, then trigger error
 			 * in the the parser. */
-			Kid *ignore = pdaRun->accumIgnore;
+			Kid *ignore = pdaRun->_accumIgnore;
+			pdaRun->_accumIgnore = pdaRun->_accumIgnore->next;
 			pdaRun->accumIgnore = pdaRun->accumIgnore->next;
+			pt(ignore->tree)->shadow->next = 0;
 			ignore->next = 0;
 
-			/* Parse tree ignore. */
-			Kid *pignore = pdaRun->_accumIgnore;
-			pdaRun->_accumIgnore = pdaRun->_accumIgnore->next;
-			pignore->next = 0;
-			
-			long region = pt(pignore->tree)->region;
+			long region = pt(ignore->tree)->region;
 			pdaRun->next = region > 0 ? region + 1 : 0;
 			pdaRun->checkNext = true;
 			pdaRun->checkStop = true;
 			
-			sendBackIgnore( prg, sp, pdaRun, fsmRun, inputStream, ignore );
+			sendBackIgnore( prg, sp, pdaRun, fsmRun, inputStream, pt(ignore->tree)->shadow );
 		}
 		else {
 
