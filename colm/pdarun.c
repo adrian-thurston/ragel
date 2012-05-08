@@ -494,7 +494,13 @@ void ignoreTree( Program *prg, PdaRun *pdaRun, Tree *tree )
 
 	incrementSteps( pdaRun );
 
-	setRegion( pdaRun, tree );
+	/* Parse tree ignore tokens. */
+	Kid *pignore = kidAllocate( prg );
+	pignore->tree = (Tree*)parseTreeAllocate( prg );
+	pignore->next = pdaRun->ptAccumIgnore;
+	pdaRun->ptAccumIgnore = pignore;
+
+	setRegion( pdaRun, pignore->tree );
 
 	/* Add the ignore string to the head of the ignore list. */
 	Kid *ignore = kidAllocate( prg );
@@ -503,12 +509,6 @@ void ignoreTree( Program *prg, PdaRun *pdaRun, Tree *tree )
 	/* Push it to the list of ignore tokens. */
 	ignore->next = pdaRun->accumIgnore;
 	pdaRun->accumIgnore = ignore;
-
-	/* Parse tree ignore tokens. */
-	Kid *pignore = kidAllocate( prg );
-	pignore->tree = (Tree*)parseTreeAllocate( prg );
-	pignore->next = pdaRun->ptAccumIgnore;
-	pdaRun->ptAccumIgnore = pignore;
 }
 
 Kid *makeTokenWithData( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, int id,
@@ -2125,7 +2125,7 @@ case PcrReverse:
 			pdaRun->ptAccumIgnore = pdaRun->ptAccumIgnore->next;
 			pignore->next = 0;
 			
-			long region = pt(ignore->tree)->region;
+			long region = pt(pignore->tree)->region;
 			pdaRun->next = region > 0 ? region + 1 : 0;
 			pdaRun->checkNext = true;
 			pdaRun->checkStop = true;
