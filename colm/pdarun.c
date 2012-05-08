@@ -478,12 +478,12 @@ static void sendBack( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
 	//FIXME: leak kidFree( prg, input );
 }
 
-void setRegion( PdaRun *pdaRun, Tree *tree )
+void setRegion( PdaRun *pdaRun, ParseTree *tree )
 {
 	if ( pdaRun->accumIgnore == 0 ) {
 		/* Recording the next region. */
-		pt(tree)->region = pdaRun->nextRegionInd;
-		if ( pdaRun->tables->tokenRegions[pt(tree)->region+1] != 0 )
+		tree->region = pdaRun->nextRegionInd;
+		if ( pdaRun->tables->tokenRegions[tree->region+1] != 0 )
 			pdaRun->numRetry += 1;
 	}
 }
@@ -500,7 +500,7 @@ void ignoreTree( Program *prg, PdaRun *pdaRun, Tree *tree )
 	pignore->next = pdaRun->ptAccumIgnore;
 	pdaRun->ptAccumIgnore = pignore;
 
-	setRegion( pdaRun, pignore->tree );
+	setRegion( pdaRun, pt(pignore->tree) );
 
 	/* Add the ignore string to the head of the ignore list. */
 	Kid *ignore = kidAllocate( prg );
@@ -795,10 +795,6 @@ static void sendToken( Program *prg, Tree **sp, InputStream *inputStream, FsmRun
 
 	incrementSteps( pdaRun );
 
-	/* Store any alternate scanning region. */
-	if ( input != 0 && pdaRun->cs >= 0 )
-		setRegion( pdaRun, input->tree );
-
 	ParseTree *parseTree = parseTreeAllocate( prg );
 	parseTree->id = input->tree->id;
 	parseTree->flags = input->tree->flags;
@@ -810,7 +806,10 @@ static void sendToken( Program *prg, Tree **sp, InputStream *inputStream, FsmRun
 	parseTree->refs = 1;
 	parseTree->prodNum = input->tree->prodNum;
 	parseTree->shadow = input;
-	parseTree->region = pt(input->tree)->region;
+
+	/* Store any alternate scanning region. */
+	if ( input != 0 && pdaRun->cs >= 0 )
+		setRegion( pdaRun, parseTree );
 		
 	pdaRun->parseInput = kidAllocate( prg );
 	pdaRun->parseInput->tree = (Tree*)parseTree;
