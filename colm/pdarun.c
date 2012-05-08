@@ -628,13 +628,13 @@ void attachIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, Kid *input )
 	input->tree->flags &= ~AF_LEFT_IL_ATTACHED;
 	input->tree->flags &= ~AF_RIGHT_IL_ATTACHED;
 
-	Kid *pignore = pdaRun->accumIgnore;
+	Kid *accum = pdaRun->accumIgnore;
 	pdaRun->accumIgnore = 0;
 
-	if ( pignore != 0 ) {
-		ptree->ignore = pignore;
+	if ( accum != 0 ) {
+		ptree->ignore = accum;
 
-		Kid *ignoreKid = pt(pignore->tree)->shadow;
+		Kid *ignoreKid = pt(accum->tree)->shadow;
 
 		debug( REALM_PARSE, "attaching ignore\n" );
 
