@@ -508,6 +508,7 @@ void ignoreTree( Program *prg, PdaRun *pdaRun, Tree *tree )
 
 	Kid *ignore = kidAllocate( prg );
 	ignore->tree = (Tree*)parseTreeAllocate( prg );
+	ignore->tree->flags |= AF_PARSE_TREE;
 	pt(ignore->tree)->shadow = kidAllocate( prg );
 	pt(ignore->tree)->shadow->tree = tree;
 
@@ -528,9 +529,9 @@ Kid *makeTokenWithData( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, InputStrea
 
 	Kid *input = 0;
 	input = kidAllocate( prg );
-	input->tree = (Tree*)parseTreeAllocate( prg );
+	input->tree = treeAllocate( prg );
+
 	debug( REALM_PARSE, "made token %p\n", input->tree );
-	input->tree->flags |= AF_PARSE_TREE;
 
 	if ( namedLangEl )
 		input->tree->flags |= AF_NAMED;
@@ -732,8 +733,7 @@ void sendIgnore( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmR
 	
 	debug( REALM_PARSE, "ignoring: %.*s\n", ignoreStr->length, ignoreStr->data );
 
-	Tree *tree = (Tree*)parseTreeAllocate( prg );
-	tree->flags |= AF_PARSE_TREE;
+	Tree *tree = treeAllocate( prg );
 	tree->refs = 1;
 	tree->id = id;
 	tree->tokdata = ignoreStr;
@@ -854,8 +854,7 @@ static void sendEof( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *
 	head->location->byte = inputStream->byte;
 
 	Kid *input = kidAllocate( prg );
-	input->tree = (Tree*)parseTreeAllocate( prg );
-	input->tree->flags |= AF_PARSE_TREE;
+	input->tree = treeAllocate( prg );
 
 	input->tree->refs = 1;
 	input->tree->id = prg->rtd->eofLelIds[pdaRun->parserId];
@@ -1386,9 +1385,7 @@ void initPdaRun( PdaRun *pdaRun, Program *prg, PdaTables *tables,
 	pdaRun->stackTop->tree->refs = 1;
 
 	pt(pdaRun->stackTop->tree)->shadow = kidAllocate( prg );
-	pt(pdaRun->stackTop->tree)->shadow->tree = (Tree*)parseTreeAllocate( prg );
-	pt(pdaRun->stackTop->tree)->shadow->tree->flags |= AF_PARSE_TREE;
-	pt(pt(pdaRun->stackTop->tree)->shadow->tree)->state = -1;
+	pt(pdaRun->stackTop->tree)->shadow->tree = treeAllocate( prg );
 	pt(pdaRun->stackTop->tree)->shadow->tree->refs = 1;
 
 	pdaRun->numRetry = 0;
@@ -1810,8 +1807,7 @@ again:
 		pt(pdaRun->lel->tree)->retryLower = 0;
 
 		pt(pdaRun->redLel->tree)->shadow = kidAllocate( prg );
-		pt(pdaRun->redLel->tree)->shadow->tree = (Tree*)parseTreeAllocate( prg );
-		pt(pdaRun->redLel->tree)->shadow->tree->flags |= AF_PARSE_TREE;
+		pt(pdaRun->redLel->tree)->shadow->tree = treeAllocate( prg );
 		pt(pdaRun->redLel->tree)->shadow->tree->refs = 1;
 		pt(pdaRun->redLel->tree)->shadow->tree->id = prg->rtd->prodInfo[pdaRun->reduction].lhsId;
 		pt(pdaRun->redLel->tree)->shadow->tree->prodNum = prg->rtd->prodInfo[pdaRun->reduction].prodNum;

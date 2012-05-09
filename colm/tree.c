@@ -593,19 +593,11 @@ Kid *copyKidList( Program *prg, Kid *kidList )
 }
 
 /* New tree has zero ref. */
-Tree *copyRealTree( Program *prg, Tree *tree, Kid *oldNextDown, 
-		Kid **newNextDown, int parseTree )
+Tree *copyRealTree( Program *prg, Tree *tree, Kid *oldNextDown, Kid **newNextDown )
 {
 	/* Need to keep a lookout for next down. If 
 	 * copying it, return the copy. */
-	Tree *newTree;
-	if ( parseTree ) {
-		newTree = (Tree*) parseTreeAllocate( prg );
-		newTree->flags |= AF_PARSE_TREE;
-	}
-	else {
-		newTree = treeAllocate( prg );
-	}
+	Tree *newTree = treeAllocate( prg );
 
 	newTree->id = tree->id;
 	newTree->tokdata = stringCopy( prg, tree->tokdata );
@@ -753,7 +745,7 @@ Tree *copyTree( Program *prg, Tree *tree, Kid *oldNextDown, Kid **newNextDown )
 	else if ( tree->id == LEL_ID_STREAM )
 		assert(false);
 	else {
-		tree = copyRealTree( prg, tree, oldNextDown, newNextDown, false );
+		tree = copyRealTree( prg, tree, oldNextDown, newNextDown );
 	}
 
 	assert( tree->refs == 0 );

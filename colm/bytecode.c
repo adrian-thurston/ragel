@@ -157,7 +157,7 @@ Tree *prepParseTree( Program *prg, Tree **sp, Tree *tree )
 	debug( REALM_BYTECODE, "copying tree in send function\n" );
 
 	Kid *unused = 0;
-	tree = copyRealTree( prg, tree, 0, &unused, true );
+	tree = copyRealTree( prg, tree, 0, &unused );
 	return tree;
 }
 

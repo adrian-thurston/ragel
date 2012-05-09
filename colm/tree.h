@@ -327,7 +327,7 @@ Tree *treeIterDerefCur( TreeIter *iter );
 /* For making references of attributes. */
 Kid *getFieldKid( Tree *tree, Word field );
 
-Tree *copyRealTree( struct ColmProgram *prg, Tree *tree, Kid *oldNextDown, Kid **newNextDown, int parsed );
+Tree *copyRealTree( struct ColmProgram *prg, Tree *tree, Kid *oldNextDown, Kid **newNextDown );
 void splitIterCur( struct ColmProgram *prg, Tree ***psp, TreeIter *iter );
 Tree *setListMem( List *list, Half field, Tree *value );
 
