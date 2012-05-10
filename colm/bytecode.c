@@ -871,8 +871,8 @@ again:
 			read_tree( restore );
 
 			debug( REALM_BYTECODE, "IN_RESTORE_LHS\n" );
-			treeDownref( prg, sp, exec->pdaRun->parseInput->tree );
-			exec->pdaRun->parseInput->tree = restore;
+			treeDownref( prg, sp, ((ParseTree*)exec->pdaRun->parseInput->tree)->shadow->tree );
+			((ParseTree*)exec->pdaRun->parseInput->tree)->shadow->tree = restore;
 			break;
 		}
 		case IN_LOAD_NIL: {
@@ -1212,9 +1212,9 @@ again:
 
 			/* Save it. */
 			treeUpref( val );
-			//exec->pdaRun->parsed = val;
+			exec->pdaRun->parsed = val;
 
-			//exec->pdaRun->redLel->tree = 0;
+			((ParseTree*)exec->pdaRun->redLel->tree)->shadow->tree = 0;
 			vm_local(field) = val;
 			break;
 		}

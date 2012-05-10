@@ -1728,8 +1728,8 @@ again:
 
 		pt(pdaRun->lel->tree)->state = pdaRun->curState;
 
-		if ( pt(pdaRun->lel->tree)->shadow != 0 && pt(pdaRun->stackTop->tree)->shadow != 0 )
-			pt(pdaRun->lel->tree)->shadow->next = pt(pdaRun->stackTop->tree)->shadow;
+//		if ( pt(pdaRun->lel->tree)->shadow != 0 && pt(pdaRun->stackTop->tree)->shadow != 0 )
+//			pt(pdaRun->lel->tree)->shadow->next = pt(pdaRun->stackTop->tree)->shadow;
 
 		pdaRun->lel->next = pdaRun->stackTop;
 		pdaRun->stackTop = pdaRun->lel;
@@ -1881,9 +1881,9 @@ case PcrReduction:
 			/* If the lhs was stored and it changed then we need to restore the
 			 * original upon backtracking, otherwise downref since we took a
 			 * copy above. */
-//			if ( pdaRun->parsed != 0 ) {
-//				if ( pdaRun->parsed != pdaRun->redLel->tree ) {
-//					debug( REALM_PARSE, "lhs tree was modified, adding a restore instruction\n" );
+			if ( pdaRun->parsed != 0 ) {
+				if ( pdaRun->parsed != pt(pdaRun->redLel->tree)->shadow->tree ) {
+					debug( REALM_PARSE, "lhs tree was modified, adding a restore instruction\n" );
 //
 //					/* Make it into a parse tree. */
 //					Tree *newPt = prepParseTree( prg, sp, pdaRun->redLel->tree );
@@ -1892,18 +1892,18 @@ case PcrReduction:
 //					/* Copy it in. */
 //					pdaRun->redLel->tree = newPt;
 //					treeUpref( pdaRun->redLel->tree );
-//
-//					/* Add the restore instruct. */
-//					append( &pdaRun->rcodeCollect, IN_RESTORE_LHS );
-//					appendWord( &pdaRun->rcodeCollect, (Word)pdaRun->parsed );
-//					append( &pdaRun->rcodeCollect, SIZEOF_CODE + SIZEOF_WORD );
-//				}
-//				else {
-//					/* Not changed. Done with parsed. */
-//					treeDownref( prg, sp, pdaRun->parsed );
-//				}
-//				pdaRun->parsed = 0;
-//			}
+
+					/* Add the restore instruct. */
+					append( &pdaRun->rcodeCollect, IN_RESTORE_LHS );
+					appendWord( &pdaRun->rcodeCollect, (Word)pdaRun->parsed );
+					append( &pdaRun->rcodeCollect, SIZEOF_CODE + SIZEOF_WORD );
+				}
+				else {
+					/* Not changed. Done with parsed. */
+					treeDownref( prg, sp, pdaRun->parsed );
+				}
+				pdaRun->parsed = 0;
+			}
 
 			/* Pull out the reverse code, if any. */
 			makeReverseCode( pdaRun );
@@ -1955,8 +1955,6 @@ return PcrReverse;
 case PcrReverse: 
 
 			decrementSteps( pdaRun );
-			{}
-
 		}
 		else if ( pdaRun->checkNext ) {
 			pdaRun->checkNext = false;
@@ -2046,26 +2044,34 @@ case PcrReverse:
 				pdaRun->undoLel = pdaRun->parseInput;
 				pdaRun->parseInput = pdaRun->parseInput->next;
 
-				/* Extract the real children from the child list. */
+				/* Extract children from the child list. */
 				Kid *first = pdaRun->undoLel->tree->child;
 				pdaRun->undoLel->tree->child = 0;
+
+				/* This will skip the ignores/attributes, etc. */
+				Kid *dataFirst = treeExtractChild( prg, pt(pdaRun->undoLel->tree)->shadow->tree );
 
 				/* Walk the child list and and push the items onto the parsing
 				 * stack one at a time. */
 				while ( first != 0 ) {
 					/* Get the next item ahead of time. */
 					Kid *next = first->next;
+					Kid *dataNext = dataFirst->next;
 
-					/*****/
-					if ( pt(first->tree)->shadow != 0 && pt(pdaRun->stackTop->tree)->shadow != 0 )
-						pt(first->tree)->shadow->next = pt(pdaRun->stackTop->tree)->shadow;
+//					/** this will go ***/
+//					if ( pt(first->tree)->shadow != 0 && pt(pdaRun->stackTop->tree)->shadow != 0 )
+//						pt(first->tree)->shadow->next = pt(pdaRun->stackTop->tree)->shadow;
 
 					/* Push onto the stack. */
 					first->next = pdaRun->stackTop;
 					pdaRun->stackTop = first;
 
+//					/* Put the data under the parse tree. */
+//					pt(first->tree)->shadow = dataFirst;
+					assert( pt(first->tree)->shadow == dataFirst );
 
 					first = next;
+					dataFirst = dataNext;
 				}
 
 				/* If there is an parseInput queued, this is one less reduction it has
@@ -2110,7 +2116,6 @@ case PcrReverse:
 			sendBackIgnore( prg, sp, pdaRun, fsmRun, inputStream, pt(ignore->tree)->shadow );
 		}
 		else {
-
 			/* Now it is time to undo something. Pick an element from the top of
 			 * the stack. */
 			pdaRun->undoLel = pdaRun->stackTop;
@@ -2141,7 +2146,6 @@ case PcrReverse:
 					pt(pdaRun->undoLel->tree)->shadow->tree->id = 
 							prg->rtd->lelInfo[pt(pdaRun->undoLel->tree)->shadow->tree->id].termDupId;
 					pt(pdaRun->undoLel->tree)->shadow->tree->flags &= ~AF_TERM_DUP;
-
 				}
 
 				/* Queue it as next parseInput item. */
