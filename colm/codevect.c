@@ -107,7 +107,7 @@ void rtCodeVectEmpty( RtCodeVect *vect )
 void rtCodeVectReplace( RtCodeVect *vect, long pos, const Code *val, long len )
 {
 	long endPos, i;
-	Code *item;
+	//Code *item;
 
 	/* If we are given a negative position to replace at then
 	 * treat it as a position relative to the length. */
@@ -123,7 +123,7 @@ void rtCodeVectReplace( RtCodeVect *vect, long pos, const Code *val, long len )
 		upResize( vect, endPos );
 
 		/* Delete any objects we need to delete. */
-		item = vect->data + pos;
+		//item = vect->data + pos;
 		//for ( i = pos; i < vect->tabLen; i++, item++ )
 		//	item->~Code();
 		
@@ -132,7 +132,7 @@ void rtCodeVectReplace( RtCodeVect *vect, long pos, const Code *val, long len )
 	}
 	else {
 		/* Delete any objects we need to delete. */
-		item = vect->data + pos;
+		//item = vect->data + pos;
 		//for ( i = pos; i < endPos; i++, item++ )
 		//	item->~Code();
 	}
@@ -164,9 +164,9 @@ void rtCodeVectRemove( RtCodeVect *vect, long pos, long len )
 	dst = vect->data + pos;
 
 	/* Call Destructors. */
-//	item = dst;
-//	for ( long i = 0; i < len; i += 1, item += 1 )
-//		item->~Code();
+	//item = dst;
+	//for ( long i = 0; i < len; i += 1, item += 1 )
+	//	item->~Code();
 	
 	/* Shift data over if necessary. */
 	lenToSlideOver = vect->tabLen - endPos;	

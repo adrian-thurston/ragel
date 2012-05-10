@@ -55,6 +55,11 @@
 	i = ((uchar) *instr++); \
 } while(0)
 
+#define consume_byte( ) do { \
+	instr += 1; \
+} while(0)
+
+
 #define read_word_p( i, p ) do { \
 	i = ((Word)  p[0]); \
 	i |= ((Word) p[1]) << 8; \
@@ -102,6 +107,10 @@
 		w |= ((Word) *instr++) << 24; \
 		i = (Type) w; \
 	} while(0)
+
+	#define consume_word( ) do { \
+		instr += 4; \
+	} while(0)
 #else
 	#define read_tree( i ) do { \
 		Word w; \
@@ -127,6 +136,10 @@
 		w |= ((Word) *instr++) << 48; \
 		w |= ((Word) *instr++) << 56; \
 		i = (Type) w; \
+	} while(0)
+
+	#define consume_word( ) do { \
+		instr += 8; \
 	} while(0)
 #endif
 
@@ -617,14 +630,14 @@ again:
 			break;
 		}
 		case IN_LOAD_ACCUM_BKT: {
-			Tree *parser;
-			read_tree( parser );
+			/* Tree *parser; */
+			consume_word();
 			debug( REALM_BYTECODE, "IN_LOAD_ACCUM_BKT\n" );
 			break;
 		}
 		case IN_LOAD_INPUT_BKT: {
-			Tree *input;
-			read_tree( input );
+			/* Tree *input; */
+			consume_word();
 			debug( REALM_BYTECODE, "IN_LOAD_INPUT_BKT\n" );
 			break;
 		}
@@ -697,9 +710,9 @@ again:
 			break;
 		}
 		case IN_MAP_INSERT_BKT: {
-			uchar inserted;
+			/* uchar inserted; */
 			Tree *key;
-			read_byte( inserted );
+			consume_byte();
 			read_tree( key );
 
 			debug( REALM_BYTECODE, "IN_MAP_INSERT_BKT\n" );
@@ -1153,8 +1166,8 @@ again:
 			break;
 		}
 		case IN_INIT_CAPTURES: {
-			uchar ncaps;
-			read_byte( ncaps );
+			/* uchar ncaps; */
+			consume_byte();
 
 			debug( REALM_BYTECODE, "IN_INIT_CAPTURES\n" );
 

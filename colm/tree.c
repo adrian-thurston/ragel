@@ -2239,9 +2239,9 @@ void openTreeXml( Program *prg, Tree **sp, struct ColmPrintArgs *args, Kid *pare
 
 void printTermXml( Program *prg, Tree **sp, struct ColmPrintArgs *printArgs, Kid *kid )
 {
-	Kid *child;
+	//Kid *child;
 
-	child = treeChild( prg, kid->tree );
+	/*child = */ treeChild( prg, kid->tree );
 	if ( kid->tree->id == LEL_ID_PTR ) {
 		char ptr[32];
 		sprintf( ptr, "%p\n", (void*)((Pointer*)kid->tree)->value );
