@@ -1827,7 +1827,7 @@ again:
 		rhsLen = prg->rtd->prodInfo[pdaRun->reduction].length;
 		child = last = 0;
 		for ( r = 0;; ) {
-			if ( r == rhsLen && pdaRun->stackTop->tree->id != LEL_ID_IGNORE )
+			if ( r == rhsLen )
 				break;
 
 			child = pdaRun->stackTop;
@@ -1835,13 +1835,8 @@ again:
 			child->next = last;
 			last = child;
 			
-			if ( child->tree->id != LEL_ID_IGNORE ) {
-				/* Count it only if it is not an ignore token. */
-				r++;
-			}
-
-			if ( child->tree->id != LEL_ID_IGNORE )
-				realChild = child;
+			r++;
+			realChild = child;
 		}
 
 		pdaRun->redLel->tree->child = child;

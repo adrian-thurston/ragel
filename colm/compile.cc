@@ -2040,7 +2040,6 @@ void LangStmt::evaluateParserItems( ParseData *pd, CodeVect &code ) const
 
 	/* Assign bind ids to the variables in the replacement. */
 	for ( ReplItemList::Iter item = *parserText->list; item.lte(); item++ ) {
-		UniqueType *exprUT = 0;
 		switch ( item->type ) {
 		case ReplItem::FactorType: {
 			String result;
@@ -2056,7 +2055,6 @@ void LangStmt::evaluateParserItems( ParseData *pd, CodeVect &code ) const
 
 			code.append( IN_LOAD_STR );
 			code.appendWord( mapEl->value );
-			exprUT = pd->uniqueTypeStr;
 			break;
 		}
 		case ReplItem::InputText: {
@@ -2067,11 +2065,10 @@ void LangStmt::evaluateParserItems( ParseData *pd, CodeVect &code ) const
 
 			code.append( IN_LOAD_STR );
 			code.appendWord( mapEl->value );
-			exprUT = pd->uniqueTypeStr;
 			break;
 		}
 		case ReplItem::ExprType:
-			exprUT = item->expr->evaluate( pd, code );
+			item->expr->evaluate( pd, code );
 			break;
 		}
 
