@@ -1791,6 +1791,7 @@ again:
 	if ( *action & act_rb ) {
 		int r, objectLength;
 		Kid *last, *child, *attrs;
+		Kid *dataLast, *dataChild;
 
 		pdaRun->reduction = *action >> 2;
 
@@ -1823,41 +1824,28 @@ again:
 		attrs = allocAttrs( prg, objectLength );
 
 		/* Build the list of children. */
-		Kid *realChild = 0;
 		rhsLen = prg->rtd->prodInfo[pdaRun->reduction].length;
 		child = last = 0;
-		for ( r = 0;; ) {
-			if ( r == rhsLen )
-				break;
-
+		dataChild = dataLast = 0;
+		for ( r = 0; r < rhsLen; r++ ) {
+			/* The child. */
 			child = pdaRun->stackTop;
+			dataChild = pt(child->tree)->shadow;
+
+			/* Pop. */
 			pdaRun->stackTop = pdaRun->stackTop->next;
+
+			/* Reverse list. */
 			child->next = last;
+			dataChild->next = dataLast;
+
+			/* Track last for reversal. */
 			last = child;
-			
-			r++;
-			realChild = child;
+			dataLast = dataChild;
 		}
 
 		pdaRun->redLel->tree->child = child;
-
-		/* SHADOW */
-		Kid *l = 0;
-		Kid *c = pdaRun->redLel->tree->child;
-		Kid *rc = 0;
-		if ( c != 0 ) {
-			rc = pt(c->tree)->shadow;
-			l = c;
-			c = c->next;
-			while ( c != 0 ) {
-				pt(l->tree)->shadow->next = pt(c->tree)->shadow;
-				l = c;
-				c = c->next;
-			}
-			pt(l->tree)->shadow->next = 0;
-		}
-
-		pt(pdaRun->redLel->tree)->shadow->tree->child = kidListConcat( attrs, rc );
+		pt(pdaRun->redLel->tree)->shadow->tree->child = kidListConcat( attrs, dataChild );
 
 		debug( REALM_PARSE, "reduced: %s rhsLen %d\n",
 				prg->rtd->prodInfo[pdaRun->reduction].name, rhsLen );
@@ -1872,7 +1860,7 @@ again:
 
 		/* When the production is of zero length we stay in the same state.
 		 * Otherwise we use the state stored in the first child. */
-		pdaRun->cs = rhsLen == 0 ? pdaRun->curState : pt(realChild->tree)->state;
+		pdaRun->cs = rhsLen == 0 ? pdaRun->curState : pt(child->tree)->state;
 
 		assert( pdaRun->redLel->tree->refs == 1 );
 
