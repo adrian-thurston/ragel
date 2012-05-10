@@ -258,19 +258,12 @@ static void sendBackIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsm
 	kidFree( prg, ignore );
 }
 
-void detachIgnores( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, Kid *input )
+void detachIgnores( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, Kid *from )
 {
 	assert( pdaRun->accumIgnore == 0 );
 
-	ParseTree *ptree = pt(input->tree);
-
-	if ( ptree->ignore != 0 ) {
-		pdaRun->accumIgnore = ptree->ignore;
-		ptree->ignore = 0;
-	}
-
-	assert( pt(input->tree)->shadow );
-	input = pt(input->tree)->shadow;
+	ParseTree *parseTree = pt(from->tree);
+	Kid *input = parseTree->shadow;
 
 	/* Right ignore are immediately discarded since they are copies of
 	 * left-ignores. */
@@ -322,7 +315,12 @@ void detachIgnores( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, Kid
 		}
 	}
 
-	if ( leftIgnore != 0 ) {
+	if ( parseTree->ignore != 0 ) {
+		assert( leftIgnore != 0 );
+
+		pdaRun->accumIgnore = parseTree->ignore;
+		parseTree->ignore = 0;
+
 		Kid *cignore = reverseKidList( leftIgnore->child );
 		leftIgnore->child = 0;
 
@@ -514,10 +512,7 @@ void ignoreTree( Program *prg, PdaRun *pdaRun, Tree *tree )
 	Kid *ignore = kidAllocate( prg );
 	ignore->tree = (Tree*)parseTree;
 
-	if ( pdaRun->accumIgnore != 0 ) {
-		parseTree->shadow->next = pt(pdaRun->accumIgnore->tree)->shadow;
-		ignore->next = pdaRun->accumIgnore;
-	}
+	ignore->next = pdaRun->accumIgnore;
 	pdaRun->accumIgnore = ignore;
 
 	setRegion( pdaRun, emptyIgnore, pt(pdaRun->accumIgnore->tree) );
@@ -619,14 +614,10 @@ static void reportParseError( Program *prg, Tree **sp, PdaRun *pdaRun )
 	treeUpref( prg->lastParseError );
 }
 
-void attachIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, Kid *input )
+void attachIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, Kid *to )
 {
-	/* Need to preserve the layout under a tree:
-	 *    attributes, ignore tokens, grammar children. */
-	
-	ParseTree *ptree = pt(input->tree);
-	assert( ( pt(input->tree)->shadow ) != 0 );
-	input = pt(input->tree)->shadow;
+	ParseTree *parseTree = pt(to->tree);
+	Kid *input = parseTree->shadow;
 
 	/* Reset. */
 	input->tree->flags &= ~AF_LEFT_IL_ATTACHED;
@@ -634,15 +625,26 @@ void attachIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, Kid *input )
 
 	Kid *accum = pdaRun->accumIgnore;
 	pdaRun->accumIgnore = 0;
+	parseTree->ignore = accum;
 
-	if ( accum != 0 ) {
-		ptree->ignore = accum;
+	/* The data list needs to be extracted and reversed. The parse tree list
+	 * can remain in stack order. */
+	Kid *child = accum;
+	Kid *dataChild = 0, *dataLast = 0;
 
-		Kid *ignoreKid = pt(accum->tree)->shadow;
+	while ( child ) {
+		dataChild = pt(child->tree)->shadow;
+		dataChild->next = dataLast;
 
+		dataLast = dataChild;
+
+		child = child->next;
+	}
+
+	if ( dataChild != 0 ) {
 		debug( REALM_PARSE, "attaching ignore\n" );
 
-		ignoreKid = reverseKidList( ignoreKid );
+		Kid *ignoreKid = dataChild;
 
 		/* Copy the ignore list first if we need to attach it as a right
 		 * ignore. */
@@ -2105,7 +2107,6 @@ case PcrReverse:
 			 * in the the parser. */
 			Kid *ignore = pdaRun->accumIgnore;
 			pdaRun->accumIgnore = pdaRun->accumIgnore->next;
-			pt(ignore->tree)->shadow->next = 0;
 			ignore->next = 0;
 
 			long region = pt(ignore->tree)->region;
