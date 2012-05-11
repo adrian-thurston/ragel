@@ -1475,28 +1475,28 @@ void ParseData::makeRuntimeData()
 
 	/* Captured attributes. Loop over tokens and count first. */
 	long numCapturedAttr = 0;
-	for ( RegionList::Iter reg = regionList; reg.lte(); reg++ ) {
-		for ( TokenDefListReg::Iter td = reg->tokenDefList; td.lte(); td++ )
-			numCapturedAttr += td->reCaptureVect.length();
-	}
+//	for ( RegionList::Iter reg = regionList; reg.lte(); reg++ ) {
+//		for ( TokenDefListReg::Iter td = reg->tokenDefList; td.lte(); td++ )
+//			numCapturedAttr += td->reCaptureVect.length();
+//	}
 	runtimeData->captureAttr = new CaptureAttr[numCapturedAttr];
 	runtimeData->numCapturedAttr = numCapturedAttr;
 	memset( runtimeData->captureAttr, 0, sizeof( CaptureAttr ) * numCapturedAttr );
 
 	count = 0;
-	for ( RegionList::Iter reg = regionList; reg.lte(); reg++ ) {
-		for ( TokenDefListReg::Iter td = reg->tokenDefList; td.lte(); td++ ) {
-			runtimeData->lelInfo[td->token->id].captureAttr = count;
-			runtimeData->lelInfo[td->token->id].numCaptureAttr = td->reCaptureVect.length();
-			for ( ReCaptureVect::Iter c = td->reCaptureVect; c.lte(); c++ ) {
-				runtimeData->captureAttr[count].mark_enter = c->markEnter->markId;
-				runtimeData->captureAttr[count].mark_leave = c->markLeave->markId;
-				runtimeData->captureAttr[count].offset = c->objField->offset;
-
-				count += 1;
-			}
-		}
-	}
+//	for ( RegionList::Iter reg = regionList; reg.lte(); reg++ ) {
+//		for ( TokenDefListReg::Iter td = reg->tokenDefList; td.lte(); td++ ) {
+//			runtimeData->lelInfo[td->token->id].captureAttr = count;
+//			runtimeData->lelInfo[td->token->id].numCaptureAttr = td->reCaptureVect.length();
+//			for ( ReCaptureVect::Iter c = td->reCaptureVect; c.lte(); c++ ) {
+//				runtimeData->captureAttr[count].mark_enter = c->markEnter->markId;
+//				runtimeData->captureAttr[count].mark_leave = c->markLeave->markId;
+//				runtimeData->captureAttr[count].offset = c->objField->offset;
+//
+//				count += 1;
+//			}
+//		}
+//	}
 
 	runtimeData->fsmTables = fsmTables;
 	runtimeData->pdaTables = pdaTables;
@@ -1546,7 +1546,7 @@ void mapNodes( Program *prg, int &count, Kid *kid )
 			}
 		}
 		
-		count += prg->rtd->lelInfo[kid->tree->id].numCaptureAttr;
+//		count += prg->rtd->lelInfo[kid->tree->id].numCaptureAttr;
 
 		if ( !( pt(kid->tree)->shadow->tree->flags & AF_NAMED ) && !( pt(kid->tree)->shadow->tree->flags & AF_ARTIFICIAL ) && kid->tree->child != 0 )
 			mapNodes( prg, count, kid->tree->child );
@@ -1554,12 +1554,13 @@ void mapNodes( Program *prg, int &count, Kid *kid )
 	}
 }
 
-void fillNodes( Program *prg, Bindings *bindings, long &bindId, 
-		PatReplNode *nodes, Kid *kid )
+void fillNodes( Program *prg, int &nextAvail, Bindings *bindings, long &bindId, 
+		PatReplNode *nodes, Kid *kid, int ind )
 {
 	if ( kid != 0 ) {
-		long ind = pt(kid->tree)->state;
-		PatReplNode &node = nodes[ind++];
+		PatReplNode &node = nodes[ind];
+
+		assert( ind == pt(kid->tree)->state );
 
 		Kid *child = 
 			!( pt(kid->tree)->shadow->tree->flags & AF_NAMED ) && !( pt(kid->tree)->shadow->tree->flags & AF_ARTIFICIAL ) && kid->tree->child != 0 
@@ -1569,8 +1570,6 @@ void fillNodes( Program *prg, Bindings *bindings, long &bindId,
 		/* Set up the fields. */
 		node.id = kid->tree->id;
 		node.prodNum = kid->tree->prodNum;
-		node.child = child == 0 ? -1 : pt(child->tree)->state;
-		node.next = kid->next == 0 ? -1 : pt(kid->next->tree)->state;
 		node.length = pt(kid->tree)->shadow != 0 ? stringLength( pt(kid->tree)->shadow->tree->tokdata ) : 0;
 		node.data = pt(kid->tree)->shadow != 0 ? stringData( pt(kid->tree)->shadow->tree->tokdata ) : 0;
 
@@ -1578,15 +1577,15 @@ void fillNodes( Program *prg, Bindings *bindings, long &bindId,
 			/* Ignore items. */
 			IgnoreList *ignoreList = treeLeftIgnore( prg, pt(kid->tree)->shadow->tree );
 			Kid *ignore = ignoreList == 0 ? 0 : ignoreList->child;
-			node.ignore = ignore == 0 ? -1 : ind;
+			node.ignore = ignore == 0 ? -1 : nextAvail;
 
 			while ( ignore != 0 ) {
-				PatReplNode &node = nodes[ind++];
+				PatReplNode &node = nodes[nextAvail++];
 
 				memset( &node, 0, sizeof(PatReplNode) );
 				node.id = ignore->tree->id;
 				node.prodNum = ignore->tree->prodNum;
-				node.next = ignore->next == 0 ? -1 : ind;
+				node.next = ignore->next == 0 ? -1 : nextAvail;
 				
 				node.length = stringLength( ignore->tree->tokdata );
 				node.data = stringData( ignore->tree->tokdata );
@@ -1595,31 +1594,33 @@ void fillNodes( Program *prg, Bindings *bindings, long &bindId,
 			}
 		}
 
-		/* The captured attributes. */
-		for ( int i = 0; i < prg->rtd->lelInfo[kid->tree->id].numCaptureAttr; i++ ) {
-			CaptureAttr *cap = prg->rtd->captureAttr + 
-					prg->rtd->lelInfo[kid->tree->id].captureAttr + i;
-
-			Tree *attr = getAttr( kid->tree, cap->offset );
-
-			PatReplNode &node = nodes[ind++];
-			memset( &node, 0, sizeof(PatReplNode) );
-
-			node.id = attr->id;
-			node.prodNum = attr->prodNum;
-			node.length = stringLength( attr->tokdata );
-			node.data = stringData( attr->tokdata );
-		}
+//		/* The captured attributes. */
+//		for ( int i = 0; i < prg->rtd->lelInfo[kid->tree->id].numCaptureAttr; i++ ) {
+//			CaptureAttr *cap = prg->rtd->captureAttr + 
+//					prg->rtd->lelInfo[kid->tree->id].captureAttr + i;
+//
+//			Tree *attr = getAttr( kid->tree, cap->offset );
+//
+//			PatReplNode &node = nodes[nextAvail++];
+//			memset( &node, 0, sizeof(PatReplNode) );
+//
+//			node.id = attr->id;
+//			node.prodNum = attr->prodNum;
+//			node.length = stringLength( attr->tokdata );
+//			node.data = stringData( attr->tokdata );
+//		}
 
 		node.stop = kid->tree->flags & AF_TERM_DUP;
 
+		node.child = child == 0 ? -1 : nextAvail++; //pt(child->tree)->state;
+
 		/* Recurse. */
-		fillNodes( prg, bindings, bindId, nodes, child );
+		fillNodes( prg, nextAvail, bindings, bindId, nodes, child, node.child );
 
 		/* Since the parser is bottom up the bindings are in a bottom up
 		 * traversal order. Check after recursing. */
 		node.bindId = 0;
-		if ( pt(kid->tree)->shadow != 0 && bindings->data[bindId] == pt(kid->tree)->shadow->tree ) {
+		if ( bindId < bindings->length() && pt(kid->tree)->shadow != 0 && bindings->data[bindId] == pt(kid->tree)->shadow->tree ) {
 			/* Remember that binding ids are indexed from one. */
 			node.bindId = bindId++;
 
@@ -1627,8 +1628,10 @@ void fillNodes( Program *prg, Bindings *bindings, long &bindId,
 			//cout << "bindId: " << node.bindId << endl;
 		}
 
+		node.next = kid->next == 0 ? -1 : nextAvail++; //pt(kid->next->tree)->state;
+
 		/* Move to the next child. */
-		fillNodes( prg, bindings, bindId, nodes, kid->next );
+		fillNodes( prg, nextAvail, bindings, bindId, nodes, kid->next, node.next );
 	}
 }
 
@@ -1641,17 +1644,20 @@ void ParseData::fillInPatterns( Program *prg )
 	/* Count is referenced and computed by mapNode. */
 	int count = 0;
 	for ( PatternList::Iter pat = patternList; pat.lte(); pat++ )
-		mapNodes( prg, count, pat->pdaRun->stackTop );
+		mapNodes( prg, count, pat->pdaRun->stackTop->next );
 
 	for ( ReplList::Iter repl = replList; repl.lte(); repl++ )
-		mapNodes( prg, count, repl->pdaRun->stackTop );
+		mapNodes( prg, count, repl->pdaRun->stackTop->next );
 	
 	runtimeData->patReplNodes = new PatReplNode[count];
 	runtimeData->numPatternNodes = count;
 
+	int nextAvail = 0;
+
 	for ( PatternList::Iter pat = patternList; pat.lte(); pat++ ) {
-		runtimeData->patReplInfo[pat->patRepId].offset = 
-				pt(pat->pdaRun->stackTop->next->tree)->state;
+		int ind = nextAvail++;
+		runtimeData->patReplInfo[pat->patRepId].offset = ind;
+				//pt(pat->pdaRun->stackTop->next->tree)->state;
 
 		/* BindIds are indexed base one. */
 		runtimeData->patReplInfo[pat->patRepId].numBindings = 
@@ -1659,22 +1665,25 @@ void ParseData::fillInPatterns( Program *prg )
 
 		/* Init the bind */
 		long bindId = 1;
-		fillNodes( prg, pat->pdaRun->bindings, bindId,
-			runtimeData->patReplNodes, pat->pdaRun->stackTop );
+		fillNodes( prg, nextAvail, pat->pdaRun->bindings, bindId,
+			runtimeData->patReplNodes, pat->pdaRun->stackTop->next, ind );
 	}
 
 	for ( ReplList::Iter repl = replList; repl.lte(); repl++ ) {
-		runtimeData->patReplInfo[repl->patRepId].offset = 
-				pt(repl->pdaRun->stackTop->next->tree)->state;
+		int ind = nextAvail++;
+		runtimeData->patReplInfo[repl->patRepId].offset = ind;
+				//pt(repl->pdaRun->stackTop->next->tree)->state;
 
 		/* BindIds are indexed base one. */
 		runtimeData->patReplInfo[repl->patRepId].numBindings = 
 				repl->pdaRun->bindings->length() - 1;
 
 		long bindId = 1;
-		fillNodes( prg, repl->pdaRun->bindings, bindId,
-				runtimeData->patReplNodes, repl->pdaRun->stackTop );
+		fillNodes( prg, nextAvail, repl->pdaRun->bindings, bindId,
+				runtimeData->patReplNodes, repl->pdaRun->stackTop->next, ind );
 	}
+
+	assert( nextAvail == count );
 }
 
 
