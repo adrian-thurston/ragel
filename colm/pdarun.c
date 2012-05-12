@@ -269,8 +269,8 @@ void detachIgnores( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, Kid
 	/* Right ignore are immediately discarded since they are copies of
 	 * left-ignores. */
 	Tree *rightIgnore = 0;
-	if ( pdaRun->tokenList != 0 && pt(pdaRun->tokenList->kid->tree)->shadow->tree->flags & AF_RIGHT_IL_ATTACHED ) {
-		Kid *riKid = treeRightIgnoreKid( prg, pt(pdaRun->tokenList->kid->tree)->shadow->tree );
+	if ( pdaRun->tokenList != 0 && pdaRun->tokenList->kid->tree->flags & AF_RIGHT_IL_ATTACHED ) {
+		Kid *riKid = treeRightIgnoreKid( prg, pdaRun->tokenList->kid->tree );
 
 		/* If the right ignore has a left ignore, then that was the original
 		 * right ignore. */
@@ -285,8 +285,8 @@ void detachIgnores( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, Kid
 		else  {
 			rightIgnore = riKid->tree;
 			treeUpref( rightIgnore );
-			removeRightIgnore( prg, sp, pt(pdaRun->tokenList->kid->tree)->shadow->tree );
-			pt(pdaRun->tokenList->kid->tree)->shadow->tree->flags &= ~AF_RIGHT_IL_ATTACHED;
+			removeRightIgnore( prg, sp, pdaRun->tokenList->kid->tree );
+			pdaRun->tokenList->kid->tree->flags &= ~AF_RIGHT_IL_ATTACHED;
 		}
 
 	}
@@ -683,10 +683,10 @@ void attachIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, Kid *to )
 		input->tree->flags |= AF_LEFT_IL_ATTACHED;
 
 		if ( pdaRun->tokenList != 0 ) {
-			if ( pt(pdaRun->tokenList->kid->tree)->shadow->tree->flags & AF_RIGHT_IGNORE ) {
+			if ( pdaRun->tokenList->kid->tree->flags & AF_RIGHT_IGNORE ) {
 				/* The previous token already has a right ignore. Merge by
 				 * attaching it as a left ignore of the new list. */
-				Kid *curIgnore = treeRightIgnoreKid( prg, pt(pdaRun->tokenList->kid->tree)->shadow->tree );
+				Kid *curIgnore = treeRightIgnoreKid( prg, pdaRun->tokenList->kid->tree );
 				attachLeftIgnore( prg, (Tree*)rightIgnore, (IgnoreList*)curIgnore->tree );
 
 				/* Replace the current ignore. */
@@ -696,10 +696,10 @@ void attachIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, Kid *to )
 			}
 			else {
 				/* Attach The ignore list. */
-				attachRightIgnore( prg, pt(pdaRun->tokenList->kid->tree)->shadow->tree, rightIgnore );
+				attachRightIgnore( prg, pdaRun->tokenList->kid->tree, rightIgnore );
 			}
 
-			pt(pdaRun->tokenList->kid->tree)->shadow->tree->flags |= AF_RIGHT_IL_ATTACHED;
+			pdaRun->tokenList->kid->tree->flags |= AF_RIGHT_IL_ATTACHED;
 		}
 	}
 	else {
@@ -1546,9 +1546,9 @@ head:
 	tree->flags |= AF_COMMITTED;
 
 	/* Do not recures on trees that are terminal dups. */
-	if ( !(pt(tree)->shadow->tree->flags & AF_TERM_DUP) && 
-			!(pt(tree)->shadow->tree->flags & AF_NAMED) && 
-			!(pt(tree)->shadow->tree->flags & AF_ARTIFICIAL) && 
+	if ( !(pt(tree)->flags & AF_TERM_DUP) && 
+			!(pt(tree)->flags & AF_NAMED) && 
+			!(pt(tree)->flags & AF_ARTIFICIAL) && 
 			tree->child != 0 )
 	{
 		vm_push( (Tree*)lel );
@@ -1745,7 +1745,7 @@ again:
 			attachIgnore( prg, sp, pdaRun, pdaRun->lel );
 
 			Ref *ref = (Ref*)kidAllocate( prg );
-			ref->kid = pdaRun->lel;
+			ref->kid = pt(pdaRun->lel->tree)->shadow;
 			//treeUpref( pdaRun->lel->tree );
 			ref->next = pdaRun->tokenList;
 			pdaRun->tokenList = ref;
