@@ -259,7 +259,7 @@ static void sendBackIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsm
 	kidFree( prg, ignore );
 }
 
-void detachIgnores( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, Kid *from )
+void detachIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, Kid *from )
 {
 	assert( pdaRun->accumIgnore == 0 );
 
@@ -319,24 +319,27 @@ void detachIgnores( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, Kid
 	if ( parseTree->ignore != 0 ) {
 		assert( leftIgnore != 0 );
 
+		/* Transfer the trees to accumIgnore. */
 		pdaRun->accumIgnore = parseTree->ignore;
 		parseTree->ignore = 0;
 
-		Kid *cignore = reverseKidList( leftIgnore->child );
+		/* Put the data trees underneath the parse trees. */
+		Kid *dataIgnore = reverseKidList( leftIgnore->child );
 		leftIgnore->child = 0;
 
 		Kid *ignore = pdaRun->accumIgnore;
 		while ( ignore != 0 ) {
-			pt(ignore->tree)->shadow = cignore;
+			pt(ignore->tree)->shadow = dataIgnore;
 
 			ignore = ignore->next;
-			cignore = cignore->next;
+			dataIgnore = dataIgnore->next;
 		}
 	}
 
 	treeDownref( prg, sp, leftIgnore );
-
 }
+
+
 
 void attachInput( FsmRun *fsmRun, InputStream *is )
 {
@@ -501,7 +504,6 @@ void ignoreTree( Program *prg, PdaRun *pdaRun, Tree *tree )
 {
 	int emptyIgnore = pdaRun->accumIgnore == 0;
 
-
 	incrementSteps( pdaRun );
 
 	ParseTree *parseTree = parseTreeAllocate( prg );
@@ -638,6 +640,10 @@ void attachIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, Kid *to )
 		dataChild = pt(child->tree)->shadow;
 		dataChild->next = dataLast;
 
+		/* Detach the parse tree from the data tree. */
+		pt(child->tree)->shadow = 0;
+
+		/* Reverse the data list. */
 		dataLast = dataChild;
 
 		child = child->next;
@@ -711,7 +717,6 @@ void attachIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, Kid *to )
 			pdaRun->tokenList->kid->flags |= KF_SUPPRESS_LEFT;
 		}
 	}
-
 }
 
 void handleError( Program *prg, Tree **sp, PdaRun *pdaRun )
@@ -1839,6 +1844,9 @@ again:
 			/* Pop. */
 			pdaRun->stackTop = pdaRun->stackTop->next;
 
+			/* Detach the parse tree from the data. */
+			pt(child->tree)->shadow = 0;
+
 			/* Reverse list. */
 			child->next = last;
 			dataChild->next = dataLast;
@@ -2062,17 +2070,12 @@ case PcrReverse:
 					Kid *next = first->next;
 					Kid *dataNext = dataFirst->next;
 
-//					/** this will go ***/
-//					if ( pt(first->tree)->shadow != 0 && pt(pdaRun->stackTop->tree)->shadow != 0 )
-//						pt(first->tree)->shadow->next = pt(pdaRun->stackTop->tree)->shadow;
-
 					/* Push onto the stack. */
 					first->next = pdaRun->stackTop;
 					pdaRun->stackTop = first;
 
-//					/* Put the data under the parse tree. */
-//					pt(first->tree)->shadow = dataFirst;
-					assert( pt(first->tree)->shadow == dataFirst );
+					/* Reattach the data and the parse tree. */
+					pt(first->tree)->shadow = dataFirst;
 
 					first = next;
 					dataFirst = dataNext;
@@ -2160,7 +2163,7 @@ case PcrReverse:
 				pdaRun->tokenList = ref->next;
 				kidFree( prg, (Kid*)ref );
 
-				detachIgnores( prg, sp, pdaRun, fsmRun, pdaRun->parseInput );
+				detachIgnore( prg, sp, pdaRun, fsmRun, pdaRun->parseInput );
 			}
 			else {
 				debug( REALM_PARSE, "backing up over non-terminal: %s\n",
