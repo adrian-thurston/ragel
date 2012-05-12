@@ -224,8 +224,9 @@ void sendBackTree( InputStream *inputStream, Tree *tree )
  *   PcrRevIgnore
  */
 static void sendBackIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
-		InputStream *inputStream, Kid *ignoreKidList )
+		InputStream *inputStream, Kid *_ignore )
 {
+	Kid *ignoreKidList = pt(_ignore->tree)->shadow;
 	Kid *ignore = ignoreKidList;
 
 	#ifdef COLM_LOG
@@ -244,9 +245,9 @@ static void sendBackIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsm
 	decrementSteps( pdaRun );
 
 	/* Check for reverse code. */
-	if ( ignore->tree->flags & AF_HAS_RCODE ) {
+	if ( _ignore->tree->flags & AF_HAS_RCODE ) {
 		pdaRun->onDeck = true;
-		ignore->tree->flags &= ~AF_HAS_RCODE;
+		_ignore->tree->flags &= ~AF_HAS_RCODE;
 	}
 
 	if ( pdaRun->steps == pdaRun->targetSteps ) {
@@ -268,8 +269,8 @@ void detachIgnores( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, Kid
 	/* Right ignore are immediately discarded since they are copies of
 	 * left-ignores. */
 	Tree *rightIgnore = 0;
-	if ( pdaRun->tokenList != 0 && pt(pdaRun->tokenList->kid->tree)->shadow->tree->flags & AF_RIGHT_IL_ATTACHED ) {
-		Kid *riKid = treeRightIgnoreKid( prg, pt(pdaRun->tokenList->kid->tree)->shadow->tree );
+	if ( pdaRun->tokenList != 0 && pdaRun->tokenList->kid->tree->flags & AF_RIGHT_IL_ATTACHED ) {
+		Kid *riKid = treeRightIgnoreKid( prg, pdaRun->tokenList->kid->tree );
 
 		/* If the right ignore has a left ignore, then that was the original
 		 * right ignore. */
@@ -284,8 +285,8 @@ void detachIgnores( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, Kid
 		else  {
 			rightIgnore = riKid->tree;
 			treeUpref( rightIgnore );
-			removeRightIgnore( prg, sp, pt(pdaRun->tokenList->kid->tree)->shadow->tree );
-			pt(pdaRun->tokenList->kid->tree)->shadow->tree->flags &= ~AF_RIGHT_IL_ATTACHED;
+			removeRightIgnore( prg, sp, pdaRun->tokenList->kid->tree );
+			pdaRun->tokenList->kid->tree->flags &= ~AF_RIGHT_IL_ATTACHED;
 		}
 
 	}
@@ -446,10 +447,10 @@ static void sendBack( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
 	/* Artifical were not parsed, instead sent in as items. */
 	if ( pt(input->tree)->shadow->tree->flags & AF_ARTIFICIAL ) {
 		/* Check for reverse code. */
-		if ( pt(input->tree)->shadow->tree->flags & AF_HAS_RCODE ) {
+		if ( pt(input->tree)->flags & AF_HAS_RCODE ) {
 			debug( REALM_PARSE, "tree has rcode, setting on deck\n" );
 			pdaRun->onDeck = true;
-			pt(input->tree)->shadow->tree->flags &= ~AF_HAS_RCODE;
+			pt(input->tree)->flags &= ~AF_HAS_RCODE;
 		}
 
 		treeUpref( pt(input->tree)->shadow->tree );
@@ -458,10 +459,10 @@ static void sendBack( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
 	}
 	else {
 		/* Check for reverse code. */
-		if ( pt(input->tree)->shadow->tree->flags & AF_HAS_RCODE ) {
+		if ( pt(input->tree)->flags & AF_HAS_RCODE ) {
 			debug( REALM_PARSE, "tree has rcode, setting on deck\n" );
 			pdaRun->onDeck = true;
-			pt(input->tree)->shadow->tree->flags &= ~AF_HAS_RCODE;
+			pt(input->tree)->flags &= ~AF_HAS_RCODE;
 		}
 
 		/* Push back the token data. */
@@ -500,7 +501,6 @@ void ignoreTree( Program *prg, PdaRun *pdaRun, Tree *tree )
 {
 	int emptyIgnore = pdaRun->accumIgnore == 0;
 
-	transferReverseCode( pdaRun, tree );
 
 	incrementSteps( pdaRun );
 
@@ -514,6 +514,8 @@ void ignoreTree( Program *prg, PdaRun *pdaRun, Tree *tree )
 
 	ignore->next = pdaRun->accumIgnore;
 	pdaRun->accumIgnore = ignore;
+
+	transferReverseCode( pdaRun, (Tree*)parseTree );
 
 	setRegion( pdaRun, emptyIgnore, pt(pdaRun->accumIgnore->tree) );
 }
@@ -681,10 +683,10 @@ void attachIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, Kid *to )
 		input->tree->flags |= AF_LEFT_IL_ATTACHED;
 
 		if ( pdaRun->tokenList != 0 ) {
-			if ( pt(pdaRun->tokenList->kid->tree)->shadow->tree->flags & AF_RIGHT_IGNORE ) {
+			if ( pdaRun->tokenList->kid->tree->flags & AF_RIGHT_IGNORE ) {
 				/* The previous token already has a right ignore. Merge by
 				 * attaching it as a left ignore of the new list. */
-				Kid *curIgnore = treeRightIgnoreKid( prg, pt(pdaRun->tokenList->kid->tree)->shadow->tree );
+				Kid *curIgnore = treeRightIgnoreKid( prg, pdaRun->tokenList->kid->tree );
 				attachLeftIgnore( prg, (Tree*)rightIgnore, (IgnoreList*)curIgnore->tree );
 
 				/* Replace the current ignore. */
@@ -694,10 +696,10 @@ void attachIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, Kid *to )
 			}
 			else {
 				/* Attach The ignore list. */
-				attachRightIgnore( prg, pt(pdaRun->tokenList->kid->tree)->shadow->tree, rightIgnore );
+				attachRightIgnore( prg, pdaRun->tokenList->kid->tree, rightIgnore );
 			}
 
-			pt(pdaRun->tokenList->kid->tree)->shadow->tree->flags |= AF_RIGHT_IL_ATTACHED;
+			pdaRun->tokenList->kid->tree->flags |= AF_RIGHT_IL_ATTACHED;
 		}
 	}
 	else {
@@ -1229,7 +1231,7 @@ case PcrGeneration:
 		}
 
 		if ( pdaRun->parseInput != 0 )
-			transferReverseCode2( pdaRun, pdaRun->parseInput->tree );
+			transferReverseCode( pdaRun, pdaRun->parseInput->tree );
 
 		long pcr = parseToken( prg, sp, pdaRun, fsmRun, inputStream, PcrStart );
 		
@@ -1480,7 +1482,7 @@ head:
 
 	/* Check for reverse code. */
 	//restore = 0;
-	if ( pt(tree)->shadow->tree->flags & AF_HAS_RCODE ) {
+	if ( pt(tree)->flags & AF_HAS_RCODE ) {
 		/* If tree caused some reductions, now is not the right time to backup
 		 * over the reverse code. We need to backup over the reductions first. Store
 		 * the count of the reductions and do it when the count drops to zero. */
@@ -1544,9 +1546,9 @@ head:
 	tree->flags |= AF_COMMITTED;
 
 	/* Do not recures on trees that are terminal dups. */
-	if ( !(pt(tree)->shadow->tree->flags & AF_TERM_DUP) && 
-			!(pt(tree)->shadow->tree->flags & AF_NAMED) && 
-			!(pt(tree)->shadow->tree->flags & AF_ARTIFICIAL) && 
+	if ( !(pt(tree)->flags & AF_TERM_DUP) && 
+			!(pt(tree)->flags & AF_NAMED) && 
+			!(pt(tree)->flags & AF_ARTIFICIAL) && 
 			tree->child != 0 )
 	{
 		vm_push( (Tree*)lel );
@@ -1743,7 +1745,7 @@ again:
 			attachIgnore( prg, sp, pdaRun, pdaRun->lel );
 
 			Ref *ref = (Ref*)kidAllocate( prg );
-			ref->kid = pdaRun->lel;
+			ref->kid = pt(pdaRun->lel->tree)->shadow;
 			//treeUpref( pdaRun->lel->tree );
 			ref->next = pdaRun->tokenList;
 			pdaRun->tokenList = ref;
@@ -2114,7 +2116,7 @@ case PcrReverse:
 			pdaRun->checkNext = true;
 			pdaRun->checkStop = true;
 			
-			sendBackIgnore( prg, sp, pdaRun, fsmRun, inputStream, pt(ignore->tree)->shadow );
+			sendBackIgnore( prg, sp, pdaRun, fsmRun, inputStream, ignore );
 		}
 		else {
 			/* Now it is time to undo something. Pick an element from the top of
