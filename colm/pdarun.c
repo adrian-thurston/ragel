@@ -224,8 +224,9 @@ void sendBackTree( InputStream *inputStream, Tree *tree )
  *   PcrRevIgnore
  */
 static void sendBackIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
-		InputStream *inputStream, Kid *ignoreKidList )
+		InputStream *inputStream, Kid *_ignore )
 {
+	Kid *ignoreKidList = pt(_ignore->tree)->shadow;
 	Kid *ignore = ignoreKidList;
 
 	#ifdef COLM_LOG
@@ -244,9 +245,9 @@ static void sendBackIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsm
 	decrementSteps( pdaRun );
 
 	/* Check for reverse code. */
-	if ( ignore->tree->flags & AF_HAS_RCODE ) {
+	if ( _ignore->tree->flags & AF_HAS_RCODE ) {
 		pdaRun->onDeck = true;
-		ignore->tree->flags &= ~AF_HAS_RCODE;
+		_ignore->tree->flags &= ~AF_HAS_RCODE;
 	}
 
 	if ( pdaRun->steps == pdaRun->targetSteps ) {
@@ -446,10 +447,10 @@ static void sendBack( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
 	/* Artifical were not parsed, instead sent in as items. */
 	if ( pt(input->tree)->shadow->tree->flags & AF_ARTIFICIAL ) {
 		/* Check for reverse code. */
-		if ( pt(input->tree)->shadow->tree->flags & AF_HAS_RCODE ) {
+		if ( pt(input->tree)->flags & AF_HAS_RCODE ) {
 			debug( REALM_PARSE, "tree has rcode, setting on deck\n" );
 			pdaRun->onDeck = true;
-			pt(input->tree)->shadow->tree->flags &= ~AF_HAS_RCODE;
+			pt(input->tree)->flags &= ~AF_HAS_RCODE;
 		}
 
 		treeUpref( pt(input->tree)->shadow->tree );
@@ -458,10 +459,10 @@ static void sendBack( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
 	}
 	else {
 		/* Check for reverse code. */
-		if ( pt(input->tree)->shadow->tree->flags & AF_HAS_RCODE ) {
+		if ( pt(input->tree)->flags & AF_HAS_RCODE ) {
 			debug( REALM_PARSE, "tree has rcode, setting on deck\n" );
 			pdaRun->onDeck = true;
-			pt(input->tree)->shadow->tree->flags &= ~AF_HAS_RCODE;
+			pt(input->tree)->flags &= ~AF_HAS_RCODE;
 		}
 
 		/* Push back the token data. */
@@ -500,7 +501,6 @@ void ignoreTree( Program *prg, PdaRun *pdaRun, Tree *tree )
 {
 	int emptyIgnore = pdaRun->accumIgnore == 0;
 
-	transferReverseCode( pdaRun, tree );
 
 	incrementSteps( pdaRun );
 
@@ -514,6 +514,8 @@ void ignoreTree( Program *prg, PdaRun *pdaRun, Tree *tree )
 
 	ignore->next = pdaRun->accumIgnore;
 	pdaRun->accumIgnore = ignore;
+
+	transferReverseCode( pdaRun, (Tree*)parseTree );
 
 	setRegion( pdaRun, emptyIgnore, pt(pdaRun->accumIgnore->tree) );
 }
@@ -1229,7 +1231,7 @@ case PcrGeneration:
 		}
 
 		if ( pdaRun->parseInput != 0 )
-			transferReverseCode2( pdaRun, pdaRun->parseInput->tree );
+			transferReverseCode( pdaRun, pdaRun->parseInput->tree );
 
 		long pcr = parseToken( prg, sp, pdaRun, fsmRun, inputStream, PcrStart );
 		
@@ -1480,7 +1482,7 @@ head:
 
 	/* Check for reverse code. */
 	//restore = 0;
-	if ( pt(tree)->shadow->tree->flags & AF_HAS_RCODE ) {
+	if ( pt(tree)->flags & AF_HAS_RCODE ) {
 		/* If tree caused some reductions, now is not the right time to backup
 		 * over the reverse code. We need to backup over the reductions first. Store
 		 * the count of the reductions and do it when the count drops to zero. */
@@ -2114,7 +2116,7 @@ case PcrReverse:
 			pdaRun->checkNext = true;
 			pdaRun->checkStop = true;
 			
-			sendBackIgnore( prg, sp, pdaRun, fsmRun, inputStream, pt(ignore->tree)->shadow );
+			sendBackIgnore( prg, sp, pdaRun, fsmRun, inputStream, ignore );
 		}
 		else {
 			/* Now it is time to undo something. Pick an element from the top of
