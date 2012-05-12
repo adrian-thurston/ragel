@@ -320,20 +320,33 @@ void detachIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, Kid 
 		assert( leftIgnore != 0 );
 
 		/* Transfer the trees to accumIgnore. */
-		pdaRun->accumIgnore = reverseKidList( parseTree->ignore );
+		Kid *ignore = parseTree->ignore;
 		parseTree->ignore = 0;
 
-		/* Put the data trees underneath the parse trees. */
-		Kid *dataIgnore = reverseKidList( leftIgnore->child );
+		Kid *dataIgnore = leftIgnore->child;
 		leftIgnore->child = 0;
 
-		Kid *ignore = pdaRun->accumIgnore;
+		Kid *last = 0, *dataLast = 0;
 		while ( ignore != 0 ) {
+			Kid *next = ignore->next;
+			Kid *dataNext = dataIgnore->next;
+
+			/* Put the data trees underneath the parse trees. */
 			pt(ignore->tree)->shadow = dataIgnore;
 
-			ignore = ignore->next;
-			dataIgnore = dataIgnore->next;
+			/* Reverse. */
+			ignore->next = last;
+			dataIgnore->next = dataLast;
+
+			/* Keep last for reversal. */
+			last = ignore;
+			dataLast = dataIgnore;
+
+			ignore = next;
+			dataIgnore = dataNext;
 		}
+
+		pdaRun->accumIgnore = last;
 	}
 
 	treeDownref( prg, sp, leftIgnore );

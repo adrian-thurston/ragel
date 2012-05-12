@@ -1001,25 +1001,6 @@ Kid *treeAttr( Program *prg, const Tree *tree )
 	return kid;
 }
 
-Kid *reverseKidList( Kid *kid )
-{
-	if ( kid != 0 ) {
-		/* Reverse the list. */
-		Kid *last = 0;
-		while ( true ) {
-			Kid *next = kid->next;
-			kid->next = last;
-
-			if ( next == 0 )
-				break;
-
-			last = kid;
-			kid = next;
-		}
-	}
-	return kid;
-}
-
 void attachLeftIgnore( Program *prg, Tree *tree, IgnoreList *ignoreList )
 {
 	assert( ! (tree->flags & AF_LEFT_IGNORE) );
