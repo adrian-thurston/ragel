@@ -320,7 +320,7 @@ void detachIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, Kid 
 		assert( leftIgnore != 0 );
 
 		/* Transfer the trees to accumIgnore. */
-		pdaRun->accumIgnore = parseTree->ignore;
+		pdaRun->accumIgnore = reverseKidList( parseTree->ignore );
 		parseTree->ignore = 0;
 
 		/* Put the data trees underneath the parse trees. */
@@ -629,25 +629,32 @@ void attachIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, Kid *to )
 
 	Kid *accum = pdaRun->accumIgnore;
 	pdaRun->accumIgnore = 0;
-	parseTree->ignore = accum;
 
 	/* The data list needs to be extracted and reversed. The parse tree list
 	 * can remain in stack order. */
-	Kid *child = accum;
+	Kid *child = accum, *last = 0;
 	Kid *dataChild = 0, *dataLast = 0;
 
 	while ( child ) {
 		dataChild = pt(child->tree)->shadow;
+		Kid *next = child->next;
+
+		/* Reverse the lists. */
 		dataChild->next = dataLast;
+		child->next = last;
 
 		/* Detach the parse tree from the data tree. */
 		pt(child->tree)->shadow = 0;
 
-		/* Reverse the data list. */
+		/* Keep the last for reversal. */
 		dataLast = dataChild;
+		last = child;
 
-		child = child->next;
+		child = next;
 	}
+
+	/* Last is now the first. */
+	parseTree->ignore = last;
 
 	if ( dataChild != 0 ) {
 		debug( REALM_PARSE, "attaching ignore\n" );
