@@ -788,6 +788,7 @@ struct ParseData
 	void generateGraphviz();
 
 	void verifyParseStopGrammar( LangEl *langEl, PdaGraph *pdaGraph );
+	void computeAdvanceReductions( LangEl *langEl, PdaGraph *pdaGraph );
 
 	void initFieldInstructions( ObjField *el );
 	void initLocalInstructions( ObjField *el );

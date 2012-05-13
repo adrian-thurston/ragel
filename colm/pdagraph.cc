@@ -50,11 +50,13 @@ PdaState::PdaState()
 
 	onClosureQueue(false),
 	inClosedMap(false),
-	followMarked(false)
+	followMarked(false),
+
+	advanceReductions(false)
 {
 }
 
-/* Copy everything except actual the transitions. That is left up to the
+/* Copy everything except the action transitions. That is left up to the
  * PdaGraph copy constructor. */
 PdaState::PdaState(const PdaState &other)
 :
@@ -424,9 +426,13 @@ void PdaGraph::addInTrans( PdaTrans *destTrans, PdaTrans *srcTrans )
 
 		/* Add in the commit points. */
 		destTrans->commits.insert( srcTrans->commits );
+
+		if ( srcTrans->toState->advanceReductions )
+			destTrans->toState->advanceReductions = true;
 	}
 }
 
+/* NO LONGER USED. */
 void PdaGraph::addInState( PdaState *destState, PdaState *srcState )
 {
 	/* Draw in any properties of srcState into destState. */

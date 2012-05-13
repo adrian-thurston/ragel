@@ -366,6 +366,8 @@ struct PdaState
 	TransMap transMap;
 
 	RegionVect regions;
+
+	bool advanceReductions;
 };
 
 /* Compare lists of epsilon transitions. Entries are name ids of targets. */

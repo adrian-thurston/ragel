@@ -649,6 +649,9 @@ void ParseData::advanceReductions( PdaGraph *pdaGraph )
 {
 	/* Loop all states. */
 	for ( PdaStateList::Iter state = pdaGraph->stateList; state.lte(); state++ ) {
+		if ( !state->advanceReductions )
+			continue;
+
 		bool outHasShift = false;
 		ReductionMap outReds;
 		LongSet outCommits;
@@ -814,6 +817,28 @@ void ParseData::reduceActions( PdaGraph *pdaGraph )
 	}
 }
 
+void ParseData::computeAdvanceReductions( LangEl *langEl, PdaGraph *pdaGraph )
+{
+	/* Get the entry into the graph and traverse over the root. The resulting
+	 * state can have eof, nothing else can. */
+	PdaState *overStart = pdaGraph->followFsm( 
+			langEl->startState,
+			langEl->rootDef->fsm );
+
+	/* The graph must reduce to root all on it's own. It cannot depend on
+	 * require EOF. */
+	for ( PdaStateList::Iter st = pdaGraph->stateList; st.lte(); st++ ) {
+		if ( st == overStart )
+			continue;
+
+		for ( TransMap::Iter tr = st->transMap; tr.lte(); tr++ ) {
+			if ( tr->value->lowKey == langEl->eofLel->id )
+				st->advanceReductions = true;
+		}
+	}
+}
+
+
 void ParseData::verifyParseStopGrammar( LangEl *langEl, PdaGraph *pdaGraph )
 {
 	/* Get the entry into the graph and traverse over the root. The resulting
@@ -941,6 +966,14 @@ void ParseData::analyzeMachine( PdaGraph *pdaGraph, LangElSet &parserEls )
 	pdaActionOrder( pdaGraph, parserEls );
 	sortActions( pdaGraph );
 	resolvePrecedence( pdaGraph );
+
+	/* Verify that any type we parse_stop can actually be parsed that way. */
+	for ( LangElSet::Iter pe = parserEls; pe.lte(); pe++ ) {
+		LangEl *lel = *pe;
+		if ( lel->parseStop )
+			computeAdvanceReductions(lel , pdaGraph);
+	}
+
 	advanceReductions( pdaGraph );
 	pdaGraph->setStateNumbers();
 	reduceActions( pdaGraph );
