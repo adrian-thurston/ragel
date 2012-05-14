@@ -18,21 +18,3 @@
  *  along with Colm; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
-
-#include <colm/fsmrun.h>
-#include <colm/pdarun.h>
-#include <colm/input.h>
-#include <colm/debug.h>
-#include <colm/tree.h>
-#include <colm/bytecode.h>
-#include <colm/pool.h>
-#include <colm/program.h>
-
-#include <string.h>
-#include <assert.h>
-#include <stdlib.h>
-
-#define false 0
-#define true 1
-#define pt(var) ((ParseTree*)(var))
-

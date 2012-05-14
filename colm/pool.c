@@ -157,17 +157,17 @@ long kidNumLost( Program *prg )
 }
 
 /* 
- * Kid2
+ * PtKid
  */
 
-Kid2 *kid2Allocate( Program *prg )
+PtKid *ptKidAllocate( Program *prg )
 {
-	return (Kid2*) kidAllocate( prg );
+	return (PtKid*) kidAllocate( prg );
 }
 
-void kid2Free( Program *prg, Kid2 *el )
+void ptKidFree( Program *prg, PtKid *el )
 {
-	kidFree( prg, (Kid2*)el );
+	kidFree( prg, (Kid*)el );
 }
 
 /* 

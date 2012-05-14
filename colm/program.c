@@ -200,6 +200,7 @@ int colmDeleteProgram( Program *prg )
 	treeDownref( prg, sp, (Tree*)prg->stdoutVal );
 	treeDownref( prg, sp, (Tree*)prg->stderrVal );
 
+#if DEBUG
 	long kidLost = kidNumLost( prg );
 	long treeLost = treeNumLost( prg );
 	long parseTreeLost = parseTreeNumLost( prg );
@@ -209,7 +210,6 @@ int colmDeleteProgram( Program *prg )
 	long locationLost = locationNumLost( prg );
 	long ilLost = ilNumLost( prg );
 
-#if DEBUG
 	if ( kidLost )
 		message( "warning: lost kids: %ld\n", kidLost );
 

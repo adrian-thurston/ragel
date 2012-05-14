@@ -421,7 +421,7 @@ void sendNamedLangEl( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, I
 	parseTree->prodNum = input->tree->prodNum;
 	parseTree->shadow = input;
 	
-	pdaRun->parseInput = kid2Allocate( prg );
+	pdaRun->parseInput = ptKidAllocate( prg );
 	pdaRun->parseInput->tree = parseTree;
 }
 

@@ -73,7 +73,7 @@ typedef struct ColmKid2
 	struct _ParseTree *tree;
 	struct ColmKid2 *next;
 	unsigned char flags;
-} Kid2;
+} PtKid;
 
 typedef struct _Ref
 {
@@ -119,7 +119,7 @@ typedef struct _ParseTree
 	short id;
 	unsigned short flags;
 	long refs;
-	Kid2 *child;
+	PtKid *child;
 
 	Head *tokdata;
 
@@ -135,7 +135,7 @@ typedef struct _ParseTree
 	char retryUpper;
 
 	Kid *shadow;
-	Kid2 *ignore;
+	PtKid *ignore;
 } ParseTree;
 
 typedef struct _Int
