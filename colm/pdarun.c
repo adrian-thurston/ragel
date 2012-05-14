@@ -224,9 +224,9 @@ void sendBackTree( InputStream *inputStream, Tree *tree )
  *   PcrRevIgnore
  */
 static void sendBackIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
-		InputStream *inputStream, Kid *_ignore )
+		InputStream *inputStream, Kid2 *_ignore )
 {
-	Kid *ignoreKidList = pt(_ignore->tree)->shadow;
+	Kid *ignoreKidList = _ignore->tree->shadow;
 	Kid *ignore = ignoreKidList;
 
 	#ifdef COLM_LOG
@@ -258,8 +258,6 @@ static void sendBackIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsm
 	treeDownref( prg, sp, ignore->tree );
 	kidFree( prg, ignore );
 }
-
-
 
 void attachInput( FsmRun *fsmRun, InputStream *is )
 {
@@ -431,15 +429,15 @@ void ignoreTree( Program *prg, PdaRun *pdaRun, Tree *tree )
 	parseTree->shadow = kidAllocate( prg );
 	parseTree->shadow->tree = tree;
 
-	Kid *ignore = kidAllocate( prg );
-	ignore->tree = (Tree*)parseTree;
+	Kid2 *ignore = kid2Allocate( prg );
+	ignore->tree = parseTree;
 
 	ignore->next = pdaRun->accumIgnore;
 	pdaRun->accumIgnore = ignore;
 
 	transferReverseCode( pdaRun, (Tree*)parseTree );
 
-	setRegion( pdaRun, emptyIgnore, pt(pdaRun->accumIgnore->tree) );
+	setRegion( pdaRun, emptyIgnore, pdaRun->accumIgnore->tree );
 }
 
 Kid *makeTokenWithData( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, int id,
@@ -554,18 +552,18 @@ static void attachIgnoreRight( Program *prg, Tree **sp, PdaRun *pdaRun )
 
 	/* The data list needs to be extracted and reversed. The parse tree list
 	 * can remain in stack order. */
-	Kid *child = pdaRun->accumIgnore, *last = 0;
-	Kid *dataChild = 0;
+	Kid2 *child = pdaRun->accumIgnore;
+	Kid *dataChild = 0, *dataLast = 0;
 
 	while ( child ) {
-		dataChild = pt(child->tree)->shadow;
+		dataChild = child->tree->shadow;
 
 		Kid *kid = kidAllocate( prg );
 		kid->tree = dataChild->tree;
-		kid->next = last;
+		kid->next = dataLast;
 		treeUpref( kid->tree );
 
-		last = kid;
+		dataLast = kid;
 		child = child->next;
 	}
 
@@ -615,17 +613,17 @@ static void attachIgnoreLeft( Program *prg, Tree **sp, PdaRun *pdaRun, Kid *to )
 	input->tree->flags &= ~AF_LEFT_IL_ATTACHED;
 	input->tree->flags &= ~AF_RIGHT_IL_ATTACHED;
 
-	Kid *accum = pdaRun->accumIgnore;
+	Kid2 *accum = pdaRun->accumIgnore;
 	pdaRun->accumIgnore = 0;
 
 	/* The data list needs to be extracted and reversed. The parse tree list
 	 * can remain in stack order. */
-	Kid *child = accum, *last = 0;
+	Kid2 *child = accum, *last = 0;
 	Kid *dataChild = 0, *dataLast = 0;
 
 	while ( child ) {
 		dataChild = pt(child->tree)->shadow;
-		Kid *next = child->next;
+		Kid2 *next = child->next;
 
 		/* Reverse the lists. */
 		dataChild->next = dataLast;
@@ -745,19 +743,20 @@ static void detachIgnoreLeft( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *f
 		assert( leftIgnore != 0 );
 
 		/* Transfer the trees to accumIgnore. */
-		Kid *ignore = parseTree->ignore;
+		Kid2 *ignore = parseTree->ignore;
 		parseTree->ignore = 0;
 
 		Kid *dataIgnore = leftIgnore->child;
 		leftIgnore->child = 0;
 
-		Kid *last = 0, *dataLast = 0;
+		Kid2 *last = 0;
+		Kid *dataLast = 0;
 		while ( ignore != 0 ) {
-			Kid *next = ignore->next;
+			Kid2 *next = ignore->next;
 			Kid *dataNext = dataIgnore->next;
 
 			/* Put the data trees underneath the parse trees. */
-			pt(ignore->tree)->shadow = dataIgnore;
+			ignore->tree->shadow = dataIgnore;
 
 			/* Reverse. */
 			ignore->next = last;
@@ -2178,11 +2177,11 @@ case PcrReverse:
 
 			/* Send back any accumulated ignore tokens, then trigger error
 			 * in the the parser. */
-			Kid *ignore = pdaRun->accumIgnore;
+			Kid2 *ignore = pdaRun->accumIgnore;
 			pdaRun->accumIgnore = pdaRun->accumIgnore->next;
 			ignore->next = 0;
 
-			long region = pt(ignore->tree)->region;
+			long region = ignore->tree->region;
 			pdaRun->next = region > 0 ? region + 1 : 0;
 			pdaRun->checkNext = true;
 			pdaRun->checkStop = true;

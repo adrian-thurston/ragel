@@ -286,7 +286,7 @@ typedef struct _PdaRun
 	int stopParsing;
 	long stopTarget;
 
-	Kid *accumIgnore;
+	Kid2 *accumIgnore;
 
 	Kid *btPoint;
 
