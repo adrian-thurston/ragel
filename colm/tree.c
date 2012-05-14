@@ -1107,7 +1107,6 @@ Kid *treeRightIgnoreKid( Program *prg, Tree *tree )
 	return 0;
 }
 
-
 Tree *treeIterDerefCur( TreeIter *iter )
 {
 	return iter->ref.kid == 0 ? 0 : iter->ref.kid->tree;
@@ -1130,6 +1129,18 @@ Tree *getRhsEl( Program *prg, Tree *lhs, long position )
 		position -= 1;
 	}
 	return pos->tree;
+}
+
+Tree *getRhsVal( Program *prg, Tree *tree, int *a )
+{
+	int i, len = a[0];
+	for ( i = 0; i < len; i++ ) {
+		int prodNum = a[1 + i * 2];
+		int childNum = a[1 + i * 2 + 1];
+		if ( tree->prodNum == prodNum )
+			return getRhsEl( prg, tree, childNum );
+	}
+	return 0;
 }
 
 void setField( Program *prg, Tree *tree, long field, Tree *value )
