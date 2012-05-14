@@ -201,36 +201,39 @@ int colmDeleteProgram( Program *prg )
 	treeDownref( prg, sp, (Tree*)prg->stderrVal );
 
 	long kidLost = kidNumLost( prg );
+	long treeLost = treeNumLost( prg );
+	long parseTreeLost = parseTreeNumLost( prg );
+	long listLost = listElNumLost( prg );
+	long mapLost = mapElNumLost( prg );
+	long headLost = headNumLost( prg );
+	long locationLost = locationNumLost( prg );
+	long ilLost = ilNumLost( prg );
+
+#if DEBUG
 	if ( kidLost )
 		message( "warning: lost kids: %ld\n", kidLost );
 
-	long treeLost = treeNumLost( prg );
 	if ( treeLost )
 		message( "warning: lost trees: %ld\n", treeLost );
 
-	long parseTreeLost = parseTreeNumLost( prg );
 	if ( parseTreeLost )
 		message( "warning: lost parse trees: %ld\n", parseTreeLost );
 
-	long listLost = listElNumLost( prg );
 	if ( listLost )
 		message( "warning: lost listEls: %ld\n", listLost );
 
-	long mapLost = mapElNumLost( prg );
 	if ( mapLost )
 		message( "warning: lost mapEls: %ld\n", mapLost );
 
-	long headLost = headNumLost( prg );
 	if ( headLost )
 		message( "warning: lost heads: %ld\n", headLost );
 
-	long locationLost = locationNumLost( prg );
 	if ( locationLost )
 		message( "warning: lost locations: %ld\n", locationLost );
 
-	long ilLost = ilNumLost( prg );
 	if ( ilLost )
 		message( "warning: lost ignore lists: %ld\n", ilLost );
+#endif
 
 	kidClear( prg );
 	treeClear( prg );
