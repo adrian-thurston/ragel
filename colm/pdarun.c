@@ -404,7 +404,7 @@ static void sendBack( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
 
 	/* Downref the tree that was sent back and free the kid. */
 	treeDownref( prg, sp, input->shadow->tree );
-	//FIXME: leak kidFree( prg, input );
+	parseTreeFree( prg, input );
 }
 
 void setRegion( PdaRun *pdaRun, int emptyIgnore, ParseTree *tree )
@@ -1368,16 +1368,29 @@ Tree *getParsedRoot( PdaRun *pdaRun, int stop )
 	return 0;
 }
 
-void clearPdaRun( Program *prg, Tree **sp, PdaRun *pdaRun )
+void clearParseTree( Program *prg, Tree **sp, ParseTree *parseTree )
 {
 	/* Traverse the stack downreffing. */
-	ParseTree *kid = pdaRun->stackTop;
-	while ( kid != 0 ) {
-		ParseTree *next = kid->next;
-//		treeDownref( prg, sp, (Tree*)kid->tree );
-//		ptKidFree( prg, kid );
-		kid = next;
+	ParseTree *pt = parseTree;
+	while ( pt != 0 ) {
+		ParseTree *next = pt->next;
+		if ( pt->shadow != 0 ) {
+			treeDownref( prg, sp, pt->shadow->tree );
+			kidFree( prg, pt->shadow );
+		}
+		if ( pt->child != 0 )
+			clearParseTree( prg, sp, pt->child );
+		if ( pt->ignore != 0 )
+			clearParseTree( prg, sp, pt->ignore );
+		parseTreeFree( prg, pt );
+		pt = next;
 	}
+}
+
+void clearPdaRun( Program *prg, Tree **sp, PdaRun *pdaRun )
+{
+	/* Remaining stack and parse trees underneath. */
+	clearParseTree( prg, sp, pdaRun->stackTop );
 	pdaRun->stackTop = 0;
 
 	/* Traverse the token list downreffing. */
@@ -1400,13 +1413,8 @@ void clearPdaRun( Program *prg, Tree **sp, PdaRun *pdaRun )
 	pdaRun->btPoint = 0;
 
 	/* Clear out any remaining ignores. */
-//	Kid *ignore = pdaRun->accumIgnore;
-//	while ( ignore != 0 ) {
-//		Kid *next = ignore->next;
-//		treeDownref( prg, sp, ignore->tree );
-//		kidFree( prg, (Kid*)ignore );
-//		ignore = next;
-//	}
+	clearParseTree( prg, sp, pdaRun->accumIgnore );
+	pdaRun->accumIgnore = 0;
 
 	if ( pdaRun->context != 0 )
 		treeDownref( prg, sp, pdaRun->context );
@@ -2131,8 +2139,7 @@ case PcrReverse:
 				}
 
 				/* Free the reduced item. */
-				//treeDownref( prg, sp, (Tree*)pdaRun->undoLel->tree );
-				//ptKidFree( prg, pdaRun->undoLel );
+				parseTreeFree( prg, pdaRun->undoLel );
 			}
 		}
 		else if ( pdaRun->accumIgnore != 0 ) {
@@ -2150,6 +2157,7 @@ case PcrReverse:
 			pdaRun->checkStop = true;
 			
 			sendBackIgnore( prg, sp, pdaRun, fsmRun, inputStream, ignore );
+			parseTreeFree( prg, ignore );
 		}
 		else {
 			/* Now it is time to undo something. Pick an element from the top of
