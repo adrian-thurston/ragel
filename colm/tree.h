@@ -119,7 +119,7 @@ typedef struct _ParseTree
 	short id;
 	unsigned short flags;
 	long refs;
-	Kid *child;
+	Kid2 *child;
 
 	Head *tokdata;
 

@@ -342,7 +342,7 @@ void resetToken( FsmRun *fsmRun )
 
 
 static void sendBack( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, 
-		InputStream *inputStream, Kid *input )
+		InputStream *inputStream, Kid2 *input )
 {
 	#ifdef COLM_LOG
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
@@ -435,7 +435,7 @@ void ignoreTree( Program *prg, PdaRun *pdaRun, Tree *tree )
 	ignore->next = pdaRun->accumIgnore;
 	pdaRun->accumIgnore = ignore;
 
-	transferReverseCode( pdaRun, (Tree*)parseTree );
+	transferReverseCode( pdaRun, parseTree );
 
 	setRegion( pdaRun, emptyIgnore, pdaRun->accumIgnore->tree );
 }
@@ -604,7 +604,7 @@ static void attachIgnoreRight( Program *prg, Tree **sp, PdaRun *pdaRun )
 	}
 }
 
-static void attachIgnoreLeft( Program *prg, Tree **sp, PdaRun *pdaRun, Kid *to )
+static void attachIgnoreLeft( Program *prg, Tree **sp, PdaRun *pdaRun, Kid2 *to )
 {
 	ParseTree *parseTree = pt(to->tree);
 	Kid *input = parseTree->shadow;
@@ -709,7 +709,7 @@ void detachIgnoreRight( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
 	treeDownref( prg, sp, rightIgnore );
 }
 
-static void detachIgnoreLeft( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, Kid *from )
+static void detachIgnoreLeft( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, Kid2 *from )
 {
 	assert( pdaRun->accumIgnore == 0 );
 
@@ -874,8 +874,8 @@ static void sendToken( Program *prg, Tree **sp, InputStream *inputStream, FsmRun
 	parseTree->prodNum = input->tree->prodNum;
 	parseTree->shadow = input;
 		
-	pdaRun->parseInput = kidAllocate( prg );
-	pdaRun->parseInput->tree = (Tree*)parseTree;
+	pdaRun->parseInput = kid2Allocate( prg );
+	pdaRun->parseInput->tree = parseTree;
 
 	/* Store any alternate scanning region. */
 	if ( input != 0 && pdaRun->cs >= 0 )
@@ -900,8 +900,8 @@ static void sendTree( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, I
 	parseTree->prodNum = input->tree->prodNum;
 	parseTree->shadow = input;
 	
-	pdaRun->parseInput = kidAllocate( prg );
-	pdaRun->parseInput->tree = (Tree*)parseTree;
+	pdaRun->parseInput = kid2Allocate( prg );
+	pdaRun->parseInput->tree = parseTree;
 }
 
 static void sendIgnoreTree( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
@@ -946,8 +946,8 @@ static void sendEof( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *
 	parseTree->prodNum = input->tree->prodNum;
 	parseTree->shadow = input;
 	
-	pdaRun->parseInput = kidAllocate( prg );
-	pdaRun->parseInput->tree = (Tree*)parseTree;
+	pdaRun->parseInput = kid2Allocate( prg );
+	pdaRun->parseInput->tree = parseTree;
 }
 
 void newToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun )
@@ -1378,11 +1378,11 @@ Tree *getParsedRoot( PdaRun *pdaRun, int stop )
 void clearPdaRun( Program *prg, Tree **sp, PdaRun *pdaRun )
 {
 	/* Traverse the stack downreffing. */
-	Kid *kid = pdaRun->stackTop;
+	Kid2 *kid = pdaRun->stackTop;
 	while ( kid != 0 ) {
-		Kid *next = kid->next;
-		treeDownref( prg, sp, kid->tree );
-		kidFree( prg, kid );
+		Kid2 *next = kid->next;
+		treeDownref( prg, sp, (Tree*)kid->tree );
+		kid2Free( prg, kid );
 		kid = next;
 	}
 	pdaRun->stackTop = 0;
@@ -1452,12 +1452,12 @@ void initPdaRun( PdaRun *pdaRun, Program *prg, PdaTables *tables,
 	sentinal->tree->refs = 1;
 
 	/* Init the element allocation variables. */
-	pdaRun->stackTop = kidAllocate( prg );
-	pdaRun->stackTop->tree = (Tree*)parseTreeAllocate( prg );
+	pdaRun->stackTop = kid2Allocate( prg );
+	pdaRun->stackTop->tree = parseTreeAllocate( prg );
 	pdaRun->stackTop->tree->flags |= AF_PARSE_TREE;
 	pdaRun->stackTop->tree->refs = 1;
-	pt(pdaRun->stackTop->tree)->state = -1;
-	pt(pdaRun->stackTop->tree)->shadow = sentinal;
+	pdaRun->stackTop->tree->state = -1;
+	pdaRun->stackTop->tree->shadow = sentinal;
 
 	pdaRun->numRetry = 0;
 	pdaRun->nextRegionInd = pdaRun->tables->tokenRegionInds[pdaRun->cs];
@@ -1513,7 +1513,7 @@ long stackTopTarget( Program *prg, PdaRun *pdaRun )
  * 		-clears all alg structures
  */
 
-int beenCommitted( Kid *kid )
+int beenCommitted( Kid2 *kid )
 {
 	return kid->tree->flags & AF_COMMITTED;
 }
@@ -1529,9 +1529,9 @@ Code *backupOverRcode( Code *rcode )
 
 /* The top level of the stack is linked right-to-left. Trees underneath are
  * linked left-to-right. */
-void commitKid( Program *prg, PdaRun *pdaRun, Tree **root, Kid *lel, Code **rcode, long *causeReduce )
+void commitKid( Program *prg, PdaRun *pdaRun, Tree **root, Kid2 *lel, Code **rcode, long *causeReduce )
 {
-	Tree *tree = 0;
+	ParseTree *tree = 0;
 	Tree **sp = root;
 	//Tree *restore = 0;
 
@@ -1627,7 +1627,7 @@ head:
 
 backup:
 	if ( sp != root ) {
-		Kid *next = (Kid*)vm_pop();
+		Kid2 *next = (Kid2*)vm_pop();
 		if ( next->next == lel ) {
 			/* Moving backwards. */
 			lel = next;
@@ -1657,7 +1657,7 @@ void commitFull( Program *prg, Tree **sp, PdaRun *pdaRun, long causeReduce )
 //	}
 //	#endif
 	
-	Kid *kid = pdaRun->stackTop;
+	Kid2 *kid = pdaRun->stackTop;
 	Code *rcode = pdaRun->reverseCode.data + pdaRun->reverseCode.tabLen;
 
 	/* The top level of the stack is linked right to left. This is the
@@ -1693,7 +1693,7 @@ long parseToken( Program *prg, Tree **sp, PdaRun *pdaRun,
 	int owner;
 	int induceReject;
 	int indPos;
-	LangElInfo *lelInfo = prg->rtd->lelInfo;
+	//LangElInfo *lelInfo = prg->rtd->lelInfo;
 
 switch ( entry ) {
 case PcrStart:
@@ -1721,35 +1721,6 @@ again:
 
 	pdaRun->lel = pdaRun->parseInput;
 	pdaRun->curState = pdaRun->cs;
-
-	/* This can disappear. An old experiment. */
-	if ( lelInfo[pdaRun->lel->tree->id].ignore ) {
-		/* Consume. */
-		pdaRun->parseInput = pdaRun->parseInput->next;
-
-		Tree *stTree = pdaRun->stackTop->tree;
-		if ( stTree->id == LEL_ID_IGNORE ) {
-			pdaRun->lel->next = stTree->child;
-			stTree->child = pdaRun->lel;
-		}
-		else {
-			Kid *kid = kidAllocate( prg );
-			IgnoreList *ignoreList = ilAllocate( prg );
-			ignoreList->generation = prg->nextIlGen++;
-
-			kid->tree = (Tree*)ignoreList;
-			kid->tree->id = LEL_ID_IGNORE;
-			kid->tree->refs = 1;
-			kid->tree->child = pdaRun->lel;
-			pdaRun->lel->next = 0;
-
-			kid->next = pdaRun->stackTop;
-			pdaRun->stackTop = kid;
-		}
-
-		/* Note: no state change. */
-		goto again;
-	}
 
 	if ( pdaRun->lel->tree->id < pdaRun->tables->keys[pdaRun->curState<<1] ||
 			pdaRun->lel->tree->id > pdaRun->tables->keys[(pdaRun->curState<<1)+1] ) {
@@ -1863,7 +1834,8 @@ again:
 
 	if ( *action & act_rb ) {
 		int r, objectLength;
-		Kid *last, *child, *attrs;
+		Kid2 *last, *child;
+		Kid *attrs;
 		Kid *dataLast, *dataChild;
 
 		if ( !( *action & act_sb ) && pdaRun->lel->tree->id < prg->rtd->firstNonTermId )
@@ -1880,8 +1852,8 @@ again:
 		value->tree->id = prg->rtd->prodInfo[pdaRun->reduction].lhsId;
 		value->tree->prodNum = prg->rtd->prodInfo[pdaRun->reduction].prodNum;
 
-		pdaRun->redLel = kidAllocate( prg );
-		pdaRun->redLel->tree = (Tree*)parseTreeAllocate( prg );
+		pdaRun->redLel = kid2Allocate( prg );
+		pdaRun->redLel->tree = parseTreeAllocate( prg );
 		pdaRun->redLel->tree->flags |= AF_PARSE_TREE;
 		pdaRun->redLel->tree->refs = 1;
 		pdaRun->redLel->tree->id = prg->rtd->prodInfo[pdaRun->reduction].lhsId;
@@ -2124,7 +2096,7 @@ case PcrReverse:
 				pdaRun->parseInput = pdaRun->parseInput->next;
 
 				/* Extract children from the child list. */
-				Kid *first = pdaRun->undoLel->tree->child;
+				Kid2 *first = pdaRun->undoLel->tree->child;
 				pdaRun->undoLel->tree->child = 0;
 
 				/* This will skip the ignores/attributes, etc. */
@@ -2134,7 +2106,7 @@ case PcrReverse:
 				 * stack one at a time. */
 				while ( first != 0 ) {
 					/* Get the next item ahead of time. */
-					Kid *next = first->next;
+					Kid2 *next = first->next;
 					Kid *dataNext = dataFirst->next;
 
 					/* Push onto the stack. */
@@ -2168,8 +2140,8 @@ case PcrReverse:
 				}
 
 				/* Free the reduced item. */
-				treeDownref( prg, sp, pdaRun->undoLel->tree );
-				kidFree( prg, pdaRun->undoLel );
+				treeDownref( prg, sp, (Tree*)pdaRun->undoLel->tree );
+				kid2Free( prg, pdaRun->undoLel );
 			}
 		}
 		else if ( pdaRun->accumIgnore != 0 ) {
@@ -2253,8 +2225,8 @@ fail:
 	/* If we failed parsing on tree we must free it. The caller expected us to
 	 * either consume it or send it back to the parseInput. */
 	if ( pdaRun->parseInput != 0 ) {
-		treeDownref( prg, sp, pdaRun->parseInput->tree );
-		kidFree( prg, pdaRun->parseInput );
+		treeDownref( prg, sp, (Tree*)pdaRun->parseInput->tree );
+		kid2Free( prg, pdaRun->parseInput );
 		pdaRun->parseInput = 0;
 	}
 

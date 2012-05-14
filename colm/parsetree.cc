@@ -524,8 +524,8 @@ void TokenRegion::runLongestMatch( ParseData *pd, FsmGraph *graph )
 
 	/* Now that all graph searching is done it certainly safe set the
 	 * restarting. It may be safe above, however this must be verified. */
-	for ( Vector<FsmTrans*>::Iter pt = restartTrans; pt.lte(); pt++ )
-		restart( graph, *pt );
+	for ( Vector<FsmTrans*>::Iter rs = restartTrans; rs.lte(); rs++ )
+		restart( graph, *rs );
 
 	int lmErrActionOrd = pd->curActionOrd++;
 

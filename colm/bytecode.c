@@ -819,7 +819,7 @@ int makeReverseCode( PdaRun *pdaRun )
 	return true;
 }
 
-void transferReverseCode( PdaRun *pdaRun, Tree *tree )
+void transferReverseCode( PdaRun *pdaRun, ParseTree *tree )
 {
 	if ( pdaRun->rcBlockCount > 0 ) {
 		debug( REALM_PARSE, "attaching reverse code to token\n" );

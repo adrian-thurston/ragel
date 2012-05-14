@@ -27,7 +27,6 @@
 #include "pool.h"
 
 #include <iostream>
-#define pt(var) ((ParseTree*)(var))
 
 using std::cerr;
 using std::endl;
@@ -422,8 +421,8 @@ void sendNamedLangEl( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, I
 	parseTree->prodNum = input->tree->prodNum;
 	parseTree->shadow = input;
 	
-	pdaRun->parseInput = kidAllocate( prg );
-	pdaRun->parseInput->tree = (Tree*)parseTree;
+	pdaRun->parseInput = kid2Allocate( prg );
+	pdaRun->parseInput->tree = parseTree;
 }
 
 void initBindings( PdaRun *pdaRun )

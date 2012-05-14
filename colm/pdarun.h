@@ -271,7 +271,7 @@ typedef struct _PoolAlloc
 typedef struct _PdaRun
 {
 	int numRetry;
-	Kid *stackTop;
+	Kid2 *stackTop;
 	Ref *tokenList;
 	int cs;
 	int nextRegionInd;
@@ -308,19 +308,19 @@ typedef struct _PdaRun
 	 * Data we added when refactoring the parsing engine into a coroutine.
 	 */
 
-	Kid *parseInput;
+	Kid2 *parseInput;
 	FrameInfo *fi;
 	int reduction;
-	Kid *redLel;
+	Kid2 *redLel;
 	int curState;
-	Kid *lel;
+	Kid2 *lel;
 	int triggerUndo;
 
 	int tokenId;
 	Head *tokdata;
 	int frameId;
 	int next;
-	Kid *undoLel;
+	Kid2 *undoLel;
 
 	int checkNext;
 	int checkStop;
@@ -385,7 +385,7 @@ void incrementSteps( PdaRun *pdaRun );
 void decrementSteps( PdaRun *pdaRun );
 
 int makeReverseCode( PdaRun *pdaRun );
-void transferReverseCode( PdaRun *pdaRun, Tree *tree );
+void transferReverseCode( PdaRun *pdaRun, ParseTree *tree );
 
 void initPdaRun( PdaRun *pdaRun, struct ColmProgram *prg, PdaTables *tables,
 		FsmRun *fsmRun, int parserId, long stopTarget, int revertOn, Tree *context );
