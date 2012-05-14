@@ -74,4 +74,6 @@ TESTS="
 	export1.lm
 	lhs1.lm
 	rhsref1.lm
+	order1.lm
+	order2.lm
 "

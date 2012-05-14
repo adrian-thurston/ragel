@@ -1,0 +1,12 @@
+#include "some_header.h"
+
+%%
+
+tcp protocol FOO 
+{
+	port 99
+
+	client c
+	server s
+}
+
