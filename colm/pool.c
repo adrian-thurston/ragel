@@ -157,20 +157,6 @@ long kidNumLost( Program *prg )
 }
 
 /* 
- * PtKid
- */
-
-PtKid *ptKidAllocate( Program *prg )
-{
-	return (PtKid*) kidAllocate( prg );
-}
-
-void ptKidFree( Program *prg, PtKid *el )
-{
-	kidFree( prg, (Kid*)el );
-}
-
-/* 
  * Tree
  */
 

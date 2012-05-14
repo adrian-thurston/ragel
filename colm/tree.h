@@ -65,16 +65,6 @@ typedef struct ColmKid
 	unsigned char flags;
 } Kid;
 
-typedef struct ColmKid2
-{
-	/* The tree needs to be first since pointers to kids are used to reference
-	 * trees on the stack. A pointer to the word that is a Tree* is cast to
-	 * a Kid*. */
-	struct _ParseTree *tree;
-	struct ColmKid2 *next;
-	unsigned char flags;
-} PtKid;
-
 typedef struct _Ref
 {
 	struct ColmKid *kid;
@@ -119,7 +109,7 @@ typedef struct _ParseTree
 	short id;
 	unsigned short flags;
 	long refs;
-	PtKid *child;
+	struct _ParseTree *child;
 
 	Head *tokdata;
 
@@ -135,7 +125,8 @@ typedef struct _ParseTree
 	char retryUpper;
 
 	Kid *shadow;
-	PtKid *ignore;
+	struct _ParseTree *ignore;
+	struct _ParseTree *next;
 } ParseTree;
 
 typedef struct _Int

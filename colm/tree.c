@@ -927,13 +927,17 @@ free_tree:
 
 void treeUpref( Tree *tree )
 {
-	if ( tree != 0 )
+	if ( tree != 0 ) {
+		assert( !( tree->flags & AF_PARSE_TREE ) );
 		tree->refs += 1;
+	}
 }
 
 void treeDownref( Program *prg, Tree **sp, Tree *tree )
 {
+
 	if ( tree != 0 ) {
+		assert( !( tree->flags & AF_PARSE_TREE ) );
 		assert( tree->refs > 0 );
 		tree->refs -= 1;
 		if ( tree->refs == 0 )

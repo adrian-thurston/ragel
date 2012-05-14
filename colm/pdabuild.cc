@@ -1675,10 +1675,10 @@ void ParseData::fillInPatterns( Program *prg )
 	/* Count is referenced and computed by mapNode. */
 	int count = 0;
 	for ( PatternList::Iter pat = patternList; pat.lte(); pat++ )
-		countNodes( prg, count, pat->pdaRun->stackTop->next->tree->shadow );
+		countNodes( prg, count, pat->pdaRun->stackTop->next->shadow );
 
 	for ( ReplList::Iter repl = replList; repl.lte(); repl++ )
-		countNodes( prg, count, repl->pdaRun->stackTop->next->tree->shadow );
+		countNodes( prg, count, repl->pdaRun->stackTop->next->shadow );
 	
 	runtimeData->patReplNodes = new PatReplNode[count];
 	runtimeData->numPatternNodes = count;
@@ -1696,7 +1696,7 @@ void ParseData::fillInPatterns( Program *prg )
 		/* Init the bind */
 		long bindId = 1;
 		fillNodes( prg, nextAvail, pat->pdaRun->bindings, bindId,
-			runtimeData->patReplNodes, pat->pdaRun->stackTop->next->tree->shadow, ind );
+			runtimeData->patReplNodes, pat->pdaRun->stackTop->next->shadow, ind );
 	}
 
 	for ( ReplList::Iter repl = replList; repl.lte(); repl++ ) {
@@ -1709,7 +1709,7 @@ void ParseData::fillInPatterns( Program *prg )
 
 		long bindId = 1;
 		fillNodes( prg, nextAvail, repl->pdaRun->bindings, bindId,
-				runtimeData->patReplNodes, repl->pdaRun->stackTop->next->tree->shadow, ind );
+				runtimeData->patReplNodes, repl->pdaRun->stackTop->next->shadow, ind );
 	}
 
 	assert( nextAvail == count );

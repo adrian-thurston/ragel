@@ -40,9 +40,6 @@ void kidFree( Program *prg, Kid *el );
 void kidClear( Program *prg );
 long kidNumLost( Program *prg );
 
-PtKid *ptKidAllocate( Program *prg );
-void ptKidFree( Program *prg, PtKid *el );
-
 Tree *treeAllocate( Program *prg );
 void treeFree( Program *prg, Tree *el );
 void treeClear( Program *prg );
