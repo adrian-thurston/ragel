@@ -538,65 +538,60 @@ static void attachIgnoreRight( Program *prg, Tree **sp, PdaRun *pdaRun )
 			(pdaRun->stackTop->flags & AF_TERM_DUP) )
 	{
 		/* OK, do it */
-	}
-	else
-	{
-		return;
-	}
+		Tree *alter = pdaRun->stackTop->shadow->tree;
 
-	Tree *alter = pdaRun->stackTop->shadow->tree;
+		/* The data list needs to be extracted and reversed. The parse tree list
+		 * can remain in stack order. */
+		ParseTree *child = pdaRun->accumIgnore;
+		Kid *dataChild = 0, *dataLast = 0;
 
-	/* The data list needs to be extracted and reversed. The parse tree list
-	 * can remain in stack order. */
-	ParseTree *child = pdaRun->accumIgnore;
-	Kid *dataChild = 0, *dataLast = 0;
+		while ( child ) {
+			dataChild = child->shadow;
 
-	while ( child ) {
-		dataChild = child->shadow;
+			Kid *kid = kidAllocate( prg );
+			kid->tree = dataChild->tree;
+			kid->next = dataLast;
+			treeUpref( kid->tree );
 
-		Kid *kid = kidAllocate( prg );
-		kid->tree = dataChild->tree;
-		kid->next = dataLast;
-		treeUpref( kid->tree );
+			dataLast = kid;
+			child = child->next;
+		}
 
-		dataLast = kid;
-		child = child->next;
-	}
+		if ( dataChild != 0 ) {
+			debug( REALM_PARSE, "attaching ignore right\n" );
 
-	if ( dataChild != 0 ) {
-		debug( REALM_PARSE, "attaching ignore right\n" );
+			Kid *ignoreKid = dataLast;
 
-		Kid *ignoreKid = dataChild;
+			/* Copy the ignore list first if we need to attach it as a right
+			 * ignore. */
+			IgnoreList *rightIgnore = 0;
 
-		/* Copy the ignore list first if we need to attach it as a right
-		 * ignore. */
-		IgnoreList *rightIgnore = 0;
+			rightIgnore = ilAllocate( prg );
+			rightIgnore->id = LEL_ID_IGNORE;
+			rightIgnore->child = ignoreKid;
+			rightIgnore->generation = prg->nextIlGen++;
 
-		rightIgnore = ilAllocate( prg );
-		rightIgnore->id = LEL_ID_IGNORE;
-		rightIgnore->child = copyKidList( prg, ignoreKid );
-		rightIgnore->generation = prg->nextIlGen++;
+			if ( alter->flags & AF_RIGHT_IGNORE ) {
+				/* The previous token already has a right ignore. Merge by
+				 * attaching it as a left ignore of the new list. */
+				Kid *curIgnore = treeRightIgnoreKid( prg, alter );
+				attachLeftIgnore( prg, (Tree*)rightIgnore, (IgnoreList*)curIgnore->tree );
 
-		if ( alter->flags & AF_RIGHT_IGNORE ) {
-			/* The previous token already has a right ignore. Merge by
-			 * attaching it as a left ignore of the new list. */
-			Kid *curIgnore = treeRightIgnoreKid( prg, alter );
-			attachLeftIgnore( prg, (Tree*)rightIgnore, (IgnoreList*)curIgnore->tree );
+				/* Replace the current ignore. */
+				treeDownref( prg, sp, curIgnore->tree );
+				curIgnore->tree = (Tree*)rightIgnore;
+				treeUpref( (Tree*)rightIgnore );
+			}
+			else {
+				/* Attach The ignore list. */
+				attachRightIgnore( prg, alter, rightIgnore );
+			}
 
-			/* Replace the current ignore. */
-			treeDownref( prg, sp, curIgnore->tree );
-			curIgnore->tree = (Tree*)rightIgnore;
-			treeUpref( (Tree*)rightIgnore );
+			alter->flags |= AF_RIGHT_IL_ATTACHED;
 		}
 		else {
-			/* Attach The ignore list. */
-			attachRightIgnore( prg, alter, rightIgnore );
+			pdaRun->stackTop->shadow->flags |= KF_SUPPRESS_LEFT;
 		}
-
-		alter->flags |= AF_RIGHT_IL_ATTACHED;
-	}
-	else {
-		pdaRun->stackTop->shadow->flags |= KF_SUPPRESS_LEFT;
 	}
 }
 
@@ -1758,9 +1753,6 @@ again:
 
 		pdaRun->lel->state = pdaRun->curState;
 
-//		if ( pdaRun->lel->shadow != 0 && pdaRun->stackTop->shadow != 0 )
-//			pdaRun->lel->shadow->next = pdaRun->stackTop->shadow;
-
 		/* If its a token then attach ignores and record it in the token list
 		 * of the next ignore attachment to use. */
 		if ( pdaRun->lel->id < prg->rtd->firstNonTermId ) {
@@ -1860,7 +1852,10 @@ again:
 		objectLength = prg->rtd->lelInfo[pdaRun->redLel->id].objectLength;
 		attrs = allocAttrs( prg, objectLength );
 
-		/* Build the list of children. */
+		/* Build the list of children. We will be giving up a reference when we
+		 * detach parse tree and data tree, but gaining the reference when we
+		 * put the children under the new data tree. No need to alter refcounts
+		 * here. */
 		rhsLen = prg->rtd->prodInfo[pdaRun->reduction].length;
 		child = last = 0;
 		dataChild = dataLast = 0;
