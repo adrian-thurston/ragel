@@ -866,8 +866,6 @@ static void sendToken( Program *prg, Tree **sp, InputStream *inputStream, FsmRun
 		AF_RIGHT_IGNORE | AF_RIGHT_IL_ATTACHED
 	);
 	parseTree->flags |= AF_PARSE_TREE;
-	parseTree->refs = 1;
-	parseTree->prodNum = input->tree->prodNum;
 	parseTree->shadow = input;
 		
 	pdaRun->parseInput = parseTree;
@@ -891,8 +889,6 @@ static void sendTree( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, I
 		AF_LEFT_IGNORE | AF_LEFT_IL_ATTACHED | AF_RIGHT_IGNORE | AF_RIGHT_IL_ATTACHED
 	);
 	parseTree->flags |= AF_PARSE_TREE;
-	parseTree->refs = 1;
-	parseTree->prodNum = input->tree->prodNum;
 	parseTree->shadow = input;
 	
 	pdaRun->parseInput = parseTree;
@@ -936,8 +932,6 @@ static void sendEof( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *
 		AF_RIGHT_IGNORE | AF_RIGHT_IL_ATTACHED
 	);
 	parseTree->flags |= AF_PARSE_TREE;
-	parseTree->refs = 1;
-	parseTree->prodNum = input->tree->prodNum;
 	parseTree->shadow = input;
 	
 	pdaRun->parseInput = parseTree;
@@ -1455,7 +1449,6 @@ void initPdaRun( PdaRun *pdaRun, Program *prg, PdaTables *tables,
 	/* Init the element allocation variables. */
 	pdaRun->stackTop = parseTreeAllocate( prg );
 	pdaRun->stackTop->flags |= AF_PARSE_TREE;
-	pdaRun->stackTop->refs = 1;
 	pdaRun->stackTop->state = -1;
 	pdaRun->stackTop->shadow = sentinal;
 
@@ -1705,7 +1698,6 @@ case PcrStart:
 	/* The tree we are given must be * parse tree size. It also must have at
 	 * least one reference. */
 	assert( pdaRun->parseInput->flags & AF_PARSE_TREE );
-	assert( pdaRun->parseInput->refs > 0 );
 
 	/* This will cause parseInput to be lost. This 
 	 * path should be traced. */
@@ -1854,9 +1846,7 @@ again:
 
 		pdaRun->redLel = parseTreeAllocate( prg );
 		pdaRun->redLel->flags |= AF_PARSE_TREE;
-		pdaRun->redLel->refs = 1;
 		pdaRun->redLel->id = prg->rtd->prodInfo[pdaRun->reduction].lhsId;
-		pdaRun->redLel->prodNum = prg->rtd->prodInfo[pdaRun->reduction].prodNum;
 		pdaRun->redLel->next = 0;
 		pdaRun->redLel->causeReduce = 0;
 		pdaRun->redLel->retryLower = 0;
@@ -1911,8 +1901,6 @@ again:
 		/* When the production is of zero length we stay in the same state.
 		 * Otherwise we use the state stored in the first child. */
 		pdaRun->cs = rhsLen == 0 ? pdaRun->curState : child->state;
-
-		assert( pdaRun->redLel->refs == 1 );
 
 		if ( prg->ctxDepParsing && prg->rtd->prodInfo[pdaRun->reduction].frameId >= 0 ) {
 			/* Frame info for reduction. */

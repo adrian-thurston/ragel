@@ -105,15 +105,13 @@ typedef struct _IgnoreList
 
 typedef struct _ParseTree
 {
-	/* Entire structure must overlay Tree. */
 	short id;
 	unsigned short flags;
-	long refs;
+
 	struct _ParseTree *child;
-
-	Head *tokdata;
-
-	unsigned short prodNum;
+	struct _ParseTree *next;
+	struct _ParseTree *ignore;
+	Kid *shadow;
 
 	/* Parsing algorithm. */
 	long state;
@@ -123,10 +121,6 @@ typedef struct _ParseTree
 	/* FIXME: unify probably. */
 	char retryLower;
 	char retryUpper;
-
-	Kid *shadow;
-	struct _ParseTree *ignore;
-	struct _ParseTree *next;
 } ParseTree;
 
 typedef struct _Int
