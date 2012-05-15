@@ -1496,25 +1496,26 @@ again:
 			break;
 		}
 		case IN_GET_RHS_VAL_R: {
+			debug( REALM_BYTECODE, "IN_GET_RHS_VAL_R\n" );
 			int i, done = 0;
 			uchar len;
-			Tree *val, *res = 0;
 
-			val = vm_pop();
+			Tree *obj = vm_pop(), *val = 0;
+			treeDownref( prg, sp, obj );
 
 			read_byte( len );
 			for ( i = 0; i < len; i++ ) {
 				uchar prodNum, childNum;
 				read_byte( prodNum );
 				read_byte( childNum );
-				if ( !done && val->prodNum == prodNum ) {
-					res = getRhsEl( prg, val, childNum );
+				if ( !done && obj->prodNum == prodNum ) {
+					val = getRhsEl( prg, obj, childNum );
 					done = 1;
 				}
 			}
 
-			treeUpref( res );
-			vm_push( res );
+			treeUpref( val );
+			vm_push( val );
 			break;
 		}
 		case IN_POP: {

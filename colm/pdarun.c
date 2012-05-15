@@ -254,8 +254,6 @@ static void sendBackIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsm
 		pdaRun->stop = true;
 	}
 
-	treeDownref( prg, sp, ignore->tree );
-	kidFree( prg, ignore );
 }
 
 void attachInput( FsmRun *fsmRun, InputStream *is )
@@ -404,6 +402,7 @@ static void sendBack( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
 
 	/* Downref the tree that was sent back and free the kid. */
 	treeDownref( prg, sp, input->shadow->tree );
+	kidFree( prg, input->shadow );
 	parseTreeFree( prg, input );
 }
 
@@ -2122,6 +2121,8 @@ case PcrReverse:
 				}
 
 				/* Free the reduced item. */
+				treeDownref( prg, sp, pdaRun->undoLel->shadow->tree );
+				kidFree( prg, pdaRun->undoLel->shadow );
 				parseTreeFree( prg, pdaRun->undoLel );
 			}
 		}
@@ -2140,6 +2141,9 @@ case PcrReverse:
 			pdaRun->checkStop = true;
 			
 			sendBackIgnore( prg, sp, pdaRun, fsmRun, inputStream, ignore );
+
+			treeDownref( prg, sp, ignore->shadow->tree );
+			kidFree( prg, ignore->shadow );
 			parseTreeFree( prg, ignore );
 		}
 		else {
