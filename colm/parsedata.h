@@ -987,6 +987,7 @@ struct ParseData
 
 	ObjField *makeDataEl();
 	ObjField *makePosEl();
+	ObjField *makeLineEl();
 
 	IterDef *findIterDef( IterDef::Type type, GenericType *generic );
 	IterDef *findIterDef( IterDef::Type type, Function *func );

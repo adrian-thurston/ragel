@@ -107,6 +107,7 @@ typedef unsigned char uchar;
 #define IN_SET_TOKEN_DATA_BKT    0x36
 
 #define IN_GET_TOKEN_POS_R       0x37
+#define IN_GET_TOKEN_LINE_R      0xf6
 
 #define IN_INIT_RHS_EL           0x38
 #define IN_INIT_LHS_EL           0xef

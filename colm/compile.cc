@@ -2468,6 +2468,23 @@ ObjField *ParseData::makePosEl()
 	return el;
 }
 
+ObjField *ParseData::makeLineEl()
+{
+	/* Create the "data" field. */
+	TypeRef *typeRef = new TypeRef( InputLoc(), uniqueTypeInt );
+	ObjField *el = new ObjField( InputLoc(), typeRef, "line" );
+
+	/* Setting beenReferenced to true prevents us from assigning instructions
+	 * and an offset to the field. */
+
+	el->isConst = true;
+	el->beenReferenced = true;
+	el->beenInitialized = true;
+	el->useOffset = false;
+	el->inGetR = IN_GET_TOKEN_LINE_R;
+	return el;
+}
+
 void ParseData::initTokenObjects( )
 {
 	/* Make a default object Definition. */
@@ -2479,6 +2496,8 @@ void ParseData::initTokenObjects( )
 	ObjField *posEl = makePosEl();
 	tokenObj->insertField( posEl->name, posEl );
 
+	ObjField *lineEl = makeLineEl();
+	tokenObj->insertField( posEl->name, lineEl );
 
 	/* Give all user terminals the token object type. */
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {

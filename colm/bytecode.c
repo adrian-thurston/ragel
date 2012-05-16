@@ -2852,6 +2852,19 @@ again:
 			treeDownref( prg, sp, tree );
 			break;
 		}
+		case IN_GET_TOKEN_LINE_R: {
+			debug( REALM_BYTECODE, "IN_GET_TOKEN_LINE_R\n" );
+
+			Tree *tree = (Tree*) vm_pop();
+			Tree *integer = 0;
+			if ( tree->tokdata->location ) {
+				integer = constructInteger( prg, tree->tokdata->location->line );
+				treeUpref( integer );
+			}
+			vm_push( integer );
+			treeDownref( prg, sp, tree );
+			break;
+		}
 		case IN_GET_MATCH_LENGTH_R: {
 			debug( REALM_BYTECODE, "IN_GET_MATCH_LENGTH_R\n" );
 
