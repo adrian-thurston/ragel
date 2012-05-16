@@ -1580,9 +1580,9 @@ void countNodes( Program *prg, int &count, ParseTree *parseTree, Kid *kid )
 		assert( ( parseTree->flags & AF_NAMED ) == ( kid->tree->flags & AF_NAMED ) );
 		assert( ( parseTree->flags & AF_ARTIFICIAL ) == ( kid->tree->flags & AF_ARTIFICIAL ) );
 
-		if ( !( kid->tree->flags & AF_NAMED ) && 
-				!( kid->tree->flags & AF_ARTIFICIAL ) && 
-				treeChild( prg, kid->tree )  != 0 )
+		if ( !( parseTree->flags & AF_NAMED ) && 
+				!( parseTree->flags & AF_ARTIFICIAL ) && 
+				treeChild( prg, kid->tree ) != 0 )
 		{
 			countNodes( prg, count, parseTree->child, treeChild( prg, kid->tree ) );
 		}
@@ -1600,15 +1600,15 @@ void fillNodes( Program *prg, int &nextAvail, Bindings *bindings, long &bindId,
 		assert( ( parseTree->flags & AF_ARTIFICIAL ) == ( kid->tree->flags & AF_ARTIFICIAL ) );
 
 		Kid *child = 
-			!( kid->tree->flags & AF_NAMED ) && 
-			!( kid->tree->flags & AF_ARTIFICIAL ) && 
+			!( parseTree->flags & AF_NAMED ) && 
+			!( parseTree->flags & AF_ARTIFICIAL ) && 
 			treeChild( prg, kid->tree ) != 0 
 			?
 			treeChild( prg, kid->tree ) : 0;
 
 		ParseTree *ptChild =
-			!( kid->tree->flags & AF_NAMED ) && 
-			!( kid->tree->flags & AF_ARTIFICIAL ) && 
+			!( parseTree->flags & AF_NAMED ) && 
+			!( parseTree->flags & AF_ARTIFICIAL ) && 
 			treeChild( prg, kid->tree ) != 0 
 			?
 			parseTree->child : 0;
@@ -1654,9 +1654,7 @@ void fillNodes( Program *prg, int &nextAvail, Bindings *bindings, long &bindId,
 		//	node.data = stringData( attr->tokdata );
 		//}
 
-		node.stop = kid->tree->flags & AF_TERM_DUP;
-
-		assert( ( parseTree->flags & AF_TERM_DUP ) == ( kid->tree->flags & AF_TERM_DUP ) );
+		node.stop = parseTree->flags & AF_TERM_DUP;
 
 		node.child = child == 0 ? -1 : nextAvail++; 
 

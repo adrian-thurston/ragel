@@ -1758,11 +1758,9 @@ again:
 		{
 			pdaRun->lel->id = prg->rtd->lelInfo[pdaRun->lel->id].termDupId;
 			pdaRun->lel->flags |= AF_TERM_DUP;
-			if ( pdaRun->lel->shadow != 0 ) {
-				pdaRun->lel->shadow->tree->id = 
-						prg->rtd->lelInfo[pdaRun->lel->shadow->tree->id].termDupId;
-				pdaRun->lel->shadow->tree->flags |= AF_TERM_DUP;
-			}
+
+			pdaRun->lel->shadow->tree->id = 
+					prg->rtd->lelInfo[pdaRun->lel->shadow->tree->id].termDupId;
 		}
 
 		if ( action[1] == 0 )
