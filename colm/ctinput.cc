@@ -412,10 +412,7 @@ void sendNamedLangEl( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, I
 	ParseTree *parseTree = parseTreeAllocate( prg );
 	parseTree->id = input->tree->id;
 	parseTree->flags = input->tree->flags;
-	parseTree->flags &= ~(
-		AF_LEFT_IGNORE | AF_LEFT_IL_ATTACHED | 
-		AF_RIGHT_IGNORE | AF_RIGHT_IL_ATTACHED
-	);
+	parseTree->flags &= ~( AF_LEFT_IGNORE | AF_RIGHT_IGNORE );
 	parseTree->flags |= AF_PARSE_TREE;
 	parseTree->shadow = input;
 	

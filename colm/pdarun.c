@@ -586,7 +586,7 @@ static void attachIgnoreRight( Program *prg, Tree **sp, PdaRun *pdaRun )
 				attachRightIgnore( prg, alter, rightIgnore );
 			}
 
-			alter->flags |= AF_RIGHT_IL_ATTACHED;
+			pdaRun->stackTop->flags |= AF_RIGHT_IL_ATTACHED;
 		}
 		else {
 			pdaRun->stackTop->shadow->flags |= KF_SUPPRESS_LEFT;
@@ -594,14 +594,12 @@ static void attachIgnoreRight( Program *prg, Tree **sp, PdaRun *pdaRun )
 	}
 }
 
-static void attachIgnoreLeft( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTree *to )
+static void attachIgnoreLeft( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTree *parseTree )
 {
-	ParseTree *parseTree = to;
 	Kid *input = parseTree->shadow;
 
 	/* Reset. */
-	input->tree->flags &= ~AF_LEFT_IL_ATTACHED;
-	input->tree->flags &= ~AF_RIGHT_IL_ATTACHED;
+	assert( ! ( parseTree->flags & AF_LEFT_IL_ATTACHED ) );
 
 	ParseTree *accum = pdaRun->accumIgnore;
 	pdaRun->accumIgnore = 0;
@@ -659,7 +657,7 @@ static void attachIgnoreLeft( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTree
 			/* Attach the ignore list. */
 			attachLeftIgnore( prg, input->tree, leftIgnore );
 		}
-		input->tree->flags |= AF_LEFT_IL_ATTACHED;
+		parseTree->flags |= AF_LEFT_IL_ATTACHED;
 
 	}
 	else {
@@ -669,13 +667,14 @@ static void attachIgnoreLeft( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTree
 	}
 }
 
+/* Not currently used. Need to revive this. */
 void detachIgnoreRight( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, Kid *from )
 {
 	/* Right ignore are immediately discarded since they are copies of
 	 * left-ignores. */
 	Tree *rightIgnore = 0;
-	if ( pdaRun->tokenList != 0 && pdaRun->tokenList->kid->tree->flags & AF_RIGHT_IL_ATTACHED ) {
-		Kid *riKid = treeRightIgnoreKid( prg, pdaRun->tokenList->kid->tree );
+	if ( pdaRun->stackTop->flags & AF_RIGHT_IL_ATTACHED ) {
+		Kid *riKid = treeRightIgnoreKid( prg, pdaRun->stackTop->shadow->tree );
 
 		/* If the right ignore has a left ignore, then that was the original
 		 * right ignore. */
@@ -690,25 +689,24 @@ void detachIgnoreRight( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
 		else  {
 			rightIgnore = riKid->tree;
 			treeUpref( rightIgnore );
-			removeRightIgnore( prg, sp, pdaRun->tokenList->kid->tree );
-			pdaRun->tokenList->kid->tree->flags &= ~AF_RIGHT_IL_ATTACHED;
+			removeRightIgnore( prg, sp, pdaRun->stackTop->shadow->tree );
 		}
 
+		pdaRun->stackTop->flags &= ~AF_RIGHT_IL_ATTACHED;
 	}
 
 	treeDownref( prg, sp, rightIgnore );
 }
 
-static void detachIgnoreLeft( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, ParseTree *from )
+static void detachIgnoreLeft( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, ParseTree *parseTree )
 {
 	assert( pdaRun->accumIgnore == 0 );
 
-	ParseTree *parseTree = from;
 	Kid *input = parseTree->shadow;
 
 	/* Detach left. */
 	Tree *leftIgnore = 0;
-	if ( input->tree->flags & AF_LEFT_IL_ATTACHED ) {
+	if ( parseTree->flags & AF_LEFT_IL_ATTACHED ) {
 		Kid *liKid = treeLeftIgnoreKid( prg, input->tree );
 
 		/* If the left ignore has a right ignore, then that was the original
@@ -725,7 +723,7 @@ static void detachIgnoreLeft( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *f
 			leftIgnore = liKid->tree;
 			treeUpref( leftIgnore );
 			removeLeftIgnore( prg, sp, input->tree );
-			input->tree->flags &= ~AF_LEFT_IL_ATTACHED;
+			parseTree->flags &= ~AF_LEFT_IL_ATTACHED;
 		}
 	}
 
@@ -855,10 +853,7 @@ static void sendToken( Program *prg, Tree **sp, InputStream *inputStream, FsmRun
 	ParseTree *parseTree = parseTreeAllocate( prg );
 	parseTree->id = input->tree->id;
 	parseTree->flags = input->tree->flags;
-	parseTree->flags &= ~(
-		AF_LEFT_IGNORE | AF_LEFT_IL_ATTACHED | 
-		AF_RIGHT_IGNORE | AF_RIGHT_IL_ATTACHED
-	);
+	parseTree->flags &= ~( AF_LEFT_IGNORE | AF_RIGHT_IGNORE );
 	parseTree->flags |= AF_PARSE_TREE;
 	parseTree->shadow = input;
 		
@@ -879,9 +874,7 @@ static void sendTree( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, I
 	ParseTree *parseTree = parseTreeAllocate( prg );
 	parseTree->id = input->tree->id;
 	parseTree->flags = input->tree->flags;
-	parseTree->flags &= ~(
-		AF_LEFT_IGNORE | AF_LEFT_IL_ATTACHED | AF_RIGHT_IGNORE | AF_RIGHT_IL_ATTACHED
-	);
+	parseTree->flags &= ~( AF_LEFT_IGNORE | AF_RIGHT_IGNORE );
 	parseTree->flags |= AF_PARSE_TREE;
 	parseTree->shadow = input;
 	
@@ -921,10 +914,7 @@ static void sendEof( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *
 	ParseTree *parseTree = parseTreeAllocate( prg );
 	parseTree->id = input->tree->id;
 	parseTree->flags = input->tree->flags;
-	parseTree->flags &= ~(
-		AF_LEFT_IGNORE | AF_LEFT_IL_ATTACHED | 
-		AF_RIGHT_IGNORE | AF_RIGHT_IL_ATTACHED
-	);
+	parseTree->flags &= ~( AF_LEFT_IGNORE | AF_RIGHT_IGNORE );
 	parseTree->flags |= AF_PARSE_TREE;
 	parseTree->shadow = input;
 	
