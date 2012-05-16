@@ -228,7 +228,7 @@ static void sendBackIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsm
 	Kid *ignoreKidList = _ignore->shadow;
 	Kid *ignore = ignoreKidList;
 
-	#ifdef COLM_LOG
+	#ifdef DEBUG
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
 	debug( REALM_PARSE, "sending back: %s%s\n",
 		lelInfo[ignore->tree->id].name, 
@@ -341,19 +341,19 @@ void resetToken( FsmRun *fsmRun )
 static void sendBack( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, 
 		InputStream *inputStream, ParseTree *input )
 {
-	#ifdef COLM_LOG
+	#ifdef DEBUG
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
 	debug( REALM_PARSE, "sending back: %s  text: %.*s%s\n", 
-			lelInfo[input->tree->id].name, 
-			stringLength( input->tree->tokdata ), 
-			stringData( input->tree->tokdata ), 
-			input->tree->flags & AF_ARTIFICIAL ? " (artificial)" : "" );
+			lelInfo[input->shadow->tree->id].name, 
+			stringLength( input->shadow->tree->tokdata ), 
+			stringData( input->shadow->tree->tokdata ), 
+			input->shadow->tree->flags & AF_ARTIFICIAL ? " (artificial)" : "" );
 	#endif
 
 	if ( input->shadow->tree->flags & AF_NAMED ) {
-		/* Send back anything in the buffer that has not been parsed. */
-//		if ( fsmRun->p == fsmRun->runBuf->data )
-//			sendBackRunBufHead( fsmRun, inputStream );
+		///* Send back anything in the buffer that has not been parsed. */
+		//if ( fsmRun->p == fsmRun->runBuf->data )
+		//	sendBackRunBufHead( fsmRun, inputStream );
 
 		/* Send the named lang el back first, then send back any leading
 		 * whitespace. */
@@ -1500,9 +1500,9 @@ long stackTopTarget( Program *prg, PdaRun *pdaRun )
  * 		-clears all alg structures
  */
 
-int beenCommitted( ParseTree *kid )
+int beenCommitted( ParseTree *parseTree )
 {
-	return kid->flags & AF_COMMITTED;
+	return parseTree->flags & AF_COMMITTED;
 }
 
 Code *backupOverRcode( Code *rcode )
@@ -1538,29 +1538,23 @@ head:
 		 * the count of the reductions and do it when the count drops to zero. */
 		if ( tree->causeReduce > 0 ) {
 			/* The top reduce block does not correspond to this alg. */
-//			#ifdef COLM_LOG_PARSE
-//			if ( colm_log_parse ) {
-//				cerr << "commit: causeReduce found, delaying backup: " << 
-//						(long)tree->causeReduce << endl;
-//			}
-//			#endif
+			debug( REALM_PARSE, "commit: causeReduce found, delaying backup: %ld\n",
+						(long)tree->causeReduce );
 			*causeReduce = tree->causeReduce;
 		}
 		else {
 			*rcode = backupOverRcode( *rcode );
 
-//			if ( **rcode == IN_RESTORE_LHS ) {
-//				#if COLM_LOG_PARSE
-//				cerr << "commit: has restore_lhs" << endl;
-//				#endif
-//				read_tree_p( restore, (*rcode+1) );
-//			}
+			//if ( **rcode == IN_RESTORE_LHS ) {
+			//	debug( REALM_PARSE, "commit: has restore_lhs\n" );
+			//	read_tree_p( restore, (*rcode+1) );
+			//}
 		}
 	}
 
-//	FIXME: what was this about?
-//	if ( restore != 0 )
-//		tree = restore;
+	//FIXME: what was this about?
+	//if ( restore != 0 )
+	//	tree = restore;
 
 	/* All the parse algorithm data except for the RCODE flag is in the
 	 * original. That is why we restore first, then we can clear the retry
@@ -1636,22 +1630,16 @@ backup:
 
 void commitFull( Program *prg, Tree **sp, PdaRun *pdaRun, long causeReduce )
 {
-//	return;
-
-//	#ifdef COLM_LOG_PARSE
-//	if ( colm_log_parse ) {
-//		cerr << "running full commit" << endl;
-//	}
-//	#endif
+	debug( REALM_PARSE, "running full commit" );
 	
-	ParseTree *kid = pdaRun->stackTop;
+	ParseTree *parseTree = pdaRun->stackTop;
 	Code *rcode = pdaRun->reverseCode.data + pdaRun->reverseCode.tabLen;
 
 	/* The top level of the stack is linked right to left. This is the
 	 * traversal order we need for committing. */
-	while ( kid != 0 && !beenCommitted( kid ) ) {
-		commitKid( prg, pdaRun, sp, kid, &rcode, &causeReduce );
-		kid = kid->next;
+	while ( parseTree != 0 && !beenCommitted( parseTree ) ) {
+		commitKid( prg, pdaRun, sp, parseTree, &rcode, &causeReduce );
+		parseTree = parseTree->next;
 	}
 
 	/* We cannot always clear all the rcode here. We may need to backup over
