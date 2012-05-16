@@ -428,7 +428,7 @@ void undoStreamPush( struct ColmProgram *prg, Tree **sp, FsmRun *fsmRun, InputSt
 void undoStreamAppend( struct ColmProgram *prg, Tree **sp, FsmRun *fsmRun, InputStream *inputStream, struct ColmTree *tree, long length );
 void unbind( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, Tree *tree );
 Kid *makeTokenWithData( struct ColmProgram *prg, PdaRun *pdaRun, FsmRun *fsmRun, 
-		InputStream *inputStream, int id, Head *tokdata, int namedLangEl, int bindId );
+		InputStream *inputStream, int id, Head *tokdata );
 void makeTokenPushBinding( PdaRun *pdaRun, int bindId, Tree *tree );
 void executeGenerationAction( struct ColmProgram *prg, Tree **sp, FsmRun *fsmRun, PdaRun *pdaRun, 
 		InputStream *inputStream, int frameId, Code *code, long id, Head *tokdata );

@@ -428,8 +428,8 @@ void ignoreTree( Program *prg, PdaRun *pdaRun, Tree *tree )
 	setRegion( pdaRun, emptyIgnore, pdaRun->accumIgnore );
 }
 
-Kid *makeTokenWithData( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, int id,
-		Head *tokdata, int namedLangEl, int bindId )
+Kid *makeTokenWithData( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, 
+		InputStream *inputStream, int id, Head *tokdata )
 {
 	/* Make the token object. */
 	long objectLength = prg->rtd->lelInfo[id].objectLength;
@@ -440,9 +440,6 @@ Kid *makeTokenWithData( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, InputStrea
 	input->tree = treeAllocate( prg );
 
 	debug( REALM_PARSE, "made token %p\n", input->tree );
-
-	if ( namedLangEl )
-		input->tree->flags |= AF_NAMED;
 
 	input->tree->refs = 1;
 	input->tree->id = id;
@@ -464,8 +461,6 @@ Kid *makeTokenWithData( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, InputStrea
 			setAttr( input->tree, ca->offset, string );
 		}
 	}
-
-	makeTokenPushBinding( pdaRun, bindId, input->tree );
 
 	return input;
 }
@@ -837,7 +832,7 @@ static void sendToken( Program *prg, Tree **sp, InputStream *inputStream, FsmRun
 
 	updatePosition( inputStream, fsmRun->tokstart, tokdata->length );
 
-	Kid *input = makeTokenWithData( prg, pdaRun, fsmRun, inputStream, id, tokdata, false, 0 );
+	Kid *input = makeTokenWithData( prg, pdaRun, fsmRun, inputStream, id, tokdata );
 
 	incrementSteps( pdaRun );
 
