@@ -2497,7 +2497,7 @@ void ParseData::initTokenObjects( )
 	tokenObj->insertField( posEl->name, posEl );
 
 	ObjField *lineEl = makeLineEl();
-	tokenObj->insertField( posEl->name, lineEl );
+	tokenObj->insertField( lineEl->name, lineEl );
 
 	/* Give all user terminals the token object type. */
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
@@ -2512,6 +2512,10 @@ void ParseData::initTokenObjects( )
 				/* Create the "pos" field. */
 				ObjField *posEl = makePosEl();
 				lel->objectDef->insertField( posEl->name, posEl );
+
+				/* Create the "line" field. */
+				ObjField *lineEl = makeLineEl();
+				lel->objectDef->insertField( lineEl->name, lineEl );
 			}
 		}
 	}
