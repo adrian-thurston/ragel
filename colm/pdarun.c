@@ -341,14 +341,7 @@ void resetToken( FsmRun *fsmRun )
 static void sendBack( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, 
 		InputStream *inputStream, ParseTree *input )
 {
-	#ifdef DEBUG
-	LangElInfo *lelInfo = prg->rtd->lelInfo;
-	debug( REALM_PARSE, "sending back: %s  text: %.*s%s\n", 
-			lelInfo[input->shadow->tree->id].name, 
-			stringLength( input->shadow->tree->tokdata ), 
-			stringData( input->shadow->tree->tokdata ), 
-			input->shadow->tree->flags & AF_ARTIFICIAL ? " (artificial)" : "" );
-	#endif
+	debug( REALM_PARSE, "sending back: %s\n", prg->rtd->lelInfo[input->id].name );
 
 	if ( input->shadow->tree->flags & AF_NAMED ) {
 		///* Send back anything in the buffer that has not been parsed. */
