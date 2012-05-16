@@ -1561,7 +1561,7 @@ void ParseData::makeRuntimeData()
 }
 
 /* Borrow alg->state for mapsTo. */
-void countNodes( Program *prg, int &count, Kid *kid )
+void countNodes( Program *prg, int &count, ParseTree *parseTree, Kid *kid )
 {
 	if ( kid != 0 ) {
 		count += 1;
@@ -1577,21 +1577,27 @@ void countNodes( Program *prg, int &count, Kid *kid )
 		
 		//count += prg->rtd->lelInfo[kid->tree->id].numCaptureAttr;
 
+		assert( ( parseTree->flags & AF_NAMED ) == ( kid->tree->flags & AF_NAMED ) );
+		assert( ( parseTree->flags & AF_ARTIFICIAL ) == ( kid->tree->flags & AF_ARTIFICIAL ) );
+
 		if ( !( kid->tree->flags & AF_NAMED ) && 
 				!( kid->tree->flags & AF_ARTIFICIAL ) && 
 				treeChild( prg, kid->tree )  != 0 )
 		{
-			countNodes( prg, count, treeChild( prg, kid->tree ) );
+			countNodes( prg, count, parseTree->child, treeChild( prg, kid->tree ) );
 		}
-		countNodes( prg, count, kid->next );
+		countNodes( prg, count, parseTree->next, kid->next );
 	}
 }
 
 void fillNodes( Program *prg, int &nextAvail, Bindings *bindings, long &bindId, 
-		PatReplNode *nodes, Kid *kid, int ind )
+		PatReplNode *nodes, ParseTree *parseTree, Kid *kid, int ind )
 {
 	if ( kid != 0 ) {
 		PatReplNode &node = nodes[ind];
+
+		assert( ( parseTree->flags & AF_NAMED ) == ( kid->tree->flags & AF_NAMED ) );
+		assert( ( parseTree->flags & AF_ARTIFICIAL ) == ( kid->tree->flags & AF_ARTIFICIAL ) );
 
 		Kid *child = 
 			!( kid->tree->flags & AF_NAMED ) && 
@@ -1599,6 +1605,13 @@ void fillNodes( Program *prg, int &nextAvail, Bindings *bindings, long &bindId,
 			treeChild( prg, kid->tree ) != 0 
 			?
 			treeChild( prg, kid->tree ) : 0;
+
+		ParseTree *ptChild =
+			!( kid->tree->flags & AF_NAMED ) && 
+			!( kid->tree->flags & AF_ARTIFICIAL ) && 
+			treeChild( prg, kid->tree ) != 0 
+			?
+			parseTree->child : 0;
 
 		/* Set up the fields. */
 		node.id = kid->tree->id;
@@ -1643,10 +1656,12 @@ void fillNodes( Program *prg, int &nextAvail, Bindings *bindings, long &bindId,
 
 		node.stop = kid->tree->flags & AF_TERM_DUP;
 
+		assert( ( parseTree->flags & AF_TERM_DUP ) == ( kid->tree->flags & AF_TERM_DUP ) );
+
 		node.child = child == 0 ? -1 : nextAvail++; 
 
 		/* Recurse. */
-		fillNodes( prg, nextAvail, bindings, bindId, nodes, child, node.child );
+		fillNodes( prg, nextAvail, bindings, bindId, nodes, ptChild, child, node.child );
 
 		/* Since the parser is bottom up the bindings are in a bottom up
 		 * traversal order. Check after recursing. */
@@ -1662,7 +1677,7 @@ void fillNodes( Program *prg, int &nextAvail, Bindings *bindings, long &bindId,
 		node.next = kid->next == 0 ? -1 : nextAvail++; 
 
 		/* Move to the next child. */
-		fillNodes( prg, nextAvail, bindings, bindId, nodes, kid->next, node.next );
+		fillNodes( prg, nextAvail, bindings, bindId, nodes, parseTree->next, kid->next, node.next );
 	}
 }
 
@@ -1674,11 +1689,17 @@ void ParseData::fillInPatterns( Program *prg )
 
 	/* Count is referenced and computed by mapNode. */
 	int count = 0;
-	for ( PatternList::Iter pat = patternList; pat.lte(); pat++ )
-		countNodes( prg, count, pat->pdaRun->stackTop->next->shadow );
+	for ( PatternList::Iter pat = patternList; pat.lte(); pat++ ) {
+		countNodes( prg, count, 
+				pat->pdaRun->stackTop->next,
+				pat->pdaRun->stackTop->next->shadow );
+	}
 
-	for ( ReplList::Iter repl = replList; repl.lte(); repl++ )
-		countNodes( prg, count, repl->pdaRun->stackTop->next->shadow );
+	for ( ReplList::Iter repl = replList; repl.lte(); repl++ ) {
+		countNodes( prg, count, 
+				repl->pdaRun->stackTop->next,
+				repl->pdaRun->stackTop->next->shadow );
+	}
 	
 	runtimeData->patReplNodes = new PatReplNode[count];
 	runtimeData->numPatternNodes = count;
@@ -1696,7 +1717,10 @@ void ParseData::fillInPatterns( Program *prg )
 		/* Init the bind */
 		long bindId = 1;
 		fillNodes( prg, nextAvail, pat->pdaRun->bindings, bindId,
-			runtimeData->patReplNodes, pat->pdaRun->stackTop->next->shadow, ind );
+				runtimeData->patReplNodes, 
+				pat->pdaRun->stackTop->next, 
+				pat->pdaRun->stackTop->next->shadow, 
+				ind );
 	}
 
 	for ( ReplList::Iter repl = replList; repl.lte(); repl++ ) {
@@ -1709,7 +1733,10 @@ void ParseData::fillInPatterns( Program *prg )
 
 		long bindId = 1;
 		fillNodes( prg, nextAvail, repl->pdaRun->bindings, bindId,
-				runtimeData->patReplNodes, repl->pdaRun->stackTop->next->shadow, ind );
+				runtimeData->patReplNodes, 
+				repl->pdaRun->stackTop->next,
+				repl->pdaRun->stackTop->next->shadow, 
+				ind );
 	}
 
 	assert( nextAvail == count );
