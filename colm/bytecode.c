@@ -217,12 +217,7 @@ Word streamAppend( Program *prg, Tree **sp, Tree *input, InputStream *inputStrea
 	}
 	else {
 		input = prepParseTree( prg, sp, input );
-
-		if ( input->id >= prg->rtd->firstNonTermId )
-			input->id = prg->rtd->lelInfo[input->id].termDupId;
-
 		input->flags |= AF_ARTIFICIAL;
-
 		treeUpref( input );
 		appendTree( inputStream, input );
 	}
@@ -385,10 +380,6 @@ long streamPush( Program *prg, Tree **sp, FsmRun *fsmRun, InputStream *in, Tree 
 	}
 	else {
 		tree = prepParseTree( prg, sp, tree );
-
-		if ( tree->id >= prg->rtd->firstNonTermId )
-			tree->id = prg->rtd->lelInfo[tree->id].termDupId;
-
 		tree->flags |= AF_ARTIFICIAL;
 		treeUpref( tree );
 		streamPushTree( fsmRun, in, tree, ignore );

@@ -526,9 +526,7 @@ static void reportParseError( Program *prg, Tree **sp, PdaRun *pdaRun )
 
 static void attachIgnoreRight( Program *prg, Tree **sp, PdaRun *pdaRun )
 {
-	if ( pdaRun->stackTop->id < prg->rtd->firstNonTermId || 
-			(pdaRun->stackTop->flags & AF_TERM_DUP) )
-	{
+	if ( pdaRun->stackTop->id < prg->rtd->firstNonTermId ) {
 		/* OK, do it */
 		Tree *alter = pdaRun->stackTop->shadow->tree;
 
@@ -1260,6 +1258,14 @@ case PcrGeneration:
 		if ( pdaRun->parseInput != 0 )
 			transferReverseCode( pdaRun, pdaRun->parseInput );
 
+		if ( pdaRun->parseInput != 0 ) {
+			/* If it's a nonterminal with a termdup then flip the parse tree to the terminal. */
+			if ( pdaRun->parseInput->id >= prg->rtd->firstNonTermId ) {
+				pdaRun->parseInput->id = prg->rtd->lelInfo[pdaRun->parseInput->id].termDupId;
+				pdaRun->parseInput->flags |= AF_TERM_DUP;
+			}
+		}
+
 		long pcr = parseToken( prg, sp, pdaRun, fsmRun, inputStream, PcrStart );
 		
 		while ( pcr != PcrDone ) {
@@ -1745,17 +1751,6 @@ again:
 			pdaRun->tokenList = ref;
 		}
 
-		/* If shifting a termDup then change it to the nonterm. */
-		if ( pdaRun->lel->id < prg->rtd->firstNonTermId &&
-				prg->rtd->lelInfo[pdaRun->lel->id].termDupId > 0 )
-		{
-			pdaRun->lel->id = prg->rtd->lelInfo[pdaRun->lel->id].termDupId;
-			pdaRun->lel->flags |= AF_TERM_DUP;
-
-			pdaRun->lel->shadow->tree->id = 
-					prg->rtd->lelInfo[pdaRun->lel->shadow->tree->id].termDupId;
-		}
-
 		if ( action[1] == 0 )
 			pdaRun->lel->retryLower = 0;
 		else {
@@ -1981,9 +1976,7 @@ case PcrReverse:
 		else if ( pdaRun->parseInput != 0 ) {
 			/* Either we are dealing with a terminal that was
 			 * shifted or a nonterminal that was reduced. */
-			if ( pdaRun->parseInput->id < prg->rtd->firstNonTermId || 
-					(pdaRun->parseInput->flags & AF_TERM_DUP) )
-			{
+			if ( pdaRun->parseInput->id < prg->rtd->firstNonTermId ) {
 				assert( pdaRun->parseInput->retryUpper == 0 );
 
 				if ( pdaRun->parseInput->retryLower != 0 ) {
@@ -2006,8 +1999,7 @@ case PcrReverse:
 
 					/* Either we are dealing with a terminal that was
 					 * shifted or a nonterminal that was reduced. */
-					assert( !(pdaRun->stackTop->id < prg->rtd->firstNonTermId || 
-							(pdaRun->stackTop->flags & AF_TERM_DUP) ) );
+					assert( !(pdaRun->stackTop->id < prg->rtd->firstNonTermId) );
 
 					debug( REALM_PARSE, "backing up over non-terminal: %s\n",
 							prg->rtd->lelInfo[pdaRun->stackTop->id].name );
@@ -2129,24 +2121,12 @@ case PcrReverse:
 
 			/* Either we are dealing with a terminal that was
 			 * shifted or a nonterminal that was reduced. */
-			if ( pdaRun->stackTop->id < prg->rtd->firstNonTermId || 
-					(pdaRun->stackTop->flags & AF_TERM_DUP) )
-			{
+			if ( pdaRun->stackTop->id < prg->rtd->firstNonTermId ) {
 				debug( REALM_PARSE, "backing up over effective terminal: %s\n",
 							prg->rtd->lelInfo[pdaRun->stackTop->id].name );
 
 				/* Pop the item from the stack. */
 				pdaRun->stackTop = pdaRun->stackTop->next;
-
-				/* Undo the translation from termDup. */
-				if ( pdaRun->undoLel->flags & AF_TERM_DUP ) {
-					pdaRun->undoLel->id = prg->rtd->lelInfo[pdaRun->undoLel->id].termDupId;
-					pdaRun->undoLel->flags &= ~AF_TERM_DUP;
-
-					pdaRun->undoLel->shadow->tree->id = 
-							prg->rtd->lelInfo[pdaRun->undoLel->shadow->tree->id].termDupId;
-					pdaRun->undoLel->shadow->tree->flags &= ~AF_TERM_DUP;
-				}
 
 				/* Queue it as next parseInput item. */
 				pdaRun->undoLel->next = pdaRun->parseInput;

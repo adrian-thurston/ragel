@@ -391,8 +391,6 @@ void sendNamedLangEl( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, I
 	long length;
 
 	LangEl *klangEl = consumeLangEl( inputStream, &bindId, &data, &length );
-	if ( klangEl->termDup != 0 )
-		klangEl = klangEl->termDup;
 	
 	#ifdef COLM_LOG_PARSE
 	if ( colm_log_parse ) {
