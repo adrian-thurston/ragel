@@ -1577,9 +1577,6 @@ void countNodes( Program *prg, int &count, ParseTree *parseTree, Kid *kid )
 		
 		//count += prg->rtd->lelInfo[kid->tree->id].numCaptureAttr;
 
-		assert( ( parseTree->flags & AF_NAMED ) == ( kid->tree->flags & AF_NAMED ) );
-		assert( ( parseTree->flags & AF_ARTIFICIAL ) == ( kid->tree->flags & AF_ARTIFICIAL ) );
-
 		if ( !( parseTree->flags & AF_NAMED ) && 
 				!( parseTree->flags & AF_ARTIFICIAL ) && 
 				treeChild( prg, kid->tree ) != 0 )
@@ -1595,9 +1592,6 @@ void fillNodes( Program *prg, int &nextAvail, Bindings *bindings, long &bindId,
 {
 	if ( kid != 0 ) {
 		PatReplNode &node = nodes[ind];
-
-		assert( ( parseTree->flags & AF_NAMED ) == ( kid->tree->flags & AF_NAMED ) );
-		assert( ( parseTree->flags & AF_ARTIFICIAL ) == ( kid->tree->flags & AF_ARTIFICIAL ) );
 
 		Kid *child = 
 			!( parseTree->flags & AF_NAMED ) && 

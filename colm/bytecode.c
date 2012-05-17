@@ -217,7 +217,6 @@ Word streamAppend( Program *prg, Tree **sp, Tree *input, InputStream *inputStrea
 	}
 	else {
 		input = prepParseTree( prg, sp, input );
-		input->flags |= AF_ARTIFICIAL;
 		treeUpref( input );
 		appendTree( inputStream, input );
 	}
@@ -380,7 +379,6 @@ long streamPush( Program *prg, Tree **sp, FsmRun *fsmRun, InputStream *in, Tree 
 	}
 	else {
 		tree = prepParseTree( prg, sp, tree );
-		tree->flags |= AF_ARTIFICIAL;
 		treeUpref( tree );
 		streamPushTree( fsmRun, in, tree, ignore );
 		return -1;

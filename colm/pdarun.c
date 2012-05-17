@@ -232,11 +232,11 @@ static void sendBackIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsm
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
 	debug( REALM_PARSE, "sending back: %s%s\n",
 		lelInfo[ignore->tree->id].name, 
-		ignore->tree->flags & AF_ARTIFICIAL ? " (artificial)" : "" );
+		_ignore->flags & AF_ARTIFICIAL ? " (artificial)" : "" );
 	#endif
 
 	Head *head = ignore->tree->tokdata;
-	int artificial = ignore->tree->flags & AF_ARTIFICIAL;
+	int artificial = _ignore->flags & AF_ARTIFICIAL;
 
 	if ( head != 0 && !artificial )
 		sendBackText( fsmRun, inputStream, stringData( head ), head->length );
@@ -343,7 +343,7 @@ static void sendBack( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
 {
 	debug( REALM_PARSE, "sending back: %s\n", prg->rtd->lelInfo[input->id].name );
 
-	if ( input->shadow->tree->flags & AF_NAMED ) {
+	if ( input->flags & AF_NAMED ) {
 		///* Send back anything in the buffer that has not been parsed. */
 		//if ( fsmRun->p == fsmRun->runBuf->data )
 		//	sendBackRunBufHead( fsmRun, inputStream );
@@ -356,7 +356,7 @@ static void sendBack( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
 	decrementSteps( pdaRun );
 
 	/* Artifical were not parsed, instead sent in as items. */
-	if ( input->shadow->tree->flags & AF_ARTIFICIAL ) {
+	if ( input->flags & AF_ARTIFICIAL ) {
 		/* Check for reverse code. */
 		if ( input->flags & AF_HAS_RCODE ) {
 			debug( REALM_PARSE, "tree has rcode, setting on deck\n" );
@@ -417,6 +417,26 @@ void ignoreTree( Program *prg, PdaRun *pdaRun, Tree *tree )
 
 	ParseTree *parseTree = parseTreeAllocate( prg );
 	parseTree->flags |= AF_PARSE_TREE;
+	parseTree->shadow = kidAllocate( prg );
+	parseTree->shadow->tree = tree;
+
+	parseTree->next = pdaRun->accumIgnore;
+	pdaRun->accumIgnore = parseTree;
+
+	transferReverseCode( pdaRun, parseTree );
+
+	setRegion( pdaRun, emptyIgnore, pdaRun->accumIgnore );
+}
+
+void ignoreTree2( Program *prg, PdaRun *pdaRun, Tree *tree )
+{
+	int emptyIgnore = pdaRun->accumIgnore == 0;
+
+	incrementSteps( pdaRun );
+
+	ParseTree *parseTree = parseTreeAllocate( prg );
+	parseTree->flags |= AF_PARSE_TREE;
+	parseTree->flags |= AF_ARTIFICIAL;
 	parseTree->shadow = kidAllocate( prg );
 	parseTree->shadow->tree = tree;
 
@@ -862,6 +882,7 @@ static void sendTree( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, I
 	parseTree->flags = input->tree->flags;
 	parseTree->flags &= ~( AF_LEFT_IGNORE | AF_RIGHT_IGNORE );
 	parseTree->flags |= AF_PARSE_TREE;
+	parseTree->flags |= AF_ARTIFICIAL;
 	parseTree->shadow = input;
 	
 	pdaRun->parseInput = parseTree;
@@ -870,7 +891,7 @@ static void sendTree( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, I
 static void sendIgnoreTree( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
 {
 	Tree *tree = consumeTree( inputStream );
-	ignoreTree( prg, pdaRun, tree );
+	ignoreTree2( prg, pdaRun, tree );
 }
 
 

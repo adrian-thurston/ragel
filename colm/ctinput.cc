@@ -405,8 +405,6 @@ void sendNamedLangEl( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, I
 
 	Kid *input = makeTokenWithData( prg, pdaRun, fsmRun, inputStream, klangEl->id, tokdata );
 
-	input->tree->flags |= AF_NAMED;
-
 	if ( bindId > 0 )
 		makeTokenPushBinding( pdaRun, bindId, input->tree );
 
@@ -417,6 +415,7 @@ void sendNamedLangEl( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, I
 	parseTree->flags = input->tree->flags;
 	parseTree->flags &= ~( AF_LEFT_IGNORE | AF_RIGHT_IGNORE );
 	parseTree->flags |= AF_PARSE_TREE;
+	parseTree->flags |= AF_NAMED;
 	parseTree->shadow = input;
 	
 	pdaRun->parseInput = parseTree;
