@@ -353,10 +353,6 @@ typedef unsigned char uchar;
 /* There is reverse code associated with this tree node. */
 #define AF_HAS_RCODE     0x0010
 
-/* Tree was produced by a parse routine. This means the data fields for
- * managing parsing fields will be active. */
-#define AF_PARSED        0x0020
-
 /* Tree was allocated as a ParseTree. */
 #define AF_PARSE_TREE    0x0040
 

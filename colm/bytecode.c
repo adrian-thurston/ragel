@@ -288,10 +288,6 @@ case PcrReverse:
 	Tree *tree = getParsedRoot( parser->pdaRun, parser->pdaRun->stopTarget > 0 );
 	treeUpref( tree );
 
-	/* Indicate that this tree came out of a parser. */
-	if ( tree != 0 )
-		tree->flags |= AF_PARSED;
-
 	*result = tree;
 
 case PcrDone:

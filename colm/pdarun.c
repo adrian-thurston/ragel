@@ -1581,17 +1581,19 @@ head:
 		}
 	}
 
-	/* Reset retries. */
-	if ( tree->flags & AF_PARSED ) {
-		if ( tree->retryLower > 0 ) {
-			pdaRun->numRetry -= 1;
-			tree->retryLower = 0;
-		}
-		if ( tree->retryUpper > 0 ) {
-			pdaRun->numRetry -= 1;
-			tree->retryUpper = 0;
-		}
-	}
+	///* FIXME: why was this here?
+	// * Reset retries. */
+	//if ( tree->flags & AF_PARSED ) {
+	//	if ( tree->retryLower > 0 ) {
+	//		pdaRun->numRetry -= 1;
+	//		tree->retryLower = 0;
+	//	}
+	//	if ( tree->retryUpper > 0 ) {
+	//		pdaRun->numRetry -= 1;
+	//		tree->retryUpper = 0;
+	//	}
+	//}
+
 	tree->flags |= AF_COMMITTED;
 
 	/* Do not recures on trees that are terminal dups. */
