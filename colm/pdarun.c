@@ -856,8 +856,6 @@ static void sendToken( Program *prg, Tree **sp, InputStream *inputStream, FsmRun
 
 	ParseTree *parseTree = parseTreeAllocate( prg );
 	parseTree->id = input->tree->id;
-	parseTree->flags = input->tree->flags;
-	parseTree->flags &= ~( AF_LEFT_IGNORE | AF_RIGHT_IGNORE );
 	parseTree->shadow = input;
 		
 	pdaRun->parseInput = parseTree;
@@ -876,8 +874,6 @@ static void sendTree( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, I
 
 	ParseTree *parseTree = parseTreeAllocate( prg );
 	parseTree->id = input->tree->id;
-	parseTree->flags = input->tree->flags;
-	parseTree->flags &= ~( AF_LEFT_IGNORE | AF_RIGHT_IGNORE );
 	parseTree->flags |= PF_ARTIFICIAL;
 	parseTree->shadow = input;
 	
@@ -916,8 +912,6 @@ static void sendEof( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *
 
 	ParseTree *parseTree = parseTreeAllocate( prg );
 	parseTree->id = input->tree->id;
-	parseTree->flags = input->tree->flags;
-	parseTree->flags &= ~( AF_LEFT_IGNORE | AF_RIGHT_IGNORE );
 	parseTree->shadow = input;
 	
 	pdaRun->parseInput = parseTree;
