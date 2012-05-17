@@ -1577,8 +1577,8 @@ void countNodes( Program *prg, int &count, ParseTree *parseTree, Kid *kid )
 		
 		//count += prg->rtd->lelInfo[kid->tree->id].numCaptureAttr;
 
-		if ( !( parseTree->flags & AF_NAMED ) && 
-				!( parseTree->flags & AF_ARTIFICIAL ) && 
+		if ( !( parseTree->flags & PF_NAMED ) && 
+				!( parseTree->flags & PF_ARTIFICIAL ) && 
 				treeChild( prg, kid->tree ) != 0 )
 		{
 			countNodes( prg, count, parseTree->child, treeChild( prg, kid->tree ) );
@@ -1594,15 +1594,15 @@ void fillNodes( Program *prg, int &nextAvail, Bindings *bindings, long &bindId,
 		PatReplNode &node = nodes[ind];
 
 		Kid *child = 
-			!( parseTree->flags & AF_NAMED ) && 
-			!( parseTree->flags & AF_ARTIFICIAL ) && 
+			!( parseTree->flags & PF_NAMED ) && 
+			!( parseTree->flags & PF_ARTIFICIAL ) && 
 			treeChild( prg, kid->tree ) != 0 
 			?
 			treeChild( prg, kid->tree ) : 0;
 
 		ParseTree *ptChild =
-			!( parseTree->flags & AF_NAMED ) && 
-			!( parseTree->flags & AF_ARTIFICIAL ) && 
+			!( parseTree->flags & PF_NAMED ) && 
+			!( parseTree->flags & PF_ARTIFICIAL ) && 
 			treeChild( prg, kid->tree ) != 0 
 			?
 			parseTree->child : 0;
@@ -1648,7 +1648,7 @@ void fillNodes( Program *prg, int &nextAvail, Bindings *bindings, long &bindId,
 		//	node.data = stringData( attr->tokdata );
 		//}
 
-		node.stop = parseTree->flags & AF_TERM_DUP;
+		node.stop = parseTree->flags & PF_TERM_DUP;
 
 		node.child = child == 0 ? -1 : nextAvail++; 
 

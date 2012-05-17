@@ -232,11 +232,11 @@ static void sendBackIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsm
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
 	debug( REALM_PARSE, "sending back: %s%s\n",
 		lelInfo[ignore->tree->id].name, 
-		_ignore->flags & AF_ARTIFICIAL ? " (artificial)" : "" );
+		_ignore->flags & PF_ARTIFICIAL ? " (artificial)" : "" );
 	#endif
 
 	Head *head = ignore->tree->tokdata;
-	int artificial = _ignore->flags & AF_ARTIFICIAL;
+	int artificial = _ignore->flags & PF_ARTIFICIAL;
 
 	if ( head != 0 && !artificial )
 		sendBackText( fsmRun, inputStream, stringData( head ), head->length );
@@ -244,9 +244,9 @@ static void sendBackIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsm
 	decrementSteps( pdaRun );
 
 	/* Check for reverse code. */
-	if ( _ignore->flags & AF_HAS_RCODE ) {
+	if ( _ignore->flags & PF_HAS_RCODE ) {
 		pdaRun->onDeck = true;
-		_ignore->flags &= ~AF_HAS_RCODE;
+		_ignore->flags &= ~PF_HAS_RCODE;
 	}
 
 	if ( pdaRun->steps == pdaRun->targetSteps ) {
@@ -343,7 +343,7 @@ static void sendBack( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
 {
 	debug( REALM_PARSE, "sending back: %s\n", prg->rtd->lelInfo[input->id].name );
 
-	if ( input->flags & AF_NAMED ) {
+	if ( input->flags & PF_NAMED ) {
 		///* Send back anything in the buffer that has not been parsed. */
 		//if ( fsmRun->p == fsmRun->runBuf->data )
 		//	sendBackRunBufHead( fsmRun, inputStream );
@@ -356,12 +356,12 @@ static void sendBack( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
 	decrementSteps( pdaRun );
 
 	/* Artifical were not parsed, instead sent in as items. */
-	if ( input->flags & AF_ARTIFICIAL ) {
+	if ( input->flags & PF_ARTIFICIAL ) {
 		/* Check for reverse code. */
-		if ( input->flags & AF_HAS_RCODE ) {
+		if ( input->flags & PF_HAS_RCODE ) {
 			debug( REALM_PARSE, "tree has rcode, setting on deck\n" );
 			pdaRun->onDeck = true;
-			input->flags &= ~AF_HAS_RCODE;
+			input->flags &= ~PF_HAS_RCODE;
 		}
 
 		treeUpref( input->shadow->tree );
@@ -370,10 +370,10 @@ static void sendBack( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
 	}
 	else {
 		/* Check for reverse code. */
-		if ( input->flags & AF_HAS_RCODE ) {
+		if ( input->flags & PF_HAS_RCODE ) {
 			debug( REALM_PARSE, "tree has rcode, setting on deck\n" );
 			pdaRun->onDeck = true;
-			input->flags &= ~AF_HAS_RCODE;
+			input->flags &= ~PF_HAS_RCODE;
 		}
 
 		/* Push back the token data. */
@@ -434,7 +434,7 @@ void ignoreTree2( Program *prg, PdaRun *pdaRun, Tree *tree )
 	incrementSteps( pdaRun );
 
 	ParseTree *parseTree = parseTreeAllocate( prg );
-	parseTree->flags |= AF_ARTIFICIAL;
+	parseTree->flags |= PF_ARTIFICIAL;
 	parseTree->shadow = kidAllocate( prg );
 	parseTree->shadow->tree = tree;
 
@@ -590,7 +590,7 @@ static void attachIgnoreRight( Program *prg, Tree **sp, PdaRun *pdaRun )
 				attachRightIgnore( prg, alter, rightIgnore );
 			}
 
-			pdaRun->stackTop->flags |= AF_RIGHT_IL_ATTACHED;
+			pdaRun->stackTop->flags |= PF_RIGHT_IL_ATTACHED;
 		}
 		else {
 			pdaRun->stackTop->shadow->flags |= KF_SUPPRESS_LEFT;
@@ -603,7 +603,7 @@ static void attachIgnoreLeft( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTree
 	Kid *input = parseTree->shadow;
 
 	/* Reset. */
-	assert( ! ( parseTree->flags & AF_LEFT_IL_ATTACHED ) );
+	assert( ! ( parseTree->flags & PF_LEFT_IL_ATTACHED ) );
 
 	ParseTree *accum = pdaRun->accumIgnore;
 	pdaRun->accumIgnore = 0;
@@ -661,7 +661,7 @@ static void attachIgnoreLeft( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTree
 			/* Attach the ignore list. */
 			attachLeftIgnore( prg, input->tree, leftIgnore );
 		}
-		parseTree->flags |= AF_LEFT_IL_ATTACHED;
+		parseTree->flags |= PF_LEFT_IL_ATTACHED;
 
 	}
 	else {
@@ -677,7 +677,7 @@ void detachIgnoreRight( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
 	/* Right ignore are immediately discarded since they are copies of
 	 * left-ignores. */
 	Tree *rightIgnore = 0;
-	if ( pdaRun->stackTop->flags & AF_RIGHT_IL_ATTACHED ) {
+	if ( pdaRun->stackTop->flags & PF_RIGHT_IL_ATTACHED ) {
 		Kid *riKid = treeRightIgnoreKid( prg, pdaRun->stackTop->shadow->tree );
 
 		/* If the right ignore has a left ignore, then that was the original
@@ -696,7 +696,7 @@ void detachIgnoreRight( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
 			removeRightIgnore( prg, sp, pdaRun->stackTop->shadow->tree );
 		}
 
-		pdaRun->stackTop->flags &= ~AF_RIGHT_IL_ATTACHED;
+		pdaRun->stackTop->flags &= ~PF_RIGHT_IL_ATTACHED;
 	}
 
 	treeDownref( prg, sp, rightIgnore );
@@ -710,7 +710,7 @@ static void detachIgnoreLeft( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *f
 
 	/* Detach left. */
 	Tree *leftIgnore = 0;
-	if ( parseTree->flags & AF_LEFT_IL_ATTACHED ) {
+	if ( parseTree->flags & PF_LEFT_IL_ATTACHED ) {
 		Kid *liKid = treeLeftIgnoreKid( prg, input->tree );
 
 		/* If the left ignore has a right ignore, then that was the original
@@ -727,7 +727,7 @@ static void detachIgnoreLeft( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *f
 			leftIgnore = liKid->tree;
 			treeUpref( leftIgnore );
 			removeLeftIgnore( prg, sp, input->tree );
-			parseTree->flags &= ~AF_LEFT_IL_ATTACHED;
+			parseTree->flags &= ~PF_LEFT_IL_ATTACHED;
 		}
 	}
 
@@ -878,7 +878,7 @@ static void sendTree( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, I
 	parseTree->id = input->tree->id;
 	parseTree->flags = input->tree->flags;
 	parseTree->flags &= ~( AF_LEFT_IGNORE | AF_RIGHT_IGNORE );
-	parseTree->flags |= AF_ARTIFICIAL;
+	parseTree->flags |= PF_ARTIFICIAL;
 	parseTree->shadow = input;
 	
 	pdaRun->parseInput = parseTree;
@@ -1273,7 +1273,7 @@ case PcrGeneration:
 			/* If it's a nonterminal with a termdup then flip the parse tree to the terminal. */
 			if ( pdaRun->parseInput->id >= prg->rtd->firstNonTermId ) {
 				pdaRun->parseInput->id = prg->rtd->lelInfo[pdaRun->parseInput->id].termDupId;
-				pdaRun->parseInput->flags |= AF_TERM_DUP;
+				pdaRun->parseInput->flags |= PF_TERM_DUP;
 			}
 		}
 
@@ -1501,7 +1501,7 @@ long stackTopTarget( Program *prg, PdaRun *pdaRun )
 
 int beenCommitted( ParseTree *parseTree )
 {
-	return parseTree->flags & AF_COMMITTED;
+	return parseTree->flags & PF_COMMITTED;
 }
 
 Code *backupOverRcode( Code *rcode )
@@ -1531,7 +1531,7 @@ head:
 
 	/* Check for reverse code. */
 	//restore = 0;
-	if ( tree->flags & AF_HAS_RCODE ) {
+	if ( tree->flags & PF_HAS_RCODE ) {
 		/* If tree caused some reductions, now is not the right time to backup
 		 * over the reverse code. We need to backup over the reductions first. Store
 		 * the count of the reductions and do it when the count drops to zero. */
@@ -1563,7 +1563,7 @@ head:
 	 * belonging to a nonterminal that caused previous reductions. */
 	if ( *causeReduce > 0 && 
 			tree->id >= prg->rtd->firstNonTermId &&
-			!(tree->flags & AF_TERM_DUP) )
+			!(tree->flags & PF_TERM_DUP) )
 	{
 		*causeReduce -= 1;
 
@@ -1588,12 +1588,12 @@ head:
 	//	}
 	//}
 
-	tree->flags |= AF_COMMITTED;
+	tree->flags |= PF_COMMITTED;
 
 	/* Do not recures on trees that are terminal dups. */
-	if ( !(tree->flags & AF_TERM_DUP) && 
-			!(tree->flags & AF_NAMED) && 
-			!(tree->flags & AF_ARTIFICIAL) && 
+	if ( !(tree->flags & PF_TERM_DUP) && 
+			!(tree->flags & PF_NAMED) && 
+			!(tree->flags & PF_ARTIFICIAL) && 
 			tree->child != 0 )
 	{
 		vm_push( (Tree*)lel );
@@ -1777,7 +1777,7 @@ again:
 	if ( pdaRun->tables->commitLen[pos] != 0 ) {
 		long causeReduce = 0;
 		if ( pdaRun->parseInput != 0 ) { 
-			if ( pdaRun->parseInput->flags & AF_HAS_RCODE )
+			if ( pdaRun->parseInput->flags & PF_HAS_RCODE )
 				causeReduce = pdaRun->parseInput->causeReduce;
 		}
 		commitFull( prg, sp, pdaRun, causeReduce );
@@ -1918,7 +1918,7 @@ case PcrReduction:
 		}
 
 		/* If the left hand side was replaced then the only parse algorithm
-		 * data that is contained in it will the AF_HAS_RCODE flag. Everthing
+		 * data that is contained in it will the PF_HAS_RCODE flag. Everthing
 		 * else will be in the original. This requires that we restore first
 		 * when going backwards and when doing a commit. */
 
@@ -2029,7 +2029,7 @@ case PcrReverse:
 					pdaRun->parseInput = 0;
 				}
 			}
-			else if ( pdaRun->parseInput->flags & AF_HAS_RCODE ) {
+			else if ( pdaRun->parseInput->flags & PF_HAS_RCODE ) {
 				debug( REALM_PARSE, "tree has rcode, setting on deck\n" );
 				pdaRun->onDeck = true;
 				pdaRun->parsed = 0;
@@ -2037,7 +2037,7 @@ case PcrReverse:
 				/* Only the RCODE flag was in the replaced lhs. All the rest is in
 				 * the the original. We read it after restoring. */
 
-				pdaRun->parseInput->flags &= ~AF_HAS_RCODE;
+				pdaRun->parseInput->flags &= ~PF_HAS_RCODE;
 			}
 			else {
 				/* Remove it from the input queue. */
