@@ -469,7 +469,6 @@ Tree *splitTree( struct ColmProgram *prg, Tree *t );
 void rcodeDownrefAll( struct ColmProgram *prg, Tree **sp, RtCodeVect *cv );
 void commitFull( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, long commitReduce );
 Tree *getParsedRoot( PdaRun *pdaRun, int stop );
-Tree *prepParseTree( struct ColmProgram *prg, Tree **sp, Tree *tree );
 void splitRef( struct ColmProgram *prg, Tree ***sp, Ref *fromRef );
 
 void allocGlobal( struct ColmProgram *prg );

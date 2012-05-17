@@ -159,21 +159,6 @@ void vm_grow( Program *prg )
 	debug( REALM_BYTECODE, "growing stack\n" );
 }
 
-Tree *prepParseTree( Program *prg, Tree **sp, Tree *tree )
-{
-	/* Seems like we need to always copy here. If it isn't a parse tree it
-	 * needs to be made into one. If it is then we need to make a new one in
-	 * case the old one is still in use by some parsing routine. The case were
-	 * we might be able to avoid a copy would be that it's a parse tree
-	 * already, but it's owning parser is completely finished with it. */
-
-	debug( REALM_BYTECODE, "copying tree in send function\n" );
-
-	Kid *unused = 0;
-	tree = copyRealTree( prg, tree, 0, &unused );
-	return tree;
-}
-
 void parserSetContext( Program *prg, Tree **sp, Parser *parser, Tree *val )
 {
 	parser->pdaRun->context = splitTree( prg, val );
@@ -216,7 +201,6 @@ Word streamAppend( Program *prg, Tree **sp, Tree *input, InputStream *inputStrea
 		appendStream( inputStream, input );
 	}
 	else {
-		input = prepParseTree( prg, sp, input );
 		treeUpref( input );
 		appendTree( inputStream, input );
 	}
@@ -374,7 +358,6 @@ long streamPush( Program *prg, Tree **sp, FsmRun *fsmRun, InputStream *in, Tree 
 		return length;
 	}
 	else {
-		tree = prepParseTree( prg, sp, tree );
 		treeUpref( tree );
 		streamPushTree( fsmRun, in, tree, ignore );
 		return -1;
