@@ -803,11 +803,11 @@ int makeReverseCode( PdaRun *pdaRun )
 	return true;
 }
 
-void transferReverseCode( PdaRun *pdaRun, ParseTree *tree )
+void transferReverseCode( PdaRun *pdaRun, ParseTree *parseTree )
 {
 	if ( pdaRun->rcBlockCount > 0 ) {
 		debug( REALM_PARSE, "attaching reverse code to token\n" );
-		tree->flags |= PF_HAS_RCODE;
+		parseTree->flags |= PF_HAS_RCODE;
 		pdaRun->rcBlockCount = 0;
 	}
 }

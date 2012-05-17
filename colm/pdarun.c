@@ -223,20 +223,17 @@ void sendBackTree( InputStream *inputStream, Tree *tree )
  *   PcrRevIgnore
  */
 static void sendBackIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
-		InputStream *inputStream, ParseTree *_ignore )
+		InputStream *inputStream, ParseTree *parseTree )
 {
-	Kid *ignoreKidList = _ignore->shadow;
-	Kid *ignore = ignoreKidList;
-
 	#ifdef DEBUG
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
 	debug( REALM_PARSE, "sending back: %s%s\n",
-		lelInfo[ignore->tree->id].name, 
-		_ignore->flags & PF_ARTIFICIAL ? " (artificial)" : "" );
+		lelInfo[parseTree->shadow->tree->id].name, 
+		parseTree->flags & PF_ARTIFICIAL ? " (artificial)" : "" );
 	#endif
 
-	Head *head = ignore->tree->tokdata;
-	int artificial = _ignore->flags & PF_ARTIFICIAL;
+	Head *head = parseTree->shadow->tree->tokdata;
+	int artificial = parseTree->flags & PF_ARTIFICIAL;
 
 	if ( head != 0 && !artificial )
 		sendBackText( fsmRun, inputStream, stringData( head ), head->length );
@@ -244,9 +241,9 @@ static void sendBackIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsm
 	decrementSteps( pdaRun );
 
 	/* Check for reverse code. */
-	if ( _ignore->flags & PF_HAS_RCODE ) {
+	if ( parseTree->flags & PF_HAS_RCODE ) {
 		pdaRun->onDeck = true;
-		_ignore->flags &= ~PF_HAS_RCODE;
+		parseTree->flags &= ~PF_HAS_RCODE;
 	}
 
 	if ( pdaRun->steps == pdaRun->targetSteps ) {
