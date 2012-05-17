@@ -334,13 +334,12 @@ void resetToken( FsmRun *fsmRun )
  *   PcrRevToken
  */
 
-
 static void sendBack( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, 
-		InputStream *inputStream, ParseTree *input )
+		InputStream *inputStream, ParseTree *parseTree )
 {
-	debug( REALM_PARSE, "sending back: %s\n", prg->rtd->lelInfo[input->id].name );
+	debug( REALM_PARSE, "sending back: %s\n", prg->rtd->lelInfo[parseTree->id].name );
 
-	if ( input->flags & PF_NAMED ) {
+	if ( parseTree->flags & PF_NAMED ) {
 		///* Send back anything in the buffer that has not been parsed. */
 		//if ( fsmRun->p == fsmRun->runBuf->data )
 		//	sendBackRunBufHead( fsmRun, inputStream );
@@ -353,36 +352,36 @@ static void sendBack( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
 	decrementSteps( pdaRun );
 
 	/* Artifical were not parsed, instead sent in as items. */
-	if ( input->flags & PF_ARTIFICIAL ) {
+	if ( parseTree->flags & PF_ARTIFICIAL ) {
 		/* Check for reverse code. */
-		if ( input->flags & PF_HAS_RCODE ) {
+		if ( parseTree->flags & PF_HAS_RCODE ) {
 			debug( REALM_PARSE, "tree has rcode, setting on deck\n" );
 			pdaRun->onDeck = true;
-			input->flags &= ~PF_HAS_RCODE;
+			parseTree->flags &= ~PF_HAS_RCODE;
 		}
 
-		treeUpref( input->shadow->tree );
+		treeUpref( parseTree->shadow->tree );
 
-		sendBackTree( inputStream, input->shadow->tree );
+		sendBackTree( inputStream, parseTree->shadow->tree );
 	}
 	else {
 		/* Check for reverse code. */
-		if ( input->flags & PF_HAS_RCODE ) {
+		if ( parseTree->flags & PF_HAS_RCODE ) {
 			debug( REALM_PARSE, "tree has rcode, setting on deck\n" );
 			pdaRun->onDeck = true;
-			input->flags &= ~PF_HAS_RCODE;
+			parseTree->flags &= ~PF_HAS_RCODE;
 		}
 
 		/* Push back the token data. */
-		sendBackText( fsmRun, inputStream, stringData( input->shadow->tree->tokdata ), 
-				stringLength( input->shadow->tree->tokdata ) );
+		sendBackText( fsmRun, inputStream, stringData( parseTree->shadow->tree->tokdata ), 
+				stringLength( parseTree->shadow->tree->tokdata ) );
 
 		/* If eof was just sent back remember that it needs to be sent again. */
-		if ( input->id == prg->rtd->eofLelIds[pdaRun->parserId] )
+		if ( parseTree->id == prg->rtd->eofLelIds[pdaRun->parserId] )
 			inputStream->eofSent = false;
 
 		/* If the item is bound then store remove it from the bindings array. */
-		unbind( prg, sp, pdaRun, input->shadow->tree );
+		popBinding( pdaRun, parseTree );
 	}
 
 	if ( pdaRun->steps == pdaRun->targetSteps ) {
@@ -391,9 +390,9 @@ static void sendBack( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
 	}
 
 	/* Downref the tree that was sent back and free the kid. */
-	treeDownref( prg, sp, input->shadow->tree );
-	kidFree( prg, input->shadow );
-	parseTreeFree( prg, input );
+	treeDownref( prg, sp, parseTree->shadow->tree );
+	kidFree( prg, parseTree->shadow );
+	parseTreeFree( prg, parseTree );
 }
 
 void setRegion( PdaRun *pdaRun, int emptyIgnore, ParseTree *tree )

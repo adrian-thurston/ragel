@@ -76,7 +76,7 @@ struct Definition;
  * runtime code. The runtime functions that access it are defined in
  * ctinput.cpp and stubbed in fsmcodegen.cpp */
 struct Bindings
-	: public Vector<Tree*>
+	: public Vector<ParseTree*>
 {};
 
 struct DefListEl { Definition *prev, *next; };

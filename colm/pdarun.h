@@ -426,10 +426,12 @@ void streamPushText( FsmRun *fsmRun, InputStream *inputStream, const char *data,
 void streamPushTree( FsmRun *fsmRun, InputStream *inputStream, Tree *tree, int ignore );
 void undoStreamPush( struct ColmProgram *prg, Tree **sp, FsmRun *fsmRun, InputStream *inputStream, long length );
 void undoStreamAppend( struct ColmProgram *prg, Tree **sp, FsmRun *fsmRun, InputStream *inputStream, struct ColmTree *tree, long length );
-void unbind( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, Tree *tree );
 Kid *makeTokenWithData( struct ColmProgram *prg, PdaRun *pdaRun, FsmRun *fsmRun, 
 		InputStream *inputStream, int id, Head *tokdata );
-void makeTokenPushBinding( PdaRun *pdaRun, int bindId, Tree *tree );
+
+void pushBinding( PdaRun *pdaRun, ParseTree *parseTree );
+void popBinding( PdaRun *pdaRun, ParseTree *parseTree );
+
 void executeGenerationAction( struct ColmProgram *prg, Tree **sp, FsmRun *fsmRun, PdaRun *pdaRun, 
 		InputStream *inputStream, int frameId, Code *code, long id, Head *tokdata );
 Kid *extractIgnore( PdaRun *pdaRun );

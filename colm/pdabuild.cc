@@ -1658,7 +1658,7 @@ void fillNodes( Program *prg, int &nextAvail, Bindings *bindings, long &bindId,
 		/* Since the parser is bottom up the bindings are in a bottom up
 		 * traversal order. Check after recursing. */
 		node.bindId = 0;
-		if ( bindId < bindings->length() && bindings->data[bindId] == kid->tree ) {
+		if ( bindId < bindings->length() && bindings->data[bindId] == parseTree ) {
 			/* Remember that binding ids are indexed from one. */
 			node.bindId = bindId++;
 

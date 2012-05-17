@@ -405,15 +405,15 @@ void sendNamedLangEl( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, I
 
 	Kid *input = makeTokenWithData( prg, pdaRun, fsmRun, inputStream, klangEl->id, tokdata );
 
-	if ( bindId > 0 )
-		makeTokenPushBinding( pdaRun, bindId, input->tree );
-
 	incrementSteps( pdaRun );
 
 	ParseTree *parseTree = parseTreeAllocate( prg );
 	parseTree->id = input->tree->id;
 	parseTree->flags |= PF_NAMED;
 	parseTree->shadow = input;
+
+	if ( bindId > 0 )
+		pushBinding( pdaRun, parseTree );
 	
 	pdaRun->parseInput = parseTree;
 }
@@ -425,21 +425,15 @@ void initBindings( PdaRun *pdaRun )
 	pdaRun->bindings->push(0);
 }
 
-void makeTokenPushBinding( PdaRun *pdaRun, int bindId, Tree *tree )
+void pushBinding( PdaRun *pdaRun, ParseTree *parseTree )
 {
 	/* If the item is bound then store it in the bindings array. */
-	if ( bindId > 0 ) {
-		pdaRun->bindings->push( tree );
-		treeUpref( tree );
-	}
+	pdaRun->bindings->push( parseTree );
 }
 
-void unbind( Program *prg, Tree **sp, PdaRun *pdaRun, Tree *tree )
+void popBinding( PdaRun *pdaRun, ParseTree *parseTree )
 {
-	Tree *lastBound = pdaRun->bindings->top();
-	if ( lastBound == tree ) {
+	ParseTree *lastBound = pdaRun->bindings->top();
+	if ( lastBound == parseTree )
 		pdaRun->bindings->pop();
-		treeDownref( prg, sp, tree );
-	}
 }
-
