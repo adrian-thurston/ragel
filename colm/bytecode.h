@@ -353,14 +353,11 @@ typedef unsigned char uchar;
 /* There is reverse code associated with this tree node. */
 #define AF_HAS_RCODE     0x0010
 
-/* Tree was allocated as a ParseTree. */
-#define AF_PARSE_TREE    0x0040
+#define AF_LEFT_IL_ATTACHED    0x0400
+#define AF_RIGHT_IL_ATTACHED   0x0800
 
 #define AF_LEFT_IGNORE   0x0100
 #define AF_RIGHT_IGNORE  0x0200
-
-#define AF_LEFT_IL_ATTACHED    0x0400
-#define AF_RIGHT_IL_ATTACHED   0x0800
 
 #define KF_SUPPRESS_RIGHT      0x01
 #define KF_SUPPRESS_LEFT       0x02

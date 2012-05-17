@@ -906,8 +906,6 @@ free_tree:
 
 			if ( tree->id == LEL_ID_IGNORE )
 				ilFree( prg, (IgnoreList*) tree );
-			else if ( tree->flags & AF_PARSE_TREE )
-				parseTreeFree( prg, (ParseTree*)tree );
 			else
 				treeFree( prg, tree );
 		}
@@ -927,17 +925,13 @@ free_tree:
 
 void treeUpref( Tree *tree )
 {
-	if ( tree != 0 ) {
-		assert( !( tree->flags & AF_PARSE_TREE ) );
+	if ( tree != 0 )
 		tree->refs += 1;
-	}
 }
 
 void treeDownref( Program *prg, Tree **sp, Tree *tree )
 {
-
 	if ( tree != 0 ) {
-		assert( !( tree->flags & AF_PARSE_TREE ) );
 		assert( tree->refs > 0 );
 		tree->refs -= 1;
 		if ( tree->refs == 0 )

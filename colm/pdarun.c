@@ -416,7 +416,6 @@ void ignoreTree( Program *prg, PdaRun *pdaRun, Tree *tree )
 	incrementSteps( pdaRun );
 
 	ParseTree *parseTree = parseTreeAllocate( prg );
-	parseTree->flags |= AF_PARSE_TREE;
 	parseTree->shadow = kidAllocate( prg );
 	parseTree->shadow->tree = tree;
 
@@ -435,7 +434,6 @@ void ignoreTree2( Program *prg, PdaRun *pdaRun, Tree *tree )
 	incrementSteps( pdaRun );
 
 	ParseTree *parseTree = parseTreeAllocate( prg );
-	parseTree->flags |= AF_PARSE_TREE;
 	parseTree->flags |= AF_ARTIFICIAL;
 	parseTree->shadow = kidAllocate( prg );
 	parseTree->shadow->tree = tree;
@@ -860,7 +858,6 @@ static void sendToken( Program *prg, Tree **sp, InputStream *inputStream, FsmRun
 	parseTree->id = input->tree->id;
 	parseTree->flags = input->tree->flags;
 	parseTree->flags &= ~( AF_LEFT_IGNORE | AF_RIGHT_IGNORE );
-	parseTree->flags |= AF_PARSE_TREE;
 	parseTree->shadow = input;
 		
 	pdaRun->parseInput = parseTree;
@@ -881,7 +878,6 @@ static void sendTree( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, I
 	parseTree->id = input->tree->id;
 	parseTree->flags = input->tree->flags;
 	parseTree->flags &= ~( AF_LEFT_IGNORE | AF_RIGHT_IGNORE );
-	parseTree->flags |= AF_PARSE_TREE;
 	parseTree->flags |= AF_ARTIFICIAL;
 	parseTree->shadow = input;
 	
@@ -922,7 +918,6 @@ static void sendEof( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *
 	parseTree->id = input->tree->id;
 	parseTree->flags = input->tree->flags;
 	parseTree->flags &= ~( AF_LEFT_IGNORE | AF_RIGHT_IGNORE );
-	parseTree->flags |= AF_PARSE_TREE;
 	parseTree->shadow = input;
 	
 	pdaRun->parseInput = parseTree;
@@ -1447,7 +1442,6 @@ void initPdaRun( PdaRun *pdaRun, Program *prg, PdaTables *tables,
 
 	/* Init the element allocation variables. */
 	pdaRun->stackTop = parseTreeAllocate( prg );
-	pdaRun->stackTop->flags |= AF_PARSE_TREE;
 	pdaRun->stackTop->state = -1;
 	pdaRun->stackTop->shadow = sentinal;
 
@@ -1684,10 +1678,6 @@ case PcrStart:
 	if ( pdaRun->parseInput == 0 )
 		goto parseError;
 
-	/* The tree we are given must be * parse tree size. It also must have at
-	 * least one reference. */
-	assert( pdaRun->parseInput->flags & AF_PARSE_TREE );
-
 	/* This will cause parseInput to be lost. This 
 	 * path should be traced. */
 	if ( pdaRun->cs < 0 )
@@ -1818,7 +1808,6 @@ again:
 		value->tree->prodNum = prg->rtd->prodInfo[pdaRun->reduction].prodNum;
 
 		pdaRun->redLel = parseTreeAllocate( prg );
-		pdaRun->redLel->flags |= AF_PARSE_TREE;
 		pdaRun->redLel->id = prg->rtd->prodInfo[pdaRun->reduction].lhsId;
 		pdaRun->redLel->next = 0;
 		pdaRun->redLel->causeReduce = 0;
