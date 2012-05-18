@@ -670,7 +670,7 @@ static void attachIgnoreLeft( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTree
 }
 
 /* Not currently used. Need to revive this. WARNING: untested changes here */
-void detachIgnoreRight( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, ParseTree *parseTree )
+static void detachIgnoreRight( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTree *parseTree )
 {
 	/* Right ignore are immediately discarded since they are copies of
 	 * left-ignores. */
@@ -1785,6 +1785,7 @@ again:
 		Kid *attrs;
 		Kid *dataLast, *dataChild;
 
+		/* If there was shift don't attach again. */
 		if ( !( *action & act_sb ) && pdaRun->lel->id < prg->rtd->firstNonTermId )
 			attachIgnoreRight( prg, sp, pdaRun, pdaRun->stackTop );
 
@@ -2084,6 +2085,10 @@ case PcrReverse:
 				treeDownref( prg, sp, pdaRun->undoLel->shadow->tree );
 				kidFree( prg, pdaRun->undoLel->shadow );
 				parseTreeFree( prg, pdaRun->undoLel );
+
+				/* If the stacktop had right ignore attached, detach now. */
+				if ( pdaRun->stackTop->flags & PF_RIGHT_IL_ATTACHED )
+					detachIgnoreRight( prg, sp, pdaRun, pdaRun->stackTop );
 			}
 		}
 		else if ( pdaRun->accumIgnore != 0 ) {
@@ -2150,6 +2155,10 @@ case PcrReverse:
 				pdaRun->undoLel->next = pdaRun->parseInput;
 				pdaRun->parseInput = pdaRun->undoLel;
 			}
+
+			/* Undo attach of right ignore. */
+			if ( pdaRun->stackTop->flags & PF_RIGHT_IL_ATTACHED )
+				detachIgnoreRight( prg, sp, pdaRun, pdaRun->stackTop );
 		}
 	}
 
