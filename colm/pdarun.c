@@ -533,7 +533,7 @@ static void reportParseError( Program *prg, Tree **sp, PdaRun *pdaRun )
 	treeUpref( prg->lastParseError );
 }
 
-static void attachIgnoreRight( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTree *parseTree )
+static void attachRightIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTree *parseTree )
 {
 	if ( pdaRun->stackTop->id < prg->rtd->firstNonTermId ) {
 		/* OK, do it */
@@ -576,7 +576,7 @@ static void attachIgnoreRight( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTre
 				/* The previous token already has a right ignore. Merge by
 				 * attaching it as a left ignore of the new list. */
 				Kid *curIgnore = treeRightIgnoreKid( prg, parseTree->shadow->tree );
-				attachLeftIgnore( prg, (Tree*)rightIgnore, (IgnoreList*)curIgnore->tree );
+				pushLeftIgnore( prg, (Tree*)rightIgnore, (IgnoreList*)curIgnore->tree );
 
 				/* Replace the current ignore. */
 				treeDownref( prg, sp, curIgnore->tree );
@@ -585,7 +585,7 @@ static void attachIgnoreRight( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTre
 			}
 			else {
 				/* Attach The ignore list. */
-				attachRightIgnore( prg, parseTree->shadow->tree, rightIgnore );
+				pushRightIgnore( prg, parseTree->shadow->tree, rightIgnore );
 			}
 
 			parseTree->flags |= PF_RIGHT_IL_ATTACHED;
@@ -596,7 +596,7 @@ static void attachIgnoreRight( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTre
 	}
 }
 
-static void attachIgnoreLeft( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTree *parseTree )
+static void attachLeftIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTree *parseTree )
 {
 	/* Reset. */
 	assert( ! ( parseTree->flags & PF_LEFT_IL_ATTACHED ) );
@@ -648,7 +648,7 @@ static void attachIgnoreLeft( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTree
 			/* The token already has a left-ignore. Merge by attaching it as a
 			 * right ignore of the new list. */
 			Kid *curIgnore = treeLeftIgnoreKid( prg, parseTree->shadow->tree );
-			attachRightIgnore( prg, (Tree*)leftIgnore, (IgnoreList*)curIgnore->tree );
+			pushRightIgnore( prg, (Tree*)leftIgnore, (IgnoreList*)curIgnore->tree );
 
 			/* Replace the current ignore. */
 			treeDownref( prg, sp, curIgnore->tree );
@@ -657,7 +657,7 @@ static void attachIgnoreLeft( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTree
 		}
 		else {
 			/* Attach the ignore list. */
-			attachLeftIgnore( prg, parseTree->shadow->tree, leftIgnore );
+			pushLeftIgnore( prg, parseTree->shadow->tree, leftIgnore );
 		}
 		parseTree->flags |= PF_LEFT_IL_ATTACHED;
 
@@ -670,7 +670,7 @@ static void attachIgnoreLeft( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTree
 }
 
 /* Not currently used. Need to revive this. WARNING: untested changes here */
-static void detachIgnoreRight( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTree *parseTree )
+static void detachRightIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTree *parseTree )
 {
 	/* Right ignore are immediately discarded since they are copies of
 	 * left-ignores. */
@@ -686,7 +686,7 @@ static void detachIgnoreRight( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTre
 		Kid *li = treeLeftIgnoreKid( prg, riKid->tree );
 		if ( li != 0 ) {
 			treeUpref( li->tree );
-			removeLeftIgnore( prg, sp, riKid->tree );
+			popLeftIgnore( prg, sp, riKid->tree );
 			rightIgnore = riKid->tree;
 			treeUpref( rightIgnore );
 			riKid->tree = li->tree;
@@ -694,7 +694,7 @@ static void detachIgnoreRight( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTre
 		else  {
 			rightIgnore = riKid->tree;
 			treeUpref( rightIgnore );
-			removeRightIgnore( prg, sp, parseTree->shadow->tree );
+			popRightIgnore( prg, sp, parseTree->shadow->tree );
 		}
 
 		parseTree->flags &= ~PF_RIGHT_IL_ATTACHED;
@@ -703,7 +703,7 @@ static void detachIgnoreRight( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTre
 	}
 }
 
-static void detachIgnoreLeft( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, ParseTree *parseTree )
+static void detachLeftIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, ParseTree *parseTree )
 {
 	/* Detach left. */
 	Tree *leftIgnore = 0;
@@ -718,7 +718,7 @@ static void detachIgnoreLeft( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *f
 		Kid *ri = treeRightIgnoreKid( prg, liKid->tree );
 		if ( ri != 0 ) {
 			treeUpref( ri->tree );
-			removeRightIgnore( prg, sp, liKid->tree );
+			popRightIgnore( prg, sp, liKid->tree );
 			leftIgnore = liKid->tree;
 			treeUpref( leftIgnore );
 			liKid->tree = ri->tree;
@@ -726,7 +726,7 @@ static void detachIgnoreLeft( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *f
 		else {
 			leftIgnore = liKid->tree;
 			treeUpref( leftIgnore );
-			removeLeftIgnore( prg, sp, parseTree->shadow->tree );
+			popLeftIgnore( prg, sp, parseTree->shadow->tree );
 			parseTree->flags &= ~PF_LEFT_IL_ATTACHED;
 		}
 	}
@@ -1733,7 +1733,7 @@ again:
 		 * of the next ignore attachment to use. */
 		if ( pdaRun->lel->id < prg->rtd->firstNonTermId ) {
 			if ( pdaRun->lel->causeReduce == 0 )
-				attachIgnoreRight( prg, sp, pdaRun, pdaRun->stackTop );
+				attachRightIgnore( prg, sp, pdaRun, pdaRun->stackTop );
 		}
 
 		pdaRun->lel->next = pdaRun->stackTop;
@@ -1742,7 +1742,7 @@ again:
 		/* If its a token then attach ignores and record it in the token list
 		 * of the next ignore attachment to use. */
 		if ( pdaRun->lel->id < prg->rtd->firstNonTermId ) {
-			attachIgnoreLeft( prg, sp, pdaRun, pdaRun->lel );
+			attachLeftIgnore( prg, sp, pdaRun, pdaRun->lel );
 
 			Ref *ref = (Ref*)kidAllocate( prg );
 			ref->kid = pdaRun->lel->shadow;
@@ -1787,7 +1787,7 @@ again:
 
 		/* If there was shift don't attach again. */
 		if ( !( *action & act_sb ) && pdaRun->lel->id < prg->rtd->firstNonTermId )
-			attachIgnoreRight( prg, sp, pdaRun, pdaRun->stackTop );
+			attachRightIgnore( prg, sp, pdaRun, pdaRun->stackTop );
 
 		pdaRun->reduction = *action >> 2;
 
@@ -2088,7 +2088,7 @@ case PcrReverse:
 
 				/* If the stacktop had right ignore attached, detach now. */
 				if ( pdaRun->stackTop->flags & PF_RIGHT_IL_ATTACHED )
-					detachIgnoreRight( prg, sp, pdaRun, pdaRun->stackTop );
+					detachRightIgnore( prg, sp, pdaRun, pdaRun->stackTop );
 			}
 		}
 		else if ( pdaRun->accumIgnore != 0 ) {
@@ -2142,7 +2142,7 @@ case PcrReverse:
 				kidFree( prg, (Kid*)ref );
 
 				assert( pdaRun->accumIgnore == 0 );
-				detachIgnoreLeft( prg, sp, pdaRun, fsmRun, pdaRun->parseInput );
+				detachLeftIgnore( prg, sp, pdaRun, fsmRun, pdaRun->parseInput );
 			}
 			else {
 				debug( REALM_PARSE, "backing up over non-terminal: %s\n",
@@ -2158,7 +2158,7 @@ case PcrReverse:
 
 			/* Undo attach of right ignore. */
 			if ( pdaRun->stackTop->flags & PF_RIGHT_IL_ATTACHED )
-				detachIgnoreRight( prg, sp, pdaRun, pdaRun->stackTop );
+				detachRightIgnore( prg, sp, pdaRun, pdaRun->stackTop );
 		}
 	}
 
