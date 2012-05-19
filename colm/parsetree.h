@@ -513,7 +513,7 @@ struct TokenRegion
 		loc(loc), name(name), id(id),
 		lmSwitchHandlesError(false), regionNameInst(0),
 		parentRegion(parentRegion), defaultTokenDef(0),
-		preEofBlock(0) { }
+		preEofBlock(0), ignoreRegion(0) { }
 
 	/* Tree traversal. */
 	FsmGraph *walk( ParseData *pd );
@@ -544,9 +544,12 @@ struct TokenRegion
 
 	TokenDef *defaultTokenDef;
 
-	TokenRegion *next, *prev;
-
 	CodeBlock *preEofBlock;
+
+	/* Dupe of the region, containing only the ignore tokens. */
+	TokenRegion *ignoreRegion;
+
+	TokenRegion *next, *prev;
 };
 
 typedef DList<TokenRegion> RegionList;

@@ -481,6 +481,15 @@ region_def:
 region_head: 
 	KW_Lex TK_Word 
 	final {
+		/* just for ignores. */
+		TokenRegion *tokenRegionIgn = new TokenRegion( InputLoc(), $2->data + "_ign" ,
+				pd->regionList.length(), regionStack.top() );
+		regionStack.top()->childRegions.append( tokenRegionIgn );
+		pd->regionList.append( tokenRegionIgn );
+		JoinOrLm *joinOrLmIgn = new JoinOrLm( tokenRegionIgn );
+		String scannerNameIgn( $2->data.length() + 2, "<%s>-ign", $2->data.data );
+		addRegularDef( InputLoc(), namespaceStack.top(), scannerNameIgn, joinOrLmIgn, true );
+
 		/* Make the new token region. */
 		TokenRegion *tokenRegion = new TokenRegion( InputLoc(), $2->data,
 				pd->regionList.length(), regionStack.top() );
@@ -490,6 +499,7 @@ region_head:
 		String scannerName( $2->data.length() + 2, "<%s>", $2->data.data );
 		addRegularDef( InputLoc(), namespaceStack.top(), scannerName, joinOrLm, true );
 		regionStack.push( tokenRegion );
+		tokenRegion->ignoreRegion = tokenRegionIgn;
 	};
 
 namespace_def: 
@@ -1000,7 +1010,16 @@ token_def:
 		region->tokenDefList.append( tokenDef );
 		nspace->tokenDefList.append( tokenDef );
 
-		reCaptureVect.empty();
+		/* All again for the ignore. */
+		if ( ignore ) {
+			TokenDef *tokenDefIgn = new TokenDef( name + "_ign", String(), false, ignore, join, 
+					0, $1->loc, pd->nextTokenId++, nspace, region->ignoreRegion,
+					&reCaptureVect, pd->objectDef,
+					contextStack.length() > 0 ? contextStack.top() : 0 );
+
+			region->ignoreRegion->tokenDefList.append( tokenDefIgn );
+			nspace->tokenDefList.append( tokenDefIgn );
+		}
 
 		/* This is created and pushed in the name. */
 		if ( !pd->insideRegion ) {
@@ -1014,6 +1033,9 @@ token_def:
 			JoinOrLm *joinOrLm = new JoinOrLm( join );
 			addRegularDef( $1->loc, namespaceStack.top(), name, joinOrLm, false );
 		}
+
+
+		reCaptureVect.empty();
 	};
 
 nonterm token_or_ignore
@@ -1043,6 +1065,15 @@ token_def_name:
 		curDefineId = name;
 
 		if ( !pd->insideRegion ) {
+			/* For just ignores. */
+			TokenRegion *tokenRegionIgn = new TokenRegion( InputLoc(), name + "_ign",
+					pd->regionList.length(), regionStack.top() );
+			regionStack.top()->childRegions.append( tokenRegionIgn );
+			pd->regionList.append( tokenRegionIgn );
+			JoinOrLm *joinOrLmIgn = new JoinOrLm( tokenRegionIgn );
+			String scannerNameIgn( name.length() + 2, "<%s>-ign", name.data );
+			addRegularDef( InputLoc(), namespaceStack.top(), scannerNameIgn, joinOrLmIgn, true );
+
 			/* If not inside a region, make one for the token. */
 			TokenRegion *tokenRegion = new TokenRegion( InputLoc(), name,
 					pd->regionList.length(), regionStack.top() );
@@ -1052,6 +1083,7 @@ token_def_name:
 			String scannerName( name.length() + 2, "<%s>", name.data );
 			addRegularDef( InputLoc(), namespaceStack.top(), scannerName, joinOrLm, true );
 			regionStack.push( tokenRegion );
+			tokenRegion->ignoreRegion = tokenRegionIgn;
 		}
 
 		/* Reset the lable id counter. */
