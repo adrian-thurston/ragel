@@ -548,8 +548,6 @@ There are some sticky issues involved ... how to parse the host language to disc
     <created_on>Wed Apr 06 15:31:44 -0700 2011</created_on>
     <updated_on>Wed Apr 06 15:36:44 -0700 2011</updated_on>
   </issue>
-</issues>
-<issues type="array">
   <issue>
     <id>251</id>
     <project name="Ragel" id="1"/>
