@@ -70,7 +70,10 @@ TEST_CASES = \
 	export1.lm \
 	multiregion1.lm \
 	multiregion2.lm \
-	lhs1.lm
+	lhs1.lm \
+	rhsref1.lm \
+	order1.lm \
+	order2.lm
 
 INPUT = \
 	ambig1.in \
@@ -129,7 +132,10 @@ INPUT = \
 	export1.in \
 	multiregion1.in \
 	multiregion2.in \
-	lhs1.in
+	lhs1.in \
+	rhsref1.in \
+	order1.in \
+	order2.in
 
 EXPECTED_OUTPUT = \
 	ambig1.exp \
@@ -201,6 +207,9 @@ EXPECTED_OUTPUT = \
 	export1.exp \
 	multiregion1.exp \
 	multiregion2.exp \
-	lhs1.exp
+	lhs1.exp \
+	rhsref1.exp \
+	order1.exp \
+	order2.exp
 
 EXTRA_DIST = genmf TESTS runtests.mk $(TEST_CASES) $(INPUT) $(EXPECTED_OUTPUT)
