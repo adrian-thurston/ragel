@@ -1,6 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <issues type="array">
   <issue>
+    <id>343</id>
+    <project name="Colm" id="2"/>
+    <tracker name="Feature" id="2"/>
+    <status name="New" id="1"/>
+    <priority name="Normal" id="4"/>
+    <author name="Adrian Thurston" id="3"/>
+    <assigned_to name="Adrian Thurston" id="3"/>
+    <fixed_version name="0.5" id="32"/>
+    <subject>export the colm namespace hierarchy using C++ namespaces</subject>
+    <description>In cases where there is a type with the same name as a namespace, augment the type name with the prefix "t_".</description>
+    <start_date>2012-04-28</start_date>
+    <due_date></due_date>
+    <done_ratio>0</done_ratio>
+    <estimated_hours></estimated_hours>
+    <custom_fields>
+    </custom_fields>
+    <created_on>Sat Apr 28 13:15:56 -0700 2012</created_on>
+    <updated_on>Sat Apr 28 13:16:15 -0700 2012</updated_on>
+  </issue>
+  <issue>
     <id>342</id>
     <project name="Colm" id="2"/>
     <tracker name="Feature" id="2"/>
@@ -519,8 +539,6 @@ print( Start )
     <created_on>Sun Jul 31 10:08:31 -0700 2011</created_on>
     <updated_on>Sun Jul 31 10:13:09 -0700 2011</updated_on>
   </issue>
-</issues>
-<issues type="array">
   <issue>
     <id>308</id>
     <project name="Colm" id="2"/>
@@ -1063,8 +1081,6 @@ print( Input )
     <created_on>Sat Mar 20 10:52:52 -0700 2010</created_on>
     <updated_on>Sat Mar 20 10:52:52 -0700 2010</updated_on>
   </issue>
-</issues>
-<issues type="array">
   <issue>
     <id>38</id>
     <project name="Colm" id="2"/>
@@ -1594,8 +1610,6 @@ Name: type ( pattern ) for sub-pattern
     <created_on>Sat Mar 20 10:42:54 -0700 2010</created_on>
     <updated_on>Sat Mar 20 10:42:54 -0700 2010</updated_on>
   </issue>
-</issues>
-<issues type="array">
   <issue>
     <id>13</id>
     <project name="Colm" id="2"/>
