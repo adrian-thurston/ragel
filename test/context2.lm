@@ -81,7 +81,7 @@ context ruby_here
 		[primary]
 	|	[call]
 
-	token foobar /any*/
+	token foobar /any+/
 
 	def item
 		[statement '!']
@@ -95,3 +95,4 @@ CTX: ruby_here = cons ruby_here []
 
 S: ruby_here::start = parse ruby_here::start( CTX stdin )
 print_xml(S)
+print('\n')
