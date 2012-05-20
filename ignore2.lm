@@ -1,0 +1,26 @@
+lex start
+{
+	ignore /space+/
+	literal '*', '(', ')'
+	token id /[a-zA-Z_]+/
+}
+
+def item 
+	[id]
+|	['(' item* ')']
+
+def start 
+	[item*]
+
+Input: start = parse start( stdin )
+
+cons Output: accum<start> []
+
+for Id: id in Input {
+	send Output
+		"( [Id] )
+}
+
+S: start = Output()
+
+print( S '\n' )

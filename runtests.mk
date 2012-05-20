@@ -76,7 +76,9 @@ TESTS = \
 	order1.lm \
 	order2.lm \
 	concat1.lm \
-	concat2.lm
+	concat2.lm \
+	ignore1.lm \
+	ignore2.lm
 
 DIFFS = \
 	ambig1.diff \
@@ -152,7 +154,9 @@ DIFFS = \
 	order1.diff \
 	order2.diff \
 	concat1.diff \
-	concat2.diff
+	concat2.diff \
+	ignore1.diff \
+	ignore2.diff
 
 all: runtests.mk $(DIFFS) $(SUBDIRS)
 
@@ -761,3 +765,19 @@ concat2.out: concat2.bin
 
 concat2.bin: concat2.lm ./../colm/colm
 	./../colm/colm concat2.lm
+ignore1.diff: ignore1.out ignore1.exp
+	@diff -u ignore1.exp ignore1.out > ignore1.diff || ( cat ignore1.diff; rm ignore1.diff )
+
+ignore1.out: ignore1.bin
+	./ignore1.bin  < ignore1.in > ignore1.out
+
+ignore1.bin: ignore1.lm ./../colm/colm
+	./../colm/colm ignore1.lm
+ignore2.diff: ignore2.out ignore2.exp
+	@diff -u ignore2.exp ignore2.out > ignore2.diff || ( cat ignore2.diff; rm ignore2.diff )
+
+ignore2.out: ignore2.bin
+	./ignore2.bin  < ignore2.in > ignore2.out
+
+ignore2.bin: ignore2.lm ./../colm/colm
+	./../colm/colm ignore2.lm

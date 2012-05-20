@@ -78,4 +78,6 @@ TESTS="
 	order2.lm
 	concat1.lm
 	concat2.lm
+	ignore1.lm
+	ignore2.lm
 "
