@@ -20,10 +20,8 @@ def choice2
 |	[id number]
 |	[number]
 
-token EOF /ws+/
-
 def start 
-	[prefix choice1 choice2 string id id EOF]
+	[prefix choice1 choice2 string id id]
 
 cons I: parser<start> []
 
