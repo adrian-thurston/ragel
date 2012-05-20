@@ -74,7 +74,9 @@ TESTS = \
 	lhs1.lm \
 	rhsref1.lm \
 	order1.lm \
-	order2.lm
+	order2.lm \
+	concat1.lm \
+	concat2.lm
 
 DIFFS = \
 	ambig1.diff \
@@ -148,7 +150,9 @@ DIFFS = \
 	lhs1.diff \
 	rhsref1.diff \
 	order1.diff \
-	order2.diff
+	order2.diff \
+	concat1.diff \
+	concat2.diff
 
 all: runtests.mk $(DIFFS) $(SUBDIRS)
 
@@ -741,3 +745,19 @@ order2.out: order2.bin
 
 order2.bin: order2.lm ./../colm/colm
 	./../colm/colm order2.lm
+concat1.diff: concat1.out concat1.exp
+	@diff -u concat1.exp concat1.out > concat1.diff || ( cat concat1.diff; rm concat1.diff )
+
+concat1.out: concat1.bin
+	./concat1.bin  < concat1.in > concat1.out
+
+concat1.bin: concat1.lm ./../colm/colm
+	./../colm/colm concat1.lm
+concat2.diff: concat2.out concat2.exp
+	@diff -u concat2.exp concat2.out > concat2.diff || ( cat concat2.diff; rm concat2.diff )
+
+concat2.out: concat2.bin
+	./concat2.bin  < concat2.in > concat2.out
+
+concat2.bin: concat2.lm ./../colm/colm
+	./../colm/colm concat2.lm
