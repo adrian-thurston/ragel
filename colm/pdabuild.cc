@@ -453,7 +453,7 @@ void ParseData::pdaOrderFollow( LangEl *rootEl, PdaState *tabState,
 			trySetTime( tt->value, redCode, time );
 	
 			/* If the items token region is not recorded in the state, do it now. */
-			addRegion( expandToState, tt->key );
+			addRegion( expandToState, tt->value, tt->key );
 		}
 	}
 }
@@ -467,7 +467,7 @@ bool regionVectHas( RegionVect &regVect, TokenRegion *region )
 	return false;
 }
 
-void ParseData::addRegion( PdaState *tabState, long pdaKey )
+void ParseData::addRegion( PdaState *tabState, PdaTrans *tabTrans, long pdaKey )
 {
 	LangEl *klangEl = langElIndex[pdaKey];
 	if ( klangEl != 0 && klangEl->type == LangEl::Term ) {
@@ -478,8 +478,13 @@ void ParseData::addRegion( PdaState *tabState, long pdaKey )
 		if ( !klangEl->isEOF && klangEl->tokenDef != 0 )
 			region = klangEl->tokenDef->tokenRegion;
 
-		if ( region != 0 && !regionVectHas( tabState->regions, region ) )
-			tabState->regions.append( region );
+		if ( region != 0 ) {
+			if ( !regionVectHas( tabState->regions, region ) )
+				tabState->regions.append( region );
+
+			if ( region->ignoreRegion != 0 && !regionVectHas( tabTrans->toState->preRegions, region->ignoreRegion ) )
+				tabTrans->toState->preRegions.append( region->ignoreRegion );
+		}
 	}
 }
 
@@ -568,7 +573,7 @@ void ParseData::pdaOrderProd( LangEl *rootEl, PdaState *tabState,
 		}
 
 		/* If the items token region is not recorded in the state, do it now. */
-		addRegion( tabState, srcTrans->key );
+		addRegion( tabState, tabTrans, srcTrans->key );
 
 		/* Go over one in the production. */
 		pdaOrderProd( rootEl, tabTrans->toState, 
@@ -1960,12 +1965,24 @@ PdaTables *ParseData::makePdaTables( PdaGraph *pdaGraph )
 	}
 
 	/*
+	 * tokenPreRegionInds. Continues on pos.
+	 */
+	count = 0;
+	pdaTables->tokenPreRegionInds = new int[pdaTables->numStates];
+	for ( PdaStateList::Iter state = pdaGraph->stateList; state.lte(); state++ ) {
+		pdaTables->tokenPreRegionInds[count++] = pos;
+		pos += state->preRegions.length() + 1;
+	}
+
+	/*
 	 * tokenRegions. Build in a null at the beginning.
 	 */
 
 	count = 1;
 	for ( PdaStateList::Iter state = pdaGraph->stateList; state.lte(); state++ )
 		count += state->regions.length() + 1;
+	for ( PdaStateList::Iter state = pdaGraph->stateList; state.lte(); state++ )
+		count += state->preRegions.length() + 1;
 
 	pdaTables->numRegionItems = count;
 	pdaTables->tokenRegions = new int[pdaTables->numRegionItems];
@@ -1974,6 +1991,13 @@ PdaTables *ParseData::makePdaTables( PdaGraph *pdaGraph )
 	pdaTables->tokenRegions[count++] = 0;
 	for ( PdaStateList::Iter state = pdaGraph->stateList; state.lte(); state++ ) {
 		for ( RegionVect::Iter reg = state->regions; reg.lte(); reg++ )
+			pdaTables->tokenRegions[count++] = (*reg)->id + 1;
+
+		pdaTables->tokenRegions[count++] = 0;
+	}
+
+	for ( PdaStateList::Iter state = pdaGraph->stateList; state.lte(); state++ ) {
+		for ( RegionVect::Iter reg = state->preRegions; reg.lte(); reg++ )
 			pdaTables->tokenRegions[count++] = (*reg)->id + 1;
 
 		pdaTables->tokenRegions[count++] = 0;

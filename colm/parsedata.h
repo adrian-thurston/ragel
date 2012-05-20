@@ -731,7 +731,7 @@ struct ParseData
 
 	int findIndexOff( PdaTables *pdaTables, PdaGraph *pdaGraph, PdaState *state, int &currLen );
 	void trySetTime( PdaTrans *trans, long code, long &time );
-	void addRegion( PdaState *tabState, long pdaKey );
+	void addRegion( PdaState *tabState, PdaTrans *pdaTrans, long pdaKey );
 	PdaState *followProd( PdaState *tabState, PdaState *prodState );
 	void findFollow( AlphSet &result, PdaState *overTab, 
 			PdaState *overSrc, Definition *parentDef );

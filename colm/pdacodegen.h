@@ -72,7 +72,7 @@ struct PdaCodeGen
 	String lelInfo() { return PARSER() + "lelInfo"; }
 	String prodInfo() { return PARSER() + "prodInfo"; }
 	String tokenRegionInds() { return PARSER() + "tokenRegionInds"; }
-	String tokenRegionsDirect() { return PARSER() + "tokenRegionsDirect"; }
+	String tokenPreRegionInds() { return PARSER() + "tokenPreRegionInds"; }
 	String tokenRegions() { return PARSER() + "tokenRegions"; }
 	String prodCodeBlocks() { return PARSER() + "prodCodeBlocks"; }
 	String prodCodeBlockLens() { return PARSER() + "prodCodeBlockLens"; }

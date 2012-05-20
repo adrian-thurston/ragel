@@ -594,6 +594,19 @@ void PdaCodeGen::writeParserData( long id, PdaTables *tables )
 	}
 	out << "\n};\n\n";
 
+	out << "int " << prefix << tokenPreRegionInds() << "[] = {\n\t";
+	for ( int i = 0; i < tables->numStates; i++ ) {
+		out << tables->tokenPreRegionInds[i];
+
+		if ( i < tables->numStates-1 ) {
+			out << ", ";
+			if ( (i+1) % 8 == 0 )
+				out << "\n\t";
+		}
+	}
+	out << "\n};\n\n";
+
+
 	out << "int " << prefix << tokenRegions() << "[] = {\n\t";
 	for ( int i = 0; i < tables->numRegionItems; i++ ) {
 		out << tables->tokenRegions[i];
@@ -619,6 +632,7 @@ void PdaCodeGen::writeParserData( long id, PdaTables *tables )
 		"	" << prefix << commitLen() << ",\n"
 
 		"	" << prefix << tokenRegionInds() << ",\n"
+		"	" << prefix << tokenPreRegionInds() << ",\n"
 		"	" << prefix << tokenRegions() << ",\n"
 		"\n"
 		"	" << tables->numIndicies << ",\n"

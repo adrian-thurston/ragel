@@ -76,7 +76,8 @@ typedef struct _FsmRun
 	RunBuf *runBuf;
 
 	/* FsmRun State. */
-	long region, cs, act;
+	long region, preRegion;
+	long cs, act;
 	char *tokstart, *tokend;
 	char *p, *pe, *peof;
 	int returnResult;
@@ -237,6 +238,7 @@ typedef struct _PdaTables
 	unsigned int *actions;
 	int *commitLen;
 	int *tokenRegionInds;
+	int *tokenPreRegionInds;
 	int *tokenRegions;
 
 	int numIndicies;

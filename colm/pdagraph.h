@@ -366,6 +366,7 @@ struct PdaState
 	TransMap transMap;
 
 	RegionVect regions;
+	RegionVect preRegions;
 
 	bool advanceReductions;
 };
