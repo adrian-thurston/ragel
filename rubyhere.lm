@@ -79,7 +79,7 @@ def statement
 	[primary]
 |	[call]
 
-token foobar /any*/
+token foobar /any+/
 
 def item
 	[statement '!']
@@ -90,3 +90,4 @@ def start
 
 S: start = parse start( stdin )
 print_xml(S)
+print('\n')
