@@ -25,7 +25,7 @@ lex regex
 	token regex_close /'/'/
 
 	rl regex_specials /[\[\.\*\/\\]/
-	token regex_chr /(^regex_specials)* | '\\' any/
+	token regex_chr /(^regex_specials)+ | '\\' any/
 }
 
 def regex_rep 
