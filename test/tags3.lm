@@ -28,11 +28,12 @@ lex ATTR_NAME
 lex ATTR_VAL
 {
 	ignore  /space+/
-	literal '>', '/>'
 	token dquote_val /'"' ([^"] | '\\' any)* '"'/
 	token squote_val /"'" ([^'] | '\\' any)* "'"/
 	token unq_val /[^ \t\r\n<>"'] [^ \t\r\n<>]*/
 }
+
+literal '>', '/>'
 
 #
 # Tokens
@@ -97,8 +98,9 @@ lex DOCTYPE
 	token dt_name /def_name/
 	token dt_literal /def_system_literal/
 	token dt_bl /"[" [^\]]* "]"/
-	token dt_close /'>'/
 }
+
+token dt_close /'>'/
 
 # Using a separate scanner for the keywords in DOCTYPE prevents them from
 # covering dt_name
