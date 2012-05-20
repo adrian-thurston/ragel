@@ -103,10 +103,8 @@ token item
 		input.push( make_token( typeid<item> M S ) )
 	}
 
-token EOL /'\n'/
-
 def stuff
-	[item* '!' EOL]
+	[item* '!']
 |	[sub]
 
 S: stuff = parse stuff( stdin  )
