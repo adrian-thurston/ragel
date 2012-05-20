@@ -74,7 +74,7 @@ lex dq
 #
 lex tag
 {
-	literal '\'', '\"', '=', '\/', '>'
+	literal '\'', '\"', '=', '\/'
 
 	# Within this region whitespace is not significant.
 	ignore xml_space / (0x20 | 0x9 | 0xD | 0xA)+ /
@@ -84,6 +84,8 @@ lex tag
 	#
 	token attr_name / name /
 }
+
+literal '>'
 
 #
 # Top Level
