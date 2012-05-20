@@ -20,10 +20,8 @@ def choice2
 |	[id number]
 |	[number]
 
-token EOL /'\n'/
-
 def start 
-	[prefix choice1 choice2 string id id EOL]
+	[prefix choice1 choice2 string id id]
 	{
 		print_xml( match lhs "id 77 88 \"hello\" dude dude\n" )
 	}
