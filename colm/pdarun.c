@@ -72,6 +72,7 @@ void initFsmRun( FsmRun *fsmRun, Program *prg )
 
 	fsmRun->attachedInput = 0;
 	fsmRun->attachedSource = 0;
+	fsmRun->preRegion = -1;
 }
 
 void clearFsmRun( Program *prg, FsmRun *fsmRun )
@@ -925,7 +926,13 @@ void newToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun )
 
 	/* Set the state using the state of the parser. */
 	fsmRun->region = pdaRunGetNextRegion( pdaRun, 0 );
-	fsmRun->cs = fsmRun->tables->entryByRegion[fsmRun->region];
+	if ( fsmRun->preRegion >= 0 ) {
+		fsmRun->cs = fsmRun->tables->entryByRegion[fsmRun->preRegion];
+		fsmRun->ncs = fsmRun->tables->entryByRegion[fsmRun->region];
+	}
+	else {
+		fsmRun->cs = fsmRun->tables->entryByRegion[fsmRun->region];
+	}
 
 	debug( REALM_PARSE, "scanning using token region: %s\n",
 			prg->rtd->regionInfo[fsmRun->region].name );
@@ -1137,6 +1144,13 @@ case PcrStart:
 		 * parsing due to inputStream pushes, usually for the purpose of includes.
 		 * */
 		pdaRun->tokenId = scanToken( prg, pdaRun, fsmRun, inputStream );
+
+		if ( pdaRun->tokenId == SCAN_ERROR && fsmRun->preRegion >= 0 ) {
+			fsmRun->preRegion = -1;
+			fsmRun->cs = fsmRun->ncs;
+			debug( REALM_PARSE,  "moving from pre region to main region" );
+			continue;
+		}
 
 		if ( pdaRun->tokenId == SCAN_TRY_AGAIN_LATER ) {
 			debug( REALM_PARSE, "scanner says try again later\n" );
@@ -1760,6 +1774,10 @@ again:
 			/* FIXME: Has the retry already been counted? */
 			pdaRun->numRetry += 1; 
 		}
+
+		//fsmRun->preRegion = pdaRun->tables->tokenRegions[ 
+		//		pdaRun->tables->tokenPreRegionInds[pdaRun->cs] ];
+		debug( REALM_PARSE,  "pre region: %d\n", fsmRun->preRegion );
 	}
 
 	/* 

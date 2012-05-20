@@ -77,7 +77,7 @@ typedef struct _FsmRun
 
 	/* FsmRun State. */
 	long region, preRegion;
-	long cs, act;
+	long cs, ncs, act;
 	char *tokstart, *tokend;
 	char *p, *pe, *peof;
 	int returnResult;
