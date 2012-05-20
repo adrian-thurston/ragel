@@ -1310,6 +1310,8 @@ void ParseData::initEmptyScanners()
 {
 	for ( RegionList::Iter reg = regionList; reg.lte(); reg++ ) {
 		if ( reg->tokenDefList.length() == 0 ) {
+			reg->wasEmpty = true;
+
 			InputLoc loc = { 0, 0, 0 };
 			String name( reg->name.length() + 16, "__%s_DEF_PAT", reg->name.data );
 

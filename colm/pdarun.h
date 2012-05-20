@@ -238,8 +238,8 @@ typedef struct _PdaTables
 	unsigned int *actions;
 	int *commitLen;
 	int *tokenRegionInds;
-	int *tokenPreRegionInds;
 	int *tokenRegions;
+	int *tokenPreRegions;
 
 	int numIndicies;
 	int numKeys;
@@ -249,6 +249,7 @@ typedef struct _PdaTables
 	int numActions;
 	int numCommitLen;
 	int numRegionItems;
+	int numPreRegionItems;
 } PdaTables;
 
 typedef struct _PoolBlock
@@ -408,6 +409,7 @@ void pdaRunMatch(  PdaRun *pdaRun, Kid *tree, Kid *pattern );
 
 /* Offset can be used to look at the next nextRegionInd. */
 int pdaRunGetNextRegion( PdaRun *pdaRun, int offset );
+int pdaRunGetNextPreRegion( PdaRun *pdaRun );
 
 #define PcrStart         1
 #define PcrDone          2

@@ -1964,15 +1964,6 @@ PdaTables *ParseData::makePdaTables( PdaGraph *pdaGraph )
 		pos += state->regions.length() + 1;
 	}
 
-	/*
-	 * tokenPreRegionInds. Continues on pos.
-	 */
-	count = 0;
-	pdaTables->tokenPreRegionInds = new int[pdaTables->numStates];
-	for ( PdaStateList::Iter state = pdaGraph->stateList; state.lte(); state++ ) {
-		pdaTables->tokenPreRegionInds[count++] = pos;
-		pos += state->preRegions.length() + 1;
-	}
 
 	/*
 	 * tokenRegions. Build in a null at the beginning.
@@ -1981,8 +1972,6 @@ PdaTables *ParseData::makePdaTables( PdaGraph *pdaGraph )
 	count = 1;
 	for ( PdaStateList::Iter state = pdaGraph->stateList; state.lte(); state++ )
 		count += state->regions.length() + 1;
-	for ( PdaStateList::Iter state = pdaGraph->stateList; state.lte(); state++ )
-		count += state->preRegions.length() + 1;
 
 	pdaTables->numRegionItems = count;
 	pdaTables->tokenRegions = new int[pdaTables->numRegionItems];
@@ -1996,12 +1985,31 @@ PdaTables *ParseData::makePdaTables( PdaGraph *pdaGraph )
 		pdaTables->tokenRegions[count++] = 0;
 	}
 
-	for ( PdaStateList::Iter state = pdaGraph->stateList; state.lte(); state++ ) {
-		for ( RegionVect::Iter reg = state->preRegions; reg.lte(); reg++ )
-			pdaTables->tokenRegions[count++] = (*reg)->id + 1;
+	/*
+	 * tokenPreRegions. Build in a null at the beginning.
+	 */
 
-		pdaTables->tokenRegions[count++] = 0;
+	count = 1;
+	for ( PdaStateList::Iter state = pdaGraph->stateList; state.lte(); state++ )
+		count += state->regions.length() + 1;
+
+	pdaTables->numPreRegionItems = count;
+	pdaTables->tokenPreRegions = new int[pdaTables->numPreRegionItems];
+
+	count = 0;
+	pdaTables->tokenPreRegions[count++] = 0;
+	for ( PdaStateList::Iter state = pdaGraph->stateList; state.lte(); state++ ) {
+		for ( RegionVect::Iter reg = state->regions; reg.lte(); reg++ ) {
+			assert( state->preRegions.length() <= 1 );
+			if ( state->preRegions.length() == 0 || state->preRegions[0]->wasEmpty )
+				pdaTables->tokenPreRegions[count++] = -1;
+			else 
+				pdaTables->tokenPreRegions[count++] = state->preRegions[0]->id + 1;
+		}
+
+		pdaTables->tokenPreRegions[count++] = 0;
 	}
+
 
 	return pdaTables;
 }

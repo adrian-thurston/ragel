@@ -513,7 +513,7 @@ struct TokenRegion
 		loc(loc), name(name), id(id),
 		lmSwitchHandlesError(false), regionNameInst(0),
 		parentRegion(parentRegion), defaultTokenDef(0),
-		preEofBlock(0), ignoreRegion(0) { }
+		preEofBlock(0), ignoreRegion(0), wasEmpty(false) { }
 
 	/* Tree traversal. */
 	FsmGraph *walk( ParseData *pd );
@@ -548,6 +548,10 @@ struct TokenRegion
 
 	/* Dupe of the region, containing only the ignore tokens. */
 	TokenRegion *ignoreRegion;
+
+	/* We alway init empty scanners with a single token. If we had to do this
+	 * then wasEmpty is true. */
+	bool wasEmpty;
 
 	TokenRegion *next, *prev;
 };

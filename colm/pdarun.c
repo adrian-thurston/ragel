@@ -907,6 +907,7 @@ static void sendEof( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *
 
 	/* Set the state using the state of the parser. */
 	fsmRun->region = pdaRunGetNextRegion( pdaRun, 0 );
+	fsmRun->preRegion = pdaRunGetNextPreRegion( pdaRun );
 	fsmRun->cs = fsmRun->tables->entryByRegion[fsmRun->region];
 
 	ParseTree *parseTree = parseTreeAllocate( prg );
@@ -926,16 +927,20 @@ void newToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun )
 
 	/* Set the state using the state of the parser. */
 	fsmRun->region = pdaRunGetNextRegion( pdaRun, 0 );
-	if ( fsmRun->preRegion >= 0 ) {
+	fsmRun->preRegion = pdaRunGetNextPreRegion( pdaRun );
+	if ( fsmRun->preRegion > 0 ) {
+		debug( REALM_PARSE,  "pre region for next token: %s\n", 
+				prg->rtd->regionInfo[fsmRun->preRegion].name );
 		fsmRun->cs = fsmRun->tables->entryByRegion[fsmRun->preRegion];
 		fsmRun->ncs = fsmRun->tables->entryByRegion[fsmRun->region];
 	}
 	else {
+		debug( REALM_PARSE, "scanning using token region: %s\n",
+				prg->rtd->regionInfo[fsmRun->region].name );
+
 		fsmRun->cs = fsmRun->tables->entryByRegion[fsmRun->region];
 	}
 
-	debug( REALM_PARSE, "scanning using token region: %s\n",
-			prg->rtd->regionInfo[fsmRun->region].name );
 
 	/* Clear the mark array. */
 	memset( fsmRun->mark, 0, sizeof(fsmRun->mark) );
@@ -1148,7 +1153,8 @@ case PcrStart:
 		if ( pdaRun->tokenId == SCAN_ERROR && fsmRun->preRegion >= 0 ) {
 			fsmRun->preRegion = -1;
 			fsmRun->cs = fsmRun->ncs;
-			debug( REALM_PARSE,  "moving from pre region to main region" );
+			debug( REALM_PARSE,  "moving from pre region to main region: %s\n",
+				prg->rtd->regionInfo[fsmRun->region].name );
 			continue;
 		}
 
@@ -1345,6 +1351,11 @@ break; }
 int pdaRunGetNextRegion( PdaRun *pdaRun, int offset )
 {
 	return pdaRun->tables->tokenRegions[pdaRun->nextRegionInd+offset];
+}
+
+int pdaRunGetNextPreRegion( PdaRun *pdaRun )
+{
+	return pdaRun->tables->tokenPreRegions[pdaRun->nextRegionInd];
 }
 
 Tree *getParsedRoot( PdaRun *pdaRun, int stop )
@@ -1774,10 +1785,6 @@ again:
 			/* FIXME: Has the retry already been counted? */
 			pdaRun->numRetry += 1; 
 		}
-
-		//fsmRun->preRegion = pdaRun->tables->tokenRegions[ 
-		//		pdaRun->tables->tokenPreRegionInds[pdaRun->cs] ];
-		debug( REALM_PARSE,  "pre region: %d\n", fsmRun->preRegion );
 	}
 
 	/* 
