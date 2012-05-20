@@ -110,7 +110,8 @@ typedef struct _ParseTree
 
 	struct _ParseTree *child;
 	struct _ParseTree *next;
-	struct _ParseTree *ignore;
+	struct _ParseTree *leftIgnore;
+	struct _ParseTree *rightIgnore;
 	Kid *shadow;
 
 	/* Parsing algorithm. */

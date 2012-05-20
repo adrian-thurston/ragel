@@ -322,7 +322,8 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 		}
 		out << ", " << node.length << ", ";
 
-		out << node.ignore << ", ";
+		out << node.leftIgnore << ", ";
+		out << node.rightIgnore << ", ";
 
 		out << (int)node.stop << " },\n";
 	}

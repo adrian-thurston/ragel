@@ -150,7 +150,8 @@ typedef struct _PatReplNode
 	long bindId;
 	const char *data;
 	long length;
-	long ignore;
+	long leftIgnore;
+	long rightIgnore;
 
 	/* Just match nonterminal, don't go inside. */
 	unsigned char stop;

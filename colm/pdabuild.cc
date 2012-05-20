@@ -1571,7 +1571,17 @@ void countNodes( Program *prg, int &count, ParseTree *parseTree, Kid *kid )
 	if ( kid != 0 ) {
 		count += 1;
 
+		/* Should't have to recurse here. */
 		IgnoreList *ignoreList = treeLeftIgnore( prg, kid->tree );
+		if ( ignoreList != 0 ) {
+			Kid *ignore = ignoreList->child;
+			while ( ignore != 0 ) {
+				count += 1;
+				ignore = ignore->next;
+			}
+		}
+
+		ignoreList = treeRightIgnore( prg, kid->tree );
 		if ( ignoreList != 0 ) {
 			Kid *ignore = ignoreList->child;
 			while ( ignore != 0 ) {
@@ -1621,7 +1631,26 @@ void fillNodes( Program *prg, int &nextAvail, Bindings *bindings, long &bindId,
 		/* Ignore items. */
 		IgnoreList *ignoreList = treeLeftIgnore( prg, kid->tree );
 		Kid *ignore = ignoreList == 0 ? 0 : ignoreList->child;
-		node.ignore = ignore == 0 ? -1 : nextAvail;
+		node.leftIgnore = ignore == 0 ? -1 : nextAvail;
+
+		while ( ignore != 0 ) {
+			PatReplNode &node = nodes[nextAvail++];
+
+			memset( &node, 0, sizeof(PatReplNode) );
+			node.id = ignore->tree->id;
+			node.prodNum = ignore->tree->prodNum;
+			node.next = ignore->next == 0 ? -1 : nextAvail;
+				
+			node.length = stringLength( ignore->tree->tokdata );
+			node.data = stringData( ignore->tree->tokdata );
+
+			ignore = ignore->next;
+		}
+
+		/* Ignore items. */
+		ignoreList = treeRightIgnore( prg, kid->tree );
+		ignore = ignoreList == 0 ? 0 : ignoreList->child;
+		node.rightIgnore = ignore == 0 ? -1 : nextAvail;
 
 		while ( ignore != 0 ) {
 			PatReplNode &node = nodes[nextAvail++];

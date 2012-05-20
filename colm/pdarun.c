@@ -536,25 +536,41 @@ static void reportParseError( Program *prg, Tree **sp, PdaRun *pdaRun )
 
 static void attachRightIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTree *parseTree )
 {
-	if ( pdaRun->stackTop->id < prg->rtd->firstNonTermId ) {
+	if ( pdaRun->stackTop->id > 0 && pdaRun->stackTop->id < prg->rtd->firstNonTermId ) {
 		/* OK, do it */
+		debug( REALM_PARSE, "attaching right ignore\n" );
+
+		/* Reset. */
+		assert( ! ( parseTree->flags & PF_RIGHT_IL_ATTACHED ) );
+
+		ParseTree *accum = pdaRun->accumIgnore;
+		pdaRun->accumIgnore = 0;
 
 		/* The data list needs to be extracted and reversed. The parse tree list
 		 * can remain in stack order. */
-		ParseTree *child = pdaRun->accumIgnore;
+		ParseTree *child = accum, *last = 0;
 		Kid *dataChild = 0, *dataLast = 0;
 
 		while ( child ) {
 			dataChild = child->shadow;
+			ParseTree *next = child->next;
 
-			Kid *kid = kidAllocate( prg );
-			kid->tree = dataChild->tree;
-			kid->next = dataLast;
-			treeUpref( kid->tree );
+			/* Reverse the lists. */
+			dataChild->next = dataLast;
+			child->next = last;
 
-			dataLast = kid;
-			child = child->next;
+			/* Detach the parse tree from the data tree. */
+			child->shadow = 0;
+
+			/* Keep the last for reversal. */
+			dataLast = dataChild;
+			last = child;
+
+			child = next;
 		}
+
+		/* Last is now the first. */
+		parseTree->rightIgnore = last;
 
 		if ( dataChild != 0 ) {
 			debug( REALM_PARSE, "attaching ignore right\n" );
@@ -591,9 +607,6 @@ static void attachRightIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTre
 
 			parseTree->flags |= PF_RIGHT_IL_ATTACHED;
 		}
-		else {
-			parseTree->shadow->flags |= KF_SUPPRESS_LEFT;
-		}
 	}
 }
 
@@ -629,10 +642,10 @@ static void attachLeftIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTree
 	}
 
 	/* Last is now the first. */
-	parseTree->ignore = last;
+	parseTree->leftIgnore = last;
 
 	if ( dataChild != 0 ) {
-		debug( REALM_PARSE, "attaching ignore left\n" );
+		debug( REALM_PARSE, "attaching left ignore\n" );
 
 		Kid *ignoreKid = dataChild;
 
@@ -663,11 +676,6 @@ static void attachLeftIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTree
 		parseTree->flags |= PF_LEFT_IL_ATTACHED;
 
 	}
-	else {
-		/* We need to do this only when it's possible that the token has come
-		 * in with an ignore list. */
-		parseTree->shadow->flags |= KF_SUPPRESS_RIGHT;
-	}
 }
 
 /* Not currently used. Need to revive this. WARNING: untested changes here */
@@ -675,11 +683,11 @@ static void detachRightIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTre
 {
 	/* Right ignore are immediately discarded since they are copies of
 	 * left-ignores. */
+	Tree *rightIgnore = 0;
 	if ( parseTree->flags & PF_RIGHT_IL_ATTACHED ) {
 		/* Modifying the tree we are detaching from. */
 		parseTree->shadow->tree = splitTree( prg, parseTree->shadow->tree );
 
-		Tree *rightIgnore = 0;
 		Kid *riKid = treeRightIgnoreKid( prg, parseTree->shadow->tree );
 
 		/* If the right ignore has a left ignore, then that was the original
@@ -699,8 +707,40 @@ static void detachRightIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTre
 		}
 
 		parseTree->flags &= ~PF_RIGHT_IL_ATTACHED;
+	}
 
-		treeDownref( prg, sp, rightIgnore );
+	if ( parseTree->rightIgnore != 0 ) {
+		assert( rightIgnore != 0 );
+
+		/* Transfer the trees to accumIgnore. */
+		ParseTree *ignore = parseTree->rightIgnore;
+		parseTree->rightIgnore = 0;
+
+		Kid *dataIgnore = rightIgnore->child;
+		rightIgnore->child = 0;
+
+		ParseTree *last = 0;
+		Kid *dataLast = 0;
+		while ( ignore != 0 ) {
+			ParseTree *next = ignore->next;
+			Kid *dataNext = dataIgnore->next;
+
+			/* Put the data trees underneath the parse trees. */
+			ignore->shadow = dataIgnore;
+
+			/* Reverse. */
+			ignore->next = last;
+			dataIgnore->next = dataLast;
+
+			/* Keep last for reversal. */
+			last = ignore;
+			dataLast = dataIgnore;
+
+			ignore = next;
+			dataIgnore = dataNext;
+		}
+
+		pdaRun->accumIgnore = last;
 	}
 }
 
@@ -732,12 +772,12 @@ static void detachLeftIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *f
 		}
 	}
 
-	if ( parseTree->ignore != 0 ) {
+	if ( parseTree->leftIgnore != 0 ) {
 		assert( leftIgnore != 0 );
 
 		/* Transfer the trees to accumIgnore. */
-		ParseTree *ignore = parseTree->ignore;
-		parseTree->ignore = 0;
+		ParseTree *ignore = parseTree->leftIgnore;
+		parseTree->leftIgnore = 0;
 
 		Kid *dataIgnore = leftIgnore->child;
 		leftIgnore->child = 0;
@@ -1385,8 +1425,10 @@ void clearParseTree( Program *prg, Tree **sp, ParseTree *parseTree )
 		}
 		if ( pt->child != 0 )
 			clearParseTree( prg, sp, pt->child );
-		if ( pt->ignore != 0 )
-			clearParseTree( prg, sp, pt->ignore );
+		if ( pt->leftIgnore != 0 )
+			clearParseTree( prg, sp, pt->leftIgnore );
+		if ( pt->rightIgnore != 0 )
+			clearParseTree( prg, sp, pt->rightIgnore );
 		parseTreeFree( prg, pt );
 		pt = next;
 	}
