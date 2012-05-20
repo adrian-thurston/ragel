@@ -76,4 +76,6 @@ TESTS="
 	rhsref1.lm
 	order1.lm
 	order2.lm
+	concat1.lm
+	concat2.lm
 "
