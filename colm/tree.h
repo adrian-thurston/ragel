@@ -92,15 +92,6 @@ typedef struct _TreePair
 	Tree *val;
 } TreePair;
 
-typedef struct _IgnoreList
-{
-	/* First four will be overlaid in other structures. */
-	short id;
-	unsigned short flags;
-	long refs;
-	Kid *child;
-} IgnoreList;
-
 typedef struct _ParseTree
 {
 	short id;
@@ -270,12 +261,12 @@ typedef struct _UserIter
 void treeUpref( Tree *tree );
 void treeDownref( struct ColmProgram *prg, Tree **sp, Tree *tree );
 long cmpTree( struct ColmProgram *prg, const Tree *tree1, const Tree *tree2 );
-void pushLeftIgnore( struct ColmProgram *prg, Tree *tree, IgnoreList *ignoreList );
-void pushRightIgnore( struct ColmProgram *prg, Tree *tree, IgnoreList *ignoreList );
+void pushLeftIgnore( struct ColmProgram *prg, Tree *tree, Tree *ignoreList );
+void pushRightIgnore( struct ColmProgram *prg, Tree *tree, Tree *ignoreList );
 void popLeftIgnore( struct ColmProgram *prg, Tree **sp, Tree *tree );
 void popRightIgnore( struct ColmProgram *prg, Tree **sp, Tree *tree );
-IgnoreList *treeLeftIgnore( struct ColmProgram *prg, Tree *tree );
-IgnoreList *treeRightIgnore( struct ColmProgram *prg, Tree *tree );
+Tree *treeLeftIgnore( struct ColmProgram *prg, Tree *tree );
+Tree *treeRightIgnore( struct ColmProgram *prg, Tree *tree );
 Kid *treeLeftIgnoreKid( struct ColmProgram *prg, Tree *tree );
 Kid *treeRightIgnoreKid( struct ColmProgram *prg, Tree *tree );
 Kid *treeChild( struct ColmProgram *prg, const Tree *tree );

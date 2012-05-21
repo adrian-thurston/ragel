@@ -101,7 +101,6 @@ typedef struct ColmProgram
 	PoolAlloc mapElPool;
 	PoolAlloc headPool;
 	PoolAlloc locationPool;
-	PoolAlloc ilPool;
 
 	Tree *trueVal;
 	Tree *falseVal;

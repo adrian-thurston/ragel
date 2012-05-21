@@ -1572,7 +1572,7 @@ void countNodes( Program *prg, int &count, ParseTree *parseTree, Kid *kid )
 		count += 1;
 
 		/* Should't have to recurse here. */
-		IgnoreList *ignoreList = treeLeftIgnore( prg, kid->tree );
+		Tree *ignoreList = treeLeftIgnore( prg, kid->tree );
 		if ( ignoreList != 0 ) {
 			Kid *ignore = ignoreList->child;
 			while ( ignore != 0 ) {
@@ -1629,7 +1629,7 @@ void fillNodes( Program *prg, int &nextAvail, Bindings *bindings, long &bindId,
 		node.data = stringData( kid->tree->tokdata );
 
 		/* Ignore items. */
-		IgnoreList *ignoreList = treeLeftIgnore( prg, kid->tree );
+		Tree *ignoreList = treeLeftIgnore( prg, kid->tree );
 		Kid *ignore = ignoreList == 0 ? 0 : ignoreList->child;
 		node.leftIgnore = ignore == 0 ? -1 : nextAvail;
 

@@ -579,9 +579,9 @@ static void attachRightIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTre
 
 			/* Copy the ignore list first if we need to attach it as a right
 			 * ignore. */
-			IgnoreList *rightIgnore = 0;
+			Tree *rightIgnore = 0;
 
-			rightIgnore = ilAllocate( prg );
+			rightIgnore = treeAllocate( prg );
 			rightIgnore->id = LEL_ID_IGNORE;
 			rightIgnore->child = ignoreKid;
 
@@ -592,12 +592,12 @@ static void attachRightIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTre
 				/* The previous token already has a right ignore. Merge by
 				 * attaching it as a left ignore of the new list. */
 				Kid *curIgnore = treeRightIgnoreKid( prg, parseTree->shadow->tree );
-				pushLeftIgnore( prg, (Tree*)rightIgnore, (IgnoreList*)curIgnore->tree );
+				pushLeftIgnore( prg, rightIgnore, curIgnore->tree );
 
 				/* Replace the current ignore. */
 				treeDownref( prg, sp, curIgnore->tree );
-				curIgnore->tree = (Tree*)rightIgnore;
-				treeUpref( (Tree*)rightIgnore );
+				curIgnore->tree = rightIgnore;
+				treeUpref( rightIgnore );
 			}
 			else {
 				/* Attach The ignore list. */
@@ -649,7 +649,7 @@ static void attachLeftIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTree
 		Kid *ignoreKid = dataChild;
 
 		/* Make the ignore list for the left-ignore. */
-		IgnoreList *leftIgnore = ilAllocate( prg );
+		Tree *leftIgnore = treeAllocate( prg );
 		leftIgnore->id = LEL_ID_IGNORE;
 		leftIgnore->child = ignoreKid;
 
@@ -660,12 +660,12 @@ static void attachLeftIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTree
 			/* The token already has a left-ignore. Merge by attaching it as a
 			 * right ignore of the new list. */
 			Kid *curIgnore = treeLeftIgnoreKid( prg, parseTree->shadow->tree );
-			pushRightIgnore( prg, (Tree*)leftIgnore, (IgnoreList*)curIgnore->tree );
+			pushRightIgnore( prg, leftIgnore, curIgnore->tree );
 
 			/* Replace the current ignore. */
 			treeDownref( prg, sp, curIgnore->tree );
-			curIgnore->tree = (Tree*)leftIgnore;
-			treeUpref( (Tree*)leftIgnore );
+			curIgnore->tree = leftIgnore;
+			treeUpref( leftIgnore );
 		}
 		else {
 			/* Attach the ignore list. */

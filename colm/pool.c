@@ -300,30 +300,6 @@ long locationNumLost( Program *prg )
 	return poolAllocNumLost( &prg->locationPool );
 }
 
-/* 
- * Ignore List
- */
-
-IgnoreList *ilAllocate( Program *prg )
-{
-	return (IgnoreList*) poolAllocAllocate( &prg->ilPool );
-}
-
-void ilFree( Program *prg, IgnoreList *el )
-{
-	poolAllocFree( &prg->ilPool, el );
-}
-
-void ilClear( Program *prg )
-{
-	poolAllocClear( &prg->ilPool );
-}
-
-long ilNumLost( Program *prg )
-{
-	return poolAllocNumLost( &prg->ilPool );
-}
-
 /*
  * Stream
  */

@@ -144,7 +144,6 @@ Program *colmNewProgram( RuntimeData *rtd, int argc, const char **argv )
 	initPoolAlloc( &prg->mapElPool, sizeof(MapEl) );
 	initPoolAlloc( &prg->headPool, sizeof(Head) );
 	initPoolAlloc( &prg->locationPool, sizeof(Location) );
-	initPoolAlloc( &prg->ilPool, sizeof(IgnoreList) );
 
 	Int *trueInt = (Int*) treeAllocate( prg );
 	trueInt->id = LEL_ID_BOOL;
@@ -207,7 +206,6 @@ int colmDeleteProgram( Program *prg )
 	long mapLost = mapElNumLost( prg );
 	long headLost = headNumLost( prg );
 	long locationLost = locationNumLost( prg );
-	long ilLost = ilNumLost( prg );
 
 	if ( kidLost )
 		message( "warning: lost kids: %ld\n", kidLost );
@@ -229,9 +227,6 @@ int colmDeleteProgram( Program *prg )
 
 	if ( locationLost )
 		message( "warning: lost locations: %ld\n", locationLost );
-
-	if ( ilLost )
-		message( "warning: lost ignore lists: %ld\n", ilLost );
 #endif
 
 	kidClear( prg );
@@ -241,7 +236,6 @@ int colmDeleteProgram( Program *prg )
 	listElClear( prg );
 	mapElClear( prg );
 	locationClear( prg );
-	ilClear( prg );
 
 	//memset( vm_stack, 0, sizeof(Tree*) * VM_STACK_SIZE);
 
