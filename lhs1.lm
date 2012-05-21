@@ -9,9 +9,12 @@ lex start
 def item 
 	[id]
 	{
-		lhs = cons item ["( " r1 " )"]
+		lhs = cons item ["( " ^r1 " )"]
 	}
 |	['(' item* ')']
+	{
+		lhs = cons item ["( " ^r2 " )"]
+	}
 
 def A 
 	[] {
