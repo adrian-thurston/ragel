@@ -741,6 +741,8 @@ static void detachRightIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTre
 		}
 
 		pdaRun->accumIgnore = last;
+
+		treeDownref( prg, sp, rightIgnore );
 	}
 }
 
