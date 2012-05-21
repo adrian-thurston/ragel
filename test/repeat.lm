@@ -17,7 +17,7 @@ Input: start = parse start( stdin )
 match Input [ItemList: item*]
 
 for I: item* in repeat( ItemList )
-	print( I '\n' )
+	print( ^I '\n' )
 
 for I: item* in rev_repeat( ItemList )
-	print( I '\n' )
+	print( ^I '\n' )

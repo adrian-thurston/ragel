@@ -63,12 +63,12 @@ for AttrListIter:attr_list in RootItemList {
 
 		# Add it to the colection
 		CollectedAttrs = construct attr_list 
-			[CollectedAttrs " foo=" Val]
+			[CollectedAttrs " foo=" ^Val]
 	}
 }
 
 # Reconstruct the left hand side with the 
 IL = construct item_list 
-	["<wrapper " CollectedAttrs ">" RootItemList "</wrapper>"]
+	["<wrapper " ^CollectedAttrs ">" ^RootItemList "</wrapper>"]
 
-print( IL '\n' )
+print( ^IL '\n' )

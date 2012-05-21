@@ -157,10 +157,10 @@ for S: statement* in P
 			# with a do ... while.
             S = construct statement* [
 				"do
-                "	[First]
-                "	[Rest]
-                "while [Expr];
-                Following]
+                "	[^First]
+                "	[^Rest]
+                "while [^Expr];
+                ^Following]
 		}
     }
 }

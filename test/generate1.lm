@@ -138,15 +138,15 @@ int print_target_subscriptions_and_slicings( Start: start )
 {
 	for TI: target_ext in Start {
 		if match TI [subscription] {
-			print( 'TARGET SUBSCRIPTION: ' TI '\n' )
+			print( 'TARGET SUBSCRIPTION: ' ^TI '\n' )
 		}
 
 		if match TI [simple_slicing] {
-			print( 'TARGET SIMPLE SLICING: ' TI '\n' )
+			print( 'TARGET SIMPLE SLICING: ' ^TI '\n' )
 		}
 
 		if match TI [extended_slicing] {
-			print( 'TARGET EXTENDED SLICING: ' TI '\n' )
+			print( 'TARGET EXTENDED SLICING: ' ^TI '\n' )
 		}
 	}
 	
@@ -156,15 +156,15 @@ int print_primary_subscriptions_and_slicings( Start: start )
 {
 	for PI: primary_ext in Start {
 		if match PI [subscription] {
-			print( 'PRIMARY SUBSCRIPTION: ' PI '\n' )
+			print( 'PRIMARY SUBSCRIPTION: ' ^PI '\n' )
 		}
 
 		if match PI [simple_slicing] {
-			print( 'PRIMARY SIMPLE SLICING: ' PI '\n' )
+			print( 'PRIMARY SIMPLE SLICING: ' ^PI '\n' )
 		}
 
 		if match PI [extended_slicing] {
-			print( 'PRIMARY EXTENDED SLICING: ' PI '\n' )
+			print( 'PRIMARY EXTENDED SLICING: ' ^PI '\n' )
 		}
 	}
 }
@@ -721,12 +721,12 @@ def keyword_item
 int print_stmts( S: start )
 {
 	for Stmt: statement in S
-		print( 'STMT: ' Stmt '\n' )
+		print( 'STMT: ' ^Stmt '\n' )
 }
 
 S: start = parse start( stdin )
 print( '*** SUCCESS ***\n' )
-print( S '\n' )
+print( ^S '\n' )
 print( '***\n' )
 print_stmts( S )
 print_target_subscriptions_and_slicings( S )

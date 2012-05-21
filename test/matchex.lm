@@ -29,6 +29,6 @@ match Tag ["<person name=" Val1:id attr*">" item* "</person>"]
 # Style: Literal text with embedded lists of types.
 match Tag "<person name=[Val2:id attr*]>[item*]</person>"
 
-print( Val1 '\n' )
-print( Val2 '\n' )
+print( ^Val1 '\n' )
+print( ^Val2 '\n' )
 

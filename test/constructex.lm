@@ -27,10 +27,10 @@ match PersonTag
 	["<person name=" Val:id attr*">" item* "</person>"]
 
 NameTag1: tag = construct tag 
-	["<name type=person>" Val "</name>"]
+	["<name type=person>" ^Val "</name>"]
 
 NameTag2: tag = construct tag 
-	"<name type=person>[Val]</name>"
+	"<name type=person>[^Val]</name>"
 
 print( NameTag1 '\n' )
 print( NameTag2 '\n' )
