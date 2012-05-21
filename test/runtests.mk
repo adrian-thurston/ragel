@@ -47,7 +47,8 @@ TESTS = \
 	liftattrs.lm \
 	mailbox.lm \
 	string.lm \
-	repeat.lm \
+	repeat1.lm \
+	repeat2.lm \
 	ragelambig1.lm \
 	ragelambig2.lm \
 	ragelambig3.lm \
@@ -125,7 +126,8 @@ DIFFS = \
 	liftattrs.diff \
 	mailbox.diff \
 	string.diff \
-	repeat.diff \
+	repeat1.diff \
+	repeat2.diff \
 	ragelambig1.diff \
 	ragelambig2.diff \
 	ragelambig3.diff \
@@ -525,14 +527,22 @@ string.out: string.bin
 
 string.bin: string.lm ./../colm/colm
 	./../colm/colm string.lm
-repeat.diff: repeat.out repeat.exp
-	@diff -u repeat.exp repeat.out > repeat.diff || ( cat repeat.diff; rm repeat.diff )
+repeat1.diff: repeat1.out repeat1.exp
+	@diff -u repeat1.exp repeat1.out > repeat1.diff || ( cat repeat1.diff; rm repeat1.diff )
 
-repeat.out: repeat.bin
-	./repeat.bin  < repeat.in > repeat.out
+repeat1.out: repeat1.bin
+	./repeat1.bin  < repeat1.in > repeat1.out
 
-repeat.bin: repeat.lm ./../colm/colm
-	./../colm/colm repeat.lm
+repeat1.bin: repeat1.lm ./../colm/colm
+	./../colm/colm repeat1.lm
+repeat2.diff: repeat2.out repeat2.exp
+	@diff -u repeat2.exp repeat2.out > repeat2.diff || ( cat repeat2.diff; rm repeat2.diff )
+
+repeat2.out: repeat2.bin
+	./repeat2.bin  < repeat2.in > repeat2.out
+
+repeat2.bin: repeat2.lm ./../colm/colm
+	./../colm/colm repeat2.lm
 ragelambig1.diff: ragelambig1.out ragelambig1.exp
 	@diff -u ragelambig1.exp ragelambig1.out > ragelambig1.diff || ( cat ragelambig1.diff; rm ragelambig1.diff )
 

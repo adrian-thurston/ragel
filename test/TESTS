@@ -48,7 +48,8 @@ TESTS="
 	liftattrs.lm
 	mailbox.lm
 	string.lm
-	repeat.lm
+	repeat1.lm
+	repeat2.lm
 	ragelambig1.lm
 	ragelambig2.lm
 	ragelambig3.lm
