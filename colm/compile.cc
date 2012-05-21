@@ -1725,6 +1725,11 @@ UniqueType *LangExpr::evaluate( ParseData *pd, CodeVect &code ) const
 					return pd->uniqueTypeStr;
 					
 				}
+				case '^': {
+					UniqueType *rt = right->evaluate( pd, code );
+					code.append( IN_TREE_TRIM );
+					return rt;
+				}
 				case OP_Deref: {
 					UniqueType *ut = right->evaluate( pd, code );
 					if ( ut->typeId != TYPE_PTR )

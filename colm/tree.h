@@ -354,6 +354,7 @@ void initStrCollect( StrCollect *collect );
 void strCollectDestroy( StrCollect *collect );
 void strCollectAppend( StrCollect *collect, const char *data, long len );
 void strCollectClear( StrCollect *collect );
+Tree *treeTrim( struct ColmProgram *prg, Tree **sp, Tree *tree );
 
 void printTree( struct ColmProgram *prg, Tree **sp, StrCollect *collect, Tree *tree );
 void printTermTree( struct ColmProgram *prg, Tree **sp, struct ColmPrintArgs *printArgs, Kid *kid );

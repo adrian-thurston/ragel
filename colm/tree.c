@@ -433,7 +433,7 @@ Tree *constructReplacementTree( Kid *kid, Tree **bindings, Program *prg, long pa
 				/* The token already has a right-ignore. Merge by attaching it as a
 				 * right ignore of the new list. */
 				Kid *curIgnore = treeRightIgnoreKid( prg, tree );
-				pushRightIgnore( prg, (Tree*)rightIgnore, (IgnoreList*)curIgnore->tree );
+				pushLeftIgnore( prg, (Tree*)rightIgnore, (IgnoreList*)curIgnore->tree );
 
 				/* Replace the current ignore. */
 				curIgnore->tree->refs -= 1;
@@ -2001,6 +2001,70 @@ void appendFile( struct ColmPrintArgs *args, const char *data, int length )
 	fwrite( data, length, 1, (FILE*)args->arg );
 }
 
+Tree *treeTrim( struct ColmProgram *prg, Tree **sp, Tree *tree )
+{
+	debug( REALM_PARSE, "attaching left ignore\n" );
+
+	/* Make the ignore list for the left-ignore. */
+	IgnoreList *leftIgnore = ilAllocate( prg );
+	leftIgnore->id = LEL_ID_IGNORE;
+	leftIgnore->child = 0;
+	leftIgnore->generation = prg->nextIlGen++;
+	leftIgnore->flags |= AF_SUPPRESS_RIGHT;
+
+	tree = splitTree( prg, tree );
+
+	/* Attach as left ignore to the token we are sending. */
+	if ( tree->flags & AF_LEFT_IGNORE ) {
+		/* The token already has a left-ignore. Merge by attaching it as a
+		 * right ignore of the new list. */
+		Kid *curIgnore = treeLeftIgnoreKid( prg, tree );
+		pushRightIgnore( prg, (Tree*)leftIgnore, (IgnoreList*)curIgnore->tree );
+
+		/* Replace the current ignore. */
+		treeDownref( prg, sp, curIgnore->tree );
+		curIgnore->tree = (Tree*)leftIgnore;
+		treeUpref( (Tree*)leftIgnore );
+	}
+	else {
+		/* Attach the ignore list. */
+		pushLeftIgnore( prg, tree, leftIgnore );
+	}
+
+
+	debug( REALM_PARSE, "attaching ignore right\n" );
+
+	/* Copy the ignore list first if we need to attach it as a right
+	 * ignore. */
+	IgnoreList *rightIgnore = 0;
+
+	rightIgnore = ilAllocate( prg );
+	rightIgnore->id = LEL_ID_IGNORE;
+	rightIgnore->child = 0;
+	rightIgnore->generation = prg->nextIlGen++;
+	rightIgnore->flags |= AF_SUPPRESS_LEFT;
+
+	/* About to alter the data tree. Split first. */
+	tree = splitTree( prg, tree );
+
+	if ( tree->flags & AF_RIGHT_IGNORE ) {
+		/* The previous token already has a right ignore. Merge by
+		 * attaching it as a left ignore of the new list. */
+		Kid *curIgnore = treeRightIgnoreKid( prg, tree );
+		pushLeftIgnore( prg, (Tree*)rightIgnore, (IgnoreList*)curIgnore->tree );
+
+		/* Replace the current ignore. */
+		treeDownref( prg, sp, curIgnore->tree );
+		curIgnore->tree = (Tree*)rightIgnore;
+		treeUpref( (Tree*)rightIgnore );
+	}
+	else {
+		/* Attach The ignore list. */
+		pushRightIgnore( prg, tree, rightIgnore );
+	}
+
+	return tree;
+}
 
 enum ReturnType
 {
@@ -2075,6 +2139,14 @@ rec_call:
 		goto skip_node;
 	}
 
+	if ( visitType == IgnoreWrapper ) {
+		Kid *newIgnore = kidAllocate( prg );
+		newIgnore->next = leadingIgnore;
+		leadingIgnore = newIgnore;
+		leadingIgnore->tree = kid->tree;
+		/* Don't skip. */
+	}
+
 	/* print leading ignore? Triggered by terminals. */
 	if ( visitType == Term ) {
 		/* Reverse the leading ignore list. */
@@ -2094,29 +2166,48 @@ rec_call:
 				last = leadingIgnore;
 				leadingIgnore = next;
 			}
+
+			ignore = leadingIgnore;
+			while ( ignore != 0 ) {
+				if ( ignore->tree->flags & AF_SUPPRESS_LEFT ) {
+					debug( REALM_PRINT, "suppress left\n" );
+					leadingIgnore = ignore;
+				}
+
+				if ( ignore->tree->flags & AF_SUPPRESS_RIGHT ) {
+					debug( REALM_PRINT, "suppress right\n" );
+					/* Chomp off what seen so far. */
+					ignore->next = 0;
+					break;
+				}
+
+				ignore = ignore->next;
+			}
 		
 			/* Print the leading ignore list, free the kids in the process. */
 			if ( printArgs->comm ) {	
 				ignore = leadingIgnore;
 				while ( ignore != 0 ) {
-					vm_push( (SW)leadingIgnore );
-					vm_push( (SW)ignore );
-					vm_push( (SW)parent );
-					vm_push( (SW)kid );
+					if ( ignore->tree->id != LEL_ID_IGNORE ) {
+						vm_push( (SW)leadingIgnore );
+						vm_push( (SW)ignore );
+						vm_push( (SW)parent );
+						vm_push( (SW)kid );
 
-					leadingIgnore = 0;
-					kid = ignore;
-					parent = 0;
+						leadingIgnore = 0;
+						kid = ignore;
+						parent = 0;
 
-					debug( REALM_PRINT, "rec call on %p\n", kid->tree );
-					vm_push( (SW) RecIgnoreList );
-					goto rec_call;
-					rec_return_il:
+						debug( REALM_PRINT, "rec call on %p\n", kid->tree );
+						vm_push( (SW) RecIgnoreList );
+						goto rec_call;
+						rec_return_il:
 
-					kid = (Kid*)vm_pop();
-					parent = (Kid*)vm_pop();
-					ignore = (Kid*)vm_pop();
-					leadingIgnore = (Kid*)vm_pop();
+						kid = (Kid*)vm_pop();
+						parent = (Kid*)vm_pop();
+						ignore = (Kid*)vm_pop();
+						leadingIgnore = (Kid*)vm_pop();
+					}
 
 					ignore = ignore->next;
 				}

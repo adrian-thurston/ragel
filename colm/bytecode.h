@@ -67,6 +67,7 @@ typedef unsigned char uchar;
 #define IN_STR_ATOI              0x16
 #define IN_STR_LENGTH            0x17
 #define IN_CONCAT_STR            0x18
+#define IN_TREE_TRIM             0xfc
 
 #define IN_INIT_LOCALS           0x19
 #define IN_POP                   0x1b
@@ -358,6 +359,9 @@ typedef unsigned char uchar;
 
 #define AF_LEFT_IGNORE   0x0100
 #define AF_RIGHT_IGNORE  0x0200
+
+#define AF_SUPPRESS_LEFT  0x4000
+#define AF_SUPPRESS_RIGHT 0x8000
 
 /*
  * Call stack.

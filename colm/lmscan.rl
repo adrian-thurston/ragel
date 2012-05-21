@@ -528,7 +528,7 @@ void Scanner::endSection( )
 		'||' => { token( TK_BarBar ); };
 		'<<' => { token( TK_LtLt ); };
 		
-		('+' | '-' | '*' | '/' | '(' | ')' | '@' | '$' ) => { token( *ts ); };
+		('+' | '-' | '*' | '/' | '(' | ')' | '@' | '$' | '^' ) => { token( *ts ); };
 
 
 		# Whitespace other than newline.

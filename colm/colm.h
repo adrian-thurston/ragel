@@ -51,5 +51,4 @@ struct ColmTree *getRepeatVal( struct ColmTree *tree );
 }
 #endif
 
-
 #endif
