@@ -2061,57 +2061,20 @@ Tree *treeTrim( struct ColmProgram *prg, Tree **sp, Tree *tree )
 	/* Make the ignore list for the left-ignore. */
 	Tree *leftIgnore = treeAllocate( prg );
 	leftIgnore->id = LEL_ID_IGNORE;
-	leftIgnore->child = 0;
 	leftIgnore->flags |= AF_SUPPRESS_RIGHT;
 
-	tree = splitTree( prg, tree );
-
-	/* Attach as left ignore to the token we are sending. */
-	if ( tree->flags & AF_LEFT_IGNORE ) {
-		/* The token already has a left-ignore. Merge by attaching it as a
-		 * right ignore of the new list. */
-		Kid *curIgnore = treeLeftIgnoreKid( prg, tree );
-		insRightIgnore( prg, leftIgnore, curIgnore->tree );
-
-		/* Replace the current ignore. */
-		treeDownref( prg, sp, curIgnore->tree );
-		curIgnore->tree = (Tree*)leftIgnore;
-		treeUpref( (Tree*)leftIgnore );
-	}
-	else {
-		/* Attach the ignore list. */
-		insLeftIgnore( prg, tree, leftIgnore );
-	}
+	tree = pushLeftIgnore( prg, tree, leftIgnore );
 
 	debug( REALM_PARSE, "attaching ignore right\n" );
 
 	/* Copy the ignore list first if we need to attach it as a right
 	 * ignore. */
 	Tree *rightIgnore = 0;
-
 	rightIgnore = treeAllocate( prg );
 	rightIgnore->id = LEL_ID_IGNORE;
-	rightIgnore->child = 0;
 	rightIgnore->flags |= AF_SUPPRESS_LEFT;
 
-	/* About to alter the data tree. Split first. */
-	tree = splitTree( prg, tree );
-
-	if ( tree->flags & AF_RIGHT_IGNORE ) {
-		/* The previous token already has a right ignore. Merge by
-		 * attaching it as a left ignore of the new list. */
-		Kid *curIgnore = treeRightIgnoreKid( prg, tree );
-		insLeftIgnore( prg, rightIgnore, curIgnore->tree );
-
-		/* Replace the current ignore. */
-		treeDownref( prg, sp, curIgnore->tree );
-		curIgnore->tree = (Tree*)rightIgnore;
-		treeUpref( rightIgnore );
-	}
-	else {
-		/* Attach The ignore list. */
-		insRightIgnore( prg, tree, rightIgnore );
-	}
+	tree = pushRightIgnore( prg, tree, rightIgnore );
 
 	return tree;
 }
