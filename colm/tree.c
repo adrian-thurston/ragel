@@ -102,6 +102,15 @@ void freeAttrs( Program *prg, Kid *attrs )
 	}
 }
 
+void freeKidList( Program *prg, Kid *kid )
+{
+	while ( kid != 0 ) {
+		Kid *next = kid->next;
+		kidFree( prg, kid );
+		kid = next;
+	}
+}
+
 void setAttr( Tree *tree, long pos, Tree *val )
 {
 	long i;
@@ -2031,7 +2040,6 @@ Tree *treeTrim( struct ColmProgram *prg, Tree **sp, Tree *tree )
 		pushLeftIgnore( prg, tree, leftIgnore );
 	}
 
-
 	debug( REALM_PARSE, "attaching ignore right\n" );
 
 	/* Copy the ignore list first if we need to attach it as a right
@@ -2153,12 +2161,18 @@ rec_call:
 		if ( leadingIgnore != 0 ) {
 			Kid *ignore = 0, *last = 0;
 
-			debug( REALM_PRINT, "printing ignore %p\n", leadingIgnore->tree );
-
-			/* Reverse the list. */
+			/* Reverse the list and take the opportunity to implement the
+			 * suppress left. */
 			while ( true ) {
 				Kid *next = leadingIgnore->next;
 				leadingIgnore->next = last;
+
+				if ( leadingIgnore->tree->flags & AF_SUPPRESS_LEFT ) {
+					/* We are moving left. Chop off the tail. */
+					debug( REALM_PRINT, "suppressing left\n" );
+					freeKidList( prg, next );
+					break;
+				}
 
 				if ( next == 0 )
 					break;
@@ -2167,28 +2181,16 @@ rec_call:
 				leadingIgnore = next;
 			}
 
-			ignore = leadingIgnore;
-			while ( ignore != 0 ) {
-				if ( ignore->tree->flags & AF_SUPPRESS_LEFT ) {
-					debug( REALM_PRINT, "suppress left\n" );
-					leadingIgnore = ignore;
-				}
-
-				if ( ignore->tree->flags & AF_SUPPRESS_RIGHT ) {
-					debug( REALM_PRINT, "suppress right\n" );
-					/* Chomp off what seen so far. */
-					ignore->next = 0;
-					break;
-				}
-
-				ignore = ignore->next;
-			}
-		
-			/* Print the leading ignore list, free the kids in the process. */
+			/* Print the leading ignore list. Also implement the suppress right
+			 * in the process. */
 			if ( printArgs->comm ) {	
 				ignore = leadingIgnore;
 				while ( ignore != 0 ) {
+					if ( ignore->tree->flags & AF_SUPPRESS_RIGHT )
+						break;
+
 					if ( ignore->tree->id != LEL_ID_IGNORE ) {
+						vm_push( (SW)visitType );
 						vm_push( (SW)leadingIgnore );
 						vm_push( (SW)ignore );
 						vm_push( (SW)parent );
@@ -2207,6 +2209,7 @@ rec_call:
 						parent = (Kid*)vm_pop();
 						ignore = (Kid*)vm_pop();
 						leadingIgnore = (Kid*)vm_pop();
+						visitType = (enum VisitType)vm_pop();
 					}
 
 					ignore = ignore->next;
@@ -2214,11 +2217,8 @@ rec_call:
 			}
 
 			/* Free the leading ignore list. */
-			while ( leadingIgnore != 0 ) {
-				Kid *next = leadingIgnore->next;
-				kidFree( prg, leadingIgnore );
-				leadingIgnore = next;
-			}
+			freeKidList( prg, leadingIgnore );
+			leadingIgnore = 0;
 		}
 	}
 
@@ -2242,6 +2242,7 @@ rec_call:
 		treeChild( prg, kid->tree );
 
 	if ( child != 0 ) {
+		vm_push( (SW)visitType );
 		vm_push( (SW)parent );
 		vm_push( (SW)kid );
 		parent = kid;
@@ -2254,6 +2255,7 @@ rec_call:
 		}
 		kid = (Kid*)vm_pop();
 		parent = (Kid*)vm_pop();
+		visitType = (enum VisitType)vm_pop();
 	}
 
 	if ( visitType == Term || visitType == NonTerm ) {
