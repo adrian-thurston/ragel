@@ -262,8 +262,8 @@ void treeUpref( Tree *tree );
 void treeDownref( struct ColmProgram *prg, Tree **sp, Tree *tree );
 long cmpTree( struct ColmProgram *prg, const Tree *tree1, const Tree *tree2 );
 
-Tree *pushRightIgnore( struct ColmProgram *prg, Tree **sp, Tree *pushTo, Tree *rightIgnore );
-Tree *pushLeftIgnore( struct ColmProgram *prg, Tree **sp, Tree *pushTo, Tree *leftIgnore );
+Tree *pushRightIgnore( struct ColmProgram *prg, Tree *pushTo, Tree *rightIgnore );
+Tree *pushLeftIgnore( struct ColmProgram *prg, Tree *pushTo, Tree *leftIgnore );
 Tree *popRightIgnore( struct ColmProgram *prg, Tree **sp, Tree *popFrom, Tree **rightIgnore );
 Tree *popLeftIgnore( struct ColmProgram *prg, Tree **sp, Tree *popFrom, Tree **leftIgnore );
 Tree *treeLeftIgnore( struct ColmProgram *prg, Tree *tree );

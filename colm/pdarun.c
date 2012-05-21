@@ -587,7 +587,7 @@ static void attachRightIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTre
 
 			Tree *pushTo = parseTree->shadow->tree;
 
-			pushTo = pushRightIgnore( prg, sp, pushTo, rightIgnore );
+			pushTo = pushRightIgnore( prg, pushTo, rightIgnore );
 
 			parseTree->shadow->tree = pushTo;
 
@@ -642,7 +642,7 @@ static void attachLeftIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTree
 
 		Tree *pushTo = parseTree->shadow->tree;
 
-		pushTo = pushLeftIgnore( prg, sp, pushTo, leftIgnore );
+		pushTo = pushLeftIgnore( prg, pushTo, leftIgnore );
 
 		parseTree->shadow->tree = pushTo;
 
