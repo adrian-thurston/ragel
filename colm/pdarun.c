@@ -585,29 +585,18 @@ static void attachRightIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTre
 			rightIgnore->id = LEL_ID_IGNORE;
 			rightIgnore->child = ignoreKid;
 
-			/* About to alter the data tree. Split first. */
-			parseTree->shadow->tree = splitTree( prg, parseTree->shadow->tree );
+			Tree *pushTo = parseTree->shadow->tree;
 
-			if ( parseTree->shadow->tree->flags & AF_RIGHT_IGNORE ) {
-				/* The previous token already has a right ignore. Merge by
-				 * attaching it as a left ignore of the new list. */
-				Kid *curIgnore = treeRightIgnoreKid( prg, parseTree->shadow->tree );
-				pushLeftIgnore( prg, rightIgnore, curIgnore->tree );
+			pushTo = pushRightIgnore2( prg, sp, pushTo, rightIgnore );
 
-				/* Replace the current ignore. */
-				treeDownref( prg, sp, curIgnore->tree );
-				curIgnore->tree = rightIgnore;
-				treeUpref( rightIgnore );
-			}
-			else {
-				/* Attach The ignore list. */
-				pushRightIgnore( prg, parseTree->shadow->tree, rightIgnore );
-			}
+			parseTree->shadow->tree = pushTo;
 
 			parseTree->flags |= PF_RIGHT_IL_ATTACHED;
 		}
 	}
 }
+
+
 
 static void attachLeftIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTree *parseTree )
 {
@@ -653,24 +642,12 @@ static void attachLeftIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTree
 		leftIgnore->id = LEL_ID_IGNORE;
 		leftIgnore->child = ignoreKid;
 
-		parseTree->shadow->tree = splitTree( prg, parseTree->shadow->tree );
+		Tree *pushTo = parseTree->shadow->tree;
 
-		/* Attach as left ignore to the token we are sending. */
-		if ( parseTree->shadow->tree->flags & AF_LEFT_IGNORE ) {
-			/* The token already has a left-ignore. Merge by attaching it as a
-			 * right ignore of the new list. */
-			Kid *curIgnore = treeLeftIgnoreKid( prg, parseTree->shadow->tree );
-			pushRightIgnore( prg, leftIgnore, curIgnore->tree );
+		pushTo = pushLeftIgnore2( prg, sp, pushTo, leftIgnore );
 
-			/* Replace the current ignore. */
-			treeDownref( prg, sp, curIgnore->tree );
-			curIgnore->tree = leftIgnore;
-			treeUpref( leftIgnore );
-		}
-		else {
-			/* Attach the ignore list. */
-			pushLeftIgnore( prg, parseTree->shadow->tree, leftIgnore );
-		}
+		parseTree->shadow->tree = pushTo;
+
 		parseTree->flags |= PF_LEFT_IL_ATTACHED;
 
 	}

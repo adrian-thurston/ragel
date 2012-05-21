@@ -261,8 +261,11 @@ typedef struct _UserIter
 void treeUpref( Tree *tree );
 void treeDownref( struct ColmProgram *prg, Tree **sp, Tree *tree );
 long cmpTree( struct ColmProgram *prg, const Tree *tree1, const Tree *tree2 );
-void pushLeftIgnore( struct ColmProgram *prg, Tree *tree, Tree *ignoreList );
-void pushRightIgnore( struct ColmProgram *prg, Tree *tree, Tree *ignoreList );
+
+Tree *pushRightIgnore2( struct ColmProgram *prg, Tree **sp, Tree *pushTo, Tree *rightIgnore );
+Tree *pushLeftIgnore2( struct ColmProgram *prg, Tree **sp, Tree *pushTo, Tree *leftIgnore );
+//void pushLeftIgnore( struct ColmProgram *prg, Tree *tree, Tree *ignoreList );
+//void pushRightIgnore( struct ColmProgram *prg, Tree *tree, Tree *ignoreList );
 void popLeftIgnore( struct ColmProgram *prg, Tree **sp, Tree *tree );
 void popRightIgnore( struct ColmProgram *prg, Tree **sp, Tree *tree );
 Tree *treeLeftIgnore( struct ColmProgram *prg, Tree *tree );

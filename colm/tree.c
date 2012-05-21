@@ -325,18 +325,17 @@ Tree *constructInput( Program *prg )
 
 Kid *constructReplacementKid( Tree **bindings, Program *prg, Kid *prev, long pat );
 
-static Kid *constructLeftIgnoreList( Program *prg, long pat )
+static Kid *constructIgnoreList( Program *prg, long ignoreInd )
 {
 	PatReplNode *nodes = prg->rtd->patReplNodes;
-	long ignore = nodes[pat].leftIgnore;
 
 	Kid *first = 0, *last = 0;
-	while ( ignore >= 0 ) {
-		Head *ignoreData = stringAllocPointer( prg, nodes[ignore].data, nodes[ignore].length );
+	while ( ignoreInd >= 0 ) {
+		Head *ignoreData = stringAllocPointer( prg, nodes[ignoreInd].data, nodes[ignoreInd].length );
 
 		Tree *ignTree = treeAllocate( prg );
 		ignTree->refs = 1;
-		ignTree->id = nodes[ignore].id;
+		ignTree->id = nodes[ignoreInd].id;
 		ignTree->tokdata = ignoreData;
 
 		Kid *ignKid = kidAllocate( prg );
@@ -348,42 +347,144 @@ static Kid *constructLeftIgnoreList( Program *prg, long pat )
 		else
 			last->next = ignKid;
 
-		ignore = nodes[ignore].next;
+		ignoreInd = nodes[ignoreInd].next;
 		last = ignKid;
 	}
 
 	return first;
+}
+
+static Kid *constructLeftIgnoreList( Program *prg, long pat )
+{
+	PatReplNode *nodes = prg->rtd->patReplNodes;
+	return constructIgnoreList( prg, nodes[pat].leftIgnore );
 }
 
 static Kid *constructRightIgnoreList( Program *prg, long pat )
 {
 	PatReplNode *nodes = prg->rtd->patReplNodes;
-	long ignore = nodes[pat].rightIgnore;
+	return constructIgnoreList( prg, nodes[pat].rightIgnore );
+}
 
-	Kid *first = 0, *last = 0;
-	while ( ignore >= 0 ) {
-		Head *ignoreData = stringAllocPointer( prg, nodes[ignore].data, nodes[ignore].length );
+static void pushLeftIgnore( Program *prg, Tree *tree, Tree *ignoreList )
+{
+	assert( ! (tree->flags & AF_LEFT_IGNORE) );
 
-		Tree *ignTree = treeAllocate( prg );
-		ignTree->refs = 1;
-		ignTree->id = nodes[ignore].id;
-		ignTree->tokdata = ignoreData;
+	/* Allocate. */
+	Kid *kid = kidAllocate( prg );
+	kid->tree = ignoreList;
+	treeUpref( ignoreList );
 
-		Kid *ignKid = kidAllocate( prg );
-		ignKid->tree = ignTree;
-		ignKid->next = 0;
+	/* Attach it. */
+	kid->next = tree->child;
+	tree->child = kid;
 
-		if ( last == 0 )
-			first = ignKid;
-		else
-			last->next = ignKid;
+	tree->flags |= AF_LEFT_IGNORE;
+}
 
-		ignore = nodes[ignore].next;
-		last = ignKid;
+static void pushRightIgnore( Program *prg, Tree *tree, Tree *ignoreList )
+{
+	assert( ! (tree->flags & AF_RIGHT_IGNORE) );
+
+	/* Insert an ignore head in the child list. */
+	Kid *kid = kidAllocate( prg );
+	kid->tree = (Tree*)ignoreList;
+	treeUpref( (Tree*)ignoreList );
+
+	/* Attach it. */
+	if ( tree->flags & AF_LEFT_IGNORE ) {
+		kid->next = tree->child->next;
+		tree->child->next = kid;
+	}
+	else {
+		kid->next = tree->child;
+		tree->child = kid;
 	}
 
-	return first;
+	tree->flags |= AF_RIGHT_IGNORE;
 }
+
+Tree *pushRightIgnore2( Program *prg, Tree **sp, Tree *pushTo, Tree *rightIgnore )
+{
+	/* About to alter the data tree. Split first. */
+	pushTo = splitTree( prg, pushTo );
+
+	if ( pushTo->flags & AF_RIGHT_IGNORE ) {
+		/* The previous token already has a right ignore. Merge by
+		 * attaching it as a left ignore of the new list. */
+		Kid *curIgnore = treeRightIgnoreKid( prg, pushTo );
+		pushLeftIgnore( prg, rightIgnore, curIgnore->tree );
+
+		/* Replace the current ignore. */
+		treeDownref( prg, sp, curIgnore->tree );
+		curIgnore->tree = rightIgnore;
+		treeUpref( rightIgnore );
+	}
+	else {
+		/* Attach The ignore list. */
+		pushRightIgnore( prg, pushTo, rightIgnore );
+	}
+
+	return pushTo;
+}
+
+Tree *pushLeftIgnore2( Program *prg, Tree **sp, Tree *pushTo, Tree *leftIgnore )
+{
+	pushTo = splitTree( prg, pushTo );
+
+	/* Attach as left ignore to the token we are sending. */
+	if ( pushTo->flags & AF_LEFT_IGNORE ) {
+		/* The token already has a left-ignore. Merge by attaching it as a
+		 * right ignore of the new list. */
+		Kid *curIgnore = treeLeftIgnoreKid( prg, pushTo );
+		pushRightIgnore( prg, leftIgnore, curIgnore->tree );
+
+		/* Replace the current ignore. */
+		treeDownref( prg, sp, curIgnore->tree );
+		curIgnore->tree = leftIgnore;
+		treeUpref( leftIgnore );
+	}
+	else {
+		/* Attach the ignore list. */
+		pushLeftIgnore( prg, pushTo, leftIgnore );
+	}
+
+	return pushTo;
+}
+
+
+void popLeftIgnore( Program *prg, Tree **sp, Tree *tree )
+{
+	assert( tree->flags & AF_LEFT_IGNORE );
+
+	Kid *next = tree->child->next;
+	treeDownref( prg, sp, tree->child->tree );
+	kidFree( prg, tree->child );
+	tree->child = next;
+
+	tree->flags &= ~AF_LEFT_IGNORE;
+}
+
+void popRightIgnore( Program *prg, Tree **sp, Tree *tree )
+{
+	assert( tree->flags & AF_RIGHT_IGNORE );
+
+	if ( tree->flags & AF_LEFT_IGNORE ) {
+		Kid *next = tree->child->next->next;
+		treeDownref( prg, sp, tree->child->next->tree );
+		kidFree( prg, tree->child->next );
+		tree->child->next = next;
+	}
+	else {
+		Kid *next = tree->child->next;
+		treeDownref( prg, sp, tree->child->tree );
+		kidFree( prg, tree->child );
+		tree->child = next;
+	}
+
+	tree->flags &= ~AF_RIGHT_IGNORE;
+}
+
 
 /* Returns an uprefed tree. Saves us having to downref and bindings to zero to
  * return a zero-ref tree. */
@@ -1070,76 +1171,6 @@ Kid *treeAttr( Program *prg, const Tree *tree )
 		kid = kid->next;
 
 	return kid;
-}
-
-void pushLeftIgnore( Program *prg, Tree *tree, Tree *ignoreList )
-{
-	assert( ! (tree->flags & AF_LEFT_IGNORE) );
-
-	/* Allocate. */
-	Kid *kid = kidAllocate( prg );
-	kid->tree = ignoreList;
-	treeUpref( ignoreList );
-
-	/* Attach it. */
-	kid->next = tree->child;
-	tree->child = kid;
-
-	tree->flags |= AF_LEFT_IGNORE;
-}
-
-void pushRightIgnore( Program *prg, Tree *tree, Tree *ignoreList )
-{
-	assert( ! (tree->flags & AF_RIGHT_IGNORE) );
-
-	/* Insert an ignore head in the child list. */
-	Kid *kid = kidAllocate( prg );
-	kid->tree = (Tree*)ignoreList;
-	treeUpref( (Tree*)ignoreList );
-
-	/* Attach it. */
-	if ( tree->flags & AF_LEFT_IGNORE ) {
-		kid->next = tree->child->next;
-		tree->child->next = kid;
-	}
-	else {
-		kid->next = tree->child;
-		tree->child = kid;
-	}
-
-	tree->flags |= AF_RIGHT_IGNORE;
-}
-
-void popLeftIgnore( Program *prg, Tree **sp, Tree *tree )
-{
-	assert( tree->flags & AF_LEFT_IGNORE );
-
-	Kid *next = tree->child->next;
-	treeDownref( prg, sp, tree->child->tree );
-	kidFree( prg, tree->child );
-	tree->child = next;
-
-	tree->flags &= ~AF_LEFT_IGNORE;
-}
-
-void popRightIgnore( Program *prg, Tree **sp, Tree *tree )
-{
-	assert( tree->flags & AF_RIGHT_IGNORE );
-
-	if ( tree->flags & AF_LEFT_IGNORE ) {
-		Kid *next = tree->child->next->next;
-		treeDownref( prg, sp, tree->child->next->tree );
-		kidFree( prg, tree->child->next );
-		tree->child->next = next;
-	}
-	else {
-		Kid *next = tree->child->next;
-		treeDownref( prg, sp, tree->child->tree );
-		kidFree( prg, tree->child );
-		tree->child = next;
-	}
-
-	tree->flags &= ~AF_RIGHT_IGNORE;
 }
 
 Tree *treeLeftIgnore( Program *prg, Tree *tree )
