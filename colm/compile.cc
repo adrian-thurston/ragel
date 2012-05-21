@@ -1720,14 +1720,22 @@ UniqueType *LangExpr::evaluate( ParseData *pd, CodeVect &code ) const
 					return pd->uniqueTypeBool;
 				}
 				case '$': {
-					right->evaluate( pd, code );
+					UniqueType *rt = right->evaluate( pd, code );
+					if ( rt->typeId == TYPE_TREE && rt != pd->uniqueTypeInt && rt != pd->uniqueTypeStr && rt != pd->uniqueTypeBool ) 
+						code.append( IN_TREE_TRIM );
 					code.append( IN_TREE_TO_STR );
 					return pd->uniqueTypeStr;
 					
 				}
+				case '%': {
+					right->evaluate( pd, code );
+					code.append( IN_TREE_TO_STR );
+					return pd->uniqueTypeStr;
+				}
 				case '^': {
 					UniqueType *rt = right->evaluate( pd, code );
-					code.append( IN_TREE_TRIM );
+					if ( rt->typeId == TYPE_TREE && rt != pd->uniqueTypeInt && rt != pd->uniqueTypeStr && rt != pd->uniqueTypeBool ) 
+						code.append( IN_TREE_TRIM );
 					return rt;
 				}
 				case OP_Deref: {
