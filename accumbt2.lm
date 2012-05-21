@@ -25,7 +25,7 @@ lex two
 		[id2]
 		{
 			send OneParser [' extra ']
-			send OneParser [$(^r1)]
+			send OneParser [$r1]
 		}
 
 	def two 
