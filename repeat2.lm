@@ -1,0 +1,553 @@
+#
+#   Copyright 2012 Adrian Thurston <thurston@complang.org>
+#
+
+#   This file is part of Ragel.
+#
+#   Ragel is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   Ragel is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with Ragel; if not, write to the Free Software
+#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+
+
+lex top 
+{
+	token word  /( [^. \t\n]+  | '.' )/
+	token lws /[ \t]+/
+	token nl  / '\n'/
+
+	token cmd_verb1 /'.verb|'/
+	token cmd_verb2 /'.verb/'/
+	token cmd_label /'.label{'/
+	token cmd_ref /'.ref{'/
+	token cmd_em /'.em{'/
+	token cmd_tt /'.tt{'/
+
+	token cmd_title /'.title' lws/
+	token cmd_sub_title /'.subtitle' lws/
+	token cmd_author /'.author' lws/
+
+	token cmd_chapter /'.chapter' lws/
+	token cmd_section /'.section' lws/
+	token cmd_sub_section /'.subsection' lws/
+	token cmd_sub_sub_section /'.subsubsection' lws/
+
+	token cmd_graphic /'.graphic' lws/
+	token cmd_comment /'.comment' lws? '\n'/
+	token cmd_verbatim /'.verbatim' lws? '\n'/
+	token cmd_code /'.code' lws? '\n'/
+
+	token cmd_itemize /'.itemize' lws? '\n'/
+	token end_itemize /'.end' lws 'itemize' lws? '\n'/
+	token cmd_item /'.item' lws/
+
+	token cmd_center /'.center' lws? '\n'/
+	token end_center /'.end' lws 'center' lws? '\n'/
+
+	token cmd_tabular /'.tabular' lws? '\n'/
+	token cmd_row /'.row' lws/
+	token end_tabular /'.end' lws 'tabular' lws? '\n'/
+
+	token cmd_multicols /'.multicols' lws? '\n'/
+	token cmd_columnbreak /'.columnbreak' lws? '\n'/
+	token end_multicols /'.end' lws 'multicols' lws? '\n'/
+
+	token cmd_figure / '.figure' lws?/
+	token cmd_caption / '.caption' lws/
+	token end_figure / '.end' lws 'figure' lws? '\n'/
+
+	token cmd_list /'.list' lws? '\n'/
+	token end_list /'.end' lws 'list' lws? '\n'/
+	token cmd_li /'.li' lws/
+
+	token cmd_license /'.license' lws? '\n'/
+}
+
+lex cmd_bar
+{
+	token bar_data /[^|]*/
+	token end_bar /'|'/
+}
+
+lex cmd_slash
+{
+	token slash_data /[^/]*/
+	token end_slash /'/'/
+}
+
+lex cmd_curly
+{
+	token curly_data /[^}]*/
+	token end_curly /'}'/
+}
+
+def cmd_il
+	[cmd_verb1 bar_data end_bar]
+|	[cmd_verb2 slash_data end_slash]
+|	[cmd_label curly_data end_curly]
+|	[cmd_ref curly_data end_curly]
+|	[cmd_em curly_data end_curly]
+|	[cmd_tt curly_data end_curly]
+
+def text
+	[word]
+|	[lws]
+|	[cmd_il]
+
+lex verbatim
+{
+	token end_verbatim /lws? '.' lws? 'end' lws 'verbatim' lws? '\n'/
+	token verbatim_line /[^\n]* '\n'/
+}
+
+def verbatim
+	[cmd_verbatim verbatim_line* end_verbatim]
+
+lex code
+{
+	token end_code /lws? '.' lws? 'end' lws 'code' lws? '\n'/
+	token code_line /[^\n]* '\n'/
+}
+
+def code
+	[cmd_code code_line* end_code]
+
+lex comment
+{
+	token end_comment /lws? '.' lws? 'end' lws 'comment' lws? '\n'/
+	token comment_line /[^\n]* '\n'/
+}
+
+def comment
+	[cmd_comment comment_line* end_comment]
+
+def figure
+	[cmd_figure text nl line* caption? end_figure]
+
+def li
+	[cmd_li text* nl]
+
+def _list
+	[cmd_list li* end_list]
+
+def scale
+	[lws word word*]
+
+def graphic
+	[cmd_graphic word scale? nl]
+
+def itemize
+	[cmd_itemize line* item* end_itemize]
+
+def center
+	[cmd_center line* end_center]
+
+def row
+	[cmd_row text* nl]
+
+def tabular
+	[cmd_tabular row* end_tabular]
+
+def multicols_line
+	[cmd_columnbreak]
+|	[line]
+
+def multicols
+	[cmd_multicols multicols_line* end_multicols]
+
+def item
+	[cmd_item line*]
+
+def caption
+	[cmd_caption line*]
+
+def line
+	[text]
+|	[nl]
+|	[comment]
+|	[verbatim]
+|	[code]
+|	[graphic]
+|	[itemize]
+|	[center]
+|	[tabular]
+|	[multicols]
+|	[figure]
+|	[_list]
+
+def sub_sub_section
+	[cmd_sub_sub_section text* nl line*]
+
+def sub_section
+	[cmd_sub_section text* nl line* sub_sub_section*]
+
+def section
+	[cmd_section text* nl line* sub_section*]
+
+def chapter
+	[cmd_chapter text* nl line* section*]
+
+def title
+	[cmd_title text* nl]
+
+def subtitle
+	[cmd_sub_title text* nl]
+
+def author
+	[cmd_author text* nl]
+
+#
+# Paragraphs.
+#
+
+def pline
+	[text text* nl]
+
+def paragraph
+	[pline pline*]
+
+def pextra
+	[nl paragraph]
+
+def block
+	[paragraph pextra*]
+
+def license
+	[cmd_license nl* block nl*]
+
+#
+# Preamble.
+#
+
+def preamble_item
+	[text]
+|	[nl]
+|	[title]
+|	[subtitle]
+|	[author]
+
+def preamble
+	[preamble_item* license]
+
+def start 
+	[preamble chapter*]
+
+parse Start: start( stdin )
+if ( ! Start ) {
+	print( error() '\n' )
+	exit( 1 )
+}
+
+int printPlData( Pld: cmd_il )
+{
+	if match Pld [ cmd_verb1 V: bar_data end_bar] {
+		print( '\\verb|' )
+		print( V )
+		print( '|' )
+	}
+	else if match Pld [cmd_verb2 V: slash_data end_slash] {
+		print( '\\verb/' )
+		print( V )
+		print( '/' )
+	}
+	else if match Pld [cmd_label L: curly_data end_curly] {
+		print( '\\label{' )
+		print( L )
+		print( '}' )
+	}
+	else if match Pld [cmd_ref L: curly_data end_curly] {
+		print( '\\ref{' )
+		print( L )
+		print( '}' )
+	}
+	else if match Pld [cmd_em L: curly_data end_curly] {
+		print( '{\\em ' )
+		print( L )
+		print( '}' )
+	}
+	else if match Pld [cmd_tt L: curly_data end_curly] {
+		print( '{\\tt ' )
+		print( L )
+		print( '}' )
+	}
+	else {
+		print( Pld )
+	}
+}
+
+int printText( Lines: text* )
+{
+	for L: text in repeat(Lines) {
+		if match L [PlData: cmd_il] {
+			printPlData( PlData )
+		}
+		else {
+			print( L )
+		}
+	}
+}
+
+int printLines( Lines: line* )
+{
+	for L: line in repeat(Lines) {
+		if match L [word] {
+			print( L )
+		}
+		if match L [lws] {
+			print( L )
+		}
+		if match L [nl] {
+			print( L )
+		}
+		if match L [PlData: cmd_il] {
+			printPlData( PlData )
+		}
+		if match L [cmd_verbatim Lines: verbatim_line* end_verbatim] {
+			print( '\\begin{verbatim}\n' )
+			print( Lines )
+			print( '\\end{verbatim}\n' )
+			print( '\\verbspace\n' )
+		}
+		if match L [cmd_code Lines: code_line* end_code] {
+			print( '\\begin{inline_code}\n' )
+			print( '\\begin{verbatim}\n' )
+			print( Lines )
+			print( '\\end{verbatim}\n' )
+			print( '\\end{inline_code}\n' )
+			print( '\\verbspace\n' )
+		}
+		if match L [cmd_graphic Name: word Scale: scale? nl] {
+			print( '\\graphspace\n' )
+			print( '\\begin{center}\n' )
+			print( '\\includegraphics' )
+			if match Scale [lws Spd: word Spd2: word*]
+				print( '[scale=' Spd Spd2 ']' )
+			else 
+				print( '[scale=0.55]' )
+			print( '{' Name '}\n' )
+			print( '\\end{center}\n' )
+			print( '\\graphspace\n' )
+		}
+		if match L [cmd_itemize Lines: line* Items: item* end_itemize] {
+			print( '\\begin{itemize}\n' )
+			printLines( Lines )
+			for Item: item in repeat(Items) {
+				match Item [cmd_item Lines: line*]
+				print( '\\item ' )
+				printLines( Lines )
+			}
+			print( '\\end{itemize}\n' )
+		}
+		if match L [cmd_figure DirData: text nl Lines: line* Caption: caption? end_figure] {
+			print( '\\begin{figure}\n' )
+			print( '\\small\n' )
+			printLines( Lines )
+			if match Caption [cmd_caption CL: line*] {
+				print( '\\caption{' )
+				printLines( CL )
+				print( '}\n' )
+			}
+			print( '\\label{' DirData '}\n' )
+			print( '\\end{figure}\n' )
+		}
+		if match L [cmd_list LiList: li* end_list] {
+			for Li: li* in LiList {
+				if match Li [cmd_li Lines: text* nl Rest: li*] {
+					print( '\\noindent\\\hspace*{24pt}' )
+					printText( Lines )
+					if match Rest [ li li* ]
+						print( '\\\\' )
+					print( '\n' )
+				}
+			}
+			print( '\\vspace{12pt}\n' )
+		}
+		if match L [cmd_center Lines: line* end_center] {
+			print( '\\begin{center}\n' )
+			printLines( Lines )
+			print( '\\end{center}\n' )
+		}
+		if match L [cmd_tabular Rows: row* end_tabular] {
+			print( '\\begin{tabular}{|c|c|c|}\n' )
+			print( '\\hline\n' )
+			for Row: row in repeat(Rows) {
+				if match Row [cmd_row Lines: text* nl ] {
+					printText( Lines )
+					print( '\\\\' '\n' )
+					print( '\\hline\n' )
+				}
+			}
+			print( '\\end{tabular}\n' )
+		}
+		if match L [cmd_multicols Lines: multicols_line* end_multicols] {
+			print( '\\begin{multicols}{2}\n' )
+			for McLine: multicols_line in repeat( Lines ) {
+				if match McLine [Line: line]
+					printLines( cons line* [Line] )
+				else if match McLine [cmd_columnbreak] {
+					print( '\\columnbreak\n' )
+				}
+			}
+			print( '\\end{multicols}\n' )
+		}
+	}
+}
+
+match Start 
+	[Preamble: preamble Chapters: chapter*]
+
+Title: title = title in Preamble
+match Title [cmd_title TitleData: text* nl]
+
+SubTitle: subtitle = subtitle in Preamble
+match SubTitle [cmd_sub_title SubTitleData: text* nl]
+
+Author: author = author in Preamble
+match Author [cmd_author AuthorData: text* nl]
+
+License: license = license in Preamble
+
+print( 
+	~\documentclass[letterpaper,11pt,oneside]{book}
+	~\usepackage{graphicx}
+	~\usepackage{comment}
+	~\usepackage{multicol}
+	~\usepackage[
+	~	colorlinks=true,
+	~	linkcolor=black,
+	~	citecolor=green,
+	~	filecolor=black,
+	~	urlcolor=black]{hyperref}
+	~
+	~\topmargin -0.20in
+	~\oddsidemargin 0in
+	~\textwidth 6.5in
+	~\textheight 9in
+	~
+	~\setlength{\parskip}{0pt}
+	~\setlength{\topsep}{0pt}
+	~\setlength{\partopsep}{0pt}
+	~\setlength{\itemsep}{0pt}
+	~
+	~\input{version}
+	~
+	~\newcommand{\verbspace}{\vspace{10pt}}
+	~\newcommand{\graphspace}{\vspace{10pt}}
+	~
+	~\renewcommand\floatpagefraction{.99}
+	~\renewcommand\topfraction{.99}
+	~\renewcommand\bottomfraction{.99}
+	~\renewcommand\textfraction{.01}   
+	~\setcounter{totalnumber}{50}
+	~\setcounter{topnumber}{50}
+	~\setcounter{bottomnumber}{50}
+	~
+	~\newenvironment{inline_code}{\def\baselinestretch{1}\vspace{12pt}\small}{}
+	~
+	~\begin{document}
+	~
+	~\thispagestyle{empty}
+	~\begin{center}
+	~\vspace*{3in}
+)
+
+print( '{\\huge ' TitleData '}\\\\\n' )
+
+print( '\\vspace*{12pt}\n' )
+
+print( '{\\Large ' SubTitleData '}\\\\\n' )
+
+print(
+	~\vspace{1in}
+	~by\\
+	~\vspace{12pt}
+)
+
+print( '{\\large ' AuthorData '}\\\\\n' )
+
+print(
+	~\end{center}
+	~\clearpage
+	~
+	~\pagenumbering{roman}
+	~
+	~\chapter*{License}
+)
+
+print(
+	~Ragel version \version, \pubdate\\
+	~Copyright \copyright\ 2003-2012 Adrian D. Thurston
+	~\vspace{6mm}
+	~
+)
+
+i: int = 0
+for P: paragraph in License {
+	if ( i != 0 ) {
+		print(
+			~
+			~\vspace{5pt}
+			~
+		)
+	}
+	print( "{\\bf\\it\\noindent " )
+	print( P )
+	print( "}\n" )
+	i = i + 1
+}
+
+print(
+	~
+	~\clearpage
+	~\tableofcontents
+	~\clearpage
+	~
+	~\pagenumbering{arabic}
+)
+
+
+for Chapter: chapter in repeat(Chapters) {
+	match Chapter
+		[cmd_chapter DirData: text* nl Lines: line* SectionList: section*]
+
+	print( '\\chapter{' DirData '}\n' )
+	printLines( Lines )
+
+	for Section: section in repeat(SectionList) {
+		match Section
+			[cmd_section DirData: text* nl Lines: line* SubSectionList: sub_section*]
+
+		print( '\\section{' DirData '}\n' )
+		printLines( Lines )
+		for SubSection: sub_section in repeat(SubSectionList) {
+			match SubSection
+				[cmd_sub_section DirData: text* nl Lines: line* 
+						SubSubSectionList: sub_sub_section*]
+
+			print( '\\subsection{' DirData '}\n' )
+			printLines( Lines )
+
+			for SubSubSection: sub_sub_section in repeat(SubSubSectionList) {
+				match SubSubSection
+					[cmd_sub_sub_section DirData: text* nl Lines: line*]
+
+				print( '\\subsubsection{' DirData '}\n' )
+				printLines( Lines )
+			}
+		}
+	}
+}
+
+print( 
+	~
+	~\end{document}
+)

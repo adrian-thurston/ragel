@@ -45,7 +45,8 @@ TEST_CASES = \
 	liftattrs.lm \
 	mailbox.lm \
 	string.lm \
-	repeat.lm \
+	repeat1.lm \
+	repeat2.lm \
 	ragelambig1.lm \
 	ragelambig2.lm \
 	ragelambig3.lm \
@@ -116,7 +117,8 @@ INPUT = \
 	ragelambig4.in \
 	rediv.in \
 	reparse.in \
-	repeat.in \
+	repeat1.in \
+	repeat2.in \
 	rubyhere.in \
 	string.in \
 	superid.in \
@@ -194,7 +196,8 @@ EXPECTED_OUTPUT = \
 	ragelambig4.exp \
 	rediv.exp \
 	reparse.exp \
-	repeat.exp \
+	repeat1.exp \
+	repeat2.exp \
 	rubyhere.exp \
 	scope1.exp \
 	sprintf.exp \
