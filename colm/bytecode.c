@@ -1555,9 +1555,7 @@ again:
 
 			Tree *tree = vm_pop();
 			Tree *trimmed = treeTrim( prg, sp, tree );
-			treeUpref( trimmed );
 			vm_push( trimmed );
-			//treeDownref( prg, sp, tree );
 			break;
 		}
 		case IN_CONCAT_STR: {
