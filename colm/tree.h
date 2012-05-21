@@ -99,8 +99,6 @@ typedef struct _IgnoreList
 	unsigned short flags;
 	long refs;
 	Kid *child;
-
-	long generation;
 } IgnoreList;
 
 typedef struct _ParseTree

@@ -407,7 +407,6 @@ Tree *constructReplacementTree( Kid *kid, Tree **bindings, Program *prg, long pa
 			leftIgnore = ilAllocate( prg );
 			leftIgnore->id = LEL_ID_IGNORE;
 			leftIgnore->child = ignore;
-			leftIgnore->generation = prg->nextIlGen++;
 
 			if ( tree->flags & AF_LEFT_IGNORE ) {
 				/* The token already has a left-ignore. Merge by attaching it as a
@@ -436,7 +435,6 @@ Tree *constructReplacementTree( Kid *kid, Tree **bindings, Program *prg, long pa
 			rightIgnore = ilAllocate( prg );
 			rightIgnore->id = LEL_ID_IGNORE;
 			rightIgnore->child = ignore;
-			rightIgnore->generation = prg->nextIlGen++;
 
 			if ( tree->flags & AF_RIGHT_IGNORE ) {
 				/* The token already has a right-ignore. Merge by attaching it as a
@@ -478,7 +476,6 @@ Tree *constructReplacementTree( Kid *kid, Tree **bindings, Program *prg, long pa
 			ignoreList->id = LEL_ID_IGNORE;
 			ignoreList->refs = 1;
 			ignoreList->child = ignore;
-			ignoreList->generation = prg->nextIlGen++;
 
 			Kid *ignoreHead = kidAllocate( prg );
 			ignoreHead->tree = (Tree*)ignoreList;
@@ -494,7 +491,6 @@ Tree *constructReplacementTree( Kid *kid, Tree **bindings, Program *prg, long pa
 			ignoreList->id = LEL_ID_IGNORE;
 			ignoreList->refs = 1;
 			ignoreList->child = ignore;
-			ignoreList->generation = prg->nextIlGen++;
 
 			Kid *ignoreHead = kidAllocate( prg );
 			ignoreHead->tree = (Tree*)ignoreList;
@@ -2018,7 +2014,6 @@ Tree *treeTrim( struct ColmProgram *prg, Tree **sp, Tree *tree )
 	IgnoreList *leftIgnore = ilAllocate( prg );
 	leftIgnore->id = LEL_ID_IGNORE;
 	leftIgnore->child = 0;
-	leftIgnore->generation = prg->nextIlGen++;
 	leftIgnore->flags |= AF_SUPPRESS_RIGHT;
 
 	tree = splitTree( prg, tree );
@@ -2049,7 +2044,6 @@ Tree *treeTrim( struct ColmProgram *prg, Tree **sp, Tree *tree )
 	rightIgnore = ilAllocate( prg );
 	rightIgnore->id = LEL_ID_IGNORE;
 	rightIgnore->child = 0;
-	rightIgnore->generation = prg->nextIlGen++;
 	rightIgnore->flags |= AF_SUPPRESS_LEFT;
 
 	/* About to alter the data tree. Split first. */

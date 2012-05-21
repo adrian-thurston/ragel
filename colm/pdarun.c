@@ -584,7 +584,6 @@ static void attachRightIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTre
 			rightIgnore = ilAllocate( prg );
 			rightIgnore->id = LEL_ID_IGNORE;
 			rightIgnore->child = ignoreKid;
-			rightIgnore->generation = prg->nextIlGen++;
 
 			/* About to alter the data tree. Split first. */
 			parseTree->shadow->tree = splitTree( prg, parseTree->shadow->tree );
@@ -653,7 +652,6 @@ static void attachLeftIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTree
 		IgnoreList *leftIgnore = ilAllocate( prg );
 		leftIgnore->id = LEL_ID_IGNORE;
 		leftIgnore->child = ignoreKid;
-		leftIgnore->generation = prg->nextIlGen++;
 
 		parseTree->shadow->tree = splitTree( prg, parseTree->shadow->tree );
 

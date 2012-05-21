@@ -91,7 +91,6 @@ typedef struct ColmProgram
 	unsigned char ctxDepParsing;
 	RuntimeData *rtd;
 	Tree *global;
-	long nextIlGen;
 	int induceExit;
 	int exitStatus;
 

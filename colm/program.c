@@ -134,7 +134,6 @@ Program *colmNewProgram( RuntimeData *rtd, int argc, const char **argv )
 	prg->stdinVal = 0;
 	prg->stdoutVal = 0;
 	prg->stderrVal = 0;
-	prg->nextIlGen = 0;
 	prg->induceExit = 0;
 	prg->exitStatus = 0;
 
