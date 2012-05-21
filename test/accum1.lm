@@ -18,7 +18,7 @@ cons Output: accum<start> []
 
 for Id: id in Input {
 	send Output
-		"( [Id] )
+		"( [^Id] )
 }
 
 S: start = Output()

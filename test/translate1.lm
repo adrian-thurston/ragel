@@ -20,5 +20,5 @@ def start
 	[item*]
 
 Input: start = parse start( stdin )
-print( Input '\n' )
+print( Input )
 
