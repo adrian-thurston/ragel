@@ -23,7 +23,7 @@ INCLUDES = -I$(top_srcdir)/aapl
 bin_PROGRAMS = colm
 
 RUNTIME_SRC = \
-	map.c fsmrun.c pdarun.c list.c input.c debug.c \
+	map.c pdarun.c list.c input.c debug.c \
 	codevect.c pool.c string.c tree.c bytecode.c program.c
 
 RUNTIME_HDR = \
