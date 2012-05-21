@@ -454,7 +454,6 @@ Tree *pushLeftIgnore( Program *prg, Tree *pushTo, Tree *leftIgnore )
 	return pushTo;
 }
 
-
 static void remLeftIgnore( Program *prg, Tree **sp, Tree *tree )
 {
 	assert( tree->flags & AF_LEFT_IGNORE );
@@ -561,23 +560,7 @@ Tree *constructReplacementTree( Kid *kid, Tree **bindings, Program *prg, long pa
 			leftIgnore->id = LEL_ID_IGNORE;
 			leftIgnore->child = ignore;
 
-			tree = splitTree( prg, tree );
-
-			if ( tree->flags & AF_LEFT_IGNORE ) {
-				/* The token already has a left-ignore. Merge by attaching it as a
-				 * right ignore of the new list. */
-				Kid *curIgnore = treeLeftIgnoreKid( prg, tree );
-				insRightIgnore( prg, leftIgnore, curIgnore->tree );
-
-				/* Replace the current ignore. */
-				curIgnore->tree->refs -= 1;
-				curIgnore->tree = leftIgnore;
-				treeUpref( leftIgnore );
-			}
-			else {
-				/* Attach the ignore list. */
-				insLeftIgnore( prg, tree, leftIgnore );
-			}
+			tree = pushLeftIgnore( prg, tree, leftIgnore );
 		}
 
 		ignore = nodes[pat].rightIgnore;
@@ -589,23 +572,7 @@ Tree *constructReplacementTree( Kid *kid, Tree **bindings, Program *prg, long pa
 			rightIgnore->id = LEL_ID_IGNORE;
 			rightIgnore->child = ignore;
 
-			tree = splitTree( prg, tree );
-
-			if ( tree->flags & AF_RIGHT_IGNORE ) {
-				/* The token already has a right-ignore. Merge by attaching it as a
-				 * right ignore of the new list. */
-				Kid *curIgnore = treeRightIgnoreKid( prg, tree );
-				insLeftIgnore( prg, rightIgnore, curIgnore->tree );
-
-				/* Replace the current ignore. */
-				curIgnore->tree->refs -= 1;
-				curIgnore->tree = rightIgnore;
-				treeUpref( rightIgnore );
-			}
-			else {
-				/* Attach the ignore list. */
-				insRightIgnore( prg, tree, rightIgnore );
-			}
+			tree = pushRightIgnore( prg, tree, rightIgnore );
 		}
 	}
 	else {
@@ -654,7 +621,6 @@ Tree *constructReplacementTree( Kid *kid, Tree **bindings, Program *prg, long pa
 
 			tree->flags |= AF_LEFT_IGNORE;
 		}
-
 
 		int i;
 		for ( i = 0; i < lelInfo[tree->id].numCaptureAttr; i++ ) {
