@@ -587,7 +587,7 @@ static void attachRightIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTre
 
 			Tree *pushTo = parseTree->shadow->tree;
 
-			pushTo = pushRightIgnore2( prg, sp, pushTo, rightIgnore );
+			pushTo = pushRightIgnore( prg, sp, pushTo, rightIgnore );
 
 			parseTree->shadow->tree = pushTo;
 
@@ -595,8 +595,6 @@ static void attachRightIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTre
 		}
 	}
 }
-
-
 
 static void attachLeftIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTree *parseTree )
 {
@@ -644,12 +642,11 @@ static void attachLeftIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTree
 
 		Tree *pushTo = parseTree->shadow->tree;
 
-		pushTo = pushLeftIgnore2( prg, sp, pushTo, leftIgnore );
+		pushTo = pushLeftIgnore( prg, sp, pushTo, leftIgnore );
 
 		parseTree->shadow->tree = pushTo;
 
 		parseTree->flags |= PF_LEFT_IL_ATTACHED;
-
 	}
 }
 
@@ -660,26 +657,11 @@ static void detachRightIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTre
 	 * left-ignores. */
 	Tree *rightIgnore = 0;
 	if ( parseTree->flags & PF_RIGHT_IL_ATTACHED ) {
-		/* Modifying the tree we are detaching from. */
-		parseTree->shadow->tree = splitTree( prg, parseTree->shadow->tree );
+		Tree *popFrom = parseTree->shadow->tree;
 
-		Kid *riKid = treeRightIgnoreKid( prg, parseTree->shadow->tree );
+		popFrom = popRightIgnore( prg, sp, popFrom, &rightIgnore );
 
-		/* If the right ignore has a left ignore, then that was the original
-		 * right ignore. */
-		Kid *li = treeLeftIgnoreKid( prg, riKid->tree );
-		if ( li != 0 ) {
-			treeUpref( li->tree );
-			popLeftIgnore( prg, sp, riKid->tree );
-			rightIgnore = riKid->tree;
-			treeUpref( rightIgnore );
-			riKid->tree = li->tree;
-		}
-		else  {
-			rightIgnore = riKid->tree;
-			treeUpref( rightIgnore );
-			popRightIgnore( prg, sp, parseTree->shadow->tree );
-		}
+		parseTree->shadow->tree = popFrom;
 
 		parseTree->flags &= ~PF_RIGHT_IL_ATTACHED;
 	}
@@ -726,27 +708,13 @@ static void detachLeftIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *f
 	/* Detach left. */
 	Tree *leftIgnore = 0;
 	if ( parseTree->flags & PF_LEFT_IL_ATTACHED ) {
-		/* Modifying, make the write safe. */
-		parseTree->shadow->tree = splitTree( prg, parseTree->shadow->tree );
+		Tree *popFrom = parseTree->shadow->tree;
 
-		Kid *liKid = treeLeftIgnoreKid( prg, parseTree->shadow->tree );
+		popFrom = popLeftIgnore( prg, sp, popFrom, &leftIgnore );
 
-		/* If the left ignore has a right ignore, then that was the original
-		 * left ignore. */
-		Kid *ri = treeRightIgnoreKid( prg, liKid->tree );
-		if ( ri != 0 ) {
-			treeUpref( ri->tree );
-			popRightIgnore( prg, sp, liKid->tree );
-			leftIgnore = liKid->tree;
-			treeUpref( leftIgnore );
-			liKid->tree = ri->tree;
-		}
-		else {
-			leftIgnore = liKid->tree;
-			treeUpref( leftIgnore );
-			popLeftIgnore( prg, sp, parseTree->shadow->tree );
-			parseTree->flags &= ~PF_LEFT_IL_ATTACHED;
-		}
+		parseTree->shadow->tree = popFrom;
+
+		parseTree->flags &= ~PF_LEFT_IL_ATTACHED;
 	}
 
 	if ( parseTree->leftIgnore != 0 ) {

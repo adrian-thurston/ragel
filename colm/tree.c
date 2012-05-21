@@ -366,7 +366,7 @@ static Kid *constructRightIgnoreList( Program *prg, long pat )
 	return constructIgnoreList( prg, nodes[pat].rightIgnore );
 }
 
-static void pushLeftIgnore( Program *prg, Tree *tree, Tree *ignoreList )
+static void insLeftIgnore( Program *prg, Tree *tree, Tree *ignoreList )
 {
 	assert( ! (tree->flags & AF_LEFT_IGNORE) );
 
@@ -382,7 +382,7 @@ static void pushLeftIgnore( Program *prg, Tree *tree, Tree *ignoreList )
 	tree->flags |= AF_LEFT_IGNORE;
 }
 
-static void pushRightIgnore( Program *prg, Tree *tree, Tree *ignoreList )
+static void insRightIgnore( Program *prg, Tree *tree, Tree *ignoreList )
 {
 	assert( ! (tree->flags & AF_RIGHT_IGNORE) );
 
@@ -404,7 +404,7 @@ static void pushRightIgnore( Program *prg, Tree *tree, Tree *ignoreList )
 	tree->flags |= AF_RIGHT_IGNORE;
 }
 
-Tree *pushRightIgnore2( Program *prg, Tree **sp, Tree *pushTo, Tree *rightIgnore )
+Tree *pushRightIgnore( Program *prg, Tree **sp, Tree *pushTo, Tree *rightIgnore )
 {
 	/* About to alter the data tree. Split first. */
 	pushTo = splitTree( prg, pushTo );
@@ -413,7 +413,7 @@ Tree *pushRightIgnore2( Program *prg, Tree **sp, Tree *pushTo, Tree *rightIgnore
 		/* The previous token already has a right ignore. Merge by
 		 * attaching it as a left ignore of the new list. */
 		Kid *curIgnore = treeRightIgnoreKid( prg, pushTo );
-		pushLeftIgnore( prg, rightIgnore, curIgnore->tree );
+		insLeftIgnore( prg, rightIgnore, curIgnore->tree );
 
 		/* Replace the current ignore. */
 		treeDownref( prg, sp, curIgnore->tree );
@@ -422,13 +422,13 @@ Tree *pushRightIgnore2( Program *prg, Tree **sp, Tree *pushTo, Tree *rightIgnore
 	}
 	else {
 		/* Attach The ignore list. */
-		pushRightIgnore( prg, pushTo, rightIgnore );
+		insRightIgnore( prg, pushTo, rightIgnore );
 	}
 
 	return pushTo;
 }
 
-Tree *pushLeftIgnore2( Program *prg, Tree **sp, Tree *pushTo, Tree *leftIgnore )
+Tree *pushLeftIgnore( Program *prg, Tree **sp, Tree *pushTo, Tree *leftIgnore )
 {
 	pushTo = splitTree( prg, pushTo );
 
@@ -437,7 +437,7 @@ Tree *pushLeftIgnore2( Program *prg, Tree **sp, Tree *pushTo, Tree *leftIgnore )
 		/* The token already has a left-ignore. Merge by attaching it as a
 		 * right ignore of the new list. */
 		Kid *curIgnore = treeLeftIgnoreKid( prg, pushTo );
-		pushRightIgnore( prg, leftIgnore, curIgnore->tree );
+		insRightIgnore( prg, leftIgnore, curIgnore->tree );
 
 		/* Replace the current ignore. */
 		treeDownref( prg, sp, curIgnore->tree );
@@ -446,14 +446,14 @@ Tree *pushLeftIgnore2( Program *prg, Tree **sp, Tree *pushTo, Tree *leftIgnore )
 	}
 	else {
 		/* Attach the ignore list. */
-		pushLeftIgnore( prg, pushTo, leftIgnore );
+		insLeftIgnore( prg, pushTo, leftIgnore );
 	}
 
 	return pushTo;
 }
 
 
-void popLeftIgnore( Program *prg, Tree **sp, Tree *tree )
+static void remLeftIgnore( Program *prg, Tree **sp, Tree *tree )
 {
 	assert( tree->flags & AF_LEFT_IGNORE );
 
@@ -465,7 +465,7 @@ void popLeftIgnore( Program *prg, Tree **sp, Tree *tree )
 	tree->flags &= ~AF_LEFT_IGNORE;
 }
 
-void popRightIgnore( Program *prg, Tree **sp, Tree *tree )
+static void remRightIgnore( Program *prg, Tree **sp, Tree *tree )
 {
 	assert( tree->flags & AF_RIGHT_IGNORE );
 
@@ -483,6 +483,58 @@ void popRightIgnore( Program *prg, Tree **sp, Tree *tree )
 	}
 
 	tree->flags &= ~AF_RIGHT_IGNORE;
+}
+
+Tree *popRightIgnore( Program *prg, Tree **sp, Tree *popFrom, Tree **rightIgnore )
+{
+	/* Modifying the tree we are detaching from. */
+	popFrom = splitTree( prg, popFrom );
+
+	Kid *riKid = treeRightIgnoreKid( prg, popFrom );
+
+	/* If the right ignore has a left ignore, then that was the original
+	 * right ignore. */
+	Kid *li = treeLeftIgnoreKid( prg, riKid->tree );
+	if ( li != 0 ) {
+		treeUpref( li->tree );
+		remLeftIgnore( prg, sp, riKid->tree );
+		*rightIgnore = riKid->tree;
+		treeUpref( *rightIgnore );
+		riKid->tree = li->tree;
+	}
+	else  {
+		*rightIgnore = riKid->tree;
+		treeUpref( *rightIgnore );
+		remRightIgnore( prg, sp, popFrom );
+	}
+
+	return popFrom;
+}
+
+Tree *popLeftIgnore( Program *prg, Tree **sp, Tree *popFrom, Tree **leftIgnore )
+{
+	/* Modifying, make the write safe. */
+	popFrom = splitTree( prg, popFrom );
+
+	Kid *liKid = treeLeftIgnoreKid( prg, popFrom );
+
+	/* If the left ignore has a right ignore, then that was the original
+	 * left ignore. */
+	Kid *ri = treeRightIgnoreKid( prg, liKid->tree );
+	if ( ri != 0 ) {
+		treeUpref( ri->tree );
+		remRightIgnore( prg, sp, liKid->tree );
+		*leftIgnore = liKid->tree;
+		treeUpref( *leftIgnore );
+		liKid->tree = ri->tree;
+	}
+	else {
+		*leftIgnore = liKid->tree;
+		treeUpref( *leftIgnore );
+		remLeftIgnore( prg, sp, popFrom );
+	}
+
+	return popFrom;
 }
 
 
@@ -513,7 +565,7 @@ Tree *constructReplacementTree( Kid *kid, Tree **bindings, Program *prg, long pa
 				/* The token already has a left-ignore. Merge by attaching it as a
 				 * right ignore of the new list. */
 				Kid *curIgnore = treeLeftIgnoreKid( prg, tree );
-				pushRightIgnore( prg, leftIgnore, curIgnore->tree );
+				insRightIgnore( prg, leftIgnore, curIgnore->tree );
 
 				/* Replace the current ignore. */
 				curIgnore->tree->refs -= 1;
@@ -522,7 +574,7 @@ Tree *constructReplacementTree( Kid *kid, Tree **bindings, Program *prg, long pa
 			}
 			else {
 				/* Attach the ignore list. */
-				pushLeftIgnore( prg, tree, leftIgnore );
+				insLeftIgnore( prg, tree, leftIgnore );
 			}
 		}
 
@@ -541,7 +593,7 @@ Tree *constructReplacementTree( Kid *kid, Tree **bindings, Program *prg, long pa
 				/* The token already has a right-ignore. Merge by attaching it as a
 				 * right ignore of the new list. */
 				Kid *curIgnore = treeRightIgnoreKid( prg, tree );
-				pushLeftIgnore( prg, rightIgnore, curIgnore->tree );
+				insLeftIgnore( prg, rightIgnore, curIgnore->tree );
 
 				/* Replace the current ignore. */
 				curIgnore->tree->refs -= 1;
@@ -550,7 +602,7 @@ Tree *constructReplacementTree( Kid *kid, Tree **bindings, Program *prg, long pa
 			}
 			else {
 				/* Attach the ignore list. */
-				pushRightIgnore( prg, tree, rightIgnore );
+				insRightIgnore( prg, tree, rightIgnore );
 			}
 		}
 	}
@@ -2051,7 +2103,7 @@ Tree *treeTrim( struct ColmProgram *prg, Tree **sp, Tree *tree )
 		/* The token already has a left-ignore. Merge by attaching it as a
 		 * right ignore of the new list. */
 		Kid *curIgnore = treeLeftIgnoreKid( prg, tree );
-		pushRightIgnore( prg, leftIgnore, curIgnore->tree );
+		insRightIgnore( prg, leftIgnore, curIgnore->tree );
 
 		/* Replace the current ignore. */
 		treeDownref( prg, sp, curIgnore->tree );
@@ -2060,7 +2112,7 @@ Tree *treeTrim( struct ColmProgram *prg, Tree **sp, Tree *tree )
 	}
 	else {
 		/* Attach the ignore list. */
-		pushLeftIgnore( prg, tree, leftIgnore );
+		insLeftIgnore( prg, tree, leftIgnore );
 	}
 
 	debug( REALM_PARSE, "attaching ignore right\n" );
@@ -2081,7 +2133,7 @@ Tree *treeTrim( struct ColmProgram *prg, Tree **sp, Tree *tree )
 		/* The previous token already has a right ignore. Merge by
 		 * attaching it as a left ignore of the new list. */
 		Kid *curIgnore = treeRightIgnoreKid( prg, tree );
-		pushLeftIgnore( prg, rightIgnore, curIgnore->tree );
+		insLeftIgnore( prg, rightIgnore, curIgnore->tree );
 
 		/* Replace the current ignore. */
 		treeDownref( prg, sp, curIgnore->tree );
@@ -2090,7 +2142,7 @@ Tree *treeTrim( struct ColmProgram *prg, Tree **sp, Tree *tree )
 	}
 	else {
 		/* Attach The ignore list. */
-		pushRightIgnore( prg, tree, rightIgnore );
+		insRightIgnore( prg, tree, rightIgnore );
 	}
 
 	return tree;
