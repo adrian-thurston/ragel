@@ -25,7 +25,7 @@ lex two
 		[id2]
 		{
 			send OneParser [' extra ']
-			send OneParser [$r1]
+			send OneParser [$(^r1)]
 		}
 
 	def two 
@@ -36,5 +36,7 @@ lex two
 Two: two = 
 	parse two( stdin )
 
+send OneParser ['\n']
+
 print( Two )
-print( OneParser.finish() '\n' )
+print( ^( OneParser.finish() ) '\n' )

@@ -79,7 +79,7 @@ def start
 
 			i: int = 1
 			for Item: item in Items {
-				print( '  item ' i ': ' Item '\n' )
+				print( '  item ' i ': ' ^Item '\n' )
 				i = i + 1
 			}
 		}

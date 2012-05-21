@@ -80,6 +80,6 @@ Two: two =
 Nested: nested = NestedParser.finish()
 
 print( '\n------------\n' )
-print( Nested '\n' )
-print( Two '\n' )
+print( ^Nested '\n' )
+print( ^Two '\n' )
 
