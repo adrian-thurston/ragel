@@ -77,7 +77,7 @@ void ParseData::generateExports()
 		"inline std::string printTreeStr( ColmProgram *prg, ColmTree *tree )\n"
 		"{\n"
 		"	std::string str;\n"
-		"	ColmPrintArgs printArgs = { &str, 1, 0, &appendString, \n"
+		"	ColmPrintArgs printArgs = { &str, 1, 0, 1, &appendString, \n"
 		"			&printNull, &printTermTree, &printNull };\n"
 		"	printTreeArgs( prg, vm_root(prg), &printArgs, tree );\n"
 		"	return str;\n"

@@ -2096,12 +2096,15 @@ enum VisitType
 	NonTerm,
 };
 
+#define TF_TERM_SEEN 0x1
+
 void printKid( Program *prg, Tree **sp, struct ColmPrintArgs *printArgs, Kid *kid )
 {
 	enum ReturnType rt;
 	Kid *parent = 0;
 	Kid *leadingIgnore = 0;
 	enum VisitType visitType;
+	int flags = 0;
 
 	/* Iterate the kids passed in. We are expecting a next, which will allow us
 	 * to print the trailing ignore list. */
@@ -2188,7 +2191,7 @@ rec_call:
 
 			/* Print the leading ignore list. Also implement the suppress right
 			 * in the process. */
-			if ( printArgs->comm ) {	
+			if ( printArgs->comm && (!printArgs->trim || (flags & TF_TERM_SEEN && kid->tree->id > 0)) ) {	
 				ignore = leadingIgnore;
 				while ( ignore != 0 ) {
 					if ( ignore->tree->flags & AF_SUPPRESS_RIGHT )
@@ -2231,6 +2234,9 @@ rec_call:
 		/* Open the tree. */
 		printArgs->openTree( prg, sp, printArgs, parent, kid );
 	}
+
+	if ( visitType == Term )
+		flags |= TF_TERM_SEEN;
 
 	if ( visitType == Term || visitType == IgnoreData ) {
 		/* Print contents. */
@@ -2455,23 +2461,23 @@ void closeTreeXml( Program *prg, Tree **sp, struct ColmPrintArgs *args, Kid *par
 	args->out( args, ">", 1 );
 }
 
-void printTreeCollect( Program *prg, Tree **sp, StrCollect *collect, Tree *tree )
+void printTreeCollect( Program *prg, Tree **sp, StrCollect *collect, Tree *tree, int trim )
 {
-	struct ColmPrintArgs printArgs = { collect, 1, 0, &appendCollect, 
+	struct ColmPrintArgs printArgs = { collect, true, false, trim, &appendCollect, 
 			&printNull, &printTermTree, &printNull };
 	printTreeArgs( prg, sp, &printArgs, tree );
 }
 
-void printTreeFile( Program *prg, Tree **sp, FILE *out, Tree *tree )
+void printTreeFile( Program *prg, Tree **sp, FILE *out, Tree *tree, int trim )
 {
-	struct ColmPrintArgs printArgs = { out, 1, 0, &appendFile, 
+	struct ColmPrintArgs printArgs = { out, true, false, trim, &appendFile, 
 			&printNull, &printTermTree, &printNull };
 	printTreeArgs( prg, sp, &printArgs, tree );
 }
 
-void printXmlStdout( Program *prg, Tree **sp, Tree *tree, int commAttr )
+void printXmlStdout( Program *prg, Tree **sp, Tree *tree, int commAttr, int trim )
 {
-	struct ColmPrintArgs printArgs = { stdout, commAttr, commAttr, &appendFile, 
+	struct ColmPrintArgs printArgs = { stdout, commAttr, commAttr, trim, &appendFile, 
 			&openTreeXml, &printTermXml, &closeTreeXml };
 	printTreeArgs( prg, sp, &printArgs, tree );
 }

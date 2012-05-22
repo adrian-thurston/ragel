@@ -20,6 +20,7 @@ struct ColmPrintArgs
 	void *arg;
 	int comm;
 	int attr;
+	int trim;
 	void (*out)( struct ColmPrintArgs *args, const char *data, int length );
 	void (*openTree)( struct ColmProgram *prg, struct ColmTree **sp, 
 		struct ColmPrintArgs *args, struct ColmKid *parent, struct ColmKid *kid );

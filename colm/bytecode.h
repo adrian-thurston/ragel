@@ -214,6 +214,7 @@ typedef unsigned char uchar;
 
 #define IN_INT_TO_STR            0x8b
 #define IN_TREE_TO_STR           0x8c
+#define IN_TREE_TO_STR_NOTRIM    0xfd
 
 #define IN_CREATE_TOKEN          0x8d
 #define IN_MAKE_TOKEN            0x8e

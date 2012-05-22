@@ -328,9 +328,6 @@ Tree *treeRevIterPrevChild( struct ColmProgram *prg, Tree ***psp, RevTreeIter *i
 Tree *treeIterNextRepeat( struct ColmProgram *prg, Tree ***psp, TreeIter *iter );
 Tree *treeIterPrevRepeat( struct ColmProgram *prg, Tree ***psp, TreeIter *iter );
 
-void printXmlStdout( struct ColmProgram *prg, Tree **sp, Tree *tree, int commAttr );
-
-
 /* An automatically grown buffer for collecting tokens. Always reuses space;
  * never down resizes. */
 typedef struct _StrCollect
@@ -346,10 +343,9 @@ void strCollectAppend( StrCollect *collect, const char *data, long len );
 void strCollectClear( StrCollect *collect );
 Tree *treeTrim( struct ColmProgram *prg, Tree **sp, Tree *tree );
 
-void printTree( struct ColmProgram *prg, Tree **sp, StrCollect *collect, Tree *tree );
-void printTermTree( struct ColmProgram *prg, Tree **sp, struct ColmPrintArgs *printArgs, Kid *kid );
-void printTreeCollect( struct ColmProgram *prg, Tree **sp, StrCollect *collect, Tree *tree );
-void printTreeFile( struct ColmProgram *prg, Tree **sp, FILE *out, Tree *tree );
+void printTreeCollect( struct ColmProgram *prg, Tree **sp, StrCollect *collect, Tree *tree, int trim );
+void printTreeFile( struct ColmProgram *prg, Tree **sp, FILE *out, Tree *tree, int trim );
+void printXmlStdout( struct ColmProgram *prg, Tree **sp, Tree *tree, int commAttr, int trim );
 
 #if defined(__cplusplus)
 }

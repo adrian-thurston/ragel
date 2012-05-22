@@ -164,13 +164,13 @@ void parserSetContext( Program *prg, Tree **sp, Parser *parser, Tree *val )
 	parser->pdaRun->context = splitTree( prg, val );
 }
 
-Head *treeToStr( Program *prg, Tree **sp, Tree *tree )
+Head *treeToStr( Program *prg, Tree **sp, Tree *tree, int trim )
 {
 	/* Collect the tree data. */
 	StrCollect collect;
 	initStrCollect( &collect );
 
-	printTreeCollect( prg, sp, &collect, tree );
+	printTreeCollect( prg, sp, &collect, tree, trim );
 
 	/* Set up the input stream. */
 	Head *ret = stringAllocFull( prg, collect.data, collect.length );
@@ -189,7 +189,7 @@ Word streamAppend( Program *prg, Tree **sp, Tree *input, InputStream *inputStrea
 		/* Collect the tree data. */
 		StrCollect collect;
 		initStrCollect( &collect );
-		printTreeCollect( prg, sp, &collect, input );
+		printTreeCollect( prg, sp, &collect, input, true );
 
 		/* Load it into the input. */
 		appendData( inputStream, collect.data, collect.length );
@@ -349,7 +349,7 @@ long streamPush( Program *prg, Tree **sp, FsmRun *fsmRun, InputStream *in, Tree 
 		/* Collect the tree data. */
 		StrCollect collect;
 		initStrCollect( &collect );
-		printTreeCollect( prg, sp, &collect, tree );
+		printTreeCollect( prg, sp, &collect, tree, true );
 
 		streamPushText( fsmRun, in, collect.data, collect.length );
 		long length = collect.length;
@@ -893,7 +893,7 @@ again:
 
 			while ( n-- > 0 ) {
 				Tree *tree = vm_pop();
-				printTreeFile( prg, sp, stdout, tree );
+				printTreeFile( prg, sp, stdout, tree, true );
 				treeDownref( prg, sp, tree );
 			}
 			break;
@@ -906,7 +906,7 @@ again:
 
 			while ( n-- > 0 ) {
 				Tree *tree = vm_pop();
-				printXmlStdout( prg, sp, tree, true );
+				printXmlStdout( prg, sp, tree, true, true );
 				treeDownref( prg, sp, tree );
 			}
 			break;
@@ -918,7 +918,7 @@ again:
 
 			while ( n-- > 0 ) {
 				Tree *tree = vm_pop();
-				printXmlStdout( prg, sp, tree, false );
+				printXmlStdout( prg, sp, tree, false, true );
 				treeDownref( prg, sp, tree );
 			}
 			break;
@@ -931,7 +931,7 @@ again:
 			Stream *stream = (Stream*)vm_pop();
 			while ( n-- > 0 ) {
 				Tree *tree = vm_pop();
-				printTreeFile( prg, sp, stream->file, tree );
+				printTreeFile( prg, sp, stream->file, tree, true );
 				treeDownref( prg, sp, tree );
 			}
 			treeDownref( prg, sp, (Tree*)stream );
@@ -1543,7 +1543,18 @@ again:
 			debug( REALM_BYTECODE, "IN_TREE_TO_STR\n" );
 
 			Tree *tree = vm_pop();
-			Head *res = treeToStr( prg, sp, tree );
+			Head *res = treeToStr( prg, sp, tree, true );
+			Tree *str = constructString( prg, res );
+			treeUpref( str );
+			vm_push( str );
+			treeDownref( prg, sp, tree );
+			break;
+		}
+		case IN_TREE_TO_STR_NOTRIM: {
+			debug( REALM_BYTECODE, "IN_TREE_TO_STR_NOTRIM\n" );
+
+			Tree *tree = vm_pop();
+			Head *res = treeToStr( prg, sp, tree, false );
 			Tree *str = constructString( prg, res );
 			treeUpref( str );
 			vm_push( str );
