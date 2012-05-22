@@ -91,6 +91,6 @@ match P [C: c '%%' protocol*]
 Output << [%C]
 Output <<
 	"#include <assert.h>
-	"
+Output << '\n\n'
 
-print( Output.finish() )
+print( Output.finish() '\n\n' )

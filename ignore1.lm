@@ -45,9 +45,8 @@ def item_list
 
 parse Attrs: attr_list( stdin )
 
-print( Attrs '\n' )
+print( %Attrs '\n' )
 
-## Reconstruct the left hand side with the 
 construct IL: item_list 
 	["<wrapper .[Attrs]. ></wrapper>"]
 

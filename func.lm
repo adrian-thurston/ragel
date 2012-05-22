@@ -27,7 +27,7 @@ int main()
     InputFile: stream = open( 'func.in' "r" )
     P: program = parse program( InputFile )
 	func( P )
-	print( P )
+	print( P '\n' )
 }
 
 main()
