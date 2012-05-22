@@ -1312,8 +1312,9 @@ void ParseData::initEmptyScanners()
 		if ( reg->tokenDefList.length() == 0 ) {
 			reg->wasEmpty = true;
 
+			static int def = 1;
 			InputLoc loc = { 0, 0, 0 };
-			String name( reg->name.length() + 16, "__%s_DEF_PAT", reg->name.data );
+			String name( reg->name.length() + 16, "__%s_DEF_PAT_%d", reg->name.data, def++ );
 
 			Join *join = new Join( new Expression( BT_Any ) );
 				
