@@ -74,10 +74,10 @@ void ParseData::generateExports()
 		"\n";
 
 	out << 
-		"inline std::string printTreeStr( ColmProgram *prg, ColmTree *tree )\n"
+		"inline std::string printTreeStr( ColmProgram *prg, ColmTree *tree, bool trim )\n"
 		"{\n"
 		"	std::string str;\n"
-		"	ColmPrintArgs printArgs = { &str, 1, 0, 1, &appendString, \n"
+		"	ColmPrintArgs printArgs = { &str, 1, 0, trim, &appendString, \n"
 		"			&printNull, &printTermTree, &printNull };\n"
 		"	printTreeArgs( prg, vm_root(prg), &printArgs, tree );\n"
 		"	return str;\n"
@@ -97,7 +97,8 @@ void ParseData::generateExports()
 		openNameSpace( out, lel->nspace );
 		out << "struct " << lel->fullName << "\n";
 		out << "{\n";
-		out << "	std::string text() { return printTreeStr( prg, tree ); }\n";
+		out << "	std::string text() { return printTreeStr( prg, tree, true ); }\n";
+		out << "	std::string text_notrim() { return printTreeStr( prg, tree, false ); }\n";
 		out << "	operator ColmTree *() { return tree; }\n";
 		out << "	ColmProgram *prg;\n";
 		out << "	ColmTree *tree;\n";
