@@ -550,27 +550,23 @@ static void attachRightIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTre
 		assert( ! ( parseTree->flags & PF_RIGHT_IL_ATTACHED ) );
 
 		ParseTree *accum = pdaRun->accumIgnore;
-		ParseTree *lasta = 0, *use = accum;
-		while ( use != 0 && use->flags & PF_RIGHT_IGNORE ) {
-			lasta = use;
+
+		ParseTree *stopAt = 0, *use = accum;
+		while ( use != 0 ) {
+			if ( ! (use->flags & PF_RIGHT_IGNORE) )
+				stopAt = use;
 			use = use->next;
 		}
 
-		if ( use == 0 ) {
-			/* Use it all. Note accum != 0 so non-empty. */
-			pdaRun->accumIgnore = 0;
+		if ( stopAt != 0 ) {
+			/* Stop at was set. Make it the last item in the igore list. Take
+			 * the rest. */
+			accum = stopAt->next;
+			stopAt->next = 0;
 		}
 		else {
-			/* Got stopped. */
-			if ( lasta == 0 ) {
-				/* Use none. */
-				accum = 0;
-			}
-			else {
-				/* Use some. */
-				lasta->next = 0;
-				pdaRun->accumIgnore = use;
-			}
+			/* Stop at was never set. All right ignore. Use it all. */
+			pdaRun->accumIgnore = 0;
 		}
 
 		/* The data list needs to be extracted and reversed. The parse tree list
