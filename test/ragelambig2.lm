@@ -65,3 +65,4 @@ def alphabet_num
 |	['-' uint]
 
 parse start( stdin )
+print( '\n' )

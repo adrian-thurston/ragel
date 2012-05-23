@@ -58,3 +58,4 @@ def start
 	}
 
 print_xml( parse start(stdin) )
+print( '\n' )
