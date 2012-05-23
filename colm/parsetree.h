@@ -398,7 +398,7 @@ struct TokenDef
 		longestMatchId(longestMatchId), inLmSelect(false), 
 		nspace(nspace), tokenRegion(tokenRegion), objectDef(objectDef),
 		contextIn(contextIn),
-		dupOf(dupOf), postNoIgnore(false), preNoIgnore(false)
+		dupOf(0), postNoIgnore(false), preNoIgnore(false)
 	{
 		if ( pReCaptureVect != 0 )
 			reCaptureVect = *pReCaptureVect;
