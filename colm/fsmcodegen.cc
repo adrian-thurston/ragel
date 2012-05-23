@@ -216,9 +216,9 @@ void FsmCodeGen::LM_SWITCH( ostream &ret, InlineItem *item,
 
 	for ( TokenDefListReg::Iter lmi = item->tokenRegion->tokenDefList; lmi.lte(); lmi++ ) {
 		if ( lmi->inLmSelect ) {
-			assert( lmi->token != 0 );
+			assert( lmi->tdLangEl != 0 );
 			ret << "	case " << lmi->longestMatchId << ":\n";
-			EMIT_TOKEN( ret, lmi->token );
+			EMIT_TOKEN( ret, lmi->tdLangEl );
 			ret << "	break;\n";
 		}
 	}
@@ -231,27 +231,27 @@ void FsmCodeGen::LM_SWITCH( ostream &ret, InlineItem *item,
 
 void FsmCodeGen::LM_ON_LAST( ostream &ret, InlineItem *item )
 {
-	assert( item->longestMatchPart->token != 0 );
+	assert( item->longestMatchPart->tdLangEl != 0 );
 
 	ret << "	" << P() << " += 1;\n";
-	EMIT_TOKEN( ret, item->longestMatchPart->token );
+	EMIT_TOKEN( ret, item->longestMatchPart->tdLangEl );
 	ret << "	return;\n";
 }
 
 void FsmCodeGen::LM_ON_NEXT( ostream &ret, InlineItem *item )
 {
-	assert( item->longestMatchPart->token != 0 );
+	assert( item->longestMatchPart->tdLangEl != 0 );
 
-	EMIT_TOKEN( ret, item->longestMatchPart->token );
+	EMIT_TOKEN( ret, item->longestMatchPart->tdLangEl );
 	ret << "	return;\n";
 }
 
 void FsmCodeGen::LM_ON_LAG_BEHIND( ostream &ret, InlineItem *item )
 {
-	assert( item->longestMatchPart->token != 0 );
+	assert( item->longestMatchPart->tdLangEl != 0 );
 
 	ret << "	" << P() << " = " << TOKEND() << ";\n";
-	EMIT_TOKEN( ret, item->longestMatchPart->token );
+	EMIT_TOKEN( ret, item->longestMatchPart->tdLangEl );
 	ret << "	return;\n";
 }
 

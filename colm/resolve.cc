@@ -77,7 +77,7 @@ UniqueType *TypeRef::lookupTypeLiteral( ParseData *pd )
 		LiteralDictEl *ldel = nspace->literalDict.find( interp );
 
 		if ( ldel != 0 )
-			return pd->findUniqueType( TYPE_TREE, ldel->value->token );
+			return pd->findUniqueType( TYPE_TREE, ldel->value->tdLangEl );
 
 		nspace = nspace->parentNamespace;
 	}

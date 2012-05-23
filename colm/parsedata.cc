@@ -1115,11 +1115,12 @@ void ParseData::createDefaultScanner()
 	name = "___DEFAULT_SCANNER_CHR";
 	defaultCharLangEl = addLangEl( this, defaultNamespace, name, LangEl::Term );
 
-	tokenDef->token = defaultCharLangEl;
+	tokenDef->tdLangEl = defaultCharLangEl;
 	defaultCharLangEl->tokenDef = tokenDef;
 }
 
-LangEl *ParseData::makeRepeatProd( Namespace *nspace, const String &repeatName, NamespaceQual *nspaceQual, const String &name )
+LangEl *ParseData::makeRepeatProd( Namespace *nspace, const String &repeatName, 
+		NamespaceQual *nspaceQual, const String &name )
 {
 	LangEl *prodName = addLangEl( this, nspace, repeatName, LangEl::NonTerm );
 	prodName->isRepeat = true;
@@ -1326,7 +1327,7 @@ void ParseData::initEmptyScanners()
 			 * in the declare pass. */
 			LangEl *lel = addLangEl( this, rootNamespace, name, LangEl::Term );
 
-			tokenDef->token = lel;
+			tokenDef->tdLangEl = lel;
 			lel->tokenDef = tokenDef;
 		}
 	}

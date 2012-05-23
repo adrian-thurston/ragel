@@ -89,7 +89,9 @@ LangEl::LangEl( Namespace *nspace, const String &name, Type type )
 	predType(PredNone),
 	predValue(0),
 	contextDef(0),
-	contextIn(0)
+	contextIn(0), 
+	preNoIgnore(false),
+	postNoIgnore(false) 
 {
 }
  
@@ -479,11 +481,25 @@ void ParseData::addRegion( PdaState *tabState, PdaTrans *tabTrans, long pdaKey )
 			region = klangEl->tokenDef->tokenRegion;
 
 		if ( region != 0 ) {
-			if ( !regionVectHas( tabState->regions, region ) )
-				tabState->regions.append( region );
+			/* region. */
+			TokenRegion *scanRegion = region;
 
-			if ( region->ignoreRegion != 0 && !regionVectHas( tabTrans->toState->preRegions, region->ignoreRegion ) )
-				tabTrans->toState->preRegions.append( region->ignoreRegion );
+			if ( klangEl->preNoIgnore )
+				scanRegion = region->tokenOnlyRegion;
+
+			if ( !regionVectHas( tabState->regions, scanRegion ) ) {
+				tabState->regions.append( scanRegion );
+			}
+
+			/* Pre-region of to state */
+			PdaState *toState = tabTrans->toState;
+			if ( !klangEl->postNoIgnore && 
+					region->ignoreOnlyRegion != 0 && 
+					!regionVectHas( toState->preRegions, region->ignoreOnlyRegion ) )
+			{
+				toState->preRegions.append( region->ignoreOnlyRegion );
+			}
+
 		}
 	}
 }
@@ -1335,8 +1351,9 @@ void ParseData::makeRuntimeData()
 		long regId = reg->id+1;
 		runtimeData->regionInfo[regId].name = reg->name;
 		runtimeData->regionInfo[regId].defaultToken =
-			reg->defaultTokenDef == 0 ? -1 : reg->defaultTokenDef->token->id;
+			reg->defaultTokenDef == 0 ? -1 : reg->defaultTokenDef->tdLangEl->id;
 		runtimeData->regionInfo[regId].eofFrameId = -1;
+		runtimeData->regionInfo[regId].isIgnoreOnly = reg->isIgnoreOnly;
 
 		CodeBlock *block = reg->preEofBlock;
 		if ( block != 0 ) {

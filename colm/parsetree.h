@@ -394,10 +394,11 @@ struct TokenDef
 		ReCaptureVect *pReCaptureVect, ObjectDef *objectDef, Context *contextIn )
 	: 
 		name(name), literal(literal), isLiteral(isLiteral), ignore(ignore), join(join), action(0),
-		codeBlock(codeBlock), token(0), semiLoc(semiLoc), 
+		codeBlock(codeBlock), tdLangEl(0), semiLoc(semiLoc), 
 		longestMatchId(longestMatchId), inLmSelect(false), 
 		nspace(nspace), tokenRegion(tokenRegion), objectDef(objectDef),
-		contextIn(contextIn)
+		contextIn(contextIn),
+		dupOf(dupOf), postNoIgnore(false), preNoIgnore(false)
 	{
 		if ( pReCaptureVect != 0 )
 			reCaptureVect = *pReCaptureVect;
@@ -412,7 +413,7 @@ struct TokenDef
 	Join *join;
 	Action *action;
 	CodeBlock *codeBlock;
-	LangEl *token;
+	LangEl *tdLangEl;
 	InputLoc semiLoc;
 
 	Action *setActId;
@@ -426,6 +427,10 @@ struct TokenDef
 	ReCaptureVect reCaptureVect;
 	ObjectDef *objectDef;
 	Context *contextIn;
+
+	TokenDef *dupOf;
+	bool postNoIgnore;
+	bool preNoIgnore;
 };
 
 struct LelDefList;
@@ -513,7 +518,9 @@ struct TokenRegion
 		loc(loc), name(name), id(id),
 		lmSwitchHandlesError(false), regionNameInst(0),
 		parentRegion(parentRegion), defaultTokenDef(0),
-		preEofBlock(0), ignoreRegion(0), wasEmpty(false) { }
+		preEofBlock(0), 
+		ignoreOnlyRegion(0), tokenOnlyRegion(0), 
+		wasEmpty(false), isIgnoreOnly(false) { }
 
 	/* Tree traversal. */
 	FsmGraph *walk( ParseData *pd );
@@ -547,11 +554,14 @@ struct TokenRegion
 	CodeBlock *preEofBlock;
 
 	/* Dupe of the region, containing only the ignore tokens. */
-	TokenRegion *ignoreRegion;
+	TokenRegion *ignoreOnlyRegion;
+	TokenRegion *tokenOnlyRegion;
 
 	/* We alway init empty scanners with a single token. If we had to do this
 	 * then wasEmpty is true. */
 	bool wasEmpty;
+
+	bool isIgnoreOnly;
 
 	TokenRegion *next, *prev;
 };

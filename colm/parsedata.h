@@ -269,6 +269,8 @@ struct LangEl : public DListEl<LangEl>
 
 	Context *contextDef;
 	Context *contextIn;
+	bool preNoIgnore;
+	bool postNoIgnore;
 };
 
 struct ProdEl

@@ -356,6 +356,7 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 		escapeLiteralString( out, runtimeData->regionInfo[i].name );
 		out << "\", " << runtimeData->regionInfo[i].defaultToken <<
 			", " << runtimeData->regionInfo[i].eofFrameId <<
+			", " << runtimeData->regionInfo[i].isIgnoreOnly <<
 			" }";
 
 		if ( i < runtimeData->numRegions-1 )

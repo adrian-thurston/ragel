@@ -406,7 +406,7 @@ void setRegion( PdaRun *pdaRun, int emptyIgnore, ParseTree *tree )
 	}
 }
 
-void ignoreTree( Program *prg, PdaRun *pdaRun, Tree *tree )
+void ignoreTree( Program *prg, FsmRun *fsmRun, PdaRun *pdaRun, Tree *tree )
 {
 	int emptyIgnore = pdaRun->accumIgnore == 0;
 
@@ -420,6 +420,9 @@ void ignoreTree( Program *prg, PdaRun *pdaRun, Tree *tree )
 	pdaRun->accumIgnore = parseTree;
 
 	transferReverseCode( pdaRun, parseTree );
+
+	if ( fsmRun->preRegion >= 0 )
+		parseTree->flags |= PF_RIGHT_IGNORE;
 
 	setRegion( pdaRun, emptyIgnore, pdaRun->accumIgnore );
 }
@@ -536,6 +539,9 @@ static void reportParseError( Program *prg, Tree **sp, PdaRun *pdaRun )
 
 static void attachRightIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTree *parseTree )
 {
+	if ( pdaRun->accumIgnore == 0 )
+		return;
+
 	if ( pdaRun->stackTop->id > 0 && pdaRun->stackTop->id < prg->rtd->firstNonTermId ) {
 		/* OK, do it */
 		debug( REALM_PARSE, "attaching right ignore\n" );
@@ -544,7 +550,28 @@ static void attachRightIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTre
 		assert( ! ( parseTree->flags & PF_RIGHT_IL_ATTACHED ) );
 
 		ParseTree *accum = pdaRun->accumIgnore;
-		pdaRun->accumIgnore = 0;
+		ParseTree *lasta = 0, *use = accum;
+		while ( use != 0 && use->flags & PF_RIGHT_IGNORE ) {
+			lasta = use;
+			use = use->next;
+		}
+
+		if ( use == 0 ) {
+			/* Use it all. Note accum != 0 so non-empty. */
+			pdaRun->accumIgnore = 0;
+		}
+		else {
+			/* Got stopped. */
+			if ( lasta == 0 ) {
+				/* Use none. */
+				accum = 0;
+			}
+			else {
+				/* Use some. */
+				lasta->next = 0;
+				pdaRun->accumIgnore = use;
+			}
+		}
 
 		/* The data list needs to be extracted and reversed. The parse tree list
 		 * can remain in stack order. */
@@ -785,7 +812,7 @@ void sendIgnore( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmR
 	tree->tokdata = ignoreStr;
 
 	/* Send it to the pdaRun. */
-	ignoreTree( prg, pdaRun, tree );
+	ignoreTree( prg, fsmRun, pdaRun, tree );
 }
 
 

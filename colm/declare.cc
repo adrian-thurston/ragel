@@ -228,13 +228,26 @@ void Namespace::declare( ParseData *pd )
 		g->declare( pd, this );
 
 	for ( LiteralDict::Iter l = literalDict; l.lte(); l++  ) {
-		/* Create a token for the literal. */
-		LangEl *newLangEl = declareLangEl( pd, this, l->value->name, LangEl::Term );
-		newLangEl->lit = l->value->literal;
-		newLangEl->isLiteral = true;
-		newLangEl->tokenDef = l->value;
+		if ( l->value->dupOf != 0 ) {
+			/* Duplicate of another. Use the lang el of that token. */
+			assert( l->value->dupOf->tdLangEl != 0 );
+			l->value->tdLangEl = l->value->dupOf->tdLangEl;
+		}
+		else {
+			/* Original. Create a token for the literal. */
+			LangEl *newLangEl = declareLangEl( pd, this, l->value->name, LangEl::Term );
 
-		l->value->token = newLangEl;
+			newLangEl->lit = l->value->literal;
+			newLangEl->isLiteral = true;
+			newLangEl->tokenDef = l->value;
+
+			l->value->tdLangEl = newLangEl;
+
+			if ( l->value->preNoIgnore )
+				newLangEl->preNoIgnore = true;
+			if ( l->value->postNoIgnore )
+				newLangEl->postNoIgnore = true;
+		}
 	}
 
 	for ( ContextDefList::Iter c = contextDefList; c.lte(); c++ ) {
@@ -273,15 +286,22 @@ void Namespace::declare( ParseData *pd )
 	for ( TokenDefListNs::Iter t = tokenDefList; t.lte(); t++ ) {
 		/* Literals already taken care of. */
 		if ( ! t->isLiteral ) {
-			/* Create the token. */
-			LangEl *tokEl = declareLangEl( pd, this, t->name, LangEl::Term );
-			tokEl->ignore = t->ignore;
-			tokEl->transBlock = t->codeBlock;
-			tokEl->objectDef = t->objectDef;
-			tokEl->contextIn = t->contextIn;
-			tokEl->tokenDef = t;
+			if ( t->dupOf != 0 ) {
+				/* Duplicate of another. Use the lang el of that token. */
+				assert( t->dupOf->tdLangEl != 0 );
+				t->tdLangEl = t->dupOf->tdLangEl;
+			}
+			else {
+				/* Create the token. */
+				LangEl *tokEl = declareLangEl( pd, this, t->name, LangEl::Term );
+				tokEl->ignore = t->ignore;
+				tokEl->transBlock = t->codeBlock;
+				tokEl->objectDef = t->objectDef;
+				tokEl->contextIn = t->contextIn;
+				tokEl->tokenDef = t;
 
-			t->token = tokEl;
+				t->tdLangEl = tokEl;
+			}
 		}
 	}
 

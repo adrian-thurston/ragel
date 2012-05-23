@@ -66,23 +66,23 @@ void execAction( FsmRun *fsmRun, GenAction *genAction )
 						lmi.lte(); lmi++ )
 				{
 					if ( lmi->inLmSelect && fsmRun->act == lmi->longestMatchId )
-						fsmRun->matchedToken = lmi->token->id;
+						fsmRun->matchedToken = lmi->tdLangEl->id;
 				}
 			}
 			fsmRun->returnResult = true;
 			break;
 		case InlineItem::LmOnLast:
 			fsmRun->p += 1;
-			fsmRun->matchedToken = item->longestMatchPart->token->id;
+			fsmRun->matchedToken = item->longestMatchPart->tdLangEl->id;
 			fsmRun->returnResult = true;
 			break;
 		case InlineItem::LmOnNext:
-			fsmRun->matchedToken = item->longestMatchPart->token->id;
+			fsmRun->matchedToken = item->longestMatchPart->tdLangEl->id;
 			fsmRun->returnResult = true;
 			break;
 		case InlineItem::LmOnLagBehind:
 			fsmRun->p = fsmRun->tokend;
-			fsmRun->matchedToken = item->longestMatchPart->token->id;
+			fsmRun->matchedToken = item->longestMatchPart->tdLangEl->id;
 			fsmRun->returnResult = true;
 			break;
 		}

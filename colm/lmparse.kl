@@ -481,7 +481,7 @@ region_def:
 region_head: 
 	KW_Lex TK_Word 
 	final {
-		/* just for ignores. */
+		/* Just for ignores. */
 		TokenRegion *tokenRegionIgn = new TokenRegion( InputLoc(), $2->data + "_ign" ,
 				pd->regionList.length(), regionStack.top() );
 		regionStack.top()->childRegions.append( tokenRegionIgn );
@@ -489,6 +489,15 @@ region_head:
 		JoinOrLm *joinOrLmIgn = new JoinOrLm( tokenRegionIgn );
 		String scannerNameIgn( $2->data.length() + 2, "<%s>-ign", $2->data.data );
 		addRegularDef( InputLoc(), namespaceStack.top(), scannerNameIgn, joinOrLmIgn, true );
+
+		/* Just for tokens. */
+		TokenRegion *tokenRegionTok = new TokenRegion( InputLoc(), $2->data + "_tok" ,
+				pd->regionList.length(), regionStack.top() );
+		regionStack.top()->childRegions.append( tokenRegionTok );
+		pd->regionList.append( tokenRegionTok );
+		JoinOrLm *joinOrLmTok = new JoinOrLm( tokenRegionTok );
+		String scannerNameTok( $2->data.length() + 2, "<%s>-tok", $2->data.data );
+		addRegularDef( InputLoc(), namespaceStack.top(), scannerNameTok, joinOrLmTok, true );
 
 		/* Make the new token region. */
 		TokenRegion *tokenRegion = new TokenRegion( InputLoc(), $2->data,
@@ -499,7 +508,11 @@ region_head:
 		String scannerName( $2->data.length() + 2, "<%s>", $2->data.data );
 		addRegularDef( InputLoc(), namespaceStack.top(), scannerName, joinOrLm, true );
 		regionStack.push( tokenRegion );
-		tokenRegion->ignoreRegion = tokenRegionIgn;
+
+		tokenRegion->ignoreOnlyRegion = tokenRegionIgn;
+		tokenRegion->tokenOnlyRegion = tokenRegionTok;
+
+		tokenRegionIgn->isIgnoreOnly = true;
 	};
 
 namespace_def: 
@@ -916,6 +929,22 @@ literal_item: TK_Literal
 
 		bool insideRegion = regionStack.top() != pd->rootRegion;
 		if ( !insideRegion ) {
+			TokenRegion *tokenRegionIgn = new TokenRegion( InputLoc(), name + "_ign",
+					pd->regionList.length(), regionStack.top() );
+			regionStack.top()->childRegions.append( tokenRegionIgn );
+			pd->regionList.append( tokenRegionIgn );
+			JoinOrLm *joinOrLmIgn = new JoinOrLm( tokenRegionIgn );
+			String scannerNameIgn( name.length() + 2, "<%s>-ign", name.data );
+			addRegularDef( InputLoc(), namespaceStack.top(), scannerNameIgn, joinOrLmIgn, true );
+
+			TokenRegion *tokenRegionTok = new TokenRegion( InputLoc(), name + "_tok",
+					pd->regionList.length(), regionStack.top() );
+			regionStack.top()->childRegions.append( tokenRegionTok );
+			pd->regionList.append( tokenRegionTok );
+			JoinOrLm *joinOrLmTok = new JoinOrLm( tokenRegionTok );
+			String scannerNameTok( name.length() + 2, "<%s>-tok", name.data );
+			addRegularDef( InputLoc(), namespaceStack.top(), scannerNameTok, joinOrLmTok, true );
+
 			/* Make a new token region just for the token. */
 			TokenRegion *tokenRegion = new TokenRegion( InputLoc(), $1->data,
 					pd->regionList.length(), regionStack.top() );
@@ -925,6 +954,11 @@ literal_item: TK_Literal
 			String scannerName( name.length() + 2, "<%s>", name.data );
 			addRegularDef( InputLoc(), namespaceStack.top(), scannerName, joinOrLm, true );
 			regionStack.push( tokenRegion );
+
+			tokenRegion->ignoreOnlyRegion = tokenRegionIgn;
+			tokenRegion->tokenOnlyRegion = tokenRegionTok;
+
+			tokenRegionIgn->isIgnoreOnly = true;
 		}
 
 		bool unusedCI;
@@ -945,13 +979,27 @@ literal_item: TK_Literal
 					Literal::LitString ) ) ) ) ) ) ) );
 			
 			TokenDef *tokenDef = new TokenDef( name, $1->data, true, false, join, 
-					0, $1->loc, pd->nextTokenId, nspace, region, 0, 0, 0 );
-
+					0, $1->loc, pd->nextTokenId++, nspace, region, 0, 0, 0 );
 			region->tokenDefList.append( tokenDef );
 			ldel = nspace->literalDict.insert( interp, tokenDef );
-			pd->nextTokenId += 1;
-
 			nspace->tokenDefList.append( tokenDef );
+
+//			if ( strcmp( interp, "%%" ) == 0 ) {
+//				tokenDef->preNoIgnore = true;
+//			}
+//			if ( strcmp( interp, ")" ) == 0 ) {
+//				tokenDef->preNoIgnore = true;
+//			}
+//			if ( strcmp( interp, "(" ) == 0 ) {
+//				tokenDef->postNoIgnore = true;
+//			}
+
+			TokenDef *tokenDefTok = new TokenDef( name + "_tok", $1->data, true, false, join, 
+					0, $1->loc, pd->nextTokenId++, nspace, region->tokenOnlyRegion, 0, 0, 0 );
+			tokenDefTok->dupOf = tokenDef;
+			region->tokenOnlyRegion->tokenDefList.append( tokenDefTok );
+			ldel = nspace->literalDict.insert( "|" + interp + "_tok", tokenDefTok );
+			nspace->tokenDefList.append( tokenDefTok );
 		}
 
 		if ( !insideRegion ) {
@@ -1013,12 +1061,25 @@ token_def:
 		/* All again for the ignore. */
 		if ( ignore ) {
 			TokenDef *tokenDefIgn = new TokenDef( name + "_ign", String(), false, ignore, join, 
-					0, $1->loc, pd->nextTokenId++, nspace, region->ignoreRegion,
+					0, $1->loc, pd->nextTokenId++, nspace, region->ignoreOnlyRegion,
 					&reCaptureVect, pd->objectDef,
 					contextStack.length() > 0 ? contextStack.top() : 0 );
 
-			region->ignoreRegion->tokenDefList.append( tokenDefIgn );
+			tokenDefIgn->dupOf = tokenDef;
+
+			region->ignoreOnlyRegion->tokenDefList.append( tokenDefIgn );
 			nspace->tokenDefList.append( tokenDefIgn );
+		}
+		else {
+			TokenDef *tokenDefTok = new TokenDef( name + "_tok", String(), false, ignore, join, 
+					0, $1->loc, pd->nextTokenId++, nspace, region->tokenOnlyRegion,
+					&reCaptureVect, pd->objectDef,
+					contextStack.length() > 0 ? contextStack.top() : 0 );
+
+			tokenDefTok->dupOf = tokenDef;
+
+			region->tokenOnlyRegion->tokenDefList.append( tokenDefTok );
+			nspace->tokenDefList.append( tokenDefTok );
 		}
 
 		/* This is created and pushed in the name. */
@@ -1074,6 +1135,14 @@ token_def_name:
 			String scannerNameIgn( name.length() + 2, "<%s>-ign", name.data );
 			addRegularDef( InputLoc(), namespaceStack.top(), scannerNameIgn, joinOrLmIgn, true );
 
+			TokenRegion *tokenRegionTok = new TokenRegion( InputLoc(), name + "_tok",
+					pd->regionList.length(), regionStack.top() );
+			regionStack.top()->childRegions.append( tokenRegionTok );
+			pd->regionList.append( tokenRegionTok );
+			JoinOrLm *joinOrLmTok = new JoinOrLm( tokenRegionTok );
+			String scannerNameTok( name.length() + 2, "<%s>-tok", name.data );
+			addRegularDef( InputLoc(), namespaceStack.top(), scannerNameTok, joinOrLmTok, true );
+			
 			/* If not inside a region, make one for the token. */
 			TokenRegion *tokenRegion = new TokenRegion( InputLoc(), name,
 					pd->regionList.length(), regionStack.top() );
@@ -1083,7 +1152,11 @@ token_def_name:
 			String scannerName( name.length() + 2, "<%s>", name.data );
 			addRegularDef( InputLoc(), namespaceStack.top(), scannerName, joinOrLm, true );
 			regionStack.push( tokenRegion );
-			tokenRegion->ignoreRegion = tokenRegionIgn;
+
+			tokenRegion->ignoreOnlyRegion = tokenRegionIgn;
+			tokenRegion->tokenOnlyRegion = tokenRegionTok;
+
+			tokenRegionIgn->isIgnoreOnly = true;
 		}
 
 		/* Reset the lable id counter. */
