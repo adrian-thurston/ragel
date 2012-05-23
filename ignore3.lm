@@ -1,0 +1,29 @@
+lex start
+{
+	ignore /space+/
+	literal '*', '(', ')', '!', ';'
+	token id /[a-zA-Z_0-9]+/ 
+}
+
+lex inner
+{
+	ignore /space+/
+	token inner /[a-zA-Z_0-9]+/ 
+}
+
+def item 
+	[id]
+|	['(' inner* ')']
+
+def start 
+	[item* ';']
+
+parse Start: start( stdin )
+
+for I: item in Start {
+	print( 'item: .' %I '.\n' )
+	if match I [ O: '(' Inner: inner* C: ')' ]
+		print( 'innr: .' %O '.' %Inner '.' %C '.\n' )
+}
+print( '\n' )
+

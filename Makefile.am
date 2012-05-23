@@ -78,7 +78,8 @@ TEST_CASES = \
 	concat1.lm \
 	concat2.lm \
 	ignore1.lm \
-	ignore2.lm
+	ignore2.lm \
+	ignore3.lm
 
 INPUT = \
 	ambig1.in \
@@ -145,7 +146,8 @@ INPUT = \
 	concat1.in \
 	concat2.in \
 	ignore1.in \
-	ignore2.in
+	ignore2.in \
+	ignore3.in
 
 EXPECTED_OUTPUT = \
 	ambig1.exp \
@@ -225,6 +227,7 @@ EXPECTED_OUTPUT = \
 	concat1.exp \
 	concat2.exp \
 	ignore1.exp \
-	ignore2.exp
+	ignore2.exp \
+	ignore3.exp
 
 EXTRA_DIST = genmf TESTS runtests.mk $(TEST_CASES) $(INPUT) $(EXPECTED_OUTPUT)

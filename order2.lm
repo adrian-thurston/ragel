@@ -6,7 +6,7 @@ lex c_token_list
 
 	token sym / ';' | ',' | '=' | '(' | ')' | ':' | '&' | '*' |
 		'[' | ']' | '~' | '+' | '-' | '/' | '<' | '>' | '|' | 
-		'^' | '%' | '!' | '?' | '.' | '#'/
+		'^' | '!' | '?' | '.' | '#'/
 
 	# Identifiers
 	token c_id /( [a-zA-Z_] [a-zA-Z0-9_]* )/
@@ -31,8 +31,11 @@ def c_token_list
 |	[c_token]
 
 # Can parse this, use ful for single constructs.
+#def c
+#	[c_token*]
+
 def c
-	[c_token*]
+	[c_token_list]
 
 lex start
 {
