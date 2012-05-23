@@ -269,8 +269,8 @@ struct LangEl : public DListEl<LangEl>
 
 	Context *contextDef;
 	Context *contextIn;
-	bool preNoIgnore;
-	bool postNoIgnore;
+	bool noPreIgnore;
+	bool noPostIgnore;
 };
 
 struct ProdEl
@@ -290,7 +290,8 @@ struct ProdEl
 		langEl(0),
 		priorVal(priorVal),
 		type(type), 
-		objField(0) {}
+		objField(0)
+	{}
 
 	ProdEl( const InputLoc &loc, TypeRef *typeRef )
 	:
@@ -299,7 +300,9 @@ struct ProdEl
 		typeRef(typeRef), 
 		langEl(0), 
 		priorVal(0), 
-		type(ReferenceType), objField(0) {}
+		type(ReferenceType), 
+		objField(0)
+	{}
 
 	ObjField *captureField;
 	bool commit;
@@ -733,7 +736,8 @@ struct ParseData
 
 	int findIndexOff( PdaTables *pdaTables, PdaGraph *pdaGraph, PdaState *state, int &currLen );
 	void trySetTime( PdaTrans *trans, long code, long &time );
-	void addRegion( PdaState *tabState, PdaTrans *pdaTrans, long pdaKey );
+	void addRegion( PdaState *tabState, PdaTrans *pdaTrans, long pdaKey,
+			bool noPreIgnore, bool noPostIgnore );
 	PdaState *followProd( PdaState *tabState, PdaState *prodState );
 	void findFollow( AlphSet &result, PdaState *overTab, 
 			PdaState *overSrc, Definition *parentDef );

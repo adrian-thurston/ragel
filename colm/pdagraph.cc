@@ -429,6 +429,11 @@ void PdaGraph::addInTrans( PdaTrans *destTrans, PdaTrans *srcTrans )
 
 		if ( srcTrans->toState->advanceReductions )
 			destTrans->toState->advanceReductions = true;
+
+		if ( srcTrans->noPreIgnore )
+			destTrans->noPreIgnore = true;
+		if ( srcTrans->noPostIgnore )
+			destTrans->noPostIgnore = true;
 	}
 }
 

@@ -192,7 +192,9 @@ struct PdaTrans
 		toState(0), 
 		isShift(false), 
 		isShiftReduce(false),
-		shiftPrior(0)
+		shiftPrior(0),
+		noPreIgnore(false),
+		noPostIgnore(false)
 	{ }
 
 	PdaTrans( const PdaTrans &other ) :
@@ -202,7 +204,9 @@ struct PdaTrans
 		isShiftReduce(other.isShiftReduce),
 		shiftPrior(other.shiftPrior),
 		reductions(other.reductions),
-		commits(other.commits)
+		commits(other.commits),
+		noPreIgnore(false),
+		noPostIgnore(false)
 	{ }
 
 	long lowKey;
@@ -231,6 +235,9 @@ struct PdaTrans
 
 	LongSet commits;
 	LongSet afterShiftCommits;
+
+	bool noPreIgnore;
+	bool noPostIgnore;
 };
 
 /* In transition list. Like DList except only has head pointers, which is all

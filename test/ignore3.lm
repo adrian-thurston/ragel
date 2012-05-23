@@ -1,7 +1,7 @@
 lex start
 {
 	ignore /space+/
-	literal '*', '(', ')', '!', ';'
+	literal '*', '(' ni, ni ')', '!', ';'
 	token id /[a-zA-Z_0-9]+/ 
 }
 

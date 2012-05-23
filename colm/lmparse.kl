@@ -838,6 +838,15 @@ prod_el_list:
 prod_el_list: 
 	final { curProdElList = new ProdElList; };
 
+nonterm opt_no_pre_ignore { bool value; };
+nonterm opt_no_post_ignore { bool value; };
+
+opt_no_pre_ignore: KW_Ni final { $$->value = true; };
+opt_no_pre_ignore:       final { $$->value = false; };
+
+opt_no_post_ignore: KW_Ni final { $$->value = true; };
+opt_no_post_ignore:       final { $$->value = false; };
+
 nonterm prod_el
 {
 	ProdEl *factor;
@@ -922,7 +931,7 @@ literal_def: KW_Literal literal_list;
 literal_list: literal_list ',' literal_item;
 literal_list: literal_item;
 
-literal_item: TK_Literal
+literal_item: opt_no_pre_ignore TK_Literal opt_no_post_ignore
 	final {
 		/* Create a name for the literal. */
 		String name( 32, "_literal_%.4x", pd->nextTokenId );
@@ -946,7 +955,7 @@ literal_item: TK_Literal
 			addRegularDef( InputLoc(), namespaceStack.top(), scannerNameTok, joinOrLmTok, true );
 
 			/* Make a new token region just for the token. */
-			TokenRegion *tokenRegion = new TokenRegion( InputLoc(), $1->data,
+			TokenRegion *tokenRegion = new TokenRegion( InputLoc(), $2->data,
 					pd->regionList.length(), regionStack.top() );
 			regionStack.top()->childRegions.append( tokenRegion );
 			pd->regionList.append( tokenRegion );
@@ -963,7 +972,7 @@ literal_item: TK_Literal
 
 		bool unusedCI;
 		String interp;
-		prepareLitString( interp, unusedCI, $1->data, $1->loc );
+		prepareLitString( interp, unusedCI, $2->data, $2->loc );
 
 		/* Look for the production's associated region. */
 		Namespace *nspace = namespaceStack.top();
@@ -971,31 +980,26 @@ literal_item: TK_Literal
 
 		LiteralDictEl *ldel = nspace->literalDict.find( interp );
 		if ( ldel != 0 )
-			error( $1->loc ) << "literal already defined in this namespace" << endp;
+			error( $2->loc ) << "literal already defined in this namespace" << endp;
 		else {
 			Join *join = new Join( new Expression( new Term( new FactorWithAug(
-				new FactorWithRep( $1->loc, new FactorWithNeg( $1->loc, new Factor(
-				new Literal( $1->loc, $1->data, 
+				new FactorWithRep( $2->loc, new FactorWithNeg( $2->loc, new Factor(
+				new Literal( $2->loc, $2->data, 
 					Literal::LitString ) ) ) ) ) ) ) );
 			
-			TokenDef *tokenDef = new TokenDef( name, $1->data, true, false, join, 
-					0, $1->loc, pd->nextTokenId++, nspace, region, 0, 0, 0 );
+			TokenDef *tokenDef = new TokenDef( name, $2->data, true, false, join, 
+					0, $2->loc, pd->nextTokenId++, nspace, region, 0, 0, 0 );
 			region->tokenDefList.append( tokenDef );
 			ldel = nspace->literalDict.insert( interp, tokenDef );
 			nspace->tokenDefList.append( tokenDef );
 
-//			if ( strcmp( interp, "%%" ) == 0 ) {
-//				tokenDef->preNoIgnore = true;
-//			}
-//			if ( strcmp( interp, ")" ) == 0 ) {
-//				tokenDef->preNoIgnore = true;
-//			}
-//			if ( strcmp( interp, "(" ) == 0 ) {
-//				tokenDef->postNoIgnore = true;
-//			}
+			if ( $1->value )
+				tokenDef->noPreIgnore = true;
+			if ( $3->value )
+				tokenDef->noPostIgnore = true;
 
-			TokenDef *tokenDefTok = new TokenDef( name + "_tok", $1->data, true, false, join, 
-					0, $1->loc, pd->nextTokenId++, nspace, region->tokenOnlyRegion, 0, 0, 0 );
+			TokenDef *tokenDefTok = new TokenDef( name + "_tok", $2->data, true, false, join, 
+					0, $2->loc, pd->nextTokenId++, nspace, region->tokenOnlyRegion, 0, 0, 0 );
 			tokenDefTok->dupOf = tokenDef;
 			region->tokenOnlyRegion->tokenDefList.append( tokenDefTok );
 			ldel = nspace->literalDict.insert( "|" + interp + "_tok", tokenDefTok );
@@ -1028,12 +1032,13 @@ leave_rl:
 
 token_def: 
 	token_or_ignore token_def_name obj_var_list
-	enter_rl '/' opt_rl_join leave_rl '/' opt_translate
+	enter_rl opt_no_pre_ignore '/' opt_rl_join leave_rl '/' opt_no_post_ignore  
+	opt_translate
 	final {
 		bool ignore = $1->ignore;
 		String name = $2->name;
-		Join *join = $6->join;
-		CodeBlock *transBlock = $9->transBlock;
+		Join *join = $7->join;
+		CodeBlock *transBlock = $11->transBlock;
 
 		/* Check the region if this is for an ignore. */
 		if ( ignore && !pd->insideRegion )
@@ -1057,6 +1062,11 @@ token_def:
 
 		region->tokenDefList.append( tokenDef );
 		nspace->tokenDefList.append( tokenDef );
+
+		if ( $5->value )
+			tokenDef->noPreIgnore = true;
+		if ( $10->value ) {cerr << "foo" << endl; 
+			tokenDef->noPostIgnore = true;}
 
 		/* All again for the ignore. */
 		if ( ignore ) {

@@ -243,10 +243,10 @@ void Namespace::declare( ParseData *pd )
 
 			l->value->tdLangEl = newLangEl;
 
-			if ( l->value->preNoIgnore )
-				newLangEl->preNoIgnore = true;
-			if ( l->value->postNoIgnore )
-				newLangEl->postNoIgnore = true;
+			if ( l->value->noPreIgnore )
+				newLangEl->noPreIgnore = true;
+			if ( l->value->noPostIgnore )
+				newLangEl->noPostIgnore = true;
 		}
 	}
 
@@ -299,6 +299,11 @@ void Namespace::declare( ParseData *pd )
 				tokEl->objectDef = t->objectDef;
 				tokEl->contextIn = t->contextIn;
 				tokEl->tokenDef = t;
+
+				if ( t->noPreIgnore )
+					tokEl->noPreIgnore = true;
+				if ( t->noPostIgnore )
+					tokEl->noPostIgnore = true;
 
 				t->tdLangEl = tokEl;
 			}

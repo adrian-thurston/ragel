@@ -90,8 +90,8 @@ LangEl::LangEl( Namespace *nspace, const String &name, Type type )
 	predValue(0),
 	contextDef(0),
 	contextIn(0), 
-	preNoIgnore(false),
-	postNoIgnore(false) 
+	noPreIgnore(false),
+	noPostIgnore(false) 
 {
 }
  
@@ -455,7 +455,8 @@ void ParseData::pdaOrderFollow( LangEl *rootEl, PdaState *tabState,
 			trySetTime( tt->value, redCode, time );
 	
 			/* If the items token region is not recorded in the state, do it now. */
-			addRegion( expandToState, tt->value, tt->key );
+			addRegion( expandToState, tt->value, tt->key, 
+					tt->value->noPreIgnore, tt->value->noPostIgnore );
 		}
 	}
 }
@@ -469,7 +470,8 @@ bool regionVectHas( RegionVect &regVect, TokenRegion *region )
 	return false;
 }
 
-void ParseData::addRegion( PdaState *tabState, PdaTrans *tabTrans, long pdaKey )
+void ParseData::addRegion( PdaState *tabState, PdaTrans *tabTrans,
+		long pdaKey, bool noPreIgnore, bool noPostIgnore )
 {
 	LangEl *klangEl = langElIndex[pdaKey];
 	if ( klangEl != 0 && klangEl->type == LangEl::Term ) {
@@ -484,7 +486,7 @@ void ParseData::addRegion( PdaState *tabState, PdaTrans *tabTrans, long pdaKey )
 			/* region. */
 			TokenRegion *scanRegion = region;
 
-			if ( klangEl->preNoIgnore )
+			if ( klangEl->noPreIgnore )
 				scanRegion = region->tokenOnlyRegion;
 
 			if ( !regionVectHas( tabState->regions, scanRegion ) ) {
@@ -493,13 +495,12 @@ void ParseData::addRegion( PdaState *tabState, PdaTrans *tabTrans, long pdaKey )
 
 			/* Pre-region of to state */
 			PdaState *toState = tabTrans->toState;
-			if ( !klangEl->postNoIgnore && 
+			if ( !klangEl->noPostIgnore && 
 					region->ignoreOnlyRegion != 0 && 
 					!regionVectHas( toState->preRegions, region->ignoreOnlyRegion ) )
 			{
 				toState->preRegions.append( region->ignoreOnlyRegion );
 			}
-
 		}
 	}
 }
@@ -589,7 +590,8 @@ void ParseData::pdaOrderProd( LangEl *rootEl, PdaState *tabState,
 		}
 
 		/* If the items token region is not recorded in the state, do it now. */
-		addRegion( tabState, tabTrans, srcTrans->key );
+		addRegion( tabState, tabTrans, srcTrans->key, 
+				srcTrans->value->noPreIgnore, srcTrans->value->noPostIgnore );
 
 		/* Go over one in the production. */
 		pdaOrderProd( rootEl, tabTrans->toState, 
