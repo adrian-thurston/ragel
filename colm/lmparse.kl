@@ -1065,8 +1065,8 @@ token_def:
 
 		if ( $5->value )
 			tokenDef->noPreIgnore = true;
-		if ( $10->value ) {cerr << "foo" << endl; 
-			tokenDef->noPostIgnore = true;}
+		if ( $10->value )
+			tokenDef->noPostIgnore = true;
 
 		/* All again for the ignore. */
 		if ( ignore ) {
