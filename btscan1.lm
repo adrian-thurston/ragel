@@ -32,3 +32,4 @@ P: btscan P = parse btscan( stdin )
 
 match P ~!abb !abba !aab
 print_xml(P)
+print( '\n' )

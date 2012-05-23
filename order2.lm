@@ -91,9 +91,8 @@ Output: output Output = construct output []
 # Take off the leading C from the input file and send it out.
 match P [C: c '%%' protocol*]
 
-Output << [%C]
+Output << [$C]
 Output <<
 	"#include <assert.h>
-Output << '\n\n'
-
-print( Output.finish() '\n\n' )
+	"
+print( Output.finish() )

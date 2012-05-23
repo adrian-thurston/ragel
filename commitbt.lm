@@ -109,3 +109,4 @@ def stuff
 
 S: stuff = parse stuff( stdin  )
 print_xml( S )
+print( '\n' )

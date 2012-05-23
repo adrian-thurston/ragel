@@ -25,5 +25,4 @@ for I: item in Start {
 	if match I [ O: '(' Inner: inner* C: ')' ]
 		print( 'innr: .' %O '.' %Inner '.' %C '.\n' )
 }
-print( '\n' )
 

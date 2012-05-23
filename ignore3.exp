@@ -1,9 +1,8 @@
-item:  .a .
-item:  .b .
-item:  .c .
-item:  .(   d   ) .
-innr:  .(   .d   .) .
-item:  .e .
-item:  .f .
-item:  .g.
-
+item: .a .
+item: .b .
+item: .c .
+item: .(   d   ) .
+innr: .(   .d   .) .
+item: .e .
+item: .f .
+item: .g.
