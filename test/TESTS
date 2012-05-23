@@ -81,4 +81,5 @@ TESTS="
 	concat2.lm
 	ignore1.lm
 	ignore2.lm
+	ignore3.lm
 "

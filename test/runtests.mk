@@ -79,7 +79,8 @@ TESTS = \
 	concat1.lm \
 	concat2.lm \
 	ignore1.lm \
-	ignore2.lm
+	ignore2.lm \
+	ignore3.lm
 
 DIFFS = \
 	ambig1.diff \
@@ -158,7 +159,8 @@ DIFFS = \
 	concat1.diff \
 	concat2.diff \
 	ignore1.diff \
-	ignore2.diff
+	ignore2.diff \
+	ignore3.diff
 
 all: runtests.mk $(DIFFS) $(SUBDIRS)
 
@@ -791,3 +793,11 @@ ignore2.out: ignore2.bin
 
 ignore2.bin: ignore2.lm ./../colm/colm
 	./../colm/colm ignore2.lm
+ignore3.diff: ignore3.out ignore3.exp
+	@diff -u ignore3.exp ignore3.out > ignore3.diff || ( cat ignore3.diff; rm ignore3.diff )
+
+ignore3.out: ignore3.bin
+	./ignore3.bin  < ignore3.in > ignore3.out
+
+ignore3.bin: ignore3.lm ./../colm/colm
+	./../colm/colm ignore3.lm
