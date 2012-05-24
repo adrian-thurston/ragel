@@ -879,8 +879,16 @@ nonterm class opt_collect_ignore
 	String region;
 };
 
-opt_collect_ignore: KW_Ni TK_Word final { $$->value = true; $$->region = $2->data; };
-opt_collect_ignore:               final { $$->value = false; };
+opt_collect_ignore: 
+	KW_Ci '<' TK_Word '>' 
+	final { 
+		$$->value = true; 
+		$$->region = $3->data;
+	};
+opt_collect_ignore:
+	final {
+		$$->value = false;
+	};
 
 nonterm prod_el
 {

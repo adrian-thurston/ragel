@@ -58,7 +58,7 @@ struct ColmParser
 
 	# Patterns.
 	token KW_Match, KW_Construct, KW_Parse, KW_ParseStop, KW_New, KW_MakeToken,
-		KW_MakeTree, KW_TypeId, KW_Alias, KW_Send, KW_Ni;
+		KW_MakeTree, KW_TypeId, KW_Alias, KW_Send, KW_Ni, KW_Ci;
 
 	token KW_Include, KW_Preeof;
 

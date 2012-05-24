@@ -472,11 +472,12 @@ void Scanner::endSection( )
 		'right' => { token( KW_Right ); };
 		'nonassoc' => { token( KW_Nonassoc ); };
 		'prec' => { token( KW_Prec ); };
-		'include' => {token( KW_Include ); };
-		'context' => {token( KW_Context ); };
-		'alias' => {token( KW_Alias ); };
-		'send' => {token( KW_Send ); };
-		'ni' => {token( KW_Ni ); };
+		'include' => { token( KW_Include ); };
+		'context' => { token( KW_Context ); };
+		'alias' => { token( KW_Alias ); };
+		'send' => { token( KW_Send ); };
+		'ni' => { token( KW_Ni ); };
+		'ci' => { token( KW_Ci ); };
 
 		# Identifiers.
 		ident => { token( TK_Word, ts, te ); } ;

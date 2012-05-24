@@ -1662,6 +1662,9 @@ void fillNodes( Program *prg, int &nextAvail, Bindings *bindings, long &bindId,
 			?
 			parseTree->child : 0;
 
+		if ( ptChild != 0 && ptChild->flags & PF_CI )
+			ptChild = ptChild->next;
+
 		/* Set up the fields. */
 		node.id = kid->tree->id;
 		node.prodNum = kid->tree->prodNum;
