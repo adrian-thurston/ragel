@@ -1098,6 +1098,7 @@ FsmTables *RedFsm::makeFsmTables()
 
 	pos = 1;
 	for ( RegionToEntry::Iter en = regionToEntry; en.lte(); en++ ) {
+		std::cerr << "en: " << *en << std::endl;
 		/* Find the entry state from the entry id. */
 		RedEntryMapEl *entryMapEl = redEntryMap.find( *en );
 		

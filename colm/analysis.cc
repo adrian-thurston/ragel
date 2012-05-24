@@ -77,6 +77,7 @@ void ParseData::semanticAnalysis()
 
 	makeTerminalWrappers();
 	makeEofElements();
+	makeIgnoreCollectors();
 
 	/*
 	 * Parsers

@@ -893,6 +893,44 @@ static void sendIgnoreTree( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsm
 	ignoreTree2( prg, pdaRun, tree );
 }
 
+static void sendCi( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, int id )
+{
+	debug( REALM_PARSE, "token: CI\n" );
+
+/**/
+
+	int emptyIgnore = pdaRun->accumIgnore == 0;
+
+	/* Make the token data. */
+	Head *tokdata = headAllocate( prg );
+	tokdata->location = locationAllocate( prg );
+	tokdata->location->line = inputStream->line;
+	tokdata->location->column = inputStream->column;
+	tokdata->location->byte = inputStream->byte;
+
+	debug( REALM_PARSE, "token: %s  text: %.*s\n",
+		prg->rtd->lelInfo[id].name,
+		stringLength(tokdata), stringData(tokdata) );
+
+	updatePosition( inputStream, fsmRun->tokstart, tokdata->length );
+
+	Kid *input = makeTokenWithData( prg, pdaRun, fsmRun, inputStream, id, tokdata );
+
+	incrementSteps( pdaRun );
+
+	ParseTree *parseTree = parseTreeAllocate( prg );
+	parseTree->id = input->tree->id;
+	parseTree->shadow = input;
+
+	parseTree->flags |= PF_CI;
+		
+	pdaRun->parseInput = parseTree;
+
+	/* Store any alternate scanning region. */
+	if ( input != 0 && pdaRun->cs >= 0 )
+		setRegion( pdaRun, emptyIgnore, parseTree );
+}
+
 
 static void sendEof( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
 {
@@ -1158,12 +1196,22 @@ case PcrStart:
 		 * */
 		pdaRun->tokenId = scanToken( prg, pdaRun, fsmRun, inputStream );
 
-		if ( pdaRun->tokenId == SCAN_ERROR && fsmRun->preRegion >= 0 ) {
-			fsmRun->preRegion = -1;
-			fsmRun->cs = fsmRun->ncs;
-			debug( REALM_PARSE,  "moving from pre region to main region: %s\n",
-				prg->rtd->regionInfo[fsmRun->region].name );
-			continue;
+		if ( pdaRun->tokenId == SCAN_ERROR ) {
+			if ( fsmRun->preRegion >= 0 ) {
+				fsmRun->preRegion = -1;
+				fsmRun->cs = fsmRun->ncs;
+				debug( REALM_PARSE,  "moving from pre region to main region: %s\n",
+					prg->rtd->regionInfo[fsmRun->region].name );
+				continue;
+			}
+		}
+
+		if ( ( pdaRun->tokenId == SCAN_ERROR /*|| pdaRun->tokenId == SCAN_LANG_EL*/ ) &&
+				( prg->rtd->regionInfo[fsmRun->region].ciLelId > 0 ) )
+		{
+			debug( REALM_PARSE, "sending a collect ignore\n" );
+			sendCi( prg, sp, inputStream, fsmRun, pdaRun, prg->rtd->regionInfo[fsmRun->region].ciLelId );
+			goto yes;
 		}
 
 		if ( pdaRun->tokenId == SCAN_TRY_AGAIN_LATER ) {
@@ -1285,6 +1333,7 @@ case PcrGeneration:
 			/* Is a plain token. */
 			sendToken( prg, sp, inputStream, fsmRun, pdaRun, pdaRun->tokenId );
 		}
+yes:
 
 		if ( pdaRun->parseInput != 0 )
 			transferReverseCode( pdaRun, pdaRun->parseInput );
@@ -1858,6 +1907,7 @@ again:
 		child = last = 0;
 		dataChild = dataLast = 0;
 		for ( r = 0; r < rhsLen; r++ ) {
+
 			/* The child. */
 			child = pdaRun->stackTop;
 			dataChild = child->shadow;
@@ -1871,6 +1921,11 @@ again:
 			/* Reverse list. */
 			child->next = last;
 			dataChild->next = dataLast;
+
+//			if ( child->flags & PF_CI ) {
+//				debug( REALM_PARSE, "advancing over CI\n" );
+//				dataChild = dataChild->next;
+//			}
 
 			/* Track last for reversal. */
 			last = child;

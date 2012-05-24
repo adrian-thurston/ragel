@@ -117,11 +117,13 @@ struct Definition
 	enum Type { Production };
 
 	Definition( const InputLoc &loc, LangEl *prodName, ProdElList *prodElList, 
-			bool prodCommit, CodeBlock *redBlock, int prodId, int prodNum, Type type ) : 
+			bool prodCommit, CodeBlock *redBlock, int prodId, int prodNum, Type type )
+	: 
 		loc(loc), prodName(prodName), prodElList(prodElList), 
 		prodCommit(prodCommit), redBlock(redBlock), prodId(prodId), prodNum(prodNum),
 		type(type), fsm(0), fsmLength(0), uniqueEmptyLeader(0), 
-		isLeftRec(false), localFrame(0), lhsField(0), predOf(0) {}
+		isLeftRec(false), localFrame(0), lhsField(0), predOf(0),
+		collectIgnoreRegion(0) {}
 
 	InputLoc loc;
 	LangEl *prodName;
@@ -151,6 +153,8 @@ struct Definition
 	LangEl *predOf;
 
 	UnsignedCharVect copy;
+
+	TokenRegion *collectIgnoreRegion;
 };
 
 struct CmpDefById
@@ -271,6 +275,8 @@ struct LangEl : public DListEl<LangEl>
 	Context *contextIn;
 	bool noPreIgnore;
 	bool noPostIgnore;
+	bool isCI;
+	TokenRegion *ciRegion;
 };
 
 struct ProdEl
@@ -318,7 +324,7 @@ struct ProdEl
 
 struct ProdElList : public DList<ProdEl>
 {
-	PdaGraph *walk( ParseData *pd );
+	PdaGraph *walk( ParseData *pd, Definition *prod );
 };
 
 /* This should be renamed. It is a literal string in a type reference. */
@@ -697,6 +703,7 @@ struct ParseData
 	void makeLangElNames();
 	void makeTerminalWrappers();
 	void makeEofElements();
+	void makeIgnoreCollectors();
 	void setPrecedence();
 
 	void typeDeclaration();

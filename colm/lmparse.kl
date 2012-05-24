@@ -369,14 +369,14 @@ nonterm define_prod
 	Definition *definition;
 };
 
-define_prod: '[' prod_el_list ']' opt_commit opt_reduce_code opt_prec
+define_prod: opt_collect_ignore '[' prod_el_list ']' opt_commit opt_reduce_code opt_prec
 	final {
-		const InputLoc &loc = $1->loc;
+		const InputLoc &loc = $2->loc;
 		//const String &name = curDefineId;
 		ProdElList *prodElList = curProdElList;
-		bool commit = $4->commit;
-		CodeBlock *redBlock = $5->codeBlock;
-		LangEl *predOf = $6->predOf;
+		bool commit = $5->commit;
+		CodeBlock *redBlock = $6->codeBlock;
+		LangEl *predOf = $7->predOf;
 
 		//Namespace *nspace = namespaceStack.top();
 
@@ -388,6 +388,15 @@ define_prod: '[' prod_el_list ']' opt_commit opt_reduce_code opt_prec
 		pd->prodList.append( newDef );
 
 		$$->definition = newDef;
+
+		if ( $1->value ) {
+			for ( RegionList::Iter r = pd->regionList; r.lte(); r++ ) {
+				if ( strcmp( r->name.data, $1->region.data ) == 0 ) {
+					cerr << "assigning collect ignore " << r->name << endl;
+					newDef->collectIgnoreRegion = r;
+				}
+			}
+		}
 	};
 
 obj_var_list: obj_var_list var_def
@@ -490,6 +499,15 @@ region_head:
 		String scannerNameIgn( $2->data.length() + 2, "<%s>-ign", $2->data.data );
 		addRegularDef( InputLoc(), namespaceStack.top(), scannerNameIgn, joinOrLmIgn, true );
 
+		/* Just for collect ignores. Will use the ignore-only start state. */
+		TokenRegion *tokenRegionCi = new TokenRegion( InputLoc(), $2->data + "_ci" ,
+				pd->regionList.length(), regionStack.top() );
+		regionStack.top()->childRegions.append( tokenRegionCi );
+		pd->regionList.append( tokenRegionCi );
+		JoinOrLm *joinOrLmCi = new JoinOrLm( tokenRegionCi );
+		String scannerNameCi( $2->data.length() + 2, "<%s>-ci", $2->data.data );
+		addRegularDef( InputLoc(), namespaceStack.top(), scannerNameCi, joinOrLmCi, true );
+
 		/* Just for tokens. */
 		TokenRegion *tokenRegionTok = new TokenRegion( InputLoc(), $2->data + "_tok" ,
 				pd->regionList.length(), regionStack.top() );
@@ -511,8 +529,16 @@ region_head:
 
 		tokenRegion->ignoreOnlyRegion = tokenRegionIgn;
 		tokenRegion->tokenOnlyRegion = tokenRegionTok;
+		tokenRegion->ciRegion = tokenRegionCi;
 
+		tokenRegion->isFullRegion = true;
 		tokenRegionIgn->isIgnoreOnly = true;
+		tokenRegionCi->isCiOnly = true;
+		tokenRegionTok->isTokenOnly = true;
+
+		tokenRegionIgn->derivedFrom = tokenRegion;
+		tokenRegionCi->derivedFrom = tokenRegion;
+		tokenRegionTok->derivedFrom = tokenRegion;
 	};
 
 namespace_def: 
@@ -847,6 +873,15 @@ opt_no_pre_ignore:       final { $$->value = false; };
 opt_no_post_ignore: KW_Ni final { $$->value = true; };
 opt_no_post_ignore:       final { $$->value = false; };
 
+nonterm class opt_collect_ignore
+{
+	bool value;
+	String region;
+};
+
+opt_collect_ignore: KW_Ni TK_Word final { $$->value = true; $$->region = $2->data; };
+opt_collect_ignore:               final { $$->value = false; };
+
 nonterm prod_el
 {
 	ProdEl *factor;
@@ -938,6 +973,7 @@ literal_item: opt_no_pre_ignore TK_Literal opt_no_post_ignore
 
 		bool insideRegion = regionStack.top() != pd->rootRegion;
 		if ( !insideRegion ) {
+			/* Just for ignores. */
 			TokenRegion *tokenRegionIgn = new TokenRegion( InputLoc(), name + "_ign",
 					pd->regionList.length(), regionStack.top() );
 			regionStack.top()->childRegions.append( tokenRegionIgn );
@@ -946,6 +982,16 @@ literal_item: opt_no_pre_ignore TK_Literal opt_no_post_ignore
 			String scannerNameIgn( name.length() + 2, "<%s>-ign", name.data );
 			addRegularDef( InputLoc(), namespaceStack.top(), scannerNameIgn, joinOrLmIgn, true );
 
+			/* Just for collect ignores. Will use the ignore-only start state. */
+			TokenRegion *tokenRegionCi = new TokenRegion( InputLoc(), name + "_ci",
+					pd->regionList.length(), regionStack.top() );
+			regionStack.top()->childRegions.append( tokenRegionCi );
+			pd->regionList.append( tokenRegionCi );
+			JoinOrLm *joinOrLmCi = new JoinOrLm( tokenRegionCi );
+			String scannerNameCi( name.length() + 2, "<%s>-ci", name.data );
+			addRegularDef( InputLoc(), namespaceStack.top(), scannerNameCi, joinOrLmCi, true );
+
+			/* Just for tokens. */
 			TokenRegion *tokenRegionTok = new TokenRegion( InputLoc(), name + "_tok",
 					pd->regionList.length(), regionStack.top() );
 			regionStack.top()->childRegions.append( tokenRegionTok );
@@ -966,8 +1012,16 @@ literal_item: opt_no_pre_ignore TK_Literal opt_no_post_ignore
 
 			tokenRegion->ignoreOnlyRegion = tokenRegionIgn;
 			tokenRegion->tokenOnlyRegion = tokenRegionTok;
+			tokenRegion->ciRegion = tokenRegionCi;
 
+			tokenRegion->isFullRegion = true;
 			tokenRegionIgn->isIgnoreOnly = true;
+			tokenRegionCi->isCiOnly = true;
+			tokenRegionTok->isTokenOnly = true;
+
+			tokenRegionIgn->derivedFrom = tokenRegion;
+			tokenRegionCi->derivedFrom = tokenRegion;
+			tokenRegionTok->derivedFrom = tokenRegion;
 		}
 
 		bool unusedCI;
@@ -1145,6 +1199,16 @@ token_def_name:
 			String scannerNameIgn( name.length() + 2, "<%s>-ign", name.data );
 			addRegularDef( InputLoc(), namespaceStack.top(), scannerNameIgn, joinOrLmIgn, true );
 
+			/* Just for explicitly collecting ignores. */
+			TokenRegion *tokenRegionCi = new TokenRegion( InputLoc(), name + "_ci",
+					pd->regionList.length(), regionStack.top() );
+			regionStack.top()->childRegions.append( tokenRegionCi );
+			pd->regionList.append( tokenRegionCi );
+			JoinOrLm *joinOrLmCi = new JoinOrLm( tokenRegionCi );
+			String scannerNameCi( name.length() + 2, "<%s>-ci", name.data );
+			addRegularDef( InputLoc(), namespaceStack.top(), scannerNameCi, joinOrLmCi, true );
+
+			/* Just for tokens. */
 			TokenRegion *tokenRegionTok = new TokenRegion( InputLoc(), name + "_tok",
 					pd->regionList.length(), regionStack.top() );
 			regionStack.top()->childRegions.append( tokenRegionTok );
@@ -1165,8 +1229,16 @@ token_def_name:
 
 			tokenRegion->ignoreOnlyRegion = tokenRegionIgn;
 			tokenRegion->tokenOnlyRegion = tokenRegionTok;
+			tokenRegion->ciRegion = tokenRegionCi;
 
+			tokenRegion->isFullRegion = true;
 			tokenRegionIgn->isIgnoreOnly = true;
+			tokenRegionCi->isCiOnly = true;
+			tokenRegionTok->isTokenOnly = true;
+
+			tokenRegionIgn->derivedFrom = tokenRegion;
+			tokenRegionCi->derivedFrom = tokenRegion;
+			tokenRegionTok->derivedFrom = tokenRegion;
 		}
 
 		/* Reset the lable id counter. */

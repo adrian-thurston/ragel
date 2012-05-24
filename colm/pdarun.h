@@ -218,7 +218,9 @@ typedef struct _RegionInfo
 	const char *name;
 	long defaultToken;
 	long eofFrameId;
-	int isIgnoreOnly;;
+	int isIgnoreOnly;
+	int isCiOnly;
+	int ciLelId;
 } RegionInfo;
 
 typedef struct _CaptureAttr

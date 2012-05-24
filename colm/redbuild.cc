@@ -559,7 +559,12 @@ void RedFsmBuild::makeEntryPoints()
 		if ( reg->regionNameInst == 0 )
 			addRegionToEntry( reg->id, pd->defaultRegion->id );
 		else {
-			NameInst *regionName = reg->regionNameInst->parent;
+			TokenRegion *use = reg;
+
+			if ( use->isCiOnly )
+				use = use->derivedFrom->ignoreOnlyRegion;
+
+			NameInst *regionName = use->regionNameInst->parent;
 			addRegionToEntry( reg->id, regionName->id );
 		}
 	}

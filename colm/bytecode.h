@@ -360,6 +360,8 @@ typedef unsigned char uchar;
 #define PF_LEFT_IL_ATTACHED    0x0400
 #define PF_RIGHT_IL_ATTACHED   0x0800
 
+#define PF_CI                  0x1000
+
 #define AF_LEFT_IGNORE   0x0100
 #define AF_RIGHT_IGNORE  0x0200
 

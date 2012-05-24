@@ -357,6 +357,8 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 		out << "\", " << runtimeData->regionInfo[i].defaultToken <<
 			", " << runtimeData->regionInfo[i].eofFrameId <<
 			", " << runtimeData->regionInfo[i].isIgnoreOnly <<
+			", " << runtimeData->regionInfo[i].isCiOnly <<
+			", " << runtimeData->regionInfo[i].ciLelId <<
 			" }";
 
 		if ( i < runtimeData->numRegions-1 )

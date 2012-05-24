@@ -761,6 +761,23 @@ void ParseData::makeEofElements()
 	}
 }
 
+void ParseData::makeIgnoreCollectors()
+{
+	for ( RegionList::Iter region = regionList; region.lte(); region++ ) {
+		if ( region->isFullRegion ) {
+			cout << "region: " << region->name << endl;
+
+			String name( region->name.length() + 5, "_ign_%s", region->name.data );
+			LangEl *ignLel = new LangEl( rootNamespace, name, LangEl::Term );
+			langEls.append( ignLel );
+			ignLel->isCI = true;
+			ignLel->ciRegion = region;
+
+			region->ciLel = ignLel;
+		}
+	}
+}
+
 void ParseData::typeResolve()
 {
 	/*
@@ -786,5 +803,4 @@ void ParseData::typeResolve()
 	 * productions. They get tacked onto the end of the list of productions.
 	 * Doing it at the end results processing a growing list. */
 	resolveProductionEls();
-
 }

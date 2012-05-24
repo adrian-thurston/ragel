@@ -91,22 +91,37 @@ LangEl::LangEl( Namespace *nspace, const String &name, Type type )
 	contextDef(0),
 	contextIn(0), 
 	noPreIgnore(false),
-	noPostIgnore(false) 
+	noPostIgnore(false),
+	isCI(false),
+	ciRegion(0)
 {
 }
  
-PdaGraph *ProdElList::walk( ParseData *pd )
+PdaGraph *ProdElList::walk( ParseData *pd, Definition *prod )
 {
 	PdaGraph *prodFsm = new PdaGraph();
 	PdaState *last = prodFsm->addState();
 	prodFsm->setStartState( last );
 
+	if ( prod->collectIgnoreRegion != 0 ) {
+		cerr << "production " << prod->data << " has collect ignore region " << 
+				prod->collectIgnoreRegion->name << endl;
+
+		/* Use the IGNORE TOKEN lang el for the region. */
+		long value = prod->collectIgnoreRegion->ciLel->id;
+
+		PdaState *newState = prodFsm->addState();
+		PdaTrans *newTrans = prodFsm->appendNewTrans( last, newState, value, value );
+
+		newTrans->isShift = true;
+		newTrans->shiftPrior = 0; // WAT
+		last = newState;
+	}
+
 	int prodLength = 0;
 	for ( Iter prodEl = first(); prodEl.lte(); prodEl++, prodLength++ ) {
 		//PdaGraph *itemFsm = prodEl->walk( pd );
-		long value = 0;
-
-		value = prodEl->langEl->id;
+		long value = prodEl->langEl->id;
 
 		PdaState *newState = prodFsm->addState();
 		PdaTrans *newTrans = prodFsm->appendNewTrans( last, newState, value, value );
@@ -282,7 +297,7 @@ void ParseData::makeProdFsms()
 
 	/* Build FSMs for all production language elements. */
 	for ( DefList::Iter prod = prodList; prod.lte(); prod++ )
-		prod->fsm = prod->prodElList->walk( this );
+		prod->fsm = prod->prodElList->walk( this, prod );
 
 	makeNonTermFirstSets();
 	makeFirstSets();
@@ -473,20 +488,25 @@ bool regionVectHas( RegionVect &regVect, TokenRegion *region )
 void ParseData::addRegion( PdaState *tabState, PdaTrans *tabTrans,
 		long pdaKey, bool noPreIgnore, bool noPostIgnore )
 {
-	LangEl *klangEl = langElIndex[pdaKey];
-	if ( klangEl != 0 && klangEl->type == LangEl::Term ) {
+	LangEl *langEl = langElIndex[pdaKey];
+	if ( langEl != 0 && langEl->type == LangEl::Term ) {
 		TokenRegion *region = 0;
 
 		/* If it is not the eof, then use the region associated 
 		 * with the token definition. */
-		if ( !klangEl->isEOF && klangEl->tokenDef != 0 )
-			region = klangEl->tokenDef->tokenRegion;
+		if ( langEl->isCI ) {
+			cerr << "isCI" << endl;
+			region = langEl->ciRegion->ciRegion;
+		}
+		else if ( !langEl->isEOF && langEl->tokenDef != 0 ) {
+			region = langEl->tokenDef->tokenRegion;
+		}
 
 		if ( region != 0 ) {
 			/* region. */
 			TokenRegion *scanRegion = region;
 
-			if ( klangEl->noPreIgnore )
+			if ( langEl->noPreIgnore )
 				scanRegion = region->tokenOnlyRegion;
 
 			if ( !regionVectHas( tabState->regions, scanRegion ) ) {
@@ -495,7 +515,7 @@ void ParseData::addRegion( PdaState *tabState, PdaTrans *tabTrans,
 
 			/* Pre-region of to state */
 			PdaState *toState = tabTrans->toState;
-			if ( !klangEl->noPostIgnore && 
+			if ( !langEl->noPostIgnore && 
 					region->ignoreOnlyRegion != 0 && 
 					!regionVectHas( toState->preRegions, region->ignoreOnlyRegion ) )
 			{
@@ -858,7 +878,6 @@ void ParseData::computeAdvanceReductions( LangEl *langEl, PdaGraph *pdaGraph )
 		}
 	}
 }
-
 
 void ParseData::verifyParseStopGrammar( LangEl *langEl, PdaGraph *pdaGraph )
 {
@@ -1356,6 +1375,8 @@ void ParseData::makeRuntimeData()
 			reg->defaultTokenDef == 0 ? -1 : reg->defaultTokenDef->tdLangEl->id;
 		runtimeData->regionInfo[regId].eofFrameId = -1;
 		runtimeData->regionInfo[regId].isIgnoreOnly = reg->isIgnoreOnly;
+		runtimeData->regionInfo[regId].isCiOnly = reg->isCiOnly;
+		runtimeData->regionInfo[regId].ciLelId = reg->isCiOnly ? reg->derivedFrom->ciLel->id : 0;
 
 		CodeBlock *block = reg->preEofBlock;
 		if ( block != 0 ) {
