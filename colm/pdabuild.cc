@@ -104,8 +104,8 @@ PdaGraph *ProdElList::walk( ParseData *pd, Definition *prod )
 	prodFsm->setStartState( last );
 
 	if ( prod->collectIgnoreRegion != 0 ) {
-		cerr << "production " << prod->data << " has collect ignore region " << 
-				prod->collectIgnoreRegion->name << endl;
+//		cerr << "production " << prod->data << " has collect ignore region " << 
+//				prod->collectIgnoreRegion->name << endl;
 
 		/* Use the IGNORE TOKEN lang el for the region. */
 		long value = prod->collectIgnoreRegion->ciLel->id;
@@ -495,7 +495,7 @@ void ParseData::addRegion( PdaState *tabState, PdaTrans *tabTrans,
 		/* If it is not the eof, then use the region associated 
 		 * with the token definition. */
 		if ( langEl->isCI ) {
-			cerr << "isCI" << endl;
+			//cerr << "isCI" << endl;
 			region = langEl->ciRegion->ciRegion;
 		}
 		else if ( !langEl->isEOF && langEl->tokenDef != 0 ) {

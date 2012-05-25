@@ -86,6 +86,22 @@ void ParseData::generateExports()
 
 	/* Declare. */
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
+		if ( lel->tokenDef != 0 && lel->tokenDef->tokenRegion != 0 && lel->tokenDef->tokenRegion->isTokenOnly ) {
+			out << "// isTokenOnly\n";
+			continue;
+		}
+		if ( lel->tokenDef != 0 && lel->tokenDef->tokenRegion != 0 && lel->tokenDef->tokenRegion->isIgnoreOnly ) {
+			out << "// isIgnoreOnly\n";
+			continue;
+		}
+		if ( lel->tokenDef != 0 && lel->tokenDef->tokenRegion != 0 && lel->tokenDef->tokenRegion->isCiOnly )  {
+			out << "// isCiOnly\n";
+			continue;
+		}
+		if ( lel->ciRegion != 0 ) {
+			out << "// ciRegion != 0\n";
+			continue;
+		}	
 		openNameSpace( out, lel->nspace );
 		out << "struct " << lel->fullName << ";";
 		closeNameSpace( out, lel->nspace );
@@ -94,6 +110,23 @@ void ParseData::generateExports()
 
 	/* Class definitions. */
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
+		if ( lel->tokenDef != 0 && lel->tokenDef->tokenRegion != 0 && lel->tokenDef->tokenRegion->isTokenOnly ) {
+			out << "// isTokenOnly\n";
+			continue;
+		}
+		if ( lel->tokenDef != 0 && lel->tokenDef->tokenRegion != 0 && lel->tokenDef->tokenRegion->isIgnoreOnly ) {
+			out << "// isIgnoreOnly\n";
+			continue;
+		}
+		if ( lel->tokenDef != 0 && lel->tokenDef->tokenRegion != 0 && lel->tokenDef->tokenRegion->isCiOnly )  {
+			out << "// isCiOnly\n";
+			continue;
+		}
+		if ( lel->ciRegion != 0 ) {
+			out << "// ciRegion != 0\n";
+			continue;
+		}	
+
 		openNameSpace( out, lel->nspace );
 		out << "struct " << lel->fullName << "\n";
 		out << "{\n";

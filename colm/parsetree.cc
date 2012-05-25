@@ -206,10 +206,8 @@ FsmGraph *VarDef::walk( ParseData *pd )
 
 	/* If the name of the variable is referenced then add the entry point to
 	 * the graph. */
-	if ( pd->curNameInst->numRefs > 0 ) {
-		std::cerr << "entry: " << pd->curNameInst->name << " " << pd->curNameInst->id << endl;
+	if ( pd->curNameInst->numRefs > 0 )
 		rtnVal->setEntry( pd->curNameInst->id, rtnVal->startState );
-	}
 	
 	/* Pop the name scope. */
 	pd->popNameScope( nameFrame );

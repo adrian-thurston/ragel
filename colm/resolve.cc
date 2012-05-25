@@ -765,8 +765,6 @@ void ParseData::makeIgnoreCollectors()
 {
 	for ( RegionList::Iter region = regionList; region.lte(); region++ ) {
 		if ( region->isFullRegion ) {
-			cout << "region: " << region->name << endl;
-
 			String name( region->name.length() + 5, "_ign_%s", region->name.data );
 			LangEl *ignLel = new LangEl( rootNamespace, name, LangEl::Term );
 			langEls.append( ignLel );

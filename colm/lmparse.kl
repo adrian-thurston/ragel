@@ -392,7 +392,7 @@ define_prod: opt_collect_ignore '[' prod_el_list ']' opt_commit opt_reduce_code 
 		if ( $1->value ) {
 			for ( RegionList::Iter r = pd->regionList; r.lte(); r++ ) {
 				if ( strcmp( r->name.data, $1->region.data ) == 0 ) {
-					cerr << "assigning collect ignore " << r->name << endl;
+					//cerr << "assigning collect ignore " << r->name << endl;
 					newDef->collectIgnoreRegion = r;
 				}
 			}
