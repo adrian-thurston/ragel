@@ -8,21 +8,31 @@ lex start
 lex inner
 {
 	ignore /space+/
-	token inner /[a-zA-Z_0-9]+/ 
+	token inner_t /[a-zA-Z_0-9]+/ 
+
+	literal ''
 }
+
+def inner
+	['' inner_t*]
 
 def item 
 	[id]
-|	['(' inner* ')']
+|	['(' inner ')']
 
 def start 
 	[item* ';']
 
 parse Start: start( stdin )
 
+if ( ! Start ) {
+	print( 'parse error\n' )
+	exit( 0 )
+}
+
 for I: item in Start {
 	print( 'item: .' %I '.\n' )
-	if match I [ O: '(' Inner: inner* C: ')' ]
+	if match I [ O: '(' Inner: inner C: ')' ]
 		print( 'innr: .' %O '.' %Inner '.' %C '.\n' )
 }
 
