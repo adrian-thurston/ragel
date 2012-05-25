@@ -369,14 +369,14 @@ nonterm define_prod
 	Definition *definition;
 };
 
-define_prod: opt_collect_ignore '[' prod_el_list ']' opt_commit opt_reduce_code opt_prec
+define_prod: '[' prod_el_list ']' opt_commit opt_reduce_code opt_prec
 	final {
-		const InputLoc &loc = $2->loc;
+		const InputLoc &loc = $1->loc;
 		//const String &name = curDefineId;
 		ProdElList *prodElList = curProdElList;
-		bool commit = $5->commit;
-		CodeBlock *redBlock = $6->codeBlock;
-		LangEl *predOf = $7->predOf;
+		bool commit = $4->commit;
+		CodeBlock *redBlock = $5->codeBlock;
+		LangEl *predOf = $6->predOf;
 
 		//Namespace *nspace = namespaceStack.top();
 
@@ -388,15 +388,6 @@ define_prod: opt_collect_ignore '[' prod_el_list ']' opt_commit opt_reduce_code 
 		pd->prodList.append( newDef );
 
 		$$->definition = newDef;
-
-		if ( $1->value ) {
-			for ( RegionList::Iter r = pd->regionList; r.lte(); r++ ) {
-				if ( strcmp( r->name.data, $1->region.data ) == 0 ) {
-					//cerr << "assigning collect ignore " << r->name << endl;
-					newDef->collectIgnoreRegion = r;
-				}
-			}
-		}
 	};
 
 obj_var_list: obj_var_list var_def
@@ -864,31 +855,10 @@ prod_el_list:
 prod_el_list: 
 	final { curProdElList = new ProdElList; };
 
-nonterm opt_no_pre_ignore { bool value; };
-nonterm opt_no_post_ignore { bool value; };
+nonterm opt_no_ignore { bool value; };
 
-opt_no_pre_ignore: KW_Ni final { $$->value = true; };
-opt_no_pre_ignore:       final { $$->value = false; };
-
-opt_no_post_ignore: KW_Ni final { $$->value = true; };
-opt_no_post_ignore:       final { $$->value = false; };
-
-nonterm class opt_collect_ignore
-{
-	bool value;
-	String region;
-};
-
-opt_collect_ignore: 
-	KW_Ci '<' TK_Word '>' 
-	final { 
-		$$->value = true; 
-		$$->region = $3->data;
-	};
-opt_collect_ignore:
-	final {
-		$$->value = false;
-	};
+opt_no_ignore: KW_Ni final { $$->value = true; };
+opt_no_ignore:       final { $$->value = false; };
 
 nonterm prod_el
 {
@@ -974,7 +944,7 @@ literal_def: KW_Literal literal_list;
 literal_list: literal_list ',' literal_item;
 literal_list: literal_item;
 
-literal_item: opt_no_pre_ignore TK_Literal opt_no_post_ignore
+literal_item: opt_no_ignore TK_Literal opt_no_ignore
 	final {
 		/* Create a name for the literal. */
 		String name( 32, "_literal_%.4x", pd->nextTokenId );
@@ -1108,7 +1078,7 @@ leave_rl:
 
 token_def: 
 	token_or_ignore token_def_name obj_var_list
-	enter_rl opt_no_pre_ignore '/' opt_rl_join leave_rl '/' opt_no_post_ignore  
+	enter_rl opt_no_ignore '/' opt_rl_join leave_rl '/' opt_no_ignore  
 	opt_translate
 	final {
 		bool ignore = $1->ignore;
