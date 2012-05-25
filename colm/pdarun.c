@@ -922,8 +922,6 @@ static void sendCi( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *f
 	parseTree->id = input->tree->id;
 	parseTree->shadow = input;
 
-	parseTree->flags |= PF_CI;
-		
 	pdaRun->parseInput = parseTree;
 
 	/* Store any alternate scanning region. */
@@ -1211,16 +1209,6 @@ case PcrStart:
 		{
 			debug( REALM_PARSE, "sending a collect ignore\n" );
 			sendCi( prg, sp, inputStream, fsmRun, pdaRun, prg->rtd->regionInfo[fsmRun->region].ciLelId );
-			goto yes;
-		}
-
-		if ( pdaRun->tokenId == SCAN_LANG_EL &&
-				( prg->rtd->regionInfo[fsmRun->region].ciLelId > 0 ) )
-		{
-			debug( REALM_PARSE, "sending a collect ignore\n" );
-			sendCi( prg, sp, inputStream, fsmRun, pdaRun, prg->rtd->regionInfo[fsmRun->region].ciLelId );
-			pdaRun->parseInput->flags |= PF_UNDO_CI;
-			pdaRun->numRetry += 1;
 			goto yes;
 		}
 
@@ -1932,11 +1920,6 @@ again:
 			child->next = last;
 			dataChild->next = dataLast;
 
-			if ( child->flags & PF_CI ) {
-				debug( REALM_PARSE, "advancing over CI\n" );
-				dataChild = dataChild->next;
-			}
-
 			/* Track last for reversal. */
 			last = child;
 			dataLast = dataChild;
@@ -2112,22 +2095,14 @@ case PcrReverse:
 					pdaRun->parseInput = pdaRun->undoLel;
 				}
 				else {
-					if ( pdaRun->stackTop->flags & PF_UNDO_CI ) {
-						pdaRun->cs = pdaRun->stackTop->state;
-						pdaRun->numRetry -= 1;
-						pdaRun->stackTop = pdaRun->stackTop->next;
-						goto again;
-					}
-					else {
-						long region = pdaRun->parseInput->region;
-						pdaRun->next = region > 0 ? region + 1 : 0;
-						pdaRun->checkNext = true;
-						pdaRun->checkStop = true;
+					long region = pdaRun->parseInput->region;
+					pdaRun->next = region > 0 ? region + 1 : 0;
+					pdaRun->checkNext = true;
+					pdaRun->checkStop = true;
 
-						sendBack( prg, sp, pdaRun, fsmRun, inputStream, pdaRun->parseInput );
+					sendBack( prg, sp, pdaRun, fsmRun, inputStream, pdaRun->parseInput );
 
-						pdaRun->parseInput = 0;
-					}
+					pdaRun->parseInput = 0;
 				}
 			}
 			else if ( pdaRun->parseInput->flags & PF_HAS_RCODE ) {
@@ -2284,6 +2259,8 @@ fail:
 
 	/* FIXME: do we still need to fall through here? A fail is permanent now,
 	 * no longer called into again. */
+
+	return PcrDone;
 
 _out:
 	pdaRun->nextRegionInd = pdaRun->tables->tokenRegionInds[pdaRun->cs];

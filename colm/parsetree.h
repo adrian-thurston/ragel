@@ -398,7 +398,7 @@ struct TokenDef
 		longestMatchId(longestMatchId), inLmSelect(false), 
 		nspace(nspace), tokenRegion(tokenRegion), objectDef(objectDef),
 		contextIn(contextIn),
-		dupOf(0), noPostIgnore(false), noPreIgnore(false)
+		dupOf(0), noPostIgnore(false), noPreIgnore(false), isZero(false)
 	{
 		if ( pReCaptureVect != 0 )
 			reCaptureVect = *pReCaptureVect;
@@ -431,6 +431,7 @@ struct TokenDef
 	TokenDef *dupOf;
 	bool noPostIgnore;
 	bool noPreIgnore;
+	bool isZero;
 };
 
 struct LelDefList;

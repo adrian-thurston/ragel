@@ -69,6 +69,7 @@ void ParseData::semanticAnalysis()
 	beginProcessing();
 	initKeyOps();
 
+
 	/* Type declaration. */
 	typeDeclaration();
 
@@ -77,7 +78,6 @@ void ParseData::semanticAnalysis()
 
 	makeTerminalWrappers();
 	makeEofElements();
-	makeIgnoreCollectors();
 
 	/*
 	 * Parsers

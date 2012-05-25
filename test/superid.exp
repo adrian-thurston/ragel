@@ -1,7 +1,7 @@
 old_id = NIL
-new_id = 13
+new_id = 14
 old_id = NIL
-new_id = 12
+new_id = 13
 this is item2
 <start><item2><e2></e2><_literal_0001>!</_literal_0001><_literal_0003>a</_literal_0003><super_id>b</super_id><super_id>b</super_id><_literal_0003>a</_literal_0003></item2><_literal_0005>;
 </_literal_0005></start>

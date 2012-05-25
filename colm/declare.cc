@@ -234,19 +234,25 @@ void Namespace::declare( ParseData *pd )
 			l->value->tdLangEl = l->value->dupOf->tdLangEl;
 		}
 		else {
-			/* Original. Create a token for the literal. */
-			LangEl *newLangEl = declareLangEl( pd, this, l->value->name, LangEl::Term );
+			if ( l->value->isZero ) {
+				l->value->tdLangEl = l->value->tokenRegion->ciLel;
+				assert( l->value->tokenRegion->ciLel != 0 );
+			}
+			else {
+				/* Original. Create a token for the literal. */
+				LangEl *newLangEl = declareLangEl( pd, this, l->value->name, LangEl::Term );
 
-			newLangEl->lit = l->value->literal;
-			newLangEl->isLiteral = true;
-			newLangEl->tokenDef = l->value;
+				newLangEl->lit = l->value->literal;
+				newLangEl->isLiteral = true;
+				newLangEl->tokenDef = l->value;
 
-			l->value->tdLangEl = newLangEl;
+				l->value->tdLangEl = newLangEl;
 
-			if ( l->value->noPreIgnore )
-				newLangEl->noPreIgnore = true;
-			if ( l->value->noPostIgnore )
-				newLangEl->noPostIgnore = true;
+				if ( l->value->noPreIgnore )
+					newLangEl->noPreIgnore = true;
+				if ( l->value->noPostIgnore )
+					newLangEl->noPostIgnore = true;
+			}
 		}
 	}
 
@@ -359,6 +365,8 @@ void ParseData::typeDeclaration()
 {
 	/* These must be declared first, since the runtime assumes their identifiers. */
 	declareBaseLangEls();
+
+	makeIgnoreCollectors();
 
 	rootNamespace->declare( this );
 

@@ -86,6 +86,10 @@ void ParseData::generateExports()
 
 	/* Declare. */
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
+		if ( lel->isEOF ) {
+			out << "// isEOF\n";
+			continue;
+		}
 		if ( lel->tokenDef != 0 && lel->tokenDef->tokenRegion != 0 && lel->tokenDef->tokenRegion->isTokenOnly ) {
 			out << "// isTokenOnly\n";
 			continue;
@@ -110,6 +114,10 @@ void ParseData::generateExports()
 
 	/* Class definitions. */
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
+		if ( lel->isEOF ) {
+			out << "// isTokenOnly\n";
+			continue;
+		}
 		if ( lel->tokenDef != 0 && lel->tokenDef->tokenRegion != 0 && lel->tokenDef->tokenRegion->isTokenOnly ) {
 			out << "// isTokenOnly\n";
 			continue;

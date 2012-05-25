@@ -1040,6 +1040,7 @@ literal_item: opt_no_pre_ignore TK_Literal opt_no_post_ignore
 		Namespace *nspace = namespaceStack.top();
 		TokenRegion *region = regionStack.top();
 
+
 		LiteralDictEl *ldel = nspace->literalDict.find( interp );
 		if ( ldel != 0 )
 			error( $2->loc ) << "literal already defined in this namespace" << endp;
@@ -1048,24 +1049,37 @@ literal_item: opt_no_pre_ignore TK_Literal opt_no_post_ignore
 				new FactorWithRep( $2->loc, new FactorWithNeg( $2->loc, new Factor(
 				new Literal( $2->loc, $2->data, 
 					Literal::LitString ) ) ) ) ) ) ) );
-			
-			TokenDef *tokenDef = new TokenDef( name, $2->data, true, false, join, 
-					0, $2->loc, pd->nextTokenId++, nspace, region, 0, 0, 0 );
-			region->tokenDefList.append( tokenDef );
-			ldel = nspace->literalDict.insert( interp, tokenDef );
-			nspace->tokenDefList.append( tokenDef );
 
-			if ( $1->value )
-				tokenDef->noPreIgnore = true;
-			if ( $3->value )
-				tokenDef->noPostIgnore = true;
+			if ( strcmp( interp.data, "" ) == 0 ) {
+				TokenDef *tokenDef = new TokenDef( name, $2->data, true, false, join, 
+						0, $2->loc, pd->nextTokenId++, nspace, region, 0, 0, 0 );
 
-			TokenDef *tokenDefTok = new TokenDef( name + "_tok", $2->data, true, false, join, 
-					0, $2->loc, pd->nextTokenId++, nspace, region->tokenOnlyRegion, 0, 0, 0 );
-			tokenDefTok->dupOf = tokenDef;
-			region->tokenOnlyRegion->tokenDefList.append( tokenDefTok );
-			ldel = nspace->literalDict.insert( "|" + interp + "_tok", tokenDefTok );
-			nspace->tokenDefList.append( tokenDefTok );
+				//region->tokenDefList.append( tokenDef );
+
+				ldel = nspace->literalDict.insert( interp, tokenDef );
+				nspace->tokenDefList.append( tokenDef );
+				
+				tokenDef->isZero = true;
+			}
+			else {
+				TokenDef *tokenDef = new TokenDef( name, $2->data, true, false, join, 
+						0, $2->loc, pd->nextTokenId++, nspace, region, 0, 0, 0 );
+				region->tokenDefList.append( tokenDef );
+				ldel = nspace->literalDict.insert( interp, tokenDef );
+				nspace->tokenDefList.append( tokenDef );
+
+				if ( $1->value )
+					tokenDef->noPreIgnore = true;
+				if ( $3->value )
+					tokenDef->noPostIgnore = true;
+
+				TokenDef *tokenDefTok = new TokenDef( name + "_tok", $2->data, true, false, join, 
+						0, $2->loc, pd->nextTokenId++, nspace, region->tokenOnlyRegion, 0, 0, 0 );
+				tokenDefTok->dupOf = tokenDef;
+				region->tokenOnlyRegion->tokenDefList.append( tokenDefTok );
+				ldel = nspace->literalDict.insert( "|" + interp + "_tok", tokenDefTok );
+				nspace->tokenDefList.append( tokenDefTok );
+			}
 		}
 
 		if ( !insideRegion ) {
