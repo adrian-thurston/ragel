@@ -580,7 +580,7 @@ int main(int argc, const char **argv)
 		return 1;
 
 	/* Initiate a compile following a parse. */
-	pd->semanticAnalysis();
+	pd->compile();
 
 	/*
 	 * Write output.

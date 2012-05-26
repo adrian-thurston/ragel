@@ -856,8 +856,8 @@ struct Compiler
 
 	void resolveUses();
 	void createDefaultScanner();
-	void semanticAnalysis();
 	void generateOutput();
+	void compile();
 
 	void openNameSpace( ostream &out, Namespace *nspace );
 	void closeNameSpace( ostream &out, Namespace *nspace );

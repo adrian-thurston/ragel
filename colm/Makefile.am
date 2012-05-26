@@ -58,7 +58,8 @@ colm_SOURCES = \
 	fsmstate.cc fsmbase.cc fsmattach.cc fsmmin.cc \
 	fsmgraph.cc pdagraph.cc pdabuild.cc pdacodegen.cc fsmcodegen.cc \
 	redfsm.cc fsmexec.cc main.cc redbuild.cc closure.cc fsmap.cc \
-	dotgen.cc pcheck.cc ctinput.cc declare.cc codegen.cc colm.cc
+	dotgen.cc pcheck.cc ctinput.cc declare.cc write.cc \
+	exports.cc colm.cc
 
 colmincdir = $(includedir)/colm
 

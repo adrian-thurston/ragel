@@ -1485,7 +1485,7 @@ void Compiler::prepGrammar()
 	runtimeData = new RuntimeData;
 }
 
-void Compiler::semanticAnalysis()
+void Compiler::compile()
 {
 	beginProcessing();
 	initKeyOps();

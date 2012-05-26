@@ -27,7 +27,6 @@
 #include "debug.h"
 #include <sstream>
 #include <string>
-#include <assert.h>
 
 using std::ostream;
 using std::ostringstream;
@@ -283,21 +282,4 @@ void Compiler::generateExportsImpl()
 	}
 }
 
-void FsmCodeGen::writeMain()
-{
-	out << 
-		"int main( int argc, const char **argv )\n"
-		"{\n"
-		"	struct ColmProgram *prg;\n"
-		"	int exitStatus;\n"
-		"	colmInit( " << colmActiveRealm << " );\n"
-		"	prg = colmNewProgram( &main_runtimeData, argc, argv );\n"
-		"	colmRunProgram( prg );\n"
-		"	exitStatus = colmDeleteProgram( prg );\n"
-		"	return exitStatus;\n"
-		"}\n"
-		"\n";
-
-	out.flush();
-}
 
