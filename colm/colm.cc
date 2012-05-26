@@ -1460,3 +1460,84 @@ void Compiler::generateOutput()
 	outStream->flush();
 }
 
+
+void Compiler::prepGrammar()
+{
+	/* This will create language elements. */
+	wrapNonTerminals();
+
+	makeLangElIds();
+	makeLangElNames();
+	makeDefinitionNames();
+	noUndefindLangEls();
+
+	/* Put the language elements in an index by language element id. */
+	langElIndex = new LangEl*[nextSymbolId+1];
+	memset( langElIndex, 0, sizeof(LangEl*)*(nextSymbolId+1) );
+	for ( LelList::Iter lel = langEls; lel.lte(); lel++ )
+		langElIndex[lel->id] = lel;
+
+	makeProdFsms();
+
+	/* Allocate the Runtime data now. Every PdaTable that we make 
+	 * will reference it, but it will be filled in after all the tables are
+	 * built. */
+	runtimeData = new RuntimeData;
+}
+
+void Compiler::semanticAnalysis()
+{
+	beginProcessing();
+	initKeyOps();
+
+
+	/* Type declaration. */
+	typeDeclaration();
+
+	/* Type resolving. */
+	typeResolve();
+
+	makeTerminalWrappers();
+	makeEofElements();
+
+	/*
+	 * Parsers
+	 */
+
+	/* Init the longest match data */
+	initLongestMatchData();
+	FsmGraph *fsmGraph = makeScanner();
+
+	if ( colm_log_compile ) {
+		printNameTree( fsmGraph->rootName );
+		printNameIndex( fsmGraph->nameIndex );
+	}
+
+	prepGrammar();
+
+	/* Compile bytecode. */
+	compileByteCode();
+
+	/* Make the reduced fsm. */
+	RedFsmBuild reduce( sectionName, this, fsmGraph );
+	redFsm = reduce.reduceMachine();
+
+	BstSet<LangEl*> parserEls;
+	collectParserEls( parserEls );
+
+	makeParser( parserEls );
+
+	/* Make the scanner tables. */
+	fsmTables = redFsm->makeFsmTables();
+
+	/* Now that all parsers are built, make the global runtimeData. */
+	makeRuntimeData();
+
+	/* 
+	 * All compilation is now complete.
+	 */
+	
+	/* Parse patterns and replacements. */
+	parsePatterns();
+}
+
