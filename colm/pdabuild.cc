@@ -97,7 +97,7 @@ LangEl::LangEl( Namespace *nspace, const String &name, Type type )
 {
 }
  
-PdaGraph *ProdElList::walk( ParseData *pd, Definition *prod )
+PdaGraph *ProdElList::walk( Compiler *pd, Definition *prod )
 {
 	PdaGraph *prodFsm = new PdaGraph();
 	PdaState *last = prodFsm->addState();
@@ -146,7 +146,7 @@ PdaGraph *ProdElList::walk( ParseData *pd, Definition *prod )
 }
 
 
-ProdElList *ParseData::makeProdElList( LangEl *langEl )
+ProdElList *Compiler::makeProdElList( LangEl *langEl )
 {
 	ProdElList *prodElList = new ProdElList();
 	UniqueType *uniqueType = findUniqueType( TYPE_TREE, langEl );
@@ -156,7 +156,7 @@ ProdElList *ParseData::makeProdElList( LangEl *langEl )
 	return prodElList;
 }
 
-void ParseData::makeDefinitionNames()
+void Compiler::makeDefinitionNames()
 {
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
 		int prodNum = 1;
@@ -170,7 +170,7 @@ void ParseData::makeDefinitionNames()
 /* Make sure there there are no language elements whose type is unkonwn. This
  * can happen when an id is used on the rhs of a definition but is not defined
  * as anything. */
-void ParseData::noUndefindLangEls()
+void Compiler::noUndefindLangEls()
 {
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
 		if ( lel->type == LangEl::Unknown )
@@ -178,7 +178,7 @@ void ParseData::noUndefindLangEls()
 	}
 }
 
-void ParseData::makeLangElIds()
+void Compiler::makeLangElIds()
 {
 	/* The first id 0 is reserved for the stack sentinal. A negative id means
 	 * error to the parsing function, inducing backtracking. */
@@ -232,7 +232,7 @@ void ParseData::makeLangElIds()
 	assert( ignoreLangEl->id == LEL_ID_IGNORE );
 }
 
-void ParseData::refNameSpace( LangEl *lel, Namespace *nspace )
+void Compiler::refNameSpace( LangEl *lel, Namespace *nspace )
 {
 	if ( nspace == defaultNamespace || nspace == rootNamespace ) {
 		lel->refName = "::" + lel->refName;
@@ -245,7 +245,7 @@ void ParseData::refNameSpace( LangEl *lel, Namespace *nspace )
 	refNameSpace( lel, nspace->parentNamespace );
 }
 
-void ParseData::makeLangElNames()
+void Compiler::makeLangElNames()
 {
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
 		if ( lel->id == LEL_ID_INT ) {
@@ -288,7 +288,7 @@ void ParseData::makeLangElNames()
 }
 
 /* Set up dot sets, shift info, and prod sets. */
-void ParseData::makeProdFsms()
+void Compiler::makeProdFsms()
 {
 	/* There are two items in the index for each production (high and low). */
 	int indexLen = prodList.length() * 2;
@@ -367,7 +367,7 @@ void ParseData::makeProdFsms()
  * it and over tab. If overSrc is the end of the production, find the follow
  * from the table, taking only the characters on which the parent is reduced.
  * */
-void ParseData::findFollow( AlphSet &result, PdaState *overTab, 
+void Compiler::findFollow( AlphSet &result, PdaState *overTab, 
 		PdaState *overSrc, Definition *parentDef )
 {
 	if ( overSrc->isFinState() ) {
@@ -415,7 +415,7 @@ void ParseData::findFollow( AlphSet &result, PdaState *overTab,
 	}
 }
 
-PdaState *ParseData::followProd( PdaState *tabState, PdaState *prodState )
+PdaState *Compiler::followProd( PdaState *tabState, PdaState *prodState )
 {
 	while ( prodState->transMap.length() == 1 ) {
 		TransMap::Iter prodTrans = prodState->transMap;
@@ -426,7 +426,7 @@ PdaState *ParseData::followProd( PdaState *tabState, PdaState *prodState )
 	return tabState;
 }
 
-void ParseData::trySetTime( PdaTrans *trans, long code, long &time )
+void Compiler::trySetTime( PdaTrans *trans, long code, long &time )
 {
 	/* Find the item. */
 	for ( ActDataList::Iter adl = trans->actions; adl.lte(); adl++ ) {
@@ -444,7 +444,7 @@ void ParseData::trySetTime( PdaTrans *trans, long code, long &time )
 }
 
 /* Go down a defintiion and then handle the follow actions. */
-void ParseData::pdaOrderFollow( LangEl *rootEl, PdaState *tabState, 
+void Compiler::pdaOrderFollow( LangEl *rootEl, PdaState *tabState, 
 		PdaTrans *tabTrans, PdaTrans *srcTrans, Definition *parentDef, 
 		Definition *definition, long &time )
 {
@@ -485,7 +485,7 @@ bool regionVectHas( RegionVect &regVect, TokenRegion *region )
 	return false;
 }
 
-void ParseData::addRegion( PdaState *tabState, PdaTrans *tabTrans,
+void Compiler::addRegion( PdaState *tabState, PdaTrans *tabTrans,
 		long pdaKey, bool noPreIgnore, bool noPostIgnore )
 {
 	LangEl *langEl = langElIndex[pdaKey];
@@ -558,7 +558,7 @@ void ParseData::addRegion( PdaState *tabState, PdaTrans *tabTrans,
     orderState( parseTable.startState, startProduction.startState, 1 )
 #endif
 
-void ParseData::pdaOrderProd( LangEl *rootEl, PdaState *tabState, 
+void Compiler::pdaOrderProd( LangEl *rootEl, PdaState *tabState, 
 	PdaState *srcState, Definition *parentDef, long &time )
 {
 	assert( srcState->dotSet.length() == 1 );
@@ -619,7 +619,7 @@ void ParseData::pdaOrderProd( LangEl *rootEl, PdaState *tabState,
 	}
 }
 
-void ParseData::pdaActionOrder( PdaGraph *pdaGraph, LangElSet &parserEls )
+void Compiler::pdaActionOrder( PdaGraph *pdaGraph, LangElSet &parserEls )
 {
 	for ( PdaStateList::Iter state = pdaGraph->stateList; state.lte(); state++ ) {
 		assert( (state->stateBits & SB_ISMARKED) == 0 );
@@ -686,7 +686,7 @@ void ParseData::pdaActionOrder( PdaGraph *pdaGraph, LangElSet &parserEls )
 	}
 }
 
-void ParseData::advanceReductions( PdaGraph *pdaGraph )
+void Compiler::advanceReductions( PdaGraph *pdaGraph )
 {
 	/* Loop all states. */
 	for ( PdaStateList::Iter state = pdaGraph->stateList; state.lte(); state++ ) {
@@ -745,7 +745,7 @@ void ParseData::advanceReductions( PdaGraph *pdaGraph )
 	pdaGraph->removeUnreachableStates();
 }
 
-void ParseData::sortActions( PdaGraph *pdaGraph )
+void Compiler::sortActions( PdaGraph *pdaGraph )
 {
 	/* Sort the actions. */
 	for ( PdaStateList::Iter state = pdaGraph->stateList; state.lte(); state++ ) {
@@ -823,7 +823,7 @@ void ParseData::sortActions( PdaGraph *pdaGraph )
 	}
 }
 
-void ParseData::reduceActions( PdaGraph *pdaGraph )
+void Compiler::reduceActions( PdaGraph *pdaGraph )
 {
 	/* Reduce the actions. */
 	for ( PdaStateList::Iter state = pdaGraph->stateList; state.lte(); state++ ) {
@@ -858,7 +858,7 @@ void ParseData::reduceActions( PdaGraph *pdaGraph )
 	}
 }
 
-void ParseData::computeAdvanceReductions( LangEl *langEl, PdaGraph *pdaGraph )
+void Compiler::computeAdvanceReductions( LangEl *langEl, PdaGraph *pdaGraph )
 {
 	/* Get the entry into the graph and traverse over the root. The resulting
 	 * state can have eof, nothing else can. */
@@ -879,7 +879,7 @@ void ParseData::computeAdvanceReductions( LangEl *langEl, PdaGraph *pdaGraph )
 	}
 }
 
-void ParseData::verifyParseStopGrammar( LangEl *langEl, PdaGraph *pdaGraph )
+void Compiler::verifyParseStopGrammar( LangEl *langEl, PdaGraph *pdaGraph )
 {
 	/* Get the entry into the graph and traverse over the root. The resulting
 	 * state can have eof, nothing else can. */
@@ -902,7 +902,7 @@ void ParseData::verifyParseStopGrammar( LangEl *langEl, PdaGraph *pdaGraph )
 	}
 }
 
-LangEl *ParseData::predOf( PdaTrans *trans, long action )
+LangEl *Compiler::predOf( PdaTrans *trans, long action )
 {
 	LangEl *lel;
 	if ( action == SHIFT_CODE )
@@ -913,7 +913,7 @@ LangEl *ParseData::predOf( PdaTrans *trans, long action )
 }
 
 
-bool ParseData::precedenceSwap( long action1, long action2, LangEl *l1, LangEl *l2 )
+bool Compiler::precedenceSwap( long action1, long action2, LangEl *l1, LangEl *l2 )
 {
 	bool swap = false;
 	if ( l2->predValue > l1->predValue )
@@ -927,14 +927,14 @@ bool ParseData::precedenceSwap( long action1, long action2, LangEl *l1, LangEl *
 	return swap;
 }
 
-bool ParseData::precedenceRemoveBoth( LangEl *l1, LangEl *l2 )
+bool Compiler::precedenceRemoveBoth( LangEl *l1, LangEl *l2 )
 {
 	if ( l1->predValue == l2->predValue && l1->predType == PredNonassoc )
 		return true;
 	return false;
 }
 
-void ParseData::resolvePrecedence( PdaGraph *pdaGraph )
+void Compiler::resolvePrecedence( PdaGraph *pdaGraph )
 {
 	for ( PdaStateList::Iter state = pdaGraph->stateList; state.lte(); state++ ) {
 		assert( CmpDotSet::compare( state->dotSet, state->dotSet2 ) == 0 );
@@ -983,7 +983,7 @@ again:
 	}
 }
 
-void ParseData::analyzeMachine( PdaGraph *pdaGraph, LangElSet &parserEls )
+void Compiler::analyzeMachine( PdaGraph *pdaGraph, LangElSet &parserEls )
 {
 	pdaGraph->maxState = pdaGraph->stateList.length() - 1;
 	pdaGraph->maxLelId = nextSymbolId - 1;
@@ -1064,7 +1064,7 @@ void ParseData::analyzeMachine( PdaGraph *pdaGraph, LangElSet &parserEls )
 	}
 }
 
-void ParseData::wrapNonTerminals()
+void Compiler::wrapNonTerminals()
 {
 	/* Make a language element that will be used to make the root productions.
 	 * These are used for making parsers rooted at any production (including
@@ -1087,7 +1087,7 @@ void ParseData::wrapNonTerminals()
 	}
 }
 
-bool ParseData::makeNonTermFirstSetProd( Definition *prod, PdaState *state )
+bool Compiler::makeNonTermFirstSetProd( Definition *prod, PdaState *state )
 {
 	bool modified = false;
 	for ( TransMap::Iter trans = state->transMap; trans.lte(); trans++ ) {
@@ -1129,7 +1129,7 @@ bool ParseData::makeNonTermFirstSetProd( Definition *prod, PdaState *state )
 }
 
 
-void ParseData::makeNonTermFirstSets()
+void Compiler::makeNonTermFirstSets()
 {
 	bool modified = true;
 	while ( modified ) {
@@ -1153,7 +1153,7 @@ void ParseData::makeNonTermFirstSets()
 	}
 }
 
-void ParseData::printNonTermFirstSets()
+void Compiler::printNonTermFirstSets()
 {
 	for ( DefList::Iter prod = prodList; prod.lte(); prod++ ) {
 		cerr << prod->data << ": ";
@@ -1173,7 +1173,7 @@ void ParseData::printNonTermFirstSets()
 	}
 }
 
-bool ParseData::makeFirstSetProd( Definition *prod, PdaState *state )
+bool Compiler::makeFirstSetProd( Definition *prod, PdaState *state )
 {
 	bool modified = false;
 	for ( TransMap::Iter trans = state->transMap; trans.lte(); trans++ ) {
@@ -1227,7 +1227,7 @@ bool ParseData::makeFirstSetProd( Definition *prod, PdaState *state )
 }
 
 
-void ParseData::makeFirstSets()
+void Compiler::makeFirstSets()
 {
 	bool modified = true;
 	while ( modified ) {
@@ -1246,7 +1246,7 @@ void ParseData::makeFirstSets()
 	}
 }
 
-void ParseData::printFirstSets()
+void Compiler::printFirstSets()
 {
 	for ( DefList::Iter prod = prodList; prod.lte(); prod++ ) {
 		cerr << prod->data << ": ";
@@ -1266,7 +1266,7 @@ void ParseData::printFirstSets()
 	}
 }
 
-void ParseData::insertUniqueEmptyProductions()
+void Compiler::insertUniqueEmptyProductions()
 {
 	int limit = prodList.length();
 	for ( DefList::Iter prod = prodList; prod.lte(); prod++ ) {
@@ -1288,7 +1288,7 @@ void ParseData::insertUniqueEmptyProductions()
 	}
 }
 
-void ParseData::makeRuntimeData()
+void Compiler::makeRuntimeData()
 {
 	long count = 0;
 
@@ -1747,7 +1747,7 @@ void fillNodes( Program *prg, int &nextAvail, Bindings *bindings, long &bindId,
 	}
 }
 
-void ParseData::fillInPatterns( Program *prg )
+void Compiler::fillInPatterns( Program *prg )
 {
 	/*
 	 * patReplNodes
@@ -1809,7 +1809,7 @@ void ParseData::fillInPatterns( Program *prg )
 }
 
 
-int ParseData::findIndexOff( PdaTables *pdaTables, PdaGraph *pdaGraph, PdaState *state, int &curLen )
+int Compiler::findIndexOff( PdaTables *pdaTables, PdaGraph *pdaGraph, PdaState *state, int &curLen )
 {
 	for ( int start = 0; start < curLen;  ) {
 		int offset = start;
@@ -1860,7 +1860,7 @@ struct CmpSpan
 	}
 };
 
-PdaGraph *ParseData::makePdaGraph( LangElSet &parserEls )
+PdaGraph *Compiler::makePdaGraph( LangElSet &parserEls )
 {
 	//for ( DefList::Iter prod = prodList; prod.lte(); prod++ )
 	//	cerr << prod->prodId << " " << prod->data << endl;
@@ -1875,7 +1875,7 @@ PdaGraph *ParseData::makePdaGraph( LangElSet &parserEls )
 	return pdaGraph;
 }
 
-PdaTables *ParseData::makePdaTables( PdaGraph *pdaGraph )
+PdaTables *Compiler::makePdaTables( PdaGraph *pdaGraph )
 {
 	int count, pos;
 	PdaTables *pdaTables = new PdaTables;
@@ -2083,7 +2083,7 @@ PdaTables *ParseData::makePdaTables( PdaGraph *pdaGraph )
 	return pdaTables;
 }
 
-void ParseData::makeParser( LangElSet &parserEls )
+void Compiler::makeParser( LangElSet &parserEls )
 {
 	pdaGraph = makePdaGraph( parserEls );
 	pdaTables = makePdaTables( pdaGraph );

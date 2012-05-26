@@ -31,7 +31,7 @@
 /* Forwards. */
 struct FsmTrans;
 struct FsmGraph;
-struct ParseData;
+struct Compiler;
 struct FsmCodeGen;
 struct RedFsm;
 struct GenCondSpace;
@@ -84,7 +84,7 @@ struct NextRedTrans
 class RedFsmBuild
 {
 public:
-	RedFsmBuild( char *fsmName, ParseData *pd, FsmGraph *fsm );
+	RedFsmBuild( char *fsmName, Compiler *pd, FsmGraph *fsm );
 	RedFsm *reduceMachine( );
 
 private:
@@ -137,7 +137,7 @@ private:
 	void makeActionExecTE( InlineItem *item );
 
 	char *fsmName;
-	ParseData *pd;
+	Compiler *pd;
 	FsmGraph *fsm;
 	ActionTableMap actionTableMap;
 	int nextActionTableId;

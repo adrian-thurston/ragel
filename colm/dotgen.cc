@@ -26,7 +26,7 @@
 using namespace std;
 
 
-void ParseData::writeTransList( PdaState *state )
+void Compiler::writeTransList( PdaState *state )
 {
 	for ( TransMap::Iter trans = state->transMap; trans.lte(); trans++ ) {
 		/* Write out the from and to states. */
@@ -67,7 +67,7 @@ void ParseData::writeTransList( PdaState *state )
 	}
 }
 
-void ParseData::writeDotFile( PdaGraph *graph )
+void Compiler::writeDotFile( PdaGraph *graph )
 {
 	out << 
 		"digraph " << parserName << " {\n"
@@ -106,7 +106,7 @@ void ParseData::writeDotFile( PdaGraph *graph )
 		"}\n";
 }
 
-void ParseData::writeDotFile()
+void Compiler::writeDotFile()
 {
 	writeDotFile( pdaGraph );
 }

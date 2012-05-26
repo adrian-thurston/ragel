@@ -151,7 +151,7 @@ typedef BstSet<char> CharSet;
 typedef Vector<unsigned char> UnsignedCharVect;
 
 
-struct ParseData;
+struct Compiler;
 struct TypeRef;
 
 /* Leaf type. */
@@ -320,9 +320,9 @@ struct VarDef
 		: name(name), joinOrLm(joinOrLm) { }
 	
 	/* Parse tree traversal. */
-	FsmGraph *walk( ParseData *pd );
-	void makeNameTree( const InputLoc &loc, ParseData *pd );
-	void resolveNameRefs( ParseData *pd );
+	FsmGraph *walk( Compiler *pd );
+	void makeNameTree( const InputLoc &loc, Compiler *pd );
+	void resolveNameRefs( Compiler *pd );
 
 	String name;
 	JoinOrLm *joinOrLm;
@@ -342,7 +342,7 @@ struct NamespaceQual
 	StringVect qualNames;
 
 	Namespace *searchFrom( Namespace *from, StringVect::Iter &qualPart );
-	Namespace *getQual( ParseData *pd );
+	Namespace *getQual( Compiler *pd );
 };
 
 struct ReCapture
@@ -531,15 +531,15 @@ struct TokenRegion
 	{ }
 
 	/* Tree traversal. */
-	FsmGraph *walk( ParseData *pd );
-	void makeNameTree( ParseData *pd );
-	void resolveNameRefs( ParseData *pd );
-	void runLongestMatch( ParseData *pd, FsmGraph *graph );
+	FsmGraph *walk( Compiler *pd );
+	void makeNameTree( Compiler *pd );
+	void resolveNameRefs( Compiler *pd );
+	void runLongestMatch( Compiler *pd, FsmGraph *graph );
 	void transferScannerLeavingActions( FsmGraph *graph );
-	Action *newAction( ParseData *pd, const InputLoc &loc, const String &name, 
+	Action *newAction( Compiler *pd, const InputLoc &loc, const String &name, 
 			InlineList *inlineList );
-	void makeActions( ParseData *pd );
-	void findName( ParseData *pd );
+	void makeActions( Compiler *pd );
+	void findName( Compiler *pd );
 	void restart( FsmGraph *graph, FsmTrans *trans );
 
 	InputLoc loc;
@@ -601,7 +601,7 @@ struct GenericType
 	const String &getKey() const 
 		{ return name; };
 
-	void declare( ParseData *pd, Namespace *nspace );
+	void declare( Compiler *pd, Namespace *nspace );
 
 	String name;
 	long typeId;
@@ -708,7 +708,7 @@ struct Namespace
 
 	Namespace *next, *prev;
 
-	void declare( ParseData *pd );
+	void declare( Compiler *pd );
 };
 
 typedef DList<Namespace> NamespaceList;
@@ -729,9 +729,9 @@ struct JoinOrLm
 	JoinOrLm( TokenRegion *tokenRegion ) :
 		tokenRegion(tokenRegion), type(LongestMatchType) {}
 
-	FsmGraph *walk( ParseData *pd );
-	void makeNameTree( ParseData *pd );
-	void resolveNameRefs( ParseData *pd );
+	FsmGraph *walk( Compiler *pd );
+	void makeNameTree( Compiler *pd );
+	void resolveNameRefs( Compiler *pd );
 	
 	Join *join;
 	TokenRegion *tokenRegion;
@@ -747,9 +747,9 @@ struct Join
 	Join( Expression *expr );
 
 	/* Tree traversal. */
-	FsmGraph *walk( ParseData *pd );
-	void makeNameTree( ParseData *pd );
-	void resolveNameRefs( ParseData *pd );
+	FsmGraph *walk( Compiler *pd );
+	void makeNameTree( Compiler *pd );
+	void resolveNameRefs( Compiler *pd );
 
 	/* Data. */
 	ExprList exprList;
@@ -790,9 +790,9 @@ struct Expression
 	~Expression();
 
 	/* Tree traversal. */
-	FsmGraph *walk( ParseData *pd, bool lastInSeq = true );
-	void makeNameTree( ParseData *pd );
-	void resolveNameRefs( ParseData *pd );
+	FsmGraph *walk( Compiler *pd, bool lastInSeq = true );
+	void makeNameTree( Compiler *pd );
+	void resolveNameRefs( Compiler *pd );
 
 	/* Node data. */
 	Expression *expression;
@@ -827,9 +827,9 @@ struct Term
 	
 	~Term();
 
-	FsmGraph *walk( ParseData *pd, bool lastInSeq = true );
-	void makeNameTree( ParseData *pd );
-	void resolveNameRefs( ParseData *pd );
+	FsmGraph *walk( Compiler *pd, bool lastInSeq = true );
+	void makeNameTree( Compiler *pd );
+	void resolveNameRefs( Compiler *pd );
 
 	Term *term;
 	FactorWithAug *factorWithAug;
@@ -848,11 +848,11 @@ struct FactorWithAug
 	~FactorWithAug();
 
 	/* Tree traversal. */
-	FsmGraph *walk( ParseData *pd );
-	void makeNameTree( ParseData *pd );
-	void resolveNameRefs( ParseData *pd );
+	FsmGraph *walk( Compiler *pd );
+	void makeNameTree( Compiler *pd );
+	void resolveNameRefs( Compiler *pd );
 
-	void assignActions( ParseData *pd, FsmGraph *graph, int *actionOrd );
+	void assignActions( Compiler *pd, FsmGraph *graph, int *actionOrd );
 	void assignPriorities( FsmGraph *graph, int *priorOrd );
 
 	void assignConditions( FsmGraph *graph );
@@ -896,9 +896,9 @@ struct FactorWithRep
 	~FactorWithRep();
 
 	/* Tree traversal. */
-	FsmGraph *walk( ParseData *pd );
-	void makeNameTree( ParseData *pd );
-	void resolveNameRefs( ParseData *pd );
+	FsmGraph *walk( Compiler *pd );
+	void makeNameTree( Compiler *pd );
+	void resolveNameRefs( Compiler *pd );
 
 	InputLoc loc;
 	FactorWithRep *factorWithRep;
@@ -928,9 +928,9 @@ struct FactorWithNeg
 	~FactorWithNeg();
 
 	/* Tree traversal. */
-	FsmGraph *walk( ParseData *pd );
-	void makeNameTree( ParseData *pd );
-	void resolveNameRefs( ParseData *pd );
+	FsmGraph *walk( Compiler *pd );
+	void makeNameTree( Compiler *pd );
+	void resolveNameRefs( Compiler *pd );
 
 	InputLoc loc;
 	FactorWithNeg *factorWithNeg;
@@ -981,9 +981,9 @@ struct Factor
 	~Factor();
 
 	/* Tree traversal. */
-	FsmGraph *walk( ParseData *pd );
-	void makeNameTree( ParseData *pd );
-	void resolveNameRefs( ParseData *pd );
+	FsmGraph *walk( Compiler *pd );
+	void makeNameTree( Compiler *pd );
+	void resolveNameRefs( Compiler *pd );
 
 	InputLoc loc;
 	Literal *literal;
@@ -1003,7 +1003,7 @@ struct Range
 		: lowerLit(lowerLit), upperLit(upperLit) { }
 
 	~Range();
-	FsmGraph *walk( ParseData *pd );
+	FsmGraph *walk( Compiler *pd );
 	bool verifyRangeFsm( FsmGraph *rangeEnd );
 
 	Literal *lowerLit;
@@ -1018,7 +1018,7 @@ struct Literal
 	Literal( const InputLoc &loc, const String &literal, LiteralType type )
 		: loc(loc), literal(literal), type(type) { }
 
-	FsmGraph *walk( ParseData *pd );
+	FsmGraph *walk( Compiler *pd );
 	
 	InputLoc loc;
 	String literal;
@@ -1038,7 +1038,7 @@ struct RegExpr
 		type(RecurseItem), caseInsensitive(false) { }
 
 	~RegExpr();
-	FsmGraph *walk( ParseData *pd, RegExpr *rootRegex );
+	FsmGraph *walk( Compiler *pd, RegExpr *rootRegex );
 
 	RegExpr *regExp;
 	ReItem *item;
@@ -1059,7 +1059,7 @@ struct ReItem
 		: loc(loc), orBlock(orBlock), star(false), type(type) { }
 
 	~ReItem();
-	FsmGraph *walk( ParseData *pd, RegExpr *rootRegex );
+	FsmGraph *walk( Compiler *pd, RegExpr *rootRegex );
 
 	InputLoc loc;
 	String data;
@@ -1080,7 +1080,7 @@ struct ReOrBlock
 		: orBlock(orBlock), item(item), type(RecurseItem) { }
 
 	~ReOrBlock();
-	FsmGraph *walk( ParseData *pd, RegExpr *rootRegex );
+	FsmGraph *walk( Compiler *pd, RegExpr *rootRegex );
 	
 	ReOrBlock *orBlock;
 	ReOrItem *item;
@@ -1097,7 +1097,7 @@ struct ReOrItem
 	ReOrItem( const InputLoc &loc, char lower, char upper )
 		: loc(loc), lower(lower), upper(upper), type(Range) { }
 
-	FsmGraph *walk( ParseData *pd, RegExpr *rootRegex );
+	FsmGraph *walk( Compiler *pd, RegExpr *rootRegex );
 
 	InputLoc loc;
 	String data;
@@ -1590,17 +1590,17 @@ struct TypeRef
 		repeatType(RepeatNone),
 		nspace(0), uniqueType(uniqueType), searchUniqueType(0), generic(0) {}
 
-	void resolveRepeat( ParseData *pd );
+	void resolveRepeat( Compiler *pd );
 
-	UniqueType *lookupTypeName( ParseData *pd );
-	UniqueType *lookupTypeLiteral( ParseData *pd );
-	UniqueType *lookupTypeMap( ParseData *pd );
-	UniqueType *lookupTypeList( ParseData *pd );
-	UniqueType *lookupTypeVector( ParseData *pd );
-	UniqueType *lookupTypeParser( ParseData *pd );
-	UniqueType *lookupType( ParseData *pd );
-	UniqueType *lookupTypePtr( ParseData *pd );
-	UniqueType *lookupTypeRef( ParseData *pd );
+	UniqueType *lookupTypeName( Compiler *pd );
+	UniqueType *lookupTypeLiteral( Compiler *pd );
+	UniqueType *lookupTypeMap( Compiler *pd );
+	UniqueType *lookupTypeList( Compiler *pd );
+	UniqueType *lookupTypeVector( Compiler *pd );
+	UniqueType *lookupTypeParser( Compiler *pd );
+	UniqueType *lookupType( Compiler *pd );
+	UniqueType *lookupTypePtr( Compiler *pd );
+	UniqueType *lookupTypeRef( Compiler *pd );
 
 	Type type;
 	InputLoc loc;
@@ -1795,15 +1795,15 @@ struct ObjectDef
 	long nextOffset;
 	long firstNonTree;
 
-	void referenceField( ParseData *pd, ObjField *field );
-	void initField( ParseData *pd, ObjField *field );
-	void createCode( ParseData *pd, CodeVect &code );
+	void referenceField( Compiler *pd, ObjField *field );
+	void initField( Compiler *pd, ObjField *field );
+	void createCode( Compiler *pd, CodeVect &code );
 	ObjField *checkRedecl( const String &name );
 	ObjMethod *findMethod( const String &name );
 	ObjField *findFieldInScope( const String &name, ObjNameScope *inScope );
 	ObjField *findField( const String &name );
 	void insertField( const String &name, ObjField *value );
-	void resolve( ParseData *pd );
+	void resolve( Compiler *pd );
 	ObjField *findFieldNum( long offset );
 
 	long size() { return nextOffset; }
@@ -1867,52 +1867,52 @@ struct LangVarRef
 	LangVarRef( const InputLoc &loc, QualItemVect *qual, String name )
 		: loc(loc), qual(qual), name(name) {}
 
-	void resolve( ParseData *pd ) const;
+	void resolve( Compiler *pd ) const;
 
-	UniqueType *loadFieldInstr( ParseData *pd, CodeVect &code, ObjectDef *inObject,
+	UniqueType *loadFieldInstr( Compiler *pd, CodeVect &code, ObjectDef *inObject,
 			ObjField *el, bool forWriting, bool revert ) const;
-	void setFieldInstr( ParseData *pd, CodeVect &code, ObjectDef *inObject, 
+	void setFieldInstr( Compiler *pd, CodeVect &code, ObjectDef *inObject, 
 			ObjField *el, UniqueType *exprUT, bool revert ) const;
 
-	VarRefLookup lookupMethod( ParseData *pd ) ;
-	VarRefLookup lookupField( ParseData *pd ) const;
+	VarRefLookup lookupMethod( Compiler *pd ) ;
+	VarRefLookup lookupField( Compiler *pd ) const;
 
-	VarRefLookup lookupQualification( ParseData *pd, ObjectDef *rootDef ) const;
-	VarRefLookup lookupObj( ParseData *pd ) const;
+	VarRefLookup lookupQualification( Compiler *pd, ObjectDef *rootDef ) const;
+	VarRefLookup lookupObj( Compiler *pd ) const;
 
-	bool isCustom( ParseData *pd ) const;
-	bool isLocalRef( ParseData *pd ) const;
-	bool isContextRef( ParseData *pd ) const;
-	void loadQualification( ParseData *pd, CodeVect &code, ObjectDef *rootObj, 
+	bool isCustom( Compiler *pd ) const;
+	bool isLocalRef( Compiler *pd ) const;
+	bool isContextRef( Compiler *pd ) const;
+	void loadQualification( Compiler *pd, CodeVect &code, ObjectDef *rootObj, 
 			int lastPtrInQual, bool forWriting, bool revert ) const;
-	void loadCustom( ParseData *pd, CodeVect &code, 
+	void loadCustom( Compiler *pd, CodeVect &code, 
 			int lastPtrInQual, bool forWriting ) const;
-	void loadLocalObj( ParseData *pd, CodeVect &code, 
+	void loadLocalObj( Compiler *pd, CodeVect &code, 
 			int lastPtrInQual, bool forWriting ) const;
-	void loadContextObj( ParseData *pd, CodeVect &code, int lastPtrInQual, bool forWriting ) const;
-	void loadGlobalObj( ParseData *pd, CodeVect &code, 
+	void loadContextObj( Compiler *pd, CodeVect &code, int lastPtrInQual, bool forWriting ) const;
+	void loadGlobalObj( Compiler *pd, CodeVect &code, 
 			int lastPtrInQual, bool forWriting ) const;
-	void loadObj( ParseData *pd, CodeVect &code, int lastPtrInQual, bool forWriting ) const;
-	void canTakeRef( ParseData *pd, VarRefLookup &lookup ) const;
+	void loadObj( Compiler *pd, CodeVect &code, int lastPtrInQual, bool forWriting ) const;
+	void canTakeRef( Compiler *pd, VarRefLookup &lookup ) const;
 
-	void setFieldIter( ParseData *pd, CodeVect &code, 
+	void setFieldIter( Compiler *pd, CodeVect &code, 
 			ObjectDef *inObject, UniqueType *objUT, UniqueType *exprType, bool revert ) const;
-	void setFieldSearch( ParseData *pd, CodeVect &code, 
+	void setFieldSearch( Compiler *pd, CodeVect &code, 
 			ObjectDef *inObject, UniqueType *exprType ) const;
-	void setField( ParseData *pd, CodeVect &code, 
+	void setField( Compiler *pd, CodeVect &code, 
 			ObjectDef *inObject, UniqueType *type, bool revert ) const;
 
-	void assignValue( ParseData *pd, CodeVect &code, UniqueType *exprUT ) const;
-	ObjField **evaluateArgs( ParseData *pd, CodeVect &code, 
+	void assignValue( Compiler *pd, CodeVect &code, UniqueType *exprUT ) const;
+	ObjField **evaluateArgs( Compiler *pd, CodeVect &code, 
 			VarRefLookup &lookup, ExprVect *args ) const;
-	void callOperation( ParseData *pd, CodeVect &code, VarRefLookup &lookup ) const;
-	UniqueType *evaluateCall( ParseData *pd, CodeVect &code, ExprVect *args );
-	UniqueType *evaluate( ParseData *pd, CodeVect &code, bool forWriting = false ) const;
-	ObjField *evaluateRef( ParseData *pd, CodeVect &code, long pushCount ) const;
-	ObjField *preEvaluateRef( ParseData *pd, CodeVect &code ) const;
-	void resetActiveRefs( ParseData *pd, VarRefLookup &lookup, ObjField **paramRefs ) const;
-	long loadQualificationRefs( ParseData *pd, CodeVect &code ) const;
-	void popRefQuals( ParseData *pd, CodeVect &code, 
+	void callOperation( Compiler *pd, CodeVect &code, VarRefLookup &lookup ) const;
+	UniqueType *evaluateCall( Compiler *pd, CodeVect &code, ExprVect *args );
+	UniqueType *evaluate( Compiler *pd, CodeVect &code, bool forWriting = false ) const;
+	ObjField *evaluateRef( Compiler *pd, CodeVect &code, long pushCount ) const;
+	ObjField *preEvaluateRef( Compiler *pd, CodeVect &code ) const;
+	void resetActiveRefs( Compiler *pd, VarRefLookup &lookup, ObjField **paramRefs ) const;
+	long loadQualificationRefs( Compiler *pd, CodeVect &code ) const;
+	void popRefQuals( Compiler *pd, CodeVect &code, 
 			VarRefLookup &lookup, ExprVect *args ) const;
 
 	InputLoc loc;
@@ -1995,17 +1995,17 @@ struct LangTerm
 			typeRef(typeRef), generic(generic), parserTypeRef(parserTypeRef),
 			replacement(replacement) {}
 	
-	void resolve( ParseData *pd );
+	void resolve( Compiler *pd );
 
-	UniqueType *evaluateParse( ParseData *pd, CodeVect &code, bool stop ) const;
-	UniqueType *evaluateNew( ParseData *pd, CodeVect &code ) const;
-	UniqueType *evaluateConstruct( ParseData *pd, CodeVect &code ) const;
-	UniqueType *evaluateMatch( ParseData *pd, CodeVect &code ) const;
-	UniqueType *evaluate( ParseData *pd, CodeVect &code ) const;
-	void assignFieldArgs( ParseData *pd, CodeVect &code, UniqueType *replUT ) const;
-	UniqueType *evaluateMakeToken( ParseData *pd, CodeVect &code ) const;
-	UniqueType *evaluateMakeTree( ParseData *pd, CodeVect &code ) const;
-	UniqueType *evaluateEmbedString( ParseData *pd, CodeVect &code ) const;
+	UniqueType *evaluateParse( Compiler *pd, CodeVect &code, bool stop ) const;
+	UniqueType *evaluateNew( Compiler *pd, CodeVect &code ) const;
+	UniqueType *evaluateConstruct( Compiler *pd, CodeVect &code ) const;
+	UniqueType *evaluateMatch( Compiler *pd, CodeVect &code ) const;
+	UniqueType *evaluate( Compiler *pd, CodeVect &code ) const;
+	void assignFieldArgs( Compiler *pd, CodeVect &code, UniqueType *replUT ) const;
+	UniqueType *evaluateMakeToken( Compiler *pd, CodeVect &code ) const;
+	UniqueType *evaluateMakeTree( Compiler *pd, CodeVect &code ) const;
+	UniqueType *evaluateEmbedString( Compiler *pd, CodeVect &code ) const;
 
 	InputLoc loc;
 	Type type;
@@ -2041,9 +2041,9 @@ struct LangExpr
 	LangExpr( LangTerm *term )
 		: type(TermType), term(term) {}
 
-	void resolve( ParseData *pd ) const;
+	void resolve( Compiler *pd ) const;
 
-	UniqueType *evaluate( ParseData *pd, CodeVect &code ) const;
+	UniqueType *evaluate( Compiler *pd, CodeVect &code ) const;
 
 	InputLoc loc;
 	Type type;
@@ -2124,15 +2124,15 @@ struct LangStmt
 	LangStmt( Type type ) : 
 		type(type), next(0) {}
 
-	void resolve( ParseData *pd ) const;
-	void resolveParserItems( ParseData *pd ) const;
+	void resolve( Compiler *pd ) const;
+	void resolveParserItems( Compiler *pd ) const;
 
-	void evaluateParserItems( ParseData *pd, CodeVect &code ) const;
-	LangTerm *chooseDefaultIter( ParseData *pd, LangTerm *fromVarRef ) const;
-	void compileWhile( ParseData *pd, CodeVect &code ) const;
-	void compileForIterBody( ParseData *pd, CodeVect &code, UniqueType *iterUT ) const;
-	void compileForIter( ParseData *pd, CodeVect &code ) const;
-	void compile( ParseData *pd, CodeVect &code ) const;
+	void evaluateParserItems( Compiler *pd, CodeVect &code ) const;
+	LangTerm *chooseDefaultIter( Compiler *pd, LangTerm *fromVarRef ) const;
+	void compileWhile( Compiler *pd, CodeVect &code ) const;
+	void compileForIterBody( Compiler *pd, CodeVect &code, UniqueType *iterUT ) const;
+	void compileForIter( Compiler *pd, CodeVect &code ) const;
+	void compile( Compiler *pd, CodeVect &code ) const;
 
 	InputLoc loc;
 	Type type;
@@ -2165,8 +2165,8 @@ struct CodeBlock
 		localFrame(0),
 		context(0) {}
 
-	void compile( ParseData *pd, CodeVect &code ) const;
-	void resolve( ParseData *pd ) const;
+	void compile( Compiler *pd, CodeVect &code ) const;
+	void resolve( Compiler *pd ) const;
 
 	long frameId;
 	StmtList *stmtList;

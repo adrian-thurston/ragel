@@ -49,7 +49,7 @@ using std::string;
 
 struct RedState;
 struct InlineList;
-struct ParseData;
+struct Compiler;
 struct ObjField;
 
 /* Element in list of actions. Contains the string for the code to exectute. */

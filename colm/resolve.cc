@@ -29,7 +29,7 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-UniqueType *TypeRef::lookupTypeName( ParseData *pd )
+UniqueType *TypeRef::lookupTypeName( Compiler *pd )
 {
 	/* Lookup up the qualifiction and then the name. */
 	nspace = nspaceQual->getQual( pd );
@@ -59,7 +59,7 @@ UniqueType *TypeRef::lookupTypeName( ParseData *pd )
 	return 0;
 }
 
-UniqueType *TypeRef::lookupTypeLiteral( ParseData *pd )
+UniqueType *TypeRef::lookupTypeLiteral( Compiler *pd )
 {
 	/* Lookup up the qualifiction and then the name. */
 	nspace = nspaceQual->getQual( pd );
@@ -86,7 +86,7 @@ UniqueType *TypeRef::lookupTypeLiteral( ParseData *pd )
 	return 0;
 }
 
-UniqueType *TypeRef::lookupTypeMap( ParseData *pd )
+UniqueType *TypeRef::lookupTypeMap( Compiler *pd )
 {
 	/* Lookup up the qualifiction and then the name. */
 	nspace = nspaceQual->getQual( pd );
@@ -119,7 +119,7 @@ UniqueType *TypeRef::lookupTypeMap( ParseData *pd )
 	return pd->findUniqueType( TYPE_TREE, inMap->generic->langEl );
 }
 
-UniqueType *TypeRef::lookupTypeList( ParseData *pd )
+UniqueType *TypeRef::lookupTypeList( Compiler *pd )
 {
 	/* Lookup up the qualifiction and then the name. */
 	nspace = nspaceQual->getQual( pd );
@@ -150,7 +150,7 @@ UniqueType *TypeRef::lookupTypeList( ParseData *pd )
 	return pd->findUniqueType( TYPE_TREE, inMap->generic->langEl );
 }
 
-UniqueType *TypeRef::lookupTypeVector( ParseData *pd )
+UniqueType *TypeRef::lookupTypeVector( Compiler *pd )
 {
 	/* Lookup up the qualifiction and then the name. */
 	nspace = nspaceQual->getQual( pd );
@@ -181,7 +181,7 @@ UniqueType *TypeRef::lookupTypeVector( ParseData *pd )
 	return pd->findUniqueType( TYPE_TREE, inMap->generic->langEl );
 }
 
-UniqueType *TypeRef::lookupTypeParser( ParseData *pd )
+UniqueType *TypeRef::lookupTypeParser( Compiler *pd )
 {
 	/* Lookup up the qualifiction and then the name. */
 	nspace = nspaceQual->getQual( pd );
@@ -212,19 +212,19 @@ UniqueType *TypeRef::lookupTypeParser( ParseData *pd )
 	return pd->findUniqueType( TYPE_TREE, inMap->generic->langEl );
 }
 
-UniqueType *TypeRef::lookupTypePtr( ParseData *pd )
+UniqueType *TypeRef::lookupTypePtr( Compiler *pd )
 {
 	typeRef1->lookupType( pd );
 	return pd->findUniqueType( TYPE_PTR, typeRef1->uniqueType->langEl );
 }
 
-UniqueType *TypeRef::lookupTypeRef( ParseData *pd )
+UniqueType *TypeRef::lookupTypeRef( Compiler *pd )
 {
 	typeRef1->lookupType( pd );
 	return pd->findUniqueType( TYPE_REF, typeRef1->uniqueType->langEl );
 }
 
-void TypeRef::resolveRepeat( ParseData *pd )
+void TypeRef::resolveRepeat( Compiler *pd )
 {
 	if ( uniqueType->typeId != TYPE_TREE )
 		error(loc) << "cannot repeat non-tree type" << endp;
@@ -272,7 +272,7 @@ void TypeRef::resolveRepeat( ParseData *pd )
 }
 
 
-UniqueType *TypeRef::lookupType( ParseData *pd )
+UniqueType *TypeRef::lookupType( Compiler *pd )
 {
 	if ( uniqueType != 0 )
 		return uniqueType;
@@ -315,13 +315,13 @@ UniqueType *TypeRef::lookupType( ParseData *pd )
 	return uniqueType;
 }
 
-void ParseData::resolveFactor( ProdEl *fact )
+void Compiler::resolveFactor( ProdEl *fact )
 {
 	fact->typeRef->lookupType( this );
 	fact->langEl = fact->typeRef->uniqueType->langEl;
 }
 
-void LangTerm::resolve( ParseData *pd )
+void LangTerm::resolve( Compiler *pd )
 {
 	switch ( type ) {
 		case ConstructType:
@@ -375,12 +375,12 @@ void LangTerm::resolve( ParseData *pd )
 	}
 }
 
-void LangVarRef::resolve( ParseData *pd ) const
+void LangVarRef::resolve( Compiler *pd ) const
 {
 
 }
 
-void LangExpr::resolve( ParseData *pd ) const
+void LangExpr::resolve( Compiler *pd ) const
 {
 	switch ( type ) {
 		case BinaryType: {
@@ -399,7 +399,7 @@ void LangExpr::resolve( ParseData *pd ) const
 	}
 }
 
-void LangStmt::resolveParserItems( ParseData *pd ) const
+void LangStmt::resolveParserItems( Compiler *pd ) const
 {
 	/* Assign bind ids to the variables in the replacement. */
 	for ( ReplItemList::Iter item = *parserText->list; item.lte(); item++ ) {
@@ -417,7 +417,7 @@ void LangStmt::resolveParserItems( ParseData *pd ) const
 	}
 }
 
-void LangStmt::resolve( ParseData *pd ) const
+void LangStmt::resolve( Compiler *pd ) const
 {
 	switch ( type ) {
 		case PrintType: 
@@ -499,7 +499,7 @@ void LangStmt::resolve( ParseData *pd ) const
 	}
 }
 
-void ObjectDef::resolve( ParseData *pd )
+void ObjectDef::resolve( Compiler *pd )
 {
 	for ( ObjFieldList::Iter fli = *objFieldList; fli.lte(); fli++ ) {
 		ObjField *field = fli->value;
@@ -510,7 +510,7 @@ void ObjectDef::resolve( ParseData *pd )
 	}
 }
 
-void CodeBlock::resolve( ParseData *pd ) const
+void CodeBlock::resolve( Compiler *pd ) const
 {
 	if ( localFrame != 0 )
 		localFrame->resolve( pd );
@@ -519,25 +519,25 @@ void CodeBlock::resolve( ParseData *pd ) const
 		stmt->resolve( pd );
 }
 
-void ParseData::resolveFunction( Function *func )
+void Compiler::resolveFunction( Function *func )
 {
 	CodeBlock *block = func->codeBlock;
 	block->resolve( this );
 }
 
-void ParseData::resolveUserIter( Function *func )
+void Compiler::resolveUserIter( Function *func )
 {
 	CodeBlock *block = func->codeBlock;
 	block->resolve( this );
 }
 
-void ParseData::resolvePreEof( TokenRegion *region )
+void Compiler::resolvePreEof( TokenRegion *region )
 {
 	CodeBlock *block = region->preEofBlock;
 	block->resolve( this );
 }
 
-void ParseData::resolveRootBlock()
+void Compiler::resolveRootBlock()
 {
 	rootLocalFrame->resolve( this );
 
@@ -545,19 +545,19 @@ void ParseData::resolveRootBlock()
 	block->resolve( this );
 }
 
-void ParseData::resolveTranslateBlock( LangEl *langEl )
+void Compiler::resolveTranslateBlock( LangEl *langEl )
 {
 	CodeBlock *block = langEl->transBlock;
 	block->resolve( this );
 }
 
-void ParseData::resolveReductionCode( Definition *prod )
+void Compiler::resolveReductionCode( Definition *prod )
 {
 	CodeBlock *block = prod->redBlock;
 	block->resolve( this );
 }
 
-void ParseData::resolveParseTree()
+void Compiler::resolveParseTree()
 {
 	/* Compile functions. */
 	for ( FunctionList::Iter f = functionList; f.lte(); f++ ) {
@@ -613,7 +613,7 @@ void ParseData::resolveParseTree()
 }
 
 
-void ParseData::resolveUses()
+void Compiler::resolveUses()
 {
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
 		if ( lel->objectDefUses != 0 ) {
@@ -630,7 +630,7 @@ void ParseData::resolveUses()
 	}
 }
 
-void ParseData::resolvePatternEls()
+void Compiler::resolvePatternEls()
 {
 	for ( PatternList::Iter pat = patternList; pat.lte(); pat++ ) {
 		for ( PatternItemList::Iter item = *pat->list; item.lte(); item++ ) {
@@ -647,7 +647,7 @@ void ParseData::resolvePatternEls()
 	}
 }
 
-void ParseData::resolveReplacementEls()
+void Compiler::resolveReplacementEls()
 {
 	for ( ReplList::Iter repl = replList; repl.lte(); repl++ ) {
 		for ( ReplItemList::Iter item = *repl->list; item.lte(); item++ ) {
@@ -664,7 +664,7 @@ void ParseData::resolveReplacementEls()
 	}
 }
 
-void ParseData::resolveParserEls()
+void Compiler::resolveParserEls()
 {
 	for ( ParserTextList::Iter accum = parserTextList; accum.lte(); accum++ ) {
 		for ( ReplItemList::Iter item = *accum->list; item.lte(); item++ ) {
@@ -681,7 +681,7 @@ void ParseData::resolveParserEls()
 }
 
 /* Resolves production els and computes the precedence of each prod. */
-void ParseData::resolveProductionEls()
+void Compiler::resolveProductionEls()
 {
 	/* NOTE: as we process this list it may be growing! */
 	for ( DefList::Iter prod = prodList; prod.lte(); prod++ ) {
@@ -704,7 +704,7 @@ void ParseData::resolveProductionEls()
 	}
 }
 
-void ParseData::resolveGenericTypes()
+void Compiler::resolveGenericTypes()
 {
 	for ( NamespaceList::Iter ns = namespaceList; ns.lte(); ns++ ) {
 		for ( GenericList::Iter gen = ns->genericList; gen.lte(); gen++ ) {
@@ -718,7 +718,7 @@ void ParseData::resolveGenericTypes()
 	}
 }
 
-void ParseData::makeTerminalWrappers()
+void Compiler::makeTerminalWrappers()
 {
 	/* Make terminal language elements corresponding to each nonterminal in
 	 * the grammar. */
@@ -739,7 +739,7 @@ void ParseData::makeTerminalWrappers()
 	}
 }
 
-void ParseData::makeEofElements()
+void Compiler::makeEofElements()
 {
 	/* Make eof language elements for each user terminal. This is a bit excessive and
 	 * need to be reduced to the ones that we need parsers for, but we don't know that yet.
@@ -762,7 +762,7 @@ void ParseData::makeEofElements()
 	}
 }
 
-void ParseData::makeIgnoreCollectors()
+void Compiler::makeIgnoreCollectors()
 {
 	for ( RegionList::Iter region = regionList; region.lte(); region++ ) {
 		if ( region->isFullRegion ) {
@@ -777,7 +777,7 @@ void ParseData::makeIgnoreCollectors()
 	}
 }
 
-void ParseData::typeResolve()
+void Compiler::typeResolve()
 {
 	/*
 	 * Type Resolving.

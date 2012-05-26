@@ -30,7 +30,7 @@
 
 struct ColmParser
 {
-	ColmParser( ParseData *pd, const char *fileName, const char *sectionName, const InputLoc &sectionLoc )
+	ColmParser( Compiler *pd, const char *fileName, const char *sectionName, const InputLoc &sectionLoc )
 		: pd(pd), sectionName(sectionName), enterRl(false)
 	{}
 
@@ -87,7 +87,7 @@ struct ColmParser
 	/* Report an error encountered by the parser. */
 	ostream &parse_error( int tokId, Token &token );
 
-	ParseData *pd;
+	Compiler *pd;
 
 	/* The name of the root section, this does not change during an include. */
 	const char *sectionName;

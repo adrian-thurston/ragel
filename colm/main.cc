@@ -567,7 +567,7 @@ int main(int argc, const char **argv)
 	if ( gblErrorCount > 0 )
 		exit(1);
 
-	ParseData *pd = new ParseData( inputFileName, "machine", InputLoc(), std::cout );
+	Compiler *pd = new Compiler( inputFileName, "machine", InputLoc(), std::cout );
 	ColmParser *parser = new ColmParser( pd, inputFileName, "machine", InputLoc() );
 	ColmScanner *scanner = new ColmScanner( inputFileName, *inStream, cout, parser, 0 );
 

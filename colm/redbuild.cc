@@ -29,7 +29,7 @@
 
 using namespace std;
 
-RedFsmBuild::RedFsmBuild( char *fsmName, ParseData *pd, FsmGraph *fsm )
+RedFsmBuild::RedFsmBuild( char *fsmName, Compiler *pd, FsmGraph *fsm )
 :
 	fsmName(fsmName),
 	pd(pd),

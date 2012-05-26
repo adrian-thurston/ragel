@@ -30,7 +30,7 @@
 using std::endl;
 using std::cerr;
 
-void ParseData::lr0BringInItem( PdaGraph *pdaGraph, PdaState *dest, PdaState *prodState, 
+void Compiler::lr0BringInItem( PdaGraph *pdaGraph, PdaState *dest, PdaState *prodState, 
 		PdaTrans *expandFrom, Definition *prod )
 {
 	/* We use dot sets for finding unique states. In the future, should merge
@@ -105,7 +105,7 @@ void ParseData::lr0BringInItem( PdaGraph *pdaGraph, PdaState *dest, PdaState *pr
 	}
 }
 
-void ParseData::lr0InvokeClosure( PdaGraph *pdaGraph, PdaState *state )
+void Compiler::lr0InvokeClosure( PdaGraph *pdaGraph, PdaState *state )
 {
 	/* State should not already be closed. */
 	assert( !state->inClosedMap );
@@ -175,7 +175,7 @@ void ParseData::lr0InvokeClosure( PdaGraph *pdaGraph, PdaState *state )
  * first search of the tree we build. Note, there are back edges in this
  * tree. They are the edges made when upon closure, a dot set exists
  * already. */
-void ParseData::lr0CloseAllStates( PdaGraph *pdaGraph )
+void Compiler::lr0CloseAllStates( PdaGraph *pdaGraph )
 {
 	/* While there are items on the closure queue. */
 	while ( pdaGraph->stateClosureQueue.length() > 0 ) {
@@ -188,7 +188,7 @@ void ParseData::lr0CloseAllStates( PdaGraph *pdaGraph )
 	}
 }
 
-void ParseData::transferCommits( PdaGraph *pdaGraph, PdaTrans *trans, 
+void Compiler::transferCommits( PdaGraph *pdaGraph, PdaTrans *trans, 
 		PdaState *state, long prodId )
 {
 	ProdIdPairSet &pendingCommits = state->pendingCommits;
@@ -198,7 +198,7 @@ void ParseData::transferCommits( PdaGraph *pdaGraph, PdaTrans *trans,
 	}
 }
 
-void ParseData::lalr1AddFollow2( PdaGraph *pdaGraph, PdaTrans *trans, FollowToAdd &followKeys )
+void Compiler::lalr1AddFollow2( PdaGraph *pdaGraph, PdaTrans *trans, FollowToAdd &followKeys )
 {
 	for ( ExpandToSet::Iter ets = trans->expandTo; ets.lte(); ets++ ) {
 		int prodId = ets->prodId;
@@ -244,7 +244,7 @@ long PdaTrans::maxPrior()
 	return prior;
 }
 
-void ParseData::lalr1AddFollow1( PdaGraph *pdaGraph, PdaState *state )
+void Compiler::lalr1AddFollow1( PdaGraph *pdaGraph, PdaState *state )
 {
 	/* Finding non-terminals into the state. */
 	for ( PdaTransInList::Iter in = state->inRange; in.lte(); in++ ) {
@@ -268,7 +268,7 @@ void ParseData::lalr1AddFollow1( PdaGraph *pdaGraph, PdaState *state )
 	}
 }
 
-void ParseData::lalr1AddFollow2( PdaGraph *pdaGraph, PdaTrans *trans, 
+void Compiler::lalr1AddFollow2( PdaGraph *pdaGraph, PdaTrans *trans, 
 		long followKey, long prior )
 {
 	for ( ExpandToSet::Iter ets = trans->expandTo; ets.lte(); ets++ ) {
@@ -300,7 +300,7 @@ void ParseData::lalr1AddFollow2( PdaGraph *pdaGraph, PdaTrans *trans,
 	}
 }
 
-void ParseData::lalr1AddFollow1( PdaGraph *pdaGraph, PdaTrans *trans )
+void Compiler::lalr1AddFollow1( PdaGraph *pdaGraph, PdaTrans *trans )
 {
 	PdaState *state = trans->fromState;
 	int fkey = trans->lowKey; 
@@ -320,7 +320,7 @@ void ParseData::lalr1AddFollow1( PdaGraph *pdaGraph, PdaTrans *trans )
 }
 
 /* Add follow sets to an LR(0) graph to make it LALR(1). */
-void ParseData::lalr1AddFollowSets( PdaGraph *pdaGraph, LangElSet &parserEls )
+void Compiler::lalr1AddFollowSets( PdaGraph *pdaGraph, LangElSet &parserEls )
 {
 	/* Make the state that all reduction actions go to. Since a reduction pops
 	 * states of the stack and sets the new target state, this state is
@@ -354,7 +354,7 @@ void ParseData::lalr1AddFollowSets( PdaGraph *pdaGraph, LangElSet &parserEls )
 	}
 }
 
-void ParseData::linkExpansions( PdaGraph *pdaGraph )
+void Compiler::linkExpansions( PdaGraph *pdaGraph )
 {
 	pdaGraph->setStateNumbers();
 	for ( PdaStateList::Iter state = pdaGraph->stateList; state.lte(); state++ ) {
@@ -384,7 +384,7 @@ void ParseData::linkExpansions( PdaGraph *pdaGraph )
 }
 
 /* Add terminal versions of all nonterminal transitions. */
-void ParseData::addDupTerms( PdaGraph *pdaGraph )
+void Compiler::addDupTerms( PdaGraph *pdaGraph )
 {
 	for ( PdaStateList::Iter state = pdaGraph->stateList; state.lte(); state++ ) {
 		PdaTransList newTranitions;
@@ -418,7 +418,7 @@ void ParseData::addDupTerms( PdaGraph *pdaGraph )
 }
 
 /* Generate a LALR(1) graph. */
-void ParseData::lalr1GenerateParser( PdaGraph *pdaGraph, LangElSet &parserEls )
+void Compiler::lalr1GenerateParser( PdaGraph *pdaGraph, LangElSet &parserEls )
 {
 	/* Make the intial graph. */
 	pdaGraph->langElIndex = langElIndex;

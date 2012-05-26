@@ -40,7 +40,7 @@
 using namespace std;
 
 
-void ParseData::prepGrammar()
+void Compiler::prepGrammar()
 {
 	/* This will create language elements. */
 	wrapNonTerminals();
@@ -64,7 +64,7 @@ void ParseData::prepGrammar()
 	runtimeData = new RuntimeData;
 }
 
-void ParseData::semanticAnalysis()
+void Compiler::semanticAnalysis()
 {
 	beginProcessing();
 	initKeyOps();

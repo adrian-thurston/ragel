@@ -31,7 +31,7 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-void ParseData::initUniqueTypes( )
+void Compiler::initUniqueTypes( )
 {
 	uniqueTypeNil = new UniqueType( TYPE_NIL );
 	uniqueTypePtr = new UniqueType( TYPE_TREE, ptrLangEl );
@@ -174,7 +174,7 @@ ObjMethod *initFunction( UniqueType *retType, ObjectDef *obj,
 	return objMethod;
 }
 
-IterDef *ParseData::findIterDef( IterDef::Type type, Function *func )
+IterDef *Compiler::findIterDef( IterDef::Type type, Function *func )
 {
 	IterDefSetEl *el = iterDefSet.find( IterDef( type, func ) );
 	if ( el == 0 )
@@ -182,7 +182,7 @@ IterDef *ParseData::findIterDef( IterDef::Type type, Function *func )
 	return &el->key;
 }
 
-IterDef *ParseData::findIterDef( IterDef::Type type )
+IterDef *Compiler::findIterDef( IterDef::Type type )
 {
 	IterDefSetEl *el = iterDefSet.find( IterDef( type ) );
 	if ( el == 0 )
@@ -190,7 +190,7 @@ IterDef *ParseData::findIterDef( IterDef::Type type )
 	return &el->key;
 }
 
-UniqueType *ParseData::findUniqueType( int typeId )
+UniqueType *Compiler::findUniqueType( int typeId )
 {
 	UniqueType searchKey( typeId );
 	UniqueType *uniqueType = uniqeTypeMap.find( &searchKey );
@@ -201,7 +201,7 @@ UniqueType *ParseData::findUniqueType( int typeId )
 	return uniqueType;
 }
 
-UniqueType *ParseData::findUniqueType( int typeId, LangEl *langEl )
+UniqueType *Compiler::findUniqueType( int typeId, LangEl *langEl )
 {
 	UniqueType searchKey( typeId, langEl );
 	UniqueType *uniqueType = uniqeTypeMap.find( &searchKey );
@@ -212,7 +212,7 @@ UniqueType *ParseData::findUniqueType( int typeId, LangEl *langEl )
 	return uniqueType;
 }
 
-UniqueType *ParseData::findUniqueType( int typeId, IterDef *iterDef )
+UniqueType *Compiler::findUniqueType( int typeId, IterDef *iterDef )
 {
 	UniqueType searchKey( typeId, iterDef );
 	UniqueType *uniqueType = uniqeTypeMap.find( &searchKey );
@@ -350,13 +350,13 @@ long sizeOfField( UniqueType *fieldUT )
 	return size;
 }
 
-void ObjectDef::referenceField( ParseData *pd, ObjField *field )
+void ObjectDef::referenceField( Compiler *pd, ObjField *field )
 {
 	field->beenReferenced = true;
 	initField( pd, field );
 }
 
-void ObjectDef::initField( ParseData *pd, ObjField *field )
+void ObjectDef::initField( Compiler *pd, ObjField *field )
 {
 	if ( !field->beenInitialized ) {
 		field->beenInitialized = true;
@@ -386,7 +386,7 @@ void ObjectDef::initField( ParseData *pd, ObjField *field )
 	}
 }
 
-UniqueType *LangVarRef::loadFieldInstr( ParseData *pd, CodeVect &code, 
+UniqueType *LangVarRef::loadFieldInstr( Compiler *pd, CodeVect &code, 
 		ObjectDef *inObject, ObjField *el, bool forWriting, bool revert ) const
 {
 	/* Ensure that the field is referenced. */
@@ -433,7 +433,7 @@ UniqueType *LangVarRef::loadFieldInstr( ParseData *pd, CodeVect &code,
 	return elUT;
 }
 
-ObjectDef *objDefFromUT( ParseData *pd, UniqueType *ut )
+ObjectDef *objDefFromUT( Compiler *pd, UniqueType *ut )
 {
 	ObjectDef *objDef = 0;
 	if ( ut->typeId == TYPE_TREE || ut->typeId == TYPE_REF )
@@ -446,7 +446,7 @@ ObjectDef *objDefFromUT( ParseData *pd, UniqueType *ut )
 }
 
 /* The qualification must start at a local frame. There cannot be any pointer. */
-long LangVarRef::loadQualificationRefs( ParseData *pd, CodeVect &code ) const
+long LangVarRef::loadQualificationRefs( Compiler *pd, CodeVect &code ) const
 {
 	long count = 0;
 	ObjectDef *rootObj = pd->curLocalFrame;
@@ -490,7 +490,7 @@ long LangVarRef::loadQualificationRefs( ParseData *pd, CodeVect &code ) const
 	return count;
 }
 
-void LangVarRef::loadQualification( ParseData *pd, CodeVect &code, 
+void LangVarRef::loadQualification( Compiler *pd, CodeVect &code, 
 		ObjectDef *rootObj, int lastPtrInQual, bool forWriting, bool revert ) const
 {
 	/* Start the search from the root object. */
@@ -560,7 +560,7 @@ void LangVarRef::loadQualification( ParseData *pd, CodeVect &code,
 	}
 }
 
-void LangVarRef::loadContextObj( ParseData *pd, CodeVect &code, 
+void LangVarRef::loadContextObj( Compiler *pd, CodeVect &code, 
 		int lastPtrInQual, bool forWriting ) const
 {
 	/* Start the search in the global object. */
@@ -583,7 +583,7 @@ void LangVarRef::loadContextObj( ParseData *pd, CodeVect &code,
 	loadQualification( pd, code, rootObj, lastPtrInQual, forWriting, true );
 }
 
-void LangVarRef::loadGlobalObj( ParseData *pd, CodeVect &code, 
+void LangVarRef::loadGlobalObj( Compiler *pd, CodeVect &code, 
 		int lastPtrInQual, bool forWriting ) const
 {
 	/* Start the search in the global object. */
@@ -606,21 +606,21 @@ void LangVarRef::loadGlobalObj( ParseData *pd, CodeVect &code,
 	loadQualification( pd, code, rootObj, lastPtrInQual, forWriting, true );
 }
 
-void LangVarRef::loadCustom( ParseData *pd, CodeVect &code, 
+void LangVarRef::loadCustom( Compiler *pd, CodeVect &code, 
 		int lastPtrInQual, bool forWriting ) const
 {
 	/* Start the search in the local frame. */
 	loadQualification( pd, code, pd->curLocalFrame, lastPtrInQual, forWriting, true );
 }
 
-void LangVarRef::loadLocalObj( ParseData *pd, CodeVect &code, 
+void LangVarRef::loadLocalObj( Compiler *pd, CodeVect &code, 
 		int lastPtrInQual, bool forWriting ) const
 {
 	/* Start the search in the local frame. */
 	loadQualification( pd, code, pd->curLocalFrame, lastPtrInQual, forWriting, false );
 }
 
-bool LangVarRef::isLocalRef( ParseData *pd ) const
+bool LangVarRef::isLocalRef( Compiler *pd ) const
 {
 	if ( qual->length() > 0 ) {
 		if ( pd->curLocalFrame->findField( qual->data[0].data ) != 0 )
@@ -634,7 +634,7 @@ bool LangVarRef::isLocalRef( ParseData *pd ) const
 	return false;
 }
 
-bool LangVarRef::isContextRef( ParseData *pd ) const
+bool LangVarRef::isContextRef( Compiler *pd ) const
 {
 	if ( pd->context != 0 ) {
 		if ( qual->length() > 0 ) {
@@ -650,7 +650,7 @@ bool LangVarRef::isContextRef( ParseData *pd ) const
 	return false;
 }
 
-bool LangVarRef::isCustom( ParseData *pd ) const
+bool LangVarRef::isCustom( Compiler *pd ) const
 {
 	if ( qual->length() > 0 ) {
 		ObjField *field = pd->curLocalFrame->findField( qual->data[0].data );
@@ -673,7 +673,7 @@ bool LangVarRef::isCustom( ParseData *pd ) const
 	return false;
 }
 
-void LangVarRef::loadObj( ParseData *pd, CodeVect &code, 
+void LangVarRef::loadObj( Compiler *pd, CodeVect &code, 
 		int lastPtrInQual, bool forWriting ) const
 {
 	if ( isCustom( pd ) )
@@ -686,7 +686,7 @@ void LangVarRef::loadObj( ParseData *pd, CodeVect &code,
 		loadGlobalObj( pd, code, lastPtrInQual, forWriting );
 }
 
-VarRefLookup LangVarRef::lookupQualification( ParseData *pd, ObjectDef *rootDef ) const
+VarRefLookup LangVarRef::lookupQualification( Compiler *pd, ObjectDef *rootDef ) const
 {
 	int lastPtrInQual = -1;
 	ObjectDef *searchObjDef = rootDef;
@@ -733,7 +733,7 @@ VarRefLookup LangVarRef::lookupQualification( ParseData *pd, ObjectDef *rootDef 
 	return VarRefLookup( lastPtrInQual, firstConstPart, searchObjDef );
 }
 
-VarRefLookup LangVarRef::lookupObj( ParseData *pd ) const
+VarRefLookup LangVarRef::lookupObj( Compiler *pd ) const
 {
 	ObjectDef *rootDef;
 	if ( isLocalRef( pd ) )
@@ -746,7 +746,7 @@ VarRefLookup LangVarRef::lookupObj( ParseData *pd ) const
 	return lookupQualification( pd, rootDef );
 }
 
-VarRefLookup LangVarRef::lookupField( ParseData *pd ) const
+VarRefLookup LangVarRef::lookupField( Compiler *pd ) const
 {
 	/* Lookup the object that the field is in. */
 	VarRefLookup lookup = lookupObj( pd );
@@ -766,7 +766,7 @@ VarRefLookup LangVarRef::lookupField( ParseData *pd ) const
 }
 
 
-VarRefLookup LangVarRef::lookupMethod( ParseData *pd ) 
+VarRefLookup LangVarRef::lookupMethod( Compiler *pd ) 
 {
 	/* Lookup the object that the field is in. */
 	VarRefLookup lookup = lookupObj( pd );
@@ -796,7 +796,7 @@ VarRefLookup LangVarRef::lookupMethod( ParseData *pd )
 	return lookup;
 }
 
-void LangVarRef::setFieldInstr( ParseData *pd, CodeVect &code, 
+void LangVarRef::setFieldInstr( Compiler *pd, CodeVect &code, 
 		ObjectDef *inObject, ObjField *el, UniqueType *exprUT, bool revert ) const
 {
 	/* Ensure that the field is referenced. */
@@ -812,7 +812,7 @@ void LangVarRef::setFieldInstr( ParseData *pd, CodeVect &code,
 		code.appendHalf( el->offset );
 }
 
-bool castAssignment( ParseData *pd, CodeVect &code, UniqueType *destUT, 
+bool castAssignment( Compiler *pd, CodeVect &code, UniqueType *destUT, 
 		UniqueType *destSearchUT, UniqueType *srcUT )
 {
 	if ( destUT == srcUT )
@@ -849,7 +849,7 @@ bool castAssignment( ParseData *pd, CodeVect &code, UniqueType *destUT,
 	return false;
 }
 
-void LangVarRef::setField( ParseData *pd, CodeVect &code, 
+void LangVarRef::setField( Compiler *pd, CodeVect &code, 
 		ObjectDef *inObject, UniqueType *exprUT, bool revert ) const
 {
 	ObjField *el = inObject->findField( name );
@@ -859,7 +859,7 @@ void LangVarRef::setField( ParseData *pd, CodeVect &code,
 	setFieldInstr( pd, code, inObject, el, exprUT, revert );
 }
 
-void LangVarRef::setFieldIter( ParseData *pd, CodeVect &code, 
+void LangVarRef::setFieldIter( Compiler *pd, CodeVect &code, 
 		ObjectDef *inObject, UniqueType *objUT, UniqueType *exprType, bool revert ) const
 {
 	ObjField *el = inObject->findField( name );
@@ -870,7 +870,7 @@ void LangVarRef::setFieldIter( ParseData *pd, CodeVect &code,
 	code.appendHalf( el->offset );
 }
 
-UniqueType *LangVarRef::evaluate( ParseData *pd, CodeVect &code, bool forWriting ) const
+UniqueType *LangVarRef::evaluate( Compiler *pd, CodeVect &code, bool forWriting ) const
 {
 	/* Lookup the loadObj. */
 	VarRefLookup lookup = lookupField( pd );
@@ -885,7 +885,7 @@ UniqueType *LangVarRef::evaluate( ParseData *pd, CodeVect &code, bool forWriting
 	return ut;
 }
 
-void LangVarRef::canTakeRef( ParseData *pd, VarRefLookup &lookup ) const
+void LangVarRef::canTakeRef( Compiler *pd, VarRefLookup &lookup ) const
 {
 	bool canTake = false;
 
@@ -906,7 +906,7 @@ void LangVarRef::canTakeRef( ParseData *pd, VarRefLookup &lookup ) const
 }
 
 /* Return the field referenced. */
-ObjField *LangVarRef::preEvaluateRef( ParseData *pd, CodeVect &code ) const
+ObjField *LangVarRef::preEvaluateRef( Compiler *pd, CodeVect &code ) const
 {
 	VarRefLookup lookup = lookupField( pd );
 
@@ -918,7 +918,7 @@ ObjField *LangVarRef::preEvaluateRef( ParseData *pd, CodeVect &code ) const
 }
 
 /* Return the field referenced. */
-ObjField *LangVarRef::evaluateRef( ParseData *pd, CodeVect &code, long pushCount ) const
+ObjField *LangVarRef::evaluateRef( Compiler *pd, CodeVect &code, long pushCount ) const
 {
 	VarRefLookup lookup = lookupField( pd );
 
@@ -956,7 +956,7 @@ ObjField *LangVarRef::evaluateRef( ParseData *pd, CodeVect &code, long pushCount
 	return lookup.objField;
 }
 
-ObjField **LangVarRef::evaluateArgs( ParseData *pd, CodeVect &code, 
+ObjField **LangVarRef::evaluateArgs( Compiler *pd, CodeVect &code, 
 		VarRefLookup &lookup, ExprVect *args ) const
 {
 	/* Parameter list is given only for user defined methods. Otherwise it
@@ -1046,7 +1046,7 @@ ObjField **LangVarRef::evaluateArgs( ParseData *pd, CodeVect &code,
 	return paramRefs;
 }
 
-void LangVarRef::resetActiveRefs( ParseData *pd, VarRefLookup &lookup, ObjField **paramRefs ) const
+void LangVarRef::resetActiveRefs( Compiler *pd, VarRefLookup &lookup, ObjField **paramRefs ) const
 {
 	/* Parameter list is given only for user defined methods. Otherwise it
 	 * will be null. */
@@ -1057,7 +1057,7 @@ void LangVarRef::resetActiveRefs( ParseData *pd, VarRefLookup &lookup, ObjField 
 }
 
 
-void LangVarRef::callOperation( ParseData *pd, CodeVect &code, VarRefLookup &lookup ) const
+void LangVarRef::callOperation( Compiler *pd, CodeVect &code, VarRefLookup &lookup ) const
 {
 	/* This is for writing if it is a non-const builtin. */
 	bool forWriting = lookup.objMethod->func == 0 && 
@@ -1104,7 +1104,7 @@ void LangVarRef::callOperation( ParseData *pd, CodeVect &code, VarRefLookup &loo
 		code.appendHalf( lookup.objMethod->funcId );
 }
 
-void LangVarRef::popRefQuals( ParseData *pd, CodeVect &code, 
+void LangVarRef::popRefQuals( Compiler *pd, CodeVect &code, 
 		VarRefLookup &lookup, ExprVect *args ) const
 {
 	long popCount = 0;
@@ -1130,7 +1130,7 @@ void LangVarRef::popRefQuals( ParseData *pd, CodeVect &code,
 	}
 }
 
-UniqueType *LangVarRef::evaluateCall( ParseData *pd, CodeVect &code, ExprVect *args ) 
+UniqueType *LangVarRef::evaluateCall( Compiler *pd, CodeVect &code, ExprVect *args ) 
 {
 	/* Evaluate the object. */
 	VarRefLookup lookup = lookupMethod( pd );
@@ -1150,7 +1150,7 @@ UniqueType *LangVarRef::evaluateCall( ParseData *pd, CodeVect &code, ExprVect *a
 	return lookup.uniqueType;
 }
 
-UniqueType *LangTerm::evaluateMatch( ParseData *pd, CodeVect &code ) const
+UniqueType *LangTerm::evaluateMatch( Compiler *pd, CodeVect &code ) const
 {
 	/* Add the vars bound by the pattern into the local scope. */
 	for ( PatternItemList::Iter item = *pattern->list; item.lte(); item++ ) {
@@ -1185,7 +1185,7 @@ UniqueType *LangTerm::evaluateMatch( ParseData *pd, CodeVect &code ) const
 	return ut;
 }
 
-UniqueType *LangTerm::evaluateNew( ParseData *pd, CodeVect &code ) const
+UniqueType *LangTerm::evaluateNew( Compiler *pd, CodeVect &code ) const
 {
 	/* Evaluate the expression. */
 	UniqueType *ut = expr->evaluate( pd, code );
@@ -1196,7 +1196,7 @@ UniqueType *LangTerm::evaluateNew( ParseData *pd, CodeVect &code ) const
 	return pd->findUniqueType( TYPE_PTR, ut->langEl );
 }
 
-void LangTerm::assignFieldArgs( ParseData *pd, CodeVect &code, UniqueType *replUT ) const
+void LangTerm::assignFieldArgs( Compiler *pd, CodeVect &code, UniqueType *replUT ) const
 {
 	/* Now assign the field initializations. Note that we need to do this in
 	 * reverse because the last expression evaluated is at the top of the
@@ -1226,7 +1226,7 @@ void LangTerm::assignFieldArgs( ParseData *pd, CodeVect &code, UniqueType *replU
 	}
 }
 
-UniqueType *LangTerm::evaluateConstruct( ParseData *pd, CodeVect &code ) const
+UniqueType *LangTerm::evaluateConstruct( Compiler *pd, CodeVect &code ) const
 {
 	/* Evaluate the initialization expressions. */
 	if ( fieldInitArgs != 0 && fieldInitArgs->length() > 0 ) {
@@ -1288,7 +1288,7 @@ UniqueType *LangTerm::evaluateConstruct( ParseData *pd, CodeVect &code ) const
 	return replUT;
 }
 
-UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) const
+UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool stop ) const
 {
 	UniqueType *ut = typeRef->uniqueType;
 	assert( ut != 0 );
@@ -1428,7 +1428,7 @@ UniqueType *LangTerm::evaluateParse( ParseData *pd, CodeVect &code, bool stop ) 
 	return ut;
 }
 
-UniqueType *LangTerm::evaluateEmbedString( ParseData *pd, CodeVect &code ) const
+UniqueType *LangTerm::evaluateEmbedString( Compiler *pd, CodeVect &code ) const
 {
 	/* Assign bind ids to the variables in the replacement. */
 	for ( ReplItemList::Iter item = *replItemList; item.lte(); item++ ) {
@@ -1473,7 +1473,7 @@ UniqueType *LangTerm::evaluateEmbedString( ParseData *pd, CodeVect &code ) const
 	return pd->uniqueTypeStr;
 }
 
-UniqueType *LangTerm::evaluate( ParseData *pd, CodeVect &code ) const
+UniqueType *LangTerm::evaluate( Compiler *pd, CodeVect &code ) const
 {
 	switch ( type ) {
 		case VarRefType:
@@ -1554,7 +1554,7 @@ UniqueType *LangTerm::evaluate( ParseData *pd, CodeVect &code ) const
 	return 0;
 }
 
-UniqueType *LangExpr::evaluate( ParseData *pd, CodeVect &code ) const
+UniqueType *LangExpr::evaluate( Compiler *pd, CodeVect &code ) const
 {
 	switch ( type ) {
 		case BinaryType: {
@@ -1756,7 +1756,7 @@ UniqueType *LangExpr::evaluate( ParseData *pd, CodeVect &code ) const
 	return 0;
 }
 
-void LangVarRef::assignValue( ParseData *pd, CodeVect &code, 
+void LangVarRef::assignValue( Compiler *pd, CodeVect &code, 
 		UniqueType *exprUT ) const
 {
 	/* Lookup the left hand side of the assignment. */
@@ -1794,9 +1794,9 @@ void LangVarRef::assignValue( ParseData *pd, CodeVect &code,
 		setField( pd, code, lookup.inObject, exprUT, revert );
 }
 
-UniqueType *LangTerm::evaluateMakeToken( ParseData *pd, CodeVect &code ) const
+UniqueType *LangTerm::evaluateMakeToken( Compiler *pd, CodeVect &code ) const
 {
-//	if ( pd->compileContext != ParseData::CompileTranslation )
+//	if ( pd->compileContext != Compiler::CompileTranslation )
 //		error(loc) << "make_token can be used only in a translation block" << endp;
 
 	/* Match the number of arguments. */
@@ -1822,9 +1822,9 @@ UniqueType *LangTerm::evaluateMakeToken( ParseData *pd, CodeVect &code ) const
 	return pd->uniqueTypeAny;
 }
 
-UniqueType *LangTerm::evaluateMakeTree( ParseData *pd, CodeVect &code ) const
+UniqueType *LangTerm::evaluateMakeTree( Compiler *pd, CodeVect &code ) const
 {
-	if ( pd->compileContext != ParseData::CompileTranslation )
+	if ( pd->compileContext != Compiler::CompileTranslation )
 		error(loc) << "make_tree can be used only in a translation block" << endp;
 
 	/* Match the number of arguments. */
@@ -1847,7 +1847,7 @@ UniqueType *LangTerm::evaluateMakeTree( ParseData *pd, CodeVect &code ) const
 	return pd->uniqueTypeAny;
 }
 
-void LangStmt::compileForIterBody( ParseData *pd, 
+void LangStmt::compileForIterBody( Compiler *pd, 
 		CodeVect &code, UniqueType *iterUT ) const
 {
 	/* Remember the top of the loop. */
@@ -1909,7 +1909,7 @@ void LangStmt::compileForIterBody( ParseData *pd,
 	/* Clean up any prepush args. */
 }
 
-LangTerm *LangStmt::chooseDefaultIter( ParseData *pd, LangTerm *fromVarRef ) const
+LangTerm *LangStmt::chooseDefaultIter( Compiler *pd, LangTerm *fromVarRef ) const
 {
 	/* Lookup the lang term and decide what iterator to use based
 	 * on its type. */
@@ -1943,7 +1943,7 @@ LangTerm *LangStmt::chooseDefaultIter( ParseData *pd, LangTerm *fromVarRef ) con
 	return callLangTerm;
 }
 
-void LangStmt::compileForIter( ParseData *pd, CodeVect &code ) const
+void LangStmt::compileForIter( Compiler *pd, CodeVect &code ) const
 {
 	pd->curLocalFrame->iterPushScope();
 
@@ -2007,7 +2007,7 @@ void LangStmt::compileForIter( ParseData *pd, CodeVect &code ) const
 	pd->curLocalFrame->iterPopScope();
 }
 
-void LangStmt::compileWhile( ParseData *pd, CodeVect &code ) const
+void LangStmt::compileWhile( Compiler *pd, CodeVect &code ) const
 {
 	pd->curLocalFrame->iterPushScope();
 
@@ -2044,7 +2044,7 @@ void LangStmt::compileWhile( ParseData *pd, CodeVect &code ) const
 	pd->curLocalFrame->iterPopScope();
 }
 
-void LangStmt::evaluateParserItems( ParseData *pd, CodeVect &code ) const
+void LangStmt::evaluateParserItems( Compiler *pd, CodeVect &code ) const
 {
 	varRef->evaluate( pd, code );
 
@@ -2117,7 +2117,7 @@ void LangStmt::evaluateParserItems( ParseData *pd, CodeVect &code ) const
 	code.append( IN_POP );
 }
 
-void LangStmt::compile( ParseData *pd, CodeVect &code ) const
+void LangStmt::compile( Compiler *pd, CodeVect &code ) const
 {
 	switch ( type ) {
 		case PrintType: 
@@ -2285,13 +2285,13 @@ void LangStmt::compile( ParseData *pd, CodeVect &code ) const
 	}
 }
 
-void CodeBlock::compile( ParseData *pd, CodeVect &code ) const
+void CodeBlock::compile( Compiler *pd, CodeVect &code ) const
 {
 	for ( StmtList::Iter stmt = *stmtList; stmt.lte(); stmt++ )
 		stmt->compile( pd, code );
 }
 
-void ParseData::addMatchLength( ObjectDef *frame, LangEl *lel )
+void Compiler::addMatchLength( ObjectDef *frame, LangEl *lel )
 {
 	/* Make the type ref. */
 	TypeRef *typeRef = new TypeRef( InputLoc(), uniqueTypeInt );
@@ -2306,7 +2306,7 @@ void ParseData::addMatchLength( ObjectDef *frame, LangEl *lel )
 	frame->insertField( el->name, el );
 }
 
-void ParseData::addMatchText( ObjectDef *frame, LangEl *lel )
+void Compiler::addMatchText( ObjectDef *frame, LangEl *lel )
 {
 	/* Make the type ref. */
 	TypeRef *typeRef = new TypeRef( InputLoc(), uniqueTypeStr );
@@ -2321,7 +2321,7 @@ void ParseData::addMatchText( ObjectDef *frame, LangEl *lel )
 	frame->insertField( el->name, el );
 }
 
-void ParseData::addInput( ObjectDef *frame )
+void Compiler::addInput( ObjectDef *frame )
 {
 	/* Make the type ref. */
 	TypeRef *typeRef = new TypeRef( InputLoc(), uniqueTypeInput );
@@ -2339,7 +2339,7 @@ void ParseData::addInput( ObjectDef *frame )
 	frame->insertField( el->name, el );
 }
 
-void ParseData::addCtx( ObjectDef *frame )
+void Compiler::addCtx( ObjectDef *frame )
 {
 	/* Make the type ref. */
 	TypeRef *typeRef = new TypeRef( InputLoc(), uniqueTypeStream );
@@ -2357,7 +2357,7 @@ void ParseData::addCtx( ObjectDef *frame )
 	frame->insertField( el->name, el );
 }
 
-void ParseData::initFieldInstructions( ObjField *el )
+void Compiler::initFieldInstructions( ObjField *el )
 {
 	el->inGetR =   IN_GET_FIELD_R;
 	el->inGetWC =  IN_GET_FIELD_WC;
@@ -2366,21 +2366,21 @@ void ParseData::initFieldInstructions( ObjField *el )
 	el->inSetWV =  IN_SET_FIELD_WV;
 }
 
-void ParseData::initLocalInstructions( ObjField *el )
+void Compiler::initLocalInstructions( ObjField *el )
 {
 	el->inGetR =   IN_GET_LOCAL_R;
 	el->inGetWC =  IN_GET_LOCAL_WC;
 	el->inSetWC =  IN_SET_LOCAL_WC;
 }
 
-void ParseData::initLocalRefInstructions( ObjField *el )
+void Compiler::initLocalRefInstructions( ObjField *el )
 {
 	el->inGetR =   IN_GET_LOCAL_REF_R;
 	el->inGetWC =  IN_GET_LOCAL_REF_WC;
 	el->inSetWC =  IN_SET_LOCAL_REF_WC;
 }
 
-void ParseData::initIntObject( )
+void Compiler::initIntObject( )
 {
 	intObj = new ObjectDef( ObjectDef::BuiltinType, "int", nextObjectId++ );
 	intLangEl->objectDef = intObj;
@@ -2390,7 +2390,7 @@ void ParseData::initIntObject( )
 
 /* Add a constant length field to the object. 
  * Opcode supplied by the caller. */
-void ParseData::addLengthField( ObjectDef *objDef, Code getLength )
+void Compiler::addLengthField( ObjectDef *objDef, Code getLength )
 {
 	/* Create the "length" field. */
 	TypeRef *typeRef = new TypeRef( InputLoc(), uniqueTypeInt );
@@ -2404,7 +2404,7 @@ void ParseData::addLengthField( ObjectDef *objDef, Code getLength )
 	objDef->insertField( el->name, el );
 }
 
-void ParseData::initStrObject( )
+void Compiler::initStrObject( )
 {
 	strObj = new ObjectDef( ObjectDef::BuiltinType, "str", nextObjectId++ );
 	strLangEl->objectDef = strObj;
@@ -2422,14 +2422,14 @@ void ParseData::initStrObject( )
 			IN_SPRINTF, IN_SPRINTF, uniqueTypeStr, uniqueTypeInt, true );
 }
 
-void ParseData::initStreamObject( )
+void Compiler::initStreamObject( )
 {
 	streamObj = new ObjectDef( ObjectDef::BuiltinType,
 			"stream", nextObjectId++ );
 	streamLangEl->objectDef = streamObj;
 }
 
-void ParseData::initInputObject( )
+void Compiler::initInputObject( )
 {
 	inputObj = new ObjectDef( ObjectDef::BuiltinType,
 			"accum_stream", nextObjectId++ );
@@ -2443,7 +2443,7 @@ void ParseData::initInputObject( )
 			IN_INPUT_PUSH_IGNORE_WV, IN_INPUT_PUSH_IGNORE_WV, uniqueTypeAny, false );
 }
 
-ObjField *ParseData::makeDataEl()
+ObjField *Compiler::makeDataEl()
 {
 	/* Create the "data" field. */
 	TypeRef *typeRef = new TypeRef( InputLoc(), uniqueTypeStr );
@@ -2461,7 +2461,7 @@ ObjField *ParseData::makeDataEl()
 	return el;
 }
 
-ObjField *ParseData::makePosEl()
+ObjField *Compiler::makePosEl()
 {
 	/* Create the "data" field. */
 	TypeRef *typeRef = new TypeRef( InputLoc(), uniqueTypeInt );
@@ -2478,7 +2478,7 @@ ObjField *ParseData::makePosEl()
 	return el;
 }
 
-ObjField *ParseData::makeLineEl()
+ObjField *Compiler::makeLineEl()
 {
 	/* Create the "data" field. */
 	TypeRef *typeRef = new TypeRef( InputLoc(), uniqueTypeInt );
@@ -2495,7 +2495,7 @@ ObjField *ParseData::makeLineEl()
 	return el;
 }
 
-void ParseData::initTokenObjects( )
+void Compiler::initTokenObjects( )
 {
 	/* Make a default object Definition. */
 	tokenObj = new ObjectDef( ObjectDef::BuiltinType, "token", nextObjectId++ );
@@ -2531,7 +2531,7 @@ void ParseData::initTokenObjects( )
 	}
 }
 
-void ParseData::findLocalTrees( CharSet &trees )
+void Compiler::findLocalTrees( CharSet &trees )
 {
 	/* We exlcude "lhs" from being downrefed because we need to use if after
 	 * the frame is is cleaned and so it must survive. */
@@ -2547,7 +2547,7 @@ void ParseData::findLocalTrees( CharSet &trees )
 	}
 }
 
-void ParseData::makeProdCopies( Definition *prod )
+void Compiler::makeProdCopies( Definition *prod )
 {
 	int pos = 0;
 	for ( ProdElList::Iter pel = *prod->prodElList; pel.lte(); pel++, pos++) {
@@ -2558,7 +2558,7 @@ void ParseData::makeProdCopies( Definition *prod )
 	}
 }
 
-void ParseData::compileReductionCode( Definition *prod )
+void Compiler::compileReductionCode( Definition *prod )
 {
 	CodeBlock *block = prod->redBlock;
 
@@ -2596,7 +2596,7 @@ void ParseData::compileReductionCode( Definition *prod )
 	findLocalTrees( block->trees );
 }
 
-void ParseData::compileTranslateBlock( LangEl *langEl )
+void Compiler::compileTranslateBlock( LangEl *langEl )
 {
 	CodeBlock *block = langEl->transBlock;
 
@@ -2642,7 +2642,7 @@ void ParseData::compileTranslateBlock( LangEl *langEl )
 	findLocalTrees( block->trees );
 }
 
-void ParseData::compilePreEof( TokenRegion *region )
+void Compiler::compilePreEof( TokenRegion *region )
 {
 	CodeBlock *block = region->preEofBlock;
 
@@ -2676,7 +2676,7 @@ void ParseData::compilePreEof( TokenRegion *region )
 	findLocalTrees( block->trees );
 }
 
-void ParseData::compileRootBlock( )
+void Compiler::compileRootBlock( )
 {
 	CodeBlock *block = rootCodeBlock;
 
@@ -2714,7 +2714,7 @@ void ParseData::compileRootBlock( )
 	findLocalTrees( block->trees );
 }
 
-void ParseData::initAllLanguageObjects()
+void Compiler::initAllLanguageObjects()
 {
 	/* Init all user object fields (need consistent size). */
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
@@ -2731,7 +2731,7 @@ void ParseData::initAllLanguageObjects()
 		globalObjectDef->initField( this, f->value );
 }
 
-void ParseData::initMapFunctions( GenericType *gen )
+void Compiler::initMapFunctions( GenericType *gen )
 {
 	addLengthField( gen->objDef, IN_MAP_LENGTH );
 	initFunction( gen->utArg, gen->objDef, "find", 
@@ -2744,7 +2744,7 @@ void ParseData::initMapFunctions( GenericType *gen )
 			IN_MAP_REMOVE_WV, IN_MAP_REMOVE_WC, gen->keyUT, false );
 }
 
-void ParseData::initListFunctions( GenericType *gen )
+void Compiler::initListFunctions( GenericType *gen )
 {
 	addLengthField( gen->objDef, IN_LIST_LENGTH );
 
@@ -2759,7 +2759,7 @@ void ParseData::initListFunctions( GenericType *gen )
 			IN_LIST_REMOVE_END_WV, IN_LIST_REMOVE_END_WC, false );
 }
 
-void ParseData::initListField( GenericType *gen, const char *name, int offset )
+void Compiler::initListField( GenericType *gen, const char *name, int offset )
 {
 	/* Make the type ref and create the field. */
 	TypeRef *typeRef = new TypeRef( InputLoc(), gen->utArg );
@@ -2781,14 +2781,14 @@ void ParseData::initListField( GenericType *gen, const char *name, int offset )
 	el->offset = offset;
 }
 
-void ParseData::initListFields( GenericType *gen )
+void Compiler::initListFields( GenericType *gen )
 {
 	initListField( gen, "head", 0 );
 	initListField( gen, "tail", 1 );
 	initListField( gen, "top", 1 );
 }
 
-void ParseData::initVectorFunctions( GenericType *gen )
+void Compiler::initVectorFunctions( GenericType *gen )
 {
 	addLengthField( gen->objDef, IN_VECTOR_LENGTH );
 	initFunction( uniqueTypeInt, gen->objDef, "append", 
@@ -2797,13 +2797,13 @@ void ParseData::initVectorFunctions( GenericType *gen )
 			IN_VECTOR_INSERT_WV, IN_VECTOR_INSERT_WC, uniqueTypeInt, gen->utArg, false );
 }
 
-void ParseData::initParserFunctions( GenericType *gen )
+void Compiler::initParserFunctions( GenericType *gen )
 {
 	initFunction( gen->utArg, gen->objDef, "finish", 
 			IN_PARSE_FINISH_WV, IN_PARSE_FINISH_WC, true );
 }
 
-void ParseData::initCtxField( GenericType *gen )
+void Compiler::initCtxField( GenericType *gen )
 {
 	LangEl *langEl = gen->utArg->langEl;
 	Context *context = langEl->contextIn;
@@ -2826,14 +2826,14 @@ void ParseData::initCtxField( GenericType *gen )
 	el->beenInitialized = true;
 }
 
-void ParseData::initParserFields( GenericType *gen )
+void Compiler::initParserFields( GenericType *gen )
 {
 	LangEl *langEl = gen->utArg->langEl;
 	if ( langEl->contextIn != 0 )
 		initCtxField( gen );
 }
 
-void ParseData::initGenericTypes()
+void Compiler::initGenericTypes()
 {
 	for ( NamespaceList::Iter ns = namespaceList; ns.lte(); ns++ ) {
 		for ( GenericList::Iter gen = ns->genericList; gen.lte(); gen++ ) {
@@ -2869,7 +2869,7 @@ void ParseData::initGenericTypes()
 	}
 }
 
-void ParseData::makeFuncVisible( Function *func, bool isUserIter )
+void Compiler::makeFuncVisible( Function *func, bool isUserIter )
 {
 	func->localFrame = func->codeBlock->localFrame;
 
@@ -2937,7 +2937,7 @@ void ParseData::makeFuncVisible( Function *func, bool isUserIter )
 	globalObjectDef->objMethodMap->insert( func->name, objMethod );
 }
 
-void ParseData::compileUserIter( Function *func, CodeVect &code )
+void Compiler::compileUserIter( Function *func, CodeVect &code )
 {
 	CodeBlock *block = func->codeBlock;
 
@@ -2963,7 +2963,7 @@ void ParseData::compileUserIter( Function *func, CodeVect &code )
 	}
 }
 
-void ParseData::compileUserIter( Function *func )
+void Compiler::compileUserIter( Function *func )
 {
 	CodeBlock *block = func->codeBlock;
 
@@ -2990,7 +2990,7 @@ void ParseData::compileUserIter( Function *func )
 }
 
 /* Called for each type of function compile: revert and commit. */
-void ParseData::compileFunction( Function *func, CodeVect &code )
+void Compiler::compileFunction( Function *func, CodeVect &code )
 {
 	CodeBlock *block = func->codeBlock;
 
@@ -3029,7 +3029,7 @@ void ParseData::compileFunction( Function *func, CodeVect &code )
 	code.append( IN_RET );
 }
 
-void ParseData::compileFunction( Function *func )
+void Compiler::compileFunction( Function *func )
 {
 	CodeBlock *block = func->codeBlock;
 
@@ -3056,7 +3056,7 @@ void ParseData::compileFunction( Function *func )
 	findLocalTrees( block->trees );
 }
 
-void ParseData::makeDefaultIterators()
+void Compiler::makeDefaultIterators()
 {
 	/* Tree iterator. */
 	{
@@ -3109,7 +3109,7 @@ void ParseData::makeDefaultIterators()
 	}
 }
 
-void ParseData::addStdin()
+void Compiler::addStdin()
 {
 	/* Make the type ref. */
 	TypeRef *typeRef = new TypeRef( InputLoc(), uniqueTypeStream );
@@ -3124,7 +3124,7 @@ void ParseData::addStdin()
 	globalObjectDef->insertField( el->name, el );
 }
 
-void ParseData::addStdout()
+void Compiler::addStdout()
 {
 	/* Make the type ref. */
 	TypeRef *typeRef = new TypeRef( InputLoc(), uniqueTypeStr );
@@ -3139,7 +3139,7 @@ void ParseData::addStdout()
 	globalObjectDef->insertField( el->name, el );
 }
 
-void ParseData::addStderr()
+void Compiler::addStderr()
 {
 	/* Make the type ref. */
 	TypeRef *typeRef = new TypeRef( InputLoc(), uniqueTypeStr );
@@ -3154,7 +3154,7 @@ void ParseData::addStderr()
 	globalObjectDef->insertField( el->name, el );
 }
 
-void ParseData::addArgv()
+void Compiler::addArgv()
 {
 	/* Create the field and insert it into the map. */
 	ObjField *el = new ObjField( InputLoc(), argvTypeRef, "argv" );
@@ -3163,7 +3163,7 @@ void ParseData::addArgv()
 	globalObjectDef->insertField( el->name, el );
 }
 
-int ParseData::argvOffset()
+int Compiler::argvOffset()
 {
 	for ( ObjFieldList::Iter field = *globalObjectDef->objFieldList;
 			field.lte(); field++ )
@@ -3176,7 +3176,7 @@ int ParseData::argvOffset()
 	assert(false);
 }
 
-void ParseData::initGlobalFunctions()
+void Compiler::initGlobalFunctions()
 {
 	ObjMethod *method;
 
@@ -3204,7 +3204,7 @@ void ParseData::initGlobalFunctions()
 	addArgv();
 }
 
-void ParseData::removeNonUnparsableRepls()
+void Compiler::removeNonUnparsableRepls()
 {
 	for ( ReplList::Iter repl = replList; repl.lte(); ) {
 		Replacement *maybeDel = repl++;
@@ -3213,7 +3213,7 @@ void ParseData::removeNonUnparsableRepls()
 	}
 }
 
-void ParseData::compileByteCode()
+void Compiler::compileByteCode()
 {
 //	initUniqueTypes();
 	initIntObject();

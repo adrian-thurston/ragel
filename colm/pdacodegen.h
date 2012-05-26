@@ -23,11 +23,11 @@
 #ifndef _PDACODEGEN_H
 #define _PDACODEGEN_H
 
-struct ParseData;
+struct Compiler;
 
 struct PdaCodeGen
 {
-	PdaCodeGen( const char *fileName, const char *parserName, ParseData *pd, ostream &out )
+	PdaCodeGen( const char *fileName, const char *parserName, Compiler *pd, ostream &out )
 	:
 		fileName(fileName),
 		parserName(parserName),
@@ -99,7 +99,7 @@ struct PdaCodeGen
 
 	const char *fileName;
 	const char *parserName;
-	ParseData *pd;
+	Compiler *pd;
 	ostream &out;
 };
 

@@ -77,7 +77,7 @@ int countTransitions( FsmGraph *fsm )
 	return numTrans;
 }
 
-Key makeFsmKeyHex( char *str, const InputLoc &loc, ParseData *pd )
+Key makeFsmKeyHex( char *str, const InputLoc &loc, Compiler *pd )
 {
 	/* Reset errno so we can check for overflow or underflow. In the event of
 	 * an error, sets the return val to the upper or lower bound being tested
@@ -99,7 +99,7 @@ Key makeFsmKeyHex( char *str, const InputLoc &loc, ParseData *pd )
 	return Key( (long)ul );
 }
 
-Key makeFsmKeyDec( char *str, const InputLoc &loc, ParseData *pd )
+Key makeFsmKeyDec( char *str, const InputLoc &loc, Compiler *pd )
 {
 	/* Convert the number to a decimal. First reset errno so we can check
 	 * for overflow or underflow. */
@@ -129,7 +129,7 @@ Key makeFsmKeyDec( char *str, const InputLoc &loc, ParseData *pd )
 /* Make an fsm key in int format (what the fsm graph uses) from an alphabet
  * number returned by the parser. Validates that the number doesn't overflow
  * the alphabet type. */
-Key makeFsmKeyNum( char *str, const InputLoc &loc, ParseData *pd )
+Key makeFsmKeyNum( char *str, const InputLoc &loc, Compiler *pd )
 {
 	/* Switch on hex/decimal format. */
 	if ( str[0] == '0' && str[1] == 'x' )
@@ -141,7 +141,7 @@ Key makeFsmKeyNum( char *str, const InputLoc &loc, ParseData *pd )
 /* Make an fsm int format (what the fsm graph uses) from a single character.
  * Performs proper conversion depending on signed/unsigned property of the
  * alphabet. */
-Key makeFsmKeyChar( char c, ParseData *pd )
+Key makeFsmKeyChar( char c, Compiler *pd )
 {
 	if ( keyOps->isSigned ) {
 		/* Copy from a char type. */
@@ -156,7 +156,7 @@ Key makeFsmKeyChar( char c, ParseData *pd )
 /* Make an fsm key array in int format (what the fsm graph uses) from a string
  * of characters. Performs proper conversion depending on signed/unsigned
  * property of the alphabet. */
-void makeFsmKeyArray( Key *result, char *data, int len, ParseData *pd )
+void makeFsmKeyArray( Key *result, char *data, int len, Compiler *pd )
 {
 	if ( keyOps->isSigned ) {
 		/* Copy from a char star type. */
@@ -175,7 +175,7 @@ void makeFsmKeyArray( Key *result, char *data, int len, ParseData *pd )
 /* Like makeFsmKeyArray except the result has only unique keys. They ordering
  * will be changed. */
 void makeFsmUniqueKeyArray( KeySet &result, char *data, int len, 
-		bool caseInsensitive, ParseData *pd )
+		bool caseInsensitive, Compiler *pd )
 {
 	/* Use a transitions list for getting unique keys. */
 	if ( keyOps->isSigned ) {
@@ -208,14 +208,14 @@ void makeFsmUniqueKeyArray( KeySet &result, char *data, int len,
 	}
 }
 
-FsmGraph *dotFsm( ParseData *pd )
+FsmGraph *dotFsm( Compiler *pd )
 {
 	FsmGraph *retFsm = new FsmGraph();
 	retFsm->rangeFsm( keyOps->minKey, keyOps->maxKey );
 	return retFsm;
 }
 
-FsmGraph *dotStarFsm( ParseData *pd )
+FsmGraph *dotStarFsm( Compiler *pd )
 {
 	FsmGraph *retFsm = new FsmGraph();
 	retFsm->rangeStarFsm( keyOps->minKey, keyOps->maxKey );
@@ -223,7 +223,7 @@ FsmGraph *dotStarFsm( ParseData *pd )
 }
 
 /* Make a builtin type. Depends on the signed nature of the alphabet type. */
-FsmGraph *makeBuiltin( BuiltinMachine builtin, ParseData *pd )
+FsmGraph *makeBuiltin( BuiltinMachine builtin, Compiler *pd )
 {
 	/* FsmGraph created to return. */
 	FsmGraph *retFsm = 0;
@@ -391,12 +391,12 @@ bool NameInst::anyRefsRec()
 }
 
 /*
- * ParseData
+ * Compiler
  */
 
 /* Initialize the structure that will collect info during the parse of a
  * machine. */
-ParseData::ParseData( const String &fileName, const String &sectionName, 
+Compiler::Compiler( const String &fileName, const String &sectionName, 
 			const InputLoc &sectionLoc, ostream &out )
 :	
 	nextPriorKey(0),
@@ -447,7 +447,7 @@ ParseData::ParseData( const String &fileName, const String &sectionName,
 }
 
 /* Clean up the data collected during a parse. */
-ParseData::~ParseData()
+Compiler::~Compiler()
 {
 	/* Delete all the nodes in the action list. Will cause all the
 	 * string data that represents the actions to be deallocated. */
@@ -456,7 +456,7 @@ ParseData::~ParseData()
 
 /* Make a name id in the current name instantiation scope if it is not
  * already there. */
-NameInst *ParseData::addNameInst( const InputLoc &loc, char *data, bool isLabel )
+NameInst *Compiler::addNameInst( const InputLoc &loc, char *data, bool isLabel )
 {
 	/* Create the name instantitaion object and insert it. */
 	NameInst *newNameInst = new NameInst( loc, curNameInst, data, nextNameId++, isLabel );
@@ -466,7 +466,7 @@ NameInst *ParseData::addNameInst( const InputLoc &loc, char *data, bool isLabel 
 	return newNameInst;
 }
 
-void ParseData::initNameWalk( NameInst *rootName )
+void Compiler::initNameWalk( NameInst *rootName )
 {
 	curNameInst = rootName;
 	curNameChild = 0;
@@ -477,7 +477,7 @@ void ParseData::initNameWalk( NameInst *rootName )
  * properly. It is reset on entry into a scope and advanced on poping of a
  * scope. A call to enterNameScope should be accompanied by a corresponding
  * popNameScope. */
-NameFrame ParseData::enterNameScope( bool isLocal, int numScopes )
+NameFrame Compiler::enterNameScope( bool isLocal, int numScopes )
 {
 	/* Save off the current data. */
 	NameFrame retFrame;
@@ -500,7 +500,7 @@ NameFrame ParseData::enterNameScope( bool isLocal, int numScopes )
 /* Return from a child scope to a parent. The parent info must be specified as
  * an argument and is obtained from the corresponding call to enterNameScope.
  * */
-void ParseData::popNameScope( const NameFrame &frame )
+void Compiler::popNameScope( const NameFrame &frame )
 {
 	/* Pop the name scope. */
 	curNameInst = frame.prevNameInst;
@@ -508,7 +508,7 @@ void ParseData::popNameScope( const NameFrame &frame )
 	localNameScope = frame.prevLocalScope;
 }
 
-void ParseData::resetNameScope( const NameFrame &frame )
+void Compiler::resetNameScope( const NameFrame &frame )
 {
 	/* Pop the name scope. */
 	curNameInst = frame.prevNameInst;
@@ -517,7 +517,7 @@ void ParseData::resetNameScope( const NameFrame &frame )
 }
 
 
-void ParseData::unsetObsoleteEntries( FsmGraph *graph )
+void Compiler::unsetObsoleteEntries( FsmGraph *graph )
 {
 	/* Loop the reference names and increment the usage. Names that are no
 	 * longer needed will be unset in graph. */
@@ -534,7 +534,7 @@ void ParseData::unsetObsoleteEntries( FsmGraph *graph )
 	}
 }
 
-NameSet ParseData::resolvePart( NameInst *refFrom, const char *data, bool recLabelsOnly )
+NameSet Compiler::resolvePart( NameInst *refFrom, const char *data, bool recLabelsOnly )
 {
 	/* Queue needed for breadth-first search, load it with the start node. */
 	NameInstList nameQueue;
@@ -565,7 +565,7 @@ NameSet ParseData::resolvePart( NameInst *refFrom, const char *data, bool recLab
 	return result;
 }
 
-void ParseData::resolveFrom( NameSet &result, NameInst *refFrom, 
+void Compiler::resolveFrom( NameSet &result, NameInst *refFrom, 
 		const NameRef &nameRef, int namePos )
 {
 	/* Look for the name in the owning scope of the factor with aug. */
@@ -658,7 +658,7 @@ void errorStateLabels( const NameSet &resolved )
 }
 
 
-void ParseData::referenceRegions( NameInst *rootName )
+void Compiler::referenceRegions( NameInst *rootName )
 {
 	for ( NameVect::Iter inst = rootName->childVect; inst.lte(); inst++ ) {
 		/* Inc the reference in the name. This will cause the entry point to
@@ -668,7 +668,7 @@ void ParseData::referenceRegions( NameInst *rootName )
 }
 
 /* Walk a name tree starting at from and fill the name index. */
-void ParseData::fillNameIndex( NameInst **nameIndex, NameInst *from )
+void Compiler::fillNameIndex( NameInst **nameIndex, NameInst *from )
 {
 	/* Fill the value for from in the name index. */
 	nameIndex[from->id] = from;
@@ -680,7 +680,7 @@ void ParseData::fillNameIndex( NameInst **nameIndex, NameInst *from )
 		fillNameIndex( nameIndex, *name );
 }
 
-NameInst **ParseData::makeNameIndex( NameInst *rootName )
+NameInst **Compiler::makeNameIndex( NameInst *rootName )
 {
 	/* The number of nodes in the tree can now be given by nextNameId. Put a
 	 * null pointer on the end of the list to terminate it. */
@@ -690,7 +690,7 @@ NameInst **ParseData::makeNameIndex( NameInst *rootName )
 	return nameIndex;
 }
 
-void ParseData::createBuiltin( const char *name, BuiltinMachine builtin )
+void Compiler::createBuiltin( const char *name, BuiltinMachine builtin )
 {
 	Expression *expression = new Expression( builtin );
 	Join *join = new Join( expression );
@@ -701,7 +701,7 @@ void ParseData::createBuiltin( const char *name, BuiltinMachine builtin )
 }
 
 /* Initialize the graph dict with builtin types. */
-void ParseData::initGraphDict( )
+void Compiler::initGraphDict( )
 {
 	createBuiltin( "any", BT_Any );
 	createBuiltin( "ascii", BT_Ascii );
@@ -724,7 +724,7 @@ void ParseData::initGraphDict( )
 
 /* Initialize the key operators object that will be referenced by all fsms
  * created. */
-void ParseData::initKeyOps( )
+void Compiler::initKeyOps( )
 {
 	/* Signedness and bounds. */
 	HostType *alphType = alphTypeSet ? userAlphType : hostLang->defaultAlphType;
@@ -740,7 +740,7 @@ void ParseData::initKeyOps( )
 	thisCondData.nextCondKey.increment();
 }
 
-void ParseData::printNameInst( NameInst *nameInst, int level )
+void Compiler::printNameInst( NameInst *nameInst, int level )
 {
 	for ( int i = 0; i < level; i++ )
 		cerr << "  ";
@@ -752,7 +752,7 @@ void ParseData::printNameInst( NameInst *nameInst, int level )
 }
 
 /* Remove duplicates of unique actions from an action table. */
-void ParseData::removeDups( ActionTable &table )
+void Compiler::removeDups( ActionTable &table )
 {
 	/* Scan through the table looking for unique actions to 
 	 * remove duplicates of. */
@@ -770,7 +770,7 @@ void ParseData::removeDups( ActionTable &table )
 /* Remove duplicates from action lists. This operates only on transition and
  * eof action lists and so should be called once all actions have been
  * transfered to their final resting place. */
-void ParseData::removeActionDups( FsmGraph *graph )
+void Compiler::removeActionDups( FsmGraph *graph )
 {
 	/* Loop all states. */
 	for ( StateList::Iter state = graph->stateList; state.lte(); state++ ) {
@@ -783,7 +783,7 @@ void ParseData::removeActionDups( FsmGraph *graph )
 	}
 }
 
-Action *ParseData::newAction( const String &name, InlineList *inlineList )
+Action *Compiler::newAction( const String &name, InlineList *inlineList )
 {
 	InputLoc loc;
 	loc.line = 1;
@@ -795,7 +795,7 @@ Action *ParseData::newAction( const String &name, InlineList *inlineList )
 	return action;
 }
 
-void ParseData::initLongestMatchData()
+void Compiler::initLongestMatchData()
 {
 	if ( regionList.length() > 0 ) {
 		/* The initActId action gives act a default value. */
@@ -824,7 +824,7 @@ void ParseData::initLongestMatchData()
 	}
 }
 
-void ParseData::finishGraphBuild( FsmGraph *graph )
+void Compiler::finishGraphBuild( FsmGraph *graph )
 {
 	/* Resolve any labels that point to multiple states. Any labels that are
 	 * still around are referenced only by gotos and calls and they need to be
@@ -860,7 +860,7 @@ void ParseData::finishGraphBuild( FsmGraph *graph )
 	graph->compressTransitions();
 }
 
-void ParseData::printNameTree( NameInst *rootName )
+void Compiler::printNameTree( NameInst *rootName )
 {
 	/* Print the name instance map. */
 	cerr << "name tree:" << endl;
@@ -868,7 +868,7 @@ void ParseData::printNameTree( NameInst *rootName )
 		printNameInst( *name, 0 );
 }
 
-void ParseData::printNameIndex( NameInst **nameIndex )
+void Compiler::printNameIndex( NameInst **nameIndex )
 {
 	/* The name index is terminated with a null pointer. */
 	cerr << "name index:" << endl;
@@ -880,7 +880,7 @@ void ParseData::printNameIndex( NameInst **nameIndex )
 }
 
 /* Build the name tree and supporting data structures. */
-NameInst *ParseData::makeJoinNameTree( Join *join )
+NameInst *Compiler::makeJoinNameTree( Join *join )
 {
 	/* Create the root name. */
 	nextNameId = 0;
@@ -895,7 +895,7 @@ NameInst *ParseData::makeJoinNameTree( Join *join )
 
 
 /* Build the name tree and supporting data structures. */
-NameInst *ParseData::makeNameTree()
+NameInst *Compiler::makeNameTree()
 {
 	/* Create the root name. */
 	nextNameId = 0;
@@ -912,7 +912,7 @@ NameInst *ParseData::makeNameTree()
 }
 
 
-FsmGraph *ParseData::makeJoin( Join *join )
+FsmGraph *Compiler::makeJoin( Join *join )
 {
 	/* Build the name tree and supporting data structures. */
 	NameInst *rootName = makeJoinNameTree( join );
@@ -937,7 +937,7 @@ FsmGraph *ParseData::makeJoin( Join *join )
 	return newGraph;
 }
 
-FsmGraph *ParseData::makeAllRegions()
+FsmGraph *Compiler::makeAllRegions()
 {
 	/* Build the name tree and supporting data structures. */
 	NameInst *rootName = makeNameTree( );
@@ -988,7 +988,7 @@ FsmGraph *ParseData::makeAllRegions()
 	return all;
 }
 
-void ParseData::analyzeAction( Action *action, InlineList *inlineList )
+void Compiler::analyzeAction( Action *action, InlineList *inlineList )
 {
 	/* FIXME: Actions used as conditions should be very constrained. */
 	for ( InlineList::Iter item = *inlineList; item.lte(); item++ ) {
@@ -1018,7 +1018,7 @@ void ParseData::analyzeAction( Action *action, InlineList *inlineList )
 	}
 }
 
-void ParseData::analyzeGraph( FsmGraph *graph )
+void Compiler::analyzeGraph( FsmGraph *graph )
 {
 	for ( ActionList::Iter act = actionList; act.lte(); act++ )
 		analyzeAction( act, act->inlineList );
@@ -1046,7 +1046,7 @@ void ParseData::analyzeGraph( FsmGraph *graph )
 	}
 }
 
-FsmGraph *ParseData::makeFsmGraph( Join *join )
+FsmGraph *Compiler::makeFsmGraph( Join *join )
 {
 	/* Make the graph, do minimization. */
 	FsmGraph *fsmGraph = join != 0 ? makeJoin( join ) : makeAllRegions();
@@ -1078,7 +1078,7 @@ FsmGraph *ParseData::makeFsmGraph( Join *join )
 	return fsmGraph;
 }
 
-void ParseData::createDefaultScanner()
+void Compiler::createDefaultScanner()
 {
 	InputLoc loc = { 0, 0, 0 };
 
@@ -1119,7 +1119,7 @@ void ParseData::createDefaultScanner()
 	defaultCharLangEl->tokenDef = tokenDef;
 }
 
-LangEl *ParseData::makeRepeatProd( Namespace *nspace, const String &repeatName, 
+LangEl *Compiler::makeRepeatProd( Namespace *nspace, const String &repeatName, 
 		NamespaceQual *nspaceQual, const String &name )
 {
 	LangEl *prodName = addLangEl( this, nspace, repeatName, LangEl::NonTerm );
@@ -1160,7 +1160,7 @@ LangEl *ParseData::makeRepeatProd( Namespace *nspace, const String &repeatName,
 	return prodName;
 }
 
-LangEl *ParseData::makeListProd( Namespace *nspace, const String &listName, NamespaceQual *nspaceQual, const String &name )
+LangEl *Compiler::makeListProd( Namespace *nspace, const String &listName, NamespaceQual *nspaceQual, const String &name )
 {
 	LangEl *prodName = addLangEl( this, nspace, listName, LangEl::NonTerm );
 	prodName->isList = true;
@@ -1203,7 +1203,7 @@ LangEl *ParseData::makeListProd( Namespace *nspace, const String &listName, Name
 	return prodName;
 }
 
-LangEl *ParseData::makeOptProd( Namespace *nspace, const String &optName, NamespaceQual *nspaceQual, const String &name )
+LangEl *Compiler::makeOptProd( Namespace *nspace, const String &optName, NamespaceQual *nspaceQual, const String &name )
 {
 	LangEl *prodName = addLangEl( this, nspace, optName, LangEl::NonTerm );
 	prodName->isOpt = true;
@@ -1262,7 +1262,7 @@ Namespace *NamespaceQual::searchFrom( Namespace *from, StringVect::Iter &qualPar
 	return from;
 }
 
-Namespace *NamespaceQual::getQual( ParseData *pd )
+Namespace *NamespaceQual::getQual( Compiler *pd )
 {
 	/* Do the search only once. */
 	if ( cachedNspaceQual != 0 )
@@ -1307,7 +1307,7 @@ Namespace *NamespaceQual::getQual( ParseData *pd )
 	return cachedNspaceQual;
 }
 
-void ParseData::initEmptyScanners()
+void Compiler::initEmptyScanners()
 {
 	for ( RegionList::Iter reg = regionList; reg.lte(); reg++ ) {
 		if ( reg->tokenDefList.length() == 0 ) {
@@ -1334,7 +1334,7 @@ void ParseData::initEmptyScanners()
 }
 
 
-void ParseData::parsePatterns()
+void Compiler::parsePatterns()
 {
 	Program *prg = colmNewProgram( runtimeData, 0, 0 );
 
@@ -1401,7 +1401,7 @@ void ParseData::parsePatterns()
 	fillInPatterns( prg );
 }
 
-void ParseData::collectParserEls( BstSet<LangEl*> &parserEls )
+void Compiler::collectParserEls( BstSet<LangEl*> &parserEls )
 {
 	for ( PatternList::Iter pat = patternList; pat.lte(); pat++ ) {
 		/* We assume the reduction action compilation phase was run before
@@ -1437,7 +1437,7 @@ void ParseData::collectParserEls( BstSet<LangEl*> &parserEls )
 }
 
 
-void ParseData::generateOutput()
+void Compiler::generateOutput()
 {
 	FsmCodeGen *fsmGen = new FsmCodeGen("<INPUT>", sectionName,
 			*outStream, redFsm, fsmTables );

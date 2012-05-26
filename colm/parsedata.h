@@ -53,7 +53,7 @@ void operator<<( std::ostream &out, exit_object & );
 /* Forwards. */
 struct RedFsm;
 struct LangEl;
-struct ParseData;
+struct Compiler;
 struct PdaCodeGen;
 struct FsmCodeGen;
 
@@ -324,7 +324,7 @@ struct ProdEl
 
 struct ProdElList : public DList<ProdEl>
 {
-	PdaGraph *walk( ParseData *pd, Definition *prod );
+	PdaGraph *walk( Compiler *pd, Definition *prod );
 };
 
 /* This should be renamed. It is a literal string in a type reference. */
@@ -516,13 +516,13 @@ struct NameFrame
 
 /* Class to collect information about the machine during the 
  * parse of input. */
-struct ParseData
+struct Compiler
 {
 	/* Create a new parse data object. This is done at the beginning of every
 	 * fsm specification. */
-	ParseData( const String &fileName, const String &sectionName, 
+	Compiler( const String &fileName, const String &sectionName, 
 			const InputLoc &sectionLoc, ostream &out );
-	~ParseData();
+	~Compiler();
 
 	/*
 	 * Setting up the graph dict.
@@ -1040,16 +1040,16 @@ struct ParseData
 };
 
 void afterOpMinimize( FsmGraph *fsm, bool lastInSeq = true );
-Key makeFsmKeyHex( char *str, const InputLoc &loc, ParseData *pd );
-Key makeFsmKeyDec( char *str, const InputLoc &loc, ParseData *pd );
-Key makeFsmKeyNum( char *str, const InputLoc &loc, ParseData *pd );
-Key makeFsmKeyChar( char c, ParseData *pd );
-void makeFsmKeyArray( Key *result, char *data, int len, ParseData *pd );
+Key makeFsmKeyHex( char *str, const InputLoc &loc, Compiler *pd );
+Key makeFsmKeyDec( char *str, const InputLoc &loc, Compiler *pd );
+Key makeFsmKeyNum( char *str, const InputLoc &loc, Compiler *pd );
+Key makeFsmKeyChar( char c, Compiler *pd );
+void makeFsmKeyArray( Key *result, char *data, int len, Compiler *pd );
 void makeFsmUniqueKeyArray( KeySet &result, char *data, int len, 
-		bool caseInsensitive, ParseData *pd );
-FsmGraph *makeBuiltin( BuiltinMachine builtin, ParseData *pd );
-FsmGraph *dotFsm( ParseData *pd );
-FsmGraph *dotStarFsm( ParseData *pd );
+		bool caseInsensitive, Compiler *pd );
+FsmGraph *makeBuiltin( BuiltinMachine builtin, Compiler *pd );
+FsmGraph *dotFsm( Compiler *pd );
+FsmGraph *dotStarFsm( Compiler *pd );
 
 void errorStateLabels( const NameSet &locations );
 
@@ -1058,9 +1058,9 @@ struct ColmParser;
 typedef AvlMap<String, ColmParser *, CmpStr> ParserDict;
 typedef AvlMapEl<String, ColmParser *> ParserDictEl;
 
-LangEl *declareLangEl( ParseData *pd, Namespace *nspace, const String &data, LangEl::Type type );
-LangEl *addLangEl( ParseData *pd, Namespace *nspace, const String &data, LangEl::Type type );
-void declareTypeAlias( ParseData *pd, Namespace *nspace, const String &data, TypeRef *typeRef );
-LangEl *findType( ParseData *pd, Namespace *nspace, const String &data );
+LangEl *declareLangEl( Compiler *pd, Namespace *nspace, const String &data, LangEl::Type type );
+LangEl *addLangEl( Compiler *pd, Namespace *nspace, const String &data, LangEl::Type type );
+void declareTypeAlias( Compiler *pd, Namespace *nspace, const String &data, TypeRef *typeRef );
+LangEl *findType( Compiler *pd, Namespace *nspace, const String &data );
 
 #endif /* _PARSEDATA_H */

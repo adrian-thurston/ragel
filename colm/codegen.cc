@@ -35,7 +35,7 @@ using std::string;
 using std::cerr;
 using std::endl;
 
-void ParseData::openNameSpace( ostream &out, Namespace *nspace )
+void Compiler::openNameSpace( ostream &out, Namespace *nspace )
 {
 	if ( nspace == defaultNamespace || nspace == rootNamespace )
 		return;
@@ -44,7 +44,7 @@ void ParseData::openNameSpace( ostream &out, Namespace *nspace )
 	out << "namespace " << nspace->name << " { ";
 }
 
-void ParseData::closeNameSpace( ostream &out, Namespace *nspace )
+void Compiler::closeNameSpace( ostream &out, Namespace *nspace )
 {
 	if ( nspace == defaultNamespace || nspace == rootNamespace )
 		return;
@@ -53,7 +53,7 @@ void ParseData::closeNameSpace( ostream &out, Namespace *nspace )
 	out << " }";
 }
 
-void ParseData::generateExports()
+void Compiler::generateExports()
 {
 	ostream &out = *outStream;
 
@@ -200,7 +200,7 @@ void ParseData::generateExports()
 	out << "#endif\n";
 }
 
-void ParseData::generateExportsImpl()
+void Compiler::generateExportsImpl()
 {
 	ostream &out = *outStream;
 

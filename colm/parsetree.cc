@@ -180,7 +180,7 @@ int CmpUniqueParser::compare( const UniqueParser &ut1, const UniqueParser &ut2 )
 	return 0;
 }
 
-FsmGraph *VarDef::walk( ParseData *pd )
+FsmGraph *VarDef::walk( Compiler *pd )
 {
 	/* We enter into a new name scope. */
 	NameFrame nameFrame = pd->enterNameScope( true, 1 );
@@ -214,7 +214,7 @@ FsmGraph *VarDef::walk( ParseData *pd )
 	return rtnVal;
 }
 
-void VarDef::makeNameTree( const InputLoc &loc, ParseData *pd )
+void VarDef::makeNameTree( const InputLoc &loc, Compiler *pd )
 {
 	/* The variable definition enters a new scope. */
 	NameInst *prevNameInst = pd->curNameInst;
@@ -230,7 +230,7 @@ void VarDef::makeNameTree( const InputLoc &loc, ParseData *pd )
 	pd->curNameInst = prevNameInst;
 }
 
-void VarDef::resolveNameRefs( ParseData *pd )
+void VarDef::resolveNameRefs( Compiler *pd )
 {
 	/* Entering into a new scope. */
 	NameFrame nameFrame = pd->enterNameScope( true, 1 );
@@ -257,7 +257,7 @@ InputLoc TokenDef::getLoc()
  *  4. start state of all longest match routines.
  */
 
-Action *TokenRegion::newAction( ParseData *pd, const InputLoc &loc, 
+Action *TokenRegion::newAction( Compiler *pd, const InputLoc &loc, 
 		const String &name, InlineList *inlineList )
 {
 	Action *action = new Action( loc, name, inlineList );
@@ -266,7 +266,7 @@ Action *TokenRegion::newAction( ParseData *pd, const InputLoc &loc,
 	return action;
 }
 
-void TokenRegion::makeActions( ParseData *pd )
+void TokenRegion::makeActions( Compiler *pd )
 {
 	/* Make actions that set the action id. */
 	for ( TokenDefListReg::Iter lmi = tokenDefList; lmi.lte(); lmi++ ) {
@@ -329,7 +329,7 @@ void TokenRegion::makeActions( ParseData *pd )
 	lmActSelect = newAction( pd, loc, "lagsel", il6 );
 }
 
-void TokenRegion::findName( ParseData *pd )
+void TokenRegion::findName( Compiler *pd )
 {
 	NameInst *nameInst = pd->curNameInst;
 	while ( nameInst->name == 0 ) {
@@ -341,7 +341,7 @@ void TokenRegion::findName( ParseData *pd )
 	name = nameInst->name;
 }
 
-void TokenRegion::makeNameTree( ParseData *pd )
+void TokenRegion::makeNameTree( Compiler *pd )
 {
 	/* Create an anonymous scope for the longest match. Will be used for
 	 * restarting machine after matching a token. */
@@ -372,7 +372,7 @@ void TokenRegion::makeNameTree( ParseData *pd )
 	pd->curNameInst = prevNameInst;
 }
 
-void TokenRegion::resolveNameRefs( ParseData *pd )
+void TokenRegion::resolveNameRefs( Compiler *pd )
 {
 	/* The longest match gets its own name scope. */
 	NameFrame nameFrame = pd->enterNameScope( true, 1 );
@@ -395,7 +395,7 @@ void TokenRegion::restart( FsmGraph *graph, FsmTrans *trans )
 	graph->attachTrans( fromState, graph->startState, trans );
 }
 
-void TokenRegion::runLongestMatch( ParseData *pd, FsmGraph *graph )
+void TokenRegion::runLongestMatch( Compiler *pd, FsmGraph *graph )
 {
 	graph->markReachableFromHereStopFinal( graph->startState );
 	for ( StateList::Iter ms = graph->stateList; ms.lte(); ms++ ) {
@@ -576,7 +576,7 @@ void TokenRegion::transferScannerLeavingActions( FsmGraph *graph )
 	}
 }
 
-FsmGraph *TokenRegion::walk( ParseData *pd )
+FsmGraph *TokenRegion::walk( Compiler *pd )
 {
 	/* The longest match has it's own name scope. */
 	NameFrame nameFrame = pd->enterNameScope( true, 1 );
@@ -634,7 +634,7 @@ FsmGraph *TokenRegion::walk( ParseData *pd )
 	return retFsm;
 }
 
-FsmGraph *JoinOrLm::walk( ParseData *pd )
+FsmGraph *JoinOrLm::walk( Compiler *pd )
 {
 	FsmGraph *rtnVal = 0;
 	switch ( type ) {
@@ -648,7 +648,7 @@ FsmGraph *JoinOrLm::walk( ParseData *pd )
 	return rtnVal;
 }
 
-void JoinOrLm::makeNameTree( ParseData *pd )
+void JoinOrLm::makeNameTree( Compiler *pd )
 {
 	switch ( type ) {
 	case JoinType:
@@ -660,7 +660,7 @@ void JoinOrLm::makeNameTree( ParseData *pd )
 	}
 }
 
-void JoinOrLm::resolveNameRefs( ParseData *pd )
+void JoinOrLm::resolveNameRefs( Compiler *pd )
 {
 	switch ( type ) {
 	case JoinType:
@@ -683,7 +683,7 @@ Join::Join( Expression *expr )
 }
 
 /* Walk an expression node. */
-FsmGraph *Join::walk( ParseData *pd )
+FsmGraph *Join::walk( Compiler *pd )
 {
 	assert( exprList.length() == 1 );
 
@@ -699,7 +699,7 @@ FsmGraph *Join::walk( ParseData *pd )
 	return retFsm;
 }
 
-void Join::makeNameTree( ParseData *pd )
+void Join::makeNameTree( Compiler *pd )
 {
 	assert( exprList.length() == 1 );
 
@@ -712,7 +712,7 @@ void Join::makeNameTree( ParseData *pd )
 }
 
 
-void Join::resolveNameRefs( ParseData *pd )
+void Join::resolveNameRefs( Compiler *pd )
 {
 	/* Branch on whether or not there is to be a join. */
 	assert( exprList.length() == 1 );
@@ -743,7 +743,7 @@ Expression::~Expression()
 }
 
 /* Evaluate a single expression node. */
-FsmGraph *Expression::walk( ParseData *pd, bool lastInSeq )
+FsmGraph *Expression::walk( Compiler *pd, bool lastInSeq )
 {
 	FsmGraph *rtnVal = 0;
 	switch ( type ) {
@@ -808,7 +808,7 @@ FsmGraph *Expression::walk( ParseData *pd, bool lastInSeq )
 	return rtnVal;
 }
 
-void Expression::makeNameTree( ParseData *pd )
+void Expression::makeNameTree( Compiler *pd )
 {
 	switch ( type ) {
 	case OrType:
@@ -826,7 +826,7 @@ void Expression::makeNameTree( ParseData *pd )
 	}
 }
 
-void Expression::resolveNameRefs( ParseData *pd )
+void Expression::resolveNameRefs( Compiler *pd )
 {
 	switch ( type ) {
 	case OrType:
@@ -862,7 +862,7 @@ Term::~Term()
 }
 
 /* Evaluate a term node. */
-FsmGraph *Term::walk( ParseData *pd, bool lastInSeq )
+FsmGraph *Term::walk( Compiler *pd, bool lastInSeq )
 {
 	FsmGraph *rtnVal = 0;
 	switch ( type ) {
@@ -960,7 +960,7 @@ FsmGraph *Term::walk( ParseData *pd, bool lastInSeq )
 	return rtnVal;
 }
 
-void Term::makeNameTree( ParseData *pd )
+void Term::makeNameTree( Compiler *pd )
 {
 	switch ( type ) {
 	case ConcatType:
@@ -976,7 +976,7 @@ void Term::makeNameTree( ParseData *pd )
 	}
 }
 
-void Term::resolveNameRefs( ParseData *pd )
+void Term::resolveNameRefs( Compiler *pd )
 {
 	switch ( type ) {
 	case ConcatType:
@@ -1004,7 +1004,7 @@ FactorWithAug::~FactorWithAug()
 		delete[] priorDescs;
 }
 
-void FactorWithAug::assignActions( ParseData *pd, FsmGraph *graph, int *actionOrd )
+void FactorWithAug::assignActions( Compiler *pd, FsmGraph *graph, int *actionOrd )
 {
 	/* Assign actions. */
 	for ( int i = 0; i < actions.length(); i++ )  {
@@ -1194,7 +1194,7 @@ void FactorWithAug::assignConditions( FsmGraph *graph )
 
 
 /* Evaluate a factor with augmentation node. */
-FsmGraph *FactorWithAug::walk( ParseData *pd )
+FsmGraph *FactorWithAug::walk( Compiler *pd )
 {
 	/* Enter into the scopes created for the labels. */
 	NameFrame nameFrame = pd->enterNameScope( false, labels.length() );
@@ -1300,7 +1300,7 @@ FsmGraph *FactorWithAug::walk( ParseData *pd )
 	return rtnVal;
 }
 
-void FactorWithAug::makeNameTree( ParseData *pd )
+void FactorWithAug::makeNameTree( Compiler *pd )
 {
 	/* Add the labels to the tree of instantiated names. Each label
 	 * makes a new scope. */
@@ -1314,7 +1314,7 @@ void FactorWithAug::makeNameTree( ParseData *pd )
 }
 
 
-void FactorWithAug::resolveNameRefs( ParseData *pd )
+void FactorWithAug::resolveNameRefs( Compiler *pd )
 {
 	/* Enter into the name scope created by any labels. */
 	NameFrame nameFrame = pd->enterNameScope( false, labels.length() );
@@ -1387,7 +1387,7 @@ FactorWithRep::~FactorWithRep()
 }
 
 /* Evaluate a factor with repetition node. */
-FsmGraph *FactorWithRep::walk( ParseData *pd )
+FsmGraph *FactorWithRep::walk( Compiler *pd )
 {
 	FsmGraph *retFsm = 0;
 
@@ -1628,7 +1628,7 @@ FsmGraph *FactorWithRep::walk( ParseData *pd )
 	return retFsm;
 }
 
-void FactorWithRep::makeNameTree( ParseData *pd )
+void FactorWithRep::makeNameTree( Compiler *pd )
 {
 	switch ( type ) {
 	case StarType:
@@ -1647,7 +1647,7 @@ void FactorWithRep::makeNameTree( ParseData *pd )
 	}
 }
 
-void FactorWithRep::resolveNameRefs( ParseData *pd )
+void FactorWithRep::resolveNameRefs( Compiler *pd )
 {
 	switch ( type ) {
 	case StarType:
@@ -1681,7 +1681,7 @@ FactorWithNeg::~FactorWithNeg()
 }
 
 /* Evaluate a factor with negation node. */
-FsmGraph *FactorWithNeg::walk( ParseData *pd )
+FsmGraph *FactorWithNeg::walk( Compiler *pd )
 {
 	FsmGraph *retFsm = 0;
 
@@ -1714,7 +1714,7 @@ FsmGraph *FactorWithNeg::walk( ParseData *pd )
 	return retFsm;
 }
 
-void FactorWithNeg::makeNameTree( ParseData *pd )
+void FactorWithNeg::makeNameTree( Compiler *pd )
 {
 	switch ( type ) {
 	case NegateType:
@@ -1727,7 +1727,7 @@ void FactorWithNeg::makeNameTree( ParseData *pd )
 	}
 }
 
-void FactorWithNeg::resolveNameRefs( ParseData *pd )
+void FactorWithNeg::resolveNameRefs( Compiler *pd )
 {
 	switch ( type ) {
 	case NegateType:
@@ -1765,7 +1765,7 @@ Factor::~Factor()
 }
 
 /* Evaluate a factor node. */
-FsmGraph *Factor::walk( ParseData *pd )
+FsmGraph *Factor::walk( Compiler *pd )
 {
 	FsmGraph *rtnVal = 0;
 	switch ( type ) {
@@ -1792,7 +1792,7 @@ FsmGraph *Factor::walk( ParseData *pd )
 	return rtnVal;
 }
 
-void Factor::makeNameTree( ParseData *pd )
+void Factor::makeNameTree( Compiler *pd )
 {
 	switch ( type ) {
 	case LiteralType:
@@ -1809,7 +1809,7 @@ void Factor::makeNameTree( ParseData *pd )
 	}
 }
 
-void Factor::resolveNameRefs( ParseData *pd )
+void Factor::resolveNameRefs( Compiler *pd )
 {
 	switch ( type ) {
 	case LiteralType:
@@ -1858,7 +1858,7 @@ bool Range::verifyRangeFsm( FsmGraph *rangeEnd )
 }
 
 /* Evaluate a range. Gets the lower an upper key and makes an fsm range. */
-FsmGraph *Range::walk( ParseData *pd )
+FsmGraph *Range::walk( Compiler *pd )
 {
 	/* Construct and verify the suitability of the lower end of the range. */
 	FsmGraph *lowerFsm = lowerLit->walk( pd );
@@ -1894,7 +1894,7 @@ FsmGraph *Range::walk( ParseData *pd )
 }
 
 /* Evaluate a literal object. */
-FsmGraph *Literal::walk( ParseData *pd )
+FsmGraph *Literal::walk( Compiler *pd )
 {
 	/* FsmGraph to return, is the alphabet signed. */
 	FsmGraph *rtnVal = 0;
@@ -1942,7 +1942,7 @@ RegExpr::~RegExpr()
 }
 
 /* Evaluate a regular expression object. */
-FsmGraph *RegExpr::walk( ParseData *pd, RegExpr *rootRegex )
+FsmGraph *RegExpr::walk( Compiler *pd, RegExpr *rootRegex )
 {
 	/* This is the root regex, pass down a pointer to this. */
 	if ( rootRegex == 0 )
@@ -1986,7 +1986,7 @@ ReItem::~ReItem()
 }
 
 /* Evaluate a regular expression object. */
-FsmGraph *ReItem::walk( ParseData *pd, RegExpr *rootRegex )
+FsmGraph *ReItem::walk( Compiler *pd, RegExpr *rootRegex )
 {
 	/* The fsm to return, is the alphabet signed? */
 	FsmGraph *rtnVal = 0;
@@ -2058,7 +2058,7 @@ ReOrBlock::~ReOrBlock()
 
 
 /* Evaluate an or block of a regular expression. */
-FsmGraph *ReOrBlock::walk( ParseData *pd, RegExpr *rootRegex )
+FsmGraph *ReOrBlock::walk( Compiler *pd, RegExpr *rootRegex )
 {
 	FsmGraph *rtnVal = 0;
 	switch ( type ) {
@@ -2083,7 +2083,7 @@ FsmGraph *ReOrBlock::walk( ParseData *pd, RegExpr *rootRegex )
 }
 
 /* Evaluate an or block item of a regular expression. */
-FsmGraph *ReOrItem::walk( ParseData *pd, RegExpr *rootRegex )
+FsmGraph *ReOrItem::walk( Compiler *pd, RegExpr *rootRegex )
 {
 	/* The return value, is the alphabet signed? */
 	FsmGraph *rtnVal = 0;

@@ -25,7 +25,7 @@
 #include <iostream>
 #include <assert.h>
 
-LangEl *declareLangEl( ParseData *pd, Namespace *nspace, const String &data, LangEl::Type type )
+LangEl *declareLangEl( Compiler *pd, Namespace *nspace, const String &data, LangEl::Type type )
 {
     /* If the id is already in the dict, it will be placed in last found. If
      * it is not there then it will be inserted and last found will be set to it. */
@@ -43,14 +43,14 @@ LangEl *declareLangEl( ParseData *pd, Namespace *nspace, const String &data, Lan
 }
 
 /* Does not map the new language element. */
-LangEl *addLangEl( ParseData *pd, Namespace *nspace, const String &data, LangEl::Type type )
+LangEl *addLangEl( Compiler *pd, Namespace *nspace, const String &data, LangEl::Type type )
 {
 	LangEl *langEl = new LangEl( nspace, data, type );
 	pd->langEls.append( langEl );
 	return langEl;
 }
 
-void declareTypeAlias( ParseData *pd, Namespace *nspace, const String &data, TypeRef *typeRef )
+void declareTypeAlias( Compiler *pd, Namespace *nspace, const String &data, TypeRef *typeRef )
 {
     /* If the id is already in the dict, it will be placed in last found. If
      * it is not there then it will be inserted and last found will be set to it. */
@@ -63,7 +63,7 @@ void declareTypeAlias( ParseData *pd, Namespace *nspace, const String &data, Typ
 	nspace->typeMap.insert( typeMapEl );
 }
 
-LangEl *findType( ParseData *pd, Namespace *nspace, const String &data )
+LangEl *findType( Compiler *pd, Namespace *nspace, const String &data )
 {
 	/* If the id is already in the dict, it will be placed in last found. If
 	 * it is not there then it will be inserted and last found will be set to it. */
@@ -76,7 +76,7 @@ LangEl *findType( ParseData *pd, Namespace *nspace, const String &data )
 }
 
 
-void ParseData::declareBaseLangEls()
+void Compiler::declareBaseLangEls()
 {
 	/* Order here is important because we make assumptions about the inbuild
 	 * language elements in the runtime. Note tokens are have identifiers set
@@ -107,7 +107,7 @@ void ParseData::declareBaseLangEls()
 }
 
 
-void ParseData::addProdRedObjectVar( ObjectDef *localFrame, LangEl *nonTerm )
+void Compiler::addProdRedObjectVar( ObjectDef *localFrame, LangEl *nonTerm )
 {
 	UniqueType *prodNameUT = findUniqueType( TYPE_TREE, nonTerm );
 	TypeRef *typeRef = new TypeRef( InputLoc(), prodNameUT );
@@ -120,7 +120,7 @@ void ParseData::addProdRedObjectVar( ObjectDef *localFrame, LangEl *nonTerm )
 	localFrame->insertField( el->name, el );
 }
 
-void ParseData::addProdLHSLoad( Definition *prod, CodeVect &code, long &insertPos )
+void Compiler::addProdLHSLoad( Definition *prod, CodeVect &code, long &insertPos )
 {
 	ObjField *lhsField = prod->redBlock->localFrame->findField("lhs");
 	assert( lhsField != 0 );
@@ -135,7 +135,7 @@ void ParseData::addProdLHSLoad( Definition *prod, CodeVect &code, long &insertPo
 	insertPos += loads.length();
 }
 
-void ParseData::addPushBackLHS( Definition *prod, CodeVect &code, long &insertPos )
+void Compiler::addPushBackLHS( Definition *prod, CodeVect &code, long &insertPos )
 {
 	CodeBlock *block = prod->redBlock;
 
@@ -152,7 +152,7 @@ void ParseData::addPushBackLHS( Definition *prod, CodeVect &code, long &insertPo
 	}
 }
 
-void ParseData::addProdRHSVars( ObjectDef *localFrame, ProdElList *prodElList )
+void Compiler::addProdRHSVars( ObjectDef *localFrame, ProdElList *prodElList )
 {
 	long position = 1;
 	for ( ProdElList::Iter rhsEl = *prodElList; rhsEl.lte(); rhsEl++, position++ ) {
@@ -175,7 +175,7 @@ void ParseData::addProdRHSVars( ObjectDef *localFrame, ProdElList *prodElList )
 	}
 }
 
-void ParseData::addProdRHSLoads( Definition *prod, CodeVect &code, long &insertPos )
+void Compiler::addProdRHSLoads( Definition *prod, CodeVect &code, long &insertPos )
 {
 	CodeVect loads;
 	long elPos = 0;
@@ -194,7 +194,7 @@ void ParseData::addProdRHSLoads( Definition *prod, CodeVect &code, long &insertP
 	insertPos += loads.length();
 }
 
-void GenericType::declare( ParseData *pd, Namespace *nspace )
+void GenericType::declare( Compiler *pd, Namespace *nspace )
 {
 	//std::cout << "generic " << g->name << std::endl;
 
@@ -222,7 +222,7 @@ void GenericType::declare( ParseData *pd, Namespace *nspace )
 	this->langEl = langEl;
 }
 
-void Namespace::declare( ParseData *pd )
+void Namespace::declare( Compiler *pd )
 {
 	for ( GenericList::Iter g = genericList; g.lte(); g++ )
 		g->declare( pd, this );
@@ -347,7 +347,7 @@ void Namespace::declare( ParseData *pd )
 		(*c)->declare( pd );
 }
 
-void ParseData::setPrecedence()
+void Compiler::setPrecedence()
 {
 	for ( PredDeclList::Iter predDecl = predDeclList; predDecl != 0; predDecl++ ) {
 		predDecl->typeRef->lookupType( this );
@@ -361,7 +361,7 @@ void ParseData::setPrecedence()
 /*
  * Type Declaration Root.
  */
-void ParseData::typeDeclaration()
+void Compiler::typeDeclaration()
 {
 	/* These must be declared first, since the runtime assumes their identifiers. */
 	declareBaseLangEls();
