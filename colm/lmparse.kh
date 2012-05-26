@@ -30,6 +30,10 @@
 
 struct ColmParser
 {
+	ColmParser( ParseData *pd, const char *fileName, const char *sectionName, const InputLoc &sectionLoc )
+		: pd(pd), sectionName(sectionName), enterRl(false)
+	{}
+
 	%%{
 	parser ColmParser;
 
@@ -68,14 +72,10 @@ struct ColmParser
 
 	%% write instance_data;
 
+
 	void init();
 	int parseLangEl( int type, const Token *token );
 
-	ColmParser( const char *fileName, const char *sectionName, const InputLoc &sectionLoc )
-		: sectionName(sectionName), enterRl(false)
-	{
-		pd = new ParseData( fileName, sectionName, sectionLoc, std::cout );
-	}
 
 	int token( InputLoc &loc, int tokId, char *tokstart, int toklen );
 	void addRegularDef( const InputLoc &loc, Namespace *nspace, 

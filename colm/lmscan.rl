@@ -45,12 +45,12 @@ using std::endl;
 	write data;
 }%%
 
-void Scanner::sectionParseInit()
+void ColmScanner::sectionParseInit()
 {
 	%% write init;
 }
 
-ostream &Scanner::scan_error()
+ostream &ColmScanner::scan_error()
 {
 	/* Maintain the error count. */
 	gblErrorCount += 1;
@@ -58,7 +58,7 @@ ostream &Scanner::scan_error()
 	return cerr;
 }
 
-bool Scanner::recursiveInclude( const char *inclFileName )
+bool ColmScanner::recursiveInclude( const char *inclFileName )
 {
 	for ( IncludeStack::Iter si = includeStack; si.lte(); si++ ) {
 		if ( strcmp( si->fileName, inclFileName ) == 0 )
@@ -67,7 +67,7 @@ bool Scanner::recursiveInclude( const char *inclFileName )
 	return false;	
 }
 
-void Scanner::updateCol()
+void ColmScanner::updateCol()
 {
 	char *from = lastnl;
 	if ( from == 0 )
@@ -77,12 +77,12 @@ void Scanner::updateCol()
 	lastnl = 0;
 }
 
-void Scanner::token( int type, char c )
+void ColmScanner::token( int type, char c )
 {
 	token( type, &c, &c + 1 );
 }
 
-void Scanner::token( int type )
+void ColmScanner::token( int type )
 {
 	token( type, 0, 0 );
 }
@@ -92,7 +92,7 @@ bool isAbsolutePath( const char *path )
 	return path[0] == '/';
 }
 
-ifstream *Scanner::tryOpenInclude( char **pathChecks, long &found )
+ifstream *ColmScanner::tryOpenInclude( char **pathChecks, long &found )
 {
 	char **check = pathChecks;
 	ifstream *inFile = new ifstream;
@@ -111,7 +111,7 @@ ifstream *Scanner::tryOpenInclude( char **pathChecks, long &found )
 	return 0;
 }
 
-char **Scanner::makeIncludePathChecks( const char *thisFileName, const char *fileName )
+char **ColmScanner::makeIncludePathChecks( const char *thisFileName, const char *fileName )
 {
 	char **checks = 0;
 	long nextCheck = 0;
@@ -199,7 +199,7 @@ char **Scanner::makeIncludePathChecks( const char *thisFileName, const char *fil
 			 * name then check if what we are including is already in the stack. */
 			includeStack.append( IncludeStackItem( checks[found] ) );
 
-			Scanner scanner( fileName, *inFile, output, parser, includeDepth+1 );
+			ColmScanner scanner( fileName, *inFile, output, parser, includeDepth+1 );
 			scanner.scan();
 			delete inFile;
 
@@ -253,7 +253,7 @@ char **Scanner::makeIncludePathChecks( const char *thisFileName, const char *fil
 	)*;
 }%%
 
-void Scanner::token( int type, char *start, char *end )
+void ColmScanner::token( int type, char *start, char *end )
 {
 	char *tokdata = 0;
 	int toklen = 0;
@@ -276,7 +276,7 @@ void Scanner::token( int type, char *start, char *end )
 	updateCol();
 }
 
-void Scanner::endSection( )
+void ColmScanner::endSection( )
 {
 	/* Execute the eof actions for the section parser. */
 	/* Probably use: token( -1 ); */
@@ -546,7 +546,7 @@ void Scanner::endSection( )
 
 %% write data;
 
-void Scanner::scan()
+void ColmScanner::scan()
 {
 	int bufsize = 8;
 	char *buf = new char[bufsize];
@@ -624,7 +624,7 @@ void Scanner::scan()
 	delete[] buf;
 }
 
-void Scanner::eof()
+void ColmScanner::eof()
 {
 	InputLoc loc;
 	loc.fileName = "<EOF>";

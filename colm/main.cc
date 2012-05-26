@@ -567,28 +567,31 @@ int main(int argc, const char **argv)
 	if ( gblErrorCount > 0 )
 		exit(1);
 
+	ParseData *pd = new ParseData( inputFileName, "machine", InputLoc(), std::cout );
+	ColmParser *parser = new ColmParser( pd, inputFileName, "machine", InputLoc() );
+	ColmScanner *scanner = new ColmScanner( inputFileName, *inStream, cout, parser, 0 );
 
-	Scanner scanner( inputFileName, *inStream, cout, 0, 0 );
-	scanner.scan();
-	scanner.eof();
+	parser->init();
+	scanner->scan();
+	scanner->eof();
 
 	/* Parsing complete, check for errors.. */
 	if ( gblErrorCount > 0 )
 		return 1;
 
 	/* Initiate a compile following a parse. */
-	scanner.parser->pd->semanticAnalysis();
+	pd->semanticAnalysis();
 
 	/*
 	 * Write output.
 	 */
 	if ( generateGraphviz ) {
 		outStream = &cout;
-		scanner.parser->pd->writeDotFile();
+		pd->writeDotFile();
 	}
 	else {
 		openOutput();
-		scanner.parser->pd->generateOutput();
+		pd->generateOutput();
 	
 		if ( outStream != 0 )
 			delete outStream;
@@ -602,15 +605,19 @@ int main(int argc, const char **argv)
 
 		if ( gblExportTo != 0 )  {
 			openExports();
-			scanner.parser->pd->generateExports();
+			pd->generateExports();
 			delete outStream;
 		}
 		if ( gblExpImplTo != 0 )  {
 			openExportsImpl();
-			scanner.parser->pd->generateExportsImpl();
+			scanner->parser->pd->generateExportsImpl();
 			delete outStream;
 		}
 	}
+
+	delete scanner;
+	delete parser;
+	delete pd;
 
 	return 0;
 }

@@ -57,23 +57,18 @@ typedef Vector<const char *> ArgsVector;
 
 extern ArgsVector includePaths;
 
-struct Scanner
+struct ColmScanner
 {
-	Scanner( const char *fileName, istream &input, 
-			ostream &output, ColmParser *includeToParser, int includeDepth )
+	ColmScanner( const char *fileName, istream &input, 
+			ostream &output, ColmParser *parser, int includeDepth )
 	: 
 		fileName(fileName), input(input), output(output),
 		includeDepth(includeDepth),
 		line(1), column(1), lastnl(0), 
+		parser(parser),
 		parserExistsError(false),
 		whitespaceOn(true)
 	{
-		if ( includeToParser != 0 )
-			parser = includeToParser;
-		else {
-			parser = new ColmParser( fileName, "machine", InputLoc() );
-			parser->init();
-		}
 	}
 
 	ifstream *tryOpenInclude( char **pathChecks, long &found );
