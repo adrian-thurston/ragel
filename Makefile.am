@@ -1,6 +1,6 @@
-TESTS = runtests.mk
+TESTS = runtests.sh
 
-TEST_CASES = \
+EXTRA_DIST = runtests.sh \
 	ambig1.lm \
 	backtrack1.lm \
 	backtrack2.lm \
@@ -79,9 +79,7 @@ TEST_CASES = \
 	concat2.lm \
 	ignore1.lm \
 	ignore2.lm \
-	ignore3.lm
-
-INPUT = \
+	ignore3.lm \
 	ambig1.in \
 	accum1.in \
 	accum2.in \
@@ -147,9 +145,7 @@ INPUT = \
 	concat2.in \
 	ignore1.in \
 	ignore2.in \
-	ignore3.in
-
-EXPECTED_OUTPUT = \
+	ignore3.in \
 	ambig1.exp \
 	accum1.exp \
 	accum2.exp \
@@ -229,5 +225,3 @@ EXPECTED_OUTPUT = \
 	ignore1.exp \
 	ignore2.exp \
 	ignore3.exp
-
-EXTRA_DIST = genmf TESTS runtests.mk $(TEST_CASES) $(INPUT) $(EXPECTED_OUTPUT)
