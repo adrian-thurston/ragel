@@ -24,11 +24,12 @@ lex ATTR_NAME
 	literal '='
 }
 
+literal '>', '/>'
+
 # Scanner for attribute values.
 lex ATTR_VAL
 {
 	ignore  /space+/
-	literal '>', '/>'
 	token dquote_val /'"' ([^"] | '\\' any)* '"'/
 	token squote_val /"'" ([^'] | '\\' any)* "'"/
 	token unq_val /[^ \t\r\n<>"'] [^ \t\r\n<>]*/
@@ -44,7 +45,7 @@ lex START
 
 	literal '<', '</', '<!DOCTYPE'
 	token close_tag 
-		/'</' [\t ]* id: [a-zA-Z]+ '>'/
+		/'</' [\t ]* [a-zA-Z]+ '>'/
 
 	token doc_data /[^<]+/
   	token comment /'<!--' any* :>> '-->'/
@@ -54,10 +55,10 @@ lex START
 # Tags
 #
 
-bool inTagStack( str id )
+bool inTagStack( id: str )
 {
-	tag_stack LocalTagStack = TagStack
-	for Tag:tag_id in LocalTagStack {
+	LocalTagStack: tag_stack = TagStack
+	for Tag: tag_id in LocalTagStack {
 		if id == Tag.data
 			return true
 	}
@@ -78,29 +79,29 @@ lex close_id
 	{
 		# If it is in the tag stack then it is a close_id. If not then it's a
 		# stray_close_id.
-		int send_id = typeid stray_close_id
+		send_id: int = typeid<stray_close_id>
 
 		if ( inTagStack( match_text ) ) {
-			print( 'CLOSE \'', match_text, '\' IN TAG STACK\n' )
+			print( 'CLOSE \'' match_text '\' IN TAG STACK\n' )
 
 			# The tag is in the stack, send missing close tags until we get to it.
 			match TagStack [Top:tag_id Rest:tag_stack] 
 			TagStack = Rest
 			while ( Top.data != match_text ) {
 				print( 'SENDING missing close\n' )
-				send( make_token( typeid missing_close_id, '' ) )
+				input.push( make_token( typeid<missing_close_id> '' ) )
 				match TagStack [Top2:tag_id Rest2:tag_stack] 
 				Top = Top2
 				TagStack = Rest2
 			}
 
 			print( 'SENDING close\n' )
-			send( make_token( typeid close_id, pull( stdin, match_length ) ) )
+			input.push( make_token( typeid<close_id> input.pull( match_length ) ) )
 		}
 		else {
-			print( 'CLOSE \'', match_text, '\' NOT IN TAG STACK\n' )
+			print( 'CLOSE \'' match_text '\' NOT IN TAG STACK\n' )
 			# The tag is not in the tag stack so send the id as a stray close.
-			send( make_token( typeid stray_close, pull( stdin, match_length ) ) )
+			input.push( make_token( typeid<stray_close> input.pull( match_length ) ) )
 		}
 	}
 }
@@ -113,7 +114,7 @@ def tag_stack
 	[tag_id tag_stack]
 |	[]
 
-global tag_stack TagStack = construct tag_stack []
+global TagStack: tag_stack = construct tag_stack []
 
 #
 # Document Type
@@ -210,13 +211,13 @@ def start
 # END GRAMMAR
 #
 
-int addDefaultAltTags( ref start Start )
+int addDefaultAltTags( Start: ref start )
 {
 	for T: open_tag in Start {
 		require T 
 			["<img" AttrList: attr* '>']
 		
-		bool haveAlt = false
+		haveAlt: bool = false
 		for A: attr in T {
 			if match A ["alt=" attr_val]
 				haveAlt = true
@@ -234,7 +235,7 @@ int addDefaultAltTags( ref start Start )
 	}
 }
 
-int printLinks( start Start )
+int printLinks( Start: start )
 {
 	for A:tag in Start {
 		require A
@@ -242,18 +243,18 @@ int printLinks( start Start )
 
 		for Attr: attr in AttrList {
 			if match Attr ["href = " AttrVal: attr_val]
-				print( 'link: ', I, '\ntarget: ', AttrVal, '\n\n' )
+				print( 'link: ' I '\ntarget: ' AttrVal '\n\n' )
 		}
 	}
 }
 
 
-bool should_close( tag_id TI )
+bool should_close( TI: tag_id )
 {
 	return true
 }
 
-bool should_flatten( tag_id TI )
+bool should_flatten( TI: tag_id )
 {
 	return true
 }
@@ -318,7 +319,10 @@ bool should_flatten( tag_id TI )
 #    }
 #}
 
-start HTML = parse start( stdin )
-print_xml( HTML )
-for C: close_tag in HTML 
-	print( C.id, '\n' )
+HTML: start = parse start( stdin )
+print( HTML )
+
+
+#print_xml( HTML )
+#for C: close_tag in HTML 
+#	print( C '\n' )
