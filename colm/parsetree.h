@@ -317,8 +317,8 @@ struct PriorityAug
  */
 struct VarDef
 {
-	VarDef( const String &name, JoinOrLm *joinOrLm )
-		: name(name), joinOrLm(joinOrLm) { }
+	VarDef( const String &name, Join *join )
+		: name(name), join(join) { }
 	
 	/* Parse tree traversal. */
 	FsmGraph *walk( Compiler *pd );
@@ -326,16 +326,16 @@ struct VarDef
 	void resolveNameRefs( Compiler *pd );
 
 	String name;
-	JoinOrLm *joinOrLm;
+	Join *join;
 };
 
 /*
  * A Variable Definition
  */
-struct RegionVarDef
+struct RegionDef
 {
-	RegionVarDef( const String &name, RegionJoinOrLm *joinOrLm )
-		: name(name), joinOrLm(joinOrLm) { }
+	RegionDef( const String &name, TokenRegion *tokenRegion )
+		: name(name), tokenRegion(tokenRegion) { }
 	
 	/* Parse tree traversal. */
 	FsmGraph *walk( Compiler *pd );
@@ -343,7 +343,7 @@ struct RegionVarDef
 	void resolveNameRefs( Compiler *pd );
 
 	String name;
-	RegionJoinOrLm *joinOrLm;
+	TokenRegion *tokenRegion;
 };
 
 typedef Vector<String> StringVect;
@@ -671,13 +671,13 @@ struct RegionGraphDictEl
 {
 	RegionGraphDictEl( const String &key ) 
 		: key(key), value(0), isInstance(false) { }
-	RegionGraphDictEl( const String &key, RegionVarDef *value ) 
+	RegionGraphDictEl( const String &key, RegionDef *value ) 
 		: key(key), value(value), isInstance(false) { }
 
 	const String &getKey() { return key; }
 
 	String key;
-	RegionVarDef *value;
+	RegionDef *value;
 	bool isInstance;
 
 	/* Location info of graph definition. Points to variable name of assignment. */

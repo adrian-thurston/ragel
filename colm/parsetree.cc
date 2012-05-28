@@ -186,7 +186,7 @@ FsmGraph *VarDef::walk( Compiler *pd )
 	NameFrame nameFrame = pd->enterNameScope( true, 1 );
 
 	/* Recurse on the expression. */
-	FsmGraph *rtnVal = joinOrLm->walk( pd );
+	FsmGraph *rtnVal = join->walk( pd );
 	
 	/* Do the tranfer of local error actions. */
 	LocalErrDictEl *localErrDictEl = pd->localErrDict.find( name );
@@ -198,7 +198,7 @@ FsmGraph *VarDef::walk( Compiler *pd )
 	/* If the expression below is a join operation with multiple expressions
 	 * then it just had epsilon transisions resolved. If it is a join
 	 * with only a single expression then run the epsilon op now. */
-	if ( joinOrLm->join->exprList.length() == 1 )
+	if ( join->exprList.length() == 1 )
 		rtnVal->epsilonOp();
 
 	/* We can now unset entry points that are not longer used. */
@@ -221,7 +221,7 @@ void VarDef::makeNameTree( const InputLoc &loc, Compiler *pd )
 	pd->curNameInst = pd->addNameInst( loc, name, false );
 
 	/* Recurse. */
-	joinOrLm->makeNameTree( pd );
+	join->makeNameTree( pd );
 
 	/* The name scope ends, pop the name instantiation. */
 	pd->curNameInst = prevNameInst;
@@ -233,19 +233,19 @@ void VarDef::resolveNameRefs( Compiler *pd )
 	NameFrame nameFrame = pd->enterNameScope( true, 1 );
 
 	/* Recurse. */
-	joinOrLm->resolveNameRefs( pd );
+	join->resolveNameRefs( pd );
 	
 	/* The name scope ends, pop the name instantiation. */
 	pd->popNameScope( nameFrame );
 }
 
-FsmGraph *RegionVarDef::walk( Compiler *pd )
+FsmGraph *RegionDef::walk( Compiler *pd )
 {
 	/* We enter into a new name scope. */
 	NameFrame nameFrame = pd->enterNameScope( true, 1 );
 
 	/* Recurse on the expression. */
-	FsmGraph *rtnVal = joinOrLm->walk( pd );
+	FsmGraph *rtnVal = tokenRegion->walk( pd );
 	
 	/* Do the tranfer of local error actions. */
 	LocalErrDictEl *localErrDictEl = pd->localErrDict.find( name );
@@ -267,7 +267,7 @@ FsmGraph *RegionVarDef::walk( Compiler *pd )
 	return rtnVal;
 }
 
-void RegionVarDef::makeNameTree( const InputLoc &loc, Compiler *pd )
+void RegionDef::makeNameTree( const InputLoc &loc, Compiler *pd )
 {
 	/* The variable definition enters a new scope. */
 	NameInst *prevNameInst = pd->curNameInst;
@@ -276,19 +276,19 @@ void RegionVarDef::makeNameTree( const InputLoc &loc, Compiler *pd )
 	pd->curNameInst->isLongestMatch = true;
 
 	/* Recurse. */
-	joinOrLm->makeNameTree( pd );
+	tokenRegion->makeNameTree( pd );
 
 	/* The name scope ends, pop the name instantiation. */
 	pd->curNameInst = prevNameInst;
 }
 
-void RegionVarDef::resolveNameRefs( Compiler *pd )
+void RegionDef::resolveNameRefs( Compiler *pd )
 {
 	/* Entering into a new scope. */
 	NameFrame nameFrame = pd->enterNameScope( true, 1 );
 
 	/* Recurse. */
-	joinOrLm->resolveNameRefs( pd );
+	tokenRegion->resolveNameRefs( pd );
 	
 	/* The name scope ends, pop the name instantiation. */
 	pd->popNameScope( nameFrame );

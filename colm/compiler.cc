@@ -694,8 +694,7 @@ void Compiler::createBuiltin( const char *name, BuiltinMachine builtin )
 {
 	Expression *expression = new Expression( builtin );
 	Join *join = new Join( expression );
-	JoinOrLm *joinOrLm = new JoinOrLm( join );
-	VarDef *varDef = new VarDef( name, joinOrLm );
+	VarDef *varDef = new VarDef( name, join );
 	GraphDictEl *graphDictEl = new GraphDictEl( name, varDef );
 	rootNamespace->rlMap.insert( graphDictEl );
 }
@@ -1094,12 +1093,11 @@ void Compiler::createDefaultScanner()
 	defaultRegion = new TokenRegion( InputLoc(), name, 
 			regionList.length(), 0 );
 	regionList.append( defaultRegion );
-	RegionJoinOrLm *joinOrLm = new RegionJoinOrLm( defaultRegion );
 
 	/* Insert the machine definition into the graph dictionary. */
 	RegionGraphDictEl *newEl = rootNamespace->graphDict.insert( name );
 	assert( newEl != 0 );
-	newEl->value = new RegionVarDef( name, joinOrLm );
+	newEl->value = new RegionDef( name, defaultRegion );
 	newEl->isInstance = true;
 	instanceList.append( newEl );
 
