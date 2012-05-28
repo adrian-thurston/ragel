@@ -488,7 +488,7 @@ region_head:
 		pd->regionList.append( tokenRegionIgn );
 		JoinOrLm *joinOrLmIgn = new JoinOrLm( tokenRegionIgn );
 		String scannerNameIgn( $2->data.length() + 2, "<%s>-ign", $2->data.data );
-		addRegularDef2( InputLoc(), namespaceStack.top(), scannerNameIgn, joinOrLmIgn, true );
+		addLexicalRegionDef( InputLoc(), namespaceStack.top(), scannerNameIgn, joinOrLmIgn );
 
 		/* Just for collect ignores. Will use the ignore-only start state. */
 		TokenRegion *tokenRegionCi = new TokenRegion( InputLoc(), $2->data + "_ci" ,
@@ -497,7 +497,7 @@ region_head:
 		pd->regionList.append( tokenRegionCi );
 		JoinOrLm *joinOrLmCi = new JoinOrLm( tokenRegionCi );
 		String scannerNameCi( $2->data.length() + 2, "<%s>-ci", $2->data.data );
-		addRegularDef2( InputLoc(), namespaceStack.top(), scannerNameCi, joinOrLmCi, true );
+		addLexicalRegionDef( InputLoc(), namespaceStack.top(), scannerNameCi, joinOrLmCi );
 
 		/* Just for tokens. */
 		TokenRegion *tokenRegionTok = new TokenRegion( InputLoc(), $2->data + "_tok" ,
@@ -506,7 +506,7 @@ region_head:
 		pd->regionList.append( tokenRegionTok );
 		JoinOrLm *joinOrLmTok = new JoinOrLm( tokenRegionTok );
 		String scannerNameTok( $2->data.length() + 2, "<%s>-tok", $2->data.data );
-		addRegularDef2( InputLoc(), namespaceStack.top(), scannerNameTok, joinOrLmTok, true );
+		addLexicalRegionDef( InputLoc(), namespaceStack.top(), scannerNameTok, joinOrLmTok );
 
 		/* Make the new token region. */
 		TokenRegion *tokenRegion = new TokenRegion( InputLoc(), $2->data,
@@ -515,7 +515,7 @@ region_head:
 		pd->regionList.append( tokenRegion );
 		JoinOrLm *joinOrLm = new JoinOrLm( tokenRegion );
 		String scannerName( $2->data.length() + 2, "<%s>", $2->data.data );
-		addRegularDef2( InputLoc(), namespaceStack.top(), scannerName, joinOrLm, true );
+		addLexicalRegionDef( InputLoc(), namespaceStack.top(), scannerName, joinOrLm );
 		regionStack.push( tokenRegion );
 
 		tokenRegion->ignoreOnlyRegion = tokenRegionIgn;
@@ -958,7 +958,7 @@ literal_item: opt_no_ignore TK_Literal opt_no_ignore
 			pd->regionList.append( tokenRegionIgn );
 			JoinOrLm *joinOrLmIgn = new JoinOrLm( tokenRegionIgn );
 			String scannerNameIgn( name.length() + 2, "<%s>-ign", name.data );
-			addRegularDef2( InputLoc(), namespaceStack.top(), scannerNameIgn, joinOrLmIgn, true );
+			addLexicalRegionDef( InputLoc(), namespaceStack.top(), scannerNameIgn, joinOrLmIgn );
 
 			/* Just for collect ignores. Will use the ignore-only start state. */
 			TokenRegion *tokenRegionCi = new TokenRegion( InputLoc(), name + "_ci",
@@ -967,7 +967,7 @@ literal_item: opt_no_ignore TK_Literal opt_no_ignore
 			pd->regionList.append( tokenRegionCi );
 			JoinOrLm *joinOrLmCi = new JoinOrLm( tokenRegionCi );
 			String scannerNameCi( name.length() + 2, "<%s>-ci", name.data );
-			addRegularDef2( InputLoc(), namespaceStack.top(), scannerNameCi, joinOrLmCi, true );
+			addLexicalRegionDef( InputLoc(), namespaceStack.top(), scannerNameCi, joinOrLmCi );
 
 			/* Just for tokens. */
 			TokenRegion *tokenRegionTok = new TokenRegion( InputLoc(), name + "_tok",
@@ -976,7 +976,7 @@ literal_item: opt_no_ignore TK_Literal opt_no_ignore
 			pd->regionList.append( tokenRegionTok );
 			JoinOrLm *joinOrLmTok = new JoinOrLm( tokenRegionTok );
 			String scannerNameTok( name.length() + 2, "<%s>-tok", name.data );
-			addRegularDef2( InputLoc(), namespaceStack.top(), scannerNameTok, joinOrLmTok, true );
+			addLexicalRegionDef( InputLoc(), namespaceStack.top(), scannerNameTok, joinOrLmTok );
 
 			/* Make a new token region just for the token. */
 			TokenRegion *tokenRegion = new TokenRegion( InputLoc(), $2->data,
@@ -985,7 +985,7 @@ literal_item: opt_no_ignore TK_Literal opt_no_ignore
 			pd->regionList.append( tokenRegion );
 			JoinOrLm *joinOrLm = new JoinOrLm( tokenRegion );
 			String scannerName( name.length() + 2, "<%s>", name.data );
-			addRegularDef2( InputLoc(), namespaceStack.top(), scannerName, joinOrLm, true );
+			addLexicalRegionDef( InputLoc(), namespaceStack.top(), scannerName, joinOrLm );
 			regionStack.push( tokenRegion );
 
 			tokenRegion->ignoreOnlyRegion = tokenRegionIgn;
@@ -1148,7 +1148,7 @@ token_def:
 			/* Create a regular language definition so the token can be used to
 			 * make other tokens */
 			JoinOrLm *joinOrLm = new JoinOrLm( join );
-			addRegularDef( $1->loc, namespaceStack.top(), name, joinOrLm, false );
+			addRegularDef( $1->loc, namespaceStack.top(), name, joinOrLm );
 		}
 
 
@@ -1189,7 +1189,7 @@ token_def_name:
 			pd->regionList.append( tokenRegionIgn );
 			JoinOrLm *joinOrLmIgn = new JoinOrLm( tokenRegionIgn );
 			String scannerNameIgn( name.length() + 2, "<%s>-ign", name.data );
-			addRegularDef2( InputLoc(), namespaceStack.top(), scannerNameIgn, joinOrLmIgn, true );
+			addLexicalRegionDef( InputLoc(), namespaceStack.top(), scannerNameIgn, joinOrLmIgn );
 
 			/* Just for explicitly collecting ignores. */
 			TokenRegion *tokenRegionCi = new TokenRegion( InputLoc(), name + "_ci",
@@ -1198,7 +1198,7 @@ token_def_name:
 			pd->regionList.append( tokenRegionCi );
 			JoinOrLm *joinOrLmCi = new JoinOrLm( tokenRegionCi );
 			String scannerNameCi( name.length() + 2, "<%s>-ci", name.data );
-			addRegularDef2( InputLoc(), namespaceStack.top(), scannerNameCi, joinOrLmCi, true );
+			addLexicalRegionDef( InputLoc(), namespaceStack.top(), scannerNameCi, joinOrLmCi );
 
 			/* Just for tokens. */
 			TokenRegion *tokenRegionTok = new TokenRegion( InputLoc(), name + "_tok",
@@ -1207,7 +1207,7 @@ token_def_name:
 			pd->regionList.append( tokenRegionTok );
 			JoinOrLm *joinOrLmTok = new JoinOrLm( tokenRegionTok );
 			String scannerNameTok( name.length() + 2, "<%s>-tok", name.data );
-			addRegularDef2( InputLoc(), namespaceStack.top(), scannerNameTok, joinOrLmTok, true );
+			addLexicalRegionDef( InputLoc(), namespaceStack.top(), scannerNameTok, joinOrLmTok );
 			
 			/* If not inside a region, make one for the token. */
 			TokenRegion *tokenRegion = new TokenRegion( InputLoc(), name,
@@ -1216,7 +1216,7 @@ token_def_name:
 			pd->regionList.append( tokenRegion );
 			JoinOrLm *joinOrLm = new JoinOrLm( tokenRegion );
 			String scannerName( name.length() + 2, "<%s>", name.data );
-			addRegularDef2( InputLoc(), namespaceStack.top(), scannerName, joinOrLm, true );
+			addLexicalRegionDef( InputLoc(), namespaceStack.top(), scannerName, joinOrLm );
 			regionStack.push( tokenRegion );
 
 			tokenRegion->ignoreOnlyRegion = tokenRegionIgn;
@@ -1283,7 +1283,7 @@ rl_def:
 	final {
 		/* Generic creation of machine for instantiation and assignment. */
 		JoinOrLm *joinOrLm = new JoinOrLm( $5->join );
-		addRegularDef( $2->loc, namespaceStack.top(), $2->data, joinOrLm, false );
+		addRegularDef( $2->loc, namespaceStack.top(), $2->data, joinOrLm );
 
 		if ( reCaptureVect.length() > 0 )
 			error($1->loc) << "rl definitions cannot capture vars" << endl;
@@ -2603,7 +2603,7 @@ void ColmParser::init()
 			pd->regionList.length(), 0 );
 	pd->regionList.append( rootRegion );
 	JoinOrLm *joinOrLm = new JoinOrLm( rootRegion );
-	addRegularDef2( InputLoc(), namespaceStack.top(), rootRegionName, joinOrLm, true );
+	addLexicalRegionDef( InputLoc(), namespaceStack.top(), rootRegionName, joinOrLm );
 	regionStack.push( rootRegion );
 	pd->rootRegion = rootRegion;
 
@@ -2650,18 +2650,14 @@ int ColmParser::parseLangEl( int type, const Token *token )
 }
 
 void ColmParser::addRegularDef( const InputLoc &loc, Namespace *nspace,
-		const String &name, JoinOrLm *joinOrLm, bool isInstance )
+		const String &name, JoinOrLm *joinOrLm )
 {
 	GraphDictEl *newEl = nspace->rlMap.insert( name );
 	if ( newEl != 0 ) {
 		/* New element in the dict, all good. */
 		newEl->value = new VarDef( name, joinOrLm );
-		newEl->isInstance = isInstance;
+		newEl->isInstance = false;
 		newEl->loc = loc;
-
-		/* It it is an instance, put on the instance list. */
-		if ( isInstance )
-			pd->instanceList.append( newEl );
 	}
 	else {
 		// Recover by ignoring the duplicate.
@@ -2669,19 +2665,18 @@ void ColmParser::addRegularDef( const InputLoc &loc, Namespace *nspace,
 	}
 }
 
-void ColmParser::addRegularDef2( const InputLoc &loc, Namespace *nspace,
-		const String &name, JoinOrLm *joinOrLm, bool isInstance )
+void ColmParser::addLexicalRegionDef( const InputLoc &loc, Namespace *nspace,
+		const String &name, JoinOrLm *joinOrLm )
 {
 	GraphDictEl *newEl = nspace->graphDict.insert( name );
 	if ( newEl != 0 ) {
 		/* New element in the dict, all good. */
 		newEl->value = new VarDef( name, joinOrLm );
-		newEl->isInstance = isInstance;
+		newEl->isInstance = true;
 		newEl->loc = loc;
 
 		/* It it is an instance, put on the instance list. */
-		if ( isInstance )
-			pd->instanceList.append( newEl );
+		pd->instanceList.append( newEl );
 	}
 	else {
 		// Recover by ignoring the duplicate.
