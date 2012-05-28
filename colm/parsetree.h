@@ -701,6 +701,9 @@ struct Namespace
 	/* Dictionary of graphs. Both instances and non-instances go here. */
 	GraphDict graphDict;
 
+	/* regular language definitions. */
+	GraphDict rlMap;
+
 	TypeAliasList typeAliasList;
 
 	Namespace *parentNamespace;

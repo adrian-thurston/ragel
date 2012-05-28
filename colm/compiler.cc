@@ -697,7 +697,7 @@ void Compiler::createBuiltin( const char *name, BuiltinMachine builtin )
 	JoinOrLm *joinOrLm = new JoinOrLm( join );
 	VarDef *varDef = new VarDef( name, joinOrLm );
 	GraphDictEl *graphDictEl = new GraphDictEl( name, varDef );
-	rootNamespace->graphDict.insert( graphDictEl );
+	rootNamespace->rlMap.insert( graphDictEl );
 }
 
 /* Initialize the graph dict with builtin types. */
