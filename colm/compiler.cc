@@ -903,7 +903,7 @@ NameInst *Compiler::makeNameTree()
 
 	/* First make the name tree. */
 	initNameWalk( rootName );
-	for ( GraphList::Iter glel = instanceList; glel.lte(); glel++ ) {
+	for ( RegionGraphList::Iter glel = instanceList; glel.lte(); glel++ ) {
 		/* Recurse on the instance. */
 		glel->value->makeNameTree( glel->loc, this );
 	}
@@ -945,7 +945,7 @@ FsmGraph *Compiler::makeAllRegions()
 
 	/* Resove name references in the tree. */
 	initNameWalk( rootName );
-	for ( GraphList::Iter glel = instanceList; glel.lte(); glel++ )
+	for ( RegionGraphList::Iter glel = instanceList; glel.lte(); glel++ )
 		glel->value->resolveNameRefs( this );
 
 	/* Resovle the implicit name references to the nfa instantiations. */
@@ -956,7 +956,7 @@ FsmGraph *Compiler::makeAllRegions()
 
 	/* Make all the instantiations, we know that main exists in this list. */
 	initNameWalk( rootName );
-	for ( GraphList::Iter glel = instanceList; glel.lte();  glel++ ) {
+	for ( RegionGraphList::Iter glel = instanceList; glel.lte();  glel++ ) {
 		/* Build the graph from a walk of the parse tree. */
 		FsmGraph *newGraph = glel->value->walk( this );
 
@@ -1094,12 +1094,12 @@ void Compiler::createDefaultScanner()
 	defaultRegion = new TokenRegion( InputLoc(), name, 
 			regionList.length(), 0 );
 	regionList.append( defaultRegion );
-	JoinOrLm *joinOrLm = new JoinOrLm( defaultRegion );
+	RegionJoinOrLm *joinOrLm = new RegionJoinOrLm( defaultRegion );
 
 	/* Insert the machine definition into the graph dictionary. */
-	GraphDictEl *newEl = rootNamespace->graphDict.insert( name );
+	RegionGraphDictEl *newEl = rootNamespace->graphDict.insert( name );
 	assert( newEl != 0 );
-	newEl->value = new VarDef( name, joinOrLm );
+	newEl->value = new RegionVarDef( name, joinOrLm );
 	newEl->isInstance = true;
 	instanceList.append( newEl );
 

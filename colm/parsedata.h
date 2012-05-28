@@ -591,7 +591,7 @@ struct Compiler
 	 */
 
 	/* The list of instances. */
-	GraphList instanceList;
+	RegionGraphList instanceList;
 
 	/* Dictionary of actions. Lets actions be defined and then referenced. */
 	ActionDict actionDict;

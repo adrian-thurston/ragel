@@ -167,6 +167,7 @@ struct Factor;
 struct Expression;
 struct Join;
 struct JoinOrLm;
+struct RegionJoinOrLm;
 struct TokenRegion;
 struct Namespace;
 struct Context;
@@ -326,6 +327,23 @@ struct VarDef
 
 	String name;
 	JoinOrLm *joinOrLm;
+};
+
+/*
+ * A Variable Definition
+ */
+struct RegionVarDef
+{
+	RegionVarDef( const String &name, RegionJoinOrLm *joinOrLm )
+		: name(name), joinOrLm(joinOrLm) { }
+	
+	/* Parse tree traversal. */
+	FsmGraph *walk( Compiler *pd );
+	void makeNameTree( const InputLoc &loc, Compiler *pd );
+	void resolveNameRefs( Compiler *pd );
+
+	String name;
+	RegionJoinOrLm *joinOrLm;
 };
 
 typedef Vector<String> StringVect;
@@ -645,6 +663,30 @@ struct GraphDictEl
 typedef AvlTree<GraphDictEl, String, CmpStr> GraphDict;
 typedef DList<GraphDictEl> GraphList;
 
+/* Graph dictionary. */
+struct RegionGraphDictEl 
+:
+	public AvlTreeEl<RegionGraphDictEl>,
+	public DListEl<RegionGraphDictEl>
+{
+	RegionGraphDictEl( const String &key ) 
+		: key(key), value(0), isInstance(false) { }
+	RegionGraphDictEl( const String &key, RegionVarDef *value ) 
+		: key(key), value(value), isInstance(false) { }
+
+	const String &getKey() { return key; }
+
+	String key;
+	RegionVarDef *value;
+	bool isInstance;
+
+	/* Location info of graph definition. Points to variable name of assignment. */
+	InputLoc loc;
+};
+
+typedef AvlTree<RegionGraphDictEl, String, CmpStr> RegionGraphDict;
+typedef DList<RegionGraphDictEl> RegionGraphList;
+
 struct TypeAlias
 {
 	TypeAlias( const InputLoc &loc, Namespace *nspace, 
@@ -699,7 +741,7 @@ struct Namespace
 	GenericList genericList;
 
 	/* Dictionary of graphs. Both instances and non-instances go here. */
-	GraphDict graphDict;
+	RegionGraphDict graphDict;
 
 	/* regular language definitions. */
 	GraphDict rlMap;
@@ -722,23 +764,28 @@ typedef DList<Expression> ExprList;
 
 struct JoinOrLm
 {
-	enum Type {
-		JoinType,
-		LongestMatchType
-	};
-
 	JoinOrLm( Join *join ) : 
-		join(join), type(JoinType) {}
-	JoinOrLm( TokenRegion *tokenRegion ) :
-		tokenRegion(tokenRegion), type(LongestMatchType) {}
+		join(join) {}
 
 	FsmGraph *walk( Compiler *pd );
 	void makeNameTree( Compiler *pd );
 	void resolveNameRefs( Compiler *pd );
 	
 	Join *join;
+};
+
+struct RegionJoinOrLm
+{
+	enum Type { LongestMatchType };
+
+	RegionJoinOrLm( TokenRegion *tokenRegion ) :
+		tokenRegion(tokenRegion) {}
+
+	FsmGraph *walk( Compiler *pd );
+	void makeNameTree( Compiler *pd );
+	void resolveNameRefs( Compiler *pd );
+	
 	TokenRegion *tokenRegion;
-	Type type;
 };
 
 /*
