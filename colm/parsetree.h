@@ -902,7 +902,6 @@ struct FactorWithAug
 	Vector<ParserAction> actions;
 	Vector<PriorityAug> priorityAugs;
 	PriorDesc *priorDescs;
-	Vector<Label> labels;
 	Vector<EpsilonLink> epsilonLinks;
 	Vector<ParserAction> conditions;
 

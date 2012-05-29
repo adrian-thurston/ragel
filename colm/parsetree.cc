@@ -1147,9 +1147,6 @@ void FactorWithAug::assignConditions( FsmGraph *graph )
 /* Evaluate a factor with augmentation node. */
 FsmGraph *FactorWithAug::walk( Compiler *pd )
 {
-	/* Enter into the scopes created for the labels. */
-	NameFrame nameFrame = pd->enterNameScope( false, labels.length() );
-
 	/* Make the array of function orderings. */
 	int *actionOrd = 0;
 	if ( actions.length() > 0 )
@@ -1224,26 +1221,6 @@ FsmGraph *FactorWithAug::walk( Compiler *pd )
 		}
 	}
 
-	/* Set entry points for labels. */
-	if ( labels.length() > 0 ) {
-		/* Pop the names. */
-		pd->resetNameScope( nameFrame );
-
-		/* Make labels that are referenced into entry points. */
-		for ( int i = 0; i < labels.length(); i++ ) {
-			pd->enterNameScope( false, 1 );
-
-			/* Will always be found. */
-			NameInst *name = pd->curNameInst;
-
-			/* If the name is referenced then set the entry point. */
-			if ( name->numRefs > 0 )
-				rtnVal->setEntry( name->id, rtnVal->startState );
-		}
-
-		pd->popNameScope( nameFrame );
-	}
-
 	if ( priorOrd != 0 )
 		delete[] priorOrd;
 	if ( actionOrd != 0 )
@@ -1253,13 +1230,7 @@ FsmGraph *FactorWithAug::walk( Compiler *pd )
 
 void FactorWithAug::makeNameTree( Compiler *pd )
 {
-	/* Add the labels to the tree of instantiated names. Each label
-	 * makes a new scope. */
 	NameInst *prevNameInst = pd->curNameInst;
-	for ( int i = 0; i < labels.length(); i++ )
-		pd->curNameInst = pd->addNameInst( labels[i].loc, labels[i].data, true );
-
-	/* Recurse, then pop the names. */
 	factorWithRep->makeNameTree( pd );
 	pd->curNameInst = prevNameInst;
 }
