@@ -571,11 +571,8 @@ struct Compiler
 
 	/* Make the graph from a graph dict node. Does minimization. */
 	void finishGraphBuild( FsmGraph *graph );
-	FsmGraph *makeJoin( Join *join );
 	FsmGraph *makeAllRegions();
-	FsmGraph *makeFsmGraph( Join *join );
-	FsmGraph *makeScanner() 
-		{ return makeFsmGraph(0); }
+	FsmGraph *makeScanner();
 
 	void analyzeAction( Action *action, InlineList *inlineList );
 	void analyzeGraph( FsmGraph *graph );

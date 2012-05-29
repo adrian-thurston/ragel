@@ -892,7 +892,6 @@ NameInst *Compiler::makeJoinNameTree( Join *join )
 	return rootName;
 }
 
-
 /* Build the name tree and supporting data structures. */
 NameInst *Compiler::makeNameTree()
 {
@@ -910,42 +909,11 @@ NameInst *Compiler::makeNameTree()
 	return rootName;
 }
 
-
-FsmGraph *Compiler::makeJoin( Join *join )
-{
-	/* Build the name tree and supporting data structures. */
-	NameInst *rootName = makeJoinNameTree( join );
-	NameInst **nameIndex = makeNameIndex( rootName );
-
-	/* Resove name references in the tree. */
-	initNameWalk( rootName );
-	join->resolveNameRefs( this );
-
-	/* Make all the instantiations, we know that main exists in this list. */
-	initNameWalk( rootName );
-
-	/* Build the graph from a walk of the parse tree. */
-	FsmGraph *newGraph = join->walk( this );
-
-	/* Wrap up the construction. */
-	finishGraphBuild( newGraph );
-
-	newGraph->rootName = rootName;
-	newGraph->nameIndex = nameIndex;
-
-	return newGraph;
-}
-
 FsmGraph *Compiler::makeAllRegions()
 {
 	/* Build the name tree and supporting data structures. */
 	NameInst *rootName = makeNameTree( );
 	NameInst **nameIndex = makeNameIndex( rootName );
-
-	/* Resove name references in the tree. */
-	initNameWalk( rootName );
-	for ( RegionGraphList::Iter glel = instanceList; glel.lte(); glel++ )
-		glel->value->resolveNameRefs( this );
 
 	/* Resovle the implicit name references to the nfa instantiations. */
 	referenceRegions( rootName );
@@ -1045,10 +1013,10 @@ void Compiler::analyzeGraph( FsmGraph *graph )
 	}
 }
 
-FsmGraph *Compiler::makeFsmGraph( Join *join )
+FsmGraph *Compiler::makeScanner()
 {
 	/* Make the graph, do minimization. */
-	FsmGraph *fsmGraph = join != 0 ? makeJoin( join ) : makeAllRegions();
+	FsmGraph *fsmGraph = makeAllRegions();
 
 	/* If any errors have occured in the input file then don't write anything. */
 	if ( gblErrorCount > 0 )

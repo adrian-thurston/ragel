@@ -323,7 +323,6 @@ struct VarDef
 	/* Parse tree traversal. */
 	FsmGraph *walk( Compiler *pd );
 	void makeNameTree( const InputLoc &loc, Compiler *pd );
-	void resolveNameRefs( Compiler *pd );
 
 	String name;
 	Join *join;
@@ -340,7 +339,6 @@ struct RegionDef
 	/* Parse tree traversal. */
 	FsmGraph *walk( Compiler *pd );
 	void makeNameTree( const InputLoc &loc, Compiler *pd );
-	void resolveNameRefs( Compiler *pd );
 
 	String name;
 	TokenRegion *tokenRegion;
@@ -551,7 +549,6 @@ struct TokenRegion
 	/* Tree traversal. */
 	FsmGraph *walk( Compiler *pd );
 	void makeNameTree( Compiler *pd );
-	void resolveNameRefs( Compiler *pd );
 	void runLongestMatch( Compiler *pd, FsmGraph *graph );
 	void transferScannerLeavingActions( FsmGraph *graph );
 	Action *newAction( Compiler *pd, const InputLoc &loc, const String &name, 
@@ -769,7 +766,6 @@ struct JoinOrLm
 
 	FsmGraph *walk( Compiler *pd );
 	void makeNameTree( Compiler *pd );
-	void resolveNameRefs( Compiler *pd );
 	
 	Join *join;
 };
@@ -783,7 +779,6 @@ struct RegionJoinOrLm
 
 	FsmGraph *walk( Compiler *pd );
 	void makeNameTree( Compiler *pd );
-	void resolveNameRefs( Compiler *pd );
 	
 	TokenRegion *tokenRegion;
 };
@@ -799,7 +794,6 @@ struct Join
 	/* Tree traversal. */
 	FsmGraph *walk( Compiler *pd );
 	void makeNameTree( Compiler *pd );
-	void resolveNameRefs( Compiler *pd );
 
 	/* Data. */
 	ExprList exprList;
@@ -842,7 +836,6 @@ struct Expression
 	/* Tree traversal. */
 	FsmGraph *walk( Compiler *pd, bool lastInSeq = true );
 	void makeNameTree( Compiler *pd );
-	void resolveNameRefs( Compiler *pd );
 
 	/* Node data. */
 	Expression *expression;
@@ -879,7 +872,6 @@ struct Term
 
 	FsmGraph *walk( Compiler *pd, bool lastInSeq = true );
 	void makeNameTree( Compiler *pd );
-	void resolveNameRefs( Compiler *pd );
 
 	Term *term;
 	FactorWithAug *factorWithAug;
@@ -900,7 +892,6 @@ struct FactorWithAug
 	/* Tree traversal. */
 	FsmGraph *walk( Compiler *pd );
 	void makeNameTree( Compiler *pd );
-	void resolveNameRefs( Compiler *pd );
 
 	void assignActions( Compiler *pd, FsmGraph *graph, int *actionOrd );
 	void assignPriorities( FsmGraph *graph, int *priorOrd );
@@ -948,7 +939,6 @@ struct FactorWithRep
 	/* Tree traversal. */
 	FsmGraph *walk( Compiler *pd );
 	void makeNameTree( Compiler *pd );
-	void resolveNameRefs( Compiler *pd );
 
 	InputLoc loc;
 	FactorWithRep *factorWithRep;
@@ -980,7 +970,6 @@ struct FactorWithNeg
 	/* Tree traversal. */
 	FsmGraph *walk( Compiler *pd );
 	void makeNameTree( Compiler *pd );
-	void resolveNameRefs( Compiler *pd );
 
 	InputLoc loc;
 	FactorWithNeg *factorWithNeg;
@@ -1033,7 +1022,6 @@ struct Factor
 	/* Tree traversal. */
 	FsmGraph *walk( Compiler *pd );
 	void makeNameTree( Compiler *pd );
-	void resolveNameRefs( Compiler *pd );
 
 	InputLoc loc;
 	Literal *literal;

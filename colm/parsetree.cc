@@ -227,18 +227,6 @@ void VarDef::makeNameTree( const InputLoc &loc, Compiler *pd )
 	pd->curNameInst = prevNameInst;
 }
 
-void VarDef::resolveNameRefs( Compiler *pd )
-{
-	/* Entering into a new scope. */
-	NameFrame nameFrame = pd->enterNameScope( true, 1 );
-
-	/* Recurse. */
-	join->resolveNameRefs( pd );
-	
-	/* The name scope ends, pop the name instantiation. */
-	pd->popNameScope( nameFrame );
-}
-
 FsmGraph *RegionDef::walk( Compiler *pd )
 {
 	/* We enter into a new name scope. */
@@ -280,18 +268,6 @@ void RegionDef::makeNameTree( const InputLoc &loc, Compiler *pd )
 
 	/* The name scope ends, pop the name instantiation. */
 	pd->curNameInst = prevNameInst;
-}
-
-void RegionDef::resolveNameRefs( Compiler *pd )
-{
-	/* Entering into a new scope. */
-	NameFrame nameFrame = pd->enterNameScope( true, 1 );
-
-	/* Recurse. */
-	tokenRegion->resolveNameRefs( pd );
-	
-	/* The name scope ends, pop the name instantiation. */
-	pd->popNameScope( nameFrame );
 }
 
 InputLoc TokenDef::getLoc()
@@ -424,21 +400,6 @@ void TokenRegion::makeNameTree( Compiler *pd )
 	pd->curNameInst = prevNameInst;
 }
 
-void TokenRegion::resolveNameRefs( Compiler *pd )
-{
-	/* The longest match gets its own name scope. */
-	NameFrame nameFrame = pd->enterNameScope( true, 1 );
-
-	/* Take an action reference for each longest match item and recurse. */
-	for ( TokenDefListReg::Iter lmi = tokenDefList; lmi.lte(); lmi++ ) {
-		/* Watch out for patternless tokens. */
-		if ( lmi->join != 0 )
-			lmi->join->resolveNameRefs( pd );
-	}
-
-	/* The name scope ends, pop the name instantiation. */
-	pd->popNameScope( nameFrame );
-}
 
 void TokenRegion::restart( FsmGraph *graph, FsmTrans *trans )
 {
@@ -698,11 +659,6 @@ void JoinOrLm::makeNameTree( Compiler *pd )
 	join->makeNameTree( pd );
 }
 
-void JoinOrLm::resolveNameRefs( Compiler *pd )
-{
-	join->resolveNameRefs( pd );
-}
-
 FsmGraph *RegionJoinOrLm::walk( Compiler *pd )
 {
 	FsmGraph *rtnVal = 0;
@@ -713,11 +669,6 @@ FsmGraph *RegionJoinOrLm::walk( Compiler *pd )
 void RegionJoinOrLm::makeNameTree( Compiler *pd )
 {
 	tokenRegion->makeNameTree( pd );
-}
-
-void RegionJoinOrLm::resolveNameRefs( Compiler *pd )
-{
-	tokenRegion->resolveNameRefs( pd );
 }
 
 /* Construct with a location and the first expression. */
@@ -758,19 +709,6 @@ void Join::makeNameTree( Compiler *pd )
 		context->makeNameTree( pd );
 }
 
-
-void Join::resolveNameRefs( Compiler *pd )
-{
-	/* Branch on whether or not there is to be a join. */
-	assert( exprList.length() == 1 );
-
-	/* Recurse into the single expression. */
-	exprList.head->resolveNameRefs( pd );
-
-	/* Maybe the the context. */
-	if ( context != 0 )
-		context->resolveNameRefs( pd );
-}
 
 /* Clean up after an expression node. */
 Expression::~Expression()
@@ -867,24 +805,6 @@ void Expression::makeNameTree( Compiler *pd )
 		break;
 	case TermType:
 		term->makeNameTree( pd );
-		break;
-	case BuiltinType:
-		break;
-	}
-}
-
-void Expression::resolveNameRefs( Compiler *pd )
-{
-	switch ( type ) {
-	case OrType:
-	case IntersectType:
-	case SubtractType:
-	case StrongSubtractType:
-		expression->resolveNameRefs( pd );
-		term->resolveNameRefs( pd );
-		break;
-	case TermType:
-		term->resolveNameRefs( pd );
 		break;
 	case BuiltinType:
 		break;
@@ -1019,22 +939,6 @@ void Term::makeNameTree( Compiler *pd )
 		break;
 	case FactorWithAugType:
 		factorWithAug->makeNameTree( pd );
-		break;
-	}
-}
-
-void Term::resolveNameRefs( Compiler *pd )
-{
-	switch ( type ) {
-	case ConcatType:
-	case RightStartType:
-	case RightFinishType:
-	case LeftType:
-		term->resolveNameRefs( pd );
-		factorWithAug->resolveNameRefs( pd );
-		break;
-	case FactorWithAugType:
-		factorWithAug->resolveNameRefs( pd );
 		break;
 	}
 }
@@ -1361,63 +1265,6 @@ void FactorWithAug::makeNameTree( Compiler *pd )
 }
 
 
-void FactorWithAug::resolveNameRefs( Compiler *pd )
-{
-	/* Enter into the name scope created by any labels. */
-	NameFrame nameFrame = pd->enterNameScope( false, labels.length() );
-
-	/* Recurse first. IMPORTANT: we must do the exact same traversal as when
-	 * the tree is constructed. */
-	factorWithRep->resolveNameRefs( pd );
-
-	/* Resolve epsilon transitions. */
-	for ( int ep = 0; ep < epsilonLinks.length(); ep++ ) {
-		/* Get the link. */
-		EpsilonLink &link = epsilonLinks[ep];
-		NameInst *resolvedName = 0;
-
-		if ( link.target.length() == 1 && strcmp( link.target.data[0], "final" ) == 0 ) {
-			/* Epsilon drawn to an implicit final state. An implicit final is
-			 * only available in join operations. */
-			resolvedName = pd->localNameScope->final;
-		}
-		else {
-			/* Do an search for the name. */
-			NameSet resolved;
-			pd->resolveFrom( resolved, pd->localNameScope, link.target, 0 );
-			if ( resolved.length() > 0 ) {
-				/* Take the first one. */
-				resolvedName = resolved[0];
-				if ( resolved.length() > 1 ) {
-					/* Complain about the multiple references. */
-					error(link.loc) << "state reference " << link.target << 
-							" resolves to multiple entry points" << endl;
-					errorStateLabels( resolved );
-				}
-			}
-		}
-
-		/* This is tricky, we stuff resolved epsilon transitions into one long
-		 * vector in the parse data structure. Since the name resolution and
-		 * graph generation both do identical walks of the parse tree we
-		 * should always find the link resolutions in the right place.  */
-		pd->epsilonResolvedLinks.append( resolvedName );
-
-		if ( resolvedName != 0 ) {
-			/* Found the name, bump of the reference count on it. */
-			resolvedName->numRefs += 1;
-		}
-		else {
-			/* Complain, no recovery action, the epsilon op will ignore any
-			 * epsilon transitions whose names did not resolve. */
-			error(link.loc) << "could not resolve label " << link.target << endl;
-		}
-	}
-
-	if ( labels.length() > 0 )
-		pd->popNameScope( nameFrame );
-}
-
 
 /* Clean up after a factor with repetition node. */
 FactorWithRep::~FactorWithRep()
@@ -1694,25 +1541,6 @@ void FactorWithRep::makeNameTree( Compiler *pd )
 	}
 }
 
-void FactorWithRep::resolveNameRefs( Compiler *pd )
-{
-	switch ( type ) {
-	case StarType:
-	case StarStarType:
-	case OptionalType:
-	case PlusType:
-	case ExactType:
-	case MaxType:
-	case MinType:
-	case RangeType:
-		factorWithRep->resolveNameRefs( pd );
-		break;
-	case FactorWithNegType:
-		factorWithNeg->resolveNameRefs( pd );
-		break;
-	}
-}
-
 /* Clean up after a factor with negation node. */
 FactorWithNeg::~FactorWithNeg()
 {
@@ -1774,18 +1602,6 @@ void FactorWithNeg::makeNameTree( Compiler *pd )
 	}
 }
 
-void FactorWithNeg::resolveNameRefs( Compiler *pd )
-{
-	switch ( type ) {
-	case NegateType:
-	case CharNegateType:
-		factorWithNeg->resolveNameRefs( pd );
-		break;
-	case FactorType:
-		factor->resolveNameRefs( pd );
-		break;
-	}
-}
 
 /* Clean up after a factor node. */
 Factor::~Factor()
@@ -1852,23 +1668,6 @@ void Factor::makeNameTree( Compiler *pd )
 		break;
 	case ParenType:
 		join->makeNameTree( pd );
-		break;
-	}
-}
-
-void Factor::resolveNameRefs( Compiler *pd )
-{
-	switch ( type ) {
-	case LiteralType:
-	case RangeType:
-	case OrExprType:
-	case RegExprType:
-		break;
-	case ReferenceType:
-		varDef->resolveNameRefs( pd );
-		break;
-	case ParenType:
-		join->resolveNameRefs( pd );
 		break;
 	}
 }
