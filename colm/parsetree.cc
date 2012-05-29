@@ -201,11 +201,6 @@ FsmGraph *VarDef::walk( Compiler *pd )
 	/* We can now unset entry points that are not longer used. */
 	pd->unsetObsoleteEntries( rtnVal );
 
-	/* If the name of the variable is referenced then add the entry point to
-	 * the graph. */
-	if ( pd->curNameInst->numRefs > 0 )
-		rtnVal->setEntry( pd->curNameInst->id, rtnVal->startState );
-	
 	return rtnVal;
 }
 
@@ -244,13 +239,15 @@ void RegionDef::makeNameTree( const InputLoc &loc, Compiler *pd )
 	NameInst *prevNameInst = pd->curNameInst;
 	pd->curNameInst = pd->addNameInst( loc, name, false );
 
-	pd->curNameInst->isLongestMatch = true;
-
-	/* Recurse. */
-	tokenRegion->makeNameTree( pd );
-
 	/* Guess we do this now. */
 	tokenRegion->makeActions( pd );
+
+	/* Save off the name inst into the token region. This is only legal for
+	 * token regions because they are only ever referenced once (near the root
+	 * of the name tree). They cannot have more than one corresponding name
+	 * inst. */
+	assert( tokenRegion->regionNameInst == 0 );
+	tokenRegion->regionNameInst = pd->curNameInst;
 
 	/* The name scope ends, pop the name instantiation. */
 	pd->curNameInst = prevNameInst;
@@ -342,25 +339,6 @@ void TokenRegion::makeActions( Compiler *pd )
 	il6->append( new InlineItem( loc, this, 0, InlineItem::LmSwitch ) );
 	lmActSelect = newAction( pd, loc, "lagsel", il6 );
 }
-
-void TokenRegion::makeNameTree( Compiler *pd )
-{
-	/* Create an anonymous scope for the longest match. Will be used for
-	 * restarting machine after matching a token. */
-	NameInst *prevNameInst = pd->curNameInst;
-	pd->curNameInst = pd->addNameInst( loc, 0, false );
-
-	/* Save off the name inst into the token region. This is only legal for
-	 * token regions because they are only ever referenced once (near the root
-	 * of the name tree). They cannot have more than one corresponding name
-	 * inst. */
-	assert( regionNameInst == 0 );
-	regionNameInst = pd->curNameInst;
-
-	/* The name scope ends, pop the name instantiation. */
-	pd->curNameInst = prevNameInst;
-}
-
 
 void TokenRegion::restart( FsmGraph *graph, FsmTrans *trans )
 {
@@ -552,9 +530,6 @@ void TokenRegion::transferScannerLeavingActions( FsmGraph *graph )
 
 FsmGraph *TokenRegion::walk( Compiler *pd )
 {
-	/* The longest match has it's own name scope. */
-	NameFrame nameFrame = pd->enterNameScope( true, 1 );
-
 	/* Make each part of the longest match. */
 	int numParts = 0;
 	FsmGraph **parts = new FsmGraph*[tokenDefList.length()];
@@ -601,9 +576,6 @@ FsmGraph *TokenRegion::walk( Compiler *pd )
 		runLongestMatch( pd, retFsm );
 		delete[] parts;
 	}
-
-	/* Pop the name scope. */
-	pd->popNameScope( nameFrame );
 
 	return retFsm;
 }

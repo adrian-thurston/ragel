@@ -556,17 +556,15 @@ void RedFsmBuild::makeEntryPoints()
 	}
 
 	for ( RegionList::Iter reg = pd->regionList; reg.lte(); reg++ ) {
-		if ( reg->regionNameInst == 0 )
-			addRegionToEntry( reg->id, pd->defaultRegion->id );
-		else {
-			TokenRegion *use = reg;
+		assert( reg->regionNameInst != 0 );
 
-			if ( use->isCiOnly )
-				use = use->derivedFrom->ignoreOnlyRegion;
+		TokenRegion *use = reg;
 
-			NameInst *regionName = use->regionNameInst->parent;
-			addRegionToEntry( reg->id, regionName->id );
-		}
+		if ( use->isCiOnly )
+			use = use->derivedFrom->ignoreOnlyRegion;
+
+		NameInst *regionName = use->regionNameInst;
+		addRegionToEntry( reg->id, regionName->id );
 	}
 }
 
