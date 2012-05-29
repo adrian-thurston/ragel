@@ -266,6 +266,9 @@ void RegionDef::makeNameTree( const InputLoc &loc, Compiler *pd )
 	/* Recurse. */
 	tokenRegion->makeNameTree( pd );
 
+	/* Guess we do this now. */
+	tokenRegion->makeActions( pd );
+
 	/* The name scope ends, pop the name instantiation. */
 	pd->curNameInst = prevNameInst;
 }
@@ -357,18 +360,6 @@ void TokenRegion::makeActions( Compiler *pd )
 	lmActSelect = newAction( pd, loc, "lagsel", il6 );
 }
 
-void TokenRegion::findName( Compiler *pd )
-{
-	NameInst *nameInst = pd->curNameInst;
-	while ( nameInst->name == 0 ) {
-		nameInst = nameInst->parent;
-		/* Since every machine must must have a name, we should always find a
-		 * name for the longest match. */
-		assert( nameInst != 0 );
-	}
-	name = nameInst->name;
-}
-
 void TokenRegion::makeNameTree( Compiler *pd )
 {
 	/* Create an anonymous scope for the longest match. Will be used for
@@ -389,12 +380,6 @@ void TokenRegion::makeNameTree( Compiler *pd )
 		if ( td->join != 0 ) 
 			td->join->makeNameTree( pd );
 	}
-
-	/* Traverse the name tree upwards to find a name for this lm. */
-	findName( pd );
-
-	/* Also make the longest match's actions at this point. */
-	makeActions( pd );
 
 	/* The name scope ends, pop the name instantiation. */
 	pd->curNameInst = prevNameInst;
@@ -645,30 +630,6 @@ FsmGraph *TokenRegion::walk( Compiler *pd )
 	pd->popNameScope( nameFrame );
 
 	return retFsm;
-}
-
-FsmGraph *JoinOrLm::walk( Compiler *pd )
-{
-	FsmGraph *rtnVal = 0;
-	rtnVal = join->walk( pd );
-	return rtnVal;
-}
-
-void JoinOrLm::makeNameTree( Compiler *pd )
-{
-	join->makeNameTree( pd );
-}
-
-FsmGraph *RegionJoinOrLm::walk( Compiler *pd )
-{
-	FsmGraph *rtnVal = 0;
-	rtnVal = tokenRegion->walk( pd );
-	return rtnVal;
-}
-
-void RegionJoinOrLm::makeNameTree( Compiler *pd )
-{
-	tokenRegion->makeNameTree( pd );
 }
 
 /* Construct with a location and the first expression. */
@@ -1234,8 +1195,6 @@ void FactorWithAug::makeNameTree( Compiler *pd )
 	factorWithRep->makeNameTree( pd );
 	pd->curNameInst = prevNameInst;
 }
-
-
 
 /* Clean up after a factor with repetition node. */
 FactorWithRep::~FactorWithRep()

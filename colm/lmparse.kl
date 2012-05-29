@@ -482,35 +482,35 @@ region_head:
 	KW_Lex TK_Word 
 	final {
 		/* Just for ignores. */
-		TokenRegion *tokenRegionIgn = new TokenRegion( InputLoc(), $2->data + "_ign" ,
+		String scannerNameIgn( $2->data.length() + 2, "<%s>-ign", $2->data.data );
+		TokenRegion *tokenRegionIgn = new TokenRegion( InputLoc(), scannerNameIgn,
 				pd->regionList.length(), regionStack.top() );
 		regionStack.top()->childRegions.append( tokenRegionIgn );
 		pd->regionList.append( tokenRegionIgn );
-		String scannerNameIgn( $2->data.length() + 2, "<%s>-ign", $2->data.data );
 		addRegionDef( InputLoc(), namespaceStack.top(), scannerNameIgn, tokenRegionIgn );
 
 		/* Just for collect ignores. Will use the ignore-only start state. */
-		TokenRegion *tokenRegionCi = new TokenRegion( InputLoc(), $2->data + "_ci" ,
+		String scannerNameCi( $2->data.length() + 2, "<%s>-ci", $2->data.data );
+		TokenRegion *tokenRegionCi = new TokenRegion( InputLoc(), scannerNameCi,
 				pd->regionList.length(), regionStack.top() );
 		regionStack.top()->childRegions.append( tokenRegionCi );
 		pd->regionList.append( tokenRegionCi );
-		String scannerNameCi( $2->data.length() + 2, "<%s>-ci", $2->data.data );
 		addRegionDef( InputLoc(), namespaceStack.top(), scannerNameCi, tokenRegionCi );
 
 		/* Just for tokens. */
-		TokenRegion *tokenRegionTok = new TokenRegion( InputLoc(), $2->data + "_tok" ,
+		String scannerNameTok( $2->data.length() + 2, "<%s>-tok", $2->data.data );
+		TokenRegion *tokenRegionTok = new TokenRegion( InputLoc(), scannerNameTok,
 				pd->regionList.length(), regionStack.top() );
 		regionStack.top()->childRegions.append( tokenRegionTok );
 		pd->regionList.append( tokenRegionTok );
-		String scannerNameTok( $2->data.length() + 2, "<%s>-tok", $2->data.data );
 		addRegionDef( InputLoc(), namespaceStack.top(), scannerNameTok, tokenRegionTok );
 
 		/* Make the new token region. */
-		TokenRegion *tokenRegion = new TokenRegion( InputLoc(), $2->data,
+		String scannerName( $2->data.length() + 2, "<%s>", $2->data.data );
+		TokenRegion *tokenRegion = new TokenRegion( InputLoc(), scannerName,
 				pd->regionList.length(), regionStack.top() );
 		regionStack.top()->childRegions.append( tokenRegion );
 		pd->regionList.append( tokenRegion );
-		String scannerName( $2->data.length() + 2, "<%s>", $2->data.data );
 		addRegionDef( InputLoc(), namespaceStack.top(), scannerName, tokenRegion );
 		regionStack.push( tokenRegion );
 
@@ -948,35 +948,35 @@ literal_item: opt_no_ignore TK_Literal opt_no_ignore
 		bool insideRegion = regionStack.top() != pd->rootRegion;
 		if ( !insideRegion ) {
 			/* Just for ignores. */
-			TokenRegion *tokenRegionIgn = new TokenRegion( InputLoc(), name + "_ign",
+			String scannerNameIgn( name.length() + 2, "<%s>-ign", name.data );
+			TokenRegion *tokenRegionIgn = new TokenRegion( InputLoc(), scannerNameIgn,
 					pd->regionList.length(), regionStack.top() );
 			regionStack.top()->childRegions.append( tokenRegionIgn );
 			pd->regionList.append( tokenRegionIgn );
-			String scannerNameIgn( name.length() + 2, "<%s>-ign", name.data );
 			addRegionDef( InputLoc(), namespaceStack.top(), scannerNameIgn, tokenRegionIgn );
 
 			/* Just for collect ignores. Will use the ignore-only start state. */
-			TokenRegion *tokenRegionCi = new TokenRegion( InputLoc(), name + "_ci",
+			String scannerNameCi( name.length() + 2, "<%s>-ci", name.data );
+			TokenRegion *tokenRegionCi = new TokenRegion( InputLoc(), scannerNameCi,
 					pd->regionList.length(), regionStack.top() );
 			regionStack.top()->childRegions.append( tokenRegionCi );
 			pd->regionList.append( tokenRegionCi );
-			String scannerNameCi( name.length() + 2, "<%s>-ci", name.data );
 			addRegionDef( InputLoc(), namespaceStack.top(), scannerNameCi, tokenRegionCi );
 
 			/* Just for tokens. */
-			TokenRegion *tokenRegionTok = new TokenRegion( InputLoc(), name + "_tok",
+			String scannerNameTok( name.length() + 2, "<%s>-tok", name.data );
+			TokenRegion *tokenRegionTok = new TokenRegion( InputLoc(), scannerNameTok,
 					pd->regionList.length(), regionStack.top() );
 			regionStack.top()->childRegions.append( tokenRegionTok );
 			pd->regionList.append( tokenRegionTok );
-			String scannerNameTok( name.length() + 2, "<%s>-tok", name.data );
 			addRegionDef( InputLoc(), namespaceStack.top(), scannerNameTok, tokenRegionTok );
 
 			/* Make a new token region just for the token. */
-			TokenRegion *tokenRegion = new TokenRegion( InputLoc(), $2->data,
+			String scannerName( name.length() + 2, "<%s>", name.data );
+			TokenRegion *tokenRegion = new TokenRegion( InputLoc(), scannerName,
 					pd->regionList.length(), regionStack.top() );
 			regionStack.top()->childRegions.append( tokenRegion );
 			pd->regionList.append( tokenRegion );
-			String scannerName( name.length() + 2, "<%s>", name.data );
 			addRegionDef( InputLoc(), namespaceStack.top(), scannerName, tokenRegion );
 			regionStack.push( tokenRegion );
 
@@ -1174,35 +1174,35 @@ token_def_name:
 
 		if ( !pd->insideRegion ) {
 			/* For just ignores. */
-			TokenRegion *tokenRegionIgn = new TokenRegion( InputLoc(), name + "_ign",
+			String scannerNameIgn( name.length() + 2, "<%s>-ign", name.data );
+			TokenRegion *tokenRegionIgn = new TokenRegion( InputLoc(), scannerNameIgn,
 					pd->regionList.length(), regionStack.top() );
 			regionStack.top()->childRegions.append( tokenRegionIgn );
 			pd->regionList.append( tokenRegionIgn );
-			String scannerNameIgn( name.length() + 2, "<%s>-ign", name.data );
 			addRegionDef( InputLoc(), namespaceStack.top(), scannerNameIgn, tokenRegionIgn );
 
 			/* Just for explicitly collecting ignores. */
-			TokenRegion *tokenRegionCi = new TokenRegion( InputLoc(), name + "_ci",
+			String scannerNameCi( name.length() + 2, "<%s>-ci", name.data );
+			TokenRegion *tokenRegionCi = new TokenRegion( InputLoc(), scannerNameCi,
 					pd->regionList.length(), regionStack.top() );
 			regionStack.top()->childRegions.append( tokenRegionCi );
 			pd->regionList.append( tokenRegionCi );
-			String scannerNameCi( name.length() + 2, "<%s>-ci", name.data );
 			addRegionDef( InputLoc(), namespaceStack.top(), scannerNameCi, tokenRegionCi );
 
 			/* Just for tokens. */
-			TokenRegion *tokenRegionTok = new TokenRegion( InputLoc(), name + "_tok",
+			String scannerNameTok( name.length() + 2, "<%s>-tok", name.data );
+			TokenRegion *tokenRegionTok = new TokenRegion( InputLoc(), scannerNameTok,
 					pd->regionList.length(), regionStack.top() );
 			regionStack.top()->childRegions.append( tokenRegionTok );
 			pd->regionList.append( tokenRegionTok );
-			String scannerNameTok( name.length() + 2, "<%s>-tok", name.data );
 			addRegionDef( InputLoc(), namespaceStack.top(), scannerNameTok, tokenRegionTok );
 			
 			/* If not inside a region, make one for the token. */
-			TokenRegion *tokenRegion = new TokenRegion( InputLoc(), name,
+			String scannerName( name.length() + 2, "<%s>", name.data );
+			TokenRegion *tokenRegion = new TokenRegion( InputLoc(), scannerName,
 					pd->regionList.length(), regionStack.top() );
 			regionStack.top()->childRegions.append( tokenRegion );
 			pd->regionList.append( tokenRegion );
-			String scannerName( name.length() + 2, "<%s>", name.data );
 			addRegionDef( InputLoc(), namespaceStack.top(), scannerName, tokenRegion );
 			regionStack.push( tokenRegion );
 
