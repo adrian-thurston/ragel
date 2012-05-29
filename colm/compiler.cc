@@ -878,19 +878,6 @@ void Compiler::printNameIndex( NameInst **nameIndex )
 	}
 }
 
-/* Build the name tree and supporting data structures. */
-NameInst *Compiler::makeJoinNameTree( Join *join )
-{
-	/* Create the root name. */
-	nextNameId = 0;
-	NameInst *rootName = new NameInst( InputLoc(), 0, 0, nextNameId++, false );
-
-	/* Make the name tree. */
-	initNameWalk( rootName );
-	join->makeNameTree( this );
-
-	return rootName;
-}
 
 /* Build the name tree and supporting data structures. */
 NameInst *Compiler::makeNameTree()

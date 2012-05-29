@@ -182,9 +182,6 @@ int CmpUniqueParser::compare( const UniqueParser &ut1, const UniqueParser &ut2 )
 
 FsmGraph *VarDef::walk( Compiler *pd )
 {
-	/* We enter into a new name scope. */
-	NameFrame nameFrame = pd->enterNameScope( true, 1 );
-
 	/* Recurse on the expression. */
 	FsmGraph *rtnVal = join->walk( pd );
 	
@@ -209,23 +206,9 @@ FsmGraph *VarDef::walk( Compiler *pd )
 	if ( pd->curNameInst->numRefs > 0 )
 		rtnVal->setEntry( pd->curNameInst->id, rtnVal->startState );
 	
-	/* Pop the name scope. */
-	pd->popNameScope( nameFrame );
 	return rtnVal;
 }
 
-void VarDef::makeNameTree( const InputLoc &loc, Compiler *pd )
-{
-	/* The variable definition enters a new scope. */
-	NameInst *prevNameInst = pd->curNameInst;
-	pd->curNameInst = pd->addNameInst( loc, name, false );
-
-	/* Recurse. */
-	join->makeNameTree( pd );
-
-	/* The name scope ends, pop the name instantiation. */
-	pd->curNameInst = prevNameInst;
-}
 
 FsmGraph *RegionDef::walk( Compiler *pd )
 {
@@ -373,13 +356,6 @@ void TokenRegion::makeNameTree( Compiler *pd )
 	 * inst. */
 	assert( regionNameInst == 0 );
 	regionNameInst = pd->curNameInst;
-
-	/* Recurse into all parts of the longest match operator. */
-	for ( TokenDefListReg::Iter td = tokenDefList; td.lte(); td++ ) {
-		/* Watch out for patternless tokens. */
-		if ( td->join != 0 ) 
-			td->join->makeNameTree( pd );
-	}
 
 	/* The name scope ends, pop the name instantiation. */
 	pd->curNameInst = prevNameInst;
@@ -658,19 +634,6 @@ FsmGraph *Join::walk( Compiler *pd )
 	return retFsm;
 }
 
-void Join::makeNameTree( Compiler *pd )
-{
-	assert( exprList.length() == 1 );
-
-	/* Recurse into the single expression. */
-	exprList.head->makeNameTree( pd );
-
-	/* Maybe the the context. */
-	if ( context != 0 )
-		context->makeNameTree( pd );
-}
-
-
 /* Clean up after an expression node. */
 Expression::~Expression()
 {
@@ -752,24 +715,6 @@ FsmGraph *Expression::walk( Compiler *pd, bool lastInSeq )
 	}
 
 	return rtnVal;
-}
-
-void Expression::makeNameTree( Compiler *pd )
-{
-	switch ( type ) {
-	case OrType:
-	case IntersectType:
-	case SubtractType:
-	case StrongSubtractType:
-		expression->makeNameTree( pd );
-		term->makeNameTree( pd );
-		break;
-	case TermType:
-		term->makeNameTree( pd );
-		break;
-	case BuiltinType:
-		break;
-	}
 }
 
 /* Clean up after a term node. */
@@ -886,22 +831,6 @@ FsmGraph *Term::walk( Compiler *pd, bool lastInSeq )
 		}
 	}
 	return rtnVal;
-}
-
-void Term::makeNameTree( Compiler *pd )
-{
-	switch ( type ) {
-	case ConcatType:
-	case RightStartType:
-	case RightFinishType:
-	case LeftType:
-		term->makeNameTree( pd );
-		factorWithAug->makeNameTree( pd );
-		break;
-	case FactorWithAugType:
-		factorWithAug->makeNameTree( pd );
-		break;
-	}
 }
 
 /* Clean up after a factor with augmentation node. */
@@ -1189,12 +1118,6 @@ FsmGraph *FactorWithAug::walk( Compiler *pd )
 	return rtnVal;
 }
 
-void FactorWithAug::makeNameTree( Compiler *pd )
-{
-	NameInst *prevNameInst = pd->curNameInst;
-	factorWithRep->makeNameTree( pd );
-	pd->curNameInst = prevNameInst;
-}
 
 /* Clean up after a factor with repetition node. */
 FactorWithRep::~FactorWithRep()
@@ -1452,24 +1375,6 @@ FsmGraph *FactorWithRep::walk( Compiler *pd )
 	return retFsm;
 }
 
-void FactorWithRep::makeNameTree( Compiler *pd )
-{
-	switch ( type ) {
-	case StarType:
-	case StarStarType:
-	case OptionalType:
-	case PlusType:
-	case ExactType:
-	case MaxType:
-	case MinType:
-	case RangeType:
-		factorWithRep->makeNameTree( pd );
-		break;
-	case FactorWithNegType:
-		factorWithNeg->makeNameTree( pd );
-		break;
-	}
-}
 
 /* Clean up after a factor with negation node. */
 FactorWithNeg::~FactorWithNeg()
@@ -1518,20 +1423,6 @@ FsmGraph *FactorWithNeg::walk( Compiler *pd )
 	}}
 	return retFsm;
 }
-
-void FactorWithNeg::makeNameTree( Compiler *pd )
-{
-	switch ( type ) {
-	case NegateType:
-	case CharNegateType:
-		factorWithNeg->makeNameTree( pd );
-		break;
-	case FactorType:
-		factor->makeNameTree( pd );
-		break;
-	}
-}
-
 
 /* Clean up after a factor node. */
 Factor::~Factor()
@@ -1585,22 +1476,6 @@ FsmGraph *Factor::walk( Compiler *pd )
 	return rtnVal;
 }
 
-void Factor::makeNameTree( Compiler *pd )
-{
-	switch ( type ) {
-	case LiteralType:
-	case RangeType:
-	case OrExprType:
-	case RegExprType:
-		break;
-	case ReferenceType:
-		varDef->makeNameTree( loc, pd );
-		break;
-	case ParenType:
-		join->makeNameTree( pd );
-		break;
-	}
-}
 
 /* Clean up a range object. Must delete the two literals. */
 Range::~Range()
