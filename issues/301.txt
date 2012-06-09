@@ -1,0 +1,9 @@
+Id: 301 
+Subject: the define/var importer should accept values in hex 
+Tracker: Feature 
+Status: New 
+Fixed-Version:  
+Created-On: Sat Jun 25 10:53:08 -0700 2011 
+Updated-On: Sat Jun 25 10:53:26 -0700 2011 
+ 
+ 

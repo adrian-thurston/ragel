@@ -1,0 +1,9 @@
+Id: 2 
+Subject: goto in a leaving action does not cause label to be referenced 
+Tracker: Bug 
+Status: New 
+Fixed-Version:  
+Created-On: Thu Feb 18 23:22:35 -0800 2010 
+Updated-On: Sun May 22 10:04:37 -0700 2011 
+ 
+Recorded in email 2010-02-18 (ragel-bug). 

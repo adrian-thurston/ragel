@@ -1,0 +1,9 @@
+Id: 311 
+Subject: Documentation in HTML in addition to PDF. 
+Tracker: Feature 
+Status: New 
+Fixed-Version: 7.0 
+Created-On: Sun Jul 31 10:52:34 -0700 2011 
+Updated-On: Sun Jul 31 10:52:34 -0700 2011 
+ 
+ 

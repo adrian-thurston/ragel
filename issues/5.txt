@@ -1,0 +1,9 @@
+Id: 5 
+Subject: not all condition embedding operators are documented 
+Tracker: Bug 
+Status: New 
+Fixed-Version:  
+Created-On: Wed Mar 03 22:44:10 -0800 2010 
+Updated-On: Sat Mar 13 18:05:05 -0800 2010 
+ 
+needs documenting 

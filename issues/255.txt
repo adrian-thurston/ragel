@@ -1,0 +1,9 @@
+Id: 255 
+Subject: state chart documentation is lacking 
+Tracker: Bug 
+Status: New 
+Fixed-Version:  
+Created-On: Thu Apr 07 13:24:20 -0700 2011 
+Updated-On: Thu Apr 07 13:24:20 -0700 2011 
+ 
+ 

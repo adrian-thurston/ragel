@@ -1,0 +1,11 @@
+Id: 100 
+Subject: Fix generated code for Ruby 1.9 compatibility. 
+Tracker: Bug 
+Status: Fixed 
+Fixed-Version: 6.7 
+Created-On: Thu Dec 16 10:32:43 -0800 2010 
+Updated-On: Sun May 22 10:53:36 -0700 2011 
+ 
+Patch from DIEGO on list.
+
+http://www.complang.org/pipermail/ragel-users/2010-December/001226.html 

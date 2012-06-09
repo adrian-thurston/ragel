@@ -1,0 +1,9 @@
+Id: 7 
+Subject: if there is a getchar expression, it should be evaluated only once 
+Tracker: Feature 
+Status: New 
+Fixed-Version:  
+Created-On: Wed Mar 03 22:45:56 -0800 2010 
+Updated-On: Sat Mar 13 18:05:05 -0800 2010 
+ 
+This would permit us to use functions that should be called only once to retrieve a character. 

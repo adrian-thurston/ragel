@@ -1,0 +1,19 @@
+Id: 307 
+Subject: go code generator is now broken 
+Tracker: Bug 
+Status: New 
+Fixed-Version: 7.0 
+Created-On: Sun Jul 17 19:40:11 -0700 2011 
+Updated-On: Sun Dec 25 10:51:08 -0800 2011 
+ 
+From Miek Gieben:
+
+With new Go versions Ragel breaks, as the
+newest weekly release(s) restricts the use of 'goto'. 
+
+See this message from Andrew Gerrand:
+http://groups.google.com/group/golang-nuts/browse_thread/thread/a27ca841a496956b/6768a0f0326a6569?lnk=gst&q=goto#6768a0f0326a6569
+
+This will soon show up in a 'stable' release thereby breaking
+Ragel's ability to generate Go code.
+ 

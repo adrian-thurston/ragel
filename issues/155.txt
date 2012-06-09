@@ -1,0 +1,11 @@
+Id: 155 
+Subject: Suppress #line output for Ruby code generation 
+Tracker: Feature 
+Status: Completed 
+Fixed-Version: 6.7 
+Created-On: Thu Feb 03 17:39:01 -0800 2011 
+Updated-On: Tue Apr 12 17:17:44 -0700 2011 
+ 
+patch from David Yip
+
+http://www.complang.org/pipermail/ragel-users/2011-February/001270.html 

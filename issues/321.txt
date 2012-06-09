@@ -1,0 +1,9 @@
+Id: 321 
+Subject: unify the ReducedGen class and the CodeGenData class 
+Tracker: Feature 
+Status: New 
+Fixed-Version: 7.0 
+Created-On: Sat Sep 10 23:09:13 -0700 2011 
+Updated-On: Sat Sep 10 23:09:13 -0700 2011 
+ 
+This separation was present because of the intermediate XML file. With the XML file gone it doesn't make much sense to separate into producer and consumer. 

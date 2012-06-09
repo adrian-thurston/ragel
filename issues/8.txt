@@ -1,0 +1,53 @@
+Id: 8 
+Subject: fgoto in eof actions does not create label 
+Tracker: Bug 
+Status: New 
+Fixed-Version:  
+Created-On: Wed Mar 03 22:47:36 -0800 2010 
+Updated-On: Sun May 09 11:24:41 -0700 2010 
+ 
+Results in code that does not compile. Should produce an error? Or maybe just change CS when in the leaving action?
+
+<pre>
+From: Drake Wilson <drake@begriffli.ch>
+To: Debian Bug Tracking System <submit@bugs.debian.org>
+Subject: ragel: emitted C code with -G2 in the presence of fgoto fails to compile
+Date: Fri, 27 Nov 2009 02:09:04 -0600
+
+Package: ragel
+Version: 6.5-1
+Severity: normal
+
+Here's a semi-minimal test machine:
+
+/* ---------------------------------------- */
+%%{
+machine foobar;
+alphtype unsigned char;
+
+bar := 'b' @{fbreak;} ;
+foo := 'a' %{fgoto bar;} ;
+}%%
+
+%%write data;
+
+void
+run(unsigned char const *p, unsigned char const *pe)
+{
+        unsigned char const *const eof = pe;
+        int cs;
+        %%write init;
+        %%write exec;
+}
+/* ---------------------------------------- */
+
+  $ ragel -C -G2 test.rl && gcc -c test.c
+  test.rl: In function ‘run’:
+  test.rl:6: error: label ‘st2’ used but not defined
+
+This appears to be because the fgoto for some reason doesn't cause a
+label to be generated for the target state, even though one is needed.
+
+   ---> Drake Wilson
+
+</pre> 

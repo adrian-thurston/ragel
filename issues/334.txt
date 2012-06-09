@@ -1,0 +1,11 @@
+Id: 334 
+Subject: again label for C ipgoto not created if an EOF action has an fret 
+Tracker: Bug 
+Status: New 
+Fixed-Version:  
+Created-On: Sun Nov 20 21:04:26 -0800 2011 
+Updated-On: Sun Nov 20 21:06:25 -0800 2011 
+ 
+Reported by Марк Коренберг.
+
+http://www.complang.org/pipermail/ragel-users/2011-October/002740.html 

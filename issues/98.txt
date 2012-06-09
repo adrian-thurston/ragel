@@ -1,0 +1,35 @@
+Id: 98 
+Subject: something like define macros 
+Tracker: Feature 
+Status: New 
+Fixed-Version:  
+Created-On: Thu Dec 16 10:27:34 -0800 2010 
+Updated-On: Thu Dec 16 10:33:00 -0800 2010 
+ 
+<pre>
+
+
+ via_parm   = ( sent_protocol LWS sent_by ( SEMI ( via_branch |
+header_param ) )* )
+                    >start_value %store_value;
+ Via           = ( "Via"i | "v"i ) >write_value >start_field
+%write_field HCOLON via_parm
+                    ( COMMA %write_value via_parm )*;
+
+
+So I would like to use smething like a C #define. This is, adding at
+the top of my Ragel file:
+
+  #define COMMA_SEPARATED_VALUES(VALUE) ">write_value >start_field
+             %write_field HCOLON VALUE ( COMMA %write_value VALUE )*;"
+</pre>
+And then in the machine write:
+
+<pre>
+  Via = ( "Via"i | "v"i ) COMMA_SEPARATED_VALUE(via_parm)
+</pre>
+
+
+Iñaki Baz Castillo <ibc@aliax.net>
+ibc@aliax.net
+ 

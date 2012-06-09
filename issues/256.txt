@@ -1,0 +1,9 @@
+Id: 256 
+Subject: add write "entry" <machine_or_label> 
+Tracker: Feature 
+Status: New 
+Fixed-Version:  
+Created-On: Thu Apr 07 14:19:56 -0700 2011 
+Updated-On: Thu Apr 07 14:19:56 -0700 2011 
+ 
+This would be useful for setting the state outside of the machine. Still needed :) 

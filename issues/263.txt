@@ -1,0 +1,11 @@
+Id: 263 
+Subject: apply new ragel.m4 
+Tracker: Feature 
+Status: Completed 
+Fixed-Version: 6.7 
+Created-On: Tue Apr 12 16:40:54 -0700 2011 
+Updated-On: Tue Apr 12 16:41:45 -0700 2011 
+ 
+Apply new ragel.m4 autoconf definitions from Diego.
+
+http://www.complang.org/pipermail/ragel-users/2009-December/002357.html 

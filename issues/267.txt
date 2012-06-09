@@ -1,0 +1,9 @@
+Id: 267 
+Subject: Apply GO patch 
+Tracker: Feature 
+Status: Completed 
+Fixed-Version: 6.7 
+Created-On: Tue Apr 12 17:10:49 -0700 2011 
+Updated-On: Tue Apr 12 17:11:36 -0700 2011 
+ 
+ 

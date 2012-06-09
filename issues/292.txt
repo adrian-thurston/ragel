@@ -1,0 +1,9 @@
+Id: 292 
+Subject: add go language to the test suite 
+Tracker: Feature 
+Status: New 
+Fixed-Version:  
+Created-On: Fri May 20 15:37:28 -0700 2011 
+Updated-On: Fri May 20 15:40:10 -0700 2011 
+ 
+ 

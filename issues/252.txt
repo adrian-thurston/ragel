@@ -1,0 +1,13 @@
+Id: 252 
+Subject: support for command line options in ragel files 
+Tracker: Feature 
+Status: New 
+Fixed-Version:  
+Created-On: Wed Apr 06 15:31:44 -0700 2011 
+Updated-On: Wed Apr 06 15:36:44 -0700 2011 
+ 
+This has been requested in the past. Requested again by Denis Naumov.
+
+%%option name = value;
+
+There are some sticky issues involved ... how to parse the host language to discover what language we are to parse? 

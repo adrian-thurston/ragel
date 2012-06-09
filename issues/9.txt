@@ -1,0 +1,11 @@
+Id: 9 
+Subject: Leaving actions executed on error 
+Tracker: Feature 
+Status: New 
+Fixed-Version:  
+Created-On: Wed Mar 03 22:48:34 -0800 2010 
+Updated-On: Sat Mar 13 18:05:05 -0800 2010 
+ 
+Maybe?
+
+RE: Dec 22, 2009 mailing list message from Andrew Dalke 

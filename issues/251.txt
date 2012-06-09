@@ -1,0 +1,44 @@
+Id: 251 
+Subject: wrong literal format generated for "alphtype byte" in C# generator 
+Tracker: Bug 
+Status: Fixed 
+Fixed-Version: 6.7 
+Created-On: Wed Apr 06 15:23:35 -0700 2011 
+Updated-On: Sun May 22 12:14:12 -0700 2011 
+ 
+From Denis Naumov:
+
+<pre>
+By default type is 'char'
+
+and ragel generate
+    static readonly char[] _test_trans_keys =  new ushort [] { '\u0022' .... }
+
+for -T0 mode and
+
+   switch( data[(      _ctx.current)] )
+       {  case '\u0009': goto tr0;  ...  }
+
+for -G0 mode
+
+it's ok.
+
+but if i use "alphtype byte;" ragel generate
+
+    static readonly byte[] _test_trans_keys =  new ushort [] { '\u0022' .... }
+
+for -T0 mode and
+
+   switch( data[(      _ctx.current)] )
+       {  case '\u0009': goto tr0;  ...  }
+
+for -G0 mode
+
+it's wrong. It must be
+    static readonly byte[] _test_trans_keys =  new ushort [] { 22, .... }
+and
+   switch( data[(      _ctx.current)] )
+       {  case 9: goto tr0;  ...  }
+
+it seems to be that ragel generate '\u****' constants for all alphtypes.
+</pre> 

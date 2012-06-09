@@ -1,0 +1,14 @@
+Id: 4 
+Subject: compiler warnings on some 64-bit Windows (Ragel 6.5) 
+Tracker: Bug 
+Status: New 
+Fixed-Version:  
+Created-On: Wed Mar 03 22:42:21 -0800 2010 
+Updated-On: Sat Mar 13 18:05:04 -0800 2010 
+ 
+reported by Dave McCaldon
+
+<pre>
+ip_addr_parser.c(442) : warning C4244: '+=' : conversion from '__int64' to 'unsigned int', possible loss of data _trans += (_mid - _keys);
+ip_addr_parser.c(465) : warning C4244: '+=' : conversion from '__int64' to 'unsigned int', possible loss of data _trans += ((_mid - _keys)>>1);
+</pre> 

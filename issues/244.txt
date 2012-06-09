@@ -1,0 +1,60 @@
+Id: 244 
+Subject: include directories (-I) not working as expected in native win32 build 
+Tracker: Bug 
+Status: Fixed 
+Fixed-Version: 6.7 
+Created-On: Wed Mar 23 17:10:36 -0700 2011 
+Updated-On: Sun May 22 10:47:13 -0700 2011 
+ 
+Reported by Austin Hastings. Win32 build only.
+
+<pre>
+===== testinc.rl =====
+%%{
+machine inner;
+one = "one";
+two = "two";
+}%%
+===== test.rl =====
+%%{
+    machine test;
+    include inner "testinc.rl";
+
+    main := one;
+}%%
+===== =====
+
+When I have test.rl and testinc.rl in the same directory, I can do
+
+    ragel test.rl
+
+with no problems. When I move testinc.rl to a different directory:
+
+    mkdir x
+    mv testinc.rl x
+    ragel test.rl
+
+I get errors (as expected):
+
+test.rl:3:28: include: failed to locate file
+test.rl:3:28: include: attempted: "testinc.rl"
+test.rl:5:10: graph lookup of "one" failed
+
+When I then specify the include path:
+
+    ragel -I x test.rl
+
+I get:
+
+$ ragel -I x test.rl
+test.rl:5:10: graph lookup of "one" failed
+
+Apparently ragel now finds the included file okay, but for some reason the exact same file which worked before has problems with finding the "one" tag.
+
+What am I doing wrong, or is this a bug?
+
+=Austin 
+
+
+
+</pre> 
