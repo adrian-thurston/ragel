@@ -1,0 +1,9 @@
+Id: 298 
+Subject: independent declare and resolve passes 
+Tracker: Feature 
+Status: Completed 
+Fixed-Version: 0.2 
+Created-On: Sun Jun 19 15:44:44 -0700 2011 
+Updated-On: Sun Jul 10 11:26:32 -0700 2011 
+ 
+The declare/resolve pass(es) need to be made independent of the parser and compile pass. Need to lookup types after parsing because we support use before declaration, and we need to do lookups before compilation because some lookups cause new tree types to be declared (generics). 

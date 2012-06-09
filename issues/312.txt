@@ -1,0 +1,9 @@
+Id: 312 
+Subject: sending long strings to a parser 
+Tracker: Bug 
+Status: Fixed 
+Fixed-Version: 0.3 
+Created-On: Mon Aug 01 09:15:12 -0700 2011 
+Updated-On: Mon Aug 01 22:53:48 -0700 2011 
+ 
+Assertion failure in inputStreamAccumAppendData prevents sending long strings to a parser. 

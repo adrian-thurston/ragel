@@ -1,0 +1,9 @@
+Id: 304 
+Subject: typeid arg should be wrapped in <> (to match map, list, etc) 
+Tracker: Feature 
+Status: Completed 
+Fixed-Version: 0.2 
+Created-On: Tue Jul 12 19:53:55 -0700 2011 
+Updated-On: Tue Jul 12 19:59:34 -0700 2011 
+ 
+ 

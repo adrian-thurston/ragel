@@ -1,0 +1,20 @@
+Id: 310 
+Subject: compilation error: single token in region, where token accepts everything 
+Tracker: Bug 
+Status: Fixed 
+Fixed-Version: 0.3 
+Created-On: Sun Jul 31 10:12:51 -0700 2011 
+Updated-On: Sun Aug 07 10:14:49 -0700 2011 
+ 
+<pre>
+
+token all /any*/
+
+def start 
+    [all]
+
+parse Start: start( stdin )
+
+print( Start )
+
+</pre> 

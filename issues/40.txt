@@ -1,0 +1,9 @@
+Id: 40 
+Subject: ref output in function call introduces leaks 
+Tracker: Bug 
+Status: New 
+Fixed-Version:  
+Created-On: Sat Mar 20 10:53:10 -0700 2010 
+Updated-On: Sat Mar 20 10:53:10 -0700 2010 
+ 
+working on a new code generator and as soon as ref output in a function call is introduces there are leaks 

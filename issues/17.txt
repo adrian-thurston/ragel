@@ -1,0 +1,9 @@
+Id: 17 
+Subject: need to support full argument list 
+Tracker: Feature 
+Status: Closed 
+Fixed-Version:  
+Created-On: Sat Mar 20 10:44:30 -0700 2010 
+Updated-On: Sat Mar 20 10:44:30 -0700 2010 
+ 
+Currently only supporting argv1. Instead all args need to go into a list of strings. 

@@ -1,0 +1,9 @@
+Id: 34 
+Subject: error location in included files is wrong 
+Tracker: Bug 
+Status: Fixed 
+Fixed-Version: 0.3 
+Created-On: Sat Mar 20 10:51:02 -0700 2010 
+Updated-On: Sun Nov 20 14:36:12 -0800 2011 
+ 
+report file that included the file that the error was in 

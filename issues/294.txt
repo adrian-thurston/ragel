@@ -1,0 +1,9 @@
+Id: 294 
+Subject: add tests to the dist 
+Tracker: Feature 
+Status: Completed 
+Fixed-Version: 0.2 
+Created-On: Mon May 23 21:56:58 -0700 2011 
+Updated-On: Sun Jul 31 10:09:03 -0700 2011 
+ 
+Tests are not currently bundled with the dist, they should be. 

@@ -1,0 +1,9 @@
+Id: 342 
+Subject: eliminate series of test functions from the input stream interface 
+Tracker: Feature 
+Status: Completed 
+Fixed-Version: 0.4 
+Created-On: Thu Dec 29 10:37:42 -0800 2011 
+Updated-On: Sat Jan 21 14:04:38 -0800 2012 
+ 
+rather than calling a series of tests for exceptional situations, us one main get data function and return the exceptional circumstances from that. This is helpful in the split between wrapper and implementation streams. 

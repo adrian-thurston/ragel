@@ -1,0 +1,9 @@
+Id: 335 
+Subject: naming attributes in cons is inconsistent with the use of colon for capture 
+Tracker: Bug 
+Status: Fixed 
+Fixed-Version: 0.4 
+Created-On: Sun Nov 27 17:52:37 -0800 2011 
+Updated-On: Sat Jan 21 14:04:06 -0800 2012 
+ 
+Eliminate this. Just go with positions. 

@@ -1,0 +1,9 @@
+Id: 330 
+Subject: parse errors cannot be printed 
+Tracker: Bug 
+Status: Fixed 
+Fixed-Version: 0.3 
+Created-On: Sun Oct 30 16:28:52 -0700 2011 
+Updated-On: Sun Nov 20 15:13:44 -0800 2011 
+ 
+Store them instead. They can be printed in the program if needed, or exported to the program that the colm program is embedded in. 

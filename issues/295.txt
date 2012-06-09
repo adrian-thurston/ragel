@@ -1,0 +1,13 @@
+Id: 295 
+Subject: unnamed generics using <type_args> as the syntax 
+Tracker: Feature 
+Status: Completed 
+Fixed-Version: 0.2 
+Created-On: Wed May 25 22:04:01 -0700 2011 
+Updated-On: Tue Jul 12 20:01:05 -0700 2011 
+ 
+Form 'map<foo bar>'
+
+This will require a proper type grammar and improvements to type references.
+
+Currently the generic types are declared like productions. This is very confusing since they are more like C++ templates. They are a predefined type that has arguments. Adopting the <args> syntax for type args. 

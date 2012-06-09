@@ -1,0 +1,9 @@
+Id: 290 
+Subject: declare variables that capture produced tree in construct and parse statements 
+Tracker: Feature 
+Status: Completed 
+Fixed-Version: 0.2 
+Created-On: Fri May 20 14:19:34 -0700 2011 
+Updated-On: Wed Jul 27 19:57:48 -0700 2011 
+ 
+This is a natural extension to the variable declaration/capture syntax that is found all over the language. 

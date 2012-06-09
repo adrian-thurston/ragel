@@ -1,0 +1,9 @@
+Id: 25 
+Subject: optimization of reference chains 
+Tracker: Research 
+Status: New 
+Fixed-Version:  
+Created-On: Sat Mar 20 10:47:40 -0700 2010 
+Updated-On: Sat Mar 20 10:47:40 -0700 2010 
+ 
+I think this is done already. Need to verify. 

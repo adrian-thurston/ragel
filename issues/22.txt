@@ -1,0 +1,9 @@
+Id: 22 
+Subject: garbage collector needs work 
+Tracker: Feature 
+Status: New 
+Fixed-Version:  
+Created-On: Sat Mar 20 10:46:29 -0700 2010 
+Updated-On: Sat Mar 20 10:46:29 -0700 2010 
+ 
+ 

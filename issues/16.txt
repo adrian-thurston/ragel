@@ -1,0 +1,14 @@
+Id: 16 
+Subject: sub patterns and sub constructs 
+Tracker: Research 
+Status: New 
+Fixed-Version:  
+Created-On: Sat Mar 20 10:44:00 -0700 2010 
+Updated-On: Sat Mar 20 10:44:00 -0700 2010 
+ 
+maybe use ( ) for these
+
+type( construct ) for sub-construct
+Name: type ( pattern ) for sub-pattern
+
+ 

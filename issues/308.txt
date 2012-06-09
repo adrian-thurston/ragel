@@ -1,0 +1,11 @@
+Id: 308 
+Subject: fix "ref tree*" 
+Tracker: Bug 
+Status: Fixed 
+Fixed-Version: 0.2 
+Created-On: Tue Jul 26 21:35:37 -0700 2011 
+Updated-On: Wed Jul 27 19:51:17 -0700 2011 
+ 
+Parsed as "(ref tree)*" when it should be parsed as "ref (tree*)".
+
+ 

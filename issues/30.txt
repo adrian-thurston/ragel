@@ -1,0 +1,9 @@
+Id: 30 
+Subject: \0 does not work as expected in "" strings 
+Tracker: Bug 
+Status: Fixed 
+Fixed-Version: 0.3 
+Created-On: Sat Mar 20 10:48:58 -0700 2010 
+Updated-On: Mon Aug 01 22:53:10 -0700 2011 
+ 
+works in '' strings, but does not in "" strings. 

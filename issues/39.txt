@@ -1,0 +1,9 @@
+Id: 39 
+Subject: parse accumulator crashes if required to backtrack 
+Tracker: Bug 
+Status: New 
+Fixed-Version:  
+Created-On: Sat Mar 20 10:52:52 -0700 2010 
+Updated-On: Sat Mar 20 10:52:52 -0700 2010 
+ 
+ 

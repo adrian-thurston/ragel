@@ -1,0 +1,9 @@
+Id: 52 
+Subject: translate block with no send causes crash 
+Tracker: Bug 
+Status: New 
+Fixed-Version:  
+Created-On: Fri Mar 26 23:58:56 -0700 2010 
+Updated-On: Fri Mar 26 23:58:56 -0700 2010 
+ 
+ 

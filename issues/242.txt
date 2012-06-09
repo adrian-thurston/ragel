@@ -1,0 +1,9 @@
+Id: 242 
+Subject: test suite failes on 64bit 
+Tracker: Bug 
+Status: Fixed 
+Fixed-Version: 0.1 
+Created-On: Wed Mar 23 17:06:17 -0700 2011 
+Updated-On: Tue May 17 20:08:07 -0700 2011 
+ 
+ 

@@ -1,0 +1,9 @@
+Id: 38 
+Subject: Really need ?expr in pattern matches. 
+Tracker: Feature 
+Status: New 
+Fixed-Version:  
+Created-On: Sat Mar 20 10:52:33 -0700 2010 
+Updated-On: Sat Mar 20 10:52:33 -0700 2010 
+ 
+Pain doing it after the pattern. 

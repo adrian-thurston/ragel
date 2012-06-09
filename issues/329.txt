@@ -1,0 +1,9 @@
+Id: 329 
+Subject: automatic access to RHS elements 
+Tracker: Feature 
+Status: Completed 
+Fixed-Version: 0.3 
+Created-On: Wed Oct 26 09:09:08 -0700 2011 
+Updated-On: Sun Nov 20 14:35:51 -0800 2011 
+ 
+Allow access to RHS elements. Useful for extraction of data. 

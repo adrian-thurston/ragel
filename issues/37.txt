@@ -1,0 +1,9 @@
+Id: 37 
+Subject: need a list concatenation operator 
+Tracker: Bug 
+Status: New 
+Fixed-Version:  
+Created-On: Sat Mar 20 10:52:14 -0700 2010 
+Updated-On: Sat Mar 20 10:52:14 -0700 2010 
+ 
+List1 . List2 should put List2 on end of List1 (requires same type, or list1 == list2*). 

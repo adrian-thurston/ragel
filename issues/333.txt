@@ -1,0 +1,9 @@
+Id: 333 
+Subject: don't attach ignores until the token is shifted 
+Tracker: Bug 
+Status: Fixed 
+Fixed-Version: 0.3 
+Created-On: Thu Nov 17 22:08:47 -0800 2011 
+Updated-On: Sun Nov 20 14:29:13 -0800 2011 
+ 
+ 

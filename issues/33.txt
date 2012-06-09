@@ -1,0 +1,9 @@
+Id: 33 
+Subject: exit function 
+Tracker: Feature 
+Status: Closed 
+Fixed-Version:  
+Created-On: Sat Mar 20 10:50:44 -0700 2010 
+Updated-On: Sat Mar 20 10:50:44 -0700 2010 
+ 
+an exit function is necessary. 

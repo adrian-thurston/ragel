@@ -1,0 +1,9 @@
+Id: 51 
+Subject: using stdin.pull in a token transformation results in IN_HALT 
+Tracker: Bug 
+Status: New 
+Fixed-Version:  
+Created-On: Thu Mar 25 17:58:09 -0700 2010 
+Updated-On: Thu Mar 25 17:58:09 -0700 2010 
+ 
+can be shown with the commitbt.lm test case. Change input.pull to stdin.pull. 

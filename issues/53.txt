@@ -1,0 +1,9 @@
+Id: 53 
+Subject: print_xml_ac fails when used at end of commitbt.lm 
+Tracker: Bug 
+Status: New 
+Fixed-Version:  
+Created-On: Sat Mar 27 01:03:53 -0700 2010 
+Updated-On: Sat Mar 27 01:03:53 -0700 2010 
+ 
+ 

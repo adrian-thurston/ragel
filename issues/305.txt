@@ -1,0 +1,9 @@
+Id: 305 
+Subject: add alias statement, which can be used to alias a type 
+Tracker: Feature 
+Status: Fixed 
+Fixed-Version: 0.2 
+Created-On: Fri Jul 15 23:33:35 -0700 2011 
+Updated-On: Wed Jul 27 19:51:03 -0700 2011 
+ 
+This is important now that we reference maps and lists using inline typerefs, rather than declaring them. Complicated maps get tedius to write out over and over again. 

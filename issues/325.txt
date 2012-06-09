@@ -1,0 +1,9 @@
+Id: 325 
+Subject: XML printing off of main print function 
+Tracker: Feature 
+Status: Completed 
+Fixed-Version: 0.3 
+Created-On: Sun Oct 09 10:29:08 -0700 2011 
+Updated-On: Sat Nov 05 14:54:59 -0700 2011 
+ 
+Need to have only one print loop as the complexity increases. 

@@ -1,0 +1,9 @@
+Id: 284 
+Subject: convert to automake 
+Tracker: Feature 
+Status: Completed 
+Fixed-Version: 0.1 
+Created-On: Wed May 11 11:47:05 -0700 2011 
+Updated-On: Tue May 17 20:09:05 -0700 2011 
+ 
+ 

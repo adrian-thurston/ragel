@@ -1,0 +1,9 @@
+Id: 326 
+Subject: print the deepest error, it is more accurate 
+Tracker: Feature 
+Status: Completed 
+Fixed-Version: 0.3 
+Created-On: Fri Oct 21 20:01:00 -0700 2011 
+Updated-On: Sun Nov 20 14:36:05 -0800 2011 
+ 
+May also consider printing a list of errors sorted by depth 
