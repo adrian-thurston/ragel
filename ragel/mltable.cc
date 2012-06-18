@@ -807,7 +807,7 @@ void OCamlTabCodeGen::writeData()
 
 	STATE_IDS();
 
-  out << "type state = { mutable keys : int; mutable trans : int; mutable acts : int; mutable nacts : int; }"
+  out << "type " << TYPE_STATE() << " = { mutable keys : int; mutable trans : int; mutable acts : int; mutable nacts : int; }"
     << TOP_SEP();
 
   out << "exception Goto_match" << TOP_SEP();

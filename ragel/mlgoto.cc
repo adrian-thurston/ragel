@@ -659,7 +659,7 @@ void OCamlGotoCodeGen::writeData()
 
 	STATE_IDS();
 
-  out << "type state = { mutable acts : " << ARRAY_TYPE(redFsm->maxActionLoc) <<
+  out << "type " << TYPE_STATE() << " = { mutable acts : " << ARRAY_TYPE(redFsm->maxActionLoc) <<
          " ; mutable nacts : " << ARRAY_TYPE(redFsm->maxActArrItem) << "; }"
     << TOP_SEP();
 
