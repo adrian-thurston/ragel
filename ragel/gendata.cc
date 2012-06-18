@@ -51,12 +51,6 @@
 
 #include "goipgoto.h"
 
-#include "mltable.h"
-#include "mlftable.h"
-#include "mlflat.h"
-#include "mlfflat.h"
-#include "mlgoto.h"
-
 #include "rubytable.h"
 #include "rubyftable.h"
 #include "rubyflat.h"

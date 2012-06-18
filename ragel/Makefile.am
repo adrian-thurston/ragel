@@ -13,7 +13,7 @@ ragel_SOURCES = \
 	dotcodegen.h parsetree.h rlscan.h version.h cdflat.h common.h \
 	csftable.h fsmgraph.h pcheck.h rubycodegen.h xmlcodegen.h cdftable.h \
 	csgoto.h gendata.h ragel.h rubyfflat.h goipgoto.h \
-	mlcodegen.h mltable.h mlftable.h mlflat.h mlfflat.h mlgoto.h \
+	mlcodegen.h mltable.h mlftable.h mlflat.h mlfflat.h mlgoto.h mlfgoto.h \
 	main.cc parsetree.cc parsedata.cc fsmstate.cc fsmbase.cc \
 	fsmattach.cc fsmmin.cc fsmgraph.cc fsmap.cc fsmcond.cc rlscan.cc rlparse.cc \
 	inputdata.cc common.cc redfsm.cc gendata.cc cdcodegen.cc \
@@ -22,7 +22,7 @@ ragel_SOURCES = \
 	rubyftable.cc rubyflat.cc rubyfflat.cc rbxgoto.cc cscodegen.cc \
 	cstable.cc csftable.cc csflat.cc csfflat.cc csgoto.cc csfgoto.cc \
 	csipgoto.cc cssplit.cc dotcodegen.cc dotcodegen-orig.cc xmlcodegen.cc reducedgen.cc goipgoto.cc \
-	mlcodegen.cc mltable.cc mlftable.cc mlflat.cc mlfflat.cc mlgoto.cc \
+	mlcodegen.cc mltable.cc mlftable.cc mlflat.cc mlfflat.cc mlgoto.cc mlfgoto.cc \
 	crackcodegen.h crackcodegen.cc crackflat.h crackflat.cc
 
 BUILT_SOURCES = \
