@@ -7,6 +7,7 @@
 /version.h
 /config.h
 /config.h.in
+/config.h.in~
 /ragel
 /ragel.exe
 /.deps
