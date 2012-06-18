@@ -101,7 +101,7 @@ maximally continuous.  One is free to specify an entire parser using a single
 regular expression.  The single-expression model affords concise and elegant
 descriptions of languages and the generation of very simple, fast and robust
 code.  Ragel compiles executable finite state machines from a high level regular language
-notation. Ragel targets C, C++, Objective-C, D, Go, Java and Ruby.
+notation. Ragel targets C, C++, Objective-C, D, Go, Java, Ruby and OCaml.
 
 In addition to building state machines from regular expressions, Ragel allows
 the programmer to directly specify state machines with state charts. These two
@@ -166,7 +166,7 @@ deterministic finite state automaton. Since every regular language has a state
 machine representation and vice versa, the terms regular language and state
 machine (or just machine) will be used interchangeably in this document.
 
-Ragel outputs machines to C, C++, Objective-C, D, Go, Java or Ruby code. The output is
+Ragel outputs machines to C, C++, Objective-C, D, Go, Java, Ruby or OCaml code. The output is
 designed to be generic and is not bound to any particular input or processing
 method. A Ragel machine expects to have data passed to it in buffer blocks.
 When there is no more input, the machine can be queried for acceptance.  In
@@ -2343,7 +2343,7 @@ stream. These can live in any scope. Control of the input processing loop is
 also possible: the user may break out of the processing loop and return to it
 at any time.
 
-In the case of the C, D, and Go host languages, Ragel is able to generate very
+In the case of the C, D, Go, OCaml host languages, Ragel is able to generate very
 fast-running code that implements state machines as directly executable code.
 Since very large files strain the host language compiler, table-based code
 generation is also supported. In the future we hope to provide a partitioned,
@@ -2403,7 +2403,7 @@ int main( int argc, char **argv )
 
 There are a number of variables that Ragel expects the user to declare. At a
 very minimum the \verb|cs|, \verb|p| and \verb|pe| variables must be declared.
-In Go, Java and Ruby code the \verb|data| variable must also be declared. If
+In Go, Java, Ruby and OCaml code the \verb|data| variable must also be declared. If
 EOF actions are used then the \verb|eof| variable is required. If
 stack-based state machine control flow statements are used then the
 \verb|stack| and \verb|top| variables are required. If a scanner is declared
@@ -2419,21 +2419,21 @@ execution loop, but not from within.
 
 \item \verb|p| - Data pointer. In C/D code this variable is expected to be a
 pointer to the character data to process. It should be initialized to the
-beginning of the data block on every run of the machine. In Go, Java and Ruby it is
-used as an offset to \verb|data| and must be an integer. In this case it should
+beginning of the data block on every run of the machine. In Go, Java, Ruby and OCaml
+it is used as an offset to \verb|data| and must be an integer. In this case it should
 be initialized to zero on every run of the machine.
 
 \item \verb|pe| - Data end pointer. This should be initialized to \verb|p| plus
-the data length on every run of the machine. In Go, Java and Ruby code this should
+the data length on every run of the machine. In Go, Java, Ruby and OCaml code this should
 be initialized to the data length.
 
 \item \verb|eof| - End of file pointer. This should be set to \verb|pe| when
 the buffer block being processed is the last one, otherwise it should be set to
-null. In Go, Java and Ruby code \verb|-1| must be used instead of null. If the EOF
+null. In Go, Java, Ruby and OCaml code \verb|-1| must be used instead of null. If the EOF
 event can be known only after the final buffer block has been processed, then
 it is possible to set \verb|p = pe = eof| and run the execute block.
 
-\item \verb|data| - This variable is only required in Go, Java and Ruby code. It
+\item \verb|data| - This variable is only required in Go, Java, Ruby and OCaml code. It
 must be an array containting the data to process.
 
 \item \verb|stack| - This must be an array of integers. It is used to store
@@ -2447,8 +2447,8 @@ to \verb|stack|, giving the next available spot on the top of the stack.
 \item \verb|act| - This must be an integer value. It is a variable sometimes
 used by scanner code to keep track of the most recent successful pattern match.
 
-\item \verb|ts| - This must be a pointer to character data. In Go, Java and
-Ruby code this must be an integer. See Section \ref{generating-scanners} for
+\item \verb|ts| - This must be a pointer to character data. In Go, Java, Ruby and
+OCaml code this must be an integer. See Section \ref{generating-scanners} for
 more information.
 
 \item \verb|te| - Also a pointer to character data.
@@ -2465,7 +2465,8 @@ alphtype unsigned int;
 The alphtype statement specifies the alphabet data type that the machine
 operates on. During the compilation of the machine, integer literals are
 expected to be in the range of possible values of the alphtype. The default
-is \verb|char| for all languages except Go where the default is \verb|byte|.
+is \verb|char| for all languages except Go where the default is \verb|byte| and
+OCaml where the default is \verb|int|.
 
 \begin{multicols}{2}
 C/C++/Objective-C:
@@ -2516,6 +2517,12 @@ D:
 \end{verbatim}
 \verbspace
 
+OCaml:
+\begin{verbatim}
+          int
+\end{verbatim}
+\verbspace
+
 \end{multicols}
 
 \section{Getkey Statement}
@@ -2560,7 +2567,7 @@ The variable statement specifies how to access a specific
 variable. All of the variables that are declared by the user and
 used by Ragel can be changed. This includes \verb|p|, \verb|pe|, \verb|eof|, \verb|cs|,
 \verb|top|, \verb|stack|, \verb|ts|, \verb|te| and \verb|act|.
-In Go, Ruby and Java code generation the \verb|data| variable can also be changed.
+In Go, Ruby, Java and OCaml code generation the \verb|data| variable can also be changed.
 
 \section{Pre-Push Statement}
 \label{prepush}
@@ -2766,7 +2773,7 @@ export machine_to_export = 0x44;
 
 When the write exports statement is used these machines are 
 written out in the generated code. Defines are used for C and constant integers
-are used for D, Java and Ruby. See Section \ref{import} for a description of the
+are used for D, Java, Ruby and OCaml. See Section \ref{import} for a description of the
 import statement.
 
 \section{Maintaining Pointers to Input Data}
@@ -2860,6 +2867,7 @@ language. The host-language options are:
 \item \verb|-J  | for Java code.
 \item \verb|-R  | for Ruby code.
 \item \verb|-A  | for C\# code.
+\item \verb|-O  | for OCaml code.
 \end{itemize}
 
 \section{Choosing a Generated Code Style}
@@ -2923,17 +2931,17 @@ Code Output Style Options
 
 \begin{tabular}{|c|c|c|}
 \hline
-\verb|-T0|&binary search table-driven&C/D/Java/Ruby/C\#\\
+\verb|-T0|&binary search table-driven&C/D/Java/Ruby/C\#/OCaml\\
 \hline
-\verb|-T1|&binary search, expanded actions&C/D/Ruby/C\#\\
+\verb|-T1|&binary search, expanded actions&C/D/Ruby/C\#/OCaml\\
 \hline
-\verb|-F0|&flat table-driven&C/D/Ruby/C\#\\
+\verb|-F0|&flat table-driven&C/D/Ruby/C\#/OCaml\\
 \hline
-\verb|-F1|&flat table, expanded actions&C/D/Ruby/C\#\\
+\verb|-F1|&flat table, expanded actions&C/D/Ruby/C\#/OCaml\\
 \hline
-\verb|-G0|&goto-driven&C/D/C\#\\
+\verb|-G0|&goto-driven&C/D/C\#/OCaml\\
 \hline
-\verb|-G1|&goto, expanded actions&C/D/C\#\\
+\verb|-G1|&goto, expanded actions&C/D/C\#/OCaml\\
 \hline
 \verb|-G2|&goto, in-place actions&C/D/Go\\
 \hline
