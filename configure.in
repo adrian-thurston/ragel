@@ -19,7 +19,7 @@ dnl   along with Colm; if not, write to the Free Software
 dnl   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
   
 AC_INIT(colm, 0.6)
-PUBDATE="April 2012"
+PUBDATE="June 2012"
 
 AM_INIT_AUTOMAKE([foreign])
 
