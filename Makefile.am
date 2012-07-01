@@ -74,7 +74,7 @@
 # ADT install: $(INSTALL_SUBDIRS)
 # ADT 
 
-SUBDIRS = colm
+SUBDIRS = src
 DIST_SUBDIRS = $(SUBDIRS) aapl test
 
 dist_doc_DATA =  colm.vim

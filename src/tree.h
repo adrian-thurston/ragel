@@ -26,7 +26,7 @@
 extern "C" {
 #endif
 
-#include <colm/colm.h>
+#include <colm.h>
 
 typedef unsigned char Code;
 typedef unsigned long Word;

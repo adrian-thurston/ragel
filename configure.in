@@ -24,7 +24,7 @@ PUBDATE="June 2012"
 AM_INIT_AUTOMAKE([foreign])
 
 AC_SUBST(PUBDATE)
-AC_CONFIG_HEADER([colm/config.h colm/defs.h])
+AC_CONFIG_HEADER([src/config.h src/defs.h])
 
 dnl Choose defaults for the build_parsers and build_manual vars. If the dist
 dnl file is present in the root then default to no, otherwise go for it.
@@ -133,6 +133,6 @@ AC_SUBST(KELBT)
 fi # build_parsers
 
 dnl write output files
-AC_OUTPUT(Makefile colm/Makefile aapl/Makefile test/Makefile)
+AC_OUTPUT(Makefile src/Makefile aapl/Makefile test/Makefile)
 
 echo "configuration of colm complete"

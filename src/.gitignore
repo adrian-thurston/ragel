@@ -14,6 +14,7 @@
 /lmparse.cc
 /lmscan.cc
 /config.h.in
+/config.h.in~
 /config.h
 /defs.h
 /version.h

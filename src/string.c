@@ -19,9 +19,9 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#include <colm/pool.h>
-#include <colm/pdarun.h>
-#include <colm/bytecode.h>
+#include <pool.h>
+#include <pdarun.h>
+#include <bytecode.h>
 
 #include <assert.h>
 #include <string.h>
