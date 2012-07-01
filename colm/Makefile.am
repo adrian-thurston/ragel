@@ -75,15 +75,15 @@ version.h: Makefile
 if BUILD_PARSERS
  
 lmparse.h: lmparse.kh
-	kelbt -o $@ $<
+	$(KELBT) -o $@ $<
 
 lmparse.cc: lmparse.kl lmparse.kh
-	kelbt -o $@ $<
+	$(KELBT) -o $@ $<
 
 lmscan.cc: lmparse.h
 
 lmscan.cc: lmscan.rl
-	ragel -G2 -o $@ $<
+	$(RAGEL) -G2 -o $@ $<
  
 endif
 
