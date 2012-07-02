@@ -2318,53 +2318,163 @@ struct LangStmt
 		ParserType
 	};
 
-	LangStmt( const InputLoc &loc, Type type, FieldInitVect *fieldInitVect ) : 
-		loc(loc), type(type), varRef(0), expr(0), fieldInitVect(fieldInitVect), next(0) {}
+	static LangStmt *cons( const InputLoc &loc, Type type, FieldInitVect *fieldInitVect )
+	{
+		LangStmt *s = new LangStmt;
+		s->loc = (loc);
+		s->type = (type);
+		s->varRef = (0);
+		s->expr = (0);
+		s->fieldInitVect = (fieldInitVect);
+		s->next = (0);
+		return s;
+	}
 
-	LangStmt( const InputLoc &loc, Type type, ExprVect *exprPtrVect ) : 
-		loc(loc), type(type), varRef(0), expr(0), exprPtrVect(exprPtrVect), next(0) {}
+	static LangStmt *cons( const InputLoc &loc, Type type, ExprVect *exprPtrVect )
+	{
+		LangStmt *s = new LangStmt;
+		s->loc = (loc);
+		s->type = (type);
+		s->varRef = (0);
+		s->expr = (0);
+		s->exprPtrVect = (exprPtrVect);
+		s->next = (0);
+		return s;
+	}
 	
-	LangStmt( const InputLoc &loc, Type type, LangExpr *expr ) : 
-		loc(loc), type(type), varRef(0), expr(expr), exprPtrVect(0), next(0) {}
+	static LangStmt *cons( const InputLoc &loc, Type type, LangExpr *expr )
+	{
+		LangStmt *s = new LangStmt;
+		s->loc = (loc);
+		s->type = (type);
+		s->varRef = (0);
+		s->expr = (expr);
+		s->exprPtrVect = (0);
+		s->next = (0);
+		return s;
+	}
 
-	LangStmt( Type type, LangVarRef *varRef ) : 
-		type(type), varRef(varRef), expr(0), exprPtrVect(0), next(0) {}
+	static LangStmt *cons( Type type, LangVarRef *varRef )
+	{
+		LangStmt *s = new LangStmt;
+		s->type = (type);
+		s->varRef = (varRef);
+		s->expr = (0);
+		s->exprPtrVect = (0);
+		s->next = (0);
+		return s;
+	}
 
-	LangStmt( const InputLoc &loc, Type type, ObjField *objField ) :
-		loc(loc), type(type), varRef(0), objField(objField), expr(0), 
-		exprPtrVect(0), next(0) {}
+	static LangStmt *cons( const InputLoc &loc, Type type, ObjField *objField )
+	{
+		LangStmt *s = new LangStmt;
+		s->loc = (loc);
+		s->type = (type);
+		s->varRef = (0);
+		s->objField = (objField);
+		s->expr = (0);
+		s->exprPtrVect = (0);
+		s->next = (0);
+		return s;
+	}
 	
-	LangStmt( const InputLoc &loc, Type type, LangVarRef *varRef, LangExpr *expr ) : 
-		loc(loc), type(type), varRef(varRef), expr(expr), exprPtrVect(0), next(0) {}
+	static LangStmt *cons( const InputLoc &loc, Type type, LangVarRef *varRef, LangExpr *expr )
+	{
+		LangStmt *s = new LangStmt;
+		s->loc = (loc);
+		s->type = (type);
+		s->varRef = (varRef);
+		s->expr = (expr);
+		s->exprPtrVect = (0);
+		s->next = (0);
+		return s;
+	}
 	
-	LangStmt( Type type, LangExpr *expr, StmtList *stmtList ) : 
-		type(type), expr(expr), stmtList(stmtList), next(0) {}
+	static LangStmt *cons( Type type, LangExpr *expr, StmtList *stmtList )
+	{
+		LangStmt *s = new LangStmt;
+		s->type = (type);
+		s->expr = (expr);
+		s->stmtList = (stmtList);
+		s->next = (0);
+		return s;
+	}
 
-	LangStmt( Type type, StmtList *stmtList ) : 
-		type(type), stmtList(stmtList), next(0) {}
+	static LangStmt *cons( Type type, StmtList *stmtList )
+	{
+		LangStmt *s = new LangStmt;
+		s->type = (type);
+		s->stmtList = (stmtList);
+		s->next = (0);
+		return s;
+	}
 
-	LangStmt( Type type, LangExpr *expr, StmtList *stmtList, LangStmt *elsePart ) : 
-		type(type), expr(expr), stmtList(stmtList), elsePart(elsePart), next(0) {}
+	static LangStmt *cons( Type type, LangExpr *expr, StmtList *stmtList, LangStmt *elsePart )
+	{
+		LangStmt *s = new LangStmt;
+		s->type = (type);
+		s->expr = (expr);
+		s->stmtList = (stmtList);
+		s->elsePart = (elsePart);
+		s->next = (0);
+		return s;
+	}
 
-	LangStmt( const InputLoc &loc, Type type ) : 
-		loc(loc), type(type), next(0) {}
+	static LangStmt *cons( const InputLoc &loc, Type type )
+	{
+		LangStmt *s = new LangStmt;
+		s->loc = (loc);
+		s->type = (type);
+		s->next = (0);
+		return s;
+	}
 
-	LangStmt( Type type, LangVarRef *varRef, Replacement *replacement ) : 
-		type(type), varRef(varRef), expr(0), replacement(replacement), 
-		exprPtrVect(0), next(0) {}
+	static LangStmt *cons( Type type, LangVarRef *varRef, Replacement *replacement )
+	{
+		LangStmt *s = new LangStmt;
+		s->type = (type);
+		s->varRef = (varRef);
+		s->expr = (0);
+		s->replacement = (replacement);
+		s->exprPtrVect = (0);
+		s->next = (0);
+		return s;
+	}
 
-	LangStmt( Type type, LangVarRef *varRef, ParserText *parserText ) : 
-		type(type), varRef(varRef), expr(0), parserText(parserText), 
-		exprPtrVect(0), next(0) {}
+	static LangStmt *cons( Type type, LangVarRef *varRef, ParserText *parserText ) 
+	{
+		LangStmt *s = new LangStmt;
+		s->type = (type);
+		s->varRef = (varRef);
+		s->expr = (0);
+		s->parserText = (parserText);
+		s->exprPtrVect = (0);
+		s->next = (0);
+		return s;
+	}
 
 	/* ForIterType */
-	LangStmt( const InputLoc &loc, Type type, ObjField *objField, 
-			TypeRef *typeRef, LangTerm *langTerm, StmtList *stmtList ) : 
-		loc(loc), type(type), langTerm(langTerm), objField(objField), typeRef(typeRef), 
-		stmtList(stmtList), next(0) {}
+	static LangStmt *cons( const InputLoc &loc, Type type, ObjField *objField, 
+			TypeRef *typeRef, LangTerm *langTerm, StmtList *stmtList )
+	{
+		LangStmt *s = new LangStmt;
+		s->loc = (loc);
+		s->type = (type);
+		s->langTerm = (langTerm);
+		s->objField = (objField);
+		s->typeRef = (typeRef);
+		s->stmtList = (stmtList);
+		s->next = (0);
+		return s;
+	}
 
-	LangStmt( Type type ) : 
-		type(type), next(0) {}
+	static LangStmt *cons( Type type )
+	{
+		LangStmt *s = new LangStmt;
+		s->type = (type);
+		s->next = (0);
+		return s;
+	}
 
 	void resolve( Compiler *pd ) const;
 	void resolveParserItems( Compiler *pd ) const;

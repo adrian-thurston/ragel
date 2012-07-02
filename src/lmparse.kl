@@ -210,7 +210,7 @@ global_def: KW_Export var_def opt_def_init
 			LangVarRef *varRef = new LangVarRef( $2->objField->loc, 
 					new QualItemVect, $2->objField->name );
 
-			$$->stmt = new LangStmt( $2->objField->loc, 
+			$$->stmt = LangStmt::cons( $2->objField->loc, 
 					$3->assignType, varRef, $3->expr );
 		}
 	};
@@ -237,7 +237,7 @@ global_def: KW_Global var_def opt_def_init
 			LangVarRef *varRef = new LangVarRef( $2->objField->loc, 
 					new QualItemVect, $2->objField->name );
 
-			$$->stmt = new LangStmt( $2->objField->loc, 
+			$$->stmt = LangStmt::cons( $2->objField->loc, 
 					$3->assignType, varRef, $3->expr );
 		}
 	};
@@ -1367,33 +1367,33 @@ statement: var_def opt_def_init
 			LangVarRef *varRef = new LangVarRef( $1->objField->loc, 
 					new QualItemVect, $1->objField->name );
 
-			$$->stmt = new LangStmt( $1->objField->loc, 
+			$$->stmt = LangStmt::cons( $1->objField->loc, 
 					$2->assignType, varRef, $2->expr );
 		}
 	};
 statement: var_ref '=' code_expr
 	final {
-		$$->stmt = new LangStmt( $2->loc, LangStmt::AssignType, $1->varRef, $3->expr );
+		$$->stmt = LangStmt::cons( $2->loc, LangStmt::AssignType, $1->varRef, $3->expr );
 	};
 statement: KW_Print '(' code_expr_list ')'
 	final {
-		$$->stmt = new LangStmt( $1->loc, LangStmt::PrintType, $3->exprVect );
+		$$->stmt = LangStmt::cons( $1->loc, LangStmt::PrintType, $3->exprVect );
 	};
 statement: KW_PrintXMLAC '(' code_expr_list ')'
 	final {
-		$$->stmt = new LangStmt( $1->loc, LangStmt::PrintXMLACType, $3->exprVect );
+		$$->stmt = LangStmt::cons( $1->loc, LangStmt::PrintXMLACType, $3->exprVect );
 	};
 statement: KW_PrintXML '(' code_expr_list ')'
 	final {
-		$$->stmt = new LangStmt( $1->loc, LangStmt::PrintXMLType, $3->exprVect );
+		$$->stmt = LangStmt::cons( $1->loc, LangStmt::PrintXMLType, $3->exprVect );
 	};
 statement: KW_PrintStream '(' code_expr_list ')'
 	final {
-		$$->stmt = new LangStmt( $1->loc, LangStmt::PrintStreamType, $3->exprVect );
+		$$->stmt = LangStmt::cons( $1->loc, LangStmt::PrintStreamType, $3->exprVect );
 	};
 statement: code_expr
 	final {
-		$$->stmt = new LangStmt( InputLoc(), LangStmt::ExprType, $1->expr );
+		$$->stmt = LangStmt::cons( InputLoc(), LangStmt::ExprType, $1->expr );
 	};
 statement: if_stmt
 	final {
@@ -1401,11 +1401,11 @@ statement: if_stmt
 	};
 statement: KW_Reject
 	final {
-		$$->stmt = new LangStmt( $1->loc, LangStmt::RejectType );
+		$$->stmt = LangStmt::cons( $1->loc, LangStmt::RejectType );
 	};
 statement: KW_While scope_push code_expr block_or_single scope_pop
 	final {
-		$$->stmt = new LangStmt( LangStmt::WhileType, $3->expr, $4->stmtList );
+		$$->stmt = LangStmt::cons( LangStmt::WhileType, $3->expr, $4->stmtList );
 	};
 
 for_scope: TK_Word ':' type_ref KW_In iter_call block_or_single
@@ -1420,7 +1420,7 @@ for_scope: TK_Word ':' type_ref KW_In iter_call block_or_single
 		ObjField *iterField = new ObjField( $1->loc, (TypeRef*)0, $1->data );
 		pd->curLocalFrame->insertField( $1->data, iterField );
 
-		$$->stmt = new LangStmt( $1->loc, LangStmt::ForIterType, 
+		$$->stmt = LangStmt::cons( $1->loc, LangStmt::ForIterType, 
 				iterField, $3->typeRef, $5->langTerm, $6->stmtList );
 	};
 
@@ -1431,15 +1431,15 @@ statement: KW_For scope_push for_scope scope_pop
 
 statement: KW_Return code_expr
 	final {
-		$$->stmt = new LangStmt( $1->loc, LangStmt::ReturnType, $2->expr );
+		$$->stmt = LangStmt::cons( $1->loc, LangStmt::ReturnType, $2->expr );
 	};
 statement: KW_Break
 	final {
-		$$->stmt = new LangStmt( LangStmt::BreakType );
+		$$->stmt = LangStmt::cons( LangStmt::BreakType );
 	};
 statement: KW_Yield var_ref
 	final {
-		$$->stmt = new LangStmt( LangStmt::YieldType, $2->varRef );
+		$$->stmt = LangStmt::cons( LangStmt::YieldType, $2->varRef );
 	};
 statement: var_ref TK_LtLt accumulate
 	final {
@@ -1448,7 +1448,7 @@ statement: var_ref TK_LtLt accumulate
 		ParserText *parserText = new ParserText( $2->loc, nspace, region, replItemList );
 		pd->parserTextList.append( parserText );
 
-		$$->stmt = new LangStmt( LangStmt::ParserType, $1->varRef, parserText );
+		$$->stmt = LangStmt::cons( LangStmt::ParserType, $1->varRef, parserText );
 	};
 statement: KW_Send var_ref accumulate
 	final {
@@ -1457,7 +1457,7 @@ statement: KW_Send var_ref accumulate
 		ParserText *parserText = new ParserText( $1->loc, nspace, region, replItemList );
 		pd->parserTextList.append( parserText );
 
-		$$->stmt = new LangStmt( LangStmt::ParserType, $2->varRef, parserText );
+		$$->stmt = LangStmt::cons( LangStmt::ParserType, $2->varRef, parserText );
 	};
 
 nonterm opt_require_stmt uses statement;
@@ -1465,7 +1465,7 @@ nonterm opt_require_stmt uses statement;
 opt_require_stmt: 
 	scope_push require_pattern lang_stmt_list scope_pop
 	final {
-		$$->stmt = new LangStmt( LangStmt::IfType, $2->expr, $3->stmtList, 0 );
+		$$->stmt = LangStmt::cons( LangStmt::IfType, $2->expr, $3->stmtList, 0 );
 	};
 opt_require_stmt:
 	final {
@@ -1522,7 +1522,7 @@ nonterm if_stmt uses statement;
 
 if_stmt: KW_If scope_push code_expr block_or_single scope_pop elsif_list
 	final {
-		$$->stmt = new LangStmt( LangStmt::IfType, $3->expr, $4->stmtList, $6->stmt );
+		$$->stmt = LangStmt::cons( LangStmt::IfType, $3->expr, $4->stmtList, $6->stmt );
 	};
 
 nonterm elsif_list
@@ -1551,7 +1551,7 @@ nonterm elsif_clause
 elsif_clause: 
 	KW_Elsif scope_push code_expr block_or_single scope_pop
 	final {
-		$$->stmt = new LangStmt( LangStmt::IfType, $3->expr, $4->stmtList, 0 );
+		$$->stmt = LangStmt::cons( LangStmt::IfType, $3->expr, $4->stmtList, 0 );
 	};
 
 nonterm optional_else
@@ -1562,7 +1562,7 @@ nonterm optional_else
 optional_else: 
 	KW_Else scope_push block_or_single scope_pop
 	final {
-		$$->stmt = new LangStmt( LangStmt::ElseType, $3->stmtList );
+		$$->stmt = LangStmt::cons( LangStmt::ElseType, $3->stmtList );
 	};
 
 optional_else: 
