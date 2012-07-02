@@ -129,7 +129,6 @@ struct CodeVect : public Vector<Code>
 /* Types of builtin machines. */
 enum BuiltinMachine
 {
-	BT_None,
 	BT_Any,
 	BT_Ascii,
 	BT_Extend,
@@ -809,7 +808,6 @@ struct Join
 struct Expression
 {
 	enum Type { 
-		None,
 		OrType,
 		IntersectType, 
 		SubtractType, 
@@ -819,35 +817,35 @@ struct Expression
 	};
 
 	Expression( ) : 
-		expression(0), term(0), builtin(BT_None), 
-		type(None), prev(this), next(this) { }
+		expression(0), term(0), builtin((BuiltinMachine)-1), 
+		type((Type)-1), prev(this), next(this) { }
 
 	/* Construct with an expression on the left and a term on the right. */
 	static Expression *cons( Expression *expression, Term *term, Type type )
 	{ 
-		Expression *expr = new Expression;
-		expr->type = type;
-		expr->expression = expression;
-		expr->term = term;
-		return expr;
+		Expression *ret = new Expression;
+		ret->type = type;
+		ret->expression = expression;
+		ret->term = term;
+		return ret;
 	}
 
 	/* Construct with only a term. */
 	static Expression *cons( Term *term )
 	{
-		Expression *expr = new Expression;
-		expr->type = TermType;
-		expr->term = term;
-		return expr;
+		Expression *ret = new Expression;
+		ret->type = TermType;
+		ret->term = term;
+		return ret;
 	}
 	
 	/* Construct with a builtin type. */
 	static Expression *cons( BuiltinMachine builtin )
 	{
-		Expression *expr = new Expression;
-		expr->type = BuiltinType;
-		expr->builtin = builtin;
-		return expr;
+		Expression *ret = new Expression;
+		ret->type = BuiltinType;
+		ret->builtin = builtin;
+		return ret;
 	}
 
 	~Expression();
@@ -886,6 +884,35 @@ struct Term
 
 	Term( FactorWithAug *factorWithAug ) :
 		term(0), factorWithAug(factorWithAug), type(FactorWithAugType) { }
+
+	Term() :
+		term(0), factorWithAug(0), type((Type)-1) { }
+
+	Term *cons( Term *term, FactorWithAug *factorWithAug )
+	{
+		Term *ret = new Term;
+		ret->term = term;
+		ret->factorWithAug = factorWithAug;
+		ret->type = ConcatType;
+		return ret;
+	}
+
+	Term *cons( Term *term, FactorWithAug *factorWithAug, Type type )
+	{
+		Term *ret = new Term;
+		ret->type = type;
+		ret->term = term;
+		ret->factorWithAug = factorWithAug;
+		return ret;
+	}
+
+	Term *cons( FactorWithAug *factorWithAug )
+	{
+		Term *ret = new Term;
+		ret->type = FactorWithAugType;
+		ret->factorWithAug = factorWithAug;
+		return term;
+	}
 	
 	~Term();
 

@@ -230,8 +230,6 @@ FsmGraph *makeBuiltin( BuiltinMachine builtin, Compiler *pd )
 	bool isSigned = keyOps->isSigned;
 
 	switch ( builtin ) {
-	case BT_None:
-		break;;
 	case BT_Any: {
 		/* All characters. */
 		retFsm = dotFsm( pd );
