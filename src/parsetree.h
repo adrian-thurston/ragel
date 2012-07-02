@@ -922,8 +922,17 @@ struct Term
 /* Third level of precedence. Augmenting nodes with actions and priorities. */
 struct FactorWithAug
 {
-	FactorWithAug( FactorWithRep *factorWithRep ) :
-		priorDescs(0), factorWithRep(factorWithRep) { }
+	FactorWithAug() :
+		priorDescs(0), factorWithRep(0) { }
+
+	static FactorWithAug *cons( FactorWithRep *factorWithRep )
+	{
+		FactorWithAug *f = new FactorWithAug;
+		f->priorDescs = 0;
+		f->factorWithRep = factorWithRep;
+		return f;
+	}
+
 	~FactorWithAug();
 
 	/* Tree traversal. */
@@ -961,14 +970,36 @@ struct FactorWithRep
 		FactorWithNegType
 	};
 
-	 FactorWithRep( const InputLoc &loc, FactorWithRep *factorWithRep, 
-			int lowerRep, int upperRep, Type type ) :
-		loc(loc), factorWithRep(factorWithRep), 
-		factorWithNeg(0), lowerRep(lowerRep), 
-		upperRep(upperRep), type(type) { }
+	FactorWithRep()
+	:
+		factorWithRep(0), 
+		factorWithNeg(0),
+		lowerRep(0), 
+		upperRep(upperRep),
+		type((Type)-1)
+	{ }
+
+	static FactorWithRep *cons( const InputLoc &loc, FactorWithRep *factorWithRep, 
+			int lowerRep, int upperRep, Type type )
+	{
+		FactorWithRep *f = new FactorWithRep;
+		f->type = (type);
+		f->loc = (loc);
+		f->factorWithRep = (factorWithRep);
+		f->factorWithNeg = (0);
+		f->lowerRep = (lowerRep);
+		f->upperRep = (upperRep);
+		return f;
+	}
 	
-	FactorWithRep( const InputLoc &loc, FactorWithNeg *factorWithNeg )
-		: loc(loc), factorWithNeg(factorWithNeg), type(FactorWithNegType) { }
+	static FactorWithRep *cons( const InputLoc &loc, FactorWithNeg *factorWithNeg )
+	{
+		FactorWithRep *f = new FactorWithRep;
+		f->type = FactorWithNegType;
+		f->loc = loc;
+		f->factorWithNeg = factorWithNeg;
+		return f;
+	}
 
 	~FactorWithRep();
 

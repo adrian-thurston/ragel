@@ -976,8 +976,8 @@ literal_item: opt_no_ignore TK_Literal opt_no_ignore
 		if ( ldel != 0 )
 			error( $2->loc ) << "literal already defined in this namespace" << endp;
 		else {
-			Join *join = new Join( Expression::cons( Term::cons( new FactorWithAug(
-				new FactorWithRep( $2->loc, FactorWithNeg::cons( $2->loc, Factor::cons(
+			Join *join = new Join( Expression::cons( Term::cons( FactorWithAug::cons(
+				FactorWithRep::cons( $2->loc, FactorWithNeg::cons( $2->loc, Factor::cons(
 				new Literal( $2->loc, $2->data, 
 					Literal::LitString ) ) ) ) ) ) ) );
 
@@ -2211,7 +2211,7 @@ nonterm factor_with_aug
 
 factor_with_aug:
 	factor_with_rep final {
-		$$->factorWithAug = new FactorWithAug( $1->factorWithRep );
+		$$->factorWithAug = FactorWithAug::cons( $1->factorWithRep );
 	};
 
 
@@ -2225,47 +2225,47 @@ nonterm factor_with_rep
 
 factor_with_rep:
 	factor_with_rep '*' final {
-		$$->factorWithRep = new FactorWithRep( $2->loc, $1->factorWithRep, 
+		$$->factorWithRep = FactorWithRep::cons( $2->loc, $1->factorWithRep, 
 				0, 0, FactorWithRep::StarType );
 	};
 factor_with_rep:
 	factor_with_rep TK_StarStar final {
-		$$->factorWithRep = new FactorWithRep( $2->loc, $1->factorWithRep, 
+		$$->factorWithRep = FactorWithRep::cons( $2->loc, $1->factorWithRep, 
 				0, 0, FactorWithRep::StarStarType );
 	};
 factor_with_rep:
 	factor_with_rep '?' final {
-		$$->factorWithRep = new FactorWithRep( $2->loc, $1->factorWithRep, 
+		$$->factorWithRep = FactorWithRep::cons( $2->loc, $1->factorWithRep, 
 				0, 0, FactorWithRep::OptionalType );
 	};
 factor_with_rep:
 	factor_with_rep '+' final {
-		$$->factorWithRep = new FactorWithRep( $2->loc, $1->factorWithRep, 
+		$$->factorWithRep = FactorWithRep::cons( $2->loc, $1->factorWithRep, 
 				0, 0, FactorWithRep::PlusType );
 	};
 factor_with_rep:
 	factor_with_rep '{' factor_rep_num '}' final {
-		$$->factorWithRep = new FactorWithRep( $2->loc, $1->factorWithRep, 
+		$$->factorWithRep = FactorWithRep::cons( $2->loc, $1->factorWithRep, 
 				$3->rep, 0, FactorWithRep::ExactType );
 	};
 factor_with_rep:
 	factor_with_rep '{' ',' factor_rep_num '}' final {
-		$$->factorWithRep = new FactorWithRep( $2->loc, $1->factorWithRep, 
+		$$->factorWithRep = FactorWithRep::cons( $2->loc, $1->factorWithRep, 
 				0, $4->rep, FactorWithRep::MaxType );
 	};
 factor_with_rep:
 	factor_with_rep '{' factor_rep_num ',' '}' final {
-		$$->factorWithRep = new FactorWithRep( $2->loc, $1->factorWithRep,
+		$$->factorWithRep = FactorWithRep::cons( $2->loc, $1->factorWithRep,
 				$3->rep, 0, FactorWithRep::MinType );
 	};
 factor_with_rep:
 	factor_with_rep '{' factor_rep_num ',' factor_rep_num '}' final {
-		$$->factorWithRep = new FactorWithRep( $2->loc, $1->factorWithRep, 
+		$$->factorWithRep = FactorWithRep::cons( $2->loc, $1->factorWithRep, 
 				$3->rep, $5->rep, FactorWithRep::RangeType );
 	};
 factor_with_rep:
 	factor_with_neg final {
-		$$->factorWithRep = new FactorWithRep( 
+		$$->factorWithRep = FactorWithRep::cons( 
 				$1->factorWithNeg->loc, $1->factorWithNeg );
 	};
 
