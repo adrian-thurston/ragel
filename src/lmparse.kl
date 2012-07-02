@@ -1483,8 +1483,8 @@ require_pattern:
 				patternItemList, pd->nextPatReplId++ );
 		pd->patternList.append( pattern );
 
-		$$->expr = new LangExpr(
-				new LangTerm( LangTerm::MatchType, $2->varRef, pattern ) );
+		$$->expr = LangExpr::cons(
+				LangTerm::cons( LangTerm::MatchType, $2->varRef, pattern ) );
 	};
 
 nonterm block_or_single uses lang_stmt_list;
@@ -1506,11 +1506,11 @@ nonterm iter_call
 
 iter_call: var_ref '(' opt_code_expr_list ')'
 	final {
-		$$->langTerm = new LangTerm( $1->varRef, $3->exprVect );
+		$$->langTerm = LangTerm::cons( $1->varRef, $3->exprVect );
 	};
 iter_call: TK_Word
 	final {
-		$$->langTerm = new LangTerm( LangTerm::VarRefType,
+		$$->langTerm = LangTerm::cons( LangTerm::VarRefType,
 			new LangVarRef( $1->loc, new QualItemVect, $1->data ) );
 	};
 
@@ -1679,12 +1679,12 @@ nonterm code_expr
 
 code_expr: code_expr TK_AmpAmp code_relational
 	final {
-		$$->expr = new LangExpr( $2->loc, $1->expr, OP_LogicalAnd, $3->expr );
+		$$->expr = LangExpr::cons( $2->loc, $1->expr, OP_LogicalAnd, $3->expr );
 	};
 
 code_expr: code_expr TK_BarBar code_relational
 	final {
-		$$->expr = new LangExpr( $2->loc, $1->expr, OP_LogicalOr, $3->expr );
+		$$->expr = LangExpr::cons( $2->loc, $1->expr, OP_LogicalOr, $3->expr );
 	};
 
 code_expr: code_relational
@@ -1696,32 +1696,32 @@ nonterm code_relational uses code_expr;
 
 code_relational: code_relational TK_DoubleEql code_additive
 	final {
-		$$->expr = new LangExpr( $2->loc, $1->expr, OP_DoubleEql, $3->expr );
+		$$->expr = LangExpr::cons( $2->loc, $1->expr, OP_DoubleEql, $3->expr );
 	};
 
 code_relational: code_relational TK_NotEql code_additive
 	final {
-		$$->expr = new LangExpr( $2->loc, $1->expr, OP_NotEql, $3->expr );
+		$$->expr = LangExpr::cons( $2->loc, $1->expr, OP_NotEql, $3->expr );
 	};
 
 code_relational: code_relational '<' code_additive
 	final {
-		$$->expr = new LangExpr( $2->loc, $1->expr, '<', $3->expr );
+		$$->expr = LangExpr::cons( $2->loc, $1->expr, '<', $3->expr );
 	};
 
 code_relational: code_relational '>' code_additive
 	final {
-		$$->expr = new LangExpr( $2->loc, $1->expr, '>', $3->expr );
+		$$->expr = LangExpr::cons( $2->loc, $1->expr, '>', $3->expr );
 	};
 
 code_relational: code_relational TK_LessEql code_additive
 	final {
-		$$->expr = new LangExpr( $2->loc, $1->expr, OP_LessEql, $3->expr );
+		$$->expr = LangExpr::cons( $2->loc, $1->expr, OP_LessEql, $3->expr );
 	};
 
 code_relational: code_relational TK_GrtrEql code_additive
 	final {
-		$$->expr = new LangExpr( $2->loc, $1->expr, OP_GrtrEql, $3->expr );
+		$$->expr = LangExpr::cons( $2->loc, $1->expr, OP_GrtrEql, $3->expr );
 	};
 
 
@@ -1734,12 +1734,12 @@ nonterm code_additive uses code_expr;
 
 code_additive: code_additive '+' code_multiplicitive
 	final {
-		$$->expr = new LangExpr( $2->loc, $1->expr, '+', $3->expr );
+		$$->expr = LangExpr::cons( $2->loc, $1->expr, '+', $3->expr );
 	};
 
 code_additive: code_additive '-' code_multiplicitive
 	final {
-		$$->expr = new LangExpr( $2->loc, $1->expr, '-', $3->expr );
+		$$->expr = LangExpr::cons( $2->loc, $1->expr, '-', $3->expr );
 	};
 
 code_additive: code_multiplicitive
@@ -1751,12 +1751,12 @@ nonterm code_multiplicitive uses code_expr;
 
 code_multiplicitive: code_multiplicitive '*' code_unary
 	final {
-		$$->expr = new LangExpr( $2->loc, $1->expr, '*', $3->expr );
+		$$->expr = LangExpr::cons( $2->loc, $1->expr, '*', $3->expr );
 	};
 
 code_multiplicitive: code_multiplicitive '/' code_unary
 	final {
-		$$->expr = new LangExpr( $2->loc, $1->expr, '/', $3->expr );
+		$$->expr = LangExpr::cons( $2->loc, $1->expr, '/', $3->expr );
 	};
 
 code_multiplicitive: code_unary
@@ -1767,19 +1767,19 @@ code_multiplicitive: code_unary
 nonterm code_unary uses code_expr;
 code_unary: '!' code_factor
 	final {
-		$$->expr = new LangExpr( $1->loc, '!', $2->expr );
+		$$->expr = LangExpr::cons( $1->loc, '!', $2->expr );
 	};
 code_unary: '$' code_factor
 	final {
-		$$->expr = new LangExpr( $1->loc, '$', $2->expr );
+		$$->expr = LangExpr::cons( $1->loc, '$', $2->expr );
 	};
 code_unary: '^' code_factor
 	final {
-		$$->expr = new LangExpr( $1->loc, '^', $2->expr );
+		$$->expr = LangExpr::cons( $1->loc, '^', $2->expr );
 	};
 code_unary: '%' code_factor
 	final {
-		$$->expr = new LangExpr( $1->loc, '%', $2->expr );
+		$$->expr = LangExpr::cons( $1->loc, '%', $2->expr );
 	};
 code_unary: code_factor
 	final {
@@ -1801,19 +1801,19 @@ nonterm code_factor uses code_expr;
 
 code_factor: TK_Number
 	final {
-		$$->expr = new LangExpr( new LangTerm( LangTerm::NumberType, $1->data ) );
+		$$->expr = LangExpr::cons( LangTerm::cons( LangTerm::NumberType, $1->data ) );
 	};
 code_factor: TK_Literal
 	final {
-		$$->expr = new LangExpr( new LangTerm( LangTerm::StringType, $1->data ) );
+		$$->expr = LangExpr::cons( LangTerm::cons( LangTerm::StringType, $1->data ) );
 	};
 code_factor: var_ref '(' opt_code_expr_list ')'
 	final {
-		$$->expr = new LangExpr( new LangTerm( $1->varRef, $3->exprVect ) );
+		$$->expr = LangExpr::cons( LangTerm::cons( $1->varRef, $3->exprVect ) );
 	};
 code_factor: var_ref
 	final {
-		$$->expr = new LangExpr( new LangTerm( LangTerm::VarRefType, $1->varRef ) );
+		$$->expr = LangExpr::cons( LangTerm::cons( LangTerm::VarRefType, $1->varRef ) );
 	};
 code_factor: KW_Match var_ref pattern_list
 	final {
@@ -1823,11 +1823,11 @@ code_factor: KW_Match var_ref pattern_list
 				patternItemList, pd->nextPatReplId++ );
 		pd->patternList.append( pattern );
 
-		$$->expr = new LangExpr( new LangTerm( LangTerm::MatchType, $2->varRef, pattern ) );
+		$$->expr = LangExpr::cons( LangTerm::cons( LangTerm::MatchType, $2->varRef, pattern ) );
 	};
 code_factor: KW_New code_factor
 	final {
-		$$->expr = new LangExpr( new LangTerm( LangTerm::NewType, $2->expr ) );
+		$$->expr = LangExpr::cons( LangTerm::cons( LangTerm::NewType, $2->expr ) );
 	};
 code_factor: 
 	KW_Construct opt_capture type_ref opt_field_init repl_list
@@ -1842,7 +1842,7 @@ code_factor:
 		if ( $2->objField != 0 )
 			varRef = new LangVarRef( $2->objField->loc, new QualItemVect, $2->objField->name );
 
-		$$->expr = new LangExpr( new LangTerm( $1->loc, LangTerm::ConstructType,
+		$$->expr = LangExpr::cons( LangTerm::cons( $1->loc, LangTerm::ConstructType,
 				varRef, $2->objField, $3->typeRef, $4->fieldInitVect, replacement ) );
 
 		/* Check for redeclaration. */
@@ -1879,7 +1879,7 @@ code_factor: KW_Parse opt_capture type_ref '(' opt_code_expr_list ')'
 		if ( $2->objField != 0 )
 			varRef = new LangVarRef( $2->objField->loc, new QualItemVect, $2->objField->name );
 
-		$$->expr = new LangExpr( new LangTerm( $1->loc, LangTerm::ParseType,
+		$$->expr = LangExpr::cons( LangTerm::cons( $1->loc, LangTerm::ParseType,
 				varRef, $2->objField, $3->typeRef, generic, parserTypeRef, replacement ) );
 		$$->expr->term->args = $5->exprVect;
 
@@ -1918,7 +1918,7 @@ code_factor: KW_ParseStop opt_capture type_ref '(' opt_code_expr_list ')'
 		if ( $2->objField != 0 )
 			varRef = new LangVarRef( $2->objField->loc, new QualItemVect, $2->objField->name );
 
-		$$->expr = new LangExpr( new LangTerm( $1->loc, LangTerm::ParseStopType, 
+		$$->expr = LangExpr::cons( LangTerm::cons( $1->loc, LangTerm::ParseStopType, 
 				varRef, $2->objField, $3->typeRef, generic, parserTypeRef, replacement ) );
 		$$->expr->term->args = $5->exprVect;
 
@@ -1937,27 +1937,27 @@ code_factor: KW_ParseStop opt_capture type_ref '(' opt_code_expr_list ')'
 	};
 code_factor: KW_TypeId '<' type_ref '>'
 	final {
-		$$->expr = new LangExpr( new LangTerm( $1->loc,
+		$$->expr = LangExpr::cons( LangTerm::cons( $1->loc,
 				LangTerm::TypeIdType, $3->typeRef ) );
 	};
 code_factor: type_ref KW_In var_ref
 	final {
-		$$->expr = new LangExpr( new LangTerm( $2->loc,
+		$$->expr = LangExpr::cons( LangTerm::cons( $2->loc,
 				LangTerm::SearchType, $1->typeRef, $3->varRef ) );
 	};
 code_factor: KW_Nil
 	final {
-		$$->expr = new LangExpr( new LangTerm( $1->loc, 
+		$$->expr = LangExpr::cons( LangTerm::cons( $1->loc, 
 				LangTerm::NilType ) );
 	};
 code_factor: KW_True
 	final {
-		$$->expr = new LangExpr( new LangTerm( $1->loc, 
+		$$->expr = LangExpr::cons( LangTerm::cons( $1->loc, 
 				LangTerm::TrueType ) );
 	};
 code_factor: KW_False
 	final {
-		$$->expr = new LangExpr( new LangTerm( $1->loc, 
+		$$->expr = LangExpr::cons( LangTerm::cons( $1->loc, 
 				LangTerm::FalseType ) );
 	};
 code_factor: '(' code_expr ')'
@@ -1966,21 +1966,21 @@ code_factor: '(' code_expr ')'
 	};
 code_factor: KW_MakeTree '(' opt_code_expr_list ')'
 	final {
-		$$->expr = new LangExpr( new LangTerm( $1->loc, 
+		$$->expr = LangExpr::cons( LangTerm::cons( $1->loc, 
 				LangTerm::MakeTreeType, $3->exprVect ) );
 	};
 code_factor: KW_MakeToken '(' opt_code_expr_list ')'
 	final {
-		$$->expr = new LangExpr( new LangTerm( $1->loc, 
+		$$->expr = LangExpr::cons( LangTerm::cons( $1->loc, 
 				LangTerm::MakeTokenType, $3->exprVect ) );
 	};
 code_factor: KW_Deref code_expr
 	final {
-		$$->expr = new LangExpr( $1->loc, OP_Deref, $2->expr );
+		$$->expr = LangExpr::cons( $1->loc, OP_Deref, $2->expr );
 	};
 code_factor: string_list
 	final {
-		$$->expr = new LangExpr( new LangTerm( replItemList ) );
+		$$->expr = LangExpr::cons( LangTerm::cons( replItemList ) );
 	};
 
 nonterm opt_field_init uses field_init_list;

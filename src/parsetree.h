@@ -1714,6 +1714,21 @@ struct TypeRef
 		Ptr,
 	};
 
+	TypeRef()
+	:
+		type((Type)-1),
+		nspaceQual(0),
+		pdaLiteral(0),
+		iterDef(0),
+		typeRef1(0),
+		typeRef2(0),
+		repeatType((RepeatType)-1),
+		nspace(0),
+		uniqueType(0),
+		searchUniqueType(0),
+		generic(0)
+	{}
+
 	/* Qualification and a type name. These require lookup. */
 	static TypeRef *cons( const InputLoc &loc, NamespaceQual *nspaceQual, String typeName )
 	{
@@ -1722,15 +1737,7 @@ struct TypeRef
 		t->loc = (loc);
 		t->nspaceQual = (nspaceQual);
 		t->typeName = (typeName);
-		t->pdaLiteral = (0);
-		t->iterDef = (0);
-		t->typeRef1 = (0);
-		t->typeRef2 = (0);
 		t->repeatType = (RepeatNone);
-		t->nspace = (0);
-		t->uniqueType = (0);
-		t->searchUniqueType = (0);
-		t->generic = (0);
 		return t;
 	}
 
@@ -1742,14 +1749,7 @@ struct TypeRef
 		t->loc = (loc);
 		t->nspaceQual = (nspaceQual);
 		t->pdaLiteral = (pdaLiteral);
-		t->iterDef = (0);
-		t->typeRef1 = (0);
-		t->typeRef2 = (0);
 		t->repeatType = (RepeatNone);
-		t->nspace = (0);
-		t->uniqueType = (0);
-		t->searchUniqueType = (0);
-		t->generic = (0);
 		return t;
 	}
 
@@ -1760,15 +1760,9 @@ struct TypeRef
 		t->type = (type);
 		t->loc = (loc);
 		t->nspaceQual = (nspaceQual);
-		t->pdaLiteral = (0);
-		t->iterDef = (0);
 		t->typeRef1 = (typeRef1);
 		t->typeRef2 = (typeRef2);
 		t->repeatType = (RepeatNone);
-		t->nspace = (0);
-		t->uniqueType = (0);
-		t->searchUniqueType = (0);
-		t->generic = (0);
 		return t;
 	}
 	
@@ -1778,16 +1772,8 @@ struct TypeRef
 		TypeRef *t = new TypeRef;
 		t->type = (type);
 		t->loc = (loc);
-		t->nspaceQual = (0);
-		t->pdaLiteral = (0);
-		t->iterDef = (0);
 		t->typeRef1 = (typeRef1);
-		t->typeRef2 = (0);
 		t->repeatType = (RepeatNone);
-		t->nspace = (0);
-		t->uniqueType = (0);
-		t->searchUniqueType = (0);
-		t->generic = (0);
 		return t;
 	}
 
@@ -1800,16 +1786,10 @@ struct TypeRef
 		TypeRef *t = new TypeRef;
 		t->type = (Iterator);
 		t->loc = (loc);
-		t->nspaceQual = (0);
-		t->pdaLiteral = (0);
 		t->iterDef = (iterDef);
-		t->typeRef1 = (0);
-		t->typeRef2 = (0);
 		t->repeatType = (RepeatNone);
-		t->nspace = (0);
 		t->uniqueType = (uniqueType);
 		t->searchUniqueType = (searchUniqueType);
-		t->generic = (0);
 		return t;
 	}
 
@@ -1819,16 +1799,8 @@ struct TypeRef
 		TypeRef *t = new TypeRef;
 		t->type = (Unspecified);
 		t->loc = (loc);
-		t->nspaceQual = (0);
-		t->pdaLiteral = (0);
-		t->iterDef = (0);
-		t->typeRef1 = (0);
-		t->typeRef2 = (0);
 		t->repeatType = (RepeatNone);
-		t->nspace = (0);
 		t->uniqueType = (uniqueType);
-		t->searchUniqueType = (0);
-		t->generic = (0);
 		return t;
 	}
 
@@ -2184,58 +2156,156 @@ struct LangTerm
 		EmbedStringType
 	};
 
-	LangTerm( Type type, LangVarRef *varRef )
-		: type(type), varRef(varRef) {}
+	static LangTerm *cons( Type type, LangVarRef *varRef )
+	{
+		LangTerm *t = new LangTerm;
+		t->type = (type);
+		t->varRef = (varRef);
+		return t;
+	}
 
-	LangTerm( LangVarRef *varRef, ExprVect *args )
-		: type(MethodCallType), varRef(varRef), args(args) {}
+	static LangTerm *cons( LangVarRef *varRef, ExprVect *args )
+	{
+		LangTerm *t = new LangTerm;
+		t->type = (MethodCallType);
+		t->varRef = (varRef);
+		t->args = (args);
+		return t;
+	}
 
-	LangTerm( const InputLoc &loc, Type type, ExprVect *args )
-		: loc(loc), type(type), args(args) {}
+	static LangTerm *cons( const InputLoc &loc, Type type, ExprVect *args )
+	{
+		LangTerm *t = new LangTerm;
+		t->loc = (loc);
+		t->type = (type);
+		t->args = (args);
+		return t;
+	}
 
-	LangTerm( Type type, String data )
-		: type(type), varRef(0), data(data) {}
+	static LangTerm *cons( Type type, String data )
+	{
+		LangTerm *t = new LangTerm;
+		t->type = (type);
+		t->varRef = (0);
+		t->data = (data);
+		return t;
+	}
 
-	LangTerm( Type type, NamespaceQual *nspaceQual, const String &data )
-		: type(type), varRef(0), nspaceQual(nspaceQual), data(data) {}
+	static LangTerm *cons( Type type, NamespaceQual *nspaceQual, const String &data )
+	{
+		LangTerm *t = new LangTerm;
+		t->type = (type);
+		t->varRef = (0);
+		t->nspaceQual = (nspaceQual);
+		t->data = (data);
+		return t;
+	}
 
-	LangTerm( const InputLoc &loc, Type type )
-		: loc(loc), type(type), varRef(0), typeRef(0) {}
+	static LangTerm *cons( const InputLoc &loc, Type type )
+	{
+		LangTerm *t = new LangTerm;
+		t->loc = (loc);
+		t->type = (type);
+		t->varRef = (0);
+		t->typeRef = (0);
+		return t;
+	}
 
-	LangTerm( const InputLoc &loc, Type type, TypeRef *typeRef )
-		: loc(loc), type(type), varRef(0), typeRef(typeRef) {}
+	static LangTerm *cons( const InputLoc &loc, Type type, TypeRef *typeRef )
+	{
+		LangTerm *t = new LangTerm;
+		t->loc = (loc);
+		t->type = (type);
+		t->varRef = (0);
+		t->typeRef = (typeRef);
+		return t;
+	}
 
-	LangTerm( const InputLoc &loc, Type type, LangVarRef *varRef )
-		: loc(loc), type(type), varRef(varRef) {}
+	static LangTerm *cons( const InputLoc &loc, Type type, LangVarRef *varRef )
+	{
+		LangTerm *t = new LangTerm;
+		t->loc = (loc);
+		t->type = (type);
+		t->varRef = (varRef);
+		return t;
+	}
 
-	LangTerm( Type type, LangVarRef *varRef, Pattern *pattern )
-		: type(type), varRef(varRef), pattern(pattern) {}
+	static LangTerm *cons( Type type, LangVarRef *varRef, Pattern *pattern )
+	{
+		LangTerm *t = new LangTerm;
+		t->type = (type);
+		t->varRef = (varRef);
+		t->pattern = (pattern);
+		return t;
+	}
 
-	LangTerm( const InputLoc &loc, Type type, TypeRef *typeRef, LangVarRef *varRef )
-		: loc(loc), type(type), varRef(varRef), typeRef(typeRef) {}
+	static LangTerm *cons( const InputLoc &loc, Type type, TypeRef *typeRef, LangVarRef *varRef )
+	{
+		LangTerm *t = new LangTerm;
+		t->loc = (loc);
+		t->type = (type);
+		t->varRef = (varRef);
+		t->typeRef = (typeRef);
+		return t;
+	}
 
-	LangTerm( const InputLoc &loc, Type type, TypeRef *typeRef, FieldInitVect *fieldInitArgs, 
+	static LangTerm *cons( const InputLoc &loc, Type type, TypeRef *typeRef, FieldInitVect *fieldInitArgs, 
 			Replacement *replacement )
-		: loc(loc), type(type), typeRef(typeRef), fieldInitArgs(fieldInitArgs), 
-		replacement(replacement) {}
+	{
+		LangTerm *t = new LangTerm;
+		t->loc = (loc);
+		t->type = (type);
+		t->typeRef = (typeRef);
+		t->fieldInitArgs = (fieldInitArgs);
+		t->replacement = (replacement);
+		return t;
+	}
 
-	LangTerm( const InputLoc &loc, Type type, LangVarRef *varRef, ObjField *objField,
+	static LangTerm *cons( const InputLoc &loc, Type type, LangVarRef *varRef, ObjField *objField,
 			TypeRef *typeRef, FieldInitVect *fieldInitArgs, Replacement *replacement )
-		: loc(loc), type(type), varRef(varRef), objField(objField), typeRef(typeRef), 
-			fieldInitArgs(fieldInitArgs), replacement(replacement) {}
+	{
+		LangTerm *t = new LangTerm;
+		t->loc = (loc);
+		t->type = (type);
+		t->varRef = (varRef);
+		t->objField = (objField);
+		t->typeRef = (typeRef);
+		t->fieldInitArgs = (fieldInitArgs);
+		t->replacement = (replacement);
+		return t;
+	}
 
-	LangTerm( Type type, LangExpr *expr )
-		: type(type), expr(expr) {}
+	static LangTerm *cons( Type type, LangExpr *expr )
+	{
+		LangTerm *t = new LangTerm;
+		t->type = (type);
+		t->expr = (expr);
+		return t;
+	}
 	
-	LangTerm( ReplItemList *replItemList )
-		: type(EmbedStringType), replItemList(replItemList) {}
+	static LangTerm *cons( ReplItemList *replItemList )
+	{
+		LangTerm *t = new LangTerm;
+		t->type = (EmbedStringType);
+		t->replItemList = (replItemList);
+		return t;
+	}
 
-	LangTerm( const InputLoc &loc, Type type, LangVarRef *varRef,
+	static LangTerm *cons( const InputLoc &loc, Type type, LangVarRef *varRef,
 			ObjField *objField, TypeRef *typeRef, GenericType *generic, TypeRef *parserTypeRef,
 			Replacement *replacement )
-		: loc(loc), type(type), varRef(varRef), objField(objField),
-			typeRef(typeRef), generic(generic), parserTypeRef(parserTypeRef),
-			replacement(replacement) {}
+	{
+		LangTerm *t = new LangTerm;
+		t->loc = (loc);
+		t->type = (type);
+		t->varRef = (varRef);
+		t->objField = (objField);
+		t->typeRef = (typeRef);
+		t->generic = (generic);
+		t->parserTypeRef = (parserTypeRef);
+		t->replacement = (replacement);
+		return t;
+	}
 	
 	void resolve( Compiler *pd );
 
@@ -2274,14 +2344,35 @@ struct LangExpr
 		TermType
 	};
 
-	LangExpr( const InputLoc &loc, LangExpr *left, char op, LangExpr *right )
-		: loc(loc), type(BinaryType), left(left), op(op), right(right) {}
+	static LangExpr *cons( const InputLoc &loc, LangExpr *left, char op, LangExpr *right )
+	{
+		LangExpr *e = new LangExpr;
+		e->loc = (loc);
+		e->type = (BinaryType);
+		e->left = (left);
+		e->op = (op);
+		e->right = (right);
+		return e;
+	}
 
-	LangExpr( const InputLoc &loc, char op, LangExpr *right )
-		: loc(loc), type(UnaryType), left(0), op(op), right(right) {}
+	static LangExpr *cons( const InputLoc &loc, char op, LangExpr *right )
+	{
+		LangExpr *e = new LangExpr;
+		e->loc = (loc);
+		e->type = (UnaryType);
+		e->left = (0);
+		e->op = (op);
+		e->right =(right);
+		return e;
+	}
 
-	LangExpr( LangTerm *term )
-		: type(TermType), term(term) {}
+	static LangExpr *cons( LangTerm *term )
+	{
+		LangExpr *e = new LangExpr;
+		e->type = (TermType);
+		e->term = (term);
+		return e;
+	}
 
 	void resolve( Compiler *pd ) const;
 
@@ -2318,15 +2409,34 @@ struct LangStmt
 		ParserType
 	};
 
+	LangStmt()
+	:
+		type((Type)-1),
+		varRef(0),
+		langTerm(0),
+		objField(0),
+		typeRef(0),
+		expr(0),
+		replacement(0),
+		parserText(0),
+		exprPtrVect(0),
+		fieldInitVect(0),
+		stmtList(0),
+		elsePart(0),
+
+		/* Normally you don't need to initialize double list pointers, however,
+		 * we make use of the next pointer for returning a pair of statements
+		 * using one pointer to a LangStmt, so we need to initialize it above. */
+		prev(0),
+		next(0)
+	{}
+
 	static LangStmt *cons( const InputLoc &loc, Type type, FieldInitVect *fieldInitVect )
 	{
 		LangStmt *s = new LangStmt;
 		s->loc = (loc);
 		s->type = (type);
-		s->varRef = (0);
-		s->expr = (0);
 		s->fieldInitVect = (fieldInitVect);
-		s->next = (0);
 		return s;
 	}
 
@@ -2335,10 +2445,7 @@ struct LangStmt
 		LangStmt *s = new LangStmt;
 		s->loc = (loc);
 		s->type = (type);
-		s->varRef = (0);
-		s->expr = (0);
 		s->exprPtrVect = (exprPtrVect);
-		s->next = (0);
 		return s;
 	}
 	
@@ -2347,10 +2454,7 @@ struct LangStmt
 		LangStmt *s = new LangStmt;
 		s->loc = (loc);
 		s->type = (type);
-		s->varRef = (0);
 		s->expr = (expr);
-		s->exprPtrVect = (0);
-		s->next = (0);
 		return s;
 	}
 
@@ -2359,9 +2463,6 @@ struct LangStmt
 		LangStmt *s = new LangStmt;
 		s->type = (type);
 		s->varRef = (varRef);
-		s->expr = (0);
-		s->exprPtrVect = (0);
-		s->next = (0);
 		return s;
 	}
 
@@ -2370,11 +2471,7 @@ struct LangStmt
 		LangStmt *s = new LangStmt;
 		s->loc = (loc);
 		s->type = (type);
-		s->varRef = (0);
 		s->objField = (objField);
-		s->expr = (0);
-		s->exprPtrVect = (0);
-		s->next = (0);
 		return s;
 	}
 	
@@ -2385,8 +2482,6 @@ struct LangStmt
 		s->type = (type);
 		s->varRef = (varRef);
 		s->expr = (expr);
-		s->exprPtrVect = (0);
-		s->next = (0);
 		return s;
 	}
 	
@@ -2396,7 +2491,6 @@ struct LangStmt
 		s->type = (type);
 		s->expr = (expr);
 		s->stmtList = (stmtList);
-		s->next = (0);
 		return s;
 	}
 
@@ -2405,7 +2499,6 @@ struct LangStmt
 		LangStmt *s = new LangStmt;
 		s->type = (type);
 		s->stmtList = (stmtList);
-		s->next = (0);
 		return s;
 	}
 
@@ -2416,7 +2509,6 @@ struct LangStmt
 		s->expr = (expr);
 		s->stmtList = (stmtList);
 		s->elsePart = (elsePart);
-		s->next = (0);
 		return s;
 	}
 
@@ -2425,7 +2517,6 @@ struct LangStmt
 		LangStmt *s = new LangStmt;
 		s->loc = (loc);
 		s->type = (type);
-		s->next = (0);
 		return s;
 	}
 
@@ -2434,10 +2525,7 @@ struct LangStmt
 		LangStmt *s = new LangStmt;
 		s->type = (type);
 		s->varRef = (varRef);
-		s->expr = (0);
 		s->replacement = (replacement);
-		s->exprPtrVect = (0);
-		s->next = (0);
 		return s;
 	}
 
@@ -2446,14 +2534,10 @@ struct LangStmt
 		LangStmt *s = new LangStmt;
 		s->type = (type);
 		s->varRef = (varRef);
-		s->expr = (0);
 		s->parserText = (parserText);
-		s->exprPtrVect = (0);
-		s->next = (0);
 		return s;
 	}
 
-	/* ForIterType */
 	static LangStmt *cons( const InputLoc &loc, Type type, ObjField *objField, 
 			TypeRef *typeRef, LangTerm *langTerm, StmtList *stmtList )
 	{
@@ -2464,7 +2548,6 @@ struct LangStmt
 		s->objField = (objField);
 		s->typeRef = (typeRef);
 		s->stmtList = (stmtList);
-		s->next = (0);
 		return s;
 	}
 
@@ -2472,7 +2555,6 @@ struct LangStmt
 	{
 		LangStmt *s = new LangStmt;
 		s->type = (type);
-		s->next = (0);
 		return s;
 	}
 

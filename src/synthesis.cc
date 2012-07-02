@@ -1934,11 +1934,11 @@ LangTerm *LangStmt::chooseDefaultIter( Compiler *pd, LangTerm *fromVarRef ) cons
 
 	/* The parameters. */
 	ExprVect *callExprVect = new ExprVect;
-	LangExpr *callExpr = new LangExpr( new LangTerm( 
+	LangExpr *callExpr = LangExpr::cons( LangTerm::cons( 
 			LangTerm::VarRefType, fromVarRef->varRef ) );
 	callExprVect->append( callExpr );
 
-	LangTerm *callLangTerm = new LangTerm( callVarRef, callExprVect );
+	LangTerm *callLangTerm = LangTerm::cons( callVarRef, callExprVect );
 
 	return callLangTerm;
 }
