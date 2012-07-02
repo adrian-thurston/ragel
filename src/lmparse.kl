@@ -977,7 +977,7 @@ literal_item: opt_no_ignore TK_Literal opt_no_ignore
 		if ( ldel != 0 )
 			error( $2->loc ) << "literal already defined in this namespace" << endp;
 		else {
-			Join *join = new Join( new Expression( new Term( new FactorWithAug(
+			Join *join = new Join( Expression::cons( new Term( new FactorWithAug(
 				new FactorWithRep( $2->loc, new FactorWithNeg( $2->loc, new Factor(
 				new Literal( $2->loc, $2->data, 
 					Literal::LitString ) ) ) ) ) ) ) );
@@ -2091,29 +2091,29 @@ nonterm rl_expr
 
 rl_expr: 
 	rl_expr '|' rl_term_short final {
-		$$->expression = new Expression( $1->expression, 
+		$$->expression = Expression::cons( $1->expression, 
 				$3->term, Expression::OrType );
 	};
 rl_expr: 
 	rl_expr '&' rl_term_short final {
-		$$->expression = new Expression( $1->expression, 
+		$$->expression = Expression::cons( $1->expression, 
 				$3->term, Expression::IntersectType );
 	};
 # This priority specification overrides the innermost parsing strategy which
 # results ordered choice interpretation of the grammar.
 rl_expr: 
 	rl_expr '-' rl_term_short final {
-		$$->expression = new Expression( $1->expression, 
+		$$->expression = Expression::cons( $1->expression, 
 				$3->term, Expression::SubtractType );
 	};
 rl_expr: 
 	rl_expr TK_DashDash rl_term_short final {
-		$$->expression = new Expression( $1->expression, 
+		$$->expression = Expression::cons( $1->expression, 
 				$3->term, Expression::StrongSubtractType );
 	};
 rl_expr: 
 	rl_term_short final {
-		$$->expression = new Expression( $1->term );
+		$$->expression = Expression::cons( $1->term );
 	};
 
 nonterm rl_term_short

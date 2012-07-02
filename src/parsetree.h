@@ -129,6 +129,7 @@ struct CodeVect : public Vector<Code>
 /* Types of builtin machines. */
 enum BuiltinMachine
 {
+	BT_None,
 	BT_Any,
 	BT_Ascii,
 	BT_Extend,
@@ -808,6 +809,7 @@ struct Join
 struct Expression
 {
 	enum Type { 
+		None,
 		OrType,
 		IntersectType, 
 		SubtractType, 
@@ -816,20 +818,37 @@ struct Expression
 		BuiltinType
 	};
 
+	Expression( ) : 
+		expression(0), term(0), builtin(BT_None), 
+		type(None), prev(this), next(this) { }
+
 	/* Construct with an expression on the left and a term on the right. */
-	Expression( Expression *expression, Term *term, Type type ) : 
-		expression(expression), term(term), 
-		builtin(builtin), type(type), prev(this), next(this) { }
+	static Expression *cons( Expression *expression, Term *term, Type type )
+	{ 
+		Expression *expr = new Expression;
+		expr->type = type;
+		expr->expression = expression;
+		expr->term = term;
+		return expr;
+	}
 
 	/* Construct with only a term. */
-	Expression( Term *term ) : 
-		expression(0), term(term), builtin(builtin), 
-		type(TermType) , prev(this), next(this) { }
+	static Expression *cons( Term *term )
+	{
+		Expression *expr = new Expression;
+		expr->type = TermType;
+		expr->term = term;
+		return expr;
+	}
 	
 	/* Construct with a builtin type. */
-	Expression( BuiltinMachine builtin ) : 
-		expression(0), term(0), builtin(builtin), 
-		type(BuiltinType), prev(this), next(this) { }
+	static Expression *cons( BuiltinMachine builtin )
+	{
+		Expression *expr = new Expression;
+		expr->type = BuiltinType;
+		expr->builtin = builtin;
+		return expr;
+	}
 
 	~Expression();
 

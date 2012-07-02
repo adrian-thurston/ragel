@@ -610,6 +610,8 @@ FsmGraph *Join::walk( Compiler *pd )
 Expression::~Expression()
 {
 	switch ( type ) {
+		case None:
+			break;
 		case OrType: case IntersectType: case SubtractType:
 		case StrongSubtractType:
 			delete expression;
@@ -628,6 +630,8 @@ FsmGraph *Expression::walk( Compiler *pd, bool lastInSeq )
 {
 	FsmGraph *rtnVal = 0;
 	switch ( type ) {
+		case None:
+			break;
 		case OrType: {
 			/* Evaluate the expression. */
 			rtnVal = expression->walk( pd, false );
