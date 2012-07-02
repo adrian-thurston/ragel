@@ -608,7 +608,7 @@ litpat_el_list: ;
 
 litpat_el: TK_LitPat
 	final {
-		PatternItem *patternItem = new PatternItem( $1->loc, $1->data,
+		PatternItem *patternItem = PatternItem::cons( $1->loc, $1->data,
 			PatternItem::InputText );
 		patternItemList->append( patternItem );
 	};
@@ -654,7 +654,7 @@ pattern_el_type_or_lit: region_qual TK_Word opt_repeat
 		TypeRef *typeRef = TypeRef::cons( $2->loc, $1->nspaceQual, $2->data );
 		typeRef->repeatType = $3->repeatType;
 		ProdEl *factor = new ProdEl( ProdEl::ReferenceType, $2->loc, 0, false, typeRef, 0 );
-		$$->patternItem = new PatternItem( $2->loc, factor, PatternItem::FactorType );
+		$$->patternItem = PatternItem::cons( $2->loc, factor, PatternItem::FactorType );
 		patternItemList->append( $$->patternItem );
 	};
 
@@ -665,7 +665,7 @@ pattern_el_type_or_lit: region_qual TK_Literal opt_repeat
 		typeRef->repeatType = $3->repeatType;
 
 		ProdEl *factor = new ProdEl( ProdEl::ReferenceType, $2->loc, 0, false, typeRef, 0 );
-		$$->patternItem = new PatternItem( $2->loc, factor, PatternItem::FactorType );
+		$$->patternItem = PatternItem::cons( $2->loc, factor, PatternItem::FactorType );
 		patternItemList->append( $$->patternItem );
 	};
 
@@ -704,7 +704,7 @@ lit_repl_el_list: ;
 
 lit_repl_el: TK_LitPat
 	final {
-		ReplItem *replItem = new ReplItem( $1->loc, ReplItem::InputText, $1->data );
+		ReplItem *replItem = ReplItem::cons( $1->loc, ReplItem::InputText, $1->data );
 		replItemList->append( replItem );
 	};
 
@@ -719,14 +719,14 @@ repl_el: region_qual TK_Literal
 		TypeRef *typeRef = TypeRef::cons( $2->loc, $1->nspaceQual, literal );
 		typeRef->repeatType = RepeatNone;
 		ProdEl *factor = new ProdEl( ProdEl::LiteralType, $2->loc, 0, false, typeRef, 0 );
-		ReplItem *replItem = new ReplItem( $2->loc, ReplItem::FactorType, factor );
+		ReplItem *replItem = ReplItem::cons( $2->loc, ReplItem::FactorType, factor );
 		replItemList->append( replItem );
 	};
 repl_el: '"' lit_repl_el_list '"';
 
 repl_el: code_expr
 	final {
-		ReplItem *replItem = new ReplItem( $1->expr->loc, ReplItem::ExprType, $1->expr );
+		ReplItem *replItem = ReplItem::cons( $1->expr->loc, ReplItem::ExprType, $1->expr );
 		replItemList->append( replItem );
 	};
 
@@ -736,7 +736,7 @@ repl_el: code_expr
 accumulate: init_repl_list accum_list;
 accumulate: init_repl_list code_expr
 	final {
-		ReplItem *replItem = new ReplItem( $2->expr->loc, ReplItem::ExprType, $2->expr );
+		ReplItem *replItem = ReplItem::cons( $2->expr->loc, ReplItem::ExprType, $2->expr );
 		replItemList->append( replItem );
 	};
 
@@ -756,7 +756,7 @@ lit_accum_el_list: ;
 
 lit_accum_el: TK_LitPat
 	final {
-		ReplItem *replItem = new ReplItem( $1->loc, ReplItem::InputText, $1->data );
+		ReplItem *replItem = ReplItem::cons( $1->loc, ReplItem::InputText, $1->data );
 		replItemList->append( replItem );
 	};
 
@@ -775,7 +775,7 @@ accum_el_list: ;
 #	};
 accum_el: code_expr
 	final {
-		ReplItem *replItem = new ReplItem( $1->expr->loc, ReplItem::ExprType, $1->expr );
+		ReplItem *replItem = ReplItem::cons( $1->expr->loc, ReplItem::ExprType, $1->expr );
 		replItemList->append( replItem );
 	};
 
@@ -802,7 +802,7 @@ lit_string_el_list: ;
 
 lit_string_el: TK_LitPat
 	final {
-		ReplItem *replItem = new ReplItem( $1->loc, ReplItem::InputText, $1->data );
+		ReplItem *replItem = ReplItem::cons( $1->loc, ReplItem::InputText, $1->data );
 		replItemList->append( replItem );
 	};
 
@@ -821,7 +821,7 @@ string_el_list: ;
 #	};
 string_el: code_expr
 	final {
-		ReplItem *replItem = new ReplItem( $1->expr->loc, ReplItem::ExprType, $1->expr );
+		ReplItem *replItem = ReplItem::cons( $1->expr->loc, ReplItem::ExprType, $1->expr );
 		replItemList->append( replItem );
 	};
 
@@ -978,7 +978,7 @@ literal_item: opt_no_ignore TK_Literal opt_no_ignore
 		else {
 			Join *join = new Join( Expression::cons( Term::cons( FactorWithAug::cons(
 				FactorWithRep::cons( $2->loc, FactorWithNeg::cons( $2->loc, Factor::cons(
-				new Literal( $2->loc, $2->data, 
+				Literal::cons( $2->loc, $2->data, 
 					Literal::LitString ) ) ) ) ) ) ) );
 
 			if ( strcmp( interp.data, "" ) == 0 ) {
@@ -1445,7 +1445,7 @@ statement: var_ref TK_LtLt accumulate
 	final {
 		Namespace *nspace = namespaceStack.top();
 		TokenRegion *region = regionStack.top();
-		ParserText *parserText = new ParserText( $2->loc, nspace, region, replItemList );
+		ParserText *parserText = ParserText::cons( $2->loc, nspace, region, replItemList );
 		pd->parserTextList.append( parserText );
 
 		$$->stmt = LangStmt::cons( LangStmt::ParserType, $1->varRef, parserText );
@@ -1454,7 +1454,7 @@ statement: KW_Send var_ref accumulate
 	final {
 		Namespace *nspace = namespaceStack.top();
 		TokenRegion *region = regionStack.top();
-		ParserText *parserText = new ParserText( $1->loc, nspace, region, replItemList );
+		ParserText *parserText = ParserText::cons( $1->loc, nspace, region, replItemList );
 		pd->parserTextList.append( parserText );
 
 		$$->stmt = LangStmt::cons( LangStmt::ParserType, $2->varRef, parserText );
@@ -1479,7 +1479,7 @@ require_pattern:
 	final {
 		Namespace *nspace = namespaceStack.top();
 		TokenRegion *region = regionStack.top();
-		Pattern *pattern = new Pattern( $1->loc, nspace, region, 
+		Pattern *pattern = Pattern::cons( $1->loc, nspace, region, 
 				patternItemList, pd->nextPatReplId++ );
 		pd->patternList.append( pattern );
 
@@ -1819,7 +1819,7 @@ code_factor: KW_Match var_ref pattern_list
 	final {
 		Namespace *nspace = namespaceStack.top();
 		TokenRegion *region = regionStack.top();
-		Pattern *pattern = new Pattern( $1->loc, nspace, region, 
+		Pattern *pattern = Pattern::cons( $1->loc, nspace, region, 
 				patternItemList, pd->nextPatReplId++ );
 		pd->patternList.append( pattern );
 
@@ -1834,7 +1834,7 @@ code_factor:
 	final {
 		Namespace *nspace = namespaceStack.top();
 		TokenRegion *region = regionStack.top();
-		Replacement *replacement = new Replacement( $1->loc, nspace, region,
+		Replacement *replacement = Replacement::cons( $1->loc, nspace, region,
 				replItemList, pd->nextPatReplId++ );
 		pd->replList.append( replacement );
 		
@@ -1871,7 +1871,7 @@ code_factor: KW_Parse opt_capture type_ref '(' opt_code_expr_list ')'
 		TypeRef *parserTypeRef = TypeRef::cons( TypeRef::Parser, 
 				InputLoc(), nspaceQual, $3->typeRef, 0 );
 
-		Replacement *replacement = new Replacement( $1->loc, nspace, pd->rootRegion,
+		Replacement *replacement = Replacement::cons( $1->loc, nspace, pd->rootRegion,
 				new ReplItemList, pd->nextPatReplId++ );
 		pd->replList.append( replacement );
 
@@ -1910,7 +1910,7 @@ code_factor: KW_ParseStop opt_capture type_ref '(' opt_code_expr_list ')'
 		TypeRef *parserTypeRef = TypeRef::cons( TypeRef::Parser, 
 				InputLoc(), nspaceQual, $3->typeRef, 0 );
 
-		Replacement *replacement = new Replacement( $1->loc, nspace, pd->rootRegion,
+		Replacement *replacement = Replacement::cons( $1->loc, nspace, pd->rootRegion,
 				new ReplItemList, pd->nextPatReplId++ );
 		pd->replList.append( replacement );
 
@@ -2044,7 +2044,7 @@ opt_rl_join: rl_join opt_context
 
 		if ( $2->context != 0 ) {
 			/* Create the enter and leaving actions that will mark the substring. */
-			Action *mark = new Action( MarkMark, pd->nextMatchEndNum++ );
+			Action *mark = Action::cons( MarkMark, pd->nextMatchEndNum++ );
 			pd->actionList.append( mark );
 
 			$$->join->context = $2->context;
@@ -2182,8 +2182,8 @@ factor_with_label:
 		pd->objectDef->insertField( $1->data, objField );
 
 		/* Create the enter and leaving actions that will mark the substring. */
-		Action *enter = new Action( MarkMark, pd->nextMatchEndNum++ );
-		Action *leave = new Action( MarkMark, pd->nextMatchEndNum++ );
+		Action *enter = Action::cons( MarkMark, pd->nextMatchEndNum++ );
+		Action *leave = Action::cons( MarkMark, pd->nextMatchEndNum++ );
 		pd->actionList.append( enter );
 		pd->actionList.append( leave );
 		
@@ -2323,12 +2323,12 @@ nonterm rl_factor
 rl_factor: 
 	TK_Literal final {
 		/* Create a new factor node going to a concat literal. */
-		$$->factor = Factor::cons( new Literal( $1->loc, $1->data, Literal::LitString ) );
+		$$->factor = Factor::cons( Literal::cons( $1->loc, $1->data, Literal::LitString ) );
 	};
 rl_factor: 
 	alphabet_num final {
 		/* Create a new factor node going to a literal number. */
-		$$->factor = Factor::cons( new Literal( $1->loc, 
+		$$->factor = Factor::cons( Literal::cons( $1->loc, 
 				$1->data, Literal::Number ) );
 	};
 rl_factor:
@@ -2364,17 +2364,17 @@ rl_factor:
 rl_factor:
 	TK_SqOpen regular_expr_or_data TK_SqClose final {
 		/* Create a new factor node going to an OR expression. */
-		$$->factor = Factor::cons( new ReItem( $1->loc, $2->reOrBlock, ReItem::OrBlock ) );
+		$$->factor = Factor::cons( ReItem::cons( $1->loc, $2->reOrBlock, ReItem::OrBlock ) );
 	};
 rl_factor:
 	TK_SqOpenNeg regular_expr_or_data TK_SqClose final {
 		/* Create a new factor node going to a negated OR expression. */
-		$$->factor = Factor::cons( new ReItem( $1->loc, $2->reOrBlock, ReItem::NegOrBlock ) );
+		$$->factor = Factor::cons( ReItem::cons( $1->loc, $2->reOrBlock, ReItem::NegOrBlock ) );
 	};
 rl_factor:
 	range_lit TK_DotDot range_lit final {
 		/* Create a new factor node going to a range. */
-		$$->factor = Factor::cons( new Range( $1->literal, $3->literal ) );
+		$$->factor = Factor::cons( Range::cons( $1->literal, $3->literal ) );
 	};
 rl_factor:
 	'(' rl_join ')' final {
@@ -2391,12 +2391,12 @@ nonterm range_lit
 range_lit:
 	TK_Literal final {
 		/* Range literas must have only one char. We restrict this in the parse tree. */
-		$$->literal = new Literal( $1->loc, $1->data, Literal::LitString );
+		$$->literal = Literal::cons( $1->loc, $1->data, Literal::LitString );
 	};
 range_lit:
 	alphabet_num final {
 		/* Create a new literal number. */
-		$$->literal = new Literal( $1->loc, $1->data, Literal::Number );
+		$$->literal = Literal::cons( $1->loc, $1->data, Literal::Number );
 	};
 
 nonterm alphabet_num uses token_data;
@@ -2449,7 +2449,7 @@ regular_expr_or_data:
 		}
 		else {
 			/* Can't optimize, put the left and right under a new node. */
-			$$->reOrBlock = new ReOrBlock( $1->reOrBlock, $2->reOrItem );
+			$$->reOrBlock = ReOrBlock::cons( $1->reOrBlock, $2->reOrItem );
 		}
 	};
 regular_expr_or_data:
@@ -2466,11 +2466,11 @@ nonterm regular_expr_or_char
 
 regular_expr_or_char:
 	TK_ReChar final {
-		$$->reOrItem = new ReOrItem( $1->loc, $1->data );
+		$$->reOrItem = ReOrItem::cons( $1->loc, $1->data );
 	};
 regular_expr_or_char:
 	TK_ReChar TK_Dash TK_ReChar final {
-		$$->reOrItem = new ReOrItem( $2->loc, $1->data[0], $3->data[0] );
+		$$->reOrItem = ReOrItem::cons( $2->loc, $1->data[0], $3->data[0] );
 	};
 
 #  A local state reference. Cannot have :: prefix.

@@ -349,41 +349,43 @@ struct Action
 {
 public:
 
-	Action( const InputLoc &loc, const String &name, InlineList *inlineList )
-	:
-		loc(loc),
-		name(name),
-		markType(MarkNone),
-		objField(0),
-		markId(-1),
-		inlineList(inlineList), 
-		actionId(-1),
-		numTransRefs(0),
-		numToStateRefs(0),
-		numFromStateRefs(0),
-		numEofRefs(0),
-		numCondRefs(0),
-		anyCall(false),
-		isLmAction(false)
+	static Action *cons( const InputLoc &loc, const String &name, InlineList *inlineList )
 	{
+		Action *a = new Action;
+		a->loc = (loc);
+		a->name = (name);
+		a->markType = (MarkNone);
+		a->objField = (0);
+		a->markId = (-1);
+		a->inlineList = (inlineList);
+		a->actionId = (-1);
+		a->numTransRefs = (0);
+		a->numToStateRefs = (0);
+		a->numFromStateRefs = (0);
+		a->numEofRefs = (0);
+		a->numCondRefs = (0);
+		a->anyCall = (false);
+		a->isLmAction = (false);
+		return a;
 	}
 
-	Action( MarkType markType, long markId )
-	:
-		name("mark"),
-		markType(markType),
-		objField(0),
-		markId(markId),
-		inlineList(new InlineList), 
-		actionId(-1),
-		numTransRefs(0),
-		numToStateRefs(0),
-		numFromStateRefs(0),
-		numEofRefs(0),
-		numCondRefs(0),
-		anyCall(false),
-		isLmAction(false)
+	static Action *cons( MarkType markType, long markId )
 	{
+		Action *a = new Action;
+		a->name = ("mark");
+		a->markType = (markType);
+		a->objField = (0);
+		a->markId = (markId);
+		a->inlineList = (InlineList::cons());
+		a->actionId = (-1);
+		a->numTransRefs = (0);
+		a->numToStateRefs = (0);
+		a->numFromStateRefs = (0);
+		a->numEofRefs = (0);
+		a->numCondRefs = (0);
+		a->anyCall = (false);
+		a->isLmAction = (false);
+		return a;
 	}
 
 	/* Key for action dictionary. */

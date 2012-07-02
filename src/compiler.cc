@@ -789,7 +789,7 @@ Action *Compiler::newAction( const String &name, InlineList *inlineList )
 	loc.col = 1;
 	loc.fileName = 0;
 
-	Action *action = new Action( loc, name, inlineList );
+	Action *action = Action::cons( loc, name, inlineList );
 	actionList.append( action );
 	return action;
 }
@@ -798,20 +798,20 @@ void Compiler::initLongestMatchData()
 {
 	if ( regionList.length() > 0 ) {
 		/* The initActId action gives act a default value. */
-		InlineList *il4 = new InlineList;
-		il4->append( new InlineItem( InputLoc(), InlineItem::LmInitAct ) );
+		InlineList *il4 = InlineList::cons();
+		il4->append( InlineItem::cons( InputLoc(), InlineItem::LmInitAct ) );
 		initActId = newAction( "initact", il4 );
 		initActId->isLmAction = true;
 
 		/* The setTokStart action sets tokstart. */
-		InlineList *il5 = new InlineList;
-		il5->append( new InlineItem( InputLoc(), InlineItem::LmSetTokStart ) );
+		InlineList *il5 = InlineList::cons();
+		il5->append( InlineItem::cons( InputLoc(), InlineItem::LmSetTokStart ) );
 		setTokStart = newAction( "tokstart", il5 );
 		setTokStart->isLmAction = true;
 
 		/* The setTokEnd action sets tokend. */
-		InlineList *il3 = new InlineList;
-		il3->append( new InlineItem( InputLoc(), InlineItem::LmSetTokEnd ) );
+		InlineList *il3 = InlineList::cons();
+		il3->append( InlineItem::cons( InputLoc(), InlineItem::LmSetTokEnd ) );
 		setTokEnd = newAction( "tokend", il3 );
 		setTokEnd->isLmAction = true;
 

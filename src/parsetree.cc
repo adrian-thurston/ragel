@@ -271,7 +271,7 @@ InputLoc TokenDef::getLoc()
 Action *TokenRegion::newAction( Compiler *pd, const InputLoc &loc, 
 		const String &name, InlineList *inlineList )
 {
-	Action *action = new Action( loc, name, inlineList );
+	Action *action = Action::cons( loc, name, inlineList );
 	pd->actionList.append( action );
 	action->isLmAction = true;
 	return action;
@@ -283,8 +283,8 @@ void TokenRegion::makeActions( Compiler *pd )
 	for ( TokenDefListReg::Iter lmi = tokenDefList; lmi.lte(); lmi++ ) {
 		/* For each part create actions for setting the match type.  We need
 		 * to do this so that the actions will go into the actionIndex. */
-		InlineList *inlineList = new InlineList;
-		inlineList->append( new InlineItem( lmi->getLoc(), this, lmi, 
+		InlineList *inlineList = InlineList::cons();
+		inlineList->append( InlineItem::cons( lmi->getLoc(), this, lmi, 
 				InlineItem::LmSetActId ) );
 		char *actName = new char[50];
 		sprintf( actName, "store%i", lmi->longestMatchId );
@@ -295,8 +295,8 @@ void TokenRegion::makeActions( Compiler *pd )
 	for ( TokenDefListReg::Iter lmi = tokenDefList; lmi.lte(); lmi++ ) {
 		/* For each part create actions for setting the match type.  We need
 		 * to do this so that the actions will go into the actionIndex. */
-		InlineList *inlineList = new InlineList;
-		inlineList->append( new InlineItem( lmi->getLoc(), this, lmi, 
+		InlineList *inlineList = InlineList::cons();
+		inlineList->append( InlineItem::cons( lmi->getLoc(), this, lmi, 
 				InlineItem::LmOnLast ) );
 		char *actName = new char[50];
 		sprintf( actName, "imm%i", lmi->longestMatchId );
@@ -309,8 +309,8 @@ void TokenRegion::makeActions( Compiler *pd )
 	for ( TokenDefListReg::Iter lmi = tokenDefList; lmi.lte(); lmi++ ) {
 		/* For each part create actions for setting the match type.  We need
 		 * to do this so that the actions will go into the actionIndex. */
-		InlineList *inlineList = new InlineList;
-		inlineList->append( new InlineItem( lmi->getLoc(), this, lmi, 
+		InlineList *inlineList = InlineList::cons();
+		inlineList->append( InlineItem::cons( lmi->getLoc(), this, lmi, 
 				InlineItem::LmOnNext ) );
 		char *actName = new char[50];
 		sprintf( actName, "lagh%i", lmi->longestMatchId );
@@ -322,8 +322,8 @@ void TokenRegion::makeActions( Compiler *pd )
 	for ( TokenDefListReg::Iter lmi = tokenDefList; lmi.lte(); lmi++ ) {
 		/* For each part create actions for setting the match type.  We need
 		 * to do this so that the actions will go into the actionIndex. */
-		InlineList *inlineList = new InlineList;
-		inlineList->append( new InlineItem( lmi->getLoc(), this, lmi, 
+		InlineList *inlineList = InlineList::cons();
+		inlineList->append( InlineItem::cons( lmi->getLoc(), this, lmi, 
 				InlineItem::LmOnLagBehind ) );
 		char *actName = new char[50];
 		sprintf( actName, "lag%i", lmi->longestMatchId );
@@ -335,8 +335,8 @@ void TokenRegion::makeActions( Compiler *pd )
 	loc.col = 1;
 
 	/* Create the error action. */
-	InlineList *il6 = new InlineList;
-	il6->append( new InlineItem( loc, this, 0, InlineItem::LmSwitch ) );
+	InlineList *il6 = InlineList::cons();
+	il6->append( InlineItem::cons( loc, this, 0, InlineItem::LmSwitch ) );
 	lmActSelect = newAction( pd, loc, "lagsel", il6 );
 }
 

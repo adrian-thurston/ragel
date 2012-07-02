@@ -1168,8 +1168,13 @@ struct Factor
 /* A range machine. Only ever composed of two literals. */
 struct Range
 {
-	Range( Literal *lowerLit, Literal *upperLit ) 
-		: lowerLit(lowerLit), upperLit(upperLit) { }
+	static Range *cons( Literal *lowerLit, Literal *upperLit ) 
+	{
+		Range *r = new Range;
+		r->lowerLit = (lowerLit);
+		r->upperLit = (upperLit);
+		return r;
+	}
 
 	~Range();
 	FsmGraph *walk( Compiler *pd );
@@ -1184,8 +1189,14 @@ struct Literal
 {
 	enum LiteralType { Number, LitString };
 
-	Literal( const InputLoc &loc, const String &literal, LiteralType type )
-		: loc(loc), literal(literal), type(type) { }
+	static Literal *cons( const InputLoc &loc, const String &literal, LiteralType type )
+	{
+		Literal *l = new Literal;
+		l->loc = (loc);
+		l->literal = (literal);
+		l->type = (type);
+		return l;
+	}
 
 	FsmGraph *walk( Compiler *pd );
 	
@@ -1200,11 +1211,23 @@ struct RegExpr
 	enum RegExpType { RecurseItem, Empty };
 
 	/* Constructors. */
-	RegExpr() : 
-		type(Empty), caseInsensitive(false) { }
-	RegExpr(RegExpr *regExp, ReItem *item) : 
-		regExp(regExp), item(item), 
-		type(RecurseItem), caseInsensitive(false) { }
+	static RegExpr *cons() 
+	{
+		RegExpr *r = new RegExpr;
+		r->type = (Empty);
+		r->caseInsensitive = (false);
+		return r;
+	}
+
+	static RegExpr *cons( RegExpr *regExp, ReItem *item )
+	{
+		RegExpr *r = new RegExpr;
+		r->regExp = (regExp);
+		r->item = (item);
+		r->type = (RecurseItem);
+		r->caseInsensitive = (false);
+		return r;
+	}
 
 	~RegExpr();
 	FsmGraph *walk( Compiler *pd, RegExpr *rootRegex );
@@ -1220,12 +1243,34 @@ struct ReItem
 {
 	enum ReItemType { Data, Dot, OrBlock, NegOrBlock };
 	
-	ReItem( const InputLoc &loc, const String &data ) 
-		: loc(loc), data(data), star(false), type(Data) { }
-	ReItem( const InputLoc &loc, ReItemType type )
-		: loc(loc), star(false), type(type) { }
-	ReItem( const InputLoc &loc, ReOrBlock *orBlock, ReItemType type )
-		: loc(loc), orBlock(orBlock), star(false), type(type) { }
+	static ReItem *cons( const InputLoc &loc, const String &data ) 
+	{
+		ReItem *r = new ReItem;
+		r->loc = (loc);
+		r->data = (data);
+		r->star = (false);
+		r->type = (Data);
+		return r;
+	}
+
+	static ReItem *cons( const InputLoc &loc, ReItemType type )
+	{
+		ReItem *r = new ReItem;
+		r->loc = (loc);
+		r->star = (false);
+		r->type = (type);
+		return r;
+	}
+
+	static ReItem *cons( const InputLoc &loc, ReOrBlock *orBlock, ReItemType type )
+	{
+		ReItem *r = new ReItem;
+		r->loc = (loc);
+		r->orBlock = (orBlock);
+		r->star = (false);
+		r->type = (type);
+		return r;
+	}
 
 	~ReItem();
 	FsmGraph *walk( Compiler *pd, RegExpr *rootRegex );
@@ -1243,10 +1288,21 @@ struct ReOrBlock
 	enum ReOrBlockType { RecurseItem, Empty };
 
 	/* Constructors. */
-	ReOrBlock()
-		: type(Empty) { }
-	ReOrBlock(ReOrBlock *orBlock, ReOrItem *item)
-		: orBlock(orBlock), item(item), type(RecurseItem) { }
+	static ReOrBlock *cons()
+	{
+		ReOrBlock *r = new ReOrBlock;
+		r->type = (Empty);
+		return r;
+	}
+
+	static ReOrBlock *cons( ReOrBlock *orBlock, ReOrItem *item )
+	{
+		ReOrBlock *r = new ReOrBlock;
+		r->orBlock = (orBlock);
+		r->item = (item);
+		r->type = (RecurseItem);
+		return r;
+	}
 
 	~ReOrBlock();
 	FsmGraph *walk( Compiler *pd, RegExpr *rootRegex );
@@ -1261,10 +1317,24 @@ struct ReOrItem
 {
 	enum ReOrItemType { Data, Range };
 
-	ReOrItem( const InputLoc &loc, const String &data ) 
-		: loc(loc), data(data), type(Data) {}
-	ReOrItem( const InputLoc &loc, char lower, char upper )
-		: loc(loc), lower(lower), upper(upper), type(Range) { }
+	static ReOrItem *cons( const InputLoc &loc, const String &data ) 
+	{
+		ReOrItem *r = new ReOrItem;
+		r->loc = (loc);
+		r->data = (data);
+		r->type = (Data);
+		return r;
+	}
+
+	static ReOrItem *cons( const InputLoc &loc, char lower, char upper )
+	{
+		ReOrItem *r = new ReOrItem;
+		r->loc = (loc);
+		r->lower = (lower);
+		r->upper = (upper);
+		r->type = (Range);
+		return r;
+	}
 
 	FsmGraph *walk( Compiler *pd, RegExpr *rootRegex );
 
@@ -1296,23 +1366,60 @@ struct InlineItem
 		LmSetTokStart 
 	};
 
-	InlineItem( const InputLoc &loc, const String &data, Type type ) : 
-		loc(loc), data(data), nameRef(0), children(0), type(type) { }
+	static InlineItem *cons( const InputLoc &loc, const String &data, Type type )
+	{
+		InlineItem *i = new InlineItem;
+		i->loc = (loc);
+		i->data = (data);
+		i->nameRef = (0);
+		i->children = (0);
+		i->type = (type);
+		return i;
+	}
 
-	InlineItem( const InputLoc &loc, NameRef *nameRef, Type type ) : 
-		loc(loc), nameRef(nameRef), children(0), type(type) { }
+	static InlineItem *cons( const InputLoc &loc, NameRef *nameRef, Type type )
+	{
+		InlineItem *i = new InlineItem;
+		i->loc = (loc);
+		i->nameRef = (nameRef);
+		i->children = (0);
+		i->type = (type);
+		return i;
+	}
 
-	InlineItem( const InputLoc &loc, TokenRegion *tokenRegion, 
-		TokenDef *longestMatchPart, Type type ) : loc(loc),
-		nameRef(0), children(0), tokenRegion(tokenRegion),
-		longestMatchPart(longestMatchPart), type(type) { } 
+	static InlineItem *cons( const InputLoc &loc, TokenRegion *tokenRegion, 
+		TokenDef *longestMatchPart, Type type ) 
+	{
+		InlineItem *i = new InlineItem;
+		i->loc = (loc);
+		i->nameRef = (0);
+		i->children = (0);
+		i->tokenRegion = (tokenRegion);
+		i->longestMatchPart = (longestMatchPart);
+		i->type = (type);
+		return i;
+	}
 
-	InlineItem( const InputLoc &loc, NameInst *nameTarg, Type type ) : 
-		loc(loc), nameRef(0), nameTarg(nameTarg), children(0),
-		type(type) { }
+	static InlineItem *cons( const InputLoc &loc, NameInst *nameTarg, Type type )
+	{
+		InlineItem *i = new InlineItem;
+		i->loc = (loc);
+		i->nameRef = (0);
+		i->nameTarg = (nameTarg);
+		i->children = (0);
+		i->type = (type);
+		return i;
+	}
 
-	InlineItem( const InputLoc &loc, Type type ) : 
-		loc(loc), nameRef(0), children(0), type(type) { }
+	static InlineItem *cons( const InputLoc &loc, Type type ) 
+	{
+		InlineItem *i = new InlineItem;
+		i->loc = (loc);
+		i->nameRef = (0);
+		i->children = (0);
+		i->type = (type);
+		return i;
+	}
 	
 	InputLoc loc;
 	String data;
@@ -1326,9 +1433,18 @@ struct InlineItem
 	InlineItem *prev, *next;
 };
 
-/* Normally this would be atypedef, but that would entail including DList from
- * ptreetypes, which should be just typedef forwards. */
-struct InlineList : public DList<InlineItem> { };
+struct InlineList 
+:
+	public DList<InlineItem>
+{
+	InlineList( int i ) {}
+
+	static InlineList *cons()
+	{
+		return new InlineList( 0 );
+	}
+};
+
 
 struct ProdEl;
 struct LangVarRef;
@@ -1341,13 +1457,30 @@ struct PatternItem
 		InputText
 	};
 
-	PatternItem( const InputLoc &loc, const String &data, Type type ) : 
-			loc(loc), factor(0), data(data), type(type), region(0), 
-			varRef(0), bindId(0) {}
+	static PatternItem *cons( const InputLoc &loc, const String &data, Type type )
+	{
+		PatternItem *p = new PatternItem;
+		p->loc = (loc);
+		p->factor = (0);
+		p->data = (data);
+		p->type = (type);
+		p->region = (0);
+		p->varRef = (0);
+		p->bindId = (0);
+		return p;
+	}
 
-	PatternItem( const InputLoc &loc, ProdEl *factor, Type type ) : 
-			loc(loc), factor(factor), type(type), region(0), 
-			varRef(0), bindId(0) {}
+	static PatternItem *cons( const InputLoc &loc, ProdEl *factor, Type type )
+	{
+		PatternItem *p = new PatternItem;
+		p->loc = (loc);
+		p->factor = (factor);
+		p->type = (type);
+		p->region = (0);
+		p->varRef = (0);
+		p->bindId = (0);
+		return p;
+	}
 
 	InputLoc loc;
 	ProdEl *factor;
@@ -1356,7 +1489,6 @@ struct PatternItem
 	TokenRegion *region;
 	LangVarRef *varRef;
 	long bindId;
-
 	PatternItem *prev, *next;
 };
 
@@ -1371,14 +1503,33 @@ struct ReplItem
 		FactorType
 	};
 
-	ReplItem( const InputLoc &loc, Type type, const String &data ) : 
-		loc(loc), type(type), data(data), expr(0), bindId(0) {}
+	static ReplItem *cons( const InputLoc &loc, Type type, const String &data )
+	{
+		ReplItem *r = new ReplItem;
+		r->loc = (loc);
+		r->type = (type);
+		r->data = (data);
+		return r;
+	}
 
-	ReplItem( const InputLoc &loc, Type type, LangExpr *expr ) : 
-		loc(loc), type(type), expr(expr), bindId(0) {}
+	static ReplItem *cons( const InputLoc &loc, Type type, LangExpr *expr )
+	{
+		ReplItem *r = new ReplItem;
+		r->loc = (loc);
+		r->type = (type);
+		r->expr = (expr);
+		return r;
+	}
 
-	ReplItem( const InputLoc &loc, Type type, ProdEl *factor ) : 
-		loc(loc), type(type), expr(expr), factor(factor), bindId(0) {}
+	static ReplItem *cons( const InputLoc &loc, Type type, ProdEl *factor )
+	{
+		ReplItem *r = new ReplItem;
+		r->loc = (loc);
+		r->type = (type);
+		r->expr = (0);
+		r->factor = (factor);
+		return r;
+	}
 
 	InputLoc loc;
 	Type type;
@@ -1387,19 +1538,27 @@ struct ReplItem
 	LangEl *langEl;
 	ProdEl *factor;
 	long bindId;
-
 	ReplItem *prev, *next;
 };
 
 typedef DList<ReplItem> ReplItemList;
 
-
 struct Pattern
 {
-	Pattern( const InputLoc &loc, Namespace *nspace, TokenRegion *region, 
-			PatternItemList *list, int patRepId ) : 
-		loc(loc), nspace(nspace), region(region), list(list), patRepId(patRepId), 
-		langEl(0), pdaRun(0), nextBindId(1) {}
+	static Pattern *cons( const InputLoc &loc, Namespace *nspace, TokenRegion *region, 
+			PatternItemList *list, int patRepId )
+	{
+		Pattern *p = new Pattern;
+		p->loc = (loc);
+		p->nspace = (nspace);
+		p->region = (region);
+		p->list = (list);
+		p->patRepId = (patRepId);
+		p->langEl = (0);
+		p->pdaRun = (0);
+		p->nextBindId = (1);
+		return p;
+	}
 	
 	InputLoc loc;
 	Namespace *nspace;
@@ -1409,7 +1568,6 @@ struct Pattern
 	LangEl *langEl;
 	PdaRun *pdaRun;
 	long nextBindId;
-
 	Pattern *prev, *next;
 };
 
@@ -1417,10 +1575,21 @@ typedef DList<Pattern> PatternList;
 
 struct Replacement
 {
-	Replacement( const InputLoc &loc, Namespace *nspace, 
-			TokenRegion *region, ReplItemList *list, int patRepId ) :
-		loc(loc), nspace(nspace), region(region), list(list), 
-		patRepId(patRepId), langEl(0), pdaRun(0), nextBindId(1), parse(true) {}
+	static Replacement *cons( const InputLoc &loc, Namespace *nspace, 
+			TokenRegion *region, ReplItemList *list, int patRepId )
+	{
+		Replacement *r = new Replacement;
+		r->loc = (loc);
+		r->nspace = (nspace);
+		r->region = (region);
+		r->list = (list);
+		r->patRepId = (patRepId);
+		r->langEl = (0);
+		r->pdaRun = (0);
+		r->nextBindId = (1);
+		r->parse = (true);
+		return r;
+	}
 
 	InputLoc loc;
 	Namespace *nspace;
@@ -1439,10 +1608,20 @@ typedef DList<Replacement> ReplList;
 
 struct ParserText
 {
-	ParserText( const InputLoc &loc, Namespace *nspace, 
-			TokenRegion *region, ReplItemList *list ) :
-		loc(loc), nspace(nspace), region(region), list(list), 
-		langEl(0), pdaRun(0), nextBindId(1), parse(true) {}
+	static ParserText *cons( const InputLoc &loc, Namespace *nspace, 
+			TokenRegion *region, ReplItemList *list )
+	{
+		ParserText *p = new ParserText;
+		p->loc = (loc);
+		p->nspace = (nspace);
+		p->region = (region);
+		p->list = (list);
+		p->langEl = (0);
+		p->pdaRun = (0);
+		p->nextBindId = (1);
+		p->parse = (true);
+		return p;
+	}
 
 	InputLoc loc;
 	Namespace *nspace;
@@ -1452,7 +1631,6 @@ struct ParserText
 	PdaRun *pdaRun;
 	long nextBindId;
 	bool parse;
-
 	ParserText *prev, *next;
 };
 
