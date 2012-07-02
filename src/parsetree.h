@@ -513,7 +513,6 @@ struct TypeMapEl
 	TypeMapEl( const String &key, LangEl *value )
 		: type(LangElType), key(key), value(value), typeRef(0) {}
 
-
 	Type type;
 	String key;
 	LangEl *value;
@@ -1716,49 +1715,122 @@ struct TypeRef
 	};
 
 	/* Qualification and a type name. These require lookup. */
-	TypeRef( const InputLoc &loc, NamespaceQual *nspaceQual, String typeName ) :
-		type(Name), loc(loc), nspaceQual(nspaceQual), typeName(typeName), pdaLiteral(0), iterDef(0),
-		typeRef1(0), typeRef2(0),
-		repeatType(RepeatNone),
-		nspace(0), uniqueType(0), searchUniqueType(0), generic(0) {}
+	static TypeRef *cons( const InputLoc &loc, NamespaceQual *nspaceQual, String typeName )
+	{
+		TypeRef *t = new TypeRef;
+		t->type = (Name);
+		t->loc = (loc);
+		t->nspaceQual = (nspaceQual);
+		t->typeName = (typeName);
+		t->pdaLiteral = (0);
+		t->iterDef = (0);
+		t->typeRef1 = (0);
+		t->typeRef2 = (0);
+		t->repeatType = (RepeatNone);
+		t->nspace = (0);
+		t->uniqueType = (0);
+		t->searchUniqueType = (0);
+		t->generic = (0);
+		return t;
+	}
 
 	/* Qualification and a type name. These require lookup. */
-	TypeRef( const InputLoc &loc, NamespaceQual *nspaceQual, PdaLiteral *pdaLiteral ) :
-		type(Literal), loc(loc), nspaceQual(nspaceQual), pdaLiteral(pdaLiteral), iterDef(0),
-		typeRef1(0), typeRef2(0),
-		repeatType(RepeatNone),
-		nspace(0), uniqueType(0), searchUniqueType(0), generic(0) {}
+	static TypeRef *cons( const InputLoc &loc, NamespaceQual *nspaceQual, PdaLiteral *pdaLiteral )
+	{
+		TypeRef *t = new TypeRef;
+		t->type = (Literal);
+		t->loc = (loc);
+		t->nspaceQual = (nspaceQual);
+		t->pdaLiteral = (pdaLiteral);
+		t->iterDef = (0);
+		t->typeRef1 = (0);
+		t->typeRef2 = (0);
+		t->repeatType = (RepeatNone);
+		t->nspace = (0);
+		t->uniqueType = (0);
+		t->searchUniqueType = (0);
+		t->generic = (0);
+		return t;
+	}
 
 	/* Generics. */
-	TypeRef( Type type, const InputLoc &loc, NamespaceQual *nspaceQual, TypeRef *typeRef1, TypeRef *typeRef2 ) :
-		type(type), loc(loc), nspaceQual(nspaceQual), pdaLiteral(0), iterDef(0),
-		typeRef1(typeRef1), typeRef2(typeRef2),
-		repeatType(RepeatNone),
-		nspace(0), uniqueType(0), searchUniqueType(0), generic(0) {}
+	static TypeRef *cons( Type type, const InputLoc &loc, NamespaceQual *nspaceQual, TypeRef *typeRef1, TypeRef *typeRef2 )
+	{
+		TypeRef *t = new TypeRef;
+		t->type = (type);
+		t->loc = (loc);
+		t->nspaceQual = (nspaceQual);
+		t->pdaLiteral = (0);
+		t->iterDef = (0);
+		t->typeRef1 = (typeRef1);
+		t->typeRef2 = (typeRef2);
+		t->repeatType = (RepeatNone);
+		t->nspace = (0);
+		t->uniqueType = (0);
+		t->searchUniqueType = (0);
+		t->generic = (0);
+		return t;
+	}
 	
 	/* Pointers and Refs. */
-	TypeRef( Type type, const InputLoc &loc, TypeRef *typeRef1 ) :
-		type(type), loc(loc), nspaceQual(0), pdaLiteral(0), iterDef(0),
-		typeRef1(typeRef1), typeRef2(0),
-		repeatType(RepeatNone),
-		nspace(0), uniqueType(0), searchUniqueType(0), generic(0) {}
+	static TypeRef *cons( Type type, const InputLoc &loc, TypeRef *typeRef1 )
+	{
+		TypeRef *t = new TypeRef;
+		t->type = (type);
+		t->loc = (loc);
+		t->nspaceQual = (0);
+		t->pdaLiteral = (0);
+		t->iterDef = (0);
+		t->typeRef1 = (typeRef1);
+		t->typeRef2 = (0);
+		t->repeatType = (RepeatNone);
+		t->nspace = (0);
+		t->uniqueType = (0);
+		t->searchUniqueType = (0);
+		t->generic = (0);
+		return t;
+	}
 
 	/* Resolution not needed. */
 
 	/* Iterator definition. */
-	TypeRef( const InputLoc &loc, IterDef *iterDef, UniqueType *uniqueType, 
-			UniqueType *searchUniqueType ) :
-		type(Iterator), loc(loc), nspaceQual(0), pdaLiteral(0), iterDef(iterDef),
-		typeRef1(0), typeRef2(0),
-		repeatType(RepeatNone),
-		nspace(0), uniqueType(uniqueType), searchUniqueType(searchUniqueType), generic(0) {}
+	static TypeRef *cons( const InputLoc &loc, IterDef *iterDef, UniqueType *uniqueType, 
+			UniqueType *searchUniqueType )
+	{
+		TypeRef *t = new TypeRef;
+		t->type = (Iterator);
+		t->loc = (loc);
+		t->nspaceQual = (0);
+		t->pdaLiteral = (0);
+		t->iterDef = (iterDef);
+		t->typeRef1 = (0);
+		t->typeRef2 = (0);
+		t->repeatType = (RepeatNone);
+		t->nspace = (0);
+		t->uniqueType = (uniqueType);
+		t->searchUniqueType = (searchUniqueType);
+		t->generic = (0);
+		return t;
+	}
 
 	/* Unique type is given directly. */
-	TypeRef( const InputLoc &loc, UniqueType *uniqueType ) :
-		type(Unspecified), loc(loc), nspaceQual(0), pdaLiteral(0), iterDef(0),
-		typeRef1(0), typeRef2(0),
-		repeatType(RepeatNone),
-		nspace(0), uniqueType(uniqueType), searchUniqueType(0), generic(0) {}
+	static TypeRef *cons( const InputLoc &loc, UniqueType *uniqueType )
+	{
+		TypeRef *t = new TypeRef;
+		t->type = (Unspecified);
+		t->loc = (loc);
+		t->nspaceQual = (0);
+		t->pdaLiteral = (0);
+		t->iterDef = (0);
+		t->typeRef1 = (0);
+		t->typeRef2 = (0);
+		t->repeatType = (RepeatNone);
+		t->nspace = (0);
+		t->uniqueType = (uniqueType);
+		t->searchUniqueType = (0);
+		t->generic = (0);
+		return t;
+	}
 
 	void resolveRepeat( Compiler *pd );
 

@@ -186,7 +186,7 @@ nonterm reference_type_ref uses type_ref;
 
 reference_type_ref: KW_Ref type_ref
 	final {
-		$$->typeRef = new TypeRef( TypeRef::Ref, $1->loc, $2->typeRef );
+		$$->typeRef = TypeRef::cons( TypeRef::Ref, $1->loc, $2->typeRef );
 	};
 
 nonterm global_def uses statement;
@@ -263,7 +263,7 @@ nonterm pred_token
 pred_token: 
 	region_qual TK_Word 
 	final {
-		TypeRef *typeRef = new TypeRef( $2->loc, $1->nspaceQual, $2->data );
+		TypeRef *typeRef = TypeRef::cons( $2->loc, $1->nspaceQual, $2->data );
 
 		PredDecl *predDecl = new PredDecl( typeRef, predType, pd->predValue );
 		pd->predDeclList.append( predDecl );
@@ -273,7 +273,7 @@ pred_token:
 	region_qual TK_Literal 
 	final {
 		PdaLiteral *literal = new PdaLiteral( $2->loc, *$2 );
-		TypeRef *typeRef = new TypeRef( $2->loc, $1->nspaceQual, literal );
+		TypeRef *typeRef = TypeRef::cons( $2->loc, $1->nspaceQual, literal );
 
 		PredDecl *predDecl = new PredDecl( typeRef, predType, pd->predValue );
 		pd->predDeclList.append( predDecl );
@@ -419,7 +419,7 @@ type_ref: KW_Map '<' type_ref type_ref '>'
 	final {
 		NamespaceQual *nspaceQual = new NamespaceQual( 
 				namespaceStack.top(), regionStack.top() );
-		$$->typeRef = new TypeRef( TypeRef::Map, InputLoc(), nspaceQual,
+		$$->typeRef = TypeRef::cons( TypeRef::Map, InputLoc(), nspaceQual,
 				$3->typeRef, $4->typeRef );
 	};
 
@@ -427,34 +427,34 @@ type_ref: KW_List '<' type_ref '>'
 	final {
 		NamespaceQual *nspaceQual = new NamespaceQual( 
 				namespaceStack.top(), regionStack.top() );
-		$$->typeRef = new TypeRef( TypeRef::List, InputLoc(), nspaceQual, $3->typeRef, 0 );
+		$$->typeRef = TypeRef::cons( TypeRef::List, InputLoc(), nspaceQual, $3->typeRef, 0 );
 	};
 type_ref: KW_Vector '<' type_ref '>'
 	final {
 		NamespaceQual *nspaceQual = new NamespaceQual( 
 				namespaceStack.top(), regionStack.top() );
-		$$->typeRef = new TypeRef( TypeRef::Vector, InputLoc(), nspaceQual, $3->typeRef, 0 );
+		$$->typeRef = TypeRef::cons( TypeRef::Vector, InputLoc(), nspaceQual, $3->typeRef, 0 );
 	};
 type_ref: KW_Accum '<' type_ref '>'
 	final {
 		NamespaceQual *nspaceQual = new NamespaceQual( 
 				namespaceStack.top(), regionStack.top() );
-		$$->typeRef = new TypeRef( TypeRef::Parser, InputLoc(), nspaceQual, $3->typeRef, 0 );
+		$$->typeRef = TypeRef::cons( TypeRef::Parser, InputLoc(), nspaceQual, $3->typeRef, 0 );
 	};
 
 nonterm basic_type_ref uses type_ref;
 
 basic_type_ref: region_qual TK_Word opt_repeat
 	final {
-		$$->typeRef = new TypeRef( $2->loc, $1->nspaceQual, $2->data );
+		$$->typeRef = TypeRef::cons( $2->loc, $1->nspaceQual, $2->data );
 		$$->typeRef->repeatType = $3->repeatType;
 	};
 
 basic_type_ref: KW_Ptr region_qual TK_Word opt_repeat
 	final {
-		$$->typeRef = new TypeRef( $1->loc, $2->nspaceQual, $3->data );
+		$$->typeRef = TypeRef::cons( $1->loc, $2->nspaceQual, $3->data );
 		$$->typeRef->repeatType = $4->repeatType;
-		$$->typeRef = new TypeRef( TypeRef::Ptr, $1->loc, $$->typeRef );
+		$$->typeRef = TypeRef::cons( TypeRef::Ptr, $1->loc, $$->typeRef );
 	};
 
 
@@ -651,7 +651,7 @@ nonterm pattern_el_type_or_lit
 
 pattern_el_type_or_lit: region_qual TK_Word opt_repeat
 	final {
-		TypeRef *typeRef = new TypeRef( $2->loc, $1->nspaceQual, $2->data );
+		TypeRef *typeRef = TypeRef::cons( $2->loc, $1->nspaceQual, $2->data );
 		typeRef->repeatType = $3->repeatType;
 		ProdEl *factor = new ProdEl( ProdEl::ReferenceType, $2->loc, 0, false, typeRef, 0 );
 		$$->patternItem = new PatternItem( $2->loc, factor, PatternItem::FactorType );
@@ -661,7 +661,7 @@ pattern_el_type_or_lit: region_qual TK_Word opt_repeat
 pattern_el_type_or_lit: region_qual TK_Literal opt_repeat
 	final {
 		PdaLiteral *literal = new PdaLiteral( $2->loc, *$2 );
-		TypeRef *typeRef = new TypeRef( $2->loc, $1->nspaceQual, literal );
+		TypeRef *typeRef = TypeRef::cons( $2->loc, $1->nspaceQual, literal );
 		typeRef->repeatType = $3->repeatType;
 
 		ProdEl *factor = new ProdEl( ProdEl::ReferenceType, $2->loc, 0, false, typeRef, 0 );
@@ -716,7 +716,7 @@ repl_el_list: ;
 repl_el: region_qual TK_Literal
 	final {
 		PdaLiteral *literal = new PdaLiteral( $2->loc, *$2 );
-		TypeRef *typeRef = new TypeRef( $2->loc, $1->nspaceQual, literal );
+		TypeRef *typeRef = TypeRef::cons( $2->loc, $1->nspaceQual, literal );
 		typeRef->repeatType = RepeatNone;
 		ProdEl *factor = new ProdEl( ProdEl::LiteralType, $2->loc, 0, false, typeRef, 0 );
 		ReplItem *replItem = new ReplItem( $2->loc, ReplItem::FactorType, factor );
@@ -849,7 +849,7 @@ nonterm prod_el
 prod_el: 
 	opt_capture opt_commit region_qual TK_Word opt_repeat
 	final {
-		TypeRef *typeRef = new TypeRef( $4->loc, $3->nspaceQual, $4->data );
+		TypeRef *typeRef = TypeRef::cons( $4->loc, $3->nspaceQual, $4->data );
 		typeRef->repeatType = $5->repeatType;
 		$$->factor = new ProdEl( ProdEl::ReferenceType, $4->loc, $1->objField, $2->commit, typeRef, 0 );
 
@@ -878,7 +878,7 @@ prod_el:
 	final {
 		/* Create a new factor node going to a concat literal. */
 		PdaLiteral *literal = new PdaLiteral( $4->loc, *$4 );
-		TypeRef *typeRef = new TypeRef( $4->loc, $3->nspaceQual, literal );
+		TypeRef *typeRef = TypeRef::cons( $4->loc, $3->nspaceQual, literal );
 		typeRef->repeatType = $5->repeatType;
 		$$->factor = new ProdEl( ProdEl::LiteralType, $4->loc, $1->objField, $2->commit, typeRef, 0 );
 
@@ -1868,7 +1868,7 @@ code_factor: KW_Parse opt_capture type_ref '(' opt_code_expr_list ')'
 
 		NamespaceQual *nspaceQual = new NamespaceQual( 
 				namespaceStack.top(), regionStack.top() );
-		TypeRef *parserTypeRef = new TypeRef( TypeRef::Parser, 
+		TypeRef *parserTypeRef = TypeRef::cons( TypeRef::Parser, 
 				InputLoc(), nspaceQual, $3->typeRef, 0 );
 
 		Replacement *replacement = new Replacement( $1->loc, nspace, pd->rootRegion,
@@ -1907,7 +1907,7 @@ code_factor: KW_ParseStop opt_capture type_ref '(' opt_code_expr_list ')'
 
 		NamespaceQual *nspaceQual = new NamespaceQual( 
 				namespaceStack.top(), regionStack.top() );
-		TypeRef *parserTypeRef = new TypeRef( TypeRef::Parser, 
+		TypeRef *parserTypeRef = TypeRef::cons( TypeRef::Parser, 
 				InputLoc(), nspaceQual, $3->typeRef, 0 );
 
 		Replacement *replacement = new Replacement( $1->loc, nspace, pd->rootRegion,
@@ -2175,7 +2175,7 @@ factor_with_label:
 
 		/* Create the object field. */
 		NamespaceQual *qual = new NamespaceQual( namespaceStack.top(), regionStack.top() );
-		TypeRef *typeRef = new TypeRef( $1->loc, qual, "str" );
+		TypeRef *typeRef = TypeRef::cons( $1->loc, qual, "str" );
 		ObjField *objField = new ObjField( $1->loc, typeRef, $1->data );
 
 		/* Insert it into the map. */
@@ -2576,12 +2576,12 @@ void ColmParser::addArgvList()
 {
 	NamespaceQual *nspaceQual1 = new NamespaceQual( 
 			namespaceStack.top(), regionStack.top() );
-	TypeRef *typeRef = new TypeRef( InputLoc(), nspaceQual1, "str" );
+	TypeRef *typeRef = TypeRef::cons( InputLoc(), nspaceQual1, "str" );
 
 	NamespaceQual *nspaceQual2 = new NamespaceQual( 
 			namespaceStack.top(), regionStack.top() );
 
-	pd->argvTypeRef = new TypeRef( TypeRef::List, InputLoc(), 
+	pd->argvTypeRef = TypeRef::cons( TypeRef::List, InputLoc(), 
 			nspaceQual2, typeRef, 0 );
 }
 

@@ -150,7 +150,7 @@ ProdElList *Compiler::makeProdElList( LangEl *langEl )
 {
 	ProdElList *prodElList = new ProdElList();
 	UniqueType *uniqueType = findUniqueType( TYPE_TREE, langEl );
-	TypeRef *typeRef = new TypeRef( InputLoc(), uniqueType );
+	TypeRef *typeRef = TypeRef::cons( InputLoc(), uniqueType );
 	prodElList->append( new ProdEl( InputLoc(), typeRef ) );
 	prodElList->tail->langEl = langEl;
 	return prodElList;
