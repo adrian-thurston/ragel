@@ -972,13 +972,12 @@ literal_item: opt_no_ignore TK_Literal opt_no_ignore
 		Namespace *nspace = namespaceStack.top();
 		TokenRegion *region = regionStack.top();
 
-
 		LiteralDictEl *ldel = nspace->literalDict.find( interp );
 		if ( ldel != 0 )
 			error( $2->loc ) << "literal already defined in this namespace" << endp;
 		else {
-			Join *join = new Join( Expression::cons( new Term( new FactorWithAug(
-				new FactorWithRep( $2->loc, new FactorWithNeg( $2->loc, new Factor(
+			Join *join = new Join( Expression::cons( Term::cons( new FactorWithAug(
+				new FactorWithRep( $2->loc, FactorWithNeg::cons( $2->loc, Factor::cons(
 				new Literal( $2->loc, $2->data, 
 					Literal::LitString ) ) ) ) ) ) ) );
 
@@ -2133,28 +2132,28 @@ nonterm rl_term
 
 rl_term:
 	rl_term factor_with_label final {
-		$$->term = new Term( $1->term, $2->factorWithAug );
+		$$->term = Term::cons( $1->term, $2->factorWithAug );
 	};
 rl_term:
 	rl_term '.' factor_with_label final {
-		$$->term = new Term( $1->term, $3->factorWithAug );
+		$$->term = Term::cons( $1->term, $3->factorWithAug );
 	};
 rl_term:
 	rl_term TK_ColonGt factor_with_label final {
-		$$->term = new Term( $1->term, $3->factorWithAug, Term::RightStartType );
+		$$->term = Term::cons( $1->term, $3->factorWithAug, Term::RightStartType );
 	};
 rl_term:
 	rl_term TK_ColonGtGt factor_with_label final {
-		$$->term = new Term( $1->term, $3->factorWithAug, Term::RightFinishType );
+		$$->term = Term::cons( $1->term, $3->factorWithAug, Term::RightFinishType );
 	};
 rl_term:
 	rl_term TK_LtColon factor_with_label final {
-		$$->term = new Term( $1->term, 
+		$$->term = Term::cons( $1->term, 
 				$3->factorWithAug, Term::LeftType );
 	};
 rl_term:
 	factor_with_label final {
-		$$->term = new Term( $1->factorWithAug );
+		$$->term = Term::cons( $1->factorWithAug );
 	};
 
 nonterm factor_with_label
@@ -2303,17 +2302,17 @@ nonterm factor_with_neg
 
 factor_with_neg:
 	'!' factor_with_neg final {
-		$$->factorWithNeg = new FactorWithNeg( $1->loc,
+		$$->factorWithNeg = FactorWithNeg::cons( $1->loc,
 				$2->factorWithNeg, FactorWithNeg::NegateType );
 	};
 factor_with_neg:
 	'^' factor_with_neg final {
-		$$->factorWithNeg = new FactorWithNeg( $1->loc,
+		$$->factorWithNeg = FactorWithNeg::cons( $1->loc,
 				$2->factorWithNeg, FactorWithNeg::CharNegateType );
 	};
 factor_with_neg:
 	rl_factor final {
-		$$->factorWithNeg = new FactorWithNeg( $1->factor->loc, $1->factor );
+		$$->factorWithNeg = FactorWithNeg::cons( $1->factor->loc, $1->factor );
 	};
 
 nonterm rl_factor
@@ -2324,12 +2323,12 @@ nonterm rl_factor
 rl_factor: 
 	TK_Literal final {
 		/* Create a new factor node going to a concat literal. */
-		$$->factor = new Factor( new Literal( $1->loc, $1->data, Literal::LitString ) );
+		$$->factor = Factor::cons( new Literal( $1->loc, $1->data, Literal::LitString ) );
 	};
 rl_factor: 
 	alphabet_num final {
 		/* Create a new factor node going to a literal number. */
-		$$->factor = new Factor( new Literal( $1->loc, 
+		$$->factor = Factor::cons( new Literal( $1->loc, 
 				$1->data, Literal::Number ) );
 	};
 rl_factor:
@@ -2348,7 +2347,7 @@ rl_factor:
 				}
 				else {
 					/* Create a factor node that is a lookup of an expression. */
-					$$->factor = new Factor( $1->loc, gdNode->value );
+					$$->factor = Factor::cons( $1->loc, gdNode->value );
 				}
 				break;
 			}
@@ -2365,22 +2364,22 @@ rl_factor:
 rl_factor:
 	TK_SqOpen regular_expr_or_data TK_SqClose final {
 		/* Create a new factor node going to an OR expression. */
-		$$->factor = new Factor( new ReItem( $1->loc, $2->reOrBlock, ReItem::OrBlock ) );
+		$$->factor = Factor::cons( new ReItem( $1->loc, $2->reOrBlock, ReItem::OrBlock ) );
 	};
 rl_factor:
 	TK_SqOpenNeg regular_expr_or_data TK_SqClose final {
 		/* Create a new factor node going to a negated OR expression. */
-		$$->factor = new Factor( new ReItem( $1->loc, $2->reOrBlock, ReItem::NegOrBlock ) );
+		$$->factor = Factor::cons( new ReItem( $1->loc, $2->reOrBlock, ReItem::NegOrBlock ) );
 	};
 rl_factor:
 	range_lit TK_DotDot range_lit final {
 		/* Create a new factor node going to a range. */
-		$$->factor = new Factor( new Range( $1->literal, $3->literal ) );
+		$$->factor = Factor::cons( new Range( $1->literal, $3->literal ) );
 	};
 rl_factor:
 	'(' rl_join ')' final {
 		/* Create a new factor going to a parenthesized join. */
-		$$->factor = new Factor( $2->join );
+		$$->factor = Factor::cons( $2->join );
 	};
 
 nonterm range_lit

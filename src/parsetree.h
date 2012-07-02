@@ -876,28 +876,19 @@ struct Term
 		FactorWithAugType
 	};
 
-	Term( Term *term, FactorWithAug *factorWithAug ) :
-		term(term), factorWithAug(factorWithAug), type(ConcatType) { }
-
-	Term( Term *term, FactorWithAug *factorWithAug, Type type ) :
-		term(term), factorWithAug(factorWithAug), type(type) { }
-
-	Term( FactorWithAug *factorWithAug ) :
-		term(0), factorWithAug(factorWithAug), type(FactorWithAugType) { }
-
 	Term() :
 		term(0), factorWithAug(0), type((Type)-1) { }
 
-	Term *cons( Term *term, FactorWithAug *factorWithAug )
+	static Term *cons( Term *term, FactorWithAug *factorWithAug )
 	{
 		Term *ret = new Term;
+		ret->type = ConcatType;
 		ret->term = term;
 		ret->factorWithAug = factorWithAug;
-		ret->type = ConcatType;
 		return ret;
 	}
 
-	Term *cons( Term *term, FactorWithAug *factorWithAug, Type type )
+	static Term *cons( Term *term, FactorWithAug *factorWithAug, Type type )
 	{
 		Term *ret = new Term;
 		ret->type = type;
@@ -906,12 +897,12 @@ struct Term
 		return ret;
 	}
 
-	Term *cons( FactorWithAug *factorWithAug )
+	static Term *cons( FactorWithAug *factorWithAug )
 	{
 		Term *ret = new Term;
 		ret->type = FactorWithAugType;
 		ret->factorWithAug = factorWithAug;
-		return term;
+		return ret;
 	}
 	
 	~Term();
@@ -1004,11 +995,32 @@ struct FactorWithNeg
 		FactorType
 	};
 
-	FactorWithNeg( const InputLoc &loc, FactorWithNeg *factorWithNeg, Type type) :
-		loc(loc), factorWithNeg(factorWithNeg), factor(0), type(type) { }
+	FactorWithNeg()
+	:
+		factorWithNeg(0),
+		factor(0),
+		type((Type)-1)
+	{}
 
-	FactorWithNeg( const InputLoc &loc, Factor *factor ) :
-		loc(loc), factorWithNeg(0), factor(factor), type(FactorType) { }
+	static FactorWithNeg *cons( const InputLoc &loc, FactorWithNeg *factorWithNeg, Type type )
+	{
+		FactorWithNeg *f = new FactorWithNeg;
+		f->type = (type);
+		f->loc = (loc);
+		f->factorWithNeg = (factorWithNeg);
+		f->factor = (0);
+		return f;
+	}
+
+	static FactorWithNeg *cons( const InputLoc &loc, Factor *factor )
+	{
+		FactorWithNeg *f = new FactorWithNeg;
+		f->type = (FactorType);
+		f->loc = (loc);
+		f->factorWithNeg = (0);
+		f->factor = (factor);
+		return f;
+	}
 
 	~FactorWithNeg();
 
@@ -1036,30 +1048,74 @@ struct Factor
 		ReferenceType,
 		ParenType,
 	}; 
+	
+	Factor()
+	:
+		literal(0),
+		range(0),
+		reItem(0),
+		regExp(0),
+		varDef(0),
+		join(0),
+		lower(0),
+		upper(0),
+		type((Type)-1)
+	{}
 
 	/* Construct with a literal fsm. */
-	Factor( Literal *literal ) :
-		literal(literal), type(LiteralType) { }
+	static Factor *cons( Literal *literal )
+	{
+		Factor *f = new Factor;
+		f->type = LiteralType;
+		f->literal = literal;
+		return f;
+	}
 
 	/* Construct with a range. */
-	Factor( Range *range ) : 
-		range(range), type(RangeType) { }
+	static Factor *cons( Range *range )
+	{
+		Factor *f = new Factor;
+		f->type = RangeType;
+		f->range = range;
+		return f;
+	}
 	
 	/* Construct with the or part of a regular expression. */
-	Factor( ReItem *reItem ) :
-		reItem(reItem), type(OrExprType) { }
+	static Factor *cons( ReItem *reItem )
+	{
+		Factor *f = new Factor;
+		f->type = OrExprType;
+		f->reItem = reItem;
+		return f;
+	}
 
 	/* Construct with a regular expression. */
-	Factor( RegExpr *regExp ) :
-		regExp(regExp), type(RegExprType) { }
+	static Factor *cons( RegExpr *regExp )
+	{
+		Factor *f = new Factor;
+		f->type = RegExprType;
+		f->regExp = regExp;
+		return f;
+	}
 
 	/* Construct with a reference to a var def. */
-	Factor( const InputLoc &loc, VarDef *varDef ) :
-		loc(loc), varDef(varDef), type(ReferenceType) {}
+	static Factor *cons( const InputLoc &loc, VarDef *varDef )
+	{
+		Factor *f = new Factor;
+		f->type = ReferenceType;
+		f->loc = loc;
+		f->varDef = varDef;
+		return f;
+	}
 
 	/* Construct with a parenthesized join. */
-	Factor( Join *join ) :
-		join(join), type(ParenType) {}
+	static Factor *cons( Join *join )
+	{
+		Factor *f = new Factor;
+		f->type = ParenType;
+		f->join = join;
+		return f;
+	}
 	
 	/* Cleanup. */
 	~Factor();
