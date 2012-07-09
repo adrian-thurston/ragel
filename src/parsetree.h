@@ -1503,6 +1503,16 @@ struct ReplItem
 		FactorType
 	};
 
+	ReplItem()
+	:
+		type((Type)-1),
+		expr(0),
+		langEl(0),
+		factor(0),
+		bindId(-1)
+	{
+	}
+
 	static ReplItem *cons( const InputLoc &loc, Type type, const String &data )
 	{
 		ReplItem *r = new ReplItem;

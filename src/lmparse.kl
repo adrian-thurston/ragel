@@ -2454,7 +2454,7 @@ regular_expr_or_data:
 	};
 regular_expr_or_data:
 	final {
-		$$->reOrBlock = new ReOrBlock();
+		$$->reOrBlock = ReOrBlock::cons();
 	};
 
 # A single character inside of an or expression. Can either be a character or a
