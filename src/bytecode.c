@@ -3522,7 +3522,10 @@ again:
 
 			while ( true ) {
 				FrameInfo *fi = &prg->rtd->frameInfo[exec->frameId];
+				int frameId = exec->frameId;
+
 				downrefLocalTrees( prg, sp, exec->framePtr, fi->trees, fi->treesLen );
+
 				vm_popn( fi->frameSize );
 
 				/* Call layout. */
@@ -3536,7 +3539,7 @@ again:
 
 				/* We stop on the root, which doesn't have the full function
 				 * stack layout. */
-				if ( exec->frameId == prg->rtd->rootFrameId )
+				if ( frameId == prg->rtd->rootFrameId )
 					break;
 			}
 
