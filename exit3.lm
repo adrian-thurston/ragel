@@ -2,7 +2,7 @@
 int f3()
 {
 	I: int = 1
-	exit( 0 )
+	print( "hello\n" )
 }
 
 int f2()
@@ -19,4 +19,4 @@ int f1()
 
 I: int = 1
 
-f1()
+exit( 0 )
