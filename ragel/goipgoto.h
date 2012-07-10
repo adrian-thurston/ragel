@@ -46,6 +46,7 @@ public:
 	void CALL( ostream &ret, int callDest, int targState, bool inFinish );
 	void CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish );
 	void RET( ostream &ret, bool inFinish );
+	void STATE_GOTO_ERROR();
 	void GOTO_HEADER( RedStateAp *state );
 	void LM_SWITCH( ostream &ret, GenInlineItem *item, 
 			int targState, int inFinish, bool csForced );
@@ -62,6 +63,7 @@ public:
 		     bool inFinish, bool csForced );
 	void CONDITION( ostream &ret, GenAction *condition );
 	ostream &FINISH_CASES();
+
 
 protected:
 	bool isFirstCase;

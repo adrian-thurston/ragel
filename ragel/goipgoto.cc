@@ -391,6 +391,27 @@ void GoIpGotoCodeGen::COND_TRANSLATE( GenStateCond *stateCond, int level )
 	}
 }
 
+void GoIpGotoCodeGen::STATE_GOTO_ERROR()
+{
+	/* In the error state we need to emit some stuff that usually goes into
+	 * the header. */
+	RedStateAp *state = redFsm->errState;
+	bool anyWritten = IN_TRANS_ACTIONS( state );
+
+	/* No case label needed since we don't switch on the error state. */
+	if ( anyWritten )
+		genLineDirective( out );
+
+	if ( state->labelNeeded ) 
+		out << "st" << state->id << ":\n";
+
+	/* Break out here. */
+	outLabelUsed = true;
+	out << vCS() << " = " << state->id << ";\n";
+	out << "	goto _out;\n";
+}
+
+
 ostream &GoIpGotoCodeGen::STATE_GOTOS()
 {
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
