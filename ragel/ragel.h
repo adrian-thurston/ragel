@@ -110,6 +110,8 @@ extern int gblErrorCount;
 extern int numSplitPartitions;
 extern bool noLineDirectives;
 
+extern long maxTransitions;
+
 std::ostream &error();
 
 /* Target language and output style. */

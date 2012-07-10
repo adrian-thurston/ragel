@@ -27,9 +27,20 @@
 #include "gendata.h"
 #include "bstmap.h"
 
+bool IpGotoCodeGen::useTransInAgainLabel()
+{
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ )
+		if ( st == redFsm->errState )
+			continue;
+		else if ( (st->outSingle.length() + st->outRange.length() * 2) > maxTransitions)
+			return true;
+	return false;
+}
+
 bool IpGotoCodeGen::useAgainLabel()
 {
-	return redFsm->anyRegActionRets() || 
+	return useTransInAgainLabel() ||
+			redFsm->anyRegActionRets() || 
 			redFsm->anyRegActionByValControl() || 
 			redFsm->anyRegNextStmt();
 }
@@ -243,6 +254,18 @@ std::ostream &IpGotoCodeGen::TRANS_GOTO( RedTransAp *trans, int level )
 	return out;
 }
 
+int IpGotoCodeGen::TRANS_NR( RedTransAp *trans )
+{
+	if ( trans->action != 0 ) {
+		/* Go to the transition which will go to the state. */
+		return trans->id + redFsm->stateList.length();
+	}
+	else {
+		/* Go directly to the target state. */
+		return trans->targ->id;
+	}
+}
+
 std::ostream &IpGotoCodeGen::EXIT_STATES()
 {
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
@@ -258,6 +281,13 @@ std::ostream &IpGotoCodeGen::EXIT_STATES()
 std::ostream &IpGotoCodeGen::AGAIN_CASES()
 {
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		if ( useTransInAgainLabel() )
+			for ( int it = 0; it < st->numInTrans; it++ ) {
+				RedTransAp *trans = st->inTrans[it];
+				if ( trans->action != 0 && trans->labelNeeded )
+					out <<
+						"\t\tcase " << (trans->id + redFsm->stateList.length()) << ": goto tr" << trans->id << ";\n";
+			}
 		out << 
 			"		case " << st->id << ": goto st" << st->id << ";\n";
 	}
@@ -409,7 +439,6 @@ void IpGotoCodeGen::writeExec()
 			out << 
 				"	" << P() << " += 1;\n";
 		}
-
 		out << "_resume:\n";
 	}
 

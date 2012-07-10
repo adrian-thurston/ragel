@@ -83,6 +83,8 @@ bool printStatistics = false;
 /* Target language and output style. */
 CodeStyle codeStyle = GenTables;
 
+long maxTransitions = LONG_MAX;
+
 int numSplitPartitions = 0;
 bool noLineDirectives = false;
 
@@ -411,7 +413,10 @@ void InputData::parseArgs( int argc, const char **argv )
 					codeStyle = GenFGoto;
 				else if ( pc.paramArg[0] == '2' )
 					codeStyle = GenIpGoto;
-				else {
+				else if ( pc.paramArg[0] == 'T' && pc.paramArg[1] == '2' ) {
+					codeStyle = GenIpGoto;
+					maxTransitions = 32;
+				} else {
 					error() << "-G" << pc.paramArg[0] << 
 							" is an invalid argument" << endl;
 					exit(1);

@@ -76,7 +76,9 @@ public:
 	void STATE_CONDS( RedStateAp *state, bool genDefault ); 
 
 	virtual std::ostream &TRANS_GOTO( RedTransAp *trans, int level );
+	virtual int TRANS_NR( RedTransAp *trans );
 
+	void emitTableSwitch( RedStateAp *state );
 	void emitSingleSwitch( RedStateAp *state );
 	void emitRangeBSearch( RedStateAp *state, int level, int low, int high );
 

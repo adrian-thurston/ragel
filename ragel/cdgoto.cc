@@ -34,6 +34,11 @@ std::ostream &GotoCodeGen::TRANS_GOTO( RedTransAp *trans, int level )
 	return out;
 }
 
+int GotoCodeGen::TRANS_NR( RedTransAp *trans )
+{
+	return trans->id;
+}
+
 std::ostream &GotoCodeGen::TO_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
@@ -108,6 +113,86 @@ void GotoCodeGen::GOTO_HEADER( RedStateAp *state )
 	out << "case " << state->id << ":\n";
 }
 
+
+void GotoCodeGen::emitTableSwitch( RedStateAp *state )
+{
+	/* Load up the singles. */
+	int numSingles = state->outSingle.length();
+	RedTransEl *sdata = state->outSingle.data;
+
+	/* Load up the ranges.  */
+	int numRanges = state->outRange.length();
+	RedTransEl *rdata = state->outRange.data;
+
+	int minId = INT_MAX;
+	int maxId = INT_MIN;
+
+	for ( Key i = keyOps->minKey; i <= keyOps->maxKey; i.increment() ) {
+		RedTransAp *trans = state->defTrans;
+		for ( int j = 0; j < numRanges; j++ )
+			if ( ( rdata[j].lowKey.getVal() <= i ) && ( i <= rdata[j].highKey.getVal() ) )
+				trans = rdata[j].value;
+		for ( int j = 0; j < numSingles; j++ )
+			if ( i == sdata[j].lowKey.getVal() )
+				trans = sdata[j].value;
+		if ( minId > TRANS_NR(trans) )
+			minId = TRANS_NR(trans);
+		if ( maxId < TRANS_NR(trans) )
+			maxId = TRANS_NR(trans);
+	}
+
+	if ( (maxId - minId) <= UCHAR_MAX )
+		out << "\t{\n" <<
+			"\t\tstatic const unsigned char jump_table[] = ";
+	else if ( (maxId - minId) <= USHRT_MAX )
+		out << "\t{\n" <<
+			"\t\tstatic const unsigned short jump_table[] = ";
+	else
+		out << "\t{\n" <<
+			"\t\tstatic const int jump_table[] = ";
+
+	char delimiter = '{';
+	for ( Key i = keyOps->minKey; i <= keyOps->maxKey; i.increment() ) {
+		RedTransAp *trans = state->defTrans;
+		for ( int j = 0; j < numRanges; j++ )
+			if ( ( rdata[j].lowKey.getVal() <= i ) && ( i <= rdata[j].highKey.getVal() ) )
+				trans = rdata[j].value;
+		for ( int j = 0; j < numSingles; j++ )
+			if ( i == sdata[j].lowKey.getVal() )
+				trans = sdata[j].value;
+		if ( minId >= 0 && maxId <= UCHAR_MAX )
+			out << delimiter << " " << TRANS_NR(trans);
+		else if ( (maxId - minId) <= UCHAR_MAX )
+			out << delimiter << " " << (TRANS_NR(trans) - minId);
+		else if ( minId >= 0 && maxId <= USHRT_MAX )
+			out << delimiter << " " << TRANS_NR(trans);
+		else if ( (maxId - minId) <= USHRT_MAX )
+			out << delimiter << " " << (TRANS_NR(trans) - minId);
+		else
+			out << delimiter << " " << TRANS_NR(trans);
+		delimiter = ',';
+	}
+	out << " };\n";
+
+	if (keyOps->minKey != 0 )
+		out << "\t\t" << vCS() << " = jump_table[" << GET_WIDE_KEY(state) << "-" <<
+			WIDE_KEY(state, keyOps->minKey) << "]";
+	else
+		out << "\t\t" << vCS() << " = jump_table[" << GET_WIDE_KEY(state) << "]";
+	if ( minId >= 0 && maxId <= UCHAR_MAX )
+		out << ";\n";
+	else if ( (maxId - minId) <= UCHAR_MAX )
+		out << " + " << minId << ";\n";
+	else if ( minId >= 0 && maxId <= USHRT_MAX )
+		out << ";\n";
+	else if ( (maxId - minId) <= USHRT_MAX )
+		out << " + " << minId << ";\n";
+	else
+		out << ";\n";
+
+	out << "\t\tgoto _again;\n"
+	       "\t}\n";
+}
 
 void GotoCodeGen::emitSingleSwitch( RedStateAp *state )
 {
@@ -361,16 +446,24 @@ std::ostream &GotoCodeGen::STATE_GOTOS()
 				emitCondBSearch( st, 1, 0, st->stateCondVect.length() - 1 );
 			}
 
-			/* Try singles. */
-			if ( st->outSingle.length() > 0 )
-				emitSingleSwitch( st );
+			if ( (st->outSingle.length() + st->outRange.length() * 2) > maxTransitions) {
 
-			/* Default case is to binary search for the ranges, if that fails then */
-			if ( st->outRange.length() > 0 )
-				emitRangeBSearch( st, 1, 0, st->outRange.length() - 1 );
+				emitTableSwitch( st );
 
-			/* Write the default transition. */
-			TRANS_GOTO( st->defTrans, 1 ) << "\n";
+			} else {
+
+				/* Try singles. */
+				if ( st->outSingle.length() > 0 )
+					emitSingleSwitch( st );
+
+				/* Default case is to binary search for the ranges, if that fails then */
+				if ( st->outRange.length() > 0 )
+					emitRangeBSearch( st, 1, 0, st->outRange.length() - 1 );
+
+				/* Write the default transition. */
+				TRANS_GOTO( st->defTrans, 1 ) << "\n";
+
+			}
 		}
 	}
 	return out;
