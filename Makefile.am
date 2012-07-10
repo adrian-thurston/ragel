@@ -1,5 +1,5 @@
 
-SUBDIRS = ragel doc
+SUBDIRS = src doc
 DIST_SUBDIRS = $(SUBDIRS) aapl contrib examples test
 
 dist_doc_DATA = CREDITS ChangeLog

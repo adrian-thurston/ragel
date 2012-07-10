@@ -23,7 +23,7 @@ PUBDATE="May 2011"
 
 AM_INIT_AUTOMAKE([foreign])
 AC_SUBST(PUBDATE)
-AC_CONFIG_HEADER(ragel/config.h)
+AC_CONFIG_HEADER(src/config.h)
 
 dnl Choose defaults for the build_parsers and build_manual vars. If the dist
 dnl file is present in the root then default to no, otherwise go for it.
@@ -140,7 +140,7 @@ AC_CHECK_PROG(GMCS, gmcs, gmcs)
 dnl write output files
 AC_OUTPUT(
 	[
-		Makefile ragel/Makefile aapl/Makefile 
+		Makefile src/Makefile aapl/Makefile 
 		doc/Makefile doc/ragel.1
 		contrib/Makefile
 		test/Makefile test/runtests
