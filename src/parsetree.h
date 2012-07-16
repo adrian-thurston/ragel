@@ -2341,8 +2341,14 @@ struct LangTerm
 		ParseStopType,
 		MakeTreeType,
 		MakeTokenType,
-		EmbedStringType
+		EmbedStringType,
+		Parser2Type,
 	};
+
+	LangTerm()
+	:
+		parserText(0)
+	{}
 
 	static LangTerm *cons( Type type, LangVarRef *varRef )
 	{
@@ -2463,6 +2469,22 @@ struct LangTerm
 		return t;
 	}
 
+	static LangTerm *cons( const InputLoc &loc, Type type, LangVarRef *varRef, ObjField *objField,
+			TypeRef *typeRef, FieldInitVect *fieldInitArgs, Replacement *replacement, 
+			ParserText *parserText )
+	{
+		LangTerm *t = new LangTerm;
+		t->loc = (loc);
+		t->type = (type);
+		t->varRef = (varRef);
+		t->objField = (objField);
+		t->typeRef = (typeRef);
+		t->fieldInitArgs = (fieldInitArgs);
+		t->replacement = (replacement);
+		t->parserText = (parserText);
+		return t;
+	}
+
 	static LangTerm *cons( Type type, LangExpr *expr )
 	{
 		LangTerm *t = new LangTerm;
@@ -2500,6 +2522,7 @@ struct LangTerm
 	UniqueType *evaluateParse( Compiler *pd, CodeVect &code, bool stop ) const;
 	UniqueType *evaluateNew( Compiler *pd, CodeVect &code ) const;
 	UniqueType *evaluateConstruct( Compiler *pd, CodeVect &code ) const;
+	UniqueType *evaluateParse2( Compiler *pd, CodeVect &code ) const;
 	UniqueType *evaluateMatch( Compiler *pd, CodeVect &code ) const;
 	UniqueType *evaluate( Compiler *pd, CodeVect &code ) const;
 	void assignFieldArgs( Compiler *pd, CodeVect &code, UniqueType *replUT ) const;
@@ -2520,6 +2543,7 @@ struct LangTerm
 	GenericType *generic;
 	TypeRef *parserTypeRef;
 	Replacement *replacement;
+	ParserText *parserText;
 	LangExpr *expr;
 	ReplItemList *replItemList;
 };

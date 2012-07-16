@@ -333,6 +333,14 @@ void LangTerm::resolve( Compiler *pd )
 					(*pi)->expr->resolve( pd );
 			}
 			break;
+		case Parser2Type:
+			typeRef->lookupType( pd );
+			/* Evaluate the initialization expressions. */
+			if ( fieldInitArgs != 0 ) {
+				for ( FieldInitVect::Iter pi = *fieldInitArgs; pi.lte(); pi++ )
+					(*pi)->expr->resolve( pd );
+			}
+			break;
 		case VarRefType:
 			break;
 

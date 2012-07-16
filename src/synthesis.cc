@@ -1288,6 +1288,141 @@ UniqueType *LangTerm::evaluateConstruct( Compiler *pd, CodeVect &code ) const
 	return replUT;
 }
 
+UniqueType *LangTerm::evaluateParse2( Compiler *pd, CodeVect &code ) const
+{
+	/* Evaluate the initialization expressions. */
+	if ( fieldInitArgs != 0 && fieldInitArgs->length() > 0 ) {
+		for ( FieldInitVect::Iter pi = *fieldInitArgs; pi.lte(); pi++ ) {
+			FieldInit *fieldInit = *pi;
+			fieldInit->exprUT = fieldInit->expr->evaluate( pd, code );
+		}
+	}
+
+	/* Assign bind ids to the variables in the replacement. */
+	for ( ReplItemList::Iter item = *replacement->list; item.lte(); item++ ) {
+		if ( item->expr != 0 )
+			item->bindId = replacement->nextBindId++;
+	}
+
+	/* Evaluate variable references. */
+	for ( ReplItemList::Iter item = replacement->list->last(); item.gtb(); item-- ) {
+		if ( item->type == ReplItem::ExprType ) {
+			UniqueType *ut = item->expr->evaluate( pd, code );
+		
+			if ( ut->typeId != TYPE_TREE )
+				error() << "variables used in replacements must be trees" << endp;
+
+			item->langEl = ut->langEl;
+		}
+	}
+
+	/* Construct the tree using the tree information stored in the compiled
+	 * code. */
+	code.append( IN_CONSTRUCT );
+	code.appendHalf( replacement->patRepId );
+
+	/* Dup for the send. */
+	code.append( IN_DUP_TOP );
+
+	/* Lookup the type of the replacement and store it in the replacement
+	 * object so that replacement parsing has a target. */
+	UniqueType *replUT = typeRef->uniqueType;
+	if ( replUT->typeId != TYPE_TREE )
+		error(loc) << "don't know how to construct this type" << endp;
+	
+	if ( replUT->langEl->generic != 0 && replUT->langEl->generic->typeId == GEN_PARSER ) {
+		code.append( IN_CONSTRUCT_INPUT );
+		code.append( IN_DUP_TOP_OFF );
+		code.appendHalf( 1 );
+		code.append( IN_SET_INPUT );
+	}
+	
+	replacement->langEl = replUT->langEl;
+	assignFieldArgs( pd, code, replUT );
+
+	if ( varRef != 0 ) {
+		code.append( IN_DUP_TOP );
+
+		/* Get the type of the variable being assigned to. */
+		VarRefLookup lookup = varRef->lookupField( pd );
+
+		varRef->loadObj( pd, code, lookup.lastPtrInQual, false );
+		varRef->setField( pd, code, lookup.inObject, replUT, false );
+	}
+
+/*****************************/
+
+	/* Assign bind ids to the variables in the replacement. */
+	for ( ReplItemList::Iter item = *parserText->list; item.lte(); item++ ) {
+		switch ( item->type ) {
+		case ReplItem::FactorType: {
+			String result;
+			bool unusedCI;
+			prepareLitString( result, unusedCI, 
+					item->factor->typeRef->pdaLiteral->token.data,
+					item->factor->typeRef->pdaLiteral->token.loc );
+
+			/* Make sure we have this string. */
+			StringMapEl *mapEl = 0;
+			if ( pd->literalStrings.insert( result, &mapEl ) )
+				mapEl->value = pd->literalStrings.length()-1;
+
+			code.append( IN_LOAD_STR );
+			code.appendWord( mapEl->value );
+			break;
+		}
+		case ReplItem::InputText: {
+			/* Make sure we have this string. */
+			StringMapEl *mapEl = 0;
+			if ( pd->literalStrings.insert( item->data, &mapEl ) )
+				mapEl->value = pd->literalStrings.length()-1;
+
+			code.append( IN_LOAD_STR );
+			code.appendWord( mapEl->value );
+			break;
+		}
+		case ReplItem::ExprType:
+			item->expr->evaluate( pd, code );
+			break;
+		}
+
+		code.append( IN_DUP_TOP_OFF );
+		code.appendHalf( 1 );
+
+		/* Not a stream. Get the input first. */
+		code.append( IN_GET_INPUT );
+		if ( pd->revertOn )
+			code.append( IN_INPUT_APPEND_WV );
+		else
+			code.append( IN_INPUT_APPEND_WC );
+		code.append( IN_POP );
+
+		code.append( IN_DUP_TOP );
+
+		/* Parse instruction, dependent on whether or not we are producing
+		 * revert or commit code. */
+		if ( pd->revertOn ) {
+			code.append( IN_PARSE_SAVE_STEPS );
+			code.append( IN_PARSE_LOAD_START );
+			code.append( IN_PARSE_FRAG_WV );
+			code.appendHalf( 0 );
+			code.append( IN_PCR_CALL );
+			code.append( IN_PARSE_FRAG_WV3 );
+		}
+		else {
+			code.append( IN_PARSE_SAVE_STEPS );
+			code.append( IN_PARSE_LOAD_START );
+			code.append( IN_PARSE_FRAG_WC );
+			code.appendHalf( 0 );
+			code.append( IN_PCR_CALL );
+			code.append( IN_PARSE_FRAG_WC3 );
+		}
+	}
+	code.append( IN_POP );
+
+	return replUT;
+}
+
 UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool stop ) const
 {
 	UniqueType *ut = typeRef->uniqueType;
@@ -1521,6 +1656,8 @@ UniqueType *LangTerm::evaluate( Compiler *pd, CodeVect &code ) const
 			return evaluateParse( pd, code, true );
 		case ConstructType:
 			return evaluateConstruct( pd, code );
+		case Parser2Type:
+			return evaluateParse2( pd, code );
 		case NewType:
 			return evaluateNew( pd, code );
 		case TypeIdType: {
