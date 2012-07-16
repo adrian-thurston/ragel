@@ -17,13 +17,13 @@ def out
 def item 
 	[id]
 	{
-		send Out r1
+		send Out [r1]
 	}
 |	['(' item* ')']
 	{
-		send Out '('
-		send Out r2
-		send Out ')'
+		send Out ['(']
+		send Out [r2]
+		send Out [')']
 	}
 
 def A1 []

@@ -28,6 +28,6 @@ context ctx
 
 cons SP: parser<ctx::start> []
 SP.ctx = cons ctx []
-send SP stdin
+send SP [stdin]
 Input: ctx::start = SP()
 print( Input '\n' )
