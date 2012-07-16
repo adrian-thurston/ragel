@@ -685,19 +685,21 @@ opt_label:
 	};
 
 #
-# Replacement
+# Replacement List (constructor)
 #
 
-repl_list: repl_list replacement;
-repl_list: init_repl_list replacement;
+replacement: init_repl_list repl_list;
+
+repl_list: repl_top_el repl_list;
+repl_list: repl_top_el;
 
 init_repl_list: 
 	final {
 		replItemList = new ReplItemList;
 	};
 
-replacement: '"' lit_repl_el_list '"';
-replacement: '[' repl_el_list ']';
+repl_top_el: '"' lit_repl_el_list '"';
+repl_top_el: '[' repl_el_list ']';
 
 lit_repl_el_list: lit_repl_el_list lit_repl_el;
 lit_repl_el_list: ;
@@ -731,25 +733,21 @@ repl_el: code_expr
 	};
 
 #
-# Accum
+# Accumulate List
 #
-accumulate: init_repl_list accum_list;
-#accumulate: init_repl_list code_expr
-#	final {
-#		ReplItem *replItem = ReplItem::cons( $2->expr->loc, ReplItem::ExprType, $2->expr );
-#		replItemList->append( replItem );
-#	};
-
-accum_list: accum accum_list;
-accum_list: accum;
+accumulate: 
+	init_accum_list accum_list;
 
 init_accum_list: 
 	final {
 		replItemList = new ReplItemList;
 	};
 
-accum: '"' lit_accum_el_list '"';
-accum: '[' accum_el_list ']';
+accum_list: accum_top_el accum_list;
+accum_list: accum_top_el;
+
+accum_top_el: '"' lit_accum_el_list '"';
+accum_top_el: '[' accum_el_list ']';
 
 lit_accum_el_list: lit_accum_el_list lit_accum_el;
 lit_accum_el_list: ;
@@ -765,14 +763,6 @@ lit_accum_el: '[' accum_el_list ']';
 accum_el_list: accum_el_list accum_el;
 accum_el_list: ;
 
-#accum_el: region_qual TK_Literal
-#	final {
-#		PdaLiteral *literal = new PdaLiteral( $2->loc, *$2 );
-#		ProdEl *factor = new ProdEl( $2->loc, false, $1->nspaceQual, 
-#				literal, 0 );
-#		ReplItem *replItem = new ReplItem( $2->loc, ReplItem::FactorType, factor );
-#		replItemList->append( replItem );
-#	};
 accum_el: code_expr
 	final {
 		ReplItem *replItem = ReplItem::cons( $1->expr->loc, ReplItem::ExprType, $1->expr );
@@ -783,19 +773,21 @@ accum_el: '"' lit_accum_el_list '"';
 
 
 #
-# String
+# String List
 #
 
-string_list: string_list string;
-string_list: init_string_list string;
+string: init_string_list string_list;
 
 init_string_list: 
 	final {
 		replItemList = new ReplItemList;
 	};
 
-string: '"' lit_string_el_list '"';
-string: '[' string_el_list ']';
+string_list: string_top_el string_list;
+string_list: string_top_el;
+
+string_top_el: '"' lit_string_el_list '"';
+string_top_el: '[' string_el_list ']';
 
 lit_string_el_list: lit_string_el_list lit_string_el;
 lit_string_el_list: ;
@@ -1812,7 +1804,7 @@ code_factor: KW_New code_factor
 		$$->expr = LangExpr::cons( LangTerm::cons( LangTerm::NewType, $2->expr ) );
 	};
 code_factor: 
-	KW_Construct opt_capture type_ref opt_field_init repl_list
+	KW_Construct opt_capture type_ref opt_field_init replacement
 	final {
 		Namespace *nspace = namespaceStack.top();
 		TokenRegion *region = regionStack.top();
@@ -2019,7 +2011,7 @@ code_factor: KW_Deref code_expr
 	final {
 		$$->expr = LangExpr::cons( $1->loc, OP_Deref, $2->expr );
 	};
-code_factor: string_list
+code_factor: string
 	final {
 		$$->expr = LangExpr::cons( LangTerm::cons( replItemList ) );
 	};
