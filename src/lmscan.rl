@@ -285,7 +285,7 @@ void ColmScanner::endSection( )
 }
 
 %%{
-	machine rlscan;
+	machine lmscan;
 
 	# This is sent by the driver code.
 	EOF = 0;
@@ -532,7 +532,7 @@ void ColmScanner::endSection( )
 		'||' => { token( TK_BarBar ); };
 		'<<' => { token( TK_LtLt ); };
 		
-		('+' | '-' | '*' | '/' | '(' | ')' | '@' | '$' | '^' ) => { token( *ts ); };
+		( '+' | '-' | '*' | '/' | '(' | ')' | '@' | '$' | '^' ) => { token( *ts ); };
 
 
 		# Whitespace other than newline.
@@ -598,7 +598,7 @@ void ColmScanner::scan()
 		%% write exec;
 
 		/* Check if we failed. */
-		if ( cs == rlscan_error ) {
+		if ( cs == lmscan_error ) {
 			/* Machine failed before finding a token. I'm not yet sure if this
 			 * is reachable. */
 			scan_error() << "colm scanner error (metalanguage)" << endl;

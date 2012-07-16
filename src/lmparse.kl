@@ -724,13 +724,14 @@ repl_el: region_qual TK_Literal
 		ReplItem *replItem = ReplItem::cons( $2->loc, ReplItem::FactorType, factor );
 		replItemList->append( replItem );
 	};
-repl_el: '"' lit_repl_el_list '"';
 
 repl_el: code_expr
 	final {
 		ReplItem *replItem = ReplItem::cons( $1->expr->loc, ReplItem::ExprType, $1->expr );
 		replItemList->append( replItem );
 	};
+
+repl_el: '"' lit_repl_el_list '"';
 
 #
 # Accumulate List
@@ -803,14 +804,6 @@ lit_string_el: '[' string_el_list ']';
 string_el_list: string_el_list string_el;
 string_el_list: ;
 
-#accum_el: region_qual TK_Literal
-#	final {
-#		PdaLiteral *literal = new PdaLiteral( $2->loc, *$2 );
-#		ProdEl *factor = new ProdEl( $2->loc, false, $1->nspaceQual, 
-#				literal, 0 );
-#		ReplItem *replItem = new ReplItem( $2->loc, ReplItem::FactorType, factor );
-#		replItemList->append( replItem );
-#	};
 string_el: code_expr
 	final {
 		ReplItem *replItem = ReplItem::cons( $1->expr->loc, ReplItem::ExprType, $1->expr );
@@ -818,6 +811,10 @@ string_el: code_expr
 	};
 
 string_el: '"' lit_string_el_list '"';
+
+#
+# Production Lists.
+#
 
 prod_el_list: 
 	prod_el_list prod_el 
@@ -1832,7 +1829,7 @@ code_factor:
 		}
 	};
 code_factor: 
-	KW_Parse opt_capture type_ref opt_field_init accumulate
+	KW_Parse opt_capture type_ref accumulate
 	final {
 		Namespace *nspace = namespaceStack.top();
 		TokenRegion *region = regionStack.top();
@@ -1855,8 +1852,8 @@ code_factor:
 		ParserText *parserText = ParserText::cons( $2->loc, nspace, region, replItemList );
 		pd->parserTextList.append( parserText );
 
-		$$->expr = LangExpr::cons( LangTerm::cons( $1->loc, LangTerm::Parse2Type,
-				varRef, $2->objField, parserTypeRef, $4->fieldInitVect, replacement, parserText ) );
+		$$->expr = LangExpr::cons( LangTerm::cons( $1->loc, LangTerm::ParseType,
+			varRef, $2->objField, parserTypeRef, 0, replacement, parserText ) );
 
 		/* Check for redeclaration. */
 		if ( $2->objField != 0 ) {
@@ -1870,7 +1867,8 @@ code_factor:
 			pd->curLocalFrame->insertField( $2->objField->name, $2->objField );
 		}
 	};
-code_factor: KW_Parse opt_capture type_ref '(' opt_code_expr_list ')'
+code_factor: 
+	KW_Parse opt_capture type_ref '(' opt_code_expr_list ')'
 	final {
 		String parserName = $3->typeRef->typeName + "_parser";
 
@@ -1908,7 +1906,8 @@ code_factor: KW_Parse opt_capture type_ref '(' opt_code_expr_list ')'
 			pd->curLocalFrame->insertField( $2->objField->name, $2->objField );
 		}
 	};
-code_factor: KW_ParseStop opt_capture type_ref '(' opt_code_expr_list ')'
+code_factor: 
+	KW_ParseStop opt_capture type_ref '(' opt_code_expr_list ')'
 	final {
 		/* This is a silly clone. To be fixed later. */
 		String parserName = $3->typeRef->typeName + "_parser";

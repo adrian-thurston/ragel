@@ -1731,7 +1731,7 @@ UniqueType *LangTerm::evaluate( Compiler *pd, CodeVect &code ) const
 			return evaluateParse( pd, code, true );
 		case ConstructType:
 			return evaluateConstruct( pd, code );
-		case Parse2Type:
+		case ParseType:
 			return evaluateParse2( pd, code );
 		case SendType:
 			return evaluateSend( pd, code );

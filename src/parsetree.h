@@ -2341,7 +2341,7 @@ struct LangTerm
 		 * parse error if present. */
 		OrigParseType,
 		OrigParseStopType,
-		Parse2Type,
+		ParseType,
 		SendType,
 		MakeTreeType,
 		MakeTokenType,

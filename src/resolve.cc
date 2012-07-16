@@ -370,7 +370,7 @@ void LangTerm::resolve( Compiler *pd )
 			generic = parserTypeRef->generic;
 			break;
 
-		case Parse2Type:
+		case ParseType:
 			typeRef->lookupType( pd );
 			/* Evaluate the initialization expressions. */
 			if ( fieldInitArgs != 0 ) {
