@@ -1650,13 +1650,13 @@ UniqueType *LangTerm::evaluate( Compiler *pd, CodeVect &code ) const
 		}
 		case MatchType:
 			return evaluateMatch( pd, code );
-		case ParseType:
+		case OrigParseType:
 			return evaluateParse( pd, code, false );
-		case ParseStopType:
+		case OrigParseStopType:
 			return evaluateParse( pd, code, true );
 		case ConstructType:
 			return evaluateConstruct( pd, code );
-		case Parser2Type:
+		case Parse2Type:
 			return evaluateParse2( pd, code );
 		case NewType:
 			return evaluateNew( pd, code );
@@ -2181,7 +2181,7 @@ void LangStmt::compileWhile( Compiler *pd, CodeVect &code ) const
 	pd->curLocalFrame->iterPopScope();
 }
 
-void LangStmt::evaluateParserItems( Compiler *pd, CodeVect &code ) const
+void LangStmt::evaluateSend( Compiler *pd, CodeVect &code ) const
 {
 	varRef->evaluate( pd, code );
 
@@ -2415,8 +2415,8 @@ void LangStmt::compile( Compiler *pd, CodeVect &code ) const
 			objField->refActive = false;
 			break;
 		}
-		case ParserType: {
-			evaluateParserItems( pd, code );
+		case SendType: {
+			evaluateSend( pd, code );
 			break;
 		}
 	}

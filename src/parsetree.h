@@ -2337,12 +2337,14 @@ struct LangTerm
 		NilType,
 		TrueType,
 		FalseType,
-		ParseType,
-		ParseStopType,
+		/* Parser that returns the tree, not the parser class. Can't get any
+		 * parse error if present. */
+		OrigParseType,
+		OrigParseStopType,
+		Parse2Type,
 		MakeTreeType,
 		MakeTokenType,
 		EmbedStringType,
-		Parser2Type,
 	};
 
 	LangTerm()
@@ -2618,7 +2620,7 @@ struct LangStmt
 		YieldType,
 		ForIterType,
 		BreakType,
-		ParserType
+		SendType
 	};
 
 	LangStmt()
@@ -2773,7 +2775,7 @@ struct LangStmt
 	void resolve( Compiler *pd ) const;
 	void resolveParserItems( Compiler *pd ) const;
 
-	void evaluateParserItems( Compiler *pd, CodeVect &code ) const;
+	void evaluateSend( Compiler *pd, CodeVect &code ) const;
 	LangTerm *chooseDefaultIter( Compiler *pd, LangTerm *fromVarRef ) const;
 	void compileWhile( Compiler *pd, CodeVect &code ) const;
 	void compileForIterBody( Compiler *pd, CodeVect &code, UniqueType *iterUT ) const;

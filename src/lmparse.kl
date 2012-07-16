@@ -1448,7 +1448,7 @@ statement: var_ref TK_LtLt accumulate
 		ParserText *parserText = ParserText::cons( $2->loc, nspace, region, replItemList );
 		pd->parserTextList.append( parserText );
 
-		$$->stmt = LangStmt::cons( LangStmt::ParserType, $1->varRef, parserText );
+		$$->stmt = LangStmt::cons( LangStmt::SendType, $1->varRef, parserText );
 	};
 statement: KW_Send var_ref accumulate
 	final {
@@ -1457,7 +1457,7 @@ statement: KW_Send var_ref accumulate
 		ParserText *parserText = ParserText::cons( $1->loc, nspace, region, replItemList );
 		pd->parserTextList.append( parserText );
 
-		$$->stmt = LangStmt::cons( LangStmt::ParserType, $2->varRef, parserText );
+		$$->stmt = LangStmt::cons( LangStmt::SendType, $2->varRef, parserText );
 	};
 
 nonterm opt_require_stmt uses statement;
@@ -1881,7 +1881,7 @@ code_factor:
 		ParserText *parserText = ParserText::cons( $2->loc, nspace, region, replItemList );
 		pd->parserTextList.append( parserText );
 
-		$$->expr = LangExpr::cons( LangTerm::cons( $1->loc, LangTerm::Parser2Type,
+		$$->expr = LangExpr::cons( LangTerm::cons( $1->loc, LangTerm::Parse2Type,
 				varRef, $2->objField, parserTypeRef, $4->fieldInitVect, replacement, parserText ) );
 
 		/* Check for redeclaration. */
@@ -1918,7 +1918,7 @@ code_factor: KW_Parse opt_capture type_ref '(' opt_code_expr_list ')'
 		if ( $2->objField != 0 )
 			varRef = new LangVarRef( $2->objField->loc, new QualItemVect, $2->objField->name );
 
-		$$->expr = LangExpr::cons( LangTerm::cons( $1->loc, LangTerm::ParseType,
+		$$->expr = LangExpr::cons( LangTerm::cons( $1->loc, LangTerm::OrigParseType,
 				varRef, $2->objField, $3->typeRef, generic, parserTypeRef, replacement ) );
 		$$->expr->term->args = $5->exprVect;
 
@@ -1957,7 +1957,7 @@ code_factor: KW_ParseStop opt_capture type_ref '(' opt_code_expr_list ')'
 		if ( $2->objField != 0 )
 			varRef = new LangVarRef( $2->objField->loc, new QualItemVect, $2->objField->name );
 
-		$$->expr = LangExpr::cons( LangTerm::cons( $1->loc, LangTerm::ParseStopType, 
+		$$->expr = LangExpr::cons( LangTerm::cons( $1->loc, LangTerm::OrigParseStopType, 
 				varRef, $2->objField, $3->typeRef, generic, parserTypeRef, replacement ) );
 		$$->expr->term->args = $5->exprVect;
 

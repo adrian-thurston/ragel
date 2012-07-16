@@ -333,7 +333,7 @@ void LangTerm::resolve( Compiler *pd )
 					(*pi)->expr->resolve( pd );
 			}
 			break;
-		case Parser2Type:
+		case Parse2Type:
 			typeRef->lookupType( pd );
 			/* Evaluate the initialization expressions. */
 			if ( fieldInitArgs != 0 ) {
@@ -371,8 +371,8 @@ void LangTerm::resolve( Compiler *pd )
 		case FalseType:
 			break;
 
-		case ParseType:
-		case ParseStopType:
+		case OrigParseType:
+		case OrigParseStopType:
 			typeRef->lookupType( pd );
 			parserTypeRef->lookupType( pd );
 			generic = parserTypeRef->generic;
@@ -500,8 +500,7 @@ void LangStmt::resolve( Compiler *pd ) const
 			varRef->resolve( pd );
 			break;
 		}
-		case ParserType: {
-			//for ( )
+		case SendType: {
 			break;
 		}
 	}
