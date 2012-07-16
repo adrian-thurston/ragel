@@ -740,7 +740,7 @@ accumulate: init_repl_list accum_list;
 #		replItemList->append( replItem );
 #	};
 
-accum_list: accum_list accum;
+accum_list: accum accum_list;
 accum_list: accum;
 
 init_accum_list: 
