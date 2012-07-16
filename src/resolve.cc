@@ -333,14 +333,6 @@ void LangTerm::resolve( Compiler *pd )
 					(*pi)->expr->resolve( pd );
 			}
 			break;
-		case Parse2Type:
-			typeRef->lookupType( pd );
-			/* Evaluate the initialization expressions. */
-			if ( fieldInitArgs != 0 ) {
-				for ( FieldInitVect::Iter pi = *fieldInitArgs; pi.lte(); pi++ )
-					(*pi)->expr->resolve( pd );
-			}
-			break;
 		case VarRefType:
 			break;
 
@@ -376,6 +368,18 @@ void LangTerm::resolve( Compiler *pd )
 			typeRef->lookupType( pd );
 			parserTypeRef->lookupType( pd );
 			generic = parserTypeRef->generic;
+			break;
+
+		case Parse2Type:
+			typeRef->lookupType( pd );
+			/* Evaluate the initialization expressions. */
+			if ( fieldInitArgs != 0 ) {
+				for ( FieldInitVect::Iter pi = *fieldInitArgs; pi.lte(); pi++ )
+					(*pi)->expr->resolve( pd );
+			}
+			break;
+
+		case SendType:
 			break;
 
 		case EmbedStringType:
@@ -498,9 +502,6 @@ void LangStmt::resolve( Compiler *pd ) const
 		case YieldType: {
 			/* take a reference and yield it. Immediately reset the referece. */
 			varRef->resolve( pd );
-			break;
-		}
-		case SendType: {
 			break;
 		}
 	}

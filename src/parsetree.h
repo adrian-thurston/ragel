@@ -2342,6 +2342,7 @@ struct LangTerm
 		OrigParseType,
 		OrigParseStopType,
 		Parse2Type,
+		SendType,
 		MakeTreeType,
 		MakeTokenType,
 		EmbedStringType,
@@ -2518,6 +2519,15 @@ struct LangTerm
 		t->replacement = (replacement);
 		return t;
 	}
+
+	static LangTerm *cons( Type type, LangVarRef *varRef, ParserText *parserText ) 
+	{
+		LangTerm *s = new LangTerm;
+		s->type = type;
+		s->varRef = varRef;
+		s->parserText = parserText;
+		return s;
+	}
 	
 	void resolve( Compiler *pd );
 
@@ -2525,6 +2535,7 @@ struct LangTerm
 	UniqueType *evaluateNew( Compiler *pd, CodeVect &code ) const;
 	UniqueType *evaluateConstruct( Compiler *pd, CodeVect &code ) const;
 	UniqueType *evaluateParse2( Compiler *pd, CodeVect &code ) const;
+	UniqueType *evaluateSend( Compiler *pd, CodeVect &code ) const;
 	UniqueType *evaluateMatch( Compiler *pd, CodeVect &code ) const;
 	UniqueType *evaluate( Compiler *pd, CodeVect &code ) const;
 	void assignFieldArgs( Compiler *pd, CodeVect &code, UniqueType *replUT ) const;
@@ -2619,8 +2630,7 @@ struct LangStmt
 		ReturnType,
 		YieldType,
 		ForIterType,
-		BreakType,
-		SendType
+		BreakType
 	};
 
 	LangStmt()
@@ -2743,15 +2753,6 @@ struct LangStmt
 		return s;
 	}
 
-	static LangStmt *cons( Type type, LangVarRef *varRef, ParserText *parserText ) 
-	{
-		LangStmt *s = new LangStmt;
-		s->type = (type);
-		s->varRef = (varRef);
-		s->parserText = (parserText);
-		return s;
-	}
-
 	static LangStmt *cons( const InputLoc &loc, Type type, ObjField *objField, 
 			TypeRef *typeRef, LangTerm *langTerm, StmtList *stmtList )
 	{
@@ -2775,7 +2776,6 @@ struct LangStmt
 	void resolve( Compiler *pd ) const;
 	void resolveParserItems( Compiler *pd ) const;
 
-	void evaluateSend( Compiler *pd, CodeVect &code ) const;
 	LangTerm *chooseDefaultIter( Compiler *pd, LangTerm *fromVarRef ) const;
 	void compileWhile( Compiler *pd, CodeVect &code ) const;
 	void compileForIterBody( Compiler *pd, CodeVect &code, UniqueType *iterUT ) const;

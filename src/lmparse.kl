@@ -1441,24 +1441,6 @@ statement: KW_Yield var_ref
 	final {
 		$$->stmt = LangStmt::cons( LangStmt::YieldType, $2->varRef );
 	};
-statement: var_ref TK_LtLt accumulate
-	final {
-		Namespace *nspace = namespaceStack.top();
-		TokenRegion *region = regionStack.top();
-		ParserText *parserText = ParserText::cons( $2->loc, nspace, region, replItemList );
-		pd->parserTextList.append( parserText );
-
-		$$->stmt = LangStmt::cons( LangStmt::SendType, $1->varRef, parserText );
-	};
-statement: KW_Send var_ref accumulate
-	final {
-		Namespace *nspace = namespaceStack.top();
-		TokenRegion *region = regionStack.top();
-		ParserText *parserText = ParserText::cons( $1->loc, nspace, region, replItemList );
-		pd->parserTextList.append( parserText );
-
-		$$->stmt = LangStmt::cons( LangStmt::SendType, $2->varRef, parserText );
-	};
 
 nonterm opt_require_stmt uses statement;
 
@@ -1973,6 +1955,26 @@ code_factor: KW_ParseStop opt_capture type_ref '(' opt_code_expr_list ')'
 			pd->curLocalFrame->insertField( $2->objField->name, $2->objField );
 		}
 
+	};
+code_factor: 
+	var_ref TK_LtLt accumulate
+	final {
+		Namespace *nspace = namespaceStack.top();
+		TokenRegion *region = regionStack.top();
+		ParserText *parserText = ParserText::cons( $2->loc, nspace, region, replItemList );
+		pd->parserTextList.append( parserText );
+
+		$$->expr = LangExpr::cons( LangTerm::cons( LangTerm::SendType, $1->varRef, parserText ) );
+	};
+code_factor: 
+	KW_Send var_ref accumulate
+	final {
+		Namespace *nspace = namespaceStack.top();
+		TokenRegion *region = regionStack.top();
+		ParserText *parserText = ParserText::cons( $1->loc, nspace, region, replItemList );
+		pd->parserTextList.append( parserText );
+
+		$$->expr = LangExpr::cons( LangTerm::cons( LangTerm::SendType, $2->varRef, parserText ) );
 	};
 code_factor: KW_TypeId '<' type_ref '>'
 	final {

@@ -1423,6 +1423,81 @@ UniqueType *LangTerm::evaluateParse2( Compiler *pd, CodeVect &code ) const
 	return replUT;
 }
 
+UniqueType *LangTerm::evaluateSend( Compiler *pd, CodeVect &code ) const
+{
+	UniqueType *varUt = varRef->evaluate( pd, code );
+
+	/* Assign bind ids to the variables in the replacement. */
+	for ( ReplItemList::Iter item = *parserText->list; item.lte(); item++ ) {
+		switch ( item->type ) {
+		case ReplItem::FactorType: {
+			String result;
+			bool unusedCI;
+			prepareLitString( result, unusedCI, 
+					item->factor->typeRef->pdaLiteral->token.data,
+					item->factor->typeRef->pdaLiteral->token.loc );
+
+			/* Make sure we have this string. */
+			StringMapEl *mapEl = 0;
+			if ( pd->literalStrings.insert( result, &mapEl ) )
+				mapEl->value = pd->literalStrings.length()-1;
+
+			code.append( IN_LOAD_STR );
+			code.appendWord( mapEl->value );
+			break;
+		}
+		case ReplItem::InputText: {
+			/* Make sure we have this string. */
+			StringMapEl *mapEl = 0;
+			if ( pd->literalStrings.insert( item->data, &mapEl ) )
+				mapEl->value = pd->literalStrings.length()-1;
+
+			code.append( IN_LOAD_STR );
+			code.appendWord( mapEl->value );
+			break;
+		}
+		case ReplItem::ExprType:
+			item->expr->evaluate( pd, code );
+			break;
+		}
+
+		code.append( IN_DUP_TOP_OFF );
+		code.appendHalf( 1 );
+
+		/* Not a stream. Get the input first. */
+		code.append( IN_GET_INPUT );
+		if ( pd->revertOn )
+			code.append( IN_INPUT_APPEND_WV );
+		else
+			code.append( IN_INPUT_APPEND_WC );
+		code.append( IN_POP );
+
+		code.append( IN_DUP_TOP );
+
+		/* Parse instruction, dependent on whether or not we are producing
+		 * revert or commit code. */
+		if ( pd->revertOn ) {
+			code.append( IN_PARSE_SAVE_STEPS );
+			code.append( IN_PARSE_LOAD_START );
+			code.append( IN_PARSE_FRAG_WV );
+			code.appendHalf( 0 );
+			code.append( IN_PCR_CALL );
+			code.append( IN_PARSE_FRAG_WV3 );
+		}
+		else {
+			code.append( IN_PARSE_SAVE_STEPS );
+			code.append( IN_PARSE_LOAD_START );
+			code.append( IN_PARSE_FRAG_WC );
+			code.appendHalf( 0 );
+			code.append( IN_PCR_CALL );
+			code.append( IN_PARSE_FRAG_WC3 );
+		}
+	}
+
+	return varUt;
+}
+
+
 UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool stop ) const
 {
 	UniqueType *ut = typeRef->uniqueType;
@@ -1658,6 +1733,8 @@ UniqueType *LangTerm::evaluate( Compiler *pd, CodeVect &code ) const
 			return evaluateConstruct( pd, code );
 		case Parse2Type:
 			return evaluateParse2( pd, code );
+		case SendType:
+			return evaluateSend( pd, code );
 		case NewType:
 			return evaluateNew( pd, code );
 		case TypeIdType: {
@@ -2181,79 +2258,6 @@ void LangStmt::compileWhile( Compiler *pd, CodeVect &code ) const
 	pd->curLocalFrame->iterPopScope();
 }
 
-void LangStmt::evaluateSend( Compiler *pd, CodeVect &code ) const
-{
-	varRef->evaluate( pd, code );
-
-	/* Assign bind ids to the variables in the replacement. */
-	for ( ReplItemList::Iter item = *parserText->list; item.lte(); item++ ) {
-		switch ( item->type ) {
-		case ReplItem::FactorType: {
-			String result;
-			bool unusedCI;
-			prepareLitString( result, unusedCI, 
-					item->factor->typeRef->pdaLiteral->token.data,
-					item->factor->typeRef->pdaLiteral->token.loc );
-
-			/* Make sure we have this string. */
-			StringMapEl *mapEl = 0;
-			if ( pd->literalStrings.insert( result, &mapEl ) )
-				mapEl->value = pd->literalStrings.length()-1;
-
-			code.append( IN_LOAD_STR );
-			code.appendWord( mapEl->value );
-			break;
-		}
-		case ReplItem::InputText: {
-			/* Make sure we have this string. */
-			StringMapEl *mapEl = 0;
-			if ( pd->literalStrings.insert( item->data, &mapEl ) )
-				mapEl->value = pd->literalStrings.length()-1;
-
-			code.append( IN_LOAD_STR );
-			code.appendWord( mapEl->value );
-			break;
-		}
-		case ReplItem::ExprType:
-			item->expr->evaluate( pd, code );
-			break;
-		}
-
-		code.append( IN_DUP_TOP_OFF );
-		code.appendHalf( 1 );
-
-		/* Not a stream. Get the input first. */
-		code.append( IN_GET_INPUT );
-		if ( pd->revertOn )
-			code.append( IN_INPUT_APPEND_WV );
-		else
-			code.append( IN_INPUT_APPEND_WC );
-		code.append( IN_POP );
-
-		code.append( IN_DUP_TOP );
-
-		/* Parse instruction, dependent on whether or not we are producing
-		 * revert or commit code. */
-		if ( pd->revertOn ) {
-			code.append( IN_PARSE_SAVE_STEPS );
-			code.append( IN_PARSE_LOAD_START );
-			code.append( IN_PARSE_FRAG_WV );
-			code.appendHalf( 0 );
-			code.append( IN_PCR_CALL );
-			code.append( IN_PARSE_FRAG_WV3 );
-		}
-		else {
-			code.append( IN_PARSE_SAVE_STEPS );
-			code.append( IN_PARSE_LOAD_START );
-			code.append( IN_PARSE_FRAG_WC );
-			code.appendHalf( 0 );
-			code.append( IN_PCR_CALL );
-			code.append( IN_PARSE_FRAG_WC3 );
-		}
-	}
-	code.append( IN_POP );
-}
-
 void LangStmt::compile( Compiler *pd, CodeVect &code ) const
 {
 	switch ( type ) {
@@ -2413,10 +2417,6 @@ void LangStmt::compile( Compiler *pd, CodeVect &code ) const
 			}
 
 			objField->refActive = false;
-			break;
-		}
-		case SendType: {
-			evaluateSend( pd, code );
 			break;
 		}
 	}
