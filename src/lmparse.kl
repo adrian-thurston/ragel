@@ -734,11 +734,11 @@ repl_el: code_expr
 # Accum
 #
 accumulate: init_repl_list accum_list;
-accumulate: init_repl_list code_expr
-	final {
-		ReplItem *replItem = ReplItem::cons( $2->expr->loc, ReplItem::ExprType, $2->expr );
-		replItemList->append( replItem );
-	};
+#accumulate: init_repl_list code_expr
+#	final {
+#		ReplItem *replItem = ReplItem::cons( $2->expr->loc, ReplItem::ExprType, $2->expr );
+#		replItemList->append( replItem );
+#	};
 
 accum_list: accum_list accum;
 accum_list: accum;
