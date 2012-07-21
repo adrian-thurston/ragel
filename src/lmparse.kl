@@ -725,13 +725,14 @@ repl_el: region_qual TK_Literal
 		replItemList->append( replItem );
 	};
 
+repl_el: '"' lit_repl_el_list '"';
+
 repl_el: code_expr
 	final {
 		ReplItem *replItem = ReplItem::cons( $1->expr->loc, ReplItem::ExprType, $1->expr );
 		replItemList->append( replItem );
 	};
 
-repl_el: '"' lit_repl_el_list '"';
 
 #
 # Accumulate List
