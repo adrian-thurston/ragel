@@ -1942,7 +1942,7 @@ struct TypeRef
 	}
 
 	/* Generics. */
-	static TypeRef *cons( Type type, const InputLoc &loc, NamespaceQual *nspaceQual, TypeRef *typeRef1, TypeRef *typeRef2 )
+	static TypeRef *cons( const InputLoc &loc, Type type, NamespaceQual *nspaceQual, TypeRef *typeRef1, TypeRef *typeRef2 )
 	{
 		TypeRef *t = new TypeRef;
 		t->type = (type);
@@ -1955,7 +1955,7 @@ struct TypeRef
 	}
 	
 	/* Pointers and Refs. */
-	static TypeRef *cons( Type type, const InputLoc &loc, TypeRef *typeRef1 )
+	static TypeRef *cons( const InputLoc &loc, Type type, TypeRef *typeRef1 )
 	{
 		TypeRef *t = new TypeRef;
 		t->type = (type);
@@ -2353,96 +2353,92 @@ struct LangTerm
 		parserText(0)
 	{}
 
-	static LangTerm *cons( Type type, LangVarRef *varRef )
+	static LangTerm *cons( const InputLoc &loc, Type type, LangVarRef *varRef )
 	{
 		LangTerm *t = new LangTerm;
-		t->type = (type);
-		t->varRef = (varRef);
+		t->loc = loc;
+		t->type = type;
+		t->varRef = varRef;
 		return t;
 	}
 
-	static LangTerm *cons( LangVarRef *varRef, ExprVect *args )
+	static LangTerm *cons( const InputLoc &loc, LangVarRef *varRef, ExprVect *args )
 	{
 		LangTerm *t = new LangTerm;
-		t->type = (MethodCallType);
-		t->varRef = (varRef);
-		t->args = (args);
+		t->loc = loc;
+		t->type = MethodCallType;
+		t->varRef = varRef;
+		t->args = args;
 		return t;
 	}
 
 	static LangTerm *cons( const InputLoc &loc, Type type, ExprVect *args )
 	{
 		LangTerm *t = new LangTerm;
-		t->loc = (loc);
-		t->type = (type);
-		t->args = (args);
+		t->loc = loc;
+		t->type = type;
+		t->args = args;
 		return t;
 	}
 
-	static LangTerm *cons( Type type, String data )
+	static LangTerm *cons( const InputLoc &loc, Type type, String data )
 	{
 		LangTerm *t = new LangTerm;
-		t->type = (type);
-		t->varRef = (0);
-		t->data = (data);
+		t->loc = loc;
+		t->type = type;
+		t->varRef = 0;
+		t->data = data;
 		return t;
 	}
 
-	static LangTerm *cons( Type type, NamespaceQual *nspaceQual, const String &data )
+	static LangTerm *cons( const InputLoc &loc, Type type, NamespaceQual *nspaceQual, const String &data )
 	{
 		LangTerm *t = new LangTerm;
-		t->type = (type);
-		t->varRef = (0);
-		t->nspaceQual = (nspaceQual);
-		t->data = (data);
+		t->loc = loc;
+		t->type = type;
+		t->varRef = 0;
+		t->nspaceQual = nspaceQual;
+		t->data = data;
 		return t;
 	}
 
 	static LangTerm *cons( const InputLoc &loc, Type type )
 	{
 		LangTerm *t = new LangTerm;
-		t->loc = (loc);
-		t->type = (type);
-		t->varRef = (0);
-		t->typeRef = (0);
+		t->loc = loc;
+		t->type = type;
+		t->varRef = 0;
+		t->typeRef = 0;
 		return t;
 	}
 
 	static LangTerm *cons( const InputLoc &loc, Type type, TypeRef *typeRef )
 	{
 		LangTerm *t = new LangTerm;
-		t->loc = (loc);
-		t->type = (type);
-		t->varRef = (0);
-		t->typeRef = (typeRef);
+		t->loc = loc;
+		t->type = type;
+		t->varRef = 0;
+		t->typeRef = typeRef;
 		return t;
 	}
 
-	static LangTerm *cons( const InputLoc &loc, Type type, LangVarRef *varRef )
+	static LangTerm *cons( const InputLoc &loc, Type type, LangVarRef *varRef, Pattern *pattern )
 	{
 		LangTerm *t = new LangTerm;
-		t->loc = (loc);
-		t->type = (type);
-		t->varRef = (varRef);
-		return t;
-	}
-
-	static LangTerm *cons( Type type, LangVarRef *varRef, Pattern *pattern )
-	{
-		LangTerm *t = new LangTerm;
-		t->type = (type);
-		t->varRef = (varRef);
-		t->pattern = (pattern);
+		t->loc = loc;
+		t->type = type;
+		t->varRef = varRef;
+		t->pattern = pattern;
 		return t;
 	}
 
 	static LangTerm *cons( const InputLoc &loc, Type type, TypeRef *typeRef, LangVarRef *varRef )
 	{
 		LangTerm *t = new LangTerm;
-		t->loc = (loc);
-		t->type = (type);
-		t->varRef = (varRef);
-		t->typeRef = (typeRef);
+		t->loc = loc;
+		t->type = type;
+		t->varRef = varRef;
+		t->typeRef = typeRef;
 		return t;
 	}
 
@@ -2450,11 +2446,11 @@ struct LangTerm
 			Replacement *replacement )
 	{
 		LangTerm *t = new LangTerm;
-		t->loc = (loc);
-		t->type = (type);
-		t->typeRef = (typeRef);
-		t->fieldInitArgs = (fieldInitArgs);
-		t->replacement = (replacement);
+		t->loc = loc;
+		t->type = type;
+		t->typeRef = typeRef;
+		t->fieldInitArgs = fieldInitArgs;
+		t->replacement = replacement;
 		return t;
 	}
 
@@ -2462,13 +2458,13 @@ struct LangTerm
 			TypeRef *typeRef, FieldInitVect *fieldInitArgs, Replacement *replacement )
 	{
 		LangTerm *t = new LangTerm;
-		t->loc = (loc);
-		t->type = (type);
-		t->varRef = (varRef);
-		t->objField = (objField);
-		t->typeRef = (typeRef);
-		t->fieldInitArgs = (fieldInitArgs);
-		t->replacement = (replacement);
+		t->loc = loc;
+		t->type = type;
+		t->varRef = varRef;
+		t->objField = objField;
+		t->typeRef = typeRef;
+		t->fieldInitArgs = fieldInitArgs;
+		t->replacement = replacement;
 		return t;
 	}
 
@@ -2477,30 +2473,32 @@ struct LangTerm
 			ParserText *parserText )
 	{
 		LangTerm *t = new LangTerm;
-		t->loc = (loc);
-		t->type = (type);
-		t->varRef = (varRef);
-		t->objField = (objField);
-		t->typeRef = (typeRef);
-		t->fieldInitArgs = (fieldInitArgs);
-		t->replacement = (replacement);
-		t->parserText = (parserText);
+		t->loc = loc;
+		t->type = type;
+		t->varRef = varRef;
+		t->objField = objField;
+		t->typeRef = typeRef;
+		t->fieldInitArgs = fieldInitArgs;
+		t->replacement = replacement;
+		t->parserText = parserText;
 		return t;
 	}
 
-	static LangTerm *cons( Type type, LangExpr *expr )
+	static LangTerm *cons( const InputLoc &loc, Type type, LangExpr *expr )
 	{
 		LangTerm *t = new LangTerm;
-		t->type = (type);
-		t->expr = (expr);
+		t->loc = loc;
+		t->type = type;
+		t->expr = expr;
 		return t;
 	}
 	
-	static LangTerm *cons( ReplItemList *replItemList )
+	static LangTerm *cons( const InputLoc &loc, ReplItemList *replItemList )
 	{
 		LangTerm *t = new LangTerm;
-		t->type = (EmbedStringType);
-		t->replItemList = (replItemList);
+		t->loc = loc;
+		t->type = EmbedStringType;
+		t->replItemList = replItemList;
 		return t;
 	}
 
@@ -2509,20 +2507,21 @@ struct LangTerm
 			Replacement *replacement )
 	{
 		LangTerm *t = new LangTerm;
-		t->loc = (loc);
-		t->type = (type);
-		t->varRef = (varRef);
-		t->objField = (objField);
-		t->typeRef = (typeRef);
-		t->generic = (generic);
-		t->parserTypeRef = (parserTypeRef);
-		t->replacement = (replacement);
+		t->loc = loc;
+		t->type = type;
+		t->varRef = varRef;
+		t->objField = objField;
+		t->typeRef = typeRef;
+		t->generic = generic;
+		t->parserTypeRef = parserTypeRef;
+		t->replacement = replacement;
 		return t;
 	}
 
-	static LangTerm *cons( Type type, LangVarRef *varRef, ParserText *parserText ) 
+	static LangTerm *cons( const InputLoc &loc, Type type, LangVarRef *varRef, ParserText *parserText ) 
 	{
 		LangTerm *s = new LangTerm;
+		s->loc = loc;
 		s->type = type;
 		s->varRef = varRef;
 		s->parserText = parserText;

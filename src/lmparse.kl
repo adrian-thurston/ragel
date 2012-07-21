@@ -186,7 +186,7 @@ nonterm reference_type_ref uses type_ref;
 
 reference_type_ref: KW_Ref type_ref
 	final {
-		$$->typeRef = TypeRef::cons( TypeRef::Ref, $1->loc, $2->typeRef );
+		$$->typeRef = TypeRef::cons( $1->loc, TypeRef::Ref, $2->typeRef );
 	};
 
 nonterm global_def uses statement;
@@ -419,27 +419,30 @@ type_ref: KW_Map '<' type_ref type_ref '>'
 	final {
 		NamespaceQual *nspaceQual = new NamespaceQual( 
 				namespaceStack.top(), regionStack.top() );
-		$$->typeRef = TypeRef::cons( TypeRef::Map, InputLoc(), nspaceQual,
-				$3->typeRef, $4->typeRef );
+		$$->typeRef = TypeRef::cons( InputLoc(), TypeRef::Map, 
+				nspaceQual, $3->typeRef, $4->typeRef );
 	};
 
 type_ref: KW_List '<' type_ref '>'
 	final {
 		NamespaceQual *nspaceQual = new NamespaceQual( 
 				namespaceStack.top(), regionStack.top() );
-		$$->typeRef = TypeRef::cons( TypeRef::List, InputLoc(), nspaceQual, $3->typeRef, 0 );
+		$$->typeRef = TypeRef::cons( InputLoc(), TypeRef::List,
+				nspaceQual, $3->typeRef, 0 );
 	};
 type_ref: KW_Vector '<' type_ref '>'
 	final {
 		NamespaceQual *nspaceQual = new NamespaceQual( 
 				namespaceStack.top(), regionStack.top() );
-		$$->typeRef = TypeRef::cons( TypeRef::Vector, InputLoc(), nspaceQual, $3->typeRef, 0 );
+		$$->typeRef = TypeRef::cons( InputLoc(), TypeRef::Vector,
+				nspaceQual, $3->typeRef, 0 );
 	};
 type_ref: KW_Accum '<' type_ref '>'
 	final {
 		NamespaceQual *nspaceQual = new NamespaceQual( 
 				namespaceStack.top(), regionStack.top() );
-		$$->typeRef = TypeRef::cons( TypeRef::Parser, InputLoc(), nspaceQual, $3->typeRef, 0 );
+		$$->typeRef = TypeRef::cons( InputLoc(), TypeRef::Parser,
+				nspaceQual, $3->typeRef, 0 );
 	};
 
 nonterm basic_type_ref uses type_ref;
@@ -454,7 +457,7 @@ basic_type_ref: KW_Ptr region_qual TK_Word opt_repeat
 	final {
 		$$->typeRef = TypeRef::cons( $1->loc, $2->nspaceQual, $3->data );
 		$$->typeRef->repeatType = $4->repeatType;
-		$$->typeRef = TypeRef::cons( TypeRef::Ptr, $1->loc, $$->typeRef );
+		$$->typeRef = TypeRef::cons( $1->loc, TypeRef::Ptr, $$->typeRef );
 	};
 
 
@@ -1455,8 +1458,8 @@ require_pattern:
 				patternItemList, pd->nextPatReplId++ );
 		pd->patternList.append( pattern );
 
-		$$->expr = LangExpr::cons(
-				LangTerm::cons( LangTerm::MatchType, $2->varRef, pattern ) );
+		$$->expr = LangExpr::cons( LangTerm::cons(
+				InputLoc(), LangTerm::MatchType, $2->varRef, pattern ) );
 	};
 
 nonterm block_or_single uses lang_stmt_list;
@@ -1478,11 +1481,11 @@ nonterm iter_call
 
 iter_call: var_ref '(' opt_code_expr_list ')'
 	final {
-		$$->langTerm = LangTerm::cons( $1->varRef, $3->exprVect );
+		$$->langTerm = LangTerm::cons( InputLoc(), $1->varRef, $3->exprVect );
 	};
 iter_call: TK_Word
 	final {
-		$$->langTerm = LangTerm::cons( LangTerm::VarRefType,
+		$$->langTerm = LangTerm::cons( InputLoc(), LangTerm::VarRefType,
 			new LangVarRef( $1->loc, new QualItemVect, $1->data ) );
 	};
 
@@ -1773,19 +1776,19 @@ nonterm code_factor uses code_expr;
 
 code_factor: TK_Number
 	final {
-		$$->expr = LangExpr::cons( LangTerm::cons( LangTerm::NumberType, $1->data ) );
+		$$->expr = LangExpr::cons( LangTerm::cons( InputLoc(), LangTerm::NumberType, $1->data ) );
 	};
 code_factor: TK_Literal
 	final {
-		$$->expr = LangExpr::cons( LangTerm::cons( LangTerm::StringType, $1->data ) );
+		$$->expr = LangExpr::cons( LangTerm::cons( InputLoc(), LangTerm::StringType, $1->data ) );
 	};
 code_factor: var_ref '(' opt_code_expr_list ')'
 	final {
-		$$->expr = LangExpr::cons( LangTerm::cons( $1->varRef, $3->exprVect ) );
+		$$->expr = LangExpr::cons( LangTerm::cons( InputLoc(), $1->varRef, $3->exprVect ) );
 	};
 code_factor: var_ref
 	final {
-		$$->expr = LangExpr::cons( LangTerm::cons( LangTerm::VarRefType, $1->varRef ) );
+		$$->expr = LangExpr::cons( LangTerm::cons( InputLoc(), LangTerm::VarRefType, $1->varRef ) );
 	};
 code_factor: KW_Match var_ref pattern_list
 	final {
@@ -1795,11 +1798,11 @@ code_factor: KW_Match var_ref pattern_list
 				patternItemList, pd->nextPatReplId++ );
 		pd->patternList.append( pattern );
 
-		$$->expr = LangExpr::cons( LangTerm::cons( LangTerm::MatchType, $2->varRef, pattern ) );
+		$$->expr = LangExpr::cons( LangTerm::cons( InputLoc(), LangTerm::MatchType, $2->varRef, pattern ) );
 	};
 code_factor: KW_New code_factor
 	final {
-		$$->expr = LangExpr::cons( LangTerm::cons( LangTerm::NewType, $2->expr ) );
+		$$->expr = LangExpr::cons( LangTerm::cons( InputLoc(), LangTerm::NewType, $2->expr ) );
 	};
 code_factor: 
 	KW_Construct opt_capture type_ref opt_field_init replacement
@@ -1847,8 +1850,8 @@ code_factor:
 
 		NamespaceQual *nspaceQual = new NamespaceQual( 
 				namespaceStack.top(), regionStack.top() );
-		TypeRef *parserTypeRef = TypeRef::cons( TypeRef::Parser, 
-				InputLoc(), nspaceQual, $3->typeRef, 0 );
+		TypeRef *parserTypeRef = TypeRef::cons( InputLoc(),
+				TypeRef::Parser, nspaceQual, $3->typeRef, 0 );
 
 		ParserText *parserText = ParserText::cons( $2->loc, nspace, region, replItemList );
 		pd->parserTextList.append( parserText );
@@ -1880,8 +1883,8 @@ code_factor:
 
 		NamespaceQual *nspaceQual = new NamespaceQual( 
 				namespaceStack.top(), regionStack.top() );
-		TypeRef *parserTypeRef = TypeRef::cons( TypeRef::Parser, 
-				InputLoc(), nspaceQual, $3->typeRef, 0 );
+		TypeRef *parserTypeRef = TypeRef::cons( InputLoc(),
+				TypeRef::Parser, nspaceQual, $3->typeRef, 0 );
 
 		Replacement *replacement = Replacement::cons( $1->loc, nspace, pd->rootRegion,
 				new ReplItemList, pd->nextPatReplId++ );
@@ -1920,8 +1923,8 @@ code_factor:
 
 		NamespaceQual *nspaceQual = new NamespaceQual( 
 				namespaceStack.top(), regionStack.top() );
-		TypeRef *parserTypeRef = TypeRef::cons( TypeRef::Parser, 
-				InputLoc(), nspaceQual, $3->typeRef, 0 );
+		TypeRef *parserTypeRef = TypeRef::cons( InputLoc(),
+				TypeRef::Parser, nspaceQual, $3->typeRef, 0 );
 
 		Replacement *replacement = Replacement::cons( $1->loc, nspace, pd->rootRegion,
 				new ReplItemList, pd->nextPatReplId++ );
@@ -1956,7 +1959,7 @@ code_factor:
 		ParserText *parserText = ParserText::cons( $2->loc, nspace, region, replItemList );
 		pd->parserTextList.append( parserText );
 
-		$$->expr = LangExpr::cons( LangTerm::cons( LangTerm::SendType, $1->varRef, parserText ) );
+		$$->expr = LangExpr::cons( LangTerm::cons( InputLoc(), LangTerm::SendType, $1->varRef, parserText ) );
 	};
 code_factor: 
 	KW_Send var_ref accumulate
@@ -1966,7 +1969,7 @@ code_factor:
 		ParserText *parserText = ParserText::cons( $1->loc, nspace, region, replItemList );
 		pd->parserTextList.append( parserText );
 
-		$$->expr = LangExpr::cons( LangTerm::cons( LangTerm::SendType, $2->varRef, parserText ) );
+		$$->expr = LangExpr::cons( LangTerm::cons( InputLoc(), LangTerm::SendType, $2->varRef, parserText ) );
 	};
 code_factor: KW_TypeId '<' type_ref '>'
 	final {
@@ -2013,7 +2016,7 @@ code_factor: KW_Deref code_expr
 	};
 code_factor: string
 	final {
-		$$->expr = LangExpr::cons( LangTerm::cons( replItemList ) );
+		$$->expr = LangExpr::cons( LangTerm::cons( InputLoc(), replItemList ) );
 	};
 
 nonterm opt_field_init uses field_init_list;
@@ -2614,7 +2617,7 @@ void ColmParser::addArgvList()
 	NamespaceQual *nspaceQual2 = new NamespaceQual( 
 			namespaceStack.top(), regionStack.top() );
 
-	pd->argvTypeRef = TypeRef::cons( TypeRef::List, InputLoc(), 
+	pd->argvTypeRef = TypeRef::cons( InputLoc(), TypeRef::List,
 			nspaceQual2, typeRef, 0 );
 }
 

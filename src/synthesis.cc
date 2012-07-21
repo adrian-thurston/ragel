@@ -2149,10 +2149,10 @@ LangTerm *LangStmt::chooseDefaultIter( Compiler *pd, LangTerm *fromVarRef ) cons
 	/* The parameters. */
 	ExprVect *callExprVect = new ExprVect;
 	LangExpr *callExpr = LangExpr::cons( LangTerm::cons( 
-			LangTerm::VarRefType, fromVarRef->varRef ) );
+			InputLoc(), LangTerm::VarRefType, fromVarRef->varRef ) );
 	callExprVect->append( callExpr );
 
-	LangTerm *callLangTerm = LangTerm::cons( callVarRef, callExprVect );
+	LangTerm *callLangTerm = LangTerm::cons( InputLoc(), callVarRef, callExprVect );
 
 	return callLangTerm;
 }
