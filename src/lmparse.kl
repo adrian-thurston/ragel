@@ -449,14 +449,12 @@ nonterm basic_type_ref uses type_ref;
 
 basic_type_ref: region_qual TK_Word opt_repeat
 	final {
-		$$->typeRef = TypeRef::cons( $2->loc, $1->nspaceQual, $2->data );
-		$$->typeRef->repeatType = $3->repeatType;
+		$$->typeRef = TypeRef::cons( $2->loc, $1->nspaceQual, $2->data, $3->repeatType );
 	};
 
 basic_type_ref: KW_Ptr region_qual TK_Word opt_repeat
 	final {
-		$$->typeRef = TypeRef::cons( $1->loc, $2->nspaceQual, $3->data );
-		$$->typeRef->repeatType = $4->repeatType;
+		$$->typeRef = TypeRef::cons( $1->loc, $2->nspaceQual, $3->data, $4->repeatType );
 		$$->typeRef = TypeRef::cons( $1->loc, TypeRef::Ptr, $$->typeRef );
 	};
 
@@ -654,8 +652,7 @@ nonterm pattern_el_type_or_lit
 
 pattern_el_type_or_lit: region_qual TK_Word opt_repeat
 	final {
-		TypeRef *typeRef = TypeRef::cons( $2->loc, $1->nspaceQual, $2->data );
-		typeRef->repeatType = $3->repeatType;
+		TypeRef *typeRef = TypeRef::cons( $2->loc, $1->nspaceQual, $2->data, $3->repeatType );
 		ProdEl *factor = new ProdEl( ProdEl::ReferenceType, $2->loc, 0, false, typeRef, 0 );
 		$$->patternItem = PatternItem::cons( $2->loc, factor, PatternItem::FactorType );
 		patternItemList->append( $$->patternItem );
@@ -664,8 +661,7 @@ pattern_el_type_or_lit: region_qual TK_Word opt_repeat
 pattern_el_type_or_lit: region_qual TK_Literal opt_repeat
 	final {
 		PdaLiteral *literal = new PdaLiteral( $2->loc, *$2 );
-		TypeRef *typeRef = TypeRef::cons( $2->loc, $1->nspaceQual, literal );
-		typeRef->repeatType = $3->repeatType;
+		TypeRef *typeRef = TypeRef::cons( $2->loc, $1->nspaceQual, literal, $3->repeatType );
 
 		ProdEl *factor = new ProdEl( ProdEl::ReferenceType, $2->loc, 0, false, typeRef, 0 );
 		$$->patternItem = PatternItem::cons( $2->loc, factor, PatternItem::FactorType );
@@ -722,7 +718,6 @@ repl_el: region_qual TK_Literal
 	final {
 		PdaLiteral *literal = new PdaLiteral( $2->loc, *$2 );
 		TypeRef *typeRef = TypeRef::cons( $2->loc, $1->nspaceQual, literal );
-		typeRef->repeatType = RepeatNone;
 		ProdEl *factor = new ProdEl( ProdEl::LiteralType, $2->loc, 0, false, typeRef, 0 );
 		ReplItem *replItem = ReplItem::cons( $2->loc, ReplItem::FactorType, factor );
 		replItemList->append( replItem );
@@ -842,8 +837,7 @@ nonterm prod_el
 prod_el: 
 	opt_capture opt_commit region_qual TK_Word opt_repeat
 	final {
-		TypeRef *typeRef = TypeRef::cons( $4->loc, $3->nspaceQual, $4->data );
-		typeRef->repeatType = $5->repeatType;
+		TypeRef *typeRef = TypeRef::cons( $4->loc, $3->nspaceQual, $4->data, $5->repeatType );
 		$$->factor = new ProdEl( ProdEl::ReferenceType, $4->loc, $1->objField, $2->commit, typeRef, 0 );
 
 		/* If there is a capture, create the field. */
@@ -871,8 +865,7 @@ prod_el:
 	final {
 		/* Create a new factor node going to a concat literal. */
 		PdaLiteral *literal = new PdaLiteral( $4->loc, *$4 );
-		TypeRef *typeRef = TypeRef::cons( $4->loc, $3->nspaceQual, literal );
-		typeRef->repeatType = $5->repeatType;
+		TypeRef *typeRef = TypeRef::cons( $4->loc, $3->nspaceQual, literal, $5->repeatType );
 		$$->factor = new ProdEl( ProdEl::LiteralType, $4->loc, $1->objField, $2->commit, typeRef, 0 );
 
 		/* If there is a capture, create the field. */
@@ -1879,8 +1872,6 @@ code_factor:
 		/* Get the language element. */
 		Namespace *nspace = namespaceStack.top();
 
-		GenericType *generic = 0;
-
 		NamespaceQual *nspaceQual = new NamespaceQual( 
 				namespaceStack.top(), regionStack.top() );
 		TypeRef *parserTypeRef = TypeRef::cons( InputLoc(),
@@ -1895,7 +1886,7 @@ code_factor:
 			varRef = new LangVarRef( $2->objField->loc, new QualItemVect, $2->objField->name );
 
 		$$->expr = LangExpr::cons( LangTerm::cons( $1->loc, LangTerm::OrigParseType,
-				varRef, $2->objField, $3->typeRef, generic, parserTypeRef, replacement ) );
+				varRef, $2->objField, $3->typeRef, parserTypeRef, replacement ) );
 		$$->expr->term->args = $5->exprVect;
 
 		/* Check for redeclaration. */
@@ -1919,8 +1910,6 @@ code_factor:
 		/* Get the language element. */
 		Namespace *nspace = namespaceStack.top();
 
-		GenericType *generic = 0;
-
 		NamespaceQual *nspaceQual = new NamespaceQual( 
 				namespaceStack.top(), regionStack.top() );
 		TypeRef *parserTypeRef = TypeRef::cons( InputLoc(),
@@ -1935,7 +1924,7 @@ code_factor:
 			varRef = new LangVarRef( $2->objField->loc, new QualItemVect, $2->objField->name );
 
 		$$->expr = LangExpr::cons( LangTerm::cons( $1->loc, LangTerm::OrigParseStopType, 
-				varRef, $2->objField, $3->typeRef, generic, parserTypeRef, replacement ) );
+				varRef, $2->objField, $3->typeRef, parserTypeRef, replacement ) );
 		$$->expr->term->args = $5->exprVect;
 
 		/* Check for redeclaration. */

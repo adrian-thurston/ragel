@@ -1910,7 +1910,7 @@ struct TypeRef
 		iterDef(0),
 		typeRef1(0),
 		typeRef2(0),
-		repeatType((RepeatType)-1),
+		repeatType(RepeatNone),
 		nspace(0),
 		uniqueType(0),
 		searchUniqueType(0),
@@ -1921,11 +1921,19 @@ struct TypeRef
 	static TypeRef *cons( const InputLoc &loc, NamespaceQual *nspaceQual, String typeName )
 	{
 		TypeRef *t = new TypeRef;
-		t->type = (Name);
-		t->loc = (loc);
-		t->nspaceQual = (nspaceQual);
-		t->typeName = (typeName);
-		t->repeatType = (RepeatNone);
+		t->type = Name;
+		t->loc = loc;
+		t->nspaceQual = nspaceQual;
+		t->typeName = typeName;
+		t->repeatType = RepeatNone;
+		return t;
+	}
+
+	/* Qualification and a type name. These require lookup. */
+	static TypeRef *cons( const InputLoc &loc, NamespaceQual *nspaceQual, String typeName, RepeatType repeatType )
+	{
+		TypeRef *t = cons( loc, nspaceQual, typeName );
+		t->repeatType = repeatType;
 		return t;
 	}
 
@@ -1933,11 +1941,19 @@ struct TypeRef
 	static TypeRef *cons( const InputLoc &loc, NamespaceQual *nspaceQual, PdaLiteral *pdaLiteral )
 	{
 		TypeRef *t = new TypeRef;
-		t->type = (Literal);
-		t->loc = (loc);
-		t->nspaceQual = (nspaceQual);
-		t->pdaLiteral = (pdaLiteral);
-		t->repeatType = (RepeatNone);
+		t->type = Literal;
+		t->loc = loc;
+		t->nspaceQual = nspaceQual;
+		t->pdaLiteral = pdaLiteral;
+		t->repeatType = RepeatNone;
+		return t;
+	}
+
+	/* Qualification and a type name. These require lookup. */
+	static TypeRef *cons( const InputLoc &loc, NamespaceQual *nspaceQual, PdaLiteral *pdaLiteral, RepeatType repeatType )
+	{
+		TypeRef *t = cons( loc, nspaceQual, pdaLiteral );
+		t->repeatType = repeatType;
 		return t;
 	}
 
@@ -1945,12 +1961,12 @@ struct TypeRef
 	static TypeRef *cons( const InputLoc &loc, Type type, NamespaceQual *nspaceQual, TypeRef *typeRef1, TypeRef *typeRef2 )
 	{
 		TypeRef *t = new TypeRef;
-		t->type = (type);
-		t->loc = (loc);
-		t->nspaceQual = (nspaceQual);
-		t->typeRef1 = (typeRef1);
-		t->typeRef2 = (typeRef2);
-		t->repeatType = (RepeatNone);
+		t->type = type;
+		t->loc = loc;
+		t->nspaceQual = nspaceQual;
+		t->typeRef1 = typeRef1;
+		t->typeRef2 = typeRef2;
+		t->repeatType = RepeatNone;
 		return t;
 	}
 	
@@ -1958,10 +1974,10 @@ struct TypeRef
 	static TypeRef *cons( const InputLoc &loc, Type type, TypeRef *typeRef1 )
 	{
 		TypeRef *t = new TypeRef;
-		t->type = (type);
-		t->loc = (loc);
-		t->typeRef1 = (typeRef1);
-		t->repeatType = (RepeatNone);
+		t->type = type;
+		t->loc = loc;
+		t->typeRef1 = typeRef1;
+		t->repeatType = RepeatNone;
 		return t;
 	}
 
@@ -1972,12 +1988,12 @@ struct TypeRef
 			UniqueType *searchUniqueType )
 	{
 		TypeRef *t = new TypeRef;
-		t->type = (Iterator);
-		t->loc = (loc);
-		t->iterDef = (iterDef);
-		t->repeatType = (RepeatNone);
-		t->uniqueType = (uniqueType);
-		t->searchUniqueType = (searchUniqueType);
+		t->type = Iterator;
+		t->loc = loc;
+		t->iterDef = iterDef;
+		t->repeatType = RepeatNone;
+		t->uniqueType = uniqueType;
+		t->searchUniqueType = searchUniqueType;
 		return t;
 	}
 
@@ -1985,10 +2001,10 @@ struct TypeRef
 	static TypeRef *cons( const InputLoc &loc, UniqueType *uniqueType )
 	{
 		TypeRef *t = new TypeRef;
-		t->type = (Unspecified);
-		t->loc = (loc);
-		t->repeatType = (RepeatNone);
-		t->uniqueType = (uniqueType);
+		t->type = Unspecified;
+		t->loc = loc;
+		t->repeatType = RepeatNone;
+		t->uniqueType = uniqueType;
 		return t;
 	}
 
@@ -2350,6 +2366,7 @@ struct LangTerm
 
 	LangTerm()
 	:
+		generic(0),
 		parserText(0)
 	{}
 
@@ -2503,7 +2520,7 @@ struct LangTerm
 	}
 
 	static LangTerm *cons( const InputLoc &loc, Type type, LangVarRef *varRef,
-			ObjField *objField, TypeRef *typeRef, GenericType *generic, TypeRef *parserTypeRef,
+			ObjField *objField, TypeRef *typeRef, TypeRef *parserTypeRef,
 			Replacement *replacement )
 	{
 		LangTerm *t = new LangTerm;
@@ -2512,7 +2529,6 @@ struct LangTerm
 		t->varRef = varRef;
 		t->objField = objField;
 		t->typeRef = typeRef;
-		t->generic = generic;
 		t->parserTypeRef = parserTypeRef;
 		t->replacement = replacement;
 		return t;
