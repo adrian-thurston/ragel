@@ -207,8 +207,8 @@ global_def: KW_Export var_def opt_def_init
 		$2->objField->isExport = true;
 
 		if ( $3->expr != 0 ) {
-			LangVarRef *varRef = new LangVarRef( $2->objField->loc, 
-					new QualItemVect, $2->objField->name );
+			LangVarRef *varRef = LangVarRef::cons( $2->objField->loc, 
+					$2->objField->name );
 
 			$$->stmt = LangStmt::cons( $2->objField->loc, 
 					$3->assignType, varRef, $3->expr );
@@ -234,8 +234,8 @@ global_def: KW_Global var_def opt_def_init
 		object->insertField( $2->objField->name, $2->objField );
 
 		if ( $3->expr != 0 ) {
-			LangVarRef *varRef = new LangVarRef( $2->objField->loc, 
-					new QualItemVect, $2->objField->name );
+			LangVarRef *varRef = LangVarRef::cons( $2->objField->loc, 
+					$2->objField->name );
 
 			$$->stmt = LangStmt::cons( $2->objField->loc, 
 					$3->assignType, varRef, $3->expr );
@@ -676,7 +676,7 @@ nonterm opt_label
 
 opt_label: TK_Word ':'
 	final {
-		$$->varRef = new LangVarRef( $1->loc, new QualItemVect, $1->data );
+		$$->varRef = LangVarRef::cons( $1->loc, $1->data );
 	};
 opt_label: 
 	final {
@@ -1350,8 +1350,8 @@ statement: var_def opt_def_init
 		//cout << "var def " << $1->objField->name << endl;
 
 		if ( $2->expr != 0 ) {
-			LangVarRef *varRef = new LangVarRef( $1->objField->loc, 
-					new QualItemVect, $1->objField->name );
+			LangVarRef *varRef = LangVarRef::cons( $1->objField->loc, 
+					$1->objField->name );
 
 			$$->stmt = LangStmt::cons( $1->objField->loc, 
 					$2->assignType, varRef, $2->expr );
@@ -1479,7 +1479,7 @@ iter_call: var_ref '(' opt_code_expr_list ')'
 iter_call: TK_Word
 	final {
 		$$->langTerm = LangTerm::cons( InputLoc(), LangTerm::VarRefType,
-			new LangVarRef( $1->loc, new QualItemVect, $1->data ) );
+			LangVarRef::cons( $1->loc, $1->data ) );
 	};
 
 #
@@ -1613,7 +1613,7 @@ nonterm var_ref
 
 var_ref: qual TK_Word
 	final {
-		$$->varRef = new LangVarRef( $2->loc, $1->qual, $2->data );
+		$$->varRef = LangVarRef::cons( $2->loc, $1->qual, $2->data );
 	};
 
 nonterm qual
@@ -1808,7 +1808,7 @@ code_factor:
 		
 		LangVarRef *varRef = 0;
 		if ( $2->objField != 0 )
-			varRef = new LangVarRef( $2->objField->loc, new QualItemVect, $2->objField->name );
+			varRef = LangVarRef::cons( $2->objField->loc, $2->objField->name );
 
 		$$->expr = LangExpr::cons( LangTerm::cons( $1->loc, LangTerm::ConstructType,
 				varRef, $2->objField, $3->typeRef, $4->fieldInitVect, replacement ) );
@@ -1839,7 +1839,7 @@ code_factor:
 		
 		LangVarRef *varRef = 0;
 		if ( $2->objField != 0 )
-			varRef = new LangVarRef( $2->objField->loc, new QualItemVect, $2->objField->name );
+			varRef = LangVarRef::cons( $2->objField->loc, $2->objField->name );
 
 		NamespaceQual *nspaceQual = new NamespaceQual( 
 				namespaceStack.top(), regionStack.top() );
@@ -1883,7 +1883,7 @@ code_factor:
 
 		LangVarRef *varRef = 0;
 		if ( $2->objField != 0 )
-			varRef = new LangVarRef( $2->objField->loc, new QualItemVect, $2->objField->name );
+			varRef = LangVarRef::cons( $2->objField->loc, $2->objField->name );
 
 		$$->expr = LangExpr::cons( LangTerm::cons( $1->loc, LangTerm::OrigParseType,
 				varRef, $2->objField, $3->typeRef, parserTypeRef, replacement ) );
@@ -1921,7 +1921,7 @@ code_factor:
 
 		LangVarRef *varRef = 0;
 		if ( $2->objField != 0 )
-			varRef = new LangVarRef( $2->objField->loc, new QualItemVect, $2->objField->name );
+			varRef = LangVarRef::cons( $2->objField->loc, $2->objField->name );
 
 		$$->expr = LangExpr::cons( LangTerm::cons( $1->loc, LangTerm::OrigParseStopType, 
 				varRef, $2->objField, $3->typeRef, parserTypeRef, replacement ) );

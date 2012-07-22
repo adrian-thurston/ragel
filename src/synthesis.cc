@@ -2139,7 +2139,7 @@ LangTerm *LangStmt::chooseDefaultIter( Compiler *pd, LangTerm *fromVarRef ) cons
 			lookup.uniqueType->typeId == TYPE_PTR )
 	{
 		/* The iterator name. */
-		callVarRef = new LangVarRef( loc, new QualItemVect, "triter" );
+		callVarRef = LangVarRef::cons( loc, "triter" );
 	}
 	else {
 		error(loc) << "there is no default iterator for a "

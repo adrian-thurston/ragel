@@ -2282,8 +2282,28 @@ typedef Vector<QualItem> QualItemVect;
 
 struct LangVarRef
 {
-	LangVarRef( const InputLoc &loc, QualItemVect *qual, String name )
-		: loc(loc), qual(qual), name(name) {}
+	LangVarRef()
+	:
+		qual(0)
+	{}
+	
+	static LangVarRef *cons( const InputLoc &loc, String name )
+	{
+		LangVarRef *l = new LangVarRef;
+		l->loc = loc;
+		l->qual = new QualItemVect;
+		l->name = name;
+		return l;
+	}
+
+	static LangVarRef *cons( const InputLoc &loc, QualItemVect *qual, String name )
+	{
+		LangVarRef *l = new LangVarRef;
+		l->loc = loc;
+		l->qual = qual;
+		l->name = name;
+		return l;
+	}
 
 	void resolve( Compiler *pd ) const;
 
