@@ -272,7 +272,7 @@ pred_token:
 pred_token: 
 	region_qual TK_Literal 
 	final {
-		PdaLiteral *literal = new PdaLiteral( $2->loc, *$2 );
+		PdaLiteral *literal = new PdaLiteral( $2->loc, $2->data );
 		TypeRef *typeRef = TypeRef::cons( $2->loc, $1->nspaceQual, literal );
 
 		PredDecl *predDecl = new PredDecl( typeRef, predType, pd->predValue );
@@ -660,7 +660,7 @@ pattern_el_type_or_lit: region_qual TK_Word opt_repeat
 
 pattern_el_type_or_lit: region_qual TK_Literal opt_repeat
 	final {
-		PdaLiteral *literal = new PdaLiteral( $2->loc, *$2 );
+		PdaLiteral *literal = new PdaLiteral( $2->loc, $2->data );
 		TypeRef *typeRef = TypeRef::cons( $2->loc, $1->nspaceQual, literal, $3->repeatType );
 
 		ProdEl *factor = new ProdEl( ProdEl::ReferenceType, $2->loc, 0, false, typeRef, 0 );
@@ -716,7 +716,7 @@ repl_el_list: ;
 
 repl_el: region_qual TK_Literal
 	final {
-		PdaLiteral *literal = new PdaLiteral( $2->loc, *$2 );
+		PdaLiteral *literal = new PdaLiteral( $2->loc, $2->data );
 		TypeRef *typeRef = TypeRef::cons( $2->loc, $1->nspaceQual, literal );
 		ProdEl *factor = new ProdEl( ProdEl::LiteralType, $2->loc, 0, false, typeRef, 0 );
 		ReplItem *replItem = ReplItem::cons( $2->loc, ReplItem::FactorType, factor );
@@ -864,7 +864,7 @@ prod_el:
 	opt_capture opt_commit region_qual TK_Literal opt_repeat
 	final {
 		/* Create a new factor node going to a concat literal. */
-		PdaLiteral *literal = new PdaLiteral( $4->loc, *$4 );
+		PdaLiteral *literal = new PdaLiteral( $4->loc, $4->data );
 		TypeRef *typeRef = TypeRef::cons( $4->loc, $3->nspaceQual, literal, $5->repeatType );
 		$$->factor = new ProdEl( ProdEl::LiteralType, $4->loc, $1->objField, $2->commit, typeRef, 0 );
 

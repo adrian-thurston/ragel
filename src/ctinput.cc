@@ -229,8 +229,8 @@ LangEl *inputStreamReplGetLangEl( SourceStream *is, long *bindId, char **data, l
 		if ( is->replItem->factor->typeRef->pdaLiteral != 0 ) {
 			bool unusedCI;
 			prepareLitString( is->replItem->data, unusedCI, 
-					is->replItem->factor->typeRef->pdaLiteral->token.data,
-					is->replItem->factor->typeRef->pdaLiteral->token.loc );
+					is->replItem->factor->typeRef->pdaLiteral->data,
+					is->replItem->factor->typeRef->pdaLiteral->loc );
 
 			*data = is->replItem->data;
 			*length = is->replItem->data.length();

@@ -1359,8 +1359,8 @@ UniqueType *LangTerm::evaluateParse2( Compiler *pd, CodeVect &code ) const
 			String result;
 			bool unusedCI;
 			prepareLitString( result, unusedCI, 
-					item->factor->typeRef->pdaLiteral->token.data,
-					item->factor->typeRef->pdaLiteral->token.loc );
+					item->factor->typeRef->pdaLiteral->data,
+					item->factor->typeRef->pdaLiteral->loc );
 
 			/* Make sure we have this string. */
 			StringMapEl *mapEl = 0;
@@ -1434,8 +1434,8 @@ UniqueType *LangTerm::evaluateSend( Compiler *pd, CodeVect &code ) const
 			String result;
 			bool unusedCI;
 			prepareLitString( result, unusedCI, 
-					item->factor->typeRef->pdaLiteral->token.data,
-					item->factor->typeRef->pdaLiteral->token.loc );
+					item->factor->typeRef->pdaLiteral->data,
+					item->factor->typeRef->pdaLiteral->loc );
 
 			/* Make sure we have this string. */
 			StringMapEl *mapEl = 0;
@@ -1647,8 +1647,8 @@ UniqueType *LangTerm::evaluateEmbedString( Compiler *pd, CodeVect &code ) const
 			String result;
 			bool unusedCI;
 			prepareLitString( result, unusedCI, 
-					item->factor->typeRef->pdaLiteral->token.data,
-					item->factor->typeRef->pdaLiteral->token.loc );
+					item->factor->typeRef->pdaLiteral->data,
+					item->factor->typeRef->pdaLiteral->loc );
 
 			/* Make sure we have this string. */
 			StringMapEl *mapEl = 0;

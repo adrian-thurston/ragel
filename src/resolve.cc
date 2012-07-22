@@ -70,8 +70,8 @@ UniqueType *TypeRef::lookupTypeLiteral( Compiler *pd )
 	/* Interpret escape sequences and remove quotes. */
 	bool unusedCI;
 	String interp;
-	prepareLitString( interp, unusedCI, pdaLiteral->token.data, 
-			pdaLiteral->token.loc );
+	prepareLitString( interp, unusedCI, pdaLiteral->data,
+			pdaLiteral->loc );
 
 	while ( nspace != 0 ) {
 		LiteralDictEl *ldel = nspace->literalDict.find( interp );

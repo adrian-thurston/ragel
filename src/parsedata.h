@@ -330,11 +330,11 @@ struct ProdElList : public DList<ProdEl>
 /* This should be renamed. It is a literal string in a type reference. */
 struct PdaLiteral
 {
-	PdaLiteral( const InputLoc &loc, const Token &token )
-		: loc(loc), token(token), value(0) { }
+	PdaLiteral( const InputLoc &loc, const String &data )
+		: loc(loc), data(data), value(0) { }
 
 	InputLoc loc;
-	Token token;
+	String data;
 	long value;
 };
 
