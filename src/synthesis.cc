@@ -2634,7 +2634,7 @@ ObjField *Compiler::makeLineEl()
 
 void Compiler::initTokenObjects( )
 {
-	/* Make a default object Definition. */
+	/* Make a default object Production. */
 	tokenObj = new ObjectDef( ObjectDef::BuiltinType, "token", nextObjectId++ );
 
 	ObjField *dataEl = makeDataEl();
@@ -2684,7 +2684,7 @@ void Compiler::findLocalTrees( CharSet &trees )
 	}
 }
 
-void Compiler::makeProdCopies( Definition *prod )
+void Compiler::makeProdCopies( Production *prod )
 {
 	int pos = 0;
 	for ( ProdElList::Iter pel = *prod->prodElList; pel.lte(); pel++, pos++) {
@@ -2695,7 +2695,7 @@ void Compiler::makeProdCopies( Definition *prod )
 	}
 }
 
-void Compiler::compileReductionCode( Definition *prod )
+void Compiler::compileReductionCode( Production *prod )
 {
 	CodeBlock *block = prod->redBlock;
 

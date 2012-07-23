@@ -44,11 +44,11 @@ struct PdaCodeGen
 	void writeTokenIds();
 	void writeLangEls();
 
-	void writeReference( Definition *prod, char *data );
-	void writeUndoReference( Definition *prod, char *data );
-	void writeFinalReference( Definition *prod, char *data );
-	void writeFirstLocate( Definition *prod );
-	void writeRhsLocate( Definition *prod );
+	void writeReference( Production *prod, char *data );
+	void writeUndoReference( Production *prod, char *data );
+	void writeFinalReference( Production *prod, char *data );
+	void writeFirstLocate( Production *prod );
+	void writeRhsLocate( Production *prod );
 
 	void defineRuntime();
 	void writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTables );

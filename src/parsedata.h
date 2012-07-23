@@ -70,7 +70,7 @@ inline long makeReduceCode( long reduction, bool isShiftReduce )
 struct ProdEl;
 struct ProdElList;
 struct PdaLiteral;
-struct Definition;
+struct Production;
 
 /* A pointer to this is in PdaRun, but it's specification is not known by the
  * runtime code. The runtime functions that access it are defined in
@@ -79,8 +79,8 @@ struct Bindings
 	: public Vector<ParseTree*>
 {};
 
-struct DefListEl { Definition *prev, *next; };
-struct LelDefListEl { Definition *prev, *next; };
+struct DefListEl { Production *prev, *next; };
+struct LelDefListEl { Production *prev, *next; };
 typedef Vector< LangEl* > LangElVect;
 typedef Vector< ProdEl* > FactorVect;
 
@@ -110,20 +110,30 @@ struct PredDecl
 typedef DList<PredDecl> PredDeclList;
 
 /* Graph dictionary. */
-struct Definition 
+struct Production 
 :
 	public DefListEl, public LelDefListEl
 {
-	enum Type { Production };
-
-	Definition( const InputLoc &loc, LangEl *prodName, ProdElList *prodElList, 
-			bool prodCommit, CodeBlock *redBlock, int prodId, int prodNum, Type type )
+	Production()
 	: 
-		loc(loc), prodName(prodName), prodElList(prodElList), 
-		prodCommit(prodCommit), redBlock(redBlock), prodId(prodId), prodNum(prodNum),
-		type(type), fsm(0), fsmLength(0), uniqueEmptyLeader(0), 
+		loc(loc), prodName(0), prodElList(0), prodCommit(false), redBlock(0),
+		prodId(0), prodNum(0), fsm(0), fsmLength(0), uniqueEmptyLeader(0),
 		isLeftRec(false), localFrame(0), lhsField(0), predOf(0),
 		collectIgnoreRegion(0) {}
+
+	static Production* cons( const InputLoc &loc, LangEl *prodName, ProdElList *prodElList, 
+			bool prodCommit, CodeBlock *redBlock, int prodId, int prodNum )
+	{
+		Production *p = new Production;
+		p->loc = loc;
+		p->prodName = prodName;
+		p->prodElList = prodElList;
+		p->prodCommit = prodCommit;
+		p->redBlock = redBlock;
+		p->prodId = prodId;
+		p->prodNum = prodNum;
+		return p;
+	}
 
 	InputLoc loc;
 	LangEl *prodName;
@@ -134,7 +144,6 @@ struct Definition
 
 	int prodId;
 	int prodNum;
-	Type type;
 
 	PdaGraph *fsm;
 	int fsmLength;
@@ -159,7 +168,7 @@ struct Definition
 
 struct CmpDefById
 {
-	static int compare( Definition *d1, Definition *d2 )
+	static int compare( Production *d1, Production *d2 )
 	{
 		if ( d1->prodId < d2->prodId )
 			return -1;
@@ -172,18 +181,18 @@ struct CmpDefById
 
 
 /* Map dotItems to productions. */
-typedef BstMap< int, Definition*, CmpOrd<int> > DotItemIndex;
-typedef BstMapEl< int, Definition*> DotItemIndexEl;
+typedef BstMap< int, Production*, CmpOrd<int> > DotItemIndex;
+typedef BstMapEl< int, Production*> DotItemIndexEl;
 
 struct DefList
 :
-	public DListMel<Definition, DefListEl>
+	public DListMel<Production, DefListEl>
 {};
 
 /* A vector of production vectors. Each non terminal can have many productions. */
 struct LelDefList
 :
-	public DListMel<Definition, LelDefListEl> 
+	public DListMel<Production, LelDefListEl> 
 {};
 
 /* A set of machines made during a closure round. */
@@ -246,7 +255,7 @@ struct LangEl : public DListEl<LangEl>
 	LelDefList defList;
 
 	TokenDef *tokenDef;
-	Definition *rootDef;
+	Production *rootDef;
 	LangEl *termDup;
 	LangEl *eofLel;
 
@@ -324,7 +333,7 @@ struct ProdEl
 
 struct ProdElList : public DList<ProdEl>
 {
-	PdaGraph *walk( Compiler *pd, Definition *prod );
+	PdaGraph *walk( Compiler *pd, Production *prod );
 };
 
 /* This should be renamed. It is a literal string in a type reference. */
@@ -726,7 +735,7 @@ struct Compiler
 	void lalr1AddFollowSets( PdaGraph *pdaGraph, LangElSet &parserEls );
 
 	void lr0BringInItem( PdaGraph *pdaGraph, PdaState *dest, PdaState *prodState, 
-			PdaTrans *expandFrom, Definition *prod );
+			PdaTrans *expandFrom, Production *prod );
 	void lr0InvokeClosure( PdaGraph *pdaGraph, PdaState *state );
 	void lr0CloseAllStates( PdaGraph *pdaGraph );
 
@@ -734,10 +743,10 @@ struct Compiler
 
 	void reduceActions( PdaGraph *pdaGraph );
 
-	bool makeNonTermFirstSetProd( Definition *prod, PdaState *state );
+	bool makeNonTermFirstSetProd( Production *prod, PdaState *state );
 	void makeNonTermFirstSets();
 
-	bool makeFirstSetProd( Definition *prod, PdaState *state );
+	bool makeFirstSetProd( Production *prod, PdaState *state );
 	void makeFirstSets();
 
 	int findIndexOff( PdaTables *pdaTables, PdaGraph *pdaGraph, PdaState *state, int &currLen );
@@ -746,13 +755,13 @@ struct Compiler
 			bool noPreIgnore, bool noPostIgnore );
 	PdaState *followProd( PdaState *tabState, PdaState *prodState );
 	void findFollow( AlphSet &result, PdaState *overTab, 
-			PdaState *overSrc, Definition *parentDef );
+			PdaState *overSrc, Production *parentDef );
 	void pdaActionOrder( PdaGraph *pdaGraph, LangElSet &parserEls );
 	void pdaOrderFollow( LangEl *rootEl, PdaState *tabState, 
 			PdaTrans *tabTrans, PdaTrans *srcTrans,
-			Definition *parentDef, Definition *definition, long &time );
+			Production *parentDef, Production *definition, long &time );
 	void pdaOrderProd( LangEl *rootEl, PdaState *tabState, 
-			PdaState *srcState, Definition *parentDef, long &time );
+			PdaState *srcState, Production *parentDef, long &time );
 	void analyzeMachine( PdaGraph *pdaGraph, LangElSet &parserEls );
 
 	void makeProdFsms();
@@ -781,9 +790,9 @@ struct Compiler
 	void addProdRedObjectVar( ObjectDef *localFrame, LangEl *langEl );
 	void addProdObjects();
 
-	void addProdRHSLoads( Definition *prod, CodeVect &code, long &insertPos );
-	void addProdLHSLoad( Definition *prod, CodeVect &code, long &insertPos );
-	void addPushBackLHS( Definition *prod, CodeVect &code, long &insertPos );
+	void addProdRHSLoads( Production *prod, CodeVect &code, long &insertPos );
+	void addProdLHSLoad( Production *prod, CodeVect &code, long &insertPos );
+	void addPushBackLHS( Production *prod, CodeVect &code, long &insertPos );
 
 	void prepGrammar();
 	void parsePatterns();
@@ -835,7 +844,7 @@ struct Compiler
 	void resolvePreEof( TokenRegion *region );
 	void resolveRootBlock();
 	void resolveTranslateBlock( LangEl *langEl );
-	void resolveReductionCode( Definition *prod );
+	void resolveReductionCode( Production *prod );
 	void resolveParseTree();
 	void resolveGenericTypes();
 
@@ -847,8 +856,8 @@ struct Compiler
 	void compileRootBlock();
 	void compileTranslateBlock( LangEl *langEl );
 	void findLocalTrees( CharSet &trees );
-	void makeProdCopies( Definition *prod );
-	void compileReductionCode( Definition *prod );
+	void makeProdCopies( Production *prod );
+	void compileReductionCode( Production *prod );
 	void initGenericTypes();
 	void removeNonUnparsableRepls();
 	void compileByteCode();
@@ -928,7 +937,7 @@ struct Compiler
 	PdaState *actionDestState;
 	DefSetSet prodSetSet;
 
-	Definition **prodIdIndex;
+	Production **prodIdIndex;
 	AlphSet literalSet;
 
 	PatternList patternList;

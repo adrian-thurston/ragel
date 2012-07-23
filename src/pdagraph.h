@@ -48,7 +48,7 @@ struct PdaTrans;
 struct PdaState;
 struct PdaGraph;
 struct TokenDef;
-struct Definition;
+struct Production;
 struct LangEl;
 struct TokenRegion;
 
@@ -101,11 +101,11 @@ struct ClosureQueueListEl { PdaState *prev, *next; };
 typedef DListMel< PdaState, ClosureQueueListEl > StateClosureQueue;
 typedef DList<PdaTrans> TransClosureQueue;
 
-typedef BstSet< Definition*, CmpOrd<Definition*> > DefSet;
-typedef CmpTable< Definition*, CmpOrd<Definition*> > CmpDefSet;
+typedef BstSet< Production*, CmpOrd<Production*> > DefSet;
+typedef CmpTable< Production*, CmpOrd<Production*> > CmpDefSet;
 typedef BstSet< DefSet, CmpDefSet > DefSetSet;
 
-typedef Vector< Definition* > DefVect;
+typedef Vector< Production* > DefVect;
 typedef BstSet< long, CmpOrd<long> > AlphSet;
 
 struct ExpandToEl

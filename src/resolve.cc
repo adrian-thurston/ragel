@@ -559,7 +559,7 @@ void Compiler::resolveTranslateBlock( LangEl *langEl )
 	block->resolve( this );
 }
 
-void Compiler::resolveReductionCode( Definition *prod )
+void Compiler::resolveReductionCode( Production *prod )
 {
 	CodeBlock *block = prod->redBlock;
 	block->resolve( this );

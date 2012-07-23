@@ -120,7 +120,7 @@ void Compiler::addProdRedObjectVar( ObjectDef *localFrame, LangEl *nonTerm )
 	localFrame->insertField( el->name, el );
 }
 
-void Compiler::addProdLHSLoad( Definition *prod, CodeVect &code, long &insertPos )
+void Compiler::addProdLHSLoad( Production *prod, CodeVect &code, long &insertPos )
 {
 	ObjField *lhsField = prod->redBlock->localFrame->findField("lhs");
 	assert( lhsField != 0 );
@@ -135,7 +135,7 @@ void Compiler::addProdLHSLoad( Definition *prod, CodeVect &code, long &insertPos
 	insertPos += loads.length();
 }
 
-void Compiler::addPushBackLHS( Definition *prod, CodeVect &code, long &insertPos )
+void Compiler::addPushBackLHS( Production *prod, CodeVect &code, long &insertPos )
 {
 	CodeBlock *block = prod->redBlock;
 
@@ -175,7 +175,7 @@ void Compiler::addProdRHSVars( ObjectDef *localFrame, ProdElList *prodElList )
 	}
 }
 
-void Compiler::addProdRHSLoads( Definition *prod, CodeVect &code, long &insertPos )
+void Compiler::addProdRHSLoads( Production *prod, CodeVect &code, long &insertPos )
 {
 	CodeVect loads;
 	long elPos = 0;
@@ -208,10 +208,9 @@ void GenericType::declare( Compiler *pd, Namespace *nspace )
 		LangEl *prodName = langEl;
 		assert( prodName->type == LangEl::NonTerm );
 
-		Definition *newDef = new Definition( InputLoc(), prodName, 
+		Production *newDef = Production::cons( InputLoc(), prodName, 
 			emptyList, false, 0,
-			pd->prodList.length(), prodName->defList.length(),
-			Definition::Production );
+			pd->prodList.length(), prodName->defList.length() );
 			
 		prodName->defList.append( newDef );
 		pd->prodList.append( newDef );
@@ -265,10 +264,9 @@ void Namespace::declare( Compiler *pd )
 			LangEl *prodName = lel;
 			assert( prodName->type == LangEl::NonTerm );
 
-			Definition *newDef = new Definition( loc, prodName, 
+			Production *newDef = Production::cons( loc, prodName, 
 				emptyList, false, 0,
-				pd->prodList.length(), prodName->defList.length(),
-				Definition::Production );
+				pd->prodList.length(), prodName->defList.length() );
 			
 			prodName->defList.append( newDef );
 			pd->prodList.append( newDef );

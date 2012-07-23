@@ -366,24 +366,17 @@ opt_prec:
 
 nonterm define_prod
 {
-	Definition *definition;
+	Production *definition;
 };
 
 define_prod: '[' prod_el_list ']' opt_commit opt_reduce_code opt_prec
 	final {
-		const InputLoc &loc = $1->loc;
-		//const String &name = curDefineId;
 		ProdElList *prodElList = curProdElList;
-		bool commit = $4->commit;
-		CodeBlock *redBlock = $5->codeBlock;
-		LangEl *predOf = $6->predOf;
 
-		//Namespace *nspace = namespaceStack.top();
-
-		Definition *newDef = new Definition( loc, 0/*prodName*/, 
-			prodElList, commit, redBlock,
-			pd->prodList.length(), 0, Definition::Production );
-		newDef->predOf = predOf;
+		Production *newDef = Production::cons( $1->loc, 0, 
+			prodElList, $4->commit, $5->codeBlock,
+			pd->prodList.length(), 0 );
+		newDef->predOf = $6->predOf;
 		
 		pd->prodList.append( newDef );
 

@@ -31,7 +31,7 @@ using std::endl;
 using std::cerr;
 
 void Compiler::lr0BringInItem( PdaGraph *pdaGraph, PdaState *dest, PdaState *prodState, 
-		PdaTrans *expandFrom, Definition *prod )
+		PdaTrans *expandFrom, Production *prod )
 {
 	/* We use dot sets for finding unique states. In the future, should merge
 	 * dots sets with the stateSet pointer (only need one of these). */

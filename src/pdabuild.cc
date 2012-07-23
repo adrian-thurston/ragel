@@ -97,7 +97,7 @@ LangEl::LangEl( Namespace *nspace, const String &name, Type type )
 {
 }
  
-PdaGraph *ProdElList::walk( Compiler *pd, Definition *prod )
+PdaGraph *ProdElList::walk( Compiler *pd, Production *prod )
 {
 	PdaGraph *prodFsm = new PdaGraph();
 	PdaState *last = prodFsm->addState();
@@ -358,7 +358,7 @@ void Compiler::makeProdFsms()
 	}
 
 	/* Make the final state specific prod id to prod id mapping. */
-	prodIdIndex = new Definition*[prodList.length()];
+	prodIdIndex = new Production*[prodList.length()];
 	for ( DefList::Iter prod = prodList; prod.lte(); prod++ )
 		prodIdIndex[prod->prodId] = prod;
 }
@@ -368,7 +368,7 @@ void Compiler::makeProdFsms()
  * from the table, taking only the characters on which the parent is reduced.
  * */
 void Compiler::findFollow( AlphSet &result, PdaState *overTab, 
-		PdaState *overSrc, Definition *parentDef )
+		PdaState *overSrc, Production *parentDef )
 {
 	if ( overSrc->isFinState() ) {
 		assert( overSrc->transMap.length() == 0 );
@@ -445,8 +445,8 @@ void Compiler::trySetTime( PdaTrans *trans, long code, long &time )
 
 /* Go down a defintiion and then handle the follow actions. */
 void Compiler::pdaOrderFollow( LangEl *rootEl, PdaState *tabState, 
-		PdaTrans *tabTrans, PdaTrans *srcTrans, Definition *parentDef, 
-		Definition *definition, long &time )
+		PdaTrans *tabTrans, PdaTrans *srcTrans, Production *parentDef, 
+		Production *definition, long &time )
 {
 	/* We need the follow from tabState/srcState over the defintion we are
 	 * currently processing. */
@@ -559,7 +559,7 @@ void Compiler::addRegion( PdaState *tabState, PdaTrans *tabTrans,
 #endif
 
 void Compiler::pdaOrderProd( LangEl *rootEl, PdaState *tabState, 
-	PdaState *srcState, Definition *parentDef, long &time )
+	PdaState *srcState, Production *parentDef, long &time )
 {
 	assert( srcState->dotSet.length() == 1 );
 	if ( tabState->dotSet2.find( srcState->dotSet[0] ) )
@@ -1074,10 +1074,9 @@ void Compiler::wrapNonTerminals()
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
 		/* Make a single production used when the lel is a root. */
 		ProdElList *prodElList = makeProdElList( lel );
-		lel->rootDef = new Definition( InputLoc(), rootLangEl, 
+		lel->rootDef = Production::cons( InputLoc(), rootLangEl, 
 				prodElList, false, 0,
-				prodList.length(), rootLangEl->defList.length(),
-				Definition::Production );
+				prodList.length(), rootLangEl->defList.length() );
 		prodList.append( lel->rootDef );
 		rootLangEl->defList.append( lel->rootDef );
 
@@ -1087,7 +1086,7 @@ void Compiler::wrapNonTerminals()
 	}
 }
 
-bool Compiler::makeNonTermFirstSetProd( Definition *prod, PdaState *state )
+bool Compiler::makeNonTermFirstSetProd( Production *prod, PdaState *state )
 {
 	bool modified = false;
 	for ( TransMap::Iter trans = state->transMap; trans.lte(); trans++ ) {
@@ -1173,7 +1172,7 @@ void Compiler::printNonTermFirstSets()
 	}
 }
 
-bool Compiler::makeFirstSetProd( Definition *prod, PdaState *state )
+bool Compiler::makeFirstSetProd( Production *prod, PdaState *state )
 {
 	bool modified = false;
 	for ( TransMap::Iter trans = state->transMap; trans.lte(); trans++ ) {
@@ -1277,10 +1276,8 @@ void Compiler::insertUniqueEmptyProductions()
 		char name[20];
 		sprintf(name, "U%li", prodList.length());
 		LangEl *prodName = addLangEl( this, rootNamespace, name, LangEl::NonTerm );
-		Definition *newDef = new Definition( InputLoc(), prodName, 
-				0 /* FIXME new VarDef( name, 0 )*/, 
-				false, 0, prodList.length(), prodName->defList.length(),
-				Definition::Production );
+		Production *newDef = Production::cons( InputLoc(), prodName, 
+				0, false, 0, prodList.length(), prodName->defList.length() );
 		prodName->defList.append( newDef );
 		prodList.append( newDef );
 
