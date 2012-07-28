@@ -3074,6 +3074,20 @@ again:
 			treeDownref( prg, sp, undid );
 			break;
 		}
+		case IN_GET_PARSER_MEM_R: {
+			short field;
+			read_half( field );
+
+			debug( REALM_BYTECODE, "IN_GET_PARSER_MEM_R\n" );
+
+			Tree *obj = vm_pop();
+			treeDownref( prg, sp, obj );
+
+			Tree *val = getParserMem( (Parser*)obj, field );
+			treeUpref( val );
+			vm_push( val );
+			break;
+		}
 		case IN_MAP_INSERT_WV: {
 			debug( REALM_BYTECODE, "IN_MAP_INSERT_WV\n" );
 

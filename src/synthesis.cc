@@ -2936,8 +2936,33 @@ void Compiler::initVectorFunctions( GenericType *gen )
 
 void Compiler::initParserFunctions( GenericType *gen )
 {
-	initFunction( gen->utArg, gen->objDef, "finish", 
+	initFunction( gen->utArg, gen->objDef, "finish",
 			IN_PARSE_FINISH_WV, IN_PARSE_FINISH_WC, true );
+
+	initFunction( gen->utArg, gen->objDef, "eof",
+			IN_PARSE_FINISH_WV, IN_PARSE_FINISH_WC, true );
+}
+
+void Compiler::initParserField( GenericType *gen, const char *name, int offset )
+{
+	/* Make the type ref and create the field. */
+	TypeRef *typeRef = TypeRef::cons( InputLoc(), gen->utArg );
+	ObjField *el = new ObjField( InputLoc(), typeRef, name );
+
+	el->inGetR =  IN_GET_PARSER_MEM_R;
+	el->inGetWC = IN_GET_PARSER_MEM_WC;
+	el->inGetWV = IN_GET_PARSER_MEM_WV;
+	el->inSetWC = IN_SET_PARSER_MEM_WC;
+	el->inSetWV = IN_SET_PARSER_MEM_WV;
+
+	gen->objDef->insertField( el->name, el );
+
+	el->useOffset = true;
+	el->beenReferenced = true;
+	el->beenInitialized = true;
+
+	/* Zero for head, One for tail. */
+	el->offset = offset;
 }
 
 void Compiler::initCtxField( GenericType *gen )
@@ -2968,6 +2993,8 @@ void Compiler::initParserFields( GenericType *gen )
 	LangEl *langEl = gen->utArg->langEl;
 	if ( langEl->contextIn != 0 )
 		initCtxField( gen );
+	
+	initParserField( gen, "tree", 0 );
 }
 
 void Compiler::initGenericTypes()

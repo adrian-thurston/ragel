@@ -321,6 +321,7 @@ void listAppend2( struct ColmProgram *prg, List *list, Tree *val );
 Tree *listRemoveEnd( struct ColmProgram *prg, List *list );
 Tree *getListMem( List *list, Word field );
 Tree *getListMemSplit( struct ColmProgram *prg, List *list, Word field );
+Tree *getParserMem( Parser *parser, Word field );
 
 Tree *treeIterAdvance( struct ColmProgram *prg, Tree ***psp, TreeIter *iter );
 Tree *treeIterNextChild( struct ColmProgram *prg, Tree ***psp, TreeIter *iter );

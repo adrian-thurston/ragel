@@ -1615,6 +1615,20 @@ Tree *getListMem( List *list, Word field )
 	return result;
 }
 
+Tree *getParserMem( Parser *parser, Word field )
+{
+	Tree *result = 0;
+	switch ( field ) {
+		case 0:
+			result = parser->result;
+			break;
+		default:
+			assert( false );
+			break;
+	}
+	return result;
+}
+
 Tree *getListMemSplit( Program *prg, List *list, Word field )
 {
 	Tree *sv = 0;

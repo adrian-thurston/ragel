@@ -307,6 +307,14 @@ typedef unsigned char uchar;
 #define IN_SET_INPUT             0xdf
 #define IN_GET_INPUT             0xe0
 
+#define IN_GET_PARSER_MEM_R      0x5b
+#define IN_GET_PARSER_MEM_WC     0x00
+#define IN_GET_PARSER_MEM_WV     0x00
+#define IN_GET_PARSER_MEM_BKT    0x00
+#define IN_SET_PARSER_MEM_WC     0x00
+#define IN_SET_PARSER_MEM_WV     0x00
+#define IN_SET_PARSER_MEM_BKT    0x00
+
 /* Types */
 #define TYPE_NIL          0x01
 #define TYPE_TREE         0x02
