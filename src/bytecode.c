@@ -597,10 +597,10 @@ again:
 			debug( REALM_BYTECODE, "IN_LOAD_CONTEXT_BKT\n" );
 			break;
 		}
-		case IN_LOAD_ACCUM_BKT: {
+		case IN_LOAD_PARSER_BKT: {
 			/* Tree *parser; */
 			consume_word();
-			debug( REALM_BYTECODE, "IN_LOAD_ACCUM_BKT\n" );
+			debug( REALM_BYTECODE, "IN_LOAD_PARSER_BKT\n" );
 			break;
 		}
 		case IN_LOAD_INPUT_BKT: {
@@ -1005,29 +1005,29 @@ again:
 			vm_push( prg->global );
 			break;
 		}
-		case IN_LOAD_ACCUM_R: {
-			debug( REALM_BYTECODE, "IN_LOAD_ACCUM_R\n" );
+		case IN_LOAD_PARSER_R: {
+			debug( REALM_BYTECODE, "IN_LOAD_PARSER_R\n" );
 
 			treeUpref( (Tree*)exec->parser );
 			vm_push( (Tree*)exec->parser );
 			assert( exec->parser != 0 );
 			break;
 		}
-		case IN_LOAD_ACCUM_WV: {
-			debug( REALM_BYTECODE, "IN_LOAD_ACCUM_WV\n" );
+		case IN_LOAD_PARSER_WV: {
+			debug( REALM_BYTECODE, "IN_LOAD_PARSER_WV\n" );
 
 			treeUpref( (Tree*)exec->parser );
 			vm_push( (Tree*)exec->parser );
 			assert( exec->parser != 0 );
 
 			/* Set up the reverse instruction. */
-			append( &exec->pdaRun->rcodeCollect, IN_LOAD_ACCUM_BKT );
+			append( &exec->pdaRun->rcodeCollect, IN_LOAD_PARSER_BKT );
 			appendWord( &exec->pdaRun->rcodeCollect, (Word)exec->parser );
 			exec->rcodeUnitLen = SIZEOF_CODE + SIZEOF_WORD;
 			break;
 		}
-		case IN_LOAD_ACCUM_WC: {
-			debug( REALM_BYTECODE, "IN_LOAD_ACCUM_WC\n" );
+		case IN_LOAD_PARSER_WC: {
+			debug( REALM_BYTECODE, "IN_LOAD_PARSER_WC\n" );
 
 			/* This is identical to the _R version, but using it for writing
 			 * would be confusing. */
@@ -1036,11 +1036,11 @@ again:
 			assert( exec->parser != 0 );
 			break;
 		}
-		case IN_LOAD_ACCUM_BKT: {
+		case IN_LOAD_PARSER_BKT: {
 			Tree *parser;
 			read_tree( parser );
 
-			debug( REALM_BYTECODE, "IN_LOAD_ACCUM_BKT\n" );
+			debug( REALM_BYTECODE, "IN_LOAD_PARSER_BKT\n" );
 
 			treeUpref( parser );
 			vm_push( parser );
@@ -1101,7 +1101,7 @@ again:
 			vm_push( exec->pdaRun->context );
 
 			/* Set up the reverse instruction. */
-			append( &exec->pdaRun->rcodeCollect, IN_LOAD_ACCUM_BKT );
+			append( &exec->pdaRun->rcodeCollect, IN_LOAD_PARSER_BKT );
 			appendWord( &exec->pdaRun->rcodeCollect, (Word)exec->parser );
 			exec->rcodeUnitLen = SIZEOF_CODE + SIZEOF_WORD;
 			break;
@@ -2067,8 +2067,8 @@ again:
 			break;
 		}
 
-		case IN_GET_ACCUM_CTX_R: {
-			debug( REALM_BYTECODE, "IN_GET_ACCUM_CTX_R\n" );
+		case IN_GET_PARSER_CTX_R: {
+			debug( REALM_BYTECODE, "IN_GET_PARSER_CTX_R\n" );
 
 			Tree *obj = vm_pop();
 			Tree *ctx = ((Parser*)obj)->pdaRun->context;
@@ -2078,8 +2078,8 @@ again:
 			break;
 		}
 
-		case IN_SET_ACCUM_CTX_WC: {
-			debug( REALM_BYTECODE, "IN_SET_ACCUM_CTX_WC\n" );
+		case IN_SET_PARSER_CTX_WC: {
+			debug( REALM_BYTECODE, "IN_SET_PARSER_CTX_WC\n" );
 
 			Tree *parser = vm_pop();
 			Tree *val = vm_pop();
@@ -2088,10 +2088,10 @@ again:
 			break;
 		}
 
-//		case IN_GET_ACCUM_CTX_WC:
-//		case IN_GET_ACCUM_CTX_WV:
-//		case IN_SET_ACCUM_CTX_WC:
-//		case IN_SET_ACCUM_CTX_WV:
+//		case IN_GET_PARSER_CTX_WC:
+//		case IN_GET_PARSER_CTX_WV:
+//		case IN_SET_PARSER_CTX_WC:
+//		case IN_SET_PARSER_CTX_WV:
 //			break;
 
 		case IN_INPUT_APPEND_WC: {

@@ -1551,7 +1551,7 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool stop ) c
 	/* FIXME: need to select right one here. */
 	code.append( IN_DUP_TOP_OFF );
 	code.appendHalf( 1 );
-	code.append( IN_SET_ACCUM_CTX_WC );
+	code.append( IN_SET_PARSER_CTX_WC );
 
 	/*
 	 * Evaluate the parse arg.
@@ -2975,11 +2975,11 @@ void Compiler::initCtxField( GenericType *gen )
 	TypeRef *typeRef = TypeRef::cons( InputLoc(), ctxUT );
 	ObjField *el = new ObjField( InputLoc(), typeRef, "ctx" );
 
-	el->inGetR =  IN_GET_ACCUM_CTX_R;
-	el->inGetWC = IN_GET_ACCUM_CTX_WC;
-	el->inGetWV = IN_GET_ACCUM_CTX_WV;
-	el->inSetWC = IN_SET_ACCUM_CTX_WC;
-	el->inSetWV = IN_SET_ACCUM_CTX_WV;
+	el->inGetR =  IN_GET_PARSER_CTX_R;
+	el->inGetWC = IN_GET_PARSER_CTX_WC;
+	el->inGetWV = IN_GET_PARSER_CTX_WV;
+	el->inSetWC = IN_SET_PARSER_CTX_WC;
+	el->inSetWV = IN_SET_PARSER_CTX_WV;
 
 	gen->objDef->insertField( el->name, el );
 

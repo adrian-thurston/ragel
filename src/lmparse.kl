@@ -430,7 +430,7 @@ type_ref: KW_Vector '<' type_ref '>'
 		$$->typeRef = TypeRef::cons( InputLoc(), TypeRef::Vector,
 				nspaceQual, $3->typeRef, 0 );
 	};
-type_ref: KW_Accum '<' type_ref '>'
+type_ref: KW_Parser '<' type_ref '>'
 	final {
 		NamespaceQual *nspaceQual = new NamespaceQual( 
 				namespaceStack.top(), regionStack.top() );

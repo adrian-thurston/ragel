@@ -447,8 +447,8 @@ void ColmScanner::endSection( )
 		'map' => { token( KW_Map ); };
 		'list' => { token( KW_List ); };
 		'vector' => { token( KW_Vector ); };
-		'accum' => { token( KW_Accum ); };
-		'parser' => { token( KW_Accum ); };
+		'accum' => { token( KW_Parser ); };
+		'parser' => { token( KW_Parser ); };
 		'return' => { token( KW_Return ); };
 		'break' => { token( KW_Break ); };
 		'yield' => { token( KW_Yield ); };
