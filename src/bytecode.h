@@ -36,277 +36,276 @@ extern "C" {
 typedef unsigned long ulong;
 typedef unsigned char uchar;
 
-#define IN_LOAD_INT              0x02
-#define IN_LOAD_STR              0x03
-#define IN_LOAD_NIL              0x04
-#define IN_LOAD_TRUE             0x05
-#define IN_LOAD_FALSE            0x06
-#define IN_LOAD_TREE             0xf4
-#define IN_LOAD_WORD             0xf5
+#define IN_LOAD_INT              0x01
+#define IN_LOAD_STR              0x02
+#define IN_LOAD_NIL              0x03
+#define IN_LOAD_TRUE             0x04
+#define IN_LOAD_FALSE            0x05
+#define IN_LOAD_TREE             0x06
+#define IN_LOAD_WORD             0x07
 
-#define IN_ADD_INT               0x07
-#define IN_SUB_INT               0x08
-#define IN_MULT_INT              0x09
-#define IN_DIV_INT               0xd0
+#define IN_ADD_INT               0x08
+#define IN_SUB_INT               0x09
+#define IN_MULT_INT              0x0a
+#define IN_DIV_INT               0x0b
 
-#define IN_TST_EQL               0x0a
-#define IN_TST_NOT_EQL           0x0b
-#define IN_TST_LESS              0x0c
-#define IN_TST_GRTR              0x0d
-#define IN_TST_LESS_EQL          0x0e
-#define IN_TST_GRTR_EQL          0x0f
-#define IN_TST_LOGICAL_AND       0x10
-#define IN_TST_LOGICAL_OR        0x11
+#define IN_TST_EQL               0x0c
+#define IN_TST_NOT_EQL           0x0d
+#define IN_TST_LESS              0x0e
+#define IN_TST_GRTR              0x0f
+#define IN_TST_LESS_EQL          0x10
+#define IN_TST_GRTR_EQL          0x11
+#define IN_TST_LOGICAL_AND       0x12
+#define IN_TST_LOGICAL_OR        0x13
 
-#define IN_NOT                   0x12
+#define IN_NOT                   0x14
 
-#define IN_JMP                   0x13
-#define IN_JMP_FALSE             0x14
-#define IN_JMP_TRUE              0x15
+#define IN_JMP                   0x15
+#define IN_JMP_FALSE             0x16
+#define IN_JMP_TRUE              0x17
 
-#define IN_STR_ATOI              0x16
-#define IN_STR_LENGTH            0x17
-#define IN_CONCAT_STR            0x18
-#define IN_TREE_TRIM             0xfc
+#define IN_STR_ATOI              0x18
+#define IN_STR_LENGTH            0x19
+#define IN_CONCAT_STR            0x1a
+#define IN_TREE_TRIM             0x1b
 
-#define IN_INIT_LOCALS           0x19
-#define IN_POP                   0x1b
-#define IN_POP_N_WORDS           0x1c
-#define IN_DUP_TOP               0x1d
-#define IN_DUP_TOP_OFF           0xbc
-#define IN_REJECT                0x1e
-#define IN_MATCH                 0x1f
-#define IN_CONSTRUCT             0x20
-#define IN_TREE_NEW              0x21
+#define IN_INIT_LOCALS           0x1c
+#define IN_POP                   0x1d
+#define IN_POP_N_WORDS           0x1e
+#define IN_DUP_TOP               0x1f
 
-#define IN_GET_LOCAL_R           0x22
-#define IN_GET_LOCAL_WC          0x23
-#define IN_SET_LOCAL_WC          0x24
+#define IN_DUP_TOP_OFF           0x20
+#define IN_REJECT                0x21
+#define IN_MATCH                 0x22
+#define IN_CONSTRUCT             0x23
+#define IN_TREE_NEW              0x24
 
-#define IN_GET_LOCAL_REF_R       0x25
-#define IN_GET_LOCAL_REF_WC      0x26
-#define IN_SET_LOCAL_REF_WC      0x27
+#define IN_GET_LOCAL_R           0x25
+#define IN_GET_LOCAL_WC          0x26
+#define IN_SET_LOCAL_WC          0x27
 
-#define IN_SAVE_RET              0x28
+#define IN_GET_LOCAL_REF_R       0x28
+#define IN_GET_LOCAL_REF_WC      0x29
+#define IN_SET_LOCAL_REF_WC      0x2a
 
-#define IN_GET_FIELD_R           0x29
-#define IN_GET_FIELD_WC          0x2a
-#define IN_GET_FIELD_WV          0x2b
-#define IN_GET_FIELD_BKT         0x2c
+#define IN_SAVE_RET              0x2b
 
-#define IN_SET_FIELD_WV          0x2d
-#define IN_SET_FIELD_WC          0x2e
-#define IN_SET_FIELD_BKT         0x2f
-#define IN_SET_FIELD_LEAVE_WC    0x30
+#define IN_GET_FIELD_R           0x2c
+#define IN_GET_FIELD_WC          0x2d
+#define IN_GET_FIELD_WV          0x2e
+#define IN_GET_FIELD_BKT         0x2f
 
-#define IN_GET_MATCH_LENGTH_R    0x31
-#define IN_GET_MATCH_TEXT_R      0x32
+#define IN_SET_FIELD_WV          0x30
+#define IN_SET_FIELD_WC          0x31
+#define IN_SET_FIELD_BKT         0x32
+#define IN_SET_FIELD_LEAVE_WC    0x33
 
-#define IN_GET_TOKEN_DATA_R      0x33
-#define IN_SET_TOKEN_DATA_WC     0x34
-#define IN_SET_TOKEN_DATA_WV     0x35
-#define IN_SET_TOKEN_DATA_BKT    0x36
+#define IN_GET_MATCH_LENGTH_R    0x34
+#define IN_GET_MATCH_TEXT_R      0x35
 
-#define IN_GET_TOKEN_POS_R       0x37
-#define IN_GET_TOKEN_LINE_R      0xf6
+#define IN_GET_TOKEN_DATA_R      0x36
+#define IN_SET_TOKEN_DATA_WC     0x37
+#define IN_SET_TOKEN_DATA_WV     0x38
+#define IN_SET_TOKEN_DATA_BKT    0x39
 
-#define IN_INIT_RHS_EL           0x38
-#define IN_INIT_LHS_EL           0xef
-#define IN_INIT_CAPTURES         0x39
-#define IN_STORE_LHS_EL          0xf0
-#define IN_RESTORE_LHS           0x01
+#define IN_GET_TOKEN_POS_R       0x3a
+#define IN_GET_TOKEN_LINE_R      0x3b
 
-#define IN_TRITER_FROM_REF       0x3a
-#define IN_TRITER_ADVANCE        0x3b
-#define IN_TRITER_NEXT_CHILD     0x3c
-#define IN_TRITER_GET_CUR_R      0x3d
-#define IN_TRITER_GET_CUR_WC     0x3e
-#define IN_TRITER_SET_CUR_WC     0x3f
-#define IN_TRITER_DESTROY        0x40
-#define IN_TRITER_NEXT_REPEAT    0x41
-#define IN_TRITER_PREV_REPEAT    0x42
+#define IN_INIT_RHS_EL           0x3c
+#define IN_INIT_LHS_EL           0x3d
+#define IN_INIT_CAPTURES         0x3e
+#define IN_STORE_LHS_EL          0x3f
+#define IN_RESTORE_LHS           0x40
 
-#define IN_REV_TRITER_FROM_REF   0x43
-#define IN_REV_TRITER_DESTROY    0x44
-#define IN_REV_TRITER_PREV_CHILD 0x45
+#define IN_TRITER_FROM_REF       0x41
+#define IN_TRITER_ADVANCE        0x42
+#define IN_TRITER_NEXT_CHILD     0x43
+#define IN_TRITER_GET_CUR_R      0x44
+#define IN_TRITER_GET_CUR_WC     0x45
+#define IN_TRITER_SET_CUR_WC     0x46
+#define IN_TRITER_DESTROY        0x47
+#define IN_TRITER_NEXT_REPEAT    0x48
+#define IN_TRITER_PREV_REPEAT    0x49
 
-#define IN_UITER_DESTROY         0x46
-#define IN_UITER_CREATE_WV       0x47
-#define IN_UITER_CREATE_WC       0x48
-#define IN_UITER_ADVANCE         0x49
-#define IN_UITER_GET_CUR_R       0x4a
-#define IN_UITER_GET_CUR_WC      0x4b
-#define IN_UITER_SET_CUR_WC      0x4c
+#define IN_REV_TRITER_FROM_REF   0x4a
+#define IN_REV_TRITER_DESTROY    0x4b
+#define IN_REV_TRITER_PREV_CHILD 0x4c
 
-#define IN_TREE_SEARCH           0x4d
+#define IN_UITER_DESTROY         0x4d
+#define IN_UITER_CREATE_WV       0x4e
+#define IN_UITER_CREATE_WC       0x4f
+#define IN_UITER_ADVANCE         0x50
+#define IN_UITER_GET_CUR_R       0x51
+#define IN_UITER_GET_CUR_WC      0x52
+#define IN_UITER_SET_CUR_WC      0x53
 
-#define IN_LOAD_GLOBAL_R         0x4e
-#define IN_LOAD_GLOBAL_WV        0x4f
-#define IN_LOAD_GLOBAL_WC        0x50
-#define IN_LOAD_GLOBAL_BKT       0x51
+#define IN_TREE_SEARCH           0x54
 
-#define IN_PTR_DEREF_R           0x52
-#define IN_PTR_DEREF_WV          0x53
-#define IN_PTR_DEREF_WC          0x54
-#define IN_PTR_DEREF_BKT         0x55
+#define IN_LOAD_GLOBAL_R         0x55
+#define IN_LOAD_GLOBAL_WV        0x56
+#define IN_LOAD_GLOBAL_WC        0x57
+#define IN_LOAD_GLOBAL_BKT       0x58
 
-#define IN_REF_FROM_LOCAL        0x56
-#define IN_REF_FROM_REF          0x57
-#define IN_REF_FROM_QUAL_REF     0x58
-#define IN_TRITER_REF_FROM_CUR   0x59
-#define IN_UITER_REF_FROM_CUR    0x5a
+#define IN_PTR_DEREF_R           0x59
+#define IN_PTR_DEREF_WV          0x5a
+#define IN_PTR_DEREF_WC          0x60
+#define IN_PTR_DEREF_BKT         0x61
 
-#define IN_MAP_LENGTH            0x5b
-#define IN_MAP_FIND              0x5c
-#define IN_MAP_INSERT_WV         0x5d
-#define IN_MAP_INSERT_WC         0x5e
-#define IN_MAP_INSERT_BKT        0x5f
-#define IN_MAP_STORE_WV          0x60
-#define IN_MAP_STORE_WC          0x61
-#define IN_MAP_STORE_BKT         0x62
-#define IN_MAP_REMOVE_WV         0x63
-#define IN_MAP_REMOVE_WC         0x64
-#define IN_MAP_REMOVE_BKT        0x65
+#define IN_REF_FROM_LOCAL        0x62
+#define IN_REF_FROM_REF          0x63
+#define IN_REF_FROM_QUAL_REF     0x64
+#define IN_TRITER_REF_FROM_CUR   0x65
+#define IN_UITER_REF_FROM_CUR    0x66
 
-#define IN_LIST_LENGTH           0x66
-#define IN_LIST_APPEND_WV        0x67
-#define IN_LIST_APPEND_WC        0x68
-#define IN_LIST_APPEND_BKT       0x69
-#define IN_LIST_REMOVE_END_WV    0x6a
-#define IN_LIST_REMOVE_END_WC    0x6b
-#define IN_LIST_REMOVE_END_BKT   0x6c
+#define IN_MAP_LENGTH            0x67
+#define IN_MAP_FIND              0x68
+#define IN_MAP_INSERT_WV         0x69
+#define IN_MAP_INSERT_WC         0x6a
+#define IN_MAP_INSERT_BKT        0x6b
+#define IN_MAP_STORE_WV          0x6c
+#define IN_MAP_STORE_WC          0x6d
+#define IN_MAP_STORE_BKT         0x6e
+#define IN_MAP_REMOVE_WV         0x6f
+#define IN_MAP_REMOVE_WC         0x70
+#define IN_MAP_REMOVE_BKT        0x71
 
-#define IN_GET_LIST_MEM_R        0x6d
-#define IN_GET_LIST_MEM_WC       0x6e
-#define IN_GET_LIST_MEM_WV       0x6f
-#define IN_GET_LIST_MEM_BKT      0x70
-#define IN_SET_LIST_MEM_WV       0x71
-#define IN_SET_LIST_MEM_WC       0x72
-#define IN_SET_LIST_MEM_BKT      0x73
+#define IN_LIST_LENGTH           0x72
+#define IN_LIST_APPEND_WV        0x73
+#define IN_LIST_APPEND_WC        0x74
+#define IN_LIST_APPEND_BKT       0x75
+#define IN_LIST_REMOVE_END_WV    0x76
+#define IN_LIST_REMOVE_END_WC    0x77
+#define IN_LIST_REMOVE_END_BKT   0x78
 
-#define IN_VECTOR_LENGTH         0x74
-#define IN_VECTOR_APPEND_WV      0x75
-#define IN_VECTOR_APPEND_WC      0x76
-#define IN_VECTOR_APPEND_BKT     0x77
-#define IN_VECTOR_INSERT_WV      0x78
-#define IN_VECTOR_INSERT_WC      0x79
-#define IN_VECTOR_INSERT_BKT     0x7a
+#define IN_GET_LIST_MEM_R        0x79
+#define IN_GET_LIST_MEM_WC       0x7a
+#define IN_GET_LIST_MEM_WV       0x7b
+#define IN_GET_LIST_MEM_BKT      0x7c
+#define IN_SET_LIST_MEM_WV       0x7d
+#define IN_SET_LIST_MEM_WC       0x7e
+#define IN_SET_LIST_MEM_BKT      0x7f
 
-#define IN_PRINT                 0x7b
-#define IN_PRINT_XML_AC          0x7c
-#define IN_PRINT_XML             0x7d
-#define IN_PRINT_STREAM          0x7e
+#define IN_VECTOR_LENGTH         0x80
+#define IN_VECTOR_APPEND_WV      0x81
+#define IN_VECTOR_APPEND_WC      0x82
+#define IN_VECTOR_APPEND_BKT     0x83
+#define IN_VECTOR_INSERT_WV      0x84
+#define IN_VECTOR_INSERT_WC      0x85
+#define IN_VECTOR_INSERT_BKT     0x86
 
-#define IN_HALT                  0x7f
+#define IN_PRINT                 0x87
+#define IN_PRINT_XML_AC          0x88
+#define IN_PRINT_XML             0x89
+#define IN_PRINT_STREAM          0x8a
 
-#define IN_CALL_WC               0x80
-#define IN_CALL_WV               0x81
-#define IN_RET                   0x82
-#define IN_YIELD                 0x83
-#define IN_STOP                  0x84
+#define IN_HALT                  0x8b
 
-#define IN_STR_UORD8             0x85
-#define IN_STR_SORD8             0x86
-#define IN_STR_UORD16            0x87
-#define IN_STR_SORD16            0x88
-#define IN_STR_UORD32            0x89
-#define IN_STR_SORD32            0x8a
+#define IN_CALL_WC               0x8c
+#define IN_CALL_WV               0x8d
+#define IN_RET                   0x8e
+#define IN_YIELD                 0x8f
+#define IN_STOP                  0x90
 
-#define IN_INT_TO_STR            0x8b
-#define IN_TREE_TO_STR           0x8c
-#define IN_TREE_TO_STR_NOTRIM    0xfd
+#define IN_STR_UORD8             0x91
+#define IN_STR_SORD8             0x92
+#define IN_STR_UORD16            0x93
+#define IN_STR_SORD16            0x94
+#define IN_STR_UORD32            0x95
+#define IN_STR_SORD32            0x96
 
-#define IN_CREATE_TOKEN          0x8d
-#define IN_MAKE_TOKEN            0x8e
-#define IN_MAKE_TREE             0x8f
-#define IN_CONSTRUCT_TERM        0x90
+#define IN_INT_TO_STR            0x97
+#define IN_TREE_TO_STR           0x98
+#define IN_TREE_TO_STR_NOTRIM    0x99
 
-#define IN_INPUT_PULL_WV         0xf7
-#define IN_INPUT_PULL_BKT        0xf8
+#define IN_CREATE_TOKEN          0x9a
+#define IN_MAKE_TOKEN            0x9b
+#define IN_MAKE_TREE             0x9c
+#define IN_CONSTRUCT_TERM        0x9d
 
-#define IN_PARSE_LOAD_START      0xf2
-#define IN_PARSE_SAVE_STEPS      0xf3
-#define IN_PARSE_FRAG_WC         0xc0
-#define IN_PARSE_FRAG_WC3        0xe1
+#define IN_INPUT_PULL_WV         0x9e
+#define IN_INPUT_PULL_BKT        0x9f
 
-#define IN_PARSE_FRAG_WV         0xc1
-#define IN_PARSE_FRAG_WV3        0xe4
+#define IN_PARSE_LOAD_START      0xa0
+#define IN_PARSE_SAVE_STEPS      0xa1
+#define IN_PARSE_FRAG_WC         0xa2
+#define IN_PARSE_FRAG_WC3        0xa3
 
-#define IN_PARSE_FRAG_BKT        0xc2
-#define IN_PARSE_FRAG_BKT3       0xe6
+#define IN_PARSE_FRAG_WV         0xa4
+#define IN_PARSE_FRAG_WV3        0xa5
 
-#define IN_INPUT_APPEND_WC       0x91
-#define IN_INPUT_APPEND_WV       0x92
-#define IN_INPUT_APPEND_BKT      0x93
+#define IN_PARSE_FRAG_BKT        0xa6
+#define IN_PARSE_FRAG_BKT3       0xa7
 
-#define IN_PARSE_FINISH_WC       0x9d
-#define IN_PARSE_FINISH_WC3      0xea
+#define IN_INPUT_APPEND_WC       0xa8
+#define IN_INPUT_APPEND_WV       0xa9
+#define IN_INPUT_APPEND_BKT      0xaa
 
-#define IN_PARSE_FINISH_WV       0xbd
-#define IN_PARSE_FINISH_WV3      0xeb
+#define IN_PARSE_FINISH_WC       0xab
+#define IN_PARSE_FINISH_WC3      0xac
 
-#define IN_PARSE_FINISH_BKT      0xbf
-#define IN_PARSE_FINISH_BKT3     0xec
+#define IN_PARSE_FINISH_WV       0xad
+#define IN_PARSE_FINISH_WV3      0xae
 
-#define IN_PCR_CALL              0xe0
-#define IN_PCR_RET               0xe3
-#define IN_PCR_END_DECK          0xed
+#define IN_PARSE_FINISH_BKT      0xaf
+#define IN_PARSE_FINISH_BKT3     0xb0
 
-#define IN_PARSE_EXTRACT_INPUT 
+#define IN_PCR_CALL              0xb1
+#define IN_PCR_RET               0xb2
+#define IN_PCR_END_DECK          0xb3
 
-#define IN_OPEN_FILE             0x9e
-#define IN_GET_STDIN             0x9f
-#define IN_GET_STDOUT            0xa0
-#define IN_GET_STDERR            0xa1
-#define IN_LOAD_ARGV             0xa2
-#define IN_TO_UPPER              0xa3
-#define IN_TO_LOWER              0xa4
-#define IN_EXIT                  0xa5
-#define IN_ERROR                 0xa6
+#define IN_OPEN_FILE             0xb4
+#define IN_GET_STDIN             0xb5
+#define IN_GET_STDOUT            0xb6
+#define IN_GET_STDERR            0xb7
+#define IN_LOAD_ARGV             0xb8
+#define IN_TO_UPPER              0xb9
+#define IN_TO_LOWER              0xba
+#define IN_EXIT                  0xbb
+#define IN_ERROR                 0xbc
 
-#define IN_LOAD_ACCUM_R          0xa8
-#define IN_LOAD_ACCUM_WV         0xa9
-#define IN_LOAD_ACCUM_WC         0xaa
-#define IN_LOAD_ACCUM_BKT        0xab
+#define IN_LOAD_ACCUM_R          0xbd
+#define IN_LOAD_ACCUM_WV         0xbe
+#define IN_LOAD_ACCUM_WC         0xbf
+#define IN_LOAD_ACCUM_BKT        0xc0
 
-#define IN_LOAD_INPUT_R          0x98
-#define IN_LOAD_INPUT_WV         0x99
-#define IN_LOAD_INPUT_WC         0x9a
-#define IN_LOAD_INPUT_BKT        0x9b
+#define IN_LOAD_INPUT_R          0xc1
+#define IN_LOAD_INPUT_WV         0xc2
+#define IN_LOAD_INPUT_WC         0xc3
+#define IN_LOAD_INPUT_BKT        0xc4
 
-#define IN_INPUT_PUSH_WV         0xf9
-#define IN_INPUT_PUSH_BKT        0xfa
-#define IN_INPUT_PUSH_IGNORE_WV  0xfb
+#define IN_INPUT_PUSH_WV         0xc5
+#define IN_INPUT_PUSH_BKT        0xc6
+#define IN_INPUT_PUSH_IGNORE_WV  0xc7
 
-#define IN_LOAD_CONTEXT_R        0xac
-#define IN_LOAD_CONTEXT_WV       0xad
-#define IN_LOAD_CONTEXT_WC       0xae
-#define IN_LOAD_CONTEXT_BKT      0xaf
+#define IN_LOAD_CONTEXT_R        0xc8
+#define IN_LOAD_CONTEXT_WV       0xc9
+#define IN_LOAD_CONTEXT_WC       0xca
+#define IN_LOAD_CONTEXT_BKT      0xcb
 
-#define IN_GET_ACCUM_CTX_R       0xb0
-#define IN_GET_ACCUM_CTX_WC      0xb1
-#define IN_GET_ACCUM_CTX_WV      0xb2
-#define IN_SET_ACCUM_CTX_WC      0xb3
-#define IN_SET_ACCUM_CTX_WV      0xb4
+#define IN_GET_ACCUM_CTX_R       0xcd
+#define IN_GET_ACCUM_CTX_WC      0xce
+#define IN_GET_ACCUM_CTX_WV      0xcf
+#define IN_SET_ACCUM_CTX_WC      0xd0
+#define IN_SET_ACCUM_CTX_WV      0xd1
 
-#define IN_LOAD_CTX_R            0xb5
-#define IN_LOAD_CTX_WC           0xb6
-#define IN_LOAD_CTX_WV           0xb7
-#define IN_LOAD_CTX_BKT          0xb8
+#define IN_LOAD_CTX_R            0xd2
+#define IN_LOAD_CTX_WC           0xd3
+#define IN_LOAD_CTX_WV           0xd4
+#define IN_LOAD_CTX_BKT          0xd5
 
-#define IN_SPRINTF               0xcf
+#define IN_SPRINTF               0xd6
 
-#define IN_GET_RHS_VAL_R         0xd1
-#define IN_GET_RHS_VAL_WC        0xd2
-#define IN_GET_RHS_VAL_WV        0xd3
-#define IN_GET_RHS_VAL_BKT       0xd4
-#define IN_SET_RHS_VAL_WC        0xd5
-#define IN_SET_RHS_VAL_WV        0xd6
-#define IN_SET_RHS_VAL_BKT       0xd7
+#define IN_GET_RHS_VAL_R         0xd7
+#define IN_GET_RHS_VAL_WC        0xd8
+#define IN_GET_RHS_VAL_WV        0xd9
+#define IN_GET_RHS_VAL_BKT       0xda
+#define IN_SET_RHS_VAL_WC        0xdb
+#define IN_SET_RHS_VAL_WV        0xdc
+#define IN_SET_RHS_VAL_BKT       0xdd
 
-#define IN_CONSTRUCT_INPUT       0x9c
-#define IN_SET_INPUT             0xa7
-#define IN_GET_INPUT             0xb9
+#define IN_CONSTRUCT_INPUT       0xde
+#define IN_SET_INPUT             0xdf
+#define IN_GET_INPUT             0xe0
 
 /* Types */
 #define TYPE_NIL          0x01
