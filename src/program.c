@@ -46,38 +46,6 @@ void colmInit( long debugRealm )
 	initInputFuncs();
 }
 
-void colmRunProgram( Program *prg )
-{
-	assert( sizeof(Int)      <= sizeof(Tree) );
-	assert( sizeof(Str)      <= sizeof(Tree) );
-	assert( sizeof(Pointer)  <= sizeof(Tree) );
-	assert( sizeof(Map)      <= sizeof(MapEl) );
-	assert( sizeof(List)     <= sizeof(MapEl) );
-	assert( sizeof(Stream)   <= sizeof(MapEl) );
-	assert( sizeof(Parser)   <= sizeof(MapEl) );
-
-	/* Allocate the global variable. */
-	allocGlobal( prg );
-
-	/* 
-	 * Allocate the VM stack.
-	 */
-
-	prg->vm_stack = stackAlloc();
-	prg->vm_root = &prg->vm_stack[VM_STACK_SIZE];
-
-	/*
-	 * Execute
-	 */
-	if ( prg->rtd->rootCodeLen > 0 ) {
-		//RtCodeVect rcodeCollect;
-		Execution execution;
-
-		initExecution( &execution, 0, 0, 0, 0, prg->rtd->rootFrameId );
-		mainExecution( prg, &execution, prg->rtd->rootCode );
-	}
-}
-
 void clearGlobal( Program *prg, Tree **sp )
 {
 	/* Downref all the fields in the global object. */
@@ -104,8 +72,6 @@ void allocGlobal( Program *prg )
 
 Tree **stackAlloc()
 {
-	//return new Tree*[VM_STACK_SIZE];
-
 	return (Tree**)mmap( 0, sizeof(Tree*)*VM_STACK_SIZE,
 		PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0 );
 }
@@ -121,12 +87,12 @@ Tree *returnVal( struct ColmProgram *prg )
 }
 
 
-Program *colmNewProgram( RuntimeData *rtd, int argc, const char **argv )
+Program *colmNewProgram( RuntimeData *rtd )
 {
 	Program *prg = malloc(sizeof(Program));
 	memset( prg, 0, sizeof(Program) );
-	prg->argc = argc;
-	prg->argv = argv;
+	prg->argc = 0;
+	prg->argv = 0;
 	prg->rtd = rtd;
 	prg->ctxDepParsing = 1;
 	prg->global = 0;
@@ -164,6 +130,45 @@ Program *colmNewProgram( RuntimeData *rtd, int argc, const char **argv )
 
 	return prg;
 }
+
+void colmRunProgram( Program *prg, int argc, const char **argv )
+{
+	prg->argc = argc;
+	prg->argv = argv;
+
+	assert( sizeof(Int)      <= sizeof(Tree) );
+	assert( sizeof(Str)      <= sizeof(Tree) );
+	assert( sizeof(Pointer)  <= sizeof(Tree) );
+	assert( sizeof(Map)      <= sizeof(MapEl) );
+	assert( sizeof(List)     <= sizeof(MapEl) );
+	assert( sizeof(Stream)   <= sizeof(MapEl) );
+	assert( sizeof(Parser)   <= sizeof(MapEl) );
+
+	/* Allocate the global variable. */
+	allocGlobal( prg );
+
+	/*
+	 * Allocate the VM stack.
+	 */
+
+	prg->vm_stack = stackAlloc();
+	prg->vm_root = &prg->vm_stack[VM_STACK_SIZE];
+
+	/*
+	 * Execute
+	 */
+	if ( prg->rtd->rootCodeLen > 0 ) {
+		//RtCodeVect rcodeCollect;
+		Execution execution;
+
+		initExecution( &execution, 0, 0, 0, 0, prg->rtd->rootFrameId );
+		mainExecution( prg, &execution, prg->rtd->rootCode );
+	}
+
+	prg->argc = 0;
+	prg->argv = 0;
+}
+
 
 int colmDeleteProgram( Program *prg )
 {

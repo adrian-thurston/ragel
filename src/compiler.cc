@@ -1283,7 +1283,7 @@ void Compiler::initEmptyScanners()
 
 void Compiler::parsePatterns()
 {
-	Program *prg = colmNewProgram( runtimeData, 0, 0 );
+	Program *prg = colmNewProgram( runtimeData );
 
 	/* Turn off context-dependent parsing. */
 	prg->ctxDepParsing = 0;

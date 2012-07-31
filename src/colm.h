@@ -11,8 +11,8 @@ struct ColmProgram;
 struct ColmRuntimeData;
 
 void colmInit( long debugRealm );
-struct ColmProgram *colmNewProgram( struct ColmRuntimeData *rtd, int argc, const char **argv );
-void colmRunProgram( struct ColmProgram *prg );
+struct ColmProgram *colmNewProgram( struct ColmRuntimeData *rtd );
+void colmRunProgram( struct ColmProgram *prg, int argc, const char **argv );
 int colmDeleteProgram( struct ColmProgram *prg );
 
 struct ColmPrintArgs
