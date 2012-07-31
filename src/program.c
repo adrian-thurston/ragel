@@ -44,6 +44,14 @@ void colmInit( long debugRealm )
 	colm_log_conds = 1;
 	colmActiveRealm = debugRealm;
 	initInputFuncs();
+
+	assert( sizeof(Int)      <= sizeof(Tree) );
+	assert( sizeof(Str)      <= sizeof(Tree) );
+	assert( sizeof(Pointer)  <= sizeof(Tree) );
+	assert( sizeof(Map)      <= sizeof(MapEl) );
+	assert( sizeof(List)     <= sizeof(MapEl) );
+	assert( sizeof(Stream)   <= sizeof(MapEl) );
+	assert( sizeof(Parser)   <= sizeof(MapEl) );
 }
 
 void clearGlobal( Program *prg, Tree **sp )
@@ -74,6 +82,11 @@ Tree **stackAlloc()
 {
 	return (Tree**)mmap( 0, sizeof(Tree*)*VM_STACK_SIZE,
 		PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0 );
+}
+
+void stackFree( Tree **stack )
+{
+	munmap( stack, sizeof(Tree*)*VM_STACK_SIZE );
 }
 
 Tree **vm_root( struct ColmProgram *prg )
@@ -128,43 +141,35 @@ Program *colmNewProgram( RuntimeData *rtd )
 	prg->returnVal = 0;
 	prg->lastParseError = 0;
 
-	return prg;
-}
-
-void colmRunProgram( Program *prg, int argc, const char **argv )
-{
-	prg->argc = argc;
-	prg->argv = argv;
-
-	assert( sizeof(Int)      <= sizeof(Tree) );
-	assert( sizeof(Str)      <= sizeof(Tree) );
-	assert( sizeof(Pointer)  <= sizeof(Tree) );
-	assert( sizeof(Map)      <= sizeof(MapEl) );
-	assert( sizeof(List)     <= sizeof(MapEl) );
-	assert( sizeof(Stream)   <= sizeof(MapEl) );
-	assert( sizeof(Parser)   <= sizeof(MapEl) );
-
 	/* Allocate the global variable. */
 	allocGlobal( prg );
 
 	/*
 	 * Allocate the VM stack.
 	 */
-
 	prg->vm_stack = stackAlloc();
 	prg->vm_root = &prg->vm_stack[VM_STACK_SIZE];
+
+	return prg;
+}
+
+void colmRunProgram( Program *prg, int argc, const char **argv )
+{
+	/* Make the arguments available to the program. */
+	prg->argc = argc;
+	prg->argv = argv;
 
 	/*
 	 * Execute
 	 */
 	if ( prg->rtd->rootCodeLen > 0 ) {
-		//RtCodeVect rcodeCollect;
 		Execution execution;
 
 		initExecution( &execution, 0, 0, 0, 0, prg->rtd->rootFrameId );
 		mainExecution( prg, &execution, prg->rtd->rootCode );
 	}
 
+	/* Clear the arg and stack. */
 	prg->argc = 0;
 	prg->argv = 0;
 }
@@ -242,8 +247,6 @@ int colmDeleteProgram( Program *prg )
 	mapElClear( prg );
 	locationClear( prg );
 
-	//memset( vm_stack, 0, sizeof(Tree*) * VM_STACK_SIZE);
-
 	RunBuf *rb = prg->allocRunBuf;
 	while ( rb != 0 ) {
 		RunBuf *next = rb->next;
@@ -251,9 +254,8 @@ int colmDeleteProgram( Program *prg )
 		rb = next;
 	}
 
+	stackFree( prg->vm_stack );
 	free( prg );
 
 	return exitStatus;
 }
-
-
