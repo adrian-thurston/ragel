@@ -137,16 +137,16 @@ void Compiler::generateExports()
 		openNameSpace( out, lel->nspace );
 		out << "struct " << lel->fullName << "\n";
 		out << "{\n";
-		out << "	std::string text() { return printTreeStr( prg, tree, true ); }\n";
-		out << "	std::string text_notrim() { return printTreeStr( prg, tree, false ); }\n";
-		out << "	operator ColmTree *() { return tree; }\n";
-		out << "	ColmProgram *prg;\n";
-		out << "	ColmTree *tree;\n";
+		out << "	std::string text() { return printTreeStr( __prg, __tree, true ); }\n";
+		out << "	std::string text_notrim() { return printTreeStr( __prg, __tree, false ); }\n";
+		out << "	operator ColmTree *() { return __tree; }\n";
+		out << "	ColmProgram *__prg;\n";
+		out << "	ColmTree *__tree;\n";
 
 		if ( mainReturnUT != 0 && mainReturnUT->langEl == lel ) {
-			out << "	" << lel->fullName << "( ColmProgram *prg ) : prg(prg), tree(returnVal(prg)) {}\n";
+			out << "	" << lel->fullName << "( ColmProgram *prg ) : __prg(prg), __tree(returnVal(prg)) {}\n";
 		}
-		out << "	" << lel->fullName << "( ColmProgram *prg, ColmTree *tree ) : prg(prg), tree(tree) {}\n";
+		out << "	" << lel->fullName << "( ColmProgram *prg, ColmTree *tree ) : __prg(prg), __tree(tree) {}\n";
 
 		if ( lel->objectDef != 0 && lel->objectDef->objFieldList != 0 ) {
 			ObjFieldList *objFieldList = lel->objectDef->objFieldList;
@@ -171,13 +171,13 @@ void Compiler::generateExports()
 		}
 
 		if ( lel->isRepeat ) {
-			out << "	" << "int end() { return repeatEnd( tree ); }\n";
+			out << "	" << "int end() { return repeatEnd( __tree ); }\n";
 			out << "	" << lel->refName << " next();\n";
 			out << "	" << lel->repeatOf->refName << " value();\n";
 		}
 
 		if ( lel->isList ) {
-			out << "	" << "int last() { return listLast( tree ); }\n";
+			out << "	" << "int last() { return listLast( __tree ); }\n";
 			out << "	" << lel->refName << " next();\n";
 			out << "	" << lel->repeatOf->refName << " value();\n";
 		}
@@ -219,7 +219,7 @@ void Compiler::generateExportsImpl()
 					if ( ut != 0 && ut->typeId == TYPE_TREE  ) {
 						out << ut->langEl->refName << " " << lel->declName << "::" << field->name << 
 							"() { return " << ut->langEl->refName << 
-							"( prg, getAttr( tree, " << field->offset << ") ); }\n";
+							"( __prg, getAttr( __tree, " << field->offset << ") ); }\n";
 					}
 				}
 
@@ -238,7 +238,7 @@ void Compiler::generateExportsImpl()
 						}
 
 						out << "}; return " << ut->langEl->refName << 
-							"( prg, getRhsVal( prg, tree, a ) ); }\n";
+							"( __prg, getRhsVal( __prg, __tree, a ) ); }\n";
 					}
 				}
 			}
@@ -247,22 +247,22 @@ void Compiler::generateExportsImpl()
 		if ( lel->isRepeat ) {
 			out << lel->refName << " " << lel->declName << "::" << " next"
 				"() { return " << lel->refName << 
-				"( prg, getRepeatNext( tree ) ); }\n";
+				"( __prg, getRepeatNext( __tree ) ); }\n";
 
 			out << lel->repeatOf->refName << " " << lel->declName << "::" << " value"
 				"() { return " << lel->repeatOf->refName << 
-				"( prg, getRepeatVal( tree ) ); }\n";
+				"( __prg, getRepeatVal( __tree ) ); }\n";
 
 		}
 
 		if ( lel->isList ) {
 			out << lel->refName << " " << lel->declName << "::" << " next"
 				"() { return " << lel->refName << 
-				"( prg, getRepeatNext( tree ) ); }\n";
+				"( __prg, getRepeatNext( __tree ) ); }\n";
 
 			out << lel->repeatOf->refName << " " << lel->declName << "::" << " value"
 				"() { return " << lel->repeatOf->refName << 
-				"( prg, getRepeatVal( tree ) ); }\n";
+				"( __prg, getRepeatVal( __tree ) ); }\n";
 		}
 	}
 
@@ -274,7 +274,7 @@ void Compiler::generateExportsImpl()
 			UniqueType *ut = field->typeRef->lookupType(this);
 			if ( ut != 0 && ut->typeId == TYPE_TREE  ) {
 				out << 
-					ut->langEl->refName << " " << field->name << "(ColmProgram *prg)\n"
+					ut->langEl->refName << " " << field->name << "( ColmProgram *prg )\n"
 					"{ return " << ut->langEl->refName << "( prg, getGlobal( prg, " << 
 					field->offset << ") ); }\n";
 			}
