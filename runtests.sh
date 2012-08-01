@@ -38,7 +38,7 @@ errors=0
 #trap sig_exit SIGINT
 #trap sig_exit SIGQUIT
 
-COLM=../src/colm
+COLM=../colm/colm
 
 [ -d $DATA ] || die "error: data directory not found"
 
