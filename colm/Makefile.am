@@ -84,7 +84,9 @@ lmscan.cc: lmparse.h
 
 lmscan.cc: lmscan.rl
 	$(RAGEL) -G2 -o $@ $<
- 
+
+CLEANFILES = $(BUILT_SOURCES)
+
 endif
 
 # ADT 
