@@ -22,9 +22,9 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include <pdarun.h>
-#include <pool.h>
-#include <debug.h>
+#include <colm/pdarun.h>
+#include <colm/pool.h>
+#include <colm/debug.h>
 
 void initPoolAlloc( PoolAlloc *poolAlloc, int sizeofT )
 {

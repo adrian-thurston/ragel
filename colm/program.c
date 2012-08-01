@@ -19,13 +19,13 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#include <pdarun.h>
-#include <fsmrun.h>
-#include <tree.h>
-#include <bytecode.h>
-#include <pool.h>
-#include <debug.h>
-#include <config.h>
+#include <colm/pdarun.h>
+#include <colm/fsmrun.h>
+#include <colm/tree.h>
+#include <colm/bytecode.h>
+#include <colm/pool.h>
+#include <colm/debug.h>
+#include <colm/config.h>
 
 #include <alloca.h>
 #include <sys/mman.h>

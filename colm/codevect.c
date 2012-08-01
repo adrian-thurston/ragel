@@ -19,8 +19,8 @@
  *  Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#include <rtvector.h>
-#include <pdarun.h>
+#include <colm/rtvector.h>
+#include <colm/pdarun.h>
 
 #include <string.h>
 #include <stdlib.h>

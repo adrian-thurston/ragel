@@ -26,7 +26,7 @@
 extern "C" {
 #endif
 
-#include <program.h>
+#include <colm/program.h>
 
 typedef struct _MapEl
 {

@@ -19,12 +19,12 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#include <pdarun.h>
-#include <tree.h>
-#include <pool.h>
-#include <bytecode.h>
-#include <debug.h>
-#include <map.h>
+#include <colm/pdarun.h>
+#include <colm/tree.h>
+#include <colm/pool.h>
+#include <colm/bytecode.h>
+#include <colm/debug.h>
+#include <colm/map.h>
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>

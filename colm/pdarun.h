@@ -22,10 +22,10 @@
 #ifndef __COLM_PDARUN_H
 #define __COLM_PDARUN_H
 
-#include <input.h>
-#include <fsmrun.h>
-#include <defs.h>
-#include <tree.h>
+#include <colm/input.h>
+#include <colm/fsmrun.h>
+#include <colm/defs.h>
+#include <colm/tree.h>
 
 #ifdef __cplusplus
 extern "C" {

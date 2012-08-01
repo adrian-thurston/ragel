@@ -20,9 +20,9 @@
  */
 
 #include <assert.h>
-#include <pdarun.h>
-#include <map.h>
-#include <pool.h>
+#include <colm/pdarun.h>
+#include <colm/map.h>
+#include <colm/pool.h>
 
 #define true 1
 #define false 0

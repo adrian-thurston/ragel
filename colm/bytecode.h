@@ -22,8 +22,8 @@
 #ifndef _BYTECODE_H
 #define _BYTECODE_H
 
-#include <pdarun.h>
-#include <tree.h>
+#include <colm/pdarun.h>
+#include <colm/tree.h>
 
 #ifdef __cplusplus
 extern "C" {

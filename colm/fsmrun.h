@@ -22,7 +22,7 @@
 #ifndef _FSMRUN2_H
 #define _FSMRUN2_H
 
-#include <input.h>
+#include <colm/input.h>
 
 #ifdef __cplusplus
 extern "C" {

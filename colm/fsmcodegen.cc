@@ -1039,20 +1039,20 @@ void FsmCodeGen::writeExec()
 void FsmCodeGen::writeIncludes()
 {
 	out << 
-		"#include <pdarun.h>\n"
-		"#include <fsmrun.h>\n"
-		"#include <debug.h>\n"
-		"#include <bytecode.h>\n"
-		"#include <config.h>\n"
-		"#include <defs.h>\n"
-		"#include <input.h>\n"
-		"#include <tree.h>\n"
-		"#include <program.h>\n"
-		"#include <colm.h>\n"
+		"#include <colm/pdarun.h>\n"
+		"#include <colm/fsmrun.h>\n"
+		"#include <colm/debug.h>\n"
+		"#include <colm/bytecode.h>\n"
 		"#include <stdio.h>\n"
 		"#include <stdlib.h>\n"
 		"#include <string.h>\n"
 		"#include <assert.h>\n"
+		"#include <colm/config.h>\n"
+		"#include <colm/defs.h>\n"
+		"#include <colm/input.h>\n"
+		"#include <colm/tree.h>\n"
+		"#include <colm/program.h>\n"
+		"#include <colm/colm.h>\n"
 		"\n"
 		"\n";
 }

@@ -350,7 +350,7 @@ void compileOutputInstalled( const char *argv0 )
 	char command[length];
 	sprintf( command, 
 		"gcc -Wall -Wwrite-strings"
-		" -I" PREFIX "/include/colm"
+		" -I" PREFIX "/include"
 		" -g"
 		" -o %s"
 		" %s"
@@ -375,7 +375,7 @@ void compileOutputInSource( const char *argv0 )
 	char command[length];
 	sprintf( command, 
 		"gcc -Wall -Wwrite-strings"
-		" -I%s."
+		" -I%s.."
 		" -I%s../aapl"
 		" -g"
 		" -o %s"

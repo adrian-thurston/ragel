@@ -25,9 +25,9 @@
 /* Allocation, number of items. */
 #define FRESH_BLOCK 8128                    
 
-#include <pdarun.h>
-#include <map.h>
-#include <tree.h>
+#include <colm/pdarun.h>
+#include <colm/map.h>
+#include <colm/tree.h>
 
 #ifdef __cplusplus
 extern "C" {

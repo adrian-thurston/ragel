@@ -22,7 +22,7 @@
 #ifndef __COLM_PROGRAM_H
 #define __COLM_PROGRAM_H
 
-#include <pdarun.h>
+#include <colm/pdarun.h>
 
 typedef struct ColmRuntimeData
 {
