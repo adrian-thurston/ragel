@@ -1321,7 +1321,7 @@ UniqueType *LangTerm::evaluateParse2( Compiler *pd, CodeVect &code ) const
 	code.append( IN_CONSTRUCT );
 	code.appendHalf( replacement->patRepId );
 
-	/* Dup for the send. */
+	/* Dup for the finish operation. */
 	code.append( IN_DUP_TOP );
 
 	/* Lookup the type of the replacement and store it in the replacement
@@ -1330,6 +1330,9 @@ UniqueType *LangTerm::evaluateParse2( Compiler *pd, CodeVect &code ) const
 	if ( replUT->typeId != TYPE_TREE )
 		error(loc) << "don't know how to construct this type" << endp;
 	
+	/*
+	 * Construct and set the input stream.
+	 */
 	if ( replUT->langEl->generic != 0 && replUT->langEl->generic->typeId == GEN_PARSER ) {
 		code.append( IN_CONSTRUCT_INPUT );
 		code.append( IN_DUP_TOP_OFF );
@@ -1340,6 +1343,9 @@ UniqueType *LangTerm::evaluateParse2( Compiler *pd, CodeVect &code ) const
 	replacement->langEl = replUT->langEl;
 	assignFieldArgs( pd, code, replUT );
 
+	/*
+	 * Capture to the local var.
+	 */
 	if ( varRef != 0 ) {
 		code.append( IN_DUP_TOP );
 
@@ -1350,7 +1356,7 @@ UniqueType *LangTerm::evaluateParse2( Compiler *pd, CodeVect &code ) const
 		varRef->setField( pd, code, lookup.inObject, replUT, false );
 	}
 
-/*****************************/
+	/*****************************/
 
 	/* Assign bind ids to the variables in the replacement. */
 	for ( ReplItemList::Iter item = *parserText->list; item.lte(); item++ ) {
@@ -1418,6 +1424,32 @@ UniqueType *LangTerm::evaluateParse2( Compiler *pd, CodeVect &code ) const
 			code.append( IN_PARSE_FRAG_WC3 );
 		}
 	}
+
+	/*
+	 * Finish operation
+	 */
+
+	/* Parse instruction, dependent on whether or not we are producing revert
+	 * or commit code. */
+	if ( pd->revertOn ) {
+		/* Finish immediately. */
+		code.append( IN_PARSE_SAVE_STEPS );
+		code.append( IN_PARSE_LOAD_START );
+		code.append( IN_PARSE_FINISH_WV );
+		code.appendHalf( 0 /*stopId*/ );
+		code.append( IN_PCR_CALL );
+		code.append( IN_PARSE_FINISH_WV3 );
+	}
+	else {
+		/* Finish immediately. */
+		code.append( IN_PARSE_SAVE_STEPS );
+		code.append( IN_PARSE_LOAD_START );
+		code.append( IN_PARSE_FINISH_WC );
+		code.appendHalf( 0 /*stopId*/ );
+		code.append( IN_PCR_CALL );
+		code.append( IN_PARSE_FINISH_WC3 );
+	}
+
 	code.append( IN_POP );
 
 	return replUT;
