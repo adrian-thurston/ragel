@@ -462,8 +462,6 @@ Head *intToStr( struct ColmProgram *prg, Word i );
 
 Tree *constructString( struct ColmProgram *prg, Head *s );
 
-void initExecution( Execution *exec, Parser *parser, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, int frameId );
-
 void mainExecution( struct ColmProgram *prg, Execution *exec, Code *code );
 void reductionExecution( Execution *exec, Tree **sp );
 void generationExecution( Execution *exec, Tree **sp );

@@ -99,22 +99,13 @@ Tree *returnVal( struct ColmProgram *prg )
 	return prg->returnVal;
 }
 
-
 Program *colmNewProgram( RuntimeData *rtd )
 {
 	Program *prg = malloc(sizeof(Program));
 	memset( prg, 0, sizeof(Program) );
-	prg->argc = 0;
-	prg->argv = 0;
+
 	prg->rtd = rtd;
 	prg->ctxDepParsing = 1;
-	prg->global = 0;
-	prg->heap = 0;
-	prg->stdinVal = 0;
-	prg->stdoutVal = 0;
-	prg->stderrVal = 0;
-	prg->induceExit = 0;
-	prg->exitStatus = 0;
 
 	initPoolAlloc( &prg->kidPool, sizeof(Kid) );
 	initPoolAlloc( &prg->treePool, sizeof(Tree) );
@@ -137,10 +128,6 @@ Program *colmNewProgram( RuntimeData *rtd )
 	prg->trueVal = (Tree*)trueInt;
 	prg->falseVal = (Tree*)falseInt;
 
-	prg->allocRunBuf = 0;
-	prg->returnVal = 0;
-	prg->lastParseError = 0;
-
 	/* Allocate the global variable. */
 	allocGlobal( prg );
 
@@ -155,19 +142,19 @@ Program *colmNewProgram( RuntimeData *rtd )
 
 void colmRunProgram( Program *prg, int argc, const char **argv )
 {
+	Execution execution;
+
+	if ( prg->rtd->rootCodeLen == 0 )
+		return;
+
 	/* Make the arguments available to the program. */
 	prg->argc = argc;
 	prg->argv = argv;
 
-	/*
-	 * Execute
-	 */
-	if ( prg->rtd->rootCodeLen > 0 ) {
-		Execution execution;
+	memset( &execution, 0, sizeof(execution) );
+	execution.frameId = prg->rtd->rootFrameId;
 
-		initExecution( &execution, 0, 0, 0, 0, prg->rtd->rootFrameId );
-		mainExecution( prg, &execution, prg->rtd->rootCode );
-	}
+	mainExecution( prg, &execution, prg->rtd->rootCode );
 
 	/* Clear the arg and stack. */
 	prg->argc = 0;

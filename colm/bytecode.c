@@ -185,7 +185,6 @@ Word streamAppend( Program *prg, Tree **sp, Tree *input, InputStream *inputStrea
 	long length = 0;
 
 	if ( input->id == LEL_ID_STR ) {
-		//assert(false);
 		/* Collect the tree data. */
 		StrCollect collect;
 		initStrCollect( &collect );
@@ -261,7 +260,7 @@ case PcrReverse:
 		}
 	}
 
-	/* FIXME: need something here to check that we aren' stopped waiting for
+	/* FIXME: need something here to check that we are not stopped waiting for
 	 * more data when we are actually expected to finish. This check doesn't
 	 * work (at time of writing). */
 	//assert( (parser->pdaRun->stopTarget > 0 && parser->pdaRun->stopParsing) || parser->input->in->eofSent );
@@ -459,18 +458,6 @@ Tree *constructArgv( Program *prg, int argc, const char **argv )
 /*
  * Execution environment
  */
-
-void initExecution( Execution *exec, Parser *parser, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, int frameId )
-{
-	exec->parser = parser;
-	exec->pdaRun = pdaRun;
-	exec->fsmRun = fsmRun;
-	exec->inputStream = inputStream;
-	exec->framePtr = 0;
-	exec->iframePtr = 0;
-	exec->frameId = frameId;
-	exec->rcodeUnitLen = 0;
-}
 
 void rcodeDownrefAll( Program *prg, Tree **sp, RtCodeVect *rev )
 {
@@ -2179,7 +2166,13 @@ again:
 			Code *returnTo = instr - ( SIZEOF_CODE + SIZEOF_CODE + SIZEOF_HALF );
 			vm_push( (SW)returnTo );
 
-			initExecution( exec, parser, parser->pdaRun, parser->fsmRun, parser->input->in, parser->pdaRun->frameId );
+			memset( exec, 0, sizeof(Execution) );
+			exec->parser = parser;
+			exec->pdaRun = parser->pdaRun;
+			exec->fsmRun = parser->fsmRun;
+			exec->inputStream = parser->input->in;
+			exec->frameId = parser->pdaRun->frameId;
+
 			instr = parser->pdaRun->code;
 			break;
 		}
