@@ -1,7 +1,7 @@
 <t1>
 
   <t2>
-  <a href="foo">FOO</a>
+  <a href="foo">&FOO</a>
   <t3>
   </t3>
 
