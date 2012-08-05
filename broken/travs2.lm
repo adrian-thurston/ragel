@@ -64,7 +64,7 @@ def factor
 def alphabet_num 
 	[uint]
 
-start S = parse start(stdin)
+parse S: start(stdin)
 
 #
 # Fixed point iteration
@@ -73,12 +73,12 @@ start S = parse start(stdin)
 bool this_iter_modified()
 	{ return true }
 
-iter fixed_point( ref any T )
+iter fixed_point( T: ref any )
 {
-	bool modified = true
+	modified: bool = true
 	while modified {
 		modified = false
-		for S:any in T {
+		for S: any in T {
 			yield S
 
 			if this_iter_modified() {

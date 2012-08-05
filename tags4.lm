@@ -1,4 +1,12 @@
 #
+#
+# This is somewhat broken. missing_close_id is cuasing close ids to be parseed
+# when they shouldn't. Maybe remove it.
+#
+#
+
+
+#
 # Regular Definitions
 #
 rl def_name_char /[\-A-Za-z0-9._:?]/
@@ -321,7 +329,6 @@ bool should_flatten( TI: tag_id )
 
 HTML: start = parse start( stdin )
 print( HTML )
-
 
 #print_xml( HTML )
 #for C: close_tag in HTML 
