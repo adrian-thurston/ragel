@@ -1818,49 +1818,53 @@ code_factor:
 			pd->curLocalFrame->insertField( $2->objField->name, $2->objField );
 		}
 	};
+
+E1: ;
+E2: ;
+
 code_factor: 
-	KW_Parse opt_capture type_ref accumulate
+	E1 KW_Parse opt_capture type_ref opt_field_init accumulate
 	final {
 		Namespace *nspace = namespaceStack.top();
 		TokenRegion *region = regionStack.top();
 
 		ReplItemList *emptyReplItemList = new ReplItemList;
 
-		Replacement *replacement = Replacement::cons( $1->loc, nspace, region,
+		Replacement *replacement = Replacement::cons( $2->loc, nspace, region,
 				emptyReplItemList, pd->nextPatReplId++ );
 		pd->replList.append( replacement );
 		
 		LangVarRef *varRef = 0;
-		if ( $2->objField != 0 )
-			varRef = LangVarRef::cons( $2->objField->loc, $2->objField->name );
+		if ( $3->objField != 0 )
+			varRef = LangVarRef::cons( $3->objField->loc, $3->objField->name );
 
 		NamespaceQual *nspaceQual = new NamespaceQual( 
 				namespaceStack.top(), regionStack.top() );
 		TypeRef *parserTypeRef = TypeRef::cons( InputLoc(),
-				TypeRef::Parser, nspaceQual, $3->typeRef, 0 );
+				TypeRef::Parser, nspaceQual, $4->typeRef, 0 );
 
-		ParserText *parserText = ParserText::cons( $2->loc, nspace, region, replItemList );
+		ParserText *parserText = ParserText::cons( $3->loc, nspace, region, replItemList );
 		pd->parserTextList.append( parserText );
 
-		$$->expr = LangExpr::cons( LangTerm::cons( $1->loc, LangTerm::ParseType,
-			varRef, $2->objField, parserTypeRef, 0, replacement, parserText ) );
+		$$->expr = LangExpr::cons( LangTerm::cons( $2->loc, LangTerm::ParseType,
+			varRef, $3->objField, parserTypeRef, $5->fieldInitVect, replacement, parserText ) );
 
 		/* Check for redeclaration. */
-		if ( $2->objField != 0 ) {
-			if ( pd->curLocalFrame->checkRedecl( $2->objField->name ) != 0 ) {
-				error( $2->objField->loc ) << "variable " << $2->objField->name <<
+		if ( $3->objField != 0 ) {
+			if ( pd->curLocalFrame->checkRedecl( $3->objField->name ) != 0 ) {
+				error( $3->objField->loc ) << "variable " << $3->objField->name <<
 						" redeclared" << endp;
 			}
 
 			/* Insert it into the field map. */
-			$2->objField->typeRef = parserTypeRef;
-			pd->curLocalFrame->insertField( $2->objField->name, $2->objField );
+			$3->objField->typeRef = parserTypeRef;
+			pd->curLocalFrame->insertField( $3->objField->name, $3->objField );
 		}
 	};
 code_factor: 
-	KW_Parse opt_capture type_ref '(' opt_code_expr_list ')'
+	E2 KW_Parse opt_capture type_ref '(' opt_code_expr_list ')'
 	final {
-		String parserName = $3->typeRef->typeName + "_parser";
+		String parserName = $4->typeRef->typeName + "_parser";
 
 		/* Get the language element. */
 		Namespace *nspace = namespaceStack.top();
@@ -1868,30 +1872,30 @@ code_factor:
 		NamespaceQual *nspaceQual = new NamespaceQual( 
 				namespaceStack.top(), regionStack.top() );
 		TypeRef *parserTypeRef = TypeRef::cons( InputLoc(),
-				TypeRef::Parser, nspaceQual, $3->typeRef, 0 );
+				TypeRef::Parser, nspaceQual, $4->typeRef, 0 );
 
-		Replacement *replacement = Replacement::cons( $1->loc, nspace, pd->rootRegion,
+		Replacement *replacement = Replacement::cons( $2->loc, nspace, pd->rootRegion,
 				new ReplItemList, pd->nextPatReplId++ );
 		pd->replList.append( replacement );
 
 		LangVarRef *varRef = 0;
-		if ( $2->objField != 0 )
-			varRef = LangVarRef::cons( $2->objField->loc, $2->objField->name );
+		if ( $3->objField != 0 )
+			varRef = LangVarRef::cons( $3->objField->loc, $3->objField->name );
 
-		$$->expr = LangExpr::cons( LangTerm::cons( $1->loc, LangTerm::OrigParseType,
-				varRef, $2->objField, $3->typeRef, parserTypeRef, replacement ) );
-		$$->expr->term->args = $5->exprVect;
+		$$->expr = LangExpr::cons( LangTerm::cons( $2->loc, LangTerm::OrigParseType,
+				varRef, $3->objField, $4->typeRef, parserTypeRef, replacement ) );
+		$$->expr->term->args = $6->exprVect;
 
 		/* Check for redeclaration. */
-		if ( $2->objField != 0 ) {
-			if ( pd->curLocalFrame->checkRedecl( $2->objField->name ) != 0 ) {
-				error( $2->objField->loc ) << "variable " << $2->objField->name <<
+		if ( $3->objField != 0 ) {
+			if ( pd->curLocalFrame->checkRedecl( $3->objField->name ) != 0 ) {
+				error( $3->objField->loc ) << "variable " << $3->objField->name <<
 						" redeclared" << endp;
 			}
 
 			/* Insert it into the field map. */
-			$2->objField->typeRef = $3->typeRef;
-			pd->curLocalFrame->insertField( $2->objField->name, $2->objField );
+			$3->objField->typeRef = $4->typeRef;
+			pd->curLocalFrame->insertField( $3->objField->name, $3->objField );
 		}
 	};
 code_factor: 

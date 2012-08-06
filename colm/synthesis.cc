@@ -1288,14 +1288,15 @@ UniqueType *LangTerm::evaluateConstruct( Compiler *pd, CodeVect &code ) const
 	return replUT;
 }
 
-UniqueType *LangTerm::evaluateParse2( Compiler *pd, CodeVect &code ) const
+UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code ) const
 {
-	/* Evaluate the initialization expressions. */
-	if ( fieldInitArgs != 0 && fieldInitArgs->length() > 0 ) {
-		for ( FieldInitVect::Iter pi = *fieldInitArgs; pi.lte(); pi++ ) {
-			FieldInit *fieldInit = *pi;
-			fieldInit->exprUT = fieldInit->expr->evaluate( pd, code );
-		}
+	UniqueType *ut = typeRef->uniqueType->langEl->generic->utArg;
+
+	bool context = false;
+	if ( ut->langEl->contextIn != 0 ) {
+		if ( fieldInitArgs == 0 || fieldInitArgs->length() != 1 )
+			error(loc) << "parse command requires just input" << endp;
+		context = true;
 	}
 
 	/* Assign bind ids to the variables in the replacement. */
@@ -1324,6 +1325,21 @@ UniqueType *LangTerm::evaluateParse2( Compiler *pd, CodeVect &code ) const
 	/* Dup for the finish operation. */
 	code.append( IN_DUP_TOP );
 
+	/*
+	 * First load the context into the parser.
+	 */
+	if ( context ) {
+		UniqueType *argUT = fieldInitArgs->data[0]->expr->evaluate( pd, code );
+
+		if ( argUT != pd->uniqueTypeStream && argUT->typeId != TYPE_TREE )
+			error(loc) << "context argument must be a stream or a tree" << endp;
+
+		/* FIXME: need to select right one here. */
+		code.append( IN_DUP_TOP_OFF );
+		code.appendHalf( 1 );
+		code.append( IN_SET_PARSER_CTX_WC );
+	}
+
 	/* Lookup the type of the replacement and store it in the replacement
 	 * object so that replacement parsing has a target. */
 	UniqueType *replUT = typeRef->uniqueType;
@@ -1341,7 +1357,6 @@ UniqueType *LangTerm::evaluateParse2( Compiler *pd, CodeVect &code ) const
 	}
 	
 	replacement->langEl = replUT->langEl;
-	assignFieldArgs( pd, code, replUT );
 
 	/*
 	 * Capture to the local var.
@@ -1455,6 +1470,7 @@ UniqueType *LangTerm::evaluateParse2( Compiler *pd, CodeVect &code ) const
 	return replUT;
 }
 
+
 UniqueType *LangTerm::evaluateSend( Compiler *pd, CodeVect &code ) const
 {
 	UniqueType *varUt = varRef->evaluate( pd, code );
@@ -1530,7 +1546,7 @@ UniqueType *LangTerm::evaluateSend( Compiler *pd, CodeVect &code ) const
 }
 
 
-UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool stop ) const
+UniqueType *LangTerm::evaluateOrigParse( Compiler *pd, CodeVect &code, bool stop ) const
 {
 	UniqueType *ut = typeRef->uniqueType;
 	assert( ut != 0 );
@@ -1670,6 +1686,7 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool stop ) c
 	return ut;
 }
 
+
 UniqueType *LangTerm::evaluateEmbedString( Compiler *pd, CodeVect &code ) const
 {
 	/* Assign bind ids to the variables in the replacement. */
@@ -1758,13 +1775,13 @@ UniqueType *LangTerm::evaluate( Compiler *pd, CodeVect &code ) const
 		case MatchType:
 			return evaluateMatch( pd, code );
 		case OrigParseType:
-			return evaluateParse( pd, code, false );
+			return evaluateOrigParse( pd, code, false );
 		case OrigParseStopType:
-			return evaluateParse( pd, code, true );
+			return evaluateOrigParse( pd, code, true );
+		case ParseType:
+			return evaluateParse( pd, code );
 		case ConstructType:
 			return evaluateConstruct( pd, code );
-		case ParseType:
-			return evaluateParse2( pd, code );
 		case SendType:
 			return evaluateSend( pd, code );
 		case NewType:
