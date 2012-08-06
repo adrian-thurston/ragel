@@ -1400,7 +1400,6 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool stop, bo
 
 		if ( item->prev == 0 ) {
 			if ( argUt == pd->uniqueTypeInput ) {
-
 				code.append( IN_DUP_TOP_OFF );
 				code.appendHalf( 1 );
 				code.append( IN_SET_INPUT );
@@ -1573,7 +1572,7 @@ UniqueType *LangTerm::evaluateSend( Compiler *pd, CodeVect &code ) const
 	return varUt;
 }
 
-UniqueType *LangTerm::evaluateOrigParse2( Compiler *pd, CodeVect &code, bool stop ) const
+UniqueType *LangTerm::evaluateOrigParse( Compiler *pd, CodeVect &code, bool stop ) const
 {
 	evaluateParse( pd, code, stop, true );
 	UniqueType *ut = typeRef->uniqueType->langEl->generic->utArg;
@@ -1583,147 +1582,6 @@ UniqueType *LangTerm::evaluateOrigParse2( Compiler *pd, CodeVect &code, bool sto
 
 	return ut;
 }
-
-UniqueType *LangTerm::evaluateOrigParse( Compiler *pd, CodeVect &code, bool stop ) const
-{
-	UniqueType *ut = typeRef->uniqueType;
-	assert( ut != 0 );
-
-	if ( ut->typeId != TYPE_TREE )
-		error(loc) << "can only parse trees" << endl;
-	
-	/* Should be one arg, a stream. */
-	if ( args == 0 || ( args->length() != 1 && args->length() != 2 ) )
-		error(loc) << "expecting one or two args" << endp;
-	
-	int context, input;
-	if ( ut->langEl->contextIn == 0 ) {
-		if ( args->length() != 1 )
-			error(loc) << "parse command requires just input" << endp;
-		context = -1;
-		input = 0;
-	}
-	else {
-		if ( args->length() != 2 )
-			error(loc) << "parse command requires context and input" << endp;
-		context = 0;
-		input = 1;
-	}
-
-	/* 
-	 * Make the parser.
-	 */
-	code.append( IN_CONSTRUCT );
-	code.appendHalf( replacement->patRepId );
-
-	/* Dup once for the context load, again for the argument load, again for
-	 * the parse frag, leaving the original there for the finish. */
-	code.append( IN_DUP_TOP );
-//	code.append( IN_DUP_TOP );
-//	code.append( IN_DUP_TOP );
-
-	/* 
-	 * First load the context into the parser.
-	 */
-	if ( context < 0 ) {
-		code.append( IN_LOAD_NIL );
-	}
-	else {
-		UniqueType *argUT = args->data[context]->evaluate( pd, code );
-		if ( argUT != pd->uniqueTypeStream && argUT->typeId != TYPE_TREE )
-			error(loc) << "context argument must be a stream or a tree" << endp;
-	}
-
-	/* FIXME: need to select right one here. */
-	code.append( IN_DUP_TOP_OFF );
-	code.appendHalf( 1 );
-	code.append( IN_SET_PARSER_CTX_WC );
-
-	/*
-	 * Evaluate the parse arg.
-	 */
-
-	/* Evaluate the parse args. */
-	UniqueType *argUT = args->data[input]->evaluate( pd, code );
-	if ( argUT != pd->uniqueTypeStream && argUT->typeId != TYPE_TREE )
-		error(loc) << "input argument must be a stream or a tree" << endp;
-
-	/* Allocate a parser id. This will cause a parser to be built for
-	 * the type. */
-	if ( ut->langEl->parserId < 0 )
-		ut->langEl->parserId = pd->nextParserId++;
-
-	/* If this is a parse stop then we need to verify that the type is
-	 * compatible with parse stop. */
-	if ( stop )
-		ut->langEl->parseStop = true;
-
-	if ( argUT != pd->uniqueTypeInput ) {
-		code.append( IN_CONSTRUCT_INPUT );
-		if ( pd->revertOn )
-			code.append( IN_INPUT_APPEND_WV );
-		else
-			code.append( IN_INPUT_APPEND_WC );
-	}
-
-	code.append( IN_DUP_TOP_OFF );
-	code.appendHalf( 1 );
-	code.append( IN_SET_INPUT );
-
-	int stopId = stop ? ut->langEl->id : 0;
-
-	/* Parse instruction, dependent on whether or not we are producing revert
-	 * or commit code. */
-	if ( pd->revertOn ) {
-		code.append( IN_PARSE_SAVE_STEPS );
-		code.append( IN_PARSE_LOAD_START );
-		code.append( IN_PARSE_FRAG_WV );
-		code.appendHalf( stopId );
-		code.append( IN_PCR_CALL );
-		code.append( IN_PARSE_FRAG_WV3 );
-
-		/* Finish immediately. */
-		code.append( IN_PARSE_SAVE_STEPS );
-		code.append( IN_PARSE_LOAD_START );
-		code.append( IN_PARSE_FINISH_WV );
-		code.appendHalf( stopId );
-		code.append( IN_PCR_CALL );
-		code.append( IN_PARSE_FINISH_WV3 );
-	}
-	else {
-		code.append( IN_PARSE_SAVE_STEPS );
-		code.append( IN_PARSE_LOAD_START );
-		code.append( IN_PARSE_FRAG_WC );
-		code.appendHalf( stopId );
-		code.append( IN_PCR_CALL );
-		code.append( IN_PARSE_FRAG_WC3 );
-
-		/* Finish immediately. */
-		code.append( IN_PARSE_SAVE_STEPS );
-		code.append( IN_PARSE_LOAD_START );
-		code.append( IN_PARSE_FINISH_WC );
-		code.appendHalf( stopId );
-		code.append( IN_PCR_CALL );
-		code.append( IN_PARSE_FINISH_WC3 );
-	}
-
-	/* Lookup the type of the replacement and store it in the replacement
-	 * object so that replacement parsing has a target. */
-	replacement->langEl = generic->langEl;
-
-	if ( varRef != 0 ) {
-		code.append( IN_DUP_TOP );
-
-		/* Get the type of the variable being assigned to. */
-		VarRefLookup lookup = varRef->lookupField( pd );
-
-		varRef->loadObj( pd, code, lookup.lastPtrInQual, false );
-		varRef->setField( pd, code, lookup.inObject, ut, false );
-	}
-
-	return ut;
-}
-
 
 UniqueType *LangTerm::evaluateEmbedString( Compiler *pd, CodeVect &code ) const
 {
@@ -1813,11 +1671,13 @@ UniqueType *LangTerm::evaluate( Compiler *pd, CodeVect &code ) const
 		case MatchType:
 			return evaluateMatch( pd, code );
 		case OrigParseType:
-			return evaluateOrigParse2( pd, code, false );
+			return evaluateOrigParse( pd, code, false );
 		case OrigParseStopType:
-			return evaluateOrigParse2( pd, code, true );
+			return evaluateOrigParse( pd, code, true );
 		case ParseType:
 			return evaluateParse( pd, code, false, false );
+		case ParseStopType:
+			return evaluateParse( pd, code, true, false );
 		case ConstructType:
 			return evaluateConstruct( pd, code );
 		case SendType:

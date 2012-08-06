@@ -83,11 +83,6 @@ function runtests()
 		fi
 
 		echo -n "running test $TST ... "
-		if [ "$verbose" = true ]; then
-			echo
-			echo command here
-			echo -n ...
-		fi
 
 		# Check for expected output.
 		if [ '!' -f $EXP ]; then
@@ -95,6 +90,12 @@ function runtests()
 			errors=$(( errors + 1 ))
 			continue
 		
+		fi
+
+		if [ "$verbose" = true ]; then
+			echo
+			echo $COLM $TST
+			echo -n ...
 		fi
 
 		# Compilation.
@@ -105,6 +106,17 @@ function runtests()
 			continue
 		fi
 
+		if [ "$verbose" = true ]; then
+			echo
+
+			if [ -f $INP ]; then
+				echo "./$BIN $cmdargs < $INP > $OUT 2>> $LOG"
+			else
+				echo "./$BIN $cmdargs > $OUT"
+			fi
+			
+			echo -n ...
+		fi
 
 		# Execution
 		if [ -f $INP ]; then
