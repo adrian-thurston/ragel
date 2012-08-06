@@ -1821,6 +1821,7 @@ code_factor:
 
 E1: ;
 E2: ;
+E3: ;
 
 code_factor: 
 	E1 KW_Parse opt_capture type_ref opt_field_init accumulate
@@ -1861,6 +1862,7 @@ code_factor:
 			pd->curLocalFrame->insertField( $3->objField->name, $3->objField );
 		}
 	};
+
 code_factor: 
 	E2 KW_Parse opt_capture type_ref '(' opt_code_expr_list ')'
 	final {
@@ -1868,6 +1870,7 @@ code_factor:
 
 		/* Get the language element. */
 		Namespace *nspace = namespaceStack.top();
+		TokenRegion *region = regionStack.top();
 
 		NamespaceQual *nspaceQual = new NamespaceQual( 
 				namespaceStack.top(), regionStack.top() );
@@ -1878,13 +1881,29 @@ code_factor:
 				new ReplItemList, pd->nextPatReplId++ );
 		pd->replList.append( replacement );
 
+		ReplItemList *replItemList = new ReplItemList;
+		FieldInitVect *fieldInitVect = new FieldInitVect;
+		if ( $6->exprVect->length() == 1 ) {
+			ReplItem *replItem = ReplItem::cons( $2->loc, ReplItem::ExprType, $6->exprVect->data[0] );
+			replItemList->append( replItem );
+		}
+		else if ( $6->exprVect->length() == 2 ) {
+			FieldInit *fieldInit = new FieldInit( InputLoc(), "_name", $6->exprVect->data[0] );
+			fieldInitVect->append( fieldInit );
+
+			ReplItem *replItem = ReplItem::cons( $2->loc, ReplItem::ExprType, $6->exprVect->data[1] );
+			replItemList->append( replItem );
+		}
+
 		LangVarRef *varRef = 0;
 		if ( $3->objField != 0 )
 			varRef = LangVarRef::cons( $3->objField->loc, $3->objField->name );
 
+		ParserText *parserText = ParserText::cons( $3->loc, nspace, region, replItemList );
+		pd->parserTextList.append( parserText );
+
 		$$->expr = LangExpr::cons( LangTerm::cons( $2->loc, LangTerm::OrigParseType,
-				varRef, $3->objField, $4->typeRef, parserTypeRef, replacement ) );
-		$$->expr->term->args = $6->exprVect;
+				varRef, $3->objField, parserTypeRef, fieldInitVect, replacement, parserText ) );
 
 		/* Check for redeclaration. */
 		if ( $3->objField != 0 ) {
@@ -1899,41 +1918,58 @@ code_factor:
 		}
 	};
 code_factor: 
-	KW_ParseStop opt_capture type_ref '(' opt_code_expr_list ')'
+	E3 KW_ParseStop opt_capture type_ref '(' opt_code_expr_list ')'
 	final {
 		/* This is a silly clone. To be fixed later. */
-		String parserName = $3->typeRef->typeName + "_parser";
+		String parserName = $4->typeRef->typeName + "_parser";
 
 		/* Get the language element. */
 		Namespace *nspace = namespaceStack.top();
+		TokenRegion *region = regionStack.top();
 
 		NamespaceQual *nspaceQual = new NamespaceQual( 
 				namespaceStack.top(), regionStack.top() );
 		TypeRef *parserTypeRef = TypeRef::cons( InputLoc(),
-				TypeRef::Parser, nspaceQual, $3->typeRef, 0 );
+				TypeRef::Parser, nspaceQual, $4->typeRef, 0 );
 
-		Replacement *replacement = Replacement::cons( $1->loc, nspace, pd->rootRegion,
+		Replacement *replacement = Replacement::cons( $2->loc, nspace, pd->rootRegion,
 				new ReplItemList, pd->nextPatReplId++ );
 		pd->replList.append( replacement );
 
-		LangVarRef *varRef = 0;
-		if ( $2->objField != 0 )
-			varRef = LangVarRef::cons( $2->objField->loc, $2->objField->name );
+		ReplItemList *replItemList = new ReplItemList;
+		FieldInitVect *fieldInitVect = new FieldInitVect;
+		if ( $6->exprVect->length() == 1 ) {
+			ReplItem *replItem = ReplItem::cons( $2->loc, ReplItem::ExprType, $6->exprVect->data[0] );
+			replItemList->append( replItem );
+		}
+		else if ( $6->exprVect->length() == 2 ) {
+			FieldInit *fieldInit = new FieldInit( InputLoc(), "_name", $6->exprVect->data[0] );
+			fieldInitVect->append( fieldInit );
 
-		$$->expr = LangExpr::cons( LangTerm::cons( $1->loc, LangTerm::OrigParseStopType, 
-				varRef, $2->objField, $3->typeRef, parserTypeRef, replacement ) );
-		$$->expr->term->args = $5->exprVect;
+			ReplItem *replItem = ReplItem::cons( $2->loc, ReplItem::ExprType, $6->exprVect->data[1] );
+			replItemList->append( replItem );
+		}
+
+		LangVarRef *varRef = 0;
+		if ( $3->objField != 0 )
+			varRef = LangVarRef::cons( $3->objField->loc, $3->objField->name );
+
+		ParserText *parserText = ParserText::cons( $3->loc, nspace, region, replItemList );
+		pd->parserTextList.append( parserText );
+
+		$$->expr = LangExpr::cons( LangTerm::cons( $2->loc, LangTerm::OrigParseStopType,
+				varRef, $3->objField, parserTypeRef, fieldInitVect, replacement, parserText ) );
 
 		/* Check for redeclaration. */
-		if ( $2->objField != 0 ) {
-			if ( pd->curLocalFrame->checkRedecl( $2->objField->name ) != 0 ) {
-				error( $2->objField->loc ) << "variable " << $2->objField->name <<
+		if ( $3->objField != 0 ) {
+			if ( pd->curLocalFrame->checkRedecl( $3->objField->name ) != 0 ) {
+				error( $3->objField->loc ) << "variable " << $3->objField->name <<
 						" redeclared" << endp;
 			}
 
 			/* Insert it into the field map. */
-			$2->objField->typeRef = $3->typeRef;
-			pd->curLocalFrame->insertField( $2->objField->name, $2->objField );
+			$3->objField->typeRef = $4->typeRef;
+			pd->curLocalFrame->insertField( $3->objField->name, $3->objField );
 		}
 
 	};

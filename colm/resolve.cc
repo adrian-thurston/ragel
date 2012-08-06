@@ -366,8 +366,13 @@ void LangTerm::resolve( Compiler *pd )
 		case OrigParseType:
 		case OrigParseStopType:
 			typeRef->lookupType( pd );
-			parserTypeRef->lookupType( pd );
-			generic = parserTypeRef->generic;
+//			parserTypeRef->lookupType( pd );
+//			generic = typeRef->generic;
+			/* Evaluate the initialization expressions. */
+			if ( fieldInitArgs != 0 ) {
+				for ( FieldInitVect::Iter pi = *fieldInitArgs; pi.lte(); pi++ )
+					(*pi)->expr->resolve( pd );
+			}
 			break;
 
 		case ParseType:

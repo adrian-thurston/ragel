@@ -1288,9 +1288,15 @@ UniqueType *LangTerm::evaluateConstruct( Compiler *pd, CodeVect &code ) const
 	return replUT;
 }
 
-UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code ) const
+UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool stop, bool orig ) const
 {
 	UniqueType *ut = typeRef->uniqueType->langEl->generic->utArg;
+
+	/* If this is a parse stop then we need to verify that the type is
+	 * compatible with parse stop. */
+	if ( stop )
+		ut->langEl->parseStop = true;
+	int stopId = stop ? ut->langEl->id : 0;
 
 	bool context = false;
 	if ( ut->langEl->contextIn != 0 ) {
@@ -1316,6 +1322,7 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code ) const
 			item->langEl = ut->langEl;
 		}
 	}
+
 
 	/* Construct the tree using the tree information stored in the compiled
 	 * code. */
@@ -1350,31 +1357,15 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code ) const
 	 * Construct and set the input stream.
 	 */
 	if ( replUT->langEl->generic != 0 && replUT->langEl->generic->typeId == GEN_PARSER ) {
-		code.append( IN_CONSTRUCT_INPUT );
-		code.append( IN_DUP_TOP_OFF );
-		code.appendHalf( 1 );
-		code.append( IN_SET_INPUT );
 	}
 	
 	replacement->langEl = replUT->langEl;
-
-	/*
-	 * Capture to the local var.
-	 */
-	if ( varRef != 0 ) {
-		code.append( IN_DUP_TOP );
-
-		/* Get the type of the variable being assigned to. */
-		VarRefLookup lookup = varRef->lookupField( pd );
-
-		varRef->loadObj( pd, code, lookup.lastPtrInQual, false );
-		varRef->setField( pd, code, lookup.inObject, replUT, false );
-	}
 
 	/*****************************/
 
 	/* Assign bind ids to the variables in the replacement. */
 	for ( ReplItemList::Iter item = *parserText->list; item.lte(); item++ ) {
+		UniqueType *argUt = 0;
 		switch ( item->type ) {
 		case ReplItem::FactorType: {
 			String result;
@@ -1403,8 +1394,25 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code ) const
 			break;
 		}
 		case ReplItem::ExprType:
-			item->expr->evaluate( pd, code );
+			argUt = item->expr->evaluate( pd, code );
 			break;
+		}
+
+		if ( item->prev == 0 ) {
+			if ( argUt == pd->uniqueTypeInput ) {
+
+				code.append( IN_DUP_TOP_OFF );
+				code.appendHalf( 1 );
+				code.append( IN_SET_INPUT );
+				goto go;
+			}
+			else {
+				code.append( IN_CONSTRUCT_INPUT );
+
+				code.append( IN_DUP_TOP_OFF );
+				code.appendHalf( 2 );
+				code.append( IN_SET_INPUT );
+			}
 		}
 
 		code.append( IN_DUP_TOP_OFF );
@@ -1418,6 +1426,7 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code ) const
 			code.append( IN_INPUT_APPEND_WC );
 		code.append( IN_POP );
 
+go:
 		code.append( IN_DUP_TOP );
 
 		/* Parse instruction, dependent on whether or not we are producing
@@ -1426,7 +1435,7 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code ) const
 			code.append( IN_PARSE_SAVE_STEPS );
 			code.append( IN_PARSE_LOAD_START );
 			code.append( IN_PARSE_FRAG_WV );
-			code.appendHalf( 0 );
+			code.appendHalf( stopId );
 			code.append( IN_PCR_CALL );
 			code.append( IN_PARSE_FRAG_WV3 );
 		}
@@ -1434,7 +1443,7 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code ) const
 			code.append( IN_PARSE_SAVE_STEPS );
 			code.append( IN_PARSE_LOAD_START );
 			code.append( IN_PARSE_FRAG_WC );
-			code.appendHalf( 0 );
+			code.appendHalf( stopId );
 			code.append( IN_PCR_CALL );
 			code.append( IN_PARSE_FRAG_WC3 );
 		}
@@ -1451,7 +1460,7 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code ) const
 		code.append( IN_PARSE_SAVE_STEPS );
 		code.append( IN_PARSE_LOAD_START );
 		code.append( IN_PARSE_FINISH_WV );
-		code.appendHalf( 0 /*stopId*/ );
+		code.appendHalf( stopId );
 		code.append( IN_PCR_CALL );
 		code.append( IN_PARSE_FINISH_WV3 );
 	}
@@ -1460,12 +1469,31 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code ) const
 		code.append( IN_PARSE_SAVE_STEPS );
 		code.append( IN_PARSE_LOAD_START );
 		code.append( IN_PARSE_FINISH_WC );
-		code.appendHalf( 0 /*stopId*/ );
+		code.appendHalf( stopId );
 		code.append( IN_PCR_CALL );
 		code.append( IN_PARSE_FINISH_WC3 );
 	}
 
 	code.append( IN_POP );
+
+	/*
+	 * Capture to the local var.
+	 */
+	if ( varRef != 0 ) {
+		code.append( IN_DUP_TOP );
+
+		if ( orig ) {
+			code.append( IN_GET_PARSER_MEM_R );
+			code.appendHalf( 0 );
+		}
+
+		/* Get the type of the variable being assigned to. */
+		VarRefLookup lookup = varRef->lookupField( pd );
+
+		varRef->loadObj( pd, code, lookup.lastPtrInQual, false );
+		varRef->setField( pd, code, lookup.inObject, replUT, false );
+	}
+
 
 	return replUT;
 }
@@ -1545,6 +1573,16 @@ UniqueType *LangTerm::evaluateSend( Compiler *pd, CodeVect &code ) const
 	return varUt;
 }
 
+UniqueType *LangTerm::evaluateOrigParse2( Compiler *pd, CodeVect &code, bool stop ) const
+{
+	evaluateParse( pd, code, stop, true );
+	UniqueType *ut = typeRef->uniqueType->langEl->generic->utArg;
+
+	code.append( IN_GET_PARSER_MEM_R );
+	code.appendHalf( 0 );
+
+	return ut;
+}
 
 UniqueType *LangTerm::evaluateOrigParse( Compiler *pd, CodeVect &code, bool stop ) const
 {
@@ -1775,11 +1813,11 @@ UniqueType *LangTerm::evaluate( Compiler *pd, CodeVect &code ) const
 		case MatchType:
 			return evaluateMatch( pd, code );
 		case OrigParseType:
-			return evaluateOrigParse( pd, code, false );
+			return evaluateOrigParse2( pd, code, false );
 		case OrigParseStopType:
-			return evaluateOrigParse( pd, code, true );
+			return evaluateOrigParse2( pd, code, true );
 		case ParseType:
-			return evaluateParse( pd, code );
+			return evaluateParse( pd, code, false, false );
 		case ConstructType:
 			return evaluateConstruct( pd, code );
 		case SendType:

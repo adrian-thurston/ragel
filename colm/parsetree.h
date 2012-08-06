@@ -2567,9 +2567,10 @@ struct LangTerm
 	void resolve( Compiler *pd );
 
 	UniqueType *evaluateOrigParse( Compiler *pd, CodeVect &code, bool stop ) const;
+	UniqueType *evaluateOrigParse2( Compiler *pd, CodeVect &code, bool stop ) const;
 	UniqueType *evaluateNew( Compiler *pd, CodeVect &code ) const;
 	UniqueType *evaluateConstruct( Compiler *pd, CodeVect &code ) const;
-	UniqueType *evaluateParse( Compiler *pd, CodeVect &code ) const;
+	UniqueType *evaluateParse( Compiler *pd, CodeVect &code, bool stop, bool orig ) const;
 	UniqueType *evaluateSend( Compiler *pd, CodeVect &code ) const;
 	UniqueType *evaluateMatch( Compiler *pd, CodeVect &code ) const;
 	UniqueType *evaluate( Compiler *pd, CodeVect &code ) const;

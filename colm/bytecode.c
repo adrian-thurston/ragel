@@ -3071,13 +3071,15 @@ again:
 			short field;
 			read_half( field );
 
-			debug( REALM_BYTECODE, "IN_GET_PARSER_MEM_R\n" );
+			debug( REALM_BYTECODE, "IN_GET_PARSER_MEM_R %hd\n", field );
 
 			Tree *obj = vm_pop();
-			treeDownref( prg, sp, obj );
-
 			Tree *val = getParserMem( (Parser*)obj, field );
 			treeUpref( val );
+
+			/* In at least one case we extract the result on a parser with ref
+			 * one. Do it after. */
+			treeDownref( prg, sp, obj );
 			vm_push( val );
 			break;
 		}
