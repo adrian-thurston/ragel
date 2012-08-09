@@ -1869,7 +1869,7 @@ code_factor:
 		pd->parserTextList.append( parserText );
 
 		$$->expr = LangExpr::cons( LangTerm::cons( $2->loc, 
-				$2->stop ? LangTerm::ParseType : LangTerm::ParseStopType,
+				$2->stop ? LangTerm::ParseStopType : LangTerm::ParseType,
 				varRef, $3->objField, parserTypeRef, $5->fieldInitVect, replacement, parserText ) );
 
 		/* Check for redeclaration. */

@@ -825,10 +825,10 @@ again:
 			break;
 		}
 		case IN_LOAD_TREE: {
-			debug( REALM_BYTECODE, "IN_LOAD_TREE\n" );
 			Tree *tree;
 			read_tree( tree );
 			vm_push( tree );
+			debug( REALM_BYTECODE, "IN_LOAD_TREE %p id: %d refs: %d\n", tree, tree->id, tree->refs );
 			break;
 		}
 		case IN_LOAD_WORD: {
@@ -2208,10 +2208,10 @@ again:
 		}
 
 		case IN_PARSE_FRAG_WC: {
-			debug( REALM_BYTECODE, "IN_PARSE_FRAG_WC\n" );
-
 			Half stopId;
 			read_half( stopId );
+
+			debug( REALM_BYTECODE, "IN_PARSE_FRAG_WC %hd\n", stopId );
 
 			long pcr = (long)vm_pop();
 			Parser *parser = (Parser*)vm_pop();
@@ -2249,7 +2249,7 @@ again:
 			Half stopId;
 			read_half( stopId );
 
-			debug( REALM_BYTECODE, "IN_PARSE_FRAG_WV\n" );
+			debug( REALM_BYTECODE, "IN_PARSE_FRAG_WV %hd\n", stopId );
 
 			long pcr = (long)vm_pop();
 			Parser *parser = (Parser*)vm_pop();
@@ -2295,7 +2295,7 @@ again:
 			Half stopId;
 			read_half( stopId );
 
-			debug( REALM_BYTECODE, "IN_PARSE_FRAG_BKT\n" );
+			debug( REALM_BYTECODE, "IN_PARSE_FRAG_BKT %hd\n", stopId );
 
 			long pcr = (long)vm_pop();
 			Parser *parser = (Parser*)vm_pop();
@@ -2327,7 +2327,7 @@ again:
 			Half stopId;
 			read_half( stopId );
 
-			debug( REALM_BYTECODE, "IN_PARSE_FINISH_WC\n" );
+			debug( REALM_BYTECODE, "IN_PARSE_FINISH_WC %hd\n", stopId );
 
 			long pcr = (long)vm_pop();
 			Parser *parser = (Parser*)vm_pop();
@@ -2367,7 +2367,7 @@ again:
 			Half stopId;
 			read_half( stopId );
 
-			debug( REALM_BYTECODE, "IN_PARSE_FINISH_WV\n" );
+			debug( REALM_BYTECODE, "IN_PARSE_FINISH_WV %hd\n", stopId );
 
 			long pcr = (long)vm_pop();
 			Parser *parser = (Parser*)vm_pop();
@@ -2415,7 +2415,7 @@ again:
 			Half stopId;
 			read_half( stopId );
 
-			debug( REALM_BYTECODE, "IN_PARSE_FINISH_BKT\n" );
+			debug( REALM_BYTECODE, "IN_PARSE_FINISH_BKT %hd\n", stopId );
 
 			long pcr = (long)vm_pop();
 			Parser *parser = (Parser*)vm_pop();

@@ -497,7 +497,7 @@ void processArgs( int argc, const char **argv )
 				else
 					fatal( "unknown argument to -D %s\n", pc.parameterArg );
 #else
-				fatal("-D option specified but debugging messsages not compiled in");
+				fatal( "-D option specified but debugging messsages not compiled in\n" );
 #endif
 				
 			}

@@ -1323,7 +1323,6 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool stop, bo
 		}
 	}
 
-
 	/* Construct the tree using the tree information stored in the compiled
 	 * code. */
 	code.append( IN_CONSTRUCT );
