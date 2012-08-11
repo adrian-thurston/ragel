@@ -2429,17 +2429,6 @@ struct LangTerm
 		return t;
 	}
 
-	static LangTerm *cons( const InputLoc &loc, Type type, NamespaceQual *nspaceQual, const String &data )
-	{
-		LangTerm *t = new LangTerm;
-		t->loc = loc;
-		t->type = type;
-		t->varRef = 0;
-		t->nspaceQual = nspaceQual;
-		t->data = data;
-		return t;
-	}
-
 	static LangTerm *cons( const InputLoc &loc, Type type )
 	{
 		LangTerm *t = new LangTerm;
@@ -2477,18 +2466,6 @@ struct LangTerm
 		t->type = type;
 		t->varRef = varRef;
 		t->typeRef = typeRef;
-		return t;
-	}
-
-	static LangTerm *cons( const InputLoc &loc, Type type, TypeRef *typeRef, FieldInitVect *fieldInitArgs, 
-			Constructor *constructor )
-	{
-		LangTerm *t = new LangTerm;
-		t->loc = loc;
-		t->type = type;
-		t->typeRef = typeRef;
-		t->fieldInitArgs = fieldInitArgs;
-		t->constructor = constructor;
 		return t;
 	}
 
@@ -2537,21 +2514,6 @@ struct LangTerm
 		t->loc = loc;
 		t->type = EmbedStringType;
 		t->replItemList = replItemList;
-		return t;
-	}
-
-	static LangTerm *cons( const InputLoc &loc, Type type, LangVarRef *varRef,
-			ObjField *objField, TypeRef *typeRef, TypeRef *parserTypeRef,
-			Constructor *constructor )
-	{
-		LangTerm *t = new LangTerm;
-		t->loc = loc;
-		t->type = type;
-		t->varRef = varRef;
-		t->objField = objField;
-		t->typeRef = typeRef;
-		t->parserTypeRef = parserTypeRef;
-		t->constructor = constructor;
 		return t;
 	}
 
