@@ -201,16 +201,16 @@ extern "C" void initPatternFuncs()
 
 
 /*
- * Replacement
+ * Constructor
  */
 
-SourceStream *newSourceStreamRepl( Replacement *replacement )
+SourceStream *newSourceStreamRepl( Constructor *constructor )
 {
 	SourceStream *is = (SourceStream*)malloc(sizeof(SourceStream));
 	memset( is, 0, sizeof(SourceStream) );
 	is->handlesLine = true;
-	is->replacement = replacement;
-	is->replItem = replacement->list->head;
+	is->constructor = constructor;
+	is->replItem = constructor->list->head;
 	is->funcs = &replFuncs;
 	return is;
 }
@@ -295,7 +295,7 @@ int inputStreamReplGetData( SourceStream *is, int skip, char *dest, int length, 
 void inputStreamReplBackup( SourceStream *is )
 {
 	if ( is->replItem == 0 )
-		is->replItem = is->replacement->list->tail;
+		is->replItem = is->constructor->list->tail;
 	else
 		is->replItem = is->replItem->prev;
 }

@@ -59,7 +59,7 @@ extern "C" {
 struct LangEl;
 struct Pattern;
 struct PatternItem;
-struct Replacement;
+struct Constructor;
 struct ReplItem;
 struct _FsmRun;
 struct ColmTree;
@@ -129,14 +129,14 @@ struct _SourceStream
 
 	struct Pattern *pattern;
 	struct PatternItem *patItem;
-	struct Replacement *replacement;
+	struct Constructor *constructor;
 	struct ReplItem *replItem;
 
 	struct _FsmRun *attached;
 };
 
 SourceStream *newSourceStreamPattern( struct Pattern *pattern );
-SourceStream *newSourceStreamRepl( struct Replacement *replacement );
+SourceStream *newSourceStreamRepl( struct Constructor *replacement );
 SourceStream *newSourceStreamFile( FILE *file );
 SourceStream *newSourceStreamFd( long fd );
 
@@ -171,7 +171,7 @@ struct _InputStream
 
 	struct Pattern *pattern;
 	struct PatternItem *patItem;
-	struct Replacement *replacement;
+	struct Constructor *replacement;
 	struct ReplItem *replItem;
 
 	struct _FsmRun *attached;

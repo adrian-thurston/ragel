@@ -1237,13 +1237,13 @@ UniqueType *LangTerm::evaluateConstruct( Compiler *pd, CodeVect &code ) const
 	}
 
 	/* Assign bind ids to the variables in the replacement. */
-	for ( ReplItemList::Iter item = *replacement->list; item.lte(); item++ ) {
+	for ( ReplItemList::Iter item = *constructor->list; item.lte(); item++ ) {
 		if ( item->expr != 0 )
-			item->bindId = replacement->nextBindId++;
+			item->bindId = constructor->nextBindId++;
 	}
 
 	/* Evaluate variable references. */
-	for ( ReplItemList::Iter item = replacement->list->last(); item.gtb(); item-- ) {
+	for ( ReplItemList::Iter item = constructor->list->last(); item.gtb(); item-- ) {
 		if ( item->type == ReplItem::ExprType ) {
 			UniqueType *ut = item->expr->evaluate( pd, code );
 		
@@ -1257,7 +1257,7 @@ UniqueType *LangTerm::evaluateConstruct( Compiler *pd, CodeVect &code ) const
 	/* Construct the tree using the tree information stored in the compiled
 	 * code. */
 	code.append( IN_CONSTRUCT );
-	code.appendHalf( replacement->patRepId );
+	code.appendHalf( constructor->patRepId );
 
 	/* Lookup the type of the replacement and store it in the replacement
 	 * object so that replacement parsing has a target. */
@@ -1272,7 +1272,7 @@ UniqueType *LangTerm::evaluateConstruct( Compiler *pd, CodeVect &code ) const
 		code.append( IN_SET_INPUT );
 	}
 	
-	replacement->langEl = replUT->langEl;
+	constructor->langEl = replUT->langEl;
 	assignFieldArgs( pd, code, replUT );
 
 	if ( varRef != 0 ) {
@@ -1306,13 +1306,13 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool stop, bo
 	}
 
 	/* Assign bind ids to the variables in the replacement. */
-	for ( ReplItemList::Iter item = *replacement->list; item.lte(); item++ ) {
+	for ( ReplItemList::Iter item = *constructor->list; item.lte(); item++ ) {
 		if ( item->expr != 0 )
-			item->bindId = replacement->nextBindId++;
+			item->bindId = constructor->nextBindId++;
 	}
 
 	/* Evaluate variable references. */
-	for ( ReplItemList::Iter item = replacement->list->last(); item.gtb(); item-- ) {
+	for ( ReplItemList::Iter item = constructor->list->last(); item.gtb(); item-- ) {
 		if ( item->type == ReplItem::ExprType ) {
 			UniqueType *ut = item->expr->evaluate( pd, code );
 		
@@ -1326,7 +1326,7 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool stop, bo
 	/* Construct the tree using the tree information stored in the compiled
 	 * code. */
 	code.append( IN_CONSTRUCT );
-	code.appendHalf( replacement->patRepId );
+	code.appendHalf( constructor->patRepId );
 
 	/* Dup for the finish operation. */
 	code.append( IN_DUP_TOP );
@@ -1358,7 +1358,7 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool stop, bo
 	if ( replUT->langEl->generic != 0 && replUT->langEl->generic->typeId == GEN_PARSER ) {
 	}
 	
-	replacement->langEl = replUT->langEl;
+	constructor->langEl = replUT->langEl;
 
 	/*****************************/
 
@@ -3317,7 +3317,7 @@ void Compiler::initGlobalFunctions()
 void Compiler::removeNonUnparsableRepls()
 {
 	for ( ReplList::Iter repl = replList; repl.lte(); ) {
-		Replacement *maybeDel = repl++;
+		Constructor *maybeDel = repl++;
 		if ( !maybeDel->parse )
 			replList.detach( maybeDel );
 	}

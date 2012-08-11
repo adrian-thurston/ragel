@@ -1583,12 +1583,12 @@ struct Pattern
 
 typedef DList<Pattern> PatternList;
 
-struct Replacement
+struct Constructor
 {
-	static Replacement *cons( const InputLoc &loc, Namespace *nspace, 
+	static Constructor *cons( const InputLoc &loc, Namespace *nspace, 
 			TokenRegion *region, ReplItemList *list, int patRepId )
 	{
-		Replacement *r = new Replacement;
+		Constructor *r = new Constructor;
 		r->loc = (loc);
 		r->nspace = (nspace);
 		r->region = (region);
@@ -1611,10 +1611,10 @@ struct Replacement
 	long nextBindId;
 	bool parse;
 
-	Replacement *prev, *next;
+	Constructor *prev, *next;
 };
 
-typedef DList<Replacement> ReplList;
+typedef DList<Constructor> ReplList;
 
 struct ParserText
 {
@@ -2481,19 +2481,19 @@ struct LangTerm
 	}
 
 	static LangTerm *cons( const InputLoc &loc, Type type, TypeRef *typeRef, FieldInitVect *fieldInitArgs, 
-			Replacement *replacement )
+			Constructor *constructor )
 	{
 		LangTerm *t = new LangTerm;
 		t->loc = loc;
 		t->type = type;
 		t->typeRef = typeRef;
 		t->fieldInitArgs = fieldInitArgs;
-		t->replacement = replacement;
+		t->constructor = constructor;
 		return t;
 	}
 
 	static LangTerm *cons( const InputLoc &loc, Type type, LangVarRef *varRef, ObjField *objField,
-			TypeRef *typeRef, FieldInitVect *fieldInitArgs, Replacement *replacement )
+			TypeRef *typeRef, FieldInitVect *fieldInitArgs, Constructor *constructor )
 	{
 		LangTerm *t = new LangTerm;
 		t->loc = loc;
@@ -2502,12 +2502,12 @@ struct LangTerm
 		t->objField = objField;
 		t->typeRef = typeRef;
 		t->fieldInitArgs = fieldInitArgs;
-		t->replacement = replacement;
+		t->constructor = constructor;
 		return t;
 	}
 
 	static LangTerm *cons( const InputLoc &loc, Type type, LangVarRef *varRef, ObjField *objField,
-			TypeRef *typeRef, FieldInitVect *fieldInitArgs, Replacement *replacement, 
+			TypeRef *typeRef, FieldInitVect *fieldInitArgs, Constructor *constructor, 
 			ParserText *parserText )
 	{
 		LangTerm *t = new LangTerm;
@@ -2517,7 +2517,7 @@ struct LangTerm
 		t->objField = objField;
 		t->typeRef = typeRef;
 		t->fieldInitArgs = fieldInitArgs;
-		t->replacement = replacement;
+		t->constructor = constructor;
 		t->parserText = parserText;
 		return t;
 	}
@@ -2542,7 +2542,7 @@ struct LangTerm
 
 	static LangTerm *cons( const InputLoc &loc, Type type, LangVarRef *varRef,
 			ObjField *objField, TypeRef *typeRef, TypeRef *parserTypeRef,
-			Replacement *replacement )
+			Constructor *constructor )
 	{
 		LangTerm *t = new LangTerm;
 		t->loc = loc;
@@ -2551,7 +2551,7 @@ struct LangTerm
 		t->objField = objField;
 		t->typeRef = typeRef;
 		t->parserTypeRef = parserTypeRef;
-		t->replacement = replacement;
+		t->constructor = constructor;
 		return t;
 	}
 
@@ -2591,7 +2591,7 @@ struct LangTerm
 	FieldInitVect *fieldInitArgs;
 	GenericType *generic;
 	TypeRef *parserTypeRef;
-	Replacement *replacement;
+	Constructor *constructor;
 	ParserText *parserText;
 	LangExpr *expr;
 	ReplItemList *replItemList;
@@ -2677,7 +2677,7 @@ struct LangStmt
 		objField(0),
 		typeRef(0),
 		expr(0),
-		replacement(0),
+		constructor(0),
 		parserText(0),
 		exprPtrVect(0),
 		fieldInitVect(0),
@@ -2780,12 +2780,12 @@ struct LangStmt
 		return s;
 	}
 
-	static LangStmt *cons( Type type, LangVarRef *varRef, Replacement *replacement )
+	static LangStmt *cons( Type type, LangVarRef *varRef, Constructor *constructor )
 	{
 		LangStmt *s = new LangStmt;
 		s->type = (type);
 		s->varRef = (varRef);
-		s->replacement = (replacement);
+		s->constructor = (constructor);
 		return s;
 	}
 
@@ -2825,7 +2825,7 @@ struct LangStmt
 	ObjField *objField;
 	TypeRef *typeRef;
 	LangExpr *expr;
-	Replacement *replacement;
+	Constructor *constructor;
 	ParserText *parserText;
 	ExprVect *exprPtrVect;
 	FieldInitVect *fieldInitVect;

@@ -677,7 +677,7 @@ opt_label:
 	};
 
 #
-# Replacement List (constructor)
+# Constructor List (constructor)
 #
 
 replacement: init_repl_list repl_list;
@@ -1819,7 +1819,7 @@ code_factor:
 	final {
 		Namespace *nspace = namespaceStack.top();
 		TokenRegion *region = regionStack.top();
-		Replacement *replacement = Replacement::cons( $1->loc, nspace, region,
+		Constructor *replacement = Constructor::cons( $1->loc, nspace, region,
 				replItemList, pd->nextPatReplId++ );
 		pd->replList.append( replacement );
 		
@@ -1852,7 +1852,7 @@ code_factor:
 
 		ReplItemList *emptyReplItemList = new ReplItemList;
 
-		Replacement *replacement = Replacement::cons( $2->loc, nspace, region,
+		Constructor *replacement = Constructor::cons( $2->loc, nspace, region,
 				emptyReplItemList, pd->nextPatReplId++ );
 		pd->replList.append( replacement );
 		
@@ -1899,7 +1899,7 @@ code_factor:
 		TypeRef *parserTypeRef = TypeRef::cons( InputLoc(),
 				TypeRef::Parser, nspaceQual, $4->typeRef, 0 );
 
-		Replacement *replacement = Replacement::cons( $2->loc, nspace, pd->rootRegion,
+		Constructor *replacement = Constructor::cons( $2->loc, nspace, pd->rootRegion,
 				new ReplItemList, pd->nextPatReplId++ );
 		pd->replList.append( replacement );
 
