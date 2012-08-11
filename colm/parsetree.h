@@ -982,12 +982,12 @@ struct FactorWithRep
 			int lowerRep, int upperRep, Type type )
 	{
 		FactorWithRep *f = new FactorWithRep;
-		f->type = (type);
-		f->loc = (loc);
-		f->factorWithRep = (factorWithRep);
-		f->factorWithNeg = (0);
-		f->lowerRep = (lowerRep);
-		f->upperRep = (upperRep);
+		f->type = type;
+		f->loc = loc;
+		f->factorWithRep = factorWithRep;
+		f->factorWithNeg = 0;
+		f->lowerRep = lowerRep;
+		f->upperRep = upperRep;
 		return f;
 	}
 	
@@ -1035,20 +1035,20 @@ struct FactorWithNeg
 	static FactorWithNeg *cons( const InputLoc &loc, FactorWithNeg *factorWithNeg, Type type )
 	{
 		FactorWithNeg *f = new FactorWithNeg;
-		f->type = (type);
-		f->loc = (loc);
-		f->factorWithNeg = (factorWithNeg);
-		f->factor = (0);
+		f->type = type;
+		f->loc = loc;
+		f->factorWithNeg = factorWithNeg;
+		f->factor = 0;
 		return f;
 	}
 
 	static FactorWithNeg *cons( const InputLoc &loc, Factor *factor )
 	{
 		FactorWithNeg *f = new FactorWithNeg;
-		f->type = (FactorType);
-		f->loc = (loc);
-		f->factorWithNeg = (0);
-		f->factor = (factor);
+		f->type = FactorType;
+		f->loc = loc;
+		f->factorWithNeg = 0;
+		f->factor = factor;
 		return f;
 	}
 
@@ -1171,8 +1171,8 @@ struct Range
 	static Range *cons( Literal *lowerLit, Literal *upperLit ) 
 	{
 		Range *r = new Range;
-		r->lowerLit = (lowerLit);
-		r->upperLit = (upperLit);
+		r->lowerLit = lowerLit;
+		r->upperLit = upperLit;
 		return r;
 	}
 
@@ -1192,9 +1192,9 @@ struct Literal
 	static Literal *cons( const InputLoc &loc, const String &literal, LiteralType type )
 	{
 		Literal *l = new Literal;
-		l->loc = (loc);
-		l->literal = (literal);
-		l->type = (type);
+		l->loc = loc;
+		l->literal = literal;
+		l->type = type;
 		return l;
 	}
 
@@ -1214,18 +1214,18 @@ struct RegExpr
 	static RegExpr *cons() 
 	{
 		RegExpr *r = new RegExpr;
-		r->type = (Empty);
-		r->caseInsensitive = (false);
+		r->type = Empty;
+		r->caseInsensitive = false;
 		return r;
 	}
 
 	static RegExpr *cons( RegExpr *regExp, ReItem *item )
 	{
 		RegExpr *r = new RegExpr;
-		r->regExp = (regExp);
-		r->item = (item);
-		r->type = (RecurseItem);
-		r->caseInsensitive = (false);
+		r->regExp = regExp;
+		r->item = item;
+		r->type = RecurseItem;
+		r->caseInsensitive = false;
 		return r;
 	}
 
@@ -1246,29 +1246,29 @@ struct ReItem
 	static ReItem *cons( const InputLoc &loc, const String &data ) 
 	{
 		ReItem *r = new ReItem;
-		r->loc = (loc);
-		r->data = (data);
-		r->star = (false);
-		r->type = (Data);
+		r->loc = loc;
+		r->data = data;
+		r->star = false;
+		r->type = Data;
 		return r;
 	}
 
 	static ReItem *cons( const InputLoc &loc, ReItemType type )
 	{
 		ReItem *r = new ReItem;
-		r->loc = (loc);
-		r->star = (false);
-		r->type = (type);
+		r->loc = loc;
+		r->star = false;
+		r->type = type;
 		return r;
 	}
 
 	static ReItem *cons( const InputLoc &loc, ReOrBlock *orBlock, ReItemType type )
 	{
 		ReItem *r = new ReItem;
-		r->loc = (loc);
-		r->orBlock = (orBlock);
-		r->star = (false);
-		r->type = (type);
+		r->loc = loc;
+		r->orBlock = orBlock;
+		r->star = false;
+		r->type = type;
 		return r;
 	}
 
@@ -1291,16 +1291,16 @@ struct ReOrBlock
 	static ReOrBlock *cons()
 	{
 		ReOrBlock *r = new ReOrBlock;
-		r->type = (Empty);
+		r->type = Empty;
 		return r;
 	}
 
 	static ReOrBlock *cons( ReOrBlock *orBlock, ReOrItem *item )
 	{
 		ReOrBlock *r = new ReOrBlock;
-		r->orBlock = (orBlock);
-		r->item = (item);
-		r->type = (RecurseItem);
+		r->orBlock = orBlock;
+		r->item = item;
+		r->type = RecurseItem;
 		return r;
 	}
 
@@ -1320,19 +1320,19 @@ struct ReOrItem
 	static ReOrItem *cons( const InputLoc &loc, const String &data ) 
 	{
 		ReOrItem *r = new ReOrItem;
-		r->loc = (loc);
-		r->data = (data);
-		r->type = (Data);
+		r->loc = loc;
+		r->data = data;
+		r->type = Data;
 		return r;
 	}
 
 	static ReOrItem *cons( const InputLoc &loc, char lower, char upper )
 	{
 		ReOrItem *r = new ReOrItem;
-		r->loc = (loc);
-		r->lower = (lower);
-		r->upper = (upper);
-		r->type = (Range);
+		r->loc = loc;
+		r->lower = lower;
+		r->upper = upper;
+		r->type = Range;
 		return r;
 	}
 
@@ -1369,21 +1369,21 @@ struct InlineItem
 	static InlineItem *cons( const InputLoc &loc, const String &data, Type type )
 	{
 		InlineItem *i = new InlineItem;
-		i->loc = (loc);
-		i->data = (data);
-		i->nameRef = (0);
-		i->children = (0);
-		i->type = (type);
+		i->loc = loc;
+		i->data = data;
+		i->nameRef = 0;
+		i->children = 0;
+		i->type = type;
 		return i;
 	}
 
 	static InlineItem *cons( const InputLoc &loc, NameRef *nameRef, Type type )
 	{
 		InlineItem *i = new InlineItem;
-		i->loc = (loc);
-		i->nameRef = (nameRef);
-		i->children = (0);
-		i->type = (type);
+		i->loc = loc;
+		i->nameRef = nameRef;
+		i->children = 0;
+		i->type = type;
 		return i;
 	}
 
@@ -1391,33 +1391,33 @@ struct InlineItem
 		TokenDef *longestMatchPart, Type type ) 
 	{
 		InlineItem *i = new InlineItem;
-		i->loc = (loc);
-		i->nameRef = (0);
-		i->children = (0);
-		i->tokenRegion = (tokenRegion);
-		i->longestMatchPart = (longestMatchPart);
-		i->type = (type);
+		i->loc = loc;
+		i->nameRef = 0;
+		i->children = 0;
+		i->tokenRegion = tokenRegion;
+		i->longestMatchPart = longestMatchPart;
+		i->type = type;
 		return i;
 	}
 
 	static InlineItem *cons( const InputLoc &loc, NameInst *nameTarg, Type type )
 	{
 		InlineItem *i = new InlineItem;
-		i->loc = (loc);
-		i->nameRef = (0);
-		i->nameTarg = (nameTarg);
-		i->children = (0);
-		i->type = (type);
+		i->loc = loc;
+		i->nameRef = 0;
+		i->nameTarg = nameTarg;
+		i->children = 0;
+		i->type = type;
 		return i;
 	}
 
 	static InlineItem *cons( const InputLoc &loc, Type type ) 
 	{
 		InlineItem *i = new InlineItem;
-		i->loc = (loc);
-		i->nameRef = (0);
-		i->children = (0);
-		i->type = (type);
+		i->loc = loc;
+		i->nameRef = 0;
+		i->children = 0;
+		i->type = type;
 		return i;
 	}
 	
@@ -1460,25 +1460,25 @@ struct PatternItem
 	static PatternItem *cons( const InputLoc &loc, const String &data, Type type )
 	{
 		PatternItem *p = new PatternItem;
-		p->loc = (loc);
-		p->factor = (0);
-		p->data = (data);
-		p->type = (type);
-		p->region = (0);
-		p->varRef = (0);
-		p->bindId = (0);
+		p->loc = loc;
+		p->factor = 0;
+		p->data = data;
+		p->type = type;
+		p->region = 0;
+		p->varRef = 0;
+		p->bindId = 0;
 		return p;
 	}
 
 	static PatternItem *cons( const InputLoc &loc, ProdEl *factor, Type type )
 	{
 		PatternItem *p = new PatternItem;
-		p->loc = (loc);
-		p->factor = (factor);
-		p->type = (type);
-		p->region = (0);
-		p->varRef = (0);
-		p->bindId = (0);
+		p->loc = loc;
+		p->factor = factor;
+		p->type = type;
+		p->region = 0;
+		p->varRef = 0;
+		p->bindId = 0;
 		return p;
 	}
 
@@ -1516,28 +1516,28 @@ struct ReplItem
 	static ReplItem *cons( const InputLoc &loc, Type type, const String &data )
 	{
 		ReplItem *r = new ReplItem;
-		r->loc = (loc);
-		r->type = (type);
-		r->data = (data);
+		r->loc = loc;
+		r->type = type;
+		r->data = data;
 		return r;
 	}
 
 	static ReplItem *cons( const InputLoc &loc, Type type, LangExpr *expr )
 	{
 		ReplItem *r = new ReplItem;
-		r->loc = (loc);
-		r->type = (type);
-		r->expr = (expr);
+		r->loc = loc;
+		r->type = type;
+		r->expr = expr;
 		return r;
 	}
 
 	static ReplItem *cons( const InputLoc &loc, Type type, ProdEl *factor )
 	{
 		ReplItem *r = new ReplItem;
-		r->loc = (loc);
-		r->type = (type);
-		r->expr = (0);
-		r->factor = (factor);
+		r->loc = loc;
+		r->type = type;
+		r->expr = 0;
+		r->factor = factor;
 		return r;
 	}
 
@@ -1559,14 +1559,14 @@ struct Pattern
 			PatternItemList *list, int patRepId )
 	{
 		Pattern *p = new Pattern;
-		p->loc = (loc);
-		p->nspace = (nspace);
-		p->region = (region);
-		p->list = (list);
-		p->patRepId = (patRepId);
-		p->langEl = (0);
-		p->pdaRun = (0);
-		p->nextBindId = (1);
+		p->loc = loc;
+		p->nspace = nspace;
+		p->region = region;
+		p->list = list;
+		p->patRepId = patRepId;
+		p->langEl = 0;
+		p->pdaRun = 0;
+		p->nextBindId = 1;
 		return p;
 	}
 	
@@ -1589,15 +1589,15 @@ struct Constructor
 			TokenRegion *region, ReplItemList *list, int patRepId )
 	{
 		Constructor *r = new Constructor;
-		r->loc = (loc);
-		r->nspace = (nspace);
-		r->region = (region);
-		r->list = (list);
-		r->patRepId = (patRepId);
-		r->langEl = (0);
-		r->pdaRun = (0);
-		r->nextBindId = (1);
-		r->parse = (true);
+		r->loc = loc;
+		r->nspace = nspace;
+		r->region = region;
+		r->list = list;
+		r->patRepId = patRepId;
+		r->langEl = 0;
+		r->pdaRun = 0;
+		r->nextBindId = 1;
+		r->parse = true;
 		return r;
 	}
 
@@ -1622,14 +1622,14 @@ struct ParserText
 			TokenRegion *region, ReplItemList *list )
 	{
 		ParserText *p = new ParserText;
-		p->loc = (loc);
-		p->nspace = (nspace);
-		p->region = (region);
-		p->list = (list);
-		p->langEl = (0);
-		p->pdaRun = (0);
-		p->nextBindId = (1);
-		p->parse = (true);
+		p->loc = loc;
+		p->nspace = nspace;
+		p->region = region;
+		p->list = list;
+		p->langEl = 0;
+		p->pdaRun = 0;
+		p->nextBindId = 1;
+		p->parse = true;
 		return p;
 	}
 
@@ -2570,30 +2570,30 @@ struct LangExpr
 	static LangExpr *cons( const InputLoc &loc, LangExpr *left, char op, LangExpr *right )
 	{
 		LangExpr *e = new LangExpr;
-		e->loc = (loc);
-		e->type = (BinaryType);
-		e->left = (left);
-		e->op = (op);
-		e->right = (right);
+		e->loc = loc;
+		e->type = BinaryType;
+		e->left = left;
+		e->op = op;
+		e->right = right;
 		return e;
 	}
 
 	static LangExpr *cons( const InputLoc &loc, char op, LangExpr *right )
 	{
 		LangExpr *e = new LangExpr;
-		e->loc = (loc);
-		e->type = (UnaryType);
-		e->left = (0);
-		e->op = (op);
-		e->right =(right);
+		e->loc = loc;
+		e->type = UnaryType;
+		e->left = 0;
+		e->op = op;
+		e->right =right;
 		return e;
 	}
 
 	static LangExpr *cons( LangTerm *term )
 	{
 		LangExpr *e = new LangExpr;
-		e->type = (TermType);
-		e->term = (term);
+		e->type = TermType;
+		e->term = term;
 		return e;
 	}
 
@@ -2656,98 +2656,98 @@ struct LangStmt
 	static LangStmt *cons( const InputLoc &loc, Type type, FieldInitVect *fieldInitVect )
 	{
 		LangStmt *s = new LangStmt;
-		s->loc = (loc);
-		s->type = (type);
-		s->fieldInitVect = (fieldInitVect);
+		s->loc = loc;
+		s->type = type;
+		s->fieldInitVect = fieldInitVect;
 		return s;
 	}
 
 	static LangStmt *cons( const InputLoc &loc, Type type, ExprVect *exprPtrVect )
 	{
 		LangStmt *s = new LangStmt;
-		s->loc = (loc);
-		s->type = (type);
-		s->exprPtrVect = (exprPtrVect);
+		s->loc = loc;
+		s->type = type;
+		s->exprPtrVect = exprPtrVect;
 		return s;
 	}
 	
 	static LangStmt *cons( const InputLoc &loc, Type type, LangExpr *expr )
 	{
 		LangStmt *s = new LangStmt;
-		s->loc = (loc);
-		s->type = (type);
-		s->expr = (expr);
+		s->loc = loc;
+		s->type = type;
+		s->expr = expr;
 		return s;
 	}
 
 	static LangStmt *cons( Type type, LangVarRef *varRef )
 	{
 		LangStmt *s = new LangStmt;
-		s->type = (type);
-		s->varRef = (varRef);
+		s->type = type;
+		s->varRef = varRef;
 		return s;
 	}
 
 	static LangStmt *cons( const InputLoc &loc, Type type, ObjField *objField )
 	{
 		LangStmt *s = new LangStmt;
-		s->loc = (loc);
-		s->type = (type);
-		s->objField = (objField);
+		s->loc = loc;
+		s->type = type;
+		s->objField = objField;
 		return s;
 	}
 	
 	static LangStmt *cons( const InputLoc &loc, Type type, LangVarRef *varRef, LangExpr *expr )
 	{
 		LangStmt *s = new LangStmt;
-		s->loc = (loc);
-		s->type = (type);
-		s->varRef = (varRef);
-		s->expr = (expr);
+		s->loc = loc;
+		s->type = type;
+		s->varRef = varRef;
+		s->expr = expr;
 		return s;
 	}
 	
 	static LangStmt *cons( Type type, LangExpr *expr, StmtList *stmtList )
 	{
 		LangStmt *s = new LangStmt;
-		s->type = (type);
-		s->expr = (expr);
-		s->stmtList = (stmtList);
+		s->type = type;
+		s->expr = expr;
+		s->stmtList = stmtList;
 		return s;
 	}
 
 	static LangStmt *cons( Type type, StmtList *stmtList )
 	{
 		LangStmt *s = new LangStmt;
-		s->type = (type);
-		s->stmtList = (stmtList);
+		s->type = type;
+		s->stmtList = stmtList;
 		return s;
 	}
 
 	static LangStmt *cons( Type type, LangExpr *expr, StmtList *stmtList, LangStmt *elsePart )
 	{
 		LangStmt *s = new LangStmt;
-		s->type = (type);
-		s->expr = (expr);
-		s->stmtList = (stmtList);
-		s->elsePart = (elsePart);
+		s->type = type;
+		s->expr = expr;
+		s->stmtList = stmtList;
+		s->elsePart = elsePart;
 		return s;
 	}
 
 	static LangStmt *cons( const InputLoc &loc, Type type )
 	{
 		LangStmt *s = new LangStmt;
-		s->loc = (loc);
-		s->type = (type);
+		s->loc = loc;
+		s->type = type;
 		return s;
 	}
 
 	static LangStmt *cons( Type type, LangVarRef *varRef, Constructor *constructor )
 	{
 		LangStmt *s = new LangStmt;
-		s->type = (type);
-		s->varRef = (varRef);
-		s->constructor = (constructor);
+		s->type = type;
+		s->varRef = varRef;
+		s->constructor = constructor;
 		return s;
 	}
 
@@ -2755,19 +2755,19 @@ struct LangStmt
 			TypeRef *typeRef, LangTerm *langTerm, StmtList *stmtList )
 	{
 		LangStmt *s = new LangStmt;
-		s->loc = (loc);
-		s->type = (type);
-		s->langTerm = (langTerm);
-		s->objField = (objField);
-		s->typeRef = (typeRef);
-		s->stmtList = (stmtList);
+		s->loc = loc;
+		s->type = type;
+		s->langTerm = langTerm;
+		s->objField = objField;
+		s->typeRef = typeRef;
+		s->stmtList = stmtList;
 		return s;
 	}
 
 	static LangStmt *cons( Type type )
 	{
 		LangStmt *s = new LangStmt;
-		s->type = (type);
+		s->type = type;
 		return s;
 	}
 
