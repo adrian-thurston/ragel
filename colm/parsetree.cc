@@ -690,7 +690,7 @@ FsmGraph *Expression::walk( Compiler *pd, bool lastInSeq )
 }
 
 /* Clean up after a term node. */
-Term::~Term()
+LexTerm::~LexTerm()
 {
 	switch ( type ) {
 		case ConcatType:
@@ -707,7 +707,7 @@ Term::~Term()
 }
 
 /* Evaluate a term node. */
-FsmGraph *Term::walk( Compiler *pd, bool lastInSeq )
+FsmGraph *LexTerm::walk( Compiler *pd, bool lastInSeq )
 {
 	FsmGraph *rtnVal = 0;
 	switch ( type ) {

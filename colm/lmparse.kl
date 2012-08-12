@@ -955,7 +955,7 @@ literal_item: opt_no_ignore TK_Literal opt_no_ignore
 		if ( ldel != 0 )
 			error( $2->loc ) << "literal already defined in this namespace" << endp;
 		else {
-			Join *join = new Join( Expression::cons( Term::cons( FactorWithAug::cons(
+			Join *join = new Join( Expression::cons( LexTerm::cons( FactorWithAug::cons(
 				FactorWithRep::cons( $2->loc, FactorWithNeg::cons( $2->loc, Factor::cons(
 				Literal::cons( $2->loc, $2->data, 
 					Literal::LitString ) ) ) ) ) ) ) );
@@ -2143,7 +2143,7 @@ rl_expr:
 
 nonterm rl_term_short
 {
-	Term *term;
+	LexTerm *term;
 };
 
 shortest rl_term_short;
@@ -2153,33 +2153,33 @@ rl_term_short: rl_term
 
 nonterm rl_term
 {
-	Term *term;
+	LexTerm *term;
 };
 
 rl_term:
 	rl_term factor_with_label final {
-		$$->term = Term::cons( $1->term, $2->factorWithAug );
+		$$->term = LexTerm::cons( $1->term, $2->factorWithAug );
 	};
 rl_term:
 	rl_term '.' factor_with_label final {
-		$$->term = Term::cons( $1->term, $3->factorWithAug );
+		$$->term = LexTerm::cons( $1->term, $3->factorWithAug );
 	};
 rl_term:
 	rl_term TK_ColonGt factor_with_label final {
-		$$->term = Term::cons( $1->term, $3->factorWithAug, Term::RightStartType );
+		$$->term = LexTerm::cons( $1->term, $3->factorWithAug, LexTerm::RightStartType );
 	};
 rl_term:
 	rl_term TK_ColonGtGt factor_with_label final {
-		$$->term = Term::cons( $1->term, $3->factorWithAug, Term::RightFinishType );
+		$$->term = LexTerm::cons( $1->term, $3->factorWithAug, LexTerm::RightFinishType );
 	};
 rl_term:
 	rl_term TK_LtColon factor_with_label final {
-		$$->term = Term::cons( $1->term, 
-				$3->factorWithAug, Term::LeftType );
+		$$->term = LexTerm::cons( $1->term,
+				$3->factorWithAug, LexTerm::LeftType );
 	};
 rl_term:
 	factor_with_label final {
-		$$->term = Term::cons( $1->factorWithAug );
+		$$->term = LexTerm::cons( $1->factorWithAug );
 	};
 
 nonterm factor_with_label

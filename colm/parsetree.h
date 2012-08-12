@@ -159,7 +159,7 @@ struct Literal;
 
 /* Tree nodes. */
 
-struct Term;
+struct LexTerm;
 struct FactorWithAug;
 struct FactorWithRep;
 struct FactorWithNeg;
@@ -820,7 +820,7 @@ struct Expression
 		type((Type)-1), prev(this), next(this) { }
 
 	/* Construct with an expression on the left and a term on the right. */
-	static Expression *cons( Expression *expression, Term *term, Type type )
+	static Expression *cons( Expression *expression, LexTerm *term, Type type )
 	{ 
 		Expression *ret = new Expression;
 		ret->type = type;
@@ -830,7 +830,7 @@ struct Expression
 	}
 
 	/* Construct with only a term. */
-	static Expression *cons( Term *term )
+	static Expression *cons( LexTerm *term )
 	{
 		Expression *ret = new Expression;
 		ret->type = TermType;
@@ -855,7 +855,7 @@ struct Expression
 
 	/* Node data. */
 	Expression *expression;
-	Term *term;
+	LexTerm *term;
 	BuiltinMachine builtin;
 	Type type;
 
@@ -863,9 +863,9 @@ struct Expression
 };
 
 /*
- * Term
+ * LexTerm
  */
-struct Term 
+struct LexTerm
 {
 	enum Type { 
 		ConcatType, 
@@ -875,41 +875,41 @@ struct Term
 		FactorWithAugType
 	};
 
-	Term() :
+	LexTerm() :
 		term(0), factorWithAug(0), type((Type)-1) { }
 
-	static Term *cons( Term *term, FactorWithAug *factorWithAug )
+	static LexTerm *cons( LexTerm *term, FactorWithAug *factorWithAug )
 	{
-		Term *ret = new Term;
+		LexTerm *ret = new LexTerm;
 		ret->type = ConcatType;
 		ret->term = term;
 		ret->factorWithAug = factorWithAug;
 		return ret;
 	}
 
-	static Term *cons( Term *term, FactorWithAug *factorWithAug, Type type )
+	static LexTerm *cons( LexTerm *term, FactorWithAug *factorWithAug, Type type )
 	{
-		Term *ret = new Term;
+		LexTerm *ret = new LexTerm;
 		ret->type = type;
 		ret->term = term;
 		ret->factorWithAug = factorWithAug;
 		return ret;
 	}
 
-	static Term *cons( FactorWithAug *factorWithAug )
+	static LexTerm *cons( FactorWithAug *factorWithAug )
 	{
-		Term *ret = new Term;
+		LexTerm *ret = new LexTerm;
 		ret->type = FactorWithAugType;
 		ret->factorWithAug = factorWithAug;
 		return ret;
 	}
 	
-	~Term();
+	~LexTerm();
 
 	FsmGraph *walk( Compiler *pd, bool lastInSeq = true );
 	void makeNameTree( Compiler *pd );
 
-	Term *term;
+	LexTerm *term;
 	FactorWithAug *factorWithAug;
 	Type type;
 

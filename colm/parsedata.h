@@ -442,7 +442,7 @@ typedef AvlTree<Action, String, CmpStr> ActionDict;
 struct VarDef;
 struct Join;
 struct Expression;
-struct Term;
+struct LexTerm;
 struct FactorWithAug;
 struct FactorWithLabel;
 struct FactorWithRep;
