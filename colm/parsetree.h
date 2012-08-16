@@ -160,9 +160,9 @@ struct Literal;
 /* Tree nodes. */
 
 struct LexTerm;
-struct FactorWithAug;
-struct FactorWithRep;
-struct FactorWithNeg;
+struct LexFactorAug;
+struct LexFactorRep;
+struct FactorNeg;
 struct Factor;
 struct Expression;
 struct Join;
@@ -274,7 +274,7 @@ struct Label
 	ObjField *objField;
 };
 
-/* Structure represents an action assigned to some FactorWithAug node. The
+/* Structure represents an action assigned to some LexFactorAug node. The
  * factor with aug will keep an array of these. */
 struct ParserAction
 {
@@ -872,35 +872,35 @@ struct LexTerm
 		RightStartType,
 		RightFinishType,
 		LeftType,
-		FactorWithAugType
+		FactorAugType
 	};
 
 	LexTerm() :
-		term(0), factorWithAug(0), type((Type)-1) { }
+		term(0), factorAug(0), type((Type)-1) { }
 
-	static LexTerm *cons( LexTerm *term, FactorWithAug *factorWithAug )
+	static LexTerm *cons( LexTerm *term, LexFactorAug *factorAug )
 	{
 		LexTerm *ret = new LexTerm;
 		ret->type = ConcatType;
 		ret->term = term;
-		ret->factorWithAug = factorWithAug;
+		ret->factorAug = factorAug;
 		return ret;
 	}
 
-	static LexTerm *cons( LexTerm *term, FactorWithAug *factorWithAug, Type type )
+	static LexTerm *cons( LexTerm *term, LexFactorAug *factorAug, Type type )
 	{
 		LexTerm *ret = new LexTerm;
 		ret->type = type;
 		ret->term = term;
-		ret->factorWithAug = factorWithAug;
+		ret->factorAug = factorAug;
 		return ret;
 	}
 
-	static LexTerm *cons( FactorWithAug *factorWithAug )
+	static LexTerm *cons( LexFactorAug *factorAug )
 	{
 		LexTerm *ret = new LexTerm;
-		ret->type = FactorWithAugType;
-		ret->factorWithAug = factorWithAug;
+		ret->type = FactorAugType;
+		ret->factorAug = factorAug;
 		return ret;
 	}
 	
@@ -910,7 +910,7 @@ struct LexTerm
 	void makeNameTree( Compiler *pd );
 
 	LexTerm *term;
-	FactorWithAug *factorWithAug;
+	LexFactorAug *factorAug;
 	Type type;
 
 	/* Priority descriptor for RightFinish type. */
@@ -919,20 +919,20 @@ struct LexTerm
 
 
 /* Third level of precedence. Augmenting nodes with actions and priorities. */
-struct FactorWithAug
+struct LexFactorAug
 {
-	FactorWithAug() :
-		priorDescs(0), factorWithRep(0) { }
+	LexFactorAug() :
+		priorDescs(0), factorRep(0) { }
 
-	static FactorWithAug *cons( FactorWithRep *factorWithRep )
+	static LexFactorAug *cons( LexFactorRep *factorRep )
 	{
-		FactorWithAug *f = new FactorWithAug;
+		LexFactorAug *f = new LexFactorAug;
 		f->priorDescs = 0;
-		f->factorWithRep = factorWithRep;
+		f->factorRep = factorRep;
 		return f;
 	}
 
-	~FactorWithAug();
+	~LexFactorAug();
 
 	/* Tree traversal. */
 	FsmGraph *walk( Compiler *pd );
@@ -950,12 +950,12 @@ struct FactorWithAug
 	Vector<EpsilonLink> epsilonLinks;
 	Vector<ParserAction> conditions;
 
-	FactorWithRep *factorWithRep;
+	LexFactorRep *factorRep;
 };
 
 /* Fourth level of precedence. Trailing unary operators. Provide kleen star,
  * optional and plus. */
-struct FactorWithRep
+struct LexFactorRep
 {
 	enum Type { 
 		StarType,
@@ -966,49 +966,49 @@ struct FactorWithRep
 		MaxType,
 		MinType,
 		RangeType,
-		FactorWithNegType
+		FactorNegType
 	};
 
-	FactorWithRep()
+	LexFactorRep()
 	:
-		factorWithRep(0), 
-		factorWithNeg(0),
+		factorRep(0),
+		factorNeg(0),
 		lowerRep(0), 
 		upperRep(upperRep),
 		type((Type)-1)
 	{ }
 
-	static FactorWithRep *cons( const InputLoc &loc, FactorWithRep *factorWithRep, 
+	static LexFactorRep *cons( const InputLoc &loc, LexFactorRep *factorRep, 
 			int lowerRep, int upperRep, Type type )
 	{
-		FactorWithRep *f = new FactorWithRep;
+		LexFactorRep *f = new LexFactorRep;
 		f->type = type;
 		f->loc = loc;
-		f->factorWithRep = factorWithRep;
-		f->factorWithNeg = 0;
+		f->factorRep = factorRep;
+		f->factorNeg = 0;
 		f->lowerRep = lowerRep;
 		f->upperRep = upperRep;
 		return f;
 	}
 	
-	static FactorWithRep *cons( const InputLoc &loc, FactorWithNeg *factorWithNeg )
+	static LexFactorRep *cons( const InputLoc &loc, FactorNeg *factorNeg )
 	{
-		FactorWithRep *f = new FactorWithRep;
-		f->type = FactorWithNegType;
+		LexFactorRep *f = new LexFactorRep;
+		f->type = FactorNegType;
 		f->loc = loc;
-		f->factorWithNeg = factorWithNeg;
+		f->factorNeg = factorNeg;
 		return f;
 	}
 
-	~FactorWithRep();
+	~LexFactorRep();
 
 	/* Tree traversal. */
 	FsmGraph *walk( Compiler *pd );
 	void makeNameTree( Compiler *pd );
 
 	InputLoc loc;
-	FactorWithRep *factorWithRep;
-	FactorWithNeg *factorWithNeg;
+	LexFactorRep *factorRep;
+	FactorNeg *factorNeg;
 	int lowerRep, upperRep;
 	Type type;
 
@@ -1017,7 +1017,7 @@ struct FactorWithRep
 };
 
 /* Fifth level of precedence. Provides Negation. */
-struct FactorWithNeg
+struct FactorNeg
 {
 	enum Type { 
 		NegateType, 
@@ -1025,41 +1025,41 @@ struct FactorWithNeg
 		FactorType
 	};
 
-	FactorWithNeg()
+	FactorNeg()
 	:
-		factorWithNeg(0),
+		factorNeg(0),
 		factor(0),
 		type((Type)-1)
 	{}
 
-	static FactorWithNeg *cons( const InputLoc &loc, FactorWithNeg *factorWithNeg, Type type )
+	static FactorNeg *cons( const InputLoc &loc, FactorNeg *factorNeg, Type type )
 	{
-		FactorWithNeg *f = new FactorWithNeg;
+		FactorNeg *f = new FactorNeg;
 		f->type = type;
 		f->loc = loc;
-		f->factorWithNeg = factorWithNeg;
+		f->factorNeg = factorNeg;
 		f->factor = 0;
 		return f;
 	}
 
-	static FactorWithNeg *cons( const InputLoc &loc, Factor *factor )
+	static FactorNeg *cons( const InputLoc &loc, Factor *factor )
 	{
-		FactorWithNeg *f = new FactorWithNeg;
+		FactorNeg *f = new FactorNeg;
 		f->type = FactorType;
 		f->loc = loc;
-		f->factorWithNeg = 0;
+		f->factorNeg = 0;
 		f->factor = factor;
 		return f;
 	}
 
-	~FactorWithNeg();
+	~FactorNeg();
 
 	/* Tree traversal. */
 	FsmGraph *walk( Compiler *pd );
 	void makeNameTree( Compiler *pd );
 
 	InputLoc loc;
-	FactorWithNeg *factorWithNeg;
+	FactorNeg *factorNeg;
 	Factor *factor;
 	Type type;
 };

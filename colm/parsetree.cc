@@ -698,10 +698,10 @@ LexTerm::~LexTerm()
 		case RightFinishType:
 		case LeftType:
 			delete term;
-			delete factorWithAug;
+			delete factorAug;
 			break;
-		case FactorWithAugType:
-			delete factorWithAug;
+		case FactorAugType:
+			delete factorAug;
 			break;
 	}
 }
@@ -714,8 +714,8 @@ FsmGraph *LexTerm::walk( Compiler *pd, bool lastInSeq )
 		case ConcatType: {
 			/* Evaluate the Term. */
 			rtnVal = term->walk( pd, false );
-			/* Evaluate the FactorWithRep. */
-			FsmGraph *rhs = factorWithAug->walk( pd );
+			/* Evaluate the LexFactorRep. */
+			FsmGraph *rhs = factorAug->walk( pd );
 			/* Perform concatenation. */
 			rtnVal->concatOp( rhs );
 			afterOpMinimize( rtnVal, lastInSeq );
@@ -725,8 +725,8 @@ FsmGraph *LexTerm::walk( Compiler *pd, bool lastInSeq )
 			/* Evaluate the Term. */
 			rtnVal = term->walk( pd );
 
-			/* Evaluate the FactorWithRep. */
-			FsmGraph *rhs = factorWithAug->walk( pd );
+			/* Evaluate the LexFactorRep. */
+			FsmGraph *rhs = factorAug->walk( pd );
 
 			/* Set up the priority descriptors. The left machine gets the
 			 * lower priority where as the right get the higher start priority. */
@@ -749,8 +749,8 @@ FsmGraph *LexTerm::walk( Compiler *pd, bool lastInSeq )
 			/* Evaluate the Term. */
 			rtnVal = term->walk( pd );
 
-			/* Evaluate the FactorWithRep. */
-			FsmGraph *rhs = factorWithAug->walk( pd );
+			/* Evaluate the LexFactorRep. */
+			FsmGraph *rhs = factorAug->walk( pd );
 
 			/* Set up the priority descriptors. The left machine gets the
 			 * lower priority where as the finishing transitions to the right
@@ -774,8 +774,8 @@ FsmGraph *LexTerm::walk( Compiler *pd, bool lastInSeq )
 			/* Evaluate the Term. */
 			rtnVal = term->walk( pd );
 
-			/* Evaluate the FactorWithRep. */
-			FsmGraph *rhs = factorWithAug->walk( pd );
+			/* Evaluate the LexFactorRep. */
+			FsmGraph *rhs = factorAug->walk( pd );
 
 			/* Set up the priority descriptors. The left machine gets the
 			 * higher priority. */
@@ -797,8 +797,8 @@ FsmGraph *LexTerm::walk( Compiler *pd, bool lastInSeq )
 			afterOpMinimize( rtnVal, lastInSeq );
 			break;
 		}
-		case FactorWithAugType: {
-			rtnVal = factorWithAug->walk( pd );
+		case FactorAugType: {
+			rtnVal = factorAug->walk( pd );
 			break;
 		}
 	}
@@ -806,9 +806,9 @@ FsmGraph *LexTerm::walk( Compiler *pd, bool lastInSeq )
 }
 
 /* Clean up after a factor with augmentation node. */
-FactorWithAug::~FactorWithAug()
+LexFactorAug::~LexFactorAug()
 {
-	delete factorWithRep;
+	delete factorRep;
 
 	/* Walk the vector of parser actions, deleting function names. */
 
@@ -817,7 +817,7 @@ FactorWithAug::~FactorWithAug()
 		delete[] priorDescs;
 }
 
-void FactorWithAug::assignActions( Compiler *pd, FsmGraph *graph, int *actionOrd )
+void LexFactorAug::assignActions( Compiler *pd, FsmGraph *graph, int *actionOrd )
 {
 	/* Assign actions. */
 	for ( int i = 0; i < actions.length(); i++ )  {
@@ -956,7 +956,7 @@ void FactorWithAug::assignActions( Compiler *pd, FsmGraph *graph, int *actionOrd
 	}
 }
 
-void FactorWithAug::assignPriorities( FsmGraph *graph, int *priorOrd )
+void LexFactorAug::assignPriorities( FsmGraph *graph, int *priorOrd )
 {
 	/* Assign priorities. */
 	for ( int i = 0; i < priorityAugs.length(); i++ ) {
@@ -984,7 +984,7 @@ void FactorWithAug::assignPriorities( FsmGraph *graph, int *priorOrd )
 	}
 }
 
-void FactorWithAug::assignConditions( FsmGraph *graph )
+void LexFactorAug::assignConditions( FsmGraph *graph )
 {
 	for ( int i = 0; i < conditions.length(); i++ )  {
 		switch ( conditions[i].type ) {
@@ -1007,7 +1007,7 @@ void FactorWithAug::assignConditions( FsmGraph *graph )
 
 
 /* Evaluate a factor with augmentation node. */
-FsmGraph *FactorWithAug::walk( Compiler *pd )
+FsmGraph *LexFactorAug::walk( Compiler *pd )
 {
 	/* Make the array of function orderings. */
 	int *actionOrd = 0;
@@ -1027,7 +1027,7 @@ FsmGraph *FactorWithAug::walk( Compiler *pd )
 	}
 
 	/* Evaluate the factor with repetition. */
-	FsmGraph *rtnVal = factorWithRep->walk( pd );
+	FsmGraph *rtnVal = factorRep->walk( pd );
 
 	/* Compute the remaining action orderings. */
 	for ( int i = 0; i < actions.length(); i++ ) {
@@ -1092,28 +1092,28 @@ FsmGraph *FactorWithAug::walk( Compiler *pd )
 
 
 /* Clean up after a factor with repetition node. */
-FactorWithRep::~FactorWithRep()
+LexFactorRep::~LexFactorRep()
 {
 	switch ( type ) {
 		case StarType: case StarStarType: case OptionalType: case PlusType:
 		case ExactType: case MaxType: case MinType: case RangeType:
-			delete factorWithRep;
+			delete factorRep;
 			break;
-		case FactorWithNegType:
-			delete factorWithNeg;
+		case FactorNegType:
+			delete factorNeg;
 			break;
 	}
 }
 
 /* Evaluate a factor with repetition node. */
-FsmGraph *FactorWithRep::walk( Compiler *pd )
+FsmGraph *LexFactorRep::walk( Compiler *pd )
 {
 	FsmGraph *retFsm = 0;
 
 	switch ( type ) {
 	case StarType: {
-		/* Evaluate the FactorWithRep. */
-		retFsm = factorWithRep->walk( pd );
+		/* Evaluate the LexFactorRep. */
+		retFsm = factorRep->walk( pd );
 		if ( retFsm->startState->isFinState() ) {
 			warning(loc) << "applying kleene star to a machine that "
 					"accepts zero length word" << endl;
@@ -1126,8 +1126,8 @@ FsmGraph *FactorWithRep::walk( Compiler *pd )
 		break;
 	}
 	case StarStarType: {
-		/* Evaluate the FactorWithRep. */
-		retFsm = factorWithRep->walk( pd );
+		/* Evaluate the LexFactorRep. */
+		retFsm = factorRep->walk( pd );
 		if ( retFsm->startState->isFinState() ) {
 			warning(loc) << "applying kleene star to a machine that "
 					"accepts zero length word" << endl;
@@ -1156,8 +1156,8 @@ FsmGraph *FactorWithRep::walk( Compiler *pd )
 		FsmGraph *nu = new FsmGraph();
 		nu->lambdaFsm( );
 
-		/* Evaluate the FactorWithRep. */
-		retFsm = factorWithRep->walk( pd );
+		/* Evaluate the LexFactorRep. */
+		retFsm = factorRep->walk( pd );
 
 		/* Perform the question operator. */
 		retFsm->unionOp( nu );
@@ -1165,8 +1165,8 @@ FsmGraph *FactorWithRep::walk( Compiler *pd )
 		break;
 	}
 	case PlusType: {
-		/* Evaluate the FactorWithRep. */
-		retFsm = factorWithRep->walk( pd );
+		/* Evaluate the LexFactorRep. */
+		retFsm = factorRep->walk( pd );
 		if ( retFsm->startState->isFinState() ) {
 			warning(loc) << "applying plus operator to a machine that "
 					"accpets zero length word" << endl;
@@ -1189,7 +1189,7 @@ FsmGraph *FactorWithRep::walk( Compiler *pd )
 	case ExactType: {
 		/* Get an int from the repetition amount. */
 		if ( lowerRep == 0 ) {
-			/* No copies. Don't need to evaluate the factorWithRep. 
+			/* No copies. Don't need to evaluate the factorRep. 
 			 * This Defeats the purpose so give a warning. */
 			warning(loc) << "exactly zero repetitions results "
 					"in the null machine" << endl;
@@ -1198,8 +1198,8 @@ FsmGraph *FactorWithRep::walk( Compiler *pd )
 			retFsm->lambdaFsm();
 		}
 		else {
-			/* Evaluate the first FactorWithRep. */
-			retFsm = factorWithRep->walk( pd );
+			/* Evaluate the first LexFactorRep. */
+			retFsm = factorRep->walk( pd );
 			if ( retFsm->startState->isFinState() ) {
 				warning(loc) << "applying repetition to a machine that "
 						"accepts zero length word" << endl;
@@ -1218,7 +1218,7 @@ FsmGraph *FactorWithRep::walk( Compiler *pd )
 	case MaxType: {
 		/* Get an int from the repetition amount. */
 		if ( upperRep == 0 ) {
-			/* No copies. Don't need to evaluate the factorWithRep. 
+			/* No copies. Don't need to evaluate the factorRep. 
 			 * This Defeats the purpose so give a warning. */
 			warning(loc) << "max zero repetitions results "
 					"in the null machine" << endl;
@@ -1227,8 +1227,8 @@ FsmGraph *FactorWithRep::walk( Compiler *pd )
 			retFsm->lambdaFsm();
 		}
 		else {
-			/* Evaluate the first FactorWithRep. */
-			retFsm = factorWithRep->walk( pd );
+			/* Evaluate the first LexFactorRep. */
+			retFsm = factorRep->walk( pd );
 			if ( retFsm->startState->isFinState() ) {
 				warning(loc) << "applying max repetition to a machine that "
 						"accepts zero length word" << endl;
@@ -1246,7 +1246,7 @@ FsmGraph *FactorWithRep::walk( Compiler *pd )
 	}
 	case MinType: {
 		/* Evaluate the repeated machine. */
-		retFsm = factorWithRep->walk( pd );
+		retFsm = factorRep->walk( pd );
 		if ( retFsm->startState->isFinState() ) {
 			warning(loc) << "applying min repetition to a machine that "
 					"accepts zero length word" << endl;
@@ -1289,7 +1289,7 @@ FsmGraph *FactorWithRep::walk( Compiler *pd )
 			retFsm->lambdaFsm();
 		}
 		else if ( lowerRep == 0 && upperRep == 0 ) {
-			/* No copies. Don't need to evaluate the factorWithRep.  This
+			/* No copies. Don't need to evaluate the factorRep.  This
 			 * defeats the purpose so give a warning. */
 			warning(loc) << "zero to zero repetitions results "
 					"in the null machine" << endl;
@@ -1299,7 +1299,7 @@ FsmGraph *FactorWithRep::walk( Compiler *pd )
 		}
 		else {
 			/* Now need to evaluate the repeated machine. */
-			retFsm = factorWithRep->walk( pd );
+			retFsm = factorRep->walk( pd );
 			if ( retFsm->startState->isFinState() ) {
 				warning(loc) << "applying range repetition to a machine that "
 						"accepts zero length word" << endl;
@@ -1339,9 +1339,9 @@ FsmGraph *FactorWithRep::walk( Compiler *pd )
 		}
 		break;
 	}
-	case FactorWithNegType: {
+	case FactorNegType: {
 		/* Evaluate the Factor. Pass it up. */
-		retFsm = factorWithNeg->walk( pd );
+		retFsm = factorNeg->walk( pd );
 		break;
 	}}
 	return retFsm;
@@ -1349,12 +1349,12 @@ FsmGraph *FactorWithRep::walk( Compiler *pd )
 
 
 /* Clean up after a factor with negation node. */
-FactorWithNeg::~FactorWithNeg()
+FactorNeg::~FactorNeg()
 {
 	switch ( type ) {
 		case NegateType:
 		case CharNegateType:
-			delete factorWithNeg;
+			delete factorNeg;
 			break;
 		case FactorType:
 			delete factor;
@@ -1363,14 +1363,14 @@ FactorWithNeg::~FactorWithNeg()
 }
 
 /* Evaluate a factor with negation node. */
-FsmGraph *FactorWithNeg::walk( Compiler *pd )
+FsmGraph *FactorNeg::walk( Compiler *pd )
 {
 	FsmGraph *retFsm = 0;
 
 	switch ( type ) {
 	case NegateType: {
-		/* Evaluate the factorWithNeg. */
-		FsmGraph *toNegate = factorWithNeg->walk( pd );
+		/* Evaluate the factorNeg. */
+		FsmGraph *toNegate = factorNeg->walk( pd );
 
 		/* Negation is subtract from dot-star. */
 		retFsm = dotStarFsm( pd );
@@ -1379,8 +1379,8 @@ FsmGraph *FactorWithNeg::walk( Compiler *pd )
 		break;
 	}
 	case CharNegateType: {
-		/* Evaluate the factorWithNeg. */
-		FsmGraph *toNegate = factorWithNeg->walk( pd );
+		/* Evaluate the factorNeg. */
+		FsmGraph *toNegate = factorNeg->walk( pd );
 
 		/* CharNegation is subtract from dot. */
 		retFsm = dotFsm( pd );

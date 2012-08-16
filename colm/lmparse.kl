@@ -955,8 +955,8 @@ literal_item: opt_no_ignore TK_Literal opt_no_ignore
 		if ( ldel != 0 )
 			error( $2->loc ) << "literal already defined in this namespace" << endp;
 		else {
-			Join *join = new Join( Expression::cons( LexTerm::cons( FactorWithAug::cons(
-				FactorWithRep::cons( $2->loc, FactorWithNeg::cons( $2->loc, Factor::cons(
+			Join *join = new Join( Expression::cons( LexTerm::cons( LexFactorAug::cons(
+				LexFactorRep::cons( $2->loc, FactorNeg::cons( $2->loc, Factor::cons(
 				Literal::cons( $2->loc, $2->data, 
 					Literal::LitString ) ) ) ) ) ) ) );
 
@@ -2157,44 +2157,44 @@ nonterm rl_term
 };
 
 rl_term:
-	rl_term factor_with_label final {
-		$$->term = LexTerm::cons( $1->term, $2->factorWithAug );
+	rl_term factor_label final {
+		$$->term = LexTerm::cons( $1->term, $2->factorAug );
 	};
 rl_term:
-	rl_term '.' factor_with_label final {
-		$$->term = LexTerm::cons( $1->term, $3->factorWithAug );
+	rl_term '.' factor_label final {
+		$$->term = LexTerm::cons( $1->term, $3->factorAug );
 	};
 rl_term:
-	rl_term TK_ColonGt factor_with_label final {
-		$$->term = LexTerm::cons( $1->term, $3->factorWithAug, LexTerm::RightStartType );
+	rl_term TK_ColonGt factor_label final {
+		$$->term = LexTerm::cons( $1->term, $3->factorAug, LexTerm::RightStartType );
 	};
 rl_term:
-	rl_term TK_ColonGtGt factor_with_label final {
-		$$->term = LexTerm::cons( $1->term, $3->factorWithAug, LexTerm::RightFinishType );
+	rl_term TK_ColonGtGt factor_label final {
+		$$->term = LexTerm::cons( $1->term, $3->factorAug, LexTerm::RightFinishType );
 	};
 rl_term:
-	rl_term TK_LtColon factor_with_label final {
+	rl_term TK_LtColon factor_label final {
 		$$->term = LexTerm::cons( $1->term,
-				$3->factorWithAug, LexTerm::LeftType );
+				$3->factorAug, LexTerm::LeftType );
 	};
 rl_term:
-	factor_with_label final {
-		$$->term = LexTerm::cons( $1->factorWithAug );
+	factor_label final {
+		$$->term = LexTerm::cons( $1->factorAug );
 	};
 
-nonterm factor_with_label
+nonterm factor_label
 {
-	FactorWithAug *factorWithAug;
+	LexFactorAug *factorAug;
 };
 
-factor_with_label: 
-	factor_with_ep final {
-		$$->factorWithAug = $1->factorWithAug;
+factor_label: 
+	factor_ep final {
+		$$->factorAug = $1->factorAug;
 	};
 
-factor_with_label: 
-	TK_Word ':' factor_with_label final {
-		$$->factorWithAug = $3->factorWithAug;
+factor_label: 
+	TK_Word ':' factor_label final {
+		$$->factorAug = $3->factorAug;
 
 		if ( pd->objectDef->checkRedecl( $1->data ) != 0 )
 			error($1->loc) << "label name \"" << $1->data << "\" already in use" << endp;
@@ -2214,85 +2214,85 @@ factor_with_label:
 		pd->actionList.append( leave );
 		
 		/* Add entering and leaving actions. */
-		$$->factorWithAug->actions.append( ParserAction( $1->loc, at_start, 0, enter ) );
-		$$->factorWithAug->actions.append( ParserAction( $1->loc, at_leave, 0, leave ) );
+		$$->factorAug->actions.append( ParserAction( $1->loc, at_start, 0, enter ) );
+		$$->factorAug->actions.append( ParserAction( $1->loc, at_leave, 0, leave ) );
 
 		reCaptureVect.append( ReCapture( enter, leave, objField ) );
 	};
 
-nonterm factor_with_ep
+nonterm factor_ep
 {
-	FactorWithAug *factorWithAug;
+	LexFactorAug *factorAug;
 };
 
-factor_with_ep: 
-	factor_with_aug final {
-		$$->factorWithAug = $1->factorWithAug;
+factor_ep: 
+	factor_aug final {
+		$$->factorAug = $1->factorAug;
 	};
 
-nonterm factor_with_aug
+nonterm factor_aug
 {
-	FactorWithAug *factorWithAug;
+	LexFactorAug *factorAug;
 };
 
-factor_with_aug:
-	factor_with_rep final {
-		$$->factorWithAug = FactorWithAug::cons( $1->factorWithRep );
+factor_aug:
+	factor_rep final {
+		$$->factorAug = LexFactorAug::cons( $1->factorRep );
 	};
 
 
 # The fourth level of precedence. These are the trailing unary operators that
 # allow for repetition.
 
-nonterm factor_with_rep
+nonterm factor_rep
 {
-	FactorWithRep *factorWithRep;
+	LexFactorRep *factorRep;
 };
 
-factor_with_rep:
-	factor_with_rep '*' final {
-		$$->factorWithRep = FactorWithRep::cons( $2->loc, $1->factorWithRep, 
-				0, 0, FactorWithRep::StarType );
+factor_rep:
+	factor_rep '*' final {
+		$$->factorRep = LexFactorRep::cons( $2->loc, $1->factorRep, 
+				0, 0, LexFactorRep::StarType );
 	};
-factor_with_rep:
-	factor_with_rep TK_StarStar final {
-		$$->factorWithRep = FactorWithRep::cons( $2->loc, $1->factorWithRep, 
-				0, 0, FactorWithRep::StarStarType );
+factor_rep:
+	factor_rep TK_StarStar final {
+		$$->factorRep = LexFactorRep::cons( $2->loc, $1->factorRep, 
+				0, 0, LexFactorRep::StarStarType );
 	};
-factor_with_rep:
-	factor_with_rep '?' final {
-		$$->factorWithRep = FactorWithRep::cons( $2->loc, $1->factorWithRep, 
-				0, 0, FactorWithRep::OptionalType );
+factor_rep:
+	factor_rep '?' final {
+		$$->factorRep = LexFactorRep::cons( $2->loc, $1->factorRep, 
+				0, 0, LexFactorRep::OptionalType );
 	};
-factor_with_rep:
-	factor_with_rep '+' final {
-		$$->factorWithRep = FactorWithRep::cons( $2->loc, $1->factorWithRep, 
-				0, 0, FactorWithRep::PlusType );
+factor_rep:
+	factor_rep '+' final {
+		$$->factorRep = LexFactorRep::cons( $2->loc, $1->factorRep, 
+				0, 0, LexFactorRep::PlusType );
 	};
-factor_with_rep:
-	factor_with_rep '{' factor_rep_num '}' final {
-		$$->factorWithRep = FactorWithRep::cons( $2->loc, $1->factorWithRep, 
-				$3->rep, 0, FactorWithRep::ExactType );
+factor_rep:
+	factor_rep '{' factor_rep_num '}' final {
+		$$->factorRep = LexFactorRep::cons( $2->loc, $1->factorRep, 
+				$3->rep, 0, LexFactorRep::ExactType );
 	};
-factor_with_rep:
-	factor_with_rep '{' ',' factor_rep_num '}' final {
-		$$->factorWithRep = FactorWithRep::cons( $2->loc, $1->factorWithRep, 
-				0, $4->rep, FactorWithRep::MaxType );
+factor_rep:
+	factor_rep '{' ',' factor_rep_num '}' final {
+		$$->factorRep = LexFactorRep::cons( $2->loc, $1->factorRep, 
+				0, $4->rep, LexFactorRep::MaxType );
 	};
-factor_with_rep:
-	factor_with_rep '{' factor_rep_num ',' '}' final {
-		$$->factorWithRep = FactorWithRep::cons( $2->loc, $1->factorWithRep,
-				$3->rep, 0, FactorWithRep::MinType );
+factor_rep:
+	factor_rep '{' factor_rep_num ',' '}' final {
+		$$->factorRep = LexFactorRep::cons( $2->loc, $1->factorRep,
+				$3->rep, 0, LexFactorRep::MinType );
 	};
-factor_with_rep:
-	factor_with_rep '{' factor_rep_num ',' factor_rep_num '}' final {
-		$$->factorWithRep = FactorWithRep::cons( $2->loc, $1->factorWithRep, 
-				$3->rep, $5->rep, FactorWithRep::RangeType );
+factor_rep:
+	factor_rep '{' factor_rep_num ',' factor_rep_num '}' final {
+		$$->factorRep = LexFactorRep::cons( $2->loc, $1->factorRep, 
+				$3->rep, $5->rep, LexFactorRep::RangeType );
 	};
-factor_with_rep:
-	factor_with_neg final {
-		$$->factorWithRep = FactorWithRep::cons( 
-				$1->factorWithNeg->loc, $1->factorWithNeg );
+factor_rep:
+	factor_neg final {
+		$$->factorRep = LexFactorRep::cons( 
+				$1->factorNeg->loc, $1->factorNeg );
 	};
 
 nonterm factor_rep_num
@@ -2321,24 +2321,24 @@ factor_rep_num:
 # The fifth level up in precedence. Negation.
 #
 
-nonterm factor_with_neg
+nonterm factor_neg
 {
-	FactorWithNeg *factorWithNeg;
+	FactorNeg *factorNeg;
 };
 
-factor_with_neg:
-	'!' factor_with_neg final {
-		$$->factorWithNeg = FactorWithNeg::cons( $1->loc,
-				$2->factorWithNeg, FactorWithNeg::NegateType );
+factor_neg:
+	'!' factor_neg final {
+		$$->factorNeg = FactorNeg::cons( $1->loc,
+				$2->factorNeg, FactorNeg::NegateType );
 	};
-factor_with_neg:
-	'^' factor_with_neg final {
-		$$->factorWithNeg = FactorWithNeg::cons( $1->loc,
-				$2->factorWithNeg, FactorWithNeg::CharNegateType );
+factor_neg:
+	'^' factor_neg final {
+		$$->factorNeg = FactorNeg::cons( $1->loc,
+				$2->factorNeg, FactorNeg::CharNegateType );
 	};
-factor_with_neg:
+factor_neg:
 	rl_factor final {
-		$$->factorWithNeg = FactorWithNeg::cons( $1->factor->loc, $1->factor );
+		$$->factorNeg = FactorNeg::cons( $1->factor->loc, $1->factor );
 	};
 
 nonterm rl_factor
