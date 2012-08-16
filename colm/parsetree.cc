@@ -581,7 +581,7 @@ FsmGraph *TokenRegion::walk( Compiler *pd )
 }
 
 /* Construct with a location and the first expression. */
-Join::Join( Expression *expr )
+LexJoin::LexJoin( LexExpression *expr )
 :
 	context(0),
 	mark(0)
@@ -590,7 +590,7 @@ Join::Join( Expression *expr )
 }
 
 /* Walk an expression node. */
-FsmGraph *Join::walk( Compiler *pd )
+FsmGraph *LexJoin::walk( Compiler *pd )
 {
 	assert( exprList.length() == 1 );
 
@@ -607,7 +607,7 @@ FsmGraph *Join::walk( Compiler *pd )
 }
 
 /* Clean up after an expression node. */
-Expression::~Expression()
+LexExpression::~LexExpression()
 {
 	switch ( type ) {
 		case OrType: case IntersectType: case SubtractType:
@@ -624,7 +624,7 @@ Expression::~Expression()
 }
 
 /* Evaluate a single expression node. */
-FsmGraph *Expression::walk( Compiler *pd, bool lastInSeq )
+FsmGraph *LexExpression::walk( Compiler *pd, bool lastInSeq )
 {
 	FsmGraph *rtnVal = 0;
 	switch ( type ) {
@@ -1349,7 +1349,7 @@ FsmGraph *LexFactorRep::walk( Compiler *pd )
 
 
 /* Clean up after a factor with negation node. */
-FactorNeg::~FactorNeg()
+LexFactorNeg::~LexFactorNeg()
 {
 	switch ( type ) {
 		case NegateType:
@@ -1363,7 +1363,7 @@ FactorNeg::~FactorNeg()
 }
 
 /* Evaluate a factor with negation node. */
-FsmGraph *FactorNeg::walk( Compiler *pd )
+FsmGraph *LexFactorNeg::walk( Compiler *pd )
 {
 	FsmGraph *retFsm = 0;
 
@@ -1397,7 +1397,7 @@ FsmGraph *FactorNeg::walk( Compiler *pd )
 }
 
 /* Clean up after a factor node. */
-Factor::~Factor()
+LexFactor::~LexFactor()
 {
 	switch ( type ) {
 		case LiteralType:
@@ -1421,7 +1421,7 @@ Factor::~Factor()
 }
 
 /* Evaluate a factor node. */
-FsmGraph *Factor::walk( Compiler *pd )
+FsmGraph *LexFactor::walk( Compiler *pd )
 {
 	FsmGraph *rtnVal = 0;
 	switch ( type ) {

@@ -162,10 +162,10 @@ struct Literal;
 struct LexTerm;
 struct LexFactorAug;
 struct LexFactorRep;
-struct FactorNeg;
-struct Factor;
-struct Expression;
-struct Join;
+struct LexFactorNeg;
+struct LexFactor;
+struct LexExpression;
+struct LexJoin;
 struct JoinOrLm;
 struct RegionJoinOrLm;
 struct TokenRegion;
@@ -317,7 +317,7 @@ struct PriorityAug
  */
 struct VarDef
 {
-	VarDef( const String &name, Join *join )
+	VarDef( const String &name, LexJoin *join )
 		: name(name), join(join) { }
 	
 	/* Parse tree traversal. */
@@ -325,7 +325,7 @@ struct VarDef
 	void makeNameTree( const InputLoc &loc, Compiler *pd );
 
 	String name;
-	Join *join;
+	LexJoin *join;
 };
 
 /*
@@ -405,7 +405,7 @@ struct TokenDef
 	public TokenDefPtr2
 {
 	TokenDef( const String &name, const String &literal, bool isLiteral, bool ignore,
-		Join *join, CodeBlock *codeBlock, InputLoc &semiLoc, 
+		LexJoin *join, CodeBlock *codeBlock, InputLoc &semiLoc, 
 		int longestMatchId, Namespace *nspace, TokenRegion *tokenRegion,
 		ReCaptureVect *pReCaptureVect, ObjectDef *objectDef, Context *contextIn )
 	: 
@@ -426,7 +426,7 @@ struct TokenDef
 	String literal;
 	bool isLiteral;
 	bool ignore;
-	Join *join;
+	LexJoin *join;
 	Action *action;
 	CodeBlock *codeBlock;
 	LangEl *tdLangEl;
@@ -756,17 +756,17 @@ typedef DList<Namespace> NamespaceList;
 typedef BstSet< Namespace*, CmpOrd<Namespace*> > NamespaceSet;
 
 /* List of Expressions. */
-typedef DList<Expression> ExprList;
+typedef DList<LexExpression> ExprList;
 
 struct JoinOrLm
 {
-	JoinOrLm( Join *join ) : 
+	JoinOrLm( LexJoin *join ) : 
 		join(join) {}
 
 	FsmGraph *walk( Compiler *pd );
 	void makeNameTree( Compiler *pd );
 	
-	Join *join;
+	LexJoin *join;
 };
 
 struct RegionJoinOrLm
@@ -783,12 +783,12 @@ struct RegionJoinOrLm
 };
 
 /*
- * Join
+ * LexJoin
  */
-struct Join
+struct LexJoin
 {
 	/* Construct with the first expression. */
-	Join( Expression *expr );
+	LexJoin( LexExpression *expr );
 
 	/* Tree traversal. */
 	FsmGraph *walk( Compiler *pd );
@@ -797,14 +797,14 @@ struct Join
 	/* Data. */
 	ExprList exprList;
 
-	Join *context;
+	LexJoin *context;
 	Action *mark;
 };
 
 /*
- * Expression
+ * LexExpression
  */
-struct Expression
+struct LexExpression
 {
 	enum Type { 
 		OrType,
@@ -815,14 +815,14 @@ struct Expression
 		BuiltinType
 	};
 
-	Expression( ) : 
+	LexExpression( ) : 
 		expression(0), term(0), builtin((BuiltinMachine)-1), 
 		type((Type)-1), prev(this), next(this) { }
 
 	/* Construct with an expression on the left and a term on the right. */
-	static Expression *cons( Expression *expression, LexTerm *term, Type type )
+	static LexExpression *cons( LexExpression *expression, LexTerm *term, Type type )
 	{ 
-		Expression *ret = new Expression;
+		LexExpression *ret = new LexExpression;
 		ret->type = type;
 		ret->expression = expression;
 		ret->term = term;
@@ -830,36 +830,36 @@ struct Expression
 	}
 
 	/* Construct with only a term. */
-	static Expression *cons( LexTerm *term )
+	static LexExpression *cons( LexTerm *term )
 	{
-		Expression *ret = new Expression;
+		LexExpression *ret = new LexExpression;
 		ret->type = TermType;
 		ret->term = term;
 		return ret;
 	}
 	
 	/* Construct with a builtin type. */
-	static Expression *cons( BuiltinMachine builtin )
+	static LexExpression *cons( BuiltinMachine builtin )
 	{
-		Expression *ret = new Expression;
+		LexExpression *ret = new LexExpression;
 		ret->type = BuiltinType;
 		ret->builtin = builtin;
 		return ret;
 	}
 
-	~Expression();
+	~LexExpression();
 
 	/* Tree traversal. */
 	FsmGraph *walk( Compiler *pd, bool lastInSeq = true );
 	void makeNameTree( Compiler *pd );
 
 	/* Node data. */
-	Expression *expression;
+	LexExpression *expression;
 	LexTerm *term;
 	BuiltinMachine builtin;
 	Type type;
 
-	Expression *prev, *next;
+	LexExpression *prev, *next;
 };
 
 /*
@@ -991,7 +991,7 @@ struct LexFactorRep
 		return f;
 	}
 	
-	static LexFactorRep *cons( const InputLoc &loc, FactorNeg *factorNeg )
+	static LexFactorRep *cons( const InputLoc &loc, LexFactorNeg *factorNeg )
 	{
 		LexFactorRep *f = new LexFactorRep;
 		f->type = FactorNegType;
@@ -1008,7 +1008,7 @@ struct LexFactorRep
 
 	InputLoc loc;
 	LexFactorRep *factorRep;
-	FactorNeg *factorNeg;
+	LexFactorNeg *factorNeg;
 	int lowerRep, upperRep;
 	Type type;
 
@@ -1017,7 +1017,7 @@ struct LexFactorRep
 };
 
 /* Fifth level of precedence. Provides Negation. */
-struct FactorNeg
+struct LexFactorNeg
 {
 	enum Type { 
 		NegateType, 
@@ -1025,16 +1025,16 @@ struct FactorNeg
 		FactorType
 	};
 
-	FactorNeg()
+	LexFactorNeg()
 	:
 		factorNeg(0),
 		factor(0),
 		type((Type)-1)
 	{}
 
-	static FactorNeg *cons( const InputLoc &loc, FactorNeg *factorNeg, Type type )
+	static LexFactorNeg *cons( const InputLoc &loc, LexFactorNeg *factorNeg, Type type )
 	{
-		FactorNeg *f = new FactorNeg;
+		LexFactorNeg *f = new LexFactorNeg;
 		f->type = type;
 		f->loc = loc;
 		f->factorNeg = factorNeg;
@@ -1042,9 +1042,9 @@ struct FactorNeg
 		return f;
 	}
 
-	static FactorNeg *cons( const InputLoc &loc, Factor *factor )
+	static LexFactorNeg *cons( const InputLoc &loc, LexFactor *factor )
 	{
-		FactorNeg *f = new FactorNeg;
+		LexFactorNeg *f = new LexFactorNeg;
 		f->type = FactorType;
 		f->loc = loc;
 		f->factorNeg = 0;
@@ -1052,22 +1052,22 @@ struct FactorNeg
 		return f;
 	}
 
-	~FactorNeg();
+	~LexFactorNeg();
 
 	/* Tree traversal. */
 	FsmGraph *walk( Compiler *pd );
 	void makeNameTree( Compiler *pd );
 
 	InputLoc loc;
-	FactorNeg *factorNeg;
-	Factor *factor;
+	LexFactorNeg *factorNeg;
+	LexFactor *factor;
 	Type type;
 };
 
 /*
- * Factor
+ * LexFactor
  */
-struct Factor
+struct LexFactor
 {
 	/* Language elements a factor node can be. */
 	enum Type {
@@ -1079,7 +1079,7 @@ struct Factor
 		ParenType,
 	}; 
 	
-	Factor()
+	LexFactor()
 	:
 		literal(0),
 		range(0),
@@ -1093,45 +1093,45 @@ struct Factor
 	{}
 
 	/* Construct with a literal fsm. */
-	static Factor *cons( Literal *literal )
+	static LexFactor *cons( Literal *literal )
 	{
-		Factor *f = new Factor;
+		LexFactor *f = new LexFactor;
 		f->type = LiteralType;
 		f->literal = literal;
 		return f;
 	}
 
 	/* Construct with a range. */
-	static Factor *cons( Range *range )
+	static LexFactor *cons( Range *range )
 	{
-		Factor *f = new Factor;
+		LexFactor *f = new LexFactor;
 		f->type = RangeType;
 		f->range = range;
 		return f;
 	}
 	
 	/* Construct with the or part of a regular expression. */
-	static Factor *cons( ReItem *reItem )
+	static LexFactor *cons( ReItem *reItem )
 	{
-		Factor *f = new Factor;
+		LexFactor *f = new LexFactor;
 		f->type = OrExprType;
 		f->reItem = reItem;
 		return f;
 	}
 
 	/* Construct with a regular expression. */
-	static Factor *cons( RegExpr *regExp )
+	static LexFactor *cons( RegExpr *regExp )
 	{
-		Factor *f = new Factor;
+		LexFactor *f = new LexFactor;
 		f->type = RegExprType;
 		f->regExp = regExp;
 		return f;
 	}
 
 	/* Construct with a reference to a var def. */
-	static Factor *cons( const InputLoc &loc, VarDef *varDef )
+	static LexFactor *cons( const InputLoc &loc, VarDef *varDef )
 	{
-		Factor *f = new Factor;
+		LexFactor *f = new LexFactor;
 		f->type = ReferenceType;
 		f->loc = loc;
 		f->varDef = varDef;
@@ -1139,16 +1139,16 @@ struct Factor
 	}
 
 	/* Construct with a parenthesized join. */
-	static Factor *cons( Join *join )
+	static LexFactor *cons( LexJoin *join )
 	{
-		Factor *f = new Factor;
+		LexFactor *f = new LexFactor;
 		f->type = ParenType;
 		f->join = join;
 		return f;
 	}
 	
 	/* Cleanup. */
-	~Factor();
+	~LexFactor();
 
 	/* Tree traversal. */
 	FsmGraph *walk( Compiler *pd );
@@ -1160,7 +1160,7 @@ struct Factor
 	ReItem *reItem;
 	RegExpr *regExp;
 	VarDef *varDef;
-	Join *join;
+	LexJoin *join;
 	int lower, upper;
 	Type type;
 };

@@ -440,8 +440,7 @@ typedef DList<Action> ActionList;
 typedef AvlTree<Action, String, CmpStr> ActionDict;
 
 struct VarDef;
-struct Join;
-struct Expression;
+struct LexJoin;
 struct LexTerm;
 struct FactorAug;
 struct FactorLabel;
@@ -498,7 +497,7 @@ struct NameInst
 	/* All names underneath us in order of appearance. */
 	NameVect childVect;
 
-	/* Join scopes need an implicit "final" target. */
+	/* LexJoin scopes need an implicit "final" target. */
 	NameInst *start, *final;
 
 	/* During a fsm generation walk, lists the names that are referenced by
@@ -550,7 +549,7 @@ struct Compiler
 	/* Make a name id in the current name instantiation scope if it is not
 	 * already there. */
 	NameInst *addNameInst( const InputLoc &loc, char *data, bool isLabel );
-	NameInst *makeJoinNameTree( Join *join );
+	NameInst *makeJoinNameTree( LexJoin *join );
 	NameInst *makeNameTree( );
 	void fillNameIndex( NameInst **nameIndex, NameInst *from );
 	NameInst **makeNameIndex( NameInst *rootName );

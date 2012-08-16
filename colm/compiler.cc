@@ -692,8 +692,8 @@ NameInst **Compiler::makeNameIndex( NameInst *rootName )
 
 void Compiler::createBuiltin( const char *name, BuiltinMachine builtin )
 {
-	Expression *expression = Expression::cons( builtin );
-	Join *join = new Join( expression );
+	LexExpression *expression = LexExpression::cons( builtin );
+	LexJoin *join = new LexJoin( expression );
 	VarDef *varDef = new VarDef( name, join );
 	GraphDictEl *graphDictEl = new GraphDictEl( name, varDef );
 	rootNamespace->rlMap.insert( graphDictEl );
@@ -1056,7 +1056,7 @@ void Compiler::createDefaultScanner()
 	newEl->isInstance = true;
 	instanceList.append( newEl );
 
-	Join *join = new Join( Expression::cons( BT_Any ) );
+	LexJoin *join = new LexJoin( LexExpression::cons( BT_Any ) );
 		
 	TokenDef *tokenDef = new TokenDef( name, String(), false, false, 
 			join, 0, loc, nextTokenId++, 
@@ -1264,7 +1264,7 @@ void Compiler::initEmptyScanners()
 			InputLoc loc = { 0, 0, 0 };
 			String name( reg->name.length() + 16, "__%s_DEF_PAT_%d", reg->name.data, def++ );
 
-			Join *join = new Join( Expression::cons( BT_Any ) );
+			LexJoin *join = new LexJoin( LexExpression::cons( BT_Any ) );
 				
 			TokenDef *tokenDef = new TokenDef( name, String(), false, false, join, 
 					0, loc, nextTokenId++, rootNamespace, reg, 0, 0, 0 );

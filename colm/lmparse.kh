@@ -78,7 +78,7 @@ struct ColmParser
 
 	int token( InputLoc &loc, int tokId, char *tokstart, int toklen );
 	void addRegularDef( const InputLoc &loc, Namespace *nspace, 
-		const String &name, Join *join );
+		const String &name, LexJoin *join );
 	TokenRegion *createRegion( String &name );
 	void addRegionDef( const InputLoc &loc, Namespace *nspace, 
 		const String &name, TokenRegion *join );

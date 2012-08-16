@@ -955,8 +955,8 @@ literal_item: opt_no_ignore TK_Literal opt_no_ignore
 		if ( ldel != 0 )
 			error( $2->loc ) << "literal already defined in this namespace" << endp;
 		else {
-			Join *join = new Join( Expression::cons( LexTerm::cons( LexFactorAug::cons(
-				LexFactorRep::cons( $2->loc, FactorNeg::cons( $2->loc, Factor::cons(
+			LexJoin *join = new LexJoin( LexExpression::cons( LexTerm::cons( LexFactorAug::cons(
+				LexFactorRep::cons( $2->loc, LexFactorNeg::cons( $2->loc, LexFactor::cons(
 				Literal::cons( $2->loc, $2->data, 
 					Literal::LitString ) ) ) ) ) ) ) );
 
@@ -1023,7 +1023,7 @@ token_def:
 	final {
 		bool ignore = $1->ignore;
 		String name = $2->name;
-		Join *join = $7->join;
+		LexJoin *join = $7->join;
 		CodeBlock *transBlock = $11->transBlock;
 
 		/* Check the region if this is for an ignore. */
@@ -1532,7 +1532,7 @@ optional_else:
 	};
 
 #
-# Code Expression Lists.
+# Code LexExpression Lists.
 #
 nonterm code_expr_list
 {
@@ -2086,8 +2086,8 @@ opt_rl_join:
 
 nonterm rl_join
 {
-	Join *join;
-	Join *context;
+	LexJoin *join;
+	LexJoin *context;
 };
 
 rl_join: 
@@ -2100,7 +2100,7 @@ rl_join:
 rl_join: 
 	rl_expr 
 	final {
-		$$->join = new Join( $1->expression );
+		$$->join = new LexJoin( $1->expression );
 	};
 
 # Context at the end of a pattern that is not included in the match
@@ -2111,34 +2111,34 @@ opt_context: final { $$->context = 0; };
 
 nonterm rl_expr
 {
-	Expression *expression;
+	LexExpression *expression;
 };
 
 rl_expr: 
 	rl_expr '|' rl_term_short final {
-		$$->expression = Expression::cons( $1->expression, 
-				$3->term, Expression::OrType );
+		$$->expression = LexExpression::cons( $1->expression, 
+				$3->term, LexExpression::OrType );
 	};
 rl_expr: 
 	rl_expr '&' rl_term_short final {
-		$$->expression = Expression::cons( $1->expression, 
-				$3->term, Expression::IntersectType );
+		$$->expression = LexExpression::cons( $1->expression, 
+				$3->term, LexExpression::IntersectType );
 	};
 # This priority specification overrides the innermost parsing strategy which
 # results ordered choice interpretation of the grammar.
 rl_expr: 
 	rl_expr '-' rl_term_short final {
-		$$->expression = Expression::cons( $1->expression, 
-				$3->term, Expression::SubtractType );
+		$$->expression = LexExpression::cons( $1->expression, 
+				$3->term, LexExpression::SubtractType );
 	};
 rl_expr: 
 	rl_expr TK_DashDash rl_term_short final {
-		$$->expression = Expression::cons( $1->expression, 
-				$3->term, Expression::StrongSubtractType );
+		$$->expression = LexExpression::cons( $1->expression, 
+				$3->term, LexExpression::StrongSubtractType );
 	};
 rl_expr: 
 	rl_term_short final {
-		$$->expression = Expression::cons( $1->term );
+		$$->expression = LexExpression::cons( $1->term );
 	};
 
 nonterm rl_term_short
@@ -2323,38 +2323,38 @@ factor_rep_num:
 
 nonterm factor_neg
 {
-	FactorNeg *factorNeg;
+	LexFactorNeg *factorNeg;
 };
 
 factor_neg:
 	'!' factor_neg final {
-		$$->factorNeg = FactorNeg::cons( $1->loc,
-				$2->factorNeg, FactorNeg::NegateType );
+		$$->factorNeg = LexFactorNeg::cons( $1->loc,
+				$2->factorNeg, LexFactorNeg::NegateType );
 	};
 factor_neg:
 	'^' factor_neg final {
-		$$->factorNeg = FactorNeg::cons( $1->loc,
-				$2->factorNeg, FactorNeg::CharNegateType );
+		$$->factorNeg = LexFactorNeg::cons( $1->loc,
+				$2->factorNeg, LexFactorNeg::CharNegateType );
 	};
 factor_neg:
 	rl_factor final {
-		$$->factorNeg = FactorNeg::cons( $1->factor->loc, $1->factor );
+		$$->factorNeg = LexFactorNeg::cons( $1->factor->loc, $1->factor );
 	};
 
 nonterm rl_factor
 {
-	Factor *factor;
+	LexFactor *factor;
 };
 
 rl_factor: 
 	TK_Literal final {
 		/* Create a new factor node going to a concat literal. */
-		$$->factor = Factor::cons( Literal::cons( $1->loc, $1->data, Literal::LitString ) );
+		$$->factor = LexFactor::cons( Literal::cons( $1->loc, $1->data, Literal::LitString ) );
 	};
 rl_factor: 
 	alphabet_num final {
 		/* Create a new factor node going to a literal number. */
-		$$->factor = Factor::cons( Literal::cons( $1->loc, 
+		$$->factor = LexFactor::cons( Literal::cons( $1->loc, 
 				$1->data, Literal::Number ) );
 	};
 rl_factor:
@@ -2373,7 +2373,7 @@ rl_factor:
 				}
 				else {
 					/* Create a factor node that is a lookup of an expression. */
-					$$->factor = Factor::cons( $1->loc, gdNode->value );
+					$$->factor = LexFactor::cons( $1->loc, gdNode->value );
 				}
 				break;
 			}
@@ -2390,22 +2390,22 @@ rl_factor:
 rl_factor:
 	TK_SqOpen regular_expr_or_data TK_SqClose final {
 		/* Create a new factor node going to an OR expression. */
-		$$->factor = Factor::cons( ReItem::cons( $1->loc, $2->reOrBlock, ReItem::OrBlock ) );
+		$$->factor = LexFactor::cons( ReItem::cons( $1->loc, $2->reOrBlock, ReItem::OrBlock ) );
 	};
 rl_factor:
 	TK_SqOpenNeg regular_expr_or_data TK_SqClose final {
 		/* Create a new factor node going to a negated OR expression. */
-		$$->factor = Factor::cons( ReItem::cons( $1->loc, $2->reOrBlock, ReItem::NegOrBlock ) );
+		$$->factor = LexFactor::cons( ReItem::cons( $1->loc, $2->reOrBlock, ReItem::NegOrBlock ) );
 	};
 rl_factor:
 	range_lit TK_DotDot range_lit final {
 		/* Create a new factor node going to a range. */
-		$$->factor = Factor::cons( Range::cons( $1->literal, $3->literal ) );
+		$$->factor = LexFactor::cons( Range::cons( $1->literal, $3->literal ) );
 	};
 rl_factor:
 	'(' rl_join ')' final {
 		/* Create a new factor going to a parenthesized join. */
-		$$->factor = Factor::cons( $2->join );
+		$$->factor = LexFactor::cons( $2->join );
 	};
 
 nonterm range_lit
@@ -2618,7 +2618,7 @@ int ColmParser::parseLangEl( int type, const Token *token )
 }
 
 void ColmParser::addRegularDef( const InputLoc &loc, Namespace *nspace,
-		const String &name, Join *join )
+		const String &name, LexJoin *join )
 {
 	GraphDictEl *newEl = nspace->rlMap.insert( name );
 	if ( newEl != 0 ) {
