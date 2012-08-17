@@ -13,9 +13,9 @@ lex start
 
 	token open_paren /'('/ 
 	{
-		parse_stop NC: nested_comment( stdin )
-		print( %NC '\n' )
-		input.push_ignore( NC )
+		parse_stop NC: nested_comment[ stdin ]
+		print( %NC.tree '\n' )
+		input.push_ignore( NC.tree )
 	}
 }
 

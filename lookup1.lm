@@ -1515,16 +1515,16 @@ def class_specifier
 	[class_head base_clause_opt '{' class_member_rep class_body_end '}']
 	{
 # FIXME: reparse not implemented yet
+# FIXME FIXME: reparse is actually implemented now implemented
 #		# Visit class function bodies, but skip nested classes.
 #		for CFB: class_function_body in lhs {
 #			skipping class_specifier
 #
 #			# Reparse the text of the class function body as a function body
-#			function_body FB = reparse function_body( CFB )
+#			function_body FB = parse function_body[ $CFB ]
 #
 #			# Replace the class function body with the parsed function body.
-#			CFB = construct class_function_body 
-#				[FB]
+#			CFB = cons class_function_body [FB.tree]
 #		}
 	}
 

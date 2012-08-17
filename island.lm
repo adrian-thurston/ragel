@@ -50,8 +50,8 @@ def top_item
 def start 
 	[top_item*]
 
-S: start = parse start( stdin )
-print_xml( S )
+parse S: start[ stdin ]
+print_xml( S.tree )
 print( '\n' )
 
 #pattern start

@@ -23,7 +23,8 @@ def item
 def start 
 	[item* ';']
 
-parse Start: start( stdin )
+parse StartP: start[ stdin ]
+Start: start = StartP.tree
 
 if ( ! Start ) {
 	print( 'parse error\n' )

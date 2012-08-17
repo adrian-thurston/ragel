@@ -69,7 +69,8 @@ def header
 def request
 	[request_line header* CRLF]
 
-parse R: request*( stdin )
+parse RP: request*[ stdin ]
+R: request* = RP.tree
 
 if !R {
 	print( error() )

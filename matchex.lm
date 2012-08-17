@@ -21,13 +21,13 @@ def item
 	[tag]
 |	[id]
 
-Tag: tag = parse tag( stdin )
+parse Tag: tag[ stdin ]
 
 # Style: List of literal text and types.
-match Tag ["<person name=" Val1:id attr*">" item* "</person>"]
+match Tag.tree ["<person name=" Val1:id attr*">" item* "</person>"]
 
 # Style: Literal text with embedded lists of types.
-match Tag "<person name=[Val2:id attr*]>[item*]</person>"
+match Tag.tree "<person name=[Val2:id attr*]>[item*]</person>"
 
 print( ^Val1 '\n' )
 print( ^Val2 '\n' )

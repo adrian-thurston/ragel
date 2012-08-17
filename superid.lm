@@ -57,5 +57,6 @@ def start
 		print( Item2.msg )
 	}
 
-print_xml( parse start(stdin) )
+parse S: start[stdin]
+print_xml( S.tree )
 print( '\n' )

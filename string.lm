@@ -50,6 +50,6 @@ def start
 		}
 	}
 
-S: start = parse start(stdin)
-print_xml( S )
+parse S: start[stdin]
+print_xml( S.tree )
 print( '\n' )

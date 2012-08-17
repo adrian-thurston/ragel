@@ -12,7 +12,8 @@ def item
 def start 
 	[item*]
 
-Input: start = parse start( stdin )
+parse InputP: start[ stdin ]
+Input: start = InputP.tree
 
 cons Output: accum<start> []
 
