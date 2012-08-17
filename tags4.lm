@@ -327,8 +327,8 @@ bool should_flatten( TI: tag_id )
 #    }
 #}
 
-HTML: start = parse start( stdin )
-print( HTML )
+HTML: parser<start> = parse start[ stdin ]
+print( HTML.tree )
 
 #print_xml( HTML )
 #for C: close_tag in HTML 

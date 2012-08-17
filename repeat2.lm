@@ -241,8 +241,8 @@ def preamble
 def start 
 	[preamble chapter*]
 
-parse Start: start( stdin )
-if ( ! Start ) {
+parse Start: start[ stdin ]
+if ( ! Start.tree ) {
 	print( error() '\n' )
 	exit( 1 )
 }
@@ -402,7 +402,7 @@ int printLines( Lines: line* )
 	}
 }
 
-match Start 
+match Start.tree
 	[Preamble: preamble Chapters: chapter*]
 
 Title: title = title in Preamble

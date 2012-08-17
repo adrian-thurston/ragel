@@ -12,9 +12,9 @@ def item
 def start 
 	[item*]
 
-Input: start = parse start( stdin )
+parse Input: start[ stdin ]
 
-match Input [ItemList: item*]
+match Input.tree [ItemList: item*]
 
 for I: item* in repeat( ItemList )
 	print( ^I '\n' )

@@ -152,7 +152,8 @@ def document
 def start 
 	[document]
 
-S: start = parse start(stdin)
+parse SP: start[stdin]
+S: start = SP.tree
 
 for Switch:tag in S {
 	if match Switch
