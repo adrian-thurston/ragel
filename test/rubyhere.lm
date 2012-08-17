@@ -24,16 +24,16 @@ lex here_start
 			HereId = input.pull( match_length )
 
 			# Get the data up to the rest of the line.
-			parse_stop ROL: rest_of_line( input )
+			parse_stop ROL: rest_of_line[ input ]
 
 			# Parse the heredoc data.
-			parse_stop HereData: here_data( input )
+			parse_stop HereData: here_data[ input ]
 
 			# Push the rest-of-line data back to the input stream.
-			input.push( $ROL )
+			input.push( $ROL.tree )
 
 			# Send the here_id token. Attach the heredoc data as an attribute.
-			input.push( make_token( typeid<here_id> HereId HereData ) )
+			input.push( make_token( typeid<here_id> HereId HereData.tree ) )
 		}
 }
 
