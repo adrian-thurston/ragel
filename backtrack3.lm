@@ -26,4 +26,4 @@ def start
 		print_xml( match lhs "id 77 88 \"hello\" dude dude\n" )
 	}
 
-parse start(stdin)
+parse start[stdin]

@@ -479,6 +479,6 @@ int print_all_names( s: start )
 	}
 }
 
-S: start = parse start( stdin )
-print_all_names( S )
+S: start = parse start[ stdin ]
+print_all_names( S.tree )
 print( '*** SUCCESS ***\n' )
