@@ -25,7 +25,8 @@ int func( P: program )
 int main()
 {
     InputFile: stream = open( 'func.in' "r" )
-    P: program = parse program( InputFile )
+    parse PP: program[ InputFile ]
+	P: program = PP.tree
 	func( P )
 	print( P '\n' )
 }

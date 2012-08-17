@@ -598,7 +598,8 @@ def paren_args
 # Grammar finished
 #
 
-parse R: ruby(stdin)
+parse RP: ruby[stdin]
+R: ruby = RP.tree
 
 print_xml( R )
 

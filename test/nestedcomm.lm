@@ -38,7 +38,8 @@ def nested_comment
 
 def nested [id*]
 
-P: nested = parse nested( stdin )
+parse NP: nested[ stdin ]
+P: nested = NP.tree
 
 print( ^P '\n' )
 print_xml( ^P )

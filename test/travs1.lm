@@ -63,7 +63,8 @@ def factor
 def alphabet_num 
 	[uint]
 
-S: start = parse start(stdin)
+parse SP: start[stdin]
+S: start = SP.tree
 
 #
 # Top-Down, Left-Right

@@ -80,4 +80,4 @@ def start
 		print( 'failed\n' )
 	}
 
-parse start(stdin)
+parse start[stdin]

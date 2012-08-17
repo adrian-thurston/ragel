@@ -12,7 +12,9 @@ def four_ids
 	[id id id id]
 
 B: id = construct id "b"
-Input: four_ids = parse four_ids( stdin )
+
+parse InputP: four_ids[ stdin ]
+Input: four_ids = InputP.tree
 
 for Id: id in Input {
 	if ( Id == B )

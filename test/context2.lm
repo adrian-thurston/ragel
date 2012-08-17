@@ -93,6 +93,7 @@ context ruby_here
 
 CTX: ruby_here = cons ruby_here []
 
-S: ruby_here::start = parse ruby_here::start( CTX stdin )
+parse SP: ruby_here::start( CTX ) [ stdin ]
+S: ruby_here::start = SP.tree
 print_xml(S)
 print('\n')

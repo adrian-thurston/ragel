@@ -34,5 +34,6 @@ def start
 	[A1 item* '^']
 |	[A2 item* ';' '\n']
 
-Input: start = parse start( stdin )
+parse InputP: start[ stdin ]
+Input: start = InputP.tree
 print( Input )

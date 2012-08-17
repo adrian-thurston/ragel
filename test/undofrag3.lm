@@ -35,10 +35,9 @@ def F
 		print_xml( Out() )
 	}
 
-
 def start 
 	[A1 item* F '.' '^']
 |	[A2 item* F '.' ';' '\n']
 
-Input: start = parse start( stdin )
-print( Input )
+parse Input: start[ stdin ]
+print( Input.tree )
