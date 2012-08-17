@@ -12,11 +12,11 @@ def item
 def start 
 	[item*]
 
-Input: item* = parse item*( stdin )
+parse Input: item*[ stdin ]
 
-S: start = cons start[ Input ]
+S: start = cons start[ Input.tree ]
 
-Again: start = parse start( Input )
+parse Again: start[ %Input.tree ]
 
-print( %Again )
+print( %Again.tree )
 

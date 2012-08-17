@@ -30,5 +30,5 @@ def start
 	[A item* '!']
 |	[B item* ';\n']
 
-parse Start: start( stdin )
-print( Start "\n" )
+parse Start: start[ stdin ]
+print( Start.tree "\n" )

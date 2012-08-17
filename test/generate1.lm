@@ -724,11 +724,11 @@ int print_stmts( S: start )
 		print( 'STMT: ' ^Stmt '\n' )
 }
 
-S: start = parse start( stdin )
+parse S: start[ stdin ]
 print( '*** SUCCESS ***\n' )
-print( ^S '\n' )
+print( ^S.tree '\n' )
 print( '***\n' )
-print_stmts( S )
-print_target_subscriptions_and_slicings( S )
-print_primary_subscriptions_and_slicings( S )
+print_stmts( S.tree )
+print_target_subscriptions_and_slicings( S.tree )
+print_primary_subscriptions_and_slicings( S.tree )
 print( '*** SUCCESS ***\n' )

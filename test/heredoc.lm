@@ -42,5 +42,5 @@ def heredoc
 	[here_name here_data here_close id nl]
 
 
-S: heredoc = parse heredoc(stdin)
-print_xml(S)
+parse S: heredoc[stdin]
+print_xml(S.tree)

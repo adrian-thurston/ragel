@@ -193,7 +193,9 @@ def item
 def start 
 	[item*]
 
-S: start = parse start(stdin)
+parse SP: start[stdin]
+S: start = SP.tree
+
 if S {
 	for I: external_link in S
 		print( 'EXTERNAL LINK: ' I  '\n' )

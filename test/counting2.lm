@@ -81,4 +81,4 @@ def start
 		}
 	}
 
-parse start( stdin )
+parse start[ stdin ]

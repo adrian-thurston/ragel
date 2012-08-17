@@ -43,7 +43,8 @@ def item_list
 	[item_list tag]
 |	[]
 
-IL: item_list = parse item_list(stdin)
+parse ILP: item_list[stdin]
+IL: item_list = ILP.tree
 
 # Get the item list
 match IL [RootItemList: item_list]

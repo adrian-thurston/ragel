@@ -289,10 +289,10 @@ int close( Start: ref start )
 
         if should_close( TagId )
         {
-			CloseId: close_id = parse close_id( TagId.data )
+			parse CloseId: close_id[ TagId.data ]
 
             CloseTag: opt_close_tag = 
-                construct opt_close_tag ['</' CloseId '>']
+                construct opt_close_tag ['</' CloseId.tree '>']
 
             # Close the tag and put inside after it.
             TL = construct item

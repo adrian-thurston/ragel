@@ -84,12 +84,12 @@ def port
 	[]
 
 # Parse the input.
-P: program = parse program( stdin )
+parse P: program[ stdin ]
 
 Output: output Output = construct output []
 
 # Take off the leading C from the input file and send it out.
-match P [C: c '%%' protocol*]
+match P.tree [C: c '%%' protocol*]
 
 Output << [$C]
 Output <<

@@ -43,11 +43,11 @@ def item_list
 	[item_list tag]
 |	[]
 
-parse Attrs: attr_list( stdin )
+parse Attrs: attr_list[ stdin ]
 
-print( %Attrs '\n' )
+print( %Attrs.tree '\n' )
 
 construct IL: item_list 
-	["<wrapper .[Attrs]. ></wrapper>"]
+	["<wrapper .[Attrs.tree]. ></wrapper>"]
 
 print( IL '\n' )
