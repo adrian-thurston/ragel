@@ -88,6 +88,8 @@ def item
 def start 
 	[item*]
 
-S: start = parse start( stdin )
+parse SP: start[ stdin ]
+S: start = SP.tree
+
 print_xml(S)
 print('\n')

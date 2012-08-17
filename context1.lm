@@ -29,5 +29,6 @@ context ctx
 }
 
 CTX: ctx = cons ctx[]
-Input: ctx::start = parse ctx::start( CTX stdin )
+parse InputP: ctx::start( CTX ) [ stdin ]
+Input: ctx::start = InputP.tree
 print( Input '\n' )

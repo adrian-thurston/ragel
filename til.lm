@@ -87,7 +87,8 @@ def labelled_statement
 def goto_statement
 	['goto' id ';']
 
-P: program = parse program(stdin)
+parse PP: program[stdin]
+P: program = PP.tree
 
 #for S:statement* in P
 #{

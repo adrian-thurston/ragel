@@ -74,8 +74,8 @@ lex two
 	[A2 item* ';' '\n']
 }
 
-Two: two = 
-	parse two( stdin )
+parse TwoP: two[ stdin ]
+Two: two = TwoP.tree
 
 Nested: nested = NestedParser.finish()
 

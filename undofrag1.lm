@@ -47,7 +47,8 @@ context ctx
 send SP "a b{c}"
 
 CTX: ctx = cons ctx []
-Input: ctx::start = parse ctx::start( CTX stdin )
+parse InputP: ctx::start( CTX )[stdin]
+Input: ctx::start = InputP.tree
 
 send SP "{e}f g"
 
