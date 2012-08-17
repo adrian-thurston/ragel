@@ -301,7 +301,8 @@ int close( Start: ref start )
     }
 }
 
-HTML: start = parse start( stdin )
+HTML_P: parser<start> = parse start[ stdin ]
+HTML: start = HTML_P.tree
 flatten( HTML )
 print_xml( HTML )
 printLinks( HTML )

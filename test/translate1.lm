@@ -19,6 +19,6 @@ def item
 def start 
 	[item*]
 
-Input: start = parse start( stdin )
-print( %Input )
+parse Input: start[ stdin ]
+print( %Input.tree )
 

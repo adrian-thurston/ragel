@@ -82,7 +82,7 @@ def port
 	[]
 
 # Parse the input.
-program = parse PP: program[ stdin ]
+parse PP: program[ stdin ]
 P: program = PP.tree
 
 Output: output Output = construct output []
