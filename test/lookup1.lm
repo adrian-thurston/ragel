@@ -2156,7 +2156,8 @@ int printNamespace()
 	printObject( '' rootNamespace )
 }
 
-S: start = parse start( stdin )
+parse SP: start[ stdin ]
+S: start = SP.tree
 if ! S {
 	print( error() )
 	exit( 1 )

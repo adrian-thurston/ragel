@@ -99,14 +99,14 @@ token item
 	/[0-9]+/
 	{
 		M: str = input.pull(match_length)
-		S: sub = parse_stop sub(input)
-		input.push( make_token( typeid<item> M S ) )
+		parse_stop S: sub[input]
+		input.push( make_token( typeid<item> M S.tree ) )
 	}
 
 def stuff
 	[item* '!']
 |	[sub]
 
-S: stuff = parse stuff( stdin  )
-print_xml( S )
+parse S: stuff[ stdin ]
+print_xml( S.tree )
 print( '\n' )

@@ -28,8 +28,8 @@ def item
 def btscan 
 	[item*]
 
-P: btscan P = parse btscan( stdin )
+parse P: btscan[ stdin ]
 
-match P ~!abb !abba !aab
-print_xml(P)
+match P.tree ~!abb !abba !aab
+print_xml(P.tree)
 print( '\n' )

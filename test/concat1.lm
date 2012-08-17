@@ -45,7 +45,8 @@ def start
 
 start parseStart( InputFile: stream )
 {
-	return parse start( InputFile )
+	parse P: start[ InputFile ]
+	return P.tree
 }
 
 start parseTxt( T: str )

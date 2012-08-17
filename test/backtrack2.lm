@@ -20,5 +20,5 @@ def prods
 def start
 	[prods]
 
-parse S: start( stdin )
-print_xml( match S "!aa bb cc dd" )
+parse S: start[ stdin ]
+print_xml( match S.tree "!aa bb cc dd" )

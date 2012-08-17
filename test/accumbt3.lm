@@ -13,8 +13,8 @@ lex start
 
 	token open_paren /'('/ 
 	{
-		parse_stop NC: nested_comment( input )
-		print( 'discarding: ' NC '\n' )
+		parse_stop NC: nested_comment[ input ]
+		print( 'discarding: ' NC.tree '\n' )
 	}
 }
 
