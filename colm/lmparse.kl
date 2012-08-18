@@ -729,41 +729,100 @@ repl_el: code_expr
 #
 # Accumulate List
 #
-accumulate: 
-	init_accum_list accum_list;
 
-init_accum_list: 
+nonterm accumulate
+{
+	ReplItemList *list;
+};
+
+accumulate: 
+	accum_list
 	final {
-		replItemList = new ReplItemList;
+		$$->list = $1->list;
 	};
 
-accum_list: accum_top_el accum_list;
-accum_list: accum_top_el;
+nonterm accum_list uses accumulate;
 
-accum_top_el: '"' lit_accum_el_list '"';
-accum_top_el: '[' accum_el_list ']';
+accum_list: accum_top_el accum_list
+	final {
+		$$->list = $1->list;
+		$$->list->append( *$2->list );
+		delete $2->list;
+	};
 
-lit_accum_el_list: lit_accum_el_list lit_accum_el;
-lit_accum_el_list: ;
+accum_list: accum_top_el
+	final {
+		$$->list = $1->list;
+	};
+
+nonterm accum_top_el uses accumulate;
+
+accum_top_el: '"' lit_accum_el_list '"'
+	final {
+		$$->list = $2->list;
+	};
+
+accum_top_el: '[' accum_el_list ']'
+	final {
+		$$->list = $2->list;
+	};
+
+nonterm lit_accum_el_list uses accumulate;
+
+lit_accum_el_list:
+	lit_accum_el_list lit_accum_el
+	final {
+		$$->list = $1->list;
+		$$->list->append( *$2->list );
+		delete $2->list;
+	};
+
+lit_accum_el_list: 
+	final {
+		$$->list = new ReplItemList;
+	};
+
+nonterm lit_accum_el uses accumulate;
 
 lit_accum_el: TK_LitPat
 	final {
 		ReplItem *replItem = ReplItem::cons( $1->loc, ReplItem::InputText, $1->data );
-		replItemList->append( replItem );
+		$$->list = new ReplItemList;
+		$$->list->append( replItem );
 	};
 
-lit_accum_el: '[' accum_el_list ']';
+lit_accum_el: '[' accum_el_list ']'
+	final {
+		$$->list = $2->list;
+	};
 
-accum_el_list: accum_el_list accum_el;
-accum_el_list: ;
+nonterm accum_el_list uses accumulate;
+
+accum_el_list: accum_el_list accum_el
+	final {
+		$$->list = $1->list;
+		$$->list->append( *$2->list );
+		delete $2->list;
+	};
+		
+accum_el_list:
+	final {
+		$$->list = new ReplItemList;
+	};
+
+nonterm accum_el uses accumulate;
 
 accum_el: code_expr
 	final {
 		ReplItem *replItem = ReplItem::cons( $1->expr->loc, ReplItem::ExprType, $1->expr );
-		replItemList->append( replItem );
+		$$->list = new ReplItemList;
+		$$->list->append( replItem );
 	};
 
-accum_el: '"' lit_accum_el_list '"';
+accum_el: '"' lit_accum_el_list '"'
+	final {
+		$$->list = $2->list;
+	};
 
 
 #
@@ -1868,7 +1927,7 @@ code_factor:
 		TypeRef *parserTypeRef = TypeRef::cons( InputLoc(),
 				TypeRef::Parser, nspaceQual, $4->typeRef, 0 );
 
-		ParserText *parserText = ParserText::cons( $3->loc, nspace, region, replItemList );
+		ParserText *parserText = ParserText::cons( $3->loc, nspace, region, $6->list );
 		pd->parserTextList.append( parserText );
 
 		$$->expr = LangExpr::cons( LangTerm::cons( $2->loc, 
@@ -1949,7 +2008,7 @@ code_factor:
 	final {
 		Namespace *nspace = namespaceStack.top();
 		TokenRegion *region = regionStack.top();
-		ParserText *parserText = ParserText::cons( $2->loc, nspace, region, replItemList );
+		ParserText *parserText = ParserText::cons( $2->loc, nspace, region, $3->list );
 		pd->parserTextList.append( parserText );
 
 		$$->expr = LangExpr::cons( LangTerm::cons( InputLoc(), LangTerm::SendType, $1->varRef, parserText ) );
@@ -1959,7 +2018,7 @@ code_factor:
 	final {
 		Namespace *nspace = namespaceStack.top();
 		TokenRegion *region = regionStack.top();
-		ParserText *parserText = ParserText::cons( $1->loc, nspace, region, replItemList );
+		ParserText *parserText = ParserText::cons( $1->loc, nspace, region, $3->list );
 		pd->parserTextList.append( parserText );
 
 		$$->expr = LangExpr::cons( LangTerm::cons( InputLoc(), LangTerm::SendType, $2->varRef, parserText ) );
