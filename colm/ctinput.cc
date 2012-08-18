@@ -38,7 +38,7 @@ SourceFuncs replFuncs;
  * Pattern
  */
 
-SourceStream *newSourceStreamPattern( Pattern *pattern )
+SourceStream *newSourceStreamPat( Pattern *pattern )
 {
 	SourceStream *is = (SourceStream*)malloc(sizeof(SourceStream));
 	memset( is, 0, sizeof(SourceStream) );
@@ -187,7 +187,7 @@ int inputStreamPatternUndoConsumeData( SourceStream *is, const char *data, int l
 	return length;
 }
 
-extern "C" void initPatternFuncs()
+extern "C" void initPatFuncs()
 {
 	memset( &patternFuncs, 0, sizeof(SourceFuncs) );
 
@@ -204,62 +204,62 @@ extern "C" void initPatternFuncs()
  * Constructor
  */
 
-SourceStream *newSourceStreamRepl( Constructor *constructor )
+SourceStream *newSourceStreamCons( Constructor *constructor )
 {
 	SourceStream *is = (SourceStream*)malloc(sizeof(SourceStream));
 	memset( is, 0, sizeof(SourceStream) );
 	is->handlesLine = true;
 	is->constructor = constructor;
-	is->replItem = constructor->list->head;
+	is->consItem = constructor->list->head;
 	is->funcs = &replFuncs;
 	return is;
 }
 
-LangEl *inputStreamReplGetLangEl( SourceStream *is, long *bindId, char **data, long *length )
+LangEl *inputStreamConsGetLangEl( SourceStream *is, long *bindId, char **data, long *length )
 { 
-	LangEl *klangEl = is->replItem->type == ReplItem::ExprType ? 
-			is->replItem->langEl : is->replItem->factor->langEl;
-	*bindId = is->replItem->bindId;
+	LangEl *klangEl = is->consItem->type == ConsItem::ExprType ? 
+			is->consItem->langEl : is->consItem->factor->langEl;
+	*bindId = is->consItem->bindId;
 
 	*data = 0;
 	*length = 0;
-	is->line = is->replItem->loc.line;
+	is->line = is->consItem->loc.line;
 
-	if ( is->replItem->type == ReplItem::FactorType ) {
-		if ( is->replItem->factor->typeRef->pdaLiteral != 0 ) {
+	if ( is->consItem->type == ConsItem::FactorType ) {
+		if ( is->consItem->factor->typeRef->pdaLiteral != 0 ) {
 			bool unusedCI;
-			prepareLitString( is->replItem->data, unusedCI, 
-					is->replItem->factor->typeRef->pdaLiteral->data,
-					is->replItem->factor->typeRef->pdaLiteral->loc );
+			prepareLitString( is->consItem->data, unusedCI, 
+					is->consItem->factor->typeRef->pdaLiteral->data,
+					is->consItem->factor->typeRef->pdaLiteral->loc );
 
-			*data = is->replItem->data;
-			*length = is->replItem->data.length();
+			*data = is->consItem->data;
+			*length = is->consItem->data.length();
 		}
 	}
 
-	is->replItem = is->replItem->next;
+	is->consItem = is->consItem->next;
 	is->offset = 0;
 	return klangEl;
 }
 
-int inputStreamReplGetData( SourceStream *is, int skip, char *dest, int length, int *copied )
+int inputStreamConsGetData( SourceStream *is, int skip, char *dest, int length, int *copied )
 { 
 	*copied = 0;
 
-	ReplItem *buf = is->replItem;
+	ConsItem *buf = is->consItem;
 	int offset = is->offset;
 
 	while ( true ) {
 		if ( buf == 0 )
 			return INPUT_EOD;
 
-		if ( buf->type == ReplItem::ExprType || buf->type == ReplItem::FactorType )
+		if ( buf->type == ConsItem::ExprType || buf->type == ConsItem::FactorType )
 			return INPUT_LANG_EL;
 
 		if ( offset == 0 )
 			is->line = buf->loc.line;
 
-		assert ( buf->type == ReplItem::InputText );
+		assert ( buf->type == ConsItem::InputText );
 		int avail = buf->data.length() - offset;
 
 		if ( avail > 0 ) {
@@ -292,15 +292,15 @@ int inputStreamReplGetData( SourceStream *is, int skip, char *dest, int length, 
 	return INPUT_DATA;
 }
 
-void inputStreamReplBackup( SourceStream *is )
+void inputStreamConsBackup( SourceStream *is )
 {
-	if ( is->replItem == 0 )
-		is->replItem = is->constructor->list->tail;
+	if ( is->consItem == 0 )
+		is->consItem = is->constructor->list->tail;
 	else
-		is->replItem = is->replItem->prev;
+		is->consItem = is->consItem->prev;
 }
 
-void inputStreamReplPushBackBuf( SourceStream *is, RunBuf *runBuf )
+void inputStreamConsPushBackBuf( SourceStream *is, RunBuf *runBuf )
 {
 	char *data = runBuf->data + runBuf->offset;
 	long length = runBuf->length;
@@ -318,35 +318,35 @@ void inputStreamReplPushBackBuf( SourceStream *is, RunBuf *runBuf )
 	while ( length > is->offset ) {
 		length -= is->offset;
 		if ( is->offset > 0 ) 
-			assert( memcmp( is->replItem->data, data-length, is->offset ) == 0 );
-		inputStreamReplBackup( is );
-		is->offset = is->replItem->data.length();
+			assert( memcmp( is->consItem->data, data-length, is->offset ) == 0 );
+		inputStreamConsBackup( is );
+		is->offset = is->consItem->data.length();
 	}
 
 	is->offset -= length;
-	assert( memcmp( &is->replItem->data[is->offset], data, length ) == 0 );
+	assert( memcmp( &is->consItem->data[is->offset], data, length ) == 0 );
 }
 
-void inputStreamReplUndoConsumeLangEl( SourceStream *is )
+void inputStreamConsUndoConsumeLangEl( SourceStream *is )
 {
-	inputStreamReplBackup( is );
-	is->offset = is->replItem->data.length();
+	inputStreamConsBackup( is );
+	is->offset = is->consItem->data.length();
 }
 
-int inputStreamReplConsumeData( SourceStream *is, int length )
+int inputStreamConsConsumeData( SourceStream *is, int length )
 {
 	int consumed = 0;
 
 	while ( true ) {
-		if ( is->replItem == 0 )
+		if ( is->consItem == 0 )
 			break;
 
-		int avail = is->replItem->data.length() - is->offset;
+		int avail = is->consItem->data.length() - is->offset;
 
 		if ( length >= avail ) {
 			/* Read up to the end of the data. Advance the
 			 * pattern item. */
-			is->replItem = is->replItem->next;
+			is->consItem = is->consItem->next;
 			is->offset = 0;
 
 			length -= avail;
@@ -365,22 +365,22 @@ int inputStreamReplConsumeData( SourceStream *is, int length )
 	return consumed;
 }
 
-int inputStreamReplUndoConsumeData( SourceStream *is, const char *data, int length )
+int inputStreamConsUndoConsumeData( SourceStream *is, const char *data, int length )
 {
 	is->offset -= length;
 	return length;
 }
 
-extern "C" void initReplFuncs()
+extern "C" void initConsFuncs()
 {
 	memset( &replFuncs, 0, sizeof(SourceFuncs) );
 
-	replFuncs.getData = &inputStreamReplGetData;
-	replFuncs.consumeData = &inputStreamReplConsumeData;
-	replFuncs.undoConsumeData = &inputStreamReplUndoConsumeData;
+	replFuncs.getData = &inputStreamConsGetData;
+	replFuncs.consumeData = &inputStreamConsConsumeData;
+	replFuncs.undoConsumeData = &inputStreamConsUndoConsumeData;
 
-	replFuncs.consumeLangEl = &inputStreamReplGetLangEl;
-	replFuncs.undoConsumeLangEl = &inputStreamReplUndoConsumeLangEl;
+	replFuncs.consumeLangEl = &inputStreamConsGetLangEl;
+	replFuncs.undoConsumeLangEl = &inputStreamConsUndoConsumeLangEl;
 }
 
 void sendNamedLangEl( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )

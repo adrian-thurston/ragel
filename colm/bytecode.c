@@ -2548,7 +2548,7 @@ again:
 			}
 
 			Tree *replTree = 0;
-			PatReplNode *nodes = prg->rtd->patReplNodes;
+			PatConsNode *nodes = prg->rtd->patReplNodes;
 			LangElInfo *lelInfo = prg->rtd->lelInfo;
 			long genericId = lelInfo[nodes[rootNode].id].genericId;
 			if ( genericId > 0 ) {

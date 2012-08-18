@@ -940,8 +940,8 @@ struct Compiler
 	Production **prodIdIndex;
 	AlphSet literalSet;
 
-	PatternList patternList;
-	ReplList replList;
+	PatList patternList;
+	ConsList replList;
 	ParserTextList parserTextList;
 
 	ObjectDef *globalObjectDef;
@@ -985,7 +985,7 @@ struct Compiler
 	FsmTables *fsmTables;
 	RuntimeData *runtimeData;
 
-	int nextPatReplId;
+	int nextPatConsId;
 	int nextGenericId;
 
 	FunctionList functionList;

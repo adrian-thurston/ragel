@@ -1237,14 +1237,14 @@ UniqueType *LangTerm::evaluateConstruct( Compiler *pd, CodeVect &code ) const
 	}
 
 	/* Assign bind ids to the variables in the replacement. */
-	for ( ReplItemList::Iter item = *constructor->list; item.lte(); item++ ) {
+	for ( ConsItemList::Iter item = *constructor->list; item.lte(); item++ ) {
 		if ( item->expr != 0 )
 			item->bindId = constructor->nextBindId++;
 	}
 
 	/* Evaluate variable references. */
-	for ( ReplItemList::Iter item = constructor->list->last(); item.gtb(); item-- ) {
-		if ( item->type == ReplItem::ExprType ) {
+	for ( ConsItemList::Iter item = constructor->list->last(); item.gtb(); item-- ) {
+		if ( item->type == ConsItem::ExprType ) {
 			UniqueType *ut = item->expr->evaluate( pd, code );
 		
 			if ( ut->typeId != TYPE_TREE )
@@ -1306,14 +1306,14 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool stop, bo
 	}
 
 	/* Assign bind ids to the variables in the replacement. */
-	for ( ReplItemList::Iter item = *constructor->list; item.lte(); item++ ) {
+	for ( ConsItemList::Iter item = *constructor->list; item.lte(); item++ ) {
 		if ( item->expr != 0 )
 			item->bindId = constructor->nextBindId++;
 	}
 
 	/* Evaluate variable references. */
-	for ( ReplItemList::Iter item = constructor->list->last(); item.gtb(); item-- ) {
-		if ( item->type == ReplItem::ExprType ) {
+	for ( ConsItemList::Iter item = constructor->list->last(); item.gtb(); item-- ) {
+		if ( item->type == ConsItem::ExprType ) {
 			UniqueType *ut = item->expr->evaluate( pd, code );
 		
 			if ( ut->typeId != TYPE_TREE )
@@ -1363,10 +1363,10 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool stop, bo
 	/*****************************/
 
 	/* Assign bind ids to the variables in the replacement. */
-	for ( ReplItemList::Iter item = *parserText->list; item.lte(); item++ ) {
+	for ( ConsItemList::Iter item = *parserText->list; item.lte(); item++ ) {
 		UniqueType *argUt = 0;
 		switch ( item->type ) {
-		case ReplItem::FactorType: {
+		case ConsItem::FactorType: {
 			String result;
 			bool unusedCI;
 			prepareLitString( result, unusedCI, 
@@ -1382,7 +1382,7 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool stop, bo
 			code.appendWord( mapEl->value );
 			break;
 		}
-		case ReplItem::InputText: {
+		case ConsItem::InputText: {
 			/* Make sure we have this string. */
 			StringMapEl *mapEl = 0;
 			if ( pd->literalStrings.insert( item->data, &mapEl ) )
@@ -1392,7 +1392,7 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool stop, bo
 			code.appendWord( mapEl->value );
 			break;
 		}
-		case ReplItem::ExprType:
+		case ConsItem::ExprType:
 			argUt = item->expr->evaluate( pd, code );
 			break;
 		}
@@ -1502,9 +1502,9 @@ UniqueType *LangTerm::evaluateSend( Compiler *pd, CodeVect &code ) const
 	UniqueType *varUt = varRef->evaluate( pd, code );
 
 	/* Assign bind ids to the variables in the replacement. */
-	for ( ReplItemList::Iter item = *parserText->list; item.lte(); item++ ) {
+	for ( ConsItemList::Iter item = *parserText->list; item.lte(); item++ ) {
 		switch ( item->type ) {
-		case ReplItem::FactorType: {
+		case ConsItem::FactorType: {
 			String result;
 			bool unusedCI;
 			prepareLitString( result, unusedCI, 
@@ -1520,7 +1520,7 @@ UniqueType *LangTerm::evaluateSend( Compiler *pd, CodeVect &code ) const
 			code.appendWord( mapEl->value );
 			break;
 		}
-		case ReplItem::InputText: {
+		case ConsItem::InputText: {
 			/* Make sure we have this string. */
 			StringMapEl *mapEl = 0;
 			if ( pd->literalStrings.insert( item->data, &mapEl ) )
@@ -1530,7 +1530,7 @@ UniqueType *LangTerm::evaluateSend( Compiler *pd, CodeVect &code ) const
 			code.appendWord( mapEl->value );
 			break;
 		}
-		case ReplItem::ExprType:
+		case ConsItem::ExprType:
 			item->expr->evaluate( pd, code );
 			break;
 		}
@@ -1585,9 +1585,9 @@ UniqueType *LangTerm::evaluateOrigParse( Compiler *pd, CodeVect &code, bool stop
 UniqueType *LangTerm::evaluateEmbedString( Compiler *pd, CodeVect &code ) const
 {
 	/* Assign bind ids to the variables in the replacement. */
-	for ( ReplItemList::Iter item = *replItemList; item.lte(); item++ ) {
+	for ( ConsItemList::Iter item = *consItemList; item.lte(); item++ ) {
 		switch ( item->type ) {
-		case ReplItem::FactorType: {
+		case ConsItem::FactorType: {
 			String result;
 			bool unusedCI;
 			prepareLitString( result, unusedCI, 
@@ -1603,7 +1603,7 @@ UniqueType *LangTerm::evaluateEmbedString( Compiler *pd, CodeVect &code ) const
 			code.appendWord( mapEl->value );
 			break;
 		}
-		case ReplItem::InputText: {
+		case ConsItem::InputText: {
 			/* Make sure we have this string. */
 			StringMapEl *mapEl = 0;
 			if ( pd->literalStrings.insert( item->data, &mapEl ) )
@@ -1613,14 +1613,14 @@ UniqueType *LangTerm::evaluateEmbedString( Compiler *pd, CodeVect &code ) const
 			code.appendWord( mapEl->value );
 			break;
 		}
-		case ReplItem::ExprType:
+		case ConsItem::ExprType:
 			item->expr->evaluate( pd, code );
 			break;
 		}
 
 	}
 
-	long items = replItemList->length();
+	long items = consItemList->length();
 	for ( long i = 0; i < items-1; i++ )
 		code.append( IN_CONCAT_STR );
 
@@ -3316,7 +3316,7 @@ void Compiler::initGlobalFunctions()
 
 void Compiler::removeNonUnparsableRepls()
 {
-	for ( ReplList::Iter repl = replList; repl.lte(); ) {
+	for ( ConsList::Iter repl = replList; repl.lte(); ) {
 		Constructor *maybeDel = repl++;
 		if ( !maybeDel->parse )
 			replList.detach( maybeDel );

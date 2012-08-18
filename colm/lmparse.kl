@@ -681,102 +681,102 @@ opt_label:
 # Constructor List (constructor)
 #
 
-nonterm replacement
+nonterm constructor
 {
-	ReplItemList *list;
+	ConsItemList *list;
 };
 
-replacement: repl_list
+constructor: cons_list
 	final {
 		$$->list = $1->list;
 	};
 
-nonterm repl_list uses replacement;
+nonterm cons_list uses constructor;
 
-repl_list: repl_top_el repl_list
-	final {
-		$$->list = $1->list;
-		$$->list->append( *$2->list );
-		delete $2->list;
-	};
-repl_list: repl_top_el
-	final {
-		$$->list = $1->list;
-	};
-
-nonterm repl_top_el uses replacement;
-
-repl_top_el: '"' lit_repl_el_list '"'
-	final {
-		$$->list = $2->list;
-	};
-repl_top_el: '[' repl_el_list ']'
-	final {
-		$$->list = $2->list;
-	};
-
-nonterm lit_repl_el_list uses replacement;
-
-lit_repl_el_list: lit_repl_el_list lit_repl_el
+cons_list: cons_top_el cons_list
 	final {
 		$$->list = $1->list;
 		$$->list->append( *$2->list );
 		delete $2->list;
 	};
-lit_repl_el_list: 
+cons_list: cons_top_el
 	final {
-		$$->list = new ReplItemList;
+		$$->list = $1->list;
 	};
 
-nonterm lit_repl_el uses replacement;
+nonterm cons_top_el uses constructor;
 
-lit_repl_el: TK_LitPat
+cons_top_el: '"' lit_cons_el_list '"'
 	final {
-		ReplItem *replItem = ReplItem::cons( $1->loc, ReplItem::InputText, $1->data );
-		$$->list = new ReplItemList;
-		$$->list->append( replItem );
+		$$->list = $2->list;
 	};
-
-lit_repl_el: '[' repl_el_list ']'
+cons_top_el: '[' cons_el_list ']'
 	final {
 		$$->list = $2->list;
 	};
 
-nonterm repl_el_list uses replacement;
+nonterm lit_cons_el_list uses constructor;
 
-repl_el_list: repl_el_list repl_el
+lit_cons_el_list: lit_cons_el_list lit_cons_el
 	final {
 		$$->list = $1->list;
 		$$->list->append( *$2->list );
 		delete $2->list;
 	};
-repl_el_list: 
+lit_cons_el_list: 
 	final {
-		$$->list = new ReplItemList;
+		$$->list = new ConsItemList;
 	};
 
-nonterm repl_el uses replacement;
+nonterm lit_cons_el uses constructor;
 
-repl_el: region_qual TK_Literal
+lit_cons_el: TK_LitPat
+	final {
+		ConsItem *consItem = ConsItem::cons( $1->loc, ConsItem::InputText, $1->data );
+		$$->list = new ConsItemList;
+		$$->list->append( consItem );
+	};
+
+lit_cons_el: '[' cons_el_list ']'
+	final {
+		$$->list = $2->list;
+	};
+
+nonterm cons_el_list uses constructor;
+
+cons_el_list: cons_el_list cons_el
+	final {
+		$$->list = $1->list;
+		$$->list->append( *$2->list );
+		delete $2->list;
+	};
+cons_el_list: 
+	final {
+		$$->list = new ConsItemList;
+	};
+
+nonterm cons_el uses constructor;
+
+cons_el: region_qual TK_Literal
 	final {
 		PdaLiteral *literal = new PdaLiteral( $2->loc, $2->data );
 		TypeRef *typeRef = TypeRef::cons( $2->loc, $1->nspaceQual, literal );
 		ProdEl *factor = new ProdEl( ProdEl::LiteralType, $2->loc, 0, false, typeRef, 0 );
-		ReplItem *replItem = ReplItem::cons( $2->loc, ReplItem::FactorType, factor );
-		$$->list = new ReplItemList;
-		$$->list->append( replItem );
+		ConsItem *consItem = ConsItem::cons( $2->loc, ConsItem::FactorType, factor );
+		$$->list = new ConsItemList;
+		$$->list->append( consItem );
 	};
 
-repl_el: '"' lit_repl_el_list '"'
+cons_el: '"' lit_cons_el_list '"'
 	final {
 		$$->list = $2->list;
 	};
 
-repl_el: code_expr
+cons_el: code_expr
 	final {
-		ReplItem *replItem = ReplItem::cons( $1->expr->loc, ReplItem::ExprType, $1->expr );
-		$$->list = new ReplItemList;
-		$$->list->append( replItem );
+		ConsItem *consItem = ConsItem::cons( $1->expr->loc, ConsItem::ExprType, $1->expr );
+		$$->list = new ConsItemList;
+		$$->list->append( consItem );
 	};
 
 #
@@ -785,7 +785,7 @@ repl_el: code_expr
 
 nonterm accumulate
 {
-	ReplItemList *list;
+	ConsItemList *list;
 };
 
 accumulate: 
@@ -832,16 +832,16 @@ lit_accum_el_list:
 
 lit_accum_el_list: 
 	final {
-		$$->list = new ReplItemList;
+		$$->list = new ConsItemList;
 	};
 
 nonterm lit_accum_el uses accumulate;
 
 lit_accum_el: TK_LitPat
 	final {
-		ReplItem *replItem = ReplItem::cons( $1->loc, ReplItem::InputText, $1->data );
-		$$->list = new ReplItemList;
-		$$->list->append( replItem );
+		ConsItem *consItem = ConsItem::cons( $1->loc, ConsItem::InputText, $1->data );
+		$$->list = new ConsItemList;
+		$$->list->append( consItem );
 	};
 
 lit_accum_el: '[' accum_el_list ']'
@@ -860,16 +860,16 @@ accum_el_list: accum_el_list accum_el
 		
 accum_el_list:
 	final {
-		$$->list = new ReplItemList;
+		$$->list = new ConsItemList;
 	};
 
 nonterm accum_el uses accumulate;
 
 accum_el: code_expr
 	final {
-		ReplItem *replItem = ReplItem::cons( $1->expr->loc, ReplItem::ExprType, $1->expr );
-		$$->list = new ReplItemList;
-		$$->list->append( replItem );
+		ConsItem *consItem = ConsItem::cons( $1->expr->loc, ConsItem::ExprType, $1->expr );
+		$$->list = new ConsItemList;
+		$$->list->append( consItem );
 	};
 
 accum_el: '"' lit_accum_el_list '"'
@@ -884,7 +884,7 @@ accum_el: '"' lit_accum_el_list '"'
 
 nonterm string
 {
-	ReplItemList *list;
+	ConsItemList *list;
 };
 
 string: string_list
@@ -926,16 +926,16 @@ lit_string_el_list: lit_string_el_list lit_string_el
 	};
 lit_string_el_list: 
 	final {
-		$$->list = new ReplItemList;
+		$$->list = new ConsItemList;
 	};
 
 nonterm lit_string_el uses string;
 
 lit_string_el: TK_LitPat
 	final {
-		ReplItem *replItem = ReplItem::cons( $1->loc, ReplItem::InputText, $1->data );
-		$$->list = new ReplItemList;
-		$$->list->append( replItem );
+		ConsItem *consItem = ConsItem::cons( $1->loc, ConsItem::InputText, $1->data );
+		$$->list = new ConsItemList;
+		$$->list->append( consItem );
 	};
 
 lit_string_el: '[' string_el_list ']'
@@ -953,16 +953,16 @@ string_el_list: string_el_list string_el
 	};
 string_el_list: 
 	final {
-		$$->list = new ReplItemList;
+		$$->list = new ConsItemList;
 	};
 
 nonterm string_el uses string;
 
 string_el: code_expr
 	final {
-		ReplItem *replItem = ReplItem::cons( $1->expr->loc, ReplItem::ExprType, $1->expr );
-		$$->list = new ReplItemList;
-		$$->list->append( replItem );
+		ConsItem *consItem = ConsItem::cons( $1->expr->loc, ConsItem::ExprType, $1->expr );
+		$$->list = new ConsItemList;
+		$$->list->append( consItem );
 	};
 
 string_el: '"' lit_string_el_list '"'
@@ -1609,7 +1609,7 @@ require_pattern:
 		Namespace *nspace = namespaceStack.top();
 		TokenRegion *region = regionStack.top();
 		Pattern *pattern = Pattern::cons( $1->loc, nspace, region, 
-				patternItemList, pd->nextPatReplId++ );
+				patternItemList, pd->nextPatConsId++ );
 		pd->patternList.append( pattern );
 
 		$$->expr = LangExpr::cons( LangTerm::cons(
@@ -1973,7 +1973,7 @@ code_factor: KW_Match var_ref pattern_list
 		Namespace *nspace = namespaceStack.top();
 		TokenRegion *region = regionStack.top();
 		Pattern *pattern = Pattern::cons( $1->loc, nspace, region, 
-				patternItemList, pd->nextPatReplId++ );
+				patternItemList, pd->nextPatConsId++ );
 		pd->patternList.append( pattern );
 
 		$$->expr = LangExpr::cons( LangTerm::cons( InputLoc(), LangTerm::MatchType, $2->varRef, pattern ) );
@@ -1983,20 +1983,20 @@ code_factor: KW_New code_factor
 		$$->expr = LangExpr::cons( LangTerm::cons( InputLoc(), LangTerm::NewType, $2->expr ) );
 	};
 code_factor: 
-	KW_Construct opt_capture type_ref opt_field_init replacement
+	KW_Construct opt_capture type_ref opt_field_init constructor
 	final {
 		Namespace *nspace = namespaceStack.top();
 		TokenRegion *region = regionStack.top();
-		Constructor *replacement = Constructor::cons( $1->loc, nspace, region,
-				$5->list, pd->nextPatReplId++ );
-		pd->replList.append( replacement );
+		Constructor *constructor = Constructor::cons( $1->loc, nspace, region,
+				$5->list, pd->nextPatConsId++ );
+		pd->replList.append( constructor );
 		
 		LangVarRef *varRef = 0;
 		if ( $2->objField != 0 )
 			varRef = LangVarRef::cons( $2->objField->loc, $2->objField->name );
 
 		$$->expr = LangExpr::cons( LangTerm::cons( $1->loc, LangTerm::ConstructType,
-				varRef, $2->objField, $3->typeRef, $4->fieldInitVect, replacement ) );
+				varRef, $2->objField, $3->typeRef, $4->fieldInitVect, constructor ) );
 
 		/* Check for redeclaration. */
 		if ( $2->objField != 0 ) {
@@ -2018,11 +2018,11 @@ code_factor:
 		Namespace *nspace = namespaceStack.top();
 		TokenRegion *region = regionStack.top();
 
-		ReplItemList *emptyReplItemList = new ReplItemList;
+		ConsItemList *emptyConsItemList = new ConsItemList;
 
-		Constructor *replacement = Constructor::cons( $2->loc, nspace, region,
-				emptyReplItemList, pd->nextPatReplId++ );
-		pd->replList.append( replacement );
+		Constructor *constructor = Constructor::cons( $2->loc, nspace, region,
+				emptyConsItemList, pd->nextPatConsId++ );
+		pd->replList.append( constructor );
 		
 		LangVarRef *varRef = 0;
 		if ( $3->objField != 0 )
@@ -2038,7 +2038,7 @@ code_factor:
 
 		$$->expr = LangExpr::cons( LangTerm::cons( $2->loc, 
 				$2->stop ? LangTerm::ParseStopType : LangTerm::ParseType,
-				varRef, $3->objField, parserTypeRef, $5->fieldInitVect, replacement, parserText ) );
+				varRef, $3->objField, parserTypeRef, $5->fieldInitVect, constructor, parserText ) );
 
 		/* Check for redeclaration. */
 		if ( $3->objField != 0 ) {
@@ -2067,34 +2067,34 @@ code_factor:
 		TypeRef *parserTypeRef = TypeRef::cons( InputLoc(),
 				TypeRef::Parser, nspaceQual, $4->typeRef, 0 );
 
-		Constructor *replacement = Constructor::cons( $2->loc, nspace, pd->rootRegion,
-				new ReplItemList, pd->nextPatReplId++ );
-		pd->replList.append( replacement );
+		Constructor *constructor = Constructor::cons( $2->loc, nspace, pd->rootRegion,
+				new ConsItemList, pd->nextPatConsId++ );
+		pd->replList.append( constructor );
 
-		ReplItemList *replItemList = new ReplItemList;
+		ConsItemList *consItemList = new ConsItemList;
 		FieldInitVect *fieldInitVect = new FieldInitVect;
 		if ( $6->exprVect->length() == 1 ) {
-			ReplItem *replItem = ReplItem::cons( $2->loc, ReplItem::ExprType, $6->exprVect->data[0] );
-			replItemList->append( replItem );
+			ConsItem *consItem = ConsItem::cons( $2->loc, ConsItem::ExprType, $6->exprVect->data[0] );
+			consItemList->append( consItem );
 		}
 		else if ( $6->exprVect->length() == 2 ) {
 			FieldInit *fieldInit = new FieldInit( InputLoc(), "_name", $6->exprVect->data[0] );
 			fieldInitVect->append( fieldInit );
 
-			ReplItem *replItem = ReplItem::cons( $2->loc, ReplItem::ExprType, $6->exprVect->data[1] );
-			replItemList->append( replItem );
+			ConsItem *consItem = ConsItem::cons( $2->loc, ConsItem::ExprType, $6->exprVect->data[1] );
+			consItemList->append( consItem );
 		}
 
 		LangVarRef *varRef = 0;
 		if ( $3->objField != 0 )
 			varRef = LangVarRef::cons( $3->objField->loc, $3->objField->name );
 
-		ParserText *parserText = ParserText::cons( $3->loc, nspace, region, replItemList );
+		ParserText *parserText = ParserText::cons( $3->loc, nspace, region, consItemList );
 		pd->parserTextList.append( parserText );
 
 		$$->expr = LangExpr::cons( LangTerm::cons( $2->loc, 
 				$2->stop ? LangTerm::OrigParseStopType : LangTerm::OrigParseType,
-				varRef, $3->objField, parserTypeRef, fieldInitVect, replacement, parserText ) );
+				varRef, $3->objField, parserTypeRef, fieldInitVect, constructor, parserText ) );
 
 		/* Check for redeclaration. */
 		if ( $3->objField != 0 ) {

@@ -1492,13 +1492,13 @@ void Compiler::makeRuntimeData()
 	}
 
 	/*
-	 * PatReplInfo
+	 * PatConsInfo
 	 */
 
 	/* Filled in later after patterns are parsed. */
-	runtimeData->patReplInfo = new PatReplInfo[nextPatReplId];
-	memset( runtimeData->patReplInfo, 0, sizeof(PatReplInfo) * nextPatReplId );
-	runtimeData->numPatterns = nextPatReplId;
+	runtimeData->patReplInfo = new PatConsInfo[nextPatConsId];
+	memset( runtimeData->patReplInfo, 0, sizeof(PatConsInfo) * nextPatConsId );
+	runtimeData->numPatterns = nextPatConsId;
 	runtimeData->patReplNodes = 0;
 	runtimeData->numPatternNodes = 0;
 
@@ -1640,10 +1640,10 @@ void countNodes( Program *prg, int &count, ParseTree *parseTree, Kid *kid )
 }
 
 void fillNodes( Program *prg, int &nextAvail, Bindings *bindings, long &bindId, 
-		PatReplNode *nodes, ParseTree *parseTree, Kid *kid, int ind )
+		PatConsNode *nodes, ParseTree *parseTree, Kid *kid, int ind )
 {
 	if ( kid != 0 ) {
-		PatReplNode &node = nodes[ind];
+		PatConsNode &node = nodes[ind];
 
 		Kid *child = 
 			!( parseTree->flags & PF_NAMED ) && 
@@ -1671,9 +1671,9 @@ void fillNodes( Program *prg, int &nextAvail, Bindings *bindings, long &bindId,
 		node.leftIgnore = ignore == 0 ? -1 : nextAvail;
 
 		while ( ignore != 0 ) {
-			PatReplNode &node = nodes[nextAvail++];
+			PatConsNode &node = nodes[nextAvail++];
 
-			memset( &node, 0, sizeof(PatReplNode) );
+			memset( &node, 0, sizeof(PatConsNode) );
 			node.id = ignore->tree->id;
 			node.prodNum = ignore->tree->prodNum;
 			node.next = ignore->next == 0 ? -1 : nextAvail;
@@ -1690,9 +1690,9 @@ void fillNodes( Program *prg, int &nextAvail, Bindings *bindings, long &bindId,
 		node.rightIgnore = ignore == 0 ? -1 : nextAvail;
 
 		while ( ignore != 0 ) {
-			PatReplNode &node = nodes[nextAvail++];
+			PatConsNode &node = nodes[nextAvail++];
 
-			memset( &node, 0, sizeof(PatReplNode) );
+			memset( &node, 0, sizeof(PatConsNode) );
 			node.id = ignore->tree->id;
 			node.prodNum = ignore->tree->prodNum;
 			node.next = ignore->next == 0 ? -1 : nextAvail;
@@ -1710,8 +1710,8 @@ void fillNodes( Program *prg, int &nextAvail, Bindings *bindings, long &bindId,
 		//
 		//	Tree *attr = getAttr( kid->tree, cap->offset );
 		//
-		//	PatReplNode &node = nodes[nextAvail++];
-		//	memset( &node, 0, sizeof(PatReplNode) );
+		//	PatConsNode &node = nodes[nextAvail++];
+		//	memset( &node, 0, sizeof(PatConsNode) );
 		//
 		//	node.id = attr->id;
 		//	node.prodNum = attr->prodNum;
@@ -1752,24 +1752,24 @@ void Compiler::fillInPatterns( Program *prg )
 
 	/* Count is referenced and computed by mapNode. */
 	int count = 0;
-	for ( PatternList::Iter pat = patternList; pat.lte(); pat++ ) {
+	for ( PatList::Iter pat = patternList; pat.lte(); pat++ ) {
 		countNodes( prg, count, 
 				pat->pdaRun->stackTop->next,
 				pat->pdaRun->stackTop->next->shadow );
 	}
 
-	for ( ReplList::Iter repl = replList; repl.lte(); repl++ ) {
+	for ( ConsList::Iter repl = replList; repl.lte(); repl++ ) {
 		countNodes( prg, count, 
 				repl->pdaRun->stackTop->next,
 				repl->pdaRun->stackTop->next->shadow );
 	}
 	
-	runtimeData->patReplNodes = new PatReplNode[count];
+	runtimeData->patReplNodes = new PatConsNode[count];
 	runtimeData->numPatternNodes = count;
 
 	int nextAvail = 0;
 
-	for ( PatternList::Iter pat = patternList; pat.lte(); pat++ ) {
+	for ( PatList::Iter pat = patternList; pat.lte(); pat++ ) {
 		int ind = nextAvail++;
 		runtimeData->patReplInfo[pat->patRepId].offset = ind;
 
@@ -1786,7 +1786,7 @@ void Compiler::fillInPatterns( Program *prg )
 				ind );
 	}
 
-	for ( ReplList::Iter repl = replList; repl.lte(); repl++ ) {
+	for ( ConsList::Iter repl = replList; repl.lte(); repl++ ) {
 		int ind = nextAvail++;
 		runtimeData->patReplInfo[repl->patRepId].offset = ind;
 

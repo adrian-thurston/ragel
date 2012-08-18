@@ -410,15 +410,15 @@ void LangExpr::resolve( Compiler *pd ) const
 void LangStmt::resolveParserItems( Compiler *pd ) const
 {
 	/* Assign bind ids to the variables in the replacement. */
-	for ( ReplItemList::Iter item = *parserText->list; item.lte(); item++ ) {
+	for ( ConsItemList::Iter item = *parserText->list; item.lte(); item++ ) {
 		varRef->resolve( pd );
 
 		switch ( item->type ) {
-		case ReplItem::FactorType:
+		case ConsItem::FactorType:
 			break;
-		case ReplItem::InputText:
+		case ConsItem::InputText:
 			break;
-		case ReplItem::ExprType:
+		case ConsItem::ExprType:
 			item->expr->resolve( pd );
 			break;
 		}
@@ -636,7 +636,7 @@ void Compiler::resolveUses()
 
 void Compiler::resolvePatternEls()
 {
-	for ( PatternList::Iter pat = patternList; pat.lte(); pat++ ) {
+	for ( PatList::Iter pat = patternList; pat.lte(); pat++ ) {
 		for ( PatternItemList::Iter item = *pat->list; item.lte(); item++ ) {
 			switch ( item->type ) {
 			case PatternItem::FactorType:
@@ -653,15 +653,15 @@ void Compiler::resolvePatternEls()
 
 void Compiler::resolveReplacementEls()
 {
-	for ( ReplList::Iter repl = replList; repl.lte(); repl++ ) {
-		for ( ReplItemList::Iter item = *repl->list; item.lte(); item++ ) {
+	for ( ConsList::Iter repl = replList; repl.lte(); repl++ ) {
+		for ( ConsItemList::Iter item = *repl->list; item.lte(); item++ ) {
 			switch ( item->type ) {
-			case ReplItem::FactorType:
+			case ConsItem::FactorType:
 				/* Use pdaFactor reference resolving. */
 				resolveFactor( item->factor );
 				break;
-			case ReplItem::InputText:
-			case ReplItem::ExprType:
+			case ConsItem::InputText:
+			case ConsItem::ExprType:
 				break;
 			}
 		}
@@ -671,13 +671,13 @@ void Compiler::resolveReplacementEls()
 void Compiler::resolveParserEls()
 {
 	for ( ParserTextList::Iter accum = parserTextList; accum.lte(); accum++ ) {
-		for ( ReplItemList::Iter item = *accum->list; item.lte(); item++ ) {
+		for ( ConsItemList::Iter item = *accum->list; item.lte(); item++ ) {
 			switch ( item->type ) {
-			case ReplItem::FactorType:
+			case ConsItem::FactorType:
 				resolveFactor( item->factor );
 				break;
-			case ReplItem::InputText:
-			case ReplItem::ExprType:
+			case ConsItem::InputText:
+			case ConsItem::ExprType:
 				break;
 			}
 		}

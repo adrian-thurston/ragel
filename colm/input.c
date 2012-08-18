@@ -42,8 +42,8 @@ RunBuf *newRunBuf()
 
 void initFdFuncs();
 void initFileFuncs();
-void initPatternFuncs();
-void initReplFuncs();
+void initPatFuncs();
+void initConsFuncs();
 
 struct SourceFuncs dynamicFuncs;
 struct SourceFuncs fileFuncs;
@@ -145,8 +145,8 @@ void initInputFuncs()
 {
 	initFdFuncs();
 	initFileFuncs();
-	initPatternFuncs();
-	initReplFuncs();
+	initPatFuncs();
+	initConsFuncs();
 }
 
 /* 

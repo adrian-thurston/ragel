@@ -45,10 +45,10 @@ typedef struct ColmRuntimeData
 	FunctionInfo *functionInfo;
 	long numFunctions;
 
-	PatReplInfo *patReplInfo;
+	PatConsInfo *patReplInfo;
 	long numPatterns;
 
-	PatReplNode *patReplNodes;
+	PatConsNode *patReplNodes;
 	long numPatternNodes;
 
 	GenericInfo *genericInfo;

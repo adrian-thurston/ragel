@@ -327,7 +327,7 @@ Kid *constructReplacementKid( Tree **bindings, Program *prg, Kid *prev, long pat
 
 static Kid *constructIgnoreList( Program *prg, long ignoreInd )
 {
-	PatReplNode *nodes = prg->rtd->patReplNodes;
+	PatConsNode *nodes = prg->rtd->patReplNodes;
 
 	Kid *first = 0, *last = 0;
 	while ( ignoreInd >= 0 ) {
@@ -356,13 +356,13 @@ static Kid *constructIgnoreList( Program *prg, long ignoreInd )
 
 static Kid *constructLeftIgnoreList( Program *prg, long pat )
 {
-	PatReplNode *nodes = prg->rtd->patReplNodes;
+	PatConsNode *nodes = prg->rtd->patReplNodes;
 	return constructIgnoreList( prg, nodes[pat].leftIgnore );
 }
 
 static Kid *constructRightIgnoreList( Program *prg, long pat )
 {
-	PatReplNode *nodes = prg->rtd->patReplNodes;
+	PatConsNode *nodes = prg->rtd->patReplNodes;
 	return constructIgnoreList( prg, nodes[pat].rightIgnore );
 }
 
@@ -543,7 +543,7 @@ Tree *popLeftIgnore( Program *prg, Tree **sp, Tree *popFrom, Tree **leftIgnore )
  * return a zero-ref tree. */
 Tree *constructReplacementTree( Kid *kid, Tree **bindings, Program *prg, long pat )
 {
-	PatReplNode *nodes = prg->rtd->patReplNodes;
+	PatConsNode *nodes = prg->rtd->patReplNodes;
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
 	Tree *tree = 0;
 
@@ -642,7 +642,7 @@ Tree *constructReplacementTree( Kid *kid, Tree **bindings, Program *prg, long pa
 
 Kid *constructReplacementKid( Tree **bindings, Program *prg, Kid *prev, long pat )
 {
-	PatReplNode *nodes = prg->rtd->patReplNodes;
+	PatConsNode *nodes = prg->rtd->patReplNodes;
 	Kid *kid = 0;
 
 	if ( pat != -1 ) {
@@ -1318,7 +1318,7 @@ Tree *getPtrValSplit( Program *prg, Pointer *ptr )
  * in. */
 int matchPattern( Tree **bindings, Program *prg, long pat, Kid *kid, int checkNext )
 {
-	PatReplNode *nodes = prg->rtd->patReplNodes;
+	PatConsNode *nodes = prg->rtd->patReplNodes;
 
 //	#ifdef COLM_LOG_MATCH
 //	if ( colm_log_match ) {

@@ -60,7 +60,7 @@ struct LangEl;
 struct Pattern;
 struct PatternItem;
 struct Constructor;
-struct ReplItem;
+struct ConsItem;
 struct _FsmRun;
 struct ColmTree;
 
@@ -130,20 +130,20 @@ struct _SourceStream
 	struct Pattern *pattern;
 	struct PatternItem *patItem;
 	struct Constructor *constructor;
-	struct ReplItem *replItem;
+	struct ConsItem *consItem;
 
 	struct _FsmRun *attached;
 };
 
-SourceStream *newSourceStreamPattern( struct Pattern *pattern );
-SourceStream *newSourceStreamRepl( struct Constructor *replacement );
+SourceStream *newSourceStreamPat( struct Pattern *pattern );
+SourceStream *newSourceStreamCons( struct Constructor *constructor );
 SourceStream *newSourceStreamFile( FILE *file );
 SourceStream *newSourceStreamFd( long fd );
 
 void initInputFuncs();
 void initStaticFuncs();
-void initPatternFuncs();
-void initReplFuncs();
+void initPatFuncs();
+void initConsFuncs();
 
 /* List of input streams. Enables streams to be pushed/popped. */
 struct _InputStream
@@ -172,7 +172,7 @@ struct _InputStream
 	struct Pattern *pattern;
 	struct PatternItem *patItem;
 	struct Constructor *replacement;
-	struct ReplItem *replItem;
+	struct ConsItem *consItem;
 
 	struct _FsmRun *attached;
 };

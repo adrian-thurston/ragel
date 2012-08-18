@@ -297,7 +297,7 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 	/*
 	 * patReplInfo
 	 */
-	out << "PatReplInfo " << patReplInfo() << "[] = {\n";
+	out << "PatConsInfo " << patReplInfo() << "[] = {\n";
 	for ( int i = 0; i < runtimeData->numPatterns; i++ ) {
 		out << "	{ " << runtimeData->patReplInfo[i].offset << ", " <<
 				runtimeData->patReplInfo[i].numBindings << " },\n";
@@ -307,9 +307,9 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 	/*
 	 * patReplNodes
 	 */
-	out << "PatReplNode " << patReplNodes() << "[] = {\n";
+	out << "PatConsNode " << patReplNodes() << "[] = {\n";
 	for ( int i = 0; i < runtimeData->numPatternNodes; i++ ) {
-		PatReplNode &node = runtimeData->patReplNodes[i];
+		PatConsNode &node = runtimeData->patReplNodes[i];
 		out << "	{ " << node.id << ", " << 
 				node.prodNum << ", " << node.next << ", " << 
 				node.child << ", " << node.bindId << ", ";

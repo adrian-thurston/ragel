@@ -135,13 +135,13 @@ typedef struct _FunctionInfo
  * Program Data.
  */
 
-typedef struct _PatReplInfo
+typedef struct _PatConsInfo
 {
 	long offset;
 	long numBindings;
-} PatReplInfo;
+} PatConsInfo;
 
-typedef struct _PatReplNode
+typedef struct _PatConsNode
 {
 	long id;
 	long prodNum;
@@ -155,7 +155,7 @@ typedef struct _PatReplNode
 
 	/* Just match nonterminal, don't go inside. */
 	unsigned char stop;
-} PatReplNode;
+} PatConsNode;
 
 /* FIXME: should have a descriptor for object types to give the length. */
 

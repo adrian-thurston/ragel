@@ -430,7 +430,7 @@ Compiler::Compiler( const String &fileName, const String &sectionName,
 	defaultRegion(0),
 	firstNonTermId(0),
 	prodIdIndex(0),
-	nextPatReplId(0),
+	nextPatConsId(0),
 	nextGenericId(1),
 	nextFuncId(0),
 	loopCleanup(0),
@@ -1291,7 +1291,7 @@ void Compiler::parsePatterns()
 	Tree **vm_stack = stackAlloc();
 	Tree **root = &vm_stack[VM_STACK_SIZE];
 
-	for ( ReplList::Iter repl = replList; repl.lte(); repl++ ) {
+	for ( ConsList::Iter repl = replList; repl.lte(); repl++ ) {
 		if ( colm_log_compile ) {
 			cerr << "parsing replacement at " << 
 					repl->loc.line << ' ' << repl->loc.col << endl;
@@ -1307,7 +1307,7 @@ void Compiler::parsePatterns()
 
 		Stream *res = streamAllocate( prg );
 		res->id = LEL_ID_STREAM;
-		res->in = newSourceStreamRepl( repl );
+		res->in = newSourceStreamCons( repl );
 		appendStream( in, (Tree*)res );
 		setEof( in );
 
@@ -1318,7 +1318,7 @@ void Compiler::parsePatterns()
 			cout << "parse error" << endp;
 	}
 
-	for ( PatternList::Iter pat = patternList; pat.lte(); pat++ ) {
+	for ( PatList::Iter pat = patternList; pat.lte(); pat++ ) {
 		if ( colm_log_compile ) {
 			cerr << "parsing pattern at " << 
 					pat->loc.line << ' ' << pat->loc.col << endl;
@@ -1334,7 +1334,7 @@ void Compiler::parsePatterns()
 
 		Stream *res = streamAllocate( prg );
 		res->id = LEL_ID_STREAM;
-		res->in = newSourceStreamPattern( pat );
+		res->in = newSourceStreamPat( pat );
 		appendStream( in, (Tree*)res );
 		setEof( in );
 
@@ -1350,7 +1350,7 @@ void Compiler::parsePatterns()
 
 void Compiler::collectParserEls( BstSet<LangEl*> &parserEls )
 {
-	for ( PatternList::Iter pat = patternList; pat.lte(); pat++ ) {
+	for ( PatList::Iter pat = patternList; pat.lte(); pat++ ) {
 		/* We assume the reduction action compilation phase was run before
 		 * pattern parsing and it decorated the pattern with the target type. */
 		assert( pat->langEl != 0 );
@@ -1364,7 +1364,7 @@ void Compiler::collectParserEls( BstSet<LangEl*> &parserEls )
 		}
 	}
 
-	for ( ReplList::Iter repl = replList; repl.lte(); repl++ ) {
+	for ( ConsList::Iter repl = replList; repl.lte(); repl++ ) {
 		/* We assume the reduction action compilation phase was run before
 		 * replacement parsing decorated the replacement with the target type. */
 		assert( repl->langEl != 0 );

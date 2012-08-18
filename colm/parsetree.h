@@ -1507,7 +1507,7 @@ struct PatternItem
 struct LangExpr;
 typedef DList<PatternItem> PatternItemList;
 
-struct ReplItem
+struct ConsItem
 {
 	enum Type { 
 		InputText, 
@@ -1515,7 +1515,7 @@ struct ReplItem
 		FactorType
 	};
 
-	ReplItem()
+	ConsItem()
 	:
 		type((Type)-1),
 		expr(0),
@@ -1525,27 +1525,27 @@ struct ReplItem
 	{
 	}
 
-	static ReplItem *cons( const InputLoc &loc, Type type, const String &data )
+	static ConsItem *cons( const InputLoc &loc, Type type, const String &data )
 	{
-		ReplItem *r = new ReplItem;
+		ConsItem *r = new ConsItem;
 		r->loc = loc;
 		r->type = type;
 		r->data = data;
 		return r;
 	}
 
-	static ReplItem *cons( const InputLoc &loc, Type type, LangExpr *expr )
+	static ConsItem *cons( const InputLoc &loc, Type type, LangExpr *expr )
 	{
-		ReplItem *r = new ReplItem;
+		ConsItem *r = new ConsItem;
 		r->loc = loc;
 		r->type = type;
 		r->expr = expr;
 		return r;
 	}
 
-	static ReplItem *cons( const InputLoc &loc, Type type, ProdEl *factor )
+	static ConsItem *cons( const InputLoc &loc, Type type, ProdEl *factor )
 	{
-		ReplItem *r = new ReplItem;
+		ConsItem *r = new ConsItem;
 		r->loc = loc;
 		r->type = type;
 		r->expr = 0;
@@ -1560,10 +1560,10 @@ struct ReplItem
 	LangEl *langEl;
 	ProdEl *factor;
 	long bindId;
-	ReplItem *prev, *next;
+	ConsItem *prev, *next;
 };
 
-typedef DList<ReplItem> ReplItemList;
+typedef DList<ConsItem> ConsItemList;
 
 struct Pattern
 {
@@ -1593,12 +1593,12 @@ struct Pattern
 	Pattern *prev, *next;
 };
 
-typedef DList<Pattern> PatternList;
+typedef DList<Pattern> PatList;
 
 struct Constructor
 {
 	static Constructor *cons( const InputLoc &loc, Namespace *nspace, 
-			TokenRegion *region, ReplItemList *list, int patRepId )
+			TokenRegion *region, ConsItemList *list, int patRepId )
 	{
 		Constructor *r = new Constructor;
 		r->loc = loc;
@@ -1616,7 +1616,7 @@ struct Constructor
 	InputLoc loc;
 	Namespace *nspace;
 	TokenRegion *region;
-	ReplItemList *list;
+	ConsItemList *list;
 	int patRepId;
 	LangEl *langEl;
 	PdaRun *pdaRun;
@@ -1626,12 +1626,12 @@ struct Constructor
 	Constructor *prev, *next;
 };
 
-typedef DList<Constructor> ReplList;
+typedef DList<Constructor> ConsList;
 
 struct ParserText
 {
 	static ParserText *cons( const InputLoc &loc, Namespace *nspace, 
-			TokenRegion *region, ReplItemList *list )
+			TokenRegion *region, ConsItemList *list )
 	{
 		ParserText *p = new ParserText;
 		p->loc = loc;
@@ -1648,7 +1648,7 @@ struct ParserText
 	InputLoc loc;
 	Namespace *nspace;
 	TokenRegion *region;
-	ReplItemList *list;
+	ConsItemList *list;
 	LangEl *langEl;
 	PdaRun *pdaRun;
 	long nextBindId;
@@ -2520,12 +2520,12 @@ struct LangTerm
 		return t;
 	}
 	
-	static LangTerm *cons( const InputLoc &loc, ReplItemList *replItemList )
+	static LangTerm *cons( const InputLoc &loc, ConsItemList *consItemList )
 	{
 		LangTerm *t = new LangTerm;
 		t->loc = loc;
 		t->type = EmbedStringType;
-		t->replItemList = replItemList;
+		t->consItemList = consItemList;
 		return t;
 	}
 
@@ -2568,7 +2568,7 @@ struct LangTerm
 	Constructor *constructor;
 	ParserText *parserText;
 	LangExpr *expr;
-	ReplItemList *replItemList;
+	ConsItemList *consItemList;
 };
 
 struct LangExpr

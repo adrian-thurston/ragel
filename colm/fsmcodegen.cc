@@ -1074,8 +1074,8 @@ void FsmCodeGen::writeCode()
 		"void pushBinding( PdaRun *pdaRun, ParseTree *parseTree ) {}\n"
 		"void popBinding( PdaRun *pdaRun, ParseTree *tree ) {}\n"
 		"void initStaticFuncs() {}\n"
-		"void initPatternFuncs() {}\n"
-		"void initReplFuncs() {}\n"
+		"void initPatFuncs() {}\n"
+		"void initConsFuncs() {}\n"
 		"void initInputFuncs();\n"
 		"\n"
 		"\n";
