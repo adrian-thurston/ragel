@@ -587,36 +587,94 @@ context_head:
 				$2->data, pd->nextObjectId++ ); 
 	};
 
-pattern_list: pattern_list pattern;
-pattern_list: init_pattern_list pattern;
+#
+# Pattern
+#
 
-init_pattern_list:
+nonterm pattern
+{
+	PatternItemList *list;
+};
+
+pattern: 	
+	pattern_list
 	final {
-		patternItemList = new PatternItemList;
+		$$->list = $1->list;
 	};
 
-pattern: '"' litpat_el_list '"';
-pattern: '[' pattern_el_list ']';
+nonterm pattern_list uses pattern;
 
-litpat_el_list: litpat_el_list litpat_el;
-litpat_el_list: ;
+pattern_list: pattern_list pattern_top_el
+	final {
+		$$->list = $1->list;
+		$$->list->append( *$2->list );
+		delete $2->list;
+	};
+pattern_list: pattern_top_el
+	final {
+		$$->list = $1->list;
+	};
+
+nonterm pattern_top_el uses pattern;
+
+pattern_top_el: '"' litpat_el_list '"'
+	final {
+		$$->list = $2->list;
+	};
+pattern_top_el: '[' pattern_el_list ']'
+	final {
+		$$->list = $2->list;
+	};
+
+nonterm litpat_el_list uses pattern;
+
+litpat_el_list: litpat_el_list litpat_el
+	final {
+		$$->list = $1->list;
+		$$->list->append( *$2->list );
+		delete $2->list;
+	};
+litpat_el_list: 
+	final {
+		$$->list = new PatternItemList;
+	};
+
+nonterm litpat_el uses pattern;
 
 litpat_el: TK_LitPat
 	final {
 		PatternItem *patternItem = PatternItem::cons( $1->loc, $1->data,
 			PatternItem::InputText );
-		patternItemList->append( patternItem );
+		$$->list = new PatternItemList;
+		$$->list->append( patternItem );
 	};
 
-litpat_el: '[' pattern_el_list ']';
+litpat_el: '[' pattern_el_list ']'
+	final {
+		$$->list = $2->list;
+	};
 
-pattern_el_list: pattern_el_list pattern_el;
-pattern_el_list: ;
+nonterm pattern_el_list uses pattern;
 
-pattern_el: opt_label pattern_el_type_or_lit
+pattern_el_list: 
+	pattern_el_list pattern_el
+	final {
+		$$->list = $1->list;
+		$$->list->append( *$2->list );
+		delete $2->list;
+	};
+pattern_el_list: 
+	final {
+		$$->list = new PatternItemList;
+	};
+
+nonterm pattern_el uses pattern;
+
+pattern_el: 
+	opt_label pattern_el_type_or_lit
 	final {
 		/* Store the variable reference in the pattern itemm. */
-		$2->patternItem->varRef = $1->varRef;
+		$2->list->head->varRef = $1->varRef;
 
 		if ( $1->varRef != 0 ) {
 			if ( pd->curLocalFrame->checkRedecl( $1->varRef->name ) != 0 ) {
@@ -624,42 +682,50 @@ pattern_el: opt_label pattern_el_type_or_lit
 						" redeclared" << endp;
 			}
 
-			TypeRef *typeRef = $2->patternItem->factor->typeRef;
+			TypeRef *typeRef = $2->list->head->factor->typeRef;
 			ObjField *objField = new ObjField( InputLoc(), typeRef, $1->varRef->name );
 
 			/* Insert it into the field map. */
 			pd->curLocalFrame->insertField( $1->varRef->name, objField );
 		}
+
+		$$->list = $2->list;
 	};
 
-pattern_el: '"' litpat_el_list '"';
+nonterm pattern_el uses pattern;
+
+pattern_el: '"' litpat_el_list '"'
+	final {
+		$$->list = $2->list;
+	};
 pattern_el: '?' TK_Word
 	final {
 		/* FIXME: Implement */
 		assert(false);
 	};
 
-nonterm pattern_el_type_or_lit
-{
-	PatternItem *patternItem;
-};
+nonterm pattern_el_type_or_lit uses pattern;
 
-pattern_el_type_or_lit: region_qual TK_Word opt_repeat
+pattern_el_type_or_lit: 
+	region_qual TK_Word opt_repeat
 	final {
 		TypeRef *typeRef = TypeRef::cons( $2->loc, $1->nspaceQual, $2->data, $3->repeatType );
 		ProdEl *factor = new ProdEl( ProdEl::ReferenceType, $2->loc, 0, false, typeRef, 0 );
-		$$->patternItem = PatternItem::cons( $2->loc, factor, PatternItem::FactorType );
-		patternItemList->append( $$->patternItem );
+		PatternItem *patternItem = PatternItem::cons( $2->loc, factor, PatternItem::FactorType );
+		$$->list = new PatternItemList;
+		$$->list->append( patternItem );
 	};
 
-pattern_el_type_or_lit: region_qual TK_Literal opt_repeat
+pattern_el_type_or_lit: 
+	region_qual TK_Literal opt_repeat
 	final {
 		PdaLiteral *literal = new PdaLiteral( $2->loc, $2->data );
 		TypeRef *typeRef = TypeRef::cons( $2->loc, $1->nspaceQual, literal, $3->repeatType );
 
 		ProdEl *factor = new ProdEl( ProdEl::ReferenceType, $2->loc, 0, false, typeRef, 0 );
-		$$->patternItem = PatternItem::cons( $2->loc, factor, PatternItem::FactorType );
-		patternItemList->append( $$->patternItem );
+		PatternItem *patternItem = PatternItem::cons( $2->loc, factor, PatternItem::FactorType );
+		$$->list = new PatternItemList;
+		$$->list->append( patternItem );
 	};
 
 nonterm opt_label
@@ -1604,12 +1670,12 @@ opt_require_stmt:
 nonterm require_pattern uses code_expr;
 
 require_pattern: 
-	KW_Require var_ref pattern_list 
+	KW_Require var_ref pattern 
 	final {
 		Namespace *nspace = namespaceStack.top();
 		TokenRegion *region = regionStack.top();
 		Pattern *pattern = Pattern::cons( $1->loc, nspace, region, 
-				patternItemList, pd->nextPatConsId++ );
+				$3->list, pd->nextPatConsId++ );
 		pd->patternList.append( pattern );
 
 		$$->expr = LangExpr::cons( LangTerm::cons(
@@ -1968,12 +2034,12 @@ code_factor: var_ref
 	final {
 		$$->expr = LangExpr::cons( LangTerm::cons( InputLoc(), LangTerm::VarRefType, $1->varRef ) );
 	};
-code_factor: KW_Match var_ref pattern_list
+code_factor: KW_Match var_ref pattern
 	final {
 		Namespace *nspace = namespaceStack.top();
 		TokenRegion *region = regionStack.top();
 		Pattern *pattern = Pattern::cons( $1->loc, nspace, region, 
-				patternItemList, pd->nextPatConsId++ );
+				$3->list, pd->nextPatConsId++ );
 		pd->patternList.append( pattern );
 
 		$$->expr = LangExpr::cons( LangTerm::cons( InputLoc(), LangTerm::MatchType, $2->varRef, pattern ) );
@@ -2010,7 +2076,6 @@ code_factor:
 			pd->curLocalFrame->insertField( $2->objField->name, $2->objField );
 		}
 	};
-
 
 code_factor: 
 	E1 parse_cmd opt_capture type_ref opt_field_init accumulate

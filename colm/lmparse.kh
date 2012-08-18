@@ -99,7 +99,6 @@ struct ColmParser
 
 	LangElVect langElVect;
 
-	PatternItemList *patternItemList;
 	RegionVect regionStack;
 	RegionPackVect regionPackStack;
 	NamespaceVect namespaceStack;
