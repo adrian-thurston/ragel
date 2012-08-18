@@ -681,32 +681,81 @@ opt_label:
 # Constructor List (constructor)
 #
 
-replacement: init_repl_list repl_list;
+nonterm replacement
+{
+	ReplItemList *list;
+};
 
-repl_list: repl_top_el repl_list;
-repl_list: repl_top_el;
-
-init_repl_list: 
+replacement: repl_list
 	final {
-		replItemList = new ReplItemList;
+		$$->list = $1->list;
 	};
 
-repl_top_el: '"' lit_repl_el_list '"';
-repl_top_el: '[' repl_el_list ']';
+nonterm repl_list uses replacement;
 
-lit_repl_el_list: lit_repl_el_list lit_repl_el;
-lit_repl_el_list: ;
+repl_list: repl_top_el repl_list
+	final {
+		$$->list = $1->list;
+		$$->list->append( *$2->list );
+		delete $2->list;
+	};
+repl_list: repl_top_el
+	final {
+		$$->list = $1->list;
+	};
+
+nonterm repl_top_el uses replacement;
+
+repl_top_el: '"' lit_repl_el_list '"'
+	final {
+		$$->list = $2->list;
+	};
+repl_top_el: '[' repl_el_list ']'
+	final {
+		$$->list = $2->list;
+	};
+
+nonterm lit_repl_el_list uses replacement;
+
+lit_repl_el_list: lit_repl_el_list lit_repl_el
+	final {
+		$$->list = $1->list;
+		$$->list->append( *$2->list );
+		delete $2->list;
+	};
+lit_repl_el_list: 
+	final {
+		$$->list = new ReplItemList;
+	};
+
+nonterm lit_repl_el uses replacement;
 
 lit_repl_el: TK_LitPat
 	final {
 		ReplItem *replItem = ReplItem::cons( $1->loc, ReplItem::InputText, $1->data );
-		replItemList->append( replItem );
+		$$->list = new ReplItemList;
+		$$->list->append( replItem );
 	};
 
-lit_repl_el: '[' repl_el_list ']';
+lit_repl_el: '[' repl_el_list ']'
+	final {
+		$$->list = $2->list;
+	};
 
-repl_el_list: repl_el_list repl_el;
-repl_el_list: ;
+nonterm repl_el_list uses replacement;
+
+repl_el_list: repl_el_list repl_el
+	final {
+		$$->list = $1->list;
+		$$->list->append( *$2->list );
+		delete $2->list;
+	};
+repl_el_list: 
+	final {
+		$$->list = new ReplItemList;
+	};
+
+nonterm repl_el uses replacement;
 
 repl_el: region_qual TK_Literal
 	final {
@@ -714,17 +763,21 @@ repl_el: region_qual TK_Literal
 		TypeRef *typeRef = TypeRef::cons( $2->loc, $1->nspaceQual, literal );
 		ProdEl *factor = new ProdEl( ProdEl::LiteralType, $2->loc, 0, false, typeRef, 0 );
 		ReplItem *replItem = ReplItem::cons( $2->loc, ReplItem::FactorType, factor );
-		replItemList->append( replItem );
+		$$->list = new ReplItemList;
+		$$->list->append( replItem );
 	};
 
-repl_el: '"' lit_repl_el_list '"';
+repl_el: '"' lit_repl_el_list '"'
+	final {
+		$$->list = $2->list;
+	};
 
 repl_el: code_expr
 	final {
 		ReplItem *replItem = ReplItem::cons( $1->expr->loc, ReplItem::ExprType, $1->expr );
-		replItemList->append( replItem );
+		$$->list = new ReplItemList;
+		$$->list->append( replItem );
 	};
-
 
 #
 # Accumulate List
@@ -829,40 +882,93 @@ accum_el: '"' lit_accum_el_list '"'
 # String List
 #
 
-string: init_string_list string_list;
+nonterm string
+{
+	ReplItemList *list;
+};
 
-init_string_list: 
+string: string_list
 	final {
-		replItemList = new ReplItemList;
+		$$->list = $1->list;
 	};
 
-string_list: string_top_el string_list;
-string_list: string_top_el;
+nonterm string_list uses string;
 
-string_top_el: '"' lit_string_el_list '"';
-string_top_el: '[' string_el_list ']';
+string_list: string_top_el string_list
+	final {
+		$$->list = $1->list;
+		$$->list->append( *$2->list );
+		delete $2->list;
+	};
+string_list: string_top_el
+	final {
+		$$->list = $1->list;
+	};
 
-lit_string_el_list: lit_string_el_list lit_string_el;
-lit_string_el_list: ;
+nonterm string_top_el uses string;
+
+string_top_el: '"' lit_string_el_list '"'
+	final {
+		$$->list = $2->list;
+	};
+string_top_el: '[' string_el_list ']'
+	final {
+		$$->list = $2->list;
+	};
+
+nonterm lit_string_el_list uses string;
+
+lit_string_el_list: lit_string_el_list lit_string_el
+	final {
+		$$->list = $1->list;
+		$$->list->append( *$2->list );
+		delete $2->list;
+	};
+lit_string_el_list: 
+	final {
+		$$->list = new ReplItemList;
+	};
+
+nonterm lit_string_el uses string;
 
 lit_string_el: TK_LitPat
 	final {
 		ReplItem *replItem = ReplItem::cons( $1->loc, ReplItem::InputText, $1->data );
-		replItemList->append( replItem );
+		$$->list = new ReplItemList;
+		$$->list->append( replItem );
 	};
 
-lit_string_el: '[' string_el_list ']';
+lit_string_el: '[' string_el_list ']'
+	final {
+		$$->list = $2->list;
+	};
 
-string_el_list: string_el_list string_el;
-string_el_list: ;
+nonterm string_el_list uses string;
+
+string_el_list: string_el_list string_el
+	final {
+		$$->list = $1->list;
+		$$->list->append( *$2->list );
+		delete $2->list;
+	};
+string_el_list: 
+	final {
+		$$->list = new ReplItemList;
+	};
+
+nonterm string_el uses string;
 
 string_el: code_expr
 	final {
 		ReplItem *replItem = ReplItem::cons( $1->expr->loc, ReplItem::ExprType, $1->expr );
-		replItemList->append( replItem );
+		$$->list = new ReplItemList;
+		$$->list->append( replItem );
 	};
 
-string_el: '"' lit_string_el_list '"';
+string_el: '"' lit_string_el_list '"'
+	final {
+		$$->list = $2->list;
+	};
 
 #
 # Production Lists.
@@ -1882,7 +1988,7 @@ code_factor:
 		Namespace *nspace = namespaceStack.top();
 		TokenRegion *region = regionStack.top();
 		Constructor *replacement = Constructor::cons( $1->loc, nspace, region,
-				replItemList, pd->nextPatReplId++ );
+				$5->list, pd->nextPatReplId++ );
 		pd->replList.append( replacement );
 		
 		LangVarRef *varRef = 0;
@@ -2068,7 +2174,7 @@ code_factor: KW_Deref code_expr
 	};
 code_factor: string
 	final {
-		$$->expr = LangExpr::cons( LangTerm::cons( InputLoc(), replItemList ) );
+		$$->expr = LangExpr::cons( LangTerm::cons( InputLoc(), $1->list ) );
 	};
 
 nonterm opt_field_init uses field_init_list;
