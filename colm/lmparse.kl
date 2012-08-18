@@ -492,6 +492,7 @@ region_head:
 		TokenRegion *tokenRegion = createRegion( scannerName );
 
 		regionStack.push( tokenRegion );
+		regionPackStack.push( 0 );
 
 		tokenRegion->ignoreOnlyRegion = tokenRegionIgn;
 		tokenRegion->tokenOnlyRegion = tokenRegionTok;
@@ -928,6 +929,7 @@ literal_item: opt_no_ignore TK_Literal opt_no_ignore
 			TokenRegion *tokenRegion = createRegion( scannerName );
 
 			regionStack.push( tokenRegion );
+			regionPackStack.push( 0 );
 
 			tokenRegion->ignoreOnlyRegion = tokenRegionIgn;
 			tokenRegion->tokenOnlyRegion = tokenRegionTok;
@@ -1138,6 +1140,7 @@ token_def_name:
 			TokenRegion *tokenRegion = createRegion( scannerName );
 			
 			regionStack.push( tokenRegion );
+			regionPackStack.push( 0 );
 
 			tokenRegion->ignoreOnlyRegion = tokenRegionIgn;
 			tokenRegion->tokenOnlyRegion = tokenRegionTok;
@@ -2572,6 +2575,7 @@ void ColmParser::init()
 	addRegionDef( InputLoc(), namespaceStack.top(), rootRegionName, rootRegion );
 
 	regionStack.push( rootRegion );
+	regionPackStack.push( 0 );
 
 	pd->rootRegion = rootRegion;
 

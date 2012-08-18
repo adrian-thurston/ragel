@@ -102,6 +102,7 @@ struct ColmParser
 	PatternItemList *patternItemList;
 	ReplItemList *replItemList;
 	RegionVect regionStack;
+	RegionPackVect regionPackStack;
 	NamespaceVect namespaceStack;
 	ContextVect contextStack;
 

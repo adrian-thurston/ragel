@@ -595,6 +595,18 @@ struct TokenRegion
 	TokenRegion *next, *prev;
 };
 
+struct RegionPack
+{
+	TokenRegion *tokenIgnore;
+	TokenRegion *ignoreOnly;
+	TokenRegion *tokenOnly;
+	TokenRegion *ci;
+
+	RegionPack *next, *prev;
+};
+
+typedef Vector<RegionPack*> RegionPackVect;
+
 typedef DList<TokenRegion> RegionList;
 typedef BstSet< TokenRegion*, CmpOrd<TokenRegion*> > RegionSet;
 
