@@ -80,6 +80,8 @@ struct ColmParser
 	void addRegularDef( const InputLoc &loc, Namespace *nspace, 
 		const String &name, LexJoin *join );
 	TokenRegion *createRegion( String &name );
+	void pushRegionPack( String &name );
+	void popRegionPack();
 	void addRegionDef( const InputLoc &loc, Namespace *nspace, 
 		const String &name, TokenRegion *join );
 	void addProduction( const InputLoc &loc, const String &name, 

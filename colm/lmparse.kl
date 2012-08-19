@@ -470,48 +470,13 @@ var_def: TK_Word ':' type_ref
 region_def: 
 	region_head '{' root_item_list '}'
 	final {
-		/* Pop the top of the stack. */
-		regionStack.pop();
-		regionPackStack.pop();
+		popRegionPack();
 	};
 
 region_head: 
 	KW_Lex TK_Word 
 	final {
-		/* Just for ignores. */
-		String scannerNameIgn( $2->data.length() + 2, "<%s>-ign", $2->data.data );
-		TokenRegion *tokenRegionIgn = createRegion( scannerNameIgn );
-
-		/* Just for collect ignores. Will use the ignore-only start state. */
-		String scannerNameCi( $2->data.length() + 2, "<%s>-ci", $2->data.data );
-		TokenRegion *tokenRegionCi = createRegion( scannerNameCi );
-
-		/* Just for tokens. */
-		String scannerNameTok( $2->data.length() + 2, "<%s>-tok", $2->data.data );
-		TokenRegion *tokenRegionTok = createRegion( scannerNameTok );
-
-		/* Make the new token region. */
-		String scannerName( $2->data.length() + 2, "<%s>", $2->data.data );
-		TokenRegion *tokenRegion = createRegion( scannerName );
-
-		RegionPack *regionPack = new RegionPack( tokenRegion,
-				tokenRegionTok, tokenRegionIgn, tokenRegionCi );
-
-		tokenRegion->ignoreOnlyRegion = tokenRegionIgn;
-		tokenRegion->tokenOnlyRegion = tokenRegionTok;
-		tokenRegion->ciRegion = tokenRegionCi;
-
-		tokenRegion->isFullRegion = true;
-		tokenRegionIgn->isIgnoreOnly = true;
-		tokenRegionCi->isCiOnly = true;
-		tokenRegionTok->isTokenOnly = true;
-
-		tokenRegionIgn->derivedFrom = tokenRegion;
-		tokenRegionCi->derivedFrom = tokenRegion;
-		tokenRegionTok->derivedFrom = tokenRegion;
-
-		regionStack.push( tokenRegion );
-		regionPackStack.push( regionPack );
+		pushRegionPack( $2->data );
 	};
 
 namespace_def: 
@@ -1156,42 +1121,8 @@ literal_item: opt_no_ignore TK_Literal opt_no_ignore
 		String name( 32, "_literal_%.4x", pd->nextTokenId );
 
 		bool insideRegion = regionStack.top() != pd->rootRegion;
-		if ( !insideRegion ) {
-			/* Just for ignores. */
-			String scannerNameIgn( name.length() + 2, "<%s>-ign", name.data );
-			TokenRegion *tokenRegionIgn = createRegion( scannerNameIgn );
-
-			/* Just for collect ignores. Will use the ignore-only start state. */
-			String scannerNameCi( name.length() + 2, "<%s>-ci", name.data );
-			TokenRegion *tokenRegionCi = createRegion( scannerNameCi );
-
-			/* Just for tokens. */
-			String scannerNameTok( name.length() + 2, "<%s>-tok", name.data );
-			TokenRegion *tokenRegionTok = createRegion( scannerNameTok );
-
-			/* Make a new token region just for the token. */
-			String scannerName( name.length() + 2, "<%s>", name.data );
-			TokenRegion *tokenRegion = createRegion( scannerName );
-
-			RegionPack *regionPack = new RegionPack( tokenRegion,
-					tokenRegionTok, tokenRegionIgn, tokenRegionCi );
-
-			tokenRegion->ignoreOnlyRegion = tokenRegionIgn;
-			tokenRegion->tokenOnlyRegion = tokenRegionTok;
-			tokenRegion->ciRegion = tokenRegionCi;
-
-			tokenRegion->isFullRegion = true;
-			tokenRegionIgn->isIgnoreOnly = true;
-			tokenRegionCi->isCiOnly = true;
-			tokenRegionTok->isTokenOnly = true;
-
-			tokenRegionIgn->derivedFrom = tokenRegion;
-			tokenRegionCi->derivedFrom = tokenRegion;
-			tokenRegionTok->derivedFrom = tokenRegion;
-
-			regionStack.push( tokenRegion );
-			regionPackStack.push( regionPack );
-		}
+		if ( !insideRegion )
+			pushRegionPack( name );
 
 		bool unusedCI;
 		String interp;
@@ -1242,11 +1173,8 @@ literal_item: opt_no_ignore TK_Literal opt_no_ignore
 			}
 		}
 
-		if ( !insideRegion ) {
-			/* Leave the region just for this token. */
-			regionStack.pop();
-			regionPackStack.pop();
-		}
+		if ( !insideRegion )
+			popRegionPack();
 	};
 
 
@@ -1330,11 +1258,8 @@ token_def:
 		}
 
 		/* This is created and pushed in the name. */
-		if ( !pd->insideRegion ) {
-			/* Leave the region that we made just for this token. */
-			regionStack.pop();
-			regionPackStack.pop();
-		}
+		if ( !pd->insideRegion )
+			popRegionPack();
 
 		if ( join != 0 ) {
 			/* Create a regular language definition so the token can be used to
@@ -1372,42 +1297,8 @@ token_def_name:
 		pd->insideRegion = regionStack.top() != pd->rootRegion;
 		curDefineId = name;
 
-		if ( !pd->insideRegion ) {
-			/* For just ignores. */
-			String scannerNameIgn( name.length() + 2, "<%s>-ign", name.data );
-			TokenRegion *tokenRegionIgn = createRegion( scannerNameIgn );
-
-			/* Just for explicitly collecting ignores. */
-			String scannerNameCi( name.length() + 2, "<%s>-ci", name.data );
-			TokenRegion *tokenRegionCi = createRegion( scannerNameCi );
-			
-			/* Just for tokens. */
-			String scannerNameTok( name.length() + 2, "<%s>-tok", name.data );
-			TokenRegion *tokenRegionTok = createRegion( scannerNameTok );
-			
-			/* If not inside a region, make one for the token. */
-			String scannerName( name.length() + 2, "<%s>", name.data );
-			TokenRegion *tokenRegion = createRegion( scannerName );
-
-			RegionPack *regionPack = new RegionPack( tokenRegion,
-					tokenRegionTok, tokenRegionIgn, tokenRegionCi );
-			
-			tokenRegion->ignoreOnlyRegion = tokenRegionIgn;
-			tokenRegion->tokenOnlyRegion = tokenRegionTok;
-			tokenRegion->ciRegion = tokenRegionCi;
-
-			tokenRegion->isFullRegion = true;
-			tokenRegionIgn->isIgnoreOnly = true;
-			tokenRegionCi->isCiOnly = true;
-			tokenRegionTok->isTokenOnly = true;
-
-			tokenRegionIgn->derivedFrom = tokenRegion;
-			tokenRegionCi->derivedFrom = tokenRegion;
-			tokenRegionTok->derivedFrom = tokenRegion;
-
-			regionStack.push( tokenRegion );
-			regionPackStack.push( regionPack );
-		}
+		if ( !pd->insideRegion )
+			pushRegionPack( name );
 	};
 
 nonterm class opt_name
@@ -2865,6 +2756,50 @@ TokenRegion *ColmParser::createRegion( String &scannerName )
 	addRegionDef( InputLoc(), namespaceStack.top(), scannerName, tokenRegion );
 
 	return tokenRegion;
+}
+
+void ColmParser::pushRegionPack( String &name )
+{
+	/* Just for ignores. */
+	String scannerNameIgn( name.length() + 2, "<%s>-ign", name.data );
+	TokenRegion *tokenRegionIgn = createRegion( scannerNameIgn );
+
+	/* Just for collect ignores. Will use the ignore-only start state. */
+	String scannerNameCi( name.length() + 2, "<%s>-ci", name.data );
+	TokenRegion *tokenRegionCi = createRegion( scannerNameCi );
+
+	/* Just for tokens. */
+	String scannerNameTok( name.length() + 2, "<%s>-tok", name.data );
+	TokenRegion *tokenRegionTok = createRegion( scannerNameTok );
+
+	/* Make the new token region. */
+	String scannerName( name.length() + 2, "<%s>", name.data );
+	TokenRegion *tokenRegion = createRegion( scannerName );
+
+	RegionPack *regionPack = new RegionPack( tokenRegion,
+			tokenRegionTok, tokenRegionIgn, tokenRegionCi );
+
+	tokenRegion->ignoreOnlyRegion = tokenRegionIgn;
+	tokenRegion->tokenOnlyRegion = tokenRegionTok;
+	tokenRegion->ciRegion = tokenRegionCi;
+
+	tokenRegion->isFullRegion = true;
+	tokenRegionIgn->isIgnoreOnly = true;
+	tokenRegionCi->isCiOnly = true;
+	tokenRegionTok->isTokenOnly = true;
+
+	tokenRegionIgn->derivedFrom = tokenRegion;
+	tokenRegionCi->derivedFrom = tokenRegion;
+	tokenRegionTok->derivedFrom = tokenRegion;
+
+	regionStack.push( tokenRegion );
+	regionPackStack.push( regionPack );
+}
+
+void ColmParser::popRegionPack()
+{
+	regionStack.pop();
+	regionPackStack.pop();
 }
 
 
