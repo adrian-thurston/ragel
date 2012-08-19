@@ -595,9 +595,9 @@ struct TokenRegion
 	TokenRegion *next, *prev;
 };
 
-struct RegionPack
+struct RegionSet
 {
-	RegionPack( TokenRegion *tokenIgnore, TokenRegion *tokenOnly, 
+	RegionSet( TokenRegion *tokenIgnore, TokenRegion *tokenOnly, 
 			TokenRegion *ignoreOnly, TokenRegion *ci )
 	:
 		tokenIgnore(tokenIgnore),
@@ -611,13 +611,12 @@ struct RegionPack
 	TokenRegion *ignoreOnly;
 	TokenRegion *ci;
 
-	RegionPack *next, *prev;
+	RegionSet *next, *prev;
 };
 
-typedef Vector<RegionPack*> RegionPackVect;
+typedef Vector<RegionSet*> RegionSetVect;
 
 typedef DList<TokenRegion> RegionList;
-typedef BstSet< TokenRegion*, CmpOrd<TokenRegion*> > RegionSet;
 
 typedef Vector<Namespace*> NamespaceVect;
 

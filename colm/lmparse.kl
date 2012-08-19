@@ -470,13 +470,13 @@ var_def: TK_Word ':' type_ref
 region_def: 
 	region_head '{' root_item_list '}'
 	final {
-		popRegionPack();
+		popRegionSet();
 	};
 
 region_head: 
 	KW_Lex TK_Word 
 	final {
-		pushRegionPack( $2->data );
+		pushRegionSet( $2->data );
 	};
 
 namespace_def: 
@@ -1122,7 +1122,7 @@ literal_item: opt_no_ignore TK_Literal opt_no_ignore
 
 		bool insideRegion = regionStack.top() != pd->rootRegion;
 		if ( !insideRegion )
-			pushRegionPack( name );
+			pushRegionSet( name );
 
 		bool unusedCI;
 		String interp;
@@ -1174,7 +1174,7 @@ literal_item: opt_no_ignore TK_Literal opt_no_ignore
 		}
 
 		if ( !insideRegion )
-			popRegionPack();
+			popRegionSet();
 	};
 
 
@@ -1259,7 +1259,7 @@ token_def:
 
 		/* This is created and pushed in the name. */
 		if ( !pd->insideRegion )
-			popRegionPack();
+			popRegionSet();
 
 		if ( join != 0 ) {
 			/* Create a regular language definition so the token can be used to
@@ -1298,7 +1298,7 @@ token_def_name:
 		curDefineId = name;
 
 		if ( !pd->insideRegion )
-			pushRegionPack( name );
+			pushRegionSet( name );
 	};
 
 nonterm class opt_name
@@ -2679,10 +2679,10 @@ void ColmParser::init()
 	pd->regionList.append( rootRegion );
 	addRegionDef( InputLoc(), namespaceStack.top(), rootRegionName, rootRegion );
 
-	RegionPack *rootRegionPack = new RegionPack( rootRegion, 0, 0, 0 );
+	RegionSet *rootRegionSet = new RegionSet( rootRegion, 0, 0, 0 );
 
 	regionStack.push( rootRegion );
-	regionPackStack.push( rootRegionPack );
+	regionPackStack.push( rootRegionSet );
 
 	pd->rootRegion = rootRegion;
 
@@ -2758,7 +2758,7 @@ TokenRegion *ColmParser::createRegion( String &scannerName )
 	return tokenRegion;
 }
 
-void ColmParser::pushRegionPack( String &name )
+void ColmParser::pushRegionSet( String &name )
 {
 	/* Just for ignores. */
 	String scannerNameIgn( name.length() + 2, "<%s>-ign", name.data );
@@ -2776,7 +2776,7 @@ void ColmParser::pushRegionPack( String &name )
 	String scannerName( name.length() + 2, "<%s>", name.data );
 	TokenRegion *tokenRegion = createRegion( scannerName );
 
-	RegionPack *regionPack = new RegionPack( tokenRegion,
+	RegionSet *regionPack = new RegionSet( tokenRegion,
 			tokenRegionTok, tokenRegionIgn, tokenRegionCi );
 
 	tokenRegion->ignoreOnlyRegion = tokenRegionIgn;
@@ -2796,7 +2796,7 @@ void ColmParser::pushRegionPack( String &name )
 	regionPackStack.push( regionPack );
 }
 
-void ColmParser::popRegionPack()
+void ColmParser::popRegionSet()
 {
 	regionStack.pop();
 	regionPackStack.pop();
