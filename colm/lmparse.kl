@@ -1261,7 +1261,7 @@ leave_rl:
 
 token_def: 
 	token_or_ignore token_def_name obj_var_list
-	enter_rl opt_no_ignore '/' opt_rl_join leave_rl '/' opt_no_ignore  
+	enter_rl opt_no_ignore '/' opt_lex_join leave_rl '/' opt_no_ignore  
 	opt_translate
 	final {
 		bool ignore = $1->ignore;
@@ -1440,7 +1440,7 @@ pre_eof:
 	};
 
 rl_def:
-	KW_Rl machine_name enter_rl '/' rl_join leave_rl '/'
+	KW_Rl machine_name enter_rl '/' lex_join leave_rl '/'
 	final {
 		/* Generic creation of machine for instantiation and assignment. */
 		addRegularDef( $2->loc, namespaceStack.top(), $2->data, $5->join );
@@ -2088,16 +2088,20 @@ code_factor:
 		Namespace *nspace = namespaceStack.top();
 		TokenRegion *region = regionStack.top();
 
+		/* We are constructing a parser, sending it items, then returning it.
+		 * Thisis the constructor for the parser. */
 		ConsItemList *emptyConsItemList = new ConsItemList;
 
 		Constructor *constructor = Constructor::cons( $2->loc, nspace, region,
 				emptyConsItemList, pd->nextPatConsId++ );
 		pd->replList.append( constructor );
 		
+		/* The parser may be referenced. */
 		LangVarRef *varRef = 0;
 		if ( $3->objField != 0 )
 			varRef = LangVarRef::cons( $3->objField->loc, $3->objField->name );
 
+		/* The typeref for the parser. */
 		NamespaceQual *nspaceQual = new NamespaceQual( 
 				namespaceStack.top(), regionStack.top() );
 		TypeRef *parserTypeRef = TypeRef::cons( InputLoc(),
@@ -2299,9 +2303,9 @@ field_init: code_expr
 # Regular Expressions
 #
 
-nonterm opt_rl_join uses rl_join;
+nonterm opt_lex_join uses lex_join;
 
-opt_rl_join: rl_join opt_context
+opt_lex_join: lex_join opt_context
 	final {
 		$$->join = $1->join;
 		$$->context = $2->context;
@@ -2316,122 +2320,122 @@ opt_rl_join: rl_join opt_context
 		}
 	};
 
-opt_rl_join:
+opt_lex_join:
 	final {
 		$$->join = 0;
 		$$->context = 0;
 	};
 
-nonterm rl_join
+nonterm lex_join
 {
 	LexJoin *join;
 	LexJoin *context;
 };
 
-rl_join: 
-	rl_join ',' rl_expr
+lex_join: 
+	lex_join ',' lex_expr
 	final {
 		/* Append the expression to the list and return it. */
 		$1->join->exprList.append( $3->expression );
 		$$->join = $1->join;
 	};
-rl_join: 
-	rl_expr 
+lex_join: 
+	lex_expr 
 	final {
 		$$->join = new LexJoin( $1->expression );
 	};
 
 # Context at the end of a pattern that is not included in the match
-nonterm opt_context uses rl_join;
+nonterm opt_context uses lex_join;
 
-opt_context: '@' rl_join final { $$->context = $2->join; };
+opt_context: '@' lex_join final { $$->context = $2->join; };
 opt_context: final { $$->context = 0; };
 
-nonterm rl_expr
+nonterm lex_expr
 {
 	LexExpression *expression;
 };
 
-rl_expr: 
-	rl_expr '|' rl_term_short final {
+lex_expr: 
+	lex_expr '|' lex_term_short final {
 		$$->expression = LexExpression::cons( $1->expression, 
 				$3->term, LexExpression::OrType );
 	};
-rl_expr: 
-	rl_expr '&' rl_term_short final {
+lex_expr: 
+	lex_expr '&' lex_term_short final {
 		$$->expression = LexExpression::cons( $1->expression, 
 				$3->term, LexExpression::IntersectType );
 	};
 # This priority specification overrides the innermost parsing strategy which
 # results ordered choice interpretation of the grammar.
-rl_expr: 
-	rl_expr '-' rl_term_short final {
+lex_expr: 
+	lex_expr '-' lex_term_short final {
 		$$->expression = LexExpression::cons( $1->expression, 
 				$3->term, LexExpression::SubtractType );
 	};
-rl_expr: 
-	rl_expr TK_DashDash rl_term_short final {
+lex_expr: 
+	lex_expr TK_DashDash lex_term_short final {
 		$$->expression = LexExpression::cons( $1->expression, 
 				$3->term, LexExpression::StrongSubtractType );
 	};
-rl_expr: 
-	rl_term_short final {
+lex_expr: 
+	lex_term_short final {
 		$$->expression = LexExpression::cons( $1->term );
 	};
 
-nonterm rl_term_short
+nonterm lex_term_short
 {
 	LexTerm *term;
 };
 
-shortest rl_term_short;
+shortest lex_term_short;
 
-rl_term_short: rl_term 
+lex_term_short: lex_term 
 	final { $$->term = $1->term; };
 
-nonterm rl_term
+nonterm lex_term
 {
 	LexTerm *term;
 };
 
-rl_term:
-	rl_term factor_label final {
+lex_term:
+	lex_term lex_factor_label final {
 		$$->term = LexTerm::cons( $1->term, $2->factorAug );
 	};
-rl_term:
-	rl_term '.' factor_label final {
+lex_term:
+	lex_term '.' lex_factor_label final {
 		$$->term = LexTerm::cons( $1->term, $3->factorAug );
 	};
-rl_term:
-	rl_term TK_ColonGt factor_label final {
+lex_term:
+	lex_term TK_ColonGt lex_factor_label final {
 		$$->term = LexTerm::cons( $1->term, $3->factorAug, LexTerm::RightStartType );
 	};
-rl_term:
-	rl_term TK_ColonGtGt factor_label final {
+lex_term:
+	lex_term TK_ColonGtGt lex_factor_label final {
 		$$->term = LexTerm::cons( $1->term, $3->factorAug, LexTerm::RightFinishType );
 	};
-rl_term:
-	rl_term TK_LtColon factor_label final {
+lex_term:
+	lex_term TK_LtColon lex_factor_label final {
 		$$->term = LexTerm::cons( $1->term,
 				$3->factorAug, LexTerm::LeftType );
 	};
-rl_term:
-	factor_label final {
+lex_term:
+	lex_factor_label final {
 		$$->term = LexTerm::cons( $1->factorAug );
 	};
 
-nonterm factor_label
+nonterm lex_factor_label
 {
 	LexFactorAug *factorAug;
 };
 
-factor_label: 
+lex_factor_label: 
 	factor_ep final {
 		$$->factorAug = $1->factorAug;
 	};
 
-factor_label: 
-	TK_Word ':' factor_label final {
+lex_factor_label: 
+	TK_Word ':' lex_factor_label final {
 		$$->factorAug = $3->factorAug;
 
 		if ( curObjectDef->checkRedecl( $1->data ) != 0 )
@@ -2474,7 +2478,7 @@ nonterm factor_aug
 };
 
 factor_aug:
-	factor_rep final {
+	lex_factor_rep final {
 		$$->factorAug = LexFactorAug::cons( $1->factorRep );
 	};
 
@@ -2482,63 +2486,63 @@ factor_aug:
 # The fourth level of precedence. These are the trailing unary operators that
 # allow for repetition.
 
-nonterm factor_rep
+nonterm lex_factor_rep
 {
 	LexFactorRep *factorRep;
 };
 
-factor_rep:
-	factor_rep '*' final {
+lex_factor_rep:
+	lex_factor_rep '*' final {
 		$$->factorRep = LexFactorRep::cons( $2->loc, $1->factorRep, 
 				0, 0, LexFactorRep::StarType );
 	};
-factor_rep:
-	factor_rep TK_StarStar final {
+lex_factor_rep:
+	lex_factor_rep TK_StarStar final {
 		$$->factorRep = LexFactorRep::cons( $2->loc, $1->factorRep, 
 				0, 0, LexFactorRep::StarStarType );
 	};
-factor_rep:
-	factor_rep '?' final {
+lex_factor_rep:
+	lex_factor_rep '?' final {
 		$$->factorRep = LexFactorRep::cons( $2->loc, $1->factorRep, 
 				0, 0, LexFactorRep::OptionalType );
 	};
-factor_rep:
-	factor_rep '+' final {
+lex_factor_rep:
+	lex_factor_rep '+' final {
 		$$->factorRep = LexFactorRep::cons( $2->loc, $1->factorRep, 
 				0, 0, LexFactorRep::PlusType );
 	};
-factor_rep:
-	factor_rep '{' factor_rep_num '}' final {
+lex_factor_rep:
+	lex_factor_rep '{' lex_factor_rep_num '}' final {
 		$$->factorRep = LexFactorRep::cons( $2->loc, $1->factorRep, 
 				$3->rep, 0, LexFactorRep::ExactType );
 	};
-factor_rep:
-	factor_rep '{' ',' factor_rep_num '}' final {
+lex_factor_rep:
+	lex_factor_rep '{' ',' lex_factor_rep_num '}' final {
 		$$->factorRep = LexFactorRep::cons( $2->loc, $1->factorRep, 
 				0, $4->rep, LexFactorRep::MaxType );
 	};
-factor_rep:
-	factor_rep '{' factor_rep_num ',' '}' final {
+lex_factor_rep:
+	lex_factor_rep '{' lex_factor_rep_num ',' '}' final {
 		$$->factorRep = LexFactorRep::cons( $2->loc, $1->factorRep,
 				$3->rep, 0, LexFactorRep::MinType );
 	};
-factor_rep:
-	factor_rep '{' factor_rep_num ',' factor_rep_num '}' final {
+lex_factor_rep:
+	lex_factor_rep '{' lex_factor_rep_num ',' lex_factor_rep_num '}' final {
 		$$->factorRep = LexFactorRep::cons( $2->loc, $1->factorRep, 
 				$3->rep, $5->rep, LexFactorRep::RangeType );
 	};
-factor_rep:
-	factor_neg final {
+lex_factor_rep:
+	lex_factor_neg final {
 		$$->factorRep = LexFactorRep::cons( 
 				$1->factorNeg->loc, $1->factorNeg );
 	};
 
-nonterm factor_rep_num
+nonterm lex_factor_rep_num
 {
 	int rep;
 };
 
-factor_rep_num:
+lex_factor_rep_num:
 	TK_UInt final {
 		// Convert the priority number to a long. Check for overflow.
 		errno = 0;
@@ -2559,43 +2563,43 @@ factor_rep_num:
 # The fifth level up in precedence. Negation.
 #
 
-nonterm factor_neg
+nonterm lex_factor_neg
 {
 	LexFactorNeg *factorNeg;
 };
 
-factor_neg:
-	'!' factor_neg final {
+lex_factor_neg:
+	'!' lex_factor_neg final {
 		$$->factorNeg = LexFactorNeg::cons( $1->loc,
 				$2->factorNeg, LexFactorNeg::NegateType );
 	};
-factor_neg:
-	'^' factor_neg final {
+lex_factor_neg:
+	'^' lex_factor_neg final {
 		$$->factorNeg = LexFactorNeg::cons( $1->loc,
 				$2->factorNeg, LexFactorNeg::CharNegateType );
 	};
-factor_neg:
-	rl_factor final {
+lex_factor_neg:
+	lex_rl_factor final {
 		$$->factorNeg = LexFactorNeg::cons( $1->factor->loc, $1->factor );
 	};
 
-nonterm rl_factor
+nonterm lex_rl_factor
 {
 	LexFactor *factor;
 };
 
-rl_factor: 
+lex_rl_factor: 
 	TK_Literal final {
 		/* Create a new factor node going to a concat literal. */
 		$$->factor = LexFactor::cons( Literal::cons( $1->loc, $1->data, Literal::LitString ) );
 	};
-rl_factor: 
-	alphabet_num final {
+lex_rl_factor: 
+	lex_alphabet_num final {
 		/* Create a new factor node going to a literal number. */
 		$$->factor = LexFactor::cons( Literal::cons( $1->loc, 
 				$1->data, Literal::Number ) );
 	};
-rl_factor:
+lex_rl_factor:
 	TK_Word final {
 		/* Find the named graph. */
 		Namespace *nspace = namespaceStack.top();
@@ -2625,59 +2629,59 @@ rl_factor:
 			$$->factor = 0;
 		}
 	};
-rl_factor:
-	TK_SqOpen regular_expr_or_data TK_SqClose final {
+lex_rl_factor:
+	TK_SqOpen lex_regular_expr_or_data TK_SqClose final {
 		/* Create a new factor node going to an OR expression. */
 		$$->factor = LexFactor::cons( ReItem::cons( $1->loc, $2->reOrBlock, ReItem::OrBlock ) );
 	};
-rl_factor:
-	TK_SqOpenNeg regular_expr_or_data TK_SqClose final {
+lex_rl_factor:
+	TK_SqOpenNeg lex_regular_expr_or_data TK_SqClose final {
 		/* Create a new factor node going to a negated OR expression. */
 		$$->factor = LexFactor::cons( ReItem::cons( $1->loc, $2->reOrBlock, ReItem::NegOrBlock ) );
 	};
-rl_factor:
-	range_lit TK_DotDot range_lit final {
+lex_rl_factor:
+	lex_range_lit TK_DotDot lex_range_lit final {
 		/* Create a new factor node going to a range. */
 		$$->factor = LexFactor::cons( Range::cons( $1->literal, $3->literal ) );
 	};
-rl_factor:
-	'(' rl_join ')' final {
+lex_rl_factor:
+	'(' lex_join ')' final {
 		/* Create a new factor going to a parenthesized join. */
 		$$->factor = LexFactor::cons( $2->join );
 	};
 
-nonterm range_lit
+nonterm lex_range_lit
 {
 	Literal *literal;
 };
 
 # Literals which can be the end points of ranges.
-range_lit:
+lex_range_lit:
 	TK_Literal final {
 		/* Range literas must have only one char. We restrict this in the parse tree. */
 		$$->literal = Literal::cons( $1->loc, $1->data, Literal::LitString );
 	};
-range_lit:
-	alphabet_num final {
+lex_range_lit:
+	lex_alphabet_num final {
 		/* Create a new literal number. */
 		$$->literal = Literal::cons( $1->loc, $1->data, Literal::Number );
 	};
 
-nonterm alphabet_num uses token_data;
+nonterm lex_alphabet_num uses token_data;
 
 # Any form of a number that can be used as a basic machine. */
-alphabet_num:
+lex_alphabet_num:
 	TK_UInt final { 
 		$$->loc = $1->loc;
 		$$->data = $1->data;
 	};
-alphabet_num: 
+lex_alphabet_num: 
 	'-' TK_UInt final { 
 		$$->loc = $1->loc;
 		$$->data = '+';
 		$$->data += $2->data;
 	};
-alphabet_num: 
+lex_alphabet_num: 
 	TK_Hex final { 
 		$$->loc = $1->loc;
 		$$->data = $1->data;
@@ -2690,13 +2694,13 @@ alphabet_num:
 
 # The data inside of a [] expression in a regular expression. Accepts any
 # number of characters or ranges. */
-nonterm regular_expr_or_data
+nonterm lex_regular_expr_or_data
 {
 	ReOrBlock *reOrBlock;
 };
 
-regular_expr_or_data:
-	regular_expr_or_data regular_expr_or_char final {
+lex_regular_expr_or_data:
+	lex_regular_expr_or_data lex_regular_expr_or_char final {
 		/* An optimization to lessen the tree size. If an or char is directly
 		 * under the left side on the right and the right side is another or
 		 * char then paste them together and return the left side. Otherwise
@@ -2716,63 +2720,25 @@ regular_expr_or_data:
 			$$->reOrBlock = ReOrBlock::cons( $1->reOrBlock, $2->reOrItem );
 		}
 	};
-regular_expr_or_data:
+lex_regular_expr_or_data:
 	final {
 		$$->reOrBlock = ReOrBlock::cons();
 	};
 
 # A single character inside of an or expression. Can either be a character or a
 # set of characters.
-nonterm regular_expr_or_char
+nonterm lex_regular_expr_or_char
 {
 	ReOrItem *reOrItem;
 };
 
-regular_expr_or_char:
+lex_regular_expr_or_char:
 	TK_ReChar final {
 		$$->reOrItem = ReOrItem::cons( $1->loc, $1->data );
 	};
-regular_expr_or_char:
+lex_regular_expr_or_char:
 	TK_ReChar TK_Dash TK_ReChar final {
 		$$->reOrItem = ReOrItem::cons( $2->loc, $1->data[0], $3->data[0] );
-	};
-
-#  A local state reference. Cannot have :: prefix.
-local_state_ref:
-	no_name_sep state_ref_names;
-
-# Clear the name ref structure.
-no_name_sep:
-	final {
-		nameRef.empty();
-	};
-
-# A qualified state reference.
-state_ref: opt_name_sep state_ref_names;
-
-# Optional leading name separator.
-opt_name_sep:
-	TK_NameSep 
-	final {
-		/* Insert an initial null pointer val to indicate the existence of the
-		 * initial name seperator. */
-		nameRef.setAs( 0 );
-	};
-opt_name_sep:
-	final {
-		nameRef.empty();
-	};
-
-# List of names separated by ::
-state_ref_names:
-	state_ref_names TK_NameSep TK_Word
-	final {
-		nameRef.append( $3->data );
-	};
-state_ref_names:
-	TK_Word 
-	final {
-		nameRef.append( $1->data );
 	};
 
 nonterm opt_commit
