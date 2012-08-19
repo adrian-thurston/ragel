@@ -373,14 +373,17 @@ define_prod: '[' prod_el_list ']' opt_commit opt_reduce_code opt_prec
 	final {
 		ProdElList *prodElList = curProdElList;
 
-		Production *newDef = Production::cons( $1->loc, 0, 
-			prodElList, $4->commit, $5->codeBlock,
-			pd->prodList.length(), 0 );
-		newDef->predOf = $6->predOf;
-		
-		pd->prodList.append( newDef );
+		Production *prod = Production::cons( $1->loc, 0, 
+				prodElList, $4->commit, $5->codeBlock,
+				pd->prodList.length(), 0 );
+		prod->predOf = $6->predOf;
 
-		$$->definition = newDef;
+		/* Link the production elements back to the production. */
+		for ( ProdEl *prodEl = prodElList->head; prodEl != 0; prodEl = prodEl->next )
+			prodEl->production = prod;
+		
+		pd->prodList.append( prod );
+		$$->definition = prod;
 	};
 
 obj_var_list: obj_var_list var_def
@@ -710,8 +713,8 @@ pattern_el_type_or_lit:
 	region_qual TK_Word opt_repeat
 	final {
 		TypeRef *typeRef = TypeRef::cons( $2->loc, $1->nspaceQual, $2->data, $3->repeatType );
-		ProdEl *factor = new ProdEl( ProdEl::ReferenceType, $2->loc, 0, false, typeRef, 0 );
-		PatternItem *patternItem = PatternItem::cons( $2->loc, factor, PatternItem::FactorType );
+		ProdEl *prodEl = new ProdEl( ProdEl::ReferenceType, $2->loc, 0, false, typeRef, 0 );
+		PatternItem *patternItem = PatternItem::cons( $2->loc, prodEl, PatternItem::FactorType );
 		$$->list = new PatternItemList;
 		$$->list->append( patternItem );
 	};
@@ -722,8 +725,8 @@ pattern_el_type_or_lit:
 		PdaLiteral *literal = new PdaLiteral( $2->loc, $2->data );
 		TypeRef *typeRef = TypeRef::cons( $2->loc, $1->nspaceQual, literal, $3->repeatType );
 
-		ProdEl *factor = new ProdEl( ProdEl::ReferenceType, $2->loc, 0, false, typeRef, 0 );
-		PatternItem *patternItem = PatternItem::cons( $2->loc, factor, PatternItem::FactorType );
+		ProdEl *prodEl = new ProdEl( ProdEl::ReferenceType, $2->loc, 0, false, typeRef, 0 );
+		PatternItem *patternItem = PatternItem::cons( $2->loc, prodEl, PatternItem::FactorType );
 		$$->list = new PatternItemList;
 		$$->list->append( patternItem );
 	};
@@ -827,8 +830,8 @@ cons_el: region_qual TK_Literal
 	final {
 		PdaLiteral *literal = new PdaLiteral( $2->loc, $2->data );
 		TypeRef *typeRef = TypeRef::cons( $2->loc, $1->nspaceQual, literal );
-		ProdEl *factor = new ProdEl( ProdEl::LiteralType, $2->loc, 0, false, typeRef, 0 );
-		ConsItem *consItem = ConsItem::cons( $2->loc, ConsItem::FactorType, factor );
+		ProdEl *prodEl = new ProdEl( ProdEl::LiteralType, $2->loc, 0, false, typeRef, 0 );
+		ConsItem *consItem = ConsItem::cons( $2->loc, ConsItem::FactorType, prodEl );
 		$$->list = new ConsItemList;
 		$$->list->append( consItem );
 	};
@@ -1043,11 +1046,14 @@ string_el: '"' lit_string_el_list '"'
 prod_el_list: 
 	prod_el_list prod_el 
 	final {
-		curProdElList->append( $2->factor );
+		$2->prodEl->pos = curProdElList->length();
+		curProdElList->append( $2->prodEl );
 	};
 
 prod_el_list: 
-	final { curProdElList = new ProdElList; };
+	final {
+		curProdElList = new ProdElList;
+	};
 
 nonterm opt_no_ignore { bool value; };
 
@@ -1056,14 +1062,14 @@ opt_no_ignore:       final { $$->value = false; };
 
 nonterm prod_el
 {
-	ProdEl *factor;
+	ProdEl *prodEl;
 };
 
 prod_el: 
 	opt_capture opt_commit region_qual TK_Word opt_repeat
 	final {
 		TypeRef *typeRef = TypeRef::cons( $4->loc, $3->nspaceQual, $4->data, $5->repeatType );
-		$$->factor = new ProdEl( ProdEl::ReferenceType, $4->loc, $1->objField, $2->commit, typeRef, 0 );
+		$$->prodEl = new ProdEl( ProdEl::ReferenceType, $4->loc, $1->objField, $2->commit, typeRef, 0 );
 
 		/* If there is a capture, create the field. */
 		if ( $1->objField != 0 ) {
@@ -1080,18 +1086,17 @@ prod_el:
 			}
 
 			objField->isRhsGet = true;
-			RhsVal rhsVal( curDefList->length(), curProdElList->length() );
-			objField->rhsVal.append( RhsVal( curDefList->length(), curProdElList->length() ) );
+			objField->rhsVal.append( RhsVal( $$->prodEl ) );
 		}
 	};
 
 prod_el: 
 	opt_capture opt_commit region_qual TK_Literal opt_repeat
 	final {
-		/* Create a new factor node going to a concat literal. */
+		/* Create a new prodEl node going to a concat literal. */
 		PdaLiteral *literal = new PdaLiteral( $4->loc, $4->data );
 		TypeRef *typeRef = TypeRef::cons( $4->loc, $3->nspaceQual, literal, $5->repeatType );
-		$$->factor = new ProdEl( ProdEl::LiteralType, $4->loc, $1->objField, $2->commit, typeRef, 0 );
+		$$->prodEl = new ProdEl( ProdEl::LiteralType, $4->loc, $1->objField, $2->commit, typeRef, 0 );
 
 		/* If there is a capture, create the field. */
 		if ( $1->objField != 0 ) {

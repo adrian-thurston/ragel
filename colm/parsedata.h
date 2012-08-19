@@ -299,6 +299,7 @@ struct ProdEl
 	/* Construct with a reference to a var def. */
 	ProdEl( Type type, const InputLoc &loc, ObjField *captureField, bool commit, TypeRef *typeRef, int priorVal )
 	:
+		production(0),
 		captureField(captureField),
 		commit(commit),
 		typeRef(typeRef),
@@ -310,6 +311,7 @@ struct ProdEl
 
 	ProdEl( const InputLoc &loc, TypeRef *typeRef )
 	:
+		production(0),
 		captureField(0), 
 		commit(false), 
 		typeRef(typeRef), 
@@ -319,6 +321,8 @@ struct ProdEl
 		objField(0)
 	{}
 
+	Production *production;
+	int pos;
 	ObjField *captureField;
 	bool commit;
 

@@ -421,8 +421,8 @@ UniqueType *LangVarRef::loadFieldInstr( Compiler *pd, CodeVect &code,
 		/* Need to place the array computing the val. */
 		code.append( el->rhsVal.length() );
 		for ( Vector<RhsVal>::Iter rg = el->rhsVal; rg.lte(); rg++ ) {
-			code.append( rg->prodNum );
-			code.append( rg->childNum );
+			code.append( rg->prodEl->production->prodNum );
+			code.append( rg->prodEl->pos );
 		}
 	}
 

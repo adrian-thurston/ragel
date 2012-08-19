@@ -233,8 +233,8 @@ void Compiler::generateExportsImpl()
 						/* Need to place the array computing the val. */
 						out << field->rhsVal.length();
 						for ( Vector<RhsVal>::Iter rg = field->rhsVal; rg.lte(); rg++ ) {
-							out << ", " << rg->prodNum;
-							out << ", " << rg->childNum;
+							out << ", " << rg->prodEl->production->prodNum;
+							out << ", " << rg->prodEl->pos;
 						}
 
 						out << "}; return " << ut->langEl->refName << 

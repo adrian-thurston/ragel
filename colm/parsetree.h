@@ -2096,7 +2096,15 @@ struct ObjMethod
 typedef AvlMap<String, ObjMethod*, CmpStr> ObjMethodMap;
 typedef AvlMapEl<String, ObjMethod*> ObjMethodMapEl;
 
-struct RhsVal { RhsVal( int prodNum, int childNum ) : prodNum(prodNum), childNum(childNum) { } int prodNum; int childNum; };
+struct RhsVal
+{
+	RhsVal( ProdEl *prodEl ) 
+	:
+		prodEl(prodEl)
+	{}
+
+	ProdEl *prodEl;
+};
 
 struct ObjField
 {
