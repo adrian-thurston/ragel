@@ -295,7 +295,7 @@ cfl_def: cfl_def_head obj_var_list properties_list cfl_prod_list
 				curDefineId,
 				nspace, 
 				$4->defList, 
-				pd->objectDef,
+				curObjectDef,
 				contextStack.length() > 0 ? contextStack.top() : 0,
 				$3->property & PROPERTY_REDUCE_FIRST );
 
@@ -305,7 +305,6 @@ cfl_def: cfl_def_head obj_var_list properties_list cfl_prod_list
 cfl_def_head: KW_Def TK_Word
 	final {
 		curDefineId = $2->data;
-		curDefList = new LelDefList;
 	};
 
 nonterm cfl_prod_list
@@ -321,7 +320,7 @@ cfl_prod_list: cfl_prod_list '|' define_prod
 	};
 cfl_prod_list: define_prod
 	final {
-		$$->defList = curDefList;
+		$$->defList = new LelDefList;
 		$1->definition->prodNum = $$->defList->length();
 		$$->defList->append( $1->definition );
 	};
@@ -371,7 +370,7 @@ nonterm define_prod
 
 define_prod: '[' prod_el_list ']' opt_commit opt_reduce_code opt_prec
 	final {
-		ProdElList *prodElList = curProdElList;
+		ProdElList *prodElList = $2->list;
 
 		Production *prod = Production::cons( $1->loc, 0, 
 				prodElList, $4->commit, $5->codeBlock,
@@ -388,15 +387,15 @@ define_prod: '[' prod_el_list ']' opt_commit opt_reduce_code opt_prec
 
 obj_var_list: obj_var_list var_def
 	final {
-		if ( pd->objectDef->checkRedecl( $2->objField->name ) != 0 )
+		if ( curObjectDef->checkRedecl( $2->objField->name ) != 0 )
 			error() << "object field renamed" << endp;
 
-		pd->objectDef->insertField( $2->objField->name, $2->objField );
+		curObjectDef->insertField( $2->objField->name, $2->objField );
 	};
 
 obj_var_list:
 	final {
-		pd->objectDef = new ObjectDef( ObjectDef::UserType,
+		curObjectDef = new ObjectDef( ObjectDef::UserType,
 				curDefineId, pd->nextObjectId++ ); 
 	};
 
@@ -1043,16 +1042,22 @@ string_el: '"' lit_string_el_list '"'
 # Production Lists.
 #
 
+nonterm prod_el_list
+{
+	ProdElList *list;
+};
+
 prod_el_list: 
 	prod_el_list prod_el 
 	final {
-		$2->prodEl->pos = curProdElList->length();
-		curProdElList->append( $2->prodEl );
+		$2->prodEl->pos = $1->list->length();
+		$$->list = $1->list;
+		$$->list->append( $2->prodEl );
 	};
 
 prod_el_list: 
 	final {
-		curProdElList = new ProdElList;
+		$$->list = new ProdElList;
 	};
 
 nonterm opt_no_ignore { bool value; };
@@ -1074,11 +1079,11 @@ prod_el:
 		/* If there is a capture, create the field. */
 		if ( $1->objField != 0 ) {
 			/* Might already exist. */
-			ObjField *objField = pd->objectDef->checkRedecl( $1->objField->name );
+			ObjField *objField = curObjectDef->checkRedecl( $1->objField->name );
 			if ( objField == 0 ) {
 				objField = $1->objField;
 				objField->typeRef = typeRef;
-				pd->objectDef->insertField( objField->name, objField );
+				curObjectDef->insertField( objField->name, objField );
 			}
 			else {
 				/* FIXME: check the types are the same. */
@@ -1101,10 +1106,10 @@ prod_el:
 		/* If there is a capture, create the field. */
 		if ( $1->objField != 0 ) {
 			$1->objField->typeRef = typeRef;
-			if ( pd->objectDef->checkRedecl( $1->objField->name ) != 0 )
+			if ( curObjectDef->checkRedecl( $1->objField->name ) != 0 )
 				error() << "object field renamed" << endp;
 
-			pd->objectDef->insertField( $1->objField->name, $1->objField );
+			curObjectDef->insertField( $1->objField->name, $1->objField );
 		}
 	};
 
@@ -1281,7 +1286,7 @@ token_def:
 
 		TokenDef *tokenDef = new TokenDef( name, String(), false, ignore, join, 
 				transBlock, $1->loc, pd->nextTokenId++, nspace, region,
-				&reCaptureVect, pd->objectDef,
+				&reCaptureVect, curObjectDef,
 				contextStack.length() > 0 ? contextStack.top() : 0 );
 
 		region->tokenDefList.append( tokenDef );
@@ -1296,7 +1301,7 @@ token_def:
 		if ( ignore ) {
 			TokenDef *tokenDefIgn = new TokenDef( name + "_ign", String(), false, ignore, join, 
 					0, $1->loc, pd->nextTokenId++, nspace, region->ignoreOnlyRegion,
-					&reCaptureVect, pd->objectDef,
+					&reCaptureVect, curObjectDef,
 					contextStack.length() > 0 ? contextStack.top() : 0 );
 
 			tokenDefIgn->dupOf = tokenDef;
@@ -1307,7 +1312,7 @@ token_def:
 		else {
 			TokenDef *tokenDefTok = new TokenDef( name + "_tok", String(), false, ignore, join, 
 					0, $1->loc, pd->nextTokenId++, nspace, region->tokenOnlyRegion,
-					&reCaptureVect, pd->objectDef,
+					&reCaptureVect, curObjectDef,
 					contextStack.length() > 0 ? contextStack.top() : 0 );
 
 			tokenDefTok->dupOf = tokenDef;
@@ -2434,7 +2439,7 @@ factor_label:
 	TK_Word ':' factor_label final {
 		$$->factorAug = $3->factorAug;
 
-		if ( pd->objectDef->checkRedecl( $1->data ) != 0 )
+		if ( curObjectDef->checkRedecl( $1->data ) != 0 )
 			error($1->loc) << "label name \"" << $1->data << "\" already in use" << endp;
 
 		/* Create the object field. */
@@ -2443,7 +2448,7 @@ factor_label:
 		ObjField *objField = new ObjField( $1->loc, typeRef, $1->data );
 
 		/* Insert it into the map. */
-		pd->objectDef->insertField( $1->data, objField );
+		curObjectDef->insertField( $1->data, objField );
 
 		/* Create the enter and leaving actions that will mark the substring. */
 		Action *enter = Action::cons( MarkMark, pd->nextMatchEndNum++ );

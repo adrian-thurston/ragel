@@ -1034,7 +1034,6 @@ struct Compiler
 	ObjectDef *rootLocalFrame;
 
 	long nextLabelId;
-	ObjectDef *objectDef;
 
 	bool revertOn;
 

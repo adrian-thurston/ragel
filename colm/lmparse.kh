@@ -105,8 +105,7 @@ struct ColmParser
 	ContextVect contextStack;
 
 	String curDefineId;
-	LelDefList *curDefList;
-	ProdElList *curProdElList;
+	ObjectDef *curObjectDef;
 
 	PredType predType;
 	ReCaptureVect reCaptureVect;
