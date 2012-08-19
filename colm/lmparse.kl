@@ -1678,8 +1678,8 @@ require_pattern:
 	KW_Require var_ref pattern 
 	final {
 		Namespace *nspace = namespaceStack.top();
-		TokenRegion *region = regionStack.top();
-		Pattern *pattern = Pattern::cons( $1->loc, nspace, region, 
+
+		Pattern *pattern = Pattern::cons( $1->loc, nspace,
 				$3->list, pd->nextPatConsId++ );
 		pd->patternList.append( pattern );
 
@@ -2042,12 +2042,13 @@ code_factor: var_ref
 code_factor: KW_Match var_ref pattern
 	final {
 		Namespace *nspace = namespaceStack.top();
-		TokenRegion *region = regionStack.top();
-		Pattern *pattern = Pattern::cons( $1->loc, nspace, region, 
+
+		Pattern *pattern = Pattern::cons( $1->loc, nspace,
 				$3->list, pd->nextPatConsId++ );
 		pd->patternList.append( pattern );
 
-		$$->expr = LangExpr::cons( LangTerm::cons( InputLoc(), LangTerm::MatchType, $2->varRef, pattern ) );
+		$$->expr = LangExpr::cons( LangTerm::cons( 
+				InputLoc(), LangTerm::MatchType, $2->varRef, pattern ) );
 	};
 code_factor: KW_New code_factor
 	final {

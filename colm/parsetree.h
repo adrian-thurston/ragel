@@ -1567,13 +1567,12 @@ typedef DList<ConsItem> ConsItemList;
 
 struct Pattern
 {
-	static Pattern *cons( const InputLoc &loc, Namespace *nspace, TokenRegion *region, 
+	static Pattern *cons( const InputLoc &loc, Namespace *nspace,
 			PatternItemList *list, int patRepId )
 	{
 		Pattern *p = new Pattern;
 		p->loc = loc;
 		p->nspace = nspace;
-		p->region = region;
 		p->list = list;
 		p->patRepId = patRepId;
 		p->langEl = 0;
@@ -1584,7 +1583,6 @@ struct Pattern
 	
 	InputLoc loc;
 	Namespace *nspace;
-	TokenRegion *region;
 	PatternItemList *list;
 	long patRepId;
 	LangEl *langEl;
@@ -1603,7 +1601,6 @@ struct Constructor
 		Constructor *r = new Constructor;
 		r->loc = loc;
 		r->nspace = nspace;
-		r->region = region;
 		r->list = list;
 		r->patRepId = patRepId;
 		r->langEl = 0;
@@ -1615,7 +1612,6 @@ struct Constructor
 
 	InputLoc loc;
 	Namespace *nspace;
-	TokenRegion *region;
 	ConsItemList *list;
 	int patRepId;
 	LangEl *langEl;
