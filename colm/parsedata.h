@@ -618,12 +618,6 @@ struct Compiler
 
 	/* The id of the next priority name and label. */
 	int nextPriorKey, nextLocalErrKey, nextNameId;
-	
-	/* The default priority number key for a machine. This is active during
-	 * the parse of the rhs of a machine assignment. */
-	int curDefPriorKey;
-
-	int curDefLocalErrKey;
 
 	/* Alphabet type. */
 	HostType *userAlphType;
@@ -1032,8 +1026,6 @@ struct Compiler
 	long nextParserId;
 
 	ObjectDef *rootLocalFrame;
-
-	long nextLabelId;
 
 	bool revertOn;
 

@@ -1396,9 +1396,6 @@ token_def_name:
 			tokenRegionCi->derivedFrom = tokenRegion;
 			tokenRegionTok->derivedFrom = tokenRegion;
 		}
-
-		/* Reset the lable id counter. */
-		pd->nextLabelId = 0;
 	};
 
 nonterm class opt_name
@@ -1468,13 +1465,11 @@ machine_name:
 		PriorDictEl *priorDictEl;
 		if ( pd->priorDict.insert( $1->data, pd->nextPriorKey, &priorDictEl ) )
 			pd->nextPriorKey += 1;
-		pd->curDefPriorKey = priorDictEl->value;
 
 		/* Make/get the local error key. */
 		LocalErrDictEl *localErrDictEl;
 		if ( pd->localErrDict.insert( $1->data, pd->nextLocalErrKey, &localErrDictEl ) )
 			pd->nextLocalErrKey += 1;
-		pd->curDefLocalErrKey = localErrDictEl->value;
 
 		$$->loc = $1->loc;
 		$$->data = $1->data;

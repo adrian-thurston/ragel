@@ -437,7 +437,6 @@ Compiler::Compiler( const String &fileName, const String &sectionName,
 	nextObjectId(1),     /* 0 is  reserved for no object. */
 	nextFrameId(0),
 	nextParserId(0),
-	nextLabelId(0),
 	revertOn(true),
 	predValue(0),
 	nextMatchEndNum(0),
