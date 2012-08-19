@@ -597,9 +597,18 @@ struct TokenRegion
 
 struct RegionPack
 {
+	RegionPack( TokenRegion *tokenIgnore, TokenRegion *tokenOnly, 
+			TokenRegion *ignoreOnly, TokenRegion *ci )
+	:
+		tokenIgnore(tokenIgnore),
+		tokenOnly(tokenOnly),
+		ignoreOnly(ignoreOnly),
+		ci(ci)
+	{}
+
 	TokenRegion *tokenIgnore;
-	TokenRegion *ignoreOnly;
 	TokenRegion *tokenOnly;
+	TokenRegion *ignoreOnly;
 	TokenRegion *ci;
 
 	RegionPack *next, *prev;

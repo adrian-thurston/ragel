@@ -472,6 +472,7 @@ region_def:
 	final {
 		/* Pop the top of the stack. */
 		regionStack.pop();
+		regionPackStack.pop();
 	};
 
 region_head: 
@@ -493,8 +494,8 @@ region_head:
 		String scannerName( $2->data.length() + 2, "<%s>", $2->data.data );
 		TokenRegion *tokenRegion = createRegion( scannerName );
 
-		regionStack.push( tokenRegion );
-		regionPackStack.push( 0 );
+		RegionPack *regionPack = new RegionPack( tokenRegion,
+				tokenRegionTok, tokenRegionIgn, tokenRegionCi );
 
 		tokenRegion->ignoreOnlyRegion = tokenRegionIgn;
 		tokenRegion->tokenOnlyRegion = tokenRegionTok;
@@ -508,6 +509,9 @@ region_head:
 		tokenRegionIgn->derivedFrom = tokenRegion;
 		tokenRegionCi->derivedFrom = tokenRegion;
 		tokenRegionTok->derivedFrom = tokenRegion;
+
+		regionStack.push( tokenRegion );
+		regionPackStack.push( regionPack );
 	};
 
 namespace_def: 
@@ -1169,8 +1173,8 @@ literal_item: opt_no_ignore TK_Literal opt_no_ignore
 			String scannerName( name.length() + 2, "<%s>", name.data );
 			TokenRegion *tokenRegion = createRegion( scannerName );
 
-			regionStack.push( tokenRegion );
-			regionPackStack.push( 0 );
+			RegionPack *regionPack = new RegionPack( tokenRegion,
+					tokenRegionTok, tokenRegionIgn, tokenRegionCi );
 
 			tokenRegion->ignoreOnlyRegion = tokenRegionIgn;
 			tokenRegion->tokenOnlyRegion = tokenRegionTok;
@@ -1184,6 +1188,9 @@ literal_item: opt_no_ignore TK_Literal opt_no_ignore
 			tokenRegionIgn->derivedFrom = tokenRegion;
 			tokenRegionCi->derivedFrom = tokenRegion;
 			tokenRegionTok->derivedFrom = tokenRegion;
+
+			regionStack.push( tokenRegion );
+			regionPackStack.push( regionPack );
 		}
 
 		bool unusedCI;
@@ -1238,6 +1245,7 @@ literal_item: opt_no_ignore TK_Literal opt_no_ignore
 		if ( !insideRegion ) {
 			/* Leave the region just for this token. */
 			regionStack.pop();
+			regionPackStack.pop();
 		}
 	};
 
@@ -1325,6 +1333,7 @@ token_def:
 		if ( !pd->insideRegion ) {
 			/* Leave the region that we made just for this token. */
 			regionStack.pop();
+			regionPackStack.pop();
 		}
 
 		if ( join != 0 ) {
@@ -1379,10 +1388,10 @@ token_def_name:
 			/* If not inside a region, make one for the token. */
 			String scannerName( name.length() + 2, "<%s>", name.data );
 			TokenRegion *tokenRegion = createRegion( scannerName );
-			
-			regionStack.push( tokenRegion );
-			regionPackStack.push( 0 );
 
+			RegionPack *regionPack = new RegionPack( tokenRegion,
+					tokenRegionTok, tokenRegionIgn, tokenRegionCi );
+			
 			tokenRegion->ignoreOnlyRegion = tokenRegionIgn;
 			tokenRegion->tokenOnlyRegion = tokenRegionTok;
 			tokenRegion->ciRegion = tokenRegionCi;
@@ -1395,6 +1404,9 @@ token_def_name:
 			tokenRegionIgn->derivedFrom = tokenRegion;
 			tokenRegionCi->derivedFrom = tokenRegion;
 			tokenRegionTok->derivedFrom = tokenRegion;
+
+			regionStack.push( tokenRegion );
+			regionPackStack.push( regionPack );
 		}
 	};
 
@@ -2776,8 +2788,10 @@ void ColmParser::init()
 	pd->regionList.append( rootRegion );
 	addRegionDef( InputLoc(), namespaceStack.top(), rootRegionName, rootRegion );
 
+	RegionPack *rootRegionPack = new RegionPack( rootRegion, 0, 0, 0 );
+
 	regionStack.push( rootRegion );
-	regionPackStack.push( 0 );
+	regionPackStack.push( rootRegionPack );
 
 	pd->rootRegion = rootRegion;
 
