@@ -2,6 +2,7 @@
 # Tokens
 #
 
+
 # Any single character can be a literal
 lex start
 {
@@ -37,47 +38,52 @@ def nested_comment
 
 def nested [id*]
 
-global NestedParser: accum<nested> = 
-	cons accum<nested>[]
-
-lex two
+context accum_bt
 {
-	ignore /[ \t]+/
-	token word /[a-zA-Z0-9/*+_\-]+/
-	token stuff /[a-zA-Z0-9()/*+_\- ]+/
-	literal '!', ';', '\n'
+	NestedParser: accum<nested>
 
-	def A1 []
-		{ print( "A1\n" ) }
+	lex two
+	{
+		ignore /[ \t]+/
+		token word /[a-zA-Z0-9/*+_\-]+/
+		token stuff /[a-zA-Z0-9()/*+_\- ]+/
+		literal '!', ';', '\n'
 
-	def A2 []
-		{ print( "A2\n" ) }
+		def A1 []
+			{ print( "A1\n" ) }
 
-	def item
-		[word]
-		{
-			send NestedParser [' ']
-			send NestedParser [$r1]
-			send NestedParser [' ']
-		}
-	|
-		[stuff]
-		{
-			send NestedParser [' ']
-			send NestedParser [$r1]
-			send NestedParser [' ']
-		}
+		def A2 []
+			{ print( "A2\n" ) }
 
-	def two 
-	[A1 item* '!' '\n']
-	|
-	[A2 item* ';' '\n']
+		def item
+			[word]
+			{
+				send NestedParser [' ']
+				send NestedParser [$r1]
+				send NestedParser [' ']
+			}
+		|
+			[stuff]
+			{
+				send NestedParser [' ']
+				send NestedParser [$r1]
+				send NestedParser [' ']
+			}
+
+		def two 
+		[A1 item* '!' '\n']
+		|
+		[A2 item* ';' '\n']
+	}
 }
 
-parse TwoP: two[ stdin ]
-Two: two = TwoP.tree
+cons AccumBt: accum_bt[]
+AccumBt.NestedParser = cons parser<nested>[]
 
-Nested: nested = NestedParser.finish()
+parse TwoParser: accum_bt::two(AccumBt)[ stdin ]
+Two: accum_bt::two = TwoParser.tree
+
+Nested: nested = AccumBt.NestedParser.finish()
 
 print( '\n------------\n' )
 print( ^Nested '\n' )
