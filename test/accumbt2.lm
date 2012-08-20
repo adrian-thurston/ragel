@@ -1,42 +1,47 @@
-lex one
+context accum_bt
 {
-	ignore /[ \t\n]+/
-	token id1 /[a-zA-Z_][a-zA-Z_0-9]*/
+	lex one
+	{
+		ignore /[ \t\n]+/
+		token id1 /[a-zA-Z_][a-zA-Z_0-9]*/
 
-	def one [ id1* ]
+		def one [ id1* ]
+	}
+
+	OneParser: accum<one>
+
+	lex two
+	{
+		ignore /[ \t]+/
+		token id2 /[a-zA-Z_][a-zA-Z_0-9]*/
+		literal '!', ';', '\n'
+
+		def A1 []
+			{ print( "A1\n" ) }
+
+		def A2 []
+			{ print( "A2\n" ) }
+
+		def item2
+			[id2]
+			{
+				send OneParser [' extra ']
+				send OneParser [$r1]
+			}
+
+		def two 
+			[A1 item2* '!' '\n']
+		|	[A2 item2* ';' '\n']
+	}
 }
 
-global OneParser: accum<one> = 
-	cons accum<one>[]
+AccumBt: accum_bt = cons accum_bt[]
+AccumBt.OneParser = cons parser<accum_bt::one>[]
 
-lex two
-{
-	ignore /[ \t]+/
-	token id2 /[a-zA-Z_][a-zA-Z_0-9]*/
-	literal '!', ';', '\n'
+parse TwoParser: accum_bt::two(AccumBt)[ stdin ]
+Two: accum_bt::two = TwoParser.tree
 
-	def A1 []
-		{ print( "A1\n" ) }
-
-	def A2 []
-		{ print( "A2\n" ) }
-
-	def item2
-		[id2]
-		{
-			send OneParser [' extra ']
-			send OneParser [$r1]
-		}
-
-	def two 
-		[A1 item2* '!' '\n']
-	|	[A2 item2* ';' '\n']
-}
-
-parse TwoP: two[ stdin ]
-Two: two = TwoP.tree
-
-send OneParser ['\n']
+send AccumBt.OneParser ['\n']
 
 print( Two )
-print( ^( OneParser.finish() ) '\n' )
+print( ^( AccumBt.OneParser.finish() ) '\n' )
