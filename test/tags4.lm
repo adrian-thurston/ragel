@@ -5,266 +5,269 @@
 #
 #
 
-
-#
-# Regular Definitions
-#
-rl def_name_char /[\-A-Za-z0-9._:?]/
-rl def_name /[A-Za-z_:] def_name_char*/
-rl def_system_literal /'"' [^"]* '"' | "'" [^']* "'"/
-
-#
-# Scanner for tag names.
-#
-lex TAG_NAME
+context tags
 {
-	ignore /space+/
-	token tag_id /def_name/
-}
 
-#
-# Scanner for attributes names
-#
-lex ATTR_NAME
-{
-	ignore  /space+/
-	token attr_name /def_name_char+/
-	literal '='
-}
+	#
+	# Regular Definitions
+	#
+	rl def_name_char /[\-A-Za-z0-9._:?]/
+	rl def_name /[A-Za-z_:] def_name_char*/
+	rl def_system_literal /'"' [^"]* '"' | "'" [^']* "'"/
 
-literal '>', '/>'
-
-# Scanner for attribute values.
-lex ATTR_VAL
-{
-	ignore  /space+/
-	token dquote_val /'"' ([^"] | '\\' any)* '"'/
-	token squote_val /"'" ([^'] | '\\' any)* "'"/
-	token unq_val /[^ \t\r\n<>"'] [^ \t\r\n<>]*/
-}
-
-#
-# Tokens
-#
-
-lex START
-{
-	ignore /space+/
-
-	literal '<', '</', '<!DOCTYPE'
-	token close_tag 
-		/'</' [\t ]* [a-zA-Z]+ '>'/
-
-	token doc_data /[^<]+/
-  	token comment /'<!--' any* :>> '-->'/
-}
-
-#
-# Tags
-#
-
-bool inTagStack( id: str )
-{
-	LocalTagStack: tag_stack = TagStack
-	for Tag: tag_id in LocalTagStack {
-		if id == Tag.data
-			return true
-	}
-	return false
-}
-
-# This scanner is just for the id in close tags. The id needs to be looked up
-# in the tag stack so we can determine if it is a stray. 
-lex close_id
-{
-	# Ignore whitespace.
-	ignore /space+/
-
-	token stray_close_id //
-	token missing_close_id //
-
-	token close_id /def_name/
+	#
+	# Scanner for tag names.
+	#
+	lex TAG_NAME
 	{
-		# If it is in the tag stack then it is a close_id. If not then it's a
-		# stray_close_id.
-		send_id: int = typeid<stray_close_id>
+		ignore /space+/
+		token tag_id /def_name/
+	}
 
-		if ( inTagStack( match_text ) ) {
-			print( 'CLOSE \'' match_text '\' IN TAG STACK\n' )
+	#
+	# Scanner for attributes names
+	#
+	lex ATTR_NAME
+	{
+		ignore  /space+/
+		token attr_name /def_name_char+/
+		literal '='
+	}
 
-			# The tag is in the stack, send missing close tags until we get to it.
-			match TagStack [Top:tag_id Rest:tag_stack] 
-			TagStack = Rest
-			while ( Top.data != match_text ) {
-				print( 'SENDING missing close\n' )
-				input.push( make_token( typeid<missing_close_id> '' ) )
-				match TagStack [Top2:tag_id Rest2:tag_stack] 
-				Top = Top2
-				TagStack = Rest2
+	literal '>', '/>'
+
+	# Scanner for attribute values.
+	lex ATTR_VAL
+	{
+		ignore  /space+/
+		token dquote_val /'"' ([^"] | '\\' any)* '"'/
+		token squote_val /"'" ([^'] | '\\' any)* "'"/
+		token unq_val /[^ \t\r\n<>"'] [^ \t\r\n<>]*/
+	}
+
+	#
+	# Tokens
+	#
+
+	lex START
+	{
+		ignore /space+/
+
+		literal '<', '</', '<!DOCTYPE'
+		token close_tag 
+			/'</' [\t ]* [a-zA-Z]+ '>'/
+
+		token doc_data /[^<]+/
+		token comment /'<!--' any* :>> '-->'/
+	}
+
+	#
+	# Tags
+	#
+
+	bool inTagStack( id: str )
+	{
+		LocalTagStack: tag_stack = TagStack
+		for Tag: tag_id in LocalTagStack {
+			if id == Tag.data
+				return true
+		}
+		return false
+	}
+
+	# This scanner is just for the id in close tags. The id needs to be looked up
+	# in the tag stack so we can determine if it is a stray. 
+	lex close_id
+	{
+		# Ignore whitespace.
+		ignore /space+/
+
+		token stray_close_id //
+		token missing_close_id //
+
+		token close_id /def_name/
+		{
+			# If it is in the tag stack then it is a close_id. If not then it's a
+			# stray_close_id.
+			send_id: int = typeid<stray_close_id>
+
+			if ( inTagStack( match_text ) ) {
+				print( 'CLOSE \'' match_text '\' IN TAG STACK\n' )
+
+				# The tag is in the stack, send missing close tags until we get to it.
+				match TagStack [Top:tag_id Rest:tag_stack] 
+				TagStack = Rest
+				while ( Top.data != match_text ) {
+					print( 'SENDING missing close\n' )
+					input.push( make_token( typeid<missing_close_id> '' ) )
+					match TagStack [Top2:tag_id Rest2:tag_stack] 
+					Top = Top2
+					TagStack = Rest2
+				}
+
+				print( 'SENDING close\n' )
+				input.push( make_token( typeid<close_id> input.pull( match_length ) ) )
+			}
+			else {
+				print( 'CLOSE \'' match_text '\' NOT IN TAG STACK\n' )
+				# The tag is not in the tag stack so send the id as a stray close.
+				input.push( make_token( typeid<stray_close> input.pull( match_length ) ) )
+			}
+		}
+	}
+
+	#
+	# Tag Stack
+	#
+
+	def tag_stack 
+		[tag_id tag_stack]
+	|	[]
+
+	TagStack: tag_stack 
+
+	#
+	# Document Type
+	#
+	# This scanner handles inside DOCTYPE tags (except keywords).
+	lex DOCTYPE
+	{
+		ignore /space+/
+		token dt_name /def_name/
+		token dt_literal /def_system_literal/
+		token dt_bl /"[" [^\]]* "]"/
+		token dt_close /'>'/
+	}
+
+	# Using a separate scanner for the keywords in DOCTYPE prevents them from
+	# covering dt_name
+	lex DOCTYPE_KW
+	{
+		ignore /space+/
+		literal 'SYSTEM', 'PUBLIC'
+	}
+
+	def DOCTYPE ['<!DOCTYPE' dt_name external_id dt_bl? dt_close]
+
+	def external_id
+		['SYSTEM' dt_literal?]
+	|	['PUBLIC' dt_literal dt_literal?]
+
+	#
+	# Tags, with optionanal close.
+	#
+
+	def tag 
+		[open_tag item* close_tag]
+
+	def unclosed_tag 
+		[open_tag item* missing_close_id]
+
+	def open_tag 
+		['<' tag_id attr* '>']
+		{
+			TagStack = construct tag_stack 
+				[r2 TagStack]
+		}
+
+	#
+	# Empty tags
+	#
+	def empty_tag 
+		['<' tag_id attr* '/>']
+
+	#
+	# Stray close tags
+	#
+	def stray_close 
+		[close_tag]
+
+
+	#
+	# Attributes
+	#
+
+	def attr
+		[attr_name eql_attr_val?]
+
+	def eql_attr_val ['=' attr_val]
+
+	def attr_val
+		[squote_val]
+	|	[dquote_val]
+	|	[unq_val]
+	|	[]
+
+	#
+	# Items
+	#
+
+	def item 
+		[DOCTYPE]
+	|	[tag]
+	|	[unclosed_tag]
+	|	[empty_tag]
+	|	[stray_close]
+	|	[doc_data]
+	|	[comment]
+
+
+	token trailing /any*/
+
+	def start 
+		[item* trailing]
+
+	#
+	# END GRAMMAR
+	#
+
+	int addDefaultAltTags( Start: ref start )
+	{
+		for T: open_tag in Start {
+			require T 
+				["<img" AttrList: attr* '>']
+			
+			haveAlt: bool = false
+			for A: attr in T {
+				if match A ["alt=" attr_val]
+					haveAlt = true
 			}
 
-			print( 'SENDING close\n' )
-			input.push( make_token( typeid<close_id> input.pull( match_length ) ) )
-		}
-		else {
-			print( 'CLOSE \'' match_text '\' NOT IN TAG STACK\n' )
-			# The tag is not in the tag stack so send the id as a stray close.
-			input.push( make_token( typeid<stray_close> input.pull( match_length ) ) )
-		}
-	}
-}
-
-#
-# Tag Stack
-#
-
-def tag_stack 
-	[tag_id tag_stack]
-|	[]
-
-global TagStack: tag_stack = construct tag_stack []
-
-#
-# Document Type
-#
-# This scanner handles inside DOCTYPE tags (except keywords).
-lex DOCTYPE
-{
-	ignore /space+/
-	token dt_name /def_name/
-	token dt_literal /def_system_literal/
-	token dt_bl /"[" [^\]]* "]"/
-	token dt_close /'>'/
-}
-
-# Using a separate scanner for the keywords in DOCTYPE prevents them from
-# covering dt_name
-lex DOCTYPE_KW
-{
-	ignore /space+/
-	literal 'SYSTEM', 'PUBLIC'
-}
-
-def DOCTYPE ['<!DOCTYPE' dt_name external_id dt_bl? dt_close]
-
-def external_id
-	['SYSTEM' dt_literal?]
-|	['PUBLIC' dt_literal dt_literal?]
-
-#
-# Tags, with optionanal close.
-#
-
-def tag 
-	[open_tag item* close_tag]
-
-def unclosed_tag 
-	[open_tag item* missing_close_id]
-
-def open_tag 
-	['<' tag_id attr* '>']
-	{
-		TagStack = construct tag_stack 
-			[r2 TagStack]
-	}
-
-#
-# Empty tags
-#
-def empty_tag 
-	['<' tag_id attr* '/>']
-
-#
-# Stray close tags
-#
-def stray_close 
-	[close_tag]
-
-
-#
-# Attributes
-#
-
-def attr
-	[attr_name eql_attr_val?]
-
-def eql_attr_val ['=' attr_val]
-
-def attr_val
-	[squote_val]
-|	[dquote_val]
-|	[unq_val]
-|	[]
-
-#
-# Items
-#
-
-def item 
-	[DOCTYPE]
-|	[tag]
-|	[unclosed_tag]
-|	[empty_tag]
-|	[stray_close]
-|	[doc_data]
-|	[comment]
-
-
-token trailing /any*/
-
-def start 
-	[item* trailing]
-
-#
-# END GRAMMAR
-#
-
-int addDefaultAltTags( Start: ref start )
-{
-	for T: open_tag in Start {
-		require T 
-			["<img" AttrList: attr* '>']
-		
-		haveAlt: bool = false
-		for A: attr in T {
-			if match A ["alt=" attr_val]
-				haveAlt = true
-		}
-
-		if !haveAlt {
-			for AL: attr* in T {
-				if match AL [] {
-					AL = construct attr* 
-						[" alt=\"default alt\""]
-					break
+			if !haveAlt {
+				for AL: attr* in T {
+					if match AL [] {
+						AL = construct attr* 
+							[" alt=\"default alt\""]
+						break
+					}
 				}
 			}
 		}
 	}
-}
 
-int printLinks( Start: start )
-{
-	for A:tag in Start {
-		require A
-			["<a" AttrList: attr* ">" I: item* "</a>"]
+	int printLinks( Start: start )
+	{
+		for A:tag in Start {
+			require A
+				["<a" AttrList: attr* ">" I: item* "</a>"]
 
-		for Attr: attr in AttrList {
-			if match Attr ["href = " AttrVal: attr_val]
-				print( 'link: ' I '\ntarget: ' AttrVal '\n\n' )
+			for Attr: attr in AttrList {
+				if match Attr ["href = " AttrVal: attr_val]
+					print( 'link: ' I '\ntarget: ' AttrVal '\n\n' )
+			}
 		}
 	}
-}
 
 
-bool should_close( TI: tag_id )
-{
-	return true
-}
+	bool should_close( TI: tag_id )
+	{
+		return true
+	}
 
-bool should_flatten( TI: tag_id )
-{
-	return true
+	bool should_flatten( TI: tag_id )
+	{
+		return true
+	}
 }
 
 # Finds unclosed tags and puts the content after the tag. Afterwards
@@ -327,7 +330,9 @@ bool should_flatten( TI: tag_id )
 #    }
 #}
 
-HTML: parser<start> = parse start[ stdin ]
+cons Tags: tags[]
+Tags.TagStack = construct tags::tag_stack []
+HTML: parser<tags::start> = parse tags::start(Tags)[ stdin ]
 print( HTML.tree )
 
 #print_xml( HTML )

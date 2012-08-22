@@ -1,47 +1,53 @@
 
-#
-# Regular Definitions
-#
-rl rl_ws /[ \t\n\r\v]+/
-rl rl_id /[a-zA-Z_][a-zA-Z0-9_]*/
-
-#
-# Tokens
-#
-
-lex start
+context maxlen
 {
-	ignore /rl_ws/
-	token id /rl_id/
+
+	#
+	# Regular Definitions
+	#
+	rl rl_ws /[ \t\n\r\v]+/
+	rl rl_id /[a-zA-Z_][a-zA-Z0-9_]*/
+
+	#
+	# Tokens
+	#
+
+	lex start
+	{
+		ignore /rl_ws/
+		token id /rl_id/
+	}
+
+	num: int
+	allow: int
+
+	def item 
+		[id]
+		{
+			num = num + 1
+			toomuch: int = allow+1
+			if num == toomuch {
+				reject
+			}
+		}
+
+	def open
+		[]
+		{
+			num = 0
+		}
+
+	def close []
+
+	def restricted_list 
+		[open item*]
+
+	def start 
+		[restricted_list id*]
 }
 
-global num: int
-global allow: int = 3
+cons MaxLen: maxlen[]
+MaxLen.allow = 3
 
-def item 
-	[id]
-	{
-		num = num + 1
-		toomuch: int = allow+1
-		if num == toomuch {
-			reject
-		}
-	}
-
-def open
-	[]
-	{
-		num = 0
-	}
-
-def close []
-
-def restricted_list 
-	[open item*]
-
-def start 
-	[restricted_list id*]
-
-
-parse S: start[stdin]
+parse S: maxlen::start(MaxLen)[stdin]
 print_xml( S.tree )

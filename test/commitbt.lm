@@ -80,16 +80,9 @@ def factor
 def alphabet_num 
 	[uint]
 
-global i: int
-
 def suint
 	i: int
 	[uint]
-	{
-		#lhs.i = 0
-		#i = 1
-		#lhs = construct suint "1"
-	}
 
 def sub
 	[suint* '*']

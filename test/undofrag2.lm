@@ -1,39 +1,45 @@
-lex start
+context undo
 {
-	ignore /[ \t]+/
-	literal '*', '(', ')', '^', ';', '\n'
-	token id /[a-zA-Z_]+/
+	lex start
+	{
+		ignore /[ \t]+/
+		literal '*', '(', ')', '^', ';', '\n'
+		token id /[a-zA-Z_]+/
+	}
+
+	Out: parser<out>
+
+	def out_item
+		[id]
+	|	['(' item* ')']
+
+	def out 
+		[out_item*]
+
+	def item 
+		[id]
+		{
+			send Out [r1]
+		}
+	|	['(' item* ')']
+		{
+			send Out ['(']
+			send Out [r2]
+			send Out [')']
+		}
+
+	def A1 []
+	def A2 []
+
+
+	def start 
+		[A1 item* '^']
+	|	[A2 item* ';' '\n']
 }
 
-global Out: parser<out> = construct parser<out> []
+cons Undo: undo[]
+Undo.Out = construct parser<undo::out> []
 
-def out_item
-	[id]
-|	['(' item* ')']
-
-def out 
-	[out_item*]
-
-def item 
-	[id]
-	{
-		send Out [r1]
-	}
-|	['(' item* ')']
-	{
-		send Out ['(']
-		send Out [r2]
-		send Out [')']
-	}
-
-def A1 []
-def A2 []
-
-
-def start 
-	[A1 item* '^']
-|	[A2 item* ';' '\n']
-
-parse InputP: start[ stdin ]
-Input: start = InputP.tree
+parse InputP: undo::start(Undo)[ stdin ]
+Input: undo::start = InputP.tree
 print( Input )

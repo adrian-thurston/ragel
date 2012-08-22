@@ -12,12 +12,12 @@ def item2
 def start2
 	[item2*]
 
-global SP: parser<start2> = 
-	cons parser<start2> []
 
 context ctx
 {
-	lex start
+	SP: parser<start2> 
+
+	lex start1
 	{
 		ignore /space+/
 		literal '*', '(', ')', '!', ';\n'
@@ -39,18 +39,20 @@ context ctx
 		send SP "{ B{d} }"
 	}
 
-	def start 
+	def start1 
 		[A item* '!']
 	|	[B item* ';\n']
 }
 
-send SP "a b{c}"
 
 CTX: ctx = cons ctx []
-parse InputP: ctx::start( CTX )[stdin]
-Input: ctx::start = InputP.tree
+CTX.SP = cons parser<start2> []
+send CTX.SP "a b{c}"
 
-send SP "{e}f g"
+parse InputParser: ctx::start1( CTX )[stdin]
+Input: ctx::start1 = InputParser.tree
+
+send CTX.SP "{e}f g"
 
 print( Input )
-print( SP() '\n' )
+print( CTX.SP() '\n' )
