@@ -1,95 +1,100 @@
-rl ident_pattern /[a-zA-Z_][a-zA-Z_0-9]*/
-rl number_pattern /[0-9]+/
-
-lex start
+context rubyhere
 {
-	ignore /[ \t\n]+/
-	token id /ident_pattern/
-	token number /number_pattern/
-	literal '<<', '*', ',', '(', ')', '!'
-}
+	rl ident_pattern /[a-zA-Z_][a-zA-Z_0-9]*/
+	rl number_pattern /[0-9]+/
 
-global HereId: str
+	lex start
+	{
+		ignore /[ \t\n]+/
+		token id /ident_pattern/
+		token number /number_pattern/
+		literal '<<', '*', ',', '(', ')', '!'
+	}
 
-token rest_of_line /[^\n]*'\n'/
+	HereId: str
 
-lex here_start
-{
-	ignore /[ \t\n]+/
-	token here_id
-		HereData: here_data
-		/ident_pattern/
-		{
-			# Take the text of the here_id from the input stream.
-			HereId = input.pull( match_length )
+	token rest_of_line /[^\n]*'\n'/
 
-			# Get the data up to the rest of the line.
-			parse_stop ROL: rest_of_line[ input ]
+	lex here_start
+	{
+		ignore /[ \t\n]+/
+		token here_id
+			HereData: here_data
+			/ident_pattern/
+			{
+				# Take the text of the here_id from the input stream.
+				HereId = input.pull( match_length )
 
-			# Parse the heredoc data.
-			parse_stop HereData: here_data[ input ]
+				# Get the data up to the rest of the line.
+				parse_stop ROL: rest_of_line(ctx)[ input ]
 
-			# Push the rest-of-line data back to the input stream.
-			input.push( $ROL.tree )
+				# Parse the heredoc data.
+				parse_stop HereData: here_data(ctx)[ input ]
 
-			# Send the here_id token. Attach the heredoc data as an attribute.
-			input.push( make_token( typeid<here_id> HereId HereData.tree ) )
-		}
-}
+				# Push the rest-of-line data back to the input stream.
+				input.push( $ROL.tree )
 
-lex here_data
-{
-	token here_close_id 
-		/ ident_pattern '\n' /
-		{
-			if match_text == HereId + '\n' {
-				input.push( make_token( 
-					typeid<here_close_id>
-					input.pull( match_length ) ) )
+				# Send the here_id token. Attach the heredoc data as an attribute.
+				input.push( make_token( typeid<here_id> HereId HereData.tree ) )
 			}
-			else 
-				input.push( make_token( typeid<here_line> input.pull(match_length) ) )
-		}
+	}
 
-	token here_line
-		/ [^\n]* '\n' /
+	lex here_data
+	{
+		token here_close_id 
+			/ ident_pattern '\n' /
+			{
+				if match_text == HereId + '\n' {
+					input.push( make_token( 
+						typeid<here_close_id>
+						input.pull( match_length ) ) )
+				}
+				else 
+					input.push( make_token( typeid<here_line> input.pull(match_length) ) )
+			}
+
+		token here_line
+			/ [^\n]* '\n' /
+	}
+
+	def here_data
+		[here_line* here_close_id]
+
+	def heredoc
+		['<<' here_id]
+
+	def primary
+		[id]
+	|	[number]
+	|	[heredoc]
+
+	def arglist
+		[primary arglist_more*]
+
+	def arglist_more
+		[',' primary]
+
+	def call
+		[id '(' arglist? ')']
+
+	def statement
+		[primary]
+	|	[call]
+
+	token foobar /any+/
+
+	def item
+		[statement '!']
+	|	[foobar]
+
+	def start 
+		[item*]
 }
 
-def here_data
-	[here_line* here_close_id]
+cons RubyHere: rubyhere[]
 
-def heredoc
-	['<<' here_id]
-
-def primary
-	[id]
-|	[number]
-|	[heredoc]
-
-def arglist
-	[primary arglist_more*]
-
-def arglist_more
-	[',' primary]
-
-def call
-	[id '(' arglist? ')']
-
-def statement
-	[primary]
-|	[call]
-
-token foobar /any+/
-
-def item
-	[statement '!']
-|	[foobar]
-
-def start 
-	[item*]
-
-parse SP: start[ stdin ]
-S: start = SP.tree
+parse SP: rubyhere::start(RubyHere)[ stdin ]
+S: rubyhere::start = SP.tree
 
 print_xml(S)
 print('\n')

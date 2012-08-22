@@ -1,46 +1,50 @@
-rl ident_char /[a-zA-Z_]/
-
-lex start
+context heredoc
 {
-	# Tokens
-	token other /(^(ident_char|0|'\n'))+/
+	rl ident_char /[a-zA-Z_]/
 
-	token here_close //
-	token id 
-		/ident_char+/
-		{
-			if HereId && HereId == match_text {
-				input.push( make_token( 
-					typeid<here_close>
-					input.pull(match_length - 1) ) )
-			}
-			else {
-				input.push( make_token( typeid<id> input.pull(match_length) ) )
-			}
-		}
-
-	token nl /'\n'/
-}
-
-def here_name 
-	[id]
+	lex start
 	{
-		HereId = $r1
+		# Tokens
+		token other /(^(ident_char|0|'\n'))+/
+
+		token here_close //
+		token id 
+			/ident_char+/
+			{
+				if HereId && HereId == match_text {
+					input.push( make_token( 
+						typeid<here_close>
+						input.pull(match_length - 1) ) )
+				}
+				else {
+					input.push( make_token( typeid<id> input.pull(match_length) ) )
+				}
+			}
+
+		token nl /'\n'/
 	}
 
-global HereId: str
+	def here_name 
+		[id]
+		{
+			HereId = $r1
+		}
 
-def here_data 
-	[here_data_item*]
+	HereId: str
 
-def here_data_item 
-	[id]
-|	[other]
-|	[nl]
+	def here_data 
+		[here_data_item*]
 
-def heredoc 
-	[here_name here_data here_close id nl]
+	def here_data_item 
+		[id]
+	|	[other]
+	|	[nl]
 
+	def start 
+		[here_name here_data here_close id nl]
+}
 
-parse S: heredoc[stdin]
+cons HereDoc: heredoc[]
+
+parse S: heredoc::start(HereDoc)[stdin]
 print_xml(S.tree)

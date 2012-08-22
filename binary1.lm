@@ -105,10 +105,10 @@ context binary
 	#
 	# Counting Primitives
 	#
-	# Uses a global stack of lengths. Using a stack allows for counted lists to be
-	# nested. As the list is consumed it brings the count down to zero. To use it,
-	# push a new count value to the list and include it in a right-recursive list
-	# like so:
+	# Uses a stack of lengths. Using a stack allows for counted lists to be
+	# nested. As the list is consumed it brings the count down to zero. To use
+	# it, push a new count value to the list and include it in a
+	# right-recursive list like so:
 	#
 	# def LIST
 	#     [count_inc ITEM LIST]
@@ -190,10 +190,11 @@ context binary
 	# How many to get
 	nbytes: int
 
-	# We use this token to eliminate the lookahead that would be needed to cause a
-	# reduce of part_len. This forces whatever comes before nbytes to be reduced before 
-	# nbytes_data token is fetched from the scanner. We need this because nbytes_data
-	# depends on the nbytes global and we need to ensure that it is set.
+	# We use this token to eliminate the lookahead that would be needed to
+	# cause a reduce of part_len. This forces whatever comes before nbytes to
+	# be reduced before nbytes_data token is fetched from the scanner. We need
+	# this because nbytes_data depends on the nbytes in the context and we need
+	# to ensure that it is set.
 	token nb_empty /''/
 
 	# Fetch nbytes bytes.

@@ -1,62 +1,65 @@
-
-lex start
+context si
 {
-	literal '!', 'a', ';\n'
-
-	token id /'a'|'b'/
+	lex start
 	{
-		input.push( make_token( trans_id_to input.pull(match_length) ) )
-	}
-	
-	token super_id //
-	token foo //
+		literal '!', 'a', ';\n'
 
-	ignore ws / [ \n\t]+ /
+		token id /'a'|'b'/
+		{
+			input.push( make_token( trans_id_to input.pull(match_length) ) )
+		}
+		
+		token super_id //
+		token foo //
+
+		ignore ws / [ \n\t]+ /
+	}
+
+	trans_id_to: int
+
+	def e1 
+		[]
+		{
+			print( 'old_id = ' trans_id_to '\n' )
+			trans_id_to = typeid<foo>
+			print( 'new_id = ' trans_id_to '\n' )
+		}
+
+	def item1 
+		msg: str
+
+		[ e1 '!' 'a' super_id super_id 'a']
+		{
+			lhs.msg = 'this is item1\n'
+		}
+
+	def e2 
+		[]
+		{
+			print( 'old_id = ' trans_id_to '\n' )
+			trans_id_to = typeid<super_id>
+			print( 'new_id = ' trans_id_to '\n' )
+		}
+
+	def item2 
+		msg: str
+
+		[ e2 '!' 'a' super_id super_id 'a']
+		{
+			lhs.msg = 'this is item2\n'
+		}
+
+
+	def start 
+		[item1 ';\n']
+	|	[item2 ';\n']
+		{
+			match lhs [Item2:item2 ';\n']
+			print( Item2.msg )
+		}
 }
 
-global trans_id_to: int
-
-def e1 
-	[]
-	{
-		print( 'old_id = ' trans_id_to '\n' )
-		trans_id_to = typeid<foo>
-		print( 'new_id = ' trans_id_to '\n' )
-	}
-
-def item1 
-	msg: str
-
-	[ e1 '!' 'a' super_id super_id 'a']
-	{
-		lhs.msg = 'this is item1\n'
-	}
-
-def e2 
-	[]
-	{
-		print( 'old_id = ' trans_id_to '\n' )
-		trans_id_to = typeid<super_id>
-		print( 'new_id = ' trans_id_to '\n' )
-	}
-
-def item2 
-	msg: str
-
-	[ e2 '!' 'a' super_id super_id 'a']
-	{
-		lhs.msg = 'this is item2\n'
-	}
-
-
-def start 
-	[item1 ';\n']
-|	[item2 ';\n']
-	{
-		match lhs [Item2:item2 ';\n']
-		print( Item2.msg )
-	}
-
-parse S: start[stdin]
+cons SuperId: si[]
+parse S: si::start(SuperId)[stdin]
 print_xml( S.tree )
 print( '\n' )
