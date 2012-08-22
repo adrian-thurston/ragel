@@ -3377,8 +3377,12 @@ void Compiler::compileByteCode()
 
 	/* Compile preeof blocks. */
 	for ( RegionList::Iter r = regionList; r.lte(); r++ ) {
-		if ( r->preEofBlock != 0 )
+		if ( r->preEofBlock != 0 ) {
+			if ( r->preEofBlock->context != 0 )
+				context = r->preEofBlock->context;
 			compilePreEof( r );
+			context = 0;
+		}
 	}
 
 	/* Compile the init code */
