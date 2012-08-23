@@ -1335,14 +1335,17 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool stop, bo
 	 * First load the context into the parser.
 	 */
 	if ( context ) {
+		/* Dup the parser. */
+		code.append( IN_DUP_TOP );
+
+		/* Eval the context. */
 		UniqueType *argUT = fieldInitArgs->data[0]->expr->evaluate( pd, code );
 
 		if ( argUT != pd->uniqueTypeStream && argUT->typeId != TYPE_TREE )
 			error(loc) << "context argument must be a stream or a tree" << endp;
 
-		/* FIXME: need to select right one here. */
-		code.append( IN_DUP_TOP_OFF );
-		code.appendHalf( 1 );
+		/* Store the context. */
+		code.append( IN_TOP_SWAP );
 		code.append( IN_SET_PARSER_CTX_WC );
 	}
 
