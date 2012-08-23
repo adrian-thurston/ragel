@@ -1266,9 +1266,9 @@ UniqueType *LangTerm::evaluateConstruct( Compiler *pd, CodeVect &code ) const
 		error(loc) << "don't know how to construct this type" << endp;
 	
 	if ( replUT->langEl->generic != 0 && replUT->langEl->generic->typeId == GEN_PARSER ) {
+		code.append( IN_DUP_TOP );
 		code.append( IN_CONSTRUCT_INPUT );
-		code.append( IN_DUP_TOP_OFF );
-		code.appendHalf( 1 );
+		code.append( IN_TOP_SWAP );
 		code.append( IN_SET_INPUT );
 	}
 	

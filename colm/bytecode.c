@@ -1812,6 +1812,15 @@ again:
 			treeDownref( prg, sp, (Tree*)o2 );
 			break;
 		}
+		case IN_TOP_SWAP: {
+			debug( REALM_BYTECODE, "IN_TOP_SWAP\n" );
+
+			Tree *v1 = vm_pop();
+			Tree *v2 = vm_pop();
+			vm_push( v1 );
+			vm_push( v2 );
+			break;
+		}
 		case IN_DUP_TOP_OFF: {
 			short off;
 			read_half( off );
