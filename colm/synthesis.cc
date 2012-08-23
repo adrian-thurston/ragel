@@ -1571,16 +1571,6 @@ UniqueType *LangTerm::evaluateSend( Compiler *pd, CodeVect &code ) const
 	return varUt;
 }
 
-UniqueType *LangTerm::evaluateOrigParse( Compiler *pd, CodeVect &code, bool stop ) const
-{
-	evaluateParse( pd, code, stop, true );
-	UniqueType *ut = typeRef->uniqueType->langEl->generic->utArg;
-
-	code.append( IN_GET_PARSER_MEM_R );
-	code.appendHalf( 0 );
-
-	return ut;
-}
 
 UniqueType *LangTerm::evaluateEmbedString( Compiler *pd, CodeVect &code ) const
 {
@@ -1669,10 +1659,6 @@ UniqueType *LangTerm::evaluate( Compiler *pd, CodeVect &code ) const
 		}
 		case MatchType:
 			return evaluateMatch( pd, code );
-		case OrigParseType:
-			return evaluateOrigParse( pd, code, false );
-		case OrigParseStopType:
-			return evaluateOrigParse( pd, code, true );
 		case ParseType:
 			return evaluateParse( pd, code, false, false );
 		case ParseStopType:

@@ -2397,10 +2397,6 @@ struct LangTerm
 		NilType,
 		TrueType,
 		FalseType,
-		/* Parser that returns the tree, not the parser class. Can't get the
-		 * parse error if it fails. */
-		OrigParseType,
-		OrigParseStopType,
 		ParseType,
 		ParseStopType,
 		SendType,
@@ -2553,7 +2549,6 @@ struct LangTerm
 	
 	void resolve( Compiler *pd );
 
-	UniqueType *evaluateOrigParse( Compiler *pd, CodeVect &code, bool stop ) const;
 	UniqueType *evaluateNew( Compiler *pd, CodeVect &code ) const;
 	UniqueType *evaluateConstruct( Compiler *pd, CodeVect &code ) const;
 	UniqueType *evaluateParse( Compiler *pd, CodeVect &code, bool stop, bool orig ) const;

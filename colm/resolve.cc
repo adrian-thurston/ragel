@@ -363,8 +363,6 @@ void LangTerm::resolve( Compiler *pd )
 		case FalseType:
 			break;
 
-		case OrigParseType:
-		case OrigParseStopType:
 		case ParseStopType:
 		case ParseType:
 			typeRef->lookupType( pd );
