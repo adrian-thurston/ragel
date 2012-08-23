@@ -42,15 +42,6 @@
 #define true 1
 #define false 0
 
-/* More common macros are in bytecode.h. */
-#define vm_top_off(n) (sp[n])
-#define vm_popn(n) (sp += (n))
-#define vm_pushn(n) (sp -= (n))
-#define vm_local(o) (exec->framePtr[o])
-#define vm_plocal(o) (&exec->framePtr[o])
-#define vm_local_iframe(o) (exec->iframePtr[o])
-#define vm_plocal_iframe(o) (&exec->iframePtr[o])
-
 #define read_byte( i ) do { \
 	i = ((uchar) *instr++); \
 } while(0)
@@ -157,6 +148,11 @@ int colm_log_conds = 0;
 void vm_grow( Program *prg )
 {
 	debug( REALM_BYTECODE, "growing stack\n" );
+}
+
+void vm_shrink( Program *prg )
+{
+	debug( REALM_BYTECODE, "shrinking stack\n" );
 }
 
 void parserSetContext( Program *prg, Tree **sp, Parser *parser, Tree *val )
@@ -414,7 +410,7 @@ void uiterInit( Program *prg, Tree **sp, UserIter *uiter,
 		uiter->resume = prg->rtd->frameInfo[fi->frameId].codeWC;
 }
 
-void treeIterDestroy( Tree ***psp, TreeIter *iter )
+void treeIterDestroy( Program *prg, Tree ***psp, TreeIter *iter )
 {
 	Tree **sp = *psp;
 	long curStackSize = iter->stackRoot - vm_ptop();
@@ -423,7 +419,7 @@ void treeIterDestroy( Tree ***psp, TreeIter *iter )
 	*psp = sp;
 }
 
-void userIterDestroy( Tree ***psp, UserIter *uiter )
+void userIterDestroy( Program *prg, Tree ***psp, UserIter *uiter )
 {
 	Tree **sp = *psp;
 
@@ -711,7 +707,7 @@ again:
 
 void mainExecution( Program *prg, Execution *exec, Code *code )
 {
-	Tree **sp = prg->vm_root;
+	Tree **sp = prg->vmRoot;
 
 	/* Set up the stack as if we have called. We allow a return value. */
 	vm_push( 0 ); 
@@ -1857,7 +1853,7 @@ again:
 			debug( REALM_BYTECODE, "IN_TRITER_DESTROY\n" );
 
 			TreeIter *iter = (TreeIter*) vm_plocal(field);
-			treeIterDestroy( &sp, iter );
+			treeIterDestroy( prg, &sp, iter );
 			break;
 		}
 		case IN_REV_TRITER_FROM_REF: {
@@ -3431,7 +3427,7 @@ again:
 			debug( REALM_BYTECODE, "IN_UITER_DESTROY\n" );
 
 			UserIter *uiter = (UserIter*) vm_local(field);
-			userIterDestroy( &sp, uiter );
+			userIterDestroy( prg, &sp, uiter );
 			break;
 		}
 		case IN_RET: {

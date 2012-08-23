@@ -107,7 +107,6 @@ typedef struct ColmProgram
 
 	Kid *heap;
 
-	Tree **se;
 
 	Stream *stdinVal;
 	Stream *stdoutVal;
@@ -115,8 +114,12 @@ typedef struct ColmProgram
 
 	RunBuf *allocRunBuf;
 
-	Tree **vm_stack;
-	Tree **vm_root; 
+	Tree **vmStack;
+	Tree **vmRoot; 
+
+	/* Current stack block limits. Changed when crossing block boundaries. */
+	Tree **sb_bot;
+	Tree **sb_top;
 
 	/* Returned from the main line. Should have exports instead. */
 	Tree *returnVal;

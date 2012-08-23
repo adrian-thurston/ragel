@@ -91,7 +91,7 @@ void stackFree( Tree **stack )
 
 Tree **vm_root( struct ColmProgram *prg )
 {
-	return prg->vm_root;
+	return prg->vmRoot;
 }
 
 Tree *returnVal( struct ColmProgram *prg )
@@ -134,8 +134,8 @@ Program *colmNewProgram( RuntimeData *rtd )
 	/*
 	 * Allocate the VM stack.
 	 */
-	prg->vm_stack = stackAlloc();
-	prg->vm_root = &prg->vm_stack[VM_STACK_SIZE];
+	prg->vmStack = stackAlloc();
+	prg->vmRoot = &prg->vmStack[VM_STACK_SIZE];
 
 	return prg;
 }
@@ -164,7 +164,7 @@ void colmRunProgram( Program *prg, int argc, const char **argv )
 
 int colmDeleteProgram( Program *prg )
 {
-	Tree **sp = prg->vm_root;
+	Tree **sp = prg->vmRoot;
 	int exitStatus = prg->exitStatus;
 
 	#ifdef COLM_LOG_BYTECODE
@@ -241,7 +241,7 @@ int colmDeleteProgram( Program *prg )
 		rb = next;
 	}
 
-	stackFree( prg->vm_stack );
+	stackFree( prg->vmStack );
 	free( prg );
 
 	return exitStatus;
