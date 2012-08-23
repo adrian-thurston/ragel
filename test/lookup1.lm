@@ -2194,8 +2194,6 @@ if ! S {
 	exit( 1 )
 }
 
-print( S )
-
 print( '***** NAMSPACES *****\n' )
 printObject( '' Lookup.rootNamespace )
 print( '***** UNKNOWN DECLARATORS *****\n' )
