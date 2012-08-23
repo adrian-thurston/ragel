@@ -1504,6 +1504,10 @@ UniqueType *LangTerm::evaluateSend( Compiler *pd, CodeVect &code ) const
 {
 	UniqueType *varUt = varRef->evaluate( pd, code );
 
+	/* Dup for every send. */
+	for ( ConsItemList::Iter item = *parserText->list; item.lte(); item++ )
+		code.append( IN_DUP_TOP );
+
 	/* Assign bind ids to the variables in the replacement. */
 	for ( ConsItemList::Iter item = *parserText->list; item.lte(); item++ ) {
 		switch ( item->type ) {
@@ -1538,8 +1542,7 @@ UniqueType *LangTerm::evaluateSend( Compiler *pd, CodeVect &code ) const
 			break;
 		}
 
-		code.append( IN_DUP_TOP_OFF );
-		code.appendHalf( 1 );
+		code.append( IN_TOP_SWAP );
 
 		/* Not a stream. Get the input first. */
 		code.append( IN_GET_INPUT );
