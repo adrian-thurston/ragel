@@ -1288,6 +1288,28 @@ UniqueType *LangTerm::evaluateConstruct( Compiler *pd, CodeVect &code ) const
 	return replUT;
 }
 
+void LangTerm::parseFrag( Compiler *pd, CodeVect &code, int stopId ) const
+{
+	/* Parse instruction, dependent on whether or not we are producing
+	 * revert or commit code. */
+	if ( pd->revertOn ) {
+		code.append( IN_PARSE_SAVE_STEPS );
+		code.append( IN_PARSE_LOAD_START );
+		code.append( IN_PARSE_FRAG_WV );
+		code.appendHalf( stopId );
+		code.append( IN_PCR_CALL );
+		code.append( IN_PARSE_FRAG_WV3 );
+	}
+	else {
+		code.append( IN_PARSE_SAVE_STEPS );
+		code.append( IN_PARSE_LOAD_START );
+		code.append( IN_PARSE_FRAG_WC );
+		code.appendHalf( stopId );
+		code.append( IN_PCR_CALL );
+		code.append( IN_PARSE_FRAG_WC3 );
+	}
+}
+
 UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool stop, bool orig ) const
 {
 	UniqueType *ut = typeRef->uniqueType->langEl->generic->utArg;
@@ -1365,12 +1387,42 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool stop, bo
 
 	/*****************************/
 
-	/* Assign bind ids to the variables in the replacement. */
-	for ( ConsItemList::Iter item = *parserText->list; item.lte(); item++ ) {
-		if ( item->prev == 0 )
+	if ( parserText->list->length() == 1 && 
+			parserText->list->head->type == ConsItem::ExprType )
+	{
+		/* Only one argument and it is an expression type. Evaluate it (but
+		 * ignore the code) to determine if it is an input type. */
+		CodeVect unused;
+		UniqueType *ut = parserText->list->head->expr->evaluate( pd, unused );
+
+		if ( ut == pd->uniqueTypeInput ) {
+			/* Only one argument and it is an input object. Set the input into
+			 * the parser and parse using it. */
 			code.append( IN_DUP_TOP );
 
-		UniqueType *argUt = 0;
+			parserText->list->head->expr->evaluate( pd, code );
+
+			code.append( IN_TOP_SWAP );
+			code.append( IN_SET_INPUT );
+
+			code.append( IN_DUP_TOP );
+
+			parseFrag( pd, code, stopId );
+
+			goto finish;
+		}
+	}
+
+	code.append( IN_DUP_TOP );
+	code.append( IN_CONSTRUCT_INPUT );
+	code.append( IN_TOP_SWAP );
+	code.append( IN_SET_INPUT );
+
+	for ( ConsItemList::Iter item = *parserText->list; item.lte(); item++ )
+		code.append( IN_DUP_TOP );
+	
+	/* Assign bind ids to the variables in the replacement. */
+	for ( ConsItemList::Iter item = *parserText->list; item.lte(); item++ ) {
 		switch ( item->type ) {
 		case ConsItem::FactorType: {
 			String result;
@@ -1399,26 +1451,11 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool stop, bo
 			break;
 		}
 		case ConsItem::ExprType:
-			argUt = item->expr->evaluate( pd, code );
+			item->expr->evaluate( pd, code );
 			break;
 		}
 
-		if ( item->prev == 0 ) {
-			if ( argUt == pd->uniqueTypeInput ) {
-				code.append( IN_TOP_SWAP );
-				code.append( IN_SET_INPUT );
-				goto go;
-			}
-			else {
-				code.append( IN_TOP_SWAP );
-				code.append( IN_CONSTRUCT_INPUT );
-				code.append( IN_TOP_SWAP );
-				code.append( IN_SET_INPUT );
-			}
-		}
-
-		code.append( IN_DUP_TOP_OFF );
-		code.appendHalf( 1 );
+		code.append( IN_TOP_SWAP );
 
 		/* Not a stream. Get the input first. */
 		code.append( IN_GET_INPUT );
@@ -1428,32 +1465,17 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool stop, bo
 			code.append( IN_INPUT_APPEND_WC );
 		code.append( IN_POP );
 
-go:
 		code.append( IN_DUP_TOP );
 
 		/* Parse instruction, dependent on whether or not we are producing
 		 * revert or commit code. */
-		if ( pd->revertOn ) {
-			code.append( IN_PARSE_SAVE_STEPS );
-			code.append( IN_PARSE_LOAD_START );
-			code.append( IN_PARSE_FRAG_WV );
-			code.appendHalf( stopId );
-			code.append( IN_PCR_CALL );
-			code.append( IN_PARSE_FRAG_WV3 );
-		}
-		else {
-			code.append( IN_PARSE_SAVE_STEPS );
-			code.append( IN_PARSE_LOAD_START );
-			code.append( IN_PARSE_FRAG_WC );
-			code.appendHalf( stopId );
-			code.append( IN_PCR_CALL );
-			code.append( IN_PARSE_FRAG_WC3 );
-		}
+		parseFrag( pd, code, stopId );
 	}
 
 	/*
 	 * Finish operation
 	 */
+finish:
 
 	/* Parse instruction, dependent on whether or not we are producing revert
 	 * or commit code. */
@@ -1555,24 +1577,7 @@ UniqueType *LangTerm::evaluateSend( Compiler *pd, CodeVect &code ) const
 
 		code.append( IN_DUP_TOP );
 
-		/* Parse instruction, dependent on whether or not we are producing
-		 * revert or commit code. */
-		if ( pd->revertOn ) {
-			code.append( IN_PARSE_SAVE_STEPS );
-			code.append( IN_PARSE_LOAD_START );
-			code.append( IN_PARSE_FRAG_WV );
-			code.appendHalf( 0 );
-			code.append( IN_PCR_CALL );
-			code.append( IN_PARSE_FRAG_WV3 );
-		}
-		else {
-			code.append( IN_PARSE_SAVE_STEPS );
-			code.append( IN_PARSE_LOAD_START );
-			code.append( IN_PARSE_FRAG_WC );
-			code.appendHalf( 0 );
-			code.append( IN_PCR_CALL );
-			code.append( IN_PARSE_FRAG_WC3 );
-		}
+		parseFrag( pd, code, 0 );
 	}
 
 	return varUt;
