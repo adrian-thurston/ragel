@@ -463,7 +463,6 @@ void ColmScanner::endSection( )
 		'false' => { token( KW_False ); };
 		'parse' => { token( KW_Parse ); };
 		'parse_stop' => { token( KW_ParseStop ); };
-		'global' => { token( KW_Global ); };
 		'export' => { token( KW_Export ); };
 		'ptr' => { token( KW_Ptr ); };
 		'ref' => { token( KW_Ref ); };
