@@ -1367,6 +1367,9 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool stop, bo
 
 	/* Assign bind ids to the variables in the replacement. */
 	for ( ConsItemList::Iter item = *parserText->list; item.lte(); item++ ) {
+		if ( item->prev == 0 )
+			code.append( IN_DUP_TOP );
+
 		UniqueType *argUt = 0;
 		switch ( item->type ) {
 		case ConsItem::FactorType: {
@@ -1402,16 +1405,14 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool stop, bo
 
 		if ( item->prev == 0 ) {
 			if ( argUt == pd->uniqueTypeInput ) {
-				code.append( IN_DUP_TOP_OFF );
-				code.appendHalf( 1 );
+				code.append( IN_TOP_SWAP );
 				code.append( IN_SET_INPUT );
 				goto go;
 			}
 			else {
+				code.append( IN_TOP_SWAP );
 				code.append( IN_CONSTRUCT_INPUT );
-
-				code.append( IN_DUP_TOP_OFF );
-				code.appendHalf( 2 );
+				code.append( IN_TOP_SWAP );
 				code.append( IN_SET_INPUT );
 			}
 		}
