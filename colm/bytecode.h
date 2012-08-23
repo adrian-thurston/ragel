@@ -73,8 +73,8 @@ typedef unsigned char uchar;
 #define IN_POP                   0x1d
 #define IN_POP_N_WORDS           0x1e
 #define IN_DUP_TOP               0x1f
+#define IN_TOP_SWAP              0x20
 
-#define IN_DUP_TOP_OFF           0x20
 #define IN_REJECT                0x21
 #define IN_MATCH                 0x22
 #define IN_CONSTRUCT             0x23
@@ -315,7 +315,6 @@ typedef unsigned char uchar;
 #define IN_SET_PARSER_MEM_WV     0x00
 #define IN_SET_PARSER_MEM_BKT    0x00
 
-#define IN_TOP_SWAP              0xe1
 
 /* Types */
 #define TYPE_NIL          0x01
@@ -423,7 +422,6 @@ typedef unsigned char uchar;
 #define vm_top() (*sp)
 #define vm_ptop() (sp)
 
-#define vm_top_off(n) (sp[n])
 #define vm_local(o) (exec->framePtr[o])
 #define vm_plocal(o) (&exec->framePtr[o])
 #define vm_local_iframe(o) (exec->iframePtr[o])

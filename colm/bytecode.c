@@ -1821,17 +1821,6 @@ again:
 			vm_push( v2 );
 			break;
 		}
-		case IN_DUP_TOP_OFF: {
-			short off;
-			read_half( off );
-
-			debug( REALM_BYTECODE, "IN_DUP_TOP_OFF %hd\n", off );
-
-			Tree *val = vm_top_off(off);
-			treeUpref( val );
-			vm_push( val );
-			break;
-		}
 		case IN_DUP_TOP: {
 			debug( REALM_BYTECODE, "IN_DUP_TOP\n" );
 
