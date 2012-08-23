@@ -1,4 +1,4 @@
-<heredoc><here_name><id>hello</id></here_name><here_data><_repeat_here_data_item><here_data_item><nl>
-</nl></here_data_item><here_data_item><id>random</id></here_data_item><here_data_item><other> 9392</other></here_data_item><here_data_item><id>af</id></here_data_item><here_data_item><other> </other></here_data_item><here_data_item><id>j</id></here_data_item><here_data_item><other>9 </other></here_data_item><here_data_item><id>stuff</id></here_data_item><here_data_item><nl>
-</nl></here_data_item></_repeat_here_data_item></here_data><here_close>hell</here_close><id>o</id><nl>
-</nl></heredoc>
+<heredoc::start><heredoc::here_name><heredoc::id>hello</heredoc::id></heredoc::here_name><heredoc::here_data><heredoc::_repeat_here_data_item><heredoc::here_data_item><heredoc::nl>
+</heredoc::nl></heredoc::here_data_item><heredoc::here_data_item><heredoc::id>random</heredoc::id></heredoc::here_data_item><heredoc::here_data_item><heredoc::other> 9392</heredoc::other></heredoc::here_data_item><heredoc::here_data_item><heredoc::id>af</heredoc::id></heredoc::here_data_item><heredoc::here_data_item><heredoc::other> </heredoc::other></heredoc::here_data_item><heredoc::here_data_item><heredoc::id>j</heredoc::id></heredoc::here_data_item><heredoc::here_data_item><heredoc::other>9 </heredoc::other></heredoc::here_data_item><heredoc::here_data_item><heredoc::id>stuff</heredoc::id></heredoc::here_data_item><heredoc::here_data_item><heredoc::nl>
+</heredoc::nl></heredoc::here_data_item></heredoc::_repeat_here_data_item></heredoc::here_data><heredoc::here_close>hell</heredoc::here_close><heredoc::id>o</heredoc::id><heredoc::nl>
+</heredoc::nl></heredoc::start>
