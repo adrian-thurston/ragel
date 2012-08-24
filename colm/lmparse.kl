@@ -42,10 +42,6 @@ include "lmparse.kh";
 
 start: root_item_list
 	final {
-		if ( colm_log_compile ) {
-			cerr << "parsing complete" << endl;
-		}
-
 		pd->rootCodeBlock = new CodeBlock( $1->stmtList );
 	};
 

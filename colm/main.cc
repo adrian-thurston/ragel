@@ -240,9 +240,7 @@ void openOutput( )
 		}
 	}
 
-	if ( colm_log_compile ) {
-		cerr << "opening output file: " << outputFileName << endl;
-	}
+	debug( REALM_PARSE, "opening output file: %s\n", outputFileName );
 
 	/* Make sure we are not writing to the same file as the input file. */
 	if ( outputFileName != 0 && strcmp( inputFileName, outputFileName  ) == 0 ) {
@@ -319,8 +317,7 @@ void openExportsImpl( )
 
 void compileOutputCommand( const char *command )
 {
-	if ( colm_log_compile )
-		cout << "compiling with: " << command << endl;
+	//cout << "compiling with: " << command << endl;
 	int res = system( command );
 	if ( res != 0 )
 		cout << "there was a problem compiling the output" << endl;
@@ -527,14 +524,8 @@ int main(int argc, const char **argv)
 {
 	processArgs( argc, argv );
 
-	if ( verbose ) {
-		colm_log_bytecode = 1;
-		colm_log_parse = 1;
-		colm_log_match = 1;
-		colm_log_compile = 1;
-		colm_log_conds = 1;
+	if ( verbose )
 		colmActiveRealm = 0xffffffff;
-	}
 	initInputFuncs();
 
 	/* Bail on above errors. */

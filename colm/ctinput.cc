@@ -305,11 +305,9 @@ void inputStreamConsPushBackBuf( SourceStream *is, RunBuf *runBuf )
 	char *data = runBuf->data + runBuf->offset;
 	long length = runBuf->length;
 
-	if ( colm_log_parse ) {
-		cerr << "push back data: ";
-		cerr.write( data, length );
-		cerr << endl;
-	}
+	//cerr << "push back data: ";
+	//cerr.write( data, length );
+	//cerr << endl;
 
 	if ( length == 0 )
 		return;
@@ -392,11 +390,7 @@ void sendNamedLangEl( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, I
 
 	LangEl *klangEl = consumeLangEl( inputStream, &bindId, &data, &length );
 	
-	#ifdef COLM_LOG_PARSE
-	if ( colm_log_parse ) {
-		cerr << "named langEl: " << prg->rtd->lelInfo[klangEl->id].name << endl;
-	}
-	#endif
+	//cerr << "named langEl: " << prg->rtd->lelInfo[klangEl->id].name << endl;
 
 	/* Copy the token data. */
 	Head *tokdata = 0;

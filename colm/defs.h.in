@@ -23,25 +23,6 @@
 #define _CONFIG_H
 
 /* Configuration */
-#undef COLM_LOG
-#undef COLM_LOG_BYTECODE
-#undef COLM_LOG_PARSE
-#undef COLM_LOG_MATCH
-#undef COLM_LOG_COMPILE
-
-/* If COLM_LOG is defined then turn on all logging options. */
-#ifdef COLM_LOG
-#define COLM_LOG_BYTECODE 1
-#define COLM_LOG_PARSE 1
-#define COLM_LOG_MATCH 1
-#define COLM_LOG_COMPILE 1
-#endif
-
-extern int colm_log_bytecode;
-extern int colm_log_parse;
-extern int colm_log_match;
-extern int colm_log_compile;
-extern int colm_log_conds;
 
 /* The size of `long', as computed by sizeof. */
 #undef SIZEOF_LONG

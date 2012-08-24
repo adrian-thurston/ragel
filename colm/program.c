@@ -37,11 +37,6 @@ void colmInit( long debugRealm )
 {
 	/* Always on because because logging is controlled with ifdefs in\n" the
 	 * runtime lib. */
-	colm_log_bytecode = 1;
-	colm_log_parse = 1;
-	colm_log_match = 1;
-	colm_log_compile = 1;
-	colm_log_conds = 1;
 	colmActiveRealm = debugRealm;
 	initInputFuncs();
 
@@ -167,11 +162,7 @@ int colmDeleteProgram( Program *prg )
 	Tree **sp = prg->vmRoot;
 	int exitStatus = prg->exitStatus;
 
-	#ifdef COLM_LOG_BYTECODE
-	if ( colm_log_bytecode ) {
-		cerr << "clearing the prg" << endl;
-	}
-	#endif
+	//cerr << "clearing the prg" << endl;
 
 	treeDownref( prg, sp, prg->returnVal );
 	treeDownref( prg, sp, prg->lastParseError );

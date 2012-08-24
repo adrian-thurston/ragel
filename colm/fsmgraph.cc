@@ -891,42 +891,6 @@ void FsmGraph::isolateStartState( )
 	setMisfitAccounting( false );
 }
 
-#if COLM_LOG_CONDS
-void logCondSpace( CondSpace *condSpace )
-{
-	if ( condSpace == 0 )
-		cerr << "<empty>";
-	else {
-		for ( CondSet::Iter csi = condSpace->condSet.last(); csi.gtb(); csi-- ) {
-			if ( ! csi.last() )
-				cerr << ',';
-			(*csi)->actionName( cerr );
-		}
-	}
-}
-
-void logNewExpansion( Expansion *exp )
-{
-	cerr << "created expansion:" << endl;
-	cerr << "  range: " << exp->lowKey.getVal() << " .. " << 
-			exp->highKey.getVal() << endl;
-
-	cerr << "  fromCondSpace: ";
-	logCondSpace( exp->fromCondSpace );
-	cerr << endl;
-	cerr << "  fromVals: " << exp->fromVals << endl;
-
-	cerr << "  toCondSpace: ";
-	logCondSpace( exp->toCondSpace );
-	cerr << endl;
-	cerr << "  toValsList: ";
-	for ( LongVect::Iter to = exp->toValsList; to.lte(); to++ )
-		cerr << " " << *to;
-	cerr << endl;
-}
-#endif
-
-
 void FsmGraph::findTransExpansions( ExpansionList &expansionList, 
 		FsmState *destState, FsmState *srcState )
 {
@@ -948,11 +912,6 @@ void FsmGraph::findTransExpansions( ExpansionList &expansionList,
 			for ( long targVals = 0; targVals < numTargVals; targVals++ )
 				expansion->toValsList.append( targVals );
 
-			#ifdef COLM_LOG_CONDS
-			if ( colm_log_conds ) {
-				logNewExpansion( expansion );
-			}
-			#endif
 			expansionList.append( expansion );
 		}
 	}
@@ -982,11 +941,6 @@ void FsmGraph::findCondExpInTrans( ExpansionList &expansionList, FsmState *state
 			expansion->toValsList = toValsList;
 
 			expansionList.append( expansion );
-			#ifdef COLM_LOG_CONDS
-			if ( colm_log_conds ) {
-				logNewExpansion( expansion );
-			}
-			#endif
 		}
 	}
 }
@@ -1010,13 +964,6 @@ void FsmGraph::findCondExpansions( ExpansionList &expansionList,
 			long srcOnlyLen = srcOnlyCS.length();
 
 			if ( srcOnlyCS.length() > 0 ) {
-				#ifdef COLM_LOG_CONDS
-				if ( colm_log_conds ) {
-					cerr << "there are " << srcOnlyCS.length() << " item(s) that are "
-								"only in the srcCS" << endl;
-				}
-				#endif
-
 				CondSet mergedCS = destCS;
 				mergedCS.insert( condCond.s2Tel.trans->condSpace->condSet );
 
@@ -1317,11 +1264,6 @@ void FsmGraph::findEmbedExpansions( ExpansionList &expansionList,
 					expansion->fromVals = 0;
 					expansion->toCondSpace = newStateCond->condSpace;
 					expansion->toValsList.append( 1 );
-					#ifdef COLM_LOG_CONDS
-					if ( colm_log_conds ) {
-						logNewExpansion( expansion );
-					}
-					#endif
 					expansionList.append( expansion );
 				}
 				break;

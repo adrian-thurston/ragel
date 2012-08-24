@@ -659,15 +659,13 @@ void Compiler::pdaActionOrder( PdaGraph *pdaGraph, LangElSet &parserEls )
 		}
 	}
 
-	if ( colm_log_compile ) {
-		/* Warn about states with empty token region lists. */
-		for ( PdaStateList::Iter state = pdaGraph->stateList; state.lte(); state++ ) {
-			if ( state->regions.length() == 0 ) {
-				warning() << "state has an empty token region, state: " << 
-					state->stateNum << endl;
-			}
-		}
-	}
+	///* Warn about states with empty token region lists. */
+	//for ( PdaStateList::Iter state = pdaGraph->stateList; state.lte(); state++ ) {
+	//	if ( state->regions.length() == 0 ) {
+	//		warning() << "state has an empty token region, state: " << 
+	//			state->stateNum << endl;
+	//	}
+	//}
 
 	/* Some actions may not have an ordering. I believe these to be actions
 	 * that result in a parse error and they arise because the state tables

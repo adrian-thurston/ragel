@@ -40,13 +40,12 @@ libcolmd_a_CFLAGS = -I..
 
 colm_CXXFLAGS = \
 	-Wall \
-	-DCOLM_LOG \
 	-DPREFIX='"$(prefix)"' \
 	-I..
 
 colm_LDADD = libcolmp.a
 
-# ADT DEFS_COLM += -DCOLM_LOG -DPREFIX='"$(prefix)"'
+# ADT DEFS_COLM += -DPREFIX='"$(prefix)"'
 
 colm_SOURCES = \
 	buffer.h bytecode.h colm.h debug.h dotgen.h fsmcodegen.h fsmgraph.h \
@@ -98,9 +97,9 @@ endif
 # ADT 
 # ADT INCS += -I../aapl
 # ADT 
-# ADT DEFS_COLM += -DCOLM_LOG -DPREFIX='"$(prefix)"'
+# ADT DEFS_COLM += -DPREFIX='"$(prefix)"'
 # ADT DEFS_RT_P +=
-# ADT DEFS_RT_D += -DCOLM_LOG
+# ADT DEFS_RT_D +=
 # ADT 
 # ADT CFLAGS += -g -Wall -Wwrite-strings
 # ADT LDFLAGS +=

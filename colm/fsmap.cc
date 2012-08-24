@@ -822,16 +822,6 @@ CondSpace *FsmGraph::addCondSpace( const CondSet &condSet )
 		condSpace = new CondSpace( condSet );
 		condSpace->baseKey = baseKey;
 		condData->condSpaceMap.insert( condSpace );
-
-		#ifdef COLM_LOG_CONDS
-		if ( colm_log_conds ) {
-			cerr << "adding new condition space" << endl;
-			cerr << "  condition set: ";
-			logCondSpace( condSpace );
-			cerr << endl;
-			cerr << "  baseKey: " << baseKey.getVal() << endl;
-		}
-		#endif
 	}
 	return condSpace;
 }

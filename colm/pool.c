@@ -43,18 +43,10 @@ void *poolAllocAllocate( PoolAlloc *poolAlloc )
 	memset( res, 0, poolAlloc->sizeofT );
 	return res;
 #else
-	//#ifdef COLM_LOG_BYTECODE
-	//cerr << "allocating in: " << __PRETTY_FUNCTION__ << endl;
-	//#endif
 
 	void *newEl = 0;
 	if ( poolAlloc->pool == 0 ) {
 		if ( poolAlloc->nextel == FRESH_BLOCK ) {
-			//#ifdef COLM_LOG_BYTECODE
-			//if ( colm_log_bytecode )
-			//	cerr << "allocating " << FRESH_BLOCK << " Elements of type T" << endl;
-			//#endif
-
 			PoolBlock *newBlock = (PoolBlock*)malloc( sizeof(PoolBlock) );
 			newBlock->data = malloc( poolAlloc->sizeofT * FRESH_BLOCK );
 			newBlock->next = poolAlloc->head;

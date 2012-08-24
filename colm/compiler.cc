@@ -1291,10 +1291,8 @@ void Compiler::parsePatterns()
 	Tree **root = &vm_stack[VM_STACK_SIZE];
 
 	for ( ConsList::Iter repl = replList; repl.lte(); repl++ ) {
-		if ( colm_log_compile ) {
-			cerr << "parsing replacement at " << 
-					repl->loc.line << ' ' << repl->loc.col << endl;
-		}
+		//cerr << "parsing replacement at " << 
+		//		repl->loc.line << ' ' << repl->loc.col << endl;
 
 		InputStream *in = new InputStream;
 		FsmRun *fsmRun = new FsmRun;
@@ -1318,10 +1316,8 @@ void Compiler::parsePatterns()
 	}
 
 	for ( PatList::Iter pat = patternList; pat.lte(); pat++ ) {
-		if ( colm_log_compile ) {
-			cerr << "parsing pattern at " << 
-					pat->loc.line << ' ' << pat->loc.col << endl;
-		}
+		//cerr << "parsing pattern at " << 
+		//	pat->loc.line << ' ' << pat->loc.col << endl;
 
 		InputStream *in = new InputStream;
 		FsmRun *fsmRun = new FsmRun;
@@ -1454,10 +1450,8 @@ void Compiler::compile()
 	initLongestMatchData();
 	FsmGraph *fsmGraph = makeScanner();
 
-	if ( colm_log_compile ) {
-		printNameTree( fsmGraph->rootName );
-		printNameIndex( fsmGraph->nameIndex );
-	}
+	//printNameTree( fsmGraph->rootName );
+	//printNameIndex( fsmGraph->nameIndex );
 
 	prepGrammar();
 

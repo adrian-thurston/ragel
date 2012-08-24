@@ -19,8 +19,6 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-//#define COLM_LOG
-
 #include <colm/pdarun.h>
 #include <colm/fsmrun.h>
 #include <colm/tree.h>
@@ -138,12 +136,6 @@
 	i = ((Word) *instr++); \
 	i |= ((Word) *instr++) << 8; \
 } while(0)
-
-int colm_log_bytecode = 0;
-int colm_log_parse = 0;
-int colm_log_match = 0;
-int colm_log_compile = 0;
-int colm_log_conds = 0;
 
 void vm_grow( Program *prg )
 {
