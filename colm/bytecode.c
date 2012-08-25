@@ -2139,7 +2139,6 @@ again:
 			vm_push( (SW)pcr );
 
 			vm_push( (SW)exec->parser );
-			vm_push( (SW)exec->inputStream );
 			vm_push( (SW)exec->framePtr );
 			vm_push( (SW)exec->iframePtr );
 			vm_push( (SW)exec->frameId );
@@ -2150,7 +2149,6 @@ again:
 
 			memset( exec, 0, sizeof(Execution) );
 			exec->parser = parser;
-			exec->inputStream = parser->input->in;
 			exec->frameId = parser->pdaRun->frameId;
 
 			instr = parser->pdaRun->code;
@@ -2169,7 +2167,6 @@ again:
 			exec->frameId = ( long ) vm_pop();
 			exec->iframePtr = ( Tree ** ) vm_pop();
 			exec->framePtr = ( Tree ** ) vm_pop();
-			exec->inputStream = ( InputStream * ) vm_pop();
 			exec->parser = ( Parser * ) vm_pop();
 
 			if ( instr == 0 ) {

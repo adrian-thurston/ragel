@@ -443,7 +443,6 @@ typedef Tree **StackPtr;
 typedef struct _Execution
 {
 	Parser *parser;
-	InputStream *inputStream;
 	Tree **framePtr;
 	Tree **iframePtr;
 	long frameId;
