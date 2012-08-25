@@ -1104,7 +1104,7 @@ again:
 			/* If there are captures (this is a translate block) then copy them into
 			 * the local frame now. */
 			LangElInfo *lelInfo = prg->rtd->lelInfo;
-			char **mark = exec->fsmRun->mark;
+			char **mark = exec->parser->fsmRun->mark;
 
 			int i;
 			for ( i = 0; i < lelInfo[exec->pdaRun->tokenId].numCaptureAttr; i++ ) {
@@ -2140,7 +2140,6 @@ again:
 
 			vm_push( (SW)exec->parser );
 			vm_push( (SW)exec->pdaRun );
-			vm_push( (SW)exec->fsmRun );
 			vm_push( (SW)exec->inputStream );
 			vm_push( (SW)exec->framePtr );
 			vm_push( (SW)exec->iframePtr );
@@ -2153,7 +2152,6 @@ again:
 			memset( exec, 0, sizeof(Execution) );
 			exec->parser = parser;
 			exec->pdaRun = parser->pdaRun;
-			exec->fsmRun = parser->fsmRun;
 			exec->inputStream = parser->input->in;
 			exec->frameId = parser->pdaRun->frameId;
 
@@ -2174,7 +2172,6 @@ again:
 			exec->iframePtr = ( Tree ** ) vm_pop();
 			exec->framePtr = ( Tree ** ) vm_pop();
 			exec->inputStream = ( InputStream * ) vm_pop();
-			exec->fsmRun = ( FsmRun * ) vm_pop();
 			exec->pdaRun = ( PdaRun * ) vm_pop();
 			exec->parser = ( Parser * ) vm_pop();
 
@@ -2433,7 +2430,7 @@ again:
 
 			Input *accumStream = (Input*)vm_pop();
 			Tree *len = vm_pop();
-			Tree *string = streamPullBc( prg, exec->fsmRun, accumStream->in, len );
+			Tree *string = streamPullBc( prg, exec->parser->fsmRun, accumStream->in, len );
 			treeUpref( string );
 			vm_push( string );
 

@@ -444,7 +444,6 @@ typedef struct _Execution
 {
 	Parser *parser;
 	PdaRun *pdaRun;
-	FsmRun *fsmRun;
 	InputStream *inputStream;
 	Tree **framePtr;
 	Tree **iframePtr;
