@@ -93,7 +93,7 @@ void clearFsmRun( struct ColmProgram *prg, FsmRun *fsmRun );
 void updatePosition( InputStream *inputStream, const char *data, long length );
 void undoPosition( InputStream *inputStream, const char *data, long length );
 void sendBackRunBufHead( FsmRun *fsmRun, InputStream *inputStream );
-void undoStreamPull( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length );
+void undoStreamPull( InputStream *inputStream, const char *data, long length );
 
 
 #if SIZEOF_LONG != 4 && SIZEOF_LONG != 8 

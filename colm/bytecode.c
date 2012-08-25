@@ -319,11 +319,11 @@ Tree *streamPullBc( Program *prg, FsmRun *fsmRun, InputStream *in, Tree *length 
 	return constructString( prg, tokdata );
 }
 
-void undoPull( Program *prg, FsmRun *fsmRun, InputStream *in, Tree *str )
+void undoPull( Program *prg, InputStream *in, Tree *str )
 {
 	const char *data = stringData( ( (Str*)str )->value );
 	long length = stringLength( ( (Str*)str )->value );
-	undoStreamPull( fsmRun, in, data, length );
+	undoStreamPull( in, data, length );
 }
 
 long streamPush( Program *prg, Tree **sp, FsmRun *fsmRun, InputStream *in, Tree *tree, int ignore )
@@ -547,10 +547,8 @@ again:
 			break;
 		}
 		case IN_INPUT_PULL_BKT: {
-			Word f;
 			Tree *string;
 			read_tree( string );
-			read_word( f );
 
 			debug( REALM_BYTECODE, "IN_INPUT_PULL_BKT\n" );
 
@@ -2443,8 +2441,7 @@ again:
 			treeUpref( string );
 			append( &exec->pdaRun->rcodeCollect, IN_INPUT_PULL_BKT );
 			appendWord( &exec->pdaRun->rcodeCollect, (Word) string );
-			appendWord( &exec->pdaRun->rcodeCollect, (Word) exec->fsmRun );
-			exec->rcodeUnitLen += SIZEOF_CODE + 2 *SIZEOF_WORD;
+			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
 			append( &exec->pdaRun->rcodeCollect, exec->rcodeUnitLen );
 
 			treeDownref( prg, sp, (Tree*)accumStream );
@@ -2452,17 +2449,14 @@ again:
 			break;
 		}
 		case IN_INPUT_PULL_BKT: {
-			Word f;
 			Tree *string;
 			read_tree( string );
-			read_word( f );
-			FsmRun *fsmRun = (FsmRun*)f;
 
 			Tree *accumStream = vm_pop();
 
 			debug( REALM_BYTECODE, "IN_INPUT_PULL_BKT\n" );
 
-			undoPull( prg, fsmRun, ((Input*)accumStream)->in, string );
+			undoPull( prg, ((Input*)accumStream)->in, string );
 			treeDownref( prg, sp, accumStream );
 			treeDownref( prg, sp, string );
 			break;

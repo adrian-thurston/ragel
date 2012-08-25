@@ -157,7 +157,7 @@ Head *streamPull( Program *prg, FsmRun *fsmRun, InputStream *inputStream, long l
 	return tokdata;
 }
 
-void undoStreamPull( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length )
+void undoStreamPull( InputStream *inputStream, const char *data, long length )
 {
 	debug( REALM_PARSE, "undoing stream pull\n" );
 
