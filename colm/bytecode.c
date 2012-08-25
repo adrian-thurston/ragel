@@ -726,8 +726,8 @@ int makeReverseCode( PdaRun *pdaRun )
 
 	if ( pdaRun->rcBlockCount == 0 ) {
 		/* One reverse code run for the DECK terminator. */
-		append( reverseCode, IN_PCR_END_DECK );
-		append( reverseCode, IN_PCR_RET );
+		appendCode( reverseCode, IN_PCR_END_DECK );
+		appendCode( reverseCode, IN_PCR_RET );
 		appendWord( reverseCode, 2 );
 		pdaRun->rcBlockCount += 1;
 		incrementSteps( pdaRun );
@@ -742,11 +742,11 @@ int makeReverseCode( PdaRun *pdaRun )
 		p--;
 		long len = *p;
 		p = p - len;
-		append2( reverseCode, p, len );
+		appendCode2( reverseCode, p, len );
 	}
 
 	/* Stop, then place a total length in the global stack. */
-	append( reverseCode, IN_PCR_RET );
+	appendCode( reverseCode, IN_PCR_RET );
 	long length = reverseCode->tabLen - startLength;
 	appendWord( reverseCode, length );
 
@@ -766,6 +766,27 @@ void transferReverseCode( PdaRun *pdaRun, ParseTree *parseTree )
 		parseTree->flags |= PF_HAS_RCODE;
 		pdaRun->rcBlockCount = 0;
 	}
+}
+
+void appendUnitLen( Execution *exec )
+{
+	appendCode( &exec->parser->pdaRun->rcodeCollect, exec->rcodeUnitLen );
+	exec->rcodeUnitLen = 0;
+}
+
+void appendRcodeCode( Execution *exec, const Code code )
+{
+	appendCode( &exec->parser->pdaRun->rcodeCollect, code );
+}
+
+void appendRcodeHalf( Execution *exec, const Half half )
+{
+	appendHalf( &exec->parser->pdaRun->rcodeCollect, half );
+}
+
+void appendRcodeWord( Execution *exec, const Word word )
+{
+	appendWord( &exec->parser->pdaRun->rcodeCollect, word );
 }
 
 Code *popReverseCode( RtCodeVect *allRev )
@@ -924,7 +945,7 @@ again:
 			vm_push( exec->parser->pdaRun->context );
 
 			/* Set up the reverse instruction. */
-			append( &exec->parser->pdaRun->rcodeCollect, IN_LOAD_CONTEXT_BKT );
+			appendCode( &exec->parser->pdaRun->rcodeCollect, IN_LOAD_CONTEXT_BKT );
 			exec->rcodeUnitLen = SIZEOF_CODE;
 			break;
 		}
@@ -958,7 +979,7 @@ again:
 			vm_push( prg->global );
 
 			/* Set up the reverse instruction. */
-			append( &exec->parser->pdaRun->rcodeCollect, IN_LOAD_GLOBAL_BKT );
+			appendCode( &exec->parser->pdaRun->rcodeCollect, IN_LOAD_GLOBAL_BKT );
 			exec->rcodeUnitLen = SIZEOF_CODE;
 			break;
 		}
@@ -994,7 +1015,7 @@ again:
 			assert( exec->parser != 0 );
 
 			/* Set up the reverse instruction. */
-			append( &exec->parser->pdaRun->rcodeCollect, IN_LOAD_PARSER_BKT );
+			appendCode( &exec->parser->pdaRun->rcodeCollect, IN_LOAD_PARSER_BKT );
 			appendWord( &exec->parser->pdaRun->rcodeCollect, (Word)exec->parser );
 			exec->rcodeUnitLen = SIZEOF_CODE + SIZEOF_WORD;
 			break;
@@ -1035,7 +1056,7 @@ again:
 			vm_push( (Tree*)exec->parser->input );
 
 			/* Set up the reverse instruction. */
-			append( &exec->parser->pdaRun->rcodeCollect, IN_LOAD_INPUT_BKT );
+			appendCode( &exec->parser->pdaRun->rcodeCollect, IN_LOAD_INPUT_BKT );
 			appendWord( &exec->parser->pdaRun->rcodeCollect, (Word)exec->parser->input );
 			exec->rcodeUnitLen = SIZEOF_CODE + SIZEOF_WORD;
 			break;
@@ -1074,7 +1095,7 @@ again:
 			vm_push( exec->parser->pdaRun->context );
 
 			/* Set up the reverse instruction. */
-			append( &exec->parser->pdaRun->rcodeCollect, IN_LOAD_PARSER_BKT );
+			appendCode( &exec->parser->pdaRun->rcodeCollect, IN_LOAD_PARSER_BKT );
 			appendWord( &exec->parser->pdaRun->rcodeCollect, (Word)exec->parser );
 			exec->rcodeUnitLen = SIZEOF_CODE + SIZEOF_WORD;
 			break;
@@ -1337,7 +1358,7 @@ again:
 			vm_push( split );
 
 			/* Set up the reverse instruction. */
-			append( &exec->parser->pdaRun->rcodeCollect, IN_GET_FIELD_BKT );
+			appendCode( &exec->parser->pdaRun->rcodeCollect, IN_GET_FIELD_BKT );
 			appendHalf( &exec->parser->pdaRun->rcodeCollect, field );
 			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_HALF;
 			break;
@@ -1388,11 +1409,11 @@ again:
 			setField( prg, obj, field, val );
 
 			/* Set up the reverse instruction. */
-			append( &exec->parser->pdaRun->rcodeCollect, IN_SET_FIELD_BKT );
+			appendCode( &exec->parser->pdaRun->rcodeCollect, IN_SET_FIELD_BKT );
 			appendHalf( &exec->parser->pdaRun->rcodeCollect, field );
 			appendWord( &exec->parser->pdaRun->rcodeCollect, (Word)prev );
 			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_HALF + SIZEOF_WORD;
-			append( &exec->parser->pdaRun->rcodeCollect, exec->rcodeUnitLen );
+			appendCode( &exec->parser->pdaRun->rcodeCollect, exec->rcodeUnitLen );
 			/* FLUSH */
 			break;
 		}
@@ -2086,11 +2107,11 @@ again:
 			treeUpref( (Tree*)accumStream );
 			vm_push( (Tree*)accumStream );
 
-			append( &exec->parser->pdaRun->rcodeCollect, IN_INPUT_APPEND_BKT );
+			appendCode( &exec->parser->pdaRun->rcodeCollect, IN_INPUT_APPEND_BKT );
 			appendWord( &exec->parser->pdaRun->rcodeCollect, (Word) accumStream );
 			appendWord( &exec->parser->pdaRun->rcodeCollect, (Word) input );
 			appendWord( &exec->parser->pdaRun->rcodeCollect, (Word) len );
-			append( &exec->parser->pdaRun->rcodeCollect, SIZEOF_CODE + 3 * SIZEOF_WORD );
+			appendCode( &exec->parser->pdaRun->rcodeCollect, SIZEOF_CODE + 3 * SIZEOF_WORD );
 			break;
 		}
 
@@ -2250,16 +2271,16 @@ again:
 			Parser *parser = (Parser*)vm_pop();
 			long steps = (long)vm_pop();
 
-			append( &exec->parser->pdaRun->rcodeCollect, IN_LOAD_WORD );
+			appendCode( &exec->parser->pdaRun->rcodeCollect, IN_LOAD_WORD );
 			appendWord( &exec->parser->pdaRun->rcodeCollect, steps );
-			append( &exec->parser->pdaRun->rcodeCollect, IN_LOAD_TREE );
+			appendCode( &exec->parser->pdaRun->rcodeCollect, IN_LOAD_TREE );
 			appendWord( &exec->parser->pdaRun->rcodeCollect, (Word)parser );
-			append( &exec->parser->pdaRun->rcodeCollect, IN_PARSE_LOAD_START );
-			append( &exec->parser->pdaRun->rcodeCollect, IN_PARSE_FRAG_BKT );
+			appendCode( &exec->parser->pdaRun->rcodeCollect, IN_PARSE_LOAD_START );
+			appendCode( &exec->parser->pdaRun->rcodeCollect, IN_PARSE_FRAG_BKT );
 			appendHalf( &exec->parser->pdaRun->rcodeCollect, 0 );
-			append( &exec->parser->pdaRun->rcodeCollect, IN_PCR_CALL );
-			append( &exec->parser->pdaRun->rcodeCollect, IN_PARSE_FRAG_BKT3 );
-			append( &exec->parser->pdaRun->rcodeCollect, 6 * SIZEOF_CODE + 2 * SIZEOF_WORD + SIZEOF_HALF );
+			appendCode( &exec->parser->pdaRun->rcodeCollect, IN_PCR_CALL );
+			appendCode( &exec->parser->pdaRun->rcodeCollect, IN_PARSE_FRAG_BKT3 );
+			appendCode( &exec->parser->pdaRun->rcodeCollect, 6 * SIZEOF_CODE + 2 * SIZEOF_WORD + SIZEOF_HALF );
 
 			if ( prg->induceExit )
 				goto out;
@@ -2369,16 +2390,16 @@ again:
 
 			vm_push( parser->result );
 
-			append( &exec->parser->pdaRun->rcodeCollect, IN_LOAD_WORD );
+			appendCode( &exec->parser->pdaRun->rcodeCollect, IN_LOAD_WORD );
 			appendWord( &exec->parser->pdaRun->rcodeCollect, steps );
-			append( &exec->parser->pdaRun->rcodeCollect, IN_LOAD_TREE );
+			appendCode( &exec->parser->pdaRun->rcodeCollect, IN_LOAD_TREE );
 			appendWord( &exec->parser->pdaRun->rcodeCollect, (Word)parser );
-			append( &exec->parser->pdaRun->rcodeCollect, IN_PARSE_LOAD_START );
-			append( &exec->parser->pdaRun->rcodeCollect, IN_PARSE_FINISH_BKT );
+			appendCode( &exec->parser->pdaRun->rcodeCollect, IN_PARSE_LOAD_START );
+			appendCode( &exec->parser->pdaRun->rcodeCollect, IN_PARSE_FINISH_BKT );
 			appendHalf( &exec->parser->pdaRun->rcodeCollect, 0 );
-			append( &exec->parser->pdaRun->rcodeCollect, IN_PCR_CALL );
-			append( &exec->parser->pdaRun->rcodeCollect, IN_PARSE_FINISH_BKT3 );
-			append( &exec->parser->pdaRun->rcodeCollect, 6 * SIZEOF_CODE + 2 * SIZEOF_WORD + SIZEOF_HALF );
+			appendCode( &exec->parser->pdaRun->rcodeCollect, IN_PCR_CALL );
+			appendCode( &exec->parser->pdaRun->rcodeCollect, IN_PARSE_FINISH_BKT3 );
+			appendCode( &exec->parser->pdaRun->rcodeCollect, 6 * SIZEOF_CODE + 2 * SIZEOF_WORD + SIZEOF_HALF );
 
 			if ( prg->induceExit )
 				goto out;
@@ -2430,10 +2451,10 @@ again:
 
 			/* Single unit. */
 			treeUpref( string );
-			append( &exec->parser->pdaRun->rcodeCollect, IN_INPUT_PULL_BKT );
+			appendCode( &exec->parser->pdaRun->rcodeCollect, IN_INPUT_PULL_BKT );
 			appendWord( &exec->parser->pdaRun->rcodeCollect, (Word) string );
 			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
-			append( &exec->parser->pdaRun->rcodeCollect, exec->rcodeUnitLen );
+			appendCode( &exec->parser->pdaRun->rcodeCollect, exec->rcodeUnitLen );
 
 			treeDownref( prg, sp, (Tree*)accumStream );
 			treeDownref( prg, sp, len );
@@ -2461,10 +2482,10 @@ again:
 			vm_push( 0 );
 
 			/* Single unit. */
-			append( &exec->parser->pdaRun->rcodeCollect, IN_INPUT_PUSH_BKT );
+			appendCode( &exec->parser->pdaRun->rcodeCollect, IN_INPUT_PUSH_BKT );
 			appendWord( &exec->parser->pdaRun->rcodeCollect, len );
 			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
-			append( &exec->parser->pdaRun->rcodeCollect, exec->rcodeUnitLen );
+			appendCode( &exec->parser->pdaRun->rcodeCollect, exec->rcodeUnitLen );
 
 			treeDownref( prg, sp, (Tree*)input );
 			treeDownref( prg, sp, tree );
@@ -2479,10 +2500,10 @@ again:
 			vm_push( 0 );
 
 			/* Single unit. */
-			append( &exec->parser->pdaRun->rcodeCollect, IN_INPUT_PUSH_BKT );
+			appendCode( &exec->parser->pdaRun->rcodeCollect, IN_INPUT_PUSH_BKT );
 			appendWord( &exec->parser->pdaRun->rcodeCollect, len );
 			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
-			append( &exec->parser->pdaRun->rcodeCollect, exec->rcodeUnitLen );
+			appendCode( &exec->parser->pdaRun->rcodeCollect, exec->rcodeUnitLen );
 
 			treeDownref( prg, sp, (Tree*)input );
 			treeDownref( prg, sp, tree );
@@ -2648,7 +2669,7 @@ again:
 			vm_push( dval );
 
 			/* This is an initial global load. Need to reverse execute it. */
-			append( &exec->parser->pdaRun->rcodeCollect, IN_PTR_DEREF_BKT );
+			appendCode( &exec->parser->pdaRun->rcodeCollect, IN_PTR_DEREF_BKT );
 			appendWord( &exec->parser->pdaRun->rcodeCollect, (Word) ptr );
 			exec->rcodeUnitLen = SIZEOF_CODE + SIZEOF_WORD;
 			break;
@@ -2768,10 +2789,10 @@ again:
 			tree->tokdata = head;
 
 			/* Set up reverse code. Needs no args. */
-			append( &exec->parser->pdaRun->rcodeCollect, IN_SET_TOKEN_DATA_BKT );
+			appendCode( &exec->parser->pdaRun->rcodeCollect, IN_SET_TOKEN_DATA_BKT );
 			appendWord( &exec->parser->pdaRun->rcodeCollect, (Word)oldval );
 			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
-			append( &exec->parser->pdaRun->rcodeCollect, exec->rcodeUnitLen );
+			appendCode( &exec->parser->pdaRun->rcodeCollect, exec->rcodeUnitLen );
 
 			treeDownref( prg, sp, tree );
 			treeDownref( prg, sp, val );
@@ -2857,9 +2878,9 @@ again:
 			vm_push( prg->trueVal );
 
 			/* Set up reverse code. Needs no args. */
-			append( &exec->parser->pdaRun->rcodeCollect, IN_LIST_APPEND_BKT );
+			appendCode( &exec->parser->pdaRun->rcodeCollect, IN_LIST_APPEND_BKT );
 			exec->rcodeUnitLen += SIZEOF_CODE;
-			append( &exec->parser->pdaRun->rcodeCollect, exec->rcodeUnitLen );
+			appendCode( &exec->parser->pdaRun->rcodeCollect, exec->rcodeUnitLen );
 			/* FLUSH */
 			break;
 		}
@@ -2908,10 +2929,10 @@ again:
 			/* Set up reverse. The result comes off the list downrefed.
 			 * Need it up referenced for the reverse code too. */
 			treeUpref( end );
-			append( &exec->parser->pdaRun->rcodeCollect, IN_LIST_REMOVE_END_BKT );
+			appendCode( &exec->parser->pdaRun->rcodeCollect, IN_LIST_REMOVE_END_BKT );
 			appendWord( &exec->parser->pdaRun->rcodeCollect, (Word)end );
 			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
-			append( &exec->parser->pdaRun->rcodeCollect, exec->rcodeUnitLen );
+			appendCode( &exec->parser->pdaRun->rcodeCollect, exec->rcodeUnitLen );
 			/* FLUSH */
 			break;
 		}
@@ -2969,7 +2990,7 @@ again:
 			vm_push( val );
 
 			/* Set up the reverse instruction. */
-			append( &exec->parser->pdaRun->rcodeCollect, IN_GET_LIST_MEM_BKT );
+			appendCode( &exec->parser->pdaRun->rcodeCollect, IN_GET_LIST_MEM_BKT );
 			appendHalf( &exec->parser->pdaRun->rcodeCollect, field );
 			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_HALF;
 			break;
@@ -3015,11 +3036,11 @@ again:
 			Tree *existing = setListMem( (List*)obj, field, val );
 
 			/* Set up the reverse instruction. */
-			append( &exec->parser->pdaRun->rcodeCollect, IN_SET_LIST_MEM_BKT );
+			appendCode( &exec->parser->pdaRun->rcodeCollect, IN_SET_LIST_MEM_BKT );
 			appendHalf( &exec->parser->pdaRun->rcodeCollect, field );
 			appendWord( &exec->parser->pdaRun->rcodeCollect, (Word)existing );
 			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_HALF + SIZEOF_WORD;
-			append( &exec->parser->pdaRun->rcodeCollect, exec->rcodeUnitLen );
+			appendCode( &exec->parser->pdaRun->rcodeCollect, exec->rcodeUnitLen );
 			/* FLUSH */
 			break;
 		}
@@ -3074,11 +3095,11 @@ again:
 
 			/* Need to upref key for storage in reverse code. */
 			treeUpref( key );
-			append( &exec->parser->pdaRun->rcodeCollect, IN_MAP_INSERT_BKT );
-			append( &exec->parser->pdaRun->rcodeCollect, inserted );
+			appendCode( &exec->parser->pdaRun->rcodeCollect, IN_MAP_INSERT_BKT );
+			appendCode( &exec->parser->pdaRun->rcodeCollect, inserted );
 			appendWord( &exec->parser->pdaRun->rcodeCollect, (Word)key );
 			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_CODE + SIZEOF_WORD;
-			append( &exec->parser->pdaRun->rcodeCollect, exec->rcodeUnitLen );
+			appendCode( &exec->parser->pdaRun->rcodeCollect, exec->rcodeUnitLen );
 
 			if ( ! inserted ) {
 				treeDownref( prg, sp, key );
@@ -3159,11 +3180,11 @@ again:
 			/* Set up the reverse instruction. */
 			treeUpref( key );
 			treeUpref( existing );
-			append( &exec->parser->pdaRun->rcodeCollect, IN_MAP_STORE_BKT );
+			appendCode( &exec->parser->pdaRun->rcodeCollect, IN_MAP_STORE_BKT );
 			appendWord( &exec->parser->pdaRun->rcodeCollect, (Word)key );
 			appendWord( &exec->parser->pdaRun->rcodeCollect, (Word)existing );
 			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD + SIZEOF_WORD;
-			append( &exec->parser->pdaRun->rcodeCollect, exec->rcodeUnitLen );
+			appendCode( &exec->parser->pdaRun->rcodeCollect, exec->rcodeUnitLen );
 			/* FLUSH */
 
 			treeDownref( prg, sp, obj );
@@ -3216,11 +3237,11 @@ again:
 			vm_push( pair.val );
 
 			/* Reverse instruction. */
-			append( &exec->parser->pdaRun->rcodeCollect, IN_MAP_REMOVE_BKT );
+			appendCode( &exec->parser->pdaRun->rcodeCollect, IN_MAP_REMOVE_BKT );
 			appendWord( &exec->parser->pdaRun->rcodeCollect, (Word)pair.key );
 			appendWord( &exec->parser->pdaRun->rcodeCollect, (Word)pair.val );
 			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD + SIZEOF_WORD;
-			append( &exec->parser->pdaRun->rcodeCollect, exec->rcodeUnitLen );
+			appendCode( &exec->parser->pdaRun->rcodeCollect, exec->rcodeUnitLen );
 
 			treeDownref( prg, sp, obj );
 			treeDownref( prg, sp, key );

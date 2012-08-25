@@ -1973,9 +1973,9 @@ case PcrReduction:
 //					treeUpref( pdaRun->redLel->tree );
 
 					/* Add the restore instruct. */
-					append( &pdaRun->rcodeCollect, IN_RESTORE_LHS );
+					appendCode( &pdaRun->rcodeCollect, IN_RESTORE_LHS );
 					appendWord( &pdaRun->rcodeCollect, (Word)pdaRun->parsed );
-					append( &pdaRun->rcodeCollect, SIZEOF_CODE + SIZEOF_WORD );
+					appendCode( &pdaRun->rcodeCollect, SIZEOF_CODE + SIZEOF_WORD );
 				}
 				else {
 					/* Not changed. Done with parsed. */
