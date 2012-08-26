@@ -2116,11 +2116,13 @@ again:
 			treeUpref( (Tree*)accumStream );
 			vm_push( (Tree*)accumStream );
 
+			rcodeUnitStart( exec );
 			rcodeCode( exec, IN_INPUT_APPEND_BKT );
 			rcodeWord( exec, (Word) accumStream );
 			rcodeWord( exec, (Word) input );
 			rcodeWord( exec, (Word) len );
-			rcodeCode( exec, SIZEOF_CODE + 3 * SIZEOF_WORD );
+			exec->rcodeUnitLen += SIZEOF_CODE + 3 * SIZEOF_WORD;
+			rcodeUnitTerm( exec );
 			break;
 		}
 
@@ -2280,6 +2282,7 @@ again:
 			Parser *parser = (Parser*)vm_pop();
 			long steps = (long)vm_pop();
 
+			rcodeUnitStart( exec );
 			rcodeCode( exec, IN_LOAD_WORD );
 			rcodeWord( exec, steps );
 			rcodeCode( exec, IN_LOAD_TREE );
@@ -2289,7 +2292,8 @@ again:
 			rcodeHalf( exec, 0 );
 			rcodeCode( exec, IN_PCR_CALL );
 			rcodeCode( exec, IN_PARSE_FRAG_BKT3 );
-			rcodeCode( exec, 6 * SIZEOF_CODE + 2 * SIZEOF_WORD + SIZEOF_HALF );
+			exec->rcodeUnitLen += 6 * SIZEOF_CODE + 2 * SIZEOF_WORD + SIZEOF_HALF;
+			rcodeUnitTerm( exec );
 
 			if ( prg->induceExit )
 				goto out;
@@ -2399,6 +2403,7 @@ again:
 
 			vm_push( parser->result );
 
+			rcodeUnitStart( exec );
 			rcodeCode( exec, IN_LOAD_WORD );
 			rcodeWord( exec, steps );
 			rcodeCode( exec, IN_LOAD_TREE );
@@ -2408,7 +2413,8 @@ again:
 			rcodeHalf( exec, 0 );
 			rcodeCode( exec, IN_PCR_CALL );
 			rcodeCode( exec, IN_PARSE_FINISH_BKT3 );
-			rcodeCode( exec, 6 * SIZEOF_CODE + 2 * SIZEOF_WORD + SIZEOF_HALF );
+			exec->rcodeUnitLen += 6 * SIZEOF_CODE + 2 * SIZEOF_WORD + SIZEOF_HALF;
+			rcodeUnitTerm( exec );
 
 			if ( prg->induceExit )
 				goto out;
