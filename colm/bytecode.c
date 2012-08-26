@@ -2154,6 +2154,9 @@ again:
 			Parser *parser = (Parser*)vm_pop();
 			long steps = parser->pdaRun->steps;
 
+			vm_push( (SW)exec->parser );
+			exec->parser = parser;
+
 			vm_push( (SW)steps );
 			vm_push( (SW)parser );
 			vm_push( (SW)PcrStart );
@@ -2170,6 +2173,9 @@ again:
 			read_word( w1 );
 			read_tree( tree );
 			read_word( w2 );
+
+			vm_push( (SW)exec->parser );
+			exec->parser = (Parser*)tree;
 
 			vm_push( (SW)w1 );
 			vm_push( tree );
@@ -2188,16 +2194,18 @@ again:
 			vm_push( (SW)parser );
 			vm_push( (SW)pcr );
 
-			vm_push( (SW)exec->parser );
 			vm_push( (SW)exec->framePtr );
 			vm_push( (SW)exec->iframePtr );
 			vm_push( (SW)exec->frameId );
 
+			/* Return location one instruction back. Depends on the size of of the frag/finish. */
 			Code *returnTo = instr - ( SIZEOF_CODE + SIZEOF_CODE + SIZEOF_HALF );
 			vm_push( (SW)returnTo );
 
-			memset( exec, 0, sizeof(Execution) );
-			exec->parser = parser;
+			exec->framePtr = 0;
+			exec->iframePtr = 0;
+			exec->frameId = 0;
+
 			exec->frameId = parser->pdaRun->frameId;
 
 			instr = parser->pdaRun->code;
@@ -2215,7 +2223,6 @@ again:
 			exec->frameId = ( long ) vm_pop();
 			exec->iframePtr = ( Tree ** ) vm_pop();
 			exec->framePtr = ( Tree ** ) vm_pop();
-			exec->parser = ( Parser * ) vm_pop();
 
 			if ( instr == 0 ) {
 				fflush( stdout );
@@ -2260,6 +2267,8 @@ again:
 			Parser *parser = (Parser*)vm_pop();
 			vm_pop_ignore();
 
+			exec->parser = (Parser*) vm_pop();
+
 			treeDownref( prg, sp, (Tree*)parser );
 
 			if ( prg->induceExit )
@@ -2297,6 +2306,8 @@ again:
 			vm_pop_ignore();
 			Parser *parser = (Parser*)vm_pop();
 			long steps = (long)vm_pop();
+
+			exec->parser = (Parser*)vm_pop();
 
 			rcodeUnitStart( exec );
 			rcodeCode( exec, IN_PARSE_INIT_BKT );
@@ -2342,6 +2353,8 @@ again:
 			Parser *parser = (Parser*)vm_pop();
 			vm_pop_ignore();
 
+			exec->parser = (Parser*)vm_pop();
+
 			treeDownref( prg, sp, (Tree*)parser );
 			break;
 		}
@@ -2376,6 +2389,8 @@ again:
 			vm_pop_ignore();
 			Parser *parser = (Parser*)vm_pop();
 			vm_pop_ignore();
+
+			exec->parser = (Parser*)vm_pop();
 
 			vm_push( parser->result );
 			treeDownref( prg, sp, (Tree*)parser );
@@ -2413,6 +2428,8 @@ again:
 			vm_pop_ignore();
 			Parser *parser = (Parser*)vm_pop();
 			long steps = (long)vm_pop();
+
+			exec->parser = (Parser *) vm_pop();
 
 			vm_push( parser->result );
 
@@ -2460,6 +2477,8 @@ again:
 			vm_pop_ignore();
 			Parser *parser = (Parser*)vm_pop();
 			vm_pop_ignore();
+
+			exec->parser = (Parser*)vm_pop();
 
 			unsetEof( parser->input->in );
 			treeDownref( prg, sp, (Tree*)parser );
