@@ -782,16 +782,19 @@ void rcodeUnitStart( Execution *exec )
 void rcodeCode( Execution *exec, const Code code )
 {
 	appendCode( &exec->parser->pdaRun->rcodeCollect, code );
+	exec->rcodeUnitLen += SIZEOF_CODE;
 }
 
 void rcodeHalf( Execution *exec, const Half half )
 {
 	appendHalf( &exec->parser->pdaRun->rcodeCollect, half );
+	exec->rcodeUnitLen += SIZEOF_HALF;
 }
 
 void rcodeWord( Execution *exec, const Word word )
 {
 	appendWord( &exec->parser->pdaRun->rcodeCollect, word );
+	exec->rcodeUnitLen += SIZEOF_WORD;
 }
 
 Code *popReverseCode( RtCodeVect *allRev )
@@ -952,7 +955,6 @@ again:
 			/* Set up the reverse instruction. */
 			rcodeUnitStart( exec );
 			rcodeCode( exec, IN_LOAD_CONTEXT_BKT );
-			exec->rcodeUnitLen += SIZEOF_CODE;
 			break;
 		}
 		case IN_LOAD_CONTEXT_WC: {
@@ -987,7 +989,6 @@ again:
 			/* Set up the reverse instruction. */
 			rcodeUnitStart( exec );
 			rcodeCode( exec, IN_LOAD_GLOBAL_BKT );
-			exec->rcodeUnitLen += SIZEOF_CODE;
 			break;
 		}
 		case IN_LOAD_GLOBAL_WC: {
@@ -1025,7 +1026,6 @@ again:
 			rcodeUnitStart( exec );
 			rcodeCode( exec, IN_LOAD_PARSER_BKT );
 			rcodeWord( exec, (Word)exec->parser );
-			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
 			break;
 		}
 		case IN_LOAD_PARSER_WC: {
@@ -1067,7 +1067,6 @@ again:
 			rcodeUnitStart( exec );
 			rcodeCode( exec, IN_LOAD_INPUT_BKT );
 			rcodeWord( exec, (Word)exec->parser->input );
-			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
 			break;
 		}
 		case IN_LOAD_INPUT_WC: {
@@ -1107,7 +1106,6 @@ again:
 			rcodeUnitStart( exec );
 			rcodeCode( exec, IN_LOAD_PARSER_BKT );
 			rcodeWord( exec, (Word)exec->parser );
-			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
 			break;
 		}
 		case IN_LOAD_CTX_WC: {
@@ -1370,7 +1368,6 @@ again:
 			/* Set up the reverse instruction. */
 			rcodeCode( exec, IN_GET_FIELD_BKT );
 			rcodeHalf( exec, field );
-			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_HALF;
 			break;
 		}
 		case IN_GET_FIELD_BKT: {
@@ -1422,7 +1419,6 @@ again:
 			rcodeCode( exec, IN_SET_FIELD_BKT );
 			rcodeHalf( exec, field );
 			rcodeWord( exec, (Word)prev );
-			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_HALF + SIZEOF_WORD;
 			rcodeUnitTerm( exec );
 			break;
 		}
@@ -2121,7 +2117,6 @@ again:
 			rcodeWord( exec, (Word) accumStream );
 			rcodeWord( exec, (Word) input );
 			rcodeWord( exec, (Word) len );
-			exec->rcodeUnitLen += SIZEOF_CODE + 3 * SIZEOF_WORD;
 			rcodeUnitTerm( exec );
 			break;
 		}
@@ -2292,7 +2287,6 @@ again:
 			rcodeHalf( exec, 0 );
 			rcodeCode( exec, IN_PCR_CALL );
 			rcodeCode( exec, IN_PARSE_FRAG_BKT3 );
-			exec->rcodeUnitLen += 6 * SIZEOF_CODE + 2 * SIZEOF_WORD + SIZEOF_HALF;
 			rcodeUnitTerm( exec );
 
 			if ( prg->induceExit )
@@ -2413,7 +2407,6 @@ again:
 			rcodeHalf( exec, 0 );
 			rcodeCode( exec, IN_PCR_CALL );
 			rcodeCode( exec, IN_PARSE_FINISH_BKT3 );
-			exec->rcodeUnitLen += 6 * SIZEOF_CODE + 2 * SIZEOF_WORD + SIZEOF_HALF;
 			rcodeUnitTerm( exec );
 
 			if ( prg->induceExit )
@@ -2468,7 +2461,6 @@ again:
 			treeUpref( string );
 			rcodeCode( exec, IN_INPUT_PULL_BKT );
 			rcodeWord( exec, (Word) string );
-			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
 			rcodeUnitTerm( exec );
 
 			treeDownref( prg, sp, (Tree*)accumStream );
@@ -2499,7 +2491,6 @@ again:
 			/* Single unit. */
 			rcodeCode( exec, IN_INPUT_PUSH_BKT );
 			rcodeWord( exec, len );
-			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
 			rcodeUnitTerm( exec );
 
 			treeDownref( prg, sp, (Tree*)input );
@@ -2517,7 +2508,6 @@ again:
 			/* Single unit. */
 			rcodeCode( exec, IN_INPUT_PUSH_BKT );
 			rcodeWord( exec, len );
-			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
 			rcodeUnitTerm( exec );
 
 			treeDownref( prg, sp, (Tree*)input );
@@ -2687,7 +2677,6 @@ again:
 			rcodeUnitStart( exec );
 			rcodeCode( exec, IN_PTR_DEREF_BKT );
 			rcodeWord( exec, (Word) ptr );
-			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
 			break;
 		}
 		case IN_PTR_DEREF_BKT: {
@@ -2807,7 +2796,6 @@ again:
 			/* Set up reverse code. Needs no args. */
 			rcodeCode( exec, IN_SET_TOKEN_DATA_BKT );
 			rcodeWord( exec, (Word)oldval );
-			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
 			rcodeUnitTerm( exec );
 
 			treeDownref( prg, sp, tree );
@@ -2895,7 +2883,6 @@ again:
 
 			/* Set up reverse code. Needs no args. */
 			rcodeCode( exec, IN_LIST_APPEND_BKT );
-			exec->rcodeUnitLen += SIZEOF_CODE;
 			rcodeUnitTerm( exec );
 			break;
 		}
@@ -2946,7 +2933,6 @@ again:
 			treeUpref( end );
 			rcodeCode( exec, IN_LIST_REMOVE_END_BKT );
 			rcodeWord( exec, (Word)end );
-			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
 			rcodeUnitTerm( exec );
 			break;
 		}
@@ -3006,7 +2992,6 @@ again:
 			/* Set up the reverse instruction. */
 			rcodeCode( exec, IN_GET_LIST_MEM_BKT );
 			rcodeHalf( exec, field );
-			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_HALF;
 			break;
 		}
 		case IN_GET_LIST_MEM_BKT: {
@@ -3053,7 +3038,6 @@ again:
 			rcodeCode( exec, IN_SET_LIST_MEM_BKT );
 			rcodeHalf( exec, field );
 			rcodeWord( exec, (Word)existing );
-			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_HALF + SIZEOF_WORD;
 			rcodeUnitTerm( exec );
 			break;
 		}
@@ -3111,7 +3095,6 @@ again:
 			rcodeCode( exec, IN_MAP_INSERT_BKT );
 			rcodeCode( exec, inserted );
 			rcodeWord( exec, (Word)key );
-			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_CODE + SIZEOF_WORD;
 			rcodeUnitTerm( exec );
 
 			if ( ! inserted ) {
@@ -3196,7 +3179,6 @@ again:
 			rcodeCode( exec, IN_MAP_STORE_BKT );
 			rcodeWord( exec, (Word)key );
 			rcodeWord( exec, (Word)existing );
-			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD + SIZEOF_WORD;
 			rcodeUnitTerm( exec );
 
 			treeDownref( prg, sp, obj );
@@ -3252,7 +3234,6 @@ again:
 			rcodeCode( exec, IN_MAP_REMOVE_BKT );
 			rcodeWord( exec, (Word)pair.key );
 			rcodeWord( exec, (Word)pair.val );
-			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD + SIZEOF_WORD;
 			rcodeUnitTerm( exec );
 
 			treeDownref( prg, sp, obj );
