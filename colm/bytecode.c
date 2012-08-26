@@ -774,6 +774,11 @@ void rcodeUnitTerm( Execution *exec )
 	exec->rcodeUnitLen = 0;
 }
 
+void rcodeUnitStart( Execution *exec )
+{
+	exec->rcodeUnitLen = 0;
+}
+
 void rcodeCode( Execution *exec, const Code code )
 {
 	appendCode( &exec->parser->pdaRun->rcodeCollect, code );
@@ -945,8 +950,9 @@ again:
 			vm_push( exec->parser->pdaRun->context );
 
 			/* Set up the reverse instruction. */
+			rcodeUnitStart( exec );
 			rcodeCode( exec, IN_LOAD_CONTEXT_BKT );
-			exec->rcodeUnitLen = SIZEOF_CODE;
+			exec->rcodeUnitLen += SIZEOF_CODE;
 			break;
 		}
 		case IN_LOAD_CONTEXT_WC: {
@@ -979,8 +985,9 @@ again:
 			vm_push( prg->global );
 
 			/* Set up the reverse instruction. */
+			rcodeUnitStart( exec );
 			rcodeCode( exec, IN_LOAD_GLOBAL_BKT );
-			exec->rcodeUnitLen = SIZEOF_CODE;
+			exec->rcodeUnitLen += SIZEOF_CODE;
 			break;
 		}
 		case IN_LOAD_GLOBAL_WC: {
@@ -1015,9 +1022,10 @@ again:
 			assert( exec->parser != 0 );
 
 			/* Set up the reverse instruction. */
+			rcodeUnitStart( exec );
 			rcodeCode( exec, IN_LOAD_PARSER_BKT );
 			rcodeWord( exec, (Word)exec->parser );
-			exec->rcodeUnitLen = SIZEOF_CODE + SIZEOF_WORD;
+			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
 			break;
 		}
 		case IN_LOAD_PARSER_WC: {
@@ -1056,9 +1064,10 @@ again:
 			vm_push( (Tree*)exec->parser->input );
 
 			/* Set up the reverse instruction. */
+			rcodeUnitStart( exec );
 			rcodeCode( exec, IN_LOAD_INPUT_BKT );
 			rcodeWord( exec, (Word)exec->parser->input );
-			exec->rcodeUnitLen = SIZEOF_CODE + SIZEOF_WORD;
+			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
 			break;
 		}
 		case IN_LOAD_INPUT_WC: {
@@ -1095,9 +1104,10 @@ again:
 			vm_push( exec->parser->pdaRun->context );
 
 			/* Set up the reverse instruction. */
+			rcodeUnitStart( exec );
 			rcodeCode( exec, IN_LOAD_PARSER_BKT );
 			rcodeWord( exec, (Word)exec->parser );
-			exec->rcodeUnitLen = SIZEOF_CODE + SIZEOF_WORD;
+			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
 			break;
 		}
 		case IN_LOAD_CTX_WC: {
@@ -2668,9 +2678,10 @@ again:
 			vm_push( dval );
 
 			/* This is an initial global load. Need to reverse execute it. */
+			rcodeUnitStart( exec );
 			rcodeCode( exec, IN_PTR_DEREF_BKT );
 			rcodeWord( exec, (Word) ptr );
-			exec->rcodeUnitLen = SIZEOF_CODE + SIZEOF_WORD;
+			exec->rcodeUnitLen += SIZEOF_CODE + SIZEOF_WORD;
 			break;
 		}
 		case IN_PTR_DEREF_BKT: {
