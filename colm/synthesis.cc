@@ -1080,7 +1080,7 @@ void LangVarRef::callOperation( Compiler *pd, CodeVect &code, VarRefLookup &look
 			code.append( IN_PARSE_FINISH_WV );
 			code.appendHalf( 0 );
 			code.append( IN_PCR_CALL );
-			code.append( IN_PARSE_FINISH_WV3 );
+			code.append( IN_PARSE_FINISH_EXIT_WV );
 		}
 		else {
 			code.append( lookup.objMethod->opcodeWV );
@@ -1093,7 +1093,7 @@ void LangVarRef::callOperation( Compiler *pd, CodeVect &code, VarRefLookup &look
 			code.append( IN_PARSE_FINISH_WC );
 			code.appendHalf( 0 );
 			code.append( IN_PCR_CALL );
-			code.append( IN_PARSE_FINISH_WC3 );
+			code.append( IN_PARSE_FINISH_EXIT_WC );
 		}
 		else {
 			code.append( lookup.objMethod->opcodeWC );
@@ -1298,7 +1298,7 @@ void LangTerm::parseFrag( Compiler *pd, CodeVect &code, int stopId ) const
 		code.append( IN_PARSE_FRAG_WV );
 		code.appendHalf( stopId );
 		code.append( IN_PCR_CALL );
-		code.append( IN_PARSE_FRAG_WV3 );
+		code.append( IN_PARSE_FRAG_EXIT_WV );
 	}
 	else {
 		code.append( IN_PARSE_SAVE_STEPS );
@@ -1306,7 +1306,7 @@ void LangTerm::parseFrag( Compiler *pd, CodeVect &code, int stopId ) const
 		code.append( IN_PARSE_FRAG_WC );
 		code.appendHalf( stopId );
 		code.append( IN_PCR_CALL );
-		code.append( IN_PARSE_FRAG_WC3 );
+		code.append( IN_PARSE_FRAG_EXIT_WC );
 	}
 }
 
@@ -1486,7 +1486,7 @@ finish:
 		code.append( IN_PARSE_FINISH_WV );
 		code.appendHalf( stopId );
 		code.append( IN_PCR_CALL );
-		code.append( IN_PARSE_FINISH_WV3 );
+		code.append( IN_PARSE_FINISH_EXIT_WV );
 	}
 	else {
 		/* Finish immediately. */
@@ -1495,7 +1495,7 @@ finish:
 		code.append( IN_PARSE_FINISH_WC );
 		code.appendHalf( stopId );
 		code.append( IN_PCR_CALL );
-		code.append( IN_PARSE_FINISH_WC3 );
+		code.append( IN_PARSE_FINISH_EXIT_WC );
 	}
 
 	code.append( IN_POP );

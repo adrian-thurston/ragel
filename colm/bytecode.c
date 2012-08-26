@@ -506,8 +506,8 @@ again:
 			debug( REALM_BYTECODE, "IN_PARSE_FRAG_BKT\n" );
 			break;
 		}
-		case IN_PARSE_FRAG_BKT3: {
-			debug( REALM_BYTECODE, "IN_PARSE_FRAG_BKT3\n" );
+		case IN_PARSE_FRAG_EXIT_BKT: {
+			debug( REALM_BYTECODE, "IN_PARSE_FRAG_EXIT_BKT\n" );
 			break;
 		}
 		case IN_PARSE_FINISH_BKT: {
@@ -516,8 +516,8 @@ again:
 			debug( REALM_BYTECODE, "IN_PARSE_FINISH_BKT\n" );
 			break;
 		}
-		case IN_PARSE_FINISH_BKT3: {
-			debug( REALM_BYTECODE, "IN_PARSE_FINISH_BKT3\n" );
+		case IN_PARSE_FINISH_EXIT_BKT: {
+			debug( REALM_BYTECODE, "IN_PARSE_FINISH_EXIT_BKT\n" );
 			break;
 		}
 		case IN_PCR_CALL: {
@@ -2230,8 +2230,8 @@ again:
 			break;
 		}
 
-		case IN_PARSE_FRAG_WC3: {
-			debug( REALM_BYTECODE, "IN_PARSE_FRAG_WC3\n" );
+		case IN_PARSE_FRAG_EXIT_WC: {
+			debug( REALM_BYTECODE, "IN_PARSE_FRAG_EXIT_WC\n" );
 
 			vm_pop_ignore();
 			Parser *parser = (Parser*)vm_pop();
@@ -2268,8 +2268,8 @@ again:
 			break;
 		}
 
-		case IN_PARSE_FRAG_WV3: {
-			debug( REALM_BYTECODE, "IN_PARSE_FRAG_WV3 \n" );
+		case IN_PARSE_FRAG_EXIT_WV: {
+			debug( REALM_BYTECODE, "IN_PARSE_FRAG_EXIT_WV \n" );
 
 			vm_pop_ignore();
 			Parser *parser = (Parser*)vm_pop();
@@ -2284,7 +2284,7 @@ again:
 			rcodeCode( exec, IN_PARSE_FRAG_BKT );
 			rcodeHalf( exec, 0 );
 			rcodeCode( exec, IN_PCR_CALL );
-			rcodeCode( exec, IN_PARSE_FRAG_BKT3 );
+			rcodeCode( exec, IN_PARSE_FRAG_EXIT_BKT );
 			rcodeUnitTerm( exec );
 
 			if ( prg->induceExit )
@@ -2313,8 +2313,8 @@ again:
 			break;
 		}
 
-		case IN_PARSE_FRAG_BKT3: {
-			debug( REALM_BYTECODE, "IN_PARSE_FRAG_BKT3\n" );
+		case IN_PARSE_FRAG_EXIT_BKT: {
+			debug( REALM_BYTECODE, "IN_PARSE_FRAG_EXIT_BKT\n" );
 
 			vm_pop_ignore();
 			Parser *parser = (Parser*)vm_pop();
@@ -2348,8 +2348,8 @@ again:
 			break;
 		}
 
-		case IN_PARSE_FINISH_WC3: {
-			debug( REALM_BYTECODE, "IN_PARSE_FINISH_WC3\n" );
+		case IN_PARSE_FINISH_EXIT_WC: {
+			debug( REALM_BYTECODE, "IN_PARSE_FINISH_EXIT_WC\n" );
 
 			vm_pop_ignore();
 			Parser *parser = (Parser*)vm_pop();
@@ -2386,8 +2386,8 @@ again:
 			break;
 		}
 
-		case IN_PARSE_FINISH_WV3: {
-			debug( REALM_BYTECODE, "IN_PARSE_FINISH_WV3\n" );
+		case IN_PARSE_FINISH_EXIT_WV: {
+			debug( REALM_BYTECODE, "IN_PARSE_FINISH_EXIT_WV\n" );
 
 			vm_pop_ignore();
 			Parser *parser = (Parser*)vm_pop();
@@ -2404,7 +2404,7 @@ again:
 			rcodeCode( exec, IN_PARSE_FINISH_BKT );
 			rcodeHalf( exec, 0 );
 			rcodeCode( exec, IN_PCR_CALL );
-			rcodeCode( exec, IN_PARSE_FINISH_BKT3 );
+			rcodeCode( exec, IN_PARSE_FINISH_EXIT_BKT );
 			rcodeUnitTerm( exec );
 
 			if ( prg->induceExit )
@@ -2434,8 +2434,8 @@ again:
 			break;
 		}
 
-		case IN_PARSE_FINISH_BKT3: {
-			debug( REALM_BYTECODE, "IN_PARSE_FINISH_BKT3\n" );
+		case IN_PARSE_FINISH_EXIT_BKT: {
+			debug( REALM_BYTECODE, "IN_PARSE_FINISH_EXIT_BKT\n" );
 
 			vm_pop_ignore();
 			Parser *parser = (Parser*)vm_pop();

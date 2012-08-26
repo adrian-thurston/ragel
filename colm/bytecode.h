@@ -228,26 +228,26 @@ typedef unsigned char uchar;
 #define IN_PARSE_LOAD_START      0xa0
 #define IN_PARSE_SAVE_STEPS      0xa1
 #define IN_PARSE_FRAG_WC         0xa2
-#define IN_PARSE_FRAG_WC3        0xa3
+#define IN_PARSE_FRAG_EXIT_WC    0xa3
 
 #define IN_PARSE_FRAG_WV         0xa4
-#define IN_PARSE_FRAG_WV3        0xa5
+#define IN_PARSE_FRAG_EXIT_WV    0xa5
 
 #define IN_PARSE_FRAG_BKT        0xa6
-#define IN_PARSE_FRAG_BKT3       0xa7
+#define IN_PARSE_FRAG_EXIT_BKT   0xa7
 
 #define IN_INPUT_APPEND_WC       0xa8
 #define IN_INPUT_APPEND_WV       0xa9
 #define IN_INPUT_APPEND_BKT      0xaa
 
 #define IN_PARSE_FINISH_WC       0xab
-#define IN_PARSE_FINISH_WC3      0xac
+#define IN_PARSE_FINISH_EXIT_WC  0xac
 
 #define IN_PARSE_FINISH_WV       0xad
-#define IN_PARSE_FINISH_WV3      0xae
+#define IN_PARSE_FINISH_EXIT_WV  0xae
 
 #define IN_PARSE_FINISH_BKT      0xaf
-#define IN_PARSE_FINISH_BKT3     0xb0
+#define IN_PARSE_FINISH_EXIT_BKT 0xb0
 
 #define IN_PCR_CALL              0xb1
 #define IN_PCR_RET               0xb2
