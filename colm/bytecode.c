@@ -471,10 +471,6 @@ void rcodeDownref( Program *prg, Tree **sp, Code *instr )
 {
 again:
 	switch ( *instr++ ) {
-		case IN_PARSE_LOAD_START: {
-			debug( REALM_BYTECODE, "IN_PARSE_LOAD_START\n" );
-			break;
-		}
 		case IN_PARSE_SAVE_STEPS: {
 			debug( REALM_BYTECODE, "IN_PARSE_SAVE_STEPS\n" );
 			break;
@@ -2137,12 +2133,6 @@ again:
 			break;
 		}
 
-		case IN_PARSE_LOAD_START: {
-			debug( REALM_BYTECODE, "IN_PARSE_LOAD_START\n" );
-			vm_push( (SW) PcrStart );
-			break;
-		}
-
 		case IN_PARSE_SAVE_STEPS: {
 			debug( REALM_BYTECODE, "IN_PARSE_SAVE_STEPS\n" );
 
@@ -2151,6 +2141,7 @@ again:
 
 			vm_push( (SW)steps );
 			vm_push( (SW)parser );
+			vm_push( (SW)PcrStart );
 			break;
 		}
 
@@ -2280,7 +2271,8 @@ again:
 			rcodeWord( exec, steps );
 			rcodeCode( exec, IN_LOAD_TREE );
 			rcodeWord( exec, (Word)parser );
-			rcodeCode( exec, IN_PARSE_LOAD_START );
+			rcodeCode( exec, IN_LOAD_WORD );
+			rcodeWord( exec, (Word)PcrStart );
 			rcodeCode( exec, IN_PARSE_FRAG_BKT );
 			rcodeHalf( exec, 0 );
 			rcodeCode( exec, IN_PCR_CALL );
@@ -2356,7 +2348,6 @@ again:
 			vm_pop_ignore();
 
 			vm_push( parser->result );
-			debug( REALM_BYTECODE, "parser refs: %d\n", parser->refs );
 			treeDownref( prg, sp, (Tree*)parser );
 			if ( prg->induceExit )
 				goto out;
@@ -2400,7 +2391,8 @@ again:
 			rcodeWord( exec, steps );
 			rcodeCode( exec, IN_LOAD_TREE );
 			rcodeWord( exec, (Word)parser );
-			rcodeCode( exec, IN_PARSE_LOAD_START );
+			rcodeCode( exec, IN_LOAD_WORD );
+			rcodeWord( exec, (Word)PcrStart );
 			rcodeCode( exec, IN_PARSE_FINISH_BKT );
 			rcodeHalf( exec, 0 );
 			rcodeCode( exec, IN_PCR_CALL );

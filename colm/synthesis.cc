@@ -1076,7 +1076,6 @@ void LangVarRef::callOperation( Compiler *pd, CodeVect &code, VarRefLookup &look
 	if ( pd->revertOn && revert )  {
 		if ( lookup.objMethod->opcodeWV == IN_PARSE_FINISH_WV ) {
 			code.append( IN_PARSE_SAVE_STEPS );
-			code.append( IN_PARSE_LOAD_START );
 			code.append( IN_PARSE_FINISH_WV );
 			code.appendHalf( 0 );
 			code.append( IN_PCR_CALL );
@@ -1089,7 +1088,6 @@ void LangVarRef::callOperation( Compiler *pd, CodeVect &code, VarRefLookup &look
 	else {
 		if ( lookup.objMethod->opcodeWC == IN_PARSE_FINISH_WC ) {
 			code.append( IN_PARSE_SAVE_STEPS );
-			code.append( IN_PARSE_LOAD_START );
 			code.append( IN_PARSE_FINISH_WC );
 			code.appendHalf( 0 );
 			code.append( IN_PCR_CALL );
@@ -1294,7 +1292,6 @@ void LangTerm::parseFrag( Compiler *pd, CodeVect &code, int stopId ) const
 	 * revert or commit code. */
 	if ( pd->revertOn ) {
 		code.append( IN_PARSE_SAVE_STEPS );
-		code.append( IN_PARSE_LOAD_START );
 		code.append( IN_PARSE_FRAG_WV );
 		code.appendHalf( stopId );
 		code.append( IN_PCR_CALL );
@@ -1302,7 +1299,6 @@ void LangTerm::parseFrag( Compiler *pd, CodeVect &code, int stopId ) const
 	}
 	else {
 		code.append( IN_PARSE_SAVE_STEPS );
-		code.append( IN_PARSE_LOAD_START );
 		code.append( IN_PARSE_FRAG_WC );
 		code.appendHalf( stopId );
 		code.append( IN_PCR_CALL );
@@ -1482,7 +1478,6 @@ finish:
 	if ( pd->revertOn ) {
 		/* Finish immediately. */
 		code.append( IN_PARSE_SAVE_STEPS );
-		code.append( IN_PARSE_LOAD_START );
 		code.append( IN_PARSE_FINISH_WV );
 		code.appendHalf( stopId );
 		code.append( IN_PCR_CALL );
@@ -1491,7 +1486,6 @@ finish:
 	else {
 		/* Finish immediately. */
 		code.append( IN_PARSE_SAVE_STEPS );
-		code.append( IN_PARSE_LOAD_START );
 		code.append( IN_PARSE_FINISH_WC );
 		code.appendHalf( stopId );
 		code.append( IN_PCR_CALL );
