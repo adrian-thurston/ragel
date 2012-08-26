@@ -2158,7 +2158,6 @@ again:
 			exec->parser = parser;
 
 			vm_push( (SW)steps );
-			vm_push( (SW)parser );
 			vm_push( (SW)PcrStart );
 			break;
 		}
@@ -2178,7 +2177,6 @@ again:
 			exec->parser = (Parser*)tree;
 
 			vm_push( (SW)w1 );
-			vm_push( tree );
 			vm_push( (SW)w2 );
 			break;
 		}
@@ -2187,11 +2185,9 @@ again:
 			debug( REALM_BYTECODE, "IN_PCR_CALL\n" );
 
 			long pcr = (long)vm_pop();
-			Parser *parser = (Parser*)vm_pop();
 			long steps = (long)vm_pop();
 
 			vm_push( (SW)steps );
-			vm_push( (SW)parser );
 			vm_push( (SW)pcr );
 
 			vm_push( (SW)exec->framePtr );
@@ -2206,9 +2202,9 @@ again:
 			exec->iframePtr = 0;
 			exec->frameId = 0;
 
-			exec->frameId = parser->pdaRun->frameId;
+			exec->frameId = exec->parser->pdaRun->frameId;
 
-			instr = parser->pdaRun->code;
+			instr = exec->parser->pdaRun->code;
 			break;
 		}
 
@@ -2244,13 +2240,11 @@ again:
 			debug( REALM_BYTECODE, "IN_PARSE_FRAG_WC %hd\n", stopId );
 
 			long pcr = (long)vm_pop();
-			Parser *parser = (Parser*)vm_pop();
 			long steps = (long)vm_pop();
 
-			pcr = parseFrag( prg, sp, parser, stopId, pcr );
+			pcr = parseFrag( prg, sp, exec->parser, stopId, pcr );
 
 			vm_push( (SW)steps );
-			vm_push( (SW)parser );
 			vm_push( (SW)pcr );
 
 			/* If done, jump to the terminating instruction, otherwise fall
@@ -2264,9 +2258,9 @@ again:
 			debug( REALM_BYTECODE, "IN_PARSE_FRAG_EXIT_WC\n" );
 
 			vm_pop_ignore();
-			Parser *parser = (Parser*)vm_pop();
 			vm_pop_ignore();
 
+			Parser *parser = exec->parser;
 			exec->parser = (Parser*) vm_pop();
 
 			treeDownref( prg, sp, (Tree*)parser );
@@ -2284,13 +2278,11 @@ again:
 			debug( REALM_BYTECODE, "IN_PARSE_FRAG_WV %hd\n", stopId );
 
 			long pcr = (long)vm_pop();
-			Parser *parser = (Parser*)vm_pop();
 			long steps = (long)vm_pop();
 
-			pcr = parseFrag( prg, sp, parser, stopId, pcr );
+			pcr = parseFrag( prg, sp, exec->parser, stopId, pcr );
 
 			vm_push( (SW)steps );
-			vm_push( (SW)parser );
 			vm_push( (SW)pcr );
 
 			/* If done, jump to the terminating instruction, otherwise fall
@@ -2304,9 +2296,9 @@ again:
 			debug( REALM_BYTECODE, "IN_PARSE_FRAG_EXIT_WV \n" );
 
 			vm_pop_ignore();
-			Parser *parser = (Parser*)vm_pop();
 			long steps = (long)vm_pop();
 
+			Parser *parser = exec->parser;
 			exec->parser = (Parser*)vm_pop();
 
 			rcodeUnitStart( exec );
@@ -2332,13 +2324,11 @@ again:
 			debug( REALM_BYTECODE, "IN_PARSE_FRAG_BKT %hd\n", stopId );
 
 			long pcr = (long)vm_pop();
-			Parser *parser = (Parser*)vm_pop();
 			long steps = (long)vm_pop();
 
-			pcr = undoParseFrag( prg, sp, parser, steps, pcr );
+			pcr = undoParseFrag( prg, sp, exec->parser, steps, pcr );
 
 			vm_push( (SW)steps );
-			vm_push( (SW)parser );
 			vm_push( (SW)pcr );
 
 			if ( pcr == PcrDone )
@@ -2350,9 +2340,9 @@ again:
 			debug( REALM_BYTECODE, "IN_PARSE_FRAG_EXIT_BKT\n" );
 
 			vm_pop_ignore();
-			Parser *parser = (Parser*)vm_pop();
 			vm_pop_ignore();
 
+			Parser *parser = exec->parser;
 			exec->parser = (Parser*)vm_pop();
 
 			treeDownref( prg, sp, (Tree*)parser );
@@ -2366,14 +2356,12 @@ again:
 			debug( REALM_BYTECODE, "IN_PARSE_FINISH_WC %hd\n", stopId );
 
 			long pcr = (long)vm_pop();
-			Parser *parser = (Parser*)vm_pop();
 			long steps = (long)vm_pop();
 
-			parser->result = 0;
-			pcr = parseFinish( &parser->result, prg, sp, parser, false, pcr );
+			exec->parser->result = 0;
+			pcr = parseFinish( &exec->parser->result, prg, sp, exec->parser, false, pcr );
 
 			vm_push( (SW)steps );
-			vm_push( (SW)parser );
 			vm_push( (SW)pcr );
 
 			/* If done, jump to the terminating instruction, otherwise fall
@@ -2387,9 +2375,9 @@ again:
 			debug( REALM_BYTECODE, "IN_PARSE_FINISH_EXIT_WC\n" );
 
 			vm_pop_ignore();
-			Parser *parser = (Parser*)vm_pop();
 			vm_pop_ignore();
 
+			Parser *parser = exec->parser;
 			exec->parser = (Parser*)vm_pop();
 
 			vm_push( parser->result );
@@ -2407,14 +2395,12 @@ again:
 			debug( REALM_BYTECODE, "IN_PARSE_FINISH_WV %hd\n", stopId );
 
 			long pcr = (long)vm_pop();
-			Parser *parser = (Parser*)vm_pop();
 			long steps = (long)vm_pop();
 
-			parser->result = 0;
-			pcr = parseFinish( &parser->result, prg, sp, parser, true, pcr );
+			exec->parser->result = 0;
+			pcr = parseFinish( &exec->parser->result, prg, sp, exec->parser, true, pcr );
 
 			vm_push( (SW)steps );
-			vm_push( (SW)parser );
 			vm_push( (SW)pcr );
 
 			if ( pcr == PcrDone )
@@ -2426,9 +2412,9 @@ again:
 			debug( REALM_BYTECODE, "IN_PARSE_FINISH_EXIT_WV\n" );
 
 			vm_pop_ignore();
-			Parser *parser = (Parser*)vm_pop();
 			long steps = (long)vm_pop();
 
+			Parser *parser = exec->parser;
 			exec->parser = (Parser *) vm_pop();
 
 			vm_push( parser->result );
@@ -2457,13 +2443,11 @@ again:
 			debug( REALM_BYTECODE, "IN_PARSE_FINISH_BKT %hd\n", stopId );
 
 			long pcr = (long)vm_pop();
-			Parser *parser = (Parser*)vm_pop();
 			long steps = (long)vm_pop();
 
-			pcr = undoParseFrag( prg, sp, parser, steps, pcr );
+			pcr = undoParseFrag( prg, sp, exec->parser, steps, pcr );
 
 			vm_push( (SW)steps );
-			vm_push( (SW)parser );
 			vm_push( (SW)pcr );
 
 			if ( pcr == PcrDone )
@@ -2475,9 +2459,9 @@ again:
 			debug( REALM_BYTECODE, "IN_PARSE_FINISH_EXIT_BKT\n" );
 
 			vm_pop_ignore();
-			Parser *parser = (Parser*)vm_pop();
 			vm_pop_ignore();
 
+			Parser *parser = exec->parser;
 			exec->parser = (Parser*)vm_pop();
 
 			unsetEof( parser->input->in );
