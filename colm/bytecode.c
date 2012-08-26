@@ -475,6 +475,21 @@ again:
 			debug( REALM_BYTECODE, "IN_PARSE_SAVE_STEPS\n" );
 			break;
 		}
+		case IN_PARSE_INIT_BKT: {
+			Word w1;
+			Tree *tree;
+			Word w2;
+
+			debug( REALM_BYTECODE, "IN_PARSE_INIT_BKT\n" );
+
+			read_word( w1 );
+			read_tree( tree );
+			read_word( w2 );
+
+			treeDownref( prg, sp, (Tree*)tree );
+			break;
+		}
+
 		case IN_LOAD_TREE: {
 			Word w;
 			read_word( w );
@@ -2145,6 +2160,23 @@ again:
 			break;
 		}
 
+		case IN_PARSE_INIT_BKT: {
+			debug( REALM_BYTECODE, "IN_PARSE_INIT_BKT\n" );
+
+			Word w1;
+			Tree *tree;
+			Word w2;
+
+			read_word( w1 );
+			read_tree( tree );
+			read_word( w2 );
+
+			vm_push( (SW)w1 );
+			vm_push( tree );
+			vm_push( (SW)w2 );
+			break;
+		}
+
 		case IN_PCR_CALL: {
 			debug( REALM_BYTECODE, "IN_PCR_CALL\n" );
 
@@ -2267,11 +2299,9 @@ again:
 			long steps = (long)vm_pop();
 
 			rcodeUnitStart( exec );
-			rcodeCode( exec, IN_LOAD_WORD );
+			rcodeCode( exec, IN_PARSE_INIT_BKT );
 			rcodeWord( exec, steps );
-			rcodeCode( exec, IN_LOAD_TREE );
 			rcodeWord( exec, (Word)parser );
-			rcodeCode( exec, IN_LOAD_WORD );
 			rcodeWord( exec, (Word)PcrStart );
 			rcodeCode( exec, IN_PARSE_FRAG_BKT );
 			rcodeHalf( exec, 0 );
@@ -2387,11 +2417,9 @@ again:
 			vm_push( parser->result );
 
 			rcodeUnitStart( exec );
-			rcodeCode( exec, IN_LOAD_WORD );
+			rcodeCode( exec, IN_PARSE_INIT_BKT );
 			rcodeWord( exec, steps );
-			rcodeCode( exec, IN_LOAD_TREE );
 			rcodeWord( exec, (Word)parser );
-			rcodeCode( exec, IN_LOAD_WORD );
 			rcodeWord( exec, (Word)PcrStart );
 			rcodeCode( exec, IN_PARSE_FINISH_BKT );
 			rcodeHalf( exec, 0 );
