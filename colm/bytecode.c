@@ -2169,7 +2169,6 @@ again:
 			vm_push( (SW)exec->framePtr );
 			vm_push( (SW)exec->iframePtr );
 			vm_push( (SW)exec->frameId );
-			vm_push( (SW)exec->rcodeUnitLen );
 
 			Code *returnTo = instr - ( SIZEOF_CODE + SIZEOF_CODE + SIZEOF_HALF );
 			vm_push( (SW)returnTo );
@@ -2190,7 +2189,6 @@ again:
 			vm_popn( fi->frameSize );
 
 			instr = (Code*) vm_pop();
-			exec->rcodeUnitLen = ( long ) vm_pop();
 			exec->frameId = ( long ) vm_pop();
 			exec->iframePtr = ( Tree ** ) vm_pop();
 			exec->framePtr = ( Tree ** ) vm_pop();
