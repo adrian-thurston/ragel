@@ -137,20 +137,6 @@
 	i |= ((Word) *instr++) << 8; \
 } while(0)
 
-void vm_grow( Program *prg )
-{
-	debug( REALM_BYTECODE, "growing stack\n" );
-}
-
-void vm_shrink( Program *prg )
-{
-	debug( REALM_BYTECODE, "shrinking stack\n" );
-}
-
-void vm_contiguous( Program *prg, int n )
-{
-}
-
 void parserSetContext( Program *prg, Tree **sp, Parser *parser, Tree *val )
 {
 	parser->pdaRun->context = splitTree( prg, val );
@@ -710,10 +696,8 @@ again:
 	goto again;
 }
 
-void mainExecution( Program *prg, Execution *exec, Code *code )
+void mainExecution( Program *prg, Tree **sp, Execution *exec, Code *code )
 {
-	Tree **sp = prg->vmRoot;
-
 	/* Set up the stack as if we have called. We allow a return value. */
 	vm_contiguous( prg, FR_AA );
 	vm_push( 0 ); 

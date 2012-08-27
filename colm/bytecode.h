@@ -334,7 +334,6 @@ typedef unsigned char uchar;
 
 /* Virtual machine stack size, number of pointers. 
  * This will be mmapped. */
-#define VM_STACK_SIZE (SIZEOF_WORD*1024ll*1024ll) 
 
 /* Known language element ids. */
 #define LEL_ID_PTR          1
@@ -415,11 +414,11 @@ typedef unsigned char uchar;
 #define IFR_RFR 0    /* return frame pointer */
 
 /* Exported to modules other than bytecode.c */
-#define vm_push(i)      ( ( sp == prg->sb_top ? vm_grow(prg) : 0 ),    (*(--sp) = (i)) )
-#define vm_pop()        ( ( sp == prg->sb_bot ? vm_shrink(prg) : 0 ),  (*sp++) )
-#define vm_pop_ignore() ( ( sp == prg->sb_bot ? vm_shrink(prg) : 0 ),  (sp++) )
-#define vm_pushn(n)     ( ( (sp-(n)) < prg->sb_top ? vm_grow(prg) : 0 ),   (sp -= (n)) )
-#define vm_popn(n)      ( ( (sp+(n)) > prg->sb_bot ? vm_shrink(prg) : 0 ), (sp += (n)) )
+#define vm_push(i)      ( ( sp == prg->sb_beg ? (sp = vm_grow(prg)) : 0 ),        (*(--sp) = (i)) )
+#define vm_pop()        ( ( sp == prg->sb_end ? (sp = vm_shrink(prg)) : 0 ),      (*sp++) )
+#define vm_pop_ignore() ( ( sp == prg->sb_end ? (sp = vm_shrink(prg)) : 0 ),      (sp++) )
+#define vm_pushn(n)     ( ( (sp-(n)) < prg->sb_beg ? (sp = vm_grow(prg)) : 0 ),   (sp -= (n)) )
+#define vm_popn(n)      ( ( (sp+(n)) > prg->sb_end ? (sp = vm_shrink(prg)) : 0 ), (sp += (n)) )
 
 void vm_contiguous( struct ColmProgram *prg, int n );
 
@@ -431,12 +430,11 @@ void vm_contiguous( struct ColmProgram *prg, int n );
 #define vm_local_iframe(o) (exec->iframePtr[o])
 #define vm_plocal_iframe(o) (&exec->iframePtr[o])
 
-void vm_grow( struct ColmProgram * );
-void vm_shrink( struct ColmProgram * );
+Tree** vm_grow( struct ColmProgram * );
+Tree** vm_shrink( struct ColmProgram * );
 
 typedef Tree *SW;
 typedef Tree **StackPtr;
-
 
 /* Can't use sizeof() because we have used types that are bigger than the
  * serial representation. */
@@ -477,7 +475,7 @@ Head *intToStr( struct ColmProgram *prg, Word i );
 
 Tree *constructString( struct ColmProgram *prg, Head *s );
 
-void mainExecution( struct ColmProgram *prg, Execution *exec, Code *code );
+void mainExecution( struct ColmProgram *prg, Tree **sp, Execution *exec, Code *code );
 void reductionExecution( Execution *exec, Tree **sp );
 void generationExecution( Execution *exec, Tree **sp );
 void reverseExecution( Execution *exec, Tree **sp, RtCodeVect *allRev );
@@ -496,7 +494,6 @@ void splitRef( struct ColmProgram *prg, Tree ***sp, Ref *fromRef );
 void allocGlobal( struct ColmProgram *prg );
 Tree **executeCode( struct ColmProgram *prg, Execution *exec, Tree **sp, Code *instr );
 void rcodeDownref( struct ColmProgram *prg, Tree **sp, Code *instr );
-Tree **stackAlloc();
 Code *popReverseCode( RtCodeVect *allRev );
 void sendBackBuffered( FsmRun *fsmRun, InputStream *inputStream );
 

@@ -33,6 +33,8 @@
 #include <assert.h>
 #include <stdlib.h>
 
+#define VM_STACK_SIZE (SIZEOF_WORD*1024ll*1024ll)
+
 void colmInit( long debugRealm )
 {
 	/* Always on because because logging is controlled with ifdefs in\n" the
@@ -73,21 +75,50 @@ void allocGlobal( Program *prg )
 	prg->global = tree;
 }
 
-Tree **stackAlloc()
+Tree **vm_grow( Program *prg )
 {
-	return (Tree**)mmap( 0, sizeof(Tree*)*VM_STACK_SIZE,
-		PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0 );
+	debug( REALM_BYTECODE, "growing stack\n" );
+
+	StackBlock *b = malloc( sizeof(StackBlock) );
+	b->next = prg->stackBlock;
+	b->data = malloc( sizeof(Tree*) * VM_STACK_SIZE );
+	b->len = VM_STACK_SIZE;
+
+	prg->stackBlock = b;
+
+	prg->sb_beg = prg->stackBlock->data;
+	prg->sb_end = prg->stackBlock->data + VM_STACK_SIZE;
+
+	return prg->sb_end;
 }
 
-void stackFree( Tree **stack )
+Tree **vm_shrink( Program *prg )
 {
-	munmap( stack, sizeof(Tree*)*VM_STACK_SIZE );
+	debug( REALM_BYTECODE, "shrinking stack\n" );
+
+	StackBlock *b = prg->stackBlock;
+
+	prg->stackBlock = prg->stackBlock->next;
+
+	free( b->data );
+	free( b );
+
+	if ( prg->stackBlock == 0 ) {
+		prg->sb_beg = 0;
+		prg->sb_end = 0;
+	}
+	else {
+		prg->sb_beg = prg->stackBlock->data;
+		prg->sb_end = prg->stackBlock->data + VM_STACK_SIZE;
+	}
+
+	return prg->sb_beg;
 }
 
-Tree **vm_root( struct ColmProgram *prg )
+void vm_contiguous( Program *prg, int n )
 {
-	return prg->vmRoot;
 }
+
 
 Tree *returnVal( struct ColmProgram *prg )
 {
@@ -129,27 +160,26 @@ Program *colmNewProgram( RuntimeData *rtd )
 	/*
 	 * Allocate the VM stack.
 	 */
-	prg->vmStack = stackAlloc();
-	prg->vmRoot = &prg->vmStack[VM_STACK_SIZE];
-
+	prg->stackRoot = vm_grow( prg );
 	return prg;
 }
 
 void colmRunProgram( Program *prg, int argc, const char **argv )
 {
-	Execution execution;
-
 	if ( prg->rtd->rootCodeLen == 0 )
 		return;
+
+	Tree **sp = prg->stackRoot;
 
 	/* Make the arguments available to the program. */
 	prg->argc = argc;
 	prg->argv = argv;
 
+	Execution execution;
 	memset( &execution, 0, sizeof(execution) );
 	execution.frameId = prg->rtd->rootFrameId;
 
-	mainExecution( prg, &execution, prg->rtd->rootCode );
+	mainExecution( prg, sp, &execution, prg->rtd->rootCode );
 
 	/* Clear the arg and stack. */
 	prg->argc = 0;
@@ -159,7 +189,7 @@ void colmRunProgram( Program *prg, int argc, const char **argv )
 
 int colmDeleteProgram( Program *prg )
 {
-	Tree **sp = prg->vmRoot;
+	Tree **sp = prg->stackRoot;
 	int exitStatus = prg->exitStatus;
 
 	//cerr << "clearing the prg" << endl;
@@ -232,7 +262,9 @@ int colmDeleteProgram( Program *prg )
 		rb = next;
 	}
 
-	stackFree( prg->vmStack );
+	while ( prg->stackBlock != 0 )
+		vm_shrink( prg );
+
 	free( prg );
 
 	return exitStatus;

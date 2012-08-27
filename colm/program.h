@@ -24,6 +24,13 @@
 
 #include <colm/pdarun.h>
 
+typedef struct ColmStackBlock
+{
+	Tree **data;
+	int len;
+	struct ColmStackBlock *next;
+} StackBlock;
+
 typedef struct ColmRuntimeData
 {
 	LangElInfo *lelInfo;
@@ -107,19 +114,18 @@ typedef struct ColmProgram
 
 	Kid *heap;
 
-
 	Stream *stdinVal;
 	Stream *stdoutVal;
 	Stream *stderrVal;
 
 	RunBuf *allocRunBuf;
 
-	Tree **vmStack;
-	Tree **vmRoot; 
-
 	/* Current stack block limits. Changed when crossing block boundaries. */
-	Tree **sb_bot;
-	Tree **sb_top;
+	Tree **sb_beg;
+	Tree **sb_end;
+
+	StackBlock *stackBlock;
+	Tree **stackRoot;
 
 	/* Returned from the main line. Should have exports instead. */
 	Tree *returnVal;

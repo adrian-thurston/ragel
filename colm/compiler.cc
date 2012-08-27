@@ -1287,8 +1287,7 @@ void Compiler::parsePatterns()
 	/* Turn off context-dependent parsing. */
 	prg->ctxDepParsing = 0;
 
-	Tree **vm_stack = stackAlloc();
-	Tree **root = &vm_stack[VM_STACK_SIZE];
+	Tree **sp = prg->stackRoot;
 
 	for ( ConsList::Iter repl = replList; repl.lte(); repl++ ) {
 		//cerr << "parsing replacement at " << 
@@ -1309,7 +1308,7 @@ void Compiler::parsePatterns()
 		setEof( in );
 
 		newToken( prg, repl->pdaRun, fsmRun );
-		long pcr = parseLoop( prg, root, repl->pdaRun, fsmRun, in, PcrStart );
+		long pcr = parseLoop( prg, sp, repl->pdaRun, fsmRun, in, PcrStart );
 		assert( pcr == PcrDone );
 		if ( repl->pdaRun->parseError )
 			cout << "parse error" << endp;
@@ -1334,13 +1333,14 @@ void Compiler::parsePatterns()
 		setEof( in );
 
 		newToken( prg, pat->pdaRun, fsmRun );
-		long pcr = parseLoop( prg, root, pat->pdaRun, fsmRun, in, PcrStart );
+		long pcr = parseLoop( prg, sp, pat->pdaRun, fsmRun, in, PcrStart );
 		assert( pcr == PcrDone );
 		if ( pat->pdaRun->parseError )
 			cout << "parse error" << endp;
 	}
 
 	fillInPatterns( prg );
+	colmDeleteProgram( prg );
 }
 
 void Compiler::collectParserEls( BstSet<LangEl*> &parserEls )
