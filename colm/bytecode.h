@@ -451,6 +451,7 @@ typedef struct _Execution
 
 	Parser *parser;
 	long steps;
+	long pcr;
 } Execution;
 
 long stringLength( Head *str );
