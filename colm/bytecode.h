@@ -443,11 +443,14 @@ typedef Tree **StackPtr;
 
 typedef struct _Execution
 {
-	Parser *parser;
 	Tree **framePtr;
 	Tree **iframePtr;
 	long frameId;
+
 	long rcodeUnitLen;
+
+	Parser *parser;
+	long steps;
 } Execution;
 
 long stringLength( Head *str );
