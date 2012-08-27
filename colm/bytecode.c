@@ -476,17 +476,17 @@ again:
 			break;
 		}
 		case IN_PARSE_INIT_BKT: {
-			Word w1;
-			Tree *tree;
-			Word w2;
+			Tree *parser;
+			Word pcr;
+			Word steps;
 
 			debug( REALM_BYTECODE, "IN_PARSE_INIT_BKT\n" );
 
-			read_word( w1 );
-			read_tree( tree );
-			read_word( w2 );
+			read_tree( parser );
+			read_word( pcr );
+			read_word( steps );
 
-			treeDownref( prg, sp, (Tree*)tree );
+			treeDownref( prg, sp, (Tree*)parser );
 			break;
 		}
 
@@ -2155,8 +2155,8 @@ again:
 			long steps = parser->pdaRun->steps;
 
 			vm_push( (SW)exec->parser );
-			vm_push( (SW)exec->steps );
 			vm_push( (SW)exec->pcr );
+			vm_push( (SW)exec->steps );
 
 			exec->parser = parser;
 			exec->steps = steps;
@@ -2167,17 +2167,17 @@ again:
 		case IN_PARSE_INIT_BKT: {
 			debug( REALM_BYTECODE, "IN_PARSE_INIT_BKT\n" );
 
-			Word steps;
 			Tree *parser;
 			Word pcr;
+			Word steps;
 
-			read_word( steps );
 			read_tree( parser );
 			read_word( pcr );
+			read_word( steps );
 
 			vm_push( (SW)exec->parser );
-			vm_push( (SW)exec->steps );
 			vm_push( (SW)exec->pcr );
+			vm_push( (SW)exec->steps );
 
 			exec->parser = (Parser*)parser;
 			exec->steps = steps;
@@ -2251,8 +2251,8 @@ again:
 
 			Parser *parser = exec->parser;
 
-			exec->pcr = (long)vm_pop();
 			exec->steps = (long)vm_pop();
+			exec->pcr = (long)vm_pop();
 			exec->parser = (Parser*) vm_pop();
 
 			treeDownref( prg, sp, (Tree*)parser );
@@ -2284,15 +2284,15 @@ again:
 			Parser *parser = exec->parser;
 			long steps = exec->steps;
 
-			exec->pcr = (long)vm_pop();
 			exec->steps = (long)vm_pop();
+			exec->pcr = (long)vm_pop();
 			exec->parser = (Parser*)vm_pop();
 
 			rcodeUnitStart( exec );
 			rcodeCode( exec, IN_PARSE_INIT_BKT );
-			rcodeWord( exec, steps );
 			rcodeWord( exec, (Word)parser );
 			rcodeWord( exec, (Word)PcrStart );
+			rcodeWord( exec, steps );
 			rcodeCode( exec, IN_PARSE_FRAG_BKT );
 			rcodeHalf( exec, 0 );
 			rcodeCode( exec, IN_PCR_CALL );
@@ -2322,8 +2322,8 @@ again:
 
 			Parser *parser = exec->parser;
 
-			exec->pcr = (long)vm_pop();
 			exec->steps = (long)vm_pop();
+			exec->pcr = (long)vm_pop();
 			exec->parser = (Parser*)vm_pop();
 
 			treeDownref( prg, sp, (Tree*)parser );
@@ -2351,8 +2351,8 @@ again:
 
 			Parser *parser = exec->parser;
 
-			exec->pcr = (long)vm_pop();
 			exec->steps = (long)vm_pop();
+			exec->pcr = (long)vm_pop();
 			exec->parser = (Parser*)vm_pop();
 
 			vm_push( parser->result );
@@ -2383,17 +2383,17 @@ again:
 			Parser *parser = exec->parser;
 			long steps = exec->steps;
 
-			exec->pcr = (long)vm_pop();
 			exec->steps = (long)vm_pop();
+			exec->pcr = (long)vm_pop();
 			exec->parser = (Parser *) vm_pop();
 
 			vm_push( parser->result );
 
 			rcodeUnitStart( exec );
 			rcodeCode( exec, IN_PARSE_INIT_BKT );
-			rcodeWord( exec, steps );
 			rcodeWord( exec, (Word)parser );
 			rcodeWord( exec, (Word)PcrStart );
+			rcodeWord( exec, steps );
 			rcodeCode( exec, IN_PARSE_FINISH_BKT );
 			rcodeHalf( exec, 0 );
 			rcodeCode( exec, IN_PCR_CALL );
@@ -2424,8 +2424,8 @@ again:
 
 			Parser *parser = exec->parser;
 
-			exec->pcr = (long)vm_pop();
 			exec->steps = (long)vm_pop();
+			exec->pcr = (long)vm_pop();
 			exec->parser = (Parser*)vm_pop();
 
 			unsetEof( parser->input->in );
