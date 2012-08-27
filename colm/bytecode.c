@@ -147,6 +147,10 @@ void vm_shrink( Program *prg )
 	debug( REALM_BYTECODE, "shrinking stack\n" );
 }
 
+void vm_contiguous( Program *prg, int n )
+{
+}
+
 void parserSetContext( Program *prg, Tree **sp, Parser *parser, Tree *val )
 {
 	parser->pdaRun->context = splitTree( prg, val );
@@ -711,6 +715,7 @@ void mainExecution( Program *prg, Execution *exec, Code *code )
 	Tree **sp = prg->vmRoot;
 
 	/* Set up the stack as if we have called. We allow a return value. */
+	vm_contiguous( prg, FR_AA );
 	vm_push( 0 ); 
 	vm_push( 0 );
 	vm_push( 0 );
@@ -3265,6 +3270,13 @@ again:
 
 			treeDownref( prg, sp, obj );
 			treeDownref( prg, sp, key );
+			break;
+		}
+		case IN_CONTIGUOUS: {
+			Half size;
+			read_half( size );
+			debug( REALM_BYTECODE, "IN_CONTIGUOUS %hd\n", size );
+			vm_contiguous( prg, size );
 			break;
 		}
 		case IN_INIT_LOCALS: {

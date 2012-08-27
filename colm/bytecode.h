@@ -253,6 +253,7 @@ typedef unsigned char uchar;
 #define IN_PCR_CALL              0xb1
 #define IN_PCR_RET               0xb2
 #define IN_PCR_END_DECK          0xb3
+#define IN_CONTIGUOUS            0x5c
 
 #define IN_OPEN_FILE             0xb4
 #define IN_GET_STDIN             0xb5
@@ -419,6 +420,8 @@ typedef unsigned char uchar;
 #define vm_pop_ignore() ( ( sp == prg->sb_bot ? vm_shrink(prg) : 0 ),  (sp++) )
 #define vm_pushn(n)     ( ( (sp-(n)) < prg->sb_top ? vm_grow(prg) : 0 ),   (sp -= (n)) )
 #define vm_popn(n)      ( ( (sp+(n)) > prg->sb_bot ? vm_shrink(prg) : 0 ), (sp += (n)) )
+
+void vm_contiguous( struct ColmProgram *prg, int n );
 
 #define vm_top() (*sp)
 #define vm_ptop() (sp)
