@@ -699,7 +699,7 @@ again:
 void mainExecution( Program *prg, Tree **sp, Execution *exec, Code *code )
 {
 	/* Set up the stack as if we have called. We allow a return value. */
-	vm_contiguous( prg, FR_AA );
+	vm_contiguous( FR_AA );
 	vm_push( 0 ); 
 	vm_push( 0 );
 	vm_push( 0 );
@@ -3260,7 +3260,7 @@ again:
 			Half size;
 			read_half( size );
 			debug( REALM_BYTECODE, "IN_CONTIGUOUS %hd\n", size );
-			vm_contiguous( prg, size );
+			vm_contiguous( size );
 			break;
 		}
 		case IN_INIT_LOCALS: {

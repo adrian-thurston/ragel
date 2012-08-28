@@ -115,10 +115,6 @@ Tree **vm_shrink( Program *prg )
 	return prg->sb_beg;
 }
 
-void vm_contiguous( Program *prg, int n )
-{
-}
-
 Tree *returnVal( struct ColmProgram *prg )
 {
 	return prg->returnVal;

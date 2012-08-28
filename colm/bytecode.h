@@ -420,7 +420,7 @@ typedef unsigned char uchar;
 #define vm_pushn(n)     ( ( (sp-(n)) < prg->sb_beg ? (sp = vm_grow(prg, n)) : 0 ),(sp -= (n)) )
 #define vm_popn(n)      ( ( (sp+(n)) > prg->sb_end ? (sp = vm_shrink(prg)) : 0 ), (sp += (n)) )
 
-void vm_contiguous( struct ColmProgram *prg, int n );
+#define vm_contiguous(n) ( ( (sp-(n)) < prg->sb_beg ? (sp = vm_grow(prg, n)) : 0 ) )
 
 #define vm_top() (*sp)
 #define vm_ptop() (sp)
