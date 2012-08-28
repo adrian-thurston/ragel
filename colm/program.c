@@ -96,23 +96,23 @@ Tree **vm_grow( Program *prg, int n )
 
 Tree **vm_shrink( Program *prg )
 {
-	StackBlock *b = prg->stackBlock;
-
-	prg->stackBlock = prg->stackBlock->next;
-
-	free( b->data );
-	free( b );
-
-	if ( prg->stackBlock == 0 ) {
-		prg->sb_beg = 0;
-		prg->sb_end = 0;
+	if ( prg->stackBlock->next == 0 ) {
+		/* Don't delete the sentinal stack block. Returns the end as in the
+		 * creation of the first stack block. */
+		return prg->sb_end;
 	}
 	else {
+		StackBlock *b = prg->stackBlock;
+		prg->stackBlock = prg->stackBlock->next;
+
+		free( b->data );
+		free( b );
+
 		prg->sb_beg = prg->stackBlock->data;
 		prg->sb_end = prg->stackBlock->data + prg->stackBlock->len;
-	}
 
-	return prg->sb_beg;
+		return prg->sb_beg;
+	}
 }
 
 Tree *returnVal( struct ColmProgram *prg )
@@ -167,7 +167,6 @@ void colmRunProgram( Program *prg, int argc, const char **argv )
 		return;
 
 	Tree **sp = prg->stackRoot;
-	vm_push(0);
 
 	/* Make the arguments available to the program. */
 	prg->argc = argc;
@@ -188,7 +187,6 @@ void colmRunProgram( Program *prg, int argc, const char **argv )
 int colmDeleteProgram( Program *prg )
 {
 	Tree **sp = prg->stackRoot;
-	vm_push(0);
 	int exitStatus = prg->exitStatus;
 
 	//cerr << "clearing the prg" << endl;
@@ -261,7 +259,7 @@ int colmDeleteProgram( Program *prg )
 		rb = next;
 	}
 
-	while ( prg->stackBlock != 0 )
+	while ( prg->stackBlock->next != 0 )
 		vm_shrink( prg );
 
 	free( prg );
