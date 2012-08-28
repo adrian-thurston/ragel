@@ -1005,7 +1005,7 @@ Tree *createGeneric( Program *prg, long genericId )
  * very large. Need the VM stack. */
 void treeFreeRec( Program *prg, Tree **sp, Tree *tree )
 {
-	Tree **top = sp;
+	Tree **top = vm_ptop();
 	LangElInfo *lelInfo;
 	long genericId;
 

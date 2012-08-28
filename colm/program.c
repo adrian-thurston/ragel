@@ -171,8 +171,6 @@ void colmRunProgram( Program *prg, int argc, const char **argv )
 	if ( prg->rtd->rootCodeLen == 0 )
 		return;
 
-	Tree **sp = prg->stackRoot;
-
 	/* Make the arguments available to the program. */
 	prg->argc = argc;
 	prg->argv = argv;
@@ -181,7 +179,7 @@ void colmRunProgram( Program *prg, int argc, const char **argv )
 	memset( &execution, 0, sizeof(execution) );
 	execution.frameId = prg->rtd->rootFrameId;
 
-	mainExecution( prg, sp, &execution, prg->rtd->rootCode );
+	mainExecution( prg, &execution, prg->rtd->rootCode );
 
 	/* Clear the arg and stack. */
 	prg->argc = 0;
@@ -193,8 +191,6 @@ int colmDeleteProgram( Program *prg )
 {
 	Tree **sp = prg->stackRoot;
 	int exitStatus = prg->exitStatus;
-
-	//cerr << "clearing the prg" << endl;
 
 	treeDownref( prg, sp, prg->returnVal );
 	treeDownref( prg, sp, prg->lastParseError );

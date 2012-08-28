@@ -696,8 +696,10 @@ again:
 	goto again;
 }
 
-void mainExecution( Program *prg, Tree **sp, Execution *exec, Code *code )
+void mainExecution( Program *prg, Execution *exec, Code *code )
 {
+	Tree **sp = prg->stackRoot;
+
 	vm_contiguous( 16 );
 
 	/* Set up the stack as if we have called. We allow a return value. */
@@ -712,6 +714,8 @@ void mainExecution( Program *prg, Tree **sp, Execution *exec, Code *code )
 	vm_pop_ignore();
 	vm_pop_ignore();
 	prg->returnVal = vm_pop();
+
+	prg->stackRoot = sp;
 }
 
 int makeReverseCode( PdaRun *pdaRun )
