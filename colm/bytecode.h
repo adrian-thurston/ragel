@@ -425,6 +425,8 @@ typedef unsigned char uchar;
 #define vm_top() (*sp)
 #define vm_ptop() (sp)
 
+#define vm_ssize()       ( prg->sb_total + (prg->sb_end - sb) )
+
 #define vm_local(o) (exec->framePtr[o])
 #define vm_plocal(o) (&exec->framePtr[o])
 #define vm_local_iframe(o) (exec->iframePtr[o])

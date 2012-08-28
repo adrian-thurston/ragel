@@ -124,6 +124,7 @@ typedef struct ColmProgram
 	/* Current stack block limits. Changed when crossing block boundaries. */
 	Tree **sb_beg;
 	Tree **sb_end;
+	long sb_total;
 
 	StackBlock *stackBlock;
 	Tree **stackRoot;

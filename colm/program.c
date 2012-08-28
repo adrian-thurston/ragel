@@ -79,8 +79,10 @@ void allocGlobal( Program *prg )
 Tree **vm_grow( Program *prg, Tree **sp, int n )
 {
 	/* Close off the current block. */
-	if ( prg->stackBlock != 0 )
+	if ( prg->stackBlock != 0 ) {
 		prg->stackBlock->offset = sp - prg->stackBlock->data;
+		prg->sb_total += prg->stackBlock->len - prg->stackBlock->offset;
+	}
 
 	StackBlock *b = malloc( sizeof(StackBlock) );
 	int size = VM_STACK_SIZE;
@@ -115,6 +117,8 @@ Tree **vm_shrink( Program *prg )
 
 		prg->sb_beg = prg->stackBlock->data + prg->stackBlock->offset;
 		prg->sb_end = prg->stackBlock->data + prg->stackBlock->len;
+
+		prg->sb_total -= prg->stackBlock->len - prg->stackBlock->offset;
 
 		return prg->sb_beg;
 	}
