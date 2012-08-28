@@ -1251,7 +1251,7 @@ again:
 			short field;
 			read_half( field );
 
-			debug( REALM_BYTECODE, "IN_GET_LOCAL_R\n" );
+			debug( REALM_BYTECODE, "IN_GET_LOCAL_R %hd\n", field );
 
 			Tree *val = vm_local(field);
 			treeUpref( val );
@@ -1262,7 +1262,7 @@ again:
 			short field;
 			read_half( field );
 
-			debug( REALM_BYTECODE, "IN_GET_LOCAL_WC\n" );
+			debug( REALM_BYTECODE, "IN_GET_LOCAL_WC %hd\n", field );
 
 			Tree *split = getLocalSplit( prg, exec->framePtr, field );
 			treeUpref( split );
@@ -1273,7 +1273,7 @@ again:
 			short field;
 			read_half( field );
 
-			debug( REALM_BYTECODE, "IN_SET_LOCAL_WC %d\n", field );
+			debug( REALM_BYTECODE, "IN_SET_LOCAL_WC %hd\n", field );
 
 			Tree *val = vm_pop();
 			treeDownref( prg, sp, vm_local(field) );
