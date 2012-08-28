@@ -44,34 +44,39 @@ ListEl *listDetachLast(List *list )         { return listDetach(list, list->tail
 long listLength(List *list)
 	{ return list->listLen; }
 
-void initTreeIter( TreeIter *treeIter, const Ref *rootRef, int searchId, Tree **stackRoot )
+void initTreeIter( TreeIter *treeIter, Tree **stackRoot, long rootSize,
+		const Ref *rootRef, int searchId )
 {
 	treeIter->rootRef = *rootRef;
 	treeIter->searchId = searchId;
 	treeIter->stackRoot = stackRoot;
 	treeIter->yieldSize = 0;
+	treeIter->rootSize = rootSize;
 	treeIter->ref.kid = 0;
 	treeIter->ref.next = 0;
 }
 
-void initRevTreeIter( RevTreeIter *revTriter, const Ref *rootRef, 
-		int searchId, Tree **stackRoot, int children )
+void initRevTreeIter( RevTreeIter *revTriter, Tree **stackRoot, long rootSize,
+		const Ref *rootRef, int searchId, int children )
 {
 	revTriter->rootRef = *rootRef;
 	revTriter->searchId = searchId;
 	revTriter->stackRoot = stackRoot;
 	revTriter->yieldSize = children;
+	revTriter->rootSize = rootSize;
 	revTriter->kidAtYield = 0;
 	revTriter->children = children;
 	revTriter->ref.kid = 0;
 	revTriter->ref.next = 0;
 }
 
-void initUserIter( UserIter *userIter, Tree **stackRoot, long argSize, long searchId )
+void initUserIter( UserIter *userIter, Tree **stackRoot, long rootSize,
+		long argSize, long searchId )
 {
 	userIter->stackRoot = stackRoot;
 	userIter->argSize = argSize;
 	userIter->yieldSize = 0;
+	userIter->rootSize = rootSize;
 	userIter->resume = 0;
 	userIter->frame = 0;
 	userIter->searchId = searchId;

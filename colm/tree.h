@@ -227,6 +227,7 @@ typedef struct _TreeIter
 	long searchId;
 	Tree **stackRoot;
 	long yieldSize;
+	long rootSize;
 } TreeIter;
 
 /* This must overlay tree iter because some of the same bytecodes are used. */
@@ -237,13 +238,13 @@ typedef struct _RevTreeIter
 	long searchId;
 	Tree **stackRoot;
 	long yieldSize;
+	long rootSize;
 
 	/* For detecting a split at the leaf. */
 	Kid *kidAtYield;
 	long children;
 	Kid **cur;
 } RevTreeIter;
-
 
 typedef struct _UserIter
 {
@@ -252,6 +253,8 @@ typedef struct _UserIter
 	Tree **stackRoot;
 	long argSize;
 	long yieldSize;
+	long rootSize;
+
 	Code *resume;
 	Tree **frame;
 	long searchId;
@@ -347,6 +350,17 @@ Tree *treeTrim( struct ColmProgram *prg, Tree **sp, Tree *tree );
 void printTreeCollect( struct ColmProgram *prg, Tree **sp, StrCollect *collect, Tree *tree, int trim );
 void printTreeFile( struct ColmProgram *prg, Tree **sp, FILE *out, Tree *tree, int trim );
 void printXmlStdout( struct ColmProgram *prg, Tree **sp, Tree *tree, int commAttr, int trim );
+
+/*
+ * Iterators.
+ */
+
+void initTreeIter( TreeIter *treeIter, Tree **stackRoot, long rootSize,
+		const Ref *rootRef, int searchId );
+void initRevTreeIter( RevTreeIter *revTriter, Tree **stackRoot, long rootSize, 
+		const Ref *rootRef, int searchId, int children );
+void initUserIter( UserIter *userIter, Tree **stackRoot, long rootSize,
+		long argSize, long searchId );
 
 #if defined(__cplusplus)
 }

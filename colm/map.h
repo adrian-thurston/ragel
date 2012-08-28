@@ -80,17 +80,6 @@ long cmpTree( Program *prg, const Tree *tree1, const Tree *tree2 );
 void mapImplRemoveEl( Program *prg, Map *map, MapEl *element );
 int mapImplRemoveKey( Program *prg, Map *map, Tree *key );
 
-/*
- * Iterators.
- */
-
-void initTreeIter( TreeIter *treeIter, const Ref *rootRef, int searchId, Tree **stackRoot );
-void initRevTreeIter( RevTreeIter *revTriter, const Ref *rootRef, 
-		int searchId, Tree **stackRoot, int children );
-
-
-void initUserIter( UserIter *userIter, Tree **stackRoot, long argSize, long searchId );
-
 Tree *mapFind( Program *prg, Map *map, Tree *key );
 long mapLength( Map *map );
 Tree *mapUnstore( Program *prg, Map *map, Tree *key, Tree *existing );

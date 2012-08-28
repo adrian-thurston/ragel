@@ -369,11 +369,16 @@ void downrefLocalTrees( Program *prg, Tree **sp, Tree **frame, char *trees, long
 UserIter *uiterCreate( Program *prg, Tree ***psp, FunctionInfo *fi, long searchId )
 {
 	Tree **sp = *psp;
+
 	vm_pushn( sizeof(UserIter) / sizeof(Word) );
 	void *mem = vm_ptop();
-
 	UserIter *uiter = mem;
-	initUserIter( uiter, vm_ptop(), fi->argSize, searchId );
+
+	Tree **stackRoot = vm_ptop();
+	long rootSize = vm_ssize();
+
+	initUserIter( uiter, stackRoot, rootSize, fi->argSize, searchId );
+
 	*psp = sp;
 	return uiter;
 }
@@ -1862,7 +1867,11 @@ again:
 			rootRef.kid = (Kid*)vm_pop();
 			rootRef.next = (Ref*)vm_pop();
 			void *mem = vm_plocal(field);
-			initTreeIter( (TreeIter*)mem, &rootRef, searchTypeId, vm_ptop() );
+
+			Tree **stackRoot = vm_ptop();
+			long rootSize = vm_ssize();
+
+			initTreeIter( (TreeIter*)mem, stackRoot, rootSize, &rootRef, searchTypeId );
 			break;
 		}
 		case IN_TRITER_DESTROY: {
@@ -1888,6 +1897,7 @@ again:
 			rootRef.next = (Ref*)vm_pop();
 
 			Tree **stackRoot = vm_ptop();
+			long rootSize = vm_ssize();
 
 			int children = 0;
 			Kid *kid = treeChild( prg, rootRef.kid->tree );
@@ -1898,7 +1908,7 @@ again:
 			}
 
 			void *mem = vm_plocal(field);
-			initRevTreeIter( (RevTreeIter*)mem, &rootRef, searchTypeId, stackRoot, children );
+			initRevTreeIter( (RevTreeIter*)mem, stackRoot, rootSize, &rootRef, searchTypeId, children );
 			break;
 		}
 		case IN_REV_TRITER_DESTROY: {
