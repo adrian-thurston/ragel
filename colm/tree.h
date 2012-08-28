@@ -226,7 +226,7 @@ typedef struct _TreeIter
 	Ref ref;
 	long searchId;
 	Tree **stackRoot;
-	long stackSize;
+	long yieldSize;
 } TreeIter;
 
 /* This must overlay tree iter because some of the same bytecodes are used. */
@@ -236,7 +236,7 @@ typedef struct _RevTreeIter
 	Ref ref;
 	long searchId;
 	Tree **stackRoot;
-	long stackSize;
+	long yieldSize;
 
 	/* For detecting a split at the leaf. */
 	Kid *kidAtYield;
@@ -251,7 +251,7 @@ typedef struct _UserIter
 	Ref ref;
 	Tree **stackRoot;
 	long argSize;
-	long stackSize;
+	long yieldSize;
 	Code *resume;
 	Tree **frame;
 	long searchId;

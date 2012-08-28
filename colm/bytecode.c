@@ -383,7 +383,7 @@ void uiterInit( Program *prg, Tree **sp, UserIter *uiter,
 {
 	/* Set up the first yeild so when we resume it starts at the beginning. */
 	uiter->ref.kid = 0;
-	uiter->stackSize = uiter->stackRoot - vm_ptop();
+	uiter->yieldSize = uiter->stackRoot - vm_ptop();
 	uiter->frame = &uiter->stackRoot[-IFR_AA];
 
 	if ( revertOn )
@@ -396,8 +396,8 @@ void treeIterDestroy( Program *prg, Tree ***psp, TreeIter *iter )
 {
 	Tree **sp = *psp;
 	long curStackSize = iter->stackRoot - vm_ptop();
-	assert( iter->stackSize == curStackSize );
-	vm_popn( iter->stackSize );
+	assert( iter->yieldSize == curStackSize );
+	vm_popn( iter->yieldSize );
 	*psp = sp;
 }
 
@@ -408,7 +408,7 @@ void userIterDestroy( Program *prg, Tree ***psp, UserIter *uiter )
 	/* We should always be coming from a yield. The current stack size will be
 	 * nonzero and the stack size in the iterator will be correct. */
 	long curStackSize = uiter->stackRoot - vm_ptop();
-	assert( uiter->stackSize == curStackSize );
+	assert( uiter->yieldSize == curStackSize );
 
 	long argSize = uiter->argSize;
 
@@ -1202,8 +1202,8 @@ again:
 			/* Get the iterator. */
 			UserIter *uiter = (UserIter*) vm_local(field);
 
-			long stackSize = uiter->stackRoot - vm_ptop();
-			assert( uiter->stackSize == stackSize );
+			long yieldSize = uiter->stackRoot - vm_ptop();
+			assert( uiter->yieldSize == yieldSize );
 
 			/* Fix the return instruction pointer. */
 			uiter->stackRoot[-IFR_AA + IFR_RIN] = (SW)instr;
@@ -1909,8 +1909,8 @@ again:
 
 			RevTreeIter *iter = (RevTreeIter*) vm_plocal(field);
 			long curStackSize = iter->stackRoot - vm_ptop();
-			assert( iter->stackSize == curStackSize );
-			vm_popn( iter->stackSize );
+			assert( iter->yieldSize == curStackSize );
+			vm_popn( iter->yieldSize );
 			break;
 		}
 		case IN_TREE_SEARCH: {
@@ -3332,7 +3332,7 @@ again:
 				/* Store the yeilded value. */
 				uiter->ref.kid = kid;
 				uiter->ref.next = next;
-				uiter->stackSize = uiter->stackRoot - vm_ptop();
+				uiter->yieldSize = uiter->stackRoot - vm_ptop();
 				uiter->resume = instr;
 				uiter->frame = exec->framePtr;
 
