@@ -700,7 +700,7 @@ void mainExecution( Program *prg, Execution *exec, Code *code )
 {
 	Tree **sp = prg->stackRoot;
 
-	vm_contiguous( 16 );
+	vm_contiguous( 64 );
 
 	/* Set up the stack as if we have called. We allow a return value. */
 	vm_push( 0 ); 
@@ -2182,6 +2182,8 @@ again:
 		case IN_PCR_CALL: {
 			debug( REALM_BYTECODE, "IN_PCR_CALL\n" );
 
+			vm_contiguous( 64 );
+
 			vm_push( (SW)exec->framePtr );
 			vm_push( (SW)exec->iframePtr );
 			vm_push( (SW)exec->frameId );
@@ -2205,6 +2207,7 @@ again:
 
 			FrameInfo *fi = &prg->rtd->frameInfo[exec->frameId];
 			downrefLocalTrees( prg, sp, exec->framePtr, fi->trees, fi->treesLen );
+			debug( REALM_BYTECODE, "RET: %d\n", fi->frameSize );
 			vm_popn( fi->frameSize );
 
 			instr = (Code*) vm_pop();
@@ -3272,7 +3275,7 @@ again:
 			Half size;
 			read_half( size );
 
-			debug( REALM_BYTECODE, "IN_INIT_LOCALS\n" );
+			debug( REALM_BYTECODE, "IN_INIT_LOCALS %hd\n", size );
 
 			exec->framePtr = vm_ptop();
 			vm_pushn( size );
