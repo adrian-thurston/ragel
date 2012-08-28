@@ -75,27 +75,26 @@ void allocGlobal( Program *prg )
 	prg->global = tree;
 }
 
-Tree **vm_grow( Program *prg )
+Tree **vm_grow( Program *prg, int n )
 {
-	debug( REALM_BYTECODE, "growing stack\n" );
-
 	StackBlock *b = malloc( sizeof(StackBlock) );
+	int size = VM_STACK_SIZE;
+	if ( n > size )
+		size = n;
 	b->next = prg->stackBlock;
-	b->data = malloc( sizeof(Tree*) * VM_STACK_SIZE );
-	b->len = VM_STACK_SIZE;
+	b->data = malloc( sizeof(Tree*) * size );
+	b->len = size;
 
 	prg->stackBlock = b;
 
 	prg->sb_beg = prg->stackBlock->data;
-	prg->sb_end = prg->stackBlock->data + VM_STACK_SIZE;
+	prg->sb_end = prg->stackBlock->data + size;
 
 	return prg->sb_end;
 }
 
 Tree **vm_shrink( Program *prg )
 {
-	debug( REALM_BYTECODE, "shrinking stack\n" );
-
 	StackBlock *b = prg->stackBlock;
 
 	prg->stackBlock = prg->stackBlock->next;
@@ -160,7 +159,7 @@ Program *colmNewProgram( RuntimeData *rtd )
 	/*
 	 * Allocate the VM stack.
 	 */
-	prg->stackRoot = vm_grow( prg );
+	prg->stackRoot = vm_grow( prg, 1 );
 	return prg;
 }
 

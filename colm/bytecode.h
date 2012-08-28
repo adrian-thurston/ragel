@@ -414,10 +414,10 @@ typedef unsigned char uchar;
 #define IFR_RFR 0    /* return frame pointer */
 
 /* Exported to modules other than bytecode.c */
-#define vm_push(i)      ( ( sp == prg->sb_beg ? (sp = vm_grow(prg)) : 0 ),        (*(--sp) = (i)) )
+#define vm_push(i)      ( ( sp == prg->sb_beg ? (sp = vm_grow(prg, 1)) : 0 ),     (*(--sp) = (i)) )
 #define vm_pop()        ( ( sp == prg->sb_end ? (sp = vm_shrink(prg)) : 0 ),      (*sp++) )
 #define vm_pop_ignore() ( ( sp == prg->sb_end ? (sp = vm_shrink(prg)) : 0 ),      (sp++) )
-#define vm_pushn(n)     ( ( (sp-(n)) < prg->sb_beg ? (sp = vm_grow(prg)) : 0 ),   (sp -= (n)) )
+#define vm_pushn(n)     ( ( (sp-(n)) < prg->sb_beg ? (sp = vm_grow(prg, n)) : 0 ),(sp -= (n)) )
 #define vm_popn(n)      ( ( (sp+(n)) > prg->sb_end ? (sp = vm_shrink(prg)) : 0 ), (sp += (n)) )
 
 void vm_contiguous( struct ColmProgram *prg, int n );
@@ -430,7 +430,7 @@ void vm_contiguous( struct ColmProgram *prg, int n );
 #define vm_local_iframe(o) (exec->iframePtr[o])
 #define vm_plocal_iframe(o) (&exec->iframePtr[o])
 
-Tree** vm_grow( struct ColmProgram * );
+Tree** vm_grow( struct ColmProgram *, int );
 Tree** vm_shrink( struct ColmProgram * );
 
 typedef Tree *SW;
