@@ -76,8 +76,12 @@ void allocGlobal( Program *prg )
 	prg->global = tree;
 }
 
-Tree **vm_grow( Program *prg, int n )
+Tree **vm_grow( Program *prg, Tree **sp, int n )
 {
+	/* Close off the current block. */
+	if ( prg->stackBlock != 0 )
+		prg->stackBlock->offset = sp - prg->stackBlock->data;
+
 	StackBlock *b = malloc( sizeof(StackBlock) );
 	int size = VM_STACK_SIZE;
 	if ( n > size )
@@ -85,6 +89,7 @@ Tree **vm_grow( Program *prg, int n )
 	b->next = prg->stackBlock;
 	b->data = malloc( sizeof(Tree*) * size );
 	b->len = size;
+	b->offset = 0;
 
 	prg->stackBlock = b;
 
@@ -108,7 +113,7 @@ Tree **vm_shrink( Program *prg )
 		free( b->data );
 		free( b );
 
-		prg->sb_beg = prg->stackBlock->data;
+		prg->sb_beg = prg->stackBlock->data + prg->stackBlock->offset;
 		prg->sb_end = prg->stackBlock->data + prg->stackBlock->len;
 
 		return prg->sb_beg;
@@ -157,7 +162,7 @@ Program *colmNewProgram( RuntimeData *rtd )
 	 * the first thing it pushes the stackRoot does not become invalid due to a
 	 * free. 
 	 */
-	prg->stackRoot = vm_grow( prg, 1 );
+	prg->stackRoot = vm_grow( prg, 0, 1 );
 	return prg;
 }
 

@@ -28,6 +28,7 @@ typedef struct ColmStackBlock
 {
 	Tree **data;
 	int len;
+	int offset;
 	struct ColmStackBlock *next;
 } StackBlock;
 
