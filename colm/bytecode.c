@@ -698,8 +698,9 @@ again:
 
 void mainExecution( Program *prg, Tree **sp, Execution *exec, Code *code )
 {
+	vm_contiguous( 16 );
+
 	/* Set up the stack as if we have called. We allow a return value. */
-	vm_contiguous( FR_AA );
 	vm_push( 0 ); 
 	vm_push( 0 );
 	vm_push( 0 );

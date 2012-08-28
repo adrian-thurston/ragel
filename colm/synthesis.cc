@@ -1130,6 +1130,9 @@ void LangVarRef::popRefQuals( Compiler *pd, CodeVect &code,
 
 UniqueType *LangVarRef::evaluateCall( Compiler *pd, CodeVect &code, ExprVect *args ) 
 {
+	code.append( IN_CONTIGUOUS );
+	code.appendHalf( 16 );
+
 	/* Evaluate the object. */
 	VarRefLookup lookup = lookupMethod( pd );
 
