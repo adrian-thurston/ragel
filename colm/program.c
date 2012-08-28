@@ -34,6 +34,7 @@
 #include <stdlib.h>
 
 #define VM_STACK_SIZE (SIZEOF_WORD*1024ll*1024ll)
+//#define VM_STACK_SIZE (1)
 
 void colmInit( long debugRealm )
 {
@@ -108,7 +109,7 @@ Tree **vm_shrink( Program *prg )
 	}
 	else {
 		prg->sb_beg = prg->stackBlock->data;
-		prg->sb_end = prg->stackBlock->data + VM_STACK_SIZE;
+		prg->sb_end = prg->stackBlock->data + prg->stackBlock->len;
 	}
 
 	return prg->sb_beg;
@@ -117,7 +118,6 @@ Tree **vm_shrink( Program *prg )
 void vm_contiguous( Program *prg, int n )
 {
 }
-
 
 Tree *returnVal( struct ColmProgram *prg )
 {
@@ -157,7 +157,9 @@ Program *colmNewProgram( RuntimeData *rtd )
 	allocGlobal( prg );
 
 	/*
-	 * Allocate the VM stack.
+	 * Allocate the VM stack. Give it one sentinal so that when execution pops
+	 * the first thing it pushes the stackRoot does not become invalid due to a
+	 * free. 
 	 */
 	prg->stackRoot = vm_grow( prg, 1 );
 	return prg;
@@ -169,6 +171,7 @@ void colmRunProgram( Program *prg, int argc, const char **argv )
 		return;
 
 	Tree **sp = prg->stackRoot;
+	vm_push(0);
 
 	/* Make the arguments available to the program. */
 	prg->argc = argc;
@@ -189,6 +192,7 @@ void colmRunProgram( Program *prg, int argc, const char **argv )
 int colmDeleteProgram( Program *prg )
 {
 	Tree **sp = prg->stackRoot;
+	vm_push(0);
 	int exitStatus = prg->exitStatus;
 
 	//cerr << "clearing the prg" << endl;

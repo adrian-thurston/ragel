@@ -415,8 +415,8 @@ typedef unsigned char uchar;
 
 /* Exported to modules other than bytecode.c */
 #define vm_push(i)      ( ( sp == prg->sb_beg ? (sp = vm_grow(prg, 1)) : 0 ),     (*(--sp) = (i)) )
-#define vm_pop()        ( ( sp == prg->sb_end ? (sp = vm_shrink(prg)) : 0 ),      (*sp++) )
-#define vm_pop_ignore() ( ( sp == prg->sb_end ? (sp = vm_shrink(prg)) : 0 ),      (sp++) )
+#define vm_pop()        ({ SW r = *sp++; if ( sp == prg->sb_end ) { sp = vm_shrink(prg); }; r; })
+#define vm_pop_ignore() ({ sp++; if ( sp == prg->sb_end ) { sp = vm_shrink(prg); }; })
 #define vm_pushn(n)     ( ( (sp-(n)) < prg->sb_beg ? (sp = vm_grow(prg, n)) : 0 ),(sp -= (n)) )
 #define vm_popn(n)      ( ( (sp+(n)) > prg->sb_end ? (sp = vm_shrink(prg)) : 0 ), (sp += (n)) )
 
