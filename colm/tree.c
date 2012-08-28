@@ -1674,6 +1674,7 @@ rec_call:
 	else {
 		child = treeChild( prg, iter->ref.kid->tree );
 		if ( child != 0 ) {
+			vm_contiguous( 2 );
 			vm_push( (SW) iter->ref.next );
 			vm_push( (SW) iter->ref.kid );
 			iter->ref.kid = child;
@@ -1729,6 +1730,7 @@ Tree *treeIterNextChild( Program *prg, Tree ***psp, TreeIter *iter )
 			iter->ref.next = 0;
 		else {
 			/* Make a reference to the root. */
+			vm_contiguous( 2 );
 			vm_push( (SW) iter->rootRef.next );
 			vm_push( (SW) iter->rootRef.kid );
 			iter->ref.next = (Ref*)vm_ptop();
@@ -1819,6 +1821,7 @@ rec_call:
 		if ( top == vm_ptop() || iter->ref.kid->next == 0  ) {
 			child = treeChild( prg, iter->ref.kid->tree );
 			if ( child != 0 ) {
+				vm_contiguous( 2 );
 				vm_push( (SW) iter->ref.next );
 				vm_push( (SW) iter->ref.kid );
 				iter->ref.kid = child;
@@ -1875,6 +1878,7 @@ void iterFindRevRepeat( Program *prg, Tree ***psp, TreeIter *iter, int tryFirst 
 
 				if ( child == 0 )
 					break;
+				vm_contiguous( 2 );
 				vm_push( (SW) iter->ref.next );
 				vm_push( (SW) iter->ref.kid );
 				iter->ref.kid = child;
