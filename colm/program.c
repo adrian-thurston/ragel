@@ -84,19 +84,29 @@ Tree **vm_grow( Program *prg, Tree **sp, int n )
 		prg->sb_total += prg->stackBlock->len - prg->stackBlock->offset;
 	}
 
-	StackBlock *b = malloc( sizeof(StackBlock) );
-	int size = VM_STACK_SIZE;
-	if ( n > size )
-		size = n;
-	b->next = prg->stackBlock;
-	b->data = malloc( sizeof(Tree*) * size );
-	b->len = size;
-	b->offset = 0;
+	if ( prg->reserve != 0 && prg->reserve->len >= n) {
+		StackBlock *b = prg->reserve;
+		b->next = prg->stackBlock;
+		b->offset = 0;
 
-	prg->stackBlock = b;
+		prg->stackBlock = b;
+		prg->reserve = 0;
+	}
+	else {
+		StackBlock *b = malloc( sizeof(StackBlock) );
+		int size = VM_STACK_SIZE;
+		if ( n > size )
+			size = n;
+		b->next = prg->stackBlock;
+		b->data = malloc( sizeof(Tree*) * size );
+		b->len = size;
+		b->offset = 0;
+
+		prg->stackBlock = b;
+	}
 
 	prg->sb_beg = prg->stackBlock->data;
-	prg->sb_end = prg->stackBlock->data + size;
+	prg->sb_end = prg->stackBlock->data + prg->stackBlock->len;
 
 	return prg->sb_end;
 }
@@ -109,12 +119,18 @@ Tree **vm_shrink( Program *prg )
 		return prg->sb_end;
 	}
 	else {
+		if ( prg->reserve != 0 ) {
+			free( prg->reserve->data );
+			free( prg->reserve );
+		}
+
 		StackBlock *b = prg->stackBlock;
 		prg->stackBlock = prg->stackBlock->next;
 
-		free( b->data );
-		free( b );
+		prg->reserve = b;
 
+		/* FIXME: need to use offset here? Maybe we can grant more space in
+		 * case any push that follows has fewer requirements. */
 		prg->sb_beg = prg->stackBlock->data + prg->stackBlock->offset;
 		prg->sb_end = prg->stackBlock->data + prg->stackBlock->len;
 

@@ -125,6 +125,7 @@ typedef struct ColmProgram
 	Tree **sb_beg;
 	Tree **sb_end;
 	long sb_total;
+	StackBlock *reserve;
 
 	StackBlock *stackBlock;
 	Tree **stackRoot;
