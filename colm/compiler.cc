@@ -441,7 +441,8 @@ Compiler::Compiler( const String &fileName, const String &sectionName,
 	predValue(0),
 	nextMatchEndNum(0),
 	argvTypeRef(0),
-	context(0)
+	context(0),
+	inContiguous(false)
 {
 }
 

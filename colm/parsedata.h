@@ -1040,6 +1040,8 @@ struct Compiler
 	TypeRef *argvTypeRef;
 
 	Context *context;
+
+	bool inContiguous;
 };
 
 void afterOpMinimize( FsmGraph *fsm, bool lastInSeq = true );

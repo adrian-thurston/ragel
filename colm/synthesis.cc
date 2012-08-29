@@ -1130,8 +1130,13 @@ void LangVarRef::popRefQuals( Compiler *pd, CodeVect &code,
 
 UniqueType *LangVarRef::evaluateCall( Compiler *pd, CodeVect &code, ExprVect *args ) 
 {
-	code.append( IN_CONTIGUOUS );
-	code.appendHalf( 512 );
+	bool resetContiguous = false;
+	if ( !pd->inContiguous ) {
+		code.append( IN_CONTIGUOUS );
+		code.appendHalf( 512 );
+		pd->inContiguous = true;
+		resetContiguous = true;
+	}
 
 	/* Evaluate the object. */
 	VarRefLookup lookup = lookupMethod( pd );
@@ -1146,6 +1151,9 @@ UniqueType *LangVarRef::evaluateCall( Compiler *pd, CodeVect &code, ExprVect *ar
 
 	resetActiveRefs( pd, lookup, paramRefs);
 	delete[] paramRefs;
+
+	if ( resetContiguous )
+		pd->inContiguous = false; 
 
 	/* Return the type to the expression. */
 	return lookup.uniqueType;
@@ -1979,6 +1987,14 @@ UniqueType *LangTerm::evaluateMakeToken( Compiler *pd, CodeVect &code ) const
 
 UniqueType *LangTerm::evaluateMakeTree( Compiler *pd, CodeVect &code ) const
 {
+	bool resetContiguous = false;
+	if ( !pd->inContiguous ) {
+		code.append( IN_CONTIGUOUS );
+		code.appendHalf( 512 );
+		pd->inContiguous = true;
+		resetContiguous = true;
+	}
+
 	if ( pd->compileContext != Compiler::CompileTranslation )
 		error(loc) << "make_tree can be used only in a translation block" << endp;
 
@@ -1998,6 +2014,9 @@ UniqueType *LangTerm::evaluateMakeTree( Compiler *pd, CodeVect &code ) const
 	/* The token is now created, send it. */
 	code.append( IN_MAKE_TREE );
 	code.append( args->length() );
+
+	if ( resetContiguous )
+		pd->inContiguous = false; 
 
 	return pd->uniqueTypeAny;
 }
@@ -2100,8 +2119,13 @@ LangTerm *LangStmt::chooseDefaultIter( Compiler *pd, LangTerm *fromVarRef ) cons
 
 void LangStmt::compileForIter( Compiler *pd, CodeVect &code ) const
 {
-	code.append( IN_CONTIGUOUS );
-	code.appendHalf( 512 );
+	bool resetContiguous = false;
+	if ( !pd->inContiguous ) {
+		code.append( IN_CONTIGUOUS );
+		code.appendHalf( 512 );
+		pd->inContiguous = true;
+		resetContiguous = true;
+	}
 
 	pd->curLocalFrame->iterPushScope();
 
@@ -2163,6 +2187,9 @@ void LangStmt::compileForIter( Compiler *pd, CodeVect &code ) const
 	delete[] paramRefs;
 
 	pd->curLocalFrame->iterPopScope();
+
+	if ( resetContiguous )
+		pd->inContiguous = false; 
 }
 
 void LangStmt::compileWhile( Compiler *pd, CodeVect &code ) const
