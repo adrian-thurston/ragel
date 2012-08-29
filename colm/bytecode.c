@@ -388,7 +388,7 @@ void uiterInit( Program *prg, Tree **sp, UserIter *uiter,
 {
 	/* Set up the first yeild so when we resume it starts at the beginning. */
 	uiter->ref.kid = 0;
-	uiter->yieldSize = uiter->stackRoot - vm_ptop();
+	uiter->yieldSize = vm_ssize() - uiter->rootSize;
 	uiter->frame = &uiter->stackRoot[-IFR_AA];
 
 	if ( revertOn )
@@ -400,7 +400,7 @@ void uiterInit( Program *prg, Tree **sp, UserIter *uiter,
 void treeIterDestroy( Program *prg, Tree ***psp, TreeIter *iter )
 {
 	Tree **sp = *psp;
-	long curStackSize = iter->stackRoot - vm_ptop();
+	long curStackSize = vm_ssize() - iter->rootSize;
 	assert( iter->yieldSize == curStackSize );
 	vm_popn( iter->yieldSize );
 	*psp = sp;
@@ -412,12 +412,12 @@ void userIterDestroy( Program *prg, Tree ***psp, UserIter *uiter )
 
 	/* We should always be coming from a yield. The current stack size will be
 	 * nonzero and the stack size in the iterator will be correct. */
-	long curStackSize = uiter->stackRoot - vm_ptop();
+	long curStackSize = vm_ssize() - uiter->rootSize;
 	assert( uiter->yieldSize == curStackSize );
 
 	long argSize = uiter->argSize;
 
-	vm_popn( uiter->stackRoot - vm_ptop() );
+	vm_popn( uiter->yieldSize );
 	vm_popn( sizeof(UserIter) / sizeof(Word) );
 	vm_popn( argSize );
 
@@ -1207,7 +1207,7 @@ again:
 			/* Get the iterator. */
 			UserIter *uiter = (UserIter*) vm_local(field);
 
-			long yieldSize = uiter->stackRoot - vm_ptop();
+			long yieldSize = vm_ssize() - uiter->rootSize;
 			assert( uiter->yieldSize == yieldSize );
 
 			/* Fix the return instruction pointer. */
@@ -1918,7 +1918,7 @@ again:
 			debug( REALM_BYTECODE, "IN_REV_TRITER_DESTROY\n" );
 
 			RevTreeIter *iter = (RevTreeIter*) vm_plocal(field);
-			long curStackSize = iter->stackRoot - vm_ptop();
+			long curStackSize = vm_ssize() - iter->rootSize;
 			assert( iter->yieldSize == curStackSize );
 			vm_popn( iter->yieldSize );
 			break;
@@ -3342,7 +3342,7 @@ again:
 				/* Store the yeilded value. */
 				uiter->ref.kid = kid;
 				uiter->ref.next = next;
-				uiter->yieldSize = uiter->stackRoot - vm_ptop();
+				uiter->yieldSize = vm_ssize() - uiter->rootSize;
 				uiter->resume = instr;
 				uiter->frame = exec->framePtr;
 

@@ -1704,7 +1704,8 @@ rec_call:
 
 Tree *treeIterAdvance( Program *prg, Tree ***psp, TreeIter *iter )
 {
-	assert( iter->yieldSize == iter->stackRoot - *psp );
+	Tree **sp = *psp;
+	assert( iter->yieldSize == (vm_ssize() - iter->rootSize) );
 
 	if ( iter->ref.kid == 0 ) {
 		/* Kid is zero, start from the root. */
@@ -1716,7 +1717,8 @@ Tree *treeIterAdvance( Program *prg, Tree ***psp, TreeIter *iter )
 		iterFind( prg, psp, iter, false );
 	}
 
-	iter->yieldSize = iter->stackRoot - *psp;
+	sp = *psp;
+	iter->yieldSize = vm_ssize() - iter->rootSize;
 
 	return (iter->ref.kid ? prg->trueVal : prg->falseVal );
 }
@@ -1724,7 +1726,7 @@ Tree *treeIterAdvance( Program *prg, Tree ***psp, TreeIter *iter )
 Tree *treeIterNextChild( Program *prg, Tree ***psp, TreeIter *iter )
 {
 	Tree **sp = *psp;
-	assert( iter->yieldSize == iter->stackRoot - vm_ptop() );
+	assert( iter->yieldSize == (vm_ssize() - iter->rootSize) );
 	Kid *kid = 0;
 
 	if ( iter->ref.kid == 0 ) {
@@ -1755,7 +1757,7 @@ Tree *treeIterNextChild( Program *prg, Tree ***psp, TreeIter *iter )
 	}
 
 	iter->ref.kid = kid;
-	iter->yieldSize = iter->stackRoot - vm_ptop();
+	iter->yieldSize = vm_ssize() - iter->rootSize;
 	*psp = sp;
 	return ( iter->ref.kid ? prg->trueVal : prg->falseVal );
 }
@@ -1763,8 +1765,7 @@ Tree *treeIterNextChild( Program *prg, Tree ***psp, TreeIter *iter )
 Tree *treeRevIterPrevChild( Program *prg, Tree ***psp, RevTreeIter *iter )
 {
 	Tree **sp = *psp;
-
-	assert( iter->yieldSize == iter->stackRoot - vm_ptop() );
+	assert( iter->yieldSize == ( vm_ssize() - iter->rootSize ) );
 
 	if ( iter->kidAtYield != iter->ref.kid ) {
 		/* Need to reload the kids. */
@@ -1799,7 +1800,7 @@ Tree *treeRevIterPrevChild( Program *prg, Tree ***psp, RevTreeIter *iter )
 	/* We will use this to detect a split above the iterated tree. */
 	iter->kidAtYield = iter->ref.kid;
 
-	iter->yieldSize = iter->stackRoot - vm_ptop();
+	iter->yieldSize = vm_ssize() - iter->rootSize;
 
 	*psp = sp;
 
@@ -1852,7 +1853,8 @@ rec_call:
 
 Tree *treeIterNextRepeat( Program *prg, Tree ***psp, TreeIter *iter )
 {
-	assert( iter->yieldSize == iter->stackRoot - *psp );
+	Tree **sp = *psp;
+	assert( iter->yieldSize == ( vm_ssize() - iter->rootSize ) );
 
 	if ( iter->ref.kid == 0 ) {
 		/* Kid is zero, start from the root. */
@@ -1864,7 +1866,8 @@ Tree *treeIterNextRepeat( Program *prg, Tree ***psp, TreeIter *iter )
 		iterFindRepeat( prg, psp, iter, false );
 	}
 
-	iter->yieldSize = iter->stackRoot - *psp;
+	sp = *psp;
+	iter->yieldSize = vm_ssize() - iter->rootSize;
 
 	return (iter->ref.kid ? prg->trueVal : prg->falseVal );
 }
@@ -1928,7 +1931,8 @@ first:
 
 Tree *treeIterPrevRepeat( Program *prg, Tree ***psp, TreeIter *iter )
 {
-	assert( iter->yieldSize == iter->stackRoot - *psp );
+	Tree **sp = *psp;
+	assert( iter->yieldSize == (vm_ssize() - iter->rootSize) );
 
 	if ( iter->ref.kid == 0 ) {
 		/* Kid is zero, start from the root. */
@@ -1940,7 +1944,8 @@ Tree *treeIterPrevRepeat( Program *prg, Tree ***psp, TreeIter *iter )
 		iterFindRevRepeat( prg, psp, iter, false );
 	}
 
-	iter->yieldSize = iter->stackRoot - *psp;
+	sp = *psp;
+	iter->yieldSize = vm_ssize() - iter->rootSize;
 
 	return (iter->ref.kid ? prg->trueVal : prg->falseVal );
 }
