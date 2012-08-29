@@ -705,7 +705,7 @@ void mainExecution( Program *prg, Execution *exec, Code *code )
 {
 	Tree **sp = prg->stackRoot;
 
-	vm_contiguous( 64 );
+	vm_contiguous( 512 );
 
 	/* Set up the stack as if we have called. We allow a return value. */
 	vm_push( 0 ); 
@@ -2192,7 +2192,7 @@ again:
 		case IN_PCR_CALL: {
 			debug( REALM_BYTECODE, "IN_PCR_CALL\n" );
 
-			vm_contiguous( 64 );
+			vm_contiguous( 512 );
 
 			vm_push( (SW)exec->framePtr );
 			vm_push( (SW)exec->iframePtr );
@@ -2694,6 +2694,7 @@ again:
 
 			/* First push the null next pointer, then the kid pointer. */
 			Tree **ptr = vm_plocal(field);
+			vm_contiguous( 2 );
 			vm_push( 0 );
 			vm_push( (SW)ptr );
 			break;
@@ -2705,6 +2706,7 @@ again:
 			debug( REALM_BYTECODE, "IN_REF_FROM_REF\n" );
 
 			Ref *ref = (Ref*)vm_plocal(field);
+			vm_contiguous( 2 );
 			vm_push( (SW)ref );
 			vm_push( (SW)ref->kid );
 			break;
@@ -2722,6 +2724,7 @@ again:
 			Tree *obj = ref->kid->tree;
 			Kid *attr_kid = getFieldKid( obj, field );
 
+			vm_contiguous( 2 );
 			vm_push( (SW)ref );
 			vm_push( (SW)attr_kid );
 			break;
@@ -2735,6 +2738,7 @@ again:
 			/* Push the next pointer first, then the kid. */
 			TreeIter *iter = (TreeIter*) vm_plocal(field);
 			Ref *ref = &iter->ref;
+			vm_contiguous( 2 );
 			vm_push( (SW)ref );
 			vm_push( (SW)iter->ref.kid );
 			break;
@@ -2747,6 +2751,7 @@ again:
 
 			/* Push the next pointer first, then the kid. */
 			UserIter *uiter = (UserIter*) vm_local(field);
+			vm_contiguous( 2 );
 			vm_push( (SW)uiter->ref.next );
 			vm_push( (SW)uiter->ref.kid );
 			break;

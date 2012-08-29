@@ -1131,7 +1131,7 @@ void LangVarRef::popRefQuals( Compiler *pd, CodeVect &code,
 UniqueType *LangVarRef::evaluateCall( Compiler *pd, CodeVect &code, ExprVect *args ) 
 {
 	code.append( IN_CONTIGUOUS );
-	code.appendHalf( 64 );
+	code.appendHalf( 512 );
 
 	/* Evaluate the object. */
 	VarRefLookup lookup = lookupMethod( pd );
@@ -2101,7 +2101,7 @@ LangTerm *LangStmt::chooseDefaultIter( Compiler *pd, LangTerm *fromVarRef ) cons
 void LangStmt::compileForIter( Compiler *pd, CodeVect &code ) const
 {
 	code.append( IN_CONTIGUOUS );
-	code.appendHalf( 64 );
+	code.appendHalf( 512 );
 
 	pd->curLocalFrame->iterPushScope();
 
