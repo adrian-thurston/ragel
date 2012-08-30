@@ -92,7 +92,7 @@ void vm_init( Program *prg )
 	prg->stackRoot = prg->sb_end;
 }
 
-Tree **vm_grow( Program *prg, Tree **sp, int n )
+Tree **vm_bs_add( Program *prg, Tree **sp, int n )
 {
 	/* Close off the current block. */
 	if ( prg->stackBlock != 0 ) {
@@ -127,32 +127,47 @@ Tree **vm_grow( Program *prg, Tree **sp, int n )
 	return prg->sb_end;
 }
 
-Tree **vm_shrink( Program *prg )
+Tree **vm_bs_pop( Program *prg, Tree **sp, int n )
 {
-	if ( prg->stackBlock->next == 0 ) {
-		/* Don't delete the sentinal stack block. Returns the end as in the
-		 * creation of the first stack block. */
-		return prg->sb_end;
-	}
-	else {
+	while ( 1 ) {
+		Tree **end = prg->stackBlock->data + prg->stackBlock->len;
+		int remaining = end - sp;
+
+		/* Don't have to free this block. Remaining values to pop leave us
+		 * inside it. */
+		if ( n < remaining ) {
+			sp += n;
+			return sp;
+		}
+
+		if ( prg->stackBlock->next == 0 ) {
+			/* Don't delete the sentinal stack block. Returns the end as in the
+			 * creation of the first stack block. */
+			return prg->sb_end;
+		}
+	
+		/* Clear any previous reserve. We are going to save this block as the
+		 * reserve. */
 		if ( prg->reserve != 0 ) {
 			free( prg->reserve->data );
 			free( prg->reserve );
 		}
 
+		/* Pop the stack block. */
 		StackBlock *b = prg->stackBlock;
 		prg->stackBlock = prg->stackBlock->next;
-
 		prg->reserve = b;
 
-		/* FIXME: need to use offset here? Maybe we can grant more space in
-		 * case any push that follows has fewer requirements. */
+		/* Setup the bounds. Need to use offset here? Maybe we can grant more
+		 * space in case any push that follows has fewer requirements. */
 		prg->sb_beg = prg->stackBlock->data + prg->stackBlock->offset;
 		prg->sb_end = prg->stackBlock->data + prg->stackBlock->len;
 
+		/* Update the total stack usage. */
 		prg->sb_total -= prg->stackBlock->len - prg->stackBlock->offset;
 
-		return prg->sb_beg;
+		n -= remaining;
+		sp = prg->sb_beg;
 	}
 }
 

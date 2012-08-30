@@ -414,13 +414,14 @@ typedef unsigned char uchar;
 #define IFR_RFR 0    /* return frame pointer */
 
 /* Exported to modules other than bytecode.c */
-#define vm_push(i)      ( ( sp == prg->sb_beg ? (sp = vm_grow(prg, sp, 1)) : 0 ), (*(--sp) = (i)) )
-#define vm_pop()        ({ SW r = *sp++; if ( sp == prg->sb_end ) { sp = vm_shrink(prg); }; r; })
-#define vm_pop_ignore() ({ sp++; if ( sp == prg->sb_end ) { sp = vm_shrink(prg); }; })
-#define vm_pushn(n)     ( ( (sp-(n)) < prg->sb_beg ? (sp = vm_grow(prg, sp, n)) : 0 ),(sp -= (n)) )
-#define vm_popn(n)      ( ( (sp+(n)) > prg->sb_end ? (sp = vm_shrink(prg)) : 0 ), (sp += (n)) )
+#define vm_push(i)      ( ( sp == prg->sb_beg ? (sp = vm_bs_add(prg, sp, 1)) : 0 ), (*(--sp) = (i)) )
+#define vm_pushn(n)     ( ( (sp-(n)) < prg->sb_beg ? (sp = vm_bs_add(prg, sp, n)) : 0 ), (sp -= (n)) )
 
-#define vm_contiguous(n) ( ( (sp-(n)) < prg->sb_beg ? (sp = vm_grow(prg, sp, n)) : 0 ) )
+#define vm_pop()        ({ SW r = *sp; (sp+1) >= prg->sb_end ? (sp = vm_bs_pop(prg, sp, 1)) : (sp += 1); r; })
+#define vm_pop_ignore() ({ (sp+1) >= prg->sb_end ? (sp = vm_bs_pop(prg, sp, 1)) : (sp += 1); })
+#define vm_popn(n)      ({ (sp+(n)) >= prg->sb_end ? (sp = vm_bs_pop(prg, sp, n)) : (sp += (n)); })
+
+#define vm_contiguous(n) ( ( (sp-(n)) < prg->sb_beg ? (sp = vm_bs_add(prg, sp, n)) : 0 ) )
 
 #define vm_top() (*sp)
 #define vm_ptop() (sp)
@@ -433,8 +434,8 @@ typedef unsigned char uchar;
 #define vm_plocal_iframe(o) (&exec->iframePtr[o])
 
 void vm_init( struct ColmProgram * );
-Tree** vm_grow( struct ColmProgram *, Tree **, int );
-Tree** vm_shrink( struct ColmProgram * );
+Tree** vm_bs_add( struct ColmProgram *, Tree **, int );
+Tree** vm_bs_pop( struct ColmProgram *, Tree **, int );
 void vm_clear( struct ColmProgram * );
 
 typedef Tree *SW;
