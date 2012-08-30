@@ -1895,14 +1895,21 @@ again:
 			Ref rootRef;
 			rootRef.kid = (Kid*)vm_pop();
 			rootRef.next = (Ref*)vm_pop();
-
-			Tree **stackRoot = vm_ptop();
-			long rootSize = vm_ssize();
-
+			
 			int children = 0;
 			Kid *kid = treeChild( prg, rootRef.kid->tree );
 			while ( kid != 0 ) {
 				children++;
+				kid = kid->next;
+			}
+
+			vm_contiguous( children );
+
+			Tree **stackRoot = vm_ptop();
+			long rootSize = vm_ssize();
+
+			kid = treeChild( prg, rootRef.kid->tree );
+			while ( kid != 0 ) {
 				vm_push( (SW) kid );
 				kid = kid->next;
 			}
