@@ -76,6 +76,22 @@ void allocGlobal( Program *prg )
 	prg->global = tree;
 }
 
+void vm_init( Program *prg )
+{
+	StackBlock *b = malloc( sizeof(StackBlock) );
+	b->data = malloc( sizeof(Tree*) * VM_STACK_SIZE );
+	b->len = VM_STACK_SIZE;
+	b->offset = 0;
+	b->next = 0;
+
+	prg->stackBlock = b;
+
+	prg->sb_beg = prg->stackBlock->data;
+	prg->sb_end = prg->stackBlock->data + prg->stackBlock->len;
+
+	prg->stackRoot = prg->sb_end;
+}
+
 Tree **vm_grow( Program *prg, Tree **sp, int n )
 {
 	/* Close off the current block. */
@@ -140,6 +156,17 @@ Tree **vm_shrink( Program *prg )
 	}
 }
 
+void vm_clear( Program *prg )
+{
+	while ( prg->stackBlock != 0 ) {
+		StackBlock *b = prg->stackBlock;
+		prg->stackBlock = prg->stackBlock->next;
+		
+		free( b->data );
+		free( b );
+	}
+}
+
 Tree *returnVal( struct ColmProgram *prg )
 {
 	return prg->returnVal;
@@ -177,12 +204,8 @@ Program *colmNewProgram( RuntimeData *rtd )
 	/* Allocate the global variable. */
 	allocGlobal( prg );
 
-	/*
-	 * Allocate the VM stack. Give it one sentinal so that when execution pops
-	 * the first thing it pushes the stackRoot does not become invalid due to a
-	 * free. 
-	 */
-	prg->stackRoot = vm_grow( prg, 0, 1 );
+	/* Allocate the VM stack. */
+	vm_init( prg);
 	return prg;
 }
 
@@ -280,8 +303,7 @@ int colmDeleteProgram( Program *prg )
 		rb = next;
 	}
 
-	while ( prg->stackBlock->next != 0 )
-		vm_shrink( prg );
+	vm_clear( prg );
 
 	free( prg );
 

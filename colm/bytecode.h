@@ -432,8 +432,10 @@ typedef unsigned char uchar;
 #define vm_local_iframe(o) (exec->iframePtr[o])
 #define vm_plocal_iframe(o) (&exec->iframePtr[o])
 
+void vm_init( struct ColmProgram * );
 Tree** vm_grow( struct ColmProgram *, Tree **, int );
 Tree** vm_shrink( struct ColmProgram * );
+void vm_clear( struct ColmProgram * );
 
 typedef Tree *SW;
 typedef Tree **StackPtr;
