@@ -719,6 +719,7 @@ void mainExecution( Program *prg, Execution *exec, Code *code )
 	vm_pop_ignore();
 	vm_pop_ignore();
 	prg->returnVal = vm_pop();
+	vm_pop_ignore();
 
 	prg->stackRoot = sp;
 }
@@ -3533,6 +3534,11 @@ again:
 
 				vm_popn( fi->frameSize );
 
+				/* We stop on the root, leaving the psuedo-call setup on the
+				 * stack. Note we exclude the local data. */
+				if ( frameId == prg->rtd->rootFrameId )
+					break;
+
 				/* Call layout. */
 				exec->frameId = (long) vm_pop();
 				exec->framePtr = (Tree**) vm_pop();
@@ -3541,11 +3547,6 @@ again:
 				vm_popn( fi->argSize );
 
 				treeDownref( prg, sp, retVal );
-
-				/* We stop on the root, which doesn't have the full function
-				 * stack layout. */
-				if ( frameId == prg->rtd->rootFrameId )
-					break;
 			}
 
 			goto out;
