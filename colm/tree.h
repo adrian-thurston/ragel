@@ -243,7 +243,6 @@ typedef struct _RevTreeIter
 	/* For detecting a split at the leaf. */
 	Kid *kidAtYield;
 	long children;
-	Kid **cur;
 } RevTreeIter;
 
 typedef struct _UserIter

@@ -1769,32 +1769,36 @@ Tree *treeRevIterPrevChild( Program *prg, Tree ***psp, RevTreeIter *iter )
 
 	if ( iter->kidAtYield != iter->ref.kid ) {
 		/* Need to reload the kids. */
+		vm_popn( iter->children );
+
+		int c;
 		Kid *kid = treeChild( prg, iter->rootRef.kid->tree );
-		Kid **dst = (Kid**)iter->stackRoot - 1;
-		while ( kid != 0 ) {
-			*dst-- = kid;
+		for ( c = 0; c < iter->children; c++ ) {
+			vm_push( (SW)kid );
 			kid = kid->next;
 		}
 	}
 
-	if ( iter->ref.kid == 0 )
-		iter->cur = (Kid**)iter->stackRoot - iter->children;
-	else
-		iter->cur += 1;
+	if ( iter->ref.kid != 0 ) {
+		vm_pop_ignore();
+		iter->children -= 1;
+	}
 
 	if ( iter->searchId != prg->rtd->anyId ) {
 		/* Have a previous item, go to the next sibling. */
-		while ( iter->cur != (Kid**)iter->stackRoot && (*iter->cur)->tree->id != iter->searchId )
-			iter->cur += 1;
+		while ( iter->children > 0 && ((Kid*)(vm_top()))->tree->id != iter->searchId ) {
+			iter->children -= 1;
+			vm_pop_ignore();
+		}
 	}
 
-	if ( iter->cur == (Kid**)iter->stackRoot ) {
+	if ( iter->children == 0 ) {
 		iter->ref.next = 0;
 		iter->ref.kid = 0;
 	}
 	else {
 		iter->ref.next = &iter->rootRef;
-		iter->ref.kid = *iter->cur;
+		iter->ref.kid = (Kid*)vm_top();
 	}
 
 	/* We will use this to detect a split above the iterated tree. */
