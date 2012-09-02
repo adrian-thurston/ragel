@@ -179,6 +179,11 @@ void vm_clear( Program *prg )
 		free( b->data );
 		free( b );
 	}
+
+	if ( prg->reserve != 0 ) {
+		free( prg->reserve->data );
+		free( prg->reserve );
+	}
 }
 
 Tree *returnVal( struct ColmProgram *prg )
