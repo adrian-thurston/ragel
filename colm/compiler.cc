@@ -1343,7 +1343,6 @@ void Compiler::parsePatterns()
 	}
 
 	fillInPatterns( prg );
-	colmDeleteProgram( prg );
 }
 
 void Compiler::collectParserEls( BstSet<LangEl*> &parserEls )
