@@ -220,7 +220,7 @@ Program *colmNewProgram( RuntimeData *rtd )
 	allocGlobal( prg );
 
 	/* Allocate the VM stack. */
-	vm_init( prg);
+	vm_init( prg );
 	return prg;
 }
 
