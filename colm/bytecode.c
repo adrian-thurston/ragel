@@ -705,7 +705,9 @@ void mainExecution( Program *prg, Execution *exec, Code *code )
 {
 	Tree **sp = prg->stackRoot;
 
-	vm_contiguous( 512 );
+	FrameInfo *fi = &prg->rtd->frameInfo[prg->rtd->rootFrameId];
+	long stretch = fi->argSize + 4 + fi->frameSize;
+	vm_contiguous( stretch );
 
 	/* Set up the stack as if we have called. We allow a return value. */
 	vm_push( 0 ); 
@@ -2193,7 +2195,9 @@ again:
 		case IN_PCR_CALL: {
 			debug( REALM_BYTECODE, "IN_PCR_CALL\n" );
 
-			vm_contiguous( 512 );
+			FrameInfo *fi = &prg->rtd->frameInfo[exec->parser->pdaRun->frameId];
+			long stretch = fi->argSize + 4 + fi->frameSize;
+			vm_contiguous( stretch );
 
 			vm_push( (SW)exec->framePtr );
 			vm_push( (SW)exec->iframePtr );

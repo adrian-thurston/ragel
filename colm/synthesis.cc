@@ -1130,16 +1130,32 @@ void LangVarRef::popRefQuals( Compiler *pd, CodeVect &code,
 
 UniqueType *LangVarRef::evaluateCall( Compiler *pd, CodeVect &code, ExprVect *args ) 
 {
-	bool resetContiguous = false;
-	if ( !pd->inContiguous ) {
-		code.append( IN_CONTIGUOUS );
-		code.appendHalf( 512 );
-		pd->inContiguous = true;
-		resetContiguous = true;
-	}
-
 	/* Evaluate the object. */
 	VarRefLookup lookup = lookupMethod( pd );
+
+	bool resetContiguous = false;
+	if ( pd->inContiguous ) {
+		Function *func = lookup.objMethod->func;
+		if ( func != 0 ) {
+			long stretch = func->paramListSize + 5 + func->localFrame->size();
+			cout << "call: " << func->paramListSize << " " << func->localFrame->size() << endl;
+			pd->contiguousStretch += stretch;
+		}
+	}
+	else {
+		Function *func = lookup.objMethod->func;
+		if ( func != 0 ) {
+			long stretch = func->paramListSize + 5 + func->localFrame->size();
+			cout << "call: " << func->paramListSize << " " << func->localFrame->size() << endl;
+			pd->contiguousStretch = stretch;
+
+			code.append( IN_CONTIGUOUS );
+			pd->contiguousOffset = code.length();
+			code.appendHalf( 0 );
+			pd->inContiguous = true;
+			resetContiguous = true;
+		}
+	}
 
 	/* Evaluate and push the arguments. */
 	ObjField **paramRefs = evaluateArgs( pd, code, lookup, args );
@@ -1152,8 +1168,11 @@ UniqueType *LangVarRef::evaluateCall( Compiler *pd, CodeVect &code, ExprVect *ar
 	resetActiveRefs( pd, lookup, paramRefs);
 	delete[] paramRefs;
 
-	if ( resetContiguous )
+	if ( resetContiguous ) {
 		pd->inContiguous = false; 
+		code.setHalf( pd->contiguousOffset, pd->contiguousStretch );
+		pd->contiguousOffset = 0;
+	}
 
 	/* Return the type to the expression. */
 	return lookup.uniqueType;
@@ -1960,12 +1979,21 @@ void LangVarRef::assignValue( Compiler *pd, CodeVect &code,
 UniqueType *LangTerm::evaluateMakeToken( Compiler *pd, CodeVect &code ) const
 {
 	bool resetContiguous = false;
-	if ( !pd->inContiguous ) {
+	if ( pd->inContiguous ) {
+		long stretch = args->length() + 2;
+		pd->contiguousStretch += stretch;
+	}
+	else {
+		long stretch = args->length() + 2;
+		pd->contiguousStretch = stretch;
+
 		code.append( IN_CONTIGUOUS );
-		code.appendHalf( 512 );
+		pd->contiguousOffset = code.length();
+		code.appendHalf( 0 );
 		pd->inContiguous = true;
 		resetContiguous = true;
 	}
+
 //	if ( pd->compileContext != Compiler::CompileTranslation )
 //		error(loc) << "make_token can be used only in a translation block" << endp;
 
@@ -1989,8 +2017,11 @@ UniqueType *LangTerm::evaluateMakeToken( Compiler *pd, CodeVect &code ) const
 	code.append( IN_MAKE_TOKEN );
 	code.append( args->length() );
 
-	if ( resetContiguous )
+	if ( resetContiguous ) {
 		pd->inContiguous = false; 
+		code.setHalf( pd->contiguousOffset, pd->contiguousStretch );
+		pd->contiguousOffset = 0;
+	}
 
 	return pd->uniqueTypeAny;
 }
@@ -1998,9 +2029,17 @@ UniqueType *LangTerm::evaluateMakeToken( Compiler *pd, CodeVect &code ) const
 UniqueType *LangTerm::evaluateMakeTree( Compiler *pd, CodeVect &code ) const
 {
 	bool resetContiguous = false;
-	if ( !pd->inContiguous ) {
+	if ( pd->inContiguous ) {
+		long stretch = args->length() + 2;
+		pd->contiguousStretch += stretch;
+	}
+	else {
+		long stretch = args->length() + 2;
+		pd->contiguousStretch = stretch;
+
 		code.append( IN_CONTIGUOUS );
-		code.appendHalf( 512 );
+		pd->contiguousOffset = code.length();
+		code.appendHalf( 0 );
 		pd->inContiguous = true;
 		resetContiguous = true;
 	}
@@ -2025,8 +2064,11 @@ UniqueType *LangTerm::evaluateMakeTree( Compiler *pd, CodeVect &code ) const
 	code.append( IN_MAKE_TREE );
 	code.append( args->length() );
 
-	if ( resetContiguous )
+	if ( resetContiguous ) {
 		pd->inContiguous = false; 
+		code.setHalf( pd->contiguousOffset, pd->contiguousStretch );
+		pd->contiguousOffset = 0;
+	}
 
 	return pd->uniqueTypeAny;
 }
@@ -2129,14 +2171,6 @@ LangTerm *LangStmt::chooseDefaultIter( Compiler *pd, LangTerm *fromVarRef ) cons
 
 void LangStmt::compileForIter( Compiler *pd, CodeVect &code ) const
 {
-	bool resetContiguous = false;
-	if ( !pd->inContiguous ) {
-		code.append( IN_CONTIGUOUS );
-		code.appendHalf( 512 );
-		pd->inContiguous = true;
-		resetContiguous = true;
-	}
-
 	pd->curLocalFrame->iterPushScope();
 
 	LangTerm *iterCallTerm = langTerm;
@@ -2153,6 +2187,31 @@ void LangStmt::compileForIter( Compiler *pd, CodeVect &code ) const
 	if ( lookup.objMethod->iterDef == 0 ) {
 		error(loc) << "attempt to iterate using something "
 				"that is not an iterator" << endp;
+	}
+
+	bool resetContiguous = false;
+	if ( pd->inContiguous ) {
+		Function *func = lookup.objMethod->func;
+		if ( func != 0 ) {
+			/* FIXME: what is the right size here (16)? */
+			long stretch = func->paramListSize + 16 + func->localFrame->size();
+			cout << "call: " << func->paramListSize << " " << func->localFrame->size() << endl;
+			pd->contiguousStretch += stretch;
+		}
+	}
+	else {
+		Function *func = lookup.objMethod->func;
+		if ( func != 0 ) {
+			long stretch = func->paramListSize + 16 + func->localFrame->size();
+			cout << "call: " << func->paramListSize << " " << func->localFrame->size() << endl;
+			pd->contiguousStretch = stretch;
+
+			code.append( IN_CONTIGUOUS );
+			pd->contiguousOffset = code.length();
+			code.appendHalf( 0 );
+			pd->inContiguous = true;
+			resetContiguous = true;
+		}
 	}
 
 	/* Now that we have done the iterator call lookup we can make the type
@@ -2189,8 +2248,11 @@ void LangStmt::compileForIter( Compiler *pd, CodeVect &code ) const
 			code.appendHalf( searchUT->langEl->id );
 	}
 
-	if ( resetContiguous )
+	if ( resetContiguous ) {
 		pd->inContiguous = false; 
+		code.setHalf( pd->contiguousOffset, pd->contiguousStretch );
+		pd->contiguousOffset = 0;
+	}
 
 	compileForIterBody( pd, code, iterUT );
 

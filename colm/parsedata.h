@@ -1042,6 +1042,8 @@ struct Compiler
 	Context *context;
 
 	bool inContiguous;
+	int contiguousOffset;
+	int contiguousStretch;
 };
 
 void afterOpMinimize( FsmGraph *fsm, bool lastInSeq = true );

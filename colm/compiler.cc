@@ -442,7 +442,9 @@ Compiler::Compiler( const String &fileName, const String &sectionName,
 	nextMatchEndNum(0),
 	argvTypeRef(0),
 	context(0),
-	inContiguous(false)
+	inContiguous(false),
+	contiguousOffset(0),
+	contiguousStretch(0)
 {
 }
 
