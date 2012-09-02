@@ -1128,33 +1128,44 @@ void LangVarRef::popRefQuals( Compiler *pd, CodeVect &code,
 	}
 }
 
+bool Compiler::beginContiguous( CodeVect &code, int stretch )
+{
+	bool resetContiguous = false;
+
+	if ( inContiguous )
+		contiguousStretch += stretch;
+	else {
+		contiguousStretch = stretch;
+
+		code.append( IN_CONTIGUOUS );
+		contiguousOffset = code.length();
+		code.appendHalf( 0 );
+		inContiguous = true;
+		resetContiguous = true;
+	}
+
+	return resetContiguous;
+}
+
+void Compiler::endContiguous( CodeVect &code, bool resetContiguous )
+{
+	if ( resetContiguous ) {
+		inContiguous = false; 
+		code.setHalf( contiguousOffset, contiguousStretch );
+		contiguousOffset = 0;
+	}
+}
+
 UniqueType *LangVarRef::evaluateCall( Compiler *pd, CodeVect &code, ExprVect *args ) 
 {
 	/* Evaluate the object. */
 	VarRefLookup lookup = lookupMethod( pd );
 
 	bool resetContiguous = false;
-	if ( pd->inContiguous ) {
-		Function *func = lookup.objMethod->func;
-		if ( func != 0 ) {
-			long stretch = func->paramListSize + 5 + func->localFrame->size();
-			cout << "call: " << func->paramListSize << " " << func->localFrame->size() << endl;
-			pd->contiguousStretch += stretch;
-		}
-	}
-	else {
-		Function *func = lookup.objMethod->func;
-		if ( func != 0 ) {
-			long stretch = func->paramListSize + 5 + func->localFrame->size();
-			cout << "call: " << func->paramListSize << " " << func->localFrame->size() << endl;
-			pd->contiguousStretch = stretch;
-
-			code.append( IN_CONTIGUOUS );
-			pd->contiguousOffset = code.length();
-			code.appendHalf( 0 );
-			pd->inContiguous = true;
-			resetContiguous = true;
-		}
+	Function *func = lookup.objMethod->func;
+	if ( func != 0 ) {
+		long stretch = func->paramListSize + 5 + func->localFrame->size();
+		resetContiguous = pd->beginContiguous( code, stretch );
 	}
 
 	/* Evaluate and push the arguments. */
@@ -1168,11 +1179,7 @@ UniqueType *LangVarRef::evaluateCall( Compiler *pd, CodeVect &code, ExprVect *ar
 	resetActiveRefs( pd, lookup, paramRefs);
 	delete[] paramRefs;
 
-	if ( resetContiguous ) {
-		pd->inContiguous = false; 
-		code.setHalf( pd->contiguousOffset, pd->contiguousStretch );
-		pd->contiguousOffset = 0;
-	}
+	pd->endContiguous( code, resetContiguous );
 
 	/* Return the type to the expression. */
 	return lookup.uniqueType;
@@ -1978,21 +1985,8 @@ void LangVarRef::assignValue( Compiler *pd, CodeVect &code,
 
 UniqueType *LangTerm::evaluateMakeToken( Compiler *pd, CodeVect &code ) const
 {
-	bool resetContiguous = false;
-	if ( pd->inContiguous ) {
-		long stretch = args->length() + 2;
-		pd->contiguousStretch += stretch;
-	}
-	else {
-		long stretch = args->length() + 2;
-		pd->contiguousStretch = stretch;
-
-		code.append( IN_CONTIGUOUS );
-		pd->contiguousOffset = code.length();
-		code.appendHalf( 0 );
-		pd->inContiguous = true;
-		resetContiguous = true;
-	}
+	long stretch = args->length() + 2;
+	bool resetContiguous = pd->beginContiguous( code, stretch );
 
 //	if ( pd->compileContext != Compiler::CompileTranslation )
 //		error(loc) << "make_token can be used only in a translation block" << endp;
@@ -2017,32 +2011,15 @@ UniqueType *LangTerm::evaluateMakeToken( Compiler *pd, CodeVect &code ) const
 	code.append( IN_MAKE_TOKEN );
 	code.append( args->length() );
 
-	if ( resetContiguous ) {
-		pd->inContiguous = false; 
-		code.setHalf( pd->contiguousOffset, pd->contiguousStretch );
-		pd->contiguousOffset = 0;
-	}
+	pd->endContiguous( code, resetContiguous );
 
 	return pd->uniqueTypeAny;
 }
 
 UniqueType *LangTerm::evaluateMakeTree( Compiler *pd, CodeVect &code ) const
 {
-	bool resetContiguous = false;
-	if ( pd->inContiguous ) {
-		long stretch = args->length() + 2;
-		pd->contiguousStretch += stretch;
-	}
-	else {
-		long stretch = args->length() + 2;
-		pd->contiguousStretch = stretch;
-
-		code.append( IN_CONTIGUOUS );
-		pd->contiguousOffset = code.length();
-		code.appendHalf( 0 );
-		pd->inContiguous = true;
-		resetContiguous = true;
-	}
+	long stretch = args->length() + 2;
+	bool resetContiguous = pd->beginContiguous( code, stretch );
 
 	if ( pd->compileContext != Compiler::CompileTranslation )
 		error(loc) << "make_tree can be used only in a translation block" << endp;
@@ -2064,11 +2041,7 @@ UniqueType *LangTerm::evaluateMakeTree( Compiler *pd, CodeVect &code ) const
 	code.append( IN_MAKE_TREE );
 	code.append( args->length() );
 
-	if ( resetContiguous ) {
-		pd->inContiguous = false; 
-		code.setHalf( pd->contiguousOffset, pd->contiguousStretch );
-		pd->contiguousOffset = 0;
-	}
+	pd->endContiguous( code, resetContiguous );
 
 	return pd->uniqueTypeAny;
 }
@@ -2190,29 +2163,13 @@ void LangStmt::compileForIter( Compiler *pd, CodeVect &code ) const
 	}
 
 	bool resetContiguous = false;
-	if ( pd->inContiguous ) {
-		Function *func = lookup.objMethod->func;
-		if ( func != 0 ) {
-			/* FIXME: what is the right size here (16)? */
-			long stretch = func->paramListSize + 16 + func->localFrame->size();
-			cout << "call: " << func->paramListSize << " " << func->localFrame->size() << endl;
-			pd->contiguousStretch += stretch;
-		}
+	Function *func = lookup.objMethod->func;
+	if ( func != 0 ) {
+		/* FIXME: what is the right size here (16)? */
+		long stretch = func->paramListSize + 16 + func->localFrame->size();
+		resetContiguous = pd->beginContiguous( code, stretch );
 	}
-	else {
-		Function *func = lookup.objMethod->func;
-		if ( func != 0 ) {
-			long stretch = func->paramListSize + 16 + func->localFrame->size();
-			cout << "call: " << func->paramListSize << " " << func->localFrame->size() << endl;
-			pd->contiguousStretch = stretch;
 
-			code.append( IN_CONTIGUOUS );
-			pd->contiguousOffset = code.length();
-			code.appendHalf( 0 );
-			pd->inContiguous = true;
-			resetContiguous = true;
-		}
-	}
 
 	/* Now that we have done the iterator call lookup we can make the type
 	 * reference for the object field. */
@@ -2248,11 +2205,7 @@ void LangStmt::compileForIter( Compiler *pd, CodeVect &code ) const
 			code.appendHalf( searchUT->langEl->id );
 	}
 
-	if ( resetContiguous ) {
-		pd->inContiguous = false; 
-		code.setHalf( pd->contiguousOffset, pd->contiguousStretch );
-		pd->contiguousOffset = 0;
-	}
+	pd->endContiguous( code, resetContiguous );
 
 	compileForIterBody( pd, code, iterUT );
 

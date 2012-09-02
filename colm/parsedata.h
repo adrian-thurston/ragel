@@ -1044,6 +1044,9 @@ struct Compiler
 	bool inContiguous;
 	int contiguousOffset;
 	int contiguousStretch;
+
+	bool beginContiguous( CodeVect &code, int stretch );
+	void endContiguous( CodeVect &code, bool resetContiguous );
 };
 
 void afterOpMinimize( FsmGraph *fsm, bool lastInSeq = true );
