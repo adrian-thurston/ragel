@@ -52,7 +52,7 @@ while getopts vdm opt; do
 			diff=true;
 		;;
 		m)
-			VALGRIND="valgrind --leak-check=full --show-reachable=yes --suppressions=../dpi.supp"
+			VALGRIND="valgrind --leak-check=full --show-reachable=yes "
 		;;
 	esac
 done
@@ -95,7 +95,6 @@ function runtests()
 		if [ "$verbose" = true ]; then
 			echo
 			echo $COLM $TST
-			echo -n ...
 		fi
 
 		# Compilation.
@@ -107,22 +106,18 @@ function runtests()
 		fi
 
 		if [ "$verbose" = true ]; then
-			echo
-
 			if [ -f $INP ]; then
-				echo "./$BIN $cmdargs < $INP > $OUT 2>> $LOG"
+				echo "${VALGRIND}./$BIN $cmdargs < $INP > $OUT 2>> $LOG"
 			else
-				echo "./$BIN $cmdargs > $OUT"
+				echo "${VALGRIND}./$BIN $cmdargs > $OUT 2>>$LOG"
 			fi
-			
-			echo -n ...
 		fi
 
 		# Execution
 		if [ -f $INP ]; then
-			./$BIN $cmdargs < $INP > $OUT 2>> $LOG
+			${VALGRIND}./$BIN $cmdargs < $INP > $OUT 2>> $LOG
 		else
-			./$BIN $cmdargs > $OUT
+			${VALGRIND}./$BIN $cmdargs > $OUT 2>>$LOG
 		fi
 		if [ $? != 0 ]; then
 			echo "FAILED execution"
