@@ -33,8 +33,7 @@
 #include <assert.h>
 #include <stdlib.h>
 
-#define VM_STACK_SIZE (SIZEOF_WORD*1024ll*1024ll)
-//#define VM_STACK_SIZE (1)
+#define VM_STACK_SIZE (8192)
 
 void colmInit( long debugRealm )
 {
