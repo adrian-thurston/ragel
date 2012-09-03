@@ -2649,7 +2649,7 @@ void ColmParser::addRegularDef( const InputLoc &loc, Namespace *nspace,
 	GraphDictEl *newEl = nspace->rlMap.insert( name );
 	if ( newEl != 0 ) {
 		/* New element in the dict, all good. */
-		newEl->value = new VarDef( name, join );
+		newEl->value = new LexDefinition( name, join );
 		newEl->isInstance = false;
 		newEl->loc = loc;
 	}

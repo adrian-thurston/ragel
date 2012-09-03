@@ -696,7 +696,7 @@ void Compiler::createBuiltin( const char *name, BuiltinMachine builtin )
 {
 	LexExpression *expression = LexExpression::cons( builtin );
 	LexJoin *join = new LexJoin( expression );
-	VarDef *varDef = new VarDef( name, join );
+	LexDefinition *varDef = new LexDefinition( name, join );
 	GraphDictEl *graphDictEl = new GraphDictEl( name, varDef );
 	rootNamespace->rlMap.insert( graphDictEl );
 }

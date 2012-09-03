@@ -315,9 +315,9 @@ struct PriorityAug
 /*
  * A Variable Definition
  */
-struct VarDef
+struct LexDefinition
 {
-	VarDef( const String &name, LexJoin *join )
+	LexDefinition( const String &name, LexJoin *join )
 		: name(name), join(join) { }
 	
 	/* Parse tree traversal. */
@@ -663,13 +663,13 @@ struct GraphDictEl
 {
 	GraphDictEl( const String &key ) 
 		: key(key), value(0), isInstance(false) { }
-	GraphDictEl( const String &key, VarDef *value ) 
+	GraphDictEl( const String &key, LexDefinition *value ) 
 		: key(key), value(value), isInstance(false) { }
 
 	const String &getKey() { return key; }
 
 	String key;
-	VarDef *value;
+	LexDefinition *value;
 	bool isInstance;
 
 	/* Location info of graph definition. Points to variable name of assignment. */
@@ -776,31 +776,7 @@ typedef DList<Namespace> NamespaceList;
 typedef BstSet< Namespace*, CmpOrd<Namespace*> > NamespaceSet;
 
 /* List of Expressions. */
-typedef DList<LexExpression> ExprList;
-
-struct JoinOrLm
-{
-	JoinOrLm( LexJoin *join ) : 
-		join(join) {}
-
-	FsmGraph *walk( Compiler *pd );
-	void makeNameTree( Compiler *pd );
-	
-	LexJoin *join;
-};
-
-struct RegionJoinOrLm
-{
-	enum Type { LongestMatchType };
-
-	RegionJoinOrLm( TokenRegion *tokenRegion ) :
-		tokenRegion(tokenRegion) {}
-
-	FsmGraph *walk( Compiler *pd );
-	void makeNameTree( Compiler *pd );
-	
-	TokenRegion *tokenRegion;
-};
+typedef DList<LexExpression> LexExprList;
 
 /*
  * LexJoin
@@ -815,7 +791,7 @@ struct LexJoin
 	void makeNameTree( Compiler *pd );
 
 	/* Data. */
-	ExprList exprList;
+	LexExprList exprList;
 
 	LexJoin *context;
 	Action *mark;
@@ -1149,7 +1125,7 @@ struct LexFactor
 	}
 
 	/* Construct with a reference to a var def. */
-	static LexFactor *cons( const InputLoc &loc, VarDef *varDef )
+	static LexFactor *cons( const InputLoc &loc, LexDefinition *varDef )
 	{
 		LexFactor *f = new LexFactor;
 		f->type = ReferenceType;
@@ -1179,7 +1155,7 @@ struct LexFactor
 	Range *range;
 	ReItem *reItem;
 	RegExpr *regExp;
-	VarDef *varDef;
+	LexDefinition *varDef;
 	LexJoin *join;
 	int lower, upper;
 	Type type;

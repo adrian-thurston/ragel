@@ -180,7 +180,7 @@ int CmpUniqueParser::compare( const UniqueParser &ut1, const UniqueParser &ut2 )
 	return 0;
 }
 
-FsmGraph *VarDef::walk( Compiler *pd )
+FsmGraph *LexDefinition::walk( Compiler *pd )
 {
 	/* Recurse on the expression. */
 	FsmGraph *rtnVal = join->walk( pd );
