@@ -49,7 +49,7 @@
 
 #include "javacodegen.h"
 
-#include "goipgoto.h"
+#include "gocodegen.h"
 
 #include "rubytable.h"
 #include "rubyftable.h"
@@ -80,7 +80,7 @@ void lineDirective( ostream &out, const char *fileName, int line )
 		else if ( hostLang == &hostLangD2 )
 			cdLineDirective( out, fileName, line );
 		else if ( hostLang == &hostLangGo )
-			gothicLineDirective( out, fileName, line );
+			goLineDirective( out, fileName, line );
 		else if ( hostLang == &hostLangJava )
 			javaLineDirective( out, fileName, line );
 		else if ( hostLang == &hostLangRuby )

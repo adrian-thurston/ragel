@@ -56,6 +56,12 @@
 
 #include "javacodegen.h"
 
+#include "gotable.h"
+#include "goftable.h"
+#include "goflat.h"
+#include "gofflat.h"
+#include "gogoto.h"
+#include "gofgoto.h"
 #include "goipgoto.h"
 
 #include "mltable.h"
@@ -248,15 +254,32 @@ CodeGenData *javaMakeCodeGen( const CodeGenArgs &args )
 /* Invoked by the parser when a ragel definition is opened. */
 CodeGenData *goMakeCodeGen( const CodeGenArgs &args )
 {
-	CodeGenData *codeGen;
+	CodeGenData *codeGen = 0;
 
 	switch ( codeStyle ) {
+	case GenTables:
+		codeGen = new GoTabCodeGen(args);
+		break;
+	case GenFTables:
+		codeGen = new GoFTabCodeGen(args);
+		break;
+	case GenFlat:
+		codeGen = new GoFlatCodeGen(args);
+		break;
+	case GenFFlat:
+		codeGen = new GoFFlatCodeGen(args);
+		break;
+	case GenGoto:
+		codeGen = new GoGotoCodeGen(args);
+		break;
+	case GenFGoto:
+		codeGen = new GoFGotoCodeGen(args);
+		break;
 	case GenIpGoto:
 		codeGen = new GoIpGotoCodeGen(args);
 		break;
 	default:
-		cerr << "I only support the -G2 output style for Go.  Please "
-			"rerun ragel including this flag.\n";
+		cerr << "Invalid output style, only -T0, -T1, -F0, -F1, -G0, -G1 and -G2 are supported.\n";
 		exit(1);
 	}
 
