@@ -12,8 +12,10 @@
 /*.out
 /*.java
 /*.class
+/*.go
 /*_c.rl
 /*_d.rl
 /*_java.rl
 /*_ruby.rl
 /*_csharp.rl
+/*_go.rl

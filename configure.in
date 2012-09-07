@@ -137,6 +137,9 @@ AC_CHECK_PROG(RUBY, ruby, ruby)
 dnl Check for the C# compiler.
 AC_CHECK_PROG(GMCS, gmcs, gmcs)
 
+dnl Check for the Go compiler.
+AC_CHECK_PROG(GOBIN, go, go)
+
 dnl write output files
 AC_OUTPUT(
 	[
