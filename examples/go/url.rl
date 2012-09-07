@@ -6,21 +6,18 @@
 //
 // To compile:
 //
-//   ragel -Z -G2 -o url.go url.rl
-//   ragel -Z -G2 -o url_authority.go url_authority.rl
-//   6g -o url.6 url.go url_authority.go
-//   6l -o url url.6
+//   ragel -Z -T0 -o url.go url.rl
+//   ragel -Z -T0 -o url_authority.go url_authority.rl
+//   go build -o url url.go url_authority.go
 //   ./url
 //
 // To show a diagram of your state machine:
 //
-//   ragel -V -G2 -p -o url.dot url.rl
-//   dot -Tpng -o url.png url.dot
-//   chrome url.png
+//   ragel -V -Z -p -o url.dot url.rl
+//   xdot url.dot
 //
-//   ragel -V -G2 -p -o url_authority.dot url_authority.rl
-//   dot -Tpng -o url_authority.png url_authority.dot
-//   chrome url_authority.png
+//   ragel -V -Z -p -o url_authority.dot url_authority.rl
+//   xdot url_authority.dot
 //
 // Reference:
 //
@@ -30,8 +27,9 @@
 package main
 
 import (
-	"os"
+  "errors"
 	"fmt"
+	"os"
 	"time"
 )
 
@@ -58,7 +56,7 @@ type URL struct {
 // performs in a predictable manner (for security/soft-realtime,)
 // doesn't modify your `data` buffer, and under no circumstances will
 // it panic (i hope!)
-func URLParse(data []byte) (url *URL, err os.Error) {
+func URLParse(data []byte) (url *URL, err error) {
 	cs, p, pe, eof := 0, 0, len(data), len(data)
 	mark := 0
 	url = new(URL)
@@ -122,10 +120,10 @@ func URLParse(data []byte) (url *URL, err os.Error) {
 
 	if cs < url_first_final {
 		if p == pe {
-			return nil, os.ErrorString(
+			return nil, errors.New(
 				fmt.Sprintf("unexpected eof: %s", data))
 		} else {
-			return nil, os.ErrorString(
+			return nil, errors.New(
 				fmt.Sprintf("error in url at pos %d: %s", p, data))
 		}
 	}
@@ -383,12 +381,12 @@ func bench() {
 		[]byte("http://user:pass@example.com:80;hello/lol.php?fun#omg"),
 		[]byte("file:///etc/passwd"),
 	} {
-		ts1 := time.Nanoseconds()
+		ts1 := time.Now()
 		for i := 0; i < rounds; i++ {
 			URLParse(s)
 		}
-		ts2 := time.Nanoseconds()
-		fmt.Printf("BENCH URLParse(%s) -> %d ns\n", s, (ts2 - ts1) / rounds)
+		ts2 := time.Now()
+		fmt.Printf("BENCH URLParse(%s) -> %d ns\n", s, ts2.Sub(ts1).Nanoseconds() / rounds)
 	}
 }
 

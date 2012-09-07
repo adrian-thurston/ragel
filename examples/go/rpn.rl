@@ -6,23 +6,22 @@
 //
 // To compile:
 //
-//   ragel -Z -G2 -o rpn.go rpn.rl
-//   6g -o rpn.6 rpn.go
-//   6l -o rpn rpn.6
+//   ragel -Z -T0 -o rpn.go rpn.rl
+//   go build -o rpn rpn.go
 //   ./rpn
 //
 // To show a diagram of your state machine:
 //
-//   ragel -V -G2 -p -o rpn.dot rpn.rl
-//   dot -Tpng -o rpn.png rpn.dot
-//   chrome rpn.png
+//   ragel -V -Z -p -o rpn.dot rpn.rl
+//   xdot -Tpng -o rpn.png rpn.dot
 //
 
 package main
 
 import (
-	"os"
+  "errors"
 	"fmt"
+  "os"
 	"strconv"
 )
 
@@ -52,7 +51,7 @@ func abs(v int) int {
 %% machine rpn;
 %% write data;
 
-func rpn(data string) (res int, err os.Error) {
+func rpn(data string) (res int, err error) {
 	// p, pe, eof := 0, len(data), len(data)
 	cs, p, pe := 0, 0, len(data)
 	mark := 0
@@ -86,14 +85,14 @@ func rpn(data string) (res int, err os.Error) {
 
 	if cs < rpn_first_final {
 		if p == pe {
-			return 0, os.ErrorString("unexpected eof")
+			return 0, errors.New("unexpected eof")
 		} else {
-			return 0, os.ErrorString(fmt.Sprintf("error at position %d", p))
+			return 0, errors.New(fmt.Sprintf("error at position %d", p))
 		}
 	}
 
 	if st.count == 0 {
-		return 0, os.ErrorString("rpn stack empty on result")
+		return 0, errors.New("rpn stack empty on result")
 	}
 
 	return st.pop(), nil
@@ -150,9 +149,9 @@ func main() {
 		if err == nil {
 			fmt.Fprintf(os.Stderr, "FAIL rpn(%#v) -> %#v should fail: %#v\n",
 				test.s, res, test.e)
-		} else if err.String() != test.e {
+		} else if err.Error() != test.e {
 			fmt.Fprintf(os.Stderr, "FAIL rpn(%#v) %#v should be %#v\n",
-				test.s, err.String(), test.e)
+				test.s, err.Error(), test.e)
 		}
 	}
 

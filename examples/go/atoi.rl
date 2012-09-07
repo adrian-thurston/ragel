@@ -4,16 +4,14 @@
 //
 // To compile:
 //
-//   ragel -Z -G2 -o atoi.go atoi.rl
-//   6g -o atoi.6 atoi.go
-//   6l -o atoi atoi.6
+//   ragel -Z -T0 -o atoi.go atoi.rl
+//   go build -o atoi atoi.go
 //   ./atoi
 //
 // To show a diagram of your state machine:
 //
-//   ragel -V -G2 -p -o atoi.dot atoi.rl
-//   dot -Tpng -o atoi.png atoi.dot
-//   chrome atoi.png
+//   ragel -V -Z -p -o atoi.dot atoi.rl
+//   xdot atoi.dot
 //
 
 package main
