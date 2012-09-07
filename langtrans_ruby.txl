@@ -140,11 +140,27 @@ function alStmtToRuby1 AlStmt [action_lang_stmt]
 			[initDecl5 VarDecl]
 end function
 
-function alTermToRuby
+rule alTermToRuby1
 	replace [al_term]
 		'first_token_char
 	by
 		'data '[ts]
+end rule
+
+rule alTermToRuby2
+	replace [al_term]
+		'< _ [al_type_decl] '> '( AlExpr [al_expr] ')
+	by
+		'( AlExpr ')
+end rule
+
+function alTermToRuby
+	replace [al_term]
+		AlTerm [al_term]
+	by
+		AlTerm
+			[alTermToRuby1]
+			[alTermToRuby2]
 end function
 
 function alExprExtendToRuby AlExprExtend [repeat al_expr_extend]

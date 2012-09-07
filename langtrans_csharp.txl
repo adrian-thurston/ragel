@@ -125,11 +125,27 @@ function alStmtToCSharp1 AlStmt [action_lang_stmt]
 		Result
 end function
 
-function alTermToCSharp
+rule alTermToCSharp1
 	replace [al_term]
 		'first_token_char
 	by
 		'data '[ts]
+end rule
+
+rule alTermToCSharp2
+	replace [al_term]
+		'< _ [al_type_decl] '> '( AlExpr [al_expr] ')
+	by
+		'( AlExpr ')
+end rule
+
+function alTermToCSharp
+	replace [al_term]
+		AlTerm [al_term]
+	by
+		AlTerm
+			[alTermToCSharp1]
+			[alTermToCSharp2]
 end function
 
 function alExprExtendToCSharp AlExprExtend [repeat al_expr_extend]
