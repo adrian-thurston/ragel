@@ -127,6 +127,7 @@ define al_term_base
 	|	'true
 	|	'false
 	|	'( [al_expr] ')
+	|	'< [SPOFF] [al_type_decl] '> '( [SPON] [al_expr] ')
 	|	'first_token_char
 end define
 

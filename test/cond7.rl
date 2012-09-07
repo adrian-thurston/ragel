@@ -11,14 +11,14 @@ int c;
 	action testi {i > 0}
 	action inc {
 		i = i - 1;
-		c = fc;
+		c = <int>(fc);
 		prints "item: ";
 		printi c;
 		prints "\n";
 	}
 
 	count = [0-9] @{ 
-		i = fc - '0'; 
+		i = <int>(fc - '0');
 		prints "count: ";
 		printi i;
 		prints "\n";

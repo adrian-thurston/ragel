@@ -266,7 +266,7 @@ int token;
 
 	# Single char symbols.
 	( punct - [_"'] ) => {
-		token = first_token_char;
+		token = <int>(first_token_char);
 		prints "<";
 		printi token;
 		prints "> ";
