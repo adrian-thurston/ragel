@@ -132,11 +132,27 @@ function alStmtToJava1 AlStmt [action_lang_stmt]
 		Result
 end function
 
-function alTermToJava
+rule alTermToJava1
 	replace [al_term]
 		'first_token_char
 	by
 		'data '[ts]
+end rule
+
+rule alTermToJava2
+	replace [al_term]
+		'< _ [al_type_decl] '> '( AlExpr [al_expr] ')
+	by
+		'( AlExpr ')
+end rule
+
+function alTermToJava
+	replace [al_term]
+		AlTerm [al_term]
+	by
+		AlTerm
+			[alTermToJava1]
+			[alTermToJava2]
 end function
 
 function alExprExtendToJava AlExprExtend [repeat al_expr_extend]

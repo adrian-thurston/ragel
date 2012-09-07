@@ -95,11 +95,27 @@ function alStmtToD1 AlStmt [action_lang_stmt]
 		Result
 end function
 
-function alTermToD
+rule alTermToD1
 	replace [al_term]
 		'first_token_char
 	by
 		'ts '[0]
+end rule
+
+rule alTermToD2
+	replace [al_term]
+		'< _ [al_type_decl] '> '( AlExpr [al_expr] ')
+	by
+		'( AlExpr ')
+end rule
+
+function alTermToD
+	replace [al_term]
+		AlTerm [al_term]
+	by
+		AlTerm
+			[alTermToD1]
+			[alTermToD2]
 end function
 
 function alExprExtendToD AlExprExtend [repeat al_expr_extend]
