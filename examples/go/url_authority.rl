@@ -8,9 +8,9 @@
 package main
 
 import (
-	"os"
-	"fmt"
-	"strconv"
+    "errors"
+    "fmt"
+    "strconv"
 )
 
 %% machine url_authority;
@@ -39,7 +39,7 @@ import (
 //   "Bob Barker" <sip:bob%20barker:priceisright@[dead:beef::666]:5060;isup-oli=00/palfun.html?haha#omg>;tag=666
 //
 // who would have thought this could be so hard ._.
-func (url *URL) parseAuthority(data []byte) (err os.Error) {
+func (url *URL) parseAuthority(data []byte) (err error) {
 	cs, p, pe, eof := 0, 0, len(data), len(data)
 	mark := 0
 
@@ -161,5 +161,5 @@ fail:
 	// }
 	// fmt.Println("^")
 	// fmt.Println(url)
-	return os.ErrorString(fmt.Sprintf("bad url authority: %#v", string(data)))
+	return errors.New(fmt.Sprintf("bad url authority: %#v", string(data)))
 }
