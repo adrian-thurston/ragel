@@ -20,7 +20,7 @@
 #   along with Ragel; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
 
-while getopts "gcnmleT:F:G:P:CDJRA" opt; do
+while getopts "gcnmleT:F:G:P:CDJRAZ" opt; do
 	case $opt in
 		T|F|G|P) 
 			genflags="$genflags -$opt$OPTARG"
@@ -37,7 +37,7 @@ while getopts "gcnmleT:F:G:P:CDJRA" opt; do
 		g) 
 			allow_generated="true"
 			;;
-		C|D|J|R|A) 
+		C|D|J|R|A|Z)
 			langflags="$langflags -$opt"
 			;;
 	esac
@@ -45,14 +45,14 @@ done
 
 [ -z "$minflags" ] && minflags="-n -m -l -e"
 [ -z "$genflags" ] && genflags="-T0 -T1 -F0 -F1 -G0 -G1 -G2"
-[ -z "$langflags" ] && langflags="-C -D -J -R -A"
+[ -z "$langflags" ] && langflags="-C -D -J -R -A -Z"
 
 shift $((OPTIND - 1));
 
 [ -z "$*" ] && set -- *.rl
 
-config=../ragel/config.h
-ragel=../ragel/ragel
+config=../src/config.h
+ragel=../src/ragel
 
 cxx_compiler="@CXX@"
 c_compiler="@CC@"
@@ -62,6 +62,7 @@ java_compiler="@JAVAC@"
 txl_engine="@TXL@"
 ruby_engine="@RUBY@"
 csharp_compiler="@GMCS@"
+go_compiler="@GOBIN@ build"
 
 function test_error
 {
@@ -203,18 +204,25 @@ for test_case; do
             compiler=$csharp_compiler
             cflags=""
         ;;
+        go)
+			lang_opt="-Z"
+			code_suffix=go
+			compiler=$go_compiler
+			cflags=""
+		;;
 		indep)
 			lang_opt="";
 
 			# If we have no txl engine then skip this test.
 			[ -z "$txl_engine" ] && continue
-			for lang in c d java ruby csharp; do
+			for lang in c d java ruby csharp go; do
 				case $lang in 
 					c) lf="-C";;
 					d) lf="-D";;
 					java) lf="-J";;
 					ruby) lf="-R";;
                     csharp) lf="-A";;
+					go) lf="-Z";;
 				esac
 
 				echo "$langflags" | grep -e $lf >/dev/null || continue
@@ -308,6 +316,20 @@ for test_case; do
 			done
 		done
 	;;
-	esac
 
+	go)
+		# Using genflags, get the allowed gen flags from the test case. If the
+		# test case doesn't specify assume that all gen flags are allowed.
+		allow_genflags=`sed '/@ALLOW_GENFLAGS:/s/^.*: *//p;d' $test_case`
+		[ -z "$allow_genflags" ] && allow_genflags="-T0 -T1 -F0 -F1 -G0 -G1 -G2"
+
+		for min_opt in $minflags; do
+			echo "$allow_minflags" | grep -e $min_opt >/dev/null || continue
+			for gen_opt in $genflags; do
+				echo "$allow_genflags" | grep -e $gen_opt >/dev/null || continue
+				run_test
+			done
+		done
+	;;
+	esac
 done
