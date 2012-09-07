@@ -12,7 +12,9 @@ ragel_SOURCES = \
 	parsedata.h rlparse.h rubytable.h cdfgoto.h cdtable.h csflat.h \
 	dotcodegen.h parsetree.h rlscan.h version.h cdflat.h common.h \
 	csftable.h fsmgraph.h pcheck.h rubycodegen.h xmlcodegen.h cdftable.h \
-	csgoto.h gendata.h ragel.h rubyfflat.h goipgoto.h \
+	csgoto.h gendata.h ragel.h rubyfflat.h \
+	gocodegen.h gotable.h goftable.h goflat.h gofflat.h gogoto.h gofgoto.h \
+	goipgoto.h gotablish.h \
 	mlcodegen.h mltable.h mlftable.h mlflat.h mlfflat.h mlgoto.h \
 	main.cpp parsetree.cpp parsedata.cpp fsmstate.cpp fsmbase.cpp \
 	fsmattach.cpp fsmmin.cpp fsmgraph.cpp fsmap.cpp rlscan.cpp rlparse.cpp \
@@ -21,7 +23,9 @@ ragel_SOURCES = \
 	cdipgoto.cpp cdsplit.cpp javacodegen.cpp rubycodegen.cpp rubytable.cpp \
 	rubyftable.cpp rubyflat.cpp rubyfflat.cpp rbxgoto.cpp cscodegen.cpp \
 	cstable.cpp csftable.cpp csflat.cpp csfflat.cpp csgoto.cpp csfgoto.cpp \
-	csipgoto.cpp cssplit.cpp dotcodegen.cpp xmlcodegen.cpp goipgoto.cpp \
+	csipgoto.cpp cssplit.cpp dotcodegen.cpp xmlcodegen.cpp \
+	gocodegen.cpp gotable.cpp goftable.cpp goflat.cpp gofflat.cpp gogoto.cpp gofgoto.cpp \
+	goipgoto.cpp gotablish.cpp \
 	mlcodegen.cpp mltable.cpp mlftable.cpp mlflat.cpp mlfflat.cpp mlgoto.cpp
 
 BUILT_SOURCES = \

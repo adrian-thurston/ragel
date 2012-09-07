@@ -11,3 +11,4 @@
 /ragel.exe
 /.deps
 /stamp-h1
+/*.o
