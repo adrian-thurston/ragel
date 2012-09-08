@@ -243,7 +243,7 @@ def start
 
 parse Start: start[ stdin ]
 if ( ! Start.tree ) {
-	print( error() '\n' )
+	print( Start.error '\n' )
 	exit( 1 )
 }
 

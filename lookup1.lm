@@ -2190,7 +2190,7 @@ Lookup.declarationData.push( construct lookup::declaration_data( 0 0 0 ) [] )
 parse SP: lookup::start( Lookup )[ stdin ]
 S: lookup::start = SP.tree
 if ! S {
-	print( error() )
+	print( SP.error )
 	exit( 1 )
 }
 
