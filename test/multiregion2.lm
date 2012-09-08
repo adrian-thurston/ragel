@@ -73,7 +73,7 @@ parse RP: request*[ stdin ]
 R: request* = RP.tree
 
 if !R {
-	print( error() )
+	print( RP.error )
 	exit( 1 )
 }
 

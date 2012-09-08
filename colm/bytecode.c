@@ -3465,16 +3465,6 @@ again:
 			treeDownref( prg, sp, in );
 			break;
 		}
-		case IN_ERROR: {
-			debug( REALM_BYTECODE, "IN_ERROR\n" );
-
-			/* Pop the global. */
-			Tree *global = vm_pop();
-			treeDownref( prg, sp, global );
-			treeUpref( prg->lastParseError );
-			vm_push( prg->lastParseError );
-			break;
-		}
 		case IN_OPEN_FILE: {
 			debug( REALM_BYTECODE, "IN_OPEN_FILE\n" );
 

@@ -1593,6 +1593,9 @@ Tree *getParserMem( Parser *parser, Word field )
 		case 0:
 			result = parser->result;
 			break;
+		case 1:
+			result = parser->pdaRun->parseErrorText;
+			break;
 		default:
 			assert( false );
 			break;

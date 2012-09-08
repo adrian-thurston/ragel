@@ -532,9 +532,9 @@ static void reportParseError( Program *prg, Tree **sp, PdaRun *pdaRun )
 	}
 
 	Tree *tree = constructString( prg, errorHead );
-	treeDownref( prg, sp, prg->lastParseError );
-	prg->lastParseError = tree;
-	treeUpref( prg->lastParseError );
+	treeDownref( prg, sp, pdaRun->parseErrorText );
+	pdaRun->parseErrorText = tree;
+	treeUpref( pdaRun->parseErrorText );
 }
 
 static void attachRightIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTree *parseTree )
@@ -1484,6 +1484,8 @@ void clearPdaRun( Program *prg, Tree **sp, PdaRun *pdaRun )
 	rcodeDownrefAll( prg, sp, &pdaRun->reverseCode );
 	rtCodeVectEmpty( &pdaRun->reverseCode );
 	rtCodeVectEmpty( &pdaRun->rcodeCollect );
+
+	treeDownref( prg, sp, pdaRun->parseErrorText );
 }
 
 int isParserStopFinished( PdaRun *pdaRun )
