@@ -91,6 +91,11 @@ void vm_init( Program *prg )
 	prg->stackRoot = prg->sb_end;
 }
 
+struct ColmTree **vm_root( struct ColmProgram *prg )
+{
+	return prg->stackRoot;
+}
+
 Tree **vm_bs_add( Program *prg, Tree **sp, int n )
 {
 	/* Close off the current block. */
