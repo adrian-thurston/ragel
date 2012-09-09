@@ -72,6 +72,7 @@ root_item: context_def commit final { $$->stmt = 0; };
 root_item: namespace_def commit final { $$->stmt = 0; };
 root_item: function_def commit final { $$->stmt = 0; };
 root_item: iter_def commit final { $$->stmt = 0; };
+root_item: global_def commit final { $$->stmt = 0; };
 root_item: export_def commit final { $$->stmt = 0; };
 root_item: statement commit final { $$->stmt = $1->stmt; };
 root_item: pre_eof commit final { $$->stmt = 0; };
@@ -184,6 +185,36 @@ reference_type_ref: KW_Ref type_ref
 	final {
 		$$->typeRef = TypeRef::cons( $1->loc, TypeRef::Ref, $2->typeRef );
 	};
+
+nonterm global_def uses statement;
+
+global_def: KW_Global var_def opt_def_init
+	final {
+		$$->stmt = 0;
+
+		ObjectDef *object;
+		if ( contextStack.length() == 0 )
+			object = pd->globalObjectDef;
+		else {
+			Context *context = contextStack.top();
+			$2->objField->context = context;
+			object = context->contextObjDef;
+		}
+
+		if ( object->checkRedecl( $2->objField->name ) != 0 )
+			error($2->objField->loc) << "object field renamed" << endp;
+
+		object->insertField( $2->objField->name, $2->objField );
+
+		if ( $3->expr != 0 ) {
+			LangVarRef *varRef = LangVarRef::cons( $2->objField->loc, 
+					$2->objField->name );
+
+			$$->stmt = LangStmt::cons( $2->objField->loc, 
+					$3->assignType, varRef, $3->expr );
+		}
+	};
+
 
 nonterm export_def uses statement;
 
