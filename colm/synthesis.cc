@@ -2939,10 +2939,9 @@ void Compiler::initParserFunctions( GenericType *gen )
 			IN_PARSE_FINISH_WV, IN_PARSE_FINISH_WC, true );
 }
 
-void Compiler::initParserField( GenericType *gen, const char *name, int offset )
+void Compiler::initParserField( GenericType *gen, const char *name, int offset, TypeRef *typeRef )
 {
 	/* Make the type ref and create the field. */
-	TypeRef *typeRef = TypeRef::cons( InputLoc(), gen->utArg );
 	ObjField *el = new ObjField( InputLoc(), typeRef, name );
 
 	el->inGetR =  IN_GET_PARSER_MEM_R;
@@ -2989,8 +2988,14 @@ void Compiler::initParserFields( GenericType *gen )
 	LangEl *langEl = gen->utArg->langEl;
 	if ( langEl->contextIn != 0 )
 		initCtxField( gen );
-	
-	initParserField( gen, "tree", 0 );
+
+	TypeRef *typeRef;
+
+	typeRef = TypeRef::cons( InputLoc(), gen->utArg );
+	initParserField( gen, "tree", 0, typeRef );
+
+	typeRef = TypeRef::cons( InputLoc(), uniqueTypeStr );
+	initParserField( gen, "error", 1, typeRef );
 }
 
 void Compiler::initGenericTypes()
@@ -3354,9 +3359,6 @@ void Compiler::initGlobalFunctions()
 
 	method = initFunction( uniqueTypeInt, globalObjectDef, "exit",
 		IN_EXIT, IN_EXIT, uniqueTypeInt, true );
-
-	method = initFunction( uniqueTypeStr, globalObjectDef, "error",
-		IN_ERROR, IN_ERROR, true );
 
 	addStdin();
 	addStdout();

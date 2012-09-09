@@ -132,9 +132,6 @@ typedef struct ColmProgram
 
 	/* Returned from the main line. Should have exports instead. */
 	Tree *returnVal;
-
-	/* The most recent parse error. Should be returned from the parsing function. */
-	Tree *lastParseError;
 } Program;
 
 #endif

@@ -255,7 +255,6 @@ int colmDeleteProgram( Program *prg )
 	int exitStatus = prg->exitStatus;
 
 	treeDownref( prg, sp, prg->returnVal );
-	treeDownref( prg, sp, prg->lastParseError );
 	clearGlobal( prg, sp );
 
 	/* Clear the heap. */

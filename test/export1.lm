@@ -10,5 +10,5 @@ def start
 export Start: start
 export Error: str
 
-parse start[ stdin ]
-Error = error()
+parse P: start[ stdin ]
+Error = P.error

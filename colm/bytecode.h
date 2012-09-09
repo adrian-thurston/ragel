@@ -263,7 +263,6 @@ typedef unsigned char uchar;
 #define IN_TO_UPPER              0xb9
 #define IN_TO_LOWER              0xba
 #define IN_EXIT                  0xbb
-#define IN_ERROR                 0xbc
 
 #define IN_LOAD_PARSER_R         0xbd
 #define IN_LOAD_PARSER_WV        0xbe

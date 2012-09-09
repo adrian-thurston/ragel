@@ -342,6 +342,8 @@ typedef struct _PdaRun
 	Code *code;
 
 	int rcBlockCount;
+
+	Tree *parseErrorText;
 } PdaRun;
 
 void rtCodeVectReplace( RtCodeVect *vect, long pos, const Code *val, long len );

@@ -817,7 +817,7 @@ struct Compiler
 	void initListFields( GenericType *gen );
 	void initListFunctions( GenericType *gen );
 	void initVectorFunctions( GenericType *gen );
-	void initParserField( GenericType *gen, const char *name, int offset );
+	void initParserField( GenericType *gen, const char *name, int offset, TypeRef *typeRef );
 	void initParserFunctions( GenericType *gen );
 	void initParserFields( GenericType *gen );
 	void initCtxField( GenericType *gen );
