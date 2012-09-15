@@ -39,8 +39,10 @@
 #include "colm.h"
 #include "pool.h"
 
-using namespace std;
 using std::ostringstream;
+using std::cout;
+using std::cerr;
+using std::endl;
 
 char machineMain[] = "main";
 exit_object endp;
@@ -1125,13 +1127,13 @@ LangEl *Compiler::makeListProd( const InputLoc &loc, Namespace *nspace,
 
 	UniqueType *prodNameUT = findUniqueType( TYPE_TREE, prodName );
 	TypeRef *typeRef2 = TypeRef::cons( loc, prodNameUT );
-	ProdEl *factor2 = new ProdEl( ProdEl::ReferenceType, InputLoc(), 0, false, typeRef2, 0 );
+	ProdEl *factor2 = new ProdEl( ProdEl::ReferenceType, loc, 0, false, typeRef2, 0 );
 
 	ProdElList *prodElList1 = new ProdElList;
 	prodElList1->append( factor1 );
 	prodElList1->append( factor2 );
 
-	Production *newDef1 = Production::cons( InputLoc(),
+	Production *newDef1 = Production::cons( loc,
 			prodName, prodElList1, false, 0,
 			prodList.length(), prodName->defList.length() );
 
@@ -1140,12 +1142,12 @@ LangEl *Compiler::makeListProd( const InputLoc &loc, Namespace *nspace,
 
 	/* Build the second production of the list. */
 	TypeRef *typeRef3 = TypeRef::cons( loc, nspaceQual, name );
-	ProdEl *factor3 = new ProdEl( ProdEl::ReferenceType, InputLoc(), 0, false, typeRef3, 0 );
+	ProdEl *factor3 = new ProdEl( ProdEl::ReferenceType, loc, 0, false, typeRef3, 0 );
 
 	ProdElList *prodElList2 = new ProdElList;
 	prodElList2->append( factor3 );
 
-	Production *newDef2 = Production::cons( InputLoc(),
+	Production *newDef2 = Production::cons( loc,
 			prodName, prodElList2, false, 0,
 			prodList.length(), prodName->defList.length() );
 
@@ -1165,10 +1167,10 @@ LangEl *Compiler::makeOptProd( const InputLoc &loc, Namespace *nspace,
 
 	/* Build the first production of the repeat. */
 	TypeRef *typeRef1 = TypeRef::cons( loc, nspaceQual, name );
-	ProdEl *factor1 = new ProdEl( ProdEl::ReferenceType, InputLoc(), 0, false, typeRef1, 0 );
+	ProdEl *factor1 = new ProdEl( ProdEl::ReferenceType, loc, 0, false, typeRef1, 0 );
 	prodElList1->append( factor1 );
 
-	Production *newDef1 = Production::cons( InputLoc(),
+	Production *newDef1 = Production::cons( loc,
 			prodName, prodElList1, false, 0,
 			prodList.length(), prodName->defList.length() );
 
@@ -1178,7 +1180,7 @@ LangEl *Compiler::makeOptProd( const InputLoc &loc, Namespace *nspace,
 	/* Build the second production of the repeat. */
 	ProdElList *prodElList2 = new ProdElList;
 
-	Production *newDef2 = Production::cons( InputLoc(),
+	Production *newDef2 = Production::cons( loc,
 			prodName, prodElList2, false, 0,
 			prodList.length(), prodName->defList.length() );
 
@@ -1265,13 +1267,12 @@ void Compiler::initEmptyScanners()
 			reg->wasEmpty = true;
 
 			static int def = 1;
-			InputLoc loc = { 0, 0, 0 };
 			String name( reg->name.length() + 16, "__%s_DEF_PAT_%d", reg->name.data, def++ );
 
 			LexJoin *join = new LexJoin( LexExpression::cons( BT_Any ) );
 				
 			TokenDef *tokenDef = new TokenDef( name, String(), false, false, join, 
-					0, loc, nextTokenId++, rootNamespace, reg, 0, 0, 0 );
+					0, internal, nextTokenId++, rootNamespace, reg, 0, 0, 0 );
 			reg->tokenDefList.append( tokenDef );
 
 			/* These do not go in the namespace so so they cannot get declared

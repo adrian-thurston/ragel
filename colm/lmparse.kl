@@ -566,6 +566,7 @@ context_head:
 nonterm pattern
 {
 	PatternItemList *list;
+	InputLoc loc;
 };
 
 pattern: 	

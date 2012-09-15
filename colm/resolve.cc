@@ -274,8 +274,6 @@ void TypeRef::resolveRepeat( Compiler *pd )
 
 UniqueType *TypeRef::lookupType( Compiler *pd )
 {
-	cout << "looking up typeref at " << loc.line << ":" << loc.col << endl;
-
 	if ( uniqueType != 0 )
 		return uniqueType;
 
