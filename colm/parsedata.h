@@ -792,6 +792,8 @@ struct Compiler
 	void addPushBackLHS( Production *prod, CodeVect &code, long &insertPos );
 
 	void prepGrammar();
+	PdaRun *parsePattern( Program *prg, Tree **sp, const InputLoc &loc,
+			int parserId, SourceStream *sourceStream );
 	void parsePatterns();
 
 	void collectParserEls( LangElSet &parserEls );

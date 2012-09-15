@@ -1282,6 +1282,40 @@ void Compiler::initEmptyScanners()
 	}
 }
 
+PdaRun *Compiler::parsePattern( Program *prg, Tree **sp, const InputLoc &loc, 
+		int parserId, SourceStream *sourceStream )
+{
+	InputStream *in = new InputStream;
+	FsmRun *fsmRun = new FsmRun;
+	PdaRun *pdaRun = new PdaRun;
+
+	initInputStream( in );
+	initPdaRun( pdaRun, prg, pdaTables, fsmRun, parserId, 0, false, 0 );
+	initFsmRun( fsmRun, prg );
+
+	Stream *res = streamAllocate( prg );
+	res->id = LEL_ID_STREAM;
+	res->in = sourceStream;
+	appendStream( in, (Tree*)res );
+	setEof( in );
+
+	newToken( prg, pdaRun, fsmRun );
+	long pcr = parseLoop( prg, sp, pdaRun, fsmRun, in, PcrStart );
+	assert( pcr == PcrDone );
+	if ( pdaRun->parseError ) {
+		cout << "PARSE ERROR " << loc.line << ":" << loc.col;
+
+		if ( pdaRun->parseErrorText != 0 ) {
+			cout << ", offset into pattern/constructor " << 
+					pdaRun->parseErrorText->tokdata->data;
+		}
+
+		cout << endl;
+	}
+
+	return pdaRun;
+}
+
 
 void Compiler::parsePatterns()
 {
@@ -1293,70 +1327,13 @@ void Compiler::parsePatterns()
 	Tree **sp = prg->stackRoot;
 
 	for ( ConsList::Iter cons = replList; cons.lte(); cons++ ) {
-		//cerr << "parsing replacement at " << 
-		//		cons->loc.line << ' ' << cons->loc.col << endl;
-
-		InputStream *in = new InputStream;
-		FsmRun *fsmRun = new FsmRun;
-		cons->pdaRun = new PdaRun;
-
-		initInputStream( in );
-		initPdaRun( cons->pdaRun, prg, pdaTables, fsmRun, cons->langEl->parserId, 0, false, 0 );
-		initFsmRun( fsmRun, prg );
-
-		Stream *res = streamAllocate( prg );
-		res->id = LEL_ID_STREAM;
-		res->in = newSourceStreamCons( cons );
-		appendStream( in, (Tree*)res );
-		setEof( in );
-
-		newToken( prg, cons->pdaRun, fsmRun );
-		long pcr = parseLoop( prg, sp, cons->pdaRun, fsmRun, in, PcrStart );
-		assert( pcr == PcrDone );
-		if ( cons->pdaRun->parseError ) {
-			cout << "PARSE ERROR " << cons->loc.line << ":" <<  cons->loc.col;
-
-			if ( cons->pdaRun->parseErrorText != 0 ) {
-				cout << ", offset into constructor " << 
-						cons->pdaRun->parseErrorText->tokdata->data;
-			}
-
-			cout << endl;
-		}
+		SourceStream *in = newSourceStreamCons( cons );
+		cons->pdaRun = parsePattern( prg, sp, cons->loc, cons->langEl->parserId, in );
 	}
 
 	for ( PatList::Iter pat = patternList; pat.lte(); pat++ ) {
-		//cerr << "parsing pattern at " << 
-		//	pat->loc.line << ' ' << pat->loc.col << endl;
-
-		InputStream *in = new InputStream;
-		FsmRun *fsmRun = new FsmRun;
-		pat->pdaRun = new PdaRun;
-
-		initInputStream( in );
-		initPdaRun( pat->pdaRun, prg, pdaTables, fsmRun, pat->langEl->parserId, 0, false, 0 );
-		initFsmRun( fsmRun, prg );
-
-		Stream *res = streamAllocate( prg );
-		res->id = LEL_ID_STREAM;
-		res->in = newSourceStreamPat( pat );
-		appendStream( in, (Tree*)res );
-		setEof( in );
-
-		newToken( prg, pat->pdaRun, fsmRun );
-		long pcr = parseLoop( prg, sp, pat->pdaRun, fsmRun, in, PcrStart );
-		assert( pcr == PcrDone );
-		if ( pat->pdaRun->parseError ) {
-			cout << "PARSE ERROR " << pat->loc.line << 
-					":" <<  pat->loc.col;
-
-			if ( pat->pdaRun->parseErrorText != 0 ) {
-				cout << ", offset into pattern " << 
-						pat->pdaRun->parseErrorText->tokdata->data;
-			}
-
-			cout << endl;
-		}
+		SourceStream *in = newSourceStreamPat( pat );
+		pat->pdaRun = parsePattern( prg, sp, pat->loc, pat->langEl->parserId, in );
 	}
 
 	fillInPatterns( prg );
@@ -1496,7 +1473,7 @@ void Compiler::compile()
 	 * All compilation is now complete.
 	 */
 	
-	/* Parse patterns and replacements. */
+	/* Parse constructors and patterns. */
 	parsePatterns();
 }
 
