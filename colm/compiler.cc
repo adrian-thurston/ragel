@@ -1292,29 +1292,37 @@ void Compiler::parsePatterns()
 
 	Tree **sp = prg->stackRoot;
 
-	for ( ConsList::Iter repl = replList; repl.lte(); repl++ ) {
+	for ( ConsList::Iter cons = replList; cons.lte(); cons++ ) {
 		//cerr << "parsing replacement at " << 
-		//		repl->loc.line << ' ' << repl->loc.col << endl;
+		//		cons->loc.line << ' ' << cons->loc.col << endl;
 
 		InputStream *in = new InputStream;
 		FsmRun *fsmRun = new FsmRun;
-		repl->pdaRun = new PdaRun;
+		cons->pdaRun = new PdaRun;
 
 		initInputStream( in );
-		initPdaRun( repl->pdaRun, prg, pdaTables, fsmRun, repl->langEl->parserId, 0, false, 0 );
+		initPdaRun( cons->pdaRun, prg, pdaTables, fsmRun, cons->langEl->parserId, 0, false, 0 );
 		initFsmRun( fsmRun, prg );
 
 		Stream *res = streamAllocate( prg );
 		res->id = LEL_ID_STREAM;
-		res->in = newSourceStreamCons( repl );
+		res->in = newSourceStreamCons( cons );
 		appendStream( in, (Tree*)res );
 		setEof( in );
 
-		newToken( prg, repl->pdaRun, fsmRun );
-		long pcr = parseLoop( prg, sp, repl->pdaRun, fsmRun, in, PcrStart );
+		newToken( prg, cons->pdaRun, fsmRun );
+		long pcr = parseLoop( prg, sp, cons->pdaRun, fsmRun, in, PcrStart );
 		assert( pcr == PcrDone );
-		if ( repl->pdaRun->parseError )
-			cout << "parse error" << endp;
+		if ( cons->pdaRun->parseError ) {
+			cout << "PARSE ERROR " << cons->loc.line << ":" <<  cons->loc.col;
+
+			if ( cons->pdaRun->parseErrorText != 0 ) {
+				cout << ", offset into constructor " << 
+						cons->pdaRun->parseErrorText->tokdata->data;
+			}
+
+			cout << endl;
+		}
 	}
 
 	for ( PatList::Iter pat = patternList; pat.lte(); pat++ ) {
@@ -1338,8 +1346,17 @@ void Compiler::parsePatterns()
 		newToken( prg, pat->pdaRun, fsmRun );
 		long pcr = parseLoop( prg, sp, pat->pdaRun, fsmRun, in, PcrStart );
 		assert( pcr == PcrDone );
-		if ( pat->pdaRun->parseError )
-			cout << "parse error" << endp;
+		if ( pat->pdaRun->parseError ) {
+			cout << "PARSE ERROR " << pat->loc.line << 
+					":" <<  pat->loc.col;
+
+			if ( pat->pdaRun->parseErrorText != 0 ) {
+				cout << ", offset into pattern " << 
+						pat->pdaRun->parseErrorText->tokdata->data;
+			}
+
+			cout << endl;
+		}
 	}
 
 	fillInPatterns( prg );
