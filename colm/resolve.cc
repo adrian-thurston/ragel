@@ -242,21 +242,21 @@ void TypeRef::resolveRepeat( Compiler *pd )
 				/* If the factor is a repeat, create the repeat element and link the
 				 * factor to it. */
 				String repeatName( 128, "_repeat_%s", typeName.data );
-				declLangEl = pd->makeRepeatProd( nspace, repeatName, nspaceQual, typeName );
+				declLangEl = pd->makeRepeatProd( loc, nspace, repeatName, nspaceQual, typeName );
 				break;
 			}
 			case RepeatList: {
 				/* If the factor is a repeat, create the repeat element and link the
 				 * factor to it. */
 				String listName( 128, "_list_%s", typeName.data );
-				declLangEl = pd->makeListProd( nspace, listName, nspaceQual, typeName );
+				declLangEl = pd->makeListProd( loc, nspace, listName, nspaceQual, typeName );
 				break;
 			}
 			case RepeatOpt: {
 				/* If the factor is an opt, create the opt element and link the factor
 				 * to it. */
 				String optName( 128, "_opt_%s", typeName.data );
-				declLangEl = pd->makeOptProd( nspace, optName, nspaceQual, typeName );
+				declLangEl = pd->makeOptProd( loc, nspace, optName, nspaceQual, typeName );
 				break;
 			}
 
@@ -274,6 +274,8 @@ void TypeRef::resolveRepeat( Compiler *pd )
 
 UniqueType *TypeRef::lookupType( Compiler *pd )
 {
+	cout << "looking up typeref at " << loc.line << ":" << loc.col << endl;
+
 	if ( uniqueType != 0 )
 		return uniqueType;
 

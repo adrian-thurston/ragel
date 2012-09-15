@@ -74,6 +74,8 @@ struct InputLoc
 	int col;
 };
 
+extern InputLoc internal;
+
 /* Error reporting. */
 std::ostream &error();
 std::ostream &error( const InputLoc &loc ); 

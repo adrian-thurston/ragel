@@ -766,11 +766,11 @@ struct Compiler
 	void printNonTermFirstSets();
 	void printFirstSets();
 
-	LangEl *makeRepeatProd( Namespace *nspace, const String &repeatName, 
+	LangEl *makeRepeatProd( const InputLoc &loc, Namespace *nspace, const String &repeatName, 
 			NamespaceQual *nspaceQual, const String &name );
-	LangEl *makeListProd( Namespace *nspace, const String &listName,
+	LangEl *makeListProd( const InputLoc &loc, Namespace *nspace, const String &listName,
 			NamespaceQual *nspaceQual, const String &name );
-	LangEl *makeOptProd( Namespace *nspace, const String &optName,
+	LangEl *makeOptProd( const InputLoc &loc, Namespace *nspace, const String &optName,
 			NamespaceQual *nspaceQual, const String &name );
 	void resolveFactor( ProdEl *fact );
 	void resolveProductionEls();

@@ -777,7 +777,7 @@ VarRefLookup LangVarRef::lookupMethod( Compiler *pd )
 	if ( method == 0 ) {
 		/* Not found as a method, try it as an object on which we will call a
 		 * default function. */
-		qual->append( QualItem( InputLoc(), name, QualItem::Dot ) );
+		qual->append( QualItem( loc, name, QualItem::Dot ) );
 		name = "finish";
 
 		/* Lookup the object that the field is in. */
@@ -2427,7 +2427,7 @@ void CodeBlock::compile( Compiler *pd, CodeVect &code ) const
 void Compiler::addMatchLength( ObjectDef *frame, LangEl *lel )
 {
 	/* Make the type ref. */
-	TypeRef *typeRef = TypeRef::cons( InputLoc(), uniqueTypeInt );
+	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeInt );
 
 	/* Create the field and insert it into the map. */
 	ObjField *el = new ObjField( InputLoc(), typeRef, "match_length" );
@@ -2442,10 +2442,10 @@ void Compiler::addMatchLength( ObjectDef *frame, LangEl *lel )
 void Compiler::addMatchText( ObjectDef *frame, LangEl *lel )
 {
 	/* Make the type ref. */
-	TypeRef *typeRef = TypeRef::cons( InputLoc(), uniqueTypeStr );
+	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeStr );
 
 	/* Create the field and insert it into the map. */
-	ObjField *el = new ObjField( InputLoc(), typeRef, "match_text" );
+	ObjField *el = new ObjField( internal, typeRef, "match_text" );
 	el->beenReferenced = true;
 	el->beenInitialized = true;
 	el->isConst = true;
@@ -2457,10 +2457,10 @@ void Compiler::addMatchText( ObjectDef *frame, LangEl *lel )
 void Compiler::addInput( ObjectDef *frame )
 {
 	/* Make the type ref. */
-	TypeRef *typeRef = TypeRef::cons( InputLoc(), uniqueTypeInput );
+	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeInput );
 
 	/* Create the field and insert it into the map. */
-	ObjField *el = new ObjField( InputLoc(), typeRef, "input" );
+	ObjField *el = new ObjField( internal, typeRef, "input" );
 	el->beenReferenced = true;
 	el->beenInitialized = true;
 	el->isConst   = false;
@@ -2475,10 +2475,10 @@ void Compiler::addInput( ObjectDef *frame )
 void Compiler::addCtx( ObjectDef *frame )
 {
 	/* Make the type ref. */
-	TypeRef *typeRef = TypeRef::cons( InputLoc(), uniqueTypeStream );
+	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeStream );
 
 	/* Create the field and insert it into the map. */
-	ObjField *el = new ObjField( InputLoc(), typeRef, "ctx" );
+	ObjField *el = new ObjField( internal, typeRef, "ctx" );
 	el->beenReferenced = true;
 	el->beenInitialized = true;
 	el->isConst   = false;
@@ -2526,8 +2526,8 @@ void Compiler::initIntObject( )
 void Compiler::addLengthField( ObjectDef *objDef, Code getLength )
 {
 	/* Create the "length" field. */
-	TypeRef *typeRef = TypeRef::cons( InputLoc(), uniqueTypeInt );
-	ObjField *el = new ObjField( InputLoc(), typeRef, "length" );
+	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeInt );
+	ObjField *el = new ObjField( internal, typeRef, "length" );
 	el->beenReferenced = true;
 	el->beenInitialized = true;
 	el->isConst = true;
@@ -2579,8 +2579,8 @@ void Compiler::initInputObject( )
 ObjField *Compiler::makeDataEl()
 {
 	/* Create the "data" field. */
-	TypeRef *typeRef = TypeRef::cons( InputLoc(), uniqueTypeStr );
-	ObjField *el = new ObjField( InputLoc(), typeRef, "data" );
+	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeStr );
+	ObjField *el = new ObjField( internal, typeRef, "data" );
 
 	/* Setting beenReferenced to true prevents us from assigning instructions
 	 * and an offset to the field. */
@@ -2597,8 +2597,8 @@ ObjField *Compiler::makeDataEl()
 ObjField *Compiler::makePosEl()
 {
 	/* Create the "data" field. */
-	TypeRef *typeRef = TypeRef::cons( InputLoc(), uniqueTypeInt );
-	ObjField *el = new ObjField( InputLoc(), typeRef, "pos" );
+	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeInt );
+	ObjField *el = new ObjField( internal, typeRef, "pos" );
 
 	/* Setting beenReferenced to true prevents us from assigning instructions
 	 * and an offset to the field. */
@@ -2614,8 +2614,8 @@ ObjField *Compiler::makePosEl()
 ObjField *Compiler::makeLineEl()
 {
 	/* Create the "data" field. */
-	TypeRef *typeRef = TypeRef::cons( InputLoc(), uniqueTypeInt );
-	ObjField *el = new ObjField( InputLoc(), typeRef, "line" );
+	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeInt );
+	ObjField *el = new ObjField( internal, typeRef, "line" );
 
 	/* Setting beenReferenced to true prevents us from assigning instructions
 	 * and an offset to the field. */
@@ -2895,8 +2895,8 @@ void Compiler::initListFunctions( GenericType *gen )
 void Compiler::initListField( GenericType *gen, const char *name, int offset )
 {
 	/* Make the type ref and create the field. */
-	TypeRef *typeRef = TypeRef::cons( InputLoc(), gen->utArg );
-	ObjField *el = new ObjField( InputLoc(), typeRef, name );
+	TypeRef *typeRef = TypeRef::cons( internal, gen->utArg );
+	ObjField *el = new ObjField( internal, typeRef, name );
 
 	el->inGetR =  IN_GET_LIST_MEM_R;
 	el->inGetWC = IN_GET_LIST_MEM_WC;
@@ -2942,7 +2942,7 @@ void Compiler::initParserFunctions( GenericType *gen )
 void Compiler::initParserField( GenericType *gen, const char *name, int offset, TypeRef *typeRef )
 {
 	/* Make the type ref and create the field. */
-	ObjField *el = new ObjField( InputLoc(), typeRef, name );
+	ObjField *el = new ObjField( internal, typeRef, name );
 
 	el->inGetR =  IN_GET_PARSER_MEM_R;
 	el->inGetWC = IN_GET_PARSER_MEM_WC;
@@ -2967,8 +2967,8 @@ void Compiler::initCtxField( GenericType *gen )
 
 	/* Make the type ref and create the field. */
 	UniqueType *ctxUT = findUniqueType( TYPE_TREE, context->lel );
-	TypeRef *typeRef = TypeRef::cons( InputLoc(), ctxUT );
-	ObjField *el = new ObjField( InputLoc(), typeRef, "ctx" );
+	TypeRef *typeRef = TypeRef::cons( internal, ctxUT );
+	ObjField *el = new ObjField( internal, typeRef, "ctx" );
 
 	el->inGetR =  IN_GET_PARSER_CTX_R;
 	el->inGetWC = IN_GET_PARSER_CTX_WC;
@@ -2991,10 +2991,10 @@ void Compiler::initParserFields( GenericType *gen )
 
 	TypeRef *typeRef;
 
-	typeRef = TypeRef::cons( InputLoc(), gen->utArg );
+	typeRef = TypeRef::cons( internal, gen->utArg );
 	initParserField( gen, "tree", 0, typeRef );
 
-	typeRef = TypeRef::cons( InputLoc(), uniqueTypeStr );
+	typeRef = TypeRef::cons( internal, uniqueTypeStr );
 	initParserField( gen, "error", 1, typeRef );
 }
 
@@ -3277,10 +3277,10 @@ void Compiler::makeDefaultIterators()
 void Compiler::addStdin()
 {
 	/* Make the type ref. */
-	TypeRef *typeRef = TypeRef::cons( InputLoc(), uniqueTypeStream );
+	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeStream );
 
 	/* Create the field and insert it into the map. */
-	ObjField *el = new ObjField( InputLoc(), typeRef, "stdin" );
+	ObjField *el = new ObjField( internal, typeRef, "stdin" );
 	el->beenReferenced = true;
 	el->beenInitialized = true;
 	el->isConst = true;
@@ -3292,10 +3292,10 @@ void Compiler::addStdin()
 void Compiler::addStdout()
 {
 	/* Make the type ref. */
-	TypeRef *typeRef = TypeRef::cons( InputLoc(), uniqueTypeStr );
+	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeStr );
 
 	/* Create the field and insert it into the map. */
-	ObjField *el = new ObjField( InputLoc(), typeRef, "stout" );
+	ObjField *el = new ObjField( internal, typeRef, "stout" );
 	el->beenReferenced = true;
 	el->beenInitialized = true;
 	el->isConst = true;
@@ -3307,10 +3307,10 @@ void Compiler::addStdout()
 void Compiler::addStderr()
 {
 	/* Make the type ref. */
-	TypeRef *typeRef = TypeRef::cons( InputLoc(), uniqueTypeStr );
+	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeStr );
 
 	/* Create the field and insert it into the map. */
-	ObjField *el = new ObjField( InputLoc(), typeRef, "stderr" );
+	ObjField *el = new ObjField( internal, typeRef, "stderr" );
 	el->beenReferenced = true;
 	el->beenInitialized = true;
 	el->isConst = true;
@@ -3322,7 +3322,7 @@ void Compiler::addStderr()
 void Compiler::addArgv()
 {
 	/* Create the field and insert it into the map. */
-	ObjField *el = new ObjField( InputLoc(), argvTypeRef, "argv" );
+	ObjField *el = new ObjField( internal, argvTypeRef, "argv" );
 	el->isArgv = true;
 	el->isConst = true;
 	globalObjectDef->insertField( el->name, el );

@@ -64,6 +64,8 @@ using std::cerr;
 using std::cin;
 using std::endl;
 
+InputLoc internal = { 0, -1, -1 };
+
 /* Io globals. */
 istream *inStream = 0;
 ostream *outStream = 0;
@@ -104,8 +106,13 @@ ostream &error( const InputLoc &loc )
 	/* Keep the error count. */
 	gblErrorCount += 1;
 
-	cerr << "error: " << inputFileName << ":" << 
-			loc.line << ":" << loc.col << ": ";
+	if ( loc.line == -1 ) {
+		cerr << "error: INTERNAL: ";
+	}
+	else {
+		cerr << "error: " << inputFileName << ":" << 
+				loc.line << ":" << loc.col << ": ";
+	}
 	return cerr;
 }
 

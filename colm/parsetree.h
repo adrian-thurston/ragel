@@ -1910,7 +1910,8 @@ struct TypeRef
 	{}
 
 	/* Qualification and a type name. These require lookup. */
-	static TypeRef *cons( const InputLoc &loc, NamespaceQual *nspaceQual, String typeName )
+	static TypeRef *cons( const InputLoc &loc, NamespaceQual *nspaceQual, 
+			String typeName )
 	{
 		TypeRef *t = new TypeRef;
 		t->type = Name;
@@ -1922,7 +1923,8 @@ struct TypeRef
 	}
 
 	/* Qualification and a type name. These require lookup. */
-	static TypeRef *cons( const InputLoc &loc, NamespaceQual *nspaceQual, String typeName, RepeatType repeatType )
+	static TypeRef *cons( const InputLoc &loc, NamespaceQual *nspaceQual,
+			String typeName, RepeatType repeatType )
 	{
 		TypeRef *t = cons( loc, nspaceQual, typeName );
 		t->repeatType = repeatType;
@@ -1930,7 +1932,8 @@ struct TypeRef
 	}
 
 	/* Qualification and a type name. These require lookup. */
-	static TypeRef *cons( const InputLoc &loc, NamespaceQual *nspaceQual, PdaLiteral *pdaLiteral )
+	static TypeRef *cons( const InputLoc &loc, NamespaceQual *nspaceQual,
+			PdaLiteral *pdaLiteral )
 	{
 		TypeRef *t = new TypeRef;
 		t->type = Literal;
@@ -1942,7 +1945,8 @@ struct TypeRef
 	}
 
 	/* Qualification and a type name. These require lookup. */
-	static TypeRef *cons( const InputLoc &loc, NamespaceQual *nspaceQual, PdaLiteral *pdaLiteral, RepeatType repeatType )
+	static TypeRef *cons( const InputLoc &loc, NamespaceQual *nspaceQual,
+			PdaLiteral *pdaLiteral, RepeatType repeatType )
 	{
 		TypeRef *t = cons( loc, nspaceQual, pdaLiteral );
 		t->repeatType = repeatType;
@@ -1950,7 +1954,8 @@ struct TypeRef
 	}
 
 	/* Generics. */
-	static TypeRef *cons( const InputLoc &loc, Type type, NamespaceQual *nspaceQual, TypeRef *typeRef1, TypeRef *typeRef2 )
+	static TypeRef *cons( const InputLoc &loc, Type type, 
+			NamespaceQual *nspaceQual, TypeRef *typeRef1, TypeRef *typeRef2 )
 	{
 		TypeRef *t = new TypeRef;
 		t->type = type;
@@ -1976,8 +1981,8 @@ struct TypeRef
 	/* Resolution not needed. */
 
 	/* Iterator definition. */
-	static TypeRef *cons( const InputLoc &loc, IterDef *iterDef, UniqueType *uniqueType, 
-			UniqueType *searchUniqueType )
+	static TypeRef *cons( const InputLoc &loc, IterDef *iterDef,
+			UniqueType *uniqueType, UniqueType *searchUniqueType )
 	{
 		TypeRef *t = new TypeRef;
 		t->type = Iterator;

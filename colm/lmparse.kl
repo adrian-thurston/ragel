@@ -414,7 +414,7 @@ type_ref: KW_Map '<' type_ref type_ref '>'
 	final {
 		NamespaceQual *nspaceQual = new NamespaceQual( 
 				namespaceStack.top(), regionStack.top() );
-		$$->typeRef = TypeRef::cons( InputLoc(), TypeRef::Map, 
+		$$->typeRef = TypeRef::cons( $1->loc, TypeRef::Map, 
 				nspaceQual, $3->typeRef, $4->typeRef );
 	};
 
@@ -422,21 +422,21 @@ type_ref: KW_List '<' type_ref '>'
 	final {
 		NamespaceQual *nspaceQual = new NamespaceQual( 
 				namespaceStack.top(), regionStack.top() );
-		$$->typeRef = TypeRef::cons( InputLoc(), TypeRef::List,
+		$$->typeRef = TypeRef::cons( $1->loc, TypeRef::List,
 				nspaceQual, $3->typeRef, 0 );
 	};
 type_ref: KW_Vector '<' type_ref '>'
 	final {
 		NamespaceQual *nspaceQual = new NamespaceQual( 
 				namespaceStack.top(), regionStack.top() );
-		$$->typeRef = TypeRef::cons( InputLoc(), TypeRef::Vector,
+		$$->typeRef = TypeRef::cons( $1->loc, TypeRef::Vector,
 				nspaceQual, $3->typeRef, 0 );
 	};
 type_ref: KW_Parser '<' type_ref '>'
 	final {
 		NamespaceQual *nspaceQual = new NamespaceQual( 
 				namespaceStack.top(), regionStack.top() );
-		$$->typeRef = TypeRef::cons( InputLoc(), TypeRef::Parser,
+		$$->typeRef = TypeRef::cons( $1->loc, TypeRef::Parser,
 				nspaceQual, $3->typeRef, 0 );
 	};
 
@@ -476,7 +476,7 @@ region_def:
 region_head: 
 	KW_Lex TK_Word 
 	final {
-		pushRegionSet( $2->data );
+		pushRegionSet( $1->loc, $2->data );
 	};
 
 namespace_def: 
@@ -489,7 +489,7 @@ namespace_head:
 	KW_Namespace TK_Word 
 	final {
 		/* Make the new namespace. */
-		Namespace *nspace = new Namespace( InputLoc(), $2->data,
+		Namespace *nspace = new Namespace( $1->loc, $2->data,
 				pd->namespaceList.length(), namespaceStack.top() );
 		namespaceStack.top()->childNamespaces.append( nspace );
 		pd->namespaceList.append( nspace );
@@ -543,7 +543,7 @@ context_head:
 	KW_Context TK_Word
 	final {
 		/* Make the new namespace. */
-		Namespace *nspace = new Namespace( InputLoc(), $2->data,
+		Namespace *nspace = new Namespace( $1->loc, $2->data,
 				pd->namespaceList.length(), namespaceStack.top() );
 		namespaceStack.top()->childNamespaces.append( nspace );
 		pd->namespaceList.append( nspace );
@@ -1123,7 +1123,7 @@ literal_item: opt_no_ignore TK_Literal opt_no_ignore
 
 		bool insideRegion = regionStack.top() != pd->rootRegion;
 		if ( !insideRegion )
-			pushRegionSet( name );
+			pushRegionSet( $2->loc, name );
 
 		bool unusedCI;
 		String interp;
@@ -1299,7 +1299,7 @@ token_def_name:
 		curDefineId = name;
 
 		if ( !pd->insideRegion )
-			pushRegionSet( name );
+			pushRegionSet( internal, name );
 	};
 
 nonterm class opt_name
@@ -1901,10 +1901,6 @@ opt_capture:
 		$$->objField = 0;
 	};
 
-# A couple empties for ordering.
-E1: ;
-E2: ;
-
 nonterm parse_cmd
 {
 	bool stop;
@@ -2009,7 +2005,7 @@ code_factor:
 		/* The typeref for the parser. */
 		NamespaceQual *nspaceQual = new NamespaceQual( 
 				namespaceStack.top(), regionStack.top() );
-		TypeRef *parserTypeRef = TypeRef::cons( InputLoc(),
+		TypeRef *parserTypeRef = TypeRef::cons( $1->loc,
 				TypeRef::Parser, nspaceQual, $3->typeRef, 0 );
 
 		ParserText *parserText = ParserText::cons( $2->loc, nspace, region, $5->list );
@@ -2659,12 +2655,12 @@ void ColmParser::addArgvList()
 {
 	NamespaceQual *nspaceQual1 = new NamespaceQual( 
 			namespaceStack.top(), regionStack.top() );
-	TypeRef *typeRef = TypeRef::cons( InputLoc(), nspaceQual1, "str" );
+	TypeRef *typeRef = TypeRef::cons( internal, nspaceQual1, "str" );
 
 	NamespaceQual *nspaceQual2 = new NamespaceQual( 
 			namespaceStack.top(), regionStack.top() );
 
-	pd->argvTypeRef = TypeRef::cons( InputLoc(), TypeRef::List,
+	pd->argvTypeRef = TypeRef::cons( internal, TypeRef::List,
 			nspaceQual2, typeRef, 0 );
 }
 
@@ -2692,7 +2688,7 @@ void ColmParser::addRegularDef( const InputLoc &loc, Namespace *nspace,
 
 TokenRegion *ColmParser::createRegion( String &scannerName )
 {
-	TokenRegion *tokenRegion = new TokenRegion( InputLoc(), scannerName,
+	TokenRegion *tokenRegion = new TokenRegion( internal, scannerName,
 			pd->regionList.length(), regionStack.top() );
 
 	regionStack.top()->childRegions.append( tokenRegion );
@@ -2704,7 +2700,7 @@ TokenRegion *ColmParser::createRegion( String &scannerName )
 	return tokenRegion;
 }
 
-void ColmParser::pushRegionSet( String &name )
+void ColmParser::pushRegionSet( const InputLoc &loc, String &name )
 {
 	/* Just for ignores. */
 	String scannerNameIgn( name.length() + 2, "<%s>-ign", name.data );

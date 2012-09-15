@@ -110,8 +110,8 @@ void Compiler::declareBaseLangEls()
 void Compiler::addProdRedObjectVar( ObjectDef *localFrame, LangEl *nonTerm )
 {
 	UniqueType *prodNameUT = findUniqueType( TYPE_TREE, nonTerm );
-	TypeRef *typeRef = TypeRef::cons( InputLoc(), prodNameUT );
-	ObjField *el = new ObjField( InputLoc(), typeRef, "lhs" );
+	TypeRef *typeRef = TypeRef::cons( internal, prodNameUT );
+	ObjField *el = new ObjField( internal, typeRef, "lhs" );
 
 	el->isLhsEl = true;
 

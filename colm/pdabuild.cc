@@ -37,7 +37,9 @@
 /* Dumping the fsm. */
 #include "mergesort.h"
 
-using namespace std;
+using std::endl;
+using std::cerr;
+using std::cout;
 
 char startDefName[] = "start";
 
@@ -150,8 +152,8 @@ ProdElList *Compiler::makeProdElList( LangEl *langEl )
 {
 	ProdElList *prodElList = new ProdElList();
 	UniqueType *uniqueType = findUniqueType( TYPE_TREE, langEl );
-	TypeRef *typeRef = TypeRef::cons( InputLoc(), uniqueType );
-	prodElList->append( new ProdEl( InputLoc(), typeRef ) );
+	TypeRef *typeRef = TypeRef::cons( internal, uniqueType );
+	prodElList->append( new ProdEl( internal, typeRef ) );
 	prodElList->tail->langEl = langEl;
 	return prodElList;
 }
