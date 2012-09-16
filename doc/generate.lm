@@ -241,11 +241,12 @@ def preamble
 def start 
 	[preamble chapter*]
 
-parse Start: start( stdin )
-if ( ! Start ) {
-	print( error() '\n' )
+parse StartP: start[ stdin ]
+if ( ! StartP.tree ) {
+	print( StartP.error '\n' )
 	exit( 1 )
 }
+Start: start = StartP.tree
 
 int printPlData( Pld: cmd_il )
 {
