@@ -778,14 +778,13 @@ VarRefLookup LangVarRef::lookupMethod( Compiler *pd )
 		/* Not found as a method, try it as an object on which we will call a
 		 * default function. */
 		qual->append( QualItem( loc, name, QualItem::Dot ) );
-		name = "finish";
 
 		/* Lookup the object that the field is in. */
 		VarRefLookup lookup = lookupObj( pd );
 
 		/* Find the method. */
 		assert( lookup.inObject->objMethodMap != 0 );
-		method = lookup.inObject->findMethod( name );
+		method = lookup.inObject->findMethod( "finish" );
 		if ( method == 0 )
 			error(loc) << "cannot find " << name << "(...) in object" << endp;
 	}
