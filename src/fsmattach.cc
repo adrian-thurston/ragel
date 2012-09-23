@@ -253,8 +253,7 @@ TransAp *FsmAp::dupTrans( StateAp *from, TransAp *srcTrans )
 	for ( CondTransList::Iter sc = srcTrans->ctList; sc.lte(); sc++ ) {
 		/* Sub-transition for conditions. */
 		CondAp *newCond = new CondAp( newTrans );
-		newCond->lowKey = sc->lowKey;
-		newCond->highKey = sc->highKey;
+		newCond->key = sc->key;
 		newTrans->ctList.append( newCond );
 
 		/* We can attach the transition, one does not exist. */
@@ -559,8 +558,7 @@ TransAp *FsmAp::copyTransForExpanision( StateAp *fromState, TransAp *srcTrans )
 	for ( CondTransList::Iter sc = srcTrans->ctList; sc.lte(); sc++ ) {
 		/* Sub-transition for conditions. */
 		CondAp *newCond = new CondAp( newTrans );
-		newCond->lowKey = sc->lowKey;
-		newCond->highKey = sc->highKey;
+		newCond->key = sc->key;
 
 		newCond->fromState = sc->fromState;
 		newCond->toState = sc->toState;
@@ -612,8 +610,7 @@ TransAp *FsmAp::crossTransitions( MergeData &md, StateAp *from,
 			/* The pair iter is the authority on the keys. It may have needed
 			 * to break the dest range. */
 			CondAp *destTrans = outPair.s1Tel.trans;
-			destTrans->lowKey = outPair.s1Tel.lowKey;
-			destTrans->highKey = outPair.s1Tel.highKey;
+			destTrans->key = outPair.s1Tel.key;
 			destList.append( destTrans );
 			break;
 		}
@@ -622,8 +619,7 @@ TransAp *FsmAp::crossTransitions( MergeData &md, StateAp *from,
 			CondAp *newTrans = dupCondTrans( from, destTrans, outPair.s2Tel.trans );
 
 			/* Set up the transition's keys and append to the dest list. */
-			newTrans->lowKey = outPair.s2Tel.lowKey;
-			newTrans->highKey = outPair.s2Tel.highKey;
+			newTrans->key = outPair.s2Tel.key;
 			destList.append( newTrans );
 			break;
 		}
@@ -633,8 +629,7 @@ TransAp *FsmAp::crossTransitions( MergeData &md, StateAp *from,
 					outPair.s1Tel.trans, outPair.s2Tel.trans );
 
 			/* Set up the transition's keys and append to the dest list. */
-			newTrans->lowKey = outPair.s1Tel.lowKey;
-			newTrans->highKey = outPair.s1Tel.highKey;
+			newTrans->key = outPair.s1Tel.key;
 			destList.append( newTrans );
 			break;
 		}

@@ -160,7 +160,7 @@ void GraphvizDotGen::transList( StateAp *state )
 
 			/* Begin the label. */
 			out << " [ label = \""; 
-			onChar( tel->lowKey, tel->highKey, tel->condSpace, ctel->lowKey.getVal() );
+			onChar( tel->lowKey, tel->highKey, tel->condSpace, ctel->key.getVal() );
 
 			/* Write the action and close the transition. */
 			transAction( state, ctel );

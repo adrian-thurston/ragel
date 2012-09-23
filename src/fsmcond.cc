@@ -53,7 +53,7 @@ void FsmAp::expandConds( StateAp *fromState, TransAp *trans, const CondSet &from
 
 	/* Need to transform condition element to the merged set. */
 	for ( CondTransList::Iter cti = trans->ctList; cti.lte(); cti++ ) {
-		long origVal = cti->lowKey.getVal();
+		long origVal = cti->key.getVal();
 		long newVal = 0;
 
 		/* Iterate the bit positions in the from set. */
@@ -70,7 +70,7 @@ void FsmAp::expandConds( StateAp *fromState, TransAp *trans, const CondSet &from
 
 		if ( origVal != newVal ) {
 			cout << "orig: " << origVal << " new: " << newVal << endl;
-			cti->lowKey = cti->highKey = newVal;
+			cti->key = newVal;
 		}
 	}
 
@@ -85,7 +85,7 @@ void FsmAp::expandConds( StateAp *fromState, TransAp *trans, const CondSet &from
 			for ( CondTransList::Iter cti = trans->ctList; cti.lte(); cti++ ) {
 				CondAp *cond = dupCondTrans( fromState, trans, cti  );
 
-				cond->lowKey = cond->highKey = cti->lowKey.getVal() | (1 << csi.pos());
+				cond->key = cti->key.getVal() | (1 << csi.pos());
 
 				newItems.append( cond );
 			}
@@ -352,7 +352,7 @@ void FsmAp::embedCondition( MergeData &md, StateAp *state, Action *condAction, b
 
 		/* Need to transform condition element to the merged set. */
 		for ( CondTransList::Iter cti = tr->ctList; cti.lte(); cti++ ) {
-			long origVal = cti->lowKey.getVal();
+			long origVal = cti->key.getVal();
 			long newVal = 0;
 
 			/* Iterate the bit positions in the from set. */
@@ -369,13 +369,13 @@ void FsmAp::embedCondition( MergeData &md, StateAp *state, Action *condAction, b
 
 			if ( origVal != newVal ) {
 				cout << "orig: " << origVal << " new: " << newVal << endl;
-				cti->lowKey = cti->highKey = newVal;
+				cti->key = cti->key = newVal;
 			}
 
 			if ( sense ) {
 				Action **cim = mergedCS.find( condAction );
 				int pos = cim - mergedCS.data;
-				cti->lowKey = cti->highKey = cti->lowKey.getVal() | (1 << pos);
+				cti->key = cti->key.getVal() | (1 << pos);
 			}
 		}
 	}

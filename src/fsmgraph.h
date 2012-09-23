@@ -421,15 +421,13 @@ struct CondAp
 	CondAp( TransAp *transAp ) 
 	:
 		transAp(transAp), 
-		lowKey(0), highKey(0),
-		fromState(0), toState(0) 
+		key(0), fromState(0), toState(0) 
 	{}
 
 	CondAp( const CondAp &other, TransAp *transAp )
 	:
 		transAp(transAp),
-		lowKey(other.lowKey),
-		highKey(other.highKey),
+		key(other.key),
 		fromState(0), toState(0),
 		actionTable(other.actionTable),
 		priorTable(other.priorTable),
@@ -440,7 +438,7 @@ struct CondAp
 	/* Owning transition. */
 	TransAp *transAp;
 
-	Key lowKey, highKey;
+	Key key;
 
 	StateAp *fromState;
 	StateAp *toState;
@@ -858,7 +856,7 @@ template <class ListItem1, class ListItem2 = ListItem1> struct ValPairIter
 
 	template <class ListItem> struct NextTrans
 	{
-		Key lowKey, highKey;
+		Key key;
 		ListItem *trans;
 		ListItem *next;
 
@@ -867,8 +865,7 @@ template <class ListItem1, class ListItem2 = ListItem1> struct ValPairIter
 				next = 0;
 			else {
 				next = trans->next;
-				lowKey = trans->lowKey;
-				highKey = trans->highKey;
+				key = trans->key;
 			}
 		}
 
@@ -961,12 +958,12 @@ entryBegin:
 		/* Both state1's and state2's transition elements are good.
 		 * The signiture of no overlap is a back key being in front of a
 		 * front key. */
-		else if ( s1Tel.highKey < s2Tel.lowKey ) {
+		else if ( s1Tel.key < s2Tel.key ) {
 			/* A range exists in state1 that does not overlap with state2. */
 			CO_RETURN2( OnlyInS1Range, RangeInS1 );
 			s1Tel.increment();
 		}
-		else if ( s2Tel.highKey < s1Tel.lowKey ) {
+		else if ( s2Tel.key < s1Tel.key ) {
 			/* A range exists in state2 that does not overlap with state1. */
 			CO_RETURN2( OnlyInS2Range, RangeInS2 );
 			s2Tel.increment();

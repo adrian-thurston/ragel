@@ -159,8 +159,7 @@ StateAp::StateAp(const StateAp &other)
 
 		for ( CondTransList::Iter cti = trans->ctList; cti.lte(); cti++ ) {
 			CondAp *newCondTrans = new CondAp( *cti, newTrans );
-			newCondTrans->lowKey = cti->lowKey;
-			newCondTrans->highKey = cti->highKey;
+			newCondTrans->key = cti->key;
 
 			newTrans->ctList.append( newCondTrans );
 
