@@ -322,45 +322,36 @@ CondSpace *FsmAp::addCondSpace( const CondSet &condSet )
 
 void FsmAp::embedCondition( MergeData &md, StateAp *state, Action *condAction, bool sense )
 {
-#if 0
-	ExpansionList expList;
-
-	findEmbedExpansions( expList, state, condAction, sense );
-	doExpand( md, state, expList );
-	doRemove( md, state, expList );
-	expList.empty();
-#endif
-
 	for ( TransList::Iter tr = state->outList; tr.lte(); tr++ ) {
 
-		CondSet destCS;
-		CondSet mergedCS;
-
+		/* The original cond set. */
+		CondSet origCS;
 		if ( tr->condSpace != 0 )
-			destCS.insert( tr->condSpace->condSet );
+			origCS.insert( tr->condSpace->condSet );
 
-		mergedCS.insert( destCS );
+		/* The merged cond set. */
+		CondSet mergedCS;
+		mergedCS.insert( origCS );
 		mergedCS.insert( condAction );
 
+		/* Allocate a cond space for the merged spet. */
 		CondSpace *mergedCondSpace = addCondSpace( mergedCS );
 		tr->condSpace = mergedCondSpace;
 
-		CondSet newCS = mergedCS;
-		for ( CondSet::Iter mcsi = destCS; mcsi.lte(); mcsi++ )
-			newCS.remove( *mcsi );
-		/*long newLen = */newCS.length();
-
-		/* Need to transform condition element to the merged set. */
+		/* Translate original condition values, making space for the new bit
+		 * (possibly) introduced by the condition embedding. */
 		for ( CondTransList::Iter cti = tr->ctList; cti.lte(); cti++ ) {
 			long origVal = cti->key.getVal();
 			long newVal = 0;
 
-			/* Iterate the bit positions in the from set. */
-			for ( CondSet::Iter csi = destCS; csi.lte(); csi++ ) {
-				/* If set, find it in the merged set and flip the bit to 1. */
+			/* For every set bit in the orig, find it's position in the merged
+			 * and set the bit appropriately. */
+			for ( CondSet::Iter csi = origCS; csi.lte(); csi++ ) {
+				/* If set, find it in the merged set and flip the bit to 1. If
+				 * not set, there is nothing to do (convenient eh?) */
 				if ( origVal & (1 << csi.pos()) ) {
-					/* The condition is set. Find the bit position in the merged
-					 * set. */
+					/* The condition is set. Find the bit position in the
+					 * merged set. */
 					Action **cim = mergedCS.find( *csi );
 					long bitPos = (cim - mergedCS.data);
 					newVal |= 1 << bitPos;
@@ -368,10 +359,12 @@ void FsmAp::embedCondition( MergeData &md, StateAp *state, Action *condAction, b
 			}
 
 			if ( origVal != newVal ) {
-				cout << "orig: " << origVal << " new: " << newVal << endl;
-				cti->key = cti->key = newVal;
+				cerr << "orig: " << origVal << " new: " << newVal << endl;
+				cti->key = newVal;
 			}
 
+			/* Now set the new bit appropriately. Since it defaults to zero we
+			 * only take action if sense is positive. */
 			if ( sense ) {
 				Action **cim = mergedCS.find( condAction );
 				int pos = cim - mergedCS.data;
