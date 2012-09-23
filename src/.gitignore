@@ -12,3 +12,6 @@
 /ragel.exe
 /.deps
 /stamp-h1
+/tmp.rl
+/tmp.c
+/tmp.ps
