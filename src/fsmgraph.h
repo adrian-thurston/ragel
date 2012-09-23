@@ -821,33 +821,6 @@ struct StateAp
 	LmItemSet lmItemSet;
 };
 
-template <class ListItem> struct NextTrans
-{
-	Key lowKey, highKey;
-	ListItem *trans;
-	ListItem *next;
-
-	void load() {
-		if ( trans == 0 )
-			next = 0;
-		else {
-			next = trans->next;
-			lowKey = trans->lowKey;
-			highKey = trans->highKey;
-		}
-	}
-
-	void set( ListItem *t ) {
-		trans = t;
-		load();
-	}
-
-	void increment() {
-		trans = next;
-		load();
-	}
-};
-
 /* Return and re-entry for the co-routine iterators. This should ALWAYS be
  * used inside of a block. */
 #define CO_RETURN(label) \
@@ -882,6 +855,33 @@ template <class ListItem1, class ListItem2 = ListItem1> struct ValPairIter
 	};
 
 	ValPairIter( ListItem1 *list1, ListItem2 *list2 );
+
+	template <class ListItem> struct NextTrans
+	{
+		Key lowKey, highKey;
+		ListItem *trans;
+		ListItem *next;
+
+		void load() {
+			if ( trans == 0 )
+				next = 0;
+			else {
+				next = trans->next;
+				lowKey = trans->lowKey;
+				highKey = trans->highKey;
+			}
+		}
+
+		void set( ListItem *t ) {
+			trans = t;
+			load();
+		}
+
+		void increment() {
+			trans = next;
+			load();
+		}
+	};
 	
 	/* Query iterator. */
 	bool lte() { return itState != End; }
@@ -1007,6 +1007,33 @@ template <class ListItem1, class ListItem2 = ListItem1> struct RangePairIter
 	};
 
 	RangePairIter( ListItem1 *list1, ListItem2 *list2 );
+
+	template <class ListItem> struct NextTrans
+	{
+		Key lowKey, highKey;
+		ListItem *trans;
+		ListItem *next;
+
+		void load() {
+			if ( trans == 0 )
+				next = 0;
+			else {
+				next = trans->next;
+				lowKey = trans->lowKey;
+				highKey = trans->highKey;
+			}
+		}
+
+		void set( ListItem *t ) {
+			trans = t;
+			load();
+		}
+
+		void increment() {
+			trans = next;
+			load();
+		}
+	};
 	
 	/* Query iterator. */
 	bool lte() { return itState != End; }
