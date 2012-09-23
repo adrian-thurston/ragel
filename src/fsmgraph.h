@@ -848,6 +848,248 @@ template <class ListItem> struct NextTrans
 	}
 };
 
+/* Return and re-entry for the co-routine iterators. This should ALWAYS be
+ * used inside of a block. */
+#define CO_RETURN(label) \
+	itState = label; \
+	return; \
+	entry##label: {}
+
+/* Return and re-entry for the co-routine iterators. This should ALWAYS be
+ * used inside of a block. */
+#define CO_RETURN2(label, uState) \
+	itState = label; \
+	userState = uState; \
+	return; \
+	entry##label: {}
+
+template <class ListItem1, class ListItem2 = ListItem1> struct ValPairIter
+{
+	/* Encodes the states that are meaningful to the of caller the iterator. */
+	enum UserState
+	{
+		RangeInS1, RangeInS2,
+		RangeOverlap,
+		BreakS1, BreakS2
+	};
+
+	/* Encodes the different states that an fsm iterator can be in. */
+	enum IterState {
+		Begin,
+		ConsumeS1Range, ConsumeS2Range,
+		OnlyInS1Range,  OnlyInS2Range,
+		S1SticksOut,    S1SticksOutBreak,
+		S2SticksOut,    S2SticksOutBreak,
+		S1DragsBehind,  S1DragsBehindBreak,
+		S2DragsBehind,  S2DragsBehindBreak,
+		ExactOverlap,   End
+	};
+
+	ValPairIter( ListItem1 *list1, ListItem2 *list2 );
+	
+	/* Query iterator. */
+	bool lte() { return itState != End; }
+	bool end() { return itState == End; }
+	void operator++(int) { findNext(); }
+	void operator++()    { findNext(); }
+
+	/* Iterator state. */
+	ListItem1 *list1;
+	ListItem2 *list2;
+	IterState itState;
+	UserState userState;
+
+	NextTrans<ListItem1> s1Tel;
+	NextTrans<ListItem2> s2Tel;
+	Key bottomLow, bottomHigh;
+	ListItem1 *bottomTrans1;
+	ListItem2 *bottomTrans2;
+
+private:
+	void findNext();
+};
+
+/* Init the iterator by advancing to the first item. */
+template <class ListItem1, class ListItem2> ValPairIter<ListItem1, ListItem2>::
+		ValPairIter( ListItem1 *list1, ListItem2 *list2 )
+:
+	list1(list1),
+	list2(list2),
+	itState(Begin)
+{
+	findNext();
+}
+
+/* Advance to the next transition. When returns, trans points to the next
+ * transition, unless there are no more, in which case end() returns true. */
+template <class ListItem1, class ListItem2> void ValPairIter<ListItem1, ListItem2>::findNext()
+{
+	/* Jump into the iterator routine base on the iterator state. */
+	switch ( itState ) {
+		case Begin:              goto entryBegin;
+		case ConsumeS1Range:     goto entryConsumeS1Range;
+		case ConsumeS2Range:     goto entryConsumeS2Range;
+		case OnlyInS1Range:      goto entryOnlyInS1Range;
+		case OnlyInS2Range:      goto entryOnlyInS2Range;
+		case S1SticksOut:        goto entryS1SticksOut;
+		case S1SticksOutBreak:   goto entryS1SticksOutBreak;
+		case S2SticksOut:        goto entryS2SticksOut;
+		case S2SticksOutBreak:   goto entryS2SticksOutBreak;
+		case S1DragsBehind:      goto entryS1DragsBehind;
+		case S1DragsBehindBreak: goto entryS1DragsBehindBreak;
+		case S2DragsBehind:      goto entryS2DragsBehind;
+		case S2DragsBehindBreak: goto entryS2DragsBehindBreak;
+		case ExactOverlap:       goto entryExactOverlap;
+		case End:                goto entryEnd;
+	}
+
+entryBegin:
+	/* Set up the next structs at the head of the transition lists. */
+	s1Tel.set( list1 );
+	s2Tel.set( list2 );
+
+	/* Concurrently scan both out ranges. */
+	while ( true ) {
+		if ( s1Tel.trans == 0 ) {
+			/* We are at the end of state1's ranges. Process the rest of
+			 * state2's ranges. */
+			while ( s2Tel.trans != 0 ) {
+				/* Range is only in s2. */
+				CO_RETURN2( ConsumeS2Range, RangeInS2 );
+				s2Tel.increment();
+			}
+			break;
+		}
+		else if ( s2Tel.trans == 0 ) {
+			/* We are at the end of state2's ranges. Process the rest of
+			 * state1's ranges. */
+			while ( s1Tel.trans != 0 ) {
+				/* Range is only in s1. */
+				CO_RETURN2( ConsumeS1Range, RangeInS1 );
+				s1Tel.increment();
+			}
+			break;
+		}
+		/* Both state1's and state2's transition elements are good.
+		 * The signiture of no overlap is a back key being in front of a
+		 * front key. */
+		else if ( s1Tel.highKey < s2Tel.lowKey ) {
+			/* A range exists in state1 that does not overlap with state2. */
+			CO_RETURN2( OnlyInS1Range, RangeInS1 );
+			s1Tel.increment();
+		}
+		else if ( s2Tel.highKey < s1Tel.lowKey ) {
+			/* A range exists in state2 that does not overlap with state1. */
+			CO_RETURN2( OnlyInS2Range, RangeInS2 );
+			s2Tel.increment();
+		}
+		/* There is overlap, must mix the ranges in some way. */
+		else if ( s1Tel.lowKey < s2Tel.lowKey ) {
+			/* Range from state1 sticks out front. Must break it into
+			 * non-overlaping and overlaping segments. */
+			bottomLow = s2Tel.lowKey;
+			bottomHigh = s1Tel.highKey;
+			s1Tel.highKey = s2Tel.lowKey;
+			s1Tel.highKey.decrement();
+			bottomTrans1 = s1Tel.trans;
+
+			/* Notify the caller that we are breaking s1. This gives them a
+			 * chance to duplicate s1Tel[0,1].value. */
+			CO_RETURN2( S1SticksOutBreak, BreakS1 );
+
+			/* Broken off range is only in s1. */
+			CO_RETURN2( S1SticksOut, RangeInS1 );
+
+			/* Advance over the part sticking out front. */
+			s1Tel.lowKey = bottomLow;
+			s1Tel.highKey = bottomHigh;
+			s1Tel.trans = bottomTrans1;
+		}
+		else if ( s2Tel.lowKey < s1Tel.lowKey ) {
+			/* Range from state2 sticks out front. Must break it into
+			 * non-overlaping and overlaping segments. */
+			bottomLow = s1Tel.lowKey;
+			bottomHigh = s2Tel.highKey;
+			s2Tel.highKey = s1Tel.lowKey;
+			s2Tel.highKey.decrement();
+			bottomTrans2 = s2Tel.trans;
+
+			/* Notify the caller that we are breaking s2. This gives them a
+			 * chance to duplicate s2Tel[0,1].value. */
+			CO_RETURN2( S2SticksOutBreak, BreakS2 );
+
+			/* Broken off range is only in s2. */
+			CO_RETURN2( S2SticksOut, RangeInS2 );
+
+			/* Advance over the part sticking out front. */
+			s2Tel.lowKey = bottomLow;
+			s2Tel.highKey = bottomHigh;
+			s2Tel.trans = bottomTrans2;
+		}
+		/* Low ends are even. Are the high ends even? */
+		else if ( s1Tel.highKey < s2Tel.highKey ) {
+			/* Range from state2 goes longer than the range from state1. We
+			 * must break the range from state2 into an evenly overlaping
+			 * segment. */
+			bottomLow = s1Tel.highKey;
+			bottomLow.increment();
+			bottomHigh = s2Tel.highKey;
+			s2Tel.highKey = s1Tel.highKey;
+			bottomTrans2 = s2Tel.trans;
+
+			/* Notify the caller that we are breaking s2. This gives them a
+			 * chance to duplicate s2Tel[0,1].value. */
+			CO_RETURN2( S2DragsBehindBreak, BreakS2 );
+
+			/* Breaking s2 produces exact overlap. */
+			CO_RETURN2( S2DragsBehind, RangeOverlap );
+
+			/* Advance over the front we just broke off of range 2. */
+			s2Tel.lowKey = bottomLow;
+			s2Tel.highKey = bottomHigh;
+			s2Tel.trans = bottomTrans2;
+
+			/* Advance over the entire s1Tel. We have consumed it. */
+			s1Tel.increment();
+		}
+		else if ( s2Tel.highKey < s1Tel.highKey ) {
+			/* Range from state1 goes longer than the range from state2. We
+			 * must break the range from state1 into an evenly overlaping
+			 * segment. */
+			bottomLow = s2Tel.highKey;
+			bottomLow.increment();
+			bottomHigh = s1Tel.highKey;
+			s1Tel.highKey = s2Tel.highKey;
+			bottomTrans1 = s1Tel.trans;
+
+			/* Notify the caller that we are breaking s1. This gives them a
+			 * chance to duplicate s2Tel[0,1].value. */
+			CO_RETURN2( S1DragsBehindBreak, BreakS1 );
+
+			/* Breaking s1 produces exact overlap. */
+			CO_RETURN2( S1DragsBehind, RangeOverlap );
+
+			/* Advance over the front we just broke off of range 1. */
+			s1Tel.lowKey = bottomLow;
+			s1Tel.highKey = bottomHigh;
+			s1Tel.trans = bottomTrans1;
+
+			/* Advance over the entire s2Tel. We have consumed it. */
+			s2Tel.increment();
+		}
+		else {
+			/* There is an exact overlap. */
+			CO_RETURN2( ExactOverlap, RangeOverlap );
+
+			s1Tel.increment();
+			s2Tel.increment();
+		}
+	}
+
+	/* Done, go into end state. */
+	CO_RETURN( End );
+}
+
 template <class ListItem1, class ListItem2 = ListItem1> struct RangePairIter
 {
 	/* Encodes the states that are meaningful to the of caller the iterator. */
@@ -904,21 +1146,6 @@ template <class ListItem1, class ListItem2> RangePairIter<ListItem1, ListItem2>:
 {
 	findNext();
 }
-
-/* Return and re-entry for the co-routine iterators. This should ALWAYS be
- * used inside of a block. */
-#define CO_RETURN(label) \
-	itState = label; \
-	return; \
-	entry##label: {}
-
-/* Return and re-entry for the co-routine iterators. This should ALWAYS be
- * used inside of a block. */
-#define CO_RETURN2(label, uState) \
-	itState = label; \
-	userState = uState; \
-	return; \
-	entry##label: {}
 
 /* Advance to the next transition. When returns, trans points to the next
  * transition, unless there are no more, in which case end() returns true. */

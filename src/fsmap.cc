@@ -741,30 +741,30 @@ int FsmAp::compareTransData( TransAp *trans1, TransAp *trans2 )
 	else if ( trans2->condSpace < trans1->condSpace )
 		return 1;
 
-	RangePairIter<CondAp> outPair( trans1->ctList.head, trans2->ctList.head );
+	ValPairIter<CondAp> outPair( trans1->ctList.head, trans2->ctList.head );
 	for ( ; !outPair.end(); outPair++ ) {
 		switch ( outPair.userState ) {
-		case RangePairIter<CondAp>::RangeInS1: {
+		case ValPairIter<CondAp>::RangeInS1: {
 			int compareRes = FsmAp::compareCondDataPtr( outPair.s1Tel.trans, 0 );
 			if ( compareRes != 0 )
 				return compareRes;
 			break;
 		}
-		case RangePairIter<CondAp>::RangeInS2: {
+		case ValPairIter<CondAp>::RangeInS2: {
 			int compareRes = FsmAp::compareCondDataPtr( 0, outPair.s2Tel.trans );
 			if ( compareRes != 0 )
 				return compareRes;
 			break;
 		}
-		case RangePairIter<CondAp>::RangeOverlap: {
+		case ValPairIter<CondAp>::RangeOverlap: {
 			int compareRes = FsmAp::compareCondDataPtr( 
 					outPair.s1Tel.trans, outPair.s2Tel.trans );
 			if ( compareRes != 0 )
 				return compareRes;
 			break;
 		}
-		case RangePairIter<CondAp>::BreakS1:
-		case RangePairIter<CondAp>::BreakS2:
+		case ValPairIter<CondAp>::BreakS1:
+		case ValPairIter<CondAp>::BreakS2:
 			assert(false);
 			break;
 		}
