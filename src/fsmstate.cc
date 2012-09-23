@@ -210,27 +210,27 @@ int ApproxCompare::compare( const StateAp *state1, const StateAp *state2 )
 	for ( ; !outPair.end(); outPair++ ) {
 		switch ( outPair.userState ) {
 
-		case RangeInS1:
+		case PairIter<TransAp>::RangeInS1:
 			compareRes = FsmAp::compareFullPtr( outPair.s1Tel.trans, 0 );
 			if ( compareRes != 0 )
 				return compareRes;
 			break;
 
-		case RangeInS2:
+		case PairIter<TransAp>::RangeInS2:
 			compareRes = FsmAp::compareFullPtr( 0, outPair.s2Tel.trans );
 			if ( compareRes != 0 )
 				return compareRes;
 			break;
 
-		case RangeOverlap:
+		case PairIter<TransAp>::RangeOverlap:
 			compareRes = FsmAp::compareFullPtr( 
 					outPair.s1Tel.trans, outPair.s2Tel.trans );
 			if ( compareRes != 0 )
 				return compareRes;
 			break;
 
-		case BreakS1:
-		case BreakS2:
+		case PairIter<TransAp>::BreakS1:
+		case PairIter<TransAp>::BreakS2:
 			break;
 		}
 	}
@@ -271,12 +271,12 @@ int InitPartitionCompare::compare( const StateAp *state1 , const StateAp *state2
 	PairIter<StateCond> condPair( state1->stateCondList.head, state2->stateCondList.head );
 	for ( ; !condPair.end(); condPair++ ) {
 		switch ( condPair.userState ) {
-		case RangeInS1:
+		case PairIter<StateCond>::RangeInS1:
 			return 1;
-		case RangeInS2:
+		case PairIter<StateCond>::RangeInS2:
 			return -1;
 
-		case RangeOverlap: {
+		case PairIter<StateCond>::RangeOverlap: {
 			CondSpace *condSpace1 = condPair.s1Tel.trans->condSpace;
 			CondSpace *condSpace2 = condPair.s2Tel.trans->condSpace;
 			if ( condSpace1 < condSpace2 )
@@ -285,8 +285,8 @@ int InitPartitionCompare::compare( const StateAp *state1 , const StateAp *state2
 				return 1;
 			break;
 		}
-		case BreakS1:
-		case BreakS2:
+		case PairIter<StateCond>::BreakS1:
+		case PairIter<StateCond>::BreakS2:
 			break;
 		}
 	}
@@ -296,27 +296,27 @@ int InitPartitionCompare::compare( const StateAp *state1 , const StateAp *state2
 	for ( ; !outPair.end(); outPair++ ) {
 		switch ( outPair.userState ) {
 
-		case RangeInS1:
+		case PairIter<TransAp>::RangeInS1:
 			compareRes = FsmAp::compareTransDataPtr( outPair.s1Tel.trans, 0 );
 			if ( compareRes != 0 )
 				return compareRes;
 			break;
 
-		case RangeInS2:
+		case PairIter<TransAp>::RangeInS2:
 			compareRes = FsmAp::compareTransDataPtr( 0, outPair.s2Tel.trans );
 			if ( compareRes != 0 )
 				return compareRes;
 			break;
 
-		case RangeOverlap:
+		case PairIter<TransAp>::RangeOverlap:
 			compareRes = FsmAp::compareTransDataPtr( 
 					outPair.s1Tel.trans, outPair.s2Tel.trans );
 			if ( compareRes != 0 )
 				return compareRes;
 			break;
 
-		case BreakS1:
-		case BreakS2:
+		case PairIter<TransAp>::BreakS1:
+		case PairIter<TransAp>::BreakS2:
 			break;
 		}
 	}
@@ -334,27 +334,27 @@ int PartitionCompare::compare( const StateAp *state1, const StateAp *state2 )
 	for ( ; !outPair.end(); outPair++ ) {
 		switch ( outPair.userState ) {
 
-		case RangeInS1:
+		case PairIter<TransAp>::RangeInS1:
 			compareRes = FsmAp::compareTransPartPtr( outPair.s1Tel.trans, 0 );
 			if ( compareRes != 0 )
 				return compareRes;
 			break;
 
-		case RangeInS2:
+		case PairIter<TransAp>::RangeInS2:
 			compareRes = FsmAp::compareTransPartPtr( 0, outPair.s2Tel.trans );
 			if ( compareRes != 0 )
 				return compareRes;
 			break;
 
-		case RangeOverlap:
+		case PairIter<TransAp>::RangeOverlap:
 			compareRes = FsmAp::compareTransPartPtr( 
 					outPair.s1Tel.trans, outPair.s2Tel.trans );
 			if ( compareRes != 0 )
 				return compareRes;
 			break;
 
-		case BreakS1:
-		case BreakS2:
+		case PairIter<TransAp>::BreakS1:
+		case PairIter<TransAp>::BreakS2:
 			break;
 		}
 	}
@@ -384,24 +384,24 @@ bool MarkCompare::shouldMark( MarkIndex &markIndex, const StateAp *state1,
 	for ( ; !outPair.end(); outPair++ ) {
 		switch ( outPair.userState ) {
 
-		case RangeInS1:
+		case PairIter<TransAp>::RangeInS1:
 			if ( FsmAp::shouldMarkPtr( markIndex, outPair.s1Tel.trans, 0 ) )
 				return true;
 			break;
 
-		case RangeInS2:
+		case PairIter<TransAp>::RangeInS2:
 			if ( FsmAp::shouldMarkPtr( markIndex, 0, outPair.s2Tel.trans ) )
 				return true;
 			break;
 
-		case RangeOverlap:
+		case PairIter<TransAp>::RangeOverlap:
 			if ( FsmAp::shouldMarkPtr( markIndex,
 					outPair.s1Tel.trans, outPair.s2Tel.trans ) )
 				return true;
 			break;
 
-		case BreakS1:
-		case BreakS2:
+		case PairIter<TransAp>::BreakS1:
+		case PairIter<TransAp>::BreakS2:
 			break;
 		}
 	}
@@ -420,21 +420,21 @@ int FsmAp::comparePart( TransAp *trans1, TransAp *trans2 )
 	for ( ; !outPair.end(); outPair++ ) {
 		switch ( outPair.userState ) {
 
-		case RangeInS1: {
+		case PairIter<CondAp>::RangeInS1: {
 			int compareRes = FsmAp::compareCondPartPtr( outPair.s1Tel.trans, 0 );
 			if ( compareRes != 0 )
 				return compareRes;
 			break;
 		}
 
-		case RangeInS2: {
+		case PairIter<CondAp>::RangeInS2: {
 			int compareRes = FsmAp::compareCondPartPtr( 0, outPair.s2Tel.trans );
 			if ( compareRes != 0 )
 				return compareRes;
 			break;
 		}
 
-		case RangeOverlap: {
+		case PairIter<CondAp>::RangeOverlap: {
 			int compareRes = FsmAp::compareCondPartPtr( 
 					outPair.s1Tel.trans, outPair.s2Tel.trans );
 			if ( compareRes != 0 )
@@ -442,8 +442,8 @@ int FsmAp::comparePart( TransAp *trans1, TransAp *trans2 )
 			break;
 		}
 
-		case BreakS1:
-		case BreakS2:
+		case PairIter<CondAp>::BreakS1:
+		case PairIter<CondAp>::BreakS2:
 			break;
 		}
 	}

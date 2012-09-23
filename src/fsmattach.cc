@@ -608,7 +608,7 @@ TransAp *FsmAp::crossTransitions( MergeData &md, StateAp *from,
 	PairIter<CondAp> outPair( destTrans->ctList.head, effectiveSrcTrans->ctList.head );
 	for ( ; !outPair.end(); outPair++ ) {
 		switch ( outPair.userState ) {
-		case RangeInS1: {
+		case PairIter<CondAp>::RangeInS1: {
 			/* The pair iter is the authority on the keys. It may have needed
 			 * to break the dest range. */
 			CondAp *destTrans = outPair.s1Tel.trans;
@@ -617,7 +617,7 @@ TransAp *FsmAp::crossTransitions( MergeData &md, StateAp *from,
 			destList.append( destTrans );
 			break;
 		}
-		case RangeInS2: {
+		case PairIter<CondAp>::RangeInS2: {
 			/* Src range may get crossed with dest's default transition. */
 			CondAp *newTrans = dupCondTrans( from, destTrans, outPair.s2Tel.trans );
 
@@ -627,7 +627,7 @@ TransAp *FsmAp::crossTransitions( MergeData &md, StateAp *from,
 			destList.append( newTrans );
 			break;
 		}
-		case RangeOverlap: {
+		case PairIter<CondAp>::RangeOverlap: {
 			/* Exact overlap, cross them. */
 			CondAp *newTrans = crossCondTransitions( md, from, destTrans,
 					outPair.s1Tel.trans, outPair.s2Tel.trans );
@@ -638,7 +638,7 @@ TransAp *FsmAp::crossTransitions( MergeData &md, StateAp *from,
 			destList.append( newTrans );
 			break;
 		}
-		case BreakS1: {
+		case PairIter<CondAp>::BreakS1: {
 //			/* Since we are always writing to the dest trans, the dest needs
 //			 * to be copied when it is broken. The copy goes into the first
 //			 * half of the break to "break it off". */
@@ -646,7 +646,7 @@ TransAp *FsmAp::crossTransitions( MergeData &md, StateAp *from,
 			assert( false );
 			break;
 		}
-		case BreakS2:
+		case PairIter<CondAp>::BreakS2:
 			break;
 		}
 	}
@@ -673,7 +673,7 @@ void FsmAp::outTransCopy( MergeData &md, StateAp *dest, TransAp *srcList )
 	PairIter<TransAp> outPair( dest->outList.head, srcList );
 	for ( ; !outPair.end(); outPair++ ) {
 		switch ( outPair.userState ) {
-		case RangeInS1: {
+		case PairIter<TransAp>::RangeInS1: {
 			/* The pair iter is the authority on the keys. It may have needed
 			 * to break the dest range. */
 			TransAp *destTrans = outPair.s1Tel.trans;
@@ -682,7 +682,7 @@ void FsmAp::outTransCopy( MergeData &md, StateAp *dest, TransAp *srcList )
 			destList.append( destTrans );
 			break;
 		}
-		case RangeInS2: {
+		case PairIter<TransAp>::RangeInS2: {
 			/* Src range may get crossed with dest's default transition. */
 			TransAp *newTrans = dupTrans( dest, outPair.s2Tel.trans );
 
@@ -692,7 +692,7 @@ void FsmAp::outTransCopy( MergeData &md, StateAp *dest, TransAp *srcList )
 			destList.append( newTrans );
 			break;
 		}
-		case RangeOverlap: {
+		case PairIter<TransAp>::RangeOverlap: {
 			/* Exact overlap, cross them. */
 			TransAp *newTrans = crossTransitions( md, dest,
 				outPair.s1Tel.trans, outPair.s2Tel.trans );
@@ -703,14 +703,14 @@ void FsmAp::outTransCopy( MergeData &md, StateAp *dest, TransAp *srcList )
 			destList.append( newTrans );
 			break;
 		}
-		case BreakS1: {
+		case PairIter<TransAp>::BreakS1: {
 			/* Since we are always writing to the dest trans, the dest needs
 			 * to be copied when it is broken. The copy goes into the first
 			 * half of the break to "break it off". */
 			outPair.s1Tel.trans = dupTrans( dest, outPair.s1Tel.trans );
 			break;
 		}
-		case BreakS2:
+		case PairIter<TransAp>::BreakS2:
 			break;
 		}
 	}

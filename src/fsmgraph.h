@@ -848,17 +848,16 @@ template <class ListItem> struct NextTrans
 	}
 };
 
-
-/* Encodes the different states that are meaningful to the of the iterator. */
-enum PairIterUserState
-{
-	RangeInS1, RangeInS2,
-	RangeOverlap,
-	BreakS1, BreakS2
-};
-
 template <class ListItem1, class ListItem2 = ListItem1> struct PairIter
 {
+	/* Encodes the states that are meaningful to the of caller the iterator. */
+	enum UserState
+	{
+		RangeInS1, RangeInS2,
+		RangeOverlap,
+		BreakS1, BreakS2
+	};
+
 	/* Encodes the different states that an fsm iterator can be in. */
 	enum IterState {
 		Begin,
@@ -883,7 +882,7 @@ template <class ListItem1, class ListItem2 = ListItem1> struct PairIter
 	ListItem1 *list1;
 	ListItem2 *list2;
 	IterState itState;
-	PairIterUserState userState;
+	UserState userState;
 
 	NextTrans<ListItem1> s1Tel;
 	NextTrans<ListItem2> s2Tel;
