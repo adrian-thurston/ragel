@@ -940,9 +940,9 @@ void FsmAp::findCondExpInTrans( ExpansionList &expansionList, StateAp *state,
 			(highKey - keyOps->minKey);
 	searchTrans.prev = searchTrans.next = 0;
 
-	PairIter<TransAp> pairIter( state->outList.head, &searchTrans );
+	RangePairIter<TransAp> pairIter( state->outList.head, &searchTrans );
 	for ( ; !pairIter.end(); pairIter++ ) {
-		if ( pairIter.userState == PairIter<TransAp>::RangeOverlap ) {
+		if ( pairIter.userState == RangePairIter<TransAp>::RangeOverlap ) {
 			/* Need to make character-space low and high keys from the range
 			 * overlap for the expansion object. */
 			Key expLowKey = pairIter.s1Tel.lowKey - fromCondSpace->baseKey - fromVals *
@@ -970,10 +970,10 @@ void FsmAp::findCondExpInTrans( ExpansionList &expansionList, StateAp *state,
 void FsmAp::findCondExpansions( ExpansionList &expansionList, 
 		StateAp *destState, StateAp *srcState )
 {
-	PairIter<StateCond> condCond( destState->stateCondList.head,
+	RangePairIter<StateCond> condCond( destState->stateCondList.head,
 			srcState->stateCondList.head );
 	for ( ; !condCond.end(); condCond++ ) {
-		if ( condCond.userState == PairIter<StateCond>::RangeOverlap ) {
+		if ( condCond.userState == RangePairIter<StateCond>::RangeOverlap ) {
 			/* Loop over all existing condVals . */
 			CondSet &destCS = condCond.s1Tel.trans->condSpace->condSet;
 			long destLen = destCS.length();
@@ -1074,30 +1074,30 @@ void FsmAp::doRemove( MergeData &md, StateAp *destState, ExpansionList &expList1
 		removal.next = 0;
 
 		TransList destList;
-		PairIter<TransAp, Removal> pairIter( destState->outList.head, &removal );
+		RangePairIter<TransAp, Removal> pairIter( destState->outList.head, &removal );
 		for ( ; !pairIter.end(); pairIter++ ) {
 			switch ( pairIter.userState ) {
-			case PairIter<TransAp, Removal>::RangeInS1: {
+			case RangePairIter<TransAp, Removal>::RangeInS1: {
 				TransAp *destTrans = pairIter.s1Tel.trans;
 				destTrans->lowKey = pairIter.s1Tel.lowKey;
 				destTrans->highKey = pairIter.s1Tel.highKey;
 				destList.append( destTrans );
 				break;
 			}
-			case PairIter<TransAp, Removal>::RangeInS2:
+			case RangePairIter<TransAp, Removal>::RangeInS2:
 				break;
-			case PairIter<TransAp, Removal>::RangeOverlap: {
+			case RangePairIter<TransAp, Removal>::RangeOverlap: {
 				TransAp *trans = pairIter.s1Tel.trans;
 				detachTrans( trans->ctList.head->fromState, trans->ctList.head->toState, trans );
 				delete trans;
 				break;
 			}
-			case PairIter<TransAp, Removal>::BreakS1: {
+			case RangePairIter<TransAp, Removal>::BreakS1: {
 				pairIter.s1Tel.trans = dupTrans( destState, 
 						pairIter.s1Tel.trans );
 				break;
 			}
-			case PairIter<TransAp, Removal>::BreakS2:
+			case RangePairIter<TransAp, Removal>::BreakS2:
 				break;
 			}
 		}
@@ -1108,25 +1108,25 @@ void FsmAp::doRemove( MergeData &md, StateAp *destState, ExpansionList &expList1
 void FsmAp::mergeStateConds( StateAp *destState, StateAp *srcState )
 {
 	StateCondList destList;
-	PairIter<StateCond> pairIter( destState->stateCondList.head,
+	RangePairIter<StateCond> pairIter( destState->stateCondList.head,
 			srcState->stateCondList.head );
 	for ( ; !pairIter.end(); pairIter++ ) {
 		switch ( pairIter.userState ) {
-		case PairIter<StateCond>::RangeInS1: {
+		case RangePairIter<StateCond>::RangeInS1: {
 			StateCond *destCond = pairIter.s1Tel.trans;
 			destCond->lowKey = pairIter.s1Tel.lowKey;
 			destCond->highKey = pairIter.s1Tel.highKey;
 			destList.append( destCond );
 			break;
 		}
-		case PairIter<StateCond>::RangeInS2: {
+		case RangePairIter<StateCond>::RangeInS2: {
 			StateCond *newCond = new StateCond( *pairIter.s2Tel.trans );
 			newCond->lowKey = pairIter.s2Tel.lowKey;
 			newCond->highKey = pairIter.s2Tel.highKey;
 			destList.append( newCond );
 			break;
 		}
-		case PairIter<StateCond>::RangeOverlap: {
+		case RangePairIter<StateCond>::RangeOverlap: {
 			StateCond *destCond = pairIter.s1Tel.trans;
 			StateCond *srcCond = pairIter.s2Tel.trans;
 			CondSet mergedCondSet;
@@ -1139,11 +1139,11 @@ void FsmAp::mergeStateConds( StateAp *destState, StateAp *srcState )
 			destList.append( destCond );
 			break;
 		}
-		case PairIter<StateCond>::BreakS1:
+		case RangePairIter<StateCond>::BreakS1:
 			pairIter.s1Tel.trans = new StateCond( *pairIter.s1Tel.trans );
 			break;
 
-		case PairIter<StateCond>::BreakS2:
+		case RangePairIter<StateCond>::BreakS2:
 			break;
 		}
 	}

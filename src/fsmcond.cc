@@ -176,10 +176,10 @@ void FsmAp::expansionTrans( Expansion *expansion, TransAp *src )
 void FsmAp::findTransExpansions( ExpansionList &expansionList, 
 		StateAp *destState, StateAp *srcState )
 {
-	PairIter<TransAp, StateCond> transCond( destState->outList.head,
+	RangePairIter<TransAp, StateCond> transCond( destState->outList.head,
 			srcState->stateCondList.head );
 	for ( ; !transCond.end(); transCond++ ) {
-		if ( transCond.userState == PairIter<TransAp, StateCond>::RangeOverlap ) {
+		if ( transCond.userState == RangePairIter<TransAp, StateCond>::RangeOverlap ) {
 			Expansion *expansion = new Expansion( transCond.s1Tel.lowKey, 
 					transCond.s1Tel.highKey );
 
@@ -205,11 +205,11 @@ void FsmAp::findEmbedExpansions( ExpansionList &expansionList,
 		StateAp *destState, Action *condAction, bool sense )
 {
 	StateCondList destList;
-	PairIter<TransAp, StateCond> transCond( destState->outList.head,
+	RangePairIter<TransAp, StateCond> transCond( destState->outList.head,
 			destState->stateCondList.head );
 	for ( ; !transCond.end(); transCond++ ) {
 		switch ( transCond.userState ) {
-			case PairIter<TransAp, StateCond>::RangeInS1: {
+			case RangePairIter<TransAp, StateCond>::RangeInS1: {
 				if ( transCond.s1Tel.lowKey <= keyOps->maxKey ) {
 					assert( transCond.s1Tel.highKey <= keyOps->maxKey );
 
@@ -237,7 +237,7 @@ void FsmAp::findEmbedExpansions( ExpansionList &expansionList,
 				}
 				break;
 			}
-			case PairIter<TransAp, StateCond>::RangeInS2: {
+			case RangePairIter<TransAp, StateCond>::RangeInS2: {
 				/* Enhance state cond and find the expansion. */
 				StateCond *stateCond = transCond.s2Tel.trans;
 				stateCond->lowKey = transCond.s2Tel.lowKey;
@@ -278,9 +278,9 @@ void FsmAp::findEmbedExpansions( ExpansionList &expansionList,
 			}
 
 
-			case PairIter<TransAp, StateCond>::RangeOverlap:
-			case PairIter<TransAp, StateCond>::BreakS1:
-			case PairIter<TransAp, StateCond>::BreakS2:
+			case RangePairIter<TransAp, StateCond>::RangeOverlap:
+			case RangePairIter<TransAp, StateCond>::BreakS1:
+			case RangePairIter<TransAp, StateCond>::BreakS2:
 				assert( false );
 				break;
 		}

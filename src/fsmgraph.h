@@ -848,7 +848,7 @@ template <class ListItem> struct NextTrans
 	}
 };
 
-template <class ListItem1, class ListItem2 = ListItem1> struct PairIter
+template <class ListItem1, class ListItem2 = ListItem1> struct RangePairIter
 {
 	/* Encodes the states that are meaningful to the of caller the iterator. */
 	enum UserState
@@ -870,7 +870,7 @@ template <class ListItem1, class ListItem2 = ListItem1> struct PairIter
 		ExactOverlap,   End
 	};
 
-	PairIter( ListItem1 *list1, ListItem2 *list2 );
+	RangePairIter( ListItem1 *list1, ListItem2 *list2 );
 	
 	/* Query iterator. */
 	bool lte() { return itState != End; }
@@ -895,8 +895,8 @@ private:
 };
 
 /* Init the iterator by advancing to the first item. */
-template <class ListItem1, class ListItem2> PairIter<ListItem1, ListItem2>::PairIter( 
-		ListItem1 *list1, ListItem2 *list2 )
+template <class ListItem1, class ListItem2> RangePairIter<ListItem1, ListItem2>::
+		RangePairIter( ListItem1 *list1, ListItem2 *list2 )
 :
 	list1(list1),
 	list2(list2),
@@ -922,7 +922,7 @@ template <class ListItem1, class ListItem2> PairIter<ListItem1, ListItem2>::Pair
 
 /* Advance to the next transition. When returns, trans points to the next
  * transition, unless there are no more, in which case end() returns true. */
-template <class ListItem1, class ListItem2> void PairIter<ListItem1, ListItem2>::findNext()
+template <class ListItem1, class ListItem2> void RangePairIter<ListItem1, ListItem2>::findNext()
 {
 	/* Jump into the iterator routine base on the iterator state. */
 	switch ( itState ) {
