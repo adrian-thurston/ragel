@@ -108,6 +108,77 @@ public:
 	inline void increment();
 };
 
+struct CondKey
+{
+private:
+	long key;
+
+public:
+	friend inline CondKey operator+(const CondKey key1, const CondKey key2);
+	friend inline CondKey operator-(const CondKey key1, const CondKey key2);
+	friend inline CondKey operator/(const CondKey key1, const CondKey key2);
+	friend inline long operator&(const CondKey key1, const CondKey key2);
+
+	friend inline bool operator<( const CondKey key1, const CondKey key2 );
+	friend inline bool operator<=( const CondKey key1, const CondKey key2 );
+	friend inline bool operator>( const CondKey key1, const CondKey key2 );
+	friend inline bool operator>=( const CondKey key1, const CondKey key2 );
+	friend inline bool operator==( const CondKey key1, const CondKey key2 );
+	friend inline bool operator!=( const CondKey key1, const CondKey key2 );
+
+	friend struct KeyOps;
+	
+	CondKey( ) {}
+	CondKey( const CondKey &key ) : key(key.key) {}
+	CondKey( long key ) : key(key) {}
+
+	/* Returns the value used to represent the key. This value must be
+	 * interpreted based on signedness. */
+	long getVal() const { return key; };
+
+	/* Returns the key casted to a long long. This form of the key does not
+	 * require any signedness interpretation. */
+	long long getLongLong() const;
+
+	/* Returns the distance from the key value to the maximum value that the
+	 * key implementation can hold. */
+	Size availableSpace() const;
+
+	bool isUpper() const { return ( 'A' <= key && key <= 'Z' ); }
+	bool isLower() const { return ( 'a' <= key && key <= 'z' ); }
+	bool isPrintable() const
+	{
+	    return ( 7 <= key && key <= 13 ) || ( 32 <= key && key < 127 );
+	}
+
+	CondKey toUpper() const
+		{ return CondKey( 'A' + ( key - 'a' ) ); }
+	CondKey toLower() const
+		{ return CondKey( 'a' + ( key - 'A' ) ); }
+
+	void operator+=( const CondKey other )
+	{
+		/* FIXME: must be made aware of isSigned. */
+		key += other.key;
+	}
+
+	void operator-=( const CondKey other )
+	{
+		/* FIXME: must be made aware of isSigned. */
+		key -= other.key;
+	}
+
+	void operator|=( const CondKey other )
+	{
+		/* FIXME: must be made aware of isSigned. */
+		key |= other.key;
+	}
+
+	/* Decrement. Needed only for ranges. */
+	inline void decrement();
+	inline void increment();
+};
+
 struct HostType
 {
 	const char *data1;
@@ -299,6 +370,91 @@ inline long operator&(const Key key1, const Key key2)
 }
 
 inline Key operator/(const Key key1, const Key key2)
+{
+	/* FIXME: must be made aware of isSigned. */
+	return key1.key / key2.key;
+}
+
+/* CondKey */
+
+inline bool operator<( const CondKey key1, const CondKey key2 )
+{
+	return keyOps->isSigned ? key1.key < key2.key : 
+		(unsigned long)key1.key < (unsigned long)key2.key;
+}
+
+inline bool operator<=( const CondKey key1, const CondKey key2 )
+{
+	return keyOps->isSigned ?  key1.key <= key2.key : 
+		(unsigned long)key1.key <= (unsigned long)key2.key;
+}
+
+inline bool operator>( const CondKey key1, const CondKey key2 )
+{
+	return keyOps->isSigned ? key1.key > key2.key : 
+		(unsigned long)key1.key > (unsigned long)key2.key;
+}
+
+inline bool operator>=( const CondKey key1, const CondKey key2 )
+{
+	return keyOps->isSigned ? key1.key >= key2.key : 
+		(unsigned long)key1.key >= (unsigned long)key2.key;
+}
+
+inline bool operator==( const CondKey key1, const CondKey key2 )
+{
+	return key1.key == key2.key;
+}
+
+inline bool operator!=( const CondKey key1, const CondKey key2 )
+{
+	return key1.key != key2.key;
+}
+
+/* Decrement. Needed only for ranges. */
+inline void CondKey::decrement()
+{
+	key = keyOps->isSigned ? key - 1 : ((unsigned long)key)-1;
+}
+
+/* Increment. Needed only for ranges. */
+inline void CondKey::increment()
+{
+	key = keyOps->isSigned ? key+1 : ((unsigned long)key)+1;
+}
+
+inline long long CondKey::getLongLong() const
+{
+	return keyOps->isSigned ? (long long)key : (long long)(unsigned long)key;
+}
+
+inline Size CondKey::availableSpace() const
+{
+	if ( keyOps->isSigned ) 
+		return (long long)LONG_MAX - (long long)key;
+	else
+		return (unsigned long long)ULONG_MAX - (unsigned long long)(unsigned long)key;
+}
+	
+inline CondKey operator+(const CondKey key1, const CondKey key2)
+{
+	/* FIXME: must be made aware of isSigned. */
+	return CondKey( key1.key + key2.key );
+}
+
+inline CondKey operator-(const CondKey key1, const CondKey key2)
+{
+	/* FIXME: must be made aware of isSigned. */
+	return CondKey( key1.key - key2.key );
+}
+
+inline long operator&(const CondKey key1, const CondKey key2)
+{
+	/* FIXME: must be made aware of isSigned. */
+	return key1.key & key2.key;
+}
+
+inline CondKey operator/(const CondKey key1, const CondKey key2)
 {
 	/* FIXME: must be made aware of isSigned. */
 	return key1.key / key2.key;

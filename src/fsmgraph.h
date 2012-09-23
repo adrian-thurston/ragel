@@ -438,7 +438,7 @@ struct CondAp
 	/* Owning transition. */
 	TransAp *transAp;
 
-	Key key;
+	CondKey key;
 
 	StateAp *fromState;
 	StateAp *toState;
@@ -856,7 +856,7 @@ template <class ListItem1, class ListItem2 = ListItem1> struct ValPairIter
 
 	template <class ListItem> struct NextTrans
 	{
-		Key key;
+		CondKey key;
 		ListItem *trans;
 		ListItem *next;
 
