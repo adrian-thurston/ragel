@@ -878,10 +878,6 @@ template <class ListItem1, class ListItem2 = ListItem1> struct ValPairIter
 		Begin,
 		ConsumeS1Range, ConsumeS2Range,
 		OnlyInS1Range,  OnlyInS2Range,
-		S1SticksOut,    S1SticksOutBreak,
-		S2SticksOut,    S2SticksOutBreak,
-		S1DragsBehind,  S1DragsBehindBreak,
-		S2DragsBehind,  S2DragsBehindBreak,
 		ExactOverlap,   End
 	};
 
@@ -931,14 +927,6 @@ template <class ListItem1, class ListItem2> void ValPairIter<ListItem1, ListItem
 		case ConsumeS2Range:     goto entryConsumeS2Range;
 		case OnlyInS1Range:      goto entryOnlyInS1Range;
 		case OnlyInS2Range:      goto entryOnlyInS2Range;
-		case S1SticksOut:        goto entryS1SticksOut;
-		case S1SticksOutBreak:   goto entryS1SticksOutBreak;
-		case S2SticksOut:        goto entryS2SticksOut;
-		case S2SticksOutBreak:   goto entryS2SticksOutBreak;
-		case S1DragsBehind:      goto entryS1DragsBehind;
-		case S1DragsBehindBreak: goto entryS1DragsBehindBreak;
-		case S2DragsBehind:      goto entryS2DragsBehind;
-		case S2DragsBehindBreak: goto entryS2DragsBehindBreak;
 		case ExactOverlap:       goto entryExactOverlap;
 		case End:                goto entryEnd;
 	}
@@ -981,100 +969,6 @@ entryBegin:
 		else if ( s2Tel.highKey < s1Tel.lowKey ) {
 			/* A range exists in state2 that does not overlap with state1. */
 			CO_RETURN2( OnlyInS2Range, RangeInS2 );
-			s2Tel.increment();
-		}
-		/* There is overlap, must mix the ranges in some way. */
-		else if ( s1Tel.lowKey < s2Tel.lowKey ) {
-			/* Range from state1 sticks out front. Must break it into
-			 * non-overlaping and overlaping segments. */
-			bottomLow = s2Tel.lowKey;
-			bottomHigh = s1Tel.highKey;
-			s1Tel.highKey = s2Tel.lowKey;
-			s1Tel.highKey.decrement();
-			bottomTrans1 = s1Tel.trans;
-
-			/* Notify the caller that we are breaking s1. This gives them a
-			 * chance to duplicate s1Tel[0,1].value. */
-			CO_RETURN2( S1SticksOutBreak, BreakS1 );
-
-			/* Broken off range is only in s1. */
-			CO_RETURN2( S1SticksOut, RangeInS1 );
-
-			/* Advance over the part sticking out front. */
-			s1Tel.lowKey = bottomLow;
-			s1Tel.highKey = bottomHigh;
-			s1Tel.trans = bottomTrans1;
-		}
-		else if ( s2Tel.lowKey < s1Tel.lowKey ) {
-			/* Range from state2 sticks out front. Must break it into
-			 * non-overlaping and overlaping segments. */
-			bottomLow = s1Tel.lowKey;
-			bottomHigh = s2Tel.highKey;
-			s2Tel.highKey = s1Tel.lowKey;
-			s2Tel.highKey.decrement();
-			bottomTrans2 = s2Tel.trans;
-
-			/* Notify the caller that we are breaking s2. This gives them a
-			 * chance to duplicate s2Tel[0,1].value. */
-			CO_RETURN2( S2SticksOutBreak, BreakS2 );
-
-			/* Broken off range is only in s2. */
-			CO_RETURN2( S2SticksOut, RangeInS2 );
-
-			/* Advance over the part sticking out front. */
-			s2Tel.lowKey = bottomLow;
-			s2Tel.highKey = bottomHigh;
-			s2Tel.trans = bottomTrans2;
-		}
-		/* Low ends are even. Are the high ends even? */
-		else if ( s1Tel.highKey < s2Tel.highKey ) {
-			/* Range from state2 goes longer than the range from state1. We
-			 * must break the range from state2 into an evenly overlaping
-			 * segment. */
-			bottomLow = s1Tel.highKey;
-			bottomLow.increment();
-			bottomHigh = s2Tel.highKey;
-			s2Tel.highKey = s1Tel.highKey;
-			bottomTrans2 = s2Tel.trans;
-
-			/* Notify the caller that we are breaking s2. This gives them a
-			 * chance to duplicate s2Tel[0,1].value. */
-			CO_RETURN2( S2DragsBehindBreak, BreakS2 );
-
-			/* Breaking s2 produces exact overlap. */
-			CO_RETURN2( S2DragsBehind, RangeOverlap );
-
-			/* Advance over the front we just broke off of range 2. */
-			s2Tel.lowKey = bottomLow;
-			s2Tel.highKey = bottomHigh;
-			s2Tel.trans = bottomTrans2;
-
-			/* Advance over the entire s1Tel. We have consumed it. */
-			s1Tel.increment();
-		}
-		else if ( s2Tel.highKey < s1Tel.highKey ) {
-			/* Range from state1 goes longer than the range from state2. We
-			 * must break the range from state1 into an evenly overlaping
-			 * segment. */
-			bottomLow = s2Tel.highKey;
-			bottomLow.increment();
-			bottomHigh = s1Tel.highKey;
-			s1Tel.highKey = s2Tel.highKey;
-			bottomTrans1 = s1Tel.trans;
-
-			/* Notify the caller that we are breaking s1. This gives them a
-			 * chance to duplicate s2Tel[0,1].value. */
-			CO_RETURN2( S1DragsBehindBreak, BreakS1 );
-
-			/* Breaking s1 produces exact overlap. */
-			CO_RETURN2( S1DragsBehind, RangeOverlap );
-
-			/* Advance over the front we just broke off of range 1. */
-			s1Tel.lowKey = bottomLow;
-			s1Tel.highKey = bottomHigh;
-			s1Tel.trans = bottomTrans1;
-
-			/* Advance over the entire s2Tel. We have consumed it. */
 			s2Tel.increment();
 		}
 		else {
