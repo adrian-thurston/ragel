@@ -594,6 +594,8 @@ TransAp *FsmAp::crossTransitions( MergeData &md, StateAp *from,
 {
 	TransAp *effectiveSrcTrans = srcTrans;
 
+	cerr << __PRETTY_FUNCTION__ << endl;
+
 	if ( destTrans->condSpace != srcTrans->condSpace ) {
 		effectiveSrcTrans = copyTransForExpanision( from, srcTrans );
 		expandCondTransitions( from, destTrans, effectiveSrcTrans );

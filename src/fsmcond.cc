@@ -43,14 +43,6 @@ void logCondSpace( CondSpace *condSpace );
 
 void FsmAp::expandConds( StateAp *fromState, TransAp *trans, const CondSet &fromCS, const CondSet &mergedCS )
 {
-	/*CondSpace *mergedCondSpace = */addCondSpace( mergedCS );
-
-	CondSet newCS = mergedCS;
-	for ( CondSet::Iter mcsi = fromCS; mcsi.lte(); mcsi++ )
-		newCS.remove( *mcsi );
-	/*long newLen = */newCS.length();
-
-
 	/* Need to transform condition element to the merged set. */
 	for ( CondTransList::Iter cti = trans->ctList; cti.lte(); cti++ ) {
 		long origVal = cti->key.getVal();
@@ -69,7 +61,7 @@ void FsmAp::expandConds( StateAp *fromState, TransAp *trans, const CondSet &from
 		}
 
 		if ( origVal != newVal ) {
-			cout << "orig: " << origVal << " new: " << newVal << endl;
+			cerr << "orig: " << origVal << " new: " << newVal << endl;
 			cti->key = newVal;
 		}
 	}
@@ -81,7 +73,7 @@ void FsmAp::expandConds( StateAp *fromState, TransAp *trans, const CondSet &from
 		Action **cim = fromCS.find( *csi );
 		if ( cim == 0 ) {
 			CondTransList newItems;
-			cout << "doubling up on condition" << endl;
+			cerr << "doubling up on condition" << endl;
 			for ( CondTransList::Iter cti = trans->ctList; cti.lte(); cti++ ) {
 				CondAp *cond = dupCondTrans( fromState, trans, cti  );
 
@@ -90,11 +82,30 @@ void FsmAp::expandConds( StateAp *fromState, TransAp *trans, const CondSet &from
 				newItems.append( cond );
 			}
 
+			/* Merge newItems in. Both the ctList and newItems are sorted. Make
+			 * a sorted list out of them. */
+			CondAp *dest = trans->ctList.head;
+			while ( dest != 0 && newItems.head != 0 ) { 
+				if ( newItems.head->key.getVal() > dest->key.getVal() ) {
+					dest = dest->next;
+				}
+				else {
+					/* Pop the item for insertion. */
+					CondAp *ins = newItems.detachFirst();
+					trans->ctList.addBefore( dest, ins );
+				}
+			}
+
+			/* Append the rest of the items. */
 			trans->ctList.append( newItems );
 		}
 	}
-#if 0
-#endif
+
+	cerr << "condition list after expansion:" << endl;
+	for ( CondTransList::Iter cti = trans->ctList; cti.lte(); cti++ ) {
+		cout << cti->key.getVal() << endl;
+	}
+}
 
 #if 0
 	cout << "newCS.length() = " << newCS.length() << endl;
@@ -141,7 +152,6 @@ void FsmAp::expandConds( StateAp *fromState, TransAp *trans, const CondSet &from
 		}
 	}
 #endif
-}
 
 void FsmAp::expandCondTransitions( StateAp *fromState, TransAp *destTrans, TransAp *srcTrans )
 {
