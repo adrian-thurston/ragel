@@ -41,7 +41,7 @@ using std::cout;
 void logNewExpansion( Expansion *exp );
 void logCondSpace( CondSpace *condSpace );
 
-void FsmAp::expandConds( StateAp *fromState, TransAp *trans, const CondSet &fromCS, const CondSet &mergedCS )
+void FsmAp::expandConds( StateAp *fromState, TransAp *trans, const CondSet &fromCS, const CondSet &mergedCS, bool attach )
 {
 	/* Need to transform condition element to the merged set. */
 	for ( CondTransList::Iter cti = trans->ctList; cti.lte(); cti++ ) {
@@ -73,9 +73,18 @@ void FsmAp::expandConds( StateAp *fromState, TransAp *trans, const CondSet &from
 		Action **cim = fromCS.find( *csi );
 		if ( cim == 0 ) {
 			CondTransList newItems;
-			cerr << "doubling up on condition" << endl;
+			cerr << "expanding condition" << endl;
 			for ( CondTransList::Iter cti = trans->ctList; cti.lte(); cti++ ) {
-				CondAp *cond = dupCondTrans( fromState, trans, cti  );
+				/* Sub-transition for conditions. */
+				CondAp *cond = new CondAp( trans );
+
+				/* Attach only if our caller wants the expanded transitions
+				 * attached. */
+				if ( attach )
+					attachTrans( fromState, cti->toState, cond );
+				
+				/* Call the user callback to add in the original source transition. */
+				addInTrans( cond, cti );
 
 				cond->key = cti->key.getVal() | (1 << csi.pos());
 
@@ -167,8 +176,8 @@ void FsmAp::expandCondTransitions( StateAp *fromState, TransAp *destTrans, Trans
 	mergedCS.insert( destCS );
 	mergedCS.insert( srcCS );
 
-	expandConds( fromState, destTrans, destCS, mergedCS );
-	expandConds( fromState, srcTrans, srcCS, mergedCS );
+	expandConds( fromState, destTrans, destCS, mergedCS, true );
+	expandConds( fromState, srcTrans, srcCS, mergedCS, false );
 
 	CondSpace *mergedCondSpace = addCondSpace( mergedCS );
 	destTrans->condSpace = mergedCondSpace;
