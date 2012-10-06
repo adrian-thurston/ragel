@@ -231,6 +231,23 @@ struct RedCondEl
 
 typedef Vector<RedCondEl> RedCondList;
 
+struct CmpRedCondEl
+{
+	static int compare( const RedCondEl &el1, const RedCondEl &el2 )
+	{
+		if ( el1.key < el2.key )
+			return -1;
+		else if ( el1.key > el2.key )
+			return 1;
+		else if ( el1.value < el2.value )
+			return -1;
+		else if ( el1.value > el2.value )
+			return 1;
+		else
+			return 0;
+	}
+};
+
 /* Reduced transition. */
 struct RedTransAp
 :
@@ -264,8 +281,10 @@ struct CmpRedTransAp
 			return -1;
 		else if ( t1.action > t2.action )
 			return 1;
-		else
-			return 0;
+		else {
+			return CmpTable<RedCondEl, CmpRedCondEl>::compare(
+					t1.outConds, t2.outConds );
+		}
 	}
 };
 
