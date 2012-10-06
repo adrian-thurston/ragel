@@ -293,8 +293,8 @@ struct CodeGenData : public ReducedGen
 	void newTrans( int snum, int tnum,
 			Key lowKey, Key highKey, 
 			long targ, long act );
-	void newCondTrans( int snum, int tnum,
-			Key lowKey, Key highKey, 
+	void newCondTrans( RedCondList &outConds, 
+			int snum, int tnum, CondKey key, 
 			long targ, long act );
 	void finishTransList( int snum );
 	void setStateActions( int snum, long toStateAction, 

@@ -263,12 +263,12 @@ void CodeGenData::newTrans( int snum, int tnum, Key lowKey,
 	destRange.append( RedTransEl( lowKey, highKey, trans ) );
 }
 
-void CodeGenData::newCondTrans( int snum, int tnum, Key lowKey, 
-		Key highKey, long targ, long action )
+void CodeGenData::newCondTrans( RedCondList &outConds,
+		int snum, int tnum, CondKey key,
+		long targ, long action )
 {
 	/* Get the current state and range. */
 	RedStateAp *curState = allStates + snum;
-	RedTransList &destRange = curState->outRange;
 
 	if ( curState == redFsm->errState )
 		return;
@@ -276,41 +276,41 @@ void CodeGenData::newCondTrans( int snum, int tnum, Key lowKey,
 	/* Make the new transitions. */
 	RedStateAp *targState = targ >= 0 ? (allStates + targ) : redFsm->getErrorState();
 	RedAction *actionTable = action >= 0 ? (allActionTables + action) : 0;
-	RedTransAp *trans = redFsm->allocateTrans( targState, actionTable );
-	RedTransEl transEl( lowKey, highKey, trans );
+	RedCondAp *cond = redFsm->allocateCond( targState, actionTable );
+	RedCondEl transEl( key, cond );
 
 	/* Reduced machines are complete. We need to fill any gaps with the error
 	 * transitions. */
-	if ( destRange.length() == 0 ) {
+	if ( outConds.length() == 0 ) {
 		/* Range is currently empty. */
-		if ( keyOps->minKey < lowKey ) {
+		if ( 0 < key.getVal() ) {
 			/* The first range doesn't start at the low end. */
-			Key fillHighKey = lowKey;
+			CondKey fillHighKey = key;
 			fillHighKey.decrement();
 
 			/* Create the filler with the state's error transition. */
-			RedTransEl newTel( keyOps->minKey, fillHighKey, redFsm->getErrorTrans() );
-			destRange.append( newTel );
+			//RedCondEl newTel( 0, redFsm->getErrorTrans() );
+			//outConds.append( newTel );
 		}
 	}
 	else {
 		/* The range list is not empty, get the the last range. */
-		RedTransEl *last = &destRange[destRange.length()-1];
-		Key nextKey = last->highKey;
+		RedCondEl *last = &outConds[outConds.length()-1];
+		CondKey nextKey = last->key;
 		nextKey.increment();
-		if ( nextKey < lowKey ) {
+		if ( nextKey < key ) {
 			/* There is a gap to fill. Make the high key. */
-			Key fillHighKey = lowKey;
+			CondKey fillHighKey = key;
 			fillHighKey.decrement();
 
 			/* Create the filler with the state's error transtion. */
-			RedTransEl newTel( nextKey, fillHighKey, redFsm->getErrorTrans() );
-			destRange.append( newTel );
+			//RedCondEl newTel( nextKey, fillHighKey, redFsm->getErrorTrans() );
+			//outConds.append( newTel );
 		}
 	}
 
 	/* Filler taken care of. Append the range. */
-	destRange.append( RedTransEl( lowKey, highKey, trans ) );
+	outConds.append( RedCondEl( key, cond ) );
 }
 
 void CodeGenData::finishTransList( int snum )
