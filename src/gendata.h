@@ -290,7 +290,11 @@ struct CodeGenData : public ReducedGen
 	void setId( int snum, int id );
 	void setFinal( int snum );
 	void initTransList( int snum, unsigned long length );
-	void newTrans( int snum, int tnum, Key lowKey, Key highKey, 
+	void newTrans( int snum, int tnum,
+			Key lowKey, Key highKey, 
+			long targ, long act );
+	void newCondTrans( int snum, int tnum,
+			Key lowKey, Key highKey, 
 			long targ, long act );
 	void finishTransList( int snum );
 	void setStateActions( int snum, long toStateAction, 

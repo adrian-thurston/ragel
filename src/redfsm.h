@@ -40,7 +40,6 @@
 #include "sbstset.h"
 #include "sbsttable.h"
 
-
 #define TRANS_ERR_TRANS   0
 #define STATE_ERR_STATE   0
 #define FUNC_NO_FUNC      0
@@ -205,6 +204,33 @@ struct RedAction
 };
 typedef AvlTree<RedAction, GenActionTable, CmpGenActionTable> GenActionTableMap;
 
+struct RedCondAp
+:
+	public AvlTreeEl<RedCondAp>
+{
+	RedCondAp( RedStateAp *targ, RedAction *action, int id )
+		: targ(targ), action(action), id(id), pos(-1), labelNeeded(true) { }
+
+	RedStateAp *targ;
+	RedAction *action;
+	int id;
+	int pos;
+	bool partitionBoundary;
+	bool labelNeeded;
+};
+
+struct RedCondEl
+{
+	/* Constructors. */
+	RedCondEl( CondKey key, RedCondAp *value ) 
+		: key(key), value(value) { }
+
+	CondKey key;
+	RedCondAp *value;
+};
+
+typedef Vector<RedCondEl> RedCondList;
+
 /* Reduced transition. */
 struct RedTransAp
 :
@@ -219,6 +245,8 @@ struct RedTransAp
 	int pos;
 	bool partitionBoundary;
 	bool labelNeeded;
+
+	RedCondList outConds;
 };
 
 /* Compare of transitions for the final reduction of transitions. Comparison
@@ -241,7 +269,25 @@ struct CmpRedTransAp
 	}
 };
 
+struct CmpRedCondAp
+{
+	static int compare( const RedCondAp &t1, const RedCondAp &t2 )
+	{
+		if ( t1.targ < t2.targ )
+			return -1;
+		else if ( t1.targ > t2.targ )
+			return 1;
+		else if ( t1.action < t2.action )
+			return -1;
+		else if ( t1.action > t2.action )
+			return 1;
+		else
+			return 0;
+	}
+};
+
 typedef AvlBasic<RedTransAp, CmpRedTransAp> TransApSet;
+typedef AvlBasic<RedCondAp, CmpRedCondAp> CondApSet;
 
 /* Element in out range. */
 struct RedTransEl
@@ -402,6 +448,7 @@ struct RedFsmAp
 	int nextStateId;
 
 	TransApSet transSet;
+	CondApSet condSet;
 	GenActionTableMap actionMap;
 	RedStateList stateList;
 	RedStateSet entryPoints;
@@ -520,6 +567,7 @@ struct RedFsmAp
 	bool alphabetCovered( RedTransList &outRange );
 
 	RedTransAp *allocateTrans( RedStateAp *targState, RedAction *actionTable );
+	RedCondAp *allocateCond( RedStateAp *targState, RedAction *actionTable );
 
 	void partitionFsm( int nParts );
 

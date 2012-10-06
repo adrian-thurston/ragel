@@ -540,6 +540,18 @@ RedTransAp *RedFsmAp::allocateTrans( RedStateAp *targ, RedAction *action )
 	return inDict;
 }
 
+RedCondAp *RedFsmAp::allocateCond( RedStateAp *targ, RedAction *action )
+{
+	/* Create a reduced trans and look for it in the transiton set. */
+	RedCondAp redCond( targ, action, 0 );
+	RedCondAp *inDict = condSet.find( &redCond );
+	if ( inDict == 0 ) {
+		inDict = new RedCondAp( targ, action, nextTransId++ );
+		condSet.insert( inDict );
+	}
+	return inDict;
+}
+
 void RedFsmAp::partitionFsm( int nparts )
 {
 	/* At this point the states are ordered by a depth-first traversal. We
