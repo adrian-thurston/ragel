@@ -143,7 +143,20 @@ AC_CHECK_PROG(GOBIN, go, go)
 dnl write output files
 AC_OUTPUT(
 	[
-		Makefile src/Makefile aapl/Makefile 
+		Makefile
+		src/Makefile
+		src/c/Makefile
+		src/d/Makefile
+		src/crack/Makefile
+		src/cs/Makefile
+		src/dot/Makefile
+		src/go/Makefile
+		src/java/Makefile
+		src/ml/Makefile
+		src/rbx/Makefile
+		src/ruby/Makefile
+		src/xml/Makefile
+		aapl/Makefile 
 		doc/Makefile doc/ragel.1
 		contrib/Makefile
 		test/Makefile test/runtests

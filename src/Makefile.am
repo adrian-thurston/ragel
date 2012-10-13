@@ -1,3 +1,4 @@
+SUBDIRS = c d crack cs dot go java ml rbx ruby xml
 
 INCLUDES = -I$(top_srcdir)/aapl
 
@@ -28,6 +29,19 @@ ragel_SOURCES = \
 	goipgoto.cc gotablish.cc \
 	mlcodegen.cc mltable.cc mlftable.cc mlflat.cc mlfflat.cc mlgoto.cc mlfgoto.cc \
 	crackcodegen.h crackcodegen.cc crackflat.h crackflat.cc
+
+ragel_LDADD = \
+	c/libc.a \
+	crack/libcrack.a \
+	cs/libcs.a \
+	d/libd.a \
+	dot/libdot.a \
+	go/libgo.a \
+	java/libjava.a \
+	ml/libml.a \
+	rbx/librbx.a \
+	ruby/libruby.a \
+	xml/libxml.a
 
 BUILT_SOURCES = \
 	rlscan.cc rlparse.h rlparse.cc version.h
