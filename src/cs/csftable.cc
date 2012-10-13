@@ -26,6 +26,8 @@
 #include "redfsm.h"
 #include "gendata.h"
 
+namespace CSharp {
+
 /* Determine if we should use indicies or not. */
 void CSharpFTabCodeGen::calcIndexSize()
 {
@@ -435,4 +437,6 @@ void CSharpFTabCodeGen::writeExec()
 		out << "	_out: {}\n";
 
 	out << "	}\n";
+}
+
 }

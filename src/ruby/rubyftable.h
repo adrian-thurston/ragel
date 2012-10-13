@@ -25,6 +25,8 @@
 
 #include "rubytable.h"
 
+namespace Ruby {
+
 class RubyFTabCodeGen : public RubyTabCodeGen
 {
 public:
@@ -53,6 +55,8 @@ protected:
 	void writeExec();
 	void calcIndexSize();
 };
+
+}
 
 /*
  * Local Variables:

@@ -30,6 +30,7 @@
 /* Integer array line length. */
 #define IALL 8
 
+namespace Crack {
 
 class CrackCodeGen : public CodeGenData
 {
@@ -162,6 +163,8 @@ protected:
 
 	void genLineDirective( ostream &out );
 };
+
+}
 
 /*
  * Local Variables:

@@ -27,6 +27,8 @@
 #include <iostream>
 #include "gotablish.h"
 
+namespace Go {
+
 class GoTabCodeGen
     : public GoTablishCodeGen
 {
@@ -72,5 +74,7 @@ protected:
     virtual std::ostream &TRANS_ACTION( RedTransAp *trans );
     virtual void calcIndexSize();
 };
+
+}
 
 #endif

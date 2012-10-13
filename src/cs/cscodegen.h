@@ -50,6 +50,8 @@ struct LongestMatchPart;
 
 string itoa( int i );
 
+namespace CSharp {
+
 /*
  * class CSharpFsmCodeGen
  */
@@ -202,5 +204,7 @@ public:
 };
 
 #define MAX(a, b) (a > b ? a : b)
+
+}
 
 #endif

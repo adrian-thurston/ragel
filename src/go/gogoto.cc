@@ -29,6 +29,8 @@
 
 using std::endl;
 
+namespace Go {
+
 /* Emit the goto to take for a given transition. */
 std::ostream &GoGotoCodeGen::TRANS_GOTO( RedTransAp *trans, int level )
 {
@@ -819,4 +821,6 @@ void GoGotoCodeGen::writeExec()
 		out << "    _out: {}" << endl;
 
 	out << "    }" << endl;
+}
+
 }

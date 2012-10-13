@@ -30,6 +30,8 @@
 /* Forwards. */
 struct CodeGenData;
 
+namespace Go {
+
 /*
  * FFlatCodeGen
  */
@@ -54,5 +56,7 @@ protected:
 	virtual void writeData();
 	virtual void writeExec();
 };
+
+}
 
 #endif

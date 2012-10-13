@@ -29,6 +29,8 @@ using std::ostream;
 using std::ios;
 using std::endl;
 
+namespace CSharp {
+
 /* Emit the goto to take for a given transition. */
 std::ostream &CSharpSplitCodeGen::TRANS_GOTO( RedTransAp *trans, int level )
 {
@@ -516,3 +518,4 @@ void CSharpSplitCodeGen::setLabelsNeeded()
 	}
 }
 
+}

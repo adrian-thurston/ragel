@@ -30,6 +30,8 @@
 /* Forwards. */
 //struct CodeGenData;
 
+namespace OCaml {
+
 
 /*
  * OCamlFTabCodeGen
@@ -52,5 +54,7 @@ private:
 	virtual void writeExec();
 	virtual void calcIndexSize();
 };
+
+}
 
 #endif

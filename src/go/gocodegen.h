@@ -48,6 +48,8 @@ struct RedAction;
 struct LongestMatch;
 struct LongestMatchPart;
 
+namespace Go {
+
 class GoCodeGen : public CodeGenData
 {
 public:
@@ -177,5 +179,7 @@ public:
 	/* Determine if we should use indicies. */
 	virtual void calcIndexSize() {}
 };
+
+}
 
 #endif

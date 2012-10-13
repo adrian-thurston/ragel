@@ -60,6 +60,8 @@ void ocamlLineDirective( ostream &out, const char *fileName, int line )
 	out << "\"\n";
 }
 
+namespace OCaml {
+
 void OCamlCodeGen::genLineDirective( ostream &out )
 {
 	std::streambuf *sbuf = out.rdbuf();
@@ -740,5 +742,7 @@ ostream &OCamlCodeGen::source_error( const InputLoc &loc )
 	assert( sourceFileName != 0 );
 	cerr << sourceFileName << ":" << loc.line << ":" << loc.col << ": ";
 	return cerr;
+}
+
 }
 

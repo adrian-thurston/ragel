@@ -35,6 +35,8 @@ struct RedTransAp;
 struct RedStateAp;
 */
 
+namespace OCaml {
+
 /*
  * OCamlTabCodeGen
  */
@@ -98,5 +100,7 @@ protected:
 	string signedKeysType;
 	string transType;
 };
+
+}
 
 #endif

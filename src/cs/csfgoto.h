@@ -30,6 +30,7 @@
 /* Forwards. */
 struct CodeGenData;
 
+namespace CSharp {
 
 /*
  * class CSharpFGotoCodeGen
@@ -52,5 +53,7 @@ public:
 	virtual void writeData();
 	virtual void writeExec();
 };
+
+}
 
 #endif

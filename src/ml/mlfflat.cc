@@ -26,6 +26,8 @@
 #include "redfsm.h"
 #include "gendata.h"
 
+namespace OCaml {
+
 std::ostream &OCamlFFlatCodeGen::TO_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
@@ -415,5 +417,7 @@ void OCamlFFlatCodeGen::writeExec()
 
   out << "\tin do_start ()\n";
 	out << "	end;\n";
+}
+
 }
 

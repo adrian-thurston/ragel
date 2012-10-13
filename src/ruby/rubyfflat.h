@@ -26,6 +26,8 @@
 #include <iostream>
 #include "rubyflat.h"
 
+namespace Ruby {
+
 class RubyFFlatCodeGen : public RubyFlatCodeGen 
 {
 public:
@@ -53,6 +55,8 @@ protected:
 	virtual void writeData();
 	virtual void writeExec();
 };
+
+}
 
 /*
  * Local Variables:

@@ -26,6 +26,8 @@
 #include "redfsm.h"
 #include "gendata.h"
 
+namespace CSharp {
+
 std::ostream &CSharpFlatCodeGen::TO_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
@@ -887,4 +889,6 @@ void CSharpFlatCodeGen::initVarTypes()
 	transType = ARRAY_TYPE(redFsm->maxIndex+1);
 	indsType = ARRAY_TYPE(redFsm->maxFlatIndexOffset);
 	condsType = ARRAY_TYPE(redFsm->maxCondIndexOffset);
+}
+
 }

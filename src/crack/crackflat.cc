@@ -29,6 +29,8 @@
 using std::ostream;
 using std::string;
 
+namespace Crack {
+
 std::ostream &CrackFlatCodeGen::TO_STATE_ACTION_SWITCH(const char *var)
 {
   /* Walk the list of functions, printing the cases. */
@@ -861,6 +863,7 @@ void CrackFlatCodeGen::writeExec()
    "  # end of execute block";
 }
 
+}
 
 /*
  * Local Variables:

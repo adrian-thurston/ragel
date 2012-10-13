@@ -33,6 +33,8 @@ using std::string;
 using std::cerr;
 using std::endl;
 
+namespace Ruby {
+
 void RubyFTabCodeGen::GOTO( ostream &out, int gotoDest, bool inFinish )
 {
 	out << 
@@ -552,6 +554,8 @@ void RubyFTabCodeGen::calcIndexSize()
 
 	/* If using indicies reduces the size, use them. */
 	useIndicies = sizeWithInds < sizeWithoutInds;
+}
+
 }
 
 /*

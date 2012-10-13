@@ -34,6 +34,8 @@ struct RedTransAp;
 struct RedStateAp;
 struct GenStateCond;
 
+namespace Go {
+
 /*
  * Goto driven fsm.
  */
@@ -80,5 +82,7 @@ protected:
 	virtual void writeData();
 	virtual void writeExec();
 };
+
+}
 
 #endif

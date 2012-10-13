@@ -28,6 +28,8 @@
 
 using std::endl;
 
+namespace Go {
+
 std::ostream &GoFlatCodeGen::TO_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
@@ -761,4 +763,6 @@ void GoFlatCodeGen::writeExec()
 		out << "    _out: {}" << endl;
 
 	out << "    }" << endl;
+}
+
 }

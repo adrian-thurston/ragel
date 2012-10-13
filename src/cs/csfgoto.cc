@@ -27,6 +27,8 @@
 #include "gendata.h"
 #include "bstmap.h"
 
+namespace CSharp {
+
 std::ostream &CSharpFGotoCodeGen::EXEC_ACTIONS()
 {
 	/* Loop the actions. */
@@ -293,4 +295,6 @@ void CSharpFGotoCodeGen::writeExec()
 		out << "	_out: {}\n";
 
 	out << "	}\n";
+}
+
 }

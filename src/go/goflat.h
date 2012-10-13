@@ -33,6 +33,8 @@ struct NameInst;
 struct RedTransAp;
 struct RedStateAp;
 
+namespace Go {
+
 /*
  * GoFlatCodeGen
  */
@@ -76,5 +78,7 @@ protected:
 	virtual void writeData();
 	virtual void writeExec();
 };
+
+}
 
 #endif

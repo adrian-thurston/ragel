@@ -29,6 +29,8 @@
 /* Integer array line length. */
 #define IALL 8
 
+namespace Ruby {
+
 
 class RubyCodeGen : public CodeGenData
 {
@@ -162,6 +164,8 @@ protected:
 
 	void genLineDirective( ostream &out );
 };
+
+}
 
 /*
  * Local Variables:

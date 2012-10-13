@@ -29,6 +29,8 @@
 
 using std::endl;
 
+namespace Go {
+
 std::ostream &GoFGotoCodeGen::EXEC_ACTIONS()
 {
 	/* Loop the actions. */
@@ -293,4 +295,6 @@ void GoFGotoCodeGen::writeExec()
 		out << "    _out: {}" << endl;
 
 	out << "    }" << endl;
+}
+
 }

@@ -29,6 +29,8 @@
 
 using std::endl;
 
+namespace Go {
+
 bool GoIpGotoCodeGen::useTransInAgainLabel()
 {
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ )
@@ -495,4 +497,6 @@ void GoIpGotoCodeGen::writeExec()
 
 	out <<
 		"    }" << endl;
+}
+
 }

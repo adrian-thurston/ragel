@@ -33,6 +33,8 @@ struct NameInst;
 struct RedTransAp;
 struct RedStateAp;
 
+namespace CSharp {
+
 /*
  * CSharpFlatCodeGen
  */
@@ -88,5 +90,7 @@ protected:
 	void initVarTypes();
 	string slenType, transType, indsType, condsType;
 };
+
+}
 
 #endif

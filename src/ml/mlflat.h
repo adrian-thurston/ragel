@@ -33,6 +33,8 @@
 //struct RedTransAp;
 //struct RedStateAp;
 
+namespace OCaml {
+
 /*
  * OCamlFlatCodeGen
  */
@@ -87,5 +89,7 @@ protected:
 	void initVarTypes();
 	string slenType, transType, indsType, condsType;
 };
+
+}
 
 #endif

@@ -28,6 +28,8 @@
 
 using std::endl;
 
+namespace Go {
+
 /* Determine if we should use indicies or not. */
 void GoFTabCodeGen::calcIndexSize()
 {
@@ -438,4 +440,6 @@ void GoFTabCodeGen::writeExec()
 		out << "    _out: {}" << endl;
 
 	out << "    }" << endl;
+}
+
 }

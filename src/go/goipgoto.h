@@ -30,6 +30,8 @@
 /* Forwards. */
 struct CodeGenData;
 
+namespace Go {
+
 class GoIpGotoCodeGen
 	: public GoGotoCodeGen
 {
@@ -72,5 +74,7 @@ protected:
 	void setLabelsNeeded( GenInlineList *inlineList );
 	void setLabelsNeeded();
 };
+
+}
 
 #endif

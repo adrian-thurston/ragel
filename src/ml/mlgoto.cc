@@ -27,6 +27,8 @@
 #include "bstmap.h"
 #include "gendata.h"
 
+namespace OCaml {
+
 /* Emit the goto to take for a given transition. */
 std::ostream &OCamlGotoCodeGen::TRANS_GOTO( RedTransAp *trans, int level )
 {
@@ -818,4 +820,6 @@ void OCamlGotoCodeGen::writeExec()
 
   out << "\tin do_start ()\n";
 	out << "	end;\n";
+}
+
 }

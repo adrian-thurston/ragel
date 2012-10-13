@@ -26,6 +26,8 @@
 
 using std::endl;
 
+namespace Go {
+
 void GoTablishCodeGen::GOTO( ostream &ret, int gotoDest, bool inFinish )
 {
     ret << vCS() << " = " << gotoDest << endl <<
@@ -108,4 +110,6 @@ void GoTablishCodeGen::BREAK( ostream &ret, int targState, bool csForced )
 {
     outLabelUsed = true;
     ret << P() << "++; " << "goto _out" << endl;
+}
+
 }

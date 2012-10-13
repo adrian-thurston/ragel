@@ -30,6 +30,8 @@
 /* Forwards. */
 //struct CodeGenData;
 
+namespace OCaml {
+
 /*
  * OCamlFFlatCodeGen
  */
@@ -51,5 +53,7 @@ private:
 	virtual void writeData();
 	virtual void writeExec();
 };
+
+}
 
 #endif

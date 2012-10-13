@@ -32,6 +32,8 @@
 using std::string;
 using std::ostream;
 
+namespace Java {
+
 /*
  * JavaTabCodeGen
  */
@@ -193,5 +195,7 @@ public:
 
 	void genLineDirective( ostream &out );
 };
+
+}
 
 #endif

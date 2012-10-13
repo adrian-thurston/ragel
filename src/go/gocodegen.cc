@@ -44,14 +44,16 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-/*
- * Go Specific
- */
-
 void goLineDirective( ostream &out, const char *fileName, int line )
 {
 	out << "// line " << line << " \"" << fileName << "\"" << endl;
 }
+
+namespace Go {
+
+/*
+ * Go Specific
+ */
 
 void GoCodeGen::genLineDirective( ostream &out )
 {
@@ -773,4 +775,6 @@ void GoCodeGen::writeExports()
 		}
 		out << endl;
 	}
+}
+
 }

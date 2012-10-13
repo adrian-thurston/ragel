@@ -27,6 +27,8 @@
 #include "gendata.h"
 #include "bstmap.h"
 
+namespace OCaml {
+
 std::ostream &OCamlFGotoCodeGen::EXEC_ACTIONS()
 {
 	/* Loop the actions. */
@@ -308,4 +310,6 @@ void OCamlFGotoCodeGen::writeExec()
 
   out << "\tin do_start ()\n";
 	out << "	end;\n";
+}
+
 }

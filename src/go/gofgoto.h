@@ -31,6 +31,8 @@
 struct CodeGenData;
 
 
+namespace Go {
+
 class GoFGotoCodeGen
 	: public GoGotoCodeGen
 {
@@ -50,5 +52,7 @@ public:
 	virtual void writeData();
 	virtual void writeExec();
 };
+
+}
 
 #endif

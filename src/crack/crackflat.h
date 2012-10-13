@@ -30,6 +30,7 @@
 using std::string;
 using std::ostream;
 
+namespace Crack {
 
 /*
  * FlatCodeGen
@@ -89,8 +90,9 @@ protected:
 
 };
 
-#endif
+}
 
+#endif
 
 /*
  * Local Variables:
@@ -99,3 +101,4 @@ protected:
  * c-file-style: "bsd"
  * End:
  */
+

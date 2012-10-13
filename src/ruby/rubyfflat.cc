@@ -22,6 +22,8 @@
 
 #include "rubyfflat.h"
 
+namespace Ruby {
+
 void RubyFFlatCodeGen::GOTO( ostream &out, int gotoDest, bool inFinish )
 {
 	out << 
@@ -476,6 +478,8 @@ void RubyFFlatCodeGen::writeExec()
 
 	/* Wrapping the execute block. */
 	out << "	end\n";
+}
+
 }
 
 /*

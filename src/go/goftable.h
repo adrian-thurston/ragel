@@ -30,6 +30,8 @@
 /* Forwards. */
 struct CodeGenData;
 
+namespace Go {
+
 /*
  * GoFTabCode
  */
@@ -55,5 +57,7 @@ protected:
 	virtual void writeExec();
 	virtual void calcIndexSize();
 };
+
+}
 
 #endif

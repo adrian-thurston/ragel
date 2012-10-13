@@ -27,6 +27,8 @@
 #include "gendata.h"
 #include "bstmap.h"
 
+namespace CSharp {
+
 bool CSharpIpGotoCodeGen::useAgainLabel()
 {
 	return redFsm->anyRegActionRets() || 
@@ -435,4 +437,6 @@ void CSharpIpGotoCodeGen::writeExec()
 
 	out <<
 		"	}\n";
+}
+
 }

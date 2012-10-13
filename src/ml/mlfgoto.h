@@ -27,6 +27,8 @@
 #include <iostream>
 #include "mlgoto.h"
 
+namespace OCaml {
+
 /*
  * class OCamlFGotoCodeGen
  */
@@ -47,5 +49,7 @@ public:
 	virtual void writeData();
 	virtual void writeExec();
 };
+
+}
 
 #endif

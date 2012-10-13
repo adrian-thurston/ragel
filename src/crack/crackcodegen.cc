@@ -79,6 +79,8 @@ void crackLineDirective( ostream &out, const char *fileName, int line )
   out << "\" # end of line directive\n";
 }
 
+namespace Crack {
+
 void CrackCodeGen::genLineDirective( ostream &out )
 {
   std::streambuf *sbuf = out.rdbuf();
@@ -808,6 +810,7 @@ void CrackCodeGen::writeError()
   out << ERROR_STATE();
 }
 
+}
 
 /*
  * Local Variables:
@@ -816,3 +819,4 @@ void CrackCodeGen::writeError()
  * c-file-style: "bsd"
  * End:
  */
+

@@ -30,6 +30,8 @@
 /* Forwards. */
 struct CodeGenData;
 
+namespace CSharp {
+
 /*
  * class CSharpIpGotoCodeGen
  */
@@ -71,5 +73,7 @@ protected:
 	void setLabelsNeeded( GenInlineList *inlineList );
 	void setLabelsNeeded();
 };
+
+}
 
 #endif

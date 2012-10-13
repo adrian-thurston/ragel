@@ -26,6 +26,8 @@
 #include "redfsm.h"
 #include "gendata.h"
 
+namespace OCaml {
+
 /* Determine if we should use indicies or not. */
 void OCamlTabCodeGen::calcIndexSize()
 {
@@ -1128,4 +1130,6 @@ void OCamlTabCodeGen::initVarTypes()
 	klenType = ARRAY_TYPE(klenMax);
 	keysType = ARRAY_TYPE(keysMax);
 	signedKeysType = ARRAY_TYPE(keysMax, true);
+}
+
 }

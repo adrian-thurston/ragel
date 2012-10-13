@@ -27,6 +27,8 @@
 #include "bstmap.h"
 #include "gendata.h"
 
+namespace CSharp {
+
 /* Emit the goto to take for a given transition. */
 std::ostream &CSharpGotoCodeGen::TRANS_GOTO( RedTransAp *trans, int level )
 {
@@ -798,4 +800,6 @@ void CSharpGotoCodeGen::writeExec()
 		out << "	_out: {}\n";
 
 	out << "	}\n";
+}
+
 }

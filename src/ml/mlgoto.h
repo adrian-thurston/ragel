@@ -34,6 +34,8 @@
 //struct RedStateAp;
 //struct GenStateCond;
 
+namespace OCaml {
+
 /*
  * OCamlGotoCodeGen
  */
@@ -85,5 +87,7 @@ public:
 	virtual void writeData();
 	virtual void writeExec();
 };
+
+}
 
 #endif

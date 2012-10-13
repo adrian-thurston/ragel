@@ -26,6 +26,8 @@
 
 #include "gocodegen.h"
 
+namespace Go {
+
 class GoTablishCodeGen
     : public GoCodeGen
 {
@@ -44,5 +46,7 @@ protected:
     virtual void RET( ostream &ret, bool inFinish );
     virtual void BREAK( ostream &ret, int targState, bool csForced );
 };
+
+}
 
 #endif

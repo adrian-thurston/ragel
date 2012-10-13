@@ -34,6 +34,8 @@ struct RedTransAp;
 struct RedStateAp;
 struct GenStateCond;
 
+namespace CSharp {
+
 /*
  * Goto driven fsm.
  */
@@ -87,5 +89,7 @@ public:
 	virtual void writeData();
 	virtual void writeExec();
 };
+
+}
 
 #endif

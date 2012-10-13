@@ -37,6 +37,8 @@ inline string label(string a, int i)
 	return a + itoa(i);
 }
 
+namespace Rbx {
+
 ostream &RbxGotoCodeGen::rbxLabel(ostream &out, string label)
 {
 	out << "Rubinius.asm { @labels[:_" << FSM_NAME() << "_" << label << "].set! }\n";
@@ -820,6 +822,8 @@ void RbxGotoCodeGen::writeEOF()
 			"	}\n"
 			"\n";
 	}
+}
+
 }
 
 /*

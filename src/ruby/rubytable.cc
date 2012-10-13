@@ -33,6 +33,8 @@ using std::string;
 using std::cerr;
 using std::endl;
 
+namespace Ruby {
+
 
 
 void RubyTabCodeGen::GOTO( ostream &out, int gotoDest, bool inFinish )
@@ -1022,6 +1024,8 @@ void RubyTabCodeGen::writeData()
 	}
 	
 	STATE_IDS();
+}
+
 }
 
 /*

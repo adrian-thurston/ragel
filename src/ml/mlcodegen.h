@@ -52,6 +52,8 @@ struct LongestMatchPart;
 
 //string itoa( int i );
 
+namespace OCaml {
+
 /*
  * class OCamlCodeGen
  */
@@ -202,5 +204,7 @@ public:
 };
 
 #define MAX(a, b) (a > b ? a : b)
+
+}
 
 #endif

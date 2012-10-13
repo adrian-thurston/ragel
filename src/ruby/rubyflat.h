@@ -30,6 +30,8 @@ using std::string;
 using std::ostream;
 
 
+namespace Ruby {
+
 /*
  * FlatCodeGen
  */
@@ -87,6 +89,8 @@ protected:
 	virtual void writeExec();
 
 };
+
+}
 
 #endif
 

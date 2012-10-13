@@ -26,6 +26,8 @@
 #include "redfsm.h"
 #include "gendata.h"
 
+namespace OCaml {
+
 /* Determine if we should use indicies or not. */
 void OCamlFTabCodeGen::calcIndexSize()
 {
@@ -458,5 +460,7 @@ void OCamlFTabCodeGen::writeExec()
 
   out << "\tin do_start ()\n";
 	out << "	end;\n";
+}
+
 }
 

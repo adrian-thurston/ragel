@@ -68,6 +68,8 @@ void javaLineDirective( ostream &out, const char *fileName, int line )
 	out << "\"\n";
 }
 
+namespace Java {
+
 void JavaTabCodeGen::genLineDirective( ostream &out )
 {
 	std::streambuf *sbuf = out.rdbuf();
@@ -1680,4 +1682,4 @@ ostream &JavaTabCodeGen::source_error( const InputLoc &loc )
 	return cerr;
 }
 
-
+}

@@ -34,6 +34,8 @@
 using std::string;
 using std::ostream;
 
+namespace Ruby {
+
 /*
  * RubyCodeGen
  */
@@ -112,6 +114,8 @@ public:
 
 
 };
+
+}
 
 
 #endif

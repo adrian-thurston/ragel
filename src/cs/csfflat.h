@@ -30,6 +30,8 @@
 /* Forwards. */
 struct CodeGenData;
 
+namespace CSharp {
+
 /*
  * CSharpFFlatCodeGen
  */
@@ -53,5 +55,7 @@ private:
 	virtual void writeData();
 	virtual void writeExec();
 };
+
+}
 
 #endif

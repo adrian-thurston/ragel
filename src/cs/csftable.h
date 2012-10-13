@@ -31,6 +31,8 @@
 struct CodeGenData;
 
 
+namespace CSharp {
+
 /*
  * CSharpFTabCodeGen
  */
@@ -54,5 +56,7 @@ private:
 	virtual void writeExec();
 	virtual void calcIndexSize();
 };
+
+}
 
 #endif

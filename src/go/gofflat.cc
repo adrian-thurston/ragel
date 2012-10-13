@@ -28,6 +28,8 @@
 
 using std::endl;
 
+namespace Go {
+
 std::ostream &GoFFlatCodeGen::TO_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
@@ -377,4 +379,6 @@ void GoFFlatCodeGen::writeExec()
 		out << "    _out: {}" << endl;
 
 	out << "    }" << endl;
+}
+
 }

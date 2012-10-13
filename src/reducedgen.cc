@@ -246,7 +246,7 @@ CodeGenData *cdMakeCodeGen( const CodeGenArgs &args )
 /* Invoked by the parser when a ragel definition is opened. */
 CodeGenData *javaMakeCodeGen( const CodeGenArgs &args )
 {
-	CodeGenData *codeGen = new JavaTabCodeGen(args);
+	CodeGenData *codeGen = new Java::JavaTabCodeGen(args);
 
 	return codeGen;
 }
@@ -258,25 +258,25 @@ CodeGenData *goMakeCodeGen( const CodeGenArgs &args )
 
 	switch ( codeStyle ) {
 	case GenTables:
-		codeGen = new GoTabCodeGen(args);
+		codeGen = new Go::GoTabCodeGen(args);
 		break;
 	case GenFTables:
-		codeGen = new GoFTabCodeGen(args);
+		codeGen = new Go::GoFTabCodeGen(args);
 		break;
 	case GenFlat:
-		codeGen = new GoFlatCodeGen(args);
+		codeGen = new Go::GoFlatCodeGen(args);
 		break;
 	case GenFFlat:
-		codeGen = new GoFFlatCodeGen(args);
+		codeGen = new Go::GoFFlatCodeGen(args);
 		break;
 	case GenGoto:
-		codeGen = new GoGotoCodeGen(args);
+		codeGen = new Go::GoGotoCodeGen(args);
 		break;
 	case GenFGoto:
-		codeGen = new GoFGotoCodeGen(args);
+		codeGen = new Go::GoFGotoCodeGen(args);
 		break;
 	case GenIpGoto:
-		codeGen = new GoIpGotoCodeGen(args);
+		codeGen = new Go::GoIpGotoCodeGen(args);
 		break;
 	default:
 		cerr << "Invalid output style, only -T0, -T1, -F0, -F1, -G0, -G1 and -G2 are supported.\n";
@@ -293,7 +293,7 @@ CodeGenData *crackMakeCodeGen( const CodeGenArgs &args )
 
 	switch ( codeStyle ) {
 	case GenFlat:
-		codeGen = new CrackFlatCodeGen(args);
+		codeGen = new Crack::CrackFlatCodeGen(args);
 		break;
 	default:
 		cerr << "Invalid output style, only -F0 is supported. Please "
@@ -311,20 +311,20 @@ CodeGenData *rubyMakeCodeGen( const CodeGenArgs &args )
 	CodeGenData *codeGen = 0;
 	switch ( codeStyle ) {
 		case GenTables: 
-			codeGen = new RubyTabCodeGen(args);
+			codeGen = new Ruby::RubyTabCodeGen(args);
 			break;
 		case GenFTables:
-			codeGen = new RubyFTabCodeGen(args);
+			codeGen = new Ruby::RubyFTabCodeGen(args);
 			break;
 		case GenFlat:
-			codeGen = new RubyFlatCodeGen(args);
+			codeGen = new Ruby::RubyFlatCodeGen(args);
 			break;
 		case GenFFlat:
-			codeGen = new RubyFFlatCodeGen(args);
+			codeGen = new Ruby::RubyFFlatCodeGen(args);
 			break;
 		case GenGoto:
 			if ( rubyImpl == Rubinius ) {
-				codeGen = new RbxGotoCodeGen(args);
+				codeGen = new Rbx::RbxGotoCodeGen(args);
 			} else {
 				cerr << "Goto style is still _very_ experimental " 
 					"and only supported using Rubinius.\n"
@@ -349,28 +349,28 @@ CodeGenData *csharpMakeCodeGen( const CodeGenArgs &args )
 
 	switch ( codeStyle ) {
 	case GenTables:
-		codeGen = new CSharpTabCodeGen(args);
+		codeGen = new CSharp::CSharpTabCodeGen(args);
 		break;
 	case GenFTables:
-		codeGen = new CSharpFTabCodeGen(args);
+		codeGen = new CSharp::CSharpFTabCodeGen(args);
 		break;
 	case GenFlat:
-		codeGen = new CSharpFlatCodeGen(args);
+		codeGen = new CSharp::CSharpFlatCodeGen(args);
 		break;
 	case GenFFlat:
-		codeGen = new CSharpFFlatCodeGen(args);
+		codeGen = new CSharp::CSharpFFlatCodeGen(args);
 		break;
 	case GenGoto:
-		codeGen = new CSharpGotoCodeGen(args);
+		codeGen = new CSharp::CSharpGotoCodeGen(args);
 		break;
 	case GenFGoto:
-		codeGen = new CSharpFGotoCodeGen(args);
+		codeGen = new CSharp::CSharpFGotoCodeGen(args);
 		break;
 	case GenIpGoto:
-		codeGen = new CSharpIpGotoCodeGen(args);
+		codeGen = new CSharp::CSharpIpGotoCodeGen(args);
 		break;
 	case GenSplit:
-		codeGen = new CSharpSplitCodeGen(args);
+		codeGen = new CSharp::CSharpSplitCodeGen(args);
 		break;
 	}
 
@@ -384,22 +384,22 @@ CodeGenData *ocamlMakeCodeGen( const CodeGenArgs &args )
 
 	switch ( codeStyle ) {
 	case GenTables:
-		codeGen = new OCamlTabCodeGen(args);
+		codeGen = new OCaml::OCamlTabCodeGen(args);
 		break;
 	case GenFTables:
-		codeGen = new OCamlFTabCodeGen(args);
+		codeGen = new OCaml::OCamlFTabCodeGen(args);
 		break;
 	case GenFlat:
-		codeGen = new OCamlFlatCodeGen(args);
+		codeGen = new OCaml::OCamlFlatCodeGen(args);
 		break;
 	case GenFFlat:
-		codeGen = new OCamlFFlatCodeGen(args);
+		codeGen = new OCaml::OCamlFFlatCodeGen(args);
 		break;
 	case GenGoto:
-		codeGen = new OCamlGotoCodeGen(args);
+		codeGen = new OCaml::OCamlGotoCodeGen(args);
 		break;
 	case GenFGoto:
-		codeGen = new OCamlFGotoCodeGen(args);
+		codeGen = new OCaml::OCamlFGotoCodeGen(args);
 		break;
 	default:
 		cerr << "I only support the -T0 -T1 -F0 -F1 -G0 and -G1 output styles for OCaml.\n";

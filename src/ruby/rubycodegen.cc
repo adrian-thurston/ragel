@@ -81,6 +81,8 @@ void rubyLineDirective( ostream &out, const char *fileName, int line )
 	out << "\"\n";
 }
 
+namespace Ruby {
+
 void RubyCodeGen::genLineDirective( ostream &out )
 {
 	std::streambuf *sbuf = out.rdbuf();
@@ -819,6 +821,8 @@ void RubyCodeGen::writeFirstFinal()
 void RubyCodeGen::writeError()
 {
 	out << ERROR_STATE();
+}
+
 }
 
 

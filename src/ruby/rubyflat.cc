@@ -28,6 +28,8 @@
 using std::ostream;
 using std::string;
 
+namespace Ruby {
+
 std::ostream &RubyFlatCodeGen::TO_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
@@ -859,6 +861,8 @@ void RubyFlatCodeGen::writeExec()
 	/* Wrapping the execute block. */
 	out << 
 		"	end\n";
+}
+
 }
 
 

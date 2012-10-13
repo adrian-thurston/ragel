@@ -66,6 +66,8 @@ void csharpLineDirective( ostream &out, const char *fileName, int line )
 	out << '\n';
 }
 
+namespace CSharp {
+
 void CSharpFsmCodeGen::genLineDirective( ostream &out )
 {
 	std::streambuf *sbuf = out.rdbuf();
@@ -822,3 +824,4 @@ ostream &CSharpFsmCodeGen::source_error( const InputLoc &loc )
 	return cerr;
 }
 
+}

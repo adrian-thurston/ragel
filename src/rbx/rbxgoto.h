@@ -29,7 +29,9 @@
 
 using std::string;
 
-class RbxGotoCodeGen : public RubyCodeGen
+namespace Rbx {
+
+class RbxGotoCodeGen : public Ruby::RubyCodeGen
 {
 public:
 	RbxGotoCodeGen( const CodeGenArgs &args ) 
@@ -87,6 +89,8 @@ private:
 	ostream &rbxGoto(ostream &out, string label);
 	ostream &rbxLabel(ostream &out, string label);	
 };
+
+}
 
 /*
  * Local Variables:

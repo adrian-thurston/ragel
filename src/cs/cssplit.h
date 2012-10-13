@@ -24,6 +24,8 @@
 
 #include "csipgoto.h"
 
+namespace CSharp {
+
 class CSharpSplitCodeGen : public CSharpIpGotoCodeGen
 {
 public:
@@ -50,5 +52,7 @@ public:
 
 	int currentPartition;
 };
+
+}
 
 #endif

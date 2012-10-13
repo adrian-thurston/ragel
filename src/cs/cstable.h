@@ -33,6 +33,8 @@ struct NameInst;
 struct RedTransAp;
 struct RedStateAp;
 
+namespace CSharp {
+
 /*
  * TabCodeGen
  */
@@ -98,5 +100,7 @@ protected:
 	string signedKeysType;
 	string transType;
 };
+
+}
 
 #endif
