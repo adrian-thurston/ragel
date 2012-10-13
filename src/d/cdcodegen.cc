@@ -47,7 +47,7 @@ using std::endl;
 extern int numSplitPartitions;
 extern bool noLineDirectives;
 
-void cLineDirective( ostream &out, const char *fileName, int line )
+void dLineDirective( ostream &out, const char *fileName, int line )
 {
 	if ( noLineDirectives )
 		out << "/* ";
@@ -68,13 +68,13 @@ void cLineDirective( ostream &out, const char *fileName, int line )
 	out << '\n';
 }
 
-namespace C {
+namespace D {
 
 void FsmCodeGen::genLineDirective( ostream &out )
 {
 	std::streambuf *sbuf = out.rdbuf();
 	output_filter *filter = static_cast<output_filter*>(sbuf);
-	cLineDirective( out, filter->fileName, filter->line + 1 );
+	dLineDirective( out, filter->fileName, filter->line + 1 );
 }
 
 /* Init code gen with in parameters. */
@@ -550,7 +550,7 @@ void FsmCodeGen::ACTION( ostream &ret, GenAction *action, int targState,
 		bool inFinish, bool csForced )
 {
 	/* Write the preprocessor line info for going into the source file. */
-	cLineDirective( ret, action->loc.fileName, action->loc.line );
+	dLineDirective( ret, action->loc.fileName, action->loc.line );
 
 	/* Write the block and close it off. */
 	ret << "\t{";
@@ -561,7 +561,7 @@ void FsmCodeGen::ACTION( ostream &ret, GenAction *action, int targState,
 void FsmCodeGen::CONDITION( ostream &ret, GenAction *condition )
 {
 	ret << "\n";
-	cLineDirective( ret, condition->loc.fileName, condition->loc.line );
+	dLineDirective( ret, condition->loc.fileName, condition->loc.line );
 	INLINE_LIST( ret, condition->inlineList, 0, false, false );
 }
 
@@ -934,7 +934,7 @@ void D2CodeGen::ACTION( ostream &ret, GenAction *action, int targState,
 		bool inFinish, bool csForced )
 {
 	/* Write the preprocessor line info for going into the source file. */
-	cLineDirective( ret, action->loc.fileName, action->loc.line );
+	dLineDirective( ret, action->loc.fileName, action->loc.line );
 
 	/* Write the block and close it off. */
 	ret << "\t{{";

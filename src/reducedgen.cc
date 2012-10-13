@@ -52,6 +52,15 @@
 #include "c/cdipgoto.h"
 #include "c/cdsplit.h"
 
+#include "d/cdtable.h"
+#include "d/cdftable.h"
+#include "d/cdflat.h"
+#include "d/cdfflat.h"
+#include "d/cdgoto.h"
+#include "d/cdfgoto.h"
+#include "d/cdipgoto.h"
+#include "d/cdsplit.h"
+
 #include "dot/dotcodegen.h"
 
 #include "java/javacodegen.h"
@@ -182,28 +191,28 @@ CodeGenData *cdMakeCodeGen( const CodeGenArgs &args )
 	case HostLang::D:
 		switch ( codeStyle ) {
 		case GenTables:
-			codeGen = new C::DTabCodeGen(args);
+			codeGen = new D::DTabCodeGen(args);
 			break;
 		case GenFTables:
-			codeGen = new C::DFTabCodeGen(args);
+			codeGen = new D::DFTabCodeGen(args);
 			break;
 		case GenFlat:
-			codeGen = new C::DFlatCodeGen(args);
+			codeGen = new D::DFlatCodeGen(args);
 			break;
 		case GenFFlat:
-			codeGen = new C::DFFlatCodeGen(args);
+			codeGen = new D::DFFlatCodeGen(args);
 			break;
 		case GenGoto:
-			codeGen = new C::DGotoCodeGen(args);
+			codeGen = new D::DGotoCodeGen(args);
 			break;
 		case GenFGoto:
-			codeGen = new C::DFGotoCodeGen(args);
+			codeGen = new D::DFGotoCodeGen(args);
 			break;
 		case GenIpGoto:
-			codeGen = new C::DIpGotoCodeGen(args);
+			codeGen = new D::DIpGotoCodeGen(args);
 			break;
 		case GenSplit:
-			codeGen = new C::DSplitCodeGen(args);
+			codeGen = new D::DSplitCodeGen(args);
 			break;
 		}
 		break;
@@ -211,28 +220,28 @@ CodeGenData *cdMakeCodeGen( const CodeGenArgs &args )
 	case HostLang::D2:
 		switch ( codeStyle ) {
 		case GenTables:
-			codeGen = new C::D2TabCodeGen(args);
+			codeGen = new D::D2TabCodeGen(args);
 			break;
 		case GenFTables:
-			codeGen = new C::D2FTabCodeGen(args);
+			codeGen = new D::D2FTabCodeGen(args);
 			break;
 		case GenFlat:
-			codeGen = new C::D2FlatCodeGen(args);
+			codeGen = new D::D2FlatCodeGen(args);
 			break;
 		case GenFFlat:
-			codeGen = new C::D2FFlatCodeGen(args);
+			codeGen = new D::D2FFlatCodeGen(args);
 			break;
 		case GenGoto:
-			codeGen = new C::D2GotoCodeGen(args);
+			codeGen = new D::D2GotoCodeGen(args);
 			break;
 		case GenFGoto:
-			codeGen = new C::D2FGotoCodeGen(args);
+			codeGen = new D::D2FGotoCodeGen(args);
 			break;
 		case GenIpGoto:
-			codeGen = new C::D2IpGotoCodeGen(args);
+			codeGen = new D::D2IpGotoCodeGen(args);
 			break;
 		case GenSplit:
-			codeGen = new C::D2SplitCodeGen(args);
+			codeGen = new D::D2SplitCodeGen(args);
 			break;
 		}
 		break;

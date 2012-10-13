@@ -38,11 +38,11 @@ void lineDirective( ostream &out, const char *fileName, int line )
 {
 	if ( !generateDot ) {
 		if ( hostLang == &hostLangC )
-			cdLineDirective( out, fileName, line );
+			cLineDirective( out, fileName, line );
 		else if ( hostLang == &hostLangD )
-			cdLineDirective( out, fileName, line );
+			dLineDirective( out, fileName, line );
 		else if ( hostLang == &hostLangD2 )
-			cdLineDirective( out, fileName, line );
+			dLineDirective( out, fileName, line );
 		else if ( hostLang == &hostLangGo )
 			goLineDirective( out, fileName, line );
 		else if ( hostLang == &hostLangJava )
