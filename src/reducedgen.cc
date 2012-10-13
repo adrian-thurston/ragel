@@ -43,14 +43,14 @@
 #include "csipgoto.h"
 #include "cssplit.h"
 
-#include "cdtable.h"
-#include "cdftable.h"
-#include "cdflat.h"
-#include "cdfflat.h"
-#include "cdgoto.h"
-#include "cdfgoto.h"
-#include "cdipgoto.h"
-#include "cdsplit.h"
+#include "c/cdtable.h"
+#include "c/cdftable.h"
+#include "c/cdflat.h"
+#include "c/cdfflat.h"
+#include "c/cdgoto.h"
+#include "c/cdfgoto.h"
+#include "c/cdipgoto.h"
+#include "c/cdsplit.h"
 
 #include "dotcodegen.h"
 
