@@ -1,3 +1,5 @@
-Makefile.in
-Makefile
-libxml.a
+/Makefile.in
+/Makefile
+/libxml.a
+/.deps
+/*.o

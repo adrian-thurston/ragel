@@ -45,17 +45,17 @@
 #include "c/cdipgoto.h"
 #include "c/cdsplit.h"
 
-#include "dotcodegen.h"
+#include "dot/dotcodegen.h"
 
-#include "javacodegen.h"
+#include "java/javacodegen.h"
 
-#include "gocodegen.h"
+#include "go/gocodegen.h"
 
-#include "rubytable.h"
-#include "rubyftable.h"
-#include "rubyflat.h"
-#include "rubyfflat.h"
-#include "rbxgoto.h"
+#include "ruby/rubytable.h"
+#include "ruby/rubyftable.h"
+#include "ruby/rubyflat.h"
+#include "ruby/rubyfflat.h"
+#include "rbx/rbxgoto.h"
 
 #include "crack/crackflat.h"
 

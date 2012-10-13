@@ -5,25 +5,12 @@ bin_PROGRAMS = ragel
 ragel_CPPFLAGS = -I$(top_srcdir)/aapl
 
 ragel_SOURCES = \
-	buffer.h inputdata.h rbxgoto.h \
-	rubyflat.h javacodegen.h \
-	redfsm.h rubyftable.h \
-	parsedata.h rlparse.h rubytable.h \
+	buffer.h inputdata.h redfsm.h parsedata.h rlparse.h \
 	dotcodegen.h parsetree.h rlscan.h version.h common.h \
-	fsmgraph.h pcheck.h rubycodegen.h xmlcodegen.h \
-	gendata.h ragel.h rubyfflat.h \
-	gocodegen.h gotable.h goftable.h goflat.h gofflat.h gogoto.h gofgoto.h \
-	goipgoto.h gotablish.h \
-	mlcodegen.h mltable.h mlftable.h mlflat.h mlfflat.h mlgoto.h mlfgoto.h \
+	fsmgraph.h pcheck.h gendata.h ragel.h \
 	main.cc parsetree.cc parsedata.cc fsmstate.cc fsmbase.cc \
 	fsmattach.cc fsmmin.cc fsmgraph.cc fsmap.cc fsmcond.cc rlscan.cc rlparse.cc \
-	inputdata.cc common.cc redfsm.cc gendata.cc \
-	javacodegen.cc rubycodegen.cc rubytable.cc \
-	rubyftable.cc rubyflat.cc rubyfflat.cc rbxgoto.cc \
-	dotcodegen.cc dotcodegen-orig.cc xmlcodegen.cc reducedgen.cc \
-	gocodegen.cc gotable.cc goftable.cc goflat.cc gofflat.cc gogoto.cc gofgoto.cc \
-	goipgoto.cc gotablish.cc \
-	mlcodegen.cc mltable.cc mlftable.cc mlflat.cc mlfflat.cc mlgoto.cc mlfgoto.cc
+	inputdata.cc common.cc redfsm.cc gendata.cc reducedgen.cc
 
 ragel_CXXFLAGS = -Wall
 

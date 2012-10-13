@@ -25,7 +25,6 @@
 #include "parsedata.h"
 #include "rlparse.h"
 #include "rlscan.h"
-#include "dotcodegen.h"
 #include <iostream>
 
 using std::istream;

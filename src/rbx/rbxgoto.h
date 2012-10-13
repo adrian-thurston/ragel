@@ -25,7 +25,7 @@
 
 #include <iostream>
 #include <string>
-#include "rubycodegen.h"
+#include "ruby/rubycodegen.h"
 
 using std::string;
 

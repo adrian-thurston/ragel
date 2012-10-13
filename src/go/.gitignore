@@ -1,3 +1,5 @@
-Makefile.in
-Makefile
-libgo.a
+/Makefile.in
+/Makefile
+/libgo.a
+/.deps
+/*.o

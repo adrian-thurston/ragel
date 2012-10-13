@@ -30,9 +30,9 @@
 #include "parsedata.h"
 #include "parsetree.h"
 #include "mergesort.h"
-#include "xmlcodegen.h"
 #include "version.h"
 #include "inputdata.h"
+#include "xml/xmlcodegen.h"
 
 using namespace std;
 

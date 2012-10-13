@@ -21,7 +21,6 @@
 
 
 #include "ragel.h"
-#include "xmlcodegen.h"
 #include "parsedata.h"
 #include "fsmgraph.h"
 #include "gendata.h"
@@ -33,6 +32,7 @@
 /*
  * Code generators.
  */
+#include "xml/xmlcodegen.h"
 
 #include "cs/cstable.h"
 #include "cs/csftable.h"
@@ -52,30 +52,30 @@
 #include "c/cdipgoto.h"
 #include "c/cdsplit.h"
 
-#include "dotcodegen.h"
+#include "dot/dotcodegen.h"
 
-#include "javacodegen.h"
+#include "java/javacodegen.h"
 
-#include "gotable.h"
-#include "goftable.h"
-#include "goflat.h"
-#include "gofflat.h"
-#include "gogoto.h"
-#include "gofgoto.h"
-#include "goipgoto.h"
+#include "go/gotable.h"
+#include "go/goftable.h"
+#include "go/goflat.h"
+#include "go/gofflat.h"
+#include "go/gogoto.h"
+#include "go/gofgoto.h"
+#include "go/goipgoto.h"
 
-#include "mltable.h"
-#include "mlftable.h"
-#include "mlflat.h"
-#include "mlfflat.h"
-#include "mlgoto.h"
-#include "mlfgoto.h"
+#include "ml/mltable.h"
+#include "ml/mlftable.h"
+#include "ml/mlflat.h"
+#include "ml/mlfflat.h"
+#include "ml/mlgoto.h"
+#include "ml/mlfgoto.h"
 
-#include "rubytable.h"
-#include "rubyftable.h"
-#include "rubyflat.h"
-#include "rubyfflat.h"
-#include "rbxgoto.h"
+#include "ruby/rubytable.h"
+#include "ruby/rubyftable.h"
+#include "ruby/rubyflat.h"
+#include "ruby/rubyfflat.h"
+#include "rbx/rbxgoto.h"
 
 #include "crack/crackflat.h"
 

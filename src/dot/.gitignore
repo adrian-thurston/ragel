@@ -1,3 +1,5 @@
-Makefile.in
-Makefile
-libdot.a
+/Makefile.in
+/Makefile
+/libdot.a
+/.deps
+/*.o

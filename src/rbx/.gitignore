@@ -1,3 +1,5 @@
-Makefile.in
-Makefile
-librbx.a
+/Makefile.in
+/Makefile
+/librbx.a
+/.deps
+/*.o

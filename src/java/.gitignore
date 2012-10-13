@@ -1,3 +1,5 @@
-Makefile.in
-Makefile
-libjava.a
+/Makefile.in
+/Makefile
+/libjava.a
+/.deps
+/*.o

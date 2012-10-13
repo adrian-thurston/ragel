@@ -1,3 +1,5 @@
-Makefile.in
-Makefile
-libruby.a
+/Makefile.in
+/Makefile
+/libruby.a
+/.deps
+/*.o
