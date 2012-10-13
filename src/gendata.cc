@@ -23,42 +23,6 @@
 #include "ragel.h"
 #include <iostream>
 
-/*
- * Code generators.
- */
-
-#include "cs/cstable.h"
-#include "cs/csftable.h"
-#include "cs/csflat.h"
-#include "cs/csfflat.h"
-#include "cs/csgoto.h"
-#include "cs/csfgoto.h"
-#include "cs/csipgoto.h"
-#include "cs/cssplit.h"
-
-#include "c/cdtable.h"
-#include "c/cdftable.h"
-#include "c/cdflat.h"
-#include "c/cdfflat.h"
-#include "c/cdgoto.h"
-#include "c/cdfgoto.h"
-#include "c/cdipgoto.h"
-#include "c/cdsplit.h"
-
-#include "dot/dotcodegen.h"
-
-#include "java/javacodegen.h"
-
-#include "go/gocodegen.h"
-
-#include "ruby/rubytable.h"
-#include "ruby/rubyftable.h"
-#include "ruby/rubyflat.h"
-#include "ruby/rubyfflat.h"
-#include "rbx/rbxgoto.h"
-
-#include "crack/crackflat.h"
-
 string itoa( int i )
 {
 	char buf[16];
