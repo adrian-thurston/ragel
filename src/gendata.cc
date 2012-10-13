@@ -279,6 +279,7 @@ void CodeGenData::newCondTrans( RedCondList &outConds,
 	RedCondAp *cond = redFsm->allocateCond( targState, actionTable );
 	RedCondEl transEl( key, cond );
 
+#if 0
 	/* Reduced machines are complete. We need to fill any gaps with the error
 	 * transitions. */
 	if ( outConds.length() == 0 ) {
@@ -308,6 +309,7 @@ void CodeGenData::newCondTrans( RedCondList &outConds,
 			//outConds.append( newTel );
 		}
 	}
+#endif
 
 	/* Filler taken care of. Append the range. */
 	outConds.append( RedCondEl( key, cond ) );

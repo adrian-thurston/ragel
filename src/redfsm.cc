@@ -43,6 +43,7 @@ RedFsmAp::RedFsmAp()
 	forcedErrorState(false),
 	nextActionId(0),
 	nextTransId(0),
+	nextCondId(0),
 	startState(0),
 	errState(0),
 	errTrans(0),
@@ -510,11 +511,18 @@ RedTransAp *RedFsmAp::getErrorTrans( )
 {
 	/* If the error trans has not been made aready, make it. */
 	if ( errTrans == 0 ) {
-		/* This insert should always succeed since no transition created by
-		 * the user can point to the error state. */
+		/* This insert should always succeed. No transition created by the user
+		 * can point to the error state. */
 		errTrans = new RedTransAp( getErrorState(), 0, nextTransId++ );
-		RedTransAp *inRes = transSet.insert( errTrans );
-		assert( inRes != 0 );
+		RedTransAp *inTransSet = transSet.insert( errTrans );
+		assert( inTransSet != 0 );
+
+		/* Create the cond transition. This should also always succeed. */
+		RedCondAp *errCond = new RedCondAp( getErrorState(), 0, nextCondId++ );
+		RedCondAp *inCondSet = condSet.insert( errCond );
+		errTrans->outConds.append( RedCondEl( 0, inCondSet ) );
+
+		assert( inCondSet != 0 );
 	}
 	return errTrans;
 }
@@ -546,7 +554,7 @@ RedCondAp *RedFsmAp::allocateCond( RedStateAp *targ, RedAction *action )
 	RedCondAp redCond( targ, action, 0 );
 	RedCondAp *inDict = condSet.find( &redCond );
 	if ( inDict == 0 ) {
-		inDict = new RedCondAp( targ, action, nextTransId++ );
+		inDict = new RedCondAp( targ, action, nextCondId++ );
 		condSet.insert( inDict );
 	}
 	return inDict;

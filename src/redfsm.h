@@ -462,6 +462,7 @@ struct RedFsmAp
 
 	int nextActionId;
 	int nextTransId;
+	int nextCondId;
 
 	/* Next State Id doubles as the total number of state ids. */
 	int nextStateId;

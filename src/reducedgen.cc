@@ -877,18 +877,25 @@ void ReducedGen::makeStateConditions( StateAp *state )
 
 void ReducedGen::makeTrans( Key lowKey, Key highKey, TransAp *trans )
 {
-	/* First reduce the action. */
-	RedActionTable *actionTable = 0;
-	if ( trans->ctList.head->actionTable.length() > 0 )
-		actionTable = actionTableMap.find( trans->ctList.head->actionTable );
-
+	RedCondList redCondList;
+		
 	long targ = -1;
-	if ( trans->ctList.head->toState != 0 )
-		targ = trans->ctList.head->toState->alg.stateNum;
-
 	long action = -1;
-	if ( actionTable != 0 )
-		action = actionTable->id;
+
+	for ( CondTransList::Iter cti = trans->ctList; cti.lte(); cti++ ) {
+		/* First reduce the action. */
+		RedActionTable *actionTable = 0;
+		if ( cti->actionTable.length() > 0 )
+			actionTable = actionTableMap.find( cti->actionTable );
+
+		if ( cti->toState != 0 )
+			targ = cti->toState->alg.stateNum;
+
+		if ( actionTable != 0 )
+			action = actionTable->id;
+
+		cgd->newCondTrans( redCondList, curState, /*curTrans++*/ 0, cti->key, targ, action );
+	}
 
 	cgd->newTrans( curState, curTrans++, lowKey, highKey, targ, action );
 }
