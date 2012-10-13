@@ -1,3 +1,5 @@
-Makefile.in
-Makefile
-libcrack.a
+/Makefile.in
+/Makefile
+/libcrack.a
+/.deps
+/*.o

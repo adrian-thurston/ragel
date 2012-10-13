@@ -24,8 +24,7 @@ ragel_SOURCES = \
 	csipgoto.cc cssplit.cc dotcodegen.cc dotcodegen-orig.cc xmlcodegen.cc reducedgen.cc \
 	gocodegen.cc gotable.cc goftable.cc goflat.cc gofflat.cc gogoto.cc gofgoto.cc \
 	goipgoto.cc gotablish.cc \
-	mlcodegen.cc mltable.cc mlftable.cc mlflat.cc mlfflat.cc mlgoto.cc mlfgoto.cc \
-	crackcodegen.h crackcodegen.cc crackflat.h crackflat.cc
+	mlcodegen.cc mltable.cc mlftable.cc mlflat.cc mlfflat.cc mlgoto.cc mlfgoto.cc
 
 ragel_CXXFLAGS = -Wall
 

@@ -57,7 +57,7 @@
 #include "rubyfflat.h"
 #include "rbxgoto.h"
 
-#include "crackflat.h"
+#include "crack/crackflat.h"
 
 string itoa( int i )
 {

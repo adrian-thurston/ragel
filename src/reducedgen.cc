@@ -77,7 +77,7 @@
 #include "rubyfflat.h"
 #include "rbxgoto.h"
 
-#include "crackflat.h"
+#include "crack/crackflat.h"
 
 using std::cerr;
 using std::endl;
