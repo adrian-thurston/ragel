@@ -30,6 +30,7 @@
 /* Forwards. */
 struct CodeGenData;
 
+namespace C {
 
 /*
  * FTabCodeG\verb|e
@@ -84,5 +85,7 @@ struct D2FTabCodeGen
 	D2FTabCodeGen( const CodeGenArgs &args ) : 
 		FsmCodeGen(args), FTabCodeGen(args), D2CodeGen(args) {}
 };
+
+}
 
 #endif

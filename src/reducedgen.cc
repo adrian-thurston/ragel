@@ -153,28 +153,28 @@ CodeGenData *cdMakeCodeGen( const CodeGenArgs &args )
 	case HostLang::C:
 		switch ( codeStyle ) {
 		case GenTables:
-			codeGen = new CTabCodeGen(args);
+			codeGen = new C::CTabCodeGen(args);
 			break;
 		case GenFTables:
-			codeGen = new CFTabCodeGen(args);
+			codeGen = new C::CFTabCodeGen(args);
 			break;
 		case GenFlat:
-			codeGen = new CFlatCodeGen(args);
+			codeGen = new C::CFlatCodeGen(args);
 			break;
 		case GenFFlat:
-			codeGen = new CFFlatCodeGen(args);
+			codeGen = new C::CFFlatCodeGen(args);
 			break;
 		case GenGoto:
-			codeGen = new CGotoCodeGen(args);
+			codeGen = new C::CGotoCodeGen(args);
 			break;
 		case GenFGoto:
-			codeGen = new CFGotoCodeGen(args);
+			codeGen = new C::CFGotoCodeGen(args);
 			break;
 		case GenIpGoto:
-			codeGen = new CIpGotoCodeGen(args);
+			codeGen = new C::CIpGotoCodeGen(args);
 			break;
 		case GenSplit:
-			codeGen = new CSplitCodeGen(args);
+			codeGen = new C::CSplitCodeGen(args);
 			break;
 		}
 		break;
@@ -182,28 +182,28 @@ CodeGenData *cdMakeCodeGen( const CodeGenArgs &args )
 	case HostLang::D:
 		switch ( codeStyle ) {
 		case GenTables:
-			codeGen = new DTabCodeGen(args);
+			codeGen = new C::DTabCodeGen(args);
 			break;
 		case GenFTables:
-			codeGen = new DFTabCodeGen(args);
+			codeGen = new C::DFTabCodeGen(args);
 			break;
 		case GenFlat:
-			codeGen = new DFlatCodeGen(args);
+			codeGen = new C::DFlatCodeGen(args);
 			break;
 		case GenFFlat:
-			codeGen = new DFFlatCodeGen(args);
+			codeGen = new C::DFFlatCodeGen(args);
 			break;
 		case GenGoto:
-			codeGen = new DGotoCodeGen(args);
+			codeGen = new C::DGotoCodeGen(args);
 			break;
 		case GenFGoto:
-			codeGen = new DFGotoCodeGen(args);
+			codeGen = new C::DFGotoCodeGen(args);
 			break;
 		case GenIpGoto:
-			codeGen = new DIpGotoCodeGen(args);
+			codeGen = new C::DIpGotoCodeGen(args);
 			break;
 		case GenSplit:
-			codeGen = new DSplitCodeGen(args);
+			codeGen = new C::DSplitCodeGen(args);
 			break;
 		}
 		break;
@@ -211,28 +211,28 @@ CodeGenData *cdMakeCodeGen( const CodeGenArgs &args )
 	case HostLang::D2:
 		switch ( codeStyle ) {
 		case GenTables:
-			codeGen = new D2TabCodeGen(args);
+			codeGen = new C::D2TabCodeGen(args);
 			break;
 		case GenFTables:
-			codeGen = new D2FTabCodeGen(args);
+			codeGen = new C::D2FTabCodeGen(args);
 			break;
 		case GenFlat:
-			codeGen = new D2FlatCodeGen(args);
+			codeGen = new C::D2FlatCodeGen(args);
 			break;
 		case GenFFlat:
-			codeGen = new D2FFlatCodeGen(args);
+			codeGen = new C::D2FFlatCodeGen(args);
 			break;
 		case GenGoto:
-			codeGen = new D2GotoCodeGen(args);
+			codeGen = new C::D2GotoCodeGen(args);
 			break;
 		case GenFGoto:
-			codeGen = new D2FGotoCodeGen(args);
+			codeGen = new C::D2FGotoCodeGen(args);
 			break;
 		case GenIpGoto:
-			codeGen = new D2IpGotoCodeGen(args);
+			codeGen = new C::D2IpGotoCodeGen(args);
 			break;
 		case GenSplit:
-			codeGen = new D2SplitCodeGen(args);
+			codeGen = new C::D2SplitCodeGen(args);
 			break;
 		}
 		break;

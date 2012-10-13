@@ -30,6 +30,7 @@
 /* Forwards. */
 struct CodeGenData;
 
+namespace C {
 
 /*
  * class FGotoCodeGen
@@ -82,5 +83,7 @@ struct D2FGotoCodeGen
 	D2FGotoCodeGen( const CodeGenArgs &args ) : 
 		FsmCodeGen(args), FGotoCodeGen(args), D2CodeGen(args) {}
 };
+
+}
 
 #endif

@@ -26,6 +26,8 @@
 #include "redfsm.h"
 #include "gendata.h"
 
+namespace C {
+
 std::ostream &FFlatCodeGen::TO_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
@@ -381,4 +383,6 @@ void FFlatCodeGen::writeExec()
 		out << "	_out: {}\n";
 
 	out << "	}\n";
+}
+
 }

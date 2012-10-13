@@ -24,6 +24,7 @@
 #ifndef _CDCODEGEN_H
 #define _CDCODEGEN_H
 
+
 #include <iostream>
 #include <string>
 #include <stdio.h>
@@ -49,6 +50,8 @@ struct LongestMatch;
 struct LongestMatchPart;
 
 string itoa( int i );
+
+namespace C {
 
 /*
  * class FsmCodeGen
@@ -253,5 +256,7 @@ public:
 			bool inFinish, bool csForced );
 
 };
+
+}
 
 #endif

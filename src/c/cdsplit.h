@@ -24,6 +24,8 @@
 
 #include "cdipgoto.h"
 
+namespace C {
+
 class SplitCodeGen : public IpGotoCodeGen
 {
 public:
@@ -77,5 +79,7 @@ struct D2SplitCodeGen
 	D2SplitCodeGen( const CodeGenArgs &args ) : 
 		FsmCodeGen(args), SplitCodeGen(args), D2CodeGen(args) {}
 };
+
+}
 
 #endif

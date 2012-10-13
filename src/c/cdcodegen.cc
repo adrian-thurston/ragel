@@ -44,7 +44,6 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-
 extern int numSplitPartitions;
 extern bool noLineDirectives;
 
@@ -68,6 +67,8 @@ void cdLineDirective( ostream &out, const char *fileName, int line )
 
 	out << '\n';
 }
+
+namespace C {
 
 void FsmCodeGen::genLineDirective( ostream &out )
 {
@@ -1003,3 +1004,4 @@ ostream &FsmCodeGen::source_error( const InputLoc &loc )
 	return cerr;
 }
 
+}

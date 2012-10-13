@@ -34,6 +34,8 @@ struct RedTransAp;
 struct RedStateAp;
 struct GenStateCond;
 
+namespace C {
+
 /*
  * Goto driven fsm.
  */
@@ -119,5 +121,7 @@ struct D2GotoCodeGen
 	D2GotoCodeGen( const CodeGenArgs &args ) : 
 		FsmCodeGen(args), GotoCodeGen(args), D2CodeGen(args) {}
 };
+
+}
 
 #endif

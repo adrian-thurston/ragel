@@ -26,6 +26,8 @@
 #include "redfsm.h"
 #include "gendata.h"
 
+namespace C {
+
 std::ostream &FlatCodeGen::TO_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
@@ -848,4 +850,6 @@ void FlatCodeGen::writeExec()
 		out << "	_out: {}\n";
 
 	out << "	}\n";
+}
+
 }

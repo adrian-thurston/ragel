@@ -27,6 +27,8 @@
 #include "gendata.h"
 #include "bstmap.h"
 
+namespace C {
+
 std::ostream &FGotoCodeGen::EXEC_ACTIONS()
 {
 	/* Loop the actions. */
@@ -293,4 +295,6 @@ void FGotoCodeGen::writeExec()
 		out << "	_out: {}\n";
 
 	out << "	}\n";
+}
+
 }

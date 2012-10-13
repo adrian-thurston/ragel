@@ -30,6 +30,8 @@
 /* Forwards. */
 struct CodeGenData;
 
+namespace C {
+
 /*
  * FFlatCodeGen
  */
@@ -82,5 +84,7 @@ struct D2FFlatCodeGen
 	D2FFlatCodeGen( const CodeGenArgs &args ) : 
 		FsmCodeGen(args), FFlatCodeGen(args), D2CodeGen(args) {}
 };
+
+}
 
 #endif

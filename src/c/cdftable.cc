@@ -26,6 +26,8 @@
 #include "redfsm.h"
 #include "gendata.h"
 
+namespace C {
+
 /* Determine if we should use indicies or not. */
 void FTabCodeGen::calcIndexSize()
 {
@@ -433,4 +435,6 @@ void FTabCodeGen::writeExec()
 		out << "	_out: {}\n";
 
 	out << "	}\n";
+}
+
 }

@@ -29,6 +29,8 @@ using std::ostream;
 using std::ios;
 using std::endl;
 
+namespace C {
+
 /* Emit the goto to take for a given transition. */
 std::ostream &SplitCodeGen::TRANS_GOTO( RedTransAp *trans, int level )
 {
@@ -524,3 +526,4 @@ void SplitCodeGen::setLabelsNeeded()
 	}
 }
 
+}

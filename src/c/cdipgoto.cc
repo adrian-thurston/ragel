@@ -27,6 +27,8 @@
 #include "gendata.h"
 #include "bstmap.h"
 
+namespace C {
+
 bool IpGotoCodeGen::useTransInAgainLabel()
 {
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ )
@@ -470,4 +472,6 @@ void IpGotoCodeGen::writeExec()
 
 	out <<
 		"	}\n";
+}
+
 }

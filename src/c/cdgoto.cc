@@ -27,6 +27,8 @@
 #include "bstmap.h"
 #include "gendata.h"
 
+namespace C {
+
 /* Emit the goto to take for a given transition. */
 std::ostream &GotoCodeGen::TRANS_GOTO( RedTransAp *trans, int level )
 {
@@ -891,4 +893,6 @@ void GotoCodeGen::writeExec()
 		out << "	_out: {}\n";
 
 	out << "	}\n";
+}
+
 }

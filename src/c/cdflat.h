@@ -33,6 +33,8 @@ struct NameInst;
 struct RedTransAp;
 struct RedStateAp;
 
+namespace C {
+
 /*
  * FlatCodeGen
  */
@@ -114,5 +116,7 @@ struct D2FlatCodeGen
 	D2FlatCodeGen( const CodeGenArgs &args ) : 
 		FsmCodeGen(args), FlatCodeGen(args), D2CodeGen(args) {}
 };
+
+}
 
 #endif

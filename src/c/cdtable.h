@@ -33,6 +33,8 @@ struct NameInst;
 struct RedTransAp;
 struct RedStateAp;
 
+namespace C {
+
 /*
  * TabCodeGen
  */
@@ -120,5 +122,7 @@ struct D2TabCodeGen
 	D2TabCodeGen( const CodeGenArgs &args ) : 
 		FsmCodeGen(args), TabCodeGen(args), D2CodeGen(args) {}
 };
+
+}
 
 #endif
