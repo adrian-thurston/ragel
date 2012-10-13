@@ -1,6 +1,7 @@
 lib_LIBRARIES = libc.a
 
-libc_a_CPPFLAGS = -I$(top_srcdir)/aapl -I$(top_srcdir)/src
+libc_a_CPPFLAGS = \
+	-I$(top_srcdir)/aapl -I$(top_srcdir)/src
 
 libc_a_SOURCES = \
 	cdcodegen.h \

@@ -5,13 +5,13 @@ bin_PROGRAMS = ragel
 ragel_CPPFLAGS = -I$(top_srcdir)/aapl
 
 ragel_SOURCES = \
-	buffer.h cscodegen.h csipgoto.h inputdata.h rbxgoto.h \
-	rubyflat.h csfflat.h cssplit.h javacodegen.h \
-	redfsm.h rubyftable.h csfgoto.h cstable.h \
-	parsedata.h rlparse.h rubytable.h csflat.h \
+	buffer.h inputdata.h rbxgoto.h \
+	rubyflat.h javacodegen.h \
+	redfsm.h rubyftable.h \
+	parsedata.h rlparse.h rubytable.h \
 	dotcodegen.h parsetree.h rlscan.h version.h common.h \
-	csftable.h fsmgraph.h pcheck.h rubycodegen.h xmlcodegen.h \
-	csgoto.h gendata.h ragel.h rubyfflat.h \
+	fsmgraph.h pcheck.h rubycodegen.h xmlcodegen.h \
+	gendata.h ragel.h rubyfflat.h \
 	gocodegen.h gotable.h goftable.h goflat.h gofflat.h gogoto.h gofgoto.h \
 	goipgoto.h gotablish.h \
 	mlcodegen.h mltable.h mlftable.h mlflat.h mlfflat.h mlgoto.h mlfgoto.h \
@@ -19,9 +19,8 @@ ragel_SOURCES = \
 	fsmattach.cc fsmmin.cc fsmgraph.cc fsmap.cc fsmcond.cc rlscan.cc rlparse.cc \
 	inputdata.cc common.cc redfsm.cc gendata.cc \
 	javacodegen.cc rubycodegen.cc rubytable.cc \
-	rubyftable.cc rubyflat.cc rubyfflat.cc rbxgoto.cc cscodegen.cc \
-	cstable.cc csftable.cc csflat.cc csfflat.cc csgoto.cc csfgoto.cc \
-	csipgoto.cc cssplit.cc dotcodegen.cc dotcodegen-orig.cc xmlcodegen.cc reducedgen.cc \
+	rubyftable.cc rubyflat.cc rubyfflat.cc rbxgoto.cc \
+	dotcodegen.cc dotcodegen-orig.cc xmlcodegen.cc reducedgen.cc \
 	gocodegen.cc gotable.cc goftable.cc goflat.cc gofflat.cc gogoto.cc gofgoto.cc \
 	goipgoto.cc gotablish.cc \
 	mlcodegen.cc mltable.cc mlftable.cc mlflat.cc mlfflat.cc mlgoto.cc mlfgoto.cc

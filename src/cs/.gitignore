@@ -1,3 +1,5 @@
-Makefile.in
-Makefile
-libcs.a
+/Makefile.in
+/Makefile
+/libcs.a
+/.deps
+/*.o

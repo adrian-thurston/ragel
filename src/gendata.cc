@@ -27,14 +27,14 @@
  * Code generators.
  */
 
-#include "cstable.h"
-#include "csftable.h"
-#include "csflat.h"
-#include "csfflat.h"
-#include "csgoto.h"
-#include "csfgoto.h"
-#include "csipgoto.h"
-#include "cssplit.h"
+#include "cs/cstable.h"
+#include "cs/csftable.h"
+#include "cs/csflat.h"
+#include "cs/csfflat.h"
+#include "cs/csgoto.h"
+#include "cs/csfgoto.h"
+#include "cs/csipgoto.h"
+#include "cs/cssplit.h"
 
 #include "c/cdtable.h"
 #include "c/cdftable.h"
