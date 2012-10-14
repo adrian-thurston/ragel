@@ -43,7 +43,6 @@ public:
 
 	std::ostream &EXIT_STATES();
 	std::ostream &TRANS_GOTO( RedTransAp *trans, int level );
-	int TRANS_NR( RedTransAp *trans );
 	std::ostream &FINISH_CASES();
 	std::ostream &AGAIN_CASES();
 
@@ -62,7 +61,6 @@ public:
 	virtual void writeExec();
 
 protected:
-	bool useTransInAgainLabel();
 	bool useAgainLabel();
 
 	/* Called from GotoCodeGen::STATE_GOTOS just before writing the gotos for
