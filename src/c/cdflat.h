@@ -97,26 +97,6 @@ struct CFlatCodeGen
 		FsmCodeGen(args), FlatCodeGen(args), CCodeGen(args) {}
 };
 
-/*
- * DFlatCodeGen
- */
-struct DFlatCodeGen
-	: public FlatCodeGen, public DCodeGen
-{
-	DFlatCodeGen( const CodeGenArgs &args ) : 
-		FsmCodeGen(args), FlatCodeGen(args), DCodeGen(args) {}
-};
-
-/*
- * D2FlatCodeGen
- */
-struct D2FlatCodeGen
-	: public FlatCodeGen, public D2CodeGen
-{
-	D2FlatCodeGen( const CodeGenArgs &args ) : 
-		FsmCodeGen(args), FlatCodeGen(args), D2CodeGen(args) {}
-};
-
 }
 
 #endif

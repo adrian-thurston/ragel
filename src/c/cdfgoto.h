@@ -64,26 +64,6 @@ struct CFGotoCodeGen
 		FsmCodeGen(args), FGotoCodeGen(args), CCodeGen(args) {}
 };
 
-/*
- * class DFGotoCodeGen
- */
-struct DFGotoCodeGen
-	: public FGotoCodeGen, public DCodeGen
-{
-	DFGotoCodeGen( const CodeGenArgs &args ) : 
-		FsmCodeGen(args), FGotoCodeGen(args), DCodeGen(args) {}
-};
-
-/*
- * class DFGotoCodeGen
- */
-struct D2FGotoCodeGen
-	: public FGotoCodeGen, public D2CodeGen
-{
-	D2FGotoCodeGen( const CodeGenArgs &args ) : 
-		FsmCodeGen(args), FGotoCodeGen(args), D2CodeGen(args) {}
-};
-
 }
 
 #endif

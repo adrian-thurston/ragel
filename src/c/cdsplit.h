@@ -60,26 +60,6 @@ struct CSplitCodeGen
 		FsmCodeGen(args), SplitCodeGen(args), CCodeGen(args) {}
 };
 
-/*
- * class DIpGotoCodeGen
- */
-struct DSplitCodeGen
-	: public SplitCodeGen, public DCodeGen
-{
-	DSplitCodeGen( const CodeGenArgs &args ) : 
-		FsmCodeGen(args), SplitCodeGen(args), DCodeGen(args) {}
-};
-
-/*
- * class D2SplitCodeGen
- */
-struct D2SplitCodeGen
-	: public SplitCodeGen, public D2CodeGen
-{
-	D2SplitCodeGen( const CodeGenArgs &args ) : 
-		FsmCodeGen(args), SplitCodeGen(args), D2CodeGen(args) {}
-};
-
 }
 
 #endif

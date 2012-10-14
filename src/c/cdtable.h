@@ -103,26 +103,6 @@ struct CTabCodeGen
 		FsmCodeGen(args), TabCodeGen(args), CCodeGen(args) {}
 };
 
-/*
- * DTabCodeGen
- */
-struct DTabCodeGen
-	: public TabCodeGen, public DCodeGen
-{
-	DTabCodeGen( const CodeGenArgs &args ) : 
-		FsmCodeGen(args), TabCodeGen(args), DCodeGen(args) {}
-};
-
-/*
- * D2TabCodeGen
- */
-struct D2TabCodeGen
-	: public TabCodeGen, public D2CodeGen
-{
-	D2TabCodeGen( const CodeGenArgs &args ) : 
-		FsmCodeGen(args), TabCodeGen(args), D2CodeGen(args) {}
-};
-
 }
 
 #endif

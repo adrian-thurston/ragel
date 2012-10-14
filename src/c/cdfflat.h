@@ -65,26 +65,6 @@ struct CFFlatCodeGen
 		FsmCodeGen(args), FFlatCodeGen(args), CCodeGen(args) {}
 };
 
-/*
- * DFFlatCodeGen
- */
-struct DFFlatCodeGen
-	: public FFlatCodeGen, public DCodeGen
-{
-	DFFlatCodeGen( const CodeGenArgs &args ) : 
-		FsmCodeGen(args), FFlatCodeGen(args), DCodeGen(args) {}
-};
-
-/*
- * D2FFlatCodeGen
- */
-struct D2FFlatCodeGen
-	: public FFlatCodeGen, public D2CodeGen
-{
-	D2FFlatCodeGen( const CodeGenArgs &args ) : 
-		FsmCodeGen(args), FFlatCodeGen(args), D2CodeGen(args) {}
-};
-
 }
 
 #endif

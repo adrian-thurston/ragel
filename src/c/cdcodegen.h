@@ -210,53 +210,6 @@ public:
 	virtual void writeExports();
 };
 
-class DCodeGen : virtual public FsmCodeGen
-{
-public:
-	DCodeGen( const CodeGenArgs &args ) : FsmCodeGen(args) {}
-
-	virtual string NULL_ITEM();
-	virtual string POINTER();
-	virtual ostream &SWITCH_DEFAULT();
-	virtual ostream &OPEN_ARRAY( string type, string name );
-	virtual ostream &CLOSE_ARRAY();
-	virtual ostream &STATIC_VAR( string type, string name );
-	virtual string ARR_OFF( string ptr, string offset );
-	virtual string CAST( string type );
-	virtual string UINT();
-	virtual string PTR_CONST();
-	virtual string PTR_CONST_END();
-	virtual string CTRL_FLOW();
-
-	virtual void writeExports();
-};
-
-class D2CodeGen : virtual public FsmCodeGen
-{
-public:
-	D2CodeGen( const CodeGenArgs &args ) : FsmCodeGen(args) {}
-
-	virtual string NULL_ITEM();
-	virtual string POINTER();
-	virtual ostream &SWITCH_DEFAULT();
-	virtual ostream &OPEN_ARRAY( string type, string name );
-	virtual ostream &CLOSE_ARRAY();
-	virtual ostream &STATIC_VAR( string type, string name );
-	virtual string ARR_OFF( string ptr, string offset );
-	virtual string CAST( string type );
-	virtual string UINT();
-	virtual string PTR_CONST();
-	virtual string PTR_CONST_END();
-	virtual string CTRL_FLOW();
-
-	virtual void writeExports();
-	virtual void SUB_ACTION( ostream &ret, GenInlineItem *item, 
-			int targState, bool inFinish, bool csForced );
-	virtual void ACTION( ostream &ret, GenAction *action, int targState, 
-			bool inFinish, bool csForced );
-
-};
-
 }
 
 #endif

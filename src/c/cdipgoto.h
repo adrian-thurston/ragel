@@ -87,26 +87,6 @@ struct CIpGotoCodeGen
 		FsmCodeGen(args), IpGotoCodeGen(args), CCodeGen(args) {}
 };
 
-/*
- * class DIpGotoCodeGen
- */
-struct DIpGotoCodeGen
-	: public IpGotoCodeGen, public DCodeGen
-{
-	DIpGotoCodeGen( const CodeGenArgs &args) : 
-		FsmCodeGen(args), IpGotoCodeGen(args), DCodeGen(args) {}
-};
-
-/*
- * class D2IpGotoCodeGen
- */
-struct D2IpGotoCodeGen
-	: public IpGotoCodeGen, public D2CodeGen
-{
-	D2IpGotoCodeGen( const CodeGenArgs &args) : 
-		FsmCodeGen(args), IpGotoCodeGen(args), D2CodeGen(args) {}
-};
-
 }
 
 #endif
