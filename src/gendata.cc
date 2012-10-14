@@ -178,7 +178,7 @@ void CodeGenData::initTransList( int snum, unsigned long length )
 }
 
 void CodeGenData::newTrans( int snum, int tnum, Key lowKey, 
-		Key highKey, long targ, long action )
+		Key highKey, long targ, long action, RedCondList &outConds )
 {
 	/* Get the current state and range. */
 	RedStateAp *curState = allStates + snum;
@@ -191,6 +191,7 @@ void CodeGenData::newTrans( int snum, int tnum, Key lowKey,
 	RedStateAp *targState = targ >= 0 ? (allStates + targ) : redFsm->getErrorState();
 	RedAction *actionTable = action >= 0 ? (allActionTables + action) : 0;
 	RedTransAp *trans = redFsm->allocateTrans( targState, actionTable );
+	trans->outConds.transfer( outConds );
 	RedTransEl transEl( lowKey, highKey, trans );
 
 	/* Reduced machines are complete. We need to fill any gaps with the error

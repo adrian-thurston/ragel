@@ -167,6 +167,38 @@ bool IpGotoCodeGen::IN_TRANS_ACTIONS( RedStateAp *state )
 		}
 	}
 
+	/* Emit any transitions that have actions and that go to this state. */
+	for ( int it = 0; it < state->numInConds; it++ ) {
+		RedCondAp *trans = state->inConds[it];
+		if ( trans->action != 0 && trans->labelNeeded ) {
+			/* Remember that we wrote an action so we know to write the
+			 * line directive for going back to the output. */
+			anyWritten = true;
+
+			/* Write the label for the transition so it can be jumped to. */
+			out << "ctr" << trans->id << ":\n";
+
+			/* If the action contains a next, then we must preload the current
+			 * state since the action may or may not set it. */
+			if ( trans->action->anyNextStmt() )
+				out << "	" << vCS() << " = " << trans->targ->id << ";\n";
+
+			/* Write each action in the list. */
+			for ( GenActionTable::Iter item = trans->action->key; item.lte(); item++ ) {
+				ACTION( out, item->value, trans->targ->id, false, 
+						trans->action->anyNextStmt() );
+			}
+
+			/* If the action contains a next then we need to reload, otherwise
+			 * jump directly to the target state. */
+			if ( trans->action->anyNextStmt() )
+				out << "\tgoto _again;\n";
+			else
+				out << "\tgoto st" << trans->targ->id << ";\n";
+		}
+	}
+
+
 	return anyWritten;
 }
 
@@ -241,17 +273,17 @@ void IpGotoCodeGen::STATE_GOTO_ERROR()
 	out << "	goto _out;\n";
 }
 
-
 /* Emit the goto to take for a given transition. */
 std::ostream &IpGotoCodeGen::TRANS_GOTO( RedTransAp *trans, int level )
 {
-	if ( trans->action != 0 ) {
+	RedCondAp *cond = trans->outConds.data[0].value;
+	if ( cond->action != 0 ) {
 		/* Go to the transition which will go to the state. */
-		out << TABS(level) << "goto tr" << trans->id << ";";
+		out << TABS(level) << "goto ctr" << cond->id << ";";
 	}
 	else {
 		/* Go directly to the target state. */
-		out << TABS(level) << "goto st" << trans->targ->id << ";";
+		out << TABS(level) << "goto st" << cond->targ->id << ";";
 	}
 	return out;
 }

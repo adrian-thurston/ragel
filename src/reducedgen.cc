@@ -906,7 +906,7 @@ void ReducedGen::makeTrans( Key lowKey, Key highKey, TransAp *trans )
 		cgd->newCondTrans( redCondList, curState, /*curTrans++*/ 0, cti->key, targ, action );
 	}
 
-	cgd->newTrans( curState, curTrans++, lowKey, highKey, targ, action );
+	cgd->newTrans( curState, curTrans++, lowKey, highKey, targ, action, redCondList );
 }
 
 void ReducedGen::makeTransList( StateAp *state )
