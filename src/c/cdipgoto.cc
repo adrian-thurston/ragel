@@ -126,37 +126,6 @@ bool IpGotoCodeGen::IN_TRANS_ACTIONS( RedStateAp *state )
 	bool anyWritten = false;
 
 	/* Emit any transitions that have actions and that go to this state. */
-	for ( int it = 0; it < state->numInTrans; it++ ) {
-		RedTransAp *trans = state->inTrans[it];
-		if ( trans->action != 0 && trans->labelNeeded ) {
-			/* Remember that we wrote an action so we know to write the
-			 * line directive for going back to the output. */
-			anyWritten = true;
-
-			/* Write the label for the transition so it can be jumped to. */
-			out << "tr" << trans->id << ":\n";
-
-			/* If the action contains a next, then we must preload the current
-			 * state since the action may or may not set it. */
-			if ( trans->action->anyNextStmt() )
-				out << "	" << vCS() << " = " << trans->targ->id << ";\n";
-
-			/* Write each action in the list. */
-			for ( GenActionTable::Iter item = trans->action->key; item.lte(); item++ ) {
-				ACTION( out, item->value, trans->targ->id, false, 
-						trans->action->anyNextStmt() );
-			}
-
-			/* If the action contains a next then we need to reload, otherwise
-			 * jump directly to the target state. */
-			if ( trans->action->anyNextStmt() )
-				out << "\tgoto _again;\n";
-			else
-				out << "\tgoto st" << trans->targ->id << ";\n";
-		}
-	}
-
-	/* Emit any transitions that have actions and that go to this state. */
 	for ( int it = 0; it < state->numInConds; it++ ) {
 		RedCondAp *trans = state->inConds[it];
 		if ( trans->action != 0 && trans->labelNeeded ) {
@@ -311,8 +280,10 @@ std::ostream &IpGotoCodeGen::FINISH_CASES()
 	}
 
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		if ( st->eofTrans != 0 )
-			out << "	case " << st->id << ": goto tr" << st->eofTrans->id << ";\n";
+		if ( st->eofTrans != 0 ) {
+			RedCondAp *cond = st->eofTrans->outConds.data[0].value;
+			out << "	case " << st->id << ": goto ctr" << cond->id << ";\n";
+		}
 	}
 
 	for ( GenActionTableMap::Iter act = redFsm->actionMap; act.lte(); act++ ) {

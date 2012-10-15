@@ -343,6 +343,8 @@ void CodeGenData::setEofTrans( int snum, long eofTarget, long actId )
 	RedStateAp *targState = allStates + eofTarget;
 	RedAction *eofAct = allActionTables + actId;
 	curState->eofTrans = redFsm->allocateTrans( targState, eofAct );
+	RedCondAp *cond = redFsm->allocateCond( targState, eofAct );
+	curState->eofTrans->outConds.append( RedCondEl( 0, cond ) );
 }
 
 void CodeGenData::resolveTargetStates( GenInlineList *inlineList )
