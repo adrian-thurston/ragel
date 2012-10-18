@@ -267,6 +267,36 @@ std::ostream &IpGotoCodeGen::AGAIN_CASES()
 	return out;
 }
 
+std::ostream &IpGotoCodeGen::STATE_GOTOS()
+{
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		if ( st == redFsm->errState )
+			STATE_GOTO_ERROR();
+		else {
+			/* Writing code above state gotos. */
+			GOTO_HEADER( st );
+
+			if ( st->stateCondVect.length() > 0 ) {
+				out << "	_widec = " << GET_KEY() << ";\n";
+				emitCondBSearch( st, 1, 0, st->stateCondVect.length() - 1 );
+			}
+
+			/* Try singles. */
+			if ( st->outSingle.length() > 0 )
+				emitSingleSwitch( st );
+
+			/* Default case is to binary search for the ranges, if that fails then */
+			if ( st->outRange.length() > 0 )
+				emitRangeBSearch( st, 1, 0, st->outRange.length() - 1 );
+
+			/* Write the default transition. */
+			TRANS_GOTO( st->defTrans, 1 ) << "\n";
+		}
+	}
+	return out;
+}
+
+
 std::ostream &IpGotoCodeGen::FINISH_CASES()
 {
 	bool anyWritten = false;
