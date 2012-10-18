@@ -89,13 +89,7 @@ protected:
 	bool isAlphTypeSigned();
 	bool isWideAlphTypeSigned();
 
-	virtual string ARR_OFF( string ptr, string offset ) = 0;
-	virtual string CAST( string type ) = 0;
-	virtual string UINT() = 0;
-	virtual string NULL_ITEM() = 0;
-	virtual string POINTER() = 0;
 	virtual string GET_KEY();
-	virtual ostream &SWITCH_DEFAULT() = 0;
 
 	string P();
 	string PE();
@@ -164,14 +158,6 @@ protected:
 	string ERROR_STATE();
 	string FIRST_FINAL_STATE();
 
-	virtual string PTR_CONST() = 0;
-	virtual string PTR_CONST_END() = 0;
-	virtual ostream &OPEN_ARRAY( string type, string name ) = 0;
-	virtual ostream &CLOSE_ARRAY() = 0;
-	virtual ostream &STATIC_VAR( string type, string name ) = 0;
-
-	virtual string CTRL_FLOW() = 0;
-
 	ostream &source_warning(const InputLoc &loc);
 	ostream &source_error(const InputLoc &loc);
 
@@ -187,13 +173,8 @@ protected:
 public:
 	/* Determine if we should use indicies. */
 	virtual void calcIndexSize() {}
-};
 
-class CCodeGen : virtual public FsmCodeGen
-{
-public:
-	CCodeGen( const CodeGenArgs &args ) : FsmCodeGen(args) {}
-
+	/* From CCodeGen. */
 	virtual string NULL_ITEM();
 	virtual string POINTER();
 	virtual ostream &SWITCH_DEFAULT();
@@ -206,7 +187,6 @@ public:
 	virtual string PTR_CONST();
 	virtual string PTR_CONST_END();
 	virtual string CTRL_FLOW();
-
 	virtual void writeExports();
 };
 

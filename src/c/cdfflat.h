@@ -59,10 +59,10 @@ protected:
  * CFFlatCodeGen
  */
 struct CFFlatCodeGen
-	: public FFlatCodeGen, public CCodeGen
+	: public FFlatCodeGen
 {
 	CFFlatCodeGen( const CodeGenArgs &args ) : 
-		FsmCodeGen(args), FFlatCodeGen(args), CCodeGen(args) {}
+		FsmCodeGen(args), FFlatCodeGen(args) {}
 };
 
 }

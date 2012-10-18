@@ -54,10 +54,10 @@ public:
 };
 
 struct CSplitCodeGen
-	: public SplitCodeGen, public CCodeGen
+	: public SplitCodeGen
 {
 	CSplitCodeGen( const CodeGenArgs &args ) : 
-		FsmCodeGen(args), SplitCodeGen(args), CCodeGen(args) {}
+		FsmCodeGen(args), SplitCodeGen(args) {}
 };
 
 }

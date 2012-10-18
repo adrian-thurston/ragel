@@ -94,10 +94,10 @@ public:
  * class CGotoCodeGen
  */
 struct CGotoCodeGen
-	: public GotoCodeGen, public CCodeGen
+	: public GotoCodeGen
 {
 	CGotoCodeGen( const CodeGenArgs &args ) : 
-		FsmCodeGen(args), GotoCodeGen(args), CCodeGen(args) {}
+		FsmCodeGen(args), GotoCodeGen(args) {}
 };
 
 }

@@ -91,10 +91,10 @@ protected:
  * CFlatCodeGen
  */
 struct CFlatCodeGen
-	: public FlatCodeGen, public CCodeGen
+	: public FlatCodeGen
 {
 	CFlatCodeGen( const CodeGenArgs &args ) : 
-		FsmCodeGen(args), FlatCodeGen(args), CCodeGen(args) {}
+		FsmCodeGen(args), FlatCodeGen(args) {}
 };
 
 }

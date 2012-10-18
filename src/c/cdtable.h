@@ -97,10 +97,10 @@ protected:
  * CTabCodeGen
  */
 struct CTabCodeGen
-	: public TabCodeGen, public CCodeGen
+	: public TabCodeGen
 {
 	CTabCodeGen( const CodeGenArgs &args ) : 
-		FsmCodeGen(args), TabCodeGen(args), CCodeGen(args) {}
+		FsmCodeGen(args), TabCodeGen(args) {}
 };
 
 }

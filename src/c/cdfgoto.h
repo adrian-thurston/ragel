@@ -58,10 +58,10 @@ public:
  * class CFGotoCodeGen
  */
 struct CFGotoCodeGen
-	: public FGotoCodeGen, public CCodeGen
+	: public FGotoCodeGen
 {
 	CFGotoCodeGen( const CodeGenArgs &args ) : 
-		FsmCodeGen(args), FGotoCodeGen(args), CCodeGen(args) {}
+		FsmCodeGen(args), FGotoCodeGen(args) {}
 };
 
 }

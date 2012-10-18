@@ -60,10 +60,10 @@ protected:
  * CFTabCodeGen
  */
 struct CFTabCodeGen
-	: public FTabCodeGen, public CCodeGen
+	: public FTabCodeGen
 {
 	CFTabCodeGen( const CodeGenArgs &args ) : 
-		FsmCodeGen(args), FTabCodeGen(args), CCodeGen(args) {}
+		FsmCodeGen(args), FTabCodeGen(args) {}
 };
 
 }

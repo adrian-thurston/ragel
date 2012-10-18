@@ -684,69 +684,69 @@ void FsmCodeGen::writeError()
  * Language specific, but style independent code generators functions.
  */
 
-string CCodeGen::PTR_CONST()
+string FsmCodeGen::PTR_CONST()
 {
 	return "const ";
 }
 
-string CCodeGen::PTR_CONST_END()
+string FsmCodeGen::PTR_CONST_END()
 {
 	return "";
 }
 
-std::ostream &CCodeGen::OPEN_ARRAY( string type, string name )
+std::ostream &FsmCodeGen::OPEN_ARRAY( string type, string name )
 {
 	out << "static const " << type << " " << name << "[] = {\n";
 	return out;
 }
 
-std::ostream &CCodeGen::CLOSE_ARRAY()
+std::ostream &FsmCodeGen::CLOSE_ARRAY()
 {
 	return out << "};\n";
 }
 
-std::ostream &CCodeGen::STATIC_VAR( string type, string name )
+std::ostream &FsmCodeGen::STATIC_VAR( string type, string name )
 {
 	out << "static const " << type << " " << name;
 	return out;
 }
 
-string CCodeGen::UINT( )
+string FsmCodeGen::UINT( )
 {
 	return "unsigned int";
 }
 
-string CCodeGen::ARR_OFF( string ptr, string offset )
+string FsmCodeGen::ARR_OFF( string ptr, string offset )
 {
 	return ptr + " + " + offset;
 }
 
-string CCodeGen::CAST( string type )
+string FsmCodeGen::CAST( string type )
 {
 	return "(" + type + ")";
 }
 
-string CCodeGen::NULL_ITEM()
+string FsmCodeGen::NULL_ITEM()
 {
 	return "0";
 }
 
-string CCodeGen::POINTER()
+string FsmCodeGen::POINTER()
 {
 	return " *";
 }
 
-std::ostream &CCodeGen::SWITCH_DEFAULT()
+std::ostream &FsmCodeGen::SWITCH_DEFAULT()
 {
 	return out;
 }
 
-string CCodeGen::CTRL_FLOW()
+string FsmCodeGen::CTRL_FLOW()
 {
 	return "";
 }
 
-void CCodeGen::writeExports()
+void FsmCodeGen::writeExports()
 {
 	if ( exportList.length() > 0 ) {
 		for ( ExportList::Iter ex = exportList; ex.lte(); ex++ ) {

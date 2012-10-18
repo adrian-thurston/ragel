@@ -80,10 +80,10 @@ protected:
  * class CIpGotoCodeGen
  */
 struct CIpGotoCodeGen
-	: public IpGotoCodeGen, public CCodeGen
+	: public IpGotoCodeGen
 {
 	CIpGotoCodeGen( const CodeGenArgs &args) : 
-		FsmCodeGen(args), IpGotoCodeGen(args), CCodeGen(args) {}
+		FsmCodeGen(args), IpGotoCodeGen(args) {}
 };
 
 }
