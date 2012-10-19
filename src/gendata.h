@@ -292,7 +292,7 @@ struct CodeGenData : public ReducedGen
 	void setFinal( int snum );
 	void initTransList( int snum, unsigned long length );
 	void newTrans( int snum, int tnum,
-			Key lowKey, Key highKey, 
+			Key lowKey, Key highKey, GenCondSpace *gcs,
 			long targ, long act, RedCondList &outConds );
 	void newCondTrans( RedCondList &outConds, 
 			int snum, int tnum, CondKey key, 

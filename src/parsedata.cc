@@ -1288,6 +1288,11 @@ void ParseData::analyzeGraph( FsmAp *graph )
 	for ( StateList::Iter st = graph->stateList; st.lte(); st++ ) {
 		/* The transition list. */
 		for ( TransList::Iter trans = st->outList; trans.lte(); trans++ ) {
+			if ( trans->condSpace != 0 ) {
+				for ( CondSet::Iter sci = trans->condSpace->condSet; sci.lte(); sci++ )
+					(*sci)->numCondRefs += 1;
+			}
+
 			for ( ActionTable::Iter at = trans->ctList.head->actionTable; at.lte(); at++ )
 				at->value->numTransRefs += 1;
 		}

@@ -248,13 +248,33 @@ struct CmpRedCondEl
 	}
 };
 
+typedef Vector< GenAction* > GenCondSet;
+
+struct GenCondSpace
+{
+	Key baseKey;
+	GenCondSet condSet;
+	int condSpaceId;
+
+	GenCondSpace *next, *prev;
+};
+typedef DList<GenCondSpace> CondSpaceList;
+
+
 /* Reduced transition. */
 struct RedTransAp
 :
 	public AvlTreeEl<RedTransAp>
 {
 	RedTransAp( RedStateAp *targ, RedAction *action, int id )
-		: targ(targ), action(action), id(id), pos(-1), labelNeeded(true) { }
+	:
+		targ(targ),
+		action(action),
+		id(id),
+		pos(-1),
+		labelNeeded(true),
+		condSpace(0)
+	{ }
 
 	RedStateAp *targ;
 	RedAction *action;
@@ -263,6 +283,7 @@ struct RedTransAp
 	bool partitionBoundary;
 	bool labelNeeded;
 
+	GenCondSpace *condSpace;
 	RedCondList outConds;
 };
 
@@ -280,6 +301,10 @@ struct CmpRedTransAp
 		else if ( t1.action < t2.action )
 			return -1;
 		else if ( t1.action > t2.action )
+			return 1;
+		else if ( t1.condSpace < t2.condSpace )
+			return -1;
+		else if ( t1.condSpace > t2.condSpace )
 			return 1;
 		else {
 			return CmpTable<RedCondEl, CmpRedCondEl>::compare(
@@ -346,8 +371,6 @@ typedef MergeSort<RedSpanMapEl, CmpRedSpanMapEl> RedSpanMapSort;
 typedef Vector<int> EntryIdVect;
 typedef Vector<char*> EntryNameVect;
 
-typedef Vector< GenAction* > GenCondSet;
-
 struct Condition
 {
 	Condition( )
@@ -360,16 +383,6 @@ struct Condition
 	Condition *next, *prev;
 };
 typedef DList<Condition> ConditionList;
-
-struct GenCondSpace
-{
-	Key baseKey;
-	GenCondSet condSet;
-	int condSpaceId;
-
-	GenCondSpace *next, *prev;
-};
-typedef DList<GenCondSpace> CondSpaceList;
 
 struct GenStateCond
 {
@@ -590,7 +603,7 @@ struct RedFsmAp
 	/* Is every char in the alphabet covered? */
 	bool alphabetCovered( RedTransList &outRange );
 
-	RedTransAp *allocateTrans( RedStateAp *targState, RedAction *actionTable );
+	RedTransAp *allocateTrans( RedStateAp *targState, RedAction *actionTable, GenCondSpace *condSpace );
 	RedCondAp *allocateCond( RedStateAp *targState, RedAction *actionTable );
 
 	void partitionFsm( int nParts );

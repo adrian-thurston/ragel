@@ -178,7 +178,8 @@ void CodeGenData::initTransList( int snum, unsigned long length )
 }
 
 void CodeGenData::newTrans( int snum, int tnum, Key lowKey, 
-		Key highKey, long targ, long action, RedCondList &outConds )
+		Key highKey, GenCondSpace *gcs, long targ, long action,
+		RedCondList &outConds )
 {
 	/* Get the current state and range. */
 	RedStateAp *curState = allStates + snum;
@@ -190,7 +191,7 @@ void CodeGenData::newTrans( int snum, int tnum, Key lowKey,
 	/* Make the new transitions. */
 	RedStateAp *targState = targ >= 0 ? (allStates + targ) : redFsm->getErrorState();
 	RedAction *actionTable = action >= 0 ? (allActionTables + action) : 0;
-	RedTransAp *trans = redFsm->allocateTrans( targState, actionTable );
+	RedTransAp *trans = redFsm->allocateTrans( targState, actionTable, gcs );
 	trans->outConds.transfer( outConds );
 	RedTransEl transEl( lowKey, highKey, trans );
 
@@ -278,6 +279,7 @@ void CodeGenData::newCondTrans( RedCondList &outConds,
 
 	/* Filler taken care of. Append the range. */
 	outConds.append( RedCondEl( key, cond ) );
+	cerr << "oc len: " << outConds.length() << endl;
 }
 
 void CodeGenData::finishTransList( int snum )
@@ -342,7 +344,7 @@ void CodeGenData::setEofTrans( int snum, long eofTarget, long actId )
 	RedStateAp *curState = allStates + snum;
 	RedStateAp *targState = allStates + eofTarget;
 	RedAction *eofAct = allActionTables + actId;
-	curState->eofTrans = redFsm->allocateTrans( targState, eofAct );
+	curState->eofTrans = redFsm->allocateTrans( targState, eofAct, 0 );
 	RedCondAp *cond = redFsm->allocateCond( targState, eofAct );
 	curState->eofTrans->outConds.append( RedCondEl( 0, cond ) );
 }

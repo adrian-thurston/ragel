@@ -234,15 +234,28 @@ void IpGotoCodeGen::STATE_GOTO_ERROR()
 /* Emit the goto to take for a given transition. */
 std::ostream &IpGotoCodeGen::TRANS_GOTO( RedTransAp *trans, int level )
 {
-	RedCondAp *cond = trans->outConds.data[0].value;
-	if ( cond->action != 0 ) {
-		/* Go to the transition which will go to the state. */
-		out << TABS(level) << "goto ctr" << cond->id << ";";
+	if ( trans->outConds.length() == 1 ) {
+		/* Existing. */
+		RedCondAp *cond = trans->outConds.data[0].value;
+		if ( cond->action != 0 ) {
+			/* Go to the transition which will go to the state. */
+			out << TABS(level) << "goto ctr" << cond->id << ";";
+		}
+		else {
+			/* Go directly to the target state. */
+			out << TABS(level) << "goto st" << cond->targ->id << ";";
+		}
 	}
 	else {
-		/* Go directly to the target state. */
-		out << TABS(level) << "goto st" << cond->targ->id << ";";
+		out << TABS(level) << "int ck = 0;\n";
+		for ( GenCondSet::Iter csi = trans->condSpace->condSet; csi.lte(); csi++ ) {
+			out << TABS(level) << "if ( ";
+			CONDITION( out, *csi );
+			Size condValOffset = (1 << csi.pos());
+			out << " ) ck += " << condValOffset << ";\n";
+		}
 	}
+
 	return out;
 }
 

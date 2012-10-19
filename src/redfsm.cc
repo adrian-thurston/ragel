@@ -536,13 +536,16 @@ RedStateAp *RedFsmAp::getErrorState()
 }
 
 
-RedTransAp *RedFsmAp::allocateTrans( RedStateAp *targ, RedAction *action )
+RedTransAp *RedFsmAp::allocateTrans( RedStateAp *targ, RedAction *action, GenCondSpace *condSpace )
 {
 	/* Create a reduced trans and look for it in the transiton set. */
 	RedTransAp redTrans( targ, action, 0 );
+	redTrans.condSpace = condSpace;
+	std::cerr << "cond space: " << condSpace << std::endl;
 	RedTransAp *inDict = transSet.find( &redTrans );
 	if ( inDict == 0 ) {
 		inDict = new RedTransAp( targ, action, nextTransId++ );
+		inDict->condSpace = condSpace;
 		transSet.insert( inDict );
 	}
 	return inDict;
