@@ -41,8 +41,11 @@ public:
 	IpGotoCodeGen( const CodeGenArgs &args ) 
 			: FsmCodeGen(args), GotoCodeGen(args) {}
 
+	string CKEY( CondKey key );
+	void COND_B_SEARCH( RedTransAp *trans, int level, int low, int high );
 	std::ostream &EXIT_STATES();
 	std::ostream &TRANS_GOTO( RedTransAp *trans, int level );
+	std::ostream &COND_GOTO( RedCondAp *trans, int level );
 	std::ostream &FINISH_CASES();
 	std::ostream &AGAIN_CASES();
 	std::ostream &STATE_GOTOS();

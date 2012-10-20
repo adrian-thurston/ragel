@@ -27,6 +27,10 @@
 #include "gendata.h"
 #include "bstmap.h"
 
+#include <sstream>
+
+using std::ostringstream;
+
 namespace C {
 
 bool IpGotoCodeGen::useAgainLabel()
@@ -231,6 +235,112 @@ void IpGotoCodeGen::STATE_GOTO_ERROR()
 	out << "	goto _out;\n";
 }
 
+/* Write out a key from the fsm code gen. Depends on wether or not the key is
+ * signed. */
+string IpGotoCodeGen::CKEY( CondKey key )
+{
+	ostringstream ret;
+	ret << key.getVal();
+	return ret.str();
+}
+
+
+void IpGotoCodeGen::COND_B_SEARCH( RedTransAp *trans, int level, int low, int high )
+{
+	/* Get the mid position, staying on the lower end of the range. */
+	int mid = (low + high) >> 1;
+	RedCondEl *data = trans->outConds.data;
+
+	/* Determine if we need to look higher or lower. */
+	bool anyLower = mid > low;
+	bool anyHigher = mid < high;
+
+	/* Determine if the keys at mid are the limits of the alphabet. */
+	bool limitLow = 0; //data[mid].key == keyOps->minKey;
+	bool limitHigh = 0; //data[mid].key == keyOps->maxKey;
+
+	if ( anyLower && anyHigher ) {
+		/* Can go lower and higher than mid. */
+		out << TABS(level) << "if ( " << "ck" << " < " << 
+				CKEY(data[mid].key) << " ) {\n";
+		COND_B_SEARCH( trans, level+1, low, mid-1 );
+		out << TABS(level) << "} else if ( " << "ck" << " > " << 
+				CKEY(data[mid].key) << " ) {\n";
+		COND_B_SEARCH( trans, level+1, mid+1, high );
+		out << TABS(level) << "} else {\n";
+		COND_GOTO(data[mid].value, level+1) << "\n";
+		out << TABS(level) << "}\n";
+	}
+	else if ( anyLower && !anyHigher ) {
+		/* Can go lower than mid but not higher. */
+		out << TABS(level) << "if ( " << "ck" << " < " << 
+				CKEY(data[mid].key) << " ) {\n";
+		COND_B_SEARCH( trans, level+1, low, mid-1 );
+
+		/* if the higher is the highest in the alphabet then there is no
+		 * sense testing it. */
+		if ( limitHigh ) {
+			out << TABS(level) << "} else {\n";
+			COND_GOTO(data[mid].value, level+1) << "\n";
+			out << TABS(level) << "}\n";
+		}
+		else {
+			out << TABS(level) << "} else if ( " << "ck" << " <= " << 
+					CKEY(data[mid].key) << " ) {\n";
+			COND_GOTO(data[mid].value, level+1) << "\n";
+			out << TABS(level) << "}\n";
+		}
+	}
+	else if ( !anyLower && anyHigher ) {
+		/* Can go higher than mid but not lower. */
+		out << TABS(level) << "if ( " << "ck" << " > " << 
+				CKEY(data[mid].key) << " ) {\n";
+		COND_B_SEARCH( trans, level+1, mid+1, high );
+
+		/* If the lower end is the lowest in the alphabet then there is no
+		 * sense testing it. */
+		if ( limitLow ) {
+			out << TABS(level) << "} else {\n";
+			COND_GOTO(data[mid].value, level+1) << "\n";
+			out << TABS(level) << "}\n";
+		}
+		else {
+			out << TABS(level) << "} else if ( " << "ck" << " >= " << 
+					CKEY(data[mid].key) << " ) {\n";
+			COND_GOTO(data[mid].value, level+1) << "\n";
+			out << TABS(level) << "}\n";
+		}
+	}
+	else {
+		/* Cannot go higher or lower than mid. It's mid or bust. What
+		 * tests to do depends on limits of alphabet. */
+		if ( !limitLow && !limitHigh ) {
+			out << TABS(level) << "if ( " << CKEY(data[mid].key) << " <= " << 
+					"ck" << " && " << "ck" << " <= " << 
+					CKEY(data[mid].key) << " ) {\n";
+			COND_GOTO(data[mid].value, level+1) << "\n";
+			out << TABS(level) << "}\n";
+		}
+		else if ( limitLow && !limitHigh ) {
+			out << TABS(level) << "if ( " << "ck" << " <= " << 
+					CKEY(data[mid].key) << " ) {\n";
+			COND_GOTO(data[mid].value, level+1) << "\n";
+			out << TABS(level) << "}\n";
+		}
+		else if ( !limitLow && limitHigh ) {
+			out << TABS(level) << "if ( " << CKEY(data[mid].key) << " <= " << 
+					"ck" << " )\n {";
+			COND_GOTO(data[mid].value, level+1) << "\n";
+			out << TABS(level) << "}\n";
+		}
+		else {
+			/* Both high and low are at the limit. No tests to do. */
+			COND_GOTO(data[mid].value, level) << "\n";
+		}
+	}
+}
+
+
 /* Emit the goto to take for a given transition. */
 std::ostream &IpGotoCodeGen::TRANS_GOTO( RedTransAp *trans, int level )
 {
@@ -254,6 +364,23 @@ std::ostream &IpGotoCodeGen::TRANS_GOTO( RedTransAp *trans, int level )
 			Size condValOffset = (1 << csi.pos());
 			out << " ) ck += " << condValOffset << ";\n";
 		}
+		COND_B_SEARCH( trans, 1, 0, trans->outConds.length()-1 );
+	}
+
+	return out;
+}
+
+/* Emit the goto to take for a given transition. */
+std::ostream &IpGotoCodeGen::COND_GOTO( RedCondAp *cond, int level )
+{
+	/* Existing. */
+	if ( cond->action != 0 ) {
+		/* Go to the transition which will go to the state. */
+		out << TABS(level) << "goto ctr" << cond->id << ";";
+	}
+	else {
+		/* Go directly to the target state. */
+		out << TABS(level) << "goto st" << cond->targ->id << ";";
 	}
 
 	return out;
