@@ -143,13 +143,6 @@ void GenBase::reduceActionTables()
 	}
 }
 
-ReducedGen::ReducedGen( const CodeGenArgs &args )
-:
-	GenBase(args.fsmName, args.pd, args.fsm),
-	cgd(0)
-{
-}
-
 /* Invoked by the parser when a ragel definition is opened. */
 CodeGenData *cdMakeCodeGen( const CodeGenArgs &args )
 {
@@ -440,7 +433,7 @@ CodeGenData *makeCodeGen( const CodeGenArgs &args )
 }
 
 
-void ReducedGen::makeText( GenInlineList *outList, InlineItem *item )
+void CodeGenData::makeText( GenInlineList *outList, InlineItem *item )
 {
 	GenInlineItem *inlineItem = new GenInlineItem( InputLoc(), GenInlineItem::Text );
 	inlineItem->data = item->data;
@@ -448,7 +441,7 @@ void ReducedGen::makeText( GenInlineList *outList, InlineItem *item )
 	outList->append( inlineItem );
 }
 
-void ReducedGen::makeTargetItem( GenInlineList *outList, NameInst *nameTarg, 
+void CodeGenData::makeTargetItem( GenInlineList *outList, NameInst *nameTarg, 
 		GenInlineItem::Type type )
 {
 	long targetState;
@@ -466,7 +459,7 @@ void ReducedGen::makeTargetItem( GenInlineList *outList, NameInst *nameTarg,
 }
 
 /* Make a sublist item with a given type. */
-void ReducedGen::makeSubList( GenInlineList *outList, 
+void CodeGenData::makeSubList( GenInlineList *outList, 
 		InlineList *inlineList, GenInlineItem::Type type )
 {
 	/* Fill the sub list. */
@@ -479,7 +472,7 @@ void ReducedGen::makeSubList( GenInlineList *outList,
 	outList->append( inlineItem );
 }
 
-void ReducedGen::makeLmOnLast( GenInlineList *outList, InlineItem *item )
+void CodeGenData::makeLmOnLast( GenInlineList *outList, InlineItem *item )
 {
 	makeSetTokend( outList, 1 );
 
@@ -490,7 +483,7 @@ void ReducedGen::makeLmOnLast( GenInlineList *outList, InlineItem *item )
 	}
 }
 
-void ReducedGen::makeLmOnNext( GenInlineList *outList, InlineItem *item )
+void CodeGenData::makeLmOnNext( GenInlineList *outList, InlineItem *item )
 {
 	makeSetTokend( outList, 0 );
 	outList->append( new GenInlineItem( InputLoc(), GenInlineItem::Hold ) );
@@ -502,7 +495,7 @@ void ReducedGen::makeLmOnNext( GenInlineList *outList, InlineItem *item )
 	}
 }
 
-void ReducedGen::makeExecGetTokend( GenInlineList *outList )
+void CodeGenData::makeExecGetTokend( GenInlineList *outList )
 {
 	/* Make the Exec item. */
 	GenInlineItem *execItem = new GenInlineItem( InputLoc(), GenInlineItem::Exec );
@@ -515,7 +508,7 @@ void ReducedGen::makeExecGetTokend( GenInlineList *outList )
 	outList->append( execItem );
 }
 
-void ReducedGen::makeLmOnLagBehind( GenInlineList *outList, InlineItem *item )
+void CodeGenData::makeLmOnLagBehind( GenInlineList *outList, InlineItem *item )
 {
 	/* Jump to the tokend. */
 	makeExecGetTokend( outList );
@@ -527,7 +520,7 @@ void ReducedGen::makeLmOnLagBehind( GenInlineList *outList, InlineItem *item )
 	}
 }
 
-void ReducedGen::makeLmSwitch( GenInlineList *outList, InlineItem *item )
+void CodeGenData::makeLmSwitch( GenInlineList *outList, InlineItem *item )
 {
 	GenInlineItem *lmSwitch = new GenInlineItem( InputLoc(), GenInlineItem::LmSwitch );
 	GenInlineList *lmList = lmSwitch->children = new GenInlineList;
@@ -590,21 +583,21 @@ void ReducedGen::makeLmSwitch( GenInlineList *outList, InlineItem *item )
 	outList->append( lmSwitch );
 }
 
-void ReducedGen::makeSetTokend( GenInlineList *outList, long offset )
+void CodeGenData::makeSetTokend( GenInlineList *outList, long offset )
 {
 	GenInlineItem *inlineItem = new GenInlineItem( InputLoc(), GenInlineItem::LmSetTokEnd );
 	inlineItem->offset = offset;
 	outList->append( inlineItem );
 }
 
-void ReducedGen::makeSetAct( GenInlineList *outList, long lmId )
+void CodeGenData::makeSetAct( GenInlineList *outList, long lmId )
 {
 	GenInlineItem *inlineItem = new GenInlineItem( InputLoc(), GenInlineItem::LmSetActId );
 	inlineItem->lmId = lmId;
 	outList->append( inlineItem );
 }
 
-void ReducedGen::makeGenInlineList( GenInlineList *outList, InlineList *inList )
+void CodeGenData::makeGenInlineList( GenInlineList *outList, InlineList *inList )
 {
 	for ( InlineList::Iter item = *inList; item.lte(); item++ ) {
 		switch ( item->type ) {
@@ -692,13 +685,13 @@ void ReducedGen::makeGenInlineList( GenInlineList *outList, InlineList *inList )
 	}
 }
 
-void ReducedGen::makeExports()
+void CodeGenData::makeExports()
 {
 	for ( ExportList::Iter exp = pd->exportList; exp.lte(); exp++ )
 		cgd->exportList.append( new Export( exp->name, exp->key ) );
 }
 
-void ReducedGen::makeAction( Action *action )
+void CodeGenData::makeAction( Action *action )
 {
 	GenInlineList *genList = new GenInlineList;
 	makeGenInlineList( genList, action->inlineList );
@@ -707,7 +700,7 @@ void ReducedGen::makeAction( Action *action )
 }
 
 
-void ReducedGen::makeActionList()
+void CodeGenData::makeActionList()
 {
 	/* Determine which actions to write. */
 	int nextActionId = 0;
@@ -726,7 +719,7 @@ void ReducedGen::makeActionList()
 	}
 }
 
-void ReducedGen::makeActionTableList()
+void CodeGenData::makeActionTableList()
 {
 	/* Must first order the action tables based on their id. */
 	int numTables = nextActionTableId;
@@ -760,7 +753,7 @@ void ReducedGen::makeActionTableList()
 	delete[] tables;
 }
 
-void ReducedGen::makeConditions()
+void CodeGenData::makeConditions()
 {
 	if ( condData->condSpaceMap.length() > 0 ) {
 		long nextCondSpaceId = 0;
@@ -781,7 +774,7 @@ void ReducedGen::makeConditions()
 	}
 }
 
-bool ReducedGen::makeNameInst( std::string &res, NameInst *nameInst )
+bool CodeGenData::makeNameInst( std::string &res, NameInst *nameInst )
 {
 	bool written = false;
 	if ( nameInst->parent != 0 )
@@ -797,7 +790,7 @@ bool ReducedGen::makeNameInst( std::string &res, NameInst *nameInst )
 	return written;
 }
 
-void ReducedGen::makeEntryPoints()
+void CodeGenData::makeEntryPoints()
 {
 	/* List of entry points other than start state. */
 	if ( fsm->entryPoints.length() > 0 || pd->lmRequiresErrorState ) {
@@ -815,7 +808,7 @@ void ReducedGen::makeEntryPoints()
 	}
 }
 
-void ReducedGen::makeStateActions( StateAp *state )
+void CodeGenData::makeStateActions( StateAp *state )
 {
 	RedActionTable *toStateActions = 0;
 	if ( state->toStateActionTable.length() > 0 )
@@ -848,7 +841,7 @@ void ReducedGen::makeStateActions( StateAp *state )
 	}
 }
 
-void ReducedGen::makeEofTrans( StateAp *state )
+void CodeGenData::makeEofTrans( StateAp *state )
 {
 	RedActionTable *eofActions = 0;
 	if ( state->eofActionTable.length() > 0 )
@@ -866,7 +859,7 @@ void ReducedGen::makeEofTrans( StateAp *state )
 	}
 }
 
-void ReducedGen::makeStateConditions( StateAp *state )
+void CodeGenData::makeStateConditions( StateAp *state )
 {
 	if ( state->stateCondList.length() > 0 ) {
 		long length = state->stateCondList.length();
@@ -880,7 +873,7 @@ void ReducedGen::makeStateConditions( StateAp *state )
 	}
 }
 
-void ReducedGen::makeTrans( Key lowKey, Key highKey, TransAp *trans )
+void CodeGenData::makeTrans( Key lowKey, Key highKey, TransAp *trans )
 {
 	RedCondList redCondList;
 		
@@ -908,7 +901,7 @@ void ReducedGen::makeTrans( Key lowKey, Key highKey, TransAp *trans )
 	cgd->newTrans( curState, curTrans++, lowKey, highKey, gcs, targ, action, redCondList );
 }
 
-void ReducedGen::makeTransList( StateAp *state )
+void CodeGenData::makeTransList( StateAp *state )
 {
 	TransListVect outList;
 
@@ -931,7 +924,7 @@ void ReducedGen::makeTransList( StateAp *state )
 }
 
 
-void ReducedGen::makeStateList()
+void CodeGenData::makeStateList()
 {
 	/* Write the list of states. */
 	long length = fsm->stateList.length();
@@ -954,7 +947,7 @@ void ReducedGen::makeStateList()
 }
 
 
-void ReducedGen::makeMachine()
+void CodeGenData::makeMachine()
 {
 	cgd->createMachine();
 
@@ -978,7 +971,7 @@ void ReducedGen::makeMachine()
 	cgd->closeMachine();
 }
 
-void ReducedGen::finishGen()
+void CodeGenData::finishGen()
 {
 	/* Do this before distributing transitions out to singles and defaults
 	 * makes life easier. */
@@ -994,7 +987,7 @@ void ReducedGen::finishGen()
 }
 
 
-CodeGenData *ReducedGen::make()
+void CodeGenData::make()
 {
 	/* Alphabet type. */
 	cgd->setAlphType( keyOps->alphType->internalName );
@@ -1081,8 +1074,4 @@ CodeGenData *ReducedGen::make()
 	makeMachine();
 
 	finishGen();
-
-	return cgd;
 }
-
-

@@ -129,11 +129,35 @@ string itoa( int i );
 CodeGenData *makeCodeGen( InputData &inputData, char *fsmName, ParseData *pd, FsmAp *fsm );
 struct CodeGenArgs;
 
-class ReducedGen : protected GenBase
+
+/*********************************/
+
+struct CodeGenArgs
+{
+	CodeGenArgs( InputData &inputData, const char *sourceFileName, 
+			char *fsmName, ParseData *pd, FsmAp *fsm, std::ostream &out )
+	:
+		inputData(inputData),
+		sourceFileName(sourceFileName),
+		fsmName(fsmName),
+		pd(pd),
+		fsm(fsm),
+		out(out)
+	{}
+
+	InputData &inputData;
+	const char *sourceFileName;
+	char *fsmName;
+	ParseData *pd;
+	FsmAp *fsm;
+	std::ostream &out;
+};
+
+struct CodeGenData : protected GenBase
 {
 public:
-	ReducedGen( const CodeGenArgs &args );
-	CodeGenData *make();
+	CodeGenData( const CodeGenArgs &args );
+	void make();
 
 private:
 	void makeGenInlineList( GenInlineList *outList, InlineList *inList );
@@ -179,34 +203,10 @@ private:
 
 protected:
 	CodeGenData *cgd;
-};
 
+public:
+/*=====================*/
 
-/*********************************/
-
-struct CodeGenArgs
-{
-	CodeGenArgs( InputData &inputData, const char *sourceFileName, 
-			char *fsmName, ParseData *pd, FsmAp *fsm, std::ostream &out )
-	:
-		inputData(inputData),
-		sourceFileName(sourceFileName),
-		fsmName(fsmName),
-		pd(pd),
-		fsm(fsm),
-		out(out)
-	{}
-
-	InputData &inputData;
-	const char *sourceFileName;
-	char *fsmName;
-	ParseData *pd;
-	FsmAp *fsm;
-	std::ostream &out;
-};
-
-struct CodeGenData : public ReducedGen
-{
 	/*
 	 * The interface to the code generator.
 	 */
@@ -226,8 +226,6 @@ struct CodeGenData : public ReducedGen
 	virtual void writeStatement( InputLoc &loc, int nargs, char **args );
 
 	/********************/
-
-	CodeGenData( const CodeGenArgs &args );
 
 	virtual ~CodeGenData() {}
 
