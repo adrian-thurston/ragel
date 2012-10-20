@@ -201,11 +201,7 @@ private:
 	int curCondSpace;
 	int curStateCond;
 
-protected:
-	CodeGenData *cgd;
-
 public:
-/*=====================*/
 
 	/*
 	 * The interface to the code generator.
@@ -302,7 +298,6 @@ public:
 	void setForcedErrorState()
 		{ redFsm->forcedErrorState = true; }
 
-	
 	void initCondSpaceList( ulong length );
 	void condSpaceItem( int cnum, long condActionId );
 	void newCondSpace( int cnum, int condSpaceId, Key baseKey );

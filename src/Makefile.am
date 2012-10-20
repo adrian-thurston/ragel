@@ -10,7 +10,7 @@ ragel_SOURCES = \
 	fsmgraph.h pcheck.h gendata.h ragel.h \
 	main.cc parsetree.cc parsedata.cc fsmstate.cc fsmbase.cc \
 	fsmattach.cc fsmmin.cc fsmgraph.cc fsmap.cc fsmcond.cc rlscan.cc rlparse.cc \
-	inputdata.cc common.cc redfsm.cc gendata.cc reducedgen.cc
+	inputdata.cc common.cc redfsm.cc gendata.cc allocgen.cc
 
 ragel_CXXFLAGS = -Wall
 
