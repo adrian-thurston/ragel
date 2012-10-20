@@ -133,9 +133,11 @@ void GenBase::reduceActionTables()
 
 		/* Loop the transitions and reduce their actions. */
 		for ( TransList::Iter trans = st->outList; trans.lte(); trans++ ) {
-			if ( trans->ctList.head->actionTable.length() > 0 ) {
-				if ( actionTableMap.insert( trans->ctList.head->actionTable, &actionTable ) )
-					actionTable->id = nextActionTableId++;
+			for ( CondTransList::Iter cond = trans->ctList; cond.lte(); cond++ ) {
+				if ( cond->actionTable.length() > 0 ) {
+					if ( actionTableMap.insert( cond->actionTable, &actionTable ) )
+						actionTable->id = nextActionTableId++;
+				}
 			}
 		}
 	}
