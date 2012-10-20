@@ -90,6 +90,10 @@ void RedFsmAp::depthFirstOrdering( RedStateAp *state )
 	for ( RedTransList::Iter rtel = state->outRange; rtel.lte(); rtel++ ) {
 		if ( rtel->value->targ != 0 )
 			depthFirstOrdering( rtel->value->targ );
+		for ( RedCondList::Iter c = rtel->value->outConds; c.lte(); c++ ) {
+			if ( c->value->targ != 0 )
+				depthFirstOrdering( c->value->targ );
+		}
 	}
 }
 
