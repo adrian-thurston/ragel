@@ -120,10 +120,11 @@ void GotoCodeGen::emitSingleSwitch( RedStateAp *state )
 	if ( numSingles == 1 ) {
 		/* If there is a single single key then write it out as an if. */
 		out << "\tif ( " << GET_WIDE_KEY(state) << " == " << 
-				WIDE_KEY(state, data[0].lowKey) << " )\n\t\t"; 
+				WIDE_KEY(state, data[0].lowKey) << " ) {\n\t\t"; 
 
 		/* Virtual function for writing the target of the transition. */
 		TRANS_GOTO(data[0].value, 0) << "\n";
+		out << "\t}\n";
 	}
 	else if ( numSingles > 1 ) {
 		/* Write out single keys in a switch if there is more than one. */
@@ -131,8 +132,9 @@ void GotoCodeGen::emitSingleSwitch( RedStateAp *state )
 
 		/* Write out the single indicies. */
 		for ( int j = 0; j < numSingles; j++ ) {
-			out << "\t\tcase " << WIDE_KEY(state, data[j].lowKey) << ": ";
+			out << "\t\tcase " << WIDE_KEY(state, data[j].lowKey) << ": {\n";
 			TRANS_GOTO(data[j].value, 0) << "\n";
+			out << "\t}\n";
 		}
 		
 		/* Emits a default case for D code. */
@@ -165,8 +167,9 @@ void GotoCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int h
 		out << TABS(level) << "} else if ( " << GET_WIDE_KEY(state) << " > " << 
 				WIDE_KEY(state, data[mid].highKey) << " ) {\n";
 		emitRangeBSearch( state, level+1, mid+1, high );
-		out << TABS(level) << "} else\n";
+		out << TABS(level) << "} else {\n";
 		TRANS_GOTO(data[mid].value, level+1) << "\n";
+		out << TABS(level) << "}\n";
 	}
 	else if ( anyLower && !anyHigher ) {
 		/* Can go lower than mid but not higher. */
@@ -177,13 +180,15 @@ void GotoCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int h
 		/* if the higher is the highest in the alphabet then there is no
 		 * sense testing it. */
 		if ( limitHigh ) {
-			out << TABS(level) << "} else\n";
+			out << TABS(level) << "} else {\n";
 			TRANS_GOTO(data[mid].value, level+1) << "\n";
+			out << TABS(level) << "}\n";
 		}
 		else {
 			out << TABS(level) << "} else if ( " << GET_WIDE_KEY(state) << " <= " << 
-					WIDE_KEY(state, data[mid].highKey) << " )\n";
+					WIDE_KEY(state, data[mid].highKey) << " ) {\n";
 			TRANS_GOTO(data[mid].value, level+1) << "\n";
+			out << TABS(level) << "}\n";
 		}
 	}
 	else if ( !anyLower && anyHigher ) {
@@ -195,13 +200,15 @@ void GotoCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int h
 		/* If the lower end is the lowest in the alphabet then there is no
 		 * sense testing it. */
 		if ( limitLow ) {
-			out << TABS(level) << "} else\n";
+			out << TABS(level) << "} else {\n";
 			TRANS_GOTO(data[mid].value, level+1) << "\n";
+			out << TABS(level) << "}\n";
 		}
 		else {
 			out << TABS(level) << "} else if ( " << GET_WIDE_KEY(state) << " >= " << 
-					WIDE_KEY(state, data[mid].lowKey) << " )\n";
+					WIDE_KEY(state, data[mid].lowKey) << " ) {\n";
 			TRANS_GOTO(data[mid].value, level+1) << "\n";
+			out << TABS(level) << "}\n";
 		}
 	}
 	else {
@@ -210,18 +217,21 @@ void GotoCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int h
 		if ( !limitLow && !limitHigh ) {
 			out << TABS(level) << "if ( " << WIDE_KEY(state, data[mid].lowKey) << " <= " << 
 					GET_WIDE_KEY(state) << " && " << GET_WIDE_KEY(state) << " <= " << 
-					WIDE_KEY(state, data[mid].highKey) << " )\n";
+					WIDE_KEY(state, data[mid].highKey) << " ) {\n";
 			TRANS_GOTO(data[mid].value, level+1) << "\n";
+			out << TABS(level) << "}\n";
 		}
 		else if ( limitLow && !limitHigh ) {
 			out << TABS(level) << "if ( " << GET_WIDE_KEY(state) << " <= " << 
-					WIDE_KEY(state, data[mid].highKey) << " )\n";
+					WIDE_KEY(state, data[mid].highKey) << " ) {\n";
 			TRANS_GOTO(data[mid].value, level+1) << "\n";
+			out << TABS(level) << "}\n";
 		}
 		else if ( !limitLow && limitHigh ) {
 			out << TABS(level) << "if ( " << WIDE_KEY(state, data[mid].lowKey) << " <= " << 
-					GET_WIDE_KEY(state) << " )\n";
+					GET_WIDE_KEY(state) << " ) {\n";
 			TRANS_GOTO(data[mid].value, level+1) << "\n";
+			out << TABS(level) << "}\n";
 		}
 		else {
 			/* Both high and low are at the limit. No tests to do. */
