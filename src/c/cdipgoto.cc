@@ -525,6 +525,23 @@ void IpGotoCodeGen::setLabelsNeeded()
 				}
 			}
 		}
+
+		for ( CondApSet::Iter cond = redFsm->condSet; cond.lte(); cond++ ) {
+			/* If there is no action with a next statement, then the label will be
+			 * needed. */
+			if ( cond->action == 0 || !cond->action->anyNextStmt() )
+				cond->targ->labelNeeded = true;
+
+			/* Need labels for states that have goto or calls in action code
+			 * invoked on characters (ie, not from out action code). */
+			if ( cond->action != 0 ) {
+				/* Loop the actions. */
+				for ( GenActionTable::Iter act = cond->action->key; act.lte(); act++ ) {
+					/* Get the action and walk it's tree. */
+					setLabelsNeeded( act->value->inlineList );
+				}
+			}
+		}
 	}
 
 	if ( !noEnd ) {
