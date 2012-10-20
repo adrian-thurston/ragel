@@ -981,7 +981,6 @@ void CodeGenData::newCondTrans( RedCondList &outConds,
 
 	/* Filler taken care of. Append the range. */
 	outConds.append( RedCondEl( key, cond ) );
-	cerr << "oc len: " << outConds.length() << endl;
 }
 
 void CodeGenData::finishTransList( int snum )
