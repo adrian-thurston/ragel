@@ -1433,7 +1433,7 @@ void ParseData::prepareMachineGenTBWrapped( GraphDictEl *graphDictEl )
 	sectionGraph->setStateNumbers( 0 );
 }
 
-CodeGenData *makeCodeGen2( const CodeGenArgs &args );
+CodeGenData *makeCodeGen( const CodeGenArgs &args );
 
 void ParseData::generateReduced( InputData &inputData )
 {
@@ -1442,7 +1442,7 @@ void ParseData::generateReduced( InputData &inputData )
 	CodeGenArgs args( inputData, inputData.inputFileName, sectionName, this, sectionGraph, *inputData.outStream );
 
 	/* Write out with it. */
-	cgd = makeCodeGen2( args );
+	cgd = makeCodeGen( args );
 
 	cgd->make();
 
