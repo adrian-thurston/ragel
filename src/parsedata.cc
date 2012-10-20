@@ -1293,8 +1293,10 @@ void ParseData::analyzeGraph( FsmAp *graph )
 					(*sci)->numCondRefs += 1;
 			}
 
-			for ( ActionTable::Iter at = trans->ctList.head->actionTable; at.lte(); at++ )
-				at->value->numTransRefs += 1;
+			for ( CondTransList::Iter cond = trans->ctList; cond.lte(); cond++ ) { 
+				for ( ActionTable::Iter at = cond->actionTable; at.lte(); at++ )
+					at->value->numTransRefs += 1;
+			}
 		}
 
 		for ( ActionTable::Iter at = st->toStateActionTable; at.lte(); at++ )
