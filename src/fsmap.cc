@@ -626,8 +626,10 @@ void FsmAp::clearAllPriorities()
 		state->outPriorTable.empty();
 
 		/* Clear transition data from the out transitions. */
-		for ( TransList::Iter trans = state->outList; trans.lte(); trans++ )
-			trans->ctList.head->priorTable.empty();
+		for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
+			for ( CondTransList::Iter cond = trans->ctList; cond.lte(); cond++ )
+				cond->priorTable.empty();
+		}
 	}
 }
 
@@ -641,15 +643,17 @@ void FsmAp::nullActionKeys( )
 	for ( StateList::Iter state = stateList; state.lte(); state++ ) {
 		/* Walk the transitions for the state. */
 		for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
-			/* Walk the action table for the transition. */
-			for ( ActionTable::Iter action = trans->ctList.head->actionTable;
-					action.lte(); action++ )
-				action->key = 0;
+			for ( CondTransList::Iter cond = trans->ctList; cond.lte(); cond++ ) {
+				/* Walk the action table for the transition. */
+				for ( ActionTable::Iter action = cond->actionTable;
+						action.lte(); action++ )
+					action->key = 0;
 
-			/* Walk the action table for the transition. */
-			for ( LmActionTable::Iter action = trans->ctList.head->lmActionTable;
-					action.lte(); action++ )
-				action->key = 0;
+				/* Walk the action table for the transition. */
+				for ( LmActionTable::Iter action = cond->lmActionTable;
+						action.lte(); action++ )
+					action->key = 0;
+			}
 		}
 
 		/* Null the action keys of the to state action table. */

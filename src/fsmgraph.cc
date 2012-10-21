@@ -1087,6 +1087,7 @@ void FsmAp::doRemove( MergeData &md, StateAp *destState, ExpansionList &expList1
 			case RangePairIter<TransAp, Removal>::RangeInS2:
 				break;
 			case RangePairIter<TransAp, Removal>::RangeOverlap: {
+				std::cerr << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
 				TransAp *trans = pairIter.s1Tel.trans;
 				detachTrans( trans->ctList.head->fromState, trans->ctList.head->toState, trans );
 				delete trans;

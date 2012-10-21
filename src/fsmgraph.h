@@ -1464,7 +1464,7 @@ struct FsmAp
 	CondAp *fsmAttachStates( MergeData &md, StateAp *from,
 			CondAp *destTrans, CondAp *srcTrans );
 
-	void expandConds( StateAp *fromState, TransAp *trans, const CondSet &origSet, const CondSet &mergedCS, bool attach );
+	void expandConds( StateAp *fromState, TransAp *trans, const CondSet &origSet, const CondSet &mergedCS );
 	void expandCondTransitions( StateAp *fromState, TransAp *destTrans, TransAp *srcTrans );
 	TransAp *copyTransForExpanision( StateAp *fromState, TransAp *srcTrans );
 	void freeEffectiveTrans( TransAp *srcTrans );

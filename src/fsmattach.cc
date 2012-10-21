@@ -580,6 +580,7 @@ void FsmAp::freeEffectiveTrans( TransAp *trans )
 {
 	for ( CondTransList::Iter sc = trans->ctList; sc.lte(); ) {
 		CondTransList::Iter next = sc.next();
+		detachCondTrans( sc->fromState, sc->toState, sc );
 		delete sc;
 		sc = next;
 	}
