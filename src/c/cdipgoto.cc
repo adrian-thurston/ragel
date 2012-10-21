@@ -365,6 +365,10 @@ std::ostream &IpGotoCodeGen::TRANS_GOTO( RedTransAp *trans, int level )
 			out << " ) ck += " << condValOffset << ";\n";
 		}
 		COND_B_SEARCH( trans, 1, 0, trans->outConds.length()-1 );
+
+		if ( trans->errCond != 0 ) {
+			COND_GOTO( trans->errCond, level+1 ) << "\n";
+		}
 	}
 
 	return out;

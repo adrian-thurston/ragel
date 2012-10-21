@@ -273,7 +273,8 @@ struct RedTransAp
 		id(id),
 		pos(-1),
 		labelNeeded(true),
-		condSpace(0)
+		condSpace(0),
+		errCond(0)
 	{ }
 
 	RedStateAp *targ;
@@ -285,6 +286,7 @@ struct RedTransAp
 
 	GenCondSpace *condSpace;
 	RedCondList outConds;
+	RedCondAp *errCond;
 };
 
 /* Compare of transitions for the final reduction of transitions. Comparison
@@ -492,6 +494,7 @@ struct RedFsmAp
 	RedStateAp *startState;
 	RedStateAp *errState;
 	RedTransAp *errTrans;
+	RedCondAp *errCond;
 	RedTransAp *errActionTrans;
 	RedStateAp *firstFinState;
 	int numFinStates;
@@ -597,6 +600,7 @@ struct RedFsmAp
 
 	void assignActionLocs();
 
+	RedCondAp *getErrorCond();
 	RedTransAp *getErrorTrans();
 	RedStateAp *getErrorState();
 
@@ -610,6 +614,5 @@ struct RedFsmAp
 
 	void setInTrans();
 };
-
 
 #endif

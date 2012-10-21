@@ -47,6 +47,7 @@ RedFsmAp::RedFsmAp()
 	startState(0),
 	errState(0),
 	errTrans(0),
+	errCond(0),
 	firstFinState(0),
 	numFinStates(0),
 	bAnyToStateActions(false),
@@ -511,7 +512,18 @@ void RedFsmAp::chooseDefaultNumRanges()
 	}
 }
 
-RedTransAp *RedFsmAp::getErrorTrans( )
+RedCondAp *RedFsmAp::getErrorCond()
+{
+	if ( errCond == 0 ) {
+		/* Create the cond transition. This should also always succeed. */
+		errCond = new RedCondAp( getErrorState(), 0, nextCondId++ );
+		RedCondAp *inCondSet = condSet.insert( errCond );
+		assert( inCondSet != 0 );
+	}
+	return errCond;
+}
+
+RedTransAp *RedFsmAp::getErrorTrans()
 {
 	/* If the error trans has not been made aready, make it. */
 	if ( errTrans == 0 ) {
@@ -521,12 +533,9 @@ RedTransAp *RedFsmAp::getErrorTrans( )
 		RedTransAp *inTransSet = transSet.insert( errTrans );
 		assert( inTransSet != 0 );
 
-		/* Create the cond transition. This should also always succeed. */
-		RedCondAp *errCond = new RedCondAp( getErrorState(), 0, nextCondId++ );
-		RedCondAp *inCondSet = condSet.insert( errCond );
-		errTrans->outConds.append( RedCondEl( 0, inCondSet ) );
-
-		assert( inCondSet != 0 );
+		/* Give it a cond transition. */
+		RedCondAp *errCond = getErrorCond();
+		errTrans->outConds.append( RedCondEl( 0, errCond ) );
 	}
 	return errTrans;
 }

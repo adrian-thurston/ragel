@@ -632,7 +632,7 @@ void CodeGenData::makeTrans( Key lowKey, Key highKey, TransAp *trans )
 
 	GenCondSpace *gcs = trans->condSpace != 0 ?
 			allCondSpaces + trans->condSpace->condSpaceId : 0;
-
+	
 	newTrans( curState, curTrans++, lowKey, highKey, gcs, targ, action, redCondList );
 }
 
@@ -896,6 +896,12 @@ void CodeGenData::newTrans( int snum, int tnum, Key lowKey,
 	RedTransAp *trans = redFsm->allocateTrans( targState, actionTable, gcs );
 	trans->outConds.transfer( outConds );
 	RedTransEl transEl( lowKey, highKey, trans );
+
+	/* If the cond list is not full then. */
+	if ( gcs != 0 && outConds.length() < ( 1 << gcs->condSet.length() ) ) {
+		cerr << "adding error condition\n" << endl;
+		trans->errCond = redFsm->getErrorCond();
+	}
 
 	/* Reduced machines are complete. We need to fill any gaps with the error
 	 * transitions. */
