@@ -43,11 +43,6 @@ void logCondSpace( CondSpace *condSpace );
 
 void FsmAp::expandConds( StateAp *fromState, TransAp *trans, const CondSet &fromCS, const CondSet &mergedCS )
 {
-	cerr << "condition list before expansion:" << endl;
-	for ( CondTransList::Iter cti = trans->ctList; cti.lte(); cti++ ) {
-		cerr << cti->key.getVal() << endl;
-	}
-
 	/* Need to transform condition element to the merged set. */
 	for ( CondTransList::Iter cti = trans->ctList; cti.lte(); cti++ ) {
 		long origVal = cti->key.getVal();
@@ -65,10 +60,8 @@ void FsmAp::expandConds( StateAp *fromState, TransAp *trans, const CondSet &from
 			}
 		}
 
-		if ( origVal != newVal ) {
-			cerr << "orig: " << origVal << " new: " << newVal << endl;
+		if ( origVal != newVal )
 			cti->key = newVal;
-		}
 	}
 
 	/* Need to double up the whole transition list for each condition test in
@@ -78,7 +71,6 @@ void FsmAp::expandConds( StateAp *fromState, TransAp *trans, const CondSet &from
 		Action **cim = fromCS.find( *csi );
 		if ( cim == 0 ) {
 			CondTransList newItems;
-			cerr << "expanding condition" << endl;
 			for ( CondTransList::Iter cti = trans->ctList; cti.lte(); cti++ ) {
 				/* Sub-transition for conditions. */
 				CondAp *cond = new CondAp( trans );
@@ -113,58 +105,7 @@ void FsmAp::expandConds( StateAp *fromState, TransAp *trans, const CondSet &from
 			trans->ctList.append( newItems );
 		}
 	}
-
-	cerr << "condition list after expansion:" << endl;
-	for ( CondTransList::Iter cti = trans->ctList; cti.lte(); cti++ ) {
-		cerr << cti->key.getVal() << endl;
-	}
 }
-
-#if 0
-	cout << "newCS.length() = " << newCS.length() << endl;
-
-	if ( newCS.length() > 0 ) {
-		#ifdef LOG_CONDS
-		cerr << "there are " << newCS.length() << " item(s) that are "
-					"only in the mergedCS" << endl;
-		#endif
-
-		long fromLen = fromCS.length();
-	
-		/* Loop all values in the dest space. */
-		for ( long fromBits = 0; fromBits < (1 << fromLen); fromBits++ ) {
-			long basicVals = 0;
-			for ( CondSet::Iter csi = fromCS; csi.lte(); csi++ ) {
-				if ( fromBits & (1 << csi.pos()) ) {
-					Action **cim = mergedCS.find( *csi );
-					long bitPos = (cim - mergedCS.data);
-					basicVals |= 1 << bitPos;
-				}
-			}
-
-			cerr << "basicVals: " << basicVals << endl;
-	
-			/* Loop all new values. */
-			LongVect expandToVals;
-			for ( long newVals = 0; newVals < (1 << newLen); newVals++ ) {
-				long targVals = basicVals;
-				for ( CondSet::Iter csi = newCS; csi.lte(); csi++ ) {
-					if ( newVals & (1 << csi.pos()) ) {
-						Action **cim = mergedCS.find( *csi );
-						long bitPos = (cim - mergedCS.data);
-						targVals |= 1 << bitPos;
-					}
-				}
-				cerr << "targVals: " << targVals << endl;
-				expandToVals.append( targVals );
-			}
-	
-//			findCondExpInTrans( expansionList, destState, 
-//					condCond.s1Tel.lowKey, condCond.s1Tel.highKey, 
-//					fromCondSpace, toCondSpace, destVals, expandToVals );
-		}
-	}
-#endif
 
 void FsmAp::expandCondTransitions( StateAp *fromState, TransAp *destTrans, TransAp *srcTrans )
 {

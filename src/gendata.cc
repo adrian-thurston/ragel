@@ -898,10 +898,8 @@ void CodeGenData::newTrans( int snum, int tnum, Key lowKey,
 	RedTransEl transEl( lowKey, highKey, trans );
 
 	/* If the cond list is not full then. */
-	if ( gcs != 0 && outConds.length() < ( 1 << gcs->condSet.length() ) ) {
-		cerr << "adding error condition\n" << endl;
+	if ( gcs != 0 && outConds.length() < ( 1 << gcs->condSet.length() ) )
 		trans->errCond = redFsm->getErrorCond();
-	}
 
 	/* Reduced machines are complete. We need to fill any gaps with the error
 	 * transitions. */

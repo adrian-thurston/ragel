@@ -40,8 +40,6 @@
 #include "avlmap.h"
 #include "ragel.h"
 
-#define LOG_CONDS 1
-
 /* Flags that control merging. */
 #define STB_GRAPH1     0x01
 #define STB_GRAPH2     0x02
