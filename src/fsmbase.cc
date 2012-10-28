@@ -562,26 +562,9 @@ void FsmAp::setStateNumbers( int base )
 
 bool FsmAp::checkErrTrans( StateAp *state, CondAp *trans )
 {
-	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
-
 	/* Might go directly to error state. */
 	if ( trans->toState == 0 )
 		return true;
-
-//	FIXME: look for gaps.
-//	if ( trans->prev == 0 ) {
-//		/* If this is the first transition. */
-//		if ( keyOps->minKey < trans->lowKey )
-//			return true;
-//	}
-//	else {
-//		/* Not the first transition. Compare against the prev. */
-//		TransAp *prev = trans->prev;
-//		Key nextKey = prev->highKey;
-//		nextKey.increment();
-//		if ( nextKey < trans->lowKey )
-//			return true; 
-//	}
 
 	return false;
 }
@@ -624,6 +607,13 @@ bool FsmAp::checkErrTrans( StateAp *state, TransAp *trans )
 			bool res = checkErrTrans( state, cti );
 			if ( res )
 				return true;
+		}
+
+		/* Check for gaps in the condition list. */
+		if ( trans->condSpace == 0 || trans->ctList.length() 
+				< (1 << trans->condSpace->condSet.length()) )
+		{
+			return true;
 		}
 	}
 
