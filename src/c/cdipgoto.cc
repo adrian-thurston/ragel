@@ -435,7 +435,9 @@ std::ostream &IpGotoCodeGen::STATE_GOTOS()
 				emitRangeBSearch( st, 1, 0, st->outRange.length() - 1 );
 
 			/* Write the default transition. */
+			out << "{\n";
 			TRANS_GOTO( st->defTrans, 1 ) << "\n";
+			out << "}\n";
 		}
 	}
 	return out;

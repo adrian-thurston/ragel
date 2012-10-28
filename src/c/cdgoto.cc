@@ -235,7 +235,9 @@ void GotoCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int h
 		}
 		else {
 			/* Both high and low are at the limit. No tests to do. */
+			out << "{\n";
 			TRANS_GOTO(data[mid].value, level+1) << "\n";
+			out << "}\n";
 		}
 	}
 }
@@ -382,7 +384,10 @@ std::ostream &GotoCodeGen::STATE_GOTOS()
 				emitRangeBSearch( st, 1, 0, st->outRange.length() - 1 );
 
 			/* Write the default transition. */
+
+			out << "{\n";
 			TRANS_GOTO( st->defTrans, 1 ) << "\n";
+			out << "}\n";
 		}
 	}
 	return out;
