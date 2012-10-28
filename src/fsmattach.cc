@@ -560,8 +560,7 @@ TransAp *FsmAp::copyTransForExpanision( StateAp *fromState, TransAp *srcTrans )
 		CondAp *newCond = new CondAp( newTrans );
 		newCond->key = sc->key;
 
-		newCond->fromState = sc->fromState;
-		newCond->toState = sc->toState;
+		attachTrans( sc->fromState, sc->toState, newCond );
 			
 		/* Call the user callback to add in the original source transition. */
 		addInTrans( newCond, sc );
