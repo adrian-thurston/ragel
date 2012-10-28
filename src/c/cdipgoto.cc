@@ -344,8 +344,9 @@ void IpGotoCodeGen::COND_B_SEARCH( RedTransAp *trans, int level, int low, int hi
 /* Emit the goto to take for a given transition. */
 std::ostream &IpGotoCodeGen::TRANS_GOTO( RedTransAp *trans, int level )
 {
-	if ( trans->outConds.length() == 1 ) {
+	if ( trans->condSpace == 0 || trans->condSpace->condSet.length() == 0 ) {
 		/* Existing. */
+		assert( trans->outConds.length() == 1 );
 		RedCondAp *cond = trans->outConds.data[0].value;
 		if ( cond->action != 0 ) {
 			/* Go to the transition which will go to the state. */
