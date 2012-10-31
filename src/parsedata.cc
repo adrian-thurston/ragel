@@ -958,8 +958,10 @@ void ParseData::removeActionDups( FsmAp *graph )
 	/* Loop all states. */
 	for ( StateList::Iter state = graph->stateList; state.lte(); state++ ) {
 		/* Loop all transitions. */
-		for ( TransList::Iter trans = state->outList; trans.lte(); trans++ )
-			removeDups( trans->ctList.head->actionTable );
+		for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
+			for ( CondTransList::Iter cond = trans->ctList; cond.lte(); cond++ )
+				removeDups( cond->actionTable );
+		}
 		removeDups( state->toStateActionTable );
 		removeDups( state->fromStateActionTable );
 		removeDups( state->eofActionTable );
