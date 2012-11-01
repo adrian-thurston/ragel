@@ -1,5 +1,5 @@
 /*
- *  Copyright 2004-2006 Adrian Thurston <thurston@complang.org>
+ *  Copyright 2001-2006 Adrian Thurston <thurston@complang.org>
  *            2004 Erich Ocean <eric.ocean@ampede.com>
  *            2005 Alan West <alan@alanz.com>
  */
@@ -22,13 +22,41 @@
  */
 
 #include "ragel.h"
-#include "cdfflat.h"
+#include "ftable.h"
 #include "redfsm.h"
 #include "gendata.h"
 
 namespace C {
 
-std::ostream &FFlatCodeGen::TO_STATE_ACTION( RedStateAp *state )
+/* Determine if we should use indicies or not. */
+void FTabCodeGen::calcIndexSize()
+{
+	int sizeWithInds = 0, sizeWithoutInds = 0;
+
+	/* Calculate cost of using with indicies. */
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		int totalIndex = st->outSingle.length() + st->outRange.length() + 
+				(st->defTrans == 0 ? 0 : 1);
+		sizeWithInds += arrayTypeSize(redFsm->maxIndex) * totalIndex;
+	}
+	sizeWithInds += arrayTypeSize(redFsm->maxState) * redFsm->transSet.length();
+	if ( redFsm->anyActions() )
+		sizeWithInds += arrayTypeSize(redFsm->maxActListId) * redFsm->transSet.length();
+
+	/* Calculate the cost of not using indicies. */
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		int totalIndex = st->outSingle.length() + st->outRange.length() + 
+				(st->defTrans == 0 ? 0 : 1);
+		sizeWithoutInds += arrayTypeSize(redFsm->maxState) * totalIndex;
+		if ( redFsm->anyActions() )
+			sizeWithoutInds += arrayTypeSize(redFsm->maxActListId) * totalIndex;
+	}
+
+	/* If using indicies reduces the size, use them. */
+	useIndicies = sizeWithInds < sizeWithoutInds;
+}
+
+std::ostream &FTabCodeGen::TO_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->toStateAction != 0 )
@@ -37,7 +65,7 @@ std::ostream &FFlatCodeGen::TO_STATE_ACTION( RedStateAp *state )
 	return out;
 }
 
-std::ostream &FFlatCodeGen::FROM_STATE_ACTION( RedStateAp *state )
+std::ostream &FTabCodeGen::FROM_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->fromStateAction != 0 )
@@ -46,7 +74,7 @@ std::ostream &FFlatCodeGen::FROM_STATE_ACTION( RedStateAp *state )
 	return out;
 }
 
-std::ostream &FFlatCodeGen::EOF_ACTION( RedStateAp *state )
+std::ostream &FTabCodeGen::EOF_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->eofAction != 0 )
@@ -55,8 +83,9 @@ std::ostream &FFlatCodeGen::EOF_ACTION( RedStateAp *state )
 	return out;
 }
 
+
 /* Write out the function for a transition. */
-std::ostream &FFlatCodeGen::TRANS_ACTION( RedTransAp *trans )
+std::ostream &FTabCodeGen::TRANS_ACTION( RedTransAp *trans )
 {
 	int action = 0;
 	if ( trans->action != 0 )
@@ -67,7 +96,7 @@ std::ostream &FFlatCodeGen::TRANS_ACTION( RedTransAp *trans )
 
 /* Write out the function switch. This switch is keyed on the values
  * of the func index. */
-std::ostream &FFlatCodeGen::TO_STATE_ACTION_SWITCH()
+std::ostream &FTabCodeGen::TO_STATE_ACTION_SWITCH()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -89,7 +118,7 @@ std::ostream &FFlatCodeGen::TO_STATE_ACTION_SWITCH()
 
 /* Write out the function switch. This switch is keyed on the values
  * of the func index. */
-std::ostream &FFlatCodeGen::FROM_STATE_ACTION_SWITCH()
+std::ostream &FTabCodeGen::FROM_STATE_ACTION_SWITCH()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -109,7 +138,7 @@ std::ostream &FFlatCodeGen::FROM_STATE_ACTION_SWITCH()
 	return out;
 }
 
-std::ostream &FFlatCodeGen::EOF_ACTION_SWITCH()
+std::ostream &FTabCodeGen::EOF_ACTION_SWITCH()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -131,7 +160,7 @@ std::ostream &FFlatCodeGen::EOF_ACTION_SWITCH()
 
 /* Write out the function switch. This switch is keyed on the values
  * of the func index. */
-std::ostream &FFlatCodeGen::ACTION_SWITCH()
+std::ostream &FTabCodeGen::ACTION_SWITCH()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -151,64 +180,89 @@ std::ostream &FFlatCodeGen::ACTION_SWITCH()
 	return out;
 }
 
-void FFlatCodeGen::writeData()
+void FTabCodeGen::writeData()
 {
 	if ( redFsm->anyConditions() ) {
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxCondOffset), CO() );
+		COND_OFFSETS();
+		CLOSE_ARRAY() <<
+		"\n";
+
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxCondLen), CL() );
+		COND_LENS();
+		CLOSE_ARRAY() <<
+		"\n";
+
 		OPEN_ARRAY( WIDE_ALPH_TYPE(), CK() );
 		COND_KEYS();
 		CLOSE_ARRAY() <<
 		"\n";
 
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxCondSpan), CSP() );
-		COND_KEY_SPANS();
-		CLOSE_ARRAY() <<
-		"\n";
-
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxCond), C() );
-		CONDS();
-		CLOSE_ARRAY() <<
-		"\n";
-
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxCondIndexOffset), CO() );
-		COND_INDEX_OFFSET();
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxCondSpaceId), C() );
+		COND_SPACES();
 		CLOSE_ARRAY() <<
 		"\n";
 	}
+
+	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxKeyOffset), KO() );
+	KEY_OFFSETS();
+	CLOSE_ARRAY() <<
+	"\n";
 
 	OPEN_ARRAY( WIDE_ALPH_TYPE(), K() );
 	KEYS();
 	CLOSE_ARRAY() <<
 	"\n";
 
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxSpan), SP() );
-	KEY_SPANS();
+	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxSingleLen), SL() );
+	SINGLE_LENS();
 	CLOSE_ARRAY() <<
 	"\n";
 
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxFlatIndexOffset), IO() );
-	FLAT_INDEX_OFFSET();
+	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxRangeLen), RL() );
+	RANGE_LENS();
 	CLOSE_ARRAY() <<
 	"\n";
 
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxIndex), I() );
-	INDICIES();
+	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxIndexOffset), IO() );
+	INDEX_OFFSETS();
 	CLOSE_ARRAY() <<
 	"\n";
 
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TT() );
-	TRANS_TARGS();
-	CLOSE_ARRAY() <<
-	"\n";
-
-	if ( redFsm->anyActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActListId), TA() );
-		TRANS_ACTIONS();
+	if ( useIndicies ) {
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxIndex), I() );
+		INDICIES();
 		CLOSE_ARRAY() <<
 		"\n";
+
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TT() );
+		TRANS_TARGS_WI();
+		CLOSE_ARRAY() <<
+		"\n";
+
+		if ( redFsm->anyActions() ) {
+			OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActListId), TA() );
+			TRANS_ACTIONS_WI();
+			CLOSE_ARRAY() <<
+			"\n";
+		}
+	}
+	else {
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TT() );
+		TRANS_TARGS();
+		CLOSE_ARRAY() <<
+		"\n";
+
+		if ( redFsm->anyActions() ) {
+			OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActListId), TA() );
+			TRANS_ACTIONS();
+			CLOSE_ARRAY() <<
+			"\n";
+		}
 	}
 
 	if ( redFsm->anyToStateActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc),  TSA() );
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), TSA() );
 		TO_STATE_ACTIONS();
 		CLOSE_ARRAY() <<
 		"\n";
@@ -238,39 +292,31 @@ void FFlatCodeGen::writeData()
 	STATE_IDS();
 }
 
-void FFlatCodeGen::writeExec()
+void FTabCodeGen::writeExec()
 {
 	testEofUsed = false;
 	outLabelUsed = false;
 
 	out << 
 		"	{\n"
-		"	int _slen";
+		"	int _klen";
 
 	if ( redFsm->anyRegCurStateRef() )
 		out << ", _ps";
-	
-	out << ";\n";
-	out << "	int _trans";
-
-	if ( redFsm->anyConditions() )
-		out << ", _cond";
-
-	out << ";\n";
 
 	out <<
+		";\n"
 		"	" << PTR_CONST() << WIDE_ALPH_TYPE() << PTR_CONST_END() << POINTER() << "_keys;\n"
-		"	" << PTR_CONST() << ARRAY_TYPE(redFsm->maxIndex) << PTR_CONST_END() << POINTER() << "_inds;\n";
+		"	int _trans;\n";
 
-	if ( redFsm->anyConditions() ) {
-		out << 
-			"	" << PTR_CONST() << ARRAY_TYPE(redFsm->maxCond) << PTR_CONST_END() << POINTER() << "_conds;\n"
-			"	" << WIDE_ALPH_TYPE() << " _widec;\n";
-	}
+	if ( redFsm->anyConditions() )
+		out << "	" << WIDE_ALPH_TYPE() << " _widec;\n";
+
+	out << "\n";
 
 	if ( !noEnd ) {
 		testEofUsed = true;
-		out << 
+		out <<
 			"	if ( " << P() << " == " << PE() << " )\n"
 			"		goto _test_eof;\n";
 	}
@@ -298,14 +344,20 @@ void FFlatCodeGen::writeExec()
 
 	LOCATE_TRANS();
 
+	out << "_match:\n";
+
+	if ( useIndicies )
+		out << "	_trans = " << I() << "[_trans];\n";
+
 	if ( redFsm->anyEofTrans() )
 		out << "_eof_trans:\n";
-	
+
 	if ( redFsm->anyRegCurStateRef() )
 		out << "	_ps = " << vCS() << ";\n";
 
-	out << 
-		"	" << vCS() << " = " << TT() << "[_trans];\n\n";
+	out <<
+		"	" << vCS() << " = " << TT() << "[_trans];\n"
+		"\n";
 
 	if ( redFsm->anyRegActions() ) {
 		out << 
@@ -374,7 +426,7 @@ void FFlatCodeGen::writeExec()
 				"	}\n";
 		}
 
-		out <<
+		out << 
 			"	}\n"
 			"\n";
 	}

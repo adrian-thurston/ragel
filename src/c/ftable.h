@@ -25,7 +25,7 @@
 #define _CDFTABLE_H
 
 #include <iostream>
-#include "cdtable.h"
+#include "table.h"
 
 /* Forwards. */
 struct CodeGenData;

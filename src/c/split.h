@@ -22,7 +22,7 @@
 #ifndef _CDSPLIT_H
 #define _CDSPLIT_H
 
-#include "cdipgoto.h"
+#include "ipgoto.h"
 
 namespace C {
 

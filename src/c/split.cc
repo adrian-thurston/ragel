@@ -21,7 +21,7 @@
 
 
 #include "ragel.h"
-#include "cdsplit.h"
+#include "split.h"
 #include "gendata.h"
 #include <assert.h>
 

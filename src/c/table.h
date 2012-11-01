@@ -21,38 +21,58 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _CDGOTO_H
-#define _CDGOTO_H
+#ifndef _CDTABLE_H
+#define _CDTABLE_H
 
 #include <iostream>
-#include "cdcodegen.h"
+#include "codegen.h"
 
 /* Forwards. */
 struct CodeGenData;
 struct NameInst;
 struct RedTransAp;
 struct RedStateAp;
-struct GenStateCond;
 
 namespace C {
 
 /*
- * Goto driven fsm.
+ * TabCodeGen
  */
-class GotoCodeGen : virtual public FsmCodeGen
+class TabCodeGen : virtual public FsmCodeGen
 {
 public:
-	GotoCodeGen( const CodeGenArgs &args ) 
-		: FsmCodeGen(args) {}
+	TabCodeGen( const CodeGenArgs &args ) : FsmCodeGen(args) {}
+	virtual ~TabCodeGen() { }
+	virtual void writeData();
+	virtual void writeExec();
 
+protected:
 	std::ostream &TO_STATE_ACTION_SWITCH();
 	std::ostream &FROM_STATE_ACTION_SWITCH();
 	std::ostream &EOF_ACTION_SWITCH();
 	std::ostream &ACTION_SWITCH();
-	std::ostream &STATE_GOTOS();
-	std::ostream &TRANSITIONS();
-	std::ostream &EXEC_FUNCS();
-	std::ostream &FINISH_CASES();
+
+	std::ostream &COND_KEYS();
+	std::ostream &COND_SPACES();
+	std::ostream &KEYS();
+	std::ostream &INDICIES();
+	std::ostream &COND_OFFSETS();
+	std::ostream &KEY_OFFSETS();
+	std::ostream &INDEX_OFFSETS();
+	std::ostream &COND_LENS();
+	std::ostream &SINGLE_LENS();
+	std::ostream &RANGE_LENS();
+	std::ostream &TO_STATE_ACTIONS();
+	std::ostream &FROM_STATE_ACTIONS();
+	std::ostream &EOF_ACTIONS();
+	std::ostream &EOF_TRANS();
+	std::ostream &TRANS_TARGS();
+	std::ostream &TRANS_ACTIONS();
+	std::ostream &TRANS_TARGS_WI();
+	std::ostream &TRANS_ACTIONS_WI();
+	void LOCATE_TRANS();
+
+	void COND_TRANSLATE();
 
 	void GOTO( ostream &ret, int gotoDest, bool inFinish );
 	void CALL( ostream &ret, int callDest, int targState, bool inFinish );
@@ -65,39 +85,22 @@ public:
 	void RET( ostream &ret, bool inFinish );
 	void BREAK( ostream &ret, int targState, bool csForced );
 
-	virtual unsigned int TO_STATE_ACTION( RedStateAp *state );
-	virtual unsigned int FROM_STATE_ACTION( RedStateAp *state );
-	virtual unsigned int EOF_ACTION( RedStateAp *state );
-
-	std::ostream &TO_STATE_ACTIONS();
-	std::ostream &FROM_STATE_ACTIONS();
-	std::ostream &EOF_ACTIONS();
-
-	void COND_TRANSLATE( GenStateCond *stateCond, int level );
-	void emitCondBSearch( RedStateAp *state, int level, int low, int high );
-	void STATE_CONDS( RedStateAp *state, bool genDefault ); 
-
-	virtual std::ostream &TRANS_GOTO( RedTransAp *trans, int level );
-
-	void emitSingleSwitch( RedStateAp *state );
-	void emitRangeBSearch( RedStateAp *state, int level, int low, int high );
-
-	/* Called from STATE_GOTOS just before writing the gotos */
-	virtual void GOTO_HEADER( RedStateAp *state );
-	virtual void STATE_GOTO_ERROR();
-
-	virtual void writeData();
-	virtual void writeExec();
+	virtual std::ostream &TO_STATE_ACTION( RedStateAp *state );
+	virtual std::ostream &FROM_STATE_ACTION( RedStateAp *state );
+	virtual std::ostream &EOF_ACTION( RedStateAp *state );
+	virtual std::ostream &TRANS_ACTION( RedTransAp *trans );
+	virtual void calcIndexSize();
 };
 
+
 /*
- * class CGotoCodeGen
+ * CTabCodeGen
  */
-struct CGotoCodeGen
-	: public GotoCodeGen
+struct CTabCodeGen
+	: public TabCodeGen
 {
-	CGotoCodeGen( const CodeGenArgs &args ) : 
-		FsmCodeGen(args), GotoCodeGen(args) {}
+	CTabCodeGen( const CodeGenArgs &args ) : 
+		FsmCodeGen(args), TabCodeGen(args) {}
 };
 
 }

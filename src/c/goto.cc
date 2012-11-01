@@ -22,7 +22,7 @@
  */
 
 #include "ragel.h"
-#include "cdgoto.h"
+#include "goto.h"
 #include "redfsm.h"
 #include "bstmap.h"
 #include "gendata.h"

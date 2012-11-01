@@ -25,7 +25,7 @@
 #define _CDFGOTO_H
 
 #include <iostream>
-#include "cdgoto.h"
+#include "goto.h"
 
 /* Forwards. */
 struct CodeGenData;

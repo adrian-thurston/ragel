@@ -1,5 +1,5 @@
 /*
- *  Copyright 2004-2006 Adrian Thurston <thurston@complang.org>
+ *  Copyright 2001-2006 Adrian Thurston <thurston@complang.org>
  *            2004 Erich Ocean <eric.ocean@ampede.com>
  *            2005 Alan West <alan@alanz.com>
  */
@@ -21,51 +21,34 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _CDFLAT_H
-#define _CDFLAT_H
+#ifndef _CDIPGOTO_H
+#define _CDIPGOTO_H
 
 #include <iostream>
-#include "cdcodegen.h"
+#include "goto.h"
 
 /* Forwards. */
 struct CodeGenData;
-struct NameInst;
-struct RedTransAp;
-struct RedStateAp;
 
 namespace C {
 
 /*
- * FlatCodeGen
+ * class FGotoCodeGen
  */
-class FlatCodeGen : virtual public FsmCodeGen
+class IpGotoCodeGen : public GotoCodeGen
 {
 public:
-	FlatCodeGen( const CodeGenArgs &args ) : FsmCodeGen(args) {}
-	virtual ~FlatCodeGen() { }
+	IpGotoCodeGen( const CodeGenArgs &args ) 
+			: FsmCodeGen(args), GotoCodeGen(args) {}
 
-protected:
-	std::ostream &TO_STATE_ACTION_SWITCH();
-	std::ostream &FROM_STATE_ACTION_SWITCH();
-	std::ostream &EOF_ACTION_SWITCH();
-	std::ostream &ACTION_SWITCH();
-	std::ostream &KEYS();
-	std::ostream &INDICIES();
-	std::ostream &FLAT_INDEX_OFFSET();
-	std::ostream &KEY_SPANS();
-	std::ostream &TO_STATE_ACTIONS();
-	std::ostream &FROM_STATE_ACTIONS();
-	std::ostream &EOF_ACTIONS();
-	std::ostream &EOF_TRANS();
-	std::ostream &TRANS_TARGS();
-	std::ostream &TRANS_ACTIONS();
-	void LOCATE_TRANS();
-
-	std::ostream &COND_INDEX_OFFSET();
-	void COND_TRANSLATE();
-	std::ostream &CONDS();
-	std::ostream &COND_KEYS();
-	std::ostream &COND_KEY_SPANS();
+	string CKEY( CondKey key );
+	void COND_B_SEARCH( RedTransAp *trans, int level, int low, int high );
+	std::ostream &EXIT_STATES();
+	std::ostream &TRANS_GOTO( RedTransAp *trans, int level );
+	std::ostream &COND_GOTO( RedCondAp *trans, int level );
+	std::ostream &FINISH_CASES();
+	std::ostream &AGAIN_CASES();
+	std::ostream &STATE_GOTOS();
 
 	void GOTO( ostream &ret, int gotoDest, bool inFinish );
 	void CALL( ostream &ret, int callDest, int targState, bool inFinish );
@@ -73,28 +56,37 @@ protected:
 	void GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish );
 	void NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish );
 	void CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish );
+	void RET( ostream &ret, bool inFinish );
 	void CURS( ostream &ret, bool inFinish );
 	void TARGS( ostream &ret, bool inFinish, int targState );
-	void RET( ostream &ret, bool inFinish );
 	void BREAK( ostream &ret, int targState, bool csForced );
-
-	virtual std::ostream &TO_STATE_ACTION( RedStateAp *state );
-	virtual std::ostream &FROM_STATE_ACTION( RedStateAp *state );
-	virtual std::ostream &EOF_ACTION( RedStateAp *state );
-	virtual std::ostream &TRANS_ACTION( RedTransAp *trans );
 
 	virtual void writeData();
 	virtual void writeExec();
+
+protected:
+	bool useAgainLabel();
+
+	/* Called from GotoCodeGen::STATE_GOTOS just before writing the gotos for
+	 * each state. */
+	bool IN_TRANS_ACTIONS( RedStateAp *state );
+	void GOTO_HEADER( RedStateAp *state );
+	void STATE_GOTO_ERROR();
+
+	/* Set up labelNeeded flag for each state. */
+	void setLabelsNeeded( GenInlineList *inlineList );
+	void setLabelsNeeded();
 };
 
+
 /*
- * CFlatCodeGen
+ * class CIpGotoCodeGen
  */
-struct CFlatCodeGen
-	: public FlatCodeGen
+struct CIpGotoCodeGen
+	: public IpGotoCodeGen
 {
-	CFlatCodeGen( const CodeGenArgs &args ) : 
-		FsmCodeGen(args), FlatCodeGen(args) {}
+	CIpGotoCodeGen( const CodeGenArgs &args) : 
+		FsmCodeGen(args), IpGotoCodeGen(args) {}
 };
 
 }

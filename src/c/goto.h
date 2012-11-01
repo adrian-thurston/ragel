@@ -21,34 +21,38 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _CDIPGOTO_H
-#define _CDIPGOTO_H
+#ifndef _CDGOTO_H
+#define _CDGOTO_H
 
 #include <iostream>
-#include "cdgoto.h"
+#include "codegen.h"
 
 /* Forwards. */
 struct CodeGenData;
+struct NameInst;
+struct RedTransAp;
+struct RedStateAp;
+struct GenStateCond;
 
 namespace C {
 
 /*
- * class FGotoCodeGen
+ * Goto driven fsm.
  */
-class IpGotoCodeGen : public GotoCodeGen
+class GotoCodeGen : virtual public FsmCodeGen
 {
 public:
-	IpGotoCodeGen( const CodeGenArgs &args ) 
-			: FsmCodeGen(args), GotoCodeGen(args) {}
+	GotoCodeGen( const CodeGenArgs &args ) 
+		: FsmCodeGen(args) {}
 
-	string CKEY( CondKey key );
-	void COND_B_SEARCH( RedTransAp *trans, int level, int low, int high );
-	std::ostream &EXIT_STATES();
-	std::ostream &TRANS_GOTO( RedTransAp *trans, int level );
-	std::ostream &COND_GOTO( RedCondAp *trans, int level );
-	std::ostream &FINISH_CASES();
-	std::ostream &AGAIN_CASES();
+	std::ostream &TO_STATE_ACTION_SWITCH();
+	std::ostream &FROM_STATE_ACTION_SWITCH();
+	std::ostream &EOF_ACTION_SWITCH();
+	std::ostream &ACTION_SWITCH();
 	std::ostream &STATE_GOTOS();
+	std::ostream &TRANSITIONS();
+	std::ostream &EXEC_FUNCS();
+	std::ostream &FINISH_CASES();
 
 	void GOTO( ostream &ret, int gotoDest, bool inFinish );
 	void CALL( ostream &ret, int callDest, int targState, bool inFinish );
@@ -56,37 +60,44 @@ public:
 	void GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish );
 	void NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish );
 	void CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish );
-	void RET( ostream &ret, bool inFinish );
 	void CURS( ostream &ret, bool inFinish );
 	void TARGS( ostream &ret, bool inFinish, int targState );
+	void RET( ostream &ret, bool inFinish );
 	void BREAK( ostream &ret, int targState, bool csForced );
+
+	virtual unsigned int TO_STATE_ACTION( RedStateAp *state );
+	virtual unsigned int FROM_STATE_ACTION( RedStateAp *state );
+	virtual unsigned int EOF_ACTION( RedStateAp *state );
+
+	std::ostream &TO_STATE_ACTIONS();
+	std::ostream &FROM_STATE_ACTIONS();
+	std::ostream &EOF_ACTIONS();
+
+	void COND_TRANSLATE( GenStateCond *stateCond, int level );
+	void emitCondBSearch( RedStateAp *state, int level, int low, int high );
+	void STATE_CONDS( RedStateAp *state, bool genDefault ); 
+
+	virtual std::ostream &TRANS_GOTO( RedTransAp *trans, int level );
+
+	void emitSingleSwitch( RedStateAp *state );
+	void emitRangeBSearch( RedStateAp *state, int level, int low, int high );
+
+	/* Called from STATE_GOTOS just before writing the gotos */
+	virtual void GOTO_HEADER( RedStateAp *state );
+	virtual void STATE_GOTO_ERROR();
 
 	virtual void writeData();
 	virtual void writeExec();
-
-protected:
-	bool useAgainLabel();
-
-	/* Called from GotoCodeGen::STATE_GOTOS just before writing the gotos for
-	 * each state. */
-	bool IN_TRANS_ACTIONS( RedStateAp *state );
-	void GOTO_HEADER( RedStateAp *state );
-	void STATE_GOTO_ERROR();
-
-	/* Set up labelNeeded flag for each state. */
-	void setLabelsNeeded( GenInlineList *inlineList );
-	void setLabelsNeeded();
 };
 
-
 /*
- * class CIpGotoCodeGen
+ * class CGotoCodeGen
  */
-struct CIpGotoCodeGen
-	: public IpGotoCodeGen
+struct CGotoCodeGen
+	: public GotoCodeGen
 {
-	CIpGotoCodeGen( const CodeGenArgs &args) : 
-		FsmCodeGen(args), IpGotoCodeGen(args) {}
+	CGotoCodeGen( const CodeGenArgs &args ) : 
+		FsmCodeGen(args), GotoCodeGen(args) {}
 };
 
 }

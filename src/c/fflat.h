@@ -25,7 +25,7 @@
 #define _CDFFLAT_H
 
 #include <iostream>
-#include "cdflat.h"
+#include "flat.h"
 
 /* Forwards. */
 struct CodeGenData;
