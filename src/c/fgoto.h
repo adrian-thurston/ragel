@@ -35,11 +35,12 @@ namespace C {
 /*
  * class FGotoCodeGen
  */
-class FGotoCodeGen : public GotoCodeGen
+class FGotoCodeGen
+	: public GotoCodeGen
 {
 public:
 	FGotoCodeGen( const CodeGenArgs &args )
-			: FsmCodeGen(args), GotoCodeGen(args) {}
+		: GotoCodeGen(args) {}
 
 	std::ostream &EXEC_ACTIONS();
 	std::ostream &TO_STATE_ACTION_SWITCH();

@@ -35,11 +35,12 @@ namespace C {
 /*
  * class FGotoCodeGen
  */
-class IpGotoCodeGen : public GotoCodeGen
+class IpGotoCodeGen
+	: public GotoCodeGen
 {
 public:
 	IpGotoCodeGen( const CodeGenArgs &args ) 
-			: FsmCodeGen(args), GotoCodeGen(args) {}
+			: GotoCodeGen(args) {}
 
 	string CKEY( CondKey key );
 	void COND_B_SEARCH( RedTransAp *trans, int level, int low, int high );

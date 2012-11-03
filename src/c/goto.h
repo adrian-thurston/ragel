@@ -39,7 +39,8 @@ namespace C {
 /*
  * Goto driven fsm.
  */
-class GotoCodeGen : virtual public FsmCodeGen
+class GotoCodeGen
+	: public FsmCodeGen
 {
 public:
 	GotoCodeGen( const CodeGenArgs &args ) 

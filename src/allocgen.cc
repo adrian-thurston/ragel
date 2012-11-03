@@ -98,7 +98,7 @@ CodeGenData *cdMakeCodeGen( const CodeGenArgs &args )
 	case HostLang::C:
 		switch ( codeStyle ) {
 		case GenTables:
-			codeGen = new C::TabCodeGen(args);
+			codeGen = new C::PlainTabCodeGen(args);
 			break;
 		case GenFTables:
 			codeGen = new C::FTabCodeGen(args);

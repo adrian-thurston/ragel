@@ -39,7 +39,7 @@ class FTabCodeGen : public TabCodeGen
 {
 public:
 	FTabCodeGen( const CodeGenArgs &args ) 
-			: FsmCodeGen(args), TabCodeGen(args) {}
+			: TabCodeGen(args) {}
 
 protected:
 	std::ostream &TO_STATE_ACTION_SWITCH();

@@ -35,11 +35,12 @@ namespace C {
 /*
  * FFlatCodeGen
  */
-class FFlatCodeGen : public FlatCodeGen
+class FFlatCodeGen
+	: public FlatCodeGen
 {
 public:
 	FFlatCodeGen( const CodeGenArgs &args ) 
-		: FsmCodeGen(args), FlatCodeGen(args) {}
+		: FlatCodeGen(args) {}
 
 protected:
 	std::ostream &TO_STATE_ACTION_SWITCH();

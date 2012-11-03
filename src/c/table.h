@@ -38,7 +38,8 @@ namespace C {
 /*
  * TabCodeGen
  */
-class TabCodeGen : virtual public FsmCodeGen
+class TabCodeGen
+	: public FsmCodeGen
 {
 public:
 	TabCodeGen( const CodeGenArgs &args ) : FsmCodeGen(args) {}
@@ -90,6 +91,14 @@ protected:
 	virtual std::ostream &EOF_ACTION( RedStateAp *state );
 	virtual std::ostream &TRANS_ACTION( RedTransAp *trans );
 	virtual void calcIndexSize();
+};
+
+class PlainTabCodeGen
+	: public TabCodeGen
+{
+public:
+	PlainTabCodeGen( const CodeGenArgs &args )
+		: TabCodeGen(args) {}
 };
 
 }

@@ -38,7 +38,8 @@ namespace C {
 /*
  * FlatCodeGen
  */
-class FlatCodeGen : virtual public FsmCodeGen
+class FlatCodeGen
+	: public FsmCodeGen
 {
 public:
 	FlatCodeGen( const CodeGenArgs &args ) : FsmCodeGen(args) {}
