@@ -78,17 +78,6 @@ protected:
 	void setLabelsNeeded();
 };
 
-
-/*
- * class CIpGotoCodeGen
- */
-struct CIpGotoCodeGen
-	: public IpGotoCodeGen
-{
-	CIpGotoCodeGen( const CodeGenArgs &args) : 
-		FsmCodeGen(args), IpGotoCodeGen(args) {}
-};
-
 }
 
 #endif

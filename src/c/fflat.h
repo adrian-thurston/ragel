@@ -37,10 +37,11 @@ namespace C {
  */
 class FFlatCodeGen : public FlatCodeGen
 {
-protected:
+public:
 	FFlatCodeGen( const CodeGenArgs &args ) 
 		: FsmCodeGen(args), FlatCodeGen(args) {}
 
+protected:
 	std::ostream &TO_STATE_ACTION_SWITCH();
 	std::ostream &FROM_STATE_ACTION_SWITCH();
 	std::ostream &EOF_ACTION_SWITCH();
@@ -53,16 +54,6 @@ protected:
 
 	virtual void writeData();
 	virtual void writeExec();
-};
-
-/*
- * CFFlatCodeGen
- */
-struct CFFlatCodeGen
-	: public FFlatCodeGen
-{
-	CFFlatCodeGen( const CodeGenArgs &args ) : 
-		FsmCodeGen(args), FFlatCodeGen(args) {}
 };
 
 }

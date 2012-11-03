@@ -37,10 +37,11 @@ namespace C {
  */
 class FTabCodeGen : public TabCodeGen
 {
-protected:
+public:
 	FTabCodeGen( const CodeGenArgs &args ) 
 			: FsmCodeGen(args), TabCodeGen(args) {}
 
+protected:
 	std::ostream &TO_STATE_ACTION_SWITCH();
 	std::ostream &FROM_STATE_ACTION_SWITCH();
 	std::ostream &EOF_ACTION_SWITCH();
@@ -53,17 +54,6 @@ protected:
 	virtual void writeData();
 	virtual void writeExec();
 	virtual void calcIndexSize();
-};
-
-
-/*
- * CFTabCodeGen
- */
-struct CFTabCodeGen
-	: public FTabCodeGen
-{
-	CFTabCodeGen( const CodeGenArgs &args ) : 
-		FsmCodeGen(args), FTabCodeGen(args) {}
 };
 
 }

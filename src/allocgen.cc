@@ -98,28 +98,28 @@ CodeGenData *cdMakeCodeGen( const CodeGenArgs &args )
 	case HostLang::C:
 		switch ( codeStyle ) {
 		case GenTables:
-			codeGen = new C::CTabCodeGen(args);
+			codeGen = new C::TabCodeGen(args);
 			break;
 		case GenFTables:
-			codeGen = new C::CFTabCodeGen(args);
+			codeGen = new C::FTabCodeGen(args);
 			break;
 		case GenFlat:
-			codeGen = new C::CFlatCodeGen(args);
+			codeGen = new C::FlatCodeGen(args);
 			break;
 		case GenFFlat:
-			codeGen = new C::CFFlatCodeGen(args);
+			codeGen = new C::FFlatCodeGen(args);
 			break;
 		case GenGoto:
-			codeGen = new C::CGotoCodeGen(args);
+			codeGen = new C::GotoCodeGen(args);
 			break;
 		case GenFGoto:
-			codeGen = new C::CFGotoCodeGen(args);
+			codeGen = new C::FGotoCodeGen(args);
 			break;
 		case GenIpGoto:
-			codeGen = new C::CIpGotoCodeGen(args);
+			codeGen = new C::IpGotoCodeGen(args);
 			break;
 		case GenSplit:
-			codeGen = new C::CSplitCodeGen(args);
+			codeGen = new C::SplitCodeGen(args);
 			break;
 		}
 		break;

@@ -53,13 +53,6 @@ public:
 	int currentPartition;
 };
 
-struct CSplitCodeGen
-	: public SplitCodeGen
-{
-	CSplitCodeGen( const CodeGenArgs &args ) : 
-		FsmCodeGen(args), SplitCodeGen(args) {}
-};
-
 }
 
 #endif

@@ -90,16 +90,6 @@ public:
 	virtual void writeExec();
 };
 
-/*
- * class CGotoCodeGen
- */
-struct CGotoCodeGen
-	: public GotoCodeGen
-{
-	CGotoCodeGen( const CodeGenArgs &args ) : 
-		FsmCodeGen(args), GotoCodeGen(args) {}
-};
-
 }
 
 #endif

@@ -87,16 +87,6 @@ protected:
 	virtual void writeExec();
 };
 
-/*
- * CFlatCodeGen
- */
-struct CFlatCodeGen
-	: public FlatCodeGen
-{
-	CFlatCodeGen( const CodeGenArgs &args ) : 
-		FsmCodeGen(args), FlatCodeGen(args) {}
-};
-
 }
 
 #endif

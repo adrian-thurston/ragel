@@ -92,17 +92,6 @@ protected:
 	virtual void calcIndexSize();
 };
 
-
-/*
- * CTabCodeGen
- */
-struct CTabCodeGen
-	: public TabCodeGen
-{
-	CTabCodeGen( const CodeGenArgs &args ) : 
-		FsmCodeGen(args), TabCodeGen(args) {}
-};
-
 }
 
 #endif
