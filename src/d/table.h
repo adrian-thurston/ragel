@@ -25,7 +25,7 @@
 #define _DTABLE_H
 
 #include <iostream>
-#include "cdcodegen.h"
+#include "codegen.h"
 
 /* Forwards. */
 struct CodeGenData;

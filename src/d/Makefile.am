@@ -4,21 +4,21 @@ libd_a_CPPFLAGS = \
 	-I$(top_srcdir)/aapl -I$(top_srcdir)/src
 
 libd_a_SOURCES = \
-	cdcodegen.h \
-	cdfflat.h \
-	cdfgoto.h \
-	cdflat.h \
-	cdftable.h \
-	cdgoto.h \
-	cdipgoto.h \
-	cdsplit.h \
-	cdtable.h \
-	cdcodegen.cc \
-	cdfflat.cc \
-	cdfgoto.cc \
-	cdflat.cc \
-	cdftable.cc \
-	cdgoto.cc \
-	cdipgoto.cc \
-	cdsplit.cc \
-	cdtable.cc
+	codegen.h \
+	fflat.h \
+	fgoto.h \
+	flat.h \
+	ftable.h \
+	goto.h \
+	ipgoto.h \
+	split.h \
+	table.h \
+	codegen.cc \
+	fflat.cc \
+	fgoto.cc \
+	flat.cc \
+	ftable.cc \
+	goto.cc \
+	ipgoto.cc \
+	split.cc \
+	table.cc

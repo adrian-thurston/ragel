@@ -22,7 +22,7 @@
 #ifndef _DSPLIT_H
 #define _DSPLIT_H
 
-#include "cdipgoto.h"
+#include "ipgoto.h"
 
 namespace D {
 

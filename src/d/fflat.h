@@ -1,5 +1,5 @@
 /*
- *  Copyright 2001-2006 Adrian Thurston <thurston@complang.org>
+ *  Copyright 2004-2006 Adrian Thurston <thurston@complang.org>
  *            2004 Erich Ocean <eric.ocean@ampede.com>
  *            2005 Alan West <alan@alanz.com>
  */
@@ -21,11 +21,11 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _DFGOTO_H
-#define _DFGOTO_H
+#ifndef _DFFLAT_H
+#define _DFFLAT_H
 
 #include <iostream>
-#include "cdgoto.h"
+#include "flat.h"
 
 /* Forwards. */
 struct CodeGenData;
@@ -33,55 +33,56 @@ struct CodeGenData;
 namespace D {
 
 /*
- * class FGotoCodeGen
+ * FFlatCodeGen
  */
-class FGotoCodeGen : public GotoCodeGen
+class FFlatCodeGen : public FlatCodeGen
 {
-public:
-	FGotoCodeGen( const CodeGenArgs &args )
-			: FsmCodeGen(args), GotoCodeGen(args) {}
+protected:
+	FFlatCodeGen( const CodeGenArgs &args ) 
+		: FsmCodeGen(args), FlatCodeGen(args) {}
 
-	std::ostream &EXEC_ACTIONS();
 	std::ostream &TO_STATE_ACTION_SWITCH();
 	std::ostream &FROM_STATE_ACTION_SWITCH();
-	std::ostream &FINISH_CASES();
 	std::ostream &EOF_ACTION_SWITCH();
-	unsigned int TO_STATE_ACTION( RedStateAp *state );
-	unsigned int FROM_STATE_ACTION( RedStateAp *state );
-	unsigned int EOF_ACTION( RedStateAp *state );
+	std::ostream &ACTION_SWITCH();
+
+	virtual std::ostream &TO_STATE_ACTION( RedStateAp *state );
+	virtual std::ostream &FROM_STATE_ACTION( RedStateAp *state );
+	virtual std::ostream &EOF_ACTION( RedStateAp *state );
+	virtual std::ostream &TRANS_ACTION( RedTransAp *trans );
 
 	virtual void writeData();
 	virtual void writeExec();
 };
 
 /*
- * class CFGotoCodeGen
+ * CFFlatCodeGen
  */
-struct CFGotoCodeGen
-	: public FGotoCodeGen, public CCodeGen
+struct CFFlatCodeGen
+	: public FFlatCodeGen, public CCodeGen
 {
-	CFGotoCodeGen( const CodeGenArgs &args ) : 
-		FsmCodeGen(args), FGotoCodeGen(args), CCodeGen(args) {}
+	CFFlatCodeGen( const CodeGenArgs &args ) : 
+		FsmCodeGen(args), FFlatCodeGen(args), CCodeGen(args) {}
 };
 
 /*
- * class DFGotoCodeGen
+ * DFFlatCodeGen
  */
-struct DFGotoCodeGen
-	: public FGotoCodeGen, public DCodeGen
+struct DFFlatCodeGen
+	: public FFlatCodeGen, public DCodeGen
 {
-	DFGotoCodeGen( const CodeGenArgs &args ) : 
-		FsmCodeGen(args), FGotoCodeGen(args), DCodeGen(args) {}
+	DFFlatCodeGen( const CodeGenArgs &args ) : 
+		FsmCodeGen(args), FFlatCodeGen(args), DCodeGen(args) {}
 };
 
 /*
- * class DFGotoCodeGen
+ * D2FFlatCodeGen
  */
-struct D2FGotoCodeGen
-	: public FGotoCodeGen, public D2CodeGen
+struct D2FFlatCodeGen
+	: public FFlatCodeGen, public D2CodeGen
 {
-	D2FGotoCodeGen( const CodeGenArgs &args ) : 
-		FsmCodeGen(args), FGotoCodeGen(args), D2CodeGen(args) {}
+	D2FFlatCodeGen( const CodeGenArgs &args ) : 
+		FsmCodeGen(args), FFlatCodeGen(args), D2CodeGen(args) {}
 };
 
 }

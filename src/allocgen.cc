@@ -51,14 +51,14 @@
 #include "c/ipgoto.h"
 #include "c/split.h"
 
-#include "d/cdtable.h"
-#include "d/cdftable.h"
-#include "d/cdflat.h"
-#include "d/cdfflat.h"
-#include "d/cdgoto.h"
-#include "d/cdfgoto.h"
-#include "d/cdipgoto.h"
-#include "d/cdsplit.h"
+#include "d/table.h"
+#include "d/ftable.h"
+#include "d/flat.h"
+#include "d/fflat.h"
+#include "d/goto.h"
+#include "d/fgoto.h"
+#include "d/ipgoto.h"
+#include "d/split.h"
 
 #include "dot/dotcodegen.h"
 

@@ -1,5 +1,5 @@
 /*
- *  Copyright 2004-2006 Adrian Thurston <thurston@complang.org>
+ *  Copyright 2001-2006 Adrian Thurston <thurston@complang.org>
  *            2004 Erich Ocean <eric.ocean@ampede.com>
  *            2005 Alan West <alan@alanz.com>
  */
@@ -21,51 +21,38 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _DFLAT_H
-#define _DFLAT_H
+#ifndef _DGOTO_H
+#define _DGOTO_H
 
 #include <iostream>
-#include "cdcodegen.h"
+#include "codegen.h"
 
 /* Forwards. */
 struct CodeGenData;
 struct NameInst;
 struct RedTransAp;
 struct RedStateAp;
+struct GenStateCond;
 
 namespace D {
 
 /*
- * FlatCodeGen
+ * Goto driven fsm.
  */
-class FlatCodeGen : virtual public FsmCodeGen
+class GotoCodeGen : virtual public FsmCodeGen
 {
 public:
-	FlatCodeGen( const CodeGenArgs &args ) : FsmCodeGen(args) {}
-	virtual ~FlatCodeGen() { }
+	GotoCodeGen( const CodeGenArgs &args ) 
+		: FsmCodeGen(args) {}
 
-protected:
 	std::ostream &TO_STATE_ACTION_SWITCH();
 	std::ostream &FROM_STATE_ACTION_SWITCH();
 	std::ostream &EOF_ACTION_SWITCH();
 	std::ostream &ACTION_SWITCH();
-	std::ostream &KEYS();
-	std::ostream &INDICIES();
-	std::ostream &FLAT_INDEX_OFFSET();
-	std::ostream &KEY_SPANS();
-	std::ostream &TO_STATE_ACTIONS();
-	std::ostream &FROM_STATE_ACTIONS();
-	std::ostream &EOF_ACTIONS();
-	std::ostream &EOF_TRANS();
-	std::ostream &TRANS_TARGS();
-	std::ostream &TRANS_ACTIONS();
-	void LOCATE_TRANS();
-
-	std::ostream &COND_INDEX_OFFSET();
-	void COND_TRANSLATE();
-	std::ostream &CONDS();
-	std::ostream &COND_KEYS();
-	std::ostream &COND_KEY_SPANS();
+	std::ostream &STATE_GOTOS();
+	std::ostream &TRANSITIONS();
+	std::ostream &EXEC_FUNCS();
+	std::ostream &FINISH_CASES();
 
 	void GOTO( ostream &ret, int gotoDest, bool inFinish );
 	void CALL( ostream &ret, int callDest, int targState, bool inFinish );
@@ -78,43 +65,59 @@ protected:
 	void RET( ostream &ret, bool inFinish );
 	void BREAK( ostream &ret, int targState, bool csForced );
 
-	virtual std::ostream &TO_STATE_ACTION( RedStateAp *state );
-	virtual std::ostream &FROM_STATE_ACTION( RedStateAp *state );
-	virtual std::ostream &EOF_ACTION( RedStateAp *state );
-	virtual std::ostream &TRANS_ACTION( RedTransAp *trans );
+	virtual unsigned int TO_STATE_ACTION( RedStateAp *state );
+	virtual unsigned int FROM_STATE_ACTION( RedStateAp *state );
+	virtual unsigned int EOF_ACTION( RedStateAp *state );
+
+	std::ostream &TO_STATE_ACTIONS();
+	std::ostream &FROM_STATE_ACTIONS();
+	std::ostream &EOF_ACTIONS();
+
+	void COND_TRANSLATE( GenStateCond *stateCond, int level );
+	void emitCondBSearch( RedStateAp *state, int level, int low, int high );
+	void STATE_CONDS( RedStateAp *state, bool genDefault ); 
+
+	virtual std::ostream &TRANS_GOTO( RedTransAp *trans, int level );
+
+	void emitSingleSwitch( RedStateAp *state );
+	void emitRangeBSearch( RedStateAp *state, int level, int low, int high );
+
+	/* Called from STATE_GOTOS just before writing the gotos */
+	virtual void GOTO_HEADER( RedStateAp *state );
+	virtual void STATE_GOTO_ERROR();
 
 	virtual void writeData();
 	virtual void writeExec();
 };
 
 /*
- * CFlatCodeGen
+ * class CGotoCodeGen
  */
-struct CFlatCodeGen
-	: public FlatCodeGen, public CCodeGen
+struct CGotoCodeGen
+	: public GotoCodeGen, public CCodeGen
 {
-	CFlatCodeGen( const CodeGenArgs &args ) : 
-		FsmCodeGen(args), FlatCodeGen(args), CCodeGen(args) {}
+	CGotoCodeGen( const CodeGenArgs &args ) : 
+		FsmCodeGen(args), GotoCodeGen(args), CCodeGen(args) {}
 };
 
 /*
- * DFlatCodeGen
+ * class DGotoCodeGen
  */
-struct DFlatCodeGen
-	: public FlatCodeGen, public DCodeGen
+struct DGotoCodeGen
+	: public GotoCodeGen, public DCodeGen
 {
-	DFlatCodeGen( const CodeGenArgs &args ) : 
-		FsmCodeGen(args), FlatCodeGen(args), DCodeGen(args) {}
+	DGotoCodeGen( const CodeGenArgs &args ) : 
+		FsmCodeGen(args), GotoCodeGen(args), DCodeGen(args) {}
 };
 
 /*
- * D2FlatCodeGen
+ * class D2GotoCodeGen
  */
-struct D2FlatCodeGen
-	: public FlatCodeGen, public D2CodeGen
+struct D2GotoCodeGen
+	: public GotoCodeGen, public D2CodeGen
 {
-	D2FlatCodeGen( const CodeGenArgs &args ) : 
-		FsmCodeGen(args), FlatCodeGen(args), D2CodeGen(args) {}
+	D2GotoCodeGen( const CodeGenArgs &args ) : 
+		FsmCodeGen(args), GotoCodeGen(args), D2CodeGen(args) {}
 };
 
 }
