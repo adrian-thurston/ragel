@@ -83,6 +83,14 @@ protected:
 	virtual std::ostream &FROM_STATE_ACTION( RedStateAp *state );
 	virtual std::ostream &EOF_ACTION( RedStateAp *state );
 	virtual std::ostream &TRANS_ACTION( RedTransAp *trans );
+};
+
+class PlainFlatCodeGen
+	: public FlatCodeGen
+{
+public:
+	PlainFlatCodeGen( const CodeGenArgs &args )
+		: FlatCodeGen(args) {}
 
 	virtual void writeData();
 	virtual void writeExec();

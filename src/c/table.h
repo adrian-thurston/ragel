@@ -42,10 +42,8 @@ class TabCodeGen
 	: public FsmCodeGen
 {
 public:
-	TabCodeGen( const CodeGenArgs &args ) : FsmCodeGen(args) {}
-	virtual ~TabCodeGen() { }
-	virtual void writeData();
-	virtual void writeExec();
+	TabCodeGen( const CodeGenArgs &args )
+		: FsmCodeGen(args) {}
 
 protected:
 	std::ostream &TO_STATE_ACTION_SWITCH();
@@ -99,6 +97,9 @@ class PlainTabCodeGen
 public:
 	PlainTabCodeGen( const CodeGenArgs &args )
 		: TabCodeGen(args) {}
+
+	virtual void writeData();
+	virtual void writeExec();
 };
 
 }

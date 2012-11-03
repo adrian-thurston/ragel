@@ -641,7 +641,7 @@ void GotoCodeGen::BREAK( ostream &ret, int targState, bool csForced )
 	ret << "{" << P() << "++; " << CTRL_FLOW() << "goto _out; }";
 }
 
-void GotoCodeGen::writeData()
+void PlainGotoCodeGen::writeData()
 {
 	if ( redFsm->anyActions() ) {
 		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActArrItem), A() );
@@ -674,7 +674,7 @@ void GotoCodeGen::writeData()
 	STATE_IDS();
 }
 
-void GotoCodeGen::writeExec()
+void PlainGotoCodeGen::writeExec()
 {
 	testEofUsed = false;
 	outLabelUsed = false;

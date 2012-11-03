@@ -539,7 +539,7 @@ void FlatCodeGen::BREAK( ostream &ret, int targState, bool csForced )
 	ret << "{" << P() << "++; " << CTRL_FLOW() << "goto _out; }";
 }
 
-void FlatCodeGen::writeData()
+void PlainFlatCodeGen::writeData()
 {
 	/* If there are any transtion functions then output the array. If there
 	 * are none, don't bother emitting an empty array that won't be used. */
@@ -676,7 +676,7 @@ void FlatCodeGen::COND_TRANSLATE()
 		"	}\n";
 }
 
-void FlatCodeGen::writeExec()
+void PlainFlatCodeGen::writeExec()
 {
 	testEofUsed = false;
 	outLabelUsed = false;

@@ -104,13 +104,13 @@ CodeGenData *cdMakeCodeGen( const CodeGenArgs &args )
 			codeGen = new C::FTabCodeGen(args);
 			break;
 		case GenFlat:
-			codeGen = new C::FlatCodeGen(args);
+			codeGen = new C::PlainFlatCodeGen(args);
 			break;
 		case GenFFlat:
 			codeGen = new C::FFlatCodeGen(args);
 			break;
 		case GenGoto:
-			codeGen = new C::GotoCodeGen(args);
+			codeGen = new C::PlainGotoCodeGen(args);
 			break;
 		case GenFGoto:
 			codeGen = new C::FGotoCodeGen(args);
