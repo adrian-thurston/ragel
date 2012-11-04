@@ -21,8 +21,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _CDTABLE_H
-#define _CDTABLE_H
+#ifndef _C_BINARY_H
+#define _C_BINARY_H
 
 #include <iostream>
 #include "codegen.h"
@@ -86,17 +86,6 @@ protected:
 	virtual std::ostream &EOF_ACTION( RedStateAp *state );
 	virtual std::ostream &TRANS_ACTION( RedTransAp *trans );
 	virtual void calcIndexSize();
-};
-
-class BinaryLooped
-	: public Binary
-{
-public:
-	BinaryLooped( const CodeGenArgs &args )
-		: Binary(args) {}
-
-	virtual void writeData();
-	virtual void writeExec();
 };
 
 }

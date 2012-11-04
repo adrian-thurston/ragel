@@ -5,21 +5,23 @@ libc_a_CPPFLAGS = \
 
 libc_a_SOURCES = \
 	codegen.h \
+	binary.h \
+	binloop.h \
+	binexp.h \
 	fflat.h \
 	fgoto.h \
 	flat.h \
-	ftable.h \
 	goto.h \
 	ipgoto.h \
 	split.h \
-	table.h \
 	\
 	codegen.cc \
+	binary.cc \
+	binloop.cc \
+	binexp.cc \
 	fflat.cc \
 	fgoto.cc \
 	flat.cc \
-	ftable.cc \
 	goto.cc \
 	ipgoto.cc \
-	split.cc \
-	table.cc
+	split.cc

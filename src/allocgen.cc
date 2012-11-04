@@ -33,8 +33,8 @@
  */
 #include "xml/xml.h"
 
-#include "c/table.h"
-#include "c/ftable.h"
+#include "c/binloop.h"
+#include "c/binexp.h"
 #include "c/flat.h"
 #include "c/fflat.h"
 #include "c/goto.h"

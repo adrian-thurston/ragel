@@ -21,11 +21,11 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _CDFTABLE_H
-#define _CDFTABLE_H
+#ifndef _C_BINEXP_H
+#define _C_BINEXP_H
 
 #include <iostream>
-#include "table.h"
+#include "binary.h"
 
 /* Forwards. */
 struct CodeGenData;
