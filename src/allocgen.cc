@@ -37,8 +37,8 @@
 #include "c/binexp.h"
 #include "c/flatloop.h"
 #include "c/flatexp.h"
-#include "c/goto.h"
-#include "c/fgoto.h"
+#include "c/gotoloop.h"
+#include "c/gotoexp.h"
 #include "c/ipgoto.h"
 #include "c/split.h"
 

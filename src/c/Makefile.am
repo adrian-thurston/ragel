@@ -11,8 +11,9 @@ libc_a_SOURCES = \
 	flat.h \
 	flatloop.h \
 	flatexp.h \
-	fgoto.h \
 	goto.h \
+	gotoloop.h \
+	gotoexp.h \
 	ipgoto.h \
 	split.h \
 	\
@@ -23,7 +24,8 @@ libc_a_SOURCES = \
 	flat.cc \
 	flatloop.cc \
 	flatexp.cc \
-	fgoto.cc \
 	goto.cc \
+	gotoloop.cc \
+	gotoexp.cc \
 	ipgoto.cc \
 	split.cc

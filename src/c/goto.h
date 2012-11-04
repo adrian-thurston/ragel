@@ -21,8 +21,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _CDGOTO_H
-#define _CDGOTO_H
+#ifndef _C_GOTO_H
+#define _C_GOTO_H
 
 #include <iostream>
 #include "codegen.h"
@@ -86,17 +86,6 @@ public:
 	/* Called from STATE_GOTOS just before writing the gotos */
 	virtual void GOTO_HEADER( RedStateAp *state );
 	virtual void STATE_GOTO_ERROR();
-};
-
-class GotoLooped
-	: public Goto
-{
-public:
-	GotoLooped( const CodeGenArgs &args ) 
-		: Goto(args) {}
-
-	virtual void writeData();
-	virtual void writeExec();
 };
 
 }

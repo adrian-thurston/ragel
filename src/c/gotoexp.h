@@ -21,8 +21,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _CDFGOTO_H
-#define _CDFGOTO_H
+#ifndef _C_GOTOEXP_H
+#define _C_GOTOEXP_H
 
 #include <iostream>
 #include "goto.h"
