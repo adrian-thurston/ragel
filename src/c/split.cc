@@ -32,7 +32,7 @@ using std::endl;
 namespace C {
 
 /* Emit the goto to take for a given transition. */
-std::ostream &SplitCodeGen::TRANS_GOTO( RedTransAp *trans, int level )
+std::ostream &SplitGoto::TRANS_GOTO( RedTransAp *trans, int level )
 {
 	if ( trans->targ->partition == currentPartition ) {
 		if ( trans->action != 0 ) {
@@ -60,7 +60,7 @@ std::ostream &SplitCodeGen::TRANS_GOTO( RedTransAp *trans, int level )
 }
 
 /* Called from before writing the gotos for each state. */
-void SplitCodeGen::GOTO_HEADER( RedStateAp *state, bool stateInPartition )
+void SplitGoto::GOTO_HEADER( RedStateAp *state, bool stateInPartition )
 {
 	bool anyWritten = IN_TRANS_ACTIONS( state );
 
@@ -109,7 +109,7 @@ void SplitCodeGen::GOTO_HEADER( RedStateAp *state, bool stateInPartition )
 		out << "	_ps = " << state->id << ";\n";
 }
 
-std::ostream &SplitCodeGen::STATE_GOTOS( int partition )
+std::ostream &SplitGoto::STATE_GOTOS( int partition )
 {
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->partition == partition ) {
@@ -146,7 +146,7 @@ std::ostream &SplitCodeGen::STATE_GOTOS( int partition )
 }
 
 
-std::ostream &SplitCodeGen::PART_TRANS( int partition )
+std::ostream &SplitGoto::PART_TRANS( int partition )
 {
 	for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ ) {
 		if ( trans->partitionBoundary ) {
@@ -194,7 +194,7 @@ std::ostream &SplitCodeGen::PART_TRANS( int partition )
 	return out;
 }
 
-std::ostream &SplitCodeGen::EXIT_STATES( int partition )
+std::ostream &SplitGoto::EXIT_STATES( int partition )
 {
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->partition == partition && st->outNeeded ) {
@@ -207,7 +207,7 @@ std::ostream &SplitCodeGen::EXIT_STATES( int partition )
 }
 
 
-std::ostream &SplitCodeGen::PARTITION( int partition )
+std::ostream &SplitGoto::PARTITION( int partition )
 {
 	outLabelUsed = false;
 	ptOutLabelUsed = false;
@@ -284,7 +284,7 @@ std::ostream &SplitCodeGen::PARTITION( int partition )
 	return out;
 }
 
-std::ostream &SplitCodeGen::PART_MAP()
+std::ostream &SplitGoto::PART_MAP()
 {
 	int *partMap = new int[redFsm->stateList.length()];
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ )
@@ -305,7 +305,7 @@ std::ostream &SplitCodeGen::PART_MAP()
 	return out;
 }
 
-void SplitCodeGen::writeData()
+void SplitGoto::writeData()
 {
 	out <<
 		"static const int " << START() << " = " << START_STATE_ID() << ";\n"
@@ -336,7 +336,7 @@ void SplitCodeGen::writeData()
 	out << "\n";
 }
 
-std::ostream &SplitCodeGen::ALL_PARTITIONS()
+std::ostream &SplitGoto::ALL_PARTITIONS()
 {
 	/* compute the format string. */
 	int width = 0, high = redFsm->nParts - 1;
@@ -381,7 +381,7 @@ std::ostream &SplitCodeGen::ALL_PARTITIONS()
 }
 
 
-void SplitCodeGen::writeExec()
+void SplitGoto::writeExec()
 {
 	/* Must set labels immediately before writing because we may depend on the
 	 * noend write option. */
@@ -436,7 +436,7 @@ void SplitCodeGen::writeExec()
 	ALL_PARTITIONS();
 }
 
-void SplitCodeGen::setLabelsNeeded( RedStateAp *fromState, GenInlineList *inlineList )
+void SplitGoto::setLabelsNeeded( RedStateAp *fromState, GenInlineList *inlineList )
 {
 	for ( GenInlineList::Iter item = *inlineList; item.lte(); item++ ) {
 		switch ( item->type ) {
@@ -457,7 +457,7 @@ void SplitCodeGen::setLabelsNeeded( RedStateAp *fromState, GenInlineList *inline
 	}
 }
 
-void SplitCodeGen::setLabelsNeeded( RedStateAp *fromState, RedTransAp *trans )
+void SplitGoto::setLabelsNeeded( RedStateAp *fromState, RedTransAp *trans )
 {
 	/* In the split code gen we don't need labels for transitions across
 	 * partitions. */
@@ -481,7 +481,7 @@ void SplitCodeGen::setLabelsNeeded( RedStateAp *fromState, RedTransAp *trans )
 }
 
 /* Set up labelNeeded flag for each state. */
-void SplitCodeGen::setLabelsNeeded()
+void SplitGoto::setLabelsNeeded()
 {
 	/* If we use the _again label, then we the _again switch, which uses all
 	 * labels. */

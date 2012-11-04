@@ -28,7 +28,7 @@
 
 namespace C {
 
-std::ostream &FlatCodeGen::TO_STATE_ACTION( RedStateAp *state )
+std::ostream &Flat::TO_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->toStateAction != 0 )
@@ -37,7 +37,7 @@ std::ostream &FlatCodeGen::TO_STATE_ACTION( RedStateAp *state )
 	return out;
 }
 
-std::ostream &FlatCodeGen::FROM_STATE_ACTION( RedStateAp *state )
+std::ostream &Flat::FROM_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->fromStateAction != 0 )
@@ -46,7 +46,7 @@ std::ostream &FlatCodeGen::FROM_STATE_ACTION( RedStateAp *state )
 	return out;
 }
 
-std::ostream &FlatCodeGen::EOF_ACTION( RedStateAp *state )
+std::ostream &Flat::EOF_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->eofAction != 0 )
@@ -55,7 +55,7 @@ std::ostream &FlatCodeGen::EOF_ACTION( RedStateAp *state )
 	return out;
 }
 
-std::ostream &FlatCodeGen::TRANS_ACTION( RedTransAp *trans )
+std::ostream &Flat::TRANS_ACTION( RedTransAp *trans )
 {
 	/* If there are actions, emit them. Otherwise emit zero. */
 	int act = 0;
@@ -65,7 +65,7 @@ std::ostream &FlatCodeGen::TRANS_ACTION( RedTransAp *trans )
 	return out;
 }
 
-std::ostream &FlatCodeGen::TO_STATE_ACTION_SWITCH()
+std::ostream &Flat::TO_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
@@ -82,7 +82,7 @@ std::ostream &FlatCodeGen::TO_STATE_ACTION_SWITCH()
 	return out;
 }
 
-std::ostream &FlatCodeGen::FROM_STATE_ACTION_SWITCH()
+std::ostream &Flat::FROM_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
@@ -99,7 +99,7 @@ std::ostream &FlatCodeGen::FROM_STATE_ACTION_SWITCH()
 	return out;
 }
 
-std::ostream &FlatCodeGen::EOF_ACTION_SWITCH()
+std::ostream &Flat::EOF_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
@@ -117,7 +117,7 @@ std::ostream &FlatCodeGen::EOF_ACTION_SWITCH()
 }
 
 
-std::ostream &FlatCodeGen::ACTION_SWITCH()
+std::ostream &Flat::ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
@@ -135,7 +135,7 @@ std::ostream &FlatCodeGen::ACTION_SWITCH()
 }
 
 
-std::ostream &FlatCodeGen::FLAT_INDEX_OFFSET()
+std::ostream &Flat::FLAT_INDEX_OFFSET()
 {
 	out << "\t";
 	int totalStateNum = 0, curIndOffset = 0;
@@ -159,7 +159,7 @@ std::ostream &FlatCodeGen::FLAT_INDEX_OFFSET()
 	return out;
 }
 
-std::ostream &FlatCodeGen::KEY_SPANS()
+std::ostream &Flat::KEY_SPANS()
 {
 	out << "\t";
 	int totalStateNum = 0;
@@ -179,7 +179,7 @@ std::ostream &FlatCodeGen::KEY_SPANS()
 	return out;
 }
 
-std::ostream &FlatCodeGen::TO_STATE_ACTIONS()
+std::ostream &Flat::TO_STATE_ACTIONS()
 {
 	out << "\t";
 	int totalStateNum = 0;
@@ -196,7 +196,7 @@ std::ostream &FlatCodeGen::TO_STATE_ACTIONS()
 	return out;
 }
 
-std::ostream &FlatCodeGen::FROM_STATE_ACTIONS()
+std::ostream &Flat::FROM_STATE_ACTIONS()
 {
 	out << "\t";
 	int totalStateNum = 0;
@@ -213,7 +213,7 @@ std::ostream &FlatCodeGen::FROM_STATE_ACTIONS()
 	return out;
 }
 
-std::ostream &FlatCodeGen::EOF_ACTIONS()
+std::ostream &Flat::EOF_ACTIONS()
 {
 	out << "\t";
 	int totalStateNum = 0;
@@ -230,7 +230,7 @@ std::ostream &FlatCodeGen::EOF_ACTIONS()
 	return out;
 }
 
-std::ostream &FlatCodeGen::EOF_TRANS()
+std::ostream &Flat::EOF_TRANS()
 {
 	out << "\t";
 	int totalStateNum = 0;
@@ -255,7 +255,7 @@ std::ostream &FlatCodeGen::EOF_TRANS()
 }
 
 
-std::ostream &FlatCodeGen::COND_KEYS()
+std::ostream &Flat::COND_KEYS()
 {
 	out << '\t';
 	int totalTrans = 0;
@@ -273,7 +273,7 @@ std::ostream &FlatCodeGen::COND_KEYS()
 	return out;
 }
 
-std::ostream &FlatCodeGen::COND_KEY_SPANS()
+std::ostream &Flat::COND_KEY_SPANS()
 {
 	out << "\t";
 	int totalStateNum = 0;
@@ -293,7 +293,7 @@ std::ostream &FlatCodeGen::COND_KEY_SPANS()
 	return out;
 }
 
-std::ostream &FlatCodeGen::CONDS()
+std::ostream &Flat::CONDS()
 {
 	int totalTrans = 0;
 	out << '\t';
@@ -318,7 +318,7 @@ std::ostream &FlatCodeGen::CONDS()
 	return out;
 }
 
-std::ostream &FlatCodeGen::COND_INDEX_OFFSET()
+std::ostream &Flat::COND_INDEX_OFFSET()
 {
 	out << "\t";
 	int totalStateNum = 0, curIndOffset = 0;
@@ -340,7 +340,7 @@ std::ostream &FlatCodeGen::COND_INDEX_OFFSET()
 }
 
 
-std::ostream &FlatCodeGen::KEYS()
+std::ostream &Flat::KEYS()
 {
 	out << '\t';
 	int totalTrans = 0;
@@ -358,7 +358,7 @@ std::ostream &FlatCodeGen::KEYS()
 	return out;
 }
 
-std::ostream &FlatCodeGen::INDICIES()
+std::ostream &Flat::INDICIES()
 {
 	int totalTrans = 0;
 	out << '\t';
@@ -387,7 +387,7 @@ std::ostream &FlatCodeGen::INDICIES()
 	return out;
 }
 
-std::ostream &FlatCodeGen::TRANS_TARGS()
+std::ostream &Flat::TRANS_TARGS()
 {
 	/* Transitions must be written ordered by their id. */
 	RedTransAp **transPtrs = new RedTransAp*[redFsm->transSet.length()];
@@ -416,7 +416,7 @@ std::ostream &FlatCodeGen::TRANS_TARGS()
 }
 
 
-std::ostream &FlatCodeGen::TRANS_ACTIONS()
+std::ostream &Flat::TRANS_ACTIONS()
 {
 	/* Transitions must be written ordered by their id. */
 	RedTransAp **transPtrs = new RedTransAp*[redFsm->transSet.length()];
@@ -441,7 +441,7 @@ std::ostream &FlatCodeGen::TRANS_ACTIONS()
 	return out;
 }
 
-void FlatCodeGen::LOCATE_TRANS()
+void Flat::LOCATE_TRANS()
 {
 	out <<
 		"	_keys = " << ARR_OFF( K(), "(" + vCS() + "<<1)" ) << ";\n"
@@ -454,42 +454,42 @@ void FlatCodeGen::LOCATE_TRANS()
 		"\n";
 }
 
-void FlatCodeGen::GOTO( ostream &ret, int gotoDest, bool inFinish )
+void Flat::GOTO( ostream &ret, int gotoDest, bool inFinish )
 {
 	ret << "{" << vCS() << " = " << gotoDest << "; " << 
 			CTRL_FLOW() << "goto _again;}";
 }
 
-void FlatCodeGen::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
+void Flat::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
 	ret << "{" << vCS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
 	ret << "); " << CTRL_FLOW() << "goto _again;}";
 }
 
-void FlatCodeGen::CURS( ostream &ret, bool inFinish )
+void Flat::CURS( ostream &ret, bool inFinish )
 {
 	ret << "(_ps)";
 }
 
-void FlatCodeGen::TARGS( ostream &ret, bool inFinish, int targState )
+void Flat::TARGS( ostream &ret, bool inFinish, int targState )
 {
 	ret << "(" << vCS() << ")";
 }
 
-void FlatCodeGen::NEXT( ostream &ret, int nextDest, bool inFinish )
+void Flat::NEXT( ostream &ret, int nextDest, bool inFinish )
 {
 	ret << vCS() << " = " << nextDest << ";";
 }
 
-void FlatCodeGen::NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
+void Flat::NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
 	ret << vCS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
 	ret << ");";
 }
 
-void FlatCodeGen::CALL( ostream &ret, int callDest, int targState, bool inFinish )
+void Flat::CALL( ostream &ret, int callDest, int targState, bool inFinish )
 {
 	if ( prePushExpr != 0 ) {
 		ret << "{";
@@ -504,7 +504,7 @@ void FlatCodeGen::CALL( ostream &ret, int callDest, int targState, bool inFinish
 }
 
 
-void FlatCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
+void Flat::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
 {
 	if ( prePushExpr != 0 ) {
 		ret << "{";
@@ -520,7 +520,7 @@ void FlatCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState,
 }
 
 
-void FlatCodeGen::RET( ostream &ret, bool inFinish )
+void Flat::RET( ostream &ret, bool inFinish )
 {
 	ret << "{" << vCS() << " = " << STACK() << "[--" << TOP() << "];";
 
@@ -533,13 +533,13 @@ void FlatCodeGen::RET( ostream &ret, bool inFinish )
 	ret << CTRL_FLOW() << "goto _again;}";
 }
 
-void FlatCodeGen::BREAK( ostream &ret, int targState, bool csForced )
+void Flat::BREAK( ostream &ret, int targState, bool csForced )
 {
 	outLabelUsed = true;
 	ret << "{" << P() << "++; " << CTRL_FLOW() << "goto _out; }";
 }
 
-void PlainFlatCodeGen::writeData()
+void FlatLooped::writeData()
 {
 	/* If there are any transtion functions then output the array. If there
 	 * are none, don't bother emitting an empty array that won't be used. */
@@ -635,7 +635,7 @@ void PlainFlatCodeGen::writeData()
 	STATE_IDS();
 }
 
-void FlatCodeGen::COND_TRANSLATE()
+void Flat::COND_TRANSLATE()
 {
 	out << 
 		"	_widec = " << GET_KEY() << ";\n";
@@ -676,7 +676,7 @@ void FlatCodeGen::COND_TRANSLATE()
 		"	}\n";
 }
 
-void PlainFlatCodeGen::writeExec()
+void FlatLooped::writeExec()
 {
 	testEofUsed = false;
 	outLabelUsed = false;

@@ -29,7 +29,7 @@
 
 namespace C {
 
-std::ostream &FGotoCodeGen::EXEC_ACTIONS()
+std::ostream &GotoExpanded::EXEC_ACTIONS()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -49,7 +49,7 @@ std::ostream &FGotoCodeGen::EXEC_ACTIONS()
 
 /* Write out the function switch. This switch is keyed on the values
  * of the func index. */
-std::ostream &FGotoCodeGen::TO_STATE_ACTION_SWITCH()
+std::ostream &GotoExpanded::TO_STATE_ACTION_SWITCH()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -71,7 +71,7 @@ std::ostream &FGotoCodeGen::TO_STATE_ACTION_SWITCH()
 
 /* Write out the function switch. This switch is keyed on the values
  * of the func index. */
-std::ostream &FGotoCodeGen::FROM_STATE_ACTION_SWITCH()
+std::ostream &GotoExpanded::FROM_STATE_ACTION_SWITCH()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -91,7 +91,7 @@ std::ostream &FGotoCodeGen::FROM_STATE_ACTION_SWITCH()
 	return out;
 }
 
-std::ostream &FGotoCodeGen::EOF_ACTION_SWITCH()
+std::ostream &GotoExpanded::EOF_ACTION_SWITCH()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -112,7 +112,7 @@ std::ostream &FGotoCodeGen::EOF_ACTION_SWITCH()
 }
 
 
-std::ostream &FGotoCodeGen::FINISH_CASES()
+std::ostream &GotoExpanded::FINISH_CASES()
 {
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* States that are final and have an out action need a case. */
@@ -128,7 +128,7 @@ std::ostream &FGotoCodeGen::FINISH_CASES()
 	return out;
 }
 
-unsigned int FGotoCodeGen::TO_STATE_ACTION( RedStateAp *state )
+unsigned int GotoExpanded::TO_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->toStateAction != 0 )
@@ -136,7 +136,7 @@ unsigned int FGotoCodeGen::TO_STATE_ACTION( RedStateAp *state )
 	return act;
 }
 
-unsigned int FGotoCodeGen::FROM_STATE_ACTION( RedStateAp *state )
+unsigned int GotoExpanded::FROM_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->fromStateAction != 0 )
@@ -144,7 +144,7 @@ unsigned int FGotoCodeGen::FROM_STATE_ACTION( RedStateAp *state )
 	return act;
 }
 
-unsigned int FGotoCodeGen::EOF_ACTION( RedStateAp *state )
+unsigned int GotoExpanded::EOF_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->eofAction != 0 )
@@ -152,7 +152,7 @@ unsigned int FGotoCodeGen::EOF_ACTION( RedStateAp *state )
 	return act;
 }
 
-void FGotoCodeGen::writeData()
+void GotoExpanded::writeData()
 {
 	if ( redFsm->anyToStateActions() ) {
 		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), TSA() );
@@ -178,7 +178,7 @@ void FGotoCodeGen::writeData()
 	STATE_IDS();
 }
 
-void FGotoCodeGen::writeExec()
+void GotoExpanded::writeExec()
 {
 	testEofUsed = false;
 	outLabelUsed = false;

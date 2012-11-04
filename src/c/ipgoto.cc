@@ -33,19 +33,19 @@ using std::ostringstream;
 
 namespace C {
 
-bool IpGotoCodeGen::useAgainLabel()
+bool IpGoto::useAgainLabel()
 {
 	return redFsm->anyRegActionRets() || 
 			redFsm->anyRegActionByValControl() || 
 			redFsm->anyRegNextStmt();
 }
 
-void IpGotoCodeGen::GOTO( ostream &ret, int gotoDest, bool inFinish )
+void IpGoto::GOTO( ostream &ret, int gotoDest, bool inFinish )
 {
 	ret << "{" << CTRL_FLOW() << "goto st" << gotoDest << ";}";
 }
 
-void IpGotoCodeGen::CALL( ostream &ret, int callDest, int targState, bool inFinish )
+void IpGoto::CALL( ostream &ret, int callDest, int targState, bool inFinish )
 {
 	if ( prePushExpr != 0 ) {
 		ret << "{";
@@ -59,7 +59,7 @@ void IpGotoCodeGen::CALL( ostream &ret, int callDest, int targState, bool inFini
 		ret << "}";
 }
 
-void IpGotoCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
+void IpGoto::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
 {
 	if ( prePushExpr != 0 ) {
 		ret << "{";
@@ -74,7 +74,7 @@ void IpGotoCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targStat
 		ret << "}";
 }
 
-void IpGotoCodeGen::RET( ostream &ret, bool inFinish )
+void IpGoto::RET( ostream &ret, bool inFinish )
 {
 	ret << "{" << vCS() << " = " << STACK() << "[--" << TOP() << "];";
 
@@ -87,36 +87,36 @@ void IpGotoCodeGen::RET( ostream &ret, bool inFinish )
 	ret << CTRL_FLOW() << "goto _again;}";
 }
 
-void IpGotoCodeGen::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
+void IpGoto::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
 	ret << "{" << vCS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
 	ret << "); " << CTRL_FLOW() << "goto _again;}";
 }
 
-void IpGotoCodeGen::NEXT( ostream &ret, int nextDest, bool inFinish )
+void IpGoto::NEXT( ostream &ret, int nextDest, bool inFinish )
 {
 	ret << vCS() << " = " << nextDest << ";";
 }
 
-void IpGotoCodeGen::NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
+void IpGoto::NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
 	ret << vCS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
 	ret << ");";
 }
 
-void IpGotoCodeGen::CURS( ostream &ret, bool inFinish )
+void IpGoto::CURS( ostream &ret, bool inFinish )
 {
 	ret << "(_ps)";
 }
 
-void IpGotoCodeGen::TARGS( ostream &ret, bool inFinish, int targState )
+void IpGoto::TARGS( ostream &ret, bool inFinish, int targState )
 {
 	ret << targState;
 }
 
-void IpGotoCodeGen::BREAK( ostream &ret, int targState, bool csForced )
+void IpGoto::BREAK( ostream &ret, int targState, bool csForced )
 {
 	outLabelUsed = true;
 	ret << "{" << P() << "++; ";
@@ -125,7 +125,7 @@ void IpGotoCodeGen::BREAK( ostream &ret, int targState, bool csForced )
 	ret << CTRL_FLOW() << "goto _out;}";
 }
 
-bool IpGotoCodeGen::IN_TRANS_ACTIONS( RedStateAp *state )
+bool IpGoto::IN_TRANS_ACTIONS( RedStateAp *state )
 {
 	bool anyWritten = false;
 
@@ -166,7 +166,7 @@ bool IpGotoCodeGen::IN_TRANS_ACTIONS( RedStateAp *state )
 
 /* Called from GotoCodeGen::STATE_GOTOS just before writing the gotos for each
  * state. */
-void IpGotoCodeGen::GOTO_HEADER( RedStateAp *state )
+void IpGoto::GOTO_HEADER( RedStateAp *state )
 {
 	bool anyWritten = IN_TRANS_ACTIONS( state );
 
@@ -215,7 +215,7 @@ void IpGotoCodeGen::GOTO_HEADER( RedStateAp *state )
 		out << "	_ps = " << state->id << ";\n";
 }
 
-void IpGotoCodeGen::STATE_GOTO_ERROR()
+void IpGoto::STATE_GOTO_ERROR()
 {
 	/* In the error state we need to emit some stuff that usually goes into
 	 * the header. */
@@ -237,7 +237,7 @@ void IpGotoCodeGen::STATE_GOTO_ERROR()
 
 /* Write out a key from the fsm code gen. Depends on wether or not the key is
  * signed. */
-string IpGotoCodeGen::CKEY( CondKey key )
+string IpGoto::CKEY( CondKey key )
 {
 	ostringstream ret;
 	ret << key.getVal();
@@ -245,7 +245,7 @@ string IpGotoCodeGen::CKEY( CondKey key )
 }
 
 
-void IpGotoCodeGen::COND_B_SEARCH( RedTransAp *trans, int level, int low, int high )
+void IpGoto::COND_B_SEARCH( RedTransAp *trans, int level, int low, int high )
 {
 	/* Get the mid position, staying on the lower end of the range. */
 	int mid = (low + high) >> 1;
@@ -342,7 +342,7 @@ void IpGotoCodeGen::COND_B_SEARCH( RedTransAp *trans, int level, int low, int hi
 
 
 /* Emit the goto to take for a given transition. */
-std::ostream &IpGotoCodeGen::TRANS_GOTO( RedTransAp *trans, int level )
+std::ostream &IpGoto::TRANS_GOTO( RedTransAp *trans, int level )
 {
 	if ( trans->condSpace == 0 || trans->condSpace->condSet.length() == 0 ) {
 		/* Existing. */
@@ -376,7 +376,7 @@ std::ostream &IpGotoCodeGen::TRANS_GOTO( RedTransAp *trans, int level )
 }
 
 /* Emit the goto to take for a given transition. */
-std::ostream &IpGotoCodeGen::COND_GOTO( RedCondAp *cond, int level )
+std::ostream &IpGoto::COND_GOTO( RedCondAp *cond, int level )
 {
 	/* Existing. */
 	if ( cond->action != 0 ) {
@@ -391,7 +391,7 @@ std::ostream &IpGotoCodeGen::COND_GOTO( RedCondAp *cond, int level )
 	return out;
 }
 
-std::ostream &IpGotoCodeGen::EXIT_STATES()
+std::ostream &IpGoto::EXIT_STATES()
 {
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->outNeeded ) {
@@ -403,7 +403,7 @@ std::ostream &IpGotoCodeGen::EXIT_STATES()
 	return out;
 }
 
-std::ostream &IpGotoCodeGen::AGAIN_CASES()
+std::ostream &IpGoto::AGAIN_CASES()
 {
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		out << 
@@ -412,7 +412,7 @@ std::ostream &IpGotoCodeGen::AGAIN_CASES()
 	return out;
 }
 
-std::ostream &IpGotoCodeGen::STATE_GOTOS()
+std::ostream &IpGoto::STATE_GOTOS()
 {
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st == redFsm->errState )
@@ -444,7 +444,7 @@ std::ostream &IpGotoCodeGen::STATE_GOTOS()
 }
 
 
-std::ostream &IpGotoCodeGen::FINISH_CASES()
+std::ostream &IpGoto::FINISH_CASES()
 {
 	bool anyWritten = false;
 
@@ -484,7 +484,7 @@ std::ostream &IpGotoCodeGen::FINISH_CASES()
 	return out;
 }
 
-void IpGotoCodeGen::setLabelsNeeded( GenInlineList *inlineList )
+void IpGoto::setLabelsNeeded( GenInlineList *inlineList )
 {
 	for ( GenInlineList::Iter item = *inlineList; item.lte(); item++ ) {
 		switch ( item->type ) {
@@ -502,7 +502,7 @@ void IpGotoCodeGen::setLabelsNeeded( GenInlineList *inlineList )
 }
 
 /* Set up labelNeeded flag for each state. */
-void IpGotoCodeGen::setLabelsNeeded()
+void IpGoto::setLabelsNeeded()
 {
 	/* If we use the _again label, then we the _again switch, which uses all
 	 * labels. */
@@ -559,12 +559,12 @@ void IpGotoCodeGen::setLabelsNeeded()
 	}
 }
 
-void IpGotoCodeGen::writeData()
+void IpGoto::writeData()
 {
 	STATE_IDS();
 }
 
-void IpGotoCodeGen::writeExec()
+void IpGoto::writeExec()
 {
 	/* Must set labels immediately before writing because we may depend on the
 	 * noend write option. */

@@ -29,7 +29,7 @@
 namespace C {
 
 /* Determine if we should use indicies or not. */
-void FTabCodeGen::calcIndexSize()
+void BinaryExpanded::calcIndexSize()
 {
 	int sizeWithInds = 0, sizeWithoutInds = 0;
 
@@ -56,7 +56,7 @@ void FTabCodeGen::calcIndexSize()
 	useIndicies = sizeWithInds < sizeWithoutInds;
 }
 
-std::ostream &FTabCodeGen::TO_STATE_ACTION( RedStateAp *state )
+std::ostream &BinaryExpanded::TO_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->toStateAction != 0 )
@@ -65,7 +65,7 @@ std::ostream &FTabCodeGen::TO_STATE_ACTION( RedStateAp *state )
 	return out;
 }
 
-std::ostream &FTabCodeGen::FROM_STATE_ACTION( RedStateAp *state )
+std::ostream &BinaryExpanded::FROM_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->fromStateAction != 0 )
@@ -74,7 +74,7 @@ std::ostream &FTabCodeGen::FROM_STATE_ACTION( RedStateAp *state )
 	return out;
 }
 
-std::ostream &FTabCodeGen::EOF_ACTION( RedStateAp *state )
+std::ostream &BinaryExpanded::EOF_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->eofAction != 0 )
@@ -85,7 +85,7 @@ std::ostream &FTabCodeGen::EOF_ACTION( RedStateAp *state )
 
 
 /* Write out the function for a transition. */
-std::ostream &FTabCodeGen::TRANS_ACTION( RedTransAp *trans )
+std::ostream &BinaryExpanded::TRANS_ACTION( RedTransAp *trans )
 {
 	int action = 0;
 	if ( trans->action != 0 )
@@ -96,7 +96,7 @@ std::ostream &FTabCodeGen::TRANS_ACTION( RedTransAp *trans )
 
 /* Write out the function switch. This switch is keyed on the values
  * of the func index. */
-std::ostream &FTabCodeGen::TO_STATE_ACTION_SWITCH()
+std::ostream &BinaryExpanded::TO_STATE_ACTION_SWITCH()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -118,7 +118,7 @@ std::ostream &FTabCodeGen::TO_STATE_ACTION_SWITCH()
 
 /* Write out the function switch. This switch is keyed on the values
  * of the func index. */
-std::ostream &FTabCodeGen::FROM_STATE_ACTION_SWITCH()
+std::ostream &BinaryExpanded::FROM_STATE_ACTION_SWITCH()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -138,7 +138,7 @@ std::ostream &FTabCodeGen::FROM_STATE_ACTION_SWITCH()
 	return out;
 }
 
-std::ostream &FTabCodeGen::EOF_ACTION_SWITCH()
+std::ostream &BinaryExpanded::EOF_ACTION_SWITCH()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -160,7 +160,7 @@ std::ostream &FTabCodeGen::EOF_ACTION_SWITCH()
 
 /* Write out the function switch. This switch is keyed on the values
  * of the func index. */
-std::ostream &FTabCodeGen::ACTION_SWITCH()
+std::ostream &BinaryExpanded::ACTION_SWITCH()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -180,7 +180,7 @@ std::ostream &FTabCodeGen::ACTION_SWITCH()
 	return out;
 }
 
-void FTabCodeGen::writeData()
+void BinaryExpanded::writeData()
 {
 	if ( redFsm->anyConditions() ) {
 		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxCondOffset), CO() );
@@ -292,7 +292,7 @@ void FTabCodeGen::writeData()
 	STATE_IDS();
 }
 
-void FTabCodeGen::writeExec()
+void BinaryExpanded::writeExec()
 {
 	testEofUsed = false;
 	outLabelUsed = false;

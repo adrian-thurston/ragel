@@ -39,11 +39,11 @@ namespace C {
 /*
  * Goto driven fsm.
  */
-class GotoCodeGen
+class Goto
 	: public FsmCodeGen
 {
 public:
-	GotoCodeGen( const CodeGenArgs &args ) 
+	Goto( const CodeGenArgs &args ) 
 		: FsmCodeGen(args) {}
 
 	std::ostream &TO_STATE_ACTION_SWITCH();
@@ -88,12 +88,12 @@ public:
 	virtual void STATE_GOTO_ERROR();
 };
 
-class PlainGotoCodeGen
-	: public GotoCodeGen
+class GotoLooped
+	: public Goto
 {
 public:
-	PlainGotoCodeGen( const CodeGenArgs &args ) 
-		: GotoCodeGen(args) {}
+	GotoLooped( const CodeGenArgs &args ) 
+		: Goto(args) {}
 
 	virtual void writeData();
 	virtual void writeExec();

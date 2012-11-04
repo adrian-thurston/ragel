@@ -35,14 +35,11 @@ struct RedStateAp;
 
 namespace C {
 
-/*
- * TabCodeGen
- */
-class TabCodeGen
+class Binary
 	: public FsmCodeGen
 {
 public:
-	TabCodeGen( const CodeGenArgs &args )
+	Binary( const CodeGenArgs &args )
 		: FsmCodeGen(args) {}
 
 protected:
@@ -91,12 +88,12 @@ protected:
 	virtual void calcIndexSize();
 };
 
-class PlainTabCodeGen
-	: public TabCodeGen
+class BinaryLooped
+	: public Binary
 {
 public:
-	PlainTabCodeGen( const CodeGenArgs &args )
-		: TabCodeGen(args) {}
+	BinaryLooped( const CodeGenArgs &args )
+		: Binary(args) {}
 
 	virtual void writeData();
 	virtual void writeExec();

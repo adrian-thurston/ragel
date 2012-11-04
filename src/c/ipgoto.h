@@ -35,12 +35,12 @@ namespace C {
 /*
  * class FGotoCodeGen
  */
-class IpGotoCodeGen
-	: public GotoCodeGen
+class IpGoto
+	: public Goto
 {
 public:
-	IpGotoCodeGen( const CodeGenArgs &args ) 
-			: GotoCodeGen(args) {}
+	IpGoto( const CodeGenArgs &args ) 
+			: Goto(args) {}
 
 	string CKEY( CondKey key );
 	void COND_B_SEARCH( RedTransAp *trans, int level, int low, int high );
@@ -68,7 +68,7 @@ public:
 protected:
 	bool useAgainLabel();
 
-	/* Called from GotoCodeGen::STATE_GOTOS just before writing the gotos for
+	/* Called from Goto::STATE_GOTOS just before writing the gotos for
 	 * each state. */
 	bool IN_TRANS_ACTIONS( RedStateAp *state );
 	void GOTO_HEADER( RedStateAp *state );

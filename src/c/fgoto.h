@@ -33,14 +33,14 @@ struct CodeGenData;
 namespace C {
 
 /*
- * class FGotoCodeGen
+ * class GotoExpanded
  */
-class FGotoCodeGen
-	: public GotoCodeGen
+class GotoExpanded
+	: public Goto
 {
 public:
-	FGotoCodeGen( const CodeGenArgs &args )
-		: GotoCodeGen(args) {}
+	GotoExpanded( const CodeGenArgs &args )
+		: Goto(args) {}
 
 	std::ostream &EXEC_ACTIONS();
 	std::ostream &TO_STATE_ACTION_SWITCH();

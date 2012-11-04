@@ -35,15 +35,12 @@ struct RedStateAp;
 
 namespace C {
 
-/*
- * FlatCodeGen
- */
-class FlatCodeGen
+class Flat
 	: public FsmCodeGen
 {
 public:
-	FlatCodeGen( const CodeGenArgs &args ) : FsmCodeGen(args) {}
-	virtual ~FlatCodeGen() { }
+	Flat( const CodeGenArgs &args ) : FsmCodeGen(args) {}
+	virtual ~Flat() { }
 
 protected:
 	std::ostream &TO_STATE_ACTION_SWITCH();
@@ -85,12 +82,12 @@ protected:
 	virtual std::ostream &TRANS_ACTION( RedTransAp *trans );
 };
 
-class PlainFlatCodeGen
-	: public FlatCodeGen
+class FlatLooped
+	: public Flat
 {
 public:
-	PlainFlatCodeGen( const CodeGenArgs &args )
-		: FlatCodeGen(args) {}
+	FlatLooped( const CodeGenArgs &args )
+		: Flat(args) {}
 
 	virtual void writeData();
 	virtual void writeExec();

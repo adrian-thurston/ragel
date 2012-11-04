@@ -29,7 +29,7 @@
 namespace C {
 
 /* Determine if we should use indicies or not. */
-void TabCodeGen::calcIndexSize()
+void Binary::calcIndexSize()
 {
 	int sizeWithInds = 0, sizeWithoutInds = 0;
 
@@ -56,7 +56,7 @@ void TabCodeGen::calcIndexSize()
 	useIndicies = sizeWithInds < sizeWithoutInds;
 }
 
-std::ostream &TabCodeGen::TO_STATE_ACTION( RedStateAp *state )
+std::ostream &Binary::TO_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->toStateAction != 0 )
@@ -65,7 +65,7 @@ std::ostream &TabCodeGen::TO_STATE_ACTION( RedStateAp *state )
 	return out;
 }
 
-std::ostream &TabCodeGen::FROM_STATE_ACTION( RedStateAp *state )
+std::ostream &Binary::FROM_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->fromStateAction != 0 )
@@ -74,7 +74,7 @@ std::ostream &TabCodeGen::FROM_STATE_ACTION( RedStateAp *state )
 	return out;
 }
 
-std::ostream &TabCodeGen::EOF_ACTION( RedStateAp *state )
+std::ostream &Binary::EOF_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->eofAction != 0 )
@@ -84,7 +84,7 @@ std::ostream &TabCodeGen::EOF_ACTION( RedStateAp *state )
 }
 
 
-std::ostream &TabCodeGen::TRANS_ACTION( RedTransAp *trans )
+std::ostream &Binary::TRANS_ACTION( RedTransAp *trans )
 {
 	/* If there are actions, emit them. Otherwise emit zero. */
 	int act = 0;
@@ -94,7 +94,7 @@ std::ostream &TabCodeGen::TRANS_ACTION( RedTransAp *trans )
 	return out;
 }
 
-std::ostream &TabCodeGen::TO_STATE_ACTION_SWITCH()
+std::ostream &Binary::TO_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
@@ -111,7 +111,7 @@ std::ostream &TabCodeGen::TO_STATE_ACTION_SWITCH()
 	return out;
 }
 
-std::ostream &TabCodeGen::FROM_STATE_ACTION_SWITCH()
+std::ostream &Binary::FROM_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
@@ -128,7 +128,7 @@ std::ostream &TabCodeGen::FROM_STATE_ACTION_SWITCH()
 	return out;
 }
 
-std::ostream &TabCodeGen::EOF_ACTION_SWITCH()
+std::ostream &Binary::EOF_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
@@ -146,7 +146,7 @@ std::ostream &TabCodeGen::EOF_ACTION_SWITCH()
 }
 
 
-std::ostream &TabCodeGen::ACTION_SWITCH()
+std::ostream &Binary::ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
@@ -163,7 +163,7 @@ std::ostream &TabCodeGen::ACTION_SWITCH()
 	return out;
 }
 
-std::ostream &TabCodeGen::COND_OFFSETS()
+std::ostream &Binary::COND_OFFSETS()
 {
 	out << "\t";
 	int totalStateNum = 0, curKeyOffset = 0;
@@ -183,7 +183,7 @@ std::ostream &TabCodeGen::COND_OFFSETS()
 	return out;
 }
 
-std::ostream &TabCodeGen::KEY_OFFSETS()
+std::ostream &Binary::KEY_OFFSETS()
 {
 	out << "\t";
 	int totalStateNum = 0, curKeyOffset = 0;
@@ -204,7 +204,7 @@ std::ostream &TabCodeGen::KEY_OFFSETS()
 }
 
 
-std::ostream &TabCodeGen::INDEX_OFFSETS()
+std::ostream &Binary::INDEX_OFFSETS()
 {
 	out << "\t";
 	int totalStateNum = 0, curIndOffset = 0;
@@ -226,7 +226,7 @@ std::ostream &TabCodeGen::INDEX_OFFSETS()
 	return out;
 }
 
-std::ostream &TabCodeGen::COND_LENS()
+std::ostream &Binary::COND_LENS()
 {
 	out << "\t";
 	int totalStateNum = 0;
@@ -244,7 +244,7 @@ std::ostream &TabCodeGen::COND_LENS()
 }
 
 
-std::ostream &TabCodeGen::SINGLE_LENS()
+std::ostream &Binary::SINGLE_LENS()
 {
 	out << "\t";
 	int totalStateNum = 0;
@@ -261,7 +261,7 @@ std::ostream &TabCodeGen::SINGLE_LENS()
 	return out;
 }
 
-std::ostream &TabCodeGen::RANGE_LENS()
+std::ostream &Binary::RANGE_LENS()
 {
 	out << "\t";
 	int totalStateNum = 0;
@@ -278,7 +278,7 @@ std::ostream &TabCodeGen::RANGE_LENS()
 	return out;
 }
 
-std::ostream &TabCodeGen::TO_STATE_ACTIONS()
+std::ostream &Binary::TO_STATE_ACTIONS()
 {
 	out << "\t";
 	int totalStateNum = 0;
@@ -295,7 +295,7 @@ std::ostream &TabCodeGen::TO_STATE_ACTIONS()
 	return out;
 }
 
-std::ostream &TabCodeGen::FROM_STATE_ACTIONS()
+std::ostream &Binary::FROM_STATE_ACTIONS()
 {
 	out << "\t";
 	int totalStateNum = 0;
@@ -312,7 +312,7 @@ std::ostream &TabCodeGen::FROM_STATE_ACTIONS()
 	return out;
 }
 
-std::ostream &TabCodeGen::EOF_ACTIONS()
+std::ostream &Binary::EOF_ACTIONS()
 {
 	out << "\t";
 	int totalStateNum = 0;
@@ -329,7 +329,7 @@ std::ostream &TabCodeGen::EOF_ACTIONS()
 	return out;
 }
 
-std::ostream &TabCodeGen::EOF_TRANS()
+std::ostream &Binary::EOF_TRANS()
 {
 	out << "\t";
 	int totalStateNum = 0;
@@ -353,7 +353,7 @@ std::ostream &TabCodeGen::EOF_TRANS()
 }
 
 
-std::ostream &TabCodeGen::COND_KEYS()
+std::ostream &Binary::COND_KEYS()
 {
 	out << '\t';
 	int totalTrans = 0;
@@ -378,7 +378,7 @@ std::ostream &TabCodeGen::COND_KEYS()
 	return out;
 }
 
-std::ostream &TabCodeGen::COND_SPACES()
+std::ostream &Binary::COND_SPACES()
 {
 	out << '\t';
 	int totalTrans = 0;
@@ -398,7 +398,7 @@ std::ostream &TabCodeGen::COND_SPACES()
 	return out;
 }
 
-std::ostream &TabCodeGen::KEYS()
+std::ostream &Binary::KEYS()
 {
 	out << '\t';
 	int totalTrans = 0;
@@ -430,7 +430,7 @@ std::ostream &TabCodeGen::KEYS()
 	return out;
 }
 
-std::ostream &TabCodeGen::INDICIES()
+std::ostream &Binary::INDICIES()
 {
 	int totalTrans = 0;
 	out << '\t';
@@ -463,7 +463,7 @@ std::ostream &TabCodeGen::INDICIES()
 	return out;
 }
 
-std::ostream &TabCodeGen::TRANS_TARGS()
+std::ostream &Binary::TRANS_TARGS()
 {
 	int totalTrans = 0;
 	out << '\t';
@@ -512,7 +512,7 @@ std::ostream &TabCodeGen::TRANS_TARGS()
 }
 
 
-std::ostream &TabCodeGen::TRANS_ACTIONS()
+std::ostream &Binary::TRANS_ACTIONS()
 {
 	int totalTrans = 0;
 	out << '\t';
@@ -559,7 +559,7 @@ std::ostream &TabCodeGen::TRANS_ACTIONS()
 	return out;
 }
 
-std::ostream &TabCodeGen::TRANS_TARGS_WI()
+std::ostream &Binary::TRANS_TARGS_WI()
 {
 	/* Transitions must be written ordered by their id. */
 	RedTransAp **transPtrs = new RedTransAp*[redFsm->transSet.length()];
@@ -588,7 +588,7 @@ std::ostream &TabCodeGen::TRANS_TARGS_WI()
 }
 
 
-std::ostream &TabCodeGen::TRANS_ACTIONS_WI()
+std::ostream &Binary::TRANS_ACTIONS_WI()
 {
 	/* Transitions must be written ordered by their id. */
 	RedTransAp **transPtrs = new RedTransAp*[redFsm->transSet.length()];
@@ -613,7 +613,7 @@ std::ostream &TabCodeGen::TRANS_ACTIONS_WI()
 	return out;
 }
 
-void TabCodeGen::LOCATE_TRANS()
+void Binary::LOCATE_TRANS()
 {
 	out <<
 		"	_keys = " << ARR_OFF( K(), KO() + "[" + vCS() + "]" ) << ";\n"
@@ -666,42 +666,42 @@ void TabCodeGen::LOCATE_TRANS()
 		"\n";
 }
 
-void TabCodeGen::GOTO( ostream &ret, int gotoDest, bool inFinish )
+void Binary::GOTO( ostream &ret, int gotoDest, bool inFinish )
 {
 	ret << "{" << vCS() << " = " << gotoDest << "; " << 
 			CTRL_FLOW() << "goto _again;}";
 }
 
-void TabCodeGen::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
+void Binary::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
 	ret << "{" << vCS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
 	ret << "); " << CTRL_FLOW() << "goto _again;}";
 }
 
-void TabCodeGen::CURS( ostream &ret, bool inFinish )
+void Binary::CURS( ostream &ret, bool inFinish )
 {
 	ret << "(_ps)";
 }
 
-void TabCodeGen::TARGS( ostream &ret, bool inFinish, int targState )
+void Binary::TARGS( ostream &ret, bool inFinish, int targState )
 {
 	ret << "(" << vCS() << ")";
 }
 
-void TabCodeGen::NEXT( ostream &ret, int nextDest, bool inFinish )
+void Binary::NEXT( ostream &ret, int nextDest, bool inFinish )
 {
 	ret << vCS() << " = " << nextDest << ";";
 }
 
-void TabCodeGen::NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
+void Binary::NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
 	ret << vCS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
 	ret << ");";
 }
 
-void TabCodeGen::CALL( ostream &ret, int callDest, int targState, bool inFinish )
+void Binary::CALL( ostream &ret, int callDest, int targState, bool inFinish )
 {
 	if ( prePushExpr != 0 ) {
 		ret << "{";
@@ -715,7 +715,7 @@ void TabCodeGen::CALL( ostream &ret, int callDest, int targState, bool inFinish 
 		ret << "}";
 }
 
-void TabCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
+void Binary::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
 {
 	if ( prePushExpr != 0 ) {
 		ret << "{";
@@ -730,7 +730,7 @@ void TabCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, 
 		ret << "}";
 }
 
-void TabCodeGen::RET( ostream &ret, bool inFinish )
+void Binary::RET( ostream &ret, bool inFinish )
 {
 	ret << "{" << vCS() << " = " << STACK() << "[--" << 
 			TOP() << "]; ";
@@ -744,13 +744,13 @@ void TabCodeGen::RET( ostream &ret, bool inFinish )
 	ret << CTRL_FLOW() <<  "goto _again;}";
 }
 
-void TabCodeGen::BREAK( ostream &ret, int targState, bool csForced )
+void Binary::BREAK( ostream &ret, int targState, bool csForced )
 {
 	outLabelUsed = true;
 	ret << "{" << P() << "++; " << CTRL_FLOW() << "goto _out; }";
 }
 
-void PlainTabCodeGen::writeData()
+void BinaryLooped::writeData()
 {
 	/* If there are any transtion functions then output the array. If there
 	 * are none, don't bother emitting an empty array that won't be used. */
@@ -871,7 +871,7 @@ void PlainTabCodeGen::writeData()
 	STATE_IDS();
 }
 
-void TabCodeGen::COND_TRANSLATE()
+void Binary::COND_TRANSLATE()
 {
 	out << 
 		"	_widec = " << GET_KEY() << ";\n"
@@ -924,7 +924,7 @@ void TabCodeGen::COND_TRANSLATE()
 		"\n";
 }
 
-void PlainTabCodeGen::writeExec()
+void BinaryLooped::writeExec()
 {
 	testEofUsed = false;
 	outLabelUsed = false;

@@ -28,7 +28,7 @@
 
 namespace C {
 
-std::ostream &FFlatCodeGen::TO_STATE_ACTION( RedStateAp *state )
+std::ostream &FlatExpanded::TO_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->toStateAction != 0 )
@@ -37,7 +37,7 @@ std::ostream &FFlatCodeGen::TO_STATE_ACTION( RedStateAp *state )
 	return out;
 }
 
-std::ostream &FFlatCodeGen::FROM_STATE_ACTION( RedStateAp *state )
+std::ostream &FlatExpanded::FROM_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->fromStateAction != 0 )
@@ -46,7 +46,7 @@ std::ostream &FFlatCodeGen::FROM_STATE_ACTION( RedStateAp *state )
 	return out;
 }
 
-std::ostream &FFlatCodeGen::EOF_ACTION( RedStateAp *state )
+std::ostream &FlatExpanded::EOF_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->eofAction != 0 )
@@ -56,7 +56,7 @@ std::ostream &FFlatCodeGen::EOF_ACTION( RedStateAp *state )
 }
 
 /* Write out the function for a transition. */
-std::ostream &FFlatCodeGen::TRANS_ACTION( RedTransAp *trans )
+std::ostream &FlatExpanded::TRANS_ACTION( RedTransAp *trans )
 {
 	int action = 0;
 	if ( trans->action != 0 )
@@ -67,7 +67,7 @@ std::ostream &FFlatCodeGen::TRANS_ACTION( RedTransAp *trans )
 
 /* Write out the function switch. This switch is keyed on the values
  * of the func index. */
-std::ostream &FFlatCodeGen::TO_STATE_ACTION_SWITCH()
+std::ostream &FlatExpanded::TO_STATE_ACTION_SWITCH()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -89,7 +89,7 @@ std::ostream &FFlatCodeGen::TO_STATE_ACTION_SWITCH()
 
 /* Write out the function switch. This switch is keyed on the values
  * of the func index. */
-std::ostream &FFlatCodeGen::FROM_STATE_ACTION_SWITCH()
+std::ostream &FlatExpanded::FROM_STATE_ACTION_SWITCH()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -109,7 +109,7 @@ std::ostream &FFlatCodeGen::FROM_STATE_ACTION_SWITCH()
 	return out;
 }
 
-std::ostream &FFlatCodeGen::EOF_ACTION_SWITCH()
+std::ostream &FlatExpanded::EOF_ACTION_SWITCH()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -131,7 +131,7 @@ std::ostream &FFlatCodeGen::EOF_ACTION_SWITCH()
 
 /* Write out the function switch. This switch is keyed on the values
  * of the func index. */
-std::ostream &FFlatCodeGen::ACTION_SWITCH()
+std::ostream &FlatExpanded::ACTION_SWITCH()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -151,7 +151,7 @@ std::ostream &FFlatCodeGen::ACTION_SWITCH()
 	return out;
 }
 
-void FFlatCodeGen::writeData()
+void FlatExpanded::writeData()
 {
 	if ( redFsm->anyConditions() ) {
 		OPEN_ARRAY( WIDE_ALPH_TYPE(), CK() );
@@ -238,7 +238,7 @@ void FFlatCodeGen::writeData()
 	STATE_IDS();
 }
 
-void FFlatCodeGen::writeExec()
+void FlatExpanded::writeExec()
 {
 	testEofUsed = false;
 	outLabelUsed = false;

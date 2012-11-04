@@ -32,14 +32,11 @@ struct CodeGenData;
 
 namespace C {
 
-/*
- * FTabCodeG\verb|e
- */
-class FTabCodeGen : public TabCodeGen
+class BinaryExpanded : public Binary
 {
 public:
-	FTabCodeGen( const CodeGenArgs &args ) 
-			: TabCodeGen(args) {}
+	BinaryExpanded( const CodeGenArgs &args ) 
+			: Binary(args) {}
 
 protected:
 	std::ostream &TO_STATE_ACTION_SWITCH();

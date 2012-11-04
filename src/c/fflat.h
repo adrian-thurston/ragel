@@ -33,14 +33,14 @@ struct CodeGenData;
 namespace C {
 
 /*
- * FFlatCodeGen
+ * FlatExpanded
  */
-class FFlatCodeGen
-	: public FlatCodeGen
+class FlatExpanded
+	: public Flat
 {
 public:
-	FFlatCodeGen( const CodeGenArgs &args ) 
-		: FlatCodeGen(args) {}
+	FlatExpanded( const CodeGenArgs &args ) 
+		: Flat(args) {}
 
 protected:
 	std::ostream &TO_STATE_ACTION_SWITCH();

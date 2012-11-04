@@ -26,12 +26,12 @@
 
 namespace C {
 
-class SplitCodeGen
-	: public IpGotoCodeGen
+class SplitGoto
+	: public IpGoto
 {
 public:
-	SplitCodeGen( const CodeGenArgs &args ) 
-		: IpGotoCodeGen(args) {}
+	SplitGoto( const CodeGenArgs &args ) 
+		: IpGoto(args) {}
 
 	bool ptOutLabelUsed;
 
