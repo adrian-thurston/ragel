@@ -21,8 +21,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _CDFFLAT_H
-#define _CDFFLAT_H
+#ifndef _C_FLATEXP_H
+#define _C_FLATEXP_H
 
 #include <iostream>
 #include "flat.h"

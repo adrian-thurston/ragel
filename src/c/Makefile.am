@@ -8,9 +8,10 @@ libc_a_SOURCES = \
 	binary.h \
 	binloop.h \
 	binexp.h \
-	fflat.h \
-	fgoto.h \
 	flat.h \
+	flatloop.h \
+	flatexp.h \
+	fgoto.h \
 	goto.h \
 	ipgoto.h \
 	split.h \
@@ -19,9 +20,10 @@ libc_a_SOURCES = \
 	binary.cc \
 	binloop.cc \
 	binexp.cc \
-	fflat.cc \
-	fgoto.cc \
 	flat.cc \
+	flatloop.cc \
+	flatexp.cc \
+	fgoto.cc \
 	goto.cc \
 	ipgoto.cc \
 	split.cc

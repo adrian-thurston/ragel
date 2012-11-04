@@ -21,8 +21,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _CDFLAT_H
-#define _CDFLAT_H
+#ifndef _C_FLAT_H
+#define _C_FLAT_H
 
 #include <iostream>
 #include "codegen.h"
@@ -80,17 +80,6 @@ protected:
 	virtual std::ostream &FROM_STATE_ACTION( RedStateAp *state );
 	virtual std::ostream &EOF_ACTION( RedStateAp *state );
 	virtual std::ostream &TRANS_ACTION( RedTransAp *trans );
-};
-
-class FlatLooped
-	: public Flat
-{
-public:
-	FlatLooped( const CodeGenArgs &args )
-		: Flat(args) {}
-
-	virtual void writeData();
-	virtual void writeExec();
 };
 
 }

@@ -22,7 +22,7 @@
  */
 
 #include "ragel.h"
-#include "fflat.h"
+#include "flatexp.h"
 #include "redfsm.h"
 #include "gendata.h"
 
