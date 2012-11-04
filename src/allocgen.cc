@@ -31,16 +31,7 @@
 /*
  * Code generators.
  */
-#include "xml/xmlcodegen.h"
-
-#include "cs/cstable.h"
-#include "cs/csftable.h"
-#include "cs/csflat.h"
-#include "cs/csfflat.h"
-#include "cs/csgoto.h"
-#include "cs/csfgoto.h"
-#include "cs/csipgoto.h"
-#include "cs/cssplit.h"
+#include "xml/xml.h"
 
 #include "c/table.h"
 #include "c/ftable.h"
@@ -60,32 +51,41 @@
 #include "d/ipgoto.h"
 #include "d/split.h"
 
-#include "dot/dotcodegen.h"
+#include "cs/table.h"
+#include "cs/ftable.h"
+#include "cs/flat.h"
+#include "cs/fflat.h"
+#include "cs/goto.h"
+#include "cs/fgoto.h"
+#include "cs/ipgoto.h"
+#include "cs/split.h"
 
-#include "java/javacodegen.h"
+#include "dot/dot.h"
 
-#include "go/gotable.h"
-#include "go/goftable.h"
-#include "go/goflat.h"
-#include "go/gofflat.h"
-#include "go/gogoto.h"
-#include "go/gofgoto.h"
-#include "go/goipgoto.h"
+#include "java/java.h"
 
-#include "ml/mltable.h"
-#include "ml/mlftable.h"
-#include "ml/mlflat.h"
-#include "ml/mlfflat.h"
-#include "ml/mlgoto.h"
-#include "ml/mlfgoto.h"
+#include "go/table.h"
+#include "go/ftable.h"
+#include "go/flat.h"
+#include "go/fflat.h"
+#include "go/goto.h"
+#include "go/fgoto.h"
+#include "go/ipgoto.h"
 
-#include "ruby/rubytable.h"
-#include "ruby/rubyftable.h"
-#include "ruby/rubyflat.h"
-#include "ruby/rubyfflat.h"
-#include "rbx/rbxgoto.h"
+#include "ml/table.h"
+#include "ml/ftable.h"
+#include "ml/flat.h"
+#include "ml/fflat.h"
+#include "ml/goto.h"
+#include "ml/fgoto.h"
 
-#include "crack/crackflat.h"
+#include "ruby/table.h"
+#include "ruby/ftable.h"
+#include "ruby/flat.h"
+#include "ruby/fflat.h"
+#include "rbx/goto.h"
+
+#include "crack/crack.h"
 
 using std::cerr;
 using std::endl;

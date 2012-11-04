@@ -32,7 +32,7 @@
 #include "mergesort.h"
 #include "version.h"
 #include "inputdata.h"
-#include "xml/xmlcodegen.h"
+#include "xml/xml.h"
 
 using namespace std;
 

@@ -20,7 +20,7 @@
  */
 
 #include "ragel.h"
-#include "dotcodegen.h"
+#include "dot.h"
 #include "gendata.h"
 #include "inputdata.h"
 #include "rlparse.h"

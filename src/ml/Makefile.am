@@ -4,17 +4,17 @@ libml_a_CPPFLAGS = \
 	-I$(top_srcdir)/aapl -I$(top_srcdir)/src
 
 libml_a_SOURCES = \
-	mlcodegen.cc \
-	mlcodegen.h \
-	mlfflat.cc \
-	mlfflat.h \
-	mlfgoto.cc \
-	mlfgoto.h \
-	mlflat.cc \
-	mlflat.h \
-	mlftable.cc \
-	mlftable.h \
-	mlgoto.cc \
-	mlgoto.h \
-	mltable.cc \
-	mltable.h
+	codegen.cc \
+	codegen.h \
+	fflat.cc \
+	fflat.h \
+	fgoto.cc \
+	fgoto.h \
+	flat.cc \
+	flat.h \
+	ftable.cc \
+	ftable.h \
+	goto.cc \
+	goto.h \
+	table.cc \
+	table.h

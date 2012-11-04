@@ -6,13 +6,13 @@ libruby_a_CPPFLAGS = \
 	-I$(top_srcdir)/src/rbx
 
 libruby_a_SOURCES = \
-	rubycodegen.cc \
-	rubycodegen.h \
-	rubyfflat.cc \
-	rubyfflat.h \
-	rubyflat.cc \
-	rubyflat.h \
-	rubyftable.cc \
-	rubyftable.h \
-	rubytable.cc \
-	rubytable.h
+	codegen.cc \
+	codegen.h \
+	fflat.cc \
+	fflat.h \
+	flat.cc \
+	flat.h \
+	ftable.cc \
+	ftable.h \
+	table.cc \
+	table.h

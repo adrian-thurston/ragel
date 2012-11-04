@@ -6,5 +6,5 @@ librbx_a_CPPFLAGS = \
 	-I$(top_srcdir)/src/ruby
 
 librbx_a_SOURCES = \
-	rbxgoto.cc \
-	rbxgoto.h
+	goto.cc \
+	goto.h

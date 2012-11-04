@@ -5,5 +5,5 @@ libxml_a_CPPFLAGS = \
 	-I$(top_srcdir)/src
 
 libxml_a_SOURCES = \
-	xmlcodegen.cc \
-	xmlcodegen.h
+	xml.cc \
+	xml.h
