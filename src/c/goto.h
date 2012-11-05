@@ -74,6 +74,10 @@ public:
 	std::ostream &FROM_STATE_ACTIONS();
 	std::ostream &EOF_ACTIONS();
 
+	virtual std::ostream &COND_GOTO( RedCondAp *trans, int level );
+
+	string CKEY( CondKey key );
+	void COND_B_SEARCH( RedTransAp *trans, int level, int low, int high );
 	void COND_TRANSLATE( GenStateCond *stateCond, int level );
 	void emitCondBSearch( RedStateAp *state, int level, int low, int high );
 	void STATE_CONDS( RedStateAp *state, bool genDefault ); 

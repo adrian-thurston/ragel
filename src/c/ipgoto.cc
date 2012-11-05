@@ -235,15 +235,6 @@ void IpGoto::STATE_GOTO_ERROR()
 	out << "	goto _out;\n";
 }
 
-/* Write out a key from the fsm code gen. Depends on wether or not the key is
- * signed. */
-string IpGoto::CKEY( CondKey key )
-{
-	ostringstream ret;
-	ret << key.getVal();
-	return ret.str();
-}
-
 
 void IpGoto::COND_B_SEARCH( RedTransAp *trans, int level, int low, int high )
 {
