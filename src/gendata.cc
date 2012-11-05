@@ -1178,40 +1178,46 @@ Key CodeGenData::findMaxKey()
 	return maxKey;
 }
 
+void CodeGenData::actionActionRefs( RedAction *action )
+{
+	action->numTransRefs += 1;
+	for ( GenActionTable::Iter item = action->key; item.lte(); item++ )
+		item->value->numTransRefs += 1;
+}
+
+void CodeGenData::transActionRefs( RedTransAp *trans )
+{
+	if ( trans->action != 0 )
+		actionActionRefs( trans->action );
+
+	for ( RedCondList::Iter rtc = trans->outConds; rtc.lte(); rtc++ ) {
+		if ( rtc->value->action != 0 )
+			actionActionRefs( rtc->value->action );
+	}
+}
+
+void CodeGenData::transListActionRefs( RedTransList &list )
+{
+	for ( RedTransList::Iter rtel = list; rtel.lte(); rtel++ )
+		transActionRefs( rtel->value );
+}
+
 void CodeGenData::findFinalActionRefs()
 {
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Rerence count out of single transitions. */
-		for ( RedTransList::Iter rtel = st->outSingle; rtel.lte(); rtel++ ) {
-			if ( rtel->value->action != 0 ) {
-				rtel->value->action->numTransRefs += 1;
-				for ( GenActionTable::Iter item = rtel->value->action->key; item.lte(); item++ )
-					item->value->numTransRefs += 1;
-			}
-		}
+		transListActionRefs( st->outSingle );
 
 		/* Reference count out of range transitions. */
-		for ( RedTransList::Iter rtel = st->outRange; rtel.lte(); rtel++ ) {
-			if ( rtel->value->action != 0 ) {
-				rtel->value->action->numTransRefs += 1;
-				for ( GenActionTable::Iter item = rtel->value->action->key; item.lte(); item++ )
-					item->value->numTransRefs += 1;
-			}
-		}
+		transListActionRefs( st->outRange );
 
 		/* Reference count default transition. */
-		if ( st->defTrans != 0 && st->defTrans->action != 0 ) {
-			st->defTrans->action->numTransRefs += 1;
-			for ( GenActionTable::Iter item = st->defTrans->action->key; item.lte(); item++ )
-				item->value->numTransRefs += 1;
-		}
+		if ( st->defTrans != 0 )
+			transActionRefs( st->defTrans );
 
-		/* Reference count eof transitions. */
-		if ( st->eofTrans != 0 && st->eofTrans->action != 0 ) {
-			st->eofTrans->action->numTransRefs += 1;
-			for ( GenActionTable::Iter item = st->eofTrans->action->key; item.lte(); item++ )
-				item->value->numTransRefs += 1;
-		}
+		/* Reference count EOF transitions. */
+		if ( st->eofTrans != 0 )
+			transActionRefs( st->eofTrans );
 
 		/* Reference count to state actions. */
 		if ( st->toStateAction != 0 ) {

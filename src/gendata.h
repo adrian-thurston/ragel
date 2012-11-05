@@ -316,6 +316,9 @@ public:
 	/* Gather various info on the machine. */
 	void analyzeActionList( RedAction *redAct, GenInlineList *inlineList );
 	void analyzeAction( GenAction *act, GenInlineList *inlineList );
+	void actionActionRefs( RedAction *action );
+	void transListActionRefs( RedTransList &list );
+	void transActionRefs( RedTransAp *trans );
 	void findFinalActionRefs();
 	void analyzeMachine();
 
