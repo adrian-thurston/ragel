@@ -415,6 +415,25 @@ std::ostream &Goto::TRANSITIONS()
 			out << "goto _again;\n";
 		}
 	}
+
+	for ( CondApSet::Iter cond = redFsm->condSet; cond.lte(); cond++ ) {
+		/* Write the label for the transition so it can be jumped to. */
+		out << "	ctr" << cond->id << ": ";
+
+		/* Destination state. */
+		if ( cond->action != 0 && cond->action->anyCurStateRef() )
+			out << "_ps = " << vCS() << ";";
+		out << vCS() << " = " << cond->targ->id << "; ";
+
+		if ( cond->action != 0 ) {
+			/* Write out the transition func. */
+			out << "goto f" << cond->action->actListId << ";\n";
+		}
+		else {
+			/* No code to execute, just loop around. */
+			out << "goto _again;\n";
+		}
+	}
 	return out;
 }
 
