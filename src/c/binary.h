@@ -66,6 +66,12 @@ protected:
 	std::ostream &TRANS_ACTIONS();
 	std::ostream &TRANS_TARGS_WI();
 	std::ostream &TRANS_ACTIONS_WI();
+	std::ostream &TRANS_OFFSETS();
+	std::ostream &TRANS_LENGTHS();
+	std::ostream &COND_KEYS2();
+	std::ostream &COND_TARGS();
+	std::ostream &COND_ACTIONS();
+
 	void LOCATE_TRANS();
 
 	void COND_TRANSLATE();
@@ -85,6 +91,7 @@ protected:
 	virtual std::ostream &FROM_STATE_ACTION( RedStateAp *state );
 	virtual std::ostream &EOF_ACTION( RedStateAp *state );
 	virtual std::ostream &TRANS_ACTION( RedTransAp *trans );
+	virtual std::ostream &COND_ACTION( RedCondAp *cond );
 	virtual void calcIndexSize();
 };
 

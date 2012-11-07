@@ -118,6 +118,31 @@ void BinaryLooped::writeData()
 		}
 	}
 
+	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TO() );
+	TRANS_OFFSETS();
+	CLOSE_ARRAY() <<
+	"\n";
+
+	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TL() );
+	TRANS_LENGTHS();
+	CLOSE_ARRAY() <<
+	"\n";
+
+	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), CK2() );
+	COND_KEYS2();
+	CLOSE_ARRAY() <<
+	"\n";
+
+	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), CT() );
+	COND_TARGS();
+	CLOSE_ARRAY() <<
+	"\n";
+
+	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), CA() );
+	COND_ACTIONS();
+	CLOSE_ARRAY() <<
+	"\n";
+
 	if ( redFsm->anyToStateActions() ) {
 		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), TSA() );
 		TO_STATE_ACTIONS();

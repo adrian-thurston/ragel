@@ -117,6 +117,11 @@ protected:
 	string A() { return "_" + DATA_PREFIX() + "actions"; }
 	string TA() { return "_" + DATA_PREFIX() + "trans_actions"; }
 	string TT() { return "_" + DATA_PREFIX() + "trans_targs"; }
+	string TO() { return "_" + DATA_PREFIX() + "trans_offsets"; }
+	string TL() { return "_" + DATA_PREFIX() + "trans_lengths"; }
+	string CT() { return "_" + DATA_PREFIX() + "cond_targs"; }
+	string CA() { return "_" + DATA_PREFIX() + "cond_actions"; }
+	string CK2() { return "_" + DATA_PREFIX() + "cond_keys2"; }
 	string TSA() { return "_" + DATA_PREFIX() + "to_state_actions"; }
 	string FSA() { return "_" + DATA_PREFIX() + "from_state_actions"; }
 	string EA() { return "_" + DATA_PREFIX() + "eof_actions"; }

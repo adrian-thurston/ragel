@@ -94,6 +94,16 @@ std::ostream &Binary::TRANS_ACTION( RedTransAp *trans )
 	return out;
 }
 
+std::ostream &Binary::COND_ACTION( RedCondAp *cond )
+{
+	/* If there are actions, emit them. Otherwise emit zero. */
+	int act = 0;
+	if ( cond->action != 0 )
+		act = cond->action->location+1;
+	out << act;
+	return out;
+}
+
 std::ostream &Binary::TO_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
@@ -610,6 +620,97 @@ std::ostream &Binary::TRANS_ACTIONS_WI()
 	}
 	out << "\n";
 	delete[] transPtrs;
+	return out;
+}
+
+std::ostream &Binary::TRANS_OFFSETS()
+{
+	out << '\t';
+	int curOffset = 0;
+	int totalOffsets = 0;
+	for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ ) {
+		out << curOffset;
+
+		TransApSet::Iter next = trans;
+		next.increment();
+		if ( next.lte() ) {
+			out << ", ";
+
+			if ( ++totalOffsets % IALL == 0 )
+				out << "\n\t";
+		}
+
+		curOffset += trans->outConds.length();
+	}
+	out << "\n";
+	return out;
+}
+
+std::ostream &Binary::TRANS_LENGTHS()
+{
+	out << '\t';
+	int totalLengths = 0;
+	for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ ) {
+		out << trans->outConds.length();
+
+		TransApSet::Iter next = trans;
+		next.increment();
+		if ( next.lte() ) {
+			out << ", ";
+
+			if ( ++totalLengths % IALL == 0 )
+				out << "\n\t";
+		}
+	}
+	out << "\n";
+	return out;
+}
+
+std::ostream &Binary::COND_KEYS2()
+{
+	out << '\t';
+	int totalKeys = 0;
+	for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ ) {
+		for ( RedCondList::Iter cond = trans->outConds; cond.lte(); cond++ ) {
+			out << cond->key.getVal() << ", ";
+			if ( ++totalKeys % IALL == 0 )
+				out << "\n\t";
+		}
+	}
+	out << "\n";
+	return out;
+}
+
+std::ostream &Binary::COND_TARGS()
+{
+	out << '\t';
+	int totalConds = 0;
+	for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ ) {
+		for ( RedCondList::Iter cond = trans->outConds; cond.lte(); cond++ ) {
+			RedCondAp *c = cond->value;
+			out << c->targ->id << ", ";
+			if ( ++totalConds % IALL == 0 )
+				out << "\n\t";
+		}
+	}
+	out << "\n";
+	return out;
+}
+
+std::ostream &Binary::COND_ACTIONS()
+{
+	out << '\t';
+	int totalConds = 0;
+	for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ ) {
+		for ( RedCondList::Iter cond = trans->outConds; cond.lte(); cond++ ) {
+			RedCondAp *c = cond->value;
+			COND_ACTION( c );
+			out << ", ";
+			if ( ++totalConds % IALL == 0 )
+				out << "\n\t";
+		}
+	}
+	out << "\n";
 	return out;
 }
 
