@@ -50,8 +50,8 @@ void BinaryLooped::writeData()
 		CLOSE_ARRAY() <<
 		"\n";
 
-		OPEN_ARRAY( WIDE_ALPH_TYPE(), CK() );
-		COND_KEYS();
+		OPEN_ARRAY( WIDE_ALPH_TYPE(), CK_v1() );
+		COND_KEYS_v1();
 		CLOSE_ARRAY() <<
 		"\n";
 
@@ -128,8 +128,8 @@ void BinaryLooped::writeData()
 	CLOSE_ARRAY() <<
 	"\n";
 
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), CK2() );
-	COND_KEYS2();
+	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), CK() );
+	COND_KEYS();
 	CLOSE_ARRAY() <<
 	"\n";
 

@@ -545,7 +545,7 @@ void Flat::COND_TRANSLATE()
 		"	_widec = " << GET_KEY() << ";\n";
 
 	out <<
-		"	_keys = " << ARR_OFF( CK(), "(" + vCS() + "<<1)" ) << ";\n"
+		"	_keys = " << ARR_OFF( CK_v1(), "(" + vCS() + "<<1)" ) << ";\n"
 		"	_conds = " << ARR_OFF( C(), CO() + "[" + vCS() + "]" ) << ";\n"
 		"\n"
 		"	_slen = " << CSP() << "[" << vCS() << "];\n"

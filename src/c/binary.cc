@@ -363,7 +363,7 @@ std::ostream &Binary::EOF_TRANS()
 }
 
 
-std::ostream &Binary::COND_KEYS()
+std::ostream &Binary::COND_KEYS_v1()
 {
 	out << '\t';
 	int totalTrans = 0;
@@ -666,7 +666,7 @@ std::ostream &Binary::TRANS_LENGTHS()
 	return out;
 }
 
-std::ostream &Binary::COND_KEYS2()
+std::ostream &Binary::COND_KEYS()
 {
 	out << '\t';
 	int totalKeys = 0;
@@ -856,7 +856,7 @@ void Binary::COND_TRANSLATE()
 	out << 
 		"	_widec = " << GET_KEY() << ";\n"
 		"	_klen = " << CL() << "[" << vCS() << "];\n"
-		"	_keys = " << ARR_OFF( CK(), "(" + CO() + "[" + vCS() + "]*2)" ) << ";\n"
+		"	_keys = " << ARR_OFF( CK_v1(), "(" + CO() + "[" + vCS() + "]*2)" ) << ";\n"
 		"	if ( _klen > 0 ) {\n"
 		"		" << PTR_CONST() << WIDE_ALPH_TYPE() << PTR_CONST_END() << POINTER() << "_lower = _keys;\n"
 		"		" << PTR_CONST() << WIDE_ALPH_TYPE() << PTR_CONST_END() << POINTER() << "_mid;\n"

@@ -193,7 +193,7 @@ void BinaryExpanded::writeData()
 		CLOSE_ARRAY() <<
 		"\n";
 
-		OPEN_ARRAY( WIDE_ALPH_TYPE(), CK() );
+		OPEN_ARRAY( WIDE_ALPH_TYPE(), CK_v1() );
 		COND_KEYS();
 		CLOSE_ARRAY() <<
 		"\n";

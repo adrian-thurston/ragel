@@ -48,7 +48,7 @@ protected:
 	std::ostream &EOF_ACTION_SWITCH();
 	std::ostream &ACTION_SWITCH();
 
-	std::ostream &COND_KEYS();
+	std::ostream &COND_KEYS_v1();
 	std::ostream &COND_SPACES();
 	std::ostream &KEYS();
 	std::ostream &INDICIES();
@@ -68,7 +68,7 @@ protected:
 	std::ostream &TRANS_ACTIONS_WI();
 	std::ostream &TRANS_OFFSETS();
 	std::ostream &TRANS_LENGTHS();
-	std::ostream &COND_KEYS2();
+	std::ostream &COND_KEYS();
 	std::ostream &COND_TARGS();
 	std::ostream &COND_ACTIONS();
 
