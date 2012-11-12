@@ -56,7 +56,7 @@ void BinaryLooped::writeData()
 		"\n";
 
 		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxCondSpaceId), C() );
-		COND_SPACES();
+		COND_SPACES_v1();
 		CLOSE_ARRAY() <<
 		"\n";
 	}
@@ -103,6 +103,21 @@ void BinaryLooped::writeData()
 			CLOSE_ARRAY() <<
 			"\n";
 		}
+
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TCS() );
+		TRANS_COND_SPACES_WI();
+		CLOSE_ARRAY() <<
+		"\n";
+
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TO() );
+		TRANS_OFFSETS_WI();
+		CLOSE_ARRAY() <<
+		"\n";
+
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TL() );
+		TRANS_LENGTHS_WI();
+		CLOSE_ARRAY() <<
+		"\n";
 	}
 	else {
 		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TT() );
@@ -116,17 +131,22 @@ void BinaryLooped::writeData()
 			CLOSE_ARRAY() <<
 			"\n";
 		}
+
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TCS() );
+		TRANS_COND_SPACES();
+		CLOSE_ARRAY() <<
+		"\n";
+
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TO() );
+		TRANS_OFFSETS();
+		CLOSE_ARRAY() <<
+		"\n";
+
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TL() );
+		TRANS_LENGTHS();
+		CLOSE_ARRAY() <<
+		"\n";
 	}
-
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TO() );
-	TRANS_OFFSETS();
-	CLOSE_ARRAY() <<
-	"\n";
-
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TL() );
-	TRANS_LENGTHS();
-	CLOSE_ARRAY() <<
-	"\n";
 
 	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), CK() );
 	COND_KEYS();
@@ -186,9 +206,10 @@ void BinaryLooped::writeExec()
 	if ( redFsm->anyRegCurStateRef() )
 		out << ", _ps";
 
-	out << 
+	out <<
 		";\n"
-		"	" << UINT() << " _trans;\n";
+		"	" << UINT() << " _trans;\n" <<
+		"	" << UINT() << " _cond;\n";
 
 	if ( redFsm->anyConditions() )
 		out << "	" << WIDE_ALPH_TYPE() << " _widec;\n";
@@ -204,6 +225,7 @@ void BinaryLooped::writeExec()
 
 	out <<
 		"	" << PTR_CONST() << WIDE_ALPH_TYPE() << PTR_CONST_END() << POINTER() << "_keys;\n"
+		"	int _cpc;\n"
 		"\n";
 
 	if ( !noEnd ) {
@@ -244,6 +266,10 @@ void BinaryLooped::writeExec()
 
 	if ( useIndicies )
 		out << "	_trans = " << I() << "[_trans];\n";
+
+	LOCATE_COND();
+
+	out << "_match2:\n";
 	
 	if ( redFsm->anyEofTrans() )
 		out << "_eof_trans:\n";
@@ -252,15 +278,15 @@ void BinaryLooped::writeExec()
 		out << "	_ps = " << vCS() << ";\n";
 
 	out <<
-		"	" << vCS() << " = " << TT() << "[_trans];\n"
+		"	" << vCS() << " = " << CT() << "[_cond];\n"
 		"\n";
 
 	if ( redFsm->anyRegActions() ) {
 		out <<
-			"	if ( " << TA() << "[_trans] == 0 )\n"
+			"	if ( " << CA() << "[_cond] == 0 )\n"
 			"		goto _again;\n"
 			"\n"
-			"	_acts = " << ARR_OFF( A(), TA() + "[_trans]" ) << ";\n"
+			"	_acts = " << ARR_OFF( A(), CA() + "[_cond]" ) << ";\n"
 			"	_nacts = " << CAST(UINT()) << " *_acts++;\n"
 			"	while ( _nacts-- > 0 )\n	{\n"
 			"		switch ( *_acts++ )\n		{\n";

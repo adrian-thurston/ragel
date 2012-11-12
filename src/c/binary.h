@@ -49,7 +49,7 @@ protected:
 	std::ostream &ACTION_SWITCH();
 
 	std::ostream &COND_KEYS_v1();
-	std::ostream &COND_SPACES();
+	std::ostream &COND_SPACES_v1();
 	std::ostream &KEYS();
 	std::ostream &INDICIES();
 	std::ostream &COND_OFFSETS();
@@ -64,15 +64,20 @@ protected:
 	std::ostream &EOF_TRANS();
 	std::ostream &TRANS_TARGS();
 	std::ostream &TRANS_ACTIONS();
-	std::ostream &TRANS_TARGS_WI();
-	std::ostream &TRANS_ACTIONS_WI();
+	std::ostream &TRANS_COND_SPACES();
 	std::ostream &TRANS_OFFSETS();
 	std::ostream &TRANS_LENGTHS();
+	std::ostream &TRANS_TARGS_WI();
+	std::ostream &TRANS_ACTIONS_WI();
+	std::ostream &TRANS_COND_SPACES_WI();
+	std::ostream &TRANS_OFFSETS_WI();
+	std::ostream &TRANS_LENGTHS_WI();
 	std::ostream &COND_KEYS();
 	std::ostream &COND_TARGS();
 	std::ostream &COND_ACTIONS();
 
 	void LOCATE_TRANS();
+	void LOCATE_COND();
 
 	void COND_TRANSLATE();
 

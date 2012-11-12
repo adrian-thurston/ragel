@@ -199,7 +199,7 @@ void BinaryExpanded::writeData()
 		"\n";
 
 		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxCondSpaceId), C() );
-		COND_SPACES();
+		COND_SPACES_v1();
 		CLOSE_ARRAY() <<
 		"\n";
 	}

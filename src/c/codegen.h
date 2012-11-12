@@ -104,7 +104,7 @@ protected:
 
 	string DATA_PREFIX();
 	string PM() { return "_" + DATA_PREFIX() + "partition_map"; }
-	string C() { return "_" + DATA_PREFIX() + "cond_spaces"; }
+	string C() { return "_" + DATA_PREFIX() + "cond_spaces_v1"; }
 	string CK_v1() { return "_" + DATA_PREFIX() + "cond_keys_v1"; }
 	string K() { return "_" + DATA_PREFIX() + "trans_keys"; }
 	string I() { return "_" + DATA_PREFIX() + "indicies"; }
@@ -117,6 +117,7 @@ protected:
 	string A() { return "_" + DATA_PREFIX() + "actions"; }
 	string TA() { return "_" + DATA_PREFIX() + "trans_actions"; }
 	string TT() { return "_" + DATA_PREFIX() + "trans_targs"; }
+	string TCS() { return "_" + DATA_PREFIX() + "trans_cond_spaces"; }
 	string TO() { return "_" + DATA_PREFIX() + "trans_offsets"; }
 	string TL() { return "_" + DATA_PREFIX() + "trans_lengths"; }
 	string CT() { return "_" + DATA_PREFIX() + "cond_targs"; }
