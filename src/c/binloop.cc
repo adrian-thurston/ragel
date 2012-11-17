@@ -383,4 +383,32 @@ void BinaryLooped::writeExec()
 	out << "	}\n";
 }
 
+/* Determine if we should use indicies or not. */
+void BinaryLooped::calcIndexSize()
+{
+	int sizeWithInds = 0, sizeWithoutInds = 0;
+
+	/* Calculate cost of using with indicies. */
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		int totalIndex = st->outSingle.length() + st->outRange.length() + 
+				(st->defTrans == 0 ? 0 : 1);
+		sizeWithInds += arrayTypeSize(redFsm->maxIndex) * totalIndex;
+	}
+	sizeWithInds += arrayTypeSize(redFsm->maxState) * redFsm->transSet.length();
+	if ( redFsm->anyActions() )
+		sizeWithInds += arrayTypeSize(redFsm->maxActionLoc) * redFsm->transSet.length();
+
+	/* Calculate the cost of not using indicies. */
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		int totalIndex = st->outSingle.length() + st->outRange.length() + 
+				(st->defTrans == 0 ? 0 : 1);
+		sizeWithoutInds += arrayTypeSize(redFsm->maxState) * totalIndex;
+		if ( redFsm->anyActions() )
+			sizeWithoutInds += arrayTypeSize(redFsm->maxActionLoc) * totalIndex;
+	}
+
+	/* If using indicies reduces the size, use them. */
+	useIndicies = sizeWithInds < sizeWithoutInds;
+}
+
 }
