@@ -70,6 +70,85 @@ void cLineDirective( ostream &out, const char *fileName, int line )
 
 namespace C {
 
+TableArray::TableArray( bool isSigned )
+:
+	state(AnalyzePass),
+	isSigned(isSigned),
+	values(0),
+	min(LLONG_MAX),
+	max(LLONG_MIN)
+{
+
+}
+
+void TableArray::startAnalyze()
+{
+}
+
+void TableArray::startGenerate()
+{
+
+}
+
+void TableArray::start()
+{
+	switch ( state ) {
+		case AnalyzePass:
+			startAnalyze();
+			break;
+		case GeneratePass:
+			startGenerate();
+			break;
+	}
+}
+
+
+void TableArray::valueAnalyze( long long v )
+{
+	values += 1;
+	if ( v < min )
+		min = v;
+	if ( v > max )
+		max = v;
+}
+
+void TableArray::valueGenerate( long long v )
+{
+
+}
+
+void TableArray::value( long long v )
+{
+	switch ( state ) {
+		case AnalyzePass:
+			valueAnalyze( v );
+			break;
+		case GeneratePass:
+			valueGenerate( v );
+			break;
+	}
+}
+
+void TableArray::finishAnalyze()
+{
+}
+
+void TableArray::finishGenerate()
+{
+}
+
+void TableArray::finish()
+{
+	switch ( state ) {
+		case AnalyzePass:
+			finishAnalyze();
+			break;
+		case GeneratePass:
+			finishGenerate();
+			break;
+	}
+}
+
 void FsmCodeGen::genLineDirective( ostream &out )
 {
 	std::streambuf *sbuf = out.rdbuf();
@@ -792,13 +871,17 @@ void FsmCodeGen::finishRagelDef()
 	if ( codeStyle == GenIpGoto || codeStyle == GenSplit )
 		redFsm->setInTrans();
 
-	/* Anlayze Machine will find the final action reference counts, among
-	 * other things. We will use these in reporting the usage
-	 * of fsm directives in action code. */
+	/* Anlayze Machine will find the final action reference counts, among other
+	 * things. We will use these in reporting the usage of fsm directives in
+	 * action code. */
 	analyzeMachine();
 
 	/* Determine if we should use indicies. */
 	calcIndexSize();
+
+	/* Run the analysis pass over the table data. */
+	setTableState( TableArray::AnalyzePass );
+	tableDataPass();
 }
 
 ostream &FsmCodeGen::source_warning( const InputLoc &loc )

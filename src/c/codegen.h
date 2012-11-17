@@ -50,7 +50,40 @@ struct LongestMatchPart;
 
 string itoa( int i );
 
-namespace C {
+namespace C
+{
+
+struct TableArray
+{
+	enum State {
+		AnalyzePass,
+		GeneratePass
+	};
+		
+	TableArray( bool isSigned );
+
+	void start();
+	void startAnalyze();
+	void startGenerate();
+
+	void value( long long v );
+	void valueAnalyze( long long v );
+	void valueGenerate( long long v );
+
+	void finish();
+	void finishAnalyze();
+	void finishGenerate();
+
+	void setState( TableArray::State state )
+		{ this->state = state; }
+
+	State state;
+	bool isSigned;
+	long long values;
+	long long max;
+	long long min;
+};
+
 
 /*
  * class FsmCodeGen
@@ -178,6 +211,9 @@ protected:
 public:
 	/* Determine if we should use indicies. */
 	virtual void calcIndexSize() {}
+
+	virtual void setTableState( TableArray::State ) {}
+	virtual void tableDataPass() {}
 
 	/* From CCodeGen. */
 	virtual string NULL_ITEM();

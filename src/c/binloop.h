@@ -44,6 +44,9 @@ public:
 
 	virtual void writeData();
 	virtual void writeExec();
+
+	virtual void setTableState( TableArray::State );
+	virtual void tableDataPass();
 };
 
 }

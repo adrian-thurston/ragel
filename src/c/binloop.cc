@@ -28,6 +28,16 @@
 
 namespace C {
 
+void BinaryLooped::setTableState( TableArray::State )
+{
+
+}
+
+void BinaryLooped::tableDataPass()
+{
+
+}
+
 void BinaryLooped::writeData()
 {
 	/* If there are any transtion functions then output the array. If there
