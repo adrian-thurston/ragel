@@ -109,7 +109,7 @@ void BinaryLooped::writeData()
 		CLOSE_ARRAY() <<
 		"\n";
 
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TO() );
+		OPEN_ARRAY( "int", TO() );
 		TRANS_OFFSETS_WI();
 		CLOSE_ARRAY() <<
 		"\n";
@@ -137,7 +137,7 @@ void BinaryLooped::writeData()
 		CLOSE_ARRAY() <<
 		"\n";
 
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TO() );
+		OPEN_ARRAY( "int", TO() );
 		TRANS_OFFSETS();
 		CLOSE_ARRAY() <<
 		"\n";
