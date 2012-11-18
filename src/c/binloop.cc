@@ -79,16 +79,11 @@ void BinaryLooped::writeData()
 	/* Run the analysis pass over the table data. */
 	setTableState( TableArray::GeneratePass );
 	// std::cerr << "min: " << actions.min << " " << actions.max << std::endl;
-	// taActions();
 
 	/* If there are any transtion functions then output the array. If there
 	 * are none, don't bother emitting an empty array that won't be used. */
-	if ( redFsm->anyActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActArrItem), A() );
-		ACTIONS_ARRAY();
-		CLOSE_ARRAY() <<
-		"\n";
-	}
+	if ( redFsm->anyActions() )
+		taActions();
 
 	if ( redFsm->anyConditions() ) {
 		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxCondOffset), CO() );

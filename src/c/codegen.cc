@@ -114,7 +114,8 @@ void TableArray::finishAnalyze()
 
 void TableArray::startGenerate()
 {
-	out << "static const " << type << " " << "name_" << name << "[] = {\n\t";
+	out << "static const " << type << " " << 
+		"_" << fsmCodeGen.DATA_PREFIX() << name << "[] = {\n\t";
 }
 
 void TableArray::valueGenerate( long long v )

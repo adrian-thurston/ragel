@@ -90,7 +90,7 @@ struct TableArray
 	long long values;
 	long long max;
 	long long min;
-	const FsmCodeGen &fsmCodeGen;
+	FsmCodeGen &fsmCodeGen;
 	std::ostream &out;
 };
 
