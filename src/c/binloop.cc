@@ -32,34 +32,33 @@ BinaryLooped::BinaryLooped( const CodeGenArgs &args )
 :
 	Binary( args ),
 
-	actions(            "actions",              arrayVector ),
-	condOffsets(        "cond_offsets",         arrayVector ),
-	condLens(           "cond_lengths",         arrayVector ),
-	condKeysV1(         "cond_keys_v1",         arrayVector ),
-	condSpacesV1(       "cond_spaces_v1",       arrayVector ),
-	keyoffsets(         "key_offsets",          arrayVector ),
-	keys(               "keys",                 arrayVector ),
-	singleLens(         "single_lengths",       arrayVector ),
-	rangeLens(          "range_lengths",        arrayVector ),
-	indexOffsets(       "index_offsets",        arrayVector ),
-	indicies(           "indicies",             arrayVector ),
-	transTargsWi(       "trans_targs_wi",       arrayVector ),
-	transActionsWi(     "trans_targs_wi",       arrayVector ),
-	transCondSpacesWi(  "trans_cond_spaces_wi", arrayVector ),
-	transOffsetsWi(     "trans_offsets_wi",     arrayVector ),
-	transLengthsWi(     "trans_lengths_wi",     arrayVector ),
-	transTargs(         "trans_targs",          arrayVector ),
-	transActions(       "trans_actions",        arrayVector ),
-	transCondSpaces(    "trans_cond_spaces",    arrayVector ),
-	transOffsets(       "trans_offsets",        arrayVector ),
-	transLengths(       "trans_lenghts",        arrayVector ),
-	condKeys(           "cond_keys",            arrayVector ),
-	condTargs(          "cond_targs",           arrayVector ),
-	condActions(        "cond_actions",         arrayVector ),
-	toStateActions(     "to_state_actions",     arrayVector ),
-	fromStateActions(   "from_state_actions",   arrayVector ),
-	eofActions(         "eof_actions",          arrayVector ),
-	eofTrans(           "eof_trans",            arrayVector )
+	condOffsets(        "cond_offsets",         arrayVector, out ),
+	condLens(           "cond_lengths",         arrayVector, out ),
+	condKeysV1(         "cond_keys_v1",         arrayVector, out ),
+	condSpacesV1(       "cond_spaces_v1",       arrayVector, out ),
+	keyoffsets(         "key_offsets",          arrayVector, out ),
+	keys(               "keys",                 arrayVector, out ),
+	singleLens(         "single_lengths",       arrayVector, out ),
+	rangeLens(          "range_lengths",        arrayVector, out ),
+	indexOffsets(       "index_offsets",        arrayVector, out ),
+	indicies(           "indicies",             arrayVector, out ),
+	transTargsWi(       "trans_targs_wi",       arrayVector, out ),
+	transActionsWi(     "trans_targs_wi",       arrayVector, out ),
+	transCondSpacesWi(  "trans_cond_spaces_wi", arrayVector, out ),
+	transOffsetsWi(     "trans_offsets_wi",     arrayVector, out ),
+	transLengthsWi(     "trans_lengths_wi",     arrayVector, out ),
+	transTargs(         "trans_targs",          arrayVector, out ),
+	transActions(       "trans_actions",        arrayVector, out ),
+	transCondSpaces(    "trans_cond_spaces",    arrayVector, out ),
+	transOffsets(       "trans_offsets",        arrayVector, out ),
+	transLengths(       "trans_lenghts",        arrayVector, out ),
+	condKeys(           "cond_keys",            arrayVector, out ),
+	condTargs(          "cond_targs",           arrayVector, out ),
+	condActions(        "cond_actions",         arrayVector, out ),
+	toStateActions(     "to_state_actions",     arrayVector, out ),
+	fromStateActions(   "from_state_actions",   arrayVector, out ),
+	eofActions(         "eof_actions",          arrayVector, out ),
+	eofTrans(           "eof_trans",            arrayVector, out )
 {}
 
 void BinaryLooped::setTableState( TableArray::State state )
@@ -72,11 +71,16 @@ void BinaryLooped::setTableState( TableArray::State state )
 
 void BinaryLooped::tableDataPass()
 {
-
+	taActions();
 }
 
 void BinaryLooped::writeData()
 {
+	/* Run the analysis pass over the table data. */
+	setTableState( TableArray::GeneratePass );
+	// std::cerr << "min: " << actions.min << " " << actions.max << std::endl;
+	// taActions();
+
 	/* If there are any transtion functions then output the array. If there
 	 * are none, don't bother emitting an empty array that won't be used. */
 	if ( redFsm->anyActions() ) {

@@ -65,7 +65,7 @@ struct TableArray
 		GeneratePass
 	};
 		
-	TableArray( const char *name, ArrayVector &arrayVector );
+	TableArray( const char *name, ArrayVector &arrayVector, std::ostream &out );
 
 	void start();
 	void startAnalyze();
@@ -84,10 +84,12 @@ struct TableArray
 
 	State state;
 	const char *name;
+	const char *type;
 	bool isSigned;
 	long long values;
 	long long max;
 	long long min;
+	std::ostream &out;
 };
 
 
@@ -108,9 +110,14 @@ public:
 	virtual void writeError();
 
 protected:
+	typedef Vector<TableArray*> ArrayVector;
+	ArrayVector arrayVector;
+	TableArray actions;
+
 	string FSM_NAME();
 	string START_STATE_ID();
 	ostream &ACTIONS_ARRAY();
+	void taActions();
 	string GET_WIDE_KEY();
 	string GET_WIDE_KEY( RedStateAp *state );
 	string TABS( int level );

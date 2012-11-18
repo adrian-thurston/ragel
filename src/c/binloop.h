@@ -49,10 +49,6 @@ public:
 	virtual void setTableState( TableArray::State );
 	virtual void tableDataPass();
 
-	typedef Vector<TableArray*> ArrayVector;
-	ArrayVector arrayVector;
-
-	TableArray actions;
 	TableArray condOffsets;
 	TableArray condLens;
 	TableArray condKeysV1;

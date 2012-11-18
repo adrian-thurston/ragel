@@ -70,14 +70,16 @@ void cLineDirective( ostream &out, const char *fileName, int line )
 
 namespace C {
 
-TableArray::TableArray( const char *name, ArrayVector &arrayVector )
+TableArray::TableArray( const char *name, ArrayVector &arrayVector, std::ostream &out )
 :
 	state(InitialState),
 	name(name),
-	isSigned(false),
+	type(0),
+	isSigned(true),
 	values(0),
 	min(LLONG_MAX),
-	max(LLONG_MIN)
+	max(LLONG_MIN),
+	out(out)
 {
 	arrayVector.append( this );
 }
@@ -86,9 +88,42 @@ void TableArray::startAnalyze()
 {
 }
 
+void TableArray::valueAnalyze( long long v )
+{
+	values += 1;
+	if ( v < min )
+		min = v;
+	if ( v > max )
+		max = v;
+}
+
+void TableArray::finishAnalyze()
+{
+	if ( min >= CHAR_MIN && max <= CHAR_MAX )
+		type = "char";
+	else if ( min >= SHRT_MIN && max <= SHRT_MAX )
+		type = "short";
+	else if ( min >= INT_MIN && max <= INT_MAX )
+		type = "int";
+	else if ( min >= LONG_MIN && max <= LONG_MAX )
+		type = "long";
+	else 
+		type = "long long";
+}
+
 void TableArray::startGenerate()
 {
+	out << "static const " << type << " " << "name_" << name << "[] = {\n\t";
+}
 
+void TableArray::valueGenerate( long long v )
+{
+	out << v << ", ";
+}
+
+void TableArray::finishGenerate()
+{
+	out << "0\n};\n\n";
 }
 
 void TableArray::start()
@@ -103,21 +138,6 @@ void TableArray::start()
 	}
 }
 
-
-void TableArray::valueAnalyze( long long v )
-{
-	values += 1;
-	if ( v < min )
-		min = v;
-	if ( v > max )
-		max = v;
-}
-
-void TableArray::valueGenerate( long long v )
-{
-
-}
-
 void TableArray::value( long long v )
 {
 	switch ( state ) {
@@ -128,14 +148,6 @@ void TableArray::value( long long v )
 			valueGenerate( v );
 			break;
 	}
-}
-
-void TableArray::finishAnalyze()
-{
-}
-
-void TableArray::finishGenerate()
-{
 }
 
 void TableArray::finish()
@@ -160,7 +172,8 @@ void FsmCodeGen::genLineDirective( ostream &out )
 /* Init code gen with in parameters. */
 FsmCodeGen::FsmCodeGen( const CodeGenArgs &args )
 :
-	CodeGenData(args)
+	CodeGenData(args),
+	actions( "actions", arrayVector, out )
 {
 }
 
@@ -225,6 +238,24 @@ std::ostream &FsmCodeGen::ACTIONS_ARRAY()
 	}
 	out << "\n";
 	return out;
+}
+
+void FsmCodeGen::taActions()
+{
+	actions.start();
+
+	/* Put "no-action" at the beginning. */
+	actions.value( 0 );
+
+	for ( GenActionTableMap::Iter act = redFsm->actionMap; act.lte(); act++ ) {
+		/* Write out the length, which will never be the last character. */
+		actions.value( act->key.length() );
+
+		for ( GenActionTable::Iter item = act->key; item.lte(); item++ )
+			actions.value( item->value->actionId );
+	}
+
+	actions.finish();
 }
 
 
@@ -440,8 +471,6 @@ string FsmCodeGen::WIDE_KEY( RedStateAp *state, Key key )
 		return KEY( key );
 	}
 }
-
-
 
 void FsmCodeGen::EXEC( ostream &ret, GenInlineItem *item, int targState, int inFinish )
 {
