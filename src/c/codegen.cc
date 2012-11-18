@@ -70,7 +70,7 @@ void cLineDirective( ostream &out, const char *fileName, int line )
 
 namespace C {
 
-TableArray::TableArray( const char *name, ArrayVector &arrayVector, std::ostream &out )
+TableArray::TableArray( const char *name, FsmCodeGen &fsmCodeGen )
 :
 	state(InitialState),
 	name(name),
@@ -79,9 +79,10 @@ TableArray::TableArray( const char *name, ArrayVector &arrayVector, std::ostream
 	values(0),
 	min(LLONG_MAX),
 	max(LLONG_MIN),
-	out(out)
+	fsmCodeGen(fsmCodeGen),
+	out(fsmCodeGen.out)
 {
-	arrayVector.append( this );
+	fsmCodeGen.arrayVector.append( this );
 }
 
 void TableArray::startAnalyze()
@@ -173,7 +174,7 @@ void FsmCodeGen::genLineDirective( ostream &out )
 FsmCodeGen::FsmCodeGen( const CodeGenArgs &args )
 :
 	CodeGenData(args),
-	actions( "actions", arrayVector, out )
+	actions( "actions", *this )
 {
 }
 

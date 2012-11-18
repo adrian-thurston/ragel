@@ -56,6 +56,7 @@ namespace C
 
 struct TableArray;
 typedef Vector<TableArray*> ArrayVector;
+struct FsmCodeGen;
 
 struct TableArray
 {
@@ -65,7 +66,7 @@ struct TableArray
 		GeneratePass
 	};
 		
-	TableArray( const char *name, ArrayVector &arrayVector, std::ostream &out );
+	TableArray( const char *name, FsmCodeGen &fsmCodeGen );
 
 	void start();
 	void startAnalyze();
@@ -89,6 +90,7 @@ struct TableArray
 	long long values;
 	long long max;
 	long long min;
+	const FsmCodeGen &fsmCodeGen;
 	std::ostream &out;
 };
 
@@ -110,6 +112,7 @@ public:
 	virtual void writeError();
 
 protected:
+	friend class TableArray;
 	typedef Vector<TableArray*> ArrayVector;
 	ArrayVector arrayVector;
 	TableArray actions;
