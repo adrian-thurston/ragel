@@ -28,9 +28,46 @@
 
 namespace C {
 
-void BinaryLooped::setTableState( TableArray::State )
-{
+BinaryLooped::BinaryLooped( const CodeGenArgs &args )
+:
+	Binary( args ),
 
+	actions(            "actions",              arrayVector ),
+	condOffsets(        "cond_offsets",         arrayVector ),
+	condLens(           "cond_lengths",         arrayVector ),
+	condKeysV1(         "cond_keys_v1",         arrayVector ),
+	condSpacesV1(       "cond_spaces_v1",       arrayVector ),
+	keyoffsets(         "key_offsets",          arrayVector ),
+	keys(               "keys",                 arrayVector ),
+	singleLens(         "single_lengths",       arrayVector ),
+	rangeLens(          "range_lengths",        arrayVector ),
+	indexOffsets(       "index_offsets",        arrayVector ),
+	indicies(           "indicies",             arrayVector ),
+	transTargsWi(       "trans_targs_wi",       arrayVector ),
+	transActionsWi(     "trans_targs_wi",       arrayVector ),
+	transCondSpacesWi(  "trans_cond_spaces_wi", arrayVector ),
+	transOffsetsWi(     "trans_offsets_wi",     arrayVector ),
+	transLengthsWi(     "trans_lengths_wi",     arrayVector ),
+	transTargs(         "trans_targs",          arrayVector ),
+	transActions(       "trans_actions",        arrayVector ),
+	transCondSpaces(    "trans_cond_spaces",    arrayVector ),
+	transOffsets(       "trans_offsets",        arrayVector ),
+	transLengths(       "trans_lenghts",        arrayVector ),
+	condKeys(           "cond_keys",            arrayVector ),
+	condTargs(          "cond_targs",           arrayVector ),
+	condActions(        "cond_actions",         arrayVector ),
+	toStateActions(     "to_state_actions",     arrayVector ),
+	fromStateActions(   "from_state_actions",   arrayVector ),
+	eofActions(         "eof_actions",          arrayVector ),
+	eofTrans(           "eof_trans",            arrayVector )
+{}
+
+void BinaryLooped::setTableState( TableArray::State state )
+{
+	for ( ArrayVector::Iter i = arrayVector; i.lte(); i++ ) {
+		TableArray *tableArray = *i;
+		tableArray->setState( state );
+	}
 }
 
 void BinaryLooped::tableDataPass()

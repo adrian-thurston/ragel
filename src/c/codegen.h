@@ -29,6 +29,7 @@
 #include <stdio.h>
 #include "common.h"
 #include "gendata.h"
+#include "vector.h"
 
 using std::string;
 using std::ostream;
@@ -53,14 +54,18 @@ string itoa( int i );
 namespace C
 {
 
+struct TableArray;
+typedef Vector<TableArray*> ArrayVector;
+
 struct TableArray
 {
 	enum State {
+		InitialState = 1,
 		AnalyzePass,
 		GeneratePass
 	};
 		
-	TableArray( bool isSigned );
+	TableArray( const char *name, ArrayVector &arrayVector );
 
 	void start();
 	void startAnalyze();
@@ -78,6 +83,7 @@ struct TableArray
 		{ this->state = state; }
 
 	State state;
+	const char *name;
 	bool isSigned;
 	long long values;
 	long long max;

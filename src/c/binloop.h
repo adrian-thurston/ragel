@@ -26,6 +26,7 @@
 
 #include <iostream>
 #include "binary.h"
+#include "vector.h"
 
 /* Forwards. */
 struct CodeGenData;
@@ -39,8 +40,7 @@ class BinaryLooped
 	: public Binary
 {
 public:
-	BinaryLooped( const CodeGenArgs &args )
-		: Binary(args) {}
+	BinaryLooped( const CodeGenArgs &args );
 
 	virtual void writeData();
 	virtual void writeExec();
@@ -48,6 +48,39 @@ public:
 	virtual void calcIndexSize();
 	virtual void setTableState( TableArray::State );
 	virtual void tableDataPass();
+
+	typedef Vector<TableArray*> ArrayVector;
+	ArrayVector arrayVector;
+
+	TableArray actions;
+	TableArray condOffsets;
+	TableArray condLens;
+	TableArray condKeysV1;
+	TableArray condSpacesV1;
+	TableArray keyoffsets;
+	TableArray keys;
+	TableArray singleLens;
+	TableArray rangeLens;
+	TableArray indexOffsets;
+	TableArray indicies;
+	TableArray transTargsWi;
+	TableArray transActionsWi;
+	TableArray transCondSpacesWi;
+	TableArray transOffsetsWi;
+	TableArray transLengthsWi;
+	TableArray transTargs;
+	TableArray transActions;
+	TableArray transCondSpaces;
+	TableArray transOffsets;
+	TableArray transLengths;
+	TableArray condKeys;
+	TableArray condTargs;
+	TableArray condActions;
+	TableArray toStateActions;
+	TableArray fromStateActions;
+	TableArray eofActions;
+	TableArray eofTrans;
+
 };
 
 }

@@ -70,15 +70,16 @@ void cLineDirective( ostream &out, const char *fileName, int line )
 
 namespace C {
 
-TableArray::TableArray( bool isSigned )
+TableArray::TableArray( const char *name, ArrayVector &arrayVector )
 :
-	state(AnalyzePass),
-	isSigned(isSigned),
+	state(InitialState),
+	name(name),
+	isSigned(false),
 	values(0),
 	min(LLONG_MAX),
 	max(LLONG_MIN)
 {
-
+	arrayVector.append( this );
 }
 
 void TableArray::startAnalyze()
