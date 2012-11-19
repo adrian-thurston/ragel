@@ -53,10 +53,7 @@ public:
 	TableArray condLens;
 	TableArray condKeysV1;
 	TableArray condSpacesV1;
-	TableArray keyoffsets;
 	TableArray keys;
-	TableArray singleLens;
-	TableArray rangeLens;
 	TableArray indexOffsets;
 	TableArray indicies;
 	TableArray transTargsWi;

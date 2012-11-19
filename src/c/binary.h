@@ -39,10 +39,13 @@ class Binary
 	: public FsmCodeGen
 {
 public:
-	Binary( const CodeGenArgs &args )
-		: FsmCodeGen(args) {}
+	Binary( const CodeGenArgs &args );
 
 protected:
+	TableArray keyOffsets;
+	TableArray singleLens;
+	TableArray rangeLens;
+
 	std::ostream &TO_STATE_ACTION_SWITCH();
 	std::ostream &FROM_STATE_ACTION_SWITCH();
 	std::ostream &EOF_ACTION_SWITCH();
@@ -75,6 +78,10 @@ protected:
 	std::ostream &COND_KEYS();
 	std::ostream &COND_TARGS();
 	std::ostream &COND_ACTIONS();
+
+	void taKeyOffsets();
+	void taSingleLens();
+	void taRangeLens();
 
 	void LOCATE_TRANS();
 	void LOCATE_COND();

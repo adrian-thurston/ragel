@@ -30,6 +30,14 @@
 
 namespace C {
 
+Binary::Binary( const CodeGenArgs &args )
+:
+	FsmCodeGen( args ),
+	keyOffsets( "key_offsets",     *this ),
+	singleLens( "single_lengths",  *this ),
+	rangeLens(  "range_lengths",   *this )
+{}
+
 void Binary::calcIndexSize()
 {
 	assert( false );
@@ -192,6 +200,19 @@ std::ostream &Binary::KEY_OFFSETS()
 	return out;
 }
 
+void Binary::taKeyOffsets()
+{
+	keyOffsets.start();
+
+	int curKeyOffset = 0;
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		keyOffsets.value( curKeyOffset );
+		curKeyOffset += st->outSingle.length() + st->outRange.length()*2;
+	}
+
+	keyOffsets.finish();
+}
+
 
 std::ostream &Binary::INDEX_OFFSETS()
 {
@@ -250,6 +271,16 @@ std::ostream &Binary::SINGLE_LENS()
 	return out;
 }
 
+void Binary::taSingleLens()
+{
+	singleLens.start();
+
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ )
+		singleLens.value( st->outSingle.length() );
+
+	singleLens.finish();
+}
+
 std::ostream &Binary::RANGE_LENS()
 {
 	out << "\t";
@@ -265,6 +296,16 @@ std::ostream &Binary::RANGE_LENS()
 	}
 	out << "\n";
 	return out;
+}
+
+void Binary::taRangeLens()
+{
+	rangeLens.start();
+
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ )
+		rangeLens.value( st->outRange.length() );
+
+	rangeLens.finish();
 }
 
 std::ostream &Binary::TO_STATE_ACTIONS()

@@ -36,10 +36,7 @@ BinaryLooped::BinaryLooped( const CodeGenArgs &args )
 	condLens(           "cond_lengths",         *this ),
 	condKeysV1(         "cond_keys_v1",         *this ),
 	condSpacesV1(       "cond_spaces_v1",       *this ),
-	keyoffsets(         "key_offsets",          *this ),
 	keys(               "keys",                 *this ),
-	singleLens(         "single_lengths",       *this ),
-	rangeLens(          "range_lengths",        *this ),
 	indexOffsets(       "index_offsets",        *this ),
 	indicies(           "indicies",             *this ),
 	transTargsWi(       "trans_targs_wi",       *this ),
@@ -72,13 +69,15 @@ void BinaryLooped::setTableState( TableArray::State state )
 void BinaryLooped::tableDataPass()
 {
 	taActions();
+	taKeyOffsets();
+	taSingleLens();
+	taRangeLens();
 }
 
 void BinaryLooped::writeData()
 {
 	/* Run the analysis pass over the table data. */
 	setTableState( TableArray::GeneratePass );
-	// std::cerr << "min: " << actions.min << " " << actions.max << std::endl;
 
 	/* If there are any transtion functions then output the array. If there
 	 * are none, don't bother emitting an empty array that won't be used. */
@@ -107,25 +106,16 @@ void BinaryLooped::writeData()
 		"\n";
 	}
 
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxKeyOffset), KO() );
-	KEY_OFFSETS();
-	CLOSE_ARRAY() <<
-	"\n";
+	taKeyOffsets();
 
 	OPEN_ARRAY( WIDE_ALPH_TYPE(), K() );
 	KEYS();
 	CLOSE_ARRAY() <<
 	"\n";
 
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxSingleLen), SL() );
-	SINGLE_LENS();
-	CLOSE_ARRAY() <<
-	"\n";
+	taSingleLens();
 
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxRangeLen), RL() );
-	RANGE_LENS();
-	CLOSE_ARRAY() <<
-	"\n";
+	taRangeLens();
 
 	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxIndexOffset), IO() );
 	INDEX_OFFSETS();
