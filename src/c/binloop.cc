@@ -305,7 +305,7 @@ void BinaryLooped::writeExec()
 
 	LOCATE_COND();
 
-	out << "_match2:\n";
+	out << "_match_cond:\n";
 	
 	if ( redFsm->anyEofTrans() )
 		out << "_eof_trans:\n";

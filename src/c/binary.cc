@@ -1144,7 +1144,7 @@ void Binary::LOCATE_COND()
 		"				_lower = _mid + 1;\n"
 		"			else {\n"
 		"				_cond += " << CAST(UINT()) << "(_mid - _keys);\n"
-		"				goto _match2;\n"
+		"				goto _match_cond;\n"
 		"			}\n"
 		"		}\n"
 		"		" << vCS() << " = " << ERROR_STATE() << ";\n"
