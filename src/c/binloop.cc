@@ -380,6 +380,7 @@ void BinaryLooped::writeExec()
 			out <<
 				"	if ( " << ET() << "[" << vCS() << "] > 0 ) {\n"
 				"		_trans = " << ET() << "[" << vCS() << "] - 1;\n"
+				"		_cond = " << TO() << "[_trans];\n"
 				"		goto _eof_trans;\n"
 				"	}\n";
 		}
