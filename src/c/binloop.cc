@@ -184,7 +184,7 @@ void BinaryLooped::writeData()
 		"\n";
 	}
 
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), CK() );
+	OPEN_ARRAY( "char", CK() );
 	COND_KEYS();
 	CLOSE_ARRAY() <<
 	"\n";
@@ -414,6 +414,9 @@ void BinaryLooped::writeExec()
 /* Determine if we should use indicies or not. */
 void BinaryLooped::calcIndexSize()
 {
+	useIndicies = false;
+	return;
+
 	int sizeWithInds = 0, sizeWithoutInds = 0;
 
 	/* Calculate cost of using with indicies. */
