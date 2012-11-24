@@ -1100,7 +1100,7 @@ void Binary::LOCATE_TRANS()
 void Binary::LOCATE_COND()
 {
 	out <<
-		"	_keys = " << ARR_OFF( CK(), TO() + "[" + "_trans" + "]" ) << ";\n"
+		"	_ckeys = " << ARR_OFF( CK(), TO() + "[" + "_trans" + "]" ) << ";\n"
 		"	_klen = " << TL() << "[" << "_trans" << "];\n"
 		"	_cond = " << TO() << "[_trans];\n"
 		"\n";
@@ -1130,9 +1130,9 @@ void Binary::LOCATE_COND()
 	
 	out <<
 		"	{\n"
-		"		" << PTR_CONST() << WIDE_ALPH_TYPE() << PTR_CONST_END() << POINTER() << "_lower = _keys;\n"
-		"		" << PTR_CONST() << WIDE_ALPH_TYPE() << PTR_CONST_END() << POINTER() << "_mid;\n"
-		"		" << PTR_CONST() << WIDE_ALPH_TYPE() << PTR_CONST_END() << POINTER() << "_upper = _keys + _klen - 1;\n"
+		"		" << PTR_CONST() << " char *_lower = _ckeys;\n"
+		"		" << PTR_CONST() << " char *_mid;\n"
+		"		" << PTR_CONST() << " char *_upper = _ckeys + _klen - 1;\n"
 		"		while (1) {\n"
 		"			if ( _upper < _lower )\n"
 		"				break;\n"
@@ -1143,7 +1143,7 @@ void Binary::LOCATE_COND()
 		"			else if ( " << "_cpc" << " > *_mid )\n"
 		"				_lower = _mid + 1;\n"
 		"			else {\n"
-		"				_cond += " << CAST(UINT()) << "(_mid - _keys);\n"
+		"				_cond += " << CAST(UINT()) << "(_mid - _ckeys);\n"
 		"				goto _match_cond;\n"
 		"			}\n"
 		"		}\n"

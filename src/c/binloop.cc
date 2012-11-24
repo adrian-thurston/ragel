@@ -261,6 +261,7 @@ void BinaryLooped::writeExec()
 
 	out <<
 		"	" << PTR_CONST() << WIDE_ALPH_TYPE() << PTR_CONST_END() << POINTER() << "_keys;\n"
+		"	const char *_ckeys;\n"
 		"	int _cpc;\n"
 		"\n";
 
@@ -333,8 +334,8 @@ void BinaryLooped::writeExec()
 			"\n";
 	}
 
-	if ( redFsm->anyRegActions() || redFsm->anyActionGotos() || 
-			redFsm->anyActionCalls() || redFsm->anyActionRets() )
+//	if ( redFsm->anyRegActions() || redFsm->anyActionGotos() || 
+//			redFsm->anyActionCalls() || redFsm->anyActionRets() )
 		out << "_again:\n";
 
 	if ( redFsm->anyToStateActions() ) {
