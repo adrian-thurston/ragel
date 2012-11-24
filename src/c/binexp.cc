@@ -31,6 +31,9 @@ namespace C {
 /* Determine if we should use indicies or not. */
 void BinaryExpanded::calcIndexSize()
 {
+	useIndicies = false;
+	return;
+
 	int sizeWithInds = 0, sizeWithoutInds = 0;
 
 	/* Calculate cost of using with indicies. */
@@ -90,6 +93,15 @@ std::ostream &BinaryExpanded::TRANS_ACTION( RedTransAp *trans )
 	int action = 0;
 	if ( trans->action != 0 )
 		action = trans->action->actListId+1;
+	out << action;
+	return out;
+}
+
+std::ostream &BinaryExpanded::COND_ACTION( RedCondAp *cond )
+{
+	int action = 0;
+	if ( cond->action != 0 )
+		action = cond->action->actListId+1;
 	out << action;
 	return out;
 }
@@ -246,6 +258,21 @@ void BinaryExpanded::writeData()
 			CLOSE_ARRAY() <<
 			"\n";
 		}
+
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TCS() );
+		TRANS_COND_SPACES_WI();
+		CLOSE_ARRAY() <<
+		"\n";
+
+		OPEN_ARRAY( "int", TO() );
+		TRANS_OFFSETS_WI();
+		CLOSE_ARRAY() <<
+		"\n";
+
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TL() );
+		TRANS_LENGTHS_WI();
+		CLOSE_ARRAY() <<
+		"\n";
 	}
 	else {
 		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TT() );
@@ -259,7 +286,37 @@ void BinaryExpanded::writeData()
 			CLOSE_ARRAY() <<
 			"\n";
 		}
+
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TCS() );
+		TRANS_COND_SPACES();
+		CLOSE_ARRAY() <<
+		"\n";
+
+		OPEN_ARRAY( "int", TO() );
+		TRANS_OFFSETS();
+		CLOSE_ARRAY() <<
+		"\n";
+
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TL() );
+		TRANS_LENGTHS();
+		CLOSE_ARRAY() <<
+		"\n";
 	}
+
+	OPEN_ARRAY( "char", CK() );
+	COND_KEYS();
+	CLOSE_ARRAY() <<
+	"\n";
+
+	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), CT() );
+	COND_TARGS();
+	CLOSE_ARRAY() <<
+	"\n";
+
+	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), CA() );
+	COND_ACTIONS();
+	CLOSE_ARRAY() <<
+	"\n";
 
 	if ( redFsm->anyToStateActions() ) {
 		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), TSA() );
@@ -307,7 +364,10 @@ void BinaryExpanded::writeExec()
 	out <<
 		";\n"
 		"	" << PTR_CONST() << WIDE_ALPH_TYPE() << PTR_CONST_END() << POINTER() << "_keys;\n"
-		"	int _trans;\n";
+		"	const char *_ckeys;\n"
+		"	int _cpc;\n"
+		"	int _trans;\n"
+		"	" << UINT() << " _cond;\n";
 
 	if ( redFsm->anyConditions() )
 		out << "	" << WIDE_ALPH_TYPE() << " _widec;\n";
@@ -349,6 +409,10 @@ void BinaryExpanded::writeExec()
 	if ( useIndicies )
 		out << "	_trans = " << I() << "[_trans];\n";
 
+	LOCATE_COND();
+
+	out << "_match_cond:\n";
+
 	if ( redFsm->anyEofTrans() )
 		out << "_eof_trans:\n";
 
@@ -356,23 +420,23 @@ void BinaryExpanded::writeExec()
 		out << "	_ps = " << vCS() << ";\n";
 
 	out <<
-		"	" << vCS() << " = " << TT() << "[_trans];\n"
+		"	" << vCS() << " = " << CT() << "[_cond];\n"
 		"\n";
 
 	if ( redFsm->anyRegActions() ) {
 		out << 
-			"	if ( " << TA() << "[_trans] == 0 )\n"
+			"	if ( " << CA() << "[_cond] == 0 )\n"
 			"		goto _again;\n"
 			"\n"
-			"	switch ( " << TA() << "[_trans] ) {\n";
+			"	switch ( " << CA() << "[_cond] ) {\n";
 			ACTION_SWITCH();
 			SWITCH_DEFAULT() <<
 			"	}\n"
 			"\n";
 	}
 
-	if ( redFsm->anyRegActions() || redFsm->anyActionGotos() || 
-			redFsm->anyActionCalls() || redFsm->anyActionRets() )
+//	if ( redFsm->anyRegActions() || redFsm->anyActionGotos() || 
+//			redFsm->anyActionCalls() || redFsm->anyActionRets() )
 		out << "_again:\n";
 
 	if ( redFsm->anyToStateActions() ) {
@@ -414,6 +478,7 @@ void BinaryExpanded::writeExec()
 			out <<
 				"	if ( " << ET() << "[" << vCS() << "] > 0 ) {\n"
 				"		_trans = " << ET() << "[" << vCS() << "] - 1;\n"
+				"		_cond = " << TO() << "[_trans];\n"
 				"		goto _eof_trans;\n"
 				"	}\n";
 		}
