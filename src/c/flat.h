@@ -57,12 +57,19 @@ protected:
 	std::ostream &EOF_TRANS();
 	std::ostream &TRANS_TARGS();
 	std::ostream &TRANS_ACTIONS();
+	std::ostream &TRANS_COND_SPACES();
+	std::ostream &TRANS_OFFSETS();
+	std::ostream &TRANS_LENGTHS();
+	std::ostream &COND_KEYS();
+	std::ostream &COND_TARGS();
+	std::ostream &COND_ACTIONS();
+
 	void LOCATE_TRANS();
 
 	std::ostream &COND_INDEX_OFFSET();
 	void COND_TRANSLATE();
 	std::ostream &CONDS();
-	std::ostream &COND_KEYS();
+	std::ostream &COND_KEYS_v1();
 	std::ostream &COND_KEY_SPANS();
 
 	void GOTO( ostream &ret, int gotoDest, bool inFinish );
@@ -80,6 +87,7 @@ protected:
 	virtual std::ostream &FROM_STATE_ACTION( RedStateAp *state );
 	virtual std::ostream &EOF_ACTION( RedStateAp *state );
 	virtual std::ostream &TRANS_ACTION( RedTransAp *trans );
+	virtual std::ostream &COND_ACTION( RedCondAp *cond );
 };
 
 }

@@ -65,6 +65,17 @@ std::ostream &Flat::TRANS_ACTION( RedTransAp *trans )
 	return out;
 }
 
+std::ostream &Flat::COND_ACTION( RedCondAp *cond )
+{
+	/* If there are actions, emit them. Otherwise emit zero. */
+	int act = 0;
+	if ( cond->action != 0 )
+		act = cond->action->location+1;
+	out << act;
+	return out;
+}
+
+
 std::ostream &Flat::TO_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
@@ -255,7 +266,7 @@ std::ostream &Flat::EOF_TRANS()
 }
 
 
-std::ostream &Flat::COND_KEYS()
+std::ostream &Flat::COND_KEYS_v1()
 {
 	out << '\t';
 	int totalTrans = 0;
@@ -415,6 +426,162 @@ std::ostream &Flat::TRANS_TARGS()
 	return out;
 }
 
+std::ostream &Flat::TRANS_COND_SPACES()
+{
+	/* Transitions must be written ordered by their id. */
+	RedTransAp **transPtrs = new RedTransAp*[redFsm->transSet.length()];
+	for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ )
+		transPtrs[trans->id] = trans;
+
+	/* Keep a count of the num of items in the array written. */
+	out << '\t';
+	int totalSpaces = 0;
+	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
+		/* Save the position. Needed for eofTargs. */
+		RedTransAp *trans = transPtrs[t];
+
+		if ( trans->condSpace != 0 )
+			out << trans->condSpace->condSpaceId << ", ";
+		else
+			out << -1 << ", ";
+
+		if ( ++totalSpaces % IALL == 0 )
+			out << "\n\t";
+	}
+	out << "\n";
+	delete[] transPtrs;
+	return out;
+}
+
+std::ostream &Flat::TRANS_OFFSETS()
+{
+	/* Transitions must be written ordered by their id. */
+	RedTransAp **transPtrs = new RedTransAp*[redFsm->transSet.length()];
+	for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ )
+		transPtrs[trans->id] = trans;
+
+	/* Keep a count of the num of items in the array written. */
+	out << '\t';
+	int curOffset = 0;
+	int totalOffsets = 0;
+	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
+		/* Save the position. Needed for eofTargs. */
+		RedTransAp *trans = transPtrs[t];
+
+		out << curOffset << ", ";
+
+		if ( ++totalOffsets % IALL == 0 )
+			out << "\n\t";
+
+		curOffset += trans->outConds.length();
+	}
+	out << "\n";
+	delete[] transPtrs;
+	return out;
+}
+
+std::ostream &Flat::TRANS_LENGTHS()
+{
+	/* Transitions must be written ordered by their id. */
+	RedTransAp **transPtrs = new RedTransAp*[redFsm->transSet.length()];
+	for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ )
+		transPtrs[trans->id] = trans;
+
+	/* Keep a count of the num of items in the array written. */
+	out << '\t';
+	int totalOffsets = 0;
+	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
+		/* Save the position. Needed for eofTargs. */
+		RedTransAp *trans = transPtrs[t];
+
+		out << trans->outConds.length() << ", ";
+
+		if ( ++totalOffsets % IALL == 0 )
+			out << "\n\t";
+	}
+	out << "\n";
+	delete[] transPtrs;
+	return out;
+}
+
+std::ostream &Flat::COND_KEYS()
+{
+	/* Transitions must be written ordered by their id. */
+	RedTransAp **transPtrs = new RedTransAp*[redFsm->transSet.length()];
+	for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ )
+		transPtrs[trans->id] = trans;
+
+	/* Keep a count of the num of items in the array written. */
+	out << '\t';
+	int totalKeys = 0;
+	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
+		/* Save the position. Needed for eofTargs. */
+		RedTransAp *trans = transPtrs[t];
+
+		for ( RedCondList::Iter cond = trans->outConds; cond.lte(); cond++ ) {
+			out << cond->key.getVal() << ", ";
+			if ( ++totalKeys % IALL == 0 )
+				out << "\n\t";
+		}
+	}
+	out << "\n";
+	delete[] transPtrs;
+	return out;
+}
+
+std::ostream &Flat::COND_TARGS()
+{
+	/* Transitions must be written ordered by their id. */
+	RedTransAp **transPtrs = new RedTransAp*[redFsm->transSet.length()];
+	for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ )
+		transPtrs[trans->id] = trans;
+
+	/* Keep a count of the num of items in the array written. */
+	out << '\t';
+	int totalConds = 0;
+	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
+		/* Save the position. Needed for eofTargs. */
+		RedTransAp *trans = transPtrs[t];
+
+		for ( RedCondList::Iter cond = trans->outConds; cond.lte(); cond++ ) {
+			RedCondAp *c = cond->value;
+			out << c->targ->id << ", ";
+			if ( ++totalConds % IALL == 0 )
+				out << "\n\t";
+		}
+	}
+	out << "\n";
+	delete[] transPtrs;
+	return out;
+}
+
+std::ostream &Flat::COND_ACTIONS()
+{
+	/* Transitions must be written ordered by their id. */
+	RedTransAp **transPtrs = new RedTransAp*[redFsm->transSet.length()];
+	for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ )
+		transPtrs[trans->id] = trans;
+
+	/* Keep a count of the num of items in the array written. */
+	out << '\t';
+	int totalConds = 0;
+	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
+		/* Save the position. Needed for eofTargs. */
+		RedTransAp *trans = transPtrs[t];
+
+		for ( RedCondList::Iter cond = trans->outConds; cond.lte(); cond++ ) {
+			RedCondAp *c = cond->value;
+			COND_ACTION( c );
+			out << ", ";
+			if ( ++totalConds % IALL == 0 )
+				out << "\n\t";
+		}
+	}
+	out << "\n";
+	delete[] transPtrs;
+	return out;
+}
+
 
 std::ostream &Flat::TRANS_ACTIONS()
 {
@@ -451,7 +618,61 @@ void Flat::LOCATE_TRANS()
 		"	_trans = _inds[ _slen > 0 && _keys[0] <=" << GET_WIDE_KEY() << " &&\n"
 		"		" << GET_WIDE_KEY() << " <= _keys[1] ?\n"
 		"		" << GET_WIDE_KEY() << " - _keys[0] : _slen ];\n"
+
 		"\n";
+
+	out <<
+		"	_ckeys = " << ARR_OFF( CK(), TO() + "[" + "_trans" + "]" ) << ";\n"
+		"	_klen = " << TL() << "[" << "_trans" << "];\n"
+		"	_cond = " << TO() << "[_trans];\n"
+		"\n";
+
+	out <<
+		"	_cpc = 0;\n"
+		"	switch ( " << TCS() << "[" << "_trans" << "] ) {\n"
+		"\n";
+
+	for ( CondSpaceList::Iter csi = condSpaceList; csi.lte(); csi++ ) {
+		GenCondSpace *condSpace = csi;
+		out << "	case " << condSpace->condSpaceId << ": {\n";
+		for ( GenCondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
+			out << TABS(2) << "if ( ";
+			CONDITION( out, *csi );
+			Size condValOffset = (1 << csi.pos());
+			out << " ) _cpc += " << condValOffset << ";\n";
+		}
+
+		out << 
+			"		break;\n"
+			"	}\n";
+	}
+
+	out << 
+		"	}\n";
+	
+	out <<
+		"	{\n"
+		"		" << PTR_CONST() << " char *_lower = _ckeys;\n"
+		"		" << PTR_CONST() << " char *_mid;\n"
+		"		" << PTR_CONST() << " char *_upper = _ckeys + _klen - 1;\n"
+		"		while (1) {\n"
+		"			if ( _upper < _lower )\n"
+		"				break;\n"
+		"\n"
+		"			_mid = _lower + ((_upper-_lower) >> 1);\n"
+		"			if ( " << "_cpc" << " < *_mid )\n"
+		"				_upper = _mid - 1;\n"
+		"			else if ( " << "_cpc" << " > *_mid )\n"
+		"				_lower = _mid + 1;\n"
+		"			else {\n"
+		"				_cond += " << CAST(UINT()) << "(_mid - _ckeys);\n"
+		"				goto _match_cond;\n"
+		"			}\n"
+		"		}\n"
+		"		" << vCS() << " = " << ERROR_STATE() << ";\n"
+		"		goto _again;\n"
+		"	}\n"
+	;
 }
 
 void Flat::GOTO( ostream &ret, int gotoDest, bool inFinish )

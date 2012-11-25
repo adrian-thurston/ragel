@@ -41,7 +41,7 @@ void FlatLooped::writeData()
 
 	if ( redFsm->anyConditions() ) {
 		OPEN_ARRAY( WIDE_ALPH_TYPE(), CK_v1() );
-		COND_KEYS();
+		COND_KEYS_v1();
 		CLOSE_ARRAY() <<
 		"\n";
 
@@ -83,6 +83,36 @@ void FlatLooped::writeData()
 
 	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TT() );
 	TRANS_TARGS();
+	CLOSE_ARRAY() <<
+	"\n";
+
+	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TCS() );
+	TRANS_COND_SPACES();
+	CLOSE_ARRAY() <<
+	"\n";
+
+	OPEN_ARRAY( "int", TO() );
+	TRANS_OFFSETS();
+	CLOSE_ARRAY() <<
+	"\n";
+
+	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TL() );
+	TRANS_LENGTHS();
+	CLOSE_ARRAY() <<
+	"\n";
+
+	OPEN_ARRAY( "char", CK() );
+	COND_KEYS();
+	CLOSE_ARRAY() <<
+	"\n";
+
+	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), CT() );
+	COND_TARGS();
+	CLOSE_ARRAY() <<
+	"\n";
+
+	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), CA() );
+	COND_ACTIONS();
 	CLOSE_ARRAY() <<
 	"\n";
 
@@ -138,10 +168,7 @@ void FlatLooped::writeExec()
 
 	out << 
 		";\n"
-		"	int _trans";
-
-	if ( redFsm->anyConditions() )
-		out << ", _cond";
+		"	int _trans, _cond";
 	out << ";\n";
 
 	if ( redFsm->anyToStateActions() || 
@@ -154,7 +181,10 @@ void FlatLooped::writeExec()
 
 	out <<
 		"	" << PTR_CONST() << WIDE_ALPH_TYPE() << PTR_CONST_END() << POINTER() << "_keys;\n"
-		"	" << PTR_CONST() << ARRAY_TYPE(redFsm->maxIndex) << PTR_CONST_END() << POINTER() << "_inds;\n";
+		"	" << PTR_CONST() << ARRAY_TYPE(redFsm->maxIndex) << PTR_CONST_END() << POINTER() << "_inds;\n"
+		"	const char *_ckeys;\n"
+		"	int _klen;\n"
+		"	int _cpc;\n";
 
 	if ( redFsm->anyConditions() ) {
 		out << 
@@ -198,6 +228,8 @@ void FlatLooped::writeExec()
 
 	LOCATE_TRANS();
 
+	out << "_match_cond:\n";
+
 	if ( redFsm->anyEofTrans() )
 		out << "_eof_trans:\n";
 
@@ -205,15 +237,15 @@ void FlatLooped::writeExec()
 		out << "	_ps = " << vCS() << ";\n";
 
 	out <<
-		"	" << vCS() << " = " << TT() << "[_trans];\n"
+		"	" << vCS() << " = " << CT() << "[_cond];\n"
 		"\n";
 
 	if ( redFsm->anyRegActions() ) {
 		out <<
-			"	if ( " << TA() << "[_trans] == 0 )\n"
+			"	if ( " << CA() << "[_cond] == 0 )\n"
 			"		goto _again;\n"
 			"\n"
-			"	_acts = " << ARR_OFF( A(), TA() + "[_trans]" ) << ";\n"
+			"	_acts = " << ARR_OFF( A(), CA() + "[_cond]" ) << ";\n"
 			"	_nacts = " << CAST(UINT()) << " *_acts++;\n"
 			"	while ( _nacts-- > 0 ) {\n"
 			"		switch ( *(_acts++) )\n		{\n";
@@ -224,8 +256,8 @@ void FlatLooped::writeExec()
 			"\n";
 	}
 
-	if ( redFsm->anyRegActions() || redFsm->anyActionGotos() || 
-			redFsm->anyActionCalls() || redFsm->anyActionRets() )
+//	if ( redFsm->anyRegActions() || redFsm->anyActionGotos() || 
+//			redFsm->anyActionCalls() || redFsm->anyActionRets() )
 		out << "_again:\n";
 
 	if ( redFsm->anyToStateActions() ) {
@@ -271,6 +303,7 @@ void FlatLooped::writeExec()
 			out <<
 				"	if ( " << ET() << "[" << vCS() << "] > 0 ) {\n"
 				"		_trans = " << ET() << "[" << vCS() << "] - 1;\n"
+				"		_cond = " << TO() << "[_trans];\n"
 				"		goto _eof_trans;\n"
 				"	}\n";
 		}
