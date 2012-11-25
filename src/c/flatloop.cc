@@ -30,6 +30,8 @@ namespace C {
 
 void FlatLooped::writeData()
 {
+	setTransPos();
+
 	/* If there are any transtion functions then output the array. If there
 	 * are none, don't bother emitting an empty array that won't be used. */
 	if ( redFsm->anyActions() ) {
@@ -81,8 +83,6 @@ void FlatLooped::writeData()
 	CLOSE_ARRAY() <<
 	"\n";
 
-	TRANS_TARGS();
-
 	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TCS() );
 	TRANS_COND_SPACES();
 	CLOSE_ARRAY() <<
@@ -112,13 +112,6 @@ void FlatLooped::writeData()
 	COND_ACTIONS();
 	CLOSE_ARRAY() <<
 	"\n";
-
-	if ( redFsm->anyActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), TA() );
-		TRANS_ACTIONS();
-		CLOSE_ARRAY() <<
-		"\n";
-	}
 
 	if ( redFsm->anyToStateActions() ) {
 		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), TSA() );

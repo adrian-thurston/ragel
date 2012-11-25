@@ -43,6 +43,50 @@ void Binary::calcIndexSize()
 	assert( false );
 }
 
+void Binary::setTransPosWi()
+{
+	/* Transitions must be written ordered by their id. */
+	RedTransAp **transPtrs = new RedTransAp*[redFsm->transSet.length()];
+	for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ )
+		transPtrs[trans->id] = trans;
+
+	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
+		/* Record the position, need this for eofTrans. */
+		RedTransAp *trans = transPtrs[t];
+		trans->pos = t;
+	}
+	delete[] transPtrs;
+}
+
+void Binary::setTransPos()
+{
+	int totalTrans = 0;
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		for ( RedTransList::Iter stel = st->outSingle; stel.lte(); stel++ ) {
+			RedTransAp *trans = stel->value;
+			trans->pos = totalTrans++;
+		}
+
+		for ( RedTransList::Iter rtel = st->outRange; rtel.lte(); rtel++ ) {
+			RedTransAp *trans = rtel->value;
+			trans->pos = totalTrans++;
+		}
+
+		if ( st->defTrans != 0 ) {
+			RedTransAp *trans = st->defTrans;
+			trans->pos = totalTrans++;
+		}
+	}
+
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		if ( st->eofTrans != 0 ) {
+			RedTransAp *trans = st->eofTrans;
+			trans->pos = totalTrans++;
+		}
+	}
+}
+
+
 std::ostream &Binary::TO_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
@@ -493,85 +537,6 @@ std::ostream &Binary::INDICIES()
 	return out;
 }
 
-std::ostream &Binary::TRANS_TARGS()
-{
-	int totalTrans = 0;
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		for ( RedTransList::Iter stel = st->outSingle; stel.lte(); stel++ ) {
-			RedTransAp *trans = stel->value;
-			++totalTrans;
-		}
-
-		for ( RedTransList::Iter rtel = st->outRange; rtel.lte(); rtel++ ) {
-			RedTransAp *trans = rtel->value;
-			++totalTrans;
-		}
-
-		if ( st->defTrans != 0 ) {
-			RedTransAp *trans = st->defTrans;
-			++totalTrans;
-		}
-	}
-
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		if ( st->eofTrans != 0 ) {
-			RedTransAp *trans = st->eofTrans;
-			trans->pos = totalTrans;
-			++totalTrans;
-		}
-	}
-
-	return out;
-}
-
-
-std::ostream &Binary::TRANS_ACTIONS()
-{
-	int totalTrans = 0;
-	out << '\t';
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		/* Walk the singles. */
-		for ( RedTransList::Iter stel = st->outSingle; stel.lte(); stel++ ) {
-			RedTransAp *trans = stel->value;
-			TRANS_ACTION( trans ) << ", ";
-			if ( ++totalTrans % IALL == 0 )
-				out << "\n\t";
-		}
-
-		/* Walk the ranges. */
-		for ( RedTransList::Iter rtel = st->outRange; rtel.lte(); rtel++ ) {
-			RedTransAp *trans = rtel->value;
-			TRANS_ACTION( trans ) << ", ";
-			if ( ++totalTrans % IALL == 0 )
-				out << "\n\t";
-		}
-
-		/* The state's default index goes next. */
-		if ( st->defTrans != 0 ) {
-			RedTransAp *trans = st->defTrans;
-			TRANS_ACTION( trans ) << ", ";
-			if ( ++totalTrans % IALL == 0 )
-				out << "\n\t";
-		}
-	}
-
-	/* Add any eof transitions that have not yet been written out above. */
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		if ( st->eofTrans != 0 ) {
-			RedTransAp *trans = st->eofTrans;
-			TRANS_ACTION( trans ) << ", ";
-			if ( ++totalTrans % IALL == 0 )
-				out << "\n\t";
-		}
-	}
-
-
-	/* Output one last number so we don't have to figure out when the last
-	 * entry is and avoid writing a comma. */
-	out << 0 << "\n";
-	return out;
-}
-
 std::ostream &Binary::TRANS_COND_SPACES()
 {
 	int totalSpaces = 0;
@@ -729,55 +694,6 @@ std::ostream &Binary::TRANS_LENGTHS()
 	/* Output one last number so we don't have to figure out when the last
 	 * entry is and avoid writing a comma. */
 	out << 0 << "\n";
-	return out;
-}
-
-std::ostream &Binary::TRANS_TARGS_WI()
-{
-	/* Transitions must be written ordered by their id. */
-	RedTransAp **transPtrs = new RedTransAp*[redFsm->transSet.length()];
-	for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ )
-		transPtrs[trans->id] = trans;
-
-	/* Keep a count of the num of items in the array written. */
-	int totalStates = 0;
-	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
-		/* Record the position, need this for eofTrans. */
-		RedTransAp *trans = transPtrs[t];
-		trans->pos = t;
-
-		/* Write out the target state. */
-		if ( t < redFsm->transSet.length()-1 ) {
-			++totalStates;
-		}
-	}
-	delete[] transPtrs;
-	return out;
-}
-
-
-std::ostream &Binary::TRANS_ACTIONS_WI()
-{
-	/* Transitions must be written ordered by their id. */
-	RedTransAp **transPtrs = new RedTransAp*[redFsm->transSet.length()];
-	for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ )
-		transPtrs[trans->id] = trans;
-
-	/* Keep a count of the num of items in the array written. */
-	out << '\t';
-	int totalAct = 0;
-	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
-		/* Write the function for the transition. */
-		RedTransAp *trans = transPtrs[t];
-		TRANS_ACTION( trans );
-		if ( t < redFsm->transSet.length()-1 ) {
-			out << ", ";
-			if ( ++totalAct % IALL == 0 )
-				out << "\n\t";
-		}
-	}
-	out << "\n";
-	delete[] transPtrs;
 	return out;
 }
 

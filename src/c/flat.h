@@ -55,8 +55,6 @@ protected:
 	std::ostream &FROM_STATE_ACTIONS();
 	std::ostream &EOF_ACTIONS();
 	std::ostream &EOF_TRANS();
-	std::ostream &TRANS_TARGS();
-	std::ostream &TRANS_ACTIONS();
 	std::ostream &TRANS_COND_SPACES();
 	std::ostream &TRANS_OFFSETS();
 	std::ostream &TRANS_LENGTHS();
@@ -71,6 +69,8 @@ protected:
 	std::ostream &CONDS();
 	std::ostream &COND_KEYS_v1();
 	std::ostream &COND_KEY_SPANS();
+
+	void setTransPos();
 
 	void GOTO( ostream &ret, int gotoDest, bool inFinish );
 	void CALL( ostream &ret, int callDest, int targState, bool inFinish );

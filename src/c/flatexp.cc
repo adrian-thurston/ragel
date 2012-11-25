@@ -74,7 +74,6 @@ std::ostream &FlatExpanded::COND_ACTION( RedCondAp *cond )
 	return out;
 }
 
-
 /* Write out the function switch. This switch is keyed on the values
  * of the func index. */
 std::ostream &FlatExpanded::TO_STATE_ACTION_SWITCH()
@@ -163,6 +162,8 @@ std::ostream &FlatExpanded::ACTION_SWITCH()
 
 void FlatExpanded::writeData()
 {
+	setTransPos();
+
 	if ( redFsm->anyConditions() ) {
 		OPEN_ARRAY( WIDE_ALPH_TYPE(), CK_v1() );
 		COND_KEYS_v1();
@@ -205,8 +206,6 @@ void FlatExpanded::writeData()
 	CLOSE_ARRAY() <<
 	"\n";
 
-	TRANS_TARGS();
-
 	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TCS() );
 	TRANS_COND_SPACES();
 	CLOSE_ARRAY() <<
@@ -236,13 +235,6 @@ void FlatExpanded::writeData()
 	COND_ACTIONS();
 	CLOSE_ARRAY() <<
 	"\n";
-
-	if ( redFsm->anyActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActListId), TA() );
-		TRANS_ACTIONS();
-		CLOSE_ARRAY() <<
-		"\n";
-	}
 
 	if ( redFsm->anyToStateActions() ) {
 		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc),  TSA() );

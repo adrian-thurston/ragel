@@ -28,13 +28,27 @@
 
 namespace C {
 
+void Flat::setTransPos()
+{
+	/* Transitions must be written ordered by their id. */
+	RedTransAp **transPtrs = new RedTransAp*[redFsm->transSet.length()];
+	for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ )
+		transPtrs[trans->id] = trans;
+
+	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
+		/* Save the position. Needed for eofTargs. */
+		RedTransAp *trans = transPtrs[t];
+		trans->pos = t;
+	}
+	delete[] transPtrs;
+}
+
 std::ostream &Flat::TO_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->toStateAction != 0 )
 		act = state->toStateAction->location+1;
 	out << act;
-	return out;
 }
 
 std::ostream &Flat::FROM_STATE_ACTION( RedStateAp *state )
@@ -398,28 +412,6 @@ std::ostream &Flat::INDICIES()
 	return out;
 }
 
-std::ostream &Flat::TRANS_TARGS()
-{
-	/* Transitions must be written ordered by their id. */
-	RedTransAp **transPtrs = new RedTransAp*[redFsm->transSet.length()];
-	for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ )
-		transPtrs[trans->id] = trans;
-
-	/* Keep a count of the num of items in the array written. */
-	int totalStates = 0;
-	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
-		/* Save the position. Needed for eofTargs. */
-		RedTransAp *trans = transPtrs[t];
-		trans->pos = t;
-
-		if ( t < redFsm->transSet.length()-1 ) {
-			++totalStates;
-		}
-	}
-	delete[] transPtrs;
-	return out;
-}
-
 std::ostream &Flat::TRANS_COND_SPACES()
 {
 	/* Transitions must be written ordered by their id. */
@@ -568,32 +560,6 @@ std::ostream &Flat::COND_ACTIONS()
 			COND_ACTION( c );
 			out << ", ";
 			if ( ++totalConds % IALL == 0 )
-				out << "\n\t";
-		}
-	}
-	out << "\n";
-	delete[] transPtrs;
-	return out;
-}
-
-
-std::ostream &Flat::TRANS_ACTIONS()
-{
-	/* Transitions must be written ordered by their id. */
-	RedTransAp **transPtrs = new RedTransAp*[redFsm->transSet.length()];
-	for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ )
-		transPtrs[trans->id] = trans;
-
-	/* Keep a count of the num of items in the array written. */
-	out << '\t';
-	int totalAct = 0;
-	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
-		/* Write the function for the transition. */
-		RedTransAp *trans = transPtrs[t];
-		TRANS_ACTION( trans );
-		if ( t < redFsm->transSet.length()-1 ) {
-			out << ", ";
-			if ( ++totalAct % IALL == 0 )
 				out << "\n\t";
 		}
 	}

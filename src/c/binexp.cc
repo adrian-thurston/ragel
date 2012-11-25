@@ -86,7 +86,6 @@ std::ostream &BinaryExpanded::EOF_ACTION( RedStateAp *state )
 	return out;
 }
 
-
 /* Write out the function for a transition. */
 std::ostream &BinaryExpanded::TRANS_ACTION( RedTransAp *trans )
 {
@@ -194,6 +193,11 @@ std::ostream &BinaryExpanded::ACTION_SWITCH()
 
 void BinaryExpanded::writeData()
 {
+	if ( useIndicies )
+		setTransPosWi();
+	else
+		setTransPos();
+
 	if ( redFsm->anyConditions() ) {
 		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxCondOffset), CO() );
 		COND_OFFSETS();
@@ -242,19 +246,11 @@ void BinaryExpanded::writeData()
 	"\n";
 
 	if ( useIndicies ) {
+
 		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxIndex), I() );
 		INDICIES();
 		CLOSE_ARRAY() <<
 		"\n";
-
-		TRANS_TARGS_WI();
-
-		if ( redFsm->anyActions() ) {
-			OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActListId), TA() );
-			TRANS_ACTIONS_WI();
-			CLOSE_ARRAY() <<
-			"\n";
-		}
 
 		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TCS() );
 		TRANS_COND_SPACES_WI();
@@ -272,14 +268,6 @@ void BinaryExpanded::writeData()
 		"\n";
 	}
 	else {
-		TRANS_TARGS();
-
-		if ( redFsm->anyActions() ) {
-			OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActListId), TA() );
-			TRANS_ACTIONS();
-			CLOSE_ARRAY() <<
-			"\n";
-		}
 
 		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TCS() );
 		TRANS_COND_SPACES();

@@ -79,6 +79,11 @@ void BinaryLooped::writeData()
 	/* Run the analysis pass over the table data. */
 	setTableState( TableArray::GeneratePass );
 
+	if ( useIndicies )
+		setTransPosWi();
+	else
+		setTransPos();
+
 	/* If there are any transtion functions then output the array. If there
 	 * are none, don't bother emitting an empty array that won't be used. */
 	if ( redFsm->anyActions() )
@@ -123,19 +128,12 @@ void BinaryLooped::writeData()
 	"\n";
 
 	if ( useIndicies ) {
+
 		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxIndex), I() );
 		INDICIES();
 		CLOSE_ARRAY() <<
 		"\n";
 
-		TRANS_TARGS_WI();
-
-		if ( redFsm->anyActions() ) {
-			OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), TA() );
-			TRANS_ACTIONS_WI();
-			CLOSE_ARRAY() <<
-			"\n";
-		}
 
 		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TCS() );
 		TRANS_COND_SPACES_WI();
@@ -153,14 +151,6 @@ void BinaryLooped::writeData()
 		"\n";
 	}
 	else {
-		TRANS_TARGS();
-
-		if ( redFsm->anyActions() ) {
-			OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), TA() );
-			TRANS_ACTIONS();
-			CLOSE_ARRAY() <<
-			"\n";
-		}
 
 		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TCS() );
 		TRANS_COND_SPACES();

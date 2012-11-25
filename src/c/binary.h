@@ -65,13 +65,10 @@ protected:
 	std::ostream &FROM_STATE_ACTIONS();
 	std::ostream &EOF_ACTIONS();
 	std::ostream &EOF_TRANS();
-	std::ostream &TRANS_TARGS();
-	std::ostream &TRANS_ACTIONS();
 	std::ostream &TRANS_COND_SPACES();
 	std::ostream &TRANS_OFFSETS();
 	std::ostream &TRANS_LENGTHS();
 	std::ostream &TRANS_TARGS_WI();
-	std::ostream &TRANS_ACTIONS_WI();
 	std::ostream &TRANS_COND_SPACES_WI();
 	std::ostream &TRANS_OFFSETS_WI();
 	std::ostream &TRANS_LENGTHS_WI();
@@ -82,6 +79,9 @@ protected:
 	void taKeyOffsets();
 	void taSingleLens();
 	void taRangeLens();
+
+	void setTransPos();
+	void setTransPosWi();
 
 	void LOCATE_TRANS();
 	void LOCATE_COND();
