@@ -15,7 +15,6 @@ libc_a_SOURCES = \
 	gotoloop.h \
 	gotoexp.h \
 	ipgoto.h \
-	split.h \
 	\
 	codegen.cc \
 	binary.cc \
@@ -27,5 +26,7 @@ libc_a_SOURCES = \
 	goto.cc \
 	gotoloop.cc \
 	gotoexp.cc \
-	ipgoto.cc \
-	split.cc
+	ipgoto.cc
+
+#	split.h
+#	split.cc

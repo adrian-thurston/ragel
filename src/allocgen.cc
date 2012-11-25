@@ -40,7 +40,7 @@
 #include "c/gotoloop.h"
 #include "c/gotoexp.h"
 #include "c/ipgoto.h"
-#include "c/split.h"
+//#include "c/split.h"
 
 //#include "d/table.h"
 //#include "d/ftable.h"
@@ -118,7 +118,7 @@ CodeGenData *cMakeCodeGen( const CodeGenArgs &args )
 		codeGen = new C::IpGoto(args);
 		break;
 	case GenSplit:
-		codeGen = new C::SplitGoto(args);
+//		codeGen = new C::SplitGoto(args);
 		break;
 	}
 
