@@ -91,98 +91,105 @@ using std::cerr;
 using std::endl;
 
 /* Invoked by the parser when a ragel definition is opened. */
-CodeGenData *cdMakeCodeGen( const CodeGenArgs &args )
+CodeGenData *cMakeCodeGen( const CodeGenArgs &args )
 {
 	CodeGenData *codeGen = 0;
-	switch ( hostLang->lang ) {
-	case HostLang::C:
-		switch ( codeStyle ) {
-		case GenTables:
-			codeGen = new C::BinaryLooped(args);
-			break;
-		case GenFTables:
-			codeGen = new C::BinaryExpanded(args);
-			break;
-		case GenFlat:
-			codeGen = new C::FlatLooped(args);
-			break;
-		case GenFFlat:
-			codeGen = new C::FlatExpanded(args);
-			break;
-		case GenGoto:
-			codeGen = new C::GotoLooped(args);
-			break;
-		case GenFGoto:
-			codeGen = new C::GotoExpanded(args);
-			break;
-		case GenIpGoto:
-			codeGen = new C::IpGoto(args);
-			break;
-		case GenSplit:
-			codeGen = new C::SplitGoto(args);
-			break;
-		}
-		break;
 
-	case HostLang::D:
-		switch ( codeStyle ) {
-		case GenTables:
-			codeGen = new D::DTabCodeGen(args);
-			break;
-		case GenFTables:
-			codeGen = new D::DFTabCodeGen(args);
-			break;
-		case GenFlat:
-			codeGen = new D::DFlatCodeGen(args);
-			break;
-		case GenFFlat:
-			codeGen = new D::DFFlatCodeGen(args);
-			break;
-		case GenGoto:
-			codeGen = new D::DGotoCodeGen(args);
-			break;
-		case GenFGoto:
-			codeGen = new D::DFGotoCodeGen(args);
-			break;
-		case GenIpGoto:
-			codeGen = new D::DIpGotoCodeGen(args);
-			break;
-		case GenSplit:
-			codeGen = new D::DSplitCodeGen(args);
-			break;
-		}
+	switch ( codeStyle ) {
+	case GenTables:
+		codeGen = new C::BinaryLooped(args);
 		break;
-
-	case HostLang::D2:
-		switch ( codeStyle ) {
-		case GenTables:
-			codeGen = new D::D2TabCodeGen(args);
-			break;
-		case GenFTables:
-			codeGen = new D::D2FTabCodeGen(args);
-			break;
-		case GenFlat:
-			codeGen = new D::D2FlatCodeGen(args);
-			break;
-		case GenFFlat:
-			codeGen = new D::D2FFlatCodeGen(args);
-			break;
-		case GenGoto:
-			codeGen = new D::D2GotoCodeGen(args);
-			break;
-		case GenFGoto:
-			codeGen = new D::D2FGotoCodeGen(args);
-			break;
-		case GenIpGoto:
-			codeGen = new D::D2IpGotoCodeGen(args);
-			break;
-		case GenSplit:
-			codeGen = new D::D2SplitCodeGen(args);
-			break;
-		}
+	case GenFTables:
+		codeGen = new C::BinaryExpanded(args);
 		break;
+	case GenFlat:
+		codeGen = new C::FlatLooped(args);
+		break;
+	case GenFFlat:
+		codeGen = new C::FlatExpanded(args);
+		break;
+	case GenGoto:
+		codeGen = new C::GotoLooped(args);
+		break;
+	case GenFGoto:
+		codeGen = new C::GotoExpanded(args);
+		break;
+	case GenIpGoto:
+		codeGen = new C::IpGoto(args);
+		break;
+	case GenSplit:
+		codeGen = new C::SplitGoto(args);
+		break;
+	}
 
-	default: break;
+	return codeGen;
+}
+
+/* Invoked by the parser when a ragel definition is opened. */
+CodeGenData *dMakeCodeGen( const CodeGenArgs &args )
+{
+	CodeGenData *codeGen = 0;
+
+	switch ( codeStyle ) {
+	case GenTables:
+		codeGen = new D::DTabCodeGen(args);
+		break;
+	case GenFTables:
+		codeGen = new D::DFTabCodeGen(args);
+		break;
+	case GenFlat:
+		codeGen = new D::DFlatCodeGen(args);
+		break;
+	case GenFFlat:
+		codeGen = new D::DFFlatCodeGen(args);
+		break;
+	case GenGoto:
+		codeGen = new D::DGotoCodeGen(args);
+		break;
+	case GenFGoto:
+		codeGen = new D::DFGotoCodeGen(args);
+		break;
+	case GenIpGoto:
+		codeGen = new D::DIpGotoCodeGen(args);
+		break;
+	case GenSplit:
+		codeGen = new D::DSplitCodeGen(args);
+		break;
+	}
+
+	return codeGen;
+}
+
+/* Invoked by the parser when a ragel definition is opened. */
+CodeGenData *d2MakeCodeGen( const CodeGenArgs &args )
+{
+	CodeGenData *codeGen = 0;
+
+	switch ( codeStyle ) {
+	case GenTables:
+		codeGen = new D::D2TabCodeGen(args);
+		break;
+	case GenFTables:
+		codeGen = new D::D2FTabCodeGen(args);
+		break;
+	case GenFlat:
+		codeGen = new D::D2FlatCodeGen(args);
+		break;
+	case GenFFlat:
+		codeGen = new D::D2FFlatCodeGen(args);
+		break;
+	case GenGoto:
+		codeGen = new D::D2GotoCodeGen(args);
+		break;
+	case GenFGoto:
+		codeGen = new D::D2FGotoCodeGen(args);
+		break;
+	case GenIpGoto:
+		codeGen = new D::D2IpGotoCodeGen(args);
+		break;
+	case GenSplit:
+		codeGen = new D::D2SplitCodeGen(args);
+		break;
 	}
 
 	return codeGen;
@@ -358,11 +365,11 @@ CodeGenData *makeCodeGen( const CodeGenArgs &args )
 {
 	CodeGenData *cgd = 0;
 	if ( hostLang == &hostLangC )
-		cgd = cdMakeCodeGen( args );
+		cgd = cMakeCodeGen( args );
 	else if ( hostLang == &hostLangD )
-		cgd = cdMakeCodeGen( args );
+		cgd = dMakeCodeGen( args );
 	else if ( hostLang == &hostLangD2 )
-		cgd = cdMakeCodeGen( args );
+		cgd = d2MakeCodeGen( args );
 	else if ( hostLang == &hostLangGo )
 		cgd = goMakeCodeGen( args );
 	else if ( hostLang == &hostLangJava )
