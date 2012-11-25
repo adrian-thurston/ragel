@@ -496,48 +496,31 @@ std::ostream &Binary::INDICIES()
 std::ostream &Binary::TRANS_TARGS()
 {
 	int totalTrans = 0;
-	out << '\t';
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		/* Walk the singles. */
 		for ( RedTransList::Iter stel = st->outSingle; stel.lte(); stel++ ) {
 			RedTransAp *trans = stel->value;
-			out << trans->targ->id << ", ";
-			if ( ++totalTrans % IALL == 0 )
-				out << "\n\t";
+			++totalTrans;
 		}
 
-		/* Walk the ranges. */
 		for ( RedTransList::Iter rtel = st->outRange; rtel.lte(); rtel++ ) {
 			RedTransAp *trans = rtel->value;
-			out << trans->targ->id << ", ";
-			if ( ++totalTrans % IALL == 0 )
-				out << "\n\t";
+			++totalTrans;
 		}
 
-		/* The state's default target state. */
 		if ( st->defTrans != 0 ) {
 			RedTransAp *trans = st->defTrans;
-			out << trans->targ->id << ", ";
-			if ( ++totalTrans % IALL == 0 )
-				out << "\n\t";
+			++totalTrans;
 		}
 	}
 
-	/* Add any eof transitions that have not yet been written out above. */
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->eofTrans != 0 ) {
 			RedTransAp *trans = st->eofTrans;
 			trans->pos = totalTrans;
-			out << trans->targ->id << ", ";
-			if ( ++totalTrans % IALL == 0 )
-				out << "\n\t";
+			++totalTrans;
 		}
 	}
 
-
-	/* Output one last number so we don't have to figure out when the last
-	 * entry is and avoid writing a comma. */
-	out << 0 << "\n";
 	return out;
 }
 
@@ -757,7 +740,6 @@ std::ostream &Binary::TRANS_TARGS_WI()
 		transPtrs[trans->id] = trans;
 
 	/* Keep a count of the num of items in the array written. */
-	out << '\t';
 	int totalStates = 0;
 	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
 		/* Record the position, need this for eofTrans. */
@@ -765,14 +747,10 @@ std::ostream &Binary::TRANS_TARGS_WI()
 		trans->pos = t;
 
 		/* Write out the target state. */
-		out << trans->targ->id;
 		if ( t < redFsm->transSet.length()-1 ) {
-			out << ", ";
-			if ( ++totalStates % IALL == 0 )
-				out << "\n\t";
+			++totalStates;
 		}
 	}
-	out << "\n";
 	delete[] transPtrs;
 	return out;
 }

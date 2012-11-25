@@ -406,22 +406,16 @@ std::ostream &Flat::TRANS_TARGS()
 		transPtrs[trans->id] = trans;
 
 	/* Keep a count of the num of items in the array written. */
-	out << '\t';
 	int totalStates = 0;
 	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
 		/* Save the position. Needed for eofTargs. */
 		RedTransAp *trans = transPtrs[t];
 		trans->pos = t;
 
-		/* Write out the target state. */
-		out << trans->targ->id;
 		if ( t < redFsm->transSet.length()-1 ) {
-			out << ", ";
-			if ( ++totalStates % IALL == 0 )
-				out << "\n\t";
+			++totalStates;
 		}
 	}
-	out << "\n";
 	delete[] transPtrs;
 	return out;
 }

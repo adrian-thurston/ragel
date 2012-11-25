@@ -128,10 +128,7 @@ void BinaryLooped::writeData()
 		CLOSE_ARRAY() <<
 		"\n";
 
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TT() );
 		TRANS_TARGS_WI();
-		CLOSE_ARRAY() <<
-		"\n";
 
 		if ( redFsm->anyActions() ) {
 			OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), TA() );
@@ -156,10 +153,7 @@ void BinaryLooped::writeData()
 		"\n";
 	}
 	else {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TT() );
 		TRANS_TARGS();
-		CLOSE_ARRAY() <<
-		"\n";
 
 		if ( redFsm->anyActions() ) {
 			OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), TA() );

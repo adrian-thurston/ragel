@@ -205,10 +205,7 @@ void FlatExpanded::writeData()
 	CLOSE_ARRAY() <<
 	"\n";
 
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TT() );
 	TRANS_TARGS();
-	CLOSE_ARRAY() <<
-	"\n";
 
 	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TCS() );
 	TRANS_COND_SPACES();
