@@ -65,6 +65,16 @@ std::ostream &FlatExpanded::TRANS_ACTION( RedTransAp *trans )
 	return out;
 }
 
+std::ostream &FlatExpanded::COND_ACTION( RedCondAp *cond )
+{
+	int action = 0;
+	if ( cond->action != 0 )
+		action = cond->action->actListId+1;
+	out << action;
+	return out;
+}
+
+
 /* Write out the function switch. This switch is keyed on the values
  * of the func index. */
 std::ostream &FlatExpanded::TO_STATE_ACTION_SWITCH()
@@ -200,6 +210,36 @@ void FlatExpanded::writeData()
 	CLOSE_ARRAY() <<
 	"\n";
 
+	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TCS() );
+	TRANS_COND_SPACES();
+	CLOSE_ARRAY() <<
+	"\n";
+
+	OPEN_ARRAY( "int", TO() );
+	TRANS_OFFSETS();
+	CLOSE_ARRAY() <<
+	"\n";
+
+	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TL() );
+	TRANS_LENGTHS();
+	CLOSE_ARRAY() <<
+	"\n";
+
+	OPEN_ARRAY( "char", CK() );
+	COND_KEYS();
+	CLOSE_ARRAY() <<
+	"\n";
+
+	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), CT() );
+	COND_TARGS();
+	CLOSE_ARRAY() <<
+	"\n";
+
+	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), CA() );
+	COND_ACTIONS();
+	CLOSE_ARRAY() <<
+	"\n";
+
 	if ( redFsm->anyActions() ) {
 		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActListId), TA() );
 		TRANS_ACTIONS();
@@ -251,16 +291,14 @@ void FlatExpanded::writeExec()
 		out << ", _ps";
 	
 	out << ";\n";
-	out << "	int _trans";
-
-	if ( redFsm->anyConditions() )
-		out << ", _cond";
-
-	out << ";\n";
+	out << "	int _trans, _cond;\n";
 
 	out <<
 		"	" << PTR_CONST() << WIDE_ALPH_TYPE() << PTR_CONST_END() << POINTER() << "_keys;\n"
-		"	" << PTR_CONST() << ARRAY_TYPE(redFsm->maxIndex) << PTR_CONST_END() << POINTER() << "_inds;\n";
+		"	" << PTR_CONST() << ARRAY_TYPE(redFsm->maxIndex) << PTR_CONST_END() << POINTER() << "_inds;\n"
+		"	const char *_ckeys;\n"
+		"	int _klen;\n"
+		"	int _cpc;\n";
 
 	if ( redFsm->anyConditions() ) {
 		out << 
@@ -298,6 +336,8 @@ void FlatExpanded::writeExec()
 
 	LOCATE_TRANS();
 
+	out << "_match_cond:\n";
+
 	if ( redFsm->anyEofTrans() )
 		out << "_eof_trans:\n";
 	
@@ -305,22 +345,22 @@ void FlatExpanded::writeExec()
 		out << "	_ps = " << vCS() << ";\n";
 
 	out << 
-		"	" << vCS() << " = " << TT() << "[_trans];\n\n";
+		"	" << vCS() << " = " << CT() << "[_cond];\n\n";
 
 	if ( redFsm->anyRegActions() ) {
 		out << 
-			"	if ( " << TA() << "[_trans] == 0 )\n"
+			"	if ( " << CA() << "[_cond] == 0 )\n"
 			"		goto _again;\n"
 			"\n"
-			"	switch ( " << TA() << "[_trans] ) {\n";
+			"	switch ( " << CA() << "[_cond] ) {\n";
 			ACTION_SWITCH();
 			SWITCH_DEFAULT() <<
 			"	}\n"
 			"\n";
 	}
 
-	if ( redFsm->anyRegActions() || redFsm->anyActionGotos() || 
-			redFsm->anyActionCalls() || redFsm->anyActionRets() )
+//	if ( redFsm->anyRegActions() || redFsm->anyActionGotos() || 
+//			redFsm->anyActionCalls() || redFsm->anyActionRets() )
 		out << "_again:\n";
 
 	if ( redFsm->anyToStateActions() ) {
@@ -362,6 +402,7 @@ void FlatExpanded::writeExec()
 			out <<
 				"	if ( " << ET() << "[" << vCS() << "] > 0 ) {\n"
 				"		_trans = " << ET() << "[" << vCS() << "] - 1;\n"
+				"		_cond = " << TO() << "[_trans];\n"
 				"		goto _eof_trans;\n"
 				"	}\n";
 		}
