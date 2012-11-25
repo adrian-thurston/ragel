@@ -86,16 +86,6 @@ std::ostream &BinaryExpanded::EOF_ACTION( RedStateAp *state )
 	return out;
 }
 
-/* Write out the function for a transition. */
-std::ostream &BinaryExpanded::TRANS_ACTION( RedTransAp *trans )
-{
-	int action = 0;
-	if ( trans->action != 0 )
-		action = trans->action->actListId+1;
-	out << action;
-	return out;
-}
-
 std::ostream &BinaryExpanded::COND_ACTION( RedCondAp *cond )
 {
 	int action = 0;

@@ -69,16 +69,6 @@ std::ostream &Flat::EOF_ACTION( RedStateAp *state )
 	return out;
 }
 
-std::ostream &Flat::TRANS_ACTION( RedTransAp *trans )
-{
-	/* If there are actions, emit them. Otherwise emit zero. */
-	int act = 0;
-	if ( trans->action != 0 )
-		act = trans->action->location+1;
-	out << act;
-	return out;
-}
-
 std::ostream &Flat::COND_ACTION( RedCondAp *cond )
 {
 	/* If there are actions, emit them. Otherwise emit zero. */
@@ -88,7 +78,6 @@ std::ostream &Flat::COND_ACTION( RedCondAp *cond )
 	out << act;
 	return out;
 }
-
 
 std::ostream &Flat::TO_STATE_ACTION_SWITCH()
 {

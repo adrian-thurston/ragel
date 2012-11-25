@@ -86,7 +86,6 @@ protected:
 	virtual std::ostream &TO_STATE_ACTION( RedStateAp *state );
 	virtual std::ostream &FROM_STATE_ACTION( RedStateAp *state );
 	virtual std::ostream &EOF_ACTION( RedStateAp *state );
-	virtual std::ostream &TRANS_ACTION( RedTransAp *trans );
 	virtual std::ostream &COND_ACTION( RedCondAp *cond );
 };
 
