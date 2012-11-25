@@ -188,28 +188,6 @@ void BinaryExpanded::writeData()
 	else
 		setTransPos();
 
-	if ( redFsm->anyConditions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxCondOffset), CO() );
-		COND_OFFSETS();
-		CLOSE_ARRAY() <<
-		"\n";
-
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxCondLen), CL() );
-		COND_LENS();
-		CLOSE_ARRAY() <<
-		"\n";
-
-		OPEN_ARRAY( WIDE_ALPH_TYPE(), CK_v1() );
-		COND_KEYS();
-		CLOSE_ARRAY() <<
-		"\n";
-
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxCondSpaceId), C() );
-		COND_SPACES_v1();
-		CLOSE_ARRAY() <<
-		"\n";
-	}
-
 	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxKeyOffset), KO() );
 	KEY_OFFSETS();
 	CLOSE_ARRAY() <<

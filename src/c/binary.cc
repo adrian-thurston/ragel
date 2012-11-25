@@ -193,26 +193,6 @@ std::ostream &Binary::ACTION_SWITCH()
 	return out;
 }
 
-std::ostream &Binary::COND_OFFSETS()
-{
-	out << "\t";
-	int totalStateNum = 0, curKeyOffset = 0;
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		/* Write the key offset. */
-		out << curKeyOffset;
-		if ( !st.last() ) {
-			out << ", ";
-			if ( ++totalStateNum % IALL == 0 )
-				out << "\n\t";
-		}
-
-		/* Move the key offset ahead. */
-		curKeyOffset += st->stateCondList.length();
-	}
-	out << "\n";
-	return out;
-}
-
 std::ostream &Binary::KEY_OFFSETS()
 {
 	out << "\t";
@@ -268,24 +248,6 @@ std::ostream &Binary::INDEX_OFFSETS()
 	out << "\n";
 	return out;
 }
-
-std::ostream &Binary::COND_LENS()
-{
-	out << "\t";
-	int totalStateNum = 0;
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		/* Write singles length. */
-		out << st->stateCondList.length();
-		if ( !st.last() ) {
-			out << ", ";
-			if ( ++totalStateNum % IALL == 0 )
-				out << "\n\t";
-		}
-	}
-	out << "\n";
-	return out;
-}
-
 
 std::ostream &Binary::SINGLE_LENS()
 {
@@ -412,52 +374,6 @@ std::ostream &Binary::EOF_TRANS()
 		}
 	}
 	out << "\n";
-	return out;
-}
-
-
-std::ostream &Binary::COND_KEYS_v1()
-{
-	out << '\t';
-	int totalTrans = 0;
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		/* Loop the state's transitions. */
-		for ( GenStateCondList::Iter sc = st->stateCondList; sc.lte(); sc++ ) {
-			/* Lower key. */
-			out << KEY( sc->lowKey ) << ", ";
-			if ( ++totalTrans % IALL == 0 )
-				out << "\n\t";
-
-			/* Upper key. */
-			out << KEY( sc->highKey ) << ", ";
-			if ( ++totalTrans % IALL == 0 )
-				out << "\n\t";
-		}
-	}
-
-	/* Output one last number so we don't have to figure out when the last
-	 * entry is and avoid writing a comma. */
-	out << 0 << "\n";
-	return out;
-}
-
-std::ostream &Binary::COND_SPACES_v1()
-{
-	out << '\t';
-	int totalTrans = 0;
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		/* Loop the state's transitions. */
-		for ( GenStateCondList::Iter sc = st->stateCondList; sc.lte(); sc++ ) {
-			/* Cond Space id. */
-			out << sc->condSpace->condSpaceId << ", ";
-			if ( ++totalTrans % IALL == 0 )
-				out << "\n\t";
-		}
-	}
-
-	/* Output one last number so we don't have to figure out when the last
-	 * entry is and avoid writing a comma. */
-	out << 0 << "\n";
 	return out;
 }
 

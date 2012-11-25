@@ -55,10 +55,8 @@ protected:
 	std::ostream &COND_SPACES_v1();
 	std::ostream &KEYS();
 	std::ostream &INDICIES();
-	std::ostream &COND_OFFSETS();
 	std::ostream &KEY_OFFSETS();
 	std::ostream &INDEX_OFFSETS();
-	std::ostream &COND_LENS();
 	std::ostream &SINGLE_LENS();
 	std::ostream &RANGE_LENS();
 	std::ostream &TO_STATE_ACTIONS();

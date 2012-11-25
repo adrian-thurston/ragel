@@ -89,28 +89,6 @@ void BinaryLooped::writeData()
 	if ( redFsm->anyActions() )
 		taActions();
 
-	if ( redFsm->anyConditions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxCondOffset), CO() );
-		COND_OFFSETS();
-		CLOSE_ARRAY() <<
-		"\n";
-
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxCondLen), CL() );
-		COND_LENS();
-		CLOSE_ARRAY() <<
-		"\n";
-
-		OPEN_ARRAY( WIDE_ALPH_TYPE(), CK_v1() );
-		COND_KEYS_v1();
-		CLOSE_ARRAY() <<
-		"\n";
-
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxCondSpaceId), C() );
-		COND_SPACES_v1();
-		CLOSE_ARRAY() <<
-		"\n";
-	}
-
 	taKeyOffsets();
 
 	OPEN_ARRAY( WIDE_ALPH_TYPE(), K() );
