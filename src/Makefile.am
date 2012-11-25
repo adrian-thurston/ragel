@@ -16,16 +16,17 @@ ragel_CXXFLAGS = -Wall
 
 ragel_LDADD = \
 	c/libc.a \
-	crack/libcrack.a \
-	cs/libcs.a \
-	d/libd.a \
 	dot/libdot.a \
-	go/libgo.a \
-	java/libjava.a \
-	ml/libml.a \
-	rbx/librbx.a \
-	ruby/libruby.a \
 	xml/libxml.a
+
+#	crack/libcrack.a
+#	cs/libcs.a
+#	d/libd.a
+#	go/libgo.a
+#	java/libjava.a
+#	ml/libml.a
+#	rbx/librbx.a
+#	ruby/libruby.a
 
 BUILT_SOURCES = \
 	rlscan.cc rlparse.h rlparse.cc version.h

@@ -46,23 +46,22 @@ void lineDirective( ostream &out, const char *fileName, int line )
 	if ( !generateDot ) {
 		if ( hostLang == &hostLangC )
 			cLineDirective( out, fileName, line );
-		else if ( hostLang == &hostLangD )
-			dLineDirective( out, fileName, line );
-		else if ( hostLang == &hostLangD2 )
-			dLineDirective( out, fileName, line );
-		else if ( hostLang == &hostLangGo )
-			goLineDirective( out, fileName, line );
-		else if ( hostLang == &hostLangJava )
-			javaLineDirective( out, fileName, line );
-		else if ( hostLang == &hostLangRuby )
-			rubyLineDirective( out, fileName, line );
-		else if ( hostLang == &hostLangCSharp )
-			csharpLineDirective( out, fileName, line );
-		else if ( hostLang == &hostLangOCaml )
-			ocamlLineDirective( out, fileName, line );
-		else if ( hostLang == &hostLangCrack )
-			rubyLineDirective( out, fileName, line );
-
+//		else if ( hostLang == &hostLangD )
+//			dLineDirective( out, fileName, line );
+//		else if ( hostLang == &hostLangD2 )
+//			dLineDirective( out, fileName, line );
+//		else if ( hostLang == &hostLangGo )
+//			goLineDirective( out, fileName, line );
+//		else if ( hostLang == &hostLangJava )
+//			javaLineDirective( out, fileName, line );
+//		else if ( hostLang == &hostLangRuby )
+//			rubyLineDirective( out, fileName, line );
+//		else if ( hostLang == &hostLangCSharp )
+//			csharpLineDirective( out, fileName, line );
+//		else if ( hostLang == &hostLangOCaml )
+//			ocamlLineDirective( out, fileName, line );
+//		else if ( hostLang == &hostLangCrack )
+//			rubyLineDirective( out, fileName, line );
 	}
 }
 
