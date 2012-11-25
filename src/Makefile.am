@@ -1,4 +1,6 @@
-SUBDIRS = c d crack cs dot go java ml rbx ruby xml
+SUBDIRS = c dot xml
+
+# d crack cs go java ml rbx ruby
 
 bin_PROGRAMS = ragel
 
