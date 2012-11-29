@@ -62,8 +62,7 @@ RedFsmAp::RedFsmAp()
 	bAnyRegActionByValControl(false),
 	bAnyRegNextStmt(false),
 	bAnyRegCurStateRef(false),
-	bAnyRegBreak(false),
-	bAnyConditions(false)
+	bAnyRegBreak(false)
 {
 }
 
@@ -293,27 +292,6 @@ void RedFsmAp::chooseSingle()
 void RedFsmAp::makeFlat()
 {
 	for ( RedStateList::Iter st = stateList; st.lte(); st++ ) {
-		if ( st->stateCondList.length() == 0 ) {
-			st->condLowKey = 0;
-			st->condHighKey = 0;
-		}
-		else {
-			st->condLowKey = st->stateCondList.head->lowKey;
-			st->condHighKey = st->stateCondList.tail->highKey;
-
-			unsigned long long span = keyOps->span( st->condLowKey, st->condHighKey );
-			st->condList = new GenCondSpace*[ span ];
-			memset( st->condList, 0, sizeof(GenCondSpace*)*span );
-
-			for ( GenStateCondList::Iter sci = st->stateCondList; sci.lte(); sci++ ) {
-				unsigned long long base, trSpan;
-				base = keyOps->span( st->condLowKey, sci->lowKey )-1;
-				trSpan = keyOps->span( sci->lowKey, sci->highKey );
-				for ( unsigned long long pos = 0; pos < trSpan; pos++ )
-					st->condList[base+pos] = sci->condSpace;
-			}
-		}
-
 		if ( st->outRange.length() == 0 ) {
 			st->lowKey = st->highKey = 0;
 			st->transList = 0;

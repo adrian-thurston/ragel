@@ -404,7 +404,6 @@ struct RedStateAp
 	RedStateAp()
 	: 
 		defTrans(0), 
-		condList(0),
 		transList(0), 
 		isFinal(false), 
 		labelNeeded(false), 
@@ -428,10 +427,6 @@ struct RedStateAp
 	RedTransList outRange;
 	RedTransAp *defTrans;
 
-	/* For flat conditions. */
-	Key condLowKey, condHighKey;
-	GenCondSpace **condList;
-
 	/* For flat keys. */
 	Key lowKey, highKey;
 	RedTransAp **transList;
@@ -448,8 +443,6 @@ struct RedStateAp
 	RedAction *eofAction;
 	RedTransAp *eofTrans;
 	int id;
-	GenStateCondList stateCondList;
-	StateCondVect stateCondVect;
 
 	/* Pointers for the list of states. */
 	RedStateAp *prev, *next;
@@ -513,7 +506,6 @@ struct RedFsmAp
 	bool bAnyRegNextStmt;
 	bool bAnyRegCurStateRef;
 	bool bAnyRegBreak;
-	bool bAnyConditions;
 
 	int maxState;
 	int maxSingleLen;
@@ -525,13 +517,9 @@ struct RedFsmAp
 	int maxActionLoc;
 	int maxActArrItem;
 	unsigned long long maxSpan;
-	unsigned long long maxCondSpan;
 	int maxFlatIndexOffset;
 	Key maxKey;
-	int maxCondOffset;
-	int maxCondLen;
 	int maxCondSpaceId;
-	int maxCondIndexOffset;
 	int maxCond;
 
 	bool anyActions();
@@ -548,7 +536,6 @@ struct RedFsmAp
 	bool anyRegNextStmt()           { return bAnyRegNextStmt; }
 	bool anyRegCurStateRef()        { return bAnyRegCurStateRef; }
 	bool anyRegBreak()              { return bAnyRegBreak; }
-	bool anyConditions()            { return bAnyConditions; }
 
 
 	/* Is is it possible to extend a range by bumping ranges that span only

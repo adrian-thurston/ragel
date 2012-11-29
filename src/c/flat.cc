@@ -623,45 +623,4 @@ void Flat::BREAK( ostream &ret, int targState, bool csForced )
 	ret << "{" << P() << "++; " << CTRL_FLOW() << "goto _out; }";
 }
 
-void Flat::COND_TRANSLATE()
-{
-	out << 
-		"	_widec = " << GET_KEY() << ";\n";
-
-	out <<
-		"	_keys = " << ARR_OFF( CK_v1(), "(" + vCS() + "<<1)" ) << ";\n"
-		"	_conds = " << ARR_OFF( C(), CO() + "[" + vCS() + "]" ) << ";\n"
-		"\n"
-		"	_slen = " << CSP() << "[" << vCS() << "];\n"
-		"	_cond = _slen > 0 && _keys[0] <=" << GET_WIDE_KEY() << " &&\n"
-		"		" << GET_WIDE_KEY() << " <= _keys[1] ?\n"
-		"		_conds[" << GET_WIDE_KEY() << " - _keys[0]] : 0;\n"
-		"\n";
-
-	out <<
-		"	switch ( _cond ) {\n";
-	for ( CondSpaceList::Iter csi = condSpaceList; csi.lte(); csi++ ) {
-		GenCondSpace *condSpace = csi;
-		out << "	case " << condSpace->condSpaceId + 1 << ": {\n";
-		out << TABS(2) << "_widec = " << CAST(WIDE_ALPH_TYPE()) << "(" <<
-				KEY(condSpace->baseKey) << " + (" << GET_KEY() << 
-				" - " << KEY(keyOps->minKey) << "));\n";
-
-		for ( GenCondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
-			out << TABS(2) << "if ( ";
-			CONDITION( out, *csi );
-			Size condValOffset = ((1 << csi.pos()) * keyOps->alphSize());
-			out << " ) _widec += " << condValOffset << ";\n";
-		}
-
-		out << "		}\n";
-		out << "		break;\n";
-	}
-
-	SWITCH_DEFAULT();
-
-	out <<
-		"	}\n";
-}
-
 }

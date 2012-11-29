@@ -257,12 +257,6 @@ void FlatExpanded::writeExec()
 		"	int _klen;\n"
 		"	int _cpc;\n";
 
-	if ( redFsm->anyConditions() ) {
-		out << 
-			"	" << PTR_CONST() << ARRAY_TYPE(redFsm->maxCond) << PTR_CONST_END() << POINTER() << "_conds;\n"
-			"	" << WIDE_ALPH_TYPE() << " _widec;\n";
-	}
-
 	if ( !noEnd ) {
 		testEofUsed = true;
 		out << 
@@ -287,9 +281,6 @@ void FlatExpanded::writeExec()
 			"	}\n"
 			"\n";
 	}
-
-	if ( redFsm->anyConditions() )
-		COND_TRANSLATE();
 
 	LOCATE_TRANS();
 

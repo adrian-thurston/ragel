@@ -80,9 +80,6 @@ void GotoLooped::writeExec()
 			"	" << UINT() << " _nacts;\n";
 	}
 
-	if ( redFsm->anyConditions() )
-		out << "	" << WIDE_ALPH_TYPE() << " _widec;\n";
-
 	out << "\n";
 
 	if ( !noEnd ) {

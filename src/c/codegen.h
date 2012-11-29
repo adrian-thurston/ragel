@@ -153,8 +153,6 @@ protected:
 
 	string DATA_PREFIX();
 	string PM() { return "_" + DATA_PREFIX() + "partition_map"; }
-	string C() { return "_" + DATA_PREFIX() + "cond_spaces_v1"; }
-	string CK_v1() { return "_" + DATA_PREFIX() + "cond_keys_v1"; }
 	string K() { return "_" + DATA_PREFIX() + "trans_keys"; }
 	string I() { return "_" + DATA_PREFIX() + "indicies"; }
 	string CO() { return "_" + DATA_PREFIX() + "cond_offsets"; }

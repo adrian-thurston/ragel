@@ -188,9 +188,6 @@ void GotoExpanded::writeExec()
 	if ( redFsm->anyRegCurStateRef() )
 		out << "	int _ps = 0;\n";
 
-	if ( redFsm->anyConditions() )
-		out << "	" << WIDE_ALPH_TYPE() << " _widec;\n";
-
 	if ( !noEnd ) {
 		testEofUsed = true;
 		out << 

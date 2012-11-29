@@ -209,9 +209,6 @@ void BinaryLooped::writeExec()
 		"	" << UINT() << " _trans;\n" <<
 		"	" << UINT() << " _cond;\n";
 
-	if ( redFsm->anyConditions() )
-		out << "	" << WIDE_ALPH_TYPE() << " _widec;\n";
-
 	if ( redFsm->anyToStateActions() || redFsm->anyRegActions() 
 			|| redFsm->anyFromStateActions() )
 	{
@@ -255,9 +252,6 @@ void BinaryLooped::writeExec()
 			"	}\n"
 			"\n";
 	}
-
-	if ( redFsm->anyConditions() )
-		COND_TRANSLATE();
 
 	LOCATE_TRANS();
 

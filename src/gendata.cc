@@ -1078,11 +1078,6 @@ void CodeGenData::closeMachine()
 	/* Note that even if we want a complete graph we do not give the error
 	 * state a default transition. All machines break out of the processing
 	 * loop when in the error state. */
-
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		for ( GenStateCondList::Iter sci = st->stateCondList; sci.lte(); sci++ )
-			st->stateCondVect.append( sci );
-	}
 }
 
 
@@ -1123,18 +1118,6 @@ void CodeGenData::initStateCondList( int snum, ulong length )
 
 void CodeGenData::addStateCond( int snum, Key lowKey, Key highKey, long condNum )
 {
-	RedStateAp *curState = allStates + snum;
-
-	/* Create the new state condition. */
-	GenStateCond *stateCond = new GenStateCond;
-	stateCond->lowKey = lowKey;
-	stateCond->highKey = highKey;
-
-	/* Assign it a cond space. */
-	GenCondSpace *condSpace = allCondSpaces + condNum;
-	stateCond->condSpace = condSpace;
-
-	curState->stateCondList.append( stateCond );
 }
 
 
@@ -1321,12 +1304,8 @@ void CodeGenData::setValueLimits()
 	redFsm->maxActionLoc = 0;
 	redFsm->maxActArrItem = 0;
 	redFsm->maxSpan = 0;
-	redFsm->maxCondSpan = 0;
 	redFsm->maxFlatIndexOffset = 0;
-	redFsm->maxCondOffset = 0;
-	redFsm->maxCondLen = 0;
 	redFsm->maxCondSpaceId = 0;
-	redFsm->maxCondIndexOffset = 0;
 
 	/* In both of these cases the 0 index is reserved for no value, so the max
 	 * is one more than it would be if they started at 0. */
@@ -1342,10 +1321,6 @@ void CodeGenData::setValueLimits()
 	}
 
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		/* Maximum cond length. */
-		if ( st->stateCondList.length() > redFsm->maxCondLen )
-			redFsm->maxCondLen = st->stateCondList.length();
-
 		/* Maximum single length. */
 		if ( st->outSingle.length() > redFsm->maxSingleLen )
 			redFsm->maxSingleLen = st->outSingle.length();
@@ -1356,16 +1331,8 @@ void CodeGenData::setValueLimits()
 
 		/* The key offset index offset for the state after last is not used, skip it.. */
 		if ( ! st.last() ) {
-			redFsm->maxCondOffset += st->stateCondList.length();
 			redFsm->maxKeyOffset += st->outSingle.length() + st->outRange.length()*2;
 			redFsm->maxIndexOffset += st->outSingle.length() + st->outRange.length() + 2;
-		}
-
-		/* Max cond span. */
-		if ( st->condList != 0 ) {
-			unsigned long long span = keyOps->span( st->condLowKey, st->condHighKey );
-			if ( span > redFsm->maxCondSpan )
-				redFsm->maxCondSpan = span;
 		}
 
 		/* Max key span. */
@@ -1373,12 +1340,6 @@ void CodeGenData::setValueLimits()
 			unsigned long long span = keyOps->span( st->lowKey, st->highKey );
 			if ( span > redFsm->maxSpan )
 				redFsm->maxSpan = span;
-		}
-
-		/* Max cond index offset. */
-		if ( ! st.last() ) {
-			if ( st->condList != 0 )
-				redFsm->maxCondIndexOffset += keyOps->span( st->condLowKey, st->condHighKey );
 		}
 
 		/* Max flat index offset. */
@@ -1457,9 +1418,6 @@ void CodeGenData::analyzeMachine()
 		if ( st->defTrans != 0 && st->defTrans->action != 0 && 
 				st->defTrans->action->anyCurStateRef() )
 			st->bAnyRegCurStateRef = true;
-		
-		if ( st->stateCondList.length() > 0 )
-			redFsm->bAnyConditions = true;
 
 		if ( st->eofTrans != 0 )
 			redFsm->bAnyEofTrans = true;

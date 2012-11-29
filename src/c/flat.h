@@ -63,7 +63,6 @@ protected:
 	std::ostream &COND_ACTIONS();
 
 	void LOCATE_TRANS();
-	void COND_TRANSLATE();
 
 	void setTransPos();
 

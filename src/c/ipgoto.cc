@@ -412,11 +412,6 @@ std::ostream &IpGoto::STATE_GOTOS()
 			/* Writing code above state gotos. */
 			GOTO_HEADER( st );
 
-			if ( st->stateCondVect.length() > 0 ) {
-				out << "	_widec = " << GET_KEY() << ";\n";
-				emitCondBSearch( st, 1, 0, st->stateCondVect.length() - 1 );
-			}
-
 			/* Try singles. */
 			if ( st->outSingle.length() > 0 )
 				emitSingleSwitch( st );
@@ -567,9 +562,6 @@ void IpGoto::writeExec()
 
 	if ( redFsm->anyRegCurStateRef() )
 		out << "	int _ps = 0;\n";
-
-	if ( redFsm->anyConditions() )
-		out << "	" << WIDE_ALPH_TYPE() << " _widec;\n";
 
 	if ( !noEnd ) {
 		testEofUsed = true;

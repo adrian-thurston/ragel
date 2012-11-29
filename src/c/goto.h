@@ -78,9 +78,6 @@ public:
 
 	string CKEY( CondKey key );
 	void COND_B_SEARCH( RedTransAp *trans, int level, int low, int high );
-	void COND_TRANSLATE( GenStateCond *stateCond, int level );
-	void emitCondBSearch( RedStateAp *state, int level, int low, int high );
-	void STATE_CONDS( RedStateAp *state, bool genDefault ); 
 
 	virtual std::ostream &TRANS_GOTO( RedTransAp *trans, int level );
 

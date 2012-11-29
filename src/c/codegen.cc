@@ -390,18 +390,12 @@ string FsmCodeGen::TOKEND()
 
 string FsmCodeGen::GET_WIDE_KEY()
 {
-	if ( redFsm->anyConditions() ) 
-		return "_widec";
-	else
-		return GET_KEY();
+	return GET_KEY();
 }
 
 string FsmCodeGen::GET_WIDE_KEY( RedStateAp *state )
 {
-	if ( state->stateCondList.length() > 0 )
-		return "_widec";
-	else
-		return GET_KEY();
+	return GET_KEY();
 }
 
 string FsmCodeGen::GET_KEY()
@@ -461,17 +455,7 @@ bool FsmCodeGen::isWideAlphTypeSigned()
 
 string FsmCodeGen::WIDE_KEY( RedStateAp *state, Key key )
 {
-	if ( state->stateCondList.length() > 0 ) {
-		ostringstream ret;
-		if ( isWideAlphTypeSigned() )
-			ret << key.getVal();
-		else
-			ret << (unsigned long) key.getVal() << 'u';
-		return ret.str();
-	}
-	else {
-		return KEY( key );
-	}
+	return KEY( key );
 }
 
 void FsmCodeGen::EXEC( ostream &ret, GenInlineItem *item, int targState, int inFinish )
