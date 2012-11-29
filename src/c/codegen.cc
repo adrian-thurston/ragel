@@ -764,11 +764,6 @@ string FsmCodeGen::PTR_CONST()
 	return "const ";
 }
 
-string FsmCodeGen::PTR_CONST_END()
-{
-	return "";
-}
-
 std::ostream &FsmCodeGen::OPEN_ARRAY( string type, string name )
 {
 	out << "static const " << type << " " << name << "[] = {\n";

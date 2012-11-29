@@ -239,7 +239,6 @@ public:
 	virtual string CAST( string type );
 	virtual string UINT();
 	virtual string PTR_CONST();
-	virtual string PTR_CONST_END();
 	virtual string CTRL_FLOW();
 	virtual void writeExports();
 };
