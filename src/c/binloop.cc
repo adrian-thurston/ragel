@@ -91,7 +91,7 @@ void BinaryLooped::writeData()
 
 	taKeyOffsets();
 
-	OPEN_ARRAY( WIDE_ALPH_TYPE(), K() );
+	OPEN_ARRAY( ALPH_TYPE(), K() );
 	KEYS();
 	CLOSE_ARRAY() <<
 	"\n";
@@ -219,7 +219,7 @@ void BinaryLooped::writeExec()
 	}
 
 	out <<
-		"	" << PTR_CONST() << WIDE_ALPH_TYPE() << PTR_CONST_END() << POINTER() << "_keys;\n"
+		"	" << PTR_CONST() << ALPH_TYPE() << PTR_CONST_END() << POINTER() << "_keys;\n"
 		"	const char *_ckeys;\n"
 		"	int _cpc;\n"
 		"\n";

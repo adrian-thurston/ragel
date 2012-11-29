@@ -718,26 +718,6 @@ string FsmCodeGen::ALPH_TYPE()
 	return ret;
 }
 
-/* Emit the alphabet data type. */
-string FsmCodeGen::WIDE_ALPH_TYPE()
-{
-	string ret;
-	if ( redFsm->maxKey <= keyOps->maxKey )
-		ret = ALPH_TYPE();
-	else {
-		long long maxKeyVal = redFsm->maxKey.getLongLong();
-		HostType *wideType = keyOps->typeSubsumes( keyOps->isSigned, maxKeyVal );
-		assert( wideType != 0 );
-
-		ret = wideType->data1;
-		if ( wideType->data2 != 0 ) {
-			ret += " ";
-			ret += wideType->data2;
-		}
-	}
-	return ret;
-}
-
 void FsmCodeGen::STATE_IDS()
 {
 	if ( redFsm->startState != 0 )

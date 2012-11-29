@@ -131,7 +131,6 @@ protected:
 			bool inFinish, bool csForced );
 	void CONDITION( ostream &ret, GenAction *condition );
 	string ALPH_TYPE();
-	string WIDE_ALPH_TYPE();
 	string ARRAY_TYPE( unsigned long maxVal );
 
 	bool isAlphTypeSigned();
