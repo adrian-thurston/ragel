@@ -226,8 +226,6 @@ public:
 	virtual void tableDataPass() {}
 
 	/* From CCodeGen. */
-	virtual string NULL_ITEM();
-	virtual string POINTER();
 	virtual ostream &SWITCH_DEFAULT();
 	virtual ostream &OPEN_ARRAY( string type, string name );
 	virtual ostream &CLOSE_ARRAY();

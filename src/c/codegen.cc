@@ -506,7 +506,7 @@ void FsmCodeGen::GET_TOKEND( ostream &ret, GenInlineItem *item )
 
 void FsmCodeGen::INIT_TOKSTART( ostream &ret, GenInlineItem *item )
 {
-	ret << TOKSTART() << " = " << NULL_ITEM() << ";";
+	ret << TOKSTART() << " = 0;";
 }
 
 void FsmCodeGen::INIT_ACT( ostream &ret, GenInlineItem *item )
@@ -678,8 +678,8 @@ void FsmCodeGen::writeInit()
 
 	if ( hasLongestMatch ) {
 		out << 
-			"	" << TOKSTART() << " = " << NULL_ITEM() << ";\n"
-			"	" << TOKEND() << " = " << NULL_ITEM() << ";\n"
+			"	" << TOKSTART() << " = 0;\n"
+			"	" << TOKEND() << " = 0;\n"
 			"	" << ACT() << " = 0;\n";
 	}
 	out << "	}\n";
@@ -779,16 +779,6 @@ string FsmCodeGen::ARR_OFF( string ptr, string offset )
 string FsmCodeGen::CAST( string type )
 {
 	return "(" + type + ")";
-}
-
-string FsmCodeGen::NULL_ITEM()
-{
-	return "0";
-}
-
-string FsmCodeGen::POINTER()
-{
-	return " *";
 }
 
 std::ostream &FsmCodeGen::SWITCH_DEFAULT()
