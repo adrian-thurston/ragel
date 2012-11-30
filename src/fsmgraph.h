@@ -737,9 +737,6 @@ struct StateAp
 	/* Epsilon transitions. */
 	EpsilonTrans epsilonTrans;
 
-	/* Condition info. */
-	StateCondList stateCondList;
-
 	/* Number of in transitions from states other than ourselves. */
 	int foreignInTrans;
 
@@ -1346,8 +1343,6 @@ struct FsmAp
 	CondSpace *addCondSpace( const CondSet &condSet );
 
 	void expansionTrans( Expansion *expansion, TransAp *src );
-	void findEmbedExpansions( ExpansionList &expansionList, 
-		StateAp *destState, Action *condAction, bool sense );
 	void embedCondition( MergeData &md, StateAp *state, Action *condAction, bool sense );
 	void embedCondition( StateAp *state, Action *condAction, bool sense );
 
@@ -1488,11 +1483,6 @@ struct FsmAp
 	void findCondExpInTrans( ExpansionList &expansionList, StateAp *state, 
 			Key lowKey, Key highKey, CondSpace *fromCondSpace, CondSpace *toCondSpace,
 			long destVals, LongVect &toValsList );
-	void findTransExpansions( ExpansionList &expansionList, 
-			StateAp *destState, StateAp *srcState );
-	void findCondExpansions( ExpansionList &expansionList, 
-			StateAp *destState, StateAp *srcState );
-	void mergeStateConds( StateAp *destState, StateAp *srcState );
 
 	/* Merge a set of states into newState. */
 	void mergeStates( MergeData &md, StateAp *destState, 

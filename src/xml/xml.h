@@ -39,7 +39,6 @@ public:
 private:
 	void writeStateActions( StateAp *state );
 	void writeStateList();
-	void writeStateConditions( StateAp *state );
 
 	void writeKey( Key key );
 	void writeText( InlineItem *item );

@@ -967,70 +967,6 @@ void FsmAp::findCondExpInTrans( ExpansionList &expansionList, StateAp *state,
 	}
 }
 
-void FsmAp::findCondExpansions( ExpansionList &expansionList, 
-		StateAp *destState, StateAp *srcState )
-{
-	RangePairIter<StateCond> condCond( destState->stateCondList.head,
-			srcState->stateCondList.head );
-	for ( ; !condCond.end(); condCond++ ) {
-		if ( condCond.userState == RangePairIter<StateCond>::RangeOverlap ) {
-			/* Loop over all existing condVals . */
-			CondSet &destCS = condCond.s1Tel.trans->condSpace->condSet;
-			long destLen = destCS.length();
-
-			/* Find the items in src cond set that are not in dest
-			 * cond set. These are the items that we must expand. */
-			CondSet srcOnlyCS = condCond.s2Tel.trans->condSpace->condSet;
-			for ( CondSet::Iter dcsi = destCS; dcsi.lte(); dcsi++ )
-				srcOnlyCS.remove( *dcsi );
-			long srcOnlyLen = srcOnlyCS.length();
-
-			if ( srcOnlyCS.length() > 0 ) {
-				#ifdef LOG_CONDS
-				cerr << "there are " << srcOnlyCS.length() << " item(s) that are "
-							"only in the srcCS" << endl;
-				#endif
-
-				CondSet mergedCS = destCS;
-				mergedCS.insert( condCond.s2Tel.trans->condSpace->condSet );
-
-				CondSpace *fromCondSpace = addCondSpace( destCS );
-				CondSpace *toCondSpace = addCondSpace( mergedCS );
-
-				/* Loop all values in the dest space. */
-				for ( long destVals = 0; destVals < (1 << destLen); destVals++ ) {
-					long basicVals = 0;
-					for ( CondSet::Iter csi = destCS; csi.lte(); csi++ ) {
-						if ( destVals & (1 << csi.pos()) ) {
-							Action **cim = mergedCS.find( *csi );
-							long bitPos = (cim - mergedCS.data);
-							basicVals |= 1 << bitPos;
-						}
-					}
-
-					/* Loop all new values. */
-					LongVect expandToVals;
-					for ( long soVals = 0; soVals < (1 << srcOnlyLen); soVals++ ) {
-						long targVals = basicVals;
-						for ( CondSet::Iter csi = srcOnlyCS; csi.lte(); csi++ ) {
-							if ( soVals & (1 << csi.pos()) ) {
-								Action **cim = mergedCS.find( *csi );
-								long bitPos = (cim - mergedCS.data);
-								targVals |= 1 << bitPos;
-							}
-						}
-						expandToVals.append( targVals );
-					}
-
-					findCondExpInTrans( expansionList, destState, 
-							condCond.s1Tel.lowKey, condCond.s1Tel.highKey, 
-							fromCondSpace, toCondSpace, destVals, expandToVals );
-				}
-			}
-		}
-	}
-}
-
 void FsmAp::doExpand( MergeData &md, StateAp *destState, ExpansionList &expList1 )
 {
 	for ( ExpansionList::Iter exp = expList1; exp.lte(); exp++ ) {
@@ -1106,51 +1042,6 @@ void FsmAp::doRemove( MergeData &md, StateAp *destState, ExpansionList &expList1
 	}
 }
 
-void FsmAp::mergeStateConds( StateAp *destState, StateAp *srcState )
-{
-	StateCondList destList;
-	RangePairIter<StateCond> pairIter( destState->stateCondList.head,
-			srcState->stateCondList.head );
-	for ( ; !pairIter.end(); pairIter++ ) {
-		switch ( pairIter.userState ) {
-		case RangePairIter<StateCond>::RangeInS1: {
-			StateCond *destCond = pairIter.s1Tel.trans;
-			destCond->lowKey = pairIter.s1Tel.lowKey;
-			destCond->highKey = pairIter.s1Tel.highKey;
-			destList.append( destCond );
-			break;
-		}
-		case RangePairIter<StateCond>::RangeInS2: {
-			StateCond *newCond = new StateCond( *pairIter.s2Tel.trans );
-			newCond->lowKey = pairIter.s2Tel.lowKey;
-			newCond->highKey = pairIter.s2Tel.highKey;
-			destList.append( newCond );
-			break;
-		}
-		case RangePairIter<StateCond>::RangeOverlap: {
-			StateCond *destCond = pairIter.s1Tel.trans;
-			StateCond *srcCond = pairIter.s2Tel.trans;
-			CondSet mergedCondSet;
-			mergedCondSet.insert( destCond->condSpace->condSet );
-			mergedCondSet.insert( srcCond->condSpace->condSet );
-			destCond->condSpace = addCondSpace( mergedCondSet );
-
-			destCond->lowKey = pairIter.s1Tel.lowKey;
-			destCond->highKey = pairIter.s1Tel.highKey;
-			destList.append( destCond );
-			break;
-		}
-		case RangePairIter<StateCond>::BreakS1:
-			pairIter.s1Tel.trans = new StateCond( *pairIter.s1Tel.trans );
-			break;
-
-		case RangePairIter<StateCond>::BreakS2:
-			break;
-		}
-	}
-	destState->stateCondList.transfer( destList );
-}
-
 /* A state merge which represents the drawing in of leaving transitions.  If
  * there is any out data then we duplicate the source state, transfer the out
  * data, then merge in the state. The new state will be reaped because it will
@@ -1183,13 +1074,6 @@ void FsmAp::mergeStates( MergeData &md, StateAp *destState, StateAp *srcState )
 	ExpansionList expList1;
 	ExpansionList expList2;
 
-	findTransExpansions( expList1, destState, srcState );
-	findCondExpansions( expList1, destState, srcState );
-	findTransExpansions( expList2, srcState, destState );
-	findCondExpansions( expList2, srcState, destState );
-
-	mergeStateConds( destState, srcState );
-	
 	outTransCopy( md, destState, srcState->outList.head );
 
 	doExpand( md, destState, expList1 );

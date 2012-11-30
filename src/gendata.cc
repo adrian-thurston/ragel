@@ -593,20 +593,6 @@ void CodeGenData::makeEofTrans( StateAp *state )
 	}
 }
 
-void CodeGenData::makeStateConditions( StateAp *state )
-{
-	if ( state->stateCondList.length() > 0 ) {
-		long length = state->stateCondList.length();
-		initStateCondList( curState, length );
-		curStateCond = 0;
-
-		for ( StateCondList::Iter scdi = state->stateCondList; scdi.lte(); scdi++ ) {
-			addStateCond( curState, scdi->lowKey, scdi->highKey, 
-					scdi->condSpace->condSpaceId );
-		}
-	}
-}
-
 void CodeGenData::makeTrans( Key lowKey, Key highKey, TransAp *trans )
 {
 	RedCondList redCondList;
@@ -667,7 +653,6 @@ void CodeGenData::makeStateList()
 	for ( StateList::Iter st = fsm->stateList; st.lte(); st++ ) {
 		makeStateActions( st );
 		makeEofTrans( st );
-		makeStateConditions( st );
 		makeTransList( st );
 
 		long id = st->alg.stateNum;

@@ -1309,11 +1309,6 @@ void ParseData::analyzeGraph( FsmAp *graph )
 
 		for ( ActionTable::Iter at = st->eofActionTable; at.lte(); at++ )
 			at->value->numEofRefs += 1;
-
-		for ( StateCondList::Iter sc = st->stateCondList; sc.lte(); sc++ ) {
-			for ( CondSet::Iter sci = sc->condSpace->condSet; sci.lte(); sci++ )
-				(*sci)->numCondRefs += 1;
-		}
 	}
 
 	/* Checks for bad usage of directives in action code. */

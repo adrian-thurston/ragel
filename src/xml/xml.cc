@@ -460,23 +460,6 @@ void XMLCodeGen::writeStateActions( StateAp *state )
 	}
 }
 
-void XMLCodeGen::writeStateConditions( StateAp *state )
-{
-	if ( state->stateCondList.length() > 0 ) {
-		out << "      <cond_list length=\"" << state->stateCondList.length() << "\">\n";
-		for ( StateCondList::Iter scdi = state->stateCondList; scdi.lte(); scdi++ ) {
-			out << "        <c>";
-			writeKey( scdi->lowKey );
-			out << " ";
-			writeKey( scdi->highKey );
-			out << " ";
-			out << scdi->condSpace->condSpaceId;
-			out << "</c>\n";
-		}
-		out << "      </cond_list>\n";
-	}
-}
-
 void XMLCodeGen::writeStateList()
 {
 	/* Write the list of states. */
@@ -489,7 +472,6 @@ void XMLCodeGen::writeStateList()
 
 		writeStateActions( st );
 		writeEofTrans( st );
-		writeStateConditions( st );
 		writeTransList( st );
 
 		out << "      </state>\n";

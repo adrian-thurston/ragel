@@ -186,7 +186,6 @@ private:
 
 	void makeStateActions( StateAp *state );
 	void makeEofTrans( StateAp *state );
-	void makeStateConditions( StateAp *state );
 	void makeTransList( StateAp *state );
 	void makeTrans( Key lowKey, Key highKey, TransAp *trans );
 

@@ -83,9 +83,6 @@ StateAp::StateAp()
 	entryIds(),
 	epsilonTrans(),
 
-	/* Conditions. */
-	stateCondList(),
-
 	/* No transitions in from other states. */
 	foreignInTrans(0),
 
@@ -126,9 +123,6 @@ StateAp::StateAp(const StateAp &other)
 	 * are sets of integers and as such need no fixing. */
 	entryIds(other.entryIds),
 	epsilonTrans(other.epsilonTrans),
-
-	/* Copy in the elements of the conditions. */
-	stateCondList( other.stateCondList ),
 
 	/* No transitions in from other states. */
 	foreignInTrans(0),
@@ -265,30 +259,6 @@ int InitPartitionCompare::compare( const StateAp *state1 , const StateAp *state2
 	compareRes = FsmAp::compareStateData( state1, state2 );
 	if ( compareRes != 0 )
 		return compareRes;
-
-	/* Use a pair iterator to test the condition pairs. */
-	RangePairIter<StateCond> condPair( state1->stateCondList.head, state2->stateCondList.head );
-	for ( ; !condPair.end(); condPair++ ) {
-		switch ( condPair.userState ) {
-		case RangePairIter<StateCond>::RangeInS1:
-			return 1;
-		case RangePairIter<StateCond>::RangeInS2:
-			return -1;
-
-		case RangePairIter<StateCond>::RangeOverlap: {
-			CondSpace *condSpace1 = condPair.s1Tel.trans->condSpace;
-			CondSpace *condSpace2 = condPair.s2Tel.trans->condSpace;
-			if ( condSpace1 < condSpace2 )
-				return -1;
-			else if ( condSpace1 > condSpace2 )
-				return 1;
-			break;
-		}
-		case RangePairIter<StateCond>::BreakS1:
-		case RangePairIter<StateCond>::BreakS2:
-			break;
-		}
-	}
 
 	/* Use a pair iterator to test the transition pairs. */
 	RangePairIter<TransAp> outPair( state1->outList.head, state2->outList.head );
