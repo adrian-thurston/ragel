@@ -313,7 +313,7 @@ void BinaryExpanded::writeExec()
 
 	out <<
 		";\n"
-		"	" << PTR_CONST() << ALPH_TYPE() << " *_keys;\n"
+		"	const " << ALPH_TYPE() << " *_keys;\n"
 		"	const char *_ckeys;\n"
 		"	int _cpc;\n"
 		"	int _trans;\n"

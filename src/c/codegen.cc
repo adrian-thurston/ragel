@@ -744,11 +744,6 @@ void FsmCodeGen::writeError()
  * Language specific, but style independent code generators functions.
  */
 
-string FsmCodeGen::PTR_CONST()
-{
-	return "const ";
-}
-
 std::ostream &FsmCodeGen::OPEN_ARRAY( string type, string name )
 {
 	out << "static const " << type << " " << name << "[] = {\n";

@@ -233,7 +233,6 @@ public:
 	virtual string ARR_OFF( string ptr, string offset );
 	virtual string CAST( string type );
 	virtual string UINT();
-	virtual string PTR_CONST();
 	virtual string CTRL_FLOW();
 	virtual void writeExports();
 };

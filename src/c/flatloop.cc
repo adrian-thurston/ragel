@@ -143,13 +143,13 @@ void FlatLooped::writeExec()
 			redFsm->anyRegActions() || redFsm->anyFromStateActions() )
 	{
 		out << 
-			"	" << PTR_CONST() << ARRAY_TYPE(redFsm->maxActArrItem) << " *_acts;\n"
+			"	const " << ARRAY_TYPE(redFsm->maxActArrItem) << " *_acts;\n"
 			"	" << UINT() << " _nacts;\n"; 
 	}
 
 	out <<
-		"	" << PTR_CONST() << ALPH_TYPE() << " *_keys;\n"
-		"	" << PTR_CONST() << ARRAY_TYPE(redFsm->maxIndex) << " *_inds;\n"
+		"	const " << ALPH_TYPE() << " *_keys;\n"
+		"	const " << ARRAY_TYPE(redFsm->maxIndex) << " *_inds;\n"
 		"	const char *_ckeys;\n"
 		"	int _klen;\n"
 		"	int _cpc;\n";
@@ -269,7 +269,7 @@ void FlatLooped::writeExec()
 
 		if ( redFsm->anyEofActions() ) {
 			out <<
-				"	" << PTR_CONST() << ARRAY_TYPE(redFsm->maxActArrItem) << " *__acts = " << 
+				"	const " << ARRAY_TYPE(redFsm->maxActArrItem) << " *__acts = " << 
 						ARR_OFF( A(), EA() + "[" + vCS() + "]" ) << ";\n"
 				"	" << UINT() << " __nacts = " << CAST(UINT()) << " *__acts++;\n"
 				"	while ( __nacts-- > 0 ) {\n"

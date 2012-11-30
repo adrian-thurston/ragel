@@ -251,8 +251,8 @@ void FlatExpanded::writeExec()
 	out << "	int _trans, _cond;\n";
 
 	out <<
-		"	" << PTR_CONST() << ALPH_TYPE() << " *_keys;\n"
-		"	" << PTR_CONST() << ARRAY_TYPE(redFsm->maxIndex) << " *_inds;\n"
+		"	const " << ALPH_TYPE() << " *_keys;\n"
+		"	const " << ARRAY_TYPE(redFsm->maxIndex) << " *_inds;\n"
 		"	const char *_ckeys;\n"
 		"	int _klen;\n"
 		"	int _cpc;\n";

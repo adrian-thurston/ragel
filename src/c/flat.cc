@@ -515,9 +515,9 @@ void Flat::LOCATE_TRANS()
 	
 	out <<
 		"	{\n"
-		"		" << PTR_CONST() << " char *_lower = _ckeys;\n"
-		"		" << PTR_CONST() << " char *_mid;\n"
-		"		" << PTR_CONST() << " char *_upper = _ckeys + _klen - 1;\n"
+		"		const " << " char *_lower = _ckeys;\n"
+		"		const " << " char *_mid;\n"
+		"		const " << " char *_upper = _ckeys + _klen - 1;\n"
 		"		while (1) {\n"
 		"			if ( _upper < _lower )\n"
 		"				break;\n"
