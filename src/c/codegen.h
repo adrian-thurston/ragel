@@ -121,11 +121,8 @@ protected:
 	string START_STATE_ID();
 	ostream &ACTIONS_ARRAY();
 	void taActions();
-	string GET_WIDE_KEY();
-	string GET_WIDE_KEY( RedStateAp *state );
 	string TABS( int level );
 	string KEY( Key key );
-	string WIDE_KEY( RedStateAp *state, Key key );
 	string LDIR_PATH( char *path );
 	virtual void ACTION( ostream &ret, GenAction *action, int targState, 
 			bool inFinish, bool csForced );

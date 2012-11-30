@@ -388,16 +388,6 @@ string FsmCodeGen::TOKEND()
 	return ret.str();
 }
 
-string FsmCodeGen::GET_WIDE_KEY()
-{
-	return GET_KEY();
-}
-
-string FsmCodeGen::GET_WIDE_KEY( RedStateAp *state )
-{
-	return GET_KEY();
-}
-
 string FsmCodeGen::GET_KEY()
 {
 	ostringstream ret;
@@ -451,11 +441,6 @@ bool FsmCodeGen::isWideAlphTypeSigned()
 		HostType *wideType = keyOps->typeSubsumes( keyOps->isSigned, maxKeyVal );
 		return wideType->isSigned;
 	}
-}
-
-string FsmCodeGen::WIDE_KEY( RedStateAp *state, Key key )
-{
-	return KEY( key );
 }
 
 void FsmCodeGen::EXEC( ostream &ret, GenInlineItem *item, int targState, int inFinish )

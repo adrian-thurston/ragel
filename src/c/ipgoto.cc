@@ -414,11 +414,11 @@ std::ostream &IpGoto::STATE_GOTOS()
 
 			/* Try singles. */
 			if ( st->outSingle.length() > 0 )
-				emitSingleSwitch( st );
+				SINGLE_SWITCH( st );
 
 			/* Default case is to binary search for the ranges, if that fails then */
 			if ( st->outRange.length() > 0 )
-				emitRangeBSearch( st, 1, 0, st->outRange.length() - 1 );
+				RANGE_B_SEARCH( st, 1, 0, st->outRange.length() - 1 );
 
 			/* Write the default transition. */
 			out << "{\n";

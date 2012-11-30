@@ -478,9 +478,9 @@ void Flat::LOCATE_TRANS()
 		"	_inds = " << ARR_OFF( I(), IO() + "[" + vCS() + "]" ) << ";\n"
 		"\n"
 		"	_slen = " << SP() << "[" << vCS() << "];\n"
-		"	_trans = _inds[ _slen > 0 && _keys[0] <=" << GET_WIDE_KEY() << " &&\n"
-		"		" << GET_WIDE_KEY() << " <= _keys[1] ?\n"
-		"		" << GET_WIDE_KEY() << " - _keys[0] : _slen ];\n"
+		"	_trans = _inds[ _slen > 0 && _keys[0] <=" << GET_KEY() << " &&\n"
+		"		" << GET_KEY() << " <= _keys[1] ?\n"
+		"		" << GET_KEY() << " - _keys[0] : _slen ];\n"
 
 		"\n";
 
