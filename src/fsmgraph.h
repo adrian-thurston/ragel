@@ -636,19 +636,6 @@ typedef Vector<CondSpace*> CondSpaceVect;
 
 typedef AvlTree<CondSpace, CondSet, CmpCondSet> CondSpaceMap;
 
-struct StateCond
-{
-	StateCond( Key lowKey, Key highKey ) :
-		lowKey(lowKey), highKey(highKey) {}
-
-	Key lowKey;
-	Key highKey;
-	CondSpace *condSpace;
-
-	StateCond *prev, *next;
-};
-
-typedef DList<StateCond> StateCondList;
 typedef Vector<long> LongVect;
 
 struct Expansion
@@ -1477,12 +1464,6 @@ struct FsmAp
 			TransAp *destParent, CondAp *destTrans, CondAp *srcTrans );
 
 	void outTransCopy( MergeData &md, StateAp *dest, TransAp *srcList );
-
-	void doRemove( MergeData &md, StateAp *destState, ExpansionList &expList1 );
-	void doExpand( MergeData &md, StateAp *destState, ExpansionList &expList1 );
-	void findCondExpInTrans( ExpansionList &expansionList, StateAp *state, 
-			Key lowKey, Key highKey, CondSpace *fromCondSpace, CondSpace *toCondSpace,
-			long destVals, LongVect &toValsList );
 
 	/* Merge a set of states into newState. */
 	void mergeStates( MergeData &md, StateAp *destState, 
