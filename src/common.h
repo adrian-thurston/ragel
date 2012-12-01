@@ -85,24 +85,6 @@ public:
 	Key toLower() const
 		{ return Key( 'a' + ( key - 'A' ) ); }
 
-	void operator+=( const Key other )
-	{
-		/* FIXME: must be made aware of isSigned. */
-		key += other.key;
-	}
-
-	void operator-=( const Key other )
-	{
-		/* FIXME: must be made aware of isSigned. */
-		key -= other.key;
-	}
-
-	void operator|=( const Key other )
-	{
-		/* FIXME: must be made aware of isSigned. */
-		key |= other.key;
-	}
-
 	/* Decrement. Needed only for ranges. */
 	inline void decrement();
 	inline void increment();
@@ -155,24 +137,6 @@ public:
 		{ return CondKey( 'A' + ( key - 'a' ) ); }
 	CondKey toLower() const
 		{ return CondKey( 'a' + ( key - 'A' ) ); }
-
-	void operator+=( const CondKey other )
-	{
-		/* FIXME: must be made aware of isSigned. */
-		key += other.key;
-	}
-
-	void operator-=( const CondKey other )
-	{
-		/* FIXME: must be made aware of isSigned. */
-		key -= other.key;
-	}
-
-	void operator|=( const CondKey other )
-	{
-		/* FIXME: must be made aware of isSigned. */
-		key |= other.key;
-	}
 
 	/* Decrement. Needed only for ranges. */
 	inline void decrement();
