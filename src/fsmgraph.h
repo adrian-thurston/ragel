@@ -1362,6 +1362,8 @@ struct FsmAp
 	/* Attach with a new transition. */
 	TransAp *attachNewTrans( StateAp *from, StateAp *to,
 			Key onChar1, Key onChar2 );
+	CondAp *attachNewTrans( TransAp *trans, StateAp *from,
+			StateAp *to, CondKey onChar );
 
 	/* Attach with an existing transition that already in an out list. */
 	void attachTrans( StateAp *from, StateAp *to, TransAp *trans );

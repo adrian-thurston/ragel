@@ -252,6 +252,9 @@ void FsmAp::longMatchAction( int ordering, LongestMatchPart *lmPart )
 
 void FsmAp::fillGaps( StateAp *state )
 {
+	/*
+	 * First pass fills in the the caps between transitions.
+	 */
 	if ( state->outList.length() == 0 ) {
 		/* Add the range on the lower and upper bound. */
 		attachNewTrans( state, 0, keyOps->minKey, keyOps->maxKey );
@@ -306,6 +309,55 @@ void FsmAp::fillGaps( StateAp *state )
 			lastHigh.increment();
 
 			attachNewTrans( state, 0, lastHigh, keyOps->maxKey );
+		}
+	}
+
+	/*
+	 * Second pass fills in gaps in condition lists.
+	 */
+	for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
+		CondTransList srcList;
+		srcList.transfer( trans->ctList );
+
+		CondTransList::Iter cond = srcList, next;
+
+		if ( cond->key > 0 ) {
+			for ( CondKey key = 0; key < cond->key; key.increment() )
+				attachNewTrans( trans, state, 0, key );
+		}
+
+		next = cond.next();
+		trans->ctList.append( cond );
+
+		CondKey lastKey = cond->key;
+
+		for ( cond = next; cond.lte(); cond = next ) {
+			/* Make the next key following the last range. */
+			CondKey nextKey = lastKey;
+			nextKey.increment();
+
+			/* Check for a gap from last up to here. */
+			if ( nextKey < cond->key ) {
+				for ( CondKey key = nextKey; key < cond->key; key.increment() )
+					attachNewTrans( trans, state, 0, key );
+			}
+
+			next = cond.next();
+			trans->ctList.append( cond );
+
+			lastKey = cond->key;
+		}
+
+		CondKey high = (trans->condSpace == 0) ?
+			0 : (1 << trans->condSpace->condSet.length());
+
+		/* Now check for a gap on the end to fill. */
+		if ( lastKey < high ) {
+			/* Get a copy of the default. */
+			lastKey.increment();
+
+			for ( CondKey key = lastKey; key < high; key.increment() )
+				attachNewTrans( trans, state, 0, key );
 		}
 	}
 }

@@ -78,6 +78,23 @@ void FsmAp::detachFromInList( StateAp *from, StateAp *to,
 	}
 }
 
+CondAp *FsmAp::attachNewTrans( TransAp *trans, StateAp *from, StateAp *to, CondKey onChar )
+{
+	/* Sub-transition for conditions. */
+	CondAp *condAp = new CondAp( trans );
+	condAp->key = onChar;
+	trans->ctList.append( condAp );
+
+	condAp->fromState = from;
+	condAp->toState = to;
+
+	/* Attach in list. */
+	if ( to != 0 )
+		attachToInList( from, to, to->inList.head, condAp );
+
+	return condAp;
+}
+
 /* Attach states on the default transition, range list or on out/in list key.
  * First makes a new transition. If there is already a transition out from
  * fromState on the default, then will assertion fail. */

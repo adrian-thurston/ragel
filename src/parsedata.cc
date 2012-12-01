@@ -1412,7 +1412,8 @@ void ParseData::generateReduced( InputData &inputData )
 {
 	beginProcessing();
 
-	CodeGenArgs args( inputData, inputData.inputFileName, sectionName, this, sectionGraph, *inputData.outStream );
+	CodeGenArgs args( inputData, inputData.inputFileName,
+			sectionName, this, sectionGraph, *inputData.outStream );
 
 	/* Write out with it. */
 	cgd = makeCodeGen( args );
