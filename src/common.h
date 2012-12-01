@@ -45,8 +45,6 @@ private:
 public:
 	friend inline Key operator+(const Key key1, const Key key2);
 	friend inline Key operator-(const Key key1, const Key key2);
-	friend inline Key operator/(const Key key1, const Key key2);
-	friend inline long operator&(const Key key1, const Key key2);
 
 	friend inline bool operator<( const Key key1, const Key key2 );
 	friend inline bool operator<=( const Key key1, const Key key2 );
@@ -98,8 +96,6 @@ private:
 public:
 	friend inline CondKey operator+(const CondKey key1, const CondKey key2);
 	friend inline CondKey operator-(const CondKey key1, const CondKey key2);
-	friend inline CondKey operator/(const CondKey key1, const CondKey key2);
-	friend inline long operator&(const CondKey key1, const CondKey key2);
 
 	friend inline bool operator<( const CondKey key1, const CondKey key2 );
 	friend inline bool operator<=( const CondKey key1, const CondKey key2 );
@@ -327,18 +323,6 @@ inline Key operator-(const Key key1, const Key key2)
 	return Key( key1.key - key2.key );
 }
 
-inline long operator&(const Key key1, const Key key2)
-{
-	/* FIXME: must be made aware of isSigned. */
-	return key1.key & key2.key;
-}
-
-inline Key operator/(const Key key1, const Key key2)
-{
-	/* FIXME: must be made aware of isSigned. */
-	return key1.key / key2.key;
-}
-
 /* CondKey */
 
 inline bool operator<( const CondKey key1, const CondKey key2 )
@@ -410,18 +394,6 @@ inline CondKey operator-(const CondKey key1, const CondKey key2)
 {
 	/* FIXME: must be made aware of isSigned. */
 	return CondKey( key1.key - key2.key );
-}
-
-inline long operator&(const CondKey key1, const CondKey key2)
-{
-	/* FIXME: must be made aware of isSigned. */
-	return key1.key & key2.key;
-}
-
-inline CondKey operator/(const CondKey key1, const CondKey key2)
-{
-	/* FIXME: must be made aware of isSigned. */
-	return key1.key / key2.key;
 }
 
 /* Filter on the output stream that keeps track of the number of lines
