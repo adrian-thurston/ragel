@@ -918,8 +918,6 @@ void ParseData::initKeyOps( )
 		thisKeyOps.minKey = makeFsmKeyNum( lowerNum, rangeLowLoc, this );
 		thisKeyOps.maxKey = makeFsmKeyNum( upperNum, rangeHighLoc, this );
 	}
-
-	thisCondData.lastCondKey = thisKeyOps.maxKey;
 }
 
 void ParseData::printNameInst( NameInst *nameInst, int level )

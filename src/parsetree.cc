@@ -538,9 +538,9 @@ FsmAp *MachineDef::walk( ParseData *pd )
 		rtnVal = longestMatch->walk( pd );
 		break;
 	case LengthDefType:
-		condData->lastCondKey.increment();
+		/* Towards lengths. */
 		rtnVal = new FsmAp();
-		rtnVal->concatFsm( condData->lastCondKey );
+		rtnVal->lambdaFsm();
 		break;
 	}
 	return rtnVal;

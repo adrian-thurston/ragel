@@ -639,11 +639,6 @@ typedef Vector<long> LongVect;
 
 struct CondData
 {
-	CondData() : lastCondKey(0) {}
-
-	/* Condition info. */
-	Key lastCondKey;
-
 	CondSpaceMap condSpaceMap;
 };
 
