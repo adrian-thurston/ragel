@@ -1362,31 +1362,7 @@ void ParseData::makeExports()
 
 }
 
-/* Construct the machine and catch failures which can occur during
- * construction. */
 void ParseData::prepareMachineGen( GraphDictEl *graphDictEl )
-{
-	try {
-		/* This machine construction can fail. */
-		prepareMachineGenTBWrapped( graphDictEl );
-	}
-	catch ( FsmConstructFail fail ) {
-		switch ( fail.reason ) {
-			case FsmConstructFail::CondNoKeySpace: {
-				InputLoc &loc = alphTypeSet ? alphTypeLoc : sectionLoc;
-				error(loc) << "sorry, no more characters are "
-						"available in the alphabet space" << endl;
-				error(loc) << "  for conditions, please use a "
-						"smaller alphtype or reduce" << endl;
-				error(loc) << "  the span of characters on which "
-						"conditions are embedded" << endl;
-				break;
-			}
-		}
-	}
-}
-
-void ParseData::prepareMachineGenTBWrapped( GraphDictEl *graphDictEl )
 {
 	beginProcessing();
 	initKeyOps();

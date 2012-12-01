@@ -644,18 +644,6 @@ struct CondData
 
 extern CondData *condData;
 
-struct FsmConstructFail
-{
-	enum Reason
-	{
-		CondNoKeySpace
-	};
-
-	FsmConstructFail( Reason reason ) 
-		: reason(reason) {}
-	Reason reason;
-};
-
 /* State class that implements actions and priorities. */
 struct StateAp 
 {

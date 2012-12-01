@@ -228,7 +228,6 @@ struct ParseData
 	void makeExports();
 
 	void prepareMachineGen( GraphDictEl *graphDictEl );
-	void prepareMachineGenTBWrapped( GraphDictEl *graphDictEl );
 	void generateXML( ostream &out );
 	void generateReduced( InputData &inputData );
 	FsmAp *sectionGraph;
