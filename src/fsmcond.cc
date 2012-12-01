@@ -38,7 +38,6 @@ using std::cerr;
 using std::endl;
 using std::cout;
 
-void logNewExpansion( Expansion *exp );
 void logCondSpace( CondSpace *condSpace );
 
 void FsmAp::expandConds( StateAp *fromState, TransAp *trans, const CondSet &fromCS, const CondSet &mergedCS )
@@ -128,15 +127,6 @@ void FsmAp::expandCondTransitions( StateAp *fromState, TransAp *destTrans, Trans
 	destTrans->condSpace = mergedCondSpace;
 }
 
-void FsmAp::expansionTrans( Expansion *expansion, TransAp *src )
-{
-	expansion->fromTrans = new TransAp(*src);
-	CondAp *condTransAp = new CondAp( *src->ctList.head, expansion->fromTrans );
-	expansion->fromTrans->ctList.append( condTransAp );
-	expansion->fromTrans->ctList.head->fromState = 0;
-	expansion->fromTrans->ctList.head->toState = src->ctList.head->toState;
-}
-
 CondSpace *FsmAp::addCondSpace( const CondSet &condSet )
 {
 	CondSpace *condSpace = condData->condSpaceMap.find( condSet );
@@ -221,80 +211,9 @@ void FsmAp::embedCondition( MergeData &md, StateAp *state, Action *condAction, b
 	}
 }
 
-#if 0
-	/* Need to double up the whole transition list for each condition test in
-	 * merged that is not in from. The one we add has the bit in question set.
-	 * */
-	for ( CondSet::Iter csi = mergedCS; csi.lte(); csi++ ) {
-		Action **cim = fromCS.find( *csi );
-		if ( cim == 0 ) {
-			CondTransList newItems;
-			cout << "doubling up on condition" << endl;
-			for ( CondTransList::Iter cti = trans->ctList; cti.lte(); cti++ ) {
-				CondAp *cond = dupCondTrans( fromState, trans, cti  );
-
-				cond->lowKey = cond->highKey = cti->lowKey.getVal() | (1 << csi.pos());
-
-				newItems.append( cond );
-			}
-
-			trans->ctList.append( newItems );
-		}
-	}
-#if 0
-#endif
-
-#if 0
-	cout << "newCS.length() = " << newCS.length() << endl;
-
-	if ( newCS.length() > 0 ) {
-		#ifdef LOG_CONDS
-		cerr << "there are " << newCS.length() << " item(s) that are "
-					"only in the mergedCS" << endl;
-		#endif
-
-		long fromLen = fromCS.length();
-	
-		/* Loop all values in the dest space. */
-		for ( long fromBits = 0; fromBits < (1 << fromLen); fromBits++ ) {
-			long basicVals = 0;
-			for ( CondSet::Iter csi = fromCS; csi.lte(); csi++ ) {
-				if ( fromBits & (1 << csi.pos()) ) {
-					Action **cim = mergedCS.find( *csi );
-					long bitPos = (cim - mergedCS.data);
-					basicVals |= 1 << bitPos;
-				}
-			}
-
-			cerr << "basicVals: " << basicVals << endl;
-	
-			/* Loop all new values. */
-			LongVect expandToVals;
-			for ( long newVals = 0; newVals < (1 << newLen); newVals++ ) {
-				long targVals = basicVals;
-				for ( CondSet::Iter csi = newCS; csi.lte(); csi++ ) {
-					if ( newVals & (1 << csi.pos()) ) {
-						Action **cim = mergedCS.find( *csi );
-						long bitPos = (cim - mergedCS.data);
-						targVals |= 1 << bitPos;
-					}
-				}
-				cerr << "targVals: " << targVals << endl;
-				expandToVals.append( targVals );
-			}
-	
-//			findCondExpInTrans( expansionList, destState, 
-//					condCond.s1Tel.lowKey, condCond.s1Tel.highKey, 
-//					fromCondSpace, toCondSpace, destVals, expandToVals );
-		}
-	}
-#endif
-#endif
-
 void FsmAp::embedCondition( StateAp *state, Action *condAction, bool sense )
 {
 	MergeData md;
-	ExpansionList expList;
 
 	/* Turn on misfit accounting to possibly catch the old start state. */
 	setMisfitAccounting( true );

@@ -638,42 +638,6 @@ typedef AvlTree<CondSpace, CondSet, CmpCondSet> CondSpaceMap;
 
 typedef Vector<long> LongVect;
 
-struct Expansion
-{
-	Expansion( Key lowKey, Key highKey ) :
-		lowKey(lowKey), highKey(highKey),
-		fromTrans(0), fromCondSpace(0), 
-		toCondSpace(0) {}
-	
-	~Expansion()
-	{
-		if ( fromTrans != 0 )
-			delete fromTrans;
-	}
-
-	Key lowKey;
-	Key highKey;
-
-	TransAp *fromTrans;
-	CondSpace *fromCondSpace;
-	long fromVals;
-
-	CondSpace *toCondSpace;
-	LongVect toValsList;
-
-	Expansion *prev, *next;
-};
-
-typedef DList<Expansion> ExpansionList;
-
-struct Removal
-{
-	Key lowKey;
-	Key highKey;
-
-	Removal *next;
-};
-
 struct CondData
 {
 	CondData() : lastCondKey(0) {}
@@ -1329,7 +1293,6 @@ struct FsmAp
 	/* Set conditions. */
 	CondSpace *addCondSpace( const CondSet &condSet );
 
-	void expansionTrans( Expansion *expansion, TransAp *src );
 	void embedCondition( MergeData &md, StateAp *state, Action *condAction, bool sense );
 	void embedCondition( StateAp *state, Action *condAction, bool sense );
 
