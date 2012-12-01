@@ -142,7 +142,6 @@ CondSpace *FsmAp::addCondSpace( const CondSet &condSet )
 		condData->lastCondKey += (1 << condSet.length() ) * keyOps->alphSize();
 
 		condSpace = new CondSpace( condSet );
-		condSpace->baseKey = baseKey;
 		condData->condSpaceMap.insert( condSpace );
 
 		#ifdef LOG_CONDS

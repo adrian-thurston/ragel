@@ -299,13 +299,10 @@ public:
 
 	void initCondSpaceList( ulong length );
 	void condSpaceItem( int cnum, long condActionId );
-	void newCondSpace( int cnum, int condSpaceId, Key baseKey );
+	void newCondSpace( int cnum, int condSpaceId );
 
 	void initStateCondList( int snum, ulong length );
 	void addStateCond( int snum, Key lowKey, Key highKey, long condNum );
-
-	GenCondSpace *findCondSpace( Key lowKey, Key highKey );
-	Condition *findCondition( Key key );
 
 	bool setAlphType( const char *data );
 

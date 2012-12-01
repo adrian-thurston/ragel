@@ -500,7 +500,7 @@ void CodeGenData::makeConditions()
 
 		for ( CondSpaceMap::Iter cs = condData->condSpaceMap; cs.lte(); cs++ ) {
 			long id = cs->condSpaceId;
-			newCondSpace( curCondSpace, id, cs->baseKey );
+			newCondSpace( curCondSpace, id );
 			for ( CondSet::Iter csi = cs->condSet; csi.lte(); csi++ )
 				condSpaceItem( curCondSpace, (*csi)->actionId );
 			curCondSpace += 1;
@@ -1083,11 +1083,10 @@ void CodeGenData::initCondSpaceList( ulong length )
 		condSpaceList.append( allCondSpaces + c );
 }
 
-void CodeGenData::newCondSpace( int cnum, int condSpaceId, Key baseKey )
+void CodeGenData::newCondSpace( int cnum, int condSpaceId )
 {
 	GenCondSpace *cond = allCondSpaces + cnum;
 	cond->condSpaceId = condSpaceId;
-	cond->baseKey = baseKey;
 }
 
 void CodeGenData::condSpaceItem( int cnum, long condActionId )
@@ -1103,29 +1102,6 @@ void CodeGenData::initStateCondList( int snum, ulong length )
 
 void CodeGenData::addStateCond( int snum, Key lowKey, Key highKey, long condNum )
 {
-}
-
-
-GenCondSpace *CodeGenData::findCondSpace( Key lowKey, Key highKey )
-{
-	for ( CondSpaceList::Iter cs = condSpaceList; cs.lte(); cs++ ) {
-		Key csHighKey = cs->baseKey;
-		csHighKey += keyOps->alphSize() * (1 << cs->condSet.length());
-
-		if ( lowKey >= cs->baseKey && highKey <= csHighKey )
-			return cs;
-	}
-	return 0;
-}
-
-Condition *CodeGenData::findCondition( Key key )
-{
-	for ( ConditionList::Iter cond = conditionList; cond.lte(); cond++ ) {
-		Key upperKey = cond->baseKey + (1 << cond->condSet.length());
-		if ( cond->baseKey <= key && key <= upperKey )
-			return cond;
-	}
-	return 0;
 }
 
 Key CodeGenData::findMaxKey()

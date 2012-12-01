@@ -628,7 +628,6 @@ struct CondSpace
 	const CondSet &getKey() { return condSet; }
 
 	CondSet condSet;
-	Key baseKey;
 	long condSpaceId;
 };
 

@@ -558,7 +558,6 @@ void XMLCodeGen::writeConditions()
 		for ( CondSpaceMap::Iter cs = condData->condSpaceMap; cs.lte(); cs++ ) {
 			out << "      <cond_space id=\"" << cs->condSpaceId << 
 				"\" length=\"" << cs->condSet.length() << "\">";
-			writeKey( cs->baseKey );
 			for ( CondSet::Iter csi = cs->condSet; csi.lte(); csi++ )
 				out << " " << (*csi)->actionId;
 			out << "</cond_space>\n";
