@@ -14,6 +14,13 @@ using namespace std;
 
 struct Concurrent
 {
+	Concurrent() :
+		cur_char(0),
+		start_word(0),
+		start_comment(0),
+		start_literal(0)
+	{}
+
 	int cur_char;
 	int start_word;
 	int start_comment;
