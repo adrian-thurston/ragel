@@ -627,6 +627,9 @@ struct CondSpace
 	
 	const CondSet &getKey() { return condSet; }
 
+	long fullSize()
+		{ return ( 1 << condSet.length() ); }
+
 	CondSet condSet;
 	long condSpaceId;
 };
