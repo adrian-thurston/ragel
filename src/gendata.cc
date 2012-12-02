@@ -612,7 +612,7 @@ void CodeGenData::makeTrans( Key lowKey, Key highKey, TransAp *trans )
 		if ( actionTable != 0 )
 			action = actionTable->id;
 
-		newCondTrans( redCondList, curState, /*curTrans++*/ 0, cti->key, targ, action );
+		newCondTrans( redCondList, curState, cti->key, targ, action );
 	}
 
 	GenCondSpace *gcs = trans->condSpace != 0 ?
@@ -920,7 +920,7 @@ void CodeGenData::newTrans( int snum, int tnum, Key lowKey,
 }
 
 void CodeGenData::newCondTrans( RedCondList &outConds,
-		int snum, int tnum, CondKey key,
+		int snum, CondKey key,
 		long targ, long action )
 {
 	/* Get the current state and range. */

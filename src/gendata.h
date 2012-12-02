@@ -288,8 +288,7 @@ public:
 			Key lowKey, Key highKey, GenCondSpace *gcs,
 			long targ, long act, RedCondList &outConds );
 	void newCondTrans( RedCondList &outConds, 
-			int snum, int tnum, CondKey key, 
-			long targ, long act );
+			int snum, CondKey key, long targ, long act );
 	void finishTransList( int snum );
 	void setStateActions( int snum, long toStateAction, 
 			long fromStateAction, long eofAction );
