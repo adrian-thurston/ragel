@@ -716,13 +716,22 @@ void FsmAp::compressTransitions()
 
 				/* Require there be no conditions in either of the merge
 				 * candidates. */
-				bool merge = 
-					trans->condSpace == 0 && 
+				bool merge = false;
+				if ( trans->condSpace == 0 && 
 					next->condSpace == 0 && 
 					trans->highKey == nextLow && 
-					trans->ctList.length() == 1 && next->ctList.length() == 1 &&
-					trans->ctList.head->toState == next->ctList.head->toState &&
-					CmpActionTable::compare( trans->ctList.head->actionTable, next->ctList.head->actionTable ) == 0;
+					trans->ctList.length() == 1 && next->ctList.length() == 1 )
+				{
+					/* Check the condition target and action data. */
+					CondAp *cond = trans->ctList.head;
+					CondAp *nextCond = next->ctList.head;
+
+					if ( cond->toState == nextCond->toState &&
+						CmpActionTable::compare( cond->actionTable, nextCond->actionTable ) == 0 )
+					{
+						merge = true;
+					}
+				}
 
 				if ( merge ) {
 					trans->highKey = next->highKey;
