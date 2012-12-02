@@ -34,6 +34,9 @@
 #include <assert.h>
 #include <iostream>
 
+long TransAp::condFullSize() 
+	{ return condSpace == 0 ? 1 : condSpace->fullSize(); }
+
 void FsmAp::expandConds( StateAp *fromState, TransAp *trans, const CondSet &fromCS, const CondSet &mergedCS )
 {
 	/* Need to transform condition element to the merged set. */

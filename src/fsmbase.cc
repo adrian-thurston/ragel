@@ -574,10 +574,9 @@ bool FsmAp::checkErrTrans( StateAp *state, CondAp *trans )
 
 bool FsmAp::checkErrTrans( StateAp *state, TransAp *trans )
 {
-	/* Might go directly to error state. */
-	if ( trans->ctList.head->toState == 0 )
-		return true;
-
+	/* 
+	 * Look for a gap between this transition and the previous.
+	 */
 	if ( trans->prev == 0 ) {
 		/* If this is the first transition. */
 		if ( keyOps->minKey < trans->lowKey )
@@ -592,32 +591,14 @@ bool FsmAp::checkErrTrans( StateAp *state, TransAp *trans )
 			return true; 
 	}
 
-	if ( trans->condSpace == 0 ) {
-		/* If there is no cond space then we are just dealing with a single
-		 * transtion. (optionally) */
-		if ( trans->ctList.length() == 0 )
-			return true;
-		else { 
-			CondAp *cond = trans->ctList.head;
-			if ( cond->toState == 0 )
-				return true;
-		}
-	}
-	else {
-		/* Need to check destination, as well as for gaps. Use the condSpace to
-		 * determine where to end. */
-		for ( CondTransList::Iter cti = trans->ctList; cti.lte(); cti++ ) {
-			bool res = checkErrTrans( state, cti );
-			if ( res )
-				return true;
-		}
+	/* Check for gaps in the condition list. */
+	if ( trans->ctList.length() < trans->condFullSize() )
+		return true;
 
-		/* Check for gaps in the condition list. */
-		if ( trans->ctList.length() < 
-				(1 << trans->condSpace->condSet.length()) )
-		{
+	/* Check all destinations. */
+	for ( CondTransList::Iter cti = trans->ctList; cti.lte(); cti++ ) {
+		if ( checkErrTrans( state, cti ) )
 			return true;
-		}
 	}
 
 	return false;

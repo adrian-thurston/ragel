@@ -473,9 +473,11 @@ struct TransAp
 
 	~TransAp()
 	{
-	//	delete ctList.head;
-	//	ctList.abandon();
+		//	delete ctList.head;
+		//	ctList.abandon();
 	}
+
+	long condFullSize();
 
 	Key lowKey, highKey;
 
