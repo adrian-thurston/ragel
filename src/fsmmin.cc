@@ -717,18 +717,24 @@ void FsmAp::compressTransitions()
 				 * candidates. */
 				bool merge = false;
 				if ( trans->condSpace == 0 && 
-					next->condSpace == 0 && 
-					trans->highKey == nextLow && 
-					trans->ctList.length() == 1 && next->ctList.length() == 1 )
+						next->condSpace == 0 && 
+						trans->highKey == nextLow )
 				{
-					/* Check the condition target and action data. */
-					CondAp *cond = trans->ctList.head;
-					CondAp *nextCond = next->ctList.head;
-
-					if ( cond->toState == nextCond->toState &&
-						CmpActionTable::compare( cond->actionTable, nextCond->actionTable ) == 0 )
+					if ( trans->condSpace == 0 &&
+							next->condSpace == 0 )
 					{
-						merge = true;
+						assert( trans->ctList.length() == 1 );
+						assert( next->ctList.length() == 1 );
+
+						/* Check the condition target and action data. */
+						CondAp *cond = trans->ctList.head;
+						CondAp *nextCond = next->ctList.head;
+
+						if ( cond->toState == nextCond->toState &&
+								CmpActionTable::compare( cond->actionTable, nextCond->actionTable ) == 0 )
+						{
+							merge = true;
+						}
 					}
 				}
 
