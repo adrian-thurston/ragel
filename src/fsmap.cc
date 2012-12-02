@@ -860,7 +860,7 @@ int FsmAp::compareCondData( CondAp *trans1, CondAp *trans2 )
  * new transition is to represent. */
 void FsmAp::addInTrans( TransAp *destTrans, TransAp *srcTrans )
 {
-	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
+	cerr << "FIXME: " << __PRETTY_FUNCTION__ << endl;
 
 	/* Protect against adding in from ourselves. */
 	if ( srcTrans == destTrans ) {

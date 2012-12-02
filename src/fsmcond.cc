@@ -27,18 +27,12 @@
  * the condition, then remove the one that is not set.
  */
 
-#include <assert.h>
-#include <iostream>
-
 #include "fsmgraph.h"
 #include "mergesort.h"
 #include "parsedata.h"
 
-using std::cerr;
-using std::endl;
-using std::cout;
-
-void logCondSpace( CondSpace *condSpace );
+#include <assert.h>
+#include <iostream>
 
 void FsmAp::expandConds( StateAp *fromState, TransAp *trans, const CondSet &fromCS, const CondSet &mergedCS )
 {
@@ -177,7 +171,7 @@ void FsmAp::embedCondition( MergeData &md, StateAp *state, Action *condAction, b
 			}
 
 			if ( origVal != newVal ) {
-				cerr << "orig: " << origVal << " new: " << newVal << endl;
+				std::cerr << "orig: " << origVal << " new: " << newVal << std::endl;
 				cti->key = newVal;
 			}
 

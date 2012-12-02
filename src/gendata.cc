@@ -37,10 +37,6 @@ string itoa( int i )
 	return buf;
 }
 
-using std::cout;
-using std::cerr;
-using std::endl;
-
 void lineDirective( ostream &out, const char *fileName, int line )
 {
 	if ( !generateDot ) {
@@ -1397,7 +1393,7 @@ void CodeGenData::analyzeMachine()
 
 void CodeGenData::write_option_error( InputLoc &loc, char *arg )
 {
-	source_warning(loc) << "unrecognized write option \"" << arg << "\"" << endl;
+	source_warning(loc) << "unrecognized write option \"" << arg << "\"" << std::endl;
 }
 
 void CodeGenData::writeStatement( InputLoc &loc, int nargs, char **args )
@@ -1463,22 +1459,22 @@ void CodeGenData::writeStatement( InputLoc &loc, int nargs, char **args )
 	else {
 		/* EMIT An error here. */
 		source_error(loc) << "unrecognized write command \"" << 
-				args[0] << "\"" << endl;
+				args[0] << "\"" << std::endl;
 	}
 }
 
 ostream &CodeGenData::source_warning( const InputLoc &loc )
 {
-	cerr << sourceFileName << ":" << loc.line << ":" << loc.col << ": warning: ";
-	return cerr;
+	std::cerr << sourceFileName << ":" << loc.line << ":" << loc.col << ": warning: ";
+	return std::cerr;
 }
 
 ostream &CodeGenData::source_error( const InputLoc &loc )
 {
 	gblErrorCount += 1;
 	assert( sourceFileName != 0 );
-	cerr << sourceFileName << ":" << loc.line << ":" << loc.col << ": ";
-	return cerr;
+	std::cerr << sourceFileName << ":" << loc.line << ":" << loc.col << ": ";
+	return std::cerr;
 }
 
 

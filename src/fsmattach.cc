@@ -129,7 +129,7 @@ TransAp *FsmAp::attachNewTrans( StateAp *from, StateAp *to, Key lowKey, Key high
  * target state.  Does not handle adding the transition into the out list. */
 void FsmAp::attachTrans( StateAp *from, StateAp *to, TransAp *trans )
 {
-	cout << "FIXME: " << __PRETTY_FUNCTION__ << endl;
+	cerr << "FIXME: " << __PRETTY_FUNCTION__ << endl;
 
 	assert( trans->ctList.head->fromState == 0 && 
 			trans->ctList.head->toState == 0 );
@@ -177,7 +177,7 @@ void FsmAp::redirectErrorTrans( StateAp *from, StateAp *to, CondAp *trans )
 /* Detach for out/in lists or for default transition. */
 void FsmAp::detachTrans( StateAp *from, StateAp *to, TransAp *trans )
 {
-	cout << "FIXME: " << __PRETTY_FUNCTION__ << endl;
+	cerr << "FIXME: " << __PRETTY_FUNCTION__ << endl;
 
 	assert( trans->ctList.head->fromState == from && 
 			trans->ctList.head->toState == to );

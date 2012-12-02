@@ -19,9 +19,12 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
+#include "fsmgraph.h"
+
 #include <string.h>
 #include <assert.h>
-#include "fsmgraph.h"
+#include <iostream>
+
 
 /* Simple singly linked list append routine for the fill list. The new state
  * goes to the end of the list. */
@@ -397,10 +400,8 @@ void FsmAp::markReachableFromHereReverse( StateAp *state )
 	state->stateBits |= STB_ISMARKED;
 
 	/* Recurse on all items in transitions. */
-	for ( TransInList<CondAp>::Iter t = state->inList; t.lte(); t++ ) {
-		TransAp *trans = t->transAp;
-		markReachableFromHereReverse( trans->ctList.head->fromState );
-	}
+	for ( TransInList<CondAp>::Iter t = state->inList; t.lte(); t++ )
+		markReachableFromHereReverse( t->fromState );
 }
 
 /* Determine if there are any entry points into a start state other than the
@@ -446,7 +447,7 @@ void FsmAp::setFinBits( int finStateBits )
 /* Tests the integrity of the transition lists and the fromStates. */
 void FsmAp::verifyIntegrity()
 {
-	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
+	std::cerr << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
 
 	for ( StateList::Iter state = stateList; state.lte(); state++ ) {
 		/* Walk the out transitions and assert fromState is correct. */

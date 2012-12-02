@@ -19,12 +19,11 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#include <string.h>
-#include <assert.h>
 #include "fsmgraph.h"
 
+#include <string.h>
+#include <assert.h>
 #include <iostream>
-using namespace std;
 
 /* Construct a mark index for a specified number of states. Must new up
  * an array that is states^2 in size. */
@@ -489,7 +488,7 @@ int FsmAp::compareCondDataPtr( CondAp *trans1, CondAp *trans2 )
  * Does not consider from state. Either of the pointers may be null. */
 int FsmAp::compareFullPtr( TransAp *trans1, TransAp *trans2 )
 {
-	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
+	std::cerr << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
 
 	if ( (trans1 != 0) ^ (trans2 != 0) ) {
 		/* Exactly one of the transitions is set. */
@@ -519,7 +518,7 @@ int FsmAp::compareFullPtr( TransAp *trans1, TransAp *trans2 )
 bool FsmAp::shouldMarkPtr( MarkIndex &markIndex, TransAp *trans1, 
 				TransAp *trans2 )
 {
-	std::cout << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
+	std::cerr << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
 
 	if ( (trans1 != 0) ^ (trans2 != 0) ) {
 		/* Exactly one of the transitions is set. The initial mark round

@@ -25,7 +25,6 @@
 #include <errno.h>
 #include <stdlib.h>
 
-using std::cout;
 using std::cerr;
 using std::endl;
 
@@ -174,7 +173,7 @@ action_spec:
 			error($2->loc) << "action \"" << $2->data << "\" already defined" << endl;
 		}
 		else {
-			//cerr << "NEW ACTION " << $2->data << " " << $4->inlineList << endl;
+			//std::cerr << "NEW ACTION " << $2->data << " " << $4->inlineList << std::endl;
 			/* Add the action to the list of actions. */
 			Action *newAction = new Action( $3->loc, $2->data, 
 					$4->inlineList, pd->nextCondId++ );
@@ -820,7 +819,7 @@ priority_aug:
 	priority_aug_num final {
 		// Convert the priority number to a long. Check for overflow.
 		errno = 0;
-		//cerr << "PRIOR AUG: " << $1->token.data << endl;
+		//std::cerr << "PRIOR AUG: " << $1->token.data << std::endl;
 		long aug = strtol( $1->token.data, 0, 10 );
 		if ( errno == ERANGE && aug == LONG_MAX ) {
 			/* Priority number too large. Recover by setting the priority to 0. */
