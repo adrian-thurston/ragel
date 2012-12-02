@@ -255,8 +255,7 @@ int FsmAp::splitCandidates( StateAp **statePtrs, MinPartition *parts, int numPar
 				/* Walk all transition into the state and put the partition
 				 * that the from state is in onto the splittable list. */
 				for ( TransInList<CondAp>::Iter t = state->inList; t.lte(); t++ ) {
-					TransAp *trans = t->transAp;
-					MinPartition *fromPart = trans->ctList.head->fromState->alg.partition;
+					MinPartition *fromPart = t->fromState->alg.partition;
 					if ( ! fromPart->active ) {
 						fromPart->active = true;
 						partList.detach( fromPart );
