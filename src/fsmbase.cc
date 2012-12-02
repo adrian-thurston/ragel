@@ -613,8 +613,8 @@ bool FsmAp::checkErrTrans( StateAp *state, TransAp *trans )
 		}
 
 		/* Check for gaps in the condition list. */
-		if ( trans->condSpace == 0 || trans->ctList.length() 
-				< (1 << trans->condSpace->condSet.length()) )
+		if ( trans->ctList.length() < 
+				(1 << trans->condSpace->condSet.length()) )
 		{
 			return true;
 		}
