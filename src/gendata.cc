@@ -80,7 +80,7 @@ GenBase::GenBase( char *fsmName, ParseData *pd, FsmAp *fsm )
 void GenBase::appendTrans( TransListVect &outList, Key lowKey, 
 		Key highKey, TransAp *trans )
 {
-	for ( CondTransList::Iter cond = trans->ctList; cond.lte(); cond++ ) {
+	for ( CondList::Iter cond = trans->condList; cond.lte(); cond++ ) {
 		if ( cond->toState != 0 || cond->actionTable.length() > 0 ) {
 			outList.append( TransEl( lowKey, highKey, trans ) );
 			break;
@@ -114,7 +114,7 @@ void GenBase::reduceActionTables()
 
 		/* Loop the transitions and reduce their actions. */
 		for ( TransList::Iter trans = st->outList; trans.lte(); trans++ ) {
-			for ( CondTransList::Iter cond = trans->ctList; cond.lte(); cond++ ) {
+			for ( CondList::Iter cond = trans->condList; cond.lte(); cond++ ) {
 				if ( cond->actionTable.length() > 0 ) {
 					if ( actionTableMap.insert( cond->actionTable, &actionTable ) )
 						actionTable->id = nextActionTableId++;
@@ -600,7 +600,7 @@ void CodeGenData::makeTrans( Key lowKey, Key highKey, TransAp *trans )
 	long targ = -1;
 	long action = -1;
 
-	for ( CondTransList::Iter cti = trans->ctList; cti.lte(); cti++ ) {
+	for ( CondList::Iter cti = trans->condList; cti.lte(); cti++ ) {
 		/* First reduce the action. */
 		RedActionTable *actionTable = 0;
 		if ( cti->actionTable.length() > 0 )

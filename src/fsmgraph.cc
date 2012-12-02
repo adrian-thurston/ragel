@@ -186,7 +186,7 @@ void FsmAp::emptyFsm( )
 void FsmAp::transferOutData( StateAp *destState, StateAp *srcState )
 {
 	for ( TransList::Iter trans = destState->outList; trans.lte(); trans++ ) {
-		for ( CondTransList::Iter cond = trans->ctList; cond.lte(); cond++ ) {
+		for ( CondList::Iter cond = trans->condList; cond.lte(); cond++ ) {
 			if ( cond->toState != 0 ) {
 				/* Get the actions data from the outActionTable. */
 				cond->actionTable.setActions( srcState->outActionTable );

@@ -957,7 +957,7 @@ void ParseData::removeActionDups( FsmAp *graph )
 	for ( StateList::Iter state = graph->stateList; state.lte(); state++ ) {
 		/* Loop all transitions. */
 		for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
-			for ( CondTransList::Iter cond = trans->ctList; cond.lte(); cond++ )
+			for ( CondList::Iter cond = trans->condList; cond.lte(); cond++ )
 				removeDups( cond->actionTable );
 		}
 		removeDups( state->toStateActionTable );
@@ -1036,9 +1036,9 @@ void ParseData::setLongestMatchData( FsmAp *graph )
 		StateSet states;
 		for ( StateList::Iter state = graph->stateList; state.lte(); state++ ) {
 			for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
-				for ( ActionTable::Iter ati = trans->ctList.head->actionTable; ati.lte(); ati++ ) {
-					if ( ati->value->anyCall && trans->ctList.head->toState != 0 )
-						states.insert( trans->ctList.head->toState );
+				for ( ActionTable::Iter ati = trans->condList.head->actionTable; ati.lte(); ati++ ) {
+					if ( ati->value->anyCall && trans->condList.head->toState != 0 )
+						states.insert( trans->condList.head->toState );
 				}
 			}
 		}
@@ -1293,7 +1293,7 @@ void ParseData::analyzeGraph( FsmAp *graph )
 					(*sci)->numCondRefs += 1;
 			}
 
-			for ( CondTransList::Iter cond = trans->ctList; cond.lte(); cond++ ) { 
+			for ( CondList::Iter cond = trans->condList; cond.lte(); cond++ ) { 
 				for ( ActionTable::Iter at = cond->actionTable; at.lte(); at++ )
 					at->value->numTransRefs += 1;
 			}

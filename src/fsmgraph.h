@@ -454,7 +454,7 @@ struct CondAp
 	CondAp *ilprev, *ilnext;
 };
 
-typedef DList<CondAp> CondTransList;
+typedef DList<CondAp> CondList;
 
 /* Transition class that implements actions and priorities. */
 struct TransAp 
@@ -467,14 +467,14 @@ struct TransAp
 		lowKey(other.lowKey),
 		highKey(other.highKey),
 		condSpace(other.condSpace),
-		ctList()
+		condList()
 	{
 	}
 
 	~TransAp()
 	{
-		//	delete ctList.head;
-		//	ctList.abandon();
+		//	delete condList.head;
+		//	condList.abandon();
 	}
 
 	long condFullSize();
@@ -485,7 +485,7 @@ struct TransAp
 	CondSpace *condSpace;
 
 	/* Cond trans list. */
-	CondTransList ctList;
+	CondList condList;
 
 	/* Pointers for outlist. */
 	TransAp *prev, *next;

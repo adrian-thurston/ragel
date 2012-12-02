@@ -94,8 +94,8 @@ void XMLCodeGen::writeTrans( Key lowKey, Key highKey, TransAp *trans )
 {
 	/* First reduce the action. */
 	RedActionTable *actionTable = 0;
-	if ( trans->ctList.head->actionTable.length() > 0 )
-		actionTable = actionTableMap.find( trans->ctList.head->actionTable );
+	if ( trans->condList.head->actionTable.length() > 0 )
+		actionTable = actionTableMap.find( trans->condList.head->actionTable );
 
 	/* Write the transition. */
 	out << "        <t>";
@@ -103,8 +103,8 @@ void XMLCodeGen::writeTrans( Key lowKey, Key highKey, TransAp *trans )
 	out << " ";
 	writeKey( highKey );
 
-	if ( trans->ctList.head->toState != 0 )
-		out << " " << trans->ctList.head->toState->alg.stateNum;
+	if ( trans->condList.head->toState != 0 )
+		out << " " << trans->condList.head->toState->alg.stateNum;
 	else
 		out << " x";
 
