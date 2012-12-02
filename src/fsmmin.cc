@@ -731,7 +731,8 @@ void FsmAp::compressTransitions()
 						CondAp *nextCond = next->condList.head;
 
 						if ( cond->toState == nextCond->toState &&
-								CmpActionTable::compare( cond->actionTable, nextCond->actionTable ) == 0 )
+								CmpActionTable::compare( cond->actionTable, 
+								nextCond->actionTable ) == 0 )
 						{
 							merge = true;
 						}
@@ -741,7 +742,8 @@ void FsmAp::compressTransitions()
 				if ( merge ) {
 					trans->highKey = next->highKey;
 					st->outList.detach( next );
-					detachCondTrans( next->condList.head->fromState, next->condList.head->toState, next->condList.head );
+					detachCondTrans( next->condList.head->fromState,
+							next->condList.head->toState, next->condList.head );
 					delete next;
 					next = trans.next();
 				}

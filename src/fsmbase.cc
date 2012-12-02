@@ -451,13 +451,15 @@ void FsmAp::verifyIntegrity()
 
 	for ( StateList::Iter state = stateList; state.lte(); state++ ) {
 		/* Walk the out transitions and assert fromState is correct. */
-		for ( TransList::Iter trans = state->outList; trans.lte(); trans++ )
-			assert( trans->condList.head->fromState == state );
+		for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
+			for ( CondList::Iter cond = trans->condList; cond.lte(); cond++ ) {
+				assert( cond->fromState == state );
+			}
+		}
 
 		/* Walk the inlist and assert toState is correct. */
 		for ( TransInList<CondAp>::Iter t = state->inList; t.lte(); t++ ) {
-			TransAp *trans = t->transAp;
-			assert( trans->condList.head->toState == state );
+			assert( t->toState == state );
 		}
 	}
 }
