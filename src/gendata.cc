@@ -490,19 +490,25 @@ void CodeGenData::makeActionTableList()
 void CodeGenData::makeConditions()
 {
 	if ( condData->condSpaceMap.length() > 0 ) {
+		/* Allocate condition space ids. */
 		long nextCondSpaceId = 0;
 		for ( CondSpaceMap::Iter cs = condData->condSpaceMap; cs.lte(); cs++ )
 			cs->condSpaceId = nextCondSpaceId++;
 
-		long listLength = condData->condSpaceMap.length();
-		initCondSpaceList( listLength );
-		curCondSpace = 0;
+		/* Allocate the array of conditions and put them on the list. */
+		long length = condData->condSpaceMap.length();
+		allCondSpaces = new GenCondSpace[length];
+		for ( long c = 0; c < length; c++ )
+			condSpaceList.append( &allCondSpaces[c] );
 
+		int curCondSpace = 0;
 		for ( CondSpaceMap::Iter cs = condData->condSpaceMap; cs.lte(); cs++ ) {
-			long id = cs->condSpaceId;
-			newCondSpace( curCondSpace, id );
+			/* Transfer the id. */
+			allCondSpaces[curCondSpace].condSpaceId = cs->condSpaceId;
+
 			for ( CondSet::Iter csi = cs->condSet; csi.lte(); csi++ )
 				condSpaceItem( curCondSpace, (*csi)->actionId );
+
 			curCondSpace += 1;
 		}
 	}
@@ -1074,19 +1080,6 @@ bool CodeGenData::setAlphType( const char *data )
 
 	thisKeyOps.setAlphType( alphType );
 	return true;
-}
-
-void CodeGenData::initCondSpaceList( ulong length )
-{
-	allCondSpaces = new GenCondSpace[length];
-	for ( ulong c = 0; c < length; c++ )
-		condSpaceList.append( allCondSpaces + c );
-}
-
-void CodeGenData::newCondSpace( int cnum, int condSpaceId )
-{
-	GenCondSpace *cond = allCondSpaces + cnum;
-	cond->condSpaceId = condSpaceId;
 }
 
 void CodeGenData::condSpaceItem( int cnum, long condActionId )

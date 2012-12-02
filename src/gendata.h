@@ -197,8 +197,6 @@ private:
 	int curActionTable;
 	int curTrans;
 	int curState;
-	int curCondSpace;
-	int curStateCond;
 
 public:
 
@@ -296,7 +294,6 @@ public:
 	void setForcedErrorState()
 		{ redFsm->forcedErrorState = true; }
 
-	void initCondSpaceList( ulong length );
 	void condSpaceItem( int cnum, long condActionId );
 	void newCondSpace( int cnum, int condSpaceId );
 
