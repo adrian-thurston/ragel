@@ -84,8 +84,12 @@ GenBase::GenBase( char *fsmName, ParseData *pd, FsmAp *fsm )
 void GenBase::appendTrans( TransListVect &outList, Key lowKey, 
 		Key highKey, TransAp *trans )
 {
-	if ( trans->ctList.head->toState != 0 || trans->ctList.head->actionTable.length() > 0 )
-		outList.append( TransEl( lowKey, highKey, trans ) );
+	for ( CondTransList::Iter cond = trans->ctList; cond.lte(); cond++ ) {
+		if ( cond->toState != 0 || cond->actionTable.length() > 0 ) {
+			outList.append( TransEl( lowKey, highKey, trans ) );
+			break;
+		}
+	}
 }
 
 void GenBase::reduceActionTables()
