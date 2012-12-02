@@ -376,9 +376,11 @@ void FsmAp::markReachableFromHereStopFinal( StateAp *state )
 
 	/* Recurse on all out transitions. */
 	for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
-		StateAp *toState = trans->ctList.head->toState;
-		if ( toState != 0 && !toState->isFinState() )
-			markReachableFromHereStopFinal( toState );
+		for ( CondTransList::Iter cond = trans->ctList; cond.lte(); cond++ ) {
+			StateAp *toState = cond->toState;
+			if ( toState != 0 && !toState->isFinState() )
+				markReachableFromHereStopFinal( toState );
+		}
 	}
 }
 
