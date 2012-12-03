@@ -53,6 +53,8 @@ protected:
 	TableArray transCondSpaces;
 	TableArray transOffsets;
 	TableArray transLengths;
+	TableArray condTargs;
+	TableArray condActions;
 
 	std::ostream &TO_STATE_ACTION_SWITCH();
 	std::ostream &FROM_STATE_ACTION_SWITCH();
@@ -72,8 +74,6 @@ protected:
 	std::ostream &EOF_TRANS();
 	std::ostream &TRANS_TARGS_WI();
 	std::ostream &COND_KEYS();
-	std::ostream &COND_TARGS();
-	std::ostream &COND_ACTIONS();
 
 	void taKeyOffsets();
 	void taSingleLens();
@@ -86,6 +86,8 @@ protected:
 	void taTransCondSpaces();
 	void taTransOffsets();
 	void taTransLengths();
+	void taCondTargs();
+	void taCondActions();
 
 	void setTransPos();
 	void setTransPosWi();
@@ -107,7 +109,7 @@ protected:
 	virtual std::ostream &TO_STATE_ACTION( RedStateAp *state );
 	virtual std::ostream &FROM_STATE_ACTION( RedStateAp *state );
 	virtual std::ostream &EOF_ACTION( RedStateAp *state );
-	virtual std::ostream &COND_ACTION( RedCondAp *cond );
+	virtual void COND_ACTION( RedCondAp *cond ) = 0;
 	virtual void calcIndexSize();
 };
 

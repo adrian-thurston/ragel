@@ -49,6 +49,8 @@ public:
 	virtual void setTableState( TableArray::State );
 	virtual void tableDataPass();
 
+	virtual void COND_ACTION( RedCondAp *cond );
+
 	TableArray condOffsets;
 	TableArray condLens;
 	TableArray condKeysV1;
@@ -59,8 +61,6 @@ public:
 	TableArray transTargs;
 	TableArray transActions;
 	TableArray condKeys;
-	TableArray condTargs;
-	TableArray condActions;
 	TableArray toStateActions;
 	TableArray fromStateActions;
 	TableArray eofActions;

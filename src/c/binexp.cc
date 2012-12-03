@@ -86,13 +86,12 @@ std::ostream &BinaryExpanded::EOF_ACTION( RedStateAp *state )
 	return out;
 }
 
-std::ostream &BinaryExpanded::COND_ACTION( RedCondAp *cond )
+void BinaryExpanded::COND_ACTION( RedCondAp *cond )
 {
 	int action = 0;
 	if ( cond->action != 0 )
 		action = cond->action->actListId+1;
-	out << action;
-	return out;
+	condActions.value( action );
 }
 
 /* Write out the function switch. This switch is keyed on the values
@@ -204,6 +203,9 @@ void BinaryExpanded::tableDataPass()
 	taTransCondSpaces();
 	taTransOffsets();
 	taTransLengths();
+
+	taCondTargs();
+	taCondActions();
 }
 
 void BinaryExpanded::writeData()
@@ -244,15 +246,8 @@ void BinaryExpanded::writeData()
 	CLOSE_ARRAY() <<
 	"\n";
 
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), CT() );
-	COND_TARGS();
-	CLOSE_ARRAY() <<
-	"\n";
-
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), CA() );
-	COND_ACTIONS();
-	CLOSE_ARRAY() <<
-	"\n";
+	taCondTargs();
+	taCondActions();
 
 	if ( redFsm->anyToStateActions() ) {
 		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), TSA() );

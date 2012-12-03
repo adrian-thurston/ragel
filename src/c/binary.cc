@@ -43,7 +43,9 @@ Binary::Binary( const CodeGenArgs &args )
 	transLengthsWi(     "trans_lengths_wi",      *this ),
 	transCondSpaces(    "trans_cond_spaces",     *this ),
 	transOffsets(       "trans_offsets",         *this ),
-	transLengths(       "trans_lengths",         *this )
+	transLengths(       "trans_lengths",         *this ),
+	condTargs(          "cond_targs",            *this ),
+	condActions(        "cond_actions",          *this )
 {
 }
 
@@ -119,16 +121,6 @@ std::ostream &Binary::EOF_ACTION( RedStateAp *state )
 	int act = 0;
 	if ( state->eofAction != 0 )
 		act = state->eofAction->location+1;
-	out << act;
-	return out;
-}
-
-std::ostream &Binary::COND_ACTION( RedCondAp *cond )
-{
-	/* If there are actions, emit them. Otherwise emit zero. */
-	int act = 0;
-	if ( cond->action != 0 )
-		act = cond->action->location+1;
 	out << act;
 	return out;
 }
@@ -612,9 +604,10 @@ std::ostream &Binary::COND_KEYS()
 	return out;
 }
 
-std::ostream &Binary::COND_TARGS()
+void Binary::taCondTargs()
 {
-	out << '\t';
+	condTargs.start();
+
 	int totalConds = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Walk the singles. */
@@ -622,9 +615,7 @@ std::ostream &Binary::COND_TARGS()
 			RedTransAp *trans = stel->value;
 			for ( RedCondList::Iter cond = trans->outConds; cond.lte(); cond++ ) {
 				RedCondAp *c = cond->value;
-				out << c->targ->id << ", ";
-				if ( ++totalConds % IALL == 0 )
-					out << "\n\t";
+				condTargs.value( c->targ->id );
 			}
 		}
 
@@ -633,9 +624,7 @@ std::ostream &Binary::COND_TARGS()
 			RedTransAp *trans = rtel->value;
 			for ( RedCondList::Iter cond = trans->outConds; cond.lte(); cond++ ) {
 				RedCondAp *c = cond->value;
-				out << c->targ->id << ", ";
-				if ( ++totalConds % IALL == 0 )
-					out << "\n\t";
+				condTargs.value( c->targ->id );
 			}
 		}
 
@@ -644,9 +633,7 @@ std::ostream &Binary::COND_TARGS()
 			RedTransAp *trans = st->defTrans;
 			for ( RedCondList::Iter cond = trans->outConds; cond.lte(); cond++ ) {
 				RedCondAp *c = cond->value;
-				out << c->targ->id << ", ";
-				if ( ++totalConds % IALL == 0 )
-					out << "\n\t";
+				condTargs.value( c->targ->id );
 			}
 		}
 	}
@@ -657,23 +644,18 @@ std::ostream &Binary::COND_TARGS()
 			RedTransAp *trans = st->eofTrans;
 			for ( RedCondList::Iter cond = trans->outConds; cond.lte(); cond++ ) {
 				RedCondAp *c = cond->value;
-				out << c->targ->id << ", ";
-				if ( ++totalConds % IALL == 0 )
-					out << "\n\t";
+				condTargs.value( c->targ->id );
 			}
 		}
 	}
 
-
-	/* Output one last number so we don't have to figure out when the last
-	 * entry is and avoid writing a comma. */
-	out << 0 << "\n";
-	return out;
+	condTargs.finish();
 }
 
-std::ostream &Binary::COND_ACTIONS()
+void Binary::taCondActions()
 {
-	out << '\t';
+	condActions.start();
+
 	int totalConds = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Walk the singles. */
@@ -682,9 +664,6 @@ std::ostream &Binary::COND_ACTIONS()
 			for ( RedCondList::Iter cond = trans->outConds; cond.lte(); cond++ ) {
 				RedCondAp *c = cond->value;
 				COND_ACTION( c );
-				out << ", ";
-				if ( ++totalConds % IALL == 0 )
-					out << "\n\t";
 			}
 		}
 
@@ -694,9 +673,6 @@ std::ostream &Binary::COND_ACTIONS()
 			for ( RedCondList::Iter cond = trans->outConds; cond.lte(); cond++ ) {
 				RedCondAp *c = cond->value;
 				COND_ACTION( c );
-				out << ", ";
-				if ( ++totalConds % IALL == 0 )
-					out << "\n\t";
 			}
 		}
 
@@ -706,9 +682,6 @@ std::ostream &Binary::COND_ACTIONS()
 			for ( RedCondList::Iter cond = trans->outConds; cond.lte(); cond++ ) {
 				RedCondAp *c = cond->value;
 				COND_ACTION( c );
-				out << ", ";
-				if ( ++totalConds % IALL == 0 )
-					out << "\n\t";
 			}
 		}
 	}
@@ -720,17 +693,11 @@ std::ostream &Binary::COND_ACTIONS()
 			for ( RedCondList::Iter cond = trans->outConds; cond.lte(); cond++ ) {
 				RedCondAp *c = cond->value;
 				COND_ACTION( c );
-				out << ", ";
-				if ( ++totalConds % IALL == 0 )
-					out << "\n\t";
 			}
 		}
 	}
 
-	/* Output one last number so we don't have to figure out when the last
-	 * entry is and avoid writing a comma. */
-	out << 0 << "\n";
-	return out;
+	condActions.finish();
 }
 
 void Binary::LOCATE_TRANS()

@@ -42,13 +42,20 @@ BinaryLooped::BinaryLooped( const CodeGenArgs &args )
 	transTargs(         "trans_targs",          *this ),
 	transActions(       "trans_actions",        *this ),
 	condKeys(           "cond_keys",            *this ),
-	condTargs(          "cond_targs",           *this ),
-	condActions(        "cond_actions",         *this ),
 	toStateActions(     "to_state_actions",     *this ),
 	fromStateActions(   "from_state_actions",   *this ),
 	eofActions(         "eof_actions",          *this ),
 	eofTrans(           "eof_trans",            *this )
 {}
+
+void BinaryLooped::COND_ACTION( RedCondAp *cond )
+{
+	/* If there are actions, emit them. Otherwise emit zero. */
+	int act = 0;
+	if ( cond->action != 0 )
+		act = cond->action->location+1;
+	condActions.value( act );
+}
 
 void BinaryLooped::setTableState( TableArray::State state )
 {
@@ -74,6 +81,9 @@ void BinaryLooped::tableDataPass()
 	taTransCondSpaces();
 	taTransOffsets();
 	taTransLengths();
+
+	taCondTargs();
+	taCondActions();
 }
 
 void BinaryLooped::writeData()
@@ -119,15 +129,8 @@ void BinaryLooped::writeData()
 	CLOSE_ARRAY() <<
 	"\n";
 
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), CT() );
-	COND_TARGS();
-	CLOSE_ARRAY() <<
-	"\n";
-
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), CA() );
-	COND_ACTIONS();
-	CLOSE_ARRAY() <<
-	"\n";
+	taCondTargs();
+	taCondActions();
 
 	if ( redFsm->anyToStateActions() ) {
 		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), TSA() );
