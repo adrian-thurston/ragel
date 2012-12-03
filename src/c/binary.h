@@ -49,6 +49,7 @@ protected:
 	TableArray indicies;
 	TableArray transCondSpacesWi;
 	TableArray transOffsetsWi;
+	TableArray transLengthsWi;
 
 	std::ostream &TO_STATE_ACTION_SWITCH();
 	std::ostream &FROM_STATE_ACTION_SWITCH();
@@ -70,7 +71,6 @@ protected:
 	std::ostream &TRANS_OFFSETS();
 	std::ostream &TRANS_LENGTHS();
 	std::ostream &TRANS_TARGS_WI();
-	std::ostream &TRANS_LENGTHS_WI();
 	std::ostream &COND_KEYS();
 	std::ostream &COND_TARGS();
 	std::ostream &COND_ACTIONS();
@@ -82,6 +82,7 @@ protected:
 	void taIndicies();
 	void taTransCondSpacesWi();
 	void taTransOffsetsWi();
+	void taTransLengthsWi();
 
 	void setTransPos();
 	void setTransPosWi();

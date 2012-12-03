@@ -39,7 +39,8 @@ Binary::Binary( const CodeGenArgs &args )
 	indexOffsets(       "index_offsets",         *this ),
 	indicies(           "indicies",              *this ),
 	transCondSpacesWi(  "trans_cond_spaces_wi",  *this ),
-	transOffsetsWi(     "trans_offsets_wi",      *this )
+	transOffsetsWi(     "trans_offsets_wi",      *this ),
+	transLengthsWi(     "trans_lengths_wi",      *this )
 {}
 
 void Binary::calcIndexSize()
@@ -571,24 +572,18 @@ void Binary::taTransOffsetsWi()
 	transOffsetsWi.finish();
 }
 
-std::ostream &Binary::TRANS_LENGTHS_WI()
+void Binary::taTransLengthsWi()
 {
-	out << '\t';
-	int totalLengths = 0;
+	transLengthsWi.start();
+
 	for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ ) {
-		out << trans->outConds.length();
+		transLengthsWi.value( trans->outConds.length() );
 
 		TransApSet::Iter next = trans;
 		next.increment();
-		if ( next.lte() ) {
-			out << ", ";
-
-			if ( ++totalLengths % IALL == 0 )
-				out << "\n\t";
-		}
 	}
-	out << "\n";
-	return out;
+
+	transLengthsWi.finish();
 }
 
 std::ostream &Binary::COND_KEYS()
