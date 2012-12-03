@@ -58,9 +58,6 @@ public:
 	TableArray transActionsWi;
 	TableArray transTargs;
 	TableArray transActions;
-	TableArray transCondSpaces;
-	TableArray transOffsets;
-	TableArray transLengths;
 	TableArray condKeys;
 	TableArray condTargs;
 	TableArray condActions;

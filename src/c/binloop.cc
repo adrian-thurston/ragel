@@ -41,9 +41,6 @@ BinaryLooped::BinaryLooped( const CodeGenArgs &args )
 	transActionsWi(     "trans_targs_wi",       *this ),
 	transTargs(         "trans_targs",          *this ),
 	transActions(       "trans_actions",        *this ),
-	transCondSpaces(    "trans_cond_spaces",    *this ),
-	transOffsets(       "trans_offsets",        *this ),
-	transLengths(       "trans_lenghts",        *this ),
 	condKeys(           "cond_keys",            *this ),
 	condTargs(          "cond_targs",           *this ),
 	condActions(        "cond_actions",         *this ),
@@ -69,9 +66,14 @@ void BinaryLooped::tableDataPass()
 	taRangeLens();
 	taIndexOffsets();
 	taIndicies();
+
 	taTransCondSpacesWi();
 	taTransOffsetsWi();
 	taTransLengthsWi();
+
+	taTransCondSpaces();
+	taTransOffsets();
+	taTransLengths();
 }
 
 void BinaryLooped::writeData()
@@ -101,29 +103,15 @@ void BinaryLooped::writeData()
 	taIndexOffsets();
 
 	if ( useIndicies ) {
-
 		taIndicies();
 		taTransCondSpacesWi();
 		taTransOffsetsWi();
 		taTransLengthsWi();
-
 	}
 	else {
-
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TCS() );
-		TRANS_COND_SPACES();
-		CLOSE_ARRAY() <<
-		"\n";
-
-		OPEN_ARRAY( "int", TO() );
-		TRANS_OFFSETS();
-		CLOSE_ARRAY() <<
-		"\n";
-
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TL() );
-		TRANS_LENGTHS();
-		CLOSE_ARRAY() <<
-		"\n";
+		taTransCondSpaces();
+		taTransOffsets();
+		taTransLengths();
 	}
 
 	OPEN_ARRAY( "char", CK() );

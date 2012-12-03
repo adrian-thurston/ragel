@@ -196,9 +196,14 @@ void BinaryExpanded::tableDataPass()
 	taRangeLens();
 	taIndexOffsets();
 	taIndicies();
+
 	taTransCondSpacesWi();
 	taTransOffsetsWi();
 	taTransLengthsWi();
+
+	taTransCondSpaces();
+	taTransOffsets();
+	taTransLengths();
 }
 
 void BinaryExpanded::writeData()
@@ -229,21 +234,9 @@ void BinaryExpanded::writeData()
 		taTransLengthsWi();
 	}
 	else {
-
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TCS() );
-		TRANS_COND_SPACES();
-		CLOSE_ARRAY() <<
-		"\n";
-
-		OPEN_ARRAY( "int", TO() );
-		TRANS_OFFSETS();
-		CLOSE_ARRAY() <<
-		"\n";
-
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TL() );
-		TRANS_LENGTHS();
-		CLOSE_ARRAY() <<
-		"\n";
+		taTransCondSpaces();
+		taTransOffsets();
+		taTransLengths();
 	}
 
 	OPEN_ARRAY( "char", CK() );

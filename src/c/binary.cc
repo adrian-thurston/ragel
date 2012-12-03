@@ -40,8 +40,12 @@ Binary::Binary( const CodeGenArgs &args )
 	indicies(           "indicies",              *this ),
 	transCondSpacesWi(  "trans_cond_spaces_wi",  *this ),
 	transOffsetsWi(     "trans_offsets_wi",      *this ),
-	transLengthsWi(     "trans_lengths_wi",      *this )
-{}
+	transLengthsWi(     "trans_lengths_wi",      *this ),
+	transCondSpaces(    "trans_cond_spaces",     *this ),
+	transOffsets(       "trans_offsets",         *this ),
+	transLengths(       "trans_lengths",         *this )
+{
+}
 
 void Binary::calcIndexSize()
 {
@@ -379,45 +383,36 @@ void Binary::taIndicies()
 	indicies.finish();
 }
 
-std::ostream &Binary::TRANS_COND_SPACES()
+void Binary::taTransCondSpaces()
 {
-	int totalSpaces = 0;
-	out << '\t';
+	transCondSpaces.start();
+
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Walk the singles. */
 		for ( RedTransList::Iter stel = st->outSingle; stel.lte(); stel++ ) {
 			RedTransAp *trans = stel->value;
 			if ( trans->condSpace != 0 )
-				out << trans->condSpace->condSpaceId << ", ";
+				transCondSpaces.value( trans->condSpace->condSpaceId );
 			else
-				out << -1 << ", ";
-
-			if ( ++totalSpaces % IALL == 0 )
-				out << "\n\t";
+				transCondSpaces.value( -1 );
 		}
 
 		/* Walk the ranges. */
 		for ( RedTransList::Iter rtel = st->outRange; rtel.lte(); rtel++ ) {
 			RedTransAp *trans = rtel->value;
 			if ( trans->condSpace != 0 )
-				out << trans->condSpace->condSpaceId << ", ";
+				transCondSpaces.value( trans->condSpace->condSpaceId );
 			else
-				out << -1 << ", ";
-
-			if ( ++totalSpaces % IALL == 0 )
-				out << "\n\t";
+				transCondSpaces.value( -1 );
 		}
 
 		/* The state's default index goes next. */
 		if ( st->defTrans != 0 ) {
 			RedTransAp *trans = st->defTrans;
 			if ( trans->condSpace != 0 )
-				out << trans->condSpace->condSpaceId << ", ";
+				transCondSpaces.value( trans->condSpace->condSpaceId );
 			else
-				out << -1 << ", ";
-
-			if ( ++totalSpaces % IALL == 0 )
-				out << "\n\t";
+				transCondSpaces.value( -1 );
 		}
 	}
 
@@ -426,52 +421,39 @@ std::ostream &Binary::TRANS_COND_SPACES()
 		if ( st->eofTrans != 0 ) {
 			RedTransAp *trans = st->eofTrans;
 			if ( trans->condSpace != 0 )
-				out << trans->condSpace->condSpaceId << ", ";
+				transCondSpaces.value( trans->condSpace->condSpaceId );
 			else
-				out << -1 << ", ";
-
-			if ( ++totalSpaces % IALL == 0 )
-				out << "\n\t";
+				transCondSpaces.value( -1 );
 		}
 	}
 
-
-	/* Output one last number so we don't have to figure out when the last
-	 * entry is and avoid writing a comma. */
-	out << 0 << "\n";
-	return out;
+	transCondSpaces.finish();
 }
 
-std::ostream &Binary::TRANS_OFFSETS()
+void Binary::taTransOffsets()
 {
-	out << '\t';
+	transOffsets.start();
+
 	int curOffset = 0;
-	int totalOffsets = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Walk the singles. */
 		for ( RedTransList::Iter stel = st->outSingle; stel.lte(); stel++ ) {
 			RedTransAp *trans = stel->value;
-			out << curOffset << ", ";
-			if ( ++totalOffsets % IALL == 0 )
-				out << "\n\t";
+			transOffsets.value( curOffset );
 			curOffset += trans->outConds.length();
 		}
 
 		/* Walk the ranges. */
 		for ( RedTransList::Iter rtel = st->outRange; rtel.lte(); rtel++ ) {
 			RedTransAp *trans = rtel->value;
-			out << curOffset << ", ";
-			if ( ++totalOffsets % IALL == 0 )
-				out << "\n\t";
+			transOffsets.value( curOffset );
 			curOffset += trans->outConds.length();
 		}
 
 		/* The state's default index goes next. */
 		if ( st->defTrans != 0 ) {
 			RedTransAp *trans = st->defTrans;
-			out << curOffset << ", ";
-			if ( ++totalOffsets % IALL == 0 )
-				out << "\n\t";
+			transOffsets.value( curOffset );
 			curOffset += trans->outConds.length();
 		}
 	}
@@ -480,46 +462,36 @@ std::ostream &Binary::TRANS_OFFSETS()
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->eofTrans != 0 ) {
 			RedTransAp *trans = st->eofTrans;
-			out << curOffset << ", ";
-			if ( ++totalOffsets % IALL == 0 )
-				out << "\n\t";
+			transOffsets.value( curOffset );
 			curOffset += trans->outConds.length();
 		}
 	}
 
-	/* Output one last number so we don't have to figure out when the last
-	 * entry is and avoid writing a comma. */
-	out << 0 << "\n";
-	return out;
+	transOffsets.finish();
 }
 
-std::ostream &Binary::TRANS_LENGTHS()
+void Binary::taTransLengths()
 {
-	out << '\t';
+	transLengths.start();
+
 	int totalLengths = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Walk the singles. */
 		for ( RedTransList::Iter stel = st->outSingle; stel.lte(); stel++ ) {
 			RedTransAp *trans = stel->value;
-			out << trans->outConds.length() << ", ";
-			if ( ++totalLengths % IALL == 0 )
-				out << "\n\t";
+			transLengths.value( trans->outConds.length() );
 		}
 
 		/* Walk the ranges. */
 		for ( RedTransList::Iter rtel = st->outRange; rtel.lte(); rtel++ ) {
 			RedTransAp *trans = rtel->value;
-			out << trans->outConds.length() << ", ";
-			if ( ++totalLengths % IALL == 0 )
-				out << "\n\t";
+			transLengths.value( trans->outConds.length() );
 		}
 
 		/* The state's default index goes next. */
 		if ( st->defTrans != 0 ) {
 			RedTransAp *trans = st->defTrans;
-			out << trans->outConds.length() << ", ";
-			if ( ++totalLengths % IALL == 0 )
-				out << "\n\t";
+			transLengths.value( trans->outConds.length() );
 		}
 	}
 
@@ -527,16 +499,11 @@ std::ostream &Binary::TRANS_LENGTHS()
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->eofTrans != 0 ) {
 			RedTransAp *trans = st->eofTrans;
-			out << trans->outConds.length() << ", ";
-			if ( ++totalLengths % IALL == 0 )
-				out << "\n\t";
+			transLengths.value( trans->outConds.length() );
 		}
 	}
 
-	/* Output one last number so we don't have to figure out when the last
-	 * entry is and avoid writing a comma. */
-	out << 0 << "\n";
-	return out;
+	transLengths.finish();
 }
 
 void Binary::taTransCondSpacesWi()
