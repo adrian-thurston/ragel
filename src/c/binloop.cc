@@ -37,8 +37,6 @@ BinaryLooped::BinaryLooped( const CodeGenArgs &args )
 	condKeysV1(         "cond_keys_v1",         *this ),
 	condSpacesV1(       "cond_spaces_v1",       *this ),
 	keys(               "keys",                 *this ),
-	indexOffsets(       "index_offsets",        *this ),
-	indicies(           "indicies",             *this ),
 	transTargsWi(       "trans_targs_wi",       *this ),
 	transActionsWi(     "trans_targs_wi",       *this ),
 	transCondSpacesWi(  "trans_cond_spaces_wi", *this ),
@@ -72,6 +70,8 @@ void BinaryLooped::tableDataPass()
 	taKeyOffsets();
 	taSingleLens();
 	taRangeLens();
+	taIndexOffsets();
+	taIndicies();
 }
 
 void BinaryLooped::writeData()
@@ -97,21 +97,12 @@ void BinaryLooped::writeData()
 	"\n";
 
 	taSingleLens();
-
 	taRangeLens();
-
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxIndexOffset), IO() );
-	INDEX_OFFSETS();
-	CLOSE_ARRAY() <<
-	"\n";
+	taIndexOffsets();
 
 	if ( useIndicies ) {
 
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxIndex), I() );
-		INDICIES();
-		CLOSE_ARRAY() <<
-		"\n";
-
+		taIndicies();
 
 		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TCS() );
 		TRANS_COND_SPACES_WI();

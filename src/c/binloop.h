@@ -54,8 +54,6 @@ public:
 	TableArray condKeysV1;
 	TableArray condSpacesV1;
 	TableArray keys;
-	TableArray indexOffsets;
-	TableArray indicies;
 	TableArray transTargsWi;
 	TableArray transActionsWi;
 	TableArray transCondSpacesWi;

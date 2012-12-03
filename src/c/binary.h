@@ -45,6 +45,8 @@ protected:
 	TableArray keyOffsets;
 	TableArray singleLens;
 	TableArray rangeLens;
+	TableArray indexOffsets;
+	TableArray indicies;
 
 	std::ostream &TO_STATE_ACTION_SWITCH();
 	std::ostream &FROM_STATE_ACTION_SWITCH();
@@ -55,7 +57,6 @@ protected:
 	std::ostream &COND_SPACES_v1();
 	std::ostream &KEYS();
 	std::ostream &INDICIES();
-	std::ostream &KEY_OFFSETS();
 	std::ostream &INDEX_OFFSETS();
 	std::ostream &SINGLE_LENS();
 	std::ostream &RANGE_LENS();
@@ -77,6 +78,8 @@ protected:
 	void taKeyOffsets();
 	void taSingleLens();
 	void taRangeLens();
+	void taIndexOffsets();
+	void taIndicies();
 
 	void setTransPos();
 	void setTransPosWi();

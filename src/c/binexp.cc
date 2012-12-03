@@ -181,44 +181,47 @@ std::ostream &BinaryExpanded::ACTION_SWITCH()
 	return out;
 }
 
+void BinaryExpanded::setTableState( TableArray::State state )
+{
+	for ( ArrayVector::Iter i = arrayVector; i.lte(); i++ ) {
+		TableArray *tableArray = *i;
+		tableArray->setState( state );
+	}
+}
+
+void BinaryExpanded::tableDataPass()
+{
+	taKeyOffsets();
+	taSingleLens();
+	taRangeLens();
+	taIndexOffsets();
+	taIndicies();
+}
+
 void BinaryExpanded::writeData()
 {
+	/* Run the analysis pass over the table data. */
+	setTableState( TableArray::GeneratePass );
+
 	if ( useIndicies )
 		setTransPosWi();
 	else
 		setTransPos();
 
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxKeyOffset), keyOffsets.ref() );
-	KEY_OFFSETS();
-	CLOSE_ARRAY() <<
-	"\n";
+	taKeyOffsets();
 
 	OPEN_ARRAY( ALPH_TYPE(), K() );
 	KEYS();
 	CLOSE_ARRAY() <<
 	"\n";
 
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxSingleLen), singleLens.ref() );
-	SINGLE_LENS();
-	CLOSE_ARRAY() <<
-	"\n";
-
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxRangeLen), rangeLens.ref() );
-	RANGE_LENS();
-	CLOSE_ARRAY() <<
-	"\n";
-
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxIndexOffset), IO() );
-	INDEX_OFFSETS();
-	CLOSE_ARRAY() <<
-	"\n";
+	taSingleLens();
+	taRangeLens();
+	taIndexOffsets();
 
 	if ( useIndicies ) {
 
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxIndex), I() );
-		INDICIES();
-		CLOSE_ARRAY() <<
-		"\n";
+		taIndicies();
 
 		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TCS() );
 		TRANS_COND_SPACES_WI();

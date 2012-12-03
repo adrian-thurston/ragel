@@ -33,9 +33,11 @@ namespace C {
 Binary::Binary( const CodeGenArgs &args )
 :
 	FsmCodeGen( args ),
-	keyOffsets( "key_offsets",     *this ),
-	singleLens( "single_lengths",  *this ),
-	rangeLens(  "range_lengths",   *this )
+	keyOffsets(   "key_offsets",     *this ),
+	singleLens(   "single_lengths",  *this ),
+	rangeLens(    "range_lengths",   *this ),
+	indexOffsets( "index_offsets",   *this ),
+	indicies(     "indicies",        *this )
 {}
 
 void Binary::calcIndexSize()
@@ -193,26 +195,6 @@ std::ostream &Binary::ACTION_SWITCH()
 	return out;
 }
 
-std::ostream &Binary::KEY_OFFSETS()
-{
-	out << "\t";
-	int totalStateNum = 0, curKeyOffset = 0;
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		/* Write the key offset. */
-		out << curKeyOffset;
-		if ( !st.last() ) {
-			out << ", ";
-			if ( ++totalStateNum % IALL == 0 )
-				out << "\n\t";
-		}
-
-		/* Move the key offset ahead. */
-		curKeyOffset += st->outSingle.length() + st->outRange.length()*2;
-	}
-	out << "\n";
-	return out;
-}
-
 void Binary::taKeyOffsets()
 {
 	keyOffsets.start();
@@ -227,45 +209,6 @@ void Binary::taKeyOffsets()
 }
 
 
-std::ostream &Binary::INDEX_OFFSETS()
-{
-	out << "\t";
-	int totalStateNum = 0, curIndOffset = 0;
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		/* Write the index offset. */
-		out << curIndOffset;
-		if ( !st.last() ) {
-			out << ", ";
-			if ( ++totalStateNum % IALL == 0 )
-				out << "\n\t";
-		}
-
-		/* Move the index offset ahead. */
-		curIndOffset += st->outSingle.length() + st->outRange.length();
-		if ( st->defTrans != 0 )
-			curIndOffset += 1;
-	}
-	out << "\n";
-	return out;
-}
-
-std::ostream &Binary::SINGLE_LENS()
-{
-	out << "\t";
-	int totalStateNum = 0;
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		/* Write singles length. */
-		out << st->outSingle.length();
-		if ( !st.last() ) {
-			out << ", ";
-			if ( ++totalStateNum % IALL == 0 )
-				out << "\n\t";
-		}
-	}
-	out << "\n";
-	return out;
-}
-
 void Binary::taSingleLens()
 {
 	singleLens.start();
@@ -276,22 +219,6 @@ void Binary::taSingleLens()
 	singleLens.finish();
 }
 
-std::ostream &Binary::RANGE_LENS()
-{
-	out << "\t";
-	int totalStateNum = 0;
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		/* Emit length of range index. */
-		out << st->outRange.length();
-		if ( !st.last() ) {
-			out << ", ";
-			if ( ++totalStateNum % IALL == 0 )
-				out << "\n\t";
-		}
-	}
-	out << "\n";
-	return out;
-}
 
 void Binary::taRangeLens()
 {
@@ -301,6 +228,25 @@ void Binary::taRangeLens()
 		rangeLens.value( st->outRange.length() );
 
 	rangeLens.finish();
+}
+
+void Binary::taIndexOffsets()
+{
+	indexOffsets.start();
+
+	int curIndOffset = 0;
+
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		/* Write the index offset. */
+		indexOffsets.value( curIndOffset );
+
+		/* Move the index offset ahead. */
+		curIndOffset += st->outSingle.length() + st->outRange.length();
+		if ( st->defTrans != 0 )
+			curIndOffset += 1;
+	}
+
+	indexOffsets.finish();
 }
 
 std::ostream &Binary::TO_STATE_ACTIONS()
@@ -440,6 +386,27 @@ std::ostream &Binary::INDICIES()
 	 * entry is and avoid writing a comma. */
 	out << 0 << "\n";
 	return out;
+}
+
+void Binary::taIndicies()
+{
+	indicies.start();
+
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		/* Walk the singles. */
+		for ( RedTransList::Iter stel = st->outSingle; stel.lte(); stel++ )
+			indicies.value( stel->value->id );
+
+		/* Walk the ranges. */
+		for ( RedTransList::Iter rtel = st->outRange; rtel.lte(); rtel++ )
+			indicies.value( rtel->value->id );
+
+		/* The state's default index goes next. */
+		if ( st->defTrans != 0 )
+			indicies.value( st->defTrans->id );
+	}
+
+	indicies.finish();
 }
 
 std::ostream &Binary::TRANS_COND_SPACES()
