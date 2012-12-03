@@ -196,6 +196,8 @@ void BinaryExpanded::tableDataPass()
 	taRangeLens();
 	taIndexOffsets();
 	taIndicies();
+	taTransCondSpacesWi();
+	taTransOffsetsWi();
 }
 
 void BinaryExpanded::writeData()
@@ -222,16 +224,8 @@ void BinaryExpanded::writeData()
 	if ( useIndicies ) {
 
 		taIndicies();
-
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TCS() );
-		TRANS_COND_SPACES_WI();
-		CLOSE_ARRAY() <<
-		"\n";
-
-		OPEN_ARRAY( "int", TO() );
-		TRANS_OFFSETS_WI();
-		CLOSE_ARRAY() <<
-		"\n";
+		taTransCondSpacesWi();
+		taTransOffsetsWi();
 
 		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TL() );
 		TRANS_LENGTHS_WI();

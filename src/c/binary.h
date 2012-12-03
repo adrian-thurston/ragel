@@ -47,6 +47,8 @@ protected:
 	TableArray rangeLens;
 	TableArray indexOffsets;
 	TableArray indicies;
+	TableArray transCondSpacesWi;
+	TableArray transOffsetsWi;
 
 	std::ostream &TO_STATE_ACTION_SWITCH();
 	std::ostream &FROM_STATE_ACTION_SWITCH();
@@ -68,8 +70,6 @@ protected:
 	std::ostream &TRANS_OFFSETS();
 	std::ostream &TRANS_LENGTHS();
 	std::ostream &TRANS_TARGS_WI();
-	std::ostream &TRANS_COND_SPACES_WI();
-	std::ostream &TRANS_OFFSETS_WI();
 	std::ostream &TRANS_LENGTHS_WI();
 	std::ostream &COND_KEYS();
 	std::ostream &COND_TARGS();
@@ -80,6 +80,8 @@ protected:
 	void taRangeLens();
 	void taIndexOffsets();
 	void taIndicies();
+	void taTransCondSpacesWi();
+	void taTransOffsetsWi();
 
 	void setTransPos();
 	void setTransPosWi();
