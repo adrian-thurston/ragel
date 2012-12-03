@@ -45,7 +45,10 @@ Binary::Binary( const CodeGenArgs &args )
 	transOffsets(       "trans_offsets",         *this ),
 	transLengths(       "trans_lengths",         *this ),
 	condTargs(          "cond_targs",            *this ),
-	condActions(        "cond_actions",          *this )
+	condActions(        "cond_actions",          *this ),
+	toStateActions(     "to_state_actions",      *this ),
+	fromStateActions(   "from_state_actions",    *this ),
+	eofActions(         "eof_actions",           *this )
 {
 }
 
@@ -97,33 +100,6 @@ void Binary::setTransPos()
 	}
 }
 
-
-std::ostream &Binary::TO_STATE_ACTION( RedStateAp *state )
-{
-	int act = 0;
-	if ( state->toStateAction != 0 )
-		act = state->toStateAction->location+1;
-	out << act;
-	return out;
-}
-
-std::ostream &Binary::FROM_STATE_ACTION( RedStateAp *state )
-{
-	int act = 0;
-	if ( state->fromStateAction != 0 )
-		act = state->fromStateAction->location+1;
-	out << act;
-	return out;
-}
-
-std::ostream &Binary::EOF_ACTION( RedStateAp *state )
-{
-	int act = 0;
-	if ( state->eofAction != 0 )
-		act = state->eofAction->location+1;
-	out << act;
-	return out;
-}
 
 std::ostream &Binary::TO_STATE_ACTION_SWITCH()
 {
@@ -248,55 +224,34 @@ void Binary::taIndexOffsets()
 	indexOffsets.finish();
 }
 
-std::ostream &Binary::TO_STATE_ACTIONS()
+void Binary::taToStateActions()
 {
-	out << "\t";
-	int totalStateNum = 0;
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		/* Write any eof action. */
+	toStateActions.start();
+
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ )
 		TO_STATE_ACTION(st);
-		if ( !st.last() ) {
-			out << ", ";
-			if ( ++totalStateNum % IALL == 0 )
-				out << "\n\t";
-		}
-	}
-	out << "\n";
-	return out;
+
+	toStateActions.finish();
 }
 
-std::ostream &Binary::FROM_STATE_ACTIONS()
+void Binary::taFromStateActions()
 {
-	out << "\t";
-	int totalStateNum = 0;
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		/* Write any eof action. */
+	fromStateActions.start();
+
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ )
 		FROM_STATE_ACTION(st);
-		if ( !st.last() ) {
-			out << ", ";
-			if ( ++totalStateNum % IALL == 0 )
-				out << "\n\t";
-		}
-	}
-	out << "\n";
-	return out;
+
+	fromStateActions.finish();
 }
 
-std::ostream &Binary::EOF_ACTIONS()
+void Binary::taEofActions()
 {
-	out << "\t";
-	int totalStateNum = 0;
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		/* Write any eof action. */
-		EOF_ACTION(st);
-		if ( !st.last() ) {
-			out << ", ";
-			if ( ++totalStateNum % IALL == 0 )
-				out << "\n\t";
-		}
-	}
-	out << "\n";
-	return out;
+	eofActions.start();
+
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ )
+		EOF_ACTION( st );
+
+	eofActions.finish();
 }
 
 std::ostream &Binary::EOF_TRANS()

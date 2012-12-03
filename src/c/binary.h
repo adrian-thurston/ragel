@@ -55,6 +55,9 @@ protected:
 	TableArray transLengths;
 	TableArray condTargs;
 	TableArray condActions;
+	TableArray toStateActions;
+	TableArray fromStateActions;
+	TableArray eofActions;
 
 	std::ostream &TO_STATE_ACTION_SWITCH();
 	std::ostream &FROM_STATE_ACTION_SWITCH();
@@ -68,9 +71,6 @@ protected:
 	std::ostream &INDEX_OFFSETS();
 	std::ostream &SINGLE_LENS();
 	std::ostream &RANGE_LENS();
-	std::ostream &TO_STATE_ACTIONS();
-	std::ostream &FROM_STATE_ACTIONS();
-	std::ostream &EOF_ACTIONS();
 	std::ostream &EOF_TRANS();
 	std::ostream &TRANS_TARGS_WI();
 	std::ostream &COND_KEYS();
@@ -88,6 +88,9 @@ protected:
 	void taTransLengths();
 	void taCondTargs();
 	void taCondActions();
+	void taToStateActions();
+	void taFromStateActions();
+	void taEofActions();
 
 	void setTransPos();
 	void setTransPosWi();
@@ -106,9 +109,9 @@ protected:
 	void RET( ostream &ret, bool inFinish );
 	void BREAK( ostream &ret, int targState, bool csForced );
 
-	virtual std::ostream &TO_STATE_ACTION( RedStateAp *state );
-	virtual std::ostream &FROM_STATE_ACTION( RedStateAp *state );
-	virtual std::ostream &EOF_ACTION( RedStateAp *state );
+	virtual void TO_STATE_ACTION( RedStateAp *state ) = 0;
+	virtual void FROM_STATE_ACTION( RedStateAp *state ) = 0;
+	virtual void EOF_ACTION( RedStateAp *state ) = 0;
 	virtual void COND_ACTION( RedCondAp *cond ) = 0;
 	virtual void calcIndexSize();
 };

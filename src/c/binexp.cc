@@ -59,39 +59,36 @@ void BinaryExpanded::calcIndexSize()
 	useIndicies = sizeWithInds < sizeWithoutInds;
 }
 
-std::ostream &BinaryExpanded::TO_STATE_ACTION( RedStateAp *state )
-{
-	int act = 0;
-	if ( state->toStateAction != 0 )
-		act = state->toStateAction->actListId+1;
-	out << act;
-	return out;
-}
-
-std::ostream &BinaryExpanded::FROM_STATE_ACTION( RedStateAp *state )
-{
-	int act = 0;
-	if ( state->fromStateAction != 0 )
-		act = state->fromStateAction->actListId+1;
-	out << act;
-	return out;
-}
-
-std::ostream &BinaryExpanded::EOF_ACTION( RedStateAp *state )
-{
-	int act = 0;
-	if ( state->eofAction != 0 )
-		act = state->eofAction->actListId+1;
-	out << act;
-	return out;
-}
-
 void BinaryExpanded::COND_ACTION( RedCondAp *cond )
 {
 	int action = 0;
 	if ( cond->action != 0 )
 		action = cond->action->actListId+1;
 	condActions.value( action );
+}
+
+void BinaryExpanded::TO_STATE_ACTION( RedStateAp *state )
+{
+	int act = 0;
+	if ( state->toStateAction != 0 )
+		act = state->toStateAction->actListId+1;
+	toStateActions.value( act );
+}
+
+void BinaryExpanded::FROM_STATE_ACTION( RedStateAp *state )
+{
+	int act = 0;
+	if ( state->fromStateAction != 0 )
+		act = state->fromStateAction->actListId+1;
+	fromStateActions.value( act );
+}
+
+void BinaryExpanded::EOF_ACTION( RedStateAp *state )
+{
+	int act = 0;
+	if ( state->eofAction != 0 )
+		act = state->eofAction->actListId+1;
+	eofActions.value( act );
 }
 
 /* Write out the function switch. This switch is keyed on the values
@@ -206,6 +203,10 @@ void BinaryExpanded::tableDataPass()
 
 	taCondTargs();
 	taCondActions();
+
+	taToStateActions();
+	taFromStateActions();
+	taEofActions();
 }
 
 void BinaryExpanded::writeData()
@@ -249,26 +250,14 @@ void BinaryExpanded::writeData()
 	taCondTargs();
 	taCondActions();
 
-	if ( redFsm->anyToStateActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), TSA() );
-		TO_STATE_ACTIONS();
-		CLOSE_ARRAY() <<
-		"\n";
-	}
+	if ( redFsm->anyToStateActions() )
+		taToStateActions();
 
-	if ( redFsm->anyFromStateActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), FSA() );
-		FROM_STATE_ACTIONS();
-		CLOSE_ARRAY() <<
-		"\n";
-	}
+	if ( redFsm->anyFromStateActions() )
+		taFromStateActions();
 
-	if ( redFsm->anyEofActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActListId), EA() );
-		EOF_ACTIONS();
-		CLOSE_ARRAY() <<
-		"\n";
-	}
+	if ( redFsm->anyEofActions() )
+		taEofActions();
 
 	if ( redFsm->anyEofTrans() ) {
 		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxIndexOffset+1), ET() );

@@ -42,19 +42,39 @@ BinaryLooped::BinaryLooped( const CodeGenArgs &args )
 	transTargs(         "trans_targs",          *this ),
 	transActions(       "trans_actions",        *this ),
 	condKeys(           "cond_keys",            *this ),
-	toStateActions(     "to_state_actions",     *this ),
-	fromStateActions(   "from_state_actions",   *this ),
-	eofActions(         "eof_actions",          *this ),
 	eofTrans(           "eof_trans",            *this )
 {}
 
 void BinaryLooped::COND_ACTION( RedCondAp *cond )
 {
-	/* If there are actions, emit them. Otherwise emit zero. */
 	int act = 0;
 	if ( cond->action != 0 )
 		act = cond->action->location+1;
 	condActions.value( act );
+}
+
+void BinaryLooped::TO_STATE_ACTION( RedStateAp *state )
+{
+	int act = 0;
+	if ( state->toStateAction != 0 )
+		act = state->toStateAction->location+1;
+	toStateActions.value( act );
+}
+
+void BinaryLooped::FROM_STATE_ACTION( RedStateAp *state )
+{
+	int act = 0;
+	if ( state->fromStateAction != 0 )
+		act = state->fromStateAction->location+1;
+	fromStateActions.value( act );
+}
+
+void BinaryLooped::EOF_ACTION( RedStateAp *state )
+{
+	int act = 0;
+	if ( state->eofAction != 0 )
+		act = state->eofAction->location+1;
+	eofActions.value( act );
 }
 
 void BinaryLooped::setTableState( TableArray::State state )
@@ -84,6 +104,10 @@ void BinaryLooped::tableDataPass()
 
 	taCondTargs();
 	taCondActions();
+
+	taToStateActions();
+	taFromStateActions();
+	taEofActions();
 }
 
 void BinaryLooped::writeData()
@@ -132,26 +156,14 @@ void BinaryLooped::writeData()
 	taCondTargs();
 	taCondActions();
 
-	if ( redFsm->anyToStateActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), TSA() );
-		TO_STATE_ACTIONS();
-		CLOSE_ARRAY() <<
-		"\n";
-	}
+	if ( redFsm->anyToStateActions() )
+		taToStateActions();
 
-	if ( redFsm->anyFromStateActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), FSA() );
-		FROM_STATE_ACTIONS();
-		CLOSE_ARRAY() <<
-		"\n";
-	}
+	if ( redFsm->anyFromStateActions() )
+		taFromStateActions();
 
-	if ( redFsm->anyEofActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), EA() );
-		EOF_ACTIONS();
-		CLOSE_ARRAY() <<
-		"\n";
-	}
+	if ( redFsm->anyEofActions() )
+		taEofActions();
 
 	if ( redFsm->anyEofTrans() ) {
 		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxIndexOffset+1), ET() );
