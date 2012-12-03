@@ -846,10 +846,10 @@ std::ostream &Binary::COND_ACTIONS()
 void Binary::LOCATE_TRANS()
 {
 	out <<
-		"	_keys = " << ARR_OFF( K(), KO() + "[" + vCS() + "]" ) << ";\n"
+		"	_keys = " << ARR_OFF( K(), keyOffsets.ref() + "[" + vCS() + "]" ) << ";\n"
 		"	_trans = " << IO() << "[" << vCS() << "];\n"
 		"\n"
-		"	_klen = " << SL() << "[" << vCS() << "];\n"
+		"	_klen = " << singleLens.ref() << "[" << vCS() << "];\n"
 		"	if ( _klen > 0 ) {\n"
 		"		const " << ALPH_TYPE() << " *_lower = _keys;\n"
 		"		const " << ALPH_TYPE() << " *_mid;\n"
@@ -872,7 +872,7 @@ void Binary::LOCATE_TRANS()
 		"		_trans += _klen;\n"
 		"	}\n"
 		"\n"
-		"	_klen = " << RL() << "[" << vCS() << "];\n"
+		"	_klen = " << rangeLens.ref() << "[" << vCS() << "];\n"
 		"	if ( _klen > 0 ) {\n"
 		"		const " << ALPH_TYPE() << " *_lower = _keys;\n"
 		"		const " << ALPH_TYPE() << " *_mid;\n"

@@ -188,7 +188,7 @@ void BinaryExpanded::writeData()
 	else
 		setTransPos();
 
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxKeyOffset), KO() );
+	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxKeyOffset), keyOffsets.ref() );
 	KEY_OFFSETS();
 	CLOSE_ARRAY() <<
 	"\n";
@@ -198,12 +198,12 @@ void BinaryExpanded::writeData()
 	CLOSE_ARRAY() <<
 	"\n";
 
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxSingleLen), SL() );
+	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxSingleLen), singleLens.ref() );
 	SINGLE_LENS();
 	CLOSE_ARRAY() <<
 	"\n";
 
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxRangeLen), RL() );
+	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxRangeLen), rangeLens.ref() );
 	RANGE_LENS();
 	CLOSE_ARRAY() <<
 	"\n";

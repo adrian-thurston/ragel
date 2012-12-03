@@ -85,6 +85,11 @@ TableArray::TableArray( const char *name, FsmCodeGen &fsmCodeGen )
 	fsmCodeGen.arrayVector.append( this );
 }
 
+std::string TableArray::ref()
+{
+	return string("_") + fsmCodeGen.DATA_PREFIX() + name;
+}
+
 void TableArray::startAnalyze()
 {
 }

@@ -72,6 +72,8 @@ struct TableArray
 	void startAnalyze();
 	void startGenerate();
 
+	std::string ref();
+
 	void value( long long v );
 	void valueAnalyze( long long v );
 	void valueGenerate( long long v );
@@ -152,11 +154,8 @@ protected:
 	string K() { return "_" + DATA_PREFIX() + "trans_keys"; }
 	string I() { return "_" + DATA_PREFIX() + "indicies"; }
 	string CO() { return "_" + DATA_PREFIX() + "cond_offsets"; }
-	string KO() { return "_" + DATA_PREFIX() + "key_offsets"; }
 	string IO() { return "_" + DATA_PREFIX() + "index_offsets"; }
 	string CL() { return "_" + DATA_PREFIX() + "cond_lengths"; }
-	string SL() { return "_" + DATA_PREFIX() + "single_lengths"; }
-	string RL() { return "_" + DATA_PREFIX() + "range_lengths"; }
 	string A() { return "_" + DATA_PREFIX() + "actions"; }
 	string TA() { return "_" + DATA_PREFIX() + "trans_actions"; }
 	string TT() { return "_" + DATA_PREFIX() + "trans_targs"; }
