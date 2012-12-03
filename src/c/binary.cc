@@ -48,7 +48,8 @@ Binary::Binary( const CodeGenArgs &args )
 	condActions(        "cond_actions",          *this ),
 	toStateActions(     "to_state_actions",      *this ),
 	fromStateActions(   "from_state_actions",    *this ),
-	eofActions(         "eof_actions",           *this )
+	eofActions(         "eof_actions",           *this ),
+	eofTrans(           "eof_trans",             *this )
 {
 }
 
@@ -254,27 +255,21 @@ void Binary::taEofActions()
 	eofActions.finish();
 }
 
-std::ostream &Binary::EOF_TRANS()
+void Binary::taEofTrans()
 {
-	out << "\t";
-	int totalStateNum = 0;
+	eofTrans.start();
+
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		/* Write any eof action. */
 		long trans = 0;
 		if ( st->eofTrans != 0 ) {
 			assert( st->eofTrans->pos >= 0 );
 			trans = st->eofTrans->pos+1;
 		}
-		out << trans;
 
-		if ( !st.last() ) {
-			out << ", ";
-			if ( ++totalStateNum % IALL == 0 )
-				out << "\n\t";
-		}
+		eofTrans.value( trans );
 	}
-	out << "\n";
-	return out;
+
+	eofTrans.start();
 }
 
 std::ostream &Binary::KEYS()

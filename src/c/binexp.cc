@@ -207,6 +207,8 @@ void BinaryExpanded::tableDataPass()
 	taToStateActions();
 	taFromStateActions();
 	taEofActions();
+
+	taEofTrans();
 }
 
 void BinaryExpanded::writeData()
@@ -259,12 +261,8 @@ void BinaryExpanded::writeData()
 	if ( redFsm->anyEofActions() )
 		taEofActions();
 
-	if ( redFsm->anyEofTrans() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxIndexOffset+1), ET() );
-		EOF_TRANS();
-		CLOSE_ARRAY() <<
-		"\n";
-	}
+	if ( redFsm->anyEofTrans() )
+		taEofTrans();
 
 	STATE_IDS();
 }

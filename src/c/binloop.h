@@ -64,7 +64,6 @@ public:
 	TableArray transTargs;
 	TableArray transActions;
 	TableArray condKeys;
-	TableArray eofTrans;
 };
 
 }

@@ -41,8 +41,7 @@ BinaryLooped::BinaryLooped( const CodeGenArgs &args )
 	transActionsWi(     "trans_targs_wi",       *this ),
 	transTargs(         "trans_targs",          *this ),
 	transActions(       "trans_actions",        *this ),
-	condKeys(           "cond_keys",            *this ),
-	eofTrans(           "eof_trans",            *this )
+	condKeys(           "cond_keys",            *this )
 {}
 
 void BinaryLooped::COND_ACTION( RedCondAp *cond )
@@ -108,6 +107,8 @@ void BinaryLooped::tableDataPass()
 	taToStateActions();
 	taFromStateActions();
 	taEofActions();
+
+	taEofTrans();
 }
 
 void BinaryLooped::writeData()
@@ -165,12 +166,8 @@ void BinaryLooped::writeData()
 	if ( redFsm->anyEofActions() )
 		taEofActions();
 
-	if ( redFsm->anyEofTrans() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxIndexOffset+1), ET() );
-		EOF_TRANS();
-		CLOSE_ARRAY() <<
-		"\n";
-	}
+	if ( redFsm->anyEofTrans() )
+		taEofTrans();
 
 	STATE_IDS();
 }
