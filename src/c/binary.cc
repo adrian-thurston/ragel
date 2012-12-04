@@ -50,8 +50,9 @@ Binary::Binary( const CodeGenArgs &args )
 	fromStateActions(   "from_state_actions",    *this ),
 	eofActions(         "eof_actions",           *this ),
 	eofTrans(           "eof_trans",             *this ),
+	actions(            "actions",               *this ),
 	keys(               "trans_keys",            *this ),
-	actions(            "actions",               *this )
+	condKeys(           "cond_keys",             *this )
 {
 }
 
@@ -414,42 +415,30 @@ void Binary::taTransLengthsWi()
 	transLengthsWi.finish();
 }
 
-std::ostream &Binary::COND_KEYS()
+void Binary::taCondKeys()
 {
-	out << '\t';
-	int totalKeys = 0;
+	condKeys.start();
+
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Walk the singles. */
 		for ( RedTransList::Iter stel = st->outSingle; stel.lte(); stel++ ) {
 			RedTransAp *trans = stel->value;
-
-			for ( RedCondList::Iter cond = trans->outConds; cond.lte(); cond++ ) {
-				out << cond->key.getVal() << ", ";
-				if ( ++totalKeys % IALL == 0 )
-					out << "\n\t";
-			}
+			for ( RedCondList::Iter cond = trans->outConds; cond.lte(); cond++ )
+				condKeys.value( cond->key.getVal() );
 		}
 
 		/* Walk the ranges. */
 		for ( RedTransList::Iter rtel = st->outRange; rtel.lte(); rtel++ ) {
 			RedTransAp *trans = rtel->value;
-
-			for ( RedCondList::Iter cond = trans->outConds; cond.lte(); cond++ ) {
-				out << cond->key.getVal() << ", ";
-				if ( ++totalKeys % IALL == 0 )
-					out << "\n\t";
-			}
+			for ( RedCondList::Iter cond = trans->outConds; cond.lte(); cond++ )
+				condKeys.value( cond->key.getVal() );
 		}
 
 		/* The state's default index goes next. */
 		if ( st->defTrans != 0 ) {
 			RedTransAp *trans = st->defTrans;
-
-			for ( RedCondList::Iter cond = trans->outConds; cond.lte(); cond++ ) {
-				out << cond->key.getVal() << ", ";
-				if ( ++totalKeys % IALL == 0 )
-					out << "\n\t";
-			}
+			for ( RedCondList::Iter cond = trans->outConds; cond.lte(); cond++ )
+				condKeys.value( cond->key.getVal() );
 		}
 	}
 
@@ -457,20 +446,12 @@ std::ostream &Binary::COND_KEYS()
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->eofTrans != 0 ) {
 			RedTransAp *trans = st->eofTrans;
-
-			for ( RedCondList::Iter cond = trans->outConds; cond.lte(); cond++ ) {
-				out << cond->key.getVal() << ", ";
-				if ( ++totalKeys % IALL == 0 )
-					out << "\n\t";
-			}
+			for ( RedCondList::Iter cond = trans->outConds; cond.lte(); cond++ )
+				condKeys.value( cond->key.getVal() );
 		}
 	}
 
-
-	/* Output one last number so we don't have to figure out when the last
-	 * entry is and avoid writing a comma. */
-	out << 0 << "\n";
-	return out;
+	condKeys.finish();
 }
 
 void Binary::taCondTargs()

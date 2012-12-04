@@ -39,8 +39,7 @@ BinaryLooped::BinaryLooped( const CodeGenArgs &args )
 	transTargsWi(       "trans_targs_wi",       *this ),
 	transActionsWi(     "trans_targs_wi",       *this ),
 	transTargs(         "trans_targs",          *this ),
-	transActions(       "trans_actions",        *this ),
-	condKeys(           "cond_keys",            *this )
+	transActions(       "trans_actions",        *this )
 {}
 
 void BinaryLooped::COND_ACTION( RedCondAp *cond )
@@ -210,10 +209,7 @@ void BinaryLooped::writeData()
 		taTransLengths();
 	}
 
-	OPEN_ARRAY( "char", CK() );
-	COND_KEYS();
-	CLOSE_ARRAY() <<
-	"\n";
+	taCondKeys();
 
 	taCondTargs();
 	taCondActions();

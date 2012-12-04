@@ -247,11 +247,7 @@ void BinaryExpanded::writeData()
 		taTransLengths();
 	}
 
-	OPEN_ARRAY( "char", CK() );
-	COND_KEYS();
-	CLOSE_ARRAY() <<
-	"\n";
-
+	taCondKeys();
 	taCondTargs();
 	taCondActions();
 

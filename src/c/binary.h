@@ -59,8 +59,9 @@ protected:
 	TableArray fromStateActions;
 	TableArray eofActions;
 	TableArray eofTrans;
-	TableArray keys;
 	TableArray actions;
+	TableArray keys;
+	TableArray condKeys;
 
 	std::ostream &COND_KEYS_v1();
 	std::ostream &COND_SPACES_v1();
@@ -69,7 +70,6 @@ protected:
 	std::ostream &SINGLE_LENS();
 	std::ostream &RANGE_LENS();
 	std::ostream &TRANS_TARGS_WI();
-	std::ostream &COND_KEYS();
 	std::ostream &ACTIONS_ARRAY();
 
 	void taKeyOffsets();
@@ -91,6 +91,7 @@ protected:
 	void taEofTrans();
 	void taKeys();
 	void taActions();
+	void taCondKeys();
 
 	void setTransPos();
 	void setTransPosWi();
