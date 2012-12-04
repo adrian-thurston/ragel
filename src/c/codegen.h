@@ -66,15 +66,19 @@ struct TableArray
 		GeneratePass
 	};
 		
-	TableArray( const char *name, CodeGen &fsmCodeGen );
+	TableArray( const char *name, CodeGen &codeGen );
 
 	void start();
 	void startAnalyze();
 	void startGenerate();
 
+	void setType( std::string type )
+		{ this->type = type; }
+
 	std::string ref();
 
 	void value( long long v );
+
 	void valueAnalyze( long long v );
 	void valueGenerate( long long v );
 
@@ -87,12 +91,12 @@ struct TableArray
 
 	State state;
 	const char *name;
-	const char *type;
+	std::string type;
 	bool isSigned;
 	long long values;
 	long long max;
 	long long min;
-	CodeGen &fsmCodeGen;
+	CodeGen &codeGen;
 	std::ostream &out;
 };
 
@@ -117,11 +121,9 @@ protected:
 	friend class TableArray;
 	typedef Vector<TableArray*> ArrayVector;
 	ArrayVector arrayVector;
-	TableArray actions;
 
 	string FSM_NAME();
 	string START_STATE_ID();
-	ostream &ACTIONS_ARRAY();
 	void taActions();
 	string TABS( int level );
 	string KEY( Key key );

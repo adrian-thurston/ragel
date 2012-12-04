@@ -70,6 +70,8 @@ public:
 	virtual unsigned int FROM_STATE_ACTION( RedStateAp *state );
 	virtual unsigned int EOF_ACTION( RedStateAp *state );
 
+	std::ostream &ACTIONS_ARRAY();
+
 	std::ostream &TO_STATE_ACTIONS();
 	std::ostream &FROM_STATE_ACTIONS();
 	std::ostream &EOF_ACTIONS();

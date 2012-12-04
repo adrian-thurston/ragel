@@ -70,24 +70,23 @@ void cLineDirective( ostream &out, const char *fileName, int line )
 
 namespace C {
 
-TableArray::TableArray( const char *name, CodeGen &fsmCodeGen )
+TableArray::TableArray( const char *name, CodeGen &codeGen )
 :
 	state(InitialState),
 	name(name),
-	type(0),
 	isSigned(true),
 	values(0),
 	min(LLONG_MAX),
 	max(LLONG_MIN),
-	fsmCodeGen(fsmCodeGen),
-	out(fsmCodeGen.out)
+	codeGen(codeGen),
+	out(codeGen.out)
 {
-	fsmCodeGen.arrayVector.append( this );
+	codeGen.arrayVector.append( this );
 }
 
 std::string TableArray::ref()
 {
-	return string("_") + fsmCodeGen.DATA_PREFIX() + name;
+	return string("_") + codeGen.DATA_PREFIX() + name;
 }
 
 void TableArray::startAnalyze()
@@ -105,27 +104,33 @@ void TableArray::valueAnalyze( long long v )
 
 void TableArray::finishAnalyze()
 {
-	if ( min >= CHAR_MIN && max <= CHAR_MAX )
-		type = "char";
-	else if ( min >= SHRT_MIN && max <= SHRT_MAX )
-		type = "short";
-	else if ( min >= INT_MIN && max <= INT_MAX )
-		type = "int";
-	else if ( min >= LONG_MIN && max <= LONG_MAX )
-		type = "long";
-	else 
-		type = "long long";
+	/* Calculate the type if it is not already set. */
+	if ( type == "" ) {
+		if ( min >= CHAR_MIN && max <= CHAR_MAX )
+			type = "char";
+		else if ( min >= SHRT_MIN && max <= SHRT_MAX )
+			type = "short";
+		else if ( min >= INT_MIN && max <= INT_MAX )
+			type = "int";
+		else if ( min >= LONG_MIN && max <= LONG_MAX )
+			type = "long";
+		else 
+			type = "long long";
+	}
 }
 
 void TableArray::startGenerate()
 {
 	out << "static const " << type << " " << 
-		"_" << fsmCodeGen.DATA_PREFIX() << name << "[] = {\n\t";
+		"_" << codeGen.DATA_PREFIX() << name << "[] = {\n\t";
 }
 
 void TableArray::valueGenerate( long long v )
 {
-	out << v << ", ";
+	out << v;
+	if ( !isSigned )
+		out << "u";
+	out << ", ";
 }
 
 void TableArray::finishGenerate()
@@ -179,8 +184,7 @@ void CodeGen::genLineDirective( ostream &out )
 /* Init code gen with in parameters. */
 CodeGen::CodeGen( const CodeGenArgs &args )
 :
-	CodeGenData(args),
-	actions( "actions", *this )
+	CodeGenData(args)
 {
 }
 
@@ -220,50 +224,6 @@ string CodeGen::START_STATE_ID()
 	ret << redFsm->startState->id;
 	return ret.str();
 };
-
-/* Write out the array of actions. */
-std::ostream &CodeGen::ACTIONS_ARRAY()
-{
-	out << "\t0, ";
-	int totalActions = 1;
-	for ( GenActionTableMap::Iter act = redFsm->actionMap; act.lte(); act++ ) {
-		/* Write out the length, which will never be the last character. */
-		out << act->key.length() << ", ";
-		/* Put in a line break every 8 */
-		if ( totalActions++ % 8 == 7 )
-			out << "\n\t";
-
-		for ( GenActionTable::Iter item = act->key; item.lte(); item++ ) {
-			out << item->value->actionId;
-			if ( ! (act.last() && item.last()) )
-				out << ", ";
-
-			/* Put in a line break every 8 */
-			if ( totalActions++ % 8 == 7 )
-				out << "\n\t";
-		}
-	}
-	out << "\n";
-	return out;
-}
-
-void CodeGen::taActions()
-{
-	actions.start();
-
-	/* Put "no-action" at the beginning. */
-	actions.value( 0 );
-
-	for ( GenActionTableMap::Iter act = redFsm->actionMap; act.lte(); act++ ) {
-		/* Write out the length, which will never be the last character. */
-		actions.value( act->key.length() );
-
-		for ( GenActionTable::Iter item = act->key; item.lte(); item++ )
-			actions.value( item->value->actionId );
-	}
-
-	actions.finish();
-}
 
 
 string CodeGen::ACCESS()

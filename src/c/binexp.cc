@@ -38,6 +38,9 @@ void BinaryExpanded::calcIndexSize()
 	else
 		setTransPos();
 
+	keys.setType( ALPH_TYPE() );
+	keys.isSigned = keyOps->isSigned;
+
 	return;
 
 	int sizeWithInds = 0, sizeWithoutInds = 0;
@@ -215,6 +218,8 @@ void BinaryExpanded::tableDataPass()
 	taEofActions();
 
 	taEofTrans();
+
+	taKeys();
 }
 
 void BinaryExpanded::writeData()
@@ -224,10 +229,7 @@ void BinaryExpanded::writeData()
 
 	taKeyOffsets();
 
-	OPEN_ARRAY( ALPH_TYPE(), K() );
-	KEYS();
-	CLOSE_ARRAY() <<
-	"\n";
+	taKeys();
 
 	taSingleLens();
 	taRangeLens();

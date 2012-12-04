@@ -137,6 +137,33 @@ std::ostream &Goto::ACTION_SWITCH()
 	return out;
 }
 
+/* Write out the array of actions. */
+std::ostream &Goto::ACTIONS_ARRAY()
+{
+	out << "\t0, ";
+	int totalActions = 1;
+	for ( GenActionTableMap::Iter act = redFsm->actionMap; act.lte(); act++ ) {
+		/* Write out the length, which will never be the last character. */
+		out << act->key.length() << ", ";
+		/* Put in a line break every 8 */
+		if ( totalActions++ % 8 == 7 )
+			out << "\n\t";
+
+		for ( GenActionTable::Iter item = act->key; item.lte(); item++ ) {
+			out << item->value->actionId;
+			if ( ! (act.last() && item.last()) )
+				out << ", ";
+
+			/* Put in a line break every 8 */
+			if ( totalActions++ % 8 == 7 )
+				out << "\n\t";
+		}
+	}
+	out << "\n";
+	return out;
+}
+
+
 void Goto::GOTO_HEADER( RedStateAp *state )
 {
 	/* Label the state. */

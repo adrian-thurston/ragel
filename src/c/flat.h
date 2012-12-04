@@ -39,10 +39,17 @@ class Flat
 	: public CodeGen
 {
 public:
-	Flat( const CodeGenArgs &args ) : CodeGen(args) {}
+	Flat( const CodeGenArgs &args ) 
+	:
+		CodeGen( args ),
+		keys(               "keys",                  *this )
+	{}
+
 	virtual ~Flat() { }
 
 protected:
+	TableArray keys;
+
 	std::ostream &KEYS();
 	std::ostream &INDICIES();
 	std::ostream &FLAT_INDEX_OFFSET();
@@ -57,6 +64,7 @@ protected:
 	std::ostream &COND_KEYS();
 	std::ostream &COND_TARGS();
 	std::ostream &COND_ACTIONS();
+	std::ostream &ACTIONS_ARRAY();
 
 	void LOCATE_TRANS();
 

@@ -32,6 +32,9 @@ namespace C {
 void FlatLooped::calcIndexSize()
 {
 	setTransPos();
+
+	keys.setType( ALPH_TYPE() );
+	keys.isSigned = keyOps->isSigned;
 }
 
 std::ostream &FlatLooped::TO_STATE_ACTION_SWITCH()

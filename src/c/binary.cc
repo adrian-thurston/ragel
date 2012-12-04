@@ -49,7 +49,9 @@ Binary::Binary( const CodeGenArgs &args )
 	toStateActions(     "to_state_actions",      *this ),
 	fromStateActions(   "from_state_actions",    *this ),
 	eofActions(         "eof_actions",           *this ),
-	eofTrans(           "eof_trans",             *this )
+	eofTrans(           "eof_trans",             *this ),
+	keys(               "trans_keys",            *this ),
+	actions(            "actions",               *this )
 {
 }
 
@@ -198,36 +200,27 @@ void Binary::taEofTrans()
 	eofTrans.finish();
 }
 
-std::ostream &Binary::KEYS()
+void Binary::taKeys()
 {
-	out << '\t';
-	int totalTrans = 0;
+	keys.start();
+
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Loop the singles. */
 		for ( RedTransList::Iter stel = st->outSingle; stel.lte(); stel++ ) {
-			out << KEY( stel->lowKey ) << ", ";
-			if ( ++totalTrans % IALL == 0 )
-				out << "\n\t";
+			keys.value( stel->lowKey.getVal() );
 		}
 
 		/* Loop the state's transitions. */
 		for ( RedTransList::Iter rtel = st->outRange; rtel.lte(); rtel++ ) {
 			/* Lower key. */
-			out << KEY( rtel->lowKey ) << ", ";
-			if ( ++totalTrans % IALL == 0 )
-				out << "\n\t";
+			keys.value( rtel->lowKey.getVal() );
 
 			/* Upper key. */
-			out << KEY( rtel->highKey ) << ", ";
-			if ( ++totalTrans % IALL == 0 )
-				out << "\n\t";
+			keys.value( rtel->highKey.getVal() );
 		}
 	}
 
-	/* Output one last number so we don't have to figure out when the last
-	 * entry is and avoid writing a comma. */
-	out << 0 << "\n";
-	return out;
+	keys.finish();
 }
 
 void Binary::taIndicies()
@@ -575,6 +568,51 @@ void Binary::taCondActions()
 
 	condActions.finish();
 }
+
+/* Write out the array of actions. */
+std::ostream &Binary::ACTIONS_ARRAY()
+{
+	out << "\t0, ";
+	int totalActions = 1;
+	for ( GenActionTableMap::Iter act = redFsm->actionMap; act.lte(); act++ ) {
+		/* Write out the length, which will never be the last character. */
+		out << act->key.length() << ", ";
+		/* Put in a line break every 8 */
+		if ( totalActions++ % 8 == 7 )
+			out << "\n\t";
+
+		for ( GenActionTable::Iter item = act->key; item.lte(); item++ ) {
+			out << item->value->actionId;
+			if ( ! (act.last() && item.last()) )
+				out << ", ";
+
+			/* Put in a line break every 8 */
+			if ( totalActions++ % 8 == 7 )
+				out << "\n\t";
+		}
+	}
+	out << "\n";
+	return out;
+}
+
+void Binary::taActions()
+{
+	actions.start();
+
+	/* Put "no-action" at the beginning. */
+	actions.value( 0 );
+
+	for ( GenActionTableMap::Iter act = redFsm->actionMap; act.lte(); act++ ) {
+		/* Write out the length, which will never be the last character. */
+		actions.value( act->key.length() );
+
+		for ( GenActionTable::Iter item = act->key; item.lte(); item++ )
+			actions.value( item->value->actionId );
+	}
+
+	actions.finish();
+}
+
 
 void Binary::LOCATE_TRANS()
 {

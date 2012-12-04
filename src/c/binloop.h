@@ -63,7 +63,6 @@ public:
 	TableArray condLens;
 	TableArray condKeysV1;
 	TableArray condSpacesV1;
-	TableArray keys;
 	TableArray transTargsWi;
 	TableArray transActionsWi;
 	TableArray transTargs;

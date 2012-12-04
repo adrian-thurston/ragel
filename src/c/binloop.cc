@@ -36,7 +36,6 @@ BinaryLooped::BinaryLooped( const CodeGenArgs &args )
 	condLens(           "cond_lengths",         *this ),
 	condKeysV1(         "cond_keys_v1",         *this ),
 	condSpacesV1(       "cond_spaces_v1",       *this ),
-	keys(               "keys",                 *this ),
 	transTargsWi(       "trans_targs_wi",       *this ),
 	transActionsWi(     "trans_targs_wi",       *this ),
 	transTargs(         "trans_targs",          *this ),
@@ -179,6 +178,8 @@ void BinaryLooped::tableDataPass()
 	taEofActions();
 
 	taEofTrans();
+
+	taKeys();
 }
 
 void BinaryLooped::writeData()
@@ -192,12 +193,7 @@ void BinaryLooped::writeData()
 		taActions();
 
 	taKeyOffsets();
-
-	OPEN_ARRAY( ALPH_TYPE(), K() );
-	KEYS();
-	CLOSE_ARRAY() <<
-	"\n";
-
+	taKeys();
 	taSingleLens();
 	taRangeLens();
 	taIndexOffsets();
@@ -420,6 +416,9 @@ void BinaryLooped::calcIndexSize()
 		setTransPosWi();
 	else
 		setTransPos();
+	
+	keys.setType( ALPH_TYPE() );
+	keys.isSigned = keyOps->isSigned;
 
 	return;
 

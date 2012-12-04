@@ -153,6 +153,8 @@ std::ostream &FlatExpanded::ACTION_SWITCH()
 void FlatExpanded::calcIndexSize()
 {
 	setTransPos();
+	keys.setType( ALPH_TYPE() );
+	keys.isSigned = keyOps->isSigned;
 }
 
 void FlatExpanded::writeData()
