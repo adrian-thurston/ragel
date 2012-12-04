@@ -48,6 +48,7 @@ void FlatExpanded::tableDataPass()
 {
 	taKeys();
 	taKeySpans();
+	taFlatIndexOffset();
 }
 
 std::ostream &FlatExpanded::TO_STATE_ACTION( RedStateAp *state )
@@ -178,11 +179,7 @@ void FlatExpanded::writeData()
 
 	taKeys();
 	taKeySpans();
-
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxFlatIndexOffset), IO() );
-	FLAT_INDEX_OFFSET();
-	CLOSE_ARRAY() <<
-	"\n";
+	taFlatIndexOffset();
 
 	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxIndex), I() );
 	INDICIES();

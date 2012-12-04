@@ -47,8 +47,10 @@ void FlatLooped::setTableState( TableArray::State state )
 
 void FlatLooped::tableDataPass()
 {
+	taActions();
 	taKeys();
 	taKeySpans();
+	taFlatIndexOffset();
 }
 
 std::ostream &FlatLooped::TO_STATE_ACTION_SWITCH()
@@ -125,20 +127,12 @@ void FlatLooped::writeData()
 
 	/* If there are any transtion functions then output the array. If there
 	 * are none, don't bother emitting an empty array that won't be used. */
-	if ( redFsm->anyActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActArrItem), A() );
-		ACTIONS_ARRAY();
-		CLOSE_ARRAY() <<
-		"\n";
-	}
+	if ( redFsm->anyActions() )
+		taActions();
 
 	taKeys();
 	taKeySpans();
-
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxFlatIndexOffset), IO() );
-	FLAT_INDEX_OFFSET();
-	CLOSE_ARRAY() <<
-	"\n";
+	taFlatIndexOffset();
 
 	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxIndex), I() );
 	INDICIES();

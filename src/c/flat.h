@@ -44,14 +44,17 @@ public:
 	virtual ~Flat() { }
 
 protected:
+	TableArray actions;
 	TableArray keys;
 	TableArray keySpans;
+	TableArray flatIndexOffset;
 
 	void taKeys();
 	void taKeySpans();
+	void taActions();
+	void taFlatIndexOffset();
 
 	std::ostream &INDICIES();
-	std::ostream &FLAT_INDEX_OFFSET();
 	std::ostream &TO_STATE_ACTIONS();
 	std::ostream &FROM_STATE_ACTIONS();
 	std::ostream &EOF_ACTIONS();
@@ -62,7 +65,6 @@ protected:
 	std::ostream &COND_KEYS();
 	std::ostream &COND_TARGS();
 	std::ostream &COND_ACTIONS();
-	std::ostream &ACTIONS_ARRAY();
 
 	void LOCATE_TRANS();
 

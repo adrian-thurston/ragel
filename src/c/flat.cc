@@ -31,8 +31,10 @@ namespace C {
 Flat::Flat( const CodeGenArgs &args ) 
 :
 	CodeGen( args ),
-	keys(       "trans_keys",  *this ),
-	keySpans(   "key_spans",   *this )
+	actions(          "actions",       *this ),
+	keys(             "trans_keys",    *this ),
+	keySpans(         "key_spans",     *this ),
+	flatIndexOffset(  "index_offsets", *this )
 {}
 
 void Flat::setTransPos()
@@ -51,18 +53,14 @@ void Flat::setTransPos()
 }
 
 
-std::ostream &Flat::FLAT_INDEX_OFFSET()
+void Flat::taFlatIndexOffset()
 {
-	out << "\t";
-	int totalStateNum = 0, curIndOffset = 0;
+	flatIndexOffset.start();
+
+	int curIndOffset = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write the index offset. */
-		out << curIndOffset;
-		if ( !st.last() ) {
-			out << ", ";
-			if ( ++totalStateNum % IALL == 0 )
-				out << "\n\t";
-		}
+		flatIndexOffset.value( curIndOffset );
 		
 		/* Move the index offset ahead. */
 		if ( st->transList != 0 )
@@ -71,8 +69,8 @@ std::ostream &Flat::FLAT_INDEX_OFFSET()
 		if ( st->defTrans != 0 )
 			curIndOffset += 1;
 	}
-	out << "\n";
-	return out;
+
+	flatIndexOffset.finish();
 }
 
 void Flat::taKeySpans()
@@ -364,29 +362,22 @@ std::ostream &Flat::COND_ACTIONS()
 }
 
 /* Write out the array of actions. */
-std::ostream &Flat::ACTIONS_ARRAY()
+void Flat::taActions()
 {
-	out << "\t0, ";
-	int totalActions = 1;
+	actions.start();
+
+	/* Add in the the empty actions array. */
+	actions.value( 0 );
+
 	for ( GenActionTableMap::Iter act = redFsm->actionMap; act.lte(); act++ ) {
-		/* Write out the length, which will never be the last character. */
-		out << act->key.length() << ", ";
-		/* Put in a line break every 8 */
-		if ( totalActions++ % 8 == 7 )
-			out << "\n\t";
+		/* Length first. */
+		actions.value( act->key.length() );
 
-		for ( GenActionTable::Iter item = act->key; item.lte(); item++ ) {
-			out << item->value->actionId;
-			if ( ! (act.last() && item.last()) )
-				out << ", ";
-
-			/* Put in a line break every 8 */
-			if ( totalActions++ % 8 == 7 )
-				out << "\n\t";
-		}
+		for ( GenActionTable::Iter item = act->key; item.lte(); item++ )
+			actions.value( item->value->actionId );
 	}
-	out << "\n";
-	return out;
+
+	actions.finish();
 }
 
 
