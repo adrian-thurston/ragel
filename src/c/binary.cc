@@ -269,7 +269,7 @@ void Binary::taEofTrans()
 		eofTrans.value( trans );
 	}
 
-	eofTrans.start();
+	eofTrans.finish();
 }
 
 std::ostream &Binary::KEYS()
