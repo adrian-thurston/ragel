@@ -58,15 +58,6 @@ public:
 	std::ostream &FROM_STATE_ACTION_SWITCH();
 	std::ostream &EOF_ACTION_SWITCH();
 	std::ostream &ACTION_SWITCH();
-
-	TableArray condOffsets;
-	TableArray condLens;
-	TableArray condKeysV1;
-	TableArray condSpacesV1;
-	TableArray transTargsWi;
-	TableArray transActionsWi;
-	TableArray transTargs;
-	TableArray transActions;
 };
 
 }

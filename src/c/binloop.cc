@@ -30,16 +30,7 @@ namespace C {
 
 BinaryLooped::BinaryLooped( const CodeGenArgs &args )
 :
-	Binary( args ),
-
-	condOffsets(        "cond_offsets",         *this ),
-	condLens(           "cond_lengths",         *this ),
-	condKeysV1(         "cond_keys_v1",         *this ),
-	condSpacesV1(       "cond_spaces_v1",       *this ),
-	transTargsWi(       "trans_targs_wi",       *this ),
-	transActionsWi(     "trans_targs_wi",       *this ),
-	transTargs(         "trans_targs",          *this ),
-	transActions(       "trans_actions",        *this )
+	Binary( args )
 {}
 
 void BinaryLooped::COND_ACTION( RedCondAp *cond )
@@ -179,6 +170,7 @@ void BinaryLooped::tableDataPass()
 	taEofTrans();
 
 	taKeys();
+	taCondKeys();
 }
 
 void BinaryLooped::writeData()

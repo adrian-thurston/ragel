@@ -220,6 +220,7 @@ void BinaryExpanded::tableDataPass()
 	taEofTrans();
 
 	taKeys();
+	taCondKeys();
 }
 
 void BinaryExpanded::writeData()
