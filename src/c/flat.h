@@ -48,11 +48,33 @@ protected:
 	TableArray keys;
 	TableArray keySpans;
 	TableArray flatIndexOffset;
+	TableArray indicies;
+	TableArray transCondSpaces;
+	TableArray transOffsets;
+	TableArray transLengths;
+	TableArray condKeys;
+	TableArray condTargs;
+	TableArray condActions;
+	TableArray toStateActions;
+	TableArray fromStateActions;
+	TableArray eofActions;
+	TableArray eofTrans;
 
 	void taKeys();
 	void taKeySpans();
 	void taActions();
 	void taFlatIndexOffset();
+	void taIndicies();
+	void taTransCondSpaces();
+	void taTransOffsets();
+	void taTransLengths();
+	void taCondKeys();
+	void taCondTargs();
+	void taCondActions();
+	void taToStateActions();
+	void taFromStateActions();
+	void taEofActions();
+	void taEofTrans();
 
 	std::ostream &INDICIES();
 	std::ostream &TO_STATE_ACTIONS();
@@ -81,10 +103,10 @@ protected:
 	void RET( ostream &ret, bool inFinish );
 	void BREAK( ostream &ret, int targState, bool csForced );
 
-	virtual std::ostream &TO_STATE_ACTION( RedStateAp *state ) = 0;
-	virtual std::ostream &FROM_STATE_ACTION( RedStateAp *state ) = 0;
-	virtual std::ostream &EOF_ACTION( RedStateAp *state ) = 0;
-	virtual std::ostream &COND_ACTION( RedCondAp *cond ) = 0;
+	virtual void TO_STATE_ACTION( RedStateAp *state ) = 0;
+	virtual void FROM_STATE_ACTION( RedStateAp *state ) = 0;
+	virtual void EOF_ACTION( RedStateAp *state ) = 0;
+	virtual void COND_ACTION( RedCondAp *cond ) = 0;
 };
 
 }

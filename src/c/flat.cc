@@ -31,10 +31,21 @@ namespace C {
 Flat::Flat( const CodeGenArgs &args ) 
 :
 	CodeGen( args ),
-	actions(          "actions",       *this ),
-	keys(             "trans_keys",    *this ),
-	keySpans(         "key_spans",     *this ),
-	flatIndexOffset(  "index_offsets", *this )
+	actions(          "actions",             *this ),
+	keys(             "trans_keys",          *this ),
+	keySpans(         "key_spans",           *this ),
+	flatIndexOffset(  "index_offsets",       *this ),
+	indicies(         "indicies",            *this ),
+	transCondSpaces(  "trans_cond_spaces",   *this ),
+	transOffsets(     "trans_offsets",       *this ),
+	transLengths(     "trans_lengths",       *this ),
+	condKeys(         "cond_keys",           *this ),
+	condTargs(        "cond_targs",          *this ),
+	condActions(      "cond_actions",        *this ),
+	toStateActions(   "to_state_actions",    *this ),
+	fromStateActions( "from_state_actions",  *this ),
+	eofActions(       "eof_actions",         *this ),
+	eofTrans(         "eof_trans",           *this )
 {}
 
 void Flat::setTransPos()
@@ -88,61 +99,46 @@ void Flat::taKeySpans()
 	keySpans.finish();
 }
 
-std::ostream &Flat::TO_STATE_ACTIONS()
+void Flat::taToStateActions()
 {
-	out << "\t";
-	int totalStateNum = 0;
+	toStateActions.start();
+
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write any eof action. */
 		TO_STATE_ACTION(st);
-		if ( !st.last() ) {
-			out << ", ";
-			if ( ++totalStateNum % IALL == 0 )
-				out << "\n\t";
-		}
 	}
-	out << "\n";
-	return out;
+
+	toStateActions.finish();
 }
 
-std::ostream &Flat::FROM_STATE_ACTIONS()
+void Flat::taFromStateActions()
 {
-	out << "\t";
-	int totalStateNum = 0;
+	fromStateActions.start();
+
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write any eof action. */
-		FROM_STATE_ACTION(st);
-		if ( !st.last() ) {
-			out << ", ";
-			if ( ++totalStateNum % IALL == 0 )
-				out << "\n\t";
-		}
+		FROM_STATE_ACTION( st );
 	}
-	out << "\n";
-	return out;
+
+	fromStateActions.finish();
 }
 
-std::ostream &Flat::EOF_ACTIONS()
+void Flat::taEofActions()
 {
-	out << "\t";
-	int totalStateNum = 0;
+	eofActions.start();
+
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write any eof action. */
-		EOF_ACTION(st);
-		if ( !st.last() ) {
-			out << ", ";
-			if ( ++totalStateNum % IALL == 0 )
-				out << "\n\t";
-		}
+		EOF_ACTION( st );
 	}
-	out << "\n";
-	return out;
+
+	eofActions.finish();
 }
 
-std::ostream &Flat::EOF_TRANS()
+void Flat::taEofTrans()
 {
-	out << "\t";
-	int totalStateNum = 0;
+	eofTrans.start();
+
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write any eof action. */
 
@@ -151,16 +147,11 @@ std::ostream &Flat::EOF_TRANS()
 			assert( st->eofTrans->pos >= 0 );
 			trans = st->eofTrans->pos+1;
 		}
-		out << trans;
 
-		if ( !st.last() ) {
-			out << ", ";
-			if ( ++totalStateNum % IALL == 0 )
-				out << "\n\t";
-		}
+		eofTrans.value( trans );
 	}
-	out << "\n";
-	return out;
+
+	eofTrans.finish();
 }
 
 void Flat::taKeys()
@@ -176,174 +167,154 @@ void Flat::taKeys()
 	keys.finish();
 }
 
-std::ostream &Flat::INDICIES()
+void Flat::taIndicies()
 {
-	int totalTrans = 0;
-	out << '\t';
+	indicies.start();
+
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->transList != 0 ) {
 			/* Walk the singles. */
 			unsigned long long span = keyOps->span( st->lowKey, st->highKey );
-			for ( unsigned long long pos = 0; pos < span; pos++ ) {
-				out << st->transList[pos]->id << ", ";
-				if ( ++totalTrans % IALL == 0 )
-					out << "\n\t";
-			}
+			for ( unsigned long long pos = 0; pos < span; pos++ )
+				indicies.value( st->transList[pos]->id );
 		}
 
 		/* The state's default index goes next. */
 		if ( st->defTrans != 0 )
-			out << st->defTrans->id << ", ";
+			indicies.value( st->defTrans->id );
 
-		if ( ++totalTrans % IALL == 0 )
-			out << "\n\t";
 	}
 
-	/* Output one last number so we don't have to figure out when the last
-	 * entry is and avoid writing a comma. */
-	out << 0 << "\n";
-	return out;
+	indicies.finish();
 }
 
-std::ostream &Flat::TRANS_COND_SPACES()
+void Flat::taTransCondSpaces()
 {
+	transCondSpaces.start();
+
 	/* Transitions must be written ordered by their id. */
 	RedTransAp **transPtrs = new RedTransAp*[redFsm->transSet.length()];
 	for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ )
 		transPtrs[trans->id] = trans;
 
 	/* Keep a count of the num of items in the array written. */
-	out << '\t';
-	int totalSpaces = 0;
 	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
 		/* Save the position. Needed for eofTargs. */
 		RedTransAp *trans = transPtrs[t];
 
 		if ( trans->condSpace != 0 )
-			out << trans->condSpace->condSpaceId << ", ";
+			transCondSpaces.value( trans->condSpace->condSpaceId );
 		else
-			out << -1 << ", ";
-
-		if ( ++totalSpaces % IALL == 0 )
-			out << "\n\t";
+			transCondSpaces.value( -1 );
 	}
-	out << "\n";
 	delete[] transPtrs;
-	return out;
+
+	transCondSpaces.finish();
 }
 
-std::ostream &Flat::TRANS_OFFSETS()
+void Flat::taTransOffsets()
 {
+	transOffsets.start();
+
 	/* Transitions must be written ordered by their id. */
 	RedTransAp **transPtrs = new RedTransAp*[redFsm->transSet.length()];
 	for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ )
 		transPtrs[trans->id] = trans;
 
 	/* Keep a count of the num of items in the array written. */
-	out << '\t';
 	int curOffset = 0;
-	int totalOffsets = 0;
 	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
 		/* Save the position. Needed for eofTargs. */
 		RedTransAp *trans = transPtrs[t];
 
-		out << curOffset << ", ";
-
-		if ( ++totalOffsets % IALL == 0 )
-			out << "\n\t";
+		transOffsets.value( curOffset );
 
 		curOffset += trans->outConds.length();
 	}
-	out << "\n";
+
 	delete[] transPtrs;
-	return out;
+
+	transOffsets.finish();
 }
 
-std::ostream &Flat::TRANS_LENGTHS()
+void Flat::taTransLengths()
 {
+	transLengths.start();
+
 	/* Transitions must be written ordered by their id. */
 	RedTransAp **transPtrs = new RedTransAp*[redFsm->transSet.length()];
 	for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ )
 		transPtrs[trans->id] = trans;
 
 	/* Keep a count of the num of items in the array written. */
-	out << '\t';
+
 	int totalOffsets = 0;
 	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
 		/* Save the position. Needed for eofTargs. */
 		RedTransAp *trans = transPtrs[t];
-
-		out << trans->outConds.length() << ", ";
-
-		if ( ++totalOffsets % IALL == 0 )
-			out << "\n\t";
+		transLengths.value( trans->outConds.length() );
 	}
-	out << "\n";
 	delete[] transPtrs;
-	return out;
+
+	transLengths.finish();
 }
 
-std::ostream &Flat::COND_KEYS()
+void Flat::taCondKeys()
 {
+	condKeys.start();
+
 	/* Transitions must be written ordered by their id. */
 	RedTransAp **transPtrs = new RedTransAp*[redFsm->transSet.length()];
 	for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ )
 		transPtrs[trans->id] = trans;
 
 	/* Keep a count of the num of items in the array written. */
-	out << '\t';
-	int totalKeys = 0;
 	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
 		/* Save the position. Needed for eofTargs. */
 		RedTransAp *trans = transPtrs[t];
 
-		for ( RedCondList::Iter cond = trans->outConds; cond.lte(); cond++ ) {
-			out << cond->key.getVal() << ", ";
-			if ( ++totalKeys % IALL == 0 )
-				out << "\n\t";
-		}
+		for ( RedCondList::Iter cond = trans->outConds; cond.lte(); cond++ )
+			condKeys.value( cond->key.getVal() );
 	}
-	out << "\n";
 	delete[] transPtrs;
-	return out;
+
+	condKeys.finish();
 }
 
-std::ostream &Flat::COND_TARGS()
+void Flat::taCondTargs()
 {
+	condTargs.start();
+
 	/* Transitions must be written ordered by their id. */
 	RedTransAp **transPtrs = new RedTransAp*[redFsm->transSet.length()];
 	for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ )
 		transPtrs[trans->id] = trans;
 
 	/* Keep a count of the num of items in the array written. */
-	out << '\t';
-	int totalConds = 0;
 	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
 		/* Save the position. Needed for eofTargs. */
 		RedTransAp *trans = transPtrs[t];
 
 		for ( RedCondList::Iter cond = trans->outConds; cond.lte(); cond++ ) {
 			RedCondAp *c = cond->value;
-			out << c->targ->id << ", ";
-			if ( ++totalConds % IALL == 0 )
-				out << "\n\t";
+			condTargs.value( c->targ->id );
 		}
 	}
-	out << "\n";
 	delete[] transPtrs;
-	return out;
+
+	condTargs.finish();
 }
 
-std::ostream &Flat::COND_ACTIONS()
+void Flat::taCondActions()
 {
+	condActions.start();
+
 	/* Transitions must be written ordered by their id. */
 	RedTransAp **transPtrs = new RedTransAp*[redFsm->transSet.length()];
 	for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ )
 		transPtrs[trans->id] = trans;
 
 	/* Keep a count of the num of items in the array written. */
-	out << '\t';
-	int totalConds = 0;
 	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
 		/* Save the position. Needed for eofTargs. */
 		RedTransAp *trans = transPtrs[t];
@@ -351,14 +322,11 @@ std::ostream &Flat::COND_ACTIONS()
 		for ( RedCondList::Iter cond = trans->outConds; cond.lte(); cond++ ) {
 			RedCondAp *c = cond->value;
 			COND_ACTION( c );
-			out << ", ";
-			if ( ++totalConds % IALL == 0 )
-				out << "\n\t";
 		}
 	}
-	out << "\n";
 	delete[] transPtrs;
-	return out;
+
+	condActions.finish();
 }
 
 /* Write out the array of actions. */

@@ -51,6 +51,19 @@ void FlatLooped::tableDataPass()
 	taKeys();
 	taKeySpans();
 	taFlatIndexOffset();
+
+	taIndicies();
+	taTransCondSpaces();
+	taTransOffsets();
+	taTransLengths();
+	taCondKeys();
+	taCondTargs();
+	taCondActions();
+
+	taToStateActions();
+	taFromStateActions();
+	taEofActions();
+	taEofTrans();
 }
 
 std::ostream &FlatLooped::TO_STATE_ACTION_SWITCH()
@@ -134,68 +147,25 @@ void FlatLooped::writeData()
 	taKeySpans();
 	taFlatIndexOffset();
 
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxIndex), I() );
-	INDICIES();
-	CLOSE_ARRAY() <<
-	"\n";
+	taIndicies();
+	taTransCondSpaces();
+	taTransOffsets();
+	taTransLengths();
+	taCondKeys();
+	taCondTargs();
+	taCondActions();
 
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TCS() );
-	TRANS_COND_SPACES();
-	CLOSE_ARRAY() <<
-	"\n";
+	if ( redFsm->anyToStateActions() )
+		taToStateActions();
 
-	OPEN_ARRAY( "int", TO() );
-	TRANS_OFFSETS();
-	CLOSE_ARRAY() <<
-	"\n";
+	if ( redFsm->anyFromStateActions() )
+		taFromStateActions();
 
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TL() );
-	TRANS_LENGTHS();
-	CLOSE_ARRAY() <<
-	"\n";
+	if ( redFsm->anyEofActions() )
+		taEofActions();
 
-	OPEN_ARRAY( "char", CK() );
-	COND_KEYS();
-	CLOSE_ARRAY() <<
-	"\n";
-
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), CT() );
-	COND_TARGS();
-	CLOSE_ARRAY() <<
-	"\n";
-
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), CA() );
-	COND_ACTIONS();
-	CLOSE_ARRAY() <<
-	"\n";
-
-	if ( redFsm->anyToStateActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), TSA() );
-		TO_STATE_ACTIONS();
-		CLOSE_ARRAY() <<
-		"\n";
-	}
-
-	if ( redFsm->anyFromStateActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), FSA() );
-		FROM_STATE_ACTIONS();
-		CLOSE_ARRAY() <<
-		"\n";
-	}
-
-	if ( redFsm->anyEofActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), EA() );
-		EOF_ACTIONS();
-		CLOSE_ARRAY() <<
-		"\n";
-	}
-
-	if ( redFsm->anyEofTrans() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxIndexOffset+1), ET() );
-		EOF_TRANS();
-		CLOSE_ARRAY() <<
-		"\n";
-	}
+	if ( redFsm->anyEofTrans() )
+		taEofTrans();
 
 	STATE_IDS();
 }
@@ -227,7 +197,7 @@ void FlatLooped::writeExec()
 
 	out <<
 		"	const " << ALPH_TYPE() << " *_keys;\n"
-		"	const " << ARRAY_TYPE(redFsm->maxIndex) << " *_inds;\n"
+		"	const " << indicies.type << " *_inds;\n"
 		"	const char *_ckeys;\n"
 		"	int _klen;\n"
 		"	int _cpc;\n";
@@ -369,40 +339,37 @@ void FlatLooped::writeExec()
 	out << "	}\n";
 }
 
-std::ostream &FlatLooped::TO_STATE_ACTION( RedStateAp *state )
+void FlatLooped::TO_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->toStateAction != 0 )
 		act = state->toStateAction->location+1;
-	out << act;
+	toStateActions.value( act );
 }
 
-std::ostream &FlatLooped::FROM_STATE_ACTION( RedStateAp *state )
+void FlatLooped::FROM_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->fromStateAction != 0 )
 		act = state->fromStateAction->location+1;
-	out << act;
-	return out;
+	fromStateActions.value( act );
 }
 
-std::ostream &FlatLooped::EOF_ACTION( RedStateAp *state )
+void FlatLooped::EOF_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->eofAction != 0 )
 		act = state->eofAction->location+1;
-	out << act;
-	return out;
+	eofActions.value( act );
 }
 
-std::ostream &FlatLooped::COND_ACTION( RedCondAp *cond )
+void FlatLooped::COND_ACTION( RedCondAp *cond )
 {
 	/* If there are actions, emit them. Otherwise emit zero. */
 	int act = 0;
 	if ( cond->action != 0 )
 		act = cond->action->location+1;
-	out << act;
-	return out;
+	condActions.value( act );
 }
 
 
