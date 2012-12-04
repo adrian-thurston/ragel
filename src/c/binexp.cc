@@ -225,7 +225,6 @@ void BinaryExpanded::tableDataPass()
 
 void BinaryExpanded::writeData()
 {
-	/* Run the analysis pass over the table data. */
 	setTableState( TableArray::GeneratePass );
 
 	taKeyOffsets();

@@ -28,6 +28,28 @@
 
 namespace C {
 
+void FlatExpanded::calcIndexSize()
+{
+	setTransPos();
+	keys.setType( ALPH_TYPE() );
+	keys.isSigned = keyOps->isSigned;
+}
+
+
+void FlatExpanded::setTableState( TableArray::State state )
+{
+	for ( ArrayVector::Iter i = arrayVector; i.lte(); i++ ) {
+		TableArray *tableArray = *i;
+		tableArray->setState( state );
+	}
+}
+
+void FlatExpanded::tableDataPass()
+{
+	taKeys();
+	taKeySpans();
+}
+
 std::ostream &FlatExpanded::TO_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
@@ -150,24 +172,12 @@ std::ostream &FlatExpanded::ACTION_SWITCH()
 	return out;
 }
 
-void FlatExpanded::calcIndexSize()
-{
-	setTransPos();
-	keys.setType( ALPH_TYPE() );
-	keys.isSigned = keyOps->isSigned;
-}
-
 void FlatExpanded::writeData()
 {
-	OPEN_ARRAY( ALPH_TYPE(), K() );
-	KEYS();
-	CLOSE_ARRAY() <<
-	"\n";
+	setTableState( TableArray::GeneratePass );
 
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxSpan), SP() );
-	KEY_SPANS();
-	CLOSE_ARRAY() <<
-	"\n";
+	taKeys();
+	taKeySpans();
 
 	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxFlatIndexOffset), IO() );
 	FLAT_INDEX_OFFSET();

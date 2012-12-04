@@ -39,21 +39,19 @@ class Flat
 	: public CodeGen
 {
 public:
-	Flat( const CodeGenArgs &args ) 
-	:
-		CodeGen( args ),
-		keys(               "keys",                  *this )
-	{}
+	Flat( const CodeGenArgs &args );
 
 	virtual ~Flat() { }
 
 protected:
 	TableArray keys;
+	TableArray keySpans;
 
-	std::ostream &KEYS();
+	void taKeys();
+	void taKeySpans();
+
 	std::ostream &INDICIES();
 	std::ostream &FLAT_INDEX_OFFSET();
-	std::ostream &KEY_SPANS();
 	std::ostream &TO_STATE_ACTIONS();
 	std::ostream &FROM_STATE_ACTIONS();
 	std::ostream &EOF_ACTIONS();

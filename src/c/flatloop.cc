@@ -37,6 +37,20 @@ void FlatLooped::calcIndexSize()
 	keys.isSigned = keyOps->isSigned;
 }
 
+void FlatLooped::setTableState( TableArray::State state )
+{
+	for ( ArrayVector::Iter i = arrayVector; i.lte(); i++ ) {
+		TableArray *tableArray = *i;
+		tableArray->setState( state );
+	}
+}
+
+void FlatLooped::tableDataPass()
+{
+	taKeys();
+	taKeySpans();
+}
+
 std::ostream &FlatLooped::TO_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
@@ -105,10 +119,10 @@ std::ostream &FlatLooped::ACTION_SWITCH()
 	return out;
 }
 
-
-
 void FlatLooped::writeData()
 {
+	setTableState( TableArray::GeneratePass );
+
 	/* If there are any transtion functions then output the array. If there
 	 * are none, don't bother emitting an empty array that won't be used. */
 	if ( redFsm->anyActions() ) {
@@ -118,15 +132,8 @@ void FlatLooped::writeData()
 		"\n";
 	}
 
-	OPEN_ARRAY( ALPH_TYPE(), K() );
-	KEYS();
-	CLOSE_ARRAY() <<
-	"\n";
-
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxSpan), SP() );
-	KEY_SPANS();
-	CLOSE_ARRAY() <<
-	"\n";
+	taKeys();
+	taKeySpans();
 
 	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxFlatIndexOffset), IO() );
 	FLAT_INDEX_OFFSET();

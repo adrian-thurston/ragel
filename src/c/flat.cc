@@ -28,6 +28,13 @@
 
 namespace C {
 
+Flat::Flat( const CodeGenArgs &args ) 
+:
+	CodeGen( args ),
+	keys(       "trans_keys",  *this ),
+	keySpans(   "key_spans",   *this )
+{}
+
 void Flat::setTransPos()
 {
 	/* Transitions must be written ordered by their id. */
@@ -68,24 +75,19 @@ std::ostream &Flat::FLAT_INDEX_OFFSET()
 	return out;
 }
 
-std::ostream &Flat::KEY_SPANS()
+void Flat::taKeySpans()
 {
-	out << "\t";
-	int totalStateNum = 0;
+	keySpans.start();
+
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		/* Write singles length. */
 		unsigned long long span = 0;
 		if ( st->transList != 0 )
 			span = keyOps->span( st->lowKey, st->highKey );
-		out << span;
-		if ( !st.last() ) {
-			out << ", ";
-			if ( ++totalStateNum % IALL == 0 )
-				out << "\n\t";
-		}
+
+		keySpans.value( span );
 	}
-	out << "\n";
-	return out;
+
+	keySpans.finish();
 }
 
 std::ostream &Flat::TO_STATE_ACTIONS()
@@ -163,22 +165,17 @@ std::ostream &Flat::EOF_TRANS()
 	return out;
 }
 
-std::ostream &Flat::KEYS()
+void Flat::taKeys()
 {
-	out << '\t';
-	int totalTrans = 0;
+	keys.start();
+
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Emit just low key and high key. */
-		out << KEY( st->lowKey ) << ", ";
-		out << KEY( st->highKey ) << ", ";
-		if ( ++totalTrans % IALL == 0 )
-			out << "\n\t";
+		keys.value( st->lowKey.getVal() );
+		keys.value( st->highKey.getVal() );
 	}
 
-	/* Output one last number so we don't have to figure out when the last
-	 * entry is and avoid writing a comma. */
-	out << 0 << "\n";
-	return out;
+	keys.finish();
 }
 
 std::ostream &Flat::INDICIES()

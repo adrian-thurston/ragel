@@ -53,6 +53,8 @@ public:
 	virtual std::ostream &COND_ACTION( RedCondAp *cond );
 
 	virtual void calcIndexSize();
+	virtual void setTableState( TableArray::State );
+	virtual void tableDataPass();
 
 	virtual void writeData();
 	virtual void writeExec();

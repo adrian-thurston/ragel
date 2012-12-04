@@ -175,7 +175,6 @@ void BinaryLooped::tableDataPass()
 
 void BinaryLooped::writeData()
 {
-	/* Run the analysis pass over the table data. */
 	setTableState( TableArray::GeneratePass );
 
 	/* If there are any transtion functions then output the array. If there
