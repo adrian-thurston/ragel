@@ -60,11 +60,6 @@ protected:
 	TableArray eofActions;
 	TableArray eofTrans;
 
-	std::ostream &TO_STATE_ACTION_SWITCH();
-	std::ostream &FROM_STATE_ACTION_SWITCH();
-	std::ostream &EOF_ACTION_SWITCH();
-	std::ostream &ACTION_SWITCH();
-
 	std::ostream &COND_KEYS_v1();
 	std::ostream &COND_SPACES_v1();
 	std::ostream &KEYS();

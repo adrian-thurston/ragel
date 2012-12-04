@@ -43,10 +43,6 @@ public:
 	virtual ~Flat() { }
 
 protected:
-	std::ostream &TO_STATE_ACTION_SWITCH();
-	std::ostream &FROM_STATE_ACTION_SWITCH();
-	std::ostream &EOF_ACTION_SWITCH();
-	std::ostream &ACTION_SWITCH();
 	std::ostream &KEYS();
 	std::ostream &INDICIES();
 	std::ostream &FLAT_INDEX_OFFSET();

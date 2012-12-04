@@ -42,6 +42,11 @@ public:
 	FlatLooped( const CodeGenArgs &args )
 		: Flat(args) {}
 
+	std::ostream &TO_STATE_ACTION_SWITCH();
+	std::ostream &FROM_STATE_ACTION_SWITCH();
+	std::ostream &EOF_ACTION_SWITCH();
+	std::ostream &ACTION_SWITCH();
+
 	virtual std::ostream &TO_STATE_ACTION( RedStateAp *state );
 	virtual std::ostream &FROM_STATE_ACTION( RedStateAp *state );
 	virtual std::ostream &EOF_ACTION( RedStateAp *state );

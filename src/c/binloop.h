@@ -54,6 +54,11 @@ public:
 	virtual void EOF_ACTION( RedStateAp *state );
 	virtual void COND_ACTION( RedCondAp *cond );
 
+	std::ostream &TO_STATE_ACTION_SWITCH();
+	std::ostream &FROM_STATE_ACTION_SWITCH();
+	std::ostream &EOF_ACTION_SWITCH();
+	std::ostream &ACTION_SWITCH();
+
 	TableArray condOffsets;
 	TableArray condLens;
 	TableArray condKeysV1;

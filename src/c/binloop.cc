@@ -76,6 +76,76 @@ void BinaryLooped::EOF_ACTION( RedStateAp *state )
 	eofActions.value( act );
 }
 
+std::ostream &BinaryLooped::TO_STATE_ACTION_SWITCH()
+{
+	/* Walk the list of functions, printing the cases. */
+	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
+		/* Write out referenced actions. */
+		if ( act->numToStateRefs > 0 ) {
+			/* Write the case label, the action and the case break. */
+			out << "\tcase " << act->actionId << ":\n";
+			ACTION( out, act, 0, false, false );
+			out << "\tbreak;\n";
+		}
+	}
+
+	genLineDirective( out );
+	return out;
+}
+
+std::ostream &BinaryLooped::FROM_STATE_ACTION_SWITCH()
+{
+	/* Walk the list of functions, printing the cases. */
+	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
+		/* Write out referenced actions. */
+		if ( act->numFromStateRefs > 0 ) {
+			/* Write the case label, the action and the case break. */
+			out << "\tcase " << act->actionId << ":\n";
+			ACTION( out, act, 0, false, false );
+			out << "\tbreak;\n";
+		}
+	}
+
+	genLineDirective( out );
+	return out;
+}
+
+std::ostream &BinaryLooped::EOF_ACTION_SWITCH()
+{
+	/* Walk the list of functions, printing the cases. */
+	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
+		/* Write out referenced actions. */
+		if ( act->numEofRefs > 0 ) {
+			/* Write the case label, the action and the case break. */
+			out << "\tcase " << act->actionId << ":\n";
+			ACTION( out, act, 0, true, false );
+			out << "\tbreak;\n";
+		}
+	}
+
+	genLineDirective( out );
+	return out;
+}
+
+
+std::ostream &BinaryLooped::ACTION_SWITCH()
+{
+	/* Walk the list of functions, printing the cases. */
+	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
+		/* Write out referenced actions. */
+		if ( act->numTransRefs > 0 ) {
+			/* Write the case label, the action and the case break. */
+			out << "\tcase " << act->actionId << ":\n";
+			ACTION( out, act, 0, false, false );
+			out << "\tbreak;\n";
+		}
+	}
+
+	genLineDirective( out );
+	return out;
+}
+
+
 void BinaryLooped::setTableState( TableArray::State state )
 {
 	for ( ArrayVector::Iter i = arrayVector; i.lte(); i++ ) {

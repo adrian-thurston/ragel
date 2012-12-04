@@ -34,6 +34,76 @@ void FlatLooped::calcIndexSize()
 	setTransPos();
 }
 
+std::ostream &FlatLooped::TO_STATE_ACTION_SWITCH()
+{
+	/* Walk the list of functions, printing the cases. */
+	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
+		/* Write out referenced actions. */
+		if ( act->numToStateRefs > 0 ) {
+			/* Write the case label, the action and the case break */
+			out << "\tcase " << act->actionId << ":\n";
+			ACTION( out, act, 0, false, false );
+			out << "\tbreak;\n";
+		}
+	}
+
+	genLineDirective( out );
+	return out;
+}
+
+std::ostream &FlatLooped::FROM_STATE_ACTION_SWITCH()
+{
+	/* Walk the list of functions, printing the cases. */
+	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
+		/* Write out referenced actions. */
+		if ( act->numFromStateRefs > 0 ) {
+			/* Write the case label, the action and the case break */
+			out << "\tcase " << act->actionId << ":\n";
+			ACTION( out, act, 0, false, false );
+			out << "\tbreak;\n";
+		}
+	}
+
+	genLineDirective( out );
+	return out;
+}
+
+std::ostream &FlatLooped::EOF_ACTION_SWITCH()
+{
+	/* Walk the list of functions, printing the cases. */
+	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
+		/* Write out referenced actions. */
+		if ( act->numEofRefs > 0 ) {
+			/* Write the case label, the action and the case break */
+			out << "\tcase " << act->actionId << ":\n";
+			ACTION( out, act, 0, true, false );
+			out << "\tbreak;\n";
+		}
+	}
+
+	genLineDirective( out );
+	return out;
+}
+
+std::ostream &FlatLooped::ACTION_SWITCH()
+{
+	/* Walk the list of functions, printing the cases. */
+	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
+		/* Write out referenced actions. */
+		if ( act->numTransRefs > 0 ) {
+			/* Write the case label, the action and the case break */
+			out << "\tcase " << act->actionId << ":\n";
+			ACTION( out, act, 0, false, false );
+			out << "\tbreak;\n";
+		}
+	}
+
+	genLineDirective( out );
+	return out;
+}
+
+
+
 void FlatLooped::writeData()
 {
 	/* If there are any transtion functions then output the array. If there
