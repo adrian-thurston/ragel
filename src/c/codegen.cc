@@ -70,7 +70,7 @@ void cLineDirective( ostream &out, const char *fileName, int line )
 
 namespace C {
 
-TableArray::TableArray( const char *name, FsmCodeGen &fsmCodeGen )
+TableArray::TableArray( const char *name, CodeGen &fsmCodeGen )
 :
 	state(InitialState),
 	name(name),
@@ -169,7 +169,7 @@ void TableArray::finish()
 	}
 }
 
-void FsmCodeGen::genLineDirective( ostream &out )
+void CodeGen::genLineDirective( ostream &out )
 {
 	std::streambuf *sbuf = out.rdbuf();
 	output_filter *filter = static_cast<output_filter*>(sbuf);
@@ -177,14 +177,14 @@ void FsmCodeGen::genLineDirective( ostream &out )
 }
 
 /* Init code gen with in parameters. */
-FsmCodeGen::FsmCodeGen( const CodeGenArgs &args )
+CodeGen::CodeGen( const CodeGenArgs &args )
 :
 	CodeGenData(args),
 	actions( "actions", *this )
 {
 }
 
-unsigned int FsmCodeGen::arrayTypeSize( unsigned long maxVal )
+unsigned int CodeGen::arrayTypeSize( unsigned long maxVal )
 {
 	long long maxValLL = (long long) maxVal;
 	HostType *arrayType = keyOps->typeSubsumes( maxValLL );
@@ -192,7 +192,7 @@ unsigned int FsmCodeGen::arrayTypeSize( unsigned long maxVal )
 	return arrayType->size;
 }
 
-string FsmCodeGen::ARRAY_TYPE( unsigned long maxVal )
+string CodeGen::ARRAY_TYPE( unsigned long maxVal )
 {
 	long long maxValLL = (long long) maxVal;
 	HostType *arrayType = keyOps->typeSubsumes( maxValLL );
@@ -208,13 +208,13 @@ string FsmCodeGen::ARRAY_TYPE( unsigned long maxVal )
 
 
 /* Write out the fsm name. */
-string FsmCodeGen::FSM_NAME()
+string CodeGen::FSM_NAME()
 {
 	return fsmName;
 }
 
 /* Emit the offset of the start state as a decimal integer. */
-string FsmCodeGen::START_STATE_ID()
+string CodeGen::START_STATE_ID()
 {
 	ostringstream ret;
 	ret << redFsm->startState->id;
@@ -222,7 +222,7 @@ string FsmCodeGen::START_STATE_ID()
 };
 
 /* Write out the array of actions. */
-std::ostream &FsmCodeGen::ACTIONS_ARRAY()
+std::ostream &CodeGen::ACTIONS_ARRAY()
 {
 	out << "\t0, ";
 	int totalActions = 1;
@@ -247,7 +247,7 @@ std::ostream &FsmCodeGen::ACTIONS_ARRAY()
 	return out;
 }
 
-void FsmCodeGen::taActions()
+void CodeGen::taActions()
 {
 	actions.start();
 
@@ -266,7 +266,7 @@ void FsmCodeGen::taActions()
 }
 
 
-string FsmCodeGen::ACCESS()
+string CodeGen::ACCESS()
 {
 	ostringstream ret;
 	if ( accessExpr != 0 )
@@ -275,7 +275,7 @@ string FsmCodeGen::ACCESS()
 }
 
 
-string FsmCodeGen::P()
+string CodeGen::P()
 { 
 	ostringstream ret;
 	if ( pExpr == 0 )
@@ -288,7 +288,7 @@ string FsmCodeGen::P()
 	return ret.str();
 }
 
-string FsmCodeGen::PE()
+string CodeGen::PE()
 {
 	ostringstream ret;
 	if ( peExpr == 0 )
@@ -301,7 +301,7 @@ string FsmCodeGen::PE()
 	return ret.str();
 }
 
-string FsmCodeGen::vEOF()
+string CodeGen::vEOF()
 {
 	ostringstream ret;
 	if ( eofExpr == 0 )
@@ -314,7 +314,7 @@ string FsmCodeGen::vEOF()
 	return ret.str();
 }
 
-string FsmCodeGen::vCS()
+string CodeGen::vCS()
 {
 	ostringstream ret;
 	if ( csExpr == 0 )
@@ -328,7 +328,7 @@ string FsmCodeGen::vCS()
 	return ret.str();
 }
 
-string FsmCodeGen::TOP()
+string CodeGen::TOP()
 {
 	ostringstream ret;
 	if ( topExpr == 0 )
@@ -341,7 +341,7 @@ string FsmCodeGen::TOP()
 	return ret.str();
 }
 
-string FsmCodeGen::STACK()
+string CodeGen::STACK()
 {
 	ostringstream ret;
 	if ( stackExpr == 0 )
@@ -354,7 +354,7 @@ string FsmCodeGen::STACK()
 	return ret.str();
 }
 
-string FsmCodeGen::ACT()
+string CodeGen::ACT()
 {
 	ostringstream ret;
 	if ( actExpr == 0 )
@@ -367,7 +367,7 @@ string FsmCodeGen::ACT()
 	return ret.str();
 }
 
-string FsmCodeGen::TOKSTART()
+string CodeGen::TOKSTART()
 {
 	ostringstream ret;
 	if ( tokstartExpr == 0 )
@@ -380,7 +380,7 @@ string FsmCodeGen::TOKSTART()
 	return ret.str();
 }
 
-string FsmCodeGen::TOKEND()
+string CodeGen::TOKEND()
 {
 	ostringstream ret;
 	if ( tokendExpr == 0 )
@@ -393,7 +393,7 @@ string FsmCodeGen::TOKEND()
 	return ret.str();
 }
 
-string FsmCodeGen::GET_KEY()
+string CodeGen::GET_KEY()
 {
 	ostringstream ret;
 	if ( getKeyExpr != 0 ) { 
@@ -411,7 +411,7 @@ string FsmCodeGen::GET_KEY()
 
 /* Write out level number of tabs. Makes the nested binary search nice
  * looking. */
-string FsmCodeGen::TABS( int level )
+string CodeGen::TABS( int level )
 {
 	string result;
 	while ( level-- > 0 )
@@ -421,7 +421,7 @@ string FsmCodeGen::TABS( int level )
 
 /* Write out a key from the fsm code gen. Depends on wether or not the key is
  * signed. */
-string FsmCodeGen::KEY( Key key )
+string CodeGen::KEY( Key key )
 {
 	ostringstream ret;
 	if ( keyOps->isSigned || !hostLang->explicitUnsigned )
@@ -431,12 +431,12 @@ string FsmCodeGen::KEY( Key key )
 	return ret.str();
 }
 
-bool FsmCodeGen::isAlphTypeSigned()
+bool CodeGen::isAlphTypeSigned()
 {
 	return keyOps->isSigned;
 }
 
-bool FsmCodeGen::isWideAlphTypeSigned()
+bool CodeGen::isWideAlphTypeSigned()
 {
 	string ret;
 	if ( redFsm->maxKey <= keyOps->maxKey )
@@ -448,7 +448,7 @@ bool FsmCodeGen::isWideAlphTypeSigned()
 	}
 }
 
-void FsmCodeGen::EXEC( ostream &ret, GenInlineItem *item, int targState, int inFinish )
+void CodeGen::EXEC( ostream &ret, GenInlineItem *item, int targState, int inFinish )
 {
 	/* The parser gives fexec two children. The double brackets are for D
 	 * code. If the inline list is a single word it will get interpreted as a
@@ -458,7 +458,7 @@ void FsmCodeGen::EXEC( ostream &ret, GenInlineItem *item, int targState, int inF
 	ret << "))-1;}";
 }
 
-void FsmCodeGen::LM_SWITCH( ostream &ret, GenInlineItem *item, 
+void CodeGen::LM_SWITCH( ostream &ret, GenInlineItem *item, 
 		int targState, int inFinish, bool csForced )
 {
 	ret << 
@@ -490,12 +490,12 @@ void FsmCodeGen::LM_SWITCH( ostream &ret, GenInlineItem *item,
 		"\t";
 }
 
-void FsmCodeGen::SET_ACT( ostream &ret, GenInlineItem *item )
+void CodeGen::SET_ACT( ostream &ret, GenInlineItem *item )
 {
 	ret << ACT() << " = " << item->lmId << ";";
 }
 
-void FsmCodeGen::SET_TOKEND( ostream &ret, GenInlineItem *item )
+void CodeGen::SET_TOKEND( ostream &ret, GenInlineItem *item )
 {
 	/* The tokend action sets tokend. */
 	ret << TOKEND() << " = " << P();
@@ -504,27 +504,27 @@ void FsmCodeGen::SET_TOKEND( ostream &ret, GenInlineItem *item )
 	out << ";";
 }
 
-void FsmCodeGen::GET_TOKEND( ostream &ret, GenInlineItem *item )
+void CodeGen::GET_TOKEND( ostream &ret, GenInlineItem *item )
 {
 	ret << TOKEND();
 }
 
-void FsmCodeGen::INIT_TOKSTART( ostream &ret, GenInlineItem *item )
+void CodeGen::INIT_TOKSTART( ostream &ret, GenInlineItem *item )
 {
 	ret << TOKSTART() << " = 0;";
 }
 
-void FsmCodeGen::INIT_ACT( ostream &ret, GenInlineItem *item )
+void CodeGen::INIT_ACT( ostream &ret, GenInlineItem *item )
 {
 	ret << ACT() << " = 0;";
 }
 
-void FsmCodeGen::SET_TOKSTART( ostream &ret, GenInlineItem *item )
+void CodeGen::SET_TOKSTART( ostream &ret, GenInlineItem *item )
 {
 	ret << TOKSTART() << " = " << P() << ";";
 }
 
-void FsmCodeGen::SUB_ACTION( ostream &ret, GenInlineItem *item, 
+void CodeGen::SUB_ACTION( ostream &ret, GenInlineItem *item, 
 		int targState, bool inFinish, bool csForced )
 {
 	if ( item->children->length() > 0 ) {
@@ -538,7 +538,7 @@ void FsmCodeGen::SUB_ACTION( ostream &ret, GenInlineItem *item,
 
 /* Write out an inline tree structure. Walks the list and possibly calls out
  * to virtual functions than handle language specific items in the tree. */
-void FsmCodeGen::INLINE_LIST( ostream &ret, GenInlineList *inlineList, 
+void CodeGen::INLINE_LIST( ostream &ret, GenInlineList *inlineList, 
 		int targState, bool inFinish, bool csForced )
 {
 	for ( GenInlineList::Iter item = *inlineList; item.lte(); item++ ) {
@@ -619,7 +619,7 @@ void FsmCodeGen::INLINE_LIST( ostream &ret, GenInlineList *inlineList,
 	}
 }
 /* Write out paths in line directives. Escapes any special characters. */
-string FsmCodeGen::LDIR_PATH( char *path )
+string CodeGen::LDIR_PATH( char *path )
 {
 	ostringstream ret;
 	for ( char *pc = path; *pc != 0; pc++ ) {
@@ -631,7 +631,7 @@ string FsmCodeGen::LDIR_PATH( char *path )
 	return ret.str();
 }
 
-void FsmCodeGen::ACTION( ostream &ret, GenAction *action, int targState, 
+void CodeGen::ACTION( ostream &ret, GenAction *action, int targState, 
 		bool inFinish, bool csForced )
 {
 	/* Write the preprocessor line info for going into the source file. */
@@ -643,14 +643,14 @@ void FsmCodeGen::ACTION( ostream &ret, GenAction *action, int targState,
 	ret << "}\n";
 }
 
-void FsmCodeGen::CONDITION( ostream &ret, GenAction *condition )
+void CodeGen::CONDITION( ostream &ret, GenAction *condition )
 {
 	ret << "\n";
 	cLineDirective( ret, condition->loc.fileName, condition->loc.line );
 	INLINE_LIST( ret, condition->inlineList, 0, false, false );
 }
 
-string FsmCodeGen::ERROR_STATE()
+string CodeGen::ERROR_STATE()
 {
 	ostringstream ret;
 	if ( redFsm->errState != 0 )
@@ -660,7 +660,7 @@ string FsmCodeGen::ERROR_STATE()
 	return ret.str();
 }
 
-string FsmCodeGen::FIRST_FINAL_STATE()
+string CodeGen::FIRST_FINAL_STATE()
 {
 	ostringstream ret;
 	if ( redFsm->firstFinState != 0 )
@@ -670,7 +670,7 @@ string FsmCodeGen::FIRST_FINAL_STATE()
 	return ret.str();
 }
 
-void FsmCodeGen::writeInit()
+void CodeGen::writeInit()
 {
 	out << "	{\n";
 
@@ -690,7 +690,7 @@ void FsmCodeGen::writeInit()
 	out << "	}\n";
 }
 
-string FsmCodeGen::DATA_PREFIX()
+string CodeGen::DATA_PREFIX()
 {
 	if ( !noPrefix )
 		return FSM_NAME() + "_";
@@ -698,7 +698,7 @@ string FsmCodeGen::DATA_PREFIX()
 }
 
 /* Emit the alphabet data type. */
-string FsmCodeGen::ALPH_TYPE()
+string CodeGen::ALPH_TYPE()
 {
 	string ret = keyOps->alphType->data1;
 	if ( keyOps->alphType->data2 != 0 ) {
@@ -708,7 +708,7 @@ string FsmCodeGen::ALPH_TYPE()
 	return ret;
 }
 
-void FsmCodeGen::STATE_IDS()
+void CodeGen::STATE_IDS()
 {
 	if ( redFsm->startState != 0 )
 		STATIC_VAR( "int", START() ) << " = " << START_STATE_ID() << ";\n";
@@ -730,17 +730,17 @@ void FsmCodeGen::STATE_IDS()
 	}
 }
 
-void FsmCodeGen::writeStart()
+void CodeGen::writeStart()
 {
 	out << START_STATE_ID();
 }
 
-void FsmCodeGen::writeFirstFinal()
+void CodeGen::writeFirstFinal()
 {
 	out << FIRST_FINAL_STATE();
 }
 
-void FsmCodeGen::writeError()
+void CodeGen::writeError()
 {
 	out << ERROR_STATE();
 }
@@ -749,49 +749,49 @@ void FsmCodeGen::writeError()
  * Language specific, but style independent code generators functions.
  */
 
-std::ostream &FsmCodeGen::OPEN_ARRAY( string type, string name )
+std::ostream &CodeGen::OPEN_ARRAY( string type, string name )
 {
 	out << "static const " << type << " " << name << "[] = {\n";
 	return out;
 }
 
-std::ostream &FsmCodeGen::CLOSE_ARRAY()
+std::ostream &CodeGen::CLOSE_ARRAY()
 {
 	return out << "};\n";
 }
 
-std::ostream &FsmCodeGen::STATIC_VAR( string type, string name )
+std::ostream &CodeGen::STATIC_VAR( string type, string name )
 {
 	out << "static const " << type << " " << name;
 	return out;
 }
 
-string FsmCodeGen::UINT( )
+string CodeGen::UINT( )
 {
 	return "unsigned int";
 }
 
-string FsmCodeGen::ARR_OFF( string ptr, string offset )
+string CodeGen::ARR_OFF( string ptr, string offset )
 {
 	return ptr + " + " + offset;
 }
 
-string FsmCodeGen::CAST( string type )
+string CodeGen::CAST( string type )
 {
 	return "(" + type + ")";
 }
 
-std::ostream &FsmCodeGen::SWITCH_DEFAULT()
+std::ostream &CodeGen::SWITCH_DEFAULT()
 {
 	return out;
 }
 
-string FsmCodeGen::CTRL_FLOW()
+string CodeGen::CTRL_FLOW()
 {
 	return "";
 }
 
-void FsmCodeGen::writeExports()
+void CodeGen::writeExports()
 {
 	if ( exportList.length() > 0 ) {
 		for ( ExportList::Iter ex = exportList; ex.lte(); ex++ ) {
@@ -802,7 +802,7 @@ void FsmCodeGen::writeExports()
 	}
 }
 
-void FsmCodeGen::finishRagelDef()
+void CodeGen::finishRagelDef()
 {
 	if ( codeStyle == GenGoto || codeStyle == GenFGoto || 
 			codeStyle == GenIpGoto || codeStyle == GenSplit )
@@ -850,13 +850,13 @@ void FsmCodeGen::finishRagelDef()
 	tableDataPass();
 }
 
-ostream &FsmCodeGen::source_warning( const InputLoc &loc )
+ostream &CodeGen::source_warning( const InputLoc &loc )
 {
 	cerr << sourceFileName << ":" << loc.line << ":" << loc.col << ": warning: ";
 	return cerr;
 }
 
-ostream &FsmCodeGen::source_error( const InputLoc &loc )
+ostream &CodeGen::source_error( const InputLoc &loc )
 {
 	gblErrorCount += 1;
 	assert( sourceFileName != 0 );

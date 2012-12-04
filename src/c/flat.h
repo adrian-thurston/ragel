@@ -36,10 +36,10 @@ struct RedStateAp;
 namespace C {
 
 class Flat
-	: public FsmCodeGen
+	: public CodeGen
 {
 public:
-	Flat( const CodeGenArgs &args ) : FsmCodeGen(args) {}
+	Flat( const CodeGenArgs &args ) : CodeGen(args) {}
 	virtual ~Flat() { }
 
 protected:

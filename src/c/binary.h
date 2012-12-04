@@ -36,7 +36,7 @@ struct RedStateAp;
 namespace C {
 
 class Binary
-	: public FsmCodeGen
+	: public CodeGen
 {
 public:
 	Binary( const CodeGenArgs &args );

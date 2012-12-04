@@ -40,11 +40,11 @@ namespace C {
  * Goto driven fsm.
  */
 class Goto
-	: public FsmCodeGen
+	: public CodeGen
 {
 public:
 	Goto( const CodeGenArgs &args ) 
-		: FsmCodeGen(args) {}
+		: CodeGen(args) {}
 
 	std::ostream &TO_STATE_ACTION_SWITCH();
 	std::ostream &FROM_STATE_ACTION_SWITCH();

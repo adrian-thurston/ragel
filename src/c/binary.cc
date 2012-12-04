@@ -32,7 +32,7 @@ namespace C {
 
 Binary::Binary( const CodeGenArgs &args )
 :
-	FsmCodeGen( args ),
+	CodeGen( args ),
 	keyOffsets(         "key_offsets",           *this ),
 	singleLens(         "single_lengths",        *this ),
 	rangeLens(          "range_lengths",         *this ),
