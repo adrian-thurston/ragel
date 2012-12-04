@@ -42,6 +42,8 @@ public:
 	FlatLooped( const CodeGenArgs &args )
 		: Flat(args) {}
 
+	virtual void calcIndexSize();
+
 	virtual void writeData();
 	virtual void writeExec();
 };

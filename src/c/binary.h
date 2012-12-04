@@ -114,7 +114,6 @@ protected:
 	virtual void FROM_STATE_ACTION( RedStateAp *state ) = 0;
 	virtual void EOF_ACTION( RedStateAp *state ) = 0;
 	virtual void COND_ACTION( RedCondAp *cond ) = 0;
-	virtual void calcIndexSize();
 };
 
 }

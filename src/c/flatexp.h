@@ -53,6 +53,8 @@ protected:
 	virtual std::ostream &EOF_ACTION( RedStateAp *state );
 	virtual std::ostream &COND_ACTION( RedCondAp *cond );
 
+	virtual void calcIndexSize();
+
 	virtual void writeData();
 	virtual void writeExec();
 };

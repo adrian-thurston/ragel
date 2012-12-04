@@ -53,11 +53,6 @@ Binary::Binary( const CodeGenArgs &args )
 {
 }
 
-void Binary::calcIndexSize()
-{
-	assert( false );
-}
-
 void Binary::setTransPosWi()
 {
 	/* Transitions must be written ordered by their id. */

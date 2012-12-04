@@ -219,7 +219,7 @@ protected:
 
 public:
 	/* Determine if we should use indicies. */
-	virtual void calcIndexSize() {}
+	virtual void calcIndexSize() = 0;
 
 	virtual void setTableState( TableArray::State ) {}
 	virtual void tableDataPass() {}

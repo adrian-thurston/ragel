@@ -150,10 +150,13 @@ std::ostream &FlatExpanded::ACTION_SWITCH()
 	return out;
 }
 
-void FlatExpanded::writeData()
+void FlatExpanded::calcIndexSize()
 {
 	setTransPos();
+}
 
+void FlatExpanded::writeData()
+{
 	OPEN_ARRAY( ALPH_TYPE(), K() );
 	KEYS();
 	CLOSE_ARRAY() <<

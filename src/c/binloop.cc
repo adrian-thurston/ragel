@@ -116,11 +116,6 @@ void BinaryLooped::writeData()
 	/* Run the analysis pass over the table data. */
 	setTableState( TableArray::GeneratePass );
 
-	if ( useIndicies )
-		setTransPosWi();
-	else
-		setTransPos();
-
 	/* If there are any transtion functions then output the array. If there
 	 * are none, don't bother emitting an empty array that won't be used. */
 	if ( redFsm->anyActions() )
@@ -350,6 +345,12 @@ void BinaryLooped::writeExec()
 void BinaryLooped::calcIndexSize()
 {
 	useIndicies = false;
+
+	if ( useIndicies )
+		setTransPosWi();
+	else
+		setTransPos();
+
 	return;
 
 	int sizeWithInds = 0, sizeWithoutInds = 0;

@@ -32,6 +32,12 @@ namespace C {
 void BinaryExpanded::calcIndexSize()
 {
 	useIndicies = false;
+
+	if ( useIndicies )
+		setTransPosWi();
+	else
+		setTransPos();
+
 	return;
 
 	int sizeWithInds = 0, sizeWithoutInds = 0;
@@ -215,11 +221,6 @@ void BinaryExpanded::writeData()
 {
 	/* Run the analysis pass over the table data. */
 	setTableState( TableArray::GeneratePass );
-
-	if ( useIndicies )
-		setTransPosWi();
-	else
-		setTransPos();
 
 	taKeyOffsets();
 
