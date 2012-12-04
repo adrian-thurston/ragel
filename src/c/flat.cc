@@ -43,42 +43,6 @@ void Flat::setTransPos()
 	delete[] transPtrs;
 }
 
-std::ostream &Flat::TO_STATE_ACTION( RedStateAp *state )
-{
-	int act = 0;
-	if ( state->toStateAction != 0 )
-		act = state->toStateAction->location+1;
-	out << act;
-}
-
-std::ostream &Flat::FROM_STATE_ACTION( RedStateAp *state )
-{
-	int act = 0;
-	if ( state->fromStateAction != 0 )
-		act = state->fromStateAction->location+1;
-	out << act;
-	return out;
-}
-
-std::ostream &Flat::EOF_ACTION( RedStateAp *state )
-{
-	int act = 0;
-	if ( state->eofAction != 0 )
-		act = state->eofAction->location+1;
-	out << act;
-	return out;
-}
-
-std::ostream &Flat::COND_ACTION( RedCondAp *cond )
-{
-	/* If there are actions, emit them. Otherwise emit zero. */
-	int act = 0;
-	if ( cond->action != 0 )
-		act = cond->action->location+1;
-	out << act;
-	return out;
-}
-
 std::ostream &Flat::TO_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */

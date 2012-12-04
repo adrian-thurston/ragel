@@ -77,10 +77,10 @@ protected:
 	void RET( ostream &ret, bool inFinish );
 	void BREAK( ostream &ret, int targState, bool csForced );
 
-	virtual std::ostream &TO_STATE_ACTION( RedStateAp *state );
-	virtual std::ostream &FROM_STATE_ACTION( RedStateAp *state );
-	virtual std::ostream &EOF_ACTION( RedStateAp *state );
-	virtual std::ostream &COND_ACTION( RedCondAp *cond );
+	virtual std::ostream &TO_STATE_ACTION( RedStateAp *state ) = 0;
+	virtual std::ostream &FROM_STATE_ACTION( RedStateAp *state ) = 0;
+	virtual std::ostream &EOF_ACTION( RedStateAp *state ) = 0;
+	virtual std::ostream &COND_ACTION( RedCondAp *cond ) = 0;
 };
 
 }

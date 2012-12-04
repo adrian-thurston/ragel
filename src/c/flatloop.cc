@@ -295,4 +295,41 @@ void FlatLooped::writeExec()
 	out << "	}\n";
 }
 
+std::ostream &FlatLooped::TO_STATE_ACTION( RedStateAp *state )
+{
+	int act = 0;
+	if ( state->toStateAction != 0 )
+		act = state->toStateAction->location+1;
+	out << act;
+}
+
+std::ostream &FlatLooped::FROM_STATE_ACTION( RedStateAp *state )
+{
+	int act = 0;
+	if ( state->fromStateAction != 0 )
+		act = state->fromStateAction->location+1;
+	out << act;
+	return out;
+}
+
+std::ostream &FlatLooped::EOF_ACTION( RedStateAp *state )
+{
+	int act = 0;
+	if ( state->eofAction != 0 )
+		act = state->eofAction->location+1;
+	out << act;
+	return out;
+}
+
+std::ostream &FlatLooped::COND_ACTION( RedCondAp *cond )
+{
+	/* If there are actions, emit them. Otherwise emit zero. */
+	int act = 0;
+	if ( cond->action != 0 )
+		act = cond->action->location+1;
+	out << act;
+	return out;
+}
+
+
 }

@@ -42,6 +42,11 @@ public:
 	FlatLooped( const CodeGenArgs &args )
 		: Flat(args) {}
 
+	virtual std::ostream &TO_STATE_ACTION( RedStateAp *state );
+	virtual std::ostream &FROM_STATE_ACTION( RedStateAp *state );
+	virtual std::ostream &EOF_ACTION( RedStateAp *state );
+	virtual std::ostream &COND_ACTION( RedCondAp *cond );
+
 	virtual void calcIndexSize();
 
 	virtual void writeData();
