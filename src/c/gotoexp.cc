@@ -29,6 +29,21 @@
 
 namespace C {
 
+void GotoExpanded::setTableState( TableArray::State state )
+{
+	for ( ArrayVector::Iter i = arrayVector; i.lte(); i++ ) {
+		TableArray *tableArray = *i;
+		tableArray->setState( state );
+	}
+}
+
+void GotoExpanded::tableDataPass()
+{
+	taToStateActions();
+	taFromStateActions();
+	taEofActions();
+}
+
 std::ostream &GotoExpanded::EXEC_ACTIONS()
 {
 	/* Loop the actions. */
@@ -154,26 +169,16 @@ unsigned int GotoExpanded::EOF_ACTION( RedStateAp *state )
 
 void GotoExpanded::writeData()
 {
-	if ( redFsm->anyToStateActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), TSA() );
-		TO_STATE_ACTIONS();
-		CLOSE_ARRAY() <<
-		"\n";
-	}
+	setTableState( TableArray::GeneratePass );
 
-	if ( redFsm->anyFromStateActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), FSA() );
-		FROM_STATE_ACTIONS();
-		CLOSE_ARRAY() <<
-		"\n";
-	}
+	if ( redFsm->anyToStateActions() )
+		taToStateActions();
 
-	if ( redFsm->anyEofActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), EA() );
-		EOF_ACTIONS();
-		CLOSE_ARRAY() <<
-		"\n";
-	}
+	if ( redFsm->anyFromStateActions() )
+		taFromStateActions();
+
+	if ( redFsm->anyEofActions() )
+		taEofActions();
 
 	STATE_IDS();
 }

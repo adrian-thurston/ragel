@@ -43,6 +43,9 @@ public:
 	GotoLooped( const CodeGenArgs &args ) 
 		: Goto(args) {}
 
+	virtual void setTableState( TableArray::State );
+	virtual void tableDataPass();
+
 	virtual void writeData();
 	virtual void writeExec();
 };

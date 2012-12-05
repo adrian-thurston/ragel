@@ -29,35 +29,37 @@
 
 namespace C {
 
+void GotoLooped::setTableState( TableArray::State state )
+{
+	for ( ArrayVector::Iter i = arrayVector; i.lte(); i++ ) {
+		TableArray *tableArray = *i;
+		tableArray->setState( state );
+	}
+}
+
+void GotoLooped::tableDataPass()
+{
+	taActions();
+	taToStateActions();
+	taFromStateActions();
+	taEofActions();
+}
+
 void GotoLooped::writeData()
 {
-	if ( redFsm->anyActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActArrItem), A() );
-		ACTIONS_ARRAY();
-		CLOSE_ARRAY() <<
-		"\n";
-	}
+	setTableState( TableArray::GeneratePass );
 
-	if ( redFsm->anyToStateActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), TSA() );
-		TO_STATE_ACTIONS();
-		CLOSE_ARRAY() <<
-		"\n";
-	}
+	if ( redFsm->anyActions() )
+		taActions();
 
-	if ( redFsm->anyFromStateActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), FSA() );
-		FROM_STATE_ACTIONS();
-		CLOSE_ARRAY() <<
-		"\n";
-	}
+	if ( redFsm->anyToStateActions() )
+		taToStateActions();
 
-	if ( redFsm->anyEofActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), EA() );
-		EOF_ACTIONS();
-		CLOSE_ARRAY() <<
-		"\n";
-	}
+	if ( redFsm->anyFromStateActions() )
+		taFromStateActions();
+
+	if ( redFsm->anyEofActions() )
+		taEofActions();
 
 	STATE_IDS();
 }

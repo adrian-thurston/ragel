@@ -33,6 +33,15 @@ using std::ostringstream;
 
 namespace C {
 
+Goto::Goto( const CodeGenArgs &args ) 
+:
+	CodeGen( args ),
+	actions(           "actions",             *this ),
+	toStateActions(    "to_state_actions",    *this ),
+	fromStateActions(  "from_state_actions",  *this ),
+	eofActions(        "eof_actions",         *this )
+{}
+
 /* Emit the goto to take for a given transition. */
 std::ostream &Goto::COND_GOTO( RedCondAp *cond, int level )
 {
@@ -138,29 +147,21 @@ std::ostream &Goto::ACTION_SWITCH()
 }
 
 /* Write out the array of actions. */
-std::ostream &Goto::ACTIONS_ARRAY()
+void Goto::taActions()
 {
-	out << "\t0, ";
-	int totalActions = 1;
+	actions.start();
+
+	actions.value( 0 );
+	
 	for ( GenActionTableMap::Iter act = redFsm->actionMap; act.lte(); act++ ) {
 		/* Write out the length, which will never be the last character. */
-		out << act->key.length() << ", ";
-		/* Put in a line break every 8 */
-		if ( totalActions++ % 8 == 7 )
-			out << "\n\t";
+		actions.value( act->key.length() );
 
-		for ( GenActionTable::Iter item = act->key; item.lte(); item++ ) {
-			out << item->value->actionId;
-			if ( ! (act.last() && item.last()) )
-				out << ", ";
-
-			/* Put in a line break every 8 */
-			if ( totalActions++ % 8 == 7 )
-				out << "\n\t";
-		}
+		for ( GenActionTable::Iter item = act->key; item.lte(); item++ )
+			actions.value( item->value->actionId );
 	}
-	out << "\n";
-	return out;
+
+	actions.finish();
 }
 
 
@@ -515,8 +516,10 @@ unsigned int Goto::EOF_ACTION( RedStateAp *state )
 	return act;
 }
 
-std::ostream &Goto::TO_STATE_ACTIONS()
+void Goto::taToStateActions()
 {
+	toStateActions.start();
+
 	/* Take one off for the psuedo start state. */
 	int numStates = redFsm->stateList.length();
 	unsigned int *vals = new unsigned int[numStates];
@@ -525,23 +528,19 @@ std::ostream &Goto::TO_STATE_ACTIONS()
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ )
 		vals[st->id] = TO_STATE_ACTION(st);
 
-	out << "\t";
 	for ( int st = 0; st < redFsm->nextStateId; st++ ) {
 		/* Write any eof action. */
-		out << vals[st];
-		if ( st < numStates-1 ) {
-			out << ", ";
-			if ( (st+1) % IALL == 0 )
-				out << "\n\t";
-		}
+		toStateActions.value( vals[st] );
 	}
-	out << "\n";
 	delete[] vals;
-	return out;
+
+	toStateActions.finish();
 }
 
-std::ostream &Goto::FROM_STATE_ACTIONS()
+void Goto::taFromStateActions()
 {
+	fromStateActions.start();
+
 	/* Take one off for the psuedo start state. */
 	int numStates = redFsm->stateList.length();
 	unsigned int *vals = new unsigned int[numStates];
@@ -550,23 +549,19 @@ std::ostream &Goto::FROM_STATE_ACTIONS()
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ )
 		vals[st->id] = FROM_STATE_ACTION(st);
 
-	out << "\t";
 	for ( int st = 0; st < redFsm->nextStateId; st++ ) {
 		/* Write any eof action. */
-		out << vals[st];
-		if ( st < numStates-1 ) {
-			out << ", ";
-			if ( (st+1) % IALL == 0 )
-				out << "\n\t";
-		}
+		fromStateActions.value( vals[st] );
 	}
-	out << "\n";
 	delete[] vals;
-	return out;
+
+	fromStateActions.finish();
 }
 
-std::ostream &Goto::EOF_ACTIONS()
+void Goto::taEofActions()
 {
+	eofActions.start();
+
 	/* Take one off for the psuedo start state. */
 	int numStates = redFsm->stateList.length();
 	unsigned int *vals = new unsigned int[numStates];
@@ -575,19 +570,13 @@ std::ostream &Goto::EOF_ACTIONS()
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ )
 		vals[st->id] = EOF_ACTION(st);
 
-	out << "\t";
 	for ( int st = 0; st < redFsm->nextStateId; st++ ) {
 		/* Write any eof action. */
-		out << vals[st];
-		if ( st < numStates-1 ) {
-			out << ", ";
-			if ( (st+1) % IALL == 0 )
-				out << "\n\t";
-		}
+		eofActions.value( vals[st] );
 	}
-	out << "\n";
 	delete[] vals;
-	return out;
+
+	eofActions.finish();
 }
 
 std::ostream &Goto::FINISH_CASES()

@@ -43,8 +43,7 @@ class Goto
 	: public CodeGen
 {
 public:
-	Goto( const CodeGenArgs &args ) 
-		: CodeGen(args) {}
+	Goto( const CodeGenArgs &args );
 
 	std::ostream &TO_STATE_ACTION_SWITCH();
 	std::ostream &FROM_STATE_ACTION_SWITCH();
@@ -54,6 +53,16 @@ public:
 	std::ostream &TRANSITIONS();
 	std::ostream &EXEC_FUNCS();
 	std::ostream &FINISH_CASES();
+
+	TableArray actions;
+	TableArray toStateActions;
+	TableArray fromStateActions;
+	TableArray eofActions;
+
+	void taActions();
+	void taToStateActions();
+	void taFromStateActions();
+	void taEofActions();
 
 	void GOTO( ostream &ret, int gotoDest, bool inFinish );
 	void CALL( ostream &ret, int callDest, int targState, bool inFinish );

@@ -323,11 +323,7 @@ void SplitGoto::writeData()
 			"\n";
 	}
 
-
-	OPEN_ARRAY( ARRAY_TYPE(numSplitPartitions), PM() );
-	PART_MAP();
-	CLOSE_ARRAY() <<
-	"\n";
+	taPartMap();
 
 	for ( int p = 0; p < redFsm->nParts; p++ ) {
 		out << "int partition" << p << "( " << ALPH_TYPE() << " **_pp, " << ALPH_TYPE() << 
