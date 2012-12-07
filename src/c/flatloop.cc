@@ -191,7 +191,7 @@ void FlatLooped::writeExec()
 			redFsm->anyRegActions() || redFsm->anyFromStateActions() )
 	{
 		out << 
-			"	const " << ARRAY_TYPE(redFsm->maxActArrItem) << " *_acts;\n"
+			"	const " << actions.type << " *_acts;\n"
 			"	" << UINT() << " _nacts;\n"; 
 	}
 
@@ -314,7 +314,7 @@ void FlatLooped::writeExec()
 
 		if ( redFsm->anyEofActions() ) {
 			out <<
-				"	const " << ARRAY_TYPE(redFsm->maxActArrItem) << " *__acts = " << 
+				"	const " << actions.type << " *__acts = " << 
 						A() << " + " << EA() + "[" + vCS() + "]" << ";\n"
 				"	" << UINT() << " __nacts = " << CAST(UINT()) << " *__acts++;\n"
 				"	while ( __nacts-- > 0 ) {\n"
