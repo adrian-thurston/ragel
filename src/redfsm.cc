@@ -424,8 +424,10 @@ RedTransAp *RedFsmAp::chooseDefaultGoto( RedStateAp *state )
 	/* Make a set of transitions from the outRange. */
 	RedTransSet stateTransSet;
 	for ( RedTransList::Iter rtel = state->outRange; rtel.lte(); rtel++ ) {
-		if ( rtel->value->targ == state->next )
-			return rtel->value;
+		for ( RedCondList::Iter cond = rtel->value->outConds; cond.lte(); cond++ ) {
+			if ( cond->value->targ == state->next )
+				return rtel->value;
+		}
 	}
 	return 0;
 }
