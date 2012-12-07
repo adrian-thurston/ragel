@@ -507,7 +507,7 @@ RedTransAp *RedFsmAp::getErrorTrans()
 	if ( errTrans == 0 ) {
 		/* This insert should always succeed. No transition created by the user
 		 * can point to the error state. */
-		errTrans = new RedTransAp( getErrorState(), 0, nextTransId++ );
+		errTrans = new RedTransAp( nextTransId++ );
 		RedTransAp *inTransSet = transSet.insert( errTrans );
 		assert( inTransSet != 0 );
 
@@ -527,14 +527,14 @@ RedStateAp *RedFsmAp::getErrorState()
 }
 
 
-RedTransAp *RedFsmAp::allocateTrans( RedStateAp *targ, RedAction *action, GenCondSpace *condSpace )
+RedTransAp *RedFsmAp::allocateTrans( GenCondSpace *condSpace )
 {
 	/* Create a reduced trans and look for it in the transiton set. */
-	RedTransAp redTrans( targ, action, 0 );
+	RedTransAp redTrans( 0 );
 	redTrans.condSpace = condSpace;
 	RedTransAp *inDict = transSet.find( &redTrans );
 	if ( inDict == 0 ) {
-		inDict = new RedTransAp( targ, action, nextTransId++ );
+		inDict = new RedTransAp( nextTransId++ );
 		inDict->condSpace = condSpace;
 		transSet.insert( inDict );
 	}

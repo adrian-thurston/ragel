@@ -266,10 +266,8 @@ struct RedTransAp
 :
 	public AvlTreeEl<RedTransAp>
 {
-	RedTransAp( RedStateAp *targ, RedAction *action, int id )
+	RedTransAp( int id )
 	:
-		targ(targ),
-		action(action),
 		id(id),
 		pos(-1),
 		labelNeeded(true),
@@ -277,8 +275,6 @@ struct RedTransAp
 		errCond(0)
 	{ }
 
-	RedStateAp *targ;
-	RedAction *action;
 	int id;
 	int pos;
 	bool partitionBoundary;
@@ -582,7 +578,7 @@ struct RedFsmAp
 	/* Is every char in the alphabet covered? */
 	bool alphabetCovered( RedTransList &outRange );
 
-	RedTransAp *allocateTrans( RedStateAp *targState, RedAction *actionTable, GenCondSpace *condSpace );
+	RedTransAp *allocateTrans( GenCondSpace *condSpace );
 	RedCondAp *allocateCond( RedStateAp *targState, RedAction *actionTable );
 
 	void partitionFsm( int nParts );

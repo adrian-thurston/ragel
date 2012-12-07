@@ -880,10 +880,7 @@ void CodeGenData::newTrans( int snum, int tnum, Key lowKey,
 	if ( curState == redFsm->errState )
 		return;
 
-	/* Make the new transitions. */
-	RedStateAp *targState = targ >= 0 ? (allStates + targ) : redFsm->getErrorState();
-	RedAction *actionTable = action >= 0 ? (allActionTables + action) : 0;
-	RedTransAp *trans = redFsm->allocateTrans( targState, actionTable, gcs );
+	RedTransAp *trans = redFsm->allocateTrans( gcs );
 	trans->outConds.transfer( outConds );
 	RedTransEl transEl( lowKey, highKey, trans );
 
@@ -1039,7 +1036,7 @@ void CodeGenData::setEofTrans( int snum, long eofTarget, long actId )
 	RedStateAp *curState = allStates + snum;
 	RedStateAp *targState = allStates + eofTarget;
 	RedAction *eofAct = allActionTables + actId;
-	curState->eofTrans = redFsm->allocateTrans( targState, eofAct, 0 );
+	curState->eofTrans = redFsm->allocateTrans( 0 );
 	RedCondAp *cond = redFsm->allocateCond( targState, eofAct );
 	curState->eofTrans->outConds.append( RedCondEl( 0, cond ) );
 }
