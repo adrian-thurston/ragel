@@ -602,11 +602,11 @@ void CodeGenData::makeEofTrans( StateAp *state )
 void CodeGenData::makeTrans( Key lowKey, Key highKey, TransAp *trans )
 {
 	RedCondList redCondList;
-		
-	long targ = -1;
-	long action = -1;
 
 	for ( CondList::Iter cti = trans->condList; cti.lte(); cti++ ) {
+		long targ = -1;
+		long action = -1;
+
 		/* First reduce the action. */
 		RedActionTable *actionTable = 0;
 		if ( cti->actionTable.length() > 0 )
