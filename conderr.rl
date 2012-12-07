@@ -45,12 +45,9 @@ int main()
 
 #ifdef _____OUTPUT_____
 run:
-  bail
-  bail
   success
 
 run:
-  bail
   bail
   failure
 
