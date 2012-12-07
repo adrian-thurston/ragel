@@ -501,24 +501,6 @@ void IpGoto::setLabelsNeeded()
 		for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ )
 			st->labelNeeded = false;
 
-		/* Walk all transitions and set only those that have targs. */
-		for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ ) {
-			/* If there is no action with a next statement, then the label will be
-			 * needed. */
-			if ( trans->action == 0 || !trans->action->anyNextStmt() )
-				trans->targ->labelNeeded = true;
-
-			/* Need labels for states that have goto or calls in action code
-			 * invoked on characters (ie, not from out action code). */
-			if ( trans->action != 0 ) {
-				/* Loop the actions. */
-				for ( GenActionTable::Iter act = trans->action->key; act.lte(); act++ ) {
-					/* Get the action and walk it's tree. */
-					setLabelsNeeded( act->value->inlineList );
-				}
-			}
-		}
-
 		for ( CondApSet::Iter cond = redFsm->condSet; cond.lte(); cond++ ) {
 			/* If there is no action with a next statement, then the label will be
 			 * needed. */
