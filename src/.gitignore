@@ -12,6 +12,10 @@
 /ragel.exe
 /.deps
 /stamp-h1
+
+# Common testing file.
 /tmp.rl
 /tmp.c
+/tmp.cc
+/tmp
 /tmp.ps
