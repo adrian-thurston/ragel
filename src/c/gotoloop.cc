@@ -102,7 +102,7 @@ void GotoLooped::writeExec()
 
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
-			"	_acts = " << ARR_OFF( A(), FSA() + "[" + vCS() + "]" ) << ";\n"
+			"	_acts = " << A() << " + " << FSA() + "[" + vCS() + "]" << ";\n"
 			"	_nacts = " << CAST(UINT()) << " *_acts++;\n"
 			"	while ( _nacts-- > 0 ) {\n"
 			"		switch ( *_acts++ ) {\n";
@@ -129,7 +129,7 @@ void GotoLooped::writeExec()
 
 	if ( redFsm->anyToStateActions() ) {
 		out <<
-			"	_acts = " << ARR_OFF( A(), TSA() + "[" + vCS() + "]" ) << ";\n"
+			"	_acts = " << A() << " + " << TSA() + "[" + vCS() + "]" << ";\n"
 			"	_nacts = " << CAST(UINT()) << " *_acts++;\n"
 			"	while ( _nacts-- > 0 ) {\n"
 			"		switch ( *_acts++ ) {\n";
@@ -184,8 +184,7 @@ void GotoLooped::writeExec()
 		if ( redFsm->anyEofActions() ) {
 			out <<
 				"	const " << ARRAY_TYPE(redFsm->maxActArrItem) <<
-						" *__acts = " << 
-						ARR_OFF( A(), EA() + "[" + vCS() + "]" ) << ";\n"
+						" *__acts = " << A() << " + " << EA() + "[" + vCS() + "]" << ";\n"
 				"	" << UINT() << " __nacts = " << CAST(UINT()) << " *__acts++;\n"
 				"	while ( __nacts-- > 0 ) {\n"
 				"		switch ( *__acts++ ) {\n";

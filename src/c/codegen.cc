@@ -731,11 +731,6 @@ string CodeGen::UINT( )
 	return "unsigned int";
 }
 
-string CodeGen::ARR_OFF( string ptr, string offset )
-{
-	return ptr + " + " + offset;
-}
-
 string CodeGen::CAST( string type )
 {
 	return "(" + type + ")";

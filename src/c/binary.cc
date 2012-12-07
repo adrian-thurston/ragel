@@ -598,7 +598,7 @@ void Binary::taActions()
 void Binary::LOCATE_TRANS()
 {
 	out <<
-		"	_keys = " << ARR_OFF( K(), keyOffsets.ref() + "[" + vCS() + "]" ) << ";\n"
+		"	_keys = " << K() << " + " << keyOffsets.ref() + "[" + vCS() + "]" << ";\n"
 		"	_trans = " << IO() << "[" << vCS() << "];\n"
 		"\n"
 		"	_klen = " << singleLens.ref() << "[" << vCS() << "];\n"
@@ -651,7 +651,7 @@ void Binary::LOCATE_TRANS()
 void Binary::LOCATE_COND()
 {
 	out <<
-		"	_ckeys = " << ARR_OFF( CK(), TO() + "[" + "_trans" + "]" ) << ";\n"
+		"	_ckeys = " << CK() << " + " << TO() + "[" + "_trans" + "]" << ";\n"
 		"	_klen = " << TL() << "[" << "_trans" << "];\n"
 		"	_cond = " << TO() << "[_trans];\n"
 		"\n";

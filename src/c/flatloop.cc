@@ -222,7 +222,7 @@ void FlatLooped::writeExec()
 
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
-			"	_acts = " << ARR_OFF( A(), FSA() + "[" + vCS() + "]" ) << ";\n"
+			"	_acts = " << A() << " + " << FSA() + "[" + vCS() + "]" << ";\n"
 			"	_nacts = " << CAST(UINT()) << " *_acts++;\n"
 			"	while ( _nacts-- > 0 ) {\n"
 			"		switch ( *_acts++ ) {\n";
@@ -252,7 +252,7 @@ void FlatLooped::writeExec()
 			"	if ( " << CA() << "[_cond] == 0 )\n"
 			"		goto _again;\n"
 			"\n"
-			"	_acts = " << ARR_OFF( A(), CA() + "[_cond]" ) << ";\n"
+			"	_acts = " << A() << " + " << CA() + "[_cond]" << ";\n"
 			"	_nacts = " << CAST(UINT()) << " *_acts++;\n"
 			"	while ( _nacts-- > 0 ) {\n"
 			"		switch ( *(_acts++) )\n		{\n";
@@ -269,7 +269,7 @@ void FlatLooped::writeExec()
 
 	if ( redFsm->anyToStateActions() ) {
 		out <<
-			"	_acts = " << ARR_OFF( A(),  TSA() + "[" + vCS() + "]" ) << ";\n"
+			"	_acts = " << A() << " + " << TSA() + "[" + vCS() + "]" << ";\n"
 			"	_nacts = " << CAST(UINT()) << " *_acts++;\n"
 			"	while ( _nacts-- > 0 ) {\n"
 			"		switch ( *_acts++ ) {\n";
@@ -318,7 +318,7 @@ void FlatLooped::writeExec()
 		if ( redFsm->anyEofActions() ) {
 			out <<
 				"	const " << ARRAY_TYPE(redFsm->maxActArrItem) << " *__acts = " << 
-						ARR_OFF( A(), EA() + "[" + vCS() + "]" ) << ";\n"
+						A() << " + " << EA() + "[" + vCS() + "]" << ";\n"
 				"	" << UINT() << " __nacts = " << CAST(UINT()) << " *__acts++;\n"
 				"	while ( __nacts-- > 0 ) {\n"
 				"		switch ( *__acts++ ) {\n";
