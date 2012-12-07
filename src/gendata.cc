@@ -1355,20 +1355,27 @@ void CodeGenData::analyzeMachine()
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Check any actions out of outSinge. */
 		for ( RedTransList::Iter rtel = st->outSingle; rtel.lte(); rtel++ ) {
-			if ( rtel->value->action != 0 && rtel->value->action->anyCurStateRef() )
-				st->bAnyRegCurStateRef = true;
+			for ( RedCondList::Iter cond = rtel->value->outConds; cond.lte(); cond++ ) {
+				if ( cond->value->action != 0 && cond->value->action->anyCurStateRef() )
+					st->bAnyRegCurStateRef = true;
+			}
 		}
 
 		/* Check any actions out of outRange. */
 		for ( RedTransList::Iter rtel = st->outRange; rtel.lte(); rtel++ ) {
-			if ( rtel->value->action != 0 && rtel->value->action->anyCurStateRef() )
-				st->bAnyRegCurStateRef = true;
+			for ( RedCondList::Iter cond = rtel->value->outConds; cond.lte(); cond++ ) {
+				if ( cond->value->action != 0 && cond->value->action->anyCurStateRef() )
+					st->bAnyRegCurStateRef = true;
+			}
 		}
 
 		/* Check any action out of default. */
-		if ( st->defTrans != 0 && st->defTrans->action != 0 && 
-				st->defTrans->action->anyCurStateRef() )
-			st->bAnyRegCurStateRef = true;
+		if ( st->defTrans != 0 ) {
+			for ( RedCondList::Iter cond = st->defTrans->outConds; cond.lte(); cond++ ) {
+				if ( cond->value->action != 0 && cond->value->action->anyCurStateRef() )
+					st->bAnyRegCurStateRef = true;
+			}
+		}
 
 		if ( st->eofTrans != 0 )
 			redFsm->bAnyEofTrans = true;
