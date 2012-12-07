@@ -408,9 +408,7 @@ struct RedStateAp
 		id(0), 
 		bAnyRegCurStateRef(false),
 		partitionBoundary(false),
-		inTrans(0),
 		inConds(0),
-		numInTrans(0),
 		numInConds(0)
 	{ }
 
@@ -445,9 +443,7 @@ struct RedStateAp
 	int partition;
 	bool partitionBoundary;
 
-	RedTransAp **inTrans;
 	RedCondAp **inConds;
-	int numInTrans;
 	int numInConds;
 };
 

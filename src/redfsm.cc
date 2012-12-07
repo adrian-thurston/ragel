@@ -580,23 +580,15 @@ void RedFsmAp::partitionFsm( int nparts )
 void RedFsmAp::setInTrans()
 {
 	/* First pass counts the number of transitions. */
-	for ( TransApSet::Iter trans = transSet; trans.lte(); trans++ )
-		trans->targ->numInTrans += 1;
 	for ( CondApSet::Iter trans = condSet; trans.lte(); trans++ )
 		trans->targ->numInConds += 1;
 
 	/* Pass over states to allocate the needed memory. Reset the counts so we
 	 * can use them as the current size. */
 	for ( RedStateList::Iter st = stateList; st.lte(); st++ ) {
-		st->inTrans = new RedTransAp*[st->numInTrans];
 		st->inConds = new RedCondAp*[st->numInConds];
-		st->numInTrans = 0;
 		st->numInConds = 0;
 	}
-
-	/* Second pass over transitions copies pointers into the in trans list. */
-	for ( TransApSet::Iter trans = transSet; trans.lte(); trans++ )
-		trans->targ->inTrans[trans->targ->numInTrans++] = trans;
 
 	for ( CondApSet::Iter trans = condSet; trans.lte(); trans++ )
 		trans->targ->inConds[trans->targ->numInConds++] = trans;
