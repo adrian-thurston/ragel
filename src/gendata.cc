@@ -624,7 +624,7 @@ void CodeGenData::makeTrans( Key lowKey, Key highKey, TransAp *trans )
 	GenCondSpace *gcs = trans->condSpace != 0 ?
 			allCondSpaces + trans->condSpace->condSpaceId : 0;
 	
-	newTrans( curState, curTrans++, lowKey, highKey, gcs, targ, action, redCondList );
+	newTrans( curState, curTrans++, lowKey, highKey, gcs, redCondList );
 }
 
 void CodeGenData::makeTransList( StateAp *state )
@@ -870,8 +870,7 @@ void CodeGenData::initTransList( int snum, unsigned long length )
 }
 
 void CodeGenData::newTrans( int snum, int tnum, Key lowKey, 
-		Key highKey, GenCondSpace *gcs, long targ, long action,
-		RedCondList &outConds )
+		Key highKey, GenCondSpace *gcs, RedCondList &outConds )
 {
 	/* Get the current state and range. */
 	RedStateAp *curState = allStates + snum;
