@@ -296,15 +296,7 @@ struct CmpRedTransAp
 {
 	static int compare( const RedTransAp &t1, const RedTransAp &t2 )
 	{
-		if ( t1.targ < t2.targ )
-			return -1;
-		else if ( t1.targ > t2.targ )
-			return 1;
-		else if ( t1.action < t2.action )
-			return -1;
-		else if ( t1.action > t2.action )
-			return 1;
-		else if ( t1.condSpace < t2.condSpace )
+		if ( t1.condSpace < t2.condSpace )
 			return -1;
 		else if ( t1.condSpace > t2.condSpace )
 			return 1;
