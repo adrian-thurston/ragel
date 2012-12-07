@@ -42,7 +42,7 @@ bool IpGoto::useAgainLabel()
 
 void IpGoto::GOTO( ostream &ret, int gotoDest, bool inFinish )
 {
-	ret << "{" << CTRL_FLOW() << "goto st" << gotoDest << ";}";
+	ret << "{" << "goto st" << gotoDest << ";}";
 }
 
 void IpGoto::CALL( ostream &ret, int callDest, int targState, bool inFinish )
@@ -53,7 +53,7 @@ void IpGoto::CALL( ostream &ret, int callDest, int targState, bool inFinish )
 	}
 
 	ret << "{" << STACK() << "[" << TOP() << "++] = " << targState << 
-			"; " << CTRL_FLOW() << "goto st" << callDest << ";}";
+			"; " << "goto st" << callDest << ";}";
 
 	if ( prePushExpr != 0 )
 		ret << "}";
@@ -68,7 +68,7 @@ void IpGoto::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool
 
 	ret << "{" << STACK() << "[" << TOP() << "++] = " << targState << "; " << vCS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
-	ret << "); " << CTRL_FLOW() << "goto _again;}";
+	ret << "); " << "goto _again;}";
 
 	if ( prePushExpr != 0 )
 		ret << "}";
@@ -84,14 +84,14 @@ void IpGoto::RET( ostream &ret, bool inFinish )
 		ret << "}";
 	}
 
-	ret << CTRL_FLOW() << "goto _again;}";
+	ret << "goto _again;}";
 }
 
 void IpGoto::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
 	ret << "{" << vCS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
-	ret << "); " << CTRL_FLOW() << "goto _again;}";
+	ret << "); " << "goto _again;}";
 }
 
 void IpGoto::NEXT( ostream &ret, int nextDest, bool inFinish )
@@ -122,7 +122,7 @@ void IpGoto::BREAK( ostream &ret, int targState, bool csForced )
 	ret << "{" << P() << "++; ";
 	if ( !csForced ) 
 		ret << vCS() << " = " << targState << "; ";
-	ret << CTRL_FLOW() << "goto _out;}";
+	ret << "goto _out;}";
 }
 
 bool IpGoto::IN_TRANS_ACTIONS( RedStateAp *state )
@@ -579,8 +579,7 @@ void IpGoto::writeExec()
 
 	out << 
 		"	switch ( " << vCS() << " )\n	{\n";
-		STATE_GOTOS();
-		SWITCH_DEFAULT() <<
+		STATE_GOTOS() <<
 		"	}\n";
 		EXIT_STATES() << 
 		"\n";
@@ -593,8 +592,7 @@ void IpGoto::writeExec()
 			"	if ( " << P() << " == " << vEOF() << " )\n"
 			"	{\n"
 			"	switch ( " << vCS() << " ) {\n";
-			FINISH_CASES();
-			SWITCH_DEFAULT() <<
+			FINISH_CASES() <<
 			"	}\n"
 			"	}\n"
 			"\n";

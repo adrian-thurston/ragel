@@ -227,13 +227,11 @@ public:
 	virtual void tableDataPass() {}
 
 	/* From CCodeGen. */
-	virtual ostream &SWITCH_DEFAULT();
 	virtual ostream &OPEN_ARRAY( string type, string name );
 	virtual ostream &CLOSE_ARRAY();
 	virtual ostream &STATIC_VAR( string type, string name );
 	virtual string CAST( string type );
 	virtual string UINT();
-	virtual string CTRL_FLOW();
 	virtual void writeExports();
 };
 

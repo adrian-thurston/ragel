@@ -307,8 +307,7 @@ void BinaryExpanded::writeExec()
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
 			"	switch ( " << FSA() << "[" << vCS() << "] ) {\n";
-			FROM_STATE_ACTION_SWITCH();
-			SWITCH_DEFAULT() <<
+			FROM_STATE_ACTION_SWITCH() <<
 			"	}\n"
 			"\n";
 	}
@@ -340,8 +339,7 @@ void BinaryExpanded::writeExec()
 			"		goto _again;\n"
 			"\n"
 			"	switch ( " << CA() << "[_cond] ) {\n";
-			ACTION_SWITCH();
-			SWITCH_DEFAULT() <<
+			ACTION_SWITCH() <<
 			"	}\n"
 			"\n";
 	}
@@ -353,8 +351,7 @@ void BinaryExpanded::writeExec()
 	if ( redFsm->anyToStateActions() ) {
 		out <<
 			"	switch ( " << TSA() << "[" << vCS() << "] ) {\n";
-			TO_STATE_ACTION_SWITCH();
-			SWITCH_DEFAULT() <<
+			TO_STATE_ACTION_SWITCH() <<
 			"	}\n"
 			"\n";
 	}
@@ -397,8 +394,7 @@ void BinaryExpanded::writeExec()
 		if ( redFsm->anyEofActions() ) {
 			out <<
 				"	switch ( " << EA() << "[" << vCS() << "] ) {\n";
-				EOF_ACTION_SWITCH();
-				SWITCH_DEFAULT() <<
+				EOF_ACTION_SWITCH() <<
 				"	}\n";
 		}
 

@@ -736,16 +736,6 @@ string CodeGen::CAST( string type )
 	return "(" + type + ")";
 }
 
-std::ostream &CodeGen::SWITCH_DEFAULT()
-{
-	return out;
-}
-
-string CodeGen::CTRL_FLOW()
-{
-	return "";
-}
-
 void CodeGen::writeExports()
 {
 	if ( exportList.length() > 0 ) {

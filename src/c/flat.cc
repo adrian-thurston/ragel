@@ -418,15 +418,14 @@ void Flat::LOCATE_TRANS()
 
 void Flat::GOTO( ostream &ret, int gotoDest, bool inFinish )
 {
-	ret << "{" << vCS() << " = " << gotoDest << "; " << 
-			CTRL_FLOW() << "goto _again;}";
+	ret << "{" << vCS() << " = " << gotoDest << "; " << "goto _again;}";
 }
 
 void Flat::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
 	ret << "{" << vCS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
-	ret << "); " << CTRL_FLOW() << "goto _again;}";
+	ret << "); " << "goto _again;}";
 }
 
 void Flat::CURS( ostream &ret, bool inFinish )
@@ -459,7 +458,7 @@ void Flat::CALL( ostream &ret, int callDest, int targState, bool inFinish )
 	}
 
 	ret << "{" << STACK() << "[" << TOP() << "++] = " << vCS() << "; " << vCS() << " = " << 
-			callDest << "; " << CTRL_FLOW() << "goto _again;}";
+			callDest << "; " << "goto _again;}";
 
 	if ( prePushExpr != 0 )
 		ret << "}";
@@ -475,7 +474,7 @@ void Flat::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool i
 
 	ret << "{" << STACK() << "[" << TOP() << "++] = " << vCS() << "; " << vCS() << " = (";
 	INLINE_LIST( ret, ilItem->children, targState, inFinish, false );
-	ret << "); " << CTRL_FLOW() << "goto _again;}";
+	ret << "); " << "goto _again;}";
 
 	if ( prePushExpr != 0 )
 		ret << "}";
@@ -492,13 +491,13 @@ void Flat::RET( ostream &ret, bool inFinish )
 		ret << "}";
 	}
 
-	ret << CTRL_FLOW() << "goto _again;}";
+	ret << "goto _again;}";
 }
 
 void Flat::BREAK( ostream &ret, int targState, bool csForced )
 {
 	outLabelUsed = true;
-	ret << "{" << P() << "++; " << CTRL_FLOW() << "goto _out; }";
+	ret << "{" << P() << "++; " << "goto _out; }";
 }
 
 }

@@ -273,8 +273,7 @@ void BinaryLooped::writeExec()
 			"	_nacts = " << CAST(UINT()) << " *_acts++;\n"
 			"	while ( _nacts-- > 0 ) {\n"
 			"		switch ( *_acts++ ) {\n";
-			FROM_STATE_ACTION_SWITCH();
-			SWITCH_DEFAULT() <<
+			FROM_STATE_ACTION_SWITCH() <<
 			"		}\n"
 			"	}\n"
 			"\n";
@@ -310,8 +309,7 @@ void BinaryLooped::writeExec()
 			"	_nacts = " << CAST(UINT()) << " *_acts++;\n"
 			"	while ( _nacts-- > 0 )\n	{\n"
 			"		switch ( *_acts++ )\n		{\n";
-			ACTION_SWITCH();
-			SWITCH_DEFAULT() <<
+			ACTION_SWITCH() <<
 			"		}\n"
 			"	}\n"
 			"\n";
@@ -327,8 +325,7 @@ void BinaryLooped::writeExec()
 			"	_nacts = " << CAST(UINT()) << " *_acts++;\n"
 			"	while ( _nacts-- > 0 ) {\n"
 			"		switch ( *_acts++ ) {\n";
-			TO_STATE_ACTION_SWITCH();
-			SWITCH_DEFAULT() <<
+			TO_STATE_ACTION_SWITCH() <<
 			"		}\n"
 			"	}\n"
 			"\n";
@@ -377,8 +374,7 @@ void BinaryLooped::writeExec()
 				"	" << UINT() << " __nacts = " << CAST(UINT()) << " *__acts++;\n"
 				"	while ( __nacts-- > 0 ) {\n"
 				"		switch ( *__acts++ ) {\n";
-				EOF_ACTION_SWITCH();
-				SWITCH_DEFAULT() <<
+				EOF_ACTION_SWITCH() <<
 				"		}\n"
 				"	}\n";
 		}

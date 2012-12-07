@@ -106,8 +106,7 @@ void GotoLooped::writeExec()
 			"	_nacts = " << CAST(UINT()) << " *_acts++;\n"
 			"	while ( _nacts-- > 0 ) {\n"
 			"		switch ( *_acts++ ) {\n";
-			FROM_STATE_ACTION_SWITCH();
-			SWITCH_DEFAULT() <<
+			FROM_STATE_ACTION_SWITCH() <<
 			"		}\n"
 			"	}\n"
 			"\n";
@@ -115,8 +114,7 @@ void GotoLooped::writeExec()
 
 	out <<
 		"	switch ( " << vCS() << " ) {\n";
-		STATE_GOTOS();
-		SWITCH_DEFAULT() <<
+		STATE_GOTOS() <<
 		"	}\n"
 		"\n";
 		TRANSITIONS() <<
@@ -133,8 +131,7 @@ void GotoLooped::writeExec()
 			"	_nacts = " << CAST(UINT()) << " *_acts++;\n"
 			"	while ( _nacts-- > 0 ) {\n"
 			"		switch ( *_acts++ ) {\n";
-			TO_STATE_ACTION_SWITCH();
-			SWITCH_DEFAULT() <<
+			TO_STATE_ACTION_SWITCH() <<
 			"		}\n"
 			"	}\n"
 			"\n";
@@ -177,7 +174,7 @@ void GotoLooped::writeExec()
 				}
 			}
 
-			SWITCH_DEFAULT() <<
+			out <<
 				"	}\n";
 		}
 
@@ -188,8 +185,7 @@ void GotoLooped::writeExec()
 				"	" << UINT() << " __nacts = " << CAST(UINT()) << " *__acts++;\n"
 				"	while ( __nacts-- > 0 ) {\n"
 				"		switch ( *__acts++ ) {\n";
-				EOF_ACTION_SWITCH();
-				SWITCH_DEFAULT() <<
+				EOF_ACTION_SWITCH() <<
 				"		}\n"
 				"	}\n";
 		}
