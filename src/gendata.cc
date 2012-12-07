@@ -1123,9 +1123,6 @@ void CodeGenData::actionActionRefs( RedAction *action )
 
 void CodeGenData::transActionRefs( RedTransAp *trans )
 {
-	if ( trans->action != 0 )
-		actionActionRefs( trans->action );
-
 	for ( RedCondList::Iter rtc = trans->outConds; rtc.lte(); rtc++ ) {
 		if ( rtc->value->action != 0 )
 			actionActionRefs( rtc->value->action );
