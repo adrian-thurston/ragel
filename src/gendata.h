@@ -189,9 +189,6 @@ private:
 	void makeTransList( StateAp *state );
 	void makeTrans( Key lowKey, Key highKey, TransAp *trans );
 
-	void finishGen();
-
-
 	/* Collected during parsing. */
 	int curAction;
 	int curActionTable;
@@ -313,7 +310,7 @@ public:
 	void findFinalActionRefs();
 	void analyzeMachine();
 
-	void closeMachine();
+	void resolveTargetStates();
 	void setValueLimits();
 	void assignActionIds();
 

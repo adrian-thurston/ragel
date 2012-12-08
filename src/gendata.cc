@@ -693,24 +693,8 @@ void CodeGenData::makeMachine()
 	makeEntryPoints();
 	makeStateList();
 
-	closeMachine();
+	resolveTargetStates();
 }
-
-void CodeGenData::finishGen()
-{
-	/* Do this before distributing transitions out to singles and defaults
-	 * makes life easier. */
-	redFsm->maxKey = findMaxKey();
-
-	redFsm->assignActionLocs();
-
-	/* Find the first final state (The final state with the lowest id). */
-	redFsm->findFirstFinState();
-
-	/* Call the user's callback. */
-	finishRagelDef();
-}
-
 
 void CodeGenData::make()
 {
@@ -798,7 +782,17 @@ void CodeGenData::make()
 	makeExports();
 	makeMachine();
 
-	finishGen();
+	/* Do this before distributing transitions out to singles and defaults
+	 * makes life easier. */
+	redFsm->maxKey = findMaxKey();
+
+	redFsm->assignActionLocs();
+
+	/* Find the first final state (The final state with the lowest id). */
+	redFsm->findFirstFinState();
+
+	/* Call the user's callback. */
+	finishRagelDef();
 }
 
 void CodeGenData::createMachine()
@@ -1057,14 +1051,10 @@ void CodeGenData::resolveTargetStates( GenInlineList *inlineList )
 	}
 }
 
-void CodeGenData::closeMachine()
+void CodeGenData::resolveTargetStates()
 {
 	for ( GenActionList::Iter a = actionList; a.lte(); a++ )
 		resolveTargetStates( a->inlineList );
-
-	/* Note that even if we want a complete graph we do not give the error
-	 * state a default transition. All machines break out of the processing
-	 * loop when in the error state. */
 }
 
 
