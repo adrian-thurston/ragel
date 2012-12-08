@@ -54,6 +54,7 @@ public:
 
 	virtual void calcIndexSize();
 	virtual void tableDataPass();
+	virtual void genAnalysis();
 
 	virtual void writeData();
 	virtual void writeExec();

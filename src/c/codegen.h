@@ -111,7 +111,6 @@ public:
 
 	virtual ~CodeGen() {}
 
-	virtual void genAnalysis();
 	virtual void writeInit();
 	virtual void writeStart();
 	virtual void writeFirstFinal();

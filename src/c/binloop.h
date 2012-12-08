@@ -42,11 +42,12 @@ class BinaryLooped
 public:
 	BinaryLooped( const CodeGenArgs &args );
 
-	virtual void writeData();
-	virtual void writeExec();
-
 	virtual void calcIndexSize();
 	virtual void tableDataPass();
+	virtual void genAnalysis();
+
+	virtual void writeData();
+	virtual void writeExec();
 
 	virtual void TO_STATE_ACTION( RedStateAp *state );
 	virtual void FROM_STATE_ACTION( RedStateAp *state );

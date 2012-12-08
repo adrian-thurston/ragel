@@ -76,6 +76,8 @@ protected:
 	/* Set up labelNeeded flag for each state. */
 	void setLabelsNeeded( GenInlineList *inlineList );
 	void setLabelsNeeded();
+
+	virtual void genAnalysis();
 };
 
 }

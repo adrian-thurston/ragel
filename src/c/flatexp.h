@@ -42,6 +42,10 @@ public:
 	FlatExpanded( const CodeGenArgs &args ) 
 		: Flat(args) {}
 
+	virtual void calcIndexSize();
+	virtual void tableDataPass();
+	virtual void genAnalysis();
+
 protected:
 	std::ostream &TO_STATE_ACTION_SWITCH();
 	std::ostream &FROM_STATE_ACTION_SWITCH();
@@ -52,9 +56,6 @@ protected:
 	virtual void FROM_STATE_ACTION( RedStateAp *state );
 	virtual void EOF_ACTION( RedStateAp *state );
 	virtual void COND_ACTION( RedCondAp *cond );
-
-	virtual void calcIndexSize();
-	virtual void tableDataPass();
 
 	virtual void writeData();
 	virtual void writeExec();

@@ -52,6 +52,7 @@ public:
 	unsigned int EOF_ACTION( RedStateAp *state );
 
 	virtual void tableDataPass();
+	virtual void genAnalysis();
 
 	virtual void writeData();
 	virtual void writeExec();

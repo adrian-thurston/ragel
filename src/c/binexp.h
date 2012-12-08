@@ -37,6 +37,10 @@ class BinaryExpanded : public Binary
 public:
 	BinaryExpanded( const CodeGenArgs &args );
 
+	virtual void calcIndexSize();
+	virtual void tableDataPass();
+	virtual void genAnalysis();
+
 protected:
 	std::ostream &TO_STATE_ACTION_SWITCH();
 	std::ostream &FROM_STATE_ACTION_SWITCH();
@@ -50,8 +54,6 @@ protected:
 	virtual void writeData();
 	virtual void writeExec();
 
-	virtual void calcIndexSize();
-	virtual void tableDataPass();
 };
 
 }

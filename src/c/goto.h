@@ -86,6 +86,7 @@ public:
 	std::ostream &EOF_ACTIONS();
 
 	virtual void calcIndexSize();
+	virtual void setTableState( TableArray::State );
 
 	virtual std::ostream &COND_GOTO( RedCondAp *trans, int level );
 
@@ -101,7 +102,6 @@ public:
 	virtual void GOTO_HEADER( RedStateAp *state );
 	virtual void STATE_GOTO_ERROR();
 
-	virtual void setTableState( TableArray::State );
 };
 
 }

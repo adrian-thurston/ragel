@@ -44,6 +44,7 @@ public:
 		: Goto(args) {}
 
 	virtual void tableDataPass();
+	virtual void genAnalysis();
 
 	virtual void writeData();
 	virtual void writeExec();
