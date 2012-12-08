@@ -220,18 +220,9 @@ protected:
 	void genLineDirective( ostream &out );
 
 public:
-	/* Determine if we should use indicies. */
 	virtual void calcIndexSize() = 0;
-
 	virtual void setTableState( TableArray::State ) {}
 	virtual void tableDataPass() {}
-
-	/* From CCodeGen. */
-	virtual ostream &OPEN_ARRAY( string type, string name );
-	virtual ostream &CLOSE_ARRAY();
-	virtual ostream &STATIC_VAR( string type, string name );
-	virtual string CAST( string type );
-	virtual string UINT();
 	virtual void writeExports();
 };
 

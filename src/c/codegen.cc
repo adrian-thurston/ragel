@@ -671,19 +671,19 @@ string CodeGen::ALPH_TYPE()
 void CodeGen::STATE_IDS()
 {
 	if ( redFsm->startState != 0 )
-		STATIC_VAR( "int", START() ) << " = " << START_STATE_ID() << ";\n";
+		out << "static const int " << START() << " = " << START_STATE_ID() << ";\n";
 
 	if ( !noFinal )
-		STATIC_VAR( "int" , FIRST_FINAL() ) << " = " << FIRST_FINAL_STATE() << ";\n";
+		out << "static const int " << FIRST_FINAL() << " = " << FIRST_FINAL_STATE() << ";\n";
 
 	if ( !noError )
-		STATIC_VAR( "int", ERROR() ) << " = " << ERROR_STATE() << ";\n";
+		out << "static const int " << ERROR() << " = " << ERROR_STATE() << ";\n";
 
 	out << "\n";
 
 	if ( entryPointNames.length() > 0 ) {
 		for ( EntryNameVect::Iter en = entryPointNames; en.lte(); en++ ) {
-			STATIC_VAR( "int", DATA_PREFIX() + "en_" + *en ) << 
+			out << "static const int " << DATA_PREFIX() + "en_" + *en << 
 					" = " << entryPointIds[en.pos()] << ";\n";
 		}
 		out << "\n";
@@ -703,37 +703,6 @@ void CodeGen::writeFirstFinal()
 void CodeGen::writeError()
 {
 	out << ERROR_STATE();
-}
-
-/*
- * Language specific, but style independent code generators functions.
- */
-
-std::ostream &CodeGen::OPEN_ARRAY( string type, string name )
-{
-	out << "static const " << type << " " << name << "[] = {\n";
-	return out;
-}
-
-std::ostream &CodeGen::CLOSE_ARRAY()
-{
-	return out << "};\n";
-}
-
-std::ostream &CodeGen::STATIC_VAR( string type, string name )
-{
-	out << "static const " << type << " " << name;
-	return out;
-}
-
-string CodeGen::UINT( )
-{
-	return "unsigned int";
-}
-
-string CodeGen::CAST( string type )
-{
-	return "(" + type + ")";
 }
 
 void CodeGen::writeExports()

@@ -192,7 +192,7 @@ void FlatLooped::writeExec()
 	{
 		out << 
 			"	const " << actions.type << " *_acts;\n"
-			"	" << UINT() << " _nacts;\n"; 
+			"	" << "unsigned int" << " _nacts;\n"; 
 	}
 
 	out <<
@@ -223,7 +223,7 @@ void FlatLooped::writeExec()
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
 			"	_acts = " << A() << " + " << FSA() + "[" + vCS() + "]" << ";\n"
-			"	_nacts = " << CAST(UINT()) << " *_acts++;\n"
+			"	_nacts = " << "(unsigned int)" << " *_acts++;\n"
 			"	while ( _nacts-- > 0 ) {\n"
 			"		switch ( *_acts++ ) {\n";
 			FROM_STATE_ACTION_SWITCH() <<
@@ -252,7 +252,7 @@ void FlatLooped::writeExec()
 			"		goto _again;\n"
 			"\n"
 			"	_acts = " << A() << " + " << CA() + "[_cond]" << ";\n"
-			"	_nacts = " << CAST(UINT()) << " *_acts++;\n"
+			"	_nacts = " << "(unsigned int)" << " *_acts++;\n"
 			"	while ( _nacts-- > 0 ) {\n"
 			"		switch ( *(_acts++) )\n		{\n";
 			ACTION_SWITCH() <<
@@ -268,7 +268,7 @@ void FlatLooped::writeExec()
 	if ( redFsm->anyToStateActions() ) {
 		out <<
 			"	_acts = " << A() << " + " << TSA() + "[" + vCS() + "]" << ";\n"
-			"	_nacts = " << CAST(UINT()) << " *_acts++;\n"
+			"	_nacts = " << "(unsigned int)" << " *_acts++;\n"
 			"	while ( _nacts-- > 0 ) {\n"
 			"		switch ( *_acts++ ) {\n";
 			TO_STATE_ACTION_SWITCH() <<
@@ -316,7 +316,7 @@ void FlatLooped::writeExec()
 			out <<
 				"	const " << actions.type << " *__acts = " << 
 						A() << " + " << EA() + "[" + vCS() + "]" << ";\n"
-				"	" << UINT() << " __nacts = " << CAST(UINT()) << " *__acts++;\n"
+				"	" << "unsigned int" << " __nacts = " << "(unsigned int)" << " *__acts++;\n"
 				"	while ( __nacts-- > 0 ) {\n"
 				"		switch ( *__acts++ ) {\n";
 				EOF_ACTION_SWITCH() <<

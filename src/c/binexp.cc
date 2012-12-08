@@ -284,7 +284,7 @@ void BinaryExpanded::writeExec()
 		"	const char *_ckeys;\n"
 		"	int _cpc;\n"
 		"	int _trans;\n"
-		"	" << UINT() << " _cond;\n";
+		"	" << "unsigned int" << " _cond;\n";
 
 	out << "\n";
 
