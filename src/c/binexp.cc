@@ -28,6 +28,12 @@
 
 namespace C {
 
+BinaryExpanded::BinaryExpanded( const CodeGenArgs &args ) 
+:
+	Binary(args)
+{
+}
+
 /* Determine if we should use indicies or not. */
 void BinaryExpanded::calcIndexSize()
 {
@@ -67,6 +73,36 @@ void BinaryExpanded::calcIndexSize()
 	/* If using indicies reduces the size, use them. */
 	useIndicies = sizeWithInds < sizeWithoutInds;
 }
+
+void BinaryExpanded::tableDataPass()
+{
+	taKeyOffsets();
+	taSingleLens();
+	taRangeLens();
+	taIndexOffsets();
+	taIndicies();
+
+	taTransCondSpacesWi();
+	taTransOffsetsWi();
+	taTransLengthsWi();
+
+	taTransCondSpaces();
+	taTransOffsets();
+	taTransLengths();
+
+	taCondTargs();
+	taCondActions();
+
+	taToStateActions();
+	taFromStateActions();
+	taEofActions();
+
+	taEofTrans();
+
+	taKeys();
+	taCondKeys();
+}
+
 
 void BinaryExpanded::COND_ACTION( RedCondAp *cond )
 {
@@ -194,35 +230,6 @@ void BinaryExpanded::setTableState( TableArray::State state )
 	}
 }
 
-void BinaryExpanded::tableDataPass()
-{
-	taKeyOffsets();
-	taSingleLens();
-	taRangeLens();
-	taIndexOffsets();
-	taIndicies();
-
-	taTransCondSpacesWi();
-	taTransOffsetsWi();
-	taTransLengthsWi();
-
-	taTransCondSpaces();
-	taTransOffsets();
-	taTransLengths();
-
-	taCondTargs();
-	taCondActions();
-
-	taToStateActions();
-	taFromStateActions();
-	taEofActions();
-
-	taEofTrans();
-
-	taKeys();
-	taCondKeys();
-}
-
 void BinaryExpanded::writeData()
 {
 	setTableState( TableArray::GeneratePass );
@@ -281,10 +288,10 @@ void BinaryExpanded::writeExec()
 	out <<
 		";\n"
 		"	const " << ALPH_TYPE() << " *_keys;\n"
-		"	const char *_ckeys;\n"
+		"	const " << condKeys.type << " *_ckeys;\n"
 		"	int _cpc;\n"
 		"	int _trans;\n"
-		"	" << "unsigned int" << " _cond;\n";
+		"	unsigned int _cond;\n";
 
 	out << "\n";
 

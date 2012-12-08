@@ -28,6 +28,14 @@
 
 namespace C {
 
+void FlatLooped::setTableState( TableArray::State state )
+{
+	for ( ArrayVector::Iter i = arrayVector; i.lte(); i++ ) {
+		TableArray *tableArray = *i;
+		tableArray->setState( state );
+	}
+}
+
 
 void FlatLooped::calcIndexSize()
 {
@@ -35,14 +43,6 @@ void FlatLooped::calcIndexSize()
 
 	keys.setType( ALPH_TYPE() );
 	keys.isSigned = keyOps->isSigned;
-}
-
-void FlatLooped::setTableState( TableArray::State state )
-{
-	for ( ArrayVector::Iter i = arrayVector; i.lte(); i++ ) {
-		TableArray *tableArray = *i;
-		tableArray->setState( state );
-	}
 }
 
 void FlatLooped::tableDataPass()
@@ -198,7 +198,7 @@ void FlatLooped::writeExec()
 	out <<
 		"	const " << ALPH_TYPE() << " *_keys;\n"
 		"	const " << indicies.type << " *_inds;\n"
-		"	const char *_ckeys;\n"
+		"	const " << condKeys.type << " *_ckeys;\n"
 		"	int _klen;\n"
 		"	int _cpc;\n";
 

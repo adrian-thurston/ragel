@@ -393,9 +393,9 @@ void Flat::LOCATE_TRANS()
 	
 	out <<
 		"	{\n"
-		"		const " << " char *_lower = _ckeys;\n"
-		"		const " << " char *_mid;\n"
-		"		const " << " char *_upper = _ckeys + _klen - 1;\n"
+		"		const " << condKeys.type << " *_lower = _ckeys;\n"
+		"		const " << condKeys.type << " *_mid;\n"
+		"		const " << condKeys.type << " *_upper = _ckeys + _klen - 1;\n"
 		"		while (1) {\n"
 		"			if ( _upper < _lower )\n"
 		"				break;\n"

@@ -35,8 +35,7 @@ namespace C {
 class BinaryExpanded : public Binary
 {
 public:
-	BinaryExpanded( const CodeGenArgs &args ) 
-			: Binary(args) {}
+	BinaryExpanded( const CodeGenArgs &args );
 
 protected:
 	std::ostream &TO_STATE_ACTION_SWITCH();
