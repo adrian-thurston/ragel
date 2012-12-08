@@ -354,7 +354,7 @@ void BinaryExpanded::writeExec()
 
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
-			"	switch ( " << FSA() << "[" << vCS() << "] ) {\n";
+			"	switch ( " << fromStateActions.ref() << "[" << vCS() << "] ) {\n";
 			FROM_STATE_ACTION_SWITCH() <<
 			"	}\n"
 			"\n";
@@ -365,7 +365,7 @@ void BinaryExpanded::writeExec()
 	out << "_match:\n";
 
 	if ( useIndicies )
-		out << "	_trans = " << I() << "[_trans];\n";
+		out << "	_trans = " << indicies.ref() << "[_trans];\n";
 
 	LOCATE_COND();
 
@@ -378,15 +378,15 @@ void BinaryExpanded::writeExec()
 		out << "	_ps = " << vCS() << ";\n";
 
 	out <<
-		"	" << vCS() << " = " << CT() << "[_cond];\n"
+		"	" << vCS() << " = " << condTargs.ref() << "[_cond];\n"
 		"\n";
 
 	if ( redFsm->anyRegActions() ) {
 		out << 
-			"	if ( " << CA() << "[_cond] == 0 )\n"
+			"	if ( " << condActions.ref() << "[_cond] == 0 )\n"
 			"		goto _again;\n"
 			"\n"
-			"	switch ( " << CA() << "[_cond] ) {\n";
+			"	switch ( " << condActions.ref() << "[_cond] ) {\n";
 			ACTION_SWITCH() <<
 			"	}\n"
 			"\n";
@@ -398,7 +398,7 @@ void BinaryExpanded::writeExec()
 
 	if ( redFsm->anyToStateActions() ) {
 		out <<
-			"	switch ( " << TSA() << "[" << vCS() << "] ) {\n";
+			"	switch ( " << toStateActions.ref() << "[" << vCS() << "] ) {\n";
 			TO_STATE_ACTION_SWITCH() <<
 			"	}\n"
 			"\n";
@@ -432,16 +432,16 @@ void BinaryExpanded::writeExec()
 
 		if ( redFsm->anyEofTrans() ) {
 			out <<
-				"	if ( " << ET() << "[" << vCS() << "] > 0 ) {\n"
-				"		_trans = " << ET() << "[" << vCS() << "] - 1;\n"
-				"		_cond = " << TO() << "[_trans];\n"
+				"	if ( " << eofTrans.ref() << "[" << vCS() << "] > 0 ) {\n"
+				"		_trans = " << eofTrans.ref() << "[" << vCS() << "] - 1;\n"
+				"		_cond = " << transOffsets.ref() << "[_trans];\n"
 				"		goto _eof_trans;\n"
 				"	}\n";
 		}
 
 		if ( redFsm->anyEofActions() ) {
 			out <<
-				"	switch ( " << EA() << "[" << vCS() << "] ) {\n";
+				"	switch ( " << eofActions.ref() << "[" << vCS() << "] ) {\n";
 				EOF_ACTION_SWITCH() <<
 				"	}\n";
 		}

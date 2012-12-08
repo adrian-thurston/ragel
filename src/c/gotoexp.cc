@@ -252,7 +252,7 @@ void GotoExpanded::writeExec()
 
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
-			"	switch ( " << FSA() << "[" << vCS() << "] ) {\n";
+			"	switch ( " << fromStateActions.ref() << "[" << vCS() << "] ) {\n";
 			FROM_STATE_ACTION_SWITCH() <<
 			"	}\n"
 			"\n";
@@ -273,7 +273,7 @@ void GotoExpanded::writeExec()
 
 	if ( redFsm->anyToStateActions() ) {
 		out <<
-			"	switch ( " << TSA() << "[" << vCS() << "] ) {\n";
+			"	switch ( " << toStateActions.ref() << "[" << vCS() << "] ) {\n";
 			TO_STATE_ACTION_SWITCH() <<
 			"	}\n"
 			"\n";
@@ -322,7 +322,7 @@ void GotoExpanded::writeExec()
 
 		if ( redFsm->anyEofActions() ) {
 			out <<
-				"	switch ( " << EA() << "[" << vCS() << "] ) {\n";
+				"	switch ( " << eofActions.ref() << "[" << vCS() << "] ) {\n";
 				EOF_ACTION_SWITCH() <<
 				"	}\n";
 		}

@@ -360,10 +360,10 @@ void Flat::taActions()
 void Flat::LOCATE_TRANS()
 {
 	out <<
-		"	_keys = " << K() << " + " << "(" + vCS() + "<<1)" << ";\n"
-		"	_inds = " << I() << " + " << IO() + "[" + vCS() + "]" << ";\n"
+		"	_keys = " << keys.ref() << " + " << "(" + vCS() + "<<1)" << ";\n"
+		"	_inds = " << indicies.ref() << " + " << flatIndexOffset.ref() + "[" + vCS() + "]" << ";\n"
 		"\n"
-		"	_slen = " << SP() << "[" << vCS() << "];\n"
+		"	_slen = " << keySpans.ref() << "[" << vCS() << "];\n"
 		"	_trans = _inds[ _slen > 0 && _keys[0] <=" << GET_KEY() << " &&\n"
 		"		" << GET_KEY() << " <= _keys[1] ?\n"
 		"		" << GET_KEY() << " - _keys[0] : _slen ];\n"
@@ -371,14 +371,14 @@ void Flat::LOCATE_TRANS()
 		"\n";
 
 	out <<
-		"	_ckeys = " << CK() << " + " << TO() + "[" + "_trans" + "]" << ";\n"
-		"	_klen = " << TL() << "[" << "_trans" << "];\n"
-		"	_cond = " << TO() << "[_trans];\n"
+		"	_ckeys = " << condKeys.ref() << " + " << transOffsets.ref() + "[" + "_trans" + "]" << ";\n"
+		"	_klen = " << transLengths.ref() << "[" << "_trans" << "];\n"
+		"	_cond = " << transOffsets.ref() << "[_trans];\n"
 		"\n";
 
 	out <<
 		"	_cpc = 0;\n"
-		"	switch ( " << TCS() << "[" << "_trans" << "] ) {\n"
+		"	switch ( " << transCondSpaces.ref() << "[" << "_trans" << "] ) {\n"
 		"\n";
 
 	for ( CondSpaceList::Iter csi = condSpaceList; csi.lte(); csi++ ) {

@@ -606,8 +606,8 @@ void Binary::taActions()
 void Binary::LOCATE_TRANS()
 {
 	out <<
-		"	_keys = " << K() << " + " << keyOffsets.ref() + "[" + vCS() + "]" << ";\n"
-		"	_trans = " << IO() << "[" << vCS() << "];\n"
+		"	_keys = " << keys.ref() << " + " << keyOffsets.ref() << "[" + vCS() + "]" << ";\n"
+		"	_trans = " << indexOffsets.ref() << "[" << vCS() << "];\n"
 		"\n"
 		"	_klen = " << singleLens.ref() << "[" << vCS() << "];\n"
 		"	if ( _klen > 0 ) {\n"
@@ -659,14 +659,14 @@ void Binary::LOCATE_TRANS()
 void Binary::LOCATE_COND()
 {
 	out <<
-		"	_ckeys = " << CK() << " + " << TO() + "[" + "_trans" + "]" << ";\n"
-		"	_klen = " << TL() << "[" << "_trans" << "];\n"
-		"	_cond = " << TO() << "[_trans];\n"
+		"	_ckeys = " << condKeys.ref() << " + " << transOffsets.ref() + "[" + "_trans" + "]" << ";\n"
+		"	_klen = " << transLengths.ref() << "[" << "_trans" << "];\n"
+		"	_cond = " << transOffsets.ref() << "[_trans];\n"
 		"\n";
 
 	out <<
 		"	_cpc = 0;\n"
-		"	switch ( " << TCS() << "[" << "_trans" << "] ) {\n"
+		"	switch ( " << transCondSpaces.ref() << "[" << "_trans" << "] ) {\n"
 		"\n";
 
 	for ( CondSpaceList::Iter csi = condSpaceList; csi.lte(); csi++ ) {

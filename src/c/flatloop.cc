@@ -264,7 +264,7 @@ void FlatLooped::writeExec()
 
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
-			"	_acts = " << A() << " + " << FSA() + "[" + vCS() + "]" << ";\n"
+			"	_acts = " << actions.ref() << " + " << fromStateActions.ref() + "[" + vCS() + "]" << ";\n"
 			"	_nacts = " << "(unsigned int)" << " *_acts++;\n"
 			"	while ( _nacts-- > 0 ) {\n"
 			"		switch ( *_acts++ ) {\n";
@@ -285,15 +285,15 @@ void FlatLooped::writeExec()
 		out << "	_ps = " << vCS() << ";\n";
 
 	out <<
-		"	" << vCS() << " = " << CT() << "[_cond];\n"
+		"	" << vCS() << " = " << condTargs.ref() << "[_cond];\n"
 		"\n";
 
 	if ( redFsm->anyRegActions() ) {
 		out <<
-			"	if ( " << CA() << "[_cond] == 0 )\n"
+			"	if ( " << condActions.ref() << "[_cond] == 0 )\n"
 			"		goto _again;\n"
 			"\n"
-			"	_acts = " << A() << " + " << CA() + "[_cond]" << ";\n"
+			"	_acts = " << actions.ref() << " + " << condActions.ref() + "[_cond]" << ";\n"
 			"	_nacts = " << "(unsigned int)" << " *_acts++;\n"
 			"	while ( _nacts-- > 0 ) {\n"
 			"		switch ( *(_acts++) )\n		{\n";
@@ -309,7 +309,7 @@ void FlatLooped::writeExec()
 
 	if ( redFsm->anyToStateActions() ) {
 		out <<
-			"	_acts = " << A() << " + " << TSA() + "[" + vCS() + "]" << ";\n"
+			"	_acts = " << actions.ref() << " + " << toStateActions.ref() + "[" + vCS() + "]" << ";\n"
 			"	_nacts = " << "(unsigned int)" << " *_acts++;\n"
 			"	while ( _nacts-- > 0 ) {\n"
 			"		switch ( *_acts++ ) {\n";
@@ -347,9 +347,9 @@ void FlatLooped::writeExec()
 
 		if ( redFsm->anyEofTrans() ) {
 			out <<
-				"	if ( " << ET() << "[" << vCS() << "] > 0 ) {\n"
-				"		_trans = " << ET() << "[" << vCS() << "] - 1;\n"
-				"		_cond = " << TO() << "[_trans];\n"
+				"	if ( " << eofTrans.ref() << "[" << vCS() << "] > 0 ) {\n"
+				"		_trans = " << eofTrans.ref() << "[" << vCS() << "] - 1;\n"
+				"		_cond = " << transOffsets.ref() << "[_trans];\n"
 				"		goto _eof_trans;\n"
 				"	}\n";
 		}
@@ -357,7 +357,7 @@ void FlatLooped::writeExec()
 		if ( redFsm->anyEofActions() ) {
 			out <<
 				"	const " << actions.type << " *__acts = " << 
-						A() << " + " << EA() + "[" + vCS() + "]" << ";\n"
+						actions.ref() << " + " << eofActions.ref() + "[" + vCS() + "]" << ";\n"
 				"	" << "unsigned int" << " __nacts = " << "(unsigned int)" << " *__acts++;\n"
 				"	while ( __nacts-- > 0 ) {\n"
 				"		switch ( *__acts++ ) {\n";

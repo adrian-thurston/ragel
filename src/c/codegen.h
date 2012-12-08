@@ -151,31 +151,9 @@ protected:
 	string ACT();
 
 	string DATA_PREFIX();
-	string PM() { return "_" + DATA_PREFIX() + "partition_map"; }
-	string K() { return "_" + DATA_PREFIX() + "trans_keys"; }
-	string I() { return "_" + DATA_PREFIX() + "indicies"; }
-	string CO() { return "_" + DATA_PREFIX() + "cond_offsets"; }
-	string IO() { return "_" + DATA_PREFIX() + "index_offsets"; }
-	string CL() { return "_" + DATA_PREFIX() + "cond_lengths"; }
-	string A() { return "_" + DATA_PREFIX() + "actions"; }
-	string TA() { return "_" + DATA_PREFIX() + "trans_actions"; }
-	string TT() { return "_" + DATA_PREFIX() + "trans_targs"; }
-	string TCS() { return "_" + DATA_PREFIX() + "trans_cond_spaces"; }
-	string TO() { return "_" + DATA_PREFIX() + "trans_offsets"; }
-	string TL() { return "_" + DATA_PREFIX() + "trans_lengths"; }
-	string CT() { return "_" + DATA_PREFIX() + "cond_targs"; }
-	string CA() { return "_" + DATA_PREFIX() + "cond_actions"; }
-	string CK() { return "_" + DATA_PREFIX() + "cond_keys"; }
-	string TSA() { return "_" + DATA_PREFIX() + "to_state_actions"; }
-	string FSA() { return "_" + DATA_PREFIX() + "from_state_actions"; }
-	string EA() { return "_" + DATA_PREFIX() + "eof_actions"; }
-	string ET() { return "_" + DATA_PREFIX() + "eof_trans"; }
-	string SP() { return "_" + DATA_PREFIX() + "key_spans"; }
-	string CSP() { return "_" + DATA_PREFIX() + "cond_key_spans"; }
 	string START() { return DATA_PREFIX() + "start"; }
 	string ERROR() { return DATA_PREFIX() + "error"; }
 	string FIRST_FINAL() { return DATA_PREFIX() + "first_final"; }
-	string CTXDATA() { return DATA_PREFIX() + "ctxdata"; }
 
 	void INLINE_LIST( ostream &ret, GenInlineList *inlineList, 
 			int targState, bool inFinish, bool csForced );
