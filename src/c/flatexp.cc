@@ -28,14 +28,6 @@
 
 namespace C {
 
-void FlatExpanded::setTableState( TableArray::State state )
-{
-	for ( ArrayVector::Iter i = arrayVector; i.lte(); i++ ) {
-		TableArray *tableArray = *i;
-		tableArray->setState( state );
-	}
-}
-
 void FlatExpanded::calcIndexSize()
 {
 	setTransPos();

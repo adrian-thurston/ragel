@@ -42,6 +42,15 @@ Goto::Goto( const CodeGenArgs &args )
 	eofActions(        "eof_actions",         *this )
 {}
 
+void Goto::setTableState( TableArray::State state )
+{
+	for ( ArrayVector::Iter i = arrayVector; i.lte(); i++ ) {
+		TableArray *tableArray = *i;
+		tableArray->setState( state );
+	}
+}
+
+
 /* Emit the goto to take for a given transition. */
 std::ostream &Goto::COND_GOTO( RedCondAp *cond, int level )
 {

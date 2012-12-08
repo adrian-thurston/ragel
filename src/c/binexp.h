@@ -51,7 +51,6 @@ protected:
 	virtual void writeExec();
 
 	virtual void calcIndexSize();
-	virtual void setTableState( TableArray::State );
 	virtual void tableDataPass();
 };
 

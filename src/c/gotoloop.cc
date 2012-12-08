@@ -29,14 +29,6 @@
 
 namespace C {
 
-void GotoLooped::setTableState( TableArray::State state )
-{
-	for ( ArrayVector::Iter i = arrayVector; i.lte(); i++ ) {
-		TableArray *tableArray = *i;
-		tableArray->setState( state );
-	}
-}
-
 void GotoLooped::tableDataPass()
 {
 	taActions();

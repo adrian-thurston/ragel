@@ -56,6 +56,14 @@ Binary::Binary( const CodeGenArgs &args )
 {
 }
 
+void Binary::setTableState( TableArray::State state )
+{
+	for ( ArrayVector::Iter i = arrayVector; i.lte(); i++ ) {
+		TableArray *tableArray = *i;
+		tableArray->setState( state );
+	}
+}
+
 void Binary::setTransPosWi()
 {
 	/* Transitions must be written ordered by their id. */

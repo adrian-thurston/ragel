@@ -54,7 +54,6 @@ protected:
 	virtual void COND_ACTION( RedCondAp *cond );
 
 	virtual void calcIndexSize();
-	virtual void setTableState( TableArray::State );
 	virtual void tableDataPass();
 
 	virtual void writeData();

@@ -46,7 +46,6 @@ public:
 	virtual void writeExec();
 
 	virtual void calcIndexSize();
-	virtual void setTableState( TableArray::State );
 	virtual void tableDataPass();
 
 	virtual void TO_STATE_ACTION( RedStateAp *state );

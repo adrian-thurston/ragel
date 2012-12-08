@@ -33,14 +33,6 @@ BinaryLooped::BinaryLooped( const CodeGenArgs &args )
 	Binary( args )
 {}
 
-void BinaryLooped::setTableState( TableArray::State state )
-{
-	for ( ArrayVector::Iter i = arrayVector; i.lte(); i++ ) {
-		TableArray *tableArray = *i;
-		tableArray->setState( state );
-	}
-}
-
 /* Determine if we should use indicies or not. */
 void BinaryLooped::calcIndexSize()
 {

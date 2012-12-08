@@ -762,6 +762,8 @@ void CodeGen::finishRagelDef()
 	/* Run the analysis pass over the table data. */
 	setTableState( TableArray::AnalyzePass );
 	tableDataPass();
+
+	/* Switch the tables over to the code gen mode. */
 }
 
 ostream &CodeGen::source_warning( const InputLoc &loc )

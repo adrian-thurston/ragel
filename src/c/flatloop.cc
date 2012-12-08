@@ -28,15 +28,6 @@
 
 namespace C {
 
-void FlatLooped::setTableState( TableArray::State state )
-{
-	for ( ArrayVector::Iter i = arrayVector; i.lte(); i++ ) {
-		TableArray *tableArray = *i;
-		tableArray->setState( state );
-	}
-}
-
-
 void FlatLooped::calcIndexSize()
 {
 	setTransPos();

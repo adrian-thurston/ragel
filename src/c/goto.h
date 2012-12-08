@@ -100,6 +100,8 @@ public:
 	/* Called from STATE_GOTOS just before writing the gotos */
 	virtual void GOTO_HEADER( RedStateAp *state );
 	virtual void STATE_GOTO_ERROR();
+
+	virtual void setTableState( TableArray::State );
 };
 
 }

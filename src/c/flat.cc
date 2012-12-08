@@ -48,6 +48,14 @@ Flat::Flat( const CodeGenArgs &args )
 	eofTrans(         "eof_trans",           *this )
 {}
 
+void Flat::setTableState( TableArray::State state )
+{
+	for ( ArrayVector::Iter i = arrayVector; i.lte(); i++ ) {
+		TableArray *tableArray = *i;
+		tableArray->setState( state );
+	}
+}
+
 void Flat::setTransPos()
 {
 	/* Transitions must be written ordered by their id. */

@@ -222,14 +222,6 @@ std::ostream &BinaryExpanded::ACTION_SWITCH()
 	return out;
 }
 
-void BinaryExpanded::setTableState( TableArray::State state )
-{
-	for ( ArrayVector::Iter i = arrayVector; i.lte(); i++ ) {
-		TableArray *tableArray = *i;
-		tableArray->setState( state );
-	}
-}
-
 void BinaryExpanded::writeData()
 {
 	setTableState( TableArray::GeneratePass );

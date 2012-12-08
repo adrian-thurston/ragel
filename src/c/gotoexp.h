@@ -51,7 +51,6 @@ public:
 	unsigned int FROM_STATE_ACTION( RedStateAp *state );
 	unsigned int EOF_ACTION( RedStateAp *state );
 
-	virtual void setTableState( TableArray::State );
 	virtual void tableDataPass();
 
 	virtual void writeData();
