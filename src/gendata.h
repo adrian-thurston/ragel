@@ -202,7 +202,8 @@ public:
 	 */
 	virtual void genAnalysis() = 0;
 
-	/* These are invoked by the corresponding write statements. */
+	/* These are invoked by writeStatement and are normally what are used to
+	 * implement the code generators. */
 	virtual void writeData() {};
 	virtual void writeInit() {};
 	virtual void writeExec() {};
@@ -211,7 +212,7 @@ public:
 	virtual void writeFirstFinal() {};
 	virtual void writeError() {};
 
-	/* This can also be overwridden to modify the processing of write
+	/* This can also be overridden to modify the processing of write
 	 * statements. */
 	virtual void writeStatement( InputLoc &loc, int nargs, char **args );
 
