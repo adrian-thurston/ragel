@@ -200,7 +200,7 @@ public:
 	/*
 	 * The interface to the code generator.
 	 */
-	virtual void finishRagelDef() {}
+	virtual void genAnalysis() = 0;
 
 	/* These are invoked by the corresponding write statements. */
 	virtual void writeData() {};

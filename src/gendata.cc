@@ -791,8 +791,8 @@ void CodeGenData::make()
 	/* Find the first final state (The final state with the lowest id). */
 	redFsm->findFirstFinState();
 
-	/* Call the user's callback. */
-	finishRagelDef();
+	/* Code generation anlysis step. */
+	genAnalysis();
 }
 
 void CodeGenData::createMachine()

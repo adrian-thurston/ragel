@@ -716,7 +716,7 @@ void CodeGen::writeExports()
 	}
 }
 
-void CodeGen::finishRagelDef()
+void CodeGen::genAnalysis()
 {
 	if ( codeStyle == GenGoto || codeStyle == GenFGoto || 
 			codeStyle == GenIpGoto || codeStyle == GenSplit )
