@@ -151,8 +151,8 @@ void BinaryExpanded::genAnalysis()
 	tableDataPass();
 
 	/* Switch the tables over to the code gen mode. */
+	setTableState( TableArray::GeneratePass );
 }
-
 
 
 void BinaryExpanded::COND_ACTION( RedCondAp *cond )
@@ -275,8 +275,6 @@ std::ostream &BinaryExpanded::ACTION_SWITCH()
 
 void BinaryExpanded::writeData()
 {
-	setTableState( TableArray::GeneratePass );
-
 	taKeyOffsets();
 
 	taKeys();

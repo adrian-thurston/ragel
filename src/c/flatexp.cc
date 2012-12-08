@@ -103,6 +103,7 @@ void FlatExpanded::genAnalysis()
 	tableDataPass();
 
 	/* Switch the tables over to the code gen mode. */
+	setTableState( TableArray::GeneratePass );
 }
 
 
@@ -226,8 +227,6 @@ std::ostream &FlatExpanded::ACTION_SWITCH()
 
 void FlatExpanded::writeData()
 {
-	setTableState( TableArray::GeneratePass );
-
 	taKeys();
 	taKeySpans();
 	taFlatIndexOffset();

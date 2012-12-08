@@ -81,9 +81,8 @@ void IpGoto::genAnalysis()
 	tableDataPass();
 
 	/* Switch the tables over to the code gen mode. */
+	setTableState( TableArray::GeneratePass );
 }
-
-
 
 bool IpGoto::useAgainLabel()
 {

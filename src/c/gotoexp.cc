@@ -84,9 +84,8 @@ void GotoExpanded::genAnalysis()
 	tableDataPass();
 
 	/* Switch the tables over to the code gen mode. */
+	setTableState( TableArray::GeneratePass );
 }
-
-
 
 std::ostream &GotoExpanded::EXEC_ACTIONS()
 {
@@ -213,8 +212,6 @@ unsigned int GotoExpanded::EOF_ACTION( RedStateAp *state )
 
 void GotoExpanded::writeData()
 {
-	setTableState( TableArray::GeneratePass );
-
 	if ( redFsm->anyToStateActions() )
 		taToStateActions();
 

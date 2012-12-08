@@ -152,6 +152,7 @@ void BinaryLooped::genAnalysis()
 	tableDataPass();
 
 	/* Switch the tables over to the code gen mode. */
+	setTableState( TableArray::GeneratePass );
 }
 
 
@@ -259,8 +260,6 @@ std::ostream &BinaryLooped::ACTION_SWITCH()
 
 void BinaryLooped::writeData()
 {
-	setTableState( TableArray::GeneratePass );
-
 	/* If there are any transtion functions then output the array. If there
 	 * are none, don't bother emitting an empty array that won't be used. */
 	if ( redFsm->anyActions() )
