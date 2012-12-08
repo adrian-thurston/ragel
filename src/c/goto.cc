@@ -49,6 +49,10 @@ std::ostream &Goto::COND_GOTO( RedCondAp *cond, int level )
 	return out;
 }
 
+void Goto::calcIndexSize()
+{
+}
+
 /* Emit the goto to take for a given transition. */
 std::ostream &Goto::TRANS_GOTO( RedTransAp *trans, int level )
 {

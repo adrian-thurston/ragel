@@ -33,6 +33,86 @@ BinaryLooped::BinaryLooped( const CodeGenArgs &args )
 	Binary( args )
 {}
 
+void BinaryLooped::setTableState( TableArray::State state )
+{
+	for ( ArrayVector::Iter i = arrayVector; i.lte(); i++ ) {
+		TableArray *tableArray = *i;
+		tableArray->setState( state );
+	}
+}
+
+/* Determine if we should use indicies or not. */
+void BinaryLooped::calcIndexSize()
+{
+	useIndicies = false;
+
+	if ( useIndicies )
+		setTransPosWi();
+	else
+		setTransPos();
+	
+	keys.setType( ALPH_TYPE() );
+	keys.isSigned = keyOps->isSigned;
+
+	return;
+
+	int sizeWithInds = 0, sizeWithoutInds = 0;
+
+	/* Calculate cost of using with indicies. */
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		int totalIndex = st->outSingle.length() + st->outRange.length() + 
+				(st->defTrans == 0 ? 0 : 1);
+		sizeWithInds += arrayTypeSize(redFsm->maxIndex) * totalIndex;
+	}
+	sizeWithInds += arrayTypeSize(redFsm->maxState) * redFsm->transSet.length();
+	if ( redFsm->anyActions() )
+		sizeWithInds += arrayTypeSize(redFsm->maxActionLoc) * redFsm->transSet.length();
+
+	/* Calculate the cost of not using indicies. */
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		int totalIndex = st->outSingle.length() + st->outRange.length() + 
+				(st->defTrans == 0 ? 0 : 1);
+		sizeWithoutInds += arrayTypeSize(redFsm->maxState) * totalIndex;
+		if ( redFsm->anyActions() )
+			sizeWithoutInds += arrayTypeSize(redFsm->maxActionLoc) * totalIndex;
+	}
+
+	/* If using indicies reduces the size, use them. */
+	useIndicies = sizeWithInds < sizeWithoutInds;
+}
+
+
+void BinaryLooped::tableDataPass()
+{
+	taActions();
+	taKeyOffsets();
+	taSingleLens();
+	taRangeLens();
+	taIndexOffsets();
+	taIndicies();
+
+	taTransCondSpacesWi();
+	taTransOffsetsWi();
+	taTransLengthsWi();
+
+	taTransCondSpaces();
+	taTransOffsets();
+	taTransLengths();
+
+	taCondTargs();
+	taCondActions();
+
+	taToStateActions();
+	taFromStateActions();
+	taEofActions();
+
+	taEofTrans();
+
+	taKeys();
+	taCondKeys();
+}
+
+
 void BinaryLooped::COND_ACTION( RedCondAp *cond )
 {
 	int act = 0;
@@ -135,44 +215,6 @@ std::ostream &BinaryLooped::ACTION_SWITCH()
 }
 
 
-void BinaryLooped::setTableState( TableArray::State state )
-{
-	for ( ArrayVector::Iter i = arrayVector; i.lte(); i++ ) {
-		TableArray *tableArray = *i;
-		tableArray->setState( state );
-	}
-}
-
-void BinaryLooped::tableDataPass()
-{
-	taActions();
-	taKeyOffsets();
-	taSingleLens();
-	taRangeLens();
-	taIndexOffsets();
-	taIndicies();
-
-	taTransCondSpacesWi();
-	taTransOffsetsWi();
-	taTransLengthsWi();
-
-	taTransCondSpaces();
-	taTransOffsets();
-	taTransLengths();
-
-	taCondTargs();
-	taCondActions();
-
-	taToStateActions();
-	taFromStateActions();
-	taEofActions();
-
-	taEofTrans();
-
-	taKeys();
-	taCondKeys();
-}
-
 void BinaryLooped::writeData()
 {
 	setTableState( TableArray::GeneratePass );
@@ -247,7 +289,7 @@ void BinaryLooped::writeExec()
 
 	out <<
 		"	const " << ALPH_TYPE() << " *_keys;\n"
-		"	const char *_ckeys;\n"
+		"	const " << condKeys.type << " *_ckeys;\n"
 		"	int _cpc;\n"
 		"\n";
 
@@ -387,46 +429,6 @@ void BinaryLooped::writeExec()
 		out << "	_out: {}\n";
 
 	out << "	}\n";
-}
-
-/* Determine if we should use indicies or not. */
-void BinaryLooped::calcIndexSize()
-{
-	useIndicies = false;
-
-	if ( useIndicies )
-		setTransPosWi();
-	else
-		setTransPos();
-	
-	keys.setType( ALPH_TYPE() );
-	keys.isSigned = keyOps->isSigned;
-
-	return;
-
-	int sizeWithInds = 0, sizeWithoutInds = 0;
-
-	/* Calculate cost of using with indicies. */
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		int totalIndex = st->outSingle.length() + st->outRange.length() + 
-				(st->defTrans == 0 ? 0 : 1);
-		sizeWithInds += arrayTypeSize(redFsm->maxIndex) * totalIndex;
-	}
-	sizeWithInds += arrayTypeSize(redFsm->maxState) * redFsm->transSet.length();
-	if ( redFsm->anyActions() )
-		sizeWithInds += arrayTypeSize(redFsm->maxActionLoc) * redFsm->transSet.length();
-
-	/* Calculate the cost of not using indicies. */
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		int totalIndex = st->outSingle.length() + st->outRange.length() + 
-				(st->defTrans == 0 ? 0 : 1);
-		sizeWithoutInds += arrayTypeSize(redFsm->maxState) * totalIndex;
-		if ( redFsm->anyActions() )
-			sizeWithoutInds += arrayTypeSize(redFsm->maxActionLoc) * totalIndex;
-	}
-
-	/* If using indicies reduces the size, use them. */
-	useIndicies = sizeWithInds < sizeWithoutInds;
 }
 
 }

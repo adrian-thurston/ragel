@@ -78,7 +78,7 @@ void GotoLooped::writeExec()
 			|| redFsm->anyFromStateActions() )
 	{
 		out << 
-			"	const " << ARRAY_TYPE(redFsm->maxActArrItem) << " *_acts;\n"
+			"	const " << actions.type << " *_acts;\n"
 			"	" << "unsigned int" << " _nacts;\n";
 	}
 
@@ -180,7 +180,7 @@ void GotoLooped::writeExec()
 
 		if ( redFsm->anyEofActions() ) {
 			out <<
-				"	const " << ARRAY_TYPE(redFsm->maxActArrItem) <<
+				"	const " << actions.type <<
 						" *__acts = " << A() << " + " << EA() + "[" + vCS() + "]" << ";\n"
 				"	" << "unsigned int" << " __nacts = " << "(unsigned int)" << " *__acts++;\n"
 				"	while ( __nacts-- > 0 ) {\n"

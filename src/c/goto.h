@@ -85,7 +85,7 @@ public:
 	std::ostream &FROM_STATE_ACTIONS();
 	std::ostream &EOF_ACTIONS();
 
-	virtual void calcIndexSize() {}
+	virtual void calcIndexSize();
 
 	virtual std::ostream &COND_GOTO( RedCondAp *trans, int level );
 
