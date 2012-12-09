@@ -84,7 +84,7 @@ TableArray::TableArray( const char *name, CodeGen &codeGen )
 	codeGen.arrayVector.append( this );
 }
 
-std::string TableArray::ref()
+std::string TableArray::ref() const
 {
 	return string("_") + codeGen.DATA_PREFIX() + name;
 }

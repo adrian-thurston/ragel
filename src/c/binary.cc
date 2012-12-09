@@ -606,10 +606,10 @@ void Binary::taActions()
 void Binary::LOCATE_TRANS()
 {
 	out <<
-		"	_keys = " << keys.ref() << " + " << keyOffsets.ref() << "[" + vCS() + "]" << ";\n"
-		"	_trans = " << indexOffsets.ref() << "[" << vCS() << "];\n"
+		"	_keys = " << ARR_REF( keys ) << " + " << ARR_REF( keyOffsets ) << "[" << vCS() << "]" << ";\n"
+		"	_trans = " << ARR_REF( indexOffsets ) << "[" << vCS() << "];\n"
 		"\n"
-		"	_klen = " << singleLens.ref() << "[" << vCS() << "];\n"
+		"	_klen = " << ARR_REF( singleLens ) << "[" << vCS() << "];\n"
 		"	if ( _klen > 0 ) {\n"
 		"		const " << ALPH_TYPE() << " *_lower = _keys;\n"
 		"		const " << ALPH_TYPE() << " *_mid;\n"
@@ -632,7 +632,7 @@ void Binary::LOCATE_TRANS()
 		"		_trans += _klen;\n"
 		"	}\n"
 		"\n"
-		"	_klen = " << rangeLens.ref() << "[" << vCS() << "];\n"
+		"	_klen = " << ARR_REF( rangeLens ) << "[" << vCS() << "];\n"
 		"	if ( _klen > 0 ) {\n"
 		"		const " << ALPH_TYPE() << " *_lower = _keys;\n"
 		"		const " << ALPH_TYPE() << " *_mid;\n"
@@ -659,14 +659,14 @@ void Binary::LOCATE_TRANS()
 void Binary::LOCATE_COND()
 {
 	out <<
-		"	_ckeys = " << condKeys.ref() << " + " << transOffsets.ref() + "[" + "_trans" + "]" << ";\n"
-		"	_klen = " << transLengths.ref() << "[" << "_trans" << "];\n"
-		"	_cond = " << transOffsets.ref() << "[_trans];\n"
+		"	_ckeys = " << ARR_REF( condKeys ) << " + " << ARR_REF( transOffsets ) << "[_trans];\n"
+		"	_klen = " << ARR_REF( transLengths ) << "[_trans];\n"
+		"	_cond = " << ARR_REF( transOffsets ) << "[_trans];\n"
 		"\n";
 
 	out <<
 		"	_cpc = 0;\n"
-		"	switch ( " << transCondSpaces.ref() << "[" << "_trans" << "] ) {\n"
+		"	switch ( " << ARR_REF( transCondSpaces ) << "[_trans] ) {\n"
 		"\n";
 
 	for ( CondSpaceList::Iter csi = condSpaceList; csi.lte(); csi++ ) {
@@ -689,9 +689,9 @@ void Binary::LOCATE_COND()
 	
 	out <<
 		"	{\n"
-		"		const " << condKeys.type << " *_lower = _ckeys;\n"
-		"		const " << condKeys.type << " *_mid;\n"
-		"		const " << condKeys.type << " *_upper = _ckeys + _klen - 1;\n"
+		"		const " << ARR_TYPE( condKeys ) << " *_lower = _ckeys;\n"
+		"		const " << ARR_TYPE( condKeys ) << " *_mid;\n"
+		"		const " << ARR_TYPE( condKeys ) << " *_upper = _ckeys + _klen - 1;\n"
 		"		while (1) {\n"
 		"			if ( _upper < _lower )\n"
 		"				break;\n"

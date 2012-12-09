@@ -98,7 +98,7 @@ void GotoLooped::writeExec()
 			|| redFsm->anyFromStateActions() )
 	{
 		out << 
-			"	const " << actions.type << " *_acts;\n"
+			"	const " << ARR_TYPE( actions ) << " *_acts;\n"
 			"	" << "unsigned int" << " _nacts;\n";
 	}
 
@@ -122,7 +122,7 @@ void GotoLooped::writeExec()
 
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
-			"	_acts = " << actions.ref() << " + " << fromStateActions.ref() + "[" + vCS() + "]" << ";\n"
+			"	_acts = " << ARR_REF( actions ) << " + " << ARR_REF( fromStateActions ) << "[" << vCS() << "];\n"
 			"	_nacts = " << "(unsigned int)" << " *_acts++;\n"
 			"	while ( _nacts-- > 0 ) {\n"
 			"		switch ( *_acts++ ) {\n";
@@ -147,7 +147,7 @@ void GotoLooped::writeExec()
 
 	if ( redFsm->anyToStateActions() ) {
 		out <<
-			"	_acts = " << actions.ref() << " + " << toStateActions.ref() + "[" + vCS() + "]" << ";\n"
+			"	_acts = " << ARR_REF( actions ) << " + " << ARR_REF( toStateActions ) << "[" << vCS() << "];\n"
 			"	_nacts = " << "(unsigned int)" << " *_acts++;\n"
 			"	while ( _nacts-- > 0 ) {\n"
 			"		switch ( *_acts++ ) {\n";
@@ -200,8 +200,9 @@ void GotoLooped::writeExec()
 
 		if ( redFsm->anyEofActions() ) {
 			out <<
-				"	const " << actions.type <<
-						" *__acts = " << actions.ref() << " + " << eofActions.ref() + "[" + vCS() + "]" << ";\n"
+				"	const " << ARR_TYPE( actions ) <<
+						" *__acts = " << ARR_REF( actions ) << " + " << 
+						ARR_REF( eofActions ) << "[" << vCS() << "];\n"
 				"	" << "unsigned int" << " __nacts = " << "(unsigned int)" << " *__acts++;\n"
 				"	while ( __nacts-- > 0 ) {\n"
 				"		switch ( *__acts++ ) {\n";

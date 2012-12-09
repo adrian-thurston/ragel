@@ -210,14 +210,14 @@ void FlatLooped::writeExec()
 			redFsm->anyRegActions() || redFsm->anyFromStateActions() )
 	{
 		out << 
-			"	const " << actions.type << " *_acts;\n"
-			"	" << "unsigned int" << " _nacts;\n"; 
+			"	const " << ARR_TYPE( actions ) << " *_acts;\n"
+			"	unsigned int _nacts;\n"; 
 	}
 
 	out <<
 		"	const " << ALPH_TYPE() << " *_keys;\n"
-		"	const " << indicies.type << " *_inds;\n"
-		"	const " << condKeys.type << " *_ckeys;\n"
+		"	const " << ARR_TYPE( indicies ) << " *_inds;\n"
+		"	const " << ARR_TYPE( condKeys ) << " *_ckeys;\n"
 		"	int _klen;\n"
 		"	int _cpc;\n";
 
@@ -241,7 +241,8 @@ void FlatLooped::writeExec()
 
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
-			"	_acts = " << actions.ref() << " + " << fromStateActions.ref() + "[" + vCS() + "]" << ";\n"
+			"	_acts = " << ARR_REF( actions ) << " + " << ARR_REF( fromStateActions ) <<
+					"[" << vCS() << "]" << ";\n"
 			"	_nacts = " << "(unsigned int)" << " *_acts++;\n"
 			"	while ( _nacts-- > 0 ) {\n"
 			"		switch ( *_acts++ ) {\n";
@@ -262,15 +263,15 @@ void FlatLooped::writeExec()
 		out << "	_ps = " << vCS() << ";\n";
 
 	out <<
-		"	" << vCS() << " = " << condTargs.ref() << "[_cond];\n"
+		"	" << vCS() << " = " << ARR_REF( condTargs ) << "[_cond];\n"
 		"\n";
 
 	if ( redFsm->anyRegActions() ) {
 		out <<
-			"	if ( " << condActions.ref() << "[_cond] == 0 )\n"
+			"	if ( " << ARR_REF( condActions ) << "[_cond] == 0 )\n"
 			"		goto _again;\n"
 			"\n"
-			"	_acts = " << actions.ref() << " + " << condActions.ref() + "[_cond]" << ";\n"
+			"	_acts = " << ARR_REF( actions ) << " + " << ARR_REF( condActions ) << "[_cond]" << ";\n"
 			"	_nacts = " << "(unsigned int)" << " *_acts++;\n"
 			"	while ( _nacts-- > 0 ) {\n"
 			"		switch ( *(_acts++) )\n		{\n";
@@ -286,7 +287,7 @@ void FlatLooped::writeExec()
 
 	if ( redFsm->anyToStateActions() ) {
 		out <<
-			"	_acts = " << actions.ref() << " + " << toStateActions.ref() + "[" + vCS() + "]" << ";\n"
+			"	_acts = " << ARR_REF( actions ) << " + " << ARR_REF( toStateActions ) << "[" << vCS() << "]" << ";\n"
 			"	_nacts = " << "(unsigned int)" << " *_acts++;\n"
 			"	while ( _nacts-- > 0 ) {\n"
 			"		switch ( *_acts++ ) {\n";
@@ -324,17 +325,17 @@ void FlatLooped::writeExec()
 
 		if ( redFsm->anyEofTrans() ) {
 			out <<
-				"	if ( " << eofTrans.ref() << "[" << vCS() << "] > 0 ) {\n"
-				"		_trans = " << eofTrans.ref() << "[" << vCS() << "] - 1;\n"
-				"		_cond = " << transOffsets.ref() << "[_trans];\n"
+				"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
+				"		_trans = " << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
+				"		_cond = " << ARR_REF( transOffsets ) << "[_trans];\n"
 				"		goto _eof_trans;\n"
 				"	}\n";
 		}
 
 		if ( redFsm->anyEofActions() ) {
 			out <<
-				"	const " << actions.type << " *__acts = " << 
-						actions.ref() << " + " << eofActions.ref() + "[" + vCS() + "]" << ";\n"
+				"	const " << ARR_TYPE( actions ) << " *__acts = " << 
+						ARR_REF( actions ) << " + " << ARR_REF( eofActions ) << "[" << vCS() << "]" << ";\n"
 				"	" << "unsigned int" << " __nacts = " << "(unsigned int)" << " *__acts++;\n"
 				"	while ( __nacts-- > 0 ) {\n"
 				"		switch ( *__acts++ ) {\n";

@@ -249,8 +249,8 @@ void FlatExpanded::writeExec()
 
 	out <<
 		"	const " << ALPH_TYPE() << " *_keys;\n"
-		"	const " << indicies.type << " *_inds;\n"
-		"	const " << condKeys.type << " *_ckeys;\n"
+		"	const " << ARR_TYPE( indicies ) << " *_inds;\n"
+		"	const " << ARR_TYPE( condKeys ) << " *_ckeys;\n"
 		"	int _klen;\n"
 		"	int _cpc;\n";
 
@@ -272,7 +272,7 @@ void FlatExpanded::writeExec()
 
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
-			"	switch ( " << fromStateActions.ref() << "[" << vCS() << "] ) {\n";
+			"	switch ( " << ARR_REF( fromStateActions ) << "[" << vCS() << "] ) {\n";
 			FROM_STATE_ACTION_SWITCH() <<
 			"	}\n"
 			"\n";
@@ -289,14 +289,14 @@ void FlatExpanded::writeExec()
 		out << "	_ps = " << vCS() << ";\n";
 
 	out << 
-		"	" << vCS() << " = " << condTargs.ref() << "[_cond];\n\n";
+		"	" << vCS() << " = " << ARR_REF( condTargs ) << "[_cond];\n\n";
 
 	if ( redFsm->anyRegActions() ) {
 		out << 
-			"	if ( " << condActions.ref() << "[_cond] == 0 )\n"
+			"	if ( " << ARR_REF( condActions ) << "[_cond] == 0 )\n"
 			"		goto _again;\n"
 			"\n"
-			"	switch ( " << condActions.ref() << "[_cond] ) {\n";
+			"	switch ( " << ARR_REF( condActions ) << "[_cond] ) {\n";
 			ACTION_SWITCH() << 
 			"	}\n"
 			"\n";
@@ -308,7 +308,7 @@ void FlatExpanded::writeExec()
 
 	if ( redFsm->anyToStateActions() ) {
 		out <<
-			"	switch ( " << toStateActions.ref() << "[" << vCS() << "] ) {\n";
+			"	switch ( " << ARR_REF( toStateActions ) << "[" << vCS() << "] ) {\n";
 			TO_STATE_ACTION_SWITCH() <<
 			"	}\n"
 			"\n";
@@ -342,16 +342,16 @@ void FlatExpanded::writeExec()
 
 		if ( redFsm->anyEofTrans() ) {
 			out <<
-				"	if ( " << eofTrans.ref() << "[" << vCS() << "] > 0 ) {\n"
-				"		_trans = " << eofTrans.ref() << "[" << vCS() << "] - 1;\n"
-				"		_cond = " << transOffsets.ref() << "[_trans];\n"
+				"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
+				"		_trans = " << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
+				"		_cond = " << ARR_REF( transOffsets ) << "[_trans];\n"
 				"		goto _eof_trans;\n"
 				"	}\n";
 		}
 
 		if ( redFsm->anyEofActions() ) {
 			out <<
-				"	switch ( " << eofActions.ref() << "[" << vCS() << "] ) {\n";
+				"	switch ( " << ARR_REF( eofActions ) << "[" << vCS() << "] ) {\n";
 				EOF_ACTION_SWITCH() <<
 				"	}\n";
 		}

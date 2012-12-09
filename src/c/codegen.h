@@ -75,7 +75,7 @@ struct TableArray
 	void setType( std::string type )
 		{ this->type = type; }
 
-	std::string ref();
+	std::string ref() const;
 
 	void value( long long v );
 
@@ -154,6 +154,12 @@ protected:
 	string START() { return DATA_PREFIX() + "start"; }
 	string ERROR() { return DATA_PREFIX() + "error"; }
 	string FIRST_FINAL() { return DATA_PREFIX() + "first_final"; }
+
+	string ARR_TYPE( const TableArray &ta )
+		{ return ta.type; }
+
+	string ARR_REF( const TableArray &ta )
+		{ return ta.ref(); }
 
 	void INLINE_LIST( ostream &ret, GenInlineList *inlineList, 
 			int targState, bool inFinish, bool csForced );

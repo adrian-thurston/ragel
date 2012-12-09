@@ -360,10 +360,10 @@ void Flat::taActions()
 void Flat::LOCATE_TRANS()
 {
 	out <<
-		"	_keys = " << keys.ref() << " + " << "(" + vCS() + "<<1)" << ";\n"
-		"	_inds = " << indicies.ref() << " + " << flatIndexOffset.ref() + "[" + vCS() + "]" << ";\n"
+		"	_keys = " << ARR_REF( keys ) << " + " << "(" << vCS() << "<<1)" << ";\n"
+		"	_inds = " << ARR_REF( indicies ) << " + " << ARR_REF( flatIndexOffset ) << "[" << vCS() << "]" << ";\n"
 		"\n"
-		"	_slen = " << keySpans.ref() << "[" << vCS() << "];\n"
+		"	_slen = " << ARR_REF( keySpans ) << "[" << vCS() << "];\n"
 		"	_trans = _inds[ _slen > 0 && _keys[0] <=" << GET_KEY() << " &&\n"
 		"		" << GET_KEY() << " <= _keys[1] ?\n"
 		"		" << GET_KEY() << " - _keys[0] : _slen ];\n"
@@ -371,14 +371,14 @@ void Flat::LOCATE_TRANS()
 		"\n";
 
 	out <<
-		"	_ckeys = " << condKeys.ref() << " + " << transOffsets.ref() + "[" + "_trans" + "]" << ";\n"
-		"	_klen = " << transLengths.ref() << "[" << "_trans" << "];\n"
-		"	_cond = " << transOffsets.ref() << "[_trans];\n"
+		"	_ckeys = " << ARR_REF( condKeys ) << " + " << ARR_REF( transOffsets ) << "[_trans];\n"
+		"	_klen = " << ARR_REF( transLengths ) << "[_trans];\n"
+		"	_cond = " << ARR_REF( transOffsets ) << "[_trans];\n"
 		"\n";
 
 	out <<
 		"	_cpc = 0;\n"
-		"	switch ( " << transCondSpaces.ref() << "[" << "_trans" << "] ) {\n"
+		"	switch ( " << ARR_REF( transCondSpaces ) << "[_trans] ) {\n"
 		"\n";
 
 	for ( CondSpaceList::Iter csi = condSpaceList; csi.lte(); csi++ ) {
@@ -401,9 +401,9 @@ void Flat::LOCATE_TRANS()
 	
 	out <<
 		"	{\n"
-		"		const " << condKeys.type << " *_lower = _ckeys;\n"
-		"		const " << condKeys.type << " *_mid;\n"
-		"		const " << condKeys.type << " *_upper = _ckeys + _klen - 1;\n"
+		"		const " << ARR_TYPE( condKeys ) << " *_lower = _ckeys;\n"
+		"		const " << ARR_TYPE( condKeys ) << " *_mid;\n"
+		"		const " << ARR_TYPE( condKeys ) << " *_upper = _ckeys + _klen - 1;\n"
 		"		while (1) {\n"
 		"			if ( _upper < _lower )\n"
 		"				break;\n"
