@@ -52,10 +52,10 @@ public:
 	virtual void EOF_ACTION( RedStateAp *state );
 	virtual void COND_ACTION( RedCondAp *cond );
 
-	virtual void calcIndexSize();
-	virtual void tableDataPass();
-	virtual void genAnalysis();
+	void calcIndexSize();
+	void tableDataPass();
 
+	virtual void genAnalysis();
 	virtual void writeData();
 	virtual void writeExec();
 };

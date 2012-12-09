@@ -115,7 +115,7 @@ protected:
 	virtual void EOF_ACTION( RedStateAp *state ) = 0;
 	virtual void COND_ACTION( RedCondAp *cond ) = 0;
 
-	virtual void setTableState( TableArray::State );
+	void setTableState( TableArray::State );
 };
 
 }

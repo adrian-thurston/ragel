@@ -106,38 +106,17 @@ void BinaryLooped::tableDataPass()
 
 void BinaryLooped::genAnalysis()
 {
-	if ( codeStyle == GenGoto || codeStyle == GenFGoto || 
-			codeStyle == GenIpGoto || codeStyle == GenSplit )
-	{
-		/* For directly executable machines there is no required state
-		 * ordering. Choose a depth-first ordering to increase the
-		 * potential for fall-throughs. */
-		redFsm->depthFirstOrdering();
-	}
-	else {
-		/* The frontend will do this for us, but it may be a good idea to
-		 * force it if the intermediate file is edited. */
-		redFsm->sortByStateId();
-	}
+	redFsm->sortByStateId();
 
 	/* Choose default transitions and the single transition. */
 	redFsm->chooseDefaultSpan();
 		
-	/* Maybe do flat expand, otherwise choose single. */
-	if ( codeStyle == GenFlat || codeStyle == GenFFlat )
-		redFsm->makeFlat();
-	else
-		redFsm->chooseSingle();
+	/* Choose the singles. */
+	redFsm->chooseSingle();
 
 	/* If any errors have occured in the input file then don't write anything. */
 	if ( gblErrorCount > 0 )
 		return;
-	
-	if ( codeStyle == GenSplit )
-		redFsm->partitionFsm( numSplitPartitions );
-
-	if ( codeStyle == GenIpGoto || codeStyle == GenSplit )
-		redFsm->setInTrans();
 
 	/* Anlayze Machine will find the final action reference counts, among other
 	 * things. We will use these in reporting the usage of fsm directives in

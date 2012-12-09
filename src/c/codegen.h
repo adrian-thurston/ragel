@@ -197,9 +197,6 @@ protected:
 	void genLineDirective( ostream &out );
 
 public:
-	virtual void calcIndexSize() = 0;
-	virtual void setTableState( TableArray::State ) {}
-	virtual void tableDataPass() {}
 	virtual void writeExports();
 };
 

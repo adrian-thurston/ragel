@@ -61,6 +61,7 @@ public:
 	void TARGS( ostream &ret, bool inFinish, int targState );
 	void BREAK( ostream &ret, int targState, bool csForced );
 
+	virtual void genAnalysis();
 	virtual void writeData();
 	virtual void writeExec();
 
@@ -76,8 +77,6 @@ protected:
 	/* Set up labelNeeded flag for each state. */
 	void setLabelsNeeded( GenInlineList *inlineList );
 	void setLabelsNeeded();
-
-	virtual void genAnalysis();
 };
 
 }

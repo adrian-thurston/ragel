@@ -43,9 +43,10 @@ public:
 	GotoLooped( const CodeGenArgs &args ) 
 		: Goto(args) {}
 
-	virtual void tableDataPass();
-	virtual void genAnalysis();
+	void tableDataPass();
 
+	/* Interface. */
+	virtual void genAnalysis();
 	virtual void writeData();
 	virtual void writeExec();
 };

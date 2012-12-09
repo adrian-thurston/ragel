@@ -42,10 +42,10 @@ class BinaryLooped
 public:
 	BinaryLooped( const CodeGenArgs &args );
 
-	virtual void calcIndexSize();
-	virtual void tableDataPass();
-	virtual void genAnalysis();
+	void calcIndexSize();
+	void tableDataPass();
 
+	virtual void genAnalysis();
 	virtual void writeData();
 	virtual void writeExec();
 
