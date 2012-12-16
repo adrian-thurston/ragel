@@ -2,27 +2,48 @@
 lex start
 {
 	ignore /[\t\n ]+/
+	ignore /'#' any* :> '\n'/
+
 	literal '^', '|', '-', ',', ':', '!', '?', '.'
 	literal '(', ')', '{', '}', '*', '&', '+'
 
 	literal '--', ':>', ':>>', '<:', '->', '**'
 
-	literal '@', '>', '%'
-	literal 'from', 'to'
+	literal '|*', '*|', '=>' 
 
-	literal ':=', '=', ';'
+	literal '@', '>', '<', '%', '$'
+	literal 'from', 'to', 'eof', 'lerr', 'err'
+	literal 'when', 'inwhen', 'outwhen', '>?', '$?', '%?' 
+
+	literal ':=', '=', ';', '..'
+
+	literal '>~', '$~', '%~', '<~', '@~', '<>~' 
+	literal '>*', '$*', '%*', '<*', '@*', '<>*' 
+	literal '>/', '$/', '%/', '</', '@/', '<>/' 
+	literal '>!', '$!', '%!', '<!', '@!', '<>!' 
+	literal '>^', '$^', '%^', '<^', '@^', '<>^' 
+	literal '<>'
 
 	literal 'machine', 'action'
 
-		token string /
-			'"' any* :> '"' |
-			"'" any* :> "'"
-		/
+	token string /
+		'"' ( [^"\\] | '\\' any )* '"' |
+		"'" ( [^'\\] | '\\' any )* "'"
+	/
+	token union /
+		'[' any* :> ']'
+	/
+
 	token word /[a-zA-Z_][a-zA-Z0-9_]*/
 	token uint /[0-9]+/
 }
 
-def expression [term expression_op*]
+def join
+	[join ',' expression]
+|	[expression]
+
+def expression
+	[term expression_op*]
 
 def expression_op
 	['|' term]
@@ -50,19 +71,67 @@ def factor_label
 
 def factor_ep
 	[factor_aug]
+|	[factor_aug '->' word]
+
+def aug_base
+	['@'] |	['>'] |	['%'] | ['$']
 
 def aug_op
-	['@']
-|	['>']
-|	['%']
+	['@'] |	['>'] |	['%'] | ['$']
 |	['>' 'from']
 |	['>' 'to']
 
 def action_ref 
 	[word]
+|	['{' host::tok* '}']
+
+def priority_aug
+	[uint]
+|	['+' uint]
+|	['-' uint]
+
+def aug_cond
+	['>?'] | ['$?'] | ['%?']
+|	['>' 'when'] | ['$' 'when'] | ['%' 'when']
+|	['when'] | ['inwhen'] | ['outwhen']
+
+def aug_to_state
+	['>~'] | ['<~'] | ['$~'] | ['%~'] | ['@~']
+|	['>' 'to'] | ['<' 'to'] | ['$' 'to'] | ['%' 'to'] | ['@' 'to']
+|	['<>~'] | ['<>' 'to']
+
+def aug_from_state
+	['>*'] | ['<*'] | ['$*'] | ['%*'] | ['@*']
+|	['>' 'from'] | ['<' 'from'] | ['$' 'from'] | ['%' 'from'] | ['@' 'from']
+|	['<>*'] | ['<>' 'to']
+
+def aug_eof
+	['>/'] | ['</'] | ['$/'] | ['%/'] | ['@/']
+|	['>' 'eof'] | ['<' 'eof'] | ['$' 'eof'] | ['%' 'eof'] | ['@' 'eof']
+|	['<>/'] | ['<>' 'to']
+
+def aug_gbl_error
+	['>!'] | ['<!'] | ['$!'] | ['%!'] | ['@!']
+|	['>' 'err'] | ['<' 'err'] | ['$' 'err'] | ['%' 'err'] | ['@' 'err']
+|	['<>!'] | ['<>' 'to']
+
+def aug_local_error
+	['>^'] | ['<^'] | ['$^'] | ['%^'] | ['@^']
+|	['>' 'lerr'] | ['<' 'lerr'] | ['$' 'lerr'] | ['%' 'lerr'] | ['@' 'lerr']
+|	['<>^'] | ['<>' 'to']
 
 def factor_aug
-	[factor_aug aug_op action_ref]
+	[factor_aug aug_base action_ref]
+|	[factor_aug aug_base priority_aug]
+|	[factor_aug aug_base '(' word ',' priority_aug ')']
+|	[factor_aug aug_cond action_ref]
+|	[factor_aug aug_cond '!' action_ref]
+|	[factor_aug aug_to_state action_ref]
+|	[factor_aug aug_from_state action_ref]
+|	[factor_aug aug_eof action_ref]
+|	[factor_aug aug_gbl_error action_ref]
+|	[factor_aug aug_local_error action_ref]
+|	[factor_aug aug_local_error '(' word ',' action_ref ')']
 |	[factor_rep]
 
 def factor_rep 
@@ -90,20 +159,37 @@ def factor
 	[alphabet_num]
 |	[word]
 |	[string]
-|	['(' expression ')']
+|	[union]
+|	[range_lit '..' range_lit]
+|	['(' join ')']
+
+def range_lit
+	[string]
+|	[alphabet_num]
 
 def alphabet_num 
 	[uint]
 |	['-' uint]
 
-def machine_def
-	[word '=' expression ';']
-|	[word ':=' expression ';']
-|	['machine' word ';']
-|	['action' word '{' host::tok+ '}']
+def lm_act
+	['=>' action_ref]
+
+def lm_stmt
+	[join lm_act? ';'] commit
+|	[word '=' join ';'] commit
+
+def lm
+	[join]
+|	['|*' lm_stmt+ '*|']
+
+def statement
+	[word '=' join ';'] commit
+|	[word ':=' lm ';'] commit
+|	['machine' word ';'] commit
+|	['action' word '{' host::tok+ '}'] commit
 
 def ragel_start 
-	[machine_def*]
+	[statement*]
 
 namespace host
 {
@@ -115,16 +201,15 @@ namespace host
 		token ws /[ \t\n]+/
 
 		token string /
-			'"' any* :> '"' |
-			"'" any* :> "'"
+			'"' ( [^"\\] | '\\' any )* '"' |
+			"'" ( [^'\\] | '\\' any )* "'"
 		/
 
 		token sym /
-			';' | '=' | '<' | '>' |
-			'-' | '(' | ')' | '*' |
-			'+' | '{' | '}'
+			';' | '=' | '-' | '+' | '*' | '/' |
+			'<' | '>' | '(' | ')' | '{' | '}' |
+			'[' | ']'
 		/
-
 
 		token word /[a-zA-Z_][a-zA-Z0-9_]*/
 		token number /[0-9]+/
