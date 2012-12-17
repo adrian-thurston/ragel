@@ -474,9 +474,9 @@ region_def:
 	};
 
 region_head: 
-	KW_Lex TK_Word 
+	KW_Lex
 	final {
-		pushRegionSet( $1->loc, $2->data );
+		pushRegionSet( $1->loc );
 	};
 
 namespace_def: 
@@ -1124,7 +1124,7 @@ literal_item: opt_no_ignore TK_Literal opt_no_ignore
 
 		bool insideRegion = regionStack.top() != pd->rootRegion;
 		if ( !insideRegion )
-			pushRegionSet( $2->loc, name );
+			pushRegionSet( $2->loc );
 
 		bool unusedCI;
 		String interp;
@@ -1300,7 +1300,7 @@ token_def_name:
 		curDefineId = name;
 
 		if ( !pd->insideRegion )
-			pushRegionSet( internal, name );
+			pushRegionSet( internal );
 	};
 
 nonterm class opt_name
@@ -2701,22 +2701,22 @@ TokenRegion *ColmParser::createRegion( String &scannerName )
 	return tokenRegion;
 }
 
-void ColmParser::pushRegionSet( const InputLoc &loc, String &name )
+void ColmParser::pushRegionSet( const InputLoc &loc )
 {
 	/* Just for ignores. */
-	String scannerNameIgn( name.length() + 2, "<%s>-ign", name.data );
+	String scannerNameIgn( 128, "<%d>-ign", loc.line );
 	TokenRegion *tokenRegionIgn = createRegion( scannerNameIgn );
 
 	/* Just for collect ignores. Will use the ignore-only start state. */
-	String scannerNameCi( name.length() + 2, "<%s>-ci", name.data );
+	String scannerNameCi( 128, "<%d>-ci", loc.line );
 	TokenRegion *tokenRegionCi = createRegion( scannerNameCi );
 
 	/* Just for tokens. */
-	String scannerNameTok( name.length() + 2, "<%s>-tok", name.data );
+	String scannerNameTok( 128, "<%d>-tok", loc.line );
 	TokenRegion *tokenRegionTok = createRegion( scannerNameTok );
 
 	/* Make the new token region. */
-	String scannerName( name.length() + 2, "<%s>", name.data );
+	String scannerName( 128, "<%d>", loc.line );
 	TokenRegion *tokenRegion = createRegion( scannerName );
 
 	RegionSet *regionPack = new RegionSet( tokenRegion,
