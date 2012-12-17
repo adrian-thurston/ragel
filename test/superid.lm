@@ -1,6 +1,6 @@
 context si
 {
-	lex start
+	lex
 	{
 		literal '!', 'a', ';\n'
 

@@ -4,7 +4,7 @@ context ctx
 	j: int
 	k: int
 
-	lex start
+	lex
 	{
 		ignore /space+/
 		literal '*', '(', ')'

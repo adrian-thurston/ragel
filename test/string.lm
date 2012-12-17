@@ -1,4 +1,4 @@
-lex string
+lex
 {
 	token str_escape /'\\' any/
 	token str_chr /[^\\"]+/
@@ -11,7 +11,7 @@ def str_item
 def string 
 	['"' str_item* '"']
 
-lex start
+lex
 {
 	token ident /[a-zA-Z_]+/
 	token number /[0-9]+/

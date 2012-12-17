@@ -3,7 +3,7 @@
 #
 
 # Any single character can be a literal
-lex start
+lex
 {
 	# Ignore whitespace.
 	ignore /[ \t\n\r\v]+/
@@ -23,7 +23,7 @@ lex start
 # Token translation
 #
 
-lex nc_scan
+lex
 {
 	literal '(', ')'
 	token nc_data /[^()]+/

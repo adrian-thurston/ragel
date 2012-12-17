@@ -1,11 +1,11 @@
-lex start
+lex
 {
 	ignore /space+/
 	literal '*', '(' ni, ni ')', '!', ';'
 	token id /[a-zA-Z_0-9]+/ 
 }
 
-lex inner
+lex
 {
 	ignore /space+/
 	token inner_t /[a-zA-Z_0-9]+/ 

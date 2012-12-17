@@ -1,6 +1,6 @@
 # Token names.
 
-lex start
+lex
 {
 	literal '+', '*'
 	token number /[0-9]+/

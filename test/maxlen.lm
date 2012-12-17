@@ -12,7 +12,7 @@ context maxlen
 	# Tokens
 	#
 
-	lex start
+	lex
 	{
 		ignore /rl_ws/
 		token id /rl_id/

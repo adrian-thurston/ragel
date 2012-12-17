@@ -1,5 +1,5 @@
 
-lex c_token_list
+lex
 {
 	token c_single_lit /( 'L'? "'" ( [^'\\\n] | '\\' any )* "'" )/
 	token c_double_lit /( 'L'? '"' ( [^"\\\n] | '\\' any )* '"' )/
@@ -37,7 +37,7 @@ def c_token_list
 def c
 	[c_token_list]
 
-lex start
+lex
 {
 	literal '%%'
 	literal '{', '}'

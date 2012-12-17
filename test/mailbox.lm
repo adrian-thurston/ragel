@@ -1,6 +1,6 @@
 
 # lines, and fromlines 
-lex lines
+lex
 {
 	rl day /[A-Z][a-z][a-z]/
 	rl month /[A-Z][a-z][a-z]/

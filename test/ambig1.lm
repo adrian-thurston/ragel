@@ -3,7 +3,7 @@
 #
 
 # The items in this scanner may have newline in front of them.
-lex start
+lex
 {
 	# Reserved Words.
 	literal '__LINE__', '__FILE__', '__ENCODING__', 'BEGIN', 'END', 'alias',
@@ -51,7 +51,7 @@ lex start
 }
 
 # These items cannot appear at the beginning of a line (except maybe the first).
-lex expr_cont_ops
+lex
 {
 	ignore /[\t ]+/
 
@@ -69,7 +69,8 @@ lex expr_cont_ops
 	literal '!=', '==', '==='
 	literal '..', '...'
 }
-lex terms
+
+lex
 {
 	ignore /[\t ]+/
 	ignore /'#' [^\n]*/
@@ -78,19 +79,19 @@ lex terms
 }
 
 
-lex dstring_contents
+lex
 {
 	token dstring_contents /[^"]+/
 	token tDSTRING_END /'"'/
 }
 
-lex sstring_contents
+lex
 {
 	token sstring_contents /[^']+/
 	token tSSTRING_END /'\''/
 }
 
-lex xstring_contents
+lex
 {
 	token xstring_contents /[^`]+/
 	token tXSTRING_END /'`'/

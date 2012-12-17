@@ -15,7 +15,7 @@ context tags
 	#
 
 	# Any single character can be a literal
-	lex start
+	lex
 	{
 		literal '!\n', ';\n'
 

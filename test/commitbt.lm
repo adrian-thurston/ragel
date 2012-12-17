@@ -17,7 +17,7 @@
 # This test shows that a global commit with revertOn correctly does not clear
 # 'parsed' items because it must entertain the possibility of backtracking.
 
-lex start
+lex
 {
 	ignore /[\t\n ]+/
 	literal '^', '|', '-', ',', ':', '!', '?', '.'

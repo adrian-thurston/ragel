@@ -1,4 +1,4 @@
-lex start2
+lex
 {
 	ignore /space+/
 	literal '#', '{', '}'
@@ -17,7 +17,7 @@ context ctx
 {
 	SP: parser<start2> 
 
-	lex start1
+	lex
 	{
 		ignore /space+/
 		literal '*', '(', ')', '!', ';\n'

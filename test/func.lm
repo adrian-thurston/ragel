@@ -1,5 +1,5 @@
 
-lex start
+lex
 {
     literal '{', '}'
     literal 'struct', 'type'
