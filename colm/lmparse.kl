@@ -2617,7 +2617,7 @@ void ColmParser::init()
 	/* Set up the root token region. */
 	const char *rootRegionName = "___ROOT_REGION";
 
-	TokenRegion *rootRegion = new TokenRegion( InputLoc(), rootRegionName, 
+	TokenRegion *rootRegion = new TokenRegion( InputLoc(),
 			pd->regionList.length(), 0 );
 	pd->regionList.append( rootRegion );
 	addRegionDef( InputLoc(), namespaceStack.top(), rootRegionName, rootRegion );
@@ -2689,7 +2689,7 @@ void ColmParser::addRegularDef( const InputLoc &loc, Namespace *nspace,
 
 TokenRegion *ColmParser::createRegion( String &scannerName )
 {
-	TokenRegion *tokenRegion = new TokenRegion( internal, scannerName,
+	TokenRegion *tokenRegion = new TokenRegion( internal,
 			pd->regionList.length(), regionStack.top() );
 
 	regionStack.top()->childRegions.append( tokenRegion );

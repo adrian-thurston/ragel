@@ -529,9 +529,11 @@ typedef Vector<TokenRegion*> RegionVect;
 struct TokenRegion
 {
 	/* Construct with a list of joins */
-	TokenRegion( const InputLoc &loc, const String &name, int id, 
-			TokenRegion *parentRegion ) : 
-		loc(loc), name(name), id(id),
+	TokenRegion( const InputLoc &loc, int id, TokenRegion *parentRegion )
+	: 
+		loc(loc),
+		name(128, "%p", this),
+		id(id),
 		lmSwitchHandlesError(false), regionNameInst(0),
 		parentRegion(parentRegion), defaultTokenDef(0),
 		preEofBlock(0), 

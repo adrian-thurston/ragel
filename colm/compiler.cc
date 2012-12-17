@@ -1049,7 +1049,7 @@ void Compiler::createDefaultScanner()
 
 	/* Create a scanner which will be used when no other scanner can be
 	 * figured out. It returns single characters. */
-	defaultRegion = new TokenRegion( InputLoc(), name, 
+	defaultRegion = new TokenRegion( InputLoc(),
 			regionList.length(), 0 );
 	regionList.append( defaultRegion );
 
