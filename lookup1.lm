@@ -138,7 +138,7 @@ context lookup
 	}
 
 	# The C++ scanner.
-	lex start
+	lex
 	{
 		rl fract_const / digit* '.' digit+ | digit+ '.' /
 		rl exponent / [eE] [+\-]? digit+ /
@@ -1634,7 +1634,7 @@ context lookup
 	def class_function_definition
 		[function_def_declaration ctor_initializer_opt class_function_body function_def_end]
 
-	lex cfb_conts
+	lex
 	{
 		token cfb_open /'{'/
 		token cfb_close /'}'/

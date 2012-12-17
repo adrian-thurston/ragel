@@ -10,7 +10,7 @@ def index_stmt [index consume_line newline]
 token separator_line / '='+ '\n' /
 
 # Whitespace separated word list
-lex word_list
+lex
 {
 	token word /[^\t \n]+/
 	ignore /[\t ]+/

@@ -10,7 +10,7 @@ context generate
 	newline_sent: int
 
 	# Tokens. 
-	lex start
+	lex
 	{
 		# Python keywords.
 		literal 'and', 'del', 'from', 'not', 'while', 'as', 'elif', 'global', 'or',

@@ -18,7 +18,7 @@ context tags
 	#
 	# Scanner for tag names.
 	#
-	lex TAG_NAME
+	lex
 	{
 		ignore /space+/
 		token tag_id /def_name/
@@ -27,7 +27,7 @@ context tags
 	#
 	# Scanner for attributes names
 	#
-	lex ATTR_NAME
+	lex
 	{
 		ignore  /space+/
 		token attr_name /def_name_char+/
@@ -37,7 +37,7 @@ context tags
 	literal '>', '/>'
 
 	# Scanner for attribute values.
-	lex ATTR_VAL
+	lex 
 	{
 		ignore  /space+/
 		token dquote_val /'"' ([^"] | '\\' any)* '"'/
@@ -49,7 +49,7 @@ context tags
 	# Tokens
 	#
 
-	lex START
+	lex
 	{
 		ignore /space+/
 
@@ -77,7 +77,7 @@ context tags
 
 	# This scanner is just for the id in close tags. The id needs to be looked up
 	# in the tag stack so we can determine if it is a stray. 
-	lex close_id
+	lex
 	{
 		# Ignore whitespace.
 		ignore /space+/
@@ -130,7 +130,7 @@ context tags
 	# Document Type
 	#
 	# This scanner handles inside DOCTYPE tags (except keywords).
-	lex DOCTYPE
+	lex
 	{
 		ignore /space+/
 		token dt_name /def_name/
@@ -141,7 +141,7 @@ context tags
 
 	# Using a separate scanner for the keywords in DOCTYPE prevents them from
 	# covering dt_name
-	lex DOCTYPE_KW
+	lex
 	{
 		ignore /space+/
 		literal 'SYSTEM', 'PUBLIC'

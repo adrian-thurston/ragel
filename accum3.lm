@@ -1,4 +1,4 @@
-lex args
+lex
 {   
 	literal '-'
 	token file /^('-'|0)(^0)*/
@@ -7,7 +7,7 @@ lex args
 token word /(^0)+/
 token zero /0/ 
 
-lex opts
+lex
 {
 	token single /[qvh]/
 	token with_opt /[oi]/

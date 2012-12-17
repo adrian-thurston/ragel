@@ -1,5 +1,5 @@
 
-lex start
+lex
 {
 
 	literal  'type', 'include'
@@ -8,7 +8,7 @@ lex start
 	ignore /[ \t\r\n]+/
 }
 
-lex include_file_name
+lex
 {
 	token ifn_part /[a-zA-Z0-9_.\-]+/ 
 	token ifn_slash /'/'/
@@ -25,7 +25,7 @@ def ifn_path
 
 literal '%%'
 
-lex embedded
+lex
 {
 	token em_ws /( any - 33..126 )+/
 }

@@ -1,6 +1,6 @@
 
 # Token names.
-lex start
+lex
 {
 	token number /[0-9]+/
 	token id /[a-z]+/

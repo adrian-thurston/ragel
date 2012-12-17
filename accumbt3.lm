@@ -4,7 +4,7 @@
 
 
 # Any single character can be a literal
-lex start
+lex
 {
 	# Ignore whitespace.
 	ignore /[ \t\n\r\v]+/
@@ -23,7 +23,7 @@ lex start
 # Token translation
 #
 
-lex nc_scan
+lex
 {
 	literal '(', ')'
 	token nc_data /[^()]+/
@@ -42,7 +42,7 @@ context accum_bt
 {
 	NestedParser: accum<nested>
 
-	lex two
+	lex
 	{
 		ignore /[ \t]+/
 		token word /[a-zA-Z0-9/*+_\-]+/

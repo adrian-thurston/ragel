@@ -19,7 +19,7 @@
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
 
 
-lex top 
+lex
 {
 	token word  /( [^. \t\n]+  | '.' )/
 	token lws /[ \t]+/
@@ -72,19 +72,19 @@ lex top
 	token cmd_license /'.license' lws? '\n'/
 }
 
-lex cmd_bar
+lex
 {
 	token bar_data /[^|]*/
 	token end_bar /'|'/
 }
 
-lex cmd_slash
+lex
 {
 	token slash_data /[^/]*/
 	token end_slash /'/'/
 }
 
-lex cmd_curly
+lex
 {
 	token curly_data /[^}]*/
 	token end_curly /'}'/
@@ -103,7 +103,7 @@ def text
 |	[lws]
 |	[cmd_il]
 
-lex verbatim
+lex
 {
 	token end_verbatim /lws? '.' lws? 'end' lws 'verbatim' lws? '\n'/
 	token verbatim_line /[^\n]* '\n'/
@@ -112,7 +112,7 @@ lex verbatim
 def verbatim
 	[cmd_verbatim verbatim_line* end_verbatim]
 
-lex code
+lex
 {
 	token end_code /lws? '.' lws? 'end' lws 'code' lws? '\n'/
 	token code_line /[^\n]* '\n'/
@@ -121,7 +121,7 @@ lex code
 def code
 	[cmd_code code_line* end_code]
 
-lex comment
+lex
 {
 	token end_comment /lws? '.' lws? 'end' lws 'comment' lws? '\n'/
 	token comment_line /[^\n]* '\n'/

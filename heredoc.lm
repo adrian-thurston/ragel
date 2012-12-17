@@ -2,7 +2,7 @@ context heredoc
 {
 	rl ident_char /[a-zA-Z_]/
 
-	lex start
+	lex
 	{
 		# Tokens
 		token other /(^(ident_char|0|'\n'))+/

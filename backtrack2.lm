@@ -1,6 +1,6 @@
 
 # Token names.
-lex start
+lex
 {
 	token id /[a-z]+/
 	ignore ws /[ \t\n]+/

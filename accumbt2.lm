@@ -1,6 +1,6 @@
 context accum_bt
 {
-	lex one
+	lex
 	{
 		ignore /[ \t\n]+/
 		token id1 /[a-zA-Z_][a-zA-Z_0-9]*/
@@ -10,7 +10,7 @@ context accum_bt
 
 	OneParser: accum<one>
 
-	lex two
+	lex
 	{
 		ignore /[ \t]+/
 		token id2 /[a-zA-Z_][a-zA-Z_0-9]*/

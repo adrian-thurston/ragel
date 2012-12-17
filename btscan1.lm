@@ -1,6 +1,6 @@
 namespace r1
 {
-	lex r1
+	lex
 	{
 		literal '!', 'a', 'b'
 		ignore /[ \n\t]+/
@@ -11,7 +11,7 @@ namespace r1
 
 namespace r2
 {
-	lex r2
+	lex
 	{
 		literal '!'
 		token id /[a-zA-Z_]+/

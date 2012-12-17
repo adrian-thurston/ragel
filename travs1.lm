@@ -1,4 +1,4 @@
-lex start
+lex
 {
 	ignore /[\t\n ]+/
 	literal '^', '|', '-', ',', ':', '!', '?', '.'

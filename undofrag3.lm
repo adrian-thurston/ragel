@@ -1,6 +1,6 @@
 context undo
 {
-	lex start
+	lex
 	{
 		ignore /[ \t]+/
 		literal '*', '(', ')', '^', ';', '\n', '.'

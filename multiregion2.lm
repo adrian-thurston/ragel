@@ -45,7 +45,7 @@ def request_line
 
 token field_name /token_char+/
 
-lex field_value
+lex
 {
 	token fv_plain /(^(CR|LF))*/
 	token fv_ext /CR LF (SP|HT)/

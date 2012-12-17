@@ -1,5 +1,5 @@
 
-lex c_token_list
+lex
 {
 	token c_single_lit /( 'L'? "'" ( [^'\\\n] | '\\' any )* "'" )/
 	token c_double_lit /( 'L'? '"' ( [^"\\\n] | '\\' any )* '"' )/
@@ -36,7 +36,7 @@ def c
 
 literal '%%'
 
-lex start
+lex
 {
 	literal '{', '}'
 	literal 'protocol', 'client', 'server', 'port', 'by', 'tcp', 'udp'

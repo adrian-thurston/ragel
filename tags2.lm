@@ -26,7 +26,7 @@ rl char_ref_pat / '&#' [0-9]+ ';' | '&0x' [0-9a-fA-F]+ ';' /
 #
 # Single quotes.
 #
-lex sq
+lex
 {
 	token sq_close /'\''/
 
@@ -49,7 +49,7 @@ lex sq
 #
 # Double quotes.
 #
-lex dq
+lex
 {
 	token dq_close /'"'/
 
@@ -72,7 +72,7 @@ lex dq
 #
 # Tag elements. 
 #
-lex tag
+lex
 {
 	literal '\'', '\"', '=', '\/'
 
@@ -90,7 +90,7 @@ literal '>'
 #
 # Top Level
 #
-lex start
+lex
 {
 	#
 	# Comments

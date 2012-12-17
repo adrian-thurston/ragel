@@ -1,5 +1,5 @@
 
-lex function_body
+lex
 {
 	token func_chr /[^{}]+/
 	token func_open /'{'/
@@ -16,7 +16,7 @@ def func_body
 def func 
 	[ident '(' ')' '{' func_body func_close ]
 
-lex start
+lex
 {
 	token ident /[a-zA-Z_]+/
 	token number /[0-9]+/

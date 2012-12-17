@@ -11,7 +11,7 @@ rl rl_num /[0-9]+/
 # Tokens
 #
 
-lex start
+lex
 {
 	# Ignore whitespace.
 	ignore /rl_ws/

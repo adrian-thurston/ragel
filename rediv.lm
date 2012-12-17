@@ -1,5 +1,5 @@
 # Or-literal scanner
-lex orlit
+lex
 {
 	token orlit_dash /'-' /
 	token orlit_close /']'/
@@ -16,7 +16,7 @@ def orlit
 	[orlit_item*]
 
 # Regex scanner
-lex regex
+lex
 {
 	token orlit_open /'['/
 	token orlit_neg_open /'[^'/
@@ -48,7 +48,7 @@ rl s_string /"'" ([^'\\\n] | '\\' any )* "'"/
 rl d_string /'"' ([^"\\\n] | '\\' any )* '"'/
 
 # Root scanner
-lex start
+lex
 {
 	token ident /[a-zA-Z_]+/
 	token number /[0-9]+/

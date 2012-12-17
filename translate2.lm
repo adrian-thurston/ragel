@@ -1,4 +1,4 @@
-lex start2
+lex
 {
 	ignore /space+/
 	literal '#', '{', '}'
@@ -15,7 +15,7 @@ def start2
 context ctx
 {
 
-	lex start
+	lex
 	{
 		ignore /space+/
 		literal '*', '(', ')', '!', ';\n'
