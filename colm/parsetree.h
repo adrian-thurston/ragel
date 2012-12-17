@@ -758,9 +758,6 @@ struct Namespace
 	TypeMap typeMap;
 	GenericList genericList;
 
-	/* Dictionary of graphs. Both instances and non-instances go here. */
-	RegionGraphDict graphDict;
-
 	/* regular language definitions. */
 	GraphDict rlMap;
 

@@ -1054,7 +1054,7 @@ void Compiler::createDefaultScanner()
 	regionList.append( defaultRegion );
 
 	/* Insert the machine definition into the graph dictionary. */
-	RegionGraphDictEl *newEl = rootNamespace->graphDict.insert( name );
+	RegionGraphDictEl *newEl = new RegionGraphDictEl( name );
 	assert( newEl != 0 );
 	newEl->value = new RegionDef( name, defaultRegion );
 	newEl->isInstance = true;

@@ -2749,20 +2749,15 @@ void ColmParser::popRegionSet()
 void ColmParser::addRegionDef( const InputLoc &loc, Namespace *nspace,
 		const String &name, TokenRegion *tokenRegion )
 {
-	RegionGraphDictEl *newEl = nspace->graphDict.insert( name );
-	if ( newEl != 0 ) {
-		/* New element in the dict, all good. */
-		newEl->value = new RegionDef( name, tokenRegion );
-		newEl->isInstance = true;
-		newEl->loc = loc;
+	RegionGraphDictEl *newEl = new RegionGraphDictEl( name );
 
-		/* It it is an instance, put on the instance list. */
-		pd->instanceList.append( newEl );
-	}
-	else {
-		// Recover by ignoring the duplicate.
-		error(loc) << "regular definition \"" << name << "\" already exists" << endl;
-	}
+	/* New element in the dict, all good. */
+	newEl->value = new RegionDef( name, tokenRegion );
+	newEl->isInstance = true;
+	newEl->loc = loc;
+
+	/* It it is an instance, put on the instance list. */
+	pd->instanceList.append( newEl );
 }
 
 ostream &ColmParser::parse_error( int tokId, Token &token )
