@@ -480,7 +480,7 @@ region_head:
 	};
 
 namespace_def: 
-	namespace_head '{' root_item_list '}'
+	namespace_head root_item_list KW_End TK_Word
 	final {
 		namespaceStack.pop();
 	};
@@ -533,7 +533,7 @@ context_item_list:
 	;
 
 context_def: 
-	context_head '{' context_item_list '}'
+	context_head context_item_list KW_End TK_Word
 	final {
 		contextStack.pop();
 		namespaceStack.pop();
