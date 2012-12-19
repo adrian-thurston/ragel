@@ -444,6 +444,7 @@ void ColmScanner::endSection( )
 		'print_xml' => { token( KW_PrintXML ); };
 		'namespace' => { token( KW_Namespace ); };
 		'lex' => { token( KW_Lex ); };
+		'end' => { token( KW_End ); };
 		'map' => { token( KW_Map ); };
 		'list' => { token( KW_List ); };
 		'vector' => { token( KW_Vector ); };

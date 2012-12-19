@@ -468,7 +468,7 @@ var_def: TK_Word ':' type_ref
 	};
 
 region_def: 
-	region_head '{' root_item_list '}'
+	region_head root_item_list KW_End
 	final {
 		popRegionSet();
 	};
