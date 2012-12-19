@@ -1,5 +1,4 @@
 context lookup
-{
 	#
 	# Data types for global data.
 	#
@@ -2139,7 +2138,7 @@ context lookup
 		print( '\n' )
 	}
 
-}
+end lookup
 
 #
 # Global data declarations

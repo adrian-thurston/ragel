@@ -1,5 +1,4 @@
 context tags
-{
 	# Open and close tags by rewriting to generic close tags. Won't work if
 	# interested in unclosed tags because a token can start as not close_id, but
 	# then become a close id during the course of parsing.
@@ -80,7 +79,7 @@ context tags
 			print_xml( lhs )
 			print( 'failed\n' )
 		}
-}
+end tags
 
 cons Tags: tags[]
 Tags.TS = cons tags::tag_stack ["sentinal"]

@@ -13,7 +13,7 @@ def start2
 
 
 context ctx
-{
+
 	SP: parser<start2> 
 
 	lex
@@ -40,7 +40,8 @@ context ctx
 	def start1 
 		[A item* '!']
 	|	[B item* ';\n']
-}
+
+end ctx
 
 
 CTX: ctx = cons ctx []

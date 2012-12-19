@@ -1,5 +1,4 @@
 context ctx
-{
 	i: int
 	j: int
 	k: int
@@ -25,7 +24,7 @@ context ctx
 
 	def start 
 		[item*]
-}
+end ctx
 
 CTX: ctx = cons ctx[]
 parse InputP: ctx::start( CTX ) [ stdin ]

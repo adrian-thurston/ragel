@@ -1,5 +1,4 @@
 context heredoc
-{
 	rl ident_char /[a-zA-Z_]/
 
 	lex
@@ -41,7 +40,7 @@ context heredoc
 
 	def start 
 		[here_name here_data here_close id nl]
-}
+end heredoc
 
 cons HereDoc: heredoc[]
 

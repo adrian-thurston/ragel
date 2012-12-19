@@ -1,37 +1,38 @@
 context accum_bt
-{
-	lex
-		ignore /[ \t\n]+/
-		token id1 /[a-zA-Z_][a-zA-Z_0-9]*/
 
-		def one [ id1* ]
-	end
+lex
+	ignore /[ \t\n]+/
+	token id1 /[a-zA-Z_][a-zA-Z_0-9]*/
 
-	OneParser: accum<one>
+	def one [ id1* ]
+end
 
-	lex
-		ignore /[ \t]+/
-		token id2 /[a-zA-Z_][a-zA-Z_0-9]*/
-		literal '!', ';', '\n'
+OneParser: accum<one>
 
-		def A1 []
-			{ print( "A1\n" ) }
+lex
+	ignore /[ \t]+/
+	token id2 /[a-zA-Z_][a-zA-Z_0-9]*/
+	literal '!', ';', '\n'
 
-		def A2 []
-			{ print( "A2\n" ) }
+	def A1 []
+		{ print( "A1\n" ) }
 
-		def item2
-			[id2]
-			{
-				send OneParser [' extra ']
-				send OneParser [$r1]
-			}
+	def A2 []
+		{ print( "A2\n" ) }
 
-		def two 
-			[A1 item2* '!' '\n']
-		|	[A2 item2* ';' '\n']
-	end
-}
+	def item2
+		[id2]
+		{
+			send OneParser [' extra ']
+			send OneParser [$r1]
+		}
+
+	def two 
+		[A1 item2* '!' '\n']
+	|	[A2 item2* ';' '\n']
+end
+
+end accum_bt
 
 AccumBt: accum_bt = cons accum_bt[]
 AccumBt.OneParser = cons parser<accum_bt::one>[]

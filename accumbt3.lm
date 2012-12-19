@@ -36,43 +36,47 @@ def nested_comment
 
 def nested [id*]
 
+#
+# Accumulator.
+#
 context accum_bt
-{
-	NestedParser: accum<nested>
 
-	lex
-		ignore /[ \t]+/
-		token word /[a-zA-Z0-9/*+_\-]+/
-		token stuff /[a-zA-Z0-9()/*+_\- ]+/
-		literal '!', ';', '\n'
+NestedParser: accum<nested>
 
-		def A1 []
-			{ print( "A1\n" ) }
+lex
+	ignore /[ \t]+/
+	token word /[a-zA-Z0-9/*+_\-]+/
+	token stuff /[a-zA-Z0-9()/*+_\- ]+/
+	literal '!', ';', '\n'
 
-		def A2 []
-			{ print( "A2\n" ) }
+end
 
-		def item
-			[word]
-			{
-				send NestedParser [' ']
-				send NestedParser [$r1]
-				send NestedParser [' ']
-			}
-		|
-			[stuff]
-			{
-				send NestedParser [' ']
-				send NestedParser [$r1]
-				send NestedParser [' ']
-			}
+def A1 []
+	{ print( "A1\n" ) }
 
-		def two 
-		[A1 item* '!' '\n']
-		|
-		[A2 item* ';' '\n']
-	end
-}
+def A2 []
+	{ print( "A2\n" ) }
+
+def item
+	[word]
+	{
+		send NestedParser [' ']
+		send NestedParser [$r1]
+		send NestedParser [' ']
+	}
+|
+	[stuff]
+	{
+		send NestedParser [' ']
+		send NestedParser [$r1]
+		send NestedParser [' ']
+	}
+
+def two 
+	[A1 item* '!' '\n']
+|	[A2 item* ';' '\n']
+
+end accum_bt
 
 cons AccumBt: accum_bt[]
 AccumBt.NestedParser = cons parser<nested>[]
