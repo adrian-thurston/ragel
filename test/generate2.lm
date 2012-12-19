@@ -1,5 +1,4 @@
 context generate
-{
 	def open_item
 		type: str
 		num: int
@@ -188,7 +187,8 @@ context generate
 
 	def start 
 		[item*]
-}
+
+end generate
 
 cons Generate: generate[]
 

@@ -1,5 +1,5 @@
 context undo
-{
+
 	lex
 		ignore /[ \t]+/
 		literal '*', '(', ')', '^', ';', '\n', '.'
@@ -39,7 +39,8 @@ context undo
 	def start 
 		[A1 item* F '.' '^']
 	|	[A2 item* F '.' ';' '\n']
-}
+
+end undo
 
 cons Undo: undo[]
 Undo.Out = construct parser<undo::out> []

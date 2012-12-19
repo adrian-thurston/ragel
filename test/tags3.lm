@@ -1,5 +1,5 @@
 context tags
-{
+
 	#
 	# Regular Definitions
 	#
@@ -295,7 +295,7 @@ context tags
 #			}
 #		}
 #	}
-}
+end tag
 
 cons Tags: tags[]
 Tags.TagStack = construct tags::tag_stack []

@@ -1,5 +1,5 @@
 context counting
-{
+
 	#
 	# Regular Definitions
 	#
@@ -89,7 +89,8 @@ context counting
 			}
 			print( '*** SUCCESS ***\n' )
 		}
-}
+
+end counting
 
 cons Counting: counting[]
 parse counting::start(Counting)[ stdin ]

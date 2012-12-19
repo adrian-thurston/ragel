@@ -1,5 +1,4 @@
 context generate
-{
 	# Regular definitions
 	rl ident_char /[a-zA-Z_]/
 
@@ -683,7 +682,7 @@ context generate
 	def keyword_item 
 		[identifier '=' expression]
 
-}
+end generate
 
 int print_stmts( S: generate::start )
 {

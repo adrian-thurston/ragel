@@ -1,5 +1,5 @@
 context ruby_here
-{
+
 	rl ident_pattern /[a-zA-Z_][a-zA-Z_0-9]*/
 	rl number_pattern /[0-9]+/
 
@@ -86,7 +86,8 @@ context ruby_here
 
 	def start 
 		[item*]
-}
+
+end ruby_here
 
 CTX: ruby_here = cons ruby_here []
 

@@ -1,6 +1,5 @@
 
 context maxlen
-{
 
 	#
 	# Regular Definitions
@@ -43,7 +42,7 @@ context maxlen
 
 	def start 
 		[restricted_list id*]
-}
+end maxlen
 
 cons MaxLen: maxlen[]
 MaxLen.allow = 3
