@@ -12,14 +12,13 @@ rl rl_num /[0-9]+/
 #
 
 lex
-{
 	# Ignore whitespace.
 	ignore /rl_ws/
 
 	# Tokens. 
 	token id /rl_id/
 	token number /rl_num/
-}
+end
 
 #
 # Productions

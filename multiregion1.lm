@@ -11,14 +11,13 @@ token separator_line / '='+ '\n' /
 
 # Whitespace separated word list
 lex
-{
 	token word /[^\t \n]+/
 	ignore /[\t ]+/
 
 	def word_list 
 		[word word_list]
 	|	[]
-}
+end
 
 token old_file_start / '---' [\t ]+ /
 token new_file_start / '+++' [\t ]+ /

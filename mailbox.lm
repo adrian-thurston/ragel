@@ -1,7 +1,6 @@
 
 # lines, and fromlines 
 lex
-{
 	rl day /[A-Z][a-z][a-z]/
 	rl month /[A-Z][a-z][a-z]/
 	rl year /[0-9][0-9][0-9][0-9]/
@@ -22,7 +21,7 @@ lex
 	# entirely correct from line is matched.
 	token from_line / 'From ' (any-'\n')* ' ' date '\n' /
 	token simple_line / [^\n]* '\n' /
-}
+end
 
 rl hchar /print - [ :]/
 token header_name /hchar+/

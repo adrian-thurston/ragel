@@ -16,7 +16,6 @@ context tags
 
 	# Any single character can be a literal
 	lex
-	{
 		literal '!\n', ';\n'
 
 		# Ignore whitespace.
@@ -24,7 +23,7 @@ context tags
 
 		# Open and close id
 		token id /rl_id/
-	}
+	end
 
 	#
 	# Global Data

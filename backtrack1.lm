@@ -1,11 +1,10 @@
 # Token names.
 
 lex
-{
 	literal '+', '*'
 	token number /[0-9]+/
 	ignore ws / [ \t\n]+ /
-}
+end
 
 def F
 	[number '+']

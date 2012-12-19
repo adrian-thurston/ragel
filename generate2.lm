@@ -8,7 +8,6 @@ context generate
 	OpenStack: list<open_item> 
 
 	lex
-	{
 		token stray_close //
 
 		token ocurly /'{'+/
@@ -122,7 +121,7 @@ context generate
 				}
 			}
 		}
-	}
+	end
 
 	#
 	# Internal Links
@@ -130,11 +129,10 @@ context generate
 
 
 	lex
-	{
 		literal 'http:'
 		literal 'ftp:'
 		literal 'mailto:'
-	}
+	end
 
 	def el_prefix
 		['http:']

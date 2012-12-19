@@ -1,16 +1,14 @@
 lex
-{
 	literal '-'
 	token file /^('-'|0)(^0)*/
-}
+end
 
 lex
-{
 	token single /[qvh]/
 	token with_opt /[oi]/
 	token dash /'-'/
 	literal 'help', 'verbose', 'input', '='
-}
+end
 
 def long
 	['help']

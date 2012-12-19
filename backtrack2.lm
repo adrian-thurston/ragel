@@ -1,10 +1,9 @@
 
 # Token names.
 lex
-{
 	token id /[a-z]+/
 	ignore ws /[ \t\n]+/
-}
+end
 
 token bang1 /'!'/
 token bang2 /'!'/

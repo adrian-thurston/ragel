@@ -1,13 +1,12 @@
 
 lex
-{
     literal '{', '}'
     literal 'struct', 'type'
     token id /[A-Za-z_][A-Za-z_0-9]*/
 
     ignore /'/*' any* :>> '*/'/
     ignore /[ \t\r\n]+/
-}
+end
 
 def attribute
     ['type' id]

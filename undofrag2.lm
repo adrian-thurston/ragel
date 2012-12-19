@@ -1,11 +1,10 @@
 context undo
 {
 	lex
-	{
 		ignore /[ \t]+/
 		literal '*', '(', ')', '^', ';', '\n'
 		token id /[a-zA-Z_]+/
-	}
+	end
 
 	Out: parser<out>
 

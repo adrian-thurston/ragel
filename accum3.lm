@@ -1,17 +1,15 @@
 lex
-{   
 	literal '-'
 	token file /^('-'|0)(^0)*/
-}
+end
 
 token word /(^0)+/
 token zero /0/ 
 
 lex
-{
 	token single /[qvh]/
 	token with_opt /[oi]/
-}
+end
 
 def item
 	[file zero]

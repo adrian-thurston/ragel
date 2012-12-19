@@ -1,12 +1,11 @@
 
 # Token names.
 lex
-{
 	token number /[0-9]+/
 	token id /[a-z]+/
 	token string /'"' [^"]* '"'/
 	ignore ws / [ \t\n]+ /
-}
+end
 
 def prefix [id]
 

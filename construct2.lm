@@ -1,10 +1,9 @@
 
 lex
-{
 	ignore /[ \t\n]+/
 	token id /[a-z]+/
 	literal ',', '.', '*', '(', ')'
-}
+end
 
 def lang [id*]
 

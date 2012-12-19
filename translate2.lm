@@ -1,9 +1,8 @@
 lex
-{
 	ignore /space+/
 	literal '#', '{', '}'
 	token id2 /[a-zA-Z_]+/ 
-}
+end
 
 def item2
 	[id2]
@@ -14,9 +13,7 @@ def start2
 
 context ctx
 {
-
 	lex
-	{
 		ignore /space+/
 		literal '*', '(', ')', '!', ';\n'
 		token id /[a-zA-Z_0-9]+/ 
@@ -28,7 +25,7 @@ context ctx
 			input.push( make_token( typeid<id> "dot" ) )
 			input.push( make_token( typeid<id> "dot" ) )
 		}
-	}
+	end
 
 	def item 
 		[id]

@@ -1,6 +1,5 @@
 
 lex
-{
 	token c_single_lit /( 'L'? "'" ( [^'\\\n] | '\\' any )* "'" )/
 	token c_double_lit /( 'L'? '"' ( [^"\\\n] | '\\' any )* '"' )/
 
@@ -15,7 +14,7 @@ lex
 	token comm_c /( '/*' (any | '\n')* :>> '*/' )/
 	token comm_cxx /( '//' any* :> '\n' )/
 	token ws /( any - 33..126 )+/
-}
+end
 
 def c_token
 	[c_single_lit]
@@ -37,7 +36,6 @@ def c
 literal '%%'
 
 lex
-{
 	literal '{', '}'
 	literal 'protocol', 'client', 'server', 'port', 'by', 'tcp', 'udp'
 	token id /[A-Za-z_][A-Za-z_0-9]*/
@@ -45,7 +43,7 @@ lex
 
 	ignore /'/*' any* :>> '*/'/
 	ignore /[ \t\r\n]+/
-}
+end
 
 def tcp_by_port
 	['tcp' 'by' 'port']

@@ -1,5 +1,4 @@
 lex
-{
 	literal 'var', 'if', 'then', 'else', 'while', 'do', 'for', 'read', 'write',
 			'end', 'to', 'goto'
 	literal ':=', '!=', ';', '+', '-', '*', '/', '=', '(', ')', ':'
@@ -9,7 +8,7 @@ lex
 	token id /[a-zA-Z_]+/
 	token integernumber /[0-9]+/
 	token stringlit /'"' [^"]* '"'/
-}
+end
 
 def program
 	[statement*]

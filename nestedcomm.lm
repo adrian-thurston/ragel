@@ -4,7 +4,6 @@
 
 # Any single character can be a literal
 lex
-{
 	# Ignore whitespace.
 	ignore /[ \t\n\r\v]+/
 
@@ -17,17 +16,16 @@ lex
 		print( %NC.tree '\n' )
 		input.push_ignore( NC.tree )
 	}
-}
+end
 
 #
 # Token translation
 #
 
 lex
-{
 	literal '(', ')'
 	token nc_data /[^()]+/
-}
+end
 
 def nc_item 
 	[nc_data]

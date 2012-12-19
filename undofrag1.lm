@@ -1,9 +1,8 @@
 lex
-{
 	ignore /space+/
 	literal '#', '{', '}'
 	token id2 /[a-zA-Z_]+/ 
-}
+end
 
 def item2
 	[id2]
@@ -18,11 +17,10 @@ context ctx
 	SP: parser<start2> 
 
 	lex
-	{
 		ignore /space+/
 		literal '*', '(', ')', '!', ';\n'
 		token id /[a-zA-Z_]+/ 
-	}
+	end
 
 	def item 
 		[id]

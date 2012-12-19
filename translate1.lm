@@ -1,5 +1,4 @@
 lex
-{
 	ignore /space+/
 	literal '*', '(', ')'
 	token id /[a-zA-Z_]+/ 
@@ -7,7 +6,7 @@ lex
 			t: str = input.pull( match_length )
 			input.push( make_token( typeid<id> t ) )
 		}
-}
+end
 
 def foo [id]
 

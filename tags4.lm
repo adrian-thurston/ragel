@@ -19,38 +19,34 @@ context tags
 	# Scanner for tag names.
 	#
 	lex
-	{
 		ignore /space+/
 		token tag_id /def_name/
-	}
+	end
 
 	#
 	# Scanner for attributes names
 	#
 	lex
-	{
 		ignore  /space+/
 		token attr_name /def_name_char+/
 		literal '='
-	}
+	end
 
 	literal '>', '/>'
 
 	# Scanner for attribute values.
 	lex 
-	{
 		ignore  /space+/
 		token dquote_val /'"' ([^"] | '\\' any)* '"'/
 		token squote_val /"'" ([^'] | '\\' any)* "'"/
 		token unq_val /[^ \t\r\n<>"'] [^ \t\r\n<>]*/
-	}
+	end
 
 	#
 	# Tokens
 	#
 
 	lex
-	{
 		ignore /space+/
 
 		literal '<', '</', '<!DOCTYPE'
@@ -59,7 +55,7 @@ context tags
 
 		token doc_data /[^<]+/
 		token comment /'<!--' any* :>> '-->'/
-	}
+	end
 
 	#
 	# Tags
@@ -78,7 +74,6 @@ context tags
 	# This scanner is just for the id in close tags. The id needs to be looked up
 	# in the tag stack so we can determine if it is a stray. 
 	lex
-	{
 		# Ignore whitespace.
 		ignore /space+/
 
@@ -114,7 +109,7 @@ context tags
 				input.push( make_token( typeid<stray_close> input.pull( match_length ) ) )
 			}
 		}
-	}
+	end
 
 	#
 	# Tag Stack
@@ -131,21 +126,19 @@ context tags
 	#
 	# This scanner handles inside DOCTYPE tags (except keywords).
 	lex
-	{
 		ignore /space+/
 		token dt_name /def_name/
 		token dt_literal /def_system_literal/
 		token dt_bl /"[" [^\]]* "]"/
 		token dt_close /'>'/
-	}
+	end
 
 	# Using a separate scanner for the keywords in DOCTYPE prevents them from
 	# covering dt_name
 	lex
-	{
 		ignore /space+/
 		literal 'SYSTEM', 'PUBLIC'
-	}
+	end
 
 	def DOCTYPE ['<!DOCTYPE' dt_name external_id dt_bl? dt_close]
 

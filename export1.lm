@@ -1,8 +1,7 @@
 lex
-{
 	token id /[a-z]+/
 	ignore /[ \t]+/
-}
+end
 
 def start
 	[id*]
