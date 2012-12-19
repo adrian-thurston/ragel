@@ -1,10 +1,9 @@
 
 lex
-{
 	ignore /space+/
 	literal '*', '(', ')', '!', ';\n'
 	token id /[a-zA-Z_0-9]+/ 
-}
+end
 
 def item 
 	[id]

@@ -13,7 +13,6 @@ context counting
 	#
 
 	lex
-	{
 		# Ignore whitespace.
 		ignore /rl_ws/
 
@@ -22,7 +21,7 @@ context counting
 		# Tokens. 
 		token id /rl_id/
 		token number /rl_num/
-	}
+	end
 
 	#
 	# Global Data

@@ -13,10 +13,9 @@ context maxlen
 	#
 
 	lex
-	{
 		ignore /rl_ws/
 		token id /rl_id/
-	}
+	end
 
 	num: int
 	allow: int

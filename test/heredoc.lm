@@ -3,7 +3,6 @@ context heredoc
 	rl ident_char /[a-zA-Z_]/
 
 	lex
-	{
 		# Tokens
 		token other /(^(ident_char|0|'\n'))+/
 
@@ -22,7 +21,7 @@ context heredoc
 			}
 
 		token nl /'\n'/
-	}
+	end
 
 	def here_name 
 		[id]

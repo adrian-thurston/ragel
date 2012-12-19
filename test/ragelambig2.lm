@@ -1,5 +1,4 @@
 lex
-{
 	ignore /[\t\n ]+/
 	literal '^', '|', '-', ',', ':', '!', '?', '.'
 	literal '(', ')', '{', '}', '*', '&', '+'
@@ -8,7 +7,7 @@ lex
 
 	token word /[a-zA-Z_][a-zA-Z0-9_]*/
 	token uint /[0-9]+/
-}
+end
 
 
 def start 

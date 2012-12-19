@@ -1,17 +1,15 @@
 context accum_bt
 {
 	lex
-	{
 		ignore /[ \t\n]+/
 		token id1 /[a-zA-Z_][a-zA-Z_0-9]*/
 
 		def one [ id1* ]
-	}
+	end
 
 	OneParser: accum<one>
 
 	lex
-	{
 		ignore /[ \t]+/
 		token id2 /[a-zA-Z_][a-zA-Z_0-9]*/
 		literal '!', ';', '\n'
@@ -32,7 +30,7 @@ context accum_bt
 		def two 
 			[A1 item2* '!' '\n']
 		|	[A2 item2* ';' '\n']
-	}
+	end
 }
 
 AccumBt: accum_bt = cons accum_bt[]

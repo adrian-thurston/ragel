@@ -5,7 +5,6 @@
 
 # Any single character can be a literal
 lex
-{
 	# Ignore whitespace.
 	ignore /[ \t\n\r\v]+/
 
@@ -17,17 +16,16 @@ lex
 		parse_stop NC: nested_comment[ input ]
 		print( 'discarding: ' NC.tree '\n' )
 	}
-}
+end
 
 #
 # Token translation
 #
 
 lex
-{
 	literal '(', ')'
 	token nc_data /[^()]+/
-}
+end
 
 def nc_item 
 	[nc_data]
@@ -43,7 +41,6 @@ context accum_bt
 	NestedParser: accum<nested>
 
 	lex
-	{
 		ignore /[ \t]+/
 		token word /[a-zA-Z0-9/*+_\-]+/
 		token stuff /[a-zA-Z0-9()/*+_\- ]+/
@@ -74,7 +71,7 @@ context accum_bt
 		[A1 item* '!' '\n']
 		|
 		[A2 item* ';' '\n']
-	}
+	end
 }
 
 cons AccumBt: accum_bt[]

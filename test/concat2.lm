@@ -1,18 +1,16 @@
 
 lex
-{
 
 	literal  'type', 'include'
 	token id /[A-Za-z_][A-Za-z_0-9]*/
 	ignore /'#' [^\n]* '\n'/
 	ignore /[ \t\r\n]+/
-}
+end
 
 lex
-{
 	token ifn_part /[a-zA-Z0-9_.\-]+/ 
 	token ifn_slash /'/'/
-}
+end
 
 def ifn_path_part
 	[ifn_part]
@@ -26,9 +24,8 @@ def ifn_path
 literal '%%'
 
 lex
-{
 	token em_ws /( any - 33..126 )+/
-}
+end
 
 def em_item
 	[em_ws]

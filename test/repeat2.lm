@@ -20,7 +20,6 @@
 
 
 lex
-{
 	token word  /( [^. \t\n]+  | '.' )/
 	token lws /[ \t]+/
 	token nl  / '\n'/
@@ -70,25 +69,22 @@ lex
 	token cmd_li /'.li' lws/
 
 	token cmd_license /'.license' lws? '\n'/
-}
+end
 
 lex
-{
 	token bar_data /[^|]*/
 	token end_bar /'|'/
-}
+end
 
 lex
-{
 	token slash_data /[^/]*/
 	token end_slash /'/'/
-}
+end
 
 lex
-{
 	token curly_data /[^}]*/
 	token end_curly /'}'/
-}
+end
 
 def cmd_il
 	[cmd_verb1 bar_data end_bar]
@@ -104,28 +100,25 @@ def text
 |	[cmd_il]
 
 lex
-{
 	token end_verbatim /lws? '.' lws? 'end' lws 'verbatim' lws? '\n'/
 	token verbatim_line /[^\n]* '\n'/
-}
+end
 
 def verbatim
 	[cmd_verbatim verbatim_line* end_verbatim]
 
 lex
-{
 	token end_code /lws? '.' lws? 'end' lws 'code' lws? '\n'/
 	token code_line /[^\n]* '\n'/
-}
+end
 
 def code
 	[cmd_code code_line* end_code]
 
 lex
-{
 	token end_comment /lws? '.' lws? 'end' lws 'comment' lws? '\n'/
 	token comment_line /[^\n]* '\n'/
-}
+end
 
 def comment
 	[cmd_comment comment_line* end_comment]

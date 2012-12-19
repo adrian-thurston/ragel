@@ -1,10 +1,9 @@
 
 lex
-{
 	token func_chr /[^{}]+/
 	token func_open /'{'/
 	token func_close /'}'/
-}
+end
 
 def func_item 
 	[func_chr]
@@ -17,7 +16,6 @@ def func
 	[ident '(' ')' '{' func_body func_close ]
 
 lex
-{
 	token ident /[a-zA-Z_]+/
 	token number /[0-9]+/
 
@@ -28,7 +26,7 @@ lex
 	literal '+', '*', ';', '(', ')', '{', '}'
 
 	ignore wp / [ \t\n]+ /
-}
+end
 
 def class_item
 	[func]

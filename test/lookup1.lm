@@ -139,7 +139,6 @@ context lookup
 
 	# The C++ scanner.
 	lex
-	{
 		rl fract_const / digit* '.' digit+ | digit+ '.' /
 		rl exponent / [eE] [+\-]? digit+ /
 		rl float_suffix / [flFL] /
@@ -236,7 +235,7 @@ context lookup
 		ignore /( '/*' (any | '\n')* :>> '*/' )/
 		ignore /( '//' any* :> '\n' )/
 		ignore /( any - 33..126 )+/
-	}
+	end
 
 	#
 	# Support functions
@@ -1635,7 +1634,6 @@ context lookup
 		[function_def_declaration ctor_initializer_opt class_function_body function_def_end]
 
 	lex
-	{
 		token cfb_open /'{'/
 		token cfb_close /'}'/
 		token cfb_string /
@@ -1645,7 +1643,7 @@ context lookup
 					( '/*' (any | '\n')* :>> '*/' ) |
 					( '//' any* :> '\n' )/
 		token cfb_data /[^{}'"/]+ | '/'/
-	}
+	end
 
 	def cfb_item
 		[cfb_data]

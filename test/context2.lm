@@ -4,19 +4,17 @@ context ruby_here
 	rl number_pattern /[0-9]+/
 
 	lex
-	{
 		ignore /[ \t\n]+/
 		token id /ident_pattern/
 		token number /number_pattern/
 		literal '<<', '*', ',', '(', ')', '!'
-	}
+	end
 
 	HereId: str
 
 	token rest_of_line /[^\n]*'\n'/
 
 	lex
-	{
 		ignore /[ \t\n]+/
 		token here_id
 			HereData: here_data
@@ -37,10 +35,9 @@ context ruby_here
 				# Send the here_id token. Attach the heredoc data as an attribute.
 				input.push( make_token( typeid<here_id> HereId HereData.tree ) )
 			}
-	}
+	end
 
 	lex
-	{
 		token here_close_id 
 			/ ident_pattern '\n' /
 			{
@@ -55,7 +52,7 @@ context ruby_here
 
 		token here_line
 			/ [^\n]* '\n' /
-	}
+	end
 
 	def here_data
 		[here_line* here_close_id]

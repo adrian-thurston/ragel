@@ -11,7 +11,6 @@ context generate
 
 	# Tokens. 
 	lex
-	{
 		# Python keywords.
 		literal 'and', 'del', 'from', 'not', 'while', 'as', 'elif', 'global', 'or',
 			'with', 'assert', 'else', 'if', 'pass', 'yield', 'break', 'except',
@@ -130,7 +129,7 @@ context generate
 				# First the newline.
 				input.push( make_token( typeid<NEWLINE> '' ) )
 			}
-	}
+	end
 
 	# Blank lines or comment lines at the beginning of the file.
 	token LEADER / ( [ \t]* ('#' [^\n]*)? '\n' )* /

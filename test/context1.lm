@@ -5,11 +5,10 @@ context ctx
 	k: int
 
 	lex
-	{
 		ignore /space+/
 		literal '*', '(', ')'
 		token id /[a-zA-Z_]+/ 
-	}
+	end
 
 	def foo [id]
 

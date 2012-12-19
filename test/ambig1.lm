@@ -4,7 +4,6 @@
 
 # The items in this scanner may have newline in front of them.
 lex
-{
 	# Reserved Words.
 	literal '__LINE__', '__FILE__', '__ENCODING__', 'BEGIN', 'END', 'alias',
 		'and', 'begin', 'break', 'case', 'class', 'def', 'defined?', 'do',
@@ -48,11 +47,10 @@ lex
 
 	ignore /[ \t\n]+/
 	ignore comment /'#' [^\n]* '\n'/
-}
+end
 
 # These items cannot appear at the beginning of a line (except maybe the first).
 lex
-{
 	ignore /[\t ]+/
 
 	literal '+', '-', '*', '**', '/', '%', '^'
@@ -68,34 +66,30 @@ lex
 	literal '<', '>', '>=', '<='
 	literal '!=', '==', '==='
 	literal '..', '...'
-}
+end
 
 lex
-{
 	ignore /[\t ]+/
 	ignore /'#' [^\n]*/
 	literal ';'
 	literal '\n'
-}
+end
 
 
 lex
-{
 	token dstring_contents /[^"]+/
 	token tDSTRING_END /'"'/
-}
+end
 
 lex
-{
 	token sstring_contents /[^']+/
 	token tSSTRING_END /'\''/
-}
+end
 
 lex
-{
 	token xstring_contents /[^`]+/
 	token tXSTRING_END /'`'/
-}
+end
 
 def ruby
 	[compstmt]

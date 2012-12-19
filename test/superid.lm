@@ -1,7 +1,6 @@
 context si
 {
 	lex
-	{
 		literal '!', 'a', ';\n'
 
 		token id /'a'|'b'/
@@ -13,7 +12,7 @@ context si
 		token foo //
 
 		ignore ws / [ \n\t]+ /
-	}
+	end
 
 	trans_id_to: int
 
