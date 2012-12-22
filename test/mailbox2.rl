@@ -27,8 +27,8 @@ using std::endl;
 	action prn_subj { cout << "SUBJECT\n"; }
 
 	action start_word { ws = p; }
-	action start_headers { preserve = p; }
-	action end_headers {preserve = 0;}
+	action start_headers { }
+	action end_headers { }
 
 	day = upper lower{2};
 	month = upper lower{2};
@@ -124,7 +124,7 @@ using std::endl;
 void test( const char *buf )
 {
 	int cs, len = strlen( buf );
-	const char *preserve = 0, *ws = 0;
+	const char *ws = 0;
 
 	%% write init;
 	const char *p = buf;
