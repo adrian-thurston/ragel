@@ -175,7 +175,8 @@ struct RedAction
 		numEofRefs(0),
 		bAnyNextStmt(false), 
 		bAnyCurStateRef(false),
-		bAnyBreakStmt(false)
+		bAnyBreakStmt(false),
+		bUsingAct(false)
 	{ }
 	
 	const GenActionTable &getKey() 
@@ -197,10 +198,12 @@ struct RedAction
 	bool anyNextStmt() { return bAnyNextStmt; }
 	bool anyCurStateRef() { return bAnyCurStateRef; }
 	bool anyBreakStmt() { return bAnyBreakStmt; }
+	bool usingAct() { return bUsingAct; }
 
 	bool bAnyNextStmt;
 	bool bAnyCurStateRef;
 	bool bAnyBreakStmt;
+	bool bUsingAct;
 };
 typedef AvlTree<RedAction, GenActionTable, CmpGenActionTable> GenActionTableMap;
 
@@ -490,6 +493,7 @@ struct RedFsmAp
 	bool bAnyRegNextStmt;
 	bool bAnyRegCurStateRef;
 	bool bAnyRegBreak;
+	bool bUsingAct;
 
 	int maxState;
 	int maxSingleLen;
@@ -520,6 +524,7 @@ struct RedFsmAp
 	bool anyRegNextStmt()           { return bAnyRegNextStmt; }
 	bool anyRegCurStateRef()        { return bAnyRegCurStateRef; }
 	bool anyRegBreak()              { return bAnyRegBreak; }
+	bool usingAct()                 { return bUsingAct; }
 
 
 	/* Is is it possible to extend a range by bumping ranges that span only

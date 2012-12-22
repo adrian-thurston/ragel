@@ -644,8 +644,12 @@ void CodeGen::writeInit()
 	if ( hasLongestMatch ) {
 		out << 
 			"	" << TOKSTART() << " = 0;\n"
-			"	" << TOKEND() << " = 0;\n"
-			"	" << ACT() << " = 0;\n";
+			"	" << TOKEND() << " = 0;\n";
+
+		if ( redFsm->usingAct() ) {
+			out << 
+				"	" << ACT() << " = 0;\n";
+		}
 	}
 	out << "	}\n";
 }

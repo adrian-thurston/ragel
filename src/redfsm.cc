@@ -62,7 +62,8 @@ RedFsmAp::RedFsmAp()
 	bAnyRegActionByValControl(false),
 	bAnyRegNextStmt(false),
 	bAnyRegCurStateRef(false),
-	bAnyRegBreak(false)
+	bAnyRegBreak(false),
+	bUsingAct(false)
 {
 }
 

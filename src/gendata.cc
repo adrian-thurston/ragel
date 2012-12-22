@@ -1167,11 +1167,20 @@ void CodeGenData::analyzeAction( GenAction *act, GenInlineList *inlineList )
 		/* Only consider actions that are referenced. */
 		if ( act->numRefs() > 0 ) {
 			if ( item->type == GenInlineItem::Goto || item->type == GenInlineItem::GotoExpr )
+			{
 				redFsm->bAnyActionGotos = true;
-			else if ( item->type == GenInlineItem::Call || item->type == GenInlineItem::CallExpr )
+			}
+			else if ( item->type == GenInlineItem::Call || item->type == GenInlineItem::CallExpr ) {
 				redFsm->bAnyActionCalls = true;
+			}
 			else if ( item->type == GenInlineItem::Ret )
 				redFsm->bAnyActionRets = true;
+			else if ( item->type == GenInlineItem::LmInitAct || 
+					item->type == GenInlineItem::LmSetActId || 
+					item->type == GenInlineItem::LmSwitch )
+			{
+				redFsm->bUsingAct = true;
+			}
 		}
 
 		/* Check for various things in regular actions. */
