@@ -256,7 +256,6 @@ void Flat::taTransLengths()
 
 	/* Keep a count of the num of items in the array written. */
 
-	int totalOffsets = 0;
 	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
 		/* Save the position. Needed for eofTargs. */
 		RedTransAp *trans = transPtrs[t];

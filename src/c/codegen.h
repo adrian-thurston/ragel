@@ -94,8 +94,8 @@ struct TableArray
 	std::string type;
 	bool isSigned;
 	long long values;
-	long long max;
 	long long min;
+	long long max;
 	CodeGen &codeGen;
 	std::ostream &out;
 };

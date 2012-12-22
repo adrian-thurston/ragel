@@ -141,6 +141,8 @@ void TableArray::finishGenerate()
 void TableArray::start()
 {
 	switch ( state ) {
+		case InitialState:
+			break;
 		case AnalyzePass:
 			startAnalyze();
 			break;
@@ -153,6 +155,8 @@ void TableArray::start()
 void TableArray::value( long long v )
 {
 	switch ( state ) {
+		case InitialState:
+			break;
 		case AnalyzePass:
 			valueAnalyze( v );
 			break;
@@ -165,6 +169,8 @@ void TableArray::value( long long v )
 void TableArray::finish()
 {
 	switch ( state ) {
+		case InitialState:
+			break;
 		case AnalyzePass:
 			finishAnalyze();
 			break;

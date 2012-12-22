@@ -344,7 +344,6 @@ void Binary::taTransLengths()
 {
 	transLengths.start();
 
-	int totalLengths = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Walk the singles. */
 		for ( RedTransList::Iter stel = st->outSingle; stel.lte(); stel++ ) {
@@ -380,7 +379,6 @@ void Binary::taTransCondSpacesWi()
 {
 	transCondSpacesWi.start();
 
-	int totalSpaces = 0;
 	for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ ) {
 		/* Cond Space id. */
 		if ( trans->condSpace != 0 )
@@ -466,7 +464,6 @@ void Binary::taCondTargs()
 {
 	condTargs.start();
 
-	int totalConds = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Walk the singles. */
 		for ( RedTransList::Iter stel = st->outSingle; stel.lte(); stel++ ) {
@@ -514,7 +511,6 @@ void Binary::taCondActions()
 {
 	condActions.start();
 
-	int totalConds = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Walk the singles. */
 		for ( RedTransList::Iter stel = st->outSingle; stel.lte(); stel++ ) {
