@@ -246,9 +246,10 @@ void test( const char *data )
 {
 	std::ios::sync_with_stdio(false);
 
-	int cs, act;
+	int cs;
 	const char *ts, *te;
 	int stack[1], top;
+	stack[0] = 0;
 
 	bool single_line = false;
 	int inline_depth = 0;
