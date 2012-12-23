@@ -388,6 +388,8 @@ void FsmAp::doConcat( FsmAp *other, StateSet *fromStates, bool optional )
  * invoked. */
 void FsmAp::concatOp( FsmAp *other )
 {
+	assert( ctx == other->ctx );
+
 	/* Assert same signedness and return graph concatenation op. */
 	doConcat( other, 0, false );
 }
@@ -437,6 +439,8 @@ void FsmAp::doOr( FsmAp *other )
 /* Unions other with this machine. Other is deleted. */
 void FsmAp::unionOp( FsmAp *other )
 {
+	assert( ctx == other->ctx );
+
 	/* Turn on misfit accounting for both graphs. */
 	setMisfitAccounting( true );
 	other->setMisfitAccounting( true );
@@ -452,6 +456,8 @@ void FsmAp::unionOp( FsmAp *other )
 /* Intersects other with this machine. Other is deleted. */
 void FsmAp::intersectOp( FsmAp *other )
 {
+	assert( ctx == other->ctx );
+
 	/* Turn on misfit accounting for both graphs. */
 	setMisfitAccounting( true );
 	other->setMisfitAccounting( true );
@@ -478,6 +484,8 @@ void FsmAp::intersectOp( FsmAp *other )
 /* Set subtracts other machine from this machine. Other is deleted. */
 void FsmAp::subtractOp( FsmAp *other )
 {
+	assert( ctx == other->ctx );
+
 	/* Turn on misfit accounting for both graphs. */
 	setMisfitAccounting( true );
 	other->setMisfitAccounting( true );
@@ -637,6 +645,10 @@ void FsmAp::epsilonOp()
  * final id. */
 void FsmAp::joinOp( int startId, int finalId, FsmAp **others, int numOthers )
 {
+	for ( int m = 0; m < numOthers; m++ ) {
+		assert( ctx == others[m]->ctx );
+	}
+
 	/* For the merging process. */
 	MergeData md;
 
@@ -741,6 +753,10 @@ void FsmAp::joinOp( int startId, int finalId, FsmAp **others, int numOthers )
 
 void FsmAp::globOp( FsmAp **others, int numOthers )
 {
+	for ( int m = 0; m < numOthers; m++ ) {
+		assert( ctx == others[m]->ctx );
+	}
+
 	/* All other machines loose start states status. */
 	for ( int m = 0; m < numOthers; m++ )
 		others[m]->unsetStartState();

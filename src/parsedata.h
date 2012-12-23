@@ -360,8 +360,8 @@ struct ParseData
 	void beginProcessing()
 	{
 		/* Old. */
-		::_keyOps = &fsmCtx->keyOps;
-		::_condData = &fsmCtx->condData;
+		::_keyOps = fsmCtx->keyOps;
+		::_condData = fsmCtx->condData;
 	}
 
 	FsmCtx *fsmCtx;

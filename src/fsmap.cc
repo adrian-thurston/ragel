@@ -257,7 +257,7 @@ void FsmAp::fillGaps( StateAp *state )
 	 */
 	if ( state->outList.length() == 0 ) {
 		/* Add the range on the lower and upper bound. */
-		attachNewTrans( state, 0, _keyOps->minKey, _keyOps->maxKey );
+		attachNewTrans( state, 0, ctx->keyOps->minKey, ctx->keyOps->maxKey );
 	}
 	else {
 		TransList srcList;
@@ -265,12 +265,12 @@ void FsmAp::fillGaps( StateAp *state )
 
 		/* Check for a gap at the beginning. */
 		TransList::Iter trans = srcList, next;
-		if ( _keyOps->minKey < trans->lowKey ) {
+		if ( ctx->keyOps->minKey < trans->lowKey ) {
 			/* Make the high key and append. */
 			Key highKey = trans->lowKey;
 			highKey.decrement();
 
-			attachNewTrans( state, 0, _keyOps->minKey, highKey );
+			attachNewTrans( state, 0, ctx->keyOps->minKey, highKey );
 		}
 
 		/* Write the transition. */
@@ -304,11 +304,11 @@ void FsmAp::fillGaps( StateAp *state )
 		}
 
 		/* Now check for a gap on the end to fill. */
-		if ( lastHigh < _keyOps->maxKey ) {
+		if ( lastHigh < ctx->keyOps->maxKey ) {
 			/* Get a copy of the default. */
 			lastHigh.increment();
 
-			attachNewTrans( state, 0, lastHigh, _keyOps->maxKey );
+			attachNewTrans( state, 0, lastHigh, ctx->keyOps->maxKey );
 		}
 	}
 

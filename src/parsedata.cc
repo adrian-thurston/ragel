@@ -239,7 +239,7 @@ FsmAp *dotFsm( ParseData *pd )
 FsmAp *dotStarFsm( ParseData *pd )
 {
 	FsmAp *retFsm = new FsmAp( pd->fsmCtx );
-	retFsm->rangeStarFsm( pd->fsmCtx->keyOps.minKey, pd->fsmCtx->keyOps.maxKey );
+	retFsm->rangeStarFsm( pd->fsmCtx->keyOps->minKey, pd->fsmCtx->keyOps->maxKey );
 	return retFsm;
 }
 
@@ -913,12 +913,12 @@ void ParseData::initKeyOps( )
 {
 	/* Signedness and bounds. */
 	HostType *alphType = alphTypeSet ? userAlphType : hostLang->defaultAlphType;
-	fsmCtx->keyOps.setAlphType( alphType );
+	fsmCtx->keyOps->setAlphType( alphType );
 
 	if ( lowerNum != 0 ) {
 		/* If ranges are given then interpret the alphabet type. */
-		fsmCtx->keyOps.minKey = makeFsmKeyNum( lowerNum, rangeLowLoc, this );
-		fsmCtx->keyOps.maxKey = makeFsmKeyNum( upperNum, rangeHighLoc, this );
+		fsmCtx->keyOps->minKey = makeFsmKeyNum( lowerNum, rangeLowLoc, this );
+		fsmCtx->keyOps->maxKey = makeFsmKeyNum( upperNum, rangeHighLoc, this );
 	}
 }
 

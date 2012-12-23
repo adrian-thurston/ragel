@@ -126,10 +126,10 @@ void FsmAp::expandCondTransitions( StateAp *fromState, TransAp *destTrans, Trans
 
 CondSpace *FsmAp::addCondSpace( const CondSet &condSet )
 {
-	CondSpace *condSpace = _condData->condSpaceMap.find( condSet );
+	CondSpace *condSpace = ctx->condData->condSpaceMap.find( condSet );
 	if ( condSpace == 0 ) {
 		condSpace = new CondSpace( condSet );
-		_condData->condSpaceMap.insert( condSpace );
+		ctx->condData->condSpaceMap.insert( condSpace );
 	}
 	return condSpace;
 }
