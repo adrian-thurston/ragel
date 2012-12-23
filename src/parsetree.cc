@@ -2086,7 +2086,7 @@ FsmAp *ReOrItem::walk( ParseData *pd, RegExpr *rootRegex )
 		 * keys. Duplicates are silently ignored. The alternative would be to
 		 * issue warning or an error but since we can't with [a0-9a] or 'a' |
 		 * 'a' don't bother here. */
-		KeySet keySet;
+		KeySet keySet( pd->fsmCtx->keyOps );
 		makeFsmUniqueKeyArray( keySet, token.data, token.length, 
 			rootRegex != 0 ? rootRegex->caseInsensitive : false, pd );
 

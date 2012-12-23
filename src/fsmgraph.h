@@ -542,11 +542,16 @@ struct TransEl
 
 struct CmpKey
 {
-	static int compare( const Key key1, const Key key2 )
+	CmpKey()
+		: keyOps(0) {}
+
+	KeyOps *keyOps;
+
+	int compare( const Key key1, const Key key2 )
 	{
-		if ( key1 < key2 )
+		if ( keyOps->lt( key1, key2 ) )
 			return -1;
-		else if ( key1 > key2 )
+		else if ( keyOps->gt( key1, key2 ) )
 			return 1;
 		else
 			return 0;
@@ -554,7 +559,15 @@ struct CmpKey
 };
 
 /* Vector based set of key items. */
-typedef BstSet<Key, CmpKey> KeySet;
+struct KeySet
+: 
+	public BstSet<Key, CmpKey>
+{
+	KeySet( KeyOps *keyOps )
+	{
+		CmpKey::keyOps = keyOps;
+	}
+};
 
 struct MinPartition 
 {

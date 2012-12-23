@@ -81,7 +81,7 @@ void FsmAp::concatFsmCI( Key *str, int len )
 	for ( int i = 0; i < len; i++ ) {
 		StateAp *newState = addState();
 
-		KeySet keySet;
+		KeySet keySet( ctx->keyOps );
 		if ( str[i].isLower() )
 			keySet.insert( str[i].toUpper() );
 		if ( str[i].isUpper() )

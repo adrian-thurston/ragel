@@ -34,6 +34,7 @@ struct InputLoc
 	long col;
 };
 
+#define GBL_KEY_OPS
 
 typedef unsigned long long Size;
 
@@ -46,12 +47,14 @@ public:
 	friend inline Key operator+(const Key key1, const Key key2);
 	friend inline Key operator-(const Key key1, const Key key2);
 
+#ifdef GBL_KEY_OPS
 	friend inline bool operator<( const Key key1, const Key key2 );
 	friend inline bool operator<=( const Key key1, const Key key2 );
 	friend inline bool operator>( const Key key1, const Key key2 );
 	friend inline bool operator>=( const Key key1, const Key key2 );
 	friend inline bool operator==( const Key key1, const Key key2 );
 	friend inline bool operator!=( const Key key1, const Key key2 );
+#endif
 
 	friend struct KeyOps;
 	
@@ -248,10 +251,46 @@ struct KeyOps
 		}
 		return 0;
 	}
+
+	inline bool lt( const Key key1, const Key key2 )
+	{
+		return this->isSigned ? key1.key < key2.key : 
+			(unsigned long)key1.key < (unsigned long)key2.key;
+	}
+
+	inline bool le( const Key key1, const Key key2 )
+	{
+		return this->isSigned ?  key1.key <= key2.key : 
+			(unsigned long)key1.key <= (unsigned long)key2.key;
+	}
+
+	inline bool gt( const Key key1, const Key key2 )
+	{
+		return this->isSigned ? key1.key > key2.key : 
+			(unsigned long)key1.key > (unsigned long)key2.key;
+	}
+
+	inline bool ge( const Key key1, const Key key2 )
+	{
+		return this->isSigned ? key1.key >= key2.key : 
+			(unsigned long)key1.key >= (unsigned long)key2.key;
+	}
+
+	inline bool eq( const Key key1, const Key key2 )
+	{
+		return key1.key == key2.key;
+	}
+
+	inline bool ne( const Key key1, const Key key2 )
+	{
+		return key1.key != key2.key;
+	}
+
 };
 
 extern KeyOps *_keyOps;
 
+#ifdef GBL_KEY_OPS
 inline bool operator<( const Key key1, const Key key2 )
 {
 	return _keyOps->isSigned ? key1.key < key2.key : 
@@ -285,6 +324,7 @@ inline bool operator!=( const Key key1, const Key key2 )
 {
 	return key1.key != key2.key;
 }
+#endif
 
 /* Decrement. Needed only for ranges. */
 inline void Key::decrement()
