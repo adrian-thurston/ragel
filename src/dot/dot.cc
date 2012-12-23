@@ -74,7 +74,7 @@ void GraphvizDotGen::key( Key key )
 		}
 	}
 	else {
-		if ( keyOps->isSigned )
+		if ( _keyOps->isSigned )
 			out << key.getVal();
 		else
 			out << (unsigned long) key.getVal();

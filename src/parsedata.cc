@@ -104,7 +104,7 @@ Key makeFsmKeyHex( char *str, const InputLoc &loc, ParseData *pd )
 	 * an error, sets the return val to the upper or lower bound being tested
 	 * against. */
 	errno = 0;
-	unsigned int size = keyOps->alphType->size;
+	unsigned int size = _keyOps->alphType->size;
 	bool unusedBits = size < sizeof(unsigned long);
 
 	unsigned long ul = strtoul( str, 0, 16 );
@@ -114,7 +114,7 @@ Key makeFsmKeyHex( char *str, const InputLoc &loc, ParseData *pd )
 		ul = 1 << (size * 8);
 	}
 
-	if ( unusedBits && keyOps->alphType->isSigned && ul >> (size * 8 - 1) )
+	if ( unusedBits && _keyOps->alphType->isSigned && ul >> (size * 8 - 1) )
 		ul |= ( -1L >> (size*8) ) << (size*8);
 
 	return Key( (long)ul );
@@ -125,8 +125,8 @@ Key makeFsmKeyDec( char *str, const InputLoc &loc, ParseData *pd )
 	/* Convert the number to a decimal. First reset errno so we can check
 	 * for overflow or underflow. */
 	errno = 0;
-	long long minVal = keyOps->alphType->minVal;
-	long long maxVal = keyOps->alphType->maxVal;
+	long long minVal = _keyOps->alphType->minVal;
+	long long maxVal = _keyOps->alphType->maxVal;
 
 	long long ll = strtoll( str, 0, 10 );
 
@@ -141,7 +141,7 @@ Key makeFsmKeyDec( char *str, const InputLoc &loc, ParseData *pd )
 		ll = maxVal;
 	}
 
-	if ( keyOps->alphType->isSigned )
+	if ( _keyOps->alphType->isSigned )
 		return Key( (long)ll );
 	else
 		return Key( (unsigned long)ll );
@@ -164,7 +164,7 @@ Key makeFsmKeyNum( char *str, const InputLoc &loc, ParseData *pd )
  * alphabet. */
 Key makeFsmKeyChar( char c, ParseData *pd )
 {
-	if ( keyOps->isSigned ) {
+	if ( _keyOps->isSigned ) {
 		/* Copy from a char type. */
 		return Key( c );
 	}
@@ -179,7 +179,7 @@ Key makeFsmKeyChar( char c, ParseData *pd )
  * property of the alphabet. */
 void makeFsmKeyArray( Key *result, char *data, int len, ParseData *pd )
 {
-	if ( keyOps->isSigned ) {
+	if ( _keyOps->isSigned ) {
 		/* Copy from a char star type. */
 		char *src = data;
 		for ( int i = 0; i < len; i++ )
@@ -199,7 +199,7 @@ void makeFsmUniqueKeyArray( KeySet &result, char *data, int len,
 		bool caseInsensitive, ParseData *pd )
 {
 	/* Use a transitions list for getting unique keys. */
-	if ( keyOps->isSigned ) {
+	if ( _keyOps->isSigned ) {
 		/* Copy from a char star type. */
 		char *src = data;
 		for ( int si = 0; si < len; si++ ) {
@@ -232,14 +232,14 @@ void makeFsmUniqueKeyArray( KeySet &result, char *data, int len,
 FsmAp *dotFsm( ParseData *pd )
 {
 	FsmAp *retFsm = new FsmAp();
-	retFsm->rangeFsm( keyOps->minKey, keyOps->maxKey );
+	retFsm->rangeFsm( _keyOps->minKey, _keyOps->maxKey );
 	return retFsm;
 }
 
 FsmAp *dotStarFsm( ParseData *pd )
 {
 	FsmAp *retFsm = new FsmAp();
-	retFsm->rangeStarFsm( keyOps->minKey, keyOps->maxKey );
+	retFsm->rangeStarFsm( _keyOps->minKey, _keyOps->maxKey );
 	return retFsm;
 }
 
@@ -248,7 +248,7 @@ FsmAp *makeBuiltin( BuiltinMachine builtin, ParseData *pd )
 {
 	/* FsmAp created to return. */
 	FsmAp *retFsm = 0;
-	bool isSigned = keyOps->isSigned;
+	bool isSigned = _keyOps->isSigned;
 
 	switch ( builtin ) {
 	case BT_Any: {

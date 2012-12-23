@@ -79,7 +79,7 @@ private:
 	bool *array;
 };
 
-extern KeyOps *keyOps;
+extern KeyOps *_keyOps;
 
 /* Transistion Action Element. */
 typedef SBstMapEl< int, Action* > ActionTableEl;
@@ -647,7 +647,7 @@ struct CondData
 	CondSpaceMap condSpaceMap;
 };
 
-extern CondData *condData;
+extern CondData *_condData;
 
 /* State class that implements actions and priorities. */
 struct StateAp 

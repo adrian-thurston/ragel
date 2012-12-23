@@ -33,7 +33,7 @@ void FlatLooped::calcIndexSize()
 	setTransPos();
 
 	keys.setType( ALPH_TYPE() );
-	keys.isSigned = keyOps->isSigned;
+	keys.isSigned = _keyOps->isSigned;
 }
 
 void FlatLooped::tableDataPass()

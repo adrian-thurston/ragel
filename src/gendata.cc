@@ -489,20 +489,20 @@ void CodeGenData::makeActionTableList()
 
 void CodeGenData::makeConditions()
 {
-	if ( condData->condSpaceMap.length() > 0 ) {
+	if ( _condData->condSpaceMap.length() > 0 ) {
 		/* Allocate condition space ids. */
 		long nextCondSpaceId = 0;
-		for ( CondSpaceMap::Iter cs = condData->condSpaceMap; cs.lte(); cs++ )
+		for ( CondSpaceMap::Iter cs = _condData->condSpaceMap; cs.lte(); cs++ )
 			cs->condSpaceId = nextCondSpaceId++;
 
 		/* Allocate the array of conditions and put them on the list. */
-		long length = condData->condSpaceMap.length();
+		long length = _condData->condSpaceMap.length();
 		allCondSpaces = new GenCondSpace[length];
 		for ( long c = 0; c < length; c++ )
 			condSpaceList.append( &allCondSpaces[c] );
 
 		int curCondSpace = 0;
-		for ( CondSpaceMap::Iter cs = condData->condSpaceMap; cs.lte(); cs++ ) {
+		for ( CondSpaceMap::Iter cs = _condData->condSpaceMap; cs.lte(); cs++ ) {
 			/* Transfer the id. */
 			allCondSpaces[curCondSpace].condSpaceId = cs->condSpaceId;
 
@@ -699,7 +699,7 @@ void CodeGenData::makeMachine()
 void CodeGenData::make()
 {
 	/* Alphabet type. */
-	setAlphType( keyOps->alphType->internalName );
+	setAlphType( _keyOps->alphType->internalName );
 	
 	/* Getkey expression. */
 	if ( pd->getKeyExpr != 0 ) {
@@ -885,13 +885,13 @@ void CodeGenData::newTrans( int snum, int tnum, Key lowKey,
 	 * transitions. */
 	if ( destRange.length() == 0 ) {
 		/* Range is currently empty. */
-		if ( keyOps->minKey < lowKey ) {
+		if ( _keyOps->minKey < lowKey ) {
 			/* The first range doesn't start at the low end. */
 			Key fillHighKey = lowKey;
 			fillHighKey.decrement();
 
 			/* Create the filler with the state's error transition. */
-			RedTransEl newTel( keyOps->minKey, fillHighKey, redFsm->getErrorTrans() );
+			RedTransEl newTel( _keyOps->minKey, fillHighKey, redFsm->getErrorTrans() );
 			destRange.append( newTel );
 		}
 	}
@@ -981,19 +981,19 @@ void CodeGenData::finishTransList( int snum )
 	if ( destRange.length() == 0 ) {
 		/* Fill with the whole alphabet. */
 		/* Add the range on the lower and upper bound. */
-		RedTransEl newTel( keyOps->minKey, keyOps->maxKey, redFsm->getErrorTrans() );
+		RedTransEl newTel( _keyOps->minKey, _keyOps->maxKey, redFsm->getErrorTrans() );
 		destRange.append( newTel );
 	}
 	else {
 		/* Get the last and check for a gap on the end. */
 		RedTransEl *last = &destRange[destRange.length()-1];
-		if ( last->highKey < keyOps->maxKey ) {
+		if ( last->highKey < _keyOps->maxKey ) {
 			/* Make the high key. */
 			Key fillLowKey = last->highKey;
 			fillLowKey.increment();
 
 			/* Create the new range with the error trans and append it. */
-			RedTransEl newTel( fillLowKey, keyOps->maxKey, redFsm->getErrorTrans() );
+			RedTransEl newTel( fillLowKey, _keyOps->maxKey, redFsm->getErrorTrans() );
 			destRange.append( newTel );
 		}
 	}
@@ -1085,7 +1085,7 @@ void CodeGenData::addStateCond( int snum, Key lowKey, Key highKey, long condNum 
 
 Key CodeGenData::findMaxKey()
 {
-	Key maxKey = keyOps->maxKey;
+	Key maxKey = _keyOps->maxKey;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		assert( st->outSingle.length() == 0 );
 		assert( st->defTrans == 0 );
@@ -1283,7 +1283,7 @@ void CodeGenData::setValueLimits()
 
 		/* Max key span. */
 		if ( st->transList != 0 ) {
-			unsigned long long span = keyOps->span( st->lowKey, st->highKey );
+			unsigned long long span = _keyOps->span( st->lowKey, st->highKey );
 			if ( span > redFsm->maxSpan )
 				redFsm->maxSpan = span;
 		}
@@ -1291,7 +1291,7 @@ void CodeGenData::setValueLimits()
 		/* Max flat index offset. */
 		if ( ! st.last() ) {
 			if ( st->transList != 0 )
-				redFsm->maxFlatIndexOffset += keyOps->span( st->lowKey, st->highKey );
+				redFsm->maxFlatIndexOffset += _keyOps->span( st->lowKey, st->highKey );
 			redFsm->maxFlatIndexOffset += 1;
 		}
 	}

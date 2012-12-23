@@ -223,8 +223,8 @@ void Goto::RANGE_B_SEARCH( RedStateAp *state, int level, int low, int high )
 	bool anyHigher = mid < high;
 
 	/* Determine if the keys at mid are the limits of the alphabet. */
-	bool limitLow = data[mid].lowKey == keyOps->minKey;
-	bool limitHigh = data[mid].highKey == keyOps->maxKey;
+	bool limitLow = data[mid].lowKey == _keyOps->minKey;
+	bool limitHigh = data[mid].highKey == _keyOps->maxKey;
 
 	if ( anyLower && anyHigher ) {
 		/* Can go lower and higher than mid. */
@@ -330,8 +330,8 @@ void Goto::COND_B_SEARCH( RedTransAp *trans, int level, int low, int high )
 	bool anyHigher = mid < high;
 
 	/* Determine if the keys at mid are the limits of the alphabet. */
-	bool limitLow = 0; //data[mid].key == keyOps->minKey;
-	bool limitHigh = 0; //data[mid].key == keyOps->maxKey;
+	bool limitLow = 0; //data[mid].key == _keyOps->minKey;
+	bool limitHigh = 0; //data[mid].key == _keyOps->maxKey;
 
 	if ( anyLower && anyHigher ) {
 		/* Can go lower and higher than mid. */

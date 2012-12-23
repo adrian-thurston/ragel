@@ -250,29 +250,29 @@ struct KeyOps
 	}
 };
 
-extern KeyOps *keyOps;
+extern KeyOps *_keyOps;
 
 inline bool operator<( const Key key1, const Key key2 )
 {
-	return keyOps->isSigned ? key1.key < key2.key : 
+	return _keyOps->isSigned ? key1.key < key2.key : 
 		(unsigned long)key1.key < (unsigned long)key2.key;
 }
 
 inline bool operator<=( const Key key1, const Key key2 )
 {
-	return keyOps->isSigned ?  key1.key <= key2.key : 
+	return _keyOps->isSigned ?  key1.key <= key2.key : 
 		(unsigned long)key1.key <= (unsigned long)key2.key;
 }
 
 inline bool operator>( const Key key1, const Key key2 )
 {
-	return keyOps->isSigned ? key1.key > key2.key : 
+	return _keyOps->isSigned ? key1.key > key2.key : 
 		(unsigned long)key1.key > (unsigned long)key2.key;
 }
 
 inline bool operator>=( const Key key1, const Key key2 )
 {
-	return keyOps->isSigned ? key1.key >= key2.key : 
+	return _keyOps->isSigned ? key1.key >= key2.key : 
 		(unsigned long)key1.key >= (unsigned long)key2.key;
 }
 
@@ -289,23 +289,23 @@ inline bool operator!=( const Key key1, const Key key2 )
 /* Decrement. Needed only for ranges. */
 inline void Key::decrement()
 {
-	key = keyOps->isSigned ? key - 1 : ((unsigned long)key)-1;
+	key = _keyOps->isSigned ? key - 1 : ((unsigned long)key)-1;
 }
 
 /* Increment. Needed only for ranges. */
 inline void Key::increment()
 {
-	key = keyOps->isSigned ? key+1 : ((unsigned long)key)+1;
+	key = _keyOps->isSigned ? key+1 : ((unsigned long)key)+1;
 }
 
 inline long long Key::getLongLong() const
 {
-	return keyOps->isSigned ? (long long)key : (long long)(unsigned long)key;
+	return _keyOps->isSigned ? (long long)key : (long long)(unsigned long)key;
 }
 
 inline Size Key::availableSpace() const
 {
-	if ( keyOps->isSigned ) 
+	if ( _keyOps->isSigned ) 
 		return (long long)LONG_MAX - (long long)key;
 	else
 		return (unsigned long long)ULONG_MAX - (unsigned long long)(unsigned long)key;
@@ -327,25 +327,25 @@ inline Key operator-(const Key key1, const Key key2)
 
 inline bool operator<( const CondKey key1, const CondKey key2 )
 {
-	return keyOps->isSigned ? key1.key < key2.key : 
+	return _keyOps->isSigned ? key1.key < key2.key : 
 		(unsigned long)key1.key < (unsigned long)key2.key;
 }
 
 inline bool operator<=( const CondKey key1, const CondKey key2 )
 {
-	return keyOps->isSigned ?  key1.key <= key2.key : 
+	return _keyOps->isSigned ?  key1.key <= key2.key : 
 		(unsigned long)key1.key <= (unsigned long)key2.key;
 }
 
 inline bool operator>( const CondKey key1, const CondKey key2 )
 {
-	return keyOps->isSigned ? key1.key > key2.key : 
+	return _keyOps->isSigned ? key1.key > key2.key : 
 		(unsigned long)key1.key > (unsigned long)key2.key;
 }
 
 inline bool operator>=( const CondKey key1, const CondKey key2 )
 {
-	return keyOps->isSigned ? key1.key >= key2.key : 
+	return _keyOps->isSigned ? key1.key >= key2.key : 
 		(unsigned long)key1.key >= (unsigned long)key2.key;
 }
 
@@ -362,23 +362,23 @@ inline bool operator!=( const CondKey key1, const CondKey key2 )
 /* Decrement. Needed only for ranges. */
 inline void CondKey::decrement()
 {
-	key = keyOps->isSigned ? key - 1 : ((unsigned long)key)-1;
+	key = _keyOps->isSigned ? key - 1 : ((unsigned long)key)-1;
 }
 
 /* Increment. Needed only for ranges. */
 inline void CondKey::increment()
 {
-	key = keyOps->isSigned ? key+1 : ((unsigned long)key)+1;
+	key = _keyOps->isSigned ? key+1 : ((unsigned long)key)+1;
 }
 
 inline long long CondKey::getLongLong() const
 {
-	return keyOps->isSigned ? (long long)key : (long long)(unsigned long)key;
+	return _keyOps->isSigned ? (long long)key : (long long)(unsigned long)key;
 }
 
 inline Size CondKey::availableSpace() const
 {
-	if ( keyOps->isSigned ) 
+	if ( _keyOps->isSigned ) 
 		return (long long)LONG_MAX - (long long)key;
 	else
 		return (unsigned long long)ULONG_MAX - (unsigned long long)(unsigned long)key;

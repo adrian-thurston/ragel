@@ -359,8 +359,8 @@ struct ParseData
 
 	void beginProcessing()
 	{
-		::condData = &thisCondData;
-		::keyOps = &thisKeyOps;
+		::_condData = &thisCondData;
+		::_keyOps = &thisKeyOps;
 	}
 
 	CondData thisCondData;

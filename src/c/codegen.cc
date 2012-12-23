@@ -197,7 +197,7 @@ CodeGen::CodeGen( const CodeGenArgs &args )
 unsigned int CodeGen::arrayTypeSize( unsigned long maxVal )
 {
 	long long maxValLL = (long long) maxVal;
-	HostType *arrayType = keyOps->typeSubsumes( maxValLL );
+	HostType *arrayType = _keyOps->typeSubsumes( maxValLL );
 	assert( arrayType != 0 );
 	return arrayType->size;
 }
@@ -205,7 +205,7 @@ unsigned int CodeGen::arrayTypeSize( unsigned long maxVal )
 string CodeGen::ARRAY_TYPE( unsigned long maxVal )
 {
 	long long maxValLL = (long long) maxVal;
-	HostType *arrayType = keyOps->typeSubsumes( maxValLL );
+	HostType *arrayType = _keyOps->typeSubsumes( maxValLL );
 	assert( arrayType != 0 );
 
 	string ret = arrayType->data1;
@@ -390,7 +390,7 @@ string CodeGen::TABS( int level )
 string CodeGen::KEY( Key key )
 {
 	ostringstream ret;
-	if ( keyOps->isSigned || !hostLang->explicitUnsigned )
+	if ( _keyOps->isSigned || !hostLang->explicitUnsigned )
 		ret << key.getVal();
 	else
 		ret << (unsigned long) key.getVal() << 'u';
@@ -399,17 +399,17 @@ string CodeGen::KEY( Key key )
 
 bool CodeGen::isAlphTypeSigned()
 {
-	return keyOps->isSigned;
+	return _keyOps->isSigned;
 }
 
 bool CodeGen::isWideAlphTypeSigned()
 {
 	string ret;
-	if ( redFsm->maxKey <= keyOps->maxKey )
+	if ( redFsm->maxKey <= _keyOps->maxKey )
 		return isAlphTypeSigned();
 	else {
 		long long maxKeyVal = redFsm->maxKey.getLongLong();
-		HostType *wideType = keyOps->typeSubsumes( keyOps->isSigned, maxKeyVal );
+		HostType *wideType = _keyOps->typeSubsumes( _keyOps->isSigned, maxKeyVal );
 		return wideType->isSigned;
 	}
 }
@@ -670,10 +670,10 @@ string CodeGen::DATA_PREFIX()
 /* Emit the alphabet data type. */
 string CodeGen::ALPH_TYPE()
 {
-	string ret = keyOps->alphType->data1;
-	if ( keyOps->alphType->data2 != 0 ) {
+	string ret = _keyOps->alphType->data1;
+	if ( _keyOps->alphType->data2 != 0 ) {
 		ret += " ";
-		ret += + keyOps->alphType->data2;
+		ret += + _keyOps->alphType->data2;
 	}
 	return ret;
 }
