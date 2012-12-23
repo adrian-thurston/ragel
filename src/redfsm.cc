@@ -38,8 +38,9 @@ string GenAction::nameOrLoc()
 	}
 }
 
-RedFsmAp::RedFsmAp()
+RedFsmAp::RedFsmAp( KeyOps *keyOps )
 :
+	keyOps(keyOps),
 	forcedErrorState(false),
 	nextActionId(0),
 	nextTransId(0),
@@ -239,7 +240,7 @@ bool RedFsmAp::canExtend( const RedTransList &list, int pos )
 
 		/* If the span of the next element is more than one, then don't keep
 		 * checking, it won't be moved to single. */
-		unsigned long long nextSpan = _keyOps->span( list[next].lowKey, list[next].highKey );
+		unsigned long long nextSpan = keyOps->span( list[next].lowKey, list[next].highKey );
 		if ( nextSpan > 1 )
 			break;
 	}
@@ -266,7 +267,7 @@ void RedFsmAp::moveTransToSingle( RedStateAp *state )
 			range.remove( rpos+1 );
 		}
 		/* Maybe move it to the singles. */
-		else if ( _keyOps->span( range[rpos].lowKey, range[rpos].highKey ) == 1 ) {
+		else if ( keyOps->span( range[rpos].lowKey, range[rpos].highKey ) == 1 ) {
 			single.append( range[rpos] );
 			range.remove( rpos );
 		}
@@ -298,14 +299,14 @@ void RedFsmAp::makeFlat()
 		else {
 			st->lowKey = st->outRange[0].lowKey;
 			st->highKey = st->outRange[st->outRange.length()-1].highKey;
-			unsigned long long span = _keyOps->span( st->lowKey, st->highKey );
+			unsigned long long span = keyOps->span( st->lowKey, st->highKey );
 			st->transList = new RedTransAp*[ span ];
 			memset( st->transList, 0, sizeof(RedTransAp*)*span );
 			
 			for ( RedTransList::Iter trans = st->outRange; trans.lte(); trans++ ) {
 				unsigned long long base, trSpan;
-				base = _keyOps->span( st->lowKey, trans->lowKey )-1;
-				trSpan = _keyOps->span( trans->lowKey, trans->highKey );
+				base = keyOps->span( st->lowKey, trans->lowKey )-1;
+				trSpan = keyOps->span( trans->lowKey, trans->highKey );
 				for ( unsigned long long pos = 0; pos < trSpan; pos++ )
 					st->transList[base+pos] = trans->value;
 			}
@@ -349,7 +350,7 @@ bool RedFsmAp::alphabetCovered( RedTransList &outRange )
 	/* If the first range doesn't start at the the lower bound then the
 	 * alphabet is not covered. */
 	RedTransList::Iter rtel = outRange;
-	if ( _keyOps->minKey < rtel->lowKey )
+	if ( keyOps->minKey < rtel->lowKey )
 		return false;
 
 	/* Check that every range is next to the previous one. */
@@ -363,7 +364,7 @@ bool RedFsmAp::alphabetCovered( RedTransList &outRange )
 
 	/* The last must extend to the upper bound. */
 	RedTransEl *last = &outRange[outRange.length()-1];
-	if ( last->highKey < _keyOps->maxKey )
+	if ( last->highKey < keyOps->maxKey )
 		return false;
 
 	return true;
@@ -384,7 +385,7 @@ RedTransAp *RedFsmAp::chooseDefaultSpan( RedStateAp *state )
 		/* Lookup the transition in the set. */
 		RedTransAp **inSet = stateTransSet.find( rtel->value );
 		int pos = inSet - stateTransSet.data;
-		span[pos] += _keyOps->span( rtel->lowKey, rtel->highKey );
+		span[pos] += keyOps->span( rtel->lowKey, rtel->highKey );
 	}
 
 	/* Find the max span, choose it for making the default. */

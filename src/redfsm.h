@@ -455,7 +455,9 @@ typedef BstSet< RedTransAp*, CmpOrd<RedTransAp*> > RedTransSet;
 /* Next version of the fsm machine. */
 struct RedFsmAp
 {
-	RedFsmAp();
+	RedFsmAp( KeyOps *keyOps );
+
+	KeyOps *keyOps;
 
 	bool forcedErrorState;
 
