@@ -370,6 +370,8 @@ struct ParseData
 	LengthDefList lengthDefList;
 
 	CodeGenData *cgd;
+
+	FsmCtx fsmCtx;
 };
 
 void afterOpMinimize( FsmAp *fsm, bool lastInSeq = true );

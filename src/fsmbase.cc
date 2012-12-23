@@ -45,8 +45,10 @@ void MergeData::fillListAppend( StateAp *state )
 }
 
 /* Graph constructor. */
-FsmAp::FsmAp()
+FsmAp::FsmAp( FsmCtx *fsmCtx )
 :
+	fsmCtx( fsmCtx ),
+
 	/* No start state. */
 	startState(0),
 	errState(0),
@@ -61,6 +63,8 @@ FsmAp::FsmAp()
 /* Copy all graph data including transitions. */
 FsmAp::FsmAp( const FsmAp &graph )
 :
+	fsmCtx( graph.fsmCtx ),
+
 	/* Lists start empty. Will be filled by copy. */
 	stateList(),
 	misfitList(),

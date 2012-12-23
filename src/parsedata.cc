@@ -231,14 +231,14 @@ void makeFsmUniqueKeyArray( KeySet &result, char *data, int len,
 
 FsmAp *dotFsm( ParseData *pd )
 {
-	FsmAp *retFsm = new FsmAp();
+	FsmAp *retFsm = new FsmAp( &pd->fsmCtx );
 	retFsm->rangeFsm( _keyOps->minKey, _keyOps->maxKey );
 	return retFsm;
 }
 
 FsmAp *dotStarFsm( ParseData *pd )
 {
-	FsmAp *retFsm = new FsmAp();
+	FsmAp *retFsm = new FsmAp( &pd->fsmCtx );
 	retFsm->rangeStarFsm( _keyOps->minKey, _keyOps->maxKey );
 	return retFsm;
 }
@@ -258,7 +258,7 @@ FsmAp *makeBuiltin( BuiltinMachine builtin, ParseData *pd )
 	}
 	case BT_Ascii: {
 		/* Ascii characters 0 to 127. */
-		retFsm = new FsmAp();
+		retFsm = new FsmAp( &pd->fsmCtx );
 		retFsm->rangeFsm( 0, 127 );
 		break;
 	}
@@ -267,18 +267,18 @@ FsmAp *makeBuiltin( BuiltinMachine builtin, ParseData *pd )
 		 * on signed, vs no signed. If the alphabet is one byte then just use
 		 * dot fsm. */
 		if ( isSigned ) {
-			retFsm = new FsmAp();
+			retFsm = new FsmAp( &pd->fsmCtx );
 			retFsm->rangeFsm( -128, 127 );
 		}
 		else {
-			retFsm = new FsmAp();
+			retFsm = new FsmAp( &pd->fsmCtx );
 			retFsm->rangeFsm( 0, 255 );
 		}
 		break;
 	}
 	case BT_Alpha: {
 		/* Alpha [A-Za-z]. */
-		FsmAp *upper = new FsmAp(), *lower = new FsmAp();
+		FsmAp *upper = new FsmAp( &pd->fsmCtx ), *lower = new FsmAp( &pd->fsmCtx );
 		upper->rangeFsm( 'A', 'Z' );
 		lower->rangeFsm( 'a', 'z' );
 		upper->unionOp( lower );
@@ -288,14 +288,14 @@ FsmAp *makeBuiltin( BuiltinMachine builtin, ParseData *pd )
 	}
 	case BT_Digit: {
 		/* Digits [0-9]. */
-		retFsm = new FsmAp();
+		retFsm = new FsmAp( &pd->fsmCtx );
 		retFsm->rangeFsm( '0', '9' );
 		break;
 	}
 	case BT_Alnum: {
 		/* Alpha numerics [0-9A-Za-z]. */
-		FsmAp *digit = new FsmAp(), *lower = new FsmAp();
-		FsmAp *upper = new FsmAp();
+		FsmAp *digit = new FsmAp( &pd->fsmCtx ), *lower = new FsmAp( &pd->fsmCtx );
+		FsmAp *upper = new FsmAp( &pd->fsmCtx );
 		digit->rangeFsm( '0', '9' );
 		upper->rangeFsm( 'A', 'Z' );
 		lower->rangeFsm( 'a', 'z' );
@@ -307,20 +307,20 @@ FsmAp *makeBuiltin( BuiltinMachine builtin, ParseData *pd )
 	}
 	case BT_Lower: {
 		/* Lower case characters. */
-		retFsm = new FsmAp();
+		retFsm = new FsmAp( &pd->fsmCtx );
 		retFsm->rangeFsm( 'a', 'z' );
 		break;
 	}
 	case BT_Upper: {
 		/* Upper case characters. */
-		retFsm = new FsmAp();
+		retFsm = new FsmAp( &pd->fsmCtx );
 		retFsm->rangeFsm( 'A', 'Z' );
 		break;
 	}
 	case BT_Cntrl: {
 		/* Control characters. */
-		FsmAp *cntrl = new FsmAp();
-		FsmAp *highChar = new FsmAp();
+		FsmAp *cntrl = new FsmAp( &pd->fsmCtx );
+		FsmAp *highChar = new FsmAp( &pd->fsmCtx );
 		cntrl->rangeFsm( 0, 31 );
 		highChar->concatFsm( 127 );
 		cntrl->unionOp( highChar );
@@ -330,22 +330,22 @@ FsmAp *makeBuiltin( BuiltinMachine builtin, ParseData *pd )
 	}
 	case BT_Graph: {
 		/* Graphical ascii characters [!-~]. */
-		retFsm = new FsmAp();
+		retFsm = new FsmAp( &pd->fsmCtx );
 		retFsm->rangeFsm( '!', '~' );
 		break;
 	}
 	case BT_Print: {
 		/* Printable characters. Same as graph except includes space. */
-		retFsm = new FsmAp();
+		retFsm = new FsmAp( &pd->fsmCtx );
 		retFsm->rangeFsm( ' ', '~' );
 		break;
 	}
 	case BT_Punct: {
 		/* Punctuation. */
-		FsmAp *range1 = new FsmAp();
-		FsmAp *range2 = new FsmAp();
-		FsmAp *range3 = new FsmAp(); 
-		FsmAp *range4 = new FsmAp();
+		FsmAp *range1 = new FsmAp( &pd->fsmCtx );
+		FsmAp *range2 = new FsmAp( &pd->fsmCtx );
+		FsmAp *range3 = new FsmAp( &pd->fsmCtx ); 
+		FsmAp *range4 = new FsmAp( &pd->fsmCtx );
 		range1->rangeFsm( '!', '/' );
 		range2->rangeFsm( ':', '@' );
 		range3->rangeFsm( '[', '`' );
@@ -359,8 +359,8 @@ FsmAp *makeBuiltin( BuiltinMachine builtin, ParseData *pd )
 	}
 	case BT_Space: {
 		/* Whitespace: [\t\v\f\n\r ]. */
-		FsmAp *cntrl = new FsmAp();
-		FsmAp *space = new FsmAp();
+		FsmAp *cntrl = new FsmAp( &pd->fsmCtx );
+		FsmAp *space = new FsmAp( &pd->fsmCtx );
 		cntrl->rangeFsm( '\t', '\r' );
 		space->concatFsm( ' ' );
 		cntrl->unionOp( space );
@@ -370,9 +370,9 @@ FsmAp *makeBuiltin( BuiltinMachine builtin, ParseData *pd )
 	}
 	case BT_Xdigit: {
 		/* Hex digits [0-9A-Fa-f]. */
-		FsmAp *digit = new FsmAp();
-		FsmAp *upper = new FsmAp();
-		FsmAp *lower = new FsmAp();
+		FsmAp *digit = new FsmAp( &pd->fsmCtx );
+		FsmAp *upper = new FsmAp( &pd->fsmCtx );
+		FsmAp *lower = new FsmAp( &pd->fsmCtx );
 		digit->rangeFsm( '0', '9' );
 		upper->rangeFsm( 'A', 'F' );
 		lower->rangeFsm( 'a', 'f' );
@@ -383,12 +383,12 @@ FsmAp *makeBuiltin( BuiltinMachine builtin, ParseData *pd )
 		break;
 	}
 	case BT_Lambda: {
-		retFsm = new FsmAp();
+		retFsm = new FsmAp( &pd->fsmCtx );
 		retFsm->lambdaFsm();
 		break;
 	}
 	case BT_Empty: {
-		retFsm = new FsmAp();
+		retFsm = new FsmAp( &pd->fsmCtx );
 		retFsm->emptyFsm();
 		break;
 	}}

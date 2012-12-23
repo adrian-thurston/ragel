@@ -1218,13 +1218,23 @@ typedef BstMapEl< int, StateAp* > EntryMapEl;
 typedef BstMap< int, StateAp* > EntryMap;
 typedef Vector<EntryMapEl> EntryMapBase;
 
+/* All FSM operations must be between machines that point to the same context
+ * structure. */
+struct FsmCtx
+{
+	KeyOps *keyOps;
+	CondData *condData;
+};
+
 /* Graph class that implements actions and priorities. */
 struct FsmAp 
 {
 	/* Constructors/Destructors. */
-	FsmAp( );
+	FsmAp( FsmCtx *fsmCtx );
 	FsmAp( const FsmAp &graph );
 	~FsmAp();
+
+	FsmCtx *fsmCtx;
 
 	/* The list of states. */
 	StateList stateList;

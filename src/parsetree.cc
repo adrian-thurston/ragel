@@ -539,7 +539,7 @@ FsmAp *MachineDef::walk( ParseData *pd )
 		break;
 	case LengthDefType:
 		/* Towards lengths. */
-		rtnVal = new FsmAp();
+		rtnVal = new FsmAp( &pd->fsmCtx );
 		rtnVal->lambdaFsm();
 		break;
 	}
@@ -1435,7 +1435,7 @@ FsmAp *FactorWithRep::walk( ParseData *pd )
 	}
 	case OptionalType: {
 		/* Make the null fsm. */
-		FsmAp *nu = new FsmAp();
+		FsmAp *nu = new FsmAp( &pd->fsmCtx );
 		nu->lambdaFsm( );
 
 		/* Evaluate the FactorWithRep. */
@@ -1476,7 +1476,7 @@ FsmAp *FactorWithRep::walk( ParseData *pd )
 			warning(loc) << "exactly zero repetitions results "
 					"in the null machine" << endl;
 
-			retFsm = new FsmAp();
+			retFsm = new FsmAp( &pd->fsmCtx );
 			retFsm->lambdaFsm();
 		}
 		else {
@@ -1505,7 +1505,7 @@ FsmAp *FactorWithRep::walk( ParseData *pd )
 			warning(loc) << "max zero repetitions results "
 					"in the null machine" << endl;
 
-			retFsm = new FsmAp();
+			retFsm = new FsmAp( &pd->fsmCtx );
 			retFsm->lambdaFsm();
 		}
 		else {
@@ -1567,7 +1567,7 @@ FsmAp *FactorWithRep::walk( ParseData *pd )
 			error(loc) << "invalid range repetition" << endl;
 
 			/* Return null machine as recovery. */
-			retFsm = new FsmAp();
+			retFsm = new FsmAp( &pd->fsmCtx );
 			retFsm->lambdaFsm();
 		}
 		else if ( lowerRep == 0 && upperRep == 0 ) {
@@ -1576,7 +1576,7 @@ FsmAp *FactorWithRep::walk( ParseData *pd )
 			warning(loc) << "zero to zero repetitions results "
 					"in the null machine" << endl;
 
-			retFsm = new FsmAp();
+			retFsm = new FsmAp( &pd->fsmCtx );
 			retFsm->lambdaFsm();
 		}
 		else {
@@ -1877,7 +1877,7 @@ FsmAp *Range::walk( ParseData *pd )
 	}
 
 	/* Return the range now that it is validated. */
-	FsmAp *retFsm = new FsmAp();
+	FsmAp *retFsm = new FsmAp( &pd->fsmCtx );
 	retFsm->rangeFsm( lowKey, highKey );
 	return retFsm;
 }
@@ -1893,7 +1893,7 @@ FsmAp *Literal::walk( ParseData *pd )
 		/* Make the fsm key in int format. */
 		Key fsmKey = makeFsmKeyNum( token.data, token.loc, pd );
 		/* Make the new machine. */
-		rtnVal = new FsmAp();
+		rtnVal = new FsmAp( &pd->fsmCtx );
 		rtnVal->concatFsm( fsmKey );
 		break;
 	}
@@ -1907,7 +1907,7 @@ FsmAp *Literal::walk( ParseData *pd )
 		makeFsmKeyArray( arr, data, length, pd );
 
 		/* Make the new machine. */
-		rtnVal = new FsmAp();
+		rtnVal = new FsmAp( &pd->fsmCtx );
 		if ( caseInsensitive )
 			rtnVal->concatFsmCI( arr, length );
 		else
@@ -1949,7 +1949,7 @@ FsmAp *RegExpr::walk( ParseData *pd, RegExpr *rootRegex )
 			break;
 		}
 		case Empty: {
-			rtnVal = new FsmAp();
+			rtnVal = new FsmAp( &pd->fsmCtx );
 			rtnVal->lambdaFsm();
 			break;
 		}
@@ -1984,7 +1984,7 @@ FsmAp *ReItem::walk( ParseData *pd, RegExpr *rootRegex )
 			makeFsmKeyArray( arr, token.data, token.length, pd );
 
 			/* Make the concat fsm. */
-			rtnVal = new FsmAp();
+			rtnVal = new FsmAp( &pd->fsmCtx );
 			if ( rootRegex != 0 && rootRegex->caseInsensitive )
 				rtnVal->concatFsmCI( arr, token.length );
 			else
@@ -2001,7 +2001,7 @@ FsmAp *ReItem::walk( ParseData *pd, RegExpr *rootRegex )
 			/* Get the or block and minmize it. */
 			rtnVal = orBlock->walk( pd, rootRegex );
 			if ( rtnVal == 0 ) {
-				rtnVal = new FsmAp();
+				rtnVal = new FsmAp( &pd->fsmCtx );
 				rtnVal->lambdaFsm();
 			}
 			rtnVal->minimizePartition2();
@@ -2080,7 +2080,7 @@ FsmAp *ReOrItem::walk( ParseData *pd, RegExpr *rootRegex )
 	switch ( type ) {
 	case Data: {
 		/* Make the or machine. */
-		rtnVal = new FsmAp();
+		rtnVal = new FsmAp( &pd->fsmCtx );
 
 		/* Put the or data into an array of ints. Note that we find unique
 		 * keys. Duplicates are silently ignored. The alternative would be to
@@ -2107,7 +2107,7 @@ FsmAp *ReOrItem::walk( ParseData *pd, RegExpr *rootRegex )
 		}
 
 		/* Make the range machine. */
-		rtnVal = new FsmAp();
+		rtnVal = new FsmAp( &pd->fsmCtx );
 		rtnVal->rangeFsm( lowKey, highKey );
 
 		if ( rootRegex != 0 && rootRegex->caseInsensitive ) {
@@ -2118,7 +2118,7 @@ FsmAp *ReOrItem::walk( ParseData *pd, RegExpr *rootRegex )
 				otherLow = 'a' + ( otherLow - 'A' );
 				otherHigh = 'a' + ( otherHigh - 'A' );
 
-				FsmAp *otherRange = new FsmAp();
+				FsmAp *otherRange = new FsmAp( &pd->fsmCtx );
 				otherRange->rangeFsm( otherLow, otherHigh );
 				rtnVal->unionOp( otherRange );
 				rtnVal->minimizePartition2();
@@ -2130,7 +2130,7 @@ FsmAp *ReOrItem::walk( ParseData *pd, RegExpr *rootRegex )
 				otherLow = 'A' + ( otherLow - 'a' );
 				otherHigh = 'A' + ( otherHigh - 'a' );
 
-				FsmAp *otherRange = new FsmAp();
+				FsmAp *otherRange = new FsmAp( &pd->fsmCtx );
 				otherRange->rangeFsm( otherLow, otherHigh );
 				rtnVal->unionOp( otherRange );
 				rtnVal->minimizePartition2();
