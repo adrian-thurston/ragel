@@ -1222,19 +1222,19 @@ typedef Vector<EntryMapEl> EntryMapBase;
  * structure. */
 struct FsmCtx
 {
-	KeyOps *keyOps;
-	CondData *condData;
+	KeyOps keyOps;
+	CondData condData;
 };
 
 /* Graph class that implements actions and priorities. */
 struct FsmAp 
 {
 	/* Constructors/Destructors. */
-	FsmAp( FsmCtx *fsmCtx );
+	FsmAp( FsmCtx *ctx );
 	FsmAp( const FsmAp &graph );
 	~FsmAp();
 
-	FsmCtx *fsmCtx;
+	FsmCtx *ctx;
 
 	/* The list of states. */
 	StateList stateList;

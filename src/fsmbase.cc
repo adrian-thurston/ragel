@@ -45,9 +45,9 @@ void MergeData::fillListAppend( StateAp *state )
 }
 
 /* Graph constructor. */
-FsmAp::FsmAp( FsmCtx *fsmCtx )
+FsmAp::FsmAp( FsmCtx *ctx )
 :
-	fsmCtx( fsmCtx ),
+	ctx( ctx ),
 
 	/* No start state. */
 	startState(0),
@@ -63,7 +63,7 @@ FsmAp::FsmAp( FsmCtx *fsmCtx )
 /* Copy all graph data including transitions. */
 FsmAp::FsmAp( const FsmAp &graph )
 :
-	fsmCtx( graph.fsmCtx ),
+	ctx( graph.ctx ),
 
 	/* Lists start empty. Will be filled by copy. */
 	stateList(),

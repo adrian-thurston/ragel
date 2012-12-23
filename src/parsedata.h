@@ -359,19 +359,18 @@ struct ParseData
 
 	void beginProcessing()
 	{
-		::_condData = &thisCondData;
-		::_keyOps = &thisKeyOps;
+		/* Old. */
+		::_keyOps = &fsmCtx->keyOps;
+		::_condData = &fsmCtx->condData;
 	}
 
-	CondData thisCondData;
-	KeyOps thisKeyOps;
+	FsmCtx *fsmCtx;
 
 	ExportList exportList;
 	LengthDefList lengthDefList;
 
 	CodeGenData *cgd;
 
-	FsmCtx fsmCtx;
 };
 
 void afterOpMinimize( FsmAp *fsm, bool lastInSeq = true );
