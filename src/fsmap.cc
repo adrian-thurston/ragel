@@ -265,7 +265,7 @@ void FsmAp::fillGaps( StateAp *state )
 
 		/* Check for a gap at the beginning. */
 		TransList::Iter trans = srcList, next;
-		if ( ctx->keyOps->minKey < trans->lowKey ) {
+		if ( ctx->keyOps->lt( ctx->keyOps->minKey, trans->lowKey ) ) {
 			/* Make the high key and append. */
 			Key highKey = trans->lowKey;
 			highKey.decrement();
@@ -287,7 +287,7 @@ void FsmAp::fillGaps( StateAp *state )
 			nextKey.increment();
 
 			/* Check for a gap from last up to here. */
-			if ( nextKey < trans->lowKey ) {
+			if ( ctx->keyOps->lt( nextKey, trans->lowKey ) ) {
 				/* Make the high end of the range that fills the gap. */
 				Key highKey = trans->lowKey;
 				highKey.decrement();
@@ -304,7 +304,7 @@ void FsmAp::fillGaps( StateAp *state )
 		}
 
 		/* Now check for a gap on the end to fill. */
-		if ( lastHigh < ctx->keyOps->maxKey ) {
+		if ( ctx->keyOps->lt( lastHigh, ctx->keyOps->maxKey ) ) {
 			/* Get a copy of the default. */
 			lastHigh.increment();
 

@@ -231,7 +231,7 @@ bool RedFsmAp::canExtend( const RedTransList &list, int pos )
 		/* If they are not continuous then cannot extend. */
 		Key nextKey = list[next].lowKey;
 		nextKey.decrement();
-		if ( list[pos].highKey != nextKey )
+		if ( keyOps->ne( list[pos].highKey, nextKey ) )
 			break;
 
 		/* Check for the extenstion property. */
@@ -350,7 +350,7 @@ bool RedFsmAp::alphabetCovered( RedTransList &outRange )
 	/* If the first range doesn't start at the the lower bound then the
 	 * alphabet is not covered. */
 	RedTransList::Iter rtel = outRange;
-	if ( keyOps->minKey < rtel->lowKey )
+	if ( keyOps->lt( keyOps->minKey, rtel->lowKey ) )
 		return false;
 
 	/* Check that every range is next to the previous one. */
@@ -358,13 +358,13 @@ bool RedFsmAp::alphabetCovered( RedTransList &outRange )
 	for ( ; rtel.lte(); rtel++ ) {
 		Key highKey = rtel[-1].highKey;
 		highKey.increment();
-		if ( highKey != rtel->lowKey )
+		if ( keyOps->ne( highKey, rtel->lowKey ) )
 			return false;
 	}
 
 	/* The last must extend to the upper bound. */
 	RedTransEl *last = &outRange[outRange.length()-1];
-	if ( last->highKey < keyOps->maxKey )
+	if ( keyOps->lt( last->highKey, keyOps->maxKey ) )
 		return false;
 
 	return true;

@@ -126,7 +126,7 @@ void FsmAp::orFsm( Key *set, int len )
 	setFinState( end );
 
 	for ( int i = 1; i < len; i++ )
-		assert( set[i-1] < set[i] );
+		assert( ctx->keyOps->lt( set[i-1], set[i] ) );
 
 	/* Attach on all the integers in the given string of ints. */
 	for ( int i = 0; i < len; i++ )
@@ -1024,7 +1024,7 @@ bool FsmAp::checkSingleCharMachine()
 		return false;
 	/* The singe transition out of the start state should not be a range. */
 	TransAp *startTrans = startState->outList.head;
-	if ( startTrans->lowKey != startTrans->highKey )
+	if ( ctx->keyOps->ne( startTrans->lowKey, startTrans->highKey ) )
 		return false;
 	return true;
 }

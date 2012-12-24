@@ -556,7 +556,7 @@ bool FsmAp::outListCovers( StateAp *state )
 	
 	/* The first must start at the lower bound. */
 	TransList::Iter trans = state->outList.first();
-	if ( ctx->keyOps->minKey < trans->lowKey )
+	if ( ctx->keyOps->lt( ctx->keyOps->minKey, trans->lowKey ) )
 		return false;
 
 	/* Loop starts at second el. */
@@ -568,13 +568,13 @@ bool FsmAp::outListCovers( StateAp *state )
 		 * previous' high end. */
 		Key lowKey = trans->lowKey;
 		lowKey.decrement();
-		if ( trans->prev->highKey < lowKey )
+		if ( ctx->keyOps->lt( trans->prev->highKey, lowKey ) )
 			return false;
 	}
 
 	/* Require that the last range extends to the upper bound. */
 	trans = state->outList.last();
-	if ( trans->highKey < ctx->keyOps->maxKey )
+	if ( ctx->keyOps->lt( trans->highKey, ctx->keyOps->maxKey ) )
 		return false;
 
 	return true;
@@ -745,7 +745,7 @@ void FsmAp::compressTransitions()
 				bool merge = false;
 				if ( trans->condSpace == 0 && 
 						next->condSpace == 0 && 
-						trans->highKey == nextLow )
+						ctx->keyOps->eq( trans->highKey, nextLow ) )
 				{
 					if ( trans->condSpace == 0 &&
 							next->condSpace == 0 )

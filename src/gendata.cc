@@ -886,7 +886,7 @@ void CodeGenData::newTrans( int snum, int tnum, Key lowKey,
 	 * transitions. */
 	if ( destRange.length() == 0 ) {
 		/* Range is currently empty. */
-		if ( pd->fsmCtx->keyOps->minKey < lowKey ) {
+		if ( keyOps->lt( keyOps->minKey, lowKey ) ) {
 			/* The first range doesn't start at the low end. */
 			Key fillHighKey = lowKey;
 			fillHighKey.decrement();
@@ -901,7 +901,7 @@ void CodeGenData::newTrans( int snum, int tnum, Key lowKey,
 		RedTransEl *last = &destRange[destRange.length()-1];
 		Key nextKey = last->highKey;
 		nextKey.increment();
-		if ( nextKey < lowKey ) {
+		if ( keyOps->lt( nextKey, lowKey ) ) {
 			/* There is a gap to fill. Make the high key. */
 			Key fillHighKey = lowKey;
 			fillHighKey.decrement();
@@ -988,7 +988,7 @@ void CodeGenData::finishTransList( int snum )
 	else {
 		/* Get the last and check for a gap on the end. */
 		RedTransEl *last = &destRange[destRange.length()-1];
-		if ( last->highKey < pd->fsmCtx->keyOps->maxKey ) {
+		if ( keyOps->lt( last->highKey, pd->fsmCtx->keyOps->maxKey ) ) {
 			/* Make the high key. */
 			Key fillLowKey = last->highKey;
 			fillLowKey.increment();
@@ -1094,7 +1094,7 @@ Key CodeGenData::findMaxKey()
 		long rangeLen = st->outRange.length();
 		if ( rangeLen > 0 ) {
 			Key highKey = st->outRange[rangeLen-1].highKey;
-			if ( highKey > maxKey )
+			if ( keyOps->gt( highKey, maxKey ) )
 				maxKey = highKey;
 		}
 	}

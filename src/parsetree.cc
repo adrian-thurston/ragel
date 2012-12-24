@@ -2075,6 +2075,8 @@ FsmAp *ReOrBlock::walk( ParseData *pd, RegExpr *rootRegex )
 /* Evaluate an or block item of a regular expression. */
 FsmAp *ReOrItem::walk( ParseData *pd, RegExpr *rootRegex )
 {
+	KeyOps *keyOps = pd->fsmCtx->keyOps;
+
 	/* The return value, is the alphabet signed? */
 	FsmAp *rtnVal = 0;
 	switch ( type ) {
@@ -2086,7 +2088,7 @@ FsmAp *ReOrItem::walk( ParseData *pd, RegExpr *rootRegex )
 		 * keys. Duplicates are silently ignored. The alternative would be to
 		 * issue warning or an error but since we can't with [a0-9a] or 'a' |
 		 * 'a' don't bother here. */
-		KeySet keySet( pd->fsmCtx->keyOps );
+		KeySet keySet( keyOps );
 		makeFsmUniqueKeyArray( keySet, token.data, token.length, 
 			rootRegex != 0 ? rootRegex->caseInsensitive : false, pd );
 
@@ -2100,7 +2102,7 @@ FsmAp *ReOrItem::walk( ParseData *pd, RegExpr *rootRegex )
 		Key highKey = makeFsmKeyChar( upper, pd );
 
 		/* Validate the range. */
-		if ( pd->fsmCtx->keyOps->gt( lowKey, highKey ) ) {
+		if ( keyOps->gt( lowKey, highKey ) ) {
 			/* Recover by setting upper to lower; */
 			error(loc) << "lower end of range is greater then upper end" << endl;
 			highKey = lowKey;
@@ -2111,9 +2113,9 @@ FsmAp *ReOrItem::walk( ParseData *pd, RegExpr *rootRegex )
 		rtnVal->rangeFsm( lowKey, highKey );
 
 		if ( rootRegex != 0 && rootRegex->caseInsensitive ) {
-			if ( lowKey <= 'Z' && 'A' <= highKey ) {
-				Key otherLow = lowKey < 'A' ? Key('A') : lowKey;
-				Key otherHigh = 'Z' < highKey ? Key('Z') : highKey;
+			if ( keyOps->le( lowKey, 'Z' ) && pd->fsmCtx->keyOps->le( 'A', highKey ) ) {
+				Key otherLow = keyOps->lt( lowKey, 'A' ) ? Key('A') : lowKey;
+				Key otherHigh = keyOps->lt( 'Z', highKey ) ? Key('Z') : highKey;
 
 				otherLow = 'a' + ( otherLow - 'A' );
 				otherHigh = 'a' + ( otherHigh - 'A' );
@@ -2123,9 +2125,9 @@ FsmAp *ReOrItem::walk( ParseData *pd, RegExpr *rootRegex )
 				rtnVal->unionOp( otherRange );
 				rtnVal->minimizePartition2();
 			}
-			else if ( lowKey <= 'z' && 'a' <= highKey ) {
-				Key otherLow = lowKey < 'a' ? Key('a') : lowKey;
-				Key otherHigh = 'z' < highKey ? Key('z') : highKey;
+			else if ( keyOps->le( lowKey, 'z' ) && keyOps->le( 'a', highKey ) ) {
+				Key otherLow = keyOps->lt( lowKey, 'a' ) ? Key('a') : lowKey;
+				Key otherHigh = keyOps->lt( 'z', highKey ) ? Key('z') : highKey;
 
 				otherLow = 'A' + ( otherLow - 'a' );
 				otherHigh = 'A' + ( otherHigh - 'a' );
