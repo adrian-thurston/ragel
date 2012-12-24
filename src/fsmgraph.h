@@ -57,6 +57,7 @@ struct Action;
 struct LongestMatchPart;
 struct LengthDef;
 struct CondSpace;
+struct FsmCtx;
 
 /* State list element for unambiguous access to list element. */
 struct FsmListEl 
@@ -662,6 +663,20 @@ struct CondData
 
 extern CondData *_condData;
 
+/* All FSM operations must be between machines that point to the same context
+ * structure. */
+struct FsmCtx
+{
+	FsmCtx() {
+		keyOps = new KeyOps;
+		condData = new CondData;
+	}
+
+	KeyOps *keyOps;
+	CondData *condData;
+};
+
+
 /* State class that implements actions and priorities. */
 struct StateAp 
 {
@@ -949,7 +964,7 @@ template <class ListItem1, class ListItem2 = ListItem1> struct RangePairIter
 		ExactOverlap,   End
 	};
 
-	RangePairIter( ListItem1 *list1, ListItem2 *list2 );
+	RangePairIter( FsmCtx *ctx, ListItem1 *list1, ListItem2 *list2 );
 
 	template <class ListItem> struct NextTrans
 	{
@@ -984,6 +999,8 @@ template <class ListItem1, class ListItem2 = ListItem1> struct RangePairIter
 	void operator++(int) { findNext(); }
 	void operator++()    { findNext(); }
 
+	FsmCtx *ctx;
+
 	/* Iterator state. */
 	ListItem1 *list1;
 	ListItem2 *list2;
@@ -1002,8 +1019,9 @@ private:
 
 /* Init the iterator by advancing to the first item. */
 template <class ListItem1, class ListItem2> RangePairIter<ListItem1, ListItem2>::
-		RangePairIter( ListItem1 *list1, ListItem2 *list2 )
+		RangePairIter( FsmCtx *ctx, ListItem1 *list1, ListItem2 *list2 )
 :
+	ctx(ctx),
 	list1(list1),
 	list2(list2),
 	itState(Begin)
@@ -1064,18 +1082,18 @@ entryBegin:
 		/* Both state1's and state2's transition elements are good.
 		 * The signiture of no overlap is a back key being in front of a
 		 * front key. */
-		else if ( s1Tel.highKey < s2Tel.lowKey ) {
+		else if ( ctx->keyOps->lt( s1Tel.highKey, s2Tel.lowKey ) ) {
 			/* A range exists in state1 that does not overlap with state2. */
 			CO_RETURN2( OnlyInS1Range, RangeInS1 );
 			s1Tel.increment();
 		}
-		else if ( s2Tel.highKey < s1Tel.lowKey ) {
+		else if ( ctx->keyOps->lt( s2Tel.highKey, s1Tel.lowKey ) ) {
 			/* A range exists in state2 that does not overlap with state1. */
 			CO_RETURN2( OnlyInS2Range, RangeInS2 );
 			s2Tel.increment();
 		}
 		/* There is overlap, must mix the ranges in some way. */
-		else if ( s1Tel.lowKey < s2Tel.lowKey ) {
+		else if ( ctx->keyOps->lt( s1Tel.lowKey, s2Tel.lowKey ) ) {
 			/* Range from state1 sticks out front. Must break it into
 			 * non-overlaping and overlaping segments. */
 			bottomLow = s2Tel.lowKey;
@@ -1096,7 +1114,7 @@ entryBegin:
 			s1Tel.highKey = bottomHigh;
 			s1Tel.trans = bottomTrans1;
 		}
-		else if ( s2Tel.lowKey < s1Tel.lowKey ) {
+		else if ( ctx->keyOps->lt( s2Tel.lowKey, s1Tel.lowKey ) ) {
 			/* Range from state2 sticks out front. Must break it into
 			 * non-overlaping and overlaping segments. */
 			bottomLow = s1Tel.lowKey;
@@ -1118,7 +1136,7 @@ entryBegin:
 			s2Tel.trans = bottomTrans2;
 		}
 		/* Low ends are even. Are the high ends even? */
-		else if ( s1Tel.highKey < s2Tel.highKey ) {
+		else if ( ctx->keyOps->lt( s1Tel.highKey, s2Tel.highKey ) ) {
 			/* Range from state2 goes longer than the range from state1. We
 			 * must break the range from state2 into an evenly overlaping
 			 * segment. */
@@ -1143,7 +1161,7 @@ entryBegin:
 			/* Advance over the entire s1Tel. We have consumed it. */
 			s1Tel.increment();
 		}
-		else if ( s2Tel.highKey < s1Tel.highKey ) {
+		else if ( ctx->keyOps->lt( s2Tel.highKey, s1Tel.highKey ) ) {
 			/* Range from state1 goes longer than the range from state2. We
 			 * must break the range from state1 into an evenly overlaping
 			 * segment. */
@@ -1189,24 +1207,27 @@ typedef CmpTable< int, CmpOrd<int> > CmpEpsilonTrans;
 class ApproxCompare
 {
 public:
-	ApproxCompare() { }
+	ApproxCompare( FsmCtx *ctx = 0 ) : ctx(ctx) { }
 	int compare( const StateAp *pState1, const StateAp *pState2 );
+	FsmCtx *ctx;
 };
 
 /* Compare class for the initial partitioning of a partition minimization. */
 class InitPartitionCompare
 {
 public:
-	InitPartitionCompare() { }
+	InitPartitionCompare( FsmCtx *ctx = 0 ) : ctx(ctx) { }
 	int compare( const StateAp *pState1, const StateAp *pState2 );
+	FsmCtx *ctx;
 };
 
 /* Compare class for the regular partitioning of a partition minimization. */
 class PartitionCompare
 {
 public:
-	PartitionCompare() { }
+	PartitionCompare( FsmCtx *ctx = 0 ) : ctx(ctx) { }
 	int compare( const StateAp *pState1, const StateAp *pState2 );
+	FsmCtx *ctx;
 };
 
 /* Compare class for a minimization that marks pairs. Provides the shouldMark
@@ -1214,9 +1235,10 @@ public:
 class MarkCompare
 {
 public:
-	MarkCompare() { }
+	MarkCompare( FsmCtx *ctx ) : ctx(ctx) { }
 	bool shouldMark( MarkIndex &markIndex, const StateAp *pState1, 
 			const StateAp *pState2 );
+	FsmCtx *ctx;
 };
 
 /* List of partitions. */
@@ -1230,19 +1252,6 @@ typedef BstSet< int > EntryIdSet;
 typedef BstMapEl< int, StateAp* > EntryMapEl;
 typedef BstMap< int, StateAp* > EntryMap;
 typedef Vector<EntryMapEl> EntryMapBase;
-
-/* All FSM operations must be between machines that point to the same context
- * structure. */
-struct FsmCtx
-{
-	FsmCtx() {
-		keyOps = new KeyOps;
-		condData = new CondData;
-	}
-
-	KeyOps *keyOps;
-	CondData *condData;
-};
 
 /* Graph class that implements actions and priorities. */
 struct FsmAp 

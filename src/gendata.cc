@@ -73,7 +73,7 @@ GenBase::GenBase( char *fsmName, ParseData *pd, FsmAp *fsm )
 	fsmName(fsmName),
 	pd(pd),
 	fsm(fsm),
-	keyOps(keyOps),
+	keyOps(pd->fsmCtx->keyOps),
 	nextActionTableId(0)
 {
 }

@@ -22,10 +22,37 @@
 #include "fsmgraph.h"
 #include "mergesort.h"
 
+struct MergeSortInitPartition
+	: public MergeSort<StateAp*, InitPartitionCompare>
+{
+	MergeSortInitPartition( FsmCtx *ctx )
+	{
+		InitPartitionCompare::ctx = ctx;
+	}
+};
+
+struct MergeSortPartition
+	: public MergeSort<StateAp*, PartitionCompare>
+{
+	MergeSortPartition( FsmCtx *ctx )
+	{
+		PartitionCompare::ctx = ctx;
+	}
+};
+
+struct MergeSortApprox
+	: public MergeSort<StateAp*, ApproxCompare>
+{
+	MergeSortApprox( FsmCtx *ctx )
+	{
+		ApproxCompare::ctx = ctx;
+	}
+};
+
 int FsmAp::partitionRound( StateAp **statePtrs, MinPartition *parts, int numParts )
 {
 	/* Need a mergesort object and a single partition compare. */
-	MergeSort<StateAp*, PartitionCompare> mergeSort;
+	MergeSortPartition mergeSort( ctx );
 	PartitionCompare partCompare;
 
 	/* For each partition. */
@@ -79,8 +106,8 @@ int FsmAp::partitionRound( StateAp **statePtrs, MinPartition *parts, int numPart
 void FsmAp::minimizePartition1()
 {
 	/* Need one mergesort object and partition compares. */
-	MergeSort<StateAp*, InitPartitionCompare> mergeSort;
-	InitPartitionCompare initPartCompare;
+	MergeSortInitPartition mergeSort( ctx );
+	InitPartitionCompare initPartCompare( ctx );
 
 	/* Nothing to do if there are no states. */
 	if ( stateList.length() == 0 )
@@ -153,8 +180,8 @@ void FsmAp::minimizePartition1()
 int FsmAp::splitCandidates( StateAp **statePtrs, MinPartition *parts, int numParts )
 {
 	/* Need a mergesort and a partition compare. */
-	MergeSort<StateAp*, PartitionCompare> mergeSort;
-	PartitionCompare partCompare;
+	MergeSortPartition mergeSort( ctx );
+	PartitionCompare partCompare( ctx );
 
 	/* The lists of unsplitable (partList) and splitable partitions. 
 	 * Only partitions in the splitable list are check for needing splitting. */
@@ -282,8 +309,8 @@ int FsmAp::splitCandidates( StateAp **statePtrs, MinPartition *parts, int numPar
 void FsmAp::minimizePartition2()
 {
 	/* Need a mergesort and an initial partition compare. */
-	MergeSort<StateAp*, InitPartitionCompare> mergeSort;
-	InitPartitionCompare initPartCompare;
+	MergeSortInitPartition mergeSort( ctx );
+	InitPartitionCompare initPartCompare( ctx );
 
 	/* Nothing to do if there are no states. */
 	if ( stateList.length() == 0 )
@@ -346,7 +373,7 @@ void FsmAp::initialMarkRound( MarkIndex &markIndex )
 	StateAp *p = stateList.head, *q;
 
 	/* Need an initial partition compare. */
-	InitPartitionCompare initPartCompare;
+	InitPartitionCompare initPartCompare( ctx );
 
 	/* Walk all unordered pairs of (p, q) where p != q.
 	 * The second depth of the walk stops before reaching p. This
@@ -373,7 +400,7 @@ bool FsmAp::markRound( MarkIndex &markIndex )
 	bool pairWasMarked = false;
 
 	/* Need a mark comparison. */
-	MarkCompare markCompare;
+	MarkCompare markCompare( ctx );
 
 	/* Walk all unordered pairs of (p, q) where p != q.
 	 * The second depth of the walk stops before reaching p. This
@@ -432,8 +459,8 @@ bool FsmAp::minimizeRound()
 		return false;
 
 	/* Need a mergesort on approx compare and an approx compare. */
-	MergeSort<StateAp*, ApproxCompare> mergeSort;
-	ApproxCompare approxCompare;
+	MergeSortApprox mergeSort( ctx );
+	ApproxCompare approxCompare( ctx );
 
 	/* Fill up an array of pointers to the states. */
 	StateAp **statePtrs = new StateAp*[stateList.length()];

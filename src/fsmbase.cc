@@ -585,7 +585,7 @@ bool FsmAp::checkErrTrans( StateAp *state, TransAp *trans )
 	 */
 	if ( trans->prev == 0 ) {
 		/* If this is the first transition. */
-		if ( ctx->keyOps->minKey < trans->lowKey )
+		if ( ctx->keyOps->lt( ctx->keyOps->minKey, trans->lowKey ) )
 			return true;
 	}
 	else {
@@ -593,7 +593,7 @@ bool FsmAp::checkErrTrans( StateAp *state, TransAp *trans )
 		TransAp *prev = trans->prev;
 		Key nextKey = prev->highKey;
 		nextKey.increment();
-		if ( nextKey < trans->lowKey )
+		if ( ctx->keyOps->lt( nextKey, trans->lowKey ) )
 			return true; 
 	}
 
@@ -618,7 +618,7 @@ bool FsmAp::checkErrTransFinish( StateAp *state )
 	else {
 		/* Get the last and check for a gap on the end. */
 		TransAp *last = state->outList.tail;
-		if ( last->highKey < ctx->keyOps->maxKey )
+		if ( ctx->keyOps->lt( last->highKey, ctx->keyOps->maxKey ) )
 			return true;
 	}
 	return 0;

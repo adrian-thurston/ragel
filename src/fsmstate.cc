@@ -198,7 +198,7 @@ int ApproxCompare::compare( const StateAp *state1, const StateAp *state2 )
 		return compareRes;
 
 	/* Use a pair iterator to get the transition pairs. */
-	RangePairIter<TransAp> outPair( state1->outList.head, state2->outList.head );
+	RangePairIter<TransAp> outPair( ctx, state1->outList.head, state2->outList.head );
 	for ( ; !outPair.end(); outPair++ ) {
 		switch ( outPair.userState ) {
 
@@ -260,7 +260,7 @@ int InitPartitionCompare::compare( const StateAp *state1 , const StateAp *state2
 		return compareRes;
 
 	/* Use a pair iterator to test the transition pairs. */
-	RangePairIter<TransAp> outPair( state1->outList.head, state2->outList.head );
+	RangePairIter<TransAp> outPair( ctx, state1->outList.head, state2->outList.head );
 	for ( ; !outPair.end(); outPair++ ) {
 		switch ( outPair.userState ) {
 
@@ -298,7 +298,7 @@ int PartitionCompare::compare( const StateAp *state1, const StateAp *state2 )
 	int compareRes;
 
 	/* Use a pair iterator to get the transition pairs. */
-	RangePairIter<TransAp> outPair( state1->outList.head, state2->outList.head );
+	RangePairIter<TransAp> outPair( ctx, state1->outList.head, state2->outList.head );
 	for ( ; !outPair.end(); outPair++ ) {
 		switch ( outPair.userState ) {
 
@@ -348,7 +348,7 @@ bool MarkCompare::shouldMark( MarkIndex &markIndex, const StateAp *state1,
 			const StateAp *state2 )
 {
 	/* Use a pair iterator to get the transition pairs. */
-	RangePairIter<TransAp> outPair( state1->outList.head, state2->outList.head );
+	RangePairIter<TransAp> outPair( ctx, state1->outList.head, state2->outList.head );
 	for ( ; !outPair.end(); outPair++ ) {
 		switch ( outPair.userState ) {
 

@@ -2100,7 +2100,7 @@ FsmAp *ReOrItem::walk( ParseData *pd, RegExpr *rootRegex )
 		Key highKey = makeFsmKeyChar( upper, pd );
 
 		/* Validate the range. */
-		if ( lowKey > highKey ) {
+		if ( pd->fsmCtx->keyOps->gt( lowKey, highKey ) ) {
 			/* Recover by setting upper to lower; */
 			error(loc) << "lower end of range is greater then upper end" << endl;
 			highKey = lowKey;
