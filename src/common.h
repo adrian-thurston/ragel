@@ -84,11 +84,7 @@ private:
 
 public:
 	friend inline bool operator<( const CondKey key1, const CondKey key2 );
-	friend inline bool operator<=( const CondKey key1, const CondKey key2 );
 	friend inline bool operator>( const CondKey key1, const CondKey key2 );
-	friend inline bool operator>=( const CondKey key1, const CondKey key2 );
-	friend inline bool operator==( const CondKey key1, const CondKey key2 );
-	friend inline bool operator!=( const CondKey key1, const CondKey key2 );
 
 	friend struct KeyOps;
 	
@@ -317,32 +313,10 @@ inline bool operator<( const CondKey key1, const CondKey key2 )
 		(unsigned long)key1.key < (unsigned long)key2.key;
 }
 
-inline bool operator<=( const CondKey key1, const CondKey key2 )
-{
-	return _keyOps->isSigned ?  key1.key <= key2.key : 
-		(unsigned long)key1.key <= (unsigned long)key2.key;
-}
-
 inline bool operator>( const CondKey key1, const CondKey key2 )
 {
 	return _keyOps->isSigned ? key1.key > key2.key : 
 		(unsigned long)key1.key > (unsigned long)key2.key;
-}
-
-inline bool operator>=( const CondKey key1, const CondKey key2 )
-{
-	return _keyOps->isSigned ? key1.key >= key2.key : 
-		(unsigned long)key1.key >= (unsigned long)key2.key;
-}
-
-inline bool operator==( const CondKey key1, const CondKey key2 )
-{
-	return key1.key == key2.key;
-}
-
-inline bool operator!=( const CondKey key1, const CondKey key2 )
-{
-	return key1.key != key2.key;
 }
 
 /* Decrement. Needed only for ranges. */
