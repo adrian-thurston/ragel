@@ -2117,8 +2117,8 @@ FsmAp *ReOrItem::walk( ParseData *pd, RegExpr *rootRegex )
 				Key otherLow = keyOps->lt( lowKey, 'A' ) ? Key('A') : lowKey;
 				Key otherHigh = keyOps->lt( 'Z', highKey ) ? Key('Z') : highKey;
 
-				otherLow = 'a' + ( otherLow - 'A' );
-				otherHigh = 'a' + ( otherHigh - 'A' );
+				otherLow = keyOps->add( 'a', ( keyOps->sub( otherLow, 'A' ) ) );
+				otherHigh = keyOps->add( 'a', ( keyOps->sub( otherHigh, 'A' ) ) );
 
 				FsmAp *otherRange = new FsmAp( pd->fsmCtx );
 				otherRange->rangeFsm( otherLow, otherHigh );
@@ -2129,8 +2129,8 @@ FsmAp *ReOrItem::walk( ParseData *pd, RegExpr *rootRegex )
 				Key otherLow = keyOps->lt( lowKey, 'a' ) ? Key('a') : lowKey;
 				Key otherHigh = keyOps->lt( 'z', highKey ) ? Key('z') : highKey;
 
-				otherLow = 'A' + ( otherLow - 'a' );
-				otherHigh = 'A' + ( otherHigh - 'a' );
+				otherLow = keyOps->add('A' , ( keyOps->sub( otherLow , 'a' ) ));
+				otherHigh = keyOps->add('A' , ( keyOps->sub( otherHigh , 'a' ) ));
 
 				FsmAp *otherRange = new FsmAp( pd->fsmCtx );
 				otherRange->rangeFsm( otherLow, otherHigh );

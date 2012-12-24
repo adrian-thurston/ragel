@@ -42,9 +42,6 @@ private:
 	long key;
 
 public:
-	friend inline Key operator+(const Key key1, const Key key2);
-	friend inline Key operator-(const Key key1, const Key key2);
-
 	friend struct KeyOps;
 	
 	Key( ) {}
@@ -275,6 +272,17 @@ struct KeyOps
 		return key1.key != key2.key;
 	}
 
+	inline Key add(const Key key1, const Key key2)
+	{
+		/* FIXME: must be made aware of isSigned. */
+		return Key( key1.key + key2.key );
+	}
+
+	inline Key sub(const Key key1, const Key key2)
+	{
+		/* FIXME: must be made aware of isSigned. */
+		return Key( key1.key - key2.key );
+	}
 };
 
 extern KeyOps *_keyOps;
@@ -304,18 +312,6 @@ inline Size Key::availableSpace() const
 		return (unsigned long long)ULONG_MAX - (unsigned long long)(unsigned long)key;
 }
 	
-inline Key operator+(const Key key1, const Key key2)
-{
-	/* FIXME: must be made aware of isSigned. */
-	return Key( key1.key + key2.key );
-}
-
-inline Key operator-(const Key key1, const Key key2)
-{
-	/* FIXME: must be made aware of isSigned. */
-	return Key( key1.key - key2.key );
-}
-
 /* CondKey */
 
 inline bool operator<( const CondKey key1, const CondKey key2 )
