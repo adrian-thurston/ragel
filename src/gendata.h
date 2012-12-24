@@ -90,6 +90,7 @@ struct GenBase
 	char *fsmName;
 	ParseData *pd;
 	FsmAp *fsm;
+	KeyOps *keyOps;
 
 	ActionTableMap actionTableMap;
 	int nextActionTableId;

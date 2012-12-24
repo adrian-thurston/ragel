@@ -197,7 +197,7 @@ CodeGen::CodeGen( const CodeGenArgs &args )
 unsigned int CodeGen::arrayTypeSize( unsigned long maxVal )
 {
 	long long maxValLL = (long long) maxVal;
-	HostType *arrayType = _keyOps->typeSubsumes( maxValLL );
+	HostType *arrayType = keyOps->typeSubsumes( maxValLL );
 	assert( arrayType != 0 );
 	return arrayType->size;
 }
@@ -405,7 +405,7 @@ bool CodeGen::isAlphTypeSigned()
 bool CodeGen::isWideAlphTypeSigned()
 {
 	string ret;
-	if ( redFsm->maxKey <= _keyOps->maxKey )
+	if ( keyOps->le( redFsm->maxKey, keyOps->maxKey ) )
 		return isAlphTypeSigned();
 	else {
 		long long maxKeyVal = redFsm->maxKey.getLongLong();

@@ -1870,7 +1870,7 @@ FsmAp *Range::walk( ParseData *pd )
 	delete upperFsm;
 
 	/* Validate the range. */
-	if ( lowKey > highKey ) {
+	if ( pd->fsmCtx->keyOps->gt( lowKey, highKey ) ) {
 		/* Recover by setting upper to lower; */
 		error(lowerLit->token.loc) << "lower end of range is greater then upper end" << endl;
 		highKey = lowKey;

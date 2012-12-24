@@ -86,7 +86,7 @@ void GraphvizDotGen::onChar( Key lowKey, Key highKey, CondSpace *condSpace, long
 {
 	/* Output the key. Possibly a range. */
 	key( lowKey );
-	if ( highKey != lowKey ) {
+	if ( keyOps->ne( highKey, lowKey ) ) {
 		out << "..";
 		key( highKey );
 	}
