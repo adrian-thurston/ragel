@@ -56,10 +56,6 @@ public:
 	 * require any signedness interpretation. */
 	long long getLongLong() const;
 
-	/* Returns the distance from the key value to the maximum value that the
-	 * key implementation can hold. */
-	Size availableSpace() const;
-
 	bool isUpper() const { return ( 'A' <= key && key <= 'Z' ); }
 	bool isLower() const { return ( 'a' <= key && key <= 'z' ); }
 	bool isPrintable() const
@@ -95,14 +91,6 @@ public:
 	/* Returns the value used to represent the key. This value must be
 	 * interpreted based on signedness. */
 	long getVal() const { return key; };
-
-	/* Returns the key casted to a long long. This form of the key does not
-	 * require any signedness interpretation. */
-	long long getLongLong() const;
-
-	/* Returns the distance from the key value to the maximum value that the
-	 * key implementation can hold. */
-	Size availableSpace() const;
 
 	bool isUpper() const { return ( 'A' <= key && key <= 'Z' ); }
 	bool isLower() const { return ( 'a' <= key && key <= 'z' ); }
@@ -297,14 +285,6 @@ inline long long Key::getLongLong() const
 	return _keyOps->isSigned ? (long long)key : (long long)(unsigned long)key;
 }
 
-inline Size Key::availableSpace() const
-{
-	if ( _keyOps->isSigned ) 
-		return (long long)LONG_MAX - (long long)key;
-	else
-		return (unsigned long long)ULONG_MAX - (unsigned long long)(unsigned long)key;
-}
-	
 /* CondKey */
 
 inline bool operator<( const CondKey key1, const CondKey key2 )
@@ -319,31 +299,12 @@ inline bool operator>( const CondKey key1, const CondKey key2 )
 		(unsigned long)key1.key > (unsigned long)key2.key;
 }
 
-/* Decrement. Needed only for ranges. */
-inline void CondKey::decrement()
-{
-	key = _keyOps->isSigned ? key - 1 : ((unsigned long)key)-1;
-}
-
 /* Increment. Needed only for ranges. */
 inline void CondKey::increment()
 {
 	key = _keyOps->isSigned ? key+1 : ((unsigned long)key)+1;
 }
 
-inline long long CondKey::getLongLong() const
-{
-	return _keyOps->isSigned ? (long long)key : (long long)(unsigned long)key;
-}
-
-inline Size CondKey::availableSpace() const
-{
-	if ( _keyOps->isSigned ) 
-		return (long long)LONG_MAX - (long long)key;
-	else
-		return (unsigned long long)ULONG_MAX - (unsigned long long)(unsigned long)key;
-}
-	
 
 /* Filter on the output stream that keeps track of the number of lines
  * output. */
