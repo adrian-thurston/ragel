@@ -289,20 +289,18 @@ inline long long Key::getLongLong() const
 
 inline bool operator<( const CondKey key1, const CondKey key2 )
 {
-	return _keyOps->isSigned ? key1.key < key2.key : 
-		(unsigned long)key1.key < (unsigned long)key2.key;
+	return key1.key < key2.key;
 }
 
 inline bool operator>( const CondKey key1, const CondKey key2 )
 {
-	return _keyOps->isSigned ? key1.key > key2.key : 
-		(unsigned long)key1.key > (unsigned long)key2.key;
+	return key1.key > key2.key;
 }
 
 /* Increment. Needed only for ranges. */
 inline void CondKey::increment()
 {
-	key = _keyOps->isSigned ? key+1 : ((unsigned long)key)+1;
+	key = key + 1;
 }
 
 
