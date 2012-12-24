@@ -83,9 +83,6 @@ private:
 	long key;
 
 public:
-	friend inline CondKey operator+(const CondKey key1, const CondKey key2);
-	friend inline CondKey operator-(const CondKey key1, const CondKey key2);
-
 	friend inline bool operator<( const CondKey key1, const CondKey key2 );
 	friend inline bool operator<=( const CondKey key1, const CondKey key2 );
 	friend inline bool operator>( const CondKey key1, const CondKey key2 );
@@ -373,17 +370,6 @@ inline Size CondKey::availableSpace() const
 		return (unsigned long long)ULONG_MAX - (unsigned long long)(unsigned long)key;
 }
 	
-inline CondKey operator+(const CondKey key1, const CondKey key2)
-{
-	/* FIXME: must be made aware of isSigned. */
-	return CondKey( key1.key + key2.key );
-}
-
-inline CondKey operator-(const CondKey key1, const CondKey key2)
-{
-	/* FIXME: must be made aware of isSigned. */
-	return CondKey( key1.key - key2.key );
-}
 
 /* Filter on the output stream that keeps track of the number of lines
  * output. */
