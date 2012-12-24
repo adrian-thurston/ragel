@@ -357,13 +357,6 @@ struct ParseData
 	Action *setTokEnd;
 	int setTokEndOrd;
 
-	void beginProcessing()
-	{
-		/* Old. */
-		::_keyOps = fsmCtx->keyOps;
-		::_condData = fsmCtx->condData;
-	}
-
 	FsmCtx *fsmCtx;
 
 	ExportList exportList;

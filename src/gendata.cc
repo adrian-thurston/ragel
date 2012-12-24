@@ -889,7 +889,7 @@ void CodeGenData::newTrans( int snum, int tnum, Key lowKey,
 		if ( keyOps->lt( keyOps->minKey, lowKey ) ) {
 			/* The first range doesn't start at the low end. */
 			Key fillHighKey = lowKey;
-			fillHighKey.decrement();
+			keyOps->decrement( fillHighKey );
 
 			/* Create the filler with the state's error transition. */
 			RedTransEl newTel( pd->fsmCtx->keyOps->minKey, fillHighKey, redFsm->getErrorTrans() );
@@ -900,11 +900,11 @@ void CodeGenData::newTrans( int snum, int tnum, Key lowKey,
 		/* The range list is not empty, get the the last range. */
 		RedTransEl *last = &destRange[destRange.length()-1];
 		Key nextKey = last->highKey;
-		nextKey.increment();
+		keyOps->increment( nextKey );
 		if ( keyOps->lt( nextKey, lowKey ) ) {
 			/* There is a gap to fill. Make the high key. */
 			Key fillHighKey = lowKey;
-			fillHighKey.decrement();
+			keyOps->decrement( fillHighKey );
 
 			/* Create the filler with the state's error transtion. */
 			RedTransEl newTel( nextKey, fillHighKey, redFsm->getErrorTrans() );
@@ -991,7 +991,7 @@ void CodeGenData::finishTransList( int snum )
 		if ( keyOps->lt( last->highKey, pd->fsmCtx->keyOps->maxKey ) ) {
 			/* Make the high key. */
 			Key fillLowKey = last->highKey;
-			fillLowKey.increment();
+			keyOps->increment( fillLowKey );
 
 			/* Create the new range with the error trans and append it. */
 			RedTransEl newTel( fillLowKey, pd->fsmCtx->keyOps->maxKey, redFsm->getErrorTrans() );

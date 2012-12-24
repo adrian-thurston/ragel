@@ -80,8 +80,6 @@ private:
 	bool *array;
 };
 
-extern KeyOps *_keyOps;
-
 /* Transistion Action Element. */
 typedef SBstMapEl< int, Action* > ActionTableEl;
 
@@ -661,8 +659,6 @@ struct CondData
 	CondSpaceMap condSpaceMap;
 };
 
-extern CondData *_condData;
-
 /* All FSM operations must be between machines that point to the same context
  * structure. */
 struct FsmCtx
@@ -1099,7 +1095,7 @@ entryBegin:
 			bottomLow = s2Tel.lowKey;
 			bottomHigh = s1Tel.highKey;
 			s1Tel.highKey = s2Tel.lowKey;
-			s1Tel.highKey.decrement();
+			ctx->keyOps->decrement( s1Tel.highKey );
 			bottomTrans1 = s1Tel.trans;
 
 			/* Notify the caller that we are breaking s1. This gives them a
@@ -1120,7 +1116,7 @@ entryBegin:
 			bottomLow = s1Tel.lowKey;
 			bottomHigh = s2Tel.highKey;
 			s2Tel.highKey = s1Tel.lowKey;
-			s2Tel.highKey.decrement();
+			ctx->keyOps->decrement( s2Tel.highKey );
 			bottomTrans2 = s2Tel.trans;
 
 			/* Notify the caller that we are breaking s2. This gives them a
@@ -1141,7 +1137,7 @@ entryBegin:
 			 * must break the range from state2 into an evenly overlaping
 			 * segment. */
 			bottomLow = s1Tel.highKey;
-			bottomLow.increment();
+			ctx->keyOps->increment( bottomLow );
 			bottomHigh = s2Tel.highKey;
 			s2Tel.highKey = s1Tel.highKey;
 			bottomTrans2 = s2Tel.trans;
@@ -1166,7 +1162,7 @@ entryBegin:
 			 * must break the range from state1 into an evenly overlaping
 			 * segment. */
 			bottomLow = s2Tel.highKey;
-			bottomLow.increment();
+			ctx->keyOps->increment( bottomLow );
 			bottomHigh = s1Tel.highKey;
 			s1Tel.highKey = s2Tel.highKey;
 			bottomTrans1 = s1Tel.trans;

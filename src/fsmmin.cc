@@ -567,7 +567,7 @@ bool FsmAp::outListCovers( StateAp *state )
 		/* Lower end of the trans must be one greater than the
 		 * previous' high end. */
 		Key lowKey = trans->lowKey;
-		lowKey.decrement();
+		ctx->keyOps->decrement( lowKey );
 		if ( ctx->keyOps->lt( trans->prev->highKey, lowKey ) )
 			return false;
 	}
@@ -738,7 +738,7 @@ void FsmAp::compressTransitions()
 		if ( st->outList.length() > 1 ) {
 			for ( TransList::Iter trans = st->outList, next = trans.next(); next.lte();  ) {
 				Key nextLow = next->lowKey;
-				nextLow.decrement();
+				ctx->keyOps->decrement( nextLow );
 
 				/* Require there be no conditions in either of the merge
 				 * candidates. */

@@ -84,7 +84,7 @@ void XMLCodeGen::writeActionTableList()
 
 void XMLCodeGen::writeKey( Key key )
 {
-	if ( _keyOps->isSigned )
+	if ( keyOps->isSigned )
 		out << key.getVal();
 	else
 		out << (unsigned long) key.getVal();
@@ -549,13 +549,14 @@ void XMLCodeGen::writeMachine()
 
 void XMLCodeGen::writeConditions()
 {
-	if ( _condData->condSpaceMap.length() > 0 ) {
+	CondData *condData = pd->fsmCtx->condData;
+	if ( condData->condSpaceMap.length() > 0 ) {
 		long nextCondSpaceId = 0;
-		for ( CondSpaceMap::Iter cs = _condData->condSpaceMap; cs.lte(); cs++ )
+		for ( CondSpaceMap::Iter cs = condData->condSpaceMap; cs.lte(); cs++ )
 			cs->condSpaceId = nextCondSpaceId++;
 
-		out << "    <cond_space_list length=\"" << _condData->condSpaceMap.length() << "\">\n";
-		for ( CondSpaceMap::Iter cs = _condData->condSpaceMap; cs.lte(); cs++ ) {
+		out << "    <cond_space_list length=\"" << condData->condSpaceMap.length() << "\">\n";
+		for ( CondSpaceMap::Iter cs = condData->condSpaceMap; cs.lte(); cs++ ) {
 			out << "      <cond_space id=\"" << cs->condSpaceId << 
 				"\" length=\"" << cs->condSet.length() << "\">";
 			for ( CondSet::Iter csi = cs->condSet; csi.lte(); csi++ )
@@ -585,7 +586,7 @@ void XMLCodeGen::writeXML()
 	out << "<ragel_def name=\"" << fsmName << "\">\n";
 
 	/* Alphabet type. */
-	out << "  <alphtype>" << _keyOps->alphType->internalName << "</alphtype>\n";
+	out << "  <alphtype>" << keyOps->alphType->internalName << "</alphtype>\n";
 	
 	/* Getkey expression. */
 	if ( pd->getKeyExpr != 0 ) {

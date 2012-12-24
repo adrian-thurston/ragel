@@ -45,7 +45,7 @@ void BinaryExpanded::calcIndexSize()
 		setTransPos();
 
 	keys.setType( ALPH_TYPE() );
-	keys.isSigned = _keyOps->isSigned;
+	keys.isSigned = keyOps->isSigned;
 
 	return;
 

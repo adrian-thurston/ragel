@@ -230,7 +230,7 @@ bool RedFsmAp::canExtend( const RedTransList &list, int pos )
 	for ( int next = pos + 1; next < list.length(); pos++, next++ ) {
 		/* If they are not continuous then cannot extend. */
 		Key nextKey = list[next].lowKey;
-		nextKey.decrement();
+		keyOps->decrement( nextKey );
 		if ( keyOps->ne( list[pos].highKey, nextKey ) )
 			break;
 
@@ -357,7 +357,7 @@ bool RedFsmAp::alphabetCovered( RedTransList &outRange )
 	rtel.increment();
 	for ( ; rtel.lte(); rtel++ ) {
 		Key highKey = rtel[-1].highKey;
-		highKey.increment();
+		keyOps->increment( highKey );
 		if ( keyOps->ne( highKey, rtel->lowKey ) )
 			return false;
 	}

@@ -330,8 +330,8 @@ void Goto::COND_B_SEARCH( RedTransAp *trans, int level, int low, int high )
 	bool anyHigher = mid < high;
 
 	/* Determine if the keys at mid are the limits of the alphabet. */
-	bool limitLow = 0; //data[mid].key == _keyOps->minKey;
-	bool limitHigh = 0; //data[mid].key == _keyOps->maxKey;
+	bool limitLow = 0; //data[mid].key == keyOps->minKey;
+	bool limitHigh = 0; //data[mid].key == keyOps->maxKey;
 
 	if ( anyLower && anyHigher ) {
 		/* Can go lower and higher than mid. */

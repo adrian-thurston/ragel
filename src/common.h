@@ -52,10 +52,6 @@ public:
 	 * interpreted based on signedness. */
 	long getVal() const { return key; };
 
-	/* Returns the key casted to a long long. This form of the key does not
-	 * require any signedness interpretation. */
-	long long getLongLong() const;
-
 	bool isUpper() const { return ( 'A' <= key && key <= 'Z' ); }
 	bool isLower() const { return ( 'a' <= key && key <= 'z' ); }
 	bool isPrintable() const
@@ -67,10 +63,6 @@ public:
 		{ return Key( 'A' + ( key - 'a' ) ); }
 	Key toLower() const
 		{ return Key( 'a' + ( key - 'A' ) ); }
-
-	/* Decrement. Needed only for ranges. */
-	inline void decrement();
-	inline void increment();
 };
 
 struct CondKey
@@ -264,26 +256,26 @@ struct KeyOps
 		/* FIXME: must be made aware of isSigned. */
 		return Key( key1.key - key2.key );
 	}
+
+	/* Decrement. Needed only for ranges. */
+	inline void decrement( Key &key )
+	{
+		key.key = this->isSigned ? key.key - 1 : ((unsigned long)key.key)-1;
+	}
+
+	/* Increment. Needed only for ranges. */
+	inline void increment( Key &key )
+	{
+		key.key = this->isSigned ? key.key+1 : ((unsigned long)key.key)+1;
+	}
+
+	/* Returns the key casted to a long long. This form of the key does not
+	 * require any signedness interpretation. */
+	inline long long getLongLong( const Key &key )
+	{
+		return this->isSigned ? (long long)key.key : (long long)(unsigned long)key.key;
+	}
 };
-
-extern KeyOps *_keyOps;
-
-/* Decrement. Needed only for ranges. */
-inline void Key::decrement()
-{
-	key = _keyOps->isSigned ? key - 1 : ((unsigned long)key)-1;
-}
-
-/* Increment. Needed only for ranges. */
-inline void Key::increment()
-{
-	key = _keyOps->isSigned ? key+1 : ((unsigned long)key)+1;
-}
-
-inline long long Key::getLongLong() const
-{
-	return _keyOps->isSigned ? (long long)key : (long long)(unsigned long)key;
-}
 
 /* CondKey */
 

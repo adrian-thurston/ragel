@@ -83,7 +83,7 @@ void Flat::taFlatIndexOffset()
 		
 		/* Move the index offset ahead. */
 		if ( st->transList != 0 )
-			curIndOffset += _keyOps->span( st->lowKey, st->highKey );
+			curIndOffset += keyOps->span( st->lowKey, st->highKey );
 
 		if ( st->defTrans != 0 )
 			curIndOffset += 1;
@@ -99,7 +99,7 @@ void Flat::taKeySpans()
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		unsigned long long span = 0;
 		if ( st->transList != 0 )
-			span = _keyOps->span( st->lowKey, st->highKey );
+			span = keyOps->span( st->lowKey, st->highKey );
 
 		keySpans.value( span );
 	}
@@ -182,7 +182,7 @@ void Flat::taIndicies()
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->transList != 0 ) {
 			/* Walk the singles. */
-			unsigned long long span = _keyOps->span( st->lowKey, st->highKey );
+			unsigned long long span = keyOps->span( st->lowKey, st->highKey );
 			for ( unsigned long long pos = 0; pos < span; pos++ )
 				indicies.value( st->transList[pos]->id );
 		}

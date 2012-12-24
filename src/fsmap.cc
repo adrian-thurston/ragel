@@ -24,9 +24,6 @@
 using std::cerr;
 using std::endl;
 
-CondData *_condData = 0;
-KeyOps *_keyOps = 0;
-
 /* Insert an action into an action table. */
 void ActionTable::setAction( int ordering, Action *action )
 {
@@ -268,7 +265,7 @@ void FsmAp::fillGaps( StateAp *state )
 		if ( ctx->keyOps->lt( ctx->keyOps->minKey, trans->lowKey ) ) {
 			/* Make the high key and append. */
 			Key highKey = trans->lowKey;
-			highKey.decrement();
+			ctx->keyOps->decrement( highKey );
 
 			attachNewTrans( state, 0, ctx->keyOps->minKey, highKey );
 		}
@@ -284,13 +281,13 @@ void FsmAp::fillGaps( StateAp *state )
 		for ( trans = next; trans.lte(); trans = next ) {
 			/* Make the next key following the last range. */
 			Key nextKey = lastHigh;
-			nextKey.increment();
+			ctx->keyOps->increment( nextKey );
 
 			/* Check for a gap from last up to here. */
 			if ( ctx->keyOps->lt( nextKey, trans->lowKey ) ) {
 				/* Make the high end of the range that fills the gap. */
 				Key highKey = trans->lowKey;
-				highKey.decrement();
+				ctx->keyOps->decrement( highKey );
 
 				attachNewTrans( state, 0, nextKey, highKey );
 			}
@@ -306,7 +303,7 @@ void FsmAp::fillGaps( StateAp *state )
 		/* Now check for a gap on the end to fill. */
 		if ( ctx->keyOps->lt( lastHigh, ctx->keyOps->maxKey ) ) {
 			/* Get a copy of the default. */
-			lastHigh.increment();
+			ctx->keyOps->increment( lastHigh );
 
 			attachNewTrans( state, 0, lastHigh, ctx->keyOps->maxKey );
 		}

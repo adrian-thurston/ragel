@@ -592,7 +592,7 @@ bool FsmAp::checkErrTrans( StateAp *state, TransAp *trans )
 		/* Not the first transition. Compare against the prev. */
 		TransAp *prev = trans->prev;
 		Key nextKey = prev->highKey;
-		nextKey.increment();
+		ctx->keyOps->increment( nextKey );
 		if ( ctx->keyOps->lt( nextKey, trans->lowKey ) )
 			return true; 
 	}

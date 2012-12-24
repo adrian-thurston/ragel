@@ -1366,7 +1366,6 @@ void ParseData::makeExports()
 
 void ParseData::prepareMachineGen( GraphDictEl *graphDictEl )
 {
-	beginProcessing();
 	initKeyOps();
 	makeRootNames();
 	initLongestMatchData();
@@ -1412,8 +1411,6 @@ CodeGenData *makeCodeGen( const CodeGenArgs &args );
 
 void ParseData::generateReduced( InputData &inputData )
 {
-	beginProcessing();
-
 	CodeGenArgs args( inputData, inputData.inputFileName,
 			sectionName, this, sectionGraph, *inputData.outStream );
 
@@ -1431,8 +1428,6 @@ void ParseData::generateReduced( InputData &inputData )
 
 void ParseData::generateXML( ostream &out )
 {
-	beginProcessing();
-
 	/* Make the generator. */
 	XMLCodeGen codeGen( sectionName, this, sectionGraph, out );
 
