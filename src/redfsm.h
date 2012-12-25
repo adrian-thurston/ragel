@@ -259,6 +259,9 @@ struct GenCondSpace
 	GenCondSet condSet;
 	int condSpaceId;
 
+	long fullSize()
+		{ return ( 1 << condSet.length() ); }
+
 	GenCondSpace *next, *prev;
 };
 typedef DList<GenCondSpace> CondSpaceList;
@@ -282,6 +285,9 @@ struct RedTransAp
 	int pos;
 	bool partitionBoundary;
 	bool labelNeeded;
+
+	long condFullSize() 
+		{ return condSpace == 0 ? 1 : condSpace->fullSize(); }
 
 	GenCondSpace *condSpace;
 	RedCondList outConds;

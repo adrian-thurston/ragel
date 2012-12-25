@@ -42,7 +42,6 @@ public:
 	IpGoto( const CodeGenArgs &args ) 
 			: Goto(args) {}
 
-	void COND_B_SEARCH( RedTransAp *trans, int level, int low, int high );
 	std::ostream &EXIT_STATES();
 	std::ostream &TRANS_GOTO( RedTransAp *trans, int level );
 	std::ostream &COND_GOTO( RedCondAp *trans, int level );

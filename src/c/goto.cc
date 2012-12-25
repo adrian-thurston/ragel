@@ -330,8 +330,8 @@ void Goto::COND_B_SEARCH( RedTransAp *trans, int level, int low, int high )
 	bool anyHigher = mid < high;
 
 	/* Determine if the keys at mid are the limits of the alphabet. */
-	bool limitLow = 0; //data[mid].key == keyOps->minKey;
-	bool limitHigh = 0; //data[mid].key == keyOps->maxKey;
+	bool limitLow = data[mid].key == 0;
+	bool limitHigh = data[mid].key == trans->condFullSize();
 
 	if ( anyLower && anyHigher ) {
 		/* Can go lower and higher than mid. */
@@ -389,8 +389,7 @@ void Goto::COND_B_SEARCH( RedTransAp *trans, int level, int low, int high )
 		/* Cannot go higher or lower than mid. It's mid or bust. What
 		 * tests to do depends on limits of alphabet. */
 		if ( !limitLow && !limitHigh ) {
-			out << TABS(level) << "if ( " << CKEY(data[mid].key) << " <= " << 
-					"ck" << " && " << "ck" << " <= " << 
+			out << TABS(level) << "if ( ck" << " == " << 
 					CKEY(data[mid].key) << " ) {\n";
 			COND_GOTO(data[mid].value, level+1) << "\n";
 			out << TABS(level) << "}\n";
