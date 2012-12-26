@@ -304,9 +304,9 @@ void Goto::RANGE_B_SEARCH( RedStateAp *state, int level, int low, int high )
 		}
 		else {
 			/* Both high and low are at the limit. No tests to do. */
-			out << "{\n";
+			out << TABS(level) << "{\n";
 			TRANS_GOTO(data[mid].value, level+1) << "\n";
-			out << "}\n";
+			out << TABS(level) << "}\n";
 		}
 	}
 }
