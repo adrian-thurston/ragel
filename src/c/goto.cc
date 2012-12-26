@@ -214,7 +214,7 @@ void Goto::SINGLE_SWITCH( RedStateAp *state )
 	}
 }
 
-void Goto::RANGE_B_SEARCH( RedStateAp *state, int level, int low, int high )
+void Goto::RANGE_B_SEARCH( RedStateAp *state, int level, Key lower, Key upper, int low, int high )
 {
 	/* Get the mid position, staying on the lower end of the range. */
 	int mid = (low + high) >> 1;
@@ -225,17 +225,17 @@ void Goto::RANGE_B_SEARCH( RedStateAp *state, int level, int low, int high )
 	bool anyHigher = mid < high;
 
 	/* Determine if the keys at mid are the limits of the alphabet. */
-	bool limitLow = keyOps->eq( data[mid].lowKey, keyOps->minKey );
-	bool limitHigh = keyOps->eq( data[mid].highKey, keyOps->maxKey );
+	bool limitLow = keyOps->eq( data[mid].lowKey, lower );
+	bool limitHigh = keyOps->eq( data[mid].highKey, upper );
 
 	if ( anyLower && anyHigher ) {
 		/* Can go lower and higher than mid. */
 		out << TABS(level) << "if ( " << GET_KEY() << " < " << 
 				KEY(data[mid].lowKey) << " ) {\n";
-		RANGE_B_SEARCH( state, level+1, low, mid-1 );
+		RANGE_B_SEARCH( state, level+1, lower, keyOps->sub( data[mid].lowKey, 1 ), low, mid-1 );
 		out << TABS(level) << "} else if ( " << GET_KEY() << " > " << 
 				KEY(data[mid].highKey) << " ) {\n";
-		RANGE_B_SEARCH( state, level+1, mid+1, high );
+		RANGE_B_SEARCH( state, level+1, keyOps->add( data[mid].highKey, 1 ), upper, mid+1, high );
 		out << TABS(level) << "} else {\n";
 		TRANS_GOTO(data[mid].value, level+1) << "\n";
 		out << TABS(level) << "}\n";
@@ -244,7 +244,7 @@ void Goto::RANGE_B_SEARCH( RedStateAp *state, int level, int low, int high )
 		/* Can go lower than mid but not higher. */
 		out << TABS(level) << "if ( " << GET_KEY() << " < " << 
 				KEY(data[mid].lowKey) << " ) {\n";
-		RANGE_B_SEARCH( state, level+1, low, mid-1 );
+		RANGE_B_SEARCH( state, level+1, lower, keyOps->sub( data[mid].lowKey, 1 ), low, mid-1 );
 
 		/* if the higher is the highest in the alphabet then there is no
 		 * sense testing it. */
@@ -264,7 +264,7 @@ void Goto::RANGE_B_SEARCH( RedStateAp *state, int level, int low, int high )
 		/* Can go higher than mid but not lower. */
 		out << TABS(level) << "if ( " << GET_KEY() << " > " << 
 				KEY(data[mid].highKey) << " ) {\n";
-		RANGE_B_SEARCH( state, level+1, mid+1, high );
+		RANGE_B_SEARCH( state, level+1, keyOps->add( data[mid].highKey, 1 ), upper, mid+1, high );
 
 		/* If the lower end is the lowest in the alphabet then there is no
 		 * sense testing it. */
@@ -437,8 +437,10 @@ std::ostream &Goto::STATE_GOTOS()
 				SINGLE_SWITCH( st );
 
 			/* Default case is to binary search for the ranges, if that fails then */
-			if ( st->outRange.length() > 0 )
-				RANGE_B_SEARCH( st, 1, 0, st->outRange.length() - 1 );
+			if ( st->outRange.length() > 0 ) {
+				RANGE_B_SEARCH( st, 1, keyOps->minKey, keyOps->maxKey,
+						0, st->outRange.length() - 1 );
+			}
 
 			/* Write the default transition. */
 

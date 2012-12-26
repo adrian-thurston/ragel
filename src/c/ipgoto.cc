@@ -348,8 +348,10 @@ std::ostream &IpGoto::STATE_GOTOS()
 				SINGLE_SWITCH( st );
 
 			/* Default case is to binary search for the ranges, if that fails then */
-			if ( st->outRange.length() > 0 )
-				RANGE_B_SEARCH( st, 1, 0, st->outRange.length() - 1 );
+			if ( st->outRange.length() > 0 ) {
+				RANGE_B_SEARCH( st, 1, keyOps->minKey, keyOps->maxKey,
+						0, st->outRange.length() - 1 );
+			}
 
 			/* Write the default transition. */
 			out << "{\n";

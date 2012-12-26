@@ -95,7 +95,7 @@ public:
 	virtual std::ostream &TRANS_GOTO( RedTransAp *trans, int level );
 
 	void SINGLE_SWITCH( RedStateAp *state );
-	void RANGE_B_SEARCH( RedStateAp *state, int level, int low, int high );
+	void RANGE_B_SEARCH( RedStateAp *state, int level, Key lower, Key upper, int low, int high );
 
 	/* Called from STATE_GOTOS just before writing the gotos */
 	virtual void GOTO_HEADER( RedStateAp *state );
