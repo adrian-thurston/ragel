@@ -112,7 +112,7 @@ void TableArray::valueAnalyze( long long v )
 void TableArray::finishAnalyze()
 {
 	/* Calculate the type if it is not already set. */
-	if ( type == "" ) {
+	if ( type == "_" ) {
 		if ( min >= CHAR_MIN && max <= CHAR_MAX ) {
 			type = "char";
 			width = sizeof(char);

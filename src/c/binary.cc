@@ -49,7 +49,8 @@ Binary::Binary( const CodeGenArgs &args )
 	toStateActions(     "to_state_actions",      *this ),
 	fromStateActions(   "from_state_actions",    *this ),
 	eofActions(         "eof_actions",           *this ),
-	eofTrans(           "eof_trans",             *this ),
+	eofTransDirect(     "eof_trans_direct",      *this ),
+	eofTransIndexed(    "eof_trans_indexed",     *this ),
 	actions(            "actions",               *this ),
 	keys(               "trans_keys",            *this ),
 	condKeys(           "cond_keys",             *this )
@@ -66,47 +67,11 @@ void Binary::setTableState( TableArray::State state )
 
 void Binary::setTransPosWi()
 {
-	/* Transitions must be written ordered by their id. */
-	RedTransAp **transPtrs = new RedTransAp*[redFsm->transSet.length()];
-	for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ )
-		transPtrs[trans->id] = trans;
-
-	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
-		/* Record the position, need this for eofTrans. */
-		RedTransAp *trans = transPtrs[t];
-		trans->pos = t;
-	}
-	delete[] transPtrs;
 }
 
 void Binary::setTransPos()
 {
-	int totalTrans = 0;
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		for ( RedTransList::Iter stel = st->outSingle; stel.lte(); stel++ ) {
-			RedTransAp *trans = stel->value;
-			trans->pos = totalTrans++;
-		}
-
-		for ( RedTransList::Iter rtel = st->outRange; rtel.lte(); rtel++ ) {
-			RedTransAp *trans = rtel->value;
-			trans->pos = totalTrans++;
-		}
-
-		if ( st->defTrans != 0 ) {
-			RedTransAp *trans = st->defTrans;
-			trans->pos = totalTrans++;
-		}
-	}
-
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		if ( st->eofTrans != 0 ) {
-			RedTransAp *trans = st->eofTrans;
-			trans->pos = totalTrans++;
-		}
-	}
 }
-
 
 void Binary::taKeyOffsets()
 {
@@ -192,21 +157,52 @@ void Binary::taEofActions()
 	eofActions.finish();
 }
 
-void Binary::taEofTrans()
+void Binary::taEofTransDirect()
 {
-	eofTrans.start();
+	eofTransDirect.start();
+
+	/* Need to compute transition positions. */
+	int totalTrans = 0;
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		totalTrans += st->outSingle.length();
+		totalTrans += st->outRange.length();
+		if ( st->defTrans != 0 )
+			totalTrans += 1;
+	}
 
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		long trans = 0;
 		if ( st->eofTrans != 0 ) {
-			assert( st->eofTrans->pos >= 0 );
-			trans = st->eofTrans->pos+1;
+			trans = totalTrans + 1;
+			totalTrans += 1;
 		}
 
-		eofTrans.value( trans );
+		eofTransDirect.value( trans );
 	}
 
-	eofTrans.finish();
+	eofTransDirect.finish();
+}
+
+void Binary::taEofTransIndexed()
+{
+	/* Transitions must be written ordered by their id. */
+	long t = 0, *transPos = new long[redFsm->transSet.length()];
+	for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ )
+		transPos[trans->id] = t++;
+
+	eofTransIndexed.start();
+
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		long trans = 0;
+		if ( st->eofTrans != 0 )
+			trans = transPos[st->eofTrans->id] + 1;
+
+		eofTransIndexed.value( trans );
+	}
+
+	eofTransIndexed.finish();
+
+	delete[] transPos;
 }
 
 void Binary::taKeys()

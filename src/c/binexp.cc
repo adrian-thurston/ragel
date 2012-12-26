@@ -97,7 +97,8 @@ void BinaryExpanded::tableDataPass()
 	taFromStateActions();
 	taEofActions();
 
-	taEofTrans();
+	taEofTransDirect();
+	taEofTransIndexed();
 
 	taKeys();
 	taCondKeys();
@@ -287,8 +288,10 @@ void BinaryExpanded::writeData()
 	if ( redFsm->anyEofActions() )
 		taEofActions();
 
-	if ( redFsm->anyEofTrans() )
-		taEofTrans();
+	if ( redFsm->anyEofTrans() ) {
+		taEofTransIndexed();
+		taEofTransDirect();
+	}
 
 	STATE_IDS();
 }
@@ -410,6 +413,7 @@ void BinaryExpanded::writeExec()
 			"	{\n";
 
 		if ( redFsm->anyEofTrans() ) {
+			TableArray &eofTrans = useIndicies ? eofTransIndexed : eofTransDirect;
 			out <<
 				"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
 				"		_trans = " << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"

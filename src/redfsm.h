@@ -275,14 +275,12 @@ struct RedTransAp
 	RedTransAp( int id )
 	:
 		id(id),
-		pos(-1),
 		labelNeeded(true),
 		condSpace(0),
 		errCond(0)
 	{ }
 
 	int id;
-	int pos;
 	bool partitionBoundary;
 	bool labelNeeded;
 

@@ -58,17 +58,6 @@ void Flat::setTableState( TableArray::State state )
 
 void Flat::setTransPos()
 {
-	/* Transitions must be written ordered by their id. */
-	RedTransAp **transPtrs = new RedTransAp*[redFsm->transSet.length()];
-	for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ )
-		transPtrs[trans->id] = trans;
-
-	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
-		/* Save the position. Needed for eofTargs. */
-		RedTransAp *trans = transPtrs[t];
-		trans->pos = t;
-	}
-	delete[] transPtrs;
 }
 
 
@@ -145,21 +134,33 @@ void Flat::taEofActions()
 
 void Flat::taEofTrans()
 {
+	/* Transitions must be written ordered by their id. */
+	RedTransAp **transPtrs = new RedTransAp*[redFsm->transSet.length()];
+	for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ )
+		transPtrs[trans->id] = trans;
+
+	long *transPos = new long[redFsm->transSet.length()];
+	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
+		/* Save the position. Needed for eofTargs. */
+		RedTransAp *trans = transPtrs[t];
+		transPos[trans->id] = t;
+	}
+
 	eofTrans.start();
 
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		/* Write any eof action. */
-
 		long trans = 0;
-		if ( st->eofTrans != 0 ) {
-			assert( st->eofTrans->pos >= 0 );
-			trans = st->eofTrans->pos+1;
-		}
+
+		if ( st->eofTrans != 0 )
+			trans = transPos[st->eofTrans->id] + 1;
 
 		eofTrans.value( trans );
 	}
 
 	eofTrans.finish();
+
+	delete[] transPtrs;
+	delete[] transPos;
 }
 
 void Flat::taKeys()

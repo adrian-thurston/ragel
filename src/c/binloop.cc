@@ -36,16 +36,16 @@ BinaryLooped::BinaryLooped( const CodeGenArgs &args )
 /* Determine if we should use indicies or not. */
 void BinaryLooped::calcIndexSize()
 {
-	long long sizeWithInds =
-		indicies.size() + 
-		transCondSpacesWi.size() + 
-		transOffsetsWi.size() + 
-		transLengthsWi.size();
-
-	long long sizeWithoutInds =
-		transCondSpaces.size() + 
-		transOffsets.size() + 
-		transLengths.size();
+//	long long sizeWithInds =
+//		indicies.size() + 
+//		transCondSpacesWi.size() + 
+//		transOffsetsWi.size() + 
+//		transLengthsWi.size();
+//
+//	long long sizeWithoutInds =
+//		transCondSpaces.size() + 
+//		transOffsets.size() + 
+//		transLengths.size();
 
 	//std::cerr << "sizes: " << sizeWithInds << " " << sizeWithoutInds << std::endl;
 
@@ -87,7 +87,8 @@ void BinaryLooped::tableDataPass()
 	taFromStateActions();
 	taEofActions();
 
-	taEofTrans();
+	taEofTransDirect();
+	taEofTransIndexed();
 
 	taKeys();
 	taCondKeys();
@@ -265,8 +266,10 @@ void BinaryLooped::writeData()
 	if ( redFsm->anyEofActions() )
 		taEofActions();
 
-	if ( redFsm->anyEofTrans() )
-		taEofTrans();
+	if ( redFsm->anyEofTrans() ) {
+		taEofTransIndexed();
+		taEofTransDirect();
+	}
 
 	STATE_IDS();
 }
@@ -411,6 +414,7 @@ void BinaryLooped::writeExec()
 			"	{\n";
 
 		if ( redFsm->anyEofTrans() ) {
+			TableArray &eofTrans = useIndicies ? eofTransIndexed : eofTransDirect;
 			out <<
 				"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
 				"		_trans = " << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
@@ -421,7 +425,7 @@ void BinaryLooped::writeExec()
 
 		if ( redFsm->anyEofActions() ) {
 			out <<
-				"	const " << ARR_TYPE( actions) << " *__acts = " << 
+				"	const " << ARR_TYPE( actions ) << " *__acts = " << 
 						ARR_REF( actions ) << " + " << ARR_REF( eofActions ) << "[" << vCS() << "]" << ";\n"
 				"	" << "unsigned int" << " __nacts = " << "(unsigned int)" << " *__acts++;\n"
 				"	while ( __nacts-- > 0 ) {\n"
