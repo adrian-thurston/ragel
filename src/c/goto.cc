@@ -77,7 +77,9 @@ std::ostream &Goto::TRANS_GOTO( RedTransAp *trans, int level )
 			Size condValOffset = (1 << csi.pos());
 			out << " ) ck += " << condValOffset << ";\n";
 		}
-		COND_B_SEARCH( trans, 1, 0, trans->outConds.length()-1 );
+		CondKey lower = 0;
+		CondKey upper = trans->condFullSize() - 1;
+		COND_B_SEARCH( trans, 1, lower, upper, 0, trans->outConds.length()-1 );
 
 		if ( trans->errCond != 0 ) {
 			COND_GOTO( trans->errCond, level+1 ) << "\n";
@@ -318,8 +320,7 @@ string Goto::CKEY( CondKey key )
 	return ret.str();
 }
 
-
-void Goto::COND_B_SEARCH( RedTransAp *trans, int level, int low, int high )
+void Goto::COND_B_SEARCH( RedTransAp *trans, int level, CondKey lower, CondKey upper, int low, int high )
 {
 	/* Get the mid position, staying on the lower end of the range. */
 	int mid = (low + high) >> 1;
@@ -330,17 +331,17 @@ void Goto::COND_B_SEARCH( RedTransAp *trans, int level, int low, int high )
 	bool anyHigher = mid < high;
 
 	/* Determine if the keys at mid are the limits of the alphabet. */
-	bool limitLow = data[mid].key == 0;
-	bool limitHigh = data[mid].key == trans->condFullSize();
+	bool limitLow = data[mid].key == lower;
+	bool limitHigh = data[mid].key == upper;
 
 	if ( anyLower && anyHigher ) {
 		/* Can go lower and higher than mid. */
 		out << TABS(level) << "if ( " << "ck" << " < " << 
 				CKEY(data[mid].key) << " ) {\n";
-		COND_B_SEARCH( trans, level+1, low, mid-1 );
+		COND_B_SEARCH( trans, level+1, lower, data[mid].key-1, low, mid-1 );
 		out << TABS(level) << "} else if ( " << "ck" << " > " << 
 				CKEY(data[mid].key) << " ) {\n";
-		COND_B_SEARCH( trans, level+1, mid+1, high );
+		COND_B_SEARCH( trans, level+1, data[mid].key+1, upper, mid+1, high );
 		out << TABS(level) << "} else {\n";
 		COND_GOTO(data[mid].value, level+1) << "\n";
 		out << TABS(level) << "}\n";
@@ -349,7 +350,7 @@ void Goto::COND_B_SEARCH( RedTransAp *trans, int level, int low, int high )
 		/* Can go lower than mid but not higher. */
 		out << TABS(level) << "if ( " << "ck" << " < " << 
 				CKEY(data[mid].key) << " ) {\n";
-		COND_B_SEARCH( trans, level+1, low, mid-1 );
+		COND_B_SEARCH( trans, level+1, lower, data[mid].key-1, low, mid-1);
 
 		/* if the higher is the highest in the alphabet then there is no
 		 * sense testing it. */
@@ -369,7 +370,7 @@ void Goto::COND_B_SEARCH( RedTransAp *trans, int level, int low, int high )
 		/* Can go higher than mid but not lower. */
 		out << TABS(level) << "if ( " << "ck" << " > " << 
 				CKEY(data[mid].key) << " ) {\n";
-		COND_B_SEARCH( trans, level+1, mid+1, high );
+		COND_B_SEARCH( trans, level+1, data[mid].key+1, upper, mid+1, high );
 
 		/* If the lower end is the lowest in the alphabet then there is no
 		 * sense testing it. */

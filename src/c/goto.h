@@ -90,7 +90,7 @@ public:
 	virtual std::ostream &COND_GOTO( RedCondAp *trans, int level );
 
 	string CKEY( CondKey key );
-	void COND_B_SEARCH( RedTransAp *trans, int level, int low, int high );
+	void COND_B_SEARCH( RedTransAp *trans, int level, CondKey lower, CondKey upper, int low, int high);
 
 	virtual std::ostream &TRANS_GOTO( RedTransAp *trans, int level );
 

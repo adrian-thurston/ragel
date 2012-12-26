@@ -74,6 +74,8 @@ public:
 	friend inline bool operator<( const CondKey key1, const CondKey key2 );
 	friend inline bool operator>( const CondKey key1, const CondKey key2 );
 	friend inline bool operator==( const CondKey key1, const CondKey key2 );
+	friend inline CondKey operator+( const CondKey key1, const CondKey key2 );
+	friend inline CondKey operator-( const CondKey key1, const CondKey key2 );
 
 	friend struct KeyOps;
 	
@@ -101,6 +103,17 @@ public:
 	inline void decrement();
 	inline void increment();
 };
+
+inline CondKey operator+(const CondKey key1, const CondKey key2)
+{
+	return CondKey( key1.key + key2.key );
+}
+
+inline CondKey operator-(const CondKey key1, const CondKey key2)
+{
+	return CondKey( key1.key - key2.key );
+}
+
 
 struct HostType
 {

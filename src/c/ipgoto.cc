@@ -285,7 +285,9 @@ std::ostream &IpGoto::TRANS_GOTO( RedTransAp *trans, int level )
 			Size condValOffset = (1 << csi.pos());
 			out << " ) ck += " << condValOffset << ";\n";
 		}
-		COND_B_SEARCH( trans, 1, 0, trans->outConds.length()-1 );
+		CondKey lower = 0;
+		CondKey upper = trans->condFullSize() - 1;
+		COND_B_SEARCH( trans, 1, lower, upper, 0, trans->outConds.length()-1 );
 
 		if ( trans->errCond != 0 ) {
 			COND_GOTO( trans->errCond, level+1 ) << "\n";
