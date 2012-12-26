@@ -31,7 +31,7 @@ namespace C {
 void FlatExpanded::calcIndexSize()
 {
 	setTransPos();
-	keys.setType( ALPH_TYPE() );
+	keys.setType( ALPH_TYPE(), keyOps->alphType->size );
 	keys.isSigned = keyOps->isSigned;
 }
 

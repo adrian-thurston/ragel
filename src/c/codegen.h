@@ -72,8 +72,10 @@ struct TableArray
 	void startAnalyze();
 	void startGenerate();
 
-	void setType( std::string type )
-		{ this->type = type; }
+	void setType( std::string type, int width )
+	{
+		this->type = type; this->width = width;
+	}
 
 	std::string ref() const;
 
@@ -89,9 +91,12 @@ struct TableArray
 	void setState( TableArray::State state )
 		{ this->state = state; }
 
+	long long size();
+
 	State state;
 	const char *name;
 	std::string type;
+	int width;
 	bool isSigned;
 	long long values;
 	long long min;

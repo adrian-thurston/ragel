@@ -74,6 +74,8 @@ TableArray::TableArray( const char *name, CodeGen &codeGen )
 :
 	state(InitialState),
 	name(name),
+	type("_"),
+	width(0),
 	isSigned(true),
 	values(0),
 	min(LLONG_MAX),
@@ -87,6 +89,11 @@ TableArray::TableArray( const char *name, CodeGen &codeGen )
 std::string TableArray::ref() const
 {
 	return string("_") + codeGen.DATA_PREFIX() + name;
+}
+
+long long TableArray::size()
+{
+	return width * values;
 }
 
 void TableArray::startAnalyze()
@@ -106,16 +113,26 @@ void TableArray::finishAnalyze()
 {
 	/* Calculate the type if it is not already set. */
 	if ( type == "" ) {
-		if ( min >= CHAR_MIN && max <= CHAR_MAX )
+		if ( min >= CHAR_MIN && max <= CHAR_MAX ) {
 			type = "char";
-		else if ( min >= SHRT_MIN && max <= SHRT_MAX )
+			width = sizeof(char);
+		}
+		else if ( min >= SHRT_MIN && max <= SHRT_MAX ) {
 			type = "short";
-		else if ( min >= INT_MIN && max <= INT_MAX )
+			width = sizeof(short);
+		}
+		else if ( min >= INT_MIN && max <= INT_MAX ) {
 			type = "int";
-		else if ( min >= LONG_MIN && max <= LONG_MAX )
+			width = sizeof(int);
+		}
+		else if ( min >= LONG_MIN && max <= LONG_MAX ) {
 			type = "long";
-		else 
+			width = sizeof(long);
+		}
+		else  {
 			type = "long long";
+			width = sizeof(long long);
+		}
 	}
 }
 
