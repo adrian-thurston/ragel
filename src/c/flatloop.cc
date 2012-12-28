@@ -28,10 +28,6 @@
 
 namespace C {
 
-void FlatLooped::calcIndexSize()
-{
-}
-
 void FlatLooped::tableDataPass()
 {
 	taActions();
@@ -73,9 +69,6 @@ void FlatLooped::genAnalysis()
 	analyzeMachine();
 
 	setKeyType();
-
-	/* Determine if we should use indicies. */
-	calcIndexSize();
 
 	/* Run the analysis pass over the table data. */
 	setTableState( TableArray::AnalyzePass );

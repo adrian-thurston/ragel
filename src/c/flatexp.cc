@@ -28,10 +28,6 @@
 
 namespace C {
 
-void FlatExpanded::calcIndexSize()
-{
-}
-
 void FlatExpanded::tableDataPass()
 {
 	taKeys();
@@ -72,9 +68,6 @@ void FlatExpanded::genAnalysis()
 	analyzeMachine();
 
 	setKeyType();
-
-	/* Determine if we should use indicies. */
-	calcIndexSize();
 
 	/* Run the analysis pass over the table data. */
 	setTableState( TableArray::AnalyzePass );

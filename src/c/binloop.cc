@@ -36,18 +36,18 @@ BinaryLooped::BinaryLooped( const CodeGenArgs &args )
 /* Determine if we should use indicies or not. */
 void BinaryLooped::calcIndexSize()
 {
-//	long long sizeWithInds =
-//		indicies.size() + 
-//		transCondSpacesWi.size() + 
-//		transOffsetsWi.size() + 
-//		transLengthsWi.size();
-//
-//	long long sizeWithoutInds =
-//		transCondSpaces.size() + 
-//		transOffsets.size() + 
-//		transLengths.size();
+	long long sizeWithInds =
+		indicies.size() +
+		transCondSpacesWi.size() +
+		transOffsetsWi.size() +
+		transLengthsWi.size();
 
-	//std::cerr << "sizes: " << sizeWithInds << " " << sizeWithoutInds << std::endl;
+	long long sizeWithoutInds =
+		transCondSpaces.size() +
+		transOffsets.size() +
+		transLengths.size();
+
+	std::cerr << "sizes: " << sizeWithInds << " " << sizeWithoutInds << std::endl;
 
 	///* If using indicies reduces the size, use them. */
 	//useIndicies = sizeWithInds < sizeWithoutInds;
@@ -107,12 +107,12 @@ void BinaryLooped::genAnalysis()
 
 	setKeyType();
 
-	/* Determine if we should use indicies. */
-	calcIndexSize();
-
 	/* Run the analysis pass over the table data. */
 	setTableState( TableArray::AnalyzePass );
 	tableDataPass();
+
+	/* Determine if we should use indicies. */
+	calcIndexSize();
 
 	/* Switch the tables over to the code gen mode. */
 	setTableState( TableArray::GeneratePass );

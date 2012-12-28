@@ -52,7 +52,6 @@ public:
 	virtual void EOF_ACTION( RedStateAp *state );
 	virtual void COND_ACTION( RedCondAp *cond );
 
-	void calcIndexSize();
 	void tableDataPass();
 
 	virtual void genAnalysis();

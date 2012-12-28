@@ -42,7 +42,6 @@ public:
 	FlatExpanded( const CodeGenArgs &args ) 
 		: Flat(args) {}
 
-	void calcIndexSize();
 	void tableDataPass();
 
 	virtual void genAnalysis();
@@ -59,7 +58,6 @@ protected:
 	virtual void FROM_STATE_ACTION( RedStateAp *state );
 	virtual void EOF_ACTION( RedStateAp *state );
 	virtual void COND_ACTION( RedCondAp *cond );
-
 };
 
 }
