@@ -53,11 +53,6 @@ void BinaryLooped::calcIndexSize()
 	//useIndicies = sizeWithInds < sizeWithoutInds;
 	useIndicies = false;
 
-	if ( useIndicies )
-		setTransPosWi();
-	else
-		setTransPos();
-	
 	keys.setType( ALPH_TYPE(), keyOps->alphType->size );
 	keys.isSigned = keyOps->isSigned;
 }

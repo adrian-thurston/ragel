@@ -65,14 +65,6 @@ void Binary::setTableState( TableArray::State state )
 	}
 }
 
-void Binary::setTransPosWi()
-{
-}
-
-void Binary::setTransPos()
-{
-}
-
 void Binary::taKeyOffsets()
 {
 	keyOffsets.start();

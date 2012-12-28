@@ -56,10 +56,6 @@ void Flat::setTableState( TableArray::State state )
 	}
 }
 
-void Flat::setTransPos()
-{
-}
-
 
 void Flat::taFlatIndexOffset()
 {

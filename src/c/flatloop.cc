@@ -30,8 +30,6 @@ namespace C {
 
 void FlatLooped::calcIndexSize()
 {
-	setTransPos();
-
 	keys.setType( ALPH_TYPE(), keyOps->alphType->size );
 	keys.isSigned = keyOps->isSigned;
 }

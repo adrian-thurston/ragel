@@ -90,8 +90,6 @@ protected:
 
 	void LOCATE_TRANS();
 
-	void setTransPos();
-
 	void GOTO( ostream &ret, int gotoDest, bool inFinish );
 	void CALL( ostream &ret, int callDest, int targState, bool inFinish );
 	void NEXT( ostream &ret, int nextDest, bool inFinish );
