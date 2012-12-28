@@ -30,8 +30,6 @@ namespace C {
 
 void FlatExpanded::calcIndexSize()
 {
-	keys.setType( ALPH_TYPE(), keyOps->alphType->size );
-	keys.isSigned = keyOps->isSigned;
 }
 
 void FlatExpanded::tableDataPass()
@@ -72,6 +70,8 @@ void FlatExpanded::genAnalysis()
 	 * things. We will use these in reporting the usage of fsm directives in
 	 * action code. */
 	analyzeMachine();
+
+	setKeyType();
 
 	/* Determine if we should use indicies. */
 	calcIndexSize();

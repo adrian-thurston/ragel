@@ -39,9 +39,6 @@ void BinaryExpanded::calcIndexSize()
 {
 	useIndicies = false;
 
-	keys.setType( ALPH_TYPE(), keyOps->alphType->size );
-	keys.isSigned = keyOps->isSigned;
-
 	return;
 
 	int sizeWithInds = 0, sizeWithoutInds = 0;
@@ -117,6 +114,8 @@ void BinaryExpanded::genAnalysis()
 	 * things. We will use these in reporting the usage of fsm directives in
 	 * action code. */
 	analyzeMachine();
+
+	setKeyType();
 
 	/* Determine if we should use indicies. */
 	calcIndexSize();

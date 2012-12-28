@@ -57,6 +57,12 @@ Binary::Binary( const CodeGenArgs &args )
 {
 }
 
+void Binary::setKeyType()
+{
+	keys.setType( ALPH_TYPE(), keyOps->alphType->size );
+	keys.isSigned = keyOps->isSigned;
+}
+
 void Binary::setTableState( TableArray::State state )
 {
 	for ( ArrayVector::Iter i = arrayVector; i.lte(); i++ ) {

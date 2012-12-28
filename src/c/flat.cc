@@ -48,6 +48,12 @@ Flat::Flat( const CodeGenArgs &args )
 	eofTrans(         "eof_trans",           *this )
 {}
 
+void Flat::setKeyType()
+{
+	keys.setType( ALPH_TYPE(), keyOps->alphType->size );
+	keys.isSigned = keyOps->isSigned;
+}
+
 void Flat::setTableState( TableArray::State state )
 {
 	for ( ArrayVector::Iter i = arrayVector; i.lte(); i++ ) {

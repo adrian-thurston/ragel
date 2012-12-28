@@ -76,6 +76,8 @@ protected:
 	void taEofActions();
 	void taEofTrans();
 
+	void setKeyType();
+
 	std::ostream &INDICIES();
 	std::ostream &TO_STATE_ACTIONS();
 	std::ostream &FROM_STATE_ACTIONS();

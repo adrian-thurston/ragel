@@ -52,9 +52,6 @@ void BinaryLooped::calcIndexSize()
 	///* If using indicies reduces the size, use them. */
 	//useIndicies = sizeWithInds < sizeWithoutInds;
 	useIndicies = false;
-
-	keys.setType( ALPH_TYPE(), keyOps->alphType->size );
-	keys.isSigned = keyOps->isSigned;
 }
 
 
@@ -107,6 +104,8 @@ void BinaryLooped::genAnalysis()
 	 * things. We will use these in reporting the usage of fsm directives in
 	 * action code. */
 	analyzeMachine();
+
+	setKeyType();
 
 	/* Determine if we should use indicies. */
 	calcIndexSize();

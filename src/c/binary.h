@@ -95,6 +95,8 @@ protected:
 	void taActions();
 	void taCondKeys();
 
+	void setKeyType();
+
 	void LOCATE_TRANS();
 	void LOCATE_COND();
 
