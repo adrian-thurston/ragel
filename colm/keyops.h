@@ -115,12 +115,7 @@ enum HostLangType
 };
 
 extern HostLang *hostLang;
-extern HostLangType hostLangType;
-
 extern HostLang hostLangC;
-extern HostLang hostLangD;
-extern HostLang hostLangJava;
-extern HostLang hostLangRuby;
 
 /* An abstraction of the key operators that manages key operations such as
  * comparison and increment according the signedness of the key. */

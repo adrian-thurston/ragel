@@ -92,13 +92,11 @@ int gblErrorCount = 0;
 
 HostType hostTypesC[] =
 {
-	{ "char",     0,       true,   CHAR_MIN,  CHAR_MAX,   sizeof(char) },
+	{ "char", 0, true, CHAR_MIN, CHAR_MAX, sizeof(char) },
 };
 
-HostLang hostLangC =    { hostTypesC,    8, hostTypesC+0,    true };
-
+HostLang hostLangC = { hostTypesC, 8, hostTypesC+0, true };
 HostLang *hostLang = &hostLangC;
-HostLangType hostLangType = CCode;
 
 /* Print the opening to an error in the input, then return the error ostream. */
 ostream &error( const InputLoc &loc )

@@ -157,10 +157,7 @@ string FsmCodeGen::TABS( int level )
 string FsmCodeGen::KEY( Key key )
 {
 	ostringstream ret;
-	if ( keyOps->isSigned || !hostLang->explicitUnsigned )
-		ret << key.getVal();
-	else
-		ret << (unsigned long) key.getVal() << 'u';
+	ret << key.getVal();
 	return ret.str();
 }
 
@@ -369,7 +366,7 @@ string FsmCodeGen::WIDE_ALPH_TYPE()
 		ret = ALPH_TYPE();
 	else {
 		long long maxKeyVal = redFsm->maxKey.getLongLong();
-		HostType *wideType = keyOps->typeSubsumes( keyOps->isSigned, maxKeyVal );
+		HostType *wideType = keyOps->typeSubsumes( true, maxKeyVal );
 		assert( wideType != 0 );
 
 		ret = wideType->data1;

@@ -95,7 +95,7 @@ Key makeFsmKeyHex( char *str, const InputLoc &loc, Compiler *pd )
 		ul = 1 << (size * 8);
 	}
 
-	if ( unusedBits && keyOps->alphType->isSigned && ul >> (size * 8 - 1) )
+	if ( unusedBits && ul >> (size * 8 - 1) )
 		ul |= (0xffffffff >> (size*8 ) ) << (size*8);
 
 	return Key( (long)ul );
@@ -122,10 +122,7 @@ Key makeFsmKeyDec( char *str, const InputLoc &loc, Compiler *pd )
 		ll = maxVal;
 	}
 
-	if ( keyOps->alphType->isSigned )
-		return Key( (long)ll );
-	else
-		return Key( (unsigned long)ll );
+	return Key( (long)ll );
 }
 
 /* Make an fsm key in int format (what the fsm graph uses) from an alphabet
@@ -145,14 +142,8 @@ Key makeFsmKeyNum( char *str, const InputLoc &loc, Compiler *pd )
  * alphabet. */
 Key makeFsmKeyChar( char c, Compiler *pd )
 {
-	if ( keyOps->isSigned ) {
-		/* Copy from a char type. */
-		return Key( c );
-	}
-	else {
-		/* Copy from an unsigned byte type. */
-		return Key( (unsigned char)c );
-	}
+	/* Copy from a char type. */
+	return Key( c );
 }
 
 /* Make an fsm key array in int format (what the fsm graph uses) from a string
@@ -160,18 +151,10 @@ Key makeFsmKeyChar( char c, Compiler *pd )
  * property of the alphabet. */
 void makeFsmKeyArray( Key *result, char *data, int len, Compiler *pd )
 {
-	if ( keyOps->isSigned ) {
-		/* Copy from a char star type. */
-		char *src = data;
-		for ( int i = 0; i < len; i++ )
-			result[i] = Key(src[i]);
-	}
-	else {
-		/* Copy from an unsigned byte ptr type. */
-		unsigned char *src = (unsigned char*) data;
-		for ( int i = 0; i < len; i++ )
-			result[i] = Key(src[i]);
-	}
+	/* Copy from a char star type. */
+	char *src = data;
+	for ( int i = 0; i < len; i++ )
+		result[i] = Key(src[i]);
 }
 
 /* Like makeFsmKeyArray except the result has only unique keys. They ordering
@@ -179,33 +162,16 @@ void makeFsmKeyArray( Key *result, char *data, int len, Compiler *pd )
 void makeFsmUniqueKeyArray( KeySet &result, char *data, int len, 
 		bool caseInsensitive, Compiler *pd )
 {
-	/* Use a transitions list for getting unique keys. */
-	if ( keyOps->isSigned ) {
-		/* Copy from a char star type. */
-		char *src = data;
-		for ( int si = 0; si < len; si++ ) {
-			Key key( src[si] );
-			result.insert( key );
-			if ( caseInsensitive ) {
-				if ( key.isLower() )
-					result.insert( key.toUpper() );
-				else if ( key.isUpper() )
-					result.insert( key.toLower() );
-			}
-		}
-	}
-	else {
-		/* Copy from an unsigned byte ptr type. */
-		unsigned char *src = (unsigned char*) data;
-		for ( int si = 0; si < len; si++ ) {
-			Key key( src[si] );
-			result.insert( key );
-			if ( caseInsensitive ) {
-				if ( key.isLower() )
-					result.insert( key.toUpper() );
-				else if ( key.isUpper() )
-					result.insert( key.toLower() );
-			}
+	/* Copy from a char star type. */
+	char *src = data;
+	for ( int si = 0; si < len; si++ ) {
+		Key key( src[si] );
+		result.insert( key );
+		if ( caseInsensitive ) {
+			if ( key.isLower() )
+				result.insert( key.toUpper() );
+			else if ( key.isUpper() )
+				result.insert( key.toLower() );
 		}
 	}
 }
@@ -229,7 +195,6 @@ FsmGraph *makeBuiltin( BuiltinMachine builtin, Compiler *pd )
 {
 	/* FsmGraph created to return. */
 	FsmGraph *retFsm = 0;
-	bool isSigned = keyOps->isSigned;
 
 	switch ( builtin ) {
 	case BT_Any: {
@@ -247,14 +212,8 @@ FsmGraph *makeBuiltin( BuiltinMachine builtin, Compiler *pd )
 		/* Ascii extended characters. This is the full byte range. Dependent
 		 * on signed, vs no signed. If the alphabet is one byte then just use
 		 * dot fsm. */
-		if ( isSigned ) {
-			retFsm = new FsmGraph();
-			retFsm->rangeFsm( -128, 127 );
-		}
-		else {
-			retFsm = new FsmGraph();
-			retFsm->rangeFsm( 0, 255 );
-		}
+		retFsm = new FsmGraph();
+		retFsm->rangeFsm( -128, 127 );
 		break;
 	}
 	case BT_Alpha: {
