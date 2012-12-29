@@ -787,7 +787,6 @@ int FsmGraph::compareStateData( const FsmState *state1, const FsmState *state2 )
 			state2->eofActionTable );
 }
 
-
 /* Invoked when a state looses its final state status and the leaving
  * transition embedding data should be deleted. */
 void FsmGraph::clearOutData( FsmState *state )
@@ -803,44 +802,4 @@ bool FsmGraph::hasOutData( FsmState *state )
 	return ( state->outActionTable.length() > 0 ||
 			state->outCondSet.length() > 0 ||
 			state->outPriorTable.length() > 0 );
-}
-
-/* 
- * Setting Conditions.
- */
-
-void logNewExpansion( Expansion *exp );
-void logCondSpace( CondSpace *condSpace );
-
-CondSpace *FsmGraph::addCondSpace( const CondSet &condSet )
-{
-	CondSpace *condSpace = condData->condSpaceMap.find( condSet );
-	if ( condSpace == 0 ) {
-		Key baseKey = condData->nextCondKey;
-		condData->nextCondKey += (1 << condSet.length() ) * keyOps->alphSize();
-
-		condSpace = new CondSpace( condSet );
-		condSpace->baseKey = baseKey;
-		condData->condSpaceMap.insert( condSpace );
-	}
-	return condSpace;
-}
-
-void FsmGraph::startFsmCondition( Action *condAction )
-{
-	/* Make sure the start state has no other entry points. */
-	isolateStartState();
-	embedCondition( startState, condAction );
-}
-
-void FsmGraph::allTransCondition( Action *condAction )
-{
-	for ( StateList::Iter state = stateList; state.lte(); state++ )
-		embedCondition( state, condAction );
-}
-
-void FsmGraph::leaveFsmCondition( Action *condAction )
-{
-	for ( StateSet::Iter state = finStateSet; state.lte(); state++ )
-		(*state)->outCondSet.insert( condAction );
 }

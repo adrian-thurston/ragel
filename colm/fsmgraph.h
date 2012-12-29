@@ -478,42 +478,6 @@ struct StateCond
 typedef DList<StateCond> StateCondList;
 typedef Vector<long> LongVect;
 
-struct Expansion
-{
-	Expansion( Key lowKey, Key highKey ) :
-		lowKey(lowKey), highKey(highKey),
-		fromTrans(0), fromCondSpace(0), 
-		toCondSpace(0) {}
-	
-	~Expansion()
-	{
-		if ( fromTrans != 0 )
-			delete fromTrans;
-	}
-
-	Key lowKey;
-	Key highKey;
-
-	FsmTrans *fromTrans;
-	CondSpace *fromCondSpace;
-	long fromVals;
-
-	CondSpace *toCondSpace;
-	LongVect toValsList;
-
-	Expansion *prev, *next;
-};
-
-typedef DList<Expansion> ExpansionList;
-
-struct Removal
-{
-	Key lowKey;
-	Key highKey;
-
-	Removal *next;
-};
-
 struct CondData
 {
 	CondData() : nextCondKey(0) {}
@@ -1012,18 +976,6 @@ struct FsmGraph
 	void leaveFsmAction( int ordering, Action *action );
 	void longMatchAction( int ordering, TokenDef *lmPart );
 
-	/* Set conditions. */
-	CondSpace *addCondSpace( const CondSet &condSet );
-
-	void findEmbedExpansions( ExpansionList &expansionList, 
-		FsmState *destState, Action *condAction );
-	void embedCondition( MergeData &md, FsmState *state, Action *condAction );
-	void embedCondition( FsmState *state, Action *condAction );
-
-	void startFsmCondition( Action *condAction );
-	void allTransCondition( Action *condAction );
-	void leaveFsmCondition( Action *condAction );
-
 	/* Set error actions to execute. */
 	void startErrorAction( int ordering, Action *action, int transferPoint );
 	void allErrorAction( int ordering, Action *action, int transferPoint );
@@ -1141,16 +1093,6 @@ struct FsmGraph
 			FsmTrans *destTrans, FsmTrans *srcTrans );
 
 	void outTransCopy( MergeData &md, FsmState *dest, FsmTrans *srcList );
-
-	void doRemove( MergeData &md, FsmState *destState, ExpansionList &expList1 );
-	void doExpand( MergeData &md, FsmState *destState, ExpansionList &expList1 );
-	void findCondExpInTrans( ExpansionList &expansionList, FsmState *state, 
-			Key lowKey, Key highKey, CondSpace *fromCondSpace, CondSpace *toCondSpace,
-			long destVals, LongVect &toValsList );
-	void findTransExpansions( ExpansionList &expansionList, 
-			FsmState *destState, FsmState *srcState );
-	void findCondExpansions( ExpansionList &expansionList, 
-			FsmState *destState, FsmState *srcState );
 	void mergeStateConds( FsmState *destState, FsmState *srcState );
 
 	/* Merge a set of states into newState. */

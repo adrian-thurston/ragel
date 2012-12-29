@@ -984,28 +984,6 @@ void LexFactorAug::assignPriorities( FsmGraph *graph, int *priorOrd )
 	}
 }
 
-void LexFactorAug::assignConditions( FsmGraph *graph )
-{
-	for ( int i = 0; i < conditions.length(); i++ )  {
-		switch ( conditions[i].type ) {
-		/* Transition actions. */
-		case at_start:
-			graph->startFsmCondition( conditions[i].action );
-			afterOpMinimize( graph );
-			break;
-		case at_all:
-			graph->allTransCondition( conditions[i].action );
-			break;
-		case at_leave:
-			graph->leaveFsmCondition( conditions[i].action );
-			break;
-		default:
-			break;
-		}
-	}
-}
-
-
 /* Evaluate a factor with augmentation node. */
 FsmGraph *LexFactorAug::walk( Compiler *pd )
 {
@@ -1039,8 +1017,6 @@ FsmGraph *LexFactorAug::walk( Compiler *pd )
 				actions[i].type != at_start_eof )
 			actionOrd[i] = pd->curActionOrd++;
 	}
-
-	assignConditions( rtnVal );
 
 	assignActions( pd, rtnVal , actionOrd );
 

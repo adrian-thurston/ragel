@@ -936,14 +936,11 @@ struct LexFactorAug
 	void assignActions( Compiler *pd, FsmGraph *graph, int *actionOrd );
 	void assignPriorities( FsmGraph *graph, int *priorOrd );
 
-	void assignConditions( FsmGraph *graph );
-
 	/* Actions and priorities assigned to the factor node. */
 	Vector<ParserAction> actions;
 	Vector<PriorityAug> priorityAugs;
 	PriorDesc *priorDescs;
 	Vector<EpsilonLink> epsilonLinks;
-	Vector<ParserAction> conditions;
 
 	LexFactorRep *factorRep;
 };
