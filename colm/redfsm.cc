@@ -53,8 +53,6 @@ RedFsm::RedFsm()
 	numFinStates(0),
 	allActions(0),
 	allActionTables(0),
-	allConditions(0),
-	allCondSpaces(0),
 	allStates(0),
 	bAnyToStateActions(false),
 	bAnyFromStateActions(false),
@@ -580,28 +578,6 @@ void RedFsm::setInTrans()
 		trans->targ->inTrans[trans->targ->numInTrans++] = trans;
 }
 
-GenCondSpace *RedFsm::findCondSpace( Key lowKey, Key highKey )
-{
-	for ( CondSpaceList::Iter cs = condSpaceList; cs.lte(); cs++ ) {
-		Key csHighKey = cs->baseKey;
-		csHighKey += keyOps->alphSize() * (1 << cs->condSet.length());
-
-		if ( lowKey >= cs->baseKey && highKey <= csHighKey )
-			return cs;
-	}
-	return 0;
-}
-
-Condition *RedFsm::findCondition( Key key )
-{
-	for ( ConditionList::Iter cond = conditionList; cond.lte(); cond++ ) {
-		Key upperKey = cond->baseKey + (1 << cond->condSet.length());
-		if ( cond->baseKey <= key && key <= upperKey )
-			return cond;
-	}
-	return 0;
-}
-
 void RedFsm::setValueLimits()
 {
 	maxSingleLen = 0;
@@ -622,15 +598,10 @@ void RedFsm::setValueLimits()
 	/* In both of these cases the 0 index is reserved for no value, so the max
 	 * is one more than it would be if they started at 0. */
 	maxIndex = transSet.length();
-	maxCond = condSpaceList.length(); 
+	maxCond = 0;
 
 	/* The nextStateId - 1 is the last state id assigned. */
 	maxState = nextStateId - 1;
-
-	for ( CondSpaceList::Iter csi = condSpaceList; csi.lte(); csi++ ) {
-		if ( csi->condSpaceId > maxCondSpaceId )
-			maxCondSpaceId = csi->condSpaceId;
-	}
 
 	for ( RedStateList::Iter st = stateList; st.lte(); st++ ) {
 		/* Maximum single length. */
@@ -647,24 +618,11 @@ void RedFsm::setValueLimits()
 			maxIndexOffset += st->outSingle.length() + st->outRange.length() + 1;
 		}
 
-		/* Max cond span. */
-		if ( st->condList != 0 ) {
-			unsigned long long span = keyOps->span( st->condLowKey, st->condHighKey );
-			if ( span > maxCondSpan )
-				maxCondSpan = span;
-		}
-
 		/* Max key span. */
 		if ( st->transList != 0 ) {
 			unsigned long long span = keyOps->span( st->lowKey, st->highKey );
 			if ( span > maxSpan )
 				maxSpan = span;
-		}
-
-		/* Max cond index offset. */
-		if ( ! st.last() ) {
-			if ( st->condList != 0 )
-				maxCondIndexOffset += keyOps->span( st->condLowKey, st->condHighKey );
 		}
 
 		/* Max flat index offset. */

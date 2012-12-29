@@ -178,7 +178,6 @@ public:
 	std::ostream &TO_STATE_ACTIONS();
 	std::ostream &FROM_STATE_ACTIONS();
 
-	void COND_TRANSLATE( GenStateCond *stateCond, int level );
 	void emitCondBSearch( RedState *state, int level, int low, int high );
 	void STATE_CONDS( RedState *state, bool genDefault ); 
 

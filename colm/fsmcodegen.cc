@@ -583,116 +583,6 @@ void FsmCodeGen::emitRangeBSearch( RedState *state, int level, int low, int high
 	}
 }
 
-void FsmCodeGen::COND_TRANSLATE( GenStateCond *stateCond, int level )
-{
-	GenCondSpace *condSpace = stateCond->condSpace;
-	out << TABS(level) << "_widec = " << CAST(WIDE_ALPH_TYPE()) << "(" <<
-			KEY(condSpace->baseKey) << " + (" << GET_KEY() << 
-			" - " << KEY(keyOps->minKey) << "));\n";
-
-	for ( GenCondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
-		out << TABS(level) << "if ( ";
-		CONDITION( out, *csi );
-		Size condValOffset = ((1 << csi.pos()) * keyOps->alphSize());
-		out << " ) _widec += " << condValOffset << ";\n";
-	}
-}
-
-void FsmCodeGen::emitCondBSearch( RedState *state, int level, int low, int high )
-{
-	/* Get the mid position, staying on the lower end of the range. */
-	int mid = (low + high) >> 1;
-	GenStateCond **data = state->stateCondVect.data;
-
-	/* Determine if we need to look higher or lower. */
-	bool anyLower = mid > low;
-	bool anyHigher = mid < high;
-
-	/* Determine if the keys at mid are the limits of the alphabet. */
-	bool limitLow = data[mid]->lowKey == keyOps->minKey;
-	bool limitHigh = data[mid]->highKey == keyOps->maxKey;
-
-	if ( anyLower && anyHigher ) {
-		/* Can go lower and higher than mid. */
-		out << TABS(level) << "if ( " << GET_KEY() << " < " << 
-				KEY(data[mid]->lowKey) << " ) {\n";
-		emitCondBSearch( state, level+1, low, mid-1 );
-		out << TABS(level) << "} else if ( " << GET_KEY() << " > " << 
-				KEY(data[mid]->highKey) << " ) {\n";
-		emitCondBSearch( state, level+1, mid+1, high );
-		out << TABS(level) << "} else {\n";
-		COND_TRANSLATE(data[mid], level+1);
-		out << TABS(level) << "}\n";
-	}
-	else if ( anyLower && !anyHigher ) {
-		/* Can go lower than mid but not higher. */
-		out << TABS(level) << "if ( " << GET_KEY() << " < " << 
-				KEY(data[mid]->lowKey) << " ) {\n";
-		emitCondBSearch( state, level+1, low, mid-1 );
-
-		/* if the higher is the highest in the alphabet then there is no
-		 * sense testing it. */
-		if ( limitHigh ) {
-			out << TABS(level) << "} else {\n";
-			COND_TRANSLATE(data[mid], level+1);
-			out << TABS(level) << "}\n";
-		}
-		else {
-			out << TABS(level) << "} else if ( " << GET_KEY() << " <= " << 
-					KEY(data[mid]->highKey) << " ) {\n";
-			COND_TRANSLATE(data[mid], level+1);
-			out << TABS(level) << "}\n";
-		}
-	}
-	else if ( !anyLower && anyHigher ) {
-		/* Can go higher than mid but not lower. */
-		out << TABS(level) << "if ( " << GET_KEY() << " > " << 
-				KEY(data[mid]->highKey) << " ) {\n";
-		emitCondBSearch( state, level+1, mid+1, high );
-
-		/* If the lower end is the lowest in the alphabet then there is no
-		 * sense testing it. */
-		if ( limitLow ) {
-			out << TABS(level) << "} else {\n";
-			COND_TRANSLATE(data[mid], level+1);
-			out << TABS(level) << "}\n";
-		}
-		else {
-			out << TABS(level) << "} else if ( " << GET_KEY() << " >= " << 
-					KEY(data[mid]->lowKey) << " ) {\n";
-			COND_TRANSLATE(data[mid], level+1);
-			out << TABS(level) << "}\n";
-		}
-	}
-	else {
-		/* Cannot go higher or lower than mid. It's mid or bust. What
-		 * tests to do depends on limits of alphabet. */
-		if ( !limitLow && !limitHigh ) {
-			out << TABS(level) << "if ( " << KEY(data[mid]->lowKey) << " <= " << 
-					GET_KEY() << " && " << GET_KEY() << " <= " << 
-					KEY(data[mid]->highKey) << " ) {\n";
-			COND_TRANSLATE(data[mid], level+1);
-			out << TABS(level) << "}\n";
-		}
-		else if ( limitLow && !limitHigh ) {
-			out << TABS(level) << "if ( " << GET_KEY() << " <= " << 
-					KEY(data[mid]->highKey) << " ) {\n";
-			COND_TRANSLATE(data[mid], level+1);
-			out << TABS(level) << "}\n";
-		}
-		else if ( !limitLow && limitHigh ) {
-			out << TABS(level) << "if ( " << KEY(data[mid]->lowKey) << " <= " << 
-					GET_KEY() << " )\n {";
-			COND_TRANSLATE(data[mid], level+1);
-			out << TABS(level) << "}\n";
-		}
-		else {
-			/* Both high and low are at the limit. No tests to do. */
-			COND_TRANSLATE(data[mid], level);
-		}
-	}
-}
-
 std::ostream &FsmCodeGen::STATE_GOTOS()
 {
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
@@ -701,11 +591,6 @@ std::ostream &FsmCodeGen::STATE_GOTOS()
 		else {
 			/* Writing code above state gotos. */
 			GOTO_HEADER( st );
-
-			if ( st->stateCondVect.length() > 0 ) {
-				out << "	_widec = " << GET_KEY() << ";\n";
-				emitCondBSearch( st, 1, 0, st->stateCondVect.length() - 1 );
-			}
 
 			/* Try singles. */
 			if ( st->outSingle.length() > 0 )

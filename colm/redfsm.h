@@ -251,50 +251,12 @@ typedef BstMapEl<int, int> RedEntryMapEl;
 
 typedef Vector<int> RegionToEntry;
 
-typedef Vector< GenAction* > GenCondSet;
-
-struct Condition
-{
-	Condition( )
-		: key(0), baseKey(0) {}
-
-	Key key;
-	Key baseKey;
-	GenCondSet condSet;
-
-	Condition *next, *prev;
-};
-typedef DList<Condition> ConditionList;
-
-struct GenCondSpace
-{
-	Key baseKey;
-	GenCondSet condSet;
-	int condSpaceId;
-
-	GenCondSpace *next, *prev;
-};
-typedef DList<GenCondSpace> CondSpaceList;
-
-struct GenStateCond
-{
-	Key lowKey;
-	Key highKey;
-
-	GenCondSpace *condSpace;
-
-	GenStateCond *prev, *next;
-};
-typedef DList<GenStateCond> GenStateCondList;
-typedef Vector<GenStateCond*> StateCondVect;
-
 /* Reduced state. */
 struct RedState
 {
 	RedState()
 	: 
 		defTrans(0), 
-		condList(0),
 		transList(0), 
 		isFinal(false), 
 		labelNeeded(false), 
@@ -318,7 +280,6 @@ struct RedState
 
 	/* For flat conditions. */
 	Key condLowKey, condHighKey;
-	GenCondSpace **condList;
 
 	/* For flat keys. */
 	Key lowKey, highKey;
@@ -336,8 +297,6 @@ struct RedState
 	RedAction *eofAction;
 	RedTrans *eofTrans;
 	int id;
-	GenStateCondList stateCondList;
-	StateCondVect stateCondVect;
 
 	/* Pointers for the list of states. */
 	RedState *prev, *next;
@@ -386,12 +345,8 @@ struct RedFsm
 
 	GenAction *allActions;
 	RedAction *allActionTables;
-	Condition *allConditions;
-	GenCondSpace *allCondSpaces;
 	RedState *allStates;
 	GenActionList genActionList;
-	ConditionList conditionList;
-	CondSpaceList condSpaceList;
 	EntryIdVect entryPointIds;
 	EntryNameVect entryPointNames;
 	RedEntryMap redEntryMap;
@@ -446,9 +401,6 @@ struct RedFsm
 	bool anyRegBreak()              { return bAnyRegBreak; }
 	bool anyLmSwitchError()         { return bAnyLmSwitchError; }
 	bool anyConditions()            { return bAnyConditions; }
-
-	GenCondSpace *findCondSpace( Key lowKey, Key highKey );
-	Condition *findCondition( Key key );
 
 	/* Is is it possible to extend a range by bumping ranges that span only
 	 * one character to the singles array. */
