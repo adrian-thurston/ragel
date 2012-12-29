@@ -41,8 +41,6 @@ private:
 public:
 	friend inline Key operator+(const Key key1, const Key key2);
 	friend inline Key operator-(const Key key1, const Key key2);
-	friend inline Key operator/(const Key key1, const Key key2);
-	friend inline long operator&(const Key key1, const Key key2);
 
 	friend inline bool operator<( const Key key1, const Key key2 );
 	friend inline bool operator<=( const Key key1, const Key key2 );
@@ -75,22 +73,13 @@ public:
 		{ return Key( 'a' + ( key - 'A' ) ); }
 
 	void operator+=( const Key other )
-	{
-		/* FIXME: must be made aware of isSigned. */
-		key += other.key;
-	}
+		{ key += other.key; }
 
 	void operator-=( const Key other )
-	{
-		/* FIXME: must be made aware of isSigned. */
-		key -= other.key;
-	}
+		{ key -= other.key; }
 
 	void operator|=( const Key other )
-	{
-		/* FIXME: must be made aware of isSigned. */
-		key |= other.key;
-	}
+		{ key |= other.key; }
 
 	/* Decrement. Needed only for ranges. */
 	inline void decrement();
@@ -200,30 +189,24 @@ struct KeyOps
 	}
 };
 
-extern KeyOps *keyOps;
-
 inline bool operator<( const Key key1, const Key key2 )
 {
-	return keyOps->isSigned ? key1.key < key2.key : 
-		(unsigned long)key1.key < (unsigned long)key2.key;
+	return key1.key < key2.key;
 }
 
 inline bool operator<=( const Key key1, const Key key2 )
 {
-	return keyOps->isSigned ?  key1.key <= key2.key : 
-		(unsigned long)key1.key <= (unsigned long)key2.key;
+	return key1.key <= key2.key;
 }
 
 inline bool operator>( const Key key1, const Key key2 )
 {
-	return keyOps->isSigned ? key1.key > key2.key : 
-		(unsigned long)key1.key > (unsigned long)key2.key;
+	return key1.key > key2.key;
 }
 
 inline bool operator>=( const Key key1, const Key key2 )
 {
-	return keyOps->isSigned ? key1.key >= key2.key : 
-		(unsigned long)key1.key >= (unsigned long)key2.key;
+	return key1.key >= key2.key;
 }
 
 inline bool operator==( const Key key1, const Key key2 )
@@ -239,42 +222,28 @@ inline bool operator!=( const Key key1, const Key key2 )
 /* Decrement. Needed only for ranges. */
 inline void Key::decrement()
 {
-	key = keyOps->isSigned ? key - 1 : ((unsigned long)key)-1;
+	key = key - 1;
 }
 
 /* Increment. Needed only for ranges. */
 inline void Key::increment()
 {
-	key = keyOps->isSigned ? key+1 : ((unsigned long)key)+1;
+	key = key + 1;
 }
 
 inline long long Key::getLongLong() const
 {
-	return keyOps->isSigned ? (long long)key : (long long)(unsigned long)key;
+	return (long long) key;
 }
 
 inline Key operator+(const Key key1, const Key key2)
 {
-	/* FIXME: must be made aware of isSigned. */
 	return Key( key1.key + key2.key );
 }
 
 inline Key operator-(const Key key1, const Key key2)
 {
-	/* FIXME: must be made aware of isSigned. */
 	return Key( key1.key - key2.key );
-}
-
-inline long operator&(const Key key1, const Key key2)
-{
-	/* FIXME: must be made aware of isSigned. */
-	return key1.key & key2.key;
-}
-
-inline Key operator/(const Key key1, const Key key2)
-{
-	/* FIXME: must be made aware of isSigned. */
-	return key1.key / key2.key;
 }
 
 const char *findFileExtension( const char *stemFile );
