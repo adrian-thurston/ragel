@@ -52,29 +52,6 @@ FsmCodeGen::FsmCodeGen( const char *sourceFileName, const char *fsmName, ostream
 {
 }
 
-unsigned int FsmCodeGen::arrayTypeSize( unsigned long maxVal )
-{
-	long long maxValLL = (long long) maxVal;
-	HostType *arrayType = keyOps->typeSubsumes( maxValLL );
-	assert( arrayType != 0 );
-	return arrayType->size;
-}
-
-string FsmCodeGen::ARRAY_TYPE( unsigned long maxVal )
-{
-	long long maxValLL = (long long) maxVal;
-	HostType *arrayType = keyOps->typeSubsumes( maxValLL );
-	assert( arrayType != 0 );
-
-	string ret = arrayType->data1;
-	if ( arrayType->data2 != 0 ) {
-		ret += " ";
-		ret += arrayType->data2;
-	}
-	return ret;
-}
-
-
 /* Write out the fsm name. */
 string FsmCodeGen::FSM_NAME()
 {
@@ -362,19 +339,7 @@ string FsmCodeGen::ALPH_TYPE()
 string FsmCodeGen::WIDE_ALPH_TYPE()
 {
 	string ret;
-	if ( redFsm->maxKey <= keyOps->maxKey )
-		ret = ALPH_TYPE();
-	else {
-		long long maxKeyVal = redFsm->maxKey.getLongLong();
-		HostType *wideType = keyOps->typeSubsumes( true, maxKeyVal );
-		assert( wideType != 0 );
-
-		ret = wideType->data1;
-		if ( wideType->data2 != 0 ) {
-			ret += " ";
-			ret += wideType->data2;
-		}
-	}
+	ret = ALPH_TYPE();
 	return ret;
 }
 

@@ -90,7 +90,6 @@ struct HostType
 {
 	const char *data1;
 	const char *data2;
-	bool isSigned;
 	long long minVal;
 	long long maxVal;
 	unsigned int size;
@@ -122,66 +121,26 @@ extern HostLang hostLangC;
 struct KeyOps
 {
 	/* Default to signed alphabet. */
-	KeyOps() :
-		isSigned(true),
-		alphType(0)
-	{}
+	KeyOps() : alphType(0) {}
 
-	/* Default to signed alphabet. */
-	KeyOps( bool isSigned ) 
-		:isSigned(isSigned) {}
-
-	bool isSigned;
 	Key minKey, maxKey;
 	HostType *alphType;
 
 	void setAlphType( HostType *alphType )
 	{
 		this->alphType = alphType;
-		isSigned = alphType->isSigned;
-		if ( isSigned ) {
-			minKey = (long) alphType->minVal;
-			maxKey = (long) alphType->maxVal;
-		}
-		else {
-			minKey = (long) (unsigned long) alphType->minVal; 
-			maxKey = (long) (unsigned long) alphType->maxVal;
-		}
+		minKey = (long) alphType->minVal;
+		maxKey = (long) alphType->maxVal;
 	}
 
 	/* Compute the distance between two keys. */
 	Size span( Key key1, Key key2 )
 	{
-		return isSigned ? 
-			(unsigned long long)(
-				(long long)key2.key - 
-				(long long)key1.key + 1) : 
-			(unsigned long long)(
-				(unsigned long)key2.key) - 
-				(unsigned long long)((unsigned long)key1.key) + 1;
+		return (unsigned long long)( (long long)key2.key - (long long)key1.key + 1) ;
 	}
 
 	Size alphSize()
 		{ return span( minKey, maxKey ); }
-
-	HostType *typeSubsumes( long long maxVal )
-	{
-		for ( int i = 0; i < hostLang->numHostTypes; i++ ) {
-			if ( maxVal <= hostLang->hostTypes[i].maxVal )
-				return hostLang->hostTypes + i;
-		}
-		return 0;
-	}
-
-	HostType *typeSubsumes( bool isSigned, long long maxVal )
-	{
-		for ( int i = 0; i < hostLang->numHostTypes; i++ ) {
-			if ( ( (isSigned && hostLang->hostTypes[i].isSigned) || !isSigned ) &&
-					maxVal <= hostLang->hostTypes[i].maxVal )
-				return hostLang->hostTypes + i;
-		}
-		return 0;
-	}
 };
 
 inline bool operator<( const Key key1, const Key key2 )

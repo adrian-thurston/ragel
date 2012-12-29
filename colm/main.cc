@@ -92,7 +92,7 @@ int gblErrorCount = 0;
 
 HostType hostTypesC[] =
 {
-	{ "char", 0, true, CHAR_MIN, CHAR_MAX, sizeof(char) },
+	{ "char", 0, CHAR_MIN, CHAR_MAX, sizeof(char) },
 };
 
 HostLang hostLangC = { hostTypesC, 8, hostTypesC+0, true };
