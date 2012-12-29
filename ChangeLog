@@ -1,0 +1,11 @@
+Colm 0.8 - Dec 29, 2012
+-----------------------
+
+ * The parse statement now includes a call to the finish operation. It returns
+   a value of type parser<Type>. The result tree and any error message can be
+   retrieved from this object using 'tree' and 'error' members.
+ * Dropped curly brackets and the name from the syntax of lexical region
+   defintition. Using "lex ... end"
+ * Dropped curly brackets from the syntax of namespaces and context blocks.
+   Using "namespace N ... end N" and "context N ... end N"
+ * Now have a growable stack instead of a large, fixed, pre-allocated stack.
