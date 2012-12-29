@@ -233,60 +233,13 @@ void RedFsmBuild::setStateActions( int snum, long toStateAction,
 
 void RedFsmBuild::closeMachine()
 {
-	//for ( GenActionList::Iter a = redFsm->actionList; a.lte(); a++ )
-	//	resolveTargetStates( a->inlineList );
-
-	/* Note that even if we want a complete graph we do not give the error
-	 * state a default transition. All machines break out of the processing
-	 * loop when in the error state. */
-
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		for ( GenStateCondList::Iter sci = st->stateCondList; sci.lte(); sci++ )
-			st->stateCondVect.append( sci );
-	}
 }
 
-void RedFsmBuild::initCondSpaceList( ulong length )
-{
-	redFsm->allCondSpaces = new GenCondSpace[length];
-	for ( ulong c = 0; c < length; c++ )
-		redFsm->condSpaceList.append( redFsm->allCondSpaces + c );
-}
-
-void RedFsmBuild::newCondSpace( int cnum, int condSpaceId, Key baseKey )
-{
-	GenCondSpace *cond = redFsm->allCondSpaces + cnum;
-	cond->condSpaceId = condSpaceId;
-	cond->baseKey = baseKey;
-}
-
-void RedFsmBuild::condSpaceItem( int cnum, long condActionId )
-{
-	GenCondSpace *cond = redFsm->allCondSpaces + cnum;
-	cond->condSet.append( redFsm->allActions + condActionId );
-}
 
 void RedFsmBuild::initStateCondList( int snum, ulong length )
 {
 	/* Could preallocate these, as we could with transitions. */
 }
-
-void RedFsmBuild::addStateCond( int snum, Key lowKey, Key highKey, long condNum )
-{
-	RedState *curState = redFsm->allStates + snum;
-
-	/* Create the new state condition. */
-	GenStateCond *stateCond = new GenStateCond;
-	stateCond->lowKey = lowKey;
-	stateCond->highKey = highKey;
-
-	/* Assign it a cond space. */
-	GenCondSpace *condSpace = redFsm->allCondSpaces + condNum;
-	stateCond->condSpace = condSpace;
-
-	curState->stateCondList.append( stateCond );
-}
-
 
 void RedFsmBuild::setForcedErrorState()
 {
@@ -493,23 +446,6 @@ void RedFsmBuild::makeStateActions( FsmState *state )
 	}
 }
 
-void RedFsmBuild::makeStateConditions( FsmState *state )
-{
-	if ( state->stateCondList.length() > 0 ) {
-
-		long length = state->stateCondList.length();
-		initStateCondList( curState, length );
-		curStateCond = 0;
-
-		for ( StateCondList::Iter scdi = state->stateCondList; scdi.lte(); scdi++ ) {
-			Key lowKey = scdi->lowKey;
-			Key highKey = scdi->highKey;
-			long condId = scdi->condSpace->condSpaceId;
-			addStateCond( curState, lowKey, highKey, condId );
-		}
-	}
-}
-
 void RedFsmBuild::makeStateList()
 {
 	/* Write the list of states. */
@@ -522,7 +458,6 @@ void RedFsmBuild::makeStateList()
 		assert( !( (st->eofTarget != 0) xor (st->eofActionTable.length() > 0) ) );
 
 		makeStateActions( st );
-		makeStateConditions( st );
 		makeTransList( st );
 
 		setId( curState, st->alg.stateNum );
@@ -590,28 +525,6 @@ void RedFsmBuild::makeMachine()
 
 void RedFsmBuild::makeConditions()
 {
-	if ( condData->condSpaceMap.length() > 0 ) {
-		long nextCondSpaceId = 0;
-		for ( CondSpaceMap::Iter cs = condData->condSpaceMap; cs.lte(); cs++ )
-			cs->condSpaceId = nextCondSpaceId++;
-
-		long length = condData->condSpaceMap.length(); 
-		initCondSpaceList( length );
-		curCondSpace = 0;
-
-		for ( CondSpaceMap::Iter cs = condData->condSpaceMap; cs.lte(); cs++ ) {
-			long condSpaceId = cs->condSpaceId;
-			Key baseKey = cs->baseKey;
-
-			newCondSpace( curCondSpace, condSpaceId, baseKey );
-			for ( CondSet::Iter csi = cs->condSet; csi.lte(); csi++ ) {
-				long actionOffset = (*csi)->actionId;
-				condSpaceItem( curCondSpace, actionOffset );
-			}
-
-			curCondSpace += 1;
-		}
-	}
 }
 
 RedFsm *RedFsmBuild::reduceMachine()

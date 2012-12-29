@@ -27,7 +27,6 @@
 using std::cerr;
 using std::endl;
 
-CondData *condData = 0;
 KeyOps *keyOps = 0;
 
 /* Insert an action into an action table. */

@@ -303,26 +303,8 @@ void RedFsm::chooseSingle()
 void RedFsm::makeFlat()
 {
 	for ( RedStateList::Iter st = stateList; st.lte(); st++ ) {
-		if ( st->stateCondList.length() == 0 ) {
-			st->condLowKey = 0;
-			st->condHighKey = 0;
-		}
-		else {
-			st->condLowKey = st->stateCondList.head->lowKey;
-			st->condHighKey = st->stateCondList.tail->highKey;
-
-			unsigned long long span = keyOps->span( st->condLowKey, st->condHighKey );
-			st->condList = new GenCondSpace*[ span ];
-			memset( st->condList, 0, sizeof(GenCondSpace*)*span );
-
-			for ( GenStateCondList::Iter sci = st->stateCondList; sci.lte(); sci++ ) {
-				unsigned long long base, trSpan;
-				base = keyOps->span( st->condLowKey, sci->lowKey )-1;
-				trSpan = keyOps->span( sci->lowKey, sci->highKey );
-				for ( unsigned long long pos = 0; pos < trSpan; pos++ )
-					st->condList[base+pos] = sci->condSpace;
-			}
-		}
+		st->condLowKey = 0;
+		st->condHighKey = 0;
 
 		if ( st->outRange.length() == 0 ) {
 			st->lowKey = st->highKey = 0;
@@ -651,10 +633,6 @@ void RedFsm::setValueLimits()
 	}
 
 	for ( RedStateList::Iter st = stateList; st.lte(); st++ ) {
-		/* Maximum cond length. */
-		if ( st->stateCondList.length() > maxCondLen )
-			maxCondLen = st->stateCondList.length();
-
 		/* Maximum single length. */
 		if ( st->outSingle.length() > maxSingleLen )
 			maxSingleLen = st->outSingle.length();
@@ -665,7 +643,6 @@ void RedFsm::setValueLimits()
 
 		/* The key offset index offset for the state after last is not used, skip it.. */
 		if ( ! st.last() ) {
-			maxCondOffset += st->stateCondList.length();
 			maxKeyOffset += st->outSingle.length() + st->outRange.length()*2;
 			maxIndexOffset += st->outSingle.length() + st->outRange.length() + 1;
 		}
@@ -853,9 +830,6 @@ void RedFsm::analyzeMachine()
 		if ( st->defTrans != 0 && st->defTrans->action != 0 && 
 				st->defTrans->action->anyCurStateRef() )
 			st->bAnyRegCurStateRef = true;
-		
-		if ( st->stateCondList.length() > 0 )
-			bAnyConditions = true;
 	}
 
 	/* Assign ids to actions that are referenced. */

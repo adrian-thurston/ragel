@@ -80,9 +80,6 @@ FsmState::FsmState()
 	entryIds(),
 	epsilonTrans(),
 
-	/* Conditions. */
-	stateCondList(),
-
 	/* No transitions in from other states. */
 	foreignInTrans(0),
 
@@ -121,9 +118,6 @@ FsmState::FsmState(const FsmState &other)
 	 * are sets of integers and as such need no fixing. */
 	entryIds(other.entryIds),
 	epsilonTrans(other.epsilonTrans),
-
-	/* Copy in the elements of the conditions. */
-	stateCondList( other.stateCondList ),
 
 	/* No transitions in from other states. */
 	foreignInTrans(0),
@@ -245,30 +239,6 @@ int InitPartitionCompare::compare( const FsmState *state1 , const FsmState *stat
 	compareRes = FsmGraph::compareStateData( state1, state2 );
 	if ( compareRes != 0 )
 		return compareRes;
-
-	/* Use a pair iterator to test the condition pairs. */
-	PairIter<StateCond> condPair( state1->stateCondList.head, state2->stateCondList.head );
-	for ( ; !condPair.end(); condPair++ ) {
-		switch ( condPair.userState ) {
-		case RangeInS1:
-			return 1;
-		case RangeInS2:
-			return -1;
-
-		case RangeOverlap: {
-			CondSpace *condSpace1 = condPair.s1Tel.trans->condSpace;
-			CondSpace *condSpace2 = condPair.s2Tel.trans->condSpace;
-			if ( condSpace1 < condSpace2 )
-				return -1;
-			else if ( condSpace1 > condSpace2 )
-				return 1;
-			break;
-		}
-		case BreakS1:
-		case BreakS2:
-			break;
-		}
-	}
 
 	/* Use a pair iterator to test the transition pairs. */
 	PairIter<FsmTrans> outPair( state1->outList.head, state2->outList.head );

@@ -478,18 +478,6 @@ struct StateCond
 typedef DList<StateCond> StateCondList;
 typedef Vector<long> LongVect;
 
-struct CondData
-{
-	CondData() : nextCondKey(0) {}
-
-	/* Condition info. */
-	Key nextCondKey;
-
-	CondSpaceMap condSpaceMap;
-};
-
-extern CondData *condData;
-
 /* State class that implements actions and priorities. */
 struct FsmState 
 {

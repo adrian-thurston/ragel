@@ -126,18 +126,12 @@ string FsmCodeGen::CS()
 
 string FsmCodeGen::GET_WIDE_KEY()
 {
-	if ( redFsm->anyConditions() ) 
-		return "_widec";
-	else
-		return GET_KEY();
+	return GET_KEY();
 }
 
 string FsmCodeGen::GET_WIDE_KEY( RedState *state )
 {
-	if ( state->stateCondList.length() > 0 )
-		return "_widec";
-	else
-		return GET_KEY();
+	return GET_KEY();
 }
 
 string FsmCodeGen::GET_KEY()

@@ -738,9 +738,6 @@ void Compiler::initKeyOps( )
 		thisKeyOps.minKey = makeFsmKeyNum( lowerNum, rangeLowLoc, this );
 		thisKeyOps.maxKey = makeFsmKeyNum( upperNum, rangeHighLoc, this );
 	}
-
-	thisCondData.nextCondKey = thisKeyOps.maxKey;
-	thisCondData.nextCondKey.increment();
 }
 
 void Compiler::printNameInst( NameInst *nameInst, int level )
@@ -996,11 +993,6 @@ void Compiler::analyzeGraph( FsmGraph *graph )
 
 		for ( ActionTable::Iter at = st->eofActionTable; at.lte(); at++ )
 			at->value->numEofRefs += 1;
-
-		for ( StateCondList::Iter sc = st->stateCondList; sc.lte(); sc++ ) {
-			for ( CondSet::Iter sci = sc->condSpace->condSet; sci.lte(); sci++ )
-				(*sci)->numCondRefs += 1;
-		}
 	}
 }
 

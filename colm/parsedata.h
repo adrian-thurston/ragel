@@ -689,11 +689,9 @@ struct Compiler
 
 	void beginProcessing()
 	{
-		::condData = &thisCondData;
 		::keyOps = &thisKeyOps;
 	}
 
-	CondData thisCondData;
 	KeyOps thisKeyOps;
 
 	UniqueType *mainReturnUT;
