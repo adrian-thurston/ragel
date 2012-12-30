@@ -78,58 +78,58 @@ void clearSourceStream( struct ColmProgram *prg, Tree **sp, SourceStream *source
 
 SourceStream *newSourceStreamFile( FILE *file )
 {
-	SourceStream *is = (SourceStream*)malloc(sizeof(SourceStream));
-	memset( is, 0, sizeof(SourceStream) );
-	is->file = file;
-	is->funcs = &fileFuncs;
-	return is;
+	SourceStream *ss = (SourceStream*)malloc(sizeof(SourceStream));
+	memset( ss, 0, sizeof(SourceStream) );
+	ss->file = file;
+	ss->funcs = &fileFuncs;
+	return ss;
 }
 
 SourceStream *newSourceStreamFd( long fd )
 {
-	SourceStream *is = (SourceStream*)malloc(sizeof(SourceStream));
-	memset( is, 0, sizeof(SourceStream) );
-	is->fd = fd;
-	is->funcs = &fdFuncs;
-	return is;
+	SourceStream *ss = (SourceStream*)malloc(sizeof(SourceStream));
+	memset( ss, 0, sizeof(SourceStream) );
+	ss->fd = fd;
+	ss->funcs = &fdFuncs;
+	return ss;
 }
 
-static RunBuf *sourceStreamPopHead( SourceStream *is )
+static RunBuf *sourceStreamPopHead( SourceStream *ss )
 {
-	RunBuf *ret = is->queue;
-	is->queue = is->queue->next;
-	if ( is->queue == 0 )
-		is->queueTail = 0;
+	RunBuf *ret = ss->queue;
+	ss->queue = ss->queue->next;
+	if ( ss->queue == 0 )
+		ss->queueTail = 0;
 	else
-		is->queue->prev = 0;
+		ss->queue->prev = 0;
 	return ret;
 }
 
-static void sourceStreamAppend( SourceStream *is, RunBuf *runBuf )
+static void sourceStreamAppend( SourceStream *ss, RunBuf *runBuf )
 {
-	if ( is->queue == 0 ) {
+	if ( ss->queue == 0 ) {
 		runBuf->prev = runBuf->next = 0;
-		is->queue = is->queueTail = runBuf;
+		ss->queue = ss->queueTail = runBuf;
 	}
 	else {
-		is->queueTail->next = runBuf;
-		runBuf->prev = is->queueTail;
+		ss->queueTail->next = runBuf;
+		runBuf->prev = ss->queueTail;
 		runBuf->next = 0;
-		is->queueTail = runBuf;
+		ss->queueTail = runBuf;
 	}
 }
 
-static void sourceStreamPrepend( SourceStream *is, RunBuf *runBuf )
+static void sourceStreamPrepend( SourceStream *ss, RunBuf *runBuf )
 {
-	if ( is->queue == 0 ) {
+	if ( ss->queue == 0 ) {
 		runBuf->prev = runBuf->next = 0;
-		is->queue = is->queueTail = runBuf;
+		ss->queue = ss->queueTail = runBuf;
 	}
 	else {
-		is->queue->prev = runBuf;
+		ss->queue->prev = runBuf;
 		runBuf->prev = 0;
-		runBuf->next = is->queue;
-		is->queue = runBuf;
+		runBuf->next = ss->queue;
+		ss->queue = runBuf;
 	}
 }
 
@@ -145,19 +145,19 @@ void initInputFuncs()
  * Base run-time input streams.
  */
 
-int fdGetData( SourceStream *is, int skip, char *dest, int length, int *copied )
+int fdGetData( SourceStream *ss, int skip, char *dest, int length, int *copied )
 {
 	int ret = 0;
 	*copied = 0;
 
 	/* Move over skip bytes. */
-	RunBuf *buf = is->queue;
+	RunBuf *buf = ss->queue;
 	while ( true ) {
 		if ( buf == 0 ) {
 			/* Got through the in-mem buffers without copying anything. */
 			RunBuf *runBuf = newRunBuf();
-			sourceStreamAppend( is, runBuf );
-			int received = is->funcs->getDataImpl( is, runBuf->data, FSM_BUFSIZE );
+			sourceStreamAppend( ss, runBuf );
+			int received = ss->funcs->getDataImpl( ss, runBuf->data, FSM_BUFSIZE );
 			if ( received == 0 ) {
 				ret = INPUT_EOD;
 				break;
@@ -204,7 +204,7 @@ int fdGetData( SourceStream *is, int skip, char *dest, int length, int *copied )
 	return ret;
 }
 
-int fdConsumeData( SourceStream *is, int length )
+int fdConsumeData( SourceStream *ss, int length )
 {
 	debug( REALM_INPUT, "source consuming %ld bytes\n", length );
 
@@ -212,7 +212,7 @@ int fdConsumeData( SourceStream *is, int length )
 
 	/* Move over skip bytes. */
 	while ( true ) {
-		RunBuf *buf = is->queue;
+		RunBuf *buf = ss->queue;
 
 		if ( buf == 0 )
 			break;
@@ -237,21 +237,21 @@ int fdConsumeData( SourceStream *is, int length )
 		if ( length == 0 )
 			break;
 
-		RunBuf *runBuf = sourceStreamPopHead( is );
+		RunBuf *runBuf = sourceStreamPopHead( ss );
 		free( runBuf );
 	}
 
 	return consumed;
 }
 
-int fdUndoConsumeData( SourceStream *is, const char *data, int length )
+int fdUndoConsumeData( SourceStream *ss, const char *data, int length )
 {
 	debug( REALM_INPUT, "undoing consume of %ld bytes\n", length );
 
 	RunBuf *newBuf = newRunBuf();
 	newBuf->length = length;
 	memcpy( newBuf->data, data, length );
-	sourceStreamPrepend( is, newBuf );
+	sourceStreamPrepend( ss, newBuf );
 
 	return length;
 }
@@ -260,10 +260,10 @@ int fdUndoConsumeData( SourceStream *is, const char *data, int length )
  * File
  */
 
-int fileGetDataImpl( SourceStream *is, char *dest, int length )
+int fileGetDataImpl( SourceStream *ss, char *dest, int length )
 {
 	debug( REALM_INPUT, "inputStreamFileGetDataImpl length = %ld\n", length );
-	size_t res = fread( dest, 1, length, is->file );
+	size_t res = fread( dest, 1, length, ss->file );
 	return res;
 }
 
@@ -280,14 +280,14 @@ void initFileFuncs()
  * FD
  */
 
-int fdGetDataImpl( SourceStream *is, char *dest, int length )
+int fdGetDataImpl( SourceStream *ss, char *dest, int length )
 {
-	if ( is->eof )
+	if ( ss->eof )
 		return 0;
 	else {
-		long got = read( is->fd, dest, length );
+		long got = read( ss->fd, dest, length );
 		if ( got == 0 )
-			is->eof = true;
+			ss->eof = true;
 		return got;
 	}
 }

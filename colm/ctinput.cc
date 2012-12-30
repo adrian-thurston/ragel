@@ -40,32 +40,32 @@ SourceFuncs replFuncs;
 
 SourceStream *newSourceStreamPat( Pattern *pattern )
 {
-	SourceStream *is = (SourceStream*)malloc(sizeof(SourceStream));
-	memset( is, 0, sizeof(SourceStream) );
-	is->pattern = pattern;
-	is->patItem = pattern->list->head;
-	is->funcs = &patternFuncs;
-	return is;
+	SourceStream *ss = (SourceStream*)malloc(sizeof(SourceStream));
+	memset( ss, 0, sizeof(SourceStream) );
+	ss->pattern = pattern;
+	ss->patItem = pattern->list->head;
+	ss->funcs = &patternFuncs;
+	return ss;
 }
 
-LangEl *inputStreamPatternGetLangEl( SourceStream *is, long *bindId, char **data, long *length )
+LangEl *inputStreamPatternGetLangEl( SourceStream *ss, long *bindId, char **data, long *length )
 { 
-	LangEl *klangEl = is->patItem->factor->langEl;
-	*bindId = is->patItem->bindId;
+	LangEl *klangEl = ss->patItem->factor->langEl;
+	*bindId = ss->patItem->bindId;
 	*data = 0;
 	*length = 0;
 
-	is->patItem = is->patItem->next;
-	is->offset = 0;
+	ss->patItem = ss->patItem->next;
+	ss->offset = 0;
 	return klangEl;
 }
 
-int inputStreamPatternGetData( SourceStream *is, int skip, char *dest, int length, int *copied )
+int inputStreamPatternGetData( SourceStream *ss, int skip, char *dest, int length, int *copied )
 { 
 	*copied = 0;
 
-	PatternItem *buf = is->patItem;
-	int offset = is->offset;
+	PatternItem *buf = ss->patItem;
+	int offset = ss->offset;
 
 	while ( true ) {
 		if ( buf == 0 )
@@ -107,15 +107,15 @@ int inputStreamPatternGetData( SourceStream *is, int skip, char *dest, int lengt
 	return INPUT_DATA;
 }
 
-void inputStreamPatternBackup( SourceStream *is )
+void inputStreamPatternBackup( SourceStream *ss )
 {
-	if ( is->patItem == 0 )
-		is->patItem = is->pattern->list->tail;
+	if ( ss->patItem == 0 )
+		ss->patItem = ss->pattern->list->tail;
 	else
-		is->patItem = is->patItem->prev;
+		ss->patItem = ss->patItem->prev;
 }
 
-void inputStreamPatternPushBackBuf( SourceStream *is, RunBuf *runBuf )
+void inputStreamPatternPushBackBuf( SourceStream *ss, RunBuf *runBuf )
 {
 	char *data = runBuf->data + runBuf->offset;
 	long length = runBuf->length;
@@ -124,41 +124,41 @@ void inputStreamPatternPushBackBuf( SourceStream *is, RunBuf *runBuf )
 		return;
 
 	/* While pushing back past the current pattern item start. */
-	while ( length > is->offset ) {
-		length -= is->offset;
-		if ( is->offset > 0 )
-			assert( memcmp( is->patItem->data, data-length, is->offset ) == 0 );
-		inputStreamPatternBackup( is );
-		is->offset = is->patItem->data.length();
+	while ( length > ss->offset ) {
+		length -= ss->offset;
+		if ( ss->offset > 0 )
+			assert( memcmp( ss->patItem->data, data-length, ss->offset ) == 0 );
+		inputStreamPatternBackup( ss );
+		ss->offset = ss->patItem->data.length();
 	}
 
-	is->offset -= length;
-	assert( memcmp( &is->patItem->data[is->offset], data, length ) == 0 );
+	ss->offset -= length;
+	assert( memcmp( &ss->patItem->data[ss->offset], data, length ) == 0 );
 }
 
-void inputStreamPatternUndoConsumeLangEl( SourceStream *is )
+void inputStreamPatternUndoConsumeLangEl( SourceStream *ss )
 {
-	inputStreamPatternBackup( is );
-	is->offset = is->patItem->data.length();
+	inputStreamPatternBackup( ss );
+	ss->offset = ss->patItem->data.length();
 }
 
-int inputStreamPatternConsumeData( SourceStream *is, int length )
+int inputStreamPatternConsumeData( SourceStream *ss, int length )
 {
 	debug( REALM_INPUT, "consuming %ld bytes\n", length );
 
 	int consumed = 0;
 
 	while ( true ) {
-		if ( is->patItem == 0 )
+		if ( ss->patItem == 0 )
 			break;
 
-		int avail = is->patItem->data.length() - is->offset;
+		int avail = ss->patItem->data.length() - ss->offset;
 
 		if ( length >= avail ) {
 			/* Read up to the end of the data. Advance the
 			 * pattern item. */
-			is->patItem = is->patItem->next;
-			is->offset = 0;
+			ss->patItem = ss->patItem->next;
+			ss->offset = 0;
 
 			length -= avail;
 			consumed += avail;
@@ -167,7 +167,7 @@ int inputStreamPatternConsumeData( SourceStream *is, int length )
 				break;
 		}
 		else {
-			is->offset += length;
+			ss->offset += length;
 			consumed += length;
 			break;
 		}
@@ -176,9 +176,9 @@ int inputStreamPatternConsumeData( SourceStream *is, int length )
 	return consumed;
 }
 
-int inputStreamPatternUndoConsumeData( SourceStream *is, const char *data, int length )
+int inputStreamPatternUndoConsumeData( SourceStream *ss, const char *data, int length )
 {
-	is->offset -= length;
+	ss->offset -= length;
 	return length;
 }
 
@@ -201,46 +201,46 @@ extern "C" void initPatFuncs()
 
 SourceStream *newSourceStreamCons( Constructor *constructor )
 {
-	SourceStream *is = (SourceStream*)malloc(sizeof(SourceStream));
-	memset( is, 0, sizeof(SourceStream) );
-	is->constructor = constructor;
-	is->consItem = constructor->list->head;
-	is->funcs = &replFuncs;
-	return is;
+	SourceStream *ss = (SourceStream*)malloc(sizeof(SourceStream));
+	memset( ss, 0, sizeof(SourceStream) );
+	ss->constructor = constructor;
+	ss->consItem = constructor->list->head;
+	ss->funcs = &replFuncs;
+	return ss;
 }
 
-LangEl *inputStreamConsGetLangEl( SourceStream *is, long *bindId, char **data, long *length )
+LangEl *inputStreamConsGetLangEl( SourceStream *ss, long *bindId, char **data, long *length )
 { 
-	LangEl *klangEl = is->consItem->type == ConsItem::ExprType ? 
-			is->consItem->langEl : is->consItem->factor->langEl;
-	*bindId = is->consItem->bindId;
+	LangEl *klangEl = ss->consItem->type == ConsItem::ExprType ? 
+			ss->consItem->langEl : ss->consItem->factor->langEl;
+	*bindId = ss->consItem->bindId;
 
 	*data = 0;
 	*length = 0;
 
-	if ( is->consItem->type == ConsItem::FactorType ) {
-		if ( is->consItem->factor->typeRef->pdaLiteral != 0 ) {
+	if ( ss->consItem->type == ConsItem::FactorType ) {
+		if ( ss->consItem->factor->typeRef->pdaLiteral != 0 ) {
 			bool unusedCI;
-			prepareLitString( is->consItem->data, unusedCI, 
-					is->consItem->factor->typeRef->pdaLiteral->data,
-					is->consItem->factor->typeRef->pdaLiteral->loc );
+			prepareLitString( ss->consItem->data, unusedCI, 
+					ss->consItem->factor->typeRef->pdaLiteral->data,
+					ss->consItem->factor->typeRef->pdaLiteral->loc );
 
-			*data = is->consItem->data;
-			*length = is->consItem->data.length();
+			*data = ss->consItem->data;
+			*length = ss->consItem->data.length();
 		}
 	}
 
-	is->consItem = is->consItem->next;
-	is->offset = 0;
+	ss->consItem = ss->consItem->next;
+	ss->offset = 0;
 	return klangEl;
 }
 
-int inputStreamConsGetData( SourceStream *is, int skip, char *dest, int length, int *copied )
+int inputStreamConsGetData( SourceStream *ss, int skip, char *dest, int length, int *copied )
 { 
 	*copied = 0;
 
-	ConsItem *buf = is->consItem;
-	int offset = is->offset;
+	ConsItem *buf = ss->consItem;
+	int offset = ss->offset;
 
 	while ( true ) {
 		if ( buf == 0 )
@@ -282,15 +282,15 @@ int inputStreamConsGetData( SourceStream *is, int skip, char *dest, int length, 
 	return INPUT_DATA;
 }
 
-void inputStreamConsBackup( SourceStream *is )
+void inputStreamConsBackup( SourceStream *ss )
 {
-	if ( is->consItem == 0 )
-		is->consItem = is->constructor->list->tail;
+	if ( ss->consItem == 0 )
+		ss->consItem = ss->constructor->list->tail;
 	else
-		is->consItem = is->consItem->prev;
+		ss->consItem = ss->consItem->prev;
 }
 
-void inputStreamConsPushBackBuf( SourceStream *is, RunBuf *runBuf )
+void inputStreamConsPushBackBuf( SourceStream *ss, RunBuf *runBuf )
 {
 	char *data = runBuf->data + runBuf->offset;
 	long length = runBuf->length;
@@ -303,39 +303,39 @@ void inputStreamConsPushBackBuf( SourceStream *is, RunBuf *runBuf )
 		return;
 
 	/* While pushing back past the current pattern item start. */
-	while ( length > is->offset ) {
-		length -= is->offset;
-		if ( is->offset > 0 ) 
-			assert( memcmp( is->consItem->data, data-length, is->offset ) == 0 );
-		inputStreamConsBackup( is );
-		is->offset = is->consItem->data.length();
+	while ( length > ss->offset ) {
+		length -= ss->offset;
+		if ( ss->offset > 0 ) 
+			assert( memcmp( ss->consItem->data, data-length, ss->offset ) == 0 );
+		inputStreamConsBackup( ss );
+		ss->offset = ss->consItem->data.length();
 	}
 
-	is->offset -= length;
-	assert( memcmp( &is->consItem->data[is->offset], data, length ) == 0 );
+	ss->offset -= length;
+	assert( memcmp( &ss->consItem->data[ss->offset], data, length ) == 0 );
 }
 
-void inputStreamConsUndoConsumeLangEl( SourceStream *is )
+void inputStreamConsUndoConsumeLangEl( SourceStream *ss )
 {
-	inputStreamConsBackup( is );
-	is->offset = is->consItem->data.length();
+	inputStreamConsBackup( ss );
+	ss->offset = ss->consItem->data.length();
 }
 
-int inputStreamConsConsumeData( SourceStream *is, int length )
+int inputStreamConsConsumeData( SourceStream *ss, int length )
 {
 	int consumed = 0;
 
 	while ( true ) {
-		if ( is->consItem == 0 )
+		if ( ss->consItem == 0 )
 			break;
 
-		int avail = is->consItem->data.length() - is->offset;
+		int avail = ss->consItem->data.length() - ss->offset;
 
 		if ( length >= avail ) {
 			/* Read up to the end of the data. Advance the
 			 * pattern item. */
-			is->consItem = is->consItem->next;
-			is->offset = 0;
+			ss->consItem = ss->consItem->next;
+			ss->offset = 0;
 
 			length -= avail;
 			consumed += avail;
@@ -344,7 +344,7 @@ int inputStreamConsConsumeData( SourceStream *is, int length )
 				break;
 		}
 		else {
-			is->offset += length;
+			ss->offset += length;
 			consumed += length;
 			break;
 		}
@@ -353,9 +353,9 @@ int inputStreamConsConsumeData( SourceStream *is, int length )
 	return consumed;
 }
 
-int inputStreamConsUndoConsumeData( SourceStream *is, const char *data, int length )
+int inputStreamConsUndoConsumeData( SourceStream *ss, const char *data, int length )
 {
-	is->offset -= length;
+	ss->offset -= length;
 	return length;
 }
 

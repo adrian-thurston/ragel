@@ -88,16 +88,16 @@ typedef struct _SourceStream SourceStream;
 struct SourceFuncs
 {
 	/* Data. */
-	int (*getData)( SourceStream *is, int offset, char *dest, int length, int *copied );
-	int (*consumeData)( SourceStream *is, int length );
-	int (*undoConsumeData)( SourceStream *is, const char *data, int length );
+	int (*getData)( SourceStream *ss, int offset, char *dest, int length, int *copied );
+	int (*consumeData)( SourceStream *ss, int length );
+	int (*undoConsumeData)( SourceStream *ss, const char *data, int length );
 
 	/* Language elments (compile-time). */
-	struct LangEl *(*consumeLangEl)( SourceStream *is, long *bindId, char **data, long *length );
-	void (*undoConsumeLangEl)( SourceStream *is );
+	struct LangEl *(*consumeLangEl)( SourceStream *ss, long *bindId, char **data, long *length );
+	void (*undoConsumeLangEl)( SourceStream *ss );
 
 	/* Private implmentation for some shared get data functions. */
-	int (*getDataImpl)( SourceStream *is, char *dest, int length );
+	int (*getDataImpl)( SourceStream *ss, char *dest, int length );
 };
 
 /* Implements a single source of input data such as a file, string, pattern.
