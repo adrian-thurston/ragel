@@ -138,6 +138,8 @@ void initConsFuncs();
 /* List of source streams. Enables streams to be pushed/popped. */
 struct _InputStream
 {
+	struct _FsmRun *attached;
+
 	char eofSent;
 	char eof;
 
@@ -145,14 +147,8 @@ struct _InputStream
 	long column;
 	long byte;
 
-	/* This is set true for input streams that do their own line counting.
-	 * Causes FsmRun to ignore NLs. */
-	int handlesLine;
-
 	RunBuf *queue;
 	RunBuf *queueTail;
-
-	struct _FsmRun *attached;
 };
 
 typedef struct _InputStream InputStream;

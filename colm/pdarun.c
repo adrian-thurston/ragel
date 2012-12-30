@@ -92,15 +92,13 @@ void clearFsmRun( Program *prg, FsmRun *fsmRun )
 /* Keep the position up to date after consuming text. */
 void updatePosition( InputStream *inputStream, const char *data, long length )
 {
-	if ( !inputStream->handlesLine ) {
-		int i;
-		for ( i = 0; i < length; i++ ) {
-			if ( data[i] != '\n' )
-				inputStream->column += 1;
-			else {
-				inputStream->line += 1;
-				inputStream->column = 1;
-			}
+	int i;
+	for ( i = 0; i < length; i++ ) {
+		if ( data[i] != '\n' )
+			inputStream->column += 1;
+		else {
+			inputStream->line += 1;
+			inputStream->column = 1;
 		}
 	}
 
@@ -113,11 +111,9 @@ void undoPosition( InputStream *inputStream, const char *data, long length )
 	/* FIXME: this needs to fetch the position information from the parsed
 	 * token and restore based on that.. */
 	int i;
-	if ( !inputStream->handlesLine ) {
-		for ( i = 0; i < length; i++ ) {
-			if ( data[i] == '\n' )
-				inputStream->line -= 1;
-		}
+	for ( i = 0; i < length; i++ ) {
+		if ( data[i] == '\n' )
+			inputStream->line -= 1;
 	}
 
 	inputStream->byte -= length;
