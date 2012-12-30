@@ -158,10 +158,6 @@ int fdGetData( SourceStream *is, int skip, char *dest, int length, int *copied )
 	int ret = 0;
 	*copied = 0;
 
-	if ( skip == 9 && length == 6 ) {
-		debug( REALM_INPUT, "foo\n" );
-	}
-
 	/* Move over skip bytes. */
 	RunBuf *buf = is->queue;
 	while ( true ) {
