@@ -111,10 +111,6 @@ struct _SourceStream
 	long column;
 	long byte;
 
-	/* This is set true for input streams that do their own line counting.
-	 * Causes FsmRun to ignore NLs. */
-	int handlesLine;
-
 	RunBuf *queue;
 	RunBuf *queueTail;
 

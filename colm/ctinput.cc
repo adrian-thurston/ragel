@@ -42,7 +42,6 @@ SourceStream *newSourceStreamPat( Pattern *pattern )
 {
 	SourceStream *is = (SourceStream*)malloc(sizeof(SourceStream));
 	memset( is, 0, sizeof(SourceStream) );
-	is->handlesLine = true;
 	is->pattern = pattern;
 	is->patItem = pattern->list->head;
 	is->funcs = &patternFuncs;
@@ -208,7 +207,6 @@ SourceStream *newSourceStreamCons( Constructor *constructor )
 {
 	SourceStream *is = (SourceStream*)malloc(sizeof(SourceStream));
 	memset( is, 0, sizeof(SourceStream) );
-	is->handlesLine = true;
 	is->constructor = constructor;
 	is->consItem = constructor->list->head;
 	is->funcs = &replFuncs;
