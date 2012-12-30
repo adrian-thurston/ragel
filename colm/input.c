@@ -290,8 +290,14 @@ void initFileFuncs()
 
 int fdGetDataImpl( SourceStream *is, char *dest, int length )
 {
-	long got = read( is->fd, dest, length );
-	return got;
+	if ( is->eof )
+		return 0;
+	else {
+		long got = read( is->fd, dest, length );
+		if ( got == 0 )
+			is->eof = true;
+		return got;
+	}
 }
 
 void initFdFuncs()
