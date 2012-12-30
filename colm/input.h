@@ -107,7 +107,6 @@ struct _SourceStream
 	struct SourceFuncs *funcs;
 
 	char eof;
-
 	long line;
 	long column;
 	long byte;
@@ -160,9 +159,6 @@ struct _InputStream
 
 	RunBuf *queue;
 	RunBuf *queueTail;
-
-	FILE *file;
-	long fd;
 
 	struct _FsmRun *attached;
 };
