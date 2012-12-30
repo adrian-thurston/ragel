@@ -190,6 +190,7 @@ typedef struct _Stream
 	Kid *child;
 
 	FILE *file;
+	int fd;
 	SourceStream *in;
 } Stream;
 
@@ -348,6 +349,7 @@ Tree *treeTrim( struct ColmProgram *prg, Tree **sp, Tree *tree );
 
 void printTreeCollect( struct ColmProgram *prg, Tree **sp, StrCollect *collect, Tree *tree, int trim );
 void printTreeFile( struct ColmProgram *prg, Tree **sp, FILE *out, Tree *tree, int trim );
+void printTreeFd( struct ColmProgram *prg, Tree **sp, int fd, Tree *tree, int trim );
 void printXmlStdout( struct ColmProgram *prg, Tree **sp, Tree *tree, int commAttr, int trim );
 
 /*

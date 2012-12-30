@@ -3294,7 +3294,7 @@ void Compiler::addStdout()
 	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeStr );
 
 	/* Create the field and insert it into the map. */
-	ObjField *el = new ObjField( internal, typeRef, "stout" );
+	ObjField *el = new ObjField( internal, typeRef, "stdout" );
 	el->beenReferenced = true;
 	el->beenInitialized = true;
 	el->isConst = true;

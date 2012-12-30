@@ -103,16 +103,6 @@ struct HostLang
 	bool explicitUnsigned;
 };
 
-
-/* Target language. */
-enum HostLangType
-{
-	CCode,
-	DCode,
-	JavaCode,
-	RubyCode
-};
-
 extern HostLang *hostLang;
 extern HostLang hostLangC;
 

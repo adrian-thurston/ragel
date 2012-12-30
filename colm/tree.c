@@ -27,6 +27,8 @@
 #include <colm/map.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
 #include <assert.h>
 
 #define true 1
@@ -242,6 +244,7 @@ Stream *openStreamFd( Program *prg, long fd )
 {
 	Stream *res = (Stream*)mapElAllocate( prg );
 	res->id = LEL_ID_STREAM;
+	res->fd = fd;
 	res->in = newSourceStreamFd( fd );
 	initSourceStream( res->in );
 	return res;
@@ -2052,7 +2055,12 @@ void appendCollect( struct ColmPrintArgs *args, const char *data, int length )
 
 void appendFile( struct ColmPrintArgs *args, const char *data, int length )
 {
-	fwrite( data, length, 1, (FILE*)args->arg );
+	fwrite( data, 1, length, (FILE*)args->arg );
+}
+
+void appendFd( struct ColmPrintArgs *args, const char *data, int length )
+{
+	write( (long)args->arg, data, length );
 }
 
 Tree *treeTrim( struct ColmProgram *prg, Tree **sp, Tree *tree )
@@ -2472,6 +2480,13 @@ void printTreeCollect( Program *prg, Tree **sp, StrCollect *collect, Tree *tree,
 void printTreeFile( Program *prg, Tree **sp, FILE *out, Tree *tree, int trim )
 {
 	struct ColmPrintArgs printArgs = { out, true, false, trim, &appendFile, 
+			&printNull, &printTermTree, &printNull };
+	printTreeArgs( prg, sp, &printArgs, tree );
+}
+
+void printTreeFd( Program *prg, Tree **sp, int fd, Tree *tree, int trim )
+{
+	struct ColmPrintArgs printArgs = { (void*)((long)fd), true, false, trim, &appendFd,
 			&printNull, &printTermTree, &printNull };
 	printTreeArgs( prg, sp, &printArgs, tree );
 }

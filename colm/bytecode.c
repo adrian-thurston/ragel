@@ -946,7 +946,10 @@ again:
 			Stream *stream = (Stream*)vm_pop();
 			while ( n-- > 0 ) {
 				Tree *tree = vm_pop();
-				printTreeFile( prg, sp, stream->file, tree, true );
+				if ( stream->file != 0 )
+					printTreeFile( prg, sp, stream->file, tree, true );
+				else
+					printTreeFd( prg, sp, stream->fd, tree, true );
 				treeDownref( prg, sp, tree );
 			}
 			treeDownref( prg, sp, (Tree*)stream );
@@ -3490,6 +3493,36 @@ again:
 
 			treeUpref( (Tree*)prg->stdinVal );
 			vm_push( (Tree*)prg->stdinVal );
+			break;
+		}
+		case IN_GET_STDOUT: {
+			debug( REALM_BYTECODE, "IN_GET_STDOUT\n" );
+
+			/* Pop the root object. */
+			Tree *obj = vm_pop();
+			treeDownref( prg, sp, obj );
+			if ( prg->stdoutVal == 0 ) {
+				prg->stdoutVal = openStreamFd( prg, 1 );
+				treeUpref( (Tree*)prg->stdoutVal );
+			}
+
+			treeUpref( (Tree*)prg->stdoutVal );
+			vm_push( (Tree*)prg->stdoutVal );
+			break;
+		}
+		case IN_GET_STDERR: {
+			debug( REALM_BYTECODE, "IN_GET_STDERR\n" );
+
+			/* Pop the root object. */
+			Tree *obj = vm_pop();
+			treeDownref( prg, sp, obj );
+			if ( prg->stderrVal == 0 ) {
+				prg->stderrVal = openStreamFd( prg, 2 );
+				treeUpref( (Tree*)prg->stderrVal );
+			}
+
+			treeUpref( (Tree*)prg->stderrVal );
+			vm_push( (Tree*)prg->stderrVal );
 			break;
 		}
 		case IN_LOAD_ARGV: {
