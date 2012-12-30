@@ -157,7 +157,7 @@ int fdGetData( SourceStream *ss, int skip, char *dest, int length, int *copied )
 			/* Got through the in-mem buffers without copying anything. */
 			RunBuf *runBuf = newRunBuf();
 			sourceStreamAppend( ss, runBuf );
-			int received = ss->funcs->getDataImpl( ss, runBuf->data, FSM_BUFSIZE );
+			int received = ss->funcs->getDataSource( ss, runBuf->data, FSM_BUFSIZE );
 			if ( received == 0 ) {
 				ret = INPUT_EOD;
 				break;
@@ -260,9 +260,9 @@ int fdUndoConsumeData( SourceStream *ss, const char *data, int length )
  * File
  */
 
-int fileGetDataImpl( SourceStream *ss, char *dest, int length )
+int fileGetDataSource( SourceStream *ss, char *dest, int length )
 {
-	debug( REALM_INPUT, "inputStreamFileGetDataImpl length = %ld\n", length );
+	debug( REALM_INPUT, "inputStreamFileGetDataSource length = %ld\n", length );
 	size_t res = fread( dest, 1, length, ss->file );
 	return res;
 }
@@ -273,14 +273,14 @@ void initFileFuncs()
 	fileFuncs.getData = &fdGetData;
 	fileFuncs.consumeData = &fdConsumeData;
 	fileFuncs.undoConsumeData = &fdUndoConsumeData;
-	fileFuncs.getDataImpl = &fileGetDataImpl;
+	fileFuncs.getDataSource = &fileGetDataSource;
 }
 
 /*
  * FD
  */
 
-int fdGetDataImpl( SourceStream *ss, char *dest, int length )
+int fdGetDataSource( SourceStream *ss, char *dest, int length )
 {
 	if ( ss->eof )
 		return 0;
@@ -298,7 +298,7 @@ void initFdFuncs()
 	fdFuncs.getData = &fdGetData;
 	fdFuncs.consumeData = &fdConsumeData;
 	fdFuncs.undoConsumeData = &fdUndoConsumeData;
-	fdFuncs.getDataImpl = &fdGetDataImpl;
+	fdFuncs.getDataSource = &fdGetDataSource;
 }
 
 /*

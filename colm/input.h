@@ -97,7 +97,7 @@ struct SourceFuncs
 	void (*undoConsumeLangEl)( SourceStream *ss );
 
 	/* Private implmentation for some shared get data functions. */
-	int (*getDataImpl)( SourceStream *ss, char *dest, int length );
+	int (*getDataSource)( SourceStream *ss, char *dest, int length );
 };
 
 /* Implements a single source of input data such as a file, string, pattern.
