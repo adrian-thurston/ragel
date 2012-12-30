@@ -51,10 +51,6 @@ struct SourceFuncs fdFuncs;
 
 void initSourceStream( SourceStream *inputStream )
 {
-	/* FIXME: correct values here. */
-	inputStream->line = 1;
-	inputStream->column = 1;
-	inputStream->byte = 0;
 }
 
 void clearSourceStream( struct ColmProgram *prg, Tree **sp, SourceStream *sourceStream )
@@ -84,8 +80,6 @@ SourceStream *newSourceStreamFile( FILE *file )
 {
 	SourceStream *is = (SourceStream*)malloc(sizeof(SourceStream));
 	memset( is, 0, sizeof(SourceStream) );
-	is->line = 1;
-	is->column = 1;
 	is->file = file;
 	is->funcs = &fileFuncs;
 	return is;
@@ -95,8 +89,6 @@ SourceStream *newSourceStreamFd( long fd )
 {
 	SourceStream *is = (SourceStream*)malloc(sizeof(SourceStream));
 	memset( is, 0, sizeof(SourceStream) );
-	is->line = 1;
-	is->column = 1;
 	is->fd = fd;
 	is->funcs = &fdFuncs;
 	return is;

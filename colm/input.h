@@ -105,11 +105,9 @@ struct SourceFuncs
 struct _SourceStream
 {
 	struct SourceFuncs *funcs;
+	struct _FsmRun *attached;
 
 	char eof;
-	long line;
-	long column;
-	long byte;
 
 	RunBuf *queue;
 	RunBuf *queueTail;
@@ -125,8 +123,6 @@ struct _SourceStream
 	struct PatternItem *patItem;
 	struct Constructor *constructor;
 	struct ConsItem *consItem;
-
-	struct _FsmRun *attached;
 };
 
 SourceStream *newSourceStreamPat( struct Pattern *pattern );

@@ -54,7 +54,6 @@ LangEl *inputStreamPatternGetLangEl( SourceStream *is, long *bindId, char **data
 	*bindId = is->patItem->bindId;
 	*data = 0;
 	*length = 0;
-	is->line = is->patItem->loc.line;
 
 	is->patItem = is->patItem->next;
 	is->offset = 0;
@@ -74,9 +73,6 @@ int inputStreamPatternGetData( SourceStream *is, int skip, char *dest, int lengt
 
 		if ( buf->type == PatternItem::FactorType )
 			return INPUT_LANG_EL;
-
-		if ( offset == 0 )
-			is->line = buf->loc.line;
 
 		assert ( buf->type == PatternItem::InputText );
 		int avail = buf->data.length() - offset;
@@ -221,7 +217,6 @@ LangEl *inputStreamConsGetLangEl( SourceStream *is, long *bindId, char **data, l
 
 	*data = 0;
 	*length = 0;
-	is->line = is->consItem->loc.line;
 
 	if ( is->consItem->type == ConsItem::FactorType ) {
 		if ( is->consItem->factor->typeRef->pdaLiteral != 0 ) {
@@ -253,9 +248,6 @@ int inputStreamConsGetData( SourceStream *is, int skip, char *dest, int length, 
 
 		if ( buf->type == ConsItem::ExprType || buf->type == ConsItem::FactorType )
 			return INPUT_LANG_EL;
-
-		if ( offset == 0 )
-			is->line = buf->loc.line;
 
 		assert ( buf->type == ConsItem::InputText );
 		int avail = buf->data.length() - offset;
