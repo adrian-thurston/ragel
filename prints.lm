@@ -1,0 +1,12 @@
+lex
+	token word /[a-z]+/
+	ignore /[\t\n ]+/
+end
+
+def start
+	[word*]
+
+parse Start: start[stdin]
+
+prints( stderr 'fd stderr: ' Start.tree '\n' )
+prints( stdout 'fd stdout: ' Start.tree '\n' )
