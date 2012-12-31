@@ -946,10 +946,10 @@ again:
 			Stream *stream = (Stream*)vm_pop();
 			while ( n-- > 0 ) {
 				Tree *tree = vm_pop();
-				if ( stream->file != 0 )
-					printTreeFile( prg, sp, stream->file, tree, true );
+				if ( stream->in->file != 0 )
+					printTreeFile( prg, sp, stream->in->file, tree, true );
 				else
-					printTreeFd( prg, sp, stream->fd, tree, true );
+					printTreeFd( prg, sp, stream->in->fd, tree, true );
 				treeDownref( prg, sp, tree );
 			}
 			treeDownref( prg, sp, (Tree*)stream );

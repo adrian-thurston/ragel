@@ -234,7 +234,6 @@ Stream *openStreamFile( Program *prg, FILE *file )
 {
 	Stream *res = (Stream*)mapElAllocate( prg );
 	res->id = LEL_ID_STREAM;
-	res->file = file;
 	res->in = newSourceStreamFile( file );
 	initSourceStream( res->in );
 	return res;
@@ -244,7 +243,6 @@ Stream *openStreamFd( Program *prg, long fd )
 {
 	Stream *res = (Stream*)mapElAllocate( prg );
 	res->id = LEL_ID_STREAM;
-	res->fd = fd;
 	res->in = newSourceStreamFd( fd );
 	initSourceStream( res->in );
 	return res;
@@ -1072,8 +1070,10 @@ free_tree:
 			Stream *stream = (Stream*)tree;
 			clearSourceStream( prg, sp, stream->in );
 			free( stream->in );
-			if ( stream->file != 0 )
-				fclose( stream->file );
+			if ( stream->in->file != 0 )
+				fclose( stream->in->file );
+			else 
+				close( stream->in->fd );
 			streamFree( prg, stream );
 		}
 		else if ( tree->id == LEL_ID_INPUT ) {
@@ -2373,7 +2373,7 @@ void printTermTree( Program *prg, Tree **sp, struct ColmPrintArgs *printArgs, Ki
 	else if ( kid->tree->id == LEL_ID_STREAM ) {
 		char buf[INT_SZ];
 		printArgs->out( printArgs, "#", 1 );
-		sprintf( buf, "%p", (void*) ((Stream*)kid->tree)->file );
+		sprintf( buf, "%p", (void*) ((Stream*)kid->tree)->in->file );
 		printArgs->out( printArgs, buf, strlen(buf) );
 	}
 	else if ( kid->tree->tokdata != 0 && 

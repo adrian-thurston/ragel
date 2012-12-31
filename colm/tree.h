@@ -189,8 +189,6 @@ typedef struct _Stream
 	long refs;
 	Kid *child;
 
-	FILE *file;
-	int fd;
 	StreamImpl *in;
 } Stream;
 
