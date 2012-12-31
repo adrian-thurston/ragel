@@ -90,33 +90,33 @@ void clearFsmRun( Program *prg, FsmRun *fsmRun )
 }
 
 /* Keep the position up to date after consuming text. */
-void updatePosition( InputStream *inputStream, const char *data, long length )
+void updatePosition( StreamImpl *is, const char *data, long length )
 {
 	int i;
 	for ( i = 0; i < length; i++ ) {
 		if ( data[i] != '\n' )
-			inputStream->column += 1;
+			is->column += 1;
 		else {
-			inputStream->line += 1;
-			inputStream->column = 1;
+			is->line += 1;
+			is->column = 1;
 		}
 	}
 
-	inputStream->byte += length;
+	is->byte += length;
 }
 
 /* Keep the position up to date after sending back text. */
-void undoPosition( InputStream *inputStream, const char *data, long length )
+void undoPosition( StreamImpl *is, const char *data, long length )
 {
 	/* FIXME: this needs to fetch the position information from the parsed
 	 * token and restore based on that.. */
 	int i;
 	for ( i = 0; i < length; i++ ) {
 		if ( data[i] == '\n' )
-			inputStream->line -= 1;
+			is->line -= 1;
 	}
 
-	inputStream->byte -= length;
+	is->byte -= length;
 }
 
 void incrementSteps( PdaRun *pdaRun )
@@ -133,7 +133,7 @@ void decrementSteps( PdaRun *pdaRun )
 
 /* Load up a token, starting from tokstart if it is set. If not set then
  * start it at data. */
-Head *streamPull( Program *prg, FsmRun *fsmRun, InputStream *inputStream, long length )
+Head *streamPull( Program *prg, FsmRun *fsmRun, StreamImpl *is, long length )
 {
 	/* We should not be in the midst of getting a token. */
 	assert( fsmRun->tokstart == 0 );
@@ -143,52 +143,52 @@ Head *streamPull( Program *prg, FsmRun *fsmRun, InputStream *inputStream, long l
 	fsmRun->runBuf = runBuf;
 
 	int len = 0;
-	getData( fsmRun, inputStream, 0, runBuf->data, length, &len );
-	consumeData( inputStream, length );
+	is->funcs->getData( fsmRun, is, 0, runBuf->data, length, &len );
+	is->funcs->consumeData( is, length );
 	fsmRun->p = fsmRun->pe = runBuf->data + length;
 
 	Head *tokdata = stringAllocPointer( prg, runBuf->data, length );
-	updatePosition( inputStream, runBuf->data, length );
+	updatePosition( is, runBuf->data, length );
 
 	return tokdata;
 }
 
-void undoStreamPull( InputStream *inputStream, const char *data, long length )
+void undoStreamPull( StreamImpl *is, const char *data, long length )
 {
 	debug( REALM_PARSE, "undoing stream pull\n" );
 
-	prependData( inputStream, data, length );
+	is->funcs->prependData( is, data, length );
 }
 
-void streamPushText( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length )
+void streamPushText( FsmRun *fsmRun, StreamImpl *is, const char *data, long length )
 {
-	prependData( inputStream, data, length );
+	is->funcs->prependData( is, data, length );
 }
 
-void streamPushTree( FsmRun *fsmRun, InputStream *inputStream, Tree *tree, int ignore )
+void streamPushTree( FsmRun *fsmRun, StreamImpl *is, Tree *tree, int ignore )
 {
-	prependTree( inputStream, tree, ignore );
+	is->funcs->prependTree( is, tree, ignore );
 }
 
-void undoStreamPush( Program *prg, Tree **sp, FsmRun *fsmRun, InputStream *inputStream, long length )
+void undoStreamPush( Program *prg, Tree **sp, FsmRun *fsmRun, StreamImpl *is, long length )
 {
 	if ( length < 0 ) {
-		Tree *tree = undoPrependTree( inputStream );
+		Tree *tree = is->funcs->undoPrependTree( is );
 		treeDownref( prg, sp, tree );
 	}
 	else {
-		undoPrependData( inputStream, length );
+		is->funcs->undoPrependData( is, length );
 	}
 }
 
-void undoStreamAppend( Program *prg, Tree **sp, FsmRun *fsmRun, InputStream *inputStream, Tree *input, long length )
+void undoStreamAppend( Program *prg, Tree **sp, FsmRun *fsmRun, StreamImpl *is, Tree *input, long length )
 {
 	if ( input->id == LEL_ID_STR )
-		undoAppendData( inputStream, length );
+		is->funcs->undoAppendData( is, length );
 	else if ( input->id == LEL_ID_STREAM )
-		undoAppendStream( inputStream );
+		is->funcs->undoAppendStream( is );
 	else {
-		Tree *tree = undoAppendTree( inputStream );
+		Tree *tree = is->funcs->undoAppendTree( is );
 		treeDownref( prg, sp, tree );
 	}
 }
@@ -196,7 +196,7 @@ void undoStreamAppend( Program *prg, Tree **sp, FsmRun *fsmRun, InputStream *inp
 /* Should only be sending back whole tokens/ignores, therefore the send back
  * should never cross a buffer boundary. Either we slide back data, or we move to
  * a previous buffer and slide back data. */
-static void sendBackText( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length )
+static void sendBackText( FsmRun *fsmRun, StreamImpl *is, const char *data, long length )
 {
 	debug( REALM_PARSE, "push back of %ld characters\n", length );
 
@@ -206,13 +206,13 @@ static void sendBackText( FsmRun *fsmRun, InputStream *inputStream, const char *
 	debug( REALM_PARSE, "sending back text: %.*s\n", 
 			(int)length, data );
 
-	undoConsumeData( fsmRun, inputStream, data, length );
-	undoPosition( inputStream, data, length );
+	is->funcs->undoConsumeData( fsmRun, is, data, length );
+	undoPosition( is, data, length );
 }
 
-void sendBackTree( InputStream *inputStream, Tree *tree )
+void sendBackTree( StreamImpl *is, Tree *tree )
 {
-	undoConsumeTree( inputStream, tree, false );
+	is->funcs->undoConsumeTree( is, tree, false );
 }
 
 /*
@@ -220,7 +220,7 @@ void sendBackTree( InputStream *inputStream, Tree *tree )
  *   PcrRevIgnore
  */
 static void sendBackIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
-		InputStream *inputStream, ParseTree *parseTree )
+		StreamImpl *is, ParseTree *parseTree )
 {
 	#ifdef DEBUG
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
@@ -233,7 +233,7 @@ static void sendBackIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsm
 	int artificial = parseTree->flags & PF_ARTIFICIAL;
 
 	if ( head != 0 && !artificial )
-		sendBackText( fsmRun, inputStream, stringData( head ), head->length );
+		sendBackText( fsmRun, is, stringData( head ), head->length );
 
 	decrementSteps( pdaRun );
 
@@ -250,7 +250,7 @@ static void sendBackIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsm
 
 }
 
-void attachInput( FsmRun *fsmRun, InputStream *is )
+void attachInput( FsmRun *fsmRun, StreamImpl *is )
 {
 	if ( is->attached != 0 && is->attached != fsmRun )
 		detachInput( is->attached, is );
@@ -262,7 +262,7 @@ void attachInput( FsmRun *fsmRun, InputStream *is )
 	}
 }
 
-void attachSource( FsmRun *fsmRun, SourceStream *ss )
+void attachSource( FsmRun *fsmRun, StreamImpl *ss )
 {
 	if ( ss->attached != 0 && ss->attached != fsmRun )
 		detachSource( ss->attached, ss );
@@ -274,7 +274,7 @@ void attachSource( FsmRun *fsmRun, SourceStream *ss )
 	}
 }
 
-void detachInput( FsmRun *fsmRun, InputStream *is )
+void detachInput( FsmRun *fsmRun, StreamImpl *is )
 {
 	debug( REALM_INPUT, "detaching fsm run from input stream:  %p %p\n", fsmRun, is );
 
@@ -289,7 +289,7 @@ void detachInput( FsmRun *fsmRun, InputStream *is )
 	}
 }
 
-void detachSource( FsmRun *fsmRun, SourceStream *is )
+void detachSource( FsmRun *fsmRun, StreamImpl *is )
 {
 	debug( REALM_INPUT, "detaching fsm run from source stream: %p %p\n", fsmRun, is );
 
@@ -332,18 +332,18 @@ void resetToken( FsmRun *fsmRun )
  */
 
 static void sendBack( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, 
-		InputStream *inputStream, ParseTree *parseTree )
+		StreamImpl *is, ParseTree *parseTree )
 {
 	debug( REALM_PARSE, "sending back: %s\n", prg->rtd->lelInfo[parseTree->id].name );
 
 	if ( parseTree->flags & PF_NAMED ) {
 		///* Send back anything in the buffer that has not been parsed. */
 		//if ( fsmRun->p == fsmRun->runBuf->data )
-		//	sendBackRunBufHead( fsmRun, inputStream );
+		//	sendBackRunBufHead( fsmRun, is );
 
 		/* Send the named lang el back first, then send back any leading
 		 * whitespace. */
-		undoConsumeLangEl( inputStream );
+		is->funcs->undoConsumeLangEl( is );
 	}
 
 	decrementSteps( pdaRun );
@@ -359,7 +359,7 @@ static void sendBack( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
 
 		treeUpref( parseTree->shadow->tree );
 
-		sendBackTree( inputStream, parseTree->shadow->tree );
+		sendBackTree( is, parseTree->shadow->tree );
 	}
 	else {
 		/* Check for reverse code. */
@@ -370,12 +370,12 @@ static void sendBack( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
 		}
 
 		/* Push back the token data. */
-		sendBackText( fsmRun, inputStream, stringData( parseTree->shadow->tree->tokdata ), 
+		sendBackText( fsmRun, is, stringData( parseTree->shadow->tree->tokdata ), 
 				stringLength( parseTree->shadow->tree->tokdata ) );
 
 		/* If eof was just sent back remember that it needs to be sent again. */
 		if ( parseTree->id == prg->rtd->eofLelIds[pdaRun->parserId] )
-			inputStream->eofSent = false;
+			is->eofSent = false;
 
 		/* If the item is bound then store remove it from the bindings array. */
 		popBinding( pdaRun, parseTree );
@@ -443,7 +443,7 @@ void ignoreTree2( Program *prg, PdaRun *pdaRun, Tree *tree )
 }
 
 Kid *makeTokenWithData( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, 
-		InputStream *inputStream, int id, Head *tokdata )
+		StreamImpl *is, int id, Head *tokdata )
 {
 	/* Make the token object. */
 	long objectLength = prg->rtd->lelInfo[id].objectLength;
@@ -788,13 +788,13 @@ void handleError( Program *prg, Tree **sp, PdaRun *pdaRun )
 	}
 }
 
-void sendIgnore( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long id )
+void sendIgnore( Program *prg, Tree **sp, StreamImpl *is, FsmRun *fsmRun, PdaRun *pdaRun, long id )
 {
 	debug( REALM_PARSE, "ignoring: %s\n", prg->rtd->lelInfo[id].name );
 
 	/* Make the ignore string. */
-	Head *ignoreStr = extractMatch( prg, fsmRun, inputStream );
-	updatePosition( inputStream, fsmRun->tokstart, ignoreStr->length );
+	Head *ignoreStr = extractMatch( prg, fsmRun, is );
+	updatePosition( is, fsmRun->tokstart, ignoreStr->length );
 	
 	debug( REALM_PARSE, "ignoring: %.*s\n", ignoreStr->length, ignoreStr->data );
 
@@ -809,51 +809,51 @@ void sendIgnore( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmR
 
 
 /* Doesn't consume. */
-Head *peekMatch( Program *prg, FsmRun *fsmRun, InputStream *inputStream )
+Head *peekMatch( Program *prg, FsmRun *fsmRun, StreamImpl *is )
 {
 	long length = fsmRun->p - fsmRun->tokstart;
 	Head *head = stringAllocPointer( prg, fsmRun->tokstart, length );
 	head->location = locationAllocate( prg );
-	head->location->line = inputStream->line;
-	head->location->column = inputStream->column;
-	head->location->byte = inputStream->byte;
+	head->location->line = is->line;
+	head->location->column = is->column;
+	head->location->byte = is->byte;
 
-	debug( REALM_PARSE, "location byte: %d\n", inputStream->byte );
+	debug( REALM_PARSE, "location byte: %d\n", is->byte );
 
 	return head;
 }
 
 /* Consumes. */
-Head *extractMatch( Program *prg, FsmRun *fsmRun, InputStream *inputStream )
+Head *extractMatch( Program *prg, FsmRun *fsmRun, StreamImpl *is )
 {
 	long length = fsmRun->p - fsmRun->tokstart;
 	Head *head = stringAllocPointer( prg, fsmRun->tokstart, length );
 	head->location = locationAllocate( prg );
-	head->location->line = inputStream->line;
-	head->location->column = inputStream->column;
-	head->location->byte = inputStream->byte;
+	head->location->line = is->line;
+	head->location->column = is->column;
+	head->location->byte = is->byte;
 
-	debug( REALM_PARSE, "location byte: %d\n", inputStream->byte );
+	debug( REALM_PARSE, "location byte: %d\n", is->byte );
 
-	consumeData( inputStream, length );
+	is->funcs->consumeData( is, length );
 
 	return head;
 }
 
-static void sendToken( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, long id )
+static void sendToken( Program *prg, Tree **sp, StreamImpl *is, FsmRun *fsmRun, PdaRun *pdaRun, long id )
 {
 	int emptyIgnore = pdaRun->accumIgnore == 0;
 
 	/* Make the token data. */
-	Head *tokdata = extractMatch( prg, fsmRun, inputStream );
+	Head *tokdata = extractMatch( prg, fsmRun, is );
 
 	debug( REALM_PARSE, "token: %s  text: %.*s\n",
 		prg->rtd->lelInfo[id].name,
 		stringLength(tokdata), stringData(tokdata) );
 
-	updatePosition( inputStream, fsmRun->tokstart, tokdata->length );
+	updatePosition( is, fsmRun->tokstart, tokdata->length );
 
-	Kid *input = makeTokenWithData( prg, pdaRun, fsmRun, inputStream, id, tokdata );
+	Kid *input = makeTokenWithData( prg, pdaRun, fsmRun, is, id, tokdata );
 
 	incrementSteps( pdaRun );
 
@@ -868,10 +868,10 @@ static void sendToken( Program *prg, Tree **sp, InputStream *inputStream, FsmRun
 		setRegion( pdaRun, emptyIgnore, parseTree );
 }
 
-static void sendTree( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
+static void sendTree( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, StreamImpl *is )
 {
 	Kid *input = kidAllocate( prg );
-	input->tree = consumeTree( inputStream );
+	input->tree = is->funcs->consumeTree( is );
 
 	incrementSteps( pdaRun );
 
@@ -883,13 +883,13 @@ static void sendTree( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, I
 	pdaRun->parseInput = parseTree;
 }
 
-static void sendIgnoreTree( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
+static void sendIgnoreTree( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, StreamImpl *is )
 {
-	Tree *tree = consumeTree( inputStream );
+	Tree *tree = is->funcs->consumeTree( is );
 	ignoreTree2( prg, pdaRun, tree );
 }
 
-static void sendCi( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun, int id )
+static void sendCi( Program *prg, Tree **sp, StreamImpl *is, FsmRun *fsmRun, PdaRun *pdaRun, int id )
 {
 	debug( REALM_PARSE, "token: CI\n" );
 
@@ -900,17 +900,17 @@ static void sendCi( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *f
 	/* Make the token data. */
 	Head *tokdata = headAllocate( prg );
 	tokdata->location = locationAllocate( prg );
-	tokdata->location->line = inputStream->line;
-	tokdata->location->column = inputStream->column;
-	tokdata->location->byte = inputStream->byte;
+	tokdata->location->line = is->line;
+	tokdata->location->column = is->column;
+	tokdata->location->byte = is->byte;
 
 	debug( REALM_PARSE, "token: %s  text: %.*s\n",
 		prg->rtd->lelInfo[id].name,
 		stringLength(tokdata), stringData(tokdata) );
 
-	updatePosition( inputStream, fsmRun->tokstart, tokdata->length );
+	updatePosition( is, fsmRun->tokstart, tokdata->length );
 
-	Kid *input = makeTokenWithData( prg, pdaRun, fsmRun, inputStream, id, tokdata );
+	Kid *input = makeTokenWithData( prg, pdaRun, fsmRun, is, id, tokdata );
 
 	incrementSteps( pdaRun );
 
@@ -926,7 +926,7 @@ static void sendCi( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *f
 }
 
 
-static void sendEof( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun, PdaRun *pdaRun )
+static void sendEof( Program *prg, Tree **sp, StreamImpl *is, FsmRun *fsmRun, PdaRun *pdaRun )
 {
 	debug( REALM_PARSE, "token: _EOF\n" );
 
@@ -934,9 +934,9 @@ static void sendEof( Program *prg, Tree **sp, InputStream *inputStream, FsmRun *
 
 	Head *head = headAllocate( prg );
 	head->location = locationAllocate( prg );
-	head->location->line = inputStream->line;
-	head->location->column = inputStream->column;
-	head->location->byte = inputStream->byte;
+	head->location->line = is->line;
+	head->location->column = is->column;
+	head->location->byte = is->byte;
 
 	Kid *input = kidAllocate( prg );
 	input->tree = treeAllocate( prg );
@@ -1016,13 +1016,13 @@ static void pushBtPoint( Program *prg, PdaRun *pdaRun )
 #define SCAN_LANG_EL           -2
 #define SCAN_EOF               -1
 
-long scanToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
+long scanToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, StreamImpl *is )
 {
 	if ( pdaRun->triggerUndo )
 		return SCAN_UNDO;
 
 	while ( true ) {
-		fsmExecute( fsmRun, inputStream );
+		fsmExecute( fsmRun, is );
 
 		/* First check if scanning stopped because we have a token. */
 		if ( fsmRun->matchedToken > 0 ) {
@@ -1119,7 +1119,7 @@ long scanToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *input
 		int have = fsmRun->tokstart != 0 ? fsmRun->p - fsmRun->tokstart : 0;
 		int len = 0;
 		debug( REALM_SCAN, "fetching data: have: %d  space: %d\n", have, space );
-		int type = getData( fsmRun, inputStream, have, fsmRun->p, space, &len );
+		int type = is->funcs->getData( fsmRun, is, have, fsmRun->p, space, &len );
 
 		switch ( type ) {
 			case INPUT_DATA:
@@ -1173,7 +1173,7 @@ long scanToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *input
  */
 
 long parseLoop( Program *prg, Tree **sp, PdaRun *pdaRun, 
-		FsmRun *fsmRun, InputStream *inputStream, long entry )
+		FsmRun *fsmRun, StreamImpl *is, long entry )
 {
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
 
@@ -1183,12 +1183,12 @@ case PcrStart:
 	pdaRun->stop = false;
 
 	while ( true ) {
-		debug( REALM_PARSE, "parse loop start %d:%d\n", inputStream->line, inputStream->column );
+		debug( REALM_PARSE, "parse loop start %d:%d\n", is->line, is->column );
 
 		/* Pull the current scanner from the parser. This can change during
 		 * parsing due to inputStream pushes, usually for the purpose of includes.
 		 * */
-		pdaRun->tokenId = scanToken( prg, pdaRun, fsmRun, inputStream );
+		pdaRun->tokenId = scanToken( prg, pdaRun, fsmRun, is );
 
 		if ( pdaRun->tokenId == SCAN_ERROR ) {
 			if ( fsmRun->preRegion >= 0 ) {
@@ -1204,7 +1204,7 @@ case PcrStart:
 				( prg->rtd->regionInfo[fsmRun->region].ciLelId > 0 ) )
 		{
 			debug( REALM_PARSE, "sending a collect ignore\n" );
-			sendCi( prg, sp, inputStream, fsmRun, pdaRun, prg->rtd->regionInfo[fsmRun->region].ciLelId );
+			sendCi( prg, sp, is, fsmRun, pdaRun, prg->rtd->regionInfo[fsmRun->region].ciLelId );
 			goto yes;
 		}
 
@@ -1218,8 +1218,8 @@ case PcrStart:
 
 		/* Check for EOF. */
 		if ( pdaRun->tokenId == SCAN_EOF ) {
-			inputStream->eofSent = true;
-			sendEof( prg, sp, inputStream, fsmRun, pdaRun );
+			is->eofSent = true;
+			sendEof( prg, sp, is, fsmRun, pdaRun );
 
 			pdaRun->frameId = prg->rtd->regionInfo[fsmRun->region].eofFrameId;
 
@@ -1269,19 +1269,19 @@ case PcrPreEof:
 			debug( REALM_PARSE, "sending an named lang el\n" );
 
 			/* A named language element (parsing colm program). */
-			sendNamedLangEl( prg, sp, pdaRun, fsmRun, inputStream );
+			sendNamedLangEl( prg, sp, pdaRun, fsmRun, is );
 		}
 		else if ( pdaRun->tokenId == SCAN_TREE ) {
 			debug( REALM_PARSE, "sending a tree\n" );
 
 			/* A tree already built. */
-			sendTree( prg, sp, pdaRun, fsmRun, inputStream );
+			sendTree( prg, sp, pdaRun, fsmRun, is );
 		}
 		else if ( pdaRun->tokenId == SCAN_IGNORE ) {
 			debug( REALM_PARSE, "sending an ignore token\n" );
 
 			/* A tree to ignore. */
-			sendIgnoreTree( prg, sp, pdaRun, fsmRun, inputStream );
+			sendIgnoreTree( prg, sp, pdaRun, fsmRun, is );
 			goto skipSend;
 		}
 		else if ( prg->ctxDepParsing && lelInfo[pdaRun->tokenId].frameId >= 0 ) {
@@ -1290,7 +1290,7 @@ case PcrPreEof:
 					prg->rtd->lelInfo[pdaRun->tokenId].name );
 
 			/* Make the token data. */
-			pdaRun->tokdata = peekMatch( prg, fsmRun, inputStream );
+			pdaRun->tokdata = peekMatch( prg, fsmRun, is );
 
 			/* Note that we don't update the position now. It is done when the token
 			 * data is pulled from the inputStream. */
@@ -1317,7 +1317,7 @@ case PcrGeneration:
 					prg->rtd->lelInfo[pdaRun->tokenId].name );
 
 			/* Is an ignore token. */
-			sendIgnore( prg, sp, inputStream, fsmRun, pdaRun, pdaRun->tokenId );
+			sendIgnore( prg, sp, is, fsmRun, pdaRun, pdaRun->tokenId );
 			goto skipSend;
 		}
 		else {
@@ -1325,7 +1325,7 @@ case PcrGeneration:
 					prg->rtd->lelInfo[pdaRun->tokenId].name );
 
 			/* Is a plain token. */
-			sendToken( prg, sp, inputStream, fsmRun, pdaRun, pdaRun->tokenId );
+			sendToken( prg, sp, is, fsmRun, pdaRun, pdaRun->tokenId );
 		}
 yes:
 
@@ -1340,7 +1340,7 @@ yes:
 			}
 		}
 
-		long pcr = parseToken( prg, sp, pdaRun, fsmRun, inputStream, PcrStart );
+		long pcr = parseToken( prg, sp, pdaRun, fsmRun, is, PcrStart );
 		
 		while ( pcr != PcrDone ) {
 
@@ -1348,7 +1348,7 @@ return pcr;
 case PcrReduction:
 case PcrReverse:
 
-			pcr = parseToken( prg, sp, pdaRun, fsmRun, inputStream, entry );
+			pcr = parseToken( prg, sp, pdaRun, fsmRun, is, entry );
 		}
 
 		assert( pcr == PcrDone );
@@ -1366,7 +1366,7 @@ skipSend:
 			break;
 		}
 
-		if ( inputStream->eofSent ) {
+		if ( is->eofSent ) {
 			debug( REALM_PARSE, "parsing stopped by EOF\n" );
 			break;
 		}
@@ -1733,7 +1733,7 @@ void commitFull( Program *prg, Tree **sp, PdaRun *pdaRun, long causeReduce )
  *   PcrRevReduction
  */
 long parseToken( Program *prg, Tree **sp, PdaRun *pdaRun,
-		FsmRun *fsmRun, InputStream *inputStream, long entry )
+		FsmRun *fsmRun, StreamImpl *is, long entry )
 {
 	int pos;
 	unsigned int *action;
@@ -2098,7 +2098,7 @@ case PcrReverse:
 					pdaRun->checkNext = true;
 					pdaRun->checkStop = true;
 
-					sendBack( prg, sp, pdaRun, fsmRun, inputStream, pdaRun->parseInput );
+					sendBack( prg, sp, pdaRun, fsmRun, is, pdaRun->parseInput );
 
 					pdaRun->parseInput = 0;
 				}
@@ -2186,7 +2186,7 @@ case PcrReverse:
 			pdaRun->checkNext = true;
 			pdaRun->checkStop = true;
 			
-			sendBackIgnore( prg, sp, pdaRun, fsmRun, inputStream, ignore );
+			sendBackIgnore( prg, sp, pdaRun, fsmRun, is, ignore );
 
 			treeDownref( prg, sp, ignore->shadow->tree );
 			kidFree( prg, ignore->shadow );

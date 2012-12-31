@@ -31,24 +31,24 @@
 using std::cerr;
 using std::endl;
 
-SourceFuncs patternFuncs;
-SourceFuncs replFuncs;
+StreamFuncs patternFuncs;
+StreamFuncs replFuncs;
 
 /*
  * Pattern
  */
 
-SourceStream *newSourceStreamPat( Pattern *pattern )
+StreamImpl *newSourceStreamPat( Pattern *pattern )
 {
-	SourceStream *ss = (SourceStream*)malloc(sizeof(SourceStream));
-	memset( ss, 0, sizeof(SourceStream) );
+	StreamImpl *ss = (StreamImpl*)malloc(sizeof(StreamImpl));
+	memset( ss, 0, sizeof(StreamImpl) );
 	ss->pattern = pattern;
 	ss->patItem = pattern->list->head;
 	ss->funcs = &patternFuncs;
 	return ss;
 }
 
-LangEl *inputStreamPatternGetLangEl( SourceStream *ss, long *bindId, char **data, long *length )
+LangEl *inputStreamPatternGetLangEl( StreamImpl *ss, long *bindId, char **data, long *length )
 { 
 	LangEl *klangEl = ss->patItem->factor->langEl;
 	*bindId = ss->patItem->bindId;
@@ -60,7 +60,7 @@ LangEl *inputStreamPatternGetLangEl( SourceStream *ss, long *bindId, char **data
 	return klangEl;
 }
 
-int inputStreamPatternGetData( SourceStream *ss, int skip, char *dest, int length, int *copied )
+int inputStreamPatternGetData( FsmRun *fsmRun, StreamImpl *ss, int skip, char *dest, int length, int *copied )
 { 
 	*copied = 0;
 
@@ -107,7 +107,7 @@ int inputStreamPatternGetData( SourceStream *ss, int skip, char *dest, int lengt
 	return INPUT_DATA;
 }
 
-void inputStreamPatternBackup( SourceStream *ss )
+void inputStreamPatternBackup( StreamImpl *ss )
 {
 	if ( ss->patItem == 0 )
 		ss->patItem = ss->pattern->list->tail;
@@ -115,7 +115,7 @@ void inputStreamPatternBackup( SourceStream *ss )
 		ss->patItem = ss->patItem->prev;
 }
 
-void inputStreamPatternPushBackBuf( SourceStream *ss, RunBuf *runBuf )
+void inputStreamPatternPushBackBuf( StreamImpl *ss, RunBuf *runBuf )
 {
 	char *data = runBuf->data + runBuf->offset;
 	long length = runBuf->length;
@@ -136,13 +136,13 @@ void inputStreamPatternPushBackBuf( SourceStream *ss, RunBuf *runBuf )
 	assert( memcmp( &ss->patItem->data[ss->offset], data, length ) == 0 );
 }
 
-void inputStreamPatternUndoConsumeLangEl( SourceStream *ss )
+void inputStreamPatternUndoConsumeLangEl( StreamImpl *ss )
 {
 	inputStreamPatternBackup( ss );
 	ss->offset = ss->patItem->data.length();
 }
 
-int inputStreamPatternConsumeData( SourceStream *ss, int length )
+int inputStreamPatternConsumeData( StreamImpl *ss, int length )
 {
 	debug( REALM_INPUT, "consuming %ld bytes\n", length );
 
@@ -176,7 +176,7 @@ int inputStreamPatternConsumeData( SourceStream *ss, int length )
 	return consumed;
 }
 
-int inputStreamPatternUndoConsumeData( SourceStream *ss, const char *data, int length )
+int inputStreamPatternUndoConsumeData( FsmRun *fsmRun, StreamImpl *ss, const char *data, int length )
 {
 	ss->offset -= length;
 	return length;
@@ -184,7 +184,7 @@ int inputStreamPatternUndoConsumeData( SourceStream *ss, const char *data, int l
 
 extern "C" void initPatFuncs()
 {
-	memset( &patternFuncs, 0, sizeof(SourceFuncs) );
+	memset( &patternFuncs, 0, sizeof(StreamFuncs) );
 
 	patternFuncs.getData = &inputStreamPatternGetData;
 	patternFuncs.consumeData = &inputStreamPatternConsumeData;
@@ -199,17 +199,17 @@ extern "C" void initPatFuncs()
  * Constructor
  */
 
-SourceStream *newSourceStreamCons( Constructor *constructor )
+StreamImpl *newSourceStreamCons( Constructor *constructor )
 {
-	SourceStream *ss = (SourceStream*)malloc(sizeof(SourceStream));
-	memset( ss, 0, sizeof(SourceStream) );
+	StreamImpl *ss = (StreamImpl*)malloc(sizeof(StreamImpl));
+	memset( ss, 0, sizeof(StreamImpl) );
 	ss->constructor = constructor;
 	ss->consItem = constructor->list->head;
 	ss->funcs = &replFuncs;
 	return ss;
 }
 
-LangEl *inputStreamConsGetLangEl( SourceStream *ss, long *bindId, char **data, long *length )
+LangEl *inputStreamConsGetLangEl( StreamImpl *ss, long *bindId, char **data, long *length )
 { 
 	LangEl *klangEl = ss->consItem->type == ConsItem::ExprType ? 
 			ss->consItem->langEl : ss->consItem->factor->langEl;
@@ -235,7 +235,7 @@ LangEl *inputStreamConsGetLangEl( SourceStream *ss, long *bindId, char **data, l
 	return klangEl;
 }
 
-int inputStreamConsGetData( SourceStream *ss, int skip, char *dest, int length, int *copied )
+int inputStreamConsGetData( FsmRun *fsmRun, StreamImpl *ss, int skip, char *dest, int length, int *copied )
 { 
 	*copied = 0;
 
@@ -282,7 +282,7 @@ int inputStreamConsGetData( SourceStream *ss, int skip, char *dest, int length, 
 	return INPUT_DATA;
 }
 
-void inputStreamConsBackup( SourceStream *ss )
+void inputStreamConsBackup( StreamImpl *ss )
 {
 	if ( ss->consItem == 0 )
 		ss->consItem = ss->constructor->list->tail;
@@ -290,7 +290,7 @@ void inputStreamConsBackup( SourceStream *ss )
 		ss->consItem = ss->consItem->prev;
 }
 
-void inputStreamConsPushBackBuf( SourceStream *ss, RunBuf *runBuf )
+void inputStreamConsPushBackBuf( StreamImpl *ss, RunBuf *runBuf )
 {
 	char *data = runBuf->data + runBuf->offset;
 	long length = runBuf->length;
@@ -315,13 +315,13 @@ void inputStreamConsPushBackBuf( SourceStream *ss, RunBuf *runBuf )
 	assert( memcmp( &ss->consItem->data[ss->offset], data, length ) == 0 );
 }
 
-void inputStreamConsUndoConsumeLangEl( SourceStream *ss )
+void inputStreamConsUndoConsumeLangEl( StreamImpl *ss )
 {
 	inputStreamConsBackup( ss );
 	ss->offset = ss->consItem->data.length();
 }
 
-int inputStreamConsConsumeData( SourceStream *ss, int length )
+int inputStreamConsConsumeData( StreamImpl *ss, int length )
 {
 	int consumed = 0;
 
@@ -353,7 +353,7 @@ int inputStreamConsConsumeData( SourceStream *ss, int length )
 	return consumed;
 }
 
-int inputStreamConsUndoConsumeData( SourceStream *ss, const char *data, int length )
+int inputStreamConsUndoConsumeData( FsmRun *fsmRun, StreamImpl *ss, const char *data, int length )
 {
 	ss->offset -= length;
 	return length;
@@ -361,7 +361,7 @@ int inputStreamConsUndoConsumeData( SourceStream *ss, const char *data, int leng
 
 extern "C" void initConsFuncs()
 {
-	memset( &replFuncs, 0, sizeof(SourceFuncs) );
+	memset( &replFuncs, 0, sizeof(StreamFuncs) );
 
 	replFuncs.getData = &inputStreamConsGetData;
 	replFuncs.consumeData = &inputStreamConsConsumeData;
@@ -371,14 +371,14 @@ extern "C" void initConsFuncs()
 	replFuncs.undoConsumeLangEl = &inputStreamConsUndoConsumeLangEl;
 }
 
-void sendNamedLangEl( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream )
+void sendNamedLangEl( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, StreamImpl *is )
 {
 	/* All three set by consumeLangEl. */
 	long bindId;
 	char *data;
 	long length;
 
-	LangEl *klangEl = consumeLangEl( inputStream, &bindId, &data, &length );
+	LangEl *klangEl = is->funcs->consumeLangEl( is, &bindId, &data, &length );
 	
 	//cerr << "named langEl: " << prg->rtd->lelInfo[klangEl->id].name << endl;
 
@@ -387,7 +387,7 @@ void sendNamedLangEl( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, I
 	if ( data != 0 )
 		tokdata = stringAllocFull( prg, data, length );
 
-	Kid *input = makeTokenWithData( prg, pdaRun, fsmRun, inputStream, klangEl->id, tokdata );
+	Kid *input = makeTokenWithData( prg, pdaRun, fsmRun, is, klangEl->id, tokdata );
 
 	incrementSteps( pdaRun );
 

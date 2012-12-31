@@ -791,7 +791,7 @@ struct Compiler
 
 	void prepGrammar();
 	PdaRun *parsePattern( Program *prg, Tree **sp, const InputLoc &loc,
-			int parserId, SourceStream *sourceStream );
+			int parserId, StreamImpl *sourceStream );
 	void parsePatterns();
 
 	void collectParserEls( LangElSet &parserEls );

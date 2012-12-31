@@ -499,7 +499,7 @@ void allocGlobal( struct ColmProgram *prg );
 Tree **executeCode( struct ColmProgram *prg, Execution *exec, Tree **sp, Code *instr );
 void rcodeDownref( struct ColmProgram *prg, Tree **sp, Code *instr );
 Code *popReverseCode( RtCodeVect *allRev );
-void sendBackBuffered( FsmRun *fsmRun, InputStream *inputStream );
+void sendBackBuffered( FsmRun *fsmRun, StreamImpl *inputStream );
 
 #ifdef __cplusplus
 }

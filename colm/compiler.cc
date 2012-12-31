@@ -1237,9 +1237,9 @@ void Compiler::initEmptyScanners()
 }
 
 PdaRun *Compiler::parsePattern( Program *prg, Tree **sp, const InputLoc &loc, 
-		int parserId, SourceStream *sourceStream )
+		int parserId, StreamImpl *sourceStream )
 {
-	InputStream *in = new InputStream;
+	StreamImpl *in = new StreamImpl;
 	FsmRun *fsmRun = new FsmRun;
 	PdaRun *pdaRun = new PdaRun;
 
@@ -1250,8 +1250,8 @@ PdaRun *Compiler::parsePattern( Program *prg, Tree **sp, const InputLoc &loc,
 	Stream *res = streamAllocate( prg );
 	res->id = LEL_ID_STREAM;
 	res->in = sourceStream;
-	appendStream( in, (Tree*)res );
-	setEof( in );
+	in->funcs->appendStream( in, (Tree*)res );
+	in->funcs->setEof( in );
 
 	newToken( prg, pdaRun, fsmRun );
 	long pcr = parseLoop( prg, sp, pdaRun, fsmRun, in, PcrStart );
@@ -1281,12 +1281,12 @@ void Compiler::parsePatterns()
 	Tree **sp = prg->stackRoot;
 
 	for ( ConsList::Iter cons = replList; cons.lte(); cons++ ) {
-		SourceStream *in = newSourceStreamCons( cons );
+		StreamImpl *in = newSourceStreamCons( cons );
 		cons->pdaRun = parsePattern( prg, sp, cons->loc, cons->langEl->parserId, in );
 	}
 
 	for ( PatList::Iter pat = patternList; pat.lte(); pat++ ) {
-		SourceStream *in = newSourceStreamPat( pat );
+		StreamImpl *in = newSourceStreamPat( pat );
 		pat->pdaRun = parsePattern( prg, sp, pat->loc, pat->langEl->parserId, in );
 	}
 

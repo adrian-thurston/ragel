@@ -158,7 +158,7 @@ Head *treeToStr( Program *prg, Tree **sp, Tree *tree, int trim )
 	return ret;
 }
 
-Word streamAppend( Program *prg, Tree **sp, Tree *input, InputStream *inputStream )
+Word streamAppend( Program *prg, Tree **sp, Tree *input, StreamImpl *is )
 {
 	long length = 0;
 
@@ -169,17 +169,17 @@ Word streamAppend( Program *prg, Tree **sp, Tree *input, InputStream *inputStrea
 		printTreeCollect( prg, sp, &collect, input, true );
 
 		/* Load it into the input. */
-		appendData( inputStream, collect.data, collect.length );
+		is->funcs->appendData( is, collect.data, collect.length );
 		length = collect.length;
 		strCollectDestroy( &collect );
 	}
 	else if ( input->id == LEL_ID_STREAM ) {
 		treeUpref( input );
-		appendStream( inputStream, input );
+		is->funcs->appendStream( is, input );
 	}
 	else {
 		treeUpref( input );
-		appendTree( inputStream, input );
+		is->funcs->appendTree( is, input );
 	}
 
 	return length;
@@ -220,7 +220,7 @@ switch ( entry ) {
 case PcrStart:
 
 	if ( parser->pdaRun->stopTarget <= 0 ) {
-		setEof( parser->input->in );
+		parser->input->in->funcs->setEof( parser->input->in );
 
 		if ( ! parser->pdaRun->parseError ) {
 			long pcr = parseLoop( prg, sp, parser->pdaRun, parser->fsmRun, parser->input->in, entry );
@@ -259,7 +259,7 @@ break; }
 
 long undoParseFrag( Program *prg, Tree **sp, Parser *parser, long steps, long entry )
 {
-	InputStream *inputStream = parser->input->in;
+	StreamImpl *is = parser->input->in;
 	FsmRun *fsmRun = parser->fsmRun;
 	PdaRun *pdaRun = parser->pdaRun;
 
@@ -278,7 +278,7 @@ case PcrStart:
 		pdaRun->triggerUndo = 1;
 
 		/* The parse loop will recognise the situation. */
-		long pcr = parseLoop( prg, sp, pdaRun, fsmRun, inputStream, entry );
+		long pcr = parseLoop( prg, sp, pdaRun, fsmRun, is, entry );
 		while ( pcr != PcrDone ) {
 
 return pcr;
@@ -287,7 +287,7 @@ case PcrGeneration:
 case PcrPreEof:
 case PcrReverse:
 
-			pcr = parseLoop( prg, sp, pdaRun, fsmRun, inputStream, entry );
+			pcr = parseLoop( prg, sp, pdaRun, fsmRun, is, entry );
 		}
 
 		/* Reset environment. */
@@ -302,21 +302,21 @@ break; }
 	return PcrDone;
 }
 
-Tree *streamPullBc( Program *prg, FsmRun *fsmRun, InputStream *in, Tree *length )
+Tree *streamPullBc( Program *prg, FsmRun *fsmRun, StreamImpl *in, Tree *length )
 {
 	long len = ((Int*)length)->value;
 	Head *tokdata = streamPull( prg, fsmRun, in, len );
 	return constructString( prg, tokdata );
 }
 
-void undoPull( Program *prg, InputStream *in, Tree *str )
+void undoPull( Program *prg, StreamImpl *in, Tree *str )
 {
 	const char *data = stringData( ( (Str*)str )->value );
 	long length = stringLength( ( (Str*)str )->value );
 	undoStreamPull( in, data, length );
 }
 
-long streamPush( Program *prg, Tree **sp, FsmRun *fsmRun, InputStream *in, Tree *tree, int ignore )
+long streamPush( Program *prg, Tree **sp, FsmRun *fsmRun, StreamImpl *in, Tree *tree, int ignore )
 {
 	if ( tree->id == LEL_ID_STR ) {
 		/* This should become a compile error. If it's text, it's up to the
@@ -2443,7 +2443,7 @@ again:
 			exec->pcr = (long)vm_pop();
 			exec->parser = (Parser*)vm_pop();
 
-			unsetEof( parser->input->in );
+			parser->input->in->funcs->unsetEof( parser->input->in );
 			treeDownref( prg, sp, (Tree*)parser );
 			break;
 		}

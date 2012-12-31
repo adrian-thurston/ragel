@@ -84,16 +84,16 @@ typedef struct _FsmRun
 	char *mark[MARK_SLOTS];
 	long matchedToken;
 
-	InputStream *attachedInput;
-	SourceStream *attachedSource;
+	StreamImpl *attachedInput;
+	StreamImpl *attachedSource;
 } FsmRun;
 
 void initFsmRun( FsmRun *fsmRun, struct ColmProgram *prg );
 void clearFsmRun( struct ColmProgram *prg, FsmRun *fsmRun );
-void updatePosition( InputStream *inputStream, const char *data, long length );
-void undoPosition( InputStream *inputStream, const char *data, long length );
-void sendBackRunBufHead( FsmRun *fsmRun, InputStream *inputStream );
-void undoStreamPull( InputStream *inputStream, const char *data, long length );
+void updatePosition( StreamImpl *inputStream, const char *data, long length );
+void undoPosition( StreamImpl *inputStream, const char *data, long length );
+void sendBackRunBufHead( FsmRun *fsmRun, StreamImpl *inputStream );
+void undoStreamPull( StreamImpl *inputStream, const char *data, long length );
 
 
 #if SIZEOF_LONG != 4 && SIZEOF_LONG != 8 
@@ -400,10 +400,10 @@ void initPdaRun( PdaRun *pdaRun, struct ColmProgram *prg, PdaTables *tables,
 		FsmRun *fsmRun, int parserId, long stopTarget, int revertOn, Tree *context );
 void clearPdaRun( struct ColmProgram *prg, Tree **root, PdaRun *pdaRun );
 
-void initInputStream( InputStream *inputStream );
-void clearInputStream( struct ColmProgram *prg, Tree **sp, InputStream *inputStream );
-void initSourceStream( SourceStream *in );
-void clearSourceStream( struct ColmProgram *prg, Tree **sp, SourceStream *sourceStream );
+void initInputStream( StreamImpl *inputStream );
+void clearInputStream( struct ColmProgram *prg, Tree **sp, StreamImpl *inputStream );
+void initSourceStream( StreamImpl *in );
+void clearSourceStream( struct ColmProgram *prg, Tree **sp, StreamImpl *sourceStream );
 
 
 void clearContext( PdaRun *pdaRun, Tree **sp );
@@ -425,48 +425,48 @@ int pdaRunGetNextPreRegion( PdaRun *pdaRun );
 #define PcrReverse       6
 
 long parseToken( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, 
-		FsmRun *fsmRun, InputStream *inputStream, long entry );
+		FsmRun *fsmRun, StreamImpl *inputStream, long entry );
 
-long undoParse( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream, Tree *tree );
+long undoParse( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, StreamImpl *inputStream, Tree *tree );
 
-Head *streamPull( struct ColmProgram *prg, FsmRun *fsmRun, InputStream *inputStream, long length );
+Head *streamPull( struct ColmProgram *prg, FsmRun *fsmRun, StreamImpl *inputStream, long length );
 Head *stringAllocPointer( struct ColmProgram *prg, const char *data, long length );
 
-void streamPushText( FsmRun *fsmRun, InputStream *inputStream, const char *data, long length );
-void streamPushTree( FsmRun *fsmRun, InputStream *inputStream, Tree *tree, int ignore );
-void undoStreamPush( struct ColmProgram *prg, Tree **sp, FsmRun *fsmRun, InputStream *inputStream, long length );
-void undoStreamAppend( struct ColmProgram *prg, Tree **sp, FsmRun *fsmRun, InputStream *inputStream, struct ColmTree *tree, long length );
+void streamPushText( FsmRun *fsmRun, StreamImpl *inputStream, const char *data, long length );
+void streamPushTree( FsmRun *fsmRun, StreamImpl *inputStream, Tree *tree, int ignore );
+void undoStreamPush( struct ColmProgram *prg, Tree **sp, FsmRun *fsmRun, StreamImpl *inputStream, long length );
+void undoStreamAppend( struct ColmProgram *prg, Tree **sp, FsmRun *fsmRun, StreamImpl *inputStream, struct ColmTree *tree, long length );
 Kid *makeTokenWithData( struct ColmProgram *prg, PdaRun *pdaRun, FsmRun *fsmRun, 
-		InputStream *inputStream, int id, Head *tokdata );
+		StreamImpl *inputStream, int id, Head *tokdata );
 
 void pushBinding( PdaRun *pdaRun, ParseTree *parseTree );
 void popBinding( PdaRun *pdaRun, ParseTree *parseTree );
 
 void executeGenerationAction( struct ColmProgram *prg, Tree **sp, FsmRun *fsmRun, PdaRun *pdaRun, 
-		InputStream *inputStream, int frameId, Code *code, long id, Head *tokdata );
+		StreamImpl *inputStream, int frameId, Code *code, long id, Head *tokdata );
 Kid *extractIgnore( PdaRun *pdaRun );
-long sendBackQueuedIgnore( struct ColmProgram *prg, Tree **sp, InputStream *inputStream,
+long sendBackQueuedIgnore( struct ColmProgram *prg, Tree **sp, StreamImpl *inputStream,
 		FsmRun *fsmRun, PdaRun *pdaRun, long entry );
 void clearIgnoreList( struct ColmProgram *prg, Tree **sp, Kid *kid );
-Head *extractMatch( struct ColmProgram *prg, FsmRun *fsmRun, InputStream *inputStream );
-Head *extractMatch( struct ColmProgram *prg, FsmRun *fsmRun, InputStream *inputStream );
+Head *extractMatch( struct ColmProgram *prg, FsmRun *fsmRun, StreamImpl *inputStream );
+Head *extractMatch( struct ColmProgram *prg, FsmRun *fsmRun, StreamImpl *inputStream );
 void newToken( struct ColmProgram *prg, PdaRun *pdaRun, FsmRun *fsmRun );
-void fsmExecute( FsmRun *fsmRun, InputStream *inputStream );
-void sendNamedLangEl( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, InputStream *inputStream );
+void fsmExecute( FsmRun *fsmRun, StreamImpl *inputStream );
+void sendNamedLangEl( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, StreamImpl *inputStream );
 long parseLoop( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, 
-		FsmRun *fsmRun, InputStream *inputStream, long entry );
+		FsmRun *fsmRun, StreamImpl *inputStream, long entry );
 void initBindings( PdaRun *pdaRun );
 Tree *getParsedRoot( PdaRun *pdaRun, int stop );
-void undoParseStream( struct ColmProgram *prg, Tree **sp, InputStream *inputStream, FsmRun *fsmRun, 
+void undoParseStream( struct ColmProgram *prg, Tree **sp, StreamImpl *inputStream, FsmRun *fsmRun, 
 		PdaRun *pdaRun, long steps );
 
 void clearBuffered( FsmRun *fsmRun );
 void resetToken( FsmRun *fsmRun );
 
-void detachInput( FsmRun *fsmRun, InputStream *is );
-void attachInput( FsmRun *fsmRun, InputStream *is );
-void detachSource( FsmRun *fsmRun, SourceStream *ss );
-void attachSource( FsmRun *fsmRun, SourceStream *ss );
+void detachInput( FsmRun *fsmRun, StreamImpl *is );
+void attachInput( FsmRun *fsmRun, StreamImpl *is );
+void detachSource( FsmRun *fsmRun, StreamImpl *ss );
+void attachSource( FsmRun *fsmRun, StreamImpl *ss );
 
 #ifdef __cplusplus
 }

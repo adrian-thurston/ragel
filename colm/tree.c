@@ -326,7 +326,7 @@ Tree *constructInput( Program *prg )
 	Input *input = inputAllocate( prg );
 	input->refs = 0;
 	input->id = LEL_ID_INPUT;
-	input->in = malloc( sizeof(InputStream) );
+	input->in = malloc( sizeof(StreamImpl) );
 	initInputStream( input->in );
 	return (Tree*)input;
 }

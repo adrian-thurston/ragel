@@ -191,7 +191,7 @@ typedef struct _Stream
 
 	FILE *file;
 	int fd;
-	SourceStream *in;
+	StreamImpl *in;
 } Stream;
 
 typedef struct _Input
@@ -202,7 +202,7 @@ typedef struct _Input
 	long refs;
 	Kid *child;
 
-	InputStream *in;
+	StreamImpl *in;
 } Input;
 
 typedef struct _Parser
