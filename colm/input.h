@@ -100,13 +100,13 @@ struct SourceFuncs
 	int (*getDataSource)( SourceStream *ss, char *dest, int length );
 };
 
-/* Implements a single source of input data such as a file, string, pattern.
- * These can be placed in an input stream to parse from multiple sources. */
+/* List of source streams. Enables streams to be pushed/popped. */
 struct _SourceStream
 {
 	struct SourceFuncs *funcs;
 	struct _FsmRun *attached;
 
+	char eofSent;
 	char eof;
 
 	RunBuf *queue;
@@ -115,6 +115,10 @@ struct _SourceStream
 	const char *data;
 	long dlen;
 	int offset;
+
+	long line;
+	long column;
+	long byte;
 
 	FILE *file;
 	long fd;
@@ -135,23 +139,8 @@ void initStaticFuncs();
 void initPatFuncs();
 void initConsFuncs();
 
-/* List of source streams. Enables streams to be pushed/popped. */
-struct _InputStream
-{
-	struct _FsmRun *attached;
-
-	char eofSent;
-	char eof;
-
-	long line;
-	long column;
-	long byte;
-
-	RunBuf *queue;
-	RunBuf *queueTail;
-};
-
-typedef struct _InputStream InputStream;
+typedef struct _SourceStream _InputStream;
+typedef struct _SourceStream InputStream;
 
 /* The input stream interface. */
 
