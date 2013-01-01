@@ -70,8 +70,6 @@ void initFsmRun( FsmRun *fsmRun, Program *prg )
 	fsmRun->p = fsmRun->pe = fsmRun->runBuf->data;
 	fsmRun->peof = 0;
 
-	fsmRun->attachedInput = 0;
-	fsmRun->attachedSource = 0;
 	fsmRun->preRegion = -1;
 }
 
@@ -250,58 +248,31 @@ static void sendBackIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsm
 
 }
 
-void attachInput( FsmRun *fsmRun, StreamImpl *is )
+void attachStream( FsmRun *fsmRun, StreamImpl *is )
 {
 	if ( is->attached != 0 && is->attached != fsmRun )
-		detachInput( is->attached, is );
+		detachStream( is->attached, is );
 
 	if ( is->attached != fsmRun ) {
-		debug( REALM_INPUT, "attaching fsm run to input stream:  %p %p\n", fsmRun, is );
-		fsmRun->attachedInput = is;
+		debug( REALM_INPUT, "attaching FsmRun to stream:  %p %p\n", fsmRun, is );
 		is->attached = fsmRun;
 	}
 }
 
-void attachSource( FsmRun *fsmRun, StreamImpl *ss )
+void detachStream( FsmRun *fsmRun, StreamImpl *is )
 {
-	if ( ss->attached != 0 && ss->attached != fsmRun )
-		detachSource( ss->attached, ss );
+	debug( REALM_INPUT, "detaching FsmRun from stream:  %p %p\n", fsmRun, is );
 
-	if ( ss->attached != fsmRun ) {
-		debug( REALM_INPUT, "attaching fsm run to source stream: %p %p\n", fsmRun, ss );
-		fsmRun->attachedSource = ss;
-		ss->attached = fsmRun;
-	}
-}
-
-void detachInput( FsmRun *fsmRun, StreamImpl *is )
-{
-	debug( REALM_INPUT, "detaching fsm run from input stream:  %p %p\n", fsmRun, is );
-
-	fsmRun->attachedInput = 0;
 	is->attached = 0;
-
 	clearBuffered( fsmRun );
-
-	if ( fsmRun->attachedSource != 0 ) {
-		fsmRun->attachedSource->attached = 0;
-		fsmRun->attachedSource = 0;
-	}
 }
 
 void detachSource( FsmRun *fsmRun, StreamImpl *is )
 {
 	debug( REALM_INPUT, "detaching fsm run from source stream: %p %p\n", fsmRun, is );
 
-	fsmRun->attachedSource = 0;
 	is->attached = 0;
-
 	clearBuffered( fsmRun );
-
-	if ( fsmRun->attachedInput != 0 ) {
-		fsmRun->attachedInput->attached = 0;
-		fsmRun->attachedInput = 0;
-	}
 }
 
 void clearBuffered( FsmRun *fsmRun )

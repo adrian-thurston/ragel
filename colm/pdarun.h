@@ -83,9 +83,6 @@ typedef struct _FsmRun
 	int returnResult;
 	char *mark[MARK_SLOTS];
 	long matchedToken;
-
-	StreamImpl *attachedInput;
-	StreamImpl *attachedSource;
 } FsmRun;
 
 void initFsmRun( FsmRun *fsmRun, struct ColmProgram *prg );
@@ -463,10 +460,8 @@ void undoParseStream( struct ColmProgram *prg, Tree **sp, StreamImpl *inputStrea
 void clearBuffered( FsmRun *fsmRun );
 void resetToken( FsmRun *fsmRun );
 
-void detachInput( FsmRun *fsmRun, StreamImpl *is );
-void attachInput( FsmRun *fsmRun, StreamImpl *is );
-void detachSource( FsmRun *fsmRun, StreamImpl *ss );
-void attachSource( FsmRun *fsmRun, StreamImpl *ss );
+void detachStream( FsmRun *fsmRun, StreamImpl *is );
+void attachStream( FsmRun *fsmRun, StreamImpl *is );
 
 #ifdef __cplusplus
 }
