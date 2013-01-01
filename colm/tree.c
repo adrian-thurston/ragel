@@ -325,7 +325,7 @@ Tree *constructInput( Program *prg )
 	input->refs = 0;
 	input->id = LEL_ID_INPUT;
 	input->in = malloc( sizeof(StreamImpl) );
-	initInputStream( input->in );
+	initStreamImpl( input->in );
 	return (Tree*)input;
 }
 
@@ -1078,7 +1078,7 @@ free_tree:
 		}
 		else if ( tree->id == LEL_ID_INPUT ) {
 			Input *input = (Input*)tree;
-			clearInputStream( prg, sp, input->in );
+			clearStreamImpl( prg, sp, input->in );
 			free( input->in );
 			inputFree( prg, input );
 		}

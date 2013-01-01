@@ -846,7 +846,7 @@ void FsmCodeGen::writeExec()
 	setLabelsNeeded();
 
 	out <<
-		"void fsmExecute( FsmRun *fsmRun, InputStream *inputStream )\n"
+		"void fsmExecute( FsmRun *fsmRun, StreamImpl *inputStream )\n"
 		"{\n"
 		"/*_resume:*/\n";
 
@@ -910,7 +910,7 @@ void FsmCodeGen::writeCode()
 	 * should use the preprocessor to make these go away. */
 	out <<
 		"void sendNamedLangEl( Program *prg, Tree **tree, PdaRun *pdaRun,\n"
-		"		FsmRun *fsmRun, InputStream *inputStream ) { }\n"
+		"		FsmRun *fsmRun, StreamImpl *inputStream ) { }\n"
 		"void initBindings( PdaRun *pdaRun ) {}\n"
 		"void pushBinding( PdaRun *pdaRun, ParseTree *parseTree ) {}\n"
 		"void popBinding( PdaRun *pdaRun, ParseTree *tree ) {}\n"

@@ -1243,7 +1243,7 @@ PdaRun *Compiler::parsePattern( Program *prg, Tree **sp, const InputLoc &loc,
 	FsmRun *fsmRun = new FsmRun;
 	PdaRun *pdaRun = new PdaRun;
 
-	initInputStream( in );
+	initStreamImpl( in );
 	initPdaRun( pdaRun, prg, pdaTables, fsmRun, parserId, 0, false, 0 );
 	initFsmRun( fsmRun, prg );
 

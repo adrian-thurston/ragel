@@ -400,8 +400,8 @@ void initPdaRun( PdaRun *pdaRun, struct ColmProgram *prg, PdaTables *tables,
 		FsmRun *fsmRun, int parserId, long stopTarget, int revertOn, Tree *context );
 void clearPdaRun( struct ColmProgram *prg, Tree **root, PdaRun *pdaRun );
 
-void initInputStream( StreamImpl *inputStream );
-void clearInputStream( struct ColmProgram *prg, Tree **sp, StreamImpl *inputStream );
+void initStreamImpl( StreamImpl *inputStream );
+void clearStreamImpl( struct ColmProgram *prg, Tree **sp, StreamImpl *inputStream );
 void initSourceStream( StreamImpl *in );
 void clearSourceStream( struct ColmProgram *prg, Tree **sp, StreamImpl *sourceStream );
 

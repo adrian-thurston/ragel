@@ -337,7 +337,7 @@ void initFdFuncs()
  * StreamImpl struct, this wraps the list of input streams.
  */
 
-void initInputStream( StreamImpl *inputStream )
+void initStreamImpl( StreamImpl *inputStream )
 {
 	memset( inputStream, 0, sizeof(StreamImpl) );
 
@@ -348,7 +348,7 @@ void initInputStream( StreamImpl *inputStream )
 	inputStream->funcs = &streamFuncs;
 }
 
-void clearInputStream( struct ColmProgram *prg, Tree **sp, StreamImpl *inputStream )
+void clearStreamImpl( struct ColmProgram *prg, Tree **sp, StreamImpl *inputStream )
 {
 	RunBuf *buf = inputStream->queue;
 	while ( buf != 0 ) {
