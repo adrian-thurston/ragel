@@ -331,17 +331,13 @@ typedef unsigned char uchar;
 #define GEN_VECTOR    0x12
 #define GEN_PARSER    0x13
 
-/* Virtual machine stack size, number of pointers. 
- * This will be mmapped. */
-
 /* Known language element ids. */
 #define LEL_ID_PTR          1
 #define LEL_ID_BOOL         2
 #define LEL_ID_INT          3
 #define LEL_ID_STR          4
 #define LEL_ID_STREAM       5
-#define LEL_ID_INPUT        6
-#define LEL_ID_IGNORE       7
+#define LEL_ID_IGNORE       6
 
 /*
  * Flags

@@ -305,18 +305,3 @@ void streamFree( Program *prg, Stream *stream )
 {
 	mapElFree( prg, (MapEl*)stream );
 }
-
-
-/*
- * Input
- */
-
-Input *inputAllocate( Program *prg )
-{
-	return (Input*)mapElAllocate( prg );
-}
-
-void inputFree( Program *prg, Input *accumStream )
-{
-	mapElFree( prg, (MapEl*)accumStream );
-}

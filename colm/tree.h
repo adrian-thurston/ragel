@@ -192,17 +192,6 @@ typedef struct _Stream
 	StreamImpl *in;
 } Stream;
 
-typedef struct _Input
-{
-	/* Must overlay Tree. */
-	short id;
-	unsigned short flags;
-	long refs;
-	Kid *child;
-
-	StreamImpl *in;
-} Input;
-
 typedef struct _Parser
 {
 	/* Must overlay Tree. */
@@ -215,7 +204,7 @@ typedef struct _Parser
 
 	struct _PdaRun *pdaRun;
 	struct _FsmRun *fsmRun;
-	struct _Input *input;
+	struct _Stream *input;
 	Tree *result;
 } Parser;
 
@@ -283,7 +272,7 @@ Tree *constructTerm( struct ColmProgram *prg, Word id, Head *tokdata );
 Tree *constructReplacementTree( Kid *kid, Tree **bindings, struct ColmProgram *prg, long pat );
 Tree *createGeneric( struct ColmProgram *prg, long genericId );
 Tree *constructToken( struct ColmProgram *prg, Tree **root, long nargs );
-Tree *constructInput( struct ColmProgram *prg );
+Tree *constructStream( struct ColmProgram *prg );
 
 
 int testFalse( struct ColmProgram *prg, Tree *tree );

@@ -173,7 +173,7 @@ Word streamAppend( Program *prg, Tree **sp, Tree *input, StreamImpl *is )
 		length = collect.length;
 		strCollectDestroy( &collect );
 	}
-	else if ( input->id == LEL_ID_STREAM || input->id == LEL_ID_INPUT ) {
+	else if ( input->id == LEL_ID_STREAM ) {
 		treeUpref( input );
 		is->funcs->appendStream( is, input );
 	}
@@ -2115,7 +2115,7 @@ again:
 		case IN_INPUT_APPEND_WC: {
 			debug( REALM_BYTECODE, "IN_INPUT_APPEND_WC \n" );
 
-			Input *accumStream = (Input*)vm_pop();
+			Stream *accumStream = (Stream*)vm_pop();
 			Tree *input = vm_pop();
 			streamAppend( prg, sp, input, accumStream->in );
 
@@ -2126,7 +2126,7 @@ again:
 		case IN_INPUT_APPEND_WV: {
 			debug( REALM_BYTECODE, "IN_INPUT_APPEND_WV \n" );
 
-			Input *accumStream = (Input*)vm_pop();
+			Stream *accumStream = (Stream*)vm_pop();
 			Tree *input = vm_pop();
 			Word len = streamAppend( prg, sp, input, accumStream->in );
 
@@ -2152,7 +2152,7 @@ again:
 
 			debug( REALM_BYTECODE, "IN_INPUT_APPEND_BKT\n" );
 
-			undoStreamAppend( prg, sp, 0, ((Input*)accumStream)->in, input, len );
+			undoStreamAppend( prg, sp, 0, ((Stream*)accumStream)->in, input, len );
 			treeDownref( prg, sp, accumStream );
 			treeDownref( prg, sp, input );
 			break;
@@ -2451,7 +2451,7 @@ again:
 		case IN_INPUT_PULL_WV: {
 			debug( REALM_BYTECODE, "IN_INPUT_PULL_WV\n" );
 
-			Input *accumStream = (Input*)vm_pop();
+			Stream *accumStream = (Stream*)vm_pop();
 			Tree *len = vm_pop();
 			Tree *string = streamPullBc( prg, exec->parser->fsmRun, accumStream->in, len );
 			treeUpref( string );
@@ -2475,7 +2475,7 @@ again:
 
 			debug( REALM_BYTECODE, "IN_INPUT_PULL_BKT\n" );
 
-			undoPull( prg, ((Input*)accumStream)->in, string );
+			undoPull( prg, ((Stream*)accumStream)->in, string );
 			treeDownref( prg, sp, accumStream );
 			treeDownref( prg, sp, string );
 			break;
@@ -2483,7 +2483,7 @@ again:
 		case IN_INPUT_PUSH_WV: {
 			debug( REALM_BYTECODE, "IN_INPUT_PUSH_WV\n" );
 
-			Input *input = (Input*)vm_pop();
+			Stream *input = (Stream*)vm_pop();
 			Tree *tree = vm_pop();
 			long len = streamPush( prg, sp, 0, input->in, tree, false );
 			vm_push( 0 );
@@ -2500,7 +2500,7 @@ again:
 		case IN_INPUT_PUSH_IGNORE_WV: {
 			debug( REALM_BYTECODE, "IN_INPUT_PUSH_IGNORE_WV\n" );
 
-			Input *input = (Input*)vm_pop();
+			Stream *input = (Stream*)vm_pop();
 			Tree *tree = vm_pop();
 			long len = streamPush( prg, sp, 0, input->in, tree, true );
 			vm_push( 0 );
@@ -2518,7 +2518,7 @@ again:
 			Word len;
 			read_word( len );
 
-			Input *input = (Input*)vm_pop();
+			Stream *input = (Stream*)vm_pop();
 
 			debug( REALM_BYTECODE, "IN_INPUT_PUSH_BKT\n" );
 
@@ -2563,7 +2563,7 @@ again:
 		case IN_CONSTRUCT_INPUT: {
 			debug( REALM_BYTECODE, "IN_CONSTRUCT_INPUT\n" );
 
-			Tree *input = constructInput( prg );
+			Tree *input = constructStream( prg );
 			treeUpref( input );
 			vm_push( input );
 			break;
@@ -2581,7 +2581,7 @@ again:
 			debug( REALM_BYTECODE, "IN_SET_INPUT\n" );
 
 			Parser *parser = (Parser*)vm_pop();
-			Input *accumStream = (Input*)vm_pop();
+			Stream *accumStream = (Stream*)vm_pop();
 			parser->input = accumStream;
 			treeUpref( (Tree*)accumStream );
 			treeDownref( prg, sp, (Tree*)parser );

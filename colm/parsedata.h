@@ -912,7 +912,6 @@ struct Compiler
 	LangEl *intLangEl;
 	LangEl *strLangEl;
 	LangEl *streamLangEl;
-	LangEl *inputLangEl;
 	LangEl *anyLangEl;
 	LangEl *rootLangEl;
 	LangEl *noTokenLangEl;
@@ -957,7 +956,6 @@ struct Compiler
 	UniqueType *uniqueTypeInt;
 	UniqueType *uniqueTypeStr;
 	UniqueType *uniqueTypeStream;
-	UniqueType *uniqueTypeInput;
 	UniqueType *uniqueTypeIgnore;
 	UniqueType *uniqueTypeAny;
 
@@ -970,14 +968,12 @@ struct Compiler
 
 	void initStrObject();
 	void initStreamObject();
-	void initInputObject();
 	void initIntObject();
 	void initTokenObjects();
 
 	ObjectDef *intObj;
 	ObjectDef *strObj;
 	ObjectDef *streamObj;
-	ObjectDef *inputObj;
 	ObjectDef *tokenObj;
 
 	FsmTables *fsmTables;

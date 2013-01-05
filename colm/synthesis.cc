@@ -39,7 +39,6 @@ void Compiler::initUniqueTypes( )
 	uniqueTypeInt = new UniqueType( TYPE_TREE, intLangEl );
 	uniqueTypeStr = new UniqueType( TYPE_TREE, strLangEl );
 	uniqueTypeStream = new UniqueType( TYPE_TREE, streamLangEl );
-	uniqueTypeInput = new UniqueType( TYPE_TREE, inputLangEl );
 	uniqueTypeIgnore = new UniqueType( TYPE_TREE, ignoreLangEl );
 	uniqueTypeAny = new UniqueType( TYPE_TREE, anyLangEl );
 
@@ -49,7 +48,6 @@ void Compiler::initUniqueTypes( )
 	uniqeTypeMap.insert( uniqueTypeInt );
 	uniqeTypeMap.insert( uniqueTypeStr );
 	uniqeTypeMap.insert( uniqueTypeStream );
-	uniqeTypeMap.insert( uniqueTypeInput );
 	uniqeTypeMap.insert( uniqueTypeIgnore );
 	uniqeTypeMap.insert( uniqueTypeAny );
 }
@@ -1481,7 +1479,6 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool stop, bo
 	/*
 	 * Finish operation
 	 */
-finish:
 
 	/* Parse instruction, dependent on whether or not we are producing revert
 	 * or commit code. */
@@ -2430,7 +2427,7 @@ void Compiler::addMatchText( ObjectDef *frame, LangEl *lel )
 void Compiler::addInput( ObjectDef *frame )
 {
 	/* Make the type ref. */
-	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeInput );
+	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeStream );
 
 	/* Create the field and insert it into the map. */
 	ObjField *el = new ObjField( internal, typeRef, "input" );
@@ -2533,19 +2530,12 @@ void Compiler::initStreamObject( )
 	streamObj = new ObjectDef( ObjectDef::BuiltinType,
 			"stream", nextObjectId++ );
 	streamLangEl->objectDef = streamObj;
-}
 
-void Compiler::initInputObject( )
-{
-	inputObj = new ObjectDef( ObjectDef::BuiltinType,
-			"accum_stream", nextObjectId++ );
-	inputLangEl->objectDef = inputObj;
-
-	initFunction( uniqueTypeStr, inputObj, "pull",  
+	initFunction( uniqueTypeStr, streamObj, "pull",  
 			IN_INPUT_PULL_WV, IN_INPUT_PULL_WV, uniqueTypeInt, false );
-	initFunction( uniqueTypeStr, inputObj, "push",  
+	initFunction( uniqueTypeStr, streamObj, "push",  
 			IN_INPUT_PUSH_WV, IN_INPUT_PUSH_WV, uniqueTypeAny, false );
-	initFunction( uniqueTypeStr, inputObj, "push_ignore",  
+	initFunction( uniqueTypeStr, streamObj, "push_ignore",  
 			IN_INPUT_PUSH_IGNORE_WV, IN_INPUT_PUSH_IGNORE_WV, uniqueTypeAny, false );
 }
 
@@ -3350,11 +3340,9 @@ void Compiler::removeNonUnparsableRepls()
 
 void Compiler::compileByteCode()
 {
-//	initUniqueTypes();
 	initIntObject();
 	initStrObject();
 	initStreamObject();
-	initInputObject();
 	initTokenObjects();
 	makeDefaultIterators();
 	initAllLanguageObjects();

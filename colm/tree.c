@@ -319,11 +319,11 @@ Tree *constructTerm( Program *prg, Word id, Head *tokdata )
 	return tree;
 }
 
-Tree *constructInput( Program *prg )
+Tree *constructStream( Program *prg )
 {
-	Input *input = inputAllocate( prg );
+	Stream *input = streamAllocate( prg );
 	input->refs = 0;
-	input->id = LEL_ID_INPUT;
+	input->id = LEL_ID_STREAM;
 	input->in = malloc( sizeof(StreamImpl) );
 	initStreamImpl( input->in );
 	return (Tree*)input;
@@ -1069,18 +1069,12 @@ free_tree:
 		else if ( tree->id == LEL_ID_STREAM ) {
 			Stream *stream = (Stream*)tree;
 			clearSourceStream( prg, sp, stream->in );
-			free( stream->in );
 			if ( stream->in->file != 0 )
 				fclose( stream->in->file );
-			else 
+			else if ( stream->in->fd > 0 )
 				close( stream->in->fd );
+			free( stream->in );
 			streamFree( prg, stream );
-		}
-		else if ( tree->id == LEL_ID_INPUT ) {
-			Input *input = (Input*)tree;
-			clearStreamImpl( prg, sp, input->in );
-			free( input->in );
-			inputFree( prg, input );
 		}
 		else { 
 			if ( tree->id != LEL_ID_IGNORE )
