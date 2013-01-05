@@ -233,6 +233,8 @@ int fdGetData( FsmRun *fsmRun, StreamImpl *ss, int skip, char *dest, int length,
 		buf = buf->next;
 	}
 
+	attachStream( fsmRun, ss );
+
 	return ret;
 }
 
@@ -450,6 +452,8 @@ int _getData( FsmRun *fsmRun, StreamImpl *is, int skip, char *dest, int length, 
 	int ret = 0;
 	*copied = 0;
 
+	attachStream( fsmRun, is );
+
 	/* Move over skip bytes. */
 	RunBuf *buf = is->queue;
 	while ( true ) {
@@ -462,8 +466,6 @@ int _getData( FsmRun *fsmRun, StreamImpl *is, int skip, char *dest, int length, 
 		if ( buf->type == RunBufSourceType ) {
 			Stream *stream = (Stream*)buf->tree;
 			int type = stream->in->funcs->getData( fsmRun, stream->in, skip, dest, length, copied );
-
-			attachStream( fsmRun, stream->in );
 
 			if ( type == INPUT_EOD && is->eof ) {
 				ret = INPUT_EOF;
@@ -513,8 +515,6 @@ int _getData( FsmRun *fsmRun, StreamImpl *is, int skip, char *dest, int length, 
 
 		buf = buf->next;
 	}
-
-	attachStream( fsmRun, is );
 
 #if DEBUG
 	switch ( ret ) {

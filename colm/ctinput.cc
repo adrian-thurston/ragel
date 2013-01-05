@@ -67,6 +67,8 @@ int inputStreamPatternGetData( FsmRun *fsmRun, StreamImpl *ss, int skip, char *d
 	PatternItem *buf = ss->patItem;
 	int offset = ss->offset;
 
+	attachStream( fsmRun, ss );
+
 	while ( true ) {
 		if ( buf == 0 )
 			return INPUT_EOD;
@@ -241,6 +243,8 @@ int inputStreamConsGetData( FsmRun *fsmRun, StreamImpl *ss, int skip, char *dest
 
 	ConsItem *buf = ss->consItem;
 	int offset = ss->offset;
+
+	attachStream( fsmRun, ss );
 
 	while ( true ) {
 		if ( buf == 0 )
