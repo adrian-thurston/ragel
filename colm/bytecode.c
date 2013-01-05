@@ -173,7 +173,7 @@ Word streamAppend( Program *prg, Tree **sp, Tree *input, StreamImpl *is )
 		length = collect.length;
 		strCollectDestroy( &collect );
 	}
-	else if ( input->id == LEL_ID_STREAM ) {
+	else if ( input->id == LEL_ID_STREAM || input->id == LEL_ID_INPUT ) {
 		treeUpref( input );
 		is->funcs->appendStream( is, input );
 	}

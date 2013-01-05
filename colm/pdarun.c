@@ -277,8 +277,6 @@ void detachSource( FsmRun *fsmRun, StreamImpl *is )
 
 void clearBuffered( FsmRun *fsmRun )
 {
-	/* If there is data in the current buffer then send the whole send back
-	 * should be in this buffer. */
 	if ( fsmRun->tokstart != 0 ) {
 		fsmRun->p = fsmRun->pe = fsmRun->tokstart;
 		fsmRun->tokstart = 0;

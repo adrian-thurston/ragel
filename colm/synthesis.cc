@@ -1419,32 +1419,6 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool stop, bo
 
 	/*****************************/
 
-	if ( parserText->list->length() == 1 && 
-			parserText->list->head->type == ConsItem::ExprType )
-	{
-		/* Only one argument and it is an expression type. Evaluate it (but
-		 * ignore the code) to determine if it is an input type. */
-		CodeVect unused;
-		UniqueType *ut = parserText->list->head->expr->evaluate( pd, unused );
-
-		if ( ut == pd->uniqueTypeInput ) {
-			/* Only one argument and it is an input object. Set the input into
-			 * the parser and parse using it. */
-			code.append( IN_DUP_TOP );
-
-			parserText->list->head->expr->evaluate( pd, code );
-
-			code.append( IN_TOP_SWAP );
-			code.append( IN_SET_INPUT );
-
-			code.append( IN_DUP_TOP );
-
-			parseFrag( pd, code, stopId );
-
-			goto finish;
-		}
-	}
-
 	code.append( IN_DUP_TOP );
 	code.append( IN_CONSTRUCT_INPUT );
 	code.append( IN_TOP_SWAP );

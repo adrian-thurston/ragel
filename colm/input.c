@@ -674,16 +674,23 @@ void _prependData( StreamImpl *is, const char *data, long length )
 	if ( is->attached != 0 )
 		detachStream( is->attached, is );
 
-	/* Create a new buffer for the data. This is the easy implementation.
-	 * Something better is needed here. It puts a max on the amount of
-	 * data that can be pushed back to the inputStream. */
-	assert( length < FSM_BUFSIZE );
+	if ( isSourceStream( is ) && ((Stream*)is->queue->tree)->in->funcs == &streamFuncs ) {
+		Stream *stream = (Stream*)is->queue->tree;
 
-	RunBuf *newBuf = newRunBuf();
-	newBuf->length = length;
-	memcpy( newBuf->data, data, length );
+		_prependData( stream->in, data, length );
+	}
+	else {
+		/* Create a new buffer for the data. This is the easy implementation.
+		 * Something better is needed here. It puts a max on the amount of
+		 * data that can be pushed back to the inputStream. */
+		assert( length < FSM_BUFSIZE );
 
-	inputStreamPrepend( is, newBuf );
+		RunBuf *newBuf = newRunBuf();
+		newBuf->length = length;
+		memcpy( newBuf->data, data, length );
+
+		inputStreamPrepend( is, newBuf );
+	}
 }
 
 int _undoPrependData( StreamImpl *is, int length )
