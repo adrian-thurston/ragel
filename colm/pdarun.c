@@ -168,6 +168,11 @@ void streamPushTree( FsmRun *fsmRun, StreamImpl *is, Tree *tree, int ignore )
 	is->funcs->prependTree( is, tree, ignore );
 }
 
+void streamPushStream( FsmRun *fsmRun, StreamImpl *is, Tree *tree )
+{
+	is->funcs->prependStream( is, tree );
+}
+
 void undoStreamPush( Program *prg, Tree **sp, FsmRun *fsmRun, StreamImpl *is, long length )
 {
 	if ( length < 0 ) {
@@ -1672,7 +1677,7 @@ backup:
 
 void commitFull( Program *prg, Tree **sp, PdaRun *pdaRun, long causeReduce )
 {
-	debug( REALM_PARSE, "running full commit" );
+	debug( REALM_PARSE, "running full commit\n" );
 	
 	ParseTree *parseTree = pdaRun->stackTop;
 	Code *rcode = pdaRun->reverseCode.data + pdaRun->reverseCode.tabLen;

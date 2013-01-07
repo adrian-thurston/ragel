@@ -334,6 +334,11 @@ long streamPush( Program *prg, Tree **sp, FsmRun *fsmRun, StreamImpl *in, Tree *
 
 		return length;
 	}
+	else if ( tree->id == LEL_ID_STREAM ) {
+		treeUpref( tree );
+		streamPushStream( fsmRun, in, tree );
+		return -1;
+	}
 	else {
 		treeUpref( tree );
 		streamPushTree( fsmRun, in, tree, ignore );

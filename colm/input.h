@@ -106,18 +106,21 @@ struct StreamFuncs
 	void (*setEof)( StreamImpl *is );
 	void (*unsetEof)( StreamImpl *is );
 
+	/* Prepending to a stream. */
 	void (*prependData)( StreamImpl *in, const char *data, long len );
-	int (*undoPrependData)( StreamImpl *is, int length );
-
 	void (*prependTree)( StreamImpl *is, struct ColmTree *tree, int ignore );
+	void (*prependStream)( StreamImpl *in, struct ColmTree *tree );
+	int (*undoPrependData)( StreamImpl *is, int length );
 	struct ColmTree *(*undoPrependTree)( StreamImpl *is );
+	struct ColmTree *(*undoPrependStream)( StreamImpl *in );
 
+	/* Appending to a stream. */
 	void (*appendData)( StreamImpl *in, const char *data, long len );
 	void (*appendTree)( StreamImpl *in, struct ColmTree *tree );
 	void (*appendStream)( StreamImpl *in, struct ColmTree *tree );
 	struct ColmTree *(*undoAppendData)( StreamImpl *in, int length );
-	struct ColmTree *(*undoAppendStream)( StreamImpl *in );
 	struct ColmTree *(*undoAppendTree)( StreamImpl *in );
+	struct ColmTree *(*undoAppendStream)( StreamImpl *in );
 };
 
 /* List of source streams. Enables streams to be pushed/popped. */
@@ -177,17 +180,18 @@ void _setEof( StreamImpl *is );
 void _unsetEof( StreamImpl *is );
 
 void _prependData( StreamImpl *in, const char *data, long len );
-int _undoPrependData( StreamImpl *is, int length );
-
 void _prependTree( StreamImpl *is, struct ColmTree *tree, int ignore );
+void _prependStream( StreamImpl *in, struct ColmTree *tree );
+int _undoPrependData( StreamImpl *is, int length );
 struct ColmTree *_undoPrependTree( StreamImpl *is );
+struct ColmTree *_undoPrependStream( StreamImpl *in );
 
 void _appendData( StreamImpl *in, const char *data, long len );
 void _appendTree( StreamImpl *in, struct ColmTree *tree );
 void _appendStream( StreamImpl *in, struct ColmTree *tree );
 struct ColmTree *_undoAppendData( StreamImpl *in, int length );
-struct ColmTree *_undoAppendStream( StreamImpl *in );
 struct ColmTree *_undoAppendTree( StreamImpl *in );
+struct ColmTree *_undoAppendStream( StreamImpl *in );
 
 #ifdef __cplusplus
 }

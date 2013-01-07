@@ -431,6 +431,7 @@ Head *stringAllocPointer( struct ColmProgram *prg, const char *data, long length
 
 void streamPushText( FsmRun *fsmRun, StreamImpl *inputStream, const char *data, long length );
 void streamPushTree( FsmRun *fsmRun, StreamImpl *inputStream, Tree *tree, int ignore );
+void streamPushStream( FsmRun *fsmRun, StreamImpl *inputStream, Tree *tree );
 void undoStreamPush( struct ColmProgram *prg, Tree **sp, FsmRun *fsmRun, StreamImpl *inputStream, long length );
 void undoStreamAppend( struct ColmProgram *prg, Tree **sp, FsmRun *fsmRun, StreamImpl *inputStream, struct ColmTree *tree, long length );
 Kid *makeTokenWithData( struct ColmProgram *prg, PdaRun *pdaRun, FsmRun *fsmRun, 

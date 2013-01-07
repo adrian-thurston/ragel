@@ -150,17 +150,17 @@ void initStreamFuncs()
 	streamFuncs.unsetEof = &_unsetEof;
 
 	streamFuncs.prependData = &_prependData;
-	streamFuncs.undoPrependData = &_undoPrependData;
-
 	streamFuncs.prependTree = &_prependTree;
+	streamFuncs.prependStream = &_prependStream;
+	streamFuncs.undoPrependData = &_undoPrependData;
 	streamFuncs.undoPrependTree = &_undoPrependTree;
 
 	streamFuncs.appendData = &_appendData;
 	streamFuncs.appendTree = &_appendTree;
 	streamFuncs.appendStream = &_appendStream;
 	streamFuncs.undoAppendData = &_undoAppendData;
-	streamFuncs.undoAppendStream = &_undoAppendStream;
 	streamFuncs.undoAppendTree = &_undoAppendTree;
+	streamFuncs.undoAppendStream = &_undoAppendStream;
 }
 
 
@@ -693,6 +693,31 @@ void _prependData( StreamImpl *is, const char *data, long length )
 	}
 }
 
+void _prependTree( StreamImpl *is, Tree *tree, int ignore )
+{
+	if ( is->attached != 0 )
+		detachStream( is->attached, is );
+
+	/* Create a new buffer for the data. This is the easy implementation.
+	 * Something better is needed here. It puts a max on the amount of
+	 * data that can be pushed back to the inputStream. */
+	RunBuf *newBuf = newRunBuf();
+	newBuf->type = ignore ? RunBufIgnoreType : RunBufTokenType;
+	newBuf->tree = tree;
+	inputStreamPrepend( is, newBuf );
+}
+
+void _prependStream( StreamImpl *in, struct ColmTree *tree )
+{
+	/* Create a new buffer for the data. This is the easy implementation.
+	 * Something better is needed here. It puts a max on the amount of
+	 * data that can be pushed back to the inputStream. */
+	RunBuf *newBuf = newRunBuf();
+	newBuf->type = RunBufSourceType;
+	newBuf->tree = tree;
+	inputStreamPrepend( in, newBuf );
+}
+
 int _undoPrependData( StreamImpl *is, int length )
 {
 	if ( is->attached != 0 )
@@ -740,20 +765,6 @@ int _undoPrependData( StreamImpl *is, int length )
 	}
 
 	return consumed;
-}
-
-void _prependTree( StreamImpl *is, Tree *tree, int ignore )
-{
-	if ( is->attached != 0 )
-		detachStream( is->attached, is );
-
-	/* Create a new buffer for the data. This is the easy implementation.
-	 * Something better is needed here. It puts a max on the amount of
-	 * data that can be pushed back to the inputStream. */
-	RunBuf *newBuf = newRunBuf();
-	newBuf->type = ignore ? RunBufIgnoreType : RunBufTokenType;
-	newBuf->tree = tree;
-	inputStreamPrepend( is, newBuf );
 }
 
 Tree *_undoPrependTree( StreamImpl *is )
