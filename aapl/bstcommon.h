@@ -361,7 +361,7 @@ template <BST_TEMPL_DEF> bool BstTable<BST_TEMPL_USE>::
 		}
 
 		mid = lower + ((upper-lower)>>1);
-		keyRelation = compare(key, GET_KEY(*mid));
+		keyRelation = this->compare(key, GET_KEY(*mid));
 
 		if ( keyRelation < 0 )
 			upper = mid - 1;
@@ -373,12 +373,12 @@ template <BST_TEMPL_DEF> bool BstTable<BST_TEMPL_USE>::
 
 			lower = mid - 1;
 			while ( lower != lowEnd && 
-					compare(key, GET_KEY(*lower)) == 0 )
+					this->compare(key, GET_KEY(*lower)) == 0 )
 				lower--;
 
 			upper = mid + 1;
 			while ( upper != highEnd && 
-					compare(key, GET_KEY(*upper)) == 0 )
+					this->compare(key, GET_KEY(*upper)) == 0 )
 				upper++;
 			
 			low = (Element*)lower + 1;
@@ -419,7 +419,7 @@ template <BST_TEMPL_DEF> Element *BstTable<BST_TEMPL_USE>::
 		}
 
 		mid = lower + ((upper-lower)>>1);
-		keyRelation = compare(key, GET_KEY(*mid));
+		keyRelation = this->compare(key, GET_KEY(*mid));
 
 		if ( keyRelation < 0 )
 			upper = mid - 1;
@@ -457,7 +457,7 @@ template <BST_TEMPL_DEF> Element *BstTable<BST_TEMPL_USE>::
 		}
 
 		mid = lower + ((upper-lower)>>1);
-		keyRelation = compare(key, GET_KEY(*mid));
+		keyRelation = this->compare(key, GET_KEY(*mid));
 
 		if ( keyRelation < 0 )
 			upper = mid - 1;
@@ -603,7 +603,7 @@ template <BST_TEMPL_DEF> Element *BstTable<BST_TEMPL_USE>::
 		}
 
 		mid = lower + ((upper-lower)>>1);
-		keyRelation = compare(GET_KEY(el), GET_KEY(*mid));
+		keyRelation = this->compare(GET_KEY(el), GET_KEY(*mid));
 
 		if ( keyRelation < 0 )
 			upper = mid - 1;
@@ -662,7 +662,7 @@ template <BST_TEMPL_DEF> Element *BstTable<BST_TEMPL_USE>::
 		}
 
 		mid = lower + ((upper-lower)>>1);
-		keyRelation = compare(GET_KEY(el), GET_KEY(*mid));
+		keyRelation = this->compare(GET_KEY(el), GET_KEY(*mid));
 
 		if ( keyRelation < 0 )
 			upper = mid - 1;

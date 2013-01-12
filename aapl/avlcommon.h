@@ -885,9 +885,9 @@ template <AVLMEL_TEMPDEF> Element *AvlTree<AVLMEL_TEMPUSE>::
 		}
 
 #ifdef AVL_BASIC
-		keyRelation = compare( *element, *curEl );
+		keyRelation = this->compare( *element, *curEl );
 #else
-		keyRelation = compare( element->BASEKEY(getKey()), 
+		keyRelation = this->compare( element->BASEKEY(getKey()),
 				curEl->BASEKEY(getKey()) );
 #endif
 
@@ -924,7 +924,7 @@ template <AVLMEL_TEMPDEF> Element *AvlTree<AVLMEL_TEMPUSE>::
 	long keyRelation;
 
 	while (curEl) {
-		keyRelation = compare( *element, *curEl );
+		keyRelation = this->compare( *element, *curEl );
 
 		/* Do we go left? */
 		if ( keyRelation < 0 )
@@ -973,7 +973,7 @@ template <AVLMEL_TEMPDEF> Element *AvlTree<AVLMEL_TEMPUSE>::
 			return element;
 		}
 
-		keyRelation = compare( key, curEl->BASEKEY(getKey()) );
+		keyRelation = this->compare( key, curEl->BASEKEY(getKey()) );
 
 		/* Do we go left? */
 		if ( keyRelation < 0 ) {
@@ -1027,7 +1027,7 @@ template <AVLMEL_TEMPDEF> Element *AvlTree<AVLMEL_TEMPUSE>::
 			return element;
 		}
 
-		keyRelation = compare(key, curEl->getKey());
+		keyRelation = this->compare(key, curEl->getKey());
 
 		/* Do we go left? */
 		if ( keyRelation < 0 ) {
@@ -1062,7 +1062,7 @@ template <AVLMEL_TEMPDEF> Element *AvlTree<AVLMEL_TEMPUSE>::
 	long keyRelation;
 
 	while (curEl) {
-		keyRelation = compare( key, curEl->BASEKEY(getKey()) );
+		keyRelation = this->compare( key, curEl->BASEKEY(getKey()) );
 
 		/* Do we go left? */
 		if ( keyRelation < 0 )
