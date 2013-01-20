@@ -2,6 +2,7 @@
 /tmp.lm
 /tmp.c
 /tmp.bin
+/input[0-9]
 /input
 /out
 
