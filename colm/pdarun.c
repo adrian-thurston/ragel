@@ -280,8 +280,10 @@ void detachSource( FsmRun *fsmRun, StreamImpl *is )
 void clearBuffered( FsmRun *fsmRun )
 {
 	if ( fsmRun->tokstart != 0 ) {
-		fsmRun->p = fsmRun->pe = fsmRun->tokstart;
-		fsmRun->tokstart = 0;
+		//fsmRun->p = fsmRun->pe = fsmRun->tokstart;
+		//fsmRun->tokstart = 0;
+
+		fsmRun->pe = fsmRun->p;
 	}
 	else {
 		fsmRun->pe = fsmRun->p;
@@ -1114,6 +1116,15 @@ long scanToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, StreamImpl *is )
 		switch ( type ) {
 			case INPUT_DATA:
 				fsmRun->pe = fsmRun->p + len;
+				break;
+
+			case INPUT_EOS:
+				if ( fsmRun->tokstart != 0 )
+					fsmRun->peof = fsmRun->pe;
+				debug( REALM_SCAN, "EOS *******************\n" );
+//				else {
+//					return SCAN_EOS;
+//				}
 				break;
 
 			case INPUT_EOF:

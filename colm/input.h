@@ -35,9 +35,10 @@ extern "C" {
 /* This is for data sources to return, not for the wrapper. */
 #define INPUT_EOD      2
 #define INPUT_EOF      3
-#define INPUT_LANG_EL  4
-#define INPUT_TREE     5
-#define INPUT_IGNORE   6
+#define INPUT_EOS      4
+#define INPUT_LANG_EL  5
+#define INPUT_TREE     6
+#define INPUT_IGNORE   7
 
 /*
  * pdaRun <- fsmRun <- stream 
@@ -131,6 +132,7 @@ struct _StreamImpl
 
 	char eofSent;
 	char eof;
+	char eosSent;
 
 	RunBuf *queue;
 	RunBuf *queueTail;

@@ -467,9 +467,16 @@ int _getData( FsmRun *fsmRun, StreamImpl *is, int skip, char *dest, int length, 
 			Stream *stream = (Stream*)buf->tree;
 			int type = stream->in->funcs->getData( fsmRun, stream->in, skip, dest, length, copied );
 
-			if ( type == INPUT_EOD && is->eof ) {
-				ret = INPUT_EOF;
-				break;
+//			if ( type == INPUT_EOD && !stream->in->eosSent ) {
+//				stream->in->eosSent = 1;
+//				ret = INPUT_EOS;
+//				continue;
+//			}
+
+			if ( type == INPUT_EOD || type == INPUT_EOF ) {
+				debug( REALM_INPUT, "skipping over input\n" );
+				buf = buf->next;
+				continue;
 			}
 
 			ret = type;
@@ -558,6 +565,7 @@ int _consumeData( StreamImpl *is, int length )
 		if ( buf->type == RunBufSourceType ) {
 			Stream *stream = (Stream*)buf->tree;
 			int slen = stream->in->funcs->consumeData( stream->in, length );
+			debug( REALM_INPUT, " got %d bytes from source\n", slen );
 
 			consumed += slen;
 			length -= slen;
@@ -578,8 +586,10 @@ int _consumeData( StreamImpl *is, int length )
 			}
 		}
 
-		if ( length == 0 )
+		if ( length == 0 ) {
+			debug( REALM_INPUT, "exiting consume\n", length );
 			break;
+		}
 
 		RunBuf *runBuf = inputStreamPopHead( is );
 		free( runBuf );
