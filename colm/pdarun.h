@@ -73,7 +73,8 @@ typedef struct _FsmRun
 {
 	FsmTables *tables;
 
-	RunBuf *runBuf;
+	RunBuf *scanBuf;
+	RunBuf *consumeBuf;
 
 	/* FsmRun State. */
 	long region, preRegion;

@@ -60,14 +60,13 @@
 void initFsmRun( FsmRun *fsmRun, Program *prg )
 {
 	fsmRun->tables = prg->rtd->fsmTables;
-	fsmRun->runBuf = 0;
 
-	/* Run buffers need to stick around because 
-	 * token strings point into them. */
-	fsmRun->runBuf = newRunBuf();
-	fsmRun->runBuf->next = 0;
+	fsmRun->scanBuf = newRunBuf();
+	fsmRun->scanBuf->next = 0;
 
-	fsmRun->p = fsmRun->pe = fsmRun->runBuf->data;
+	fsmRun->consumeBuf = 0;
+
+	fsmRun->p = fsmRun->pe = fsmRun->scanBuf->data;
 	fsmRun->peof = 0;
 
 	fsmRun->preRegion = -1;
@@ -75,9 +74,9 @@ void initFsmRun( FsmRun *fsmRun, Program *prg )
 
 void clearFsmRun( Program *prg, FsmRun *fsmRun )
 {
-	if ( fsmRun->runBuf != 0 ) {
+	if ( fsmRun->consumeBuf != 0 ) {
 		/* Transfer the run buf list to the program */
-		RunBuf *head = fsmRun->runBuf;
+		RunBuf *head = fsmRun->consumeBuf;
 		RunBuf *tail = head;
 		while ( tail->next != 0 )
 			tail = tail->next;
@@ -135,13 +134,15 @@ Head *streamPull( Program *prg, FsmRun *fsmRun, StreamImpl *is, long length )
 	assert( fsmRun->tokstart == 0 );
 
 	RunBuf *runBuf = newRunBuf();
-	runBuf->next = fsmRun->runBuf;
-	fsmRun->runBuf = runBuf;
+	runBuf->next = fsmRun->consumeBuf;
+	fsmRun->consumeBuf = runBuf;
 
 	int lenCopied = 0;
 	is->funcs->getData( fsmRun, is, 0, runBuf->data, length, &lenCopied );
 	is->funcs->consumeData( is, length );
-	fsmRun->p = fsmRun->pe = runBuf->data + length;
+
+	fsmRun->p = fsmRun->pe = fsmRun->scanBuf->data;
+	//fsmRun->peof = 0;
 
 	Head *tokdata = stringAllocPointer( prg, runBuf->data, length );
 	updatePosition( is, runBuf->data, length );
@@ -785,12 +786,14 @@ Head *peekMatch( Program *prg, FsmRun *fsmRun, StreamImpl *is )
 	long length = fsmRun->p - fsmRun->tokstart;
 
 	RunBuf *runBuf = newRunBuf();
-	runBuf->next = fsmRun->runBuf;
-	fsmRun->runBuf = runBuf;
+	runBuf->next = fsmRun->consumeBuf;
+	fsmRun->consumeBuf = runBuf;
 
 	int lenCopied = 0;
 	is->funcs->getData( fsmRun, is, 0, runBuf->data, length, &lenCopied );
-	fsmRun->p = fsmRun->pe = runBuf->data + length;
+
+	fsmRun->p = fsmRun->pe = fsmRun->scanBuf->data;
+	//fsmRun->peof = 0;
 
 	Head *head = stringAllocPointer( prg, runBuf->data, length );
 
@@ -810,13 +813,15 @@ Head *extractMatch( Program *prg, FsmRun *fsmRun, StreamImpl *is )
 	long length = fsmRun->p - fsmRun->tokstart;
 
 	RunBuf *runBuf = newRunBuf();
-	runBuf->next = fsmRun->runBuf;
-	fsmRun->runBuf = runBuf;
+	runBuf->next = fsmRun->consumeBuf;
+	fsmRun->consumeBuf = runBuf;
 
 	int lenCopied = 0;
 	is->funcs->getData( fsmRun, is, 0, runBuf->data, length, &lenCopied );
 	is->funcs->consumeData( is, length );
-	fsmRun->p = fsmRun->pe = runBuf->data + length;
+
+	fsmRun->p = fsmRun->pe = fsmRun->scanBuf->data;
+	//fsmRun->peof = 0;
 
 	Head *head = stringAllocPointer( prg, runBuf->data, length );
 
@@ -1049,7 +1054,7 @@ long scanToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, StreamImpl *is )
 
 		/* There may be space left in the current buffer. If not then we need
 		 * to make some. */
-		long space = fsmRun->runBuf->data + FSM_BUFSIZE - fsmRun->pe;
+		long space = fsmRun->scanBuf->data + FSM_BUFSIZE - fsmRun->pe;
 		if ( space == 0 ) {
 			/* Create a new run buf. */
 			RunBuf *newBuf = newRunBuf();
@@ -1059,15 +1064,15 @@ long scanToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, StreamImpl *is )
 
 			if ( fsmRun->tokstart == 0 ) {
 				/* No prefix. We filled the previous buffer. */
-				fsmRun->runBuf->length = FSM_BUFSIZE;
+				fsmRun->scanBuf->length = FSM_BUFSIZE;
 			}
 			else {
 				int i;
 
 				debug( REALM_SCAN, "copying data over to new buffer\n" );
-				assert( fsmRun->runBuf->offset == 0 );
+				assert( fsmRun->scanBuf->offset == 0 );
 
-				if ( fsmRun->tokstart == fsmRun->runBuf->data ) {
+				if ( fsmRun->tokstart == fsmRun->scanBuf->data ) {
 					/* A token is started and it is already at the beginning
 					 * of the current buffer. This means buffer is full and it
 					 * must be grown. Probably need to do this sooner. */
@@ -1079,7 +1084,7 @@ long scanToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, StreamImpl *is )
 				memcpy( newBuf->data, fsmRun->tokstart, have );
 
 				/* Compute the length of the previous buffer. */
-				fsmRun->runBuf->length = FSM_BUFSIZE - have;
+				fsmRun->scanBuf->length = FSM_BUFSIZE - have;
 
 				/* Compute tokstart and tokend. */
 				long dist = fsmRun->tokstart - newBuf->data;
@@ -1097,12 +1102,12 @@ long scanToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, StreamImpl *is )
 			fsmRun->p = fsmRun->pe = newBuf->data + have;
 			fsmRun->peof = 0;
 
-			newBuf->next = fsmRun->runBuf;
-			fsmRun->runBuf = newBuf;
+			newBuf->next = fsmRun->scanBuf;
+			fsmRun->scanBuf = newBuf;
 		}
 
 		/* We don't have any data. What is next in the input inputStream? */
-		space = fsmRun->runBuf->data + FSM_BUFSIZE - fsmRun->pe;
+		space = fsmRun->scanBuf->data + FSM_BUFSIZE - fsmRun->pe;
 		assert( space > 0 );
 			
 		/* Get more data. */
