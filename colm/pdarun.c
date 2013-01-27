@@ -817,7 +817,14 @@ Head *extractMatch( Program *prg, FsmRun *fsmRun, StreamImpl *is )
 	fsmRun->consumeBuf = runBuf;
 
 	int lenCopied = 0;
+	int total = 0;
 	is->funcs->getData( fsmRun, is, 0, runBuf->data, length, &lenCopied );
+	total += lenCopied;
+	while ( total < length ) {
+		is->funcs->getData( fsmRun, is, total, runBuf->data+total, length-total, &lenCopied );
+		total += lenCopied;
+	}
+
 	is->funcs->consumeData( is, length );
 
 	fsmRun->p = fsmRun->pe = fsmRun->scanBuf->data;
