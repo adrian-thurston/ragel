@@ -73,7 +73,8 @@ typedef struct _FsmRun
 {
 	FsmTables *tables;
 
-	RunBuf *runBuf;
+	RunBuf *scanBuf;
+	RunBuf *consumeBuf;
 
 	/* FsmRun State. */
 	long region, preRegion;
@@ -460,9 +461,6 @@ void undoParseStream( struct ColmProgram *prg, Tree **sp, StreamImpl *inputStrea
 
 void clearBuffered( FsmRun *fsmRun );
 void resetToken( FsmRun *fsmRun );
-
-void detachStream( FsmRun *fsmRun, StreamImpl *is );
-void attachStream( FsmRun *fsmRun, StreamImpl *is );
 
 #ifdef __cplusplus
 }
