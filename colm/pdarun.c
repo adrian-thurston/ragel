@@ -251,33 +251,6 @@ static void sendBackIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsm
 	}
 }
 
-void attachStream( FsmRun *fsmRun, StreamImpl *is )
-{
-	if ( is->attached != 0 && is->attached != fsmRun )
-		detachStream( is->attached, is );
-
-	if ( is->attached != fsmRun ) {
-		debug( REALM_INPUT, "attaching FsmRun to stream:  %p %p\n", fsmRun, is );
-		is->attached = fsmRun;
-	}
-}
-
-void detachStream( FsmRun *fsmRun, StreamImpl *is )
-{
-	debug( REALM_INPUT, "detaching FsmRun from stream:  %p %p\n", fsmRun, is );
-
-	is->attached = 0;
-	clearBuffered( fsmRun );
-}
-
-void detachSource( FsmRun *fsmRun, StreamImpl *is )
-{
-	debug( REALM_INPUT, "detaching fsm run from source stream: %p %p\n", fsmRun, is );
-
-	is->attached = 0;
-	clearBuffered( fsmRun );
-}
-
 void clearBuffered( FsmRun *fsmRun )
 {
 	if ( fsmRun->tokstart != 0 ) {

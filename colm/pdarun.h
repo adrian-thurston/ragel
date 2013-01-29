@@ -462,9 +462,6 @@ void undoParseStream( struct ColmProgram *prg, Tree **sp, StreamImpl *inputStrea
 void clearBuffered( FsmRun *fsmRun );
 void resetToken( FsmRun *fsmRun );
 
-void detachStream( FsmRun *fsmRun, StreamImpl *is );
-void attachStream( FsmRun *fsmRun, StreamImpl *is );
-
 #ifdef __cplusplus
 }
 #endif

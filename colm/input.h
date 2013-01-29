@@ -127,7 +127,6 @@ struct StreamFuncs
 struct _StreamImpl
 {
 	struct StreamFuncs *funcs;
-	struct _FsmRun *attached;
 
 	char eofSent;
 	char eof;
