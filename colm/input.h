@@ -88,7 +88,8 @@ typedef struct _StreamImpl StreamImpl;
 
 struct StreamFuncs
 {
-	int (*getParseBlock)( struct _FsmRun *fsmRun, StreamImpl *ss, int offset, char *dest, int length, int *copied );
+	int (*getParseBlock)( struct _FsmRun *fsmRun, StreamImpl *ss, int offset,
+			char *dest, int length, char **pdp, int *copied );
 
 	int (*getData)( struct _FsmRun *fsmRun, StreamImpl *ss, int offset, char *dest, int length, int *copied );
 
@@ -168,8 +169,10 @@ void initConsFuncs();
 
 /* The input stream interface. */
 
-int _getData( struct _FsmRun *fsmRun, StreamImpl *in, int offset, char *dest, int length, int *copied );
-int _getParseBlock( struct _FsmRun *fsmRun, StreamImpl *in, int offset, char *dest, int length, int *copied );
+int _getData( struct _FsmRun *fsmRun, StreamImpl *in, int offset,
+		char *dest, int length, int *copied );
+int _getParseBlock( struct _FsmRun *fsmRun, StreamImpl *in, int offset,
+		char *dest, int length, char **pdp, int *copied );
 int _consumeData( StreamImpl *in, int length );
 int _undoConsumeData( struct _FsmRun *fsmRun, StreamImpl *is, const char *data, int length );
 

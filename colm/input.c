@@ -178,7 +178,8 @@ void initInputFuncs()
  * Base run-time input streams.
  */
 
-int fdGetParseBlock( FsmRun *fsmRun, StreamImpl *ss, int skip, char *dest, int length, int *copied )
+int fdGetParseBlock( FsmRun *fsmRun, StreamImpl *ss, int skip,
+		char *dest, int length, char **pdp, int *copied )
 {
 	int ret = 0;
 	*copied = 0;
@@ -199,6 +200,7 @@ int fdGetParseBlock( FsmRun *fsmRun, StreamImpl *ss, int skip, char *dest, int l
 
 			int slen = received < length ? received : length;
 			memcpy( dest, runBuf->data, slen );
+			*pdp = runBuf->data;
 			*copied = slen;
 			ret = INPUT_DATA;
 			break;
@@ -225,6 +227,7 @@ int fdGetParseBlock( FsmRun *fsmRun, StreamImpl *ss, int skip, char *dest, int l
 
 				int slen = avail < length ? avail : length;
 				memcpy( dest, src, slen ) ;
+				*pdp = src;
 				*copied += slen;
 				ret = INPUT_DATA;
 				break;
@@ -507,7 +510,8 @@ void _unsetEof( StreamImpl *is )
 	}
 }
 
-int _getParseBlock( FsmRun *fsmRun, StreamImpl *is, int skip, char *dest, int length, int *copied )
+int _getParseBlock( FsmRun *fsmRun, StreamImpl *is, int skip,
+		char *dest, int length, char **pdp, int *copied )
 {
 	int ret = 0;
 	*copied = 0;
@@ -523,7 +527,7 @@ int _getParseBlock( FsmRun *fsmRun, StreamImpl *is, int skip, char *dest, int le
 
 		if ( buf->type == RunBufSourceType ) {
 			Stream *stream = (Stream*)buf->tree;
-			int type = stream->in->funcs->getData( fsmRun, stream->in, skip, dest, length, copied );
+			int type = stream->in->funcs->getParseBlock( fsmRun, stream->in, skip, dest, length, pdp, copied );
 
 //			if ( type == INPUT_EOD && !stream->in->eosSent ) {
 //				stream->in->eosSent = 1;
@@ -572,6 +576,7 @@ int _getParseBlock( FsmRun *fsmRun, StreamImpl *is, int skip, char *dest, int le
 
 				int slen = avail <= length ? avail : length;
 				memcpy( dest, src, slen ) ;
+				*pdp = src;
 				*copied += slen;
 				ret = INPUT_DATA;
 				break;

@@ -60,7 +60,8 @@ LangEl *inputStreamPatternGetLangEl( StreamImpl *ss, long *bindId, char **data, 
 	return klangEl;
 }
 
-int inputStreamPatternGetParseBlock( FsmRun *fsmRun, StreamImpl *ss, int skip, char *dest, int length, int *copied )
+int inputStreamPatternGetParseBlock( FsmRun *fsmRun, StreamImpl *ss, int skip,
+		char *dest, int length, char **pdp, int *copied )
 { 
 	*copied = 0;
 
@@ -95,6 +96,7 @@ int inputStreamPatternGetParseBlock( FsmRun *fsmRun, StreamImpl *ss, int skip, c
 				skip = 0;
 
 				memcpy( dest, src, slen ) ;
+				*pdp = src;
 				*copied += slen;
 				break;
 			}
@@ -283,7 +285,8 @@ LangEl *inputStreamConsGetLangEl( StreamImpl *ss, long *bindId, char **data, lon
 	return klangEl;
 }
 
-int inputStreamConsGetParseBlock( FsmRun *fsmRun, StreamImpl *ss, int skip, char *dest, int length, int *copied )
+int inputStreamConsGetParseBlock( FsmRun *fsmRun, StreamImpl *ss, int skip,
+		char *dest, int length, char **pdp, int *copied )
 { 
 	*copied = 0;
 
@@ -318,6 +321,7 @@ int inputStreamConsGetParseBlock( FsmRun *fsmRun, StreamImpl *ss, int skip, char
 				skip = 0;
 
 				memcpy( dest, src, slen ) ;
+				*pdp = src;
 				*copied += slen;
 				break;
 			}

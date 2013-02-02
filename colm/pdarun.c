@@ -1094,9 +1094,12 @@ long scanToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, StreamImpl *is )
 			
 		/* Get more data. */
 		int have = fsmRun->tokstart != 0 ? fsmRun->p - fsmRun->tokstart : 0;
-		int len = 0;
+	
 		debug( REALM_SCAN, "fetching data: have: %d  space: %d\n", have, space );
-		int type = is->funcs->getParseBlock( fsmRun, is, have, fsmRun->p, space, &len );
+
+		char *pd = 0;
+		int len = 0;
+		int type = is->funcs->getParseBlock( fsmRun, is, have, fsmRun->p, space, &pd, &len );
 
 		switch ( type ) {
 			case INPUT_DATA:
