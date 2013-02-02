@@ -163,10 +163,7 @@ std::ostream &GoIpGotoCodeGen::STATE_GOTOS_SWITCH( int level )
 {
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		out << TABS(level) << "case " << st->id << ":" << endl;
-		if ( redFsm->errState == st )
-			out << TABS(level + 1) << "goto st" << st->id << endl;
-		else
-			out << TABS(level + 1) << "goto st" << st->id << "_body" << endl;
+		out << TABS(level + 1) << "goto st_case_" << st->id << endl;
 	}
 	return out;
 }
@@ -204,7 +201,7 @@ void GoIpGotoCodeGen::GOTO_HEADER( RedStateAp *state, int level )
 	}
 
 	/* Give the state a label. */
-	out << TABS(level) << "st" << state->id << "_body:" << endl;
+	out << TABS(level) << "st_case_" << state->id << ":" << endl;
 
 	if ( state->fromStateAction != 0 ) {
 		/* Remember that we wrote an action. Write every action in the list. */
@@ -234,6 +231,7 @@ void GoIpGotoCodeGen::STATE_GOTO_ERROR( int level )
 	if ( anyWritten )
 		genLineDirective( out );
 
+	out << "st_case_" << state->id << ":" << endl;
 	if ( state->labelNeeded )
 		out << TABS(level) << "st" << state->id << ":" << endl;
 
