@@ -1,6 +1,6 @@
-SUBDIRS = c dot xml
+SUBDIRS = c dot xml go
 
-# d crack cs go java ml rbx ruby
+# d crack cs java ml rbx ruby
 
 bin_PROGRAMS = ragel
 
@@ -19,12 +19,12 @@ ragel_CXXFLAGS = -Wall
 ragel_LDADD = \
 	c/libc.a \
 	dot/libdot.a \
-	xml/libxml.a
+	xml/libxml.a \
+	go/libgo.a
 
 #	crack/libcrack.a
 #	cs/libcs.a
 #	d/libd.a
-#	go/libgo.a
 #	java/libjava.a
 #	ml/libml.a
 #	rbx/librbx.a

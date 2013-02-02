@@ -10,19 +10,19 @@
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
- *
+ * 
  *  Ragel is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- *
+ * 
  *  You should have received a copy of the GNU General Public License
  *  along with Ragel; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _GOIPGOTO_H
-#define _GOIPGOTO_H
+#ifndef _GO_IPGOTO_H
+#define _GO_IPGOTO_H
 
 #include <iostream>
 #include "goto.h"
@@ -32,47 +32,50 @@ struct CodeGenData;
 
 namespace Go {
 
-class GoIpGotoCodeGen
-	: public GoGotoCodeGen
+class IpGoto
+    : public Goto
 {
 public:
-	GoIpGotoCodeGen( const CodeGenArgs &args )
-			: GoGotoCodeGen(args) {}
+    IpGoto( const CodeGenArgs &args )
+            : Goto(args) {}
 
-	std::ostream &EXIT_STATES();
-	std::ostream &TRANS_GOTO( RedTransAp *trans, int level );
-	int TRANS_NR( RedTransAp *trans );
-	std::ostream &FINISH_CASES( int level );
-	std::ostream &AGAIN_CASES( int level );
-	std::ostream &STATE_GOTOS_SWITCH( int level );
+    std::ostream &EXIT_STATES();
+    std::ostream &TRANS_GOTO( RedTransAp *trans, int level );
+    std::ostream &COND_GOTO( RedCondAp *trans, int level );
+    std::ostream &FINISH_CASES();
+    std::ostream &AGAIN_CASES();
+    std::ostream &STATE_GOTOS();
 
-	void GOTO( ostream &ret, int gotoDest, bool inFinish );
-	void CALL( ostream &ret, int callDest, int targState, bool inFinish );
-	void NEXT( ostream &ret, int nextDest, bool inFinish );
-	void GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish );
-	void NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish );
-	void CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish );
-	void RET( ostream &ret, bool inFinish );
-	void CURS( ostream &ret, bool inFinish );
-	void TARGS( ostream &ret, bool inFinish, int targState );
-	void BREAK( ostream &ret, int targState, bool csForced );
+    void GOTO( ostream &ret, int gotoDest, bool inFinish );
+    void CALL( ostream &ret, int callDest, int targState, bool inFinish );
+    void NEXT( ostream &ret, int nextDest, bool inFinish );
+    void GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish );
+    void NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish );
+    void CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish );
+    void RET( ostream &ret, bool inFinish );
+    void CURS( ostream &ret, bool inFinish );
+    void TARGS( ostream &ret, bool inFinish, int targState );
+    void BREAK( ostream &ret, int targState, bool csForced );
 
-	virtual void writeData();
-	virtual void writeExec();
+    virtual void genAnalysis();
+    virtual void writeData();
+    virtual void writeExec();
 
 protected:
-	bool useTransInAgainLabel();
-	bool useAgainLabel();
+    bool useAgainLabel();
 
-	/* Called from GotoCodeGen::STATE_GOTOS just before writing the gotos for
-	 * each state. */
-	bool IN_TRANS_ACTIONS( RedStateAp *state );
-	void GOTO_HEADER( RedStateAp *state, int level );
-	void STATE_GOTO_ERROR( int level );
+    /* Called from Goto::STATE_GOTOS just before writing the gotos for
+     * each state. */
+    bool IN_TRANS_ACTIONS( RedStateAp *state );
+    void GOTO_HEADER( RedStateAp *state );
+    void STATE_GOTO_ERROR();
 
-	/* Set up labelNeeded flag for each state. */
-	void setLabelsNeeded( GenInlineList *inlineList );
-	void setLabelsNeeded();
+    /* Set up labelNeeded flag for each state. */
+    void setLabelsNeeded( GenInlineList *inlineList );
+    void setLabelsNeeded();
+
+private:
+    std::ostream &STATE_GOTOS_SWITCH();
 };
 
 }

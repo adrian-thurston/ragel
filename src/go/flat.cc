@@ -10,15 +10,15 @@
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
- *
+ * 
  *  Ragel is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- *
+ * 
  *  You should have received a copy of the GNU General Public License
  *  along with Ragel; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
 #include "ragel.h"
@@ -26,743 +26,491 @@
 #include "redfsm.h"
 #include "gendata.h"
 
-using std::endl;
-
 namespace Go {
 
-std::ostream &GoFlatCodeGen::TO_STATE_ACTION( RedStateAp *state )
+Flat::Flat( const CodeGenArgs &args )
+:
+    CodeGen( args ),
+    actions(          "actions",             *this ),
+    keys(             "trans_keys",          *this ),
+    keySpans(         "key_spans",           *this ),
+    flatIndexOffset(  "index_offsets",       *this ),
+    indicies(         "indicies",            *this ),
+    transCondSpaces(  "trans_cond_spaces",   *this ),
+    transOffsets(     "trans_offsets",       *this ),
+    transLengths(     "trans_lengths",       *this ),
+    condKeys(         "cond_keys",           *this ),
+    condTargs(        "cond_targs",          *this ),
+    condActions(      "cond_actions",        *this ),
+    toStateActions(   "to_state_actions",    *this ),
+    fromStateActions( "from_state_actions",  *this ),
+    eofActions(       "eof_actions",         *this ),
+    eofTrans(         "eof_trans",           *this )
+{}
+
+void Flat::setKeyType()
 {
-	int act = 0;
-	if ( state->toStateAction != 0 )
-		act = state->toStateAction->location+1;
-	out << act;
-	return out;
+    keys.setType( ALPH_TYPE(), keyOps->alphType->size );
+    keys.isSigned = keyOps->isSigned;
 }
 
-std::ostream &GoFlatCodeGen::FROM_STATE_ACTION( RedStateAp *state )
+void Flat::setTableState( TableArray::State state )
 {
-	int act = 0;
-	if ( state->fromStateAction != 0 )
-		act = state->fromStateAction->location+1;
-	out << act;
-	return out;
-}
-
-std::ostream &GoFlatCodeGen::EOF_ACTION( RedStateAp *state )
-{
-	int act = 0;
-	if ( state->eofAction != 0 )
-		act = state->eofAction->location+1;
-	out << act;
-	return out;
-}
-
-std::ostream &GoFlatCodeGen::TRANS_ACTION( RedTransAp *trans )
-{
-	/* If there are actions, emit them. Otherwise emit zero. */
-	int act = 0;
-	if ( trans->action != 0 )
-		act = trans->action->location+1;
-	out << act;
-	return out;
-}
-
-std::ostream &GoFlatCodeGen::TO_STATE_ACTION_SWITCH( int level )
-{
-	/* Walk the list of functions, printing the cases. */
-	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
-		/* Write out referenced actions. */
-		if ( act->numToStateRefs > 0 ) {
-			/* Write the case label, the action and the case break */
-			out << TABS(level) << "case " << act->actionId << ":" << endl;
-			ACTION( out, act, 0, false, false );
-		}
-	}
-
-	genLineDirective( out );
-	return out;
-}
-
-std::ostream &GoFlatCodeGen::FROM_STATE_ACTION_SWITCH( int level )
-{
-	/* Walk the list of functions, printing the cases. */
-	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
-		/* Write out referenced actions. */
-		if ( act->numFromStateRefs > 0 ) {
-			/* Write the case label, the action and the case break */
-			out << TABS(level) << "case " << act->actionId << ":" << endl;
-			ACTION( out, act, 0, false, false );
-		}
-	}
-
-	genLineDirective( out );
-	return out;
-}
-
-std::ostream &GoFlatCodeGen::EOF_ACTION_SWITCH( int level )
-{
-	/* Walk the list of functions, printing the cases. */
-	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
-		/* Write out referenced actions. */
-		if ( act->numEofRefs > 0 ) {
-			/* Write the case label, the action and the case break */
-			out << TABS(level) << "case " << act->actionId << ":" << endl;
-			ACTION( out, act, 0, true, false );
-		}
-	}
-
-	genLineDirective( out );
-	return out;
+    for ( ArrayVector::Iter i = arrayVector; i.lte(); i++ ) {
+        TableArray *tableArray = *i;
+        tableArray->setState( state );
+    }
 }
 
 
-std::ostream &GoFlatCodeGen::ACTION_SWITCH( int level )
+void Flat::taFlatIndexOffset()
 {
-	/* Walk the list of functions, printing the cases. */
-	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
-		/* Write out referenced actions. */
-		if ( act->numTransRefs > 0 ) {
-			/* Write the case label, the action and the case break */
-			out << TABS(level) << "case " << act->actionId << ":" << endl;
-			ACTION( out, act, 0, false, false );
-		}
-	}
+    flatIndexOffset.start();
 
-	genLineDirective( out );
-	return out;
+    int curIndOffset = 0;
+    for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+        /* Write the index offset. */
+        flatIndexOffset.value( curIndOffset );
+
+        /* Move the index offset ahead. */
+        if ( st->transList != 0 )
+            curIndOffset += keyOps->span( st->lowKey, st->highKey );
+
+        if ( st->defTrans != 0 )
+            curIndOffset += 1;
+    }
+
+    flatIndexOffset.finish();
+}
+
+void Flat::taKeySpans()
+{
+    keySpans.start();
+
+    for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+        unsigned long long span = 0;
+        if ( st->transList != 0 )
+            span = keyOps->span( st->lowKey, st->highKey );
+
+        keySpans.value( span );
+    }
+
+    keySpans.finish();
+}
+
+void Flat::taToStateActions()
+{
+    toStateActions.start();
+
+    for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+        /* Write any eof action. */
+        TO_STATE_ACTION(st);
+    }
+
+    toStateActions.finish();
+}
+
+void Flat::taFromStateActions()
+{
+    fromStateActions.start();
+
+    for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+        /* Write any eof action. */
+        FROM_STATE_ACTION( st );
+    }
+
+    fromStateActions.finish();
+}
+
+void Flat::taEofActions()
+{
+    eofActions.start();
+
+    for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+        /* Write any eof action. */
+        EOF_ACTION( st );
+    }
+
+    eofActions.finish();
+}
+
+void Flat::taEofTrans()
+{
+    /* Transitions must be written ordered by their id. */
+    RedTransAp **transPtrs = new RedTransAp*[redFsm->transSet.length()];
+    for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ )
+        transPtrs[trans->id] = trans;
+
+    long *transPos = new long[redFsm->transSet.length()];
+    for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
+        /* Save the position. Needed for eofTargs. */
+        RedTransAp *trans = transPtrs[t];
+        transPos[trans->id] = t;
+    }
+
+    eofTrans.start();
+
+    for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+        long trans = 0;
+
+        if ( st->eofTrans != 0 )
+            trans = transPos[st->eofTrans->id] + 1;
+
+        eofTrans.value( trans );
+    }
+
+    eofTrans.finish();
+
+    delete[] transPtrs;
+    delete[] transPos;
+}
+
+void Flat::taKeys()
+{
+    keys.start();
+
+    for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+        /* Emit just low key and high key. */
+        keys.value( st->lowKey.getVal() );
+        keys.value( st->highKey.getVal() );
+    }
+
+    keys.finish();
+}
+
+void Flat::taIndicies()
+{
+    indicies.start();
+
+    for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+        if ( st->transList != 0 ) {
+            /* Walk the singles. */
+            unsigned long long span = keyOps->span( st->lowKey, st->highKey );
+            for ( unsigned long long pos = 0; pos < span; pos++ )
+                indicies.value( st->transList[pos]->id );
+        }
+
+        /* The state's default index goes next. */
+        if ( st->defTrans != 0 )
+            indicies.value( st->defTrans->id );
+
+    }
+
+    indicies.finish();
+}
+
+void Flat::taTransCondSpaces()
+{
+    transCondSpaces.start();
+
+    /* Transitions must be written ordered by their id. */
+    RedTransAp **transPtrs = new RedTransAp*[redFsm->transSet.length()];
+    for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ )
+        transPtrs[trans->id] = trans;
+
+    /* Keep a count of the num of items in the array written. */
+    for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
+        /* Save the position. Needed for eofTargs. */
+        RedTransAp *trans = transPtrs[t];
+
+        if ( trans->condSpace != 0 )
+            transCondSpaces.value( trans->condSpace->condSpaceId );
+        else
+            transCondSpaces.value( -1 );
+    }
+    delete[] transPtrs;
+
+    transCondSpaces.finish();
+}
+
+void Flat::taTransOffsets()
+{
+    transOffsets.start();
+
+    /* Transitions must be written ordered by their id. */
+    RedTransAp **transPtrs = new RedTransAp*[redFsm->transSet.length()];
+    for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ )
+        transPtrs[trans->id] = trans;
+
+    /* Keep a count of the num of items in the array written. */
+    int curOffset = 0;
+    for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
+        /* Save the position. Needed for eofTargs. */
+        RedTransAp *trans = transPtrs[t];
+
+        transOffsets.value( curOffset );
+
+        curOffset += trans->outConds.length();
+    }
+
+    delete[] transPtrs;
+
+    transOffsets.finish();
+}
+
+void Flat::taTransLengths()
+{
+    transLengths.start();
+
+    /* Transitions must be written ordered by their id. */
+    RedTransAp **transPtrs = new RedTransAp*[redFsm->transSet.length()];
+    for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ )
+        transPtrs[trans->id] = trans;
+
+    /* Keep a count of the num of items in the array written. */
+
+    for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
+        /* Save the position. Needed for eofTargs. */
+        RedTransAp *trans = transPtrs[t];
+        transLengths.value( trans->outConds.length() );
+    }
+    delete[] transPtrs;
+
+    transLengths.finish();
+}
+
+void Flat::taCondKeys()
+{
+    condKeys.start();
+
+    /* Transitions must be written ordered by their id. */
+    RedTransAp **transPtrs = new RedTransAp*[redFsm->transSet.length()];
+    for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ )
+        transPtrs[trans->id] = trans;
+
+    /* Keep a count of the num of items in the array written. */
+    for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
+        /* Save the position. Needed for eofTargs. */
+        RedTransAp *trans = transPtrs[t];
+
+        for ( RedCondList::Iter cond = trans->outConds; cond.lte(); cond++ )
+            condKeys.value( cond->key.getVal() );
+    }
+    delete[] transPtrs;
+
+    condKeys.finish();
+}
+
+void Flat::taCondTargs()
+{
+    condTargs.start();
+
+    /* Transitions must be written ordered by their id. */
+    RedTransAp **transPtrs = new RedTransAp*[redFsm->transSet.length()];
+    for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ )
+        transPtrs[trans->id] = trans;
+
+    /* Keep a count of the num of items in the array written. */
+    for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
+        /* Save the position. Needed for eofTargs. */
+        RedTransAp *trans = transPtrs[t];
+
+        for ( RedCondList::Iter cond = trans->outConds; cond.lte(); cond++ ) {
+            RedCondAp *c = cond->value;
+            condTargs.value( c->targ->id );
+        }
+    }
+    delete[] transPtrs;
+
+    condTargs.finish();
+}
+
+void Flat::taCondActions()
+{
+    condActions.start();
+
+    /* Transitions must be written ordered by their id. */
+    RedTransAp **transPtrs = new RedTransAp*[redFsm->transSet.length()];
+    for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ )
+        transPtrs[trans->id] = trans;
+
+    /* Keep a count of the num of items in the array written. */
+    for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
+        /* Save the position. Needed for eofTargs. */
+        RedTransAp *trans = transPtrs[t];
+
+        for ( RedCondList::Iter cond = trans->outConds; cond.lte(); cond++ ) {
+            RedCondAp *c = cond->value;
+            COND_ACTION( c );
+        }
+    }
+    delete[] transPtrs;
+
+    condActions.finish();
+}
+
+/* Write out the array of actions. */
+void Flat::taActions()
+{
+    actions.start();
+
+    /* Add in the the empty actions array. */
+    actions.value( 0 );
+
+    for ( GenActionTableMap::Iter act = redFsm->actionMap; act.lte(); act++ ) {
+        /* Length first. */
+        actions.value( act->key.length() );
+
+        for ( GenActionTable::Iter item = act->key; item.lte(); item++ )
+            actions.value( item->value->actionId );
+    }
+
+    actions.finish();
 }
 
 
-std::ostream &GoFlatCodeGen::FLAT_INDEX_OFFSET()
+void Flat::LOCATE_TRANS()
 {
-	out << "    ";
-	int totalStateNum = 0, curIndOffset = 0;
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		/* Write the index offset. */
-		out << curIndOffset << ", ";
-		if ( !st.last() ) {
-			if ( ++totalStateNum % IALL == 0 )
-				out << endl << "    ";
-		}
+    out <<
+        "	_keys = " << "uint(" << vCS() << " << 1)" << "\n" // keys array index
+        "	_inds = " << "uint(" << ARR_REF( flatIndexOffset ) << "[" << vCS() << "]" << ")\n" // indicies array index
+        "\n"
+        "	_slen = " << "int(" << ARR_REF( keySpans ) << "[" << vCS() << "])\n"
+        "	if _slen > 0 && " << ARR_REF( keys ) << "[_keys] <= " << GET_KEY() << " && "
+            << GET_KEY() << " <= " << ARR_REF( keys ) << "[_keys + 1] {\n"
+        "		_trans = " << "int(" << ARR_REF( indicies )
+            << "[int(_inds) + int(" << GET_KEY() << " - " << ARR_REF( keys ) << "[_keys]" << ")])\n"
+        "	} else {\n"
+        "		_trans = " << "int(" << ARR_REF( indicies ) << "[int(_inds) + _slen])\n"
+        "	}\n"
+        "\n";
 
-		/* Move the index offset ahead. */
-		if ( st->transList != 0 )
-			curIndOffset += keyOps->span( st->lowKey, st->highKey );
+    out <<
+        "	_ckeys = " << "uint(" << ARR_REF( transOffsets ) << "[_trans]" << ")\n" // condKeys array index
+        "	_klen = " << "int(" << ARR_REF( transLengths ) << "[_trans]" << ")\n"
+        "	_cond = " << "int(" << ARR_REF( transOffsets ) << "[_trans]" << ")\n"
+        "\n";
 
-		if ( st->defTrans != 0 )
-			curIndOffset += 1;
-	}
-	out << endl;
-	return out;
+    out <<
+        "	_cpc = 0\n"
+        "	switch " << ARR_REF( transCondSpaces ) << "[_trans] {\n"
+        "\n";
+
+    for ( CondSpaceList::Iter csi = condSpaceList; csi.lte(); csi++ ) {
+        GenCondSpace *condSpace = csi;
+        out << "	case " << condSpace->condSpaceId << ":\n";
+        for ( GenCondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
+            out << TABS(2) << "if ";
+            CONDITION( out, *csi );
+            Size condValOffset = (1 << csi.pos());
+            out << " {\n";
+            out << TABS(3) << "_cpc += " << condValOffset << "\n";
+            out << TABS(2) << "}\n";
+        }
+    }
+
+    out <<
+        "	}\n";
+
+    out <<
+        "	{\n"
+        "		var _lower = int(_ckeys)\n" // condKeys array index
+        "		var _mid int\n" // condKeys array index
+        "		var _upper = int(_ckeys) + _klen - 1\n" // condKeys array index
+        "		for {\n"
+        "			if _upper < _lower {\n"
+        "				break\n"
+        "			}\n"
+        "\n"
+        "			_mid = _lower + ((_upper - _lower) >> 1)\n"
+        "			switch {\n"
+        "			case " << "_cpc" << " < " << "int(" << ARR_REF( condKeys ) << "[_mid]):\n"
+        "				_upper = _mid - 1\n"
+        "			case " << "_cpc" << " > " << "int(" << ARR_REF( condKeys ) << "[_mid]):\n"
+        "				_lower = _mid + 1\n"
+        "           default:\n"
+        "				_cond += " << "_mid - int(_ckeys)\n"
+        "				goto _match_cond\n"
+        "			}\n"
+        "		}\n"
+        "		" << vCS() << " = " << ERROR_STATE() << "\n"
+        "		goto _again\n"
+        "	}\n"
+    ;
 }
 
-std::ostream &GoFlatCodeGen::KEY_SPANS()
+void Flat::GOTO( ostream &ret, int gotoDest, bool inFinish )
 {
-	out << "    ";
-	int totalStateNum = 0;
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		/* Write singles length. */
-		unsigned long long span = 0;
-		if ( st->transList != 0 )
-			span = keyOps->span( st->lowKey, st->highKey );
-		out << span << ", ";
-		if ( !st.last() ) {
-			if ( ++totalStateNum % IALL == 0 )
-				out << endl << "    ";
-		}
-	}
-	out << endl;
-	return out;
+    ret << "{ " << vCS() << " = " << gotoDest << "; " << "goto _again }\n";
 }
 
-std::ostream &GoFlatCodeGen::TO_STATE_ACTIONS()
+void Flat::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
-	out << "    ";
-	int totalStateNum = 0;
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		/* Write any eof action. */
-		TO_STATE_ACTION(st);
-		out << ", ";
-		if ( !st.last() ) {
-			if ( ++totalStateNum % IALL == 0 )
-				out << endl << "    ";
-		}
-	}
-	out << endl;
-	return out;
+    ret << "{ " << vCS() << " = (";
+    INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
+    ret << "); " << "goto _again }\n";
 }
 
-std::ostream &GoFlatCodeGen::FROM_STATE_ACTIONS()
+void Flat::CURS( ostream &ret, bool inFinish )
 {
-	out << "    ";
-	int totalStateNum = 0;
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		/* Write any eof action. */
-		FROM_STATE_ACTION(st);
-		out << ", ";
-		if ( !st.last() ) {
-			if ( ++totalStateNum % IALL == 0 )
-				out << endl << "    ";
-		}
-	}
-	out << endl;
-	return out;
+    ret << "(_ps)";
 }
 
-std::ostream &GoFlatCodeGen::EOF_ACTIONS()
+void Flat::TARGS( ostream &ret, bool inFinish, int targState )
 {
-	out << "    ";
-	int totalStateNum = 0;
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		/* Write any eof action. */
-		EOF_ACTION(st);
-		out << ", ";
-		if ( !st.last() ) {
-			if ( ++totalStateNum % IALL == 0 )
-				out << endl << "    ";
-		}
-	}
-	out << endl;
-	return out;
+    ret << "(" << vCS() << ")";
 }
 
-std::ostream &GoFlatCodeGen::EOF_TRANS()
+void Flat::NEXT( ostream &ret, int nextDest, bool inFinish )
 {
-	out << "    ";
-	int totalStateNum = 0;
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		/* Write any eof action. */
-
-		long trans = 0;
-		if ( st->eofTrans != 0 ) {
-			assert( st->eofTrans->pos >= 0 );
-			trans = st->eofTrans->pos+1;
-		}
-		out << trans << ", ";
-
-		if ( !st.last() ) {
-			if ( ++totalStateNum % IALL == 0 )
-				out << endl << "    ";
-		}
-	}
-	out << endl;
-	return out;
+    ret << vCS() << " = " << nextDest << "\n";
 }
 
-
-std::ostream &GoFlatCodeGen::COND_KEYS()
+void Flat::NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
-	out << "    ";
-	int totalStateNum = 0;
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		/* Emit just cond low key and cond high key. */
-		out << KEY( st->condLowKey ) << ", ";
-		out << KEY( st->condHighKey ) << ", ";
-		if ( !st.last() ) {
-			if ( ++totalStateNum % IALL == 0 )
-				out << endl << "    ";
-		}
-	}
-
-	out << endl;
-	return out;
+    ret << vCS() << " = (";
+    INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
+    ret << ")\n";
 }
 
-std::ostream &GoFlatCodeGen::COND_KEY_SPANS()
+void Flat::CALL( ostream &ret, int callDest, int targState, bool inFinish )
 {
-	out << "    ";
-	int totalStateNum = 0;
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		/* Write singles length. */
-		unsigned long long span = 0;
-		if ( st->condList != 0 )
-			span = keyOps->span( st->condLowKey, st->condHighKey );
-		out << span << ", ";
-		if ( !st.last() ) {
-			if ( ++totalStateNum % IALL == 0 )
-				out << endl << "    ";
-		}
-	}
-	out << endl;
-	return out;
-}
+    if ( prePushExpr != 0 ) {
+        ret << "{\n";
+        INLINE_LIST( ret, prePushExpr, 0, false, false );
+    }
 
-std::ostream &GoFlatCodeGen::CONDS()
-{
-	out << "    ";
-	int totalStateNum = 0;
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		if ( st->condList != 0 ) {
-			/* Walk the singles. */
-			unsigned long long span = keyOps->span( st->condLowKey, st->condHighKey );
-			for ( unsigned long long pos = 0; pos < span; pos++ ) {
-				if ( st->condList[pos] != 0 )
-					out << st->condList[pos]->condSpaceId + 1 << ", ";
-				else
-					out << "0, ";
-				if ( !st.last() ) {
-					if ( ++totalStateNum % IALL == 0 )
-						out << endl << "    ";
-				}
-			}
-		}
-	}
+    ret << "{ " << STACK() << "[" << TOP() << "] = " << vCS() << "; " << TOP() << "++; " << vCS() << " = " <<
+            callDest << "; " << "goto _again }\n";
 
-	out << endl;
-	return out;
-}
-
-std::ostream &GoFlatCodeGen::COND_INDEX_OFFSET()
-{
-	out << "    ";
-	int totalStateNum = 0;
-	int curIndOffset = 0;
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		/* Write the index offset. */
-		out << curIndOffset << ", ";
-		if ( !st.last() ) {
-			if ( ++totalStateNum % IALL == 0 )
-				out << endl << "    ";
-		}
-
-		/* Move the index offset ahead. */
-		if ( st->condList != 0 )
-			curIndOffset += keyOps->span( st->condLowKey, st->condHighKey );
-	}
-	out << endl;
-	return out;
+    if ( prePushExpr != 0 )
+        ret << "}\n";
 }
 
 
-std::ostream &GoFlatCodeGen::KEYS()
+void Flat::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
 {
-	out << "    ";
-	int totalStateNum = 0;
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		/* Emit just low key and high key. */
-		out << KEY( st->lowKey ) << ", ";
-		out << KEY( st->highKey ) << ", ";
-		if ( !st.last() ) {
-			if ( ++totalStateNum % IALL == 0 )
-				out << endl << "    ";
-		}
-	}
+    if ( prePushExpr != 0 ) {
+        ret << "{\n";
+        INLINE_LIST( ret, prePushExpr, 0, false, false );
+    }
 
-	out << endl;
-	return out;
-}
+    ret << "{ " << STACK() << "[" << TOP() << "] = " << vCS() << "; " << TOP() << "++; " << vCS() << " = (";
+    INLINE_LIST( ret, ilItem->children, targState, inFinish, false );
+    ret << "); " << "goto _again }\n";
 
-std::ostream &GoFlatCodeGen::INDICIES()
-{
-	out << "    ";
-	int totalStateNum = 0;
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		if ( st->transList != 0 ) {
-			/* Walk the singles. */
-			unsigned long long span = keyOps->span( st->lowKey, st->highKey );
-			for ( unsigned long long pos = 0; pos < span; pos++ ) {
-				out << st->transList[pos]->id << ", ";
-				if ( ++totalStateNum % IALL == 0 )
-					out << endl << "    ";
-			}
-		}
-
-		/* The state's default index goes next. */
-		if ( st->defTrans != 0 ) {
-			out << st->defTrans->id << ", ";
-			if ( ++totalStateNum % IALL == 0 )
-				out << endl << "    ";
-		}
-	}
-
-	out << endl;
-	return out;
-}
-
-std::ostream &GoFlatCodeGen::TRANS_TARGS()
-{
-	/* Transitions must be written ordered by their id. */
-	RedTransAp **transPtrs = new RedTransAp*[redFsm->transSet.length()];
-	for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ )
-		transPtrs[trans->id] = trans;
-
-	/* Keep a count of the num of items in the array written. */
-	out << "    ";
-	int totalStates = 0;
-	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
-		/* Save the position. Needed for eofTargs. */
-		RedTransAp *trans = transPtrs[t];
-		trans->pos = t;
-
-		/* Write out the target state. */
-		out << trans->targ->id << ", ";
-		if ( t < redFsm->transSet.length()-1 ) {
-			if ( ++totalStates % IALL == 0 )
-				out << endl << "    ";
-		}
-	}
-	out << endl;
-	delete[] transPtrs;
-	return out;
+    if ( prePushExpr != 0 )
+        ret << "}\n";
 }
 
 
-std::ostream &GoFlatCodeGen::TRANS_ACTIONS()
+void Flat::RET( ostream &ret, bool inFinish )
 {
-	/* Transitions must be written ordered by their id. */
-	RedTransAp **transPtrs = new RedTransAp*[redFsm->transSet.length()];
-	for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ )
-		transPtrs[trans->id] = trans;
+    ret << "{ " << TOP() << "--; " << vCS() << " = " << STACK() << "[" << TOP() << "]\n";
 
-	/* Keep a count of the num of items in the array written. */
-	out << "    ";
-	int totalAct = 0;
-	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
-		/* Write the function for the transition. */
-		RedTransAp *trans = transPtrs[t];
-		TRANS_ACTION( trans );
-		out << ", ";
-		if ( t < redFsm->transSet.length()-1 ) {
-			if ( ++totalAct % IALL == 0 )
-				out << endl << "    ";
-		}
-	}
-	out << endl;
-	delete[] transPtrs;
-	return out;
+    if ( postPopExpr != 0 ) {
+        ret << "{\n";
+        INLINE_LIST( ret, postPopExpr, 0, false, false );
+        ret << "}\n";
+    }
+
+    ret << "goto _again }\n";
 }
 
-void GoFlatCodeGen::LOCATE_TRANS()
+void Flat::BREAK( ostream &ret, int targState, bool csForced )
 {
-	out <<
-		"    _keys = " << CAST(INT(), vCS() + " << 1") << endl <<
-		"    _inds = " << CAST(INT(), IO() + "[" + vCS() + "]") << endl <<
-		endl <<
-		"    _slen = " << CAST(INT(), SP() + "[" + vCS() + "]") << endl <<
-		"    if _slen > 0 && " << K() << "[_keys] <= " << GET_WIDE_KEY() << " && " <<
-			GET_WIDE_KEY() << " <= " << K() << "[_keys + 1]" << " {" << endl <<
-		"        _trans = " << CAST(INT(), I() + "[_inds + " + CAST(INT(), GET_WIDE_KEY() + " - " + K() + "[_keys]") + "]") << endl <<
-		"    } else {" << endl <<
-		"        _trans = " << CAST(INT(), I() + "[_inds + _slen]") << endl <<
-		"    }" << endl <<
-		endl;
-}
-
-void GoFlatCodeGen::writeData()
-{
-	/* If there are any transtion functions then output the array. If there
-	 * are none, don't bother emitting an empty array that won't be used. */
-	if ( redFsm->anyActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActArrItem), A() );
-		ACTIONS_ARRAY();
-		CLOSE_ARRAY() <<
-		endl;
-	}
-
-	if ( redFsm->anyConditions() ) {
-		OPEN_ARRAY( WIDE_ALPH_TYPE(), CK() );
-		COND_KEYS();
-		CLOSE_ARRAY() <<
-		endl;
-
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxCondSpan), CSP() );
-		COND_KEY_SPANS();
-		CLOSE_ARRAY() <<
-		endl;
-
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxCond), C() );
-		CONDS();
-		CLOSE_ARRAY() <<
-		endl;
-
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxCondIndexOffset), CO() );
-		COND_INDEX_OFFSET();
-		CLOSE_ARRAY() <<
-		endl;
-	}
-
-	OPEN_ARRAY( WIDE_ALPH_TYPE(), K() );
-	KEYS();
-	CLOSE_ARRAY() <<
-	endl;
-
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxSpan), SP() );
-	KEY_SPANS();
-	CLOSE_ARRAY() <<
-	endl;
-
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxFlatIndexOffset), IO() );
-	FLAT_INDEX_OFFSET();
-	CLOSE_ARRAY() <<
-	endl;
-
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxIndex), I() );
-	INDICIES();
-	CLOSE_ARRAY() <<
-	endl;
-
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TT() );
-	TRANS_TARGS();
-	CLOSE_ARRAY() <<
-	endl;
-
-	if ( redFsm->anyActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), TA() );
-		TRANS_ACTIONS();
-		CLOSE_ARRAY() <<
-		endl;
-	}
-
-	if ( redFsm->anyToStateActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), TSA() );
-		TO_STATE_ACTIONS();
-		CLOSE_ARRAY() <<
-		endl;
-	}
-
-	if ( redFsm->anyFromStateActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), FSA() );
-		FROM_STATE_ACTIONS();
-		CLOSE_ARRAY() <<
-		endl;
-	}
-
-	if ( redFsm->anyEofActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), EA() );
-		EOF_ACTIONS();
-		CLOSE_ARRAY() <<
-		endl;
-	}
-
-	if ( redFsm->anyEofTrans() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxIndexOffset+1), ET() );
-		EOF_TRANS();
-		CLOSE_ARRAY() <<
-		endl;
-	}
-
-	STATE_IDS();
-}
-
-void GoFlatCodeGen::COND_TRANSLATE()
-{
-	out <<
-		"    _widec = " << CAST(WIDE_ALPH_TYPE(), GET_KEY()) << endl;
-
-	out <<
-		"    _keys = " << CAST(INT(), vCS() + " << 1") << endl <<
-		"    _conds = " << CAST(INT(), CO() + "[" + vCS() + "]") << endl <<
-		endl <<
-		"    _slen = " << CAST(INT(), CSP() + "[" + vCS() + "]") << endl <<
-		"    if _slen > 0 && " << CK() << "[_keys]" << " <= " << GET_WIDE_KEY() << " && " <<
-				GET_WIDE_KEY() << " <= " << CK() << "[_keys + 1] {" << endl <<
-		"        _cond = " << CAST(INT(), C() + "[_conds + " + CAST(INT(), GET_WIDE_KEY() + " - " + CK() + "[_keys]") + "]") << endl <<
-		"    } else {" << endl <<
-		"        _cond = 0" << endl <<
-		"    }" << endl <<
-		endl;
-
-	out <<
-		"    switch _cond {" << endl;
-	for ( CondSpaceList::Iter csi = condSpaceList; csi.lte(); csi++ ) {
-		GenCondSpace *condSpace = csi;
-		out << "    case " << condSpace->condSpaceId + 1 << ":" << endl;
-		out << TABS(2) << "_widec = " <<
-		        KEY(condSpace->baseKey) << " + (" << CAST(WIDE_ALPH_TYPE(), GET_KEY()) <<
-				" - " << KEY(keyOps->minKey) << ")" << endl;
-
-		for ( GenCondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
-			out << TABS(2) << "if ";
-			CONDITION( out, *csi );
-			Size condValOffset = ((1 << csi.pos()) * keyOps->alphSize());
-			out << " {" << endl <<
-			    "            _widec += " << condValOffset << endl <<
-			    "        }" << endl;
-		}
-	}
-
-	out <<
-		"    }" << endl;
-}
-
-void GoFlatCodeGen::writeExec()
-{
-	testEofUsed = false;
-	outLabelUsed = false;
-
-	out <<
-		"    {" << endl <<
-		"    var _slen " << INT() << endl;
-
-	if ( redFsm->anyRegCurStateRef() )
-		out << "    var _ps " << INT() << endl;
-
-	out <<
-		"    var _trans " << INT() << endl;
-
-	if ( redFsm->anyConditions() )
-		out << "    var _cond " << INT() << endl;
-
-	if ( redFsm->anyToStateActions() ||
-			redFsm->anyRegActions() || redFsm->anyFromStateActions() )
-	{
-		out <<
-			"    var _acts " << INT() << endl <<
-			"    var _nacts " << UINT() << endl;
-	}
-
-	out <<
-		"    var _keys " << INT() << endl <<
-		"    var _inds " << INT() << endl;
-
-	if ( redFsm->anyConditions() ) {
-		out <<
-			"    var _conds " << INT() << endl <<
-			"    var _widec " << WIDE_ALPH_TYPE() << endl;
-	}
-
-	out << endl;
-
-	if ( !noEnd ) {
-		testEofUsed = true;
-		out <<
-			"    if " << P() << " == " << PE() << " {" << endl <<
-			"        goto _test_eof" << endl <<
-			"    }" << endl;
-	}
-
-	if ( redFsm->errState != 0 ) {
-		outLabelUsed = true;
-		out <<
-			"    if " << vCS() << " == " << redFsm->errState->id << " {" << endl <<
-			"        goto _out" << endl <<
-			"    }" << endl;
-	}
-
-	out << "_resume:" << endl;
-
-	if ( redFsm->anyFromStateActions() ) {
-		out <<
-			"    _acts = " << CAST(INT(), FSA() + "[" + vCS() + "]") << endl <<
-			"    _nacts = " << CAST(UINT(), A() + "[_acts]") << "; _acts++" << endl <<
-			"    for ; _nacts > 0; _nacts-- {" << endl <<
-			"        _acts++" << endl <<
-			"        switch " << A() << "[_acts - 1]" << " {" << endl;
-			FROM_STATE_ACTION_SWITCH(2);
-			out <<
-			"        }" << endl <<
-			"    }" << endl <<
-			endl;
-	}
-
-	if ( redFsm->anyConditions() )
-		COND_TRANSLATE();
-
-	LOCATE_TRANS();
-
-	if ( redFsm->anyEofTrans() )
-		out << "_eof_trans:" << endl;
-
-	if ( redFsm->anyRegCurStateRef() )
-		out << "    _ps = " << vCS() << endl;
-
-	out <<
-		"    " << vCS() << " = " << CAST(INT(), TT() + "[_trans]") << endl <<
-		endl;
-
-	if ( redFsm->anyRegActions() ) {
-		out <<
-			"    if " << TA() << "[_trans] == 0 {" << endl <<
-			"        goto _again" << endl <<
-			"    }" << endl <<
-			endl <<
-			"    _acts = " << CAST(INT(), TA() + "[_trans]") << endl <<
-			"    _nacts = " << CAST(UINT(), A() + "[_acts]") << "; _acts++" << endl <<
-			"    for ; _nacts > 0; _nacts-- {" << endl <<
-			"        _acts++" << endl <<
-			"        switch " << A() << "[_acts - 1]" << " {" << endl;
-			ACTION_SWITCH(2);
-			out <<
-			"        }" << endl <<
-			"    }" << endl <<
-			endl;
-	}
-
-	if ( redFsm->anyRegActions() || redFsm->anyActionGotos() ||
-			redFsm->anyActionCalls() || redFsm->anyActionRets() )
-		out << "_again:" << endl;
-
-	if ( redFsm->anyToStateActions() ) {
-		out <<
-			"    _acts = " << CAST(INT(), TSA() + "[" + vCS() + "]") << endl <<
-			"    _nacts = " << CAST(UINT(), A() + "[_acts]") << "; _acts++" << endl <<
-			"    for ; _nacts > 0; _nacts-- {" << endl <<
-			"        _acts++" << endl <<
-			"        switch " << A() << "[_acts - 1]" << " {" << endl;
-			TO_STATE_ACTION_SWITCH(2);
-			out <<
-			"        }" << endl <<
-			"    }" << endl <<
-			endl;
-	}
-
-	if ( redFsm->errState != 0 ) {
-		outLabelUsed = true;
-		out <<
-			"    if " << vCS() << " == " << redFsm->errState->id << " {" << endl <<
-			"        goto _out" << endl <<
-			"    }" << endl;
-	}
-
-	if ( !noEnd ) {
-		out <<
-			"    if " << P() << "++; " << P() << " != " << PE() << " {" << endl <<
-			"        goto _resume" << endl <<
-			"    }" << endl;
-	}
-	else {
-		out <<
-			"    " << P() << "++" << endl <<
-			"    goto _resume" << endl;
-	}
-
-	if ( testEofUsed )
-		out << "    _test_eof: {}" << endl;
-
-	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
-		out <<
-			"    if " << P() << " == " << vEOF() << " {" << endl;
-
-		if ( redFsm->anyEofTrans() ) {
-			out <<
-				"        if " << ET() << "[" << vCS() << "] > 0 {" << endl <<
-				"            _trans = " << CAST(INT(), ET() + "[" + vCS() + "] - 1") << endl <<
-				"            goto _eof_trans" << endl <<
-				"        }" << endl;
-		}
-
-		if ( redFsm->anyEofActions() ) {
-			out <<
-				"        __acts := " << CAST(INT(), EA() + "[" + vCS() + "]") << endl <<
-				"        __nacts := " << CAST(UINT(), A() + "[__acts]") << "; __acts++" << endl <<
-				"        for ; __nacts > 0; __nacts-- {" << endl <<
-				"            __acts++" << endl <<
-				"            switch " << A() << "[__acts - 1]" << " {" << endl;
-				EOF_ACTION_SWITCH(3);
-				out <<
-				"            }" << endl <<
-				"        }" << endl;
-		}
-
-		out <<
-			"    }" << endl <<
-			endl;
-	}
-
-	if ( outLabelUsed )
-		out << "    _out: {}" << endl;
-
-	out << "    }" << endl;
+    outLabelUsed = true;
+    ret << "{ " << P() << "++; " << "goto _out }\n";
 }
 
 }

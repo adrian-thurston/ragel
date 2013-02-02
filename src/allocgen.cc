@@ -64,13 +64,13 @@
 
 //#include "java/java.h"
 
-//#include "go/table.h"
-//#include "go/ftable.h"
-//#include "go/flat.h"
-//#include "go/fflat.h"
-//#include "go/goto.h"
-//#include "go/fgoto.h"
-//#include "go/ipgoto.h"
+#include "go/binloop.h"
+#include "go/binexp.h"
+#include "go/flatloop.h"
+#include "go/flatexp.h"
+#include "go/gotoloop.h"
+#include "go/gotoexp.h"
+#include "go/ipgoto.h"
 
 //#include "ml/table.h"
 //#include "ml/ftable.h"
@@ -203,40 +203,40 @@ CodeGenData *cMakeCodeGen( const CodeGenArgs &args )
 //	return codeGen;
 //}
 
-///* Invoked by the parser when a ragel definition is opened. */
-//CodeGenData *goMakeCodeGen( const CodeGenArgs &args )
-//{
-//	CodeGenData *codeGen = 0;
-//
-//	switch ( codeStyle ) {
-//	case GenTables:
-//		codeGen = new Go::GoTabCodeGen(args);
-//		break;
-//	case GenFTables:
-//		codeGen = new Go::GoFTabCodeGen(args);
-//		break;
-//	case GenFlat:
-//		codeGen = new Go::GoFlatCodeGen(args);
-//		break;
-//	case GenFFlat:
-//		codeGen = new Go::GoFFlatCodeGen(args);
-//		break;
-//	case GenGoto:
-//		codeGen = new Go::GoGotoCodeGen(args);
-//		break;
-//	case GenFGoto:
-//		codeGen = new Go::GoFGotoCodeGen(args);
-//		break;
-//	case GenIpGoto:
-//		codeGen = new Go::GoIpGotoCodeGen(args);
-//		break;
-//	default:
-//		cerr << "Invalid output style, only -T0, -T1, -F0, -F1, -G0, -G1 and -G2 are supported.\n";
-//		exit(1);
-//	}
-//
-//	return codeGen;
-//}
+/* Invoked by the parser when a ragel definition is opened. */
+CodeGenData *goMakeCodeGen( const CodeGenArgs &args )
+{
+	CodeGenData *codeGen = 0;
+
+	switch ( codeStyle ) {
+	case GenTables:
+		codeGen = new Go::BinaryLooped(args);
+		break;
+	case GenFTables:
+		codeGen = new Go::BinaryExpanded(args);
+		break;
+	case GenFlat:
+		codeGen = new Go::FlatLooped(args);
+		break;
+	case GenFFlat:
+		codeGen = new Go::FlatExpanded(args);
+		break;
+	case GenGoto:
+		codeGen = new Go::GotoLooped(args);
+		break;
+	case GenFGoto:
+		codeGen = new Go::GotoExpanded(args);
+		break;
+	case GenIpGoto:
+		codeGen = new Go::IpGoto(args);
+		break;
+	default:
+		cerr << "Invalid output style, only -T0, -T1, -F0, -F1, -G0, -G1 and -G2 are supported.\n";
+		exit(1);
+	}
+
+	return codeGen;
+}
 
 ///* Invoked by the parser when a ragel definition is opened. */
 //CodeGenData *crackMakeCodeGen( const CodeGenArgs &args )
@@ -370,8 +370,8 @@ CodeGenData *makeCodeGen( const CodeGenArgs &args )
 //		cgd = dMakeCodeGen( args );
 //	else if ( hostLang == &hostLangD2 )
 //		cgd = d2MakeCodeGen( args );
-//	else if ( hostLang == &hostLangGo )
-//		cgd = goMakeCodeGen( args );
+	else if ( hostLang == &hostLangGo )
+		cgd = goMakeCodeGen( args );
 //	else if ( hostLang == &hostLangJava )
 //		cgd = javaMakeCodeGen( args );
 //	else if ( hostLang == &hostLangRuby )

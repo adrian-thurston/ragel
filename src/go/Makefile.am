@@ -4,21 +4,26 @@ libgo_a_CPPFLAGS = \
 	-I$(top_srcdir)/aapl -I$(top_srcdir)/src
 
 libgo_a_SOURCES = \
+    codegen.h \
+    binary.h \
+    binloop.h \
+    binexp.h \
+    flat.h \
+    flatloop.h \
+    flatexp.h \
+    goto.h \
+    gotoloop.h \
+    gotoexp.h \
+    ipgoto.h \
+    \
 	codegen.cc \
-	codegen.h \
-	fflat.cc \
-	fflat.h \
-	fgoto.cc \
-	fgoto.h \
-	flat.cc \
-	flat.h \
-	ftable.cc \
-	ftable.h \
-	goto.cc \
-	goto.h \
-	ipgoto.cc \
-	ipgoto.h \
-	table.cc \
-	table.h \
-	tablish.cc \
-	tablish.h 
+    binary.cc \
+    binloop.cc \
+    binexp.cc \
+    flat.cc \
+    flatloop.cc \
+    flatexp.cc \
+    goto.cc \
+    gotoloop.cc \
+    gotoexp.cc \
+    ipgoto.cc

@@ -46,8 +46,8 @@ void lineDirective( ostream &out, const char *fileName, int line )
 //			dLineDirective( out, fileName, line );
 //		else if ( hostLang == &hostLangD2 )
 //			dLineDirective( out, fileName, line );
-//		else if ( hostLang == &hostLangGo )
-//			goLineDirective( out, fileName, line );
+		else if ( hostLang == &hostLangGo )
+			goLineDirective( out, fileName, line );
 //		else if ( hostLang == &hostLangJava )
 //			javaLineDirective( out, fileName, line );
 //		else if ( hostLang == &hostLangRuby )

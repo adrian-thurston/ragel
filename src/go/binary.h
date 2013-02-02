@@ -1,5 +1,5 @@
 /*
- *  Copyright 2004-2006 Adrian Thurston <thurston@complang.org>
+ *  Copyright 2001-2006 Adrian Thurston <thurston@complang.org>
  *            2004 Erich Ocean <eric.ocean@ampede.com>
  *            2005 Alan West <alan@alanz.com>
  */
@@ -21,8 +21,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _GO_FLAT_H
-#define _GO_FLAT_H
+#ifndef _GO_BINARY_H
+#define _GO_BINARY_H
 
 #include <iostream>
 #include "codegen.h"
@@ -35,62 +35,70 @@ struct RedStateAp;
 
 namespace Go {
 
-class Flat
+class Binary
     : public CodeGen
 {
 public:
-    Flat( const CodeGenArgs &args );
-
-    virtual ~Flat() { }
+    Binary( const CodeGenArgs &args );
 
 protected:
-    TableArray actions;
-    TableArray keys;
-    TableArray keySpans;
-    TableArray flatIndexOffset;
+    TableArray keyOffsets;
+    TableArray singleLens;
+    TableArray rangeLens;
+    TableArray indexOffsets;
     TableArray indicies;
+    TableArray transCondSpacesWi;
+    TableArray transOffsetsWi;
+    TableArray transLengthsWi;
     TableArray transCondSpaces;
     TableArray transOffsets;
     TableArray transLengths;
-    TableArray condKeys;
     TableArray condTargs;
     TableArray condActions;
     TableArray toStateActions;
     TableArray fromStateActions;
     TableArray eofActions;
-    TableArray eofTrans;
+    TableArray eofTransDirect;
+    TableArray eofTransIndexed;
+    TableArray actions;
+    TableArray keys;
+    TableArray condKeys;
 
-    void taKeys();
-    void taKeySpans();
-    void taActions();
-    void taFlatIndexOffset();
+    std::ostream &COND_KEYS_v1();
+    std::ostream &COND_SPACES_v1();
+    std::ostream &INDICIES();
+    std::ostream &INDEX_OFFSETS();
+    std::ostream &SINGLE_LENS();
+    std::ostream &RANGE_LENS();
+    std::ostream &TRANS_TARGS_WI();
+    std::ostream &ACTIONS_ARRAY();
+
+    void taKeyOffsets();
+    void taSingleLens();
+    void taRangeLens();
+    void taIndexOffsets();
     void taIndicies();
+    void taTransCondSpacesWi();
+    void taTransOffsetsWi();
+    void taTransLengthsWi();
     void taTransCondSpaces();
     void taTransOffsets();
     void taTransLengths();
-    void taCondKeys();
     void taCondTargs();
     void taCondActions();
     void taToStateActions();
     void taFromStateActions();
     void taEofActions();
-    void taEofTrans();
+    void taEofTransDirect();
+    void taEofTransIndexed();
+    void taKeys();
+    void taActions();
+    void taCondKeys();
 
     void setKeyType();
 
-    std::ostream &INDICIES();
-    std::ostream &TO_STATE_ACTIONS();
-    std::ostream &FROM_STATE_ACTIONS();
-    std::ostream &EOF_ACTIONS();
-    std::ostream &EOF_TRANS();
-    std::ostream &TRANS_COND_SPACES();
-    std::ostream &TRANS_OFFSETS();
-    std::ostream &TRANS_LENGTHS();
-    std::ostream &COND_KEYS();
-    std::ostream &COND_TARGS();
-    std::ostream &COND_ACTIONS();
-
     void LOCATE_TRANS();
+    void LOCATE_COND();
 
     void GOTO( ostream &ret, int gotoDest, bool inFinish );
     void CALL( ostream &ret, int callDest, int targState, bool inFinish );
@@ -108,7 +116,7 @@ protected:
     virtual void EOF_ACTION( RedStateAp *state ) = 0;
     virtual void COND_ACTION( RedCondAp *cond ) = 0;
 
-    virtual void setTableState( TableArray::State );
+    void setTableState( TableArray::State );
 };
 
 }

@@ -10,22 +10,22 @@
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
- *
+ * 
  *  Ragel is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- *
+ * 
  *  You should have received a copy of the GNU General Public License
  *  along with Ragel; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _GOGOTO_H
-#define _GOGOTO_H
+#ifndef _GO_GOTO_H
+#define _GO_GOTO_H
 
 #include <iostream>
-#include "tablish.h"
+#include "codegen.h"
 
 /* Forwards. */
 struct CodeGenData;
@@ -39,48 +39,68 @@ namespace Go {
 /*
  * Goto driven fsm.
  */
-class GoGotoCodeGen
-	: public GoTablishCodeGen
+class Goto
+	: public CodeGen
 {
 public:
-	GoGotoCodeGen( const CodeGenArgs &args )
-		: GoTablishCodeGen(args) {}
+	Goto( const CodeGenArgs &args );
 
-protected:
-	std::ostream &TO_STATE_ACTION_SWITCH( int level );
-	std::ostream &FROM_STATE_ACTION_SWITCH( int level );
-	std::ostream &EOF_ACTION_SWITCH( int level );
-	std::ostream &ACTION_SWITCH( int level );
-	std::ostream &STATE_GOTOS( int level );
+	std::ostream &TO_STATE_ACTION_SWITCH();
+	std::ostream &FROM_STATE_ACTION_SWITCH();
+	std::ostream &EOF_ACTION_SWITCH();
+	std::ostream &ACTION_SWITCH();
+	std::ostream &STATE_GOTOS();
 	std::ostream &TRANSITIONS();
 	std::ostream &EXEC_FUNCS();
 	std::ostream &FINISH_CASES();
+
+	TableArray actions;
+	TableArray toStateActions;
+	TableArray fromStateActions;
+	TableArray eofActions;
+
+	void taActions();
+	void taToStateActions();
+	void taFromStateActions();
+	void taEofActions();
+
+	void GOTO( ostream &ret, int gotoDest, bool inFinish );
+	void CALL( ostream &ret, int callDest, int targState, bool inFinish );
+	void NEXT( ostream &ret, int nextDest, bool inFinish );
+	void GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish );
+	void NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish );
+	void CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish );
+	void CURS( ostream &ret, bool inFinish );
+	void TARGS( ostream &ret, bool inFinish, int targState );
+	void RET( ostream &ret, bool inFinish );
+	void BREAK( ostream &ret, int targState, bool csForced );
 
 	virtual unsigned int TO_STATE_ACTION( RedStateAp *state );
 	virtual unsigned int FROM_STATE_ACTION( RedStateAp *state );
 	virtual unsigned int EOF_ACTION( RedStateAp *state );
 
+	std::ostream &ACTIONS_ARRAY();
+
 	std::ostream &TO_STATE_ACTIONS();
 	std::ostream &FROM_STATE_ACTIONS();
 	std::ostream &EOF_ACTIONS();
 
-	void COND_TRANSLATE( GenStateCond *stateCond, int level );
-	void emitCondBSearch( RedStateAp *state, int level, int low, int high );
-	void STATE_CONDS( RedStateAp *state, bool genDefault );
+	void setTableState( TableArray::State );
+
+	virtual std::ostream &COND_GOTO( RedCondAp *trans, int level );
+
+	string CKEY( CondKey key );
+	void COND_B_SEARCH( RedTransAp *trans, int level, CondKey lower, CondKey upper, int low, int high);
 
 	virtual std::ostream &TRANS_GOTO( RedTransAp *trans, int level );
-	virtual int TRANS_NR( RedTransAp *trans );
 
-	void emitTableSwitch( RedStateAp *state, int level );
-	void emitSingleSwitch( RedStateAp *state, int level );
-	void emitRangeBSearch( RedStateAp *state, int level, int low, int high );
+	void SINGLE_SWITCH( RedStateAp *state );
+	void RANGE_B_SEARCH( RedStateAp *state, int level, Key lower, Key upper, int low, int high );
 
 	/* Called from STATE_GOTOS just before writing the gotos */
-	virtual void GOTO_HEADER( RedStateAp *state, int level );
-	virtual void STATE_GOTO_ERROR( int level );
+	virtual void GOTO_HEADER( RedStateAp *state );
+	virtual void STATE_GOTO_ERROR();
 
-	virtual void writeData();
-	virtual void writeExec();
 };
 
 }
