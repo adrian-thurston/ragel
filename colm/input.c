@@ -139,6 +139,7 @@ void initStreamFuncs()
 {
 	memset( &streamFuncs, 0, sizeof(struct StreamFuncs) );
 	streamFuncs.getData = &_getData;
+	streamFuncs.getParseBlock = &_getParseBlock;
 	streamFuncs.consumeData = &_consumeData;
 	streamFuncs.undoConsumeData = &_undoConsumeData;
 	streamFuncs.consumeTree = &_consumeTree;
@@ -176,6 +177,65 @@ void initInputFuncs()
 /* 
  * Base run-time input streams.
  */
+
+int fdGetParseBlock( FsmRun *fsmRun, StreamImpl *ss, int skip, char *dest, int length, int *copied )
+{
+	int ret = 0;
+	*copied = 0;
+
+	/* Move over skip bytes. */
+	RunBuf *buf = ss->queue;
+	while ( true ) {
+		if ( buf == 0 ) {
+			/* Got through the in-mem buffers without copying anything. */
+			RunBuf *runBuf = newRunBuf();
+			sourceStreamAppend( ss, runBuf );
+			int received = ss->funcs->getDataSource( ss, runBuf->data, FSM_BUFSIZE );
+			if ( received == 0 ) {
+				ret = INPUT_EOD;
+				break;
+			}
+			runBuf->length = received;
+
+			int slen = received < length ? received : length;
+			memcpy( dest, runBuf->data, slen );
+			*copied = slen;
+			ret = INPUT_DATA;
+			break;
+		}
+
+		int avail = buf->length - buf->offset;
+
+		/* Anything available in the current buffer. */
+		if ( avail > 0 ) {
+			/* The source data from the current buffer. */
+			char *src = &buf->data[buf->offset];
+
+			/* Need to skip? */
+			if ( skip > 0 && skip >= avail ) {
+				/* Skipping the the whole source. */
+				skip -= avail;
+			}
+			else {
+				/* Either skip is zero, or less than slen. Skip goes to zero.
+				 * Some data left over, copy it. */
+				src += skip;
+				avail -= skip;
+				skip = 0;
+
+				int slen = avail < length ? avail : length;
+				memcpy( dest, src, slen ) ;
+				*copied += slen;
+				ret = INPUT_DATA;
+				break;
+			}
+		}
+
+		buf = buf->next;
+	}
+
+	return ret;
+}
 
 int fdGetData( FsmRun *fsmRun, StreamImpl *ss, int skip, char *dest, int length, int *copied )
 {
@@ -303,6 +363,7 @@ void initFileFuncs()
 {
 	memset( &fileFuncs, 0, sizeof(struct StreamFuncs) );
 	fileFuncs.getData = &fdGetData;
+	fileFuncs.getParseBlock = &fdGetParseBlock;
 	fileFuncs.consumeData = &fdConsumeData;
 	fileFuncs.undoConsumeData = &fdUndoConsumeData;
 	fileFuncs.getDataSource = &fileGetDataSource;
@@ -328,6 +389,7 @@ void initFdFuncs()
 {
 	memset( &fdFuncs, 0, sizeof(struct StreamFuncs) );
 	fdFuncs.getData = &fdGetData;
+	fdFuncs.getParseBlock = &fdGetParseBlock;
 	fdFuncs.consumeData = &fdConsumeData;
 	fdFuncs.undoConsumeData = &fdUndoConsumeData;
 	fdFuncs.getDataSource = &fdGetDataSource;
@@ -443,6 +505,106 @@ void _unsetEof( StreamImpl *is )
 	else {
 		is->eof = false;
 	}
+}
+
+int _getParseBlock( FsmRun *fsmRun, StreamImpl *is, int skip, char *dest, int length, int *copied )
+{
+	int ret = 0;
+	*copied = 0;
+
+	/* Move over skip bytes. */
+	RunBuf *buf = is->queue;
+	while ( true ) {
+		if ( buf == 0 ) {
+			/* Got through the in-mem buffers without copying anything. */
+			ret = is->eof ? INPUT_EOF : INPUT_EOD;
+			break;
+		}
+
+		if ( buf->type == RunBufSourceType ) {
+			Stream *stream = (Stream*)buf->tree;
+			int type = stream->in->funcs->getData( fsmRun, stream->in, skip, dest, length, copied );
+
+//			if ( type == INPUT_EOD && !stream->in->eosSent ) {
+//				stream->in->eosSent = 1;
+//				ret = INPUT_EOS;
+//				continue;
+//			}
+
+			if ( type == INPUT_EOD || type == INPUT_EOF ) {
+				debug( REALM_INPUT, "skipping over input\n" );
+				buf = buf->next;
+				continue;
+			}
+
+			ret = type;
+			break;
+		}
+
+		if ( buf->type == RunBufTokenType ) {
+			ret = INPUT_TREE;
+			break;
+		}
+
+		if ( buf->type == RunBufIgnoreType ) {
+			ret = INPUT_IGNORE;
+			break;
+		}
+
+		int avail = buf->length - buf->offset;
+
+		/* Anything available in the current buffer. */
+		if ( avail > 0 ) {
+			/* The source data from the current buffer. */
+			char *src = &buf->data[buf->offset];
+
+			/* Need to skip? */
+			if ( skip > 0 && skip >= avail ) {
+				/* Skipping the the whole source. */
+				skip -= avail;
+			}
+			else {
+				/* Either skip is zero, or less than slen. Skip goes to zero.
+				 * Some data left over, copy it. */
+				src += skip;
+				avail -= skip;
+				skip = 0;
+
+				int slen = avail <= length ? avail : length;
+				memcpy( dest, src, slen ) ;
+				*copied += slen;
+				ret = INPUT_DATA;
+				break;
+			}
+		}
+
+		buf = buf->next;
+	}
+
+#if DEBUG
+	switch ( ret ) {
+		case INPUT_DATA:
+			debug( REALM_INPUT, "get data: DATA copied: %d: %.*s\n", *copied, (int)*copied, dest );
+			break;
+		case INPUT_EOD:
+			debug( REALM_INPUT, "get data: EOD\n" );
+			break;
+		case INPUT_EOF:
+			debug( REALM_INPUT, "get data: EOF\n" );
+			break;
+		case INPUT_TREE:
+			debug( REALM_INPUT, "get data: TREE\n" );
+			break;
+		case INPUT_IGNORE:
+			debug( REALM_INPUT, "get data: IGNORE\n" );
+			break;
+		case INPUT_LANG_EL:
+			debug( REALM_INPUT, "get data: LANG_EL\n" );
+			break;
+	}
+#endif
+
+	return ret;
 }
 
 int _getData( FsmRun *fsmRun, StreamImpl *is, int skip, char *dest, int length, int *copied )

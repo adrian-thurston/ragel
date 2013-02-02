@@ -60,6 +60,53 @@ LangEl *inputStreamPatternGetLangEl( StreamImpl *ss, long *bindId, char **data, 
 	return klangEl;
 }
 
+int inputStreamPatternGetParseBlock( FsmRun *fsmRun, StreamImpl *ss, int skip, char *dest, int length, int *copied )
+{ 
+	*copied = 0;
+
+	PatternItem *buf = ss->patItem;
+	int offset = ss->offset;
+
+	while ( true ) {
+		if ( buf == 0 )
+			return INPUT_EOD;
+
+		if ( buf->type == PatternItem::FactorType )
+			return INPUT_LANG_EL;
+
+		assert ( buf->type == PatternItem::InputText );
+		int avail = buf->data.length() - offset;
+
+		if ( avail > 0 ) {
+			/* The source data from the current buffer. */
+			char *src = &buf->data[offset];
+			int slen = avail <= length ? avail : length;
+
+			/* Need to skip? */
+			if ( skip > 0 && slen <= skip ) {
+				/* Skipping the the whole source. */
+				skip -= slen;
+			}
+			else {
+				/* Either skip is zero, or less than slen. Skip goes to zero.
+				 * Some data left over, copy it. */
+				src += skip;
+				slen -= skip;
+				skip = 0;
+
+				memcpy( dest, src, slen ) ;
+				*copied += slen;
+				break;
+			}
+		}
+
+		buf = buf->next;
+		offset = 0;
+	}
+
+	return INPUT_DATA;
+}
+
 int inputStreamPatternGetData( FsmRun *fsmRun, StreamImpl *ss, int skip, char *dest, int length, int *copied )
 { 
 	*copied = 0;
@@ -187,6 +234,7 @@ extern "C" void initPatFuncs()
 	memset( &patternFuncs, 0, sizeof(StreamFuncs) );
 
 	patternFuncs.getData = &inputStreamPatternGetData;
+	patternFuncs.getParseBlock = &inputStreamPatternGetParseBlock;
 	patternFuncs.consumeData = &inputStreamPatternConsumeData;
 	patternFuncs.undoConsumeData = &inputStreamPatternUndoConsumeData;
 
@@ -233,6 +281,53 @@ LangEl *inputStreamConsGetLangEl( StreamImpl *ss, long *bindId, char **data, lon
 	ss->consItem = ss->consItem->next;
 	ss->offset = 0;
 	return klangEl;
+}
+
+int inputStreamConsGetParseBlock( FsmRun *fsmRun, StreamImpl *ss, int skip, char *dest, int length, int *copied )
+{ 
+	*copied = 0;
+
+	ConsItem *buf = ss->consItem;
+	int offset = ss->offset;
+
+	while ( true ) {
+		if ( buf == 0 )
+			return INPUT_EOD;
+
+		if ( buf->type == ConsItem::ExprType || buf->type == ConsItem::FactorType )
+			return INPUT_LANG_EL;
+
+		assert ( buf->type == ConsItem::InputText );
+		int avail = buf->data.length() - offset;
+
+		if ( avail > 0 ) {
+			/* The source data from the current buffer. */
+			char *src = &buf->data[offset];
+			int slen = avail <= length ? avail : length;
+
+			/* Need to skip? */
+			if ( skip > 0 && slen <= skip ) {
+				/* Skipping the the whole source. */
+				skip -= slen;
+			}
+			else {
+				/* Either skip is zero, or less than slen. Skip goes to zero.
+				 * Some data left over, copy it. */
+				src += skip;
+				slen -= skip;
+				skip = 0;
+
+				memcpy( dest, src, slen ) ;
+				*copied += slen;
+				break;
+			}
+		}
+
+		buf = buf->next;
+		offset = 0;
+	}
+
+	return INPUT_DATA;
 }
 
 int inputStreamConsGetData( FsmRun *fsmRun, StreamImpl *ss, int skip, char *dest, int length, int *copied )
@@ -364,6 +459,7 @@ extern "C" void initConsFuncs()
 	memset( &replFuncs, 0, sizeof(StreamFuncs) );
 
 	replFuncs.getData = &inputStreamConsGetData;
+	replFuncs.getParseBlock = &inputStreamConsGetParseBlock;
 	replFuncs.consumeData = &inputStreamConsConsumeData;
 	replFuncs.undoConsumeData = &inputStreamConsUndoConsumeData;
 
