@@ -100,19 +100,19 @@ string GoCodeGen::START_STATE_ID()
 /* Write out the array of actions. */
 std::ostream &GoCodeGen::ACTIONS_ARRAY()
 {
-	out << "    0, ";
+	out << "	0, ";
 	int totalActions = 1;
 	for ( GenActionTableMap::Iter act = redFsm->actionMap; act.lte(); act++ ) {
 		/* Write out the length, which will never be the last character. */
 		out << act->key.length() << ", ";
 		if ( totalActions++ % IALL == 0 )
-			out << endl << "    ";
+			out << endl << "	";
 
 		for ( GenActionTable::Iter item = act->key; item.lte(); item++ ) {
 			out << item->value->actionId << ", ";
 			if ( ! (act.last() && item.last()) ) {
 				if ( totalActions++ % IALL == 0 )
-					out << endl << "    ";
+					out << endl << "	";
 			}
 		}
 	}
@@ -286,7 +286,7 @@ string GoCodeGen::TABS( int level )
 {
 	string result;
 	while ( level-- > 0 )
-		result += "    ";
+		result += "\t";
 	return result;
 }
 
@@ -350,25 +350,25 @@ void GoCodeGen::LM_SWITCH( ostream &ret, GenInlineItem *item,
 		int targState, int inFinish, bool csForced )
 {
 	ret <<
-		"    switch " << ACT() << " {" << endl;
+		"	switch " << ACT() << " {" << endl;
 
 	for ( GenInlineList::Iter lma = *item->children; lma.lte(); lma++ ) {
 		/* Write the case label, the action and the case break. */
 		if ( lma->lmId < 0 ) {
-			ret << "    default:" << endl;
+			ret << "	default:" << endl;
 		}
 		else
-			ret << "    case " << lma->lmId << ":" << endl;
+			ret << "	case " << lma->lmId << ":" << endl;
 
 		/* Write the block and close it off. */
-		ret << "    {";
+		ret << "	{";
 		INLINE_LIST( ret, lma->children, targState, inFinish, csForced );
 		ret << "}" << endl;
 	}
 
 	ret <<
-		"    }" << endl <<
-		"    ";
+		"	}" << endl <<
+		"	";
 }
 
 void GoCodeGen::SET_ACT( ostream &ret, GenInlineItem *item )
@@ -551,22 +551,22 @@ string GoCodeGen::FIRST_FINAL_STATE()
 
 void GoCodeGen::writeInit()
 {
-	out << "    {" << endl;
+	out << "	{" << endl;
 
 	if ( !noCS )
-		out << "    " << vCS() << " = " << START() << endl;
+		out << "	" << vCS() << " = " << START() << endl;
 
 	/* If there are any calls, then the stack top needs initialization. */
 	if ( redFsm->anyActionCalls() || redFsm->anyActionRets() )
-		out << "    " << TOP() << " = 0" << endl;
+		out << "	" << TOP() << " = 0" << endl;
 
 	if ( hasLongestMatch ) {
 		out <<
-			"    " << TOKSTART() << " = " << NULL_ITEM() << endl <<
-			"    " << TOKEND() << " = " << NULL_ITEM() << endl <<
-			"    " << ACT() << " = 0" << endl;
+			"	" << TOKSTART() << " = " << NULL_ITEM() << endl <<
+			"	" << TOKEND() << " = " << NULL_ITEM() << endl <<
+			"	" << ACT() << " = 0" << endl;
 	}
-	out << "    }" << endl;
+	out << "	}" << endl;
 }
 
 string GoCodeGen::DATA()
