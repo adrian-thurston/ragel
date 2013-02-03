@@ -128,8 +128,8 @@ void decrementSteps( PdaRun *pdaRun )
 
 Head *streamPull( Program *prg, FsmRun *fsmRun, StreamImpl *is, long length )
 {
-	/* We should not be in the midst of getting a token. */
-	assert( fsmRun->tokstart == 0 );
+//	/* We should not be in the midst of getting a token. */
+//	assert( fsmRun->tokstart == 0 );
 
 	RunBuf *runBuf = newRunBuf();
 	runBuf->next = fsmRun->consumeBuf;
