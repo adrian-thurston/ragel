@@ -177,46 +177,46 @@ void GoFGotoCodeGen::writeExec()
 	testEofUsed = false;
 	outLabelUsed = false;
 
-	out << "    {" << endl;
+	out << "	{" << endl;
 
 	if ( redFsm->anyRegCurStateRef() )
-		out << "    var _ps " << INT() << " = 0" << endl;
+		out << "	var _ps " << INT() << " = 0" << endl;
 
 	if ( redFsm->anyConditions() )
-		out << "    var _widec " << WIDE_ALPH_TYPE() << endl;
+		out << "	var _widec " << WIDE_ALPH_TYPE() << endl;
 
 	if ( !noEnd ) {
 		testEofUsed = true;
 		out <<
-			"    if " << P() << " == " << PE() << " {" << endl <<
-			"        goto _test_eof" << endl <<
-			"    }" << endl;
+			"	if " << P() << " == " << PE() << " {" << endl <<
+			"		goto _test_eof" << endl <<
+			"	}" << endl;
 	}
 
 	if ( redFsm->errState != 0 ) {
 		outLabelUsed = true;
 		out <<
-			"    if " << vCS() << " == " << redFsm->errState->id << " {" << endl <<
-			"        goto _out" << endl <<
-			"    }" << endl;
+			"	if " << vCS() << " == " << redFsm->errState->id << " {" << endl <<
+			"		goto _out" << endl <<
+			"	}" << endl;
 	}
 
 	out << "_resume:" << endl;
 
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
-			"    switch " << FSA() << "[" << vCS() << "] {" << endl;
+			"	switch " << FSA() << "[" << vCS() << "] {" << endl;
 			FROM_STATE_ACTION_SWITCH(1);
 			out <<
-			"    }" << endl <<
+			"	}" << endl <<
 			endl;
 	}
 
 	out <<
-		"    switch " << vCS() << " {" << endl;
+		"	switch " << vCS() << " {" << endl;
 		STATE_GOTOS(1);
 		out <<
-		"    }" << endl <<
+		"	}" << endl <<
 		endl;
 		TRANSITIONS() <<
 		endl;
@@ -228,69 +228,70 @@ void GoFGotoCodeGen::writeExec()
 
 	if ( redFsm->anyToStateActions() ) {
 		out <<
-			"    switch " << TSA() << "[" << vCS() << "] {" << endl;
+			"	switch " << TSA() << "[" << vCS() << "] {" << endl;
 			TO_STATE_ACTION_SWITCH(1);
 			out <<
-			"    }" << endl <<
+			"	}" << endl <<
 			endl;
 	}
 
 	if ( redFsm->errState != 0 ) {
 		outLabelUsed = true;
 		out <<
-			"    if " << vCS() << " == " << redFsm->errState->id << " {" << endl <<
-			"        goto _out" << endl <<
-			"    }" << endl;
+			"	if " << vCS() << " == " << redFsm->errState->id << " {" << endl <<
+			"		goto _out" << endl <<
+			"	}" << endl;
 	}
 
 	if ( !noEnd ) {
 		out <<
-			"    if " << P() << "++; " << P() << " != " << PE() << " {" << endl <<
-			"        goto _resume" << endl <<
-			"    }" << endl;
+			"	if " << P() << "++; " << P() << " != " << PE() << " {" << endl <<
+			"		goto _resume" << endl <<
+			"	}" << endl;
 	}
 	else {
 		out <<
-			"    " << P() << "++" << endl <<
-			"    goto _resume" << endl;
+			"	" << P() << "++" << endl <<
+			"	goto _resume" << endl;
 	}
 
 	if ( testEofUsed )
-		out << "    _test_eof: {}" << endl;
+		out << "	_test_eof: {}" << endl;
 
 	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
 		out <<
-			"    if " << P() << " == " << vEOF() << " {" << endl;
+			"	if " << P() << " == " << vEOF() << " {" << endl;
 
 		if ( redFsm->anyEofTrans() ) {
 			out <<
-				"        switch " << vCS() << " {" << endl;
+				"		switch " << vCS() << " {" << endl;
 
 			for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 				if ( st->eofTrans != 0 )
-					out << "        case " << st->id << ":" << endl <<
-				           "            goto tr" << st->eofTrans->id << endl;
+					out <<
+						"		case " << st->id << ":" << endl <<
+						"			goto tr" << st->eofTrans->id << endl;
 			}
 
 			out <<
-				"        }" << endl;
+				"		}" << endl;
 		}
 
 		if ( redFsm->anyEofActions() ) {
 			out <<
-				"        switch " << EA() << "[" << vCS() << "] {" << endl;
+				"		switch " << EA() << "[" << vCS() << "] {" << endl;
 				EOF_ACTION_SWITCH(2);
 				out <<
-				"        }" << endl;
+				"		}" << endl;
 		}
 
 		out <<
-			"    }" << endl <<
+			"	}" << endl <<
 			endl;
 	}
 
 	if ( outLabelUsed )
-		out << "    _out: {}" << endl;
+		out << "	_out: {}" << endl;
 
-	out << "    }" << endl;
+	out << "	}" << endl;
 }

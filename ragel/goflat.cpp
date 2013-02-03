@@ -133,14 +133,14 @@ std::ostream &GoFlatCodeGen::ACTION_SWITCH( int level )
 
 std::ostream &GoFlatCodeGen::FLAT_INDEX_OFFSET()
 {
-	out << "    ";
+	out << "	";
 	int totalStateNum = 0, curIndOffset = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write the index offset. */
 		out << curIndOffset << ", ";
 		if ( !st.last() ) {
 			if ( ++totalStateNum % IALL == 0 )
-				out << endl << "    ";
+				out << endl << "	";
 		}
 
 		/* Move the index offset ahead. */
@@ -156,7 +156,7 @@ std::ostream &GoFlatCodeGen::FLAT_INDEX_OFFSET()
 
 std::ostream &GoFlatCodeGen::KEY_SPANS()
 {
-	out << "    ";
+	out << "	";
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write singles length. */
@@ -166,7 +166,7 @@ std::ostream &GoFlatCodeGen::KEY_SPANS()
 		out << span << ", ";
 		if ( !st.last() ) {
 			if ( ++totalStateNum % IALL == 0 )
-				out << endl << "    ";
+				out << endl << "	";
 		}
 	}
 	out << endl;
@@ -175,7 +175,7 @@ std::ostream &GoFlatCodeGen::KEY_SPANS()
 
 std::ostream &GoFlatCodeGen::TO_STATE_ACTIONS()
 {
-	out << "    ";
+	out << "	";
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write any eof action. */
@@ -183,7 +183,7 @@ std::ostream &GoFlatCodeGen::TO_STATE_ACTIONS()
 		out << ", ";
 		if ( !st.last() ) {
 			if ( ++totalStateNum % IALL == 0 )
-				out << endl << "    ";
+				out << endl << "	";
 		}
 	}
 	out << endl;
@@ -192,7 +192,7 @@ std::ostream &GoFlatCodeGen::TO_STATE_ACTIONS()
 
 std::ostream &GoFlatCodeGen::FROM_STATE_ACTIONS()
 {
-	out << "    ";
+	out << "	";
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write any eof action. */
@@ -200,7 +200,7 @@ std::ostream &GoFlatCodeGen::FROM_STATE_ACTIONS()
 		out << ", ";
 		if ( !st.last() ) {
 			if ( ++totalStateNum % IALL == 0 )
-				out << endl << "    ";
+				out << endl << "	";
 		}
 	}
 	out << endl;
@@ -209,7 +209,7 @@ std::ostream &GoFlatCodeGen::FROM_STATE_ACTIONS()
 
 std::ostream &GoFlatCodeGen::EOF_ACTIONS()
 {
-	out << "    ";
+	out << "	";
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write any eof action. */
@@ -217,7 +217,7 @@ std::ostream &GoFlatCodeGen::EOF_ACTIONS()
 		out << ", ";
 		if ( !st.last() ) {
 			if ( ++totalStateNum % IALL == 0 )
-				out << endl << "    ";
+				out << endl << "	";
 		}
 	}
 	out << endl;
@@ -226,7 +226,7 @@ std::ostream &GoFlatCodeGen::EOF_ACTIONS()
 
 std::ostream &GoFlatCodeGen::EOF_TRANS()
 {
-	out << "    ";
+	out << "	";
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write any eof action. */
@@ -240,7 +240,7 @@ std::ostream &GoFlatCodeGen::EOF_TRANS()
 
 		if ( !st.last() ) {
 			if ( ++totalStateNum % IALL == 0 )
-				out << endl << "    ";
+				out << endl << "	";
 		}
 	}
 	out << endl;
@@ -250,7 +250,7 @@ std::ostream &GoFlatCodeGen::EOF_TRANS()
 
 std::ostream &GoFlatCodeGen::COND_KEYS()
 {
-	out << "    ";
+	out << "	";
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Emit just cond low key and cond high key. */
@@ -258,7 +258,7 @@ std::ostream &GoFlatCodeGen::COND_KEYS()
 		out << KEY( st->condHighKey ) << ", ";
 		if ( !st.last() ) {
 			if ( ++totalStateNum % IALL == 0 )
-				out << endl << "    ";
+				out << endl << "	";
 		}
 	}
 
@@ -268,7 +268,7 @@ std::ostream &GoFlatCodeGen::COND_KEYS()
 
 std::ostream &GoFlatCodeGen::COND_KEY_SPANS()
 {
-	out << "    ";
+	out << "	";
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write singles length. */
@@ -278,7 +278,7 @@ std::ostream &GoFlatCodeGen::COND_KEY_SPANS()
 		out << span << ", ";
 		if ( !st.last() ) {
 			if ( ++totalStateNum % IALL == 0 )
-				out << endl << "    ";
+				out << endl << "	";
 		}
 	}
 	out << endl;
@@ -287,7 +287,7 @@ std::ostream &GoFlatCodeGen::COND_KEY_SPANS()
 
 std::ostream &GoFlatCodeGen::CONDS()
 {
-	out << "    ";
+	out << "	";
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->condList != 0 ) {
@@ -300,7 +300,7 @@ std::ostream &GoFlatCodeGen::CONDS()
 					out << "0, ";
 				if ( !st.last() ) {
 					if ( ++totalStateNum % IALL == 0 )
-						out << endl << "    ";
+						out << endl << "	";
 				}
 			}
 		}
@@ -312,7 +312,7 @@ std::ostream &GoFlatCodeGen::CONDS()
 
 std::ostream &GoFlatCodeGen::COND_INDEX_OFFSET()
 {
-	out << "    ";
+	out << "	";
 	int totalStateNum = 0;
 	int curIndOffset = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
@@ -320,7 +320,7 @@ std::ostream &GoFlatCodeGen::COND_INDEX_OFFSET()
 		out << curIndOffset << ", ";
 		if ( !st.last() ) {
 			if ( ++totalStateNum % IALL == 0 )
-				out << endl << "    ";
+				out << endl << "	";
 		}
 
 		/* Move the index offset ahead. */
@@ -334,7 +334,7 @@ std::ostream &GoFlatCodeGen::COND_INDEX_OFFSET()
 
 std::ostream &GoFlatCodeGen::KEYS()
 {
-	out << "    ";
+	out << "	";
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Emit just low key and high key. */
@@ -342,7 +342,7 @@ std::ostream &GoFlatCodeGen::KEYS()
 		out << KEY( st->highKey ) << ", ";
 		if ( !st.last() ) {
 			if ( ++totalStateNum % IALL == 0 )
-				out << endl << "    ";
+				out << endl << "	";
 		}
 	}
 
@@ -352,7 +352,7 @@ std::ostream &GoFlatCodeGen::KEYS()
 
 std::ostream &GoFlatCodeGen::INDICIES()
 {
-	out << "    ";
+	out << "	";
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->transList != 0 ) {
@@ -361,7 +361,7 @@ std::ostream &GoFlatCodeGen::INDICIES()
 			for ( unsigned long long pos = 0; pos < span; pos++ ) {
 				out << st->transList[pos]->id << ", ";
 				if ( ++totalStateNum % IALL == 0 )
-					out << endl << "    ";
+					out << endl << "	";
 			}
 		}
 
@@ -369,7 +369,7 @@ std::ostream &GoFlatCodeGen::INDICIES()
 		if ( st->defTrans != 0 ) {
 			out << st->defTrans->id << ", ";
 			if ( ++totalStateNum % IALL == 0 )
-				out << endl << "    ";
+				out << endl << "	";
 		}
 	}
 
@@ -385,7 +385,7 @@ std::ostream &GoFlatCodeGen::TRANS_TARGS()
 		transPtrs[trans->id] = trans;
 
 	/* Keep a count of the num of items in the array written. */
-	out << "    ";
+	out << "	";
 	int totalStates = 0;
 	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
 		/* Save the position. Needed for eofTargs. */
@@ -396,7 +396,7 @@ std::ostream &GoFlatCodeGen::TRANS_TARGS()
 		out << trans->targ->id << ", ";
 		if ( t < redFsm->transSet.length()-1 ) {
 			if ( ++totalStates % IALL == 0 )
-				out << endl << "    ";
+				out << endl << "	";
 		}
 	}
 	out << endl;
@@ -413,7 +413,7 @@ std::ostream &GoFlatCodeGen::TRANS_ACTIONS()
 		transPtrs[trans->id] = trans;
 
 	/* Keep a count of the num of items in the array written. */
-	out << "    ";
+	out << "	";
 	int totalAct = 0;
 	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
 		/* Write the function for the transition. */
@@ -422,7 +422,7 @@ std::ostream &GoFlatCodeGen::TRANS_ACTIONS()
 		out << ", ";
 		if ( t < redFsm->transSet.length()-1 ) {
 			if ( ++totalAct % IALL == 0 )
-				out << endl << "    ";
+				out << endl << "	";
 		}
 	}
 	out << endl;
@@ -433,16 +433,16 @@ std::ostream &GoFlatCodeGen::TRANS_ACTIONS()
 void GoFlatCodeGen::LOCATE_TRANS()
 {
 	out <<
-		"    _keys = " << CAST(INT(), vCS() + " << 1") << endl <<
-		"    _inds = " << CAST(INT(), IO() + "[" + vCS() + "]") << endl <<
+		"	_keys = " << CAST(INT(), vCS() + " << 1") << endl <<
+		"	_inds = " << CAST(INT(), IO() + "[" + vCS() + "]") << endl <<
 		endl <<
-		"    _slen = " << CAST(INT(), SP() + "[" + vCS() + "]") << endl <<
-		"    if _slen > 0 && " << K() << "[_keys] <= " << GET_WIDE_KEY() << " && " <<
+		"	_slen = " << CAST(INT(), SP() + "[" + vCS() + "]") << endl <<
+		"	if _slen > 0 && " << K() << "[_keys] <= " << GET_WIDE_KEY() << " && " <<
 			GET_WIDE_KEY() << " <= " << K() << "[_keys + 1]" << " {" << endl <<
-		"        _trans = " << CAST(INT(), I() + "[_inds + " + CAST(INT(), GET_WIDE_KEY() + " - " + K() + "[_keys]") + "]") << endl <<
-		"    } else {" << endl <<
-		"        _trans = " << CAST(INT(), I() + "[_inds + _slen]") << endl <<
-		"    }" << endl <<
+		"		_trans = " << CAST(INT(), I() + "[_inds + " + CAST(INT(), GET_WIDE_KEY() + " - " + K() + "[_keys]") + "]") << endl <<
+		"	} else {" << endl <<
+		"		_trans = " << CAST(INT(), I() + "[_inds + _slen]") << endl <<
+		"	}" << endl <<
 		endl;
 }
 
@@ -545,28 +545,28 @@ void GoFlatCodeGen::writeData()
 void GoFlatCodeGen::COND_TRANSLATE()
 {
 	out <<
-		"    _widec = " << CAST(WIDE_ALPH_TYPE(), GET_KEY()) << endl;
+		"	_widec = " << CAST(WIDE_ALPH_TYPE(), GET_KEY()) << endl;
 
 	out <<
-		"    _keys = " << CAST(INT(), vCS() + " << 1") << endl <<
-		"    _conds = " << CAST(INT(), CO() + "[" + vCS() + "]") << endl <<
+		"	_keys = " << CAST(INT(), vCS() + " << 1") << endl <<
+		"	_conds = " << CAST(INT(), CO() + "[" + vCS() + "]") << endl <<
 		endl <<
-		"    _slen = " << CAST(INT(), CSP() + "[" + vCS() + "]") << endl <<
-		"    if _slen > 0 && " << CK() << "[_keys]" << " <= " << GET_WIDE_KEY() << " && " <<
+		"	_slen = " << CAST(INT(), CSP() + "[" + vCS() + "]") << endl <<
+		"	if _slen > 0 && " << CK() << "[_keys]" << " <= " << GET_WIDE_KEY() << " && " <<
 				GET_WIDE_KEY() << " <= " << CK() << "[_keys + 1] {" << endl <<
-		"        _cond = " << CAST(INT(), C() + "[_conds + " + CAST(INT(), GET_WIDE_KEY() + " - " + CK() + "[_keys]") + "]") << endl <<
-		"    } else {" << endl <<
-		"        _cond = 0" << endl <<
-		"    }" << endl <<
+		"		_cond = " << CAST(INT(), C() + "[_conds + " + CAST(INT(), GET_WIDE_KEY() + " - " + CK() + "[_keys]") + "]") << endl <<
+		"	} else {" << endl <<
+		"		_cond = 0" << endl <<
+		"	}" << endl <<
 		endl;
 
 	out <<
-		"    switch _cond {" << endl;
+		"	switch _cond {" << endl;
 	for ( CondSpaceList::Iter csi = condSpaceList; csi.lte(); csi++ ) {
 		GenCondSpace *condSpace = csi;
-		out << "    case " << condSpace->condSpaceId + 1 << ":" << endl;
+		out << "	case " << condSpace->condSpaceId + 1 << ":" << endl;
 		out << TABS(2) << "_widec = " <<
-		        KEY(condSpace->baseKey) << " + (" << CAST(WIDE_ALPH_TYPE(), GET_KEY()) <<
+				KEY(condSpace->baseKey) << " + (" << CAST(WIDE_ALPH_TYPE(), GET_KEY()) <<
 				" - " << KEY(keyOps->minKey) << ")" << endl;
 
 		for ( GenCondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
@@ -574,13 +574,13 @@ void GoFlatCodeGen::COND_TRANSLATE()
 			CONDITION( out, *csi );
 			Size condValOffset = ((1 << csi.pos()) * keyOps->alphSize());
 			out << " {" << endl <<
-			    "            _widec += " << condValOffset << endl <<
-			    "        }" << endl;
+				"			_widec += " << condValOffset << endl <<
+				"		}" << endl;
 		}
 	}
 
 	out <<
-		"    }" << endl;
+		"	}" << endl;
 }
 
 void GoFlatCodeGen::writeExec()
@@ -589,34 +589,34 @@ void GoFlatCodeGen::writeExec()
 	outLabelUsed = false;
 
 	out <<
-		"    {" << endl <<
-		"    var _slen " << INT() << endl;
+		"	{" << endl <<
+		"	var _slen " << INT() << endl;
 
 	if ( redFsm->anyRegCurStateRef() )
-		out << "    var _ps " << INT() << endl;
+		out << "	var _ps " << INT() << endl;
 
 	out <<
-		"    var _trans " << INT() << endl;
+		"	var _trans " << INT() << endl;
 
 	if ( redFsm->anyConditions() )
-		out << "    var _cond " << INT() << endl;
+		out << "	var _cond " << INT() << endl;
 
 	if ( redFsm->anyToStateActions() ||
 			redFsm->anyRegActions() || redFsm->anyFromStateActions() )
 	{
 		out <<
-			"    var _acts " << INT() << endl <<
-			"    var _nacts " << UINT() << endl;
+			"	var _acts " << INT() << endl <<
+			"	var _nacts " << UINT() << endl;
 	}
 
 	out <<
-		"    var _keys " << INT() << endl <<
-		"    var _inds " << INT() << endl;
+		"	var _keys " << INT() << endl <<
+		"	var _inds " << INT() << endl;
 
 	if ( redFsm->anyConditions() ) {
 		out <<
-			"    var _conds " << INT() << endl <<
-			"    var _widec " << WIDE_ALPH_TYPE() << endl;
+			"	var _conds " << INT() << endl <<
+			"	var _widec " << WIDE_ALPH_TYPE() << endl;
 	}
 
 	out << endl;
@@ -624,32 +624,32 @@ void GoFlatCodeGen::writeExec()
 	if ( !noEnd ) {
 		testEofUsed = true;
 		out <<
-			"    if " << P() << " == " << PE() << " {" << endl <<
-			"        goto _test_eof" << endl <<
-			"    }" << endl;
+			"	if " << P() << " == " << PE() << " {" << endl <<
+			"		goto _test_eof" << endl <<
+			"	}" << endl;
 	}
 
 	if ( redFsm->errState != 0 ) {
 		outLabelUsed = true;
 		out <<
-			"    if " << vCS() << " == " << redFsm->errState->id << " {" << endl <<
-			"        goto _out" << endl <<
-			"    }" << endl;
+			"	if " << vCS() << " == " << redFsm->errState->id << " {" << endl <<
+			"		goto _out" << endl <<
+			"	}" << endl;
 	}
 
 	out << "_resume:" << endl;
 
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
-			"    _acts = " << CAST(INT(), FSA() + "[" + vCS() + "]") << endl <<
-			"    _nacts = " << CAST(UINT(), A() + "[_acts]") << "; _acts++" << endl <<
-			"    for ; _nacts > 0; _nacts-- {" << endl <<
-			"        _acts++" << endl <<
-			"        switch " << A() << "[_acts - 1]" << " {" << endl;
+			"	_acts = " << CAST(INT(), FSA() + "[" + vCS() + "]") << endl <<
+			"	_nacts = " << CAST(UINT(), A() + "[_acts]") << "; _acts++" << endl <<
+			"	for ; _nacts > 0; _nacts-- {" << endl <<
+			"		_acts++" << endl <<
+			"		switch " << A() << "[_acts - 1]" << " {" << endl;
 			FROM_STATE_ACTION_SWITCH(2);
 			out <<
-			"        }" << endl <<
-			"    }" << endl <<
+			"		}" << endl <<
+			"	}" << endl <<
 			endl;
 	}
 
@@ -662,27 +662,27 @@ void GoFlatCodeGen::writeExec()
 		out << "_eof_trans:" << endl;
 
 	if ( redFsm->anyRegCurStateRef() )
-		out << "    _ps = " << vCS() << endl;
+		out << "	_ps = " << vCS() << endl;
 
 	out <<
-		"    " << vCS() << " = " << CAST(INT(), TT() + "[_trans]") << endl <<
+		"	" << vCS() << " = " << CAST(INT(), TT() + "[_trans]") << endl <<
 		endl;
 
 	if ( redFsm->anyRegActions() ) {
 		out <<
-			"    if " << TA() << "[_trans] == 0 {" << endl <<
-			"        goto _again" << endl <<
-			"    }" << endl <<
+			"	if " << TA() << "[_trans] == 0 {" << endl <<
+			"		goto _again" << endl <<
+			"	}" << endl <<
 			endl <<
-			"    _acts = " << CAST(INT(), TA() + "[_trans]") << endl <<
-			"    _nacts = " << CAST(UINT(), A() + "[_acts]") << "; _acts++" << endl <<
-			"    for ; _nacts > 0; _nacts-- {" << endl <<
-			"        _acts++" << endl <<
-			"        switch " << A() << "[_acts - 1]" << " {" << endl;
+			"	_acts = " << CAST(INT(), TA() + "[_trans]") << endl <<
+			"	_nacts = " << CAST(UINT(), A() + "[_acts]") << "; _acts++" << endl <<
+			"	for ; _nacts > 0; _nacts-- {" << endl <<
+			"		_acts++" << endl <<
+			"		switch " << A() << "[_acts - 1]" << " {" << endl;
 			ACTION_SWITCH(2);
 			out <<
-			"        }" << endl <<
-			"    }" << endl <<
+			"		}" << endl <<
+			"	}" << endl <<
 			endl;
 	}
 
@@ -692,73 +692,73 @@ void GoFlatCodeGen::writeExec()
 
 	if ( redFsm->anyToStateActions() ) {
 		out <<
-			"    _acts = " << CAST(INT(), TSA() + "[" + vCS() + "]") << endl <<
-			"    _nacts = " << CAST(UINT(), A() + "[_acts]") << "; _acts++" << endl <<
-			"    for ; _nacts > 0; _nacts-- {" << endl <<
-			"        _acts++" << endl <<
-			"        switch " << A() << "[_acts - 1]" << " {" << endl;
+			"	_acts = " << CAST(INT(), TSA() + "[" + vCS() + "]") << endl <<
+			"	_nacts = " << CAST(UINT(), A() + "[_acts]") << "; _acts++" << endl <<
+			"	for ; _nacts > 0; _nacts-- {" << endl <<
+			"		_acts++" << endl <<
+			"		switch " << A() << "[_acts - 1]" << " {" << endl;
 			TO_STATE_ACTION_SWITCH(2);
 			out <<
-			"        }" << endl <<
-			"    }" << endl <<
+			"		}" << endl <<
+			"	}" << endl <<
 			endl;
 	}
 
 	if ( redFsm->errState != 0 ) {
 		outLabelUsed = true;
 		out <<
-			"    if " << vCS() << " == " << redFsm->errState->id << " {" << endl <<
-			"        goto _out" << endl <<
-			"    }" << endl;
+			"	if " << vCS() << " == " << redFsm->errState->id << " {" << endl <<
+			"		goto _out" << endl <<
+			"	}" << endl;
 	}
 
 	if ( !noEnd ) {
 		out <<
-			"    if " << P() << "++; " << P() << " != " << PE() << " {" << endl <<
-			"        goto _resume" << endl <<
-			"    }" << endl;
+			"	if " << P() << "++; " << P() << " != " << PE() << " {" << endl <<
+			"		goto _resume" << endl <<
+			"	}" << endl;
 	}
 	else {
 		out <<
-			"    " << P() << "++" << endl <<
-			"    goto _resume" << endl;
+			"	" << P() << "++" << endl <<
+			"	goto _resume" << endl;
 	}
 
 	if ( testEofUsed )
-		out << "    _test_eof: {}" << endl;
+		out << "	_test_eof: {}" << endl;
 
 	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
 		out <<
-			"    if " << P() << " == " << vEOF() << " {" << endl;
+			"	if " << P() << " == " << vEOF() << " {" << endl;
 
 		if ( redFsm->anyEofTrans() ) {
 			out <<
-				"        if " << ET() << "[" << vCS() << "] > 0 {" << endl <<
-				"            _trans = " << CAST(INT(), ET() + "[" + vCS() + "] - 1") << endl <<
-				"            goto _eof_trans" << endl <<
-				"        }" << endl;
+				"		if " << ET() << "[" << vCS() << "] > 0 {" << endl <<
+				"			_trans = " << CAST(INT(), ET() + "[" + vCS() + "] - 1") << endl <<
+				"			goto _eof_trans" << endl <<
+				"		}" << endl;
 		}
 
 		if ( redFsm->anyEofActions() ) {
 			out <<
-				"        __acts := " << CAST(INT(), EA() + "[" + vCS() + "]") << endl <<
-				"        __nacts := " << CAST(UINT(), A() + "[__acts]") << "; __acts++" << endl <<
-				"        for ; __nacts > 0; __nacts-- {" << endl <<
-				"            __acts++" << endl <<
-				"            switch " << A() << "[__acts - 1]" << " {" << endl;
+				"		__acts := " << CAST(INT(), EA() + "[" + vCS() + "]") << endl <<
+				"		__nacts := " << CAST(UINT(), A() + "[__acts]") << "; __acts++" << endl <<
+				"		for ; __nacts > 0; __nacts-- {" << endl <<
+				"			__acts++" << endl <<
+				"			switch " << A() << "[__acts - 1]" << " {" << endl;
 				EOF_ACTION_SWITCH(3);
 				out <<
-				"            }" << endl <<
-				"        }" << endl;
+				"			}" << endl <<
+				"		}" << endl;
 		}
 
 		out <<
-			"    }" << endl <<
+			"	}" << endl <<
 			endl;
 	}
 
 	if ( outLabelUsed )
-		out << "    _out: {}" << endl;
+		out << "	_out: {}" << endl;
 
-	out << "    }" << endl;
+	out << "	}" << endl;
 }
