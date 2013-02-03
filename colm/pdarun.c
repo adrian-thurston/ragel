@@ -61,13 +61,11 @@ void initFsmRun( FsmRun *fsmRun, Program *prg )
 {
 	fsmRun->tables = prg->rtd->fsmTables;
 
-	fsmRun->scanBuf = newRunBuf();
-	fsmRun->scanBuf->next = 0;
-
 	fsmRun->consumeBuf = 0;
 
-	fsmRun->p = fsmRun->pe = fsmRun->scanBuf->data;
-	fsmRun->peof = 0;
+	fsmRun->p = fsmRun->pe = 0;
+	fsmRun->have = 0;
+	fsmRun->peof = (char*)-1;
 
 	fsmRun->preRegion = -1;
 }
@@ -141,8 +139,9 @@ Head *streamPull( Program *prg, FsmRun *fsmRun, StreamImpl *is, long length )
 	is->funcs->getData( fsmRun, is, 0, runBuf->data, length, &lenCopied );
 	is->funcs->consumeData( is, length );
 
-	fsmRun->p = fsmRun->pe = fsmRun->scanBuf->data;
-	//fsmRun->peof = 0;
+	fsmRun->p = fsmRun->pe = 0;
+	fsmRun->have = 0;
+	//fsmRun->peof = (char*)-1;
 
 	Head *tokdata = stringAllocPointer( prg, runBuf->data, length );
 	updatePosition( is, runBuf->data, length );
@@ -767,8 +766,9 @@ Head *peekMatch( Program *prg, FsmRun *fsmRun, StreamImpl *is )
 	int lenCopied = 0;
 	is->funcs->getData( fsmRun, is, 0, runBuf->data, length, &lenCopied );
 
-	fsmRun->p = fsmRun->pe = fsmRun->scanBuf->data;
-	//fsmRun->peof = 0;
+	fsmRun->p = fsmRun->pe = 0;
+	fsmRun->have = 0;
+	//fsmRun->peof = (char*)-1;
 
 	Head *head = stringAllocPointer( prg, runBuf->data, length );
 
@@ -802,8 +802,9 @@ Head *extractMatch( Program *prg, FsmRun *fsmRun, StreamImpl *is )
 
 	is->funcs->consumeData( is, length );
 
-	fsmRun->p = fsmRun->pe = fsmRun->scanBuf->data;
-	//fsmRun->peof = 0;
+	fsmRun->p = fsmRun->pe = 0;
+	fsmRun->have = 0;
+	//fsmRun->peof = (char*)-1;
 
 	Head *head = stringAllocPointer( prg, runBuf->data, length );
 
@@ -936,6 +937,10 @@ static void sendEof( Program *prg, Tree **sp, StreamImpl *is, FsmRun *fsmRun, Pd
 
 void newToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun )
 {
+	fsmRun->p = fsmRun->pe = 0;
+	fsmRun->have = 0;
+	fsmRun->peof = (char*)-1;
+
 	/* Init the scanner vars. */
 	fsmRun->act = 0;
 	fsmRun->tokstart = 0;
@@ -999,7 +1004,10 @@ long scanToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, StreamImpl *is )
 		return SCAN_UNDO;
 
 	while ( true ) {
+		char *start = fsmRun->p;
 		fsmExecute( fsmRun, is );
+		if ( fsmRun->p != 0 )
+			fsmRun->have += fsmRun->p - start;
 
 		/* First check if scanning stopped because we have a token. */
 		if ( fsmRun->matchedToken > 0 ) {
@@ -1029,93 +1037,32 @@ long scanToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, StreamImpl *is )
 			return SCAN_ERROR;
 		}
 
-		/* Got here because the state machine didn't match a token or
-		 * encounter an error. Must be because we got to the end of the buffer
-		 * data. */
+		/* Got here because the state machine didn't match a token or encounter
+		 * an error. Must be because we got to the end of the buffer data. */
 		assert( fsmRun->p == fsmRun->pe );
-
-		/* There may be space left in the current buffer. If not then we need
-		 * to make some. */
-		long space = fsmRun->scanBuf->data + FSM_BUFSIZE - fsmRun->pe;
-		if ( space == 0 ) {
-			/* Create a new run buf. */
-			RunBuf *newBuf = newRunBuf();
-
-			/* If partway through a token then preserve the prefix. */
-			long have = 0;
-
-			if ( fsmRun->tokstart == 0 ) {
-				/* No prefix. We filled the previous buffer. */
-				fsmRun->scanBuf->length = FSM_BUFSIZE;
-			}
-			else {
-				int i;
-
-				debug( REALM_SCAN, "copying data over to new buffer\n" );
-				assert( fsmRun->scanBuf->offset == 0 );
-
-				if ( fsmRun->tokstart == fsmRun->scanBuf->data ) {
-					/* A token is started and it is already at the beginning
-					 * of the current buffer. This means buffer is full and it
-					 * must be grown. Probably need to do this sooner. */
-					fatal( "OUT OF BUFFER SPACE\n" );
-				}
-
-				/* There is data that needs to be shifted over. */
-				have = fsmRun->pe - fsmRun->tokstart;
-				memcpy( newBuf->data, fsmRun->tokstart, have );
-
-				/* Compute the length of the previous buffer. */
-				fsmRun->scanBuf->length = FSM_BUFSIZE - have;
-
-				/* Compute tokstart and tokend. */
-				long dist = fsmRun->tokstart - newBuf->data;
-
-				fsmRun->tokend -= dist;
-				fsmRun->tokstart = newBuf->data;
-
-				/* Shift any markers. */
-				for ( i = 0; i < MARK_SLOTS; i++ ) {
-					if ( fsmRun->mark[i] != 0 )
-						fsmRun->mark[i] -= dist;
-				}
-			}
-
-			fsmRun->p = fsmRun->pe = newBuf->data + have;
-			fsmRun->peof = 0;
-
-			newBuf->next = fsmRun->scanBuf;
-			fsmRun->scanBuf = newBuf;
-		}
-
-		/* We don't have any data. What is next in the input inputStream? */
-		space = fsmRun->scanBuf->data + FSM_BUFSIZE - fsmRun->pe;
-		assert( space > 0 );
-			
-		/* Get more data. */
-		int have = fsmRun->tokstart != 0 ? fsmRun->p - fsmRun->tokstart : 0;
-	
-		debug( REALM_SCAN, "fetching data: have: %d  space: %d\n", have, space );
 
 		char *pd = 0;
 		int len = 0;
-		int type = is->funcs->getParseBlock( fsmRun, is, have, fsmRun->p, space, &pd, &len );
+		int type = is->funcs->getParseBlock( fsmRun, is, fsmRun->have, &pd, &len );
 
 		switch ( type ) {
 			case INPUT_DATA:
-				fsmRun->pe = fsmRun->p + len;
+				fsmRun->p = pd;
+				fsmRun->pe = pd + len;
 				break;
 
 			case INPUT_EOS:
+				//fsmRun->p = fsmRun->pe = 0;
 				if ( fsmRun->tokstart != 0 )
 					fsmRun->peof = fsmRun->pe;
 				debug( REALM_SCAN, "EOS *******************\n" );
-//				else {
-//					return SCAN_EOS;
-//				}
+				//else {
+				//	return SCAN_EOS;
+				//}
 				break;
 
 			case INPUT_EOF:
+				//fsmRun->p = fsmRun->pe = 0;
 				if ( fsmRun->tokstart != 0 )
 					fsmRun->peof = fsmRun->pe;
 				else 

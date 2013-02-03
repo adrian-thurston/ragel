@@ -73,7 +73,6 @@ typedef struct _FsmRun
 {
 	FsmTables *tables;
 
-	RunBuf *scanBuf;
 	RunBuf *consumeBuf;
 
 	/* FsmRun State. */
@@ -81,6 +80,7 @@ typedef struct _FsmRun
 	long cs, ncs, act;
 	char *tokstart, *tokend;
 	char *p, *pe, *peof;
+	int have;
 	int returnResult;
 	char *mark[MARK_SLOTS];
 	long matchedToken;

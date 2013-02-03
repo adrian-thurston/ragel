@@ -178,8 +178,8 @@ void initInputFuncs()
  * Base run-time input streams.
  */
 
-int fdGetParseBlock( FsmRun *fsmRun, StreamImpl *ss, int skip,
-		char *dest, int length, char **pdp, int *copied )
+int fdGetParseBlock( FsmRun *fsmRun, StreamImpl *ss,
+		int skip, char **pdp, int *copied )
 {
 	int ret = 0;
 	*copied = 0;
@@ -198,8 +198,7 @@ int fdGetParseBlock( FsmRun *fsmRun, StreamImpl *ss, int skip,
 			}
 			runBuf->length = received;
 
-			int slen = received < length ? received : length;
-			memcpy( dest, runBuf->data, slen );
+			int slen = received;
 			*pdp = runBuf->data;
 			*copied = slen;
 			ret = INPUT_DATA;
@@ -225,8 +224,7 @@ int fdGetParseBlock( FsmRun *fsmRun, StreamImpl *ss, int skip,
 				avail -= skip;
 				skip = 0;
 
-				int slen = avail < length ? avail : length;
-				memcpy( dest, src, slen ) ;
+				int slen = avail;
 				*pdp = src;
 				*copied += slen;
 				ret = INPUT_DATA;
@@ -510,8 +508,8 @@ void _unsetEof( StreamImpl *is )
 	}
 }
 
-int _getParseBlock( FsmRun *fsmRun, StreamImpl *is, int skip,
-		char *dest, int length, char **pdp, int *copied )
+int _getParseBlock( FsmRun *fsmRun, StreamImpl *is,
+		int skip, char **pdp, int *copied )
 {
 	int ret = 0;
 	*copied = 0;
@@ -527,7 +525,7 @@ int _getParseBlock( FsmRun *fsmRun, StreamImpl *is, int skip,
 
 		if ( buf->type == RunBufSourceType ) {
 			Stream *stream = (Stream*)buf->tree;
-			int type = stream->in->funcs->getParseBlock( fsmRun, stream->in, skip, dest, length, pdp, copied );
+			int type = stream->in->funcs->getParseBlock( fsmRun, stream->in, skip, pdp, copied );
 
 //			if ( type == INPUT_EOD && !stream->in->eosSent ) {
 //				stream->in->eosSent = 1;
@@ -574,10 +572,8 @@ int _getParseBlock( FsmRun *fsmRun, StreamImpl *is, int skip,
 				avail -= skip;
 				skip = 0;
 
-				int slen = avail <= length ? avail : length;
-				memcpy( dest, src, slen ) ;
 				*pdp = src;
-				*copied += slen;
+				*copied += avail;
 				ret = INPUT_DATA;
 				break;
 			}
@@ -589,22 +585,22 @@ int _getParseBlock( FsmRun *fsmRun, StreamImpl *is, int skip,
 #if DEBUG
 	switch ( ret ) {
 		case INPUT_DATA:
-			debug( REALM_INPUT, "get data: DATA copied: %d: %.*s\n", *copied, (int)*copied, dest );
+			debug( REALM_INPUT, "get parse block: DATA: %d\n", *copied );
 			break;
 		case INPUT_EOD:
-			debug( REALM_INPUT, "get data: EOD\n" );
+			debug( REALM_INPUT, "get parse block: EOD\n" );
 			break;
 		case INPUT_EOF:
-			debug( REALM_INPUT, "get data: EOF\n" );
+			debug( REALM_INPUT, "get parse block: EOF\n" );
 			break;
 		case INPUT_TREE:
-			debug( REALM_INPUT, "get data: TREE\n" );
+			debug( REALM_INPUT, "get parse block: TREE\n" );
 			break;
 		case INPUT_IGNORE:
-			debug( REALM_INPUT, "get data: IGNORE\n" );
+			debug( REALM_INPUT, "get parse block: IGNORE\n" );
 			break;
 		case INPUT_LANG_EL:
-			debug( REALM_INPUT, "get data: LANG_EL\n" );
+			debug( REALM_INPUT, "get parse block: LANG_EL\n" );
 			break;
 	}
 #endif

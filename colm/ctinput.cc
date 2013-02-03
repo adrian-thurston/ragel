@@ -60,8 +60,8 @@ LangEl *inputStreamPatternGetLangEl( StreamImpl *ss, long *bindId, char **data, 
 	return klangEl;
 }
 
-int inputStreamPatternGetParseBlock( FsmRun *fsmRun, StreamImpl *ss, int skip,
-		char *dest, int length, char **pdp, int *copied )
+int inputStreamPatternGetParseBlock( FsmRun *fsmRun, StreamImpl *ss,
+		int skip, char **pdp, int *copied )
 { 
 	*copied = 0;
 
@@ -81,7 +81,7 @@ int inputStreamPatternGetParseBlock( FsmRun *fsmRun, StreamImpl *ss, int skip,
 		if ( avail > 0 ) {
 			/* The source data from the current buffer. */
 			char *src = &buf->data[offset];
-			int slen = avail <= length ? avail : length;
+			int slen = avail;
 
 			/* Need to skip? */
 			if ( skip > 0 && slen <= skip ) {
@@ -95,7 +95,6 @@ int inputStreamPatternGetParseBlock( FsmRun *fsmRun, StreamImpl *ss, int skip,
 				slen -= skip;
 				skip = 0;
 
-				memcpy( dest, src, slen ) ;
 				*pdp = src;
 				*copied += slen;
 				break;
@@ -285,8 +284,8 @@ LangEl *inputStreamConsGetLangEl( StreamImpl *ss, long *bindId, char **data, lon
 	return klangEl;
 }
 
-int inputStreamConsGetParseBlock( FsmRun *fsmRun, StreamImpl *ss, int skip,
-		char *dest, int length, char **pdp, int *copied )
+int inputStreamConsGetParseBlock( FsmRun *fsmRun, StreamImpl *ss,
+		int skip, char **pdp, int *copied )
 { 
 	*copied = 0;
 
@@ -306,7 +305,7 @@ int inputStreamConsGetParseBlock( FsmRun *fsmRun, StreamImpl *ss, int skip,
 		if ( avail > 0 ) {
 			/* The source data from the current buffer. */
 			char *src = &buf->data[offset];
-			int slen = avail <= length ? avail : length;
+			int slen = avail;
 
 			/* Need to skip? */
 			if ( skip > 0 && slen <= skip ) {
@@ -320,7 +319,6 @@ int inputStreamConsGetParseBlock( FsmRun *fsmRun, StreamImpl *ss, int skip,
 				slen -= skip;
 				skip = 0;
 
-				memcpy( dest, src, slen ) ;
 				*pdp = src;
 				*copied += slen;
 				break;
