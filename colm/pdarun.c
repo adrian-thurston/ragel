@@ -268,8 +268,9 @@ void resetToken( FsmRun *fsmRun )
 	/* If there is a token started, but never finished for a lack of data, we
 	 * must first backup over it. */
 	if ( fsmRun->tokstart != 0 ) {
-		fsmRun->p = fsmRun->tokstart;
-		fsmRun->tokstart = 0;
+		fsmRun->p = fsmRun->pe = 0;
+		fsmRun->have = 0;
+		fsmRun->peof = (char*)-1;
 	}
 }
 
@@ -740,7 +741,7 @@ void sendIgnore( Program *prg, Tree **sp, StreamImpl *is, FsmRun *fsmRun, PdaRun
 
 	/* Make the ignore string. */
 	Head *ignoreStr = extractMatch( prg, fsmRun, is );
-	updatePosition( is, fsmRun->tokstart, ignoreStr->length );
+	updatePosition( is, ignoreStr->data, ignoreStr->length );
 	
 	debug( REALM_PARSE, "ignoring: %.*s\n", ignoreStr->length, ignoreStr->data );
 
@@ -757,7 +758,7 @@ void sendIgnore( Program *prg, Tree **sp, StreamImpl *is, FsmRun *fsmRun, PdaRun
 /* Doesn't consume. */
 Head *peekMatch( Program *prg, FsmRun *fsmRun, StreamImpl *is )
 {
-	long length = fsmRun->p - fsmRun->tokstart;
+	long length = fsmRun->have;
 
 	RunBuf *runBuf = newRunBuf();
 	runBuf->next = fsmRun->consumeBuf;
@@ -785,7 +786,7 @@ Head *peekMatch( Program *prg, FsmRun *fsmRun, StreamImpl *is )
 /* Consumes. */
 Head *extractMatch( Program *prg, FsmRun *fsmRun, StreamImpl *is )
 {
-	long length = fsmRun->p - fsmRun->tokstart;
+	long length = fsmRun->have;
 
 	RunBuf *runBuf = newRunBuf();
 	runBuf->next = fsmRun->consumeBuf;
@@ -804,6 +805,7 @@ Head *extractMatch( Program *prg, FsmRun *fsmRun, StreamImpl *is )
 
 	fsmRun->p = fsmRun->pe = 0;
 	fsmRun->have = 0;
+	fsmRun->tokstart = 0;
 	//fsmRun->peof = (char*)-1;
 
 	Head *head = stringAllocPointer( prg, runBuf->data, length );
@@ -829,7 +831,7 @@ static void sendToken( Program *prg, Tree **sp, StreamImpl *is, FsmRun *fsmRun, 
 		prg->rtd->lelInfo[id].name,
 		stringLength(tokdata), stringData(tokdata) );
 
-	updatePosition( is, fsmRun->tokstart, tokdata->length );
+	updatePosition( is, stringData(tokdata), stringLength(tokdata) );
 
 	Kid *input = makeTokenWithData( prg, pdaRun, fsmRun, is, id, tokdata );
 
@@ -886,7 +888,7 @@ static void sendCi( Program *prg, Tree **sp, StreamImpl *is, FsmRun *fsmRun, Pda
 		prg->rtd->lelInfo[id].name,
 		stringLength(tokdata), stringData(tokdata) );
 
-	updatePosition( is, fsmRun->tokstart, tokdata->length );
+	updatePosition( is, stringData(tokdata), stringLength(tokdata) );
 
 	Kid *input = makeTokenWithData( prg, pdaRun, fsmRun, is, id, tokdata );
 
@@ -1052,7 +1054,8 @@ long scanToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, StreamImpl *is )
 				break;
 
 			case INPUT_EOS:
-				//fsmRun->p = fsmRun->pe = 0;
+				fsmRun->p = fsmRun->pe = 0;
+				//fsmRun->have = 0;
 				if ( fsmRun->tokstart != 0 )
 					fsmRun->peof = fsmRun->pe;
 				debug( REALM_SCAN, "EOS *******************\n" );
@@ -1062,7 +1065,8 @@ long scanToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, StreamImpl *is )
 				break;
 
 			case INPUT_EOF:
-				//fsmRun->p = fsmRun->pe = 0;
+				fsmRun->p = fsmRun->pe = 0;
+				//fsmRun->have = 0;
 				if ( fsmRun->tokstart != 0 )
 					fsmRun->peof = fsmRun->pe;
 				else 
@@ -1231,8 +1235,9 @@ case PcrPreEof:
 			/* Note that we don't update the position now. It is done when the token
 			 * data is pulled from the inputStream. */
 
-			fsmRun->p = fsmRun->tokstart;
-			fsmRun->tokstart = 0;
+			fsmRun->p = fsmRun->pe = 0;
+			fsmRun->have = 0;
+			fsmRun->peof = (char*)-1;
 
 			pdaRun->fi = &prg->rtd->frameInfo[prg->rtd->lelInfo[pdaRun->tokenId].frameId];
 			pdaRun->frameId = prg->rtd->lelInfo[pdaRun->tokenId].frameId;
