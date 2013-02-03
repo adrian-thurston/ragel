@@ -56,9 +56,9 @@ void execAction( FsmRun *fsmRun, GenAction *genAction )
 		case InlineItem::LmSwitch:
 			/* If the switch handles error then we also forced the error state. It
 			 * will exist. */
-			fsmRun->p = fsmRun->tokend;
+			//fsmRun->p = fsmRun->tokend;
 			if ( item->tokenRegion->lmSwitchHandlesError && fsmRun->act == 0 ) {
-				fsmRun->p = fsmRun->tokstart;
+				//fsmRun->p = fsmRun->tokstart;
 				fsmRun->cs = fsmRun->tables->errorState;
 			}
 			else {
@@ -81,7 +81,7 @@ void execAction( FsmRun *fsmRun, GenAction *genAction )
 			fsmRun->returnResult = true;
 			break;
 		case InlineItem::LmOnLagBehind:
-			fsmRun->p = fsmRun->tokend;
+			//fsmRun->p = fsmRun->tokend;
 			fsmRun->matchedToken = item->longestMatchPart->tdLangEl->id;
 			fsmRun->returnResult = true;
 			break;

@@ -788,6 +788,8 @@ Head *extractMatch( Program *prg, FsmRun *fsmRun, StreamImpl *is )
 {
 	long length = fsmRun->have;
 
+	debug( REALM_PARSE, "extracting token of length: %ld\n", length );
+
 	RunBuf *runBuf = newRunBuf();
 	runBuf->next = fsmRun->consumeBuf;
 	fsmRun->consumeBuf = runBuf;
@@ -1074,6 +1076,7 @@ long scanToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, StreamImpl *is )
 				break;
 
 			case INPUT_EOD:
+				fsmRun->p = fsmRun->pe = 0;
 				return SCAN_TRY_AGAIN_LATER;
 
 			case INPUT_LANG_EL:

@@ -172,14 +172,14 @@ void FsmCodeGen::LM_SWITCH( ostream &ret, InlineItem *item,
 		int targState, int inFinish )
 {
 	ret << 
-		"	" << P() << " = " << TOKEND() << ";\n"
+		//"	" << P() << " = " << TOKEND() << ";\n"
 		"	switch( " << ACT() << " ) {\n";
 
 	/* If the switch handles error then we also forced the error state. It
 	 * will exist. */
 	if ( item->tokenRegion->lmSwitchHandlesError ) {
-		ret << "	case 0: " << P() << " = " << TOKSTART() << 
-				"; goto st" << redFsm->errState->id << ";\n";
+		ret << "	case 0: " //<< P() << " = " << TOKSTART() << ";" <<
+				"goto st" << redFsm->errState->id << ";\n";
 	}
 
 	for ( TokenDefListReg::Iter lmi = item->tokenRegion->tokenDefList; lmi.lte(); lmi++ ) {
@@ -218,7 +218,7 @@ void FsmCodeGen::LM_ON_LAG_BEHIND( ostream &ret, InlineItem *item )
 {
 	assert( item->longestMatchPart->tdLangEl != 0 );
 
-	ret << "	" << P() << " = " << TOKEND() << ";\n";
+//	ret << "	" << P() << " = " << TOKEND() << ";\n";
 	EMIT_TOKEN( ret, item->longestMatchPart->tdLangEl );
 	ret << "	return;\n";
 }
