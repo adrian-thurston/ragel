@@ -1031,7 +1031,7 @@ long scanToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, StreamImpl *is )
 			/* Check for a default token in the region. If one is there
 			 * then send it and continue with the processing loop. */
 			if ( prg->rtd->regionInfo[fsmRun->region].defaultToken >= 0 ) {
-				fsmRun->tokstart = fsmRun->tokend = fsmRun->p;
+				fsmRun->toklen = 0;
 				return prg->rtd->regionInfo[fsmRun->region].defaultToken;
 			}
 

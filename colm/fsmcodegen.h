@@ -105,6 +105,8 @@ protected:
 	string TOP() { return ACCESS() + "top"; }
 	string TOKSTART() { return ACCESS() + "tokstart"; }
 	string TOKEND() { return ACCESS() + "tokend"; }
+	string BLOCK_START() { return ACCESS() + "start"; }
+	string TOKLEN() { return ACCESS() + "toklen"; }
 	string ACT() { return ACCESS() + "act"; }
 	string MATCHED_TOKEN() { return ACCESS() + "matchedToken"; }
 

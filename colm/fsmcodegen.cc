@@ -146,7 +146,7 @@ void FsmCodeGen::SET_ACT( ostream &ret, InlineItem *item )
 void FsmCodeGen::SET_TOKEND( ostream &ret, InlineItem *item )
 {
 	/* The tokend action sets tokend. */
-	ret << TOKEND() << " = " << P() << "+1;";
+	ret << "{ " << TOKEND() << " = " << TOKLEN() << " + ( " << P() << " - " << BLOCK_START() << " ) + 1; }";
 }
 void FsmCodeGen::INIT_TOKSTART( ostream &ret, InlineItem *item )
 {
@@ -172,7 +172,7 @@ void FsmCodeGen::LM_SWITCH( ostream &ret, InlineItem *item,
 		int targState, int inFinish )
 {
 	ret << 
-		//"	" << P() << " = " << TOKEND() << ";\n"
+		"	" << TOKLEN() << " = " << TOKEND() << ";\n"
 		"	switch( " << ACT() << " ) {\n";
 
 	/* If the switch handles error then we also forced the error state. It
@@ -194,7 +194,7 @@ void FsmCodeGen::LM_SWITCH( ostream &ret, InlineItem *item,
 	ret << 
 		"	}\n"
 		"\t"
-		"	goto out;\n";
+		"	goto skip_toklen;\n";
 }
 
 void FsmCodeGen::LM_ON_LAST( ostream &ret, InlineItem *item )
@@ -218,9 +218,9 @@ void FsmCodeGen::LM_ON_LAG_BEHIND( ostream &ret, InlineItem *item )
 {
 	assert( item->longestMatchPart->tdLangEl != 0 );
 
-//	ret << "	" << P() << " = " << TOKEND() << ";\n";
+	ret << "	" << TOKLEN() << " = " << TOKEND() << ";\n";
 	EMIT_TOKEN( ret, item->longestMatchPart->tdLangEl );
-	ret << "	goto out;\n";
+	ret << "	goto skip_toklen;\n";
 }
 
 
@@ -848,7 +848,7 @@ void FsmCodeGen::writeExec()
 	out <<
 		"void fsmExecute( FsmRun *fsmRun, StreamImpl *inputStream )\n"
 		"{\n"
-		"	char *start = fsmRun->p;\n"
+		"	" << BLOCK_START() << " = fsmRun->p;\n"
 		"/*_resume:*/\n";
 
 	if ( redFsm->errState != 0 ) {
@@ -873,9 +873,11 @@ void FsmCodeGen::writeExec()
 		"	}\n";
 
 	out <<
-		"	out:\n"
-		"	if ( fsmRun->p != 0 )\n"
-		"		fsmRun->toklen += fsmRun->p - start;\n"
+		"out:\n"
+		"	if ( " << P() << " != 0 )\n"
+		"		" << TOKLEN() << " += " << P() << " - " << BLOCK_START() << ";\n"
+		"skip_toklen:\n"
+		"	{}\n"
 		"}\n"
 		"\n";
 }

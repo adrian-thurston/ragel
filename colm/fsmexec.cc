@@ -42,7 +42,7 @@ void execAction( FsmRun *fsmRun, GenAction *genAction )
 			fsmRun->act = item->longestMatchPart->longestMatchId;
 			break;
 		case InlineItem::LmSetTokEnd:
-			fsmRun->tokend = fsmRun->p + 1;
+			fsmRun->tokend = fsmRun->toklen + ( fsmRun->p - fsmRun->start ) + 1;
 			break;
 		case InlineItem::LmInitTokStart:
 			assert(false);
@@ -56,9 +56,8 @@ void execAction( FsmRun *fsmRun, GenAction *genAction )
 		case InlineItem::LmSwitch:
 			/* If the switch handles error then we also forced the error state. It
 			 * will exist. */
-			//fsmRun->p = fsmRun->tokend;
+			fsmRun->toklen = fsmRun->tokend;
 			if ( item->tokenRegion->lmSwitchHandlesError && fsmRun->act == 0 ) {
-				//fsmRun->p = fsmRun->tokstart;
 				fsmRun->cs = fsmRun->tables->errorState;
 			}
 			else {
@@ -70,6 +69,7 @@ void execAction( FsmRun *fsmRun, GenAction *genAction )
 				}
 			}
 			fsmRun->returnResult = true;
+			fsmRun->skipToklen = true;
 			break;
 		case InlineItem::LmOnLast:
 			fsmRun->p += 1;
@@ -81,9 +81,10 @@ void execAction( FsmRun *fsmRun, GenAction *genAction )
 			fsmRun->returnResult = true;
 			break;
 		case InlineItem::LmOnLagBehind:
-			//fsmRun->p = fsmRun->tokend;
+			fsmRun->toklen = fsmRun->tokend;
 			fsmRun->matchedToken = item->longestMatchPart->tdLangEl->id;
 			fsmRun->returnResult = true;
+			fsmRun->skipToklen = true;
 			break;
 		}
 	}
@@ -100,7 +101,7 @@ void fsmExecute( FsmRun *fsmRun, StreamImpl *inputStream )
 	unsigned int _nacts;
 	const char *_keys;
 		
-	char *start = fsmRun->p;
+	fsmRun->start = fsmRun->p;
 
 	/* Init the token match to nothing (the sentinal). */
 	fsmRun->matchedToken = 0;
@@ -173,12 +174,16 @@ _match:
 		goto _again;
 
 	fsmRun->returnResult = false;
+	fsmRun->skipToklen = false;
 	_acts = fsmRun->tables->actions + fsmRun->tables->transActionsWI[_trans];
 	_nacts = (unsigned int) *_acts++;
 	while ( _nacts-- > 0 )
 		execAction( fsmRun, fsmRun->tables->actionSwitch[*_acts++] );
-	if ( fsmRun->returnResult )
+	if ( fsmRun->returnResult ) {
+		if ( fsmRun->skipToklen )
+			goto skip_toklen;
 		goto final;
+	}
 
 _again:
 	_acts = fsmRun->tables->actions + fsmRun->tables->toStateActions[fsmRun->cs];
@@ -194,6 +199,7 @@ _again:
 out:
 	if ( fsmRun->p == fsmRun->peof ) {
 		fsmRun->returnResult = false;
+		fsmRun->skipToklen = false;
 		_acts = fsmRun->tables->actions + fsmRun->tables->eofActions[fsmRun->cs];
 		_nacts = (unsigned int) *_acts++;
 
@@ -202,14 +208,17 @@ out:
 
 		while ( _nacts-- > 0 )
 			execAction( fsmRun, fsmRun->tables->actionSwitch[*_acts++] );
-		if ( fsmRun->returnResult )
+		if ( fsmRun->returnResult ) {
+			if ( fsmRun->skipToklen )
+				goto skip_toklen;
 			goto final;
+		}
 	}
 
 final:
 
 	if ( fsmRun->p != 0 )
-		fsmRun->toklen += fsmRun->p - start;
+		fsmRun->toklen += fsmRun->p - fsmRun->start;
+skip_toklen:
+	{}
 }
-
-
