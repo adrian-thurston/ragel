@@ -64,7 +64,7 @@ void initFsmRun( FsmRun *fsmRun, Program *prg )
 	fsmRun->consumeBuf = 0;
 
 	fsmRun->p = fsmRun->pe = 0;
-	fsmRun->have = 0;
+	fsmRun->toklen = 0;
 	fsmRun->peof = (char*)-1;
 
 	fsmRun->preRegion = -1;
@@ -140,7 +140,7 @@ Head *streamPull( Program *prg, FsmRun *fsmRun, StreamImpl *is, long length )
 	is->funcs->consumeData( is, length );
 
 	fsmRun->p = fsmRun->pe = 0;
-	fsmRun->have = 0;
+	fsmRun->toklen = 0;
 	//fsmRun->peof = (char*)-1;
 
 	Head *tokdata = stringAllocPointer( prg, runBuf->data, length );
@@ -269,7 +269,7 @@ void resetToken( FsmRun *fsmRun )
 	 * must first backup over it. */
 	if ( fsmRun->tokstart != 0 ) {
 		fsmRun->p = fsmRun->pe = 0;
-		fsmRun->have = 0;
+		fsmRun->toklen = 0;
 		fsmRun->peof = (char*)-1;
 	}
 }
@@ -758,7 +758,7 @@ void sendIgnore( Program *prg, Tree **sp, StreamImpl *is, FsmRun *fsmRun, PdaRun
 /* Doesn't consume. */
 Head *peekMatch( Program *prg, FsmRun *fsmRun, StreamImpl *is )
 {
-	long length = fsmRun->have;
+	long length = fsmRun->toklen;
 
 	RunBuf *runBuf = newRunBuf();
 	runBuf->next = fsmRun->consumeBuf;
@@ -768,7 +768,7 @@ Head *peekMatch( Program *prg, FsmRun *fsmRun, StreamImpl *is )
 	is->funcs->getData( fsmRun, is, 0, runBuf->data, length, &lenCopied );
 
 	fsmRun->p = fsmRun->pe = 0;
-	fsmRun->have = 0;
+	fsmRun->toklen = 0;
 	//fsmRun->peof = (char*)-1;
 
 	Head *head = stringAllocPointer( prg, runBuf->data, length );
@@ -786,7 +786,7 @@ Head *peekMatch( Program *prg, FsmRun *fsmRun, StreamImpl *is )
 /* Consumes. */
 Head *extractMatch( Program *prg, FsmRun *fsmRun, StreamImpl *is )
 {
-	long length = fsmRun->have;
+	long length = fsmRun->toklen;
 
 	debug( REALM_PARSE, "extracting token of length: %ld\n", length );
 
@@ -806,7 +806,7 @@ Head *extractMatch( Program *prg, FsmRun *fsmRun, StreamImpl *is )
 	is->funcs->consumeData( is, length );
 
 	fsmRun->p = fsmRun->pe = 0;
-	fsmRun->have = 0;
+	fsmRun->toklen = 0;
 	fsmRun->tokstart = 0;
 	//fsmRun->peof = (char*)-1;
 
@@ -942,7 +942,7 @@ static void sendEof( Program *prg, Tree **sp, StreamImpl *is, FsmRun *fsmRun, Pd
 void newToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun )
 {
 	fsmRun->p = fsmRun->pe = 0;
-	fsmRun->have = 0;
+	fsmRun->toklen = 0;
 	fsmRun->peof = (char*)-1;
 
 	/* Init the scanner vars. */
@@ -1008,10 +1008,7 @@ long scanToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, StreamImpl *is )
 		return SCAN_UNDO;
 
 	while ( true ) {
-		char *start = fsmRun->p;
 		fsmExecute( fsmRun, is );
-		if ( fsmRun->p != 0 )
-			fsmRun->have += fsmRun->p - start;
 
 		/* First check if scanning stopped because we have a token. */
 		if ( fsmRun->matchedToken > 0 ) {
@@ -1047,7 +1044,7 @@ long scanToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, StreamImpl *is )
 
 		char *pd = 0;
 		int len = 0;
-		int type = is->funcs->getParseBlock( fsmRun, is, fsmRun->have, &pd, &len );
+		int type = is->funcs->getParseBlock( fsmRun, is, fsmRun->toklen, &pd, &len );
 
 		switch ( type ) {
 			case INPUT_DATA:
@@ -1239,7 +1236,7 @@ case PcrPreEof:
 			 * data is pulled from the inputStream. */
 
 			fsmRun->p = fsmRun->pe = 0;
-			fsmRun->have = 0;
+			fsmRun->toklen = 0;
 			fsmRun->peof = (char*)-1;
 
 			pdaRun->fi = &prg->rtd->frameInfo[prg->rtd->lelInfo[pdaRun->tokenId].frameId];

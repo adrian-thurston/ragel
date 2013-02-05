@@ -194,7 +194,7 @@ void FsmCodeGen::LM_SWITCH( ostream &ret, InlineItem *item,
 	ret << 
 		"	}\n"
 		"\t"
-		" return;\n";
+		"	goto out;\n";
 }
 
 void FsmCodeGen::LM_ON_LAST( ostream &ret, InlineItem *item )
@@ -203,7 +203,7 @@ void FsmCodeGen::LM_ON_LAST( ostream &ret, InlineItem *item )
 
 	ret << "	" << P() << " += 1;\n";
 	EMIT_TOKEN( ret, item->longestMatchPart->tdLangEl );
-	ret << "	return;\n";
+	ret << "	goto out;\n";
 }
 
 void FsmCodeGen::LM_ON_NEXT( ostream &ret, InlineItem *item )
@@ -211,7 +211,7 @@ void FsmCodeGen::LM_ON_NEXT( ostream &ret, InlineItem *item )
 	assert( item->longestMatchPart->tdLangEl != 0 );
 
 	EMIT_TOKEN( ret, item->longestMatchPart->tdLangEl );
-	ret << "	return;\n";
+	ret << "	goto out;\n";
 }
 
 void FsmCodeGen::LM_ON_LAG_BEHIND( ostream &ret, InlineItem *item )
@@ -220,7 +220,7 @@ void FsmCodeGen::LM_ON_LAG_BEHIND( ostream &ret, InlineItem *item )
 
 //	ret << "	" << P() << " = " << TOKEND() << ";\n";
 	EMIT_TOKEN( ret, item->longestMatchPart->tdLangEl );
-	ret << "	return;\n";
+	ret << "	goto out;\n";
 }
 
 
@@ -848,6 +848,7 @@ void FsmCodeGen::writeExec()
 	out <<
 		"void fsmExecute( FsmRun *fsmRun, StreamImpl *inputStream )\n"
 		"{\n"
+		"	char *start = fsmRun->p;\n"
 		"/*_resume:*/\n";
 
 	if ( redFsm->errState != 0 ) {
@@ -872,7 +873,9 @@ void FsmCodeGen::writeExec()
 		"	}\n";
 
 	out <<
-		"	out: {}\n"
+		"	out:\n"
+		"	if ( fsmRun->p != 0 )\n"
+		"		fsmRun->toklen += fsmRun->p - start;\n"
 		"}\n"
 		"\n";
 }

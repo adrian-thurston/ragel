@@ -79,8 +79,8 @@ typedef struct _FsmRun
 	long region, preRegion;
 	long cs, ncs, act;
 	char *tokstart, *tokend;
+	long toklen;
 	char *p, *pe, *peof;
-	int have;
 	int returnResult;
 	char *mark[MARK_SLOTS];
 	long matchedToken;

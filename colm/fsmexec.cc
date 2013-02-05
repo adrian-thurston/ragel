@@ -99,6 +99,8 @@ void fsmExecute( FsmRun *fsmRun, StreamImpl *inputStream )
 	const long *_acts;
 	unsigned int _nacts;
 	const char *_keys;
+		
+	char *start = fsmRun->p;
 
 	/* Init the token match to nothing (the sentinal). */
 	fsmRun->matchedToken = 0;
@@ -176,7 +178,7 @@ _match:
 	while ( _nacts-- > 0 )
 		execAction( fsmRun, fsmRun->tables->actionSwitch[*_acts++] );
 	if ( fsmRun->returnResult )
-		return;
+		goto final;
 
 _again:
 	_acts = fsmRun->tables->actions + fsmRun->tables->toStateActions[fsmRun->cs];
@@ -201,8 +203,13 @@ out:
 		while ( _nacts-- > 0 )
 			execAction( fsmRun, fsmRun->tables->actionSwitch[*_acts++] );
 		if ( fsmRun->returnResult )
-			return;
+			goto final;
 	}
+
+final:
+
+	if ( fsmRun->p != 0 )
+		fsmRun->toklen += fsmRun->p - start;
 }
 
 
