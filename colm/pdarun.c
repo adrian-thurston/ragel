@@ -1398,24 +1398,41 @@ Tree *getParsedRoot( PdaRun *pdaRun, int stop )
 	return 0;
 }
 
-void clearParseTree( Program *prg, Tree **sp, ParseTree *parseTree )
+void clearParseTree( Program *prg, Tree **sp, ParseTree *pt )
 {
-	/* Traverse the stack downreffing. */
-	ParseTree *pt = parseTree;
-	while ( pt != 0 ) {
-		ParseTree *next = pt->next;
-		if ( pt->shadow != 0 ) {
-			treeDownref( prg, sp, pt->shadow->tree );
-			kidFree( prg, pt->shadow );
-		}
-		if ( pt->child != 0 )
-			clearParseTree( prg, sp, pt->child );
-		if ( pt->leftIgnore != 0 )
-			clearParseTree( prg, sp, pt->leftIgnore );
-		if ( pt->rightIgnore != 0 )
-			clearParseTree( prg, sp, pt->rightIgnore );
-		parseTreeFree( prg, pt );
-		pt = next;
+	Tree **top = vm_ptop();
+
+	if ( pt == 0 )
+		return;
+
+free_tree:
+	if ( pt->next != 0 ) {
+		vm_push( (Tree*)pt->next );
+	}
+
+	if ( pt->leftIgnore != 0 ) {
+		vm_push( (Tree*)pt->leftIgnore );
+	}
+
+	if ( pt->child != 0 ) {
+		vm_push( (Tree*)pt->child );
+	}
+
+	if ( pt->rightIgnore != 0 ) {
+		vm_push( (Tree*)pt->rightIgnore );
+	}
+
+	if ( pt->shadow != 0 ) {
+		treeDownref( prg, sp, pt->shadow->tree );
+		kidFree( prg, pt->shadow );
+	}
+
+	parseTreeFree( prg, pt );
+
+	/* Any trees to downref? */
+	if ( sp != top ) {
+		pt = (ParseTree*)vm_pop();
+		goto free_tree;
 	}
 }
 
