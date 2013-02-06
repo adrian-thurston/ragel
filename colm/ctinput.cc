@@ -108,19 +108,19 @@ int inputStreamPatternGetParseBlock( FsmRun *fsmRun, StreamImpl *ss,
 	return INPUT_DATA;
 }
 
-int inputStreamPatternGetData( FsmRun *fsmRun, StreamImpl *ss, int skip, char *dest, int length, int *copied )
+int inputStreamPatternGetData( FsmRun *fsmRun, StreamImpl *ss, int skip, char *dest, int length )
 { 
-	*copied = 0;
+	int copied = 0;
 
 	PatternItem *buf = ss->patItem;
 	int offset = ss->offset;
 
 	while ( true ) {
 		if ( buf == 0 )
-			return INPUT_EOD;
+			return 0;
 
 		if ( buf->type == PatternItem::FactorType )
-			return INPUT_LANG_EL;
+			return 0;
 
 		assert ( buf->type == PatternItem::InputText );
 		int avail = buf->data.length() - offset;
@@ -143,7 +143,7 @@ int inputStreamPatternGetData( FsmRun *fsmRun, StreamImpl *ss, int skip, char *d
 				skip = 0;
 
 				memcpy( dest, src, slen ) ;
-				*copied += slen;
+				copied += slen;
 				break;
 			}
 		}
@@ -152,7 +152,7 @@ int inputStreamPatternGetData( FsmRun *fsmRun, StreamImpl *ss, int skip, char *d
 		offset = 0;
 	}
 
-	return INPUT_DATA;
+	return copied;
 }
 
 void inputStreamPatternBackup( StreamImpl *ss )
@@ -332,19 +332,19 @@ int inputStreamConsGetParseBlock( FsmRun *fsmRun, StreamImpl *ss,
 	return INPUT_DATA;
 }
 
-int inputStreamConsGetData( FsmRun *fsmRun, StreamImpl *ss, int skip, char *dest, int length, int *copied )
+int inputStreamConsGetData( FsmRun *fsmRun, StreamImpl *ss, int skip, char *dest, int length )
 { 
-	*copied = 0;
+	int copied = 0;
 
 	ConsItem *buf = ss->consItem;
 	int offset = ss->offset;
 
 	while ( true ) {
 		if ( buf == 0 )
-			return INPUT_EOD;
+			return 0;
 
 		if ( buf->type == ConsItem::ExprType || buf->type == ConsItem::FactorType )
-			return INPUT_LANG_EL;
+			return 0;
 
 		assert ( buf->type == ConsItem::InputText );
 		int avail = buf->data.length() - offset;
@@ -367,7 +367,7 @@ int inputStreamConsGetData( FsmRun *fsmRun, StreamImpl *ss, int skip, char *dest
 				skip = 0;
 
 				memcpy( dest, src, slen ) ;
-				*copied += slen;
+				copied += slen;
 				break;
 			}
 		}
@@ -376,7 +376,7 @@ int inputStreamConsGetData( FsmRun *fsmRun, StreamImpl *ss, int skip, char *dest
 		offset = 0;
 	}
 
-	return INPUT_DATA;
+	return copied;
 }
 
 void inputStreamConsBackup( StreamImpl *ss )

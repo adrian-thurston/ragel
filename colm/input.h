@@ -92,7 +92,7 @@ struct StreamFuncs
 			int skip, char **pdp, int *copied );
 
 	int (*getData)( struct _FsmRun *fsmRun, StreamImpl *ss,
-			int offset, char *dest, int length, int *copied );
+			int offset, char *dest, int length );
 
 	int (*consumeData)( StreamImpl *ss, int length );
 	int (*undoConsumeData)( struct _FsmRun *fsmRun, StreamImpl *ss, const char *data, int length );
@@ -170,8 +170,6 @@ void initConsFuncs();
 
 /* The input stream interface. */
 
-int _getData( struct _FsmRun *fsmRun, StreamImpl *in, int offset,
-		char *dest, int length, int *copied );
 int _getParseBlock( struct _FsmRun *fsmRun, StreamImpl *in,
 		int skip, char **pdp, int *copied );
 int _consumeData( StreamImpl *in, int length );

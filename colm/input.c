@@ -135,36 +135,6 @@ static void sourceStreamPrepend( StreamImpl *ss, RunBuf *runBuf )
 	}
 }
 
-void initStreamFuncs()
-{
-	memset( &streamFuncs, 0, sizeof(struct StreamFuncs) );
-	streamFuncs.getData = &_getData;
-	streamFuncs.getParseBlock = &_getParseBlock;
-	streamFuncs.consumeData = &_consumeData;
-	streamFuncs.undoConsumeData = &_undoConsumeData;
-	streamFuncs.consumeTree = &_consumeTree;
-	streamFuncs.undoConsumeTree = &_undoConsumeTree;
-	streamFuncs.consumeLangEl = &_consumeLangEl;
-	streamFuncs.undoConsumeLangEl = &_undoConsumeLangEl;
-
-	streamFuncs.setEof = &_setEof;
-	streamFuncs.unsetEof = &_unsetEof;
-
-	streamFuncs.prependData = &_prependData;
-	streamFuncs.prependTree = &_prependTree;
-	streamFuncs.prependStream = &_prependStream;
-	streamFuncs.undoPrependData = &_undoPrependData;
-	streamFuncs.undoPrependTree = &_undoPrependTree;
-
-	streamFuncs.appendData = &_appendData;
-	streamFuncs.appendTree = &_appendTree;
-	streamFuncs.appendStream = &_appendStream;
-	streamFuncs.undoAppendData = &_undoAppendData;
-	streamFuncs.undoAppendTree = &_undoAppendTree;
-	streamFuncs.undoAppendStream = &_undoAppendStream;
-}
-
-
 void initInputFuncs()
 {
 	initStreamFuncs();
@@ -238,10 +208,9 @@ int fdGetParseBlock( FsmRun *fsmRun, StreamImpl *ss,
 	return ret;
 }
 
-int fdGetData( FsmRun *fsmRun, StreamImpl *ss, int skip, char *dest, int length, int *copied )
+int fdGetData( FsmRun *fsmRun, StreamImpl *ss, int skip, char *dest, int length )
 {
-	int ret = 0;
-	*copied = 0;
+	int copied = 0;
 
 	/* Move over skip bytes. */
 	RunBuf *buf = ss->queue;
@@ -252,15 +221,13 @@ int fdGetData( FsmRun *fsmRun, StreamImpl *ss, int skip, char *dest, int length,
 			sourceStreamAppend( ss, runBuf );
 			int received = ss->funcs->getDataSource( ss, runBuf->data, FSM_BUFSIZE );
 			if ( received == 0 ) {
-				ret = INPUT_EOD;
 				break;
 			}
 			runBuf->length = received;
 
 			int slen = received < length ? received : length;
 			memcpy( dest, runBuf->data, slen );
-			*copied = slen;
-			ret = INPUT_DATA;
+			copied = slen;
 			break;
 		}
 
@@ -285,8 +252,7 @@ int fdGetData( FsmRun *fsmRun, StreamImpl *ss, int skip, char *dest, int length,
 
 				int slen = avail < length ? avail : length;
 				memcpy( dest, src, slen ) ;
-				*copied += slen;
-				ret = INPUT_DATA;
+				copied += slen;
 				break;
 			}
 		}
@@ -294,7 +260,7 @@ int fdGetData( FsmRun *fsmRun, StreamImpl *ss, int skip, char *dest, int length,
 		buf = buf->next;
 	}
 
-	return ret;
+	return copied;
 }
 
 int fdConsumeData( StreamImpl *ss, int length )
@@ -608,49 +574,37 @@ int _getParseBlock( FsmRun *fsmRun, StreamImpl *is,
 	return ret;
 }
 
-int _getData( FsmRun *fsmRun, StreamImpl *is, int skip, char *dest, int length, int *copied )
+int _getData( FsmRun *fsmRun, StreamImpl *is, int skip, char *dest, int length )
 {
-	int ret = 0;
-	*copied = 0;
+	int copied = 0;
 
 	/* Move over skip bytes. */
 	RunBuf *buf = is->queue;
 	while ( true ) {
 		if ( buf == 0 ) {
 			/* Got through the in-mem buffers without copying anything. */
-			ret = is->eof ? INPUT_EOF : INPUT_EOD;
 			break;
 		}
 
 		if ( buf->type == RunBufSourceType ) {
 			Stream *stream = (Stream*)buf->tree;
-			int type = stream->in->funcs->getData( fsmRun, stream->in, skip, dest, length, copied );
+			copied += stream->in->funcs->getData( fsmRun, stream->in, skip, dest, length );
 
-//			if ( type == INPUT_EOD && !stream->in->eosSent ) {
-//				stream->in->eosSent = 1;
-//				ret = INPUT_EOS;
-//				continue;
-//			}
-
-			if ( type == INPUT_EOD || type == INPUT_EOF ) {
+			if ( copied == 0 ) {
 				debug( REALM_INPUT, "skipping over input\n" );
 				buf = buf->next;
 				continue;
 			}
 
-			ret = type;
+			//ret = type;
 			break;
 		}
 
-		if ( buf->type == RunBufTokenType ) {
-			ret = INPUT_TREE;
+		if ( buf->type == RunBufTokenType )
 			break;
-		}
 
-		if ( buf->type == RunBufIgnoreType ) {
-			ret = INPUT_IGNORE;
+		if ( buf->type == RunBufIgnoreType )
 			break;
-		}
 
 		int avail = buf->length - buf->offset;
 
@@ -673,8 +627,7 @@ int _getData( FsmRun *fsmRun, StreamImpl *is, int skip, char *dest, int length, 
 
 				int slen = avail <= length ? avail : length;
 				memcpy( dest, src, slen ) ;
-				*copied += slen;
-				ret = INPUT_DATA;
+				copied += slen;
 				break;
 			}
 		}
@@ -682,30 +635,7 @@ int _getData( FsmRun *fsmRun, StreamImpl *is, int skip, char *dest, int length, 
 		buf = buf->next;
 	}
 
-#if DEBUG
-	switch ( ret ) {
-		case INPUT_DATA:
-			debug( REALM_INPUT, "get data: DATA copied: %d: %.*s\n", *copied, (int)*copied, dest );
-			break;
-		case INPUT_EOD:
-			debug( REALM_INPUT, "get data: EOD\n" );
-			break;
-		case INPUT_EOF:
-			debug( REALM_INPUT, "get data: EOF\n" );
-			break;
-		case INPUT_TREE:
-			debug( REALM_INPUT, "get data: TREE\n" );
-			break;
-		case INPUT_IGNORE:
-			debug( REALM_INPUT, "get data: IGNORE\n" );
-			break;
-		case INPUT_LANG_EL:
-			debug( REALM_INPUT, "get data: LANG_EL\n" );
-			break;
-	}
-#endif
-
-	return ret;
+	return copied;
 }
 
 int _consumeData( StreamImpl *is, int length )
@@ -1033,3 +963,34 @@ Tree *_undoAppendTree( StreamImpl *is )
 	free( runBuf );
 	return tree;
 }
+
+void initStreamFuncs()
+{
+	memset( &streamFuncs, 0, sizeof(struct StreamFuncs) );
+	streamFuncs.getData = &_getData;
+	streamFuncs.getParseBlock = &_getParseBlock;
+	streamFuncs.consumeData = &_consumeData;
+	streamFuncs.undoConsumeData = &_undoConsumeData;
+	streamFuncs.consumeTree = &_consumeTree;
+	streamFuncs.undoConsumeTree = &_undoConsumeTree;
+	streamFuncs.consumeLangEl = &_consumeLangEl;
+	streamFuncs.undoConsumeLangEl = &_undoConsumeLangEl;
+
+	streamFuncs.setEof = &_setEof;
+	streamFuncs.unsetEof = &_unsetEof;
+
+	streamFuncs.prependData = &_prependData;
+	streamFuncs.prependTree = &_prependTree;
+	streamFuncs.prependStream = &_prependStream;
+	streamFuncs.undoPrependData = &_undoPrependData;
+	streamFuncs.undoPrependTree = &_undoPrependTree;
+
+	streamFuncs.appendData = &_appendData;
+	streamFuncs.appendTree = &_appendTree;
+	streamFuncs.appendStream = &_appendStream;
+	streamFuncs.undoAppendData = &_undoAppendData;
+	streamFuncs.undoAppendTree = &_undoAppendTree;
+	streamFuncs.undoAppendStream = &_undoAppendStream;
+}
+
+
