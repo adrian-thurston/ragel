@@ -108,7 +108,7 @@ int inputStreamPatternGetParseBlock( FsmRun *fsmRun, StreamImpl *ss,
 	return INPUT_DATA;
 }
 
-int inputStreamPatternGetData( FsmRun *fsmRun, StreamImpl *ss, int skip, char *dest, int length )
+int inputStreamPatternGetData( FsmRun *fsmRun, StreamImpl *ss, char *dest, int length )
 { 
 	int copied = 0;
 
@@ -322,7 +322,7 @@ int inputStreamConsGetParseBlock( FsmRun *fsmRun, StreamImpl *ss,
 	return INPUT_DATA;
 }
 
-int inputStreamConsGetData( FsmRun *fsmRun, StreamImpl *ss, int skip, char *dest, int length )
+int inputStreamConsGetData( FsmRun *fsmRun, StreamImpl *ss, char *dest, int length )
 { 
 	int copied = 0;
 

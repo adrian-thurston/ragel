@@ -92,7 +92,7 @@ struct StreamFuncs
 			int skip, char **pdp, int *copied );
 
 	int (*getData)( struct _FsmRun *fsmRun, StreamImpl *ss,
-			int offset, char *dest, int length );
+			char *dest, int length );
 
 	int (*consumeData)( StreamImpl *ss, int length );
 	int (*undoConsumeData)( struct _FsmRun *fsmRun, StreamImpl *ss, const char *data, int length );

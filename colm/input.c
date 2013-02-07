@@ -208,7 +208,7 @@ int fdGetParseBlock( FsmRun *fsmRun, StreamImpl *ss,
 	return ret;
 }
 
-int fdGetData( FsmRun *fsmRun, StreamImpl *ss, int skip, char *dest, int length )
+int fdGetData( FsmRun *fsmRun, StreamImpl *ss, char *dest, int length )
 {
 	int copied = 0;
 
@@ -562,7 +562,7 @@ static int _getParseBlock( FsmRun *fsmRun, StreamImpl *is,
 	return ret;
 }
 
-static int _getData( FsmRun *fsmRun, StreamImpl *is, int skip, char *dest, int length )
+static int _getData( FsmRun *fsmRun, StreamImpl *is, char *dest, int length )
 {
 	int copied = 0;
 
@@ -576,7 +576,7 @@ static int _getData( FsmRun *fsmRun, StreamImpl *is, int skip, char *dest, int l
 
 		if ( buf->type == RunBufSourceType ) {
 			Stream *stream = (Stream*)buf->tree;
-			int glen = stream->in->funcs->getData( fsmRun, stream->in, 0, dest+copied, length );
+			int glen = stream->in->funcs->getData( fsmRun, stream->in, dest+copied, length );
 
 			if ( glen == 0 ) {
 				debug( REALM_INPUT, "skipping over input\n" );

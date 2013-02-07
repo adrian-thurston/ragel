@@ -135,7 +135,7 @@ Head *streamPull( Program *prg, FsmRun *fsmRun, StreamImpl *is, long length )
 	runBuf->next = fsmRun->consumeBuf;
 	fsmRun->consumeBuf = runBuf;
 
-	is->funcs->getData( fsmRun, is, 0, runBuf->data, length );
+	is->funcs->getData( fsmRun, is, runBuf->data, length );
 	is->funcs->consumeData( is, length );
 
 	fsmRun->p = fsmRun->pe = 0;
@@ -763,7 +763,7 @@ Head *peekMatch( Program *prg, FsmRun *fsmRun, StreamImpl *is )
 	runBuf->next = fsmRun->consumeBuf;
 	fsmRun->consumeBuf = runBuf;
 
-	is->funcs->getData( fsmRun, is, 0, runBuf->data, length );
+	is->funcs->getData( fsmRun, is, runBuf->data, length );
 
 	fsmRun->p = fsmRun->pe = 0;
 	fsmRun->toklen = 0;
@@ -792,7 +792,7 @@ Head *extractMatch( Program *prg, FsmRun *fsmRun, StreamImpl *is )
 	runBuf->next = fsmRun->consumeBuf;
 	fsmRun->consumeBuf = runBuf;
 
-	is->funcs->getData( fsmRun, is, 0, runBuf->data, length );
+	is->funcs->getData( fsmRun, is, runBuf->data, length );
 
 	is->funcs->consumeData( is, length );
 
