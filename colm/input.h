@@ -168,36 +168,6 @@ void initStaticFuncs();
 void initPatFuncs();
 void initConsFuncs();
 
-/* The input stream interface. */
-
-int _getParseBlock( struct _FsmRun *fsmRun, StreamImpl *in,
-		int skip, char **pdp, int *copied );
-int _consumeData( StreamImpl *in, int length );
-int _undoConsumeData( struct _FsmRun *fsmRun, StreamImpl *is, const char *data, int length );
-
-struct ColmTree *_consumeTree( StreamImpl *in );
-void _undoConsumeTree( StreamImpl *in, struct ColmTree *tree, int ignore );
-
-struct LangEl *_consumeLangEl( StreamImpl *in, long *bindId, char **data, long *length );
-void _undoConsumeLangEl( StreamImpl *in );
-
-void _setEof( StreamImpl *is );
-void _unsetEof( StreamImpl *is );
-
-void _prependData( StreamImpl *in, const char *data, long len );
-void _prependTree( StreamImpl *is, struct ColmTree *tree, int ignore );
-void _prependStream( StreamImpl *in, struct ColmTree *tree );
-int _undoPrependData( StreamImpl *is, int length );
-struct ColmTree *_undoPrependTree( StreamImpl *is );
-struct ColmTree *_undoPrependStream( StreamImpl *in );
-
-void _appendData( StreamImpl *in, const char *data, long len );
-void _appendTree( StreamImpl *in, struct ColmTree *tree );
-void _appendStream( StreamImpl *in, struct ColmTree *tree );
-struct ColmTree *_undoAppendData( StreamImpl *in, int length );
-struct ColmTree *_undoAppendTree( StreamImpl *in );
-struct ColmTree *_undoAppendStream( StreamImpl *in );
-
 #ifdef __cplusplus
 }
 #endif

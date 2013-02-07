@@ -457,13 +457,13 @@ static int isSourceStream( StreamImpl *is )
 	return false;
 }
 
-void _setEof( StreamImpl *is )
+static void _setEof( StreamImpl *is )
 {
 	debug( REALM_INPUT, "setting EOF in input stream\n" );
 	is->eof = true;
 }
 
-void _unsetEof( StreamImpl *is )
+static void _unsetEof( StreamImpl *is )
 {
 	if ( isSourceStream( is ) ) {
 		Stream *stream = (Stream*)is->queue->tree;
@@ -474,7 +474,7 @@ void _unsetEof( StreamImpl *is )
 	}
 }
 
-int _getParseBlock( FsmRun *fsmRun, StreamImpl *is,
+static int _getParseBlock( FsmRun *fsmRun, StreamImpl *is,
 		int skip, char **pdp, int *copied )
 {
 	int ret = 0;
@@ -574,7 +574,7 @@ int _getParseBlock( FsmRun *fsmRun, StreamImpl *is,
 	return ret;
 }
 
-int _getData( FsmRun *fsmRun, StreamImpl *is, int skip, char *dest, int length )
+static int _getData( FsmRun *fsmRun, StreamImpl *is, int skip, char *dest, int length )
 {
 	int copied = 0;
 
@@ -638,7 +638,7 @@ int _getData( FsmRun *fsmRun, StreamImpl *is, int skip, char *dest, int length )
 	return copied;
 }
 
-int _consumeData( StreamImpl *is, int length )
+static int _consumeData( StreamImpl *is, int length )
 {
 	debug( REALM_INPUT, "consuming %d bytes\n", length );
 
@@ -687,7 +687,7 @@ int _consumeData( StreamImpl *is, int length )
 	return consumed;
 }
 
-int _undoConsumeData( FsmRun *fsmRun, StreamImpl *is, const char *data, int length )
+static int _undoConsumeData( FsmRun *fsmRun, StreamImpl *is, const char *data, int length )
 {
 	debug( REALM_INPUT, "undoing consume of %ld bytes\n", length );
 
@@ -711,7 +711,7 @@ int _undoConsumeData( FsmRun *fsmRun, StreamImpl *is, const char *data, int leng
 	}
 }
 
-Tree *_consumeTree( StreamImpl *is )
+static Tree *_consumeTree( StreamImpl *is )
 {
 	while ( is->queue != 0 && is->queue->type == RunBufDataType && is->queue->offset == is->queue->length ) {
 		RunBuf *runBuf = inputStreamPopHead( is );
@@ -730,7 +730,7 @@ Tree *_consumeTree( StreamImpl *is )
 	return 0;
 }
 
-void _undoConsumeTree( StreamImpl *is, Tree *tree, int ignore )
+static void _undoConsumeTree( StreamImpl *is, Tree *tree, int ignore )
 {
 	/* Create a new buffer for the data. This is the easy implementation.
 	 * Something better is needed here. It puts a max on the amount of
@@ -741,7 +741,7 @@ void _undoConsumeTree( StreamImpl *is, Tree *tree, int ignore )
 	inputStreamPrepend( is, newBuf );
 }
 
-struct LangEl *_consumeLangEl( StreamImpl *is, long *bindId, char **data, long *length )
+static struct LangEl *_consumeLangEl( StreamImpl *is, long *bindId, char **data, long *length )
 {
 	if ( isSourceStream( is ) ) {
 		Stream *stream = (Stream*)is->queue->tree;
@@ -752,7 +752,7 @@ struct LangEl *_consumeLangEl( StreamImpl *is, long *bindId, char **data, long *
 	}
 }
 
-void _undoConsumeLangEl( StreamImpl *is )
+static void _undoConsumeLangEl( StreamImpl *is )
 {
 	if ( isSourceStream( is ) ) {
 		Stream *stream = (Stream*)is->queue->tree;
@@ -763,7 +763,7 @@ void _undoConsumeLangEl( StreamImpl *is )
 	}
 }
 
-void _prependData( StreamImpl *is, const char *data, long length )
+static void _prependData( StreamImpl *is, const char *data, long length )
 {
 	if ( isSourceStream( is ) && ((Stream*)is->queue->tree)->in->funcs == &streamFuncs ) {
 		Stream *stream = (Stream*)is->queue->tree;
@@ -784,7 +784,7 @@ void _prependData( StreamImpl *is, const char *data, long length )
 	}
 }
 
-void _prependTree( StreamImpl *is, Tree *tree, int ignore )
+static void _prependTree( StreamImpl *is, Tree *tree, int ignore )
 {
 	/* Create a new buffer for the data. This is the easy implementation.
 	 * Something better is needed here. It puts a max on the amount of
@@ -795,7 +795,7 @@ void _prependTree( StreamImpl *is, Tree *tree, int ignore )
 	inputStreamPrepend( is, newBuf );
 }
 
-void _prependStream( StreamImpl *in, struct ColmTree *tree )
+static void _prependStream( StreamImpl *in, struct ColmTree *tree )
 {
 	/* Create a new buffer for the data. This is the easy implementation.
 	 * Something better is needed here. It puts a max on the amount of
@@ -806,7 +806,7 @@ void _prependStream( StreamImpl *in, struct ColmTree *tree )
 	inputStreamPrepend( in, newBuf );
 }
 
-int _undoPrependData( StreamImpl *is, int length )
+static int _undoPrependData( StreamImpl *is, int length )
 {
 	debug( REALM_INPUT, "consuming %d bytes\n", length );
 
@@ -852,7 +852,7 @@ int _undoPrependData( StreamImpl *is, int length )
 	return consumed;
 }
 
-Tree *_undoPrependTree( StreamImpl *is )
+static Tree *_undoPrependTree( StreamImpl *is )
 {
 	while ( is->queue != 0 && is->queue->type == RunBufDataType && is->queue->offset == is->queue->length ) {
 		RunBuf *runBuf = inputStreamPopHead( is );
@@ -871,7 +871,7 @@ Tree *_undoPrependTree( StreamImpl *is )
 	return 0;
 }
 
-void _appendData( StreamImpl *is, const char *data, long len )
+static void _appendData( StreamImpl *is, const char *data, long len )
 {
 	while ( len > 0 ) {
 		RunBuf *ad = newRunBuf();
@@ -889,7 +889,7 @@ void _appendData( StreamImpl *is, const char *data, long len )
 	}
 }
 
-Tree *_undoAppendData( StreamImpl *is, int length )
+static Tree *_undoAppendData( StreamImpl *is, int length )
 {
 	int consumed = 0;
 
@@ -926,7 +926,7 @@ Tree *_undoAppendData( StreamImpl *is, int length )
 	return 0;
 }
 
-void _appendTree( StreamImpl *is, Tree *tree )
+static void _appendTree( StreamImpl *is, Tree *tree )
 {
 	RunBuf *ad = newRunBuf();
 
@@ -937,7 +937,7 @@ void _appendTree( StreamImpl *is, Tree *tree )
 	ad->length = 0;
 }
 
-void _appendStream( StreamImpl *in, struct ColmTree *tree )
+static void _appendStream( StreamImpl *in, struct ColmTree *tree )
 {
 	RunBuf *ad = newRunBuf();
 
@@ -948,7 +948,7 @@ void _appendStream( StreamImpl *in, struct ColmTree *tree )
 	ad->length = 0;
 }
 
-Tree *_undoAppendStream( StreamImpl *is )
+static Tree *_undoAppendTree( StreamImpl *is )
 {
 	RunBuf *runBuf = inputStreamPopTail( is );
 	Tree *tree = runBuf->tree;
@@ -956,7 +956,7 @@ Tree *_undoAppendStream( StreamImpl *is )
 	return tree;
 }
 
-Tree *_undoAppendTree( StreamImpl *is )
+static Tree *_undoAppendStream( StreamImpl *is )
 {
 	RunBuf *runBuf = inputStreamPopTail( is );
 	Tree *tree = runBuf->tree;
