@@ -220,15 +220,11 @@ int fdGetData( FsmRun *fsmRun, StreamImpl *ss, int skip, char *dest, int length 
 			RunBuf *runBuf = newRunBuf();
 			sourceStreamAppend( ss, runBuf );
 			int received = ss->funcs->getDataSource( ss, runBuf->data, FSM_BUFSIZE );
-			if ( received == 0 ) {
-				break;
-			}
 			runBuf->length = received;
+			if ( received == 0 )
+				break;
 
-			int slen = received < length ? received : length;
-			memcpy( dest, runBuf->data, slen );
-			copied = slen;
-			break;
+			buf = runBuf;
 		}
 
 		int avail = buf->length - buf->offset;
@@ -238,23 +234,15 @@ int fdGetData( FsmRun *fsmRun, StreamImpl *ss, int skip, char *dest, int length 
 			/* The source data from the current buffer. */
 			char *src = &buf->data[buf->offset];
 
-			/* Need to skip? */
-			if ( skip > 0 && skip >= avail ) {
-				/* Skipping the the whole source. */
-				skip -= avail;
-			}
-			else {
-				/* Either skip is zero, or less than slen. Skip goes to zero.
-				 * Some data left over, copy it. */
-				src += skip;
-				avail -= skip;
-				skip = 0;
+			int slen = avail < length ? avail : length;
+			memcpy( dest+copied, src, slen ) ;
+			copied += slen;
+			length -= slen;
+		}
 
-				int slen = avail < length ? avail : length;
-				memcpy( dest, src, slen ) ;
-				copied += slen;
-				break;
-			}
+		if ( length == 0 ) {
+			debug( REALM_INPUT, "exiting get data\n", length );
+			break;
 		}
 
 		buf = buf->next;
@@ -588,48 +576,40 @@ static int _getData( FsmRun *fsmRun, StreamImpl *is, int skip, char *dest, int l
 
 		if ( buf->type == RunBufSourceType ) {
 			Stream *stream = (Stream*)buf->tree;
-			copied += stream->in->funcs->getData( fsmRun, stream->in, skip, dest, length );
+			int glen = stream->in->funcs->getData( fsmRun, stream->in, 0, dest+copied, length );
 
-			if ( copied == 0 ) {
+			if ( glen == 0 ) {
 				debug( REALM_INPUT, "skipping over input\n" );
 				buf = buf->next;
 				continue;
 			}
 
-			//ret = type;
-			break;
+			copied += glen;
+			length -= glen;
 		}
-
-		if ( buf->type == RunBufTokenType )
+		else if ( buf->type == RunBufTokenType )
 			break;
-
-		if ( buf->type == RunBufIgnoreType )
+		else if ( buf->type == RunBufIgnoreType )
 			break;
+		else {
+			int avail = buf->length - buf->offset;
 
-		int avail = buf->length - buf->offset;
-
-		/* Anything available in the current buffer. */
-		if ( avail > 0 ) {
-			/* The source data from the current buffer. */
-			char *src = &buf->data[buf->offset];
-
-			/* Need to skip? */
-			if ( skip > 0 && skip >= avail ) {
-				/* Skipping the the whole source. */
-				skip -= avail;
-			}
-			else {
-				/* Either skip is zero, or less than slen. Skip goes to zero.
-				 * Some data left over, copy it. */
-				src += skip;
-				avail -= skip;
-				skip = 0;
+			/* Anything available in the current buffer. */
+			if ( avail > 0 ) {
+				/* The source data from the current buffer. */
+				char *src = &buf->data[buf->offset];
 
 				int slen = avail <= length ? avail : length;
-				memcpy( dest, src, slen ) ;
+				memcpy( dest+copied, src, slen ) ;
+
 				copied += slen;
-				break;
+				length -= slen;
 			}
+		}
+
+		if ( length == 0 ) {
+			debug( REALM_INPUT, "exiting get data\n", length );
+			break;
 		}
 
 		buf = buf->next;

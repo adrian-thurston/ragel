@@ -117,10 +117,10 @@ int inputStreamPatternGetData( FsmRun *fsmRun, StreamImpl *ss, int skip, char *d
 
 	while ( true ) {
 		if ( buf == 0 )
-			return 0;
+			break;
 
 		if ( buf->type == PatternItem::FactorType )
-			return 0;
+			break;
 
 		assert ( buf->type == PatternItem::InputText );
 		int avail = buf->data.length() - offset;
@@ -130,23 +130,13 @@ int inputStreamPatternGetData( FsmRun *fsmRun, StreamImpl *ss, int skip, char *d
 			char *src = &buf->data[offset];
 			int slen = avail <= length ? avail : length;
 
-			/* Need to skip? */
-			if ( skip > 0 && slen <= skip ) {
-				/* Skipping the the whole source. */
-				skip -= slen;
-			}
-			else {
-				/* Either skip is zero, or less than slen. Skip goes to zero.
-				 * Some data left over, copy it. */
-				src += skip;
-				slen -= skip;
-				skip = 0;
-
-				memcpy( dest, src, slen ) ;
-				copied += slen;
-				break;
-			}
+			memcpy( dest+copied, src, slen ) ;
+			copied += slen;
+			length -= slen;
 		}
+
+		if ( length == 0 )
+			break;
 
 		buf = buf->next;
 		offset = 0;
@@ -341,10 +331,10 @@ int inputStreamConsGetData( FsmRun *fsmRun, StreamImpl *ss, int skip, char *dest
 
 	while ( true ) {
 		if ( buf == 0 )
-			return 0;
+			break;
 
 		if ( buf->type == ConsItem::ExprType || buf->type == ConsItem::FactorType )
-			return 0;
+			break;
 
 		assert ( buf->type == ConsItem::InputText );
 		int avail = buf->data.length() - offset;
@@ -354,23 +344,13 @@ int inputStreamConsGetData( FsmRun *fsmRun, StreamImpl *ss, int skip, char *dest
 			char *src = &buf->data[offset];
 			int slen = avail <= length ? avail : length;
 
-			/* Need to skip? */
-			if ( skip > 0 && slen <= skip ) {
-				/* Skipping the the whole source. */
-				skip -= slen;
-			}
-			else {
-				/* Either skip is zero, or less than slen. Skip goes to zero.
-				 * Some data left over, copy it. */
-				src += skip;
-				slen -= skip;
-				skip = 0;
-
-				memcpy( dest, src, slen ) ;
-				copied += slen;
-				break;
-			}
+			memcpy( dest+copied, src, slen ) ;
+			copied += slen;
+			length -= slen;
 		}
+
+		if ( length == 0 )
+			break;
 
 		buf = buf->next;
 		offset = 0;

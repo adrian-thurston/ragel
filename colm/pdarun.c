@@ -792,9 +792,7 @@ Head *extractMatch( Program *prg, FsmRun *fsmRun, StreamImpl *is )
 	runBuf->next = fsmRun->consumeBuf;
 	fsmRun->consumeBuf = runBuf;
 
-	int total = is->funcs->getData( fsmRun, is, 0, runBuf->data, length );
-	while ( total < length )
-		total += is->funcs->getData( fsmRun, is, total, runBuf->data+total, length-total );
+	is->funcs->getData( fsmRun, is, 0, runBuf->data, length );
 
 	is->funcs->consumeData( is, length );
 
