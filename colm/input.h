@@ -156,8 +156,6 @@ struct _StreamImpl
 	struct ConsItem *consItem;
 };
 
-typedef struct _StreamImpl StreamImpl;
-
 StreamImpl *newSourceStreamPat( struct Pattern *pattern );
 StreamImpl *newSourceStreamCons( struct Constructor *constructor );
 StreamImpl *newSourceStreamFile( FILE *file );
