@@ -65,7 +65,7 @@ void initFsmRun( FsmRun *fsmRun, Program *prg )
 
 	fsmRun->p = fsmRun->pe = 0;
 	fsmRun->toklen = 0;
-	fsmRun->peof = (char*)-1;
+	fsmRun->eof = 0;
 
 	fsmRun->preRegion = -1;
 }
@@ -140,7 +140,6 @@ Head *streamPull( Program *prg, FsmRun *fsmRun, StreamImpl *is, long length )
 
 	fsmRun->p = fsmRun->pe = 0;
 	fsmRun->toklen = 0;
-	//fsmRun->peof = (char*)-1;
 
 	Head *tokdata = stringAllocPointer( prg, runBuf->data, length );
 	updatePosition( is, runBuf->data, length );
@@ -269,7 +268,7 @@ void resetToken( FsmRun *fsmRun )
 	if ( fsmRun->tokstart != 0 ) {
 		fsmRun->p = fsmRun->pe = 0;
 		fsmRun->toklen = 0;
-		fsmRun->peof = (char*)-1;
+		fsmRun->eof = 0;
 	}
 }
 
@@ -767,7 +766,6 @@ Head *peekMatch( Program *prg, FsmRun *fsmRun, StreamImpl *is )
 
 	fsmRun->p = fsmRun->pe = 0;
 	fsmRun->toklen = 0;
-	//fsmRun->peof = (char*)-1;
 
 	Head *head = stringAllocPointer( prg, runBuf->data, length );
 
@@ -799,7 +797,6 @@ Head *extractMatch( Program *prg, FsmRun *fsmRun, StreamImpl *is )
 	fsmRun->p = fsmRun->pe = 0;
 	fsmRun->toklen = 0;
 	fsmRun->tokstart = 0;
-	//fsmRun->peof = (char*)-1;
 
 	Head *head = stringAllocPointer( prg, runBuf->data, length );
 
@@ -934,7 +931,7 @@ void newToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun )
 {
 	fsmRun->p = fsmRun->pe = 0;
 	fsmRun->toklen = 0;
-	fsmRun->peof = (char*)-1;
+	fsmRun->eof = 0;
 
 	/* Init the scanner vars. */
 	fsmRun->act = 0;
@@ -1047,7 +1044,7 @@ long scanToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, StreamImpl *is )
 				fsmRun->p = fsmRun->pe = 0;
 				//fsmRun->have = 0;
 				if ( fsmRun->tokstart != 0 )
-					fsmRun->peof = fsmRun->pe;
+					fsmRun->eof = 1;
 				debug( REALM_SCAN, "EOS *******************\n" );
 				//else {
 				//	return SCAN_EOS;
@@ -1058,7 +1055,7 @@ long scanToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, StreamImpl *is )
 				fsmRun->p = fsmRun->pe = 0;
 				//fsmRun->have = 0;
 				if ( fsmRun->tokstart != 0 )
-					fsmRun->peof = fsmRun->pe;
+					fsmRun->eof = 1;
 				else 
 					return SCAN_EOF;
 				break;
@@ -1069,20 +1066,20 @@ long scanToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, StreamImpl *is )
 
 			case INPUT_LANG_EL:
 				if ( fsmRun->tokstart != 0 )
-					fsmRun->peof = fsmRun->pe;
+					fsmRun->eof = 1;
 				else 
 					return SCAN_LANG_EL;
 				break;
 
 			case INPUT_TREE:
 				if ( fsmRun->tokstart != 0 )
-					fsmRun->peof = fsmRun->pe;
+					fsmRun->eof = 1;
 				else 
 					return SCAN_TREE;
 				break;
 			case INPUT_IGNORE:
 				if ( fsmRun->tokstart != 0 )
-					fsmRun->peof = fsmRun->pe;
+					fsmRun->eof = 1;
 				else
 					return SCAN_IGNORE;
 				break;
@@ -1228,7 +1225,7 @@ case PcrPreEof:
 
 			fsmRun->p = fsmRun->pe = 0;
 			fsmRun->toklen = 0;
-			fsmRun->peof = (char*)-1;
+			fsmRun->eof = 0;
 
 			pdaRun->fi = &prg->rtd->frameInfo[prg->rtd->lelInfo[pdaRun->tokenId].frameId];
 			pdaRun->frameId = prg->rtd->lelInfo[pdaRun->tokenId].frameId;

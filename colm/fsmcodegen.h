@@ -99,7 +99,7 @@ protected:
 
 	string P() { return ACCESS() + "p"; }
 	string PE() { return ACCESS() + "pe"; }
-	string PEOF() { return ACCESS() + "peof"; }
+	string DATA_EOF() { return ACCESS() + "eof"; }
 
 	string CS();
 	string TOP() { return ACCESS() + "top"; }

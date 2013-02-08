@@ -731,7 +731,7 @@ std::ostream &FsmCodeGen::EXIT_STATES()
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		out << "	case " << st->id << ": out" << st->id << ": ";
 		if ( st->eofTrans != 0 ) {
-			out << "if ( " << PE() << " == " << PEOF() << " ) {";
+			out << "if ( " << DATA_EOF() << " ) {";
 			TRANS_GOTO( st->eofTrans, 0 );
 			out << "\n";
 			out << "}";

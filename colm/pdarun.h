@@ -82,9 +82,13 @@ typedef struct _FsmRun
 	char *tokstart;
 	long tokend;
 	long toklen;
-	char *p, *pe, *peof;
-	int returnResult;
-	int skipToklen;
+	char *p, *pe;
+
+	/* Bits. */
+	char eof;
+	char returnResult;
+	char skipToklen;
+
 	char *mark[MARK_SLOTS];
 	long matchedToken;
 } FsmRun;

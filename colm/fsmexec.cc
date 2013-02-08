@@ -197,7 +197,7 @@ _again:
 	if ( ++fsmRun->p != fsmRun->pe )
 		goto _loop_head;
 out:
-	if ( fsmRun->p == fsmRun->peof ) {
+	if ( fsmRun->eof ) {
 		fsmRun->returnResult = false;
 		fsmRun->skipToklen = false;
 		_acts = fsmRun->tables->actions + fsmRun->tables->eofActions[fsmRun->cs];
