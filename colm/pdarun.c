@@ -192,7 +192,6 @@ Head *peekMatch( Program *prg, FsmRun *fsmRun, StreamImpl *is )
 	return head;
 }
 
-
 Head *streamPull( Program *prg, FsmRun *fsmRun, StreamImpl *is, long length )
 {
 	RunBuf *runBuf = fsmRun->consumeBuf;
@@ -1010,6 +1009,56 @@ long scanToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, StreamImpl *is )
 		return SCAN_UNDO;
 
 	while ( true ) {
+		char *pd = 0;
+		int len = 0;
+		int type = is->funcs->getParseBlock( fsmRun, is, fsmRun->toklen, &pd, &len );
+
+		switch ( type ) {
+			case INPUT_DATA:
+				fsmRun->p = pd;
+				fsmRun->pe = pd + len;
+				break;
+
+			case INPUT_EOS:
+				fsmRun->p = fsmRun->pe = 0;
+				if ( fsmRun->tokstart != 0 )
+					fsmRun->eof = 1;
+				debug( REALM_SCAN, "EOS *******************\n" );
+				break;
+
+			case INPUT_EOF:
+				fsmRun->p = fsmRun->pe = 0;
+				if ( fsmRun->tokstart != 0 )
+					fsmRun->eof = 1;
+				else 
+					return SCAN_EOF;
+				break;
+
+			case INPUT_EOD:
+				fsmRun->p = fsmRun->pe = 0;
+				return SCAN_TRY_AGAIN_LATER;
+
+			case INPUT_LANG_EL:
+				if ( fsmRun->tokstart != 0 )
+					fsmRun->eof = 1;
+				else 
+					return SCAN_LANG_EL;
+				break;
+
+			case INPUT_TREE:
+				if ( fsmRun->tokstart != 0 )
+					fsmRun->eof = 1;
+				else 
+					return SCAN_TREE;
+				break;
+			case INPUT_IGNORE:
+				if ( fsmRun->tokstart != 0 )
+					fsmRun->eof = 1;
+				else
+					return SCAN_IGNORE;
+				break;
+		}
+
 		fsmExecute( fsmRun, is );
 
 		/* First check if scanning stopped because we have a token. */
@@ -1043,61 +1092,6 @@ long scanToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, StreamImpl *is )
 		/* Got here because the state machine didn't match a token or encounter
 		 * an error. Must be because we got to the end of the buffer data. */
 		assert( fsmRun->p == fsmRun->pe );
-
-		char *pd = 0;
-		int len = 0;
-		int type = is->funcs->getParseBlock( fsmRun, is, fsmRun->toklen, &pd, &len );
-
-		switch ( type ) {
-			case INPUT_DATA:
-				fsmRun->p = pd;
-				fsmRun->pe = pd + len;
-				break;
-
-			case INPUT_EOS:
-				fsmRun->p = fsmRun->pe = 0;
-				//fsmRun->have = 0;
-				if ( fsmRun->tokstart != 0 )
-					fsmRun->eof = 1;
-				debug( REALM_SCAN, "EOS *******************\n" );
-				//else {
-				//	return SCAN_EOS;
-				//}
-				break;
-
-			case INPUT_EOF:
-				fsmRun->p = fsmRun->pe = 0;
-				//fsmRun->have = 0;
-				if ( fsmRun->tokstart != 0 )
-					fsmRun->eof = 1;
-				else 
-					return SCAN_EOF;
-				break;
-
-			case INPUT_EOD:
-				fsmRun->p = fsmRun->pe = 0;
-				return SCAN_TRY_AGAIN_LATER;
-
-			case INPUT_LANG_EL:
-				if ( fsmRun->tokstart != 0 )
-					fsmRun->eof = 1;
-				else 
-					return SCAN_LANG_EL;
-				break;
-
-			case INPUT_TREE:
-				if ( fsmRun->tokstart != 0 )
-					fsmRun->eof = 1;
-				else 
-					return SCAN_TREE;
-				break;
-			case INPUT_IGNORE:
-				if ( fsmRun->tokstart != 0 )
-					fsmRun->eof = 1;
-				else
-					return SCAN_IGNORE;
-				break;
-		}
 	}
 
 	/* Should not be reached. */
