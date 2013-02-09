@@ -1251,7 +1251,6 @@ PdaRun *Compiler::parsePattern( Program *prg, Tree **sp, const InputLoc &loc,
 	in->funcs->appendStream( in, (Tree*)res );
 	in->funcs->setEof( in );
 
-	newToken( prg, pdaRun, fsmRun );
 	long pcr = parseLoop( prg, sp, pdaRun, fsmRun, in, PcrStart );
 	assert( pcr == PcrDone );
 	if ( pdaRun->parseError ) {

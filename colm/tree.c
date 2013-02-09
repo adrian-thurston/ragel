@@ -992,7 +992,6 @@ Tree *createGeneric( Program *prg, long genericId )
 			/* Start off the parsing process. */
 			initPdaRun( prg, parser->pdaRun, parser->fsmRun, prg->rtd->pdaTables, 
 					genericInfo->parserId, false, false, 0 );
-			newToken( prg, parser->pdaRun, parser->fsmRun );
 
 			newGeneric = (Tree*) parser;
 			break;

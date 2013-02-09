@@ -939,7 +939,7 @@ static void sendEof( Program *prg, Tree **sp, StreamImpl *is, FsmRun *fsmRun, Pd
 	pdaRun->parseInput = parseTree;
 }
 
-void newToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun )
+static void newToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun )
 {
 	fsmRun->p = fsmRun->pe = 0;
 	fsmRun->toklen = 0;
@@ -1480,6 +1480,7 @@ void initPdaRun( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, PdaTables *tables
 	pdaRun->rcBlockCount = 0;
 
 	initFsmRun( prg, fsmRun );
+	newToken( prg, pdaRun, fsmRun );
 }
 
 long stackTopTarget( Program *prg, PdaRun *pdaRun )

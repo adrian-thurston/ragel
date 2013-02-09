@@ -453,7 +453,6 @@ long sendBackQueuedIgnore( struct ColmProgram *prg, Tree **sp, StreamImpl *input
 void clearIgnoreList( struct ColmProgram *prg, Tree **sp, Kid *kid );
 Head *extractMatch( struct ColmProgram *prg, FsmRun *fsmRun, StreamImpl *inputStream );
 Head *extractMatch( struct ColmProgram *prg, FsmRun *fsmRun, StreamImpl *inputStream );
-void newToken( struct ColmProgram *prg, PdaRun *pdaRun, FsmRun *fsmRun );
 void fsmExecute( FsmRun *fsmRun, StreamImpl *inputStream );
 void sendNamedLangEl( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, StreamImpl *inputStream );
 long parseLoop( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, 
