@@ -126,23 +126,94 @@ void decrementSteps( PdaRun *pdaRun )
 	debug( REALM_PARSE, "steps down to %ld\n", pdaRun->steps );
 }
 
-Head *streamPull( Program *prg, FsmRun *fsmRun, StreamImpl *is, long length )
+Head *extractMatch( Program *prg, FsmRun *fsmRun, StreamImpl *is )
 {
-//	/* We should not be in the midst of getting a token. */
-//	assert( fsmRun->tokstart == 0 );
+	long length = fsmRun->toklen;
 
-	RunBuf *runBuf = newRunBuf();
-	runBuf->next = fsmRun->consumeBuf;
-	fsmRun->consumeBuf = runBuf;
+	debug( REALM_PARSE, "extracting token of length: %ld\n", length );
 
-	is->funcs->getData( fsmRun, is, runBuf->data, length );
+	RunBuf *runBuf = fsmRun->consumeBuf;
+	if ( runBuf == 0 || length > ( FSM_BUFSIZE - runBuf->length ) ) {
+		runBuf = newRunBuf();
+		runBuf->next = fsmRun->consumeBuf;
+		fsmRun->consumeBuf = runBuf;
+	}
+
+	char *dest = runBuf->data + runBuf->length;
+
+	is->funcs->getData( fsmRun, is, dest, length );
 	is->funcs->consumeData( is, length );
+
+	runBuf->length += length;
+
+	fsmRun->p = fsmRun->pe = 0;
+	fsmRun->toklen = 0;
+	fsmRun->tokstart = 0;
+
+	Head *head = stringAllocPointer( prg, dest, length );
+
+	head->location = locationAllocate( prg );
+	head->location->line = is->line;
+	head->location->column = is->column;
+	head->location->byte = is->byte;
+
+	debug( REALM_PARSE, "location byte: %d\n", is->byte );
+
+	return head;
+}
+
+Head *peekMatch( Program *prg, FsmRun *fsmRun, StreamImpl *is )
+{
+	long length = fsmRun->toklen;
+
+	RunBuf *runBuf = fsmRun->consumeBuf;
+	if ( runBuf == 0 || length > ( FSM_BUFSIZE - runBuf->length ) ) {
+		runBuf = newRunBuf();
+		runBuf->next = fsmRun->consumeBuf;
+		fsmRun->consumeBuf = runBuf;
+	}
+
+	char *dest = runBuf->data + runBuf->length;
+
+	is->funcs->getData( fsmRun, is, dest, length );
 
 	fsmRun->p = fsmRun->pe = 0;
 	fsmRun->toklen = 0;
 
-	Head *tokdata = stringAllocPointer( prg, runBuf->data, length );
-	updatePosition( is, runBuf->data, length );
+	Head *head = stringAllocPointer( prg, dest, length );
+
+	head->location = locationAllocate( prg );
+	head->location->line = is->line;
+	head->location->column = is->column;
+	head->location->byte = is->byte;
+
+	debug( REALM_PARSE, "location byte: %d\n", is->byte );
+
+	return head;
+}
+
+
+Head *streamPull( Program *prg, FsmRun *fsmRun, StreamImpl *is, long length )
+{
+	RunBuf *runBuf = fsmRun->consumeBuf;
+	if ( length > ( FSM_BUFSIZE - runBuf->length ) ) {
+		runBuf = newRunBuf();
+		runBuf->next = fsmRun->consumeBuf;
+		fsmRun->consumeBuf = runBuf;
+	}
+
+	char *dest = runBuf->data + runBuf->length;
+
+	is->funcs->getData( fsmRun, is, dest, length );
+	is->funcs->consumeData( is, length );
+
+	runBuf->length += length;
+
+	fsmRun->p = fsmRun->pe = 0;
+	fsmRun->toklen = 0;
+
+	Head *tokdata = stringAllocPointer( prg, dest, length );
+	updatePosition( is, dest, length );
 
 	return tokdata;
 }
@@ -752,63 +823,6 @@ void sendIgnore( Program *prg, Tree **sp, StreamImpl *is, FsmRun *fsmRun, PdaRun
 	ignoreTree( prg, fsmRun, pdaRun, tree );
 }
 
-
-/* Doesn't consume. */
-Head *peekMatch( Program *prg, FsmRun *fsmRun, StreamImpl *is )
-{
-	long length = fsmRun->toklen;
-
-	RunBuf *runBuf = newRunBuf();
-	runBuf->next = fsmRun->consumeBuf;
-	fsmRun->consumeBuf = runBuf;
-
-	is->funcs->getData( fsmRun, is, runBuf->data, length );
-
-	fsmRun->p = fsmRun->pe = 0;
-	fsmRun->toklen = 0;
-
-	Head *head = stringAllocPointer( prg, runBuf->data, length );
-
-	head->location = locationAllocate( prg );
-	head->location->line = is->line;
-	head->location->column = is->column;
-	head->location->byte = is->byte;
-
-	debug( REALM_PARSE, "location byte: %d\n", is->byte );
-
-	return head;
-}
-
-/* Consumes. */
-Head *extractMatch( Program *prg, FsmRun *fsmRun, StreamImpl *is )
-{
-	long length = fsmRun->toklen;
-
-	debug( REALM_PARSE, "extracting token of length: %ld\n", length );
-
-	RunBuf *runBuf = newRunBuf();
-	runBuf->next = fsmRun->consumeBuf;
-	fsmRun->consumeBuf = runBuf;
-
-	is->funcs->getData( fsmRun, is, runBuf->data, length );
-
-	is->funcs->consumeData( is, length );
-
-	fsmRun->p = fsmRun->pe = 0;
-	fsmRun->toklen = 0;
-	fsmRun->tokstart = 0;
-
-	Head *head = stringAllocPointer( prg, runBuf->data, length );
-
-	head->location = locationAllocate( prg );
-	head->location->line = is->line;
-	head->location->column = is->column;
-	head->location->byte = is->byte;
-
-	debug( REALM_PARSE, "location byte: %d\n", is->byte );
-
-	return head;
-}
 
 static void sendToken( Program *prg, Tree **sp, StreamImpl *is, FsmRun *fsmRun, PdaRun *pdaRun, long id )
 {
