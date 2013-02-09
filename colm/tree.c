@@ -2052,7 +2052,10 @@ void appendFile( struct ColmPrintArgs *args, const char *data, int length )
 
 void appendFd( struct ColmPrintArgs *args, const char *data, int length )
 {
-	write( (long)args->arg, data, length );
+	int res = write( (long)args->arg, data, length );
+	if ( res != 0 ) {
+		message( "write error\n" );
+	}
 }
 
 Tree *treeTrim( struct ColmProgram *prg, Tree **sp, Tree *tree )
