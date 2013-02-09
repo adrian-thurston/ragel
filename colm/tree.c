@@ -990,9 +990,8 @@ Tree *createGeneric( Program *prg, long genericId )
 			parser->pdaRun = malloc( sizeof(PdaRun) );
 
 			/* Start off the parsing process. */
-			initPdaRun( parser->pdaRun, prg, prg->rtd->pdaTables, 
-					parser->fsmRun, genericInfo->parserId, false, false, 0 );
-			initFsmRun( parser->fsmRun, prg );
+			initPdaRun( prg, parser->pdaRun, parser->fsmRun, prg->rtd->pdaTables, 
+					genericInfo->parserId, false, false, 0 );
 			newToken( prg, parser->pdaRun, parser->fsmRun );
 
 			newGeneric = (Tree*) parser;

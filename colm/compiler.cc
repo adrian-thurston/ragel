@@ -1243,8 +1243,7 @@ PdaRun *Compiler::parsePattern( Program *prg, Tree **sp, const InputLoc &loc,
 	PdaRun *pdaRun = new PdaRun;
 
 	initStreamImpl( in );
-	initPdaRun( pdaRun, prg, pdaTables, fsmRun, parserId, 0, false, 0 );
-	initFsmRun( fsmRun, prg );
+	initPdaRun( prg, pdaRun, fsmRun, pdaTables, parserId, 0, false, 0 );
 
 	Stream *res = streamAllocate( prg );
 	res->id = LEL_ID_STREAM;

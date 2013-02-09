@@ -92,13 +92,11 @@ typedef struct _FsmRun
 	long matchedToken;
 } FsmRun;
 
-void initFsmRun( FsmRun *fsmRun, struct ColmProgram *prg );
 void clearFsmRun( struct ColmProgram *prg, FsmRun *fsmRun );
 void updatePosition( StreamImpl *inputStream, const char *data, long length );
 void undoPosition( StreamImpl *inputStream, const char *data, long length );
 void sendBackRunBufHead( FsmRun *fsmRun, StreamImpl *inputStream );
 void undoStreamPull( StreamImpl *inputStream, const char *data, long length );
-
 
 #if SIZEOF_LONG != 4 && SIZEOF_LONG != 8 
 	#error "SIZEOF_LONG contained an unexpected value"
@@ -400,8 +398,8 @@ void decrementSteps( PdaRun *pdaRun );
 int makeReverseCode( PdaRun *pdaRun );
 void transferReverseCode( PdaRun *pdaRun, ParseTree *tree );
 
-void initPdaRun( PdaRun *pdaRun, struct ColmProgram *prg, PdaTables *tables,
-		FsmRun *fsmRun, int parserId, long stopTarget, int revertOn, Tree *context );
+void initPdaRun( struct ColmProgram *prg, PdaRun *pdaRun, FsmRun *fsmRun, PdaTables *tables,
+		int parserId, long stopTarget, int revertOn, Tree *context );
 void clearPdaRun( struct ColmProgram *prg, Tree **root, PdaRun *pdaRun );
 
 void initStreamImpl( StreamImpl *inputStream );

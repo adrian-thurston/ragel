@@ -56,7 +56,7 @@
 	i = (Tree*)w; \
 } while(0)
 
-void initFsmRun( FsmRun *fsmRun, Program *prg )
+static void initFsmRun( Program *prg, FsmRun *fsmRun )
 {
 	fsmRun->tables = prg->rtd->fsmTables;
 
@@ -1429,8 +1429,8 @@ int isParserStopFinished( PdaRun *pdaRun )
 	return done;
 }
 
-void initPdaRun( PdaRun *pdaRun, Program *prg, PdaTables *tables,
-		FsmRun *fsmRun, int parserId, long stopTarget, int revertOn, Tree *context )
+void initPdaRun( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, PdaTables *tables,
+		int parserId, long stopTarget, int revertOn, Tree *context )
 {
 	memset( pdaRun, 0, sizeof(PdaRun) );
 	pdaRun->tables = tables;
@@ -1478,6 +1478,8 @@ void initPdaRun( PdaRun *pdaRun, Program *prg, PdaTables *tables,
 	pdaRun->reject = false;
 
 	pdaRun->rcBlockCount = 0;
+
+	initFsmRun( prg, fsmRun );
 }
 
 long stackTopTarget( Program *prg, PdaRun *pdaRun )
