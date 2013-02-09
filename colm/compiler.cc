@@ -1251,7 +1251,7 @@ PdaRun *Compiler::parsePattern( Program *prg, Tree **sp, const InputLoc &loc,
 	in->funcs->appendStream( in, (Tree*)res );
 	in->funcs->setEof( in );
 
-	long pcr = parseLoop( prg, sp, pdaRun, pdaRun->fsmRun, in, PcrStart );
+	long pcr = parseLoop( prg, sp, pdaRun, in, PcrStart );
 	assert( pcr == PcrDone );
 	if ( pdaRun->parseError ) {
 		cout << "PARSE ERROR " << loc.line << ":" << loc.col;

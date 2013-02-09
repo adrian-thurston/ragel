@@ -458,7 +458,7 @@ Head *extractMatch( struct ColmProgram *prg, FsmRun *fsmRun, StreamImpl *inputSt
 void fsmExecute( FsmRun *fsmRun, StreamImpl *inputStream );
 void sendNamedLangEl( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, StreamImpl *inputStream );
 long parseLoop( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, 
-		FsmRun *fsmRun, StreamImpl *inputStream, long entry );
+		StreamImpl *inputStream, long entry );
 void initBindings( PdaRun *pdaRun );
 Tree *getParsedRoot( PdaRun *pdaRun, int stop );
 void undoParseStream( struct ColmProgram *prg, Tree **sp, StreamImpl *inputStream, FsmRun *fsmRun, 

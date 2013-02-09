@@ -192,7 +192,7 @@ case PcrStart:
 	if ( ! parser->pdaRun->parseError ) {
 		parser->pdaRun->stopTarget = stopId;
 
-		long pcr = parseLoop( prg, sp, parser->pdaRun, parser->pdaRun->fsmRun, parser->input->in, entry );
+		long pcr = parseLoop( prg, sp, parser->pdaRun, parser->input->in, entry );
 
 		while ( pcr != PcrDone ) {
 
@@ -202,7 +202,7 @@ case PcrGeneration:
 case PcrPreEof:
 case PcrReverse:
 
-			pcr = parseLoop( prg, sp, parser->pdaRun, parser->pdaRun->fsmRun, parser->input->in, entry );
+			pcr = parseLoop( prg, sp, parser->pdaRun, parser->input->in, entry );
 		}
 	}
 
@@ -222,7 +222,7 @@ case PcrStart:
 		parser->input->in->funcs->setEof( parser->input->in );
 
 		if ( ! parser->pdaRun->parseError ) {
-			long pcr = parseLoop( prg, sp, parser->pdaRun, parser->pdaRun->fsmRun, parser->input->in, entry );
+			long pcr = parseLoop( prg, sp, parser->pdaRun, parser->input->in, entry );
 
 		 	while ( pcr != PcrDone ) {
 
@@ -232,7 +232,7 @@ case PcrGeneration:
 case PcrPreEof:
 case PcrReverse:
 
-				pcr = parseLoop( prg, sp, parser->pdaRun, parser->pdaRun->fsmRun, parser->input->in, entry );
+				pcr = parseLoop( prg, sp, parser->pdaRun, parser->input->in, entry );
 			}
 		}
 	}
@@ -277,7 +277,7 @@ case PcrStart:
 		pdaRun->triggerUndo = 1;
 
 		/* The parse loop will recognise the situation. */
-		long pcr = parseLoop( prg, sp, pdaRun, fsmRun, is, entry );
+		long pcr = parseLoop( prg, sp, pdaRun, is, entry );
 		while ( pcr != PcrDone ) {
 
 return pcr;
@@ -286,7 +286,7 @@ case PcrGeneration:
 case PcrPreEof:
 case PcrReverse:
 
-			pcr = parseLoop( prg, sp, pdaRun, fsmRun, is, entry );
+			pcr = parseLoop( prg, sp, pdaRun, is, entry );
 		}
 
 		/* Reset environment. */

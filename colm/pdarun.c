@@ -1108,8 +1108,9 @@ long scanToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, StreamImpl *is )
  */
 
 long parseLoop( Program *prg, Tree **sp, PdaRun *pdaRun, 
-		FsmRun *fsmRun, StreamImpl *is, long entry )
+		StreamImpl *is, long entry )
 {
+	FsmRun *fsmRun = pdaRun->fsmRun;
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
 
 switch ( entry ) {
