@@ -23,7 +23,6 @@
 #include "fsmcodegen.h"
 #include "redfsm.h"
 #include "bstmap.h"
-#include "fsmrun.h"
 #include <sstream>
 #include <string>
 #include <assert.h>
@@ -886,7 +885,6 @@ void FsmCodeGen::writeIncludes()
 {
 	out << 
 		"#include <colm/pdarun.h>\n"
-		"#include <colm/fsmrun.h>\n"
 		"#include <colm/debug.h>\n"
 		"#include <colm/bytecode.h>\n"
 		"#include <stdio.h>\n"

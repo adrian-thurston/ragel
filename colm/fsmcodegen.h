@@ -28,7 +28,6 @@
 #include "keyops.h"
 #include "parsedata.h"
 #include "redfsm.h"
-#include "fsmrun.h"
 
 using std::string;
 using std::ostream;

@@ -22,7 +22,6 @@
 #include "parsedata.h"
 #include "parsetree.h"
 #include "input.h"
-#include "fsmrun.h"
 #include "debug.h"
 #include "pool.h"
 

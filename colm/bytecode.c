@@ -20,7 +20,6 @@
  */
 
 #include <colm/pdarun.h>
-#include <colm/fsmrun.h>
 #include <colm/tree.h>
 #include <colm/bytecode.h>
 #include <colm/pool.h>

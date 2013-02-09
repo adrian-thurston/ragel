@@ -23,7 +23,6 @@
 #define __COLM_PDARUN_H
 
 #include <colm/input.h>
-#include <colm/fsmrun.h>
 #include <colm/defs.h>
 #include <colm/tree.h>
 

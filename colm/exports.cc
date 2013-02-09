@@ -23,7 +23,6 @@
 #include "fsmcodegen.h"
 #include "redfsm.h"
 #include "bstmap.h"
-#include "fsmrun.h"
 #include "debug.h"
 #include <sstream>
 #include <string>

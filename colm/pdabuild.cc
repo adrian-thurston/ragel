@@ -32,7 +32,6 @@
 #include "redfsm.h"
 #include "fsmcodegen.h"
 #include "redbuild.h"
-#include "fsmrun.h"
 
 /* Dumping the fsm. */
 #include "mergesort.h"

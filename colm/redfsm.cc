@@ -26,7 +26,6 @@
 #include "mergesort.h"
 #include "fsmgraph.h"
 #include "parsetree.h"
-#include "fsmrun.h"
 
 using std::ostringstream;
 

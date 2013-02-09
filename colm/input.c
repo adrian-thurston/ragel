@@ -20,7 +20,6 @@
  */
 
 #include <colm/input.h>
-#include <colm/fsmrun.h>
 #include <colm/pdarun.h>
 #include <colm/debug.h>
 
