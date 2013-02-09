@@ -1479,6 +1479,8 @@ void initPdaRun( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, PdaTables *tables
 
 	pdaRun->rcBlockCount = 0;
 
+	pdaRun->fsmRun = fsmRun;
+
 	initFsmRun( prg, fsmRun );
 	newToken( prg, pdaRun, fsmRun );
 }

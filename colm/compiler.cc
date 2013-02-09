@@ -1239,11 +1239,11 @@ PdaRun *Compiler::parsePattern( Program *prg, Tree **sp, const InputLoc &loc,
 		int parserId, StreamImpl *sourceStream )
 {
 	StreamImpl *in = new StreamImpl;
-	FsmRun *fsmRun = new FsmRun;
 	PdaRun *pdaRun = new PdaRun;
+	pdaRun->fsmRun = new FsmRun;
 
 	initStreamImpl( in );
-	initPdaRun( prg, pdaRun, fsmRun, pdaTables, parserId, 0, false, 0 );
+	initPdaRun( prg, pdaRun, pdaRun->fsmRun, pdaTables, parserId, 0, false, 0 );
 
 	Stream *res = streamAllocate( prg );
 	res->id = LEL_ID_STREAM;
@@ -1251,7 +1251,7 @@ PdaRun *Compiler::parsePattern( Program *prg, Tree **sp, const InputLoc &loc,
 	in->funcs->appendStream( in, (Tree*)res );
 	in->funcs->setEof( in );
 
-	long pcr = parseLoop( prg, sp, pdaRun, fsmRun, in, PcrStart );
+	long pcr = parseLoop( prg, sp, pdaRun, pdaRun->fsmRun, in, PcrStart );
 	assert( pcr == PcrDone );
 	if ( pdaRun->parseError ) {
 		cout << "PARSE ERROR " << loc.line << ":" << loc.col;

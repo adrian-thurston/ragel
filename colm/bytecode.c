@@ -192,7 +192,7 @@ case PcrStart:
 	if ( ! parser->pdaRun->parseError ) {
 		parser->pdaRun->stopTarget = stopId;
 
-		long pcr = parseLoop( prg, sp, parser->pdaRun, parser->fsmRun, parser->input->in, entry );
+		long pcr = parseLoop( prg, sp, parser->pdaRun, parser->pdaRun->fsmRun, parser->input->in, entry );
 
 		while ( pcr != PcrDone ) {
 
@@ -202,7 +202,7 @@ case PcrGeneration:
 case PcrPreEof:
 case PcrReverse:
 
-			pcr = parseLoop( prg, sp, parser->pdaRun, parser->fsmRun, parser->input->in, entry );
+			pcr = parseLoop( prg, sp, parser->pdaRun, parser->pdaRun->fsmRun, parser->input->in, entry );
 		}
 	}
 
@@ -222,7 +222,7 @@ case PcrStart:
 		parser->input->in->funcs->setEof( parser->input->in );
 
 		if ( ! parser->pdaRun->parseError ) {
-			long pcr = parseLoop( prg, sp, parser->pdaRun, parser->fsmRun, parser->input->in, entry );
+			long pcr = parseLoop( prg, sp, parser->pdaRun, parser->pdaRun->fsmRun, parser->input->in, entry );
 
 		 	while ( pcr != PcrDone ) {
 
@@ -232,7 +232,7 @@ case PcrGeneration:
 case PcrPreEof:
 case PcrReverse:
 
-				pcr = parseLoop( prg, sp, parser->pdaRun, parser->fsmRun, parser->input->in, entry );
+				pcr = parseLoop( prg, sp, parser->pdaRun, parser->pdaRun->fsmRun, parser->input->in, entry );
 			}
 		}
 	}
@@ -259,7 +259,7 @@ break; }
 long undoParseFrag( Program *prg, Tree **sp, Parser *parser, long steps, long entry )
 {
 	StreamImpl *is = parser->input->in;
-	FsmRun *fsmRun = parser->fsmRun;
+	FsmRun *fsmRun = parser->pdaRun->fsmRun;
 	PdaRun *pdaRun = parser->pdaRun;
 
 	debug( REALM_PARSE, "undo parse frag, target steps: %ld, pdarun steps: %ld\n", steps, pdaRun->steps );
@@ -1153,7 +1153,7 @@ again:
 			/* If there are captures (this is a translate block) then copy them into
 			 * the local frame now. */
 			LangElInfo *lelInfo = prg->rtd->lelInfo;
-			char **mark = exec->parser->fsmRun->mark;
+			char **mark = exec->parser->pdaRun->fsmRun->mark;
 
 			int i;
 			for ( i = 0; i < lelInfo[exec->parser->pdaRun->tokenId].numCaptureAttr; i++ ) {
@@ -2457,7 +2457,7 @@ again:
 
 			Stream *accumStream = (Stream*)vm_pop();
 			Tree *len = vm_pop();
-			Tree *string = streamPullBc( prg, exec->parser->fsmRun, accumStream->in, len );
+			Tree *string = streamPullBc( prg, exec->parser->pdaRun->fsmRun, accumStream->in, len );
 			treeUpref( string );
 			vm_push( string );
 

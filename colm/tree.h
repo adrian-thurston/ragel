@@ -203,7 +203,6 @@ typedef struct _Parser
 	GenericInfo *genericInfo;
 
 	struct _PdaRun *pdaRun;
-	struct _FsmRun *fsmRun;
 	struct _Stream *input;
 	Tree *result;
 } Parser;

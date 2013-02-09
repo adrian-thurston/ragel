@@ -986,11 +986,11 @@ Tree *createGeneric( Program *prg, long genericId )
 			Parser *parser = (Parser*)mapElAllocate( prg );
 			parser->id = genericInfo->langElId;
 			parser->genericInfo = genericInfo;
-			parser->fsmRun = malloc( sizeof(FsmRun) );
 			parser->pdaRun = malloc( sizeof(PdaRun) );
+			parser->pdaRun->fsmRun = malloc( sizeof(FsmRun) );
 
 			/* Start off the parsing process. */
-			initPdaRun( prg, parser->pdaRun, parser->fsmRun, prg->rtd->pdaTables, 
+			initPdaRun( prg, parser->pdaRun, parser->pdaRun->fsmRun, prg->rtd->pdaTables, 
 					genericInfo->parserId, false, false, 0 );
 
 			newGeneric = (Tree*) parser;
@@ -1043,10 +1043,10 @@ free_tree:
 		}
 		else if ( generic->type == GEN_PARSER ) {
 			Parser *parser = (Parser*)tree;
-			clearFsmRun( prg, parser->fsmRun );
+			clearFsmRun( prg, parser->pdaRun->fsmRun );
 			clearPdaRun( prg, sp, parser->pdaRun );
+			free( parser->pdaRun->fsmRun );
 			free( parser->pdaRun );
-			free( parser->fsmRun );
 			treeDownref( prg, sp, (Tree*)parser->input );
 			mapElFree( prg, (MapEl*)parser );
 		}
