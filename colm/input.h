@@ -88,11 +88,9 @@ typedef struct _StreamImpl StreamImpl;
 
 struct StreamFuncs
 {
-	int (*getParseBlock)( struct _FsmRun *fsmRun, StreamImpl *ss,
-			int skip, char **pdp, int *copied );
+	int (*getParseBlock)( StreamImpl *ss, int skip, char **pdp, int *copied );
 
-	int (*getData)( struct _FsmRun *fsmRun, StreamImpl *ss,
-			char *dest, int length );
+	int (*getData)( StreamImpl *ss, char *dest, int length );
 
 	int (*consumeData)( StreamImpl *ss, int length );
 	int (*undoConsumeData)( struct _FsmRun *fsmRun, StreamImpl *ss, const char *data, int length );

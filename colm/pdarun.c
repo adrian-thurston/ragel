@@ -140,7 +140,7 @@ Head *extractMatch( Program *prg, FsmRun *fsmRun, StreamImpl *is )
 
 	char *dest = runBuf->data + runBuf->length;
 
-	is->funcs->getData( fsmRun, is, dest, length );
+	is->funcs->getData( is, dest, length );
 	is->funcs->consumeData( is, length );
 
 	runBuf->length += length;
@@ -174,7 +174,7 @@ Head *peekMatch( Program *prg, FsmRun *fsmRun, StreamImpl *is )
 
 	char *dest = runBuf->data + runBuf->length;
 
-	is->funcs->getData( fsmRun, is, dest, length );
+	is->funcs->getData( is, dest, length );
 
 	fsmRun->p = fsmRun->pe = 0;
 	fsmRun->toklen = 0;
@@ -202,7 +202,7 @@ Head *streamPull( Program *prg, FsmRun *fsmRun, StreamImpl *is, long length )
 
 	char *dest = runBuf->data + runBuf->length;
 
-	is->funcs->getData( fsmRun, is, dest, length );
+	is->funcs->getData( is, dest, length );
 	is->funcs->consumeData( is, length );
 
 	runBuf->length += length;
@@ -1012,7 +1012,7 @@ long scanToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, StreamImpl *is )
 	while ( true ) {
 		char *pd = 0;
 		int len = 0;
-		int type = is->funcs->getParseBlock( fsmRun, is, fsmRun->toklen, &pd, &len );
+		int type = is->funcs->getParseBlock( is, fsmRun->toklen, &pd, &len );
 
 		switch ( type ) {
 			case INPUT_DATA:
