@@ -3247,7 +3247,9 @@ void Compiler::addStdin()
 	el->beenInitialized = true;
 	el->isConst = true;
 	el->useOffset = false;
-	el->inGetR    = IN_GET_STDIN;
+	el->inGetR     = IN_GET_STDIN;
+	el->inGetWC    = IN_GET_STDIN;
+	el->inGetWV    = IN_GET_STDIN;
 	globalObjectDef->insertField( el->name, el );
 }
 
@@ -3263,6 +3265,8 @@ void Compiler::addStdout()
 	el->isConst = true;
 	el->useOffset = false;
 	el->inGetR    = IN_GET_STDOUT;
+	el->inGetWC    = IN_GET_STDOUT;
+	el->inGetWV    = IN_GET_STDOUT;
 	globalObjectDef->insertField( el->name, el );
 }
 
@@ -3278,6 +3282,8 @@ void Compiler::addStderr()
 	el->isConst = true;
 	el->useOffset = false;
 	el->inGetR    = IN_GET_STDERR;
+	el->inGetWC    = IN_GET_STDERR;
+	el->inGetWV    = IN_GET_STDERR;
 	globalObjectDef->insertField( el->name, el );
 }
 
