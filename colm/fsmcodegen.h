@@ -75,6 +75,7 @@ public:
 			RedFsm *redFsm, FsmTables *fsmTables );
 
 protected:
+
 	string FSM_NAME();
 	string START_STATE_ID();
 	ostream &ACTIONS_ARRAY();
@@ -165,6 +166,7 @@ public:
 	bool dataPrefix;
 	bool writeFirstFinal;
 	bool writeErr;
+	bool skipTokenLabelNeeded;
 
 	std::ostream &TO_STATE_ACTION_SWITCH();
 	std::ostream &FROM_STATE_ACTION_SWITCH();

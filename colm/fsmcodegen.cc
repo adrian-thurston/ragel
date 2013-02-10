@@ -47,7 +47,8 @@ FsmCodeGen::FsmCodeGen( const char *sourceFileName, const char *fsmName, ostream
 	codeGenErrCount(0),
 	dataPrefix(true),
 	writeFirstFinal(true),
-	writeErr(true)
+	writeErr(true),
+	skipTokenLabelNeeded(false)
 {
 }
 
@@ -194,6 +195,8 @@ void FsmCodeGen::LM_SWITCH( ostream &ret, InlineItem *item,
 		"	}\n"
 		"\t"
 		"	goto skip_toklen;\n";
+
+	skipTokenLabelNeeded = true;
 }
 
 void FsmCodeGen::LM_ON_LAST( ostream &ret, InlineItem *item )
@@ -220,6 +223,8 @@ void FsmCodeGen::LM_ON_LAG_BEHIND( ostream &ret, InlineItem *item )
 	ret << "	" << TOKLEN() << " = " << TOKEND() << ";\n";
 	EMIT_TOKEN( ret, item->longestMatchPart->tdLangEl );
 	ret << "	goto skip_toklen;\n";
+
+	skipTokenLabelNeeded = true;
 }
 
 
@@ -874,9 +879,15 @@ void FsmCodeGen::writeExec()
 	out <<
 		"out:\n"
 		"	if ( " << P() << " != 0 )\n"
-		"		" << TOKLEN() << " += " << P() << " - " << BLOCK_START() << ";\n"
-		"skip_toklen:\n"
-		"	{}\n"
+		"		" << TOKLEN() << " += " << P() << " - " << BLOCK_START() << ";\n";
+
+	if ( skipTokenLabelNeeded ) {
+		out << 
+			"skip_toklen:\n"
+			"	{}\n";
+	}
+	
+	out << 
 		"}\n"
 		"\n";
 }
