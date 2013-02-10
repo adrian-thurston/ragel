@@ -191,29 +191,42 @@ Head *peekMatch( Program *prg, FsmRun *fsmRun, StreamImpl *is )
 	return head;
 }
 
-Head *streamPull( Program *prg, FsmRun *fsmRun, StreamImpl *is, long length )
+Head *streamPull( Program *prg, PdaRun *pdaRun, StreamImpl *is, long length )
 {
-	RunBuf *runBuf = fsmRun->consumeBuf;
-	if ( length > ( FSM_BUFSIZE - runBuf->length ) ) {
-		runBuf = newRunBuf();
-		runBuf->next = fsmRun->consumeBuf;
-		fsmRun->consumeBuf = runBuf;
+	if ( pdaRun != 0 ) {
+		FsmRun *fsmRun = pdaRun->fsmRun;
+		RunBuf *runBuf = fsmRun->consumeBuf;
+		if ( length > ( FSM_BUFSIZE - runBuf->length ) ) {
+			runBuf = newRunBuf();
+			runBuf->next = fsmRun->consumeBuf;
+			fsmRun->consumeBuf = runBuf;
+		}
+
+		char *dest = runBuf->data + runBuf->length;
+
+		is->funcs->getData( is, dest, length );
+		is->funcs->consumeData( is, length );
+
+		runBuf->length += length;
+
+		fsmRun->p = fsmRun->pe = 0;
+		fsmRun->toklen = 0;
+
+		Head *tokdata = stringAllocPointer( prg, dest, length );
+		updatePosition( is, dest, length );
+
+		return tokdata;
 	}
+	else {
+		Head *head = initStrSpace( length );
+		char *dest = (char*)head->data;
 
-	char *dest = runBuf->data + runBuf->length;
+		is->funcs->getData( is, dest, length );
+		is->funcs->consumeData( is, length );
 
-	is->funcs->getData( is, dest, length );
-	is->funcs->consumeData( is, length );
-
-	runBuf->length += length;
-
-	fsmRun->p = fsmRun->pe = 0;
-	fsmRun->toklen = 0;
-
-	Head *tokdata = stringAllocPointer( prg, dest, length );
-	updatePosition( is, dest, length );
-
-	return tokdata;
+		updatePosition( is, dest, length );
+		return head;
+	}
 }
 
 void undoStreamPull( StreamImpl *is, const char *data, long length )

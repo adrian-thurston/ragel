@@ -89,8 +89,6 @@ Head *initStrSpace( long length )
 {
 	/* Find the length and allocate the space for the shared string. */
 	Head *head = (Head*) malloc( sizeof(Head) + length );
-	//if ( head == 0 )
-	//	throw std::bad_alloc();
 
 	/* Init the header. */
 	head->data = (char*)(head+1);
