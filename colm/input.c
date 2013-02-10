@@ -289,7 +289,7 @@ int fdConsumeData( StreamImpl *ss, int length )
 	return consumed;
 }
 
-int fdUndoConsumeData( FsmRun *fsmRun, StreamImpl *ss, const char *data, int length )
+int fdUndoConsumeData( StreamImpl *ss, const char *data, int length )
 {
 	debug( REALM_INPUT, "undoing consume of %ld bytes\n", length );
 
@@ -664,15 +664,13 @@ static int _consumeData( StreamImpl *is, int length )
 	return consumed;
 }
 
-static int _undoConsumeData( FsmRun *fsmRun, StreamImpl *is, const char *data, int length )
+static int _undoConsumeData( StreamImpl *is, const char *data, int length )
 {
 	debug( REALM_INPUT, "undoing consume of %ld bytes\n", length );
 
 	if ( isSourceStream( is ) ) {
 		Stream *stream = (Stream*)is->queue->tree;
-		int len = stream->in->funcs->undoConsumeData( fsmRun, stream->in, data, length );
-
-		clearBuffered( fsmRun );
+		int len = stream->in->funcs->undoConsumeData( stream->in, data, length );
 
 		return len;
 	}
@@ -681,8 +679,6 @@ static int _undoConsumeData( FsmRun *fsmRun, StreamImpl *is, const char *data, i
 		newBuf->length = length;
 		memcpy( newBuf->data, data, length );
 		inputStreamPrepend( is, newBuf );
-
-		clearBuffered( fsmRun );
 
 		return length;
 	}

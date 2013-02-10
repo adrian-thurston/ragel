@@ -274,7 +274,7 @@ static void sendBackText( FsmRun *fsmRun, StreamImpl *is, const char *data, long
 	debug( REALM_PARSE, "sending back text: %.*s\n", 
 			(int)length, data );
 
-	is->funcs->undoConsumeData( fsmRun, is, data, length );
+	is->funcs->undoConsumeData( is, data, length );
 	undoPosition( is, data, length );
 }
 

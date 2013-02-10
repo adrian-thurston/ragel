@@ -212,7 +212,7 @@ int inputStreamPatternConsumeData( StreamImpl *ss, int length )
 	return consumed;
 }
 
-int inputStreamPatternUndoConsumeData( FsmRun *fsmRun, StreamImpl *ss, const char *data, int length )
+int inputStreamPatternUndoConsumeData( StreamImpl *ss, const char *data, int length )
 {
 	ss->offset -= length;
 	return length;
@@ -428,7 +428,7 @@ int inputStreamConsConsumeData( StreamImpl *ss, int length )
 	return consumed;
 }
 
-int inputStreamConsUndoConsumeData( FsmRun *fsmRun, StreamImpl *ss, const char *data, int length )
+int inputStreamConsUndoConsumeData( StreamImpl *ss, const char *data, int length )
 {
 	ss->offset -= length;
 	return length;

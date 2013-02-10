@@ -93,7 +93,7 @@ struct StreamFuncs
 	int (*getData)( StreamImpl *ss, char *dest, int length );
 
 	int (*consumeData)( StreamImpl *ss, int length );
-	int (*undoConsumeData)( struct _FsmRun *fsmRun, StreamImpl *ss, const char *data, int length );
+	int (*undoConsumeData)( StreamImpl *ss, const char *data, int length );
 
 	struct ColmTree *(*consumeTree)( StreamImpl *ss );
 	void (*undoConsumeTree)( StreamImpl *ss, struct ColmTree *tree, int ignore );
