@@ -465,7 +465,7 @@ void undoParseStream( struct ColmProgram *prg, Tree **sp, StreamImpl *inputStrea
 		PdaRun *pdaRun, long steps );
 
 void clearBuffered( FsmRun *fsmRun );
-void resetToken( FsmRun *fsmRun );
+void resetToken( PdaRun *pdaRun );
 
 #ifdef __cplusplus
 }

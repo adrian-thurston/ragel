@@ -259,12 +259,11 @@ break; }
 long undoParseFrag( Program *prg, Tree **sp, Parser *parser, long steps, long entry )
 {
 	StreamImpl *is = parser->input->in;
-	FsmRun *fsmRun = parser->pdaRun->fsmRun;
 	PdaRun *pdaRun = parser->pdaRun;
 
 	debug( REALM_PARSE, "undo parse frag, target steps: %ld, pdarun steps: %ld\n", steps, pdaRun->steps );
 
-	resetToken( fsmRun );
+	resetToken( pdaRun );
 
 switch ( entry ) {
 case PcrStart:

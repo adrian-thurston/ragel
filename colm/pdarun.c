@@ -330,8 +330,10 @@ void clearBuffered( FsmRun *fsmRun )
 	}
 }
 
-void resetToken( FsmRun *fsmRun )
+void resetToken( PdaRun *pdaRun )
 {
+	FsmRun *fsmRun = pdaRun->fsmRun;
+
 	/* If there is a token started, but never finished for a lack of data, we
 	 * must first backup over it. */
 	if ( fsmRun->tokstart != 0 ) {
