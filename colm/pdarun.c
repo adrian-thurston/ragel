@@ -223,22 +223,22 @@ void undoStreamPull( StreamImpl *is, const char *data, long length )
 	is->funcs->prependData( is, data, length );
 }
 
-void streamPushText( FsmRun *fsmRun, StreamImpl *is, const char *data, long length )
+void streamPushText( StreamImpl *is, const char *data, long length )
 {
 	is->funcs->prependData( is, data, length );
 }
 
-void streamPushTree( FsmRun *fsmRun, StreamImpl *is, Tree *tree, int ignore )
+void streamPushTree( StreamImpl *is, Tree *tree, int ignore )
 {
 	is->funcs->prependTree( is, tree, ignore );
 }
 
-void streamPushStream( FsmRun *fsmRun, StreamImpl *is, Tree *tree )
+void streamPushStream( StreamImpl *is, Tree *tree )
 {
 	is->funcs->prependStream( is, tree );
 }
 
-void undoStreamPush( Program *prg, Tree **sp, FsmRun *fsmRun, StreamImpl *is, long length )
+void undoStreamPush( Program *prg, Tree **sp, StreamImpl *is, long length )
 {
 	if ( length < 0 ) {
 		Tree *tree = is->funcs->undoPrependTree( is );
@@ -249,7 +249,7 @@ void undoStreamPush( Program *prg, Tree **sp, FsmRun *fsmRun, StreamImpl *is, lo
 	}
 }
 
-void undoStreamAppend( Program *prg, Tree **sp, FsmRun *fsmRun, StreamImpl *is, Tree *input, long length )
+void undoStreamAppend( Program *prg, Tree **sp, StreamImpl *is, Tree *input, long length )
 {
 	if ( input->id == LEL_ID_STR )
 		is->funcs->undoAppendData( is, length );
