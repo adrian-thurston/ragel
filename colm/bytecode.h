@@ -223,6 +223,7 @@ typedef unsigned char uchar;
 #define IN_CONSTRUCT_TERM        0x9d
 
 #define IN_INPUT_PULL_WV         0x9e
+#define IN_INPUT_PULL_WC         0xe1
 #define IN_INPUT_PULL_BKT        0x9f
 
 #define IN_PARSE_SAVE_STEPS      0xa0
@@ -458,6 +459,7 @@ typedef struct _Execution
 long stringLength( Head *str );
 const char *stringData( Head *str );
 Head *stringAllocFull( struct ColmProgram *prg, const char *data, long length );
+Head *initStrSpace( long length );
 Head *stringCopy( struct ColmProgram *prg, Head *head );
 void stringFree( struct ColmProgram *prg, Head *head );
 void stringShorten( Head *tokdata, long newlen );
@@ -495,7 +497,6 @@ void allocGlobal( struct ColmProgram *prg );
 Tree **executeCode( struct ColmProgram *prg, Execution *exec, Tree **sp, Code *instr );
 void rcodeDownref( struct ColmProgram *prg, Tree **sp, Code *instr );
 Code *popReverseCode( RtCodeVect *allRev );
-void sendBackBuffered( FsmRun *fsmRun, StreamImpl *inputStream );
 
 #ifdef __cplusplus
 }

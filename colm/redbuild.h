@@ -26,7 +26,6 @@
 #include "avltree.h"
 #include "fsmgraph.h"
 #include "parsedata.h"
-#include "fsmrun.h"
 
 /* Forwards. */
 struct FsmTrans;

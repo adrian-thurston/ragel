@@ -34,7 +34,6 @@
 #include "redbuild.h"
 #include "pdacodegen.h"
 #include "fsmcodegen.h"
-#include "fsmrun.h"
 #include "pdarun.h"
 #include "colm.h"
 #include "pool.h"
@@ -1240,12 +1239,11 @@ PdaRun *Compiler::parsePattern( Program *prg, Tree **sp, const InputLoc &loc,
 		int parserId, StreamImpl *sourceStream )
 {
 	StreamImpl *in = new StreamImpl;
-	FsmRun *fsmRun = new FsmRun;
 	PdaRun *pdaRun = new PdaRun;
+	pdaRun->fsmRun = new FsmRun;
 
 	initStreamImpl( in );
-	initPdaRun( pdaRun, prg, pdaTables, fsmRun, parserId, 0, false, 0 );
-	initFsmRun( fsmRun, prg );
+	initPdaRun( prg, pdaRun, pdaRun->fsmRun, pdaTables, parserId, 0, false, 0 );
 
 	Stream *res = streamAllocate( prg );
 	res->id = LEL_ID_STREAM;
@@ -1253,8 +1251,7 @@ PdaRun *Compiler::parsePattern( Program *prg, Tree **sp, const InputLoc &loc,
 	in->funcs->appendStream( in, (Tree*)res );
 	in->funcs->setEof( in );
 
-	newToken( prg, pdaRun, fsmRun );
-	long pcr = parseLoop( prg, sp, pdaRun, fsmRun, in, PcrStart );
+	long pcr = parseLoop( prg, sp, pdaRun, in, PcrStart );
 	assert( pcr == PcrDone );
 	if ( pdaRun->parseError ) {
 		cout << "PARSE ERROR " << loc.line << ":" << loc.col;

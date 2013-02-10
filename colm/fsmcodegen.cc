@@ -23,7 +23,6 @@
 #include "fsmcodegen.h"
 #include "redfsm.h"
 #include "bstmap.h"
-#include "fsmrun.h"
 #include <sstream>
 #include <string>
 #include <assert.h>
@@ -48,7 +47,8 @@ FsmCodeGen::FsmCodeGen( const char *sourceFileName, const char *fsmName, ostream
 	codeGenErrCount(0),
 	dataPrefix(true),
 	writeFirstFinal(true),
-	writeErr(true)
+	writeErr(true),
+	skipTokenLabelNeeded(false)
 {
 }
 
@@ -146,7 +146,7 @@ void FsmCodeGen::SET_ACT( ostream &ret, InlineItem *item )
 void FsmCodeGen::SET_TOKEND( ostream &ret, InlineItem *item )
 {
 	/* The tokend action sets tokend. */
-	ret << TOKEND() << " = " << P() << "+1;";
+	ret << "{ " << TOKEND() << " = " << TOKLEN() << " + ( " << P() << " - " << BLOCK_START() << " ) + 1; }";
 }
 void FsmCodeGen::INIT_TOKSTART( ostream &ret, InlineItem *item )
 {
@@ -172,14 +172,14 @@ void FsmCodeGen::LM_SWITCH( ostream &ret, InlineItem *item,
 		int targState, int inFinish )
 {
 	ret << 
-		"	" << P() << " = " << TOKEND() << ";\n"
+		"	" << TOKLEN() << " = " << TOKEND() << ";\n"
 		"	switch( " << ACT() << " ) {\n";
 
 	/* If the switch handles error then we also forced the error state. It
 	 * will exist. */
 	if ( item->tokenRegion->lmSwitchHandlesError ) {
-		ret << "	case 0: " << P() << " = " << TOKSTART() << 
-				"; goto st" << redFsm->errState->id << ";\n";
+		ret << "	case 0: " //<< P() << " = " << TOKSTART() << ";" <<
+				"goto st" << redFsm->errState->id << ";\n";
 	}
 
 	for ( TokenDefListReg::Iter lmi = item->tokenRegion->tokenDefList; lmi.lte(); lmi++ ) {
@@ -194,7 +194,9 @@ void FsmCodeGen::LM_SWITCH( ostream &ret, InlineItem *item,
 	ret << 
 		"	}\n"
 		"\t"
-		" return;\n";
+		"	goto skip_toklen;\n";
+
+	skipTokenLabelNeeded = true;
 }
 
 void FsmCodeGen::LM_ON_LAST( ostream &ret, InlineItem *item )
@@ -203,7 +205,7 @@ void FsmCodeGen::LM_ON_LAST( ostream &ret, InlineItem *item )
 
 	ret << "	" << P() << " += 1;\n";
 	EMIT_TOKEN( ret, item->longestMatchPart->tdLangEl );
-	ret << "	return;\n";
+	ret << "	goto out;\n";
 }
 
 void FsmCodeGen::LM_ON_NEXT( ostream &ret, InlineItem *item )
@@ -211,16 +213,18 @@ void FsmCodeGen::LM_ON_NEXT( ostream &ret, InlineItem *item )
 	assert( item->longestMatchPart->tdLangEl != 0 );
 
 	EMIT_TOKEN( ret, item->longestMatchPart->tdLangEl );
-	ret << "	return;\n";
+	ret << "	goto out;\n";
 }
 
 void FsmCodeGen::LM_ON_LAG_BEHIND( ostream &ret, InlineItem *item )
 {
 	assert( item->longestMatchPart->tdLangEl != 0 );
 
-	ret << "	" << P() << " = " << TOKEND() << ";\n";
+	ret << "	" << TOKLEN() << " = " << TOKEND() << ";\n";
 	EMIT_TOKEN( ret, item->longestMatchPart->tdLangEl );
-	ret << "	return;\n";
+	ret << "	goto skip_toklen;\n";
+
+	skipTokenLabelNeeded = true;
 }
 
 
@@ -731,7 +735,7 @@ std::ostream &FsmCodeGen::EXIT_STATES()
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		out << "	case " << st->id << ": out" << st->id << ": ";
 		if ( st->eofTrans != 0 ) {
-			out << "if ( " << PE() << " == " << PEOF() << " ) {";
+			out << "if ( " << DATA_EOF() << " ) {";
 			TRANS_GOTO( st->eofTrans, 0 );
 			out << "\n";
 			out << "}";
@@ -848,6 +852,7 @@ void FsmCodeGen::writeExec()
 	out <<
 		"void fsmExecute( FsmRun *fsmRun, StreamImpl *inputStream )\n"
 		"{\n"
+		"	" << BLOCK_START() << " = fsmRun->p;\n"
 		"/*_resume:*/\n";
 
 	if ( redFsm->errState != 0 ) {
@@ -872,7 +877,17 @@ void FsmCodeGen::writeExec()
 		"	}\n";
 
 	out <<
-		"	out: {}\n"
+		"out:\n"
+		"	if ( " << P() << " != 0 )\n"
+		"		" << TOKLEN() << " += " << P() << " - " << BLOCK_START() << ";\n";
+
+	if ( skipTokenLabelNeeded ) {
+		out << 
+			"skip_toklen:\n"
+			"	{}\n";
+	}
+	
+	out << 
 		"}\n"
 		"\n";
 }
@@ -881,7 +896,6 @@ void FsmCodeGen::writeIncludes()
 {
 	out << 
 		"#include <colm/pdarun.h>\n"
-		"#include <colm/fsmrun.h>\n"
 		"#include <colm/debug.h>\n"
 		"#include <colm/bytecode.h>\n"
 		"#include <stdio.h>\n"

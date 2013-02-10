@@ -1,0 +1,98 @@
+namespace string
+	lex
+		literal '"'
+		token data /[^"\\]+/
+		token escape /'\\' any/
+	end
+
+	def string_data
+		[data]
+	|	[escape]
+
+	def string 
+		['"' string_data* '"']
+	
+	str unquote( S: string )
+	{
+		match S ['"' DL: string_data* '"']
+		for E: escape in DL
+			E.data = 'x'
+		return $DL
+	}
+
+end string
+		
+namespace hash
+
+	lex
+		literal 'define', 'include'
+		literal '#', '\n' ni
+
+		token id /[a-zA-Z_][a-zA-Z_0-9]*/
+		token number /[0-9]+/
+
+		ignore /[ \t]/
+	end
+
+	def hash
+		['#' 'define' Id: id number '\n']
+	|	['#' 'include' Inc: string::string '\n']
+
+end hash
+
+token rest_of_line /[^\n]* '\n'/
+
+namespace lang
+
+	lex
+		ignore /space/
+		literal '*', '(', ')', ';'
+		token id /[a-zA-Z_][a-zA-Z_0-9]*/
+		token number /[0-9]+/
+
+		token hash /'#'/ {
+			parse_stop H: hash::hash[ input ]
+			if ( H.tree ) {
+				if ( H.tree.Inc ) {
+					FN: str = unquote( H.tree.Inc )
+					print( 'opening ' FN '\n' )
+					IS: stream = open( FN 'r' )
+					if ( ! IS ) {
+						print( 'ERROR: failed to open ' FN '\n' )
+						exit(1)
+					}
+					input.push( IS )
+				}
+			}
+			else {
+				parse_stop L: rest_of_line[ input ]
+				if ! L.tree {
+					print( "ERROR: stuck: " L.error )
+					exit(1)
+				}
+				print( "ERROR: failed to parse # directive: " L.tree )
+			}
+		}
+	end
+
+	def item 
+		[id]
+	|	['(' item* ')']
+
+	def statement
+		[item* ';']
+
+	def start 
+		[statement*]
+
+end lang
+
+parse Input: lang::start[ stdin ]
+
+if ! Input.tree 
+	print( Input.error '\n' )
+else {
+	#print( Input.tree '\n' )
+	S: lang::start = Input.tree
+	print( Input.tree '\n' )
+}

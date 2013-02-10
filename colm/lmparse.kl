@@ -26,7 +26,6 @@
 #include "lmparse.h"
 #include "global.h"
 #include "input.h"
-#include "fsmrun.h"
 
 using std::cout;
 using std::cerr;

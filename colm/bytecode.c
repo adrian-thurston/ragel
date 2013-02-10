@@ -20,7 +20,6 @@
  */
 
 #include <colm/pdarun.h>
-#include <colm/fsmrun.h>
 #include <colm/tree.h>
 #include <colm/bytecode.h>
 #include <colm/pool.h>
@@ -193,7 +192,7 @@ case PcrStart:
 	if ( ! parser->pdaRun->parseError ) {
 		parser->pdaRun->stopTarget = stopId;
 
-		long pcr = parseLoop( prg, sp, parser->pdaRun, parser->fsmRun, parser->input->in, entry );
+		long pcr = parseLoop( prg, sp, parser->pdaRun, parser->input->in, entry );
 
 		while ( pcr != PcrDone ) {
 
@@ -203,7 +202,7 @@ case PcrGeneration:
 case PcrPreEof:
 case PcrReverse:
 
-			pcr = parseLoop( prg, sp, parser->pdaRun, parser->fsmRun, parser->input->in, entry );
+			pcr = parseLoop( prg, sp, parser->pdaRun, parser->input->in, entry );
 		}
 	}
 
@@ -223,7 +222,7 @@ case PcrStart:
 		parser->input->in->funcs->setEof( parser->input->in );
 
 		if ( ! parser->pdaRun->parseError ) {
-			long pcr = parseLoop( prg, sp, parser->pdaRun, parser->fsmRun, parser->input->in, entry );
+			long pcr = parseLoop( prg, sp, parser->pdaRun, parser->input->in, entry );
 
 		 	while ( pcr != PcrDone ) {
 
@@ -233,7 +232,7 @@ case PcrGeneration:
 case PcrPreEof:
 case PcrReverse:
 
-				pcr = parseLoop( prg, sp, parser->pdaRun, parser->fsmRun, parser->input->in, entry );
+				pcr = parseLoop( prg, sp, parser->pdaRun, parser->input->in, entry );
 			}
 		}
 	}
@@ -260,12 +259,11 @@ break; }
 long undoParseFrag( Program *prg, Tree **sp, Parser *parser, long steps, long entry )
 {
 	StreamImpl *is = parser->input->in;
-	FsmRun *fsmRun = parser->fsmRun;
 	PdaRun *pdaRun = parser->pdaRun;
 
 	debug( REALM_PARSE, "undo parse frag, target steps: %ld, pdarun steps: %ld\n", steps, pdaRun->steps );
 
-	resetToken( fsmRun );
+	resetToken( pdaRun );
 
 switch ( entry ) {
 case PcrStart:
@@ -278,7 +276,7 @@ case PcrStart:
 		pdaRun->triggerUndo = 1;
 
 		/* The parse loop will recognise the situation. */
-		long pcr = parseLoop( prg, sp, pdaRun, fsmRun, is, entry );
+		long pcr = parseLoop( prg, sp, pdaRun, is, entry );
 		while ( pcr != PcrDone ) {
 
 return pcr;
@@ -287,7 +285,7 @@ case PcrGeneration:
 case PcrPreEof:
 case PcrReverse:
 
-			pcr = parseLoop( prg, sp, pdaRun, fsmRun, is, entry );
+			pcr = parseLoop( prg, sp, pdaRun, is, entry );
 		}
 
 		/* Reset environment. */
@@ -302,10 +300,10 @@ break; }
 	return PcrDone;
 }
 
-Tree *streamPullBc( Program *prg, FsmRun *fsmRun, StreamImpl *in, Tree *length )
+Tree *streamPullBc( Program *prg, PdaRun *pdaRun, StreamImpl *in, Tree *length )
 {
 	long len = ((Int*)length)->value;
-	Head *tokdata = streamPull( prg, fsmRun, in, len );
+	Head *tokdata = streamPull( prg, pdaRun, in, len );
 	return constructString( prg, tokdata );
 }
 
@@ -316,7 +314,7 @@ void undoPull( Program *prg, StreamImpl *in, Tree *str )
 	undoStreamPull( in, data, length );
 }
 
-long streamPush( Program *prg, Tree **sp, FsmRun *fsmRun, StreamImpl *in, Tree *tree, int ignore )
+static long streamPush( Program *prg, Tree **sp, StreamImpl *in, Tree *tree, int ignore )
 {
 	if ( tree->id == LEL_ID_STR ) {
 		/* This should become a compile error. If it's text, it's up to the
@@ -328,7 +326,7 @@ long streamPush( Program *prg, Tree **sp, FsmRun *fsmRun, StreamImpl *in, Tree *
 		initStrCollect( &collect );
 		printTreeCollect( prg, sp, &collect, tree, true );
 
-		streamPushText( fsmRun, in, collect.data, collect.length );
+		streamPushText( in, collect.data, collect.length );
 		long length = collect.length;
 		strCollectDestroy( &collect );
 
@@ -336,12 +334,12 @@ long streamPush( Program *prg, Tree **sp, FsmRun *fsmRun, StreamImpl *in, Tree *
 	}
 	else if ( tree->id == LEL_ID_STREAM ) {
 		treeUpref( tree );
-		streamPushStream( fsmRun, in, tree );
+		streamPushStream( in, tree );
 		return -1;
 	}
 	else {
 		treeUpref( tree );
-		streamPushTree( fsmRun, in, tree, ignore );
+		streamPushTree( in, tree, ignore );
 		return -1;
 	}
 }
@@ -1154,7 +1152,7 @@ again:
 			/* If there are captures (this is a translate block) then copy them into
 			 * the local frame now. */
 			LangElInfo *lelInfo = prg->rtd->lelInfo;
-			char **mark = exec->parser->fsmRun->mark;
+			char **mark = exec->parser->pdaRun->fsmRun->mark;
 
 			int i;
 			for ( i = 0; i < lelInfo[exec->parser->pdaRun->tokenId].numCaptureAttr; i++ ) {
@@ -2157,7 +2155,7 @@ again:
 
 			debug( REALM_BYTECODE, "IN_INPUT_APPEND_BKT\n" );
 
-			undoStreamAppend( prg, sp, 0, ((Stream*)accumStream)->in, input, len );
+			undoStreamAppend( prg, sp, ((Stream*)accumStream)->in, input, len );
 			treeDownref( prg, sp, accumStream );
 			treeDownref( prg, sp, input );
 			break;
@@ -2458,7 +2456,8 @@ again:
 
 			Stream *accumStream = (Stream*)vm_pop();
 			Tree *len = vm_pop();
-			Tree *string = streamPullBc( prg, exec->parser->fsmRun, accumStream->in, len );
+			PdaRun *pdaRun = exec->parser != 0 ? exec->parser->pdaRun : 0;
+			Tree *string = streamPullBc( prg, pdaRun, accumStream->in, len );
 			treeUpref( string );
 			vm_push( string );
 
@@ -2467,6 +2466,21 @@ again:
 			rcodeCode( exec, IN_INPUT_PULL_BKT );
 			rcodeWord( exec, (Word) string );
 			rcodeUnitTerm( exec );
+
+			treeDownref( prg, sp, (Tree*)accumStream );
+			treeDownref( prg, sp, len );
+			break;
+		}
+
+		case IN_INPUT_PULL_WC: {
+			debug( REALM_BYTECODE, "IN_INPUT_PULL_WC\n" );
+
+			Stream *accumStream = (Stream*)vm_pop();
+			Tree *len = vm_pop();
+			PdaRun *pdaRun = exec->parser != 0 ? exec->parser->pdaRun : 0;
+			Tree *string = streamPullBc( prg, pdaRun, accumStream->in, len );
+			treeUpref( string );
+			vm_push( string );
 
 			treeDownref( prg, sp, (Tree*)accumStream );
 			treeDownref( prg, sp, len );
@@ -2490,7 +2504,7 @@ again:
 
 			Stream *input = (Stream*)vm_pop();
 			Tree *tree = vm_pop();
-			long len = streamPush( prg, sp, 0, input->in, tree, false );
+			long len = streamPush( prg, sp, input->in, tree, false );
 			vm_push( 0 );
 
 			/* Single unit. */
@@ -2507,7 +2521,7 @@ again:
 
 			Stream *input = (Stream*)vm_pop();
 			Tree *tree = vm_pop();
-			long len = streamPush( prg, sp, 0, input->in, tree, true );
+			long len = streamPush( prg, sp, input->in, tree, true );
 			vm_push( 0 );
 
 			/* Single unit. */
@@ -2527,7 +2541,7 @@ again:
 
 			debug( REALM_BYTECODE, "IN_INPUT_PUSH_BKT\n" );
 
-			undoStreamPush( prg, sp, 0, input->in, len );
+			undoStreamPush( prg, sp, input->in, len );
 			treeDownref( prg, sp, (Tree*)input );
 			break;
 		}

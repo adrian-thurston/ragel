@@ -28,7 +28,7 @@ RUNTIME_SRC = \
 
 RUNTIME_HDR = \
 	bytecode.h config.h defs.h debug.h pool.h input.h \
-	fsmrun.h pdarun.h map.h tree.h program.h colm.h
+	pdarun.h map.h tree.h program.h colm.h
 
 lib_LIBRARIES = libcolmp.a libcolmd.a
 
@@ -49,7 +49,7 @@ colm_LDADD = libcolmp.a
 
 colm_SOURCES = \
 	buffer.h bytecode.h colm.h debug.h dotgen.h fsmcodegen.h fsmgraph.h \
-	fsmrun.h input.h keyops.h lmparse.h lmscan.h map.h parsedata.h \
+	input.h keyops.h lmparse.h lmscan.h map.h parsedata.h \
 	parsetree.h pcheck.h pdacodegen.h pdagraph.h pdarun.h pool.h redbuild.h \
 	redfsm.h rtvector.h tree.h version.h global.h colm.h \
 	\

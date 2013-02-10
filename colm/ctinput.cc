@@ -22,7 +22,6 @@
 #include "parsedata.h"
 #include "parsetree.h"
 #include "input.h"
-#include "fsmrun.h"
 #include "debug.h"
 #include "pool.h"
 
@@ -60,14 +59,12 @@ LangEl *inputStreamPatternGetLangEl( StreamImpl *ss, long *bindId, char **data, 
 	return klangEl;
 }
 
-int inputStreamPatternGetData( FsmRun *fsmRun, StreamImpl *ss, int skip, char *dest, int length, int *copied )
+int inputStreamPatternGetParseBlock( StreamImpl *ss, int skip, char **pdp, int *copied )
 { 
 	*copied = 0;
 
 	PatternItem *buf = ss->patItem;
 	int offset = ss->offset;
-
-	attachStream( fsmRun, ss );
 
 	while ( true ) {
 		if ( buf == 0 )
@@ -82,7 +79,7 @@ int inputStreamPatternGetData( FsmRun *fsmRun, StreamImpl *ss, int skip, char *d
 		if ( avail > 0 ) {
 			/* The source data from the current buffer. */
 			char *src = &buf->data[offset];
-			int slen = avail <= length ? avail : length;
+			int slen = avail;
 
 			/* Need to skip? */
 			if ( skip > 0 && slen <= skip ) {
@@ -96,7 +93,7 @@ int inputStreamPatternGetData( FsmRun *fsmRun, StreamImpl *ss, int skip, char *d
 				slen -= skip;
 				skip = 0;
 
-				memcpy( dest, src, slen ) ;
+				*pdp = src;
 				*copied += slen;
 				break;
 			}
@@ -107,6 +104,43 @@ int inputStreamPatternGetData( FsmRun *fsmRun, StreamImpl *ss, int skip, char *d
 	}
 
 	return INPUT_DATA;
+}
+
+int inputStreamPatternGetData( StreamImpl *ss, char *dest, int length )
+{ 
+	int copied = 0;
+
+	PatternItem *buf = ss->patItem;
+	int offset = ss->offset;
+
+	while ( true ) {
+		if ( buf == 0 )
+			break;
+
+		if ( buf->type == PatternItem::FactorType )
+			break;
+
+		assert ( buf->type == PatternItem::InputText );
+		int avail = buf->data.length() - offset;
+
+		if ( avail > 0 ) {
+			/* The source data from the current buffer. */
+			char *src = &buf->data[offset];
+			int slen = avail <= length ? avail : length;
+
+			memcpy( dest+copied, src, slen ) ;
+			copied += slen;
+			length -= slen;
+		}
+
+		if ( length == 0 )
+			break;
+
+		buf = buf->next;
+		offset = 0;
+	}
+
+	return copied;
 }
 
 void inputStreamPatternBackup( StreamImpl *ss )
@@ -178,7 +212,7 @@ int inputStreamPatternConsumeData( StreamImpl *ss, int length )
 	return consumed;
 }
 
-int inputStreamPatternUndoConsumeData( FsmRun *fsmRun, StreamImpl *ss, const char *data, int length )
+int inputStreamPatternUndoConsumeData( StreamImpl *ss, const char *data, int length )
 {
 	ss->offset -= length;
 	return length;
@@ -189,6 +223,7 @@ extern "C" void initPatFuncs()
 	memset( &patternFuncs, 0, sizeof(StreamFuncs) );
 
 	patternFuncs.getData = &inputStreamPatternGetData;
+	patternFuncs.getParseBlock = &inputStreamPatternGetParseBlock;
 	patternFuncs.consumeData = &inputStreamPatternConsumeData;
 	patternFuncs.undoConsumeData = &inputStreamPatternUndoConsumeData;
 
@@ -237,14 +272,13 @@ LangEl *inputStreamConsGetLangEl( StreamImpl *ss, long *bindId, char **data, lon
 	return klangEl;
 }
 
-int inputStreamConsGetData( FsmRun *fsmRun, StreamImpl *ss, int skip, char *dest, int length, int *copied )
+int inputStreamConsGetParseBlock( StreamImpl *ss,
+		int skip, char **pdp, int *copied )
 { 
 	*copied = 0;
 
 	ConsItem *buf = ss->consItem;
 	int offset = ss->offset;
-
-	attachStream( fsmRun, ss );
 
 	while ( true ) {
 		if ( buf == 0 )
@@ -259,7 +293,7 @@ int inputStreamConsGetData( FsmRun *fsmRun, StreamImpl *ss, int skip, char *dest
 		if ( avail > 0 ) {
 			/* The source data from the current buffer. */
 			char *src = &buf->data[offset];
-			int slen = avail <= length ? avail : length;
+			int slen = avail;
 
 			/* Need to skip? */
 			if ( skip > 0 && slen <= skip ) {
@@ -273,7 +307,7 @@ int inputStreamConsGetData( FsmRun *fsmRun, StreamImpl *ss, int skip, char *dest
 				slen -= skip;
 				skip = 0;
 
-				memcpy( dest, src, slen ) ;
+				*pdp = src;
 				*copied += slen;
 				break;
 			}
@@ -284,6 +318,43 @@ int inputStreamConsGetData( FsmRun *fsmRun, StreamImpl *ss, int skip, char *dest
 	}
 
 	return INPUT_DATA;
+}
+
+int inputStreamConsGetData( StreamImpl *ss, char *dest, int length )
+{ 
+	int copied = 0;
+
+	ConsItem *buf = ss->consItem;
+	int offset = ss->offset;
+
+	while ( true ) {
+		if ( buf == 0 )
+			break;
+
+		if ( buf->type == ConsItem::ExprType || buf->type == ConsItem::FactorType )
+			break;
+
+		assert ( buf->type == ConsItem::InputText );
+		int avail = buf->data.length() - offset;
+
+		if ( avail > 0 ) {
+			/* The source data from the current buffer. */
+			char *src = &buf->data[offset];
+			int slen = avail <= length ? avail : length;
+
+			memcpy( dest+copied, src, slen ) ;
+			copied += slen;
+			length -= slen;
+		}
+
+		if ( length == 0 )
+			break;
+
+		buf = buf->next;
+		offset = 0;
+	}
+
+	return copied;
 }
 
 void inputStreamConsBackup( StreamImpl *ss )
@@ -357,7 +428,7 @@ int inputStreamConsConsumeData( StreamImpl *ss, int length )
 	return consumed;
 }
 
-int inputStreamConsUndoConsumeData( FsmRun *fsmRun, StreamImpl *ss, const char *data, int length )
+int inputStreamConsUndoConsumeData( StreamImpl *ss, const char *data, int length )
 {
 	ss->offset -= length;
 	return length;
@@ -368,6 +439,7 @@ extern "C" void initConsFuncs()
 	memset( &replFuncs, 0, sizeof(StreamFuncs) );
 
 	replFuncs.getData = &inputStreamConsGetData;
+	replFuncs.getParseBlock = &inputStreamConsGetParseBlock;
 	replFuncs.consumeData = &inputStreamConsConsumeData;
 	replFuncs.undoConsumeData = &inputStreamConsUndoConsumeData;
 

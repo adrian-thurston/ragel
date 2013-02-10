@@ -23,7 +23,6 @@
 #define __COLM_PDARUN_H
 
 #include <colm/input.h>
-#include <colm/fsmrun.h>
 #include <colm/defs.h>
 #include <colm/tree.h>
 
@@ -73,25 +72,31 @@ typedef struct _FsmRun
 {
 	FsmTables *tables;
 
-	RunBuf *runBuf;
+	RunBuf *consumeBuf;
 
 	/* FsmRun State. */
 	long region, preRegion;
 	long cs, ncs, act;
-	char *tokstart, *tokend;
-	char *p, *pe, *peof;
-	int returnResult;
+	char *start;
+	char *tokstart;
+	long tokend;
+	long toklen;
+	char *p, *pe;
+
+	/* Bits. */
+	char eof;
+	char returnResult;
+	char skipToklen;
+
 	char *mark[MARK_SLOTS];
 	long matchedToken;
 } FsmRun;
 
-void initFsmRun( FsmRun *fsmRun, struct ColmProgram *prg );
 void clearFsmRun( struct ColmProgram *prg, FsmRun *fsmRun );
 void updatePosition( StreamImpl *inputStream, const char *data, long length );
 void undoPosition( StreamImpl *inputStream, const char *data, long length );
 void sendBackRunBufHead( FsmRun *fsmRun, StreamImpl *inputStream );
 void undoStreamPull( StreamImpl *inputStream, const char *data, long length );
-
 
 #if SIZEOF_LONG != 4 && SIZEOF_LONG != 8 
 	#error "SIZEOF_LONG contained an unexpected value"
@@ -341,6 +346,8 @@ typedef struct _PdaRun
 	int rcBlockCount;
 
 	Tree *parseErrorText;
+
+	FsmRun *fsmRun;
 } PdaRun;
 
 void rtCodeVectReplace( RtCodeVect *vect, long pos, const Code *val, long len );
@@ -393,8 +400,8 @@ void decrementSteps( PdaRun *pdaRun );
 int makeReverseCode( PdaRun *pdaRun );
 void transferReverseCode( PdaRun *pdaRun, ParseTree *tree );
 
-void initPdaRun( PdaRun *pdaRun, struct ColmProgram *prg, PdaTables *tables,
-		FsmRun *fsmRun, int parserId, long stopTarget, int revertOn, Tree *context );
+void initPdaRun( struct ColmProgram *prg, PdaRun *pdaRun, FsmRun *fsmRun, PdaTables *tables,
+		int parserId, long stopTarget, int revertOn, Tree *context );
 void clearPdaRun( struct ColmProgram *prg, Tree **root, PdaRun *pdaRun );
 
 void initStreamImpl( StreamImpl *inputStream );
@@ -426,14 +433,14 @@ long parseToken( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun,
 
 long undoParse( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, StreamImpl *inputStream, Tree *tree );
 
-Head *streamPull( struct ColmProgram *prg, FsmRun *fsmRun, StreamImpl *inputStream, long length );
+Head *streamPull( struct ColmProgram *prg, PdaRun *pdaRun, StreamImpl *is, long length );
 Head *stringAllocPointer( struct ColmProgram *prg, const char *data, long length );
 
-void streamPushText( FsmRun *fsmRun, StreamImpl *inputStream, const char *data, long length );
-void streamPushTree( FsmRun *fsmRun, StreamImpl *inputStream, Tree *tree, int ignore );
-void streamPushStream( FsmRun *fsmRun, StreamImpl *inputStream, Tree *tree );
-void undoStreamPush( struct ColmProgram *prg, Tree **sp, FsmRun *fsmRun, StreamImpl *inputStream, long length );
-void undoStreamAppend( struct ColmProgram *prg, Tree **sp, FsmRun *fsmRun, StreamImpl *inputStream, struct ColmTree *tree, long length );
+void streamPushText( StreamImpl *inputStream, const char *data, long length );
+void streamPushTree( StreamImpl *inputStream, Tree *tree, int ignore );
+void streamPushStream( StreamImpl *inputStream, Tree *tree );
+void undoStreamPush( struct ColmProgram *prg, Tree **sp, StreamImpl *inputStream, long length );
+void undoStreamAppend( struct ColmProgram *prg, Tree **sp, StreamImpl *inputStream, struct ColmTree *tree, long length );
 Kid *makeTokenWithData( struct ColmProgram *prg, PdaRun *pdaRun, FsmRun *fsmRun, 
 		StreamImpl *inputStream, int id, Head *tokdata );
 
@@ -448,21 +455,17 @@ long sendBackQueuedIgnore( struct ColmProgram *prg, Tree **sp, StreamImpl *input
 void clearIgnoreList( struct ColmProgram *prg, Tree **sp, Kid *kid );
 Head *extractMatch( struct ColmProgram *prg, FsmRun *fsmRun, StreamImpl *inputStream );
 Head *extractMatch( struct ColmProgram *prg, FsmRun *fsmRun, StreamImpl *inputStream );
-void newToken( struct ColmProgram *prg, PdaRun *pdaRun, FsmRun *fsmRun );
 void fsmExecute( FsmRun *fsmRun, StreamImpl *inputStream );
 void sendNamedLangEl( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, StreamImpl *inputStream );
 long parseLoop( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, 
-		FsmRun *fsmRun, StreamImpl *inputStream, long entry );
+		StreamImpl *inputStream, long entry );
 void initBindings( PdaRun *pdaRun );
 Tree *getParsedRoot( PdaRun *pdaRun, int stop );
 void undoParseStream( struct ColmProgram *prg, Tree **sp, StreamImpl *inputStream, FsmRun *fsmRun, 
 		PdaRun *pdaRun, long steps );
 
 void clearBuffered( FsmRun *fsmRun );
-void resetToken( FsmRun *fsmRun );
-
-void detachStream( FsmRun *fsmRun, StreamImpl *is );
-void attachStream( FsmRun *fsmRun, StreamImpl *is );
+void resetToken( PdaRun *pdaRun );
 
 #ifdef __cplusplus
 }

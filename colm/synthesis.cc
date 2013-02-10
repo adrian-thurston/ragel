@@ -21,7 +21,6 @@
 
 #include "bytecode.h"
 #include "parsedata.h"
-#include "fsmrun.h"
 #include "pdarun.h"
 #include "input.h"
 #include <iostream>
@@ -2532,7 +2531,7 @@ void Compiler::initStreamObject( )
 	streamLangEl->objectDef = streamObj;
 
 	initFunction( uniqueTypeStr, streamObj, "pull",  
-			IN_INPUT_PULL_WV, IN_INPUT_PULL_WV, uniqueTypeInt, false );
+			IN_INPUT_PULL_WV, IN_INPUT_PULL_WC, uniqueTypeInt, false );
 	initFunction( uniqueTypeStr, streamObj, "push",  
 			IN_INPUT_PUSH_WV, IN_INPUT_PUSH_WV, uniqueTypeAny, false );
 	initFunction( uniqueTypeStr, streamObj, "push_ignore",  
@@ -3248,7 +3247,9 @@ void Compiler::addStdin()
 	el->beenInitialized = true;
 	el->isConst = true;
 	el->useOffset = false;
-	el->inGetR    = IN_GET_STDIN;
+	el->inGetR     = IN_GET_STDIN;
+	el->inGetWC    = IN_GET_STDIN;
+	el->inGetWV    = IN_GET_STDIN;
 	globalObjectDef->insertField( el->name, el );
 }
 
@@ -3264,6 +3265,8 @@ void Compiler::addStdout()
 	el->isConst = true;
 	el->useOffset = false;
 	el->inGetR    = IN_GET_STDOUT;
+	el->inGetWC    = IN_GET_STDOUT;
+	el->inGetWV    = IN_GET_STDOUT;
 	globalObjectDef->insertField( el->name, el );
 }
 
@@ -3279,6 +3282,8 @@ void Compiler::addStderr()
 	el->isConst = true;
 	el->useOffset = false;
 	el->inGetR    = IN_GET_STDERR;
+	el->inGetWC    = IN_GET_STDERR;
+	el->inGetWV    = IN_GET_STDERR;
 	globalObjectDef->insertField( el->name, el );
 }
 

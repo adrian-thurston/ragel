@@ -1,0 +1,3 @@
+Stream: stream = open( 'pull2.in' 'r' )
+String: str = Stream.pull( 10 )
+print( String '\n' )

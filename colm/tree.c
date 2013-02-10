@@ -986,14 +986,12 @@ Tree *createGeneric( Program *prg, long genericId )
 			Parser *parser = (Parser*)mapElAllocate( prg );
 			parser->id = genericInfo->langElId;
 			parser->genericInfo = genericInfo;
-			parser->fsmRun = malloc( sizeof(FsmRun) );
 			parser->pdaRun = malloc( sizeof(PdaRun) );
+			parser->pdaRun->fsmRun = malloc( sizeof(FsmRun) );
 
 			/* Start off the parsing process. */
-			initPdaRun( parser->pdaRun, prg, prg->rtd->pdaTables, 
-					parser->fsmRun, genericInfo->parserId, false, false, 0 );
-			initFsmRun( parser->fsmRun, prg );
-			newToken( prg, parser->pdaRun, parser->fsmRun );
+			initPdaRun( prg, parser->pdaRun, parser->pdaRun->fsmRun, prg->rtd->pdaTables, 
+					genericInfo->parserId, false, false, 0 );
 
 			newGeneric = (Tree*) parser;
 			break;
@@ -1045,10 +1043,10 @@ free_tree:
 		}
 		else if ( generic->type == GEN_PARSER ) {
 			Parser *parser = (Parser*)tree;
-			clearFsmRun( prg, parser->fsmRun );
+			clearFsmRun( prg, parser->pdaRun->fsmRun );
 			clearPdaRun( prg, sp, parser->pdaRun );
+			free( parser->pdaRun->fsmRun );
 			free( parser->pdaRun );
-			free( parser->fsmRun );
 			treeDownref( prg, sp, (Tree*)parser->input );
 			mapElFree( prg, (MapEl*)parser );
 		}
@@ -2054,7 +2052,10 @@ void appendFile( struct ColmPrintArgs *args, const char *data, int length )
 
 void appendFd( struct ColmPrintArgs *args, const char *data, int length )
 {
-	write( (long)args->arg, data, length );
+	int res = write( (long)args->arg, data, length );
+	if ( res != 0 ) {
+		message( "write error\n" );
+	}
 }
 
 Tree *treeTrim( struct ColmProgram *prg, Tree **sp, Tree *tree )

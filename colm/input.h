@@ -35,9 +35,10 @@ extern "C" {
 /* This is for data sources to return, not for the wrapper. */
 #define INPUT_EOD      2
 #define INPUT_EOF      3
-#define INPUT_LANG_EL  4
-#define INPUT_TREE     5
-#define INPUT_IGNORE   6
+#define INPUT_EOS      4
+#define INPUT_LANG_EL  5
+#define INPUT_TREE     6
+#define INPUT_IGNORE   7
 
 /*
  * pdaRun <- fsmRun <- stream 
@@ -87,11 +88,12 @@ typedef struct _StreamImpl StreamImpl;
 
 struct StreamFuncs
 {
-	/* Data. */
-	int (*getData)( struct _FsmRun *fsmRun, StreamImpl *ss, int offset, char *dest, int length, int *copied );
+	int (*getParseBlock)( StreamImpl *ss, int skip, char **pdp, int *copied );
+
+	int (*getData)( StreamImpl *ss, char *dest, int length );
 
 	int (*consumeData)( StreamImpl *ss, int length );
-	int (*undoConsumeData)( struct _FsmRun *fsmRun, StreamImpl *ss, const char *data, int length );
+	int (*undoConsumeData)( StreamImpl *ss, const char *data, int length );
 
 	struct ColmTree *(*consumeTree)( StreamImpl *ss );
 	void (*undoConsumeTree)( StreamImpl *ss, struct ColmTree *tree, int ignore );
@@ -127,10 +129,10 @@ struct StreamFuncs
 struct _StreamImpl
 {
 	struct StreamFuncs *funcs;
-	struct _FsmRun *attached;
 
 	char eofSent;
 	char eof;
+	char eosSent;
 
 	RunBuf *queue;
 	RunBuf *queueTail;
@@ -152,8 +154,6 @@ struct _StreamImpl
 	struct ConsItem *consItem;
 };
 
-typedef struct _StreamImpl StreamImpl;
-
 StreamImpl *newSourceStreamPat( struct Pattern *pattern );
 StreamImpl *newSourceStreamCons( struct Constructor *constructor );
 StreamImpl *newSourceStreamFile( FILE *file );
@@ -163,35 +163,6 @@ void initInputFuncs();
 void initStaticFuncs();
 void initPatFuncs();
 void initConsFuncs();
-
-/* The input stream interface. */
-
-int _getData( struct _FsmRun *fsmRun, StreamImpl *in, int offset, char *dest, int length, int *copied );
-int _consumeData( StreamImpl *in, int length );
-int _undoConsumeData( struct _FsmRun *fsmRun, StreamImpl *is, const char *data, int length );
-
-struct ColmTree *_consumeTree( StreamImpl *in );
-void _undoConsumeTree( StreamImpl *in, struct ColmTree *tree, int ignore );
-
-struct LangEl *_consumeLangEl( StreamImpl *in, long *bindId, char **data, long *length );
-void _undoConsumeLangEl( StreamImpl *in );
-
-void _setEof( StreamImpl *is );
-void _unsetEof( StreamImpl *is );
-
-void _prependData( StreamImpl *in, const char *data, long len );
-void _prependTree( StreamImpl *is, struct ColmTree *tree, int ignore );
-void _prependStream( StreamImpl *in, struct ColmTree *tree );
-int _undoPrependData( StreamImpl *is, int length );
-struct ColmTree *_undoPrependTree( StreamImpl *is );
-struct ColmTree *_undoPrependStream( StreamImpl *in );
-
-void _appendData( StreamImpl *in, const char *data, long len );
-void _appendTree( StreamImpl *in, struct ColmTree *tree );
-void _appendStream( StreamImpl *in, struct ColmTree *tree );
-struct ColmTree *_undoAppendData( StreamImpl *in, int length );
-struct ColmTree *_undoAppendTree( StreamImpl *in );
-struct ColmTree *_undoAppendStream( StreamImpl *in );
 
 #ifdef __cplusplus
 }

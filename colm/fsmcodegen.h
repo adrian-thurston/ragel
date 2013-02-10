@@ -28,7 +28,6 @@
 #include "keyops.h"
 #include "parsedata.h"
 #include "redfsm.h"
-#include "fsmrun.h"
 
 using std::string;
 using std::ostream;
@@ -76,6 +75,7 @@ public:
 			RedFsm *redFsm, FsmTables *fsmTables );
 
 protected:
+
 	string FSM_NAME();
 	string START_STATE_ID();
 	ostream &ACTIONS_ARRAY();
@@ -99,12 +99,14 @@ protected:
 
 	string P() { return ACCESS() + "p"; }
 	string PE() { return ACCESS() + "pe"; }
-	string PEOF() { return ACCESS() + "peof"; }
+	string DATA_EOF() { return ACCESS() + "eof"; }
 
 	string CS();
 	string TOP() { return ACCESS() + "top"; }
 	string TOKSTART() { return ACCESS() + "tokstart"; }
 	string TOKEND() { return ACCESS() + "tokend"; }
+	string BLOCK_START() { return ACCESS() + "start"; }
+	string TOKLEN() { return ACCESS() + "toklen"; }
 	string ACT() { return ACCESS() + "act"; }
 	string MATCHED_TOKEN() { return ACCESS() + "matchedToken"; }
 
@@ -164,6 +166,7 @@ public:
 	bool dataPrefix;
 	bool writeFirstFinal;
 	bool writeErr;
+	bool skipTokenLabelNeeded;
 
 	std::ostream &TO_STATE_ACTION_SWITCH();
 	std::ostream &FROM_STATE_ACTION_SWITCH();
