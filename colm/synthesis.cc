@@ -607,7 +607,7 @@ void LangVarRef::loadCustom( Compiler *pd, CodeVect &code,
 		int lastPtrInQual, bool forWriting ) const
 {
 	/* Start the search in the local frame. */
-	loadQualification( pd, code, pd->curLocalFrame, lastPtrInQual, forWriting, true );
+	loadQualification( pd, code, pd->curLocalFrame, lastPtrInQual, forWriting, pd->revertOn );
 }
 
 void LangVarRef::loadLocalObj( Compiler *pd, CodeVect &code, 
@@ -1066,7 +1066,7 @@ void LangVarRef::callOperation( Compiler *pd, CodeVect &code, VarRefLookup &look
 
 	/* Check if we need to revert the function. If it operates on a reference
 	 * or if it is not local then we need to revert it. */
-	bool revert = lookup.lastPtrInQual >= 0 || !isLocalRef(pd);
+	bool revert = lookup.lastPtrInQual >= 0 || !isLocalRef(pd) || isCustom(pd);
 	
 	/* The call instruction. */
 	if ( pd->revertOn && revert )  {
@@ -2531,7 +2531,7 @@ void Compiler::initStreamObject( )
 	streamLangEl->objectDef = streamObj;
 
 	initFunction( uniqueTypeStr, streamObj, "pull",  
-			IN_INPUT_PULL_WV, IN_INPUT_PULL_WV, uniqueTypeInt, false );
+			IN_INPUT_PULL_WV, IN_INPUT_PULL_WC, uniqueTypeInt, false );
 	initFunction( uniqueTypeStr, streamObj, "push",  
 			IN_INPUT_PUSH_WV, IN_INPUT_PUSH_WV, uniqueTypeAny, false );
 	initFunction( uniqueTypeStr, streamObj, "push_ignore",  
