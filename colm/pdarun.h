@@ -348,6 +348,7 @@ typedef struct _PdaRun
 	Tree *parseErrorText;
 
 	FsmRun *fsmRun;
+	FsmRun _fsmRun;
 } PdaRun;
 
 void rtCodeVectReplace( RtCodeVect *vect, long pos, const Code *val, long len );
@@ -400,9 +401,8 @@ void decrementSteps( PdaRun *pdaRun );
 int makeReverseCode( PdaRun *pdaRun );
 void transferReverseCode( PdaRun *pdaRun, ParseTree *tree );
 
-void initPdaRun( struct ColmProgram *prg, PdaRun *pdaRun, FsmRun *fsmRun, PdaTables *tables,
+void initPdaRun( struct ColmProgram *prg, PdaRun *pdaRun, PdaTables *tables,
 		int parserId, long stopTarget, int revertOn, Tree *context );
-void clearPdaRun( struct ColmProgram *prg, Tree **root, PdaRun *pdaRun );
 
 void initStreamImpl( StreamImpl *inputStream );
 void clearStreamImpl( struct ColmProgram *prg, Tree **sp, StreamImpl *inputStream );

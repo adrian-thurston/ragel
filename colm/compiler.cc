@@ -1239,11 +1239,10 @@ PdaRun *Compiler::parsePattern( Program *prg, Tree **sp, const InputLoc &loc,
 		int parserId, StreamImpl *sourceStream )
 {
 	StreamImpl *in = new StreamImpl;
-	PdaRun *pdaRun = new PdaRun;
-	pdaRun->fsmRun = new FsmRun;
-
 	initStreamImpl( in );
-	initPdaRun( prg, pdaRun, pdaRun->fsmRun, pdaTables, parserId, 0, false, 0 );
+
+	PdaRun *pdaRun = new PdaRun;
+	initPdaRun( prg, pdaRun, pdaTables, parserId, 0, false, 0 );
 
 	Stream *res = streamAllocate( prg );
 	res->id = LEL_ID_STREAM;

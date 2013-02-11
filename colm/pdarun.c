@@ -1416,6 +1416,8 @@ free_tree:
 
 void clearPdaRun( Program *prg, Tree **sp, PdaRun *pdaRun )
 {
+	clearFsmRun( prg, pdaRun->fsmRun );
+
 	/* Remaining stack and parse trees underneath. */
 	clearParseTree( prg, sp, pdaRun->stackTop );
 	pdaRun->stackTop = 0;
@@ -1462,10 +1464,11 @@ int isParserStopFinished( PdaRun *pdaRun )
 	return done;
 }
 
-void initPdaRun( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, PdaTables *tables,
+void initPdaRun( Program *prg, PdaRun *pdaRun, PdaTables *tables,
 		int parserId, long stopTarget, int revertOn, Tree *context )
 {
 	memset( pdaRun, 0, sizeof(PdaRun) );
+
 	pdaRun->tables = tables;
 	pdaRun->parserId = parserId;
 	pdaRun->stopTarget = stopTarget;
@@ -1512,10 +1515,9 @@ void initPdaRun( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, PdaTables *tables
 
 	pdaRun->rcBlockCount = 0;
 
-	pdaRun->fsmRun = fsmRun;
-
-	initFsmRun( prg, fsmRun );
-	newToken( prg, pdaRun, fsmRun );
+	pdaRun->fsmRun = &pdaRun->_fsmRun;
+	initFsmRun( prg, pdaRun->fsmRun );
+	newToken( prg, pdaRun, pdaRun->fsmRun );
 }
 
 long stackTopTarget( Program *prg, PdaRun *pdaRun )
