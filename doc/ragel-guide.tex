@@ -2641,7 +2641,8 @@ Go:
           int8      uint8
           int16     uint16
           int32     uint32
-          int
+          int64     uint64
+          rune
 \end{verbatim}
 
 Ruby: 
@@ -3084,17 +3085,17 @@ preferred output format.
 \hline
 \multicolumn{3}{|c|}{\bf Code Output Style Options} \\
 \hline
-\verb|-T0|&binary search table-driven&C/D/Java/Ruby/C\#\\
+\verb|-T0|&binary search table-driven&C/D/Java/Ruby/C\#/Go\\
 \hline
-\verb|-T1|&binary search, expanded actions&C/D/Ruby/C\#\\
+\verb|-T1|&binary search, expanded actions&C/D/Ruby/C\#/Go\\
 \hline
-\verb|-F0|&flat table-driven&C/D/Ruby/C\#\\
+\verb|-F0|&flat table-driven&C/D/Ruby/C\#/Go\\
 \hline
-\verb|-F1|&flat table, expanded actions&C/D/Ruby/C\#\\
+\verb|-F1|&flat table, expanded actions&C/D/Ruby/C\#/Go\\
 \hline
-\verb|-G0|&goto-driven&C/D/C\#\\
+\verb|-G0|&goto-driven&C/D/C\#/Go\\
 \hline
-\verb|-G1|&goto, expanded actions&C/D/C\#\\
+\verb|-G1|&goto, expanded actions&C/D/C\#/Go\\
 \hline
 \verb|-G2|&goto, in-place actions&C/D/Go\\
 \hline
