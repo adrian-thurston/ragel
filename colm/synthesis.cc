@@ -2531,7 +2531,7 @@ void Compiler::initStreamObject( )
 	streamLangEl->objectDef = streamObj;
 
 	initFunction( uniqueTypeStr, streamObj, "pull",  
-			IN_INPUT_PULL_WV, IN_INPUT_PULL_WC, uniqueTypeInt, false );
+			IN_INPUT_PULL_WV, IN_INPUT_PULL_WV, uniqueTypeInt, false );
 	initFunction( uniqueTypeStr, streamObj, "push",  
 			IN_INPUT_PUSH_WV, IN_INPUT_PUSH_WV, uniqueTypeAny, false );
 	initFunction( uniqueTypeStr, streamObj, "push_ignore",  
