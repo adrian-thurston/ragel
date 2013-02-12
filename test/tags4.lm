@@ -259,7 +259,7 @@ context tags
 	{
 		return true
 	}
-end tags
+end # tags
 
 # Finds unclosed tags and puts the content after the tag. Afterwards
 # all unclosed tags will be empty 'inside'.

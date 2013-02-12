@@ -55,7 +55,7 @@ context si
 			match lhs [Item2:item2 ';\n']
 			print( Item2.msg )
 		}
-end si
+end # si
 
 cons SuperId: si[]
 parse S: si::start(SuperId)[stdin]

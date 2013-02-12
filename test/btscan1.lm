@@ -10,7 +10,7 @@ namespace r1
 
 	def line [ '!' 'a' 'b' 'b' 'a']
 
-end r1
+end # r1
 
 #
 # R2
@@ -25,7 +25,7 @@ namespace r2
 
 	def line [ '!' id ]
 
-end r2
+end # r2
 
 def item 
 	[r1::line]

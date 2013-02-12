@@ -24,7 +24,7 @@ context ctx
 
 	def start 
 		[item*]
-end ctx
+end # ctx
 
 CTX: ctx = cons ctx[]
 parse InputP: ctx::start( CTX ) [ stdin ]

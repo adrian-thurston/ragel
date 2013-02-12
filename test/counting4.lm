@@ -85,7 +85,7 @@ context counting
 			}
 			print( '*** SUCCESS ***\n' )
 		}
-end counting
+end # counting
 
 cons Counting: counting[]
 parse counting::start(Counting)[stdin]
