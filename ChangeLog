@@ -1,4 +1,4 @@
-Ragel 6.8 - Jan XX, 2013
+Ragel 6.8 - Feb 11, 2013
 ========================
 
  -The -G2 code generator for Go1 was rewritten. Table, flat and switch-based
