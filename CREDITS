@@ -25,7 +25,8 @@ missed.
 
 * C# code generation contributed by Daniel Tang.
 
-* Go code generation contributed by Justine Tunney.
+* Go code generation contributed by Justine Tunney. Significantly expanded by
+  Anton Ageev
 
 * D2 patch from Johannes Pfau.
 
