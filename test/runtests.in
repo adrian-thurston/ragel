@@ -62,7 +62,7 @@ java_compiler="@JAVAC@"
 txl_engine="@TXL@"
 ruby_engine="@RUBY@"
 csharp_compiler="@GMCS@"
-go_compiler="@GOBIN@ build"
+go_compiler="@GOBIN@"
 
 function test_error
 {

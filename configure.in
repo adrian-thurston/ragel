@@ -138,7 +138,7 @@ dnl Check for the C# compiler.
 AC_CHECK_PROG(GMCS, gmcs, gmcs)
 
 dnl Check for the Go compiler.
-AC_CHECK_PROG(GOBIN, go, go)
+AC_CHECK_PROG(GOBIN, go, go build)
 
 dnl write output files
 AC_OUTPUT(
