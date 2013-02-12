@@ -37,8 +37,6 @@
 
 #define act_sb 0x1
 #define act_rb 0x2
-#define lower 0x0000ffff
-#define upper 0xffff0000
 
 #define read_word_p( i, p ) do { \
 	i = ((Word)  p[0]); \
