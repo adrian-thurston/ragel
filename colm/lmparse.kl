@@ -477,10 +477,8 @@ region_head:
 	};
 
 namespace_def: 
-	namespace_head root_item_list KW_End TK_Word
+	namespace_head root_item_list KW_End
 	final {
-		if ( strcmp( namespaceStack.top()->name, $4->data ) != 0 )
-			error($4->loc) << "namespace end name does not match begin name" << endp;
 		namespaceStack.pop();
 	};
 
@@ -532,11 +530,8 @@ context_item_list:
 	;
 
 context_def: 
-	context_head context_item_list KW_End TK_Word
+	context_head context_item_list KW_End
 	final {
-		if ( strcmp( namespaceStack.top()->name, $4->data ) != 0 )
-			error($4->loc) << "context end name does not match begin name" << endp;
-
 		contextStack.pop();
 		namespaceStack.pop();
 	};
