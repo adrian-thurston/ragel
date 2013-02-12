@@ -41,7 +41,7 @@ include "lmparse.kh";
 
 start: root_item_list
 	final {
-		pd->rootCodeBlock = new CodeBlock( $1->stmtList );
+		pd->rootCodeBlock = new CodeBlock( $1->stmtList, 0 );
 	};
 
 nonterm root_item_list uses lang_stmt_list;
@@ -115,8 +115,7 @@ block_close: '}'
 iter_def: 
 	KW_Iter TK_Word '(' opt_param_list ')' block_open lang_stmt_list block_close
 	final {
-		CodeBlock *codeBlock = new CodeBlock( $7->stmtList );
-		codeBlock->localFrame = $6->localFrame;
+		CodeBlock *codeBlock = new CodeBlock( $7->stmtList, $6->localFrame );
 		Function *newFunction = new Function( 0, $2->data, 
 				$4->paramList, codeBlock, pd->nextFuncId++, true );
 		pd->functionList.append( newFunction );
@@ -125,8 +124,7 @@ iter_def:
 function_def: 
 	type_ref TK_Word '(' opt_param_list ')' block_open lang_stmt_list block_close
 	final {
-		CodeBlock *codeBlock = new CodeBlock( $7->stmtList );
-		codeBlock->localFrame = $6->localFrame;
+		CodeBlock *codeBlock = new CodeBlock( $7->stmtList, $6->localFrame );
 		Function *newFunction = new Function( $1->typeRef, $2->data, 
 				$4->paramList, codeBlock, pd->nextFuncId++, false );
 		pd->functionList.append( newFunction );
@@ -1323,8 +1321,7 @@ nonterm opt_translate
 opt_translate: 
 	block_open lang_stmt_list block_close
 	final { 
-		$$->transBlock = new CodeBlock( $2->stmtList );
-		$$->transBlock->localFrame = $1->localFrame;
+		$$->transBlock = new CodeBlock( $2->stmtList, $1->localFrame );
 		$$->transBlock->context = contextStack.length() == 0 ? 0 : contextStack.top();
 	};
 
@@ -1340,8 +1337,7 @@ pre_eof:
 		if ( !insideRegion )
 			error($1->loc) << "preeof must be used inside an existing region" << endl;
 
-		CodeBlock *codeBlock = new CodeBlock( $3->stmtList );
-		codeBlock->localFrame = $2->localFrame;
+		CodeBlock *codeBlock = new CodeBlock( $3->stmtList, $2->localFrame );
 		codeBlock->context = contextStack.length() == 0 ? 0 : contextStack.top();
 
 		TokenRegion *region = regionStack.top();
@@ -1399,8 +1395,7 @@ opt_reduce_code:
 opt_reduce_code: 
 	start_reduce lang_stmt_list block_close
 	final { 
-		$$->codeBlock = new CodeBlock( $2->stmtList );
-		$$->codeBlock->localFrame = $1->localFrame;
+		$$->codeBlock = new CodeBlock( $2->stmtList, $1->localFrame );
 		$$->codeBlock->context = contextStack.length() == 0 ? 0 : contextStack.top();
 	};
 
