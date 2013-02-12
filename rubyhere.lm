@@ -85,7 +85,7 @@ context rubyhere
 
 	def start 
 		[item*]
-end rubyhere
+end # rubyhere
 
 cons RubyHere: rubyhere[]
 

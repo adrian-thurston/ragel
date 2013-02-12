@@ -88,7 +88,7 @@ context counting
 				}
 			}
 		}
-end counting
+end # counting
 
 cons Counting: counting[]
 parse counting::start(Counting)[ stdin ]

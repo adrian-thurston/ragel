@@ -20,7 +20,7 @@ namespace string
 		return $DL
 	}
 
-end string
+end # string
 		
 namespace hash
 
@@ -38,7 +38,7 @@ namespace hash
 		['#' 'define' Id: id number '\n']
 	|	['#' 'include' Inc: string::string '\n']
 
-end hash
+end # hash
 
 token rest_of_line /[^\n]* '\n'/
 
@@ -85,7 +85,7 @@ namespace lang
 	def start 
 		[statement*]
 
-end lang
+end # lang
 
 parse Input: lang::start[ stdin ]
 

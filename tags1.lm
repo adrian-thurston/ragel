@@ -79,7 +79,7 @@ context tags
 			print_xml( lhs )
 			print( 'failed\n' )
 		}
-end tags
+end # tags
 
 cons Tags: tags[]
 Tags.TS = cons tags::tag_stack ["sentinal"]

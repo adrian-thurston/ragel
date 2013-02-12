@@ -76,7 +76,7 @@ def two
 	[A1 item* '!' '\n']
 |	[A2 item* ';' '\n']
 
-end accum_bt
+end # accum_bt
 
 cons AccumBt: accum_bt[]
 AccumBt.NestedParser = cons parser<nested>[]

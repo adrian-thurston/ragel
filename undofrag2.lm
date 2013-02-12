@@ -35,7 +35,7 @@ context undo
 		[A1 item* '^']
 	|	[A2 item* ';' '\n']
 
-end undo
+end # undo
 
 cons Undo: undo[]
 Undo.Out = construct parser<undo::out> []

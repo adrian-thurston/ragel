@@ -32,7 +32,7 @@ lex
 	|	[A2 item2* ';' '\n']
 end
 
-end accum_bt
+end # accum_bt
 
 AccumBt: accum_bt = cons accum_bt[]
 AccumBt.OneParser = cons parser<accum_bt::one>[]

@@ -16,7 +16,7 @@ namespace hash
 		['define' id number '\n']
 	|	['include' string '\n']
 
-end hash
+end # hash
 
 namespace lang
 
@@ -38,7 +38,7 @@ namespace lang
 	def start 
 		[statement*]
 
-end lang
+end # lang
 
 parse Input: lang::start[ stdin ]
 

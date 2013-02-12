@@ -295,7 +295,7 @@ context tags
 #			}
 #		}
 #	}
-end tags
+end # tags
 
 cons Tags: tags[]
 Tags.TagStack = construct tags::tag_stack []

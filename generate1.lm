@@ -682,7 +682,7 @@ context generate
 	def keyword_item 
 		[identifier '=' expression]
 
-end generate
+end # generate
 
 int print_stmts( S: generate::start )
 {

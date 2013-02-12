@@ -40,7 +40,7 @@ context heredoc
 
 	def start 
 		[here_name here_data here_close id nl]
-end heredoc
+end # heredoc
 
 cons HereDoc: heredoc[]
 

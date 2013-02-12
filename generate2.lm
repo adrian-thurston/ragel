@@ -188,7 +188,7 @@ context generate
 	def start 
 		[item*]
 
-end generate
+end # generate
 
 cons Generate: generate[]
 

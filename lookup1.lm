@@ -2138,7 +2138,7 @@ context lookup
 		print( '\n' )
 	}
 
-end lookup
+end # lookup
 
 #
 # Global data declarations

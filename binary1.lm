@@ -482,7 +482,7 @@ int print_all_names( s: start )
 	}
 }
 
-end binary
+end # binary
 
 cons Binary: binary[]
 Binary.CL = cons list<int> []
