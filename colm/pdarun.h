@@ -92,7 +92,6 @@ typedef struct _FsmRun
 	long matchedToken;
 } FsmRun;
 
-void clearFsmRun( struct ColmProgram *prg, FsmRun *fsmRun );
 void updatePosition( StreamImpl *inputStream, const char *data, long length );
 void undoPosition( StreamImpl *inputStream, const char *data, long length );
 void sendBackRunBufHead( FsmRun *fsmRun, StreamImpl *inputStream );
@@ -351,6 +350,9 @@ typedef struct _PdaRun
 	FsmRun _fsmRun;
 } PdaRun;
 
+void initPdaRun( struct ColmProgram *prg, PdaRun *pdaRun, PdaTables *tables,
+		int parserId, long stopTarget, int revertOn, Tree *context );
+void clearPdaRun( struct ColmProgram *prg, struct ColmTree **sp, PdaRun *pdaRun );
 void rtCodeVectReplace( RtCodeVect *vect, long pos, const Code *val, long len );
 void rtCodeVectEmpty( RtCodeVect *vect );
 void rtCodeVectRemove( RtCodeVect *vect, long pos, long len );
@@ -400,9 +402,6 @@ void decrementSteps( PdaRun *pdaRun );
 
 int makeReverseCode( PdaRun *pdaRun );
 void transferReverseCode( PdaRun *pdaRun, ParseTree *tree );
-
-void initPdaRun( struct ColmProgram *prg, PdaRun *pdaRun, PdaTables *tables,
-		int parserId, long stopTarget, int revertOn, Tree *context );
 
 void initStreamImpl( StreamImpl *inputStream );
 void clearStreamImpl( struct ColmProgram *prg, Tree **sp, StreamImpl *inputStream );
