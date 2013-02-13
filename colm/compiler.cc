@@ -847,9 +847,9 @@ NameInst *Compiler::makeNameTree()
 
 	/* First make the name tree. */
 	initNameWalk( rootName );
-	for ( RegionGraphList::Iter glel = instanceList; glel.lte(); glel++ ) {
+	for ( RegionDefList::Iter rdel = regionDefList; rdel.lte(); rdel++ ) {
 		/* Recurse on the instance. */
-		glel->value->makeNameTree( glel->loc, this );
+		rdel->makeNameTree( rdel->loc, this );
 	}
 
 	return rootName;
@@ -865,13 +865,13 @@ FsmGraph *Compiler::makeAllRegions()
 	referenceRegions( rootName );
 
 	int numGraphs = 0;
-	FsmGraph **graphs = new FsmGraph*[instanceList.length()];
+	FsmGraph **graphs = new FsmGraph*[regionDefList.length()];
 
 	/* Make all the instantiations, we know that main exists in this list. */
 	initNameWalk( rootName );
-	for ( RegionGraphList::Iter glel = instanceList; glel.lte();  glel++ ) {
+	for ( RegionDefList::Iter rdel = regionDefList; rdel.lte(); rdel++ ) {
 		/* Build the graph from a walk of the parse tree. */
-		FsmGraph *newGraph = glel->value->walk( this );
+		FsmGraph *newGraph = rdel->walk( this );
 
 		/* Wrap up the construction. */
 		finishGraphBuild( newGraph );
@@ -1004,11 +1004,8 @@ void Compiler::createDefaultScanner()
 	regionList.append( defaultRegion );
 
 	/* Insert the machine definition into the graph dictionary. */
-	RegionGraphDictEl *newEl = new RegionGraphDictEl( name );
-	assert( newEl != 0 );
-	newEl->value = new RegionDef( name, defaultRegion );
-	newEl->isInstance = true;
-	instanceList.append( newEl );
+	RegionDef *rdel = new RegionDef( name, defaultRegion, loc );
+	regionDefList.append( rdel );
 
 	LexJoin *join = new LexJoin( LexExpression::cons( BT_Any ) );
 		

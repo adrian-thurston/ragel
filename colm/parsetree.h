@@ -331,9 +331,11 @@ struct LexDefinition
  * A Variable Definition
  */
 struct RegionDef
+:
+	public DListEl<RegionDef>
 {
-	RegionDef( const String &name, TokenRegion *tokenRegion )
-		: name(name), tokenRegion(tokenRegion) { }
+	RegionDef( const String &name, TokenRegion *tokenRegion, const InputLoc &loc )
+		: name(name), tokenRegion(tokenRegion), loc(loc) { }
 	
 	/* Parse tree traversal. */
 	FsmGraph *walk( Compiler *pd );
@@ -341,6 +343,7 @@ struct RegionDef
 
 	String name;
 	TokenRegion *tokenRegion;
+	InputLoc loc;
 };
 
 typedef Vector<String> StringVect;
@@ -664,6 +667,7 @@ struct GraphDictEl
 {
 	GraphDictEl( const String &key ) 
 		: key(key), value(0), isInstance(false) { }
+
 	GraphDictEl( const String &key, LexDefinition *value ) 
 		: key(key), value(value), isInstance(false) { }
 
@@ -680,29 +684,7 @@ struct GraphDictEl
 typedef AvlTree<GraphDictEl, String, CmpStr> GraphDict;
 typedef DList<GraphDictEl> GraphList;
 
-/* Graph dictionary. */
-struct RegionGraphDictEl 
-:
-	public AvlTreeEl<RegionGraphDictEl>,
-	public DListEl<RegionGraphDictEl>
-{
-	RegionGraphDictEl( const String &key ) 
-		: key(key), value(0), isInstance(false) { }
-	RegionGraphDictEl( const String &key, RegionDef *value ) 
-		: key(key), value(value), isInstance(false) { }
-
-	const String &getKey() { return key; }
-
-	String key;
-	RegionDef *value;
-	bool isInstance;
-
-	/* Location info of graph definition. Points to variable name of assignment. */
-	InputLoc loc;
-};
-
-typedef AvlTree<RegionGraphDictEl, String, CmpStr> RegionGraphDict;
-typedef DList<RegionGraphDictEl> RegionGraphList;
+typedef DList<RegionDef> RegionDefList;
 
 struct TypeAlias
 {
