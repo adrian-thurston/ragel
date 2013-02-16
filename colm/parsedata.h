@@ -441,7 +441,6 @@ public:
 
 /* A list of actions. */
 typedef DList<Action> ActionList;
-typedef AvlTree<Action, String, CmpStr> ActionDict;
 
 struct VarDef;
 struct LexJoin;
@@ -458,14 +457,6 @@ struct ReItem;
 struct ReOrBlock;
 struct ReOrItem;
 struct TokenRegion;
-
-/* Priority name dictionary. */
-typedef AvlMapEl<String, int> PriorDictEl;
-typedef AvlMap<String, int, CmpStr> PriorDict;
-
-/* Local error name dictionary. */
-typedef AvlMapEl<String, int> LocalErrDictEl;
-typedef AvlMap<String, int, CmpStr> LocalErrDict;
 
 /* Tree of instantiated names. */
 typedef BstMapEl<String, NameInst*> NameMapEl;
@@ -603,9 +594,6 @@ struct Compiler
 
 	/* The list of instances. */
 	RegionDefList regionDefList;
-
-	/* Dictionary of actions. Lets actions be defined and then referenced. */
-	ActionDict actionDict;
 
 	/* List of actions. Will be pasted into a switch statement. */
 	ActionList actionList;
