@@ -501,9 +501,6 @@ struct NameInst
 
 	/* Pointers for the name search queue. */
 	NameInst *prev, *next;
-
-	/* Check if this name inst or any name inst below is referenced. */
-	bool anyRefsRec();
 };
 
 typedef DList<NameInst> NameInstList;
@@ -542,10 +539,8 @@ struct Compiler
 	 * already there. */
 	NameInst *addNameInst( const InputLoc &loc, char *data, bool isLabel );
 	NameInst *makeJoinNameTree( LexJoin *join );
-	NameInst *makeNameTree( );
-	void fillNameIndex( NameInst **nameIndex, NameInst *from );
-	NameInst **makeNameIndex( NameInst *rootName );
-
+	NameInst *makeNameTree();
+	NameInst **makeNameIndex();
 
 	void printNameTree( NameInst *rootName );
 	void printNameIndex( NameInst **nameIndex );
@@ -622,6 +617,7 @@ struct Compiler
 	/* Root of the name tree. */
 	NameInst *curNameInst;
 	int curNameChild;
+	NameInstList nameInstList;
 
 	/* The place where resolved epsilon transitions go. These cannot go into
 	 * the parse tree because a single epsilon op can resolve more than once

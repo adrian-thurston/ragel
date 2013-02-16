@@ -335,21 +335,6 @@ FsmGraph *makeBuiltin( BuiltinMachine builtin, Compiler *pd )
 	return retFsm;
 }
 
-/* Check if this name inst or any name inst below is referenced. */
-bool NameInst::anyRefsRec()
-{
-	if ( numRefs > 0 )
-		return true;
-
-	/* Recurse on children until true. */
-	for ( NameVect::Iter ch = childVect; ch.lte(); ch++ ) {
-		if ( (*ch)->anyRefsRec() )
-			return true;
-	}
-
-	return false;
-}
-
 /*
  * Compiler
  */
@@ -424,6 +409,8 @@ NameInst *Compiler::addNameInst( const InputLoc &loc, char *data, bool isLabel )
 	curNameInst->childVect.append( newNameInst );
 	if ( data != 0 )
 		curNameInst->children.insertMulti( data, newNameInst );
+	
+	nameInstList.append( newNameInst );
 	return newNameInst;
 }
 
@@ -475,57 +462,6 @@ void Compiler::resetNameScope( const NameFrame &frame )
 	curNameInst = frame.prevNameInst;
 	curNameChild = frame.prevNameChild;
 	localNameScope = frame.prevLocalScope;
-}
-
-NameSet Compiler::resolvePart( NameInst *refFrom, const char *data, bool recLabelsOnly )
-{
-	/* Queue needed for breadth-first search, load it with the start node. */
-	NameInstList nameQueue;
-	nameQueue.append( refFrom );
-
-	NameSet result;
-	while ( nameQueue.length() > 0 ) {
-		/* Pull the next from location off the queue. */
-		NameInst *from = nameQueue.detachFirst();
-
-		/* Look for the name. */
-		NameMapEl *low, *high;
-		if ( from->children.findMulti( data, low, high ) ) {
-			/* Record all instances of the name. */
-			for ( ; low <= high; low++ )
-				result.insert( low->value );
-		}
-
-		/* Name not there, do breadth-first operation of appending all
-		 * childrent to the processing queue. */
-		for ( NameVect::Iter name = from->childVect; name.lte(); name++ ) {
-			if ( !recLabelsOnly || (*name)->isLabel )
-				nameQueue.append( *name );
-		}
-	}
-
-	/* Queue exhausted and name never found. */
-	return result;
-}
-
-void Compiler::resolveFrom( NameSet &result, NameInst *refFrom, 
-		const NameRef &nameRef, int namePos )
-{
-	/* Look for the name in the owning scope of the factor with aug. */
-	NameSet partResult = resolvePart( refFrom, nameRef[namePos], false );
-	
-	/* If there are more parts to the name then continue on. */
-	if ( ++namePos < nameRef.length() ) {
-		/* There are more components to the name, search using all the part
-		 * results as the base. */
-		for ( NameSet::Iter name = partResult; name.lte(); name++ )
-			resolveFrom( result, *name, nameRef, namePos );
-	}
-	else {
-		/* This is the last component, append the part results to the final
-		 * results. */
-		result.insert( partResult );
-	}
 }
 
 ostream &operator<<( ostream &out, const Token &token )
@@ -600,27 +536,16 @@ void errorStateLabels( const NameSet &resolved )
 		error((*res)->loc) << "  -> " << **res << endl;
 }
 
-
-/* Walk a name tree starting at from and fill the name index. */
-void Compiler::fillNameIndex( NameInst **nameIndex, NameInst *from )
-{
-	/* Fill the value for from in the name index. */
-	nameIndex[from->id] = from;
-
-	/* Recurse on the implicit final state and then all children. */
-	if ( from->final != 0 )
-		fillNameIndex( nameIndex, from->final );
-	for ( NameVect::Iter name = from->childVect; name.lte(); name++ )
-		fillNameIndex( nameIndex, *name );
-}
-
-NameInst **Compiler::makeNameIndex( NameInst *rootName )
+NameInst **Compiler::makeNameIndex()
 {
 	/* The number of nodes in the tree can now be given by nextNameId. Put a
 	 * null pointer on the end of the list to terminate it. */
 	NameInst **nameIndex = new NameInst*[nextNameId+1];
 	memset( nameIndex, 0, sizeof(NameInst*)*(nextNameId+1) );
-	fillNameIndex( nameIndex, rootName );
+
+	for ( NameInstList::Iter ni = nameInstList; ni.lte(); ni++ )
+		nameIndex[ni->id] = ni;
+
 	return nameIndex;
 }
 
@@ -829,8 +754,8 @@ NameInst *Compiler::makeNameTree()
 FsmGraph *Compiler::makeAllRegions()
 {
 	/* Build the name tree and supporting data structures. */
-	NameInst *rootName = makeNameTree( );
-	NameInst **nameIndex = makeNameIndex( rootName );
+	NameInst *rootName = makeNameTree();
+	NameInst **nameIndex = makeNameIndex();
 
 	int numGraphs = 0;
 	FsmGraph **graphs = new FsmGraph*[regionDefList.length()];
