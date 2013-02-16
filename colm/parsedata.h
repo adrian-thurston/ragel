@@ -483,12 +483,6 @@ struct NameInst
 	bool isLabel;
 	bool isLongestMatch;
 
-	/* Names underneath us, excludes anonymous names. */
-	NameMap children;
-	
-	/* All names underneath us in order of appearance. */
-	NameVect childVect;
-
 	/* LexJoin scopes need an implicit "final" target. */
 	NameInst *start, *final;
 
@@ -630,11 +624,6 @@ struct Compiler
 
 	void setLmInRetLoc( InlineList *inlineList );
 	void initLongestMatchData();
-	void initNameWalk( NameInst *rootName );
-	NameInst *nextNameScope() { return curNameInst->childVect[curNameChild]; }
-	NameFrame enterNameScope( bool isLocal, int numScopes );
-	void popNameScope( const NameFrame &frame );
-	void resetNameScope( const NameFrame &frame );
 
 	/* Counter for assigning ids to longest match items. */
 	int nextTokenId;

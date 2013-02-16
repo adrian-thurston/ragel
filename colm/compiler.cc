@@ -405,64 +405,11 @@ Compiler::~Compiler()
 NameInst *Compiler::addNameInst( const InputLoc &loc, char *data, bool isLabel )
 {
 	/* Create the name instantitaion object and insert it. */
-	NameInst *newNameInst = new NameInst( loc, curNameInst, data, nextNameId++, isLabel );
-	curNameInst->childVect.append( newNameInst );
-	if ( data != 0 )
-		curNameInst->children.insertMulti( data, newNameInst );
-	
+	NameInst *newNameInst = new NameInst( loc, 0, data, nextNameId++, isLabel );
 	nameInstList.append( newNameInst );
 	return newNameInst;
 }
 
-void Compiler::initNameWalk( NameInst *rootName )
-{
-	curNameInst = rootName;
-	curNameChild = 0;
-}
-
-/* Goes into the next child scope. The number of the child is already set up.
- * We need this for the syncronous name tree and parse tree walk to work
- * properly. It is reset on entry into a scope and advanced on poping of a
- * scope. A call to enterNameScope should be accompanied by a corresponding
- * popNameScope. */
-NameFrame Compiler::enterNameScope( bool isLocal, int numScopes )
-{
-	/* Save off the current data. */
-	NameFrame retFrame;
-	retFrame.prevNameInst = curNameInst;
-	retFrame.prevNameChild = curNameChild;
-	retFrame.prevLocalScope = localNameScope;
-
-	/* Enter into the new name scope. */
-	for ( int i = 0; i < numScopes; i++ ) {
-		curNameInst = curNameInst->childVect[curNameChild];
-		curNameChild = 0;
-	}
-
-	if ( isLocal )
-		localNameScope = curNameInst;
-
-	return retFrame;
-}
-
-/* Return from a child scope to a parent. The parent info must be specified as
- * an argument and is obtained from the corresponding call to enterNameScope.
- * */
-void Compiler::popNameScope( const NameFrame &frame )
-{
-	/* Pop the name scope. */
-	curNameInst = frame.prevNameInst;
-	curNameChild = frame.prevNameChild+1;
-	localNameScope = frame.prevLocalScope;
-}
-
-void Compiler::resetNameScope( const NameFrame &frame )
-{
-	/* Pop the name scope. */
-	curNameInst = frame.prevNameInst;
-	curNameChild = frame.prevNameChild;
-	localNameScope = frame.prevLocalScope;
-}
 
 ostream &operator<<( ostream &out, const Token &token )
 {
@@ -601,8 +548,6 @@ void Compiler::printNameInst( NameInst *nameInst, int level )
 		cerr << "  ";
 	cerr << (nameInst->name != 0 ? nameInst->name : "<ANON>") << 
 			"  id: " << nameInst->id << endl;
-	for ( NameVect::Iter name = nameInst->childVect; name.lte(); name++ )
-		printNameInst( *name, level+1 );
 }
 
 /* Remove duplicates of unique actions from an action table. */
@@ -714,26 +659,6 @@ void Compiler::finishGraphBuild( FsmGraph *graph )
 	graph->compressTransitions();
 }
 
-void Compiler::printNameTree( NameInst *rootName )
-{
-	/* Print the name instance map. */
-	cerr << "name tree:" << endl;
-	for ( NameVect::Iter name = rootName->childVect; name.lte(); name++ )
-		printNameInst( *name, 0 );
-}
-
-void Compiler::printNameIndex( NameInst **nameIndex )
-{
-	/* The name index is terminated with a null pointer. */
-	cerr << "name index:" << endl;
-	for ( int ni = 0; nameIndex[ni]; ni++ ) {
-		cerr << ni << ": ";
-		char *name = nameIndex[ni]->name;
-		cerr << ( name != 0 ? name : "<ANON>" ) << endl;
-	}
-}
-
-
 /* Build the name tree and supporting data structures. */
 NameInst *Compiler::makeNameTree()
 {
@@ -742,7 +667,6 @@ NameInst *Compiler::makeNameTree()
 	NameInst *rootName = new NameInst( InputLoc(), 0, 0, nextNameId++, false );
 
 	/* First make the name tree. */
-	initNameWalk( rootName );
 	for ( RegionDefList::Iter rdel = regionDefList; rdel.lte(); rdel++ ) {
 		/* Recurse on the instance. */
 		rdel->makeNameTree( rdel->loc, this );
@@ -761,7 +685,6 @@ FsmGraph *Compiler::makeAllRegions()
 	FsmGraph **graphs = new FsmGraph*[regionDefList.length()];
 
 	/* Make all the instantiations, we know that main exists in this list. */
-	initNameWalk( rootName );
 	for ( RegionDefList::Iter rdel = regionDefList; rdel.lte(); rdel++ ) {
 		/* Build the graph from a walk of the parse tree. */
 		FsmGraph *newGraph = rdel->walk( this );
@@ -1285,9 +1208,6 @@ void Compiler::compile()
 	/* Init the longest match data */
 	initLongestMatchData();
 	FsmGraph *fsmGraph = makeScanner();
-
-	//printNameTree( fsmGraph->rootName );
-	//printNameIndex( fsmGraph->nameIndex );
 
 	prepGrammar();
 

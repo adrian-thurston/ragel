@@ -196,25 +196,19 @@ FsmGraph *LexDefinition::walk( Compiler *pd )
 
 FsmGraph *RegionDef::walk( Compiler *pd )
 {
-	/* We enter into a new name scope. */
-	NameFrame nameFrame = pd->enterNameScope( true, 1 );
-
 	/* Recurse on the expression. */
 	FsmGraph *rtnVal = tokenRegion->walk( pd );
 
 	/* Need the entry point for the region. */
 	rtnVal->setEntry( tokenRegion->regionNameInst->id, rtnVal->startState );
 	
-	/* Pop the name scope. */
-	pd->popNameScope( nameFrame );
 	return rtnVal;
 }
 
 void RegionDef::makeNameTree( const InputLoc &loc, Compiler *pd )
 {
 	/* The variable definition enters a new scope. */
-	NameInst *prevNameInst = pd->curNameInst;
-	pd->curNameInst = pd->addNameInst( loc, name, false );
+	NameInst *nameInst = pd->addNameInst( loc, name, false );
 
 	/* Guess we do this now. */
 	tokenRegion->makeActions( pd );
@@ -224,10 +218,7 @@ void RegionDef::makeNameTree( const InputLoc &loc, Compiler *pd )
 	 * of the name tree). They cannot have more than one corresponding name
 	 * inst. */
 	assert( tokenRegion->regionNameInst == 0 );
-	tokenRegion->regionNameInst = pd->curNameInst;
-
-	/* The name scope ends, pop the name instantiation. */
-	pd->curNameInst = prevNameInst;
+	tokenRegion->regionNameInst = nameInst;
 }
 
 InputLoc TokenDef::getLoc()
