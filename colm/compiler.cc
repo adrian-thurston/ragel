@@ -477,24 +477,6 @@ void Compiler::resetNameScope( const NameFrame &frame )
 	localNameScope = frame.prevLocalScope;
 }
 
-
-void Compiler::unsetObsoleteEntries( FsmGraph *graph )
-{
-	/* Loop the reference names and increment the usage. Names that are no
-	 * longer needed will be unset in graph. */
-	for ( NameVect::Iter ref = curNameInst->referencedNames; ref.lte(); ref++ ) {
-		/* Get the name. */
-		NameInst *name = *ref;
-		name->numUses += 1;
-
-		/* If the name is no longer needed unset its corresponding entry. */
-		if ( name->numUses == name->numRefs ) {
-			assert( graph->entryPoints.find( name->id ) != 0 );
-			graph->unsetEntry( name->id );
-		}
-	}
-}
-
 NameSet Compiler::resolvePart( NameInst *refFrom, const char *data, bool recLabelsOnly )
 {
 	/* Queue needed for breadth-first search, load it with the start node. */
@@ -619,15 +601,6 @@ void errorStateLabels( const NameSet &resolved )
 }
 
 
-void Compiler::referenceRegions( NameInst *rootName )
-{
-	for ( NameVect::Iter inst = rootName->childVect; inst.lte(); inst++ ) {
-		/* Inc the reference in the name. This will cause the entry point to
-		 * survive to the end of the graph generating walk. */
-		(*inst)->numRefs += 1;
-	}
-}
-
 /* Walk a name tree starting at from and fill the name index. */
 void Compiler::fillNameIndex( NameInst **nameIndex, NameInst *from )
 {
@@ -702,8 +675,7 @@ void Compiler::printNameInst( NameInst *nameInst, int level )
 	for ( int i = 0; i < level; i++ )
 		cerr << "  ";
 	cerr << (nameInst->name != 0 ? nameInst->name : "<ANON>") << 
-			"  id: " << nameInst->id << 
-			"  refs: " << nameInst->numRefs << endl;
+			"  id: " << nameInst->id << endl;
 	for ( NameVect::Iter name = nameInst->childVect; name.lte(); name++ )
 		printNameInst( *name, level+1 );
 }
@@ -859,9 +831,6 @@ FsmGraph *Compiler::makeAllRegions()
 	/* Build the name tree and supporting data structures. */
 	NameInst *rootName = makeNameTree( );
 	NameInst **nameIndex = makeNameIndex( rootName );
-
-	/* Resovle the implicit name references to the nfa instantiations. */
-	referenceRegions( rootName );
 
 	int numGraphs = 0;
 	FsmGraph **graphs = new FsmGraph*[regionDefList.length()];

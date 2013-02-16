@@ -190,9 +190,6 @@ FsmGraph *LexDefinition::walk( Compiler *pd )
 	if ( join->exprList.length() == 1 )
 		rtnVal->epsilonOp();
 
-	/* We can now unset entry points that are not longer used. */
-	pd->unsetObsoleteEntries( rtnVal );
-
 	return rtnVal;
 }
 
@@ -205,13 +202,8 @@ FsmGraph *RegionDef::walk( Compiler *pd )
 	/* Recurse on the expression. */
 	FsmGraph *rtnVal = tokenRegion->walk( pd );
 
-	/* We can now unset entry points that are not longer used. */
-	pd->unsetObsoleteEntries( rtnVal );
-
-	/* If the name of the variable is referenced then add the entry point to
-	 * the graph. */
-	if ( pd->curNameInst->numRefs > 0 )
-		rtnVal->setEntry( pd->curNameInst->id, rtnVal->startState );
+	/* Need the entry point for the region. */
+	rtnVal->setEntry( tokenRegion->regionNameInst->id, rtnVal->startState );
 	
 	/* Pop the name scope. */
 	pd->popNameScope( nameFrame );

@@ -470,7 +470,7 @@ struct NameInst
 	NameInst( const InputLoc &loc, NameInst *parent, const String &name, 
 				int id, bool isLabel ) : 
 		loc(loc), parent(parent), name(name), id(id), isLabel(isLabel),
-		isLongestMatch(false), numRefs(0), numUses(0), start(0), final(0) {}
+		isLongestMatch(false), start(0), final(0) {}
 
 	InputLoc loc;
 
@@ -483,12 +483,9 @@ struct NameInst
 	bool isLabel;
 	bool isLongestMatch;
 
-	int numRefs;
-	int numUses;
-
 	/* Names underneath us, excludes anonymous names. */
 	NameMap children;
-
+	
 	/* All names underneath us in order of appearance. */
 	NameVect childVect;
 
@@ -553,15 +550,10 @@ struct Compiler
 	void printNameTree( NameInst *rootName );
 	void printNameIndex( NameInst **nameIndex );
 
-	/* Increments the usage count on entry names. Names that are no longer
-	 * needed will have their entry points unset. */
-	void unsetObsoleteEntries( FsmGraph *graph );
-
 	/* Resove name references in action code and epsilon transitions. */
 	NameSet resolvePart( NameInst *refFrom, const char *data, bool recLabelsOnly );
 	void resolveFrom( NameSet &result, NameInst *refFrom, 
 			const NameRef &nameRef, int namePos );
-	void referenceRegions( NameInst *root );
 
 	/* Set the alphabet type. If type types are not valid returns false. */
 	bool setAlphType( char *s1, char *s2 );
