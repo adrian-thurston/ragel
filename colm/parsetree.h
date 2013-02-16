@@ -176,66 +176,10 @@ struct TokenDefListNs;
 struct Range;
 struct LangEl;
 
-/* Type of augmentation. Describes locations in the machine. */
 enum AugType
 {
-	/* Transition actions/priorities. */
 	at_start,
-	at_all,
-	at_finish,
 	at_leave,
-
-	/* Global error actions. */
-	at_start_gbl_error,
-	at_all_gbl_error,
-	at_final_gbl_error,
-	at_not_start_gbl_error,
-	at_not_final_gbl_error,
-	at_middle_gbl_error,
-
-	/* Local error actions. */
-	at_start_local_error,
-	at_all_local_error,
-	at_final_local_error,
-	at_not_start_local_error,
-	at_not_final_local_error,
-	at_middle_local_error,
-	
-	/* To State Action embedding. */
-	at_start_to_state,
-	at_all_to_state,
-	at_final_to_state,
-	at_not_start_to_state,
-	at_not_final_to_state,
-	at_middle_to_state,
-
-	/* From State Action embedding. */
-	at_start_from_state,
-	at_all_from_state,
-	at_final_from_state,
-	at_not_start_from_state,
-	at_not_final_from_state,
-	at_middle_from_state,
-
-	/* EOF Action embedding. */
-	at_start_eof,
-	at_all_eof,
-	at_final_eof,
-	at_not_start_eof,
-	at_not_final_eof,
-	at_middle_eof
-};
-
-/* IMPORTANT: These must follow the same order as the state augs in AugType
- * since we will be using this to compose AugType. */
-enum StateAugType
-{
-	sat_start = 0,
-	sat_all,
-	sat_final,
-	sat_not_start,
-	sat_not_final,
-	sat_middle
 };
 
 struct Action;

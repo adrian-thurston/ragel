@@ -821,135 +821,12 @@ void LexFactorAug::assignActions( Compiler *pd, FsmGraph *graph, int *actionOrd 
 	/* Assign actions. */
 	for ( int i = 0; i < actions.length(); i++ )  {
 		switch ( actions[i].type ) {
-		/* Transition actions. */
 		case at_start:
 			graph->startFsmAction( actionOrd[i], actions[i].action );
 			afterOpMinimize( graph );
 			break;
-		case at_all:
-			graph->allTransAction( actionOrd[i], actions[i].action );
-			break;
-		case at_finish:
-			graph->finishFsmAction( actionOrd[i], actions[i].action );
-			break;
 		case at_leave:
 			graph->leaveFsmAction( actionOrd[i], actions[i].action );
-			break;
-
-		/* Global error actions. */
-		case at_start_gbl_error:
-			graph->startErrorAction( actionOrd[i], actions[i].action, 0 );
-			afterOpMinimize( graph );
-			break;
-		case at_all_gbl_error:
-			graph->allErrorAction( actionOrd[i], actions[i].action, 0 );
-			break;
-		case at_final_gbl_error:
-			graph->finalErrorAction( actionOrd[i], actions[i].action, 0 );
-			break;
-		case at_not_start_gbl_error:
-			graph->notStartErrorAction( actionOrd[i], actions[i].action, 0 );
-			break;
-		case at_not_final_gbl_error:
-			graph->notFinalErrorAction( actionOrd[i], actions[i].action, 0 );
-			break;
-		case at_middle_gbl_error:
-			graph->middleErrorAction( actionOrd[i], actions[i].action, 0 );
-			break;
-
-		/* Local error actions. */
-		case at_start_local_error:
-			graph->startErrorAction( actionOrd[i], actions[i].action,
-					actions[i].localErrKey );
-			afterOpMinimize( graph );
-			break;
-		case at_all_local_error:
-			graph->allErrorAction( actionOrd[i], actions[i].action,
-					actions[i].localErrKey );
-			break;
-		case at_final_local_error:
-			graph->finalErrorAction( actionOrd[i], actions[i].action,
-					actions[i].localErrKey );
-			break;
-		case at_not_start_local_error:
-			graph->notStartErrorAction( actionOrd[i], actions[i].action,
-					actions[i].localErrKey );
-			break;
-		case at_not_final_local_error:
-			graph->notFinalErrorAction( actionOrd[i], actions[i].action,
-					actions[i].localErrKey );
-			break;
-		case at_middle_local_error:
-			graph->middleErrorAction( actionOrd[i], actions[i].action,
-					actions[i].localErrKey );
-			break;
-
-		/* EOF actions. */
-		case at_start_eof:
-			graph->startEOFAction( actionOrd[i], actions[i].action );
-			afterOpMinimize( graph );
-			break;
-		case at_all_eof:
-			graph->allEOFAction( actionOrd[i], actions[i].action );
-			break;
-		case at_final_eof:
-			graph->finalEOFAction( actionOrd[i], actions[i].action );
-			break;
-		case at_not_start_eof:
-			graph->notStartEOFAction( actionOrd[i], actions[i].action );
-			break;
-		case at_not_final_eof:
-			graph->notFinalEOFAction( actionOrd[i], actions[i].action );
-			break;
-		case at_middle_eof:
-			graph->middleEOFAction( actionOrd[i], actions[i].action );
-			break;
-
-		/* To State Actions. */
-		case at_start_to_state:
-			graph->startToStateAction( actionOrd[i], actions[i].action );
-			afterOpMinimize( graph );
-			break;
-		case at_all_to_state:
-			graph->allToStateAction( actionOrd[i], actions[i].action );
-			break;
-		case at_final_to_state:
-			graph->finalToStateAction( actionOrd[i], actions[i].action );
-			break;
-		case at_not_start_to_state:
-			graph->notStartToStateAction( actionOrd[i], actions[i].action );
-			break;
-		case at_not_final_to_state:
-			graph->notFinalToStateAction( actionOrd[i], actions[i].action );
-			break;
-		case at_middle_to_state:
-			graph->middleToStateAction( actionOrd[i], actions[i].action );
-			break;
-
-		/* From State Actions. */
-		case at_start_from_state:
-			graph->startFromStateAction( actionOrd[i], actions[i].action );
-			afterOpMinimize( graph );
-			break;
-		case at_all_from_state:
-			graph->allFromStateAction( actionOrd[i], actions[i].action );
-			break;
-		case at_final_from_state:
-			graph->finalFromStateAction( actionOrd[i], actions[i].action );
-			break;
-		case at_not_start_from_state:
-			graph->notStartFromStateAction( actionOrd[i], actions[i].action );
-			break;
-		case at_not_final_from_state:
-			graph->notFinalFromStateAction( actionOrd[i], actions[i].action );
-			break;
-		case at_middle_from_state:
-			graph->middleFromStateAction( actionOrd[i], actions[i].action );
-			break;
-
-		/* Remaining cases, prevented by the parser. */
-		default: 
-			assert( false );
 			break;
 		}
 	}
@@ -966,18 +843,8 @@ void LexFactorAug::assignPriorities( FsmGraph *graph, int *priorOrd )
 			 * minimization afterwards. */
 			afterOpMinimize( graph );
 			break;
-		case at_all:
-			graph->allTransPrior( priorOrd[i], &priorDescs[i] );
-			break;
-		case at_finish:
-			graph->finishFsmPrior( priorOrd[i], &priorDescs[i] );
-			break;
 		case at_leave:
 			graph->leaveFsmPrior( priorOrd[i], &priorDescs[i] );
-			break;
-
-		default:
-			/* Parser Prevents this case. */
 			break;
 		}
 	}
@@ -994,12 +861,7 @@ FsmGraph *LexFactorAug::walk( Compiler *pd )
 	/* First walk the list of actions, assigning order to all starting
 	 * actions. */
 	for ( int i = 0; i < actions.length(); i++ ) {
-		if ( actions[i].type == at_start || 
-				actions[i].type == at_start_gbl_error ||
-				actions[i].type == at_start_local_error ||
-				actions[i].type == at_start_to_state ||
-				actions[i].type == at_start_from_state ||
-				actions[i].type == at_start_eof )
+		if ( actions[i].type == at_start )
 			actionOrd[i] = pd->curActionOrd++;
 	}
 
@@ -1008,12 +870,7 @@ FsmGraph *LexFactorAug::walk( Compiler *pd )
 
 	/* Compute the remaining action orderings. */
 	for ( int i = 0; i < actions.length(); i++ ) {
-		if ( actions[i].type != at_start && 
-				actions[i].type != at_start_gbl_error &&
-				actions[i].type != at_start_local_error &&
-				actions[i].type != at_start_to_state &&
-				actions[i].type != at_start_from_state &&
-				actions[i].type != at_start_eof )
+		if ( actions[i].type != at_start )
 			actionOrd[i] = pd->curActionOrd++;
 	}
 
