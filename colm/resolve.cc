@@ -767,7 +767,7 @@ void Compiler::makeIgnoreCollectors()
 {
 	for ( RegionList::Iter region = regionList; region.lte(); region++ ) {
 		if ( region->isFullRegion ) {
-			String name( region->name.length() + 5, "_ign_%s", region->name.data );
+			String name( 64, "_ign_%p", region );
 			LangEl *ignLel = new LangEl( rootNamespace, name, LangEl::Term );
 			langEls.append( ignLel );
 			ignLel->isCI = true;

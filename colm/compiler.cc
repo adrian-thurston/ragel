@@ -1213,7 +1213,7 @@ void Compiler::initEmptyScanners()
 			reg->wasEmpty = true;
 
 			static int def = 1;
-			String name( reg->name.length() + 16, "__%s_DEF_PAT_%d", reg->name.data, def++ );
+			String name( 64, "__%p_DEF_PAT_%d", reg, def++ );
 
 			LexJoin *join = new LexJoin( LexExpression::cons( BT_Any ) );
 				
