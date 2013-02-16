@@ -607,9 +607,6 @@ struct Compiler
 	/* Dictionary of actions. Lets actions be defined and then referenced. */
 	ActionDict actionDict;
 
-	/* Dictionary of named priorities. */
-	PriorDict priorDict;
-
 	/* List of actions. Will be pasted into a switch statement. */
 	ActionList actionList;
 

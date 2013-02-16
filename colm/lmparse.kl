@@ -1360,12 +1360,6 @@ nonterm machine_name uses token_data;
 machine_name: 
 	TK_Word
 	final {
-		/* Make/get the priority key. The name may have already been referenced
-		 * and therefore exist. */
-		PriorDictEl *priorDictEl;
-		if ( pd->priorDict.insert( $1->data, pd->nextPriorKey, &priorDictEl ) )
-			pd->nextPriorKey += 1;
-
 		$$->loc = $1->loc;
 		$$->data = $1->data;
 	};
