@@ -932,7 +932,6 @@ struct FsmGraph
 	bool misfitAccounting;
 
 	bool lmRequiresErrorState;
-	NameInst *rootName;
 	NameInst **nameIndex;
 
 	/*

@@ -663,8 +663,7 @@ void Compiler::finishGraphBuild( FsmGraph *graph )
 NameInst *Compiler::makeNameTree()
 {
 	/* Create the root name. */
-	nextNameId = 0;
-	NameInst *rootName = new NameInst( InputLoc(), 0, 0, nextNameId++, false );
+	nextNameId = 1;
 
 	/* First make the name tree. */
 	for ( RegionDefList::Iter rdel = regionDefList; rdel.lte(); rdel++ ) {
@@ -672,13 +671,13 @@ NameInst *Compiler::makeNameTree()
 		rdel->makeNameTree( rdel->loc, this );
 	}
 
-	return rootName;
+	return 0;
 }
 
 FsmGraph *Compiler::makeAllRegions()
 {
 	/* Build the name tree and supporting data structures. */
-	NameInst *rootName = makeNameTree();
+	makeNameTree();
 	NameInst **nameIndex = makeNameIndex();
 
 	int numGraphs = 0;
@@ -711,7 +710,6 @@ FsmGraph *Compiler::makeAllRegions()
 			all->lmRequiresErrorState = true;
 	}
 
-	all->rootName = rootName;
 	all->nameIndex = nameIndex;
 
 	return all;
