@@ -1366,11 +1366,6 @@ machine_name:
 		if ( pd->priorDict.insert( $1->data, pd->nextPriorKey, &priorDictEl ) )
 			pd->nextPriorKey += 1;
 
-		/* Make/get the local error key. */
-		LocalErrDictEl *localErrDictEl;
-		if ( pd->localErrDict.insert( $1->data, pd->nextLocalErrKey, &localErrDictEl ) )
-			pd->nextLocalErrKey += 1;
-
 		$$->loc = $1->loc;
 		$$->data = $1->data;
 	};

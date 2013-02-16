@@ -183,13 +183,6 @@ FsmGraph *LexDefinition::walk( Compiler *pd )
 {
 	/* Recurse on the expression. */
 	FsmGraph *rtnVal = join->walk( pd );
-	
-	/* Do the tranfer of local error actions. */
-	LocalErrDictEl *localErrDictEl = pd->localErrDict.find( name );
-	if ( localErrDictEl != 0 ) {
-		for ( StateList::Iter state = rtnVal->stateList; state.lte(); state++ )
-			rtnVal->transferErrorActions( state, localErrDictEl->value );
-	}
 
 	/* If the expression below is a join operation with multiple expressions
 	 * then it just had epsilon transisions resolved. If it is a join
@@ -211,13 +204,6 @@ FsmGraph *RegionDef::walk( Compiler *pd )
 
 	/* Recurse on the expression. */
 	FsmGraph *rtnVal = tokenRegion->walk( pd );
-	
-	/* Do the tranfer of local error actions. */
-	LocalErrDictEl *localErrDictEl = pd->localErrDict.find( name );
-	if ( localErrDictEl != 0 ) {
-		for ( StateList::Iter state = rtnVal->stateList; state.lte(); state++ )
-			rtnVal->transferErrorActions( state, localErrDictEl->value );
-	}
 
 	/* We can now unset entry points that are not longer used. */
 	pd->unsetObsoleteEntries( rtnVal );

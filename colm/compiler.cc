@@ -360,7 +360,6 @@ Compiler::Compiler( const String &fileName, const String &sectionName,
 			const InputLoc &sectionLoc, ostream &out )
 :	
 	nextPriorKey(0),
-	nextLocalErrKey(1),          /* 0 is reserved for global error actions. */
 	nextNameId(0),
 	alphTypeSet(false),
 	getKeyExpr(0),

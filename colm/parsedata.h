@@ -610,14 +610,11 @@ struct Compiler
 	/* Dictionary of named priorities. */
 	PriorDict priorDict;
 
-	/* Dictionary of named local errors. */
-	LocalErrDict localErrDict;
-
 	/* List of actions. Will be pasted into a switch statement. */
 	ActionList actionList;
 
 	/* The id of the next priority name and label. */
-	int nextPriorKey, nextLocalErrKey, nextNameId;
+	int nextPriorKey, nextNameId;
 
 	/* Alphabet type. */
 	HostType *userAlphType;
