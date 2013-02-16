@@ -861,7 +861,6 @@ struct LexFactorAug
 
 	/* Actions and priorities assigned to the factor node. */
 	Vector<ParserAction> actions;
-	Vector<EpsilonLink> epsilonLinks;
 
 	LexFactorRep *factorRep;
 };

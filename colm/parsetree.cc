@@ -851,20 +851,6 @@ FsmGraph *LexFactorAug::walk( Compiler *pd )
 
 	assignActions( pd, rtnVal , actionOrd );
 
-	/* Assign epsilon transitions. */
-	for ( int e = 0; e < epsilonLinks.length(); e++ ) {
-		/* Get the name, which may not exist. If it doesn't then silently
-		 * ignore it because an error has already been reported. */
-		NameInst *epTarg = pd->epsilonResolvedLinks[pd->nextEpsilonResolvedLink++];
-		if ( epTarg != 0 ) {
-			/* Make the epsilon transitions. */
-			rtnVal->epsilonTrans( epTarg->id );
-
-			/* Note that we have made a link to the name. */
-			pd->localNameScope->referencedNames.append( epTarg );
-		}
-	}
-
 	if ( actionOrd != 0 )
 		delete[] actionOrd;	
 	return rtnVal;
