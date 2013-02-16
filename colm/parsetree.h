@@ -842,12 +842,11 @@ struct LexTerm
 struct LexFactorAug
 {
 	LexFactorAug() :
-		priorDescs(0), factorRep(0) { }
+		factorRep(0) { }
 
 	static LexFactorAug *cons( LexFactorRep *factorRep )
 	{
 		LexFactorAug *f = new LexFactorAug;
-		f->priorDescs = 0;
 		f->factorRep = factorRep;
 		return f;
 	}
@@ -859,12 +858,9 @@ struct LexFactorAug
 	void makeNameTree( Compiler *pd );
 
 	void assignActions( Compiler *pd, FsmGraph *graph, int *actionOrd );
-	void assignPriorities( FsmGraph *graph, int *priorOrd );
 
 	/* Actions and priorities assigned to the factor node. */
 	Vector<ParserAction> actions;
-	Vector<PriorityAug> priorityAugs;
-	PriorDesc *priorDescs;
 	Vector<EpsilonLink> epsilonLinks;
 
 	LexFactorRep *factorRep;

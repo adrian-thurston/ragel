@@ -804,16 +804,9 @@ FsmGraph *LexTerm::walk( Compiler *pd, bool lastInSeq )
 	return rtnVal;
 }
 
-/* Clean up after a factor with augmentation node. */
 LexFactorAug::~LexFactorAug()
 {
 	delete factorRep;
-
-	/* Walk the vector of parser actions, deleting function names. */
-
-	/* Clean up priority descriptors. */
-	if ( priorDescs != 0 )
-		delete[] priorDescs;
 }
 
 void LexFactorAug::assignActions( Compiler *pd, FsmGraph *graph, int *actionOrd )
@@ -827,24 +820,6 @@ void LexFactorAug::assignActions( Compiler *pd, FsmGraph *graph, int *actionOrd 
 			break;
 		case at_leave:
 			graph->leaveFsmAction( actionOrd[i], actions[i].action );
-			break;
-		}
-	}
-}
-
-void LexFactorAug::assignPriorities( FsmGraph *graph, int *priorOrd )
-{
-	/* Assign priorities. */
-	for ( int i = 0; i < priorityAugs.length(); i++ ) {
-		switch ( priorityAugs[i].type ) {
-		case at_start:
-			graph->startFsmPrior( priorOrd[i], &priorDescs[i]);
-			/* Start fsm priorities are a special case that may require
-			 * minimization afterwards. */
-			afterOpMinimize( graph );
-			break;
-		case at_leave:
-			graph->leaveFsmPrior( priorOrd[i], &priorDescs[i] );
 			break;
 		}
 	}
@@ -876,31 +851,6 @@ FsmGraph *LexFactorAug::walk( Compiler *pd )
 
 	assignActions( pd, rtnVal , actionOrd );
 
-	/* Make the array of priority orderings. Orderings are local to this walk
-	 * of the factor with augmentation. */
-	int *priorOrd = 0;
-	if ( priorityAugs.length() > 0 )
-		priorOrd = new int[priorityAugs.length()];
-	
-	/* Walk all priorities, assigning the priority ordering. */
-	for ( int i = 0; i < priorityAugs.length(); i++ )
-		priorOrd[i] = pd->curPriorOrd++;
-
-	/* If the priority descriptors have not been made, make them now.  Make
-	 * priority descriptors for each priority asignment that will be passed to
-	 * the fsm. Used to keep track of the key, value and used bit. */
-	if ( priorDescs == 0 && priorityAugs.length() > 0 ) {
-		priorDescs = new PriorDesc[priorityAugs.length()];
-		for ( int i = 0; i < priorityAugs.length(); i++ ) {
-			/* Init the prior descriptor for the priority setting. */
-			priorDescs[i].key = priorityAugs[i].priorKey;
-			priorDescs[i].priority = priorityAugs[i].priorValue;
-		}
-	}
-
-	/* Assign priorities into the machine. */
-	assignPriorities( rtnVal, priorOrd );
-
 	/* Assign epsilon transitions. */
 	for ( int e = 0; e < epsilonLinks.length(); e++ ) {
 		/* Get the name, which may not exist. If it doesn't then silently
@@ -915,8 +865,6 @@ FsmGraph *LexFactorAug::walk( Compiler *pd )
 		}
 	}
 
-	if ( priorOrd != 0 )
-		delete[] priorOrd;
 	if ( actionOrd != 0 )
 		delete[] actionOrd;	
 	return rtnVal;
