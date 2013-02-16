@@ -217,7 +217,6 @@ typedef struct _FrameInfo
 
 typedef struct _RegionInfo
 {
-	const char *name;
 	long defaultToken;
 	long eofFrameId;
 	int isIgnoreOnly;

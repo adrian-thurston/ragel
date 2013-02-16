@@ -968,15 +968,10 @@ static void newToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun )
 	fsmRun->region = pdaRunGetNextRegion( pdaRun, 0 );
 	fsmRun->preRegion = pdaRunGetNextPreRegion( pdaRun );
 	if ( fsmRun->preRegion > 0 ) {
-		debug( REALM_PARSE,  "pre region for next token: %s\n", 
-				prg->rtd->regionInfo[fsmRun->preRegion].name );
 		fsmRun->cs = fsmRun->tables->entryByRegion[fsmRun->preRegion];
 		fsmRun->ncs = fsmRun->tables->entryByRegion[fsmRun->region];
 	}
 	else {
-		debug( REALM_PARSE, "scanning using token region: %s\n",
-				prg->rtd->regionInfo[fsmRun->region].name );
-
 		fsmRun->cs = fsmRun->tables->entryByRegion[fsmRun->region];
 	}
 
@@ -1143,8 +1138,6 @@ case PcrStart:
 			if ( fsmRun->preRegion >= 0 ) {
 				fsmRun->preRegion = -1;
 				fsmRun->cs = fsmRun->ncs;
-				debug( REALM_PARSE,  "moving from pre region to main region: %s\n",
-					prg->rtd->regionInfo[fsmRun->region].name );
 				continue;
 			}
 		}

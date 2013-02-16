@@ -1361,11 +1361,9 @@ void Compiler::makeRuntimeData()
 	runtimeData->regionInfo = new RegionInfo[runtimeData->numRegions];
 	memset( runtimeData->regionInfo, 0, sizeof(RegionInfo) * runtimeData->numRegions );
 
-	runtimeData->regionInfo[0].name = "___EMPTY";
 	runtimeData->regionInfo[0].defaultToken = -1;
 	for ( RegionList::Iter reg = regionList; reg.lte(); reg++ ) {
 		long regId = reg->id+1;
-		runtimeData->regionInfo[regId].name = reg->name;
 		runtimeData->regionInfo[regId].defaultToken =
 			reg->defaultTokenDef == 0 ? -1 : reg->defaultTokenDef->tdLangEl->id;
 		runtimeData->regionInfo[regId].eofFrameId = -1;

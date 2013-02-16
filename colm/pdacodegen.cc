@@ -351,10 +351,7 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 	 */
 	out << "RegionInfo " << regionInfo() << "[] = {\n";
 	for ( int i = 0; i < runtimeData->numRegions; i++ ) {
-		out << "\t{ \"";
-		/* Name. */
-		escapeLiteralString( out, runtimeData->regionInfo[i].name );
-		out << "\", " << runtimeData->regionInfo[i].defaultToken <<
+		out << "\t{ " << runtimeData->regionInfo[i].defaultToken <<
 			", " << runtimeData->regionInfo[i].eofFrameId <<
 			", " << runtimeData->regionInfo[i].isIgnoreOnly <<
 			", " << runtimeData->regionInfo[i].isCiOnly <<
