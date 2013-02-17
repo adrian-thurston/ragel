@@ -109,7 +109,7 @@ void Compiler::addProdRedObjectVar( ObjectDef *localFrame, LangEl *nonTerm )
 {
 	UniqueType *prodNameUT = findUniqueType( TYPE_TREE, nonTerm );
 	TypeRef *typeRef = TypeRef::cons( internal, prodNameUT );
-	ObjField *el = new ObjField( internal, typeRef, "lhs" );
+	ObjField *el = ObjField::cons( internal, typeRef, "lhs" );
 
 	el->isLhsEl = true;
 
@@ -158,7 +158,7 @@ void Compiler::addProdRHSVars( ObjectDef *localFrame, ProdElList *prodElList )
 			/* Use an offset of zero. For frame objects we compute the offset on
 			 * demand. */
 			String name( 8, "r%d", position );
-			ObjField *el = new ObjField( InputLoc(), rhsEl->typeRef, name );
+			ObjField *el = ObjField::cons( InputLoc(), rhsEl->typeRef, name );
 			rhsEl->objField = el;
 
 			/* Right hand side elements are constant. */

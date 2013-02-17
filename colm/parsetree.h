@@ -2006,8 +2006,9 @@ struct RhsVal
 
 struct ObjField
 {
-	ObjField( const InputLoc &loc, TypeRef *typeRef, const String &name ) : 
-		loc(loc), typeRef(typeRef), name(name), 
+	ObjField()
+	: 
+		typeRef(0),
 		context(0),
 		pos(0), offset(0),
 		beenReferenced(false),
@@ -2027,7 +2028,16 @@ struct ObjField
 		inGetWV( IN_HALT ),
 		inSetWC( IN_HALT ),
 		inSetWV( IN_HALT )
-		{}
+	{}
+
+	static ObjField *cons( const InputLoc &loc, TypeRef *typeRef, const String &name )
+	{
+		ObjField *c = new ObjField;
+		c->loc = loc;
+		c->typeRef = typeRef;
+		c->name = name;
+		return c;
+	}
 	
 	InputLoc loc;
 	TypeRef *typeRef;
@@ -2102,16 +2112,27 @@ struct ObjectDef
 		BuiltinType
 	};
 
-	ObjectDef( Type type, String name, int id )
+	ObjectDef()
 	:
-		type(type), name(name), id(id), 
-		nextOffset(0), firstNonTree(0)
-	{
-		scope = new ObjNameScope;
-		scope->objFieldMap = new ObjFieldMap;
+		nextOffset(0),
+		firstNonTree(0)
+	{}
 
-		objFieldList = new ObjFieldList;
-		objMethodMap = new ObjMethodMap();
+	static ObjectDef *cons( Type type, String name, int id )
+	{
+		ObjectDef *o = new ObjectDef;
+
+		o->type = type;
+		o->name = name;
+		o->id = id;
+
+		o->scope = new ObjNameScope;
+		o->scope->objFieldMap = new ObjFieldMap;
+
+		o->objFieldList = new ObjFieldList;
+		o->objMethodMap = new ObjMethodMap;
+
+		return o;
 	}
 
 	Type type;
