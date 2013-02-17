@@ -79,11 +79,10 @@ struct ColmParser
 	int token( InputLoc &loc, int tokId, char *tokstart, int toklen );
 	void addRegularDef( const InputLoc &loc, Namespace *nspace, 
 		const String &name, LexJoin *join );
-	TokenRegion *createRegion( String &name );
+	TokenRegion *createRegion();
 	void pushRegionSet( const InputLoc &loc );
 	void popRegionSet();
-	void addRegionDef( const InputLoc &loc, Namespace *nspace, 
-		const String &name, TokenRegion *join );
+	void addRegionDef( const InputLoc &loc, Namespace *nspace, TokenRegion *join );
 	void addProduction( const InputLoc &loc, const String &name, 
 		ProdElList *prodElList, bool commit, CodeBlock *redBlock, LangEl *predOf );
 	void addArgvList();

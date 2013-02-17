@@ -2597,17 +2597,14 @@ void ColmParser::init()
 	namespaceStack.push( rootNamespace );
 	pd->rootNamespace = rootNamespace;
 
-	/* Set up the root token region. */
-	const char *rootRegionName = "___ROOT_REGION";
-
-	TokenRegion *rootRegion = new TokenRegion( InputLoc(),
-			pd->regionList.length(), 0 );
+	TokenRegion *rootRegion = new TokenRegion( InputLoc(), pd->regionList.length(), 0 );
 	pd->regionList.append( rootRegion );
-	addRegionDef( InputLoc(), namespaceStack.top(), rootRegionName, rootRegion );
+	addRegionDef( InputLoc(), namespaceStack.top(), rootRegion );
+
+	regionStack.push( rootRegion );
 
 	RegionSet *rootRegionSet = new RegionSet( rootRegion, 0, 0, 0 );
 
-	regionStack.push( rootRegion );
 	regionPackStack.push( rootRegionSet );
 
 	pd->rootRegion = rootRegion;
@@ -2670,7 +2667,7 @@ void ColmParser::addRegularDef( const InputLoc &loc, Namespace *nspace,
 	}
 }
 
-TokenRegion *ColmParser::createRegion( String &scannerName )
+TokenRegion *ColmParser::createRegion()
 {
 	TokenRegion *tokenRegion = new TokenRegion( internal,
 			pd->regionList.length(), regionStack.top() );
@@ -2679,7 +2676,7 @@ TokenRegion *ColmParser::createRegion( String &scannerName )
 
 	pd->regionList.append( tokenRegion );
 
-	addRegionDef( InputLoc(), namespaceStack.top(), scannerName, tokenRegion );
+	addRegionDef( InputLoc(), namespaceStack.top(), tokenRegion );
 
 	return tokenRegion;
 }
@@ -2687,20 +2684,16 @@ TokenRegion *ColmParser::createRegion( String &scannerName )
 void ColmParser::pushRegionSet( const InputLoc &loc )
 {
 	/* Just for ignores. */
-	String scannerNameIgn( 128, "<%d>-ign", loc.line );
-	TokenRegion *tokenRegionIgn = createRegion( scannerNameIgn );
+	TokenRegion *tokenRegionIgn = createRegion();
 
 	/* Just for collect ignores. Will use the ignore-only start state. */
-	String scannerNameCi( 128, "<%d>-ci", loc.line );
-	TokenRegion *tokenRegionCi = createRegion( scannerNameCi );
+	TokenRegion *tokenRegionCi = createRegion();
 
 	/* Just for tokens. */
-	String scannerNameTok( 128, "<%d>-tok", loc.line );
-	TokenRegion *tokenRegionTok = createRegion( scannerNameTok );
+	TokenRegion *tokenRegionTok = createRegion();
 
 	/* Make the new token region. */
-	String scannerName( 128, "<%d>", loc.line );
-	TokenRegion *tokenRegion = createRegion( scannerName );
+	TokenRegion *tokenRegion = createRegion();
 
 	RegionSet *regionPack = new RegionSet( tokenRegion,
 			tokenRegionTok, tokenRegionIgn, tokenRegionCi );
@@ -2728,9 +2721,8 @@ void ColmParser::popRegionSet()
 	regionPackStack.pop();
 }
 
-
 void ColmParser::addRegionDef( const InputLoc &loc, Namespace *nspace,
-		const String &name, TokenRegion *tokenRegion )
+		TokenRegion *tokenRegion )
 {
 	/* New element in the dict, all good. */
 	RegionDef *regionDef = new RegionDef( tokenRegion, loc );
