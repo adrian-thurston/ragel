@@ -488,14 +488,6 @@ void Compiler::initKeyOps( )
 	}
 }
 
-void Compiler::printNameInst( NameInst *nameInst, int level )
-{
-	for ( int i = 0; i < level; i++ )
-		cerr << "  ";
-	cerr << (nameInst->name != 0 ? nameInst->name : "<ANON>") << 
-			"  id: " << nameInst->id << endl;
-}
-
 /* Remove duplicates of unique actions from an action table. */
 void Compiler::removeDups( ActionTable &table )
 {

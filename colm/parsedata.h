@@ -467,10 +467,9 @@ typedef BstSet<NameInst*> NameSet;
 /* Node in the tree of instantiated names. */
 struct NameInst
 {
-	NameInst( const String &name, int id ) : 
-		name(name), id(id) {}
+	NameInst( const String &name, int id )
+		: id(id) {}
 
-	String name;
 	int id;
 
 	/* Pointers for the name search queue. */

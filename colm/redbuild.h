@@ -102,7 +102,7 @@ private:
 	void addStateCond( int snum, Key lowKey, Key highKey, long condNum );
 	void initStateList( unsigned long length );
 	void addRegionToEntry( int regionId, int entryId );
-	void addEntryPoint( int entryId, char *name, unsigned long entryState );
+	void addEntryPoint( int entryId, unsigned long entryState );
 	void setId( int snum, int id );
 	void initTransList( int snum, unsigned long length );
 	void newTrans( int snum, int tnum, Key lowKey, Key highKey, 

@@ -348,7 +348,6 @@ struct RedFsm
 	RedState *allStates;
 	GenActionList genActionList;
 	EntryIdVect entryPointIds;
-	EntryNameVect entryPointNames;
 	RedEntryMap redEntryMap;
 	RegionToEntry regionToEntry;
 

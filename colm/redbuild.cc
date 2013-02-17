@@ -92,10 +92,9 @@ void RedFsmBuild::initStateList( unsigned long length )
 	redFsm->nextStateId = redFsm->stateList.length();
 }
 
-void RedFsmBuild::addEntryPoint( int entryId, char *name, unsigned long entryState )
+void RedFsmBuild::addEntryPoint( int entryId, unsigned long entryState )
 {
 	redFsm->entryPointIds.append( entryState );
-	redFsm->entryPointNames.append( name );
 	redFsm->redEntryMap.insert( entryId, entryState );
 }
 
@@ -483,11 +482,9 @@ void RedFsmBuild::makeEntryPoints()
 
 	for ( EntryMap::Iter en = fsm->entryPoints; en.lte(); en++ ) {
 		/* Get the name instantiation from nameIndex. */
-		NameInst *nameInst = fsm->nameIndex[en->key];
 		FsmState *state = en->value;
-		char *name = nameInst->name;
 		long entry = state->alg.stateNum;
-		addEntryPoint( en->key, name, entry );
+		addEntryPoint( en->key, entry );
 	}
 
 	for ( RegionList::Iter reg = pd->regionList; reg.lte(); reg++ ) {
