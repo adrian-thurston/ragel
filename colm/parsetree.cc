@@ -207,8 +207,8 @@ FsmGraph *RegionDef::walk( Compiler *pd )
 
 void RegionDef::makeNameTree( const InputLoc &loc, Compiler *pd )
 {
-	/* The variable definition enters a new scope. */
-	NameInst *nameInst = pd->addNameInst( loc, name );
+	NameInst *nameInst = new NameInst( pd->nextNameId++ );
+	pd->nameInstList.append( nameInst );
 
 	/* Guess we do this now. */
 	tokenRegion->makeActions( pd );

@@ -2733,7 +2733,7 @@ void ColmParser::addRegionDef( const InputLoc &loc, Namespace *nspace,
 		const String &name, TokenRegion *tokenRegion )
 {
 	/* New element in the dict, all good. */
-	RegionDef *regionDef = new RegionDef( name, tokenRegion, loc );
+	RegionDef *regionDef = new RegionDef( tokenRegion, loc );
 
 	/* It it is an instance, put on the instance list. */
 	pd->regionDefList.append( regionDef );

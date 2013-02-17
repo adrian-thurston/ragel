@@ -400,15 +400,6 @@ Compiler::~Compiler()
 	actionList.empty();
 }
 
-NameInst *Compiler::addNameInst( const InputLoc &loc, char *data )
-{
-	/* Create the name instantitaion object and insert it. */
-	NameInst *newNameInst = new NameInst( data, nextNameId++ );
-	nameInstList.append( newNameInst );
-	return newNameInst;
-}
-
-
 ostream &operator<<( ostream &out, const Token &token )
 {
 	out << token.data;
@@ -756,7 +747,7 @@ void Compiler::createDefaultScanner()
 	regionList.append( defaultRegion );
 
 	/* Insert the machine definition into the graph dictionary. */
-	RegionDef *rdel = new RegionDef( name, defaultRegion, loc );
+	RegionDef *rdel = new RegionDef( defaultRegion, loc );
 	regionDefList.append( rdel );
 
 	LexJoin *join = new LexJoin( LexExpression::cons( BT_Any ) );

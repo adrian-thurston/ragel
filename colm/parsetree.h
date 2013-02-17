@@ -278,14 +278,13 @@ struct RegionDef
 :
 	public DListEl<RegionDef>
 {
-	RegionDef( const String &name, TokenRegion *tokenRegion, const InputLoc &loc )
-		: name(name), tokenRegion(tokenRegion), loc(loc) { }
+	RegionDef( TokenRegion *tokenRegion, const InputLoc &loc )
+		: tokenRegion(tokenRegion), loc(loc) { }
 	
 	/* Parse tree traversal. */
 	FsmGraph *walk( Compiler *pd );
 	void makeNameTree( const InputLoc &loc, Compiler *pd );
 
-	String name;
 	TokenRegion *tokenRegion;
 	InputLoc loc;
 };

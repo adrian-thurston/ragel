@@ -467,7 +467,7 @@ typedef BstSet<NameInst*> NameSet;
 /* Node in the tree of instantiated names. */
 struct NameInst
 {
-	NameInst( const String &name, int id )
+	NameInst( int id )
 		: id(id) {}
 
 	int id;
@@ -510,7 +510,6 @@ struct Compiler
 
 	/* Make a name id in the current name instantiation scope if it is not
 	 * already there. */
-	NameInst *addNameInst( const InputLoc &loc, char *data );
 	NameInst *makeJoinNameTree( LexJoin *join );
 	NameInst *makeNameTree();
 	NameInst **makeNameIndex();
