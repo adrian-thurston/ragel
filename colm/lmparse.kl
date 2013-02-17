@@ -2597,14 +2597,10 @@ void ColmParser::init()
 	namespaceStack.push( rootNamespace );
 	pd->rootNamespace = rootNamespace;
 
-	TokenRegion *rootRegion = new TokenRegion( InputLoc(), pd->regionList.length(), 0 );
-	pd->regionList.append( rootRegion );
-	addRegionDef( InputLoc(), namespaceStack.top(), rootRegion );
-
+	TokenRegion *rootRegion = createRegion( internal );
 	regionStack.push( rootRegion );
 
 	RegionSet *rootRegionSet = new RegionSet( rootRegion, 0, 0, 0 );
-
 	regionPackStack.push( rootRegionSet );
 
 	pd->rootRegion = rootRegion;
@@ -2667,16 +2663,22 @@ void ColmParser::addRegularDef( const InputLoc &loc, Namespace *nspace,
 	}
 }
 
-TokenRegion *ColmParser::createRegion()
+TokenRegion *ColmParser::createRegion( const InputLoc &loc )
 {
-	TokenRegion *tokenRegion = new TokenRegion( internal,
-			pd->regionList.length(), regionStack.top() );
+	TokenRegion *parentRegion = regionStack.length() > 0 ?
+			regionStack.top() : 0;
 
-	regionStack.top()->childRegions.append( tokenRegion );
+	TokenRegion *tokenRegion = new TokenRegion( loc,
+			pd->regionList.length(), parentRegion );
+
+	if ( parentRegion != 0 )
+		parentRegion->childRegions.append( tokenRegion );
 
 	pd->regionList.append( tokenRegion );
 
-	addRegionDef( InputLoc(), namespaceStack.top(), tokenRegion );
+	/* New element in the dict, all good. */
+	RegionDef *regionDef = new RegionDef( tokenRegion, loc );
+	pd->regionDefList.append( regionDef );
 
 	return tokenRegion;
 }
@@ -2684,16 +2686,16 @@ TokenRegion *ColmParser::createRegion()
 void ColmParser::pushRegionSet( const InputLoc &loc )
 {
 	/* Just for ignores. */
-	TokenRegion *tokenRegionIgn = createRegion();
+	TokenRegion *tokenRegionIgn = createRegion( loc );
 
 	/* Just for collect ignores. Will use the ignore-only start state. */
-	TokenRegion *tokenRegionCi = createRegion();
+	TokenRegion *tokenRegionCi = createRegion( loc );
 
 	/* Just for tokens. */
-	TokenRegion *tokenRegionTok = createRegion();
+	TokenRegion *tokenRegionTok = createRegion( loc );
 
 	/* Make the new token region. */
-	TokenRegion *tokenRegion = createRegion();
+	TokenRegion *tokenRegion = createRegion( loc );
 
 	RegionSet *regionPack = new RegionSet( tokenRegion,
 			tokenRegionTok, tokenRegionIgn, tokenRegionCi );
@@ -2724,11 +2726,6 @@ void ColmParser::popRegionSet()
 void ColmParser::addRegionDef( const InputLoc &loc, Namespace *nspace,
 		TokenRegion *tokenRegion )
 {
-	/* New element in the dict, all good. */
-	RegionDef *regionDef = new RegionDef( tokenRegion, loc );
-
-	/* It it is an instance, put on the instance list. */
-	pd->regionDefList.append( regionDef );
 }
 
 ostream &ColmParser::parse_error( int tokId, Token &token )
