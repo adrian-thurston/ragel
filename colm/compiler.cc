@@ -366,14 +366,33 @@ Compiler::Compiler( const String &fileName, const String &sectionName,
 	out(out),
 	access(0),
 	tokenStruct(0),
+
+	ptrLangEl(0),
+	boolLangEl(0),
+	intLangEl(0),
+	strLangEl(0),
+	streamLangEl(0),
+	anyLangEl(0),
 	rootLangEl(0),
+	noTokenLangEl(0),
 	eofLangEl(0),
 	errorLangEl(0),
 	defaultCharLangEl(0),
+	ignoreLangEl(0),
+
 	rootRegion(0),
 	defaultRegion(0),
 	firstNonTermId(0),
 	prodIdIndex(0),
+
+	uniqueTypeNil(0),
+	uniqueTypePtr(0),
+	uniqueTypeBool(0),
+	uniqueTypeInt(0),
+	uniqueTypeStr(0),
+	uniqueTypeStream(0),
+	uniqueTypeIgnore(0),
+	uniqueTypeAny(0),
 	nextPatConsId(0),
 	nextGenericId(1),
 	nextFuncId(0),
@@ -1117,7 +1136,6 @@ void Compiler::compile()
 {
 	beginProcessing();
 	initKeyOps();
-
 
 	/* Type declaration. */
 	typeDeclaration();

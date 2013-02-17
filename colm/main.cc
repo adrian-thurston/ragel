@@ -568,6 +568,13 @@ int main(int argc, const char **argv)
 	ColmScanner *scanner = new ColmScanner( inputFileName, *inStream, cout, parser, 0 );
 
 	parser->init();
+
+	/* These must be declared first, since the runtime assumes their identifiers. */
+	pd->declareBaseLangEls();
+	pd->initUniqueTypes();
+
+	parser->addArgvList();
+
 	scanner->scan();
 	scanner->eof();
 

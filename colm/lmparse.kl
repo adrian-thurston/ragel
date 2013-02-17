@@ -2272,8 +2272,7 @@ lex_factor_label:
 			error($1->loc) << "label name \"" << $1->data << "\" already in use" << endp;
 
 		/* Create the object field. */
-		NamespaceQual *qual = new NamespaceQual( namespaceStack.top(), regionStack.top() );
-		TypeRef *typeRef = TypeRef::cons( $1->loc, qual, "str" );
+		TypeRef *typeRef = TypeRef::cons( $1->loc, pd->uniqueTypeStr );
 		ObjectField *objField = ObjectField::cons( $1->loc, typeRef, $1->data );
 
 		/* Insert it into the map. */
@@ -2624,15 +2623,11 @@ void ColmParser::init()
 	pd->curLocalFrame = pd->rootLocalFrame;
 
 	%% write init;
-
-	addArgvList();
 }
 
 void ColmParser::addArgvList()
 {
-	NamespaceQual *nspaceQual1 = new NamespaceQual( 
-			namespaceStack.top(), regionStack.top() );
-	TypeRef *typeRef = TypeRef::cons( internal, nspaceQual1, "str" );
+	TypeRef *typeRef = TypeRef::cons( internal, pd->uniqueTypeStr );
 
 	NamespaceQual *nspaceQual2 = new NamespaceQual( 
 			namespaceStack.top(), regionStack.top() );

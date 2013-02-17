@@ -359,9 +359,6 @@ void Compiler::setPrecedence()
  */
 void Compiler::typeDeclaration()
 {
-	/* These must be declared first, since the runtime assumes their identifiers. */
-	declareBaseLangEls();
-
 	makeIgnoreCollectors();
 
 	rootNamespace->declare( this );
@@ -372,8 +369,6 @@ void Compiler::typeDeclaration()
 	/* Create the default scanner which will return single characters for us
 	 * when we have no other scanner */
 	createDefaultScanner();
-
-	initUniqueTypes();
 
 	setPrecedence();
 }
